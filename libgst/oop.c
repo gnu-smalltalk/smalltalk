@@ -846,7 +846,7 @@ int oldspace_sigsegv_handler (void* fault_address, int serious)
   page = (char *) fault_address - ((long) fault_address & (getpagesize() - 1));
   errno = 0;
   if (_gst_mem_protect (page, getpagesize(), PROT_READ | PROT_WRITE) == -1 &&
-      (errno == ENOMEM || errno == EFAULT))
+      (errno == ENOMEM || errno == EFAULT || errno == EACCES || errno == EINVAL))
     {
 #if defined (MMAN_DEBUGGING)
       printf ("Plain old segmentation violation -- address = %p\n", page);
