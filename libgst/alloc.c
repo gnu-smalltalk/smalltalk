@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+ * Copyright 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.  Ideas based on Mike Haertel's malloc.
  *
  * This file is part of GNU Smalltalk.
@@ -32,6 +32,19 @@
 /* Define to provide a log of memory allocations on stderr.  */
 /* #define LOG_MEMORY_OPERATIONS */
 
+/* MinGW32 and MacOS X have problems redefining malloc and friends.  In this
+   case, we use a completely separate area than the one used by the system
+   malloc and we don't cause trouble.
+
+   For MacOS X, these problems only show up when using readline: readline
+   will use the system malloc because of Mach-O's unique two-level namespaces
+   "feature", and as you can imagine we have some problems when we try to use
+   *our* routine to reallocate memory that readline has allocated.  Even
+   if we did not try reallocating readline memory, we would not have a way
+   to free it.  */
+#if defined __MSVCRT__ || defined __MACH__
+#define NO_MALLOC_OVERRIDE
+#endif
 
 #define	SMALL2FREE(B, N)	((heap_freeobj*)(((char *)(B)->vSmall.data) + (N)*(B)->size))
 
@@ -644,13 +657,25 @@ PTR
 morecore (size_t size)
 {
   heap just_allocated_heap = NULL;
-  static heap current_extra_heap = NULL;
+
+  /* _gst_heap_sbrk is actually the same as sbrk as long as
+     current_heap is NULL.  But we cannot do that unless we
+     can replace malloc (which we cannot do on MacOS X, see above).  */
+  static heap current_heap = NULL;
+
+#ifdef NO_MALLOC_OVERRIDE
+  if (current_heap == NULL)
+    {
+      just_allocated_heap = _gst_heap_create (MMAP_AREA_SIZE);
+      if (!just_allocated_heap)
+	return (NULL);
+      current_heap = just_allocated_heap;
+    }
+#endif
 
   for (;;)
     {
-      /* _gst_heap_sbrk is actually the same as sbrk as long as
-         current_extra_heap is NULL.  */
-      char *ptr = _gst_heap_sbrk (current_extra_heap, size);
+      char *ptr = _gst_heap_sbrk (current_heap, size);
 
       if (ptr != (PTR) -1)
 	{
@@ -658,8 +683,8 @@ morecore (size_t size)
             {
 	      /* Oops, we have to align to a page.  */
 	      int missed = pagesize - ((intptr_t) ptr & (pagesize - 1));
-	      _gst_heap_sbrk (current_extra_heap, -size + missed);
-	      ptr = _gst_heap_sbrk (current_extra_heap, size);
+	      _gst_heap_sbrk (current_heap, -size + missed);
+	      ptr = _gst_heap_sbrk (current_heap, size);
             }
 
           if (ptr != (PTR) -1)
@@ -677,18 +702,12 @@ morecore (size_t size)
       if (!just_allocated_heap)
 	return (NULL);
 
-      current_extra_heap = just_allocated_heap;
+      current_heap = just_allocated_heap;
     }
 }
 
 
-/* MinGW32 has problems redefining malloc and friends.  It's not
-   a problem: since sbrk is not present there, we end up using a
-   completely separate area than the one used by the system malloc
-   and we don't cause trouble.  */
-
-#ifndef __MSVCRT__
-
+#ifndef NO_MALLOC_OVERRIDE
 static heap_data default_heap;
 static int default_heap_init;
 
@@ -763,7 +782,7 @@ free (PTR block)
 #endif
   _gst_mem_free(&default_heap, block);
 }
-#endif /* !__MSVCRT__ */
+#endif /* !NO_MALLOC_OVERRIDE */
 
 char *
 xstrdup (const char *str)
