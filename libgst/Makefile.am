@@ -17,7 +17,7 @@ endif
 # This switch is not included in libtool 1.4, but it is included in
 # libtool 1.5; I have plugged it back in libtool 1.4, so that it is
 # upwards compatible.
-LIBTOOL = @LIBTOOL@ --tag disable-shared
+LIBTOOL = @LIBTOOL@ --tag=disable-shared
 
 LEX_OUTPUT_ROOT = lex.yy
 ## CFLAGS=-O0 -g

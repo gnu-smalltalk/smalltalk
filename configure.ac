@@ -1,13 +1,13 @@
 dnl Hey Emacs, I want this in -*- Autoconf -*- mode, please.
 dnl ---
-dnl Copyright 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002, 2003
+dnl Copyright 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002, 2003, 2005
 dnl Free Software Foundation, Inc.
 dnl Please see COPYING for a description your rights and responsibilities
 dnl with this software.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.52)
-AC_INIT([GNU Smalltalk], 2.1.9, help-smalltalk@gnu.org, smalltalk)
+AC_INIT([GNU Smalltalk], 2.1.10, help-smalltalk@gnu.org, smalltalk)
 MAINTAINER="bonzini@gnu.org"
 
 dnl CURRENT:REVISION:AGE means this is the REVISION-th version of
@@ -80,7 +80,7 @@ GST_C_SYMBOLSET
 
 GST_LIBC_SO_NAME
 
-AC_LIBTOOL_TAGS([])
+AC_LIBTOOL_TAGS([CXX])
 AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL

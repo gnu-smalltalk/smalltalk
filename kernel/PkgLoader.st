@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -179,6 +179,18 @@ callouts
     ^callouts!
 
 baseDirs: baseDirs
+    "Resolve the names in the package according to the base directories
+     in baseDirs, which depend on where the packages.xml is found:
+     the three possible places are 1) the system kernel directory's parent
+     directory, 2) the local kernel directory's parent directory, 3) the
+     local image directory (in order of decreasing priority).
+
+     For a packages.xml found in the system kernel directory's parent
+     directory, all three directories are searched.  For a packages.xml
+     found in the local kernel directory's parent directory, only
+     directories 2 and 3 are searched.  For a packages.xml directory in
+     the local image directory, instead, only directory 3 is searched."
+
     | found |
     files := self findBaseDirs: baseDirs for: self files.
     fileIns := self findBaseDirs: baseDirs for: self fileIns.
@@ -195,12 +207,18 @@ baseDirs: baseDirs
 !
 
 findBaseDirs: baseDirs for: aCollection
+    "Resolve the names in aCollection according to the base directories
+     in baseDirs, and return the collection with the full filenames, or
+     nil if no directory was found for one or more file in aCollection."
     ^aCollection collect: [ :fileName || name |
         name := self findBaseDirs: baseDirs forFile: fileName.
         name isNil ifTrue: [ ^nil ] ifFalse: [ name ]]
 !
 
 findBaseDirs: baseDirs forFile: fileName
+    "Try appending 'self directory' and fileName to each of the directory
+     in baseDirs, and return the path to the first tried filename that exists.
+     Return nil if no directory is found that contains the file."
     | name |
     baseDirs do: [ :dir |
        name := Directory append: self directory to: dir.
@@ -291,7 +309,16 @@ flush
 !
 
 refreshDependencies
-    "Reload the `packages.xml' file in the image and kernel directories"
+    "Reload the `packages.xml' file in the image and kernel directories.
+     The three possible places are 1) the system kernel directory's parent
+     directory, 2) the local kernel directory's parent directory, 3) the
+     local image directory (in order of decreasing priority).
+
+     For a packages.xml found in the system kernel directory's parent
+     directory, all three directories are searched.  For a packages.xml
+     found in the local kernel directory's parent directory, only
+     directories 2 and 3 are searched.  For a packages.xml directory in
+     the local image directory, instead, only directory 3 is searched."
     | state |
     LoadDate isNil ifFalse: [
 	self stillValid ifTrue: [ ^self ]
