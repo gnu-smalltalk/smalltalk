@@ -1,5 +1,9 @@
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/cint.c: Remove out-of-date comment.
+
+2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/lib.c: Load Transcript.st earlier.
 
 2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
