@@ -1,3 +1,7 @@
+2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/gdbm.c: Do not include malloc.h.
+
 2004-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
         * kernel/Directory.st: support passing an absolute path as the

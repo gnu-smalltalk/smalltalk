@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2005
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -33,8 +33,7 @@
 #include "config.h"
 #include "gstpub.h"
 #include <gdbm.h>
-
-#include <malloc.h>
+#include <stdlib.h>
 
 /*
      GDBM_FILE gdbm_open(name, block_size, flags, mode, fatal_func);
