@@ -133,7 +133,7 @@ all-local:
 #
 ###########################################################
 
-EXTRA_DIST = \
+dist_noinst_DATA += \
 	superops/ChangeLog superops/Makefile superops/README \
 	superops/bool-array.cc superops/bool-array.h superops/bool-array.icc \
 	superops/byte_def.cc superops/byte_def.h superops/hash-table.cc \

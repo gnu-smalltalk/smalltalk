@@ -1,4 +1,4 @@
-LIBTOOL += --tag LIBGST
+LIBTOOL += --tag=LIBGST
 
 LEX_OUTPUT_ROOT = lex.yy
 ## CFLAGS=-O0 -g

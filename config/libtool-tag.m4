@@ -8,6 +8,9 @@ dnl appending the configuration to the libtool script.
 dnl
 AC_DEFUN([GST_LIBTOOL_TAG], [
 
+# This is left screwed up by AC_LIBTOOL_CXX_CONFIG!
+eval compiler=$lt_compiler
+
 tagname=$1
 m4_define([GST_SRC_TAG], m4_if([$2], [], [$1], [$2]))
 m4_define([GST_SRC_TAG], m4_if(GST_SRC_TAG, [CC], [], GST_SRC_TAG))
