@@ -1,3 +1,7 @@
+2004-12-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tcp/tcp.c (O_NONBLOCK): Add here from sysdep.h.
+
 2004-11-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tcp/SocketAddress.st: fix typo in #newRawSocket.

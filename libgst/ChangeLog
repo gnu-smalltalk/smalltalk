@@ -1,3 +1,7 @@
+2004-12-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sysdep.h (O_NONBLOCK): Unused, remove.
+
 2004-11-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c (gen_dirty_block): Return value is not in JIT_R0
