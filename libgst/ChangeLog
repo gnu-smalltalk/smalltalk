@@ -1,5 +1,9 @@
 2004-11-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/oop.c: Catch more errors out of mprotect.
+
+2004-11-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/alloc.h: Use char for the type of large.data
 	in struct heap_block.
 
