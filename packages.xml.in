@@ -16,6 +16,14 @@
   <name>GTK</name>
   <namespace>GTK</namespace>
   <filein>GtkDecl.st</filein>
+  <filein>Libs.st</filein>
+  <filein>Structs.st</filein>
+  <filein>MoreStructs.st</filein>
+  <filein>Enums.st</filein>
+  <filein>Funcs.st</filein>
+  <filein>MoreFuncs.st</filein>
+  <filein>GtkImpl.st</filein>
+
   <module>gst-gtk</module>
   <directory>gtk</directory>
 
@@ -27,7 +35,6 @@
   <file>GtkImpl.st</file>
   <file>MoreFuncs.st</file>
   <file>MoreStructs.st</file>
-  <file>Types.st</file>
   <file>example_arrow.st</file>
   <file>example_aspectframe.st</file>
   <file>example_buttonbox.st</file>

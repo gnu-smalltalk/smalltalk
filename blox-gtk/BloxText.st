@@ -798,7 +798,7 @@ gtkbuffer
     ^gtkbuffer
   !
 
-onChanged: userData
+onChanged: userData data: unused
     self invokeCallback
 !
 
@@ -807,8 +807,11 @@ create
    self connected: GTK.GtkTextView new.
 
    gtkbuffer := self connected getBuffer.
-   self gtkbuffer connectSignal: 'changed' to: self selector: #onChanged: userData: nil.
-!
+   self gtkbuffer
+	connectSignal: 'changed'
+	to: self
+	selector: #onChanged:data:
+	userData: nil!
 
 defineTag: name as: options
     options class = String ifTrue: [options printNl. 0 unconverted defineTag call].

@@ -1,0 +1,5 @@
+2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gtk/GtkDecl.st: Remove file-ins, now done through packages.xml.
+	* gtk/GtkImpl.st: Add code that was after file-ins in GtkDecl.st
+

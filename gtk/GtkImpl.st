@@ -321,3 +321,7 @@ main
         Processor yield.
     ]
 ! !
+
+"Finish initialization.  This will be done upon #returnFromSnapshot on
+ subsequent image loads."
+GLib registerAllTypes!

@@ -95,13 +95,21 @@ CObject variableWordSubclass: #GdkEvent
 	poolDictionaries: ''
 	category: 'Gtk'!
 
-FileStream fileIn: 'Libs.st'!
-FileStream fileIn: 'Types.st'!
-FileStream fileIn: 'Structs.st'!
-FileStream fileIn: 'MoreStructs.st'!
-FileStream fileIn: 'Enums.st'!
-FileStream fileIn: 'Funcs.st'!
-FileStream fileIn: 'MoreFuncs.st'!
-FileStream fileIn: 'GtkImpl.st'!
+!GLib class methodsFor: 'registering GObject types'!
 
-GLib registerAllTypes!
+registerAllTypes
+    GtkTypes isNil ifTrue: [ GtkTypes := OrderedCollection new ].
+    GtkTypes do: [ :each | self register: each forType: each getType ]
+!
+
+registerType: aClass
+    GtkTypes isNil ifTrue: [ GtkTypes := OrderedCollection new ].
+    GtkTypes addLast: aClass
+!
+
+update: anObject
+    anObject == #returnFromSnapshot
+        ifTrue: [ self registerAllTypes ]
+! !
+
+ObjectMemory addDependent: GLib!

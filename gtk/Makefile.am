@@ -90,7 +90,7 @@ enums.c: mk_enums cpp .order
 
 .order: order.st Makefile $(LOCAL_FILES)
 	PKG_CONFIG='$(PKG_CONFIG)' ../gst \
-	  -I ../gst.im order.st -a \
+	  -I ../gst.im $(srcdir)/order.st -a \
 	  `$(PKG_CONFIG) --cflags-only-I gobject-2.0` \
 	  `$(PKG_CONFIG) --cflags-only-I gdk-2.0` \
 	  `$(PKG_CONFIG) --cflags-only-I gdk-pixbuf-2.0` \
