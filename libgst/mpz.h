@@ -36,9 +36,9 @@
 
 typedef struct
 {
-  mp_size_t alloc;		/* Number of *limbs* allocated and pointed
+  size_t alloc;			/* Number of *limbs* allocated and pointed
 				   to by the D field.  */
-  mp_size_t size;		/* abs(SIZE) is the number of limbs
+  ssize_t size;			/* abs(SIZE) is the number of limbs
 				   the last field points to.  If SIZE
 				   is negative this is a negative
 				   number.  */
@@ -49,75 +49,96 @@ typedef struct
 
 
 /* Add two integers.  */
-void _gst_mpz_add (gst_mpz *, const gst_mpz *, const gst_mpz *);
+void _gst_mpz_add (gst_mpz *, const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Compute the two's complement AND of two integers.  */
-void _gst_mpz_and (gst_mpz *, const gst_mpz *, const gst_mpz *);
+void _gst_mpz_and (gst_mpz *, const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Compute the two's complement inclusive OR of two integers.  */
-void _gst_mpz_ior (gst_mpz *, const gst_mpz *, const gst_mpz *);
+void _gst_mpz_ior (gst_mpz *, const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Compute the two's complement XOR of two integers.  */
-void _gst_mpz_xor (gst_mpz *, const gst_mpz *, const gst_mpz *);
+void _gst_mpz_xor (gst_mpz *, const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Assign the bit-complemented value of an integer to another */
-void _gst_mpz_com (gst_mpz *dst, const gst_mpz *src);
+void _gst_mpz_com (gst_mpz *dst, const gst_mpz *src) 
+  ATTRIBUTE_HIDDEN;
 
 /* Subtract two integers.  */
-void _gst_mpz_sub (gst_mpz *, const gst_mpz *, const gst_mpz *);
+void _gst_mpz_sub (gst_mpz *, const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Multiply two integers.  */
-void _gst_mpz_mul (gst_mpz *, const gst_mpz *, const gst_mpz *);
+void _gst_mpz_mul (gst_mpz *, const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Floor DIVision, with Quotient and Remainder, i.e. division that
    rounds the quotient towards -infinity, and with the remainder
    non-negative.  */
-void _gst_mpz_fdiv_qr (gst_mpz *, gst_mpz *, const gst_mpz *, const gst_mpz *);
+void _gst_mpz_fdiv_qr (gst_mpz *, gst_mpz *, const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
-/* Floor DIVision by a Signed Integer, with Quotient and Remainder. */
-long _gst_mpz_fdiv_qr_si (gst_mpz *quot, const gst_mpz *num, long den);
+/* Floor DIVision by a Signed Integer, with Quotient and Remainder.  */
+mp_limb_t _gst_mpz_fdiv_qr_si (gst_mpz *quot, const gst_mpz *num, intptr_t den) 
+  ATTRIBUTE_HIDDEN;
 
-/* Truncated DIVision, with Quotient and Remainder. */
-void _gst_mpz_tdiv_qr (gst_mpz *, gst_mpz *, const gst_mpz *, const gst_mpz *);
+/* Truncated DIVision, with Quotient and Remainder.  */
+void _gst_mpz_tdiv_qr (gst_mpz *, gst_mpz *, const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
-/* Truncated DIVision by a Signed Integer, with Quotient and Remainder. */
-long _gst_mpz_tdiv_qr_si (gst_mpz *quot, const gst_mpz *num, long den);
+/* Truncated DIVision by a Signed Integer, with Quotient and Remainder.  */
+mp_limb_t _gst_mpz_tdiv_qr_si (gst_mpz *quot, const gst_mpz *num, intptr_t den) 
+  ATTRIBUTE_HIDDEN;
 
-/* Greatest Common Divisor of two numbers. */
-void _gst_mpz_gcd (gst_mpz *, const gst_mpz *, const gst_mpz *);
+/* Greatest Common Divisor of two numbers.  */
+void _gst_mpz_gcd (gst_mpz *, const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Compare two integers U, V.  Return positive, zero, or negative
    based on if U > V, U == V, or U < V.  */
-int _gst_mpz_cmp (const gst_mpz *, const gst_mpz *);
+int _gst_mpz_cmp (const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Convert to double */
-double _gst_mpz_get_d (const gst_mpz *);
+double _gst_mpz_get_d (const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Convert to long double */
-long double _gst_mpz_get_ld (const gst_mpz *);
+long double _gst_mpz_get_ld (const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Multiply an integer by 2**CNT  */
-void _gst_mpz_mul_2exp (gst_mpz *, const gst_mpz *, unsigned long int);
+void _gst_mpz_mul_2exp (gst_mpz *, const gst_mpz *, unsigned) 
+  ATTRIBUTE_HIDDEN;
 
 /* Divide an integer by 2**CNT  */
-void _gst_mpz_div_2exp (gst_mpz *, const gst_mpz *, unsigned long int);
+void _gst_mpz_div_2exp (gst_mpz *, const gst_mpz *, unsigned) 
+  ATTRIBUTE_HIDDEN;
 
 /* Allocate space for an integer if necessary, and assign an integer
-   from another one. */
-void _gst_mpz_set (gst_mpz *, const gst_mpz *);
+   from another one.  */
+void _gst_mpz_set (gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 /* Free an integer */
-void _gst_mpz_clear (gst_mpz *m);
+void _gst_mpz_clear (gst_mpz *m) 
+  ATTRIBUTE_HIDDEN;
 
 /* Create an integer from an OOP (an instance of a subclass of
    Integer).  Space from the object itself is pointed to on
    little-endian machines, so you should care that no GC's happen
-   while we're manipulating integers. */
-void _gst_mpz_from_oop (gst_mpz *, OOP);
+   while we're manipulating integers.  */
+void _gst_mpz_from_oop (gst_mpz *, OOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Create an OOP (an instance of a subclass of Integer) from a big
-   integer. */
-OOP _gst_oop_from_mpz (gst_mpz *);
+   integer.  */
+OOP _gst_oop_from_mpz (gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
 
 #endif
 

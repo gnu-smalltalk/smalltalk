@@ -37,35 +37,43 @@
 /* Returns the currently accumulated string, as a C string, and resets
    the pointer to start with a new string.  The string returned is
    unique.  */
-extern char *_gst_cur_str_buf (void);
+extern char *_gst_cur_str_buf (void)
+  ATTRIBUTE_HIDDEN;
 
 /* Returns the currently accumulated string, as a C string, and resets
    the pointer to start with a new string.  The string returned is
    unique and is allocated in the obstack H.  */
-extern char *_gst_obstack_cur_str_buf (struct obstack *h);
+extern char *_gst_obstack_cur_str_buf (struct obstack *h)
+  ATTRIBUTE_HIDDEN;
 
 /* Returns the currently accumulated buffer, and resets the pointer
    to start with a new string.  Instead of allocating fresh memory for
    the data, it is moved to the location pointed by WHERE. WHERE is
    returned */
-extern PTR _gst_copy_buffer (PTR where);
+extern PTR _gst_copy_buffer (PTR where)
+  ATTRIBUTE_HIDDEN;
 
-/* Answer the current size of the buffer. */
-extern long _gst_buffer_size (void);
+/* Answer the current size of the buffer.  */
+extern size_t _gst_buffer_size (void)
+  ATTRIBUTE_HIDDEN;
 
 /* Adds a character C to the string being accumulated.  The character
-   can be any valid ASCII character. */
-extern void _gst_add_str_buf_char (char c);
+   can be any valid ASCII character.  */
+extern void _gst_add_str_buf_char (char c)
+  ATTRIBUTE_HIDDEN;
 
-/* Resets the pointer to start with a new string. */
-extern void _gst_reset_buffer (void);
+/* Resets the pointer to start with a new string.  */
+extern void _gst_reset_buffer (void)
+  ATTRIBUTE_HIDDEN;
 
-/* Adds a pointer PTR to the buffer being built. */
-extern void _gst_add_buf_pointer (PTR ptr);
+/* Adds a pointer PTR to the buffer being built.  */
+extern void _gst_add_buf_pointer (PTR ptr)
+  ATTRIBUTE_HIDDEN;
 
 /* Adds N bytes of data starting from PTR to the string being
-   accumulated. */
+   accumulated.  */
 extern void _gst_add_buf_data (PTR ptr,
-			       int n);
+			       int n)
+  ATTRIBUTE_HIDDEN;
 
 #endif /* GST_STR_H */

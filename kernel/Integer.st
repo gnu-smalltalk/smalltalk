@@ -403,7 +403,7 @@ printOn: aStream base: b
 !
 
 storeOn: aStream base: b
-    "Print on aStream Smalltalk code compiling to the receiver,
+    "Print on aStream Smalltalk code compiling to the receiver, 
      represented in base b"
     aStream nextPutAll: (self printStringRadix: b)
 !
@@ -442,16 +442,16 @@ printString: baseInteger
     "Return the base b representation of the receiver"
     | num string |
     ^self < self zero
-        ifFalse: [
-            string := String new: (self floorLog: baseInteger) + 1.
-            self replace: string withStringBase: baseInteger
-        ]
-        ifTrue: [
-            num := self negated.
-            string := String new: (num floorLog: baseInteger) + 2.
-            string at: 1 put: $-.
-            num replace: string withStringBase: baseInteger
-        ].
+	ifFalse: [
+	    string := String new: (self floorLog: baseInteger) + 1.
+	    self replace: string withStringBase: baseInteger
+	]
+	ifTrue: [
+	    num := self negated.
+	    string := String new: (num floorLog: baseInteger) + 2.
+	    string at: 1 put: $-.
+	    num replace: string withStringBase: baseInteger
+	].
 !
 
 displayString
@@ -490,20 +490,6 @@ storeOn: aStream
 
 
 
-!Integer methodsFor: 'storing'!
-
-storeString
-    "Return the base 10 representation of the receiver"
-    ^self printStringRadix: 10 showRadix: false
-!
-
-storeOn: aStream
-    "Print on aStream the base 10 representation of the receiver"
-    aStream nextPutAll: (self printStringRadix: 10 showRadix: false)
-! !
-
-
-
 !Integer methodsFor: 'private'!
 
 replace: string withStringBase: b
@@ -514,9 +500,9 @@ replace: string withStringBase: b
     num := self.
     where := string size.
     [
-        string at: where put: (Character digitValue: (num \\ b)).
-        where := where - 1.
-        (num := num // b) > 0
+	string at: where put: (Character digitValue: (num \\ b)).
+	where := where - 1.
+	(num := num // b) > 0
     ] whileTrue.
     ^string
 ! !

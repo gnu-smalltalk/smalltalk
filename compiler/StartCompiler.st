@@ -29,8 +29,6 @@
  ======================================================================"
 
 
-Namespace current: STInST!
-
 RBParser subclass: #STFileInParser
        instanceVariableNames: 'curCategory curClass curCompilerClass evalFor lastResult method'
        classVariableNames: ''
@@ -128,9 +126,7 @@ record: string
     "Transcript nextPutAll: string; nl"
 ! !
 
-Namespace current: Smalltalk!
-
-!Behavior methodsFor: 'compiling'!
+!Smalltalk.Behavior methodsFor: 'compiling'!
 
 compilerClass
     "This method is present for symmetry with #parserClass.  It
@@ -153,7 +149,7 @@ parserClass
 
 "Final definitions to start the compiler..."
 
-!FileStream methodsFor: 'file-in'!
+!Smalltalk.FileStream methodsFor: 'file-in'!
 
 fileIn
     STInST.STSymbolTable nowInsideFileIn.
@@ -161,7 +157,7 @@ fileIn
     STInST.STSymbolTable nowOutsideFileIn.
 ! !
 
-!Behavior methodsFor: 'compiling'!
+!Smalltalk.Behavior methodsFor: 'compiling'!
 
 evalString: aString to: anObject
     ^STInST.STFileInParser new

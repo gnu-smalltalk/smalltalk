@@ -40,14 +40,43 @@ Object subclass: #Message
 !
 
 Message comment: 
-'I am a virtually existent class.  By that I mean that logically instances of 
-my class are created whenever a message is sent to an object, but in reality
-my instances are only created to hold a message that has failed, so that
-error reporting methods can examine the sender and arguments.' !
+'I represent a message send.  My instances are created to hold a message
+that has failed, so that error reporting methods can examine the sender
+and arguments, but also to represent method attributes (like
+<primitive: 111> since their syntax is isomorphic to that of a
+message send.' !
 	   
 
 
 !Message methodsFor: 'basic'!
+
+printAsAttributeOn: aStream
+    "Print a representation of the receiver on aStream, modeling
+     it after the source code for a attribute."
+
+    aStream nextPut: $<.
+
+    (self selector includes: $:)
+	ifFalse: [
+	    aStream nextPutAll: self selector.
+	    self arguments do: [ :arg |
+		aStream store: arg
+	    ]
+	]
+	ifTrue: [
+	    (self selector substrings: $:) with: self arguments do: [:sel :arg |
+		aStream
+		    nextPutAll: sel;
+		    nextPutAll: ': ';
+		    store: arg;
+		    nextPut: ($ )
+	    ]
+	].
+
+    aStream nextPut: $>
+!
+
+!Message methodsFor: 'printing'!
 
 printOn: aStream
     "Print a representation of the receiver on aStream"

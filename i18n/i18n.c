@@ -92,7 +92,7 @@ LangLookupEntry;
 
 extern char *locale_charset ();
 static OOP buildArray ();
-static char *loadLocale ();
+static const char *loadLocale ();
 
 static VMProxy *vmProxy;
 
@@ -119,10 +119,11 @@ buildArray (nl_item * nlitems, int count)
   return (vmProxy->evalExpr (arraySrc));
 }
 
-char *
-loadLocale (OOP localeOOP, char *string)
+const char *
+loadLocale (OOP localeOOP, const char *string)
 {
-  char *oldLocale, *ourLocale, *grouping, *charset;
+  char *oldLocale, *ourLocale;
+  const char *grouping, *charset;
   struct lconv *lconv;
   Locale locale;
   LcTime lcTime;
@@ -279,7 +280,7 @@ iconvWrapper (iconv_t handle, OOP readBufferOOP, int readPos,
   return (save_errno != EILSEQ);
 }
 
-char *
+const char *
 localeDirectory (void)
 {
   return LOCALEDIR;

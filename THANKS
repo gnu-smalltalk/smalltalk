@@ -30,21 +30,25 @@ Acknowledgments from version 1.6 on (yours truly Paolo Bonzini):
 Mike Anderson                     <msasjf@yahoo.co.uk>
 Pahi Andras                       <pahi@info-m.hu>
 Simon Britnell                    <ughbash@yahoo.com>
-Nicolas Burrus                    <Nicolas.Burrus@epita.fr>
+Nicolas Burrus                    <nicolas.burrus@epita.fr>
+Robert Collins                    <robertc@robertcollins.net>
+Brett Cundal			  <bcundal@cundal.net>
 Carlo Dapor                       <catull_us@yahoo.com>
 Ulf Dambacher                     <ulf.dambacher@mach.uni-karlsruhe.de>
+Fabio Massimo Di Nitto		  <fabbione@fabbione.net>
 Federico Di Gregorio		  <fog@debian.org>
 Jeremy Dreese                     <jdreese@bucknell.edu>
 Mark Elbrecht                     <snowball@bigfoot.com>
 David Forster			  <dforste@m-net.arbornet.org>
 Markus Fritsche                   <marbusse@t-online.de>
 Norman Jordan			  <njordan@shaw.ca>
-GertJan Kersten                   <GertJan.Kersten@bolesian.nl>
+GertJan Kersten                   <gertjan.kersten@bolesian.nl>
 Casper Kit			  <casper.kit@holland.sun.com>
-Thorsten Klein                    <TK@Thorsten-Klein.de>
+Thorsten Klein                    <tk@thorsten-klein.de>
 Andreas Klimas			  <aklimas@iridium.de>
 Bruce Korb			  <bkorb@gnu.org>
 Alexander Lazarevic               <alexander@lazarevic.de>
+Ben Leslie			  <benjl@cse.unsw.edu.au>
 Fernando Lopez Hernandez          <fernando@macprogramadores.org>
 Peter William Lount		  <peter@smalltalk.org>
 Elisa Manara                      <e@entropika.net>
@@ -75,18 +79,18 @@ Claus Gittinger
 Travis Griggs
 Richard A. Harmon
 Reinout Heeck
-Eliot Miranda
 Paul McDonough
+Eliot Miranda
 Joseph Pelrine
-James A. Robertson
 Don Roberts
+James A. Robertson
 Peter van Roojen
 David Simmons
 
 (and many more)
 
 
-I also thank specially the two people who followed me patiently through 
+I also thank specially the two people who followed me patiently through
 the revival of GNU Smalltalk as I worked out the alphas that eventually
 led to version 1.6: David V. Duccini (duccini@backpack.com), who helped
 a lot with his enthusiasm in the earliest phases of testing, as I grew
@@ -120,5 +124,5 @@ you make of this document.
                          Andy Valencia
                          325 Union Ave #359
                          Campbell, CA 95008
-                         jtk@netcom.com (Not checked)
+                         vandys@zendo.com
                          November 27, 1992

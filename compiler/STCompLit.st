@@ -29,113 +29,65 @@
  ======================================================================"
 
 Smalltalk at: #VMByteCodeNames put: ((Dictionary new: 75)
-    at: #PushReceiverVariable	put: 0;
-    at: #PushTemporaryVariable	put: 16;
-    at: #PushLitConstant	put: 32;
-    at: #PushLitVariable	put: 64;
-    at: #PopReceiverVariable	put: 96;
-    at: #PopTemporaryVariable	put: 104;
-    at: #PushSpecial		put: 112;
-    at: #PushNil    		put: 115;
-    at: #Push8BitSigned   	put: 116;
-    at: #Push8BitUnsigned   	put: 117;
-    at: #PushZero   		put: 118;
-    at: #ReturnSpecial		put: 120;
-    at: #ReturnSelf		put: 120;
-    at: #ReturnMethodStackTop	put: 124;
-    at: #ReturnContextStackTop	put: 125;
-    at: #BigLiteral		put: 126;
-    at: #PushIndexed		put: 128;
-    at: #StoreIndexed		put: 129;
-    at: #PopStoreIndexed	put: 130;
-    at: #SendSelector1ExtByte	put: 131;
-    at: #SendSelector2ExtByte	put: 132;
-    at: #SendSuper1ExtByte	put: 133;
-    at: #BigInstance		put: 134;
-    at: #PopStackTop		put: 135;
-    at: #DupStackTop		put: 136;
-    at: #PushActiveContext	put: 137;
-    at: #OuterVar     		put: 138;
-    at: #Nop		     	put: 139;
-    at: #ReplaceSelf	     	put: 140;
-    at: #ReplaceOne	    	put: 141;
-    at: #ReplaceIndexed	   	put: 142;
-    at: #JumpShort		put: 144;
-    at: #PopJumpFalseShort	put: 152;
-    at: #JumpLong		put: 160;
-    at: #PopJumpTrue		put: 168;
-    at: #PopJumpFalse		put: 172;
-    at: #SendSpecial		put: 176;
-    at: #BlockCopyColonSpecial	put: 200;
-    at: #NewColonSpecial	put: 205;
-    at: #SendSelectorShort	put: 208;
+    at: #Send			put: 28;
+    at: #SendSuper		put: 29;
+    at: #SendImmediate		put: 30;
+    at: #SendImmediateSuper	put: 31;
+    at: #PushTemporaryVariable	put: 32;
+    at: #PushOuterVariable	put: 33;
+    at: #PushLitVariable	put: 34;
+    at: #PushReceiverVariable	put: 35;
+    at: #StoreTemporaryVariable	put: 36;
+    at: #StoreOuterVariable	put: 37;
+    at: #StoreLitVariable	put: 38;
+    at: #StoreReceiverVariable	put: 39;
+    at: #JumpBack		put: 40;
+    at: #Jump			put: 41;
+    at: #PopJumpTrue		put: 42;
+    at: #PopJumpFalse		put: 43;
+    at: #PushInteger		put: 44;
+    at: #PushSpecial		put: 45;
+    at: #PushLitConstant	put: 46;
+    at: #PopStoreIntoArray	put: 47;
+    at: #PopStackTop		put: 48;
+    at: #MakeDirtyBlock		put: 49;
+    at: #ReturnMethodStackTop	put: 50;
+    at: #ReturnContextStackTop	put: 51;
+    at: #DupStackTop		put: 52;
+    at: #LineNumber		put: 54;
+    at: #ExtByte		put: 55;
+    at: #PushSelf		put: 56;
     yourself).
 
-Smalltalk at: #VMOtherConstants put: ((Dictionary new: 39)
-    at: #ReceiverIndex			put: 0;
+Smalltalk at: #VMOtherConstants put: ((Dictionary new: 16)
+    at: #NilIndex			put: 0;
     at: #TrueIndex			put: 1;
     at: #FalseIndex			put: 2;
-    at: #NilIndex			put: 3;
-    at: #LiteralZeroIndex		put: 6;
-    at: #LiteralOneIndex		put: 7;
-
-    at: #PushLiteral			put: 0;
-    at: #PopStoreIntoArray		put: 0;
-    at: #PushVariable			put: 64;
-    at: #PopStoreVariable		put: 128;
-    at: #StoreVariable			put: 192;
-
-    at: #ReceiverLocation		put: 0;
-    at: #TemporaryLocation		put: 64;
-    at: #LiteralConstantLocation	put: 128;
-    at: #LiteralVariableLocation	put: 192;
+    at: #LastImmediateSend		put: 24;
+    at: #NewColonSpecial		put: 32;
+    at: #ThisContextSpecial		put: 33;
     yourself)!
 
-VMOtherConstants at: #VMSpecialSelectors put: ((IdentityDictionary new: 65)
-    at: #+				put: 0;
-    at: #-			    	put: 1;
-    at: #<			    	put: 2;
-    at: #>			    	put: 3;
-    at: #<=				put: 4;
-    at: #>=				put: 5;
-    at: #=				put: 6;
-    at: #~=				put: 7;
-    at: #*				put: 8;
-    at: #/				put: 9;
-    at: #\\				put: 10;
-    at: #bitShift:			put: 12;
-    at: #//				put: 13;
-    at: #bitAnd:			put: 14;
-    at: #bitOr:				put: 15;
-    at: #at:				put: 16;
-    at: #at:put:			put: 17;
-    at: #size				put: 18;
-    at: #next				put: 19;
-    at: #nextPut:			put: 20;
-    at: #atEnd				put: 21;
-    at: #==				put: 22;
-    at: #class				put: 23;
-    at: #blockCopy:temporaries:		put: 24;
-    at: #value				put: 25;
-    at: #value:				put: 26;
-    at: #do:				put: 27;
-    at: #new				put: 28;
-    at: #new:				put: 29;
-    at: #isNil				put: 30;
-    at: #notNil				put: 31;
-    yourself).
+| selectorsMap |
+selectorsMap := IdentityDictionary new: 512.
+CompiledCode specialSelectors keysAndValuesDo: [ :index :selector |
+    selector isNil ifFalse: [ selectorsMap at: selector put: index - 1 ].
+].
 
-VMOtherConstants at: #VMSpecialIdentifiers put: ((LookupTable new: 19)
-    at: 'self'		put: 0;
-    at: 'true'		put: 1;
-    at: 'false'		put: 2;
-    at: 'nil'		put: 3;
-    at: 'thisContext'	put: 25;
+VMOtherConstants at: #VMSpecialSelectors put: selectorsMap.
 
-    at: 'super'		put: -1;
+VMOtherConstants at: #VMSpecialIdentifiers put: ((LookupTable new: 8)
+    at: 'super'		put: [ :c | c compileError: 'invalid occurrence of super' ];
+    at: 'self'		put: [ :c | c compileByte: VMByteCodeNames.PushSelf ];
+    at: 'nil'		put: [ :c | c compileByte: VMByteCodeNames.PushSpecial arg: VMOtherConstants.NilIndex ];
+    at: 'true'		put: [ :c | c compileByte: VMByteCodeNames.PushSpecial arg: VMOtherConstants.TrueIndex ];
+    at: 'false'		put: [ :c | c compileByte: VMByteCodeNames.PushSpecial arg: VMOtherConstants.FalseIndex ];
+    at: 'thisContext'	put: [ :c | c
+					pushLiteralVariable: #{ContextPart};
+					compileByte: VMByteCodeNames.SendImmediate arg: VMOtherConstants.ThisContextSpecial ];
     yourself).
     
-VMOtherConstants at: #VMSpecialMethods put: ((IdentityDictionary new: 29)
+VMOtherConstants at: #VMSpecialMethods put: ((IdentityDictionary new: 32)
     at: #whileTrue		put: nil		 ;
     at: #whileFalse		put: nil		 ;
     at: #whileTrue:		put: nil		 ;

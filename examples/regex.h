@@ -151,7 +151,7 @@ typedef struct
 
 #ifdef __STDC__
 
-extern char *pre_compile_pattern (const char *, int, struct pre_pattern_buffer *);
+extern const char *pre_compile_pattern (const char *, int, struct pre_pattern_buffer *);
 void pre_free_pattern (struct pre_pattern_buffer *);
 /* Is this really advertised?  */
 extern int pre_adjust_startpos (struct pre_pattern_buffer *, const char*, int, int, int);

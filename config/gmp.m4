@@ -19,10 +19,10 @@ if test "$with_gmp" != no; then
     ac_save_LIBS="$LIBS"
     LIBS="$ac_save_LIBS $gst_cv_gmp_libs"
 
-    AC_TRY_LINK([
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 	#include <stdio.h>
 	#include <gmp.h>
-      ], [
+      ]], [[
         #if __GNU_MP_VERSION < 4
           you lose
         #endif
@@ -30,7 +30,7 @@ if test "$with_gmp" != no; then
         mp_limb_t n[10];
         mpn_tdiv_qr (n, n, 10, n, 10, n, 10);
         mpz_init_set_str (z, "123456", 0);
-      ], , gst_cv_gmp_libs="not found")
+      ]])],[],[gst_cv_gmp_libs="not found"])
     LIBS="$ac_save_LIBS"
   ])
 

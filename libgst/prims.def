@@ -59,10 +59,10 @@
 #define IS_OFF_T(oop)          is_c_int_64(oop)
 #endif
 
-#ifdef USE_JIT_TRANSLATION
-#define PRIM_FAILED			return ((long) -1)
-#define PRIM_SUCCEEDED			return ((long) 0)
-#define PRIM_SUCCEEDED_RELOAD_IP	return ((long) native_ip)
+#ifdef ENABLE_JIT_TRANSLATION
+#define PRIM_FAILED			return ((intptr_t) -1)
+#define PRIM_SUCCEEDED			return ((intptr_t) 0)
+#define PRIM_SUCCEEDED_RELOAD_IP	return ((intptr_t) native_ip)
 #else
 #define PRIM_FAILED			return (true)
 #define PRIM_SUCCEEDED			return (false)
@@ -75,7 +75,7 @@
     oop2 = POP_OOP();				\
     oop1 = POP_OOP();				\
     if COMMON (RECEIVER_IS_INT(oop1) && IS_INT(oop2)) {\
-      long iarg1, iarg2;			\
+      intptr_t iarg1, iarg2;			\
       iarg1 = TO_INT(oop1);			\
       iarg2 = TO_INT(oop2);			\
 						\
@@ -95,7 +95,7 @@
     oop2 = POP_OOP();						\
     oop1 = POP_OOP();						\
     if COMMON (RECEIVER_IS_INT(oop1) && IS_INT(oop2)) {		\
-      PUSH_BOOLEAN( ((long)oop1) operator ((long)oop2) );	\
+      PUSH_BOOLEAN( ((intptr_t)oop1) operator ((intptr_t)oop2) );	\
       PRIM_SUCCEEDED;						\
     }								\
     UNPOP(2);							\
@@ -178,7 +178,7 @@ primitive VMpr_SmallInteger_divide [succeed,fail]
   oop1 = POP_OOP ();
   if (RECEIVER_IS_INT (oop1) && IS_INT (oop2) && oop2 != FROM_INT (0))
     {
-      long iarg1, iarg2, result;
+      intptr_t iarg1, iarg2, result;
       iarg1 = TO_INT (oop1);
       iarg2 = TO_INT (oop2);
       result = iarg1 / iarg2;
@@ -205,7 +205,7 @@ primitive VMpr_SmallInteger_modulo [succeed,fail]
   oop1 = POP_OOP ();
   if COMMON (RECEIVER_IS_INT (oop1) && IS_INT (oop2) && oop2 != FROM_INT (0))
     {
-      long iarg1, iarg2, result;
+      intptr_t iarg1, iarg2, result;
       iarg1 = TO_INT (oop1);
       iarg2 = TO_INT (oop2);
       result = iarg1 % iarg2;
@@ -229,7 +229,7 @@ primitive VMpr_SmallInteger_intDiv [succeed,fail]
   oop1 = POP_OOP ();
   if COMMON (RECEIVER_IS_INT (oop1) && IS_INT (oop2) && oop2 != FROM_INT (0))
     {
-      long iarg1, iarg2;
+      intptr_t iarg1, iarg2;
       iarg1 = TO_INT (oop1);
       iarg2 = TO_INT (oop2);
       if (iarg2 < 0)
@@ -260,7 +260,7 @@ primitive VMpr_SmallInteger_quo [succeed,fail]
   oop1 = POP_OOP ();
   if COMMON (RECEIVER_IS_INT (oop1) && IS_INT (oop2))
     {
-      long iarg1, iarg2;
+      intptr_t iarg1, iarg2;
       iarg1 = TO_INT (oop1);
       iarg2 = TO_INT (oop2);
       if COMMON (iarg2 != 0)
@@ -305,8 +305,8 @@ primitive VMpr_SmallInteger_bitShift [succeed,fail]
   oop1 = POP_OOP ();
   if COMMON (RECEIVER_IS_INT (oop1) && IS_INT (oop2))
     {
-      long iarg1;
-      long iarg2;
+      intptr_t iarg1;
+      intptr_t iarg2;
       iarg1 = TO_INT (oop1);
       iarg2 = TO_INT (oop2);
       if (iarg2 < 0)
@@ -316,7 +316,7 @@ primitive VMpr_SmallInteger_bitShift [succeed,fail]
 	}
       if COMMON (iarg2 < ST_INT_SIZE)
 	{
-	  long result = iarg1 << iarg2;
+	  intptr_t result = iarg1 << iarg2;
 	  if ((result >> iarg2) == iarg1 && !INT_OVERFLOW(result))
 	    {
 	      PUSH_INT (result);
@@ -774,7 +774,7 @@ primitive VMpr_LargeInteger_modulo [uses_gmp]
 
   if COMMON (IS_INT (oop2) && oop2 != FROM_INT (0))
     {
-      long rem = _gst_mpz_fdiv_qr_si (&q, &a, TO_INT(oop2));
+      mp_limb_t rem = _gst_mpz_fdiv_qr_si (&q, &a, TO_INT(oop2));
       oop3 = FROM_INT (rem);
     }
   else if (IS_OOP (oop2)
@@ -877,7 +877,7 @@ primitive VMpr_LargeInteger_rem [uses_gmp]
 
   if COMMON (IS_INT (oop2) && oop2 != FROM_INT (0))
     {
-      long rem = _gst_mpz_tdiv_qr_si (&q, &a, TO_INT(oop2));
+      mp_limb_t rem = _gst_mpz_tdiv_qr_si (&q, &a, TO_INT(oop2));
       oop3 = FROM_INT (rem);
     }
   else if (IS_OOP (oop2)
@@ -1464,12 +1464,12 @@ primitive VMpr_FloatD_truncated [succeed,fail]
       double oopValue = FLOATD_OOP_VALUE (oop1);
       if COMMON (oopValue >= 0.0 && oopValue <= MAX_ST_INT)
 	{
-	  PUSH_INT ((long) (oopValue + 0.000000000000005));
+	  PUSH_INT ((intptr_t) (oopValue + 0.000000000000005));
 	  PRIM_SUCCEEDED;
 	}
       else if COMMON (oopValue < 0.0 && oopValue >= MIN_ST_INT)
 	{
-	  PUSH_INT ((long) (oopValue - 0.000000000000005));
+	  PUSH_INT ((intptr_t) (oopValue - 0.000000000000005));
 	  PRIM_SUCCEEDED;
 	}
     }
@@ -1536,7 +1536,7 @@ primitive VMpr_FloatD_timesTwoPower [succeed,fail]
   if (RECEIVER_IS_CLASS (oop1, _gst_floatd_class) && IS_INT (oop2))
     {
       double farg1;
-      long iarg2;
+      intptr_t iarg2;
       farg1 = FLOATD_OOP_VALUE (oop1);
       iarg2 = TO_INT (oop2);
       PUSH_OOP (floatd_new (ldexp (farg1, iarg2)));
@@ -1665,12 +1665,12 @@ primitive VMpr_FloatE_truncated [succeed,fail]
       double oopValue = FLOATE_OOP_VALUE (oop1);
       if COMMON (oopValue >= 0.0 && oopValue <= MAX_ST_INT)
 	{
-	  PUSH_INT ((long) (oopValue + 0.000000000000005));
+	  PUSH_INT ((intptr_t) (oopValue + 0.000000000000005));
 	  PRIM_SUCCEEDED;
 	}
       else if COMMON (oopValue < 0.0 && oopValue >= MIN_ST_INT)
 	{
-	  PUSH_INT ((long) (oopValue - 0.000000000000005));
+	  PUSH_INT ((intptr_t) (oopValue - 0.000000000000005));
 	  PRIM_SUCCEEDED;
 	}
     }
@@ -1737,7 +1737,7 @@ primitive VMpr_FloatE_timesTwoPower [succeed,fail]
   if (RECEIVER_IS_CLASS (oop1, _gst_floate_class) && IS_INT (oop2))
     {
       double farg1;
-      long iarg2;
+      intptr_t iarg2;
       farg1 = FLOATE_OOP_VALUE (oop1);
       iarg2 = TO_INT (oop2);
       PUSH_OOP (floate_new (ldexp (farg1, iarg2)));
@@ -1866,12 +1866,12 @@ primitive VMpr_FloatQ_truncated [succeed,fail]
       long double oopValue = FLOATQ_OOP_VALUE (oop1);
       if COMMON (oopValue >= 0.0 && oopValue <= MAX_ST_INT)
 	{
-	  PUSH_INT ((long) (oopValue + 0.000000000000005));
+	  PUSH_INT ((intptr_t) (oopValue + 0.000000000000005));
 	  PRIM_SUCCEEDED;
 	}
       else if COMMON (oopValue < 0.0 && oopValue >= MIN_ST_INT)
 	{
-	  PUSH_INT ((long) (oopValue - 0.000000000000005));
+	  PUSH_INT ((intptr_t) (oopValue - 0.000000000000005));
 	  PRIM_SUCCEEDED;
 	}
     }
@@ -1938,7 +1938,7 @@ primitive VMpr_FloatQ_timesTwoPower [succeed,fail]
   if (RECEIVER_IS_CLASS (oop1, _gst_floatq_class) && IS_INT (oop2))
     {
       long double farg1;
-      long iarg2;
+      intptr_t iarg2;
       farg1 = FLOATQ_OOP_VALUE (oop1);
       iarg2 = TO_INT (oop2);
       PUSH_OOP (floatq_new (ldexpl (farg1, iarg2)));
@@ -1996,7 +1996,7 @@ primitive VMpr_Object_basicAt = 60 [succeed,fail,inlined]
   oop1 = STACKTOP ();
   if COMMON (IS_INT (oop2))
     {
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       oop1 = index_oop (oop1, arg2);
       if COMMON (oop1)
@@ -2022,7 +2022,7 @@ primitive VMpr_Object_basicAtPut = 61 [succeed,fail,inlined]
   oop1 = STACKTOP ();
   if COMMON (IS_INT (oop2) && !IS_OOP_READONLY (oop1))
     {
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       if COMMON (index_oop_put (oop1, arg2, oop3))
 	{
@@ -2057,7 +2057,7 @@ primitive VMpr_String_basicAt = 63 [succeed,fail,inlined]
   oop1 = STACKTOP ();
   if COMMON (IS_INT (oop2))
     {
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       oop1 = index_string_oop (oop1, arg2);
       if COMMON (oop1)
@@ -2083,9 +2083,9 @@ primitive VMpr_String_basicAtPut = 64 [succeed,fail,inlined]
   oop2 = POP_OOP ();
   oop1 = STACKTOP ();
   if COMMON (IS_INT (oop2) && IS_CLASS (oop3, _gst_char_class)
-      && !IS_OOP_READONLY (oop1))
+             && !IS_OOP_READONLY (oop1))
     {
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       if COMMON (index_string_oop_put (oop1, arg2, oop3))
 	{
@@ -2098,8 +2098,19 @@ primitive VMpr_String_basicAtPut = 64 [succeed,fail,inlined]
   PRIM_FAILED;
 }
 
-/* CompiledBlock numArgs:numTemps:bytecodes:depth:literals: */
 
+/* CompiledCode verificationResult */
+primitive VMpr_CompiledCode_verificationResult [succeed]
+{
+  OOP oop1 = STACKTOP ();
+  const char *result = _gst_verify_method (oop1, NULL, 0);
+  OOP resultOOP = result ? _gst_string_new (result) : _gst_nil_oop;
+
+  SET_STACKTOP (resultOOP);
+  PRIM_SUCCEEDED;
+}
+
+/* CompiledBlock numArgs:numTemps:bytecodes:depth:literals: */
 primitive VMpr_CompiledBlock_create [succeed]
 {
   OOP *_gst_literals = OOP_TO_OBJ (POP_OOP ())->data;
@@ -2107,31 +2118,39 @@ primitive VMpr_CompiledBlock_create [succeed]
   OOP bytecodesOOP = POP_OOP ();
   int blockTemps = TO_INT (POP_OOP ());
   int blockArgs = TO_INT (POP_OOP ());
-  bytecodes bytecodes = _gst_extract_bytecodes (bytecodesOOP);
+  bc_vector bytecodes = _gst_extract_bytecodes (bytecodesOOP);
 
   OOP block =
     _gst_block_new (blockArgs, blockTemps, bytecodes, depth, _gst_literals);
+
+  OOP_CLASS(block) = STACKTOP ();
 
   _gst_primitives_executed++;
   SET_STACKTOP (block);
   PRIM_SUCCEEDED;
 }
 
-/* CompiledMethod literals:numArgs:numTemps:primitive:bytecodes:depth: */
-primitive VMpr_CompiledMethod_create [succeed]
+/* CompiledMethod literals:numArgs:numTemps:attributes:bytecodes:depth: */
+primitive VMpr_CompiledMethod_create [succeed,fail]
 {
-  int depth = TO_INT (POP_OOP ());
-  OOP bytecodesOOP = POP_OOP ();
-  int primitive = TO_INT (POP_OOP ());
-  int methodTemps = TO_INT (POP_OOP ());
-  int methodArgs = TO_INT (POP_OOP ());
-  OOP literals = POP_OOP ();
-  bytecodes bytecodes = _gst_extract_bytecodes (bytecodesOOP);
+  int depth = TO_INT (STACK_AT (0));
+  OOP bytecodesOOP = STACK_AT (1);
+  OOP attributesOOP = STACK_AT (2);
+  int methodTemps = TO_INT (STACK_AT (3));
+  int methodArgs = TO_INT (STACK_AT (4));
+  OOP literals = STACK_AT (5);
+  bc_vector bytecodes = _gst_extract_bytecodes (bytecodesOOP);
+  int primitive = _gst_process_attributes_array (attributesOOP);
+  OOP method;
+  if (primitive == -1)
+    PRIM_FAILED;
 
-  OOP method =
-    _gst_make_new_method (primitive, methodArgs, methodTemps, depth,
-			  literals,
-			  bytecodes, _gst_nil_oop, _gst_nil_oop);
+  POP_N_OOPS(6);
+
+  method = _gst_make_new_method (primitive, methodArgs, methodTemps, depth,
+			         literals, bytecodes, _gst_nil_oop, _gst_nil_oop);
+
+  OOP_CLASS(method) = STACKTOP ();
 
   _gst_primitives_executed++;
   SET_STACKTOP (method);
@@ -2185,7 +2204,7 @@ primitive VMpr_Behavior_basicNewColon = 71 [succeed,fail,inlined]
     {
       if COMMON (CLASS_IS_INDEXABLE (oop1))
 	{
-	  long arg2;
+	  intptr_t arg2;
 	  arg2 = TO_INT (oop2);
 	  if (arg2 >= 0)
 	    {
@@ -2210,15 +2229,13 @@ primitive VMpr_Object_become [succeed,fail]
 
   oop2 = POP_OOP ();
   oop1 = STACKTOP ();
-  if COMMON (IS_OOP (oop1) && !IS_OOP_READONLY (oop1))
+  if COMMON (!IS_OOP_READONLY (oop1)
+	     && !IS_OOP_READONLY (oop2))
     {
-      if COMMON (IS_OOP (oop2) && !IS_OOP_READONLY (oop2))
-	{
-	  _gst_swap_objects (oop1, oop2);
-	  /* ??? maybe we should do `_gst_self = oop2' here? */
-	  PRIM_SUCCEEDED;
-	}
+      _gst_swap_objects (oop1, oop2);
+      PRIM_SUCCEEDED;
     }
+
   UNPOP (1);
   PRIM_FAILED;
 }
@@ -2234,7 +2251,7 @@ primitive VMpr_Object_instVarAt = 73 [succeed,fail,inlined]
   oop1 = STACKTOP ();
   if COMMON (IS_INT (oop2))
     {
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       if COMMON (CHECK_BOUNDS_OF (oop1, arg2))
 	{
@@ -2259,7 +2276,7 @@ primitive VMpr_Object_instVarAtPut = 74 [succeed,fail,inlined]
   oop1 = STACKTOP ();
   if COMMON (IS_INT (oop2))
     {
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       if COMMON (CHECK_BOUNDS_OF (oop1, arg2))
 	{
@@ -2291,7 +2308,7 @@ primitive VMpr_Object_hash [succeed,fail]
 primitive VMpr_SmallInteger_asObject [succeed,fail]
 {
   OOP oop1;
-  long arg1;
+  intptr_t arg1;
   _gst_primitives_executed++;
 
   oop1 = STACKTOP ();
@@ -2313,7 +2330,7 @@ primitive VMpr_SmallInteger_asObject [succeed,fail]
 primitive VMpr_SmallInteger_nextValidOop [succeed,fail]
 {
   OOP oop1;
-  long arg1;
+  intptr_t arg1;
   _gst_primitives_executed++;
 
   oop1 = STACKTOP ();
@@ -2339,9 +2356,11 @@ primitive VMpr_Behavior_someInstance [succeed,fail]
   _gst_primitives_executed++;
 
   oop1 = STACKTOP ();
+  PREFETCH_START (_gst_mem.ot_base, PREF_READ | PREF_NTA);
   for (oop2 = _gst_mem.ot_base, lastOOP = &_gst_mem.ot[_gst_mem.ot_size];
        oop2 < lastOOP; oop2++)
     {
+      PREFETCH_LOOP (oop2, PREF_READ | PREF_NTA);
       if UNCOMMON (IS_OOP_VALID (oop2) && oop1 == OOP_CLASS (oop2))
 	{
 	  SET_STACKTOP (oop2);
@@ -2376,6 +2395,7 @@ primitive VMpr_Object_nextInstance [succeed,fail]
       OOP class_oop = OOP_CLASS (oop1);
       for (++oop1; oop1 <= _gst_mem.last_allocated_oop; oop1++)
 	{
+          PREFETCH_LOOP (oop1, PREF_READ | PREF_NTA);
 	  if (IS_OOP_VALID (oop1) && class_oop == OOP_CLASS (oop1))
 	    {
 	      SET_STACKTOP (oop1);
@@ -2385,7 +2405,6 @@ primitive VMpr_Object_nextInstance [succeed,fail]
     }
   PRIM_FAILED;
 }
-
 
 /* Object allOwners */
 primitive VMpr_Object_allOwners [succeed]
@@ -2399,29 +2418,39 @@ primitive VMpr_Object_allOwners [succeed]
   oop1 = STACKTOP ();
 
   _gst_reset_buffer ();
+  PREFETCH_START (_gst_mem.ot_base, PREF_READ | PREF_NTA);
   for (oop2 = _gst_mem.ot_base, lastOOP = &_gst_mem.ot[_gst_mem.ot_size];
        oop2 < lastOOP; oop2++)
     {
+      PREFETCH_LOOP (oop2, PREF_READ | PREF_NTA);
       if UNCOMMON (IS_OOP_VALID (oop2) && is_owner(oop2, oop1))
-        _gst_add_buf_pointer (oop2);
+	_gst_add_buf_pointer (oop2);
     }
 
   object = new_instance_with (_gst_array_class,
-                              _gst_buffer_size() / sizeof (PTR),
-                              &result);
+			      _gst_buffer_size() / sizeof (PTR),
+			      &result);
 
   _gst_copy_buffer (object->data);
   SET_STACKTOP (result);
   PRIM_SUCCEEDED;
 }
-
 
+
+primitive VMpr_ContextPart_thisContext [succeed]
+{
+  _gst_primitives_executed++;
+  empty_context_stack ();
+  SET_STACKTOP (_gst_this_context_oop);
+  PRIM_SUCCEEDED;
+}
+
 primitive VMpr_ContextPart_continue [checks_receiver,reload_ip]
 {
   OOP oop2;
   OOP oop1;
-
   _gst_primitives_executed++;
+
   oop2 = POP_OOP ();
   oop1 = STACKTOP ();
   if COMMON (RECEIVER_IS_A_KIND_OF (OOP_CLASS (oop1),
@@ -2436,29 +2465,6 @@ primitive VMpr_ContextPart_continue [checks_receiver,reload_ip]
       UNPOP (1);
       PRIM_FAILED;
     }
-}
-
-/* BlockClosure blockCopy: */
-
-primitive VMpr_BlockClosure_blockCopy [succeed]
-{
-  gst_block_closure closure, original;
-  OOP closureOOP;
-  OOP oop1;
-  OOP oop2;
-  _gst_primitives_executed++;
-
-  oop2 = POP_OOP ();
-  oop1 = STACKTOP ();
-  closure = (gst_block_closure) new_instance (_gst_block_closure_class,
-					      &closureOOP);
-
-  original = (gst_block_closure) OOP_TO_OBJ (oop1);
-  closure->outerContext = oop2;
-  closure->block = original->block;
-  closure->receiver = _gst_self;
-  SET_STACKTOP (closureOOP);
-  PRIM_SUCCEEDED;
 }
 
 /* BlockClosure value
@@ -2546,11 +2552,11 @@ primitive VMpr_Object_perform [fail,reload_ip]
       while (--i >= 0)
 	PUSH_OOP (oopVec[i]);
 
-      SEND_MESSAGE (oop1, numArgs, false);
+      SEND_MESSAGE (oop1, numArgs);
       PRIM_SUCCEEDED_RELOAD_IP;
     }
 
-  if COMMON (IS_CLASS (oop1, _gst_compiled_method_class))
+  if COMMON (is_a_kind_of (OOP_CLASS (oop1), _gst_compiled_method_class))
     {
       gst_compiled_method method;
       method_header header;
@@ -2594,11 +2600,11 @@ primitive VMpr_Object_performWithArguments [fail,reload_ip]
       for (i = 1; i <= numArgs; i++)
 	PUSH_OOP (ARRAY_AT (oop2, i));
 
-      SEND_MESSAGE (oop1, numArgs, false);
+      SEND_MESSAGE (oop1, numArgs);
       PRIM_SUCCEEDED_RELOAD_IP;
     }
 
-  else if COMMON (IS_CLASS (oop1, _gst_compiled_method_class))
+  else if COMMON (is_a_kind_of (OOP_CLASS (oop1), _gst_compiled_method_class))
     {
       gst_compiled_method method;
       method_header header;
@@ -2738,7 +2744,7 @@ primitive VMpr_Process_yield [succeed,check_interrupt]
   struct timespec ts = { 0, 1000000 };
   nanosleep (&ts, NULL);
 #elif defined HAVE_USLEEP
-  usleep (1000);		/* exhibit good behavior */
+  usleep (1000);                /* exhibit good behavior */
 #endif
 
   _gst_primitives_executed++;
@@ -2769,7 +2775,7 @@ primitive VMpr_Behavior_flushCache [succeed]
 primitive VMpr_CompiledCode_discardTranslation [succeed]
 {
   _gst_primitives_executed++;
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
   _gst_discard_native_code (STACKTOP ());
 #endif
   PRIM_SUCCEEDED;
@@ -2820,7 +2826,7 @@ primitive VMpr_Time_timezone [succeed]
        semantics from those defined in the
        book.  This primitive returns the
        seconds since/to Jan 1, 2000 00:00:00
-       instead of Jan 1,1901. */
+       instead of Jan 1,1901.  */
 primitive VMpr_Time_secondClock [succeed]
 {
   _gst_primitives_executed++;
@@ -2832,7 +2838,7 @@ primitive VMpr_Time_secondClock [succeed]
 /* Time class millisecondClock -- Note: the semantics of this
      primitive are different than those described in the book.  This
      primitive returns the number of milliseconds since midnight
-   today. */
+   today.  */
 primitive VMpr_Time_millisecondClock [succeed]
 {
   _gst_primitives_executed++;
@@ -2852,7 +2858,7 @@ primitive VMpr_Processor_signalAtMilliseconds [succeed,fail,check_interrupt]
   oop1 = POP_OOP ();
   if (IS_INT (oop2))
     {
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       if (arg2 <= 0)
 	{
@@ -2891,13 +2897,13 @@ primitive VMpr_String_similarityTo [succeed,fail]
   oop2 = STACKTOP ();
   oop1 = STACKTOP ();
 
-  if ((OOP_INSTANCE_SPEC (oop2) &
-       ((~0 << ISP_NUMFIXEDFIELDS) | ISP_ISPOINTERS | ISP_ISWORDS)))
+  if ((OOP_INSTANCE_SPEC (oop1) & (~0 << ISP_NUMFIXEDFIELDS))
+      || (OOP_INSTANCE_SPEC (oop1) & ISP_INDEXEDVARS) != ISP_UCHAR)
     PRIM_FAILED;
 
 #ifndef OPTIMIZE
-  if ((OOP_INSTANCE_SPEC (oop1) &
-       ((~0 << ISP_NUMFIXEDFIELDS) | ISP_ISPOINTERS | ISP_ISWORDS)))
+  if ((OOP_INSTANCE_SPEC (oop1) & (~0 << ISP_NUMFIXEDFIELDS))
+      || (OOP_INSTANCE_SPEC (oop1) & ISP_INDEXEDVARS) != ISP_UCHAR)
     PRIM_FAILED;
 #endif
 
@@ -2917,15 +2923,14 @@ primitive VMpr_String_similarityTo [succeed,fail]
 
 primitive VMpr_String_hash [checks_receiver]
 {
-  unsigned long hash;
+  uintptr_t hash;
   gst_uchar *base;
   OOP oop1;
   _gst_primitives_executed++;
 
   oop1 = STACKTOP ();
 #ifndef OPTIMIZE
-  if ((OOP_INSTANCE_SPEC (oop1) &
-       ((~0 << ISP_NUMFIXEDFIELDS) | ISP_ISPOINTERS | ISP_ISWORDS)))
+  if (!CLASS_IS_SCALAR (OOP_CLASS (oop1)))
     PRIM_FAILED;
 #endif
 
@@ -2943,7 +2948,6 @@ primitive VMpr_ByteArray_replaceFromToWithStartingAt [succeed,fail]
 {
   OOP srcIndexOOP, srcOOP, dstEndIndexOOP, dstStartIndexOOP, dstOOP;
   int dstEndIndex, dstStartIndex, srcIndex, dstLen, srcLen, dstRangeLen;
-  long spec;
   gst_uchar *dstBase, *srcBase;
   _gst_primitives_executed++;
 
@@ -2954,8 +2958,8 @@ primitive VMpr_ByteArray_replaceFromToWithStartingAt [succeed,fail]
   if COMMON (IS_INT (srcIndexOOP) && IS_INT (dstStartIndexOOP)
              && IS_INT (dstEndIndexOOP) && !IS_INT (srcOOP))
     {
-      spec = OOP_INSTANCE_SPEC (srcOOP);
-      if COMMON (!(spec & (ISP_ISWORDS | ISP_ISPOINTERS)))
+      if (!(OOP_INSTANCE_SPEC (srcOOP) & (~0 << ISP_NUMFIXEDFIELDS))
+          && (OOP_INSTANCE_SPEC (srcOOP) & ISP_INDEXEDVARS) == ISP_UCHAR)
 	{
 	  /* dstEnd is inclusive: (1 to: 1) has length 1 */
 	  dstEndIndex = TO_INT (dstEndIndexOOP);
@@ -3004,7 +3008,7 @@ primitive VMpr_Object_identity = 110 [succeed,inlined]
 }
 
 /* Object class */
-primitive VMpr_Object_class [succeed]
+primitive VMpr_Object_class = 111 [succeed]
 {
   OOP oop1;
   _gst_primitives_executed++;
@@ -3025,7 +3029,7 @@ primitive VMpr_Object_class [succeed]
 primitive VMpr_ObjectMemory_quit [fail]
 {
   OOP oop1;
-  long arg1;
+  intptr_t arg1;
   _gst_primitives_executed++;
 
   oop1 = STACKTOP ();
@@ -3080,7 +3084,7 @@ primitive VMpr_Dictionary_atPut [succeed]
 /* This is not defined in terms of #error: in a .st file because some 
    of the required functionality may not be present when it gets
    first invoked, say during the loading of the first kernel files.
-   We'll redefine it later. */
+   We'll redefine it later.  */
 
 /* Object doesNotUnderstand:
  * Object error: */
@@ -3118,7 +3122,7 @@ primitive VMpr_Character_create [succeed,fail]
   oop1 = STACKTOP ();
   if (IS_INT (oop2))
     {
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       if (arg2 >= 0 && arg2 <= 255)
 	{
@@ -3128,17 +3132,6 @@ primitive VMpr_Character_create [succeed,fail]
     }
   UNPOP (1);
   PRIM_FAILED;
-}
-
-/* Character value */
-primitive VMpr_Character_value [succeed]
-{
-  OOP oop1;
-  _gst_primitives_executed++;
-
-  oop1 = STACKTOP ();
-  SET_STACKTOP_INT (CHAR_OOP_VALUE (oop1));
-  PRIM_SUCCEEDED;
 }
 
 /* Symbol class intern: aString */
@@ -3186,7 +3179,7 @@ primitive VMpr_Memory_addressOfOOP [succeed,fail]
   oop1 = POP_OOP ();
   if (IS_OOP (oop2))
     {
-      PUSH_OOP (FROM_C_ULONG ((long) oop2));
+      PUSH_OOP (FROM_C_ULONG ((uintptr_t) oop2));
       PRIM_SUCCEEDED;
     }
   UNPOP (2);
@@ -3204,7 +3197,7 @@ primitive VMpr_Memory_addressOf [succeed,fail]
   oop1 = POP_OOP ();
   if (IS_OOP (oop2))
     {
-      PUSH_OOP (FROM_C_ULONG ((long) OOP_TO_OBJ (oop2)));
+      PUSH_OOP (FROM_C_ULONG ((uintptr_t) OOP_TO_OBJ (oop2)));
       PRIM_SUCCEEDED;
     }
   UNPOP (2);
@@ -3232,7 +3225,7 @@ primitive VMpr_SystemDictionary_getTraceFlag [succeed,fail]
   oop1 = POP_OOP ();
   if (IS_INT (oop2))
     {
-      long arg2;
+      intptr_t arg2;
       mst_Boolean *boolAddr;
       arg2 = TO_INT (oop2);
       boolAddr = bool_addr_index (arg2);
@@ -3260,7 +3253,7 @@ primitive VMpr_SystemDictionary_setTraceFlag [succeed,fail]
   if (IS_INT (oop1))
     {
       mst_Boolean *boolAddr;
-      long arg1 = TO_INT (oop1);
+      intptr_t arg1 = TO_INT (oop1);
       boolAddr = bool_addr_index (arg1);
       if (boolAddr != NULL)
 	{
@@ -3286,7 +3279,7 @@ primitive VMpr_CObject_alloc [succeed,fail]
   oop1 = STACKTOP ();
   if (IS_INT (oop2))
     {
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       SET_STACKTOP (_gst_alloc_cobject (oop1, arg2));
       PRIM_SUCCEEDED;
@@ -3308,7 +3301,7 @@ primitive VMpr_Memory_at [succeed,fail]
   oop1 = POP_OOP ();
   if (IS_C_LONG (oop3) && IS_INT (oop2))
     {
-      long arg1, arg2;
+      intptr_t arg1, arg2;
       arg1 = TO_INT (oop2);
       arg2 = TO_C_LONG (oop3);
       switch (arg1)
@@ -3354,6 +3347,9 @@ primitive VMpr_Memory_at [succeed,fail]
 	case 11:		/* unsigned int */
 	  PUSH_OOP (FROM_C_UINT (*(unsigned int *) arg2));
 	  PRIM_SUCCEEDED;
+	case 12:		/* long double */
+	  PUSH_OOP (floatq_new (*(long double *) arg2));
+	  PRIM_SUCCEEDED;
 	}
     }
 
@@ -3375,7 +3371,7 @@ primitive VMpr_Memory_atPut [succeed,fail]
   /* don't pop the receiver */
   if (IS_C_LONG (oop3) && IS_INT (oop2))
     {
-      long arg1, arg2;
+      intptr_t arg1, arg2;
       arg1 = TO_INT (oop2);
       arg2 = TO_C_LONG (oop3);
       switch (arg1)
@@ -3465,6 +3461,23 @@ primitive VMpr_Memory_atPut [succeed,fail]
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
+	case 12:		/* long double */
+	  if (IS_CLASS (oop4, _gst_floatd_class))
+	    {
+	      *(long double *) arg2 = (long double) FLOATD_OOP_VALUE (oop4);
+	      PRIM_SUCCEEDED;
+	    }
+	  else if (IS_CLASS (oop4, _gst_floate_class))
+	    {
+	      *(long double *) arg2 = (long double) FLOATE_OOP_VALUE (oop4);
+	      PRIM_SUCCEEDED;
+	    }
+	  else if (IS_CLASS (oop4, _gst_floatq_class))
+	    {
+	      *(long double *) arg2 = FLOATQ_OOP_VALUE (oop4);
+	      PRIM_SUCCEEDED;
+	    }
+	  break;
 	}
     }
 
@@ -3476,9 +3489,11 @@ primitive VMpr_Memory_atPut [succeed,fail]
 /* methodsFor: category */
 primitive VMpr_Behavior_methodsFor [succeed]
 {
+  OOP oop2 = POP_OOP ();
+  OOP oop1 = STACKTOP ();
+
   _gst_primitives_executed++;
-  _gst_set_compilation_category (POP_OOP ());
-  _gst_set_compilation_class (STACKTOP ());
+  _gst_set_compilation_category (oop1, oop2);
   _gst_display_compilation_trace ("Compiling", true);
   _gst_compile_code = true;
   PRIM_SUCCEEDED;
@@ -3487,13 +3502,14 @@ primitive VMpr_Behavior_methodsFor [succeed]
 /* methodsFor: category ifTrue: condition */
 primitive VMpr_Behavior_methodsForIfTrue [succeed]
 {
-  OOP oop2;
+  OOP oop3 = POP_OOP ();
+  OOP oop2 = POP_OOP ();
+  OOP oop1 = STACKTOP ();
+
   _gst_primitives_executed++;
 
-  oop2 = POP_OOP ();
-  _gst_set_compilation_category (POP_OOP ());
-  _gst_set_compilation_class (STACKTOP ());
-  if (oop2 == _gst_true_oop)
+  _gst_set_compilation_category (oop1, oop2);
+  if (oop3 == _gst_true_oop)
     _gst_display_compilation_trace ("Conditionally compiling", true);
   else
     {
@@ -3543,7 +3559,7 @@ primitive VMpr_Processor_signalOnInterrupt [succeed,fail,check_interrupt]
   oop1 = POP_OOP ();
   if (IS_INT (oop2))
     {
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       _gst_async_interrupt_wait (oop1, arg2);
       PRIM_SUCCEEDED;
@@ -3565,7 +3581,7 @@ primitive VMpr_ObjectMemory_getSpaceGrowRate [succeed]
 /* ObjectMemory spaceGrowRate: */
 primitive VMpr_ObjectMemory_setSpaceGrowRate [succeed,fail]
 {
-  long arg1;
+  intptr_t arg1;
   OOP oop1;
   _gst_primitives_executed++;
 
@@ -3606,7 +3622,7 @@ primitive VMpr_ObjectMemory_getSmoothingFactor [succeed]
 primitive VMpr_ObjectMemory_setSmoothingFactor [succeed,fail]
 {
   OOP oop1;
-  long arg1;
+  intptr_t arg1;
   _gst_primitives_executed++;
 
   oop1 = POP_OOP ();
@@ -3645,7 +3661,7 @@ primitive VMpr_ObjectMemory_getGrowThresholdPercent [succeed]
 primitive VMpr_ObjectMemory_setGrowThresholdPercent [succeed,fail]
 {
   OOP oop1;
-  long arg1;
+  intptr_t arg1;
   _gst_primitives_executed++;
 
   oop1 = POP_OOP ();
@@ -3684,7 +3700,7 @@ primitive VMpr_ObjectMemory_getBigObjectThreshold [succeed]
 primitive VMpr_ObjectMemory_setBigObjectThreshold [succeed,fail]
 {
   OOP oop1;
-  long arg1;
+  intptr_t arg1;
   _gst_primitives_executed++;
 
   oop1 = POP_OOP ();
@@ -3712,7 +3728,7 @@ primitive VMpr_ObjectMemory_setBigObjectThreshold [succeed,fail]
 primitive VMpr_ObjectMemory_growTo [succeed,fail]
 {
   OOP oop1;
-  long arg1;
+  intptr_t arg1;
   _gst_primitives_executed++;
 
   oop1 = POP_OOP ();
@@ -3753,7 +3769,7 @@ primitive VMpr_CObject_allocType [succeed,fail]
   oop2 = POP_OOP ();
   if (IS_INT (oop2))
     {
-      long arg2;
+      intptr_t arg2;
       PTR ptr;
       arg2 = TO_INT (oop2);
       ptr = xmalloc (arg2);
@@ -4043,7 +4059,7 @@ primitive VMpr_Float_pow [succeed,fail]
       if (IS_NAN (lfarg1) || IS_NAN (lfarg2))
         /* The C99 standard mandates that pow(1, NaN) = 1.0 and pow
            (NaN, 0.0) = 1.0, which is plain wrong.  We take the
-           liberty to make these results be NaN. */
+           liberty to make these results be NaN.  */
         SET_STACKTOP (floatq_new (lfarg1 + lfarg2));
       else
         SET_STACKTOP (floatq_new (expl (lfarg2 * logl (lfarg1))));
@@ -4054,7 +4070,7 @@ primitive VMpr_Float_pow [succeed,fail]
       if (IS_NAN (farg1) || IS_NAN (farg2))
         /* The C99 standard mandates that pow(1, NaN) = 1.0 and pow
            (NaN, 0.0) = 1.0, which is plain wrong.  We take the
-           liberty to make these results be NaN. */
+           liberty to make these results be NaN.  */
         SET_STACKTOP (floatd_new (farg1 + farg2));
       else
         SET_STACKTOP (floatd_new (exp (lfarg2 * log (lfarg1))));
@@ -4131,10 +4147,10 @@ primitive VMpr_Float_ceil_floor :
       switch (id)
         {
         case prim_id (VMpr_Float_ceil):
-          SET_STACKTOP_INT ((long) ceil (farg1));
+          SET_STACKTOP_INT ((intptr_t) ceil (farg1));
           PRIM_SUCCEEDED;
         case prim_id (VMpr_Float_floor):
-          SET_STACKTOP_INT ((long) floor (farg1));
+          SET_STACKTOP_INT ((intptr_t) floor (farg1));
           PRIM_SUCCEEDED;
         }
     }
@@ -4176,7 +4192,7 @@ primitive VMpr_Behavior_basicNewFixedColon [succeed,fail]
     {
       if (CLASS_IS_INDEXABLE (oop1))
 	{
-	  long arg2;
+	  intptr_t arg2;
 	  arg2 = TO_INT (oop2);
 	  if (arg2 >= 0)
 	    {
@@ -4241,7 +4257,7 @@ primitive VMpr_CObject_at :
   if (IS_INT (oop2))
     {
       char *addr;
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       if (id == prim_id (VMpr_CObject_derefAt))
 	{
@@ -4258,7 +4274,7 @@ primitive VMpr_CObject_at :
       addr += arg2;		/* compute effective address */
       if (IS_INT (oop3))
 	{			/* int type spec means a scalar type */
-	  long arg3;
+	  intptr_t arg3;
 	  arg3 = TO_INT (oop3);
 
 	  switch (arg3)
@@ -4321,6 +4337,10 @@ primitive VMpr_CObject_at :
 	    case 11:
 	      PUSH_OOP (FROM_C_UINT (*(unsigned int *) addr));
 	      PRIM_SUCCEEDED;
+
+	    case 12:
+	      PUSH_OOP (floatq_new (*(long double *) addr));
+	      PRIM_SUCCEEDED;
 	    }
 
 	}
@@ -4351,7 +4371,7 @@ primitive VMpr_CObject_atPut :
      prim_id VMpr_CObject_atPut [succeed,fail]
 {
   /* I don't think that this deals properly with setting the pointer
-     value as opposed to setting the pointed-to value. */
+     value as opposed to setting the pointed-to value.  */
   OOP oop1;
   OOP oop2;
   OOP oop3;
@@ -4366,7 +4386,7 @@ primitive VMpr_CObject_atPut :
   if (IS_INT (oop2))
     {
       char *addr;
-      long arg2;
+      intptr_t arg2;
       arg2 = TO_INT (oop2);
       if (id == prim_id (VMpr_CObject_derefAtPut))
 	addr = *(char **) COBJECT_VALUE (oop1);
@@ -4376,7 +4396,7 @@ primitive VMpr_CObject_atPut :
       addr += arg2;		/* compute effective address */
       if (IS_INT (oop4))
 	{			/* int type spec means a scalar type */
-	  long arg4;
+	  intptr_t arg4;
 	  arg4 = TO_INT (oop4);
 	  switch (arg4)
 	    {
@@ -4502,6 +4522,33 @@ primitive VMpr_CObject_atPut :
 		}
 	      break;
 
+	    case 12:		/* long double */
+	      {
+		long double *longDoubleAddr;
+		longDoubleAddr = (long double *) addr;
+		if (IS_INT (oop3))
+		  {
+		    *longDoubleAddr = TO_INT (oop3);
+		    PRIM_SUCCEEDED;
+		  }
+		else if (IS_CLASS (oop3, _gst_floatd_class))
+		  {
+		    *longDoubleAddr = FLOATD_OOP_VALUE (oop3);
+		    PRIM_SUCCEEDED;
+		  }
+		else if (IS_CLASS (oop3, _gst_floate_class))
+		  {
+		    *longDoubleAddr = FLOATE_OOP_VALUE (oop3);
+		    PRIM_SUCCEEDED;
+		  }
+		else if (IS_CLASS (oop3, _gst_floatq_class))
+		  {
+		    *longDoubleAddr = FLOATQ_OOP_VALUE (oop3);
+		    PRIM_SUCCEEDED;
+		  }
+	      }
+	      break;
+
 	    }
 	}
       else
@@ -4528,12 +4575,12 @@ primitive VMpr_CString_replaceWith [succeed,fail]
 
   /* assumes the receiver is already pointing at an area of memory that 
      is the correct size; does not (re)allocate receiver's string at
-     all. */
+     all.  */
 
   if (IS_CLASS (oop2, _gst_string_class)
       || IS_CLASS (oop2, _gst_byte_array_class))
     {
-      unsigned long srcLen;
+      size_t srcLen;
       gst_uchar *dstBase, *srcBase;
       srcBase = STRING_OOP_CHARS (oop2);
       srcLen = NUM_INDEXABLE_FIELDS (oop2);
@@ -4549,7 +4596,7 @@ primitive VMpr_CString_replaceWith [succeed,fail]
 }
 
 /* ByteArray class fromCdata: aCObject size: anInteger */
-primitive VMpr_ByteArray_fromCData [succeed,fail]
+primitive VMpr_ByteArray_fromCData_size [succeed,fail]
 {
   OOP oop1;
   OOP oop2;
@@ -4561,7 +4608,7 @@ primitive VMpr_ByteArray_fromCData [succeed,fail]
   oop1 = STACKTOP ();
   if (IS_INT (oop3))
     {
-      long arg3 = TO_INT (oop3);
+      intptr_t arg3 = TO_INT (oop3);
       OOP byteArrayOOP =
 	_gst_byte_array_new (COBJECT_VALUE (oop2), arg3);
       SET_STACKTOP (byteArrayOOP);
@@ -4572,7 +4619,7 @@ primitive VMpr_ByteArray_fromCData [succeed,fail]
 }
 
 /* String class fromCdata: aCObject size: anInteger */
-primitive VMpr_String_fromCData [succeed,fail]
+primitive VMpr_String_fromCData_size [succeed,fail]
 {
   OOP oop1;
   OOP oop2;
@@ -4584,7 +4631,7 @@ primitive VMpr_String_fromCData [succeed,fail]
   oop1 = STACKTOP ();
   if (IS_INT (oop3))
     {
-      long arg3 = TO_INT (oop3);
+      intptr_t arg3 = TO_INT (oop3);
       OOP stringOOP =
 	_gst_counted_string_new (COBJECT_VALUE (oop2), arg3);
       SET_STACKTOP (stringOOP);
@@ -4592,6 +4639,21 @@ primitive VMpr_String_fromCData [succeed,fail]
     }
   UNPOP (2);
   PRIM_FAILED;
+}
+
+/* String class fromCdata: aCObject */
+primitive VMpr_String_fromCData [succeed]
+{
+  OOP oop1;
+  OOP oop2;
+  OOP stringOOP;
+  _gst_primitives_executed++;
+
+  oop2 = POP_OOP ();
+  oop1 = STACKTOP ();
+  stringOOP = _gst_string_new (COBJECT_VALUE (oop2));
+  SET_STACKTOP (stringOOP);
+  PRIM_SUCCEEDED;
 }
 
 /* String asCdata: aCType
@@ -4645,12 +4707,47 @@ primitive VMpr_SystemDictionary_debug [succeed]
 {
   _gst_primitives_executed++;
   _gst_debug ();		/* used to allow gdb to stop based on
-				   Smalltalk execution paths. */
+				   Smalltalk execution paths.  */
   PRIM_SUCCEEDED;
 }
 
-/* Object isReadOnly */
 
+/* Object isUntrusted */
+primitive VMpr_Object_isUntrusted [succeed]
+{
+  OOP oop1;
+  _gst_primitives_executed++;
+
+  oop1 = STACKTOP ();
+  SET_STACKTOP_BOOLEAN (IS_OOP_UNTRUSTED (oop1));
+  PRIM_SUCCEEDED;
+}
+
+/* Object makeUntrusted: */
+primitive VMpr_Object_makeUntrusted [succeed,fail]
+{
+  OOP oop1;
+  OOP oop2;
+  _gst_primitives_executed++;
+
+  oop2 = POP_OOP ();
+  oop1 = STACKTOP ();
+  if (oop2 == _gst_true_oop)
+    {
+      MAKE_OOP_UNTRUSTED (oop1, true);
+      PRIM_SUCCEEDED;
+    }
+  else if (oop2 == _gst_false_oop)
+    {
+      MAKE_OOP_UNTRUSTED (oop1, false);
+      PRIM_SUCCEEDED;
+    }
+
+  UNPOP (1);
+  PRIM_FAILED;
+}
+
+/* Object isReadOnly */
 primitive VMpr_Object_isReadOnly [succeed]
 {
   OOP oop1;
@@ -4705,8 +4802,7 @@ primitive VMpr_Behavior_compileString [succeed]
   else
     _gst_push_stream_oop (oop2);
 
-  _gst_set_compilation_category (_gst_string_new ("still unclassified"));
-  _gst_set_compilation_class (oop1);
+  _gst_set_compilation_category (oop1, _gst_string_new ("still unclassified"));
   parse_stream_with_protection ();
   _gst_pop_stream (true);
   PUSH_OOP (_gst_latest_compiled_method);
@@ -4742,8 +4838,7 @@ primitive VMpr_Behavior_compileStringIfError [fail,succeed,reload_ip]
       else
 	_gst_push_stream_oop (oop2);
 
-      _gst_set_compilation_category (_gst_string_new ("still unclassified"));
-      _gst_set_compilation_class (oop1);
+      _gst_set_compilation_category (oop1, _gst_string_new ("still unclassified"));
       parse_stream_with_protection ();
       _gst_pop_stream (true);
 
@@ -4824,7 +4919,7 @@ primitive VMpr_ObjectMemory_snapshot [succeed,fail]
       errno = 0;
 
       PROTECT_CURRENT_PROCESS_WITH (&localJmpBuf)
-        success = _gst_save_to_file (fileName);
+	success = _gst_save_to_file (fileName);
       
       xfree (fileName);
       if (success)
@@ -4848,10 +4943,8 @@ primitive VMpr_Object_basicPrint [succeed]
 /* Object makeWeak */
 primitive VMpr_Object_makeWeak [succeed,fail]
 {
-  OOP oop1;
-
+  OOP oop1 = STACKTOP ();
   _gst_primitives_executed++;
-  oop1 = STACKTOP ();
 
   if (IS_INT (oop1))
     PRIM_FAILED;
@@ -4866,13 +4959,13 @@ primitive VMpr_Object_makeWeak [succeed,fail]
 
 primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 {
-  char *fileName, *fileName2, *fileMode;
+  char *fileName, *fileName2;
   gst_file_stream fileStream;
   int fd;
   OOP oop1;
   OOP *oopVec = alloca (numArgs * sizeof (OOP));
   int i;
-  long arg1;
+  intptr_t arg1;
 
   _gst_primitives_executed++;
 
@@ -4891,16 +4984,26 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
   case PRIM_OPEN_FILE:
   case PRIM_OPEN_PIPE:
     {
+      int is_pipe = false;
+      char *fileMode = NULL;
+      int access = 0;
       struct stat st;
-      int is_pipe;
-      int access;
 
       /* open: fileName[1] mode: mode[2] or popen: command[1] dir:
          direction[2] */
       fileName = _gst_to_cstring (oopVec[1]);
-      fileMode = _gst_to_cstring (oopVec[2]);
-      if (arg1 == PRIM_OPEN_FILE)
+      if (IS_INT (oopVec[2]) && arg1 == PRIM_OPEN_FILE)
         {
+          fd = open ((char *) fileName, TO_INT (oopVec[2]));
+	  access = TO_INT (oopVec[2]) && (O_RDONLY | O_WRONLY | O_RDWR);
+	}
+
+      else if (!is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class))
+        fd = -1;
+
+      else if (arg1 == PRIM_OPEN_FILE)
+        {
+	  fileMode = _gst_to_cstring (oopVec[2]);
           fd = _gst_open_file ((char *) fileName, (char *) fileMode);
 	  memzero (&st, sizeof (st));
           fstat (fd, &st);
@@ -4908,24 +5011,37 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	    S_ISFIFO(st.st_mode) ? true :
 	    S_ISREG(st.st_mode) && st.st_size > 0 ? false : -1;
 	}
+
       else
         {
+	  fileMode = _gst_to_cstring (oopVec[2]);
 	  fd = _gst_open_pipe (fileName, fileMode);
 	  is_pipe = true;
 	}
 
+      if (fileMode)
+	{
+          access = strchr (fileMode, '+') ? O_RDWR :
+	           (fileMode[0] == 'r') ? O_RDONLY : O_WRONLY;
+	  
+          xfree (fileMode);
+	}
+
       xfree (fileName);
-      xfree (fileMode);
       if (fd < 0)
         {
 	  UNPOP (numArgs);
 	  PRIM_FAILED;
         }
 
-      /* MinGW32 has no fcntl, so we determine the access mode manually from
-         fileMode.  */
-      access = strchr (fileMode, '+') ? O_RDWR :
-	       (fileMode[0] == 'r') ? O_RDONLY : O_WRONLY;
+      if (!is_pipe)
+        {
+	  memzero (&st, sizeof (st));
+          fstat (fd, &st);
+	  is_pipe =
+	    S_ISFIFO(st.st_mode) ? true :
+	    S_ISREG(st.st_mode) && st.st_size > 0 ? false : -1;
+	}
 
       _gst_set_file_stream_file (oop1, fd, oopVec[1],
 			         is_pipe, access, false);
@@ -4939,7 +5055,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
     fd = mkstemp ((char *) fileName2);
 
     xfree (fileName);
-    if (fd < 0)
+    if (fd >= 0)
       {
         xfree (fileName2);
 	UNPOP (numArgs);
@@ -4954,11 +5070,12 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
   }
 
   fileStream = (gst_file_stream) OOP_TO_OBJ (oop1);
-  if (IS_NIL (fileStream->file))
+  if (!IS_INT (fileStream->file))
     {
       UNPOP (numArgs);
       PRIM_FAILED;
     }
+
   fd = TO_INT (fileStream->file);
   switch (arg1)
     {
@@ -5015,11 +5132,12 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       }
 
     case PRIM_PUT_CHARS:
-      if (is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class))
+      if (is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class)
+          || is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_byte_array_class))
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
-	  long from = TO_INT (oopVec[2]);
-	  long to = TO_INT (oopVec[3]);
+	  intptr_t from = TO_INT (oopVec[2]);
+	  intptr_t to = TO_INT (oopVec[3]);
 	  int result;
 	  if (to >= from - 1
 	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
@@ -5035,11 +5153,12 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       break;
 
     case PRIM_GET_CHARS:		/* only works for strings */
-      if (is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class))
+      if (is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class)
+          || is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_byte_array_class))
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
-	  long from = TO_INT (oopVec[2]);
-	  long to = TO_INT (oopVec[3]);
+	  intptr_t from = TO_INT (oopVec[2]);
+	  intptr_t to = TO_INT (oopVec[3]);
 	  int result;
 	  if (to >= from - 1
 	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
@@ -5158,8 +5277,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 		    (IS_CLASS (oopVec[2], _gst_string_class)
 		     && IS_INT (oopVec[3]))))
 	      {
-		long arg2;
-		long arg4;
+		intptr_t arg2;
+		intptr_t arg4;
 		arg2 = TO_INT (oopVec[1]);
 		if (!IS_NIL (oopVec[2]))
 		  {
@@ -5203,7 +5322,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
   OOP oop1;
   OOP *oopVec = alloca (numArgs * sizeof (OOP));
   int i;
-  long arg1;
+  intptr_t arg1;
 
   _gst_primitives_executed++;
 
@@ -5240,8 +5359,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       if (is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class))
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
-	  long from = TO_INT (oopVec[2]);
-	  long to = TO_INT (oopVec[3]);
+	  intptr_t from = TO_INT (oopVec[2]);
+	  intptr_t to = TO_INT (oopVec[3]);
 	  int result;
 	  if (to >= from - 1
 	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
@@ -5263,8 +5382,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       if (is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class))
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
-	  long from = TO_INT (oopVec[2]);
-	  long to = TO_INT (oopVec[3]);
+	  intptr_t from = TO_INT (oopVec[2]);
+	  intptr_t to = TO_INT (oopVec[3]);
 	  int result;
 	  if (to >= from - 1
 	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
@@ -5330,7 +5449,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
   PRIM_FAILED;
 }
 
-/* C callout primitive. */
+/* C callout primitives.  */
 
 primitive VMpr_CFuncDescriptor_asyncCall [succeed,fail]
 {
@@ -5360,6 +5479,7 @@ primitive VMpr_CFuncDescriptor_asyncCall [succeed,fail]
   UNPOP (1);
   PRIM_FAILED;
 }
+
 primitive VMpr_CFuncDescriptor_call [succeed,fail]
 {
   volatile OOP result = NULL;		/* initialize to please GCC */

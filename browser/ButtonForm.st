@@ -54,7 +54,6 @@ parentView: sv data: anObject label: label handleUserChange: changeSelector
 
 initBlox: aLabel 
     blox := BButton new: parentView blox label: aLabel.
-    blox font: 'Helvetica 10'.
     blox callback: self message: 'pressed'! !
 
 !PButton methodsFor: 'message selectors'!

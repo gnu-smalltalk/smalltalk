@@ -30,7 +30,7 @@
 
 #include "gstpriv.h"
 
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
 #include "lightning.h"
 #include "jitpriv.h"
 
@@ -59,11 +59,11 @@
    information (Self's 64MB requirement comes to mind...).  Nothing
    less, nothing more.  All bottlenecks and inefficiencies should be
    due to the generic nature of GNU lightning's architecture and to
-   interp.c, not to the compiler. */
+   interp.c, not to the compiler.  */
 
 
 /* These two small structures are used to store information on labels
-   and forward references. */
+   and forward references.  */
 typedef struct label_use
 {
   jit_insn *addr;		/* addr of client insn */
@@ -110,8 +110,7 @@ typedef struct code_tree
   PTR data;
   label *jumpDest;
   gst_uchar *bp;
-}
-code_tree, *code_stack_element, **code_stack_pointer;
+} code_tree, *code_stack_element, **code_stack_pointer;
 
 /* This structure represents a message send.  A sequence of
    inline_cache objects is allocated on the heap and initialized as
@@ -124,12 +123,13 @@ code_tree, *code_stack_element, **code_stack_pointer;
       lookups to be done.
   
    A pointer to an inline_cache is used for the 'data' field in
-   message send code_trees. */
+   message send code_trees.  */
 typedef struct inline_cache
 {
   OOP selector;
   jit_insn *cachedIP;
   jit_insn *native_ip;
+  char imm;			/* For short sends, the selector number. */
   char numArgs;
   char more;
   char is_super;
@@ -146,7 +146,7 @@ ip_map;
 /* This structure forms a list that remembers which message sends were
    inlined directly into the instruction flow.  The list is walked by
    emit_deferred_sends after the last bytecode has been compiled, and
-   recovery code that performs real message sends is written. */
+   recovery code that performs real message sends is written.  */
 typedef struct deferred_send
 {
   code_tree *tree;
@@ -159,6 +159,10 @@ typedef struct deferred_send
 }
 deferred_send;
 
+
+/* To reduce multiplies and divides to shifts */
+
+#define LONG_SHIFT (sizeof (long) == 4 ? 2 : 3)
 
 /* An arbitrary value */
 
@@ -190,7 +194,7 @@ static code_stack_pointer t_sp;
 static mst_Boolean self_cached, rec_var_cached;
 static int sp_delta, self_class_check, stack_cached;
 
-/* These are pieces of native code that are used by the run-time. */
+/* These are pieces of native code that are used by the run-time.  */
 static jit_insn *do_send_code, *do_super_code, *non_boolean_code,
   *bad_return_code, *does_not_understand_code;
 
@@ -205,14 +209,14 @@ typedef mst_Boolean (*decode_func) (gst_uchar b, gst_uchar *bp);
 
 /* Constants used in the reconstruction of the parse tree (operation field)
   
-   .--------------.---------------. .--------------.-----------.--------------.
-   | bits 14-15   |   bits 12-13  |.|   bits 6-8   | bits 3-5  |  bits 0-2    |
-   |--------------|---------------|.|--------------|-----------|--------------|
-   | class check  |  class check  |.| jump, pop &  | operation | suboperation |
-   | SmallInteger |  gst_block_closure |.| return flags |           |              |
-   '--------------'---------------' '--------------'-----------'--------------'
-                                   \
-                                    \__ 3 unused bits */
+   .---------------. .--------------.-----------.--------------.
+   |   bits 12-13  |.|   bits 6-8   | bits 3-5  |  bits 0-2    |
+   |---------------|.|--------------|-----------|--------------|
+   |  class check  |.| jump, pop &  | operation | suboperation |
+   | SmallInteger  |.| return flags |           |              |
+   '---------------' '--------------'-----------'--------------'
+                    \
+                     \__ 3 unused bits */
 
 /* operations 				** value of tree->data		*/
 #define TREE_OP			00070
@@ -227,12 +231,10 @@ typedef mst_Boolean (*decode_func) (gst_uchar b, gst_uchar *bp);
 #define TREE_SUBOP		00007
 #define TREE_NORMAL		00000
 #define TREE_BINARY_INT		00001
-#define TREE_BINARY_BOOL	00003	/* 2 skipped - reserved to
-					   LIT_CONST */
-#define TREE_BLOCKCOPY		00004
-#define TREE_CLASS		00005
-#define TREE_NIL_CHECK		00006
-#define TREE_POP_INTO_ARRAY	00007	/* tree->data = index */
+#define TREE_BINARY_BOOL	00003	/* 2 skipped - reserved to LIT_CONST */
+#define TREE_UNARY_SPECIAL	00004
+#define TREE_UNARY_BOOL		00005
+#define TREE_DIRTY_BLOCK	00006	/* doesn't use tree->data! */
 
 /* stack suboperations 			   value of tree->data		*/
 #define TREE_REC_VAR		00000	/* variable number */
@@ -242,7 +244,7 @@ typedef mst_Boolean (*decode_func) (gst_uchar b, gst_uchar *bp);
 #define TREE_DUP		00004	/* unused */
 #define TREE_SELF		00005	/* unused */
 #define TREE_OUTER_TEMP		00006	/* unused */
-#define TREE_THIS_CONTEXT	00007	/* unused */
+#define TREE_POP_INTO_ARRAY	00007	/* index */
 
 /* suboperations for TREE_NOP */
 #define TREE_ALREADY_EMITTED	00000
@@ -259,17 +261,13 @@ typedef mst_Boolean (*decode_func) (gst_uchar b, gst_uchar *bp);
 #define TREE_EXTRA_POP		00600
 
 /* class check flags */
-#define TREE_CLASS_CHECKS	0x0F000L
-#define TREE_IS_BLOCK		0x01000L
-#define TREE_IS_NOT_BLOCK	0x02000L
-#define TREE_IS_INTEGER		0x04000L
-#define TREE_IS_NOT_INTEGER	0x08000L
+#define TREE_CLASS_CHECKS	0x03000L
+#define TREE_IS_INTEGER		0x01000L
+#define TREE_IS_NOT_INTEGER	0x02000L
 
 /* testing macros */
 #define NOT_INTEGER(tree) ( (tree)->operation & TREE_IS_NOT_INTEGER)
-#define NOT_BLOCK(tree)	  ( (tree)->operation & TREE_IS_NOT_BLOCK)
 #define IS_INTEGER(tree)  ( (tree)->operation & TREE_IS_INTEGER)
-#define IS_BLOCK(tree)	  ( (tree)->operation & TREE_IS_BLOCK)
 #define IS_PUSH(tree)	  ( ((tree)->operation & TREE_OP) == TREE_PUSH)
 #define IS_SEND(tree)	  ( ((tree)->operation & TREE_OP) == TREE_SEND)
 #define IS_STORE(tree)	  ( ((tree)->operation & TREE_OP) == TREE_STORE)
@@ -280,7 +278,7 @@ typedef mst_Boolean (*decode_func) (gst_uchar b, gst_uchar *bp);
 
 /* Strength reduction */
 static inline int analyze_factor (int x);
-static inline void analyze_dividend (int imm, int *shift, mst_Boolean *adjust, long unsigned int *factor);
+static inline void analyze_dividend (int imm, int *shift, mst_Boolean *adjust, uintptr_t *factor);
 
 /* label handling */
 static inline label *lbl_new (void);
@@ -304,31 +302,33 @@ static inline method_entry *finish_method_entry (void);
 static inline code_tree *push_tree_node (gst_uchar *bp, code_tree *firstChild, int operation, PTR data);
 static inline code_tree *push_tree_node_oop (gst_uchar *bp, code_tree *firstChild, int operation, OOP literal);
 static inline code_tree *pop_tree_node (code_tree *linkedChild);
-static inline code_tree *push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int operation);
+static inline code_tree *push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int operation, int imm);
+static inline void set_top_node_extra (int extra, int jumpOffset);
+static inline gst_uchar *decode_bytecode (gst_uchar *bp);
 
 static inline void emit_code (void);
-static inline void emit_code_tree (code_tree *tree);
-static inline void set_top_node_extra (int extra, int jumpOffset);
+static void emit_code_tree (code_tree *tree);
 
 /* Non-bytecode specific code generation functions */
+static inline void emit_user_defined_method_call (OOP methodOOP, int numArgs, gst_compiled_method method);
 static inline mst_Boolean emit_method_prolog (OOP methodOOP, gst_compiled_method method);
 static inline mst_Boolean emit_block_prolog (OOP blockOOP, gst_compiled_block block);
 static inline mst_Boolean emit_inlined_primitive (int primitive, int numArgs, int attr);
+static inline mst_Boolean emit_primitive (int primitive, int numArgs);
 
 static inline void emit_interrupt_check (int restartReg);
 static inline void generate_run_time_code (void);
 static inline void translate_method (OOP methodOOP, OOP receiverClass, int size);
-static inline void emit_primitive (int primitive, int numArgs);
-static inline void emit_basic_size_in_r0 (mst_Boolean tagged);
+static void emit_basic_size_in_r0 (OOP classOOP, mst_Boolean tagged, int objectReg);
 
 /* Code generation functions for bytecodes */
 static void gen_send (code_tree *tree);
 static void gen_binary_int (code_tree *tree);
 static void gen_pop_into_array (code_tree *tree);
 static void gen_binary_bool (code_tree *tree);
-static void gen_block_copy (code_tree *tree);
-static void gen_fetch_class (code_tree *tree);
-static void gen_nil_check (code_tree *tree);
+static void gen_dirty_block (code_tree *tree);
+static void gen_unary_special (code_tree *tree);
+static void gen_unary_bool (code_tree *tree);
 static void gen_store_rec_var (code_tree *tree);
 static void gen_store_temp (code_tree *tree);
 static void gen_store_lit_var (code_tree *tree);
@@ -340,7 +340,6 @@ static void gen_push_lit_var (code_tree *tree);
 static void gen_dup_top (code_tree *tree);
 static void gen_push_self (code_tree *tree);
 static void gen_push_outer (code_tree *tree);
-static void gen_push_context (code_tree *tree);
 static void gen_top_rec_var (code_tree *tree);
 static void gen_top_temp (code_tree *tree);
 static void gen_top_self (code_tree *tree);
@@ -352,143 +351,31 @@ static void gen_alt_lit_var (code_tree *tree);
 static void gen_get_top (code_tree *tree);
 static void gen_alt_self (code_tree *tree);
 static void gen_alt_outer (code_tree *tree);
-static void gen_alt_context (code_tree *tree);
 static void gen_top_lit_const (code_tree *tree);
 static void gen_top_lit_var (code_tree *tree);
-static void gen_top_context (code_tree *tree);
 static void gen_nothing (code_tree *tree);
 static void gen_two_extras (code_tree *tree);
 static void gen_invalid (code_tree *tree);
 
-/* code_tree building functions */
-static mst_Boolean dcd_push_rec_var (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_push_temp (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_push_lit (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_push_var (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_st_rec_var (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_st_temp (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_push_self (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_push_special (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_ret_self (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_ret_special (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_explicit_ret (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_ret_stack_top (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_big_literal_op (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_push_idx_val (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_big_instance_op (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_store_stack_top (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_pop_store_top (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_send_short (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_send_long (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_sup_send_short (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_pop_stack (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_dup_stack (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_push_context (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_outer_temp_op (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_nop (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_top_self (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_top_one (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_top_indexed_val (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_end_execution (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_sh_jmp (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_sh_jmp_false (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_long_jmp (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_pop_jmp_true (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_pop_jmp_false (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_send_special (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_send_packed (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_push_sign8 (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_push_unsign8 (gst_uchar b, gst_uchar *bp);
-static mst_Boolean dcd_push_zero_one (gst_uchar b, gst_uchar *bp);
-
-
 /* Function table for the code generator */
 static const emit_func emit_operation_funcs[96] = {
   gen_send, gen_binary_int, gen_invalid, gen_binary_bool,
-  gen_block_copy, gen_fetch_class, gen_nil_check, gen_pop_into_array,
+  gen_unary_special, gen_unary_bool, gen_dirty_block, gen_invalid,
 
   gen_store_rec_var, gen_store_temp, gen_invalid, gen_store_lit_var,
-  gen_invalid, gen_invalid, gen_store_outer, gen_invalid,
+  gen_invalid, gen_invalid, gen_store_outer, gen_pop_into_array,
 
   gen_push_rec_var, gen_push_temp, gen_push_lit_const, gen_push_lit_var,
-  gen_dup_top, gen_push_self, gen_push_outer, gen_push_context,
+  gen_dup_top, gen_push_self, gen_push_outer, gen_invalid,
 
   gen_alt_rec_var, gen_alt_temp, gen_alt_lit_const, gen_alt_lit_var,
-  gen_get_top, gen_alt_self, gen_alt_outer, gen_alt_context,
+  gen_get_top, gen_alt_self, gen_alt_outer, gen_invalid,
 
   gen_top_rec_var, gen_top_temp, gen_top_lit_const, gen_top_lit_var,
-  gen_invalid, gen_top_self, gen_top_outer, gen_top_context,
+  gen_invalid, gen_top_self, gen_top_outer, gen_invalid,
 
   gen_nothing, gen_two_extras, gen_invalid, gen_invalid,
   gen_invalid, gen_invalid, gen_invalid, gen_invalid
-};
-
-/* Functions used in the reconstruction of the parse true */
-static const decode_func decode_bytecode_funcs[256] = {
-  dcd_push_rec_var, dcd_push_rec_var, dcd_push_rec_var, dcd_push_rec_var,	/* 0 */
-  dcd_push_rec_var, dcd_push_rec_var, dcd_push_rec_var, dcd_push_rec_var,	/* 4 */
-  dcd_push_rec_var, dcd_push_rec_var, dcd_push_rec_var, dcd_push_rec_var,	/* 8 */
-  dcd_push_rec_var, dcd_push_rec_var, dcd_push_rec_var, dcd_push_rec_var,	/* 12 */
-  dcd_push_temp, dcd_push_temp, dcd_push_temp, dcd_push_temp,	/* 16 */
-  dcd_push_temp, dcd_push_temp, dcd_push_temp, dcd_push_temp,	/* 20 */
-  dcd_push_temp, dcd_push_temp, dcd_push_temp, dcd_push_temp,	/* 24 */
-  dcd_push_temp, dcd_push_temp, dcd_push_temp, dcd_push_temp,	/* 28 */
-  dcd_push_lit, dcd_push_lit, dcd_push_lit, dcd_push_lit,	/* 32 */
-  dcd_push_lit, dcd_push_lit, dcd_push_lit, dcd_push_lit,	/* 36 */
-  dcd_push_lit, dcd_push_lit, dcd_push_lit, dcd_push_lit,	/* 40 */
-  dcd_push_lit, dcd_push_lit, dcd_push_lit, dcd_push_lit,	/* 44 */
-  dcd_push_lit, dcd_push_lit, dcd_push_lit, dcd_push_lit,	/* 48 */
-  dcd_push_lit, dcd_push_lit, dcd_push_lit, dcd_push_lit,	/* 52 */
-  dcd_push_lit, dcd_push_lit, dcd_push_lit, dcd_push_lit,	/* 56 */
-  dcd_push_lit, dcd_push_lit, dcd_push_lit, dcd_push_lit,	/* 60 */
-  dcd_push_var, dcd_push_var, dcd_push_var, dcd_push_var,	/* 64 */
-  dcd_push_var, dcd_push_var, dcd_push_var, dcd_push_var,	/* 68 */
-  dcd_push_var, dcd_push_var, dcd_push_var, dcd_push_var,	/* 72 */
-  dcd_push_var, dcd_push_var, dcd_push_var, dcd_push_var,	/* 76 */
-  dcd_push_var, dcd_push_var, dcd_push_var, dcd_push_var,	/* 80 */
-  dcd_push_var, dcd_push_var, dcd_push_var, dcd_push_var,	/* 84 */
-  dcd_push_var, dcd_push_var, dcd_push_var, dcd_push_var,	/* 88 */
-  dcd_push_var, dcd_push_var, dcd_push_var, dcd_push_var,	/* 92 */
-  dcd_st_rec_var, dcd_st_rec_var, dcd_st_rec_var, dcd_st_rec_var,	/* 96 */
-  dcd_st_rec_var, dcd_st_rec_var, dcd_st_rec_var, dcd_st_rec_var,	/* 100 */
-  dcd_st_temp, dcd_st_temp, dcd_st_temp, dcd_st_temp,	/* 104 */
-  dcd_st_temp, dcd_st_temp, dcd_st_temp, dcd_st_temp,	/* 108 */
-  dcd_push_self, dcd_push_special, dcd_push_special, dcd_push_special,	/* 112 */
-  dcd_push_sign8, dcd_push_unsign8, dcd_push_zero_one, dcd_push_zero_one,	/* 116 */
-  dcd_ret_self, dcd_ret_special, dcd_ret_special, dcd_ret_special,	/* 120 */
-  dcd_explicit_ret, dcd_ret_stack_top, dcd_big_literal_op, dcd_nop,	/* 124 */
-  dcd_push_idx_val, dcd_store_stack_top, dcd_pop_store_top, dcd_send_short,	/* 128 */
-  dcd_send_long, dcd_sup_send_short, dcd_big_instance_op, dcd_pop_stack,	/* 132 */
-  dcd_dup_stack, dcd_push_context, dcd_outer_temp_op, dcd_nop,	/* 136 */
-  dcd_top_self, dcd_top_one, dcd_top_indexed_val, dcd_end_execution,	/* 140 */
-  dcd_sh_jmp, dcd_sh_jmp, dcd_sh_jmp, dcd_sh_jmp,	/* 144 */
-  dcd_sh_jmp, dcd_sh_jmp, dcd_sh_jmp, dcd_sh_jmp,	/* 148 */
-  dcd_sh_jmp_false, dcd_sh_jmp_false, dcd_sh_jmp_false, dcd_sh_jmp_false,	/* 152 */
-  dcd_sh_jmp_false, dcd_sh_jmp_false, dcd_sh_jmp_false, dcd_sh_jmp_false,	/* 156 */
-  dcd_long_jmp, dcd_long_jmp, dcd_long_jmp, dcd_long_jmp,	/* 160 */
-  dcd_long_jmp, dcd_long_jmp, dcd_long_jmp, dcd_long_jmp,	/* 164 */
-  dcd_pop_jmp_true, dcd_pop_jmp_true, dcd_pop_jmp_true, dcd_pop_jmp_true,	/* 168 */
-  dcd_pop_jmp_false, dcd_pop_jmp_false, dcd_pop_jmp_false, dcd_pop_jmp_false,	/* 172 */
-  dcd_send_special, dcd_send_special, dcd_send_special, dcd_send_special,	/* 176 */
-  dcd_send_special, dcd_send_special, dcd_send_special, dcd_send_special,	/* 180 */
-  dcd_send_special, dcd_send_special, dcd_send_special, dcd_send_special,	/* 184 */
-  dcd_send_special, dcd_send_special, dcd_send_special, dcd_send_special,	/* 188 */
-  dcd_send_special, dcd_send_special, dcd_send_special, dcd_send_special,	/* 192 */
-  dcd_send_special, dcd_send_special, dcd_send_special, dcd_send_special,	/* 196 */
-  dcd_send_special, dcd_send_special, dcd_send_special, dcd_send_special,	/* 200 */
-  dcd_send_special, dcd_send_special, dcd_send_special, dcd_send_special,	/* 204 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 208 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 212 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 216 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 220 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 224 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 228 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 232 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 236 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 240 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 244 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed,	/* 248 */
-  dcd_send_packed, dcd_send_packed, dcd_send_packed, dcd_send_packed	/* 252 */
 };
 
 static const special_selector special_send_bytecodes[32] = {
@@ -502,30 +389,23 @@ static const special_selector special_send_bytecodes[32] = {
   {&_gst_not_equal_symbol, 1, TREE_SEND | TREE_BINARY_BOOL},
   {&_gst_times_symbol, 1, TREE_SEND | TREE_BINARY_INT},
   {&_gst_divide_symbol, 1, TREE_SEND | TREE_NORMAL},
-  {&_gst_remainder_symbol, 1, TREE_SEND | TREE_NORMAL	/* TREE_BINARY_INT 
-							 */ },
-  {&_gst_at_sign_symbol, 1, TREE_SEND | TREE_NORMAL},
-  {&_gst_bit_shift_colon_symbol, 1, TREE_SEND | TREE_NORMAL	/* TREE_BINARY_INT 
-								 */ },
+  {&_gst_remainder_symbol, 1, TREE_SEND | TREE_NORMAL	/* TREE_BINARY_INT */ },
+  {&_gst_bit_xor_symbol, 1, TREE_SEND | TREE_BINARY_INT},
+  {&_gst_bit_shift_symbol, 1, TREE_SEND | TREE_NORMAL	/* TREE_BINARY_INT */ },
   {&_gst_integer_divide_symbol, 1, TREE_SEND | TREE_BINARY_INT},
-  {&_gst_bit_and_colon_symbol, 1, TREE_SEND | TREE_BINARY_INT},
-  {&_gst_bit_or_colon_symbol, 1, TREE_SEND | TREE_BINARY_INT},
-  {&_gst_at_colon_symbol, 1, TREE_SEND | TREE_NORMAL},
-  {&_gst_at_colon_put_colon_symbol, 2, TREE_SEND | TREE_NORMAL},
+  {&_gst_bit_and_symbol, 1, TREE_SEND | TREE_BINARY_INT},
+  {&_gst_bit_or_symbol, 1, TREE_SEND | TREE_BINARY_INT},
+  {&_gst_at_symbol, 1, TREE_SEND | TREE_NORMAL},
+  {&_gst_at_put_symbol, 2, TREE_SEND | TREE_NORMAL},
   {&_gst_size_symbol, 0, TREE_SEND | TREE_NORMAL},
-  {&_gst_next_symbol, 0, TREE_SEND | TREE_NORMAL},
-  {&_gst_next_put_colon_symbol, 1, TREE_SEND | TREE_NORMAL},
-  {&_gst_at_end_symbol, 0, TREE_SEND | TREE_NORMAL},
-  {&_gst_same_object_symbol, 1, TREE_SEND | TREE_BINARY_BOOL},
-  {&_gst_class_symbol, 0, TREE_SEND | TREE_CLASS},
-  {&_gst_block_copy_colon_symbol, 1, TREE_SEND | TREE_BLOCKCOPY},
+  {&_gst_class_symbol, 0, TREE_SEND | TREE_NORMAL},
+  {&_gst_is_nil_symbol, 0, TREE_SEND | TREE_UNARY_BOOL},
+  {&_gst_not_nil_symbol, 0, TREE_SEND | TREE_UNARY_BOOL},
   {&_gst_value_symbol, 0, TREE_SEND | TREE_NORMAL},
   {&_gst_value_colon_symbol, 1, TREE_SEND | TREE_NORMAL},
-  {&_gst_do_colon_symbol, 1, TREE_SEND | TREE_NORMAL},
-  {&_gst_new_symbol, 0, TREE_SEND | TREE_NORMAL},
-  {&_gst_new_colon_symbol, 1, TREE_SEND | TREE_NORMAL},
-  {&_gst_is_nil_symbol, 0, TREE_SEND | TREE_NIL_CHECK},
-  {&_gst_not_nil_symbol, 0, TREE_SEND | TREE_NIL_CHECK}
+  {&_gst_same_object_symbol, 1, TREE_SEND | TREE_BINARY_BOOL},
+  {&_gst_java_as_int_symbol, 0, TREE_SEND | TREE_UNARY_SPECIAL},
+  {&_gst_java_as_long_symbol, 0, TREE_SEND | TREE_UNARY_SPECIAL},
 };
 
 
@@ -556,12 +436,12 @@ generate_dnu_code (void)
   /* send #doesNotUnderstand: If the method is not understood, the
      stack is changed to the format needed by #doesNotUnderstand: in
      lookup_native_ip; no inline caching must take place because we
-     have modify the stack each time they try to send the message. */
+     have modify the stack each time they try to send the message.  */
 
   jit_ldi_p (JIT_V2, &sp);	/* changed by lookup_method!! */
   jit_movi_l (JIT_R2, 1);
-  jit_ldi_p (JIT_R0, &_gst_does_not_understand_colon_symbol);
-  jit_ldxi_p (JIT_R1, JIT_V2, -SIZEOF_LONG);
+  jit_ldi_p (JIT_R0, &_gst_does_not_understand_symbol);
+  jit_ldxi_p (JIT_R1, JIT_V2, -sizeof (PTR));
   jit_prepare (4);
   jit_pusharg_p (JIT_V0);	/* method_class */
   jit_pusharg_p (JIT_R1);	/* receiver */
@@ -571,7 +451,7 @@ generate_dnu_code (void)
   jit_retval (JIT_R0);
 
   /* Could crash if again #doesNotUnderstand: -- probably better than
-     an infinite loop. */
+     an infinite loop.  */
   jit_jmpr (JIT_R0);
 }
 
@@ -609,11 +489,10 @@ static void
 generate_non_boolean_code (void)
 {
   static char methodName[] = "mustBeBoolean";
-  extern char *_gst_abort_execution;
 
   jit_ldi_p (JIT_V2, &sp);	/* push R0 on the */
-  jit_stxi_p (SIZEOF_LONG, JIT_V2, JIT_R0);	/* Smalltalk stack */
-  jit_addi_p (JIT_V2, JIT_V2, SIZEOF_LONG);
+  jit_stxi_p (sizeof (PTR), JIT_V2, JIT_R0);	/* Smalltalk stack */
+  jit_addi_p (JIT_V2, JIT_V2, sizeof (PTR));
   jit_movi_p (JIT_R1, methodName);
   jit_sti_p (&sp, JIT_V2);	/* update SP */
   jit_sti_p (&_gst_abort_execution, JIT_R1);
@@ -697,7 +576,7 @@ generate_run_time_code (void)
   generate_dnu_code ();
 
   /* send #badReturnError.  No inline caching must take place because
-     this is called upon a return, not upon a send. */
+     this is called upon a return, not upon a send.  */
   jit_align (2);
   bad_return_code = jit_get_label ();
   jit_prolog (1);
@@ -737,6 +616,9 @@ generate_run_time_code (void)
 void
 new_method_entry (OOP methodOOP, OOP receiverClass, int size)
 {
+  if (!size)
+    size = GET_METHOD_NUM_ARGS (methodOOP) * 2 + 10;
+
   current =
     (method_entry *) xmalloc (MAX_BYTES_PER_BYTECODE * (size + 2));
   current->methodOOP = methodOOP;
@@ -744,7 +626,7 @@ new_method_entry (OOP methodOOP, OOP receiverClass, int size)
   current->inlineCaches = NULL;
   methodOOP->flags |= F_XLAT;
 
-  /* The buffer functions in str.c are used to deal with the ip_map. */
+  /* The buffer functions in str.c are used to deal with the ip_map.  */
   _gst_reset_buffer ();
 
   obstack_init (&aux_data_obstack);
@@ -752,7 +634,7 @@ new_method_entry (OOP methodOOP, OOP receiverClass, int size)
 
   /* We need to compile a dummy prolog, which we'll overwrite, to make
      GNU lightning's status consistent with that when the
-     trampolineCode was written. */
+     trampolineCode was written.  */
   jit_prolog (1);
   jit_set_ip (current->nativeCode);
 }
@@ -810,11 +692,9 @@ push_tree_node_oop (gst_uchar *bp, code_tree *firstChild, int operation, OOP lit
 {
   int classCheck;
   if (IS_INT (literal))
-    classCheck = TREE_IS_NOT_BLOCK | TREE_IS_INTEGER;
-  else if (OOP_CLASS (literal) == _gst_block_closure_class)
-    classCheck = TREE_IS_BLOCK | TREE_IS_NOT_INTEGER;
+    classCheck = TREE_IS_INTEGER;
   else
-    classCheck = TREE_IS_NOT_BLOCK | TREE_IS_NOT_INTEGER;
+    classCheck = TREE_IS_NOT_INTEGER;
 
   return push_tree_node (bp, firstChild, operation | classCheck,
 			 literal);
@@ -841,12 +721,20 @@ void
 set_top_node_extra (int extra, int jumpOffset)
 {
   code_tree *node;
+
+#ifndef OPTIMIZE
+  if (extra == TREE_EXTRA_JMP_ALWAYS
+      || extra == TREE_EXTRA_JMP_TRUE
+      || extra == TREE_EXTRA_JMP_FALSE)
+    assert (this_label[jumpOffset] != NULL);
+#endif
+
   if (t_sp <= t_stack)
     {
       /* Stack is currently empty -- generate the code directly */
       if (extra != TREE_EXTRA_JMP_ALWAYS)
 	{
-	  OOP selector = get_method_info (current->methodOOP)->selector;
+	  OOP selector = GET_METHOD_SELECTOR (current->methodOOP);
 	  if (method_class == current->receiverClass)
 	    _gst_errorf ("Stack underflow in JIT compilation %O>>%O",
 		         current->receiverClass, selector);
@@ -870,7 +758,6 @@ set_top_node_extra (int extra, int jumpOffset)
     {
       /* More than one extra operation -- add a fake node */
       node = obstack_alloc (&aux_data_obstack, sizeof (code_tree));
-
       node->child = NULL;
       node->next = t_sp[-1];
       node->operation = TREE_NOP | TREE_TWO_EXTRAS;
@@ -882,7 +769,7 @@ set_top_node_extra (int extra, int jumpOffset)
 }
 
 code_tree *
-push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int operation)
+push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int operation, int imm)
 {
   code_tree *args, *node;
 
@@ -891,6 +778,7 @@ push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int
   curr_inline_cache->cachedIP = super ? do_super_code : do_send_code;
   curr_inline_cache->is_super = super;
   curr_inline_cache->more = true;
+  curr_inline_cache->imm = imm;
 
   /* Remember that we must pop an extra node for the receiver! */
   for (args = pop_tree_node (NULL); numArgs--;)
@@ -899,15 +787,6 @@ push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int
   node =
     push_tree_node (bp, args, operation, (PTR) curr_inline_cache++);
   return (node);
-}
-
-void
-emit_code_tree (code_tree *tree)
-{
-  int operation;
-
-  operation = tree->operation & (TREE_OP | TREE_SUBOP);
-  emit_operation_funcs[operation] (tree);
 }
 
 void
@@ -950,7 +829,7 @@ analyze_factor (int x)
 }
 
 void
-analyze_dividend (int imm, int *shift, mst_Boolean *adjust, long unsigned int *factor)
+analyze_dividend (int imm, int *shift, mst_Boolean *adjust, uintptr_t *factor)
 {
   int x, b, r;
   double f;
@@ -970,7 +849,7 @@ analyze_dividend (int imm, int *shift, mst_Boolean *adjust, long unsigned int *f
 
   r += 31;
   f = ldexp (((double) 1.0) / imm, r);
-  b = (unsigned long) floor (f);
+  b = (int) floor (f);
 
   if ((f - (double) b) < 0.5)
     /* round f down to nearest integer, compute ((x + 1) * f) >> r */
@@ -1157,7 +1036,7 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
 
 /* Save the old stack top if it was cached in V0 */
 #define BEFORE_PUSH do {						\
-  sp_delta += SIZEOF_LONG;						\
+  sp_delta += sizeof (PTR);						\
   if (sp_delta > 0) {							\
     jit_stxi_p(sp_delta, JIT_V2, JIT_V0);				\
   }									\
@@ -1172,31 +1051,29 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
     emit_code_tree(tree->child);						\
   }									\
   if (sp_delta < 0) {							\
-    jit_subi_p(JIT_V2, JIT_V2, SIZEOF_LONG);	/* pop stack top */	\
-    sp_delta += SIZEOF_LONG;						\
+    jit_subi_p(JIT_V2, JIT_V2, sizeof (PTR));	/* pop stack top */	\
+    sp_delta += sizeof (PTR);						\
   }									\
 } while(0)
 
 /* Generate code to evaluate the value to be stored, and have it loaded
- * in V0. */
+ * in V0.  */
 #define BEFORE_STORE do {						\
   emit_code_tree(tree->child);						\
   if (sp_delta < 0) {							\
     jit_ldr_p(JIT_V0, JIT_V2);						\
-    jit_subi_p(JIT_V2, JIT_V2, SIZEOF_LONG);	/* pop stack top */	\
-    sp_delta += SIZEOF_LONG;						\
+    jit_subi_p(JIT_V2, JIT_V2, sizeof (PTR));	/* pop stack top */	\
+    sp_delta += sizeof (PTR);						\
   }									\
 } while(0)
 
 
 /* Common pieces of code for generating & caching addresses */
 
-#define STACK_INDEX(bp)	   ((long) ((bp)[1] & ~LOCATION_MASK) )
-
-#define TEMP_OFS(tree)	   (SIZEOF_LONG * ((long) ((tree)->data)) )
-#define REC_VAR_OFS(tree)  jit_ptr_field(mst_Object, data[(long) ((tree)->data)])
+#define TEMP_OFS(tree)	   (sizeof (PTR) * (((intptr_t) ((tree)->data)) & 255))
+#define REC_VAR_OFS(tree)  jit_ptr_field(mst_Object, data[(intptr_t) ((tree)->data)])
 #define STACK_OFS(tree)	   (jit_ptr_field(gst_block_context, contextStack) + \
-				SIZEOF_LONG * STACK_INDEX((tree)->bp))
+				TEMP_OFS (tree))
 
 
 /* Cache the address of the first instance variable in R1 */
@@ -1240,12 +1117,12 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
    of the n-th outer context' (i.e. the address of the Context's first
    *fixed* instance variable).  Although confusing, this was done
    because the VM provides the address of the first indexed instance
-   variable for thisContext into the `_gst_temporaries' variable. */
+   variable for thisContext into the `_gst_temporaries' variable.  */
 #define CACHE_OUTER_CONTEXT do {					   \
   int scopes;								   \
-  scopes = tree->bp[2];							   \
+  scopes = ((int) tree->data) >> 8;					   \
   if (stack_cached <= 0 || stack_cached > scopes) {			   \
-    jit_ldi_p(JIT_V1, &_gst_this_context_oop);					   \
+    jit_ldi_p(JIT_V1, &_gst_this_context_oop);				   \
     jit_ldxi_p(JIT_V1, JIT_V1, jit_ptr_field(OOP, object));		   \
     stack_cached = scopes;						   \
   } else {								   \
@@ -1272,26 +1149,26 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
 } while(0)
 
 /* Remember that the stack top is *not* cached in V0, and import V2 (the
- * stack pointer) from the sp variable. */
+ * stack pointer) from the sp variable.  */
 #define IMPORT_SP do {							\
   jit_ldi_p(JIT_V2, &sp);						\
-  sp_delta = -SIZEOF_LONG;						\
+  sp_delta = -sizeof (PTR);						\
 } while(0)
 
 /* Export V2 (the stack pointer) into the sp variable; the top of the
- * stack is assured to be in *sp, not in V0. */
+ * stack is assured to be in *sp, not in V0.  */
 #define EXPORT_SP do {							\
   if (sp_delta >= 0) {							\
-    sp_delta += SIZEOF_LONG;						\
+    sp_delta += sizeof (PTR);						\
     jit_stxi_p(sp_delta, JIT_V2, JIT_V0);				\
     jit_addi_p(JIT_V2, JIT_V2, sp_delta);				\
     jit_sti_p(&sp, JIT_V2);						\
-    sp_delta = -SIZEOF_LONG;						\
+    sp_delta = -sizeof (PTR);						\
   }									\
 } while(0)
 
 /* Export V2 (the stack pointer) into the sp variable; the top of the
- * stack is assured to be in *sp AND in V0. */
+ * stack is assured to be in *sp AND in V0.  */
 #define CACHE_STACK_TOP do {						\
   if (sp_delta < 0) {							\
     jit_ldr_p(JIT_V0, JIT_V2);						\
@@ -1308,11 +1185,11 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
   }									\
   jit_sti_p(&sp, JIT_V2);						\
   jit_ldr_p(JIT_V0, JIT_V2);						\
-  sp_delta = -SIZEOF_LONG;						\
+  sp_delta = -sizeof (PTR);						\
 } while(0)
 
 /* Do a conditional jump to tree->jumpDest if the top of the stack
- * is successOOP, or to non_boolean_code if it is anything but failOOP. */
+ * is successOOP, or to non_boolean_code if it is anything but failOOP.  */
 #define CONDITIONAL_JUMP(successOOP, failOOP) do {			\
   jit_insn *addr;							\
   									\
@@ -1326,8 +1203,8 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
 									\
   addr = lbl_get(tree->jumpDest);					\
   addr = jit_beqi_p(addr, JIT_R0, successOOP);				\
-  lbl_use(tree->jumpDest, addr);						\
-  jit_bnei_p(non_boolean_code, JIT_R0, failOOP);				\
+  lbl_use(tree->jumpDest, addr);					\
+  jit_bnei_p(non_boolean_code, JIT_R0, failOOP);			\
 									\
   CACHE_NOTHING;							\
 } while(0)
@@ -1347,11 +1224,12 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
 /* Don't attempt to inline an arithmetic operation if one of its
  * argument is known not to be a SmallInteger.
  */
-#define DONT_INLINE_NONINTEGER						\
+#define DONT_INLINE_NONINTEGER do {					\
   if (NOT_INTEGER(tree->child) || NOT_INTEGER(tree->child->next)) {	\
     gen_send(tree);							\
     return;								\
-  }
+  }									\
+} while(0)
 
 /* Create a `true' or `false' oop if the value is required `as is'; else
  * compile a `jump if true' or `jump if false' native opcode.  This is
@@ -1368,7 +1246,7 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
     case TREE_EXTRA_JMP_ALWAYS:						\
       FALSE_SET(JIT_R0);						\
       jit_lshi_i(JIT_R0, JIT_R0, LONG_SHIFT+1);				\
-      jit_addi_p(JIT_V0, JIT_R0, _gst_true_oop);				\
+      jit_addi_p(JIT_V0, JIT_R0, _gst_true_oop);			\
       break;								\
 									\
     case TREE_EXTRA_JMP_TRUE:						\
@@ -1376,7 +1254,7 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
       if (sp_delta) { 							\
 	jit_addi_p(JIT_V2, JIT_V2, sp_delta);				\
       }									\
-      sp_delta = -SIZEOF_LONG;						\
+      sp_delta = -sizeof (PTR);						\
       addr = lbl_get(tree->jumpDest);					\
       if ((tree->operation & TREE_EXTRA) == TREE_EXTRA_JMP_TRUE) {	\
         TRUE_BRANCH(addr);						\
@@ -1431,16 +1309,15 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
     if (sp_delta < 0) {							\
       /* We load the 2nd argument and then the 1st */			\
       jit_ldr_p(JIT_V1, JIT_V2);					\
-      jit_ldxi_p(JIT_V0, JIT_V2, -SIZEOF_LONG);				\
+      jit_ldxi_p(JIT_V0, JIT_V2, -sizeof (PTR));				\
     } else { 								\
       /* We load the 1st argument; the 2nd is already in V0 */		\
-      /* ### isn't this superfluous??? */				\
       jit_ldxi_p(JIT_V1, JIT_V2, sp_delta);				\
       reg0 = JIT_V1;							\
       reg1 = JIT_V0;							\
     }									\
     /* "Pop" the 2nd argument */					\
-    sp_delta -= SIZEOF_LONG;						\
+    sp_delta -= sizeof (PTR);						\
   }									\
   									\
   if (sp_delta) {							\
@@ -1479,12 +1356,12 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
 
 /* These are used to simplify the inlining code, as they group the
  * `second operand is a literal' and `second operand is a register'
- * cases in a single statement. */
+ * cases in a single statement.  */
 #define EXPAND_(what)		what
 #define IMM_OR_REG(opcode, a)					 \
 	((reg1 != JIT_NOREG) 					 \
 		? EXPAND_(jit_##opcode##r_l(a, reg0, reg1))	 \
-		: EXPAND_(jit_##opcode##i_l(a, reg0, (long) oop)))
+		: EXPAND_(jit_##opcode##i_l(a, reg0, (intptr_t) oop)))
 
 
 
@@ -1498,7 +1375,7 @@ gen_send (code_tree *tree)
   jit_movi_p (JIT_V1, ic);
   EXPORT_SP;
 
-  jit_movi_ul (JIT_V0, tree->bp - bc);
+  jit_movi_ul (JIT_V0, tree->bp - bc + BYTECODE_SIZE);
   jit_ldxi_p (JIT_R1, JIT_V1, jit_field (inline_cache, cachedIP));
   jit_sti_ul (&ip, JIT_V0);
   if (ic->is_super)
@@ -1508,12 +1385,10 @@ gen_send (code_tree *tree)
   jit_align (2);
 
   ic->native_ip = jit_get_label ();
-  define_ip_map_entry (tree->bp - bc);
+  define_ip_map_entry (tree->bp - bc + BYTECODE_SIZE);
 
   IMPORT_SP;
   CACHE_NOTHING;
-
-  gen_nothing (tree);
 }
 
 void
@@ -1523,7 +1398,7 @@ gen_binary_int (code_tree *tree)
   label *overflow;
   int reg0, reg1;
   OOP oop;
-  long imm;
+  intptr_t imm;
   jit_insn *addr;
 
   DONT_INLINE_SUPER;
@@ -1531,11 +1406,11 @@ gen_binary_int (code_tree *tree)
   GET_BINARY_ARGS;
   ENSURE_INT_ARGS (false, overflow);
 
-  imm = (long) oop;
+  imm = (intptr_t) oop;
 
   /* Now generate the code for the inlined operation.  Don't touch
      reg0/reg1 until we are sure that no overflow happens! */
-  switch (*tree->bp)
+  switch (ic->imm)
     {
     case PLUS_SPECIAL:
       if (reg1 == JIT_NOREG)
@@ -1681,7 +1556,7 @@ gen_binary_int (code_tree *tree)
 	      lbl_use (overflow, addr2);
 	    }
 
-	  /* Do some strength reduction... */
+	  /* Do some strength reduction...  */
 	  reduce = analyze_factor (imm);
 	  if (reduce == 0)
 	    jit_muli_l (JIT_V0, reg0, imm);
@@ -1718,7 +1593,7 @@ gen_binary_int (code_tree *tree)
 
 	      /* check for sensible bits of the result in R0, and in
 	         bits 30-31 of R2 */
-	      jit_rshi_i (JIT_R1, JIT_R0, SIZEOF_LONG * 8 - 1);
+	      jit_rshi_i (JIT_R1, JIT_R0, sizeof (PTR) * 8 - 1);
 	      addr = lbl_get (overflow);
 	      addr = jit_bner_l (addr, JIT_R0, JIT_R1);
 	      lbl_use (overflow, addr);
@@ -1726,7 +1601,7 @@ gen_binary_int (code_tree *tree)
 	      jit_xorr_i (JIT_R1, JIT_R0, JIT_R2);
 	      addr = lbl_get (overflow);
 	      addr =
-		jit_bmsi_l (addr, JIT_R1, 3 << (SIZEOF_LONG * 8 - 2));
+		jit_bmsi_l (addr, JIT_R1, 3 << (sizeof (PTR) * 8 - 2));
 	      lbl_use (overflow, addr);
 	    }
 
@@ -1742,7 +1617,7 @@ gen_binary_int (code_tree *tree)
 	{
 	  int shift;
 	  mst_Boolean adjust;
-	  unsigned long factor;
+	  uintptr_t factor;
 
 	  imm >>= 1;
 	  if (imm == 0)
@@ -1781,20 +1656,20 @@ gen_binary_int (code_tree *tree)
 	  /* Fix the sign of the result: reg0 = imm - _gst_self - 1 if
 	     reg0 < 0 All these instructions are no-ops if reg0 > 0,
 	     because R0=R1=0 */
-	  jit_rshi_l (JIT_R0, reg0, 8 * SIZEOF_LONG - 1);
+	  jit_rshi_l (JIT_R0, reg0, 8 * sizeof (PTR) - 1);
 	  jit_andi_l (JIT_R1, JIT_R0, imm - 1);	/* if reg0 < 0, reg0
-						   is... */
+						   is...  */
 	  jit_subr_l (reg0, reg0, JIT_R1);	/* _gst_self - imm + 1 */
 	  jit_xorr_l (reg0, reg0, JIT_R0);	/* imm - _gst_self - 2 */
 	  jit_subr_l (reg0, reg0, JIT_R0);	/* imm - _gst_self - 1 */
 
-	  /* Do some strength reduction... */
+	  /* Do some strength reduction...  */
 	  analyze_dividend (imm, &shift, &adjust, &factor);
 
 	  if (adjust)
 	    {
 	      /* If adjust is true, we have to sum 1 here, and the
-	         carry after the multiplication. */
+	         carry after the multiplication.  */
 	      jit_movi_l (JIT_R1, 0);
 	      jit_addci_l (reg0, reg0, 1);
 	      jit_addxi_l (JIT_R1, JIT_R1, 0);
@@ -1833,17 +1708,17 @@ gen_binary_int (code_tree *tree)
 	  jit_rshi_l (reg0, reg0, 1);
 
 	  /* Make the divisor positive */
-	  jit_rshi_l (JIT_R0, reg1, 8 * SIZEOF_LONG - 1);
+	  jit_rshi_l (JIT_R0, reg1, 8 * sizeof (PTR) - 1);
 	  jit_xorr_l (reg0, reg0, JIT_R0);
 	  jit_xorr_l (reg1, reg1, JIT_R0);
 	  jit_subr_l (reg0, reg0, JIT_R0);
 	  jit_subr_l (reg1, reg1, JIT_R0);
 
 	  /* Fix the result if signs differ: reg0 -= reg1-1 */
-	  jit_rshi_l (JIT_R1, reg0, 8 * SIZEOF_LONG - 1);
+	  jit_rshi_l (JIT_R1, reg0, 8 * sizeof (PTR) - 1);
 	  jit_subi_l (JIT_R0, reg1, 1);
 	  jit_andr_l (JIT_R0, JIT_R0, JIT_R1);	/* if reg0 < 0, reg0
-						   is... */
+						   is...  */
 	  jit_subr_l (reg0, reg0, JIT_R0);	/* _gst_self - imm + 1 */
 	  jit_xorr_l (reg0, reg0, JIT_R1);	/* imm - _gst_self - 2 */
 	  jit_subr_l (reg0, reg0, JIT_R1);	/* imm - _gst_self - 1 */
@@ -1876,13 +1751,27 @@ gen_binary_int (code_tree *tree)
     case BIT_OR_COLON_SPECIAL:
       IMM_OR_REG (or, JIT_V0);
       break;
+
+    case BIT_XOR_COLON_SPECIAL:
+      /* For XOR, the tag bits of the two operands cancel (unlike
+	 AND and OR), so we cannot simply use the IMM_OR_REG macro.  */
+      if (reg1 != JIT_NOREG)
+	{
+	  jit_xorr_l(JIT_V0, reg0, reg1);
+	  jit_addi_l(JIT_V0, JIT_V0, 1);	/* Put back the tag bit.  */
+	}
+      else
+	{
+	  imm--;				/* Strip the tag bit.  */
+	  jit_xori_l(JIT_V0, reg0, imm);
+	}
+
+      break;
     }
 
   EXPORT_SP;
   if (overflow)
     finish_deferred_send ();
-
-  gen_nothing (tree);
 }
 
 void
@@ -1894,18 +1783,18 @@ gen_binary_bool (code_tree *tree)
   OOP oop;
 
   DONT_INLINE_SUPER;
-  if (*tree->bp != SAME_OBJECT_SPECIAL)
+  if (ic->imm != SAME_OBJECT_SPECIAL)
     DONT_INLINE_NONINTEGER;
 
   GET_BINARY_ARGS;
-  if (*tree->bp != SAME_OBJECT_SPECIAL)
+  if (ic->imm != SAME_OBJECT_SPECIAL)
     ENSURE_INT_ARGS (true, deferredSend);
 
   else
     deferredSend = NULL;
 
 #define TRUE_BRANCH(addr)						\
-  switch(*tree->bp) {							\
+  switch(ic->imm) {							\
     case LESS_THAN_SPECIAL:	addr = IMM_OR_REG(blt, addr); break;	\
     case GREATER_THAN_SPECIAL:	addr = IMM_OR_REG(bgt, addr); break;	\
     case LESS_EQUAL_SPECIAL:	addr = IMM_OR_REG(ble, addr); break;	\
@@ -1916,7 +1805,7 @@ gen_binary_bool (code_tree *tree)
   }
 
 #define FALSE_BRANCH(addr)						\
-  switch(*tree->bp) {							\
+  switch(ic->imm) {							\
     case LESS_THAN_SPECIAL:	addr = IMM_OR_REG(bge, addr); break;	\
     case GREATER_THAN_SPECIAL:	addr = IMM_OR_REG(ble, addr); break;	\
     case LESS_EQUAL_SPECIAL:	addr = IMM_OR_REG(bgt, addr); break;	\
@@ -1927,7 +1816,7 @@ gen_binary_bool (code_tree *tree)
   }
 
 #define FALSE_SET(reg)							\
-  switch(*tree->bp) {							\
+  switch(ic->imm) {							\
     case LESS_THAN_SPECIAL:	IMM_OR_REG(ge, reg); break;		\
     case GREATER_THAN_SPECIAL:	IMM_OR_REG(le, reg); break;		\
     case LESS_EQUAL_SPECIAL:	IMM_OR_REG(gt, reg); break;		\
@@ -1945,42 +1834,24 @@ gen_binary_bool (code_tree *tree)
   EXPORT_SP;
   if (deferredSend)
     finish_deferred_send ();
-
-  gen_nothing (tree);
 }
 
 void
-gen_block_copy (code_tree *tree)
+gen_dirty_block (code_tree *tree)
 {
-  inline_cache *ic = (inline_cache *) tree->data;
+  GET_UNARY_ARG;
 
-  DONT_INLINE_SUPER;
-  if (IS_BLOCK (tree->child))
-    {
-      tree->operation |= TREE_IS_BLOCK | TREE_IS_NOT_INTEGER;
-      PUSH_CHILDREN;
+  jit_prepare (1);
+  jit_pusharg_p (JIT_V0);
+  jit_finish (_gst_make_block_closure);
+  jit_movr_p (JIT_V0, JIT_R0);
 
-      EXPORT_SP;
-      jit_prepare (3);
-      jit_movi_p (JIT_R0, NULL);
-      jit_movi_i (JIT_R1, 1);
-      jit_movi_i (JIT_R2, 80);
-      jit_pusharg_p (JIT_R0);
-      jit_pusharg_i (JIT_R1);
-      jit_pusharg_i (JIT_R2);
-      jit_finish (PTR_BLOCKCOPY);
-      IMPORT_SP;
-
-      rec_var_cached = false;
-      stack_cached = -1;
-      self_cached = false;
-      gen_nothing (tree);
-    }
-  else
-    gen_send (tree);
-
+  rec_var_cached = false;
+  stack_cached = -1;
+  self_cached = false;
 }
 
+#if 0
 void
 gen_fetch_class (code_tree *tree)
 {
@@ -1988,6 +1859,7 @@ gen_fetch_class (code_tree *tree)
 
   DONT_INLINE_SUPER;
   GET_UNARY_ARG;
+
   if (IS_INTEGER (tree->child))
     jit_movi_p (JIT_V0, _gst_small_integer_class);
 
@@ -2008,14 +1880,80 @@ gen_fetch_class (code_tree *tree)
     }
 
   self_cached = false;
-  gen_nothing (tree);
+}
+#endif
+
+void
+gen_unary_special (code_tree *tree)
+{
+  inline_cache *ic = (inline_cache *) tree->data;
+  jit_insn *ok1 = NULL, *bad1, *ok2, *ok3;
+  int sz;
+
+  DONT_INLINE_SUPER;
+
+  switch (ic->imm)
+    {
+    case JAVA_AS_INT_SPECIAL:
+    case JAVA_AS_LONG_SPECIAL:
+      emit_code_tree(tree->child);
+      if (IS_INTEGER (tree->child))
+	break;
+
+      /* In order to prepare for emitting the send,
+	 we have to export the top of the stack here.
+	 We won't emit anything in gen_send, though.  */
+      CACHE_STACK_TOP;
+
+      if (!NOT_INTEGER (tree->child))
+	ok1 = jit_bmsi_ul (jit_forward (), JIT_V0, 1);
+
+      sz = (ic->imm == JAVA_AS_LONG_SPECIAL) ? 8 : 4;
+
+      jit_ldr_p (JIT_R2, JIT_V0);
+
+      /* Check if it belongs to the wrong class...  */
+      jit_ldxi_p (JIT_R0, JIT_R2, jit_ptr_field (mst_Object, objClass));
+      jit_subi_p (JIT_R0, JIT_R0, _gst_large_positive_integer_class);
+      ok2 = jit_beqi_p (jit_forward (), JIT_R0, NULL);
+      bad1 = jit_bnei_p (jit_forward (), JIT_R0,
+			 ((char *) _gst_large_negative_integer_class) -
+			 ((char *) _gst_large_positive_integer_class));
+
+      /* Look for too big an integer...  */
+      jit_patch (ok2);
+      if (SIZEOF_OOP > 4)
+	{
+          emit_basic_size_in_r0 (_gst_large_positive_integer_class, false, JIT_R2);
+          ok3 = jit_blei_ui (jit_forward (), JIT_R0, sz);
+	}
+      else
+	{
+           /* We can check the size field directly.  */
+          jit_ldxi_p (JIT_R0, JIT_R2, jit_ptr_field (mst_Object, objSize));
+          ok3 = jit_blei_p (jit_forward (), JIT_R0, 
+			    FROM_INT (OBJ_HEADER_SIZE_WORDS + sz / SIZEOF_OOP));
+	}
+
+      jit_patch (bad1);
+      gen_send (tree);
+      jit_patch (ok3);
+      if (ok1)
+	jit_patch (ok1);
+      self_cached = false;
+      return;
+
+    default:
+      GET_UNARY_ARG;
+      abort ();
+    }
 }
 
 void
-gen_nil_check (code_tree *tree)
+gen_unary_bool (code_tree *tree)
 {
   inline_cache *ic = (inline_cache *) tree->data;
-  mst_Boolean compileIsNil = *tree->bp == IS_NIL_SPECIAL;
+  mst_Boolean compileIsNil = ic->imm == IS_NIL_SPECIAL;
 
   DONT_INLINE_SUPER;
   GET_UNARY_ARG;
@@ -2030,8 +1968,6 @@ gen_nil_check (code_tree *tree)
 #undef TRUE_BRANCH
 #undef FALSE_BRANCH
 #undef FALSE_SET
-
-  gen_nothing (tree);
 }
 
 void
@@ -2045,7 +1981,7 @@ gen_pop_into_array (code_tree *tree)
   value = array->next;
   index = (int) tree->data;
   useCachedR0 = (array->operation & (TREE_OP | TREE_SUBOP))
-    == (TREE_SEND | TREE_POP_INTO_ARRAY);
+    == (TREE_STORE | TREE_POP_INTO_ARRAY);
 
   /* This code is the same as GET_BINARY_ARGS, but it forces the first 
      parameter in V0 and the second in V1. This is because the bytecode 
@@ -2071,18 +2007,17 @@ gen_pop_into_array (code_tree *tree)
 	{
 	  /* We load the 2nd argument and then the 1st */
 	  jit_ldr_p (JIT_V1, JIT_V2);
-	  jit_ldxi_p (JIT_V0, JIT_V2, -SIZEOF_LONG);
+	  jit_ldxi_p (JIT_V0, JIT_V2, -sizeof (PTR));
 	}
       else
 	{
 	  /* The 2nd argument is already in V0, move it in V1 */
-	  /* ### isn't this superfluous??? */
 	  jit_movr_p (JIT_V1, JIT_V0);
 	  jit_ldxi_p (JIT_V0, JIT_V2, sp_delta);
 	}
 
       /* "Pop" the 2nd argument */
-      sp_delta -= SIZEOF_LONG;
+      sp_delta -= sizeof (PTR);
       useCachedR0 = false;
     }
 
@@ -2099,7 +2034,6 @@ gen_pop_into_array (code_tree *tree)
     }
 
   jit_stxi_p (jit_ptr_field (mst_Object, data[index]), JIT_R0, JIT_V1);
-  gen_nothing (tree);
 }
 
 
@@ -2111,7 +2045,6 @@ gen_store_rec_var (code_tree *tree)
   CACHE_REC_VAR;
 
   jit_stxi_p (REC_VAR_OFS (tree), JIT_R1, JIT_V0);
-  gen_nothing (tree);
 }
 
 void
@@ -2121,7 +2054,6 @@ gen_store_temp (code_tree *tree)
   CACHE_TEMP;
 
   jit_stxi_p (TEMP_OFS (tree), JIT_V1, JIT_V0);
-  gen_nothing (tree);
 }
 
 void
@@ -2132,7 +2064,6 @@ gen_store_lit_var (code_tree *tree)
 
   jit_ldi_p (JIT_R0, assocOOP);
   jit_stxi_p (jit_ptr_field (gst_association, value), JIT_R0, JIT_V0);
-  gen_nothing (tree);
 }
 
 void
@@ -2142,7 +2073,6 @@ gen_store_outer (code_tree *tree)
   CACHE_OUTER_CONTEXT;
 
   jit_stxi_p (STACK_OFS (tree), JIT_V1, JIT_V0);
-  gen_nothing (tree);
 }
 
 /* Pushes */
@@ -2154,7 +2084,6 @@ gen_push_rec_var (code_tree *tree)
 
   jit_ldxi_p (JIT_V0, JIT_R1, REC_VAR_OFS (tree));
   self_cached = false;
-  gen_nothing (tree);
 }
 
 void
@@ -2165,7 +2094,6 @@ gen_push_temp (code_tree *tree)
 
   jit_ldxi_p (JIT_V0, JIT_V1, TEMP_OFS (tree));
   self_cached = false;
-  gen_nothing (tree);
 }
 
 void
@@ -2175,7 +2103,6 @@ gen_push_lit_const (code_tree *tree)
 
   jit_movi_p (JIT_V0, tree->data);
   self_cached = false;
-  gen_nothing (tree);
 }
 
 void
@@ -2187,7 +2114,6 @@ gen_push_lit_var (code_tree *tree)
   jit_ldi_p (JIT_V0, assocOOP);
   jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (gst_association, value));
   self_cached = false;
-  gen_nothing (tree);
 }
 
 void
@@ -2197,7 +2123,6 @@ gen_dup_top (code_tree *tree)
     jit_ldr_p (JIT_V0, JIT_V2);
 
   BEFORE_PUSH;
-  gen_nothing (tree);
 }
 
 void
@@ -2209,7 +2134,6 @@ gen_push_self (code_tree *tree)
     jit_ldi_p (JIT_V0, &_gst_self);
 
   self_cached = true;
-  gen_nothing (tree);
 }
 
 void
@@ -2220,18 +2144,6 @@ gen_push_outer (code_tree *tree)
 
   jit_ldxi_p (JIT_V0, JIT_V1, STACK_OFS (tree));
   self_cached = false;
-  gen_nothing (tree);
-}
-
-void
-gen_push_context (code_tree *tree)
-{
-  BEFORE_PUSH;
-
-  jit_calli (PTR_EMPTY_CONTEXT_STACK);
-  jit_ldi_p (JIT_V0, &_gst_this_context_oop);
-  self_cached = false;
-  gen_nothing (tree);
 }
 
 /* Moves to V1 (alternative push) */
@@ -2242,7 +2154,6 @@ gen_alt_rec_var (code_tree *tree)
 
   jit_ldxi_p (JIT_V1, JIT_R1, REC_VAR_OFS (tree));
   stack_cached = -1;
-  gen_nothing (tree);
 }
 
 void
@@ -2252,7 +2163,6 @@ gen_alt_temp (code_tree *tree)
 
   jit_ldxi_p (JIT_V1, JIT_V1, TEMP_OFS (tree));
   stack_cached = -1;
-  gen_nothing (tree);
 }
 
 void
@@ -2260,7 +2170,6 @@ gen_alt_lit_const (code_tree *tree)
 {
   jit_movi_p (JIT_V1, tree->data);
   stack_cached = -1;
-  gen_nothing (tree);
 }
 
 void
@@ -2271,7 +2180,6 @@ gen_alt_lit_var (code_tree *tree)
   jit_ldi_p (JIT_V1, assocOOP);
   jit_ldxi_p (JIT_V1, JIT_V1, jit_ptr_field (gst_association, value));
   stack_cached = -1;
-  gen_nothing (tree);
 }
 
 void
@@ -2284,7 +2192,6 @@ gen_get_top (code_tree *tree)
     jit_movr_p (JIT_V1, JIT_V0);
 
   stack_cached = -1;
-  gen_nothing (tree);
 }
 
 void
@@ -2294,7 +2201,6 @@ gen_alt_self (code_tree *tree)
     jit_ldi_p (JIT_V1, &_gst_self);
 
   stack_cached = -1;
-  gen_nothing (tree);
 }
 
 void
@@ -2304,16 +2210,6 @@ gen_alt_outer (code_tree *tree)
 
   jit_ldxi_p (JIT_V1, JIT_V1, STACK_OFS (tree));
   stack_cached = -1;
-  gen_nothing (tree);
-}
-
-void
-gen_alt_context (code_tree *tree)
-{
-  jit_calli (PTR_EMPTY_CONTEXT_STACK);
-  jit_ldi_p (JIT_V1, &_gst_this_context_oop);
-  stack_cached = -1;
-  gen_nothing (tree);
 }
 
 /* Set top */
@@ -2325,7 +2221,6 @@ gen_top_rec_var (code_tree *tree)
 
   jit_ldxi_p (JIT_V0, JIT_R1, REC_VAR_OFS (tree));
   self_cached = false;
-  gen_nothing (tree);
 }
 
 void
@@ -2336,7 +2231,6 @@ gen_top_temp (code_tree *tree)
 
   jit_ldxi_p (JIT_V0, JIT_V1, TEMP_OFS (tree));
   self_cached = false;
-  gen_nothing (tree);
 }
 
 void
@@ -2348,7 +2242,6 @@ gen_top_self (code_tree *tree)
     jit_ldi_p (JIT_V0, &_gst_self);
 
   self_cached = true;
-  gen_nothing (tree);
 }
 
 void
@@ -2361,7 +2254,6 @@ gen_top_outer (code_tree *tree)
 
   jit_ldxi_p (JIT_V0, JIT_V1, STACK_OFS (tree));
   self_cached = false;
-  gen_nothing (tree);
 }
 
 void
@@ -2371,7 +2263,6 @@ gen_top_lit_const (code_tree *tree)
 
   jit_movi_p (JIT_V0, tree->data);
   self_cached = false;
-  gen_nothing (tree);
 }
 
 void
@@ -2384,31 +2275,38 @@ gen_top_lit_var (code_tree *tree)
   jit_ldi_p (JIT_V0, assocOOP);
   jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (gst_association, value));
   self_cached = false;
-  gen_nothing (tree);
-}
-
-void
-gen_top_context (code_tree *tree)
-{
-  BEFORE_SET_TOP;
-
-  jit_calli (PTR_EMPTY_CONTEXT_STACK);
-  jit_ldi_p (JIT_V0, &_gst_this_context_oop);
-  self_cached = false;
-  gen_nothing (tree);
 }
 
 void
 gen_invalid (code_tree *tree)
 {
   printf ("Invalid operation %o in the code tree", tree->operation);
-  exit (1);
+  abort ();
 }
-
-/* Handling of extra operations */
+
 void
 gen_nothing (code_tree *tree)
 {
+}
+
+void
+gen_two_extras (code_tree *tree)
+{
+  /* Emit code for the real node and the first extra;
+     emit_code_tree will take care of the second extra
+     held by TREE.  */
+  emit_code_tree (tree->next);	/* emit the code for the real node */
+}
+
+void
+emit_code_tree (code_tree *tree)
+{
+  int operation;
+
+  operation = tree->operation & (TREE_OP | TREE_SUBOP);
+  emit_operation_funcs[operation] (tree);
+
+  /* Now emit the extras.  */
   switch (tree->operation & TREE_EXTRA)
     {
     case TREE_EXTRA_NONE:
@@ -2464,12 +2362,6 @@ gen_nothing (code_tree *tree)
   tree->operation |= TREE_NOP | TREE_ALREADY_EMITTED;
 }
 
-void
-gen_two_extras (code_tree *tree)
-{
-  emit_code_tree (tree->next);	/* emit the code for the real node */
-  gen_nothing (tree);		/* and then the second extra */
-}
 
 
 /* Initialization and other code generation (prologs, interrupt checks) */
@@ -2496,9 +2388,9 @@ emit_deferred_sends (deferred_send *ds)
       ds->reg1 = JIT_R0;
     }
 
-  jit_stxi_p (SIZEOF_LONG * 1, JIT_V2, ds->reg0);
-  jit_stxi_p (SIZEOF_LONG * 2, JIT_V2, ds->reg1);
-  jit_addi_p (JIT_V2, JIT_V2, SIZEOF_LONG * 2);
+  jit_stxi_p (sizeof (PTR) * 1, JIT_V2, ds->reg0);
+  jit_stxi_p (sizeof (PTR) * 2, JIT_V2, ds->reg1);
+  jit_addi_p (JIT_V2, JIT_V2, sizeof (PTR) * 2);
 
   jit_movi_p (JIT_V1, ic);
   jit_sti_p (&sp, JIT_V2);
@@ -2517,7 +2409,7 @@ emit_deferred_sends (deferred_send *ds)
   IMPORT_SP;
   if (ds->trueDest == ds->falseDest)
     {
-      /* This was an arithmetic deferred send. */
+      /* This was an arithmetic deferred send.  */
       jit_ldr_p (JIT_V0, JIT_V2);
       addr = lbl_get (ds->trueDest);
       addr = jit_jmpi (addr);
@@ -2526,9 +2418,9 @@ emit_deferred_sends (deferred_send *ds)
     }
   else
     {
-      /* This was a boolean deferred send. */
+      /* This was a boolean deferred send.  */
       jit_ldr_p (JIT_R0, JIT_V2);
-      jit_subi_p (JIT_V2, JIT_V2, SIZEOF_LONG);
+      jit_subi_p (JIT_V2, JIT_V2, sizeof (PTR));
       jit_ldr_p (JIT_V0, JIT_V2);
 
       addr = lbl_get (ds->trueDest);
@@ -2563,55 +2455,67 @@ emit_interrupt_check (int restartReg)
 }
 
 /* Auxiliary function for inlined primitives.  Retrieves the receiver's
- * basicSize in R0, leaves the pointer to the object data in R2 */
+ * basicSize in R0, expects the pointer to the object data in objectReg.
+ * Destroys V1.  */
 void
-emit_basic_size_in_r0 (mst_Boolean tagged)
+emit_basic_size_in_r0 (OOP classOOP, mst_Boolean tagged, int objectReg)
 {
-  if (!CLASS_IS_INDEXABLE (current->receiverClass))
-    jit_movi_p (JIT_R0, FROM_INT (0));
-  else
+  int adjust;
+
+  int shape = CLASS_INSTANCE_SPEC (classOOP) & ISP_INDEXEDVARS;
+
+  if (!CLASS_IS_INDEXABLE (classOOP))
     {
-      int adjust = CLASS_FIXED_FIELDS (current->receiverClass) +
-	sizeof (gst_object_header) / SIZEOF_LONG;
-
-      int isBytes = !CLASS_IS_POINTERS (current->receiverClass) &&
-	!CLASS_IS_WORDS (current->receiverClass);
-
-      jit_ldxi_p (JIT_R2, JIT_V0, jit_ptr_field (OOP, object));
-      if (isBytes)
-	jit_ldxi_p (JIT_V1, JIT_V0, jit_ptr_field (OOP, flags));
-
-      jit_ldxi_l (JIT_R0, JIT_R2, jit_ptr_field (mst_Object, objSize));
-
-      if (!tagged)
-	/* Remove the tag bit */
-	jit_rshi_l (JIT_R0, JIT_R0, 1);
-      else
-	adjust = adjust * 2;
-
-      if (isBytes)
-	{
-	  jit_andi_l (JIT_V1, JIT_V1, EMPTY_BYTES);
-	  jit_lshi_l (JIT_R0, JIT_R0, LONG_SHIFT);
-	  jit_subr_l (JIT_R0, JIT_R0, JIT_V1);
-
-	  adjust *= SIZEOF_LONG;
-	  if (tagged)
-	    {
-	      jit_subr_l (JIT_R0, JIT_R0, JIT_V1);
-
-	      /* Move the tag bit back to bit 0 after the long shift above */
-	      adjust += SIZEOF_LONG - 1;
-	    }
-	}
-
-      if (adjust)
-	jit_subi_l (JIT_R0, JIT_R0, adjust);
+      jit_movi_p (JIT_R0, FROM_INT (0));
+      return;
     }
+
+  /* Not yet implemented.  */
+  if (shape != ISP_POINTER && shape != ISP_UCHAR)
+    abort ();
+
+  adjust = CLASS_FIXED_FIELDS (classOOP) +
+    sizeof (gst_object_header) / sizeof (PTR);
+
+  if (objectReg == JIT_NOREG)
+    {
+      jit_ldxi_p (JIT_R2, JIT_V0, jit_ptr_field (OOP, object));
+      objectReg = JIT_R2;
+    }
+
+  jit_ldxi_l (JIT_R0, objectReg, jit_ptr_field (mst_Object, objSize));
+
+  if (shape == ISP_UCHAR)
+    jit_ldxi_p (JIT_V1, JIT_V0, jit_ptr_field (OOP, flags));
+
+  if (!tagged)
+    /* Remove the tag bit */
+    jit_rshi_l (JIT_R0, JIT_R0, 1);
+  else
+    adjust = adjust * 2;
+
+  if (shape == ISP_UCHAR)
+    {
+      jit_andi_l (JIT_V1, JIT_V1, EMPTY_BYTES);
+      jit_lshi_l (JIT_R0, JIT_R0, LONG_SHIFT);
+      jit_subr_l (JIT_R0, JIT_R0, JIT_V1);
+
+      adjust *= sizeof (PTR);
+      if (tagged)
+        {
+          jit_subr_l (JIT_R0, JIT_R0, JIT_V1);
+
+          /* Move the tag bit back to bit 0 after the long shift above */
+          adjust += sizeof (PTR) - 1;
+        }
+    }
+
+  if (adjust)
+    jit_subi_l (JIT_R0, JIT_R0, adjust);
 }
 
 /* This takes care of emitting the code for inlined primitives.
-   Returns a new set of attributes which applies to the inlined code. */
+   Returns a new set of attributes which applies to the inlined code.  */
 mst_Boolean
 emit_inlined_primitive (int primitive, int numArgs, int attr)
 {
@@ -2622,31 +2526,29 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	jit_insn *fail1, *fail2;
 
 	int numFixed = CLASS_FIXED_FIELDS (current->receiverClass) +
-	  sizeof (gst_object_header) / SIZEOF_LONG;
+	  sizeof (gst_object_header) / sizeof (PTR);
 
-	int isBytes = !CLASS_IS_POINTERS (current->receiverClass) &&
-	  !CLASS_IS_WORDS (current->receiverClass);
+	int shape = CLASS_INSTANCE_SPEC (current->receiverClass) & ISP_INDEXEDVARS;
 
 	if (numArgs != 1)
 	  break;
 
-	if (!CLASS_IS_INDEXABLE (current->receiverClass))
+	if (!shape)
 	  {
 	    /* return failure */
 	    jit_movi_p (JIT_R0, -1);
 	    return PRIM_FAIL | PRIM_INLINED;
 	  }
-	if (CLASS_IS_WORDS (current->receiverClass))
-	  {
-	    /* too complicated to return LargeIntegers */
-	    break;
-	  }
+
+	else if (shape != ISP_POINTER && shape != ISP_UCHAR)
+	  /* too complicated to return LargeIntegers */
+	  break;
 
 	jit_ldi_p (JIT_R1, &sp);
-	emit_basic_size_in_r0 (false);
+	emit_basic_size_in_r0 (current->receiverClass, false, JIT_NOREG);
 
 	/* Point R2 to the first indexed slot */
-	jit_addi_ui (JIT_R2, JIT_R2, numFixed * SIZEOF_LONG);
+	jit_addi_ui (JIT_R2, JIT_R2, numFixed * sizeof (PTR));
 
 	/* Load the index and test it: remove tag bit, then check if
 	   (unsigned) (V1 - 1) >= R0 */
@@ -2659,13 +2561,13 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	fail2 = jit_bger_ul (jit_get_label (), JIT_V1, JIT_R0);
 
 	/* adjust stack top */
-	jit_subi_l (JIT_R1, JIT_R1, SIZEOF_LONG);
+	jit_subi_l (JIT_R1, JIT_R1, sizeof (PTR));
 
-	if (!isBytes)
+	if (shape == ISP_POINTER)
 	  jit_lshi_ul (JIT_V1, JIT_V1, LONG_SHIFT);
 
 	/* Now R2 + V1 contains the pointer to the slot */
-	if (isBytes)
+	if (shape == ISP_UCHAR)
 	  {
 	    jit_ldxr_uc (JIT_R0, JIT_R2, JIT_V1);
 
@@ -2687,7 +2589,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 
 	/* We get here with the _gst_basic_size in R0 upon failure,
 	   with -1 upon success.  We need to get 0 upon success and -1
-	   upon failure. */
+	   upon failure.  */
 	jit_rshi_l (JIT_R0, JIT_R0, 31);
 	jit_notr_l (JIT_R0, JIT_R0);
 
@@ -2700,39 +2602,37 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	jit_insn *fail0, *fail1, *fail2, *fail3, *fail4;
 
 	int numFixed = CLASS_FIXED_FIELDS (current->receiverClass) +
-	  sizeof (gst_object_header) / SIZEOF_LONG;
+	  sizeof (gst_object_header) / sizeof (PTR);
 
-	int isBytes = !CLASS_IS_POINTERS (current->receiverClass) &&
-	  !CLASS_IS_WORDS (current->receiverClass);
+	int shape = CLASS_INSTANCE_SPEC (current->receiverClass) & ISP_INDEXEDVARS;
 
 	if (numArgs != 2)
 	  break;
 
-	if (!CLASS_IS_INDEXABLE (current->receiverClass))
+	if (!shape)
 	  {
 	    /* return failure */
 	    jit_movi_p (JIT_R0, -1);
 	    return PRIM_FAIL | PRIM_INLINED;
 	  }
-	if (CLASS_IS_WORDS (current->receiverClass))
-	  {
-	    /* too complicated to convert LargeIntegers */
-	    break;
-	  }
+
+	if (shape != ISP_UCHAR && shape != ISP_POINTER)
+	  /* too complicated to convert LargeIntegers */
+	  break;
 
 	jit_ldxi_ul (JIT_V1, JIT_V0, jit_ptr_field (OOP, flags));
 	fail0 = jit_bmsi_ul (jit_get_label (), JIT_V1, F_READONLY);
 
 	jit_ldi_p (JIT_R1, &sp);
-	emit_basic_size_in_r0 (false);
+	emit_basic_size_in_r0 (current->receiverClass, false, JIT_NOREG);
 
 	/* Point R2 to the first indexed slot */
-	jit_addi_ui (JIT_R2, JIT_R2, numFixed * SIZEOF_LONG);
+	jit_addi_ui (JIT_R2, JIT_R2, numFixed * sizeof (PTR));
 
 	/* Load the index and test it: remove tag bit, then check if
 	   (unsigned) (V1 - 1) >= R0 */
 
-	jit_ldxi_l (JIT_V1, JIT_R1, -SIZEOF_LONG);
+	jit_ldxi_l (JIT_V1, JIT_R1, -sizeof (PTR));
 
 	fail1 = jit_bmci_l (jit_get_label (), JIT_V1, 1);
 
@@ -2740,14 +2640,14 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	jit_subi_ul (JIT_V1, JIT_V1, 1);
 	fail2 = jit_bger_ul (jit_get_label (), JIT_V1, JIT_R0);
 
-	if (!isBytes)
+	if (shape == ISP_POINTER)
 	  jit_lshi_ul (JIT_V1, JIT_V1, LONG_SHIFT);
 
 	/* Compute the effective address to free V1 for the operand */
 	jit_addr_l (JIT_R2, JIT_R2, JIT_V1);
 	jit_ldr_l (JIT_V1, JIT_R1);
 
-	if (isBytes)
+	if (shape == ISP_UCHAR)
 	  {
 	    /* Check and untag the byte we store */
 	    fail3 = jit_bmci_l (jit_get_label (), JIT_V1, 1);
@@ -2763,7 +2663,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	  }
 
 	/* Store the result and the new stack pointer */
-	jit_subi_l (JIT_R1, JIT_R1, SIZEOF_LONG * 2);
+	jit_subi_l (JIT_R1, JIT_R1, sizeof (PTR) * 2);
 	jit_str_p (JIT_R1, JIT_V1);
 	jit_sti_p (&sp, JIT_R1);
 
@@ -2780,7 +2680,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 
 	/* We get here with the _gst_basic_size in R0 upon failure,
 	   with -1 upon success.  We need to get 0 upon success and -1
-	   upon failure. */
+	   upon failure.  */
 	jit_rshi_l (JIT_R0, JIT_R0, 31);
 	jit_notr_l (JIT_R0, JIT_R0);
 
@@ -2789,13 +2689,21 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
       break;
 
     case 62:
-      if (numArgs != 0)
-	break;
+      {
+	int shape = CLASS_INSTANCE_SPEC (current->receiverClass) & ISP_INDEXEDVARS;
 
-      jit_ldi_p (JIT_R1, &sp);
-      emit_basic_size_in_r0 (true);
-      jit_str_p (JIT_R1, JIT_R0);
-      return (PRIM_SUCCEED | PRIM_INLINED);
+        if (numArgs != 0)
+	  break;
+
+	if (shape != 0 && shape != ISP_UCHAR && shape != ISP_POINTER)
+	  /* too complicated to convert LargeIntegers */
+	  break;
+
+        jit_ldi_p (JIT_R1, &sp);
+        emit_basic_size_in_r0 (current->receiverClass, true, JIT_NOREG);
+        jit_str_p (JIT_R1, JIT_R0);
+        return (PRIM_SUCCEED | PRIM_INLINED);
+      }
 
     case 63:
       {
@@ -2803,11 +2711,12 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	OOP charBase = CHAR_OOP_AT (0);
 
 	int numFixed = CLASS_FIXED_FIELDS (current->receiverClass) +
-	  sizeof (gst_object_header) / SIZEOF_LONG;
+	  sizeof (gst_object_header) / sizeof (PTR);
+
+	int shape = CLASS_INSTANCE_SPEC (current->receiverClass) & ISP_INDEXEDVARS;
 
 	if (numArgs != 1
-	    || CLASS_IS_WORDS (current->receiverClass)
-	    || CLASS_IS_POINTERS (current->receiverClass))
+	    || (shape != ISP_UCHAR && shape != ISP_SCHAR))
 	  break;
 
 	if (!CLASS_IS_INDEXABLE (current->receiverClass))
@@ -2818,10 +2727,10 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	  }
 
 	jit_ldi_p (JIT_R1, &sp);
-	emit_basic_size_in_r0 (false);
+	emit_basic_size_in_r0 (current->receiverClass, false, JIT_NOREG);
 
 	/* Point R2 to the first indexed slot */
-	jit_addi_ui (JIT_R2, JIT_R2, numFixed * SIZEOF_LONG);
+	jit_addi_ui (JIT_R2, JIT_R2, numFixed * sizeof (PTR));
 
 	/* Load the index and test it: remove tag bit, then check if
 	   (unsigned) (V1 - 1) >= R0 */
@@ -2834,7 +2743,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	fail2 = jit_bger_ul (jit_get_label (), JIT_V1, JIT_R0);
 
 	/* adjust stack top */
-	jit_subi_l (JIT_R1, JIT_R1, SIZEOF_LONG);
+	jit_subi_l (JIT_R1, JIT_R1, sizeof (PTR));
 
 	/* Now R2 + V1 contains the pointer to the slot */
 	jit_ldxr_uc (JIT_R0, JIT_R2, JIT_V1);
@@ -2854,7 +2763,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 
 	/* We get here with the _gst_basic_size in R0 upon failure,
 	   with -1 upon success.  We need to get 0 upon success and -1
-	   upon failure. */
+	   upon failure.  */
 	jit_rshi_l (JIT_R0, JIT_R0, 31);
 	jit_notr_l (JIT_R0, JIT_R0);
 
@@ -2868,11 +2777,12 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	OOP charBase = CHAR_OOP_AT (0);
 
 	int numFixed = CLASS_FIXED_FIELDS (current->receiverClass) +
-	  sizeof (gst_object_header) / SIZEOF_LONG;
+	  sizeof (gst_object_header) / sizeof (PTR);
+
+	int shape = CLASS_INSTANCE_SPEC (current->receiverClass) & ISP_INDEXEDVARS;
 
 	if (numArgs != 2
-	    || CLASS_IS_WORDS (current->receiverClass)
-	    || CLASS_IS_POINTERS (current->receiverClass))
+	    || (shape != ISP_UCHAR && shape != ISP_SCHAR))
 	  break;
 
 	if (!CLASS_IS_INDEXABLE (current->receiverClass))
@@ -2886,15 +2796,15 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	fail0 = jit_bmsi_ul (jit_get_label (), JIT_V1, F_READONLY);
 
 	jit_ldi_p (JIT_R1, &sp);
-	emit_basic_size_in_r0 (false);
+	emit_basic_size_in_r0 (current->receiverClass, false, JIT_NOREG);
 
 	/* Point R2 to the first indexed slot */
-	jit_addi_ui (JIT_R2, JIT_R2, numFixed * SIZEOF_LONG);
+	jit_addi_ui (JIT_R2, JIT_R2, numFixed * sizeof (PTR));
 
 	/* Load the index and test it: remove tag bit, then check if
 	   (unsigned) (V1 - 1) >= R0 */
 
-	jit_ldxi_l (JIT_V1, JIT_R1, -SIZEOF_LONG);
+	jit_ldxi_l (JIT_V1, JIT_R1, -sizeof (PTR));
 
 	fail1 = jit_bmci_l (jit_get_label (), JIT_V1, 1);
 
@@ -2917,7 +2827,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	jit_str_uc (JIT_R2, JIT_R0);
 
 	/* Store the result and the new stack pointer */
-	jit_subi_l (JIT_R1, JIT_R1, SIZEOF_LONG * 2);
+	jit_subi_l (JIT_R1, JIT_R1, sizeof (PTR) * 2);
 	jit_str_p (JIT_R1, JIT_V1);
 	jit_sti_p (&sp, JIT_R1);
 
@@ -2931,7 +2841,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 
 	/* We get here with the _gst_basic_size in R0 upon failure,
 	   with -1 upon success.  We need to get 0 upon success and -1
-	   upon failure. */
+	   upon failure.  */
 	jit_rshi_l (JIT_R0, JIT_R0, 31);
 	jit_notr_l (JIT_R0, JIT_R0);
 
@@ -3001,7 +2911,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	fail1 = jit_blti_p (jit_get_label (), JIT_R1, FROM_INT (0));
 
 	jit_rshi_l (JIT_R1, JIT_R1, 1);	/* clear tag bit */
-	jit_subi_l (JIT_V1, JIT_V1, SIZEOF_LONG);	/* set new
+	jit_subi_l (JIT_V1, JIT_V1, sizeof (PTR));	/* set new
 							   stack top */
 
 	/* SET_STACKTOP (instantiate_oopwith (_gst_self, POP_OOP())) */
@@ -3032,7 +2942,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
       jit_ldr_p (JIT_R1, JIT_V1);	/* load the argument */
       jit_ner_p (JIT_R0, JIT_R1, JIT_V0);
 
-      jit_subi_l (JIT_V1, JIT_V1, SIZEOF_LONG);	/* set new stack top */
+      jit_subi_l (JIT_V1, JIT_V1, sizeof (PTR));	/* set new stack top */
       jit_lshi_i (JIT_V0, JIT_R0, LONG_SHIFT + 1);
       jit_movi_i (JIT_R0, 0);	/* success */
       jit_addi_p (JIT_V0, JIT_V0, _gst_true_oop);
@@ -3042,18 +2952,38 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
       jit_sti_p (&sp, JIT_V1);
 
       return (PRIM_SUCCEED | PRIM_INLINED);
+
+    case 111:
+      {
+	jit_insn *jmp;
+        if (numArgs != 0)
+	  break;
+
+        jit_ldi_p (JIT_V1, &sp);
+        jit_movi_p (JIT_R0, _gst_small_integer_class);
+        jmp = jit_bmsi_ul (jit_forward (), JIT_V0, 1);
+        jit_ldxi_p (JIT_R0, JIT_V0, jit_ptr_field (OOP, object));
+        jit_ldxi_p (JIT_R0, JIT_R0, jit_ptr_field (mst_Object, objClass));
+        jit_patch (jmp);
+
+        /* Store the result and the new stack pointer */
+        jit_movi_i (JIT_R0, 0);	/* success */
+        jit_str_p (JIT_V1, JIT_V0);
+
+        return (PRIM_SUCCEED | PRIM_INLINED);
+      }
     }
 
   return (attr & ~PRIM_INLINED);
 }
 
-void
+mst_Boolean
 emit_primitive (int primitive, int numArgs)
 {
   /* primitive */
   jit_insn *fail, *succeed;
   prim_table_entry *pte = _gst_get_primitive_attributes (primitive);
-  long attr = pte->attributes;
+  int attr = pte->attributes;
 
   if (attr & PRIM_INLINED)
     attr = emit_inlined_primitive (pte->id, numArgs, attr);
@@ -3078,7 +3008,7 @@ emit_primitive (int primitive, int numArgs)
       succeed = (attr & PRIM_SUCCEED)
 	? jit_beqi_i (jit_forward (), JIT_R0, 0) : NULL;
 
-      /* gst_block_closure>>#value caches the value */
+      /* BlockClosure>>#value saves the native code's IP in the inline cache */
       if (attr & PRIM_CACHE_NEW_IP)
 	jit_stxi_p (jit_field (inline_cache, cachedIP), JIT_V1, JIT_R0);
 
@@ -3096,6 +3026,8 @@ emit_primitive (int primitive, int numArgs)
     }
   if (fail)
     jit_patch (fail);
+
+  return !(attr & PRIM_FAIL);
 }
 
 void
@@ -3115,7 +3047,7 @@ emit_context_setup (int numArgs, int numTemps)
     }
 
   /* Generate unrolled code to set up the frame -- this is done for
-     about 95% of the methods. */
+     about 95% of the methods.  */
   if (numArgs || numTemps)
     {
       int ofs;
@@ -3124,9 +3056,9 @@ emit_context_setup (int numArgs, int numTemps)
       switch (numArgs)
 	{
 	case 3:
-	  jit_ldxi_p (JIT_V0, JIT_V2, -2 * SIZEOF_LONG);
+	  jit_ldxi_p (JIT_V0, JIT_V2, -2 * sizeof (PTR));
 	case 2:
-	  jit_ldxi_p (JIT_R2, JIT_V2, -1 * SIZEOF_LONG);
+	  jit_ldxi_p (JIT_R2, JIT_V2, -1 * sizeof (PTR));
 	case 1:
 	  jit_ldr_p (JIT_R1, JIT_V2);
 	case 0:
@@ -3143,13 +3075,13 @@ emit_context_setup (int numArgs, int numTemps)
 	{
 	case 3:
 	  jit_stxi_p (ofs, JIT_V2, JIT_V0);
-	  ofs += SIZEOF_LONG;
+	  ofs += sizeof (PTR);
 	case 2:
 	  jit_stxi_p (ofs, JIT_V2, JIT_R2);
-	  ofs += SIZEOF_LONG;
+	  ofs += sizeof (PTR);
 	case 1:
 	  jit_stxi_p (ofs, JIT_V2, JIT_R1);
-	  ofs += SIZEOF_LONG;
+	  ofs += sizeof (PTR);
 	case 0:
 	  break;
 	}
@@ -3157,18 +3089,18 @@ emit_context_setup (int numArgs, int numTemps)
 	{
 	case 3:
 	  jit_stxi_p (ofs, JIT_V2, JIT_V1);
-	  ofs += SIZEOF_LONG;
+	  ofs += sizeof (PTR);
 	case 2:
 	  jit_stxi_p (ofs, JIT_V2, JIT_V1);
-	  ofs += SIZEOF_LONG;
+	  ofs += sizeof (PTR);
 	case 1:
 	  jit_stxi_p (ofs, JIT_V2, JIT_V1);
-	  ofs += SIZEOF_LONG;
+	  ofs += sizeof (PTR);
 	case 0:
 	  break;
 	}
 
-      jit_addi_p (JIT_V2, JIT_V2, ofs - SIZEOF_LONG);
+      jit_addi_p (JIT_V2, JIT_V2, ofs - sizeof (PTR));
     }
   else
     {
@@ -3178,19 +3110,75 @@ emit_context_setup (int numArgs, int numTemps)
   jit_sti_p (&sp, JIT_V2);
 }
 
+void
+emit_user_defined_method_call (OOP methodOOP, int numArgs,
+			       gst_compiled_method method)
+{
+  int i;
+  char *bp = method->bytecodes;
+  static OOP arrayAssociation;
+
+  current->inlineCaches = curr_inline_cache =
+    (inline_cache *) xmalloc (2 * sizeof (inline_cache));
+
+  /* Emit code similar to
+     <method> valueWithReceiver: <self> withArguments: { arg1. arg2. ... } */
+
+  if (!arrayAssociation)
+    {
+      arrayAssociation =
+	dictionary_association_at (_gst_smalltalk_dictionary,
+				   _gst_intern_string ("Array"));
+    }
+
+  t_sp = t_stack;
+  push_tree_node_oop (bp, NULL, TREE_PUSH | TREE_LIT_CONST, methodOOP);
+  push_tree_node (bp, NULL, TREE_PUSH | TREE_SELF, NULL);
+
+  push_tree_node_oop (bp, NULL, TREE_PUSH | TREE_LIT_VAR, arrayAssociation);
+  push_tree_node_oop (bp, NULL, TREE_PUSH | TREE_LIT_CONST, FROM_INT (numArgs));
+  push_send_node (bp, _gst_new_colon_symbol, 1, false,
+		  TREE_SEND | TREE_NORMAL, NEW_COLON_SPECIAL);
+
+  for (i = 0; i < numArgs; i++)
+    {
+      push_tree_node (bp, NULL, TREE_PUSH | TREE_TEMP, (PTR) (uintptr_t) i);
+      push_tree_node (bp, pop_tree_node (pop_tree_node (NULL)),
+		      TREE_STORE | TREE_POP_INTO_ARRAY,
+		      (PTR) (uintptr_t) i);
+    }
+
+  push_send_node (bp, _gst_value_with_rec_with_args_symbol, 2,
+		  false, TREE_SEND | TREE_NORMAL, 0);
+
+  set_top_node_extra (TREE_EXTRA_RETURN, 0);
+  emit_code ();
+  curr_inline_cache[-1].more = false;
+}
+
 mst_Boolean
 emit_method_prolog (OOP methodOOP,
 		    gst_compiled_method method)
 {
   method_header header;
-  int flag;
+  int flag, stack_depth;
   OOP receiverClass;
 
   header = method->header;
   flag = header.headerFlag;
   receiverClass = current->receiverClass;
 
-  jit_ldxi_p (JIT_V0, JIT_V2, SIZEOF_LONG * -header.numArgs);
+  if (flag == MTH_USER_DEFINED)
+    /* Include enough stack slots for the arguments, the first
+       two parameters of #valueWithReceiver:withArguments:,
+       the Array class, and the parameter to #new:.  */
+    stack_depth = ((header.numArgs + 4) + (1 << DEPTH_SCALE) - 1)
+		  >> DEPTH_SCALE;
+  else
+    stack_depth = header.stack_depth;
+
+
+  jit_ldxi_p (JIT_V0, JIT_V2, sizeof (PTR) * -header.numArgs);
   if (receiverClass == _gst_small_integer_class)
     jit_bmci_ul (do_send_code, JIT_V0, 1);
 
@@ -3202,45 +3190,48 @@ emit_method_prolog (OOP methodOOP,
       jit_bnei_p (do_send_code, JIT_R1, receiverClass);
     }
 
-  if (flag & 3)
-    {
-      jit_ldxi_p (JIT_V1, JIT_V1, jit_field (inline_cache, native_ip));
-
-      /* 1 is return _gst_self - nothing to do */
-      if (flag > 1)
-	{
-	  if (flag == 2)
-	    {
-	      /* return inst. var */
-	      int ofs =
-		jit_ptr_field (mst_Object, data[header.primitiveIndex]);
-	      jit_ldxi_p (JIT_R2, JIT_R2, ofs);	/* Remember? R2 is
-						   _gst_self->object */
-
-	    }
-	  else
-	    {
-	      /* return literal */
-	      OOP literal = OOP_TO_OBJ (method->literals)->data[0];
-	      jit_movi_p (JIT_R2, literal);
-	    }
-
-	  jit_str_p (JIT_V2, JIT_R2);	/* Make it the stack top */
-	}
-
-      jit_jmpr (JIT_V1);
-      return (true);
-    }
-
-  jit_ldxi_p (JIT_V2, JIT_V1, jit_field (inline_cache, native_ip));
-
-  /* Mark the translation as used *before* a GC can be triggered. */
+  /* Mark the translation as used *before* a GC can be triggered.  */
   jit_ldi_ul (JIT_R0, &(methodOOP->flags));
   jit_ori_ul (JIT_R0, JIT_R0, F_XLAT_REACHABLE);
   jit_sti_ul (&(methodOOP->flags), JIT_R0);
 
-  if (flag == 4)
-    emit_primitive (header.primitiveIndex, header.numArgs);
+  switch (flag)
+    {
+    case MTH_RETURN_SELF:
+      jit_ldxi_p (JIT_V1, JIT_V1, jit_field (inline_cache, native_ip));
+      jit_jmpr (JIT_V1);
+      return (true);
+
+    case MTH_RETURN_INSTVAR:
+      {
+	      _gst_debug ();
+	jit_ldxi_p (JIT_V1, JIT_V1, jit_field (inline_cache, native_ip));
+	int ofs = jit_ptr_field (mst_Object, data[header.primitiveIndex]);
+	jit_ldxi_p (JIT_R2, JIT_R2, ofs);	/* Remember? R2 is _gst_self->object */
+	jit_str_p (JIT_V2, JIT_R2);	/* Make it the stack top */
+	jit_jmpr (JIT_V1);
+	return (true);
+      }
+      
+    case MTH_RETURN_LITERAL:
+      {
+	OOP literal = OOP_TO_OBJ (method->literals)->data[header.primitiveIndex];
+	jit_ldxi_p (JIT_V1, JIT_V1, jit_field (inline_cache, native_ip));
+	jit_movi_p (JIT_R2, literal);
+	jit_str_p (JIT_V2, JIT_R2);	/* Make it the stack top */
+	jit_jmpr (JIT_V1);
+	return (true);
+      }
+      
+    default:
+      break;
+    }
+
+  jit_ldxi_p (JIT_V2, JIT_V1, jit_field (inline_cache, native_ip));
+
+  if (flag == MTH_PRIMITIVE)
+    if (emit_primitive (header.primitiveIndex, header.numArgs))
+      return (true);
 
   /* Save the return IP */
   jit_ldi_p (JIT_R0, &_gst_this_context_oop);
@@ -3250,7 +3241,7 @@ emit_method_prolog (OOP methodOOP,
 	      JIT_V2);
 
   /* Prepare new state */
-  jit_movi_i (JIT_R0, header.stack_depth);
+  jit_movi_i (JIT_R0, stack_depth);
   jit_movi_i (JIT_V2, header.numArgs);
   jit_prepare (2);
   jit_pusharg_p (JIT_V2);
@@ -3274,6 +3265,16 @@ emit_method_prolog (OOP methodOOP,
   define_ip_map_entry (0);
   emit_interrupt_check (JIT_NOREG);
 
+  /* For simplicity, we emit user-defined methods by creating a code_tree
+     for the acrual send of #valueWithReceiver:withArguments: that they do.
+     This requires creating the context, so we translate it now; otherwise
+     it is very similar to a non-failing primitive.  */
+  if (flag == MTH_USER_DEFINED)
+    {
+      emit_user_defined_method_call (methodOOP, header.numArgs, method);
+      return (true);
+    }
+
   return (false);
 }
 
@@ -3296,14 +3297,14 @@ emit_block_prolog (OOP blockOOP,
      send_block_value.  In this case, the number of arguments is surely 
      valid and the inline cache's numArgs is bogus. This handles
      #valueWithArguments:, #compileString:ifError: and other primitives 
-     in which send_block_value is used. */
+     in which send_block_value is used.  */
   jit_ldi_p (JIT_R2, &native_ip);
   jit_bnei_p (do_send_code, JIT_R2, current->nativeCode);
   jit_patch (x);
 
   /* Check if a block evaluation was indeed requested, and if the
-     gst_block_closure really points to this gst_compiled_block */
-  jit_ldxi_p (JIT_R1, JIT_V2, SIZEOF_LONG * -header.numArgs);
+     BlockClosure really points to this CompiledBlock */
+  jit_ldxi_p (JIT_R1, JIT_V2, sizeof (PTR) * -header.numArgs);
   jit_bmsi_ul (do_send_code, JIT_R1, 1);
   jit_ldxi_p (JIT_R1, JIT_R1, jit_ptr_field (OOP, object));
   jit_ldxi_p (JIT_R0, JIT_R1, jit_ptr_field (mst_Object, objClass));
@@ -3312,7 +3313,7 @@ emit_block_prolog (OOP blockOOP,
   jit_bnei_p (do_send_code, JIT_R2, current->methodOOP);
 
   /* Now, the standard class check.  Always load _gst_self, but don't
-     check the receiver's class for clean blocks. */
+     check the receiver's class for clean blocks.  */
   jit_ldxi_p (JIT_V0, JIT_R1,
 	      jit_ptr_field (gst_block_closure, receiver));
   if (block->header.clean != 0)
@@ -3331,7 +3332,7 @@ emit_block_prolog (OOP blockOOP,
 	}
     }
 
-  /* Mark the translation as used *before* a GC can be triggered. */
+  /* Mark the translation as used *before* a GC can be triggered.  */
   jit_ldi_ul (JIT_R0, &(blockOOP->flags));
   jit_ori_ul (JIT_R0, JIT_R0, F_XLAT_REACHABLE);
   jit_sti_ul (&(blockOOP->flags), JIT_R0);
@@ -3344,7 +3345,7 @@ emit_block_prolog (OOP blockOOP,
   jit_stxi_p (jit_ptr_field (gst_method_context, native_ip), JIT_R0,
 	      JIT_V2);
 
-  /* Get the outer context in a callee-preserved register... */
+  /* Get the outer context in a callee-preserved register...  */
   jit_ldxi_p (JIT_V1, JIT_R1,
 	      jit_ptr_field (gst_block_closure, outerContext));
 
@@ -3359,7 +3360,7 @@ emit_block_prolog (OOP blockOOP,
 
   /* Remember? V0 was loaded with _gst_self for the inline cache test.
      Also initialize _gst_this_method and the pointer to the
-     outerContext. */
+     outerContext.  */
   jit_movi_p (JIT_R1, current->methodOOP);
   jit_sti_p (&_gst_self, JIT_V0);
   jit_sti_p (&_gst_this_method, JIT_R1);
@@ -3376,605 +3377,208 @@ emit_block_prolog (OOP blockOOP,
 }
 
 
-/* Code tree creation functions */
+/* Code tree creation */
 
-mst_Boolean
-dcd_push_rec_var (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node (bp,
-		  NULL,
-		  TREE_PUSH | TREE_REC_VAR,
-		  (PTR) (unsigned long) (b - PUSH_RECEIVER_VARIABLE));
-
-  return (false);
-}
-
-mst_Boolean
-dcd_push_temp (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node (bp,
-		  NULL,
-		  TREE_PUSH | TREE_TEMP,
-		  (PTR) (unsigned long) (b - PUSH_TEMPORARY_VARIABLE));
-
-  return (false);
-}
-
-mst_Boolean
-dcd_push_lit (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node_oop (bp,
-		      NULL,
-		      TREE_PUSH | TREE_LIT_CONST,
-		      literals[b - PUSH_LIT_CONSTANT]);
-
-  return (false);
-}
-
-mst_Boolean
-dcd_push_var (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node (bp,
-		  NULL,
-		  TREE_PUSH | TREE_LIT_VAR,
-		  literals[b - PUSH_LIT_VARIABLE]);
-
-  return (false);
-}
-
-mst_Boolean
-dcd_st_rec_var (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node (bp,
-		  pop_tree_node (NULL),
-		  TREE_STORE | TREE_REC_VAR | TREE_EXTRA_POP,
-		  (PTR) (unsigned long) (b - POP_RECEIVER_VARIABLE));
-
-  return (true);
-}
-
-mst_Boolean
-dcd_st_temp (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node (bp,
-		  pop_tree_node (NULL),
-		  TREE_STORE | TREE_TEMP | TREE_EXTRA_POP,
-		  (PTR) (unsigned long) (b - POP_TEMPORARY_VARIABLE));
-
-  return (true);
-}
-
-mst_Boolean
-dcd_push_self (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node (bp, NULL, TREE_PUSH | TREE_SELF, NULL);
-
-  return (false);
-}
-
-mst_Boolean
-dcd_push_special (gst_uchar b, gst_uchar *bp)
+gst_uchar *
+decode_bytecode (gst_uchar *bp)
 {
   static OOP *specialOOPs[] = {
-    &_gst_true_oop, &_gst_false_oop, &_gst_nil_oop,
+    &_gst_nil_oop, &_gst_true_oop, &_gst_false_oop
   };
 
-  push_tree_node_oop (bp,
-		      NULL,
-		      TREE_PUSH | TREE_LIT_CONST,
-		      *specialOOPs[b - PUSH_SPECIAL - 1]);
-
-  return (false);
-}
-
-mst_Boolean
-dcd_push_sign8 (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node_oop (bp,
-		      NULL,
-		      TREE_PUSH | TREE_LIT_CONST,
-		      FROM_INT((signed char) bp[1]));
-
-  return (false);
-}
-
-mst_Boolean
-dcd_push_unsign8 (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node_oop (bp,
-		      NULL,
-		      TREE_PUSH | TREE_LIT_CONST,
-		      FROM_INT((gst_uchar) bp[1]));
-
-  return (false);
-}
-
-mst_Boolean
-dcd_push_zero_one (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node_oop (bp,
-		      NULL,
-		      TREE_PUSH | TREE_LIT_CONST,
-		      FROM_INT(b == PUSH_ONE));
-
-  return (false);
-}
-
-mst_Boolean
-dcd_ret_self (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node (bp,
-		  pop_tree_node (NULL),
-		  TREE_SET_TOP | TREE_SELF | TREE_EXTRA_RETURN |
-		  self_class_check, NULL);
-
-  return (true);
-}
-
-mst_Boolean
-dcd_ret_special (gst_uchar b, gst_uchar *bp)
-{
-  static OOP *specialOOPs[] =
-    { &_gst_true_oop, &_gst_false_oop, &_gst_nil_oop };
-
-  push_tree_node_oop (bp,
-		      pop_tree_node (NULL),
-		      TREE_SET_TOP | TREE_LIT_CONST | TREE_EXTRA_RETURN,
-		      *specialOOPs[b - RETURN_INDEXED - 1]);
-
-  return (true);
-}
-
-mst_Boolean
-dcd_explicit_ret (gst_uchar b, gst_uchar *bp)
-{
-  set_top_node_extra (TREE_EXTRA_METHOD_RET, 0);
-  return (true);
-}
-
-mst_Boolean
-dcd_ret_stack_top (gst_uchar b, gst_uchar *bp)
-{
-  set_top_node_extra (TREE_EXTRA_RETURN, 0);
-  return (true);
-}
-
-mst_Boolean
-dcd_big_literal_op (gst_uchar b, gst_uchar *bp)
-{
-  unsigned int num;
-  num = bp[1];
-  num <<= 8;
-  num |= bp[2];
-
-  switch (num >> 14)
-    {
-    case 0:
-      push_tree_node_oop (bp,
-			  NULL,
-			  TREE_PUSH | TREE_LIT_CONST,
-			  literals[num & 16383]);
-
-      return (false);
-
-    case 1:
-      push_tree_node (bp,
-		      NULL, TREE_PUSH | TREE_LIT_VAR,
-		      literals[num & 16383]);
-
-      return (false);
-
-    case 2:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_LIT_VAR | TREE_EXTRA_POP,
-		      literals[num & 16383]);
-
-      return (true);
-
-    case 3:
-    default:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_LIT_VAR,
-		      literals[num & 16383]);
-
-      return (false);
+  MATCH_BYTECODES (XLAT_BUILD_CODE_TREE, bp, (
+    PUSH_RECEIVER_VARIABLE {
+      push_tree_node (IP0, NULL, TREE_PUSH | TREE_REC_VAR,
+                      (PTR) (uintptr_t) n);
     }
-}
 
-
-mst_Boolean
-dcd_big_instance_op (gst_uchar b, gst_uchar *bp)
-{
-  unsigned int num;
-  num = bp[1];
-  num <<= 8;
-  num |= bp[2];
-
-  switch (num >> 14)
-    {
-    case 0:
-      push_tree_node (bp,
-		      pop_tree_node (pop_tree_node (NULL)),
-		      TREE_SEND | TREE_POP_INTO_ARRAY,
-		      (PTR) (unsigned long) (num & 16383));
-
-      return (false);
-
-    case 1:
-      push_tree_node (bp,
-		      NULL,
-		      TREE_PUSH | TREE_REC_VAR,
-		      (PTR) (unsigned long) (num & 16383));
-
-      return (false);
-
-    case 2:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_REC_VAR | TREE_EXTRA_POP,
-		      (PTR) (unsigned long) (num & 16383));
-
-      return (true);
-
-    case 3:
-    default:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_REC_VAR,
-		      (PTR) (unsigned long) (num & 16383));
-
-      return (false);
+    PUSH_TEMPORARY_VARIABLE {
+      push_tree_node (IP0, NULL, TREE_PUSH | TREE_TEMP,
+                      (PTR) (uintptr_t) n);
     }
-}
 
-mst_Boolean
-dcd_push_idx_val (gst_uchar b, gst_uchar *bp)
-{
-  gst_uchar ival2;
-  ival2 = bp[1];
-
-  switch (ival2 >> 6)
-    {
-    case 0:
-      push_tree_node (bp,
-		      NULL,
-		      TREE_PUSH | TREE_REC_VAR,
-		      (PTR) (unsigned long) (ival2 & 63));
-
-      break;
-    case 1:
-      push_tree_node (bp,
-		      NULL,
-		      TREE_PUSH | TREE_TEMP,
-		      (PTR) (unsigned long) (ival2 & 63));
-
-      break;
-    case 2:
-      push_tree_node_oop (bp,
-			  NULL,
-			  TREE_PUSH | TREE_LIT_CONST,
-			  literals[(unsigned long) (ival2 & 63)]);
-
-      break;
-    case 3:
-    default:
-      push_tree_node (bp,
-		      NULL,
-		      TREE_PUSH | TREE_LIT_VAR,
-		      literals[(unsigned long) (ival2 & 63)]);
-
-      break;
+    PUSH_LIT_CONSTANT {
+      push_tree_node_oop (IP0, NULL, TREE_PUSH | TREE_LIT_CONST,
+                          literals[n]);
     }
-  return (false);
-}
 
-mst_Boolean
-dcd_store_stack_top (gst_uchar b, gst_uchar *bp)
-{
-  gst_uchar ival2;
-  ival2 = bp[1];
-
-  switch (ival2 >> 6)
-    {
-    case 0:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_REC_VAR,
-		      (PTR) (unsigned long) (ival2 & 63));
-
-      break;
-    case 1:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_TEMP,
-		      (PTR) (unsigned long) (ival2 & 63));
-
-      break;
-    case 2:
-      push_tree_node_oop (bp,
-			  pop_tree_node (NULL),
-			  TREE_STORE | TREE_LIT_CONST,
-			  literals[(unsigned long) (ival2 & 63)]);
-
-      break;
-    case 3:
-    default:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_LIT_VAR,
-		      literals[(unsigned long) (ival2 & 63)]);
-
-      break;
+    PUSH_LIT_VARIABLE {
+      push_tree_node_oop (IP0, NULL, TREE_PUSH | TREE_LIT_VAR,
+                          literals[n]);
     }
-  return (false);
-}
 
-mst_Boolean
-dcd_pop_store_top (gst_uchar b, gst_uchar *bp)
-{
-  gst_uchar ival2;
-  ival2 = bp[1];
-
-  switch (ival2 >> 6)
-    {
-    case 0:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_REC_VAR | TREE_EXTRA_POP,
-		      (PTR) (unsigned long) (ival2 & 63));
-
-      break;
-    case 1:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_TEMP | TREE_EXTRA_POP,
-		      (PTR) (unsigned long) (ival2 & 63));
-
-      break;
-    case 2:
-      push_tree_node_oop (bp,
-			  pop_tree_node (NULL),
-			  TREE_STORE | TREE_LIT_CONST | TREE_EXTRA_POP,
-			  literals[(unsigned long) (ival2 & 63)]);
-
-      break;
-    case 3:
-    default:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_LIT_VAR | TREE_EXTRA_POP,
-		      literals[(unsigned long) (ival2 & 63)]);
-
-      break;
+    PUSH_SELF {
+      push_tree_node (IP0, NULL,
+		      TREE_PUSH | TREE_SELF | self_class_check, NULL);
     }
-  return (true);
-}
+    PUSH_SPECIAL {
+      push_tree_node_oop (IP0, NULL, TREE_PUSH | TREE_LIT_CONST,
+                          *specialOOPs[n]);
+    }
+    PUSH_INTEGER {
+      push_tree_node_oop (IP0, NULL, TREE_PUSH | TREE_LIT_CONST,
+                          FROM_INT (n));
+    }
 
-mst_Boolean
-dcd_send_short (gst_uchar b, gst_uchar *bp)
-{
-  gst_uchar ival2 = bp[1];
-  push_send_node (bp, literals[ival2 & 31], ival2 >> 5, false,
-		  TREE_SEND);
+    RETURN_METHOD_STACK_TOP {
+      set_top_node_extra (TREE_EXTRA_METHOD_RET, 0);
+      emit_code ();
+    }
+    RETURN_CONTEXT_STACK_TOP {
+      set_top_node_extra (TREE_EXTRA_RETURN, 0);
+      emit_code ();
+    }
 
-  return (false);
-}
+    LINE_NUMBER_BYTECODE {
+    }
 
-mst_Boolean
-dcd_send_long (gst_uchar b, gst_uchar *bp)
-{
-  int ival2 = bp[1];
-  int ival3 = bp[2];
-  ival3 |= (ival2 & 192) << 2;
-  push_send_node (bp, literals[ival3], ival2 & 31, ival2 & 32,
-		  TREE_SEND);
+    STORE_RECEIVER_VARIABLE {
+      push_tree_node (IP0, pop_tree_node (NULL),
+                      TREE_STORE | TREE_REC_VAR,
+                      (PTR) (uintptr_t) n);
+    }
+    STORE_TEMPORARY_VARIABLE {
+      push_tree_node (IP0, pop_tree_node (NULL),
+                      TREE_STORE | TREE_TEMP,
+                      (PTR) (uintptr_t) n);
+    }
+    STORE_LIT_VARIABLE {
+      push_tree_node_oop (IP0, pop_tree_node (NULL),
+                          TREE_STORE | TREE_LIT_VAR,
+                          literals[n]);
+    }
 
-  return (false);
-}
+    SEND {
+      push_send_node (IP0, literals[n], num_args, super, TREE_SEND, 0);
+    }
 
-mst_Boolean
-dcd_sup_send_short (gst_uchar b, gst_uchar *bp)
-{
-  gst_uchar ival2 = bp[1];
-  push_send_node (bp, literals[ival2 & 31], ival2 >> 5, true,
-		  TREE_SEND);
+    POP_INTO_NEW_STACKTOP {
+      push_tree_node (IP0,
+                      pop_tree_node (pop_tree_node (NULL)),
+                      TREE_STORE | TREE_POP_INTO_ARRAY,
+                      (PTR) (uintptr_t) n);
+    }
 
-  return (false);
-}
+    POP_STACK_TOP {
+      set_top_node_extra (TREE_EXTRA_POP, 0);
+      emit_code ();
 
-mst_Boolean
-dcd_pop_stack (gst_uchar b, gst_uchar *bp)
-{
-  set_top_node_extra (TREE_EXTRA_POP, 0);
-  return (true);
-}
+      /* This is very important!  If we do not adjust T_SP here, we
+         miscompile superoperators that include a POP/PUSH sequence.  */
+      t_sp--;
+    }
+    DUP_STACK_TOP {
+      push_tree_node (IP0, NULL, TREE_PUSH | TREE_DUP, NULL);
+    }
 
-mst_Boolean
-dcd_dup_stack (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node (bp, NULL, TREE_PUSH | TREE_DUP, NULL);
+    PUSH_OUTER_TEMP {
+      push_tree_node (IP0, NULL, TREE_PUSH | TREE_OUTER_TEMP,
+		      (PTR) (uintptr_t) ((scopes << 8) | n));
+    }
+    STORE_OUTER_TEMP {
+      push_tree_node (IP0,
+                      pop_tree_node (NULL),
+                      TREE_STORE | TREE_OUTER_TEMP, 
+		      (PTR) (uintptr_t) ((scopes << 8) | n));
+    }
 
-  return (false);
-}
+    JUMP {
+      set_top_node_extra (TREE_EXTRA_JMP_ALWAYS, ofs);
 
-mst_Boolean
-dcd_push_context (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node (bp, NULL, TREE_PUSH | TREE_THIS_CONTEXT, NULL);
+      emit_code ();
+    }
+    POP_JUMP_TRUE {
+      set_top_node_extra (TREE_EXTRA_JMP_TRUE, ofs);
 
-  return (false);
-}
+      emit_code ();
+    }
+    POP_JUMP_FALSE {
+      set_top_node_extra (TREE_EXTRA_JMP_FALSE, ofs);
 
-mst_Boolean
-dcd_outer_temp_op (gst_uchar b, gst_uchar *bp)
-{
-  gst_uchar op = bp[1] >> 6;
+      emit_code ();
+    }
 
-  switch (op)
-    {
-    case 0:
+    SEND_ARITH {
+      const special_selector *info = &special_send_bytecodes[n];
+      push_send_node (IP0, *info->selectorOOP, info->numArgs, false,
+                      info->operation, n);
+    }
+    SEND_SPECIAL {
+      const special_selector *info = &special_send_bytecodes[n + 16];
+      push_send_node (IP0, *info->selectorOOP, info->numArgs, false,
+                      info->operation, n + 16);
+    }
+    SEND_IMMEDIATE {
+      const struct builtin_selector *bs = _gst_builtin_selectors[n];
+      push_send_node (IP0, bs->symbol, bs->numArgs, super,
+                      TREE_SEND | TREE_NORMAL, n);
+    }
+
+    MAKE_DIRTY_BLOCK {
+      code_tree *arg;
+      arg = pop_tree_node (NULL);
+      push_tree_node (IP0, arg, TREE_SEND | TREE_DIRTY_BLOCK, NULL);
+    }
+
+    EXIT_INTERPRETER, INVALID {
       abort ();
-
-    case 1:
-      push_tree_node (bp, NULL, TREE_PUSH | TREE_OUTER_TEMP, NULL);
-
-      return (false);
-
-    case 2:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_OUTER_TEMP | TREE_EXTRA_POP,
-		      NULL);
-
-      return (true);
-
-    case 3:
-    default:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_STORE | TREE_OUTER_TEMP, NULL);
-
-      return (false);
     }
-}
+  ));
 
-mst_Boolean
-dcd_nop (gst_uchar b, gst_uchar *bp)
-{
-  return (false);
-}
+#if 0
+    /* These used to be here but we do not produce them anymore.  It would
+       speed up the code a bit, so they are kept here as a remainder.  */
 
-mst_Boolean
-dcd_top_self (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node (bp,
-		  pop_tree_node (NULL),
-		  TREE_SET_TOP | TREE_SELF | self_class_check, NULL);
+    REPLACE_SELF {
+      push_tree_node (IP0,
+                      pop_tree_node (NULL),
+                      TREE_SET_TOP | TREE_SELF | self_class_check, NULL);
 
-  return (true);
-}
-
-mst_Boolean
-dcd_top_one (gst_uchar b, gst_uchar *bp)
-{
-  push_tree_node_oop (bp,
-		      pop_tree_node (NULL),
-		      TREE_SET_TOP | TREE_LIT_CONST, FROM_INT (1));
-
-  return (true);
-}
-
-mst_Boolean
-dcd_top_indexed_val (gst_uchar b, gst_uchar *bp)
-{
-  gst_uchar ival2;
-  ival2 = bp[1];
-
-  switch (ival2 >> 6)
-    {
-    case 0:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_SET_TOP | TREE_REC_VAR,
-		      (PTR) (unsigned long) (ival2 & 63));
-
-      break;
-    case 1:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_SET_TOP | TREE_TEMP,
-		      (PTR) (unsigned long) (ival2 & 63));
-
-      break;
-    case 2:
-      push_tree_node_oop (bp,
-			  pop_tree_node (NULL),
-			  TREE_SET_TOP | TREE_LIT_CONST,
-			  literals[(unsigned long) (ival2 & 63)]);
-
-      break;
-    case 3:
-    default:
-      push_tree_node (bp,
-		      pop_tree_node (NULL),
-		      TREE_SET_TOP | TREE_LIT_VAR,
-		      literals[(unsigned long) (ival2 & 63)]);
-
-      break;
+      emit_code ();
     }
-  return (true);
-}
+    REPLACE_ONE {
+      push_tree_node_oop (IP0,
+                          pop_tree_node (NULL),
+                          TREE_SET_TOP | TREE_LIT_CONST, FROM_INT (1));
 
-mst_Boolean
-dcd_end_execution (gst_uchar b, gst_uchar *bp)
-{
-  _gst_errorf ("End of execution bytecode ignored\n");
-  return (false);
-}
+      emit_code ();
+    }
 
-mst_Boolean
-dcd_sh_jmp (gst_uchar b, gst_uchar *bp)
-{
-  set_top_node_extra (TREE_EXTRA_JMP_ALWAYS, (b & 7) + 2);
-  return (true);
-}
+    REPLACE_RECEIVER_VARIABLE {
+      push_tree_node (IP0,
+                      pop_tree_node (NULL),
+                      TREE_SET_TOP | TREE_REC_VAR,
+                      (PTR) (uintptr_t) n);
 
-mst_Boolean
-dcd_sh_jmp_false (gst_uchar b, gst_uchar *bp)
-{
-  set_top_node_extra (TREE_EXTRA_JMP_FALSE, (b & 7) + 2);
-  return (true);
-}
+      emit_code ();
+    }
+    REPLACE_TEMPORARY_VARIABLE {
+      push_tree_node (IP0,
+                      pop_tree_node (NULL),
+                      TREE_SET_TOP | TREE_TEMP,
+                      (PTR) (uintptr_t) n);
 
-mst_Boolean
-dcd_long_jmp (gst_uchar b, gst_uchar *bp)
-{
-  int ofs;
-  ofs = (b & 7) << 8;
-  ofs += bp[1] - 1022;
-  set_top_node_extra (TREE_EXTRA_JMP_ALWAYS, ofs);
-  return (true);
-}
+      emit_code ();
+    }
+    REPLACE_LIT_CONSTANT {
+      push_tree_node (IP0,
+                      pop_tree_node (NULL),
+                      TREE_SET_TOP | TREE_LIT_CONST,
+                      literals[n]);
 
-mst_Boolean
-dcd_pop_jmp_true (gst_uchar b, gst_uchar *bp)
-{
-  int ofs;
-  ofs = (b & 3) << 8;
-  ofs += bp[1] + 2;
-  set_top_node_extra (TREE_EXTRA_JMP_TRUE, ofs);
-  return (true);
-}
+      emit_code ();
+    }
+    REPLACE_LIT_VARIABLE {
+      push_tree_node (IP0,
+                      pop_tree_node (NULL),
+                      TREE_SET_TOP | TREE_LIT_VAR,
+                      literals[n]);
 
-mst_Boolean
-dcd_pop_jmp_false (gst_uchar b, gst_uchar *bp)
-{
-  int ofs;
-  ofs = (b & 3) << 8;
-  ofs += bp[1] + 2;
-  set_top_node_extra (TREE_EXTRA_JMP_FALSE, ofs);
-  return (true);
-}
+      emit_code ();
+    }
+#endif
 
-mst_Boolean
-dcd_send_special (gst_uchar b, gst_uchar *bp)
-{
-  const special_selector *info = &special_send_bytecodes[b - PLUS_SPECIAL];
-  push_send_node (bp, *info->selectorOOP, info->numArgs, false,
-		  info->operation);
-
-  return (false);
-}
-
-mst_Boolean
-dcd_send_packed (gst_uchar b, gst_uchar *bp)
-{
-  int numArgs = (b - SEND_NO_ARG) >> 4;
-  push_send_node (bp, literals[b & 15], numArgs, false, TREE_SEND);
-
-  return (false);
+  return bp;
 }
 
 
@@ -3984,7 +3588,7 @@ dcd_send_packed (gst_uchar b, gst_uchar *bp)
 void
 translate_method (OOP methodOOP, OOP receiverClass, int size)
 {
-  gst_uchar *end, *bp, b;
+  gst_uchar *end, *bp, *bp_first;
   int inlineCacheCount;
   char *destinations;
   code_stack_pointer *stackPos;
@@ -3992,7 +3596,7 @@ translate_method (OOP methodOOP, OOP receiverClass, int size)
 
   rec_var_cached = self_cached = false;
   stack_cached = -1;
-  sp_delta = -SIZEOF_LONG;
+  sp_delta = -sizeof (PTR);
   deferred_head = NULL;
   method_class = GET_METHOD_CLASS (methodOOP);
   bc = GET_METHOD_BYTECODES (methodOOP);
@@ -4000,23 +3604,12 @@ translate_method (OOP methodOOP, OOP receiverClass, int size)
   end = bc + size;
 
   if (receiverClass == _gst_small_integer_class)
-    self_class_check = TREE_IS_INTEGER | TREE_IS_NOT_BLOCK;
-
-  else if (receiverClass == _gst_block_closure_class)
-    self_class_check = TREE_IS_NOT_INTEGER | TREE_IS_BLOCK;
+    self_class_check = TREE_IS_INTEGER;
 
   else
-    self_class_check = TREE_IS_NOT_INTEGER | TREE_IS_NOT_BLOCK;
+    self_class_check = TREE_IS_NOT_INTEGER;
 
-  /* Count the space for the inline caches */
-  for (inlineCacheCount = 0, bp = bc; bp < end;
-       bp += BYTECODE_SIZE (b))
-    {
-      b = *bp;
-      inlineCacheCount += IS_SEND_BYTECODE (b);
-    }
-
-  /* Emit the prolog of the compiled code. */
+  /* Emit the prolog of the compiled code.  */
   jit_ldi_p (JIT_V2, &sp);
   if (OOP_CLASS (methodOOP) == _gst_compiled_block_class)
     {
@@ -4030,6 +3623,26 @@ translate_method (OOP methodOOP, OOP receiverClass, int size)
 	  (methodOOP, (gst_compiled_method) OOP_TO_OBJ (methodOOP)))
 	return;
     }
+
+
+  /* Count the space for the inline caches */
+  for (inlineCacheCount = 0, bp = bc; bp < end; )
+    MATCH_BYTECODES (XLAT_COUNT_SENDS, bp, (
+      PUSH_RECEIVER_VARIABLE, PUSH_TEMPORARY_VARIABLE,
+      PUSH_LIT_CONSTANT, PUSH_LIT_VARIABLE, PUSH_SELF,
+      PUSH_SPECIAL, PUSH_INTEGER, RETURN_METHOD_STACK_TOP,
+      RETURN_CONTEXT_STACK_TOP, LINE_NUMBER_BYTECODE,
+      STORE_RECEIVER_VARIABLE, STORE_TEMPORARY_VARIABLE,
+      STORE_LIT_VARIABLE, POP_INTO_NEW_STACKTOP,
+      POP_STACK_TOP, DUP_STACK_TOP, PUSH_OUTER_TEMP,
+      STORE_OUTER_TEMP, JUMP, POP_JUMP_TRUE, POP_JUMP_FALSE,
+      MAKE_DIRTY_BLOCK, EXIT_INTERPRETER, INVALID { }
+
+      SEND_ARITH, SEND_SPECIAL, SEND_IMMEDIATE, SEND {
+        inlineCacheCount++;
+      }
+    ));
+
 
   if (inlineCacheCount)
     {
@@ -4050,29 +3663,33 @@ translate_method (OOP methodOOP, OOP receiverClass, int size)
     labels[i] = destinations[i] ? lbl_new () : NULL;
 
   /* Now, go through the main translation loop */
-  for (bp = bc, this_label = labels; bp < end;
-       bp += BYTECODE_SIZE (b), this_label += BYTECODE_SIZE (b),
-       stackPos += BYTECODE_SIZE (b))
+  for (bp = bc, this_label = labels; bp < end; )
     {
-      mst_Boolean endStatement;
+      if (!*stackPos)
+	{
+	  assert (!*this_label);
+	  this_label += 2;
+	  stackPos += 2;
+	  continue;
+	}
 
       /* Updating the t_sp in push_tree_node/pop_tree_node is not
          enough, because if two basic blocks are mutually exclusive the
          SP at the second block's entrance must be the same as the SP at 
          the first block's entrance, even if the blocks have a non-zero
-         stack balance. */
+         stack balance.  */
       t_sp = *stackPos;
 
       if (*this_label)
 	{
-	  /* A basic block ends here. Compile it. */
+	  /* A basic block ends here. Compile it.  */
 	  emit_code ();
 	  CACHE_STACK_TOP;
 
 	  /* If the label was not used yet, it will be used for a
 	     backward jump.  A backward jump could be used to code an
 	     infinite loop such as `[] repeat', so we test
-	     _gst_except_flag here. */
+	     _gst_except_flag here.  */
 	  if (!lbl_define (*this_label))
 	    {
 	      define_ip_map_entry (bp - bc);
@@ -4082,16 +3699,17 @@ translate_method (OOP methodOOP, OOP receiverClass, int size)
 	    }
 	}
 
-      b = *bp;
-      endStatement = decode_bytecode_funcs[b] (b, bp);
-      if (endStatement)
-	/* The current statement has ended. Compile it. */
-	emit_code ();
+      bp_first = bp;
+      bp = decode_bytecode (bp);
+      this_label += bp - bp_first;
+      stackPos += bp - bp_first;
     }
 
   emit_code ();
   emit_deferred_sends (deferred_head);
-  curr_inline_cache[-1].more = false;
+
+  if (inlineCacheCount)
+    curr_inline_cache[-1].more = false;
 }
 
 
@@ -4133,6 +3751,9 @@ _gst_map_virtual_ip (OOP methodOOP, OOP receiverClass, int ip)
 PTR
 _gst_get_native_code (OOP methodOOP, OOP receiverClass)
 {
+  if (!IS_OOP_VERIFIED (methodOOP))
+    _gst_verify_sent_method (methodOOP);
+
   return find_method_entry (methodOOP, receiverClass)->nativeCode;
 }
 
@@ -4300,6 +3921,8 @@ _gst_discard_native_code (OOP methodOOP)
 	  continue;
 	}
 
+      assert (methodOOP->flags & F_XLAT);
+
       /* Move to the `discarded' list */
       *ptrNext = method->next;
       method->next = discarded;
@@ -4310,4 +3933,4 @@ _gst_discard_native_code (OOP methodOOP)
   *ptrNext = NULL;
 }
 
-#endif /* USE_JIT_TRANSLATION */
+#endif /* ENABLE_JIT_TRANSLATION */

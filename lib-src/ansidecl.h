@@ -34,6 +34,15 @@
 # endif /* GNUC >= 2.96 */
 #endif /* ATTRIBUTE_MALLOC */
 
+/* Attribute __const__ on functions was valid as of gcc 2.96. */
+#ifndef ATTRIBUTE_CONST
+# if (__GNUC__ * 1000 + __GNUC_MINOR__) >= 2096
+#  define ATTRIBUTE_CONST __attribute__ ((__const__))
+# else
+#  define ATTRIBUTE_CONST
+# endif /* GNUC >= 2.96 */
+#endif /* ATTRIBUTE_CONST */
+
 /* Attribute __pure__ on functions was valid as of gcc 2.96. */
 #ifndef ATTRIBUTE_PURE
 # if (__GNUC__ * 1000 + __GNUC_MINOR__) >= 2096

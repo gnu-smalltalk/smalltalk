@@ -21,100 +21,41 @@ MOSTLYCLEANFILES = gst-libs.me gst-libs.mes gst-base.me gst-base.mes \
 	gst-libs.cl gst-libs.cls gst-base.cl gst-base.cls \
 	gst-libs.sl gst-libs.sls gst-base.sl gst-base.sls
 
-# The list of namespaces that are part of the printed manual
-PUBLISHED_NAMESPACES = Smalltalk SystemExceptions NetClients VFS
+####################################################
+##
+##  Rule to build the man page
+##
+####################################################
 
 $(srcdir)/gst.1: $(top_srcdir)/libgst/lib.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) --info-page gst \
 	  --name "the GNU Smalltalk virtual machine" $(top_builddir)/gst >$@
 
-# Must check whether this stuff works with VPATH builds
+####################################################
+##
+##  Rules to build the generated documentation
+##
+####################################################
 
-blox.texi: $(top_builddir)/blox-tk/stamp-classes
-	touch $(srcdir)/gst-libs.texi
-	builddir=`pwd`; top_builddir=$$builddir/$(top_builddir); \
-	SMALLTALK_IMAGE=$$top_builddir; export SMALLTALK_IMAGE; \
-	GST=$$top_builddir/gst; \
-	cd $(top_srcdir)/blox-tk && echo " \
-	  PackageLoader fileInPackage: 'Parser'. \
-	  Smalltalk addSubspace: #BLOX! \
-          | source list classes | \
-	  list := FileStream open: 'stamp-classes' mode: FileStream read. \
-	  source := list lines \
-	    inject: ConcatenatedStream new \
-	    into: [ :str :each | str, (FileStream open: each mode: FileStream read) ]. \
-	  Namespace current: BLOX. \
-	  classes := STInST STClassLoader parseSmalltalkStream: source. \
-	  Namespace current: Smalltalk. \
-	  ClassPublisher Texinfo \
-		publishAll: classes \
-		onFile: '$$builddir/$@'!" | $$GST -g \
-	  ../examples/Publish.st \
-	  ../examples/StreamFilter.st -
+GENLIBDOC = $(GST_RUN) ../scripts/GenLibDoc.st
+GENBASEDOC = $(GST_RUN) ../scripts/GenBaseDoc.st
+PUBLISHED_NAMESPACES = Smalltalk SystemExceptions NetClients VFS
 
-tcp.texi: $(top_builddir)/tcp/stamp-classes
-	touch $(srcdir)/gst-libs.texi
-	builddir=`pwd`; top_builddir=$$builddir/$(top_builddir); \
-	SMALLTALK_IMAGE=$$top_builddir; export SMALLTALK_IMAGE; \
-	GST=$$top_builddir/gst; \
-	cd $(top_srcdir)/tcp && echo " \
-	  PackageLoader fileInPackage: 'Parser'. \
-	  Smalltalk addSubspace: #TCP! \
-	  | source list classes | \
-	  list := FileStream open: 'stamp-classes' mode: FileStream read. \
-	  source := list lines \
-	    inject: ConcatenatedStream new \
-	    into: [ :str :each | str, (FileStream open: each mode: FileStream read) ]. \
-	  Namespace current: TCP. \
-	  classes := STInST STClassLoader parseSmalltalkStream: source. \
-	  Namespace current: Smalltalk. \
-	  ClassPublisher Texinfo \
-		publishAll: classes \
-		onFile: '$$builddir/$@'!" | $$GST -g \
-	  ../examples/Publish.st \
-	  ../examples/StreamFilter.st -
+$(srcdir)/blox.texi: $(top_srcdir)/blox-tk/stamp-classes
+	$(GENLIBDOC) BLOX BloxTK $(srcdir)/blox.texi Blox.st
+	touch $(srcdir)/gst-libs.texi 
 
-i18n.texi: $(top_builddir)/i18n/stamp-classes
-	touch $(srcdir)/gst-libs.texi
-	builddir=`pwd`; top_builddir=$$builddir/$(top_builddir); \
-	SMALLTALK_IMAGE=$$top_builddir; export SMALLTALK_IMAGE; \
-	GST=$$top_builddir/gst; \
-	cd $(top_srcdir)/i18n && echo " \
-	  PackageLoader fileInPackage: 'Parser'. \
-	  Smalltalk addSubspace: #I18N! \
-	  | source list classes | \
-	  list := FileStream open: 'stamp-classes' mode: FileStream read. \
-	  source := list lines \
-	    inject: ConcatenatedStream new \
-	    into: [ :str :each | str, (FileStream open: each mode: FileStream read) ]. \
-	  Namespace current: I18N. \
-	  classes := STInST STClassLoader parseSmalltalkStream: source. \
-	  Namespace current: Smalltalk. \
-	  ClassPublisher Texinfo \
-		publishAll: classes \
-		onFile: '$$builddir/$@'!" | $$GST -g \
-	  ../examples/Publish.st \
-	  ../examples/StreamFilter.st -
+$(srcdir)/tcp.texi: $(top_srcdir)/tcp/stamp-classes
+	$(GENLIBDOC) TCP TCP $(srcdir)/tcp.texi TCP.st
+	touch $(srcdir)/gst-libs.texi 
 
-classes.texi: $(top_builddir)/kernel/stamp-classes
+$(srcdir)/i18n.texi: $(top_srcdir)/i18n/stamp-classes
+	$(GENLIBDOC) I18N I18N $(srcdir)/i18n.texi Load.st Collation.st
+	touch $(srcdir)/gst-libs.texi 
+
+$(srcdir)/classes.texi: $(top_srcdir)/kernel/stamp-classes
+	$(GENBASEDOC) $(PUBLISHED_NAMESPACES)
 	touch $(srcdir)/gst-base.texi
-	@builddir=`pwd`; top_builddir=$$builddir/$(top_builddir); \
-	SMALLTALK_IMAGE=$$top_builddir; export SMALLTALK_IMAGE; \
-	GST=$$top_builddir/gst; \
-	echo 'cd $(top_srcdir) &&'; \
-	  echo '  echo "ClassPublisher Texinfo publishNamespaces: #('; \
-	  echo "$(PUBLISHED_NAMESPACES)" | sed \
-	    -e 's/[A-Za-z][A-Za-z]*/#{&}/g' \
-	    -e 's/^/	/' \
-	    -e '$$s/$$/)!\" |/'; \
-	  echo "  `pwd`/$(top_builddir)/gst examples/Publish.st - -g"; \
-	cd $(top_srcdir) && \
-	  echo "$(PUBLISHED_NAMESPACES)" | sed \
-	    -e 's/[A-Za-z][A-Za-z]*/#{&}/g' \
-	    -e '1s/^/ClassPublisher Texinfo publishNamespaces: #(/' \
-	    -e '$$s/$$/)!/' | \
-	      $$GST examples/Publish.st - -g
-
 
 # In TeX output, having colons in index entries looks pretty, but
 # this is impossible in info output!!!  So we hack by replacing
@@ -128,8 +69,14 @@ classes.texi: $(top_builddir)/kernel/stamp-classes
 	  $(MAKEINFO) $$fixed > /dev/null 2>&1 && \
 	  rm -f $$fixed
 
+####################################################
+##
+##  Rules to build the HTML documentation
+##
+####################################################
+
 # We want the HTML doc to look professional, so we use makeinfo first.
-# This rule is very complex.  What it does is:
+# This rule is pretty complex.  What it does is:
 #  - check whether /usr/bin/env perl works
 #  - check whether we have makeinfo (it could be faked by the missing script)
 #  - check whether we have makeinfo 4.0
@@ -141,7 +88,7 @@ html: $(srcdir)/gst.texi $(srcdir)/gst-base.texi $(srcdir)/gst-libs.texi
 	    (echo "You need Perl to make HTML documentation"; exit 1)
 	@($(MAKEINFO) --version 2>&1 | grep missing:) > /dev/null 2>&1 || exit 0; \
 	    (echo "You need Makeinfo to make HTML documentation"; exit 1)
-	-$(RM) -r html
+	rm -rf html
 	mkdir html
 	@echo "Building HTML documentation may be a long task... please wait"
 	($(MAKEINFO) --help | grep ifhtml) > /dev/null 2>&1 && makeinfo4=yes; \
@@ -161,9 +108,7 @@ html: $(srcdir)/gst.texi $(srcdir)/gst-base.texi $(srcdir)/gst-libs.texi
 	  ln -sf $$srcdir/images $$htmldir/images && \
 	  $(RM) $$htmldir/gst.texi $$htmldir/gst-libs.texi $$htmldir/gst-base.texi
 
-clean: clean-html
-
-clean-html:
+clean-local:
 	$(RM) -r html
 
 .PHONY: clean-html

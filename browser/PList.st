@@ -30,13 +30,21 @@
 "
 
 Primitive subclass:  #PList
-	instanceVariableNames: 'selection selectionMsg listMsg dataMsg '
+	instanceVariableNames: 'selection selectionMsg listMsg dataMsg label'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Graphics-Windows'!
 
 PList comment: 
 nil!
+
+!PList class methodsFor: 'instance creation' !
+new: aString in: view 
+    | result |
+    result:=super new: aString in: view.
+    result label: aString.
+    ^result
+! !
 
 !PList methodsFor: 'displaying'!
 
@@ -67,6 +75,10 @@ dataMsg
 
 !PList methodsFor: 'initializing'!
 
+label: aString
+    label := aString
+!
+
 changedSelection: stateChangeKey 
     "Install message handler for stateChangeKey to select the item based on the
      initial selection"
@@ -92,7 +104,7 @@ selectionMsg: selectionSelector
 initialize
     selection := 0.
     blox := BList new: parentView blox.
-    self blox font: 'Helvetica 10'!
+    self blox label: label!
 
 listMsg: listSelector 
     "Return array of list labels"

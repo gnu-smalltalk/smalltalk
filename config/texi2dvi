@@ -26,6 +26,17 @@
 # If possible, please send a copy of the output of the script called with
 # the `--debug' option when making a bug report.
 
+if ! command -v tex >/dev/null 2>&1; then
+ cat <<%EOM%
+You don't have a working TeX binary installed, but the texi2dvi script
+can't proceed without it. If you want to use this script, you have to
+install some kind of TeX, for example teTeX Debian packages. You can do
+that with this command:
+	apt-get install tetex-bin
+%EOM%
+ exit 1
+fi
+
 # This string is expanded by rcs automatically when this file is checked out.
 rcs_revision='$Revision: 0.51 $'
 rcs_version=`set - $rcs_revision; echo $2`

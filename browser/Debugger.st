@@ -137,6 +137,7 @@ createWindowFrom: notifier
 			     #() #('Line...' #line) #('Find...' #find)
 			     #() #('Do it' #eval) #('Print it' #evalAndPrintResult)
 			     #('Inspect' #evalAndInspectResult)
+			     #() #('Senders' #senders) #('Implementors' #implementors)
 			     #() #('Accept' #compileIt) #('Cancel' #revert)
 			     #() #('Close' #close))
 		receiver: textView
@@ -231,17 +232,17 @@ finishButtonCallback
 !
 
 continueButtonCallback
-    topView destroy.
+    topView close.
     self continue.
 !
 
 killButtonCallback
-    topView destroy.
+    topView close.
     process primTerminate
 !
 
 terminateButtonCallback
-    topView destroy.
+    topView close.
     process terminate.
     self continue
 ! !

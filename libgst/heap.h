@@ -40,8 +40,9 @@ typedef char *heap;
    so that users of the package don't have to worry about the actual
    implementation details.
 
-   On failure returns NULL. */
-extern heap _gst_heap_create (int size);
+   On failure returns NULL.  */
+extern heap _gst_heap_create (int size) 
+  ATTRIBUTE_HIDDEN;
 
 /* Terminate access to a heap managed region by unmapping all memory pages
    associated with the region, and closing the file descriptor if it is one
@@ -50,13 +51,15 @@ extern heap _gst_heap_create (int size);
    Returns NULL on success.
   
    Returns the heap descriptor on failure, which can subsequently be used
-   for further action. */
-extern heap _gst_heap_destroy (heap hd);
+   for further action.  */
+extern heap _gst_heap_destroy (heap hd) 
+  ATTRIBUTE_HIDDEN;
 
 /* Get core for the memory region specified by HD, using SIZE as the
    amount to either add to or subtract from the existing region.  Works
    like sbrk(), but using mmap() if HD is not NULL.  */
 extern PTR _gst_heap_sbrk (heap hd,
-			   size_t size);
+			   size_t size) 
+  ATTRIBUTE_HIDDEN;
 
 #endif /* GST_HEAP_H */

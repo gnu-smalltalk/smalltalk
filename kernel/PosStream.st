@@ -170,7 +170,7 @@ skipSeparators
      stream pointed before #skipSeparators was sent)."
     | ch |
     [   (ch := self peek) isNil ifTrue: [^false].
-	ch isSeparator ] whileTrue: [ self next ].
+        ch isSeparator ] whileTrue: [ self next ].
 
     ^true
 !

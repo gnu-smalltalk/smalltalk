@@ -70,7 +70,6 @@ state: value
 
 initBlox: aLabel 
     blox := BRadioButton new: parentView label: aLabel.
-    blox font: 'Helvetica 10'.
     blox value: self isPressed.
     blox callback: self message: 'toggle:'!
 

@@ -37,7 +37,7 @@ memoryUsage
     numObjs := t := 0.
     ObjectMemory compact.
     Object withAllSubclasses do: [ :class |
-	"class printNl."
+	class printNl.
 	totalInstanceSize := classObjs := 0.
 	instVarSize := class instSize.
     	(class inheritsFrom: ContextPart) ifFalse: [
@@ -47,9 +47,9 @@ memoryUsage
 		classObjs := classObjs + 1 ] 
 	    ].
 						    
-        "Transcript nextPutAll: '  Instances: '. classObjs printNl.
+        Transcript nextPutAll: '  Instances: '. classObjs printNl.
 	Transcript nextPutAll: '  Size: '. totalInstanceSize printNl.
-	Transcript nl."
+	Transcript nl.
 	t := t + totalInstanceSize.
 	numObjs := numObjs + classObjs ].
 

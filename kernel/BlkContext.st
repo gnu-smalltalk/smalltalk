@@ -83,6 +83,18 @@ printOn: aStream
 ! !
 
 
+!BlockContext methodsFor: 'debugging'!
+
+isInternalExceptionHandlingContext
+    "Answer whether the receiver is a context that should be hidden to the user
+     when presenting a backtrace.  Such contexts are never blocks, but check
+     the rest of the chain."
+
+    ^self parentContext notNil
+	and: [ self parentContext isInternalExceptionHandlingContext ]
+! !
+
+
 !BlockContext methodsFor: 'accessing'!
 
 caller

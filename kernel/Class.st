@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -33,7 +33,7 @@
 
 
 ClassDescription subclass: #Class
-		 instanceVariableNames: 'name comment category environment classVariables sharedPools'
+		 instanceVariableNames: 'name comment category environment classVariables sharedPools securityPolicy'
 		 classVariableNames: ''
 		 poolDictionaries: ''
 		 category: 'Language-Implementation'
@@ -261,7 +261,7 @@ variableByteSubclass: classNameString classInstanceVariableNames: stringClassIns
 variableLongSubclass: classNameString classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
     "Don't use this, it is only present to file in from IBM Smalltalk"
     ^self
-	variableWordSubclass: classNameString
+	variable: #uint subclass: classNameString
 	instanceVariableNames: ''
 	classVariableNames: stringOfClassVarNames
 	poolDictionaries: stringOfPoolNames
@@ -271,7 +271,7 @@ variableLongSubclass: classNameString classVariableNames: stringOfClassVarNames 
 variableLongSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
     "Don't use this, it is only present to file in from IBM Smalltalk"
     ^(self
-	variableWordSubclass: classNameString
+	variable: #uint subclass: classNameString
 	instanceVariableNames: ''
 	classVariableNames: stringOfClassVarNames
 	poolDictionaries: stringOfPoolNames
@@ -316,9 +316,7 @@ subclass: classNameString
 	  environment: Namespace current
 	  subclassOf: self
 	  instanceVariableNames: stringInstVarNames
-	  variable: false
-	  words: false
-	  pointers: true
+	  shape: nil
 	  classVariableNames: stringOfClassVarNames
 	  poolDictionaries: stringOfPoolNames
 	  category: categoryNameString
@@ -343,13 +341,39 @@ variableSubclass: classNameString
 	  environment: Namespace current
 	  subclassOf: self
 	  instanceVariableNames: stringInstVarNames
-	  variable: true
-	  words: false
-	  pointers: true
+	  shape: #pointer
 	  classVariableNames: stringOfClassVarNames
 	  poolDictionaries: stringOfPoolNames
 	  category: categoryNameString
 !
+
+variable: shape subclass: classNameString
+    instanceVariableNames: stringInstVarNames
+    classVariableNames: stringOfClassVarNames
+    poolDictionaries: stringOfPoolNames
+    category: categoryNameString
+    "Define a variable pointer subclass of the receiver with the given
+     name, instance variables, class variables, pool dictionaries and
+     category. If the class is already defined, if necessary, recompile
+     everything needed.  The shape can be one of #byte #int8 #short #ushort
+     #int #uint #float #int64 #uint64 #double or #pointer."
+
+    | meta |
+    KernelInitialized ifFalse: [
+	^(Smalltalk at: classNameString) category: categoryNameString
+    ].
+
+    meta := self metaclassFor: classNameString.
+    ^meta name: classNameString
+	    environment: Namespace current
+	    subclassOf: self
+	    instanceVariableNames: stringInstVarNames
+	    shape: shape
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: categoryNameString
+!
+
 
 variableWordSubclass: classNameString
   instanceVariableNames: stringInstVarNames
@@ -371,9 +395,7 @@ variableWordSubclass: classNameString
 	    environment: Namespace current
 	    subclassOf: self
 	    instanceVariableNames: stringInstVarNames
-	    variable: true
-	    words: true
-	    pointers: false
+	    shape: (CSymbols.CLongSize = 4 ifTrue: [ #uint ] ifFalse: [ #uint64 ])
 	    classVariableNames: stringOfClassVarNames
 	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString
@@ -399,9 +421,7 @@ variableByteSubclass: classNameString
 	    environment: Namespace current
 	    subclassOf: self
 	    instanceVariableNames: stringInstVarNames
-	    variable: true
-	    words: false
-	    pointers: false
+	    shape: #byte
 	    classVariableNames: stringOfClassVarNames
 	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString
@@ -428,6 +448,16 @@ storeOn: aStream
     aStream nextPutAll: (self nameIn: Smalltalk)
 ! !
 
+
+!Class methodsFor: 'security'!
+
+policy
+    ^securityPolicy
+!
+
+policy: aSecurityPolicy
+    securityPolicy := aSecurityPolicy withOwner: self
+! !
 
 
 !Class methodsFor: 'private'!
@@ -561,6 +591,16 @@ fileOutOn: aFileStream
 
     self fileOutHeaderOn: aFileStream. 
     self fileOutDeclarationOn: aFileStream.
+    self fileOutMethodsOn: aFileStream.
+    self fileOutInitializeOn: aFileStream!
+
+fileOutInitializeOn: aFileStream
+    (self class includesSelector: #initialize) ifTrue: [
+	aFileStream nl; print: self; nextPutAll: ' initialize!'.
+    ]!
+
+fileOutMethodsOn: aFileStream
+    "File out instance methods of the receiver."
 
     self class collectCategories do:
 	[ :category | self class fileOutCategory: category toStream: aFileStream ].
@@ -568,9 +608,6 @@ fileOutOn: aFileStream
     self collectCategories do:
 	[ :category | self fileOutCategory: category toStream: aFileStream ].
 
-    (self class includesSelector: #initialize) ifTrue: [
-	aFileStream nl; print: self; nextPutAll: ' initialize!'.
-    ].
     aFileStream nl
 ! !
 

@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -35,15 +35,15 @@
 #define	STRING_BASE_SIZE	128
 
 /* This variable holds the base of the buffer maintained by this
-   module. */
+   module.  */
 static char *buf_base = NULL;
 
 /* This variable holds the size of the currently filled part of the
-   buffer. */
-static long cur_len = 0;
+   buffer.  */
+static size_t cur_len = 0;
 
-/* This variable holds the current size of the buffer. */
-static long max_buf_len = 0;
+/* This variable holds the current size of the buffer.  */
+static size_t max_buf_len = 0;
 
 char *
 _gst_cur_str_buf (void)
@@ -88,11 +88,11 @@ _gst_add_str_buf_char (char c)
 void
 _gst_add_buf_pointer (PTR ptr)
 {
-  if (cur_len > max_buf_len - SIZEOF_CHAR_P)
+  if (cur_len + sizeof (PTR) > max_buf_len)
     {
       if (max_buf_len)
 	{
-	  max_buf_len += (max_buf_len / 2) + SIZEOF_CHAR_P;
+	  max_buf_len += (max_buf_len / 2) + sizeof (PTR);
 	  buf_base = (char *) xrealloc (buf_base, max_buf_len);
 	}
       else
@@ -103,14 +103,14 @@ _gst_add_buf_pointer (PTR ptr)
     }
 
   *((PTR *) (buf_base + cur_len)) = ptr;
-  cur_len += SIZEOF_CHAR_P;
+  cur_len += sizeof (PTR);
 }
 
 void
 _gst_add_buf_data (PTR ptr,
 		   int n)
 {
-  if (cur_len > max_buf_len - n)
+  if (cur_len + n > max_buf_len)
     {
       if (max_buf_len)
 	{
@@ -143,7 +143,7 @@ _gst_reset_buffer (void)
   cur_len = 0;
 }
 
-long
+size_t
 _gst_buffer_size (void)
 {
   return (cur_len);

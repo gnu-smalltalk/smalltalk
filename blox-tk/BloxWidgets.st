@@ -340,7 +340,7 @@ selectForeground: value
 create
     "Private - Set up the widget and Tcl hooks to get callbacks from
      it."
-    self create: ' -width 0'.
+    self create: ' -width 0 -font {Helvetica 10}'.
     Initialized ifFalse: [ self defineCallbackProcedure ].
     self tclEval: '
 	set var%1 {}
@@ -690,7 +690,7 @@ anchor: value
     self properties at: #anchor put: value!
 
 create
-    self create: '-anchor nw -takefocus 0'.
+    self create: '-anchor nw -takefocus 0 -font {Helvetica 10}'.
     self tclEval: 'bind %1 <Configure> "+%1 configure -wraplength %%w"'
 	with: self connected
 !
@@ -879,7 +879,7 @@ label: value
 !BButton methodsFor: 'private'!
 
 create
-    self create: ('-highlightthickness 0 -takefocus 1 -command {callback %1 invokeCallback}'
+    self create: ('-highlightthickness 0 -takefocus 1 -command {callback %1 invokeCallback} -font {Helvetica 10}'
 	bindWith: self asOop printString)
 !
 
@@ -1068,7 +1068,14 @@ child: child yOffset: value
 !
 
 heightChild: child
-!
+    | w |
+    w := self toplevel.
+    Blox idle.
+    w isMapped
+	ifTrue: [ self tclEval: 'winfo height ', child container ]
+	ifFalse: [ self tclEval: 'winfo reqheight ', child container ].
+    ^self tclResult asInteger!
+
 
 setInitialSize
     "Make the Tk placer's status, the receiver's properties and the
@@ -1084,7 +1091,13 @@ setInitialSize
 !
 
 widthChild: child
-    ^child widthAbsolute!
+    | w |
+    w := self toplevel.
+    Blox idle.
+    w isMapped
+	ifTrue: [ self tclEval: 'winfo width ', child container ]
+	ifFalse: [ self tclEval: 'winfo reqwidth ', child container ].
+    ^self tclResult asInteger!
 
 xChild: child
     ^child xAbsolute!
@@ -2285,6 +2298,15 @@ isSelected: index
     ^self tclResult = '1'
 !
 
+label
+    "Return nil, it is here for Gtk+ support"
+    ^nil
+!
+
+label: aString
+    "Do nothing, it is here for Gtk+ support"
+!
+
 labelAt: anIndex
     "Answer the label displayed at the given position in the list
      box."
@@ -2419,7 +2441,7 @@ itemSelected: receiver at: index
 create
     self
 	create: '-highlightthickness 0 -takefocus 1 -bg white \
-		 -exportselection no';
+		 -exportselection no -font {Helvetica 10}';
 	horizontal: true; vertical: true.
 
     "Tcl hack to get the callback upon activate. See analogous
@@ -3514,7 +3536,7 @@ initialize: parentWidget
 	ifFalse: [ self parent container, '.menu' ].
 
     "BMenuBar is NOT a BPrimitive, so it has to explicitly create itself"
-    self tclEval: 'menu ', self connected, ' -tearoff 0'.
+    self tclEval: 'menu ', self connected, ' -font {Helvetica 10} -tearoff 0'.
     self parent isNil ifFalse: [ self parent menu: self ]
 ! !
 
@@ -3828,7 +3850,7 @@ initialize: parentWidget label: label
     s := WriteStream on: (String new: 80).
     s
 	nextPutAll: self container;
-	nextPutAll: ' add %2 -label %1 -underline ';
+	nextPutAll: ' add %2 -label %1 -font {Helvetica 10} -underline ';
 	print:	    (self parent underline: label);
 	nextPutAll: ' -command { callback ';
 	print:      self asOop;

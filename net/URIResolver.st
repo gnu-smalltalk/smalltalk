@@ -143,12 +143,11 @@ entity
 !
 
 contentsNoSignal
-    | scheme |
+    | scheme contents |
     (entity notNil and: [ noCache not ]) ifTrue: [ ^entity ].
 
     url hasPostData ifTrue:
-	[| contents |
-	contents := MimeEntity new
+	[contents := MimeEntity new
 		addField: ContentTypeField urlEncoded;
 		body: url postData;
 		yourself.
@@ -384,7 +383,8 @@ getFtpContents
 	]!
 
 getFtpDirectoryContentsFrom: aStream
-    | baseURL maxSize stream title contents |
+    | baseURL maxSize stream title contents sp read mode ftype fileSize name
+      newURL index |
     baseURL := url copy.
     baseURL path isNil
 	ifTrue: [baseURL path: '/junk']
@@ -423,8 +423,7 @@ getFtpDirectoryContentsFrom: aStream
 
     stream nextPutAll: 'Up to higher level directory</a>'; nl; nl.
     [aStream atEnd] whileFalse:
-	[| sp read mode ftype fileSize name |
-	sp := Character space.
+	[sp := Character space.
 	read := (aStream upTo: Character nl) readStream.
 	mode := read upTo: sp.
 	mode isEmpty
@@ -456,11 +455,9 @@ getFtpDirectoryContentsFrom: aStream
 	name := read upToEnd trimSeparators.
 
 	(ftype isNil or: [name isEmpty or: [name = '.' or: [name = '..']]]) ifFalse:
-		[| newURL |
-		ftype = $l
+		[ftype = $l
 			ifTrue: "symbolic link"
-				[| index |
-				index := name indexOfSubCollection: ' -> ' startingAt: 1.
+				[index := name indexOfSubCollection: ' -> ' startingAt: 1.
 				index > 0
 					ifTrue:
 						[newURL := baseURL construct: (URL fromString: (name copyFrom: index + 4 to: name size)).
@@ -529,7 +526,7 @@ getHttpContents
     ^self requestHttpContents: url requestString!
 
 requestHttpContents: urlString
-    | requestHeaders tmpFile stream protocolError response type |
+    | requestHeaders tmpFile stream protocolError response type string |
 
     requestHeaders := OrderedCollection new.
     requestHeaders add: ('User-Agent: GNU-Smalltalk/', Smalltalk version).
@@ -577,7 +574,7 @@ requestHttpContents: urlString
     ] ensure: [stream isNil ifFalse: [stream close]].
 
     ^protocolError
-	ifTrue: [| string |
+	ifTrue: [
 		string := tmpFile contents.
 		tmpFile remove.
 
@@ -607,7 +604,7 @@ getHttpHead
     ^self requestHttpHead: url requestString!
 
 requestHttpHead: urlString
-    | requestHeaders tmpFile stream protocolError response type |
+    | requestHeaders tmpFile stream protocolError response type string |
     requestHeaders := OrderedCollection new.
     requestHeaders add: ('User-Agent: GNU-Smalltalk/', Smalltalk version).
     requestHeaders add: ('Accept: text/html, image/gif, */*; q=0.2').
@@ -656,7 +653,7 @@ requestHttpHead: urlString
     ] ensure: [stream isNil ifFalse: [stream close]].
 
     ^protocolError
-	ifTrue: [| string |
+	ifTrue: [
 		string := tmpFile contents.
 		tmpFile remove.
 
@@ -688,7 +685,7 @@ postHttpContents: contents
 	urlString: url requestString!
 
 postHttpContents: contents urlString: urlString
-    | requestHeaders tmpFile stream protocolError response type |
+    | requestHeaders tmpFile stream protocolError response type string |
 
     requestHeaders := OrderedCollection new.
     requestHeaders add: ('User-Agent: GNU-Smalltalk/', Smalltalk version).
@@ -737,7 +734,7 @@ postHttpContents: contents urlString: urlString
     ] ensure: [stream isNil ifFalse: [stream close]].
 
     ^protocolError
-	ifTrue: [| string |
+	ifTrue: [
 		string := tmpFile contents.
 		tmpFile remove.
 
@@ -860,15 +857,14 @@ getNewsArticleList: from to: to group: group
     ^subjects!
 
 getNewsArticleListContents: group
-    | maxRange range from to prevRanges subjects stream |
+    | maxRange range from to prevRanges subjects stream pto pfrom |
     maxRange := 100.
     range := client activeArticlesInGroup: group.
     from := range first.
     to := range last.
     prevRanges := OrderedCollection new.
     (to - from + 1) > maxRange ifTrue:
-	[| pto pfrom |
-	pfrom := from.
+	[pfrom := from.
 	from := to - maxRange + 1.
 	pto := from - 1.
 	[(pto - pfrom + 1) > maxRange] whileTrue:
@@ -1059,7 +1055,7 @@ getThreadedNewsArticleList: from to: to group: group
     ^threads!
 
 getThreadedNewsArticleListContents: group
-    | maxRange range from to prevRanges threads stream |
+    | maxRange range from to prevRanges threads stream pto pfrom |
     maxRange := 100.
     range := client activeArticlesInGroup: group.
     from := range first.
@@ -1067,8 +1063,7 @@ getThreadedNewsArticleListContents: group
     prevRanges := OrderedCollection new.
 
     (to - from + 1) > maxRange ifTrue:
-	[| pto pfrom |
-	pfrom := from.
+	[pfrom := from.
 	from := to - maxRange + 1.
 	pto := from - 1.
 	[(pto - pfrom + 1) > maxRange] whileTrue:
@@ -1233,7 +1228,7 @@ getBufferSize
     ^kbytes * 1024!
 
 getNoProxyHostNames
-    | col read stream noProxy |
+    | col read stream noProxy ch |
     col := OrderedCollection new.
     noProxy := UserProfileSettings default settingAt: #proxyList.
     noProxy = 'none'
@@ -1242,8 +1237,7 @@ getNoProxyHostNames
     read := noProxy readStream.
     stream := WriteStream on: (String new: 64).
     [read atEnd] whileFalse:
-	[| ch |
-	read skipSeparators.
+	[read skipSeparators.
 	stream reset.
 	[read atEnd or:
 	[ch := read next.

@@ -74,5 +74,31 @@ CP value: CA.
 ^(CP value + 1) at: 0!
 ^(CP value + 1) - CA!
 
+Object
+	 defineCFunc: 'testCallin'
+	 withSelectorArgs: 'testCallin'
+	 returning: #void
+	 args: #(#selfSmalltalk).
+
+Object
+	 defineCFunc: 'testCString'
+	 withSelectorArgs: 'testCString: cString'
+	 returning: #void
+	 args: #(#cObject).
+
+Object
+	 defineCFunc: 'testCObjectPtr'
+	 withSelectorArgs: 'testCObjectPtr: cObject'
+	 returning: #void
+	 args: #(#cObjectPtr).
+
+true testCallin!
+nil testCString: (CString value: 'this is a test')!
+
+| cObject |
+cObject := CCharType new.
+nil testCObjectPtr: cObject.
+^cObject asString!
+
 " ### need a lot more!"
 

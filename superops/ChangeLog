@@ -1,0 +1,53 @@
+2003-09-13  Paolo Bonzini <bonzini@gnu.org>
+
+	* observer-list.cc: new file
+	* observer-list.h: new file
+	* superops.cc: use observer pattern
+	* table.cc: new file
+	* table.h: new file
+
+2003-09-11  Paolo Bonzini <bonzini@gnu.org>
+
+	* vm_def.cc: new file
+	* vm_def.h: new file
+	* superops.cc: create vm.def too
+
+2003-09-10  Paolo Bonzini <bonzini@gnu.org>
+
+	* byte_def.cc: new file
+	* byte_def.h: new file
+	* hash.cc: new file from output.cc and output.h
+	* hash.h: new file
+	* output.cc: merged into hash.cc
+	* output.h: merged into hash.cc
+	* superops.cc: create byte.def too
+
+2003-09-09  Paolo Bonzini <bonzini@gnu.org>
+
+	* bool-array.cc: included from GPERF 3.0.1.
+	* bool-array.h: included from GPERF 3.0.1.
+	* bool-array.icc: included from GPERF 3.0.1.
+	* hash-table.cc: included from GPERF 3.0.1.
+	* hash-table.h: included from GPERF 3.0.1.
+	* keyword-list.cc: included from GPERF 3.0.1.
+	* keyword-list.h: included from GPERF 3.0.1.
+	* keyword-list.icc: included from GPERF 3.0.1.
+	* keyword.cc: included from GPERF 3.0.1.
+	* keyword.h: included from GPERF 3.0.1.
+	* keyword.icc: included from GPERF 3.0.1.
+	* options.cc: trimmed down from GPERF 3.0.1.
+	* options.h: trimmed down from GPERF 3.0.1.
+	* options.icc: trimmed down from GPERF 3.0.1.
+	* output.cc: trimmed down from GPERF 3.0.1, use iostreams.
+	* output.h: trimmed down from GPERF 3.0.1, use iostreams.
+	* positions.cc: included from GPERF 3.0.1.
+	* positions.h: included from GPERF 3.0.1.
+	* positions.icc: included from GPERF 3.0.1.
+	* search.cc: included from GPERF 3.0.1.
+	* search.h: included from GPERF 3.0.1.
+	* superops.cc: interface to the GPERF routines.
+
+2003-09-07  Paolo Bonzini <bonzini@gnu.org>
+
+	* superops.cc: Done the searching part.
+

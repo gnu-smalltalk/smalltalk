@@ -31,80 +31,60 @@
 
 #include "gstpriv.h"
 
-char *_gst_nil_name = "(nil)";	/* how to print nil */
-
-
 /* Make a tree_node made up of the NODETYPE type-tag and a list_node
    representing the head of the list, for NAME and VALUE.  */
-static tree_node make_list_node (YYLTYPE *location,
-				 node_type nodeType,
-				 char *name,
-				 tree_node value);
+static inline tree_node make_list_node (YYLTYPE *location,
+					node_type nodeType,
+					const char *name,
+					tree_node value);
 
 /* Make a expr_node made up of the NODETYPE type-tag and an expr_node
    with given RECEIVER, SELECTOR and EXPRESSION.  */
-static tree_node make_expr_node (YYLTYPE *location,
-				 node_type nodeType,
-				 tree_node receiver,
-				 OOP selector,
-				 tree_node expression);
+static inline tree_node make_expr_node (YYLTYPE *location,
+					node_type nodeType,
+					tree_node receiver,
+					OOP selector,
+					tree_node expression);
 
 /* Allocate from the compilation obstack a node and assign it the
    NODETYPE type-tag.  */
-static tree_node make_tree_node (YYLTYPE *location,
-				 node_type nodeType);
+static inline tree_node make_tree_node (YYLTYPE *location,
+					node_type nodeType);
 
-/* Print the NODE method_node with LEVEL spaces of indentation. */
+/* Print the NODE method_node with LEVEL spaces of indentation.  */
 static void print_method_node (tree_node node,
 			       int level);
 
-/* Print the NODE method_node with LEVEL spaces of indentation. */
+/* Print the NODE method_node with LEVEL spaces of indentation.  */
 static void print_block_node (tree_node node,
 			      int level);
 
-/* Print the NODE expr_node with LEVEL spaces of indentation. */
+/* Print the NODE expr_node with LEVEL spaces of indentation.  */
 static void print_expr_node (tree_node node,
 			     int level);
 
-/* Print the NODE list_node with LEVEL spaces of indentation. */
+/* Print the NODE list_node with LEVEL spaces of indentation.  */
 static void print_list_node (tree_node node,
 			     int level);
 
-/* Print the NODE const_node with LEVEL spaces of indentation. */
+/* Print the NODE list_node with LEVEL spaces of indentation,
+   assuming it is a attribute.  */
+static void print_attribute_list_node (tree_node node,
+				       int level);
+
+/* Print the NODE const_node with LEVEL spaces of indentation.  */
 static void print_const_node (tree_node node,
 			      int level);
 
 /* Print the NODE list_node with LEVEL spaces of indentation, 
    discarding the NAME of each node (hence the distinction between
-   this and print_list_node). */
+   this and print_list_node).  */
 static void print_array_constructor_node (tree_node node,
 					  int level);
 
-/* Print LEVEL spaces of indentation. */
+/* Print LEVEL spaces of indentation.  */
 static void indent (int level);
 
-
-/* These are used only for printing tree node names when debugging */
-static char *node_type_names[] = {
-  "TREE_METHOD_NODE",		/* TREE_METHOD_NODE */
-  "TREE_UNARY_EXPR",		/* TREE_UNARY_EXPR */
-  "TREE_BINARY_EXPR",		/* TREE_BINARY_EXPR */
-  "TREE_KEYWORD_EXPR",		/* TREE_KEYWORD_EXPR */
-  "TREE_VARIABLE_NODE",		/* TREE_VARIABLE_NODE */
-  "TREE_KEYWORD_LIST",		/* TREE_KEYWORD_LIST */
-  "TREE_VAR_DECL_LIST",		/* TREE_VAR_DECL_LIST */
-  "TREE_VAR_ASSIGN_LIST",	/* TREE_VAR_ASSIGN_LIST */
-  "TREE_STATEMENT_LIST",	/* TREE_STATEMENT_LIST */
-  "TREE_RETURN_EXPR",		/* TREE_RETURN_EXPR */
-  "TREE_ASSIGN_EXPR",		/* TREE_ASSIGN_EXPR */
-  "TREE_CONST_EXPR",		/* TREE_CONST_EXPR */
-  "TREE_SYMBOL_NODE",		/* TREE_SYMBOL_NODE */
-  "TREE_ARRAY_ELT_LIST",	/* TREE_ARRAY_ELT_LIST */
-  "TREE_BLOCK_NODE",		/* TREE_BLOCK_NODE */
-  "TREE_CASCADE_EXPR",		/* TREE_CASCADE_EXPR */
-  "TREE_MESSAGE_LIST",		/* TREE_MESSAGE_LIST */
-  "TREE_ARRAY_CONSTRUCTOR"	/* TREE_ARRAY_CONSTRUCTOR */
-};
 
 
 
@@ -118,9 +98,9 @@ _gst_make_array_elt (YYLTYPE *location,
 
 tree_node
 _gst_make_method (YYLTYPE *location,
-		     tree_node selectorExpr,
+		  tree_node selectorExpr,
 		  tree_node temporaries,
-		  char *primitiveName,
+		  tree_node attributes,
 		  tree_node statements)
 {
   tree_node result;
@@ -128,7 +108,7 @@ _gst_make_method (YYLTYPE *location,
   result = make_tree_node (location, TREE_METHOD_NODE);
   result->v_method.selectorExpr = selectorExpr;
   result->v_method.temporaries = temporaries;
-  result->v_method.primitiveName = primitiveName;
+  result->v_method.attributes = attributes;
   result->v_method.statements = statements;
   return (result);
 }
@@ -146,8 +126,8 @@ _gst_make_cascaded_message (YYLTYPE *location,
 
 tree_node
 _gst_make_unary_expr (YYLTYPE *location,
-		     tree_node receiver,
-		      char *unarySelectorExpr)
+		      tree_node receiver,
+		      const char *unarySelectorExpr)
 {
   OOP selector;
 
@@ -159,7 +139,7 @@ _gst_make_unary_expr (YYLTYPE *location,
 
 tree_node
 _gst_intern_ident (YYLTYPE *location,
-		     char *ident)
+		   const char *ident)
 {
   return (make_expr_node
 	  (location, TREE_SYMBOL_NODE, NULL, _gst_intern_string (ident), NULL));
@@ -167,7 +147,7 @@ _gst_intern_ident (YYLTYPE *location,
 
 tree_node
 _gst_make_return (YYLTYPE *location,
-		     tree_node expression)
+		  tree_node expression)
 {
   return (make_expr_node
 	  (location, TREE_RETURN_EXPR, expression, _gst_nil_oop, NULL));
@@ -175,7 +155,7 @@ _gst_make_return (YYLTYPE *location,
 
 tree_node
 _gst_make_keyword_expr (YYLTYPE *location,
-		     tree_node receiver,
+		        tree_node receiver,
 			tree_node keywordMessage)
 {
   return (make_expr_node
@@ -184,7 +164,7 @@ _gst_make_keyword_expr (YYLTYPE *location,
 
 tree_node
 _gst_make_assign (YYLTYPE *location,
-		     tree_node variables,
+		  tree_node variables,
 		  tree_node expression)
 {
   return (make_expr_node
@@ -199,8 +179,21 @@ _gst_make_statement_list (YYLTYPE *location,
 }
 
 tree_node
+_gst_make_attribute_list (YYLTYPE *location,
+		          tree_node attribute)
+{
+  /* First convert the TREE_KEYWORD_EXPR into a Message object, then
+     into a TREE_CONST_EXPR, and finally embed this one into a
+     TREE_ATTRIBUTE_LIST.  */
+  OOP attributeOOP = _gst_make_attribute (attribute);
+  tree_node constant = _gst_make_oop_constant (location, attributeOOP);
+
+  return (make_list_node (location, TREE_ATTRIBUTE_LIST, NULL, constant));
+}
+
+tree_node
 _gst_make_keyword_list (YYLTYPE *location,
-		     char *keyword,
+			const char *keyword,
 			tree_node expression)
 {
   return (make_list_node (location, TREE_KEYWORD_LIST, keyword, expression));
@@ -212,7 +205,7 @@ _gst_make_variable_list (YYLTYPE *location,
 {
   /* Actually, we rely on the fact that a variable is represented as a
      tree node of type list_node, so all we do is change the node tag
-     to TREE_VAR_DECL_LIST. */
+     to TREE_VAR_DECL_LIST.  */
   variable->nodeType = TREE_VAR_DECL_LIST;
   return (variable);
 }
@@ -223,15 +216,15 @@ _gst_make_assignment_list (YYLTYPE *location,
 {
   /* Actually, we rely on the fact that a variable is represented as a
      tree node of type list_node, so all we do is change the node tag
-     to TREE_VAR_DECL_LIST. */
+     to TREE_VAR_DECL_LIST.  */
   return (make_list_node (location, TREE_VAR_ASSIGN_LIST, NULL, variable));
 }
 
 
 tree_node
 _gst_make_binary_expr (YYLTYPE *location,
-		     tree_node receiver,
-		       char *binaryOp,
+		       tree_node receiver,
+		       const char *binaryOp,
 		       tree_node argument)
 {
   OOP selector;
@@ -243,14 +236,14 @@ _gst_make_binary_expr (YYLTYPE *location,
 
 tree_node
 _gst_make_message_list (YYLTYPE *location,
-		     tree_node messageElt)
+		        tree_node messageElt)
 {
   return (make_list_node (location, TREE_MESSAGE_LIST, NULL, messageElt));
 }
 
 tree_node
 _gst_make_block (YYLTYPE *location,
-		     tree_node arguments,
+		 tree_node arguments,
 		 tree_node temporaries,
 		 tree_node statements)
 {
@@ -265,7 +258,7 @@ _gst_make_block (YYLTYPE *location,
 
 tree_node
 _gst_make_variable (YYLTYPE *location,
-		     char *name)
+		    const char *name)
 {
   return (make_list_node (location, TREE_VARIABLE_NODE, name, NULL));
 }
@@ -273,7 +266,7 @@ _gst_make_variable (YYLTYPE *location,
 
 tree_node
 _gst_make_int_constant (YYLTYPE *location,
-		     long int ival)
+		     intptr_t ival)
 {
   tree_node result;
 
@@ -312,7 +305,7 @@ _gst_make_float_constant (YYLTYPE *location,
 
 tree_node
 _gst_make_string_constant (YYLTYPE *location,
-		     char *sval)
+		           const char *sval)
 {
   tree_node result;
 
@@ -325,7 +318,7 @@ _gst_make_string_constant (YYLTYPE *location,
 
 tree_node
 _gst_make_oop_constant (YYLTYPE *location,
-		     OOP oval)
+		        OOP oval)
 {
   tree_node result;
 
@@ -382,7 +375,7 @@ _gst_make_symbol_constant (YYLTYPE *location,
  */
 tree_node
 _gst_make_byte_array_constant (YYLTYPE *location,
-		     tree_node aval)
+			       tree_node aval)
 {
   tree_node arrayElt, ival;
   int len;
@@ -484,8 +477,8 @@ _gst_free_tree ()
 
 static tree_node
 make_list_node (YYLTYPE *location,
-		     node_type nodeType,
-		char *name,
+		node_type nodeType,
+		const char *name,
 		tree_node value)
 {
   tree_node result;
@@ -500,7 +493,7 @@ make_list_node (YYLTYPE *location,
 
 static tree_node
 make_expr_node (YYLTYPE *location,
-		     node_type nodeType,
+		node_type nodeType,
 		tree_node receiver,
 		OOP selector,
 		tree_node expression)
@@ -539,9 +532,10 @@ void
 _gst_print_tree (tree_node node,
 		 int level)
 {
+  const char *name;
   if (node == NULL)
     {
-      printf ("%s\n", _gst_nil_name);
+      printf ("(nil)\n");
       return;
     }
 
@@ -551,8 +545,31 @@ _gst_print_tree (tree_node node,
       return;
     }
 
-  printf ("%s\n", node_type_names[node->nodeType]);
+  switch (node->nodeType)
+    {
+    case TREE_METHOD_NODE: name = "TREE_METHOD_NODE"; break;
+    case TREE_UNARY_EXPR: name = "TREE_UNARY_EXPR"; break;
+    case TREE_BINARY_EXPR: name = "TREE_BINARY_EXPR"; break;
+    case TREE_KEYWORD_EXPR: name = "TREE_KEYWORD_EXPR"; break;
+    case TREE_VARIABLE_NODE: name = "TREE_VARIABLE_NODE"; break;
+    case TREE_ATTRIBUTE_LIST: name = "TREE_ATTRIBUTE_LIST"; break;
+    case TREE_KEYWORD_LIST: name = "TREE_KEYWORD_LIST"; break;
+    case TREE_VAR_DECL_LIST: name = "TREE_VAR_DECL_LIST"; break;
+    case TREE_VAR_ASSIGN_LIST: name = "TREE_VAR_ASSIGN_LIST"; break;
+    case TREE_STATEMENT_LIST: name = "TREE_STATEMENT_LIST"; break;
+    case TREE_RETURN_EXPR: name = "TREE_RETURN_EXPR"; break;
+    case TREE_ASSIGN_EXPR: name = "TREE_ASSIGN_EXPR"; break;
+    case TREE_CONST_EXPR: name = "TREE_CONST_EXPR"; break;
+    case TREE_SYMBOL_NODE: name = "TREE_SYMBOL_NODE"; break;
+    case TREE_ARRAY_ELT_LIST: name = "TREE_ARRAY_ELT_LIST"; break;
+    case TREE_BLOCK_NODE: name = "TREE_BLOCK_NODE"; break;
+    case TREE_CASCADE_EXPR: name = "TREE_CASCADE_EXPR"; break;
+    case TREE_MESSAGE_LIST: name = "TREE_MESSAGE_LIST"; break;
+    case TREE_ARRAY_CONSTRUCTOR: name = "TREE_ARRAY_CONSTRUCTOR"; break;
+    default: abort ();
+    }
 
+  printf ("%s\n", name);
   switch (node->nodeType)
     {
     case TREE_METHOD_NODE:
@@ -591,6 +608,10 @@ _gst_print_tree (tree_node node,
       print_const_node (node, level + 2);
       break;
 
+    case TREE_ATTRIBUTE_LIST:
+      print_attribute_list_node (node, level + 2);
+      break;
+
     default:
       abort ();
     }
@@ -610,7 +631,7 @@ print_list_node (tree_node node,
 {
   indent (level);
   printf ("name: %s\n",
-	  node->v_list.name ? node->v_list.name : _gst_nil_name);
+	  node->v_list.name ? node->v_list.name : "(nil)");
   indent (level);
   printf ("value: ");
   _gst_print_tree (node->v_list.value, level + 7);
@@ -647,6 +668,9 @@ print_method_node (tree_node node,
   indent (level);
   printf ("temporaries: ");
   _gst_print_tree (node->v_method.temporaries, level + 13);
+  indent (level);
+  printf ("attributes: ");
+  _gst_print_tree (node->v_method.attributes, level + 9);
   indent (level);
   printf ("statements: ");
   _gst_print_tree (node->v_method.statements, level + 12);
@@ -705,6 +729,46 @@ print_const_node (tree_node node,
 
     default:
       _gst_errorf ("Unknown constant type %d", node->v_const.constType);
+    }
+}
+
+static void
+print_attribute_list_node (tree_node node,
+			   int level)
+{
+  tree_node value = node->v_list.value;
+  OOP messageOOP = value->v_const.val.oopVal;
+  gst_message message = (gst_message) OOP_TO_OBJ (messageOOP);
+  OOP selectorOOP = message->selector;
+  gst_string selector = (gst_string) OOP_TO_OBJ (selectorOOP);
+  OOP argumentsOOP = message->args;
+  mst_Object arguments = OOP_TO_OBJ (argumentsOOP);
+
+  const char *sel = selector->chars;
+  char *name = alloca (oop_num_fields (selectorOOP) + 1);
+  int numArgs = oop_num_fields (argumentsOOP);
+
+  int i;
+  char sep;
+
+  indent (level);
+  printf ("value: ");
+  for (sep = '<', i = 0; i < numArgs; sep = ' ', i++)
+    {
+      /* Find the end of this keyword and print it together with
+         its argument.  */
+      const char *end = strchr (sel, ':');
+      memcpy (name, sel, end - sel);
+      name[end - sel] = 0;
+      sel = end + 1;
+      printf ("%c%s: %O", sep, name, arguments->data[i]);
+    }
+
+  printf (">\n");
+  if (node->v_list.next)
+    {
+      indent (level - 2);
+      _gst_print_tree (node->v_list.next, level - 2);
     }
 }
 

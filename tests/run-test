@@ -23,7 +23,7 @@ case $1 in
 
   *Test)
     grep $base $builddir/ANSI.log > /dev/null 2>&1 && rm $builddir/ANSI.log
-    $top_builddir/gst -QsI $builddir/gst.im $srcdir/AnsiRun.st -a $base >> $builddir/ANSI.log 2>&1
+    $top_builddir/gst -QI $builddir/gst.im $srcdir/AnsiRun.st -a $base >> $builddir/ANSI.log 2>&1
     exit $?
     ;;
 esac

@@ -10,7 +10,7 @@
 |
 | Copyright 1988,92,94,95,99,2000,2002
 | Free Software Foundation, Inc.
-| Written by Andy Valencia (uunet!sequent!vandys).
+| Written by Andy Valencia (vandys@zendo.com).
 |
 | This file is part of GNU Smalltalk.
 |

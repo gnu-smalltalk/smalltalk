@@ -108,6 +108,12 @@ CScalar variableWordSubclass: #CDouble
 	poolDictionaries: ''
 	category: 'Language-C interface'.
 
+CScalar variableWordSubclass: #CLongDouble
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Language-C interface'.
+
 CObject variableWordSubclass: #CAggregate
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -152,10 +158,14 @@ environment.  The C callout mechanism allows my instances to be transformed
 into their corresponding C values for use in external routines.'.
 
 CString comment:
-'Technically, CString is really a pointer to type char.  However, it''s
-so darn useful as a distinct datatype, and it is a separate datatype
-in Smalltalk, so we allow developers to express their semantics more precisely
-by using a more descriptive type.
+'Technically, CString is really a pointer to CChar.  However, it can be
+very useful as a distinct datatype because it is a separate datatype
+in Smalltalk, so we allow developers to express their semantics more
+precisely by using a more descriptive type.
+
+Note that like CChar is a pointer to char, CString is actually a *pointer*
+to string: a char ** in C terms.  If you need to take a String out of a
+char *, use CChar>>#asString.
 
 In general, I behave like a cross between an array of characters and a pointer
 to a character.  I provide the protocol for both data types.  My #value
@@ -707,6 +717,21 @@ scalarIndex
 ! !
     
 
+!CChar methodsFor: 'conversion'!
+
+asByteArray: size
+    "Convert size bytes pointed to by the receiver to a String"
+    ^ByteArray fromCData: self size: size!
+
+asString
+    "Convert the data pointed to by the receiver, up to the first NULL byte,
+     to a String"
+    ^String fromCData: self!
+
+asString: size
+    "Convert size bytes pointed to by the receiver to a String"
+    ^String fromCData: self size: size! !
+
 !CChar methodsFor: 'accessing'!
 
 sizeof
@@ -834,6 +859,41 @@ alignof
 scalarIndex
     "Private - Answer an index referring to the receiver's scalar type"
     ^7
+! !
+
+
+!CLongDouble class methodsFor: 'accessing'!
+
+sizeof
+    "Answer the receiver's instances size"
+    ^CLongDoubleSize
+!
+
+alignof
+    "Answer the receiver's instances required aligment"
+    ^CLongDoubleAlignment
+!
+
+scalarIndex
+    "Private - Answer an index referring to the receiver's instances scalar type"
+    ^12
+! !
+    
+!CLongDouble methodsFor: 'accessing'!
+
+sizeof
+    "Answer the receiver's size"
+    ^CLongDoubleSize
+!
+
+alignof
+    "Answer the receiver's required aligment"
+    ^CLongDoubleAlignment
+!
+
+scalarIndex
+    "Private - Answer an index referring to the receiver's scalar type"
+    ^12
 ! !
 
 

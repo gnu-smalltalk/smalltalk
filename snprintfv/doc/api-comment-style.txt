@@ -1,0 +1,94 @@
+This is based on the gnome comment style used by gdoc, originally written
+by Miguel de Icaza <miguel@gnu.org>.
+
+  We use the following for documenting API entry points in snprintfv.
+An awk script written by me <gary@gnu.org> is included in
+this package to pull this information and generate a texinfo fragment,
+suitable for @including into a texinfo master document.
+
+   The gtk-doc system (which is what the GNOME project is using to
+document its API and the user manuals) has support for these comments
+and can generate DocBook output by using this setup.  I'm not sure
+that gtk-doc will cope with the GNU ANSI declarations + K&R
+definitions that snprintfv uses.
+
+   The gnome-libs/tools/gnome-doc directory contains a simple Emacs
+lisp function that you can load to simplify entering these special
+comment.  This utility tool is bound to the "C-x 4 h" key sequence,
+and is included in the doc directory of this package.
+
+Format:
+
+/**
+ * function_name: keywords
+ * @par1:  description of parameter 1
+ * @par2:  description of parameter 2
+ * @par3:  description of parameter 3
+ *
+ * function description.  You can include references to parameters
+ * here like @par1 and their font will be set properly on the output.
+ * constants can be references with %constant as well to make their
+ * string descriptions use a font specification.  This function
+ * is simliar to function_name2() in this and that, and is used like
+ * this:
+ *
+ *	result = function_name(1, "two", "three");
+ * 
+ * Return values:
+ * Returns -1 in the event of an error.
+ **/
+int
+function_name (par1, par2, par3)l
+    int par;
+    char *par2;
+    char *par3;
+{
+    return -1;
+}
+
+The important parts are:
+
+The first line of an API entry point documentation starts with /**
+like the Java documentation system (slash and two stars).  The comment
+is formatted with stars at the beginning of each line.  The second
+line is the function name, it might include an optional ':' for
+beautification purposes. 
+
+A number of keywords can be included in the function_name line, so far
+only the [constructor] string has a special meaning (it is used to
+list before any other API entry points in the generated output).  We
+can define more of those attributes in the future.
+
+Any line from that point on that matches the regular expression:
+
+	^ \* @[a-zA-Z0-9]:
+
+(for example: " * @par1: parameter one")
+
+is taken to be the declaration of a function parameter.  We can
+extract the type of this parameter from the actual function definition. 
+
+After the parameters we have the function description.  If any line of
+the function description matches the regexp:
+
+	^ \* [Rr]eturn [Vv]alues?:
+
+It is taken to be the description of the return value for the
+function.
+
+Something we do which isn't in the gtk-doc spec is that any line which
+matches the regexp:
+
+	^ \*^I
+
+(^I is a tab by the way) and would otherwise be part of either the main
+description text or the return value text is assumed to be preformatted (a
+code example for instance), and will not have any linebreaks added or
+removed.
+
+Text inside the description or return values text can have any of the
+following special tags on the beginning:
+
+   @name:   reference to a parameter.
+   %name:   reference to a constant. (not yet implemented)
+   name():   function reference.

@@ -123,7 +123,7 @@ print_class_name_to_stream (STREAM *stream, OOP class_oop)
 void
 print_oop_constructor_to_stream (STREAM *stream, OOP oop)
 {
-  long instanceSpec;
+  intptr_t instanceSpec;
   OOP class_oop;
 
   class_oop = OOP_CLASS (oop);
@@ -131,7 +131,7 @@ print_oop_constructor_to_stream (STREAM *stream, OOP oop)
 
   instanceSpec = CLASS_INSTANCE_SPEC (class_oop);
   if (instanceSpec & ISP_ISINDEXABLE)
-    stream_printf (stream, " new: %ld ", NUM_INDEXABLE_FIELDS (oop));
+    stream_printf (stream, " new: %zu ", NUM_INDEXABLE_FIELDS (oop));
 
   else
     stream_printf (stream, " new ");
@@ -139,7 +139,7 @@ print_oop_constructor_to_stream (STREAM *stream, OOP oop)
   if (_gst_regression_testing)
     stream_printf (stream, "\"<0>\"");
   else
-    stream_printf (stream, "\"<%#lx>\"", (unsigned long) oop);
+    stream_printf (stream, "\"<%p>\"", oop);
 }
 
 void
@@ -156,7 +156,7 @@ printf_oop (STREAM *stream,
     }
 
   if (IS_INT (oop))
-    stream_printf (stream, "%ld", TO_INT (oop));
+    stream_printf (stream, "%td", TO_INT (oop));
 
   else if (IS_NIL (oop))
     stream_printf (stream, "nil");
@@ -253,7 +253,7 @@ printf_oop_arginfo (struct printf_info *info,
 		    int *argtypes)
 {
   /* We always take exactly one argument and this is a pointer to the
-     structure.. */
+     structure.  */
   if (n > 0)
     argtypes[0] = PA_POINTER;
   return 1;
@@ -264,7 +264,7 @@ void
 _gst_classify_addr (void *addr)
 {
   if (IS_INT (addr))
-    printf ("Smalltalk SmallInteger %ld\n", TO_INT (addr));
+    printf ("Smalltalk SmallInteger %td\n", TO_INT (addr));
 
   else if (IS_OOP_ADDR (addr))
     _gst_display_oop (addr);
@@ -349,7 +349,7 @@ _gst_display_object (mst_Object obj)
 	  IS_SURVIVOR_ADDR (obj, 1) ? "Odd" : "Old");
 
   if (IS_OOP_ADDR (obj->objClass))
-    printf (", size %O (%ld OOPs), class %O\n",
+    printf (", size %O (%zu OOPs), class %O\n",
 	    obj->objSize, NUM_OOPS (obj), obj->objClass);
   else
     printf (", contains invalid data\n");

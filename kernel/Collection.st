@@ -462,24 +462,39 @@ inspect
     "Print all the instance variables and objects in the receiver on the
      Transcript"
 
-    | class instVars i |
+    | instVars output object |
     self beConsistent.
-    class := self class.
-    instVars := class allInstVarNames.
-    Transcript nextPutAll: 'An instance of '.
-    class printNl.
-    1 to: instVars size do:
-	[ :i | Transcript nextPutAll: '  ';
+    Transcript
+	nextPutAll: 'An instance of ';
+	print: self class;
+	nl.
+
+    instVars := self class allInstVarNames.
+    1 to: instVars size do: [ :i |
+	object := self instVarAt: i.
+    	output := [ object printString ]
+		      on: Error
+		      do: [ :ex | ex return: ('%1 %2'
+				      bindWith: object class article
+				      with: object class name asString) ].
+
+	Transcript nextPutAll: '  ';
 	    nextPutAll: (instVars at: i);
-	    nextPutAll: ': '.
-	    (self instVarAt: i)  printNl ].
+	    nextPutAll: ': ';
+	    nextPutAll: output;
+	    nl ].
 
     Transcript nextPutAll: '  contents: ['; nl.
 
-    self do: [ :obj |
+    self do: [ :obj || output |
+    	output := [ obj printString ]
+		      on: Error
+		      do: [ :ex | ex return: ('%1 %2'
+				      bindWith: obj class article
+				      with: obj class name asString) ].
 	Transcript 
 	    nextPutAll: '    ';
-	    print: obj;
+	    nextPutAll: output;
 	    nl
     ].
     Transcript nextPutAll: '  ]'; nl

@@ -12,7 +12,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -60,7 +60,7 @@ oop_array_registry;
 
 /* The registry of OOPs which have been passed to C code.  Implemented
    as a red-black tree.  The registry is examined at GC time to ensure
-   that OOPs that C code knows about don't go away. */
+   that OOPs that C code knows about don't go away.  */
 static oop_registry *oop_registry_root;
 static oop_array_registry *oop_array_registry_root;
 
@@ -91,7 +91,11 @@ VMProxy gst_interpreter_proxy = {
 /* Smalltalk process support */
   _gst_async_signal, _gst_sync_wait, _gst_async_signal_and_unregister,
 
-  _gst_register_oop_array, _gst_unregister_oop_array
+  _gst_register_oop_array, _gst_unregister_oop_array,
+
+/* Convert Smalltalk datatypes to C data types (2) */
+  _gst_oop_to_long_double, _gst_long_double_to_oop
+
 };
 
 OOP
@@ -344,6 +348,11 @@ _gst_msg_sendf (PTR resultPtr,
 	    IS_NIL (result) ? 0.0 : _gst_oop_to_float (result);
 	  break;
 
+	case 'F':
+	  *(long double *) resultPtr =
+	    IS_NIL (result) ? 0.0 : _gst_oop_to_long_double (result);
+	  break;
+
 	case 'v':		/* don't care about the result */
 	  break;		/* "v" for "void" */
 
@@ -411,7 +420,7 @@ _gst_object_alloc (OOP class_oop,
   OOP oop;
 
   if (CLASS_IS_INDEXABLE (class_oop))
-    instantiate_with (class_oop, (unsigned long) size, &oop);
+    instantiate_with (class_oop, size, &oop);
   else
     instantiate (class_oop, &oop);
 
@@ -459,6 +468,12 @@ _gst_id_to_oop (long int i)
     gst_init_smalltalk ();
 
   return (OOP_AT (i));
+}
+
+OOP
+_gst_long_double_to_oop (long double f)
+{
+  return (INC_ADD_OOP (floatq_new (f)));
 }
 
 OOP
@@ -551,19 +566,6 @@ _gst_set_c_object (OOP oop, PTR co)
 
   SET_COBJECT_VALUE(oop, co);
 }
-
-OOP
-_gst_c_object_to_typed_oop (PTR co,
-			    OOP typeOOP)
-{
-  if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
-
-  if (co == NULL)
-    return (_gst_nil_oop);
-  else
-    return (INC_ADD_OOP (_gst_c_object_new_typed (co, typeOOP)));
-}
 
 
 /***********************************************************************
@@ -620,6 +622,22 @@ _gst_oop_to_id (OOP oop)
 
 double
 _gst_oop_to_float (OOP oop)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  if (IS_CLASS (oop, _gst_floatd_class))
+    return (FLOATD_OOP_VALUE (oop));
+  else if (IS_CLASS (oop, _gst_floate_class))
+    return (FLOATE_OOP_VALUE (oop));
+  else if (IS_CLASS (oop, _gst_floatq_class))
+    return (FLOATQ_OOP_VALUE (oop));
+  else
+    return 0.0 / 0.0;
+}
+
+long double
+_gst_oop_to_long_double (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
     gst_init_smalltalk ();
@@ -738,7 +756,7 @@ _gst_unregister_oop (OOP oop)
   oop_registry *entry = oop_registry_root;
 
   /* Speed things up, this will never be in the registry (but we allow
-     it to simplify client code). */
+     it to simplify client code).  */
   if (!oop)
     return;
 
@@ -819,7 +837,7 @@ _gst_copy_registered_oops (void)
   rb_node_t *node;
   rb_traverse_t t;
 
-  /* Walk the OOP registry... */
+  /* Walk the OOP registry...  */
   for (node = rb_first(&(oop_registry_root->rb), &t); 
        node; node = rb_next(&t))
     {
@@ -827,14 +845,14 @@ _gst_copy_registered_oops (void)
       MAYBE_COPY_OOP (k->oop);
     }
 
-  /* ...and then the OOP-array registry. */
+  /* ...and then the OOP-array registry.  */
   for (node = rb_first(&(oop_array_registry_root->rb), &t); 
        node; node = rb_next(&t))
     {
       oop_array_registry *k = (oop_array_registry *) node;
 
       /* Dereference the pointers in the tree to obtain where the array
-	 lies. */
+	 lies.  */
       OOP *first = *(k->first);
       OOP *last = *(k->last);
       COPY_OOP_RANGE (first, last);
@@ -847,7 +865,7 @@ _gst_mark_registered_oops (void)
   rb_node_t *node;
   rb_traverse_t t;
 
-  /* Walk the OOP registry... */
+  /* Walk the OOP registry...  */
   for (node = rb_first(&(oop_registry_root->rb), &t); 
        node; node = rb_next(&t))
     {
@@ -855,14 +873,14 @@ _gst_mark_registered_oops (void)
       MAYBE_MARK_OOP (k->oop);
     }
 
-  /* ...and then the OOP-array registry. */
+  /* ...and then the OOP-array registry.  */
   for (node = rb_first(&(oop_array_registry_root->rb), &t); 
        node; node = rb_next(&t))
     {
       oop_array_registry *k = (oop_array_registry *) node;
 
       /* Dereference the pointers in the tree to obtain where the array
-	 lies. */
+	 lies.  */
       OOP *first = *(k->first);
       OOP *last = *(k->last);
       MARK_OOP_RANGE (first, last);

@@ -159,10 +159,7 @@ instanceVariableNames: classInstVarNames
     | variableArray variableString |
     variableString := self superclass instanceVariableString,
 	classInstVarNames.
-    variableArray := self parseVariableString: variableString.
-
-    1 to: variableArray size do:
-	[ :i | variableArray at: i put: (variableArray at: i) asSymbol ].
+    variableArray := self parseInstanceVariableString: variableString.
 
     "If instance variables change, update  instance variables and
      instance spec of the class and all its subclasses "
@@ -171,9 +168,7 @@ instanceVariableNames: classInstVarNames
 
     self
 	updateInstanceVars: variableArray 
-	variable: false
-	words: false
-	pointers: true.
+	shape: nil.
 
     "If no variable has been removed, no need to recompile"
     (self allInstVarNames allSatisfy: [ :each | variableArray includes: each ])
@@ -188,80 +183,79 @@ name: newName
     environment: aNamespace
     subclassOf: superclass
     instanceVariableNames: stringOfInstVarNames
-    variable: variableBoolean
-    words: wordBoolean
-    pointers: pointerBoolean
+    shape: shape
     classVariableNames: stringOfClassVarNames
     poolDictionaries: stringOfPoolNames
+    category: categoryName
+
+    "Private - parse the instance and class variables, and the pool
+     dictionaries, then create the class."
+
+    | variableArray classVarDict sharedPoolNames |
+
+    "Inherit instance variables from parent"
+    variableArray := self parseInstanceVariableString: stringOfInstVarNames.
+    variableArray := superclass notNil 
+	ifTrue: [ superclass allInstVarNames, variableArray ]
+	ifFalse: [ variableArray ].
+
+    classVarDict := self
+	parse: stringOfClassVarNames
+	toDictionary: (BindingDictionary new).
+
+    sharedPoolNames := self
+	parsePools: stringOfPoolNames
+	in: aNamespace.
+
+    ^self
+	name: newName asSymbol
+	environment: aNamespace
+	subclassOf: superclass
+	instanceVariableArray: variableArray
+	shape: shape
+	classPool: classVarDict
+	poolDictionaries: sharedPoolNames
+	category: categoryName
+!
+
+name: className
+    environment: aNamespace
+    subclassOf: superclass
+    instanceVariableArray: variableArray
+    shape: shape
+    classPool: classVarDict
+    poolDictionaries: sharedPoolNames
     category: categoryName
 
     "Private - create a full featured class and install it, or change an
      existing one"
 
-    | aClass variableString variableArray sharedPoolNames poolName poolDict 
-      className classVarDict  needToRecompileMetaclasses needToRecompileClasses |
+    | aClass needToRecompileMetaclasses needToRecompileClasses |
 
-    "Initialize a metaclass"
-
-    className := newName asSymbol.
+    "Look for an existing metaclass"
     aClass := aNamespace hereAt: className ifAbsent: [ nil ].
     aClass isNil ifTrue: [
 	^self newMeta: className
 	    environment: aNamespace
 	    subclassOf: superclass
-	    instanceVariableNames: stringOfInstVarNames
-	    variable: variableBoolean
-	    words: wordBoolean
-	    pointers: pointerBoolean
-	    classVariableNames: stringOfClassVarNames
-	    poolDictionaries: stringOfPoolNames
+	    instanceVariableArray: variableArray
+	    shape: shape
+	    classPool: classVarDict
+	    poolDictionaries: sharedPoolNames
 	    category: categoryName
     ].
 
-    needToRecompileMetaclasses := false.
-
-    (aClass isVariable & aClass isBits) ifTrue: [
-	(variableBoolean not | pointerBoolean) ifTrue: [
-	    SystemExceptions.MutationError signal: 'Cannot change non-pointer subclass to pointer subclass'
-	].
-	aClass isWords ~~ wordBoolean ifTrue: [
-	    SystemExceptions.MutationError signal: 'Cannot change representation of non-pointer subclass'
-	]
+    (aClass isVariable & shape notNil) ifTrue: [
+	aClass shape == shape ifFalse: [
+	    SystemExceptions.MutationError
+		signal: 'Cannot change shape of variable class' ]
     ].
 
-    "Inherit instance variables from parent"
-    variableString := superclass notNil 
-	ifTrue: [ superclass instanceVariableString, stringOfInstVarNames ]
-	ifFalse: [ stringOfInstVarNames ].
+    superclass isUntrusted & self class isUntrusted not ifTrue: [
+	SystemExceptions.MutationError signal: 'Cannot move trusted class below untrusted superclass'
+    ].
 
-    variableArray := self parseVariableString: variableString.
-    1 to: variableArray size do:
-	[ :i | variableArray at: i put: (variableArray at: i) asSymbol ].
-
-    "If instance or indexed variables change, update 
-     instance variables and instance spec of the class and all its subclasses "
-
-    (needToRecompileClasses := variableArray ~= aClass allInstVarNames
-	| (aClass environment ~~ aNamespace)) 
-
-	| (aClass isVariable ~~ variableBoolean)
-	| (aClass isWords ~~ wordBoolean )
-	| (aClass isPointers ~~ pointerBoolean)
-	    ifTrue: [
-	        aClass instanceCount > 0 ifTrue: [ ObjectMemory globalGarbageCollect ].
-		aClass
-		    updateInstanceVars: variableArray 
-		    variable: variableBoolean
-		    words: wordBoolean
-		    pointers: pointerBoolean
-	    ].
-
-   needToRecompileMetaclasses := aClass environment ~~ aNamespace.
-		
-   classVarDict := self
-	parse: stringOfClassVarNames
-	toDictionary: (BindingDictionary new environment: aClass; yourself).
-
+   needToRecompileMetaclasses := false.
    aClass classPool isNil 
        ifTrue: [ aClass setClassVariables: classVarDict ]
        ifFalse: [
@@ -279,7 +273,20 @@ name: newName
 	    ]
 	].
 
-    sharedPoolNames := self parsePools: stringOfPoolNames in: aNamespace.
+    "If instance or indexed variables change, update 
+     instance variables and instance spec of the class and all its subclasses "
+
+    (needToRecompileClasses := variableArray ~= aClass allInstVarNames
+	| needToRecompileMetaclasses) 
+	| (aClass shape ~~ shape)
+	    ifTrue: [
+	        aClass instanceCount > 0
+		    ifTrue: [ ObjectMemory globalGarbageCollect ].
+		aClass
+		    updateInstanceVars: variableArray 
+		    shape: shape
+	    ].
+
     aClass sharedPoolDictionaries isNil 
 	ifTrue: [ aClass setSharedPools: sharedPoolNames ]
 	ifFalse: [
@@ -298,17 +305,17 @@ name: newName
 	].
 
     (aClass superclass ~~ superclass) ifTrue: [
-	 "Fix references between classes..."
-	 aClass superclass removeSubclass: aClass.
-	 superclass addSubclass: aClass.
-	 aClass superclass: superclass.
-	 needToRecompileClasses := true.
+	"Fix references between classes..."
+	aClass superclass removeSubclass: aClass.
+	superclass addSubclass: aClass.
+	aClass superclass: superclass.
+	needToRecompileClasses := true.
 
-	 "...and between metaclasses..."
-	 self superclass removeSubclass: self.
-	 superclass class addSubclass: self.
-	 self superclass: superclass class.
-	 needToRecompileMetaclasses := true.
+	"...and between metaclasses..."
+	self superclass removeSubclass: self.
+	superclass class addSubclass: self.
+	self superclass: superclass class.
+	needToRecompileMetaclasses := true.
     ].
 
     aClass category: categoryName.
@@ -339,52 +346,34 @@ name: newName
 newMeta: className
     environment: aNamespace
     subclassOf: superclass
-    instanceVariableNames: stringOfInstVarNames
-    variable: variableBoolean
-    words: wordBoolean
-    pointers: pointerBoolean
-    classVariableNames: stringOfClassVarNames
-    poolDictionaries: stringOfPoolNames
+    instanceVariableArray: arrayOfInstVarNames
+    shape: shape
+    classPool: classVarDict
+    poolDictionaries: sharedPoolNames
     category: categoryName
 
     "Private - create a full featured class and install it"
 
-    | aClass variableString variableArray sharedPoolNames poolName poolDict
-      classVarDict |
+    | aClass |
 
-    sharedPoolNames := self parsePools: stringOfPoolNames in: aNamespace.
     aClass := self new.
+    classVarDict environment: aClass.
     instanceClass := aClass.
     aNamespace at: className put: aClass.
-    aClass superclass: superclass.
-    aClass setName: className.
-    superclass notNil
-	ifTrue: [
-	    "Inherit instance variables from parent"
-	    variableString := superclass instanceVariableString.
-	    superclass addSubclass: aClass
-	]
-	ifFalse: [ variableString := '' ].
-
-    variableString := variableString , stringOfInstVarNames.
-    variableArray := self parseVariableString: variableString.
-    1 to: variableArray size do:
-	[ :i | variableArray at: i put: (variableArray at: i) asSymbol ].
-
-   classVarDict := self
-	parse: stringOfClassVarNames
-	toDictionary: (BindingDictionary new environment: aClass; yourself).
+    superclass isNil
+	ifFalse: [ superclass addSubclass: aClass ].
 
     Behavior flushCache.
     ^aClass
+        superclass: superclass;
+        setName: className;
 	setEnvironment: aNamespace;
-	setInstanceVariables: variableArray;
-	setInstanceSpec: variableBoolean
-	    words: wordBoolean
-	    pointers: pointerBoolean
-	    instVars: variableArray size;
+	setInstanceVariables: arrayOfInstVarNames;
+	setInstanceSpec: shape
+	    instVars: arrayOfInstVarNames size;
 	setClassVariables: classVarDict;
 	setSharedPools: sharedPoolNames;
+        makeUntrusted: superclass isUntrusted;
 	category: categoryName;
 	yourself
 ! !
@@ -446,13 +435,21 @@ initMetaclass: superclass
     instanceSpec := superclass instanceSpec
 !
 
+parseInstanceVariableString: variableString
+    | variableArray |
+    variableArray := self parseVariableString: variableString.
+
+    1 to: variableArray size do:
+	[ :i | variableArray at: i put: (variableArray at: i) asSymbol ].
+
+    ^variableArray
+!
+
 parseVariableString: aString
     | stream tokens |
     stream := TokenStream on: aString.
     tokens := stream contents.
-    "Smalltalk verboseExecTracing: true."
     tokens do: [ :token | self validateIdentifier: token ].
-    "Smalltalk verboseExecTracing: false."
     ^tokens
 !
 

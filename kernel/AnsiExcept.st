@@ -139,6 +139,16 @@ Notification subclass: #EndOfStream
 EndOfStream comment: 
 'I am raised when a stream reaches its end.'!
 
+Error subclass: #NotEnoughElements
+      instanceVariableNames: 'remainingCount'
+      classVariableNames: ''
+      poolDictionaries: ''
+      category: 'Language-Exceptions'!
+
+NotEnoughElements comment: 
+'I am raised when one invokes #next: but not enough items remain in the
+stream.'!
+
 Error subclass: #InvalidValue
       instanceVariableNames: 'value'
       classVariableNames: ''
@@ -146,16 +156,7 @@ Error subclass: #InvalidValue
       category: 'Language-Exceptions'!
 
 InvalidValue comment: 
-'I am raised when one invokes a method with an invalid argument.'!
-
-InvalidValue subclass: #MustBeBoolean
-      instanceVariableNames: ''
-      classVariableNames: ''
-      poolDictionaries: ''
-      category: 'Language-Exceptions'!
-
-MustBeBoolean comment: 
-'I am raised when one invokes a boolean method on a non-boolean.'!
+'I am raised when one invokes a method with an invalid receiver or argument.'!
 
 InvalidValue subclass: #NotIndexable
       instanceVariableNames: ''
@@ -255,6 +256,15 @@ WrongClass comment:
 'I am raised when an argument is constrained to be an instance of a determinate
 class, and this constraint is not respected by the caller.'!
 
+WrongClass subclass: #MustBeBoolean
+      instanceVariableNames: ''
+      classVariableNames: ''
+      poolDictionaries: ''
+      category: 'Language-Exceptions'!
+
+MustBeBoolean comment: 
+'I am raised when one invokes a boolean method on a non-boolean.'!
+
 InvalidValue subclass: #ProcessTerminated
       instanceVariableNames: ''
       classVariableNames: ''
@@ -294,6 +304,27 @@ Error subclass: #VMError
 
 VMError comment: 
 'I am an error related to the innards of the system.'!
+
+
+VMError subclass: #SecurityError
+      instanceVariableNames: 'failedPermission '
+      classVariableNames: ''
+      poolDictionaries: ''
+      category: 'Language-Exceptions'!
+
+SecurityError comment: 
+'I am an error raised when an untrusted object tries to do an insecure
+operation.'!
+
+
+VMError subclass: #VerificationError
+      instanceVariableNames: ''
+      classVariableNames: ''
+      poolDictionaries: ''
+      category: 'Language-Exceptions'!
+
+VerificationError comment: 
+'I am raised when the verification of a method fails.'!
 
 
 VMError subclass: #BadReturn
@@ -573,8 +604,6 @@ hash
 ! !
 
 
-!Signal methodsFor: 'private'!
-
 !Exception methodsFor: 'private'!
 
 asAnsiException
@@ -788,7 +817,10 @@ doesNotUnderstand: aMessage
     "Called by the system when a selector was not found. message is a
      Message containing information on the receiver"
 
-    ^MessageNotUnderstood new
+     "aMessage inspect."
+     "thisContext parentContext method inspect."
+     "ObjectMemory abort."
+     ^MessageNotUnderstood new
 	message: aMessage receiver: self;
 	signal
 !
@@ -840,6 +872,34 @@ stream
 stream: anObject
     "Set the stream whose end was reached."
     stream := anObject! !
+
+!SystemExceptions.NotEnoughElements class methodsFor: 'signaling'!
+
+signalOn: remainingCount
+    "Answer an exception reporting the parameter as invalid."
+    ^self new
+	remainingCount: remainingCount;
+	signal
+! !
+
+!SystemExceptions.NotEnoughElements methodsFor: 'accessing'!
+
+description
+    "Answer a textual description of the exception."
+    ^'premature end of stream'!
+
+messageText
+    "Answer an exception's message text."
+    ^'%1: %2 element(s) missing' bindWith: self basicMessageText
+	with: self remainingCount!
+
+remainingCount
+    "Answer the number of items that were to be read."
+    ^remainingCount!
+
+remainingCount: anObject
+    "Set the number of items that were to be read."
+    remainingCount := anObject! !
 
 !SystemExceptions.InvalidValue class methodsFor: 'signaling'!
 
@@ -996,7 +1056,7 @@ signalOn: anObject mustBe: aClassOrArray
      they should be."
 
     (aClassOrArray isKindOf: Collection) ifFalse: [
-	^self signalOn: anObject mustBe: { aClassOrArray } ].
+	^self signalOn: anObject mustBe: { aClassOrArray binding } ].
 
     ^self new
 	validClasses: aClassOrArray;
@@ -1023,13 +1083,14 @@ validClassesString
     "Answer the list of classes whose instances would have been valid,
     formatted as a string."
     ^String streamContents: [ :str |
-	validClasses keysAndValuesDo: [ :idx :class |
-	    | name |
+	validClasses keysAndValuesDo: [ :idx :binding |
+	    | name class |
 	    idx > 1 ifTrue: [
 		idx = validClasses size
 		    ifFalse: [ str nextPutAll: ', ' ]
 		    ifTrue: [ str nextPutAll: ' or ' ]
 	    ].
+	    class := binding value.
 	    name := class nameIn: Namespace current.
 	    name first isVowel
 		ifTrue: [ str nextPutAll: 'an ' ]
@@ -1043,6 +1104,11 @@ validClasses: aCollection
     "Set the list of classes whose instances would have been valid."
     validClasses := aCollection! !
 
+!SystemExceptions.MustBeBoolean class methodsFor: 'signaling'!
+
+signalOn: anObject
+    ^self signalOn: anObject mustBe: #( #{Boolean} )! !
+
 !SystemExceptions.NotIndexable methodsFor: 'accessing'!
 
 description
@@ -1054,6 +1120,35 @@ description
 description
     "Answer a textual description of the exception."
     ^'object is read-only'! !
+
+!SystemExceptions.SecurityError class methodsFor: 'accessing'!
+
+signal: aPermission
+    "Raise the exception, setting to aPermission the permission
+     that was tested and failed."
+    ^self new
+	failedPermission: aPermission;
+	signal! !
+
+!SystemExceptions.SecurityError methodsFor: 'accessing'!
+
+description
+    "Answer a textual description of the exception."
+    ^'insecure operation in an untrusted context'!
+
+failedPermission
+    "Answer the permission that was tested and that failed."
+    ^failedPermission!
+
+failedPermission: anObject
+    "Set which permission was tested and failed."
+    failedPermission := anObject! !
+
+!SystemExceptions.VerificationError methodsFor: 'accessing'!
+
+description
+    "Answer a textual description of the exception."
+    ^'a method did not pass the bytecode verification process'! !
 
 !SystemExceptions.BadReturn methodsFor: 'accessing'!
 

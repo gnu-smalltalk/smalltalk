@@ -1,4 +1,4 @@
-/******************************** -*- C -*- ****************************
+/******************************* -*- C -*- ****************************
  *
  *	Functions for byte code optimization & analysis
  *
@@ -31,84 +31,32 @@
 
 #include "gstpriv.h"
 
+/* Define this to have verbose messages from the JIT compiler's
+   basic-block split phase.  */
+/* #define DEBUG_JIT_TRANSLATOR */
+
+/* Define this to have verbose messages from the bytecode verifier.  */
+/* #define DEBUG_VERIFIER */
 
 /* Define this to disable the peephole bytecode optimizer.  It works
-   well and increases a bit performance, so there's no reason to do that
-   unless you're debugging the compiler. */
+   well for decreasing the footprint and increasing the speed, so
+   there's no reason to do that unless you're debugging the compiler.  */
 /* #define NO_OPTIMIZE */
 
+/* Define this to disable superoperators in the peephole bytecode
+   optimizer.  Some simple optimizations will still be done, making
+   the output suitable for searching superoperator candidates.  */
+/* #define NO_SUPEROPERATORS */
+
+/* Define this to disable bytecode verification.  */
+#define NO_VERIFIER
+
 /* The JIT compiler prefers optimized bytecodes, because they are
-   more regular. */
-#ifdef USE_JIT_TRANSLATION
+   more regular.  */
+#ifdef ENABLE_JIT_TRANSLATION
 #undef NO_OPTIMIZE
 #endif
 
-/* This specifies which bytecodes are pushes */
-const int _gst_is_push_table[256] = {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,	/* 0 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,	/* 16 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,	/* 32 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,	/* 48 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,	/* 64 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,	/* 80 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 96 */
-  1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,	/* 112 */
-  1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,	/* 128 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 144 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 160 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 176 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 192 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 208 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 224 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};				/* 240 */
-
-/* This specifies which bytecodes are message sends */
-const int _gst_is_send_table[256] = {
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 0 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 16 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 32 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 48 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 64 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 80 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 96 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 112 */
-  0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 128 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 144 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 160 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,	/* 176 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,	/* 192 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,	/* 208 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,	/* 224 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-};				/* 240 */
-
-/* This specifies the stack balance of bytecodes  */
-static const int stack_balance_table[256] = {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		  /* 0 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		  /* 16 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		  /* 32 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		  /* 48 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		  /* 64 */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		  /* 80 */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /* 96 */
-  1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 255, 0,		  /* 112 */
-  1, 0, -1, 255, 255, 255, 255, -1, 1, 1, 255, 0, 0, 0, 0, 0,	  /* 128 */
-  0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1,	  /* 144 */
-  0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1,	  /* 160 */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /* 176 */
-  -1, -2, 0, 0, -1, 0, -1, 0, -1, 0, -1, -1, 0, -1, 0, 0,	  /* 192 */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,		  /* 208 */
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /* 224 */
-  -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2  /* 240 */
-};
-
-/* The offsets for 2-byte jump bytecodes.  The final offset
-   is jump_offsets[FIRST_BYTE & 15] + SECOND_BYTE */
-static const int jump_offsets[16] = {
-  -1022, -766, -510, -254, 2, 258, 514, 770,
-  2, 258, 514, 770, 2, 258, 514, 770
-};
 
 
 /* This structure and the following one are used by the bytecode
@@ -121,7 +69,7 @@ static const int jump_offsets[16] = {
    bytecode we fill two block_boundaries -- one has positive id and
    represents the destination of the jump, one has negative id (but
    the same absolute value) and represents the jump bytecode
-   itself. */
+   itself.  */
 typedef struct block_boundary
 {
   short byte;
@@ -140,31 +88,99 @@ block_boundary;
    single field at a time -- the id's sign in the block_boundary says
    which field is to be filled, the absolute value gives which jump
    structure is to be filled.  In the end, block_boundaries whose id's
-   absolute value is the same are all paired. */
+   absolute value is the same are all paired.  */
 typedef struct jump
 {
   int from;			/* where the jump bytecode lies */
   int dest;			/* where the jump bytecode lands */
 }
 jump;
+
+/* Basic block data structure, common to the JIT and the verifier.  */
+typedef struct basic_block_item {
+  struct basic_block_item *next;
+  struct basic_block_item **bb;
+  gst_uchar *bp;
+  int sp;
+
+  /* Suspended basic blocks are those for which we know the initial
+     instruction pointer, but not the initial stack pointer.  Since
+     data-flow analysis should walk them, these are put aside
+     momentarily.
+
+     They are generated when there is no basic block for the
+     bytecode after a jump or a return.  If they are unreachable
+     and they follow a jump, they're supposed to have an initial
+     SP = 0, else the initial SP is put to the same as the
+     return bytecode's SP (this is to accomodate comp.c's
+     behavior when emitting "a ifTrue: [ ^1 ] ifFalse: [ ^2 ]").
+
+     However, the initial SP of a suspended block can always be
+     overridden if a jump to the block is found, in which case
+     the flag is cleared.  Suspended basic blocks are processed
+     FIFO, not LIFO like the normal worklist.  */
+  mst_Boolean suspended;
+  OOP stack[1];
+} basic_block_item;
+
+#define ALLOCA_BASIC_BLOCK(dest, depth, bp_, sp_) \
+  do \
+    { \
+      *(dest) = alloca (sizeof (basic_block_item) + \
+		        sizeof (OOP) * ((depth) - 1)); \
+      (*(dest))->bb = (dest); \
+      (*(dest))->bp = (bp_); \
+      (*(dest))->sp = (sp_); \
+      (*(dest))->suspended = false; \
+    } \
+  while (0)
+
+#define INIT_BASIC_BLOCK(bb, temps) \
+  do \
+    { \
+      int i; \
+      for (i = 0; i < (temps); i++) \
+	(bb)->stack[i] = FROM_INT (VARYING); \
+      for (; i < (bb)->sp; i++) \
+	(bb)->stack[i] = FROM_INT (UNDEFINED); \
+    } \
+  while (0)
+
 
+/* Use the hash table and function in superop1.inl to look for a
+   superoperator representing bytecode BC1 with argument ARG, followed
+   by bytecode BC2.  */
+static inline int search_superop_fixed_arg_1 (int bc1,
+					      int arg,
+					      int bc2);
 
-/* Scan the bytecodes between FROM and TO. As they are
-   scanned, they are overwritten with an optimized version; in
-   the end, _gst_compile_bytecodes() is used to append them to the
-   stream of optimized bytecodes.  The return value indicates
-   whether at least a bytecode was generated.  */
-static mst_Boolean optimize_basic_block (gst_uchar * from,
-					 gst_uchar * to);
+/* Use the hash table and function in superop1.inl to look for a
+   superoperator representing bytecode BC1 followed by bytecode BC2
+   with argument ARG.  */
+static inline int search_superop_fixed_arg_2 (int bc1,
+					      int bc2,
+					      int arg);
 
+/* Scan the bytecodes between FROM and TO, performing a handful
+   of peephole optimizations.  As they are overwritten with an
+   optimized version; then, superoperators are created with
+   optimize_superoperators and _gst_compile_bytecodes() is
+   used to append the final bytecodes to the stream of optimized
+   bytecodes.  */
+static void optimize_basic_block (gst_uchar * from,
+				  gst_uchar * to);
+
+/* Scan the peephole-optimized bytecodes between FROM and TO.  */
+gst_uchar *optimize_superoperators (gst_uchar * from,
+			            gst_uchar * to);
 
 /* This compares two block_boundary structures according to their
-   bytecode position. */
+   bytecode position.  */
 static int compare_blocks (const PTR a, const PTR b) ATTRIBUTE_PURE;
 
-/* This answers how the dirtyness of BLOCKCLOSUREOOP affects
+/* This answers how the dirtyness of BLOCKOOP affects
    the block that encloses it.  */
-static inline int check_inner_block (OOP blockClosureOOP);
+static inline int check_inner_block (OOP blockOOP);
 
 /* This fills a table that says to which bytecodes a jump lands.
    Starting from BP, and for a total of SIZE bytes, bytecodes are
@@ -176,283 +192,155 @@ static int make_destination_table (gst_uchar * bp,
 				   int size,
 				   char *dest);
 
+/* Helper function to compute the bytecode verifier's `in'
+   sets from the `out' sets.  */
+static mst_Boolean merge_stacks (OOP *dest,
+				 int dest_sp,
+				 OOP *src,
+				 int src_sp);
+
+
 int
-_gst_is_simple_return (bytecodes bytecodes)
+_gst_is_simple_return (bc_vector bytecodes)
 {
   gst_uchar *bytes;
-  long byteCodeLen;
+  size_t byteCodeLen;
+  int maybe = MTH_NORMAL;
+  OOP maybe_object = NULL;
 
   if (bytecodes == NULL)
-    return (0);
+    return (MTH_NORMAL);
 
   byteCodeLen = _gst_bytecode_length (bytecodes);
   bytes = bytecodes->base;
 
   if (bytes[0] == LINE_NUMBER_BYTECODE)
     {
-      byteCodeLen -= 3;
-      bytes += 3;
+      byteCodeLen -= BYTECODE_SIZE;
+      bytes += BYTECODE_SIZE;
     }
 
-  if (byteCodeLen == 2)
-    {
-      if (bytes[1] != RETURN_CONTEXT_STACK_TOP)
-	return (0);
-
-      /* check for ^INSTANCE_VARIABLE */
-      if ((bytes[0] & ~15) == PUSH_RECEIVER_VARIABLE)
-	return (((bytes[0] & 0x0F) << 8) | 2);
-
-      /* check for ^LITERAL */
-      else if (bytes[0] == PUSH_LIT_CONSTANT)
-	return (3);
-
-      else if (bytes[0] == PUSH_ZERO)
+  MATCH_BYTECODES (IS_SIMPLE_RETURN, bytes, (
+    PUSH_SELF { maybe = MTH_RETURN_SELF; }
+    PUSH_RECEIVER_VARIABLE { maybe = (n << 8) | MTH_RETURN_INSTVAR; }
+    PUSH_LIT_CONSTANT { maybe = (n << 8) | MTH_RETURN_LITERAL; }
+    PUSH_INTEGER { maybe_object = FROM_INT (n); maybe = MTH_RETURN_LITERAL; }
+    PUSH_SPECIAL {
+      maybe = MTH_RETURN_LITERAL;
+      switch (n)
 	{
-	  _gst_add_forced_object (FROM_INT (0));
-	  return (3);
+	  case NIL_INDEX: maybe_object = _gst_nil_oop; break;
+          case TRUE_INDEX: maybe_object = _gst_true_oop; break;
+          case FALSE_INDEX: maybe_object = _gst_false_oop; break;
+	  default: abort ();
 	}
-      else if (bytes[0] == PUSH_ONE)
-	{
-	  _gst_add_forced_object (FROM_INT (1));
-	  return (3);
-	}
-      else
-	return (0);
-
     }
 
-  else if (byteCodeLen == 3)
-    {
-      if (bytes[2] != RETURN_CONTEXT_STACK_TOP)
-	return (0);
+    LINE_NUMBER_BYTECODE,
+    STORE_RECEIVER_VARIABLE,
+    PUSH_OUTER_TEMP, STORE_OUTER_TEMP,
+    JUMP, POP_JUMP_TRUE, POP_JUMP_FALSE,
+    PUSH_TEMPORARY_VARIABLE, PUSH_LIT_VARIABLE,
+    RETURN_CONTEXT_STACK_TOP,
+    STORE_TEMPORARY_VARIABLE, STORE_LIT_VARIABLE,
+    SEND, POP_INTO_NEW_STACKTOP,
+    POP_STACK_TOP, DUP_STACK_TOP,
+    SEND_IMMEDIATE, EXIT_INTERPRETER,
+    SEND_ARITH, SEND_SPECIAL, MAKE_DIRTY_BLOCK,
+    RETURN_METHOD_STACK_TOP { return (MTH_NORMAL); }
 
-      /* check for ^INSTANCE_VARIABLE */
-      if (bytes[0] == PUSH_INDEXED
-	  && (bytes[1] & LOCATION_MASK) == RECEIVER_LOCATION)
-	return (((bytes[1] & ~LOCATION_MASK) << 8) | 2);
+    INVALID { abort(); }
+  ));
 
-      /* check for ^LITERAL */
-      else if (bytes[0] == PUSH_SIGNED_8)
-	{
-	  _gst_add_forced_object (FROM_INT ((signed char) bytes[1]));
-	  return (3);
-	}
+  if (bytes[0] != RETURN_CONTEXT_STACK_TOP)
+    return (MTH_NORMAL);
 
-      else if (bytes[0] == PUSH_UNSIGNED_8)
-	{
-	  _gst_add_forced_object (FROM_INT ((unsigned char) bytes[1]));
-	  return (3);
-	}
-      else
-	return (0);
-    }
+  if (maybe_object)
+    _gst_add_forced_object (maybe_object);
 
-  /* check for ^LITERAL */
-  if (byteCodeLen == 1)
-    {
-      /* check for ^self */
-      if (bytes[0] == (RETURN_INDEXED | RECEIVER_INDEX))
-        return (1);
-
-      if (bytes[0] == (RETURN_INDEXED | TRUE_INDEX))
-	{
-	  _gst_add_forced_object (_gst_true_oop);
-	  return (3);
-	}
-      else if (bytes[0] == (RETURN_INDEXED | FALSE_INDEX))
-	{
-	  _gst_add_forced_object (_gst_false_oop);
-	  return (3);
-	}
-      else if (bytes[0] == (RETURN_INDEXED | NIL_INDEX))
-	{
-	  _gst_add_forced_object (_gst_nil_oop);
-	  return (3);
-	}
-      else
-	return (0);
-    }
-
-  return (0);
+  return (maybe);
 }
 
 int
-_gst_check_kind_of_block (bytecodes bc,
+_gst_check_kind_of_block (bc_vector bc,
 			  OOP * literals)
 {
   int status, newStatus;
   gst_uchar *bp, *end;
-  OOP blockClosureOOP;
 
   status = 0;			/* clean block */
-  for (bp = bc->base, end = bc->ptr; bp != end;
-       bp += BYTECODE_SIZE (*bp))
+  for (bp = bc->base, end = bc->ptr; bp != end; )
     {
-      switch (*bp)
-	{
-	case 134:
-	  if ((bp[1] & 63) == POP_STORE_INTO_ARRAY)
-	    break;
-
-	  /* operation on instance variables - fall through */
-
-	case 0:
-	case 1:
-	case 2:
-	case 3:		/* push instance variable */
-	case 4:
-	case 5:
-	case 6:
-	case 7:
-	case 8:
-	case 9:
-	case 10:
-	case 11:
-	case 12:
-	case 13:
-	case 14:
-	case 15:
-	case 96:
-	case 97:
-	case 98:
-	case 99:		/* pop into instance var */
-	case 100:
-	case 101:
-	case 102:
-	case 103:
-	case 112:
-	case 120:
-	case 140:		/* push self/return/set top */
+      MATCH_BYTECODES (CHECK_KIND_OF_BLOCK, bp, (
+        PUSH_SELF, PUSH_RECEIVER_VARIABLE, 
+	STORE_RECEIVER_VARIABLE {
 	  if (status == 0)
 	    status = 1;
-
-	  break;
-
-	case 32:
-	case 33:
-	case 34:
-	case 35:		/* push literal constant */
-	case 36:
-	case 37:
-	case 38:
-	case 39:
-	case 40:
-	case 41:
-	case 42:
-	case 43:
-	case 44:
-	case 45:
-	case 46:
-	case 47:
-	case 48:
-	case 49:
-	case 50:
-	case 51:
-	case 52:
-	case 53:
-	case 54:
-	case 55:
-	case 56:
-	case 57:
-	case 58:
-	case 59:
-	case 60:
-	case 61:
-	case 62:
-	case 63:
-	  newStatus = check_inner_block (literals[*bp & 31]);
-	  if (newStatus > status)
-	    {
-	      if (newStatus == 31)
-		{
-		  return (31);
-		}
-	      status = newStatus;
-	    }
-	  break;
-
-	case 124:		/* return from method */
-	  return (31);
-
-	case 126:		/* big literal operations */
-	  if ((bp[1] & LOCATION_MASK) != PUSH_LITERAL)
-	    continue;
-
-	  blockClosureOOP =
-	    literals[((bp[1] & ~LOCATION_MASK) << 6) | bp[2]];
-	  newStatus = check_inner_block (blockClosureOOP);
-	  if (newStatus > status)
-	    {
-	      if (newStatus == 31)
-		return (31);
-
-	      status = newStatus;
-	    }
-	  break;
-
-	case 137:		/* push this context */
-	  if (bp[1] != BLOCK_COPY_COLON_SPECIAL)
-	    return (31);
-
-	  break;
-
-	case 128:
-	case 129:
-	case 130:
-	case 142:		/* 2-byte stack ops */
-	  if ((bp[1] & LOCATION_MASK) == RECEIVER_LOCATION
-	      && status == 0)
-	    status = 1;
-
-	  else if ((bp[1] & LOCATION_MASK) == LIT_CONST_LOCATION)
-	    {
-	      newStatus =
-		check_inner_block (literals[bp[1] & ~LOCATION_MASK]);
-	      if (newStatus > status)
-		{
-		  if (newStatus == 31)
-		    return (31);
-
-		  status = newStatus;
-		}
-	    }
-	  break;
-
-	case 138:		/* outer temp operation */
-	  if (status < (1 + bp[2]))
-	    {
-	      status = 1 + bp[2];
-	      if (status > 31)	/* ouch! how deep!! */
-		return (31);
-	    }
-	  break;
 	}
+
+        PUSH_LIT_CONSTANT {
+	  newStatus = check_inner_block (literals[n]);
+	  if (newStatus > status)
+	    {
+	      if (newStatus == 31)
+		return (31);
+	      status = newStatus;
+	    }
+        }
+
+        PUSH_OUTER_TEMP, STORE_OUTER_TEMP  {
+	  if (status < 1 + scopes) status = 1 + scopes;
+	  if (status > 31)
+	    /* ouch! how deep!! */
+	    return (31);
+	}
+
+        JUMP,
+        POP_JUMP_TRUE,
+        POP_JUMP_FALSE,
+        PUSH_TEMPORARY_VARIABLE,
+        PUSH_LIT_VARIABLE,
+        PUSH_SPECIAL,
+        PUSH_INTEGER,
+        RETURN_CONTEXT_STACK_TOP,
+        LINE_NUMBER_BYTECODE,
+        STORE_TEMPORARY_VARIABLE,
+        STORE_LIT_VARIABLE,
+        SEND,
+        POP_INTO_NEW_STACKTOP,
+        POP_STACK_TOP,
+        DUP_STACK_TOP,
+        EXIT_INTERPRETER,
+        SEND_ARITH,
+        SEND_SPECIAL,
+        SEND_IMMEDIATE,
+	MAKE_DIRTY_BLOCK { }
+
+        RETURN_METHOD_STACK_TOP { return (31); }
+        INVALID { abort(); }
+      ));
     }
   return (status);
 }
 
 int
-check_inner_block (OOP blockClosureOOP)
+check_inner_block (OOP blockOOP)
 {
   int newStatus;
-  gst_block_closure blockClosure;
   gst_compiled_block block;
 
-  if (!IS_CLASS (blockClosureOOP, _gst_block_closure_class))
+  if (!IS_CLASS (blockOOP, _gst_compiled_block_class))
     return (0);
 
-  /* This case is the most complicated -- we must check the cleanness
-     of the inner block and adequately change the status. 
+  /* Check the cleanness of the inner block and adequately change the status. 
      full block: no way dude -- exit immediately
      clean block: same for us 
      receiver access: same for us
      access to temps in the Xth context: from the perspective of the block
      being checked here, it is like an access to temps in the (X-1)th
      context access to this block's temps: our outerContext can be nil
-     either, but for safety we won't be a clean block. */
-  blockClosure = (gst_block_closure) OOP_TO_OBJ (blockClosureOOP);
-  block = (gst_compiled_block) OOP_TO_OBJ (blockClosure->block);
+     either, but for safety we won't be a clean block.  */
+  block = (gst_compiled_block) OOP_TO_OBJ (blockOOP);
   newStatus = block->header.clean;
   switch (newStatus)
     {
@@ -475,18 +363,18 @@ compare_blocks (const PTR a, const PTR b)
   return (ba->byte - bb->byte);
 }
 
-bytecodes
-_gst_optimize_bytecodes (bytecodes bytecodes)
+bc_vector
+_gst_optimize_bytecodes (bc_vector bytecodes)
 {
+#ifdef NO_OPTIMIZE
+  return (bytecodes);
+#else
+  bc_vector old_bytecodes;
   block_boundary *blocks, *current;
   jump *jumps;
   gst_uchar *bp;
   gst_uchar *end, *first;
   int num;
-
-#ifdef NO_OPTIMIZE
-  return (bytecodes);
-#endif
 
   bp = bytecodes->base;
   end = bytecodes->ptr;
@@ -494,133 +382,115 @@ _gst_optimize_bytecodes (bytecodes bytecodes)
   memset (blocks, 0, sizeof (block_boundary) * (end - bp + 1));
 
   /* 1) Split into basic blocks.  This part cheats so that the final
-     fixup also performs jump optimization. */
-  for (current = blocks, num = 0; bp != end; bp += BYTECODE_SIZE (*bp))
+     fixup also performs jump optimization.  */
+  for (current = blocks, num = 0; bp != end; bp += BYTECODE_SIZE)
     {
       gst_uchar *dest = bp;
-      mst_Boolean canOptimizeJump;
+      gst_uchar *first_byte;
+      mst_Boolean canOptimizeJump, split;
+      split = false;
+
       do
 	{
+	  first_byte = dest;
 	  canOptimizeJump = false;
-	  switch (*dest)
-	    {
-	      /* short jump */
-	    case JUMP_SHORT:
-	      if (dest[2] == POP_STACK_TOP)
-		{
-		  /* The bytecodes can only be those produced by
-		     #ifTrue:/#ifFalse: 
-			     0: jump to 2 
-			     1: push nil 
-			     2: pop stack top 
+	  MATCH_BYTECODES (THREAD_JUMPS, dest, (
+	    MAKE_DIRTY_BLOCK,
+	    SEND_SPECIAL,
+	    SEND_ARITH,
+	    SEND_IMMEDIATE,
+	    PUSH_RECEIVER_VARIABLE,
+	    PUSH_TEMPORARY_VARIABLE,
+	    PUSH_LIT_CONSTANT,
+	    PUSH_LIT_VARIABLE,
+	    PUSH_SELF,
+	    PUSH_SPECIAL,
+	    PUSH_INTEGER,
+	    LINE_NUMBER_BYTECODE,
+	    STORE_RECEIVER_VARIABLE,
+	    STORE_TEMPORARY_VARIABLE,
+	    STORE_LIT_VARIABLE,
+	    SEND,
+	    POP_INTO_NEW_STACKTOP,
+	    POP_STACK_TOP,
+	    DUP_STACK_TOP,
+	    PUSH_OUTER_TEMP,
+	    STORE_OUTER_TEMP,
+	    EXIT_INTERPRETER { }
 
-		     This could not be optimized to a single
-		     pop, cause bytecodes 1 and 2 lie in different
+	    JUMP {
+	      if (ofs == 2
+		  && dest[0] == LINE_NUMBER_BYTECODE)
+		{
+		  /* This could not be optimized to a nop, cause the
+		     jump and line number bytecodes lie in different
 		     basic blocks! So we rewrite it to a functionally
-		     equivalent but optimizable bytecode sequence. */
-		  *dest = POP_STACK_TOP;
-		  break;
+		     equivalent but optimizable bytecode sequence.  */
+		  dest[-2] = dest[0];
+		  dest[-1] = dest[1];
 		}
-	      /* Fall through */
-
-	    case JUMP_SHORT | 1:
-	    case JUMP_SHORT | 2:
-	    case JUMP_SHORT | 3:
-	    case JUMP_SHORT | 4:
-	    case JUMP_SHORT | 5:
-	    case JUMP_SHORT | 6:
-	    case JUMP_SHORT | 7:
-	      /* If bp == dest, we could end up writing a 2-byte jump
-	         bytecode where space was only reserved for a 1-byte
-	         jump bytecode! But if we jump to a return, we can
-	         safely optimize -- returns are always one byte */
-	      canOptimizeJump = (bp != dest);
-	      dest += *dest;
-	      dest -= 142;
-	      canOptimizeJump |= (*dest >= 120 && *dest <= 125);
-	      break;
-
-	      /* pop and short jump if false */
-	    case POP_JUMP_FALSE_SHORT:
-	    case POP_JUMP_FALSE_SHORT | 1:
-	    case POP_JUMP_FALSE_SHORT | 2:
-	    case POP_JUMP_FALSE_SHORT | 3:
-	    case POP_JUMP_FALSE_SHORT | 4:
-	    case POP_JUMP_FALSE_SHORT | 5:
-	    case POP_JUMP_FALSE_SHORT | 6:
-	    case POP_JUMP_FALSE_SHORT | 7:
-	      /* UNCONDITIONAL jumps to CONDITIONAL jumps must not be
-	         touched! */
-	      if (bp == dest)
+	      else if (ofs == 4
+		  && IS_PUSH_BYTECODE (dest[0])
+		  && dest[2] == POP_STACK_TOP)
 		{
-		  dest += *dest;
-		  dest -= 150;
-		}
-	      break;
-
-	      /* long jump, pop and long jump if true, pop and long
-	         jump if false */
-	    case JUMP_LONG:
-	    case JUMP_LONG | 1:
-	    case JUMP_LONG | 2:
-	    case JUMP_LONG | 3:
-	    case JUMP_LONG | 4:
-	    case JUMP_LONG | 5:
-	    case JUMP_LONG | 6:
-	    case JUMP_LONG | 7:
-	      /* 2-byte unconditional jump, we can indeed optimize it */
-	      canOptimizeJump = true;
-	      dest += ((signed int) dest[1]) + jump_offsets[*dest & 15];
-	      break;
-
-	    case POP_JUMP_TRUE:
-	    case POP_JUMP_TRUE | 1:
-	    case POP_JUMP_TRUE | 2:
-	    case POP_JUMP_TRUE | 3:
-	    case POP_JUMP_FALSE:
-	    case POP_JUMP_FALSE | 1:
-	    case POP_JUMP_FALSE | 2:
-	    case POP_JUMP_FALSE | 3:
-	      /* UNCONDITIONAL jumps to CONDITIONAL jumps must not be
-	         touched! */
-	      if (bp == dest)
-		dest +=
-		  ((signed int) dest[1]) + jump_offsets[*dest & 15];
-
-	      break;
-
-	    case RETURN_INDEXED:
-	    case RETURN_INDEXED | 1:
-	    case RETURN_INDEXED | 2:
-	    case RETURN_INDEXED | 3:
-	    case RETURN_METHOD_STACK_TOP:
-	    case RETURN_CONTEXT_STACK_TOP:
-	      /* Return bytecodes - patch the original jump to return
-	         directly */
-	      if (*bp >= JUMP_LONG)
-		{
-		  bp[0] = NOP_BYTECODE;
-		  bp[1] = *dest;	/* fill both bytes */
+		  /* This could not be optimized to a single pop,
+		     cause the push and pop bytecodes lie in different
+		     basic blocks! Again, rewrite to an optimizable
+		     sequence.  */
+		  dest[-2] = POP_STACK_TOP;
+		  dest[-1] = 0;
 		}
 	      else
-		*bp = *dest;
+		{
+	          /* Don't optimize jumps that land on one which has extension
+		     bytes.  But if we jump to a return, we can safely optimize:
+		     returns are never extended, and the interpreter ignores the
+		     extension byte.  */
+	          canOptimizeJump = (*IP0 != EXT_BYTE);
+	          dest = IP0 + ofs;
+	  	  current->byte = dest - bytecodes->base;
+	          canOptimizeJump |= IS_RETURN_BYTECODE (*dest);
+		  split = true;
+		}
+	    }
+
+	    POP_JUMP_TRUE, POP_JUMP_FALSE {
+	      /* Jumps to CONDITIONAL jumps must not be touched, either because
+		 they were unconditional or because they pop the stack top! */
+	      if (first_byte == bp)
+		{
+		  dest = IP0 + ofs;
+	  	  current->byte = dest - bytecodes->base;
+		  split = true;
+		}
+	    }
+
+	    RETURN_METHOD_STACK_TOP, RETURN_CONTEXT_STACK_TOP {
+	      /* Return bytecodes - patch the original jump to return
+	         directly */
+	      bp[0] = dest[-2];
+	      bp[1] = 0;
 
 	      /* This in fact eliminated the jump, don't split in basic 
 	         blocks */
-	      dest = bp;
-	      break;
+	      split = false;
 	    }
+
+	    INVALID { abort (); }
+	  ));
 	}
       while (canOptimizeJump);
-      if (bp != dest)
+      if (split)
 	{
-	  current->byte = dest - bytecodes->base;
 	  current->id = ++num;
 	  current++;
 	  current->byte = bp - bytecodes->base;
 	  current->id = -num;
 	  current++;
 	}
+
+      while (*bp == EXT_BYTE)
+	bp += BYTECODE_SIZE;
     }
 
   /* 2) Get the "real" block boundaries by sorting them according to
@@ -628,14 +498,14 @@ _gst_optimize_bytecodes (bytecodes bytecodes)
      bucket sort is not enough because multiple jumps could end on the
      same bytecode, and the same bytecode could be both the start and
      the destination of a jump! */
-  qsort (blocks, current - blocks, sizeof (block_boundary),
-	 compare_blocks);
+  qsort (blocks, current - blocks, sizeof (block_boundary), compare_blocks);
 
   /* 3) Optimize the single basic blocks, and reorganize into `jumps'
      the data that was put in blocks */
   jumps = alloca (sizeof (jump) * num);
 
-  _gst_alloc_bytecodes ();
+  old_bytecodes = _gst_save_bytecode_array ();
+
   for (bp = bytecodes->base; blocks != current; blocks++)
     {
       first = bp;
@@ -647,8 +517,8 @@ _gst_optimize_bytecodes (bytecodes bytecodes)
       else
 	jumps[-blocks->id - 1].from = _gst_current_bytecode_length ();
     }
-  optimize_basic_block (bp, end);
 
+  optimize_basic_block (bp, end);
   _gst_free_bytecodes (bytecodes);
   bytecodes = _gst_get_bytecodes ();
 
@@ -656,453 +526,483 @@ _gst_optimize_bytecodes (bytecodes bytecodes)
      same basic block */
   for (; num--; jumps++)
     {
-      short offset;
+      int ofs;
 
       bp = bytecodes->base + jumps->from;
-      offset = jumps->dest - jumps->from - 2;
-      if (offset == -1)
-	{			/* jump to following bytecode do */
-	  if (*bp >= JUMP_LONG)	/* NOT exist - use other bytecodes */
-	    bp[1] = NOP_BYTECODE;	/* 2 byte jumps = nop+nop or
-					   pop+nop */
+      ofs = jumps->dest - jumps->from - 2;
 
-	  if (*bp & 8)
-	    *bp = POP_STACK_TOP;	/* pop stack top for
-					   conditionals */
-	  else
-	    *bp = NOP_BYTECODE;	/* nop for unconditional jumps */
+      /* Fill the bytes from the topmost one.  */
+      while (*bp == EXT_BYTE)
+        ofs -= 2, bp += BYTECODE_SIZE;
 
-	  continue;
-	}
-      switch (*bp & ~7)
+      if (ofs == 0 && (*bp & ~1) != JUMP)
 	{
-	  /* short jumps */
-	case JUMP_SHORT:
-	  *bp = JUMP_SHORT | offset;
-	  continue;
-	case POP_JUMP_FALSE_SHORT:
-	  *bp = POP_JUMP_FALSE_SHORT | offset;
-	  continue;
-
-	  /* long jumps */
-	case JUMP_LONG:
-	  *bp = JUMP_LONG | 4;
-	  break;
-	case POP_JUMP_TRUE:
-	  *bp &= ~3;
-	  break;
+	  /* Use pop stack top for conditionals which jump to
+	     the following bytecode.  */
+	  bp[0] = POP_STACK_TOP;
+	  bp[1] = 0;
 	}
-      *bp++ += offset >> 8;
-      *bp = offset & 255;
+      else
+	{
+	  if (ofs < 0)
+	    ofs = -ofs;
+
+	  do
+	    {
+	      bp[1] = ofs & 255;
+	      bp -= BYTECODE_SIZE;
+	      ofs >>= 8;
+	    }
+	  while UNCOMMON (*bp == EXT_BYTE);
+	}
     }
 
+  _gst_restore_bytecode_array (old_bytecodes);
+
   return (bytecodes);
+#endif
 }
 
-mst_Boolean
+static inline int
+search_superop_fixed_arg_1(int bc1, int arg, int bc2)
+{
+  /* ARG is in the range 0..255.  The format of the hash table entries is
+
+     { { BC1, BC2, ARG }, SUPEROP } */
+
+  struct superop_with_fixed_arg_1_type {
+    unsigned char bytes[3];
+    int superop;
+  };
+
+#include "superop1.inl"
+
+  unsigned int key = asso_values[bc1] + asso_values[bc2] + asso_values[arg];
+
+  register const struct superop_with_fixed_arg_1_type *k;
+
+  if (key > MAX_HASH_VALUE)
+    return -1;
+
+  k = &keylist[key];
+  if (bc1 == k->bytes[0] && bc2 == k->bytes[1] && arg == k->bytes[2])
+    return k->superop;
+  else
+    return -1;
+}
+
+
+static inline int
+search_superop_fixed_arg_2(int bc1, int bc2, int arg)
+{
+  /* ARG is in the range 0..255.  The format of the hash table entries is
+
+     { { BC1, BC2, ARG }, SUPEROP } */
+
+  struct superop_with_fixed_arg_2_type {
+    unsigned char bytes[3];
+    int superop;
+  };
+
+#include "superop2.inl"
+
+  unsigned int key = asso_values[bc1] + asso_values[bc2] + asso_values[arg];
+
+  register const struct superop_with_fixed_arg_2_type *k;
+
+  if (key > MAX_HASH_VALUE)
+    return -1;
+
+  k = &keylist[key];
+  if (bc1 == k->bytes[0] && bc2 == k->bytes[1] && arg == k->bytes[2])
+    return k->superop;
+  else
+    return -1;
+}
+
+void
 optimize_basic_block (gst_uchar * from,
 		      gst_uchar * to)
 {
-#define NEXT(size) BEGIN_MACRO {	\
-  n = size;				\
-  opt += size;				\
-  continue;				\
-} END_MACRO
+  /* Points to the optimized bytecodes that have been written. */
+  gst_uchar *opt = from;
 
-#define REPLACE(size) BEGIN_MACRO {	\
-  n = size;				\
-  continue;				\
-} END_MACRO
+  /* Points to the unoptimized bytecodes as they are read.  */
+  gst_uchar *bp = from;
 
-#define COPY BEGIN_MACRO {		\
-  n = BYTECODE_SIZE(byte);		\
-  opt++;				\
-  if(n != 1) *opt++ = *bp++;		\
-  if(n == 3) *opt++ = *bp++;		\
-  continue;				\
-} END_MACRO
+  if (from == to)
+    return;
 
-#define BEGIN	     if(0) {
-#define BYTECODE(n)  } else if(byte == (n)) {
-#define RANGE(a, b)  } else if((unsigned char)(byte - (a)) <= ((b) - (a))) {
-#define EITHER(a, b) } else if(byte == (a) b) {
-#define OR(b)  		       || byte == (b)
-#define CONDITION(c) } else if(c) {
-#define NO_MATCH     } else {
-#define END	     }
+  /* For simplicity, the optimizations on line number bytecodes
+     don't take into account the possibility that the line number
+     bytecode is extended (>256 lines in a method).  This almost
+     never happens, so we don't bother.  */
 
-
-  gst_uchar byte, *bp, *opt;
-  int n;
-
-  bp = opt = from;
-  n = 0;
-  while (bp != to)
+  do
     {
-      byte = *opt = *bp++;
-      BEGIN
-	RANGE (RETURN_INDEXED, RETURN_CONTEXT_STACK_TOP) 
-	  opt++;
-          break;		/* this `break' performs unreachable
-				   code elimination! */
-
-	BYTECODE (NOP_BYTECODE) 
-	  REPLACE (n);
-
-        BYTECODE (NOT_EQUAL_SPECIAL) 
-	  if (!n)
-	    NEXT (1);
-	  if (opt[-n] == (PUSH_SPECIAL | NIL_INDEX))
-	    {			/* x ~= nil */
-	      opt[-n] = NOT_NIL_SPECIAL;
-	      REPLACE (1);
-	    }
-	  NEXT (1);
-
-	EITHER (SAME_OBJECT_SPECIAL, OR (EQUAL_SPECIAL)) 
-	  if (!n)
-	    NEXT (1);
-	  if (opt[-n] == (PUSH_SPECIAL | NIL_INDEX))
-	    {			/* x = nil, x == nil */
-	      opt[-n] = IS_NIL_SPECIAL;
-	      REPLACE (1);
-	    }
-	  NEXT (1);
-
-        BYTECODE (POP_STACK_TOP) 
-	  if (n)
+      switch (bp[0])
+	{
+	case LINE_NUMBER_BYTECODE:
+	  /* Remove two consecutive line-number bytecode.  */
+	  if (bp < to - 2
+	      && bp[2] == LINE_NUMBER_BYTECODE)
 	    {
-	      byte = opt[-n];
-	      BEGIN 
-		CONDITION (IS_PUSH_BYTECODE (byte))	/* push/pop */
-		  opt -= n;
-	          NEXT (0);
-
-		BYTECODE (STORE_INDEXED)	/* store/pop */
-		  byte = *--opt;	/* get data byte */
-		  opt--;		/* move to opcode */
-		  if (byte < 8)
-		    {
-		      *opt = POP_RECEIVER_VARIABLE | byte;
-		      NEXT (1);
-		    }
-		  else if (byte >= 64 && byte < 72)
-		    {
-		      *opt = POP_TEMPORARY_VARIABLE | (byte & 63);
-		      NEXT (1);
-		    }
-		  else
-		    {
-		      *opt = POP_STORE_INDEXED;
-		      NEXT (2);
-		    }
-		  
-		EITHER (BIG_LITERALS_BYTECODE, 
-			OR (BIG_INSTANCE_BYTECODE) 
-			OR (OUTER_TEMP_BYTECODE))
-
-		  byte = opt[-2];	/* get second byte */
-		  if (byte < POP_STORE_VARIABLE)
-		    {
-		      opt -= n;		/* push/pop */
-		      NEXT (0);
-		    }
-		  else if (byte >= STORE_VARIABLE)
-		    {
-		      opt[-2] ^= (POP_STORE_VARIABLE ^ STORE_VARIABLE);
-		      REPLACE (3);
-		    }
-	      END;
+	      bp += 2;
+	      continue;
 	    }
+	  break;
 
-	  if (bp != to && (*bp & ~3) == RETURN_INDEXED)
+        case PUSH_TEMPORARY_VARIABLE:
+        case PUSH_LIT_VARIABLE:
+        case PUSH_RECEIVER_VARIABLE:
+	  /* Leave only the store in store/pop/push sequences.  */
+	  if (opt >= from + 4
+	      && (opt == from + 4 || opt[-6] != EXT_BYTE)
+	      && opt[-4] == bp[0] + (STORE_TEMPORARY_VARIABLE - PUSH_TEMPORARY_VARIABLE)
+	      && opt[-3] == bp[1]
+	      && opt[-2] == POP_STACK_TOP
+	      && bp[-2] != EXT_BYTE)
 	    {
-	      *opt++ = *bp++;	/* pop/return */
-	      break;		/* kill unreachable code */
+	      opt -= 2;
+	      bp += 2;
+	      continue;
 	    }
-	  NEXT (1);
 
-	CONDITION (IS_PUSH_BYTECODE (byte))	/* push/push -> dup */
-	  if (!n)
-	    COPY;
-	  if (opt[-n] == *opt)
+	  /* Also rewrite store/pop/line/push to store/line in the middle.  */
+	  if (opt >= from + 6
+	      && (opt == from + 6 || opt[-8] != EXT_BYTE)
+	      && opt[-6] == bp[0] + (STORE_TEMPORARY_VARIABLE - PUSH_TEMPORARY_VARIABLE)
+	      && opt[-5] == bp[1]
+	      && opt[-4] == POP_STACK_TOP
+	      && opt[-2] == LINE_NUMBER_BYTECODE
+	      && bp[-2] != EXT_BYTE)
 	    {
-	      if (n == 1)
-		{
-		  *opt = DUP_STACK_TOP;
-		  NEXT (1);
-		}
-	      else if (opt[-1] == *bp)
-		{
-		  *opt = DUP_STACK_TOP;
-		  bp++;
-		  NEXT (1);
-		}
+	      opt[-4] = opt[-2];
+	      opt[-3] = opt[-1];
+	      opt -= 2;
+	      bp += 2;
+	      continue;
 	    }
 
-	  BEGIN			/* pop-store/push -> store */
-	    RANGE (PUSH_RECEIVER_VARIABLE, PUSH_RECEIVER_VARIABLE | 7)
-	      if (opt[-n] == (POP_RECEIVER_VARIABLE | (byte & 15)))
-		{
-		  opt[-1] = STORE_INDEXED;
-		  *opt++ = RECEIVER_LOCATION | (byte & 15);
-		  REPLACE (2);
-		}
-	      if (opt[-n] == POP_STACK_TOP)
-	        {			/* pop/push -> replace */
-		  opt--;
-		  *opt++ = REPLACE_INDEXED;
-		  *opt++ = RECEIVER_LOCATION | (byte & 15);
-		  REPLACE (2);
-		}
+	  /* fall through to other pushes.  */
 
-	    RANGE (PUSH_RECEIVER_VARIABLE | 8, PUSH_RECEIVER_VARIABLE | 15)
-	      if (opt[-n] == POP_STORE_INDEXED
-		  && opt[-1] == (RECEIVER_LOCATION | (byte & 15)))
-		{
-		  opt[-2] = STORE_INDEXED;
-		  REPLACE (2);
-		}
-	      if (opt[-n] == POP_STACK_TOP)
-		{
-		  opt--;
-		  *opt++ = REPLACE_INDEXED;
-		  *opt++ = RECEIVER_LOCATION | (byte & 15);
-		  REPLACE (2);
-		}
-
-	    RANGE (PUSH_TEMPORARY_VARIABLE, PUSH_TEMPORARY_VARIABLE | 7)
-	      if (opt[-n] == (POP_TEMPORARY_VARIABLE | (byte & 15)))
-		{
-		  opt[-1] = STORE_INDEXED;
-		  *opt++ = TEMPORARY_LOCATION | (byte & 15);
-		  REPLACE (2);
-		}
-	      if (opt[-n] == POP_STACK_TOP)
-		{
-		  opt--;
-		  *opt++ = REPLACE_INDEXED;
-		  *opt++ = TEMPORARY_LOCATION | (byte & 15);
-		  REPLACE (2);
-		}
-
-	    RANGE (PUSH_TEMPORARY_VARIABLE | 8, PUSH_TEMPORARY_VARIABLE | 15)
-	      if (opt[-n] == POP_STORE_INDEXED
-		  && opt[-1] == (TEMPORARY_LOCATION | (byte & 15)))
-		{
-		  opt[-2] = STORE_INDEXED;
-		  REPLACE (2);
-		}
-	      if (opt[-n] == POP_STACK_TOP)
-	        {
-		  opt--;
-		  *opt++ = REPLACE_INDEXED;
-		  *opt++ = TEMPORARY_LOCATION | (byte & 15);
-		  REPLACE (2);
-		}
-
-	    RANGE (PUSH_LIT_VARIABLE, PUSH_LIT_VARIABLE | 31)
-	      if (opt[-n] == POP_STORE_INDEXED
-		  && opt[-1] == (LIT_VAR_LOCATION | (byte & 31)))
-		{
-		  opt[-2] = STORE_INDEXED;
-		  REPLACE (2);
-		}
-	      if (opt[-n] == POP_STACK_TOP)
-		{
-		  opt--;
-		  *opt++ = REPLACE_INDEXED;
-		  *opt++ = LIT_VAR_LOCATION | (byte & 31);
-		  REPLACE (2);
-		}
-
-	    RANGE (PUSH_LIT_CONSTANT, PUSH_LIT_CONSTANT | 31)
-	      if (opt[-n] == POP_STACK_TOP)
-		{
-		  opt--;
-		  *opt++ = REPLACE_INDEXED;
-		  *opt++ = LIT_CONST_LOCATION | (byte & 31);
-		  REPLACE (2);
-		}
-
-	    BYTECODE (PUSH_SPECIAL | RECEIVER_INDEX)
-	      if (opt[-n] == POP_STACK_TOP)
-		{
-		  opt[-1] = REPLACE_SELF;
-		  REPLACE (1);
-		}
-
-	    BYTECODE (PUSH_ONE)
-	      if (opt[-n] == POP_STACK_TOP)
-		{
-		  opt[-1] = REPLACE_ONE;
-		  REPLACE (1);
-		}
-
-	    BYTECODE (PUSH_INDEXED)
-	      byte = *bp++;
-	      if (opt[-n] == POP_STORE_INDEXED)
-		{
-		  opt[-2] = STORE_INDEXED;
-		  if (opt[-1] == byte)
-		    REPLACE (2);
-		  else
-		    *opt = REPLACE_INDEXED;
-		}
-	      else if (opt[-n] == POP_STACK_TOP)
-		*--opt = REPLACE_INDEXED;
-
-	      opt[1] = byte;
-	      NEXT (2);
-
-	  END;
-	  COPY;
-
-        BYTECODE (BIG_INSTANCE_BYTECODE) 
-	  if (!n || opt[-n] != byte)
-	    COPY;
-
-          byte = opt[-2];		/* get second byte */
-	  if (byte < PUSH_VARIABLE)
-	    ;	  /* do nothing */
-	  else if (byte < POP_STORE_VARIABLE)
+        case PUSH_OUTER_TEMP:
+        case PUSH_INTEGER:
+        case PUSH_SELF:
+        case PUSH_SPECIAL:
+        case PUSH_LIT_CONSTANT:
+	  /* Remove a push followed by a pop */
+          if (bp < to - 2
+	      && bp[2] == POP_STACK_TOP)
 	    {
-	      if (byte == *bp && opt[-1] == bp[1])
-		{			/* push/push -> dup */
-		  *opt = DUP_STACK_TOP;
-		  bp += 2;
-		  NEXT (1);
-		}
+	      bp += 4;
+	      continue;
 	    }
-	  else if (byte < STORE_VARIABLE)
-	    {			/* pop-store/push -> store */
-	      if ((byte & 63) == (*bp & 63) && opt[-1] == bp[1])
-		{
-		  opt[-2] ^= (POP_STORE_VARIABLE ^ STORE_VARIABLE);
-		  bp += 2;
-		  REPLACE (3);
-		}
-	    }
-	  
-	  opt++;
-	  *opt++ = *bp++;
-	  *opt++ = *bp++;
-	  REPLACE (3);
 
-        EITHER (BIG_LITERALS_BYTECODE,
-	        OR (OUTER_TEMP_BYTECODE)) 
-	  if (!n || opt[-n] != byte)
-	    COPY;
+	  /* Remove the pop in a pop/push/return sequence */
+          if (opt >= from + 2 && bp < to - 2
+	      && bp[2] == RETURN_CONTEXT_STACK_TOP
+	      && opt[-2] == POP_STACK_TOP)
+	    opt -= 2;
 
-          byte = opt[-2];		/* get second byte */
-	  if (byte < POP_STORE_VARIABLE)
+	  /* Rewrite the pop/line number/push sequence to
+	     line number/pop/push because this can be better
+	     optimized by superoperators (making a superoperator
+	     with a nop byte saves on decoding, but not on
+	     scheduling the instructions in the interpreter!).  */
+	  if (opt >= from + 4
+	      && opt[-4] == POP_STACK_TOP
+	      && opt[-2] == LINE_NUMBER_BYTECODE)
 	    {
-	      if (byte == *bp && opt[-1] == bp[1])
-		{			/* push/push -> dup */
-		  *opt = DUP_STACK_TOP;
-		  bp += 2;
-		  NEXT (1);
-		}
+	      opt[-4] = LINE_NUMBER_BYTECODE;
+	      opt[-3] = opt[-1];
+	      opt[-2] = POP_STACK_TOP;
+	      opt[-1] = 0;
 	    }
-	  else if (byte < STORE_VARIABLE)
-	    {			/* pop-store/push -> store */
-	      if ((byte & 63) == (*bp & 63) && opt[-1] == bp[1])
-		{
-		  opt[-2] ^= (POP_STORE_VARIABLE ^ STORE_VARIABLE);
-		  bp += 2;
-		  REPLACE (3);
-		}
-	    }
-	  
-	  opt++;
-	  *opt++ = *bp++;
-	  *opt++ = *bp++;
-	  REPLACE (3);
+	  break;
 
-	NO_MATCH
-	  COPY;
-      END;
+	default:
+	  break;
+	}
+
+      /* Else, just copy the bytecode to the optimized area.  */
+      *opt++ = *bp++;
+      *opt++ = *bp++;
+    }
+  while (bp < to);
+
+#ifndef NO_SUPEROPERATORS
+  opt = optimize_superoperators (from, opt);
+#endif
+  _gst_compile_bytecodes (from, opt);
+}
+
+gst_uchar *
+optimize_superoperators (gst_uchar * from,
+		         gst_uchar * to)
+{
+  /* Points to the optimized bytecodes that have been written. */
+  gst_uchar *opt = from;
+
+  /* Points to the unoptimized bytecodes as they are read.  */
+  gst_uchar *bp = from;
+
+  int new_bc;
+
+  if (from == to)
+    return from;
+
+  *opt++ = *bp++;
+  *opt++ = *bp++;
+  while (bp < to)
+    {
+      /* Copy two bytecodes to the optimized area.  */
+      *opt++ = *bp++;
+      *opt++ = *bp++;
+
+      do
+        {
+	  /* Try to match the case when the second argument is fixed.
+	     We try this first because
+		EXT_BYTE(*), SEND(1)
+
+	     is more beneficial than
+		EXT_BYTE(1), SEND(*).  */
+	  new_bc = search_superop_fixed_arg_2 (opt[-4], opt[-2], opt[-1]);
+	  if (new_bc != -1)
+	    {
+	      opt[-4] = new_bc;
+	      /* opt[-3] is already ok */
+	      opt -= 2;
+
+	      /* Look again at the last four bytes.  */
+	      continue;
+	    }
+
+	  /* If the first bytecode is not extended, try matching it with a
+	     fixed argument.  We skip this when the first bytecode is
+	     extended because otherwise we might have superoperators like
+
+	       PUSH_OUTER_TEMP(1), SEND(*)
+
+	     Suppose we find
+
+	       EXT_BYTE(1), SUPEROP(2)
+
+	     Now the argument to SEND is 2, but the interpreter receives
+	     an argument of 258 and has to decode the argument to extract
+	     the real argument of PUSH_OUTER_TEMP (found in the extension
+	     byte).  This messes up everything and goes against the very
+	     purpose of introducing superoperators.  */
+	  if (opt - from == 4 || opt[-6] != EXT_BYTE)
+	    {
+	      new_bc = search_superop_fixed_arg_1 (opt[-4], opt[-3], opt[-2]);
+	      if (new_bc != -1)
+		{
+		  opt[-4] = new_bc;
+		  opt[-3] = opt[-1];
+		  opt -= 2;
+
+		  /* Look again at the last four bytes.  */
+		  continue;
+		}
+	    }
+
+	  /* Nothing matched.  Exit. */
+	  break;
+	}
+      while (opt - from >= 4);
     }
 
-  _gst_compile_bytecodes (from, opt);
-  return (opt != from);
+  return opt;
 }
-
 
+
 void
 _gst_compute_stack_positions (gst_uchar * bp,
 			      int size,
 			      PTR * base,
 			      PTR ** pos)
 {
-  gst_uchar *end;
-  int balance, ofs;
-  static const int stackOpBalanceTable[16] = {
-    1, 1, -1, 0,		/* 126 (push, push, pop/store, store) */
-    0, 0, 0, 0,			/* unused */
-    -1, 1, -1, 0,		/* 134 (pop/store, push, pop/store,
-				   store) */
-    255, 1, -1, 0,		/* 138 (invalid, push, pop/store,
-				   store) */
-  };
+  basic_block_item **bb_start, *bb_first, *worklist, *susp_head,
+	**susp_tail = &susp_head;
+  int bc_len;
 
-  memzero (pos, sizeof (PTR *) * (1 + size));
+  bb_start = alloca ((1 + size) * sizeof (basic_block_item *));
+  memzero (bb_start, (1 + size) * sizeof (basic_block_item *));
+  memzero (pos, (1 + size) * sizeof (PTR *));
 
-  pos[0] = base;
-  for (end = bp + size; bp != end;
-       pos += BYTECODE_SIZE (*bp), bp += BYTECODE_SIZE (*bp))
+  /* Allocate the first and last basic block specially */
+  ALLOCA_BASIC_BLOCK (bb_start, 0, bp, 0);
+  ALLOCA_BASIC_BLOCK (bb_start + size, 0, bp + size, 0);
+  bb_first = bb_start[0];
+  bb_first->next = NULL;
+
+  /* First build the pointers to the basic blocks into BB_START.  Then use
+     of a worklist here is only to find a correct order for visiting the
+     basic blocks, not because they're visited multiple times.  This
+     works transparently when we have a return in the middle of the method.
+     Then the basic block is ending, yet it might be that the stack height
+     for the next bytecode is already known!!! */
+  for (susp_head = NULL, worklist = bb_first; worklist; )
     {
+      int curr_sp = worklist->sp;
+      bp = worklist->bp;
+      bb_start = worklist->bb;
+      worklist = worklist->next;
 
-      switch (*bp)
-	{
-	  /* 3-byte stack operations */
-	case BIG_LITERALS_BYTECODE:
-	case BIG_INSTANCE_BYTECODE:
-	case OUTER_TEMP_BYTECODE:
-	  balance = stackOpBalanceTable[(*bp - 126) | (bp[1] >> 6)];
-	  break;
+#ifdef DEBUG_JIT_TRANSLATOR
+      printf ("Tracing basic block at %d:\n", bb_start - bb_first->bb);
+#endif
 
-	  /* 1-byte sends */
-	case SEND1EXT_BYTE:
-	case SEND_SUPER1EXT_BYTE:
-	  balance = -(bp[1] >> 5);
-	  break;
+      do
+        {
+	  int curr_ip = bb_start - bb_first->bb;
+	  int balance;
+	  gst_uchar *bp_first = bp;
 
-	  /* 2-byte send */
-	case SEND2EXT_BYTE:
-	  balance = -(bp[1] & 31);
-	  break;
+#ifdef DEBUG_JIT_TRANSLATOR
+          printf ("[SP=%3d]%5d:", curr_sp, curr_ip);
+          _gst_print_bytecode_name (bp, curr_ip, NULL, "\t");
+#endif
 
-	  /* Everything else */
-	default:
-	  balance = stack_balance_table[*bp];
-	  if (*bp >= JUMP_SHORT)
-	    {
-	      if (*bp < JUMP_LONG)
+	  balance = 0;
+	  pos[curr_ip] = base + curr_sp;
+
+	  MATCH_BYTECODES (COMPUTE_STACK_POS, bp, (
+	    RETURN_METHOD_STACK_TOP,
+	    RETURN_CONTEXT_STACK_TOP {
+	      bc_len = bp - bp_first;
+
+	      /* We cannot fill the basic block right now because the
+		 stack height might be different.  */
+	      if (!bb_start[bc_len])
 		{
-		  /* short jumps */
-		  ofs = (*bp & 7) + 2;
-		  pos[ofs] = pos[0] + balance;
-		}
-	      else if (*bp < PLUS_SPECIAL)
-		{
-		  /* long jumps */
-		  ofs = ((signed int) bp[1]) + jump_offsets[*bp & 15];
-		  if (ofs > 0)
-		    pos[ofs] = pos[0] + balance;
+		  ALLOCA_BASIC_BLOCK (bb_start + bc_len, 0,
+				      bp_first + bc_len, curr_sp + balance);
+		  bb_start[bc_len]->suspended = true;
+		  bb_start[bc_len]->next = NULL;
+		  *susp_tail = bb_start[bc_len];
+		  susp_tail = &(bb_start[bc_len]->next);
 		}
 	    }
-	}
 
-      if (balance == 255)
+            POP_INTO_NEW_STACKTOP,
+            POP_STACK_TOP { balance--; }
+
+            PUSH_RECEIVER_VARIABLE,
+            PUSH_TEMPORARY_VARIABLE,
+            PUSH_LIT_CONSTANT,
+            PUSH_LIT_VARIABLE,
+            PUSH_SELF,
+            PUSH_SPECIAL,
+            PUSH_INTEGER,
+            DUP_STACK_TOP,
+            PUSH_OUTER_TEMP { balance++; }
+
+            LINE_NUMBER_BYTECODE,
+            STORE_RECEIVER_VARIABLE,
+            STORE_TEMPORARY_VARIABLE,
+            STORE_LIT_VARIABLE,
+            STORE_OUTER_TEMP,
+            EXIT_INTERPRETER,
+            MAKE_DIRTY_BLOCK { }
+
+            SEND {
+	      balance += -num_args;
+	    }
+
+	    SEND_ARITH, SEND_IMMEDIATE {
+	      balance += -_gst_builtin_selectors[n]->numArgs;
+	    }
+
+            SEND_SPECIAL {
+	      balance += -_gst_builtin_selectors[n + 16]->numArgs;
+	    }
+
+            INVALID {
+	      abort ();
+	    }
+
+            JUMP {
+	      bc_len = bp - bp_first;
+
+	      /* We cannot fill the basic block right now because the
+		 stack height might be different.  */
+	      if (!bb_start[bc_len])
+		{
+		  ALLOCA_BASIC_BLOCK (bb_start + bc_len, 0,
+				      bp_first + bc_len, 0);
+		  bb_start[bc_len]->suspended = true;
+		  bb_start[bc_len]->next = NULL;
+		  *susp_tail = bb_start[bc_len];
+		  susp_tail = &(bb_start[bc_len]->next);
+		}
+
+	      if (!bb_start[ofs])
+		{
+		  ALLOCA_BASIC_BLOCK (bb_start + ofs, 0,
+				      bp_first + ofs, curr_sp + balance);
+		  bb_start[ofs]->next = worklist;
+		  worklist = bb_start[ofs];
+		}
+	      else if (bb_start[ofs]->suspended)
+		{
+		  bb_start[ofs]->suspended = false;
+		  bb_start[ofs]->sp = curr_sp + balance;
+		}
+	      else if (curr_sp + balance != bb_start[ofs]->sp)
+		abort ();
+	    }
+
+	    POP_JUMP_TRUE, POP_JUMP_FALSE {
+	      balance--;
+	      bc_len = bp - bp_first;
+	      if (!bb_start[bc_len])
+		{
+		  ALLOCA_BASIC_BLOCK (bb_start + bc_len, 0,
+				      bp_first + bc_len, curr_sp + balance);
+		  bb_start[bc_len]->next = worklist;
+		  worklist = bb_start[bc_len];
+		}
+	      else if (bb_start[bc_len]->suspended)
+		{
+		  bb_start[bc_len]->suspended = false;
+		  bb_start[bc_len]->sp = curr_sp + balance;
+		}
+	      else if (curr_sp + balance != bb_start[bc_len]->sp)
+		abort ();
+
+	      if (!bb_start[ofs])
+		{
+		  ALLOCA_BASIC_BLOCK (bb_start + ofs, 0,
+				      bp_first + ofs, curr_sp + balance);
+		  bb_start[ofs]->next = worklist;
+		  worklist = bb_start[ofs];
+		}
+              else if (bb_start[ofs]->suspended)
+		{
+		  bb_start[ofs]->suspended = false;
+		  bb_start[ofs]->sp = curr_sp + balance;
+		}
+	      else if (curr_sp + balance != bb_start[ofs]->sp)
+		abort ();
+            }
+          ));
+
+	  curr_sp += balance;
+	  bb_start += bp - bp_first;
+	}
+      while (!*bb_start);
+
+      if (!worklist && susp_head)
 	{
-	  _gst_errorf
-	    ("Invalid bytecode encountered during bytecode analysis");
-	  balance = 0;
+	  worklist = susp_head;
+	  susp_head = susp_head->next;
+	  worklist->next = NULL;
+	  if (!susp_head)
+	    susp_tail = &susp_head;
 	}
-
-      if (!pos[BYTECODE_SIZE (*bp)])
-	pos[BYTECODE_SIZE (*bp)] = pos[0] + balance;
     }
 }
 
@@ -1125,33 +1025,738 @@ make_destination_table (gst_uchar * bp,
 			int size,
 			char *dest)
 {
-  gst_uchar *end;
-  int n;
+  gst_uchar *end, *bp_first;
+  int count;
 
   memzero (dest, sizeof (char) * size);
 
-  for (n = 0, end = bp + size; bp != end;
-       dest += BYTECODE_SIZE (*bp), bp += BYTECODE_SIZE (*bp))
+  for (count = 0, end = bp + size; bp != end;
+       dest += bp - bp_first)
     {
+      bp_first = bp;
+      MATCH_BYTECODES (MAKE_DEST_TABLE, bp, (
+        PUSH_RECEIVER_VARIABLE,
+        PUSH_TEMPORARY_VARIABLE,
+        PUSH_LIT_CONSTANT,
+        PUSH_LIT_VARIABLE,
+        PUSH_SELF,
+        PUSH_SPECIAL,
+        PUSH_INTEGER,
+        RETURN_METHOD_STACK_TOP,
+        RETURN_CONTEXT_STACK_TOP,
+        LINE_NUMBER_BYTECODE,
+        STORE_RECEIVER_VARIABLE,
+        STORE_TEMPORARY_VARIABLE,
+        STORE_LIT_VARIABLE,
+        SEND,
+        POP_INTO_NEW_STACKTOP,
+        POP_STACK_TOP,
+        DUP_STACK_TOP,
+        PUSH_OUTER_TEMP,
+        STORE_OUTER_TEMP,
+        EXIT_INTERPRETER,
+        SEND_ARITH,
+        SEND_SPECIAL,
+        SEND_IMMEDIATE,
+	MAKE_DIRTY_BLOCK { }
 
-      if (*bp >= JUMP_SHORT)
+        INVALID { abort(); }
+
+        JUMP, POP_JUMP_TRUE, POP_JUMP_FALSE {
+          dest[ofs] = ofs > 0 ? 1 : -1;
+	  count++;
+        }
+      ));
+    }
+
+  return (count);
+}
+
+
+
+#define SELF 0
+#define VARYING 1
+#define UNDEFINED 2
+
+typedef struct partially_constructed_array {
+  struct partially_constructed_array *next;
+  int sp;
+  int size;
+} partially_constructed_array;
+
+#define CHECK_LITERAL(n) \
+  /* Todo: recurse into BlockClosures! */ \
+  last_used_literal = literals[n]; \
+  if ((n) >= num_literals) \
+    return (_gst_debug(), "literal out of range");
+
+#define CHECK_TEMP(n) \
+  last_used_literal = NULL; \
+  if ((n) >= sp - stack) \
+    return ("temporary out of range");
+
+#define CHECK_REC_VAR(first, n) \
+  last_used_literal = NULL; \
+  if ((n) < (first) || (n) >= num_rec_vars) \
+    return ("receiver variable out of range");
+
+#define CHECK_LIT_VARIABLE(store, n) \
+  CHECK_LITERAL (n); \
+  if (IS_INT (literals[(n)]) || \
+      !is_a_kind_of (OOP_CLASS (literals[(n)]), _gst_association_class)) \
+    return ("Association expected"); \
+  else if (store \
+	   && untrusted \
+	   && !IS_OOP_UNTRUSTED (literals[(n)])) \
+    return ("Invalid global variable access");
+
+#define LIT_VARIABLE_CLASS(n) \
+  /* Special case Array because it is used to compile {...} */ \
+  (ASSOCIATION_VALUE (literals[(n)]) == _gst_array_class \
+    ? OOP_CLASS (_gst_array_class) \
+    : FROM_INT (VARYING))
+
+#define LITERAL_CLASS(n) \
+  OOP_INT_CLASS (literals[(n)])
+
+/* Bytecode verification is a dataflow analysis on types.  We perform it
+   on basic blocks: `in' is the stack when entering the basic block and
+   `out' is the stack upon exit.
+
+   Each member of the stack can be UNDEFINED, a type, or VARYING.  When
+   merging two `out' stacks to compute an `in' stack, we have these
+   possible situations:
+   - the stacks are not the same height, and bytecode verification fails
+   - a slot is the same in both stacks, so it has this type in the output too
+   - a slot is different in the two stacks, so it is VARYING in the output.
+
+   Bytecode verification proceeds forwards, so the worklist is added all the
+   successors of the basic block whenever merging results in a difference.  */
+
+mst_Boolean
+merge_stacks (OOP *dest, int dest_sp,
+	      OOP *src, int src_sp)
+{
+  mst_Boolean varied = false;
+  assert (dest_sp == src_sp);
+
+  for (; src_sp--; dest++, src++)
+    {
+      OOP newDest = *src;
+      if (newDest != *src)
 	{
-	  if (*bp < JUMP_LONG)
+	  if (*dest != FROM_INT (UNDEFINED))
+	    /* If different, mark as overdefined.  */
+	    newDest = FROM_INT (VARYING);
+
+	  if (newDest != *dest)
 	    {
-	      /* short jumps */
-	      dest[(*bp & 7) + 2] = 1;
-	      n++;
-	    }
-	  else if (*bp < PLUS_SPECIAL)
-	    {
-	      int ofs;
-	      ofs = ((signed int) bp[1]) + jump_offsets[*bp & 15];
-	      /* long jumps */
-	      dest[ofs] = (ofs <= 0) ? -1 : 1;
-	      n++;
+	      *dest = newDest;
+	      varied = true;
 	    }
 	}
     }
 
-  return (n);
+  return (varied);
 }
+
+void
+_gst_verify_sent_method (OOP methodOOP)
+{
+  const char *error;
+  error = _gst_verify_method (methodOOP, NULL, 0);
+
+  if (error)
+    {
+      _gst_errorf ("Bytecode verification failed: %s", error);
+      if (OOP_CLASS (methodOOP) == _gst_compiled_block_class)
+        methodOOP = GET_BLOCK_METHOD (methodOOP);
+
+      _gst_errorf ("Method verification failed for %O>>%O",
+                   GET_METHOD_CLASS (methodOOP),
+                   GET_METHOD_SELECTOR (methodOOP));
+
+      abort ();
+    }
+}
+
+const char *
+_gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
+{
+#ifndef NO_VERIFIER
+  int size, bc_len, num_temps, stack_depth,
+    num_literals, num_rec_vars, num_ro_rec_vars;
+
+  mst_Boolean untrusted;
+  const char *error;
+  gst_uchar *bp;
+  OOP *literals, methodClass, last_used_literal;
+  basic_block_item **bb_start, *bb_first, *worklist, *susp_head,
+    **susp_tail = &susp_head;
+  partially_constructed_array *arrays = NULL, *arrays_pool = NULL;
+
+  if (IS_OOP_VERIFIED (methodOOP))
+    return (NULL);
+
+  size = NUM_INDEXABLE_FIELDS (methodOOP);
+  bp = GET_METHOD_BYTECODES (methodOOP);
+  literals = GET_METHOD_LITERALS (methodOOP);
+  methodClass = GET_METHOD_CLASS (methodOOP);
+  num_literals = NUM_METHOD_LITERALS (methodOOP);
+  num_rec_vars = CLASS_FIXED_FIELDS (methodClass);
+  untrusted = IS_OOP_UNTRUSTED (methodOOP);
+
+  if (is_a_kind_of (OOP_CLASS (methodOOP), _gst_compiled_method_class))
+    {
+      method_header header;
+      header = GET_METHOD_HEADER (methodOOP);
+      num_temps = header.numArgs + header.numTemps;
+      stack_depth = header.stack_depth << DEPTH_SCALE;
+      switch (header.headerFlag)
+        {
+	case MTH_NORMAL:
+	case MTH_PRIMITIVE:
+	case MTH_ANNOTATED:
+	case MTH_UNUSED:
+	  break;
+
+	case MTH_USER_DEFINED:
+	case MTH_RETURN_SELF:
+	  methodOOP->flags |= F_VERIFIED;
+	  return (NULL);
+
+	case MTH_RETURN_INSTVAR:
+	  CHECK_REC_VAR (0, header.primitiveIndex);
+	  methodOOP->flags |= F_VERIFIED;
+	  return (NULL);
+
+	case MTH_RETURN_LITERAL:
+	  CHECK_LITERAL (0);
+	  methodOOP->flags |= F_VERIFIED;
+	  return (NULL);
+        }
+    }
+  else if (OOP_CLASS (methodOOP) == _gst_compiled_block_class)
+    {
+      block_header header;
+      header = GET_BLOCK_HEADER (methodOOP);
+
+      /* If we're verifying a block but not from a nested call,
+	 restart from the top-level method.  */
+      if (header.clean != 0 && depth == 0)
+	return _gst_verify_method (GET_BLOCK_METHOD (methodOOP), NULL, 0);
+
+      num_temps = header.numArgs + header.numTemps;
+      stack_depth = header.depth << DEPTH_SCALE;
+    }
+  else
+    return "invalid class";
+
+  if (untrusted)
+    {
+       OOP class_oop;
+       for (class_oop = methodClass; IS_OOP_UNTRUSTED (class_oop);
+            class_oop = SUPERCLASS (class_oop))
+         ;
+
+       num_ro_rec_vars = CLASS_FIXED_FIELDS (class_oop);
+    }
+  else
+    num_ro_rec_vars = 0;
+
+#ifdef DEBUG_VERIFIER
+  printf ("Verifying %O (max. stack depth = %d):\n", methodOOP, stack_depth);
+#endif
+
+  /* Prepare the NUM_OUTER_TEMPS array for the inner blocks.  */
+  if (depth)
+    {
+      int *new_num_outer_temps = alloca (sizeof (int) * (depth + 1));
+      memcpy (new_num_outer_temps + 1, num_outer_temps, sizeof (int) * depth);
+      new_num_outer_temps[0] = num_temps;
+      num_outer_temps = new_num_outer_temps;
+    }
+  else
+    num_outer_temps = &num_temps;
+
+  depth++;
+
+  bb_start = alloca ((1 + size) * sizeof (basic_block_item *));
+  memzero (bb_start, (1 + size) * sizeof (basic_block_item *));
+
+  /* Allocate the first and last basic block specially */
+  ALLOCA_BASIC_BLOCK(bb_start, stack_depth, bp, num_temps);
+  ALLOCA_BASIC_BLOCK(bb_start + size, stack_depth, bp + size, num_temps);
+  bb_first = bb_start[0];
+  bb_first->next = NULL;
+
+  /* First build the pointers to the basic blocks into BB_START.  The use
+     of a worklist here is only to find a correct order for visiting the
+     basic blocks, not because they're visited multiple times.  This
+     works transparently when we have a return in the middle of the method.
+     Then the basic block is ending, yet it might be that the stack height
+     for the next bytecode is already known!!! */
+  for (susp_head = NULL, worklist = bb_first; worklist; )
+    {
+      int curr_sp = worklist->sp;
+      bp = worklist->bp;
+      bb_start = worklist->bb;
+      worklist = worklist->next;
+
+#ifdef DEBUG_VERIFIER
+      printf ("Tracing basic block at %d:\n", bb_start - bb_first->bb);
+#endif
+
+      do
+        {
+	  int curr_ip = bb_start - bb_first->bb;
+	  int balance;
+	  gst_uchar *bp_first = bp;
+
+#ifdef DEBUG_VERIFIER
+          printf ("[SP=%3d]%5d:", curr_sp, curr_ip);
+          _gst_print_bytecode_name (bp, curr_ip, literals, "\t");
+#endif
+
+	  balance = 0;
+	  MATCH_BYTECODES (CREATE_BASIC_BLOCKS, bp, (
+	    RETURN_METHOD_STACK_TOP,
+	    RETURN_CONTEXT_STACK_TOP {
+	      bc_len = bp - bp_first;
+
+	      /* We cannot fill the basic block right now because the
+		 stack height might be different.  */
+	      if (!bb_start[bc_len])
+		{
+		  ALLOCA_BASIC_BLOCK (bb_start + bc_len, stack_depth,
+				      bp_first + bc_len, curr_sp + balance);
+		  bb_start[bc_len]->suspended = true;
+		  bb_start[bc_len]->next = NULL;
+		  *susp_tail = bb_start[bc_len];
+		  susp_tail = &(bb_start[bc_len]->next);
+		}
+	    }
+
+            POP_STACK_TOP { balance--; }
+
+            PUSH_RECEIVER_VARIABLE,
+            PUSH_TEMPORARY_VARIABLE,
+            PUSH_LIT_CONSTANT,
+            PUSH_LIT_VARIABLE,
+            PUSH_SELF,
+            PUSH_SPECIAL,
+            PUSH_INTEGER,
+            PUSH_OUTER_TEMP { balance++; }
+
+            LINE_NUMBER_BYTECODE,
+            STORE_RECEIVER_VARIABLE,
+            STORE_TEMPORARY_VARIABLE,
+            STORE_LIT_VARIABLE,
+            STORE_OUTER_TEMP,
+            EXIT_INTERPRETER,
+            MAKE_DIRTY_BLOCK { }
+
+            SEND {
+	      balance += -num_args;
+
+	      /* Sends touch the new stack top, so they require an extra slot.  */
+	      if (curr_sp + balance < 1)
+	        return ("stack underflow");
+	    }
+
+	    SEND_ARITH {
+	      if (!_gst_builtin_selectors[n])
+		return ("invalid immediate send");
+
+	      balance += -_gst_builtin_selectors[n]->numArgs;
+
+	      /* Sends touch the new stack top, so they require an extra slot.  */
+	      if (curr_sp + balance < 1)
+	        return ("stack underflow");
+	    }
+
+            SEND_SPECIAL {
+	      if (!_gst_builtin_selectors[n + 16])
+		return ("invalid immediate send");
+
+	      balance += -_gst_builtin_selectors[n + 16]->numArgs;
+
+	      /* Sends touch the new stack top, so they require an extra slot.  */
+	      if (curr_sp + balance < 1)
+	        return ("stack underflow");
+	    }
+
+            SEND_IMMEDIATE {
+	      if (!_gst_builtin_selectors[n])
+		return ("invalid immediate send");
+
+	      balance += -_gst_builtin_selectors[n]->numArgs;
+
+	      /* Sends touch the new stack top, so they require an extra slot.  */
+	      if (curr_sp + balance < 1)
+	        return ("stack underflow");
+	    }
+
+            POP_INTO_NEW_STACKTOP {
+	      balance--;
+
+	      /* Sends touch the new stack top, so they require an extra slot.  */
+	      if (curr_sp + balance < 1)
+	        return ("stack underflow");
+	    }
+
+            DUP_STACK_TOP {
+	      balance++;
+	    }
+
+            INVALID {
+	      return ("invalid bytecode");
+	    }
+
+            JUMP {
+	      if (ofs & 1)
+		return ("jump to odd offset");
+
+	      if (ofs + curr_ip < 0 || ofs + curr_ip > size)
+		return ("jump out of range");
+
+	      if (ofs + curr_ip > 0 && bp_first[ofs - 2] == EXT_BYTE)
+		return ("jump skips extension bytecode");
+
+	      bc_len = bp - bp_first;
+
+	      /* We cannot fill the basic block right now because the
+		 stack height might be different.  */
+	      if (!bb_start[bc_len])
+		{
+		  ALLOCA_BASIC_BLOCK (bb_start + bc_len, stack_depth,
+				      bp_first + bc_len, 0);
+		  bb_start[bc_len]->suspended = true;
+		  bb_start[bc_len]->next = NULL;
+		  *susp_tail = bb_start[bc_len];
+		  susp_tail = &(bb_start[bc_len]->next);
+		}
+
+	      if (!bb_start[ofs])
+		{
+		  ALLOCA_BASIC_BLOCK (bb_start + ofs, stack_depth,
+				      bp_first + ofs, curr_sp + balance);
+
+		  bb_start[ofs]->next = worklist;
+		  worklist = bb_start[ofs];
+		  INIT_BASIC_BLOCK (worklist, num_temps);
+		}
+	      else if (bb_start[ofs]->suspended)
+	        {
+		  bb_start[ofs]->suspended = false;
+		  bb_start[ofs]->sp = curr_sp + balance;
+		  INIT_BASIC_BLOCK (bb_start[ofs], num_temps);
+		}
+	      else if (curr_sp + balance != bb_start[ofs]->sp)
+		return ("stack height mismatch");
+	    }
+
+	    POP_JUMP_TRUE, POP_JUMP_FALSE {
+	      balance--;
+	      if (ofs & 1)
+		return ("jump to odd offset");
+
+	      if (ofs + curr_ip < 0 || ofs + curr_ip > size)
+		return ("jump out of range");
+
+	      if (ofs + curr_ip > 0 && bp_first[ofs - 2] == EXT_BYTE)
+		return ("jump skips extension bytecode");
+
+	      bc_len = bp - bp_first;
+	      if (!bb_start[bc_len])
+		{
+		  ALLOCA_BASIC_BLOCK (bb_start + bc_len, stack_depth,
+				      bp_first + bc_len, curr_sp + balance);
+
+		  bb_start[bc_len]->next = worklist;
+		  worklist = bb_start[bc_len];
+		  INIT_BASIC_BLOCK (worklist, num_temps);
+		}
+              else if (bb_start[bc_len]->suspended)
+                {
+                  bb_start[bc_len]->suspended = false;
+                  bb_start[bc_len]->sp = curr_sp + balance;
+		  INIT_BASIC_BLOCK (bb_start[bc_len], num_temps);
+                }
+	      else if (curr_sp + balance != bb_start[bc_len]->sp)
+		return ("stack height mismatch");
+
+	      if (!bb_start[ofs])
+		{
+		  ALLOCA_BASIC_BLOCK (bb_start + ofs, stack_depth,
+				      bp_first + ofs, curr_sp + balance);
+
+		  bb_start[ofs]->next = worklist;
+		  worklist = bb_start[ofs];
+		  INIT_BASIC_BLOCK (worklist, num_temps);
+		}
+	      else if (bb_start[ofs]->suspended)
+	        {
+		  bb_start[ofs]->suspended = false;
+		  bb_start[ofs]->sp = curr_sp + balance;
+		  INIT_BASIC_BLOCK (bb_start[ofs], num_temps);
+		}
+	      else if (curr_sp + balance != bb_start[ofs]->sp)
+		return ("stack height mismatch");
+            }
+          ));
+
+	  curr_sp += balance;
+	  if (curr_sp >= stack_depth)
+	    return ("stack overflow");
+
+	  bb_start += bp - bp_first;
+	}
+      while (!*bb_start);
+
+      if (!worklist && susp_head)
+	{
+	  worklist = susp_head;
+	  susp_head = susp_head->next;
+	  worklist->next = NULL;
+	  if (!susp_head)
+	    susp_tail = &susp_head;
+	}
+
+#ifdef DEBUG_VERIFIER
+      printf ("\n");
+#endif
+    }
+
+  for (worklist = bb_first; worklist; )
+    {
+      OOP *stack = worklist->stack;
+      OOP *sp;
+
+      /* Look for unreachable basic blocks.  */
+      if (worklist->sp < 0)
+	abort ();
+
+      sp = stack + worklist->sp;
+      bp = worklist->bp;
+      bb_start = worklist->bb;
+      worklist = worklist->next;
+
+#ifdef DEBUG_VERIFIER
+      printf ("Executing basic block at %d:\n", bb_start - bb_first->bb);
+#endif
+      last_used_literal = NULL;
+
+      do
+	{
+	  gst_uchar *bp_first = bp;
+
+#ifdef DEBUG_VERIFIER
+          printf ("[SP=%3d]%5d:", sp - stack, bb_start - bb_first->bb);
+          _gst_print_bytecode_name (bp, bb_start - bb_first->bb, literals, "\t");
+#endif
+
+	  MATCH_BYTECODES (EXEC_BASIC_BLOCK, bp, (
+	    PUSH_RECEIVER_VARIABLE {
+	      CHECK_REC_VAR (0, n);
+	      *sp++ = FROM_INT (VARYING);
+	    }
+
+	    PUSH_TEMPORARY_VARIABLE {
+	      CHECK_TEMP (n);
+	      *sp++ = stack[n];
+	    }
+
+	    PUSH_LIT_CONSTANT {
+	      CHECK_LITERAL (n);
+	      *sp++ = LITERAL_CLASS (n);
+	    }
+
+	    PUSH_LIT_VARIABLE {
+	      CHECK_LIT_VARIABLE (false, n);
+	      *sp++ = LIT_VARIABLE_CLASS (n);
+	    }
+
+	    PUSH_SELF {
+	      last_used_literal = NULL;
+	      *sp++ = FROM_INT (SELF);
+	    }
+	    PUSH_SPECIAL {
+	      switch (n)
+		{
+		  case NIL_INDEX: last_used_literal = _gst_nil_oop; break;
+	          case TRUE_INDEX: last_used_literal = _gst_true_oop; break;
+	          case FALSE_INDEX: last_used_literal = _gst_false_oop; break;
+		  default: return "invalid special object index";
+		}
+
+	      *sp++ = OOP_CLASS (last_used_literal);
+	    }
+	    PUSH_INTEGER {
+	      last_used_literal = FROM_INT (n);
+	      *sp++ = _gst_small_integer_class;
+	    }
+
+	    RETURN_METHOD_STACK_TOP,
+	    RETURN_CONTEXT_STACK_TOP { break; }
+
+	    LINE_NUMBER_BYTECODE { }
+
+	    STORE_RECEIVER_VARIABLE {
+	      CHECK_REC_VAR (num_ro_rec_vars, n);
+	    }
+	    STORE_TEMPORARY_VARIABLE {
+	      CHECK_TEMP (n);
+	    }
+	    STORE_LIT_VARIABLE {
+	      CHECK_LIT_VARIABLE (true, n);
+	    }
+
+	    SEND {
+	      last_used_literal = NULL;
+	      sp -= num_args;
+	      if (super && sp[-1] != FROM_INT (SELF))
+		return ("Invalid send to super");
+
+	      sp[-1] = FROM_INT (VARYING);
+	    }
+
+	    POP_INTO_NEW_STACKTOP {
+	      if (sp[-2] != _gst_array_class)
+	        return ("Array expected");
+
+	      if (!arrays || &sp[-2] - stack != arrays->sp)
+	        return ("Invalid Array constructor");
+
+	      if (n >= arrays->size)
+	        return ("Out of bounds Array access");
+
+	      /* Discard arrays whose construction has ended.  */
+	      if (n == arrays->size - 1)
+	        {
+	          partially_constructed_array *next = arrays->next;
+	          arrays->next = arrays_pool;
+	          arrays_pool = arrays;
+	          arrays = next;
+	        }
+
+	      last_used_literal = NULL;
+	      sp--;
+	    }
+
+	    POP_STACK_TOP {
+	      last_used_literal = NULL;
+	      sp--;
+	    }
+	    DUP_STACK_TOP {
+	      sp++;
+	      sp[-1] = sp[-2];
+	    }
+
+	    PUSH_OUTER_TEMP {
+	      if (scopes == 0 || scopes > depth || n >= num_outer_temps[scopes])
+	        return ("temporary out of range");
+
+	      last_used_literal = NULL;
+	      *sp++ = FROM_INT (VARYING);
+	    }
+
+	    STORE_OUTER_TEMP {
+	      if (scopes == 0 || scopes > depth || n >= num_outer_temps[scopes])
+	        return ("temporary out of range");
+	    }
+
+	    EXIT_INTERPRETER {
+	      if (size != 4
+		  || IP0 != GET_METHOD_BYTECODES (methodOOP)
+		  || *bp != RETURN_CONTEXT_STACK_TOP)
+		return ("bad termination method");
+	    }
+
+	    JUMP {
+	      if (merge_stacks (stack, sp - stack, bb_start[ofs]->stack,
+				bb_start[ofs]->sp))
+		bb_start[ofs]->next = worklist, worklist = bb_start[ofs];
+	    }
+
+	    POP_JUMP_TRUE, POP_JUMP_FALSE {
+	      sp--;
+	      bc_len = bp - bp_first;
+	      if (merge_stacks (stack, sp - stack, bb_start[bc_len]->stack,
+				bb_start[bc_len]->sp))
+		bb_start[bc_len]->next = worklist, worklist = bb_start[bc_len];
+
+	      if (merge_stacks (stack, sp - stack, bb_start[ofs]->stack,
+				bb_start[ofs]->sp))
+		bb_start[ofs]->next = worklist, worklist = bb_start[ofs];
+	    }
+
+	    SEND_ARITH {
+	      sp -= _gst_builtin_selectors[n]->numArgs;
+	      sp[-1] = FROM_INT (VARYING);
+	    }
+	    SEND_SPECIAL {
+	      sp -= _gst_builtin_selectors[n + 16]->numArgs;
+	      sp[-1] = FROM_INT (VARYING);
+	    }
+
+	    SEND_IMMEDIATE {
+	      if (n == NEW_COLON_SPECIAL
+		  && IS_INT (last_used_literal)
+		  && sp[-2] == OOP_CLASS (_gst_array_class))
+		{
+		  partially_constructed_array *a;
+		  sp--;
+
+		  /* If possible, reuse an existing struct, else allocate a new one.  */
+		  if (arrays_pool)
+		    {
+		      a = arrays_pool;
+		      arrays_pool = arrays_pool->next;
+		    }
+		  else
+		    a = alloca (sizeof (partially_constructed_array));
+
+		  a->size = TO_INT (last_used_literal);
+		  a->sp = &sp[-1] - stack;
+		  a->next = arrays;
+		  arrays = a;
+
+		  sp[-1] = _gst_array_class;
+		}
+	      else
+	        {
+	          sp -= _gst_builtin_selectors[n]->numArgs;
+	          sp[-1] = FROM_INT (VARYING);
+		}
+	    }
+
+	    MAKE_DIRTY_BLOCK {
+	      if (sp[-1] != _gst_compiled_block_class
+		  || !last_used_literal)
+		return ("CompiledBlock expected");
+
+	      error = _gst_verify_method (last_used_literal, num_outer_temps, depth);
+	      if (error)
+	        return (error);
+	    }
+
+	    INVALID {
+	      abort ();
+	    }
+	  ));
+
+	  bb_start += bp - bp_first;
+	}
+      while (!*bb_start);
+
+#ifdef DEBUG_VERIFIER
+      printf ("\n");
+#endif
+    }
+#endif /* !NO_VERIFIER */
+
+  methodOOP->flags |= F_VERIFIED;
+  return (NULL);
+}
+

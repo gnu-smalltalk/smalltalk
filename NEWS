@@ -1,6 +1,234 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 2.1.5 TO 2.1.9
+NEWS FROM 2.1.9 TO 2.2
+
+Scripting improvements:
+
+o   A sharp-bang sequence at the beginning of a file is parsed as a
+    one-line comment.
+
+o   Provides an "-f" option (long option "--file" to be used in a #! line,
+    as in "#! /usr/bin/env gst -f", which has the same effect of -Q,
+    processing the file indicated by the option's argument, and passing
+    the rest of the command line to GNU Smalltalk.  In other words, the
+    two invocations that follow are equivalent:
+
+	gst -f script.st ARG1 ARG2
+	gst script.st -Qa ARG1 ARG2
+
+o   Load.st installed as gst-load, Reload.st installed as gst-reload,
+    Test.st installed as gst-sunit.
+
+
+VM changes:
+
+o   Can define subclasses of CompiledMethod and have a method invoked on
+    the instances whenever the method is called.
+
+o   Can pass a "void **" to C using the #cObjectPtr parameter specifier
+    (previously undocumented and broken).
+
+o   The #class method can be overridden.  This is useful for example
+    for debuggers and proxies.
+
+o   Code for decoding/interpreting the bytecode set is for the most part
+    automatically generated.  Take a look at the ``genbc'' and ``genvm''
+    programs if you are going to write an high performance interpreter, and
+    write to me for any information on them or on the other program
+    ``superops'' (this one is much more specialized).
+
+o   CompiledBlocks and CompiledMethods are read-only.
+
+o   Dollars are allowed in the middle of identifiers and method names.
+    This is unportable, so do not abuse it.  As with underscores, it is not
+    possible to use them at the beginning of an identifier or method name.
+
+o   Fixed bug that caused the compiler to accept duplicate argument or
+    temporary names.
+
+o   GCC needed to compile GNU Smalltalk.
+
+o   gst_smalltalk_args accepts a const char **.
+
+o   Improved clarity and portability using intptr_t, size_t and ptrdiff_t
+    more widely and wisely.
+
+o   Indexed instance variables can be 8-bit and 16-bit, signed and unsigned
+    integers; or they can be 32-bit and 64-bit, signed integers and unsigned
+    integers and floating point values; or objects of course.  Previously
+    the only three possibilities were objects, 8-bit unsigned ints, and
+    pointer-sized unsigned ints.
+
+o   Instance variables are scanned backwards: if a subclass declares an
+    instance variable with the same name of the superclass, it wins when
+    compiling code in the subclass (fixes the so-called "fragile subclass"
+    problem).
+
+o   Keywords and parameters need not be separated by a space (as in
+    `self x: y z:w').
+
+o   New bytecode set.  This is a significant departure from the Blue Book's
+    instruction set, and it improves performance by ~20%.  Over 150 common
+    bytecode sequences are optimized, saving on dispatching overhead and
+    minimizing the cost of decoding arguments.
+
+o   Options -l and -L (--log-changes and --log-file) are no more.  The
+    change log is not useful outside the GUI, while inside the GUI it
+    ought to be maintained by the GUI itself.
+
+o   Option -s is no more.  It was made the default in 2.1.5.
+
+o   Passing floating-point arguments to C works.
+
+o   Prefetching instructions are used wherever supported (Alpha, SPARC,
+    PPC, AMD K6 or newer, Intel PIII or newer, all with GCC 3.2).  This
+    speeds up the startup by up to 20%.
+
+o   Instances of subclasses of CompiledBlock and CompiledMethod can be
+    created using the same primitive that creates CompiledBlocks and
+    CompiledMethods, but sent to the subclass.
+
+o   Subclasses of MethodInfo can be used as the descriptors for CompiledMethod
+    objects.
+
+o   Two-character binary messages ending with a minus are scanned differently
+    if followed by a number: "1+-2" is now read as "1 + -2", not "1 +- 2".
+    This is what you would usually expect; however, including spaces explicitly
+    is recommended.
+
+o   When GCC 3.3 or later is used, a shared library is also built.  The
+    code has been to some extent optimized to make this less expensive, but
+    the shared library still has a 5-10% performance hit.  Note that the x86
+    shared library is undebuggable (-fomit-frame-pointer) with GCC < 4.0
+    because of the dearth of registers.  The installed virtual machine is not
+    linked to the shared library for optimal speed.
+
+
+
+Smalltalk changes:
+
+o   CLongDouble class allows one to access long doubles; long doubles are
+    supported by CStruct, Memory and ByteArray as well.
+
+o   CompiledCode>>#literalsDo: does what CompiledCode>>#allLiteralsDo:
+    used to do.  CompiledCode>>#allLiteralsDo: recurses into literal
+    arrays.
+
+o   GNU Smalltalk includes a mechanism for defining security policies
+    on a class-by-class basis.  See below for more information.
+
+o   #min: and #max: always return a NaN when one of the two operands is
+    a NaN; previously they would always return the other operand.
+
+o   PackageLoader can be told the namespace in which to load the package.
+    Most package loading scripts are now no longer necessary or can be
+    reduced to simple initialization duties.
+
+o   #raisedToInteger: is better optimized and does the minimum number of
+    multiplications for exponents up to 256.
+
+o   SequenceableCollection has a more efficient implementation of #fold:,
+    as well as #second, #third, and #fourth (and I'm going to stop here!).
+
+o   #return and #return: now reinstate exception handlers, which will
+    therefore be active while executing pending #ensure: or #ifCurtailed:
+    blocks.
+
+o   Stored CompiledBlocks into the method's literal frame for non-clean
+    blocks, and turned #blockCopy: into a `make dirty block' bytecode
+    without introducing a method of unclear utility.  This is a little
+    faster and (consistently) saves around 1% on image files.
+
+o   The syntax for primitives has been generalized into a "method attribute"
+    mechanism; pragmas are accessible through methods in CompiledMethod.
+
+o   The thisContext variable is compiled as a message send like
+    "ContextPart thisContext".
+
+o   When a send to super fails, #doesNotUnderstand: is also sent to super
+    and not to self.  This change is experimental; these semantics look more
+    coherent to me.  As a result (think about it...) sends to super from a
+    root class are now forbidden.
+
+o   When a non-existing message is sent with the wrong number of arguments
+    (using #perform:), #doesNotUnderstand: is invoked.  In the past, the
+    wrong number of arguments error would have been printed.  The reason
+    for this is to allow selector names that would be invalid for the
+    Smalltalk language.
+
+
+Goodies:
+
+30% Blox-GTK interface, to use the browser under Gtk+.  Currently, only
+    the browser works.  Thanks to Robert Collins.
+
+o   Glorp, a layer for mapping objects to relational databases,
+    integrated with the MySQL driver.
+
+o   GNU Smalltalk now supports executing (some) Java programs.  See the
+    info documentation for more information.  The class library is based
+    on GCJ 3.4.  There is no AWT nor JNI support (and it is not planned);
+    reflection and serialization are not there but will be added in the
+    future.
+
+
+Overview of the security mechanism:
+
+o   Implemented class-level permissions.  Each class can have its own
+    permission set, and if this is not trivial (all-allowed) the class
+    is marked untrusted; then instances of that class, as well as contexts
+    that have at least an untrusted object as the receiver in the sender
+    chain, are considered untrusted.  In the future, security checks will
+    be made for untrusted objects in such methods as
+
+	C call-outs				[#memoryAccess]
+	CObject class>>#alloc:			[#memoryAccess]
+	CObject class>>#alloc:type:		[#memoryAccess]
+	CObject>>#free				[#memoryAccess]
+	CObject>>#at:				[#memoryAccess]
+	CObject>>#at:put:			[#memoryAccess]
+	Memory>>#at:				[#memoryAccess]
+	Memory>>#at:put:			[#memoryAccess]
+	FileDescriptor>>#fileOp:...		[#io]
+	ObjectMemory>>#snapshot:		[#io]
+	ObjectMemory>>#quit:			[#system]
+	ObjectMemory>>#abort			[#system]
+	ObjectMemory>>#setSpaceGrowRate:	[#system]
+	ObjectMemory>>#setSmoothingFactor:	[#system]
+	ObjectMemory>>#setGrowThresholdPercent:	[#system]
+	ObjectMemory>>#setBigObjectThreshold:	[#system]
+	ObjectMemory>>#growTo:			[#system]
+	Object>>#makeUntrusted:	(given true)	[#securityManagement]
+	Object>>#instVarAt: (not self)		[#debugging]
+	Object>>#instVarAt:put:	           	[#debugging]
+	Object>>#perform:... (given a method)	[#debugging]
+	Object>>#changeClassTo:			[#debugging]
+	Process>>#suspend			[#processManagement]
+	Process>>#resume			[#processManagement]
+	UndefinedObject>>#subclass:... etc...	[#system]
+	Class>>#subclass:... etc... (mutation)	[#system]
+	Metaclass>>#instanceVariableNames: (mutation)	[#system]
+	MethodDictionary>>#at:put:...		[#system]
+	... (maybe more?) ...
+
+o   Instance variables of an untrusted class that are declared by a trusted
+    class are read-only.  This is necessary to avoid that a misbehaving
+    class method screws up the instance variables of Behavior that are known
+    to the VM.
+
+o   Methods are verified.
+
+o   Permissions can be granted by a method to its callees if the method's
+    definition class owns those permissions.  This can be used to invoke
+    trusted C call-outs.
+
+o   Primitives cannot be declared for untrusted objects (this might be
+    fine-grained in the future).
+
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.1.5 TO 2.1.8
 
 These are bugfix releases.  The only visible changes are:
 
@@ -16,11 +244,7 @@ o   Fix crash when accessing an ill-formed namespace from Smalltalk code
 
 o   Fixes to the JIT compiler (2.1.8).
 
-o   Improvements to Gtk+ bindings (2.1.9).
-
 o   libltdl is no longer configured in a separate subdirectory (2.1.6).
-
-o   Portability improvements (2.1.8).
 
 o   Updated to Automake 1.8, Libtool 1.5 (CVS checkout on 2003-08-01),
     Autoconf 2.59a, snprintfv 1.1 (2.1.6).
@@ -31,33 +255,14 @@ o   Updates to Emacs mode (2.1.6).
 
 NEWS FROM 2.1.4 TO 2.1.5
 
-o   Can pass integers to C routines that expect floats (where passing
-    floats works...)
-
 o   Changes in the internals of the GTK+ bindings.  The bindings are
     loaded with the GTK+ package which is enabled by default if GTK+ 2.0
     is installed.  They don't disable the Tk bindings.
 
-o   Correctly find exception handlers in #ensure: blocks.  Previously,
-    errors upon file close would not be caught in a snippet like
-    this:
-
-    [
-	file := FileStream open: fileName mode: FileStream read.
-	[
-	     ...
-	     file atEnd ifTrue: [ ^self ]
-	     ...
-	] ensure: [
-	     file close     "<<< Did not trap exceptions!!!"
-	]
-    ] on: FileError do: [ :ex | ... ]
+o   Can pass integers to C routines that expect floats (where passing
+    floats works...)
 
 o   Do idle processes correctly.
-
-o   Fix Tcl/Tk detection for Red Hat Linux 9.
-
-o   LGPL meaning explained better in the manual.
 
 o   More examples provided for GTK+.
 
@@ -74,11 +279,6 @@ o   Warnings are suppressed correctly under GCC 3.3.
 
 o   --without-emacs suppresses compilation and installation of Emacs LISP
     files
-
-This version was released to have a distributable version of GNU Smalltalk
-after the recent crack of the GNU FTP machines.  However it does fix some
-outstanding bugs and includes the new & improved GTK+ bindings.
-
 
 -----------------------------------------------------------------------------
 
@@ -124,11 +324,11 @@ o   CallinProcesses do not survive across image saves.  This fixed a
     caused mysterious bugs whenever, for example, you saved the
     image with
 
-	ObjectMemory snapshot; quit!
+        ObjectMemory snapshot; quit!
 
-    and then tried to do 
+    and then tried to do
 
-	Processor yield!
+        Processor yield!
 
     Now the CallinProcess would wake up from the point it was snapshotted,
     and happily quit the VM!
@@ -150,16 +350,16 @@ o   Fixed syntax highlighting of unary and binary methods
 o   New iteration method Collection>>#fold:, the latest variation on the
     #inject:into: and #do:separatedBy: themes.  You'll undoubtedly love
 
-	#('abc' 'def' 'ghi') fold: [ :string :elem | string, ' ', elem ]
+        #('abc' 'def' 'ghi') fold: [ :string :elem | string, ' ', elem ]
 
     which yields 'abc def ghi'.  This method can also replace most
     usages of #anyOne together with #inject:into:, as in
 
-	coll inject: coll anyOne into: [ :max :elem | max max: elem ]
+        coll inject: coll anyOne into: [ :max :elem | max max: elem ]
 
     versus
 
-	coll fold: [ :max :elem | max max: elem ]
+        coll fold: [ :max :elem | max max: elem ]
 
 o   Set was incorrectly said to have 2 instance variables.
 
@@ -192,13 +392,13 @@ o   BACKWARDS INCOMPATIBLE: File class>>#extensionFor: includes the leading
 o   Better support for detecting the headers when multiple versions of Tcl/Tk
     are installed on the same machine.
 
-o   Configure option --disable-generational-gc to disable usage of libsigsegv
-    (which seems to lock up under some versions of MacOS X).
-
 o   Fixed call-in bug (if a primitive did a call-in and *then* failed, the
     call-in might have dirtied the method cache and an invalid method was
     invoked).  This could not happen in previous releases, but the new
     #snapshot: primitive satisfies this condition.
+
+o   Configure option --disable-generational-gc to disable usage of libsigsegv
+    (which seems to lock up under some versions of MacOS X).
 
 o   Fix lexing bugs under Linux/PPC and, supposedly, S390 and ARM too.
 
@@ -547,7 +747,7 @@ o   Uses libsnprintfv to simplify printing OOPs (custom %-specifiers)
 Other Smalltalk changes:
 
 o   All the expected failures in the ANSI test suite have been fixed (both
-    with the bytecode interpreter and the JIT -- the causes of the failures
+    with the bytecode interpreter and the JIT---the causes of the failures
     were different in the two cases).
 
 o   Fixed a few bugs in the parsing of ScaledDecimal constants in both the
@@ -907,7 +1107,7 @@ o   Works on Solaris and possibly other systems (thanks to Dirk Sodermann!
 ANSI & cross-dialect compatibility:
 
 o   DateTime and Duration classes provided.  The Date class does not support
-    2-digit years anymore -- instead, a proleptic calendar is adopted for years
+    2-digit years anymore---instead, a proleptic calendar is adopted for years
     before 1582 (*backwards-incompatible*).
 
 o   ScaledDecimal class provided; the 2.0s3 syntax for literals is supported.
@@ -1191,7 +1391,7 @@ o   #at: and #at:put: implementations don't retrieve the instance
     specification twice.
 
 o   Growable object table (OOP table in Blue Book parlance) allows to
-    use huge data structures -- not working yet... I have to find a way
+    use huge data structures---not working yet... I have to find a way
     to reserve memory without allocating it.
 
 o   New structures for contexts and BlockClosure makes it possible to do
@@ -1207,7 +1407,7 @@ o   New structures for contexts and BlockClosure makes it possible to do
 
 o   Number of arguments is checked in #perform:...
 
-o   More polite behavior -- when a Process object yields control, the
+o   More polite behavior: when a Process object yields control, the
     virtual machine automatically goes to sleep for a millisecond to
     give more occasions to run to the other processes running on the
     operating system.
@@ -1304,7 +1504,7 @@ o   Namespaces (yeah!)
 o   New CharacterArray class (superclass of String) is a provision for
     multilingual support...
 
-o   New LookupTable class -- behaves like Dictionary but it is represented
+o   New LookupTable class: it behaves like Dictionary but it is represented
     as an IdentityDictionary; not in the Book but is quite standard
 
 o   New MethodDictionary class avoids crashes caused by partially updated or
@@ -1383,8 +1583,7 @@ NEWS FROM 1.6.1 TO 1.6.2
 o   Can load images produced by system with similar sizeof(long) but
     different endianness.
 
-o   Class reference now includes a beautiful class hierarchy -- took two days
-    to make it work with both Makeinfo and TeX...
+o   Class reference now includes a beautiful class hierarchy.
 
 o   DLD class always present (even where it is not functional). This prevents
     `undeclared variable' errors in code using DLD where it is not supported

@@ -14,9 +14,13 @@ uni_cat ()
 	;;
     *.tar.gz)	gzip -dc "$1"
 	;;
+    *.tar.bz2)	bzip2 -dc "$1"
+	;;
     *.tar)	cat "$1"
 	;;
     *.tgz)	gzip -dc "$1"
+	;;
+    *.tbz)	bzip2 -dc "$1"
 	;;
     *)		echo "unknown extension"
     esac

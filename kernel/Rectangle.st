@@ -374,7 +374,7 @@ expandBy: delta
 		   bottom:(corner y)+delta].
 
     SystemExceptions.WrongClass signalOn: delta
-	mustBe: {Point. Rectangle. Number}
+	mustBe: #( #{Point} #{Rectangle} #{Number} )
 !
 
 insetBy: delta
@@ -395,7 +395,7 @@ insetBy: delta
 		   bottom:(corner y)-delta].
 
     SystemExceptions.WrongClass signalOn: delta
-	mustBe: {Point. Rectangle. Number}
+	mustBe: #( #{Point} #{Rectangle} #{Number} )
 !
 
 insetOriginBy: originDelta corner: cornerDelta

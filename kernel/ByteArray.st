@@ -158,6 +158,12 @@ doubleAt: index
     ^self type: 7 at: index size: CDoubleSize - 1
 !
 
+longDoubleAt: index 
+    "Access the C long double at the given index in the receiver.
+     Indices are 1-based just like for other Smalltalk access."
+    ^self type: 12 at: index size: CLongDoubleSize - 1
+!
+
 stringAt: index 
     "Access the string pointed by the C `char *' at the given index in the
      receiver. Indices are 1-based just like for other Smalltalk access."
@@ -272,6 +278,13 @@ doubleAt: index put: value
      given index in the receiver, writing it like a C double.
      Indices are 1-based just like for other Smalltalk access."
     ^self type: 7 at: index put: value size: CDoubleSize - 1
+!
+
+longDoubleAt: index put: value
+    "Store the Smalltalk Float object identified by `value', at the
+     given index in the receiver, writing it like a C double.
+     Indices are 1-based just like for other Smalltalk access."
+    ^self type: 12 at: index put: value size: CLongDoubleSize - 1
 !
 
 stringAt: index put: value

@@ -11,6 +11,9 @@ GUI development:
     Steve Byrne (original X toolkit version)
     Paolo Bonzini (Tcl/Tk version)
 
+superops program:
+    Parts by Douglas C. Schmidt and Bruno Haible.
+
 --------------------------------------- Manuals ------------------
 
 GNU Smalltalk user guide by:

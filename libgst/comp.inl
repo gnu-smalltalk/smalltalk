@@ -35,6 +35,11 @@
 #define GET_METHOD_BYTECODES(methodOOP) \
   ( ((gst_compiled_method)OOP_TO_OBJ(methodOOP))->bytecodes )
 
+/* Returns the number of literals in the CompiledMethod or CompiledBlock,
+   METHODOOP */
+#define NUM_METHOD_LITERALS(methodOOP) \
+  NUM_WORDS (OOP_TO_OBJ(((gst_compiled_method)OOP_TO_OBJ(methodOOP))->literals))
+
 /* Returns the literals of the CompiledMethod or CompiledBlock,
    METHODOOP */
 #define GET_METHOD_LITERALS(methodOOP) \
@@ -47,29 +52,42 @@
 /* Returns the class in which the CompiledMethod or CompiledBlock,
    METHODOOP, was defined */
 #define GET_METHOD_CLASS(methodOOP) \
-  (get_method_info(methodOOP)->class)
+  (((gst_method_info)OOP_TO_OBJ(get_method_info(methodOOP)))->class)
+
+/* Returns the selector under which the CompiledMethod or CompiledBlock,
+   METHODOOP, was defined */
+#define GET_METHOD_SELECTOR(methodOOP) \
+  (((gst_method_info)OOP_TO_OBJ(get_method_info(methodOOP)))->selector)
 
 /* Returns the header of the CompiledBlock, BLOCKOOP */
 #define GET_BLOCK_HEADER(blockOOP) \
   (((gst_compiled_block)OOP_TO_OBJ(blockOOP))->header)
 
+/* Returns the method for the CompiledBlock, BLOCKOOP */
+#define GET_BLOCK_METHOD(blockOOP) \
+  (((gst_compiled_block)OOP_TO_OBJ(blockOOP))->method)
+
+/* Returns the number of arguments of the CompiledMethod or CompiledBlock
+   pointed to by METHODOOP */
+#define GET_METHOD_NUM_ARGS(methodOOP) \
+  (GET_METHOD_HEADER (methodOOP).numArgs)
+
 /* Returns the method descriptor of OOP (either the CompiledMethod's
    descriptor or the descriptor of the home method if a
-   CompiledBlock). */
-static inline gst_method_info get_method_info (OOP oop);
+   CompiledBlock).  */
+static inline OOP get_method_info (OOP oop);
 
-gst_method_info
+OOP
 get_method_info (OOP oop)
 {
   mst_Object obj;
   obj = OOP_TO_OBJ (oop);
-  do
+  if UNCOMMON (obj->objClass == _gst_compiled_block_class)
     {
-      oop = ((gst_compiled_method) obj)->descriptor;
+      oop = ((gst_compiled_block) obj)->method;
       obj = OOP_TO_OBJ (oop);
     }
-  while (obj->objClass != _gst_method_info_class);
 
-  return ((gst_method_info) obj);
+  return ((gst_compiled_method) obj)->descriptor;
 }
 

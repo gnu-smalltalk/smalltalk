@@ -100,6 +100,11 @@ deepCopy
 
 !Number methodsFor: 'converting'!
 
+asNumber
+    "Answer the receiver, since it is already a number"
+    ^self
+!
+
 degreesToRadians
     "Convert the receiver to radians"
     ^self asFloatD / 57.295779513082320876846364344191
@@ -487,22 +492,26 @@ odd
 !Number methodsFor: 'comparing'!
 
 min: aNumber
-    "Redefined to ensure that a NaN is never answered.  Answer
-     the minimum between the receiver and aNumber."
-    self isNaN ifTrue: [ ^aNumber ].
+    "Answer the minimum between the receiver and aNumber.  Redefine
+     in subclasses if necessary to ensure that if either self or
+     aNumber is a NaN, it is always answered."
 
-    "< will return false if aNumber is a NaN, then self will
-     be answered"
-    ^aNumber < self ifTrue: [ aNumber ] ifFalse: [ self ]!
+    "If both self and aNumber are zero, return aNumber in case it
+     has a negative sign, because we assume our zero is positive.
+     If the test is false, always answer aNumber in case it is a
+     NaN, because we assume that self is not a NaN."
+    ^aNumber > self ifTrue: [ self ] ifFalse: [ aNumber ]!
 
 max: aNumber
-    "Redefined to ensure that a NaN is never answered.  Answer
-     the maximum between the receiver and aNumber."
-    self isNaN ifTrue: [ ^aNumber ].
+    "Answer the maximum between the receiver and aNumber.  Redefine
+     in subclasses if necessary to ensure that if either self or
+     aNumber is a NaN, it is always answered."
 
-    "> will return false if aNumber is a NaN, then self will
-     be answered"
-    ^aNumber > self ifTrue: [ aNumber ] ifFalse: [ self ]! !
+    "If both self and aNumber are zero, return self in case aNumber
+     has a negative sign, because we assume our zero is positive.
+     If the test is false, always answer aNumber in case it is a
+     NaN, because we assume that self is not a NaN."
+    ^aNumber <= self ifTrue: [ self ] ifFalse: [ aNumber ]!
 
 
 
@@ -536,47 +545,75 @@ negated
 !
 
 sin
-    "return the sine of the receiver"
+    "Answer the sine of the receiver"
     ^self asFloatD sin
 !
 
 cos
-    "return the cosine of the receiver"
+    "Answer the cosine of the receiver"
     ^self asFloatD cos
 !
 
 tan
-    "return the tangent of the receiver"
+    "Answer the tangent of the receiver"
     ^self asFloatD tan
 !
 
 arcSin
-    "return the arc sine of the receiver"
+    "Answer the arc sine of the receiver"
     ^self asFloatD arcSin
 !
 
 arcCos
-    "return the arc cosine of the receiver"
+    "Answer the arc cosine of the receiver"
     ^self asFloatD arcCos
 !
 
 arcTan
-    "return the arc tangent of the receiver"
+    "Answer the arc tangent of the receiver"
     ^self asFloatD arcTan
 !
 
+arcTan: x
+    "Answer the angle (measured counterclockwise) between (x, self) and
+     a ray starting in (0, 0) and moving towards (1, 0) - i.e. 3 o'clock"
+
+    | result |
+    x = 0 ifTrue: [
+	"Always adopt the most general number representation of pi.
+	 If none of the number is a floating point number, go with
+	 a FloatD."
+	^self generality < x generality
+	    ifTrue: [
+		x generality < 0.0e generality
+		    ifTrue: [ FloatD pi * self sign / -2 ]
+		    ifFalse: [ x class pi * self sign / -2 ]]
+	    ifFalse: [
+		self generality < 0.0e generality
+		    ifTrue: [ FloatD pi * self sign / -2 ]
+		    ifFalse: [ self class pi * self sign / -2 ]]].
+
+    result := (self / x) arcTan.
+    ^x < 0
+	ifFalse: [ result ]
+	ifTrue: [
+	    result > result zero
+		ifFalse: [ result + result class pi ]
+		ifTrue: [ result - result class pi ] ]
+!
+
 sqrt
-    "return the square root of the receiver"
+    "Answer the square root of the receiver"
     ^self asFloatD sqrt
 !
 
 exp
-    "return e raised to the receiver"
+    "Answer e raised to the receiver"
     ^self asFloatD exp
 !
 
 ln
-    "return log base e of the receiver"
+    "Answer log base e of the receiver"
     ^self asFloatD ln
 !
 
@@ -589,17 +626,17 @@ estimatedLog
 !
 
 log
-    "return log base aNumber of the receiver"
+    "Answer log base aNumber of the receiver"
     ^self asFloatD ln / FloatD ln10
 !
 
 log: aNumber
-    "return log base aNumber of the receiver"
+    "Answer log base aNumber of the receiver"
     ^self asFloatD ln / aNumber asFloatD ln
 !
 
 floorLog: radix
-    "return (self log: radix) floor. Optimized to answer an integer."
+    "Answer (self log: radix) floor. Optimized to answer an integer."
 
     | me answer |
 
@@ -641,7 +678,6 @@ raisedTo: aNumber
 
 raisedToInteger: anInteger
     "Return self raised to the anInteger-th power"
-    | result y n |
 
     "Some special cases first"
     anInteger isInteger ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: Integer ].
@@ -649,14 +685,12 @@ raisedToInteger: anInteger
     anInteger = 0 ifTrue: [ ^self unity ].
     anInteger = 1 ifTrue: [ ^self ].
 
-    result := self unity.
-    y := self.
-    n := anInteger.
-    [   (n bitAnd: 1) == 1 ifTrue: [ result := result * y ].
-	n := n bitShift: -1. n > 0
-    ]   whileTrue: [ y := y * y ].
-
-    ^result
+    "Fire the big loop."
+    ^self
+	raisedToInteger: anInteger
+	withCache: ((Array new: (255 min: anInteger))
+			at: 1 put: self;
+			yourself)
 !
 
 withSignOf: aNumber
@@ -750,5 +784,75 @@ arithmeticError: message
 
 zeroDivide
     self error: 'cannot divide by zero'
+! !
+
+
+!Number methodsFor: 'private'!
+
+raisedToInteger: n withCache: cache
+    "Internal implementation of #raisedToInteger:."
+
+    | result index |
+
+    "For very big numbers, remove the rightmost bit."
+    n > 255
+	ifTrue: [
+	    result := self raisedToInteger: n // 2 withCache: cache.
+	    ^(n bitAnd: 1) = 0
+		ifTrue: [ result squared ]
+		ifFalse: [ result * (result * self) ]
+	].
+
+    "Else, use a table with the optimal choice of k so that
+     self^k * self^(n - k) does as few multiplications as possible."
+    result := cache at: n.
+    result isNil ifTrue: [
+        index := self powerTable at: n.
+        result := 
+	    (self raisedToInteger: n - index withCache: cache) *
+	    (self raisedToInteger: index withCache: cache).
+
+        cache at: n put: result
+    ].
+    ^result
+!
+
+powerTable
+    "Internal table for #raisedToInteger:withCache:.  Example:
+     (powerTable at: 9) == 6 means that n^9 is best computed
+     as n^3 * n^6.  From Knuth's Seminumerical Algorithms."
+
+    ^#[    0   1   2   2   3   3   4  "   1 -   7 "
+       4   6   5   6   6  10   7   9  "   8 -  15 "
+       8  16   9  16  10  12  11  13  "  16 -  23 "
+      12  17  13  18  14  24  15  26  "  24 -  31 "
+      16  17  17  19  18  33  19  26  "  32 -  39 "
+      20  25  21  40  22  27  23  44  "  40 -  47 "
+      24  32  25  34  26  29  27  44  "  48 -  55 "
+      28  31  29  34  30  60  31  36  "  56 -  63 "
+      32  64  33  34  34  46  35  37  "  64 -  71 "
+      36  65  37  50  38  48  39  69  "  72 -  79 "
+      40  49  41  43  42  51  43  58  "  80 -  87 "
+      44  64  45  47  46  59  47  76  "  88 -  95 "
+      48  65  49  66  50  67  51  66  "  96 - 103 "
+      52  70  53  74  54 104  55  74  " 104 - 111 "
+      56  64  57  69  58  78  59  68  " 112 - 119 "
+      60  61  61  80  62  75  63  68  " 120 - 127 "
+      64  65  65 128  66 129  67  90  " 128 - 135 "
+      68  73  69 131  70  94  71  88  " 136 - 143 "
+      72 128  73  98  74 132  75 121  " 144 - 151 "
+      76 102  77 124  78 132  79 106  " 152 - 159 "
+      80  97  81 160  82  99  83 134  " 160 - 167 "
+      84  86  85  95  86 160  87 100  " 168 - 175 "
+      88 113  89  98  90 107  91 122  " 176 - 183 "
+      92 111  93 102  94 126  95 150  " 184 - 191 "
+      96 128  97 130  98 133  99 195  " 192 - 199 "
+     100 128 101 123 102 164 103 138  " 200 - 207 "
+     104 145 105 146 106 109 107 149  " 208 - 215 "
+     108 200 109 146 110 170 111 157  " 216 - 223 "
+     112 128 113 130 114 182 115 132  " 224 - 231 "
+     116 200 117 132 118 158 119 206  " 232 - 239 "
+     120 240 121 162 122 147 123 152  " 240 - 247 "
+     124 166 125 214 126 138 127 153] " 248 - 255 "
 ! !
 

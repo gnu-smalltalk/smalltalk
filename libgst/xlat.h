@@ -32,7 +32,7 @@
 #define GST_XLAT_H
 
 
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
 
 struct inline_cache;
 struct ip_map;
@@ -47,20 +47,32 @@ typedef struct method_entry
 }
 method_entry;
 
-extern void _gst_reset_inline_caches ();
+extern void _gst_reset_inline_caches ()
+  ATTRIBUTE_HIDDEN;
 
-extern PTR _gst_get_native_code (OOP methodOOP, OOP receiverClass);
+extern PTR _gst_get_native_code (OOP methodOOP,
+				 OOP receiverClass) 
+  ATTRIBUTE_HIDDEN;
 
-extern PTR _gst_map_virtual_ip (OOP methodOOP, OOP receiverClass, int ip);
+extern PTR _gst_map_virtual_ip (OOP methodOOP,
+				OOP receiverClass,
+				int ip)
+  ATTRIBUTE_HIDDEN;
 
-extern void _gst_free_released_native_code (void);
-extern void _gst_release_native_code (OOP methodOOP);
-extern void _gst_discard_native_code (OOP methodOOP);
-extern void _gst_init_translator (void);
+extern void _gst_free_released_native_code (void)
+  ATTRIBUTE_HIDDEN;
+extern void _gst_release_native_code (OOP methodOOP)
+  ATTRIBUTE_HIDDEN;
+extern void _gst_discard_native_code (OOP methodOOP)
+  ATTRIBUTE_HIDDEN;
+extern void _gst_init_translator (void)
+  ATTRIBUTE_HIDDEN;
 
-extern PTR (*_gst_run_native_code) ();
+extern PTR (*_gst_run_native_code) ()
+  ATTRIBUTE_HIDDEN;
 
-extern PTR (*_gst_return_from_native_code) ();
+extern PTR (*_gst_return_from_native_code) ()
+  ATTRIBUTE_HIDDEN;
 
 #define GET_METHOD_ENTRY(nativeCodeStart) ((method_entry *) (		\
   ((char *) nativeCodeStart) - (sizeof(method_entry) - sizeof(int))  ))
@@ -68,6 +80,6 @@ extern PTR (*_gst_return_from_native_code) ();
 #define IS_VALID_IP(nativeCodeStart) 					\
   (GET_METHOD_ENTRY(nativeCodeStart)->receiverClass)
 
-#endif /* USE_JIT_TRANSLATION */
+#endif /* ENABLE_JIT_TRANSLATION */
 
 #endif /* GST_XLAT_H */

@@ -470,7 +470,12 @@ lastDayOfMonth
 !
 
 month
-    "Answer the month represented by the receiver"
+    "Answer the index of the month represented by the receiver"
+    ^month
+!
+
+monthIndex
+    "Answer the index of the month represented by the receiver"
     ^month
 !
 

@@ -8,7 +8,7 @@ AC_CACHE_CHECK(for working strtoul, gst_cv_working_strtoul, [
   exec AS_MESSAGE_FD([])>/dev/null
   AC_CHECK_FUNC(strtoul, gst_cv_working_strtoul=yes, gst_cv_working_strtoul=no)
   if test $gst_cv_working_strtoul = yes; then
-    AC_TRY_RUN([
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
       extern int strtoul();
       int main()
       {
@@ -17,9 +17,7 @@ AC_CACHE_CHECK(for working strtoul, gst_cv_working_strtoul, [
 	int value;
 	value = strtoul(string, &term, 0);
 	exit((value != 0) || (term != (string+1)));
-      }], ,
-      [gst_cv_working_strtoul=no],
-      [gst_cv_working_strtoul=no])
+      }]])],[],[gst_cv_working_strtoul=no],[gst_cv_working_strtoul=no])
   fi
   test "$silent" != yes && exec AS_MESSAGE_FD([])>&1
 ])

@@ -29,59 +29,11 @@
  ======================================================================
 "
 
-"Smalltalk blox+browser initialization script"
-
-BLOX addSubspace: #BLOXBrowser!
-
 Class allSubclassesDo: [ :each |
     (each instanceClass notNil and: [
 	each instanceClass includesSelector: #inspect])
 	ifTrue: [ each instanceClass removeSelector: #inspect ]
 ]!
 
-| verbose |
-
-Transcript nl; nextPutAll: 'Initializing system -- be patient...'; nl.
-
-verbose := FileStream verbose: true.
-
-(Namespace current includesKey: #BrowserMain)
-    ifTrue: [ (Namespace current at: #BrowserMain) close ].
-
-Namespace current: BLOX.BLOXBrowser.
-
-#("Load our dependancy system and graphics kernel"
-  'GuiData.st'
-  'View.st'
-  'Manager.st'
-  'RadioForm.st'
-  'Menu.st'
-  'ModalDialog.st'
-  'PList.st'
-  'PText.st'
-  'PCode.st'
-  'ButtonForm.st'
-
-  "View classes"
-  'BrowShell.st'
-  'BrowserMain.st'
-  'ClassHierBrow.st'
-  'ClassBrow.st'
-  'NamespBrow.st'
-  'MethSetBrow.st'
-  'Inspector.st'
-  'DictInspect.st'
-  'MethInspect.st'
-  'StrcInspect.st'
-  'DebugSupport.st'
-  'Debugger.st'
-  'Notifier.st'
-) do: [ :file | FileStream fileIn: file ].
-
-FileStream verbose: verbose.
-
-Namespace current: Smalltalk!
-
-Collection removeSelector: #inspect ifAbsent: [ ].
-SequenceableCollection removeSelector: #inspect ifAbsent: [ ]!
-
+(BLOX.BLOXBrowser includesKey: #BrowserMain)
+    ifTrue: [ BLOX BLOXBrowser BrowserMain close ]!

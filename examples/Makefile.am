@@ -22,4 +22,4 @@ md5_la_SOURCES = md5.c
 md5_la_LIBADD = ../lib-src/library.la
 md5_la_LDFLAGS = $(gst_module_ldflags)
 
-INCLUDES = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src @INCSNPRINTFV@
+AM_CPPFLAGS = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src @INCSNPRINTFV@

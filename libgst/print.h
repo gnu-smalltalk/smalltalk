@@ -37,29 +37,35 @@
 /* Print a representation of OOP on stdout.  For Strings, Symbols,
    Floats and SmallIntegers, this is the #storeString; for other
    objects it is a generic representation including the pointer to the
-   OOP. */
-extern void _gst_print_object (OOP oop);
+   OOP.  */
+extern void _gst_print_object (OOP oop)
+  ATTRIBUTE_HIDDEN;
 
 /* Show information about the contents of the pointer ADDR, deciding
    what kind of Smalltalk entity it is.  Mainly provided for
    debugging.  */
-void _gst_classify_addr (void *addr);
+void _gst_classify_addr (void *addr)
+  ATTRIBUTE_HIDDEN;
 
 /* Show information about the contents of the given OOP.
    Mainly provided for debugging.  */
-void _gst_display_oop (OOP oop);
+void _gst_display_oop (OOP oop)
+  ATTRIBUTE_HIDDEN;
 
 /* Show information about the contents of the given OOP without
    dereferencing the pointer to the object data and to the class.
    Mainly provided for debugging.  */
-void _gst_display_oop_short (OOP oop);
+void _gst_display_oop_short (OOP oop)
+  ATTRIBUTE_HIDDEN;
 
 /* Show information about the contents of the OBJ object.
    Mainly provided for debugging.  */
-void _gst_display_object (mst_Object obj);
+void _gst_display_object (mst_Object obj)
+  ATTRIBUTE_HIDDEN;
 
 /* Initialize the snprintfv library with hooks to print GNU Smalltalk
-   OOPs. */
-extern void _gst_init_snprintfv ();
+   OOPs.  */
+extern void _gst_init_snprintfv ()
+  ATTRIBUTE_HIDDEN;
 
 #endif /* GST_OOP_H */

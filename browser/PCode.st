@@ -176,6 +176,10 @@ highlightBlockClosure
 
 highlightSyntax
     | parser |
+    (source = self contents) ifFalse:
+      [ 'FIXME: this is wrong, something is being dropped elsewhere with respect to content updates' printNl.
+        source:=self contents
+      ].
     parser := STInST.RBParser new
 	errorBlock: [ :string :pos | ^self ];
 	initializeParserWith: source type: #on:errorBlock:;
@@ -437,7 +441,7 @@ highlightNewVariable: node as: kind
 PText subclass:  #PCode
 	instanceVariableNames: ''
 	classVariableNames: ''
-	poolDictionaries: ''
+	poolDictionaries: 'STInST'
 	category: 'Graphics-Browser'!
 
 PCode comment: 
@@ -448,7 +452,54 @@ nil!
 bloxClass
     ^BCode! !
 
+!PCode methodsFor: 'limited parsing'!
+
+implementorsFrom: position
+    | symbol |
+    symbol := self getMessageAt: position.
+    symbol isNil ifTrue: [ Blox beep. ^self ].
+    MethodSetBrowser implementorsOf: symbol parent: self!
+
+sendersFrom: position
+    | symbol |
+    symbol := self getMessageAt: position.
+    symbol isNil ifTrue: [ Blox beep. ^self ].
+    MethodSetBrowser sendersOf: symbol parent: self!
+
+getMessageAt: position
+    "This is so easy to do with the Refactoring Browser's
+     parse nodes!!!"
+    | stream pos parser node |
+    "First, we must map line/row to the actual index in
+     the source code."
+    stream := ReadStream on: blox contents.
+    position y - 1 timesRepeat: [ stream nextLine ].
+    stream skip: position x - 1.
+    pos := stream position.
+    stream reset.
+
+    parser := RBParser new.
+    parser errorBlock: [ :message :position | ^nil ].
+    parser scanner: (parser scannerClass
+			on: stream
+			errorBlock: parser errorBlock).
+
+    node := parser parseMethod body.
+    node := node bestNodeFor: (pos to: pos + 1).
+    [ node isMessage ] whileFalse: [
+	node := node parent.
+	node isNil ifTrue: [ ^nil ]
+    ].
+
+    ^node selector! !
+
 !PCode methodsFor: 'blue button menu'!
+
+implementors
+    ^self implementorsFrom: blox currentPosition!
+
+senders
+    ^self sendersFrom: blox currentPosition!
 
 compileIt
     super compileIt.

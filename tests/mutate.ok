@@ -23,7 +23,7 @@ returned value is B
 Execution begins...
 A(var1:1 )
 B(var1:0 var2:2 )
-nil
+2
 B(var1:0 var2:nil var2:2 )
 2
 B(var1:0 var2:2 )

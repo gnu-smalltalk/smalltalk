@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2002, 2003 Free Software Foundation, Inc.
+ * Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.  Ideas based on Mike Haertel's malloc.
  *
  * This file is part of GNU Smalltalk.
@@ -33,9 +33,9 @@
 /* #define LOG_MEMORY_OPERATIONS */
 
 
-#define SMALL2FREE(B, N)        ((heap_freeobj*)(((char *)(B)->vSmall.data) + (N)*(B)->size))
+#define	SMALL2FREE(B, N)	((heap_freeobj*)(((char *)(B)->vSmall.data) + (N)*(B)->size))
 
-#define	MEM2BLOCK(M)		((heap_block*)(((long)(M)) & -pagesize))
+#define	MEM2BLOCK(M)		((heap_block*)(((intptr_t)(M)) & -pagesize))
 #define	MEM2FREE(M)		((heap_freeobj*)(M))
 
 #define	BLOCKEND(B)		((heap_block*)(((unsigned char*)(B)) + (B)->size))
@@ -44,8 +44,8 @@
 #define	IS_SMALL_SIZE(S)	((S) <= max_small_object_size)
 
 #define	MEMALIGN		8
-#define	ROUNDUPALIGN(V)		(((long)(V) + MEMALIGN - 1) & -MEMALIGN)
-#define	ROUNDUPPAGESIZE(V)	(((long)(V) + pagesize - 1) & -pagesize)
+#define	ROUNDUPALIGN(V)		(((intptr_t)(V) + MEMALIGN - 1) & -MEMALIGN)
+#define	ROUNDUPPAGESIZE(V)	(((intptr_t)(V) + pagesize - 1) & -pagesize)
 
 #define	OBJECT_SIZE(M)		(MEM2BLOCK(M)->size)
 
@@ -88,17 +88,15 @@ static void log_memory (char *op, int n, PTR block);
 
 /* This list was produced by this command 
 
-   echo 'for (i = (4072 + 7) / 8; i >= 1; i--) (4072 / i) / 8 * 8; 0' |
+   echo 'for (i = (4072 + 7) / 32; i >= 1; i--) (4072 / i) / 32 * 32; 0' |
      bc | uniq | sed '$!s/$/,/' | fmt -60
 
    for 32-bit machines, and similarly with 4064 instead of
-   4072 on 64-bit machines. */
+   4072 for 64-bit machines.  8 and 16 were added manually.  */
 
 static unsigned short freelist_size[NUM_FREELISTS + 1] = {
-  8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112,
-  120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200,
-  208, 224, 232, 248, 264, 288, 312, 336, 368, 400, 448,
-  504, 576, 672, 808, 1016, 1352, 2032, 
+  8, 16, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352,
+  384, 448, 480, 576, 672, 800, 992, 1344, 2016,
   4096 - SMALL_OBJ_HEADER_SIZE,
   8192 - SMALL_OBJ_HEADER_SIZE,
   16384 - SMALL_OBJ_HEADER_SIZE, 0
@@ -190,7 +188,7 @@ rerun:
 	      goto nospace;
 	    }
 
-          if (((long) blk) & (pagesize - 1))
+          if (((intptr_t) blk) & (pagesize - 1))
 	    abort ();
 
 	  blk->vSmall.nfree = *mptr;
@@ -206,8 +204,8 @@ rerun:
       /* Unlink free one and return it */
       mem = blk->vSmall.free;
 
-      if (((long) mem <= (long) blk) ||
-	  ((long) mem >= (long) blk + pagesize))
+      if (((intptr_t) mem <= (intptr_t) blk) ||
+	  ((intptr_t) mem >= (intptr_t) blk + pagesize))
 	abort ();
 
       blk->vSmall.free = mem->next;
@@ -342,7 +340,7 @@ _gst_mem_free (heap_data *h, PTR mem)
          it to freelist.  */
       if (++info->vSmall.avail == 1)
 	{
-	  if ( ((long) info) & (pagesize - 1))
+	  if ( ((intptr_t) info) & (pagesize - 1))
 	    abort ();
 
 	  info->vSmall.nfree = h->freelist[lnr];
@@ -352,9 +350,9 @@ _gst_mem_free (heap_data *h, PTR mem)
       obj->next = info->vSmall.free;
       info->vSmall.free = obj;
 
-      if ((long) obj < (long) info ||
-	  (long) obj >= (long) info + pagesize ||
-	  (long) obj == (long) (obj->next))
+      if ((intptr_t) obj < (intptr_t) info ||
+	  (intptr_t) obj >= (intptr_t) info + pagesize ||
+	  (intptr_t) obj == (intptr_t) (obj->next))
 	abort ();
 
       /* If we free all sub-blocks, free the block */
@@ -473,7 +471,7 @@ heap_primitive_alloc (heap_data *h, size_t sz)
           ptr->mmap_block = 1;
 	  ptr->user = 0;
 	  ptr->size = sz;
-          if (((long) ptr) & (pagesize - 1))
+          if (((intptr_t) ptr) & (pagesize - 1))
 	    abort ();
 
 	  return ptr;
@@ -483,7 +481,7 @@ heap_primitive_alloc (heap_data *h, size_t sz)
   for (pptr = &heap_prim_freelist; (ptr = *pptr); pptr = &(ptr->vFree.next))
     {
       h->probes++;
-      if (((long) ptr) & (pagesize - 1))
+      if (((intptr_t) ptr) & (pagesize - 1))
 	abort ();
 
       /* First fit */
@@ -551,7 +549,7 @@ heap_add_to_free_list (heap_data *h, heap_block *mem)
   heap_block *lptr;
   heap_block *nptr;
 
-  if (((long) mem) & (pagesize - 1))
+  if (((intptr_t) mem) & (pagesize - 1))
     abort ();
 
   if (mem < heap_prim_freelist || heap_prim_freelist == 0)
@@ -656,10 +654,10 @@ morecore (size_t size)
 
       if (ptr != (PTR) -1)
 	{
-          if (((long) ptr & (pagesize - 1)) > 0)
+          if (((intptr_t) ptr & (pagesize - 1)) > 0)
             {
 	      /* Oops, we have to align to a page.  */
-	      int missed = pagesize - ((long) ptr & (pagesize - 1));
+	      int missed = pagesize - ((intptr_t) ptr & (pagesize - 1));
 	      _gst_heap_sbrk (current_extra_heap, -size + missed);
 	      ptr = _gst_heap_sbrk (current_extra_heap, size);
             }
@@ -860,7 +858,7 @@ static void
 log_memory (char *op, int n, PTR block)
 {
   char buf[40];
-  long k;
+  intptr_t k;
   int i;
 
   memset (buf, ' ', 40);
@@ -871,7 +869,7 @@ log_memory (char *op, int n, PTR block)
 
   memcpy (buf, op, strlen(op));
 
-  k = (long) block;
+  k = (intptr_t) block;
   i = 18;
   do
     buf[i--] = (k & 15) + ((k & 15) < 10 ? '0' : 'a');
@@ -881,7 +879,7 @@ log_memory (char *op, int n, PTR block)
 
   if (n >= 0)
     {
-      k = (long) n;
+      k = (intptr_t) n;
       i = 38;
       do
         buf[i--] = (k % 10) + '0';

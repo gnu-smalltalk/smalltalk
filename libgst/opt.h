@@ -40,18 +40,20 @@
    optimizing jumps (because they span multiple basic blocks). 
 
    On output, BYTECODES is freed and another vector of bytecodes
-   is answered. */
-extern bytecodes _gst_optimize_bytecodes (bytecodes bytecodes);
+   is answered.  */
+extern bc_vector _gst_optimize_bytecodes (bc_vector bytecodes) 
+  ATTRIBUTE_HIDDEN;
 
 /* This fills a table that says which stack slot is touched by each
    bytecode.  BP points to SIZE bytecodes, POS points to an array that
    is filled with pointers relative to BASE.  In other words, if bp[x]
    writes in the first stack slot, we put pos[x] == &base[0]; if bp[x]
-   writes in the second stack slot, we put pos[x] == &base[1], etc. */
+   writes in the second stack slot, we put pos[x] == &base[1], etc.  */
 extern void _gst_compute_stack_positions (gst_uchar * bp,
 					  int size,
 					  PTR * base,
-					  PTR ** pos);
+					  PTR ** pos) 
+  ATTRIBUTE_HIDDEN;
 
 /* METHODOOP is the OOP for a CompiledMethod or CompiledBlock to be
    analyzed, having SIZE bytecodes.  DEST is an array of SIZE items,
@@ -60,12 +62,32 @@ extern void _gst_compute_stack_positions (gst_uchar * bp,
    backward jump.  */
 extern void _gst_analyze_bytecodes (OOP methodOOP,
 				    int size,
-				    char *dest);
+				    char *dest) 
+  ATTRIBUTE_HIDDEN;
+
+/* Look at METHODOOP and checks if it is well formed.  If it is an
+   inner block, the external methods are examined.  Abort if the
+   process fails.  */
+extern void _gst_verify_sent_method (OOP methodOOP) 
+  ATTRIBUTE_HIDDEN;
+
+/* Look at METHODOOP and checks if it is well formed.  If it is
+   an inner block, DEPTH is the length of the static chain and
+   NUM_OUTER_TEMPS is the number of temporaries available in the
+   first outer context, the second, and so on; if they are NULL,
+   the CompiledMethod that holds the block is verified.  Return
+   NULL or an error message.  */
+extern const char *_gst_verify_method (OOP methodOOP,
+				       int *num_outer_temps,
+				       int depth) 
+  ATTRIBUTE_HIDDEN;
 
 /* This looks at BYTECODES and checks if they could be replaced
    with an optimized return of self, of an instance variable or of
    a literal.  */
-extern int _gst_is_simple_return (bytecodes bytecodes) ATTRIBUTE_PURE;
+extern int _gst_is_simple_return (bc_vector bytecodes)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
 /* This decides whether the block compiled to the BC bytecodes can be
    optimized; LITERALS contains the literals for the given block, and
@@ -77,20 +99,17 @@ extern int _gst_is_simple_return (bytecodes bytecodes) ATTRIBUTE_PURE;
    accesses to outer contexts) which however needs to know about self,
    31 for a block containing a method return or a reference to
    thisContext, and another number N for a block that accesses the
-   (N-1)th outer context. */
-extern int _gst_check_kind_of_block (bytecodes bc,
-				     OOP * literals);
+   (N-1)th outer context.  */
+extern int _gst_check_kind_of_block (bc_vector bc,
+				     OOP * literals) 
+  ATTRIBUTE_HIDDEN;
 
-/* These specify which bytecodes are pushes or message sends.  Use
-   them through the macros below.  */
-extern const int _gst_is_send_table[], _gst_is_push_table[];
-
-#define IS_SEND_BYTECODE(b)	_gst_is_send_table[(gst_uchar) (b)]
-#define IS_PUSH_BYTECODE(b)	_gst_is_push_table[(gst_uchar) (b)]
-
-/* The values emitted by _gst_analyze_bytecodes. */
-#define TOP_UNKNOWN		0
-#define TOP_IS_INTEGER		1
-#define TOP_IS_NOT_INTEGER	2
+#define IS_RETURN_BYTECODE(b)	((b) == RETURN_METHOD_STACK_TOP || \
+		  		 (b) == RETURN_CONTEXT_STACK_TOP)
+#define IS_SEND_BYTECODE(b)	((int) (b) < PUSH_TEMPORARY_VARIABLE)
+#define IS_PUSH_BYTECODE(b)	(((b) >= PUSH_TEMPORARY_VARIABLE \
+				  && (b) <= PUSH_RECEIVER_VARIABLE) \
+				 || ((b) >= PUSH_INTEGER \
+				     && (b) <= PUSH_LIT_CONSTANT))
 
 #endif /* GST_OPT_H */

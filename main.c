@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2004
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -37,10 +37,11 @@
 
 #if STDC_HEADERS
 #include <stdlib.h>
+#include <string.h>
 #endif
 
 int
-main(int argc, char **argv)
+main(int argc, const char **argv)
 {
   int result;
   gst_smalltalk_args(argc, argv);

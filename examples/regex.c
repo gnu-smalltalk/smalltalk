@@ -1011,7 +1011,7 @@ scan_hex (start, len, retlen)
    the `struct pre_pattern_buffer' that bufp pointed to, after
    pre_compile_pattern returns. */
 
-char *
+const char *
 pre_compile_pattern (pattern, size, bufp)
      const char *pattern;
      int size;
@@ -1283,10 +1283,10 @@ pre_compile_pattern (pattern, size, bufp)
 	  /* Read in characters and ranges, setting map bits.  */
 	  for (;;)
 	    {
-	      int size;
+	      int size = EXTRACT_UNSIGNED (&b[(1 << BYTEWIDTH) / BYTEWIDTH]);
 	      unsigned last = (unsigned) -1;
 
-	      if (size = EXTRACT_UNSIGNED (&b[(1 << BYTEWIDTH) / BYTEWIDTH]))
+	      if (size)
 		{
 		  /* Ensure the space is enough to hold another interval
 		     of multi-byte chars in charset(_not)?.  */

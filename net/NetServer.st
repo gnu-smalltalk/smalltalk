@@ -92,9 +92,13 @@ createSocket
     self subclassResponsibility
 !
 
-newProcess
-    ^[ self run ] forkAt: priority
-!
+startNewProcess
+    process := [ self run ] newProcess
+	priority: priority;
+	name: (self class name, ' Process');
+	yourself.
+
+    process resume!
 
 socket
     ^socket
@@ -114,7 +118,7 @@ isRunning
 start
     self isRunning ifTrue: [^self].
     socket := self createSocket.
-    process := self newProcess!
+    self startNewProcess!
 
 stop
     self isRunning
@@ -122,8 +126,7 @@ stop
 	    [process terminate.
 	    process := nil.
 	    socket close.
-	    socket := nil.
-	    ]! !
+	    socket := nil]! !
 
 
 !NetServer class methodsFor: 'accessing'!

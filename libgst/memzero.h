@@ -55,16 +55,14 @@
 #ifndef GST_MEMZERO_DONE
 #define GST_MEMZERO_DONE
 static inline void
-memzero (s,
-	 count)
-     PTR s;
-     register long count;
+memzero (PTR s,
+	 size_t count)
 {
   if (!count)
     return;
 
   /* hmmm... this zeroes memory a byte at a time... I wonder whether it
-     is really faster than the generic version... */
+     is really faster than the generic version...  */
   __asm__ __volatile__ (".set	noreorder" "\n"
 			"1:	sb	%3,(%0)" "\n"
 			"	bne	%0,%1,1b" "\n"
@@ -84,7 +82,7 @@ memzero (s,
 #define GST_MEMZERO_DONE
 static inline void
 memzero (PTR s,
-	 long int count)
+	 size_t count)
 {
   int d0, d1;
   __asm__ __volatile__ ("cld" "\n"
@@ -98,7 +96,7 @@ memzero (PTR s,
 			"=&D" (d1):"a" (0L),
 			"q" (count),
 			"0" (count / 4),
-			"1" ((long) s):"memory");
+			"1" ((intptr_t) s):"memory");
 }
 #endif
 #endif
@@ -109,19 +107,19 @@ memzero (PTR s,
 
 /* cfr memmove.c -- both files implement a very fast unrolled loop, using
  * approx. the same code (this has only destination, memmove has
- * source+destination). */
+ * source+destination).  */
 #define COPY(type)  *((type *) dst)++ = (type) 0;
 
 /* This loop ensures that dst is aligned to a power of two 
  * bigger than sizeof(type)
  */
 #define LOOP_ALIGN(type)					\
-  while(n >= sizeof(type) && ((long) dst) & sizeof(type) ) {	\
+  while(n >= sizeof(type) && ((intptr_t) dst) & sizeof(type) ) {	\
     n -= sizeof(type);						\
     COPY(type);							\
   }								\
 
-/* This loop does as much as possible with the given type. */
+/* This loop does as much as possible with the given type.  */
 #define LOOP_FINISH(type)					\
   while(n >= sizeof(type)) {					\
     n -= sizeof(type);						\
@@ -129,17 +127,16 @@ memzero (PTR s,
   }								\
 
 static inline void
-memzero (dst,
-	 n)
-     register PTR dst;
-     register long n;
+memzero (PTR dst,
+	 size_t n)
 {
   LOOP_ALIGN (char);
   LOOP_ALIGN (short);
-#if SIZEOF_LONG > SIZEOF_INT
-  LOOP_ALIGN (int);
-  LOOP_FINISH (long);
-#endif
+  if (sizeof (long) > sizeof (int))
+    {
+      LOOP_ALIGN (int);
+      LOOP_FINISH (long);
+    }
   LOOP_FINISH (int);
   LOOP_FINISH (short);
   LOOP_FINISH (char);

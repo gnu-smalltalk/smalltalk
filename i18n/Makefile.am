@@ -1,33 +1,23 @@
-i18ndir = $(pkgdatadir)/i18n
-localedir = $(datadir)/locale
+pkglib_LTLIBRARIES = @MODULES_I18N@
+EXTRA_LTLIBRARIES = i18n.la
+
+gst_module_ldflags = -rpath $(pkglibdir) -release $(VERSION) -module \
+	-no-undefined -export-symbols-regex gst_initModule
+
+i18n_la_LDFLAGS = $(gst_module_ldflags)
+i18n_la_LIBADD = $(LIBICONV) $(top_builddir)/lib-src/library.la
+i18n_la_SOURCES = i18n.c localcharset.c
+
+AM_CPPFLAGS = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src \
+	-DLOCALEDIR="\"$(localedir)\"" -DLIBDIR="\"$(libdir)\""
+
+# These rules are from GNU gettext
 
 EXTRA_DIST = ref-add.sin ref-del.sin config.charset
-
-dist_noinst_DATA = stamp-classes
-
 noinst_SCRIPTS = ref-add.sed ref-del.sed
 CLEANFILES = ref-add.sed ref-del.sed charset.alias
 
-EXTRA_LTLIBRARIES = i18n.la
-pkglib_LTLIBRARIES = @MODULES_I18N@
-
-AM_CPPFLAGS = -DLOCALEDIR="\"$(localedir)\"" -DLIBDIR="\"$(libdir)\""
-
-i18n_la_LIBADD = $(LIBICONV) $(top_builddir)/lib-src/library.la
-i18n_la_LDFLAGS = -module -rpath $(pkglibdir) -no-undefined \
-	-release $(VERSION)
-i18n_la_SOURCES = i18n.c localcharset.c
-
-INCLUDES = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src
-
-stamp-classes: GetText.st	Load.st		Locale.st	\
-Numbers.st     Times.st		Collation.st	Sets.st		\
-Expression.st
-	@echo Updating $@
-	@sed -n "s/.*'\([^']*\.st\)'.*/\1/p" $(srcdir)/Load.st>$@
-
-
-# These rules are from GNU gettext
+localedir = $(datadir)/locale
 
 .sin.sed:
 	sed -e '/^#/d' -e 's/@''PACKAGE''@/@PACKAGE@/g' $< > t-$@

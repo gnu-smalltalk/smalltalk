@@ -457,6 +457,8 @@ flush
     super flush!
 
 logError: exception
+exception messageText displayNl.
+Smalltalk backtrace.
     self flush.
     self showCr: 'ERROR'!
 

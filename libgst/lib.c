@@ -39,13 +39,9 @@
 #endif
 
 
-/* Define to debug the getopt code. */
+/* Define to debug the getopt code.  */
 /* #define DEBUG_GETOPT */
 
-#ifdef atarist
-#define INIT_FILE_NAME		".gstinit"
-#define PRE_IMAGE_FILE_NAME	".gstpre"	/* hope this is ok */
-#else
 #ifdef MSDOS
 #define INIT_FILE_NAME		"_stinit"
 #define PRE_IMAGE_FILE_NAME	"_stpre"
@@ -53,10 +49,8 @@
 #define INIT_FILE_NAME		".stinit"
 #define PRE_IMAGE_FILE_NAME	".stpre"
 #endif
-#endif
 
 
-extern int _gst_yydebug;
 
 
 static const char help_text[] =
@@ -71,17 +65,15 @@ static const char help_text[] =
   "\n   -c --core-dump\t\t Dump core on fatal signal"
   "\n   -d --declaration-trace-user\t Trace compilation of files on the command line"
   "\n   -D --declaration-trace-all\t Trace compilation of all loaded files"
-#ifndef USE_JIT_TRANSLATION
+#ifndef ENABLE_JIT_TRANSLATION
   "\n   -e --execution-trace-user\t Trace execution of files on the command line"
   "\n   -E --execution-trace-all\t Trace execution of all loaded files"
 #endif
   "\n   -g --no-gc-message\t\t Do not print garbage collection messages"
-  "\n   -H -h -? --help\t\t Print this message and exit"
+  "\n   -H --help\t\t\t Print this message and exit"
   "\n   -i --rebuild-image\t\t Ignore the image file; rebuild it from scratch"
   "\n   -I --image-file file\t\t Instead of `gst.im', use `file' as the image\n\t\t\t\t file, and ignore the kernel files' timestamps\n"
   "\n   -K --kernel-file file\t Make file's path relative to the image path."
-  "\n   -l --log-changes\t\t Log changes in `change-log.st'"
-  "\n   -L --log-file file\t\t Log changes in file `file'"
   "\n   -p --emacs-mode\t\t Execute as a `process' (from within Emacs)"
   "\n   -q --quiet --silent\t\t Do not print execution information"
   "\n   -Q --no-messages\t\t Run Smalltalk with -q -g and no startup banner"
@@ -115,23 +107,21 @@ static const struct option long_options[] = {
   {"core-dump", 0, 0, 'c'},
   {"declaration-trace-user", 0, 0, 'd'},
   {"declaration-trace-all", 0, 0, 'D'},
-#ifndef USE_JIT_TRANSLATION
+#ifndef ENABLE_JIT_TRANSLATION
   {"execution-trace-user", 0, 0, 'e'},
   {"execution-trace-all", 0, 0, 'E'},
 #endif
+  {"file", 0, 0, 'f'},
   {"no-gc-message", 0, 0, 'g'},
   {"help", 0, 0, 'H'},
   {"rebuild-image", 0, 0, 'i'},
   {"image-file", 1, 0, 'I'},
   {"kernel-file", 1, 0, 'K'},
-  {"log-changes", 0, 0, 'l'},
-  {"log-file", 1, 0, 'L'},
   {"emacs-mode", 0, 0, 'p'},
   {"quiet", 0, 0, 'q'},
   {"no-messages", 0, 0, 'Q'},
   {"silent", 0, 0, 'q'},
   {"regression-test", 0, 0, 'r'},
-  {"store-no-source", 0, 0, 's'},
   {"snapshot", 0, 0, 'S'},
   {"version", 0, 0, 'v'},
   {"verbose", 0, 0, 'V'},
@@ -144,44 +134,41 @@ static const struct option long_options[] = {
  * messages, such as the number of byte codes executed by the
  * last expression, etc.
  */
-mst_Boolean _gst_quiet_execution;
-
-/* Set by cmd line flag.  If true, Smalltalk is more verbose about
-   what it's doing. */
-mst_Boolean _gst_verbose = false;
+int _gst_verbosity = 2;
 
 /* These contain the default path that was picked (after looking at the
-   environment variables) for the kernel files and the image. */
-char *_gst_kernel_file_default_path, *_gst_image_file_default_path;
+   environment variables) for the kernel files and the image.  */
+const char *_gst_kernel_file_path = NULL;
+const char *_gst_image_file_path = NULL;
 
 /* This is the name of the binary image to load.  If it is not NULL after the
    command line is parsed, the checking of the dates of the kernel source files
    against the image file date is overridden.  If it is NULL, it is set to
-   default_image_name. */
-char *_gst_binary_image_name = NULL;
+   default_image_name.  */
+const char *_gst_binary_image_name = NULL;
 
 /* This is used by the callin functions to auto-initialize Smalltalk.
    When it's not true, initialization needs to be performed.  It's set
-   to true by gst_init_smalltalk(). */
+   to true by gst_init_smalltalk().  */
 mst_Boolean _gst_smalltalk_initialized = false;
 
 /* This is used to avoid doing complicated things (currently, this
    includes call-ins before and after _gst_execute_statements) before
-   the system is ready to do them. */
+   the system is ready to do them.  */
 mst_Boolean _gst_kernel_initialized = false;
 
 /* If true, even both kernel and user method definitions are shown as
    they are compiled.  */
-mst_Boolean _gst_trace_kernel_declarations;
+mst_Boolean _gst_trace_kernel_declarations = false;
 
 /* If true, execution tracing is performed when loading kernel method
-   definitions. */
-mst_Boolean _gst_trace_kernel_execution;
+   definitions.  */
+mst_Boolean _gst_trace_kernel_execution = false;
 
 /* This is TRUE if we are doing regression testing, and causes
    whatever sources of variance to be suppressed (such as printing out
    execution statistics).  */
-mst_Boolean _gst_regression_testing;
+mst_Boolean _gst_regression_testing = false;
 
 
 
@@ -194,7 +181,7 @@ mst_Boolean _gst_regression_testing;
 /* Parse the Smalltalk source code contained in FILENAME.  If QUIET
    is true, for no reason show messages about the execution state (this
    is turned on while loading kernel files).  */
-static mst_Boolean process_file (char *fileName);
+static mst_Boolean process_file (const char *fileName);
 
 /* Parse the Smalltalk source code read from stdin.  */
 static void process_stdin ();
@@ -203,7 +190,7 @@ static void process_stdin ();
    _gst_binary_image_name.  This is good is the image file is local
    and newer than all of the kernel files, or if the image file is
    global, newer than all of the global kernel files, and no local
-   kernel file is found. */
+   kernel file is found.  */
 static mst_Boolean ok_to_load_binary (void);
 
 /* Attempts to find a viable kernel Smalltalk file (.st file).  First
@@ -239,182 +226,183 @@ static int load_standard_files (void);
 /* Sets up the paths for the kernel source directory and for where the
    saved Smalltalk binary image lives.  Uses environment variables
    SMALLTALK_KERNEL and SMALLTALK_IMAGE if they are set, otherwise
-   uses the paths passed by the makefiles. */
+   uses the paths passed by the makefiles.  */
 static void init_paths (void);
 
 /* This routine scans the command line arguments, accumulating
-   information and setting flags. */
-static int parse_args (int argc, char **argv);
+   information and setting flags.  */
+static int parse_args (int argc,
+		       const char **argv);
 
 /* These functions load the per-user customization files, respectively
    .stinit (loaded at every startup) and .stpre (loaded before a local
-   image is saved. */
+   image is saved.  */
 static void load_user_init_file (void);
 static void load_user_pre_image_file (void);
 
 /* Set by command line flag.  When true, Smalltalk saves a snapshot after
-   loading the files on the command line, before exiting. */
+   loading the files on the command line, before exiting.  */
 static mst_Boolean snapshot_after_load = false;
 
 /* Whether SMALLTALK_IMAGE is set (only if it is set, .stpre is loaded) */
 static mst_Boolean is_local_image;
 
-/* The _gst_image_file_default_path followed by /gst.im */
+/* Usually the same as _gst_image_file_path.  */
+static char *default_image_path;
+
+/* The default_image_path followed by /gst.im */
 static char *default_image_name;
 
-/* Set by command line flag.  When true, Smalltalk does not print any
-   sort of version banner at the startup of the interpreter.  This
-   makes Smalltalk usable as a filter, or as a pure producer of
-   content (such as the main program in a cgi-bin script). */
-static mst_Boolean no_errors = false;
-
 /* If true, skip date checking of kernel files vs. binary image; pretend
-   that binary image does not exist. */
-static mst_Boolean ignore_image;
+   that binary image does not exist.  */
+static mst_Boolean ignore_image = false;
 
 /* The complete list of "kernel" class and method definitions.  Each
    of these files is loaded, in the order given below.  Their last
    modification dates are compared against that of the image file; if
    any are newer, the image file is ignored, these files are loaded,
-   and a new image file is created. */
-static const char *standard_files[] = {
-  "Builtins.st",
-  "Object.st",
-  "Message.st",
-  "DirMessage.st",
-  "Boolean.st",
-  "False.st",
-  "True.st",
-  "Magnitude.st",
-  "Integer.st",
-  "Date.st",
-  "Time.st",
-  "Number.st",
-  "Float.st",
-  "FloatD.st",
-  "FloatE.st",
-  "FloatQ.st",
-  "Fraction.st",
-  "LargeInt.st",
-  "SmallInt.st",
-  "Character.st",
-  "LookupKey.st",
-  "Association.st",
-  "HomedAssoc.st",
-  "VarBinding.st",
-  "Link.st",
-  "Process.st",
-  "CallinProcess.st",
-  "CompildCode.st",
-  "CompildMeth.st",
-  "CompiledBlk.st",
-  "Collection.st",
-  "SeqCollect.st",
-  "LinkedList.st",
-  "Semaphore.st",
-  "ArrayColl.st",
-  "Array.st",
-  "ByteArray.st",
-  "CharArray.st",
-  "String.st",
-  "Symbol.st",
-  "Interval.st",
-  "OrderColl.st",
-  "SortCollect.st",
-  "Bag.st",
-  "MappedColl.st",
-  "HashedColl.st",
-  "Set.st",
-  "IdentitySet.st",
-  "Dictionary.st",
-  "LookupTable.st",
-  "IdentDict.st",
-  "MethodDict.st",
-  "BindingDict.st",
-  "AbstNamespc.st",
-  "RootNamespc.st",
-  "Namespace.st",
-  "SysDict.st",
-  "Stream.st",
-  "PosStream.st",
-  "ReadStream.st",
-  "WriteStream.st",
-  "RWStream.st",
-  "ByteStream.st",
-  "TokenStream.st",
-  "Random.st",
-  "UndefObject.st",
-  "ProcSched.st",
-  "Delay.st",
-  "SharedQueue.st",
-  "Behavior.st",
-  "ClassDesc.st",
-  "Class.st",
-  "Metaclass.st",
-  "ContextPart.st",
-  "MthContext.st",
-  "BlkContext.st",
-  "BlkClosure.st",
-  "Memory.st",
-  "MethodInfo.st",
-  "FileSegment.st",
-  "FileDescr.st",
-  "SymLink.st",
-  "ObjMemory.st",
+   and a new image file is created.
+   
+   As a provision for when we'll switch to a shared library, this
+   is not an array but a list of consecutive file names.  */
+static const char standard_files[] = {
+  "Builtins.st\0"
+  "Object.st\0"
+  "Message.st\0"
+  "DirMessage.st\0"
+  "Boolean.st\0"
+  "False.st\0"
+  "True.st\0"
+  "Magnitude.st\0"
+  "Integer.st\0"
+  "Date.st\0"
+  "Time.st\0"
+  "Number.st\0"
+  "Float.st\0"
+  "FloatD.st\0"
+  "FloatE.st\0"
+  "FloatQ.st\0"
+  "Fraction.st\0"
+  "LargeInt.st\0"
+  "SmallInt.st\0"
+  "Character.st\0"
+  "LookupKey.st\0"
+  "Association.st\0"
+  "HomedAssoc.st\0"
+  "VarBinding.st\0"
+  "Link.st\0"
+  "Process.st\0"
+  "CallinProcess.st\0"
+  "CompildCode.st\0"
+  "CompildMeth.st\0"
+  "CompiledBlk.st\0"
+  "Collection.st\0"
+  "SeqCollect.st\0"
+  "LinkedList.st\0"
+  "Semaphore.st\0"
+  "ArrayColl.st\0"
+  "Array.st\0"
+  "ByteArray.st\0"
+  "CharArray.st\0"
+  "String.st\0"
+  "Symbol.st\0"
+  "Interval.st\0"
+  "OrderColl.st\0"
+  "SortCollect.st\0"
+  "Bag.st\0"
+  "MappedColl.st\0"
+  "HashedColl.st\0"
+  "Set.st\0"
+  "IdentitySet.st\0"
+  "Dictionary.st\0"
+  "LookupTable.st\0"
+  "IdentDict.st\0"
+  "MethodDict.st\0"
+  "BindingDict.st\0"
+  "AbstNamespc.st\0"
+  "RootNamespc.st\0"
+  "Namespace.st\0"
+  "SysDict.st\0"
+  "Stream.st\0"
+  "PosStream.st\0"
+  "ReadStream.st\0"
+  "WriteStream.st\0"
+  "RWStream.st\0"
+  "ByteStream.st\0"
+  "TokenStream.st\0"
+  "Random.st\0"
+  "UndefObject.st\0"
+  "ProcSched.st\0"
+  "Delay.st\0"
+  "SharedQueue.st\0"
+  "Behavior.st\0"
+  "ClassDesc.st\0"
+  "Class.st\0"
+  "Metaclass.st\0"
+  "ContextPart.st\0"
+  "MthContext.st\0"
+  "BlkContext.st\0"
+  "BlkClosure.st\0"
+  "Memory.st\0"
+  "MethodInfo.st\0"
+  "FileSegment.st\0"
+  "FileDescr.st\0"
+  "SymLink.st\0"
+  "Security.st\0"
+  "ObjMemory.st\0"
 
   /* More core classes */
-  "WeakObjects.st",
-  "RecursionLock.st",
-  "Point.st",
-  "Rectangle.st",
-  "RunArray.st",
-  "OtherArrays.st",
-  "AnsiDates.st",
-  "ScaledDec.st",
-  "ValueAdapt.st",
+  "WeakObjects.st\0"
+  "RecursionLock.st\0"
+  "Point.st\0"
+  "Rectangle.st\0"
+  "RunArray.st\0"
+  "AnsiDates.st\0"
+  "ScaledDec.st\0"
+  "ValueAdapt.st\0"
+  "OtherArrays.st\0"
 
   /* C call-out facilities */
-  "CObject.st",
-  "CType.st",
-  "CFuncs.st",
-  "CStruct.st",
+  "CObject.st\0"
+  "CType.st\0"
+  "CFuncs.st\0"
+  "CStruct.st\0"
 
   /* Exception handling */
-  "ExcHandling.st",
-  "AnsiExcept.st",
+  "ExcHandling.st\0"
+  "AnsiExcept.st\0"
 
   /* Virtual filesystem layer */
-  "File.st",
-  "Directory.st",
-  "VFS.st",
-  "URL.st",
-  "FileStream.st",
-  "Transcript.st",
+  "File.st\0"
+  "Directory.st\0"
+  "VFS.st\0"
+  "URL.st\0"
+  "FileStream.st\0"
+  "Transcript.st\0"
 
   /* Goodies */
-  "Autoload.st",
-  "ObjDumper.st",
-  "PkgLoader.st",
-  "DLD.st",
-  NULL
+  "Autoload.st\0"
+  "ObjDumper.st\0"
+  "PkgLoader.st\0"
+  "DLD.st\0"
 };
 
 /* The argc and argv that are passed to libgst via gst_smalltalk_args. 
-   The default is passing no parameters. */
-static char *smalltalk_arg_vec[] = { "gst", NULL };
+   The default is passing no parameters.  */
+static const char *smalltalk_arg_vec[] = { "gst", NULL };
 static int smalltalk_argc = 0;
-static char **smalltalk_argv = smalltalk_arg_vec;
+static const char **smalltalk_argv = smalltalk_arg_vec;
 
 /* The argc and argv that are made available to Smalltalk programs
-   through the -a option. */
+   through the -a option.  */
 int _gst_smalltalk_passed_argc = 0;
-char **_gst_smalltalk_passed_argv = NULL;
+const char **_gst_smalltalk_passed_argv = NULL;
 
 
 
 void
 gst_smalltalk_args (int argc,
-		    char **argv)
+		    const char **argv)
 {
   smalltalk_argc = argc;
   smalltalk_argv = argv;
@@ -428,13 +416,6 @@ gst_init_smalltalk (void)
   mst_Boolean traceUserDeclarations, traceUserExecution;
   int result;
   char *p;
-
-  _gst_yydebug = 0;
-  _gst_trace_kernel_declarations = _gst_declare_tracing = false;
-  _gst_trace_kernel_execution = _gst_execution_tracing = false;
-  _gst_regression_testing = false;
-  _gst_verbose = false;
-  ignore_image = false;
 
   /* Even though we're nowhere near through initialization, we set this
      to make sure we don't invoke a callin function which would recursively
@@ -457,7 +438,7 @@ gst_init_smalltalk (void)
     {
       _gst_trace_kernel_declarations = _gst_declare_tracing = false;
       _gst_trace_kernel_execution = _gst_execution_tracing = false;
-      _gst_verbose = false;
+      _gst_verbosity = 2;
       setvbuf (stdout, NULL, _IOLBF, 1024);
     }
 
@@ -480,24 +461,21 @@ gst_init_smalltalk (void)
 
       if (!loadBinary
           && !is_local_image
-          && !_gst_file_is_writeable (_gst_image_file_default_path))
+          && !_gst_file_is_writeable (_gst_image_file_path))
         {
-          xfree (_gst_binary_image_name);
-
           is_local_image = true;
-          xfree (_gst_image_file_default_path);
-          _gst_image_file_default_path = _gst_get_cur_dir_name ();
+          xfree (default_image_path);
+          _gst_image_file_path = default_image_path = _gst_get_cur_dir_name ();
           _gst_binary_image_name = "gst.im";
           loadBinary = !ignore_image && ok_to_load_binary();
         }
     }
 
   /* Compute the actual path of the image file */
-  xfree (_gst_image_file_default_path);
-
-  p = _gst_image_file_default_path =
+  _gst_image_file_path = p =
     _gst_get_full_file_name (_gst_binary_image_name);
-  p += strlen (_gst_image_file_default_path);
+  
+  p += strlen (_gst_image_file_path);
 #if defined(MSDOS) || defined(WIN32) || defined(__OS2__)
   while (*--p != '/' && *p != '\\');
 #else
@@ -507,9 +485,8 @@ gst_init_smalltalk (void)
 
   if (loadBinary && _gst_load_from_file (_gst_binary_image_name))
     {
-      _gst_init_changes_stream ();
-      _gst_init_compiler ();
       _gst_init_interpreter ();
+      _gst_init_compiler ();
       _gst_init_vmproxy ();
     }
   else
@@ -526,13 +503,11 @@ gst_init_smalltalk (void)
       _gst_init_oop_table (INITIAL_OOP_TABLE_SIZE);
       _gst_init_mem_default ();
       _gst_init_dictionary ();
-      _gst_init_compiler ();
       _gst_init_interpreter ();
+      _gst_init_compiler ();
       _gst_init_vmproxy ();
 
-      _gst_reset_changes_file ();
       _gst_install_initial_methods ();
-      _gst_init_changes_stream ();
 
       result = load_standard_files ();
       if (!result)
@@ -576,7 +551,7 @@ gst_top_level_loop (void)
       else
 	{
 	  _gst_use_undeclared++;
-	  if (!process_file (smalltalk_argv[0]) && !no_errors)
+	  if (!process_file (smalltalk_argv[0]) && _gst_verbosity > 0)
 	    _gst_errorf ("Couldn't open file %s", smalltalk_argv[0]);
 
 	  _gst_use_undeclared--;
@@ -599,42 +574,50 @@ void
 init_paths (void)
 {
   char *currentDirectory = _gst_get_cur_dir_name ();
+  const char *kernel_path, *image_path;
 
-  _gst_kernel_file_default_path = (char *) getenv ("SMALLTALK_KERNEL");
-  _gst_image_file_default_path = (char *) getenv ("SMALLTALK_IMAGE");
+  kernel_path = (char *) getenv ("SMALLTALK_KERNEL");
+  image_path = (char *) getenv ("SMALLTALK_IMAGE");
   is_local_image = true;
 
-  if (!_gst_kernel_file_default_path
-      || !_gst_file_is_readable (_gst_kernel_file_default_path))
-    asprintf (&_gst_kernel_file_default_path, "%s/kernel",
-	      currentDirectory);
-
-  if (!_gst_image_file_default_path
-      || !_gst_file_is_readable (_gst_image_file_default_path))
+  if (!kernel_path
+      || !_gst_file_is_readable (kernel_path))
     {
-      _gst_image_file_default_path = IMAGE_PATH;
+      char *kernel_file_path;
+      asprintf (&kernel_file_path, "%s/kernel",
+	        currentDirectory);
 
-      if (_gst_file_is_readable (_gst_image_file_default_path))
+      _gst_kernel_file_path = kernel_file_path;
+    }
+  else
+    _gst_kernel_file_path = xstrdup (kernel_path);
+
+  if (!image_path
+      || !_gst_file_is_readable (image_path))
+    {
+      image_path = IMAGE_PATH;
+
+      if (_gst_file_is_readable (image_path))
 	/* Found in the standard image path.  Apply this kludge so
 	   that OSes such as Windows and MS-DOS which have no concept 
-	   of home directories always load the .stpre file. */
+	   of home directories always load the .stpre file.  */
 	is_local_image = (((char *) getenv ("HOME")) == NULL);
       else
-	_gst_image_file_default_path = currentDirectory;
+	image_path = currentDirectory;
     }
 
   asprintf (&default_image_name, "%s/gst.im",
-	    _gst_image_file_default_path);
+	    image_path);
 
-  _gst_image_file_default_path = xstrdup (_gst_image_file_default_path);
+  _gst_image_file_path = default_image_path = xstrdup (image_path);
   xfree (currentDirectory);
 }
 
 mst_Boolean
 ok_to_load_binary (void)
 {
-  long imageFileTime;
-  const char **fileNames;
+  time_t imageFileTime;
+  const char *fileName;
   char fullFileName[MAXPATHLEN], *home, preImageFileName[MAXPATHLEN];
 
   imageFileTime = _gst_get_file_modify_time (_gst_binary_image_name);
@@ -642,14 +625,14 @@ ok_to_load_binary (void)
   if (imageFileTime == 0)	/* not found */
     return (false);
 
-  for (fileNames = standard_files; *fileNames; fileNames++)
+  for (fileName = standard_files; *fileName; fileName += strlen (fileName) + 1)
     {
-      if (find_kernel_file (*fileNames, fullFileName)
+      if (find_kernel_file (fileName, fullFileName)
 	  && !is_local_image)
 	{
 	  /* file lives locally but the image doesn't -- bad semantics.
 	     Note that if SOME of the files are local and the image file
-	     is local, it is good. */
+	     is local, it is good.  */
 	  return (false);
 	}
       if (imageFileTime < _gst_get_file_modify_time (fullFileName))
@@ -673,13 +656,13 @@ ok_to_load_binary (void)
 int
 load_standard_files (void)
 {
-  const char **fileNames;
+  const char *fileName;
   char fullFileName[MAXPATHLEN];
 
   _gst_use_undeclared++;
-  for (fileNames = standard_files; *fileNames; fileNames++)
+  for (fileName = standard_files; *fileName; fileName += strlen (fileName) + 1)
     {
-      find_kernel_file (*fileNames, fullFileName);
+      find_kernel_file (fileName, fullFileName);
       if (!process_file (fullFileName))
 	{
 	  _gst_errorf ("can't find system file '%s'", fullFileName);
@@ -703,14 +686,14 @@ find_kernel_file (const char *fileName,
       return (true);
     }
 
-  sprintf (fullFileName, "%s/%s", _gst_kernel_file_default_path,
+  sprintf (fullFileName, "%s/%s", _gst_kernel_file_path,
 	   fileName);
   if (_gst_file_is_readable (fullFileName))
     {
       char systemFileName[256];
       sprintf (systemFileName, KERNEL_PATH "/%s", fileName);
       /* If this file and the system file are the same, consider the
-         file as a system file instead. */
+         file as a system file instead.  */
       return (!_gst_file_is_readable (systemFileName) ||
 	      _gst_get_file_modify_time (fullFileName) !=
 	      _gst_get_file_modify_time (systemFileName));
@@ -753,7 +736,7 @@ load_user_init_file (void)
 void
 process_stdin ()
 {
- if (!no_errors)
+  if (_gst_verbosity > 0)
     {
       printf ("GNU Smalltalk ready\n\n");
       fflush (stdout);
@@ -767,7 +750,7 @@ process_stdin ()
 }
 
 mst_Boolean
-process_file (char *fileName)
+process_file (const char *fileName)
 {
   int fd;
 
@@ -775,7 +758,7 @@ process_file (char *fileName)
   if (fd == -1)
     return (false);
 
-  if (_gst_verbose)
+  if (_gst_verbosity > 2)
     printf ("Processing %s\n", fileName);
 
   _gst_push_unix_file (fd, fileName);
@@ -787,15 +770,15 @@ process_file (char *fileName)
 
 int
 parse_args (int argc,
-	    char **argv)
+	    const char **argv)
 {
-  char **av = argv;
-  int ch, prev_optind = 0, minus_a_optind = -1;
+  const char **av = argv;
+  int ch, prev_optind = 1, minus_a_optind = -1;
 
-#ifndef USE_DYNAMIC_TRANSLATION
-# define OPTIONS "-acdDeEghHiI:K:lL:pQqrsSvVy"
+#ifndef ENABLE_DYNAMIC_TRANSLATION
+# define OPTIONS "-acdDeEf:ghiI:K:lL:pQqrSvVy"
 #else
-# define OPTIONS "-acdDghHiI:K:lL:pQqrsSvVy"
+# define OPTIONS "-acdDf:ghiI:K:lL:pQqrSvVy"
 #endif
 
   /* get rid of getopt's own error reporting for invalid options */
@@ -807,8 +790,8 @@ parse_args (int argc,
 #undef OPTIONS
 
 #if DEBUG_GETOPT
-      printf ("%c \"%s\" %d     %d\n", ch, optarg ? optarg : "",
-	      optind, minus_a_optind);
+      printf ("%c \"%s\"  %d  %d  %d\n", ch, optarg ? optarg : "",
+	      optind, prev_optind, minus_a_optind);
 #endif
 
       switch (ch)
@@ -821,7 +804,7 @@ parse_args (int argc,
 	case 'd':
 	  _gst_declare_tracing = true;
 	  break;
-#ifndef USE_JIT_TRANSLATION
+#ifndef ENABLE_JIT_TRANSLATION
 	case 'E':
 	  _gst_trace_kernel_execution = true;		/* fall thru */
 	case 'e':
@@ -838,39 +821,28 @@ parse_args (int argc,
 	  _gst_emacs_process = true;
 	  break;
 	case 'Q':
-	  _gst_gc_message = false;
-	  no_errors = true;	/* fall thru */
+	  _gst_verbosity = 0;
+	  break;
 	case 'q':
-          _gst_quiet_execution = true;
+	  _gst_verbosity = (_gst_verbosity > 1) ? 1 : _gst_verbosity;
 	  break;
 	case 'r':
 	  _gst_regression_testing = true;
-	  break;
-	case 's':
-	  /* _gst_store_no_source = true;  always enabled, will die in 2.2 */
 	  break;
 	case 'S':
 	  snapshot_after_load = true;
 	  break;
 	case 'V':
-	  _gst_verbose = true;
+	  _gst_verbosity = 3;
 	  break;
 	case 'y':
 	  _gst_yydebug = 1;
 	  break;
 
-	  /* ??? Is there some better place for this to be? Canonical
-	     places seem to lose in that canonical places are often
-	     write-protected, which is ok for extant changes (like in a 
-	     saved system), but not for new changes by the user.
-	     Again, the notion of "the" user's home area is kind of
-	     random if there are multiple snapshots, since each
-	     snapshot should be associated with a particular changes
-	     file for which it is relevant. We use the current
-	     directory and allow to override with the -L option. */
-	case 'l':
-	  _gst_change_file_name = "change-log.st";
-	  break;
+	case 'f':
+	  /* Same as -Q, passing a file, and -a.  */
+	  _gst_verbosity = 0;
+	  *++av = optarg;
 
 	case 'a':
 	  /* "Officially", the C command line ends here.  The Smalltalk 
@@ -894,14 +866,10 @@ parse_args (int argc,
 	case 'K':
 	  {
 	    char *file;
-	    asprintf (&file, "%s/%s", _gst_image_file_default_path, optarg);
+	    asprintf (&file, "%s/%s", _gst_image_file_path, optarg);
 	    *++av = file;
 	    break;
 	  }
-
-	case 'L':
-	  _gst_change_file_name = optarg;
-	  break;
 
 	case 'v':
 	  printf (copyright_and_legal_stuff_text, VERSION, KERNEL_PATH,
@@ -913,17 +881,18 @@ parse_args (int argc,
 	  break;
 
 	default:
-	  printf (help_text);
-	  return 1;
+	  /* Fall through and show help message */
 
 	case 'h':
-	case 'H':
-	case '?':
 	  printf (help_text);
-	  return -1;
+	  return ch == 'h' ? -1 : 1;
 	}
 
-      if (minus_a_optind > -1)
+      if (minus_a_optind > -1
+	  && (ch == '\1'
+	      || ch == 'f'
+	      || optind > prev_optind
+	      || optind > minus_a_optind))
 	{
 	  /* If the first argument was not an option, undo and leave.  */
 	  if (ch == '\1')
@@ -932,18 +901,16 @@ parse_args (int argc,
 	  /* If the first argument after -a was not an option, or if there
 	     is nothing after -a, or if we finished processing the argument
 	     which included -a, leave.  */
-	  if (ch == '\1' || optind > prev_optind || optind > minus_a_optind)
-	    break;
+	  _gst_smalltalk_passed_argc = argc - optind;
+	  _gst_smalltalk_passed_argv = xmalloc (sizeof (char *) * _gst_smalltalk_passed_argc);
+	  memcpy (_gst_smalltalk_passed_argv, argv + optind,
+		  sizeof (char *) * _gst_smalltalk_passed_argc);
+	  break;
 	}
+
       prev_optind = optind;
     }
 
   *++av = NULL;
-  if (minus_a_optind > -1)
-    {
-      _gst_smalltalk_passed_argc = argc - optind;
-      _gst_smalltalk_passed_argv = argv + optind;
-    }
-
   return 0;
 }

@@ -1,4 +1,4 @@
-/* A Bison parser, made from /home/utente/devel-gst-stable/libgst/gst-parse.y, by GNU bison 1.49b.  */
+/* A Bison parser, made by GNU Bison 1.875.  */
 
 /* Skeleton parser for Yacc-like parsing with Bison,
    Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002 Free Software Foundation, Inc.
@@ -23,23 +23,20 @@
    This special exception was added by the Free Software Foundation
    in version 1.24 of Bison.  */
 
-#ifndef BISON_Y_TAB_H
-# define BISON_Y_TAB_H
-
 /* Tokens.  */
 #ifndef YYTOKENTYPE
-# if defined (__STDC__) || defined (__cplusplus)
+# define YYTOKENTYPE
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     PRIMITIVE_START = 258,
-     INTERNAL_TOKEN = 259,
-     SCOPE_SEPARATOR = 260,
-     ASSIGNMENT = 261,
+     INTERNAL_TOKEN = 258,
+     SCOPE_SEPARATOR = 259,
+     ASSIGNMENT = 260,
+     SHEBANG = 261,
      IDENTIFIER = 262,
      KEYWORD = 263,
      STRING_LITERAL = 264,
-     SYMBOL_KEYWORD = 265,
+     SYMBOL_LITERAL = 265,
      BINOP = 266,
      INTEGER_LITERAL = 267,
      BYTE_LITERAL = 268,
@@ -50,18 +47,15 @@
      SCALED_DECIMAL_LITERAL = 273,
      LARGE_INTEGER_LITERAL = 274
    };
-# endif
-  /* POSIX requires `int' for tokens in interfaces.  */
-# define YYTOKENTYPE int
-#endif /* !YYTOKENTYPE */
-#define PRIMITIVE_START 258
-#define INTERNAL_TOKEN 259
-#define SCOPE_SEPARATOR 260
-#define ASSIGNMENT 261
+#endif
+#define INTERNAL_TOKEN 258
+#define SCOPE_SEPARATOR 259
+#define ASSIGNMENT 260
+#define SHEBANG 261
 #define IDENTIFIER 262
 #define KEYWORD 263
 #define STRING_LITERAL 264
-#define SYMBOL_KEYWORD 265
+#define SYMBOL_LITERAL 265
 #define BINOP 266
 #define INTEGER_LITERAL 267
 #define BYTE_LITERAL 268
@@ -75,36 +69,39 @@
 
 
 
-#ifndef YYSTYPE
+#if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
 #line 52 "gst-parse.y"
-typedef union {
+typedef union YYSTYPE {
   char		cval;
   long double	fval;
-  long		ival;
+  intptr_t	ival;
   char		*sval;
   byte_object	boval;
   OOP		oval;
   tree_node	node;
-} yystype;
-/* Line 1292 of /usr/share/bison/yacc.c.  */
-#line 91 "gst-parse.h"
-# define YYSTYPE yystype
+} YYSTYPE;
+/* Line 1248 of yacc.c.  */
+#line 84 "gst-parse.h"
+# define yystype YYSTYPE /* obsolescent; will be withdrawn */
+# define YYSTYPE_IS_DECLARED 1
+# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 
 
-#ifndef YYLTYPE
-typedef struct yyltype
+#if ! defined (YYLTYPE) && ! defined (YYLTYPE_IS_DECLARED)
+typedef struct YYLTYPE
 {
   int first_line;
   int first_column;
   int last_line;
   int last_column;
-} yyltype;
-# define YYLTYPE yyltype
+} YYLTYPE;
+# define yyltype YYLTYPE /* obsolescent; will be withdrawn */
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
 #endif
 
 
 
-#endif /* not BISON_Y_TAB_H */
 

@@ -31,19 +31,5 @@
 |
  ======================================================================"
 
-Smalltalk addSubspace: #BLOX!
-Namespace current: BLOX!
-
-#(
-  'BloxBasic.st'
-  'BloxWidgets.st'
-  'BloxText.st'
-  'BloxCanvas.st'
-  'BloxExtend.st'
-) do: [ :file |
-    FileStream fileIn: file ]!
-
-ObjectMemory addDependent: Blox!
-Blox update: #returnFromSnapshot!
-
-Namespace current: Smalltalk!
+ObjectMemory addDependent: BLOX.Blox!
+BLOX.Blox update: #returnFromSnapshot!

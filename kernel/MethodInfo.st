@@ -32,7 +32,7 @@
  ======================================================================"
 
 
-Object subclass: #MethodInfo
+Object variableSubclass: #MethodInfo
        instanceVariableNames: 'sourceCode category class selector '
        classVariableNames: ''
        poolDictionaries: ''

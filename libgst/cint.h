@@ -35,9 +35,10 @@
 #define GST_CINT_H
 
 /* Value of errno which is checked by the Smalltalk base classes.  */
-extern int _gst_errno;
+extern int _gst_errno 
+  ATTRIBUTE_HIDDEN;
 
-/* Element type for the name-to-C-function mapping table. */
+/* Element type for the name-to-C-function mapping table.  */
 typedef void (*p_void_func) ();
 
 /* Invokes a C routine.  Arguments passed from Smalltalk are stored starting
@@ -49,22 +50,20 @@ typedef void (*p_void_func) ();
    an OOP holding the result otherwise.  */
 extern OOP _gst_invoke_croutine (OOP cFuncOOP,
 				 OOP receiver,
-				 OOP *args);
+				 OOP *args) 
+  ATTRIBUTE_HIDDEN;
 
 /* Defines the mapping between a string function name FUNCNAME and the
    address FUNCADDR of that function, for later use in
-   _gst_lookup_function.  The mapping table will expand as needed to
-   hold new entries as they are added. */
-extern void _gst_define_cfunc (const char *funcName, PTR funcAddr);
+   lookup_function.  The mapping table will expand as needed to
+   hold new entries as they are added.  */
+extern void _gst_define_cfunc (const char *funcName, PTR funcAddr) 
+  ATTRIBUTE_HIDDEN;
 
 /* Adds to the mapping table the standard C functions supported by
    GNU Smalltalk.  */
-extern void _gst_init_cfuncs (void);
-
-/* Returns the address of the latest C function which has been
-   registered using _gst_define_cfunc with the name FUNCNAME.  Returns
-   NULL if there is no such function. */
-extern p_void_func _gst_lookup_function (const char *funcName);
+extern void _gst_init_cfuncs (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* This routine is called during image loading to restore a C function
    descriptor pointer.  This is because between the time that the image
@@ -72,20 +71,23 @@ extern p_void_func _gst_lookup_function (const char *funcName);
    reference to the C function address may be invalid.  We therefore just
    perform the function lookup again and use that value.  CFUNCDESCOOP
    is the C function descriptor object to be adjusted, which contains
-   the name of the function to be looked up. */
-extern void _gst_restore_cfunc_descriptor (OOP cFuncDescOOP);
+   the name of the function to be looked up.  */
+extern void _gst_restore_cfunc_descriptor (OOP cFuncDescOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Makes a C based descriptor for a callout method.  Returns a
    gst_cfunc_descriptor object which holds onto the descriptor.  This
    descriptor is subsequently used when the called out function
    FUNCNAMEOOP (a Smalltalk String) is invoked. RETURNOOP is a Symbol
    or CType which indicates the return type and ARGSOOP is a Smalltalk
-   Array containing the argument types (as Symbols). */
+   Array containing the argument types (as Symbols).  */
 extern OOP _gst_make_descriptor (OOP funcNameOOP,
 				 OOP returnTypeOOP,
-				 OOP argsOOP);
+				 OOP argsOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Set the value of errno which is checked by Smalltalk to be errnum.  */
-extern void _gst_set_errno(int errnum);
+extern void _gst_set_errno(int errnum) 
+  ATTRIBUTE_HIDDEN;
 
 #endif /* GST_CINT_H */

@@ -56,11 +56,11 @@ coerce: aNumber
 !FloatE class methodsFor: 'byte-order dependancies'!
 
 signByte
-    "Answer the byte of the receiver that contains the exponent"
+    "Answer the byte of the receiver that contains the sign bit"
     ^##(| n k |
-        n := 0.0e * -1.
-        1 to: n size do: [ :i | (n at: i) = 128 ifTrue: [ k := i ] ].
-        k)
+	n := 0.0e * -1.
+	1 to: n size do: [ :i | (n at: i) = 128 ifTrue: [ k := i ] ].
+	k)
 ! !
 
 

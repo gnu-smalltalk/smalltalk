@@ -32,7 +32,7 @@
 #include "gst.h"
 #include "gstpriv.h"
 #include <stdio.h>
-#if defined(STDC_HEADERS)
+#if defined (STDC_HEADERS)
 #include <string.h>
 #endif
 
@@ -52,7 +52,7 @@ static inline mst_Boolean           is_unlikely_selector (register const char *s
 %union{
   char		cval;
   long double	fval;
-  long		ival;
+  intptr_t	ival;
   char		*sval;
   byte_object	boval;
   OOP		oval;
@@ -60,18 +60,20 @@ static inline mst_Boolean           is_unlikely_selector (register const char *s
 }
 
 /* single definite characters */     
-%token PRIMITIVE_START "<primitive: ...>"
 %token INTERNAL_TOKEN
 %token SCOPE_SEPARATOR "'.' or '::'"
 %token ASSIGNMENT "'_' or ':='"
+%token SHEBANG "#!"
 
 /* larger lexical items */
 %token <sval> IDENTIFIER "identifier"
 %token <sval> KEYWORD "keyword message"
 %token <sval> STRING_LITERAL "string literal"
-%token <sval> SYMBOL_KEYWORD "symbol literal"
+%token <sval> SYMBOL_LITERAL "symbol literal"
 %token <sval> BINOP "binary message"
 %token <sval> '|'
+%token <sval> '<'
+%token <sval> '>'
 %token <ival> INTEGER_LITERAL "integer literal"
 %token <ival> BYTE_LITERAL "integer literal"
 %token <fval> FLOATD_LITERAL "floating-point literal"
@@ -84,34 +86,46 @@ static inline mst_Boolean           is_unlikely_selector (register const char *s
 %type <node> method message_pattern variable_name keyword_variable_list
 	temporaries variable_names statements 
 	statements.1 statement expression return_statement
-	assigns primary number small_number symbol_constant symbol
+	assigns primary number small_number symbol_constant
 	character_constant string array_constant array
 	array_constant_list byte_array byte_array_constant_list
 	block opt_block_variables array_constructor
 	block_variable_list unary_expression binary_expression
-	keyword_expression keyword_binary_object_description_list
+	keyword_expression keyword_message_arguments
 	cascaded_message_expression semi_message_list
 	message_elt simple_expression literal message_expression
-	array_constant_elt unary_object_description
-	binary_object_description variable_binding 
-	variable_primary compile_time_constant
-	compile_time_constant_body
+	array_constant_elt unary_message_receiver
+	binary_message_receiver binary_message_argument
+	keyword_message_receiver keyword_message_argument
+	variable_binding variable_primary compile_time_constant
+	compile_time_constant_body attributes attributes.1 attribute
+	attribute_argument attribute_body
 
-%type <sval> unary_selector keyword binary_selector primitive
+%type <sval> unary_selector keyword binary_selector
 %%
 
 program:
 	internal_marker method
-	| file_in
+		{
+		  _gst_reset_compilation_category ();
+		}
+	| opt_shebang file_in
 	| /* empty */
 	;
 
 internal_marker:
 	INTERNAL_TOKEN
 		{
-		  _gst_clear_method_start_pos(); 
+		  _gst_clear_method_start_pos (); 
 		}
 	;
+
+opt_shebang:
+	SHEBANG
+	| /* empty */
+	;
+
+/* Doit syntax. ----------------------------------------------------- */
 
 file_in:
 	doit_and_method_list
@@ -123,9 +137,8 @@ doit_and_method_list:
 	| doit internal_marker method_list '!'
 		{
 		  _gst_skip_compilation = false;
-		  _gst_set_compilation_class(_gst_undefined_object_class);
+		  _gst_reset_compilation_category ();
 		}
-
 	;
 
 doit:
@@ -133,9 +146,9 @@ doit:
 
 		{
 		  if ($2 && !_gst_had_error)
-		    _gst_execute_statements($1, $2, false);
+		    _gst_execute_statements ($1, $2, false);
 
-		  _gst_free_tree();
+		  _gst_free_tree ();
 		  _gst_had_error = false;
 		}
 	| error '!'
@@ -157,16 +170,18 @@ method_list:
 	| /* EMPTY */
 	;
      
+/* Method selectors. ------------------------------------------------ */
+
 method:
-	message_pattern temporaries primitive statements
+	message_pattern temporaries attributes statements
 		{
-		  $$ = _gst_make_method(&@$, $1, $2, $3, $4); 
+		  $$ = _gst_make_method (&@$, $1, $2, $3, $4); 
 		  if (!_gst_had_error && !_gst_skip_compilation) {
-		    _gst_compile_method($$, false, true);
-		    _gst_clear_method_start_pos();
+		    _gst_compile_method ($$, false, true);
+		    _gst_clear_method_start_pos ();
 		  }
 
-		  _gst_free_tree();
+		  _gst_free_tree ();
 		  _gst_had_error = false;
 		}
 	;
@@ -174,15 +189,15 @@ method:
 message_pattern:
 	unary_selector
 		{
-		  $$ = _gst_make_unary_expr(&@$, NULL, $1); 
+		  $$ = _gst_make_unary_expr (&@$, NULL, $1); 
 		}
 	| binary_selector variable_name
 		{
-		  $$ = _gst_make_binary_expr(&@$, NULL, $1, $2); 
+		  $$ = _gst_make_binary_expr (&@$, NULL, $1, $2); 
 		}
 	| keyword_variable_list
 		{
-		  $$ = _gst_make_keyword_expr(&@$, NULL, $1); 
+		  $$ = _gst_make_keyword_expr (&@$, NULL, $1); 
 		}
 	;
 
@@ -193,23 +208,25 @@ unary_selector:
 binary_selector:
 	BINOP
 	| '|'
+	| '<'
+	| '>'
 	;
 
 variable_name:
 	IDENTIFIER
 		{
-		  $$ = _gst_make_variable(&@$, $1); 
+		  $$ = _gst_make_variable (&@$, $1); 
 		}
 	;
 
 keyword_variable_list:
 	keyword variable_name
 		{
-		  $$ = _gst_make_keyword_list(&@$, $1, $2); 
+		  $$ = _gst_make_keyword_list (&@$, $1, $2); 
 		}
 	| keyword_variable_list keyword variable_name
 		{
-		  _gst_add_node($1, _gst_make_keyword_list(&@$, $2, $3));
+		  _gst_add_node ($1, _gst_make_keyword_list (&@$, $2, $3));
 		  $$ = $1; 
 		}
 	;
@@ -218,22 +235,75 @@ keyword:
 	KEYWORD
 	;
 
-primitive:
+/* Method attributes. ----------------------------------------------- */
+
+attributes:
 	/* empty */
 		{
-		  $$ = 0; 
+		  $$ = NULL;
 		}
-	| PRIMITIVE_START IDENTIFIER primitive_end
+	| attributes.1
 		{
-		  $$ = $2; 
+		  $$ = $1;
+		};
+
+attributes.1:
+	attribute
+		{
+		  $$ = $1;
+		}
+	| attributes.1 attribute
+		{
+		  if ($1 && $2)
+		    _gst_add_node ($1, $2);
+
+		  $$ = $1 ? $1 : $2;
 		}
 	;
 
-primitive_end: BINOP
+attribute:
+	'<' attribute_body '>'
 		{
-		  if (strcmp($1, ">") != 0) YYFAIL; 
+		  if ($2)
+		    $$ = _gst_make_attribute_list (&@$, $2); 
+		  else
+		    $$ = NULL;
 		}
 	;
+
+attribute_body: keyword attribute_argument
+		{
+		  $$ = $2 ? _gst_make_keyword_list (&@$, $1, $2) : NULL; 
+		}
+	| attribute_body keyword attribute_argument
+		{
+		  if ($1 && $3)
+		    _gst_add_node ($1, _gst_make_keyword_list (&@$, $2, $3));
+
+		  $$ = $1 ? $1 : $3; 
+		}
+	;
+
+attribute_argument: unary_message_receiver
+		{
+		  OOP result;
+		  if ($1 && !_gst_had_error)
+		    {
+		      tree_node stmt = _gst_make_statement_list (&@$, $1); 
+		      result = _gst_execute_statements (NULL, stmt, true);
+		      _gst_had_error = !result;
+		    }
+		  else
+		    result = NULL;
+
+		  if (result)
+		    $$ = _gst_make_oop_constant (&@$, result); 
+		  else
+		    $$ = NULL;
+		}
+	;
+
+/* Method and block temporaries. ------------------------------------ */
 
 temporaries:
 	/* empty */
@@ -253,14 +323,16 @@ temporaries:
 variable_names:
 	variable_name
 		{
-		  $$ = _gst_make_variable_list(&@$, $1); 
+		  $$ = _gst_make_variable_list (&@$, $1); 
 		}
 	| variable_names variable_name
 		{
-		  _gst_add_node($1, _gst_make_variable_list(&@$, $2));
+		  _gst_add_node ($1, _gst_make_variable_list (&@$, $2));
 		  $$ = $1; 
 		}
 	;
+
+/* Method and block statements. ------------------------------------- */
 
 statements:
 	/* empty */
@@ -289,7 +361,7 @@ statements.1:
 		}
 	| statements.1 '.' statement
 		{
-		  _gst_add_node($1, $3); 
+		  _gst_add_node ($1, $3); 
 		  $$ = $1;
 		}
 	| statements.1 '.' error
@@ -308,34 +380,36 @@ optional_dot:
 statement:
 	expression
 		{
-		  $$ = _gst_make_statement_list(&@$, $1); 
+		  $$ = _gst_make_statement_list (&@$, $1); 
 		}
 	;
 
 return_statement:
 	'^' expression 
 		{
-		  $$ = _gst_make_statement_list(&@$,
-						_gst_make_return(&@$, $2));
+		  $$ = _gst_make_statement_list (&@$,
+						_gst_make_return (&@$, $2));
 		}
 	;
+
+/* Method and block statements: expressions. ------------------------ */
 
 expression:
 	simple_expression
 	| assigns simple_expression
 		{
-		  $$ = _gst_make_assign(&@$, $1, $2); 
+		  $$ = _gst_make_assign (&@$, $1, $2); 
 		}
 	;
 
 assigns:
 	variable_primary ASSIGNMENT
 		{
-		  $$ = _gst_make_assignment_list(&@$, $1); 
+		  $$ = _gst_make_assignment_list (&@$, $1); 
 		}
 	| assigns variable_primary ASSIGNMENT
 		{
-		  _gst_add_node($1, _gst_make_assignment_list(&@$, $2));
+		  _gst_add_node ($1, _gst_make_assignment_list (&@$, $2));
 		  $$ = $1; 
 		}
 	;
@@ -345,6 +419,8 @@ simple_expression:
 	| message_expression
 	| cascaded_message_expression
 	;
+
+/* Method and block statements: constants. -------------------------- */
 
 primary:
 	variable_primary
@@ -373,11 +449,11 @@ primary:
 variable_primary:
 	IDENTIFIER
 		{
-		  $$ = _gst_make_variable(&@$, $1); 
+		  $$ = _gst_make_variable (&@$, $1); 
 		}
 	| variable_primary SCOPE_SEPARATOR IDENTIFIER
 		{
-		  _gst_add_node($1, _gst_make_variable(&@$, $3)); 
+		  _gst_add_node ($1, _gst_make_variable (&@$, $3)); 
 		}
 	;
 
@@ -395,81 +471,59 @@ literal:
 number:
 	INTEGER_LITERAL
 		{
-		  $$ = _gst_make_int_constant(&@$, $1); 
+		  $$ = _gst_make_int_constant (&@$, $1); 
 		}
 	| FLOATD_LITERAL
 		{
-		  $$ = _gst_make_float_constant(&@$, $1, CONST_FLOATD); 
+		  $$ = _gst_make_float_constant (&@$, $1, CONST_FLOATD); 
 		}
 	| FLOATE_LITERAL
 		{
-		  $$ = _gst_make_float_constant(&@$, $1, CONST_FLOATE); 
+		  $$ = _gst_make_float_constant (&@$, $1, CONST_FLOATE); 
 		}
 	| FLOATQ_LITERAL
 		{
-		  $$ = _gst_make_float_constant(&@$, $1, CONST_FLOATQ); 
+		  $$ = _gst_make_float_constant (&@$, $1, CONST_FLOATQ); 
 		}
 	| LARGE_INTEGER_LITERAL
 		{
-		  $$ = _gst_make_byte_object_constant(&@$, $1); 
+		  $$ = _gst_make_byte_object_constant (&@$, $1); 
 		}
 	| SCALED_DECIMAL_LITERAL
 		{
-		  $$ = _gst_make_oop_constant(&@$, $1); 
+		  $$ = _gst_make_oop_constant (&@$, $1); 
 		}
 	;
 
 small_number:
 	BYTE_LITERAL
 		{
-		  $$ = _gst_make_int_constant(&@$, $1); 
+		  $$ = _gst_make_int_constant (&@$, $1); 
 		}
 	;
 
 symbol_constant:
-	'#' symbol
+	SYMBOL_LITERAL
 		{
-		  $$ = _gst_make_symbol_constant(&@$, $2); 
-		}
-	| '#' STRING_LITERAL
-		{
-		  $$ = _gst_make_symbol_constant(&@$, _gst_intern_ident(&@$, $2)); 
+		  $$ = _gst_make_symbol_constant (&@$, _gst_intern_ident (&@$, $1)); 
 		}
 	;
-
-symbol:
-	IDENTIFIER
-		{
-		  $$ = _gst_intern_ident(&@$, $1); 
-		}
-	| binary_selector
-		{
-		  $$ = _gst_intern_ident(&@$, $1); 
-		}
-	| SYMBOL_KEYWORD
-		{
-		  $$ = _gst_intern_ident(&@$, $1); 
-		}
-	| KEYWORD
-		{
-		  $$ = _gst_intern_ident(&@$, $1); 
-		}
-	;
-
 
 character_constant:
 	CHAR_LITERAL
 		{
-		  $$ = _gst_make_char_constant(&@$, $1); 
+		  $$ = _gst_make_char_constant (&@$, $1); 
 		}
 	;
 
 string:
 	STRING_LITERAL
 		{
-		  $$ = _gst_make_string_constant(&@$, $1); 
+		  $$ = _gst_make_string_constant (&@$, $1); 
 		}
 	;
+
+/* Method and block statements: array constants. -------------------- */
 
 array_constant:
 	'#' array
@@ -485,7 +539,7 @@ array_constant:
 array:
 	'(' ')'
 		{
-		  $$ = _gst_make_array_constant(&@$, NULL); 
+		  $$ = _gst_make_array_constant (&@$, NULL); 
 		}
 	| '(' error '!'
 		{
@@ -502,18 +556,18 @@ array:
 		}
 	| '(' array_constant_list ')'
 		{
-		  $$ = _gst_make_array_constant(&@$, $2); 
+		  $$ = _gst_make_array_constant (&@$, $2); 
 		}
 	;
 
 array_constant_list:
 	array_constant_elt
 		{
-		  $$ = _gst_make_array_elt(&@$, $1); 
+		  $$ = _gst_make_array_elt (&@$, $1); 
 		}
 	| array_constant_list array_constant_elt
 		{
-		  _gst_add_node($1, _gst_make_array_elt(&@$, $2));
+		  _gst_add_node ($1, _gst_make_array_elt (&@$, $2));
 		  $$ = $1; 
 		}
 	;
@@ -522,15 +576,15 @@ array_constant_elt:
 	array
 	| byte_array
 	| literal
-	| symbol
+	| IDENTIFIER
 		{
-		  OOP symbolOOP = $1->v_expr.selector;
+		  OOP symbolOOP = _gst_intern_string ($1);
 		  if (symbolOOP == _gst_true_symbol) {
-		    $$ = _gst_make_oop_constant(&@$, _gst_true_oop);
+		    $$ = _gst_make_oop_constant (&@$, _gst_true_oop);
 		  } else if (symbolOOP == _gst_false_symbol) {
-		    $$ = _gst_make_oop_constant(&@$, _gst_false_oop);
+		    $$ = _gst_make_oop_constant (&@$, _gst_false_oop);
 		  } else if (symbolOOP == _gst_nil_symbol) {
-		    $$ = _gst_make_oop_constant(&@$, _gst_nil_oop);
+		    $$ = _gst_make_oop_constant (&@$, _gst_nil_oop);
 		  } else {
 		    _gst_errorf ("expected true, false or nil");
 		    YYERROR;
@@ -538,10 +592,12 @@ array_constant_elt:
 		}
 	;
 
+/* Method and block statements: ByteArray constants. ---------------- */
+
 byte_array:
 	'[' ']'
 		{
-		  $$ = _gst_make_byte_array_constant(&@$, NULL); 
+		  $$ = _gst_make_byte_array_constant (&@$, NULL); 
 		}
 	| '[' error '!'
 		{
@@ -558,21 +614,23 @@ byte_array:
 		}
 	| '[' byte_array_constant_list ']'
 		{
-		  $$ = _gst_make_byte_array_constant(&@$, $2); 
+		  $$ = _gst_make_byte_array_constant (&@$, $2); 
 		}
 	;
 
 byte_array_constant_list:
 	small_number
 		{
-		  $$ = _gst_make_array_elt(&@$, $1); 
+		  $$ = _gst_make_array_elt (&@$, $1); 
 		}
 	| byte_array_constant_list small_number
 		{
-		  _gst_add_node($1, _gst_make_array_elt(&@$, $2));
+		  _gst_add_node ($1, _gst_make_array_elt (&@$, $2));
 		  $$ = $1; 
 		}
 	;
+
+/* Method and block statements: VariableBinding constants. ---------- */
 
 variable_binding:
 	'#' '{' error '!'
@@ -591,13 +649,15 @@ variable_binding:
 	| '#' '{' variable_primary '}'
 
 		{
-		  $$ = _gst_make_binding_constant(&@$, $3); 
+		  $$ = _gst_make_binding_constant (&@$, $3); 
 		  if (!$$) {
 		    _gst_errorf ("invalid variable binding");
 		    YYERROR;
 		  }
 		}
 	;
+
+/* Method and block statements: compile-time evaluation. ------------ */
 
 compile_time_constant:
 	'#' '#' compile_time_constant_body
@@ -612,23 +672,26 @@ compile_time_constant_body:
 		  yyclearin;
 		  _gst_unread_char ('!');
 		  _gst_had_error = true;
-		  $$ = _gst_make_oop_constant(&@$, _gst_nil_oop); 
+		  $$ = _gst_make_oop_constant (&@$, _gst_nil_oop); 
 		}
 	| '(' error ')'
 		{
 		  yyerrok;
 		  _gst_had_error = true;
-		  $$ = _gst_make_oop_constant(&@$, _gst_nil_oop); 
+		  $$ = _gst_make_oop_constant (&@$, _gst_nil_oop); 
 		}
 	| '(' temporaries statements ')'
 		{
 		  OOP result = _gst_nil_oop;
 		  if ($3 && !_gst_had_error)
-		    result = _gst_execute_statements($2, $3, true);
+		    result = _gst_execute_statements ($2, $3, true);
 
-		  $$ = _gst_make_oop_constant(&@$, result); 
+		  $$ = _gst_make_oop_constant (&@$,
+					       result ? result : _gst_nil_oop); 
 		}
 	;
+
+/* Method and block statements: run-time array construction. -------- */
 
 array_constructor:
 	'{' error '!'
@@ -646,9 +709,11 @@ array_constructor:
 		}
 	| '{' statements '}'
 		{
-		  $$ = _gst_make_array_constructor(&@$, $2); 
+		  $$ = _gst_make_array_constructor (&@$, $2); 
 		}
 	;
+
+/* Method and block statements: blocks. ----------------------------- */
 
 block:
 	'[' error '!'
@@ -666,7 +731,7 @@ block:
 		}
 	| '[' opt_block_variables temporaries statements ']'
 		{
-		  $$ = _gst_make_block(&@$, $2, $3, $4); 
+		  $$ = _gst_make_block (&@$, $2, $3, $4); 
 		}
 	;
 
@@ -681,25 +746,24 @@ opt_block_variables:
 		    YYFAIL;
 		  } else if ($2[1] == '\0') {	/* | */
 		  } else if ($2[1] == '|') {   /* || */
-		    _gst_unread_char('|');
+		    _gst_unread_char ('|');
 		  }
 		}
 	;
 
-/* syntax for blocks with temporaries is just args and vertical bar (if
- * any followed by a standard temporaries declarations */
-
 block_variable_list:
 	':' variable_name
 		{
-		  $$ = _gst_make_variable_list(&@$, $2); 
+		  $$ = _gst_make_variable_list (&@$, $2); 
 		}
 	| block_variable_list ':' variable_name
 		{
-		  _gst_add_node($1, _gst_make_variable_list(&@$, $3));
+		  _gst_add_node ($1, _gst_make_variable_list (&@$, $3));
 		  $$ = $1; 
 		}
 	;
+
+/* Method and block statements: unary message sends. ---------------- */
 
 message_expression:
 	unary_expression
@@ -707,69 +771,91 @@ message_expression:
 	| keyword_expression
 	;
 
+unary_message_receiver:
+	primary
+	| unary_expression
+	;
+
 unary_expression:
-	unary_object_description unary_selector
+	unary_message_receiver unary_selector
 		{
-		  if (is_unlikely_selector ($2)) {
-		    _gst_warningf ("sending `%s', most likely you "
-			           "forgot a period", $2);
-		  }
-		  $$ = _gst_make_unary_expr(&@$, $1, $2); 
+		  if (is_unlikely_selector ($2))
+		    {
+		      _gst_warningf ("sending `%s', most likely you "
+			             "forgot a period", $2);
+		    }
+		  $$ = _gst_make_unary_expr (&@$, $1, $2); 
 		}
 	;
 
-unary_object_description:
+/* Method and block statements: binary message sends. --------------- */
+
+binary_message_receiver:
+	primary
+	| unary_expression
+	| binary_expression
+	;
+
+binary_message_argument:
 	primary
 	| unary_expression
 	;
 
 binary_expression:
-	binary_object_description binary_selector unary_object_description
+	binary_message_receiver binary_selector binary_message_argument
 		{
-		  $$ = _gst_make_binary_expr(&@$, $1, $2, $3); 
+		  $$ = _gst_make_binary_expr (&@$, $1, $2, $3); 
 		}
 	;
 
-binary_object_description:
-	unary_object_description
+/* Method and block statements: keyword message sends. -------------- */
+
+keyword_message_receiver:
+	binary_message_argument
+	| binary_expression
+	;
+
+keyword_message_argument:
+	binary_message_argument
 	| binary_expression
 	;
 
 keyword_expression:
-	binary_object_description keyword_binary_object_description_list
+	keyword_message_receiver keyword_message_arguments
 		{
-		  $$ = _gst_make_keyword_expr(&@$, $1, $2); 
+		  $$ = _gst_make_keyword_expr (&@$, $1, $2); 
 		}
  	;
 
-keyword_binary_object_description_list:
-	keyword binary_object_description
+keyword_message_arguments:
+	keyword keyword_message_argument
 		{
-		  $$ = _gst_make_keyword_list(&@$, $1, $2); 
+		  $$ = _gst_make_keyword_list (&@$, $1, $2); 
 		}
-	| keyword_binary_object_description_list keyword
-	  binary_object_description
+	| keyword_message_arguments keyword keyword_message_argument
 		{
-		   _gst_add_node($1, _gst_make_keyword_list(&@$, $2, $3));
+		   _gst_add_node ($1, _gst_make_keyword_list (&@$, $2, $3));
 		   $$ = $1; 
 		}
 	;
 
+/* Method and block statements: cascaded message sends. ------------- */
+
 cascaded_message_expression:
 	message_expression semi_message_list
 		{
-		  $$ = _gst_make_cascaded_message(&@$, $1, $2); 
+		  $$ = _gst_make_cascaded_message (&@$, $1, $2); 
 		}
 	;
 
 semi_message_list:
 	';' message_elt
 		{
-		  $$ = _gst_make_message_list(&@$, $2); 
+		  $$ = _gst_make_message_list (&@$, $2); 
 		}
 	| semi_message_list ';' message_elt
 		{
-		  _gst_add_node($1, _gst_make_message_list(&@$, $3));
+		  _gst_add_node ($1, _gst_make_message_list (&@$, $3));
 		  $$ = $1; 
 		}
 	;
@@ -777,15 +863,15 @@ semi_message_list:
 message_elt:
 	unary_selector
 		{
-		   $$ = _gst_make_unary_expr(&@$, NULL, $1); 
+		   $$ = _gst_make_unary_expr (&@$, NULL, $1); 
 		}
-	| binary_selector unary_object_description
+	| binary_selector binary_message_argument
 		{
-		  $$ = _gst_make_binary_expr(&@$, NULL, $1, $2); 
+		  $$ = _gst_make_binary_expr (&@$, NULL, $1, $2); 
 		}
-	| keyword_binary_object_description_list
+	| keyword_message_arguments
 		{
-		  $$ = _gst_make_keyword_expr(&@$, NULL, $1); 
+		  $$ = _gst_make_keyword_expr (&@$, NULL, $1); 
 		}
 	;
 
@@ -824,15 +910,15 @@ message_elt:
    code like this:
 
    return ((*$1 == 's' &&
-	    (strcmp($1+1, "elf") == 0 ||
-	     strcmp($1+1, "uper") == 0)) ||
+	    (strcmp ($1+1, "elf") == 0 ||
+	     strcmp ($1+1, "uper") == 0)) ||
    
 	   (*$1 == 't' &&
-	    (strcmp($1+1, "rue") == 0 ||
-	     strcmp($1+1, "hisContext") == 0)) ||
+	    (strcmp ($1+1, "rue") == 0 ||
+	     strcmp ($1+1, "hisContext") == 0)) ||
    
-	   (*$1 == 'f' && strcmp($1+1, "alse") == 0) ||
-	   (*$1 == 'n' && strcmp($1+1, "il") == 0))
+	   (*$1 == 'f' && strcmp ($1+1, "alse") == 0) ||
+	   (*$1 == 'n' && strcmp ($1+1, "il") == 0))
 
    ... but using gperf is more cool :-) */
 
@@ -842,10 +928,10 @@ is_unlikely_selector (register const char *str)
   /* The first-character table is big enough that
      we skip the range check on the hash value */
 
-  static char first[31] = 
+  static const char first[31] = 
     "s  s   f  n  tt               ";
 
-  static char *rest[] =
+  static const char *rest[] =
     {
       "elf",
       NULL,

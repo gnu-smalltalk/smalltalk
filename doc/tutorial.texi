@@ -3359,16 +3359,17 @@ to the methodsFor: message.  Each method is terminated with
 an ``!''; two bangs in a row (with a space in the middle)
 signify the end of the new methods.
 
-@item @t{method: message [prim] [temps] exprs}
+@item @t{method: message [pragma] [temps] exprs}
 @itemx @t{message: id | binsel id | [keysel id]+}
-@itemx @t{prim: ``<'' ``primitive:'' id ``>''}
+@itemx @t{pragma: ``<'' keymsg ``>''}
 @itemx @t{temps: ``|'' [id]* ``|''}
 A method definition starts out with a kind of template.  The
 message to be handled is specified with the message names
 spelled out and identifiers in the place of arguments.  A
-special kind of definition is the primitive; it has not been
-covered in this tutorial; it provides an interface to the
-underlying Smalltalk virtual machine.  temps is the declaration
+special kind of definition is the pragma; it has not been
+covered in this tutorial and it provides a way to mark a
+method specially as well as the interface to the underlying
+Smalltalk virtual machine.  temps is the declaration
 of local variables.  Finally, exprs (covered soon) is
 the actual code for implementing the method.
 
@@ -3419,7 +3420,7 @@ id is how you send a unary message) can thus be sent.
 
 @item @t{binexpr: primary binmsg [ binmsg ]*}
 @itemx @t{binmsg: binsel primary}
-@itemx @t{binsel: selchar[selchar]}
+@itemx @t{binsel: binchar[binchar]}
 A binary message is sent to an object, which primary has
 identified.  Each binary message is a binary selector, constructed
 from one or two characters, and an argument which
@@ -3459,7 +3460,7 @@ of two symbols @code{#a} and @code{#b}, to @code{@{a. b+c@}} which
 results in an Array whose two elements are the contents of variable
 @code{a} and the result of summing @code{c} to @code{b}.
 
-@item @t{literal: number | string | charconst | symconst | arrayconst | binding}
+@item @t{literal: number | string | charconst | symconst | arrayconst | binding | eval}
 @itemx @t{arrayconst: ``#'' array | ``#'' bytearray}
 @itemx @t{bytearray: ``['' [number]* ``]''}
 @itemx @t{array: ``('' [literal | array | bytearray | arraysym | ]* ``)''}
@@ -3512,14 +3513,20 @@ and keyword selectors:
    #at:put:
 @end example
 
+@itemx @t{eval: ``#'' ``#'' ``('' [temps] exprs ``)''}
+This syntax also has not been used in the tutorial, and results
+in evaluating an arbitrarily complex expression at compile-time,
+and substituting the result: for example @code{##(Object allInstances
+size)} is the number of instances of @code{Object} held in the
+image @emph{at the time the method is compiled}.
+
 @item @t{id: letter[letter|dig]*}
-@itemx @t{selchar: ``+'' | ``-'' | ``*'' | ``/'' | ``~'' | ``|'' | ``,'' |}
+@itemx @t{binchar: ``+'' | ``-'' | ``*'' | ``/'' | ``~'' | ``|'' | ``,'' |}
 @itemx @t{``<'' | ``>'' | ``='' | ``&'' | ``@'' | ``?'' | ``\'' | ``%''}
 @itemx @t{alphanum: ``0''..``9'' | ``A''..``Z''}
 @itemx @t{dig: ``0''..``9''}
 These are the categories of characters and how they are combined
-at the most basic level.  selchar simply lists the
-characters which can be combined to name a binary message (binary
-messages including a question mark are almost never used).
+at the most basic level.  binchar simply lists the
+characters which can be combined to name a binary message.
 
 @end table

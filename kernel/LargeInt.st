@@ -562,6 +562,26 @@ bitShift: aNumber
 	 ifFalse: [ self basicRightShift: aNumber negated ]
 ! !
 
+
+!LargeInteger methodsFor: 'accessing'!
+
+raisedToInteger: n
+    "Return self raised to the anInteger-th power"
+
+    "For LargeIntegers only, it pays off to strip the rightmost
+     0 bits and put them back later with a left shift..."
+
+    | nbit |
+    nbit := 1.
+    [ (self bitAt: nbit) = 0 ] whileTrue: [ nbit := nbit + 1 ].
+    nbit = 1 ifTrue: [ ^super raisedToInteger: n ].
+
+    nbit := nbit - 1.
+
+    ^((self bitShift: nbit negated) raisedToInteger: n)
+        bitShift: nbit * n
+! !
+
 
 !LargeInteger methodsFor: 'primitive operations'!
 
@@ -570,12 +590,12 @@ basicLeftShift: totalShift
     | newBytes byteShift carry shift a |
     byteShift := totalShift // 8.
     shift := totalShift bitAnd: 7.
-    newBytes := ByteArray new: (self size + byteShift + 1).
+    newBytes := ByteArray new: (totalShift + 7) // 8 + self size.
 
     "That `+ 1' in the #to:do: performs an extra iteration that stores the
      last carry in the extra byte reserved in the previous statement"
     carry := 0.
-    1 to: self size + 1 do: [ :index |
+    1 to: newBytes size - byteShift do: [ :index |
 	a := ((self at: index) bitShift: shift) + carry.
 	carry := a bitShift: -8.
 	a := a bitAnd: 255.
@@ -971,14 +991,14 @@ asFloatQ
     ^self asFloat: FloatQ
 !
 
-replace: string withStringBase: radix
+replace: str withStringBase: radix
     "Return in a String str the base radix representation of the
      receiver."
 
     | digits source quo t rem where |
     source := self.
     quo := ByteArray new: self size.
-    where := string size.
+    where := str size.
     self size to: 1 by: -1 do: [ :i |
 	[
 	    rem := 0.
@@ -987,13 +1007,13 @@ replace: string withStringBase: radix
 		quo at: j put: t // radix.
 		rem := t \\ radix ].
 
-	    string at: where put: (Character digitValue: rem).
+	    str at: where put: (Character digitValue: rem).
 	    where := where - 1.
 	    source := quo.
 	    (source at: i) = 0
 	] whileFalse
     ].
-    ^string
+    ^str
 ! !
 
 
@@ -1405,5 +1425,6 @@ quo: aNumber
 replace: str withStringBase: radix
     "Return in a string the base radix representation of the receiver."
 
-    ^str at: str size put: $0; yourself
+    str at: str size put: $0.
+    ^str
 ! !

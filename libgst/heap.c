@@ -34,46 +34,46 @@ struct heap;
 
 /* Internal structure that defines the format of the heap descriptor.
    This gets written to the base address of the region that we are
-   managing. */
+   managing.  */
 struct heap
 {
   size_t areasize;
 
   /* The base address of the memory region for this malloc heap.  This
      is the location where the bookkeeping data for mmap and for malloc
-     begins. */
+     begins.  */
   char *base;
 
   /* The current location in the memory region for this malloc heap
-     which represents the end of memory in use. */
+     which represents the end of memory in use.  */
   char *breakval;
 
   /* The end of the current memory region for this malloc heap.  This
-     is the first location past the end of mapped memory. */
+     is the first location past the end of mapped memory.  */
   char *top;
 };
 
 /* This is the internal function for heap_sbrk which receives a struct
    heap instead of the pointer to the base location available to
-   clients. */
+   clients.  */
 static PTR heap_sbrk_internal (struct heap *hdp,
 			       int size);
 
 /* Cache pagesize-1 for the current host machine.  Note that if the
    host does not readily provide a getpagesize() function, we need to
    emulate it elsewhere, not clutter up this file with lots of kluges
-   to try to figure it out. */
+   to try to figure it out.  */
 static size_t pageround, pagesize;
 #ifndef HAVE_GETPAGESIZE
 extern int getpagesize ();
 #endif
 
-#define PAGE_ALIGN(addr) ((PTR) (((long)(addr) + pageround) & ~pageround))
+#define PAGE_ALIGN(addr) ((PTR) (((intptr_t)(addr) + pageround) & ~pageround))
 
 /* We allocate extra pages for the heap descriptor and answer an
    address that is HEAP_DELTA bytes past the actual beginning of the
-   allocation. */
-#define HEAP_DELTA	 ((long) PAGE_ALIGN(sizeof (struct heap)))
+   allocation.  */
+#define HEAP_DELTA	 ((intptr_t) PAGE_ALIGN(sizeof (struct heap)))
 
 
 
@@ -94,7 +94,7 @@ _gst_heap_create (int size)
      until we build it up enough to call heap_sbrk_internal() to
      allocate the first page of the region and copy it there.  Ensure
      that it is zero'd and then initialize the fields that we know
-     values for. */
+     values for.  */
 
   hdp = &mtemp;
   memzero ((char *) hdp, sizeof (mtemp));
@@ -107,7 +107,7 @@ _gst_heap_create (int size)
   /* Now try to map in the first page, copy the heap descriptor
      structure there, and arrange to return a pointer to this new copy. 
      If the mapping fails, then close the file descriptor if it was
-     opened by us, and arrange to return a NULL. */
+     opened by us, and arrange to return a NULL.  */
 
   hdp->top = hdp->breakval = hdp->base;
   if ((hdp = heap_sbrk_internal (hdp, HEAP_DELTA)) != NULL)
@@ -133,12 +133,12 @@ _gst_heap_destroy (heap hd)
     {
       /* The heap descriptor that we are using is currently located in
 	 region we are about to unmap, so we first make a local copy of
-	 it on the stack and use the copy. */
+	 it on the stack and use the copy.  */
       mtemp = *(struct heap *) (hd - HEAP_DELTA);
 
       /* Now unmap all the pages associated with this region by asking
          for a negative increment equal to the current size of the
-         region. */
+         region.  */
       if ((heap_sbrk_internal (&mtemp, mtemp.base - mtemp.top)) == NULL)
 	/* Update the original heap descriptor with any changes */
 	*(struct heap *) (hd - HEAP_DELTA) = mtemp;
@@ -183,7 +183,7 @@ heap_sbrk_internal (struct heap * hdp,
   char *mapto;			/* Address we actually mapped to */
 
   if (size == 0)
-    /* Just return the current "break" value. */
+    /* Just return the current "break" value.  */
     result = hdp->breakval;
 
   else if (size < 0)
@@ -191,7 +191,7 @@ heap_sbrk_internal (struct heap * hdp,
       /* We are deallocating memory.  If the amount requested would
          cause us to try to deallocate back past the base of the mmap'd 
          region then do nothing, and return NULL.  Otherwise,
-         deallocate the memory and return the old break value. */
+         deallocate the memory and return the old break value.  */
       if (hdp->breakval + size >= hdp->base)
 	{
 	  result = (PTR) hdp->breakval;

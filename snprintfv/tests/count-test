@@ -1,0 +1,80 @@
+#! /bin/sh
+# dprintf-test --- test the dprintf api
+# Copyright (C) 1999 Gary V. Vaughan
+# Originally by Gary V. Vaughan <gvv@techie.com>, 1999
+# This file is part of Snprintfv.
+#
+# Snprintfv is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Snprintfv is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+# As a special exception to the GNU General Public License, if you
+# distribute this file as part of a program that also links with and
+# uses the libopts library from AutoGen, you may include it under
+# the same distribution terms used by the libopts library.
+
+# Code:
+
+# Common definitions
+if test -z "$srcdir"; then
+    srcdir=`echo "$0" | sed 's,[^/]*$,,'`
+    test "$srcdir" = "$0" && srcdir=.
+    test -z "$srcdir" && srcdir=.
+    test "${VERBOSE+set}" != set && VERBOSE=1
+fi
+. $srcdir/defs
+
+# this is the output we should expect to see
+cat <<\EOF >ok
+
+*** count returned 8 chars.
+
+*** count returned 8 chars.
+
+*** count returned 8 chars.
+EOF
+
+cat <<\EOF >errok
+EOF
+
+# Run the test saving stderr to a file, and showing stdout if VERBOSE == 1
+$SNPRINTFV -f count '1 string' 2>> err | tee -ai out >&2
+$SNPRINTFV -f count '2 %s' string 2>> err | tee -ai out >&2
+$SNPRINTFV -f count '3 %s%s' str ing 2>> err | tee -ai out >&2
+
+# Test against expected output
+if ${CMP} -s out ok; then
+    :
+else
+    echo "ok:" >&2
+    cat ok >&2
+    exit 1
+fi
+
+# Munge error output to remove leading directories, `lt-' or trailing `.exe'
+sed -e "s,^[^:]*[lt-]*snprintfv-test[.ex]*:,snprintfv-test:," err >sederr \
+    && mv sederr err
+
+# Show stderr if doesn't match expected output if VERBOSE == 1
+if "$CMP" -s err errok; then
+    :
+else
+    echo "err:" >&2
+    cat err >&2
+    echo "errok:" >&2
+    cat errok >&2
+    exit 1
+fi
+
+# count-test ends here
+

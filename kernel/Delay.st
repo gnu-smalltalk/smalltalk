@@ -41,7 +41,7 @@ Object subclass: #Delay
 
 Delay comment: 
 'I am the ultimate agent for frustration in the world.  I cause things to wait 
-(typically much more than is appropriate, but it is those losing operating
+(sometimes much more than is appropriate, but it is those losing operating
 systems'' fault).  When a process sends one of my instances a wait message,
 that process goes to sleep for the interval specified when the instance was
 created.'

@@ -107,7 +107,7 @@
    objects and partly inside inline_cache structures (see xlat.c): the
    latter also act as continuations that are passed to the callee, which
    stores the continuation info in the ContextPart.  This allows an
-   extremely easy implementation of non-local returns. */
+   extremely easy implementation of non-local returns.  */
 
 
 /* This is the bridge between the interpreter and Just-In-Time code
@@ -139,12 +139,10 @@ const internal_func _gst_internal_funcs[] = {
   (internal_func) prepare_context,
   (internal_func) empty_context_stack,
   (internal_func) lookup_native_ip,
-  (internal_func) VMpr_BlockClosure_blockCopy
 };
 
-#define GET_CONTEXT_IP(ctx) 	((char *) (((long) ((ctx)->native_ip)) - 1))
-
-#define GET_NATIVE_IP(ipOffset) 	((OOP) (((long) ipOffset) + 1))
+#define GET_CONTEXT_IP(ctx) 	((char *) (((uintptr_t) ((ctx)->native_ip)) - 1))
+#define GET_NATIVE_IP(ipOffset)	((OOP) (((uintptr_t) ipOffset) + 1))
 
 #define SET_THIS_METHOD(method, ipOffset) {				\
   _gst_this_method = (method);						\
@@ -159,7 +157,7 @@ lookup_native_ip (OOP sendSelector,
 		  OOP method_class) /* the class in which to start the
 				       search */
 {
-  REGISTER (1, long hashIndex);
+  REGISTER (1, int hashIndex);
   REGISTER (2, method_cache_entry * methodData);
   REGISTER (3, OOP receiverClass);
 
@@ -185,8 +183,7 @@ lookup_native_ip (OOP sendSelector,
 	methodData->receiverClass = NULL;
     }
 
-  receiverClass =
-    IS_INT (receiver) ? _gst_small_integer_class : OOP_CLASS (receiver);
+  receiverClass = OOP_INT_CLASS (receiver);
   if (methodData->receiverClass == receiverClass)
     return (methodData->nativeCode);
 
@@ -203,7 +200,7 @@ _gst_send_message_internal (OOP sendSelector,
 			    OOP method_class) /* the class in which to start the
 						 search */
 {
-  long hashIndex;
+  int hashIndex;
   method_header header;
   REGISTER (1, OOP receiverClass);
   REGISTER (2, method_cache_entry * methodData);
@@ -225,8 +222,7 @@ _gst_send_message_internal (OOP sendSelector,
       if (!lookup_method
 	  (sendSelector, methodData, sendArgs, method_class))
 	{
-	  SEND_MESSAGE (_gst_does_not_understand_colon_symbol, 1,
-			false);
+	  SEND_MESSAGE (_gst_does_not_understand_symbol, 1);
 	  return;
 	}
       else
@@ -236,15 +232,13 @@ _gst_send_message_internal (OOP sendSelector,
 
   header = methodData->methodHeader;
 
-  receiverClass =
-    IS_INT (receiver) ? _gst_small_integer_class : OOP_CLASS (receiver);
+  receiverClass = OOP_INT_CLASS (receiver);
   if (methodData->receiverClass != receiverClass)
     {
       methodData->receiverClass = receiverClass;
       methodData->nativeCode =
 	_gst_get_native_code (methodData->methodOOP, receiverClass);
     }
-
   native_ip = methodData->nativeCode;
 }
 
@@ -265,9 +259,7 @@ _gst_send_method (OOP methodOOP)
   sendArgs = header.numArgs;
   receiver = STACK_AT (sendArgs);
 
-  receiverClass =
-    IS_INT (receiver) ? _gst_small_integer_class : OOP_CLASS (receiver);
-
+  receiverClass = OOP_INT_CLASS (receiver);
   native_ip = _gst_get_native_code (methodOOP, receiverClass);
 }
 
@@ -324,9 +316,7 @@ refresh_native_ips (OOP contextOOP)
   do
     {
       receiver = context->receiver;
-      receiverClass =
-	IS_INT (receiver) ? _gst_small_integer_class :
-	OOP_CLASS (receiver);
+      receiverClass = OOP_INT_CLASS (receiver);
 
       if (context->method == _gst_get_termination_method ())
 	native_ip = (char *) _gst_return_from_native_code;
@@ -343,7 +333,7 @@ refresh_native_ips (OOP contextOOP)
 	      /* This problem *might* (I'm not even sure) happen if you
 		 restore a non-JITted snapshot with the JIT enabled.  It
 		 should be easy to fix the interpreter so that a process
-		 can be suspended at message sends only. */
+		 can be suspended at message sends only.  */
 	      printf ("Context's IP is not a sequence point!");
 	      abort ();
 	    }
@@ -387,7 +377,7 @@ _gst_interpret (OOP processOOP)
 	  OOP selectorOOP;
 	  selectorOOP = _gst_intern_string ((char *)_gst_abort_execution);
 	  _gst_abort_execution = NULL;
-	  SEND_MESSAGE (selectorOOP, 0, false);
+	  SEND_MESSAGE (selectorOOP, 0);
 	}
 
       if (!disable_preemption)
@@ -448,10 +438,10 @@ _gst_interpret (OOP processOOP)
 
       if (!(_gst_this_method->flags & F_XLAT)
 	  || thisContext->native_ip == DUMMY_NATIVE_IP)
-        {
-          refresh_native_ips (_gst_this_context_oop);
-          native_ip = GET_CONTEXT_IP (thisContext);
-        }
+	{
+	  refresh_native_ips (_gst_this_context_oop);
+	  native_ip = GET_CONTEXT_IP (thisContext);
+	}
 
       if UNCOMMON (time_to_preempt)
 	set_preemption_timer ();

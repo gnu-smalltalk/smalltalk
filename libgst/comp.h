@@ -69,14 +69,23 @@
 #define MTH_PRIM_BITS		10
 #define MTH_FLAG_BITS		3
 
+#define MTH_NORMAL		0
+#define MTH_RETURN_SELF		1
+#define MTH_RETURN_INSTVAR	2
+#define MTH_RETURN_LITERAL	3
+#define MTH_PRIMITIVE		4
+#define MTH_ANNOTATED		5
+#define MTH_USER_DEFINED	6
+#define MTH_UNUSED		7
+
 typedef struct method_header
 {
 #ifdef WORDS_BIGENDIAN
-#if SIZEOF_LONG == 8
+#if SIZEOF_OOP == 8
   unsigned dummy:32;		/* unused */
 #endif
   unsigned:1;			/* sign - must be 0 */
-  unsigned headerFlag:MTH_FLAG_BITS;	/* prim _gst_self, etc. */
+  unsigned headerFlag:MTH_FLAG_BITS;	/* prim _gst_self, etc.  */
   unsigned primitiveIndex:MTH_PRIM_BITS;	/* index of primitve,
 						   or 0 */
   unsigned numTemps:MTH_TEMPS_BITS;
@@ -90,9 +99,9 @@ typedef struct method_header
   unsigned numTemps:MTH_TEMPS_BITS;
   unsigned primitiveIndex:MTH_PRIM_BITS;	/* index of primitve,
 						   or 0 */
-  unsigned headerFlag:MTH_FLAG_BITS;	/* prim _gst_self, etc. */
+  unsigned headerFlag:MTH_FLAG_BITS;	/* prim _gst_self, etc.  */
   unsigned:1;			/* sign - must be 0 */
-#if SIZEOF_LONG == 8
+#if SIZEOF_OOP == 8
   unsigned dummy:32;		/* unused */
 #endif
 #endif				/* WORDS_BIGENDIAN */
@@ -116,6 +125,7 @@ typedef struct gst_method_info
   OOP category;
   OOP class;
   OOP selector;
+  OOP attributes[1];
 }
  *gst_method_info;
 
@@ -141,7 +151,7 @@ typedef struct gst_method_info
 typedef struct block_header
 {
 #ifdef WORDS_BIGENDIAN
-#if SIZEOF_LONG == 8
+#if SIZEOF_OOP == 8
   unsigned dummy:32;		/* unused */
 #endif
   unsigned:1;			/* sign - must be 0 */
@@ -163,7 +173,7 @@ typedef struct block_header
 					   we have */
   unsigned numArgs:BLK_ARGS_BITS;	/* number of arguments we have */
   unsigned:1;			/* sign - must be 0 */
-#if SIZEOF_LONG == 8
+#if SIZEOF_OOP == 8
   unsigned dummy:32;		/* unused */
 #endif
 #endif
@@ -194,7 +204,9 @@ typedef struct gst_block_closure
 
 /* These hold the compiler's notions of the current class for compilations,
    and the current category that compiled methods are to be placed into */
-extern OOP _gst_this_class, _gst_latest_compiled_method;
+extern OOP _gst_this_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_this_category ATTRIBUTE_HIDDEN;
+extern OOP _gst_latest_compiled_method ATTRIBUTE_HIDDEN;
 
 /* This is the value most recently returned by
    _gst_execute_statements.  It is used to communicate the returned
@@ -202,38 +214,49 @@ extern OOP _gst_this_class, _gst_latest_compiled_method;
    the called context stack in the case of nested invocations of
    _gst_prepare_execution_environment/_gst_finish_execution_environment.
    Most often, the caller does not care about the returned value,
-   since it often is called from a radically different context. */
-extern OOP _gst_last_returned_value;
+   since it often is called from a radically different context.  */
+extern OOP _gst_last_returned_value 
+  ATTRIBUTE_HIDDEN;
 
 /* This flag controls whether byte codes are printed after
-   compilation. */
-extern mst_Boolean _gst_declare_tracing;
+   compilation.  */
+extern mst_Boolean _gst_declare_tracing 
+  ATTRIBUTE_HIDDEN;
 
 /* If true, the compilation of a set of methods will be skipped
    completely; only syntax will be checked.  Set by primitive, cleared
-   by grammar. */
-extern mst_Boolean _gst_skip_compilation;
+   by grammar.  */
+extern mst_Boolean _gst_skip_compilation 
+  ATTRIBUTE_HIDDEN;
 
 /* This is set to true by the parser or the compiler if an error
    (respectively, a parse error or a semantic error) is found, and
    avoids that _gst_execute_statements tries to execute the result of
-   the compilation. */
-extern mst_Boolean _gst_had_error;
+   the compilation.  */
+extern mst_Boolean _gst_had_error 
+  ATTRIBUTE_HIDDEN;
+
+/* This holds whether the compiler should make the compiled methods
+   untrusted.  */
+extern mst_Boolean _gst_untrusted_methods 
+  ATTRIBUTE_HIDDEN;
 
 /* Called to compile and execute an "immediate expression"; i.e. a set
    of Smalltalk statements that are not part of a method definition.
    The parse trees are in TEMPORARIES and STATEMENTS.  Return the object
-   that was returned by the expression. */
+   that was returned by the expression.  */
 extern OOP _gst_execute_statements (tree_node temporaries,
 				    tree_node statements,
-				    mst_Boolean quiet);
+				    mst_Boolean quiet) 
+  ATTRIBUTE_HIDDEN;
 
 /* This function will print a message describing the method category
    and class being compiled.  The message can have the form "STRING
    _GST_THIS_CATEGORY for _GST_THIS_CLASS" or "STRING for
-   _GST_THIS_CLASS", depending on the value of CATEGORY. */
-extern void _gst_display_compilation_trace (char *string,
-				  mst_Boolean category);
+   _GST_THIS_CLASS", depending on the value of CATEGORY.  */
+extern void _gst_display_compilation_trace (const char *string,
+				            mst_Boolean category) 
+  ATTRIBUTE_HIDDEN;
 
 /* This routine does a very interesting thing.  It installs the inital
    method, which is the primitive for "methodsFor:".  It does this by
@@ -247,42 +270,39 @@ extern void _gst_display_compilation_trace (char *string,
   
    In addition, we also define the special
    UndefinedObject>>#__terminate method here, because bytecode 143
-   cannot be compiled by parsing Smalltalk code. */
-extern void _gst_install_initial_methods (void);
+   cannot be compiled by parsing Smalltalk code.  */
+extern void _gst_install_initial_methods (void) 
+  ATTRIBUTE_HIDDEN;
 
-/* Sets the compiler's notion of the class to compile methods into. */
-extern void _gst_set_compilation_class (OOP class_oop);
+/* Sets the compiler's notion of the class and category to compile
+   methods into.  */
+extern void _gst_set_compilation_category (OOP class_oop, OOP categoryOOP) 
+  ATTRIBUTE_HIDDEN;
 
-/* Sets the compiler's notion of the current method category. */
-extern void _gst_set_compilation_category (OOP categoryOOP);
+/* Clears the compiler's notion of the class and category to compile
+   methods into.  */
+extern void _gst_reset_compilation_category () 
+  ATTRIBUTE_HIDDEN;
 
 /* This function will send a message to ObjectMemory (a system
-   class) asking it to broadcast the event named HOOK. */
-extern void _gst_invoke_hook (char *hook);
+   class) asking it to broadcast the event named HOOK.  */
+extern void _gst_invoke_hook (const char *hook) 
+  ATTRIBUTE_HIDDEN;
 
-/* Store VALUEOOP as the INDEX-th literal of the CompiledMethod or
-   CompiledBlock METHODOOP. INDEX is 1-based. */
-extern void _gst_compiled_method_at_put (OOP methodOOP,
-			       long int index,
-			       OOP valueOOP);
-
-/* Retrieve and return the INDEX-th literal of the CompiledMethod or
-   CompiledBlock METHODOOP. */
-extern OOP _gst_compiled_method_at (OOP methodOOP,
-			   long int index);
-
-/* Prepares the compiler for execution, initializing some variables. */
-extern void _gst_init_compiler (void);
+/* Prepares the compiler for execution, initializing some variables.  */
+extern void _gst_init_compiler (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Compile the code for a complete method definition.  This basically
    walks the METHOD parse tree, but in addition it special cases for
    methods that don't return a value explicitly by returning "self".
    Also creates the CompiledMethod object and, if INSTALL is true,
    installs it in the current method dictionary with the selector
-   derived from the method expression. */
+   derived from the method expression.  */
 extern OOP _gst_compile_method (tree_node method,
 				mst_Boolean returnLast,
-				mst_Boolean install);
+				mst_Boolean install) 
+  ATTRIBUTE_HIDDEN;
 
 /* Constructs and returns a new CompiledMethod instance.  It computes
    the method header based on its arguments, and on the contents of
@@ -294,31 +314,41 @@ extern OOP _gst_make_new_method (int primitiveIndex,
 			int numTemps,
 			int maximumStackDepth,
 			OOP literals,
-			bytecodes bytecodes,
+			bc_vector bytecodes,
 			OOP class,
-			OOP selector);
+			OOP selector) 
+  ATTRIBUTE_HIDDEN;
 
 /* This function looks for the UndefinedObject>>#__terminate method
    (if it is not cached already) and answers it.  This method is
    executed by contexts created with
-   _gst_prepare_execution_environment. */
-extern OOP _gst_get_termination_method (void) ATTRIBUTE_PURE;
+   _gst_prepare_execution_environment.  */
+extern OOP _gst_get_termination_method (void)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
 /* Creates and returns a CompiledBlock.  The object is not completely
    filled in, as we only know the method literals and enclosing method
    when we create the outer CompiledMethod; the header is however
-   filled, analyzing the BYTECODES to check the block's cleanness. */
+   filled, analyzing the BYTECODES to check the block's cleanness.  */
 extern OOP _gst_block_new (int numArgs,
 		  int numTemps,
-		  bytecodes bytecodes,
+		  bc_vector bytecodes,
 		  int depth,
-		  OOP * literals);
+		  OOP * literals) 
+  ATTRIBUTE_HIDDEN;
 
 /* Adds OOP to the literal vector that's being created, unless it's
    already there.  "Already there" is defined as the exact same object
    is present in the literal vector.  The answer is the index into the
-   literal vector where the object was stored. */
-extern int _gst_add_forced_object (OOP oop);
+   literal vector where the object was stored.  */
+extern int _gst_add_forced_object (OOP oop) 
+  ATTRIBUTE_HIDDEN;
+
+/* Transform the ATTRIBUTE_KEYWORDS node (a TREE_ATTRIBUTE_LIST)
+   into a Message object, and return it.  */
+extern OOP _gst_make_attribute (tree_node attribute_keywords) 
+  ATTRIBUTE_HIDDEN;
 
 /* This routine is called during image loading to restore the
    primitive number in a CompiledMethod.  This is because we achieve
@@ -327,7 +357,14 @@ extern int _gst_add_forced_object (OOP oop);
    This allows us to keep the primitive list in prims.inl in a logical
    order rather than having to add at the end of the list.  MAP
    associates primitive numbers in the saved image (obtained by the
-   saved VMPrimitives dictionary) to primitive numbers in this VM. */
-extern void _gst_restore_primitive_number (OOP methodOOP, int *map);
+   saved VMPrimitives dictionary) to primitive numbers in this VM.  */
+extern void _gst_restore_primitive_number (OOP methodOOP, int *map) 
+  ATTRIBUTE_HIDDEN;
+
+/* Process the attributes in ARRAYOOP, return the primitive number
+   (so far, this is the only attribute we honor), or -1 for a bad
+   primitive number.  */
+extern int _gst_process_attributes_array (OOP arrayOOP) 
+  ATTRIBUTE_HIDDEN;
 
 #endif /* GST_COMP_H */

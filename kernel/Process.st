@@ -58,6 +58,18 @@ on: aBlockContext at: aPriority suspend: aBoolean
 
 !Process methodsFor: 'basic'!
 
+makeUntrusted: aBoolean
+    "Set whether the receiver is trusted or not."
+    | ctx |
+    ctx := self == Processor activeProcess
+	ifTrue: [ thisContext ]
+	ifFalse: [ suspendedContext ].
+
+    [ ctx isNil ] whileFalse: [
+	ctx makeUntrusted: aBoolean.
+	ctx := ctx parentContext
+    ]!
+    
 lowerPriority
     "Lower a bit the priority of the receiver. A #lowerPriority will
      cancel a previous #raisePriority, and vice versa."

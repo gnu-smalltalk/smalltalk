@@ -10,7 +10,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2004
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -50,55 +50,29 @@
    value changed by the GC) after the send.  I'm leaving the code to
    deal with them as local registers conditionally compiled in so that
    you can disable it easily if necessary; however this seems quite
-   improbable except for debugging purposes. */
+   improbable except for debugging purposes.  */
 #define LOCAL_REGS
-
-#ifdef HAVE_GOTO_VOID_P
-
-/* New-style dispatching obtains a 30/40% speed boost over standard
-   switch-statement dispatching.  It works by replacing the switch
-   statement with a `computed goto'.  The checks for asynchronous
-   events (semaphore signals, timers, etc.) are skipped because code
-   that handles these events modifies the interpreter's status so that
-   the next `computed goto' jumps to where the event is passed to
-   Smalltalk.  The default is to use new-style dispatch with GNU C;
-   comment this to use old-style dispatching with GCC too. */
-#define USE_GCC_DISPATCH
-#endif /* HAVE_GOTO_VOID_P */
 
 /* By "hard wiring" the definitions of the special math operators
    (bytecodes 176-191), we get a performance boost of more than 50%.
    Yes, it means that we cannot redefine + et al for SmallInteger and
    Float, but I think the trade is worth it.  Besides, the Blue Book
-   does it. */
+   does it.  */
 #define OPEN_CODE_MATH
-
-/* jump lookahead uses special machinery after open-coded boolean
-   selectors (<, =, >, <=, >=, ~= for Integers and Floats; ==, IS_NIL
-   and notNil for all objects) that executes conditional jump
-   bytecodes without pushing and popping the result of the comparison.
-   This catches the common "a < b ifTrue: [ ... ]" and "[ ... a < b ]
-   whileTrue: [ ... ]" patterns, as well as code generated for
-   #to:do:, #timesRepeat: and #to:by:do:.  Jump lookahead only
-   applies to the GCC-based bytecode interpreter (that is,
-   USE_GCC_DISPATCH defined, USE_JIT_TRANSLATION not defined). */
-#define JUMP_LOOKAHEAD
 
 /* Pipelining uses separate fetch-decode-execute stages, which is a
    nice choice for VLIW machines.  It also enables more aggressive
    caching of global variables.  It is currently enabled for the IA-64
    only, because it is a win only where we would have had lots of
-   unused instruction scheduling slots and an awful lot of registers.
-   It disables jump lookahead because jump lookahead interferes with
-   the pre-decoding mechanism of the pipelined interpreter.  */
-#if defined(USE_GCC_DISPATCH) && REG_AVAILABILITY == 3
+   unused instruction scheduling slots and an awful lot of registers. */
+#if REG_AVAILABILITY == 3
 #define PIPELINING
 #endif
 
 /* Answer the quantum assigned to each Smalltalk process (in
    milliseconds) before it is preempted.  Setting this to zero
-   disables preemption until ProcessorScheduler>>#timeSlice: is
-   invoked. */
+   disables preemption until gst_processor_scheduler>>#timeSlice: is
+   invoked.  */
 #define DEFAULT_PREEMPTION_TIMESLICE 40
 
 /* This symbol does not control execution speed.  Instead, it causes
@@ -106,7 +80,7 @@
    SmallInteger(Object)>>#printString form.  Can be useful to find out
    the last method sent before an error, if the context stack is
    trashed when the debugger gets control and printing a backtrace is
-   impossible. */
+   impossible.  */
 /* #define DEBUG_CODE_FLOW */
 
 /* The method cache is a hash table used to cache the most commonly
@@ -115,11 +89,11 @@
    modify it, but be sure it is a power of two.  Additionally,
    separately from this, the interpreter caches the last primitive
    numbers used for sends of #at:, #at:put: and #size, in an attempt
-   to speed up these messages for Arrays, Strings, and ByteArrays. */
+   to speed up these messages for Arrays, Strings, and ByteArrays.  */
 #define METHOD_CACHE_SIZE		(1 << 11)
 
 /* Length of the queue of Semaphores to be signaled at the next
-   sequence point. */
+   sequence point.  */
 #define ASYNC_QUEUE_SIZE		100
 
 
@@ -132,7 +106,7 @@ typedef struct method_cache_entry
   OOP methodOOP;
   OOP methodClassOOP;
   method_header methodHeader;
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
   OOP receiverClass;
   PTR nativeCode;
   PTR dummy;			/* 32 bytes are usually a sweet spot */
@@ -160,41 +134,42 @@ interp_jmp_buf;
 
 /* If this is true, for each byte code that is executed, we print on
    stdout the byte index within the current gst_compiled_method and a
-   decoded interpretation of the byte code. */
-mst_Boolean _gst_execution_tracing;
+   decoded interpretation of the byte code.  */
+mst_Boolean _gst_execution_tracing = false;
 
 /* When this is true, and an interrupt occurs (such as SIGABRT),
    Smalltalk will terminate itself by making a core dump (normally it
-   produces a backtrace). */
+   produces a backtrace).  */
 mst_Boolean _gst_make_core_file = false;
 
 /* When true, this indicates that there is no top level loop for
-   control to return to, so it causes the system to exit. */
+   control to return to, so it causes the system to exit.  */
 mst_Boolean _gst_non_interactive = true;
 
-/* The table of functions that implement the primitives. */
+/* The table of functions that implement the primitives.  */
 static prim_table_entry _gst_primitive_table[NUM_PRIMITIVES];
 
 /* Some performance counters from the interpreter: these
-   count the number of special returns. */
-unsigned long _gst_literal_returns, _gst_inst_var_returns;
-unsigned long _gst_self_returns;
+   count the number of special returns.  */
+unsigned long _gst_literal_returns = 0;
+unsigned long _gst_inst_var_returns = 0;
+unsigned long _gst_self_returns = 0;
 
-/* The number of primitives executed. */
-unsigned long _gst_primitives_executed;
+/* The number of primitives executed.  */
+unsigned long _gst_primitives_executed = 0;
 
-/* The number of bytecodes executed. */
-unsigned long _gst_bytecode_counter;
+/* The number of bytecodes executed.  */
+unsigned long _gst_bytecode_counter = 0;
 
 /* The number of method cache misses */
-unsigned long _gst_cache_misses;
+unsigned long _gst_cache_misses = 0;
 
 /* The number of cache lookups - either hits or misses */
-unsigned long _gst_sample_counter;
+unsigned long _gst_sample_counter = 0;
 
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
 #define method_base		0
-char *native_ip;
+char *native_ip = NULL;
 #else /* plain bytecode interpreter */
 static ip_type method_base;
 #endif
@@ -224,36 +199,46 @@ static ip_type method_base;
    _gst_self -- an OOP that is the current receiver of the current
    message.  */
 
-/* The virtual machine's stack and instruction pointers. */
-OOP *sp;
+/* The virtual machine's stack and instruction pointers.  */
+OOP *sp = NULL;
 ip_type ip;
 
-OOP *_gst_temporaries, *_gst_literals;
-OOP _gst_self;
-OOP _gst_this_context_oop;
-OOP _gst_this_method;
+OOP *_gst_temporaries = NULL;
+OOP *_gst_literals = NULL;
+OOP _gst_self = NULL;
+OOP _gst_this_context_oop = NULL;
+OOP _gst_this_method = NULL;
 
-/* Signal this semaphore at the following instruction. */
+/* Signal this semaphore at the following instruction.  */
 static OOP single_step_semaphore = NULL;
 
-/* Answer whether we are in the interpreter or in application code. */
+/* Answer whether we are in the interpreter or in application code.  */
 static mst_Boolean in_interpreter = false;
 
 /* CompiledMethod cache which memoizes the methods and some more
-   information for each class->selector pairs. */
+   information for each class->selector pairs.  */
 static method_cache_entry method_cache[METHOD_CACHE_SIZE] CACHELINE_ALIGNED;
 
-/* The number of the last primitive called. */
+/* The number of the last primitive called.  */
 static int last_primitive;
 
 /* A special cache that tries to skip method lookup when #at:, #at:put
    and #size are implemented by a class through a primitive, and is
    repeatedly sent to instances of the same class.  Since this is a
    mini-inline cache it makes no sense when JIT translation is
-   enabled. */
-#ifndef USE_JIT_TRANSLATION
-static OOP at_cache_class, at_put_cache_class, size_cache_class;
-static int at_cache_prim, at_put_cache_prim, size_cache_prim;
+   enabled.  */
+#ifndef ENABLE_JIT_TRANSLATION
+static OOP at_cache_class;
+static int at_cache_prim;
+
+static OOP at_put_cache_class;
+static int at_put_cache_prim;
+
+static OOP size_cache_class;
+static int size_cache_prim;
+
+static OOP class_cache_class;
+static int class_cache_prim;
 #endif
 
 /* Queue for async (outside the interpreter) semaphore signals */
@@ -263,25 +248,25 @@ static async_queue_entry queued_async_signals[ASYNC_QUEUE_SIZE]
 
 /* When not NULL, this causes the byte code interpreter to immediately
    send the message whose selector is here to the current stack
-   top. */
-char *_gst_abort_execution = NULL;
+   top.  */
+const char *_gst_abort_execution = NULL;
 
 /* Set to true when some special action must be done at the next
-   sequence point. */
-volatile mst_Boolean _gst_except_flag;
+   sequence point.  */
+volatile mst_Boolean _gst_except_flag = false;
 
-/* Set to non-nil if a process must preempt the current one. */
+/* Set to non-nil if a process must preempt the current one.  */
 static OOP switch_to_process;
 
 /* Set to true if the currently running process has disabled
-   external signals. */
+   external signals.  */
 static mst_Boolean disable_preemption;
 
 /* Set to true if it is time to switch process in a round-robin
-   time-sharing fashion. */
+   time-sharing fashion.  */
 static mst_Boolean time_to_preempt;
 
-/* Used to bail out of a C callout and back to the interpreter. */
+/* Used to bail out of a C callout and back to the interpreter.  */
 static interp_jmp_buf *reentrancy_jmp_buf = NULL;
 
 /* when this flag is on and execution tracing is in effect, the top of
@@ -293,16 +278,16 @@ static mst_Boolean verbose_exec_tracing = false;
 static OOP highest_priority_process (void) ATTRIBUTE_PURE;
 
 /* Remove the head of the given list (a Semaphore is a subclass of
-   LinkedList) and answer it. */
+   LinkedList) and answer it.  */
 static OOP remove_first_link (OOP semaphoreOOP);
 
 /* Add PROCESSOOP as the head of the given list (a Semaphore is a
-   subclass of LinkedList) and answer it. */
+   subclass of LinkedList) and answer it.  */
 static void add_first_link (OOP semaphoreOOP,
 			   OOP processOOP);
 
 /* Add PROCESSOOP as the tail of the given list (a Semaphore is a
-   subclass of LinkedList) and answer it. */
+   subclass of LinkedList) and answer it.  */
 static void add_last_link (OOP semaphoreOOP,
 			   OOP processOOP);
 
@@ -310,20 +295,20 @@ static void add_last_link (OOP semaphoreOOP,
    Answer nil if there is no other process than the current one.
    Create a new process that terminates execution if there is no
    runnable process (which should never be because there is always the
-   idle process). */
+   idle process).  */
 static OOP next_scheduled_process (void);
 
 /* Create a Process that is running at userSchedulingPriority on the
-   CONTEXTOOP context, and answer it. */
+   CONTEXTOOP context, and answer it.  */
 static OOP create_callin_process (OOP contextOOP);
 
 /* Sets flags so that the interpreter starts returning immediately from
    whatever byte codes it's executing.  It returns via a normal message
    send of the unary selector MSG, so that the world is in a consistent 
-   state when it's done. */
-static void stop_executing (char *msg);
+   state when it's done.  */
+static void stop_executing (const char *msg);
 
-/* Set a timer at the end of which we'll preempt the current process. */
+/* Set a timer at the end of which we'll preempt the current process.  */
 static void set_preemption_timer (void);
 
 /* Same as _gst_parse_stream, but creating a reentrancy_jmpbuf.  */
@@ -331,7 +316,7 @@ static void parse_stream_with_protection ();
 
 /* Put the given process to sleep by rotating the list of processes for
    PROCESSOOP's priority (i.e. it was the head of the list and becomes
-   the tail). */
+   the tail).  */
 static void sleep_process (OOP processOOP);
 
 /* Sets flags so that the interpreter switches to PROCESSOOP at the
@@ -358,7 +343,7 @@ static void copy_semaphore_oops (void);
 
 /* Signal the given SEMAPHOREOOP and if processes were queued on it
    resume the one that has waited for the longest time and is still
-   alive. */
+   alive.  */
 static void sync_signal (OOP semaphoreOOP);
 
 /* Suspend execution of PROCESSOOP.  */
@@ -385,19 +370,19 @@ static mst_Boolean is_process_ready (OOP processOOP) ATTRIBUTE_PURE;
 static inline mst_Boolean is_empty (OOP processListOOP) ATTRIBUTE_PURE;
 
 /* Answer whether the processs is terminating, that is, it does not
-   have an execution context to resume execution from. */
+   have an execution context to resume execution from.  */
 static inline mst_Boolean is_process_terminating (OOP processOOP) ATTRIBUTE_PURE;
 
 /* Answer the process that is scheduled to run (that is, the
    executing process or, if any, the process that is scheduled
-   to start execution at the next sequence point. */
+   to start execution at the next sequence point.  */
 static inline OOP get_scheduled_process (void) ATTRIBUTE_PURE;
 
 /* Answer the active process (that is, the process that executed
-   the last bytecode. */
+   the last bytecode.  */
 static inline OOP get_active_process (void) ATTRIBUTE_PURE;
 
-/* Create a new Semaphore OOP with SIGNALS signals on it and return it. */
+/* Create a new Semaphore OOP with SIGNALS signals on it and return it.  */
 static inline OOP semaphore_new (int signals);
 
 /* Pop NUMARGS items from the stack and put them into a newly
@@ -411,21 +396,27 @@ static inline OOP create_args_array (int numArgs);
    the caller's context. 
 
    On failure return true, on success (i.e. if NUMARGS matches what
-   the BlockClosure says) return false. */
+   the BlockClosure says) return false.  */
 static mst_Boolean send_block_value (int numArgs);
 
 /* This is a kind of simplified _gst_send_message_internal that,
    instead of setting up a context for a particular receiver, stores
    information on the lookup into METHODDATA.  Unlike
    _gst_send_message_internal, this function is generic and valid for
-   both the interpreter and the JIT compiler. */
+   both the interpreter and the JIT compiler.  */
 static mst_Boolean lookup_method (OOP sendSelector,
 				  method_cache_entry *methodData,
 				  int sendArgs,
 				  OOP method_class);
 
+/* This is a further simplified lookup_method which does not care
+   about preparing for #doesNotUnderstand:.  */
+static inline mst_Boolean find_method (OOP receiverClass,
+				       OOP sendSelector,
+				       method_cache_entry *methodData);
+
 /* This tenures context objects from the stack to the context pools
-   (see below for a description). */
+   (see below for a description).  */
 static void empty_context_stack (void);
 
 /* This allocates a new context pool, eventually triggering a GC once
@@ -433,11 +424,11 @@ static void empty_context_stack (void);
 static void alloc_new_chunk ();
 
 /* This allocates a context object which is SIZE words big from
-   a pool, allocating one if the current pool is full. */
+   a pool, allocating one if the current pool is full.  */
 static inline gst_method_context alloc_stack_context (int size);
 
 /* This frees the most recently allocated stack from the current
-   context pool.  It is called when unwinding. */
+   context pool.  It is called when unwinding.  */
 static inline void dealloc_stack_context (gst_context_part context);
 
 /* This allocates a new context of SIZE, prepares an OOP for it
@@ -446,7 +437,7 @@ static inline void dealloc_stack_context (gst_context_part context);
    parentContext field of the newly-allocated context is initialized,
    because the other fields can be desumed from the execution state:
    these other fields instead are filled in the parent context since
-   the execution state will soon be overwritten. */
+   the execution state will soon be overwritten.  */
 static inline gst_method_context activate_new_context (int size,
 						       int sendArgs);
 
@@ -457,12 +448,12 @@ static inline void prepare_context (gst_context_part context,
 				    int temps);
 
 /* Return from the current context and restore the virtual machine's
-   status (ip, sp, _gst_this_method, _gst_self, ...). */
+   status (ip, sp, _gst_this_method, _gst_self, ...).  */
 static void unwind_context (void);
 
 /* Used to help minimize the number of primitives used to control the
    various debugging flags, this routine maps the variable's INDEX to the
-   address of a boolean debug flag, which it returns. */
+   address of a boolean debug flag, which it returns.  */
 static inline mst_Boolean *bool_addr_index (int index) ATTRIBUTE_PURE;
 
 /* Check whether it is true that sending SENDSELECTOR to RECEIVER
@@ -472,7 +463,7 @@ static inline mst_Boolean *bool_addr_index (int index) ATTRIBUTE_PURE;
    understood by the receiver, provided that NUMARGS matches the
    number of arguments expected by the selector (1 if binary, else the
    number of colons).  If you don't know a receiver you can just pass
-   _gst_nil_oop or directly call _gst_selector_num_args. */
+   _gst_nil_oop or directly call _gst_selector_num_args.  */
 static inline mst_Boolean check_send_correctness (OOP receiver,
 						  OOP sendSelector,
 						  int numArgs) ATTRIBUTE_PURE;
@@ -485,7 +476,7 @@ static inline mst_Boolean check_send_correctness (OOP receiver,
    Note that unwind_method is only called inside `dirty' (or `full')
    block closures, hence the context we return from can be found by
    following OUTERCONTEXT links starting from the currently executing
-   context, and until we reach a MethodContext. */
+   context, and until we reach a MethodContext.  */
 static mst_Boolean unwind_method (void);
 
 /* Unwind up to context returnContextOOP, carefully examining the
@@ -495,7 +486,7 @@ static mst_Boolean unwind_method (void);
    continue up the call chain until we finally reach methodContextOOP
    or an unwind method.  In this case the non-unwind contexts between
    the unwind method and the returnContextOOP must be removed from the
-   chain. */
+   chain.  */
 static void unwind_to (OOP returnContextOOP);
 
 /* Arrange things so that all the non-unwinding contexts up to
@@ -511,11 +502,11 @@ static void disable_non_unwind_contexts (OOP returnContextOOP);
    program, such as interrupts or segmentation violation.  In the
    latter case, try to show a method invocation backtrace if possibly,
    otherwise try to show where the system was in the file it was
-   processing when the error occurred. */
+   processing when the error occurred.  */
 static RETSIGTYPE interrupt_handler (int sig);
 
 /* Called to preempt the current process after a specified amount
-   of time has been spent in the GNU Smalltalk interpreter. */
+   of time has been spent in the GNU Smalltalk interpreter.  */
 #ifdef ENABLE_PREEMPTION
 static RETSIGTYPE preempt_smalltalk_process (int sig);
 #endif
@@ -558,28 +549,34 @@ static RETSIGTYPE preempt_smalltalk_process (int sig);
 
 /* Pick a process that is the highest-priority process different from
    the currently executing one, and schedule it for execution after
-   the first sequence points. */
+   the first sequence points.  */
 #define ACTIVE_PROCESS_YIELD() \
   activate_process(next_scheduled_process())
 
 /* Answer an OOP for a Smalltalk object of class Array, holding the
-   different process lists for each priority. */
+   different process lists for each priority.  */
 #define GET_PROCESS_LISTS() \
   (((gst_processor_scheduler)OOP_TO_OBJ(_gst_processor_oop))->processLists)
 
 /* Tell the interpreter that special actions are needed as soon as a
    sequence point is reached.  */
+#ifdef ENABLE_JIT_TRANSLATION
+#define SET_EXCEPT_FLAG(x) _gst_except_flag = (x);
+#else
+static void * const *global_monitored_bytecodes;
+static void * const *global_normal_bytecodes;
+static void * const *dispatch_vec;
+
 #define SET_EXCEPT_FLAG(x) do {						\
   _gst_except_flag = (x);						\
-  DO_SET_EXCEPT_FLAG(x);						\
+  dispatch_vec = (x) ? global_monitored_bytecodes : global_normal_bytecodes; \
 } while(0)
-
-#define DO_SET_EXCEPT_FLAG(x)	/* might be redefined by interp-*.inl */
+#endif
 
 /* Answer an hash value for a send of the SENDSELECTOR message, when
    the CompiledMethod is found in class METHODCLASS.  */
 #define METHOD_CACHE_HASH(sendSelector, methodClass)			 \
-    (( ((long)(sendSelector)) ^ ((long)(methodClass)) >> (LONG_SHIFT+1)) \
+    (( ((intptr_t)(sendSelector)) ^ ((intptr_t)(methodClass)) / (2 * sizeof (PTR))) \
       & (METHOD_CACHE_SIZE - 1))
 
 /* Answer whether CONTEXT is a MethodContext.  This happens whenever
@@ -587,6 +584,25 @@ static RETSIGTYPE preempt_smalltalk_process (int sig);
    context) in the last instance variable.  */
 #define CONTEXT_FLAGS(context) \
   ( ((gst_method_context)(context)) ->flags)
+
+/* Answer the sender of CONTEXTOOP.  */
+#define PARENT_CONTEXT(contextOOP) \
+  ( ((gst_method_context) OOP_TO_OBJ (contextOOP)) ->parentContext)
+
+/* Set whether the old context was a trusted one.  Untrusted contexts
+   are those whose receiver or sender is untrusted.  */
+#define UPDATE_CONTEXT_TRUSTFULNESS(contextOOP, parentContextOOP) \
+  MAKE_OOP_UNTRUSTED (contextOOP, \
+    IS_OOP_UNTRUSTED (_gst_self) | \
+    IS_OOP_UNTRUSTED (parentContextOOP));
+
+/* Set whether the current context is an untrusted one.  Untrusted contexts
+   are those whose receiver or sender is untrusted.  */
+#define IS_THIS_CONTEXT_UNTRUSTED() \
+  (UPDATE_CONTEXT_TRUSTFULNESS(_gst_this_context_oop, \
+			       PARENT_CONTEXT (_gst_this_context_oop)) \
+     & F_UNTRUSTED)
+
 
 /* Context management
  
@@ -640,14 +656,14 @@ static RETSIGTYPE preempt_smalltalk_process (int sig);
 /* I made CHUNK_SIZE a nice power of two.  Allocate 64KB at a time,
    never use more than 3 MB; anyway these are here so behavior can be
    fine tuned.  MAX_LIFO_DEPTH is enough to have room for an entire
-   stack chunk and avoid testing for overflows in lifo_contexts. */
+   stack chunk and avoid testing for overflows in lifo_contexts.  */
 #define CHUNK_SIZE			16384
 #define MAX_CHUNKS_IN_MEMORY		48
 #define MAX_LIFO_DEPTH			(CHUNK_SIZE / CTX_SIZE(0))
 
 /* CHUNK points to an item of CHUNKS.  CUR_CHUNK_BEGIN is equal
    to *CHUNK (i.e. points to the base of the current chunk) and
-   CUR_CHUNK_END is equal to CUR_CHUNK_BEGIN + CHUNK_SIZE. */
+   CUR_CHUNK_END is equal to CUR_CHUNK_BEGIN + CHUNK_SIZE.  */
 static gst_context_part cur_chunk_begin = NULL, cur_chunk_end = NULL;
 static gst_context_part chunks[MAX_CHUNKS_IN_MEMORY] CACHELINE_ALIGNED;
 static gst_context_part *chunk = chunks - 1;
@@ -657,7 +673,7 @@ static gst_context_part *chunk = chunks - 1;
    long as it resides in the same chunk as the newest object created,
    and as long as no context switches happen since the time the
    process was created.  FREE_LIFO_CONTEXT points to just after the
-   top of the stack. */
+   top of the stack.  */
 static struct OOP lifo_contexts[MAX_LIFO_DEPTH] CACHELINE_ALIGNED;
 static OOP free_lifo_context = lifo_contexts;
 
@@ -679,12 +695,11 @@ static OOP free_lifo_context = lifo_contexts;
 
 #include "prims.inl"
 
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
 #include "interp-jit.inl"
 #else
 #include "interp-bc.inl"
 #endif
-
 
 
 void
@@ -712,41 +727,39 @@ empty_context_stack (void)
 
   /* printf("[[[[ Gosh, not lifo anymore! (free = %p, base = %p)\n",
      free_lifo_context, lifo_contexts); */
-  if (free_lifo_context != lifo_contexts)
-    {
-      free_lifo_context = contextOOP = lifo_contexts;
-      last = _gst_this_context_oop;
-      context = (gst_method_context) OOP_TO_OBJ (contextOOP);
+  if COMMON (free_lifo_context != lifo_contexts)
+    for (free_lifo_context = contextOOP = lifo_contexts,
+         last = _gst_this_context_oop,
+         context = (gst_method_context) OOP_TO_OBJ (contextOOP);;)
+      {
+	oop = alloc_oop (context, contextOOP->flags | _gst_mem.active_flag);
 
-      for (;;)
-	{
-	  oop = alloc_oop (context,
-			   _gst_mem.active_flag | F_POOLED | F_CONTEXT);
+        /* Fill the object's uninitialized fields. */
+        context->objClass = CONTEXT_FLAGS (context) & MCF_IS_METHOD_CONTEXT
+          ? _gst_method_context_class
+	  : _gst_block_context_class;
 
-	  /* Fill the object's uninitialized fields. */
-	  context->objClass = CONTEXT_FLAGS (context) & MCF_IS_METHOD_CONTEXT
-	    ? _gst_method_context_class : _gst_block_context_class;
-
-#ifndef USE_JIT_TRANSLATION
-	  /* This field is unused without the JIT compiler, but it must 
-	     be initialized when a context becomes a fully formed
-	     Smalltalk object.  We do that here.  Note that we need the 
-	     field so that the same image is usable with or without the 
-	     JIT compiler. */
-	  context->native_ip = DUMMY_NATIVE_IP;
+#ifndef ENABLE_JIT_TRANSLATION
+	/* This field is unused without the JIT compiler, but it must 
+	   be initialized when a context becomes a fully formed
+	   Smalltalk object.  We do that here.  Note that we need the 
+	   field so that the same image is usable with or without the 
+	   JIT compiler.  */
+	context->native_ip = DUMMY_NATIVE_IP;
 #endif
 
-	  /* The last context is not referenced anywhere, so we're done 
-	     with it. */
-	  if (contextOOP++ == last)
+	/* The last context is not referenced anywhere, so we're done 
+	   with it.  */
+	if (contextOOP++ == last)
+	  {
+            _gst_this_context_oop = oop;
 	    break;
+	  }
 
-	  /* Else we redirect its sender field to the main OOP table */
-	  context = (gst_method_context) OOP_TO_OBJ (contextOOP);
-	  context->parentContext = oop;
-	}
-      _gst_this_context_oop = oop;
-    }
+	/* Else we redirect its sender field to the main OOP table */
+	context = (gst_method_context) OOP_TO_OBJ (contextOOP);
+	context->parentContext = oop;
+      }
   else
     {
       if (IS_NIL (_gst_this_context_oop))
@@ -757,18 +770,20 @@ empty_context_stack (void)
 
   /* When a context gets out of the context stack it must be a fully
      formed Smalltalk object.  These fields were left uninitialized in
-     _gst_send_message_internal and send_block_value -- set them here. */
+     _gst_send_message_internal and send_block_value -- set them here.  */
   context->method = _gst_this_method;
   context->receiver = _gst_self;
   context->spOffset = FROM_INT (sp - context->contextStack);
   context->ipOffset = FROM_INT (ip - method_base);
+
+  UPDATE_CONTEXT_TRUSTFULNESS (_gst_this_context_oop, context->parentContext);
 
   /* Even if the JIT is active, the current context might have no
      attached native_ip -- in fact it has one only if we are being
      called from activate_new_context -- so we have to `invent'
      one. We test for a valid native_ip first, though; this test must
      have no false positives, i.e. it won't ever overwrite a valid
-     native_ip, and won't leave a bogus OOP for the native_ip. */
+     native_ip, and won't leave a bogus OOP for the native_ip.  */
   if (!IS_INT (context->native_ip))
     context->native_ip = DUMMY_NATIVE_IP;
 }
@@ -792,7 +807,7 @@ alloc_new_chunk (void)
     {
       /* Allocate memory only the first time we're using the chunk.
          _gst_empty_context_pool resets the status but doesn't free
-         the memory. */
+         the memory.  */
       cur_chunk_begin = *chunk = (gst_context_part)
         xcalloc (1, SIZE_TO_BYTES (CHUNK_SIZE));
 
@@ -844,13 +859,14 @@ activate_new_context (int size,
 
   /* We cannot overflow lifo_contexts, because it is designed to
      contain all of the contexts in a chunk, and we empty lifo_contexts 
-     when we exhaust a chunk.  So we can get the oop the easy way. */
+     when we exhaust a chunk.  So we can get the oop the easy way.  */
   newContext = alloc_stack_context (size);
   oop = free_lifo_context++;
 
   /* printf("[[[[ Context (size %d) allocated at %p (oop = %p)\n",
      size, newContext, oop); */
   SET_OOP_OBJECT (oop, newContext);
+
   newContext->parentContext = _gst_this_context_oop;
 
   /* save old context information */
@@ -863,6 +879,7 @@ activate_new_context (int size,
     FROM_INT ((sp - thisContext->contextStack) - sendArgs);
   thisContext->ipOffset = FROM_INT (ip - method_base);
 
+  UPDATE_CONTEXT_TRUSTFULNESS (_gst_this_context_oop, thisContext->parentContext);
   _gst_this_context_oop = oop;
 
   return (newContext);
@@ -893,7 +910,7 @@ prepare_context (gst_context_part context,
   _gst_temporaries = mySP = context->contextStack;
   if (args)
     {
-      REGISTER (2, unsigned long num);
+      REGISTER (2, int num);
       REGISTER (3, OOP * src);
       num = args;
       src = &sp[1 - num];
@@ -906,8 +923,8 @@ prepare_context (gst_context_part context,
 
       mySP += num;
     }
-  mySP = nil_fill (mySP, temps);
-  sp = --mySP;
+  sp = mySP + temps - 1;
+  nil_fill (mySP, temps);
 }
 
 mst_Boolean
@@ -917,9 +934,25 @@ lookup_method (OOP sendSelector,
 	       OOP method_class)
 {
   inc_ptr inc;
-  OOP argsArrayOOP, receiverClass;
+  OOP argsArrayOOP;
 
-  receiverClass = method_class;
+  if (find_method (method_class, sendSelector, methodData))
+    return (true);
+
+  inc = INC_SAVE_POINTER ();
+  argsArrayOOP = create_args_array (sendArgs);
+  INC_ADD_OOP (argsArrayOOP);
+  PUSH_OOP (_gst_message_new_args (sendSelector, argsArrayOOP));
+  INC_RESTORE_POINTER (inc);
+  return (false);
+}
+
+mst_Boolean
+find_method (OOP receiverClass,
+	     OOP sendSelector,
+	     method_cache_entry *methodData)
+{
+  OOP method_class = receiverClass;
   for (; !IS_NIL (method_class);
        method_class = SUPERCLASS (method_class))
     {
@@ -932,17 +965,17 @@ lookup_method (OOP sendSelector,
 	  methodData->methodOOP = methodOOP;
 	  methodData->methodClassOOP = method_class;
 	  methodData->methodHeader = GET_METHOD_HEADER (methodOOP);
+
+#ifdef ENABLE_JIT_TRANSLATION
+	  /* Force the translation to be looked up the next time
+	     this entry is used for a message send.  */
+	  methodData->receiverClass = NULL;
+#endif
 	  _gst_cache_misses++;
 	  return (true);
 	}
     }
 
-
-  inc = INC_SAVE_POINTER ();
-  argsArrayOOP = create_args_array (sendArgs);
-  INC_ADD_OOP (argsArrayOOP);
-  PUSH_OOP (_gst_message_new_args (sendSelector, argsArrayOOP));
-  INC_RESTORE_POINTER (inc);
   return (false);
 }
 
@@ -966,20 +999,26 @@ check_send_correctness (OOP receiver,
 			OOP sendSelector,
 			int numArgs)
 {
-  long hashIndex;
+  int hashIndex;
   method_cache_entry *methodData;
   OOP receiverClass;
 
-  receiverClass =
-    IS_INT (receiver) ? _gst_small_integer_class : OOP_CLASS (receiver);
+  receiverClass = OOP_INT_CLASS (receiver);
   hashIndex = METHOD_CACHE_HASH (sendSelector, receiverClass);
   methodData = &method_cache[hashIndex];
 
-  if (methodData->selectorOOP == sendSelector
-      && methodData->startingClassOOP == receiverClass)
-    return (methodData->methodHeader.numArgs == numArgs);
-  else
-    return (_gst_selector_num_args (sendSelector) == numArgs);
+  if (methodData->selectorOOP != sendSelector
+      || methodData->startingClassOOP != receiverClass)
+    {
+      /* If we do not find the method, don't worry and fire
+	 #doesNotUnderstand:  */
+      if (!find_method (receiverClass, sendSelector, methodData))
+	return (true);
+
+      methodData = &method_cache[hashIndex];
+    }
+
+  return (methodData->methodHeader.numArgs == numArgs);
 }
 
 void
@@ -998,7 +1037,7 @@ unwind_context (void)
       oldContextOOP = newContextOOP;
       oldContext = newContext;
 
-      /* Descend in the chain... */
+      /* Descend in the chain...  */
       newContextOOP = oldContext->parentContext;
 
       if COMMON (numLifoContexts > 0)
@@ -1058,7 +1097,7 @@ unwind_method (void)
      encountered.  This means that we are to return from the caller of
      the method that created the block context, no matter how many
      levels of message sending are between where we currently are and
-     our parent method context. */
+     our parent method context.  */
 
   newContext = (gst_block_context) OOP_TO_OBJ (_gst_this_context_oop);
   do
@@ -1072,7 +1111,7 @@ unwind_method (void)
   if UNCOMMON (IS_NIL (newContext->parentContext))
     {
       /* We are to create a reference to thisContext, so empty the
-         stack. */
+         stack.  */
       empty_context_stack ();
       oldContextOOP = _gst_this_context_oop;
 
@@ -1105,11 +1144,11 @@ unwind_to (OOP returnContextOOP)
       oldContextOOP = newContextOOP;
       oldContext = newContext;
 
-      /* Descend in the chain... */
+      /* Descend in the chain...  */
       newContextOOP = oldContext->parentContext;
       newContext = (gst_method_context) OOP_TO_OBJ (newContextOOP);
 
-      /* Check if we got to an unwinding context (#ensure:). */
+      /* Check if we got to an unwinding context (#ensure:).  */
       if UNCOMMON (CONTEXT_FLAGS (newContext) & MCF_IS_UNWIND_CONTEXT)
         {
 	  _gst_this_context_oop = oldContextOOP;
@@ -1172,7 +1211,7 @@ disable_non_unwind_contexts (OOP returnContextOOP)
       oldContextOOP = newContextOOP;
       oldContext = newContext;
 
-      /* Descend in the chain... */
+      /* Descend in the chain...  */
       newContextOOP = oldContext->parentContext;
       newContext = (gst_method_context) OOP_TO_OBJ (newContextOOP);
 
@@ -1204,7 +1243,7 @@ disable_non_unwind_contexts (OOP returnContextOOP)
       oldContextOOP = newContextOOP;
       oldContext = newContext;
 
-      /* Descend in the chain... */
+      /* Descend in the chain...  */
       newContextOOP = oldContext->parentContext;
       newContext = (gst_method_context) OOP_TO_OBJ (newContextOOP);
 
@@ -1219,6 +1258,35 @@ disable_non_unwind_contexts (OOP returnContextOOP)
     }
 
   *chain = newContext->parentContext;
+}
+
+
+OOP
+_gst_make_block_closure (OOP blockOOP)
+{
+  gst_block_closure closure;
+  gst_compiled_block block;
+  OOP closureOOP;
+
+  closure = (gst_block_closure) new_instance (_gst_block_closure_class,
+                                              &closureOOP);
+
+  /* Check how clean the block is: if it only accesses self,
+     we can afford not moving the context chain to the heap
+     and setting the outerContext to nil.  */
+  block = (gst_compiled_block) OOP_TO_OBJ (blockOOP);
+
+  if (block->header.clean > 1)
+    {
+      empty_context_stack ();
+      closure->outerContext = _gst_this_context_oop;
+    }
+  else
+    closure->outerContext = _gst_nil_oop;
+
+  closure->block = blockOOP;
+  closure->receiver = _gst_self;
+  return (closureOOP);
 }
 
 
@@ -1286,7 +1354,7 @@ change_process_context (OOP newProcess)
   SET_THIS_METHOD (thisContext->method, GET_CONTEXT_IP (thisContext));
   sp = thisContext->contextStack + TO_INT (thisContext->spOffset);
 
-#if USE_JIT_TRANSLATION
+#if ENABLE_JIT_TRANSLATION
   ip = TO_INT (thisContext->ipOffset);
 #endif
 
@@ -1582,7 +1650,7 @@ resume_process (OOP processOOP,
   gst_process process, active;
   mst_Boolean ints_enabled;
 
-  /* 2002-19-12: tried get_active_process instead of get_scheduled_process. */
+  /* 2002-19-12: tried get_active_process instead of get_scheduled_process.  */
   activeOOP = get_active_process ();
   if (processOOP == activeOOP)
     return (true);
@@ -1621,7 +1689,7 @@ resume_process (OOP processOOP,
     /* this process has a lower priority than the active one, so the
        policy is that it doesn't preempt the currently running one.
        Anyway, it must be the first in its priority queue - so don't
-       put it to sleep. */
+       put it to sleep.  */
     add_first_link (processList, processOOP);
 
   return (true);
@@ -1638,7 +1706,7 @@ activate_process (OOP processOOP)
   if (IS_NIL (processOOP))
     return processOOP;
 
-  /* 2002-19-12: tried get_active_process instead of get_scheduled_process. */
+  /* 2002-19-12: tried get_active_process instead of get_scheduled_process.  */
   if (processOOP != get_active_process ())
     {
       process = (gst_process) OOP_TO_OBJ (processOOP);
@@ -1823,7 +1891,7 @@ _gst_print_process_state (void)
   if (processOOP == _gst_nil_oop)
     printf ("No active process\n");
   else
-    printf ("Active process: <Proc %p prio: %ld next %p context %p>\n",
+    printf ("Active process: <Proc %p prio: %td next %p context %p>\n",
 	    processOOP, TO_INT (process->priority),
 	    process->nextLink, process->suspendedContext);
 
@@ -1843,7 +1911,7 @@ _gst_print_process_state (void)
 	   processOOP = process->nextLink)
 	{
 	  process = (gst_process) OOP_TO_OBJ (processOOP);
-	  printf ("\n    <Proc %p prio: %ld context %p> ",
+	  printf ("\n    <Proc %p prio: %td context %p> ",
 		  processOOP, TO_INT (process->priority),
 		  process->suspendedContext);
 	}
@@ -1866,7 +1934,7 @@ semaphore_new (int signals)
 }
 
 /* runs before every evaluation (_gst_execute_statements) and before GC turned on.
-   We don't use the incubator because _gst_processor_oop is in the root set. */
+   Note that we don't use the incubator because _gst_processor_oop is a global.  */
 void
 _gst_init_process_system (void)
 {
@@ -1893,7 +1961,7 @@ _gst_init_process_system (void)
     processor->gcSemaphore = semaphore_new (0);
 
   /* No process is active -- so highest_priority_process() need not
-     worry about discarding an active process. */
+     worry about discarding an active process.  */
   processor->activeProcess = _gst_nil_oop;
   switch_to_process = _gst_nil_oop;
   activate_process (highest_priority_process ());
@@ -1957,7 +2025,7 @@ _gst_init_interpreter (void)
 {
   unsigned int i;
 
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
   _gst_init_translator ();
   ip = 0;
 #else
@@ -1992,11 +2060,10 @@ _gst_prepare_execution_environment (void)
   dummyContext->ipOffset = FROM_INT (0);
   dummyContext->spOffset = FROM_INT (-1);
 
-#ifdef USE_JIT_TRANSLATION
-  dummyContext->native_ip = FROM_INT ((char *) _gst_return_from_native_code);
+#ifdef ENABLE_JIT_TRANSLATION
+  dummyContext->native_ip = GET_NATIVE_IP ((char *) _gst_return_from_native_code);
 #else
-  dummyContext->native_ip = DUMMY_NATIVE_IP;	/* See
-						   empty_context_stack */
+  dummyContext->native_ip = DUMMY_NATIVE_IP;	/* See empty_context_stack */
 #endif
 
   dummyContextOOP = alloc_oop (dummyContext,
@@ -2046,7 +2113,7 @@ _gst_nvmsg_send (OOP receiver,
       dirMessageOOP = _gst_directed_message_new_args (receiver, sendSelector, argsArrayOOP);
 
       receiver = _gst_process_class;
-      sendSelector = _gst_start_execution_colon_symbol;
+      sendSelector = _gst_start_execution_symbol;
       sendArgs = 1;
       args = &dirMessageOOP;
     }
@@ -2057,7 +2124,7 @@ _gst_nvmsg_send (OOP receiver,
     PUSH_OOP (args[i]);
 
   if (OOP_CLASS (sendSelector) == _gst_symbol_class)
-    SEND_MESSAGE (sendSelector, sendArgs, true);
+    SEND_MESSAGE (sendSelector, sendArgs);
   else
     _gst_send_method (sendSelector);
 
@@ -2112,12 +2179,16 @@ _gst_invalidate_method_cache (void)
 {
   int i;
 
-#ifdef USE_JIT_TRANSLATION
-  /* Only run this if code was run since the last method cache cleanup.  */
-  if (_gst_sample_counter)
-    _gst_reset_inline_caches ();
+  /* Only do this if some code was run since the last cache cleanup,
+     as it is quite expensive.  */
+  if (!_gst_sample_counter)
+    return;
+
+#ifdef ENABLE_JIT_TRANSLATION
+  _gst_reset_inline_caches ();
 #else
-  at_cache_class = at_put_cache_class = size_cache_class = NULL;
+  at_cache_class = at_put_cache_class =
+    size_cache_class = class_cache_class = NULL;
 #endif
 
   _gst_cache_misses = _gst_sample_counter = 0;
@@ -2125,11 +2196,10 @@ _gst_invalidate_method_cache (void)
   for (i = 0; i < METHOD_CACHE_SIZE; i++)
     {
       method_cache[i].selectorOOP = NULL;
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
       method_cache[i].receiverClass = NULL;
 #endif
     }
-
 }
 
 
@@ -2138,13 +2208,13 @@ _gst_copy_processor_registers (void)
 {
   copy_semaphore_oops ();
 
-  /* Get everything into the main OOP table first. */
+  /* Get everything into the main OOP table first.  */
   if (_gst_this_context_oop)
     MAYBE_COPY_OOP (_gst_this_context_oop);
 
   /* everything else is pointed to by _gst_this_context_oop, either
      directly or indirectly, or has been copyed when scanning the 
-     registered roots. */
+     registered roots.  */
 }
 
 void
@@ -2174,13 +2244,13 @@ _gst_mark_processor_registers (void)
 {
   mark_semaphore_oops ();
 
-  /* Get everything into the main OOP table first. */
+  /* Get everything into the main OOP table first.  */
   if (_gst_this_context_oop)
     MAYBE_MARK_OOP (_gst_this_context_oop);
 
   /* everything else is pointed to by _gst_this_context_oop, either
      directly or indirectly, or has been marked when scanning the 
-     registered roots. */
+     registered roots.  */
 }
 
 void
@@ -2243,7 +2313,7 @@ _gst_restore_object_pointers (void)
      all this information is re-computable, so we pick up
      _gst_this_method to adjust the ip and _gst_literals accordingly,
      and we also pick up the context to adjust sp and the temps
-     accordingly. */
+     accordingly.  */
 
   if (!IS_NIL (_gst_this_context_oop))
     {
@@ -2290,7 +2360,7 @@ _gst_init_signals (void)
 {
   if (!_gst_make_core_file)
     {
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
       _gst_set_signal_handler (SIGILL, interrupt_handler);
 #endif
       _gst_set_signal_handler (SIGABRT, interrupt_handler);
@@ -2302,7 +2372,7 @@ _gst_init_signals (void)
 
 
 void
-stop_executing (char *msg)
+stop_executing (const char *msg)
 {
   _gst_abort_execution = msg;
   SET_EXCEPT_FLAG (true);
@@ -2361,7 +2431,7 @@ interrupt_handler (int sig)
 
 #ifdef HAVE_EXECINFO_H
       /* Don't print a backtrace, for example, if exiting during a
-	 compilation. */
+	 compilation.  */
       if (ip || _gst_gc_running || is_serious_error || sig == SIGUSR1)
 	{
           PTR array[11];
@@ -2396,9 +2466,8 @@ _gst_show_backtrace (void)
 	  == (MCF_IS_METHOD_CONTEXT | MCF_IS_DISABLED_CONTEXT))
 	continue;
 
-#if 0
-      printf ("(OOP %p)", context->method);
-#endif
+      /* printf ("(OOP %p)", context->method); */
+      printf ("(ip %d)", TO_INT (context->ipOffset));
       if (CONTEXT_FLAGS (context) & MCF_IS_METHOD_CONTEXT)
 	{
 	  OOP receiver, receiverClass;
@@ -2468,12 +2537,12 @@ _gst_show_stack_contents (void)
 }
 
 
-long _gst_execute_primitive_operation (int primitive,
-                                       volatile int numArgs)
+intptr_t _gst_execute_primitive_operation (int primitive,
+                                           volatile int numArgs)
 {
   prim_table_entry *pte = &_gst_primitive_table[primitive];
 
-  long result = pte->func (pte->id, numArgs);
+  intptr_t result = pte->func (pte->id, numArgs);
   last_primitive = primitive;
   return result;
 }

@@ -42,7 +42,9 @@
 #include "genpr-parse.h"
 
 static int from = 0, depth = 0;
+#if !defined YY_FLEX_SUBMINOR_VERSION || YY_FLEX_SUBMINOR_VERSION < 31
 int yylineno = 1;
+#endif
 
 /* This file implements a bit more than a lexical analyzer: it also writes
    literal tokens to the output until a reserved word is found.  This is

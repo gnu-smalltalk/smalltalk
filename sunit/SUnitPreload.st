@@ -86,7 +86,7 @@ sunitSignalWith: aString
 !Exception methodsFor: 'Camp Smalltalk'!
 
 sunitExitWith: aValue
-    self resetHandler; return: aValue! !
+    ^self return: aValue! !
 
 !ResumableTestFailure methodsFor: 'Camp Smalltalk'!
 

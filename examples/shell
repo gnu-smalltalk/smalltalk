@@ -1,5 +1,4 @@
-#Smalltalk ==                     "start of -*- Smalltalk -*- comment
-exec gst "$0" -aQ $@              # end  of     Smalltalk     comment"!
+#! /usr/bin/env gst -f
 
 "======================================================================
 |
@@ -7,42 +6,11 @@ exec gst "$0" -aQ $@              # end  of     Smalltalk     comment"!
 |
  ======================================================================"
 
-" The first two lines above needs some explanations.
+" The first line above is parsed specially by GNU Smalltalk.  gst -f
+| is similar to passing -aQ after the first argument, so the net result
+| is that of executing
 |
-| The first line is nothing more than a comment to bash, so the first thing
-| bash sees is the second line, up to the hash sign: an `exec' command
-| which starts gst. And nothing more, since the child shell's execution
-| stops after it launches GNU Smalltalk.
-| 
-| Instead, what Smalltalk sees after you delete the Smalltalk comments, is
-| `#Smalltalk == $0!': a valid expression which is executed but produces no
-| visible results.
-| 
-| Also, note that you can put the -*- MODE -*- signature used by Emacs on the
-| first line.
-|
-| This technique should be used with script that you expect to take at least a
-| few seconds to run, since Smalltalk's startup is not exactly lightning fast.
-| 
-| Since we are talking about Unix, I'll put here some more magic:
-|
-| a) add this to your /usr/share/magic file:
-|  
-|    # GNU Smalltalk image, starting at version 1.6.2
-|    0	string		GSTIm\0\0	GNU Smalltalk image
-|
-| b) echo these two to /proc/sys/fs/binfmt_misc/register under Linux (maybe
-| from a startup script) -- nothing goes before the first colons, and
-| remember to use double backslashes from the shell!):
-|
-|    :GSTIm_Magic:M::GSTIm\x0\x0::/usr/bin/gst-startimage
-|    :GSTIm_Ext:E::.im::/usr/bin/gst-startimage
-|
-| putting this in /usr/bin/gst-startimage
-|
-|    #! /bin/sh
-|    exec gst -I $1
-|
+|    /path/to/gst /path/to/this/script -aQ param1 param2 paramN
 |
 | Now here is the file juggler by Alexander Lazarevic, the first Smalltalk
 | script known to me. <Alexander@Lazarevic.de>

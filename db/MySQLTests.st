@@ -260,7 +260,7 @@ createTableNamed: aName
 		nextPutAll: 'CREATE TABLE ';
 		nextPutAll: aName;
 		nextPut: $(;
-		cr.
+		nl.
 	writeStream nextPutAll: (self 
 				createDelimitedStringFor: mysqlTypes keys
 				delimiter: ', '
@@ -279,14 +279,14 @@ insertIntoTableNamed: aName
 		nextPutAll: 'INSERT INTO ';
 		nextPutAll: aName;
 		nextPutAll: ' (';
-		cr.
+		nl.
 	writeStream nextPutAll: (self 
 				createDelimitedStringFor: mysqlTypes keys
 				delimiter: ', '
 				using: [:field | self fieldNameFor: field]).
 	writeStream
 		nextPutAll: ') VALUES (';
-		cr.
+		nl.
 	writeStream
 		nextPutAll: (self 
 					createDelimitedStringFor: mysqlTypes keys
@@ -641,7 +641,7 @@ initialize
 	self addTest: (JdmMysqlSelectTestCase selector: #selectRows).
 	self addTest: (JdmMysqlDeleteTestCase selector: #deleteRows).
 	self addTest: (JdmMysqlDropTableTestCase selector: #dropTable).
-	Transcript cr! !
+	Transcript nl! !
 
 !JdmMysqlTestSuite class methodsFor: 'instance creation'!
 
@@ -703,7 +703,7 @@ createTableNamed: aName
 		nextPutAll: 'CREATE TABLE ';
 		nextPutAll: aName;
 		nextPut: $(;
-		cr.
+		nl.
 	writeStream nextPutAll: (self 
 				createDelimitedStringFor: mysqlTypes keys
 				delimiter: ', '
@@ -722,14 +722,14 @@ insertIntoTableNamed: aName
 		nextPutAll: 'INSERT INTO ';
 		nextPutAll: aName;
 		nextPutAll: ' (';
-		cr.
+		nl.
 	writeStream nextPutAll: (self 
 				createDelimitedStringFor: mysqlTypes keys
 				delimiter: ', '
 				using: [:field | self fieldNameFor: field]).
 	writeStream
 		nextPutAll: ') VALUES (';
-		cr.
+		nl.
 	writeStream
 		nextPutAll: (self 
 					createDelimitedStringFor: mysqlTypes keys

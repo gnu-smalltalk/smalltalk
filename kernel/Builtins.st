@@ -713,6 +713,7 @@ checkIndexableBounds: index put: object
    "Private - Check the reason why a store to the given indexed
     instance variable failed"
 
+    | shape size |
     self class isFixed ifTrue: [ ^SystemExceptions.NotIndexable signalOn: self ].
 
     self isReadOnly ifTrue: [ ^SystemExceptions.ReadOnlyObject signal ].
@@ -721,15 +722,23 @@ checkIndexableBounds: index put: object
     (index < 1) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
     (index > self basicSize) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
 
-    self class isBytes ifTrue: [
-	object isSmallInteger
-	    ifTrue: [ ^SystemExceptions.ArgumentOutOfRange signalOn: object mustBeBetween: 0 and: 255 ]
-	    ifFalse: [ ^SystemExceptions.WrongClass signalOn: object mustBe: Integer ]
-    ].
+    shape := self class shape.
+    (shape == #float or: [ shape == #double ]) ifTrue: [
+	SystemExceptions.WrongClass signalOn: object mustBe: { Float. SmallInteger } ].
 
-    object isInteger
-	ifTrue: [ ^SystemExceptions.ArgumentOutOfRange signalOn: object mustBeBetween: 0 and: SmallInteger largest * 4 + 3 ]
-	ifFalse: [ ^SystemExceptions.WrongClass signalOn: object mustBe: Integer ]
+    shape == #byte ifTrue: [ size := 8 ].
+    shape == #int8 ifTrue: [ size := 7 ].
+    shape == #ushort ifTrue: [ size := 16 ].
+    shape == #short ifTrue: [ size := 15 ].
+    shape == #uint ifTrue: [ size := 32 ].
+    shape == #int ifTrue: [ size := 31 ].
+    shape == #uint64 ifTrue: [ size := 64 ].
+    shape == #int64 ifTrue: [ size := 63 ].
+    size isNil ifTrue: [ ^self primtiveFailed ].
+    ^SystemExceptions.ArgumentOutOfRange
+	signalOn: object
+	mustBeBetween: (size odd ifTrue: [ -1 bitShift: size ] ifFalse: [ 0 ])
+	and: (1 bitShift: size) - 1
 !
 
 at: anIndex
@@ -862,10 +871,23 @@ isReadOnly
     <primitive: VMpr_Object_isReadOnly>
 !
 
+isUntrusted
+    "Answer whether the object is to be considered untrusted."
+
+    <primitive: VMpr_Object_isUntrusted>
+!
+
 makeReadOnly: aBoolean
     "Set whether the object's indexed instance variables can be written"
 
     <primitive: VMpr_Object_makeReadOnly>
+    SystemExceptions.WrongClass signalOn: aBoolean mustBe: Boolean
+!
+
+makeUntrusted: aBoolean
+    "Set whether the object is to be considered untrusted."
+
+    <primitive: VMpr_Object_makeUntrusted>
     SystemExceptions.WrongClass signalOn: aBoolean mustBe: Boolean
 !
 
@@ -942,7 +964,7 @@ perform: selectorOrMessageOrMethod
 		selector: selectorOrMessageOrMethod
 		arguments: #()) ]
     ].
-    selectorOrMessageOrMethod class == CompiledMethod
+    (selectorOrMessageOrMethod isKindOf: CompiledMethod)
 	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
 
     ^selectorOrMessageOrMethod sendTo: self
@@ -959,7 +981,7 @@ perform: selectorOrMethod with: arg1
 
      This method should not be overridden"
     <primitive: VMpr_Object_perform>
-    selectorOrMethod class == CompiledMethod
+    (selectorOrMethod isKindOf: CompiledMethod)
 	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
     selectorOrMethod isSymbol
 	ifFalse: [ SystemExceptions.WrongClass signalOn: selectorOrMethod mustBe: Symbol ].
@@ -982,7 +1004,7 @@ perform: selectorOrMethod with: arg1 with: arg2
 
      This method should not be overridden"
     <primitive: VMpr_Object_perform>
-    selectorOrMethod class == CompiledMethod
+    (selectorOrMethod isKindOf: CompiledMethod)
 	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
     selectorOrMethod isSymbol
 	ifFalse: [ SystemExceptions.WrongClass signalOn: selectorOrMethod mustBe: Symbol ].
@@ -1005,7 +1027,7 @@ perform: selectorOrMethod with: arg1 with: arg2 with: arg3
 
      This method should not be overridden"
     <primitive: VMpr_Object_perform>
-    selectorOrMethod class == CompiledMethod
+    (selectorOrMethod isKindOf: CompiledMethod)
 	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
     selectorOrMethod isSymbol
 	ifFalse: [ SystemExceptions.WrongClass signalOn: selectorOrMethod mustBe: Symbol ].
@@ -1015,6 +1037,29 @@ perform: selectorOrMethod with: arg1 with: arg2 with: arg3
 	ifFalse: [ self doesNotUnderstand: (Message
 	    selector: selectorOrMethod
 	    arguments: { arg1. arg2. arg3 }) ]
+!
+
+perform: selectorOrMethod with: arg1 with: arg2 with: arg3 with: arg4
+    "Send the message named selectorOrMethod (if a Symbol) to the receiver,
+     passing the other arguments to it, or execute the method within the
+     receiver (if a CompiledMethod).  In the latter case, the method need not
+     reside on the hierarchy from the receiver's class to Object -- it need
+     not reside at all in a MethodDictionary, in fact -- but doing bad things
+     will compromise stability of the Smalltalk virtual machine (and don't
+     blame anybody but yourself).
+
+     This method should not be overridden"
+    <primitive: VMpr_Object_perform>
+    (selectorOrMethod isKindOf: CompiledMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
+    selectorOrMethod isSymbol
+	ifFalse: [ SystemExceptions.WrongClass signalOn: selectorOrMethod mustBe: Symbol ].
+
+    (self respondsTo: selectorOrMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ]
+	ifFalse: [ self doesNotUnderstand: (Message
+	    selector: selectorOrMethod
+	    arguments: { arg1. arg2. arg3. arg4 }) ]
 !
 
 perform: selectorOrMethod withArguments: argumentsArray
@@ -1030,7 +1075,7 @@ perform: selectorOrMethod withArguments: argumentsArray
     <primitive: VMpr_Object_performWithArguments>
     argumentsArray isArray 
 	ifFalse: [ SystemExceptions.WrongClass signalOn: argumentsArray mustBe: Array ].
-    selectorOrMethod class == CompiledMethod
+    (selectorOrMethod isKindOf: CompiledMethod)
 	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
     selectorOrMethod isSymbol
 	ifFalse: [ SystemExceptions.WrongClass signalOn: selectorOrMethod mustBe: Symbol ].
@@ -1044,13 +1089,13 @@ perform: selectorOrMethod withArguments: argumentsArray
 
 == arg
     "Answer whether the receiver is the same object as arg. This is a
-     very fast test and is called 'identity' "
+     very fast test and is called 'object identity'. "
     <primitive: VMpr_Object_identity>
 !
 
 = arg
     "Answer whether the receiver is equal to arg. The equality test is
-     by default the same as that for equal objects. = must not fail;
+     by default the same as that for identical objects. = must not fail;
      answer false if the receiver cannot be compared to arg"
     <primitive: VMpr_Object_identity>
 !
@@ -1125,8 +1170,6 @@ doesNotUnderstand: message
      Message containing information on the receiver"
     <primitive: VMpr_Object_bootstrapDNU>
 !
-
-!Object methodsFor: 'exception handling'!
 
 badReturnError
     "Called back when a block performs a bad return."
@@ -1556,8 +1599,16 @@ compileString: aString ifError: aBlock
     ^self primitiveFailed
 ! !
 
-
 
+!ContextPart class methodsFor: 'built ins'!
+
+thisContext
+    "Return the value of the thisContext variable.  Called internally
+     when the variable is accessed."
+
+    <primitive: VMpr_ContextPart_thisContext>
+! !
+
 !ContextPart methodsFor: 'built ins'!
 
 continue: anObject
@@ -1576,13 +1627,6 @@ continue: anObject
 
 
 !BlockClosure methodsFor: 'built ins'!
-
-blockCopy: outerContext
-    "Generate a BlockClosure identical to the receiver, with the
-     given context as its outer context."
-    <primitive: VMpr_BlockClosure_blockCopy>
-    ^self primitiveFailed
-!
 
 value
     "Evaluate the receiver passing no parameters"
@@ -1637,13 +1681,30 @@ size
 
 
 
+!ByteArray class methodsFor: 'instance creation'!
+
+fromCData: aCObject size: anInteger
+    "Answer a ByteArray containing anInteger bytes starting at the location pointed
+     to by aCObject"
+    <primitive: VMpr_String_fromCData>
+    ^SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger
+! !
+
+
+
 !String class methodsFor: 'instance creation'!
+
+fromCData: aCObject
+    "Answer a String containing the bytes starting at the location pointed
+     to by aCObject, up to the first NUL character."
+    <primitive: VMpr_String_fromCData>
+    ^self primitiveFailed!
 
 fromCData: aCObject size: anInteger
     "Answer a String containing anInteger bytes starting at the location pointed
      to by aCObject"
-    <primitive: VMpr_String_fromCData>
-    ^self primitiveFailed
+    <primitive: VMpr_String_fromCData_size>
+    ^SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger
 ! !
 
 
@@ -1843,25 +1904,25 @@ value: anInteger
 asciiValue
     "Returns the integer value corresponding to self.  #codePoint,
      #asciiValue, #value, and #asInteger are synonyms."
-    <primitive: VMpr_Character_value>
+    ^asciiValue
 !
 
 asInteger
     "Returns the integer value corresponding to self.  #codePoint,
      #asciiValue, #value, and #asInteger are synonyms."
-    <primitive: VMpr_Character_value>
+    ^asciiValue
 !
 
 codePoint
     "Returns the integer value corresponding to self.  #codePoint,
      #asciiValue, #value, and #asInteger are synonyms."
-    <primitive: VMpr_Character_value>
+    ^asciiValue
 !
 
 value
     "Returns the integer value corresponding to self.  #codePoint,
      #asciiValue, #value, and #asInteger are synonyms."
-    <primitive: VMpr_Character_value>
+    ^asciiValue
 ! !
 
 
@@ -1910,12 +1971,30 @@ discardTranslation
     <primitive: VMpr_CompiledCode_discardTranslation>
 ! !
 
+!CompiledCode methodsFor: 'private'!
+
+verificationResult
+    "Answer the result of verifying the bytecodes for the receiver."
+    <primitive: VMpr_CompiledCode_verificationResult>
+! !
+
+!CompiledCode methodsFor: 'security'!
+
+verify
+    "Verify the bytecodes for the receiver, and raise an exception if
+     the verification process failed."
+    | result |
+    result := self verificationResult.
+    result isNil ifFalse: [
+	SystemExceptions.VerificationError signal: result
+    ]
+! !
 
 
 !CompiledMethod class methodsFor: 'instance creation'!
 
 literals: lits numArgs: numArg numTemps: numTemp
-    primitive: primIndex bytecodes: bytecodes depth: depth
+    attributes: attrArray bytecodes: bytecodes depth: depth
 
     "Answer a full fledged CompiledMethod. Construct the method
      header from the parameters, and set the literals and bytecodes
@@ -1924,14 +2003,28 @@ literals: lits numArgs: numArg numTemps: numTemp
      and to the newly created CompiledMethod."
 
     <primitive: VMpr_CompiledMethod_create>
-    self primitiveFailed
+    attrArray inject: false into: [ :found :each |
+	each arguments size ~= each selector numArgs
+	    ifTrue: [ SystemExceptions.VerificationError signal: 'invalid number of arguments' ].
+
+	each selector == #primitive:
+	    ifFalse: [ found ]
+	    ifTrue: [
+		found
+		    ifTrue: [ SystemExceptions.VerificationError signal: 'duplicate primitive declaration' ].
+		(each arguments first class == SmallInteger
+		    and: [ each arguments first strictlyPositive ])
+		    ifFalse: [ SystemExceptions.VerificationError signal: 'invalid primitive declaration' ].
+
+		true
+	    ].
+    ]
 ! !
 
 
 !CompiledBlock class methodsFor: 'instance creation'!
 
 numArgs: args numTemps: temps bytecodes: bytecodes depth: depth literals: literalArray
-
     "Answer an (almost) full fledged CompiledBlock.  To make it complete,
      you must either set the new object's `method' variable, or put it
      into a BlockClosure and put the BlockClosure into a CompiledMethod's
@@ -1940,9 +2033,8 @@ numArgs: args numTemps: temps bytecodes: bytecodes depth: depth literals: litera
     <primitive: VMpr_CompiledBlock_create>
     self primitiveFailed
 !
-
-
 
+
 !ByteArray methodsFor: 'built ins'!
 
 byteAt: index
@@ -2008,7 +2100,7 @@ fileOp: ioFuncIndex
     "Private - Used to limit the number of primitives used by FileStreams"
     <primitive: VMpr_FileDescriptor_fileOp>
     file isNil ifTrue: [ SystemExceptions.FileError signal: 'file closed' ].
-    File checkError.
+    self checkError.
     ^nil
 !
 
@@ -2022,7 +2114,7 @@ fileOp: ioFuncIndex with: arg1
     "Private - Used to limit the number of primitives used by FileStreams"
     <primitive: VMpr_FileDescriptor_fileOp>
     file isNil ifTrue: [ SystemExceptions.FileError signal: 'file closed' ].
-    File checkError.
+    self checkError.
     ^nil
 !
 
@@ -2036,7 +2128,7 @@ fileOp: ioFuncIndex with: arg1 with: arg2
     "Private - Used to limit the number of primitives used by FileStreams"
     <primitive: VMpr_FileDescriptor_fileOp>
     file isNil ifTrue: [ SystemExceptions.FileError signal: 'file closed' ].
-    File checkError.
+    self checkError.
     ^nil
 !
 
@@ -2050,7 +2142,7 @@ fileOp: ioFuncIndex with: arg1 with: arg2 with: arg3
     "Private - Used to limit the number of primitives used by FileStreams"
     <primitive: VMpr_FileDescriptor_fileOp>
     file isNil ifTrue: [ SystemExceptions.FileError signal: 'file closed' ].
-    File checkError.
+    self checkError.
     ^nil
 !
 
@@ -2231,9 +2323,9 @@ waitAfterSignalling: aSemaphore
     "Signal aSemaphore then, atomically, wait for the receiver to be
      signalled, suspending the executing process if it is not yet.  This
      is needed to avoid race conditions when the #notify and #notifyAll
-     is used together with the receiver: otherwise, if a process sends one
-     of them between the time aSemaphore is signaled and the time the
-     process starts waiting on the receiver, the notification is lost."
+     are used before waiting on receiver: otherwise, if a process sends
+     any of the two between the time aSemaphore is signaled and the time
+     the process starts waiting on the receiver, the notification is lost."
     <primitive: VMpr_Semaphore_waitAfterSignalling>
     ^self primitiveFailed
 !

@@ -80,6 +80,7 @@ processesAt: aPriority
 
 terminateActive
     "Terminate the active process"
+    Smalltalk backtrace.
     self activeProcess terminate
 !
 
@@ -210,25 +211,25 @@ initialize
     ObjectMemory addDependent: self.
     finalizerProcess := [
         | local localFinalizerProcess |
-        [
+	[
             gcSemaphore wait.
             local := gcArray.
             gcArray := nil.
 
 	    "Fire a low-priority process to finalize the objects"
             localFinalizerProcess :=
-                [ :array | array do: [ :each | each mourn ] ]
-                    newProcessWith: { local }.
+		[ :array | array do: [ :each | each mourn ] ]
+		    newProcessWith: { local }.
 
-            localFinalizerProcess name: 'finalization worker'.
-            localFinalizerProcess resume.
-        ] repeat.
+	    localFinalizerProcess name: 'finalization worker'.
+	    localFinalizerProcess resume.
+	] repeat.
     ] forkAt: Processor timingPriority.
     finalizerProcess name: 'finalization listener'.
 !
 
 update: aSymbol
-    "Private - If we left some work behind when the image was saved,
+    "If we left some work behind when the image was saved,
      do it now."
 
     aSymbol == #returnFromSnapshot ifFalse: [ ^self ].
@@ -250,4 +251,3 @@ storeOn: aStream
     "Store onto aStream a Smalltalk expression which evaluates to the receiver"
     aStream nextPutAll: 'Processor'
 ! !
-

@@ -30,8 +30,8 @@
 @end macro
 
 @c Redefine @var to produce <xxx> in the Info file, and italics in TeX
-@setifinfo {L_var, <}
-@setifinfo {R_var, >}
+@setifinfo{L_var, <}
+@setifinfo{R_var, >}
 @macro var{x}
 @value{L_var}@i{@t{\x\}}@value{R_var}
 @end macro
@@ -327,7 +327,7 @@ Paolo Bonzini
 @node Invocation
 @section Command line arguments
 
-@gst{} may be invoked via the following command:
+The @gst{} virtual machine may be invoked via the following command:
 @example
 gst [ flags @dots{} ] [ file @dots{} ]
 @end example
@@ -374,8 +374,8 @@ various flags are interpreted as follows:
 @table @option
 @item -a --smalltalk
 Used to make arguments available to Smalltalk code.  The C option parser
-discards everything after the parameter including -a, while Smalltalk
-code can get it sending the @code{arguments} message to the
+discards everything after the parameter including @option{-a}, while
+Smalltalk code can get it sending the @code{arguments} message to the
 @code{Smalltalk} object.
 
 Examples:
@@ -427,11 +427,33 @@ This option and the following one is disabled when the dynamic
 translator (@pxref{Dynamic translator}) is enabled.
 @end ignore
 
-
 @item -E --kernel-declaration-trace
 Like the -e flag, but includes all byte codes executed, whether they
 occur during the loading of the kernel method definition files, or
 during the loading and execution of user files.
+
+@item -f --file
+This special flag is designed to prepare Smalltalk programs that can
+be invoked from the Unix shell.  The following two command lines are
+equivalent:
+
+@example
+gst -f @var{file} @file{args...}
+gst -Q @var{file} -a @file{args...}
+@end example
+
+This is meant to be used in the so called ``sharp-bang'' sequence at the
+beginning of a file, as in
+
+@example
+#! /usr/bin/env gst -f
+
+@var{@dots{} Smalltalk source code @dots{}}
+@end example
+
+The first line is specially parsed by @gst{} as a comment, and the
+@option{-f} option ensures that the arguments are passed properly to
+the script.
 
 @item -g --no-gc-messages
 Suppress garbage collection messages. 
@@ -696,6 +718,8 @@ reported here:
     to use the modified definitions.)
 @end quotation
 
+
+
 @node Features
 @chapter Features of @gst{}
 
@@ -757,7 +781,7 @@ Other methods in ByteArray and Memory allow to read various C types
 @file{blox-tk/BloxBasic.st}.
 
 Another interesting class is ObjectMemory.  This provides a few methods
-that enable one to tune the virtual machine''s usage of memory; many
+that enable one to tune the virtual machine's usage of memory; many
 methods that in the past were instance methods of Smalltalk or class
 methods of Memory are now class methods of ObjectMemory.  In addition,
 and that's what the rest of this section is about, the virtual machines
@@ -1159,10 +1183,10 @@ objects, that is those objects that expire while residing in NewSpace,
 and to decide when enough data is residing in NewSpace that it is
 useful to move some of it in OldSpace.  A @dfn{copying} garbage
 collector is particularly efficient in an object population whose
-members are more likely to die than survive, because a scavenger
-spends most of its time copying survivors, who will be few in number
-in such populations, rather than tracing corpses, who will be many in
-number in such populations.  This fact makes scavenging especially
+members are more likely to die than survive, because this kind of
+scavenger spends most of its time copying survivors, who will be few
+in number in such populations, rather than tracing corpses, who will
+be many in number.  This fact makes copying collection especially
 well suited to NewSpace, where a percentage of 90% or more objects
 often fails to survive across a single scavenge.
 
@@ -1258,7 +1282,7 @@ efficient scavenging of young objects.
 
 To do so, the grey page table@footnote{The denomination @dfn{grey}
 comes from the lexicon of @dfn{tri-color marking}, which is an
-  abstraction of every possible garbage collection algorithms: in
+  abstraction of every possible garbage collection algorithm: in
   tri-color marking, grey objects are those that are known to be
   reachable or that we are not interested in reclaiming, yet have not
   been scanned yet to mark the objects that they refer to as reachable.}
@@ -1274,7 +1298,7 @@ pointers to NewSpace.  Then the page is recolored black@footnote{Black
   reachable are white, and when all objects are either black or white,
   the white ones are garbage).},
 and will stay black until it is written to or another object is
-allocated in them (either a new fixed object, or a young object being
+allocated in it (either a new fixed object, or a young object being
 tenured).  The grey page table is expanded and shrunk as needed by the
 virtual machine.
 
@@ -1330,9 +1354,8 @@ when necessary.
 @node Security
 @section Security in @gst{}
 
-
 @node Special objects
-@section Special kinds of object
+@section Special kinds of objects
 
 A few methods in Object support the creation of particular objects.
 This include:
@@ -1510,12 +1533,11 @@ For example:
     PackageLoader fileInPackage: 'Compiler'.
 @end example
 
-The second way is to use the @file{Load.st} file which lies in the GST image
-directory.  For example, start @gst{} with this command line:
+The second way is to use the @file{gst-load} script which is installed
+together with the virtual machine.  For example, you can do:
 
-@t{@ @ @ @ gst -qsK Load.st -a Browser Blox Compiler}@footnote{
-When using an alternate image path, don't use the -K option and pass
-the full path to the @file{Load.st} script.}
+@t{@ @ @ @ gst-load Browser Blox Compiler}@footnote{
+When using an alternate image path, use the @env{SMALLTALK_IMAGE} variable.}
 
 @noindent
 and GST will automatically file in:
@@ -1602,7 +1624,7 @@ Library Reference}, act as wrappers around other toolkits, which
 constitute the required portability layer; currently the only one
 supported is Tcl/Tk but alternative versions of Blox, for example based
 on Gtk+ and GNOME, have been considered and might even replace Tcl/Tk
-in the future@footnote{The Gtk+ bindings for GNU Smalltalk are
+in the future@footnote{The Gtk+ bindings for @gst{} are
     in an embryonic state; you can find them in the @code{GTK}
     package if you have Gtk+ 2.0 or later installed}.  Instead of
 having to rewrite widgets and support for each platform, Blox simply
@@ -1816,7 +1838,7 @@ Mysql types and many of the inserted values are generated.
 To run the tests execute the following:
 
 @example
-Jdm MySQL JdmMysqlTestSuite new run printNl
+Jdm.MySQL.JdmMysqlTestSuite new run printNl
 @end example
 
 @node Locales
@@ -2543,6 +2565,9 @@ A C unsigned long value
 @item double      
 A C double, converted to an instance of FloatD
 
+@item longDouble      
+A C long double, converted to an instance of FloatQ
+
 @item void        
 No returned value
 
@@ -2611,8 +2636,15 @@ passed as @code{unsigned long}
 @item double      
 passed as @code{double}
 
+@item longDouble      
+passed as @code{long double}
+
 @item cObject     
-C object value passed as @code{long} or @code{void *}
+C object value passed as @code{void *}
+
+@item cObjectPtr
+Pointer to C object value passed as @code{void **}.  The @code{CObject}
+is modified on output to reflect the value stored into the passed object.
 
 @item smalltalk   
 Pass the object pointer to C.  The C routine should treat the value as a
@@ -2642,10 +2674,12 @@ Table of parameter conversions:
 @item boolean             @tab Boolean (True, False)@tab int
 @item byteArray           @tab ByteArray            @tab char *
 @item cObject             @tab CObject              @tab void *
+@item cObjectPtr          @tab CObject              @tab void **
 @item char                @tab Boolean (True, False)@tab int
 @item char                @tab Character            @tab int (C promotion rule)
 @item char                @tab Integer              @tab int
 @item double              @tab Float                @tab double (C promotion)
+@item longDouble          @tab Float                @tab long double
 @item int                 @tab Boolean (True, False)@tab int
 @item int                 @tab Integer              @tab int
 @item uInt                @tab Boolean (True, False)@tab unsigned int
@@ -2772,7 +2806,7 @@ These classes provide direct access to C data structures including
 @bulletize @code{long} (unsigned too)
 @bulletize @code{short} (unsigned too)
 @bulletize @code{char} (unsigned too) & byte type
-@bulletize @code{double} (and @code{float})
+@bulletize @code{double}, @code{long double}, @code{float}
 @bulletize @code{string} (NUL terminated char *, with special accessors)
 @bulletize arrays of any type
 @bulletize pointers to any type
@@ -2880,6 +2914,7 @@ Here's the set of scalars names, as defined in @file{kernel/CStruct.st}:
    #uint                   CUInt
    #float                  CFloat
    #double                 CDouble
+   #longDouble             CLongDouble
    #string                 CString
    #smalltalk              CSmalltalk
    #@{...@}                  @r{A given subclass of @code{CObject}}
@@ -2980,8 +3015,13 @@ until the OOP is garbage-collected.
 @end deftypefun
 
 @deftypefun double OOPToFloat (OOP)
-This function assumes that the passed OOP is an Float and returns the C
-@code{double} for that integer.
+This function assumes that the passed OOP is an Integer or Float and
+returns the C @code{double} for that object.
+@end deftypefun
+
+@deftypefun {long double} OOPToLongDouble (OOP)
+This function assumes that the passed OOP is an Integer or Float and
+returns the C @code{long double} for that object.
 @end deftypefun
 
 @deftypefun int OOPToBool (OOP)
@@ -3054,6 +3094,12 @@ since the call to @code{OOPToId}.
 This object returns a Smalltalk FloatD which contains the same value as
 the passed @code{double}.  Unlike Integers, FloatDs have exactly the same
 precision as C doubles.
+@end deftypefun
+
+@deftypefun OOP longDoubleToOOP (long double)
+This object returns a Smalltalk FloatQ which contains the same value as
+the passed @code{long double}.  Unlike Integers, FloatQs have exactly the same
+precision as C long doubles.
 @end deftypefun
 
 @deftypefun OOP boolToOOP (int)
@@ -3313,7 +3359,7 @@ registry (@pxref{Smalltalk types}).  @dfn{receiver_type} and
       Specifier        C data type        equivalent Smalltalk class
           i                long           Integer (see intToOOP)
           f               double          Float (see floatToOOP)
-          F            long double        Float (see floatToOOP)
+          F            long double        Float (see longDoubleToOOP)
           b                int            True or False (see boolToOOP)
           c                char           Character (see charToOOP)
           C               PTR             CObject (see cObjToOOP)
@@ -3342,6 +3388,7 @@ different:
 Specifier   if nil    C data type      expected result
    i         0L          long          nil or an Integer
    f         0.0        double         nil or a Float
+   F         0.0     long double       nil or a Float
    b          0          int           nil or a Boolean
    c        '\0'         char          nil or a Character
    C        NULL        PTR            nil or a CObject

@@ -42,7 +42,6 @@ nil!
 !ModalDialog methodsFor: 'displaying'!
 
 display: parent 
-    blox center.
     dialogShell map.
     blox loop! !
 
@@ -160,7 +159,6 @@ message: queryString default: aResponse in: view
 	receiver: self
 	message: #cancel.
     dialogShell map.
-    self blox center.
     self blox loop! !
 
 

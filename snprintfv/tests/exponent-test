@@ -1,0 +1,301 @@
+#! /bin/sh
+# gfloat-test --- %g and %G specifiers
+# Copyright (C) 2001 Gary V. Vaughan
+# Originally by Gary V. Vaughan <gary@gnu.org>, 2001
+# This file is part of Snprintfv.
+#
+# Snprintfv is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# Snprintfv is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+# As a special exception to the GNU General Public License, if you
+# distribute this file as part of a program that also links with and
+# uses the libopts library from AutoGen, you may include it under
+# the same distribution terms used by the libopts library.
+
+# Common definitions
+if test -z "$srcdir"; then
+    srcdir=`echo "$0" | sed 's,[^/]*$,,'`
+    test "$srcdir" = "$0" && srcdir=.
+    test -z "$srcdir" && srcdir=.
+    test "${VERBOSE+set}" != set && VERBOSE=1
+fi
+. $srcdir/defs
+
+
+# this is the output we should expect to see
+cat <<\EOF >ok
+1 0.000000e+00
+*** printfv returned 14 chars.
+2 2.000000e-01
+*** printfv returned 14 chars.
+3 3.000000e+01
+*** printfv returned 14 chars.
+4 1.234567e+06
+*** printfv returned 14 chars.
+5 1.234567e-01
+*** printfv returned 14 chars.
+6 1.000000e+07
+*** printfv returned 14 chars.
+7 1.000000e-07
+*** printfv returned 14 chars.
+8 1.234567e-01
+*** printfv returned 14 chars.
+9 1.234567e-01
+*** printfv returned 14 chars.
+10   1.234567e-01
+*** printfv returned 17 chars.
+11 1e+02
+*** printfv returned 8 chars.
+12 4.6e+02
+*** printfv returned 10 chars.
+13 7.89e+02
+*** printfv returned 11 chars.
+14 1.23e+03
+*** printfv returned 11 chars.
+15 1.24e+03
+*** printfv returned 11 chars.
+16 1.616e+01.
+*** printfv returned 13 chars.
+17 1.717e+01.
+*** printfv returned 13 chars.
+18 1.818e+01 .
+*** printfv returned 14 chars.
+19 +1.234560e+02
+*** printfv returned 16 chars.
+20 -1.234560e+02
+*** printfv returned 16 chars.
+21 +1.234560e+02
+*** printfv returned 16 chars.
+22 -1.234560e+02
+*** printfv returned 16 chars.
+23  2.323000e+01
+*** printfv returned 16 chars.
+24 -2.424000e+01
+*** printfv returned 16 chars.
+25  2.525e+01
+*** printfv returned 13 chars.
+26 -2.626e+01
+*** printfv returned 13 chars.
+27  2.727e+01
+*** printfv returned 13 chars.
+28 -2.828e+01
+*** printfv returned 13 chars.
+29    2.929e+01
+*** printfv returned 15 chars.
+30   -3.030e+01
+*** printfv returned 15 chars.
+31 3e+01
+*** printfv returned 8 chars.
+32 3.e+01
+*** printfv returned 9 chars.
+33    1.234e+01
+*** printfv returned 15 chars.
+34   -1.234e+01
+*** printfv returned 15 chars.
+35 0001.234e+01
+*** printfv returned 15 chars.
+36 -001.234e+01
+*** printfv returned 15 chars.
+37 1.234000e+01
+*** printfv returned 15 chars.
+38 -1.234000e+01
+*** printfv returned 16 chars.
+39 1.234000e+01
+*** printfv returned 15 chars.
+40 -1.234000e+01
+*** printfv returned 16 chars.
+41 1.234000e+01
+*** printfv returned 15 chars.
+42 -1.234000e+01
+*** printfv returned 16 chars.
+43 1.234000e+01
+*** printfv returned 15 chars.
+44 -1.234000e+01
+*** printfv returned 16 chars.
+45 1e+00
+*** printfv returned 8 chars.
+46 0e+00
+*** printfv returned 8 chars.
+47 1.e+00
+*** printfv returned 9 chars.
+48 0.e+00
+*** printfv returned 9 chars.
+49 1.0e+00
+*** printfv returned 10 chars.
+50 0.0e+00
+*** printfv returned 10 chars.
+51 1.0e+00
+*** printfv returned 10 chars.
+52 0.0e+00
+*** printfv returned 10 chars.
+53 1.1e+00
+*** printfv returned 10 chars.
+54 1.0e-01
+*** printfv returned 10 chars.
+55 1.1e+00
+*** printfv returned 10 chars.
+56 1.0e-01
+*** printfv returned 10 chars.
+57 1.00e+00
+*** printfv returned 11 chars.
+58 0.00e+00
+*** printfv returned 11 chars.
+59 1.00e+00
+*** printfv returned 11 chars.
+60 0.00e+00
+*** printfv returned 11 chars.
+61 1.000000e+05
+*** printfv returned 15 chars.
+62 1.000000e+06
+*** printfv returned 15 chars.
+63 1.000000E+06
+*** printfv returned 15 chars.
+64 -1.000000e+06
+*** printfv returned 16 chars.
+65 -1.000000E+06
+*** printfv returned 16 chars.
+66 1.000000e-04
+*** printfv returned 15 chars.
+67 1.000000e-05
+*** printfv returned 15 chars.
+68 1.000000E-05
+*** printfv returned 15 chars.
+69 -1.000000e-05
+*** printfv returned 16 chars.
+70 -1.000000E-05
+*** printfv returned 16 chars.
+EOF
+
+cat <<\EOF >errok
+EOF
+
+# straight forward number output
+$SNPRINTFV '1 %e' 0.0 2>> err | tee -ai out >&2
+$SNPRINTFV '2 %e' 0.2 2>> err | tee -ai out >&2
+$SNPRINTFV '3 %e' 30.0 2>> err | tee -ai out >&2
+$SNPRINTFV '4 %e' 1234567.0 2>> err | tee -ai out >&2
+$SNPRINTFV '5 %e' 0.1234567 2>> err | tee -ai out >&2
+$SNPRINTFV '6 %e' 10000000.0 2>> err | tee -ai out >&2
+$SNPRINTFV '7 %e' 0.0000001 2>> err | tee -ai out >&2
+
+# test width flag (every character counts)
+$SNPRINTFV '8 %10e' 0.1234567 2>> err | tee -ai out >&2
+$SNPRINTFV '9 %12e' 0.1234567 2>> err | tee -ai out >&2
+$SNPRINTFV '10 %14e' 0.1234567 2>> err | tee -ai out >&2
+
+# test precision flag (mantissa digits only count)
+$SNPRINTFV '11 %.0e' 123.0 2>> err | tee -ai out >&2
+$SNPRINTFV '12 %.1e' 456.0 2>> err | tee -ai out >&2
+$SNPRINTFV '13 %.2e' 789.0 2>> err | tee -ai out >&2
+
+$SNPRINTFV '14 %.2e' 1234.0 2>> err | tee -ai out >&2
+$SNPRINTFV '15 %.2e' 1235.0 2>> err | tee -ai out >&2
+
+# test grouping flag
+# TODO!
+
+# test left justify flag
+$SNPRINTFV '16 %-8.3e.' 16.16 2>> err | tee -ai out >&2
+$SNPRINTFV '17 %-9.3e.' 17.17 2>> err | tee -ai out >&2
+$SNPRINTFV '18 %-10.3e.' 18.18 2>> err | tee -ai out >&2
+
+# test sign flag
+$SNPRINTFV '19 %+e' 123.456 2>> err | tee -ai out >&2
+$SNPRINTFV '20 %+e' -123.456 2>> err | tee -ai out >&2
+
+# test blank flag
+$SNPRINTFV '21 % +e' 123.456 2>> err | tee -ai out >&2
+$SNPRINTFV '22 % +e' -123.456 2>> err | tee -ai out >&2
+$SNPRINTFV '23 % e' 23.23 2>> err | tee -ai out >&2
+$SNPRINTFV '24 % e' -24.24 2>> err | tee -ai out >&2
+$SNPRINTFV '25 % 8.3e' 25.25 2>> err | tee -ai out >&2
+$SNPRINTFV '26 % 8.3e' -26.26 2>> err | tee -ai out >&2
+$SNPRINTFV '27 % 10.3e' 27.27 2>> err | tee -ai out >&2
+$SNPRINTFV '28 % 10.3e' -28.28 2>> err | tee -ai out >&2
+$SNPRINTFV '29 % 12.3e' 29.29 2>> err | tee -ai out >&2
+$SNPRINTFV '30 % 12.3e' -30.30 2>> err | tee -ai out >&2
+
+# test alternate form flag
+$SNPRINTFV '31 %.0e' 31.0 2>> err | tee -ai out >&2
+$SNPRINTFV '32 %#.0e' 32.0 2>>err | tee -ai out >&2
+
+# combining width and precision
+$SNPRINTFV '33 %12.3e' 12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '34 %12.3e' -12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '35 %012.3e' 12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '36 %012.3e' -12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '37 %12.6e' 12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '38 %12.6e' -12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '39 %012.6e' 12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '40 %012.6e' -12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '41 %-12.6e' 12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '42 %-12.6e' -12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '43 %-012.6e' 12.34 2>> err | tee -ai out >&2
+$SNPRINTFV '44 %-012.6e' -12.34 2>> err | tee -ai out >&2
+
+# handling of zero valued arguments
+$SNPRINTFV '45 %.0e' 1.0 2>>err | tee -ai out >&2
+$SNPRINTFV '46 %.0e' 0.0 2>>err | tee -ai out >&2
+$SNPRINTFV '47 %#.0e' 1.0 2>>err | tee -ai out >&2
+$SNPRINTFV '48 %#.0e' 0.0 2>>err | tee -ai out >&2
+$SNPRINTFV '49 %.1e' 1.0 2>>err | tee -ai out >&2
+$SNPRINTFV '50 %.1e' 0.0 2>>err | tee -ai out >&2
+$SNPRINTFV '51 %#.1e' 1.0 2>>err | tee -ai out >&2
+$SNPRINTFV '52 %#.1e' 0.0 2>>err | tee -ai out >&2
+$SNPRINTFV '53 %.1e' 1.1 2>>err | tee -ai out >&2
+$SNPRINTFV '54 %.1e' 0.1 2>>err | tee -ai out >&2
+$SNPRINTFV '55 %#.1e' 1.1 2>>err | tee -ai out >&2
+$SNPRINTFV '56 %#.1e' 0.1 2>>err | tee -ai out >&2
+$SNPRINTFV '57 %.2e' 1.0 2>>err | tee -ai out >&2
+$SNPRINTFV '58 %.2e' 0.0 2>>err | tee -ai out >&2
+$SNPRINTFV '59 %#.2e' 1.0 2>>err | tee -ai out >&2
+$SNPRINTFV '60 %#.2e' 0.0 2>>err | tee -ai out >&2
+
+# exponent display
+$SNPRINTFV '61 %e' 100000.0 2>>err | tee -ai out >&2
+$SNPRINTFV '62 %e' 1000000.0 2>>err | tee -ai out >&2
+$SNPRINTFV '63 %E' 1000000.0 2>>err | tee -ai out >&2
+$SNPRINTFV '64 %e' -1000000.0 2>>err | tee -ai out >&2
+$SNPRINTFV '65 %E' -1000000.0 2>>err | tee -ai out >&2
+$SNPRINTFV '66 %e' 0.0001 2>>err | tee -ai out >&2
+$SNPRINTFV '67 %e' 0.00001 2>>err | tee -ai out >&2
+$SNPRINTFV '68 %E' 0.00001 2>>err | tee -ai out >&2
+$SNPRINTFV '69 %e' -0.00001 2>>err | tee -ai out >&2
+$SNPRINTFV '70 %E' -0.00001 2>>err | tee -ai out >&2
+
+# Test against expected output
+if ${CMP} -s out ok; then
+    :
+else
+    echo "ok:" >&2
+    cat ok >&2
+    exit 1
+fi
+
+# Munge error output to remove leading directories, `lt-' or trailing `.exe'
+sed -e "s,^[^:]*[lt-]*snprintfv-test[.ex]*:,snprintfv-test:," err >sederr \
+    && mv sederr err
+
+# Show stderr if doesn't match expected output if VERBOSE == 1
+if "$CMP" -s err errok; then
+    :
+else
+    echo "err:" >&2
+    cat err >&2
+    echo "errok:" >&2
+    cat errok >&2
+    exit 1
+fi
+
+# decimal-test ends here

@@ -64,26 +64,41 @@ inspect
     "Print all the instance variables and context of the receiver on the
      Transcript"
 
-    | class instVars i |
+    | instVars object output |
     self beConsistent.
-    class := self class.
-    instVars := class allInstVarNames.
-    Transcript nextPutAll: 'An instance of '.
-    class printNl.
-    1 to: instVars size do:
-	[ :i | Transcript nextPutAll: '  ';
+    Transcript
+	nextPutAll: 'An instance of ';
+	print: self class;
+	nl.
+
+    instVars := self class allInstVarNames.
+    1 to: instVars size do: [ :i |
+	object := self instVarAt: i.
+    	output := [ object printString ]
+		      on: Error
+		      do: [ :ex | ex return: ('%1 %2'
+				      bindWith: object class article
+				      with: object class name asString) ].
+
+	Transcript nextPutAll: '  ';
 	    nextPutAll: (instVars at: i);
-	    nextPutAll: ': '.
-	    (self instVarAt: i)  printNl ].
+	    nextPutAll: ': ';
+	    nextPutAll: output;
+	    nl ].
 
     Transcript nextPutAll: '  contents: ['; nl.
 
-    self keysAndValuesDo: [ :i :obj |
+    self keysAndValuesDo: [ :i :obj || output |
+    	output := [ obj printString ]
+		      on: Error
+		      do: [ :ex | ex return: ('%1 %2'
+				      bindWith: obj class article
+				      with: obj class name asString) ].
 	Transcript 
 	    nextPutAll: '    [';
 	    print: i;
 	    nextPutAll: ']: ';
-	    print: obj;
+	    nextPutAll: output;
 	    nl
     ].
     Transcript nextPutAll: '  ]'; nl
@@ -165,6 +180,21 @@ before: oldObject
 first
     "Answer the first item in the receiver"
     ^self at: 1
+!
+
+second
+    "Answer the second item in the receiver"
+    ^self at: 2
+!
+
+third
+    "Answer the third item in the receiver"
+    ^self at: 3
+!
+
+fourth
+    "Answer the fourth item in the receiver"
+    ^self at: 4
 !
 
 last
@@ -332,14 +362,14 @@ replaceFrom: start to: stop with: replacementCollection startingAt: repStart
     minStop := start - 1.
     maxStop := self size min: minStop + replacementCollection size.
     (minStop <= stop and: [ stop <= maxStop ]) ifFalse: [
-	^SystemExceptions.ArgumentOutOfRange
-	    signalOn: stop
-	    mustBeBetween: minStop and: maxStop ].
+        ^SystemExceptions.ArgumentOutOfRange
+            signalOn: stop
+            mustBeBetween: minStop and: maxStop ].
 
     delta := start - repStart.
     start to: stop do: [ :i |
-	self at: i
-    	     put: (replacementCollection at: i - delta)
+        self at: i
+             put: (replacementCollection at: i - delta)
     ]
 !
 
@@ -351,12 +381,12 @@ replaceFrom: start to: stop with: replacementCollection
     | i |
     i := start - 1.
     stop - i = replacementCollection size
-	ifFalse: [ ^SystemExceptions.InvalidSize signalOn: replacementCollection ].
+        ifFalse: [ ^SystemExceptions.InvalidSize signalOn: replacementCollection ].
 
     replacementCollection do: [ :each |
         self at: (i := i + 1) put: each
     ]
-!
+! 
 
 replaceFrom: anIndex to: stopIndex withObject: replacementObject
     "Replace every item from start to stop with replacementObject."
@@ -542,6 +572,26 @@ doWithIndex: aBlock
     1 to: self size do: [ :i | aBlock value: (self at: i) value: i ].
 !
 
+fold: binaryBlock
+    "First, pass to binaryBlock the first and second elements of the
+     receiver; for each subsequent element, pass the result of the previous
+     evaluation and an element. Answer the result of the last invocation,
+     or the first element if the collection has size 1.  Fail if the collection
+     is empty."
+
+    "This method is redefined from Collection for efficiency only"
+
+    | result |
+    self isEmpty
+	ifTrue: [ ^SystemExceptions.EmptyCollection signalOn: self ].
+
+    result := self at: 1.
+    self from: 2 to: self size do: [ :element |
+	result := binaryBlock value: result value: element
+    ].
+    ^result
+!
+
 keysAndValuesDo: aBlock
     "Evaluate aBlock for all the elements in the sequenceable collection,
      passing the index of each element as the first parameter and the
@@ -598,16 +648,6 @@ findLast: aBlock
     ^0
 !
 
-readStream
-    "Answer a ReadStream streaming on the receiver"
-    ^ReadStream on: self
-!
-
-readWriteStream
-    "Answer a ReadWriteStream which streams on the receiver"
-    ^ReadWriteStream on: self
-!
-
 reverse
     "Answer the receivers' contents in reverse order"
     | result |
@@ -654,11 +694,6 @@ with: aSequenceableCollection collect: aBlock
     	    (aBlock value: (self at: i) value: (aSequenceableCollection at: i)).
     ].
     ^newCollection
-!
-
-writeStream
-    "Answer a WriteStream streaming on the receiver"
-    ^WriteStream on: self
 ! !
 
 

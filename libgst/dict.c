@@ -7,8 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
- * Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
  * This file is part of GNU Smalltalk.
@@ -42,139 +41,208 @@ typedef struct class_definition
 {
   OOP *classVar;
   OOP *superClassPtr;
-  mst_Boolean isPointers;
-  mst_Boolean isWords;
-  mst_Boolean isIndexable;
+  intptr_t instanceSpec;
   char numFixedFields;
-  char *name;
-  char *instVarNames;
-  char *classVarNames;
-  char *sharedPoolNames;
+  const char *name;
+  const char *instVarNames;
+  const char *classVarNames;
+  const char *sharedPoolNames;
 }
 class_definition;
 
 /* Primary class variables.  These variables hold the class objects for
    most of the builtin classes in the system */
-OOP _gst_object_class, _gst_magnitude_class, _gst_char_class,
-  _gst_time_class, _gst_date_class, _gst_fraction_class,
-  _gst_context_part_class, _gst_number_class, _gst_float_class,
-  _gst_floatd_class, _gst_floate_class, _gst_floatq_class,
-  _gst_integer_class, _gst_small_integer_class,
-  _gst_object_memory_class, _gst_large_integer_class,
-  _gst_large_negative_integer_class, _gst_large_zero_integer_class,
-  _gst_large_positive_integer_class, _gst_association_class,
-  _gst_homed_association_class, _gst_variable_binding_class,
-  _gst_link_class, _gst_process_class, _gst_sym_link_class,
-  _gst_callin_process_class,
-  _gst_collection_class, _gst_lookup_key_class,
-  _gst_sequenceable_collection_class, _gst_linked_list_class,
-  _gst_semaphore_class, _gst_character_array_class,
-  _gst_arrayed_collection_class, _gst_array_class, _gst_string_class,
-  _gst_symbol_class, _gst_byte_array_class, _gst_compiled_method_class,
-  _gst_compiled_code_class, _gst_compiled_block_class,
-  _gst_interval_class, _gst_ordered_collection_class,
-  _gst_sorted_collection_class, _gst_bag_class,
-  _gst_mapped_collection_class, _gst_set_class, _gst_dictionary_class,
-  _gst_abstract_namespace_class, _gst_binding_dictionary_class,
-  _gst_namespace_class, _gst_system_dictionary_class,
-  _gst_identity_set_class, _gst_hashed_collection_class,
-  _gst_method_dictionary_class, _gst_identity_dictionary_class,
-  _gst_undefined_object_class, _gst_boolean_class, _gst_false_class,
-  _gst_true_class, _gst_lookup_table_class,
-  _gst_processor_scheduler_class, _gst_delay_class,
-  _gst_shared_queue_class, _gst_behavior_class,
-  _gst_root_namespace_class, _gst_class_description_class,
-  _gst_class_class, _gst_metaclass_class, _gst_smalltalk_dictionary,
-  _gst_message_class, _gst_directed_message_class,
-  _gst_method_context_class,
-  _gst_block_context_class, _gst_block_closure_class,
-  _gst_byte_stream_class, _gst_stream_class,
-  _gst_positionable_stream_class, _gst_read_stream_class,
-  _gst_write_stream_class, _gst_read_write_stream_class,
-  _gst_file_descriptor_class, _gst_file_stream_class,
-  _gst_c_object_class, _gst_c_type_class, _gst_memory_class,
-  _gst_random_class, _gst_c_func_descriptor_class,
-  _gst_token_stream_class, _gst_method_info_class,
-  _gst_file_segment_class, _gst_c_object_type_ctype,
-  _gst_processor_oop = NULL;
+OOP _gst_abstract_namespace_class = NULL;
+OOP _gst_array_class = NULL;
+OOP _gst_arrayed_collection_class = NULL;
+OOP _gst_association_class = NULL;
+OOP _gst_bag_class = NULL;
+OOP _gst_behavior_class = NULL;
+OOP _gst_binding_dictionary_class = NULL;
+OOP _gst_block_closure_class = NULL;
+OOP _gst_block_context_class = NULL;
+OOP _gst_boolean_class = NULL;
+OOP _gst_byte_array_class = NULL;
+OOP _gst_byte_stream_class = NULL;
+OOP _gst_c_func_descriptor_class = NULL;
+OOP _gst_c_object_class = NULL;
+OOP _gst_c_object_type_ctype = NULL;
+OOP _gst_c_type_class = NULL;
+OOP _gst_callin_process_class = NULL;
+OOP _gst_char_class = NULL;
+OOP _gst_character_array_class = NULL;
+OOP _gst_class_class = NULL;
+OOP _gst_class_description_class = NULL;
+OOP _gst_collection_class = NULL;
+OOP _gst_compiled_block_class = NULL;
+OOP _gst_compiled_code_class = NULL;
+OOP _gst_compiled_method_class = NULL;
+OOP _gst_context_part_class = NULL;
+OOP _gst_date_class = NULL;
+OOP _gst_delay_class = NULL;
+OOP _gst_dictionary_class = NULL;
+OOP _gst_directed_message_class = NULL;
+OOP _gst_false_class = NULL;
+OOP _gst_file_descriptor_class = NULL;
+OOP _gst_file_segment_class = NULL;
+OOP _gst_file_stream_class = NULL;
+OOP _gst_float_class = NULL;
+OOP _gst_floatd_class = NULL;
+OOP _gst_floate_class = NULL;
+OOP _gst_floatq_class = NULL;
+OOP _gst_fraction_class = NULL;
+OOP _gst_hashed_collection_class = NULL;
+OOP _gst_homed_association_class = NULL;
+OOP _gst_identity_dictionary_class = NULL;
+OOP _gst_identity_set_class = NULL;
+OOP _gst_integer_class = NULL;
+OOP _gst_interval_class = NULL;
+OOP _gst_large_integer_class = NULL;
+OOP _gst_large_negative_integer_class = NULL;
+OOP _gst_large_positive_integer_class = NULL;
+OOP _gst_large_zero_integer_class = NULL;
+OOP _gst_link_class = NULL;
+OOP _gst_linked_list_class = NULL;
+OOP _gst_lookup_key_class = NULL;
+OOP _gst_lookup_table_class = NULL;
+OOP _gst_magnitude_class = NULL;
+OOP _gst_mapped_collection_class = NULL;
+OOP _gst_memory_class = NULL;
+OOP _gst_message_class = NULL;
+OOP _gst_metaclass_class = NULL;
+OOP _gst_method_context_class = NULL;
+OOP _gst_method_dictionary_class = NULL;
+OOP _gst_method_info_class = NULL;
+OOP _gst_namespace_class = NULL;
+OOP _gst_number_class = NULL;
+OOP _gst_object_class = NULL;
+OOP _gst_object_memory_class = NULL;
+OOP _gst_ordered_collection_class = NULL;
+OOP _gst_permission_class = NULL;
+OOP _gst_positionable_stream_class = NULL;
+OOP _gst_process_class = NULL;
+OOP _gst_processor_scheduler_class = NULL;
+OOP _gst_random_class = NULL;
+OOP _gst_read_stream_class = NULL;
+OOP _gst_read_write_stream_class = NULL;
+OOP _gst_root_namespace_class = NULL;
+OOP _gst_security_policy_class = NULL;
+OOP _gst_semaphore_class = NULL;
+OOP _gst_sequenceable_collection_class = NULL;
+OOP _gst_set_class = NULL;
+OOP _gst_shared_queue_class = NULL;
+OOP _gst_small_integer_class = NULL;
+OOP _gst_smalltalk_dictionary = NULL;
+OOP _gst_sorted_collection_class = NULL;
+OOP _gst_stream_class = NULL;
+OOP _gst_string_class = NULL;
+OOP _gst_sym_link_class = NULL;
+OOP _gst_symbol_class = NULL;
+OOP _gst_system_dictionary_class = NULL;
+OOP _gst_time_class = NULL;
+OOP _gst_token_stream_class = NULL;
+OOP _gst_true_class = NULL;
+OOP _gst_undefined_object_class = NULL;
+OOP _gst_variable_binding_class = NULL;
+OOP _gst_write_stream_class = NULL;
+OOP _gst_processor_oop = NULL;
 
 /* Answer the number of slots that are in a dictionary of
-   OLDNUMFIELDS items after growing it. */
-static int new_num_fields (int oldNumFields);
+   OLDNUMFIELDS items after growing it.  */
+static size_t new_num_fields (size_t oldNumFields);
 
 /* Instantiate the OOPs that are created before the first classes
    (true, false, nil, the Smalltalk dictionary, the symbol table
-   and Processor, the sole instance of ProcessorScheduler. */
+   and Processor, the sole instance of ProcessorScheduler.  */
 static void init_proto_oops (void);
 
-/* Create a new instance of IdentityDictionary and answer it. */
+/* Look for the index at which KEYOOP resides in IDENTITYDICTIONARYOOP
+   and answer it or, if not found, answer -1.  */
+static ssize_t identity_dictionary_find_key (OOP identityDictionaryOOP,
+					     OOP keyOOP);
+
+/* Look for the index at which KEYOOP resides in IDENTITYDICTIONARYOOP
+   or, if not found, find a nil slot which can be replaced by that
+   key.  */
+static size_t identity_dictionary_find_key_or_nil (OOP identityDictionaryOOP,
+						   OOP keyOOP);
+
+/* Create a new instance of IdentityDictionary and answer it.  */
 static OOP identity_dictionary_new (int size);
 
 /* Create a new instance of Namespace with the given SIZE, NAME and
-   superspace (SUPERSPACEOOP). */
+   superspace (SUPERSPACEOOP).  */
 static OOP namespace_new (int size,
-			  char *name,
+			  const char *name,
 			  OOP superspaceOOP);
 
-/* Create new subclass of SUPERCLASSOOP, whose instances have
-   a shape defined by the remaining parameters. */
-static OOP new_class (OOP superClassOOP,
-		      mst_Boolean isPointers,
-		      mst_Boolean isWords,
-		      mst_Boolean isIndexable,
-		      int numFixedFields);
+/* Create new class whose instances have a shape defined by CI.  */
+static void create_class (const class_definition *ci);
 
-/* Create a new metaclass for CLASS_OOP; leave space for NUMSUBCLASSES
-   classes in the instance variable "subclasses". */
-static OOP new_metaclass (OOP class_oop,
-			  int numSubClasses);
+/* Create a new metaclass for CLASS_OOP; reserve space for NUMSUBCLASSES
+   classes in the instance variable "subclasses" of the class, and for
+   NUMMETACLASSSUBCLASSES in the instance variable "subclasses" of the
+   metaclass.  */
+static void create_metaclass (OOP class_oop,
+			      int numSubClasses,
+			      int numMetaclassSubClasses);
+
+/* Finish initializing the metaclass METACLASSOOP.  */
+static void init_metaclass (OOP metaclassOOP);
+
+/* Finish initializing the class CLASSOOP, using information from CI.  */
+static void init_class (OOP classOOP, const class_definition *ci);
 
 /* This creates the SystemDictionary called Smalltalk and initializes
-   some of the variables in it. */
+   some of the variables in it.  */
 static void init_smalltalk_dictionary (void);
 
 /* This fills MAP so that it associates primitive numbers in the saved
-   image to primitive numbers in this VM. */
+   image to primitive numbers in this VM.  */
 static void prepare_primitive_numbers_map (int *map);
 
 /* Add a global named GLOBALNAME and give it the value GLOBALVALUE.
-   Return GLOBALVALUE. */
-static OOP add_smalltalk (char *globalName,
+   Return GLOBALVALUE.  */
+static OOP add_smalltalk (const char *globalName,
 			  OOP globalValue);
 
-/* Create the class objects, establishing the instance shape and the
-   link between a class and its superclass. */
-static void create_classes_pass1 (void);
+/* Create N class objects described in the array starting at CI,
+   establishing the instance shape and the link between a class
+   and its superclass.  */
+static void create_classes_pass1 (const class_definition *ci,
+				  int n);
 
-/* Create the subclasses variable of each class (which being an Array
-   must be created after the class objects are stored in the global
-   variables).  Also create the metaclass hierarchy and make the class
-   objects point to it. */
-static void create_classes_pass2 (void);
+/* Create the subclasses variable of the N classes described in the
+   array starting at CI (which being an Array must be created after
+   the class objects are stored in the global variables).  Also
+   create the metaclass hierarchy and make the class objects point
+   to it.  */
+static void create_classes_pass2 (const class_definition *ci,
+				  int n);
 
 /* Add a subclass SUBCLASSOOP to the subclasses array of
    SUPERCLASSOOP.  Subclasses are stored from the last index to the
    first, and the first slot of the Array indicates the index of the
-   last free slot. */
+   last free slot.  */
 static void add_subclass (OOP superClassOOP,
 			  OOP subClassOOP);
 
 /* Adds to Smalltalk a global named FILEOBJECTNAME which is a
-   FileStream referring to file descriptor FD. */
+   FileStream referring to file descriptor FD.  */
 static void add_file_stream_object (int fd,
 				    int access,
-				    char *fileObjectName);
+				    const char *fileObjectName);
 
 /* Creates the Symbols that the VM knows about, and initializes
-   the globals in the Smalltalk dictionary. */
+   the globals in the Smalltalk dictionary.  */
 static void init_runtime_objects (void);
 
 /* Creates the VMPrimitives dictionary, which maps primitive names
-   to primitive numbers. */
+   to primitive numbers.  */
 static void init_primitives_dictionary (void);
 
 /* Creates the CSymbols pool dictionary, which gives access from
-   Smalltalk to some definitions in float.h and config.h. */
+   Smalltalk to some definitions in float.h and config.h.  */
 static void init_c_symbols (void);
 
 static const char *feature_strings[] = {
@@ -193,12 +261,12 @@ static const char *feature_strings[] = {
    set of Smalltalk classes are defined.  */
 
 static const class_definition class_info[] = {
-  {&_gst_object_class, NULL,
-   true, false, false, 0,
-   "Object", NULL, "Dependencies FinalizableObjects", NULL },
+  {&_gst_object_class, &_gst_nil_oop,
+   ISP_FIXED, 0,
+   "Object", NULL, "Dependencies FinalizableObjects", "VMPrimitives" },
 
   {&_gst_object_memory_class, &_gst_object_class,
-   true, false, false, 34,
+   ISP_FIXED, 34,
    "ObjectMemory", "bytesPerOOP bytesPerOTE "
    "edenSize survSpaceSize oldSpaceSize fixedSpaceSize "
    "edenUsedBytes survSpaceUsedBytes oldSpaceUsedBytes "
@@ -212,392 +280,411 @@ static const class_definition class_info[] = {
    "allocFailures allocMatches allocSplits allocProbes", NULL, NULL },
 
   {&_gst_message_class, &_gst_object_class,
-   true, false, false, 2,
+   ISP_FIXED, 2,
    "Message", "selector args", NULL, NULL },
 
   {&_gst_directed_message_class, &_gst_message_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "DirectedMessage", "receiver", NULL, NULL },
 
   {&_gst_magnitude_class, &_gst_object_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "Magnitude", NULL, NULL, NULL },
 
   {&_gst_char_class, &_gst_magnitude_class,
-   false, true, true, 0,	/* has 1 indexed var */
-   "Character", NULL, "Table", NULL },
+   ISP_FIXED, 1,
+   "Character", "asciiValue", "Table", NULL },
 
   {&_gst_time_class, &_gst_magnitude_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "Time", "seconds",
    "SecondClockAdjustment ClockOnStartup", NULL },
 
   {&_gst_date_class, &_gst_magnitude_class,
-   true, false, false, 4,
+   ISP_FIXED, 4,
    "Date", "days day month year",
    "DayNameDict MonthNameDict", NULL },
 
   {&_gst_number_class, &_gst_magnitude_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "Number", NULL, NULL, NULL },
 
   {&_gst_float_class, &_gst_number_class,
-   false, false, true, 0,
+   ISP_UCHAR, 0,
    "Float", NULL, NULL, "CSymbols" },
 
   {&_gst_floatd_class, &_gst_float_class,
-   false, false, true, 0,
+   ISP_UCHAR, 0,
    "FloatD", NULL, NULL, "CSymbols" },
 
   {&_gst_floate_class, &_gst_float_class,
-   false, false, true, 0,
+   ISP_UCHAR, 0,
    "FloatE", NULL, NULL, "CSymbols" },
 
   {&_gst_floatq_class, &_gst_float_class,
-   false, false, true, 0,
+   ISP_UCHAR, 0,
    "FloatQ", NULL, NULL, "CSymbols" },
 
   {&_gst_fraction_class, &_gst_number_class,
-   true, false, false, 2,
+   ISP_FIXED, 2,
    "Fraction", "numerator denominator", "Zero One", NULL },
 
   {&_gst_integer_class, &_gst_number_class,
-   false, false, false, 0,
+   ISP_FIXED, 0,
    "Integer", NULL, NULL, "CSymbols" },
 
   {&_gst_small_integer_class, &_gst_integer_class,
-   false, false, false, 0,
+   ISP_FIXED, 0,
    "SmallInteger", NULL, NULL, NULL },
 
   {&_gst_large_integer_class, &_gst_integer_class,	/* these four
 							   classes
 							   added by */
-   false, false, true, 0,	/* pb Sep 10 18:06:49 1998 */
+   ISP_UCHAR, 0,	/* pb Sep 10 18:06:49 1998 */
    "LargeInteger", NULL,
    "Zero One ZeroBytes OneBytes LeadingZeros TrailingZeros", NULL },
 
   {&_gst_large_positive_integer_class, &_gst_large_integer_class,
-   false, false, true, 0,
+   ISP_UCHAR, 0,
    "LargePositiveInteger", NULL, NULL, NULL },
 
   {&_gst_large_zero_integer_class, &_gst_large_positive_integer_class,
-   false, false, true, 0,
+   ISP_UCHAR, 0,
    "LargeZeroInteger", NULL, NULL, NULL },
 
   {&_gst_large_negative_integer_class, &_gst_large_integer_class,
-   false, false, true, 0,
+   ISP_UCHAR, 0,
    "LargeNegativeInteger", NULL, NULL, NULL },
 
   {&_gst_lookup_key_class, &_gst_magnitude_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "LookupKey", "key", NULL, NULL },
 
   {&_gst_association_class, &_gst_lookup_key_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "Association", "value", NULL, NULL },
 
   {&_gst_homed_association_class, &_gst_association_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "HomedAssociation", "environment", NULL, NULL },
 
   {&_gst_variable_binding_class, &_gst_homed_association_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "VariableBinding", NULL, NULL, NULL },
 
   {&_gst_link_class, &_gst_object_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "Link", "nextLink", NULL, NULL },
 
   {&_gst_process_class, &_gst_link_class,
-   true, false, false, 7,
+   ISP_FIXED, 7,
    "Process",
    "suspendedContext priority myList name unwindPoints interrupts interruptLock",
    NULL, NULL },
 
   {&_gst_callin_process_class, &_gst_process_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "CallinProcess",
    "returnedValue",
    NULL, NULL },
 
   {&_gst_sym_link_class, &_gst_link_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "SymLink", "symbol", NULL, NULL },
 
   {&_gst_collection_class, &_gst_object_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "Collection", NULL, NULL, NULL },
 
   {&_gst_sequenceable_collection_class, &_gst_collection_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "SequenceableCollection", NULL, NULL, NULL },
 
   {&_gst_linked_list_class, &_gst_sequenceable_collection_class,
-   true, false, false, 2,
+   ISP_FIXED, 2,
    "LinkedList", "firstLink lastLink", NULL, NULL },
 
   {&_gst_semaphore_class, &_gst_linked_list_class,
-   true, false, false, 2,
+   ISP_FIXED, 2,
    "Semaphore", "signals name", NULL, NULL },
 
   {&_gst_arrayed_collection_class, &_gst_sequenceable_collection_class,
-   true, false, true, 0,
+   ISP_POINTER, 0,
    "ArrayedCollection", NULL, NULL, NULL },
 
   {&_gst_array_class, &_gst_arrayed_collection_class,
-   true, false, true, 0,
+   ISP_POINTER, 0,
    "Array", NULL, NULL, NULL },
 
   {&_gst_character_array_class, &_gst_arrayed_collection_class,
-   false, true, true, 0,
+   ISP_ULONG, 0,
    "CharacterArray", NULL, NULL, NULL },
 
   {&_gst_string_class, &_gst_character_array_class,
-   false, false, true, 0,
+   ISP_UCHAR, 0,
    "String", NULL, NULL, NULL },
 
   {&_gst_symbol_class, &_gst_string_class,
-   false, false, true, 0,
+   ISP_UCHAR, 0,
    "Symbol", NULL, NULL, NULL },
 
   {&_gst_byte_array_class, &_gst_arrayed_collection_class,
-   false, false, true, 0,
+   ISP_UCHAR, 0,
    "ByteArray", NULL, NULL, "CSymbols" },
 
   {&_gst_compiled_code_class, &_gst_arrayed_collection_class,
-   false, false, true, 2,
+   ISP_UCHAR, 2,
    "CompiledCode", "literals header",
    NULL, NULL },
 
   {&_gst_compiled_block_class, &_gst_compiled_code_class,
-   false, false, true, 1,
+   ISP_UCHAR, 1,
    "CompiledBlock", "method",
    NULL, NULL },
 
   {&_gst_compiled_method_class, &_gst_compiled_code_class,
-   false, false, true, 1,
+   ISP_UCHAR, 1,
    "CompiledMethod", "descriptor ",
    NULL, NULL },
 
   {&_gst_interval_class, &_gst_arrayed_collection_class,
-   true, false, false, 3,
+   ISP_FIXED, 3,
    "Interval", "start stop step", NULL, NULL },
 
   {&_gst_ordered_collection_class, &_gst_sequenceable_collection_class,
-   true, false, true, 2,
+   ISP_POINTER, 2,
    "OrderedCollection", "firstIndex lastIndex", NULL, NULL },
 
   {&_gst_sorted_collection_class, &_gst_ordered_collection_class,
-   true, false, true, 3,
+   ISP_POINTER, 3,
    "SortedCollection", "lastOrdered sorted sortBlock",
    "DefaultSortBlock",
    NULL },
 
   {&_gst_bag_class, &_gst_collection_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "Bag", "contents", NULL, NULL },
 
   {&_gst_mapped_collection_class, &_gst_collection_class,
-   true, false, false, 2,
+   ISP_FIXED, 2,
    "MappedCollection", "domain map", NULL, NULL },
 
   {&_gst_hashed_collection_class, &_gst_collection_class,
-   true, false, true, 1,
+   ISP_POINTER, 1,
    "HashedCollection", "tally", NULL, NULL },
 
   {&_gst_set_class, &_gst_hashed_collection_class,
-   true, false, true, 0,
+   ISP_POINTER, 0,
    "Set", NULL, NULL, NULL },
 
   {&_gst_identity_set_class, &_gst_set_class,
-   true, false, true, 0,
+   ISP_POINTER, 0,
    "IdentitySet", NULL, NULL, NULL },
 
   {&_gst_dictionary_class, &_gst_hashed_collection_class,
-   true, false, true, 0,
+   ISP_POINTER, 0,
    "Dictionary", NULL, NULL, NULL },
 
   {&_gst_lookup_table_class, &_gst_dictionary_class,
-   true, false, true, 1,
-   "LookupTable", "values", NULL, NULL },
+   ISP_POINTER, 0,
+   "LookupTable", NULL, NULL, NULL },
 
   {&_gst_identity_dictionary_class, &_gst_lookup_table_class,
-   true, false, true, 0,
+   ISP_POINTER, 0,
    "IdentityDictionary", NULL, NULL, NULL },
 
   {&_gst_method_dictionary_class, &_gst_lookup_table_class,
-   true, false, true, 0,
+   ISP_POINTER, 0,
    "MethodDictionary", NULL, NULL, NULL },
 
   /* These five MUST have the same structure as dictionary; they're
      used interchangeably within the C portion of the system */
   {&_gst_binding_dictionary_class, &_gst_dictionary_class,
-   true, false, true, 1,
+   ISP_POINTER, 1,
    "BindingDictionary", "environment", NULL, NULL },
 
   {&_gst_abstract_namespace_class, &_gst_binding_dictionary_class,
-   true, false, true, 2,
+   ISP_POINTER, 2,
    "AbstractNamespace", "name subspaces", NULL, NULL },
 
   {&_gst_root_namespace_class, &_gst_abstract_namespace_class,
-   true, false, true, 0,
+   ISP_POINTER, 0,
    "RootNamespace", NULL, NULL, NULL },
 
   {&_gst_namespace_class, &_gst_abstract_namespace_class,
-   true, false, true, 0,
+   ISP_POINTER, 0,
    "Namespace", NULL, "Current", NULL },
 
   {&_gst_system_dictionary_class, &_gst_root_namespace_class,
-   true, false, true, 0,
+   ISP_POINTER, 0,
    "SystemDictionary", NULL, NULL, NULL },
 
   {&_gst_stream_class, &_gst_object_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "Stream", NULL, NULL, NULL },
 
   {&_gst_token_stream_class, &_gst_stream_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "TokenStream", "charStream", NULL, NULL },
 
   {&_gst_positionable_stream_class, &_gst_stream_class,
-   true, false, false, 4,
+   ISP_FIXED, 4,
    "PositionableStream", "collection ptr endPtr access", NULL, NULL },
 
   {&_gst_read_stream_class, &_gst_positionable_stream_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "ReadStream", NULL, NULL, NULL },
 
   {&_gst_write_stream_class, &_gst_positionable_stream_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "WriteStream", NULL, NULL, NULL },
 
   {&_gst_read_write_stream_class, &_gst_write_stream_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "ReadWriteStream", NULL, NULL, NULL },
 
   {&_gst_byte_stream_class, &_gst_read_write_stream_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "ByteStream", NULL, NULL, NULL },
 
   {&_gst_file_descriptor_class, &_gst_byte_stream_class,
-   true, false, false, 4,
+   ISP_FIXED, 4,
    "FileDescriptor", "file name isPipe atEnd", NULL, NULL },
 
   {&_gst_file_stream_class, &_gst_file_descriptor_class,
-   true, false, false, 2,
+   ISP_FIXED, 2,
    "FileStream", "writePtr writeEnd", "Verbose Record Includes", NULL },
 
   {&_gst_random_class, &_gst_stream_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "Random", "seed", "Source", NULL },
 
   {&_gst_undefined_object_class, &_gst_object_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "UndefinedObject", NULL, NULL, NULL },
 
   {&_gst_boolean_class, &_gst_object_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "Boolean", NULL, NULL, NULL },
 
   {&_gst_false_class, &_gst_boolean_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "False", "truthValue", NULL, NULL },
 
   {&_gst_true_class, &_gst_boolean_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "True", "truthValue", NULL, NULL },
 
   {&_gst_processor_scheduler_class, &_gst_object_class,
-   true, false, false, 6,
+   ISP_FIXED, 6,
    "ProcessorScheduler",
    "processLists activeProcess idleTasks processTimeslice gcSemaphore gcArray",
    NULL, NULL },
 
   {&_gst_delay_class, &_gst_object_class,
-   true, false, false, 2,
+   ISP_FIXED, 2,
    "Delay", "resumptionTime isRelative",
    "Queue TimeoutSem MutexSem DelayProcess IdleProcess", NULL },
 
   {&_gst_shared_queue_class, &_gst_object_class,
-   true, false, false, 3,
+   ISP_FIXED, 3,
    "SharedQueue", "queueSem valueReady queue", NULL, NULL },
 
   /* Change this, classDescription, or gst_class, and you must change
      the implementaion of new_metaclass some */
   {&_gst_behavior_class, &_gst_object_class,
-   true, false, false, 5,
+   ISP_FIXED, 5,
    "Behavior",
    "superClass subClasses methodDictionary instanceSpec instanceVariables",
    NULL, NULL },
 
   {&_gst_class_description_class, &_gst_behavior_class,
-   true, false, false, 0,
+   ISP_FIXED, 0,
    "ClassDescription", NULL, NULL, NULL },
 
   {&_gst_class_class, &_gst_class_description_class,
-   true, false, false, 6,
+   ISP_FIXED, 7,
    "Class",
-   "name comment category environment classVariables sharedPools",
+   "name comment category environment classVariables sharedPools securityPolicy",
    NULL, NULL },
 
   {&_gst_metaclass_class, &_gst_class_description_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "Metaclass", "instanceClass", NULL, NULL },
 
   {&_gst_context_part_class, &_gst_object_class,
-   true, false, true, 6,
+   ISP_POINTER, 6,
    "ContextPart", "parent nativeIP ip sp receiver method ",
    "UnwindPoints", NULL },
 
   {&_gst_method_context_class, &_gst_context_part_class,
-   true, false, true, 1,
+   ISP_POINTER, 1,
    "MethodContext", "flags ", NULL, NULL },
 
   {&_gst_block_context_class, &_gst_context_part_class,
-   true, false, true, 1,
+   ISP_POINTER, 1,
    "BlockContext", "outerContext ", NULL, NULL },
 
   {&_gst_block_closure_class, &_gst_object_class,
-   true, false, false, 3,
+   ISP_FIXED, 3,
    "BlockClosure", "outerContext block receiver", NULL, NULL },
 
 
 /***********************************************************************
  *
- *	End of Standard Smalltalk gst_class definitions.  The definitions below are
+ *	End of Standard Smalltalk Class definitions.  The definitions below are
  *	specific to GNU Smalltalk.
  *
  ***********************************************************************/
 
+  {&_gst_permission_class, &_gst_object_class,
+   ISP_FIXED, 4,
+   "Permission", "name actions target positive", NULL, NULL },
+
+  {&_gst_security_policy_class, &_gst_object_class,
+   ISP_FIXED, 2,
+   "SecurityPolicy", "dictionary owner", NULL, NULL },
+
   {&_gst_c_object_class, &_gst_object_class,
-   false, true, true, 1,	/* leave this this way */
+   ISP_ULONG, 1,	/* leave this this way */
    "CObject", "type", NULL, "CSymbols" },
 
   {&_gst_c_type_class, &_gst_object_class,
-   true, false, false, 1,
+   ISP_FIXED, 1,
    "CType", "cObjectType", NULL, NULL },
 
   {&_gst_c_func_descriptor_class, &_gst_object_class,
-   true, false, true, 4,
+   ISP_POINTER, 4,
    "CFunctionDescriptor",
    "cFunction cFunctionName returnType numFixedArgs",
    NULL, NULL },
 
   {&_gst_memory_class, &_gst_object_class,
-   false, true, true, 0,
+   ISP_FIXED, 0,
    "Memory", NULL, NULL, NULL },
 
   {&_gst_method_info_class, &_gst_object_class,
-   true, false, false, 4,
+   ISP_POINTER, 4,
    "MethodInfo", "sourceCode category class selector", NULL, NULL },
 
   {&_gst_file_segment_class, &_gst_object_class,
-   true, false, false, 3,
+   ISP_FIXED, 3,
    "FileSegment", "file startPos size", NULL, NULL }
 
 /* Classes not defined here (like Point/Rectangle/RunArray) are
-   defined after the kernel has been fully initialized. */
+   defined after the kernel has been fully initialized.  */
 };
+
+signed char _gst_log2_sizes[32] = {
+  0, -1, 0, -1, 
+  1, -1, 1, -1, 
+  2, -1, 2, -1, 2, -1, 
+  3, -1, 3, -1, 3, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  sizeof (long) == 4 ? 2 : 3, -1
+};
+
+
 
 
 
@@ -614,7 +701,7 @@ init_proto_oops()
   /* Also finish the creation of the OOPs with reserved indices in
      oop.h */
 
-  /* the symbol table ... */
+  /* the symbol table ...  */
   numWords = OBJ_HEADER_SIZE_WORDS + SYMBOL_TABLE_SIZE;
   symbolTable = _gst_alloc_words (numWords);
   SET_OOP_OBJECT (_gst_symbol_table, symbolTable);
@@ -625,7 +712,7 @@ init_proto_oops()
 
   numWords = OBJ_HEADER_SIZE_WORDS + INITIAL_SMALLTALK_SIZE + 4;
 
-  /* ... now the Smalltalk dictionary ... */
+  /* ... now the Smalltalk dictionary ...  */
   smalltalkDictionary = (gst_namespace) _gst_alloc_words (numWords);
   SET_OOP_OBJECT (_gst_smalltalk_dictionary, smalltalkDictionary);
 
@@ -638,7 +725,7 @@ init_proto_oops()
 	    INITIAL_SMALLTALK_SIZE);
 
   /* ... and finally Processor */
-  numWords = sizeof (struct gst_processor_scheduler) / sizeof (long);
+  numWords = sizeof (struct gst_processor_scheduler) / sizeof (PTR);
   processorScheduler = _gst_alloc_words (numWords);
   SET_OOP_OBJECT (_gst_processor_oop, processorScheduler);
 
@@ -655,15 +742,15 @@ _gst_init_dictionary (void)
   _gst_processor_oop = alloc_oop (NULL, _gst_mem.active_flag);
   _gst_symbol_table = alloc_oop (NULL, _gst_mem.active_flag);
 
-  create_classes_pass1 ();
+  create_classes_pass1 (class_info, sizeof (class_info) / sizeof (class_info[0]));
 
   init_proto_oops();
   init_smalltalk_dictionary ();
 
-  create_classes_pass2 ();
+  create_classes_pass2 (class_info, sizeof (class_info) / sizeof (class_info[0]));
 
   add_smalltalk ("KernelFilePath",
-		 _gst_string_new (_gst_kernel_file_default_path));
+		 _gst_string_new (_gst_kernel_file_path));
 
   init_runtime_objects ();
 
@@ -671,120 +758,112 @@ _gst_init_dictionary (void)
 }
 
 void
-create_classes_pass1 (void)
+create_classes_pass1 (const class_definition *ci,
+		      int n)
 {
-  const class_definition *ci;
-  OOP parentClassOOP;
+  OOP superClassOOP;
+  int nilSubclasses;
+  gst_class classObj, superclass;
 
-  /* Because all of the classes in class_info are in the root set, we
-     never need to validate them */
-  for (ci = class_info; 
-       ci < class_info + sizeof(class_info) / sizeof(class_definition);
-       ci++)
+  for (nilSubclasses = 0; n--; ci++)
     {
-      if (ci->superClassPtr == NULL)
-	parentClassOOP = (OOP) NULL;
-      else
-	parentClassOOP = *ci->superClassPtr;
+      superClassOOP = *ci->superClassPtr;
+      create_class (ci);
 
-      *ci->classVar =
-	new_class (parentClassOOP, ci->isPointers, ci->isWords,
-		   ci->isIndexable, ci->numFixedFields);
+      if (IS_NIL (superClassOOP))
+	nilSubclasses++;
+      else
+	{
+          superclass = (gst_class) OOP_TO_OBJ (superClassOOP);
+          superclass->subClasses =
+	    FROM_INT (TO_INT (superclass->subClasses) + 1);
+	}
+    }
+
+  /* Object class being a subclass of gst_class is not an apparent link,
+     and so the index which is the number of subclasses of the class
+     is off by the number of subclasses of nil.  We correct that here.
+
+     On the other hand, we don't want the meta class to have a subclass
+     (`Class class' and `Class' are unique in that they don't have the
+     same number of subclasses), so since we have the information here,
+     we special case the Class class and create its metaclass here.  */
+  classObj = (gst_class) OOP_TO_OBJ (_gst_class_class);
+  create_metaclass (_gst_class_class,
+		    TO_INT (classObj->subClasses),
+		    TO_INT (classObj->subClasses) + nilSubclasses);
+}
+
+void
+create_classes_pass2 (const class_definition *ci,
+		      int n)
+{
+  OOP class_oop;
+  gst_class class;
+  int numSubclasses;
+
+  for (; n--; ci++)
+    {
+      class_oop = *ci->classVar;
+      class = (gst_class) OOP_TO_OBJ (class_oop);
+
+      if (!class->objClass)
+	{
+          numSubclasses = TO_INT (class->subClasses);
+	  create_metaclass (class_oop, numSubclasses, numSubclasses);
+	}
+
+      init_metaclass (class->objClass);
+      init_class (class_oop, ci);
     }
 }
 
 void
-create_classes_pass2 (void)
+create_metaclass (OOP class_oop,
+	          int numMetaclassSubClasses,
+	          int numSubClasses)
 {
-  const class_definition *ci;
-  OOP class_oop, superClassOOP;
-  gst_class class, superclass;
-  mst_Object subClasses;
-  long index;
-
-  /* Because all of the classes in class_info are in the root set, we
-     never need to validate them */
-  for (ci = class_info; 
-       ci < class_info + sizeof(class_info) / sizeof(class_definition);
-       ci++)
-    {
-      class_oop = *ci->classVar;
-      class = (gst_class) OOP_TO_OBJ (class_oop);
-      class->name = _gst_intern_string (ci->name);
-      add_smalltalk (ci->name, class_oop);
-      class->methodDictionary = _gst_nil_oop;
-      index = TO_INT (class->subClasses);
-      if (class_oop == _gst_class_class)
-	{
-	  /* Object class being a subclass of gst_class is not an apparent link,
-	     and so the index which is the number of subclasses of the class
-	     is off by one.  We correct that here. */
-	  index++;
-	}
-
-      subClasses = new_instance_with (_gst_array_class, index, &class->subClasses);
-      if (index > 0)
-	subClasses->data[0] = FROM_INT (index);
-
-      if (class_oop == _gst_class_class)
-	/* we don't want the meta class to have a subclass if we're special
-	   casing Object class, so back off the number of sub classes for
-	   the meta class. */
-	index--;
-
-      if (class_oop == _gst_object_class)
-	/* _gst_nil_oop wasn't available during pass1, but now it is */
-	class->superclass = _gst_nil_oop;
-      else
-	{
-	  /* hack the parent's subclass array */
-	  superClassOOP = class->superclass;
-	  add_subclass (superClassOOP, class_oop);
-	  if (class_oop == _gst_class_class)
-	    {
-	      /* here's where we patch in Object class is-a-subclass-of 
-	         gst_class */
-	      superclass =
-		(gst_class) OOP_TO_OBJ (OOP_CLASS (_gst_object_class));
-	      superclass->superclass = class_oop;
-	      add_subclass (class_oop, OOP_CLASS (_gst_object_class));
-	    }
-	}
-
-      class->objClass = new_metaclass (class_oop, index);
-      class->environment = _gst_smalltalk_dictionary;
-      class->instanceVariables =
-	_gst_make_instance_variable_array (class->superclass,
-					   ci->instVarNames);
-      class->classVariables =
-	_gst_make_class_variable_dictionary (ci->classVarNames, class_oop);
-      class->sharedPools = _gst_make_pool_array (ci->sharedPoolNames);
-
-      class->comment = _gst_nil_oop;	/* not used yet. */
-      class->category = _gst_nil_oop;	/* not used yet. */
-    }
-}
-
-OOP
-new_metaclass (OOP class_oop,
-	       int numSubClasses)
-{
-  OOP superClassOOP, metaclassOOP;
+  gst_class class;
   gst_metaclass metaclass;
   mst_Object subClasses;
+  OOP superClassOOP;
+
+  superClassOOP = SUPERCLASS (class_oop);
+  class = (gst_class) OOP_TO_OBJ (class_oop);
 
   metaclass = (gst_metaclass) new_instance (_gst_metaclass_class,
-					    &metaclassOOP);
+					    &class->objClass);
+
+  metaclass->instanceClass = class_oop;
+
+  subClasses = new_instance_with (_gst_array_class, numSubClasses,
+				  &class->subClasses);
+  if (numSubClasses > 0)
+    subClasses->data[0] = FROM_INT (numSubClasses);
+
+  subClasses = new_instance_with (_gst_array_class, numMetaclassSubClasses,
+		     		  &metaclass->subClasses);
+  if (numMetaclassSubClasses > 0)
+    subClasses->data[0] = FROM_INT (numMetaclassSubClasses);
+}
+
+void
+init_metaclass (OOP metaclassOOP)
+{
+  gst_metaclass metaclass;
+  OOP class_oop, superClassOOP;
+
+  metaclass = (gst_metaclass) OOP_TO_OBJ (metaclassOOP);
+  class_oop = metaclass->instanceClass;
   superClassOOP = SUPERCLASS (class_oop);
 
-  if (class_oop == _gst_object_class)
+  if (IS_NIL (superClassOOP))
     /* Object case: make this be gst_class to close the circularity */
     metaclass->superclass = _gst_class_class;
   else
-    {
-      metaclass->superclass = OOP_CLASS (superClassOOP);
-      add_subclass (metaclass->superclass, metaclassOOP);
-    }
+    metaclass->superclass = OOP_CLASS (superClassOOP);
+
+  add_subclass (metaclass->superclass, metaclassOOP);
 
   /* the specifications here should match what a class should have:
      instance variable names, the right number of instance variables,
@@ -793,43 +872,65 @@ new_metaclass (OOP class_oop,
      them here by hand */
   metaclass->instanceVariables =
     _gst_make_instance_variable_array (_gst_nil_oop,
-				       "superclass subClasses methodDictionary instanceSpec \
-instanceVariables name comment category environment \
-classVariables sharedPools");
+				       "superclass subClasses methodDictionary instanceSpec "
+				       "instanceVariables name comment category environment "
+				       "classVariables sharedPools securityPolicy");
 
-  subClasses = new_instance_with (_gst_array_class, numSubClasses,
-		     		  &metaclass->subClasses);
-  if (numSubClasses > 0)
-    subClasses->data[0] = FROM_INT (numSubClasses);
-
-  metaclass->methodDictionary = _gst_nil_oop;
-  metaclass->instanceSpec = ISP_INTMARK | ISP_ISPOINTERS |
+  metaclass->instanceSpec = ISP_INTMARK | ISP_FIXED |
     (((sizeof (struct gst_class) -
        sizeof (gst_object_header)) /
       sizeof (OOP)) << ISP_NUMFIXEDFIELDS);
 
-  metaclass->instanceClass = class_oop;
+  metaclass->methodDictionary = _gst_nil_oop;
+}
 
-  return (metaclassOOP);
+void
+init_class (OOP class_oop, const class_definition *ci)
+{
+  gst_class class;
+
+  class = (gst_class) OOP_TO_OBJ (class_oop);
+  class->name = _gst_intern_string (ci->name);
+  add_smalltalk (ci->name, class_oop);
+
+  if (!IS_NIL (class->superclass))
+    add_subclass (class->superclass, class_oop);
+
+  class->environment = _gst_smalltalk_dictionary;
+  class->instanceVariables =
+    _gst_make_instance_variable_array (class->superclass, ci->instVarNames);
+  class->classVariables =
+    _gst_make_class_variable_dictionary (ci->classVarNames, class_oop);
+
+  class->sharedPools = _gst_make_pool_array (ci->sharedPoolNames);
+
+  /* Other fields are set by the Smalltalk code.  */
+  class->methodDictionary = _gst_nil_oop;
+  class->comment = _gst_nil_oop;
+  class->category = _gst_nil_oop;
+  class->securityPolicy = _gst_nil_oop;
 }
 
 void
 add_subclass (OOP superClassOOP,
-	       OOP subClassOOP)
+	      OOP subClassOOP)
 {
   gst_class_description superclass;
   int index;
 
   superclass = (gst_class_description) OOP_TO_OBJ (superClassOOP);
 
-  if (NUM_WORDS (OOP_TO_OBJ (superclass->subClasses)) > 0)
+#ifndef OPTIMIZE
+  if (NUM_WORDS (OOP_TO_OBJ (superclass->subClasses)) == 0)
     {
-      index = TO_INT (ARRAY_AT (superclass->subClasses, 1));
-      ARRAY_AT_PUT (superclass->subClasses, 1, FROM_INT (index - 1));
-      ARRAY_AT_PUT (superclass->subClasses, index, subClassOOP);
+      _gst_errorf ("Attempt to add subclass to zero sized class");
+      abort ();
     }
-  else
-    _gst_errorf ("Attempt to add subclass to zero sized class");
+#endif
+
+  index = TO_INT (ARRAY_AT (superclass->subClasses, 1));
+  ARRAY_AT_PUT (superclass->subClasses, 1, FROM_INT (index - 1));
+  ARRAY_AT_PUT (superclass->subClasses, index, subClassOOP);
 }
 
 void
@@ -867,6 +968,8 @@ init_smalltalk_dictionary (void)
   add_smalltalk ("CSymbols",
     namespace_new (32, "CSymbols", _gst_smalltalk_dictionary));
 
+  init_primitives_dictionary ();
+
   add_smalltalk ("Undeclared",
     namespace_new (32, "Undeclared", _gst_nil_oop));
   add_smalltalk ("SystemExceptions",
@@ -880,7 +983,7 @@ init_smalltalk_dictionary (void)
 }
 
 static OOP
-add_smalltalk (char *globalName,
+add_smalltalk (const char *globalName,
 	       OOP globalValue)
 {
   NAMESPACE_AT_PUT (_gst_smalltalk_dictionary,
@@ -895,11 +998,13 @@ init_runtime_objects (void)
   add_smalltalk ("KernelFileSystemPath", _gst_string_new (KERNEL_PATH));
   add_smalltalk ("ModulePath", _gst_string_new (MODULE_PATH));
   add_smalltalk ("KernelFileLocalPath",
-		 _gst_string_new (_gst_kernel_file_default_path));
+		 _gst_string_new (_gst_kernel_file_path));
   add_smalltalk ("ImageFilePath",
-		 _gst_string_new (_gst_image_file_default_path));
+		 _gst_string_new (_gst_image_file_path));
   add_smalltalk ("ImageFileName",
 		 _gst_string_new (_gst_binary_image_name));
+  add_smalltalk ("OutputVerbosity",
+		 FROM_INT (_gst_verbosity));
   add_smalltalk ("RegressionTesting",
 		 _gst_regression_testing ? _gst_true_oop : _gst_false_oop);
 
@@ -914,7 +1019,6 @@ init_runtime_objects (void)
   add_file_stream_object (2, O_WRONLY, "stderr");
 
   init_c_symbols ();
-  init_primitives_dictionary ();
 
   /* Add the root among the roots :-) to the root set */
   _gst_register_oop (_gst_smalltalk_dictionary);
@@ -925,6 +1029,9 @@ init_c_symbols ()
 {
   OOP cSymbolsOOP = dictionary_at (_gst_smalltalk_dictionary,
 				   _gst_intern_string ("CSymbols"));
+
+  NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("HostSystem"),
+		    _gst_string_new (HOST_SYSTEM));
 
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CIntSize"),
 		    FROM_INT (sizeof (int)));
@@ -1015,7 +1122,7 @@ init_c_symbols ()
 void
 init_primitives_dictionary ()
 {
-  OOP primDictionaryOOP = identity_dictionary_new (512);
+  OOP primDictionaryOOP = _gst_dictionary_new (512);
   int i;
 
   add_smalltalk ("VMPrimitives", primDictionaryOOP);
@@ -1027,7 +1134,7 @@ init_primitives_dictionary ()
 	{
 	  OOP keyOOP = _gst_intern_string (pte->name);
 	  OOP valueOOP = FROM_INT (i);
-	  _gst_identity_dictionary_at_put (primDictionaryOOP, keyOOP, valueOOP);
+	  DICTIONARY_AT_PUT (primDictionaryOOP, keyOOP, valueOOP);
 	}
     }
 }
@@ -1035,7 +1142,7 @@ init_primitives_dictionary ()
 void
 add_file_stream_object (int fd,
 			int access,
-			char *fileObjectName)
+			const char *fileObjectName)
 {
   OOP fileStreamOOP;
   OOP keyOOP;
@@ -1052,55 +1159,48 @@ add_file_stream_object (int fd,
   add_smalltalk (fileObjectName, fileStreamOOP);
 }
 
-
-OOP
-new_class (OOP superClassOOP,
-	   mst_Boolean isPointers,
-	   mst_Boolean isWords,
-	   mst_Boolean isIndexable,
-	   int numFixedFields)
+void
+create_class (const class_definition *ci)
 {
-  gst_class class, superclass;
-  long superInstanceSpec;
-  OOP classOOP;
+  gst_class class;
+  intptr_t superInstanceSpec;
+  OOP classOOP, superClassOOP;
+  int numFixedFields;
 
-  if (superClassOOP != (OOP) NULL)
+  numFixedFields = ci->numFixedFields;
+  superClassOOP = *ci->superClassPtr;
+  if (!IS_NIL (superClassOOP))
     {
       /* adjust the number of instance variables to account for
          inheritance */
       superInstanceSpec = CLASS_INSTANCE_SPEC (superClassOOP);
       numFixedFields += superInstanceSpec >> ISP_NUMFIXEDFIELDS;
-      superclass = (gst_class) OOP_TO_OBJ (superClassOOP);
-      superclass->subClasses =
-	FROM_INT (TO_INT (superclass->subClasses) + 1);
     }
 
   class = (gst_class) _gst_alloc_obj (sizeof (struct gst_class), &classOOP);
 
   class->objClass = NULL;
   class->superclass = superClassOOP;
-  class->instanceSpec = ISP_INTMARK |
-    (isPointers ? ISP_ISPOINTERS : 0) |
-    (isWords ? ISP_ISWORDS : 0) |
-    (isIndexable ? ISP_ISINDEXABLE : 0) |
-    (numFixedFields << ISP_NUMFIXEDFIELDS);
+  class->instanceSpec = ISP_INTMARK
+    | ci->instanceSpec
+    | (numFixedFields << ISP_NUMFIXEDFIELDS);
 
   class->subClasses = FROM_INT (0);
 
-  return (classOOP);
+  *ci->classVar = classOOP;
 }
 
 
 mst_Boolean
-_gst_init_dictionary_on_image_load (long numOOPs)
+_gst_init_dictionary_on_image_load (size_t numOOPs)
 {
   const class_definition *ci;
   OOP oop;
   int primitive_numbers_map[NUM_PRIMITIVES];
 
-  _gst_smalltalk_dictionary = OOP_AT (smalltalkOOPIndex);
-  _gst_processor_oop = OOP_AT (processorOOPIndex);
-  _gst_symbol_table = OOP_AT (symbolTableOOPIndex);
+  _gst_smalltalk_dictionary = OOP_AT (SMALLTALK_OOP_INDEX);
+  _gst_processor_oop = OOP_AT (PROCESSOR_OOP_INDEX);
+  _gst_symbol_table = OOP_AT (SYM_TABLE_OOP_INDEX);
 
   if (IS_NIL (_gst_processor_oop) || IS_NIL (_gst_symbol_table)
       || IS_NIL (_gst_smalltalk_dictionary))
@@ -1128,11 +1228,12 @@ _gst_init_dictionary_on_image_load (long numOOPs)
   _gst_init_builtin_objects_classes ();
   _gst_init_symbols ();
 
-  /* Important: this is called *before* init_runtime_objects
+  /* Important: this is called *before* init_primitives_dictionary
      fills the VMPrimitives dictionary and *after* _gst_init_symbols
      fills in _gst_vm_primitives_symbol! */
   prepare_primitive_numbers_map (primitive_numbers_map);
 
+  init_primitives_dictionary ();
   init_runtime_objects ();
 
   for (oop = _gst_mem.ot_base; oop < &_gst_mem.ot[numOOPs]; oop++)
@@ -1141,11 +1242,11 @@ _gst_init_dictionary_on_image_load (long numOOPs)
 	continue;
 
       if UNCOMMON (OOP_CLASS (oop) == _gst_c_func_descriptor_class)
-        _gst_restore_cfunc_descriptor (oop); /* in cint.c */
+	_gst_restore_cfunc_descriptor (oop); /* in cint.c */
       else if UNCOMMON (OOP_CLASS (oop) == _gst_compiled_method_class)
-        _gst_restore_primitive_number (oop, primitive_numbers_map);
+	_gst_restore_primitive_number (oop, primitive_numbers_map);
       else if UNCOMMON (OOP_CLASS (oop) == _gst_callin_process_class)
-        _gst_terminate_process (oop);
+	_gst_terminate_process (oop);
     }
 
   return (true);
@@ -1155,18 +1256,37 @@ void
 prepare_primitive_numbers_map (int *map)
 {
   int i;
+  OOP primitivesDictionaryOOP;
+  gst_dictionary primitivesDictionary;
 
   memzero (map, NUM_PRIMITIVES * sizeof (int));
+  primitivesDictionaryOOP = dictionary_at (_gst_smalltalk_dictionary, 
+					   _gst_vm_primitives_symbol);
+
+  primitivesDictionary =
+    (gst_dictionary) OOP_TO_OBJ (primitivesDictionaryOOP);
+
   for (i = 0; i < NUM_PRIMITIVES; i++)
     {
       prim_table_entry *pte = _gst_get_primitive_attributes (i);
+      OOP symbolOOP, valueOOP;
+      int old_index;
 
-      if (pte->name)
-	{
-	  int old_index = _gst_resolve_primitive_name (pte->name);
-	  map[old_index] = i;
-	  /* printf ("Old primitive %d is now %d\n", old_index, i); */
-	}
+      if (!pte->name)
+	continue;
+
+      symbolOOP = _gst_intern_string (pte->name);
+      valueOOP = dictionary_at (primitivesDictionaryOOP, symbolOOP);
+
+      if IS_NIL (valueOOP)
+        {
+          _gst_errorf ("bad primitive name");
+          continue;
+        }
+
+      old_index = TO_INT (valueOOP);
+      map[old_index] = i;
+      /* printf ("Old primitive %d is now %d\n", old_index, i); */
     }
 }
 
@@ -1214,35 +1334,6 @@ _gst_valid_class_method_dictionary (OOP class_oop)
   return (class->methodDictionary);
 }
 
-int
-_gst_resolve_primitive_name (char *name)
-{
-  OOP primitivesDictionaryOOP;
-  gst_identity_dictionary primitivesDictionary;
-  OOP symbolOOP, valueOOP;
-  int index;
-
-  symbolOOP = _gst_intern_string (name);
-
-  primitivesDictionaryOOP = dictionary_at (_gst_smalltalk_dictionary, 
-					   _gst_vm_primitives_symbol);
-
-  index = identity_dictionary_find_key (primitivesDictionaryOOP,
-					symbolOOP);
-
-  if (index < 0)
-    {
-      _gst_errorf ("bad primitive name");
-      return index;
-    }
-
-  primitivesDictionary =
-    (gst_identity_dictionary) OOP_TO_OBJ (primitivesDictionaryOOP);
-
-  valueOOP = ARRAY_AT (primitivesDictionary->values, index + 1);
-  return TO_INT (valueOOP);
-}
-
 OOP
 _gst_find_class_method (OOP class_oop,
 			OOP selector)
@@ -1267,12 +1358,7 @@ _gst_find_class_method (OOP class_oop,
   methodDictionary =
     (gst_identity_dictionary) OOP_TO_OBJ (method_dictionary_oop);
 
-#ifndef OPTIMIZE
-  if (!IS_OOP_ADDR (ARRAY_AT (methodDictionary->values, index + 1)))
-    abort ();
-#endif
-
-  return (ARRAY_AT (methodDictionary->values, index + 1));
+  return (methodDictionary->keys[index]);
 }
 
 OOP
@@ -1323,11 +1409,11 @@ _gst_find_shared_pool_variable (OOP poolOOP,
 
       assocOOP = dictionary_association_at (poolOOP, symbol);
       if (!IS_NIL (assocOOP))
-	return (assocOOP);
+        return (assocOOP);
 
       /* Try to find a super-namespace */
       if (!is_a_kind_of (OOP_CLASS (poolOOP), _gst_abstract_namespace_class))
-	return (_gst_nil_oop);
+        return (_gst_nil_oop);
 
       pool = (gst_namespace) OOP_TO_OBJ (poolOOP);
       poolOOP = pool->superspace;
@@ -1335,8 +1421,8 @@ _gst_find_shared_pool_variable (OOP poolOOP,
 }
 
 
-int
-new_num_fields (int oldNumFields)
+size_t
+new_num_fields (size_t oldNumFields)
 {
   /* Find a power of two that is larger than oldNumFields */
 
@@ -1347,7 +1433,7 @@ new_num_fields (int oldNumFields)
     return oldNumFields * 2;
 
   /* Find the next power of two by setting all bits to the right of
-     the leftmost 1 bit to 1, and then incrementing. */
+     the leftmost 1 bit to 1, and then incrementing.  */
   for (; oldNumFields & (oldNumFields + 1); n <<= 1)
     oldNumFields |= oldNumFields >> n;
 
@@ -1358,8 +1444,8 @@ static int
 find_key_or_nil (OOP dictionaryOOP,
 		 OOP keyOOP)
 {
-  long count, numFields, numFixedFields;
-  long index;
+  size_t count, numFields, numFixedFields;
+  intptr_t index;
   mst_Object dictionary;
   OOP associationOOP;
   gst_association association;
@@ -1396,7 +1482,7 @@ mst_Object
 _gst_grow_dictionary (OOP oldDictionaryOOP)
 {
   mst_Object oldDictionary, dictionary;
-  long oldNumFields, numFields, i, index, numFixedFields;
+  size_t oldNumFields, numFields, i, index, numFixedFields;
   OOP associationOOP;
   gst_association association;
   OOP dictionaryOOP;
@@ -1412,7 +1498,7 @@ _gst_grow_dictionary (OOP oldDictionaryOOP)
 
   dictionary = instantiate_with (OOP_CLASS (oldDictionaryOOP), 
 						  numFields, &dictionaryOOP);
-  memcpy (dictionary->data, oldDictionary->data, SIZEOF_LONG * numFixedFields);
+  memcpy (dictionary->data, oldDictionary->data, sizeof (PTR) * numFixedFields);
   oldDictionary = OOP_TO_OBJ (dictionaryOOP);
 
   /* rehash all associations from old dictionary into new one */
@@ -1435,79 +1521,127 @@ gst_identity_dictionary
 _gst_grow_identity_dictionary (OOP oldIdentityDictionaryOOP)
 {
   gst_identity_dictionary oldIdentityDictionary, identityDictionary;
-  mst_Object values, oldValues;
-  OOP key, valuesOOP, oldValuesOOP, oldOOP, identityDictionaryOOP;
-  long oldNumFields, numFields, i, index;
-  inc_ptr incPtr;
-
+  OOP key, identityDictionaryOOP;
+  size_t oldNumFields, numFields, i, index;
 
   oldIdentityDictionary =
     (gst_identity_dictionary) OOP_TO_OBJ (oldIdentityDictionaryOOP);
   oldNumFields =
-    NUM_WORDS (oldIdentityDictionary) - 2;
+    (NUM_WORDS (oldIdentityDictionary) - 1) / 2;
 
   numFields = new_num_fields (oldNumFields);
-  oldValuesOOP = oldIdentityDictionary->values;
-
-  incPtr = INC_SAVE_POINTER ();
-  instantiate_with (_gst_array_class, numFields, &valuesOOP);
-  INC_ADD_OOP (valuesOOP);
 
   identityDictionary = (gst_identity_dictionary)
-    instantiate_with (OOP_CLASS (oldIdentityDictionaryOOP), numFields,
+    instantiate_with (OOP_CLASS (oldIdentityDictionaryOOP), numFields * 2,
 		      &identityDictionaryOOP);
 
   oldIdentityDictionary =
     (gst_identity_dictionary) OOP_TO_OBJ (oldIdentityDictionaryOOP);
 
   identityDictionary->tally = oldIdentityDictionary->tally;
-  identityDictionary->values = valuesOOP;
-
-  values = OOP_TO_OBJ (valuesOOP);
-  oldValues = OOP_TO_OBJ (oldValuesOOP);
 
   /* rehash all associations from old dictionary into new one */
   for (i = 0; i < oldNumFields; i++)
     {
-      key = oldIdentityDictionary->keys[i];
+      key = oldIdentityDictionary->keys[i * 2];
       if COMMON (!IS_NIL (key))
 	{
 	  index =
 	    identity_dictionary_find_key_or_nil (identityDictionaryOOP,
 						 key);
-	  identityDictionary->keys[index] = key;
-	  oldOOP = oldValues->data[i];
-	  values->data[index] = oldOOP;
+	  identityDictionary->keys[index - 1] = key;
+	  identityDictionary->keys[index] = oldIdentityDictionary->keys[i*2+1];
 	}
     }
 
-  INC_RESTORE_POINTER (incPtr);
   _gst_swap_objects (identityDictionaryOOP, oldIdentityDictionaryOOP);
   return ((gst_identity_dictionary) OOP_TO_OBJ (oldIdentityDictionaryOOP));
 }
 
 
+ssize_t
+identity_dictionary_find_key (OOP identityDictionaryOOP,
+			      OOP keyOOP)
+{
+  gst_identity_dictionary identityDictionary;
+  size_t index, count, numFields;
+
+  identityDictionary =
+    (gst_identity_dictionary) OOP_TO_OBJ (identityDictionaryOOP);
+
+  numFields = NUM_WORDS (identityDictionary) - 1;
+  index = scramble (OOP_INDEX (keyOOP)) * 2;
+  count = numFields / 2;
+  /* printf ("%d %d %O\n", count, index & numFields - 1, keyOOP); */
+  while (count--)
+    {
+      index &= numFields - 1;
+
+      if COMMON (IS_NIL (identityDictionary->keys[index]))
+	return (-1);
+
+      if COMMON (identityDictionary->keys[index] == keyOOP)
+	return (index + 1);
+
+      /* linear reprobe -- it is simple and guaranteed */
+      index += 2;
+    }
+
+  _gst_errorf
+    ("Error - searching IdentityDictionary for nil, but it is full!\n");
+
+  abort ();
+}
+
+
+
+size_t
+identity_dictionary_find_key_or_nil (OOP identityDictionaryOOP,
+				     OOP keyOOP)
+{
+  gst_identity_dictionary identityDictionary;
+  size_t index, count, numFields;
+
+  identityDictionary =
+    (gst_identity_dictionary) OOP_TO_OBJ (identityDictionaryOOP);
+
+  numFields = NUM_WORDS (identityDictionary) - 1;
+  index = scramble (OOP_INDEX (keyOOP)) * 2;
+  count = numFields / 2;
+  /* printf ("%d %d %O\n", count, index & numFields - 1, keyOOP); */
+  while (count--)
+    {
+      index &= numFields - 1;
+
+      if COMMON (IS_NIL (identityDictionary->keys[index]))
+	return (index + 1);
+
+      if COMMON (identityDictionary->keys[index] == keyOOP)
+	return (index + 1);
+
+      /* linear reprobe -- it is simple and guaranteed */
+      index += 2;
+    }
+
+  _gst_errorf
+    ("Error - searching IdentityDictionary for nil, but it is full!\n");
+
+  abort ();
+}
+
 OOP
 identity_dictionary_new (int size)
 {
   gst_identity_dictionary identityDictionary;
-  inc_ptr incPtr;
-  OOP valuesOOP, identityDictionaryOOP;
+  OOP identityDictionaryOOP;
 
   size = new_num_fields (size);
 
-  incPtr = INC_SAVE_POINTER ();
-  instantiate_with (_gst_array_class, size, &valuesOOP);
-  INC_ADD_OOP (valuesOOP);
-
   identityDictionary = (gst_identity_dictionary)
-    instantiate_with (_gst_identity_dictionary_class, size,
+    instantiate_with (_gst_identity_dictionary_class, size * 2,
 		      &identityDictionaryOOP);
 
   identityDictionary->tally = FROM_INT (0);
-  identityDictionary->values = valuesOOP;
-
-  INC_RESTORE_POINTER (incPtr);
   return (identityDictionaryOOP);
 }
 
@@ -1517,8 +1651,7 @@ _gst_identity_dictionary_at_put (OOP identityDictionaryOOP,
 				 OOP valueOOP)
 {
   gst_identity_dictionary identityDictionary;
-  mst_Object valuesArray;
-  long index;
+  intptr_t index;
   OOP oldValueOOP;
 
   identityDictionary =
@@ -1526,29 +1659,44 @@ _gst_identity_dictionary_at_put (OOP identityDictionaryOOP,
 
   /* Never make dictionaries too full! For simplicity, we do this even
      if the key is present in the dictionary (because it will most
-     likely resolve some collisions and make things faster). */
+     likely resolve some collisions and make things faster).  */
 
   if UNCOMMON (TO_INT (identityDictionary->tally) >
-      	       TO_INT (identityDictionary->objSize) * 3 / 4)
+      	       TO_INT (identityDictionary->objSize) * 3 / 8)
     identityDictionary =
       _gst_grow_identity_dictionary (identityDictionaryOOP);
 
   index =
     identity_dictionary_find_key_or_nil (identityDictionaryOOP, keyOOP);
 
-  if COMMON (IS_NIL (identityDictionary->keys[index]))
+  if COMMON (IS_NIL (identityDictionary->keys[index - 1]))
     identityDictionary->tally = INCR_INT (identityDictionary->tally);
 
-  identityDictionary->keys[index] = keyOOP;
-  valuesArray = OOP_TO_OBJ (identityDictionary->values);
-  oldValueOOP = valuesArray->data[index];
-  valuesArray->data[index] = valueOOP;
+  identityDictionary->keys[index - 1] = keyOOP;
+  oldValueOOP = identityDictionary->keys[index];
+  identityDictionary->keys[index] = valueOOP;
 
   return (oldValueOOP);
 }
 
 OOP
-namespace_new (int size, char *name, OOP superspaceOOP)
+_gst_identity_dictionary_at (OOP identityDictionaryOOP,
+			     OOP keyOOP)
+{
+  gst_identity_dictionary identityDictionary;
+  intptr_t index;
+
+  identityDictionary =
+    (gst_identity_dictionary) OOP_TO_OBJ (identityDictionaryOOP);
+
+  index =
+    identity_dictionary_find_key_or_nil (identityDictionaryOOP, keyOOP);
+
+  return identityDictionary->keys[index];
+}
+
+OOP
+namespace_new (int size, const char *name, OOP superspaceOOP)
 {
   gst_namespace ns;
   OOP namespaceOOP, classOOP;
@@ -1602,7 +1750,7 @@ OOP
 _gst_dictionary_add (OOP dictionaryOOP,
 		     OOP associationOOP)
 {
-  long index;
+  intptr_t index;
   gst_association association;
   mst_Object dictionary;
   gst_dictionary dict;
@@ -1647,7 +1795,7 @@ _gst_object_copy (OOP oop)
 {
   mst_Object old, new;
   OOP newOOP;
-  long numFields;
+  size_t numFields;
 
   if UNCOMMON (IS_INT(oop) || IS_BUILTIN_OOP (oop))
     return (oop);
@@ -1665,7 +1813,7 @@ _gst_object_copy (OOP oop)
 
 
 OOP
-_gst_new_string (int len)
+_gst_new_string (size_t len)
 {
   OOP stringOOP;
 
@@ -1677,7 +1825,7 @@ OOP
 _gst_string_new (const char *s)
 {
   gst_string string;
-  int len;
+  size_t len;
   OOP stringOOP;
 
   len = strlen (s);
@@ -1690,7 +1838,7 @@ _gst_string_new (const char *s)
 
 OOP
 _gst_counted_string_new (const char *s,
-			 int len)
+			 size_t len)
 {
   gst_string string;
   OOP stringOOP;
@@ -1716,7 +1864,7 @@ char *
 _gst_to_cstring (OOP stringOOP)
 {
   char *result;
-  int len;
+  size_t len;
   gst_string string;
 
   string = (gst_string) OOP_TO_OBJ (stringOOP);
@@ -1730,7 +1878,7 @@ _gst_to_cstring (OOP stringOOP)
 
 OOP
 _gst_byte_array_new (const gst_uchar * bytes,
-		     int len)
+		     size_t len)
 {
   gst_byte_array byteArray;
   OOP byteArrayOOP;
@@ -1748,7 +1896,7 @@ gst_uchar *
 _gst_to_byte_array (OOP byteArrayOOP)
 {
   gst_uchar *result;
-  int len;
+  size_t len;
   gst_byte_array byteArray;
 
   byteArray = (gst_byte_array) OOP_TO_OBJ (byteArrayOOP);
@@ -1764,7 +1912,7 @@ _gst_set_oop_bytes (OOP byteArrayOOP,
 		    gst_uchar * bytes)
 {
   gst_byte_array byteArray;
-  long len;
+  size_t len;
 
   len = oop_num_fields (byteArrayOOP);
   byteArray = (gst_byte_array) OOP_TO_OBJ (byteArrayOOP);
@@ -1827,7 +1975,7 @@ _gst_c_object_new_typed (PTR cObjPtr,
 
 OOP
 _gst_alloc_cobject (OOP class_oop,
-		    long unsigned int size)
+		    size_t size)
 {
   PTR space;
   OOP typeOOP, cobjOOP;
@@ -1885,10 +2033,13 @@ _gst_set_file_stream_file (OOP fileStreamOOP,
     {
     case O_RDONLY:
       fileStream->access = FROM_INT (1);
+      break;
     case O_WRONLY:
       fileStream->access = FROM_INT (2);
+      break;
     case O_RDWR:
       fileStream->access = FROM_INT (3);
+      break;
     }
 
   if (buffered)

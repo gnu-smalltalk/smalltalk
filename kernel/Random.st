@@ -88,7 +88,7 @@ chiSquare: n range: r
      numbers in the 0..r range."
 
     | f t seed |
-    seed := 1234567.
+    seed := 0.1234567.
     f := Array new: r + 1.
     1 to: r + 1 do: [ :i | f at: i put: 0 ].
     n timesRepeat: [

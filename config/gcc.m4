@@ -17,7 +17,7 @@ AC_ARG_ENABLE(warnings,
 enable_warnings=no)
 
 if test "$GCC" = yes; then
-ifelse([$1$2], , , [dnl
+ifelse([$1$2$3$4$5], , , [dnl
   changequote(<<, >>)
   case "`$CC --version 2>&1`" in
     # This assumes egcs 1.1.2

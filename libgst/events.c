@@ -51,12 +51,12 @@ static polling_queue *head, **p_tail_next;
 
 /* This variable holds a variable-sized array of pollfd structures.
    NUM_USED_POLLFDS of the total NUM_TOTAL_POLLFDS items available are
-   being used. */
+   being used.  */
 static struct pollfd *pollfds;
 static int num_used_pollfds, num_total_pollfds;
 
 /* Holds the semaphores to be signaled when the operating system sends
-   us a C-style signal. */
+   us a C-style signal.  */
 static volatile OOP sem_int_vec[NSIG];
 
 /* These are the signal handlers that we install to process
@@ -272,7 +272,7 @@ _gst_async_file_polling (int fd,
 
   /* Now check if I/O was made possible while setting up our machinery...
      If so, exit; otherwise, wait on the semaphore and the SIGIO
-     will wake us up. */
+     will wake us up.  */
 
   result = _gst_sync_file_polling (fd, cond);
   if (result == 0)

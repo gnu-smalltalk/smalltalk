@@ -7,13 +7,13 @@ dnl with this software.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.52)
-AC_INIT([GNU Smalltalk], 2.1.9, help-smalltalk@gnu.org, smalltalk)
+AC_INIT([GNU Smalltalk], 2.1g, help-smalltalk@gnu.org, smalltalk)
 MAINTAINER="bonzini@gnu.org"
 
 dnl CURRENT:REVISION:AGE means this is the REVISION-th version of
 dnl the CURRENT-th interface; all the interface from CURRENT-AGE
 dnl to CURRENT are supported.
-GST_REVISION(4:14:0)
+GST_REVISION(5:1:1)
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([main.c])
 AM_CONFIG_HEADER(config.h)
@@ -27,39 +27,47 @@ dnl ------------------------------- PROGRAMS ------------------
 
 { echo; echo "${term_bold}Build Tools:${term_norm}"; } >& AS_MESSAGE_FD
 
-GST_PROG_CC(strict-aliasing,    				 dnl enabled optimizations
-    gcse,               		                         dnl disabled optimizations
-    all pointer-arith declaration-after-statement,	         dnl enabled warnings
-    strict-aliasing long-double format switch parentheses)       dnl disabled warnings
+GST_PROG_CC(strict-aliasing,	   	 		           dnl enabled optimizations
+    gcse,                               	                   dnl disabled optimizations
+    all write-strings pointer-arith declaration-after-statement,   dnl enabled warnings
+    strict-aliasing long-double format switch parentheses)	   dnl disabled warnings
+
+if test "$GCC" != yes; then
+  AC_MSG_ERROR([Please use GCC to compile GNU Smalltalk.])
+fi
 
 AC_PROG_AWK
 AC_PROG_LN_S
+GST_PROG_LN
 AC_PATH_PROG(INSTALL_INFO, install-info, :, $PATH:/sbin)
 AM_PATH_LISPDIR
 
 dnl We only want the GNU implementations
 AM_MISSING_PROG(LEX, flex, $missing_dir)
 AM_MISSING_PROG(YACC, bison, $missing_dir)
-
-test -z "$RM" && RM='rm -f'
-AC_SUBST(RM)
+AM_MISSING_PROG(GPERF, gperf, $missing_dir)
 
 dnl 
 dnl ------------------------------ SUBDIRS --------------------
 
-ac_configure_args="$ac_configure_args --enable-subdir"
+AC_CONFIG_SUBDIRS(libffi)
+
+case $ac_configure_args in
+  *--enable-subdir) ;;
+  *) ac_configure_args="$ac_configure_args --enable-subdir" ;;
+esac
 AC_SNPRINTFV_CONVENIENCE
 AC_CONFIG_SUBDIRS(snprintfv)
 
-AC_ARG_ENABLE(generational-gc, 
+AC_ARG_ENABLE(generational-gc,
 [  --disable-generational-gc disable generational garbage collection], ,
 [case $host in
-	*-*-cygwin* | *-*-mingw* | ia64-*-* | x86_64-*-* ) enable_generational_gc=no ;;
-	*) enable_generational_gc=yes ;;
+        *-*-cygwin* | *-*-mingw* | ia64-*-* | x86_64-*-* ) enable_generational_gc=no ;;
+        *) enable_generational_gc=yes ;;
 esac])
 if test $enable_generational_gc != no; then
   AC_CONFIG_SUBDIRS(sigsegv)
-  AC_DEFINE_UNQUOTED(HAVE_SIGSEGV_H, 1,
+  AC_DEFINE(HAVE_SIGSEGV_H, 1,
     [Define to 1 if libsigsegv is being used])
 fi
 AM_CONDITIONAL(HAVE_SIGSEGV, test "$enable_generational_gc" != no)
@@ -74,8 +82,24 @@ AC_C_INLINE
 AC_C_CONST
 AC_C_VOLATILE
 ACX_C_RESTRICT
-GST_C_GOTO_VOID_P
 GST_C_SYMBOLSET
+GST_C_GOTO_VOID_P
+
+AC_DEFINE_UNQUOTED(HOST_SYSTEM, "$host",
+  [Define to the host triplet.])
+
+AC_C_BIGENDIAN
+GST_HEADER_STDINT(lib-src/stdintx.h)
+GST_CHECK_ALIGNMENT(double)
+GST_CHECK_ALIGNMENT(long double)
+AC_CHECK_SIZEOF(off_t)
+
+dnl We want to see the size of a pointer but our custom stdint.h
+dnl is only created in config.status.  So, we define intptr_t as
+dnl void *, but we have to guard against somebody else actually
+dnl including stdint.h or inttypes.h.
+AC_CHECK_SIZEOF(OOP, , [[
+typedef void *OOP;]])
 
 GST_LIBC_SO_NAME
 
@@ -84,21 +108,40 @@ AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
-AC_C_BIGENDIAN
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(long)
-AC_CHECK_SIZEOF(off_t)
-AC_CHECK_SIZEOF(char *, $ac_cv_sizeof_long)
-GST_CHECK_ALIGNMENT(double)
-GST_CHECK_ALIGNMENT(long double)
+# We define two tags for LIBTOOL, one of which is special
+# for libgst.
 
-case "$gst_cv_machine_defines" in
-    *WIN32*)
-	ICON=gsticon.o
-	;;
-    *)
-	ICON=
-	;;
+save_enable_shared=$enable_shared
+GST_LIBTOOL_TAG(LIBGST, CC, [
+  case "$host_cpu:$GCC:`$CC -v 2>&1 | sed -n '[s/^gcc version \([0-9.]*\).*/\1/p]'`" in
+   *:no:*)
+     enable_shared=no ;;
+
+   # Old versions of GCC do not support the visibility attribute,
+   # and we need it otherwise the library is dead slow.
+   [*:*:[12].*])
+     enable_shared=no ;;
+
+   [*:*:3.[012]*])
+     enable_shared=no ;;
+
+   i*86:yes:*)
+     # For the x86, building a shared library with the frame pointer
+     # is too slow.  On the other hand, most people will find a static
+     # library without it undebuggable, which is a problem with respeect
+     # to bug reports.  For this reason, we hack libtool to allow
+     # additional flags to be specified for the PIC case.
+     _LT_AC_TAGVAR(lt_prog_compiler_pic, LIBGST)="dnl
+$lt_prog_compiler_pic -fomit-frame-pointer" ;;
+
+   *) ;;
+  esac
+])
+enable_shared=$save_enable_shared
+
+case "$host_os" in
+  cygwin*|mingw*) ICON=gsticon.o ;;
+  *) ICON= ;;
 esac
 AC_SUBST(ICON)
 
@@ -119,7 +162,7 @@ AC_HEADER_TIME
 AC_CHECK_HEADERS(unistd.h poll.h sys/ioctl.h sys/resource.h \
 	sys/utsname.h stropts.h sys/param.h stddef.h limits.h \
 	sys/timeb.h termios.h sys/mman.h sys/file.h execinfo.h \
-	sys/wait.h fcntl.h)
+	sys/wait.h fcntl.h, [], [], [AC_INCLUDES_DEFAULT])
 
 if test x$ac_cv_header_poll_h = xno; then
   AC_CONFIG_LINKS([lib-src/poll.h:lib-src/poll_.h])
@@ -162,18 +205,18 @@ MODULES_TK=""
 MODULES_GTK=""
 MODULES_TCP=""
 MODULES_I18N=""
+BLOX_IMPLEMENTATION=BloxTK
 I18N_DISABLED="disabled-"
 GTK_DISABLED="disabled-"
-BLOX_IMPLEMENTATION=BloxTK
 
 AC_SUBST(MODULES_EXAMPLE)
 AC_SUBST(MODULES_TCP)
 AC_SUBST(MODULES_GTK)
 AC_SUBST(MODULES_I18N)
 AC_SUBST(MODULES_TK)
-AC_SUBST(I18N_DISABLED)
-AC_SUBST(GTK_DISABLED)
 AC_SUBST(BLOX_IMPLEMENTATION)
+AC_SUBST(GTK_DISABLED)
+AC_SUBST(I18N_DISABLED)
 
 AC_CHECK_HEADER(gdbm.h, MODULES_EXAMPLE="$MODULES_EXAMPLE gdbm.la")
 
@@ -181,7 +224,7 @@ AC_ARG_ENABLE(gtk,
 [  --disable-gtk           disable GTK+ bindings], ,
 enable_gtk=yes)
 
-if test "$enable_gtk" != "no"; then
+if test "$enable_gtk" != no; then
   enable_gtk=no
   AM_PATH_GLIB_2_0(2.0.0, [
     AM_PATH_GTK_2_0(2.0.0, [
@@ -191,29 +234,25 @@ if test "$enable_gtk" != "no"; then
     ])
   ], [], gobject)
 fi
-
-
+ 
 AM_CONDITIONAL(HAVE_GTK, test "$enable_gtk" != no)
-test "$enable_gtk" != no && MODULES_GTK="gst-gtk.la" GTK_DISABLED=""
+test "$enable_gtk" != no && MODULES_GTK="gst-gtk.la" GTK_DISABLED="" BLOX_IMPLEMENTATION=BloxGTK
 test "$gst_cv_tcltk_libs" != "not found" && MODULES_TK="blox-tk.la"
 test "$gst_cv_inet_sockets" != "no" && MODULES_TCP="tcp.la"
 test "$ac_cv_func_nl_langinfo" = yes && \
   test "$am_cv_func_iconv" = yes && MODULES_I18N="i18n.la" I18N_DISABLED=""
 
-
-LIGHTNING_CONFIGURE_IF_NOT_FOUND(jit=yes, jit=no)
 AC_ARG_ENABLE(jit, 
 [  --enable-jit            enable dynamic translation to machine code], ,
-jit=no)
+enable_jit=no)
 
-AM_CONDITIONAL(USE_JIT_TRANSLATION, test x$jit = xyes)
-if test x$jit = xyes; then
-     AC_DEFINE(USE_JIT_TRANSLATION, 1, 
-           [Define to enable dynamic translation to machine code])
+LIGHTNING_CONFIGURE_IF_NOT_FOUND([], enable_jit=no)
+if test "$enable_jit" = yes; then
+  AC_DEFINE(ENABLE_JIT_TRANSLATION, 1, 
+    [Define to enable dynamic translation to machine code])
 fi
-jit=
 
-AC_ARG_WITH(emacs,
+AC_ARG_ENABLE(emacs, 
 [  --without-emacs         disable Emacs modes for Smalltalk], ,
 with_emacs=yes)
 AM_CONDITIONAL(WITH_EMACS, test "$with_emacs" != no)
@@ -234,6 +273,15 @@ enable_checking=no)
 if test "$enable_checking" = no; then
   AC_DEFINE(OPTIMIZE, 1,
     [Define to disable assertion checking at runtime])
+fi
+
+AC_ARG_ENABLE(security,
+[  --enable-security       enable security checks at runtime], ,
+enable_security=no)
+
+if test "$enable_security" != no; then
+  AC_DEFINE(ENABLE_SECURITY, 1,
+    [Define to enable security checks at runtime])
 fi
 
 AC_ARG_ENABLE(preemption,
@@ -259,24 +307,58 @@ AC_CONFIG_COMMANDS_PRE([
   LTALLOCA=`echo "$ALLOCA" | sed 's/\.o/.lo/g'`
 ])
 
+GST_RUN='$(top_builddir)/gst -I $(top_builddir)/gst.im -f'
+
+AC_SUBST(GST_RUN)
 AC_SUBST(CFLAGS)
 AC_SUBST(INCLTDL)
 AC_SUBST(LIBLTDL)
-AC_SUBST(LDFLAGS)
-AC_SUBST(LDPATH)
 AC_SUBST(LTALLOCA)
 AC_SUBST(LTLIBOBJS)
 
 dnl Scripts & data files
-AC_CONFIG_FILES(gnu-smalltalk.spec)
+AC_CONFIG_FILES(gnu-smalltalk.spec gnu-smalltalk.pc)
 AC_CONFIG_FILES(gst-config, chmod +x gst-config)
 AC_CONFIG_FILES(gst-package, chmod +x gst-package)
+AC_CONFIG_FILES(packages.xml)
 AC_CONFIG_FILES(libc.la)
 
-dnl Makefiles
-AC_CONFIG_FILES(Makefile doc/Makefile lib-src/Makefile libgst/Makefile lightning/Makefile config/Makefile tests/Makefile)
+dnl Master Makefile
+AC_CONFIG_FILES(Makefile, [
+  echo 'Makefile: packages.xml' >> Makefile
+  for i in blox-tk:BloxTK tcp:TCP i18n:I18N kernel:Kernel; do
+    package=`echo $i | sed s/.*://`
+    dir=`echo $i | sed s/:.*//`
 
-dnl Smalltalk makefiles
-AC_CONFIG_FILES(blox-tk/Makefile examples/Makefile i18n/Makefile kernel/Makefile tcp/Makefile gtk/Makefile)
+    echo
+    echo "$dir/stamp-classes: \\"
+
+    ./gst-package --list-files $package packages.xml | \
+      sed -n 's,.*\.st$,& \\,p'
+
+    echo
+    echo "	echo timestamp > $dir/stamp-classes"
+  done >> Makefile
+])
+
+dnl VM makefiles
+AC_CONFIG_FILES(doc/Makefile lib-src/Makefile libgst/Makefile)
+AC_CONFIG_FILES(lightning/Makefile tests/Makefile)
+
+dnl Modules makefiles
+AC_CONFIG_FILES(blox-tk/Makefile examples/Makefile)
+AC_CONFIG_FILES(i18n/Makefile tcp/Makefile)
+AC_CONFIG_FILES(gtk/Makefile)
+
+dnl Support VPATH builds off a CVS repository.  When building from
+dnl the tarball, a suitable packages.xml file is put in the root source
+dnl directory by `make dist'.
+AC_CONFIG_COMMANDS($srcdir/packages.xml, [
+  if test -f $srcdir/packages.xml; then
+    :
+  else
+    $LN_S `pwd`/packages.xml $srcdir/packages.xml
+  fi
+], [srcdir="$srcdir"])
 
 AC_OUTPUT

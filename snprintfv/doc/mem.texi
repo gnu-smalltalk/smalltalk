@@ -1,0 +1,49 @@
+@deftypefn Function SNV_SCOPE snv_malloc (size_t @var{count})
+@fnindex snv_malloc
+
+Parameters:
+@table @code
+@item count
+The number of bytes to allocate.
+@end table
+
+Allocates a fresh block of memory whose size is @var{count} bytes.
+
+
+The pointer to the newly-allocated memory area.
+
+@end deftypefn
+
+@deftypefn Function SNV_SCOPE snv_realloc (snv_pointer @var{old}, size_t @var{count})
+@fnindex snv_realloc
+
+Parameters:
+@table @code
+@item old
+The pointer to the block whose size must be changed.
+@item count
+The number of bytes to allocate.
+@end table
+
+Reallocates a fresh block of memory pointed to by @var{old}
+so that its size becomes @var{count} bytes.
+
+
+The pointer to the newly-allocated memory area, possibly
+the same as @var{old}.
+
+@end deftypefn
+
+@deftypefn Function SNV_SCOPE snv_free (snv_pointer @var{old})
+@fnindex snv_free
+
+Parameters:
+@table @code
+@item old
+The pointer to the block that must freed.
+@end table
+
+Frees a block of memory pointed to by @var{old}.
+
+@end deftypefn
+

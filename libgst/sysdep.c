@@ -69,7 +69,7 @@
 # include <windows.h>
 #endif
 
-#if defined(MAP_ANONYMOUS) && !defined(MAP_ANON)
+#if defined MAP_ANONYMOUS && !defined MAP_ANON
 # define MAP_ANON MAP_ANONYMOUS
 #endif
 
@@ -99,7 +99,7 @@
 #endif /* !P_WAIT */
 #endif /* HAVE_SPAWNL */
 
-#if defined(FASYNC) && !defined (O_ASYNC)
+#if defined FASYNC && !defined O_ASYNC
 #define O_ASYNC FASYNC
 #endif
 
@@ -115,14 +115,11 @@ static int tm_diff (struct tm *a,
 
 static void do_interrupts (mst_Boolean disable);
 
-#undef INTERRUPTS_DONE
-
 #define DISABLED_MASK ((-1) ^ (1 << SIGSEGV) ^ (1 << SIGBUS) ^ \
 			      (1 << SIGILL) ^ (1 << SIGABRT))
 
 
-#ifdef SIG_BLOCK
-#define INTERRUPTS_DONE
+#if defined SIG_BLOCK
 #define DECLARE \
   sigset_t newSet; \
   static sigset_t oldSet
@@ -140,36 +137,30 @@ static void do_interrupts (mst_Boolean disable);
 #define ENABLE \
   sigprocmask (SIG_SETMASK, &oldSet, NULL)
 
-#endif
-
-#if defined(HAVE_SIGSETMASK) && !defined(INTERRUPTS_DONE)  /* BSD */
-#define INTERRUPTS_DONE
+#elif defined HAVE_SIGSETMASK     /* BSD */
 #define DECLARE static int mask
 #define DISABLE mask = sigsetmask (DISABLED_MASK)
 #define ENABLE sigsetmask (mask)
-#endif
 
-#if defined(HAVE_SIGHOLD) && !defined(INTERRUPTS_DONE)	/* SVID style */
-#define INTERRUPTS_DONE
+#elif defined HAVE_SIGHOLD 	/* SVID style */
 #define DECLARE int i
 #define DISABLE \
   do { \
-    for (i = 1; i <= 8 * SIZEOF_LONG; i++) \
+    for (i = 0; i < 8 * sizeof (long); i++) \
       if (DISABLED_MASK & (1 << i)) \
         sighold (i); \
   } while(0)
 
 #define ENABLE \
   do { \
-    for (i = 1; i <= 8 * SIZEOF_LONG; i++) \
+    for (i = 0; i < 8 * sizeof (long); i++) \
       if (DISABLED_MASK & (1 << i)) \
         sigrelse (i);
   } while(0)
-#endif
 
-#ifndef INTERRUPTS_DONE
+#else
 static long pending_sigs = 0;
-static SigHandler saved_handlers[8 * SIZEOF_LONG];
+static SigHandler saved_handlers[8 * sizeof (long)];
 static RETSIGTYPE dummy_signal_handler (int sig)
 {
   pending_sigs |= 1L << sig;
@@ -182,7 +173,7 @@ static RETSIGTYPE dummy_signal_handler (int sig)
 
 #define DISABLE \
   do { \
-    for (i = 1; i <= 8 * SIZEOF_LONG; i++) \
+    for (i = 0; i < 8 * sizeof (long); i++) \
       if (DISABLED_MASK & (1 << i)) \
         saved_handlers[i] = signal (i, dummy_signal_handler); \
   } while (0)
@@ -190,7 +181,7 @@ static RETSIGTYPE dummy_signal_handler (int sig)
 #define ENABLE \
   do \
     { \
-      for (i = 1; i <= 8 * SIZEOF_LONG; i++) \
+      for (i = 0; i < 8 * sizeof (long); i++) \
         if (DISABLED_MASK & (1 << i)) \
           signal (i, saved_handlers[i]); \
       local_pending_sigs = pending_sigs; \
@@ -239,7 +230,7 @@ _gst_set_signal_handler (int signum,
 {
 #ifdef _POSIX_VERSION
   /* If we are running on a POSIX-compliant system, then do things the
-     POSIX way. */
+     POSIX way.  */
   struct sigaction act, o_act;
 
   act.sa_handler = handlerFunc;
@@ -255,10 +246,13 @@ _gst_set_signal_handler (int signum,
 }
 
 
-#ifndef HAVE_MPROTECT
 int
-_gst_mem_protect (PTR addr, unsigned long len, int prot)
+_gst_mem_protect (PTR addr, size_t len, int prot)
 {
+#if defined HAVE_MPROTECT
+  return mprotect (addr, len, prot);
+
+#elif defined WIN32
   DWORD oldprot;
   int my_prot;
 
@@ -292,25 +286,19 @@ _gst_mem_protect (PTR addr, unsigned long len, int prot)
     return 0;
   else
     return -1;
-}
 #else
-int
-_gst_mem_protect (PTR addr, unsigned long len, int prot)
-{
-  return mprotect (addr, len, prot);
-}
+  return -1;
 #endif
+}
 
 
 
-unsigned long
+unsigned
 _gst_get_milli_time (void)
 {
-#undef MILLI_DONE
-#ifdef WIN32
-#define MILLI_DONE
+#if defined WIN32
   /* time() seems not to work... so we hack. This method to obtain the
-     time is complex, but it is the most precise. */
+     time is complex, but it is the most precise.  */
   static long frequency = 0, frequencyH, adjust = 0;
   long milli;
   LARGE_INTEGER counter;
@@ -341,7 +329,7 @@ _gst_get_milli_time (void)
          2^32 / freq) + (low * 1000 / freq) = (high * frequencyH) +
          (low / 4) * 4000 / freq) Dividing and multiplying
          counter.LowPart by 4 is needed because MulDiv accepts signed
-         integers but counter.LowPart is unsigned. */
+         integers but counter.LowPart is unsigned.  */
       milli = counter.HighPart * frequencyH;
       milli += MulDiv (counter.LowPart >> 2, 4000, frequency);
     }
@@ -365,19 +353,16 @@ _gst_get_milli_time (void)
 	  adjust -= 86400000;
 	}
     }
-  return (milli);
-#endif
+  return (unsigned) milli;
 
-#if defined(HAVE_GETTIMEOFDAY) && !defined(MILLI_DONE)	/* BSD style */
-#define MILLI_DONE
+#elif defined HAVE_GETTIMEOFDAY 	/* BSD style */
   struct timeval t;
 
   gettimeofday (&t, NULL);
   t.tv_sec %= 86400;
   return (t.tv_sec * 1000 + t.tv_usec / 1000);
-#endif
 
-#ifndef MILLI_DONE
+#else
   /* Assume that ftime (System V) is available */
   struct timeb t;
   ftime (&t);
@@ -408,11 +393,11 @@ tm_diff (struct tm *a,
 		+ (a->tm_min - b->tm_min)) + (a->tm_sec - b->tm_sec));
 }
 
-long
+time_t
 _gst_adjust_time_zone (time_t t)
 {
   struct tm save_tm, *decoded_time;
-  long bias;
+  time_t bias;
 
 #ifdef LOCALTIME_CACHE
   tzset ();
@@ -422,7 +407,7 @@ _gst_adjust_time_zone (time_t t)
   decoded_time = gmtime (&t);
   bias = tm_diff (&save_tm, decoded_time);
 
-  return (((long) t) + bias);
+  return (t + bias);
 }
 
 long
@@ -448,7 +433,7 @@ _gst_current_time_zone_bias (void)
 char *
 _gst_current_time_zone_name (void)
 {
-  char *zone;
+  const char *zone;
   zone = getenv ("TZ");
   if (!zone)
     {
@@ -474,7 +459,7 @@ _gst_current_time_zone_name (void)
   return xstrdup (zone);
 }
 
-long
+time_t
 _gst_get_time (void)
 {
   time_t now;
@@ -556,7 +541,7 @@ _gst_signal_after (int deltaMilli,
 
   if (kind == TIMER_PROCESS)
     {
-#if defined(ITIMER_VIRTUAL)
+#if defined ITIMER_VIRTUAL
       struct itimerval value;
       value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
       value.it_value.tv_sec = deltaMilli / 1000;
@@ -567,24 +552,18 @@ _gst_signal_after (int deltaMilli,
     }
   else if (kind == TIMER_REAL)
     {
-
-#ifdef WIN32
-#define ALARM_DONE
+#if defined WIN32
       alarms.sleepTime = deltaMilli;
       SetEvent (alarms.hNewWaitEvent);
-#endif
 
-#if defined(ITIMER_REAL) && !defined(ALARM_DONE)
-#define ALARM_DONE
+#elif defined ITIMER_REAL
       struct itimerval value;
       value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
       value.it_value.tv_sec = deltaMilli / 1000;
       value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
       setitimer (ITIMER_REAL, &value, (struct itimerval *) 0);
-#endif
 
-#if defined(HAVE_FORK) && !defined(ALARM_DONE)
-#define ALARM_DONE
+#elif defined HAVE_FORK
       static pid_t pid = -1;
       long end, ticks;
       if (pid != -1)
@@ -610,15 +589,10 @@ _gst_signal_after (int deltaMilli,
 	  kill (getppid (), SIGALRM);
 	  _exit (0);
 	}
-#endif
 
-#if defined(HAVE_ALARM) && !defined(ALARM_DONE)
-#define ALARM_DONE
+#elif defined HAVE_ALARM
       alarm (deltaMilli / 1000);
-#endif
 
-#if defined(ALARM_DONE)
-#undef ALARM_DONE
 #else
       /* Cannot do anything better than this */
       raise (SIGALRM);
@@ -647,7 +621,7 @@ _gst_set_file_interrupt (int fd,
 #endif
     }
 
-#if defined(F_SETOWN) && defined(O_ASYNC)
+#if defined F_SETOWN && defined O_ASYNC
 
   {
     int oldflags;
@@ -682,13 +656,13 @@ _gst_set_file_interrupt (int fd,
 #ifdef FIOASYNC
   {
     int argFIOASYNC = 1;
-#if defined (SIOCSPGRP)
+#if defined SIOCSPGRP
     int argSIOCSPGRP = getpid ();
 
     if (ioctl (fd, SIOCSPGRP, &argSIOCSPGRP) > -1 ||
         ioctl (fd, FIOASYNC, &argFIOASYNC) > -1)
       return;
-#elif defined (O_ASYNC)
+#elif defined O_ASYNC
     int oldflags;
 
     oldflags = fcntl (fd, F_GETFL, 0);
@@ -717,7 +691,7 @@ _gst_get_cur_dir_name (void)
   int save_errno;
 
   path_max = (unsigned) PATH_MAX;
-  path_max += 2;		/* The getcwd docs say to do this. */
+  path_max += 2;		/* The getcwd docs say to do this.  */
 
   cwd = xmalloc (path_max);
 
@@ -778,13 +752,13 @@ _gst_get_full_file_name (const char *fileName)
 
 
 
-long
+time_t
 _gst_get_file_modify_time (const char *fileName)
 {
   struct stat st;
 
   if (stat (fileName, &st) < 0)
-    return ((unsigned long) 0);
+    return (0);
 
   else
     return (_gst_adjust_time_zone (st.st_mtime));
@@ -1023,7 +997,7 @@ init_pty (pty_info *pty)
 
 #ifdef I_PUSH
   /* Push the necessary modules onto the slave to get terminal
-     semantics. */
+     semantics.  */
   ioctl (slave, I_PUSH, "ptem");
   ioctl (slave, I_PUSH, "ldterm");
 #endif
@@ -1077,7 +1051,7 @@ init_pty (pty_info *pty)
      anti-intuitive: remember that pty->access gives the parent's point 
      of view, not the child's, so `read only' means the child
      should write to the pipe and `write only' means the child
-     should read from the pipe. */
+     should read from the pipe.  */
   if (pty->access != O_RDONLY)
     {
       SAVE_FD (pty->save_stdin, 0);
@@ -1401,7 +1375,7 @@ _gst_debugf (const char *fmt,
 
   vsprintf (buf, fmt, args);
 
-#if defined(WIN32) && !defined(__GNUC__)
+#if defined WIN32 && !defined __GNUC__
   OutputDebugString (buf);
 #else /* !WIN32 */
   {
@@ -1635,7 +1609,7 @@ anon_mmap_reserve (size_t size)
   PTR base;
 
   /* We must check for overflows in baseaddr!  */
-  if (((unsigned long) baseaddr) + size < (unsigned long) baseaddr)
+  if (((uintptr_t) baseaddr) + size < (uintptr_t) baseaddr)
     {
       errno = ENOMEM;
       return NULL;
@@ -1665,7 +1639,7 @@ anon_mmap_commit (PTR base, size_t size)
   return result;
 }
 
-/* This is hairy and a hack.  We have to find a place for our heaps... */
+/* This is hairy and a hack.  We have to find a place for our heaps...  */
 
 /* This signal handler is used if it is the only means to decide if
    a page is mapped into memory.  We intercept SIGSEGV and decide
@@ -1675,7 +1649,7 @@ anon_mmap_commit (PTR base, size_t size)
    We also try access(2) and EFAULT, but it is not ensured that it
    works because the whole EFAULT business is quite unclear; however
    it is worth doing because debugging is way more painful if we
-   have SIGSEGV's as part of the normal initialization sequence. */
+   have SIGSEGV's as part of the normal initialization sequence.  */
 
 static RETSIGTYPE not_mapped (int sig);
 static jmp_buf already_mapped;
@@ -1735,15 +1709,15 @@ anon_mmap_check (void)
       lower = mmapGuess;
     }
 
-  /* Now try each of the possibilities... */
+  /* Now try each of the possibilities...  */
   for (step = steps; *step > -1; step += 4)
     {
       if (higher > lower + (step[3] << 20))
 	{
 	  first = ((step[0] ? higher : lower) + (step[1] << 20));
 	  second = (first + (step[2] << 20));
-	  assert ( ((long)first & (pagesize-1)) == 0);
-	  assert ( ((long)second & (pagesize-1)) == 0);
+	  assert ( ((intptr_t)first & (pagesize-1)) == 0);
+	  assert ( ((intptr_t)second & (pagesize-1)) == 0);
 
 	  /* Try reading the two locations */
 	  if (setjmp (already_mapped) == 0)
@@ -1775,13 +1749,13 @@ anon_mmap_check (void)
 	  if (!anon_mmap_commit ((char *) second, pagesize))
 	    continue;
 
-	  /* Were not readable and could be mmap-ed.  We're done. */
+	  /* Were not readable and could be mmap-ed.  We're done.  */
 	  _gst_osmem_free ((char *) second, pagesize);
 	  break;
 	}
     }
 
-  /* Restore things... */
+  /* Restore things...  */
   _gst_set_signal_handler (SIGSEGV, oldSegvHandler);
 
   munmap ((char *) mmapGuess, pagesize);

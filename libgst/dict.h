@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
  * This file is part of GNU Smalltalk.
@@ -65,7 +65,7 @@ typedef struct gst_dictionary
   OOP tally;			/* really, an int */
 
   /* Other, indexable fields that are the associations for this
-     dictionary. */
+     dictionary.  */
 }
  *gst_dictionary;
 
@@ -77,7 +77,7 @@ typedef struct gst_binding_dictionary
   OOP assoc[1];
 
   /* Other, indexable fields that are the associations for this
-     dictionary. */
+     dictionary.  */
 }
  *gst_binding_dictionary;
 
@@ -91,7 +91,7 @@ typedef struct gst_namespace
   OOP assoc[1];
 
   /* Other, indexable fields that are the associations for this
-     dictionary. */
+     dictionary.  */
 }
  *gst_namespace;
 
@@ -99,9 +99,7 @@ typedef struct gst_identity_dictionary
 {
   OBJ_HEADER;
   OOP tally;			/* really, an int */
-  OOP values;			/* an gst_array */
-  OOP keys[1];			/* variable sized array of OOPS
-				   (symbols) */
+  OOP keys[1];			/* variable sized array of OOPS (keys/values) */
 }
  *gst_identity_dictionary;
 
@@ -111,7 +109,7 @@ typedef struct gst_identity_dictionary
   OOP		superclass; \
   OOP		subClasses; \
   OOP		methodDictionary; \
-  long		instanceSpec; \
+  intptr_t	instanceSpec; \
   OOP		instanceVariables
 
 typedef struct gst_behavior
@@ -220,8 +218,9 @@ typedef struct gst_class
   OOP comment;
   OOP category;
   OOP environment;
-  OOP classVariables;		/* dictionary of varName, storage */
+  OOP classVariables;		/* dictionary of name->value pairs */
   OOP sharedPools;
+  OOP securityPolicy;
 }
  *gst_class;
 
@@ -231,6 +230,14 @@ typedef struct gst_metaclass
   OOP instanceClass;
 }
  *gst_metaclass;
+
+typedef struct gst_ordered_collection
+{
+  OBJ_HEADER;
+  OOP firstIndex;
+  OOP lastIndex;
+  OOP data[1];
+} *gst_ordered_collection;
 
 typedef struct gst_cobject
 {
@@ -248,207 +255,313 @@ typedef struct gst_ctype
  *gst_ctype;
 
 
-extern OOP _gst_object_class, _gst_magnitude_class, _gst_char_class,
-  _gst_time_class, _gst_date_class, _gst_fraction_class,
-  _gst_context_part_class, _gst_number_class, _gst_float_class,
-  _gst_floatd_class, _gst_floate_class, _gst_floatq_class,
-  _gst_integer_class, _gst_small_integer_class,
-  _gst_object_memory_class, _gst_large_integer_class,
-  _gst_large_negative_integer_class, _gst_large_zero_integer_class,
-  _gst_large_positive_integer_class, _gst_association_class,
-  _gst_homed_association_class, _gst_variable_binding_class,
-  _gst_link_class, _gst_process_class, _gst_sym_link_class,
-  _gst_callin_process_class,
-  _gst_collection_class, _gst_lookup_key_class,
-  _gst_sequenceable_collection_class, _gst_linked_list_class,
-  _gst_semaphore_class, _gst_method_dictionary_class,
-  _gst_arrayed_collection_class, _gst_array_class, _gst_string_class,
-  _gst_symbol_class, _gst_byte_array_class, _gst_compiled_method_class,
-  _gst_compiled_code_class, _gst_compiled_block_class,
-  _gst_interval_class, _gst_ordered_collection_class,
-  _gst_sorted_collection_class, _gst_bag_class,
-  _gst_mapped_collection_class, _gst_set_class, _gst_dictionary_class,
-  _gst_binding_dictionary_class, _gst_abstract_namespace_class,
-  _gst_character_array_class, _gst_system_dictionary_class,
-  _gst_namespace_class, _gst_identity_dictionary_class,
-  _gst_undefined_object_class, _gst_boolean_class, _gst_false_class,
-  _gst_true_class, _gst_lookup_table_class,
-  _gst_processor_scheduler_class, _gst_delay_class,
-  _gst_shared_queue_class, _gst_behavior_class,
-  _gst_root_namespace_class, _gst_byte_stream_class,
-  _gst_class_description_class, _gst_class_class, _gst_metaclass_class,
-  _gst_smalltalk_dictionary, _gst_message_class,
-  _gst_directed_message_class,
-  _gst_method_context_class, _gst_block_context_class,
-  _gst_block_closure_class, _gst_stream_class,
-  _gst_positionable_stream_class, _gst_read_stream_class,
-  _gst_write_stream_class, _gst_read_write_stream_class,
-  _gst_file_descriptor_class, _gst_file_stream_class,
-  _gst_c_object_class, _gst_c_type_class, _gst_memory_class,
-  _gst_random_class, _gst_c_func_descriptor_class,
-  _gst_token_stream_class, _gst_method_info_class,
-  _gst_file_segment_class, _gst_c_object_type_ctype, _gst_processor_oop;
+extern OOP _gst_abstract_namespace_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_array_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_arrayed_collection_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_association_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_bag_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_behavior_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_binding_dictionary_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_block_closure_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_block_context_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_boolean_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_byte_array_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_byte_stream_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_c_func_descriptor_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_c_object_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_c_object_type_ctype ATTRIBUTE_HIDDEN;
+extern OOP _gst_c_type_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_callin_process_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_char_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_character_array_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_class_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_class_description_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_collection_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_compiled_block_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_compiled_code_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_compiled_method_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_context_part_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_date_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_delay_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_dictionary_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_directed_message_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_false_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_file_descriptor_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_file_segment_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_file_stream_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_float_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_floatd_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_floate_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_floatq_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_fraction_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_hashed_collection_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_homed_association_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_identity_dictionary_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_identity_set_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_integer_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_interval_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_large_integer_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_large_negative_integer_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_large_positive_integer_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_large_zero_integer_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_link_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_linked_list_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_lookup_key_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_lookup_table_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_magnitude_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_mapped_collection_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_memory_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_message_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_metaclass_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_method_context_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_method_dictionary_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_method_info_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_namespace_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_number_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_object_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_object_memory_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_ordered_collection_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_permission_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_positionable_stream_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_process_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_processor_scheduler_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_random_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_read_stream_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_read_write_stream_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_root_namespace_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_security_policy_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_semaphore_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_sequenceable_collection_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_set_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_shared_queue_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_small_integer_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_smalltalk_dictionary ATTRIBUTE_HIDDEN;
+extern OOP _gst_sorted_collection_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_stream_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_string_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_sym_link_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_symbol_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_system_dictionary_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_time_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_token_stream_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_true_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_undefined_object_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_variable_binding_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_write_stream_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_processor_oop ATTRIBUTE_HIDDEN;
+
+/* The size of the indexed instance variables corresponding to the
+   various instanceSpec values declared in gstpriv.h.  */
+extern signed char _gst_log2_sizes[32] ATTRIBUTE_HIDDEN;
 
 /* Creates a new instance of the Dictionary class with room for SIZE
-   items. */
-extern OOP _gst_dictionary_new (int size);
+   items.  */
+extern OOP _gst_dictionary_new (int size)
+  ATTRIBUTE_HIDDEN;
 
 /* Creates a new instance of the BindingDictionary class with room for SIZE
    items.  The object has the ENVIRONMENTOOP environment (which for
-   dictionary of class variables is the class that hosts the dictionary). */
+   dictionary of class variables is the class that hosts the dictionary).  */
 extern OOP _gst_binding_dictionary_new (int size,
-			        	OOP environmentOOP);
+			        	OOP environmentOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Gets the method dictionary associated with CLASS_OOP, and returns
    it.  If the methodDictionary associated with CLASS_OOP is nil, one
-   is created and installed into that class. */
-extern OOP _gst_valid_class_method_dictionary (OOP class_oop) ATTRIBUTE_PURE;
+   is created and installed into that class.  */
+extern OOP _gst_valid_class_method_dictionary (OOP class_oop)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
 /* This returns the dictionary of class variables for CLASS_OOP */
-extern OOP _gst_class_variable_dictionary (OOP class_oop) ATTRIBUTE_PURE;
+extern OOP _gst_class_variable_dictionary (OOP class_oop)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
 /* This finds the key SYMBOL into the dictionary POOLOOP and, if any,
-   in all of its super-namespaces. */
+   in all of its super-namespaces.  */
 extern OOP _gst_find_shared_pool_variable (OOP poolOOP,
-					   OOP symbol) ATTRIBUTE_PURE;
+					   OOP symbol)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
 /* Adds the Association in ASSOCIATIONOOP to the Dictionary (or a
-   subclass sharing the same representation) DICTIONARYOOP. */
+   subclass sharing the same representation) DICTIONARYOOP.  */
 extern OOP _gst_dictionary_add (OOP dictionaryOOP,
-				OOP associationOOP);
+				OOP associationOOP) 
+  ATTRIBUTE_HIDDEN;
+
+/* Look for the value associated to KEYOOP in IDENTITYDICTIONARYOOP
+   and answer it or, if not found, _gst_nil_oop.  */
+extern OOP _gst_identity_dictionary_at (OOP identityDictionaryOOP,
+					OOP keyOOP)
+  ATTRIBUTE_PURE
+  ATTRIBUTE_HIDDEN;
 
 /* Creates a String object starting from the NUL-terminated string
-   S. */
-extern OOP _gst_string_new (const char *s);
+   S.  */
+extern OOP _gst_string_new (const char *s) 
+  ATTRIBUTE_HIDDEN;
 
 /* Look in the Smalltalk dictionary for a class whose name is in the
-   Symbol CLASSNAMEOOP. */
-extern OOP _gst_find_class (OOP classNameOOP) ATTRIBUTE_PURE;
+   Symbol CLASSNAMEOOP.  */
+extern OOP _gst_find_class (OOP classNameOOP)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
 /* Look for an implementation of SELECTOR (a Symbol) into CLASS_OOP's
-   method dictionary or in the method dictionary of a superclass. */
+   method dictionary or in the method dictionary of a superclass.  */
 extern OOP _gst_find_class_method (OOP class_oop,
-				   OOP selector) ATTRIBUTE_PURE;
+				   OOP selector)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
 /* Create a new Message object for the given SELECTOR (a Symbol) and
-   Array of arguments. */
+   Array of arguments.  */
 extern OOP _gst_message_new_args (OOP selectorOOP,
-				  OOP argsArray);
+				  OOP argsArray) 
+  ATTRIBUTE_HIDDEN;
 
 /* Create a new DirectedMessage object for the given RECEIVER,
-   SELECTOR (a Symbol) and Array of arguments. */
+   SELECTOR (a Symbol) and Array of arguments.  */
 extern OOP _gst_directed_message_new_args (OOP receiverOOP,
 					   OOP selectorOOP,
-					   OOP argsArray);
+					   OOP argsArray) 
+  ATTRIBUTE_HIDDEN;
 
 /* Returns the name of CLASS_OOP (a Smalltalk Class) */
-extern OOP _gst_get_class_symbol (OOP class_oop) ATTRIBUTE_PURE;
+extern OOP _gst_get_class_symbol (OOP class_oop)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
 /* Create and return an exact copy of OOP, which can be any kind
    of OOP.  Builtin OOPs and integers are returned unchanged,
    while for other objects this is a "shallow copy"; all the
    instance variables in the new object are the exact same ones
-   that are in the original object. */
-extern OOP _gst_object_copy (OOP oop);
+   that are in the original object.  */
+extern OOP _gst_object_copy (OOP oop) 
+  ATTRIBUTE_HIDDEN;
 
 /* Returns the array of the names of the instance variables of
-   CLASS_OOP (a Smalltalk Class). */
-extern OOP _gst_instance_variable_array (OOP class_oop) ATTRIBUTE_PURE;
+   CLASS_OOP (a Smalltalk Class).  */
+extern OOP _gst_instance_variable_array (OOP class_oop)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
 /* Returns the array of the names of the pool dictionaries of
-   CLASS_OOP (a Smalltalk Class). */
-extern OOP _gst_shared_pool_dictionary (OOP class_oop) ATTRIBUTE_PURE;
+   CLASS_OOP (a Smalltalk Class).  */
+extern OOP _gst_shared_pool_dictionary (OOP class_oop)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
 /* Creates a new CObject pointing to cObjPtr, extracting the name of
-   the class to be instantiated from the CType, TYPEOOP. */
+   the class to be instantiated from the CType, TYPEOOP.  */
 extern OOP _gst_c_object_new_typed (PTR cObjPtr,
-				    OOP typeOOP);
+				    OOP typeOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Allocates a new CObject by malloc-ing SIZE bytes; CLASS_OOP is the
-   class to be instantiated. */
+   class to be instantiated.  */
 extern OOP _gst_alloc_cobject (OOP class_oop,
-			       long unsigned int size);
+			       size_t size) 
+  ATTRIBUTE_HIDDEN;
 
 /* Creates a new CType that when passed to _gst_c_object_new_typed
-   creates an instance of COBJECTSUBCLASSOOP. */
-extern OOP _gst_c_type_new (OOP cObjectSubclassOOP);
+   creates an instance of COBJECTSUBCLASSOOP.  */
+extern OOP _gst_c_type_new (OOP cObjectSubclassOOP) 
+  ATTRIBUTE_HIDDEN;
 
-/* Creates a new String with LEN indexed instance variables. */
-extern OOP _gst_new_string (int len);
+/* Creates a new String with LEN indexed instance variables.  */
+extern OOP _gst_new_string (size_t len) 
+  ATTRIBUTE_HIDDEN;
 
-/* Creates a new ByteArray containing LEN bytes starting at BYTES. */
+/* Creates a new ByteArray containing LEN bytes starting at BYTES.  */
 extern OOP _gst_byte_array_new (const gst_uchar * bytes,
-				int len);
+				size_t len) 
+  ATTRIBUTE_HIDDEN;
 
-/* Creates a new String containing LEN characters starting at S. */
+/* Creates a new String containing LEN characters starting at S.  */
 extern OOP _gst_counted_string_new (const char *s,
-				    int len);
+				    size_t len) 
+  ATTRIBUTE_HIDDEN;
 
 /* Adds the key KEYOOP, associated with VALUEOOP, to the
    IdentityDictionary (or a subclass sharing the same representation)
-   IDENTITYDICTIONARYOOP. */
+   IDENTITYDICTIONARYOOP.  */
 extern OOP _gst_identity_dictionary_at_put (OOP identityDictionaryOOP,
 					    OOP keyOOP,
-					    OOP valueOOP);
+					    OOP valueOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Called when a dictionary becomes full, this routine replaces the
    dictionary instance that DICTIONARYOOP is pointing to with a new,
    larger dictionary, and returns this new dictionary (the object
-   pointer, not the OOP). */
-extern mst_Object _gst_grow_dictionary (OOP dictionaryOOP);
+   pointer, not the OOP).  */
+extern mst_Object _gst_grow_dictionary (OOP dictionaryOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Called when an IdentityDictionary becomes full, this routine
    replaces the IdentityDictionary instance that IDENTITYDICTIONARYOOP
    is pointing to with a new, larger dictionary, and returns this new
-   dictionary (the object pointer, not the OOP). */
-extern gst_identity_dictionary _gst_grow_identity_dictionary (OOP identityDictionaryOOP);
+   dictionary (the object pointer, not the OOP).  */
+extern gst_identity_dictionary _gst_grow_identity_dictionary (OOP identityDictionaryOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Allocates and returns a new C (ASCIZ) string that has the same
    contents as STRINGOOP.  Even if there are embedded NULs, the
-   allocated area has always a size of "stringOOP size + 1" bytes. */
-extern char *_gst_to_cstring (OOP stringOOP);
+   allocated area has always a size of "stringOOP size + 1" bytes.  */
+extern char *_gst_to_cstring (OOP stringOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Allocates and returns a new memory block that has the same contents
    as BYTEARRAYOOP.  Even if there are embedded NULs, the allocated
-   area has always a size of "byteArrayOOP size" bytes. */
-extern gst_uchar *_gst_to_byte_array (OOP byteArrayOOP);
+   area has always a size of "byteArrayOOP size" bytes.  */
+extern gst_uchar *_gst_to_byte_array (OOP byteArrayOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Creates the kernel classes of the Smalltalk system.  Operates in two
    passes: pass1 creates the class objects, but they're not completely
    initialized.  pass2 finishes the initialization process.  The garbage
-   collector can NOT run during this time. */
-extern void _gst_init_dictionary (void);
+   collector can NOT run during this time.  */
+extern void _gst_init_dictionary (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Copies the first bytes of S into STRINGOOP (as many bytes as the
-   OOP can hold). */
+   OOP can hold).  */
 extern void _gst_set_oopstring (OOP stringOOP,
-				const char *s);
+				const char *s) 
+  ATTRIBUTE_HIDDEN;
 
 /* Set the instance variables of the FileStream object,
    FILESTREAMOOP.  If BUFFERED is true, the variables
-   inherited by Streams are set to a 1024-bytes String. */
+   inherited by Streams are set to a 1024-bytes String.  */
 extern void _gst_set_file_stream_file (OOP fileStreamOOP,
 				       int fd,
 				       OOP fileNameOOP,
 				       mst_Boolean isPipe,
 				       int access,
-				       mst_Boolean buffered);
+				       mst_Boolean buffered) 
+  ATTRIBUTE_HIDDEN;
 
 /* Copies the first bytes of BYTES into BYTEARRAYOOP (as many bytes as
-   the OOP can hold). */
+   the OOP can hold).  */
 extern void _gst_set_oop_bytes (OOP byteArrayOOP,
-				gst_uchar * bytes);
+				gst_uchar * bytes) 
+  ATTRIBUTE_HIDDEN;
 
-/* Frees the memory pointed to by the CObject, COBJOOP. */
-extern void _gst_free_cobject (OOP cObjOOP);
+/* Frees the memory pointed to by the CObject, COBJOOP.  */
+extern void _gst_free_cobject (OOP cObjOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Loads the contents of the global variable from the Smalltalk
    dictionary after NUMOOPS objects have been loaded from an
-   image. */
-extern mst_Boolean _gst_init_dictionary_on_image_load (long numOOPs);
+   image.  */
+extern mst_Boolean _gst_init_dictionary_on_image_load (size_t numOOPs) 
+  ATTRIBUTE_HIDDEN;
 
 /* Transforms a primitive name into a primitive index, looking up
-   the VMPrimitives dictionary. */
-extern int _gst_resolve_primitive_name (char *name);
+   the VMPrimitives dictionary.  */
+extern int _gst_resolve_primitive_name (char *name) 
+  ATTRIBUTE_HIDDEN;
 
 #endif /* GST_DICT_H */

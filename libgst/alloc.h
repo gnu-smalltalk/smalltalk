@@ -82,17 +82,60 @@ struct heap_data
 };
 
 
-PTR _gst_mem_alloc (heap_data *h, size_t);
-void _gst_mem_free (heap_data *h, PTR);
-PTR _gst_mem_realloc (heap_data *h, PTR, size_t);
-heap_data *_gst_mem_new_heap (size_t heap_allocation_size, size_t heap_limit);
+/* Allocate a chunk of N bytes from the independent heap H.  Invoke
+   the out-of-memory hook if the heap's limit is reached, and return
+   NULL if memory cannot be allocated even after the hook returned.  */
+extern PTR _gst_mem_alloc (heap_data *h, size_t n)
+  ATTRIBUTE_HIDDEN;
 
-PTR xmalloc (register size_t n);
-PTR xcalloc (register size_t n, register size_t s);
-PTR xrealloc (register PTR p, register size_t n);
-char *xstrdup (const char *s);
-void xfree (register PTR p);
-void nomemory (int fatal);
+/* Free the memory chunk pointed to by P, which was allocated from the
+   independent heap H.  */
+extern void _gst_mem_free (heap_data *h, PTR p)
+  ATTRIBUTE_HIDDEN;
+
+/* Resize the memory chunk pointed to by P, which was allocated from the
+   independent heap H, so that its size becomes N.  Return the new
+   pointer.  Invoke the out-of-memory hook if the heap's limit is reached,
+   and return NULL if memory cannot be allocated even after the hook
+   returned.  */
+extern PTR _gst_mem_realloc (heap_data *h, PTR p, size_t n)
+  ATTRIBUTE_HIDDEN;
+
+/* Allocate a new, independent heap which allocates from the OS chunks
+   of HEAP_ALLOCATION_SIZE bytes, up to a limit of HEAP_LIMIT bytes.  */
+extern heap_data *_gst_mem_new_heap (size_t heap_allocation_size,
+				     size_t heap_limit)
+  ATTRIBUTE_HIDDEN;
+
+/* Allocate a chunk of N bytes using malloc.  Exit if this amount of
+   memory cannot be allocated.  */
+extern PTR xmalloc (size_t n)
+  ATTRIBUTE_HIDDEN;
+
+/* Allocate a chunk of S*N bytes using malloc, clear it and return a pointer
+   to its base.  Exit if memory cannot be allocated.  */
+extern PTR xcalloc (size_t n, size_t s)
+  ATTRIBUTE_HIDDEN;
+
+/* Resize the memory chunk pointed to by P, which was allocated using
+   malloc, so that its size becomes N.  Return the new pointer, or exit
+   if the memory cannot be allocated.  */
+extern PTR xrealloc (PTR p, size_t n)
+  ATTRIBUTE_HIDDEN;
+
+/* Allocate memory for a copy of the null-terminated string S using malloc,
+   duplicate the contents of S, and return the pointer to the copy.  Exit
+   if the memory cannot be allocated.  */
+extern char *xstrdup (const char *s)
+  ATTRIBUTE_HIDDEN;
+
+/* Free the chunk pointed to by P, which was allocated using malloc.  */
+extern void xfree (PTR p)
+  ATTRIBUTE_HIDDEN;
+
+/* Print an error message, and exit if FATAL is non-zero.  */
+extern void nomemory (int fatal)
+  ATTRIBUTE_HIDDEN;
 
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free xfree

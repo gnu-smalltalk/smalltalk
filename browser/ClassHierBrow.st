@@ -1003,6 +1003,7 @@ blueButtonMenuForText: theView
 	selectors: #(#('Cut' #gstCut) #('Copy' #gstCopy) #('Paste' #gstPaste)
 		     #() #('Clear' #gstClear) #() #('Line...' #line) #('Find...' #find)
 		     #() #('Do it' #eval) #('Print it' #evalAndPrintResult) #('Inspect' #evalAndInspectResult)
+		     #() #('Senders' #senders) #('Implementors' #implementors)
 		     #() #('Accept' #compileIt) #('Cancel' #revert) #() #('Close' #close))
 	receiver: theView
 	argument: nil!

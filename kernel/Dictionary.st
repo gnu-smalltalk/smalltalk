@@ -45,6 +45,7 @@ unique objects (typcially instances of Symbol), and associates another
 object with that index.  I use the equality operator = to determine
 equality of indices.' !
 
+
 
 !Dictionary class methodsFor: 'instance creation'!
 
@@ -94,7 +95,9 @@ at: key put: value
 at: key
     "Answer the value associated to the given key. Fail if the key
      is not found"
-    ^self at: key ifAbsent: [ SystemExceptions.NotFound signalOn: key what: 'key' ]
+    ^self
+	at: key
+	ifAbsent: [ SystemExceptions.NotFound signalOn: key what: 'key' ]
 !
 
 at: key ifAbsent: aBlock
@@ -127,7 +130,9 @@ at: aKey ifPresent: aBlock
 associationAt: key
     "Answer the key/value Association for the given key. Fail if the key
      is not found"
-    ^self associationAt: key ifAbsent: [ SystemExceptions.NotFound signalOn: key what: 'key' ]
+    ^self
+	associationAt: key
+	ifAbsent: [ SystemExceptions.NotFound signalOn: key what: 'key' ]
 !
 
 associationAt: key ifAbsent: aBlock
@@ -287,12 +292,12 @@ associationsDo: aBlock
 
 keysDo: aBlock
     "Pass each key in the dictionary to aBlock"
-    self keysAndValuesDo: [ :key :val | aBlock value: key ]
+    super do: [ :assoc | aBlock value: assoc key ]
 !
 
 do: aBlock
     "Pass each value in the dictionary to aBlock"
-    self keysAndValuesDo: [ :key :val | aBlock value: val ]
+    super do: [ :assoc | aBlock value: assoc value ]
 !
 
 keysAndValuesDo: aBlock
@@ -354,12 +359,12 @@ hash
     | hashValue |
     hashValue := tally.
     self associationsDo: [:assoc |
-	hashValue := hashValue bitXor: (self hashFor: assoc) scramble.
+        hashValue := hashValue bitXor: (self hashFor: assoc) scramble.
 
-	"hack needed because the Smalltalk dictionary contains itself"
-	assoc value == self ifFalse: [
-	    hashValue := hashValue bitXor: assoc value hash scramble.
-	]
+        "hack needed because the Smalltalk dictionary contains itself"
+        assoc value == self ifFalse: [
+            hashValue := hashValue bitXor: assoc value hash scramble.
+        ]
     ].
 
     ^hashValue
@@ -530,4 +535,3 @@ withAllSuperspaces
     "This method is needed by the compiler"
     ^{self}
 ! !
-

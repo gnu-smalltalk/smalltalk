@@ -1,0 +1,179 @@
+@deffn Typedef STREAM
+@fnindex STREAM
+
+Data type used to pass details of streams between functions,
+much like stdio's @code{FILE}, but more flexible.  A @code{STREAM} can be uni- or
+bi-directional depending on how it is initialised.
+
+@end deffn
+
+@deftypefn Typedef int (*StreamPut) (int @var{ch}, STREAM * @var{stream})
+@fnindex StreamPut
+
+Parameters:
+@table @code
+@item ch
+The character to write to @var{stream} cast to an int.
+@item stream
+The stream being written to.
+@end table
+
+Type of the function to put a character in a writeable stream.
+
+
+The function should return the character written to the
+stream, cast to an int if it was written successfully, or
+else @code{EOF}, if the write failed.
+
+@end deftypefn
+
+@deftypefn Typedef int (*StreamGet) (STREAM * @var{stream})
+@fnindex StreamGet
+
+Parameters:
+@table @code
+@item stream
+The stream being read from.
+@end table
+
+Type of the function to get a character from a readable stream.
+
+
+The function should return the character read from the
+stream, cast to an int if it was read successfully, or
+else @code{EOF}, if the read failed.
+
+@end deftypefn
+
+@deftypefn Function STREAM * stream_new (snv_pointer @var{dets}, unsigned long @var{limit}, StreamGet @var{get_func}, StreamPut @var{put_func})
+@fnindex stream_new
+
+Parameters:
+@table @code
+@item dets
+user supplied stream details to be passed into the various funcs.
+@item limit
+the maximum number of consecutive bytes to fit in @var{dets}.
+@item get_func
+function to get a character from @var{dets} stream.
+@item put_func
+function to put a character in @var{dets} stream.
+@end table
+
+Allocate and initialize a new @code{STREAM} data type.  The @var{get_func}
+and @var{put_func} can be NULL if you intend to create a non-readable
+or non-writable stream, respectively.
+
+
+The address of the newly allocated and initialised stream is returned.
+
+@end deftypefn
+
+@deftypefn Function snv_pointer stream_delete (STREAM *@var{stream})
+@fnindex stream_delete
+
+Parameters:
+@table @code
+@item stream
+The stream pending deletion
+@end table
+
+The memory associated with @var{stream} is recycled.
+
+The @code{dets} supplied by the user when the stream was created are
+returned for handling by the calling function.
+
+@end deftypefn
+
+@deffn Macro SNV_UNLIMITED
+@fnindex SNV_UNLIMITED
+
+Used to denote that there is no upper limit to the number of characters
+that can safely be written to a stream.
+
+@end deffn
+
+@deftypefn Function snv_pointer stream_details (STREAM *@var{stream})
+@fnindex stream_details
+
+Parameters:
+@table @code
+@item stream
+the stream being queried.
+@end table
+
+The finalization function specified when @var{stream} was created (if any)
+is called, and then the memory associated with @var{stream} is recycled.
+It is the responsibility of the finalization function to recycle, or
+otherwise manage, any memory associated with the user supplied @code{dets}.
+
+This function returns the stream details associated with @var{stream}
+when it was originally created.
+
+@end deftypefn
+
+@deftypefn Function int stream_put (int @var{ch}, STREAM *@var{stream})
+@fnindex stream_put
+
+Parameters:
+@table @code
+@item ch
+A single character to be placed in @var{stream}.
+@item stream
+The stream to be written to.
+@end table
+
+This function will @var{ch} in @var{stream} if that stream's output limit will
+not be exceeded.
+
+
+If @var{stream} is full, return 1.  Otherwise, if any other error occurs,
+that error code is returned unchanged.  This is of course dependant
+on what the handler function uses to indicate an error.  If the stream
+is not full and the stream's writing function succeeds, 1 (the number of
+characters emitted!) is returned.
+
+@end deftypefn
+
+@deftypefn Function int stream_puts (char *@var{s}, STREAM *@var{stream})
+@fnindex stream_puts
+
+Parameters:
+@table @code
+@item s
+A string to be placed in @var{s}tream.
+@item stream
+The stream to be written to.
+@end table
+
+This function will @@ch in @var{s}tream if that stream's output limit will
+not be exceeded.
+
+
+If any other error occurs, that error code is returned unchanged.
+This is of course dependant on what the handler function uses to
+indicate an error.  If the stream becomes full, the remaining
+characters are not printed.  If the stream's writing function
+always succeeds, the number of characters emitted or skipped is
+returned.
+
+@end deftypefn
+
+@deftypefn Function int stream_get (STREAM *@var{stream})
+@fnindex stream_get
+
+Parameters:
+@table @code
+@item stream
+The stream to be read from.
+@end table
+
+This function will try to read a single character from @var{stream}.
+
+
+If an error occurs or the end of @var{stream} is reached, -1 is returned.
+Under normal circumstances the value if the character read (cast to
+an int) is returned.
+
+@end deftypefn
+

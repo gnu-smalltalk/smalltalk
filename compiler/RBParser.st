@@ -246,8 +246,8 @@ parseDoits
 
     | node |
 
-    [   self atEnd ifTrue: [ ^false ].
-
+    [
+	self atEnd ifTrue: [ ^false ].
         node := self parseStatements: false.
         self step.           "gobble doit terminating bang"
 	node statements size > 0 and: [ self evaluate: node ]
@@ -421,7 +421,7 @@ parseStatementList: tagBoolean into: sequenceNode
     periods := OrderedCollection new.
     self addCommentsTo: sequenceNode.
     tagBoolean ifTrue: [self parseResourceTag].
-    
+
     [self atEnd 
 	or: [currentToken isSpecial and: ['!])}' includes: currentToken value]]] 
 	    whileFalse: 
@@ -442,7 +442,7 @@ parseStatementList: tagBoolean into: sequenceNode
 		    ifTrue: 
 			[periods add: currentToken start.
 			self step]
-		    ifFalse: [return := true]].
+		    ifFalse: [ return := true]].
     sequenceNode
 	statements: statements;
 	periods: periods.
@@ -1140,7 +1140,6 @@ stripComment
     comments add: (start to: stop)!
 
 stripSeparators
-    
     [[characterType == #separator]
 	whileTrue: [self step].
     currentCharacter == $"]

@@ -34,100 +34,74 @@
 #define GST_BYTE_H
 
 enum {
-  PUSH_RECEIVER_VARIABLE = 0,
-  PUSH_TEMPORARY_VARIABLE = 16,
-  PUSH_LIT_CONSTANT = 32,
-  PUSH_LIT_VARIABLE = 64,
-  POP_RECEIVER_VARIABLE = 96,
-  POP_TEMPORARY_VARIABLE = 104,
-  PUSH_SPECIAL = 112,
-  PUSH_SIGNED_8 = 116,
-  PUSH_UNSIGNED_8 = 117,
-  PUSH_ZERO = 118,
-  PUSH_ONE = 119,
-  RETURN_INDEXED = 120,
-  RETURN_METHOD_STACK_TOP = 124,
-  RETURN_CONTEXT_STACK_TOP = 125,
-  BIG_LITERALS_BYTECODE = 126,
-  LINE_NUMBER_BYTECODE = 127,
-  PUSH_INDEXED = 128,
-  STORE_INDEXED = 129,
-  POP_STORE_INDEXED = 130,
-  SEND1EXT_BYTE = 131,
-  SEND2EXT_BYTE = 132,
-  SEND_SUPER1EXT_BYTE = 133,
-  BIG_INSTANCE_BYTECODE = 134,
-  POP_STACK_TOP = 135,
-  DUP_STACK_TOP = 136,
-  PUSH_ACTIVE_CONTEXT = 137,
-  OUTER_TEMP_BYTECODE = 138,
-  NOP_BYTECODE = 139,
-  REPLACE_SELF = 140,
-  REPLACE_ONE = 141,	/* chosen for `1 to: ... do:' */
-  REPLACE_INDEXED = 142,
-  EXIT_INTERPRETER = 143,
-  JUMP_SHORT = 144,
-  POP_JUMP_FALSE_SHORT = 152,
-  JUMP_LONG = 160,
-  POP_JUMP_TRUE = 168,
-  POP_JUMP_FALSE = 172,
-  PLUS_SPECIAL = 176,
-  MINUS_SPECIAL = 177,
-  LESS_THAN_SPECIAL = 178,
-  GREATER_THAN_SPECIAL = 179,
-  LESS_EQUAL_SPECIAL = 180,
-  GREATER_EQUAL_SPECIAL = 181,
-  EQUAL_SPECIAL = 182,
-  NOT_EQUAL_SPECIAL = 183,
-  TIMES_SPECIAL = 184,
-  DIVIDE_SPECIAL = 185,
-  REMAINDER_SPECIAL = 186,
-  AT_SIGN_SPECIAL = 187,
-  BIT_SHIFT_COLON_SPECIAL = 188,
-  INTEGER_DIVIDE_SPECIAL = 189,
-  BIT_AND_COLON_SPECIAL = 190,
-  BIT_OR_COLON_SPECIAL = 191,
-  AT_COLON_SPECIAL = 192,
-  AT_COLON_PUT_COLON_SPECIAL = 193,
-  SIZE_SPECIAL = 194,
-  NEXT_SPECIAL = 195,
-  NEXT_PUT_COLON_SPECIAL = 196,
-  AT_END_SPECIAL = 197,
-  SAME_OBJECT_SPECIAL = 198,
-  CLASS_SPECIAL = 199,
-  BLOCK_COPY_COLON_SPECIAL = 200,
-  VALUE_SPECIAL = 201,
-  VALUE_COLON_SPECIAL = 202,
-  DO_COLON_SPECIAL = 203,
-  NEW_SPECIAL = 204,
-  NEW_COLON_SPECIAL = 205,
-  IS_NIL_SPECIAL = 206,
-  NOT_NIL_SPECIAL = 207,
-  SEND_NO_ARG = 208,
-  SEND_1_ARG = 224,
-  SEND_2_ARG = 240,
+  PLUS_SPECIAL = 0,
+  MINUS_SPECIAL = 1,
+  LESS_THAN_SPECIAL = 2,
+  GREATER_THAN_SPECIAL = 3,
+  LESS_EQUAL_SPECIAL = 4,
+  GREATER_EQUAL_SPECIAL = 5,
+  EQUAL_SPECIAL = 6,
+  NOT_EQUAL_SPECIAL = 7,
+  TIMES_SPECIAL = 8,
+  DIVIDE_SPECIAL = 9,
+  REMAINDER_SPECIAL = 10,
+  BIT_XOR_COLON_SPECIAL = 11,
+  BIT_SHIFT_COLON_SPECIAL = 12,
+  INTEGER_DIVIDE_SPECIAL = 13,
+  BIT_AND_COLON_SPECIAL = 14,
+  BIT_OR_COLON_SPECIAL = 15,
 
-  RECEIVER_INDEX = 0,
-  TRUE_INDEX = 1,
-  FALSE_INDEX = 2,
-  NIL_INDEX = 3,
-  THIS_CONTEXT_INDEX = (PUSH_ACTIVE_CONTEXT - PUSH_SPECIAL),
+  AT_COLON_SPECIAL = 16,
+  AT_COLON_PUT_COLON_SPECIAL = 17,
+  SIZE_SPECIAL = 18,
+  CLASS_SPECIAL = 19,
+  IS_NIL_SPECIAL = 20,
+  NOT_NIL_SPECIAL = 21,
+  VALUE_SPECIAL = 22,
+  VALUE_COLON_SPECIAL = 23,
+  SAME_OBJECT_SPECIAL = 24,
+  JAVA_AS_INT_SPECIAL = 25,
+  JAVA_AS_LONG_SPECIAL = 26,
 
-  RECEIVER_LOCATION = (0 << 6),
-  TEMPORARY_LOCATION = (1 << 6),
-  LIT_CONST_LOCATION = (2 << 6),
-  LIT_VAR_LOCATION = (3 << 6),
+  NEW_COLON_SPECIAL = 32,
+  THIS_CONTEXT_SPECIAL = 33,
 
-  LOCATION_MASK = (3 << 6),
-  OPERATION_MASK = (3 << 6),
+  SEND = 28,
+  SEND_SUPER = 29,
+  SEND_IMMEDIATE = 30,
+  SEND_SUPER_IMMEDIATE = 31,
 
-  PUSH_LITERAL = (0 << 6),
-  POP_STORE_INTO_ARRAY = (0 << 6),
-  PUSH_VARIABLE = (1 << 6),
-  POP_STORE_VARIABLE = (2 << 6),
-  STORE_VARIABLE = (3 << 6),
+  PUSH_TEMPORARY_VARIABLE = 32,
+  PUSH_OUTER_TEMP = 33,
+  PUSH_LIT_VARIABLE = 34,
+  PUSH_RECEIVER_VARIABLE = 35,
+  STORE_TEMPORARY_VARIABLE = 36,
+  STORE_OUTER_TEMP = 37,
+  STORE_LIT_VARIABLE = 38,
+  STORE_RECEIVER_VARIABLE = 39,
+  JUMP_BACK = 40,
+  JUMP = 41,
+  POP_JUMP_TRUE = 42,
+  POP_JUMP_FALSE = 43,
+  PUSH_INTEGER = 44,
+  PUSH_SPECIAL = 45,
+  PUSH_LIT_CONSTANT = 46,
+  POP_INTO_NEW_STACKTOP = 47,
+  POP_STACK_TOP = 48,
+  MAKE_DIRTY_BLOCK = 49,
+  RETURN_METHOD_STACK_TOP = 50,
+  RETURN_CONTEXT_STACK_TOP = 51,
+  DUP_STACK_TOP = 52,
+  EXIT_INTERPRETER = 53,
+  LINE_NUMBER_BYTECODE = 54,
+  EXT_BYTE = 55,
+  PUSH_SELF = 56,
 
-  EXTENDED_SEND_SUPER_FLAG = 32
+  NIL_INDEX = 0,
+  TRUE_INDEX = TRUE_OOP_INDEX - NIL_OOP_INDEX,
+  FALSE_INDEX = FALSE_OOP_INDEX - NIL_OOP_INDEX,
+  THIS_CONTEXT_INDEX = -128,
+  RECEIVER_INDEX = -129
 };
 
 typedef struct bytecode_array
@@ -137,12 +111,13 @@ typedef struct bytecode_array
   int maxLen;			/* max allocated len of byte code array */
   int stack_depth;
   int max_stack_depth;
-} *bytecodes;
+} *bc_vector;
 
-extern bytecodes _gst_cur_bytecodes;
+extern bc_vector _gst_cur_bytecodes
+  ATTRIBUTE_HIDDEN;
 
 /* Add 1 to the current stack depth and adjust the maximum depth
-   accordingly. */
+   accordingly.  */
 #define INCR_STACK_DEPTH()      do {                                         \
    if (++_gst_cur_bytecodes->stack_depth >				     \
        _gst_cur_bytecodes->max_stack_depth)				     \
@@ -150,151 +125,121 @@ extern bytecodes _gst_cur_bytecodes;
 } while (0)
 
 /* Add N to the current stack depth and adjust the maximum depth
-   accordingly. */
+   accordingly.  */
 #define ADD_STACK_DEPTH(n)      do {                                         \
   _gst_cur_bytecodes->stack_depth += (n);                             	     \
  if (_gst_cur_bytecodes->stack_depth > _gst_cur_bytecodes->max_stack_depth)  \
    _gst_cur_bytecodes->max_stack_depth = _gst_cur_bytecodes->stack_depth;    \
 } while (0)
 
-/* Subtract N from the current stack depth. */
+/* Subtract N from the current stack depth.  */
 #define SUB_STACK_DEPTH(n)      					     \
   (assert (_gst_cur_bytecodes->stack_depth >= (n)),		             \
    _gst_cur_bytecodes->stack_depth -= (n))
 
-/* Subtract N from the current stack depth. */
+/* Subtract N from the current stack depth.  */
 #define GET_STACK_DEPTH()	      					     \
   (_gst_cur_bytecodes->max_stack_depth)
 
-/* Allocate a new array of bytecodes. */
-extern void _gst_alloc_bytecodes ();
+/* Allocate a new array of bytecodes.  */
+extern void _gst_alloc_bytecodes () 
+  ATTRIBUTE_HIDDEN;
 
 /* Called when byte code compilation is complete, this routine returns
    the set of byte codes that were compiled.  Since compilation is
    complete, this routine also resets the internal state of the byte
-   code compiler in preparation for next time. */
-extern bytecodes _gst_get_bytecodes (void);
+   code compiler in preparation for next time.  */
+extern bc_vector _gst_get_bytecodes (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Called to save the set of byte codes currently being compiled and
    prepare for a new compilation of byte codes. The current set of
    byte codes being compiled is returned for the caller to keep and to
    later use in a _gst_restore_bytecode_array call.  */
-extern bytecodes _gst_save_bytecode_array ();
+extern bc_vector _gst_save_bytecode_array () 
+  ATTRIBUTE_HIDDEN;
 
 /* Restores the internal state of the byte code compiler so that it
    can continue compiling byte codes into the byte code array
    BYTECODES, which should have been returned at some previous point
    from _gst_save_bytecode_array().  Return the TAG that was passed
    to _gst_save_bytecode_array.  */
-extern void _gst_restore_bytecode_array ();
+extern void _gst_restore_bytecode_array () 
+  ATTRIBUTE_HIDDEN;
 
 /* This copies the byte instance variables out of the Smalltalk
    ByteArray object, BYTEARRAYOOP, and creates a bytecodes structure
    for it.  This is used when a method is created by Smalltalk
-   code. */
-extern bytecodes _gst_extract_bytecodes (OOP byteArrayOOP);
+   code.  */
+extern bc_vector _gst_extract_bytecodes (OOP byteArrayOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* This eliminates all the bytecodes in the array starting at the one
-   pointed to by HERE. */
+   pointed to by HERE.  */
 extern void _gst_truncate_bytecodes (gst_uchar * here,
-				     bytecodes bytecodes);
+				     bc_vector bytecodes) 
+  ATTRIBUTE_HIDDEN;
 
 /* This compiles a LINE_NUMBER_BYTECODE if line is different from the
-   last line we compiled, or if FORCE is true. */
-extern void _gst_line_number (int line, mst_Boolean force);
+   last line we compiled, or if FORCE is true.  */
+extern void _gst_line_number (int line, mst_Boolean force) 
+  ATTRIBUTE_HIDDEN;
 
-/* This tacks BYTE at the end of the current bytecode array. */
-extern void _gst_compile_byte (gst_uchar byte);
+/* This tacks the bytecode BYTE, with argument ARG, at the end of the
+   current bytecode array.  */
+extern void _gst_compile_byte (gst_uchar byte, long arg) 
+  ATTRIBUTE_HIDDEN;
 
 /* This tacks the contents of the BYTECODES array at the end of the
-   current bytecode array, and then frees the array. */
-extern void _gst_compile_and_free_bytecodes (bytecodes bytecodes);
+   current bytecode array, and then frees the array.  */
+extern void _gst_compile_and_free_bytecodes (bc_vector bytecodes) 
+  ATTRIBUTE_HIDDEN;
 
 /* This tacks the bytes starting at FROM (included) and ending at TO
-   (excluded) at the end of the current bytecode array. */
-extern void _gst_compile_bytecodes (register gst_uchar * from,
-				    register gst_uchar * to);
+   (excluded) at the end of the current bytecode array.  */
+extern void _gst_compile_bytecodes (gst_uchar * from,
+				    gst_uchar * to) 
+  ATTRIBUTE_HIDDEN;
 
-/* This frees the BYTECODES data structure. */
-extern void _gst_free_bytecodes (bytecodes bytecodes);
+/* This frees the BYTECODES data structure.  */
+extern void _gst_free_bytecodes (bc_vector bytecodes) 
+  ATTRIBUTE_HIDDEN;
 
 /* This copies the contents of the bytecode array, BYTECODES, to the
-   memory starting at DEST. */
+   memory starting at DEST.  */
 extern void _gst_copy_bytecodes (gst_uchar * dest,
-				 bytecodes bytecodes);
+				 bc_vector bytecodes) 
+  ATTRIBUTE_HIDDEN;
 
 /* This prints the bytecode pointed to by BP, using IP to resolve the
    offsets for the relative jumps.  LITERAL_VEC is used to print the
-   literals pointed to by the bytecodes. */
-extern void _gst_print_bytecode_name (gst_uchar * bp,
-				      int ip,
-				      OOP * literal_vec);
+   literals pointed to by the bytecodes.  The first line is preceded
+   by a tab character, subsequent lines are preceded by PREFIX and a
+   tab.  */
+extern gst_uchar *_gst_print_bytecode_name (gst_uchar * bp,
+				            int ip,
+				            OOP * literal_vec,
+					    const char *prefix) 
+  ATTRIBUTE_HIDDEN;
 
 /* This prints the bytecode array, using LITERAL_VEC is used to print
-   the literals pointed to by the bytecodes. */
-extern void _gst_print_bytecodes (bytecodes bytecodes,
-				  OOP * literal_vec);
+   the literals pointed to by the bytecodes.  */
+extern void _gst_print_bytecodes (bc_vector bytecodes,
+				  OOP * literal_vec) 
+  ATTRIBUTE_HIDDEN;
 
 /* This returns the current number of bytecodes that have been compiled
-   (the size of the current bytecode array). */
-extern int _gst_current_bytecode_length (void);
+   (the size of the current bytecode array).  */
+extern int _gst_current_bytecode_length (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* This returns the number of bytecdoes compiled into the BYTECODES
-   array. */
-extern int _gst_bytecode_length (bytecodes bytecodes);
+   array.  */
+extern int _gst_bytecode_length (bc_vector bytecodes) 
+  ATTRIBUTE_HIDDEN;
 
-/* A table of the sizes of each bytecode. */
-extern const int _gst_bytecode_size_table[];
+/* Returns the size of each bytecode, including the arguments.  */
+#define BYTECODE_SIZE			2
 
-/* Returns the size of the bytecode B. */
-#define BYTECODE_SIZE(b)		_gst_bytecode_size_table[(gst_uchar) b]
-
-
-/*    Interpretation of the virtual machine byte codes
-
-0-15    push receiver variable 	0000iiii
-16-31   push temporary location	0001iiii
-32-63   push literal constant	001iiiii
-64-95   push literal variable	010iiiii
-96-103  pop & store rec var	01100iii
-104-111 pop & store temp loc	01101iii
-112-119 push indexed		01110iii receiver true false nil -1 0 1 2
-120-123 return indexed		011110ii receiver true false nil
-124-125 return st top from	0111110i method, current context
-126	literal > 63 operation  01111110 yyxxxxxx xxxxxxxx: xx...xx index;
-						 yy = op: push const, push
-						 var, store var, pop/store var
-127     breakpoint patch        01111111 send #breakpoint:return:, reexecute
-128	push indir		10000000 jjkkkkkk jj = receiver var, temp loc,
-						  lit const, lit var; #kkkkkk
-129	store indir		10000001 jjkkkkkk (rv, tl, invalid, lv)
-130	pop & store indir	10000010 jjkkkkkk (like store indir)
-131	send lit selector	10000011 jjjkkkkk sel #kkkkk with jjj args
-132	send lit selector	10000100 kksjjjjj kkkkkkkk (as 131, s=super)
-133	send lit sel to super	10000101 jjjkkkkk as 131
-134	inst.var> 63 operation  01111110 yyxxxxxx xxxxxxxx: xx...xx index;
-						 yy = op: pop/store into new
-						 stack top, push, store, pop/store
-135	pop stack top		10000111
-136	duplicate stack top	10001000
-137	push active context	10001001
-138	outer var operation	10001010 yyindex- scopes-- yy op
-					(invalid, push, store, pop/store)
-139	nop-needed by optimizer	10001011
-140	stack top = _gst_self	10001100
-141	stack top = one		10001101
-142	indir replace stack top	10001100 jjkkkkkk (like push indir)
-143	unused
-144-151	jmp (short)		10010iii 	  ofs=iii+1
-152-159	pop & jmp false (short)	10011iii 	  ofs=iii+1
-160-167	jmp (long)		10100iii jjjjjjjj ofs=(iii-4)*256+jjjjjjjj
-168-171 pop & jmp on true	101010ii jjjjjjjj ofs=ii*256+jjjjjjjj
-172-175 pop & jmp on false	101011ii jjjjjjjj like 168
-176-191 send arith message	1011iiii
-192-207	send special message	1100iiii
-208-223 send lit sel #iiii	1101iiii with no arguments
-224-239 send lit sel #iiii	1110iiii with 1 argument
-240-255 send lit sel #iiii	1111iiii with 2 arguments
-*/
 
 #endif /* GST_BYTE_H */

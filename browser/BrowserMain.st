@@ -184,7 +184,9 @@ initialize
     Windows := Set new.
     transcriptAndShell := BrowserShell openWorksheet: 'Smalltalk Transcript'
 		withText: (Version copyWith: Character nl).
-    Transcript message: transcriptAndShell value -> #insertAtEnd:.
+    (Smalltalk includesKey: #GTK) 
+        ifTrue: [ 'FIXME GTK bindings not ready for GUI transcript' printNl.]
+	ifFalse: [ Transcript message: transcriptAndShell value -> #insertAtEnd: ].
     Shell := transcriptAndShell key.
     Shell data: self.
     win := Shell blox.

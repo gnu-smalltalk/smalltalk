@@ -5,6 +5,7 @@
   <name>Blox</name>
   <prereq>@BLOX_IMPLEMENTATION@</prereq>
   <filein>test.st</filein>
+  <namespace>BLOX</namespace>
   <directory>browser</directory>
 
   <file>test.st</file>
@@ -13,6 +14,7 @@
 
 <@GTK_DISABLED@package>
   <name>GTK</name>
+  <namespace>GTK</namespace>
   <filein>GtkDecl.st</filein>
   <module>gst-gtk</module>
   <directory>gtk</directory>
@@ -33,28 +35,78 @@
   <file>example_eventbox.st</file>
   <file>example_hello.st</file>
   <file>example_tictactoe.st</file>
+  <file>example_tree.st</file>
 </@GTK_DISABLED@package>
 
 <package>
+  <name>BloxGTK</name>
+  <namespace>BLOX</namespace>
+  <prereq>GTK</prereq>
+  <filein>BloxBasic.st</filein>
+  <filein>BloxWidgets.st</filein>
+  <filein>BloxText.st</filein>
+  <filein>BloxExtend.st</filein>
+  <filein>Blox.st</filein>
+  <directory>blox-gtk</directory>
+
+  <file>Blox.st</file>
+  <file>BloxBasic.st</file>
+  <file>BloxWidgets.st</file>
+  <file>BloxText.st</file>
+  <file>BloxExtend.st</file>
+</package>
+
+<package>
   <name>BloxTK</name>
+  <namespace>BLOX</namespace>
+  <filein>BloxBasic.st</filein>
+  <filein>BloxWidgets.st</filein>
+  <filein>BloxText.st</filein>
+  <filein>BloxCanvas.st</filein>
+  <filein>BloxExtend.st</filein>
   <filein>Blox.st</filein>
   <module>blox-tk</module>
   <directory>blox-tk</directory>
 
   <file>Blox.st</file>
   <file>BloxBasic.st</file>
+  <file>BloxWidgets.st</file>
+  <file>BloxText.st</file>
   <file>BloxCanvas.st</file>
   <file>BloxExtend.st</file>
-  <file>BloxText.st</file>
-  <file>BloxWidgets.st</file>
   <file>colors.txt</file>
 </package>
 
 <package>
   <name>Browser</name>
+  <namespace>BLOX.BLOXBrowser</namespace>
   <prereq>Blox</prereq>
   <prereq>Parser</prereq>
   <filein>Load.st</filein>
+  <filein>GuiData.st</filein>
+  <filein>View.st</filein>
+  <filein>Manager.st</filein>
+  <filein>RadioForm.st</filein>
+  <filein>Menu.st</filein>
+  <filein>ModalDialog.st</filein>
+  <filein>PList.st</filein>
+  <filein>PText.st</filein>
+  <filein>PCode.st</filein>
+  <filein>ButtonForm.st</filein>
+  <filein>BrowShell.st</filein>
+  <filein>BrowserMain.st</filein>
+  <filein>ClassHierBrow.st</filein>
+  <filein>ClassBrow.st</filein>
+  <filein>NamespBrow.st</filein>
+  <filein>MethSetBrow.st</filein>
+  <filein>Inspector.st</filein>
+  <filein>DictInspect.st</filein>
+  <filein>MethInspect.st</filein>
+  <filein>StrcInspect.st</filein>
+  <filein>DebugSupport.st</filein>
+  <filein>Debugger.st</filein>
+  <filein>Notifier.st</filein>
+
   <directory>browser</directory>
 
   <file>BrowShell.st</file>
@@ -116,6 +168,7 @@
 
 <package>
   <name>Compiler</name>
+  <namespace>STInST</namespace>
   <prereq>Parser</prereq>
   <filein>StartCompiler.st</filein>
   <directory>compiler</directory>
@@ -127,23 +180,30 @@
 
 <@I18N_DISABLED@package>
   <name>I18N</name>
-  <filein>Load.st</filein>
+  <namespace>I18N</namespace>
+  <filein>Sets.st</filein>
+  <filein>Locale.st</filein>
+  <filein>Expression.st</filein>
+  <filein>GetText.st</filein>
+  <filein>Numbers.st</filein>
+  <filein>Times.st</filein>
+
   <module>i18n</module>
   <directory>i18n</directory>
 
-  <file>GetText.st</file>
-  <file>Load.st</file>
+  <file>Sets.st</file>
   <file>Locale.st</file>
+  <file>Expression.st</file>
+  <file>GetText.st</file>
   <file>Numbers.st</file>
   <file>Times.st</file>
   <file>Collation.st</file>
-  <file>Sets.st</file>
-  <file>Expression.st</file>
   <file>ChangeLog</file>
 </@I18N_DISABLED@package>
 
 <package>
   <name>DB</name>
+  <namespace>Jdm</namespace>
   <filein>DB.st</filein>
   <directory>db</directory>
 
@@ -154,22 +214,33 @@
 
 <package>
   <name>DhbNumericalMethods</name>
+  <namespace>Dhb</namespace>
   <prereq>SUnit</prereq>
-  <filein>Load.st</filein>
+  <prereq>DhbNumericalMethodsExtensions</prereq>
+  <filein>Basic.st</filein>
+  <filein>Statistics.st</filein>
+  <filein>RNG.st</filein>
+  <filein>Approximation.st</filein>
+  <filein>Matrixes.st</filein>
+  <filein>Functions.st</filein>
+  <filein>Optimization.st</filein>
+  <filein>Distributions.st</filein>
+  <filein>Integration.st</filein>
+  <filein>NumericsTests.st</filein>
+  <filein>NumericsAdds.st</filein>
   <directory>numerics</directory>
 
-  <file>NumericsAdds.st</file>
   <file>NumericsTests.st</file>
   <file>Approximation.st</file>
   <file>Basic.st</file>
   <file>Distributions.st</file>
   <file>Functions.st</file>
   <file>Integration.st</file>
-  <file>Load.st</file>
   <file>Matrixes.st</file>
   <file>Optimization.st</file>
   <file>RNG.st</file>
   <file>Statistics.st</file>
+  <file>NumericsAdds.st</file>
 </package>
 
 <package>
@@ -194,6 +265,7 @@
 
 <package>
   <name>MySQL</name>
+  <namespace>Jdm.MySQL</namespace>
   <prereq>DB</prereq>
   <prereq>TCP</prereq>
   <prereq>SUnit</prereq>
@@ -204,6 +276,22 @@
   <file>MySQL.st</file>
   <file>MySQLTests.st</file>
   <file>mysql-test.st</file>
+</package>
+
+<package>
+  <name>Glorp</name>
+  <prereq>MySQL</prereq>
+  <prereq>SUnit</prereq>
+  <filein>GlorpPort.st</filein>
+  <filein>Glorp.st</filein>
+  <filein>GlorpMySQL.st</filein>
+  <filein>GlorpTest.st</filein>
+  <directory>db</directory>
+
+  <file>GlorpPort.st</file>
+  <file>Glorp.st</file>
+  <file>GlorpMySQL.st</file>
+  <file>GlorpTest.st</file>
 </package>
 
 <package>
@@ -230,10 +318,21 @@
 
 <package>
   <name>Parser</name>
-  <filein>Load.st</filein>
+  <namespace>STInST</namespace>
+  <filein>RBToken.st</filein>
+  <filein>RBParseNodes.st</filein>
+  <filein>RBParser.st</filein>
+  <filein>ParseTreeSearcher.st</filein>
+  <filein>RBFormatter.st</filein>
+  <filein>STCompLit.st</filein>
+  <filein>STSymTable.st</filein>
+  <filein>STCompiler.st</filein>
+  <filein>STDecompiler.st</filein>
+  <filein>STLoaderObjs.st</filein>
+  <filein>STLoader.st</filein>
+
   <directory>compiler</directory>
 
-  <file>Load.st</file>
   <file>ParseTreeSearcher.st</file>
   <file>RBFormatter.st</file>
   <file>RBParseNodes.st</file>
@@ -272,32 +371,46 @@
 
 <package>
   <name>TCP</name>
-  <filein>TCP.st</filein>
+  <namespace>TCP</namespace>
+  <filein>Buffers.st</filein>
+  <filein>Datagram.st</filein>
+  <filein>SocketAddress.st</filein>
+  <filein>AbstractSocketImpl.st</filein>
+  <filein>IPSocketImpl.st</filein>
+  <filein>Sockets.st</filein>
+  <filein>Tests.st</filein>
+  <filein>cfuncs.st</filein>
+  <filein>init.st</filein>
+
   <module>tcp</module>
   <directory>tcp</directory>
 
-  <file>SocketAddress.st</file>
+  <file>Buffers.st</file>
   <file>Datagram.st</file>
+  <file>SocketAddress.st</file>
   <file>AbstractSocketImpl.st</file>
   <file>IPSocketImpl.st</file>
   <file>Sockets.st</file>
   <file>Tests.st</file>
-  <file>init.st</file>
   <file>cfuncs.st</file>
-  <file>TCP.st</file>
-  <file>Buffers.st</file>
+  <file>init.st</file>
   <file>ChangeLog</file>
 </package>
 
 <package>
   <name>WebServer</name>
+  <namespace>NetClients.WikiWorks</namespace>
   <prereq>NetClients</prereq>
-  <filein>Load.st</filein>
+  <filein>WebServer.st</filein>
+  <filein>FileServer.st</filein>
+  <filein>WikiServer.st</filein>
+  <filein>STT.st</filein>
+  <filein>Haiku.st</filein>
+
   <directory>net/httpd</directory>
 
   <file>FileServer.st</file>
   <file>Haiku.st</file>
-  <file>Load.st</file>
   <file>STT.st</file>
   <file>WebServer.st</file>
   <file>WikiServer.st</file>
@@ -314,6 +427,60 @@
   <file>rename.jpg</file>
   <file>test.st</file>
   <file>top.jpg</file>
+</package>
+
+<package>
+  <name>Java</name>
+  <prereq>TCP</prereq>
+  <filein>Java.st</filein>
+  <directory>java</directory>
+
+  <file>Java.st</file>
+  <file>JavaClassFiles.st</file>
+  <file>JavaMetaobjects.st</file>
+  <file>JavaTranslation.st</file>
+  <file>JavaRuntime.st</file>
+  <file>JavaExtensions.st</file>
+  <file>extract-native.awk</file>
+  <file>gnu_gcj_convert_IOConverter.st</file>
+  <file>gnu_gcj_runtime_StackTrace.st</file>
+  <file>gnu_gcj_runtime_StringBuffer.st</file>
+  <file>gnu_java_net_PlainDatagramSocketImpl.st</file>
+  <file>gnu_java_net_PlainSocketImpl.st</file>
+  <file>gnu_java_nio_FileLockImpl.st</file>
+  <file>gnu_java_nio_SelectorImpl.st</file>
+  <file>java_io_File.st</file>
+  <file>java_io_FileDescriptor.st</file>
+  <file>java_io_ObjectInputStream.st</file>
+  <file>java_io_VMObjectStreamClass.st</file>
+  <file>java_lang_Character.st</file>
+  <file>java_lang_Class.st</file>
+  <file>java_lang_ConcreteProcess.st</file>
+  <file>java_lang_Double.st</file>
+  <file>java_lang_Float.st</file>
+  <file>java_lang_Math.st</file>
+  <file>java_lang_Object.st</file>
+  <file>java_lang_Runtime.st</file>
+  <file>java_lang_String.st</file>
+  <file>java_lang_StringBuffer.st</file>
+  <file>java_lang_System.st</file>
+  <file>java_lang_Thread.st</file>
+  <file>java_lang_VMClassLoader.st</file>
+  <file>java_lang_ref_Reference.st</file>
+  <file>java_lang_reflect_Array.st</file>
+  <file>java_lang_reflect_Constructor.st</file>
+  <file>java_lang_reflect_Field.st</file>
+  <file>java_lang_reflect_Method.st</file>
+  <file>java_lang_reflect_Proxy.st</file>
+  <file>java_net_InetAddress.st</file>
+  <file>java_net_NetworkInterface.st</file>
+  <file>java_nio_DirectByteBufferImpl.st</file>
+  <file>java_nio_channels_FileChannelImpl.st</file>
+  <file>java_text_Collator.st</file>
+  <file>java_util_ResourceBundle.st</file>
+  <file>java_util_TimeZone.st</file>
+  <file>java_util_zip_Deflater.st</file>
+  <file>java_util_zip_Inflater.st</file>
 </package>
 
 <package>
@@ -369,6 +536,7 @@
   <file>bug4.st</file>
   <file>er2.st</file>
   <file>market.st</file>
+  <file>profile.st</file>
   <file>resolve.st</file>
   <file>self.st</file>
   <file>t.st</file>
@@ -378,11 +546,15 @@
 <disabled-package>
   <name>Examples</name>
   <directory>examples</directory>
+  <file>Debugger.st</file>
   <file>Man.st</file>
   <file>Tetris.st</file>
   <file>Application.st</file>
+  <file>Generator.st</file>
+  <file>Gen2.st</file>
   <file>Lisp.st</file>
   <file>Queens.st</file>
+  <file>DeltaBlue.st</file>
   <file>Richards.st</file>
   <file>Bench.st</file>
   <file>MiniDebugger.st</file>
@@ -394,7 +566,6 @@
   <file>RandomInt.st</file>
   <file>EditStream.st</file>
   <file>PrtHier.st</file>
-  <file>RecursLit.st</file>
   <file>Case.st</file>
   <file>Publish.st</file>
   <file>RegExp.st</file>
@@ -468,6 +639,7 @@
   <file>Time.st</file>
   <file>ByteStream.st</file>
   <file>FileStream.st</file>
+  <file>Security.st</file>
   <file>OrderColl.st</file>
   <file>TokenStream.st</file>
   <file>CFuncs.st</file>

@@ -30,7 +30,7 @@
 |
  ======================================================================"
 
-LcFile subclass: #LcCollate
+LocaleData subclass: #LcCollate
     instanceVariableNames: 'nrules rules hashSize hashLayers table tableEL undefined extra extraEL'
     classVariableNames: ''
     poolDictionaries: ''

@@ -61,7 +61,6 @@ new: parent
     view canBeDirty: true.
     view parentView: parent.
     view blox: (self bloxClass new: parent blox).
-    view blox font: 'Helvetica 10'.
     view blox callback: view message: 'setDirtyFlag'.
     ^view!
 
@@ -80,10 +79,9 @@ getSelectionOrLine
      there's no text selected.  This enables Do It, Print It, and Inspect It
      to be used without manually selecting text."
 
-    | pos text |
-    pos := blox currentLine.
+    | text |
     text := blox getSelection.
-    (text isNil or: [text size = 0]) ifTrue: [^blox lineAt: pos].
+    (text isNil or: [ text isEmpty ]) ifTrue: [^blox lineAt: blox currentLine].
     ^text! !
 
 !PText methodsFor: 'blue button menu items'!
@@ -280,7 +278,6 @@ setEvaluationKeyBindings
 
 setDirtyFlag
     "Set modification state of text view"
-
     dirty := canBeDirty!
 
 stateChange: stateChangeKey 

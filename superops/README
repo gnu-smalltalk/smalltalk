@@ -1,0 +1,44 @@
+This is a C++ program to look for candidate superoperators, make a perfect
+hash function for them, and write out the tables needed and the perfect
+hash functions.
+
+Much of the code in this directory is taken from GPERF, as a result,
+it is written in a different style than superops.cc which is the main
+driver program (e.g. superops.cc uses the STL, many other files do not).
+The reason why I used GPERF's code instead of using GPERF directly
+(as I do for the builtins.gperf hash function, for example) is that:
+1) I would still have needed to write code to glue the
+   superoperator search with GPERF.
+2) I needed a completely different calling convention and
+   implementation of the lookup function than the usual one: so instead
+   of hacking and sed'ing GPERF's output I decided that modifying
+   GPERF's output routines would have been more maintainable.
+3) I had already written the superoperator search program in C++, which
+   made it easier to put in GPERF's code.
+4) It is unlikely that GPERF changes significantly enough (and that
+   superops be ever used again to generate a new bytecode set) to
+   consider merging the upstream modifications into superops.
+
+The GPERF code was taken almost unmodified with the exception of
+options.cc (because most options that only affected output are not
+needed anymore, and because I stripped the getopt code).  Of course,
+input.cc and main.cc are not there anymore, their function is done by
+the single file hash.cc, which also includes much of output.cc.
+
+Run the program, and it will automagically generate:
+1) superop1.inl and superop2.inl, which contain the hash
+   tables and the tables for writing the hash lookup function.
+
+2) byte.def, the final part of the input to genbc (used for
+   decoding the instructions).
+
+3) vm.def, the final part of the input to genvm (used for
+   executing the instructions in the virtual machine proper).
+
+4) table.st, the superoperator table to be included in
+   CompildCode.st.
+
+This is strictly a maintainer tool, so it is written for a recent
+C++ compiler and does not even use autoconf.
+
+Paolo

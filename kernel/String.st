@@ -46,11 +46,25 @@ case, they are particularly optimized.' !
 
 !String class methodsFor: 'basic'!
 
+= aString
+    "Answer whether the receiver's items match those in aCollection"
+    | newString mySize |
+
+    self class == aString class ifFalse: [^false].
+    self size = aString size ifFalse: [^false].
+    self hash == aString hash ifFalse: [^false].
+
+    1 to: self size do: [ :i |
+	(self at: i) == (aString at: i) ifFalse: [^false]
+    ].
+    ^true
+!
+
 , aString
     "Answer a new instance of an ArrayedCollection containing all the elements
      in the receiver, followed by all the elements in aSequenceableCollection"
     | newString mySize |
-    (aString isKindOf: String) ifFalse: [ ^super , aString ].
+    aString class == String ifFalse: [ ^super, aString ].
 
     newString := self copyEmpty: ((mySize := self size) + aString size).
     newString primReplaceFrom: 1 to: mySize with: self startingAt: 1.

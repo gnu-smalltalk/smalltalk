@@ -56,6 +56,8 @@ Arrays... and multi-line strings'') printNl.
        temp
 	   nl;
 	   print: (i = 9 ifTrue: [ ''okay'' ] ifFalse: [ ''huh?!?'' ]);
+	   nl;
+	   print: thisContext;
 	   nl; nextPutAll: a;
 	   nl; nextPutAll: b;
 	   nl; nextPutAll: c;

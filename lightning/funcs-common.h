@@ -33,16 +33,16 @@
 #define __lightning_funcs_common_h
 
 #include <stdio.h>
+#include <stdlib.h>
 
-static int jit_fail(char *, char*, int, char *) JIT_UNUSED;
+static int jit_fail(const char *, const char*, int, const char *) JIT_UNUSED;
 
 int
-jit_fail(char *msg, char *file, int line, char *function)
+jit_fail(const char *msg, const char *file, int line, const char *function)
 {
   fprintf(stderr, "%s: In function `%s':\n", file, function);
   fprintf(stderr, "%s:%d: %s\n", file, line, msg);
   abort();
-  return 0;
 }
 
 #endif /* __lightning_funcs_common_h */

@@ -982,6 +982,10 @@ on: aDictionary for: aSTClassLoader
 	setProxy: aDictionary;
 	yourself.
 
+    "Link the instance to itself."
+    instance
+	at: aDictionary name asSymbol put: instance.
+
     "Create proxies for the superspaces and for links to the
      subspaces"
     aDictionary superspace isNil ifFalse: [

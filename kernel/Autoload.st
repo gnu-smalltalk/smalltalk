@@ -168,6 +168,12 @@ class: nameSymbol in: aNamespace from: fileNameString
 
 !Autoload methodsFor: 'accessing'!
 
+class
+    "We need it to access the metaclass instance, because that's what
+     will load the file."
+    <primitive: VMpr_Object_class>
+!
+
 doesNotUnderstand: aMessage
     "Load the class and resend the message to it"
 

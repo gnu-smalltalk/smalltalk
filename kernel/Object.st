@@ -48,7 +48,6 @@ All classes in the system are subclasses of me.' !
 update: aspect
     "Do any global tasks for the ObjectMemory events."
     aspect == #returnFromSnapshot ifFalse: [ ^self ].
-
     ContextPart checkPresenceOfJIT.
     FinalizableObjects := nil
 !
@@ -596,24 +595,37 @@ breakpoint: context return: return
 
 inspect
     "Print all the instance variables of the receiver on the Transcript"
-    | class instVars instVal |
-    class := self class.
-    instVars := class allInstVarNames.
-    Transcript nextPutAll: 'An instance of '.
-    class printNl.
-    1 to: instVars size do:
-    	[ :i | Transcript nextPutAll: '  ';
-		   nextPutAll: (instVars at: i);
-		   nextPutAll: ': '.
-	       (self instVarAt: i)  printNl ].
+    | instVars output object |
+    Transcript
+	nextPutAll: 'An instance of ';
+	print: self class;
+	nl.
 
-    1 to: self validSize do:
-	[ :i | Transcript nextPutAll: '  [';
-	       print: i;
-	       nextPutAll: ']: ';
-	       print: (self basicAt: i);
-	       nl ] 
-!
+    instVars := self class allInstVarNames.
+    1 to: instVars size + self validSize do: [ :i |
+	object := self instVarAt: i.
+    	output := [ object printString ]
+		      on: Error
+		      do: [ :ex | ex return: ('%1 %2'
+				      bindWith: object class article
+				      with: object class name asString) ].
+
+        i <= instVars size
+	    ifTrue: [
+		Transcript
+		    nextPutAll: '  ';
+		    nextPutAll: (instVars at: i);
+		    nextPutAll: ': ' ]
+	     ifFalse: [
+		 Transcript
+		    nextPutAll: '  [';
+		    print: i - instVars size;
+		    nextPutAll: ']: ' ].
+
+        Transcript
+	    nextPutAll: output;
+	    nl
+    ]!
 
 validSize
     "Answer how many elements in the receiver should be inspected"
@@ -672,3 +684,5 @@ mutate: instVarMap startAt: start newClass: class
     ].
     ^self become: aCopy
 ! !
+
+Smalltalk verboseTrace: true!

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -162,21 +162,9 @@ debuggerClass
 
 isInternalExceptionHandlingContext
     "Answer whether the receiver is a context that should be hidden to the user
-     when presenting a backtrace"
-    
-    | topmostNonInternalMethods |
-    topmostNonInternalMethods := #(#activateHandler: #doesNotUnderstand: #halt #error:).
+     when presenting a backtrace."
 
-    self selector == #halt ifTrue: [ ^false ].
-    self selector == #error: ifTrue: [ ^false ].
-    self selector == #doesNotUnderstand: ifTrue: [ ^false ].
-
-    self scanBacktraceFor: topmostNonInternalMethods do: [ :ctx |
-	ctx method == (Signal >> #activateHandler:) ifTrue: [ ^true ].
-	ctx selector == #activateHandler: ifFalse: [ ^true ]
-    ].
-
-    ^false
+    self subclassResponsibility
 ! !
 
 
@@ -229,10 +217,11 @@ isUnwind
 !
 
 isEnvironment
-    "To create a valid execution environment for the interpreter even before
-     it starts, GST creates a fake context whose selector is nil and which
-     can be used as a marker for the current execution environment.  Answer
-     whether the receiver is that kind of context."
+    "To create a valid execution environment for the interpreter even
+     before it starts, GST creates a fake context which invokes a special
+     ``termination'' method.  Such a context can be used as a marker for
+     the current execution environment.  Answer whether the receiver is
+     that kind of context."
     self subclassResponsibility
 !
 
@@ -277,7 +266,7 @@ size
     "Answer the number of valid fields for the receiver. Any read
      access from (self size + 1) to (self basicSize) has undefined
      results - even crashing"
-    ^self sp
+    ^self sp + 1
 !
 
 sp
@@ -299,6 +288,16 @@ numArgs
 numTemps
     "Answer the number of temporaries used by the receiver"
     ^self method numTemps
+!
+
+push: anObject
+    "Push an object on the receiver's stack."
+
+    "Since the newly accessible slots may have contained garbage, this method
+     stores into the cell *before* they become accessible."
+
+    self at: self size + 1 put: anObject.
+    sp := sp + 1
 !
 
 sp: newSP
@@ -377,10 +376,27 @@ deepCopy
 
 !ContextPart methodsFor: 'enumerating'!
 
+scanBacktraceForAttribute: selector do: aBlock
+    "Scan the backtrace for contexts which have the attribute selector
+     listed in selectors; if one is found, invoke aBlock passing the
+     context and the attribute."
+    | ctx last attr |
+    ctx := self.
+    last := self class lastUnwindPoint.
+    [ ctx == last | ctx isNil ] whileFalse: [
+	(ctx isBlock not and: [
+	    attr := ctx method attributeAt: selector ifAbsent: [ nil ].
+	    attr notNil ])
+		ifTrue: [ aBlock value: ctx value: attr ].
+
+	ctx := ctx parentContext
+    ].
+!
+
 scanBacktraceFor: selectors do: aBlock
     "Scan the backtrace for contexts whose selector is among those
      listed in selectors; if one is found, invoke aBlock passing the
-     selector."
+     context."
     | ctx last |
     ctx := self.
     last := self class lastUnwindPoint.
@@ -391,4 +407,87 @@ scanBacktraceFor: selectors do: aBlock
 
 	ctx := ctx parentContext
     ].
+! !
+
+
+!ContextPart methodsFor: 'security checks'!
+
+securityCheckForName: name
+    self isUntrusted ifFalse: [ ^self ].
+
+    ^self doSecurityCheckForName: name actions: #() target: nil
+!
+
+securityCheckForName: name action: action
+    self isUntrusted ifFalse: [ ^self ].
+
+    ^self doSecurityCheckForName: name actions: { action } target: nil
+!
+
+securityCheckForName: name target: target
+    self isUntrusted ifFalse: [ ^self ].
+
+    ^self doSecurityCheckForName: name actions: #() target: target
+!
+
+securityCheckForName: name actions: actions target: target
+    self isUntrusted ifFalse: [ ^self ].
+
+    ^self doSecurityCheckForName: name actions: actions target: target
+!
+
+doSecurityCheckForName: name actions: actions target: target
+    | perm ctx |
+    perm := Permission new
+	name: name
+	actions: actions;
+	target: target.
+
+    (self checkSecurityFor: perm)
+	ifFalse: [ (SecurityError for: perm) signal ].
+!
+
+checkSecurityFor: perm
+    | state foundAnnotation |
+    "First of all, check against the static permissions for this
+     context."
+    (self receiver class check: perm) ifFalse: [ ^false ].
+
+    "Then, check the dynamic permissions.  So:
+     1) check if a method was specifically denying access,
+     2) look for a deeper context whose static permissions
+	denies access, but stop if a method is specifically
+	granting access."
+
+    self method isAnnotated ifTrue: [
+	foundAnnotation := false.
+	self method attributesDo: [ :each || newPerm |
+	    each selector = #permission: ifTrue: [
+		newPerm := each arguments at: 1.
+
+		(newPerm implies: perm) ifTrue: [
+		    "Should we check if the granted permission is statically
+		     available?  Of course, you can only grant permissions if you
+		     own them statically, so the real question is, should we
+		     check perm or newPerm?  The answer is perm (which has
+		     already been found to be available), hence we can skip
+		     an expensive static permission check.  Suppose we have a
+		     method that grants access to all files: it makes more sense
+		     if it means ``grant access to all files allowed by the class
+		     security policy'', rather than ``grant access to all files if
+		     the security policy allows it, else do not grant access to
+		     any file''."
+		    foundAnnotation := true.
+		    state := newPerm isAllowing
+		]
+	    ]
+	].
+	foundAnnotation ifTrue: [ ^state ].
+    ].
+
+    "Nope, no special regulations were found in this method.  Look in the
+     parent context, and grant permission if the bottom is reached."
+
+    ^self parentContext isNil or: [
+	self parentContext checkSecurityFor: perm ]
 ! !

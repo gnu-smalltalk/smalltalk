@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2000, 2001 Free Software Foundation, Inc.
+| Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -45,10 +45,11 @@ CompiledBlock comment:
 
 !CompiledBlock class methodsFor: 'instance creation'!
 
-newMethod: numBytecodes header: anInteger method: outerMethod
-    "Answer a new CompiledMethod with room for the given bytes and the
-     given header"
-    ^(self newMethod: numBytecodes
+new: numBytecodes header: anInteger method: outerMethod
+    "Answer a new instance of the receiver with room for the given
+     number of bytecodes and the given header."
+    ^(self
+	new: numBytecodes
 	header: anInteger
 	literals: outerMethod literals) method: outerMethod
 ! !
@@ -206,6 +207,12 @@ binaryRepresentationObject
      to the CompiledMethod containing the receiver."
     | literalNumber |
     self literals keysAndValuesDo: [ :i :lit |
+	lit == self
+	    ifTrue: [ ^DirectedMessage
+		selector: #blockAt:
+		arguments: (Array with: i)
+		receiver: self method
+	    ].
 	(lit class == BlockClosure and: [ lit block == self ])
 	    ifTrue: [ ^DirectedMessage
 		selector: #blockAt:

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -49,7 +49,7 @@ if the hardware supports it.'  !
 !Float class methodsFor: 'byte-order dependancies'!
 
 signByte
-    "Answer the byte of the receiver that contains the exponent"
+    "Answer the byte of the receiver that contains the sign bit"
     self subclassResponsibility
 ! !
 
@@ -188,7 +188,7 @@ truncated
 
     | exponent bytes positive float |
 
-    self checkCoercion.
+    self isFinite ifFalse: [^self].
     (positive := self > 0)
         ifTrue: [ float := self ]
         ifFalse: [ float := self negated ].
@@ -250,6 +250,12 @@ asFraction
 	denominator: d0
 !
 
+
+!Float methodsFor: 'transcendental operations'!
+
+log
+    ^self ln / self class ln10
+!
 
 estimatedLog
     "Answer an estimate of (self abs floorLog: 10)"
@@ -261,6 +267,63 @@ asFloat
     ^self
 ! !
 
+
+!Float methodsFor: 'comparing'!
+
+min: aNumber
+    "Answer the minimum between the receiver and aNumber.  Redefine
+     in subclasses if necessary to ensure that if either self or
+     aNumber is a NaN, it is always answered."
+
+    "If both self and aNumber are zero, return aNumber in case it
+     has a negative sign, because we assume our zero is positive.
+     If the test is false, always answer aNumber in case it is a
+     NaN, because we assume that self is not a NaN."
+
+    ^aNumber < self
+	ifTrue: [ aNumber ]
+	ifFalse: [
+	    self = aNumber
+		ifFalse: [
+		    aNumber = aNumber
+			ifFalse: [ aNumber ]
+			ifTrue: [ self ] ]
+		ifTrue: [
+		    "Remember than -0.0 - +0.0 = -0.0, but the other pairs are +0.0."
+		    self = self zero
+			ifTrue: [ (self * -1 - aNumber) * -1 ]
+			ifFalse: [ self ] ] ]!
+
+max: aNumber
+    "Answer the maximum between the receiver and aNumber.  Redefine
+     in subclasses if necessary to ensure that if either self or
+     aNumber is a NaN, it is always answered."
+
+    ^aNumber > self
+	ifTrue: [ aNumber ]
+	ifFalse: [
+	    self = aNumber
+		ifFalse: [
+		    aNumber = aNumber
+			ifFalse: [ aNumber ]
+			ifTrue: [ self ] ]
+		ifTrue: [
+		    "Remember than -0.0 + -0.0 = -0.0, but the other pairs are +0.0."
+		    self = self zero
+			ifTrue: [ self + aNumber ]
+			ifFalse: [ self ] ] ]!
+
+withSignOf: aNumber
+    "Answer the receiver, with its sign possibly changed to match
+     that of aNumber."
+    ^aNumber positive == self positive
+	ifTrue: [ self ]
+	ifFalse: [ self negated ]
+! !
+
+
+
+!Number methodsFor: 'truncation and round off'!
 
 !Float methodsFor: 'printing'!
 

@@ -18,14 +18,14 @@ statement := connection createStatement.
 
 resultSet := (statement executeQuery: 'select * from db') value.
 
-Transcript cr; show: (resultSet columns collect: [:col | col name]) printString.
+Transcript nl; show: (resultSet columns collect: [:col | col name]) printString.
 
 [resultSet next]
 whileTrue:
 [
 	value := resultSet valueNamed: 'Db'. "get column named Db"
-	Transcript cr; show: value printString.
+	Transcript nl; show: value printString.
 ].
-Transcript cr.
+Transcript nl.
 
 connection close!

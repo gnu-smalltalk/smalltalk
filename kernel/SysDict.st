@@ -94,6 +94,12 @@ backtrace
     "Print a backtrace on the Transcript."
     "This replaces the primitive in builtins.st"
     thisContext parentContext backtrace
+!
+
+hostSystem
+    "Answer the triplet corresponding to the system for which GNU
+     Smalltalk was built."
+    ^CSymbols.HostSystem
 ! !
 
 

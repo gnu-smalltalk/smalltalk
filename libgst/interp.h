@@ -62,12 +62,12 @@ enum
 
 /* These macros are used to quickly compute the number of words needed
    for a context with a maximum allowable stack depth of DEPTH.  */
-#define FIXED_CTX_SIZE	(sizeof(struct gst_method_context) / sizeof(long) - 1)
+#define FIXED_CTX_SIZE	(sizeof(struct gst_method_context) / sizeof(PTR) - 1)
 #define CTX_SIZE(depth) (((depth) << DEPTH_SCALE) + FIXED_CTX_SIZE)
 
 #define DUMMY_NATIVE_IP FROM_INT(0)
 
-/* The structure of execution context objects. */
+/* The structure of execution context objects.  */
 typedef struct gst_context_part
 {
   OBJ_HEADER;
@@ -93,7 +93,7 @@ typedef struct gst_method_context
 				   stack */
   OOP receiver;			/* the receiver OOP */
   OOP method;			/* the method that we're executing */
-  long flags;			/* must be an int to distinguish
+  intptr_t flags;		/* must be an int to distinguish
 				   gst_compiled_block/gst_method_context 
 				 */
   OOP contextStack[1];
@@ -121,7 +121,7 @@ typedef struct gst_method_context
 /* Answer whether execution started from this context (this kind
    of MethodContext is used to mark call-ins from C to Smalltalk
    and is placed on top of the context that was executing at the
-   time of the call-in, and is the parent of the called-in method). */
+   time of the call-in, and is the parent of the called-in method).  */
 #define MCF_IS_EXECUTION_ENVIRONMENT  8
 
 
@@ -141,7 +141,7 @@ typedef struct gst_block_context
 }
  *gst_block_context;
 
-/* The structure of various objects related to the process system. */
+/* The structure of various objects related to the process system.  */
 typedef struct gst_semaphore
 {
   OBJ_HEADER;
@@ -189,54 +189,69 @@ typedef struct gst_processor_scheduler
  *gst_processor_scheduler;
 
 /* Some performance counters from the interpreter: these
-   count the number of special returns. */
-extern unsigned long _gst_literal_returns, _gst_inst_var_returns,
-  _gst_self_returns;
+   count the number of special returns.  */
+extern unsigned long _gst_literal_returns 
+  ATTRIBUTE_HIDDEN, _gst_inst_var_returns 
+  ATTRIBUTE_HIDDEN,
+  _gst_self_returns 
+  ATTRIBUTE_HIDDEN;
 
-/* The number of primitives executed. */
-extern unsigned long _gst_primitives_executed;
+/* The number of primitives executed.  */
+extern unsigned long _gst_primitives_executed 
+  ATTRIBUTE_HIDDEN;
 
-/* The number of bytecodes executed. */
-extern unsigned long _gst_bytecode_counter;
+/* The number of bytecodes executed.  */
+extern unsigned long _gst_bytecode_counter 
+  ATTRIBUTE_HIDDEN;
 
 /* The number of method cache misses */
-extern unsigned long _gst_cache_misses;
+extern unsigned long _gst_cache_misses 
+  ATTRIBUTE_HIDDEN;
 
 /* The number of cache lookups - either hits or misses */
-extern unsigned long _gst_sample_counter;
+extern unsigned long _gst_sample_counter 
+  ATTRIBUTE_HIDDEN;
 
 /* If this is true, for each byte code that is executed, we print on
    stdout the byte index within the current gst_compiled_method and a
-   decoded interpretation of the byte code. */
-extern mst_Boolean _gst_execution_tracing;
+   decoded interpretation of the byte code.  */
+extern mst_Boolean _gst_execution_tracing 
+  ATTRIBUTE_HIDDEN;
 
 /* When this is true, and an interrupt occurs (such as SIGSEGV),
    Smalltalk will terminate itself by making a core dump (normally it
-   produces a backtrace). */
-extern mst_Boolean _gst_make_core_file;
+   produces a backtrace).  */
+extern mst_Boolean _gst_make_core_file 
+  ATTRIBUTE_HIDDEN;
 
 /* When true, this indicates that there is no top level loop for
-   control to return to, so it causes the system to exit. */
-extern mst_Boolean _gst_non_interactive;
+   control to return to, so it causes the system to exit.  */
+extern mst_Boolean _gst_non_interactive 
+  ATTRIBUTE_HIDDEN;
 
 /* The OOP for a gst_compiled_method or gst_compiled_block that is the
-   currently executing method. */
-extern OOP _gst_this_method;
+   currently executing method.  */
+extern OOP _gst_this_method 
+  ATTRIBUTE_HIDDEN;
 
 /* Physical address of the base of the method temporary variables.
    Typically a small number of bytes (multiple of 4 since it points to
-   OOPs) lower than sp. */
-extern OOP *_gst_temporaries;
+   OOPs) lower than sp.  */
+extern OOP *_gst_temporaries 
+  ATTRIBUTE_HIDDEN;
 
-/* Physical address of the base of the method literals. */
-extern OOP *_gst_literals;
+/* Physical address of the base of the method literals.  */
+extern OOP *_gst_literals 
+  ATTRIBUTE_HIDDEN;
 
-/* An OOP that is the current receiver of the current message. */
-extern OOP _gst_self;
+/* An OOP that is the current receiver of the current message.  */
+extern OOP _gst_self 
+  ATTRIBUTE_HIDDEN;
 
 /* A gst_block_context or gst_method_context that indicates the
-   context that the interpreter is currently running in. */
-extern OOP _gst_this_context_oop;
+   context that the interpreter is currently running in.  */
+extern OOP _gst_this_context_oop 
+  ATTRIBUTE_HIDDEN;
 
 /* The type used to hold the instruction pointer.  For the JIT, this
    is an offset from a location which is deemed the `base' of
@@ -244,8 +259,8 @@ extern OOP _gst_this_context_oop;
    SmallInteger and can be stored in the returnIP field of the context
    objects); for the interpreter, this is the physical address of the
    next executed bytecode (note: the global is usually synchronized at
-   sequence points only). */
-#ifdef USE_JIT_TRANSLATION
+   sequence points only).  */
+#ifdef ENABLE_JIT_TRANSLATION
 typedef int ip_type;
 extern char *native_ip;
 #else /* plain bytecode interpreter */
@@ -253,17 +268,27 @@ typedef gst_uchar *ip_type;
 #endif
 #define ip			_gst_ip
 
-extern ip_type ip;
+extern ip_type ip 
+  ATTRIBUTE_HIDDEN;
+
+/* When not NULL, this causes the byte code interpreter to immediately
+   send the message whose selector is here to the current stack
+   top.  */
+extern const char *_gst_abort_execution
+  ATTRIBUTE_HIDDEN;
+
 
 /* Set to true when some special action must be done at the next
-   sequence point. */
-extern volatile mst_Boolean _gst_except_flag;
+   sequence point.  */
+extern volatile mst_Boolean _gst_except_flag 
+  ATTRIBUTE_HIDDEN;
 
 /* Create a new Process on the top of the stack, which is specially
    marked so that it stops the interpreter's execution.  This kind
    of MethodContext is used to mark call-ins from C to Smalltalk
    and is the parent of the called-in method.  Return the Process.  */
-extern OOP _gst_prepare_execution_environment (void);
+extern OOP _gst_prepare_execution_environment (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Sends SELECTOR (which should be a Symbol, otherwise _gst_nil_oop is
    returned) to RECEIVER.  The message arguments should also be OOPs
@@ -274,10 +299,12 @@ extern OOP _gst_prepare_execution_environment (void);
 extern OOP _gst_nvmsg_send (OOP receiver,
 			    OOP selector,
 			    OOP *args,
-			    int nArgs);
+			    int nArgs) 
+  ATTRIBUTE_HIDDEN;
 
 /* Start the interpreter, and go on until we terminate PROCESSOOP.  */
-extern OOP _gst_interpret (OOP processOOP);
+extern OOP _gst_interpret (OOP processOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Internal function for SEND_MESSAGE and for sends to super; send
    SENDSELECTOR, with SENDARGS arguments, to RECEIVER.  Start looking
@@ -296,43 +323,51 @@ extern OOP _gst_interpret (OOP processOOP);
 extern void _gst_send_message_internal (OOP sendSelector,
 			      int sendArgs,
 			      OOP receiver,
-			      OOP method_class);
+			      OOP method_class) 
+  ATTRIBUTE_HIDDEN;
 
-/* Prepare the data structures held by the interpreter. */
-extern void _gst_init_interpreter (void);
+/* Prepare the data structures held by the interpreter.  */
+extern void _gst_init_interpreter (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Reset the fast allocator for context objects, telling it that
    all contexts living there have been tenured and thus the space
    can be reused.  */
-extern void _gst_empty_context_pool (void);
+extern void _gst_empty_context_pool (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Signal SEMAPHOREOOP so that one of the processes waiting on that
    semaphore is waken up.  Since a Smalltalk call-in is not an atomic
    operation, the correct way to signal a semaphore is not to send
    #signal to the object but, rather, to use this function.  The
    signal request will be processed as soon as the next sequence point
-   is reached. */
-extern void _gst_async_signal (OOP semaphoreOOP);
+   is reached.  */
+extern void _gst_async_signal (OOP semaphoreOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Signal SEMAPHOREOOP so that one of the processes waiting on that
    semaphore is waken up, and remove it from the registry.  Since a
    Smalltalk call-in is not an atomic operation, the correct way to
    signal a semaphore is not to send #signal to the object but,
    rather, to use this function.  The signal request will be processed
-   as soon as the next sequence point is reached. */
-extern void _gst_async_signal_and_unregister (OOP semaphoreOOP);
+   as soon as the next sequence point is reached.  */
+extern void _gst_async_signal_and_unregister (OOP semaphoreOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Invalidate all the cached CompiledMethod lookups.  This does NOT
    include inline caches when the JIT compiler is active.  */
-extern void _gst_invalidate_method_cache (void);
+extern void _gst_invalidate_method_cache (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Show a backtrace of the current state of the stack of execution
    contexts.  */
-extern void _gst_show_backtrace (void);
+extern void _gst_show_backtrace (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Trap the signals that we care about, basically SIGBUS and
-   SIGSEGV. */
-extern void _gst_init_signals (void);
+   SIGSEGV.  */
+extern void _gst_init_signals (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Store the context of the VM registers into the currently executing
    contexts.  Since the contexts store relative addresses, these are
@@ -342,18 +377,21 @@ extern void _gst_init_signals (void);
    currently executing contexts (they are only used after a message
    send) so we need a special function to ensure that even that
    context has the information saved in it.  */
-extern void _gst_fixup_object_pointers (void);
+extern void _gst_fixup_object_pointers (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Complementary to _gst_fixup_object_pointers, this function picks
    the relative addresses stored in the current context and uses
    them to adjust the VM registers after the heap is compacted or
-   grown. */
-extern void _gst_restore_object_pointers (void);
+   grown.  */
+extern void _gst_restore_object_pointers (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* This runs before every evaluation (_gst_execute_statements) and
    before GC turned on.  It creates an initial process if no process
-   is ready to run or if no process has been created yet. */
-extern void _gst_init_process_system (void);
+   is ready to run or if no process has been created yet.  */
+extern void _gst_init_process_system (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* These function mark or copy all the objects that the interpreter keeps in
    the root set.  These are the semaphores that are held to be
@@ -368,20 +406,25 @@ extern void _gst_init_process_system (void);
    Processor (including the current process and the other active
    processes).  Processor itself is reachable from the Smalltalk
    dictionary.  */
-extern void _gst_mark_processor_registers (void);
-extern void _gst_copy_processor_registers (void);
+extern void _gst_mark_processor_registers (void) 
+  ATTRIBUTE_HIDDEN;
+extern void _gst_copy_processor_registers (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Print the current state of the lists of ready to run processes for
-   each priority, for debugging purposes. */
-extern void _gst_print_process_state (void);
+   each priority, for debugging purposes.  */
+extern void _gst_print_process_state (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Sanity check the process lists that the sole instance of ProcessorScheduler
    holds.  */
-extern void _gst_check_process_state (void);
+extern void _gst_check_process_state (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Print the objects currently on the stack, for debugging
-   purposes. */
-extern void _gst_show_stack_contents (void);
+   purposes.  */
+extern void _gst_show_stack_contents (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Called after the mark phase, but before the sweep phase, so that if
    a method cache entry is not valid anymore it is cleared.  This is
@@ -391,17 +434,20 @@ extern void _gst_show_stack_contents (void);
    also if the translation to native code for the method is garbage
    collected.  In particular, this function is called *after* the
    unused method translations are marked as such, and *before* they
-   are actually freed. */
-extern void _gst_validate_method_cache_entries (void);
+   are actually freed.  */
+extern void _gst_validate_method_cache_entries (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Terminate execution of the given PROCESSOOP.  */
-extern void _gst_terminate_process (OOP processOOP);
+extern void _gst_terminate_process (OOP processOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Similar to _gst_send_message_internal, but forces the specified
    CompiledMethod to be sent.  If it is not valid for the current
    receiver, well, you are looking for trouble and well deserve it.
    The number of arguments is looked in METHODOOP.  */
-extern void _gst_send_method (OOP methodOOP);
+extern void _gst_send_method (OOP methodOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* This functions accepts an OOP for a Semaphore object and puts the
    current process to sleep, unless the semaphore has excess signals
@@ -409,8 +455,14 @@ extern void _gst_send_method (OOP methodOOP);
    correct way to signal a semaphore is not to send the wait method to
    the object but, rather, to use _gst_sync_wait.  The `sync' in the
    name of this function distinguishes it from _gst_async_signal, in
-   that it cannot be called from within a signal handler. */
-extern void _gst_sync_wait (OOP semaphoreOOP);
+   that it cannot be called from within a signal handler.  */
+extern void _gst_sync_wait (OOP semaphoreOOP) 
+  ATTRIBUTE_HIDDEN;
+
+/* Take a CompiledBlock and turn it into a BlockClosure that references
+   thisContext as its static link.  */
+extern OOP _gst_make_block_closure (OOP blockOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /************************************************* PRIMITIVES ****************/
 
@@ -422,15 +474,15 @@ extern void _gst_sync_wait (OOP semaphoreOOP);
    to invoke the primitive.  Such a function must execute a primitive,
    aided in the choice of which by the user-defined parameter ID,
    popping NUMARGS methods off the stack if they succeed.  */
-typedef long (*primitive_func) (int primitive, 
-				volatile int numArgs);
+typedef intptr_t (*primitive_func) (int primitive, 
+				    volatile int numArgs);
 
-/* Table of primitives, including a primitive and its attributes. */
+/* Table of primitives, including a primitive and its attributes.  */
 typedef struct prim_table_entry
 {
-  char *name;
-  long attributes;
+  const char *name;
   primitive_func func;
+  int attributes;
   int id;
 }
 prim_table_entry;
@@ -449,14 +501,18 @@ prim_table_entry;
    system.  This function invokes the proper primitive_func with the
    correct id and the same NUMARGS and METHODOOP with which it was
    invoked.  */
-extern long _gst_execute_primitive_operation (int primitive,
-					      volatile int numArgs);
+extern intptr_t _gst_execute_primitive_operation (int primitive,
+					          volatile int numArgs) 
+  ATTRIBUTE_HIDDEN;
 
 /* This can be used to obtain information on a particular primitive
    operations in the GNU Smalltalk system.  */
-extern prim_table_entry * _gst_get_primitive_attributes (int primitive) ATTRIBUTE_PURE;
+extern prim_table_entry * _gst_get_primitive_attributes (int primitive)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
-/* Initialize the table of primitives. */
-extern void _gst_init_primitives ();
+/* Initialize the table of primitives.  */
+extern void _gst_init_primitives () 
+  ATTRIBUTE_HIDDEN;
 
 #endif /* GST_INTERP_H */

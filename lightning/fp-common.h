@@ -106,6 +106,7 @@ _jit_emit(jit_state *jit, struct jit_fp *head,
       _jit_emit(jit, head->d.ops.lhs, JIT_NULL, 0, 0, reg0);
       switch (head->subkind) {
 	case JIT_ABS: jit_abs(reg0); break;
+	case JIT_NEG: jit_neg(reg0); break;
 #ifdef JIT_TRANSCENDENTAL
 	case JIT_SIN: jit_sin(reg0); break;
 	case JIT_SQRT: jit_sqrt(reg0); break;
@@ -114,7 +115,6 @@ _jit_emit(jit_state *jit, struct jit_fp *head,
 	case JIT_ATN: jit_atn(reg0); break;
 	case JIT_EXP: jit_exp(reg0); break;
 	case JIT_LOG: jit_log(reg0); break;
-	case JIT_NEG: jit_neg(reg0); break;
 #endif
       }
       break;
@@ -151,8 +151,8 @@ _jit_emit(jit_state *jit, struct jit_fp *head,
     case JIT_R:      jit_str_f(store2, reg0);		 break;
     case JIT_I | 1:  jit_sti_d(store2, reg0);		 break;
     case JIT_R | 1:  jit_str_d(store2, reg0);		 break;
-     case JIT_NULL:  break;
 #endif
+    case JIT_NULL:   break;
   }
 #undef _jit
 }
@@ -217,9 +217,9 @@ _jit_imm(struct jit_fp *where, double number)
 #define jitfp_sqrt(op1)	 		_jit_fn(++_jit.fp, JIT_SQRT, (op1))
 #define jitfp_neg(op1)			_jit_fn(++_jit.fp, JIT_NEG, (op1))
 #define jitfp_stxi_f(imm, reg1, op1)	_jit_emit(&_jit, (op1), JIT_XI, (reg1), (long)(imm), 0)
-#define jitfp_stxr_f(reg1, reg2, op2)	_jit_emit(&_jit, (op1), JIT_XR, (reg1), (reg2), 0)
+#define jitfp_stxr_f(reg1, reg2, op1)	_jit_emit(&_jit, (op1), JIT_XR, (reg1), (reg2), 0)
 #define jitfp_stxi_d(imm, reg1, op1)	_jit_emit(&_jit, (op1), JIT_XI | 1, (reg1), (long)(imm), 0)
-#define jitfp_stxr_d(reg1, reg2, op2)	_jit_emit(&_jit, (op1), JIT_XR | 1, (reg1), (reg2), 0)
+#define jitfp_stxr_d(reg1, reg2, op1)	_jit_emit(&_jit, (op1), JIT_XR | 1, (reg1), (reg2), 0)
 #define jitfp_cmp(regle, regge, op1)	_jit_emit(&_jit, (op1), JIT_CMP, regle, regge, 0)
 #define jitfp_floor(reg1, op1)		_jit_emit(&_jit, (op1), JIT_FLOOR, reg1, 0, 0)
 #define jitfp_ceil(reg1, op1)		_jit_emit(&_jit, (op1), JIT_CEIL, reg1, 0, 0)
@@ -247,9 +247,9 @@ _jit_imm(struct jit_fp *where, double number)
 #define jitfp_str_d(reg1, op1)		_jit_emit(&_jit, (op1), JIT_XR | 1, JIT_RZERO, (reg1), 0)
 #else
 #define jitfp_ldi_f(imm)		_jit_ld(++_jit.fp, JIT_I, 0, (long)(imm))
-#define jitfp_ldr_f(reg1)		_jit_ld(++_jit.fp, JIT_R, 0, (reg1))
+#define jitfp_ldr_f(reg1)		_jit_ld(++_jit.fp, JIT_R, (reg1), 0)
 #define jitfp_ldi_d(imm)		_jit_ld(++_jit.fp, JIT_I | 1, 0, (long)(imm))
-#define jitfp_ldr_d(reg1)		_jit_ld(++_jit.fp, JIT_R | 1, 0, (reg1))
+#define jitfp_ldr_d(reg1)		_jit_ld(++_jit.fp, JIT_R | 1, (reg1), 0)
 #define jitfp_sti_f(imm, op1)		_jit_emit(&_jit, (op1), JIT_I, 0, (long)(imm), 0)
 #define jitfp_str_f(reg1, op1)		_jit_emit(&_jit, (op1), JIT_R, 0, (reg1), 0)
 #define jitfp_sti_d(imm, op1)		_jit_emit(&_jit, (op1), JIT_I | 1, 0, (long)(imm), 0)

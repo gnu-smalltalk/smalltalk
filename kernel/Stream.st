@@ -56,9 +56,16 @@ next
 
 next: anInteger
     "Return the next anInteger objects in the receiver"
-    | data |
+    | data i item |
     data := self species new: anInteger.
-    1 to: anInteger do: [ :i | data at: i put: self next ].
+    [
+	i := 0.
+        [ i < anInteger ] whileTrue: [
+	    item := self next.
+	    data at: (i := i + 1) put: item ].
+    ]
+	on: EndOfStream
+	do: [ :ex | SystemExceptions.NotEnoughElements signalOn: anInteger-i ].
     ^data
 !
 
@@ -113,7 +120,7 @@ upToEnd
 
 nextLine
     "Returns a collection of the same type that the stream accesses, containing
-     the next line up to the next new-line character.  Returns the entire rest of the
+     the next line up to the next new-line character.  Returns the entire rest of the 
      stream's contents if no new-line character is found. "
     | next ws |
     ws := WriteStream on: (self species new: 40).

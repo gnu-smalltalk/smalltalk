@@ -1,0 +1,289 @@
+%delimiters=";"
+%null-strings
+%struct-type
+%pic
+%define initializer-suffix ,NULL,-1,-1
+%define slot-name offset
+%define hash-function-name _gst_hash_selector
+%define lookup-function-name _gst_lookup_builtin_selector
+%define string-pool-name _gst_builtin_selectors_names
+%define word-array-name _gst_builtin_selectors_hash
+%compare-lengths
+%enum
+%global-table
+%omit-struct-type
+%{
+/* Process with gperf -k'1-3,6,$' -r
+
+   This table was generated starting from a 5 megabyte image
+   including Blox (TK), the GTK bindings, the Browser (and hence
+   the parser), TCP, NetClients, I18N, NumericalMethods, GDBM,
+   MD5, and MySQL, starting from the output of this script
+
+        | b |
+        b := Bag new.
+        CompiledMethod allInstances do: [ :each || n |
+            each literals do: [ :each |
+                each isSymbol ifTrue: [ b add: each ]
+            ].
+        ].
+
+        Transcript nl.
+        b sortedByCount from: 1 to: 226 keysAndValuesDo: [ :i :each |
+	    ('%1;				NULL, %2,	%3'
+		bindWith: each value with: each value numArgs with: i + 31)
+		    displayNl ]!  */
+%}
+struct builtin_selector { int offset; OOP symbol; int numArgs; int bytecode; };
+%%
++;                  			NULL, 1,        PLUS_SPECIAL
+-;                  			NULL, 1,        MINUS_SPECIAL
+<;                  			NULL, 1,        LESS_THAN_SPECIAL
+>;                  			NULL, 1,        GREATER_THAN_SPECIAL
+<=;                 			NULL, 1,        LESS_EQUAL_SPECIAL
+>=;                 			NULL, 1,        GREATER_EQUAL_SPECIAL
+=;                  			NULL, 1,        EQUAL_SPECIAL
+~=;                 			NULL, 1,        NOT_EQUAL_SPECIAL
+*;                  			NULL, 1,        TIMES_SPECIAL
+/;                  			NULL, 1,        DIVIDE_SPECIAL
+\\;               			NULL, 1,        REMAINDER_SPECIAL
+bitXor:;            			NULL, 1,        BIT_XOR_COLON_SPECIAL
+bitShift:;          			NULL, 1,        BIT_SHIFT_COLON_SPECIAL
+//;                 			NULL, 1,        INTEGER_DIVIDE_SPECIAL
+bitAnd:;            			NULL, 1,        BIT_AND_COLON_SPECIAL
+bitOr:;             			NULL, 1,        BIT_OR_COLON_SPECIAL
+at:;                			NULL, 1,        AT_COLON_SPECIAL
+at:put:;            			NULL, 2,        AT_COLON_PUT_COLON_SPECIAL
+size;               			NULL, 0,        SIZE_SPECIAL
+class;              			NULL, 0,        CLASS_SPECIAL
+isNil;              			NULL, 0,        IS_NIL_SPECIAL
+notNil;             			NULL, 0,        NOT_NIL_SPECIAL
+value;              			NULL, 0,        VALUE_SPECIAL
+value:;              			NULL, 1,        VALUE_COLON_SPECIAL
+==;                 			NULL, 1,        SAME_OBJECT_SPECIAL
+javaAsInt;				NULL, 0,	JAVA_AS_INT_SPECIAL
+javaAsLong;				NULL, 0,	JAVA_AS_LONG_SPECIAL
+new:;               			NULL, 1,        NEW_COLON_SPECIAL
+thisContext;        			NULL, 0,        THIS_CONTEXT_SPECIAL
+callFrom:into:;     			NULL, 2,       34
+narrow;             			NULL, 0,       35
+nextPutAll:;        			NULL, 1,       36
+yourself;           			NULL, 0,       37
+,;                  			NULL, 1,       38
+on:;                			NULL, 1,       39
+subclassResponsibility;                 NULL, 0,       40
+add:;               			NULL, 1,       41
+nl;                 			NULL, 0,       42
+printString;        			NULL, 0,       43
+contents;           			NULL, 0,       44
+name;               			NULL, 0,       45
+isEmpty;            			NULL, 0,       46
+properties;         			NULL, 0,       47
+container;          			NULL, 0,       48
+error:;             			NULL, 1,       49
+first;              			NULL, 0,       50
+tclEval:;           			NULL, 1,       51
+collect:;           			NULL, 1,       52
+tclResult;          			NULL, 0,       53
+key;                			NULL, 0,       54
+asTkString;         			NULL, 0,       55
+abs;                			NULL, 0,       56
+basicNew;           			NULL, 0,       57
+negated;            			NULL, 0,       58
+not;                			NULL, 0,       59
+close;              			NULL, 0,       60
+includes:;          			NULL, 1,       61
+at:ifAbsent:;       			NULL, 2,       62
+asSymbol;           			NULL, 0,       63
+with:;              			NULL, 1,       64
+copy;               			NULL, 0,       65
+copyFrom:to:;       			NULL, 2,       66
+print:;             			NULL, 1,       67
+last;               			NULL, 0,       68
+initialize;         			NULL, 0,       69
+tclEval:with:with:; 			NULL, 3,       70
+assert:;            			NULL, 1,       71
+primitiveFailed;    			NULL, 0,       72
+initialize:;        			NULL, 1,       73
+asString;           			NULL, 0,       74
+cr;                 			NULL, 0,       75
+should:;            			NULL, 1,       76
+arguments;          			NULL, 0,       77
+x;                  			NULL, 0,       78
+readStream;         			NULL, 0,       79
+y;                  			NULL, 0,       80
+tclEval:with:with:with:;                NULL, 4,       81
+asInteger;          			NULL, 0,       82
+space;              			NULL, 0,       83
+new;                			NULL, 0,       84
+shouldNotImplement; 			NULL, 0,       85
+->;                 			NULL, 1,       86
+numArgs;            			NULL, 0,       87
+with:with:;         			NULL, 2,       88
+species;            			NULL, 0,       89
+blox;               			NULL, 0,       90
+step;               			NULL, 0,       91
+signal;             			NULL, 0,       92
+parent;             			NULL, 0,       93
+selector;           			NULL, 0,       94
+at:ifPresent:;      			NULL, 2,       95
+to:;                			NULL, 1,       96
+addLast:;           			NULL, 1,       97
+squared;            			NULL, 0,       98
+generality;         			NULL, 0,       99
+signalOn:mustBe:;   			NULL, 2,       100
+ensure:;            			NULL, 1,       101
+body;               			NULL, 0,       102
+max:;               			NULL, 1,       103
+keysAndValuesDo:;   			NULL, 1,       104
+printOn:;           			NULL, 1,       105
+isKindOf:;          			NULL, 1,       106
+visitNode:;         			NULL, 1,       107
+addAll:;            			NULL, 1,       108
+isInteger;          			NULL, 0,       109
+name:;              			NULL, 1,       110
+hash;               			NULL, 0,       111
+sqrt;               			NULL, 0,       112
+beep;               			NULL, 0,       113
+primAt:;            			NULL, 1,       114
+environment;        			NULL, 0,       115
+position;           			NULL, 0,       116
+at:ifAbsentPut:;    			NULL, 2,       117
+signal:;            			NULL, 1,       118
+postCopy;           			NULL, 0,       119
+readFrom:;          			NULL, 1,       120
+coefficients:;      			NULL, 1,       121
+clientPI;           			NULL, 0,       122
+flush;              			NULL, 0,       123
+value:value:;       			NULL, 2,       124
+asFloatD;           			NULL, 0,       125
+on:do:;             			NULL, 2,       126
+basicAt:put:;       			NULL, 2,       127
+primSize;           			NULL, 0,       128
+evaluate;           			NULL, 0,       129
+connected;          			NULL, 0,       130
+reset;              			NULL, 0,       131
+copyEmpty:;         			NULL, 1,       132
+start;              			NULL, 0,       133
+signalOn:;          			NULL, 1,       134
+basicAt:;           			NULL, 1,       135
+asClass;            			NULL, 0,       136
+ln;                 			NULL, 0,       137
+implementation;     			NULL, 0,       138
+checkResponse;      			NULL, 0,       139
+average;            			NULL, 0,       140
+upTo:;              			NULL, 1,       141
+receiver;           			NULL, 0,       142
+peek;               			NULL, 0,       143
+basicSize;          			NULL, 0,       144
+x:y:;               			NULL, 2,       145
+foregroundColor:;   			NULL, 1,       146
+rows:;              			NULL, 1,       147
+text;               			NULL, 0,       148
+exp;                			NULL, 0,       149
+statements;         			NULL, 0,       150
+body:;              			NULL, 1,       151
+|;                  			NULL, 1,       152
+sizeof;             			NULL, 0,       153
+includesKey:;       			NULL, 1,       154
+pi;					NULL, 0,       155
+completedSuccessfully;                  NULL, 0,       156
+writeStream;        			NULL, 0,       157
+superclass;         			NULL, 0,       158
+arguments:;         			NULL, 1,       159
+state;              			NULL, 0,       160
+truncated;          			NULL, 0,       161
+inject:into:;       			NULL, 2,       162
+replaceFrom:to:with:startingAt:;        NULL, 4,       163
+current;            			NULL, 0,       164
+between:and:;       			NULL, 2,       165
+retryRelationalOp:coercing:;            NULL, 2,       166
+connectIfClosed;    			NULL, 0,       167
+detect:ifNone:;     			NULL, 2,       168
+checkError;         			NULL, 0,       169
+executeAndWait:arguments:;              NULL, 2,       170
+min:;               			NULL, 1,       171
+width;              			NULL, 0,       172
+parentContext;      			NULL, 0,       173
+removeLast;         			NULL, 0,       174
+zero;               			NULL, 0,       175
+bindWith:with:;     			NULL, 2,       176
+temporaries;        			NULL, 0,       177
+asOop;              			NULL, 0,       178
+width:height:;      			NULL, 2,       179
+methodDictionary;   			NULL, 0,       180
+accumulate:;        			NULL, 1,       181
+count;              			NULL, 0,       182
+asLowercase;        			NULL, 0,       183
+asArray;            			NULL, 0,       184
+exists;             			NULL, 0,       185
+signalOn:what:;     			NULL, 2,       186
+select:;            			NULL, 1,       187
+parent:;            			NULL, 1,       188
+selector:;          			NULL, 1,       189
+signalOn:withIndex:;			NULL, 2,       190
+bind:to:of:parameters:;                 NULL, 4,       191
+return:;            			NULL, 1,       192
+~~;                 			NULL, 1,       193
+changeState:;       			NULL, 1,       194
+sign;               			NULL, 0,       195
+variance;           			NULL, 0,       196
+asVector;           			NULL, 0,       197
+getResponse;        			NULL, 0,       198
+wait;               			NULL, 0,       199
+instanceClass;      			NULL, 0,       200
+asOrderedCollection;			NULL, 0,       201
+keys;               			NULL, 0,       202
+asFloat;            			NULL, 0,       203
+random;             			NULL, 0,       204
+origin;             			NULL, 0,       205
+superspace;         			NULL, 0,       206
+stop;               			NULL, 0,       207
+perform:;           			NULL, 1,       208
+backgroundColor:;   			NULL, 1,       209
+login;              			NULL, 0,       210
+data:;              			NULL, 1,       211
+nextToken;          			NULL, 0,       212
+primAt:put:;        			NULL, 2,       213
+method;             			NULL, 0,       214
+allSatisfy:;        			NULL, 1,       215
+position:;          			NULL, 1,       216
+default;            			NULL, 0,       217
+atAllPut:;          			NULL, 1,       218
+asSortedCollection; 			NULL, 0,       219
+invalidArgsError:;  			NULL, 1,       220
+nameIn:;            			NULL, 1,       221
+allSubclassesDo:;   			NULL, 1,       222
+signalError;        			NULL, 0,       223
+height;             			NULL, 0,       224
+source;             			NULL, 0,       225
+asNumber;           			NULL, 0,       226
+primitive;          			NULL, 0,       227
+store:;             			NULL, 1,       228
+updateViews;        			NULL, 0,       229
+errorContents:;     			NULL, 1,       230
+displayString;      			NULL, 0,       231
+skipSeparators;     			NULL, 0,       232
+origin:corner:;     			NULL, 2,       233
+activeProcess;      			NULL, 0,       234
+bindWith:;          			NULL, 1,       235
+beConsistent;       			NULL, 0,       236
+at:type:;           			NULL, 2,       237
+skip:;              			NULL, 1,       238
+days;               			NULL, 0,       239
+tclEval:with:;      			NULL, 2,       240
+fromSeconds:;       			NULL, 1,       241
+&;                  			NULL, 1,       242
+upToEnd;            			NULL, 0,       243
+variable;           			NULL, 0,       244
+become:;            			NULL, 1,       245
+with:do:;           			NULL, 2,       246
+findIndexOrNil:;    			NULL, 1,       247
+asSeconds;          			NULL, 0,       248
+copyWith:;          			NULL, 1,       249
+background;         			NULL, 0,       250
+status;             			NULL, 0,       251
+selectors:receiver:argument:;           NULL, 3,       252
+create:;            			NULL, 1,       253
+coerce:;            			NULL, 1,       254
+bytecodeAt:;        			NULL, 1,       255

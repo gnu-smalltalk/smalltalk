@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
  * Free Software Foundation, Inc.
  * Written by Steve Byrne and Paolo Bonzini.
  *
@@ -51,7 +51,7 @@
 
 /* Define this flag to disable blacking of grey pages (that is, the
    entire oldspace is scanned to look for reachable newspace objects).
-   This is also necessary to run valgrind on GNU Smalltalk. */
+   This is also necessary to run valgrind on GNU Smalltalk.  */
 /* #define NO_SIGSEGV_HANDLING */
 
 /* Define this flag to turn on debugging code for oldspace management */
@@ -68,17 +68,19 @@
 
 
 
-/* These are the memory areas within which we mantain object data. */
-heap _gst_oop_heap;
-
 /* These are the real OOPS for nil, true, and false */
-OOP _gst_nil_oop, _gst_true_oop, _gst_false_oop;
+OOP _gst_nil_oop = NULL;
+OOP _gst_true_oop = NULL;
+OOP _gst_false_oop = NULL;
 
-/* This is true to show a message whenever a GC happens. */
+/* This is true to show a message whenever a GC happens.  */
 mst_Boolean _gst_gc_message = true;
 
-/* This is != 0 in the middle of a GC. */
+/* This is != 0 in the middle of a GC.  */
 int _gst_gc_running = 0;
+
+/* These is the memory area which holds the object table.  */
+static heap oop_heap;
 
 /* This vector holds the storage for all the Character objects in the
    system.  Since all character objects are unique, we pre-allocate
@@ -87,7 +89,7 @@ int _gst_gc_running = 0;
 static struct gst_character _gst_char_object_table[NUM_CHAR_OBJECTS];
 
 /* This is "nil" object in the system.  That is, the single instance
-   of the UndefinedObject class, which is called "nil". */
+   of the UndefinedObject class, which is called "nil".  */
 static struct gst_undefined_object _gst_nil_object;
 
 /* These represent the two boolean objects in the system, true and
@@ -99,7 +101,7 @@ static struct gst_boolean _gst_boolean_objects[2];
 /* This variable represents information about the memory space.
    _gst_mem holds the required information: basically the
    pointer to the base and top of the space, and the pointers into it
-   for allocation and copying. */
+   for allocation and copying.  */
 struct memory_space _gst_mem;
 
 /* Data to compute the statistics in _gst_mem.  */
@@ -113,7 +115,7 @@ struct statistical_data
 
 
 /* Allocates a table for OOPs of SIZE bytes, and store pointers to the
-   builtin OOPs into _gst_nil_oop et al. */
+   builtin OOPs into _gst_nil_oop et al.  */
 static void alloc_oop_table (size_t);
 
 /* Free N slots from the beginning of the queue Q and return a pointer
@@ -124,7 +126,7 @@ static OOP *queue_get (surv_space *q, int n);
    to their base.  */
 static OOP *queue_put (surv_space *q, OOP *src, int n);
 
-/* Move an object from survivor space to oldspace. */
+/* Move an object from survivor space to oldspace.  */
 static void tenure_one_object ();
 
 /* Initialize an allocation heap with the oldspace hooks set.  */
@@ -132,6 +134,9 @@ static heap_data *init_old_space (size_t size);
 
 /* Initialize a surv_space structure.  */
 static void init_survivor_space (struct surv_space *space, size_t size);
+
+/* Raise the oldspace size limit to SIZE bytes without compacting it.  */
+static void grow_memory_no_compact (size_t size);
 
 /* Reset a surv_space structure (same as init, but without allocating 
    memory.  */
@@ -150,7 +155,7 @@ static void finished_incremental_gc ();
 /* Gather statistics.  */
 static void update_stats (unsigned long *last, double *between, double *duration);
 
-/* The copying collector. */
+/* The copying collector.  */
 static inline void copy_oops (void);
 
 /* Grey ranges are generated in two cases.  The standard one is when we
@@ -185,18 +190,20 @@ static void oldspace_before_freeing (heap_data *h, heap_block *blk, size_t sz);
 static int oldspace_sigsegv_handler (void* fault_address, int serious);
 #endif
 
-/* Hook that triggers garbage collection. */
+/* Hook that triggers garbage collection.  */
 static void oldspace_nomemory (heap_data *h, size_t sz);
 
 /* Answer the number of fields to be scanned in the object starting
    at OBJ, with the given FLAGS on its OOP.  */
 static int scanned_fields_in (mst_Object obj, int flags) ATTRIBUTE_PURE;
 
-/* The mark phase of oldspace GC. */
+/* The mark phase of oldspace GC.  */
 static inline void mark_oops (void);
 
-/* Performs special checks on weak and ephemeron objects.  When one
-   of the objects pointed to by a weak object have no other
+/* Communicate to the finalization thread which objects have to be sent
+   the #mourn message.
+
+   When one of the objects pointed to by a weak object have no other
    references, the slot of the weak object is replaced by a zero and
    the #mourn message is sent to it.  Ephemerons' keys are checked for
    reachability after non-ephemerons are marked, and if no objects outside
@@ -250,9 +257,9 @@ _gst_init_mem (size_t eden, size_t survivor, size_t old,
       sigsegv_install_handler (oldspace_sigsegv_handler);
 #endif
       if (!eden)
-        eden = 300 * K;
+        eden = 3 * K * K;
       if (!survivor)
-        survivor = 60 * K;
+        survivor = 128 * K;
       if (!old)
         old = 4 * K * K;
       if (!big_object_threshold)
@@ -335,7 +342,7 @@ void _gst_update_object_memory_oop (OOP oop)
   for (;;) {
     numScavenges = _gst_mem.numScavenges;
     data = (gst_object_memory) OOP_TO_OBJ (oop);
-    data->bytesPerOOP = FROM_INT (SIZEOF_CHAR_P);
+    data->bytesPerOOP = FROM_INT (sizeof (PTR));
     data->bytesPerOTE = FROM_INT (sizeof (struct OOP) +
 				  sizeof (gst_object_header));
 
@@ -391,11 +398,11 @@ _gst_init_oop_table (size_t size)
 {
   int i;
 
-  _gst_oop_heap = NULL;
-  for (i = MAX_OOP_TABLE_SIZE; i && !_gst_oop_heap; i >>= 1)
-    _gst_oop_heap = _gst_heap_create (i * sizeof (struct OOP));
+  oop_heap = NULL;
+  for (i = MAX_OOP_TABLE_SIZE; i && !oop_heap; i >>= 1)
+    oop_heap = _gst_heap_create (i * sizeof (struct OOP));
 
-  if (!_gst_oop_heap)
+  if (!oop_heap)
     nomemory (true);
 
   alloc_oop_table (size);
@@ -420,7 +427,7 @@ _gst_init_oop_table (size_t size)
     {
       _gst_char_object_table[i].objSize =
 	FROM_INT (ROUNDED_WORDS (sizeof (struct gst_character)));
-      _gst_char_object_table[i].charVal = (char) i;
+      _gst_char_object_table[i].charVal = FROM_INT (i);
       _gst_mem.ot[i + CHAR_OBJECT_BASE].object =
 	(mst_Object) & _gst_char_object_table[i];
       _gst_mem.ot[i + CHAR_OBJECT_BASE].flags =
@@ -432,27 +439,31 @@ _gst_init_oop_table (size_t size)
 void
 alloc_oop_table (size_t size)
 {
-  long bytes;
+  size_t bytes;
   OOP oop;
 
   _gst_mem.ot_size = size;
   bytes = (size - FIRST_OOP_INDEX) * sizeof (struct OOP);
   _gst_mem.ot_base =
-    (struct OOP *) _gst_heap_sbrk (_gst_oop_heap, bytes);
+    (struct OOP *) _gst_heap_sbrk (oop_heap, bytes);
   if (!_gst_mem.ot_base)
     nomemory (true);
 
   _gst_mem.ot = &_gst_mem.ot_base[-FIRST_OOP_INDEX];
-  _gst_nil_oop = &_gst_mem.ot[nilOOPIndex];
-  _gst_true_oop = &_gst_mem.ot[trueOOPIndex];
-  _gst_false_oop = &_gst_mem.ot[falseOOPIndex];
+  _gst_nil_oop = &_gst_mem.ot[NIL_OOP_INDEX];
+  _gst_true_oop = &_gst_mem.ot[TRUE_OOP_INDEX];
+  _gst_false_oop = &_gst_mem.ot[FALSE_OOP_INDEX];
 
   _gst_mem.num_free_oops = size;
 
   /* mark the OOPs as available */
+  PREFETCH_START (_gst_mem.ot, PREF_WRITE | PREF_NTA);
   for (oop = _gst_mem.ot;
        oop < &_gst_mem.ot[_gst_mem.ot_size]; oop++)
-    oop->flags = F_FREE;
+    {
+      PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
+      oop->flags = F_FREE;
+    }
 
   _gst_mem.first_allocated_oop = _gst_mem.ot;
   _gst_mem.last_allocated_oop = _gst_mem.last_swept_oop = _gst_mem.ot - 1;
@@ -462,25 +473,29 @@ alloc_oop_table (size_t size)
 mst_Boolean
 _gst_realloc_oop_table (size_t newSize)
 {
-  long bytes;
+  size_t bytes;
   OOP oop;
 
   bytes = (newSize - _gst_mem.ot_size) * sizeof (struct OOP);
   if (bytes < 0)
     return (true);
 
-  if (!_gst_heap_sbrk (_gst_oop_heap, bytes))
+  if (!_gst_heap_sbrk (oop_heap, bytes))
     {
       /* try to recover.  Note that we cannot move the OOP table like
-         we do with the object data. */
+         we do with the object data.  */
       nomemory (false);
       return (false);
     }
 
   /* mark the new OOPs as available */
+  PREFETCH_START (&_gst_mem.ot[_gst_mem.ot_size], PREF_WRITE | PREF_NTA);
   for (oop = &_gst_mem.ot[_gst_mem.ot_size];
        oop < &_gst_mem.ot[newSize]; oop++)
-    oop->flags = F_FREE;
+    {
+      PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
+      oop->flags = F_FREE;
+    }
 
   _gst_mem.num_free_oops += newSize - _gst_mem.ot_size;
   _gst_mem.ot_size = newSize;
@@ -516,15 +531,16 @@ _gst_init_builtin_objects_classes (void)
     _gst_char_object_table[i].objClass = _gst_char_class;
 }
 
-
 OOP
 _gst_find_an_instance (OOP class_oop)
 {
   OOP oop;
 
+  PREFETCH_START (_gst_mem.ot, PREF_READ | PREF_NTA);
   for (oop = _gst_mem.ot;
        oop <= _gst_mem.last_allocated_oop; oop++)
     {
+      PREFETCH_LOOP (oop, PREF_READ | PREF_NTA);
       if (IS_OOP_VALID (oop) && (OOP_CLASS (oop) == class_oop))
 	return (oop);
     }
@@ -598,7 +614,6 @@ _gst_swap_objects (OOP oop1,
 		   OOP oop2)
 {
   struct OOP tempOOP;
-
   if (oop2->flags & F_WEAK)
     _gst_make_oop_non_weak (oop2);
 
@@ -610,6 +625,17 @@ _gst_swap_objects (OOP oop1,
      garbage!  */
   if ((oop1->flags & F_OLD) ^ (oop2->flags & F_OLD))
     _gst_tenure_oop ((oop1->flags & F_OLD) ? oop2 : oop1);
+
+#ifdef ENABLE_JIT_TRANSLATION
+  /* We may exchange the translations, but it is very likely that
+     one of the objects does not have one yet, and the other one
+     will never be needed anymore (the object becomes garbage).  */
+  if (oop1->flags & F_XLAT)
+    _gst_discard_native_code (oop1);
+
+  if (oop2->flags & F_XLAT)
+    _gst_discard_native_code (oop2);
+#endif
 
   tempOOP = *oop2;		/* note structure assignment going on here */
   *oop2 = *oop1;
@@ -640,7 +666,7 @@ _gst_make_oop_fixed (OOP oop)
   if (oop->flags & F_FIXED)
     return;
 
-  size = TO_INT(oop->object->objSize) * SIZEOF_LONG;
+  size = SIZE_TO_BYTES (TO_INT(oop->object->objSize));
   newObj = (mst_Object) _gst_mem_alloc (_gst_mem.fixed, size);
   if (!newObj)
     abort ();
@@ -665,7 +691,7 @@ _gst_tenure_oop (OOP oop)
 
   if (!(oop->flags & F_FIXED))
     {
-      int size = TO_INT(oop->object->objSize) * SIZEOF_LONG;
+      int size = SIZE_TO_BYTES (TO_INT(oop->object->objSize));
       newObj = (mst_Object) _gst_mem_alloc (_gst_mem.old, size);
       if (!newObj)
         abort ();
@@ -693,7 +719,7 @@ _gst_alloc_obj (size_t size,
 
   /* We don't want to have allocPtr pointing to the wrong thing during
      GC, so we use a local var to hold its new value */
-  newAllocPtr = _gst_mem.eden.allocPtr + (size >> LONG_SHIFT);
+  newAllocPtr = _gst_mem.eden.allocPtr + BYTES_TO_SIZE (size);
 
   if UNCOMMON (size >= _gst_mem.big_object_threshold)
     return _gst_alloc_old_obj (size, p_oop);
@@ -707,7 +733,7 @@ _gst_alloc_obj (size_t size,
   p_instance = (mst_Object) _gst_mem.eden.allocPtr;
   _gst_mem.eden.allocPtr = newAllocPtr;
   *p_oop = alloc_oop (p_instance, _gst_mem.active_flag);
-  p_instance->objSize = FROM_INT (size >> LONG_SHIFT);
+  p_instance->objSize = FROM_INT (BYTES_TO_SIZE (size));
 
   return p_instance;
 }
@@ -720,7 +746,7 @@ _gst_alloc_old_obj (size_t size,
   mst_Object p_instance;
 
   size = ROUNDED_BYTES (size);
-  newAllocPtr = _gst_mem.eden.allocPtr + (size >> LONG_SHIFT);
+  newAllocPtr = _gst_mem.eden.allocPtr + BYTES_TO_SIZE (size);
 
   /* If the object is big enough, we put it directly in oldspace.  */
   p_instance = (mst_Object) _gst_mem_alloc (_gst_mem.old, size);
@@ -743,7 +769,7 @@ _gst_alloc_old_obj (size_t size,
 
 ok:
   *p_oop = alloc_oop (p_instance, F_OLD);
-  p_instance->objSize = FROM_INT (size >> LONG_SHIFT);
+  p_instance->objSize = FROM_INT (BYTES_TO_SIZE (size));
   return p_instance;
 }
 
@@ -761,6 +787,9 @@ mst_Object _gst_alloc_words (size_t size)
       nomemory (0);
       abort ();
     }
+
+  if UNCOMMON (size >= _gst_mem.big_object_threshold)
+    abort ();
 
   p_instance = (mst_Object) _gst_mem.eden.allocPtr;
   _gst_mem.eden.allocPtr = newAllocPtr;
@@ -783,7 +812,7 @@ oldspace_after_allocating (heap_data *h, heap_block *blk, size_t sz)
   printf ("Allocating oldspace page at %p (%d)\n", blk, sz);
 #endif
 
-  add_to_grey_list ((OOP *) blk, sz / SIZEOF_CHAR_P, NULL);
+  add_to_grey_list ((OOP *) blk, sz / sizeof (PTR), NULL);
   _gst_mem.rememberedTableEntries++;
 }
 
@@ -843,7 +872,7 @@ int oldspace_sigsegv_handler (void* fault_address, int serious)
      reentering = 1;
    }
 
-  page = (char *) fault_address - ((long) fault_address & (getpagesize() - 1));
+  page = (char *) fault_address - ((intptr_t) fault_address & (getpagesize() - 1));
   errno = 0;
   if (_gst_mem_protect (page, getpagesize(), PROT_READ | PROT_WRITE) == -1 &&
       (errno == ENOMEM || errno == EFAULT))
@@ -864,7 +893,7 @@ int oldspace_sigsegv_handler (void* fault_address, int serious)
 #endif
 
   _gst_mem.rememberedTableEntries++;
-  add_to_grey_list ((PTR) page, getpagesize() / SIZEOF_CHAR_P, NULL);
+  add_to_grey_list ((PTR) page, getpagesize() / sizeof (PTR), NULL);
   return !reentered;
 }
 #endif
@@ -893,7 +922,7 @@ _gst_grow_memory_to (size_t spaceSize)
 }
 
 void
-_gst_grow_memory_no_compact (size_t new_heap_limit)
+grow_memory_no_compact (size_t new_heap_limit)
 {
   _gst_mem.old->heap_limit = new_heap_limit;
   _gst_mem.fixed->heap_limit = new_heap_limit;
@@ -936,17 +965,21 @@ _gst_compact (size_t new_heap_limit)
   _gst_fixup_object_pointers ();
 
   /* Now do the copying loop which will compact oldspace.  */
+  PREFETCH_START (_gst_mem.ot, PREF_READ | PREF_NTA);
   for (oop = _gst_mem.ot;
        oop < &_gst_mem.ot[_gst_mem.ot_size]; oop++)
-    if ((oop->flags & (F_OLD | F_FIXED)) == F_OLD)
-      {
-        mst_Object new;
-        size_t size = SIZEOF_LONG * TO_INT (oop->object->objSize);
-        new = _gst_mem_alloc (new_heap, size);
-        memcpy (new, oop->object, size);
-        _gst_mem_free (_gst_mem.old, oop->object);
-        oop->object = new;
-      }
+    {
+      PREFETCH_LOOP (oop, PREF_READ | PREF_NTA);
+      if ((oop->flags & (F_OLD | F_FIXED)) == F_OLD)
+        {
+          mst_Object new;
+          size_t size = SIZE_TO_BYTES (TO_INT (oop->object->objSize));
+          new = _gst_mem_alloc (new_heap, size);
+          memcpy (new, oop->object, size);
+          _gst_mem_free (_gst_mem.old, oop->object);
+          oop->object = new;
+        }
+    }
 
   xfree (_gst_mem.old);
   _gst_mem.old = new_heap;
@@ -969,7 +1002,7 @@ _gst_global_compact ()
 void
 _gst_global_gc (int next_allocation)
 {
-  char *s;
+  const char *s;
   int old_limit;
 
   _gst_mem.numGlobalGCs++;
@@ -977,14 +1010,17 @@ _gst_global_gc (int next_allocation)
   old_limit = _gst_mem.old->heap_limit;
   _gst_mem.old->heap_limit = 0;
     
-  if (!_gst_gc_running++ && _gst_gc_message && !_gst_regression_testing)
+  if (!_gst_gc_running++
+      && _gst_gc_message
+      && _gst_verbosity > 0
+      && !_gst_regression_testing)
     {
       /* print the first part of this message before we finish
          scanning oop table for live ones, so that the delay caused by
          this scanning is apparent.  Note the use of stderr for the
          printed message.  The idea here was that generated output
          could be treated as Smalltalk code, HTML or whatever else you
-         want without harm. */
+         want without harm.  */
       fflush (stdout);
       fprintf (stderr, "\"Global garbage collection... ");
       fflush (stderr);
@@ -1036,12 +1072,15 @@ _gst_global_gc (int next_allocation)
 	       * 100.0 /_gst_mem.grow_threshold_percent;
 
           s = "done, heap grown";
-          _gst_grow_memory_no_compact (MAX (grow_amount_to_satisfy_rate,
-					    grow_amount_to_satisfy_threshold));
+          grow_memory_no_compact (MAX (grow_amount_to_satisfy_rate,
+				       grow_amount_to_satisfy_threshold));
         }
      }
 
-  if (!--_gst_gc_running && _gst_gc_message && !_gst_regression_testing)
+  if (!--_gst_gc_running
+      && _gst_gc_message
+      && _gst_verbosity > 0
+      && !_gst_regression_testing)
     {
       fprintf (stderr, "%s\"\n", s);
       fflush (stderr);
@@ -1071,14 +1110,17 @@ _gst_scavenge (void)
       return;
     }
 
-  if (!_gst_gc_running++ && _gst_gc_message && !_gst_regression_testing)
+  if (!_gst_gc_running++
+      && _gst_gc_message
+      && _gst_verbosity > 0
+      && !_gst_regression_testing)
     {
       /* print the first part of this message before we finish
 	 scanning oop table for live ones, so that the delay caused by
 	 this scanning is apparent.  Note the use of stderr for the
 	 printed message.  The idea here was that generated output
 	 could be treated as Smalltalk code, HTML or whatever else you
-	 want without harm. */
+	 want without harm.  */
       fflush (stdout);
       fprintf (stderr, "\"Scavenging... ");
       fflush (stderr);
@@ -1108,7 +1150,10 @@ _gst_scavenge (void)
   tenuredBytes = _gst_mem.active_half->allocated - _gst_mem.active_half->filled;
   reclaimedPercent = 100.0 * reclaimedBytes / oldBytes;
 
-  if (!--_gst_gc_running && _gst_gc_message && !_gst_regression_testing)
+  if (!--_gst_gc_running
+      && _gst_gc_message
+      && _gst_verbosity > 0
+      && !_gst_regression_testing)
     {
       fprintf (stderr, "%d%% reclaimed, done\"\n", reclaimedPercent);
       fflush (stderr);
@@ -1142,16 +1187,20 @@ _gst_finish_incremental_gc ()
           _gst_mem.highest_swept_oop, _gst_mem.live_flags);
 #endif
 
+  PREFETCH_START (_gst_mem.highest_swept_oop, PREF_BACKWARDS | PREF_READ | PREF_NTA);
   for (oop = _gst_mem.highest_swept_oop, firstOOP = _gst_mem.last_swept_oop;
        --oop > firstOOP; oop->flags &= ~F_REACHABLE)
-    if (!IS_OOP_VALID_GC(oop))
-      {
-        _gst_sweep_oop (oop);
-	_gst_mem.num_free_oops++;
-        _gst_mem.highest_swept_oop = oop;
-        if (oop == _gst_mem.last_allocated_oop)
-          _gst_mem.last_allocated_oop--;
-      }
+    {
+      PREFETCH_LOOP (oop, PREF_BACKWARDS | PREF_READ | PREF_NTA);
+      if (!IS_OOP_VALID_GC (oop))
+        {
+          _gst_sweep_oop (oop);
+	  _gst_mem.num_free_oops++;
+          _gst_mem.highest_swept_oop = oop;
+          if (oop == _gst_mem.last_allocated_oop)
+            _gst_mem.last_allocated_oop--;
+        }
+    }
 
   finished_incremental_gc ();
 }
@@ -1166,9 +1215,9 @@ finished_incremental_gc (void)
     _gst_mem.factor * stats.reclaimedOldSpaceBytesSinceLastGlobalGC +
     (1 - _gst_mem.factor) * _gst_mem.reclaimedBytesPerScavenge;
 
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
   /* Go and really free the blocks associated to garbage collected
-     native code. */
+     native code.  */
   _gst_free_released_native_code ();
 #endif
 }
@@ -1190,11 +1239,11 @@ _gst_incremental_gc_step ()
 	  break;
 	}
 
-      if (!IS_OOP_VALID_GC(oop))
+      if (!IS_OOP_VALID_GC (oop))
         {
           i++;
           _gst_sweep_oop (oop);
-  	_gst_mem.num_free_oops++;
+  	  _gst_mem.num_free_oops++;
           _gst_mem.highest_swept_oop = oop;
           if (oop == _gst_mem.last_allocated_oop)
             _gst_mem.last_allocated_oop--;
@@ -1210,17 +1259,17 @@ reset_incremental_gc (OOP firstOOP)
   /* This loop is the same as that in alloc_oop.  Skip low OOPs
      that are allocated */
   for (oop = firstOOP; IS_OOP_VALID_GC (oop); oop->flags &= ~F_REACHABLE, oop++)
-#if defined(USE_JIT_TRANSLATION)
+#if defined(ENABLE_JIT_TRANSLATION)
     if (oop->flags & F_XLAT)
       {
         if (oop->flags & F_XLAT_REACHABLE)
           /* Reachable, and referenced by active contexts.  Keep it
-             around. */
+             around.  */
           oop->flags &= ~F_XLAT_2NDCHANCE;
         else
           {
             /* Reachable, but not referenced by active contexts.  We
-               give it a second chance... */
+               give it a second chance...  */
             if (oop->flags & F_XLAT_2NDCHANCE)
               _gst_release_native_code (oop);
 
@@ -1272,7 +1321,7 @@ _gst_sweep_oop (OOP oop)
   if (IS_OOP_FREE (oop))
     return;
 
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
   if (oop->flags & F_XLAT)
     /* Unreachable, always free the native code.  Note
        it is *not* optional to free the code in this case -- and
@@ -1286,19 +1335,19 @@ _gst_sweep_oop (OOP oop)
   if UNCOMMON (oop->flags & F_WEAK)
     _gst_make_oop_non_weak (oop);
 
-  /* Free unreachable oldspace objects. */
+  /* Free unreachable oldspace objects.  */
   if UNCOMMON (oop->flags & F_FIXED)
     {
       _gst_mem.numOldOOPs--;
       stats.reclaimedOldSpaceBytesSinceLastGlobalGC +=
-	SIZEOF_LONG * TO_INT (OOP_TO_OBJ (oop)->objSize);
+	SIZE_TO_BYTES (TO_INT (OOP_TO_OBJ (oop)->objSize));
       _gst_mem_free (_gst_mem.fixed, oop->object);
     }
   else if UNCOMMON (oop->flags & F_OLD)
     {
       _gst_mem.numOldOOPs--;
       stats.reclaimedOldSpaceBytesSinceLastGlobalGC +=
-	SIZEOF_LONG * TO_INT (OOP_TO_OBJ (oop)->objSize);
+	SIZE_TO_BYTES (TO_INT (OOP_TO_OBJ (oop)->objSize));
       _gst_mem_free (_gst_mem.old, oop->object);
     }
 
@@ -1324,7 +1373,7 @@ mourn_objects (void)
     }
   else
     {
-      /* Copy the buffer */
+      /* Copy the buffer into an Array */
       array = new_instance_with (_gst_array_class, size, &processor->gcArray);
       _gst_copy_buffer (array->data);
       _gst_async_signal (processor->gcSemaphore);
@@ -1334,13 +1383,11 @@ mourn_objects (void)
 
 #define IS_QUEUE_SPLIT(q) ((q)->topPtr != (q)->allocPtr)
 
-#define QUEUE_NEXT(q, addr) (IS_QUEUE_SPLIT (q) && (addr) >= (q)->topPtr ? (q)->minPtr : (addr))
-
 OOP *
 queue_get (surv_space *q, int n)
 {
   OOP *result = q->tenurePtr;
-  q->filled -= n * SIZEOF_CHAR_P;
+  q->filled -= n * sizeof (PTR);
   q->tenurePtr += n;
 
   /* Check if the read pointer has to wrap.  */
@@ -1395,13 +1442,13 @@ queue_put (surv_space *q, OOP *src, int n)
     /* We are still extending towards the top.  Push further the
        valid area (which is space...topPtr and minPtr...allocPtr
        if topPtr != allocPtr (not circular yet), space...allocPtr
-       if topPtr == allocPtr (circular). */
+       if topPtr == allocPtr (circular).  */
     q->topPtr = newAlloc;
 
-  q->filled += n * SIZEOF_CHAR_P;
-  q->allocated += n * SIZEOF_CHAR_P;
+  q->filled += n * sizeof (PTR);
+  q->allocated += n * sizeof (PTR);
   q->allocPtr = newAlloc;
-  memcpy (result, src, n * SIZEOF_CHAR_P);
+  memcpy (result, src, n * sizeof (PTR));
   return result;
 }
 
@@ -1426,8 +1473,6 @@ tenure_one_object ()
       _gst_mem.scan.at = (OOP *) oop->object;
     }
 
-  /* Ephemerons are treated specially.  Since _gst_copy_an_oop itself
-     puts them in the tree of grey areas, we don't need to grey them.  */
   else if (_gst_mem.scan.queue_at == _gst_mem.tenuring_queue.tenurePtr)
     {
       mst_Object obj;
@@ -1437,8 +1482,14 @@ tenure_one_object ()
       printf ("Tenured OOP %p had not been scanned yet\n", oop);
 #endif
 
-      _gst_mem.scan.queue_at = QUEUE_NEXT (&_gst_mem.tenuring_queue,
-					   _gst_mem.scan.queue_at + 1);
+      /* Since tenurePtr is going to advance by a place, we must
+	 keep the Cheney scan pointer up to date.  Check if it has
+	 to wrap!  */
+      _gst_mem.scan.queue_at++;
+      if (_gst_mem.scan.queue_at >= _gst_mem.tenuring_queue.topPtr
+          && IS_QUEUE_SPLIT (&_gst_mem.tenuring_queue))
+        _gst_mem.scan.queue_at = _gst_mem.tenuring_queue.minPtr;
+
       _gst_tenure_oop (oop);
       obj = OOP_TO_OBJ (oop);
       numFields = scanned_fields_in (obj, oop->flags);
@@ -1458,7 +1509,7 @@ _gst_grey_oop_range (PTR from, size_t size)
   volatile char *last, *page;
 
   for (last = ((char *)from) + size,
-       page = ((char *)from) - ((long) from & (getpagesize() - 1));
+       page = ((char *)from) - ((intptr_t) from & (getpagesize() - 1));
        page < last;
        page += getpagesize())
     *page = *page;
@@ -1598,8 +1649,10 @@ scan_grey_pages ()
       printf ("Scanning grey page %p...%p\n", node->base, node->base + node->n);
 #endif
 
+      PREFETCH_START (node->base, PREF_READ | PREF_NTA);
       for (n = 0, pOOP = node->base, i = node->n; i--; pOOP++)
         {
+          PREFETCH_LOOP (pOOP, PREF_READ | PREF_NTA);
           oop = *pOOP;
 
           /* Not all addresses are known to contain valid OOPs! */
@@ -1721,18 +1774,18 @@ scanned_fields_in (mst_Object object,
 
   if COMMON (flags & F_CONTEXT)
     {
-      gst_method_context context;
-      long methodSP;
-      context = (gst_method_context) object;
-      methodSP = TO_INT (context->spOffset);
-      return context->contextStack + methodSP + 1 - &context->objClass;
+      gst_method_context ctx;
+      intptr_t methodSP;
+      ctx = (gst_method_context) object;
+      methodSP = TO_INT (ctx->spOffset);
+      return ctx->contextStack + methodSP + 1 - &ctx->objClass;
     }
   else
     {
       /* In general, there will be many instances of a class,
 	 but only the first time will it need to be copied;
          moreover, classes are often old.  So I'm
-	 marking this as uncommon. */
+	 marking this as uncommon.  */
       return UNCOMMON (!IS_OOP_COPIED (objClass));
     }
 }
@@ -1855,7 +1908,7 @@ _gst_copy_an_oop (OOP oop)
       /* Look for a child that has not been copied and move it
          near the object.  This improves the locality of reference.  
          We do not copy the class (that's the reason for the -1
-	 here). */
+	 here).  */
       n = scanned_fields_in (obj, oop->flags) - 1;
       if (oop->flags & F_EPHEMERON)
 	{
@@ -1899,10 +1952,10 @@ mark_ephemeron_oops (void)
   base = alloca (size);
   _gst_copy_buffer (base);
   _gst_reset_buffer ();
-  size /= SIZEOF_CHAR_P;
+  size /= sizeof (PTR);
 
   /* First pass: distinguish objects whose key was reachable from
-     the outside by clearing their F_EPHEMERON bit. */
+     the outside by clearing their F_EPHEMERON bit.  */
   for (pOOP = base, i = size; i--; pOOP++)
     {
       OOP oop = *pOOP;
@@ -1924,31 +1977,33 @@ mark_ephemeron_oops (void)
       int j;
 
       /* Find if the key is reachable from the objects (so that
-         we can mourn the ephemeron if this is not so). */
+         we can mourn the ephemeron if this is not so).  */
       key->flags &= ~F_REACHABLE;
 
       for (j = 1; j < num; j++)
         MAYBE_MARK_OOP (obj->data[j]);
 
       /* Remember that above we cleared F_EPHEMERON is the key
-         is alive. */
+         is alive.  */
       if (!IS_OOP_MARKED (key) && (oop->flags & F_EPHEMERON))
         _gst_add_buf_pointer (oop);
 
-      /* Ok, now mark the key. */
+      /* Ok, now mark the key.  */
       MAYBE_MARK_OOP (key);
 
-      /* Restore the flag in case it was cleared. */
+      /* Restore the flag in case it was cleared.  */
       oop->flags |= F_EPHEMERON;
     }
 }
 
 #define TAIL_MARK_OOP(newOOP) BEGIN_MACRO { \
+  PREFETCH_ADDR ((newOOP)->object, PREF_READ | PREF_NTA); \
   oop = (newOOP); \
   continue;		/* tail recurse!!! */ \
 } END_MACRO
 
 #define TAIL_MARK_OOPRANGE(firstOOP, oopAtEnd) BEGIN_MACRO { \
+  PREFETCH_START (firstOOP, PREF_READ | PREF_NTA); \
   curOOP = (OOP *)(firstOOP); \
   atEndOOP = (OOP *)(oopAtEnd); \
   oop = NULL; \
@@ -1970,6 +2025,7 @@ _gst_mark_an_oop_internal (OOP oop,
 	iterationLoop:
 	  /* in a loop, do next iteration */
 	  oop = *curOOP;
+	  PREFETCH_LOOP (curOOP, PREF_READ | PREF_NTA);
 	  curOOP++;
 	  if (IS_OOP (oop))
 	    {
@@ -1985,6 +2041,7 @@ _gst_mark_an_oop_internal (OOP oop,
 #endif
 	      if (!IS_OOP_MARKED (oop))
 		{
+		  PREFETCH_START (oop->object, PREF_READ | PREF_NTA);
 		  if COMMON (curOOP < atEndOOP)
 		    {
 		      _gst_mark_an_oop_internal (oop, NULL, NULL);
@@ -2000,7 +2057,7 @@ _gst_mark_an_oop_internal (OOP oop,
 	  /* We reach this point if the object isn't to be marked.  The 
 	     code above contains a continue to tail recurse, so we
 	     cannot put the loop in a do...while and a goto is
-	     necessary here.  Speed is a requirement, so I'm doing it. */
+	     necessary here.  Speed is a requirement, so I'm doing it.  */
 	  if (curOOP < atEndOOP)
 	    goto iterationLoop;
 	}
@@ -2008,7 +2065,7 @@ _gst_mark_an_oop_internal (OOP oop,
 	{			/* just starting with this oop */
 	  OOP objClass;
 	  mst_Object object;
-	  unsigned long size;
+	  uintptr_t size;
 
 #if !defined (OPTIMIZE)
 	  if UNCOMMON (IS_OOP_FREE (oop))
@@ -2031,22 +2088,21 @@ _gst_mark_an_oop_internal (OOP oop,
 	  objClass = object->objClass;
 	  if UNCOMMON (oop->flags & F_CONTEXT)
 	    {
-	      gst_method_context context = (gst_method_context) object;
-	      long methodSP;
-
-	      context = (gst_method_context) object;
-	      methodSP = TO_INT (context->spOffset);
+	      gst_method_context ctx;
+	      intptr_t methodSP;
+	      ctx = (gst_method_context) object;
+	      methodSP = TO_INT (ctx->spOffset);
 	      /* printf("setting up for loop on context %x, sp = %d\n", 
-	         context, methodSP); */
-	      TAIL_MARK_OOPRANGE (&context->objClass,
-				  context->contextStack + methodSP + 1);
+	         ctx, methodSP); */
+	      TAIL_MARK_OOPRANGE (&ctx->objClass,
+				  ctx->contextStack + methodSP + 1);
 
 	    }
 	  else if UNCOMMON (oop->flags & (F_EPHEMERON | F_WEAK))
 	    {
 	      /* In general, there will be many instances of a class,
 		 but only the first time will it be unmarked.  So I'm
-		 marking this as uncommon. */
+		 marking this as uncommon.  */
 	      if UNCOMMON (!IS_OOP_MARKED (objClass))
 		TAIL_MARK_OOP (objClass);
 
@@ -2065,7 +2121,7 @@ _gst_mark_an_oop_internal (OOP oop,
 	    }
 	}
       /* This point is reached if and only if nothing has to be marked
-         anymore in the current iteration. So exit. */
+         anymore in the current iteration. So exit.  */
       break;
     }				/* for(;;) */
 }
@@ -2089,8 +2145,8 @@ void
 _gst_inc_grow_registry (void)
 {
   OOP *oldBase;
-  unsigned long oldPtrOffset;
-  unsigned long oldRegistrySize, newRegistrySize;
+  unsigned oldPtrOffset;
+  unsigned oldRegistrySize, newRegistrySize;
 
   oldBase = _gst_mem.inc_base;
   oldPtrOffset = _gst_mem.inc_ptr - _gst_mem.inc_base;

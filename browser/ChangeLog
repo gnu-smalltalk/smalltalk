@@ -1,11 +1,22 @@
-2003-06-28  Paolo Bonzini  <bonzini@gnu.org>
+2004-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
-	*** Version 2.1.3 released.
+	* browser/ButtonForm.st: Remove setting of the Helvetica font.
+	* browser/PList.st: Likewise.
+	* browser/PCode.st: Likewise.
+
+2003-08-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* browser/PCode.st: add senders and implementors
+	that parse the current method.
+	* browser/ClassHierBrow.st: add them to context
+	menus.
+	* browser/Debugger.st: likewise
+	* browser/MethSetBrow.st: likewise
 
 2003-05-14  Jan Hidders
 
-        * browser/PCode.st: syntax highlight unary and
-        binary methods correctly.
+	* browser/PCode.st: syntax highlight unary and
+	binary methods correctly.
 
 2003-05-09  Paolo Bonzini  <bonzini@gnu.org>
 

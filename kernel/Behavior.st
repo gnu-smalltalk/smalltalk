@@ -65,9 +65,7 @@ addInstVarName: aString
 
     self
 	updateInstanceVars: newInstanceVariables
-	variable: self isVariable
-	words: self isWords
-	pointers: self isPointers.
+	shape: self shape.
 
     duplicated ifTrue: [ self compileAll ].
     self compileAllSubclasses.
@@ -88,9 +86,7 @@ removeInstVarName: aString
 
     self
 	updateInstanceVars: newInstanceVariables
-	variable: self isVariable
-	words: self isWords
-	pointers: self isPointers.
+	shape: self shape.
 
     self compileAll; compileAllSubclasses.
 ! !
@@ -866,7 +862,7 @@ scopeHas: name ifTrue: aBlock
 isPointers
     "Answer whether the instance variables of the receiver's instances
      are objects"
-    ^(self instanceSpec bitAt: 4) ~= 0
+    ^(self instanceSpec bitAnd: 31) = 31
 !
 
 isIdentity
@@ -879,24 +875,6 @@ isImmediate
     ^false
 !
 
-isBits
-    "Answer whether the instance variables of the receiver's instances
-     are bytes or words"
-    ^self isPointers not
-!
-
-isBytes
-    "Answer whether the instance variables of the receiver's
-     instances are bytes"
-    ^self isPointers not & self isWords not
-!
-
-isWords
-    "Answer whether the instance variables of the receiver's
-     instances are words"
-    ^(self instanceSpec bitAt: 3) ~= 0
-!
-
 isFixed
     "Answer whether the receiver's instances have no indexed
      instance variables"
@@ -905,7 +883,7 @@ isFixed
 
 isVariable
     "Answer whether the receiver's instances have indexed instance variables"
-    ^(self instanceSpec bitAt: 2) ~= 0
+    ^(self instanceSpec bitAt: 5) ~= 0
 !
 
 instSize
@@ -938,11 +916,18 @@ inheritsFrom: aClass
 kindOfSubclass
     "Return a string indicating the type of class the receiver is"
     self isVariable ifFalse: [ ^'subclass:' ].
-    self isBytes ifTrue: [ ^'variableByteSubclass:' ].
+    self isPointers ifFalse: [ ^'variableSubclass:' ].
+    ^'variable: ', self shape storeString, 'subclass:'
+!
 
-    ^self isPointers
-	ifTrue: [ 'variableSubclass:' ]
-	ifFalse: [ 'variableWordSubclass:' ]
+shapes
+    ^#(#int8 #byte #short #ushort #int #uint #float #int64 #uint64 #double
+       nil nil nil nil nil #pointer)
+!
+
+shape
+    self isVariable ifFalse: [ ^nil ].
+    ^self shapes at: (instanceSpec bitAnd: 15) + 1
 ! !
 
 
@@ -1085,6 +1070,13 @@ publicMethods
     ^self methodsFor: 'public'
 ! !
 
+
+!Class methodsFor: 'security'!
+
+check: aPermission
+    self securityPolicy isNil ifTrue: [ ^self isUntrusted not ].
+    ^self securityPolicy check: aPermission
+! !
 
 
 !Behavior methodsFor: 'support for lightweight classes'!
@@ -1109,6 +1101,14 @@ nameIn: aNamespace
     "Answer the class name when the class is referenced from aNamespace
      - a dummy one, since Behavior does not support names."
     ^'<no name>'
+!
+
+securityPolicy
+    ^self asClass securityPolicy
+!
+
+securityPolicy: aSecurityPolicy
+    self shouldNotImplement
 !
 
 printOn: aStream in: aNamespace
@@ -1175,19 +1175,14 @@ instanceSpec
     ^instanceSpec
 !
 
-setInstanceSpec: variableBoolean
-  words: wordsBoolean
-  pointers: pointersBoolean
-  instVars: anIntegerSize
-    "hasFinalize is cleared by this method -- should it be? "
-    instanceSpec := 0.
-    pointersBoolean
-    	ifTrue: [ instanceSpec := instanceSpec bitOr: ( 1 bitShift: 3 ) ].
-    wordsBoolean
-	ifTrue: [ instanceSpec := instanceSpec bitOr: ( 1 bitShift: 2 ) ].
-    variableBoolean
-	ifTrue: [ instanceSpec := instanceSpec bitOr: ( 1 bitShift: 1 ) ].
-    instanceSpec := instanceSpec bitOr: (anIntegerSize bitShift: 12).
+setInstanceSpec: shape instVars: anIntegerSize
+    instanceSpec := anIntegerSize bitShift: 12.
+    shape isNil ifFalse: [
+	instanceSpec := instanceSpec
+	    bitOr: 15 + (self shapes
+			    indexOf: shape
+			    ifAbsent: [ self error: 'invalid shape value' ]) ].
+
 !
 
 sharedPoolDictionaries
@@ -1213,17 +1208,16 @@ validateIdentifier: token
 !
 
 updateInstanceVars: variableArray
-    variable: variableBoolean
-    words: wordBoolean 
-    pointers: pointerBoolean
+    shape: shape
 
-    "Update instance variables and instance spec of the class and all its subclasses"
+    "Update instance variables and instance spec of the class and all
+     its subclasses"
 
     | instVarMap startOfInstanceVars endOfInstanceVars newInstanceVars 
        oldInstVars oldClass instances |
 
     startOfInstanceVars := self superclass instSize + 1.
-    endOfInstanceVars :=  self instSize.
+    endOfInstanceVars := self instSize.
     newInstanceVars := variableArray
 	copyFrom: startOfInstanceVars 
 	to: variableArray size. 
@@ -1243,15 +1237,13 @@ updateInstanceVars: variableArray
 	instances do: [ :each | each changeClassTo: oldClass ].
 
 	iv := sc allInstVarNames
-	    copyReplaceFrom: startOfInstanceVars 
+	    copyReplaceFrom: startOfInstanceVars
 	    to: endOfInstanceVars
 	    with: newInstanceVars.
 
 	sc setInstanceVariables: iv.
 
-	sc setInstanceSpec: sc isVariable
-	    words: sc isWords
-	    pointers: sc isPointers
+	sc setInstanceSpec: sc shape
 	    instVars: sc allInstVarNames size.
 
 	"Mutate all instances of the class to conform to new memory model
@@ -1272,8 +1264,8 @@ updateInstanceVars: variableArray
 
     self setInstanceVariables: variableArray.
 
-    self setInstanceSpec: variableBoolean words: wordBoolean
-	pointers: pointerBoolean instVars: variableArray size.
+    self setInstanceSpec: shape
+	instVars: variableArray size.
 
     instances do: [ :each |
 	each

@@ -14,8 +14,7 @@
 |
  ======================================================================"
 
-
-!Integer methodsFor: 'numerics'!
+!Smalltalk.Integer methodsFor: 'numerics'!
 
 gamma
     "Compute the Gamma function for the receiver.
@@ -33,7 +32,7 @@ random
 
     ^Dhb.DhbMitchellMooreGenerator new integerValue: self! !
 
-!Number class methodsFor: 'numerics'!
+!Smalltalk.Number class methodsFor: 'numerics'!
 
 random
     "Answers a random number between 0 and the receiver
@@ -42,7 +41,7 @@ random
 
     ^Dhb.DhbMitchellMooreGenerator new floatValue * self! !
 
-!Number methodsFor: 'numerics'!
+!Smalltalk.Number methodsFor: 'numerics'!
 
 addPolynomial: aPolynomial
     "(c) Copyrights Didier BESSET, 1999, all rights reserved.
@@ -158,7 +157,7 @@ timesPolynomial: aPolynomial
 
     ^aPolynomial timesNumber: self! !
 
-!Point methodsFor: 'numerics'!
+!Smalltalk.Point methodsFor: 'numerics'!
 
 extentFromBottomLeft: aPoint
     "(c) Copyrights Didier BESSET, 1998, all rights reserved
@@ -194,7 +193,7 @@ extentFromTopRight: aPoint
                                                   ifFalse:[ aPoint x ]) @ 0))
                extent: aPoint! !
 
-!Rectangle methodsFor: 'numerics'!
+!Smalltalk.Rectangle methodsFor: 'numerics'!
 
 positiveRectangle
     "(c) Copyrights Didier BESSET, 1998, all rights reserved
@@ -202,7 +201,7 @@ positiveRectangle
 
     ^( origin min: corner) corner: ( origin max: corner)! !
 
-!Collection methodsFor: 'numerics'!
+!Smalltalk.Collection methodsFor: 'numerics'!
 
 asVector
     ^(Dhb.DhbVector new: self size)

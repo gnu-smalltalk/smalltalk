@@ -28,10 +28,10 @@
  *
  ***********************************************************************/
 
-static inline OOP alloc_oop (PTR obj, long flags);
+static inline OOP alloc_oop (PTR obj, intptr_t flags);
 
 /* Copy the OOP object because it is part of the root set.  Integers
-   and already-copied OOPs are not processed silently. */
+   and already-copied OOPs are not processed silently.  */
 #define MAYBE_COPY_OOP(oop) do {			  \
   if (!IS_OOP_COPIED(oop)) {				  \
     _gst_copy_an_oop(oop);				  \
@@ -39,7 +39,7 @@ static inline OOP alloc_oop (PTR obj, long flags);
 } while(0)
 
 /* Mark the OOPs starting at STARTOOP (included) and ending at ENDOOP
-   (excluded). */
+   (excluded).  */
 #define COPY_OOP_RANGE(startOOP, endOOP) do {		  \
   if ((startOOP) < (endOOP)) {				  \
     _gst_copy_oop_range((startOOP), (endOOP));		  \
@@ -47,7 +47,7 @@ static inline OOP alloc_oop (PTR obj, long flags);
 } while(0)
 
 /* Mark the OOP object because it is part of the root set.  Integers
-   and already-marked OOPs are not processed silently. */
+   and already-marked OOPs are not processed silently.  */
 #define MAYBE_MARK_OOP(oop) do {			  \
   if (IS_OOP(oop) && !IS_OOP_MARKED(oop)) {		  \
     _gst_mark_an_oop_internal((oop), NULL, NULL);	  \
@@ -55,7 +55,7 @@ static inline OOP alloc_oop (PTR obj, long flags);
 } while(0)
 
 /* Mark the OOPs starting at STARTOOP (included) and ending at ENDOOP
-   (excluded). */
+   (excluded).  */
 #define MARK_OOP_RANGE(startOOP, endOOP) do {		  \
   if ((startOOP) < (endOOP)) {				  \
     _gst_mark_an_oop_internal(NULL, (startOOP), (endOOP));\
@@ -92,28 +92,28 @@ static inline OOP alloc_oop (PTR obj, long flags);
 #define OOP_INDEX_VALID(index) \
   ((index) >= FIRST_OOP_INDEX && (index) < _gst_mem.ot_size)
 
-/* Answer the INDEX-th OOP in the table. */
+/* Answer the INDEX-th OOP in the table.  */
 #define OOP_AT(index) \
   ( &_gst_mem.ot[index] )
 
-/* Answer the index of OOP in the table. */
+/* Answer the index of OOP in the table.  */
 #define OOP_INDEX(oop) \
   ( (OOP)(oop) - _gst_mem.ot )
 
-/* Answer whether OOP is a builtin OOP (a Character, true, false, nil). */
+/* Answer whether OOP is a builtin OOP (a Character, true, false, nil).  */
 #define IS_BUILTIN_OOP(oop) \
   ( (OOP)(oop) - _gst_mem.ot < 0 )
 
-/* Set the indirect object pointer OOP to point to OBJ. */
+/* Set the indirect object pointer OOP to point to OBJ.  */
 #define SET_OOP_OBJECT(oop, obj) do {				\
   (oop)->object = (mst_Object) (obj);				\
 } while(0)
 
-/* Answer whether ADDR is part of the OOP table. */
+/* Answer whether ADDR is part of the OOP table.  */
 #define IS_OOP_ADDR(addr)					\
   ((OOP)(addr) >= _gst_mem.ot_base 	 			\
     && (OOP)(addr) <= _gst_mem.last_allocated_oop		\
-    && (((long)addr & (sizeof (struct OOP) - 1)) == 0))
+    && (((intptr_t)addr & (sizeof (struct OOP) - 1)) == 0))
 
 /* Answer whether ADDR is part of newspace.  */
 #define IS_EDEN_ADDR(addr)					\
@@ -125,11 +125,11 @@ static inline OOP alloc_oop (PTR obj, long flags);
   ((OOP *)(addr) >= _gst_mem.surv[(n)].minPtr && 		\
    (OOP *)(addr) < _gst_mem.surv[(n)].maxPtr)
 
-/* Return the Character object for ASCII value C. */
+/* Return the Character object for ASCII value C.  */
 #define CHAR_OOP_AT(c)      (&_gst_mem.ot[(c) + CHAR_OBJECT_BASE])
 
 /* Return the ASCII value corresponding to the Character object
-   OOP. */
+   OOP.  */
 #define CHAR_OOP_VALUE(oop) ((oop) - &_gst_mem.ot[CHAR_OBJECT_BASE])
 
 #define INC_ADD_OOP(oop)					\
@@ -149,9 +149,9 @@ static inline OOP alloc_oop (PTR obj, long flags);
 /* Given an object OBJ, allocate an OOP table slot for it and returns
    it.  It marks the OOP so that it indicates the object is in new
    space, and that the oop has been referenced on this pass (to keep
-   the OOP table reaper from reclaiming this OOP). */
+   the OOP table reaper from reclaiming this OOP).  */
 static inline OOP
-alloc_oop (PTR objData, long flags)
+alloc_oop (PTR objData, intptr_t flags)
 {
   REGISTER (1, OOP oop);
   mst_Object obj;
@@ -167,19 +167,19 @@ alloc_oop (PTR objData, long flags)
   else
     {
       for (oop = _gst_mem.last_swept_oop;
-           ++oop, IS_OOP_VALID_GC (oop);
+           ++oop, IS_OOP_VALID (oop);
 	   oop->flags &= ~F_REACHABLE)
-#if defined(USE_JIT_TRANSLATION)
+#if defined(ENABLE_JIT_TRANSLATION)
         if (oop->flags & F_XLAT)
           {
             if (oop->flags & F_XLAT_REACHABLE)
               /* Reachable, and referenced by active contexts.  Keep it
-                 around. */
+                 around.  */
               oop->flags &= ~F_XLAT_2NDCHANCE;
             else
               {
                 /* Reachable, but not referenced by active contexts.  We
-                   give it a second chance... */
+                   give it a second chance...  */
                 if (oop->flags & F_XLAT_2NDCHANCE)
                   _gst_release_native_code (oop);
 
@@ -194,6 +194,7 @@ alloc_oop (PTR objData, long flags)
         _gst_mem.last_allocated_oop = oop;
 
       _gst_sweep_oop (oop);
+      PREFETCH_LOOP (oop, PREF_READ);
     }
 
   /* Force a GC as soon as possible if we're low on OOPs.  */

@@ -105,7 +105,13 @@ new: aString in: view
     | aView |
     aView := super new: aString in: view.
     aView blox: (BContainer new: view blox).
-    ^aView! !
+    ^aView! 
+    
+horizontal: aString in: view
+    | result |
+    result := self new: aString in: view.
+    result blox setVerticalLayout: false.
+    ^result! !
 
 
 Manager subclass:  #TopLevelShell

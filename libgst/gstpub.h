@@ -123,9 +123,13 @@ typedef struct VMProxy
   void (*asyncSignalAndUnregister) __PROTO ((OOP semaphoreOOP));
 
   /* Array-of-OOP registry support.  Move these above
-     when we break binary compatibility. */
+     when we break binary compatibility.  */
   void (*registerOOPArray) __PROTO ((OOP **first, OOP **last));
   void (*unregisterOOPArray) __PROTO ((OOP **first));
+
+  /* More conversions.  */
+  long double (*OOPToLongDouble) __PROTO ((OOP oop));
+  OOP (*longDoubleToOOP) __PROTO ((long double f));
 } VMProxy;
 
 #define INDEXED_WORD(obj, n)   ( ((long *) ((obj) + 1))		    [(n)-1] )
@@ -147,27 +151,27 @@ typedef struct VMProxy
 
 /* These are extern in case one wants to link to libgst.a; these
    are not meant to be called by a module, which is brought up by
-   GNU Smalltalk when the VM is already up and running. */
+   GNU Smalltalk when the VM is already up and running.  */
 
 /* This loads the image and prepares the Smalltalk environment.
    Return -1 if the Smalltalk main loop should not be run but
    without returning an erroneous exit code, 0 if it should be
    run, and >0 if there was an error (such as the inability
-   to bootstrap). */
+   to bootstrap).  */
 extern int gst_init_smalltalk __PROTO ((void));
 
 /* This sets the arguments to be passed to the Smalltalk library,
-   which are the same that are available by the `gst' executable. */
+   which are the same that are available by the `gst' executable.  */
 extern void gst_smalltalk_args __PROTO ((int argc,
-					 char **argv));
+					 const char **argv));
 
 /* This processes files passed to gst_smalltalk_args and, if none
-   was passed, stdin is looked for input. */
+   was passed, stdin is looked for input.  */
 extern void gst_top_level_loop __PROTO ((void));
 
 /* This is exclusively for programs who link with libgst.a; plugins
    should not use this VMProxy but rather the one they receive in
-   gst_initModule. */
+   gst_initModule.  */
 extern VMProxy gst_interpreter_proxy;
 
 #ifdef __cplusplus

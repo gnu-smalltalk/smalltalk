@@ -1,0 +1,79 @@
+#! /bin/sh
+#  -*- Mode: Shell-script -*-
+# defs --- define the environment for tests.
+# Copyright (C) 1999 Gary V. Vaughan
+# Originally by Gary V. Vaughan <gvv@techie.com>, 1999
+# This file is part of Snprintfv.
+#
+# Snprintfv is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Snprintfv is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+# As a special exception to the GNU General Public License, if you
+# distribute this file as part of a program that also links with and
+# uses the libopts library from AutoGen, you may include it under
+# the same distribution terms used by the libopts library.
+
+# Code:
+
+# Make sure srcdir is an absolute path.  Supply the variable
+# if it does not exist.  We want to be able to run the tests
+# stand-alone!!
+#
+srcdir=${srcdir-.}
+if test ! -d $srcdir ; then
+    echo "defs: installation error" 1>&2
+    exit 1
+fi
+
+#  IF the source directory is a Unix or a DOS root directory, ...
+#
+case "$srcdir" in
+    /* | [A-Za-z]:\\*) ;;
+    *) srcdir=`\cd $srcdir && pwd` ;;
+esac
+
+case "$top_builddir" in
+    /* | [A-Za-z]:\\*) ;;
+    *) top_builddir=`\cd ${top_builddir-..} && pwd` ;;
+esac
+
+progname=`echo "$0" | sed 's,^.*/,,'`
+testname=`echo "$progname" | sed 's,-.*$,,'`
+builddir=${top_builddir}/tests
+testsubdir=${testsubdir-testSubDir}
+
+# User can set VERBOSE to prevent output redirection
+case x$VERBOSE in
+    xNO | xno | x0 | x)
+        exec > /dev/null 2>&1
+        ;;
+esac
+
+rm -rf $testsubdir > /dev/null 2>&1
+mkdir $testsubdir
+cd $testsubdir || { echo "Cannot make or change into $testsubdir"; exit 1; }
+
+echo "=== Running test $progname"
+
+CMP="${CMP-cmp}"
+SNPRINTFV=../snprintfv-test
+
+# nls related vars
+LANGUAGE=C; export LANGUAGE
+LC_ALL=C; export LC_ALL
+LANG=C; export LANG
+
+# defs ends here
+
+

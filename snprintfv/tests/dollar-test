@@ -1,0 +1,112 @@
+#! /bin/sh
+#  -*- Mode: Sh -*- 
+# dollar-test --- exercise %n$s specifiers
+# Copyright (C) 1998, 1999 Gary V. Vaughan
+# Originally by Gary V. Vaughan <gvv@techie.com>, 1998, 1999
+# This file is part of Snprintfv.
+#
+# Snprintfv is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Snprintfv is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+# As a special exception to the GNU General Public License, if you
+# distribute this file as part of a program that also links with and
+# uses the libopts library from AutoGen, you may include it under
+# the same distribution terms used by the libopts library.
+
+# Code:
+
+# Common definitions
+if test -z "$srcdir"; then
+    srcdir=`echo "$0" | sed 's,[^/]*$,,'`
+    test "$srcdir" = "$0" && srcdir=.
+    test -z "$srcdir" && srcdir=.
+    test "${VERBOSE+set}" != set && VERBOSE=1
+fi
+. $srcdir/defs
+
+
+# this is the output we should expect to see
+cat <<\EOF >ok
+1 string string
+*** printfv returned 15 chars.
+2 first first second
+*** printfv returned 20 chars.
+3 first second second
+*** printfv returned 21 chars.
+4 first third second
+*** printfv returned 20 chars.
+5  string string
+*** printfv returned 16 chars.
+6  first first secon
+*** printfv returned 20 chars.
+7 firs second  second
+*** printfv returned 21 chars.
+8   firs third second
+*** printfv returned 21 chars.
+9 second third first
+*** printfv returned 20 chars.
+10 second first first
+*** printfv returned 21 chars.
+*** parse_printf_format returned ERROR (invalid position specifier).
+*** parse_printf_format returned ERROR (invalid position specifier).
+EOF
+
+cat <<\EOF >errok
+EOF
+
+# basic tests
+$SNPRINTFV '1 %s %1$s' string 2> err | tee -i out >&2
+$SNPRINTFV '2 %s %1$s %s' first second third 2>> err | tee -ai out >&2
+$SNPRINTFV '3 %s %2$s %s' first second third 2>> err | tee -ai out >&2
+$SNPRINTFV '4 %s %3$s %s' first second third 2>> err | tee -ai out >&2
+
+# test with extra * arguments
+$SNPRINTFV '5 %*s %2$s' 7 string 2>> err | tee -ai out >&2
+$SNPRINTFV '6 %*s %2$s %.*s' 6 first 5 second third 2>> err | tee -ai out >&2
+$SNPRINTFV '7 %.*s %4$s %*s' 4 first 7 second third 2>> err | tee -ai out >&2
+$SNPRINTFV '8 %*.*s %5$s %s' 6 4 first second third 2>> err | tee -ai out >&2
+
+# try several in one spec
+$SNPRINTFV '9 %2$s %3$s %1$s' first second third 2>> err | tee -ai out >&2
+$SNPRINTFV '10 %2$s %s %1$s' first second 2>> err | tee -ai out >&2
+
+# provoke an error
+$SNPRINTFV '11 %.*$s' first 2>> err | tee -ai out >&2
+$SNPRINTFV '12 %0$s' first 2>> err | tee -ai out >&2
+
+# Test against expected output
+if ${CMP} -s out ok; then
+    :
+else
+    echo "ok:" >&2
+    cat ok >&2
+    exit 1
+fi
+
+# Munge error output to remove leading directories, `lt-' or trailing `.exe'
+sed -e "s,^[^:]*[lt-]*snprintfv-test[.ex]*:,snprintfv-test:," err >sederr \
+    && mv sederr err
+
+# Show stderr if doesn't match expected output if VERBOSE == 1
+if "$CMP" -s err errok; then
+    :
+else
+    echo "err:" >&2
+    cat err >&2
+    echo "errok:" >&2
+    cat errok >&2
+    exit 1
+fi
+
+# dollar-test ends here

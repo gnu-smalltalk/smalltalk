@@ -40,12 +40,12 @@ tinyBenchmarks
 
     | t1 t2 r n1 n2 |
     n1 _ 1 bitShift: self.
-    [t1 _ Time millisecondsToRun: [n1 benchmark].
-     t1 < 5000] whileTrue:[ ObjectMemory compact. n1 _ n1 * 2 ].
+    [ObjectMemory compact. t1 _ Time millisecondsToRun: [n1 benchmark].
+     t1 < 5000] whileTrue:[ n1 _ n1 * 2 ].
 
     n2 _ 24 + self.
-    [t2 _ Time millisecondsToRun: [r _ n2 benchFib].
-     t2 < 5000] whileTrue:[ ObjectMemory compact. n2 _ n2 + 1 ].
+    [ObjectMemory compact. t2 _ Time millisecondsToRun: [r _ n2 benchFib].
+     t2 < 5000] whileTrue:[ n2 _ n2 + 1 ].
 
     ^((n1 * 500000 * 1000) // t1) printString, ' bytecodes/sec; ',
      ((r * 1000) // t2) printString, ' sends/sec'!
@@ -80,6 +80,4 @@ benchmark
     ^count
 ! !
 
-|iter|
-iter := (Smalltalk hasFeatures: #JIT) ifTrue: [ 10 ] ifFalse: [ 8 ].
-Transcript showCr: iter tinyBenchmarks!
+Transcript showCr: 10 tinyBenchmarks!

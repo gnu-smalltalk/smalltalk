@@ -35,7 +35,7 @@
 # define __DECL_REG1 __asm("$16")
 # define __DECL_REG2 __asm("$17")
 # define __DECL_REG3 __asm("$18")
-# define BRANCH_REGISTER(name) REGISTER(3, void *name)
+# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__DECL_REG1) && defined(__sparc__)
@@ -43,7 +43,7 @@
 # define __DECL_REG1 __asm("%l0")
 # define __DECL_REG2 __asm("%l1")
 # define __DECL_REG3 __asm("%l2")
-# define BRANCH_REGISTER(name) REGISTER(3, void *name)
+# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__DECL_REG1) && defined(__alpha__)
@@ -55,12 +55,12 @@
 #  define __DECL_REG1 __asm("r9")
 #  define __DECL_REG2 __asm("r10")
 #  define __DECL_REG3		/* __asm("r11") */
-#  define BRANCH_REGISTER(name) register void *name
+#  define BRANCH_REGISTER(name) void *name
 # else
 #  define __DECL_REG1 __asm("$9")
 #  define __DECL_REG2 __asm("$10")
 #  define __DECL_REG3		/* __asm("$11") */
-#  define BRANCH_REGISTER(name) register void *name
+#  define BRANCH_REGISTER(name) void *name
 # endif
 # define L1_CACHE_SHIFT 6
 #endif
@@ -69,8 +69,12 @@
 # define REG_AVAILABILITY 0
 # define __DECL_REG1 __asm("%esi")
 # define __DECL_REG2 __asm("%edi")
-# define __DECL_REG3 __asm("%ebx")
-# define BRANCH_REGISTER(name) REGISTER(3, void *name)
+# ifdef PIC
+#  define __DECL_REG3 __asm("%edx")   /* Don't conflict with GOT pointer... */
+# else
+#  define __DECL_REG3 __asm("%ebx")   /* ...but prefer a callee-save reg.  */
+# endif
+# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__DECL_REG1) && defined(PPC) || defined(_POWER) || defined(_IBMR2)
@@ -78,7 +82,7 @@
 # define __DECL_REG1 __asm("26")
 # define __DECL_REG2 __asm("27")
 # define __DECL_REG3 __asm("28")
-# define BRANCH_REGISTER(name) REGISTER(3, void *name)
+# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__DECL_REG1) && defined(__hppa__)
@@ -86,23 +90,28 @@
 # define __DECL_REG1 __asm("%r16")
 # define __DECL_REG2 __asm("%r17")
 # define __DECL_REG3 __asm("%r18")
-# define BRANCH_REGISTER(name) REGISTER(3, void *name)
+# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__DECL_REG1) && defined(__mc68000__)
 /* Has lots of registers, but REG_AVAILABILITY == 1 currently
- * helps on RISC machines only.  Things might change however. */
+ * helps on RISC machines only.  Things might change however.  */
 # define REG_AVAILABILITY 0
 # define __DECL_REG1 __asm("a5")
 # define __DECL_REG2 __asm("a4")
 # define __DECL_REG3 __asm("d7")
-# define BRANCH_REGISTER(name) REGISTER(3, void *name)
+# define BRANCH_REGISTER(name) void *name
 # define L1_CACHE_SHIFT 4
 #endif
 
 #if defined(__ia64) && defined(__GNUC__)
 # define REG_AVAILABILITY 3
 # define BRANCH_REGISTER(name) register void *name __asm("b4")
+# define L1_CACHE_SHIFT 7
+#endif
+
+#if defined(__s390__)
+# define REG_AVAILABILITY 2
 # define L1_CACHE_SHIFT 7
 #endif
 
@@ -122,11 +131,11 @@
    don't put them in hardware registers, or (especially) do unneeded
    spills and reloads.  This slows down the interpreter considerably.
    For GCC, this provides the ability to hand-assign hardware
-   registers for several common architectures. */
+   registers for several common architectures.  */
 
 #ifndef REG_AVAILABILITY
 # define REG_AVAILABILITY 1
-# define BRANCH_REGISTER(name) register void *name
+# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__GNUC__) || !defined(__DECL_REG1)
@@ -136,10 +145,13 @@
 # define REGISTER(reg, decl)	register decl __DECL_REG(__DECL_REG##reg)
 #endif
 
-/* Define a way to unroll a loop by the constant factor 8. */
+/* Define a way to unroll a loop by the constant factor 8.  */
 
 #ifndef __ia64
 
+/* We don't use Duff's device, because it aligns n first, misaligning
+   the pointer: better to make n small, keeping the pointer aligned,
+   and do the small part at the end of the loop.  */
 #define UNROLL_BY_8(n) \
 __switch: \
   switch (n) { \
@@ -164,9 +176,8 @@ __switch: \
 #else /* __ia64 */
 
 /* On the IA-64, the above implementation is expensive because
- * the architecture lacks indexed addressing (afaik - surely GCC
- * does not generate it).
- */
+   the architecture lacks indexed addressing (afaik - surely GCC
+   does not generate it).  */
 #define UNROLL_BY_8(n) \
   while UNCOMMON (n >= 8) { \
     UNROLL_OP(0); UNROLL_OP(1); \
@@ -175,23 +186,17 @@ __switch: \
     UNROLL_OP(6); UNROLL_OP(7); \
     UNROLL_ADV(8); n -= 8; \
   } \
-  if (n >= 2) { \
+  if (n & 4) { \
+    UNROLL_OP(0); UNROLL_OP(1); \
+    UNROLL_OP(2); UNROLL_OP(3); \
+    UNROLL_ADV(4); \
+  } \
+  if (n & 2) { \
     UNROLL_OP(0); UNROLL_OP(1); \
     UNROLL_ADV(2); \
-    if (n >= 4) { \
-      UNROLL_OP(0); UNROLL_OP(1); \
-      UNROLL_ADV(2); \
-      if (n >= 6) { \
-        UNROLL_OP(0); UNROLL_OP(1); \
-        UNROLL_ADV(2); \
-      } \
-    } \
-    n &= 1; \
   } \
-  if (n) { \
-    n = 0; \
+  if (n &= 1) { \
     UNROLL_OP(0); \
-    UNROLL_ADV(1); \
   }
 #endif /* __ia64 */
 

@@ -48,7 +48,7 @@ Dictionary variableSubclass: #WeakKeyDictionary
 	category: 'Collections-Weak'!
 
 LookupTable variableSubclass: #WeakValueLookupTable
-	instanceVariableNames: ''
+	instanceVariableNames: 'values'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Collections-Weak'!
@@ -361,6 +361,12 @@ at: key put: value
 ! !
 
 
+!WeakValueLookupTable class methodsFor: 'hacks'!
+
+primNew: realSize
+    "Answer a new, uninitialized instance of the receiver with the given size"
+    ^self basicNew: realSize! !
+
 !WeakValueLookupTable methodsFor: 'hacks'!
 
 at: key ifAbsent: aBlock
@@ -370,7 +376,7 @@ at: key ifAbsent: aBlock
     | result |
     result := super at: key ifAbsent: [ ^aBlock value ].
     result isNil ifFalse: [ ^result ].
-    self cleanup.
+    self beConsistent.
     ^super at: key ifAbsent: aBlock
 !
 
@@ -391,14 +397,14 @@ includesKey: key
 
 !WeakValueLookupTable methodsFor: 'private'!
 
-cleanup
+beConsistent
      "Private - Clean the dictionary of key->(finalized value) pairs"
      | keys key |
      keys := WriteStream on: (Array new: self size // 3 + 1).
      1 to: self primSize do: [ :index |
 	"Find values that are nil and should not be"
 	(values isAlive: index) ifFalse: [
-	    keys nextPut: key.
+	    keys nextPut: (self primAt: index).
 	    values clearGCFlag: index
 	]
      ].
@@ -406,11 +412,32 @@ cleanup
      self removeAllKeys: keys contents ifAbsent: [:key |]
 !
 
-initValues
+initialize: anInteger
     "Private - Initialize the values array; plus, make it weak and create
     the ByteArray used to track garbage collected values"
 
+    super initialize: anInteger.
     values := WeakArray new: self primSize.
+!
+
+primSize
+    ^self basicSize
+!
+
+primAt: index
+    ^self basicAt: index
+!
+
+primAt: index put: object
+    ^self basicAt: index put: object
+!
+
+valueAt: index
+    ^values at: index
+!
+
+valueAt: index put: object
+    ^values at: index put: object
 ! !
 
 

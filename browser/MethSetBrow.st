@@ -208,6 +208,7 @@ openOn: aSortedCollection title: name selection: aSymbol
 			     #('Find...' #find)
 			     #() #('Do it' #eval) #('Print it' #evalAndPrintResult)
 			     #('Inspect' #evalAndInspectResult)
+			     #() #('Senders' #senders) #('Implementors' #implementors)
 			     #() #('Accept' #compileIt) #('Cancel' #revert)
 			     #() #('Close' #close))
 		receiver: textView

@@ -157,12 +157,19 @@ addPool: poolDictionary
 
 declareEnvironment: aBehavior
 
-    | i |
+    | i readOnly |
     environment := aBehavior.
 
-    i := 0.
-    aBehavior allInstVarNames do: [ :iv |
-	instVars at: iv asSymbol put: (i := i + 1).
+    i := -1.
+    readOnly := aBehavior isUntrusted not and: [ thisContext isUntrusted ].
+    aBehavior withAllSuperclassesDo: [ :class |
+	readOnly := readOnly and: [ class isUntrusted not ].
+	class instVarNames do: [ :iv |
+	    instVars at: iv asSymbol put: (STVariable
+	        id: (i := i + 1)
+	        scope: 0
+	        canStore: readOnly not).
+	].
     ].
     self declareGlobals
 !
@@ -191,7 +198,7 @@ declareGlobals
 	dicts isNil ifFalse: [
 	    dicts do: [ :sp | self addPool: sp ]
 	]
-    ].
+    ]
 !
 
 declareTemporary: tempName canStore: canStore for: stCompiler
@@ -236,10 +243,18 @@ addLiteral: aLiteral
 !STSymbolTable methodsFor: 'accessing'!
 
 canStore: aName
-    variables at: aName asSymbol ifPresent: [ :var |
-	^var canStore
-    ].
+    | var |
+    var := variables at: aName asSymbol ifAbsent: [ nil ].
+    var isNil ifFalse: [ ^var canStore ].
+
+    var := instVars at: aName asSymbol ifAbsent: [ nil ].
+    var isNil ifFalse: [ ^var canStore ].
+
     ^true
+!
+
+environment
+    ^environment
 !
 
 numTemps
@@ -308,15 +323,13 @@ lookupName: aName for: stCompiler
 	ifTrue: [ aName asSymbol ]
 	ifFalse: [ (aName copyFrom: 1 to: index - 1) asSymbol ].
 
-    value := variables at: symbol ifAbsent: [ nil ].
-    value isNil ifFalse: [ 
-        index = 0 ifFalse: [ self invalidScopeResolution: stCompiler ].
-        ^value id ].
+    index = 0 ifTrue: [
+        value := variables at: symbol ifAbsent: [ nil ].
+        value isNil ifFalse: [ ^value id ].
 
-    value := instVars at: symbol ifAbsent: [ nil ].
-    value isNil ifFalse: [
-        index = 0 ifFalse: [ self invalidScopeResolution: stCompiler ].
-        ^value - 1 ].
+        value := instVars at: symbol ifAbsent: [ nil ].
+        value isNil ifFalse: [ ^value id ].
+    ].
 
     assoc := index = 0
 	ifTrue: [ self lookupPoolsFor: symbol ]

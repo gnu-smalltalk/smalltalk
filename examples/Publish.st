@@ -306,15 +306,6 @@ skipWhite: start on: string
     ^pos
 !
 
-upToWhite: stream
-    "Answer everything up to the first white character in stream"
-    | write stream |
-    write := WriteStream on: (String new: 20).
-    [ stream atEnd not and: [ stream peek isSeparator ] ]
-	whileFalse: [ write nextPut: stream next ].
-    ^write contents
-!
-
 skipWhite: stream
     "Skip everything up to the first white character in stream. Answer
      true if a non-white character was found before the end of the stream"
@@ -355,8 +346,8 @@ parseUnaryOrKeyword: string from: start
     pos > string size ifTrue: [ ^string size + 1 ].
 
     ch := string at: pos.
-    ch ~~ $:
-	ifTrue: [ "Got a unary selector"
+    ch == $:
+	ifFalse: [ "Got a unary selector"
 		  pos := self skipPastNewline: pos on: string.
 		  ^pos ].
 
@@ -373,8 +364,8 @@ parseUnaryOrKeyword: string from: start
       tempPos > string size ifTrue: [ ^string size + 1 ].
 
       ch := string at: tempPos.
-      ch ~~ $:
-	  ifTrue: [ ^self skipPastNewline: pos on: string ].
+      ch == $:
+	  ifFalse: [ ^self skipPastNewline: pos on: string ].
 
      "parsed a keyword, expect an identifier next"
       tempPos := self skipWhite: tempPos + 1 on: string.
@@ -832,16 +823,14 @@ publishNamespaces: aCollection
     | subclasses |
     subclasses := Set new.
     aCollection do: [ :ns |
-	ns value allClassesDo: [ :each | 
+	ns allClassesDo: [ :each | 
 	    (each inheritsFrom: CStruct) ifFalse: [ subclasses add: each ]
         ]
     ].
 
-    Directory working: 'doc'.
     self
 	publishAll: subclasses
 	withIndexOnFile: 'classes.html'.
-    Directory working: '..'.
 !
 
 publishAll: classArray withIndexOn: aFileStream
@@ -1217,14 +1206,14 @@ publishNamespaces: aCollection
     | subclasses |
     subclasses := Set new.
     aCollection do: [ :ns |
-	ns value allClassesDo: [ :each | 
+	ns allClassesDo: [ :each | 
 	    (each inheritsFrom: CStruct) ifFalse: [ subclasses add: each ]
         ]
     ].
 
     ^self
 	publishAll: subclasses
-	onFile: 'doc/classes.texi'
+	onFile: 'classes.texi'
 ! !
 
 !Texinfo methodsFor: 'emitting comments'!

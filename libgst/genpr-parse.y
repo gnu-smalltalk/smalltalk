@@ -254,7 +254,7 @@ void
 gen_proto (const char *s)
 {
   filprintf (proto_fil,
-	     "static long\n"
+	     "static intptr_t\n"
 	     "%s (int id ATTRIBUTE_UNUSED,\n"
 	     "%*svolatile int numArgs ATTRIBUTE_UNUSED);\n\n",
 	     s, 2 + strlen(s), "");
@@ -264,7 +264,7 @@ static void
 gen_prim_decl (const char *s)
 {
   filprintf (stmt_fil,
-	     "long\n"
+	     "intptr_t\n"
 	     "%s (int id,\n"
 	     "%*svolatile int numArgs)\n",
 	     s, 2 + strlen(s), "");
@@ -342,7 +342,7 @@ output()
 
   printf ("%s\n"
 	  "%s\n"
-	  "long\n"
+	  "intptr_t\n"
 	  "VMpr_HOLE (int id,\n"
 	  "           volatile int numArgs)\n"
 	  "{\n"

@@ -247,13 +247,7 @@ arcTan
     "Answer the angle (measured counterclockwise) between the receiver and
      a ray starting in (0, 0) and moving towards (1, 0) - i.e. 3 o'clock"
 
-    | result |
-    self x = 0 ifTrue: [ ^self y sign * FloatD pi / -2 ].
-    
-    result := (self y / self x) arcTan.
-    self x < 0 ifTrue: [ result := result + FloatD pi ].
-    result > FloatD pi ifTrue: [ result := result - FloatD pi - FloatD pi ].
-    ^result
+    ^self y arcTan: self x
 !
 
 dist: aPoint

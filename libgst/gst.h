@@ -58,7 +58,7 @@ char *alloca ();
 #endif
 
 /* Some compilers use different win32 definitions. Define WIN32 so we 
-   have only to check for one symbol. */
+   have only to check for one symbol.  */
 #if defined(_WIN32) || defined(__CYGWIN32__) || defined(__CYGWIN__) || defined(Win32) || defined(__WIN32)
 #ifndef WIN32
 #define WIN32 1
@@ -71,7 +71,7 @@ char *alloca ();
 #endif
 
 /* Defined as char * in traditional compilers, void * in
-   standard-compliant compilers. */
+   standard-compliant compilers.  */
 #ifndef PTR
 #if !defined(__STDC__)
 #define PTR char *
@@ -90,22 +90,22 @@ typedef enum {
 } mst_Boolean;
 #endif
 
-/* An indirect pointer to object data. */
+/* An indirect pointer to object data.  */
 typedef struct OOP *OOP;
 
-/* A direct pointer to the object data. */
+/* A direct pointer to the object data.  */
 typedef struct mst_Object *mst_Object;
 
-/* The contents of an indirect pointer to object data. */
+/* The contents of an indirect pointer to object data.  */
 struct OOP
 {
   mst_Object object;
-  unsigned long flags;
+  unsigned long flags;		/* FIXME, use uintptr_t */
 };
 
 /* The header of all objects in the system.
    Note how structural inheritance is achieved without adding extra levels of 
-   nested structures. */
+   nested structures.  */
 #define OBJ_HEADER \
   OOP		objSize; \
   OOP		objClass
@@ -118,7 +118,7 @@ typedef struct gst_object_header
 }
 gst_object_header;
 
-#define OBJ_HEADER_SIZE_WORDS	(sizeof(gst_object_header) / sizeof(long))
+#define OBJ_HEADER_SIZE_WORDS	(sizeof(gst_object_header) / sizeof(PTR))
 
 /* A bare-knuckles accessor for real objects */
 struct mst_Object
@@ -126,31 +126,31 @@ struct mst_Object
   OBJ_HEADER;
   OOP data[1];			/* variable length, may not be objects, 
 				   but will always be at least this
-				   big. */
+				   big.  */
 };
 
 /* Convert an OOP (indirect pointer to an object) to the real object
-   data. */
+   data.  */
 #define OOP_TO_OBJ(oop) \
   ((oop)->object)
 
 /* Retrieve the class for the object pointed to by OOP.  OOP must be
-   a real pointer, not a SmallInteger. */
+   a real pointer, not a SmallInteger.  */
 #define OOP_CLASS(oop) \
   (OOP_TO_OBJ(oop)->objClass)
 
 
-/* Answer whether OOP is a SmallInteger or a `real' object pointer. */
+/* Answer whether OOP is a SmallInteger or a `real' object pointer.  */
 #define IS_INT(oop) \
-  ((long)(oop) & 1)
+  ((intptr_t)(oop) & 1)
 
 /* Answer whether both OOP1 and OOP2 are SmallIntegers, or rather at
-   least one of them a `real' object pointer. */
+   least one of them a `real' object pointer.  */
 #define ARE_INTS(oop1, oop2) \
-  ((long)(oop1) & (long)(oop2) & 1)
+  ((intptr_t)(oop1) & (intptr_t)(oop2) & 1)
 
 /* Answer whether OOP is a `real' object pointer or rather a
-   SmallInteger. */
+   SmallInteger.  */
 #define IS_OOP(oop) \
   (! IS_INT(oop) )
 

@@ -88,11 +88,11 @@ typedef unsigned int	_ui;
 typedef long		_sl;
 typedef unsigned long	_ul;
 
-#define _UC(X)		((_uc  )(X))
-#define _US(X)		((_us  )(X))
-#define _UI(X)		((_ui  )(X))
-#define _SL(X)		((_sl  )(X))
-#define _UL(X)		((_ul  )(X))
+#define _jit_UC(X)		((_uc  )(X))
+#define _jit_US(X)		((_us  )(X))
+#define _jit_UI(X)		((_ui  )(X))
+#define _jit_SL(X)		((_sl  )(X))
+#define _jit_UL(X)		((_ul  )(X))
 
 # define _PUC(X)	((_uc *)(X))
 # define _PUS(X)	((_us *)(X))
@@ -100,10 +100,10 @@ typedef unsigned long	_ul;
 # define _PSL(X)	((_sl *)(X))
 # define _PUL(X)	((_ul *)(X))
 
-#define _B(B)         _UL(((*_jit.x.uc_pc++)= _UC((B)&  0xff)))
-#define _W(W)         _UL(((*_jit.x.us_pc++)= _US((W)&0xffff)))
-#define _I(I)         _UL(((*_jit.x.ui_pc++)= _UI((I)       )))
-#define _L(L)         _UL(((*_jit.x.ul_pc++)= _UL((L)       )))
+#define _jit_B(B)         _jit_UL(((*_jit.x.uc_pc++)= _jit_UC((B)&  0xff)))
+#define _jit_W(W)         _jit_UL(((*_jit.x.us_pc++)= _jit_US((W)&0xffff)))
+#define _jit_I(I)         _jit_UL(((*_jit.x.ui_pc++)= _jit_UI((I)       )))
+#define _jit_L(L)         _jit_UL(((*_jit.x.ul_pc++)= _jit_UL((L)       )))
 
 #define _MASK(N)	((unsigned)((1<<(N)))-1)
 #define _siP(N,I)	(!((((unsigned)(I))^(((unsigned)(I))<<1))&~_MASK(N)))
@@ -111,15 +111,15 @@ typedef unsigned long	_ul;
 #define _suiP(N,I)	(_siP(N,I) | _uiP(N,I))
 
 #ifndef _ASM_SAFETY
-#define _ck_s(W,I)	(_UL(I) & _MASK(W))
-#define _ck_u(W,I)    	(_UL(I) & _MASK(W))
-#define _ck_su(W,I)    	(_UL(I) & _MASK(W))
-#define _ck_d(W,I)    	(_UL(I) & _MASK(W))
+#define _ck_s(W,I)	(_jit_UL(I) & _MASK(W))
+#define _ck_u(W,I)    	(_jit_UL(I) & _MASK(W))
+#define _ck_su(W,I)    	(_jit_UL(I) & _MASK(W))
+#define _ck_d(W,I)    	(_jit_UL(I) & _MASK(W))
 #else
-#define _ck_s(W,I)	(_siP(W,I) ? (_UL(I) & _MASK(W)) : JITFAIL(  "signed integer `"#I"' too large for "#W"-bit field"))
-#define _ck_u(W,I)    	(_uiP(W,I) ? (_UL(I) & _MASK(W)) : JITFAIL("unsigned integer `"#I"' too large for "#W"-bit field"))
-#define _ck_su(W,I)    	(_suiP(W,I) ? (_UL(I) & _MASK(W)) : JITFAIL(        "integer `"#I"' too large for "#W"-bit field"))
-#define _ck_d(W,I)    	(_siP(W,I) ? (_UL(I) & _MASK(W)) : JITFAIL(    "displacement `"#I"' too large for "#W"-bit field"))
+#define _ck_s(W,I)	(_siP(W,I) ? (_jit_UL(I) & _MASK(W)) : JITFAIL(  "signed integer `"#I"' too large for "#W"-bit field"))
+#define _ck_u(W,I)    	(_uiP(W,I) ? (_jit_UL(I) & _MASK(W)) : JITFAIL("unsigned integer `"#I"' too large for "#W"-bit field"))
+#define _ck_su(W,I)    	(_suiP(W,I) ? (_jit_UL(I) & _MASK(W)) : JITFAIL(        "integer `"#I"' too large for "#W"-bit field"))
+#define _ck_d(W,I)    	(_siP(W,I) ? (_jit_UL(I) & _MASK(W)) : JITFAIL(    "displacement `"#I"' too large for "#W"-bit field"))
 #endif
 
 #define _s0P(I)		((I)==0)

@@ -1,0 +1,207 @@
+@deffn Typedef Filament
+@fnindex Filament
+
+Opaque data type used to hold 8-bit clean dynamic strings which know
+their own length and resize themselves to avoid buffer overruns.
+
+@end deffn
+
+@deftypefn Function Filament * filnew (const char *const @var{init}, size_t @var{len})
+@fnindex filnew
+
+Parameters:
+@table @code
+@item init
+address of the first byte to copy into the new object.
+@item len
+the number of bytes to copy into the new object.
+@end table
+
+Create a new Filament object, initialised to hold a copy of the
+first @var{len} bytes starting at address @var{init}.  If @var{init} is NULL, or
+@var{len} is 0 (or less), then the initialised Filament will return the
+empty string, "", if its value is queried.
+
+
+A newly created Filament object is returned.
+
+@end deftypefn
+
+@deftypefn Function char * fildelete (Filament *@var{fil})
+@fnindex fildelete
+
+Parameters:
+@table @code
+@item fil
+The Filament object for recycling.
+@end table
+
+The memory being used by @var{fil} is recycled.
+
+
+The original contents of @var{fil} are converted to a null terminated
+string which is returned, either to be freed itself or else used
+as a normal C string.  The entire Filament contents are copied into
+this string including any embedded nulls.
+
+@end deftypefn
+
+@deftypefn Function Filament * filinit (Filament *@var{fil}, const char *const @var{init}, size_t @var{len})
+@fnindex filinit
+
+Parameters:
+@table @code
+@item fil
+The Filament object to initialise.
+@item init
+address of the first byte to copy into the new object.
+@item len
+the number of bytes to copy into the new object.
+@end table
+
+Initialise a Filament object to hold a copy of the first @var{len} bytes
+starting at address @var{init}.  If @var{init} is NULL, or @var{len} is 0 (or less),
+then the Filament will be reset to hold the empty string, "".
+
+
+The initialised Filament object is returned.
+
+@end deftypefn
+
+@deftypefn Function void _fil_extend (Filament *@var{fil}, size_t @var{len}, boolean @var{copy})
+@fnindex _fil_extend
+
+Parameters:
+@table @code
+@item fil
+The Filament object which may need more string space.
+@item len
+The length of the data to be stored in @var{fil}.
+@item copy
+whether to copy data from the static buffer on reallocation.
+@end table
+
+This function will will assign a bigger block of memory to @var{fil}
+considering the space left in @var{fil} and @var{len}, the length required
+for the prospective contents.
+
+@end deftypefn
+
+@deftypefn Function SNV_INLINE char * filval (Filament *@var{fil})
+@fnindex filval
+
+Parameters:
+@table @code
+@item fil
+The Filament object being queried.
+@end table
+
+A pointer to the null terminated string held by the Filament
+object is returned.  Since the @var{fil} may contain embedded nulls, it
+is not entirely safe to use the @code{strfoo()} API to examine the contents
+of the return value.
+
+@end deftypefn
+
+@deftypefn Function SNV_INLINE size_t fillen (Filament *@var{fil})
+@fnindex fillen
+
+Parameters:
+@table @code
+@item fil
+The Filament object being queried.
+@end table
+
+The length of @var{fil}, including any embedded nulls, but excluding the
+terminating null, is returned.
+
+@end deftypefn
+
+@deftypefn Function SNV_INLINE int filelt (Filament *@var{fil}, ssize_t @var{n})
+@fnindex filelt
+
+Parameters:
+@table @code
+@item fil
+The Filament being queried.
+@item n
+A zero based index into @var{fil}.
+@end table
+
+This function looks for the @var{n}'th element of @var{fil}.
+
+
+If @var{n} is an index inside the Filament @var{fil}, then the character stored
+at that index cast to an int is returned, otherwise @var{n} is outside
+this range and -1 is returned.
+
+@end deftypefn
+
+@deftypefn Function SNV_INLINE char * filncat (Filament *@var{fil}, const char *@var{str}, size_t @var{n})
+@fnindex filncat
+
+Parameters:
+@table @code
+@item fil
+The destination Filament of the concatenation.
+@item str
+The address of the source bytes for concatenation.
+@item n
+The number of bytes to be copied from @var{str}.
+@end table
+
+@var{n} bytes starting with the byte at address @var{str} are destructively
+concatenated to @var{fil}.  If necessary, @var{fil} is dynamically reallocated
+to make room for this operation.
+
+
+A pointer to the (not null terminated) string which is the result
+of this concatenation is returned.
+
+@end deftypefn
+
+@deftypefn Function SNV_INLINE char * filcat (Filament *@var{fil}, const char *@var{str})
+@fnindex filcat
+
+Parameters:
+@table @code
+@item fil
+The destination Filament of the concatenation.
+@item str
+The address of the source bytes for concatenation.
+@end table
+
+The bytes starting at address @var{str} upto and including the first null
+byte encountered are destructively concatenated to @var{fil}.  If
+necessary @var{fil} is dynamically reallocated to make room for this
+operation.
+
+
+A pointer to the (not null terminated) string which is the result
+of this concatenation is returned.
+
+@end deftypefn
+
+@deftypefn Function SNV_INLINE char * filccat (Filament *@var{fil}, int @var{c})
+@fnindex filccat
+
+Parameters:
+@table @code
+@item fil
+The destination Filament of the concatenation.
+@item c
+The character to append to @var{fil}.
+@end table
+
+@var{c} is destructively concatenated to @var{fil}.  If necessary, @var{fil} is
+dynamically reallocated to make room for this operation.  When used
+repeatedly this function is less efficient than @code{filncat},
+since it must check whether to extend the filament before each
+character is appended.
+
+
+A pointer to the (not null terminated) string which is the result
+of this concatenation is returned.
+
+@end deftypefn
+

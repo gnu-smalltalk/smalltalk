@@ -167,30 +167,17 @@ addLiteral: literal
     ^symTable addLiteral: literal
 !
 
-addPool: poolDictionary
-    symTable addPool: poolDictionary
-!
-
-bytecodeSize
-    ^bytecodes position
-!
-
 bytecodesFor: aBlockNode
-    | saveBytecodes result |
-    saveBytecodes := bytecodes.
-    bytecodes := WriteStream on: (ByteArray new: 240).
-    self compileStatements: aBlockNode.
-
-    result := bytecodes contents.
-    bytecodes := saveBytecodes.
-    ^result
+    ^self bytecodesFor: aBlockNode atEndDo: []
 !
 
 bytecodesFor: aBlockNode atEndDo: aBlock
     | saveBytecodes result |
     saveBytecodes := bytecodes.
     bytecodes := WriteStream on: (ByteArray new: 240).
-    self compileStatements: aBlockNode.
+    self declareArgumentsAndTemporaries: aBlockNode.
+    self compileStatements: aBlockNode body.
+    self undeclareArgumentsAndTemporaries: aBlockNode.
     aBlock value.
 
     result := bytecodes contents.
@@ -204,49 +191,27 @@ checkStore: aVariableName
     ]
 !
 
-compileBigLiteral: op index: index
-    self
-	nextPut: BigLiteral;
-	nextPut: index // 256 + op;
-	nextPut: (index bitAnd: 255)
-!
-
-compileBigInstance: op index: index
-    self
-	nextPut: BigInstance;
-	nextPut: index // 256 + op;
-	nextPut: (index bitAnd: 255)
-!
-
 compileError: aString
     parser parserError: aString
 !
 
-compileJump: displacement if: jmpCondition
+compileBackJump: displacement
+    | jumpLen |
+    jumpLen := displacement + 2.
+    jumpLen := displacement + (self sizeOfJump: jumpLen).
+    jumpLen := displacement + (self sizeOfJump: jumpLen).
+    self compileByte: JumpBack arg: displacement
+!
 
-    jmpCondition isNil ifTrue: [
-	"Unconditional"
-	^self
-	    nextPut: JumpLong + (((displacement + 1024) bitShift: -8) bitAnd: 7);
-	    nextPut: (displacement bitAnd: 255).
-    ].
+compileJump: displacement if: jmpCondition
     displacement < 0 ifTrue: [
 	 "Should not happen"
 	 ^self error: 'Cannot compile backwards conditional jumps'.
     ].
+    self depthDecr: 1.
     jmpCondition
-	ifFalse: [
-	    self
-		depthDecr: 1;
-		nextPut: PopJumpFalse + ((displacement bitShift: -8) bitAnd: 3)
-	]
-	ifTrue: [
-	    self
-		depthDecr: 1;
-		nextPut: PopJumpTrue + ((displacement bitShift: -8) bitAnd: 3)
-	].
-    self
-	nextPut: (displacement bitAnd: 255)
+	ifFalse: [ self compileByte: PopJumpFalse arg: displacement ]
+	ifTrue: [ self compileByte: PopJumpTrue arg: displacement ].
 !
 
 compileWarning: aString
@@ -254,20 +219,22 @@ compileWarning: aString
 !
 
 declareTemporaries: node
-    | result |
-    node arguments do: [ :anArg |
-	result := symTable
-	    declareTemporary: anArg name
-	    canStore: false
-	    for: self
-    ].
-    node body temporaries do: [ :aTemp |
-	result := symTable
+    node temporaries do: [ :aTemp |
+	symTable
 	    declareTemporary: aTemp name
 	    canStore: true
 	    for: self
     ].
-    ^result
+!
+
+declareArgumentsAndTemporaries: node
+    node arguments do: [ :anArg |
+	symTable
+	    declareTemporary: anArg name
+	    canStore: false
+	    for: self
+    ].
+    self declareTemporaries: node body
 !
 
 maxDepth
@@ -295,14 +262,6 @@ depthSet: n
     ^oldDepth
 !
 
-isReceiver: variable
-    ^symTable isReceiver: variable
-!
-
-isTemporary: variable
-    ^symTable isTemporary: variable
-!
-
 literals
     ^symTable literals
 !
@@ -321,8 +280,26 @@ lookupName: variable
     ^definition
 !
 
-nextPut: aByte
-    bytecodes nextPut: aByte.
+compileByte: aByte
+    self compileByte: aByte arg: 0.
+!
+
+compileByte: aByte arg: arg
+    | n |
+    n := 0.
+    [ (arg bitShift: n) > 255 ] whileTrue: [ n := n - 8 ].
+    n to: -8 by: 8 do: [ :shift |
+	bytecodes
+	    nextPut: ExtByte;
+	    nextPut: ((arg bitShift: shift) bitAnd: 255).
+    ].
+    bytecodes
+	nextPut: aByte;
+	nextPut: (arg bitAnd: 255)
+!
+
+compileByte: aByte arg: arg1 arg: arg2
+    self compileByte: aByte arg: (arg1 bitShift: 8) + arg2
 !
 
 nextPutAll: aByteArray
@@ -333,65 +310,41 @@ isInsideBlock
     ^isInsideBlock > 0
 !
 
-outerScopes: variable
-    ^symTable outerScopes: variable
-!
-
 pushLiteral: value
     | definition |
-    value isInteger ifTrue: [
-	value == 0
-	    ifTrue: [ self nextPut: PushSpecial + LiteralZeroIndex. ^self ].
-	value == 1
-	    ifTrue: [ self nextPut: PushSpecial + LiteralOneIndex. ^self ].
-
-        (value between: -128 and: 255) ifTrue: [
-	    self
-	        nextPut: (value < 0
-			     ifTrue: [ Push8BitSigned ]
-			     ifFalse: [ Push8BitUnsigned ]);
-	        nextPut: (value bitAnd: 255).
-
-	    ^self
-	]
-    ].
+    (value isInteger and: [ value >= 0 and: [ value <= 16r3FFFFFFF ]])
+	    ifTrue: [ self compileByte: PushInteger arg: value. ^self ].
 
     definition := self addLiteral: value.
-
-    definition <= 31 ifTrue: [
-	self nextPut: (PushLitConstant + definition).
-	^self
-    ].    
-    
-    definition > 63 ifTrue: [
-	self compileBigLiteral: PushLiteral index: definition.
-	^self
-    ].
-    self
-	nextPut: PushIndexed;
-	nextPut: (LiteralConstantLocation + definition)
+    self compileByte: PushLitConstant arg: definition
 !
 
 pushLiteralVariable: value
     | definition |
     definition := self addLiteral: value.
-
-    definition <= 31 ifTrue: [
-	self nextPut: (PushLitVariable + definition).
-	^self
-    ].    
-    
-    definition > 63 ifTrue: [
-	self compileBigLiteral: PushVariable index: definition.
-	^self
-    ].
-    self
-	nextPut: PushIndexed;
-	nextPut: (LiteralVariableLocation + definition)
+    self compileByte: PushLitVariable arg: definition
 !
 
-sizeOfJump
-    ^2
+sizeOfJump: distance
+    distance < 256 ifTrue: [ ^2 ].
+    distance < 65536 ifTrue: [ ^4 ].
+    distance < 16777216 ifTrue: [ ^6 ].
+    ^8
+!
+
+displacementsToJumpAround: jumpAroundOfs and: initialCondLen
+    | jumpAroundLen oldJumpAroundLen finalJumpOfs finalJumpLen |
+    jumpAroundLen := oldJumpAroundLen := 0.
+    [
+	finalJumpOfs := initialCondLen + oldJumpAroundLen + jumpAroundOfs.
+	finalJumpLen := self sizeOfJump: finalJumpOfs.
+	jumpAroundLen := self sizeOfJump: jumpAroundOfs + finalJumpLen.
+	oldJumpAroundLen = jumpAroundLen
+    ]   whileFalse: [
+	oldJumpAroundLen := jumpAroundLen
+    ].
+
+    ^(finalJumpLen + finalJumpOfs) -> (jumpAroundOfs + finalJumpLen)
 !
 
 insideNewScopeDo: aBlock
@@ -415,7 +368,11 @@ bindingOf: anOrderedCollection
 !
 
 undeclareTemporaries: aNode
-    aNode body temporaries do: [ :each | symTable undeclareTemporary: each name ].
+    aNode temporaries do: [ :each | symTable undeclareTemporary: each name ].
+!
+
+undeclareArgumentsAndTemporaries: aNode
+    self undeclareTemporaries: aNode body.
     aNode arguments do: [ :each | symTable undeclareTemporary: each name ]
 ! !
 
@@ -424,27 +381,25 @@ undeclareTemporaries: aNode
 acceptSequenceNode: node
     | statements method |
     node addSelfReturn.
-    node temporaries do: [ :aTemp |
-        symTable
-            declareTemporary: aTemp name
-            canStore: true
-            for: self
-    ].
-
     depth := maxDepth := 0.
-
-    node statements do: [ :each | self visitNode: each ].
+    self declareTemporaries: node.
+    self compileStatements: node.
+    self undeclareTemporaries: node.
     symTable finish.
 
     method := CompiledMethod
 	literals: symTable literals
 	numArgs: 0
 	numTemps: symTable numTemps
-	primitive: 0
+	attributes: #()
 	bytecodes: bytecodes contents
 	depth: maxDepth + symTable numTemps.
 
-    method getDescriptor setSourceCode: node source.
+    method descriptor
+	setSourceCode: node source;
+	methodClass: UndefinedObject;
+	selector: #executeStatements.
+
     ^method
 ! !
 
@@ -455,23 +410,27 @@ acceptSequenceNode: node
 acceptMethodNode: node
     | statements method |
     node body addSelfReturn.
-    self declareTemporaries: node.
 
     depth := maxDepth := 0.
 
-    node body statements do: [ :each | self visitNode: each ].
+    self declareArgumentsAndTemporaries: node.
+    self compileStatements: node body.
+    self undeclareArgumentsAndTemporaries: node.
     symTable finish.
 
     method := CompiledMethod
 	literals: symTable literals
 	numArgs: node arguments size
 	numTemps: node body temporaries size
-	primitive: 0
-	"primitive: node body primitive FIXME"
+	attributes: #()
 	bytecodes: bytecodes contents
 	depth: maxDepth + node body temporaries size + node arguments size.
 
-    method getDescriptor setSourceCode: node source.
+    method descriptor
+	setSourceCode: node source;
+	methodClass: symTable environment;
+	selector: node selector.
+
     ^method
 ! !
 
@@ -490,15 +449,15 @@ acceptArrayConstructorNode: aNode
 	depthIncr;
 	pushLiteralVariable: (Smalltalk associationAt: #Array);
 	depthIncr;
-	pushLiteral: aNode body statements size;
+	compileByte: PushInteger arg: aNode body statements size;
 	depthDecr: 1;
-	nextPut: NewColonSpecial.
+	compileByte: SendImmediate arg: NewColonSpecial.
 
-    aNode body statements doWithIndex: [ :each :index |
+    aNode body statements keysAndValuesDo: [ :index :each |
 	each acceptVisitor: self.
 	self
 	    depthDecr: 1;
-	    compileBigInstance: PopStoreIntoArray index: index.
+	    compileByte: PopStoreIntoArray arg: index.
     ]
 ! !
 
@@ -511,17 +470,16 @@ acceptBlockNode: aNode
      and one that contains a list of statements. Here is how STBlockNodes
      are compiled:
 
-	push BlockClosure literal
-	push thisContext (or push nil)      <--- optional
-	send #blockCopy:                    <--- optional
+	push BlockClosure or CompiledBlock literal
+	make dirty block                    <--- only if pushed CompiledBlock
 
      Statements are put in a separate CompiledBlock object that is referenced
-     by the BlockClosure.
+     by the BlockClosure that the sequence above pushes or creates.
 
      compileStatements: creates the bytecodes.  It is this method that is
      called by STCompiler>>bytecodesFor: and STCompiler>>bytecodesFor:append:"
 
-    | bc depth blockClosure clean |
+    | bc depth block clean |
     depth := self depthSet: aNode arguments size + aNode body temporaries size.
    
     aNode body statements isEmpty ifTrue: [
@@ -530,49 +488,46 @@ acceptBlockNode: aNode
  
     bc := self insideNewScopeDo: [
 	self bytecodesFor: aNode atEndDo: [
-	    aNode body lastIsReturn ifFalse: [ self nextPut: ReturnContextStackTop ]
+	    aNode body lastIsReturn
+		ifFalse: [ self compileByte: ReturnContextStackTop ]
 	]
     ].
 
-    blockClosure := BlockClosure
+    block := CompiledBlock
 	numArgs: aNode arguments size
 	numTemps: aNode body temporaries size
 	bytecodes: bc
 	depth: self maxDepth
 	literals: self literals.
 
-    self
-	depthSet: depth;
-	pushLiteral: blockClosure.
+    self depthSet: depth.
 
-    clean := blockClosure block flags.
-    clean == 0 ifTrue: [ ^aNode ].
+    clean := block flags.
+    clean == 0 ifTrue: [
+        self pushLiteral: (BlockClosure
+	    block: block
+	    receiver: symTable environment).
 
-    self nextPut: (clean == 1
-	ifTrue: [ PushNil ]
-	ifFalse: [ PushActiveContext ]).
+        ^aNode ].
 
-    self nextPut: BlockCopyColonSpecial
+    self pushLiteral: block.
+    self compileByte: MakeDirtyBlock
 !
 
 compileStatements: aNode
-
-    self declareTemporaries: aNode.
-
-    aNode body statements doWithIndex: [ :each :index |
+    aNode statements keysAndValuesDo: [ :index :each |
 	index = 1 ifFalse: [
 	    self
 		depthDecr: 1;
-		nextPut: PopStackTop
+		compileByte: PopStackTop
 	].
 	each acceptVisitor: self.
     ].
-    aNode body statements isEmpty ifTrue: [
+    aNode statements isEmpty ifTrue: [
 	self
 	    depthIncr;
-	    nextPut: PushNil
+	    compileByte: PushSpecial arg: NilIndex
     ].
-    self undeclareTemporaries: aNode.
 ! !
 
 
@@ -588,7 +543,7 @@ acceptCascadeNode: aNode
     first receiver = SuperVariable ifTrue: [
 	aNode messages
 	    do: [ :each | self compileSendToSuper: each ]
-	    separatedBy: [ self depthDecr: 1; nextPut: PopStackTop ].
+	    separatedBy: [ self depthDecr: 1; compileByte: PopStackTop ].
 
 	^aNode
     ].
@@ -599,10 +554,10 @@ acceptCascadeNode: aNode
     messages
 	from: 2 to: messages size - 1
 	do: [ :each |
-	    self nextPut: PopStackTop; nextPut: DupStackTop.
+	    self compileByte: PopStackTop; compileByte: DupStackTop.
 	    each acceptVisitor: self ].
 
-    self nextPut: PopStackTop.
+    self compileByte: PopStackTop.
     self depthDecr: 1.
     (messages at: messages size) acceptVisitor: self.
 ! !
@@ -665,12 +620,12 @@ acceptMessageNode: aNode
 	specialSelector := VMSpecialMethods at: aNode selector.
 	(specialSelector isNil and: [aNode receiver isBlock and: [ dup not ]])
 	    ifTrue: [
-		(self acceptWhileLoop: aNode) ifTrue: [^false]
+		(self compileWhileLoop: aNode) ifTrue: [^false]
 	    ]
 	].
 
     aNode receiver acceptVisitor: self.
-    dup ifTrue: [ self depthIncr; nextPut: DupStackTop ].
+    dup ifTrue: [ self depthIncr; compileByte: DupStackTop ].
     specialSelector isNil ifFalse: [
 	(self perform: specialSelector with: aNode) ifTrue: [^false]
     ].
@@ -678,87 +633,86 @@ acceptMessageNode: aNode
     aNode arguments do: [ :each | each acceptVisitor: self ].
 
     VMSpecialSelectors at: aNode selector ifPresent: [ :idx |
-	self nextPut: SendSpecial + idx.
+	idx <= LastImmediateSend
+	    ifTrue: [ self compileByte: idx arg: 0 ]
+	    ifFalse: [ self compileByte: SendImmediate arg: idx ].
 	^aNode
     ].
 
     args := aNode arguments size.
     litIndex := self addLiteral: aNode selector.
-    (args <= 2) & (litIndex <= 15)
-	ifTrue: [
-	    self nextPut: SendSelectorShort + (args * 16) + litIndex
-	]
-	ifFalse: [
-	    self
-		emitExtendedSendBytecodesToSuperFlag: 0
-		literalIndex: litIndex
-		argCount: args
-	].
-
-    self depthDecr: aNode arguments size.
+    self compileByte: Send arg: litIndex arg: args.
 !
 
-acceptWhileLoop: aNode
+compileWhileLoop: aNode
     "Answer whether the while loop can be optimized (that is,
      whether the only parameter is a STBlockNode)"
 
-    | whileBytecodes argBytecodes totBytecodesSize argBytecodesSize |
+    | whileBytecodes argBytecodes jumpOffsets |
 
     (aNode receiver arguments isEmpty and: [
 	aNode receiver body temporaries isEmpty ]) ifFalse: [ ^false ].
 
-    argBytecodesSize := 0.
+    argBytecodes := #().
     aNode arguments do: [ :onlyArgument |
 	onlyArgument isBlock ifFalse: [ ^false ].
         (onlyArgument arguments isEmpty and: [
 	    onlyArgument body temporaries isEmpty ])
 		ifFalse: [ ^false ].
 
-	argBytecodes := self bytecodesFor: onlyArgument.
-
-	"+1 accounts for the final pop"
-	argBytecodesSize := argBytecodes size + 1.
+	argBytecodes := self bytecodesFor: onlyArgument atEndDo: [
+	    self compileByte: PopStackTop; depthDecr: 1 ]
     ].
     whileBytecodes := self bytecodesFor: aNode receiver.
     self nextPutAll: whileBytecodes.
 
-    totBytecodesSize := whileBytecodes size + self sizeOfJump + argBytecodesSize.
-    aNode selector == #repeat ifFalse: [
-	"The if: clause means: if selector is whileFalse:, compile
-	 a 'pop/jump if true'; else compile a 'pop/jump if false'"
-	self
-	    compileJump: argBytecodesSize + self sizeOfJump
-	    if: (aNode selector == #whileFalse or: [ aNode selector == #whileFalse: ]).
+    aNode selector == #repeat
+	ifFalse: [
+            jumpOffsets := self
+		displacementsToJumpAround: argBytecodes size
+		and: whileBytecodes size + 2.   "for jump around jump"
 
-	argBytecodes isNil ifFalse: [
+	    "The if: clause means: if selector is whileFalse:, compile
+	     a 'pop/jump if true'; else compile a 'pop/jump if false'"
 	    self
-		nextPutAll: argBytecodes;
-		nextPut: PopStackTop;
-		depthDecr: 1
-	].
-	totBytecodesSize := totBytecodesSize + self sizeOfJump.
-    ].
+		compileJump: (self sizeOfJump: jumpOffsets value)
+	        if: (aNode selector == #whileTrue or: [ aNode selector == #whileTrue: ]).
 
-    self
-	compileJump: totBytecodesSize negated
-	if: nil.
+	    self
+	        compileByte: Jump
+	        arg: jumpOffsets value.
+
+	    argBytecodes isNil ifFalse: [
+	        self nextPutAll: argBytecodes
+	    ].
+
+	    self
+		compileByte: JumpBack
+		arg: jumpOffsets key
+        ]
+	ifTrue: [
+	    self compileBackJump: whileBytecodes size
+	].
 
     "Somebody might want to use the return value of #whileTrue:
      and #whileFalse:"
 
-    self depthIncr; nextPut: PushNil.
+    self depthIncr; compileByte: PushSpecial arg: NilIndex.
     ^true
 !
 
 compileSendToSuper: aNode
-
-    self depthIncr; nextPut: PushSpecial.
+    | litIndex args |
+    self depthIncr; compileByte: PushSelf.
     aNode arguments do: [ :each | each acceptVisitor: self ].
-    self
-	emitExtendedSendBytecodesToSuperFlag: 2
-	literalIndex: (self addLiteral: aNode selector)
-	argCount: aNode arguments size.
+    VMSpecialSelectors at: aNode selector ifPresent: [ :idx |
+	self compileByte: SendSuperImmediate arg: idx.
+	^aNode
+    ].
 
+    litIndex := self addLiteral: aNode selector.
+    args := aNode arguments size.
+    self compileByte: SendSuper arg: litIndex arg: args.
     self depthDecr: aNode arguments size.
 !
 
@@ -807,17 +761,18 @@ compileBoolean: aNode
 	"Transform everything into #ifTrue:ifFalse: or #ifFalse:ifTrue:"
 
 	selector == #ifTrue: ifTrue: [
-	    selector := #ifTrue:ifFalse: . bc2 := #[115]. "Push nil"
+	    selector := #ifTrue:ifFalse: . bc2 := NilIndex. "Push nil"
 	].
 	selector == #ifFalse: ifTrue: [
-	    selector := #ifFalse:ifTrue: . bc2 := #[115]. "Push nil"
+	    selector := #ifFalse:ifTrue: . bc2 := NilIndex. "Push nil"
 	].
 	selector == #and: ifTrue: [
-	    selector := #ifTrue:ifFalse: . bc2 := #[114]. "Push false"
+	    selector := #ifTrue:ifFalse: . bc2 := FalseIndex. "Push false"
 	].
 	selector == #or: ifTrue: [
-	    selector := #ifFalse:ifTrue: . bc2 := #[113]. "Push true"
+	    selector := #ifFalse:ifTrue: . bc2 := TrueIndex. "Push true"
 	].
+	bc2 := { PushSpecial. bc2 }.
 	^self compileBoolean: aNode
 	    longBranch: bc1 returns: ret1 shortBranch: bc2
 	    longIfTrue: selector == #ifTrue:ifFalse:
@@ -836,12 +791,12 @@ compileBoolean: aNode longBranch: bc1 returns: ret1 shortBranch: bc2
 	longIfTrue: longIfTrue
 
     self
-	compileJump: bc1 size + (ret1 ifTrue: [ 0 ] ifFalse: [ 1 ])
+	compileJump: bc1 size + (ret1 ifTrue: [ 0 ] ifFalse: [ 2 ])
 	if: longIfTrue not.
 
     self nextPutAll: bc1.
     ret1 ifFalse: [
-	self nextPut: JumpShort + bc2 size - 1.
+	self compileByte: Jump arg: bc2 size.
     ].
     self nextPutAll: bc2.
     ^true
@@ -852,12 +807,12 @@ compileIfTrue: bcTrue returns: bcTrueReturns ifFalse: bcFalse
     | trueSize |
     trueSize := bcTrueReturns
 	ifTrue: [ bcTrue size ]
-	ifFalse: [ bcTrue size + self sizeOfJump ].
+	ifFalse: [ bcTrue size + (self sizeOfJump: bcFalse size) ].
 
     self compileJump: trueSize if: false.
     self nextPutAll: bcTrue.
     bcTrueReturns ifFalse: [
-	self compileJump: bcFalse size if: nil.
+	self compileByte: Jump arg: bcFalse size.
     ].
     self nextPutAll: bcFalse.
     ^true
@@ -868,31 +823,15 @@ compileIfFalse: bcFalse returns: bcFalseReturns ifTrue: bcTrue
     | falseSize |
     falseSize := bcFalseReturns
 	ifTrue: [ bcFalse size ]
-	ifFalse: [ bcFalse size + self sizeOfJump ].
+	ifFalse: [ bcFalse size + (self sizeOfJump: bcTrue size) ].
 
     self compileJump: falseSize if: true.
     self nextPutAll: bcFalse.
     bcFalseReturns ifFalse: [
-	self compileJump: bcTrue size if: nil.
+	self compileByte: Jump arg: bcFalse size.
     ].
     self nextPutAll: bcTrue.
     ^true
-!
-
-emitExtendedSendBytecodesToSuperFlag: toSuperFlag literalIndex: litIndex argCount: args
-
-    (args <= 7) & (litIndex <= 31)
-	ifTrue: [
-	    self
-		nextPut: SendSelector1ExtByte + toSuperFlag;
-		nextPut: args * 32 + litIndex
-	]
-	ifFalse: [
-	    self
-		nextPut: SendSelector2ExtByte;
-		nextPut: (litIndex bitAnd: 16r300) // 4 + (toSuperFlag * 32) + args;
-		nextPut: (litIndex bitAnd: 16r0FF)
-	]
 ! !
 
 "--------------------------------------------------------------------"
@@ -900,14 +839,10 @@ emitExtendedSendBytecodesToSuperFlag: toSuperFlag literalIndex: litIndex argCoun
 !STCompiler methodsFor: 'compiling'!
 
 acceptReturnNode: aNode
-    aNode = TrueNode ifTrue: [ ^self nextPut: ReturnSpecial + 1 ].
-    aNode = FalseNode ifTrue: [ ^self nextPut: ReturnSpecial + 2 ].
-    aNode = NilNode ifTrue: [ ^self nextPut: ReturnSpecial + 3 ].
-
     aNode value acceptVisitor: self.
     self isInsideBlock
-	ifTrue: [ self nextPut: ReturnMethodStackTop ]
-	ifFalse: [ self nextPut: ReturnContextStackTop ]
+	ifTrue: [ self compileByte: ReturnMethodStackTop ]
+	ifFalse: [ self compileByte: ReturnContextStackTop ]
 ! !
 
 "--------------------------------------------------------------------"
@@ -917,103 +852,73 @@ acceptReturnNode: aNode
 compileAssignmentFor: aNode
     "RBVariableNode has one instance variable, the name of the variable
      that it represents."
-    | locationType definition |
+    | definition |
 
+    self checkStore: aNode name.
     definition := self lookupName: aNode name.
-    locationType := LiteralVariableLocation.
 
-    (self isTemporary: aNode name) ifTrue: [
-	self checkStore: aNode name.
+    (symTable isTemporary: aNode name) ifTrue: [
 	^self
 	    compileStoreTemporary: definition
-	    scopes: (self outerScopes: aNode name)
+	    scopes: (symTable outerScopes: aNode name)
     ].    
 
-    (self isReceiver: aNode name) ifTrue: [
-	locationType := ReceiverLocation.
-	definition > 63 ifTrue: [
-	    self compileBigInstance: StoreVariable index: definition.
-	    ^aNode
-	]
+    (symTable isReceiver: aNode name) ifTrue: [
+	^self compileByte: StoreReceiverVariable arg: definition.
     ].
     
-    definition > 63 ifTrue: [
-	self compileBigLiteral: StoreVariable index: definition.
-	^aNode
-    ].
-    self
-	nextPut: StoreIndexed;
-	nextPut: (locationType + definition)
+    ^self compileByte: StoreLitVariable arg: definition.
 !
 
 acceptVariableNode: aNode
     | locationType definition |
 
     self depthIncr.
-    VMSpecialIdentifiers at: aNode name ifPresent: [ :encodedValue |
-	self nextPut: PushSpecial + encodedValue.
+    VMSpecialIdentifiers at: aNode name ifPresent: [ :block |
+	block value: self.
 	^aNode
     ].
 
     definition := self lookupName: aNode name.
-    locationType := LiteralVariableLocation.
 
-    (self isTemporary: aNode name) ifTrue: [
+    (symTable isTemporary: aNode name) ifTrue: [
 	^self
 	    compilePushTemporary: definition
-	    scopes: (self outerScopes: aNode name)
+	    scopes: (symTable outerScopes: aNode name)
     ].    
-    (self isReceiver: aNode name) ifTrue: [
-	locationType := ReceiverLocation.
-	definition <= 15 ifTrue: [
-	    self nextPut: (PushReceiverVariable + definition).
-	    ^aNode
-	].
-	definition > 63 ifTrue: [
-	    self compileBigInstance: PushVariable index: definition.
-	    ^aNode
-	]
-    ].
-    definition <= 31 ifTrue: [
-	self nextPut: (PushLitVariable + definition).
-	^aNode
-    ].
-    definition > 63 ifTrue: [
-	self compileBigLiteral: PushVariable index: definition.
+    (symTable isReceiver: aNode name) ifTrue: [
+	self compileByte: PushReceiverVariable arg: definition.
 	^aNode
     ].
     
     self
-	nextPut: PushIndexed;
-	nextPut: (locationType + definition)
+	compileByte: PushLitVariable arg: definition.
 !
 
 compilePushTemporary: number scopes: outerScopes
-    outerScopes = 0 ifFalse: [ Smalltalk debug.
+    outerScopes = 0 ifFalse: [
 	self
-	    nextPut: OuterVar;
-	    nextPut: (number + PushVariable);
-	    nextPut: outerScopes.
+	    compileByte: PushOuterVariable
+	    arg: number
+	    arg: outerScopes.
 	^self
     ].
-    number < 16 ifTrue: [
-	^self nextPut: (PushTemporaryVariable + number).
-    ].
     self
-	nextPut: PushIndexed;
-	nextPut: (TemporaryLocation + number)
+	compileByte: PushTemporaryVariable
+	arg: number
 !
 
 compileStoreTemporary: number scopes: outerScopes
     outerScopes = 0 ifFalse: [
+	self
+	    compileByte: StoreOuterVariable
+	    arg: number
+	    arg: outerScopes.
 	^self
-	    nextPut: OuterVar;
-	    nextPut: number + StoreVariable;
-	    nextPut: outerScopes.
     ].
     self
-	nextPut: StoreIndexed;
-	nextPut: (TemporaryLocation + number)
+	compileByte: StoreTemporaryVariable
+	arg: number
 ! !
 
 STCompiler initialize!

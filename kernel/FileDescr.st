@@ -251,6 +251,13 @@ update: aspect
 
 !FileDescriptor methodsFor: 'basic'!
 
+checkError
+    "Perform error checking.  By default, we call
+     File class>>#checkError."
+    File checkError.
+    ^0
+!
+
 invalidate
     "Invalidate a file descriptor"
     file := nil
@@ -597,25 +604,6 @@ initialize
 newBuffer
     "Private - Answer a String to be used as the receiver's buffer"
     ^String new: 1
-!
-
-nextHunk
-    "Answer the next buffers worth of stuff in the Stream represented
-     by the receiver.  Do at most one actual input operation."
-
-    | answer count |
-    count := self fileOp: 3
-        with: collection
-        with: endPtr + 1
-        with: collection size - endPtr
-	ifFail: [ File checkError. 0 ].
-
-    count = 0 ifTrue: [ atEnd := true. ].
-    endPtr := endPtr + count.
-    answer := collection copyFrom: ptr to: endPtr.
-    ptr := 1.
-    endPtr := 0.
-    ^answer
 ! !
 
 
@@ -639,6 +627,25 @@ isText
 
 !FileDescriptor methodsFor: 'low-level access'!
 
+nextHunk
+    "Answer the next buffers worth of stuff in the Stream represented
+     by the receiver.  Do at most one actual input operation."
+
+    | answer count |
+    count := self fileOp: 3
+        with: collection
+        with: endPtr + 1
+        with: collection size - endPtr
+	ifFail: [ self checkError ].
+
+    count = 0 ifTrue: [ atEnd := true. ].
+    endPtr := endPtr + count.
+    answer := collection copyFrom: ptr to: endPtr.
+    ptr := 1.
+    endPtr := 0.
+    ^answer
+!
+
 read: byteArray
     "Ignoring any buffering, try to fill byteArray with the
      contents of the file"
@@ -649,7 +656,7 @@ read: byteArray
 	with: byteArray
         with: 1
 	with: byteArray size
-	ifFail: [ File checkError. ^0 ].
+	ifFail: [ self checkError ].
 
     count = 0 ifTrue: [ atEnd := true ].
     ^count
@@ -665,7 +672,7 @@ read: byteArray numBytes: anInteger
 	with: byteArray
         with: 1
 	with: (anInteger min: byteArray size)
-	ifFail: [ File checkError. ^0 ].
+	ifFail: [ self checkError ].
 
     count = 0 ifTrue: [ atEnd := true ].
     ^count
@@ -681,7 +688,7 @@ read: byteArray from: position to: end
 	with: byteArray
         with: position
 	with: (end min: byteArray size)
-	ifFail: [ File checkError. 0 ].
+	ifFail: [ self checkError ].
 
     count = 0 ifTrue: [ atEnd := true ].
     ^count
@@ -713,7 +720,7 @@ write: byteArray from: position to: end
 	    with: byteArray
             with: cur
 	    with: last
-	    ifFail: [ File checkError. 0 ].
+	    ifFail: [ self checkError ].
 
 	result = 0 ifTrue: [ ^cur - position ].
         cur := cur + result.

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001
+| Copyright 1988,92,94,95,99,2000,2001,2003
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -32,7 +32,7 @@
  ======================================================================"
 
 
-Object variableWordSubclass: #Memory
+Object subclass: #Memory
        instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
@@ -113,6 +113,11 @@ floatAt: anAddress
 doubleAt: anAddress
     "Access the C double at the given address."
     ^self type: 7 at: anAddress
+!
+
+longDoubleAt: anAddress
+    "Access the C long double at the given address."
+    ^self type: 12 at: anAddress
 !
 
 stringAt: anAddress
@@ -219,6 +224,12 @@ doubleAt: anAddress put: aValue
     "Store the Smalltalk Float object identified by `value', at the
      given address, writing it like a C double."
     ^self type: 7 at: anAddress put: aValue
+!
+
+longDoubleAt: anAddress put: aValue
+    "Store the Smalltalk Float object identified by `value', at the
+     given address, writing it like a C long double."
+    ^self type: 12 at: anAddress put: aValue
 !
 
 stringAt: anAddress put: aValue

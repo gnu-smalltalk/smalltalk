@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -51,7 +51,8 @@
 #define WHITE_SPACE		1
 #define DIGIT			2
 #define ID_CHAR			4
-#define SPECIAL_CHAR		8
+#define BIN_OP_CHAR		8
+#define SYMBOL_CHAR		16
 
 #if defined(WIN32) || defined(__OS2__) || defined(MSDOS)
 #define HAVE_DOS_STYLE_PATH_NAMES
@@ -61,36 +62,31 @@
    compile mode */
 mst_Boolean _gst_compile_code = false;
 
-/* The obstack containing parse tree nodes. */
-struct obstack *_gst_compilation_obstack;
+/* The obstack containing parse tree nodes.  */
+struct obstack *_gst_compilation_obstack = NULL;
 
 /* True if errors must be reported to the standard error, false if
    errors should instead stored so that they are passed to Smalltalk
-   code. */
+   code.  */
 mst_Boolean _gst_report_errors = true;
 
 /* The location of the first error reported, stored here so that
-   compilation primitives can pass them to Smalltalk code. */
+   compilation primitives can pass them to Smalltalk code.  */
 char *_gst_first_error_str = NULL;
 char *_gst_first_error_file = NULL;
-long _gst_first_error_line;
+int _gst_first_error_line = 0;
 
 /* The starting-position state.  If this is <0, as soon as another
    token is lexed, the flag is reinitialized to the starting position
-   of the next token. */
+   of the next token.  */
 static int method_start_pos = -1;
 
-/* Answer true if IC is a valid base-10 digit. */
+/* Answer true if IC is a valid base-10 digit.  */
 static mst_Boolean is_digit (int ic);
 
-/* Answer true if C is a valid base-BASE digit. */
+/* Answer true if C is a valid base-BASE digit.  */
 static mst_Boolean is_base_digit (int c,
 				  int base);
-
-/* Answer true if the first thing available in the stream is
-   the string "primitive:" */
-static mst_Boolean parse_primitive (int c,
-				    YYSTYPE * lvalp);
 
 /* Parse the fractional part of a Float constant.  Store it in
    NUMPTR.  Read numbers in base-BASE, the first one being C. 
@@ -109,7 +105,7 @@ static int parse_fraction (int c,
    changed accordingly.  If LARGEINTEGER is not NULL, the
    digits are stored in the buffer maintained by str.c,
    and LARGEINTEGER is set to true if the return value does
-   not have sufficient precision. */
+   not have sufficient precision.  */
 static long double parse_digits (int c,
 			    mst_Boolean negative,
 			    int base,
@@ -118,16 +114,16 @@ static long double parse_digits (int c,
 /* Parse the large integer constant stored as base-BASE
    digits in the buffer maintained by str.c, adjusting
    the sign if NEGATIVE is true.  Return an embryo of the
-   LargeInteger object as a byte_object structure. */
+   LargeInteger object as a byte_object structure.  */
 static byte_object parse_large_integer (mst_Boolean negative,
 					int base);
 
-/* Raise an error. */
+/* Raise an error.  */
 static int invalid (int c,
 		    YYSTYPE * lvalp);
 
 /* Parse a comment.  C is '"'.  Return 0 to indicate the lexer
-   that this lexeme must be ignored. */
+   that this lexeme must be ignored.  */
 static int comment (int c,
 		    YYSTYPE * lvalp);
 
@@ -143,29 +139,33 @@ static int parse_bin_op (int c,
 static int string_literal (int c,
 			   YYSTYPE * lvalp);
 
-/* Parse a number.  C is the first digit. */
+/* Parse a number.  C is the first digit.  */
 static int parse_number (int c,
 			 YYSTYPE * lvalp);
 
-/* Parse an identifier.  C is the first letter. */
+/* Parse an identifier.  C is the first letter.  */
 static int parse_ident (int c,
 			YYSTYPE * lvalp);
 
-/* Try to parse an assignment operator.  C is ':'. */
+/* Try to parse an assignment operator or namespace separator.  C is ':'.  */
 static int parse_colon (int c,
 			YYSTYPE * lvalp);
 
+/* Try to parse a symbol constant, or return '#'.  C is '#'.  */
+static int parse_symbol (int c,
+			 YYSTYPE * lvalp);
+
 /* Convert the digit C (if it is a valid base-BASE digit) to its
-   value.  Raise an error if it is invalid. */
+   value.  Raise an error if it is invalid.  */
 static int digit_to_int (int c,
 			 int base);
 
-/* Raise BASE to the N-th power. */
+/* Raise BASE to the N-th power.  */
 static inline long double ipowl (long double base,
 			         int n);
 
 #ifdef LEXDEBUG
-static void print_token (int token
+static void print_token (int token,
 			 YYSTYPE *yylval);
 #endif
 
@@ -174,7 +174,7 @@ typedef struct
   int (*lexFunc) (int,
 		  YYSTYPE *);
   int retToken;
-  int _gst_char_class;
+  int char_class;
 }
 lex_tab_elt;
 
@@ -217,98 +217,98 @@ static const lex_tab_elt char_table[128] = {
 /*     */ {0, 0, WHITE_SPACE},
 /*   ! */ {0, '!', 0},
 /*   " */ {comment, 0, 0},
-/*   # */ {0, '#', 0},
-/*   $ */ {char_literal, 0, 0},
-/*   % */ {parse_bin_op, 0, SPECIAL_CHAR},
-/*   & */ {parse_bin_op, 0, SPECIAL_CHAR},
+/*   # */ {parse_symbol, 0, 0},
+/*   $ */ {char_literal, 0, ID_CHAR | SYMBOL_CHAR},
+/*   % */ {parse_bin_op, 0, BIN_OP_CHAR},
+/*   & */ {parse_bin_op, 0, BIN_OP_CHAR},
 /*   ' */ {string_literal, 0, 0},
 /*   ( */ {0, '(', 0},
 /*   ) */ {0, ')', 0},
-/*   * */ {parse_bin_op, 0, SPECIAL_CHAR},
-/*   + */ {parse_bin_op, 0, SPECIAL_CHAR},
-/*   , */ {parse_bin_op, 0, SPECIAL_CHAR},
-/*   - */ {parse_bin_op, 0, SPECIAL_CHAR},
+/*   * */ {parse_bin_op, 0, BIN_OP_CHAR},
+/*   + */ {parse_bin_op, 0, BIN_OP_CHAR},
+/*   , */ {parse_bin_op, 0, BIN_OP_CHAR},
+/*   - */ {parse_bin_op, 0, BIN_OP_CHAR},
 /*   . */ {0, '.', 0},
-/*   / */ {parse_bin_op, 0, SPECIAL_CHAR},
-/*   0 */ {parse_number, 0, DIGIT | ID_CHAR},
-/*   1 */ {parse_number, 0, DIGIT | ID_CHAR},
-/*   2 */ {parse_number, 0, DIGIT | ID_CHAR},
-/*   3 */ {parse_number, 0, DIGIT | ID_CHAR},
-/*   4 */ {parse_number, 0, DIGIT | ID_CHAR},
-/*   5 */ {parse_number, 0, DIGIT | ID_CHAR},
-/*   6 */ {parse_number, 0, DIGIT | ID_CHAR},
-/*   7 */ {parse_number, 0, DIGIT | ID_CHAR},
-/*   8 */ {parse_number, 0, DIGIT | ID_CHAR},
-/*   9 */ {parse_number, 0, DIGIT | ID_CHAR},
-/*   : */ {parse_colon, 0, 0},
+/*   / */ {parse_bin_op, 0, BIN_OP_CHAR},
+/*   0 */ {parse_number, 0, DIGIT | ID_CHAR | SYMBOL_CHAR},
+/*   1 */ {parse_number, 0, DIGIT | ID_CHAR | SYMBOL_CHAR},
+/*   2 */ {parse_number, 0, DIGIT | ID_CHAR | SYMBOL_CHAR},
+/*   3 */ {parse_number, 0, DIGIT | ID_CHAR | SYMBOL_CHAR},
+/*   4 */ {parse_number, 0, DIGIT | ID_CHAR | SYMBOL_CHAR},
+/*   5 */ {parse_number, 0, DIGIT | ID_CHAR | SYMBOL_CHAR},
+/*   6 */ {parse_number, 0, DIGIT | ID_CHAR | SYMBOL_CHAR},
+/*   7 */ {parse_number, 0, DIGIT | ID_CHAR | SYMBOL_CHAR},
+/*   8 */ {parse_number, 0, DIGIT | ID_CHAR | SYMBOL_CHAR},
+/*   9 */ {parse_number, 0, DIGIT | ID_CHAR | SYMBOL_CHAR},
+/*   : */ {parse_colon, 0, SYMBOL_CHAR},
 /*   ; */ {0, ';', 0},
-/*   < */ {parse_bin_op, 0, SPECIAL_CHAR},
-/*   = */ {parse_bin_op, 0, SPECIAL_CHAR},
-/*   > */ {parse_bin_op, 0, SPECIAL_CHAR},
-/*   ? */ {parse_bin_op, 0, SPECIAL_CHAR},
-/*   @ */ {parse_bin_op, 0, SPECIAL_CHAR},
-/*   A */ {parse_ident, 0, ID_CHAR},
-/*   B */ {parse_ident, 0, ID_CHAR},
-/*   C */ {parse_ident, 0, ID_CHAR},
-/*   D */ {parse_ident, 0, ID_CHAR},
-/*   E */ {parse_ident, 0, ID_CHAR},
-/*   F */ {parse_ident, 0, ID_CHAR},
-/*   G */ {parse_ident, 0, ID_CHAR},
-/*   H */ {parse_ident, 0, ID_CHAR},
-/*   I */ {parse_ident, 0, ID_CHAR},
-/*   J */ {parse_ident, 0, ID_CHAR},
-/*   K */ {parse_ident, 0, ID_CHAR},
-/*   L */ {parse_ident, 0, ID_CHAR},
-/*   M */ {parse_ident, 0, ID_CHAR},
-/*   N */ {parse_ident, 0, ID_CHAR},
-/*   O */ {parse_ident, 0, ID_CHAR},
-/*   P */ {parse_ident, 0, ID_CHAR},
-/*   Q */ {parse_ident, 0, ID_CHAR},
-/*   R */ {parse_ident, 0, ID_CHAR},
-/*   S */ {parse_ident, 0, ID_CHAR},
-/*   T */ {parse_ident, 0, ID_CHAR},
-/*   U */ {parse_ident, 0, ID_CHAR},
-/*   V */ {parse_ident, 0, ID_CHAR},
-/*   W */ {parse_ident, 0, ID_CHAR},
-/*   X */ {parse_ident, 0, ID_CHAR},
-/*   Y */ {parse_ident, 0, ID_CHAR},
-/*   Z */ {parse_ident, 0, ID_CHAR},
+/*   < */ {parse_bin_op, 0, BIN_OP_CHAR},
+/*   = */ {parse_bin_op, 0, BIN_OP_CHAR},
+/*   > */ {parse_bin_op, 0, BIN_OP_CHAR},
+/*   ? */ {parse_bin_op, 0, BIN_OP_CHAR},
+/*   @ */ {parse_bin_op, 0, BIN_OP_CHAR},
+/*   A */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   B */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   C */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   D */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   E */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   F */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   G */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   H */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   I */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   J */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   K */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   L */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   M */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   N */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   O */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   P */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   Q */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   R */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   S */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   T */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   U */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   V */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   W */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   X */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   Y */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   Z */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
 /*   [ */ {0, '[', 0},
-/*   \ */ {parse_bin_op, 0, SPECIAL_CHAR},
+/*   \ */ {parse_bin_op, 0, BIN_OP_CHAR},
 /*   ] */ {0, ']', 0},
 /*   ^ */ {0, '^', 0},
-/*   _ */ {0, ASSIGNMENT, ID_CHAR},
+/*   _ */ {0, ASSIGNMENT, ID_CHAR | SYMBOL_CHAR},
 /*   ` */ {invalid, 0, 0},
-/*   a */ {parse_ident, 0, ID_CHAR},
-/*   b */ {parse_ident, 0, ID_CHAR},
-/*   c */ {parse_ident, 0, ID_CHAR},
-/*   d */ {parse_ident, 0, ID_CHAR},
-/*   e */ {parse_ident, 0, ID_CHAR},
-/*   f */ {parse_ident, 0, ID_CHAR},
-/*   g */ {parse_ident, 0, ID_CHAR},
-/*   h */ {parse_ident, 0, ID_CHAR},
-/*   i */ {parse_ident, 0, ID_CHAR},
-/*   j */ {parse_ident, 0, ID_CHAR},
-/*   k */ {parse_ident, 0, ID_CHAR},
-/*   l */ {parse_ident, 0, ID_CHAR},
-/*   m */ {parse_ident, 0, ID_CHAR},
-/*   n */ {parse_ident, 0, ID_CHAR},
-/*   o */ {parse_ident, 0, ID_CHAR},
-/*   p */ {parse_ident, 0, ID_CHAR},
-/*   q */ {parse_ident, 0, ID_CHAR},
-/*   r */ {parse_ident, 0, ID_CHAR},
-/*   s */ {parse_ident, 0, ID_CHAR},
-/*   t */ {parse_ident, 0, ID_CHAR},
-/*   u */ {parse_ident, 0, ID_CHAR},
-/*   v */ {parse_ident, 0, ID_CHAR},
-/*   w */ {parse_ident, 0, ID_CHAR},
-/*   x */ {parse_ident, 0, ID_CHAR},
-/*   y */ {parse_ident, 0, ID_CHAR},
-/*   z */ {parse_ident, 0, ID_CHAR},
+/*   a */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   b */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   c */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   d */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   e */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   f */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   g */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   h */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   i */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   j */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   k */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   l */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   m */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   n */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   o */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   p */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   q */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   r */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   s */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   t */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   u */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   v */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   w */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   x */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   y */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
+/*   z */ {parse_ident, 0, ID_CHAR | SYMBOL_CHAR},
 /*   { */ {0, '{', 0},
-/*   | */ {parse_bin_op, 0, SPECIAL_CHAR},
+/*   | */ {parse_bin_op, 0, BIN_OP_CHAR},
 /*   } */ {0, '}', 0},
-/*   ~ */ {parse_bin_op, 0, SPECIAL_CHAR},
+/*   ~ */ {parse_bin_op, 0, BIN_OP_CHAR},
 /*  ^? */ {invalid, 0, 0}
 };
 
@@ -316,11 +316,12 @@ static const lex_tab_elt char_table[128] = {
 #if defined(LEXDEBUG)
 static inline int yylex_internal ();
 
-int _gst_yylex (PTR lvalp);
+int
+_gst_yylex (PTR lvalp, YYLTYPE *llocp)
 {
   int result;
 
-  result = yylex_internal (lvalp);
+  result = yylex_internal (lvalp, llocp);
   print_token (result, lvalp);
   return (result);
 }
@@ -347,7 +348,7 @@ _gst_yylex (PTR lvalp, YYLTYPE *llocp)
          grammar use INTERNAL_TOKEN as the first token of an internal
          method. The same happens when you have a call to methodsFor:
          - INTERNAL_TOKEN is pushed so that the grammar switches to
-         the method_list production. */
+         the method_list production.  */
       _gst_compile_code = false;
       return (INTERNAL_TOKEN);
     }
@@ -356,7 +357,7 @@ _gst_yylex (PTR lvalp, YYLTYPE *llocp)
     {
 
       ct = CHAR_TAB (ic);
-      if ((ct->_gst_char_class & WHITE_SPACE) == 0)
+      if ((ct->char_class & WHITE_SPACE) == 0)
 	{
 	  _gst_get_location (&llocp->first_column, &llocp->first_line);
 	  if (method_start_pos < 0)
@@ -400,23 +401,24 @@ int
 invalid (int c,
 	 YYSTYPE * lvalp)
 {
-  char charName[3], *cp;
+  char cp[5];
 
-  cp = charName;
-
-  if (c < ' ' || c > '~')
+  if (c < ' ' || c == 127)
     {
-      *cp++ = '^';
-      c &= 127;			/* strip high bit */
-      c ^= 64;			/* uncontrolify */
+      cp[0] = '^';
+      cp[1] = c ^ 64;		/* uncontrolify */
+      cp[2] = '\0';
+    }
+  else if (c & 128)
+    sprintf (cp, "%#02x", c & 255);
+  else
+    {
+      cp[0] = c;
+      cp[1] = '\0';
     }
 
-  *cp++ = c;
-  *cp++ = '\0';
-
-  _gst_errorf ("Invalid character %s", charName);
+  _gst_errorf ("Invalid character %s", cp);
   _gst_had_error = true;
-
   return (0);			/* tell the lexer to ignore this */
 }
 
@@ -482,40 +484,107 @@ parse_colon (int c,
 
 
 int
-parse_bin_op (int c,
-	      YYSTYPE * lvalp)
+parse_symbol (int c,
+	      YYSTYPE *lvalp)
 {
-  char buf[3], *bp;
   int ic;
 
-  bp = buf;
-  *bp++ = c;
-
   ic = _gst_next_char ();
-  if (c == '<')
+  if (ic == EOF)
+    return '#';
+
+  /* Look for a shebang (#! /).  */
+  if (ic == '!')
     {
-      if (ic == 'p')
-	{
-	  if (parse_primitive (ic, lvalp))
-	    return (PRIMITIVE_START);
-	}
+      int line, column;
+      _gst_get_location (&column, &line);
+      if (line == 1 && column == 2)
+        {
+          while (((ic = _gst_next_char ()) != EOF)
+                 && ic != '\r' && ic != '\n')
+            continue;
+          return (SHEBANG);
+        }
     }
 
-  if (ic != EOF && (CHAR_TAB (ic)->_gst_char_class & SPECIAL_CHAR))
-    *bp++ = ic;			/* accumulate next char */
+  /* We can read a binary operator and return a SYMBOL_LITERAL,... */
+  if (CHAR_TAB (ic)->char_class & BIN_OP_CHAR)
+    {
+      parse_bin_op (ic, lvalp);
+      return SYMBOL_LITERAL;
+    }
+
+  if (ic == '\'')
+    {
+      string_literal (ic, lvalp);
+      return SYMBOL_LITERAL;
+    }
+
+  /* ...else, we can absorb identifier characters and colons, but
+     discard anything else. */
+  if ((CHAR_TAB (ic)->char_class & (DIGIT | SYMBOL_CHAR)) != SYMBOL_CHAR)
+    {
+      _gst_unread_char (ic);
+      return '#';
+    }
+
+  _gst_reset_buffer ();
+  _gst_add_str_buf_char (ic);
+
+  while (((ic = _gst_next_char ()) != EOF)
+         && (CHAR_TAB (ic)->char_class & SYMBOL_CHAR))
+    _gst_add_str_buf_char (ic);
+
+  _gst_unread_char (ic);
+  lvalp->sval = _gst_obstack_cur_str_buf (_gst_compilation_obstack);
+  return SYMBOL_LITERAL;
+}
+
+
+int
+parse_bin_op (int c,
+	      YYSTYPE *lvalp)
+{
+  char buf[3];
+  int ic;
+
+  buf[0] = c;
+
+  ic = _gst_next_char ();
+  if (ic != EOF && (CHAR_TAB (ic)->char_class & BIN_OP_CHAR))
+    {
+      buf[1] = ic, buf[2] = 0;	/* temptatively accumulate next char */
+
+      /* This may be a two-character binary operator, except if
+         the second character is a - and is followed by a digit.  */
+      if (ic == '-')
+	{
+	  ic = _gst_next_char ();
+	  _gst_unread_char (ic);
+	  if (is_digit (ic))
+	    {
+	      _gst_unread_char ('-');
+	      buf[1] = '\0';
+	    }
+	}
+    }
   else
     {
       _gst_unread_char (ic);
+
+      /* We come here also for a negative number, which we handle
+         specially.  */
       if (c == '-' && is_digit (ic))
 	return (parse_number ('-', lvalp));
-    }
 
-  *bp = '\0';
+      buf[1] = 0;
+    }
 
   lvalp->sval = xstrdup (buf);
 
-  if (strcmp (buf, "|") == 0)
-    return ('|');
+  if ((buf[0] == '|' || buf[0] == '<' || buf[0] == '>')
+      && buf[1] == '\0')
+    return (buf[0]);
 
   else
     return (BINOP);
@@ -554,17 +623,6 @@ string_literal (int c,
   return (STRING_LITERAL);
 }
 
-mst_Boolean
-parse_primitive (int c,
-		 YYSTYPE * lvalp)
-{
-  mst_Boolean result;
-
-  parse_ident (c, lvalp);
-  result = (strcmp (lvalp->sval, "primitive:") == 0);
-  return (result);
-}
-
 int
 parse_ident (int c,
 	     YYSTYPE * lvalp)
@@ -576,71 +634,41 @@ parse_ident (int c,
 
   identType = IDENTIFIER;
 
-  for (;;)
+  while (((ic = _gst_next_char ()) != EOF)
+	 && (CHAR_TAB (ic)->char_class & ID_CHAR))
+    _gst_add_str_buf_char (ic);
+
+  /* Read a dot as '::' if followed by a letter.  */
+  if (ic == '.')
     {
-      while (((ic = _gst_next_char ()) != EOF)
-	     && (CHAR_TAB (ic)->_gst_char_class & ID_CHAR))
-	_gst_add_str_buf_char (ic);
-
-      /* Read a dot as '::' if followed by a letter. */
-      if (ic == '.')
+      ic = _gst_next_char ();
+      _gst_unread_char (ic);
+      if (ic != EOF && (CHAR_TAB (ic)->char_class & ID_CHAR))
 	{
-	  ic = _gst_next_char ();
-	  _gst_unread_char (ic);
-	  if (CHAR_TAB (ic)->_gst_char_class == ID_CHAR)
-	    {
-	      _gst_unread_char (':');
-	      _gst_unread_char (':');
-            }
-	  else
-	    _gst_unread_char ('.');
-
-	  break;
+	  _gst_unread_char (':');
+	  _gst_unread_char (':');
         }
+      else
+	_gst_unread_char ('.');
+    }
 
-      if (ic == ':')
-	{
-	  ic = _gst_next_char ();
-	  _gst_unread_char (ic);
-	  if (ic == ':' && identType == IDENTIFIER) /* Namespace if we have foo:: */
-	    {
-	      _gst_unread_char (':');
-              break;
-            }
-
-	  if (ic == '=')
-	    {			/* if we have 'foo:=' => 'foo :=' */
-	      if (identType != IDENTIFIER)
-		{
-		  _gst_errorf ("Malformed symbol literal");
-		  break;
-		}
-	      _gst_unread_char (':');
-	      break;
-	    }
-	  _gst_add_str_buf_char (':');
-	  if (ic == EOF
-	      || (CHAR_TAB (ic)->_gst_char_class & ID_CHAR) == 0
-	      || (CHAR_TAB (ic)->_gst_char_class & DIGIT) != 0)
-	    {
-	      if (identType == IDENTIFIER)
-		{
-		  /* first time through */
-		  identType = KEYWORD;
-		}
-	      break;
-	    }
-	  identType = SYMBOL_KEYWORD;
-	}
+  else if (ic == ':')
+    {
+      ic = _gst_next_char ();
+      _gst_unread_char (ic);
+      if (ic == ':' || ic == '=') /* foo:: and foo:= split before colon */
+	_gst_unread_char (':');
       else
 	{
-	  _gst_unread_char (ic);
-	  break;
+          _gst_add_str_buf_char (':');
+          identType = KEYWORD;
 	}
     }
 
-  lvalp->sval = _gst_obstack_cur_str_buf (_gst_compilation_obstack);
+  else
+    _gst_unread_char (ic);
 
+  lvalp->sval = _gst_obstack_cur_str_buf (_gst_compilation_obstack);
   return (identType);
 }
 
@@ -649,19 +677,19 @@ long double
 ipowl (long double base, 
        int n)
 {
-    int k = 1;
-    long double result = 1.0;
-    while (n)
+  int k = 1;
+  long double result = 1.0;
+  while (n)
     {
-        if (n & k)
+      if (n & k)
         {
-            result *= base;
-            n ^= k;
+          result *= base;
+          n ^= k;
         }
-        base *= base;
-        k <<= 1;
+      base *= base;
+      k <<= 1;
     }
-    return result;
+  return result;
 }
 
 int
@@ -724,7 +752,7 @@ parse_number (int c,
 	  /* OOPS...we gobbled the '.' by mistake...it was a statement
 	     boundary delimiter.  We have an integer that we need to
 	     return, and need to push back both the . and the character 
-	     that we just read. */
+	     that we just read.  */
 	  _gst_unread_char (ic);
 	  ic = '.';
 	}
@@ -740,16 +768,18 @@ parse_number (int c,
     do
       {
         /* By default the same as the number of decimal points
-	   we used. */
+	   we used.  */
 	floatExponent = -exponent;
 
 	ic = _gst_next_char ();
-	if (CHAR_TAB (ic)->_gst_char_class & DIGIT)
+	if (ic == EOF)
+	  ;
+	else if (CHAR_TAB (ic)->char_class & DIGIT)
 	  {
 	    /* 123s4 format -- parse the exponent */
 	    floatExponent = parse_digits (ic, false, 10, NULL);
 	  }
-	else if (CHAR_TAB (ic)->_gst_char_class & ID_CHAR)
+	else if (CHAR_TAB (ic)->char_class & ID_CHAR)
 	  {
 	    /* 123stuvwxyz sends #stuvwxyz to 123!!! */
 	    _gst_unread_char (ic);
@@ -803,18 +833,19 @@ parse_number (int c,
       }
 
       ic = _gst_next_char ();
-      if (ic == '-')
-	{
+      if (ic == EOF) 
+        ;
+      else if (ic == '-') {
 	  floatExponent =
 	    parse_digits (_gst_next_char (), true, 10, NULL);
 	  exponent -= (int) floatExponent;
 	}
-      else if (CHAR_TAB (ic)->_gst_char_class & DIGIT)
+      else if (CHAR_TAB (ic)->char_class & DIGIT)
 	{
 	  floatExponent = parse_digits (ic, false, 10, NULL);
 	  exponent += (int) floatExponent;
 	}
-      else if (CHAR_TAB (ic)->_gst_char_class & ID_CHAR)
+      else if (CHAR_TAB (ic)->char_class & ID_CHAR)
 	{
 	  /* 123def sends #def to 123!!! */
 	  _gst_unread_char (ic);
@@ -851,12 +882,12 @@ parse_number (int c,
     }
   else if (num >= 0 && num <= 255)
     {
-      lvalp->ival = (long) num;
+      lvalp->ival = (intptr_t) num;
       return (BYTE_LITERAL);
     }
   else
     {
-      lvalp->ival = (long) num;
+      lvalp->ival = (intptr_t) num;
       return (INTEGER_LITERAL);
     }
 }
@@ -991,7 +1022,7 @@ is_base_digit (int c,
 mst_Boolean
 is_digit (int ic)
 {
-  return ((CHAR_TAB (ic)->_gst_char_class & DIGIT) != 0);
+  return (ic != EOF && (CHAR_TAB (ic)->char_class & DIGIT) != 0);
 }
 
 byte_object
@@ -1083,7 +1114,6 @@ _gst_parse_stream (void)
     YYSTYPE yylval;
     while (_gst_yylex (&yylval));
 #else /* !NO_PARSE */
-    extern int _gst_yyparse (void);
     _gst_had_error = false;
     _gst_yyparse ();
 #endif /* !NO_PARSE */
@@ -1119,19 +1149,19 @@ print_token (token,
     case 0:
       break;
     case '.':
-      printf (".\n");
-      break;
     case '!':
-      printf ("!\n");
-      break;
     case ':':
-      printf (":\n");
-      break;
     case '|':
-      printf ("|\n");
-      break;
     case '^':
-      printf ("^\n");
+    case '#':
+    case ';':
+    case '(':
+    case ')':
+    case '[':
+    case ']':
+    case '{':
+    case '}':
+      printf ("%c\n", token);
       break;
     case SCOPE_SEPARATOR:
       printf ("::\n");
@@ -1139,61 +1169,40 @@ print_token (token,
     case ASSIGNMENT:
       printf (":=\n");
       break;
-    case '#':
-      printf ("#\n");
-      break;
-    case ';':
-      printf (";\n");
-      break;
-    case '(':
-      printf ("(\n");
-      break;
-    case ')':
-      printf (")\n");
-      break;
-    case PRIMITIVE_START:
-      printf ("<primitive:\n");
-      break;
-    case '[':
-      printf ("[\n");
-      break;
-    case ']':
-      printf ("]\n");
-      break;
-    case '{':
-      printf ("{\n");
-      break;
-    case '}':
-      printf ("}\n");
-      break;
     case INTERNAL_TOKEN:
       printf ("INTERNAL_TOKEN\n");
       break;
     case IDENTIFIER:
-      printf ("IDENTIFIER: %s\n", yylval->sval);
+      printf ("IDENTIFIER: `%s'\n", yylval->sval);
       break;
     case KEYWORD:
-      printf ("KEYWORD: %s\n", yylval->sval);
+      printf ("KEYWORD: `%s'\n", yylval->sval);
       break;
-    case SYMBOL_KEYWORD:
-      printf ("SYMBOL_KEYWORD: %s\n", yylval->sval);
+    case SYMBOL_LITERAL:
+      printf ("SYMBOL_LITERAL: #'%s'\n", yylval->sval);
       break;
     case LARGE_INTEGER_LITERAL:
       printf ("LARGE_INTEGER_LITERAL\n");
     case INTEGER_LITERAL:
       printf ("INTEGER_LITERAL: %ld\n", yylval->ival);
       break;
-    case FLOATING_LITERAL:
-      printf ("FLOATING_LITERAL: %g\n", yylval->fval);
+    case FLOATD_LITERAL:
+      printf ("FLOATD_LITERAL: %g\n", (double) yylval->fval);
+      break;
+    case FLOATE_LITERAL:
+      printf ("FLOATE_LITERAL: %g\n", (float) yylval->fval);
+      break;
+    case FLOATQ_LITERAL:
+      printf ("FLOATQ_LITERAL: %Lg\n", yylval->fval);
       break;
     case CHAR_LITERAL:
-      printf ("CHAR_LITERAL: %c\n", yylval->cval);
+      printf ("CHAR_LITERAL: %d ($%c)\n", yylval->cval, yylval->cval);
       break;
     case STRING_LITERAL:
-      printf ("STRING_LITERAL: %s\n", yylval->sval);
+      printf ("STRING_LITERAL: '%s'\n", yylval->sval);
       break;
     case BINOP:
-      printf ("BINOP: %s\n", yylval->sval);
+      printf ("BINOP: `%s'\n", yylval->sval);
       break;
     }
 }
@@ -1209,11 +1218,15 @@ _gst_yyprint (FILE * file,
   switch (token)
     {
     case IDENTIFIER:
-    case KEYWORD:
-    case SYMBOL_KEYWORD:
-    case STRING_LITERAL:
     case BINOP:
+    case KEYWORD:
       fprintf (file, ": `%s'", yylval->sval);
+      break;
+    case SYMBOL_LITERAL:
+      fprintf (file, ": #'%s'", yylval->sval);
+      break;
+    case STRING_LITERAL:
+      fprintf (file, ": '%s'", yylval->sval);
       break;
     case INTEGER_LITERAL:
       fprintf (file, ": %ld", yylval->ival);
@@ -1228,7 +1241,7 @@ _gst_yyprint (FILE * file,
       fprintf (file, ": %Lg", yylval->fval);
       break;
     case CHAR_LITERAL:
-      fprintf (file, ": %c", yylval->cval);
+      fprintf (file, ": %d ($%c)\n", yylval->cval, yylval->cval);
       break;
     default:
       break;

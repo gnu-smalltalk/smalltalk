@@ -29,13 +29,13 @@
 ACLOCAL_AMFLAGS		= -I ../config
 AUTOMAKE_OPTIONS	= gnits
 
+## BEGIN GNU SMALLTALK LOCAL
 dist-hook:
-if SUBDIR_SNPRINTFV
 	rm -rf $(distdir)/doc $(distdir)/tests
+
 SUBDIRS			= snprintfv
-else
-SUBDIRS                 = snprintfv doc tests
-endif
+## SUBDIRS              = snprintfv doc tests
+## END GNU SMALLTALK LOCAL
 
 DIST_SUBDIRS		= $(SUBDIRS)
 

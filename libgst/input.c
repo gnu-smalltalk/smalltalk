@@ -89,37 +89,37 @@ typedef struct input_stream
 #define st_str		st.u_st_str
 #define st_oop		st.u_st_oop
 
-/* The internal interface used by _gst_next_char. */
+/* The internal interface used by _gst_next_char.  */
 static int my_getc (input_stream stream);
 
-/* Print a line indicator in front of an error message. */
+/* Print a line indicator in front of an error message.  */
 static void line_stamp (int line);
 
 /* Close the given stream */
 static void my_close (input_stream stream);
 
 /* Allocate and push a new stream of type TYPE on the stack; the new
-   stream is then available through IN_STREAM. */
+   stream is then available through IN_STREAM.  */
 static input_stream push_new_stream (stream_type type);
 
 /* The topmost stream in the stack, and the head of the linked list
-   that implements the stack. */
+   that implements the stack.  */
 static input_stream in_stream = NULL;
 
-/* Controls the use of the changes file, for recording source text.
-   If NULL, no recording */
-char *_gst_change_file_name = NULL;
+/* Poll FD until it is available for input (or until it returns
+   POLLHUP) and then perform a read system call.  */
+static int poll_and_read (int fd, char *buf, int n);
 
 static int change_str = -1;
 
 
 /* If true, the normal execution information is supressed, and the
    prompt is emitted with a special marker character ahead of it to
-   let the process filter know that the execution has completed. */
+   let the process filter know that the execution has completed.  */
 mst_Boolean _gst_emacs_process = false;
 
 /* >= 1 if completions are enabled, < 1 if they are not.  Available
-   for completeness even if Readline is not used. */
+   for completeness even if Readline is not used.  */
 static int completions_enabled = 1;
 
 
@@ -127,14 +127,14 @@ static int completions_enabled = 1;
 /* Storage for the possible completions */
 static char **completions;
 
-/* Number of completions available. */
+/* Number of completions available.  */
 static int count;
 
-/* Number of completions before the array must be resized. */
+/* Number of completions before the array must be resized.  */
 static int free_items;
 
 /* Number of sorted completions.  Completions are not sorted until
-   we are requested to use them. */
+   we are requested to use them.  */
 static int sorted_count;
 
 /* Internal functions */
@@ -176,7 +176,7 @@ static char **readline_match_symbols (char *text,
    The `readline()' interface: The behavior is like the Smalltalk
    String interface.  The end-of-string or a NULL strBase-pointer
    decides to read in a new line.  The prompt is still shown by the
-   readline() call. */
+   readline() call.  */
 
 void
 _gst_pop_stream (mst_Boolean closeIt)
@@ -324,7 +324,7 @@ my_getc (input_stream stream)
       return ic;
 
     case STREAM_OOP:
-      /* Refill the buffer... */
+      /* Refill the buffer...  */
       if (stream->st_oop.ptr == stream->st_oop.end)
 	{
 	  if (stream->st_oop.buf)
@@ -354,16 +354,10 @@ my_getc (input_stream stream)
 	  fflush(stdout);
 	}
 
-      /* Refill the buffer... */
+      /* Refill the buffer...  */
       if (stream->st_file.ptr == stream->st_file.end)
 	{
-	  int n;
-	  do
-	    {
-	      errno = 0;
-	      n = _gst_read (stream->st_file.fd, stream->st_file.buf, 1024);
-	    }
-	  while ((n == -1) && (errno == EINTR));
+	  int n = poll_and_read (stream->st_file.fd, stream->st_file.buf, 1024);
 	  if (n < 0)
 	    n = 0;
 
@@ -394,7 +388,7 @@ my_getc (input_stream stream)
 	    xfree (stream->st_str.strBase);
 	    stream->st_str.strBase = NULL;
 	  }
-	r_line = readline ("st> ");
+	r_line = readline ((char *) "st> ");
 	if (!r_line)
 	  {
 	    /* return value of NULL indicates EOF */
@@ -402,7 +396,7 @@ my_getc (input_stream stream)
 	  }
 	if (*r_line)
 	  {
-	    /* add only non-empty lines. */
+	    /* add only non-empty lines.  */
 	    add_history (r_line);
 	  }
 
@@ -413,7 +407,7 @@ my_getc (input_stream stream)
 	  {
 	    _gst_errorf ("Out of memory reallocating linebuffer space");
 	    stream->st_str.str = stream->st_str.strBase = NULL;
-	    ic = '\n';		/* return a newline ... */
+	    ic = '\n';		/* return a newline ...  */
 	  }
 	else
 	  {
@@ -684,7 +678,6 @@ line_stamp (int line)
 }
 
 
-
 int
 _gst_get_cur_file_pos (void)
 {
@@ -710,25 +703,6 @@ _gst_get_cur_file_pos (void)
     return (-1);
 }
 
-void
-_gst_init_changes_stream (void)
-{
-  if (_gst_change_file_name)
-    change_str = _gst_open_file (_gst_change_file_name, "a");
-}
-
-void
-_gst_reset_changes_file (void)
-{
-  if (!_gst_change_file_name)
-    return;
-  if (change_str != -1)
-    close (change_str);
-
-  remove (_gst_change_file_name);
-  if (change_str != -1)
-    _gst_init_changes_stream ();
-}
 
 
 int
@@ -738,7 +712,8 @@ _gst_next_char (void)
 
   if (in_stream->pushedBackCount > 0)
     {
-      ic = in_stream->pushedBackChars[--in_stream->pushedBackCount];
+      ic = (unsigned char)
+	      in_stream->pushedBackChars[--in_stream->pushedBackCount];
       return (ic);
     }
   else
@@ -768,7 +743,8 @@ _gst_unread_char (int ic)
 }
 
 
-/* These two are not used, but are provided for additional flexibility. */
+
+/* These two are not used, but are provided for additional flexibility.  */
 void
 _gst_enable_completion (void)
 {
@@ -779,6 +755,38 @@ void
 _gst_disable_completion (void)
 {
   completions_enabled--;
+}
+
+int
+poll_and_read (int fd, char *buf, int n)
+{
+  int result;
+  struct pollfd pfd;
+
+  pfd.fd = fd;
+  pfd.events = POLLIN;
+  pfd.revents = 0;
+
+  do
+    {
+      errno = 0;
+      result = poll (&pfd, 1, -1); /* Infinite wait */
+    }
+  while (result == 0
+	 || ((result == -1) && (errno == EINTR)));
+
+  if (pfd.revents & POLLIN)
+    {
+      do
+	{
+	  errno = 0;
+	  result = _gst_read (fd, buf, n);
+	}
+      while ((result == -1) && (errno == EINTR));
+      return result;
+    }
+  else
+    return -1;
 }
 
 #ifdef HAVE_READLINE
@@ -846,7 +854,7 @@ add_completion (const char *str,
     {
       free_items += 50;
       completions =
-	(char **) xrealloc (completions, SIZEOF_CHAR_P * (count + 50));
+	(char **) xrealloc (completions, sizeof (char *) * (count + 50));
     }
 
   free_items--;
@@ -896,14 +904,14 @@ merge (char **a1,
 
   if (!count2)
     {
-      memmove (a1, a2, count1 * SIZEOF_CHAR_P);
+      memmove (a1, a2, count1 * sizeof (char *));
       return;
     }
 
   if (reallocate)
     {
-      char **new = (char **) alloca (count1 * SIZEOF_CHAR_P);
-      memcpy (new, a1, count1 * SIZEOF_CHAR_P);
+      char **new = (char **) alloca (count1 * sizeof (char *));
+      memcpy (new, a1, count1 * sizeof (char *));
       a1 = new;
     }
 
@@ -918,7 +926,7 @@ merge (char **a1,
 	  if (--count2 == 0)
 	    {
 	      /* Any leftovers from the source array? */
-	      memcpy (a1, a2, count1 * SIZEOF_CHAR_P);
+	      memcpy (a1, a2, count1 * sizeof (char *));
 	      return;
 	    }
 
@@ -959,7 +967,7 @@ symbol_generator (const char *text,
     return (NULL);
 
   /* Since we have to sort the array to perform the binary search, we
-     remove duplicates and avoid that readline resorts the result. */
+     remove duplicates and avoid that readline resorts the result.  */
   while (matches_left > 1 &&
 	 strcmp (completions[current_index],
 		 completions[current_index + 1]) == 0)
@@ -991,11 +999,11 @@ readline_match_symbols (char *text,
 
   /* Prepare for binary searching.  We use qsort when necessary, and
      merge the result, instead of doing expensive (quadratic) insertion
-     sorts. */
+     sorts.  */
   if (sorted_count < count)
     {
       qsort (&completions[sorted_count], count - sorted_count,
-	     SIZEOF_CHAR_P, compare_strings);
+	     sizeof (char *), compare_strings);
 
       merge (&completions[sorted_count], count - sorted_count,
 	     completions, sorted_count, true);
@@ -1004,10 +1012,10 @@ readline_match_symbols (char *text,
     }
 
   /* Initialize current_index and matches_left with two binary
-     searches. */
+     searches.  */
   len = strlen (text);
 
-  /* The first binary search gives the first matching item. */
+  /* The first binary search gives the first matching item.  */
   low = -1;
   high = count;
   while (low + 1 != high)
@@ -1042,31 +1050,9 @@ readline_getc (FILE * file)
 {
   int result;
   unsigned char ch;
-  struct pollfd pfd;
+  result = poll_and_read (fileno (file), &ch, 1);
 
-  pfd.fd = fileno (file);
-  pfd.events = POLLIN;
-  pfd.revents = 0;
-
-  do
-    {
-      errno = 0;
-      result = poll (&pfd, 1, -1); /* Infinite wait */
-    }
-  while ((result == -1) && (errno == EINTR));
-
-  if (pfd.revents & POLLIN)
-    {
-      do
-	{
-	  errno = 0;
-	  result = _gst_read (fileno (file), &ch, 1);
-	}
-      while ((result == -1) && (errno == EINTR));
-      return (result < 1) ? EOF : (int) ch;
-    }
-  else
-    return EOF;
+  return (result < 1) ? EOF : (int) ch;
 }
 
 void
@@ -1075,20 +1061,20 @@ _gst_initialize_readline (void)
   static char everything[255];
   int i;
 
-  /* Allow conditional parsing of the ~/.inputrc file. */
-  rl_readline_name = "Smalltalk";
+  /* Allow conditional parsing of the ~/.inputrc file.  */
+  rl_readline_name = (char *) "Smalltalk";
 
   /* Always put filenames in quotes */
   for (i = 0; i < 255; i++)
     everything[i] = i + 1;
 
   rl_filename_quote_characters = everything;
-  rl_completer_quote_characters = "'\"";
-  rl_basic_word_break_characters = "() []{};+-=*<>~'?%/@|&#^\"\\.";
+  rl_completer_quote_characters = (char *) "'\"";
+  rl_basic_word_break_characters = (char *) "() []{};+-=*<>~'?%/@|&#^\"\\.";
 
   /* Consider binary selectors both word-breaking characters and
      candidates for completion */
-  rl_special_prefixes = "+-=*<>~?%/@|&\\";
+  rl_special_prefixes = (char *) "+-=*<>~?%/@|&\\";
 
   /* Our rules for quoting are a bit different from the default */
   rl_filename_quoting_function = (CPFunction *) readline_quote_filename;
@@ -1100,7 +1086,7 @@ _gst_initialize_readline (void)
     (CPPFunction *) readline_match_symbols;
 
   /* Since we have to sort the array to perform the binary search,
-     remove duplicates and avoid that readline resorts the result. */
+     remove duplicates and avoid that readline resorts the result.  */
   rl_ignore_completion_duplicates = 0;
 
   /* Set up to use read to read from stdin */

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+| Copyright 1999,2000,2001,2002,2003,2004 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -32,7 +32,7 @@
 
 
 Object subclass: #Package
-	instanceVariableNames: 'name prerequisites builtFiles files fileIns directory libraries modules callouts '
+	instanceVariableNames: 'name prerequisites builtFiles files fileIns directory libraries modules callouts namespace'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Language-Packaging'
@@ -77,6 +77,14 @@ printOn: aStream
     aStream nextPutAll: '
 <package>
   <name>'; nextPutAll: self name; nextPutAll: '</name>'; nl.
+
+    self namespace isNil ifFalse: [
+	aStream
+	    nextPutAll: '  <namespace>';
+	    nextPutAll: self namespace;
+	    nextPutAll: '</namespace>';
+	    nl.
+    ].
 
     self
 	printXmlOn: aStream
@@ -129,6 +137,14 @@ name
 name: aString
     "Set to aString the name of the package."
     name := aString!
+
+namespace
+    "Answer the namespace in which the package is loaded."
+    ^namespace!
+
+namespace: aString
+    "Set to aString the namespace in which the package is loaded."
+    namespace := aString!
 
 prerequisites
     "Answer a (modifiable) Set of prerequisites."
@@ -189,63 +205,103 @@ directory: dir forBaseDir: baseDir
     (dir size = 1 or: [ 
         ((dir at: 1) ~= $/) & ((dir at: 1) ~= $\) & (dir includes: $:) not])
 	   ifTrue: [ directory := baseDir, '/', dir ]
-	   ifFalse: [ directory := dir ]! !
+	   ifFalse: [ directory := dir ]!
+
+createNamespace
+    "Private - Create the path of namespaces indicated by our
+     namespace field in dot notation, and answer the final namespace"
+    | ns |
+    ns := Smalltalk.
+    self namespace isNil ifTrue: [ ^ns ].
+    (self namespace subStrings: $.) do: [ :each || key |
+	key := each asSymbol.
+	(ns includesKey: key) ifFalse: [ ns addSubspace: key ].
+	ns := ns at: key
+    ].
+    ^ns!
+
+fileIn
+    "Private - File in the given package without paying attention at
+     dependencies and C callout availability"
+    | dir namespace |
+
+    (Smalltalk hasFeatures: self name asSymbol) ifTrue: [ ^self ].
+    OutputVerbosity > 0 ifTrue: [
+        Transcript
+	    nextPutAll: 'Loading package ', self name;
+	    nl
+    ].
+
+    dir := Directory working.
+    namespace := Namespace current.
+    Namespace current: self createNamespace.
+    Directory working: self directory.
+    self libraries do: [ :each | DLD addLibrary: each ].
+    self modules do: [ :each | DLD addModule: each ].
+
+    PackageLoader ignoreCallouts ifFalse: [
+        self callouts do: [ :func |
+            (CFunctionDescriptor isFunction: func)
+	         ifFalse: [ ^self error: 'C callout not available: ', func ]]].
+
+    self fileIns do: [ :each | FileStream fileIn: each ].
+    Directory working: dir.
+    Namespace current: namespace.
+    Smalltalk addFeature: self name asSymbol! !
 
 !PackageLoader class methodsFor: 'accessing'!
 
+packageAt: package
+    "Answer a Package object for the given package"
+    self refreshDependencies.
+    ^Packages at: package asString
+!
+
 directoryFor: package
     "Answer a complete path to the given package's files"
-    self refreshDependencies.
-    ^(Packages at: package asString) directory.
+    ^(self packageAt: package) directory.
 !
 
 builtFilesFor: package
     "Answer a Set of Strings containing the filenames of the given package's
      machine-generated files (relative to the directory answered by
      #directoryFor:)"
-    self refreshDependencies.
-    ^(Packages at: package asString) builtFiles.
+    ^(self packageAt: package) builtFiles.
 !
 
 filesFor: package
     "Answer a Set of Strings containing the filenames of the given package's
      files (relative to the directory answered by #directoryFor:)"
-    self refreshDependencies.
-    ^(Packages at: package asString) files.
+    ^(self packageAt: package) files.
 !
 
 fileInsFor: package
     "Answer a Set of Strings containing the filenames of the given package's
      file-ins (relative to the directory answered by #directoryFor:)"
-    self refreshDependencies.
-    ^(Packages at: package asString) fileIns.
+    ^(self packageAt: package) fileIns.
 !
 
 calloutsFor: package
     "Answer a Set of Strings containing the filenames of the given package's
      required callouts (relative to the directory answered by #directoryFor:)"
-    self refreshDependencies.
-    ^(Packages at: package asString) callouts.
+    ^(self packageAt: package) callouts.
 !
 
 librariesFor: package
     "Answer a Set of Strings containing the filenames of the given package's
      libraries (relative to the directory answered by #directoryFor:)"
-    self refreshDependencies.
-    ^(Packages at: package asString) libraries.
+    ^(self packageAt: package) libraries.
 !
 
 modulesFor: package
     "Answer a Set of Strings containing the filenames of the given package's
      modules (relative to the directory answered by #directoryFor:)"
-    self refreshDependencies.
-    ^(Packages at: package asString) modules.
+    ^(self packageAt: package) modules.
 !
 
 prerequisitesFor: package
     "Answer a Set of Strings containing the prerequisites for the given package"
-    self refreshDependencies.
-    ^(Packages at: package asString) prerequisites.
+    ^(self packageAt: package) prerequisites.
 !
 
 ignoreCallouts
@@ -340,7 +396,7 @@ fileInPackages: packagesList
 	extractDependenciesFor: packagesList
 	onError: [ :errorMessage | ^self error: errorMessage ].
 	
-    toBeLoaded do: [ :each | self primFileInPackage: each ]
+    toBeLoaded do: [ :each | (self packageAt: each) fileIn ]
 ! !
 
 
@@ -359,39 +415,12 @@ canLoad: package
 
 hasCallout: feature
     "Private - Answer whether the given callout is present in GNU Smalltalk"
-    ^IgnoreCallouts or: [ CFunctionDescriptor isFunction: feature]
 !
 
 isLoadable: feature
     "Private - Answer whether the packages file includes an entry for `feature'"
     self refreshDependencies.
     ^Packages includesKey: feature asString
-!
-
-primFileInPackage: package
-    "Private - File in the given package without paying attention at
-     dependencies and C callout availability"
-    | dir |
-    (Smalltalk hasFeatures: package asSymbol) ifTrue: [ ^self ].
-
-    Transcript
-	nextPutAll: 'Loading package ', package;
-	nl.
-
-    dir := Directory working.
-    Directory working: (self directoryFor: package).
-    (self librariesFor: package) do: [ :each | DLD addLibrary: each ].
-    (self modulesFor: package) do: [ :each | DLD addModule: each ].
-
-    (self calloutsFor: package) do: [ :func |
-	(self hasCallout: func)
-	    ifTrue: [ ^self error: 'C callout not available: ', func ]
-    ].
-
-    (self fileInsFor: package) do: [ :each | FileStream fileIn: each ].
-    Directory working: dir.
-
-    Smalltalk addFeature: package asSymbol
 ! !
 
 
@@ -474,10 +503,11 @@ processPackageFile: fileName baseDirectory: baseDir
 		    ifTrue: [ Packages at: package name put: package ]
 	    ] ifFalse: [
 	    tag = 'name' ifTrue: [ package name: cdata ] ifFalse: [
+	    tag = 'namespace' ifTrue: [ package namespace: cdata ] ifFalse: [
 	    tag = 'library' ifTrue: [ package libraries add: cdata ] ifFalse: [
 	    tag = 'disabled-package' ifTrue: [ Packages removeKey: package name ifAbsent: [] ] ifFalse: [
 	    tag = 'built-file' ifTrue: [ package builtFiles add: cdata ] ifFalse: [
-	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]].
+	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]].
 	    cdata := nil.
 	].
 	ch isAlphaNumeric ifTrue: [

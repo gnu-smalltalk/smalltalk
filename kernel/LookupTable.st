@@ -32,7 +32,7 @@
  ======================================================================"
 
 Dictionary variableSubclass: #LookupTable
-	   instanceVariableNames: 'values'
+	   instanceVariableNames: ''
 	   classVariableNames: ''
 	   poolDictionaries: ''
 	   category: 'Collections-Keyed'
@@ -46,6 +46,10 @@ to determine equivalence of indices.' !
 
 
 !LookupTable class methodsFor: 'instance creation'!
+
+primNew: realSize
+    ^self basicNew: realSize * 2
+!
 
 new
     "Create a new LookupTable with a default size"
@@ -106,25 +110,6 @@ associationAt: key ifAbsent: aBlock
 ! !
 
 
-!LookupTable methodsFor: 'hashing'!
-
-hash
-    "Answer the hash value for the receiver"
-    | hashValue |
-    hashValue := tally.
-    self keysAndValuesDo: [:key :val |
-        hashValue := hashValue bitXor: (self hashFor: key) scramble.
-
-        "hack needed because the Smalltalk dictionary contains itself"
-        val == self ifFalse: [
-            hashValue := hashValue bitXor: val hash scramble.
-        ]
-    ].
-
-    ^hashValue
-! !
-
-
 !LookupTable methodsFor: 'copying'!
 
 deepCopy
@@ -177,15 +162,36 @@ removeKey: key ifAbsent: aBlock
 !LookupTable methodsFor: 'enumerating'!
 
 associationsDo: aBlock
-    "Pass each association in the LookupTable to aBlock"
+    "Pass each association in the LookupTable to aBlock."
+
     self keysAndValuesDo: [ :key :val | aBlock value:
 	(Association key: key value: val)
     ]
 !
 
+keysDo: aBlock
+    "Pass each key in the LookupTable to aBlock."
+
+    self beConsistent.
+    1 to: self primSize do: [:i |
+	(self primAt: i) notNil
+	    ifTrue: [ aBlock value: (self primAt: i) ]
+    ]
+!
+
+do: aBlock
+    "Pass each value in the LookupTable to aBlock."
+
+    self beConsistent.
+    1 to: self primSize do: [:i |
+	(self primAt: i) notNil
+	    ifTrue: [ aBlock value: (self valueAt: i) ]
+    ]
+!
+
 keysAndValuesDo: aBlock
     "Pass each key/value pair in the LookupTable as two distinct parameters
-     to aBlock"
+     to aBlock."
 
     1 to: self primSize do: [:i |
 	(self primAt: i) notNil
@@ -219,6 +225,24 @@ rehash
     ]
 ! !
 
+
+!LookupTable methodsFor: 'hashing'!
+
+hash
+    "Answer the hash value for the receiver"
+    | hashValue |
+    hashValue := tally.
+    self keysAndValuesDo: [:key :val |
+        hashValue := hashValue bitXor: (self hashFor: key) scramble.
+
+        "hack needed because the Smalltalk dictionary contains itself"
+        val == self ifFalse: [
+            hashValue := hashValue bitXor: val hash scramble.
+        ]
+    ].
+
+    ^hashValue
+! !
 
 
 !LookupTable methodsFor: 'storing'!
@@ -242,17 +266,6 @@ storeOn: aStream
 
 
 !LookupTable methodsFor: 'private methods'!
-
-initialize: anInteger
-    "Private - Instance variable initialization."
-    super initialize: anInteger.
-    self initValues
-!
-
-initValues
-    "Private - Initialize the values instance variable."
-    values := Array new: self primSize
-!
 
 rehashObjectsAfter: index
     "Rehashes all the objects in the collection after index to see if any of
@@ -303,12 +316,24 @@ whileGrowingAt: key put: value
     ^value
 !
 
+primSize
+    ^self basicSize // 2
+!
+
+primAt: index
+    ^self basicAt: index + index - 1
+!
+
+primAt: index put: object
+    ^self basicAt: index + index - 1 put: object
+!
+
 valueAt: index
-    ^values at: index
+    ^self basicAt: index + index
 !
 
 valueAt: index put: object
-    ^values at: index put: object
+    ^self basicAt: index + index put: object
 !
 
 hashFor: anObject

@@ -52,6 +52,8 @@ debuggingPriority
 !Notifier class methodsFor: 'instance creation'!
 
 openOn: process message: message
+    | handleErrorsWithGui |
+    handleErrorsWithGui := BLOX BLOXBrowser BrowserMain handleErrorsWithGui.
     BLOX BLOXBrowser BrowserMain handleErrorsWithGui: false.
     [
         Processor activeProcess name: 'Notifier/Debugger'.
@@ -61,7 +63,7 @@ openOn: process message: message
             init: message
 	    process: process.
 
-        BLOX BLOXBrowser BrowserMain handleErrorsWithGui: true.
+        BLOX BLOXBrowser BrowserMain handleErrorsWithGui: handleErrorsWithGui.
     ] fork.
 
     process suspend.
@@ -87,7 +89,7 @@ process
 contextSelectedFrom: assoc 
     currentSelection := assoc key!
 
-inspectContext
+debug
     Debugger new: self!
 
 stacktrace
@@ -142,7 +144,7 @@ createWindow
 		listMsg: #stacktrace;
 		handleUserChange: #contextSelectedFrom:;
 		menuInit: ((PopupMenu new: listView label: 'Context')
-			    selectors: #(#('Inspect' #inspectContext))
+			    selectors: #(#('Debug' #debug))
 				receiver: self
 				argument: listView;
 			    selectors: #(#() #('Copy Trace' #copyAll) #('Copy Selection' #copySelection))

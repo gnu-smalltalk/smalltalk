@@ -236,7 +236,7 @@ peek
 	self fill.
 	self atEnd ifTrue: [ ^self pastEnd ].
     ].
-    ^collection at: ptr
+    ^collection at: ptr.
 !
 
 next
@@ -354,7 +354,7 @@ fileIn
     self clean.
     self fileOp: 11 ifFail: [
         file isNil ifTrue: [ SystemExceptions.FileError signal: 'file already closed' ].
-        File checkError.
+        self checkError.
         ^nil
     ]
 !
@@ -366,7 +366,7 @@ fileInLine: lineNum fileName: aString at: charPosInt
     self clean.
     self fileOp: 12 with: lineNum with: aString with: charPosInt ifFail: [
         file isNil ifTrue: [ SystemExceptions.FileError signal: 'file already closed' ].
-        File checkError.
+        self checkError.
         ^nil
     ]
 ! !
@@ -451,34 +451,34 @@ nextLine
     writePtr notNil ifTrue: [ self basicFlush ].
     ptr > endPtr ifTrue: [
 	self fill.
-        self atEnd ifTrue: [ ^self pastEnd ]
+	self atEnd ifTrue: [ ^self pastEnd ].
     ].
 
     "First, examine the buffer's contents."
     [
         ptr to: endPtr do: [ :i |
-            ((ch := collection at: i) == ##(Character cr)
-                or: [ ch == ##(Character nl) ])
-                    ifTrue: [
-                        result := collection copyFrom: ptr to: i - 1.
-                        ptr := i + 1.
-                        ch == ##(Character cr)
-                            ifTrue: [ self peekFor: ##(Character nl) ].
+	    ((ch := collection at: i) == ##(Character cr)
+		or: [ ch == ##(Character nl) ])
+		    ifTrue: [
+			result := collection copyFrom: ptr to: i - 1.
+			ptr := i + 1.
+			ch == ##(Character cr)
+			    ifTrue: [ self peekFor: ##(Character nl) ].
 
-                        "If we went through the loop only once, we're done."
-                        resultStream isNil ifTrue: [ ^result ].
+			"If we went through the loop only once, we're done."
+			resultStream isNil ifTrue: [ ^result ].
 
-                        "Else finish the stream and return its contents."
-                        ^resultStream nextPutAll: result; contents
-                    ]
+			"Else finish the stream and return its contents."
+			^resultStream nextPutAll: result; contents
+		    ]
         ].
 
-        resultStream isNil ifTrue: [
-            resultStream := WriteStream on: (self species new: endPtr - ptr + 20)
-        ].
-        resultStream next: endPtr - ptr + 1 putAll: collection startingAt: ptr.
-        self fill.
-        self atEnd
+	resultStream isNil ifTrue: [
+	    resultStream := WriteStream on: (self species new: endPtr - ptr + 20)
+	].
+	resultStream next: endPtr - ptr + 1 putAll: collection startingAt: ptr.
+	self fill.
+	self atEnd
     ] whileFalse.
 
     ^resultStream contents
@@ -585,7 +585,7 @@ nextHunk
         with: collection
         with: endPtr + 1
         with: collection size - endPtr
-	ifFail: [ File checkError. 0 ]).
+	ifFail: [ self checkError ]).
 
     answer := collection copyFrom: ptr to: endPtr.
     ptr := 1.

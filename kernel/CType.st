@@ -290,6 +290,7 @@ Smalltalk at: #CUIntType	put: (CScalarCType cObjectType: CUInt).
 Smalltalk at: #CSmalltalkType	put: (CScalarCType cObjectType: CSmalltalk).
 Smalltalk at: #CFloatType	put: (CScalarCType cObjectType: CFloat).
 Smalltalk at: #CDoubleType	put: (CScalarCType cObjectType: CDouble).
+Smalltalk at: #CLongDoubleType	put: (CScalarCType cObjectType: CLongDouble).
 Smalltalk at: #CStringType	put: (CStringCType cObjectType: CString).
 Smalltalk at: #CByteType	put: (CScalarCType cObjectType: CByte).
 Smalltalk at: #CBooleanType	put: (CScalarCType cObjectType: CBoolean).

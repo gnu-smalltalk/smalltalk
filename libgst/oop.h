@@ -42,44 +42,37 @@
 
 /* The number of OOPs in the system.  This is exclusive of Character,
    True, False, and UndefinedObject (nil) oops, which are
-   built-ins. */
+   built-ins.  */
 #define INITIAL_OOP_TABLE_SIZE	(1024 * 128 + BUILTIN_OBJECT_BASE)
 #define MAX_OOP_TABLE_SIZE	(sizeof(struct OOP) << 20)
-#define MAX_OBJECT_DATA_SIZE	(sizeof(long) << 26)
 
 /* The number of free OOPs under which we trigger GCs.  0 is not
    enough because _gst_scavenge might still need some oops in
    empty_context_stack!!! */
 #define LOW_WATER_OOP_THRESHOLD	(1024 * 2)
 
-#define smalltalkOOPIndex	0
-#define processorOOPIndex	1
-#define symbolTableOOPIndex	2
-#define nilOOPIndex		(BUILTIN_OBJECT_BASE + 0)
-#define trueOOPIndex		(BUILTIN_OBJECT_BASE + 1)
-#define falseOOPIndex		(BUILTIN_OBJECT_BASE + 2)
+#define SMALLTALK_OOP_INDEX	0
+#define PROCESSOR_OOP_INDEX	1
+#define SYM_TABLE_OOP_INDEX	2
+#define NIL_OOP_INDEX		(BUILTIN_OBJECT_BASE + 0)
+#define TRUE_OOP_INDEX		(BUILTIN_OBJECT_BASE + 1)
+#define FALSE_OOP_INDEX		(BUILTIN_OBJECT_BASE + 2)
 
 /* Given a number of bytes "x", return the number of 32 bit words
    needed to represent that object, rounded up to the nearest 32 bit
-   word boundary. */
+   word boundary.  */
 #define ROUNDED_WORDS(x) \
   (((x) + sizeof(long) - 1) / sizeof(long))
 
 /* Given a number of bytes "x", round it up to the next multiple of
-   sizeof (long). */
+   sizeof (long).  */
 #define ROUNDED_BYTES(x) \
   (((x) + sizeof(long) - 1) & ~(sizeof(long) - 1))
 
 struct gst_character
 {
   OBJ_HEADER;
-#if defined(WORDS_BIGENDIAN)
-  gst_uchar dummy[3];		/* filler */
-  gst_uchar charVal;
-#else
-  gst_uchar charVal;
-  gst_uchar dummy[3];		/* filler */
-#endif
+  OOP charVal;
 };
 
 struct gst_undefined_object
@@ -177,7 +170,7 @@ struct memory_space
      bits indicating whether the object is read-only, reachable and/or pooled.
      Some of the bits indicate the difference between the allocated length
      (stored in the object itself), and the real length, because variable
-     byte objects may not be an even multiple of sizeof(PTR). */
+     byte objects may not be an even multiple of sizeof(PTR).  */
   struct OOP *ot, *ot_base;
 
   /* The number of OOPs in the free list and in the full OOP
@@ -213,21 +206,21 @@ struct memory_space
 
   /* Objects that are at least this big (in bytes) are allocated outside
      the main heap, hoping to provide more locality of reference between
-     small objects. */
+     small objects.  */
   size_t big_object_threshold;
 
   /* If there is this much space used after a oldspace collection, we need to
      grow the object heap by _gst_space_grow_rate % next time we
      do a collection, so that the storage gets copied into the new, larger
-     area. */
+     area.  */
   int grow_threshold_percent;
 
   /* Grow the object heap by this percentage when the amount of space
-     used exceeds _gst_grow_threshold_percent. */
+     used exceeds _gst_grow_threshold_percent.  */
   int space_grow_rate;
 
   /* Some statistics are computed using exponential smoothing.  The smoothing
-     factor is stored here. */
+     factor is stored here.  */
   double factor;
 
   /* Here are the stats.  */
@@ -241,86 +234,105 @@ struct memory_space
          reclaimedPercentPerScavenge;
 };
 
-/* This is true to show a message whenever a GC happens. */
-extern mst_Boolean _gst_gc_message;
+/* This is true to show a message whenever a GC happens.  */
+extern mst_Boolean _gst_gc_message 
+  ATTRIBUTE_HIDDEN;
 
-/* This is true in the middle of a GC. */
-extern int _gst_gc_running;
+/* This is true in the middle of a GC.  */
+extern int _gst_gc_running 
+  ATTRIBUTE_HIDDEN;
 
 /* Finds and returns an instance of the class CLASS_OOP.  Returns "nil"
-   if there are no instances present. */
-extern OOP _gst_find_an_instance (OOP class_oop) ATTRIBUTE_PURE;
+   if there are no instances present.  */
+extern OOP _gst_find_an_instance (OOP class_oop)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
 
-/* Execute a two-way become operation between OOP1 and OOP2. */
+/* Execute a two-way become operation between OOP1 and OOP2.  */
 extern void _gst_swap_objects (OOP oop1,
-			       OOP oop2);
+			       OOP oop2) 
+  ATTRIBUTE_HIDDEN;
 
 /* Flip the two survivor spaces.  Starting from the root set, move eden
    objects to survivor space, tenuring objects when the top of the space
    is hit.  Then tell the incremental sweeper not to sweep old objects.  */
-extern void _gst_scavenge (void);
+extern void _gst_scavenge (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Mark the old objects.  Starting from the root set,
    recursively mark objects as reachable, and tell the incremental
    sweeper to sweep unreachable objects.  Decide whether the heap should
    be compacted or even grown, so that allocating NEXT_ALLOCATION bytes
    leaves it empty enough.  */
-extern void _gst_global_gc (int next_allocation);
+extern void _gst_global_gc (int next_allocation) 
+  ATTRIBUTE_HIDDEN;
 
 /* Mark, sweep & compact the old objects.  */
-extern void _gst_global_compact (void);
+extern void _gst_global_compact (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Mark, sweep & compact the old objects.  */
-extern void _gst_incremental_gc_step (void);
+extern void _gst_incremental_gc_step (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Finish the incremental sweep phase of the GC.  */
-extern void _gst_finish_incremental_gc (void);
+extern void _gst_finish_incremental_gc (void) 
+  ATTRIBUTE_HIDDEN;
 
-/* Compact the old objects.  Grow oldspace to NEWSIZE bytes. */
-extern void _gst_compact (size_t newSize);
+/* Compact the old objects.  Grow oldspace to NEWSIZE bytes.  */
+extern void _gst_compact (size_t newSize) 
+  ATTRIBUTE_HIDDEN;
 
 /* Move all the object in survivor space to old space.  */
-extern void _gst_tenure_all_survivors ();
+extern void _gst_tenure_all_survivors () 
+  ATTRIBUTE_HIDDEN;
 
 /* Initialize the memory allocator.  The memory space is allocated,
    and the various garbage collection flags are set to their initial
-   values. */
-extern void _gst_init_mem_default ();
+   values.  */
+extern void _gst_init_mem_default () 
+  ATTRIBUTE_HIDDEN;
 
 /* Initialize the memory allocator.  The memory space is allocated,
    and the various garbage collection flags are set to the given
-   values. */
+   values.  */
 extern void _gst_init_mem (size_t eden, size_t survivor, size_t old,
 	                   size_t big_threshold, int grow_threshold_percent,
-           	           int space_grow_rate);
+           	           int space_grow_rate) 
+  ATTRIBUTE_HIDDEN;
 
 /* Initialize an OOP table of SIZE bytes.  Initially, all the OOPs are
    free list so that's just how we initialize them.  We do
    as much initialization as we can, but we're called before classses
    are defined, so things that have definite classes must wait until
-   the classes are defined. */
-extern void _gst_init_oop_table (size_t size);
+   the classes are defined.  */
+extern void _gst_init_oop_table (size_t size) 
+  ATTRIBUTE_HIDDEN;
 
 /* Dump the entire contents of the OOP table.  Mainly for debugging
    purposes.  */
-extern void _gst_dump_oop_table ();
+extern void _gst_dump_oop_table () 
+  ATTRIBUTE_HIDDEN;
 
 /* The almost-depth-first copying collector.  If survivor space is
    full, tenuring of the oldest object is invoked (in a circular fashion).
 
    This function does not copy children of weak objects, for obvious
-   reasons. */
-extern void _gst_copy_an_oop (OOP oop);
+   reasons.  */
+extern void _gst_copy_an_oop (OOP oop) 
+  ATTRIBUTE_HIDDEN;
 
 /* Copy the objects pointed to by the list of pointers to OOPs at CUROOP
    (included) and finishing at ATENDOOP (excluded).  */
-extern void _gst_copy_oop_range (register OOP * curOOP,
-			         OOP * atEndOOP);
+extern void _gst_copy_oop_range (OOP * curOOP,
+			         OOP * atEndOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Grey the pointers pointed to by the list of pointers to OOPs at FROM
    (included) and for SIZE bytes.  */
-extern void _gst_grey_oop_range (register PTR from,
-			         size_t size);
+extern void _gst_grey_oop_range (PTR from,
+			         size_t size) 
+  ATTRIBUTE_HIDDEN;
 
 /* The transitive marker.  This function works in two ways: a) when
    OOP is NULL, it walks the list of pointers to OOPs at CUROOP
@@ -331,20 +343,24 @@ extern void _gst_grey_oop_range (register PTR from,
    jobs to allow a fast, tail-recursive implementation of
    single-object marking. 
 
-   This function does not mark weak objects, for obvious reasons. */
-extern void _gst_mark_an_oop_internal (register OOP oop,
-				       register OOP * curOOP,
-				       OOP * atEndOOP);
+   This function does not mark weak objects, for obvious reasons.  */
+extern void _gst_mark_an_oop_internal (OOP oop,
+				       OOP * curOOP,
+				       OOP * atEndOOP) 
+  ATTRIBUTE_HIDDEN;
 
 /* Fully initialize the builtin objects, possible after the respective
-   classes have been created. */
-extern void _gst_init_builtin_objects_classes (void);
+   classes have been created.  */
+extern void _gst_init_builtin_objects_classes (void) 
+  ATTRIBUTE_HIDDEN;
 
-/* Create the registry of incubated objects. */
-extern void _gst_inc_init_registry (void);
+/* Create the registry of incubated objects.  */
+extern void _gst_inc_init_registry (void) 
+  ATTRIBUTE_HIDDEN;
 
-/* Grow the registry of incubated objects when it is full. */
-extern void _gst_inc_grow_registry (void);
+/* Grow the registry of incubated objects when it is full.  */
+extern void _gst_inc_grow_registry (void) 
+  ATTRIBUTE_HIDDEN;
 
 /* Allocate and return space for an object of SIZE bytes.  This
    basically means moving the allocation pointer for the current space
@@ -353,51 +369,63 @@ extern void _gst_inc_grow_registry (void);
    merely allocated; it is not initialized. 
 
    The pointer to the object data is returned, the OOP is
-   stored in P_OOP. */
+   stored in P_OOP.  */
 extern mst_Object _gst_alloc_obj (size_t size,
-				  OOP *p_oop);
+				  OOP *p_oop) 
+  ATTRIBUTE_HIDDEN;
 
 /* The same, but for an oldspace object */
 extern mst_Object _gst_alloc_old_obj (size_t size,
-				      OOP *p_oop);
+				      OOP *p_oop) 
+  ATTRIBUTE_HIDDEN;
 
 /* Allocate and return space for an object of SIZE words, without
    creating an OOP.  This is a special operation that is only needed
-   at bootstrap time, so it does not care about garbage collection. */
-extern mst_Object _gst_alloc_words (size_t size);
+   at bootstrap time, so it does not care about garbage collection.  */
+extern mst_Object _gst_alloc_words (size_t size) 
+  ATTRIBUTE_HIDDEN;
 
 /* Grows the allocated memory to SPACESIZE bytes, if it's not there
    already.  
    the memory could not be allocated.  Should be called after the
    sweep has occurred so that things are contiguous.  Ensures that the
-   OOP table pointers are fixed up to point to the new objects. */
-extern void _gst_grow_memory_to (size_t size);
+   OOP table pointers are fixed up to point to the new objects.  */
+extern void _gst_grow_memory_to (size_t size) 
+  ATTRIBUTE_HIDDEN;
 
 /* Grow the OOP table to NEWSIZE pointers and initialize the newly
-   created pointers. */
-extern mst_Boolean _gst_realloc_oop_table (size_t newSize);
+   created pointers.  */
+extern mst_Boolean _gst_realloc_oop_table (size_t newSize) 
+  ATTRIBUTE_HIDDEN;
 
-/* Move OOP to oldspace. */
-extern void _gst_tenure_oop (OOP oop);
+/* Move OOP to oldspace.  */
+extern void _gst_tenure_oop (OOP oop) 
+  ATTRIBUTE_HIDDEN;
 
-/* Move OOP to fixedspace. */
-extern void _gst_make_oop_fixed (OOP oop);
+/* Move OOP to fixedspace.  */
+extern void _gst_make_oop_fixed (OOP oop) 
+  ATTRIBUTE_HIDDEN;
 
 /* Make OOP a weak object.  */
-extern void _gst_make_oop_weak (OOP oop);
+extern void _gst_make_oop_weak (OOP oop) 
+  ATTRIBUTE_HIDDEN;
 
 /* Make OOP a non-weak object.  */
-extern void _gst_make_oop_non_weak (OOP oop);
+extern void _gst_make_oop_non_weak (OOP oop) 
+  ATTRIBUTE_HIDDEN;
 
 /* Clear the OOP data related to OOP */
-extern void _gst_sweep_oop (OOP oop);
+extern void _gst_sweep_oop (OOP oop) 
+  ATTRIBUTE_HIDDEN;
 
 /* Set the fields of the given ObjectMemory object */
-extern void _gst_update_object_memory_oop (OOP oop);
+extern void _gst_update_object_memory_oop (OOP oop) 
+  ATTRIBUTE_HIDDEN;
 
 /* This variable represents information about the memory space.  _gst_mem
    holds the required information: basically the pointer to the base and
    top of the space, and the pointers into it for allocation and copying.  */
-extern struct memory_space _gst_mem;
+extern struct memory_space _gst_mem 
+  ATTRIBUTE_HIDDEN;
 
 #endif /* GST_OOP_H */

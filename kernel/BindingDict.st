@@ -62,7 +62,7 @@ copyEmpty: newSize
         realSize := 1 bitShift: realSize highBit
     ].
 
-    ^(self class basicNew: realSize)
+    ^(self class primNew: realSize)
 	initialize: realSize;
 	environment: self environment;
 	yourself
@@ -170,49 +170,30 @@ printOn: aStream in: aNamespace
 
 !BindingDictionary methodsFor: 'forward declarations'!
 
-add: aVariableBinding
-    "Store value as associated to the given key. If any, recycle Associations
-     temporarily stored by the compiler inside the `Undeclared' dictionary."
-    | assoc |
-    assoc := aVariableBinding.
-
-    assoc environment == Undeclared ifTrue: [
-        assoc environment: self.
-	Undeclared remove: assoc.
-    ].
-
-    "Need static typing to avoid crashes..."
-    ((assoc isKindOf: VariableBinding) and: [
-	assoc environment == self]) ifFalse: [
-	assoc := VariableBinding
-	    key: assoc key
-	    value: assoc value
-	    environment: self.
-    ].
-
-    ^super add: assoc
-!
-
 at: key put: value
     "Store value as associated to the given key. If any, recycle Associations
      temporarily stored by the compiler inside the `Undeclared' dictionary."
-    | assoc |
-
-    assoc := (Undeclared includesKey: key)
+    | index assoc |
+    index := self findIndex: key.
+    assoc := self primAt: index.
+    assoc isNil
 	ifTrue: [
-	    (Undeclared associationAt: key)
-	        value: value;
-	        yourself
-        ]
-	ifFalse: [
-	    VariableBinding
-	        key: key
-	        value: value
-	        environment: self
+	    self incrementTally ifTrue: [
+	        index := self findIndex: key ].
+
+	    assoc := Undeclared
+		associationAt: key
+		ifAbsent: [
+		    VariableBinding
+			key: key
+			value: value
+			environment: self ].
+
+	    assoc := self primAt: index put: assoc.
 	].
 
-   self add: assoc.
-   ^value
+    assoc value: value.
+    ^value
 ! !
 
 
@@ -232,17 +213,52 @@ findIndex: anObject
 
     "Sorry for the lack of readability, but I want speed... :-)"
     index := (anObject identityHash scramble
-                bitAnd: (size := self primSize) - 1) + 1.
+		bitAnd: (size := self primSize) - 1) + 1.
 
     [
-        ((element := self primAt: index) isNil
-            or: [ element key == anObject ])
-                ifTrue: [ ^index ].
+	((element := self primAt: index) isNil
+	    or: [ element key == anObject ])
+		ifTrue: [ ^index ].
 
-        index == size
-            ifTrue: [ index := 1 ]
-            ifFalse: [ index := index + 1 ]
+	index == size
+	    ifTrue: [ index := 1 ]
+	    ifFalse: [ index := index + 1 ]
     ] repeat
+!
+
+primAt: index put: anObject
+    "Store anObject in the dictionary. If any, recycle Associations
+     temporarily stored by the compiler inside the `Undeclared' dictionary."
+    | assoc |
+    assoc := anObject.
+    assoc isNil ifFalse: [
+	assoc environment == Undeclared ifTrue: [
+	    Undeclared remove: assoc ifAbsent: [ ].
+            assoc environment: self.
+	].
+
+	"Need static typing to avoid crashes..."
+	((assoc isKindOf: VariableBinding) and: [
+	    assoc environment == self]) ifFalse: [
+	    assoc := VariableBinding
+	        key: assoc key
+	        value: assoc value
+	        environment: self.
+	].
+
+	assoc makeUntrusted: environment isUntrusted.
+    ].
+
+    ^super primAt: index put: assoc
+!
+
+addWhileGrowing: anAssociation
+    | save |
+    save := anAssociation environment.
+    anAssociation environment: self.
+    super addWhileGrowing: anAssociation.
+    anAssociation environment: save.
+    ^anAssociation
 !
 
 keysClass

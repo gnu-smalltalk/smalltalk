@@ -191,6 +191,21 @@ copyWith: anElement
 
 !ArrayedCollection methodsFor: 'enumerating the elements of a collection'!
 
+readStream
+    "Answer a ReadStream streaming on the receiver"
+    ^ReadStream on: self
+!
+
+readWriteStream
+    "Answer a ReadWriteStream which streams on the receiver"
+    ^ReadWriteStream on: self
+!
+
+writeStream
+    "Answer a WriteStream streaming on the receiver"
+    ^WriteStream on: self
+!
+
 select: aBlock
     "Answer a new instance of an ArrayedCollection containing all the elements
      in the receiver which, when passed to aBlock, answer true"
@@ -344,7 +359,8 @@ copyReplaceFrom: start to: stop with: replacementCollection
     start > 1 ifTrue: [
 	result replaceFrom: 1 to: start - 1 with: self startingAt: 1 ].
 
-    result replaceFrom: start to: start + repSize - 1 with: replacementCollection.
+    repSize > 0 ifTrue: [
+        result replaceFrom: start to: start + repSize - 1 with: replacementCollection ].
 
     stop < self size ifTrue: [
 	result replaceFrom: start + repSize to: newSize with: self startingAt: stop + 1 ].

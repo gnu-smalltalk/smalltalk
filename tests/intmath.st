@@ -119,23 +119,23 @@
 
     'Shift -1 left then right and test for -1' printNl.
     bits := (1 to: 100) collect: [ :i | -1 bitShift: i ].
-    bits doWithIndex: [:n :i | (n bitShift: i negated) = -1 ifFalse: [^false]].
+    bits keysAndValuesDo: [:i :n | (n bitShift: i negated) = -1 ifFalse: [^i]].
 
     'Shift 1 left then right and test for 1' printNl.
     bits := (1 to: 100) collect: [ :i | 1 bitShift: i ].
-    bits doWithIndex: [:n :i | (n bitShift: i negated) = 1 ifFalse: [^false]].
+    bits keysAndValuesDo: [:i :n | (n bitShift: i negated) = 1 ifFalse: [^i]].
 
     'And a single bit with -1 and test for same value' printNl.
-    bits doWithIndex: [:n :i | (n bitAnd: -1) = n ifFalse: [^false]].
+    bits keysAndValuesDo: [:i :n | (n bitAnd: -1) = n ifFalse: [^i]].
 
     'Verify that (n bitAnd: n negated) = n' printNl.
-    bits doWithIndex: [:n :i | (n bitAnd: n negated) = n ifFalse: [^false]].
+    bits keysAndValuesDo: [:i :n | (n bitAnd: n negated) = n ifFalse: [^i]].
 
     'Verify that (n + n complemented) = -1' printNl.
-    bits doWithIndex: [:n :i | (n + n bitInvert) = -1 ifFalse: [^false]].
+    bits keysAndValuesDo: [:i :n | (n + n bitInvert) = -1 ifFalse: [^i]].
 
     'Verify that n negated = (n complemented +1)' printNl.
-    bits doWithIndex: [:n :i | n bitInvert + 1 = n negated ifFalse: [^false]].
+    bits keysAndValuesDo: [:i :n | n bitInvert + 1 = n negated ifFalse: [^i]].
 
     'LargeInteger bit logic tests passed' printNl.
     ^true

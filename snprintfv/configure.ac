@@ -28,7 +28,7 @@ dnl Code:
 AC_INIT(snprintfv, 1.1, bonzini@gnu.org)
 AC_CONFIG_SRCDIR(snprintfv/printf.h)
 AC_CONFIG_HEADERS(config.h)
-AC_CONFIG_AUX_DIRS(../config)
+AC_CONFIG_AUX_DIR(../config)
 
 AC_ARG_ENABLE(subdir,
 [  --enable-subdir     used in a package, libltdl+texinfo+testsuite stripped], ,
@@ -358,9 +358,11 @@ AC_SUBST(INCLUDES)
 AC_SUBST(ac_aux_dir)
 
 AC_CONFIG_FILES(Makefile snprintfv/Makefile)
-if test "x${enable_subdir-no}" = xno; then
-  AC_CONFIG_FILES(doc/Makefile tests/Makefile)
-fi
+dnl BEGIN GNU SMALLTALK LOCAL
+dnl if test "x${enable_subdir-no}" = xno; then
+dnl   AC_CONFIG_FILES(doc/Makefile tests/Makefile)
+dnl fi
+dnl END GNU SMALLTALK LOCAL
 
 AC_OUTPUT
 

@@ -285,7 +285,7 @@ findIndex: anObject
     self beConsistent.
     1 to: self size do: [ :i |
         element := self primAt: i.
-        (element isNil or: [ self is: element sameAs: anObject ])
+        (element isNil or: [ element = anObject ])
             ifTrue: [ ^i ]
     ].
     ^self size + 1! !

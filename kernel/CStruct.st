@@ -96,6 +96,7 @@ initialize
 	at: #uint put: #{CUIntType};
 	at: #float put: #{CFloatType};
 	at: #double put: #{CDoubleType};
+	at: #longDouble put: #{CLongDoubleType};
 	at: #string put: #{CStringType};
 	at: #smalltalk put: #{CSmalltalkType};
 	yourself

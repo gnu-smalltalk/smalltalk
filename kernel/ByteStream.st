@@ -67,6 +67,38 @@ nextSignedByte
     ^self nextBytes: 1 signed: true
 !
 
+nextDouble
+    "Return the next 64-bit float in the byte array"
+    ^(FloatD new: 8)
+	at: 1 put: self nextByte;
+	at: 2 put: self nextByte;
+	at: 3 put: self nextByte;
+	at: 4 put: self nextByte;
+	at: 5 put: self nextByte;
+	at: 6 put: self nextByte;
+	at: 7 put: self nextByte;
+	at: 8 put: self nextByte
+!
+
+nextFloat
+    "Return the next 32-bit float in the byte array"
+    ^(FloatE new: 4)
+	at: 1 put: self nextByte;
+	at: 2 put: self nextByte;
+	at: 3 put: self nextByte;
+	at: 4 put: self nextByte
+!
+
+nextUint64
+    "Return the next 8 bytes in the byte array, interpreted as a 64 bit unsigned int"
+    ^self nextBytes: 8 signed: false
+!
+
+nextLongLong
+    "Return the next 8 bytes in the byte array, interpreted as a 64 bit signed int"
+    ^self nextBytes: 8 signed: true
+!
+
 nextUlong
     "Return the next 4 bytes in the byte array, interpreted as a 32 bit unsigned int"
     ^self nextBytes: 4 signed: false
@@ -92,6 +124,30 @@ nextPut: aChar
     aChar isCharacter
 	ifTrue: [ super nextPut: aChar value ]
 	ifFalse: [ SystemExceptions.WrongClass signalOn: aChar mustBe: Character ]
+!
+
+nextPutDouble: aDouble
+    "Store aDouble as a 64-bit float in the byte array"
+    | d |
+    d := aDouble asFloatD.
+    self nextPutByte: (d at: 1).
+    self nextPutByte: (d at: 2).
+    self nextPutByte: (d at: 3).
+    self nextPutByte: (d at: 4).
+    self nextPutByte: (d at: 5).
+    self nextPutByte: (d at: 6).
+    self nextPutByte: (d at: 7).
+    self nextPutByte: (d at: 8)
+!
+
+nextPutFloat: aFloat
+    "Return the next 32-bit float in the byte array"
+    | f |
+    f := aFloat asFloatE.
+    self nextPutByte: (f at: 1).
+    self nextPutByte: (f at: 2).
+    self nextPutByte: (f at: 3).
+    self nextPutByte: (f at: 4).
 !
 
 nextPutByte: anInteger
@@ -131,6 +187,11 @@ nextPutAll: aCollection
 nextPutByteArray: aByteArray
     "Store aByteArray on the byte array"
     ^self nextPutAll: aByteArray
+!
+
+nextPutInt64: anInteger
+    "Store anInteger (range: -2^63..2^64-1) on the byte array as 4 bytes"
+    self nextPutBytes: 8 of: anInteger
 !
 
 nextPutLong: anInteger

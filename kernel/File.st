@@ -170,6 +170,11 @@ checkError: errno
     ^true
 !
 
+touch: fileName
+    "Update the timestamp of the file with the given path name."
+    (File name: fileName) touch
+!
+
 remove: fileName
     "Remove the file with the given path name"
     (VFS.VFSHandler for: fileName) remove
@@ -364,6 +369,11 @@ contents
     contents := stream contents.
     stream close.
     ^contents
+!
+
+touch
+    "Update the timestamp of the file with the given path name."
+    (self openDescriptor: FileStream append) close
 !
 
 open: mode

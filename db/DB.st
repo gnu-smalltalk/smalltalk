@@ -30,9 +30,6 @@
 |
  ======================================================================"
 
-Smalltalk addSubspace: #Jdm!
-Namespace current: Jdm!
-
 Object subclass: #JdmErrorTable
         instanceVariableNames: 'errors '
         classVariableNames: 'ErrorTable '
@@ -515,10 +512,14 @@ JdmStatement class
 !JdmStatement class methodsFor: 'constants'!
 
 sqlQueries
-	"To be added: EXPLAIN"
-	^#(#('SELECT'    #(#read #{JdmResultSet}))
+	^#(#('EXPLAIN'   #(#read #{JdmResultSet}))
+	   #('SELECT'    #(#read #{JdmResultSet}))
 	   #('SHOW'	 #(#read #{JdmResultSet}))
 	   #('DESCRIBE'  #(#read #{JdmResultSet}))
+           #('BEGIN'     #(#update))
+           #('START'     #(#update))
+           #('COMMIT'    #(#update))
+           #('ROLLBACK'  #(#update))
            #('INSERT'    #(#update))
            #('UPDATE'    #(#update))
            #('DELETE'    #(#update))
@@ -567,5 +568,3 @@ on: aConnection
 	^self new connection: aConnection! !
 
 JdmStatement initialize!
-
-Namespace current: Smalltalk!

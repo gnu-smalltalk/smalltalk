@@ -728,7 +728,7 @@ extractClientData: clientVersion
     rs := (stream upToAll: self endOfRequest) readStream.
     [rs atEnd] whileFalse: [
 	self
-	    at: (rs upTo: $:) asUppercase asSymbol
+	    at: (rs upTo: $:) trimSeparators asUppercase asSymbol
 	    put: (rs upTo: Character cr) trimSeparators
     ]!
 

@@ -66,7 +66,32 @@ printOn: aStream
     ]
 ! !
 
+
+!MethodContext methodsFor: 'debugging'!
 
+isInternalExceptionHandlingContext
+    "Answer whether the receiver is a context that should be hidden to the user
+     when presenting a backtrace.  Such contexts are identified through the
+     #exceptionHandlingInternal: attribute: if there is such a context in
+     the backtrace, all those above it are marked as internal.
+
+     That is, the attribute being set to true means that the context and all those
+     above it are to be hidden, while the attribute being set to false means
+     that the contexts above it must be hidden, but not the context itself."
+
+    | attr |
+    attr := self method
+        attributeAt: #exceptionHandlingInternal:
+        ifAbsent: [ nil ].
+
+    attr isNil ifFalse: [ ^attr arguments at: 1 ].
+
+    self
+        scanBacktraceForAttribute: #exceptionHandlingInternal:
+        do: [ :ctx :attr | ^true ].
+
+    ^false
+! !
 
 !MethodContext methodsFor: 'accessing'!
 
@@ -88,10 +113,11 @@ isUnwind
 !
 
 isEnvironment
-    "To create a valid execution environment for the interpreter even before
-     it starts, GST creates a fake context whose selector is nil and which
-     can be used as a marker for the current execution environment.  Answer
-     whether the receiver is that kind of context."
+    "To create a valid execution environment for the interpreter even
+     before it starts, GST creates a fake context which invokes a special
+     ``termination'' method.  Such a context can be used as a marker for
+     the current execution environment.  Answer whether the receiver is
+     that kind of context."
     ^(flags bitAnd: 4) == 4
 !
 

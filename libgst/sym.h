@@ -63,46 +63,113 @@ typedef struct symbol_entry
 symbol_entry;
 
 /* True if undeclared globals can be considered forward references.  */
-extern long _gst_use_undeclared;
+extern int _gst_use_undeclared
+  ATTRIBUTE_HIDDEN;
 
-extern OOP _gst_and_colon_symbol, _gst_at_colon_put_colon_symbol,
-  _gst_at_colon_symbol, _gst_at_sign_symbol, _gst_at_end_symbol,
-  _gst_bit_and_colon_symbol, _gst_bit_or_colon_symbol,
-  _gst_bit_shift_colon_symbol, _gst_block_copy_colon_symbol,
-  _gst_class_symbol, _gst_is_nil_symbol, _gst_not_nil_symbol,
-  _gst_divide_symbol, _gst_do_colon_symbol, _gst_equal_symbol,
-  _gst_greater_equal_symbol, _gst_greater_than_symbol,
-  _gst_if_false_colon_if_true_colon_symbol, _gst_if_false_colon_symbol,
-  _gst_if_true_colon_if_false_colon_symbol, _gst_if_true_colon_symbol,
-  _gst_integer_divide_symbol, _gst_less_equal_symbol,
-  _gst_less_than_symbol, _gst_minus_symbol, _gst_new_colon_symbol,
-  _gst_new_symbol, _gst_next_put_colon_symbol, _gst_next_symbol,
-  _gst_not_equal_symbol, _gst_not_same_object_symbol,
-  _gst_or_colon_symbol, _gst_plus_symbol, _gst_remainder_symbol,
-  _gst_same_object_symbol, _gst_size_symbol, _gst_this_context_symbol,
-  _gst_times_symbol,
-  _gst_to_colon_do_colon_symbol, _gst_times_repeat_colon_symbol,
-  _gst_to_colon_by_colon_do_colon_symbol,
-  _gst_value_colon_symbol, _gst_value_colon_value_colon_symbol,
-  _gst_value_colon_value_colon_value_colon_symbol,
-  _gst_value_with_arguments_colon_symbol, _gst_while_false_symbol,
-  _gst_value_symbol, _gst_yourself_symbol, _gst_while_true_symbol,
-  _gst_while_false_colon_symbol, _gst_while_true_colon_symbol,
-  _gst_bad_return_error_symbol, _gst_super_symbol, _gst_nil_symbol,
-  _gst_true_symbol, _gst_false_symbol, _gst_self_symbol,
-  _gst_repeat_symbol, _gst_does_not_understand_colon_symbol,
-  _gst_must_be_boolean_symbol, _gst_terminate_symbol, _gst_char_symbol,
-  _gst_as_scaled_decimal_scale_symbol, _gst_unknown_symbol,
-  _gst_string_symbol, _gst_string_out_symbol, _gst_symbol_symbol,
-  _gst_int_symbol, _gst_uint_symbol, _gst_long_symbol,
-  _gst_ulong_symbol, _gst_float_symbol, _gst_double_symbol,
-  _gst_boolean_symbol, _gst_void_symbol, _gst_variadic_symbol,
-  _gst_c_object_symbol, _gst_c_object_ptr_symbol, _gst_smalltalk_symbol,
-  _gst_byte_array_symbol, _gst_byte_array_out_symbol,
-  _gst_undeclared_symbol, _gst_self_smalltalk_symbol,
-  _gst_vm_primitives_symbol, _gst_variadic_smalltalk_symbol,
-  _gst_start_execution_colon_symbol, _gst_symbol_table,
-  _gst_current_namespace;
+extern OOP _gst_and_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_as_scaled_decimal_scale_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_at_put_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_at_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_at_end_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_at_sign_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_bad_return_error_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_bit_and_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_bit_or_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_bit_shift_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_bit_xor_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_boolean_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_byte_array_out_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_byte_array_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_c_object_ptr_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_c_object_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_char_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_class_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_divide_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_do_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_does_not_understand_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_double_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_equal_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_false_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_float_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_greater_equal_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_greater_than_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_if_false_if_true_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_if_false_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_if_true_if_false_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_if_true_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_int_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_integer_divide_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_is_nil_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_java_as_int_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_java_as_long_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_less_equal_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_less_than_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_long_double_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_long_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_minus_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_must_be_boolean_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_new_colon_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_new_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_next_put_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_next_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_nil_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_not_equal_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_not_nil_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_not_same_object_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_or_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_perform_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_perform_with_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_perform_with_with_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_perform_with_with_with_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_perform_with_arguments_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_permission_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_plus_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_primitive_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_remainder_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_repeat_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_same_object_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_self_smalltalk_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_self_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_size_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_smalltalk_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_start_execution_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_string_out_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_string_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_super_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_symbol_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_terminate_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_this_context_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_times_repeat_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_times_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_to_by_do_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_to_do_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_true_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_uint_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_ulong_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_undeclared_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_unknown_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_value_colon_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_value_value_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_value_value_value_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_value_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_value_with_arguments_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_value_with_rec_with_args_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_variadic_smalltalk_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_variadic_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_vm_primitives_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_void_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_while_false_colon_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_while_false_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_while_true_colon_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_while_true_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_yourself_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_symbol_table ATTRIBUTE_HIDDEN;
+extern OOP _gst_current_namespace ATTRIBUTE_HIDDEN;
+
+/* This returns the name of the given scope (instance variable, temporary, ...). */
+extern const char *_gst_get_scope_kind (scope_type scope)
+  ATTRIBUTE_CONST
+  ATTRIBUTE_HIDDEN;
 
 /* This walks the list of scopes and of symbols defined for each scope,
    looking for a variable represented by the tree LIST.  Then it looks in
@@ -116,70 +183,92 @@ extern OOP _gst_and_colon_symbol, _gst_at_colon_put_colon_symbol,
 
    True is returned, and SE is filled with the information about the
    variable if it is found or it is deemed part of Undeclared.  Else,
-   SE is untouched and FALSE is returned. */
+   SE is untouched and FALSE is returned.  */
 extern mst_Boolean _gst_find_variable (symbol_entry * se,
-				       tree_node list) ATTRIBUTE_PURE;
+				       tree_node list)
+  ATTRIBUTE_PURE
+  ATTRIBUTE_HIDDEN;
 
 /* This converts a C string to a symbol and stores it in the symbol
-   table. */
-extern OOP _gst_intern_string (const char *str) ATTRIBUTE_PURE;
+   table.  */
+extern OOP _gst_intern_string (const char *str)
+  ATTRIBUTE_PURE
+  ATTRIBUTE_HIDDEN;
 
 /* This makes an Array with an element for each instance variable
    declared in VARIABLESTRING, plus those inherited from
-   SUPERCLASSOOP. */
+   SUPERCLASSOOP.  */
 extern OOP _gst_make_instance_variable_array (OOP superclassOOP,
-					      gst_uchar * variableString);
+					      const char * variableString)
+  ATTRIBUTE_HIDDEN;
 
 /* This makes a BindingDictionary whose keys are the class variables
    declared in VARIABLENAMES.  The environment of the dictionary is
    classOOP.  */
-extern OOP _gst_make_class_variable_dictionary (gst_uchar * variableNames,
-						OOP classOOP);
+extern OOP _gst_make_class_variable_dictionary (const char * variableNames,
+						OOP classOOP)
+  ATTRIBUTE_HIDDEN;
 
 /* This makes an Array whose elements are the pool dictionaries
-   declared in POOLNAMES. */
-extern OOP _gst_make_pool_array (gst_uchar * poolNames);
+   declared in POOLNAMES.  */
+extern OOP _gst_make_pool_array (const char * poolNames)
+  ATTRIBUTE_HIDDEN;
 
 /* This resolves to an Association the variable binding constant expressed
-   by the LIST parse tree node. */
-extern OOP _gst_find_variable_binding (tree_node list) ATTRIBUTE_PURE;
+   by the LIST parse tree node.  */
+extern OOP _gst_find_variable_binding (tree_node list)
+  ATTRIBUTE_PURE
+  ATTRIBUTE_HIDDEN;
 
 /* This converts the Smalltalk String STRINGOOP into a Symbol and
-   return the converted Symbol. */
-extern OOP _gst_intern_string_oop (OOP stringOOP) ATTRIBUTE_PURE;
+   return the converted Symbol.  */
+extern OOP _gst_intern_string_oop (OOP stringOOP)
+  ATTRIBUTE_PURE
+  ATTRIBUTE_HIDDEN;
 
 /* Given a symbol, this routine returns a C string that corresponds to the
    name of the symbol.  The returned value is a pointer to a static area,
    so if it's to be used for anything other than immediate output, the
-   caller needs to make a copy of the retured string. */
-extern char *_gst_symbol_as_string (OOP symbolOOP);
+   caller needs to make a copy of the retured string.  */
+extern char *_gst_symbol_as_string (OOP symbolOOP)
+  ATTRIBUTE_HIDDEN;
 
-/* This computes an hash of LEN bytes, starting at STR. */
-extern unsigned long _gst_hash_string (const char *str,
-				       int len) ATTRIBUTE_PURE;
+/* This computes an hash of LEN bytes, starting at STR.  */
+extern uintptr_t _gst_hash_string (const char *str,
+				   int len)
+  ATTRIBUTE_PURE
+  ATTRIBUTE_HIDDEN;
 
-/* This computes the length of a String object OOP. */
-extern int _gst_string_oop_len (OOP oop) ATTRIBUTE_PURE;
+/* This computes the length of a String object OOP.  */
+extern int _gst_string_oop_len (OOP oop)
+  ATTRIBUTE_PURE
+  ATTRIBUTE_HIDDEN;
 
 /* This returns the number of arguments declared in the current
-   scope. */
-extern int _gst_get_arg_count (void) ATTRIBUTE_PURE;
+   scope.  */
+extern int _gst_get_arg_count (void)
+  ATTRIBUTE_PURE
+  ATTRIBUTE_HIDDEN;
 
 /* This returns the number of temporaries declared in the current
-   scope. */
-extern int _gst_get_temp_count (void) ATTRIBUTE_PURE;
+   scope.  */
+extern int _gst_get_temp_count (void)
+  ATTRIBUTE_PURE
+  ATTRIBUTE_HIDDEN;
 
 /* This adds the arguments corresponding to the message declaration in
    ARGS to the list of arguments in the current scope.  Note that this
    handles unary, binary and keyword expressions.  Arguments must be
    declared before temporaries, so this resets the number of
    temporaries in the current scope to 0 and absorbs any temporaries
-   into the arguments.  The number of arguments is returned. */
-extern int _gst_declare_arguments (tree_node args);
+   into the arguments.  The number of arguments is returned.  */
+extern int _gst_declare_arguments (tree_node args)
+  ATTRIBUTE_HIDDEN;
 
 /* This adds the declarations in TEMPS to the list of arguments
-   in the current scope. */
-extern int _gst_declare_temporaries (tree_node temps);
+   in the current scope.  */
+extern int _gst_declare_temporaries (tree_node temps)
+  ATTRIBUTE_HIDDEN;
 
 /* This adds the arguments corresponding to the message declaration in
    ARGS to the list of arguments in the current scope.  Note that this
@@ -187,48 +276,85 @@ extern int _gst_declare_temporaries (tree_node temps);
    blocks.  Arguments must be declared before temporaries, so this
    resets the number of temporaries in the current scope to 0 and
    absorbs any temporaries into the arguments.  The number of
-   arguments is returned. */
-extern int _gst_declare_block_arguments (tree_node args);
+   arguments is returned.  */
+extern int _gst_declare_block_arguments (tree_node args)
+  ATTRIBUTE_HIDDEN;
 
 /* Declare the argument or temporary variable whose name is pointed to
    by NAME as either WRITEABLE or not.  A Symbol corresponding to NAME
    is created and links a new entry inside the symbol list for the
-   currently active scope.  Returns the index of the variable into the
-   stack frame. */
+   currently active scope.  Unless ALLOWDUP is true, search for a
+   variable with the same name in the currently active scope and return
+   -1 if one is found; otherwise, return the index of the variable into
+   the activation record.  */
 extern int _gst_declare_name (const char *name,
-			      mst_Boolean writeable);
+			      mst_Boolean writeable,
+			      mst_Boolean allowDup)
+  ATTRIBUTE_HIDDEN;
 
 /* Computes the number of selectors that a message named SYMBOLOOP
-   expects. */
-extern int _gst_selector_num_args (OOP symbolOOP) ATTRIBUTE_PURE;
+   expects.  */
+extern int _gst_selector_num_args (OOP symbolOOP)
+  ATTRIBUTE_PURE
+  ATTRIBUTE_HIDDEN;
 
 /* This removes from the current scope the knowledge of the last
-   declared temporary variable. */
-extern void _gst_undeclare_name (void);
+   declared temporary variable.  */
+extern void _gst_undeclare_name (void)
+  ATTRIBUTE_HIDDEN;
 
 /* This adds a new scope (corresponding to a level of block nesting)
-   to the linked list of scopes. */
-extern void _gst_push_new_scope (void);
+   to the linked list of scopes.  */
+extern void _gst_push_new_scope (void)
+  ATTRIBUTE_HIDDEN;
+
+/* Convert a lightweight class (instance of Behavior) or a Metaclass
+   into the corresponding Class object.  */
+extern OOP _gst_get_class_object (OOP classOOP)
+  ATTRIBUTE_HIDDEN;
 
 /* This removes the outermost scope (corresponding to a level of block
-   nesting) to the linked list of scopes. */
-extern void _gst_pop_old_scope (void);
+   nesting) to the linked list of scopes.  */
+extern void _gst_pop_old_scope (void)
+  ATTRIBUTE_HIDDEN;
 
-/* This frees the whole linked list of scopes. */
-extern void _gst_pop_all_scopes (void);
+/* This frees the whole linked list of scopes.  */
+extern void _gst_pop_all_scopes (void)
+  ATTRIBUTE_HIDDEN;
 
-/* For debugging purposes, this prints the declaration of ENT. */
-extern void _gst_print_symbol_entry (symbol_entry * ent);
+/* For debugging purposes, this prints the declaration of ENT.  */
+extern void _gst_print_symbol_entry (symbol_entry * ent)
+  ATTRIBUTE_HIDDEN;
 
-/* This routine is used for symbol table debugging only. */
-extern void _gst_print_symbols (void);
+/* This routine is used for symbol table debugging only.  */
+extern void _gst_print_symbols (void)
+  ATTRIBUTE_HIDDEN;
 
 /* This routine initializes the variables containing the Symbols
-   known to the VM. */
-extern void _gst_init_symbols (void);
+   known to the VM.  */
+extern void _gst_init_symbols (void)
+  ATTRIBUTE_HIDDEN;
+
+extern void _gst_check_symbol_chain (void)
+  ATTRIBUTE_HIDDEN;
 
 #ifdef HAVE_READLINE
-extern void _gst_add_all_symbol_completions (void);
+extern void _gst_add_all_symbol_completions (void)
+  ATTRIBUTE_HIDDEN;
 #endif
+
+struct builtin_selector {
+  int offset;
+  OOP symbol;
+  int numArgs;
+  int bytecode;
+};
+
+extern struct builtin_selector *_gst_builtin_selectors[256]
+  ATTRIBUTE_HIDDEN;
+
+extern struct builtin_selector *_gst_lookup_builtin_selector (const char *str,
+							      unsigned int len)
+  ATTRIBUTE_HIDDEN;
 
 #endif /* GST_SYM_H */

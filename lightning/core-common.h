@@ -70,18 +70,18 @@ static jit_state 			_jit;
  */
 typedef union jit_code {	
   char		 *ptr;
-  void		 (*vptr)();
-  char		 (*cptr)();
-  unsigned char	 (*ucptr)();
-  short		 (*sptr)();
-  unsigned short (*usptr)();
-  int		 (*iptr)();
-  unsigned int	 (*uiptr)();
-  long		 (*lptr)();
-  unsigned long	 (*ulptr)();
-  void *	 (*pptr)();
-  float		 (*fptr)();
-  double	 (*dptr)();
+  void		 (*vptr)(void);
+  char		 (*cptr)(void);
+  unsigned char	 (*ucptr)(void);
+  short		 (*sptr)(void);
+  unsigned short (*usptr)(void);
+  int		 (*iptr)(void);
+  unsigned int	 (*uiptr)(void);
+  long		 (*lptr)(void);
+  unsigned long	 (*ulptr)(void);
+  void *	 (*pptr)(void);
+  float		 (*fptr)(void);
+  double	 (*dptr)(void);
 } jit_code;
 
 #ifndef jit_fill_delay_after
@@ -198,18 +198,10 @@ typedef union jit_code {
 #define jit_notr_uc(d, rs)		jit_xori_c((d), (rs), 255)
 #define jit_notr_s(d, rs)		jit_xori_s((d), (rs), 65535)
 #define jit_notr_us(d, rs)		jit_xori_s((d), (rs), 65535)
-
-#if SIZEOF_LONG != 4
-#define jit_notr_i(d, rs)		jit_xori_i((d), (rs), 0xFFFFFFFF)
-#define jit_notr_ui(d, rs)		jit_xori_i((d), (rs), 0xFFFFFFFF)
-#define jit_notr_l(d, rs)		jit_xori_l((d), (rs), 0xFFFFFFFFFFFFFFFFL)
-#define jit_notr_ul(d, rs)		jit_xori_l((d), (rs), 0xFFFFFFFFFFFFFFFFL)
-#else
-#define jit_notr_i(d, rs)		jit_xori_i((d), (rs), 0xFFFFFFFFL)
-#define jit_notr_ui(d, rs)		jit_xori_i((d), (rs), 0xFFFFFFFFL)
-#define jit_notr_l(d, rs)		jit_xori_i((d), (rs), 0xFFFFFFFFL)
-#define jit_notr_ul(d, rs)		jit_xori_i((d), (rs), 0xFFFFFFFFL)
-#endif
+#define jit_notr_i(d, rs)		jit_xori_i((d), (rs), ~0)
+#define jit_notr_ui(d, rs)		jit_xori_i((d), (rs), ~0)
+#define jit_notr_l(d, rs)		jit_xori_l((d), (rs), ~0L)
+#define jit_notr_ul(d, rs)		jit_xori_l((d), (rs), ~0L)
 
 #ifndef jit_extr_c_ui
 #define jit_extr_c_ui(d, rs)		jit_andi_ui((d), (rs), 0xFF)

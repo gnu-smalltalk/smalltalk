@@ -1,0 +1,1311 @@
+"======================================================================
+|
+|   Smalltalk Tk-based GUI building blocks (text widget).
+|
+|
+ ======================================================================"
+
+
+"======================================================================
+|
+| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Written by Paolo Bonzini and Robert Collins.
+|
+| This file is part of the GNU Smalltalk class library.
+|
+| The GNU Smalltalk class library is free software; you can redistribute it
+| and/or modify it under the terms of the GNU Lesser General Public License
+| as published by the Free Software Foundation; either version 2.1, or (at
+| your option) any later version.
+| 
+| The GNU Smalltalk class library is distributed in the hope that it will be
+| useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
+| General Public License for more details.
+| 
+| You should have received a copy of the GNU Lesser General Public License
+| along with the GNU Smalltalk class library; see the file COPYING.LESSER.
+| If not, write to the Free Software Foundation, 59 Temple Place - Suite
+| 330, Boston, MA 02111-1307, USA.  
+|
+ ======================================================================"
+
+
+BViewport subclass:  #BText
+	instanceVariableNames: 'callback tagInfo images gtkbuffer'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Graphics-Windows'!
+
+BEventTarget subclass:  #BTextBindings
+	instanceVariableNames: 'list tagName '
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Graphics-Windows'!
+
+Object subclass:  #BTextAttributes
+	instanceVariableNames: 'bgColor fgColor font styles events '
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Graphics-Windows'!
+
+Object subclass:  #BTextTags
+	instanceVariableNames: 'client tags '
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Graphics-Windows'!
+
+"-------------------------- BText class -----------------------------"
+
+BText comment: 
+'
+I represent a text viewer with pretty good formatting options.'!
+
+!BText class methodsFor: 'accessing'!
+
+emacsLike
+    "Answer whether we are using Emacs or Motif key bindings."
+    'FIXME: emacsLike should die?' printNl.
+    ^false
+"    self tclEval: 'return $tk_strictMotif'.
+    ^self tclResult = '0'"
+!
+
+emacsLike: aBoolean
+    "Set whether we are using Emacs or Motif key bindings."
+    'FIXME: emacsLike should die?' printNl.
+    "self tclEval:
+	'set tk_strictMotif ', (aBoolean ifTrue: [ '0' ] ifFalse: [ '1' ])."
+! !
+
+!BText class methodsFor: 'instance creation'!
+
+newReadOnly: parent
+    "Answer a new read-only text widget (read-only is achieved simply
+     by setting its state to be disabled)"
+    | ctl |
+    ctl := self new: parent.
+    ctl tclEval: ctl connected, ' configure -state disabled'.
+    ^ctl
+! !
+
+!BText methodsFor: 'accessing'!
+
+backgroundColor
+    "Answer the value of the backgroundColor option for the widget.
+
+     Specifies the normal background color to use when displaying the widget."
+    self properties at: #background ifPresent: [ :value | ^value ].
+    self tclEval: '%1 cget -background'
+	with: self connected
+	with: self container.
+    ^self properties at: #background put: (self tclResult )!
+
+backgroundColor: value
+    "Set the value of the backgroundColor option for the widget.
+
+     Specifies the normal background color to use when displaying the widget."
+    self tclEval: '%1 configure -background %3'
+	with: self connected
+	with: self container
+	with: (value  asTkString).
+    self properties at: #background put: value!
+
+callback
+    "Answer a DirectedMessage that is sent when the receiver is modified,
+     or nil if none has been set up."
+    ^callback
+!
+
+callback: aReceiver message: aSymbol
+    "Set up so that aReceiver is sent the aSymbol message (the name of
+     a zero- or one-argument selector) when the receiver is modified.
+     If the method accepts an argument, the receiver is passed."
+    | arguments selector numArgs |
+    selector := aSymbol asSymbol.
+    numArgs := selector numArgs.
+    arguments := #().
+    numArgs = 1 ifTrue: [ arguments := Array with: self ].
+
+    callback := DirectedMessage
+	selector: selector
+	arguments: arguments
+	receiver: aReceiver
+!
+
+contents
+    "Return the contents of the widget"
+    | bounds |
+    bounds := self gtkbuffer getBounds.
+    ^(bounds at: 1) getVisibleText: (bounds at:2)
+!
+
+contents: aString
+    "Set the contents of the widget"
+    self gtkbuffer setText: aString
+!
+
+font
+    "Answer the value of the font option for the widget.
+
+     Specifies the font to use when drawing text inside the widget. The font
+     can be given as either an X font name or a Blox font description string.
+
+     X font names are given as many fields, each led by a minus, and each of
+     which can be replaced by an * to indicate a default value is ok: 
+     foundry, family, weight, slant, setwidth, addstyle, pixel size, point size
+     (the same as pixel size for historical reasons), horizontal resolution,
+     vertical resolution, spacing, width, charset and character encoding.
+
+     Blox font description strings have three fields, which must be separated by
+     a space and of which only the first is mandatory: the font family, the font
+     size in points (or in pixels if a negative value is supplied), and a number
+     of styles separated by a space (valid styles are normal, bold, italic,
+     underline and overstrike). Examples of valid fonts are ``Helvetica 10 Bold'',
+     ``Times -14'', ``Futura Bold Underline''.  You must enclose the font family
+     in braces if it is made of two or more words."
+    self properties at: #font ifPresent: [ :value | ^value ].
+    self tclEval: '%1 cget -font'
+	with: self connected
+	with: self container.
+    ^self properties at: #font put: (self tclResult )!
+
+font: value
+    "Set the value of the font option for the widget.
+
+     Specifies the font to use when drawing text inside the widget. The font
+     can be given as either an X font name or a Blox font description string.
+
+     X font names are given as many fields, each led by a minus, and each of
+     which can be replaced by an * to indicate a default value is ok: 
+     foundry, family, weight, slant, setwidth, addstyle, pixel size, point size
+     (the same as pixel size for historical reasons), horizontal resolution,
+     vertical resolution, spacing, width, charset and character encoding.
+
+     Blox font description strings have three fields, which must be separated by
+     a space and of which only the first is mandatory: the font family, the font
+     size in points (or in pixels if a negative value is supplied), and a number
+     of styles separated by a space (valid styles are normal, bold, italic,
+     underline and overstrike). Examples of valid fonts are ``Helvetica 10 Bold'',
+     ``Times -14'', ``Futura Bold Underline''.  You must enclose the font family
+     in braces if it is made of two or more words."
+
+     "Change default font throughout the widget "
+     self connected modifyFont: (GTK.PangoFontDescription fromString: value).
+     self properties at: #font put: value!
+
+foregroundColor
+    "Answer the value of the foregroundColor option for the widget.
+
+     Specifies the normal foreground color to use when displaying the widget."
+    self properties at: #foreground ifPresent: [ :value | ^value ].
+    self tclEval: '%1 cget -foreground'
+	with: self connected
+	with: self container.
+    ^self properties at: #foreground put: (self tclResult )!
+
+foregroundColor: value
+    "Set the value of the foregroundColor option for the widget.
+
+     Specifies the normal foreground color to use when displaying the widget."
+    self tclEval: '%1 configure -foreground %3'
+	with: self connected
+	with: self container
+	with: (value  asTkString).
+    self properties at: #foreground put: value!
+
+getSelection
+    "Answer an empty string if the widget has no selection, else answer
+     the currently selected text"
+    | bounds |
+    bounds := self gtkbuffer getSelectionBounds.
+    ^(bounds at: 1) getVisibleText: (bounds at:2)
+!
+
+selectBackground
+    "Answer the value of the selectBackground option for the widget.
+
+     Specifies the background color to use when displaying selected parts
+     of the widget."
+    self properties at: #selectbackground ifPresent: [ :value | ^value ].
+    self tclEval: '%1 cget -selectbackground'
+	with: self connected
+	with: self container.
+    ^self properties at: #selectbackground put: (self tclResult )!
+
+selectBackground: value
+    "Set the value of the selectBackground option for the widget.
+
+     Specifies the background color to use when displaying selected parts
+     of the widget."
+    self tclEval: '%1 configure -selectbackground %3'
+	with: self connected
+	with: self container
+	with: (value  asTkString).
+    self properties at: #selectbackground put: value!
+
+selectForeground
+    "Answer the value of the selectForeground option for the widget.
+
+     Specifies the foreground color to use when displaying selected parts
+     of the widget."
+    self properties at: #selectforeground ifPresent: [ :value | ^value ].
+    self tclEval: '%1 cget -selectforeground'
+	with: self connected
+	with: self container.
+    ^self properties at: #selectforeground put: (self tclResult )!
+
+selectForeground: value
+    "Set the value of the selectForeground option for the widget.
+
+     Specifies the foreground color to use when displaying selected parts
+     of the widget."
+    self tclEval: '%1 configure -selectforeground %3'
+	with: self connected
+	with: self container
+	with: (value  asTkString).
+    self properties at: #selectforeground put: value!
+
+wrap
+    "Answer the value of the wrap option for the widget.
+
+     Specifies how to handle lines in the text that are too long to be displayed
+     in a single line of the text's window. The value must be #none or #char or
+     #word. A wrap mode of none means that each line of text appears as exactly
+     one line on the screen; extra characters that do not fit on the screen are
+     not displayed. In the other modes each line of text will be broken up into
+     several screen lines if necessary to keep all the characters visible. In
+     char mode a screen line break may occur after any character; in word mode a
+     line break will only be made at word boundaries."
+    self properties at: #wrap ifPresent: [ :value | ^value ].
+    self tclEval: '%1 cget -wrap'
+	with: self connected
+	with: self container.
+    ^self properties at: #wrap put: (self tclResult asSymbol)!
+
+wrap: value
+    "Set the value of the wrap option for the widget.
+
+     Specifies how to handle lines in the text that are too long to be displayed
+     in a single line of the text's window. The value must be #none or #char or
+     #word. A wrap mode of none means that each line of text appears as exactly
+     one line on the screen; extra characters that do not fit on the screen are
+     not displayed. In the other modes each line of text will be broken up into
+     several screen lines if necessary to keep all the characters visible. In
+     char mode a screen line break may occur after any character; in word mode a
+     line break will only be made at word boundaries."
+    self tclEval: '%1 configure -wrap %3'
+	with: self connected
+	with: self container
+	with: (value  asTkString).
+    self properties at: #wrap put: value! !
+
+!BText methodsFor: 'attributes'!
+
+insertAtEnd: aString attribute: attr
+    "Clear the selection and append aString at the end of the
+     widget.  Use the given attributes to format the text."
+    | start tmpMark end |
+    attr isNil ifTrue: [ ^self insertAtEnd: aString ].
+
+    end := self gtkbuffer getEndIter.
+    tmpMark := self gtkbuffer
+	createMark: 'temporary' where: end leftGravity: true.
+
+    self gtkbuffer beginUserAction.
+    self gtkbuffer insert: end text: aString.
+
+    start := self gtkbuffer getIterAtMark: tmpMark.
+    end := self gtkbuffer getEndIter.
+    self gtkbuffer placeCursor: end.
+    self setAttributes: attr start: start end: end.
+    self gtkbuffer endUserAction.
+!
+
+insertText: aString attribute: attr
+    "Insert aString in the widget at the current insertion point,
+     replacing the currently selected text (if any).  Use the
+     given attributes to format the text."
+    | bounds start end tmpMark |
+
+    attr isNil ifTrue: [ ^self insertText: aString ].
+
+    "We need a temporary mark to save the beginning of the selection."
+    bounds := self gtkbuffer getSelectionBounds.
+    tmpMark := self gtkbuffer
+	createMark: 'temporary' where: (bounds at: 1) leftGravity: true.
+
+    self gtkbuffer
+	beginUserAction;
+	deleteSelection: false defaultEditable: true;
+	insertAtCursor: aString.
+
+    start := self gtkbuffer getIterAtMark: tmpMark.
+    end := self gtkbuffer getIterAtMark: self gtkbuffer getInsert.
+    self setAttributes: attr start: start end: end.
+
+    self gtkbuffer endUserAction
+!
+
+removeAttributes
+    "Remove any kind of formatting from the text in the widget"
+    tagInfo isNil ifTrue: [ ^self ].
+    self removeAttributesInside: {self gtkbuffer getStartIter. self gtkbuffer getEndIter}.
+!
+
+removeAttributesFrom: aPoint to: endPoint
+    "Remove any kind of formatting from the text in the widget
+     between the given endpoints.  The two endpoints are Point
+     objects in which both coordinates are 1-based: the first
+     line is line 1, and the first character in the first line
+     is character 1."
+    tagInfo isNil ifTrue: [ ^self ].
+    self removeAttributesInside: (self from: aPoint to: endPoint)
+!
+
+setAttributes: attr from: aPoint to: endPoint
+    "Add the formatting given by attr to the text in the widget
+     between the given endpoints.  The two endpoints are Point
+     objects in which both coordinates are 1-based: the first
+     line is line 1, and the first character in the first line
+     is character 1."
+    | range tag tags tagtable |
+    attr isNil ifTrue: [ ^self ].
+    range := self from: aPoint to: endPoint.
+    self setAttributes: attr start: (range at: 1) end: (range at: 2)
+! !
+
+!BText methodsFor: 'geometry management'!
+
+child: child height: value
+    "Set the height of the given child to be `value' pixels."
+    | width height |
+    height := self at: #heightGeom put: value asInteger.
+    width := self at: #widthGeom ifAbsentPut: [ self widthAbsolute ].
+    "self
+	tclEval: 'wm geometry %1 =%2x%3'
+	with: child container
+	with: width printString
+	with: height printString"!
+
+child: child heightOffset: value 
+    "Adjust the height of the given child to be given by `value'
+     more pixels."
+   self child: child height: (self heightChild: child) + value!
+
+child: child width: value
+    "Set the width of the given child to be `value' pixels."
+    | width height |
+    width := self at: #widthGeom put: value asInteger.
+    height := self at: #heightGeom ifAbsentPut: [ child heightAbsolute ].
+    "self
+	tclEval: 'wm geometry %1 =%2x%3'
+	with: child container
+	with: width printString
+	with: height printString"!
+
+child: child widthOffset: value
+    "Adjust the width of the given child to be given by `value'
+     more pixels."
+    self child: child width: (self widthChild: child) + value!
+
+child: child x: value
+    "Never fail and do nothing, the children stay where
+     the text ended at the time each child was added in
+     the widget"!
+
+child: child xOffset: value
+    self shouldNotImplement!
+
+child: child y: value
+    "Never fail and do nothing, the children stay where
+     the text ended at the time each child was added in
+     the widget"!
+
+child: child yOffset: value
+    self shouldNotImplement!
+
+heightChild: child
+    "Answer the given child's height in pixels."
+    ^child at: #heightGeom ifAbsentPut: [ child heightAbsolute ]!
+
+widthChild: child
+    "Answer the given child's width in pixels."
+    ^child at: #widthGeom ifAbsentPut: [ child widthAbsolute ]!
+
+xChild: child
+    "Answer the given child's top-left border's x coordinate.
+     We always answer 0 since the children actually move when
+     the text widget scrolls"
+    ^0!
+
+yChild: child
+    "Answer the given child's top-left border's y coordinate.
+     We always answer 0 since the children actually move when
+     the text widget scrolls"
+    ^0! !
+
+!BText methodsFor: 'images'!
+
+insertImage: anObject
+    "Insert an image where the insertion point currently lies in the widget.
+     anObject can be a String containing image data (either Base-64 encoded
+     GIF data, XPM data, or PPM data), or the result or registering an image
+     with #registerImage:"
+    | key |
+    key := self registerImage: anObject.
+
+    self tclEval: '%1 image create insert -align baseline -image %2'
+	with: self connected
+	with: key value.
+
+    ^key
+!
+
+insertImage: anObject at: position
+    "Insert an image at the given position in the widget.  The
+     position is a Point object in which both coordinates are 1-based:
+     the first line is line 1, and the first character in the first
+     line is character 1.
+
+     anObject can be a String containing image data (either Base-64 encoded
+     GIF data, XPM data, or PPM data), or the result or registering an image
+     with #registerImage:"
+    | key |
+    key := self registerImage: anObject.
+
+    self tclEval: '%1 image create %2.%3 -align baseline -image %4'
+	with: self connected
+	with: position y printString
+	with: (position x - 1) printString
+	with: key value.
+
+    ^key
+!
+
+insertImageAtEnd: anObject
+    "Insert an image at the end of the widgets text.
+     anObject can be a String containing image data (either Base-64 encoded
+     GIF data, XPM data, or PPM data), or the result or registering an image
+     with #registerImage:"
+    | key |
+    key := self registerImage: anObject.
+
+    self tclEval: '%1 image create end -align baseline -image %2'
+	with: self connected
+	with: key value.
+
+    ^key
+!
+
+registerImage: anObject
+    "Register an image (whose data is in anObject, a String including
+     Base-64 encoded GIF data, XPM data, or PPM data) to be used
+     in the widget.  If the same image must be used a lot of times,
+     it is better to register it once and then pass the result of
+     #registerImage: to the image insertion methods.
+
+     Registered image are private within each BText widget.  Registering
+     an image with a widget and using it with another could give
+     unpredictable results."
+    | imageName |
+    anObject class == ValueHolder ifTrue: [ ^anObject ].
+
+    self tclEval: 'image create photo -data ', anObject asTkImageString.
+    images isNil ifTrue: [ images := OrderedCollection new ].
+    imageName := images add: self tclResult.
+    ^ValueHolder value: imageName
+! !
+
+!BText methodsFor: 'inserting text'!
+
+insertAtEnd: aString
+    "Clear the selection and append aString at the end of the
+     widget."
+    self gtkbuffer
+	insert: self gtkbuffer getEndIter text: aString;
+	placeCursor: self gtkbuffer getEndIter
+!
+
+insertText: aString
+    "Insert aString in the widget at the current insertion point,
+     replacing the currently selected text (if any)."
+    self gtkbuffer
+	beginUserAction;
+	deleteSelection: false defaultEditable: true;
+	insertAtCursor: aString;
+	endUserAction
+!
+
+insertSelectedText: aString
+    "Insert aString in the widget at the current insertion point,
+     leaving the currently selected text (if any) in place, and
+     selecting the text."
+    | bounds selBound tmpMark |
+    selBound := self gtkbuffer getSelectionBound.
+    bounds := self gtkbuffer getSelectionBounds.
+
+    "We need a temporary mark to keep the beginning of the selection
+     where it is."
+    tmpMark := self gtkbuffer
+	createMark: 'temporary' where: (bounds at: 1) leftGravity: true.
+
+    self gtkbuffer
+	beginUserAction;
+	placeCursor: (bounds at: 2);
+	insertAtCursor: aString;
+	moveMark: selBound where: (self gtkbuffer getIterAtMark: tmpMark);
+	endUserAction;
+	deleteMark: tmpMark
+!
+
+insertText: aString at: position
+    "Insert aString in the widget at the given position,
+     replacing the currently selected text (if any).  The
+     position is a Point object in which both coordinates are 1-based:
+     the first line is line 1, and the first character in the first
+     line is character 1."
+    self tclEval:
+	'%1 delete sel.first sel.last
+	%1 insert %2.%3 %4
+	%1 see insert'
+	with: self connected
+	with: position y printString
+	with: (position x - 1) printString
+	with: aString asTkString
+!
+
+insertTextSelection: aString
+    "Insert aString in the widget after the current selection,
+     leaving the currently selected text (if any) intact."
+    | bounds selBound tmpMark |
+    selBound := self gtkbuffer getSelectionBound.
+    bounds := self gtkbuffer getSelectionBounds.
+
+    "We need a temporary mark to put the beginning of the selection
+     where the selection used to end."
+    tmpMark := self gtkbuffer
+	createMark: 'temporary' where: (bounds at: 2) leftGravity: true.
+    self gtkbuffer
+	beginUserAction;
+	placeCursor: (bounds at: 2);
+        insertAtCursor: aString;
+	moveMark: selBound where: (self gtkbuffer getIterAtMark: tmpMark);
+        endUserAction;
+	deleteMark: tmpMark
+!
+
+invokeCallback
+    "Generate a synthetic callback."
+    self callback isNil ifFalse: [ self callback send ]
+!
+
+nextPut: aCharacter
+    "Clear the selection and append aCharacter at the end of the
+     widget."
+    self insertAtEnd: (String with: aCharacter)
+!
+
+nextPutAll: aString
+    "Clear the selection and append aString at the end of the
+     widget."
+    self insertAtEnd: aString
+!
+
+nl
+    "Clear the selection and append a linefeed character at the
+     end of the widget."
+    self insertAtEnd: Character nl asString
+!
+
+refuseTabs
+    "Arrange so that Tab characters, instead of being inserted
+     in the widget, traverse the widgets in the parent window."
+    self tclEval: '
+	bind %1 <Tab> {
+	    focus [tk_focusNext %W]
+	    break
+	}
+	bind %1 <Shift-Tab> {
+	    focus [tk_focusPrev %W]
+	    break
+	}' with: self connected
+!
+
+replaceSelection: aString
+    "Insert aString in the widget at the current insertion point,
+     replacing the currently selected text (if any), and leaving
+     the text selected."
+    | bounds |
+    bounds := self gtkbuffer getSelectionBounds.
+    self gtkbuffer delete: (bounds at: 1) end: (bounds at: 2).
+    self gtkbuffer insertAtCursor: aString
+!
+
+searchString: aString
+    "Search aString in the widget.  If it is not found,
+     answer zero, else answer the 1-based line number
+     and move the insertion point to the place where
+     the string was found."
+    | result |
+    self tclEval: self connected, ' search ',
+	aString asTkString, ' 1.0 end'.
+
+    result := self tclResult.
+    result isEmpty ifTrue: [ ^0 ].
+    
+    self tclEval: '
+	%1 mark set insert %2
+	%1 see insert'
+	with: self connected with: result.
+
+    "Sending asInteger removes the column"
+    ^result asInteger
+!
+
+space
+    "Clear the selection and append a space at the end of the
+     widget."
+    self insertAtEnd: ' '
+! !
+
+!BText methodsFor: 'position & lines'!
+
+charsInLine: number
+    "Answer how many characters are there in the number-th line"
+    | iter | 
+    iter := self gtkbuffer getIterAtLine: number.
+    iter forwardToLineEnd.
+    ^1 + iter getLineOffset
+!
+
+currentColumn
+    "Answer the 1-based column number where the insertion point
+     currently lies."
+    | mark iter |
+    mark := self gtkbuffer getInsert.
+    iter := self gtkbuffer getIterAtMark: mark.
+    ^1 + iter getLineOffset
+!
+
+currentLine
+    "Answer the 1-based line number where the insertion point
+     currently lies."
+    | mark iter |
+    mark := self gtkbuffer getInsert.
+    iter := self gtkbuffer getIterAtMark: mark.
+    ^ 1 + iter getLine
+!
+
+currentPosition
+    "Answer a Point representing where the insertion point
+     currently lies.  Both coordinates in the answer are 1-based:
+     the first line is line 1, and the first character in the first
+     line is character 1."
+    | mark iter |
+    mark := self gtkbuffer getInsert.
+    iter := self gtkbuffer getIterAtMark: mark.
+    ^(1 + iter getLine) @ (1 + iter getLineOffset)
+!
+
+currentPosition: aPoint
+    "Move the insertion point to the position given by aPoint.
+     Both coordinates in aPoint are interpreted as 1-based:
+     the first line is line 1, and the first character in the first
+     line is character 1."
+    | iter |
+    iter := self gtkbuffer
+	getIterAtLineOffset: aPoint y - 1
+	charOffset: aPoint x - 1.
+    self gtkbuffer placeCursor: iter.
+!
+
+gotoLine: line end: aBoolean
+    "If aBoolean is true, move the insertion point to the last
+     character of the line-th line (1 being the first line
+     in the widget); if aBoolean is false, move it to the start
+     of the line-th line."
+    | iter |
+    iter := self gtkbuffer getIterAtLine: line - 1.
+    aBoolean ifTrue: [ iter forwardToLineEnd ].
+    self gtkbuffer placeCursor: iter.
+!
+
+indexAt: point
+    "Answer the position of the character that covers the
+     pixel whose coordinates within the text's window are
+     given by the supplied Point object."
+
+    self
+	tclEval: self connected, ' index @%1,%2'
+	with: point x printString
+	with: point y printString.
+
+    ^self parseResult
+!
+
+lineAt: number
+    "Answer the number-th line of text in the widget"
+    | start end | 
+    start := self gtkbuffer getIterAtLine: (number - 1).
+    end := self gtkbuffer getIterAtLine: (number - 1).
+    end forwardToLineEnd.
+    ^start getVisibleText: end
+!
+
+numberOfLines
+    "Answer the number of lines in the widget"
+    ^self gtkbuffer getLineCount
+!
+
+selectFrom: first to: last
+    "Select the text between the given endpoints.  The two endpoints
+     are Point objects in which both coordinates are 1-based: the
+     first line is line 1, and the first character in the first line
+     is character 1."
+    | bounds |
+    bounds:= self from: first to: last.
+    self gtkbuffer selectRange: (bounds at: 1) bound: (bounds at: 2)
+!
+
+setToEnd
+    "Move the insertion point to the end of the widget"
+    self tclEval: '
+	%1 mark set insert end-1c
+	%1 see end' with: self connected
+! !
+
+!BText methodsFor: 'private'!
+
+addChild: child
+    self tclEval: '%1 window create end -window %2'
+	with: self connected
+	with: child container.
+!
+
+setAttributes: attr start: startTextIter end: endTextIter
+    | tags |
+    tagInfo isNil ifTrue: [ tagInfo := BTextTags new: self ].
+    tags := attr tags: tagInfo.
+    tags do: [ :each |
+        self gtkbuffer applyTag: each start: startTextIter end: endTextIter
+    ]
+!
+
+gtkbuffer
+    "answer the gtk text buffer"
+    gtkbuffer isNil ifTrue: [ self createWidget ].
+    ^gtkbuffer
+  !
+
+onChanged: userData
+    self invokeCallback
+!
+
+create
+   "initialise a Text widget"
+   self connected: GTK.GtkTextView new.
+
+   gtkbuffer := self connected getBuffer.
+   self gtkbuffer connectSignal: 'changed' to: self selector: #onChanged: userData: nil.
+!
+
+defineTag: name as: options
+    options class = String ifTrue: [options printNl. 0 unconverted defineTag call].
+    "FIXME/TODO: use g_object_set_property and recreate createTag"
+    self gtkbuffer createTag: name varargs: options.
+!
+
+destroyed
+    super destroyed.
+    images isNil ifTrue: [ ^self ].
+    images do: [ :name |
+	self tclEval: 'image delete ', name.
+    ].
+    images := nil
+!
+
+from: aPoint to: endPoint
+    | start end |
+    start := self gtkbuffer
+	getIterAtLineOffset: aPoint y - 1 charOffset: aPoint x - 1.
+    end := self gtkbuffer
+	getIterAtLineOffset: endPoint y - 1 charOffset: endPoint x - 1.
+    ^ {start. end }
+!
+
+removeAttributesInside: range
+    | start end |
+    start := range at: 1.
+    end := range at: 2.
+    self gtkbuffer removeAllTags: start end: end
+!
+
+tag: name bind: event to: aSymbol of: anObject parameters: params
+
+    self
+	bind: event
+	to: aSymbol
+	of: anObject
+	parameters: params
+	prefix: ('%1 tag bind %2' bindWith: self connected with: name)
+! !
+
+
+
+"-------------------------- BTextBindings class -----------------------------"
+
+BTextBindings comment: 
+'This object is used to assign event handlers to particular sections of
+text in a BText widget.  To use it, you simply have to add event handlers
+to it, and then create a BTextAttributes object that refers to it.'!
+
+!BTextBindings class methodsFor: 'instance creation'!
+
+new
+    "Create a new instance of the receiver."
+    ^self basicNew initialize
+! !
+
+!BTextBindings methodsFor: 'private - BTextTags protocol'!
+
+defineTagFor: aBText
+    list do: [ :each | each sendTo: aBText ]
+!
+
+tagName
+    ^tagName
+! !
+
+!BTextBindings methodsFor: 'private'!
+
+initialize
+    tagName := 'ev', (Time millisecondClockValue printString: 36).
+    list := OrderedCollection new.
+!
+
+primBind: event to: aSymbol of: anObject parameters: params
+    | args |
+    (args := Array new: 5)
+	at: 1 put: tagName;
+	at: 2 put: event;
+	at: 3 put: aSymbol;
+	at: 4 put: anObject;
+	at: 5 put: params.
+    list add: (Message
+	selector: #tag:bind:to:of:parameters:
+	arguments: args)
+! !
+
+
+
+"-------------------------- BTextAttributes class -----------------------------"
+
+BTextAttributes comment: 
+'
+I help you creating wonderful, colorful BTexts.'!
+
+!BTextAttributes class methodsFor: 'instance-creation shortcuts'!
+
+backgroundColor: color
+    "Create a new BTextAttributes object resulting in text
+     with the given background color."
+    ^self new backgroundColor: color
+!
+
+black
+    "Create a new BTextAttributes object resulting in black text."
+    ^self new foregroundColor: 'black'
+!
+
+blue
+    "Create a new BTextAttributes object resulting in blue text."
+    ^self new foregroundColor: 'blue'
+!
+
+center
+    "Create a new BTextAttributes object resulting in centered
+     paragraphs."
+    ^self new center
+!
+
+cyan
+    "Create a new BTextAttributes object resulting in cyan text."
+    ^self new foregroundColor: 'cyan'
+!
+
+darkCyan 
+    "Create a new BTextAttributes object resulting in dark cyan text."
+   ^self new foregroundColor: 'PureDarkCyan'
+!
+
+darkGreen
+    "Create a new BTextAttributes object resulting in dark green text."
+    ^self new foregroundColor: 'PureDarkGreen'
+!
+
+darkMagenta
+    "Create a new BTextAttributes object resulting in dark purple text."
+    ^self new foregroundColor: 'PureDarkMagenta'
+!
+
+events: aBTextBindings
+    "Create a new BTextAttributes object for text that responds to
+     events according to the callbacks established in aBTextBindings."
+    ^self new events: aBTextBindings
+!
+
+font: font
+    "Create a new BTextAttributes object resulting in text with the given font.
+     The font can be given as either an X font name or a Blox font description
+     string.
+
+     X font names are given as many fields, each led by a minus, and each of
+     which can be replaced by an * to indicate a default value is ok: 
+     foundry, family, weight, slant, setwidth, addstyle, pixel size, point size
+     (the same as pixel size for historical reasons), horizontal resolution,
+     vertical resolution, spacing, width, charset and character encoding.
+
+     Blox font description strings have three fields, which must be separated by
+     a space and of which only the first is mandatory: the font family, the font
+     size in points (or in pixels if a negative value is supplied), and a number
+     of styles separated by a space (valid styles are normal, bold, italic,
+     underline and overstrike). Examples of valid fonts are ``Helvetica 10 Bold'',
+     ``Times -14'', ``Futura Bold Underline''.  You must enclose the font family
+     in braces if it is made of two or more words."
+    ^self new font: font
+!
+
+foregroundColor: color
+    "Create a new BTextAttributes object resulting in text
+     with the given foreground color."
+    ^self new foregroundColor: color
+!
+
+green
+    "Create a new BTextAttributes object resulting in green text."
+    ^self new foregroundColor: 'green'
+!
+
+magenta 
+    "Create a new BTextAttributes object resulting in magenta text."
+   ^self new foregroundColor: 'magenta'
+!
+
+red
+    "Create a new BTextAttributes object resulting in red text."
+    ^self new foregroundColor: 'red'
+!
+
+strikeout
+    "Create a new BTextAttributes object resulting in struck-out text."
+    ^self new strikeout
+!
+
+underline
+    "Create a new BTextAttributes object resulting in underlined text."
+    ^self new underline
+!
+
+yellow
+    "Create a new BTextAttributes object resulting in yellow text."
+    ^self new foregroundColor: 'yellow'
+!
+
+white
+    "Create a new BTextAttributes object resulting in white text."
+    ^self new foregroundColor: 'white'
+! !
+
+!BTextAttributes methodsFor: 'colors'!
+
+black 
+    "Set the receiver so that applying it results in black text."
+   self foregroundColor: 'black'
+!
+
+blue
+    "Set the receiver so that applying it results in blue text."
+    self foregroundColor: 'blue'
+!
+
+cyan
+    "Set the receiver so that applying it results in cyan text."
+    self foregroundColor: 'cyan'
+!
+
+darkCyan
+    "Set the receiver so that applying it results in dark cyan text."
+    self foregroundColor: 'PureDarkCyan'
+!
+
+darkGreen
+    "Set the receiver so that applying it results in dark green text."
+    self foregroundColor: 'PureDarkGreen'
+!
+
+darkMagenta
+    "Set the receiver so that applying it results in dark magenta text."
+    self foregroundColor: 'PureDarkMagenta'
+!
+
+green
+    "Set the receiver so that applying it results in green text."
+    self foregroundColor: 'green'
+!
+
+magenta
+    "Set the receiver so that applying it results in magenta text."
+    self foregroundColor: 'magenta'
+!
+
+red
+    "Set the receiver so that applying it results in red text."
+    self foregroundColor: 'red'
+!
+
+white
+    "Set the receiver so that applying it results in white text."
+    self foregroundColor: 'white'
+!
+
+yellow
+    "Set the receiver so that applying it results in black text."
+    self foregroundColor: 'yellow'
+! !
+
+!BTextAttributes methodsFor: 'private'!
+
+hasStyle: aSymbol
+    ^styles notNil and: [ styles includes: aSymbol ]
+!
+
+style: aSymbol
+    styles isNil ifTrue: [ styles := Set new ].
+    styles add: aSymbol
+!
+
+tags: aBTextTags
+    | s tagTable |
+    tagTable := aBTextTags tagTable.
+    s := OrderedCollection new.
+
+    fgColor isNil ifFalse: [ s add: (tagTable lookup: (aBTextTags fgColor: fgColor)) ].
+    bgColor isNil ifFalse: [ s add: (tagTable lookup: (aBTextTags bgColor: bgColor)) ].
+    font    isNil ifFalse: [ s add: (tagTable lookup: (aBTextTags font:    font))    ].
+    events  isNil ifFalse: [ s add: (tagTable lookup: (aBTextTags events:  events))  ].
+
+    styles isNil ifFalse: [
+	styles do: [ :each | s add: (tagTable lookup: each) ]
+    ].
+    ^s
+! !
+
+!BTextAttributes methodsFor: 'setting attributes'!
+
+backgroundColor
+    "Answer the value of the backgroundColor option for the text.
+
+     Specifies the background color to use when displaying text with
+     these attributes.  nil indicates that the default value is not
+     overridden."
+    ^bgColor
+!
+
+backgroundColor: color
+    "Set the value of the backgroundColor option for the text.
+
+     Specifies the background color to use when displaying text with
+     these attributes.  nil indicates that the default value is not
+     overridden."
+    bgColor := color
+!
+
+center
+    "Center the text to which these attributes are applied"
+    self style: #STYLEcenter
+!
+
+events
+    "Answer the event bindings which apply to text subject to these
+     attributes"
+    ^events
+!
+
+events: aBTextBindings
+    "Set the event bindings which apply to text subject to these
+     attributes"
+    events := aBTextBindings
+!
+
+font
+    "Answer the value of the font option for the text.
+     The font can be given as either an X font name or a Blox font description
+     string, or nil if you want the widget's default font to apply.
+
+     X font names are given as many fields, each led by a minus, and each of
+     which can be replaced by an * to indicate a default value is ok: 
+     foundry, family, weight, slant, setwidth, addstyle, pixel size, point size
+     (the same as pixel size for historical reasons), horizontal resolution,
+     vertical resolution, spacing, width, charset and character encoding.
+
+     Blox font description strings have three fields, which must be separated by
+     a space and of which only the first is mandatory: the font family, the font
+     size in points (or in pixels if a negative value is supplied), and a number
+     of styles separated by a space (valid styles are normal, bold, italic,
+     underline and overstrike). Examples of valid fonts are ``Helvetica 10 Bold'',
+     ``Times -14'', ``Futura Bold Underline''.  You must enclose the font family
+     in braces if it is made of two or more words."
+    ^font
+!
+
+font: fontName
+    "Set the value of the font option for the text.
+     The font can be given as either an X font name or a Blox font description
+     string, or nil if you want the widget's default font to apply.
+
+     X font names are given as many fields, each led by a minus, and each of
+     which can be replaced by an * to indicate a default value is ok: 
+     foundry, family, weight, slant, setwidth, addstyle, pixel size, point size
+     (the same as pixel size for historical reasons), horizontal resolution,
+     vertical resolution, spacing, width, charset and character encoding.
+
+     Blox font description strings have three fields, which must be separated by
+     a space and of which only the first is mandatory: the font family, the font
+     size in points (or in pixels if a negative value is supplied), and a number
+     of styles separated by a space (valid styles are normal, bold, italic,
+     underline and overstrike). Examples of valid fonts are ``Helvetica 10 Bold'',
+     ``Times -14'', ``Futura Bold Underline''.  You must enclose the font family
+     in braces if it is made of two or more words."
+    font := fontName
+!
+
+foregroundColor
+    "Answer the value of the foregroundColor option for the text.
+
+     Specifies the foreground color to use when displaying text with
+     these attributes.  nil indicates that the default value is not
+     overridden."
+    ^fgColor
+!
+
+foregroundColor: color
+    "Set the value of the foregroundColor option for the text.
+
+     Specifies the foreground color to use when displaying text with
+     these attributes.  nil indicates that the default value is not
+     overridden."
+    fgColor := color
+!
+
+isCentered
+    "Answer whether the text to which these attributes are applied
+     is centered"
+    ^self hasStyle: #STYLEcenter
+!
+
+isStruckout
+    "Answer whether the text to which these attributes are applied
+     is struckout"
+    ^self hasStyle: #STYLEstrikeout
+!
+
+isUnderlined
+    "Answer whether the text to which these attributes are applied
+     is underlined"
+    ^self hasStyle: #STYLEunderline
+!
+
+strikeout
+    "Strike out the text to which these attributes are applied"
+    self style: #STYLEstrikeout
+!
+
+underline
+    "Underline the text to which these attributes are applied"
+    self style: #STYLEunderline
+! !
+
+
+
+"-------------------------- BTextTags class -----------------------------"
+
+BTextTags comment: 
+'I am a private class. I sit between a BText and BTextAttributes, helping
+the latter in telling the former which attributes to use.'!
+
+!BTextTags class methodsFor: 'private - instance creation'!
+
+new
+    self shouldNotImplement
+!
+
+new: client
+    ^super new initialize: client
+! !
+
+!BTextTags methodsFor: 'private - BTextAttributes protocol'!
+
+bgColor: color
+    ^'b_', (self color: color)
+!
+
+events: aBTextBindings
+    | tagName |
+    tagName := aBTextBindings tagName.
+    (tags includes: tagName) ifFalse: [
+	 tags add: tagName.
+	 aBTextBindings defineTagFor: client.
+    ].
+    ^tagName
+!
+
+fgColor: color
+    ^'f_', (self color: color)
+!
+
+font: font
+    | tagName |
+    tagName := WriteStream on: (String new: 20).
+    font substrings do: [ :each | tagName nextPutAll: each; nextPut: $_ ].
+    tagName := tagName contents.
+
+    (tags includes: tagName)
+	ifFalse: [
+	    tags add: tagName.
+	    'FIXME fonts.. ' display. font printNl.
+	    client defineTag: tagName as: {'font'. font. nil}
+	].
+
+    ^tagName
+! !
+
+!BTextTags methodsFor: 'private'!
+
+color: color
+    | tagName |
+    tagName := (color at: 1) = $#
+	ifTrue: [ color copy at: 1 put: $_; yourself ]
+	ifFalse: [ color asLowercase ].
+
+    (tags includes: tagName)
+	ifFalse: [
+	    tags add: tagName.
+	    client defineTag: 'f_', tagName as: {'foreground'. color. nil}.
+	    client defineTag: 'b_', tagName as: {'background'. color. nil}.
+	].
+    ^tagName
+!
+
+initialize: clientBText
+    "initialise for use with clientBText"
+    client := clientBText.
+    tags := Set new.
+    client defineTag: 'STYLEstrikeout' as: {'strikethrough'. true . nil}.
+    client defineTag: 'STYLEunderline' as: {'underline'. GTK.Pango pangoUnderlineSingle. nil}.
+    client defineTag: 'STYLEcenter' as: {'justification'. GTK.Gtk gtkJustifyCenter. nil}.
+!
+
+tagTable
+    ^client gtkbuffer getTagTable
+! !

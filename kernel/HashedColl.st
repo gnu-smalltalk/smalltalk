@@ -45,6 +45,10 @@ give fast responses on their presence in the collection.' !
 
 !HashedCollection class methodsFor: 'instance creation'!
 
+primNew: realSize
+    ^self basicNew: realSize
+!
+
 new
     "Answer a new instance of the receiver with a default size"
     ^self new: 8
@@ -58,7 +62,7 @@ new: anInteger
 	realSize := 1 bitShift: realSize highBit
     ].
 
-    ^(self basicNew: realSize) initialize: realSize
+    ^(self primNew: realSize) initialize: realSize
 ! !
 
 
@@ -185,6 +189,7 @@ hash
 do: aBlock
     "Enumerate all the non-nil members of the set"
 
+    self beConsistent.
     1 to: self primSize do: [ :i |
     	(self primAt: i) notNil
 	   ifTrue: [ aBlock value: (self primAt: i) ].
@@ -252,6 +257,7 @@ incrementTally
     | grown |
     (grown := tally >= (self primSize * 3 // 4))
         ifTrue: [ self growBy: self primSize ].
+
     tally := tally + 1.
     ^grown
 !

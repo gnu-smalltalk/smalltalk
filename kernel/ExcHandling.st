@@ -42,7 +42,7 @@ Smalltalk at: #ExDoesNotUnderstand put: nil.
 Smalltalk at: #ExUserBreak put: nil.
 
 Object subclass: #Signal
-    instanceVariableNames: 'exception arguments tag messageText resumeBlock onDoBlock handlerBlock context nested previousState'
+    instanceVariableNames: 'exception arguments tag messageText resumeBlock onDoBlock handlerBlock context isNested previousState'
     classVariableNames: 'NoTag'
     poolDictionaries: ''
     category: 'Language-Exceptions'.
@@ -325,67 +325,25 @@ depth: anInteger
 
 instantiateNextHandler: aSignal
     "Private - Tell aSignal what it needs on the next handler for the receiver.
-     If one is not found found, look for an handler for our parent, until one
+     If none is found, look for an handler for our parent, until one
      is found or ExAll if reached and there is no handler. In this case, answer
      the default handler for anException."
 
-    | exc nested |
-    exc := self.
+    thisContext
+	scanBacktraceForAttribute: #exceptionHandlerSearch:reset:
+        do: [ :context :attr || status |
+    	    status := (attr arguments at: 1)
+    	        value: context
+    	        value: aSignal.
 
-    [
-	nested := false. 
-	thisContext 
-	    scanBacktraceFor:
-		#(#on:do:
-		  #on:do:on:do:
-		  #on:do:on:do:on:do:
-		  #on:do:on:do:on:do:on:do:
-		  #on:do:on:do:on:do:on:do:on:do:)
-	    do: [ :context || best bestGoodness goodness activeHandlers |
-		bestGoodness := -1.
-		activeHandlers := context at: context numArgs + 1.
+    	    status == #found ifTrue: [ ^self ].
+    	    status == #skip ifTrue: [ aSignal isNested: true ].
+        ].
 
-		1 to: context numArgs - 1 by: 2 do: [ :i |
-		    goodness := (context at: i) goodness: exc.
-		    goodness > -1 ifTrue: [
-		        (activeHandlers bitAt: i) = 1 ifTrue: [
-			    "Sorry, this handler is already active..."
-			    nested := true.
-			    goodness := -1.
-			]
-		    ].
-		    goodness > bestGoodness ifTrue: [
-			best := i.
-			bestGoodness := goodness.
-		    ]
-		].
-
-		"Now instantiate the best handler we found"
-		best isNil ifFalse: [
-		    context
-			at: context numArgs + 1
-			put: (activeHandlers setBit: best).
-
-		    aSignal
-			onDoBlock: context receiver
-			handlerBlock: (context at: best + 1)
-			onDoContext: context
-			nested: nested
-			previousState: activeHandlers.
-
-		    ^self
-		]
-	    ].
-
-	exc == ExAll
-    ]   whileFalse: [
-	exc := exc parent
-    ].
     aSignal
 	onDoBlock: nil
 	handlerBlock: self actualDefaultHandler
 	onDoContext: nil
-	nested: false
 	previousState: nil
 !
 
@@ -394,8 +352,9 @@ activateOuterHandlerFor: aSignal
      Signal modeled after aSignal, and returning the return value of the
      handler."
 
-    "This is not refactored to avoid too long backtraces"
     | signal |
+
+    <exceptionHandlingInternal: true>
     signal := signalClass new
 	initException: self;
 	copyFrom: aSignal.
@@ -440,13 +399,9 @@ resetAllHandlers
      next handlers used will be the first to be declared"
 
     thisContext
-	scanBacktraceFor: #(#on:do: #on:do:on:do:
-		#on:do:on:do:on:do: #on:do:on:do:on:do:on:do: 
-		#on:do:on:do:on:do:on:do:on:do:)
-	do: [ :context |
-	    context receiver class == BlockClosure ifTrue: [
-		context at: context numArgs + 1 put: 0
-	    ]
+	scanBacktraceForAttribute: #exceptionHandlerSearch:reset:
+	do: [ :context :attr |
+	    (attr arguments at: 2) value: context
 	]
 ! !
 
@@ -570,7 +525,8 @@ defaultAction
 isNested
     "Answer whether the current exception handler is within the scope of
      another handler for the same exception."
-    ^nested
+    isNested isNil ifTrue: [ isNested := false ].
+    ^isNested
 !
 
 isResumable
@@ -587,6 +543,7 @@ outer
      exception action does not resume then this message will not return, and
      #outer will be equivalent to #pass."
 
+    <exceptionHandlingInternal: false>
     ^self exception activateOuterHandlerFor: self
 !
 
@@ -595,6 +552,7 @@ pass
      Similar to #outer, but control does not return to the currently active exception
      handler."
 
+    <exceptionHandlingInternal: false>
     ^self return: (self exception activateOuterHandlerFor: self)
 !
 
@@ -636,7 +594,8 @@ resignalAs: replacementException
      as `sig retryUsing: [ replacementException signal ])"
 
     CoreException resetAllHandlers.
-    replacementException passFor: self
+    replacementException return: (replacementException exception
+	activateOuterHandlerFor: replacementException)
 !
 
 retry
@@ -659,20 +618,22 @@ retryUsing: aBlock
 !
 
 return
-    "Exit the #on:do: snippet, answering anObject to its caller"
+    "Exit the #on:do: snippet, answering nil to its caller."
 
     context isNil ifTrue: [
 	self primError: 'No exception handler effective - #return failed'
     ].
+    CoreException resetAllHandlers.
     context parentContext continue: nil.
 !
 
 return: anObject
-    "Exit the #on:do: snippet, answering anObject to its caller"
+    "Exit the #on:do: snippet, answering anObject to its caller."
 
     context isNil ifTrue: [
-	self primError: 'No exception handler effective - #return failed'
+	self primError: 'No exception handler effective - #return: failed'
     ].
+    CoreException resetAllHandlers.
     context parentContext continue: anObject.
 ! !
 
@@ -685,6 +646,8 @@ activateHandler: resumeBoolean
      exiting it) to be taken upon leaving from the handler block."
 
     | result |
+    <exceptionHandlingInternal: true>
+
     resumeBlock := [ :object |
 	self resetHandler.
 	^object ].
@@ -699,9 +662,13 @@ activateHandler: resumeBoolean
     context parentContext continue: result
 !
 
-onDoBlock: wdBlock handlerBlock: hBlock onDoContext: ctx nested: aBoolean previousState: anInteger
+isNested: aBoolean
+    "Set the receiver's isNested instance variable."
+    isNested := aBoolean.
+!
+
+onDoBlock: wdBlock handlerBlock: hBlock onDoContext: ctx previousState: anInteger
     "Initialize the receiver's instance variables."
-    nested := aBoolean.
     previousState := anInteger.
     context := ctx.
     onDoBlock := wdBlock.
@@ -769,11 +736,11 @@ primError: message
 	nl.
 
     RegressionTesting ifFalse: [
-	context := thisContext.
-	[ context isInternalExceptionHandlingContext ]
-	    whileTrue: [ context := context parentContext ].
+        context := thisContext.
+        "[ context isInternalExceptionHandlingContext ]
+            whileTrue: [ context := context parentContext ]."
 
-	context backtraceOn: stdout
+        context backtraceOn: stdout
     ].
 
     stdout flush.

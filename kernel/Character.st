@@ -31,8 +31,8 @@
 |
  ======================================================================"
 
-Magnitude variableWordSubclass: #Character 
-	  instanceVariableNames: ''
+Magnitude subclass: #Character 
+	  instanceVariableNames: 'asciiValue'
 	  classVariableNames: 'Table'
 	  poolDictionaries: ''
 	  category: 'Language-Data types'
@@ -174,13 +174,18 @@ digitValue: anInteger
 
 !Character methodsFor: 'converting'!
 
+asCharacter
+    "Return the receiver, since it is already a character."
+    ^self
+!
+
 digitValue
     "Returns the value of self interpreted as a digit.  Here, 'digit' means
     either 0-9, or A-Z, which maps to 10-35."
     | result |
-    result := Table at: 1 + self asciiValue.
+    result := Table at: 1 + asciiValue.
     ^result > 32
-	ifTrue: [ self asciiValue - result ]
+	ifTrue: [ asciiValue - result ]
 	ifFalse: [ SystemExceptions.InvalidValue signalOn: self reason: 'Not a digit character' ]
 ! !
 
@@ -191,25 +196,25 @@ digitValue
 < aCharacter
     "Compare the character's ASCII value. Answer whether the receiver's
      is the least."
-    ^self asciiValue < aCharacter asciiValue
+    ^asciiValue < aCharacter asciiValue
 !
 
 <= aCharacter
     "Compare the character's ASCII value. Answer whether the receiver's
      is the least or their equal."
-    ^self asciiValue <= aCharacter asciiValue
+    ^asciiValue <= aCharacter asciiValue
 !
 
 > aCharacter
     "Compare the character's ASCII value. Answer whether the receiver's
      is the greatest."
-    ^self asciiValue > aCharacter asciiValue
+    ^asciiValue > aCharacter asciiValue
 !
 
 >= aCharacter
     "Compare the character's ASCII value. Answer whether the receiver's
      is the greatest or their equal."
-    ^self asciiValue >= aCharacter asciiValue
+    ^asciiValue >= aCharacter asciiValue
 ! !
 
 
@@ -218,12 +223,12 @@ digitValue
 
 isDigit
     "True if self is a 0-9 digit"
-    ^(Table at: 1 + self asciiValue) = 48
+    ^(Table at: 1 + asciiValue) = 48
 !
 
 isLetter
     "True if self is an upper- or lowercase letter"
-    ^((Table at: 1 + self asciiValue) bitAnd: 1) = 1
+    ^((Table at: 1 + asciiValue) bitAnd: 1) = 1
 !
 
 isAlphaNumeric
@@ -233,22 +238,22 @@ isAlphaNumeric
 
 isLowercase
     "True if self is a lowercase letter"
-    ^(Table at: 1 + self asciiValue) = 3
+    ^(Table at: 1 + asciiValue) = 3
 !
 
 isUppercase
     "True if self is uppercase"
-    ^(Table at: 1 + self asciiValue) = 55
+    ^(Table at: 1 + asciiValue) = 55
 !
 
 isSeparator
     "Returns true if self is a space, cr, tab, nl, or newPage"
-    ^(Table at: 1 + self asciiValue) = 2
+    ^(Table at: 1 + asciiValue) = 2
 !
 
 isPunctuation
     "Returns true if self is one of '.,:;!?'"
-    ^(Table at: 1 + self asciiValue) = 4
+    ^(Table at: 1 + asciiValue) = 4
 !
 
 isVowel
@@ -271,13 +276,13 @@ isVowel
 asLowercase
     "Returns self as a lowercase character if it's an uppercase letter,
      otherwise returns the character unchanged."
-    ^Character value: (Table at: 513 + self asciiValue)
+    ^Character value: (Table at: 513 + asciiValue)
 !
 
 asUppercase
     "Returns self as a uppercase character if it's an lowercase letter,
      otherwise returns the character unchanged."
-    ^Character value: (Table at: 257 + self asciiValue)
+    ^Character value: (Table at: 257 + asciiValue)
 !
 
 asString
@@ -321,7 +326,7 @@ storeOn: aStream
 asLowercaseValue
     "Returns the ASCII value of the receiver converted to a lowercase character
      if it's an uppercase letter, otherwise returns the ASCII value unchanged."
-    ^Table at: 513 + self asciiValue
+    ^Table at: 513 + asciiValue
 ! !
 
 

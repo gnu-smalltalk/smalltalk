@@ -30,9 +30,6 @@
 |
  ======================================================================"
 
-Jdm addSubspace: #MySQL!
-Namespace current: Jdm.MySQL!
-
 ReadStream subclass: #JdmReadStream
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -116,7 +113,7 @@ Object subclass: #JdmTimestampWriter
 	category: 'Mysql-Driver'!
 
 Jdm.JdmColumn subclass: #JdmColumn
-	instanceVariableNames: 'table name size type flags decimalPlaces '
+	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Mysql-Driver'!
@@ -551,7 +548,7 @@ packetNumberOffset
 packetNumberSize
 	^1!
 
-sizeOffset
+izeOffset
 	^1!
 
 sizeSize
@@ -567,6 +564,8 @@ on: aStream
 !JdmInputPacket methodsFor: 'initialize-release'!
 
 initialize
+	self stream atEnd
+		ifTrue: [ size := packetNumber := 0. buffer := #[]. ^self ].
 	size := self readSize.
 	packetNumber := self readPacketNumber.
 	buffer := self readBuffer.
@@ -1418,4 +1417,3 @@ asByteString
     ^stream contents
 ! !
 
-Namespace current: Smalltalk!

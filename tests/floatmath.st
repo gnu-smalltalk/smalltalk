@@ -87,6 +87,31 @@ ObjectMemory globalGarbageCollect.
 ^FloatD infinity reciprocal printString!
 ^FloatD negativeInfinity reciprocal printString!
 
+0.0 positive!
+(0.0 * -1) positive!
+
+^FloatD nan min: FloatD nan!
+^FloatD nan min: 5.0!
+^5.0 min: FloatD nan!
+^5.0 min: 7.0!
+^7.0 min: 5.0!
+^7.0 min: 7.0!
+^0.0 min: 0.0!
+^0.0 min: 0.0 * -1!
+^0.0 * -1 min: 0.0!
+^0.0 * -1 min: 0.0 * -1!
+
+^FloatD nan max: FloatD nan!
+^FloatD nan max: 5.0!
+^5.0 max: FloatD nan!
+^5.0 max: 7.0!
+^7.0 max: 5.0!
+^7.0 max: 7.0!
+^0.0 max: 0.0!
+^0.0 max: 0.0 * -1!
+^0.0 * -1 max: 0.0!
+^0.0 * -1 max: 0.0 * -1!
+
 " ### need more tests"
 
 ^(( 0.6 \\  1) * 10) rounded == ( 6 \\  10)!

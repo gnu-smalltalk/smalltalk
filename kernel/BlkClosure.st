@@ -52,6 +52,58 @@ creation of Processes from blocks.'!
 
 !BlockClosure class methodsFor: 'instance creation'!
 
+exceptionHandlerResetBlock
+    ^[ :context |
+         context at: context numArgs + 1 put: 0
+    ]
+!
+
+exceptionHandlerSearchBlock
+    ^[ :context :signal |
+        | best bestGoodness goodness activeHandlers nested |
+        bestGoodness := -1.
+        activeHandlers := context at: context numArgs + 1.
+	nested := false.
+
+        1 to: context numArgs - 1 by: 2 do: [ :i |
+            goodness := (context at: i) goodness: signal exception.
+            goodness > -1 ifTrue: [
+                (activeHandlers bitAt: i) = 1 ifTrue: [
+                    "Sorry, this handler is already active..."
+                    nested := true.
+                    goodness := -1.
+                ]
+            ].
+            goodness > bestGoodness ifTrue: [
+                best := i.
+                bestGoodness := goodness.
+            ]
+        ].
+
+        "Now instantiate the best handler we found"
+        best isNil
+	    ifFalse: [
+                context
+                    at: context numArgs + 1
+                    put: (activeHandlers setBit: best).
+
+                signal
+                    onDoBlock: context receiver
+                    handlerBlock: (context at: best + 1)
+                    onDoContext: context
+                    previousState: activeHandlers.
+
+		#found
+            ]
+	    ifTrue: [
+		nested ifTrue: [ #skip ] ifFalse: [ nil ]
+	    ]
+    ]
+! !
+
+
+!BlockClosure class methodsFor: 'instance creation'!
+
 numArgs: args numTemps: temps bytecodes: bytecodes depth: depth literals: literalArray
     "Answer a BlockClosure for a new CompiledBlock that is created using
      the passed parameters.  To make it work, you must put the BlockClosure
@@ -60,9 +112,30 @@ numArgs: args numTemps: temps bytecodes: bytecodes depth: depth literals: litera
 	numArgs: args numTemps: temps bytecodes: bytecodes depth: depth literals: literalArray)
 !
 
+block: aCompiledBlock receiver: anObject outerContext: aContext
+    "Answer a BlockClosure that activates the passed CompiledBlock
+     with the given receiver."
+    ^self new
+	block: aCompiledBlock;
+	receiver: anObject;
+	outerContext: aContext;
+	yourself
+!
+
+block: aCompiledBlock receiver: anObject
+    "Answer a BlockClosure that activates the passed CompiledBlock
+     with the given receiver."
+    ^self new
+	block: aCompiledBlock;
+	receiver: anObject;
+	yourself
+!
+
 block: aCompiledBlock
     "Answer a BlockClosure that activates the passed CompiledBlock."
-    ^self new block: aCompiledBlock; yourself
+    ^self new
+	block: aCompiledBlock;
+	yourself
 ! !
 
 
@@ -117,6 +190,8 @@ on: anException do: aBlock
      evaluating the receiver or the parameter of a Signal>>#return:"
 
     | active |
+    <exceptionHandlerSearch: BlockClosure exceptionHandlerSearchBlock
+	reset: BlockClosure exceptionHandlerResetBlock>
     active := 0.
     ^self value
 !
@@ -127,6 +202,8 @@ on: e1 do: b1 on: e2 do: b2
      result of evaluating the receiver or the argument of a Signal>>#return:"
 
     | active |
+    <exceptionHandlerSearch: BlockClosure exceptionHandlerSearchBlock
+	reset: BlockClosure exceptionHandlerResetBlock>
     active := 0.
     ^self value
 !
@@ -138,6 +215,8 @@ on: e1 do: b1 on: e2 do: b2 on: e3 do: b3
      Signal>>#return:"
 
     | active |
+    <exceptionHandlerSearch: BlockClosure exceptionHandlerSearchBlock
+	reset: BlockClosure exceptionHandlerResetBlock>
     active := 0.
     ^self value
 !
@@ -149,6 +228,8 @@ on: e1 do: b1 on: e2 do: b2 on: e3 do: b3 on: e4 do: b4
      Signal>>#return:"
 
     | active |
+    <exceptionHandlerSearch: BlockClosure exceptionHandlerSearchBlock
+	reset: BlockClosure exceptionHandlerResetBlock>
     active := 0.
     ^self value
 !
@@ -160,6 +241,8 @@ on: e1 do: b1 on: e2 do: b2 on: e3 do: b3 on: e4 do: b4 on: e5 do: b5
      Signal>>#return:"
 
     | active |
+    <exceptionHandlerSearch: BlockClosure exceptionHandlerSearchBlock
+	reset: BlockClosure exceptionHandlerResetBlock>
     active := 0.
     ^self value
 !

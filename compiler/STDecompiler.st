@@ -251,10 +251,7 @@ pushInstVar: anIndex with: unused
 storeInstVar: anIndex with: unused
 !
 
-popStoreInstVar: anIndex with: unused
-!
-
-setTopInstVar: anIndex with: unused
+makeDirtyBlock: unused
 !
 
 pushTemporary: anIndex outer: scopes with: unused
@@ -273,14 +270,6 @@ storeTemporary: anIndex outer: scopes with: unused
 	ifFalse: [ outer storeTemporary: anIndex outer: scopes - 1 with: unused ]
 !
 
-popStoreTemporary: anIndex outer: scopes with: unused
-    "Create the name of the given temporary"
-
-    scopes > 0
-	ifTrue: [ self popStoreTemporary: anIndex with: unused ]
-	ifFalse: [ outer popStoreTemporary: anIndex outer: scopes - 1 with: unused ]
-!
-
 pushTemporary: anIndex with: unused
     "Create the name of the given temporary"
 
@@ -291,23 +280,10 @@ storeTemporary: anIndex with: unused
 
     tmpNames at: anIndex ifAbsentPut: [ self newTemporaryName ]!
 
-popStoreTemporary: anIndex with: unused
-    "Create the name of the given temporary"
-
-    tmpNames at: anIndex ifAbsentPut: [ self newTemporaryName ]!
-
-setTopTemporary: anIndex with: unused
-    "Create the name of the given temporary"
-
-    tmpNames at: anIndex ifAbsentPut: [ self newTemporaryName ]!
-
 popIntoArray: anIndex with: unused
 !
 
 pushLiteral: anObject with: unused
-!
-
-setTopLiteral: anObject with: unused
 !
 
 pushGlobal: anObject with: unused
@@ -316,25 +292,7 @@ pushGlobal: anObject with: unused
 storeGlobal: anObject with: unused
 !
 
-popStoreGlobal: anObject with: unused
-!
-
-setTopGlobal: anObject with: unused
-!
-
 pushSelf: unused
-!
-
-returnSelf: unused
-    "Returns are treated as jumps to past the final bytecode"
-
-    self returnFromContext: unused
-!
-
-setTopSelf: unused
-!
-
-pushThisContext: unused
 !
 
 popStackTop: unused
@@ -344,15 +302,6 @@ dupStackTop: unused
 !
 
 exitInterpreter: unused
-!
-
-noOperation: unused
-!
-
-returnLiteral: anObject with: unused
-    "Returns are treated as jumps to past the final bytecode"
-
-    self returnFromContext: unused
 !
 
 returnFromContext: unused
@@ -1005,21 +954,14 @@ endStatement
 invalidOpcode: unused
     self error: 'invalid opcode'!
 
+makeDirtyBlock: unused
+!
+
 pushInstVar: anIndex with: unused
     stack addLast: (self varNode: (context instVarNameAt: anIndex))!
 
 storeInstVar: anIndex with: unused
     stack addLast: (self assignment: (context instVarNameAt: anIndex))!
-
-popStoreInstVar: anIndex with: unused
-    self
-	storeInstVar: anIndex with: unused;
-	popStackTop: unused!
-
-setTopInstVar: anIndex with: unused
-    self
-	popStackTop: unused;
-	pushInstVar: anIndex with: unused!
 
 pushTemporary: anIndex outer: scopes with: unused
     stack addLast: (self varNode: (context outerTemporaryAt: anIndex scopes: scopes))!
@@ -1027,26 +969,11 @@ pushTemporary: anIndex outer: scopes with: unused
 storeTemporary: anIndex outer: scopes with: unused
     stack addLast: (self assignment: (context outerTemporaryAt: anIndex scopes: scopes))!
 
-popStoreTemporary: anIndex outer: scopes with: unused
-    self
-	storeTemporary: anIndex outer: scopes with: unused;
-	popStackTop: unused!
-
 pushTemporary: anIndex with: unused
     stack addLast: (self varNode: (context temporaryAt: anIndex))!
 
 storeTemporary: anIndex with: unused
     stack addLast: (self assignment: (context temporaryAt: anIndex))!
-
-popStoreTemporary: anIndex with: unused
-    self
-	storeTemporary: anIndex with: unused;
-	popStackTop: unused!
-
-setTopTemporary: anIndex with: unused
-    self
-	popStackTop: unused;
-	pushTemporary: anIndex with: unused!
 
 popIntoArray: anIndex with: unused
     | value |
@@ -1065,44 +992,14 @@ popIntoArray: anIndex with: unused
 pushLiteral: anObject with: unused
     stack addLast: (self litNode: anObject)!
 
-setTopLiteral: anObject with: unused
-    self
-	popStackTop: unused;
-	pushLiteral: anObject with: unused!
-
 pushGlobal: anObject with: unused
     stack addLast: (self varNode: anObject path)!
 
 storeGlobal: anObject with: unused
     stack addLast: (self assignment: anObject path)!
 
-popStoreGlobal: anObject with: unused
-    self
-	storeGlobal: anObject with: unused;
-	popStackTop: unused!
-
-setTopGlobal: anObject with: unused
-    self
-	popStackTop: unused;
-	pushGlobal: anObject with: unused!
-
 pushSelf: unused
     stack addLast: (self varNode: 'self')!
-
-returnSelf: unused
-    stack isEmpty ifFalse: [ self popStackTop: unused ].
-
-    self
-	pushSelf: unused;
-	returnFromContext: unused!
-
-setTopSelf: unused
-    self
-	popStackTop: unused;
-	pushSelf: unused!
-
-pushThisContext: unused
-    stack addLast: (self varNode: 'thisContext')!
 
 isCascadeLast
     ^stack size >= 2 and: [
@@ -1140,16 +1037,6 @@ dupStackTop: unused
 exitInterpreter: unused
 !
 
-noOperation: unused
-!
-
-returnLiteral: anObject with: unused
-    stack isEmpty ifFalse: [ self popStackTop: unused ].
-
-    self
-	pushLiteral: anObject with: unused;
-	returnFromContext: unused!
-
 returnFromContext: unused
     isBlock
 	ifTrue: [ self endStatement ]
@@ -1174,8 +1061,14 @@ superSend: aSymbol numArgs: anInteger with: unused
 
 send: aSymbol numArgs: anInteger with: unused
     | args collection msg |
-    aSymbol == #blockCopy: ifTrue: [
-	^stack removeLast ].
+    "Not a very efficient check, but a rare one indeed (who
+     sends #thisContext?)"
+    (aSymbol == #thisContext
+        and: [ stack last = self varNode: ContextPart binding path ])
+        ifTrue: [
+	    stack removeLast; addLast: (self varNode: 'thisContext').
+	    ^self
+        ].
 
     args := Array new: anInteger.
     anInteger to: 1 by: -1 do: [ :each |

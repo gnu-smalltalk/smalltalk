@@ -36,10 +36,10 @@
 #define WRITE_BUFFER_SIZE 65536
 
 /* These flags help defining the flags and checking whether they are
-   different between the image we are loading and our environment. */
+   different between the image we are loading and our environment.  */
 
 #define MASK_ENDIANNESS_FLAG 1
-#define MASK_LONG_SIZE_FLAG 2
+#define MASK_SLOT_SIZE_FLAG 2
 
 #ifdef WORDS_BIGENDIAN
 # define LOCAL_ENDIANNESS_FLAG MASK_ENDIANNESS_FLAG
@@ -47,17 +47,17 @@
 # define LOCAL_ENDIANNESS_FLAG 0
 #endif
 
-#if SIZEOF_LONG == 4
-# define LOCAL_LONG_SIZE_FLAG 0
-#else /* SIZEOF_LONG == 8 */
-# define LOCAL_LONG_SIZE_FLAG MASK_LONG_SIZE_FLAG
-#endif /* SIZEOF_LONG == 8 */
+#if SIZEOF_OOP == 4
+# define LOCAL_SLOT_SIZE_FLAG 0
+#else /* SIZEOF_OOP == 8 */
+# define LOCAL_SLOT_SIZE_FLAG MASK_SLOT_SIZE_FLAG
+#endif /* SIZEOF_OOP == 8 */
 
 #define FLAG_CHANGED(flags, whichFlag)	\
   ((flags ^ LOCAL_##whichFlag) & MASK_##whichFlag)
 
 #define FLAGS_WRITTEN		\
-  (LOCAL_ENDIANNESS_FLAG | LOCAL_LONG_SIZE_FLAG)
+  (LOCAL_ENDIANNESS_FLAG | LOCAL_SLOT_SIZE_FLAG)
 
 #define VERSION_REQUIRED	\
   ((ST_MAJOR_VERSION << 16) + (ST_MINOR_VERSION << 8) + ST_EDIT_VERSION)
@@ -76,18 +76,18 @@
 
 typedef struct save_file_header
 {
-  unsigned char dummy[64];	/* Bourne shell command to execute image */
-  unsigned char signature[6];	/* 6+2=8 should be enough to align version! */
-  unsigned char unused;
-  unsigned char flags;		/* flags for endianness and sizeof(long) */
-  unsigned long version;	/* the Smalltalk version that made this dump */
-  unsigned long oopTableSize;	/* size of the oop table at dump */
-  unsigned long edenSpaceSize;	/* size of new space at dump time */
-  unsigned long survSpaceSize;	/* size of survivor spaces at dump time */
-  unsigned long oldSpaceSize;	/* size of old space at dump time */
-  unsigned long big_object_threshold;
-  unsigned long grow_threshold_percent;
-  unsigned long space_grow_rate;
+  char dummy[64];	/* Bourne shell command to execute image */
+  char signature[6];	/* 6+2=8 should be enough to align version! */
+  char unused;
+  char flags;		/* flags for endianness and sizeof(PTR) */
+  size_t version;	/* the Smalltalk version that made this dump */
+  size_t oopTableSize;	/* size of the oop table at dump */
+  size_t edenSpaceSize;	/* size of new space at dump time */
+  size_t survSpaceSize;	/* size of survivor spaces at dump time */
+  size_t oldSpaceSize;	/* size of old space at dump time */
+  size_t big_object_threshold;
+  size_t grow_threshold_percent;
+  size_t space_grow_rate;
 }
 save_file_header;
 
@@ -135,27 +135,27 @@ static void buffer_fill (int imageFd);
 
 /* This function saves the object pointed to by OOP on the image-file
    whose descriptor is IMAGEFD.  The object pointers are made relative
-   to the beginning of the object data-area. */
+   to the beginning of the object data-area.  */
 static void save_object (int imageFd,
 			 OOP oop);
 
 /* This function converts NUMFIXED absolute addresses at OBJ->data,
-   which are instance variables of the object, into relative ones. */
+   which are instance variables of the object, into relative ones.  */
 static inline void fixup_object (mst_Object obj,
 			  int numPointers);
 
 /* This function converts NUMFIXED relative addresses at OBJ->data,
-   which are instance variables of the object, into absolute ones. */
+   which are instance variables of the object, into absolute ones.  */
 static inline void restore_object (mst_Object object,
 			    int numPointers);
 
 /* This function inverts the endianness of SIZE long-words, starting at
-   BUF. */
+   BUF.  */
 static inline void fixup_byte_order (PTR buf,
-			      int size);
+			      size_t size);
 
 /* This function converts NUMFIXED relative addresses, starting at
-   OBJ->data, back to absolute form. */
+   OBJ->data, back to absolute form.  */
 static inline void restore_pointer_slots (mst_Object obj,
 				          int numPointers);
 
@@ -172,64 +172,64 @@ static void load_oop_table (int imageFd);
    including the class objects which are necessary to fix the byte
    objects, then all the byte-objects which also have instance
    variables). 
-   Object data is loaded from the IMAGEFD file descriptor. */
+   Object data is loaded from the IMAGEFD file descriptor.  */
 static void load_normal_oops (int imageFd);
 
 /* This function stores the header of the image file into the file
-   whose descriptor is IMAGEFD. */
+   whose descriptor is IMAGEFD.  */
 static void save_file_version (int imageFd);
 
 /* This function loads into HEADERP the header of the image file
    without checking its validity.
-   This data is loaded from the IMAGEFD file descriptor. */
+   This data is loaded from the IMAGEFD file descriptor.  */
 static void load_file_version (int imageFd,
 			       save_file_header * headerp);
 
 /* This function walks the OOP table and converts all the relative
-   addresses for the instance variables to absolute ones. */
+   addresses for the instance variables to absolute ones.  */
 static inline void restore_all_pointer_slots (void);
 
 /* This function converts all the relative addresses for OOP's
-   instance variables to absolute ones. */
+   instance variables to absolute ones.  */
 static inline void restore_oop_pointer_slots (OOP oop);
 
 /* This function prepares the OOP table to be written to the image
    file.  This contains the object sizes instead of the pointers,
-   since addresses will be recalculated upon load. */
+   since addresses will be recalculated upon load.  */
 static struct OOP *make_oop_table_to_be_saved (void);
 
 /* This function walks the OOP table and saves the data
-   onto the file whose descriptor is IMAGEFD. */
+   onto the file whose descriptor is IMAGEFD.  */
 static void save_all_objects (int imageFd);
 
 /* This function is the heart of _gst_load_from_file, which opens
    the file and then passes the descriptor to load_snapshot into
-   IMAGEFD. */
+   IMAGEFD.  */
 static mst_Boolean load_snapshot (int imageFd);
 
 /* This variable says whether the image we are loading has the
-   wrong endianness. */
+   wrong endianness.  */
 static mst_Boolean wrong_endianness;
 
 /* This variable contains the OOP slot index of the highest non-free
    OOP, excluding the built-in ones (i.e., it will always be <
    _gst_mem.ot_size).  This is used for optimizing the size of the
    saved image, and minimizing the load time when restoring the
-   system. */
+   system.  */
 static int num_used_oops = 0;
 
 /* Convert to a relative offset from start of OOP table.  The offset
    is 0 mod pointer-size, so it still looks like a pointer to the
    IS_INT test.  */
 #define OOP_RELATIVE(obj) \
-  ( (OOP)((long)(obj) - (long)_gst_mem.ot) )
+  ( (OOP)((intptr_t)(obj) - (intptr_t)_gst_mem.ot) )
 
-/* Convert from relative offset to actual oop table address. */
+/* Convert from relative offset to actual oop table address.  */
 #define OOP_ABSOLUTE(obj) \
-  ( (OOP)((long)(obj) + (long)_gst_mem.ot) )
+  ( (OOP)((intptr_t)(obj) + (intptr_t)_gst_mem.ot) )
 
 
-struct OOP *myOOPTable;
+struct OOP *myOOPTable = NULL;
 
 mst_Boolean
 _gst_save_to_file (const char *fileName)
@@ -315,7 +315,7 @@ make_oop_table_to_be_saved (void)
 
 	  /* Cache the number of indexed instance variables.  We prefer
 	     to do more work upon saving (done once) than upon loading
-	     (done many times). */
+	     (done many times).  */
 	  if (numPointers < (F_COUNT >> F_COUNT_SHIFT))
 	    myOOPTable[i].flags |= numPointers << F_COUNT_SHIFT;
 	  else
@@ -418,8 +418,8 @@ load_snapshot (int imageFd)
   if (strcmp (header.signature, SIGNATURE))
     return (false);
 
-  /* different sizeof(long) not supported */
-  if (FLAG_CHANGED (header.flags, LONG_SIZE_FLAG))
+  /* different sizeof(PTR) not supported */
+  if (FLAG_CHANGED (header.flags, SLOT_SIZE_FLAG))
     return (false);
 
   if UNCOMMON ((wrong_endianness =
@@ -492,12 +492,14 @@ load_oop_table (int imageFd)
   buffer_read (imageFd, _gst_mem.ot, sizeof (struct OOP) * num_used_oops);
   if UNCOMMON (wrong_endianness)
     fixup_byte_order (_gst_mem.ot,
-		      sizeof (struct OOP) * num_used_oops / sizeof (long));
+		      sizeof (struct OOP) * num_used_oops / sizeof (PTR));
 
   /* mark the remaining ones as available */
+  PREFETCH_START (&_gst_mem.ot[num_used_oops], PREF_WRITE | PREF_NTA);
   for (oop = &_gst_mem.ot[num_used_oops];
        oop < &_gst_mem.ot[_gst_mem.ot_size]; oop++)
     {
+      PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
       oop->flags = F_FREE;
       oop++;
     }
@@ -510,15 +512,17 @@ load_normal_oops (int imageFd)
   OOP oop;
   mst_Object object;
 
-  /* Now walk the oop table.  Start fixing the byte order. */
+  /* Now walk the oop table.  Start fixing the byte order.  */
 
   _gst_mem.num_free_oops = _gst_mem.ot_size - num_used_oops;
   _gst_mem.last_allocated_oop = &_gst_mem.ot[num_used_oops - 1];
+  PREFETCH_START (_gst_mem.ot, PREF_WRITE | PREF_NTA);
   for (oop = _gst_mem.ot; oop < &_gst_mem.ot[num_used_oops];
        oop++)
     {
-      long size;
+      size_t size;
 
+      PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
       if (oop->flags & F_FREE)
 	{
 	  _gst_mem.num_free_oops++;
@@ -542,24 +546,24 @@ load_normal_oops (int imageFd)
       if (oop->flags & F_FIXED)
 	_gst_mem.numFixedOOPs++;
 
-      size = (long) oop->object;
+      size = (size_t) oop->object;
       object = (mst_Object) _gst_mem_alloc (
 	(oop->flags & F_FIXED) ? _gst_mem.fixed : _gst_mem.old,
-        size * SIZEOF_LONG);
+        size * sizeof (PTR));
 
-      buffer_read (imageFd, object, SIZEOF_LONG * size);
+      buffer_read (imageFd, object, sizeof (PTR) * size);
       if (!IS_INT (object->objSize) || TO_INT (object->objSize) != size)
 	abort ();
 
       object->objClass = OOP_ABSOLUTE (object->objClass);
 
-      /* Remove flags that are invalid after an image has been loaded. */
+      /* Remove flags that are invalid after an image has been loaded.  */
       oop->flags &= ~F_RUNTIME;
 
       oop->object = object;
       if UNCOMMON (wrong_endianness)
 	{
-	  OOP size = (OOP) BYTE_INVERT ((long) oop->object->objSize);
+	  OOP size = (OOP) BYTE_INVERT ((intptr_t) oop->object->objSize);
 	  fixup_byte_order (object, 
 			    (oop->flags & F_BYTE)
 			      ? OBJ_HEADER_SIZE_WORDS : TO_INT (size));
@@ -572,7 +576,7 @@ load_normal_oops (int imageFd)
 	{
 	  /* this is another quirk; this is not the best place to do
 	     it. We have to reset the nativeIPs so that we can find
-	     restarted processes and recompile their methods. */
+	     restarted processes and recompile their methods.  */
 	  gst_method_context context = (gst_method_context) object;
 	  context->native_ip = DUMMY_NATIVE_IP;
 	}
@@ -582,7 +586,7 @@ load_normal_oops (int imageFd)
      objects. So we start by fixing the endianness of NON-BYTE objects
      (including classes!), for which we can do without NUM_OOPS, then
      do another pass here and fix the byte objects using the now
-     correct class objects. */
+     correct class objects.  */
   if UNCOMMON (wrong_endianness)
     for (oop = _gst_mem.ot; oop < &_gst_mem.ot[num_used_oops];
          oop++)
@@ -667,9 +671,9 @@ restore_oop_pointer_slots (OOP oop)
 
 void
 fixup_byte_order (PTR buf,
-		  int size)
+		  size_t size)
 {
-  long unsigned int *p = (long unsigned int *) buf;
+  uintptr_t *p = (uintptr_t *) buf;
   for (; size--; p++)
     *p = BYTE_INVERT (*p);
 }

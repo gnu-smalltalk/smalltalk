@@ -32,13 +32,13 @@
 #ifndef GST_INTERNAL_H
 #define GST_INTERNAL_H
 
-#ifdef USE_JIT_TRANSLATION
+#ifdef ENABLE_JIT_TRANSLATION
 
 /* These are functions that are called by the JIT-compiled code and
    yet are internal to interp.c.  xlat.c needs their addresses so that
    it can store them in the compiled code it generates.  */
 typedef void (*internal_func) ();
-extern const internal_func _gst_internal_funcs[];
+extern const internal_func _gst_internal_funcs[6];
 
 #define PTR_UNWIND_CONTEXT	 _gst_internal_funcs[0]
 #define PTR_UNWIND_METHOD	 _gst_internal_funcs[1]
@@ -46,7 +46,6 @@ extern const internal_func _gst_internal_funcs[];
 #define PTR_PREPARE_CONTEXT	 _gst_internal_funcs[3]
 #define PTR_EMPTY_CONTEXT_STACK	 _gst_internal_funcs[4]
 #define PTR_LOOKUP_NATIVE_IP	 _gst_internal_funcs[5]
-#define PTR_BLOCKCOPY		 _gst_internal_funcs[6]
 #endif
 
 #endif /* GST_INTERNAL_H */

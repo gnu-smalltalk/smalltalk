@@ -1,0 +1,174 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename snprintfv.info
+@settitle Extensible Formatted Printing
+@setchapternewpage odd
+@c %**end of header
+@c @finalout
+@headings 	    double
+
+@include version.texi
+
+@dircategory Programming
+@direntry
+* snprintfv: (snprintfv).	The extensible format printing library.
+@end direntry
+
+@copying
+This file documents libsnprintfv Version @value{VERSION}.
+It was last updated on @value{UPDATED}.
+
+Copyright @copyright{} 1999, 2002 Gary V. Vaughan
+
+This document is released under the terms of the GNU Free Documentation
+License as published by the Free Software Foundation; either version 1.1, or
+(at your option) any later version.
+
+You should have received a copy of the GNU Free Documentation License along
+with Snprintf.  If not, write to the Free Software Foundation, 59 Temple
+Place - Suite 330, Boston, MA 02111-1307, USA.
+
+There are no Cover Texts and no Invariant Sections; this text, along
+with its equivalent in the printed manual, constitutes the Title Page.
+@end copying
+
+@titlepage
+@sp 10
+@title snprintfv
+@subtitle Edition @value{EDITION}, @value{UPDATE-MONTH}
+@author Gary V. Vaughan
+@author @email{gvv@@techie.com}
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@ifinfo
+@c    name next   previous  up
+@node Top, Introduction, (dir), (dir)
+@top  The Extensible Format Print Library
+
+@insertcopying
+@end ifinfo
+
+@iftex
+@unnumbered Forward
+@end iftex
+
+Insert witty banter here
+
+@menu
+* Introduction::
+* Memory management::
+* Filaments::
+* Streams::
+* Printing::
+* Customizing::
+
+* GNU Free Documentation License::
+
+* Index::
+* Function Index::
+@end menu
+
+@node Introduction
+@chapter Introduction
+
+@c the generated mem API documentation
+@node Memory management
+@chapter Memory management
+@include mem.texi
+
+@c the generated filament API documentation
+@node Filaments
+@chapter Filaments
+@include filament.texi
+
+@c the generated stream API documentation
+@node Streams
+@chapter Streams
+@include stream.texi
+
+@c the generated snprintfv API documentation
+@node Printing
+@chapter Printing
+@include printf.texi
+
+@c the generated snprintfv API documentation
+@node Customizing
+@chapter Customizing
+@cindex customizing @code{printf}
+@cindex defining new @code{printf} conversions
+@cindex extending @code{printf}
+
+The @code{snprintfv} library lets you define your own custom conversion
+specifiers for @code{printf} template strings, to teach @code{printf}
+clever ways to print the important data structures of your program.
+
+The way you do this is by registering the conversion with the function
+@code{register_printf_function}; see @ref{Registering New Conversions}.
+One of the arguments you pass to this function is a pointer to a handler
+function that produces the actual output; see @ref{Defining the Output
+Handler}, for information on how to write this function.
+
+The facilities of this section are declared in the header file
+@file{printf.h}.
+
+@menu
+* Registering New Conversions::         Using @code{register_printf_function}
+                                         to register a new output conversion.
+* Conversion Specifier Options::        The handler must be able to get
+                                         the options specified in the
+                                         template when it is called.
+* Defining the Output Handler::         Defining the handler and arginfo
+                                         functions that are passed as arguments
+                                         to @code{register_printf_function}.
+* Printf Extension Example::            How to define a @code{printf}
+                                         handler function.
+* Differences from glibc::              glibc has a similar feature, almost
+					 source compatible
+@end menu
+
+@raisesections
+@include stdio.texi
+@lowersections
+
+@node Differences from glibc
+@section Differences from @code{glibc}
+
+Here is a brief summary of the differences and incompatibilities between
+@code{glibc}'s customizable printf and @code{snprintfv}'s.
+
+@itemize @bullet
+@item
+The first parameter to the @code{printf} handler is not a @code{FILE *},
+but a @code{STREAM *}.
+
+@item
+It is possible to extract multiple characters from the format string.
+
+@item
+the documentation.
+@end itemize
+
+@page
+@raisesections
+@include fdl.texi
+@lowersections
+
+@page
+@node Index
+@unnumbered Index
+
+@printindex cp
+
+@page
+@node Function Index
+@unnumbered Function Index
+
+@printindex fn
+
+@c summarycontents
+@contents
+@bye

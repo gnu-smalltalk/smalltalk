@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -45,6 +45,27 @@ CompiledMethod comment:
 methods from their source code, I can invoke Emacs to edit the source code
 for one of my instances, and I know how to access components of my
 instances.' !
+
+
+!CompiledMethod class methodsFor: 'instance creation'!
+
+numArgs: args
+    "Create a user-defined method (one that is sent
+     #valueWithReceiver:withArguments: when it is invoked)
+     with numArgs arguments.  This only makes sense when
+     called for a subclass of CompiledMethod."
+
+    args isInteger
+    	ifFalse: [ SystemExceptions.WrongClass signalOn: args mustBe: Integer ].
+
+    (args between: 0 and: 31)
+    	ifFalse: [ SystemExceptions.ArgumentOutOfRange signalOn: args
+			mustBeBetween: 0 and: 31 ].
+
+    ^self new
+	initialize;
+	header: (6 bitShift: 27) + args literals: #()
+! !
 
 
 !CompiledMethod class methodsFor: 'lean images'!
@@ -101,7 +122,7 @@ methodSourcePos
 
     self == aMethod ifTrue: [ ^true ].
     ^super = aMethod and: [
-	descriptor = aMethod getDescriptor ]
+	descriptor = aMethod descriptor ]
 !
 
 hash
@@ -127,6 +148,9 @@ methodClass: methodClass
 allBlocksDo: aBlock
     "Evaluate aBlock, passing to it all the CompiledBlocks it holds"
     self allLiterals do: [ :each |
+	each class == CompiledBlock ifTrue: [
+	    aBlock value: each
+	].
 	each class == BlockClosure ifTrue: [
 	    aBlock value: each block
 	]
@@ -178,7 +202,6 @@ allLiterals
     "Answer the literals referred to by the receiver and all the blocks
      in it"
 
-    "We don't use separate literal arrays, so answer literals."
     ^literals isNil ifTrue: [ #() ] ifFalse: [ literals ]
 !
 
@@ -197,6 +220,108 @@ stackDepth
     ^((header bitShift: -5) bitAnd: 16r3F) * 4
 ! !
 
+
+
+!CompiledMethod methodsFor: 'invoking'!
+
+valueWithReceiver: anObject withArguments: args
+    "Execute the method within anObject, passing the elements of the args
+     Array as parameters.  The method need not reside on the hierarchy
+     from the receiver's class to Object -- it need not reside at all in
+     a MethodDictionary, in fact -- but doing bad things will compromise
+     stability of the Smalltalk virtual machine (and don't blame anybody
+     but yourself).
+     
+     If the flags field of the method header is 6, this method instead
+     provides a hook from which the virtual machine can call back whenever
+     execution of the method is requested.  In this case, invoking the
+     method would cause an infinite loop (the VM asks the method to
+     run, the method asks the VM to invoke it, and so on), so this method
+     fails with a #subclassResponsibility error."
+
+    self flags = 6
+    	ifTrue: [ self subclassResponsibility ]
+    	ifFalse: [ anObject perform: self withArguments: args ]
+! !
+
+
+!CompiledMethod methodsFor: 'attributes'!
+
+isAnnotated
+    "If the receiver has any attributes, answer true."
+    | flags |
+    flags := self flags.
+    ^flags == 4 or: [ flags == 5 ]
+!
+
+primitiveAttribute
+    "If the receiver defines a primitive, return a Message resembling
+     the attribute that was used to define it."
+    | primitive |
+    primitive = 0 ifTrue: [ ^nil ].
+    ^Message selector: #primitive: arguments: { primitive }
+!
+
+attributes
+    "Return an Array of Messages, one for each attribute defined by the
+     receiver."
+    | attributes numAttr |
+    self isAnnotated ifFalse: [ ^#() ].
+    numAttr := descriptor size.
+    self primitive = 0 ifFalse: [ numAttr := numAttr + 1 ].
+
+    attributes := Array new: numAttr.
+    self primitive = 0 ifFalse: [
+	attributes at: numAttr put: self primitiveAttribute ].
+
+    1 to: descriptor size do: [ :i |
+	attributes at: i put: (descriptor at: i) ].
+
+    ^attributes
+!
+
+attributeAt: aSymbol
+    "Return a Message for the first attribute named aSymbol defined by the
+     receiver, or answer an error if none was found."
+
+    ^self
+	attributeAt: aSymbol
+	ifAbsent: [ SystemExceptions.NotFound signalOn: aSymbol what: 'attribute' ]
+!
+
+attributeAt: aSymbol ifAbsent: aBlock
+    "Return a Message for the first attribute named aSymbol defined by the
+     receiver, or evaluate aBlock is none was found."
+    | primitive attr |
+    self isAnnotated ifFalse: [ ^aBlock value ].
+
+    aSymbol == #primitive: ifTrue: [
+	primitive := self primitiveAttribute.
+	^primitive isNil ifTrue: [ aBlock value ] ifFalse: [ primitive ]
+    ].
+
+    1 to: descriptor size do: [ :i |
+	attr := descriptor at: i.
+	attr selector = aSymbol ifTrue: [ ^attr ]
+    ].
+    ^aBlock value
+!
+
+attributesDo: aBlock
+    "Evaluate aBlock once for each attribute defined by the receiver,
+     passing a Message each time."
+
+    | attr |
+    self isAnnotated ifFalse: [ ^self ].
+
+    self primitive = 0
+	ifFalse: [ aBlock value: self primitiveAttribute ].
+
+    1 to: descriptor size do: [ :i || attr |
+	attr := descriptor at: i.
+	aBlock value: attr
+    ]
+! !
 
 
 !CompiledMethod methodsFor: 'printing'!
@@ -219,7 +344,7 @@ storeOn: aStream
 	nextPutAll: ' source: ';
 	store: self methodSourceCode;
 	nextPutAll: ') makeLiteralsReadOnly; setDescriptor: ';
-	store: self getDescriptor;
+	store: self descriptor;
 	nextPutAll: '; yourself)'
 ! !
 
@@ -287,11 +412,12 @@ postCopy
 
     super postCopy.
     descriptor := descriptor copy.
-    literals := literals deepCopy.
-    self makeLiteralsReadOnly
+    "literals := literals deepCopy.
+    self makeLiteralsReadOnly"
 !
 
 makeLiteralsReadOnly
+    literals isNil ifTrue: [ ^self ].
     ^self makeLiteralsReadOnly: literals
 !
 
@@ -306,45 +432,16 @@ initialize
     descriptor := MethodInfo new
 !
 
-getDescriptor
+descriptor
     ^descriptor
+!
+
+descriptor: aMethodInfo
+    descriptor := aMethodInfo
 !
 
 stripSourceCode
     descriptor stripSourceCode
-!
-
-header: hdr literals: lits
-     "The structure of a method header is as follows (from interp.h)
-
-	3                   2                   1 
-      1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
-     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-     |.|.|flg| prim index        | #temps    | depth / 4 | #args   |1|
-     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-     stackdepth 6 bits 6..11
-     temporarycount 6 bits 12..17
-     argscount 5 bits 1..5
-     primitiveIndex 10 bits 18..27
-     flags 2 bits 29..28
-     flags 0 -- call the primitive indexed by primIndex or do nothing
-     flags 1 -- return self
-     flags 2 -- return instance variable in primIndex
-     flags 3 -- return first literal"
-    header := hdr.
-    literals := lits.
-    Behavior flushCache
-!
-
-numBytecodes
-    "Answer the number of bytecodes in the receiver"
-    ^(self basicSize) - (self bytecodeStart)
-!
-
-bytecodeStart
-    "Answer the index where the bytecodes start - 1"
-    ^0
 ! !
 
 !CompiledMethod methodsFor: 'testing'!

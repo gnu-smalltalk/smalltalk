@@ -1,0 +1,834 @@
+@deffn Typedef printf_arg
+@fnindex printf_arg
+
+Fields:
+@table @code
+@item pa_char
+an unsigned %char
+@item pa_wchar
+a %wchar_t
+@item pa_short_int
+a %short integer
+@item pa_int
+an %int
+@item pa_long_int
+a %long integer
+@item pa_long_long_int
+the widest signed integer type in use on the host
+@item pa_u_short_int
+an unsigned %short integer
+@item pa_u_int
+an unsigned %int
+@item pa_u_long_int
+an unsigned %long integer
+@item pa_u_long_long_int
+the widest unsigned integer type in use on the host
+@item pa_float
+a %float
+@item pa_double
+a %double
+@item pa_long_double
+a long %double, or a simple %double if it is the widest floating-point type in use on the host
+@item pa_string
+a %const pointer to %char
+@item pa_wstring
+a %const pointer to %wchar_t
+@item pa_pointer
+a generic pointer
+@end table
+
+The various kinds of arguments that can be passed to printf.
+
+@end deffn
+
+@deffn Typedef spec_entry
+@fnindex spec_entry
+
+Fields:
+@table @code
+@item spec
+the specifier character that was matched
+@item type
+when @var{arg} is NULL, the type of the only argument to the specifier
+@item fmt
+the handler function to actually print the arguments to the specifier
+@item arg
+the handler function to tell %printf about the types of the arguments to the specifier
+@item user
+the user data for the specifier, accessible to the handler function
+@end table
+
+This is returned by register_printf_function. 
+
+@end deffn
+
+@deftypefn Typedef spec_entry * register_callback_function (unsigned @var{spec}, printf_function *func, printf_arginfo_function *arginfo)
+@fnindex register_callback_function
+
+Parameters:
+@table @code
+@item spec
+the character which will trigger the functions, cast to an unsigned int.
+@item fmt
+the handler function to actually print the arguments to the specifier
+@item arg
+the handler function to tell %printf about the types of the arguments to the specifier
+@end table
+
+Register the pair made of @var{fmt} and @var{arg}, so that it is called
+when @var{spec} is encountered in a format string.  If you create
+a shared library with an entry point named
+@code{snv_register_printf_funcs}, and put the library in the
+search path given by the environment library @code{LTDL_LIBRARY_PATH},
+that entry point will be called when @code{libsnprintfv} is initialized,
+passing a pointer to this kind of function (actually, a pointer
+to @code{register_printf_function)} to it.  This functionality is only
+present when the library is installed, not when it is built as
+a convenience library.
+
+
+Returns @code{NULL} if @@func was not successfully registered, a
+@code{spec_entry} with the information on the function if it was.
+
+@end deftypefn
+
+@deffn Macro  PRINTF_ERROR (@var{pi}, @var{str})
+@fnindex PRINTF_ERROR
+
+Parameters:
+@table @code
+@item pi
+A pointer to the current state for the parser
+@item str
+The error message
+@end table
+
+Append an error that will be returned by printf_strerror.
+
+@end deffn
+
+@deffn Macro  SNV_EMIT (@var{ch}, @var{stream}, @var{count})
+@fnindex SNV_EMIT
+
+Parameters:
+@table @code
+@item ch
+the character to be printed
+@item stream
+the stream on which to print
+@item count
+a variable to be updated with the count of printed
+@end table
+
+characters
+
+Maintain the count while putting @var{ch} in @var{stream}, also be careful about
+handling @code{NULL} stream if the handler is being called purely to count
+output size.
+
+@end deffn
+
+@deftypefn Function int printf_generic_info (struct printf_info *const @var{pinfo}, size_t @var{n}, int *@var{argtypes})
+@fnindex printf_generic_info
+
+Parameters:
+@table @code
+@item pinfo
+the current state information for the format
+@item n
+the number of available slots in the @var{argtypes} array
+@item argtypes
+the pointer to the first slot to be filled by the
+@end table
+
+string parser.
+function
+
+An example implementation of a @code{printf_arginfo_function}, which
+takes the basic type from the type given in the @code{spec_entry}
+and adds flags depending on what was parsed (e.g. @code{PA_FLAG_SHORT}
+is @code{pparser->is_short} and so on).
+
+
+Always 1.
+
+@end deftypefn
+
+@deftypefn Function int printf_generic (STREAM *@var{stream}, struct printf_info *const @var{pinfo}, union printf_arg const *@var{args})
+@fnindex printf_generic
+
+Parameters:
+@table @code
+@item stream
+the stream (possibly a struct printfv_stream appropriately
+@item pinfo
+the current state information for the format string parser.
+@item args
+the pointer to the first argument to be read by the handler
+@end table
+
+cast) on which to write output.
+
+An example implementation of a @code{printf_function}, used to provide easy
+access to justification, width and precision options.
+
+
+The number of characters output.
+
+@end deftypefn
+
+@deftypefn Function spec_entry * register_printf_function (unsigned @var{spec}, printf_function *@var{fmt}, printf_arginfo_function *@var{arg})
+@fnindex register_printf_function
+
+Parameters:
+@table @code
+@item spec
+the character which will trigger @@func, cast to an unsigned int.
+@item fmt
+the handler function to actually print the arguments to the specifier
+@item arg
+the handler function to tell %printf about the types of the arguments to the specifier
+@end table
+
+Register the pair made of @var{fmt} and @var{arg}, so that it is called
+when @var{spec} is encountered in a format string.
+
+
+Returns @code{NULL} if @@func was not successfully registered, a
+@code{spec_entry} with the information on the function if it was.
+
+@end deftypefn
+
+@deftypefn Function char * printf_strerror ()
+@fnindex printf_strerror
+
+Communicate information on the last error in a printf
+format string.
+
+
+A string describing the last error which occurred during the
+parsing of a printf format string.  It is the responsibility
+of the caller to free the string.
+
+@end deftypefn
+
+@deftypefn Function char * printf_error (struct printf_info *@var{pinfo}, const char *@var{file}, int @var{line}, const char *@var{func1}, const char *@var{func2}, const char *@var{func3}, const char *@var{error_message})
+@fnindex printf_error
+
+Parameters:
+@table @code
+@item pinfo
+pointer to the current parser state.
+@item file
+file where error was detected.
+@item line
+line where error was detected.
+@item func1
+" (" if function is supplied by compiler.
+@item func2
+function where error was detected, if supplied by compiler.
+@item func3
+")" if function is supplied by compiler.
+@item error_message
+new error message to append to @var{pinfo}.
+@end table
+
+The contents of @var{error_message} are appended to the @var{pinfo} internal
+error string, so it is safe to pass static strings or recycle the
+original when this function returns.
+
+
+The address of the full accumulated error message in @var{pinfo} is
+returned.
+
+@end deftypefn
+
+@deftypefn Function size_t parse_printf_format (const char *@var{format}, int @var{n}, int *@var{argtypes})
+@fnindex parse_printf_format
+
+Parameters:
+@table @code
+@item format
+a % delimited format string.
+@item n
+the size of the @var{argtypes} vector
+@item argtypes
+a vector of ints, to be filled with the argument types from @var{format}
+@end table
+
+Returns information about the number and types of
+arguments expected by the template string @var{format}.
+The argument @var{n} specifies the number of elements in the array
+@var{argtypes}.  This is the maximum number of elements that
+the function will try to write.
+
+
+The total number of arguments required by @var{format}.  If this
+number is greater than @var{n}, then the information returned
+describes only the first @var{n} arguments.  If you want information
+about additional arguments, allocate a bigger array and call
+this function again. If there is an error, then @code{SNV_ERROR}
+is returned instead.
+
+@end deftypefn
+
+@deftypefn Function int stream_printfv (STREAM *@var{stream}, const char *@var{format}, snv_constpointer const *ap)
+@fnindex stream_printfv
+
+Parameters:
+@table @code
+@item stream
+an initialised stream structure.
+@item format
+a % delimited format string.
+@item args
+a vector of argument addresses to match @var{format}.
+@end table
+
+Format the elements of @var{args} according to @var{format}, and write
+the results to @var{stream}.  If @var{stream} is @code{NULL}, only count the
+number of characters needed to output the format.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int stream_vprintf (STREAM *@var{stream}, const char *@var{format}, va_list @var{ap})
+@fnindex stream_vprintf
+
+Parameters:
+@table @code
+@item stream
+an initialised stream structure.
+@item format
+a % delimited format string.
+@item ap
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{ap} according to @var{format}, and write
+the results to @var{stream}.  If @var{stream} is @code{NULL}, only count the
+number of characters needed to output the format.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int stream_printf (STREAM * @var{stream}, const char *@var{format}, ...)
+@fnindex stream_printf
+
+Parameters:
+@table @code
+@item stream
+an initialised stream structure.
+@item format
+a % delimited format string.
+@item va_alist
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{va_alist} according to @var{format}, and write
+the results to @var{stream}.  If @var{stream} is @code{NULL}, only count the
+number of characters needed to output the format.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_fdputc (int @var{ch}, STREAM *@var{stream})
+@fnindex snv_fdputc
+
+Parameters:
+@table @code
+@item ch
+A single character to be added to @var{stream}.
+@item stream
+The stream in which to write @var{ch}.
+@end table
+
+A StreamPut function for use in putting characters
+into STREAMs holding a file descriptor.
+
+
+The value of @var{ch} that has been put in @var{stream}, or -1 in case of
+an error (errno will be set to indicate the type of error).
+
+@end deftypefn
+
+@deftypefn Function int snv_dprintf (int @var{fd}, const char *@var{format}, ...)
+@fnindex snv_dprintf
+
+Parameters:
+@table @code
+@item fd
+an open file descriptor.
+@item format
+a % delimited format string.
+@item va_alist
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{va_alist} according to @var{format}, and write
+the results to the file descriptor @var{fd}.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_vdprintf (int @var{fd}, const char *@var{format}, va_list @var{ap})
+@fnindex snv_vdprintf
+
+Parameters:
+@table @code
+@item fd
+an open file descriptor.
+@item format
+a % delimited format string.
+@item ap
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{ap} according to @var{format}, and write
+the results to the file descriptor @var{fd}.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_dprintfv (int @var{fd}, const char *@var{format}, snv_constpointer const @var{args}[])
+@fnindex snv_dprintfv
+
+Parameters:
+@table @code
+@item fd
+an open file descriptor.
+@item format
+a % delimited format string.
+@item args
+a vector of argument addresses to match @var{format}.
+@end table
+
+Format the elements of @var{args} according to @var{format}, and write
+the results to file descriptor @var{fd}.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_fileputc (int @var{ch}, STREAM *@var{stream})
+@fnindex snv_fileputc
+
+Parameters:
+@table @code
+@item ch
+A single character to be added to @var{stream}.
+@item stream
+The stream in which to write @var{ch}.
+@end table
+
+A StreamPut function for use in putting characters
+into STREAMs holding a FILE*.
+
+
+The value of @var{ch} that has been put in @var{stream}.
+
+@end deftypefn
+
+@deftypefn Function int snv_printf (const char *@var{format}, ...)
+@fnindex snv_printf
+
+Parameters:
+@table @code
+@item format
+a % delimited format string.
+@item va_alist
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{va_alist} according to @var{format}, and write
+the results to the standard output stream.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_vprintf (const char *@var{format}, va_list @var{ap})
+@fnindex snv_vprintf
+
+Parameters:
+@table @code
+@item format
+a % delimited format string.
+@item ap
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{ap} according to @var{format}, and write
+the results to the standard output stream.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_printfv (const char *@var{format}, snv_constpointer const @var{args}[])
+@fnindex snv_printfv
+
+Parameters:
+@table @code
+@item format
+a % delimited format string.
+@item args
+a vector of argument addresses to match @var{format}.
+@end table
+
+Format the elements of @var{args} according to the string @var{format},
+and write the result to the standard output stream.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_fprintf (FILE * @var{file}, const char *@var{format}, ...)
+@fnindex snv_fprintf
+
+Parameters:
+@table @code
+@item file
+a stdio.h FILE* stream.
+@item format
+a % delimited format string.
+@item va_alist
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{va_alist} according to @var{format}, and write
+the results to the @var{file} stream.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_vfprintf (FILE *@var{file}, const char *@var{format}, va_list @var{ap})
+@fnindex snv_vfprintf
+
+Parameters:
+@table @code
+@item file
+a stdio.h FILE* stream.
+@item format
+a % delimited format string.
+@item ap
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{ap} according to @var{format}, and write
+the results to the @var{file} stream.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_fprintfv (FILE *@var{file}, const char *@var{format}, snv_constpointer const @var{args}[])
+@fnindex snv_fprintfv
+
+Parameters:
+@table @code
+@item file
+a stdio.h FILE* stream.
+@item format
+a % delimited format string.
+@item args
+a vector of argument addresses to match @var{format}.
+@end table
+
+Format the elements of @var{args} according to @var{format}, and write
+the results to @var{file}.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_bufputc (int @var{ch}, STREAM *@var{stream})
+@fnindex snv_bufputc
+
+Parameters:
+@table @code
+@item ch
+A single character to be added to @var{stream}.
+@item stream
+The stream in which to write @var{ch}.
+@end table
+
+A StreamPut function for use in putting characters
+into STREAMs holding a char buffer.
+
+
+The value of @var{ch} that has been put in @var{stream}.
+
+@end deftypefn
+
+@deftypefn Function int snv_sprintf (char @var{buffer}[], const char *@var{format}, ...)
+@fnindex snv_sprintf
+
+Parameters:
+@table @code
+@item buffer
+a preallocated char* buffer.
+@item format
+a % delimited format string.
+@item va_alist
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{va_alist} according to @var{format}, and write
+the results to the string @var{buffer}.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_vsprintf (char @var{buffer}[], const char *@var{format}, va_list @var{ap})
+@fnindex snv_vsprintf
+
+Parameters:
+@table @code
+@item buffer
+a preallocated char* buffer.
+@item format
+a % delimited format string.
+@item ap
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{ap} according to @var{format}, and write
+the results to the string @var{buffer}.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_sprintfv (char @var{buffer}[], const char *@var{format}, snv_constpointer const @var{args}[])
+@fnindex snv_sprintfv
+
+Parameters:
+@table @code
+@item buffer
+a preallocated char* buffer.
+@item format
+a % delimited format string.
+@item args
+a vector of argument addresses to match @var{format}.
+@end table
+
+Format the elements of @var{args} according to @var{format}, and write
+the results to the string @var{buffer}.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_snprintf (char @var{buffer}[], unsigned long @var{limit}, const char *@var{format}, ...)
+@fnindex snv_snprintf
+
+Parameters:
+@table @code
+@item buffer
+a preallocated char* buffer.
+@item limit
+the maximum number of characters to write into @var{buffer}.
+@item format
+a % delimited format string.
+@item va_alist
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{va_alist} according to @var{format}, and write
+the results to the string @var{buffer}, truncating the formatted string
+if it reaches @var{limit} characters in length.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_vsnprintf (char @var{buffer}[], unsigned long @var{limit}, const char *@var{format}, va_list @var{ap})
+@fnindex snv_vsnprintf
+
+Parameters:
+@table @code
+@item buffer
+a preallocated char* buffer.
+@item limit
+the maximum number of characters to write into @var{buffer}.
+@item format
+a % delimited format string.
+@item ap
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{ap} according to @var{format}, and write
+the results to the string @var{buffer}, truncating the formatted string
+if it reaches @var{limit} characters in length.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_snprintfv (char @var{buffer}[], unsigned long @var{limit}, const char *@var{format}, snv_constpointer const @var{args}[])
+@fnindex snv_snprintfv
+
+Parameters:
+@table @code
+@item buffer
+a preallocated char* buffer.
+@item limit
+the maximum number of characters to write into @var{buffer}.
+@item format
+a % delimited format string.
+@item args
+a vector of argument addresses to match @var{format}.
+@end table
+
+Format the elements of @var{args} according to @var{format}, and write
+the results to the string @var{buffer}, truncating the formatted string
+if it reaches @var{limit} characters in length.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_filputc (int @var{ch}, STREAM *@var{stream})
+@fnindex snv_filputc
+
+Parameters:
+@table @code
+@item ch
+A single character to be added to @var{stream}.
+@item stream
+The stream in which to write @var{ch}.
+@end table
+
+A StreamPut function for use in putting characters
+into STREAMs holding a Filament*.
+
+
+The value of @var{ch} that has been put in @var{stream}.
+
+@end deftypefn
+
+@deftypefn Function int snv_asprintf (char **@var{result}, const char *@var{format}, ...)
+@fnindex snv_asprintf
+
+Parameters:
+@table @code
+@item result
+the address of a char * variable.
+@item format
+a % delimited format string.
+@item va_alist
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{va_alist} according to @var{format}, and write
+the results to an internally allocated buffer whose address is
+stored in @var{result} (and should be freed by the caller) unless
+there is an error.
+
+Yes, this interface is cumbersome and totally useless.  It would
+have been better to simply return the allocated address, but
+it turns out that somebody wasn't thinking much when adding 
+asprintf to libiberty a few years ago.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_vasprintf (char **@var{result}, const char *@var{format}, va_list @var{ap})
+@fnindex snv_vasprintf
+
+Parameters:
+@table @code
+@item result
+the address of a char * variable.
+@item format
+a % delimited format string.
+@item ap
+a varargs/stdargs va_list.
+@end table
+
+Format the elements of @var{ap} according to @var{format}, and write
+the results to an internally allocated buffer whose address is
+stored in @var{result} (and should be freed by the caller) unless
+there is an error.
+
+Above moaning for asprintf applies here too.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+
+@deftypefn Function int snv_asprintfv (char **@var{result}, const char *@var{format}, snv_constpointer const @var{args}[])
+@fnindex snv_asprintfv
+
+Parameters:
+@table @code
+@item result
+the address of a char * variable.
+@item format
+a % delimited format string.
+@item args
+a vector of argument addresses to match @var{format}.
+@end table
+
+Format the elements of @var{args} according to @var{format}, and write
+the results to an internally allocated buffer whose address is
+stored in @var{result} (and should be freed by the caller) unless
+there is an error.
+
+Above moaning for asprintf applies here too.
+
+
+The number of characters written is returned, unless there is
+an error, when @code{SNV_ERROR} is returned.
+
+@end deftypefn
+

@@ -28,17 +28,16 @@
 |
  ======================================================================"
 
-RecursionLock subclass: #Monitor
-	instanceVariableNames: 'defaultLock lockDict '
-	classVariableNames: ''
+Object subclass: #Monitor
+	instanceVariableNames: 'semaphore process count waitSemaphores '
+	classVariableNames: 'Mutex'
 	poolDictionaries: ''
-	category: 'Kernel-Processes'!
+	category: 'Examples-Processes'!
 
 Monitor comment: '
 A monitor provides process synchronization that is more highlevel than the
-one provided by a Semaphore. Similar to the classical definition of a
-Monitor, and an extension of the facility provided by the Java
-language it has the following properties:
+one provided by a Semaphore.  It is equivalent to the facility provided
+by the Java language.
 
 1) At any time, only one process can be executing code inside a critical
 section of a monitor.
@@ -47,16 +46,14 @@ section of a monitor.
 does never get blocked when it enters a (nested) critical section of the
 same monitor.
 
-3) Inside a critcal section, a process can wait for an event that maybe
-coupled to a certain condition. If the condition is not fulfilled, the
-process leaves the monitor temporarily (in order to let other processes
-enter) and waits until another process notifys the event. Then, the 
-original process checks the condition again (this often necessary because
-the state of the monitor could have changed in the meantime) and continues 
-if it is fulfilled.
+3) Inside a critcal section, a process can stop to wait for events.
+The process leaves the monitor temporarily (in order to let other
+processes enter) and waits until another process notifies the event.
+Then, the original process checks if the event is the desired one and
+continues if it is.
 
 4) The monitor is fair, which means that the process that is waiting on a
-notifyed condition the longest gets activated first.'!
+notified condition the longest gets activated first.'!
 
 Semaphore subclass: #ConditionVariable
        instanceVariableNames: 'set'
@@ -112,113 +109,29 @@ sent to an instance of me, I periodically check if during the
 time you sent #notify and, if you did not, I evaluate a
 user-supplied action block.'!
 
+!Monitor class methodsFor: 'initialization'!
 
-!Monitor methodsFor: 'waiting-specific'!
+initialize
+    Mutex := Semaphore forMutualExclusion! !
 
-waitFor: aSymbolOrNil
-    "Unconditional waiting for the non-default event represented by the
-    argument symbol.  Same as Monitor>>wait, but the process gets only
-    reactivated by the specific event and not the default event."
+!Monitor class methodsFor: 'private'!
 
-    self checkOwnerProcess.
-    self waitOnLock: (self requestLockFor: aSymbolOrNil)!
+delayProcessFor: mils semaphore: s
+    ^[
+        (Delay forMilliseconds: mils) wait.
+        s signal.
+	Processor activeProcess suspend ]!
 
-waitUntil: aBlock for: aSymbolOrNil
-    "Conditional waiting for the non-default event represented by the
-    argument symbol.  See Monitor>>waitWhile:for: aBlock."
+!Monitor class methodsFor: 'instance creation'!
 
-    ^self waitWhile: [aBlock value not] for: aSymbolOrNil!
+new
+    ^super new initialize!
 
-waitWhile: aBlock for: aSymbolOrNil
-    "Conditional waiting for the non-default event represented by
-    the argument symbol.  Same as Monitor>>waitWhile:for:, but the
-    process gets only reactivated by the specific event and not the
-    default event."
+!Monitor methodsFor: 'initialize-release'!
 
-    self checkOwnerProcess.
-    self waitWhile: aBlock onLock: (self requestLockFor: aSymbolOrNil).! !
-
-!Monitor methodsFor: 'waiting-default'!
-
-wait
-    "Unconditional waiting for the default event.  The current process
-    gets blocked and leaves the monitor, which means that the monitor
-    allows another process to execute critical code. When the default
-    event is notifyed, the original process is resumed."
-
-    ^self waitFor: nil!
-
-waitUntil: aBlock
-	"Conditional waiting for the default event.
-	See Monitor>>waitWhile: aBlock."
-
-    ^self waitUntil: aBlock for: nil!
-
-waitWhile: aBlock
-    "Conditional waiting for the default event.
-    The current process gets blocked and leaves the monitor only if
-    the argument block evaluates to true. This means that another
-    process can enter the monitor. When the default event is notifyed,
-    the original process is resumed, which means that the condition
-    (argument block) is checked again. Only if it evaluates to false,
-    execution proceeds. Otherwise, the process gets blocked and leaves
-    the monitor again..."
-
-    ^self waitWhile: aBlock for: nil! !
-
-!Monitor methodsFor: 'notifying-default'!
-
-notify
-    "One process waiting for the default event is woken up."
-    ^self notify: nil!
-
-notifyAll
-    "All processes waiting for the default event are woken up."
-    ^self notifyAll: nil! !
-
-!Monitor methodsFor: 'notifying-specific'!
-
-notify: aSymbolOrNil
-    "One process waiting for the given event is woken up. If there
-    is no process waiting for this specific event, a process waiting
-    for the default event gets resumed."
-
-    | lock |
-    self checkOwnerProcess.
-    lock := self lockFor: aSymbolOrNil.
-    lock isNil ifTrue: [ lock := self defaultLock ].
-    lock notify!
-
-notifyAll: aSymbolOrNil
-    "All process waiting for the given event or the default event
-    are woken up."
-
-    | lock |
-    self checkOwnerProcess.
-    self defaultLock notifyAll.
-    lock := self lockFor: aSymbolOrNil.
-    lock isNil ifTrue: [ ^self ].
-    lock notifyAll!
-
-notifyReallyAll
-    "All processes waiting for any events (default or specific) are
-    woken up."
-
-    self checkOwnerProcess.
-    self defaultLock notifyAll.
-    self lockDict valuesDo: [:lock |
-    	lock notifyAll]! !
-
-!Monitor methodsFor: 'accessing'!
-
-
-cleanup
-    self checkOwnerProcess.
-    self defaultLock isEmpty ifTrue: [defaultLock := nil].
-    lockDict ifNotNil: [
-	lockDict copy keysAndValuesDo: [:id :lock | 
-	    lock isEmpty ifTrue: [lockDict removeKey: id]].
-	lockDict isEmpty ifTrue: [lockDict := nil]]!
+initialize
+    count := 0.
+    semaphore := Semaphore forMutualExclusion! !
 
 !Monitor methodsFor: 'private'!
 
@@ -226,29 +139,91 @@ checkOwnerProcess
     self isOwnerProcess
 	ifFalse: [self error: 'Monitor access violation']!
 
-defaultLock
-    defaultLock isNil ifTrue: [defaultLock := Semaphore new].
-    ^defaultLock!
+enter
+    | activeProcess |
+    activeProcess := Processor activeProcess.
+    process == activeProcess
+	ifFalse: [
+	    semaphore wait.
+	    process := activeProcess ].
+    count := count + 1!
 
-waitOnLock: aSemaphore
-    self exit.
-    aSemaphore wait.
-    self enter!
+exit
+    Mutex wait.
+    (count := count - 1) == 0
+	ifTrue: [ process := nil. semaphore signal ].
+    Mutex signal!
 
-lockDict
-    lockDict isNil ifTrue: [lockDict := IdentityDictionary new].
-    ^lockDict!
+unlock
+    | oldCount |
+    oldCount := count.
+    count := 0.
+    process := nil.
+    semaphore signal.
+    ^oldCount!
 
-requestLockFor: aSymbol
-    aSymbol isNil ifTrue: [ ^self defaultLock ].
-    ^self lockDict at: aSymbol ifAbsentPut: [Semaphore new]!
+lock: saveCount
+    | activeProcess |
+    activeProcess := Processor activeProcess.
+    process == activeProcess
+	ifFalse: [
+	    semaphore wait.
+	    process := activeProcess ].
+    count := count + saveCount! !
 
-lockFor: aSymbol
-    aSymbol isNil ifTrue: [ ^self defaultLock ].
-    ^self lockDict at: aSymbol ifAbsent: [nil]!
+!Monitor methodsFor: 'control'!
 
-waitWhile: aBlock onLock: aSemaphore
-    [aBlock value] whileTrue: [self waitOnLock: aSemaphore]!
+critical: aBlock
+    self enter.
+    ^aBlock ensure: [ self exit ]!
+
+signal
+    self checkOwnerProcess.
+    Mutex wait.
+    waitSemaphores isNil ifTrue: [ Mutex signal. ^self ].
+    waitSemaphores isEmpty ifFalse: [ waitSemaphores removeFirst signal ].
+    Mutex signal!
+
+signalAll
+    self checkOwnerProcess.
+    Mutex wait.
+    waitSemaphores isNil ifTrue: [ Mutex signal. ^self ].
+    waitSemaphores size timesRepeat: [ waitSemaphores removeFirst signal ].
+    Mutex signal!
+
+wait
+    ^self wait: 0!
+
+wait: msec
+    | count process sema |
+    self checkOwnerProcess.
+    sema := Semaphore new.
+
+    "Grab the monitor, unlock it and register the semaphore we'll wait on.
+     Note that we unlock the monitor *before* relinquishing the mutex."
+    Mutex wait.
+    count := self unlock.
+    waitSemaphores isNil ifTrue: [ waitSemaphores := OrderedCollection new ].
+    waitSemaphores addLast: sema.
+    Mutex signal.
+
+    "If there's a timeout, start a process to exit the wait anticipatedly."
+    msec > 0 ifTrue: [
+	process := (self class delayProcessFor: msec semaphore: sema) fork ].
+
+    sema wait.
+
+    "Also if there's a timeout, ensure that the semaphore is removed from
+     the list.  If there's no timeout we do not even need to reacquire the
+     monitor afterwards (see also #exit:, which waits after getting the
+     monitor and relinquishing the mutex)."
+    process notNil ifTrue: [
+        Mutex wait.
+        waitSemaphores remove: sema ifAbsent: [].
+        process terminate.
+        Mutex signal ].
+
+    self lock: count! !
 
 !ConditionVariable methodsFor: 'all'!
 
@@ -429,3 +404,5 @@ start
 	 ok := false.
     ] ] forkAt: Processor lowIOPriority.
 ! !
+
+Monitor initialize!

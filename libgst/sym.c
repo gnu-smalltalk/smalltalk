@@ -53,7 +53,7 @@ struct symbol_list
 /* Represents all the identifiers, both arguments and temporaries,
    which are declared in a given scope.  Nested scopes result in
    nested instances of the scope struct, with the current scope always
-   being the innermost at any point during the compilation. */
+   being the innermost at any point during the compilation.  */
 typedef struct scope *scope;
 struct scope
 {
@@ -72,60 +72,124 @@ typedef struct symbol_info
 symbol_info;
 
 
-OOP _gst_and_colon_symbol, _gst_at_colon_put_colon_symbol,
-  _gst_at_colon_symbol, _gst_at_sign_symbol, _gst_at_end_symbol,
-  _gst_bit_and_colon_symbol, _gst_bit_or_colon_symbol,
-  _gst_bit_shift_colon_symbol, _gst_block_copy_colon_symbol,
-  _gst_class_symbol, _gst_is_nil_symbol, _gst_not_nil_symbol,
-  _gst_divide_symbol, _gst_do_colon_symbol, _gst_equal_symbol,
-  _gst_greater_equal_symbol, _gst_greater_than_symbol,
-  _gst_if_false_colon_if_true_colon_symbol, _gst_if_false_colon_symbol,
-  _gst_if_true_colon_if_false_colon_symbol, _gst_if_true_colon_symbol,
-  _gst_integer_divide_symbol, _gst_less_equal_symbol,
-  _gst_less_than_symbol, _gst_minus_symbol, _gst_new_colon_symbol,
-  _gst_new_symbol, _gst_next_put_colon_symbol, _gst_next_symbol,
-  _gst_not_equal_symbol, _gst_not_same_object_symbol,
-  _gst_or_colon_symbol, _gst_plus_symbol, _gst_remainder_symbol,
-  _gst_same_object_symbol, _gst_size_symbol, _gst_this_context_symbol,
-  _gst_times_symbol,
-  _gst_to_colon_do_colon_symbol, _gst_times_repeat_colon_symbol,
-  _gst_to_colon_by_colon_do_colon_symbol,
-  _gst_value_colon_symbol, _gst_value_colon_value_colon_symbol,
-  _gst_value_colon_value_colon_value_colon_symbol,
-  _gst_value_with_arguments_colon_symbol, _gst_while_false_symbol,
-  _gst_value_symbol, _gst_yourself_symbol, _gst_while_true_symbol,
-  _gst_while_false_colon_symbol, _gst_while_true_colon_symbol,
-  _gst_bad_return_error_symbol, _gst_super_symbol, _gst_nil_symbol,
-  _gst_true_symbol, _gst_false_symbol, _gst_self_symbol,
-  _gst_repeat_symbol, _gst_does_not_understand_colon_symbol,
-  _gst_must_be_boolean_symbol, _gst_terminate_symbol, _gst_char_symbol,
-  _gst_as_scaled_decimal_scale_symbol, _gst_unknown_symbol,
-  _gst_string_symbol, _gst_string_out_symbol, _gst_symbol_symbol,
-  _gst_int_symbol, _gst_uint_symbol, _gst_long_symbol,
-  _gst_ulong_symbol, _gst_float_symbol, _gst_double_symbol,
-  _gst_boolean_symbol, _gst_void_symbol, _gst_variadic_symbol,
-  _gst_c_object_symbol, _gst_c_object_ptr_symbol, _gst_smalltalk_symbol,
-  _gst_byte_array_symbol, _gst_byte_array_out_symbol,
-  _gst_undeclared_symbol, _gst_self_smalltalk_symbol,
-  _gst_vm_primitives_symbol, _gst_variadic_smalltalk_symbol,
-  _gst_start_execution_colon_symbol, _gst_symbol_table,
-  _gst_current_namespace;
+OOP _gst_and_symbol = NULL;
+OOP _gst_as_scaled_decimal_scale_symbol = NULL;
+OOP _gst_at_put_symbol = NULL;
+OOP _gst_at_symbol = NULL;
+OOP _gst_at_end_symbol = NULL;
+OOP _gst_at_sign_symbol = NULL;
+OOP _gst_bad_return_error_symbol = NULL;
+OOP _gst_bit_and_symbol = NULL;
+OOP _gst_bit_or_symbol = NULL;
+OOP _gst_bit_shift_symbol = NULL;
+OOP _gst_bit_xor_symbol = NULL;
+OOP _gst_boolean_symbol = NULL;
+OOP _gst_byte_array_out_symbol = NULL;
+OOP _gst_byte_array_symbol = NULL;
+OOP _gst_c_object_ptr_symbol = NULL;
+OOP _gst_c_object_symbol = NULL;
+OOP _gst_char_symbol = NULL;
+OOP _gst_class_symbol = NULL;
+OOP _gst_divide_symbol = NULL;
+OOP _gst_do_symbol = NULL;
+OOP _gst_does_not_understand_symbol = NULL;
+OOP _gst_double_symbol = NULL;
+OOP _gst_equal_symbol = NULL;
+OOP _gst_false_symbol = NULL;
+OOP _gst_float_symbol = NULL;
+OOP _gst_greater_equal_symbol = NULL;
+OOP _gst_greater_than_symbol = NULL;
+OOP _gst_if_false_if_true_symbol = NULL;
+OOP _gst_if_false_symbol = NULL;
+OOP _gst_if_true_if_false_symbol = NULL;
+OOP _gst_if_true_symbol = NULL;
+OOP _gst_int_symbol = NULL;
+OOP _gst_integer_divide_symbol = NULL;
+OOP _gst_is_nil_symbol = NULL;
+OOP _gst_java_as_int_symbol = NULL;
+OOP _gst_java_as_long_symbol = NULL;
+OOP _gst_less_equal_symbol = NULL;
+OOP _gst_less_than_symbol = NULL;
+OOP _gst_long_double_symbol = NULL;
+OOP _gst_long_symbol = NULL;
+OOP _gst_minus_symbol = NULL;
+OOP _gst_must_be_boolean_symbol = NULL;
+OOP _gst_new_colon_symbol = NULL;
+OOP _gst_new_symbol = NULL;
+OOP _gst_next_put_symbol = NULL;
+OOP _gst_next_symbol = NULL;
+OOP _gst_nil_symbol = NULL;
+OOP _gst_not_equal_symbol = NULL;
+OOP _gst_not_nil_symbol = NULL;
+OOP _gst_not_same_object_symbol = NULL;
+OOP _gst_or_symbol = NULL;
+OOP _gst_perform_symbol = NULL;
+OOP _gst_perform_with_symbol = NULL;
+OOP _gst_perform_with_with_symbol = NULL;
+OOP _gst_perform_with_with_with_symbol = NULL;
+OOP _gst_perform_with_arguments_symbol = NULL;
+OOP _gst_permission_symbol = NULL;
+OOP _gst_plus_symbol = NULL;
+OOP _gst_primitive_symbol = NULL;
+OOP _gst_remainder_symbol = NULL;
+OOP _gst_repeat_symbol = NULL;
+OOP _gst_same_object_symbol = NULL;
+OOP _gst_self_smalltalk_symbol = NULL;
+OOP _gst_self_symbol = NULL;
+OOP _gst_size_symbol = NULL;
+OOP _gst_smalltalk_symbol = NULL;
+OOP _gst_start_execution_symbol = NULL;
+OOP _gst_string_out_symbol = NULL;
+OOP _gst_string_symbol = NULL;
+OOP _gst_super_symbol = NULL;
+OOP _gst_symbol_symbol = NULL;
+OOP _gst_symbol_table = NULL;
+OOP _gst_terminate_symbol = NULL;
+OOP _gst_this_context_symbol = NULL;
+OOP _gst_times_repeat_symbol = NULL;
+OOP _gst_times_symbol = NULL;
+OOP _gst_to_by_do_symbol = NULL;
+OOP _gst_to_do_symbol = NULL;
+OOP _gst_true_symbol = NULL;
+OOP _gst_uint_symbol = NULL;
+OOP _gst_ulong_symbol = NULL;
+OOP _gst_undeclared_symbol = NULL;
+OOP _gst_unknown_symbol = NULL;
+OOP _gst_value_colon_symbol = NULL;
+OOP _gst_value_value_symbol = NULL;
+OOP _gst_value_value_value_symbol = NULL;
+OOP _gst_value_symbol = NULL;
+OOP _gst_value_with_arguments_symbol = NULL;
+OOP _gst_value_with_rec_with_args_symbol = NULL;
+OOP _gst_variadic_smalltalk_symbol = NULL;
+OOP _gst_variadic_symbol = NULL;
+OOP _gst_vm_primitives_symbol = NULL;
+OOP _gst_void_symbol = NULL;
+OOP _gst_while_false_colon_symbol = NULL;
+OOP _gst_while_false_symbol = NULL;
+OOP _gst_while_true_colon_symbol = NULL;
+OOP _gst_while_true_symbol = NULL;
+OOP _gst_yourself_symbol = NULL;
+OOP _gst_current_namespace = NULL;
+
+/* The list of selectors for the send immediate bytecode.  */
+struct builtin_selector *_gst_builtin_selectors[256] = {};
 
 /* True if undeclared globals can be considered forward references.  */
-long _gst_use_undeclared;
+int _gst_use_undeclared = 0;
 
 /* Answer whether OOP is a Smalltalk String LEN characters long and
    these characters match the first LEN characters of STR (which must
-   not have embedded NULs). */
+   not have embedded NULs).  */
 static mst_Boolean is_same_string (const char *str,
 				   OOP oop,
 				   int len);
 
 /* Answer whether C is considered a white space character in Smalltalk
-   programs. */
-static mst_Boolean is_white_space (gst_uchar c);
+   programs.  */
+static mst_Boolean is_white_space (char c);
 
-/* Free the list of symbols declared in the given SCOPE. */
+/* Free the list of symbols declared in the given SCOPE.  */
 static void free_scope_symbols (scope scope);
 
 /* Scans a variable name (letters and digits, initial letter), and
@@ -134,11 +198,11 @@ static void free_scope_symbols (scope scope);
    whitespace or start of variable.  At end, it points to the first
    character after the initial whitespace, if any.  ENDP instead is
    initialized by the function to point to first character after the
-   parsed variable name, which may be NUL. */
-static void parse_variable_name (gst_uchar ** pp,
-				 gst_uchar ** endp);
+   parsed variable name, which may be NUL.  */
+static void parse_variable_name (const char ** pp,
+				 const char ** endp);
 
-/* This fills ENT's fields with the contents of its parameters. */
+/* This fills ENT's fields with the contents of its parameters.  */
 static void fill_symbol_entry (symbol_entry * ent,
 			       scope_type scope,
 			       mst_Boolean readOnly,
@@ -151,47 +215,53 @@ static void fill_symbol_entry (symbol_entry * ent,
    of the string to be scanned.  May be pointing at either whitespace
    or start of variable.  At end, points to first character after the
    parsed variable name, which may be NUL.  The output is a Smalltalk
-   Symbol, _gst_nil_oop if no variable name is found. */
-static OOP scan_name (gst_uchar ** pp);
+   Symbol, _gst_nil_oop if no variable name is found.  */
+static OOP scan_name (const char ** pp);
 
 /* This creates a Symbol containing LEN bytes starting at STR and puts
    it in the symbol list, or returns an existing one if it is
-   found. */
+   found.  */
 static OOP intern_counted_string (const char *str,
 				  int len);
 
 /* This looks for SYMBOL among the instance variables that the current
    class declares, and returns the index of the variable if one is
-   found. */
+   found.  */
 static int instance_variable_index (OOP symbol);
+
+/* This checks if the INDEX-th instance variable among those that the
+   current class declares is read-only.  Read-only index variables are
+   those that are declared by a trusted super-class of an untrusted
+   subclass.  */
+static mst_Boolean is_instance_variable_read_only (int index);
 
 /* This looks for SYMBOL among the arguments and temporary variables
    that the current scope sees, and returns the entry in the symbol
-   list for the variable if it is found. */
+   list for the variable if it is found.  */
 static symbol_list find_local_var (scope scope,
 				   OOP symbol);
 
 /* This looks for SYMBOL among the global variables that the current
    scope sees, including superspaces if any, and returns the entry in
-   the symbol list for the variable if it is found. */
+   the symbol list for the variable if it is found.  */
 static OOP find_class_variable (OOP varName);
 
 static scope cur_scope = NULL;
 
 /* This is an array of symbols which the virtual machine knows about,
-   and is used to restore the global variables upon image load. */
+   and is used to restore the global variables upon image load.  */
 static const symbol_info sym_info[] = {
-  {&_gst_and_colon_symbol, "and:"},
+  {&_gst_and_symbol, "and:"},
   {&_gst_as_scaled_decimal_scale_symbol, "asScaledDecimal:scale:"},
-  {&_gst_at_colon_put_colon_symbol, "at:put:"},
-  {&_gst_at_colon_symbol, "at:"},
+  {&_gst_at_put_symbol, "at:put:"},
+  {&_gst_at_symbol, "at:"},
   {&_gst_at_end_symbol, "atEnd"},
   {&_gst_at_sign_symbol, "@"},
   {&_gst_bad_return_error_symbol, "badReturnError"},
-  {&_gst_bit_and_colon_symbol, "bitAnd:"},
-  {&_gst_bit_or_colon_symbol, "bitOr:"},
-  {&_gst_bit_shift_colon_symbol, "bitShift:"},
-  {&_gst_block_copy_colon_symbol, "blockCopy:"},
+  {&_gst_bit_and_symbol, "bitAnd:"},
+  {&_gst_bit_or_symbol, "bitOr:"},
+  {&_gst_bit_xor_symbol, "bitXor:"},
+  {&_gst_bit_shift_symbol, "bitShift:"},
   {&_gst_byte_array_symbol, "byteArray"},
   {&_gst_byte_array_out_symbol, "byteArrayOut"},
   {&_gst_boolean_symbol, "boolean"},
@@ -200,46 +270,55 @@ static const symbol_info sym_info[] = {
   {&_gst_c_object_symbol, "cObject"},
   {&_gst_c_object_ptr_symbol, "cObjectPtr"},
   {&_gst_divide_symbol, "/"},
-  {&_gst_do_colon_symbol, "do:"},
-  {&_gst_does_not_understand_colon_symbol, "doesNotUnderstand:"},
+  {&_gst_do_symbol, "do:"},
+  {&_gst_does_not_understand_symbol, "doesNotUnderstand:"},
   {&_gst_float_symbol, "float"},
   {&_gst_double_symbol, "double"},
   {&_gst_equal_symbol, "="},
   {&_gst_false_symbol, "false"},
-  {&_gst_start_execution_colon_symbol, "startExecution:"},
   {&_gst_greater_equal_symbol, ">="},
   {&_gst_greater_than_symbol, ">"},
-  {&_gst_if_false_colon_if_true_colon_symbol, "ifFalse:ifTrue:"},
-  {&_gst_if_false_colon_symbol, "ifFalse:"},
-  {&_gst_if_true_colon_if_false_colon_symbol, "ifTrue:ifFalse:"},
-  {&_gst_if_true_colon_symbol, "ifTrue:"},
+  {&_gst_if_false_if_true_symbol, "ifFalse:ifTrue:"},
+  {&_gst_if_false_symbol, "ifFalse:"},
+  {&_gst_if_true_if_false_symbol, "ifTrue:ifFalse:"},
+  {&_gst_if_true_symbol, "ifTrue:"},
   {&_gst_integer_divide_symbol, "//"},
   {&_gst_int_symbol, "int"},
   {&_gst_uint_symbol, "uInt"},
   {&_gst_is_nil_symbol, "isNil"},
+  {&_gst_java_as_int_symbol, "javaAsInt"},
+  {&_gst_java_as_long_symbol, "javaAsLong"},
   {&_gst_less_equal_symbol, "<="},
   {&_gst_less_than_symbol, "<"},
+  {&_gst_long_double_symbol, "longDouble"},
   {&_gst_long_symbol, "long"},
   {&_gst_ulong_symbol, "uLong"},
   {&_gst_minus_symbol, "-"},
   {&_gst_must_be_boolean_symbol, "mustBeBoolean"},
   {&_gst_new_colon_symbol, "new:"},
   {&_gst_new_symbol, "new"},
-  {&_gst_next_put_colon_symbol, "nextPut:"},
+  {&_gst_next_put_symbol, "nextPut:"},
   {&_gst_next_symbol, "next"},
   {&_gst_nil_symbol, "nil"},
   {&_gst_not_equal_symbol, "~="},
   {&_gst_not_nil_symbol, "notNil"},
   {&_gst_not_same_object_symbol, "~~"},
-  {&_gst_or_colon_symbol, "or:"},
+  {&_gst_or_symbol, "or:"},
+  {&_gst_perform_symbol, "perform:"},
+  {&_gst_perform_with_symbol, "perform:with:"},
+  {&_gst_perform_with_with_symbol, "perform:with:with:"},
+  {&_gst_perform_with_with_with_symbol, "perform:with:with:with:"},
+  {&_gst_perform_with_arguments_symbol, "perform:withArguments:"},
   {&_gst_plus_symbol, "+"},
-  {&_gst_remainder_symbol, "\\"},
+  {&_gst_primitive_symbol, "primitive:"},
+  {&_gst_remainder_symbol, "\\\\"},
   {&_gst_repeat_symbol, "repeat"},
   {&_gst_same_object_symbol, "=="},
   {&_gst_self_symbol, "self"},
   {&_gst_self_smalltalk_symbol, "selfSmalltalk"},
   {&_gst_size_symbol, "size"},
   {&_gst_smalltalk_symbol, "smalltalk"},
+  {&_gst_start_execution_symbol, "startExecution:"},
   {&_gst_string_out_symbol, "stringOut"},
   {&_gst_string_symbol, "string"},
   {&_gst_super_symbol, "super"},
@@ -247,18 +326,20 @@ static const symbol_info sym_info[] = {
   {&_gst_terminate_symbol, "__terminate"},
   {&_gst_this_context_symbol, "thisContext"},
   {&_gst_times_symbol, "*"},
-  {&_gst_times_repeat_colon_symbol, "timesRepeat:"},
-  {&_gst_to_colon_by_colon_do_colon_symbol, "to:by:do:"},
-  {&_gst_to_colon_do_colon_symbol, "to:do:"},
+  {&_gst_times_repeat_symbol, "timesRepeat:"},
+  {&_gst_to_by_do_symbol, "to:by:do:"},
+  {&_gst_to_do_symbol, "to:do:"},
   {&_gst_true_symbol, "true"},
   {&_gst_undeclared_symbol, "Undeclared"},
   {&_gst_unknown_symbol, "unknown"},
   {&_gst_value_colon_symbol, "value:"},
-  {&_gst_value_colon_value_colon_symbol, "value:value:"},
-  {&_gst_value_colon_value_colon_value_colon_symbol,
+  {&_gst_value_value_symbol, "value:value:"},
+  {&_gst_value_value_value_symbol,
    "value:value:value:"},
+  {&_gst_value_with_rec_with_args_symbol,
+   "valueWithReceiver:withArguments:"},
   {&_gst_value_symbol, "value"},
-  {&_gst_value_with_arguments_colon_symbol, "valueWithArguments:"},
+  {&_gst_value_with_arguments_symbol, "valueWithArguments:"},
   {&_gst_variadic_symbol, "variadic"},
   {&_gst_variadic_smalltalk_symbol, "variadicSmalltalk"},
   {&_gst_vm_primitives_symbol, "VMPrimitives"},
@@ -272,7 +353,18 @@ static const symbol_info sym_info[] = {
 };
 
 
-
+const char *
+_gst_get_scope_kind (scope_type scope)
+{
+  switch (scope)
+    {
+    case SCOPE_TEMPORARY: return "argument";
+    case SCOPE_RECEIVER: return "instance variable";
+    case SCOPE_GLOBAL: return "global variable";
+    case SCOPE_SPECIAL: return "special variable";
+    default: abort ();
+    }
+}
 
 int
 _gst_get_arg_count (void)
@@ -325,13 +417,14 @@ _gst_declare_arguments (tree_node args)
     return (0);
 
   else if (args->nodeType == TREE_BINARY_EXPR)
-    _gst_declare_name (args->v_expr.expression->v_list.name, false);
+    _gst_declare_name (args->v_expr.expression->v_list.name, false, false);
 
   else
     {
       for (args = args->v_expr.expression; args != NULL;
 	   args = args->v_list.next)
-	_gst_declare_name (args->v_list.value->v_list.name, false);
+	if (_gst_declare_name (args->v_list.value->v_list.name, false, false) == -1)
+	  return -1;
     }
 
   /* Arguments are always declared first! */
@@ -345,7 +438,8 @@ _gst_declare_temporaries (tree_node temps)
 {
   int n;
   for (n = 0; temps != NULL; n++, temps = temps->v_list.next)
-    _gst_declare_name (temps->v_list.name, true);
+    if (_gst_declare_name (temps->v_list.name, true, false) == -1)
+      return -1;
 
   return (n);
 }
@@ -354,7 +448,8 @@ int
 _gst_declare_block_arguments (tree_node args)
 {
   for (; args != NULL; args = args->v_list.next)
-    _gst_declare_name (args->v_list.name, false);
+    if (_gst_declare_name (args->v_list.name, false, false) == -1)
+      return -1;
 
   /* Arguments are always declared first! */
   cur_scope->numArguments = cur_scope->numTemporaries;
@@ -375,19 +470,24 @@ _gst_undeclare_name (void)
 
 int
 _gst_declare_name (const char *name,
-		   mst_Boolean writeable)
+		   mst_Boolean writeable,
+		   mst_Boolean allowDup)
 {
   symbol_list newList;
+  OOP symbol = _gst_intern_string (name);
+
+  if (!allowDup && find_local_var (cur_scope, symbol) != NULL)
+    return -1;
 
   newList = (symbol_list) xmalloc (sizeof (struct symbol_list));
-  newList->symbol = _gst_intern_string (name);
+  newList->symbol = symbol;
   newList->index = cur_scope->numArguments + cur_scope->numTemporaries;
   newList->readOnly = !writeable;
   newList->prevSymbol = cur_scope->symbols;
 
   /* Arguments are always declared first, so we can assume it is a
      temporary -- if it is not, _gst_declare_arguments and
-     _gst_declare_block_arguments will fix it. */
+     _gst_declare_block_arguments will fix it.  */
   cur_scope->numTemporaries++;
   cur_scope->symbols = newList;
   return (newList->index);
@@ -409,6 +509,19 @@ free_scope_symbols (scope scope)
 
 
 OOP
+_gst_get_class_object (OOP classOOP)
+{
+  if (OOP_CLASS (classOOP) == _gst_metaclass_class)
+    classOOP = METACLASS_INSTANCE (classOOP);
+
+  while (OOP_CLASS (classOOP) == _gst_behavior_class
+	 || OOP_CLASS (classOOP) == _gst_class_description_class)
+    classOOP = SUPERCLASS (classOOP);
+
+  return classOOP;
+}
+
+OOP
 find_class_variable (OOP varName)
 {
   OOP class_oop, assocOOP, poolDictionaryOOP;
@@ -416,20 +529,7 @@ find_class_variable (OOP varName)
   int numPools, i;
   gst_class class;
 
-  myClass = _gst_this_class;
-  if (OOP_CLASS (myClass) == _gst_metaclass_class)
-    {
-      /* pretend that metaclasses have the class variables and shared
-         pools that their instance classes do */
-      myClass = METACLASS_INSTANCE (myClass);
-    }
-  while (OOP_CLASS (myClass) == _gst_behavior_class
-	 || OOP_CLASS (myClass) == _gst_class_description_class)
-    {
-      /* pretend that lightweight classes have the class variables and
-         shared pools that their superclasses have */
-      myClass = SUPERCLASS (myClass);
-    }
+  myClass = _gst_get_class_object (_gst_this_class);
 
   /* Now search in the class pools */
   for (class_oop = myClass; !IS_NIL (class_oop);
@@ -491,7 +591,7 @@ _gst_find_variable_binding (tree_node list)
 
   if (IS_NIL (assocOOP) && !(list->v_list.next))
     {
-      gst_uchar *varName;
+      char *varName;
 
       varName = STRING_OOP_CHARS (symbol);
       if (!isupper (*varName) || !_gst_use_undeclared)
@@ -505,9 +605,13 @@ _gst_find_variable_binding (tree_node list)
 	dictionary_association_at (undeclaredDictionary, symbol);
 
       if (IS_NIL (assocOOP))
-	assocOOP =
-	  NAMESPACE_AT_PUT (undeclaredDictionary, symbol,
-			    _gst_nil_oop);
+	{
+	  assocOOP =
+	    NAMESPACE_AT_PUT (undeclaredDictionary, symbol,
+			      _gst_nil_oop);
+
+	  MAKE_OOP_UNTRUSTED (assocOOP, _gst_untrusted_methods);
+	}
     }
 
   return (assocOOP);
@@ -571,7 +675,9 @@ _gst_find_variable (symbol_entry * se,
   index = instance_variable_index (symbol);
   if (index >= 0)
     {
-      fill_symbol_entry (se, SCOPE_RECEIVER, false, symbol, index, 0);
+      fill_symbol_entry (se, SCOPE_RECEIVER, 
+			 is_instance_variable_read_only (index),
+			 symbol, index, 0);
       return (true);
     }
 
@@ -581,8 +687,27 @@ _gst_find_variable (symbol_entry * se,
 
   index = _gst_add_forced_object (varAssoc);
 
-  fill_symbol_entry (se, SCOPE_GLOBAL, false, varAssoc, index, 0);
+  fill_symbol_entry (se, SCOPE_GLOBAL, 
+		     _gst_untrusted_methods && !IS_OOP_UNTRUSTED (varAssoc),
+		     varAssoc, index, 0);
   return (true);
+}
+
+static mst_Boolean
+is_instance_variable_read_only (int index)
+{
+  int numVars;
+  OOP class_oop;
+
+  if (!_gst_untrusted_methods)
+    return (false);
+
+  for (class_oop = _gst_this_class; IS_OOP_UNTRUSTED (class_oop);
+       class_oop = SUPERCLASS (class_oop))
+    ;
+
+  numVars = CLASS_FIXED_FIELDS (class_oop);
+  return index + 1 <= numVars;
 }
 
 static int
@@ -594,12 +719,13 @@ instance_variable_index (OOP symbol)
   arrayOOP = _gst_instance_variable_array (_gst_this_class);
   numVars = NUM_OOPS (OOP_TO_OBJ (arrayOOP));
 
-  for (index = 1; index <= numVars; index++)
+  for (index = numVars; index >= 1; index--)
     if (ARRAY_AT (arrayOOP, index) == symbol)
       return (index - 1);
 
   return (-1);
 }
+
 
 static symbol_list
 find_local_var (scope scope,
@@ -660,16 +786,16 @@ _gst_print_symbol_entry (symbol_entry * ent)
 
 OOP
 _gst_make_instance_variable_array (OOP superclassOOP,
-				   gst_uchar * variableString)
+				   const char * variableString)
 {
   OOP arrayOOP, superArrayOOP, name;
   int index, numInstanceVars, superInstanceVars;
-  gst_uchar *p;
+  const char *p;
   inc_ptr incPtr;
   mst_Object array;
 
   if (variableString == NULL)
-    variableString = (gst_uchar *) "";
+    variableString = "";
 
   if (IS_NIL (superclassOOP))
     {
@@ -721,11 +847,11 @@ _gst_make_instance_variable_array (OOP superclassOOP,
 }
 
 OOP
-_gst_make_class_variable_dictionary (gst_uchar *variableNames,
+_gst_make_class_variable_dictionary (const char *variableNames,
 				     OOP classOOP)
 {
   OOP dictionaryOOP, name;
-  gst_uchar *p;
+  const char *p;
   inc_ptr incPtr;
 
   if (variableNames == NULL)
@@ -757,16 +883,16 @@ _gst_make_class_variable_dictionary (gst_uchar *variableNames,
 }
 
 OOP
-_gst_make_pool_array (gst_uchar * poolNames)
+_gst_make_pool_array (const char * poolNames)
 {
   OOP poolsOOP, name;
   mst_Object pools;
   int numPools, i;
-  gst_uchar *p, *e;
+  const char *p, *e;
   inc_ptr incPtr;
 
   if (poolNames == NULL)
-    poolNames = (gst_uchar *) "";
+    poolNames = (char *) "";
 
   /* count the number of new pool names */
   for (p = poolNames, numPools = 0; *p;)
@@ -790,7 +916,7 @@ _gst_make_pool_array (gst_uchar * poolNames)
       if (!IS_NIL (name))
 	{
 	  /* don't need to add name to incubator -- it's a symbol so
-	     it's already held onto. */
+	     it's already held onto.  */
 
 	  /* ### error if already exists in parent?, or if value isn't
 	     a dictionary */
@@ -817,17 +943,18 @@ _gst_make_pool_array (gst_uchar * poolNames)
 
 
 static OOP
-scan_name (gst_uchar ** pp)
+scan_name (const char ** pp)
 {
-  gst_uchar *end, *str;
-  long len;
+  const char *end;
+  char *str;
+  size_t len;
 
   parse_variable_name (pp, &end);
   len = end - *pp;
   if (len == 0)
     return (_gst_nil_oop);
 
-  str = (gst_uchar *) alloca (len + 1);
+  str = (char *) alloca (len + 1);
   strncpy (str, *pp, len);
   str[len] = '\0';
 
@@ -837,10 +964,10 @@ scan_name (gst_uchar ** pp)
 }
 
 static void
-parse_variable_name (gst_uchar ** pp,
-		     gst_uchar ** endp)
+parse_variable_name (const char ** pp,
+		     const char ** endp)
 {
-  gst_uchar *p, *e;
+  const char *p, *e;
 
   p = *pp;
   while (is_white_space (*p))
@@ -862,7 +989,7 @@ parse_variable_name (gst_uchar ** pp,
 }
 
 static mst_Boolean
-is_white_space (gst_uchar c)
+is_white_space (char c)
 {
   return (c == ' ' || c == '\r' || c == '\t' || c == '\n' || c == '\f');
 }
@@ -884,7 +1011,7 @@ _gst_intern_string_oop (OOP stringOOP)
      of the stringOOP.  intern_counted_string can do allocations.  If
      it allocates, and the gc runs, stringOOP can move, meaning the
      dereferenced set of chars becomes invalid.  So instead we make a
-     non-moving copy and use that. */
+     non-moving copy and use that.  */
   if (len < sizeof (copyBuf))
     copyPtr = copyBuf;
   else
@@ -913,7 +1040,7 @@ static OOP
 intern_counted_string (const char *str,
 		       int len)
 {
-  unsigned long index;
+  uintptr_t index;
   sym_link link;
   gst_symbol symbol;
   OOP symbolOOP, linkOOP;
@@ -937,7 +1064,7 @@ intern_counted_string (const char *str,
 
   incPtr = INC_SAVE_POINTER ();
   symbol = (gst_symbol) new_instance_with (_gst_symbol_class, 
-					   (long) len, &symbolOOP);
+					   len, &symbolOOP);
 
   memcpy (symbol->symString, str, len);
   symbolOOP->flags |= F_READONLY;
@@ -972,11 +1099,11 @@ _gst_string_oop_len (OOP oop)
   return (OOP_SIZE_BYTES (oop) - (oop->flags & EMPTY_BYTES));
 }
 
-unsigned long
+uintptr_t
 _gst_hash_string (const char *str,
 		  int len)
 {
-  unsigned long hashVal = 1497032417;    /* arbitrary value */
+  uintptr_t hashVal = 1497032417;    /* arbitrary value */
 
   while (len--)
     {
@@ -1013,7 +1140,7 @@ _gst_symbol_as_string (OOP symbolOOP)
 void
 _gst_check_symbol_chain (void)
 {
-  unsigned long i;
+  int i;
 
   for (i = 1; i <= SYMBOL_TABLE_SIZE; i++)
     {
@@ -1037,7 +1164,7 @@ _gst_check_symbol_chain (void)
 void
 _gst_add_all_symbol_completions (void)
 {
-  unsigned long i;
+  int i;
 
   for (i = 1; i <= SYMBOL_TABLE_SIZE; i++)
     {
@@ -1063,11 +1190,11 @@ _gst_add_all_symbol_completions (void)
 int
 _gst_selector_num_args (OOP symbolOOP)
 {
-  gst_uchar *bytes;
+  char *bytes;
   int numArgs, len;
 
   len = _gst_string_oop_len (symbolOOP);
-  bytes = (gst_uchar *) (OOP_TO_OBJ (symbolOOP)->data);
+  bytes = (char *) (OOP_TO_OBJ (symbolOOP)->data);
   if (bytes[0] < 'A' || bytes[0] > 'z')
     return (1);
 
@@ -1084,13 +1211,28 @@ _gst_selector_num_args (OOP symbolOOP)
   return (numArgs);
 }
 
+#include "builtins.inl"
 
 void
 _gst_init_symbols (void)
 {
   const symbol_info *si;
+  struct builtin_selector *bs;
 
   for (si = sym_info; si->symbolVar; si++)
     *si->symbolVar = _gst_intern_string (si->value);
-}
 
+  /* Complete gperf's generated table with each symbol's OOP,
+     and prepare a kind of reverse mapping from the 256 bytecodes
+     to the hash table entries.  */
+  for (bs = _gst_builtin_selectors_hash;
+       bs - _gst_builtin_selectors_hash <
+	 sizeof (_gst_builtin_selectors_hash) / sizeof (_gst_builtin_selectors_hash[0]);
+       bs++)
+    if (bs->offset != -1)
+      {
+	const char *name = bs->offset + _gst_builtin_selectors_names;
+	bs->symbol = _gst_intern_string (name);
+        _gst_builtin_selectors[bs->bytecode] = bs;
+      }
+}

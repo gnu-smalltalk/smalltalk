@@ -1,3 +1,29 @@
+* 2.2
+
+** use intptr_t instead of long for SmallIntegers.  In general,
+use stdint.h/inttypes.h way more widely (with an automatically
+generated one, perusing Autoconf). (done)
+
+** use libffi to fix bugs in C call-outs (done)
+
+** remove logging and -s (done)
+
+** new bytecode set! (done)
+
+** shared library (done)
+
+** fix bitrot in JITter (done)
+
+** some kind of sandboxing (partly done)
+
+** Java support (partly done)
+
+** fix debugging of JITted code (boring)
+
+** deprecate SMALLTALK_IMAGE and SMALLTALK_KERNEL in favor of
+two new options, --image-directory and --kernel-directory
+(harder than it looks)
+
 * sometime
 
 ** add check in/check out to the browser so that .st files remain
@@ -17,14 +43,33 @@ in sync.  Maybe with CVS support (see Smalltalk/X).
 * code auditing
 
 ** check endian-cleanness of ByteStream's float and double I/O.
+Possibly fix by mutuating code from the Java package.
 
 * VM
+
+** create combined pop/push tree codes in the JIT compiler.  They're
+still there from the old bytecode set and they should improve
+performance by ~5%.
+
+** Fix some copy & paste redundancies in comp.c (the small iteration
+to find out the length of loops) and opt.c (basic block handling in
+the verifier and in the JIT compiler's analysis pass).
 
 ** Use multiple malloc-ed areas for the OOP table, and make heap.c
 only an implementation detail of alloc.c (not really necessary
 anymore with MAP_NORESERVE, and quite complicated)
 
 ** Implement polymorphic inline caching
+
+
+* Java
+
+** Write more native methods.  Some, such as network methods, are
+easy.  Reflection is hard especially for arrays.
+
+** Pass exception in a temporary rather than in the top of the
+stack; not very hard, and should make the JITter happy about
+exceptions.
 
 
 * Blox

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -233,7 +233,7 @@ initialize
 
     "We can only use #isNil, #==, #class here"
     self
-	specialCaseIf: [ :object | object isNil ]
+	specialCaseIf: [ :object | object == nil ]
 	dump: [ :client :object | ]
 	load: [ :client | nil ];
 
@@ -245,7 +245,7 @@ initialize
 	dump: [ :client :object | ]
 	load: [ :client | false ];
 
-	specialCaseIf: [ :object | self isSmallInteger: object ]
+	specialCaseIf: [ :object | object class == SmallInteger ]
 	dump: [ :client :object | client stream nextPutLong: object ]
 	load: [ :client | client stream nextLong ];
 
@@ -285,8 +285,7 @@ initialize
 		client register: object
 	    ]
 	]
-	load: [ :client |
-	    | index placeholder object |
+	load: [ :client || index |
 
 	    "Special-case metaclasses and other objects"
 	    index := client stream nextLong.
@@ -294,16 +293,6 @@ initialize
 		ifTrue: [ client register: (client loadGlobal loadFrom: client) ]
 		ifFalse: [ client lookupIndex: index ]
 	]
-! !
-
-
-!ObjectDumper class methodsFor: 'private - portability'!
-
-isSmallInteger: anObject
-    "Private - Answer true if the receiver is a small integer (<2^30
-     in GNU Smalltalk)"
-
-    ^anObject class == SmallInteger
 ! !
 
 
@@ -534,7 +523,7 @@ primDump: anObject
     "Private - Basic code to dump anObject on the stream associated with the
      receiver, without using proxies and the like."
 
-    | class |
+    | class shape |
     self storeClass: (class := anObject class).
     self register: anObject.
 
@@ -545,16 +534,32 @@ primDump: anObject
     ].
 
     class isVariable ifFalse: [ ^self ].
-
     class isPointers
 	ifTrue: [ ^self store: anObject through: [ :obj | self dump: obj ] ].
 
-    class isBytes
-	ifFalse: [ ^self store: anObject through: [ :long | stream nextPutLong: long ] ].
+    anObject isString
+	ifTrue: [ ^self store: anObject through: [ :char | stream nextPut: char ] ].
 
-    ^anObject isString
-	ifTrue: [ self store: anObject through: [ :char | stream nextPut: char ] ]
-	ifFalse: [ self store: anObject through: [ :byte | stream nextPutByte: byte ] ]
+    shape := class shape.
+    (shape == #byte or: [ shape == #int8 ])
+	ifTrue: [ ^self store: anObject through: [ :byte | stream nextPutByte: byte ] ].
+
+    (shape == #short or: [ shape == #ushort ])
+	ifTrue: [ ^self store: anObject through: [ :short | stream nextPutShort: short ] ].
+
+    (shape == #int or: [ shape == #int ])
+	ifTrue: [ ^self store: anObject through: [ :int | stream nextPutLong: int ] ].
+
+    (shape == #int64 or: [ shape == #uint64 ])
+	ifTrue: [ ^self store: anObject through: [ :int64 | stream nextPutInt64: int64 ] ].
+
+    shape == #float
+	ifTrue: [ ^self store: anObject through: [ :float | stream nextPutFloat: float ] ].
+
+    shape == #double
+	ifTrue: [ ^self store: anObject through: [ :double | stream nextPutFloat: double ] ].
+
+    self notYetImplemented
 !
 
 loadFromVersion: version fixedSize: instSize
@@ -565,7 +570,7 @@ loadFromVersion: version fixedSize: instSize
      will be the size of the second parameter.  The object returned by
      that method is registered and returned."
 
-    | object class realSize size fixed indexed placeholder index |
+    | object class realSize size fixed indexed placeholder index shape |
     index := stream nextLong.
     index > 0 ifTrue: [ ^self lookupIndex: index ].
 
@@ -580,17 +585,44 @@ loadFromVersion: version fixedSize: instSize
     (1 to: realSize) collect: [ :i | self load ].
 
     class isVariable ifTrue: [
+        shape := class shape.
 	class isPointers
 	    ifTrue: [ indexed := (1 to: size) collect: [ :i | self load ] ].
 
 	class == String
 	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream next ] ].
 
-	(class isBytes and: [ indexed isNil ])
+	(shape == #byte and: [ indexed isNil ])
 	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextByte ] ].
 
-	indexed isNil
+        shape == #int8
+	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextSignByte ] ].
+
+        shape == #short
+	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextShort ] ].
+
+        shape == #ushort
+	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextUshort ] ].
+
+        shape == #int
+	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextLong ] ].
+
+        shape == #uint
 	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextUlong ] ].
+
+        shape == #int64
+	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextInt64 ] ].
+
+        shape == #uint64
+	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextUint64 ] ].
+
+        shape == #float
+	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextFloat ] ].
+
+        shape == #double
+	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextDouble ] ].
+
+	indexed isNil ifTrue: [ self shouldNotImplement ]
     ].
 
     placeholder become: (class
@@ -606,7 +638,7 @@ primLoad: index
      receiver, assuming it doesn't use proxies and the like.  The first four
      bytes of the encoding are in index"
 
-    | object class |
+    | object class shape |
     index > 0 ifTrue: [ ^self lookupIndex: index ].
 
     class := self loadClass.
@@ -619,12 +651,41 @@ primLoad: index
     class isPointers
 	ifTrue: [ ^self load: object through: [ self load ] ].
 
-    class isBytes
-	ifFalse: [ ^self load: object through: [ stream nextUlong ] ].
+    class == String
+	ifTrue: [ ^self load: object through: [ stream next ] ].
 
-    ^class == String
-	ifTrue: [ self load: object through: [ stream next ] ]
-	ifFalse: [ self load: object through: [ stream nextByte ] ]
+    shape := class shape.
+    shape == #byte
+	ifTrue: [ ^self load: object through: [ stream nextByte ] ].
+
+    shape == #int8
+	ifTrue: [ ^self load: object through: [ stream nextSignByte ] ].
+
+    shape == #short
+	ifTrue: [ ^self load: object through: [ stream nextShort ] ].
+
+    shape == #ushort
+	ifTrue: [ ^self load: object through: [ stream nextUshort ] ].
+
+    shape == #int
+	ifTrue: [ ^self load: object through: [ stream nextLong ] ].
+
+    shape == #uint
+	ifTrue: [ ^self load: object through: [ stream nextUlong ] ].
+
+    shape == #int64
+	ifTrue: [ ^self load: object through: [ stream nextInt64 ] ].
+
+    shape == #uint64
+	ifTrue: [ ^self load: object through: [ stream nextUint64 ] ].
+
+    shape == #float
+	ifTrue: [ ^self load: object through: [ stream nextFloat ] ].
+
+    shape == #double
+	ifTrue: [ ^self load: object through: [ stream nextDouble ] ].
+
+    self shouldNotImplement 
 !
 
 specialCaseDump: anObject

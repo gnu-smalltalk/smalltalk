@@ -1,0 +1,228 @@
+@node Registering New Conversions
+@subsection Registering New Conversions
+
+The function to register a new output conversion is
+@code{register_printf_function}, declared in @file{printf.h}.
+@pindex printf.h
+
+@comment printf.h
+@comment GNU
+@deftypefun int register_printf_function (int @var{spec}, printf_function @var{handler-function}, printf_arginfo_function @var{arginfo-function})
+This function defines the conversion specifier character @var{spec}.
+Thus, if @var{spec} is @code{'z'}, it defines the conversion @samp{%z}.
+You can redefine the built-in conversions like @samp{%s}, but flag
+characters like @samp{#} and type modifiers like @samp{l} can never be
+used as conversions; calling @code{register_printf_function} for those
+characters has no effect.
+
+The @var{handler-function} is the function called by @code{printf} and
+friends when this conversion appears in a template string.
+@xref{Defining the Output Handler}, for information about how to define
+a function to pass as this argument.  If you specify a null pointer, any
+existing handler function for @var{spec} is removed.
+
+The @var{arginfo-function} is the function called by
+@code{parse_printf_format} when this conversion appears in a
+template string.  @xref{Printing}, for information about this.
+
+@c The following is not true anymore.  The `parse_printf_format' function
+@c is now also called from `vfprintf' via `parse_one_spec'.
+@c --drepper@gnu, 1996/11/14
+@c
+@c Normally, you install both functions for a conversion at the same time,
+@c but if you are never going to call @code{parse_printf_format}, you do
+@c not need to define an arginfo function.
+
+The return value is @code{0} on success, and @code{-1} on failure
+(which occurs if @var{spec} is out of range).
+
+You can redefine the standard output conversions, but this is probably
+not a good idea because of the potential for confusion.  Library routines
+written by other people could break if you do this.
+@end deftypefun
+
+@node Conversion Specifier Options
+@subsection Conversion Specifier Options
+
+If you define a meaning for @samp{%A}, what if the template contains
+@samp{%+23A} or @samp{%-#A}?  To implement a sensible meaning for these,
+the handler when called needs to be able to get the options specified in
+the template.
+
+Both the @var{handler-function} and @var{arginfo-function} arguments
+to @code{register_printf_function} accept an argument that points to a
+@code{struct printf_info}, which contains information about the options
+appearing in an instance of the conversion specifier.  This data type
+is declared in the header file @file{printf.h}.
+@pindex printf.h
+
+@comment printf.h
+@comment GNU
+@deftp {Type} {struct printf_info}
+This structure is used to pass information about the options appearing
+in an instance of a conversion specifier in a @code{printf} template
+string to the handler and arginfo functions for that specifier.  It
+contains the following members:
+
+@table @code
+@item int prec
+This is the precision specified.  The value is @code{-1} if no precision
+was specified.  If the precision was given as @samp{*}, the
+@code{printf_info} structure passed to the handler function contains the
+actual value retrieved from the argument list.  But the structure passed
+to the arginfo function contains a value of @code{INT_MIN}, since the
+actual value is not known.
+
+@item int width
+This is the minimum field width specified.  The value is @code{0} if no
+width was specified.  If the field width was given as @samp{*}, the
+@code{printf_info} structure passed to the handler function contains the
+actual value retrieved from the argument list.  But the structure passed
+to the arginfo function contains a value of @code{INT_MIN}, since the
+actual value is not known.
+
+@item wchar_t spec
+This is the conversion specifier character specified.  It's stored in
+the structure so that you can register the same handler function for
+multiple characters, but still have a way to tell them apart when the
+handler function is called.
+
+@item unsigned int is_long_double
+This is a boolean that is true if the @samp{L}, @samp{ll}, or @samp{q}
+type modifier was specified.  For integer conversions, this indicates
+@code{long long int}, as opposed to @code{long double} for floating
+point conversions.
+
+@item unsigned int is_short
+This is a boolean that is true if the @samp{h} type modifier was specified.
+
+@item unsigned int is_long
+This is a boolean that is true if the @samp{l} type modifier was specified.
+
+@item unsigned int alt
+This is a boolean that is true if the @samp{#} flag was specified.
+
+@item unsigned int space
+This is a boolean that is true if the @samp{ } flag was specified.
+
+@item unsigned int left
+This is a boolean that is true if the @samp{-} flag was specified.
+
+@item unsigned int showsign
+This is a boolean that is true if the @samp{+} flag was specified.
+
+@item unsigned int group
+This is a boolean that is true if the @samp{'} flag was specified.
+
+@item unsigned void *extra
+This flag has a special meaning depending on the context.  It could
+be used freely by the user-defined handlers.  When calling the
+@code{printf_arginfo} function this variable always contains the value
+@code{0}, when calling the @code{print} function it keeps the value 
+that was left by the @code{printf_arginfo} function.
+
+@item char pad
+This is the character to use for padding the output to the minimum field
+width.  The value is @code{'0'} if the @samp{0} flag was specified, and
+@code{' '} otherwise.
+@end table
+@end deftp
+
+
+@node Defining the Output Handler
+@subsection Defining the Output Handler
+
+Now let's look at how to define the handler and arginfo functions
+which are passed as arguments to @code{register_printf_function}.
+
+You should define your handler functions with a prototype like:
+
+@smallexample
+int @var{function} (STREAM *stream, const struct printf_info *info,
+                    const void *const *args)
+@end smallexample
+
+The @var{stream} argument passed to the handler function is the stream to
+which it should write output.
+
+The @var{info} argument is a pointer to a structure that contains
+information about the various options that were included with the
+conversion in the template string.  You should not modify this structure
+inside your handler function.  @xref{Conversion Specifier Options}, for
+a description of this data structure.
+
+@c The following changes some time back.  --drepper@gnu, 1996/11/14
+@c
+@c The @code{ap_pointer} argument is used to pass the tail of the variable
+@c argument list containing the values to be printed to your handler.
+@c Unlike most other functions that can be passed an explicit variable
+@c argument list, this is a @emph{pointer} to a @code{va_list}, rather than
+@c the @code{va_list} itself.  Thus, you should fetch arguments by
+@c means of @code{va_arg (*ap_pointer, @var{type})}.
+@c
+@c (Passing a pointer here allows the function that calls your handler
+@c function to update its own @code{va_list} variable to account for the
+@c arguments that your handler processes.  @xref{Variadic Functions}.)
+
+The @var{args} is a vector of pointers to the arguments data.
+The number of arguments were determined by calling the argument
+information function provided by the user.
+
+Your handler function should return a value just like @code{printf}
+does: it should return the number of characters it has written, or a
+negative value to indicate an error.
+
+@comment printf.h
+@comment GNU
+@deftp {Data Type} printf_function
+This is the data type that a handler function should have.
+@end deftp
+
+If you are going to use @w{@code{parse_printf_format}} in your
+application, you must also define a function to pass as the
+@var{arginfo-function} argument for each new conversion you install with
+@code{register_printf_function}.
+
+You have to define these functions with a prototype like:
+
+@smallexample
+int @var{function} (const struct printf_info *info,
+                    size_t n, int *argtypes)
+@end smallexample
+
+The return value from the function should be the number of arguments the
+conversion expects.  The function should also fill in no more than
+@var{n} elements of the @var{argtypes} array with information about the
+types of each of these arguments.  This information is encoded using the
+various @samp{PA_} macros.  (You will notice that this is the same
+calling convention @code{parse_printf_format} itself uses.)
+
+@comment printf.h
+@comment GNU
+@deftp {Data Type} printf_arginfo_function
+This type is used to describe functions that return information about
+the number and type of arguments used by a conversion specifier.
+@end deftp
+
+@node Printf Extension Example
+@subsection @code{printf} Extension Example
+
+Here is an example showing how to define a @code{printf} handler function.
+This program defines a data structure called a @code{Widget} and
+defines the @samp{%W} conversion to print information about @w{@code{Widget *}}
+arguments, including the pointer value and the name stored in the data
+structure.  The @samp{%W} conversion supports the minimum field width and
+left-justification options, but ignores everything else.
+
+@smallexample
+@include rprintf.c.texi
+@end smallexample
+
+The output produced by this program looks like:
+
+@smallexample
+|<Widget 0xffeffb7c: mywidget>|
+|      <Widget 0xffeffb7c: mywidget>|
+|<Widget 0xffeffb7c: mywidget>      |
+@end smallexample
+

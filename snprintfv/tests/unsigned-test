@@ -1,0 +1,180 @@
+#! /bin/sh
+# unsigned-test --- %u specifier
+# Copyright (C) 2001 Gary V. Vaughan
+# Originally by Gary V. Vaughan <gary@gnu.org>, 2001
+# This file is part of Snprintfv.
+#
+# Snprintfv is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# Snprintfv is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+# As a special exception to the GNU General Public License, if you
+# distribute this file as part of a program that also links with and
+# uses the libopts library from AutoGen, you may include it under
+# the same distribution terms used by the libopts library.
+
+# Common definitions
+if test -z "$srcdir"; then
+    srcdir=`echo "$0" | sed 's,[^/]*$,,'`
+    test "$srcdir" = "$0" && srcdir=.
+    test -z "$srcdir" && srcdir=.
+    test "${VERBOSE+set}" != set && VERBOSE=1
+fi
+. $srcdir/defs
+
+
+# this is the output we should expect to see
+cat <<\EOF >ok
+1 10
+*** printfv returned 4 chars.
+2 >20<
+*** printfv returned 6 chars.
+3 333
+*** printfv returned 5 chars.
+4         40
+*** printfv returned 12 chars.
+5 55555
+*** printfv returned 7 chars.
+6 66666
+*** printfv returned 7 chars.
+7 0077777
+*** printfv returned 9 chars.
+8 8888
+*** printfv returned 6 chars.
+9 9999
+*** printfv returned 6 chars.
+10 1010
+*** printfv returned 7 chars.
+11 1111
+*** printfv returned 7 chars.
+12 001212
+*** printfv returned 9 chars.
+13 001313
+*** printfv returned 9 chars.
+14 1414.
+*** printfv returned 8 chars.
+15 1515.
+*** printfv returned 8 chars.
+16 1616  .
+*** printfv returned 10 chars.
+17 1717
+*** printfv returned 7 chars.
+18 1818
+*** printfv returned 7 chars.
+19  1819
+*** printfv returned 8 chars.
+20 1821
+*** printfv returned 7 chars.
+21 1822
+*** printfv returned 7 chars.
+22 1919
+*** printfv returned 7 chars.
+23 00001900
+*** printfv returned 11 chars.
+24     123456
+*** printfv returned 13 chars.
+25 0000123456
+*** printfv returned 13 chars.
+26   00123456
+*** printfv returned 13 chars.
+27 0000123456
+*** printfv returned 13 chars.
+28 00123456  
+*** printfv returned 13 chars.
+29 00123456  
+*** printfv returned 13 chars.
+30 00123456 
+*** printfv returned 12 chars.
+EOF
+
+cat <<\EOF >errok
+EOF
+
+# straight forward integer output
+$SNPRINTFV '1 %u' 10 2>> err | tee -ai out >&2
+$SNPRINTFV '2 >%u<' 20 2>> err | tee -ai out >&2
+
+# test width flag
+$SNPRINTFV '3 %2u' 333 2>> err | tee -ai out >&2
+$SNPRINTFV '4 %10u' 40 2>> err | tee -ai out >&2
+
+# test precision flag
+$SNPRINTFV '5 %.3u' 55555 2>> err | tee -ai out >&2
+$SNPRINTFV '6 %.5u' 66666 2>> err | tee -ai out >&2
+$SNPRINTFV '7 %.7u' 77777 2>> err | tee -ai out >&2
+
+# test zero padding
+$SNPRINTFV '8 %02u' 8888 2>> err | tee -ai out >&2
+$SNPRINTFV '9 %0.2u' 9999 2>> err | tee -ai out >&2
+
+$SNPRINTFV '10 %04u' 1010 2>> err | tee -ai out >&2
+$SNPRINTFV '11 %0.4u' 1111 2>> err | tee -ai out >&2
+
+$SNPRINTFV '12 %06u' 1212 2>> err | tee -ai out >&2
+$SNPRINTFV '13 %0.6u' 1313 2>> err | tee -ai out >&2
+
+# test grouping flag
+# TODO!
+
+# test left justfy flag
+$SNPRINTFV '14 %-2u.' 1414 2>> err | tee -ai out >&2
+$SNPRINTFV '15 %-4u.' 1515 2>> err | tee -ai out >&2
+$SNPRINTFV '16 %-6u.' 1616 2>> err | tee -ai out >&2
+
+# test sign flag
+$SNPRINTFV '17 %+u' 1717 2>> err | tee -ai out >&2
+
+# test blank flag
+$SNPRINTFV '18 % u' 1818 2>> err | tee -ai out >&2
+$SNPRINTFV '19 % 5u' 1819 2>> err | tee -ai out >&2
+$SNPRINTFV '20 %+ u' 1821 2>> err | tee -ai out >&2
+$SNPRINTFV '21 % +u' 1822 2>> err | tee -ai out >&2
+
+# test alternate form flag
+$SNPRINTFV '22 %#u' 1919 2>> err | tee -ai out >&2
+$SNPRINTFV '23 %#08u' 1900 2>>err | tee -ai out >&2
+
+# combining width and precision
+$SNPRINTFV '24 %10.5u' 123456 2>> err | tee -ai out >&2
+$SNPRINTFV '25 %010.5u' 123456 2>> err | tee -ai out >&2
+$SNPRINTFV '26 %10.8u' 123456 2>> err | tee -ai out >&2
+$SNPRINTFV '27 %010.8u' 123456 2>> err | tee -ai out >&2
+$SNPRINTFV '28 %-10.8u' 123456 2>> err | tee -ai out >&2
+$SNPRINTFV '29 %-010.8u' 123456 2>> err | tee -ai out >&2
+$SNPRINTFV '30 %-9.8u' 123456 2>> err | tee -ai out >&2
+
+# Test against expected output
+if ${CMP} -s out ok; then
+    :
+else
+    echo "ok:" >&2
+    cat ok >&2
+    exit 1
+fi
+
+# Munge error output to remove leading directories, `lt-' or trailing `.exe'
+sed -e "s,^[^:]*[lt-]*snprintfv-test[.ex]*:,snprintfv-test:," err >sederr \
+    && mv sederr err
+
+# Show stderr if doesn't match expected output if VERBOSE == 1
+if "$CMP" -s err errok; then
+    :
+else
+    echo "err:" >&2
+    cat err >&2
+    echo "errok:" >&2
+    cat errok >&2
+    exit 1
+fi
+
+# unsigned-test ends here

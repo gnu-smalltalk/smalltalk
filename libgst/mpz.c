@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1991, 2002, 2003 Free Software Foundation, Inc.
+ * Copyright 1991, 2002 Free Software Foundation, Inc.
  *
  * This file is derived from an absurdly old version of the GNU MP Library.
  *
@@ -52,14 +52,14 @@
     (X)->d = (mp_ptr) alloca ((NLIMBS) * SIZEOF_MP_LIMB_T);		\
   } while (0)
 
-/* gst_mpz_realloc -- make the gst_mpz have NEW_SIZE digits allocated. */
+/* gst_mpz_realloc -- make the gst_mpz have NEW_SIZE digits allocated.  */
 static void *gst_mpz_realloc (gst_mpz *m, mp_size_t new_size);
 static void gst_mpz_sub_ui (gst_mpz *dif, const gst_mpz *min, mp_limb_t sub);
 
 static void *
 gst_mpz_realloc (gst_mpz *m, mp_size_t new_size)
 {
-  /* Never allocate zero space. */
+  /* Never allocate zero space.  */
   if (new_size == 0)
     new_size = 1;
 
@@ -73,7 +73,7 @@ gst_mpz_realloc (gst_mpz *m, mp_size_t new_size)
 }
 
 
-/* mpz_sub_ui -- Subtract an unsigned one-word integer from an gst_mpz. */
+/* mpz_sub_ui -- Subtract an unsigned one-word integer from an gst_mpz.  */
 
 static void
 gst_mpz_sub_ui (gst_mpz *dif, const gst_mpz *min, mp_limb_t sub)
@@ -132,7 +132,7 @@ gst_mpz_sub_ui (gst_mpz *dif, const gst_mpz *min, mp_limb_t sub)
 
 #define COUNT_LEADING_ZEROS(count, x) \
   do {									\
-    unsigned long int __xr = (x);					\
+    mp_limb_t __xr = (x);						\
     unsigned int __a;							\
 									\
     if (SIZEOF_MP_LIMB_T <= 32)						\
@@ -153,7 +153,7 @@ gst_mpz_sub_ui (gst_mpz *dif, const gst_mpz *min, mp_limb_t sub)
 
 #define COUNT_TRAILING_ZEROS(count, x) \
   do {									\
-    unsigned long int __ctz_x = (x);					\
+    mp_limb_t __ctz_x = (x);						\
     unsigned int __ctz_c;						\
     COUNT_LEADING_ZEROS (__ctz_c, __ctz_x & -__ctz_x);			\
     (count) = 8 * SIZEOF_MP_LIMB_T - 1 - __ctz_c;			\
@@ -194,7 +194,7 @@ _gst_mpz_add (gst_mpz *sum, const gst_mpz *u, const gst_mpz *v)
 
   if (abs_usize < abs_vsize)
     {
-      /* Swap U and V. */
+      /* Swap U and V.  */
       {const gst_mpz *t = u; u = v; v = t;}
       {mp_size_t t = usize; usize = vsize; vsize = t;}
       {mp_size_t t = abs_usize; abs_usize = abs_vsize; abs_vsize = t;}
@@ -362,7 +362,7 @@ _gst_mpz_com (gst_mpz *dst, const gst_mpz *src)
 }
 
 void
-_gst_mpz_div_2exp (gst_mpz *w, const gst_mpz *u, unsigned long int cnt)
+_gst_mpz_div_2exp (gst_mpz *w, const gst_mpz *u, unsigned cnt)
 {
   mp_size_t usize = u->size;
   mp_size_t wsize;
@@ -405,7 +405,7 @@ _gst_mpz_tdiv_qr (gst_mpz *quot, gst_mpz *rem, const gst_mpz *num, const gst_mpz
   nsize = ABS (nsize);
   dsize = ABS (dsize);
 
-  /* Ensure space is enough for quotient and remainder. */
+  /* Ensure space is enough for quotient and remainder.  */
 
   qsize = nsize - dsize + 1;	/* qsize cannot be bigger than this.  */
 
@@ -461,8 +461,8 @@ _gst_mpz_tdiv_qr (gst_mpz *quot, gst_mpz *rem, const gst_mpz *num, const gst_mpz
   alloca (0);
 }
 
-long
-_gst_mpz_tdiv_qr_si (gst_mpz *quot, const gst_mpz *num, long den)
+mp_limb_t
+_gst_mpz_tdiv_qr_si (gst_mpz *quot, const gst_mpz *num, intptr_t den)
 {
   mp_ptr np;
   mp_ptr qp;
@@ -506,7 +506,7 @@ _gst_mpz_tdiv_qr_si (gst_mpz *quot, const gst_mpz *num, long den)
 void
 _gst_mpz_gcd (gst_mpz *g, const gst_mpz *u, const gst_mpz *v)
 {
-  unsigned long int g_zero_bits, u_zero_bits, v_zero_bits;
+  int g_zero_bits, u_zero_bits, v_zero_bits;
   mp_size_t g_zero_limbs, u_zero_limbs, v_zero_limbs;
   mp_ptr tp;
   mp_ptr up = u->d;
@@ -669,9 +669,9 @@ _gst_mpz_fdiv_qr (gst_mpz *quot, gst_mpz *rem,
     }
 }
 
-long
+mp_limb_t
 _gst_mpz_fdiv_qr_si (gst_mpz *quot,
-		     const gst_mpz *dividend, long divisor)
+		     const gst_mpz *dividend, intptr_t divisor)
 {
   int rem = _gst_mpz_tdiv_qr_si (quot, dividend, divisor);
 
@@ -761,7 +761,7 @@ _gst_mpz_mul (gst_mpz *w, const gst_mpz *u, const gst_mpz *v)
 }
 
 void
-_gst_mpz_mul_2exp (gst_mpz *w, const gst_mpz *u, unsigned long int cnt)
+_gst_mpz_mul_2exp (gst_mpz *w, const gst_mpz *u, unsigned cnt)
 {
   mp_size_t usize = u->size;
   mp_size_t abs_usize = ABS (usize);
@@ -840,7 +840,7 @@ _gst_mpz_sub (gst_mpz *w, const gst_mpz *u, const gst_mpz *v)
 
   if (abs_usize < abs_vsize)
     {
-      /* Swap U and V. */
+      /* Swap U and V.  */
       {const gst_mpz *t = u; u = v; v = t;}
       {mp_size_t t = usize; usize = vsize; vsize = t;}
       {mp_size_t t = abs_usize; abs_usize = abs_vsize; abs_vsize = t;}
@@ -919,7 +919,7 @@ _gst_mpz_get_d(const gst_mpz *mpz)
       d = old + mpz->d[n];
 
       if (d - old < mpz->d[n])
-	/* Lost some bytes of precision, exit now. */
+	/* Lost some bytes of precision, exit now.  */
 	return ldexp (d, 8 * SIZEOF_MP_LIMB_T * n);
     }
 
@@ -945,7 +945,7 @@ _gst_mpz_get_ld(const gst_mpz *mpz)
       d = old + mpz->d[n];
 
       if (d - old < mpz->d[n])
-	/* Lost some bytes of precision, exit now. */
+	/* Lost some bytes of precision, exit now.  */
 	return ldexpl (d, 8 * SIZEOF_MP_LIMB_T * n);
     }
 
@@ -1564,7 +1564,7 @@ _gst_mpz_from_oop(gst_mpz *mpz, OOP srcOOP)
   adjust = ((mp_limb_t) ~0UL) >> (8 * (srcOOP->flags & EMPTY_BYTES));
 
 #ifdef WORDS_BIGENDIAN
-  /* Big-endian code, we cannot optimize anything... */
+  /* Big-endian code, we cannot optimize anything...  */
   gst_mpz_realloc(mpz, n);
   dest = mpz->d;
       
@@ -1588,7 +1588,7 @@ _gst_mpz_from_oop(gst_mpz *mpz, OOP srcOOP)
     }
 
 #else
-  /* Little-endian code, we can optimize positive integers. */
+  /* Little-endian code, we can optimize positive integers.  */
   if (srcClass == _gst_large_negative_integer_class)
     {
       gst_mpz_realloc(mpz, n);
@@ -1603,17 +1603,15 @@ _gst_mpz_from_oop(gst_mpz *mpz, OOP srcOOP)
       while (n--)
 	*dest++ = ~*src++;
     }
-#if SIZEOF_LONG < SIZEOF_MP_LIMB_T
-  else if (n % (SIZEOF_MP_LIMB_T / SIZEOF_LONG))
+  else if (n % (sizeof (mp_limb_t) / sizeof (PTR)))
     {
       /* We have half a limb in the LargeInteger, so we cannot work
-	 directly in the object data. */
+	 directly in the object data.  */
 
       mpz->size = n;
       while (n--)
 	*dest++ = ~*src++;
     }
-#endif
   else
     {
       /* Point directly in the bytes */
@@ -1626,7 +1624,7 @@ _gst_mpz_from_oop(gst_mpz *mpz, OOP srcOOP)
 #endif
 
   /* DEST now points past the limbs in the new gst_mpz.  Don't do
-     gratuitous writes to avoid over-GCing. */
+     gratuitous writes to avoid over-GCing.  */
   if (dest[-1] & ~adjust)
     dest[-1] &= adjust;
 
@@ -1648,7 +1646,7 @@ _gst_oop_from_mpz(gst_mpz *mpz)
   gst_byte_array ba;
 
   /* Convert to the absolute value (for ease in referencing mpz->size)
-     and remove leading zero bytes. */
+     and remove leading zero bytes.  */
 
   if (mpz->size < 0)
     {
@@ -1668,7 +1666,7 @@ _gst_oop_from_mpz(gst_mpz *mpz)
   if (neg)
     {
       if (mpz->size == 1 && mpz->d[0] <= (mp_limb_t) -MIN_ST_INT)
-	return FROM_INT(-(long) mpz->d[0]);
+	return FROM_INT(-(mp_limb_t) mpz->d[0]);
 
       n = mpz->size;
       limbs = mpz->d;
@@ -1681,7 +1679,7 @@ _gst_oop_from_mpz(gst_mpz *mpz)
   else
     {
       if (mpz->size == 1 && mpz->d[0] <= (mp_limb_t) MAX_ST_INT)
-	return FROM_INT ((long) mpz->d[0]);
+	return FROM_INT ((mp_limb_t) mpz->d[0]);
     }
 
 #if WORDS_BIGENDIAN
@@ -1721,7 +1719,7 @@ _gst_oop_from_mpz(gst_mpz *mpz)
 
   /* If the last byte was not in our internal object (this is possible,
      for example 16r80000000 fits a single limb but uses a 5-byte object)
-     fill in the last byte. */
+     fill in the last byte.  */
   if (n > SIZEOF_MP_LIMB_T * mpz->size)
     ba->bytes[--n] = neg ? 255 : 0;
       

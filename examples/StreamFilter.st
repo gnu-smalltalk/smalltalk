@@ -75,6 +75,12 @@ with: stream1 with: stream2
     ^self basicNew
 	streams: { stream1. stream2 };
 	startPos: 0
+!
+
+withAll: array
+    ^self basicNew
+	streams: array;
+	startPos: 0
 ! !
 
 !ConcatenatedStream methodsFor: 'all'!

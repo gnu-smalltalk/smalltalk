@@ -89,9 +89,8 @@ nextPut: anObject
 
     "(access bitAnd: 2) = 0
        ifTrue: [ ^self shouldNotImplement ]."
-
     ptr > endPtr ifTrue: [
-        ptr > collection size ifTrue: [ self growCollection ].
+	ptr > collection size ifTrue: [ self growCollection ].
 	endPtr := ptr
     ].
     collection at: ptr put: anObject.

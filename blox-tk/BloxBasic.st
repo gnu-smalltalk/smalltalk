@@ -664,13 +664,9 @@ dispatchEvents
 !
 
 dispatchEvents: mainWindow
-    "Dispatch some events; return instantly if this is not the outermost
-    dispatching loop that is started, else loop until the number of calls
-    to #dispatchEvents balance the number of calls to #terminateMainLoop.
-
-    In addition, set up an event handler that will call #terminateMainLoop
-    upon destruction of the `mainWindow' widget (which can be any kind of
-    BWidget, but will be typically a BWindow)."
+    "Dispatch some events; return upon destruction of the `mainWindow'
+    widget (which can be any kind of BWidget, but will be typically a
+    BWindow)."
 
     | sem |
     sem := Semaphore new.
@@ -682,13 +678,10 @@ dispatchEvents: mainWindow
 
 terminateMainLoop
     "Terminate the event dispatching loop if this call to #terminateMainLoop
-    balances the number of calls to #dispatchEvents. Answer whether the
-    calls are balanced."
+    balances the number of calls to #dispatchEvents."
 
     DoDispatchEvents > 0
 	ifTrue: [ DoDispatchEvents := DoDispatchEvents - 1 ].
-
-    ^DoDispatchEvents == 0
 !
 
 update: aspect

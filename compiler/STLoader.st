@@ -29,8 +29,7 @@
  ======================================================================"
 
 RBParser subclass: #STInterpreter
-       instanceVariableNames: 'currentClass
-			       '
+       instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: 'System-Compiler'
@@ -45,8 +44,9 @@ STInterpreter comment:
 file-in.'!
 
 STInterpreter subclass: #STClassLoader
-       instanceVariableNames: 'loadedClasses proxies currentCategory currentNamespace'
-       classVariableNames: ''
+       instanceVariableNames: 'loadedClasses proxies currentClass
+			       currentCategory currentNamespace'
+       classVariableNames: 'EvaluationMethods'
        poolDictionaries: 'STClassLoaderObjects'
        category: 'System-Compiler'
 !
@@ -70,26 +70,31 @@ toEvaluate: interpretedSelector perform: selector
 !STInterpreter methodsFor: 'overrides'!
 
 evaluateStatement: node
-    | receiver selector argumentNodes |
-    node arguments size = 0 ifTrue: [ ^self ].
-
+    | receiver selector argumentNodes result |
     receiver := node receiver.
     selector := node selector.
     argumentNodes := node arguments.
 
+    result := false.
     self class evaluationMethods at: selector ifPresent: [ :method |
-	self
+	result := self
 	    perform: method
 	    with: receiver
 	    with: selector
 	    with: argumentNodes ].
+
+    ^result
 !
 
 evaluate: node
-    node statements do: [ :each |
-        each isMessage ifTrue: [ self evaluateStatement: each ]
-    ].
-    ^currentClass notNil
+    ^node statements 
+	inject: false
+	into: [ :old :each |
+	    "We *do not* want short-circuit evaluation here!!"
+            each isMessage
+	        ifTrue: [ old | (self evaluateStatement: each) ]
+	        ifFalse: [ old ]
+        ]
 ! !
 
 !STClassLoader class methodsFor: 'accessing'!
@@ -178,60 +183,67 @@ compile: node
 doSubclass: receiver selector: selector arguments: argumentNodes
     | class arguments newClass |
     (argumentNodes allSatisfy: [ :each | each isLiteral ])
-	ifFalse: [ ^self ].
+	ifFalse: [ ^false ].
 
     class := self resolveClass: receiver.
     arguments := argumentNodes collect: [ :each | each value ].
     newClass := class perform: selector withArguments: arguments asArray.
     loadedClasses add: newClass.
-    proxies at: newClass put: newClass
+    proxies at: newClass put: newClass.
+    ^false
 !
 
 doComment: receiver selector: selector arguments: argumentNodes
     | class |
     (argumentNodes allSatisfy: [ :each | each isLiteral ])
-	ifFalse: [ ^self ].
+	ifFalse: [ ^false ].
 
     class := self resolveClass: receiver.
     class comment: argumentNodes first value.
+    ^false
 !
 
 doClassInstVars: receiver selector: selector arguments: argumentNodes
     | class |
     (argumentNodes allSatisfy: [ :each | each isLiteral ])
-	ifFalse: [ ^self ].
+	ifFalse: [ ^false ].
 
-    receiver isMessage ifFalse: [ ^self ].
-    receiver selector = #class ifFalse: [ ^self ].
+    receiver isMessage ifFalse: [ ^false ].
+    receiver selector = #class ifFalse: [ ^false ].
 
     class := self resolveClass: receiver.
     class instanceVariableNames: argumentNodes first value.
+    ^false
 !
 
 doSetNamespace: receiver selector: selector arguments: argumentNodes
     | ns |
-    receiver isVariable ifFalse: [ ^self ].
-    receiver name = 'Namespace' ifFalse: [ ^self ].
+    receiver isVariable ifFalse: [ ^false ].
+    receiver name = 'Namespace' ifFalse: [ ^false ].
 
     ns := self resolveNamespace: argumentNodes first.
-    self currentNamespace: ns
+    self currentNamespace: ns.
+    ^false
 !
 
 doAddNamespace: receiver selector: selector arguments: argumentNodes
     | root |
     (argumentNodes allSatisfy: [ :each | each isLiteral ])
-	ifFalse: [ ^self ].
+	ifFalse: [ ^false ].
+
     root := self resolveNamespace: receiver.
     root addSubspace: argumentNodes first value.
+    ^false
 !
 
 doMethodsFor: receiver selector: selector arguments: argumentNodes
     | class |
     (argumentNodes allSatisfy: [ :each | each isLiteral ])
-	ifFalse: [ ^self ].
+	ifFalse: [ ^false ].
 
     currentClass := self resolveClass: receiver.
-    currentCategory := argumentNodes first value
+    currentCategory := argumentNodes first value.
+    ^true
 !
 
 resolveClass: node
@@ -265,10 +277,10 @@ resolveName: node
     current := node.
     selectors := OrderedCollection new.
     [ current isMessage ] whileTrue: [
-	selectors addFirst: current selector printNl.
+	selectors addFirst: current selector.
 	current := current receiver
     ].
-    selectors addAllFirst: (current name printNl substrings: $.).
+    selectors addAllFirst: (current name substrings: $.).
 
     ^selectors
 	inject: self currentNamespace

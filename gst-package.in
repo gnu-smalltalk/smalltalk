@@ -36,59 +36,68 @@
 : ${prefix:=@prefix@}
 : ${exec_prefix:=@exec_prefix@}
 : ${AWK:=gawk}
-: ${GST:=${exec_prefix}/bin/gst}
-IMAGE_PATH=${SMALLTALK_IMAGE:-@datadir@/@PACKAGE@}
-KERNEL_PATH=${SMALLTALK_KERNEL:-@datadir@/@PACKAGE@/kernel}
-MODULE_PATH=${SMALLTALK_MODULES:-@libdir@/@PACKAGE@}
+: ${GST_LOAD:=${exec_prefix}/bin/gst-load}
 
-(cd $IMAGE_PATH 2> /dev/null & IMAGE_PATH=`pwd`)
-(cd $KERNEL_PATH 2> /dev/null & KERNEL_PATH=`pwd`)
-(cd $MODULE_PATH 2> /dev/null & MODULE_PATH=`pwd`)
+IMAGE_PATH=${SMALLTALK_IMAGE:-@datadir@/@PACKAGE@}
+(cd $IMAGE_PATH 2> /dev/null && IMAGE_PATH=`pwd`)
 
 request_help=false
 request_version=false
 options_error=false
 load=:
 install=:
+dist=false
+list_files=
 uninstall=false
 dry_run=false
 DESTDIR=
 srcdir=.
 files=
 
+# Command line parsing.
+
 while [ -n "$1" ]; do
   case $1 in
 	--v | --ve | --ver | --vers | --versi | --versio | \
-  	--version)	 request_version=:		   ;;
+	--version)	 request_version=:		   ;;
 
 	--h | --he | --hel | \
-  	--help)		 request_help=:			   ;;
+	--help)		 request_help=:			   ;;
 
 	--no-l | --no-lo | --no-loa | \
-  	--no-load)	 load=false			   ;;
+	--no-load)	 load=false			   ;;
 
 	--no-i | --no-in | --no-ins | --no-inst | \
 	--no-insta | --no-instal | \
-  	--no-install)	 install=false			   ;;
+	--no-install)	 install=false			   ;;
 
-        --u | --un | --uni | --unin | --unins | --uninst | \
-        --uninsta | --uninstal | \
-        --uninstall)     load=false; uninstall=:           ;;
+	--u | --un | --uni | --unin | --unins | --uninst | \
+	--uninsta | --uninstal | \
+	--uninstall)     load=false; uninstall=:           ;;
 
 	--di | --dis | \
-  	--dist)		 load=false; built_files=false	   ;;
+	--dist)		 load=false; dist=:	  	   ;;
+
+	--l=* | --li=* | --lis=* | --list=* | --list-=* | \
+	--list-f=* | --list-fi=* | --list-fil=* | --list-file=* | \
+	--list-files=*)	 list_files="$list_files `echo $1 | sed s/.*=//`"
+							   ;;
+
+	--l | --li | --lis | --list | --list- | \
+	--list-f | --list-fi | --list-fil | --list-file | \
+	--list-files)	 shift; list_files="$1"		   ;;
 
 	--s | --sr | --src | --srcd | --srcdi | \
-  	--srcdir)	 DESTDIR="$1"; shift		   ;;
+	--srcdir)	 shift; srcdir="$1"		   ;;
 
 	--s=* | --sr=* | --src=* | --srcd=* | --srcdi=* | \
-  	--srcdir=*)	 srcdir="`echo $1 | sed s/.*=//`"  ;;
+	--srcdir=*)	 srcdir="`echo $1 | sed s/.*=//`"  ;;
 
 	--de | --des | --dest | --destd | --destdi | \
-  	--destdir)	 DESTDIR="$1"; shift		   ;;
+	--destdir)	 shift; DESTDIR="$1"		   ;;
 
 	--de=* | --des=* | --dest=* | --destd=* | --destdi=* | \
-  	--destdir=*)	 DESTDIR="`echo $1 | sed s/.*=//`" ;;
+	--destdir=*)	 DESTDIR="`echo $1 | sed s/.*=//`" ;;
 
 	-n | --dr | --dry | --dry- | --dry-r | --dry-ru | \
   	--dry-run)	 dry_run=:			   ;;
@@ -100,33 +109,32 @@ while [ -n "$1" ]; do
   shift
 done
 
+# Do --help and --version.
+
 if [ -z "$files" ] || $request_help || $options_error; then
   cat <<EOF
 Syntax: gst-package [OPTION]... FILES...
 
     -n, --dry-run         print commands rather than running them
-	--no-load         don\'t load the Smalltalk files in the image
-        --no-install      don\'t copy the files
-        --uninstall       remove the files mentioned in the FILES
+	--no-load         don't load the Smalltalk files in the image
+        --no-install      don't copy the files
+        --uninstall       remove the packages mentioned in the FILES
         --dist            create symbolic links of non-built files
+        --list-files PKG  just output the list of files in the package
 	--srcdir DIR      look for non-built files in directory DIR
 	--destdir DIR	  prefix the destination directory with DIR
 
 	--help            display this message and exit
 	--version         print version information and exit
 
-Except in uninstall mode, gst-package requires write access to the
-\`packages.xml\' file in the GNU Smalltalk image directory, and
-installs the packages whose description is contained contained in
-the given XML files.
+Except in uninstall and list files mode, gst-package requires write
+access to the \`packages.xml' file in the GNU Smalltalk image directory,
+and merges the XML package files on the command line with that file.
 
 The image path is $IMAGE_PATH.
-The kernel path is $KERNEL_PATH.
-The module path is $MODULE_PATH.
 
 EOF
-  # If no options were passed, return an error.
-  $options_error && exit 1
+  # Unless --help was passed, return an error.
   $request_help && exit 0
   exit 1
 fi
@@ -136,23 +144,42 @@ if $request_version; then
   exit 0
 fi
 
-echo "Merging $files and $IMAGE_PATH/packages.xml..."
-$dry_run || {
-  sed -e '$i\' -e '</packages>' -e '/<.packages>/,/<packages>/d' $files > $IMAGE_PATH/packages.tmp
-  mv $IMAGE_PATH/packages.tmp $IMAGE_PATH/packages.xml
-}
+# Process --list-files now, then exit.
 
+if [ -n "$list_files" ]; then
+  for i in $list_files; do
+    dir="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files | sed 1q`"
+
+    list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	      -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' $files `"
+
+    for j in $list; do
+      echo $dir/$j
+    done
+
+    list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	      -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `"
+
+    for j in $list; do
+      echo $dir/$j
+    done
+  done
+  exit 0
+fi
+
+# Extract the name of the packages to be (un)installed.
 
 pkgs=`sed -e '/<name>/!d' \
           -e 's,.*<name>\([^<]*\)<.name>,\1 ,' $files `
 
 if $uninstall; then
   for i in $pkgs; do
-    dir=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files `
+    dir="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files | sed 1q`"
 
-    list=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	      -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' $files `
+    list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	      -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' $files `"
     for j in $list; do
       case $j in
         /*) dest=$DESTDIR$j ;;
@@ -163,8 +190,8 @@ if $uninstall; then
       $dry_run || rm -f "$dest"
     done
 
-    list=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	      -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `
+    list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	      -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `"
     for j in $list; do
       dest="$DESTDIR$IMAGE_PATH/$dir/$j"
       echo "rm -f $dest"
@@ -174,13 +201,40 @@ if $uninstall; then
   exit 0
 fi
 
+# If we are installing, add packages.xml to the list
+# and merge the supplied packages files with it
+
+if $dist; then
+  :
+else
+  base="$DESTDIR$IMAGE_PATH/packages.xml"
+  if test -f $base; then
+    for i in $files; do
+      if test $i -ef $base; then
+        add=
+        break
+      fi
+    done
+    files="$base${base:+ }$files"
+  fi
+
+  echo "Merging $files..."
+  $dry_run || {
+    sed -e '$i\
+</packages>' -e '/<.packages>/,/<packages>/d' \
+      $files > packages.tmp
+
+    mv packages.tmp $DESTDIR$IMAGE_PATH/packages.xml
+  }
+fi
+
 if $install; then
   for i in $pkgs; do
-    dir=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files `
-    dirs=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+    dir="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files | sed 1q`"
+    dirs="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
 	      -e 's,.*<built-file>\([^<]*\)/<.built-file>,\1,p' \
-	      -e 's,.*<file>\([^<]*\)/<.file>,\1,p' $files `
+	      -e 's,.*<file>\([^<]*\)/<.file>,\1,p' $files `"
 
     for j in . $dirs; do
       case $j in
@@ -210,34 +264,10 @@ if $install; then
       done
     done
 
-    if $built_files; then
-      list=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	        -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' $files `
-      for j in $list; do
-        case $j in
-          /*) dest=$DESTDIR$j ;;
-	  *) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
-        esac
+    if $dist; then
+      list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	        -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `"
 
-        echo "@INSTALL@ -m 644 $dir/$j $dest"
-        $dry_run || (rm -f "$dest" && cp "$dir/$j" "$dest" && chmod 644 "$dest")
-      done
-
-      list=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	        -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `
-      for j in $list; do
-        case $j in
-          /*) dest=$DESTDIR$j ;;
-	  *) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
-        esac
-
-        echo "@INSTALL@ -m 644 $srcdir/$dir/$j $dest"
-        $dry_run || (rm -f "$dest" && cp "$srcdir/$dir/$j" "$dest" && chmod 644 "$dest")
-      done
-
-    else
-      list=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	        -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `
       wd=`cd $srcdir && pwd`
       for j in $list; do
         case $j in
@@ -248,16 +278,38 @@ if $install; then
         echo @LN_S@ -f "$wd/$dir/$j" "$dest"
         $dry_run || @LN_S@ -f "$wd/$dir/$j" "$dest"
       done
+
+    else
+      list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	        -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' $files `"
+      for j in $list; do
+        case $j in
+          /*) dest=$DESTDIR$j ;;
+	  *) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
+        esac
+
+        echo "@INSTALL@ -m 644 $dir/$j $dest"
+        $dry_run || (rm -f "$dest" && cp "$dir/$j" "$dest" && chmod 644 "$dest")
+      done
+
+      list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	        -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `"
+      for j in $list; do
+        case $j in
+          /*) dest=$DESTDIR$j ;;
+	  *) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
+        esac
+
+        echo "@INSTALL@ -m 644 $srcdir/$dir/$j $dest"
+        $dry_run || (rm -f "$dest" && cp "$srcdir/$dir/$j" "$dest" && chmod 644 "$dest")
+      done
     fi
   done
 fi
 
-if $load; then
-  pkgs=`sed -ne '/<disabled-package>/,/<.disabled-package>/ d' \
-            -e 's,.*<name>\([^<]*\)<.name>,\1 ,p' $files `
-
-  if [ -n "$pkgs" ]; then
-    echo $GST -qsK Load.st -a $pkgs
-    $dry_run || $GST -qsK Load.st -a $pkgs
-  fi
+if $load && [ -n "$pkgs" ]; then
+  echo ${GST_LOAD} $pkgs
+  $dry_run || ${GST_LOAD} $pkgs
 fi
+
+exit 0
