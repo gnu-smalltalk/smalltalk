@@ -89,7 +89,7 @@ newRawSocket
      and interfaces for the protocol family represented by the receiver
      (for example, the C protocol family PF_INET for the IPAddress class)
      Ordinary user programs usually have no need to use this method."
-    ^self new: defaultRawSocketImplClass new
+    ^DatagramSocket new: defaultRawSocketImplClass new
 ! !
 
 !SocketAddress class methodsFor: 'initialization'!
