@@ -1,0 +1,184 @@
+##  -*- Mode: C -*-
+## --------------------------------------------------------------------
+## compat.h.in --- verbose but portable cpp defines for snprintfv
+## Copyright (C) 1999 Gary V. Vaughan
+## Originally by Gary V. Vaughan, 1999
+## This file is part of Snprintfv
+##
+## Snprintfv is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License as
+## published by the Free Software Foundation; either version 2 of the
+## License, or (at your option) any later version.
+##
+## Snprintfv program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, write to the Free Software
+## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+##
+## As a special exception to the GNU General Public License, if you
+## distribute this file as part of a program that also links with and
+## uses the libopts library from AutoGen, you may include it under
+## the same distribution terms used by the libopts library.
+
+## Code:
+
+/* inline and const keywords are (mostly) handled by config.h */
+#ifdef __GNUC__
+#  ifndef const
+#    define const	__const
+#  endif
+#  ifndef signed
+#    define signed	__signed
+#  endif
+#  ifndef volatile
+#    define volatile	__volatile
+#  endif
+#else
+#  ifndef __STDC__
+#    undef  signed
+#    define signed
+#    undef  volatile
+#    define volatile
+#  endif
+#endif
+
+#ifdef __STDC__
+#  ifndef _STR
+#    define _STR(x)		#x
+#  endif
+#  ifndef _CONC
+#    define _CONC(x, y)	x##y
+#  endif
+typedef void *snv_pointer;
+typedef const void *snv_constpointer;
+#else
+#  ifndef _STR
+#    define _STR(x)		"x"
+#  endif
+#  ifndef _CONC
+#    define _CONC(x, y)	x/**/y
+#  endif
+typedef char *snv_pointer;
+typedef char *snv_constpointer;
+#endif
+
+/* If FALSE is defined, we presume TRUE is defined too.  In this case,
+   merely typedef boolean as being int.  Or else, define these all.  */
+#ifndef FALSE
+/* Do not use `enum boolean': this tag is used in SVR4 <sys/types.h>.  */
+typedef enum
+{ FALSE = 0, TRUE = 1 }
+compatboolean;
+#else
+typedef int compatboolean;
+#endif
+#ifndef boolean
+#  define boolean compatboolean
+#endif
+
+#if defined __CYGWIN32__
+#  ifndef __CYGWIN__
+#     define __CYGWIN__
+#  endif
+#endif
+#if defined __CYGWIN__ || defined __MSVCRT__ || defined WIN32 || defined __WIN32__
+#  ifndef _WIN32
+#    define _WIN32
+#  endif
+#endif
+
+#ifndef EXIT_SUCCESS
+#  define EXIT_SUCCESS  0
+#  define EXIT_FAILURE  1
+#endif
+
+#undef SNV_STMT_START
+#undef SNV_STMT_END
+#if defined (__GNUC__) && !defined (__STRICT_ANSI__) && !defined (__cplusplus)
+#  define SNV_STMT_START	(void)(
+#  define SNV_STMT_END		)
+#else
+#  if (defined (sun) || defined (__sun__))
+#    define SNV_STMT_START	if (1)
+#    define SNV_STMT_END	else (void)0
+#  else
+#    define SNV_STMT_START	do
+#    define SNV_STMT_END	while (0)
+#  endif
+#endif
+
+#ifdef _WIN32
+#  ifdef DLL_EXPORT
+#    define SNV_SCOPE	extern __declspec(dllexport)
+#  else
+#    ifdef LIBSNPRINTFV_DLL_IMPORT
+#      define SNV_SCOPE	extern __declspec(dllimport)
+#    endif
+#  endif
+#endif
+#ifndef SNV_SCOPE
+#  define SNV_SCOPE	extern
+#endif
+
+#undef SNV_GNUC_PRINTF
+#undef SNV_GNUC_NORETURN
+#if	__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+#  define SNV_GNUC_PRINTF( args, format_idx, arg_idx )		\
+  	args __attribute__((format (printf, format_idx, arg_idx)))
+#  define SNV_GNUC_NORETURN						\
+	__attribute__((noreturn))
+#  define SNV_ASSERT_FMT  	 " (", __PRETTY_FUNCTION__, ")"
+#else /* !__GNUC__ */
+#  define SNV_GNUC_PRINTF( args, format_idx, arg_idx ) args
+#  define SNV_GNUC_NORETURN
+#  define SNV_ASSERT_FMT		"", "", ""
+#endif /* !__GNUC__ */
+
+#ifndef STR
+#  define STR(s) _STR(s)
+#endif
+
+#define snv_assert(expr)			snv_fassert(stderr, expr)
+#define snv_fassert(stream, expr)	SNV_STMT_START{			\
+    if (!(expr))                         	\
+    {                    	                           \
+	fprintf (stream, "file %s: line %d%s%s%s: assertion \"%s\" failed.\n", \
+	__FILE__, __LINE__, SNV_ASSERT_FMT, _STR(expr));		\
+	exit(EXIT_FAILURE);						\
+    };					}SNV_STMT_END
+
+#define return_if_fail(expr)		freturn_if_fail(stderr, expr)
+#define freturn_if_fail(expr)		SNV_STMT_START{			\
+    if (!(expr))							\
+    {									\
+	fprintf (stream, "file %s: line %d%s%s%s: assertion \"%s\" failed.\n", \
+	__FILE__, __LINE__, SNV_ASSERT_FMT, _STR(expr));		\
+	return;								\
+    };					}SNV_STMT_END
+
+#define return_val_if_fail(expr, val)	freturn_val_if_fail(stderr, expr, val)
+#define freturn_val_if_fail(stream, expr, val)	SNV_STMT_START{		\
+    if (!(expr))							\
+    {									\
+	fprintf (stream, "file %s: line %d%s%s%s: assertion \"%s\" failed.\n", \
+	__FILE__, __LINE__, SNV_ASSERT_FMT, _STR(expr));		\
+	return val;							\
+    };					}SNV_STMT_END
+
+#ifndef MAX
+#define MAX(a,b)	((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef MIN
+#define MIN(a,b)	((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef ABS
+#define ABS(a)		((a) < 0 ? -(a) : (a))
+#endif
+
+##  compat.h.in ends here

@@ -1,0 +1,378 @@
+@emph{by Thomas Gagne}
+
+@menu
+* Building a DOM from XML::
+* Building XML::
+* Using DTDs::
+* XSL Processing::
+* Attributions::
+@end menu
+
+@node Building a DOM from XML
+@section Building a DOM from XML
+
+If you're like me, the first thing you may be trying to do is build
+a Document Object Model (DOM) tree from some kind of XML input.  Assuming
+you've got the XML in a String the following code will build an XML Document:
+
+@example
+XML XMLParser processDocumentString: theXMLString 
+	beforeScanDo: [ :p | p validate: false].
+@end example
+
+Though the code above appears as though it should be easy to use, there's
+some hidden features you should know about.  First, @code{theXMLString}
+can not contain any null bytes.  Depending on where your XML comes from
+it may have a NULL byte at the end (like mine did).  Many languages implement
+strings as an array of bytes (usually printable ones) ending with a null
+(a character with integer value 0).  In my case, the XML was coming from
+a remote client written in C using middleware to send the message to my server.
+Since the middleware doesn't assume to know anything about the message
+it received, it's received into a String, null-byte and all.  To remove it I used:
+
+@example
+XML XMLParser processDocumentString: (aString copyWithout: 0 asCharacter)
+    beforeScanDo: [ :p | p validate: false].
+
+@end example
+
+Starting out, I didn't know much about the value of DTDs either
+(Document Type Definitions), so I wasn't using them (more on why you
+should later).  What you need to know is XML comes in two flavors, (three if you include broken
+as a flavor) @emph{well-formed} and @emph{valid}.
+
+@emph{Well-formed XML} is simply XML following the basic rules, like only one top-level (the
+document's root), no overlapping tags, and a few other contraints.  Valid XML means not only is the XML
+well-formed, but it's also compliant with some kind of rule base about
+which elements are allowed to follow which other ones, whether or not
+attributes are permitted and what their values and defaults should be,
+etc.
+
+There's no way to get around well-formedness.  Most XML tools complain
+vociferously about missing or open tags.  What you may not have lying
+around, though, is a DTD describing how the XML should be assembled.  If
+you need to skip validation for any reason you must include the selector:
+
+@example
+beforeScanDo: [ :p | p validate: false].
+@end example
+
+Now that you have your XML document, you probably want to access
+its contents (why else would you want one, right?).  Let's take
+the following (brief) XML as an example:
+
+@example
+<porder porder_num="10351">
+  <porder_head>
+    <order_date>01/04/2000</order_date>
+  </porder_head>
+  <porder_line>
+    <part>widget</part>
+    <quantity>1.0000</quantity>
+  </porder_line>
+  <porder_line>
+    <part>doodad</part>
+    <quantity>2.0000</quantity>
+  </porder_line>
+</porder>
+@end example
+
+The first thing you probably want to know is how to access the different
+tags, and more specifically, how to access the contents of those tags.
+First, by way of providing a roadmap to the elements I'll show you
+the Smalltalk code for getting different pieces of the document,
+assuming the variable you've assigned the document to is named @emph{doc}.
+I'll also create instance variables for the various elements as I go
+along:
+
+@multitable @columnfractions .5 .5
+@item @emph{Element you want}
+@tab @emph{Code to get it}
+
+@item porder element
+@tab @code{doc root}
+
+@item porder_head
+@tab @code{doc root elementNamed: 'porder_head'}
+
+@item order_date (as a String)
+@tab @code{(porderHead elementNamed: 'order_date') characterData}
+
+@item order_date (as a Date)
+@tab @code{(Date readFrom: (porderHead elementNamed: 'order_date') characterData readStream)}
+
+@item a collection with both porder_lines
+@tab @code{doc root elementsNamed: 'porder_line'}
+@end multitable
+
+I've deliberately left-out accessing @code{porder}'s attribute because accessing
+them is different from accessing other nodes.  You can get an OrderedCollection
+of attributes using:
+
+@example
+attributes := doc root attributes.
+@end example
+
+@noindent
+but the ordered collection isn't really useful.  To access any single attribute
+you'd need to look for it in the collection:
+
+@example
+porderNum := (attributes detect: [ :each | each key type = 'porder_num' ]) value.
+@end example
+
+But that's not a whole lot of fun, especially if there's a lot you need to get,
+and if there's any possibility the attribute may not exist.  Then you have to do the whole
+@code{detect:ifNone:} thing, and boy, does that make the code readable!
+What I did instead was create a method in my objects' abstract:
+
+@example
+dictionaryForAttributes: aCollection
+    ^Dictionary withAll: (aCollection
+	collect: [ :each | each key type -> each value ])
+@end example
+
+Now what you have is an incrementally more useful method for getting attributes:
+
+@example
+attributes := self dictionaryForAttributes: doc root attributes.
+porderNum := attributes at: 'porder_num'.
+@end example
+
+At first this appears like more code, and for a single attribute it probably is.  
+But if an element includes more than one attribute the payoff is fairly decent.
+Of course, you still need to handle the absence of an attribute in the dictionary
+but I think it reads a little better using a Dictionary than an OrderedCollection:
+
+@example
+porderNum := attributes at: 'porder_num' ifAbsent: [].
+@end example
+
+@node Building XML
+@section Building XML
+
+There's little reason to build an XML document if its not going to be processed
+by something down the road.  Most XML tools require XML documents have a document
+root.  A root is a tag inside which all other tags exist, or put another way,
+a single parent node from which all other nodes descend.  In my case, a
+co-worker was attempting to use Sablot's sabcmd to transform the XML
+from my server into HTML.  So start your document with the root ready to go:
+
+@example
+replyDoc := XML Document new.
+replyDoc addNode: (XML Element tag: 'response').
+@end example
+
+Before doing anything more complex, we can play with our new
+XML document.  Assuming you're going to want to send the
+XML text to someone or write it to a file, you may first
+want to capture it in a string.  Even if you don't want to
+first capture it into a string our example is going to:
+
+@example
+replyStream := String new writeStream.
+replyDoc printOn: replyStream.
+@end example
+
+If we examine'd the contents of our replyStream
+(@code{replyStream contents}) we'd see:
+
+@example
+<response/>
+@end example
+
+Which is what an empty tag looks like.
+
+Let's add some text to our XML document now.  Let's say we want it to look like:
+
+@example
+<response>Hello, world!</response>
+@end example
+
+Building this actually requires two nodes be added to a new XML 
+document.  The first node (or element) is named @code{response}.
+The second node adds text to the first:
+
+@example
+replyDoc := XML Document new.
+replyDoc addNode: (XML Element tag: response). "our root node"
+replyDoc root addNode: (XML Text text: 'Hello, world!').
+@end example
+
+Another way of writing it, and the way I've adopted in my code is to create the whole
+node before adding it.  This is not just to reduce the appearance of assignments,
+but it suggests a template for cascading @code{#addNode:} messages to an element,
+which, if you're building any kind of nontrivial XML, you'll be doing a lot of:
+
+@example
+replyDoc := XML Document new.
+replyDoc addNode: (
+    (XML Element tag: response)
+        addNode: (XML Text text: 'Hello, world!')
+).
+@end example
+
+Unless you're absolutely sure you'll never accidentally add
+text nodes that have an ampersand (&) in them, you'll need
+to escape it to get past XML parsers.  The way I got around 
+this was to escape them whenever I added text nodes.  To
+make it easier, I (again) created a method in my objects'
+abstract superclass:
+
+@example
+asXMLElement: tag value: aValue
+    | n |
+
+    n := XML Element tag: tag.
+    aValue isNil ifFalse: [
+	n addNode: (XML Text
+	    text: (aValue displayString copyReplaceAll: '&' with: '&amp;'))].
+    ^n
+@end example
+
+Calls to @code{self asXMLElement: 'sometagname' value: anInstanceVariable} are
+littered throughout my code.
+
+Adding attributes to documents is, thankfully, easier than accessing them.
+If we wanted to add an attribute to our document above we can do so with
+a single statement:
+
+@example
+replyDoc root addAttribute: (XML Attribute name: 'isExample' value: 'yes').
+@end example
+
+Now, our XML looks like:
+
+@example
+<response isExample="yes">Hello, world!</response>
+@end example
+
+@node Using DTDs
+@section Using DTDs
+
+What I didn't appreciate in my first XML project (this one) was how
+much error checking I was doing just to verify the format of
+incoming XML.  During testing I'd go looking for attributes or 
+elements that @emph{should} have been there but for various reasons
+were not.  Because I was coding fast and furious I overlooked some
+and ignored others.  Testing quickly ferreted out my carelessnes
+and my application started throwing exceptions faster than election
+officials throw chads.
+
+The cure, at least for formatting, is having a DTD, or Document Type Definition
+describing the XML format.  You can read more about the syntax of DTDs in
+the XML specification.
+
+There's not a lot programmers are able to do with DTDs in VisualWorks,
+except requiring incoming XML to include DOCTYPE statements.  There is 
+something programmers need to do to handle the exceptions the XML parser
+throws when it finds errors.
+
+I'm not an expert at writing Smalltalk exception handling code, and I 
+haven't decided on what those exceptions should look like to the client
+who sent the poorly formatted XML in the first place.  The code below
+does a decent job of catching the errors and putting the description
+of the error into an XML response.  It's also a fairly decent example
+of XML document building as discussed earlier.
+
+@example
+replyDoc := XML Document new.
+replyDoc addNode: (XML Element tag: 'response').
+
+[
+    doc := XML XMLParser processDocumentString: (anIsdMessage message copyWithout: 0) asString
+] on: Exception do: [ :ex |
+    replyDoc root 
+        addAttribute: (XML Attribute name: 'type' value: 'Exception');
+        addNode: ((XML Element tag: 'description')
+            addNode: (XML Text text: ex signal description));
+        addNode: ((XML Element tag: 'message')
+            addNode: (XML Text text: ex messageText))
+].
+
+@end example
+
+I said before there's not a lot programmers can do with DTDs,
+but there are some things I wish VW's XML library would do:
+
+@itemize @bullet
+
+@item
+I'd like to make sure the documents I build are built
+correctly.  It would be great if a DTD could be
+attached to an empty XML document so that exceptions
+could be thrown as misplaced elements were added.
+	
+@item
+It would be great to specify which DTD the XML parser
+should use when parsing incoming XML so that the 
+incoming XML wouldn't always have to include a
+<!DOCTYPE> tag.  Though it's fairly easy to
+add the tag at the start of XML text, it's really
+not that simple.  You need to know the XML's root
+element before adding the <!DOCTYPE> tag but
+you really don't know that until after you've
+parsed the XML   You would have to parse the XML,
+determine the root tag, then parse the output
+of the first into a new XML document with validation
+turned-on.
+
+@item
+Another reason to be able to create a DTD document
+to use with subsequent parsing is to avoid the
+overhead of parsing the same DTD over and over
+again.  In transaction processing systems this
+kind of redundant task could be eliminated and
+the spare CPU cycles put to better use.
+@end itemize
+
+@node XSL Processing
+@section XSL Processing
+
+I spent a night the other week trying to figure out how
+to get VW's XSL libraries to do anything.  I no longer
+need it now, but I did discover some things others
+with an immediate need may want to be aware of.
+
+@itemize @bullet
+@item	
+Transforming an XML document requires you parse
+the XSL and XML documents separately first.  After
+that, you tell the XSL RuleDatabase to process
+the XML document.  The result is another XML
+document with the transformations.
+		
+A code snippet for doing just that appears below.
+@example
+| rules xmlDoc htmlDoc |
+
+rules := XSL RuleDatabase new readFileNamed: 'paymentspending.xsl'.
+xmlDoc := XML XMLParser
+             processDocumentInFilename: 'paymentspending.xml'
+             beforeScanDo: [ :p | p validate: false ].
+htmlDoc := rules process: xmlDoc.
+@end example
+		
+There is also a @code{readString:} method which can be used
+instead of @code{readFileNamed:}.
+
+@item	
+VW's XSL library doesn't use the W3-approved stylesheet, but
+instead uses the draft version (same one Microsoft uses).
+@code{<xsl:stylesheet xmlns:xsl="http://www.w3.org/TR/WD-xsl">}
+	
+@item	
+The functions @code{position()} and @code{count()} aren't
+implemented, or if they are, aren't implemented in the way other XSL
+tools implement it.
+@end itemize
+
+@node Attributions
+@section Attributions
+
+Cincom, for supporting Smalltalk and the Smalltalk community by making 
+an open-source version available.
+
+Thanks also to Randy Ynchausti, Bijan Parsia, Reinout Heeck, 
+and Joseph Bacanskas for answering many questions on VW XML.
+

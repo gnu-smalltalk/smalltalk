@@ -1,0 +1,30 @@
+This is libsnprintfv, a portable, extensible reimplementation of the
+POSIX format printing API.  libsnprintfv provides all the features
+which should be present in a POSIX format printing implementation,
+but which often are not, such as guaranteed return of number of
+characters printed and support for %n$ format specifiers.
+
+In addition the the POSIX features, libsnprintfv also provides some
+extensions to the API, and a GNU glibc-2 compatible printf custom
+format specifier, all of which you can use with impunity if you link
+with libsnprintfv, rather than worrying about whether the target C
+library provides the extensions.  See the info manual for details of
+the API calls available, and an explanation of how to write custom
+specifier handlers.
+
+The latest version of libsnprintfv is available from the author's
+homepage: http://www.oranda.demon.co.uk.
+
+libsnprintfv is written in a very portable K&R compatible style, and
+should build anywhere that provides a reasonable C compiler and runtime.
+See the file INSTALL for instructions on how to build and install
+libsnprintfv.
+
+See the file NEWS for a description of user visible changes to
+libsnprintfv between releases.
+
+See the file TODO for a list of outstanding work.
+
+If you have any suggestions or bug reports, please send email to the
+author at <gary@gnu.org>.
+

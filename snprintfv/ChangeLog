@@ -1,0 +1,283 @@
+2003-12-03 Paolo Bonzini  <bonzini@gnu.org>
+
+	* libltdl: die die die
+	* configure.ac: always do the libltdl tests.
+	* snprintfv/ltdl.c: moved from libltdl.
+	* snprintfv/ltdl.h: moved from libltdl.
+	* snprintfv/Makefile.am: put ltdl.c in
+	the library, and ltdl.h in noinst_HEADERS.
+	Death to INCLTDL and LIBLTDL.
+
+2003-07-25 Paolo Bonzini  <bonzini@gnu.org>
+
+	* configure.ac: generate unlocked I/O macros
+	* snprintfv/printf.c: use them
+
+2003-07-24 Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: support *n$ notation, merge printf_flag
+	and printf_flag_info, printf_numeric_param and
+	printf_numeric_param_info
+	* snprintfv/printf.c: don't call the formatting function for
+	modifiers because it is now NULL, check this to distinguish modifiers
+	and non-modifiers, save argindex in call_argtype_function, save pointer
+	to the arguments (for printf_numeric_param_info's perusal) into the
+	parser's state.
+	* snprintfv/printf.in: add pointer to the arguments to the parser's
+	state.
+	* tests/Makefile.am: enable width-test
+
+2003-06-19 Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: fix %hhd to work on a signed char.
+
+2003-04-18 Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: extracted *_generic_*
+	* snprintfv/custom.c: to here
+	* snprintfv/filament.in: change argument of
+	filelt to ssize_t.
+
+2003-04-12 Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 1.0 released
+
+2003-03-30  Bruce Korb  <bkorb@gnu.org>
+
+	* snprintfv/filament.in: more ANSIfication
+	* snprintfv/format.c: make all functions explicitly
+	static.
+
+2003-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 1.0-pre2 released.
+
+	* snprintfv/filament.c: remove functions
+	* snprintfv/filament.in: turn them into inlines
+
+	* snprintfv/printf.c: drop support for varargs, ANSIfy
+	* snprintfv/filament.c: ANSIfy
+	* snprintfv/stream.c: ANSIfy
+	* tests/filament-test.c: ANSIfy
+	* tests/piglatin.c: ANSIfy
+	* tests/regress-test.c: ANSIfy
+	* tests/snprintfv-test.c: ANSIfy
+	* tests/stream-test.c: ANSIfy
+
+2003-03-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 1.0-pre released.
+
+	* snprintfv/format.c: clarify error message for things
+	like %2$*s (where the second argument should give the
+	width).
+
+2003-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: make replacement frexpl/ldexpl
+	static in case some other convenience library defines
+	them, and get rid of strtoul.
+
+2003-03-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/regress-test.c: added test, suggested by bkorb,
+	for the bug below.
+
+2003-03-02  Bruce Korb  <bkorb@gnu.org>
+
+	* snprintfv/printf.c: fix bug for 64-bit hosts,
+	i.e. where sizeof (int) != sizeof (char *).
+
+2002-12-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/printf.in: more protection against namespace
+	pollution (*printfv functions)
+	* snprintfv/printf.c: more protection against namespace
+	pollution (*putc functions)
+	* snprintfv/format.c, tests/stream-test.c,
+	tests/snprintfv-test.c: adapt callers
+
+2002-12-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/stream.c (stream_new): always set get_func
+	and put_func
+	(stream_get, stream_put): don't check for get_func != NULL
+	(stream_not_readable, stream_not_writeable): stub
+	implementation
+
+2002-12-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/filament.in: define macros equivalent to each
+	filament function.
+	* snprintfv/filament.c: likewise, plus doc fixes.
+
+2002-12-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 0.99f released.
+
+2002-12-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/filament.c: various bug fixes from me or
+	Bruce Korb.
+	* snprintfv/dl-yes.c: new file
+	* snprintfv/dl-no.c: new file
+	* snprintfv/printf.c: call hook in dl-*.c
+	* tests/snprintfv-test.c: remove pig latin modifier
+	* tests/piglatin.c: put it here, in a shared library
+
+2002-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 0.99d released.
+
+2002-11-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: improve handling of boundary floating-point
+	values.
+	* tests/regress-test.c: add floating-point stress tests.
+
+2002-11-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* configure.ac: detect wint_t
+	* snprintfv/compat.in: don't concatenate literal strings with
+	__PRETTY_FUNCTION__; ERROR_FUNCTION changed SNV_ASSERT_FMT
+	* snprintfv/printf.in: adapt for change to compat.in: printf_error
+	receives all the arguments and builds the error string
+	* snprintfv/printf.c: implement printf_error as above
+
+	* snprintfv/printf.in (snprintfv, printfv, asprintfv, fprintfv,
+	stream_printfv): accept a snv_constpointer * as the last
+	parameter, not a union printf_arg *.
+	* snprintfv/printf.c (snprintfv, printfv, asprintfv, fprintfv):
+	likewise
+	(do_printfv): new name of the old stream_printfv
+	(stream_printfv): rewritten
+	* snprintfv/snprintfv-test.c (vector_canonicalize): return
+	a snv_constpointer *.  Caller adjusted
+
+	* tests/regress-test.c: add another test.
+
+	* tests/char-test, tests/count-test, tests/hex-test,
+	tests/octal-test, tests/unsigned-test, tests/width-test: fix
+	incorrect last line
+
+2002-11-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 0.99b released.
+
+	* snprintfv/format.c (call_argtype_function): fix bug,
+	test on spec->modifier_char was inverted
+
+	* snprintfv/format.c: change overridable to modifier_char
+	* snprintfv/printf.c: likewise
+	* snprintfv/printf.in: likewise
+
+	* tests/regress-test.c: new test based on bug reported by
+	Bruce Korb.
+
+2002-11-15  Bruce Korb  <bkorb@gnu.org>
+
+	* snprintfv/printf.c (call_argtype_function): initialize the
+	new elements when reallocating the vector
+
+2002-10-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: add prototypes for frexpl and ldexpl
+	* snprintfv/compat.in: protect against multiple definitions of
+	"_STR" and "_CONC".
+
+2002-10-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 0.99 released.
+
+2002-07-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/snprintfv-test.c: convert the vector based on
+	the results of parse_printf_format
+	* tests/width-test, tests/exponent-test, tests/float-test,
+	tests/gfloat-test, tests/char-test, tests/octal-test,
+	tests/hex-test: more tests from Gary V. Vaughan
+
+2002-07-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: added %n
+
+2002-07-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: second round of glibc compatibility,
+	split formatting function and argument-parsing functions
+	* snprintfv/list.c: removed
+	* snprintfv/list.in: removed
+	* snprintfv/snprintfv.c: renamed to printf.c
+	* snprintfv/snprintfv.in: renamed to printf.in
+
+	* snprintfv/stream.c: return 1 if the stream is full
+	* tests/snprintfv-test.c: don't print past buflen characters.
+	* tests/limit-test: adjusted
+	* tests/stream-test.c: adjusted
+
+2002-07-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: added %p; showsign flag reserves
+	a place for the sign at the expense of the width.
+
+2002-06-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: don't try to format the arguments
+	when all we are interested in is their types.  Add more
+	state to printf_info instead of passing it through
+	handler parameters
+	* snprintfv/snprintfv.c: document passing a NULL stream
+	to stream_*.
+	* snprintfv/snprintfv.in: don't declare DEFINE/DECLARE
+	macros anymore, we only have three parameters now.
+	* tests/hex-test: test %x and %X.
+
+2002-06-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/register.in: adopt the fields in glibc's struct
+	printf_info and PA_ instead of SNV_, moved to snprintfv.in
+	* snprintfv/format.c: use the new fields instead of parser
+	data and PA_ instead of SNV_.
+	* snprintfv/snprintfv.c: initialize some of the new fields
+	and use PA_ instead of SNV_.  Added parse_printf_format
+	and related helper functions.  parser_argtype_renew now
+	called argtype_renew and made static.
+	* tests/snprintfv-test.c: use PA_ instead of SNV_.
+
+2002-06-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/format.c: a lot of changes including support for
+	%[eEfFgG], snv_generic_specifier_modifier and long longs.
+	* snprintfv/compat.in: define intmax_t and uintmax_t.
+	* snprintfv/snprintfv.c: asprintf compatible with GNU libc;
+	support long longs; support user data in custom handlers
+	* tests/extend-test: new test case
+	* tests/snprintfv-test.c: test extensibility via the
+	pig-latin modifier %P.
+
+2001-08-11  Bruce Korb  <bkorb@gnu.org>
+
+	* snprintfv/format.c: fix unimportant uninitialized variable
+	* snprintfv/snprintfv.c: Do not allocate longs in value array
+	* test/Makefile.am: add hex-test and cleanup scripts
+	* test/test-cleanup: clean up the dinkleberries when done
+
+2001-08-08  Gary V. Vaughan  <gary@gnu.org>
+
+	* snprintfv/format.c (fetch_argv_long):  Don't let my knowledge
+	that void* is not guaranteed to be large enough to hold an
+	integral type larger than an int leak out into the interface.
+	(fetch_argv_ulong): Ditto.
+	* tests/snprintfv-test.c (vector_canonicalize): Now that the
+	library no longer expects long ints to be stored indirectly, force
+	them into a void* and hope for the best!
+	* README: Confessional.
+
+2001-08-04  Bruce Korb  <bkorb@gnu.org>
+
+	* snprintfv/format.c: broken ptr dereference and unsigned format
+	types are treated as signed.
+
+1998-11-13  Gary V. Vaughan  <gary@gnu.org>
+
+	* For hysterical reasons, this is when I first started to write

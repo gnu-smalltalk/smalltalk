@@ -1,0 +1,98 @@
+
+Execution begins...
+returned value is Object
+
+Execution begins...
+returned value is Array new: 3 "<0>"
+
+Execution begins...
+returned value is Array
+
+Execution begins...
+returned value is 3
+
+Execution begins...
+returned value is Array
+
+Execution begins...
+returned value is #foo
+
+Execution begins...
+returned value is Array new: 3 "<0>"
+
+Execution begins...
+returned value is #bar
+
+Execution begins...
+returned value is 'quem'
+
+Execution begins...
+returned value is 3.40000
+
+Execution begins...
+returned value is 1
+
+Execution begins...
+returned value is $C
+
+Execution begins...
+returned value is #barn:yard:owl:
+
+Execution begins...
+returned value is #baz
+
+Execution begins...
+returned value is Array
+
+Execution begins...
+returned value is 1
+
+Execution begins...
+returned value is 5
+
+Execution begins...
+returned value is 10
+
+Execution begins...
+True
+Symbol
+False
+Symbol
+UndefinedObject
+Symbol
+returned value is nil
+
+Execution begins...
+ error: Invalid argument -1: argument out of range
+returned value is nil
+
+Execution begins...
+returned value is ByteArray new: 1 "<0>"
+
+Execution begins...
+returned value is ByteArray new: 1 "<0>"
+
+Execution begins...
+ error: Invalid argument 256: argument out of range
+returned value is nil
+
+Execution begins...
+ error: Invalid argument -18446744073709551616: argument out of range
+returned value is nil
+
+Execution begins...
+ error: Invalid argument -1: argument out of range
+returned value is nil
+
+Execution begins...
+returned value is WordArray new: 1 "<0>"
+
+Execution begins...
+returned value is WordArray new: 1 "<0>"
+
+Execution begins...
+returned value is WordArray new: 1 "<0>"
+
+Execution begins...
+ error: Invalid argument 18446744073709551616: argument out of range
+returned value is nil

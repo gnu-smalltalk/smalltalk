@@ -1,0 +1,128 @@
+MYSQL VERSIONS SUPPORTED:
+
+The Mysql driver has only been tested using versions 3.21.33b,
+3.22.14-gamma, 3.22.20, and 3.23.27-beta however all versions in between 
+should work.  The driver has been tested on both Linux and NT.
+
+--UPDATE version 0.2.0 has only been tested with mysql version 3.22.14-gamma
+         and 3.22.20.  Tested platforms are Linux (Red Hat dist 5.1)
+         kernel 2.0.36.
+
+--UPDATE the GNU Smalltalk port has only been tested with mysql
+	 version 3.23.39.  Tested platform is Linux (Slackware 8.0)
+	 kernel 2.4.5.
+
+The driver does not support the YEAR type which is new to 3.22.
+
+USAGE:
+
+Using the driver is fairly simple.  To execute a query you need to 
+create a connection to the database, create a statement on the connection,
+and execute your query.
+
+Example:
+
+Let's say I want to connect to the "test" database on the localhost.
+My user name is "doe" and my password is "mypass".
+
+| connection statement result |
+
+connection := Jdm MySQL JdmConnection on: 
+  (Jdm JdmConnectionSpec new initialize
+	user: 'doe'; password: 'mypass';
+	database: 'test').
+
+The JdmConnectionSpec is initialized with defaults for all the values
+which are:
+
+user := ''.
+password := ''.
+host := 'localhost'.
+port := 3306.
+database := 'test'
+
+Now I want to insert a row into a table I have named "aTable".  First
+I need to create a statement.
+
+statement := connection createStatement.
+
+Now execute the query.
+
+result := statement executeQuery: 'insert into aTable (aField) values (aValue)'.
+
+The result that is returned is a JdmResult.  It holds two values:  The result
+type and the actual result value.  For update queries (such as INSERT,
+UPDATE, DELETE, CREATE TABLE, etc) the type is set to #update and the
+value is an Integer designating the number of rows effected.  For read
+queries (such as SELECT...others such as SHOW, DESCRIBE, etc are not
+yet implemented) the type is set to #read and the value is a JdmResultSet.
+
+A JdmResultSet reads rows off the result stream.  It also contains a
+collection of column information (JdmColumns) which describe the type, size,
+and other characteristics of the returned column.  Generally you
+grab the columns by sending the "next" message to the result set.  
+The next message returns a Boolean which indicates whether or not
+there are any more rows to be read.  Do NOT read past the last row...
+currently the driver will block when this happens.
+
+A common usage of a JdmResultSet would be:
+
+| resultSet value |
+
+[resultSet next] whileFalse: [value := resultSet valueNamed: 'columnName'].
+
+The result set has several accessing methods. They are:
+
+valueAt: anInteger       -- returns the Smalltalk value at column 
+                            number anInteger
+rawValueAt: anInteger    -- returns the raw (String) value at column
+                            number anInteger
+valueNamed: aString      -- returns the Smalltalk value for the column
+                            named aString.
+rawValueNamed: aString   -- returns the raw (String) value for the column
+                            named aString
+
+The value* methods use the JdmFieldConverter to convert the Mysql
+data into Smalltalk objects.  The only unsupported Mysql type is
+the YEAR type.  Mysql sends the types of columns with it's query
+results which are used to determine what Smalltalk object a field should be
+converted to.  Unfortunately, it reports TEXT as BLOBs so TEXT values
+result in ByteArrays.  This conversion can be avoided by sending
+the rawValue* messages instead.  Mysql SETS are also misreported.
+Mysql says they are Strings so SETS are not automatically parsed.
+
+NOTES
+
+The error handling in the driver needs some work.  General errors and
+database errors are reported well, but if the protocol fails the results can
+be non-deterministic.  The protocol SHOULDNT fail unless the connection
+is broken. 
+
+If a JdmResultSet is opened and neither read to the end nor flushed, no
+further queries can be made on the connection.
+
+Mysql supports times between -838:59:59 and 838:59:59 however the
+Time class only supports times between 00:00:00 and 23:59:59 so any value
+in the database outside this range cannot be converted to Time.  You can
+get the raw value and handle it yourself.
+
+If you declare a Mysql numeric type with the qualifier ZEROFILL, automatic
+conversion to the corresponding Smalltalk type will drop the zeroes. Get
+the raw value to avoid this.
+
+Only full Timestamps are currently converted (ie a TIMESTAMP(14)).
+
+TESTING
+
+To run the test suites your mysql server needs to be on the local machine,
+the database "test" needs to exist, and a user named `utente' on the
+localhost need full access to the database "test".
+
+The aforementioned conditions are true when Mysql is first installed.
+
+The tests run fairly slow since each row consists of all possible
+Mysql types and many of the inserted values are generated.
+
+To run the tests execute the following:
+
+Jdm MySQL JdmMysqlTestSuite new run printNl

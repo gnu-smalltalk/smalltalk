@@ -1,0 +1,40 @@
+
+Execution begins...
+returned value is ObjectsTest
+
+Execution begins...
+returned value is ObjectsTest class
+
+Execution begins...
+returned value is ObjectsTest
+
+Execution begins...
+a finalized
+b finalized, surviving
+c finalized
+b finalized
+returned value is ObjectsTest
+
+Execution begins...
+returned value is true
+
+Execution begins...
+('abc' an Object nil nil 1 )
+('abc' an Object nil nil 1 )
+('abc' nil nil nil 1 )
+('abc' nil nil nil 1 )
+(true false true true true )
+(true true true true true )
+(true false true true true )
+returned value is Array new: 5 "<0>"
+
+Execution begins...
+New instance of Behavior created
+Superclass assigned
+First method compiled
+Second method compiled
+Instance created
+'test message'
+an {Object}
+Well it seems to work fine
+returned value is TextCollector new "<0>"

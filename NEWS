@@ -1,0 +1,1670 @@
+List of user-visible changes in GNU Smalltalk
+
+NEWS FROM 2.1.5 TO 2.1.9
+
+These are bugfix releases.  The only visible changes are:
+
+o   DLD can open the C library (2.1.6).
+
+o   Fix bug in compilation of ##() expression where the expression
+    evaluates to an integer (2.1.8).
+
+o   Fix bug in #next: on sockets (2.1.6).
+
+o   Fix crash when accessing an ill-formed namespace from Smalltalk code
+    (2.1.8).
+
+o   Fixes to the JIT compiler (2.1.8).
+
+o   Improvements to Gtk+ bindings (2.1.9).
+
+o   libltdl is no longer configured in a separate subdirectory (2.1.6).
+
+o   Portability improvements (2.1.8).
+
+o   Updated to Automake 1.8, Libtool 1.5 (CVS checkout on 2003-08-01),
+    Autoconf 2.59a, snprintfv 1.1 (2.1.6).
+
+o   Updates to Emacs mode (2.1.6).
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.1.4 TO 2.1.5
+
+o   Can pass integers to C routines that expect floats (where passing
+    floats works...)
+
+o   Changes in the internals of the GTK+ bindings.  The bindings are
+    loaded with the GTK+ package which is enabled by default if GTK+ 2.0
+    is installed.  They don't disable the Tk bindings.
+
+o   Correctly find exception handlers in #ensure: blocks.  Previously,
+    errors upon file close would not be caught in a snippet like
+    this:
+
+    [
+	file := FileStream open: fileName mode: FileStream read.
+	[
+	     ...
+	     file atEnd ifTrue: [ ^self ]
+	     ...
+	] ensure: [
+	     file close     "<<< Did not trap exceptions!!!"
+	]
+    ] on: FileError do: [ :ex | ... ]
+
+o   Do idle processes correctly.
+
+o   Fix Tcl/Tk detection for Red Hat Linux 9.
+
+o   LGPL meaning explained better in the manual.
+
+o   More examples provided for GTK+.
+
+o   Option -s is always enabled and will be removed in 2.2.
+
+o   Removed some GNU make-isms
+
+o   #return and #return: should reinstate handlers according to the
+    ANSI standard, but they currently aren't;  SUnit however needs this
+    behavior.  For this reason a workaround was added to SUnit, and
+    this behavior will be adopted uniformly in 2.2.
+
+o   Warnings are suppressed correctly under GCC 3.3.
+
+o   --without-emacs suppresses compilation and installation of Emacs LISP
+    files
+
+This version was released to have a distributable version of GNU Smalltalk
+after the recent crack of the GNU FTP machines.  However it does fix some
+outstanding bugs and includes the new & improved GTK+ bindings.
+
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.1.3 TO 2.1.4
+
+o   Fix bugs treating old objects that have already been considered by
+    the incremental GC (and survived it).  Example:
+
+	ObjectMemory globalGarbageCollect.
+	HomedAssociation class instanceCount
+
+    gave 0 instead of 1.  As a result, --enable-checking now can be
+    used.
+
+o   Fix bugs when doing #become: between old objects, exactly one of
+    which has not been considered by the incremental GC and was
+    incorrectly swept when the collector finally reached it.
+
+o   Fix bugs when garbage collection triggered finalization while a
+    primitive was being run.  Finalization is now done in a separate
+    Process.
+
+o   Fix bugs treating very large objects.
+
+o   Fix infinite loop when the big object threshold was set between
+    the size of survivor spaces and the size of the eden.
+
+o   Printing Integers was unbelievably inefficient.  Fixed together
+    with some more low-hanging fruit.
+
+o   SequenceableCollection>>#replaceFrom:to:with:startingAt: allows
+    again that stop=start-1 (like replaceFrom: 1 to: 0 with: ...)
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.1.2 TO 2.1.3
+
+o   Add Object>>#allOwners.
+
+o   CallinProcesses do not survive across image saves.  This fixed a
+    memory leak where upon every image save, the CallinProcess that
+    invoked the save was left ready to run in the least.  This also
+    caused mysterious bugs whenever, for example, you saved the
+    image with
+
+	ObjectMemory snapshot; quit!
+
+    and then tried to do 
+
+	Processor yield!
+
+    Now the CallinProcess would wake up from the point it was snapshotted,
+    and happily quit the VM!
+
+o   --disable-generational-gc in theory should not be necessary anymore.
+
+o   Fixed a couple of bugs in printing bytecodes
+
+o   Fixed bug in LargeInteger>>#bitAt:
+
+o   Fixed compilation under Alpha
+
+o   Fixed method caching error when using the JIT compiler
+
+o   Fixed rare GC bug
+
+o   Fixed syntax highlighting of unary and binary methods
+
+o   New iteration method Collection>>#fold:, the latest variation on the
+    #inject:into: and #do:separatedBy: themes.  You'll undoubtedly love
+
+	#('abc' 'def' 'ghi') fold: [ :string :elem | string, ' ', elem ]
+
+    which yields 'abc def ghi'.  This method can also replace most
+    usages of #anyOne together with #inject:into:, as in
+
+	coll inject: coll anyOne into: [ :max :elem | max max: elem ]
+
+    versus
+
+	coll fold: [ :max :elem | max max: elem ]
+
+o   Set was incorrectly said to have 2 instance variables.
+
+o   SmallIntegers are reported to be read-only.
+
+o   Support for generational GC under NetBSD/Alpha (and possibly more
+    OSes running on Alpha)
+
+o   Updated libtool to Debian's 1.4.3-9.
+
+o   Upgraded GNU lightning to 1.1.
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.1.1 TO 2.1.2
+
+o   Adding instance variables via #addInstVarName: validates their name and
+    possibly recompiles the class if the superclass defines an identically
+    named class.  Removing class variables via #removeClassVarName: recompiles
+    the class.
+
+o   BACKWARDS INCOMPATIBLE: ObjectMemory class>>#snapshot: will fail if it
+    cannot write to the file.
+
+o   BACKWARDS INCOMPATIBLE: File class>>#extensionFor: includes the leading
+    dot.  This is necessary to obtain the sensible behavior
+
+    (File stripExtensionFrom: string), (File extensionFor: string) = string
+
+o   Better support for detecting the headers when multiple versions of Tcl/Tk
+    are installed on the same machine.
+
+o   Configure option --disable-generational-gc to disable usage of libsigsegv
+    (which seems to lock up under some versions of MacOS X).
+
+o   Fixed call-in bug (if a primitive did a call-in and *then* failed, the
+    call-in might have dirtied the method cache and an invalid method was
+    invoked).  This could not happen in previous releases, but the new
+    #snapshot: primitive satisfies this condition.
+
+o   Fix lexing bugs under Linux/PPC and, supposedly, S390 and ARM too.
+
+o   Fix misbehavior under GCC 2.x
+
+o   Upgraded libsigsegv from CVS (includes ports to Linux/HPPA and
+    OpenBSD/i386).
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.1 TO 2.1.1
+
+o   Support for readline 4.2 and 4.3.
+
+o   Works under Cygwin, with generational GC enabled
+
+o   .stinit is not loaded in regression testing mode.
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.0.11 TO 2.1
+
+VM changes:
+
+o   #asObject returns nil instead of SIGSEGV-ing when a bogus OOP number
+    is passed.
+
+o   Changed default verbosity of the virtual machine.  Specify -V to get 
+    execution statistics.
+
+o   Corrected an incredible number of bugs in Processes.
+
+o   Do-its at the 'st>' prompt return the last evaluated value.
+
+o   Finalization is no longer provided by the VM, but rather implemented
+    on top of the more general "ephemeron object" facility.  As a result
+    of using ephemerons, code referencing the WeakKeyLookupTable class
+    should use the new WeakKeyDictionary class (which behaves the same).
+
+o   gst_init_smalltalk will not exit on error, instead it will return an
+    error code
+
+o   If an invalid image file is specified along with -I, it is considered
+    an error.
+
+o   More portable than ever!
+
+o   New, redesigned implementation of call-ins and call-outs, enforces the
+    priority under which the call-ins are executed and supports context
+    switches during a call-out as well as asynchronous call-outs.  The
+    #defineCFunc:withSelectorArgs:forClass:returning:args: method which
+    had been deprecated three years ago was finally removed.
+
+o   Primitives are written with a `little language' (actually C with a few
+    extra directives) and preprocessed to C at build time.
+
+o   Rewritten the garbage collector: it is now generational and incremental.
+
+o   Small massaging to the bytecode set.  Replaced little-used push -1
+    and push 2 bytecodes with push signed 8-bit and push unsigned 8-bit
+    bytecodes
+
+o   Smalltalk processes can ask not to be interrupted by external events.
+
+o   Source code line number stored in the bytecodes.
+
+o   Support for single-stepping into a Process (to be used and abused by
+    debuggers).
+
+o   Support for compile-time evaluation with the ##( ... ) syntax.
+
+o   Support for compile-time Namespace resolution, with any of the .
+    or :: scope-resolution operators (former used in kernel source code).
+
+o   Unused JIT-compiled code is garbage collected.
+
+o   Upgraded libtool and libltdl to 1.4.3.
+
+
+Smalltalk changes:
+
+o   Associations that are part of a Namespace or a class pool know
+    which namespace they are in and, when stored, resolve to the
+    association that is already in the namespace.  This is achieved
+    through a new class VariableBinding.
+
+o   Backtraces don't show methods that are internal to the exception
+    handling system.
+
+o   Calls to dynamically loaded libraries are resolved on demand
+    rather than right after the image is loaded.  Useful for GTK+
+    bindings which have thousands of function to be resolved.
+
+o   Class autoloading supports namespaces.  In addition autoloaded
+    classes have a proper metaclass even before they are loaded,
+    and keep the same VariableBinding they used to have before
+    loading.
+
+o   Class pool dictionaries know about the class that hosts them.
+
+o   CompiledCode supports dispatching the bytecodes to an object that
+    wishes to decode them.
+
+o   Creating an instance of a variable class with #new creates an
+    instance with no indexed variables, instead of failing.
+
+o   Deprecated Integer>>#radix: in favor of #printStringRadix:.
+
+o   "Falling off" an exception handler does not resume a resumable
+    exception: instead the #on:do: block is always left like it already
+    was for non-resumable exceptions.  For example
+
+     | var |
+     [ var := self mySelector ]
+	on: MessageNotUnderstood
+	do: [ :ex | 1234 ]
+
+    used to give 1234 as the answer to the not understood message and
+    hence used to assign it to var.  Instead now 1234 is returned by
+    #on:do: and then discarded.  Also,
+
+     [ 'Huey' printNl.  self mySelector.
+       'Dewey' printNl.  self mySelector.
+       'Louie' printNl.  self mySelector ]
+	   on: MessageNotUnderstod do: [ :ex | ].
+
+    used to resume the block and then to print all the three strings,
+    while now it only prints "Huey" before leaving the #on:do: block.
+    This was caused by an incorrect reading of the ANSI standard.  The
+    correct way is to write `ex resume: 1234' or `ex resume' explicitly
+    in the exception handler.  This is *BACKWARDS INCOMPATIBLE*.
+
+o   Namespaces use instance variables properly to store information
+    about superspaces and subspaces (they used to use special keys
+    such as #Super).
+
+o   New class RecursionLock that is like Semaphores but will let the
+    Process that owns the lock send #wait without actually waiting.
+
+o   New syntax %<trueString|falseString>n supported by String>>#bind...
+    picks one of the two strings depending on the truth value of %n.
+
+o   The packages file is XML.  It also contains enough information to
+    simplify the Makefiles and avoid unneeded recursive invocations of
+    make.
+
+o   Protected blocks (#ensure:/#ifCurtailed:) are executed even if the
+    enclosing process is terminated.  Processes receive a notification
+    (SystemExceptions.ProcessBeingTerminated) when they are sent
+    #terminate.  They are also removed from the semaphore they are
+    waiting on (if any).
+
+o   Support for pluggable debuggers to be started whenever an error
+    exception fires.  An example text-mode debugger is provided, as well
+    as a nicer Blox debugger.
+
+o   The EndOfStream exception is now a notification exception (i.e. not a
+    fatal exception).  The ReadStream class raises it (it did not because
+    ANSI mandates that it returns nil and does not fail at the end of the
+    stream; turning EndOfStream to a notification allows us to satisfy
+    ANSI and raise the exception at the same time).
+
+o   Virtual filesystems for unzipping, untarring, uncpio-ing, etc. are
+    now implemented.
+
+
+Goodies:
+
+o   Database manager with MySQL driver
+
+o   Emacs Smalltalk mode back from the dead (thanks to David Forster)
+
+o   GTK+ bindings support callbacks and GTK+ 2.x
+
+o   NetClientsBase is integrated in the base image.  FileStreams support
+    opening URLs (only file URLs until you load NetClients).
+
+o   Numerical methods library
+
+o   The Parser and its companion classes have been dropped, and their
+    users converted to use the Refactoring Browser's parser, formatter
+    and parse trees.  Some of the advantages, such as better syntax
+    highlighting in the browser, are already visible.
+
+o   WebServer supports virtual hosting.  The change is backwards compatible,
+    if you don't intend to use virtual hosting you don't need to change
+    your initialization scripts, and you don't either need to change the
+    servlets in any way.
+
+o   WebServer supports STT (Smalltalk Templates) a` la PHP
+
+o   XML parser supports SAX 2.0 API
+
+
+Blox & the browser:
+
+o   Added callbacks to BMenu
+
+o   Added or improved many menus (e.g. Method set browser's upper pane)
+
+o   Added menu bars that mimic the pop-ups
+
+o   Changed fonts
+
+o   Class definitions are syntax highlighted just like methods
+
+o   Class hierarchy browsers enters "add method" mode automatically whenever
+    a protocol is clicked
+
+o   Context inspector is now a debugger with context list, variable names,
+    and single-step capabilities (*could lock up the JIT compiler!*)
+
+o   Faster!
+
+o   Fixed many bugs
+
+o   Rewritten inspectors, with multiple visualization and Dive/Pop
+    functionalities
+
+o   `self' is the inspected object when evaluating code from an Inspector
+
+o   The clipboard and the primary selection work as expected
+
+o   The label that is shown in a BDialog wraps correctly.
+
+o   Undeclared variables used in a worksheet variables survive across
+    multiple evaluations
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.0.2 TO 2.0.11
+
+These are bug-fix releases.  The only visible changes are:
+
+o   Added Integer>>#printStringRadix: which replaces Integer>>#radix:
+    The latter is now deprecated and will be removed in 2.2 (2.0.11)
+
+o   Added shortcut keys to the browser (2.0.7)
+
+o   Better error detection in TCP connections (2.0.11)
+
+o   Better error recovery in the parser (2.0.7, 2.0.11)
+
+o   Modified CObjects to be more orthogonal (2.0.4)
+
+Bug fixes:
+
+o   Backported several little improvements for the development branch
+    (2.0.11)
+
+o   ByteStream on a ByteArray is now equivalent to a FileStream (2.0.5)
+
+o   Blox compiles cleanly on FreeBSD (2.0.5)
+
+o   Blox shows XPM images again (2.0.9)
+
+o   Child process when opening a pipe is made a session group leader, so that
+    job control will work correctly (2.0.11)
+
+o   Detect FreeBSD's Tcl/Tk port in which tclsh is not a valid binary (2.0.11)
+
+o   Fixed dangling pointer in DLD (2.0.11)
+
+o   Fixed failure to compile when libtool is not installed (2.0.11)
+
+o   Fixed race condition in Delay (2.0.7)
+
+o   Fixed race condition between arrival of SIGCHLD and SIGIO (2.0.6)
+
+o   Fixed rare bogus compilation error (2.0.11)
+
+o   Fixed rare out-of-bounds access to context objects due to incorrect
+    computation of the number of stack slots needed by cascades (2.0.6)
+
+o   Fixed rare garbage collection bug, when a GC was triggered between
+    _gst_get_cur_file_name and the creation of a FileSegment that used
+    that name (2.0.10)
+
+o   Fixed severe lossage in the JIT related to #ensure: (2.0.11)
+
+o   Fixed testsuite failures when GMP is not installed (2.0.11)
+
+o   Improved autoconf detection of Tcl/Tk (2.0.5)
+
+o   Improved detection of pipe-like behavior of files such as FIFO
+    special files and /proc special files (2.0.6)
+
+o   Improved handling of low-water conditions (2.0.6)
+
+o   Included implementations of long double transcendental
+    functions in case the C library does not provide them (2.0.4)
+
+o   Instead of guessing, if possible use MAP_NORESERVE to have
+    the OS give us a big consecutive area of memory to store the OOP
+    table (2.0.9)
+
+o   Re-enabled separate memory space for large objects, was disabled
+    because of a bug (2.0.6)
+
+o   Removed a couple of C99-isms in the source code that had
+    crept in (2.0.3)
+
+o   Restored portability problem to systems with unaligned doubles
+    with clever compilers such as GCC 3.0 on the SPARC (2.0.8)
+
+o   SequenceableCollection>>#includes: was unnecessarily slow (2.0.6)
+
+o   Support for locale files stored in a user-specified directory (2.0.9)
+
+o   SUnit upgraded to 3.1 (2.0.6)
+
+o   Various updates to libsnprintfv (2.0.10)
+ 
+o   XPath package and XSL processor are included under the LGPL (2.0.6)
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.0.1 TO 2.0.2
+
+This release should be ANSI compliant.  All the known problems with ANSI
+compliancy have been fixed.
+
+VM changes:
+
+o   #ensure: methods are always executed, even in the presence of non-local
+    returns.  #ifCurtailed: conditions are also more general and include
+    non-local returns (not only exceptions).
+
+o   Floating point constants are always parsed as long doubles to increase
+    their precision.
+
+o   Implemented the `make installcheck' target.
+
+o   LargeInteger primitives failed and went back to Smalltalk code when
+    zero operands were involved; LargeInteger exact division in addition
+    failed to detect division by zero.
+
+o   Object copying with the default semantics is a primitive for speed
+
+o   Support for separate FloatD/FloatE/FloatQ classes with varying
+    precision.
+
+o   Uses libsnprintfv to simplify printing OOPs (custom %-specifiers)
+
+
+Other Smalltalk changes:
+
+o   All the expected failures in the ANSI test suite have been fixed (both
+    with the bytecode interpreter and the JIT -- the causes of the failures
+    were different in the two cases).
+
+o   Fixed a few bugs in the parsing of ScaledDecimal constants in both the
+    compilers (builtin and Smalltalk-in-Smalltalk)
+
+o   Fractions print without parentheses
+
+o   Some numeric methods return values of different classes (for ANSI
+    compliancy).
+
+o   The package loader stores absolute paths to the packages
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.0 TO 2.0.1
+
+VM changes:
+
+o   Fixed embarrassing syntax error in the JIT
+
+o   Image directory must not be world-writeable anymore, unless of course
+    the image must be built
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 1.95.13a TO 2.0
+
+VM changes:
+
+o   A few internal data structures are now implemented as balanced binary
+    trees rather than resizable arrays.  This allows for faster lookup.
+
+o   All the functions and variables in the C source code are now
+    commented.
+
+o   Big objects are allocated outside the main heap, hoping to improve the
+    locality of reference between small objects
+
+o   Byte and word instance variables are range checked.  Previously (it was
+    a bug, not a feature) we only checked that the values of byte instance
+    variables were < 256 (and not even that they were >= 0).
+
+o   Globals are searched in the class namespace before and in the
+    pool dictionaries (i.e. in the imported namespaces) after.  This is
+    backwards-incompatible.
+
+o   Just-in-time compiler to native code for the PowerPC, SPARC and x86
+    architectures
+
+o   Hash table sizes are assumed to be power of two.  The class library
+    and the VM both take care of scrambling the bits with some rotations
+    instead of using the modulo to do this.
+
+o   Image loading is up to 15% faster
+
+o   LargeIntegers operations are demanded to the GNU MP library if found
+    (otherwise, the old Smalltalk implementation is used).  On my 266MHz
+    PC this means that the factorial of 100000 is computed in 6
+    seconds. :-)
+
+o   ObjectMemory hooks are traced only if -E/-D is specified, in order to
+    decrease the amount of noise given by the more commonly used -e/-d.
+
+o   Optionally, preemptive multitasking of Processes can be enabled.
+
+o   Primitives are named rather than numbered
+
+o   Removed most special-purpose hooks from the higher-level parts of the
+    system, such as the compiler and C interface, into the low-level
+    parts (such as GC and the VM)
+
+o   SIGUSR1 triggers a backtrace
+
+o   Support for file sizes over 2 gigabytes
+
+o   vpath builds are fully supported
+
+
+Other changes:
+
+o   All the libraries are loaded within their own namespace.  This
+    is STInST for the Smalltalk compiler and parser, I18N for the
+    internationalization library, TCP for the sockets library, and
+    BLOX for the GUI library.  You might need to change your pool
+    dictionaries declarations accordingly.
+
+o   ANSI-compliance tests integrated into "make check"
+
+o   Backwards-incompatible fixes for ANSI compatibility in:
+	SequenceableCollection>>#replaceFrom:to:with:
+	SequenceableCollection>>#copyReplaceFrom:to:withObject:
+	Dictionary>>#keyAtValue:
+	Bag>>#add:
+	Bag>>#add:withOccurrences:
+	PositionableStream>>#next
+	PositionableStream>>#position
+	PositionableStream>>#position:
+
+o   Changed the names of these methods, for ANSI compatibility:
+	Float class>>#largest (now #fmax)
+	Float class>>#smallest (now #fmin)
+	Float class>>#mantissaDigits (now #precision)
+
+o   Constants like CDoubleSize that are used only to pass information
+    about the runtime environment do not pollute the Smalltalk namespace
+    anymore.
+
+o   Deprecated methods in SystemDictionary were removed (use their
+    counterparts in ObjectMemory).
+
+o   Documentation includes BLOX, TCP and internationalization.
+
+o   FileDescriptors support #atEnd for pipes as well
+
+o   File operations go through a virtual filesystem layer that can
+    provide transparent decompression and archiving of files.
+
+o   Floats now implement IEEE 754 correctly.  NaNs and infinities
+    are generated by transcendental functions (since arithmetic
+    operators already generated them), negative zero is correctly
+    handled, and custom versions of #min:, #max: and the like are
+    provided that take NaNs into accounts.  Tests for NaN and
+    infinity are possible for any kind of Number.
+
+o   A gst.m4 file, providing an AM_PATH_GST autoconf macro, is installed
+    (courtesy of Ryan Pavlik).
+
+o   Load.st and Reload.st correctly provide an exit status.
+
+o   Optimized and bugfixed many numeric computations: Fractions based
+    on algorithms in GNU MP, bitwise operations such as #highBit,
+    factorial, etc.
+
+o   Pool dictionaries can be specified with dot notation to indicate
+    subspaces.
+
+o   Regression testing mode disables backtraces when an exception is
+    raised.  Only the error message is printed.
+
+o   The behavior of the filename-manipulation class methods in File has
+    changed in sometimes backwards incompatible, but more correct, ways.
+    For example, the path of '/vmlinuz' is '/' and not the empty string.
+
+o   The disabled operations in Blox that were kept for backwards
+    compatibility with GNU Smalltalk 1.1.5 have been removed.
+
+o   The ObjectDumper's #postLoad hook is only called the first time
+    an object is found in the stream; once the object got its
+    definitive shape it makes no sense to lose time (or even do harm)
+    with post-load fixups.  This change is at least in theory backwards
+    incompatible, but I doubt it has practical relevance.
+
+o   The `packages' file is searched in the parent directory of the kernel
+    directory, rather than in the image directory.
+
+o   The policy for picking the exception handler when more than one is
+    specified is best-fit rather than first-fit.  For example, previously
+
+	[...] on: Error do: [...]
+	      on: MessageNotUnderstood do: [...]
+
+    never picked the MessageNotUnderstood handler because the Error handler
+    was chosen earlier.
+ 
+o   The Random class includes a facility to use a common Random object
+    instead of forcing every client to use his own object.
+
+o   The source has been converted to ANSI C and reformatted according
+    to the GNU standards.  All the external symbols are prefixed with
+    either _gst_ or gst_ depending on their privateness.  Since there
+    were four public symbols in all, this does not cause much trouble,
+    but it *is* backwards incompatible
+
+o   To avoid namespace pollution, the C callout mechanism does not
+    generate global variables with strange names anymore (actually,
+    it generates them in a separate namespace).
+
+o   true, false and nil inside Arrays are parsed according to the ANSI
+    standard.
+
+o   Warnings are raised if one tries to send any of the six reserved
+    keywords, since they most likely forgot a period (the six keywords
+    are #self, #super, #true, #false, #nil and #thisContext).
+
+
+New goodies:
+
+o   GTK+ bindings are provided.  No way to have callbacks from GTK+ to
+    Smalltalk yet, and we need a way to have gtk_main act as a coroutine.
+    Note that these bindings are a proof-of-concept and are expected to
+    be used internally by a future port of Blox to GTK+.
+
+o   NetClients toolkit, supporting popular Internet protocols.  NNTP and
+    IMAP are not very well tested yet, but HTTP/FTP/SMTP/POP3 are.
+
+o   New NamespaceBrowser tool (the traditional four-paned browser)
+
+o   Primitive support for address families other than AF_INET.  In particular,
+    the default implementation classes for sockets are now picked by subclasses
+    of SocketAddress, rather than by a class instance variable in Socket.  Also,
+    the #byName: and #allByName: methods should now be sent to SocketAddress
+    rather than to one of its subclasses such as IPAddress.  SO_REUSEADDR is
+    not accessible anymore by instance methods because it was totally useless;
+    instead it is always set for server sockets.
+
+o   Proxy class loader, used to generate documentation without compiling the
+    source code.
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 1.95.5 TO 1.95.13a
+
+These are bug fix releases.  Bug fixes include:
+
+o   correct installing when DESTDIR is specified (1.95.13a)
+
+o   fixed possible infinite loops in exception handling (1.95.12)
+
+o   improved portability to HP/UX systems and systems without
+    the readline library (1.95.12)
+
+o   fixed hangups that sometimes happened when outputting to
+    a tty (1.95.11)
+
+o   adopted the glibc implementation of MD5 (1.95.11)
+
+o   fixed exactly four bugs due to missing periods (symptom:
+    strange `does not understand' messages). (1.95.10)
+
+o   improved SortedCollection performance (1.95.9)
+
+o   ensured that the Directory class>>#image method returns the
+    *current* rather than the default image path (1.95.9)
+
+o   fixed bugs in the namespace classes (1.95.8)
+
+o   fixed lossage when many I/O events happened in a row (1.95.7)
+
+o   The #(a b) syntax for symbols inside Arrays has been obsoleted,
+    since 2.0 will parse it according to the ANSI standard.  A warning
+    is emitted if you use it.  The source code has been modified
+    accordingly. (1.95.6)
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 1.95.4 TO 1.95.5
+
+VM changes:
+
+o   Calls to the virtual machine from plugins, and objects that are passed
+    as OOPs in call-outs, put OOPs in the incubator rather than in the
+    registry; call-outs are wrapped in incSavePointer/incRestorePointer.
+
+o   Command line parsing uses getopt and thus behaves exactly like other
+    programs (previously there were some discrepancies)
+
+o   Errors are signaled if a file specified on the command line is not found.
+
+o   Events can be passed to the Smalltalk image via an ObjectMemory class.
+
+o   Fixed bug in evalExpr and typeNameToOOP (gave a parse error).
+
+o   Removed the `make optimize' mess.
+
+o   Supported two additional ways to pass objects from Smalltalk to C:
+    #selfSmalltalk and #variadicSmalltalk, which are similar to respectively
+    #self and #variadic but pass raw object pointers to the C function
+    instead of attempting automatic conversions.
+
+Other Smalltalk changes:
+
+o   #bindWith:... methods now accept other objects than Strings as parameters.
+
+o   Complete hierarchy of exceptions, with more meaningful error message
+    and possibility of more fine-grained exception handling.
+
+o   FileStream calls are not blocking and can preempt the current Process.
+
+o   FileStream handling has been rewritten; the buffering is now done
+    by Smalltalk code rather than implied in stdio.  Unbuffered file
+    descriptor access (which used to be provided by UnixStream, defined
+    by the TCP package) is provided by FileStream's parent, FileDescriptor.
+
+o   Many methods in SystemDictionary were moved to ObjectMemory (a new class);
+    the old ones are now deprecated.
+
+o   SortedCollection's #includes:, #indexOf:, and #occurrencesOf: can
+    check for objects that could not be inserted in the collection
+    (e.g. an Integer in a collection of Strings).  Fixed bugs in the same
+    methods related to sort blocks for which sort-block equality
+    (a <= b and b <= a) does not imply equality.
+
+o   Support for init blocks will be removed in a future version, as it
+    was replaced by the much more powerful ObjectMemory class.
+
+o   The SystemDictionary>>#enableGC: method does not exist any more, since
+    it only caused harm (the correct way to obtain its effect is to use the
+    incubator, since what we want is to unregister a batch of many objects
+    at the same time).
+
+o   The TCP library does not poll the socket for I/O, but relies on the
+    system's preemptive I/O facilities.  As a result, the polling period
+    methods in Socket have disappeared.
+
+o   Usual round of bug fixes
+
+
+New goodies:
+
+o   MD5 checksums
+
+o   Perl regular expressions
+
+o   Support for localization, internationalization and multiple character sets
+    (note: must be tested more thoroughly)
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 1.8.5 TO 1.95.4
+
+VM changes:
+
+o   Added support for allocating objects with malloc so that they don't move
+    across GCs.
+
+o   Added support for `free' methods, that is, for calling methods that do
+    not reside in a MethodDictionary or in the receiver's MethodDictionary.
+    This can be achieved by sending #perform: with a CompiledMethod parameter.
+    #executeStatements is now a free method.
+
+o   A little more performance could derive from keeping the MethodDictionaries
+    no more than 75% full (actually this was done to fix a discrepancy between
+    the C-coded identityDictionaryFindKeyOrNil, which grew a full dictionary,
+    and the Smalltalk class, which assumed that dictionaries are never full).
+
+o   An object must be explicitly marked as to be finalized *every time the
+    image is loaded*.  That is, finalizability is not preserved by an
+    image save.  This was done because in most cases finalization is
+    used together with CObjects that would be stale when the image is
+    loaded, causing a segmentation violation as soon as they were accessed
+    by the finalization method.
+
+o   Fixed bug when #at: and #at:put: were handled by a C call-out.
+
+o   Invalid C call-outs raise an error instead of simply writing to stdout.
+
+o   Sending arithmetic selectors to a Float with a SmallInteger parameter
+    (not vice versa) does not cause the primitive to fail (much faster!).
+
+o   Support for a fetch/decode/execute pipeline on architectures with a
+    lot of registers.
+
+o   Works on Solaris and possibly other systems (thanks to Dirk Sodermann!
+    I would never have caught it!!!)
+
+
+ANSI & cross-dialect compatibility:
+
+o   DateTime and Duration classes provided.  The Date class does not support
+    2-digit years anymore -- instead, a proleptic calendar is adopted for years
+    before 1582 (*backwards-incompatible*).
+
+o   ScaledDecimal class provided; the 2.0s3 syntax for literals is supported.
+
+o   Sending #asInteger to a Number `rounds' the number instead of `truncating'
+    (*backwards-incompatible*)
+
+o   Support for the #{ClassName} syntax referring to the association for
+    the named class.
+
+
+Other Smalltalk changes:
+
+o   A great part of the exception handling code has been rewritten.  The
+    new algorithm scans backtraces for contexts marked as storing exception
+    handlers instead of storing the handlers' state in a Dictionary, which
+    is smarter, faster when no exceptions are raised, and less bug prone.
+
+o   BList (Blox's list box) used indices that were half 0-based, half
+    1-based.  This caused an infinite loop if you double-clicked a BList;
+    for this reason they have been corrected to be 1-based everywhere
+    even if this is *backwards-incompatible*.
+
+o   IMPORTANT: the preferred method for mantaining geometry in Blox has
+    changed, as a provision for switching to other (less flexible in this
+    respect) toolkits like GTK+.  The #...Offset: methods should *not*
+    be used anymore as they are now flagged implementation-dependant.
+    Instead, you should use the new #inset: method, or rely more heavily
+    on BContainers which now use the packer (in a backwards-compatible way).
+    Relying on widget outside of the client area is also deprecated because
+    GTK+ alignments do not allow this.
+
+o   In general, the performance and stability of Blox are now more acceptable.
+
+o   More ObjectDumper proxies are provided, including easy support for
+    singletons, controlled creation of the object at load time, and
+    versionable schemas.
+
+o   ObjectDumper sends #postStore rather than #postLoad to restore an
+    object to its previous state after storing it.  For backwards
+    compatibility, #postStore's default action is to send #postLoad.
+
+o   ObjectDumper uses exception handling to ensure that #postStore (see
+    above) is sent to an object that was sent #preStore.
+
+o   Sets support arithmetic; to avoid this to propagate into Dictionary,
+    a new common superclass of Dictionary and Set (HashedCollection) has
+    been created.
+
+o   Usual round of bug fixes
+
+
+New goodies:
+
+o   Enhanced and refactored socket library, including support for multiple
+    address families, UDP servers, out-of-band data and ICMP sockets.
+
+o   GDBM interface works again and has a nice Dictionary-like layer.
+
+o   LargeArray classes which obtain optimal memory consumption (at the
+    expense of O(log n) access).
+
+o   Smalltalk code pretty printer
+
+o   SUnit tool for writing test suites (missing: a nicer user interface).
+
+o   The command-line interface supports readline's completion (for filenames,
+    globals, and method keywords)
+
+o   The VisualWorks XML parser is now included.  It will gradually replace
+    the InDelv parser (2.0 will include the InDelv parser, but its usage will
+    be deprecated).  The reasons are that the VW parser is more modern (it is
+    validating and supports namespaces), it is more actively mantained, and
+    there is an open-source XSL processor that uses it.
+
+o   Web server (needs more testing, but is relatively stable)
+
+
+Packaging and other external changes:
+
+o   Automake is used to mantain makefiles more easily; the library is now
+    in a `libgst' directory rather than `lib'.
+
+o   At last, there is a new module system using libtool to build modules
+    as shared dynamic libraries.  Old-style support for portable dlopening
+    has also been superseded by libltdl.  This scheme is incompatible with
+    the old one.
+
+o   HTML documentation can be built.  A custom version of texi2html is
+    included which produces very pretty output.
+
+o   Moved Emacs interface and CPP implementation to an `unsupported'
+    directory.
+
+o   The configuration file is not installed anymore
+
+o   The class reference has indices and cross-references
+
+o   Using libtool gives the benefit of versioning libgst.  The current
+    version is 1:0:0 (there is no cfuncs.h file anymore, hence the
+    age of 0).
+
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.8.4 TO 1.8.5
+
+o   Had forgotten to bump up version number.
+
+o   The position where we allocate the heap is now found at startup rather than
+    when configuring, to deal (for example) with the presence of more shared
+    libraries.  The test has been made more portable and checks whether pages
+    had already been mapped.
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.8.3 TO 1.8.4
+
+o   Added autoconf test to find where to mmap the heap.
+
+o   Documented new mailing list (help-smalltalk@gnu.org)
+
+o   Removed (as announced in 1.8.3) the ByteMemory and WordMemory classes.
+
+o   Supported { ... } syntax for creating Arrays without sending
+    #with:... (Squeak also has them on LHS, but this is seldom used).
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.8.2 TO 1.8.3
+
+This is a bug-fix release.
+
+o   Better Tcl/Tk autoconf test provided
+
+o   ByteMemory and WordMemory are now deprecated.  References to it have
+    been removed from the manual; the code will be took out soon
+
+o   DLD functions are relinked correctly when an image is restored
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.8.1 TO 1.8.2
+
+This release was provided mostly as a means to synchronize with other
+Smalltalk dialects with regard to exception handling, and to provide
+a version that could run the SUnit test system.  In the meanwhile,
+several bugs were fixed.
+
+o   A few SortedCollection bugs fixed.
+
+o   ANSI Exceptions provided.  The only backwards-incompatible change is
+    that the old Exception and ExceptionCollection classes are now called
+    CoreException and ExceptionSet, respectively.  Should cause little
+    problems (if any).
+
+o   Fix to the VM: not understood messages don't overwrite the method
+    cache
+
+o   Fixed bug in re-linking dynamically linked functions at image startup.
+
+o   More stable in low-water conditions
+
+o   OSes without /dev/zero supported
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.8 TO 1.8.1
+
+I just received this patch for a gst-config script and could not wait
+publishing it!!!  This version also modifies install-pkg to be more
+flexible; it is now called gst-package and installs in the binary
+directory.
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.7.5 TO 1.8
+
+When I took over mantainance, I decided that increasing the second version
+number would have meant a mountain of changes and improvements in GNU
+Smalltalk's speed and flexibility.  This is not the case with the step
+from 1.7.5 to 1.8, which only includes some things that I had written
+a few months ago and, until now, had only been in the development version.
+
+The reason is that 1.7.x was, overall, an unlucky series, crippled with
+bugs and packaging problems.  I admit my faults, I apologize, and seek
+forgiving from you. :-/ I had little free time, and devoted most of
+it to 2.0's development instead of being more careful with the stable
+versions.
+
+Recently, when university courses ended, I had more free time available,
+and was able to fix a lot of these problems (many thanks, among others,
+to Albert Wagner).  Hoping that changing the second version number
+ends the 1.7.x bug saga (in Italy 17 is believed to be an unlucky number,
+just like 13 in the US), I am releasing this version as 1.8.
+
+The changes from the development version that I had mentioned include:
+
+o   DLD supports BeOS.
+
+o   Execution times for SortedCollection are O(n log n) rather than O(n^2),
+    and are amortized so that long runs of adds are the same as a single
+    #addAll:
+
+o   Working growable object table (OOP table in Blue Book parlance),
+    thanks to the new memory allocator (which can handle separate
+    sbrk-like regions).
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.7.4 TO 1.7.5
+
+o   Abort compilation if a method turns out to be too complex for the
+    bytecode set (e.g. if it jumps too far).  Previously, erroneous code
+    was generated.
+
+o   Fixed bug in LargeIntegers which broke gst on HP-UX (and possibly other
+    OSes which load programs high in memory)
+
+o   Fixed bug in parsing #( () ), where empty inner arrays were parsed to
+    nils
+
+o   Fixed crash in parsing #[]
+
+o   Support LinuxPPC which loses on va_arg(..., char)
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.7.3 TO 1.7.4
+
+o   Adopted GNU Free Documentation License
+
+o   Fixed bogus errors on big-endian machines
+
+o   Fixed a few (innocuous) typos
+
+o   Fixed bug in configure
+
+o   Fixed bug in redefining a class that had pool dictionaries (caused crash
+    on first compile!)
+
+o   TCP ignores SIGPIPE on writing to a socket
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.7.1 TO 1.7.3 (1.7.2 was retired because of a packaging problem)
+
+o   Adopted Lesser General Public License
+
+o   Fixed crash on sends to super from a block
+
+o   Finally fixed the installer after years of struggle...
+
+o   In C call-outs, ByteArrays passed as Strings are considered
+    null-terminated, and Strings passed as ByteArrays are not.
+    This allows more interoperability between ByteArrays and Strings;
+    the choice of whether to truncate them to the first null is left
+    to the library (which uses #defineCFunc:...), not to the user.
+
+o   Time zone support
+
+o   Various Delay-related bug fixes
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.7 TO 1.7.1
+
+o   Fixed bug when left shifting -1
+
+o   Fixed bug when returning from non-existent method context
+
+o   Test suite was broken (`.ok' files were not up to date)
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.6.2 TO 1.7
+
+Changes to the VM:
+
+o   #at: and #at:put: implementations don't retrieve the instance
+    specification twice.
+
+o   Growable object table (OOP table in Blue Book parlance) allows to
+    use huge data structures -- not working yet... I have to find a way
+    to reserve memory without allocating it.
+
+o   New structures for contexts and BlockClosure makes it possible to do
+    things faster, creating BlockClosure objects at compilation time and
+    simplifying the VM's job when blocks are particularly well-behaved
+    (so called `clean' blocks).  Now there are four levels of block
+    optimization:
+    - inlining (always been there)
+    - `clean' (no refs. to self, to instance variables, to temporaries
+      that reside in outer contexts, no method returns)
+    - `self-contained' (can reference self or instance variables)
+    - `full' (can do everything)
+
+o   Number of arguments is checked in #perform:...
+
+o   More polite behavior -- when a Process object yields control, the
+    virtual machine automatically goes to sleep for a millisecond to
+    give more occasions to run to the other processes running on the
+    operating system.
+
+o   Blocks store their bytecodes in a separated CompiledBlock object.
+
+o   The image no longer has to store all the pointers to the global OOPs
+    (classes, symbols, Processor,...) Instead the program is able to
+    rebuild the pointers after the image has been loaded. This should
+    make the image format for future versions more stable.
+
+o   The method header is cached together with the method OOP.
+
+o   Using various dirty tricks increased the interpreter's speed; they
+    include caching the number of the primitive which #at:/#at:put:/#size
+    called last time, avoiding to retrieve instance specifications twice,
+    and specially handling cases where execution is surely LIFO.
+
+o   You can read and write 32-bit LargeIntegers (64-bit on Alphas) to word
+    objects, to the Memory object and to C objects.
+
+
+
+Other changes to the C code:
+
+o   `configure' macros specific to GNU Smalltalk are split in several small
+    .m4 files that are then automatically grouped in aclocal.m4
+
+o   DLD interface to AIX
+
+o   Floating point operations with infinity/NaN work fine with FreeBSD.
+
+o   Full open-coding of control structures (including #whileTrue,
+    #whileFalse, #repeat)
+
+o   Maximum number of instance variables is now 262143 (ANSI mandates 65535)
+    Not so useful anyway until we add bytecodes that access variables whose
+    index exceeds 63...
+
+o   New -K option to load file from the shared files path (useful for
+    Load.st, for example).
+
+o   Option parsing now more similar to getopt and getopt_long's (-- does not
+    mean `standard input', but `no more options').
+
+o   Parameter checking in callins from C to Smalltalk.
+
+o   Support for ByteArrays in Smalltalk code, like #[1 2 3].
+						    ^	  ^
+
+o   Support for forward references through the Undeclared dictionary.
+
+o   Support for large integers in Smalltalk code, like 16r800000000000.
+
+o   Support for sharps inside array constants, like #(1 #(2 3) 4).
+							^
+
+o   Support for the [ :a :b || c d e | ... ] syntax.
+			    ^^
+
+o   Support for the #(1 2 3 #a #b #'cdef' 45) syntax for Symbols
+			    ^^ ^^ ^^^^^^^
+
+o   Support for the 1.0d32 and 1.0q254 ANSI syntaxes for Floats
+		       ^	  ^
+
+o   The parser uses GNU's winning obstacks to avoid memory leaks (important
+    because large integers are passed to the parser into a structure that
+    is created on the heap, and freeing it at the appropriate points was
+    pretty hard).
+
+			    
+Changes to the Smalltalk system (new classes, etc.):
+
+o   Class TranscriptInterface changed its name to TextCollector
+
+o   Easy to use weak collections are included in the basic image
+
+o   File-outs without exclamation marks are readable from other Smalltalks
+    too (that was a bug).  As for exclamation marks, please wait a bit more;
+    I can do that only between two versions whose image files are compatible
+    (otherwise I'd break all the code that you wrote...)
+
+o   Methods know about the class to which they belongs and about their
+    selector.
+
+o   Mutation of existing instances is done with a trick that allows the
+    original instances to preserve their original instance specification
+    during the mutation process; the result is simpler and (I hope)
+    more stable code.
+
+o   Namespaces (yeah!)
+
+o   New CharacterArray class (superclass of String) is a provision for
+    multilingual support...
+
+o   New LookupTable class -- behaves like Dictionary but it is represented
+    as an IdentityDictionary; not in the Book but is quite standard
+
+o   New MethodDictionary class avoids crashes caused by partially updated or
+    inconsistent method dictionaries.
+
+o   Printing `for the programmer' and printing `for the user' are separated.
+    The former is accomplished by the familiar #printOn: and #printString
+    family; the latter is accomplished by the new #display... family of
+    methods.
+
+o   Restored LookupKey now that I finally figured out what it was meant to do.
+
+o   Small integers are now instances of SmallInteger (used to be Integer).
+
+
+    
+Changes to BLOX and the GUI:
+
+Blox has undergone major improvements in this release.  Many more features of
+Tk have been implemented, making it a lot more powerful especially in the
+creation of mega-widgets.
+
+o   BImage reads XPM files; some images are available as BImage class methods
+
+o   BLabels do word wrapping.
+
+o   Browsers support namespaces
+
+o   Callbacks in BEdit controls.
+
+o   Canvases handle child windows, images and scrolling
+
+o   If possible, different short-cut letters are chosen for items in the same
+    menu
+
+o   Controls with two scroll bars look better; in addition the user can force
+    scroll bars to appear and disappear on the fly (previously the widget code
+    hard-coded their presence or absence). Finally, scroll bars are hidden
+    automatically when they are not needed.
+
+o   Images in a text widget
+
+o   Many more methods for miscellaneous features (some interesting ones are
+    Blox class>>#atMouse to get the widget under the mouse, #fontWidth:,
+    #fontHeight: and Blox class>>#fonts to measure and enumerate fonts,
+    Blox class>>#createColor:saturation:value: for HSV colors).
+
+o   New BEventSet class to assign the same event handlers to many widgets
+
+o   New (private) BPopupWindow class allows to create popup widget (drop-down
+    lists and balloons, and lots of other possible uses!); it is easily used
+    by sending #new to a widget class (a `should not implement' error was 
+    issued in previous versions).
+
+o   Some extended widgets are included in Blox as useful examples (progress bar,
+    drop-down lists, balloon help).
+
+o   Source more commented (but not enough yet...)
+
+o   Syntax highlighting
+
+
+
+New goodies:
+
+o   Lisp and Prolog (!) interpreters by Aoki Atsushi & Nishihara Satoshi
+
+o   HTML/XML parser and World Wide Web Consortium's Document Object Model
+
+o   TCP/UDP layer
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.6.1 TO 1.6.2
+
+o   Can load images produced by system with similar sizeof(long) but
+    different endianness.
+
+o   Class reference now includes a beautiful class hierarchy -- took two days
+    to make it work with both Makeinfo and TeX...
+
+o   DLD class always present (even where it is not functional). This prevents
+    `undeclared variable' errors in code using DLD where it is not supported
+    (they will have a run-time error instead).
+
+o   DLD interface to libtool's libltdl.a
+
+o   DLD tries to append sensed extensions to the passed filename
+
+o   Fixed more bugs in the makefiles
+
+o   Fixed parse error :-( on some systems in sysdep.c (I'm sorry for the
+    problems that this caused to so many of you).
+
+o   GNU make is not needed anymore
+
+o   More logical and coherent policy to look for the image file. In 1.6.1 we
+    chose a default path, and overridden it if an image was found in the
+    current directory: the problem was that snapshots were *always* saved to
+    the default path! Now, instead, we choose a path for the image directly.
+
+o   Now uses the `missing' shell script if bison and makeinfo aren't found
+
+o   Readline interface is enabled by default.
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.6 TO 1.6.1
+
+o   Fixed bug in the makefiles (install target)
+
+o   GNU qsort is provided
+
+-------------------------------------------------------------------------------
+
+NEWS FROM 1.1.5 TO 1.6
+
+The versioning scheme has changed - I didn't need three version numbers,
+I even wonder when and if I'll change the first.
+
+Also the mantainer has changed, from the great Steve Byrne to yours truly
+Paolo Bonzini.
+
+Changes to the VM:
+
+o   Blocks are now real closures.  This had a lot of side effects.  For in-
+    stance, context realization now happens only after a GC, making GCs
+    much less common.
+
+o   #==, #notNil and #isNil are optimized out by the bytecode interpreter.
+
+o   Ctrl-C interrupts and bytecode interpreting errors (`boolean instance
+    required') now do callbacks to Smalltalk.
+
+o   Faster &&-based dispatch for GCC (to disable it, define USE_OLD_DISPATCH).
+
+o   Methods that simply return a constant (i.e. ^6 or ^#(1 2 3) or ^nil) are
+    now optimized like methods that return self or an instance variable.
+
+o   More inlining in the C code.
+
+o   More than 64 literals (16384) supported.
+
+o   Open-coded relational operators (plus #isNil and #notNil) try to look
+    for a jump bytecode immediately following them, and directly do that
+    jump (only for GCC new dispatch)
+
+o   Overflow detection in Integer primitives.
+
+o   Sends to super are now handled outside sendMessage so that sendMessage
+    does not have to choose its behavior at run-time (it was testing a
+    parameter that is always a constant).
+
+o   Support for breakpoints.
+
+o   Support for finalizable objects.
+
+o   Support for readonly objects.
+
+o   Support for weak objects.
+
+o   The GC code now does not analyze OOP slots which are surely free.  This
+    change made it up to five times faster.
+
+o   The GC code now skips unused (beyond the stack pointer) slots of a context
+    object.
+
+o   The OOP table now has a free list (+200% speed with this!!).
+
+o   The size of context stacks depends on the complexity of its method's code
+
+o   The symbol table is hashed better (the new hash is based on John Boyer's).
+
+o   The VM has more error handling built in: this includes passing integers
+    where real OOPs were expected, detecting wrong number of arguments
+    passed to blocks, trapping negative sizes passed to #new:, etc.
+
+o   #to:do:, #to:by:do:, #timesRepeat: and #yourself are optimized out by
+    the bytecode compiler.
+
+
+
+Other changes to the C code:
+
+o   _ inside an identifier is now valid. Note that, in Squeak, _ always
+    identifies the assignment operator, even in code like a_b, while GST
+    allowed something like a:=b, but a_b was a syntax error. Use of _ inside
+    identifiers is common in other Smalltalks to avoid namespace clashes for
+    automatically generated code.
+
+o   New command line switch -a: the C code never gets everything after -a,
+    while Smalltalk code gets only those arguments that are past -a.
+
+o   New command line switch -Q: produce absolutely no message.
+ 
+o   New command line switch -S: automatically save a snapshot before exiting.
+
+o   New system to include user modules, works like this:
+	./modules blox
+	make
+    To use it, model your Makefile.body and cfuncs.h after those in the
+    blox or tcp directories. If you want to have many versions, proceed
+    like this:
+        ./modules blox;		make; mv gst blox/gst
+        ./modules;		make; mv gst base_gst
+        ./modules blox tcp;	make
+    and you'll have blox/gst with only blox; base_gst with nothing; gst
+    with blox and tcp.
+
+o   Portability: now compiles under CygWin (Win32 GCC), HPUX and more.
+
+o   Precise Win32 version of Delay.
+
+o   Support for long GNU style options.
+
+o   The compiled bytecodes are now ran through an optimizer that performs
+    jump and peephole optimizations, and eliminates unreachable code.
+
+
+
+Changes to the Smalltalk system (new classes, etc.):
+
+o   Added ability to access the Smalltalk arguments; Smalltalk can get
+    arguments that follow -a through the SystemDictionary>>#arguments
+    method.
+
+o   Added a thread-safe Transcript object which prints to stdout if the
+    GUI is not loaded and which is used by #print, #printNl and companions.
+
+o   Added binary dump of Smalltalk objects (class ObjectDumper).
+
+o   Added endian-neutral binary I/O to FileStream through the new
+    ByteStreams.
+
+o   Added fast ByteStreams, specially crafted for ByteArrays, which can
+    be used with ObjectDumper.
+
+o   Added ContextPart (superclass of MethodContext and BlockContext).
+
+o   Added DirectedMessage.
+
+o   Added file-handling classes (File and Directory).
+
+o   Added IdentitySets.  Also, most of the Set hierarchy has been
+    refactored and rewritten for better speed and design.
+
+o   Added LargeIntegers.  LargeInteger literals can't be used in Smalltalk
+    code yet, though. 
+
+o   Added optional automatic freeing of CObjects (through finalization)
+    and automatic closing of FileStreams.
+
+o   Added RunArrays.
+
+o   Added three subclasses of CObject: CSmalltalk, CInt, CUInt (and
+    analogous messages to the Memory class).
+
+o   Added useful functionality to Date.
+
+o   Added ValueAdaptors.
+
+o   Added #zero and #unity in Number; they make a few operations a bit
+    faster if you override them in subclasses (it is not necessary though).
+
+o   #allInstances now returns a weak object, thus avoiding that a call
+    to it forces GST to keep lots of unused objects in the heap.
+
+o   A lot of messages have been added to most classes.
+
+o   An implementation of a great idea by Andreas Klimas: a packaging system
+    which automatically handles prerequisites and tests availability of C
+    call-outs.
+
+o   #asSortedCollection: now uses quicksort.
+
+o   ByteArrays now support accessing shorts, longs, ints, etc.
+
+o   CObjects are now variable word classes (try 'stdout store' in 1.1.5!!)
+
+o   Code for mutating existing class has been merged from the BLOX directory.
+
+o   DLD (dynamic loading of C modules) is now a `first class' package, included
+    in the image wherever it is available. Architectures supported (besides
+    GNU DLD, available in 1.1.5 too) include Linux (dlopen), HP/UX and Win32.
+
+o   FileStreams detect when they have been closed and refuse to do any more o-
+    perations - this shields Smalltalk programs from C's quirks and bugs.
+
+o   Fixed millisecondClock and secondClock to use correct Blue Book semantics.
+
+o   Float is now a variable byte class.
+
+o   Float now handles NaN and infinity values correctly.
+
+o   Some fixes to Point and Rectangle.
+
+o   Many fixes in PositionableStream.  For example, #upToAll: and #skipToAll:.
+    now don't seek back in the stream, and hence are usable with stdin.
+
+o   Methods are not `special' objects anymore
+
+o   Most of the Smalltalk code is now commented.
+
+o   Removed LookupKey.
+
+o   SortedCollection now uses binary search in #indexOf:, #occurrencesOf:
+    and #add:.
+
+o   Support for class-instance variables (at last!).
+
+o   Support for class declarations like "nil subclass: #XXX ..." (at last!).
+
+o   Support for fixed instance variables in non-pointer classes
+
+o   Support for the almost standard message #copyEmpty: (with the colon!).
+
+o   System classes now have a category.
+
+o   The kernel now uses := (even though of course _ is still supported).
+
+o   The results of most character operations are now precalculated.
+
+o   The Smalltalk-in-Smalltalk compiler, even though is slow, works quite well
+    and supports #[1 2 3 4] ByteArray and LargeInteger literals.  Bug reports
+    for the compiler are MUCH appreciated!!  Please include code that is as
+    short as possible.
+
+o   WriteStreams now double the size of the collection they stream on when
+    there's no more space.
+
+
+
+Changes to BLOX and the GUI:
+
+o   Added a Transcript window.  Also, the Smalltalk menu is now part of every
+    window.
+
+o   Added support for standard color selection and file selection dialogs.
+
+o   BLOX now has a comprehensive test suite.
+
+o   Completely rewritten, 99% Smalltalk code now, working across different
+    platforms because it relies on Tcl/Tk, with advanced Tk features such as:
+    - X11 color names.  Also, colors can now be passed with
+      strings like '#0080FF' or '#1234789ADEF0' ('#RRRRGGGGBBBB').
+    - event handling (including focus in/out, mouse enter/leave, key
+      press/release, button press/drag/release/double click/triple click)
+    - a much better text widget, with support for text with different
+      attributes in the same widget
+    - a new canvas widget for vector graphics - will somebody ever contribute a
+      nice Asteroids for GST???
+
+o   The Class Hierarchy Browser shows classes not derived from Object.
+
+o   The hierarchy for the BLOX toolkit is better designed (since I'm now
+    implementing it in Smalltalk, if I had not done it I would have had a lot
+    of duplicated code).
+
+o   The new GUI system is not 100% compatible with the old one, partly because
+    it now uses Tk and partly because of a few design decisions that were, to
+    say the least, questionable.  Check your old code where it sets the
+    geometry and where it passes the gui CObject to a method (in this case,
+    just remove the first parameter).

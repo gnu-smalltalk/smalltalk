@@ -1,0 +1,23 @@
+This is a list of user-visible changes between releases of libsnprintfv.
+
+New in 1.1: 2003-??-??
+* Support *n$ and .*n$ specifications for width and precision
+* libltdl is not configured separately.
+* The convenience library may omit floating point printing routines
+  if desired.
+* The floating point algorithms in libio v.2.95 were adopted which
+  are correct for long doubles (1.0 sometimes got the last digit wrong).
+* Uses unlocked I/O for improved speed.
+
+New in 1.0: 2003-04-11
+* First stable release of snprintfv
+* POSIX formatted printing API
+* GNU dprintf and asprintf API
+* snprintfv API accepts argv arrays of argument lists
+* User definable % format specifier handlers
+* User definable output streams
+* Load custom % format specifier handlers from shared libraries
+* Can be built as a libtool convenience library or installed from the
+  distribution as a shared and static libtool archive
+* functions for 8-bit clean string
+

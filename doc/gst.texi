@@ -1,0 +1,3965 @@
+\input texinfo.tex  @c -*- texinfo -*-
+@c %**start of header (This is for running Texinfo on a region.)
+@setfilename gst.info
+@settitle GNU Smalltalk User's Guide
+@setchapternewpage odd
+@c %**end of header (This is for running Texinfo on a region.)
+
+@c ******************************************* Values and macros *********
+
+@include vers-gst.texi
+@ifclear UPDATE-MONTH
+@set UPDATE-MONTH @value{UPDATED}
+@end ifclear
+
+@macro bulletize{a}
+@item
+\a\
+@end macro
+
+@macro setifinfo{var, value}
+@iftex
+@set \var\
+@end iftex
+@ifinfo
+@set \var\ \value\
+@end ifinfo
+@ifhtml
+@set \var\
+@end ifhtml
+@end macro
+
+@c Redefine @var to produce <xxx> in the Info file, and italics in TeX
+@setifinfo {L_var, <}
+@setifinfo {R_var, >}
+@macro var{x}
+@value{L_var}@i{@t{\x\}}@value{R_var}
+@end macro
+
+@comment Not appropriate for a printed manual...
+@setifinfo{SMILE, ;-)}
+
+@c Preferred layout than @uref's
+@macro hlink{url, link}
+\link\@footnote{\link\, \url\}
+@end macro
+
+@macro email{mail}
+\mail\
+@end macro
+
+@ifhtml
+@unmacro hlink
+@unmacro email
+
+@macro hlink{url, link}
+@uref{\url\, \link\}
+@end macro
+
+@macro email{mail}
+@uref{mailto:\mail\, , \mail\}
+@end macro
+
+@macro url{url}
+@uref{\url\}
+@end macro
+@end ifhtml
+
+@macro gst{}
+@sc{gnu} Smalltalk
+@end macro
+@macro gnu{}
+@sc{gnu}
+@end macro
+
+@dircategory GNU Smalltalk
+@direntry
+     * GNU Smalltalk: (gst).                 The @gst{} environment.
+@end direntry
+
+@copying
+This file documents @sc{gnu} Smalltalk Version @value{VERSION}.
+It was last updated on @value{UPDATED}.
+
+Copyright @copyright{} 1988, 1989, 1991, 1992, 1994, 1995, 1999,
+2000, 2001, 2002 Free Software Foundation, Inc.
+
+This document is released under the terms of the @sc{gnu} Free
+Documentation License as published by the Free Software Foundation;
+either version 1.1, or (at your option) any later version.
+
+You should have received a copy of the @sc{gnu} Free Documentation
+License along with @sc{gnu} Smalltalk; see the file @file{COPYING.DOC}.
+If not, write to the Free Software Foundation, 59 Temple Place - Suite
+330, Boston, MA 02111-1307, USA.  
+
+There are no Cover Texts and no Invariant Sections; this text, along
+with its equivalent in the printed manual, constitutes the Title Page.
+@end copying
+
+@titlepage
+@title @sc{gnu} Smalltalk User's Guide
+@subtitle Version @value{VERSION}
+@subtitle @value{UPDATE-MONTH}
+
+@author by Steven B. Byrne, Paolo Bonzini, Andy Valencia.
+
+@comment  The following two commands start the copyright page.
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@node Top, , , (DIR)
+@top
+
+@ifnottex
+This document describes installing and operating the @gst{}
+programming language.
+
+@insertcopying
+
+@end ifnottex
+
+@menu
+
+* Overview::            What @gst{} is.
+* Using GNU Smalltalk:: Running @gst{}.
+* Features::            A description of @gst{}'s special features.
+* Emacs::               @gst{} and Emacs.
+* C and Smalltalk::     @gst{}'s C/Smalltalk interoperability features.
+* Tutorial::            An introduction to Smalltalk and OOP.
+* Future::              Tasks for @gst{}'s subsequent releases.
+                        Volunteers to help out in performing some of these
+                        tasks would be greatly appreciated.
+                        Please see this node to find out what you can do
+                        to help make @gst{} a truly winning system.
+
+@detailmenu
+--- The detailed node listing ---
+
+Invocation:
+* Invocation::          What you can specify on the command line.
+* Operation::           A step-by-step description of the
+                        startup process and a short description of
+                        how to interact with @gst{}.
+* Syntax::              A description of the input file syntax
+* Test suite::          How to run the test suite system.
+* Legal concerns::      Licensing of GNU Smalltalk
+
+Features:
+* Memory access::      The direct memory accessing classes and methods.
+* Namespaces::         Avoiding clashes between class names.
+* Disk file-IO::       Methods for reading and writing disk files.
+* Object dumping::     Methods that read and write objects in binary format.
+* GC::                 The @gst{} memory manager.
+* Security::           Sandboxing and access control.
+* Special objects::    Methods to assign particular properties to objects.
+* Dynamic loading::    Picking external libraries and modules at run-time.
+* Packages::           An easy way to install Smalltalk code into an image.
+
+Packages
+* Blox::                   @gst{}'s user interface building blocks.
+* Smalltalk-in-Smalltalk:: Beyond Smalltalk's standard reflective abilities.
+* Database::               Access databases from Smalltalk programs
+* Locales::                Intenationalize and localize Smalltalk programs
+* SUnit:                   SUnit.
+* Network support::        An interface to TCP/IP and UDP and support for
+                           popular network protocols.
+* XML::                    An XML parser and XSL processor.
+* Minor packages::         Various interesting modules.
+
+Emacs
+* Autoloading::       Autoloading @gst{} mode.
+* Editing::           Autoindent and more for @gst{}.
+* Interactor::        Smalltalk interactor mode.
+
+C and Smalltalk:
+* External modules::   Linking your libraries to the virtual machine
+* C callout::          Calls from Smalltalk to C.
+* C data types::       Manipulating C data from Smalltalk.
+* Smalltalk types::    Manipulating Smalltalk data from C.
+* Smalltalk callin::   Calls from C to Smalltalk.
+* Using Smalltalk::    Using the Smalltalk environment as an extension library.
+* Incubator::          Protecting newly created objects from garbage
+                       collections.
+
+Tutorial:
+* Getting started::              Starting to explore @gst{}
+* Some classes::                 Using some of the Smalltalk classes
+* The hierarchy::                The Smalltalk class hierarchy
+* Creating classes::             Creating a new class of objects
+* Creating subclasses::          Adding subclasses to another class
+* Code blocks (I)::              Control structures in Smalltalk
+* Code blocks (II)::             Guess what? More control structures
+* Debugging::                    Things go bad in Smalltalk too!
+* More subclassing::             Coexisting in the class hierarchy
+* Streams::                      Something really powerful
+* Behind the scenes::            Some nice stuff from the Smalltalk innards
+* And now::                      Some final words
+* The syntax::                   For the most die-hard computer scientists
+
+
+@end detailmenu
+@end menu
+
+@node Overview
+@unnumbered Introduction
+
+@gst{} is an implementation that closely follows the Smalltalk-80
+language as described in the book @cite{Smalltalk-80: the Language
+and its Implementation} by Adele Goldberg and David Robson, which
+will hereinafter be referred to as @cite{the Blue Book}.
+
+The Smalltalk programming language is an object oriented programming
+language.  This means, for one thing, that when programming you are
+thinking of not only the data that an object contains, but also of the
+operations available on that object.  The object's data representation
+capabilities and the operations available on the object are
+``inseparable''; the set of things that you can do with an object is defined
+precisely by the set of operations, which Smalltalk calls @dfn{methods},
+that are available for that object: each object belongs to a @dfn{class}
+(a datatype and the set of functions that operate on it) or, better, it
+is an @dfn{instance} of that class. You cannot even examine the
+contents of an object from the outside---to an outsider, the object is a
+black box that has some state and some operations available, but that's
+all you know: when you want to perform an operation on an object, you
+can only send it a @dfn{message}, and the object picks up the method
+that corresponds to that message.
+
+In the Smalltalk language, everything is an object.  This includes not
+only numbers and all data structures, but even classes, methods,
+pieces of code within a method (@dfn{blocks} or @dfn{closures}), stack
+frames (@dfn{contexts}), etc.  Even @code{if} and @code{while} structures
+are implemented as methods sent to particular objects.
+
+Unlike other Smalltalks (including Smalltalk-80), @gst{} emphasizes
+Smalltalk's rapid prototyping features rather than the graphical and
+easy-to-use nature of the programming environment (did you know that the
+first GUIs ever ran under Smalltalk?).  The availability of a large body of
+system classes, once you master them, makes it pretty easy to write complex
+programs which are usually a task for the so called @dfn{scripting
+languages}.  Therefore, even though we have a nice GUI environment including
+a class browser (@pxref{Blox}), the goal of the @gst{} project is
+currently to produce a complete system to be used to write your scripts in a
+clear, aesthetically pleasing, and philosophically appealing programming
+language.
+
+An example of what can be obtained with Smalltalk in this novel way can be
+found in @ref{Top, , Class reference, gst-libs, the @gst{} Library
+Reference}.  That part of the manual is entirely generated by a Smalltalk
+program, starting from the source code for the class libraries
+distributed together with the system.
+
+@ignore
+I'd like to end this introduction reporting an article I posted to Usenet
+in September 1999.  It's about @gst{}'s `place in the world' and its
+comparison with another open source Smalltalk, Squeak (a new version of
+Smalltalk-80 written by lots of people including the great wise behind the
+original Smalltalk implementation).
+
+@quotation
+@cartouche
+@noindent
+Re: @gst{} and Squeak (was Re: @gst{} 1.7 development)
+
+I enjoy discussions about the relationship between @gst{} and
+Squeak, because I also think about it sometimes.  And, believe
+it or not, I cannot tell which system is more ``winning''.  Actually,
+they're fundamentally different---the only thing they share is that
+both are free.
+
+Squeak is Smalltalk for the pure.  Smalltalk for @emph{die-hard}
+object-oriented folks.  Don't flame me please, and interpret this
+article with the necessary irony and benevolence.  Why do I say
+this? Because only a die-hard object-oriented folk, IMO, would
+write BitBlt and real-time FM synthesis stuff in Smalltalk---even
+Adele Goldberg wrote her Smalltalk implementation in Smalltalk
+mostly for clarity (at least she says so).
+
+@gst{} is Smalltalk for @emph{hacking} object-oriented folks.  You
+know them: they like the object-oriented paradigm because it's clearer
+and powerful, and maybe they learnt something of design too@dots{} but
+they nevertheless like to toy with C and think that only pointers make
+them feel like they are ``really'' programming.  Why do I say this?
+Because I am one of them, and proud of it.
+
+Having said so, I must admit that I have Squeak on my hard disk.  And
+I'd be happy if one of the `great wise' behind Squeak told me he
+dignated himself to have a look at my humble creation.  Because both
+do have good points.  Let's take a bird's fly on them@dots{} Squeak had
+LargeIntegers ever since it was born, I added them three months ago
+to a ten-year old GST.  Squeak has Namespaces and I already confessed
+that I'm taking inspiration from them.  But GST has closures, it has
+a better compiler, better C interoperability, and (I beg your pardon
+Squeakers) an easy to use window framework.
+
+I added closures to GST in three days of work without taking extra
+caffeine; the Squeak Mailing List has been wondering for two years
+about when they will be finally there.  Having to choose between
+1000 downloads a day and Dan Ingalls adding closures to Squeak
+after peeping at my source code, I'd surely pick the second!!!
+
+Being too loquacious?  Probably, so I stop here.  The moral is, no
+civil wars between Smalltalk dialects please; let's all write good
+programs and let others write good programs.  It'll surely be a better
+world for both.
+
+Paolo Bonzini
+@end cartouche
+@end quotation
+@end ignore
+
+@node Using GNU Smalltalk
+@chapter Using @gst{}
+
+@menu
+* Invocation::          What you can specify on the command line.
+* Operation::           A step-by-step description of the
+                        startup process and a short description of
+                        how to interact with @gst{}.
+* Syntax::              A description of the input file syntax
+* Test suite::          How to run the test suite system.
+* Legal concerns::      Licensing of GNU Smalltalk
+
+@end menu
+
+@node Invocation
+@section Command line arguments
+
+@gst{} may be invoked via the following command:
+@example
+gst [ flags @dots{} ] [ file @dots{} ]
+@end example
+
+When you first invoke @gst{}, it will attempt to see if any of the
+kernel method definition files are newer than the last saved binary
+image in the current directory (if there is one).  If there is a newer
+kernel method definition file, or if the binary image file (called
+@file{gst.im}) does not exist, a new binary image will be built by
+loading in all the kernel method definition files, performing a full
+garbage collection in order to compact the space in use, and then saving
+the resulting data in a position independent format.  Your first
+invocation should look something like this:
+
+@display
+"Major scavenging@dots{} done, used space = 51%"
+@gst{} Ready
+
+st>
+@end display
+
+If you specify @var{file}, that file will be read and executed and
+Smalltalk will exit when end of file is reached.  If you specify more
+than one file, each will be read and processed in turn.  If you don't
+specify @var{file}, standard input is read, and if the standard input is
+a terminal, a prompt is issued.  You may specify @option{-} for the name
+of a file to invoke an explicit read from standard input; furthermore,
+specifying @option{--} stops the interpretation of options so that every
+argument that follows is considered a file name even if it begins with a
+minus.
+
+You can specify both short and long flags; for example, @option{--version}
+is exactly the same as @option{-v}, but is easier to remember.  Short
+flags may be specified one at a time, or in a group.  A short flag or a
+group of short flags always starts off with a single dash to indicate
+that what follows is a flag or set of flags instead of a file name; a
+long flag starts off with two consecutive dashes, without spaces between
+them.
+
+In the current implementation the flags can be intermixed with file
+names, but their effect is as if they were all specified first.  The
+various flags are interpreted as follows:
+
+@table @option
+@item -a --smalltalk
+Used to make arguments available to Smalltalk code.  The C option parser
+discards everything after the parameter including -a, while Smalltalk
+code can get it sending the @code{arguments} message to the
+@code{Smalltalk} object.
+
+Examples:
+@multitable {@option{--verbose -aq -c}} {Options seen by @sc{gnu} Smalltalk} {@code{Smalltalk arguments}}
+@item command line      
+@tab Options seen by @gst{}
+@tab @code{Smalltalk arguments}
+@item (empty)
+  @tab (none)
+  @tab @code{#()}
+@item @option{-Via foo bar}
+  @tab @option{-Vi}
+  @tab @code{#('foo' 'bar')}
+@item @option{-Vai test}
+  @tab @option{-Vi}
+  @tab @code{#('test')}
+@item @option{-Vaq}
+  @tab @option{-Vq}
+  @tab @code{#()}
+@item @option{--verbose -aq -c  }
+  @tab @option{--verbose -q}
+  @tab @code{#('-c')}
+@end multitable
+
+That should be clear.
+
+@item -c --core-dump
+When this flag is set and a fatal signal occurs, a core dump is produced
+after an error message is printed.  Normally, the backtrace is produced
+and the system terminates without dumping core.
+
+@item -d --user-declaration-trace
+Declaration tracing prints the class name, the method name, and the byte
+codes that the compiler is generating as it compiles methods.  Only for
+files that are named explicitly on the command line; kernel files that
+are loaded automatically as part of rebuilding the image file do not
+have their declarations traced.
+
+@item -D --kernel-declaration-trace
+Like the -d flag, but also includes declarations processed for the
+kernel files.
+
+@item -e --user-execution-trace
+Prints the byte codes being executed as the interpreter operates.  Only
+works for those executions that occur after the kernel files have been
+loaded and the image file dumped.
+@ignore
+This option and the following one is disabled when the dynamic
+translator (@pxref{Dynamic translator}) is enabled.
+@end ignore
+
+
+@item -E --kernel-declaration-trace
+Like the -e flag, but includes all byte codes executed, whether they
+occur during the loading of the kernel method definition files, or
+during the loading and execution of user files.
+
+@item -g --no-gc-messages
+Suppress garbage collection messages. 
+
+@item -h --help
+Prints out a brief summary of the command line syntax of @gst{},
+including the definitions of all of the option flags, and then exits.
+
+@item -i --rebuild-image
+Ignore the saved image file; always load from the kernel method
+definition files.  Setting this flag bypasses the normal checks for
+kernel files newer than the image file, or the image file's version
+stamp out of date with respect to the Smalltalk version.  After the
+kernel definitions have been loaded, a new image file will be saved.
+
+@item -I @var{file} --image-file @var{file}
+Use the image file named @var{file} as the image file to load.
+Completely bypasses checking the file dates on the kernel files and
+standard image file.
+
+@item -l --log-changes
+Produce a log of the compiled Smalltalk code to st-changes.st, in the
+current working directory.
+
+@item -L @var{file} --log-file @var{file}
+Produce a log of the compiled Smalltalk code to the file named
+@var{file}.
+
+@item -q --quiet --silent
+Suppress the printing of returned values while @gst{} runs.
+
+@item -Q --no-messages
+Suppress the printing of execution information and any other informative
+message while @gst{} runs.
+
+@item -r --regression-test
+Controls printing of certain informative I/O; this is used by the
+regression testing system and is probably not of interest to the general
+user.
+
+@item -S --snapshot
+Save a snapshot after loading files from the command line.  Of course
+the snapshot is not saved if you include - (stdin) on the command line
+and exit by typing Ctrl-C.
+
+@item -v --version
+Prints out the Smalltalk version number, then exits.
+
+@item -V --verbose
+Enables verbose mode.  When verbose mode is on, various diagnostic
+messages are printed (the name of each file as it's loaded, plus
+messages about the beginning of execution or how many byte codes were
+executed).
+
+@item -y --yacc-debug
+Turns on parser debugging.  Not typically used.
+@end table
+
+@node Operation
+@section Startup sequence
+
+When @gst{} is invoked, the first thing it does is choosing two paths,
+respectively the ``image path'' and the ``kernel path''.  the image path
+is set to the value of the @env{SMALLTALK_IMAGE} environment variable
+(if it is defined); if @env{SMALLTALK_IMAGE} is not defined, Smalltalk
+will try the path compiled in the binary (usually, under Unix systems,
+@file{/usr/local/share/gnu-smalltalk} or a similar data file path) and
+then the current directory.
+
+The ``kernel path'' directory in which to look for each of the kernel
+method definition files.  There are only two possibilities in this case:
+the directory pointed to by @env{SMALLTALK_KERNEL} if it is defined,
+and a subdirectory named @file{kernel} in the current directory.
+However, kernel files are not required to be in this directory:
+Smalltalk also knows about a system default location for kernel files,
+which is compiled in the binary (usually, under Unix systems,
+@file{/usr/local/share/gnu-smalltalk/kernel} or a similar data file
+path), and which is used for kernel files not found in the directory
+chosen as above.
+
+Then, if the @option{-i} flag is not used, Smalltalk tries to find a saved
+binary image file in the image path.  If this is found, it is checked to
+be compatible with the current version of Smalltalk and with the current
+system; Smalltalk is able to load an image created on a system with the
+same @code{sizeof(long)} but different endianness (for example, a 68k
+image on an x86), but not an image created on a system with different
+@code{sizeof(long)} like an Alpha image on an x86.  Finally, if the
+images are compatible, it compares the write dates of all of the kernel
+method definition files against the write date of the binary image file.
+
+If the image is not found, is incompatible, or older than any of the
+kernel files, a new image has to be created.  The set of files that make
+up the kernel is loaded, one at a time.  The list can be found in
+@file{libgst/lib.c}, in the @code{standardFiles} variable.  If the image
+lies in the current directory, or if at least a kernel file was found
+outside of the system default path, a user-dependant
+@file{.stpre}@footnote{ The file is called @file{_stpre} under MS-DOS
+and @file{.gstpre} on the Atari ST.  Under OSes that don't use home
+directories it is looked for in the current directory.}
+
+At this point, independent of whether the binary image file was loaded
+or created, the @code{initialize} event is sent to the dependants of the
+special class @code{ObjectMemory} (@pxref{Memory access}).  After the
+initialization blocks have been executed, the user initialization file
+@file{.stinit} is loaded if found in the user's home
+directory@footnote{The same considerations made above hold here too.
+The file is called @file{_stinit} under MS-DOS and @file{.gstinit} on
+the Atari ST, and is looked for in the current directory under OSes that
+don't use home directories.}.
+
+Finally, if there were any files specified on the command line, they are
+loaded, otherwise standard input is read and executed until an EOF is
+detected.  You are then able to operate @gst{} by typing in expressions
+to the @samp{st>} prompt, and/or reading in files that contain Smalltalk
+code.
+
+At some time, you may wish to abort what @gst{} is doing and return to
+the command prompt: you can use @kbd{C-c} to do this.
+
+
+@node Syntax
+@section Syntax of @gst{}
+
+The language that @gst{} accepts is based on the @dfn{file out} syntax
+as shown in the @dfn{Green Book}, also known as @cite{Smalltalk-80: Bits
+of History, Words of Advice} by Glenn Krasner.  The entire grammar of
+@gst{} is described in the @file{libgst/gst.y} file, but a brief description
+may be in order:
+@example
+<statements> !
+@end example
+@noindent
+executes the given statements immediately.  For example,
+
+@example
+16rFFFF printNl !
+@end example
+@noindent
+prints out the decimal value of hex @code{FFFF}, followed by a newline.
+
+@example
+Smalltalk quitPrimitive !
+@end example
+@noindent
+exits from the system.  You can also type a @kbd{C-d} to exit from
+Smalltalk if it's reading statements from standard input.
+
+@example
+! @var{class expression} methodsFor: @var{category name} !
+@var{method definition 1} !
+@var{method definition 2} !
+@dots{}
+@var{method definition n} ! !
+@end example
+
+This syntax is used to define new methods in a given class.  The
+@var{class expression} is an expression that evaluates to a class
+object, which is typically just the name of a class, although it can be
+the name of a class followed by the word @code{class}, which causes the
+method definitions that follow to apply to the named class itself,
+rather than to its instances.  Two consecutive bangs terminate the set
+of method definitions.  @var{category name} should be a string object
+that describes what category to file the methods in.
+
+@example
+!Float methodsFor: 'pi calculations'!
+
+radiusToArea
+    ^self squared * Float pi !
+
+radiusToCircumference
+    ^self * 2 * Float pi ! !
+@end example
+
+It also bears mentioning that there are two assignment operators:
+@code{_} and @code{:=}.  Both are usable interchangeably, provided that
+they are surrounded by spaces.  The @gst{} kernel code uses the
+@code{:=} form exclusively, but @code{_} is supported a) for
+compatibility with previous versions of @gst{} b) because this is the
+correct mapping between the assignment operator mentioned in the Blue
+Book and the current ASCII definition.  In the ancient days (like the
+middle 70's), the ASCII underscore character was also printed as a
+back-arrow, and many terminals would display it that way, thus its
+current usage.  Anyway, using @code{_} may lead to portability problems.
+
+The return operator, which is represented in the Blue Book as an
+up-arrow, is mapped to the ASCII caret symbol @code{^}.
+
+A complete treatment of the Smalltalk syntax and of the class library
+can be found in the included tutorial and class reference (@pxref{Top, ,
+Class Reference, gst-libs, the @gst{} Library Reference}).
+
+More information on the implementation of the language can be found in
+the @cite{Blue Book}; the relevant parts are also available online as
+@sc{html} documents, at
+@url{http://users.ipa.net/~dwighth/smalltalk/bluebook/bluebook_imp_toc.html}.
+
+
+@node Test suite
+@section Running the test suite
+
+@gst{} comes with a set of files that provides a simple regression test
+suite.
+
+To run the test suite, you should be connected to the top-level
+Smalltalk directory.  Type
+@example
+make check
+@end example
+
+You should see the names of the test suite files as they are processed,
+but that's it.  Any other output indicates some problem.  The only
+system that I know of which currently fails the test suite is the NeXT,
+and this is apparently due to their non-standard C runtime libraries.
+
+The test suite is by no means exhaustive.  @xref{Future}.
+
+
+@node Legal concerns
+@section Licensing of @gst{}
+
+Different parts of @gst{} comes under two licenses: the virtual machine
+and the development environment (compiler and browser) come under the
+@gnu{} General Public License, while the system class libraries come
+under the Lesser General Public License.
+
+The GPL licensing of the virtual machine means that all derivatives of
+the virtual machine must be put under the same license.  In other
+words, it is strictly forbidden to put programs that include the @gst{}
+virtual machine under a proprietary license.
+
+This however does not extend to Smalltalk programs, since these are
+merely input data for the virtual machine.  In general, these must
+respect the terms of the Lesser General Public License@footnote{Of
+  course, they may be more constrained by usage of GPL class libraries.}.
+The interpretation of this license for architectures different from
+that of the C language is often difficult; the accepted one for
+Smalltalk is as follows.  The image file can be considered as an
+object file, falling under Subsection 6a of the license, as long as
+it allows a user to load an image, upgrade the library or otherwise
+apply modifications to it, and save a modified image: this is most
+conveniently obtained by allowing the user to use the read-eval-print
+loop that is embedded in the @gst{} virtual machine.
+
+In other words, provided that you leave access to the loop in a
+documented way, or that you provide a way to file in arbitrary files
+in an image and save the result to a new image, you are obeying
+Subsection 6a of the Lesser General Public License, which is
+reported here:
+
+@quotation
+    a) Accompany the work with the complete corresponding
+    machine-readable source code for the Library including whatever
+    changes were used in the work (which must be distributed under
+    Sections 1 and 2 above); and, if the work is an executable linked
+    with the Library, with the complete machine-readable "work that
+    uses the Library", as object code and/or source code, so that the
+    user can modify the Library and then relink to produce a modified
+    executable containing the modified Library.  (It is understood
+    that the user who changes the contents of definitions files in the
+    Library will not necessarily be able to recompile the application
+    to use the modified definitions.)
+@end quotation
+
+@node Features
+@chapter Features of @gst{}
+
+In this section, the features which are specific to @gst{} are
+described.  These features include support for calling C functions from
+within Smalltalk, accessing environment variables, and controlling
+various aspects of compilation and execution monitoring.
+
+Note that, in general, @gst{} is much more powerful than the original
+Smalltalk-80, as it contains a lot of methods that are common in today's
+Smalltalk implementation and are present in the ANSI Standard for
+Smalltalk, but were absent in the Blue Book.  Examples include
+Collection's @code{allSatisfy:} and @code{anySatisfy:} methods and many
+methods in SystemDictionary (the Smalltalk dictionary's class).
+
+@menu
+* Memory access::      The direct memory accessing classes and methods, plus
+                       broadcasts from the virtual machine.
+* Namespaces::         Avoiding clashes between class names.
+* Disk file-IO::       Methods for reading and writing disk files.
+* Object dumping::     Methods that read and write objects in binary format.
+* GC::                 The @gst{} memory manager.
+* Security::           Sandboxing and access control.
+* Special objects::    Methods to assign particular properties to objects.
+* Dynamic loading::    Picking external libraries and modules at run-time.
+* Packages::           An easy way to install Smalltalk code into an image.
+
+@end menu
+
+
+@node Memory access
+@section Memory accessing methods
+
+@gst{} provides methods to query its own internal data structures.
+You may determine the real memory address of an object or the real 
+memory address of the OOP table that points to a given object, by
+using messages to the @code{Memory} class, described below.
+
+@defmethod Object asOop
+Returns the index of the OOP for anObject.  This index is immume from
+garbage collection and is the same value used by default as an hash
+value for anObject (it is returned by Object's implementation of
+@code{hash} and @code{identityHash}).
+@end defmethod
+
+@defmethod Integer asObject
+Converts the given OOP @emph{index} (not address) back to an object.
+Fails if no object is associated to the given index.
+@end defmethod
+
+@defmethod Integer asObjectNoFail
+Converts the given OOP @emph{index} (not address) back to an object.
+Returns nil if no object is associated to the given index.
+@end defmethod
+
+Other methods in ByteArray and Memory allow to read various C types
+(@code{doubleAt:}, @code{ucharAt:}, etc.).  For examples of using
+@code{asOop} and @code{asObject}, look at the Blox source code in
+@file{blox-tk/BloxBasic.st}.
+
+Another interesting class is ObjectMemory.  This provides a few methods
+that enable one to tune the virtual machine''s usage of memory; many
+methods that in the past were instance methods of Smalltalk or class
+methods of Memory are now class methods of ObjectMemory.  In addition,
+and that's what the rest of this section is about, the virtual machines
+signals events to its dependants exactly through this class.
+
+The events that can be received are
+@table @dfn
+@item returnFromSnapshot
+This is sent every time an image is restarted, and substitutes the
+concept of an @dfn{init block} that was present in previous versions.
+
+@item aboutToQuit
+This is sent just before the interpreter is exiting, either because
+@code{ObjectMemory quit} was sent or because the specified files were
+all filed in.  Exiting from within this event might cause an infinite
+loop, so be careful.
+
+@item aboutToSnapshot
+This is sent just before an image file is created.  Exiting from within
+this event will leave any preexisting image untouched.
+
+@item finishedSnapshot
+This is sent just after an image file is created.  Exiting from within
+this event will not make the image unusable.
+@end table
+
+@node Namespaces
+@section Namespaces
+
+@i{[This section (and the implementation of namespaces in @gst{})
+is based on the paper @cite{Structured Symbolic Name Spaces in
+Smalltalk}, by Augustin Mrazik.]}
+
+@subsection Introduction
+
+The standard Smalltalk-80 programming environment supports symbolic
+identification of objects in one global namespace---in the
+@code{Smalltalk} system dictionary. This means that each global variable
+in the system has its unique name which is used for symbolic
+identification of the particular object in the source code (e.g. in
+expressions or methods).  Most important global variables are classes
+defining the behavior of objects.
+
+In a development dealing with modelling of real systems, polymorphic
+symbolic identification is often needed.  This means that it should be
+possible to use the same name for different classes or other global
+variables.  Let us mention class Module as an example which would mean
+totaly different things for a programmer, for a computer technician and
+for a civil engineer or an architect.
+
+This issue becomes inevitable if we start to work in a Smalltalk
+environment supporting persistence.  Polymorphism of classes becomes
+necessary in the moment we start to think about storing classes in the
+database since after restoring them into the running Smalltalk image a
+mismatch with the current symbolic identification of the present classes
+could occur.  For example you might have the class Module already in
+your image with the meaning of a program module (e.g. in a CASE system)
+and you might attempt to load the class Module representing a part of
+the computer hardware from the database for hardware configuration
+system.  The last class could get bound to the #Module symbol in the
+Smalltalk system dictionary and the other class could remain in the
+system as unbound class with full functionality, however, it could not
+be accessed anymore at the symbolical level in the source code.
+
+Objects which have to be identified in the source code of methods or
+message sends by their names are included in Smalltalk which is a sole
+instance of SystemDictionary.  Such objects may be identified simply by
+stating their name as primary in a Smalltalk statement.  The code is
+compiled in the Smalitalk environment and if such a primary is found it
+is bound to the corresponding object as receiver of the rest of the
+message send.  In this way Smalltalk as instance of SystemDictionary
+represents the sole symbolic name space in the Smalltalk system.  In the
+following text the symbolic name space will be called simply environment
+to make the text more clear.
+
+@subsection Concepts
+
+To support polymorphic symbolical identification several environments
+will be needed.  The same name may be located concurrently in several
+environments and point to diverse objects.
+
+However, symbolic navigation between these environments is needed.
+Before approaching the problem of the syntax to be implemented and of
+its very implementation, we have to point out which structural relations
+are going to be established between environments.
+
+Since the environment has first to be symbolically identified to gain
+access to its global variables, it has to be a global variable in
+another environment. Obviously, @code{Smalltalk} will be the first
+environment from which the navigation begins. From @code{Smalltalk} some
+of the existing environments may be seen. From these environments other
+sub-environments may be seen, etc. This means that environments
+represent nodes in a graph where symbolic identifications from one
+environment to another one represent branches.
+
+However, the symbolic identification should be unambiguous although it
+will be polymorphic. This is why we should avoid cycles in the
+environment graph. Cycles in the graph could cause also other problems
+in the implementation, e.g. unability to use recursive algorithms. This
+is why in general the environments build a directed acyclic
+graph@footnote{An inheritance tree in the current @gst{} implementation
+of namespaces; a class can fake multiple inheritance by specifying a
+namespace (environment, if you prefer) as one of its pool
+dictionaries.}.
+
+Let us call the partial ordering relation which occurs between the two
+environments to be inheritance. Sub-environments inherits from their
+super-environments.
+
+Not only that ``inheritance'' is the standard term for the partial
+ordering relation in the lattice theory but the feature of inheritance
+in the meaning of object-orientation is associated with this
+relation. This means that all associations of the super-environment are
+valid also in its sub-environments unless they are locally redefined in
+the sub-environment.
+
+A super-environment includes all its sub-enviroments as associations
+under their names.  The sub-environment includes its super-environment
+under the symbol @code{#Super}.  Most environments inherit from
+Smalltalk, the standard root environment, but they are not required to
+do so; this is similar to how most classes derive from Object, yet one
+can derive a class directly from nil.  Since they all inherit from
+Smalltalk all global variables defined in it, it is not necessary to
+define a special global variable pointing to root in each environment.
+
+The inheritance links to the super-environments are used in the lookup
+for a potentially inherited global variable.  This includes lookups by a
+compiler searching for a variable and lookups via methods such as
+@code{#at:} and @code{#includesKey:}.
+
+@subsection Syntax
+
+Global objects of an environment (local or inherited) may be referenced by
+their symbol used in the source code, e.g.
+@example
+            John goHome
+@end example
+
+@noindent
+if the @code{#John -> aMan} association exists in the particular environment or
+one of its super-environments, all along the way to the root environment.
+
+If an object has to be referenced from another environment (i.e. which
+is not on the inheritance link) it has to be referenced either
+relatively to the position of the current environment (using the Super
+symbol), or absolutely (using the ``full pathname'' of the object,
+navigating from Smalltalk through the tree of sub-environments).
+
+For the identification of global objects in another environment a
+``pathname'' of symbols is used. The symbols are separated by blanks,
+i.e. the ``look'' to be implemented is that of
+@example
+Smalltalk Tasks MyTask
+@end example
+
+@noindent
+and of
+@example
+Super Super Peter.
+@end example
+
+Its similarity to a sequence of message sends is not casual, and
+suggests the following syntax for write access:@footnote{Absent from the
+original paper.}
+@example
+Smalltalk Tasks MyTask: anotherTask
+@end example
+
+This resembles the way accessors are used for other objects.  As it is
+custom in Smalltalk, however, we are reminded by uppercase letters that
+we are accessing global objects.
+
+For compatibility and efficiency (compile-time name resolving is faster
+than run-time resolving), two special syntaxes have been implemented.
+Standard dot notation can be used to read the value of a global
+(like in @code{Tasks.MyTask} or @code{Tasks::MyTask}), and another
+syntax returns the Association object for a particular global: so
+the last example above can be written also like
+@example
+#@{Smalltalk.Tasks.MyTask@} value: anotherTask
+@end example
+
+The latter kind of literal (called a @dfn{variable binding}) is also
+valid inside literal arrays.
+
+@subsection Implementation
+
+A superclass of @code{SystemDictionary} called @code{RootNamespace} has to be
+defined and many of the features of Smalltalk-80 SystemDictionaries will
+be hosted by that class. @code{Namespace} and @code{RootNamespace} will in
+turn become subclasses of @code{AbstractNamespace}.
+
+To handle inheritance, the following methods have to be defined or redefined in
+Namespace (@emph{not} in RootNamespace):
+
+@table @asis
+@item Accessors like @code{#at:ifAbsent:} and @code{#includesKey:}
+Inheritance has to be implemented.
+
+@item Enumerators like @code{#do:} and @code{#keys}
+This should return @strong{all} the objects in the namespace, including
+those which are inherited.
+@end table
+
+For programs to be able to process correctly the ``pathnames'' and the
+accessors, this feature must be implemented directly in
+@code{AbstractNamespace}; it is easily handled through the standard
+@code{doesNotUnderstand:} message for trapping message sends that the
+virtual machine could not resolve.  @code{AbstractNamespace} will also
+implement a new set of methods that allow one to navigate through the
+namespace hierarchy; these parallel those found in @code{Behavior} for
+the class hierarchy.
+
+The most important task of the @code{Namespace} class is to provide
+organization for the most important global objects in the Smalltalk
+system---for the classes.  This importance becomes even more crucial in
+the structured environments which is first of all a framework for class
+polymorphism.
+
+In Smalltalk the classes have the instance variable @code{name} which holds the
+name of the class. Each defined class is included in Smalltalk under this name.
+In a framework with several environments the class should know the environment
+in which it has been created and compiled.  This is a new variable of Class
+which has to be defined and properly set in relevant methods. In the mother
+environment the class should be included under its name.
+
+Of course, any class (just like any other object) may be included concurrently
+in several environments, even under different symbols in the same or in
+diverse environments.  We can consider this 'alias names' of the particular
+class or global variable.  However, classes may be referenced under the other
+names or in other environments as their mother environment e.g. for the
+purpose of intance creation or messages to he class (class methods), but
+they cannot be compiled in other environment. If a class compiles its methods
+it always compiles them in its mother environment even if this compilation is
+requested from another environment.  If the syntax is not correct in the mother
+environment, a compilation error simply occurs.
+
+An important issue is also the name of the class answered by the class for the
+purpose of its identification in diverse tools (e.g. in a browser). This has
+to be change to reflect the environment in which it is shown, i.e. the
+method @samp{nameIn: environment} has to be implemented and used on
+proper places.
+
+These methods are not all which have to redefined in the Smalltalk system to
+achieve full functionality of structured environments.  In particular, changes
+have to be made to the behavior classes, to the user interface, to the
+compiler, to a few classes supporting persistance.  An interesting point that
+could not be noticed is that the environment is easier to use if evaluations
+(@dfn{doits}) are parsed as if UndefinedObject's mother environment was
+@emph{the current namespace}.
+
+@subsection Using namespaces
+
+Using namespaces if often merely a matter of rewriting the loading script this
+way:
+@example
+    Smalltalk addSubspace: #NewNS!
+    Namespace current: NewNS!
+    @dots{}
+    Namespace current: Smalltalk!
+@end example
+
+Also remember that pool dictionaries are actually ``pool namespaces'', in the
+sense that including a namespace in the pool dictionaries list will
+automatically include its superspaces too. Declaring a namespace as a 
+pool dictionaries is similar in this way to C++'s @code{using namespace}
+declaration.
+
+Finally, be careful when working with fundamental system classes.  Although you
+can use code like
+@example
+    Smalltalk Set variableSubclass: #Set
+        @dots{}
+        category: 'My application-Extensions'
+
+@end example
+
+@noindent
+or the equivalent syntax @code{Set extend}, this approach won't work
+when applied to core classes.  For example, you might be successful with
+a @code{Set} or @code{WriteStream} object, but subclassing SmallInteger this
+way can bite you in strange ways: integer literals will still belong to the
+Smalltalk dictionary's version of the class (this holds for Arrays, Strings,
+etc.  too), primitive operations will still answer standard Smalltalk
+@code{SmallIntegers}, and so on.  Or, @code{variableWordSubclasses} will
+recognize 32-bit @code{Smalltalk LargeInteger} objects, but not LargeIntegers
+belonging to your own namespace.
+
+Unfortunately this problem is not easy to solve since Smalltalk has to cache
+the OOPs of determinate class objects for speed---it would not be feasible
+to lookup the environment to which sender of a message belongs every time
+the @code{+} message was sent to an Integer.
+
+So, @gst{} namespaces cannot yet solve 100% of the problem of clashes
+between extensions to a class---for that you'll still have to rely on
+prefixes to method names.  But they @emph{do} solve the problem of clashes
+between class names, or between class names and pool dictionary names, so you
+might want to give them a try.  An example of using namespaces is given by the
+@file{examples/Publish.st} file in the @gst{} source code directory.
+
+
+@node Disk file-IO
+@section Disk file-IO primitive messages
+
+Four classes (@code{FileDescriptor}, @code{FileStream}, @code{File},
+@code{Directory}) allow you to create files and access the file system
+in a fully object-oriented way.
+
+@code{FileDescriptor} and @code{FileStream} are much more powerful than the
+corresponding C language facilities (the difference between the two is that,
+like the C @code{stdio} library, @code{FileStream} does buffering).  For one
+thing, they allow you to write raw binary data in a portable endian-neutral
+format.  But, more importantly, these classes transparently implement
+virtual filesystems and asynchronous I/O.
+
+Asynchronous I/O means that an input/output operation blocks the
+Smalltalk Process that is doing it, but not the others, which makes them
+very useful in the context of network programming.  Virtual file systems
+mean that these objects can transparently extract files from archives
+such as @file{tar} and @file{gzip} files, through a mechanism that can
+be extended through either shell scripting or Smalltalk programming.
+For more information on these classes, look in the class reference, under
+the @code{VFS} namespace.  @acronym{URL}s may be used as file names; though,
+unless you have loaded the @code{NetClients} package (@pxref{Network support}),
+only @code{file} @acronym{URL}s will be accepted.
+
+In addition, the three files, @code{stdin}, @code{stdout}, and @code{stderr}
+are declared as global instances of @code{FileStream} that are bound to the
+proper values as passed to the C virtual machine.  They can be accessed as
+either @code{stdout} and @code{FileStream stdout}---the former is easier to
+type, but the latter can be clearer.
+
+Finally, @code{Object} defines four other methods: @code{print} and
+@code{printNl}, @code{store} and @code{storeNl}.  These do a @code{printOn:} or
+@code{storeOn:} to the ``Transcript'' object; this object, which is the sole
+instance of class @code{TextCollector}, normally delegates write
+operations to @code{stdout}.  If you load the Blox @sc{gui}, instead,
+the Transcript Window will be attached to the Transcript object (@pxref{Blox}).
+
+The @code{fileIn:} message sent to the FileStream class, with a file
+name as a string argument, will cause that file to be loaded into
+Smalltalk.
+
+For example,
+@example
+FileStream fileIn: 'foo.st' !
+@end example
+@noindent
+
+will cause @file{foo.st} to be loaded into @gst{}.
+
+@node Object dumping
+@section The @gst{} ObjectDumper
+
+Another @gst{}-specific class, the @code{ObjectDumper} class, allows
+you to dump objects in a portable, endian-neutral, binary format. Note that
+you can use the @code{ObjectDumper} on ByteArrays too, thanks to another
+@gst{}-specific class, @code{ByteStream}, which allows you to treat
+ByteArrays the same way you would treat disk files.
+
+For more information on the usage of the @code{ObjectDumper}, look in the
+class reference.
+
+
+@node GC
+@section Memory management in @gst{}
+
+The @gst{} virtual machine is equipped with a garbage collector, a
+facility that reclaims the space occupied by objects that are no
+longer accessible from the system roots.  The collector is composed
+of several parts, each of which can be invoked by the virtual machine
+using various tunable strategies, or invoked manually by the programmer.
+
+These parts include a @dfn{generation scavenger}, a @dfn{mark & sweep}
+collectory with an incremental sweep phase, and a @dfn{compactor}.
+All these facilities work on different memory spaces and differs from
+the other in its scope, speed and disadvantages (which are hopefully
+balanced by the availability of different algorithms).  What follows
+is a description of these algorithms and of the memory spaces they
+work in.
+
+@dfn{NewSpace} is the memory space where young objects live.  It is
+composed of three sub-spaces: an object-creation space (@dfn{Eden})
+and two @dfn{SurvivorSpaces}. When an object is first created, it is
+placed in Eden. When Eden starts to fill up (i.e., when the number of
+used bytes in Eden exceeds the scavenge threshold), objects that are
+housed in Eden or in the occupied SurvivorSpace and that are still
+reachable from the system roots are copied to the unoccupied
+SurvivorSpace.  As an object survives different scavenging passes, it
+will be shuffled by the scavenger from the occupied SurvivorSpace to
+the unoccupied one.  When the number of used bytes in SurvivorSpace is
+high enough that the scavenge pause might be excessively long, the
+scavenger will move some of the older surviving objects from NewSpace
+to @dfn{OldSpace}.  In the garbage collection jargon, we say that such
+objects are being @dfn{tenured} to OldSpace.
+
+This garbage collection algorithm is designed to reclaim short-lived
+objects, that is those objects that expire while residing in NewSpace,
+and to decide when enough data is residing in NewSpace that it is
+useful to move some of it in OldSpace.  A @dfn{copying} garbage
+collector is particularly efficient in an object population whose
+members are more likely to die than survive, because a scavenger
+spends most of its time copying survivors, who will be few in number
+in such populations, rather than tracing corpses, who will be many in
+number in such populations.  This fact makes scavenging especially
+well suited to NewSpace, where a percentage of 90% or more objects
+often fails to survive across a single scavenge.
+
+The particular structure of NewSpace has many advantages.  On one
+hand, having a large Eden and two small SurvivorSpaces has a smaller
+memory footprint than having two equally big semi-spaces and
+allocating new objects directly from the occupied one (by default,
+@gst{} uses 420=300+60*2 kilobytes of memory, while a simpler
+configuration would use 720=360*2 kilobytes).  On the other hand, it
+makes tenuring decisions particularly simple: the copying order is
+such that short-lived objects tend to be copied last, while objects
+that are being referred from OldSpace tend to be copied first: this is
+because the tenuring strategy of the scavenger is simply to treat the
+destination SurvivorSpace as a circular buffer, tenuring objects with
+a First-In-First-Out policy.
+
+An object might become part of the scavenger root set for several
+reasons: objects that have been tenured are roots if their data lives
+in an OldSpace page that has been written to since the last scavenge
+(more on this later), plus all objects can be roots if they are known
+to be referenced from C code or from the Smalltalk stacks.
+
+In turn, some of the old objects can be made to live in a special
+area, called @dfn{FixedSpace}.  Objects that reside in FixedSpace are
+special in that their body is guaranteed to remain at a fixed address
+(in general, @gst{} only ensures that the header of the object remains
+at a fixed address in the Object Table).  Because the garbage
+collector can and does move objects, passing objects to foreign code
+which uses the object's address as a fixed key, or which uses a
+ByteArray as a buffer, presents difficulties.  One can use
+@code{CObject} to manipulate C data on the @code{malloc} heap, which
+indeed does not move, but this can be tedious and requires the same
+attentions to avoid memory leaks as coding in C.  FixedSpace provides
+a much more convenient mechanism: once an object is deemed fixed, the
+object's body will never move through-out its life-time; the space it
+occupies will however still be returned automatically to the
+FixedSpace pool when the object is garbage collected.  Note that
+because objects in FixedSpace cannot move, FixedSpace cannot be
+compacted and can therefore suffer from extensive fragmentation.  For
+this reason, FixedSpace should be used carefully.  FixedSpace however
+is rebuilt (of course) every time an image is brought up, so a kind of
+compaction of FixedSpace can be achieved by saving a snapshot,
+quitting, and then restarting the newly saved image.
+
+Memory for OldSpace and FixedSpace is allocated using a variation of
+the system allocator @code{malloc}: in fact, @gst{} uses the same
+allocator for its own internal needs, for OldSpace and for FixedSpace,
+but it ensures that a given memory page never hosts objects that
+reside in separate spaces.  New pages are mapped into the address
+space as needed and devoted to OldSpace or FixedSpace segments;
+similarly, when unused they may be subsequently unmapped, or they
+might be left in place waiting to be reused by @code{malloc} or
+by another Smalltalk data space.
+
+Garbage that is created among old objects is taken care of by a mark &
+sweep collector which, unlike the scavenger which only reclaims
+objects in NewSpace, can only reclaim objects in OldSpace.  Note that
+as objects are allocated, they will not only use the space that was
+previously occupied in the Eden by objects that have survived, but
+they will also reuse the entries in the global Object Table that have
+been freed by object that the scavenger could reclaim.  This quest for
+free object table entries can be combined with the sweep phase of the
+OldSpace collector, which can then be done incrementally, limiting the
+disruptive part of OldSpace garbage collection to the mark phase.
+
+Several runs of the mark & sweep collector can lead to fragmentation
+(where objects are allocated from several pages, and then become
+garbage in an order such that a bunch of objects remain in each page
+and the system is not able to recycle them).  For this reason, the
+system periodically tries to compact OldSpace.  It does so simply by
+looping through every old object and copying it into a new OldSpace.
+Since the OldSpace allocator does not suffer from fragmentation until
+objects start to be freed nor after all objects are freed, at the end
+of the copy all the pages in the fragmented OldSpace will have been
+returned to the system (some of them might already have been used by
+the compacted OldSpace), and the new, compacted OldSpace is ready to
+be used as the system oldspace.  Growing the object heap (which is
+done when it is found to be quite full even after a mark & sweep
+collection) automatically triggers a compaction.
+
+You can run the compactor without marking live objects.  Since the
+amount of garbage in OldSpace is usually quite limited, the overhead
+incurred by copying potentially dead objects is small enough that the
+compactor still runs considerably faster than a full garbage
+collection, and can still give the application some breathing room.
+
+Keeping OldSpace and FixedSpace in the same heap would then make
+compaction of OldSpace (whereby it is rebuilt from time to time in
+order to limit fragmentation) much less effective.  Also, the
+@code{malloc} heap is not used for FixedSpace objects because @gst{}
+needs to track writes to OldSpace and FixedSpace in order to support
+efficient scavenging of young objects.
+
+To do so, the grey page table@footnote{The denomination @dfn{grey}
+comes from the lexicon of @dfn{tri-color marking}, which is an
+  abstraction of every possible garbage collection algorithms: in
+  tri-color marking, grey objects are those that are known to be
+  reachable or that we are not interested in reclaiming, yet have not
+  been scanned yet to mark the objects that they refer to as reachable.}
+contains one entry for each page in OldSpace or FixedSpace that is
+thought to contain at least a reference to an object housed in
+NewSpace.  Every page in OldSpace is created as grey, and is considered
+grey until a scavenging pass finds out that it actually does not contain
+pointers to NewSpace.  Then the page is recolored black@footnote{Black
+  objects are those that are known to be reachable or that we are not
+  interested in reclaiming, and are known to have references only to
+  other black or grey objects (in case you're curious, the tri-color
+  marking algorithm goes on like this: object not yet known to be
+  reachable are white, and when all objects are either black or white,
+  the white ones are garbage).},
+and will stay black until it is written to or another object is
+allocated in them (either a new fixed object, or a young object being
+tenured).  The grey page table is expanded and shrunk as needed by the
+virtual machine.
+
+Drawing an histogram of object sizes shows that there are only a few
+sources of large objects on average (i.e., objects greater than a page
+in size), but that enough of these objects are created dynamically
+that they must be handled specially.  Such objects should not be
+allocated in NewSpace along with ordinary objects, since they would
+fill up NewSpace prematurely (or might not even fit in it), thus
+accelerating the scavenging rate, reducing performance and resulting
+in an increase in tenured garbage.  Even though this is not an optimal
+solution because it effectively tenures these objects at the time they
+are created, a benefit can be obtained by allocating these objects
+directly in FixedSpace.  The reason why FixedSpace is used is that
+these objects are big enough that they don't result in
+fragmentation@footnote{Remember that free pages are shared among the
+  three heaps, that is, OldSpace, FixedSpace and the @code{malloc}
+  heap.  When a large object is freed, the memory that it used can be
+  reused by @code{malloc} or by OldSpace allocation}; and using
+FixedSpace instead of OldSpace avoids that the compactor copies them
+because this would not provide any benefit in terms of reduced
+fragmentation.
+
+Smalltalk activation records are allocated from another special heap,
+the context pool.  This is because it is often the case that they
+can be deallocated in a Last-In-First-Out (stack) fashion, thereby
+saving the work needed to allocate entries in the object table for them,
+and quickly reusing the memory that they use.  When the activation record
+is accessed by Smalltalk, however, the activation record must be turned
+into a first-class @code{OOP}@footnote{This is short for @dfn{Ordinary
+  Object Pointer}.}.  Since even these objects are usually very
+short-lived, the data is however not copied to the Eden: the eviction
+of the object bodies from the context pool is delayed to the next
+scavenging, which will also empty the context pool just like it
+empties Eden.  If few objects are allocated and the context pool turns
+full before the Eden, a scavenging is also triggered; this is however
+quite rare.
+
+Optionally, @gst{} can avoid the overhead of interpretation by
+executing a given Smalltalk method only after that method has been
+compiled into the underlying microprocessor's machine code. This
+machine-code generation is performed automatically, and the resulting
+machine code is then placed in @code{malloc}-managed memory.  Once
+executed, a method's machine code is left there for subsequent
+execution.  However, since it would require way too much memory to
+permanently house the machine-code version of every Smalltalk method,
+methods might be compiled more than once: when a translation is not
+used at the time that two garbage collection actions are taken
+(scavenges and global garbage collections count equally), the
+incremental sweeper discards it, so that it will be recomputed if and
+when necessary.
+
+@node Security
+@section Security in @gst{}
+
+
+@node Special objects
+@section Special kinds of object
+
+A few methods in Object support the creation of particular objects.
+This include:
+
+@itemize @bullet
+@item
+finalizable objects
+
+@item
+weak and ephemeron objects (i.e. objects whose contents are considered
+specially, during the heap scanning phase of garbage collection).
+
+@item
+read-only objects (like literals found in methods)
+
+@item
+fixed objects (guaranteed not to move across garbage collections)
+
+@end itemize
+
+They are:
+@defmethod Object makeWeak
+Marks the object so that it is considered weak in subsequent garbage
+collection passes.  The garbage collector will consider dead an object
+which has references only inside weak objects, and will replace
+references to such an ``almost-dead'' object with nils, and then
+send the @code{mourn} message to the object.
+@end defmethod
+
+@defmethod Object makeEphemeron
+Marks the object so that it is considered specially in subsequent
+garbage collection passes.  Ephemeron objects are sent the message
+@code{mourn} when the first instance variable is not referenced
+or is referenced @emph{only through another instance variable in the
+ephemeron}.
+
+Ephemerons provide a very versatile base on which complex interactions
+with the garbage collector can be programmed (for example, finalization
+which is described below is implemented with ephemerons).
+@end defmethod
+
+@defmethod Object addToBeFinalized
+Marks the object so that, as soon as it becomes unreferenced, its
+@code{finalize} method is called.  Before @code{finalize} is called,
+the VM implicitly removes the objects from the list of finalizable
+ones.  If necessary, the @code{finalize} method can mark again
+the object as finalizable, but by default finalization will only occur
+once.
+
+Note that a finalizable object is kept in memory even when it has no
+references, because tricky finalizers might ``resuscitate'' the object;
+automatic marking of the object as not to be finalized has the nice side
+effect that the VM can simply delay the releasing of the memory associated
+to the object, instead of being forced to waste memory even after
+finalization happens. 
+
+An object must be explicitly marked as to be finalized @emph{every time the
+image is loaded}; that is, finalizability is not preserved by an
+image save.  This was done because in most cases finalization is
+used together with @code{CObject}s that would be stale when the image is
+loaded again, causing a segmentation violation as soon as they are accessed
+by the finalization method.
+@end defmethod
+
+@defmethod Object removeToBeFinalized
+Removes the to-be-finalized mark from the object.
+As I noted above, the finalize code for the object does not have to
+do this explicitly. 
+@end defmethod
+
+@defmethod Object finalize
+This method is called by the VM when there are no more references to
+the object (or, of course, if it only has references inside weak objects). 
+@end defmethod
+
+@defmethod Object isReadOnly
+This method answers whether the VM will refuse to make changes to the
+objects when methods like @code{become:}, @code{basicAt:put:},
+and possibly @code{at:put:} too (depending on the implementation of the
+method).
+Note that @gst{} won't try to intercept assignments to fixed
+instance variables, nor assignments via @code{instVarAt:put:}. Many
+objects (Characters, @code{nil}, @code{true}, @code{false}, method
+literals) are read-only by default. 
+@end defmethod
+
+@defmethod Object makeReadOnly: aBoolean
+Changes the read-only or read-write status of the receiver to that
+indicated by @code{aBoolean}. 
+@end defmethod
+
+@defmethod Object basicNewInFixedSpace
+Same as @code{#basicNew}, but the object won't move across garbage
+collections.
+@end defmethod
+
+@defmethod Object basicNewInFixedSpace:
+Same as @code{#basicNew:}, but the object won't move across garbage
+collections.
+@end defmethod
+
+@defmethod Object makeFixed
+Ensure that the receiver won't move across garbage collections.
+This can be used either if you decide after its creation that an
+object must be fixed, or if a class does not support using @code{#new}
+or @code{#new:} to create an object
+@end defmethod
+
+Note that, although particular applications will indeed have a need for
+fixed, read-only or finalizable objects, the @code{#makeWeak} primitive
+is seldom needed and weak objects are normally used only indirectly,
+through the so called @dfn{weak collections}.  These are easier to use
+because they provide additional functionality (for example, @code{WeakArray}
+is able to determine whether an item has been garbage collected, and
+@code{WeakSet} implements hash table functionality); they are:
+
+@itemize @bullet
+@bulletize @code{WeakArray}
+@bulletize @code{WeakSet}
+@bulletize @code{WeakKeyDictionary}
+@bulletize @code{WeakValueLookupTable}
+@bulletize @code{WeakIdentitySet}
+@bulletize @code{WeakKeyIdentityDictionary}
+@bulletize @code{WeakValueIdentityDictionary}
+@end itemize
+
+Versions of @gst{} preceding 2.1 included a @code{WeakKeyLookupTable} class
+which has been replaced by @code{WeakKeyDictionary}; the usage is completely
+identical, but the implementation was changed to use a more efficient
+approach based on ephemeron objects.
+
+@node Dynamic loading
+@section Dynamic loading
+
+The @code{DLD} class enhances the C callout mechanism to automatically look
+for unresolved functions in a series of program-specified libraries.  To
+add a library to the list, evaluate code like the following:
+@example
+     DLD addLibrary: '/usr/lib/libc'
+@end example
+
+The extension (@file{.so}, @file{.sl}, @file{.a}, @file{.dll} depending
+on your operating system) will be added automatically.  You are advised
+not to specify it for portability reasons.
+
+You will then be able to use the standard C call-out mechanisms
+to define all the functions in the C run-time library.  Note
+that this is a potential security problem (especially if your program is
+SUID root under Unix), so you might want to disable dynamic loading when
+using @gst{} as an extension language.  To disable dynamic loading,
+configure @gst{} passing the @option{--without-dld} switch.
+
+Note that a @code{DLD} class will be present even if dynamic loading is
+disabled (either because your system is not supported, or by the
+@option{--without-dld} configure switch) but any attempt to perform
+dynamic linking will result in an error.
+
+@node Packages
+@section Packages
+
+Thanks to Andreas Klimas' insight, @gst{} now includes a
+powerful packaging system which allows one to file in components
+(@dfn{goodies} in Smalltalk's very folkloristic terminology)
+without caring of whether they need other goodies to be loaded.
+
+The packaging system is implemented by a Smalltalk class,
+@code{PackageLoader}, which looks for information about packages in
+the XML file named (guess what) @file{packages.xml}, in the current image
+directory. There are two ways to load something using the packaging
+system. The first way is to use the PackageLoader's
+@code{fileInPackage:} and @code{fileInPackages:} methods.
+For example:
+@example
+    PackageLoader fileInPackages: #('Blox' 'Browser').
+    PackageLoader fileInPackage: 'Compiler'.
+@end example
+
+The second way is to use the @file{Load.st} file which lies in the GST image
+directory.  For example, start @gst{} with this command line:
+
+@t{@ @ @ @ gst -qsK Load.st -a Browser Blox Compiler}@footnote{
+When using an alternate image path, don't use the -K option and pass
+the full path to the @file{Load.st} script.}
+
+@noindent
+and GST will automatically file in:
+
+@itemize @bullet
+@bulletize BloxTK, needed by Blox
+@bulletize Blox, loaded first because Browser needs it
+@bulletize Parser, not specified, but needed by Browser and Compiler
+@bulletize Browser
+@bulletize Compiler (Blox is skipped because it has already been loaded)
+@end itemize
+
+Then it will save the Smalltalk image, and finally exit!
+
+To provide support for this system, you have to give away with your GST
+goodies a small file (say you call it @file{mypkg}) which looks like
+this:
+@example
+<!-- This is the comment for the package file for
+     the absolutely WONDERFUL package MyPackage -->
+
+<packages>
+<package>
+  <name>MyPackage</name>
+  <prereq>MyPrereq1</prereq>
+  <prereq>MyPrereq2</prereq>
+  <callout>MyCallout1</callout>
+  <callout>MyCallout2</callout>
+  <filein>Load.st</filein>
+  <filein>Finish.st</filein>
+  <module>libmymodule</module>
+  <directory>yourDirectoryName</directory>
+
+  <file>Load.st</file>
+  <file>Finish.st</file>
+  <file>MyFile1.st</file>
+  <file>MyFile2.st</file>
+  <!-- @i{@r{More files may follow}} -->
+</package>
+
+<!-- @i{@r{More packages may follow}} -->
+
+</packages>
+@end example
+
+then people who install your package will only have to do
+@example
+    gst-package mypkg
+@end example
+
+which is a small shell script which will merge the file
+with @file{packages.xml}, install the files specified in
+the @code{file} tags and load the packages.
+
+Simple, isn't it?  For examples of package declarations, have a look at
+the @file{packages.xml} file as distributed with @gst{}.  The @gst{}
+makefile also use @file{gst-package} to install packages and to
+prepare the distribution tarballs.
+
+The rest of this chapter discusses the packages provided with @gst{}.
+
+@menu
+* Blox, BloxTK, and Browser:             Blox.
+* Parser, STInST, Compiler:              Smalltalk-in-Smalltalk.
+* DB and MySQL:                          Database.
+* I18N:                                  Locales.
+* SUnit:                                 SUnit.
+* TCP, WebServer, NetClients:            Network support.
+* XML, XPath, XSL:                       XML.
+* Minor packages:                        Minor packages.
+@end menu
+
+@node Blox
+@subsection Blox
+
+Blox is a GUI building block tool kit.  It is an abstraction on top of
+the a platform's native GUI toolkit that is common across all platforms.
+Writing to the Blox interface means your GUI based application will be
+portable to any platform where Blox is supported.
+
+The Blox classes, which reside in the @code{BLOX} namespace and are
+fully documented in @ref{BLOX, , BLOX, gst-libs, the @gst{}
+Library Reference}, act as wrappers around other toolkits, which
+constitute the required portability layer; currently the only one
+supported is Tcl/Tk but alternative versions of Blox, for example based
+on Gtk+ and GNOME, have been considered and might even replace Tcl/Tk
+in the future@footnote{The Gtk+ bindings for GNU Smalltalk are
+    in an embryonic state; you can find them in the @code{GTK}
+    package if you have Gtk+ 2.0 or later installed}.  Instead of
+having to rewrite widgets and support for each platform, Blox simply
+asks the other toolkit to do so (currently, it hands valid Tcl code
+to a standard Tcl 8.0 environment); the abstraction from the operating
+system being used is then extracted out of @gst{}.
+
+Together with the toolkit, there is a browsing system in the
+@file{browser} directory that will allow the programmer to view the
+source code for existing classes, to modify existing classes and methods,
+to get detailed information about the classes and methods, and to evaluate
+code within the browser.  In addition, some simple debugging tools are
+provided.  An Inspector window allows the programmer to graphically
+inspect and modify the representation of an object and a walkback
+inspector was designed which will display a backtrace when the program
+encounters an error.
+
+The Transcript global object is redirected to print to the
+transcript window instead of printing to stdout, and the transcript
+window as well as the workspaces, unlike the console read-eval-print
+loop, support variables that live across multiple evaluations:
+
+@example
+    a := 2   "Do-it"
+    a + 2    "Print-it: 4 will be shown"
+@end example
+
+This browser evolved from an Xt-based version developed around 1993
+written by Brad Diller (@email{bdiller@@docent.com}). Because of legal
+concerns about possible copyright infringement because his initial
+implementation used parts of ParcPlace's Model-View-Controller (MVC)
+message interface, he and Richard Stallman devised a new window update
+scheme which is more flexible and powerful than MVC's dependency
+mechanism, and allowed him to purge all the MVC elements from the
+implementation.
+
+The code was then further improved to employ a better class design
+(for example, Brad used Dictionaries for classes still to be fleshed
+out), to be aesthetically more appealing (taking advantage of the
+new Blox text widget, the code browsers were enhanced with
+syntax highlighting), and to be more complete (adding multiple ``views''
+to the inspector, namespace support and a complete debugger).
+
+To start the browser you can simply type:
+
+@example
+    gst -qK browser/Run.st
+@end example
+
+This will load any requested packages, then, if all goes well, a
+worksheet window with a menu named @dfn{Smalltalk} will appear in the
+top-left corner of the screen. You might want to file-in
+@file{browser/Run.st} from your @file{.stinit} file (@pxref{Operation, ,
+Startup sequence}) or to run it automatically through ObjectMemory
+(@pxref{Memory access}).
+
+
+@node Smalltalk-in-Smalltalk
+@subsection The Smalltalk-in-Smalltalk library
+
+
+The Smalltalk-in-Smalltalk library is a set of classes for looking at
+Smalltalk code, constructing models of Smalltalk classes that can later
+be created for real, analyzing and performing changes to the image,
+finding smelly code and automatically doing repetitive changes.
+This package incredibly enhances the reflective capabilities of Smalltalk.
+
+Being quite big (20000 source code lines) this package is split into
+three different packages: @code{Parser} loads the parser only,
+@code{STInST} loads various other tools (which compose the
+``Refactoring Browser'' package by John Brant and Don Roberts and
+will be the foundation for @gst{}'s next generation browser),
+@code{STInSTTest} performs comprehensive unit tests@footnote{
+    The tests can take @strong{hours} to complete!}
+(@pxref{SUnit}).  Porting of the @code{STInST} package will be
+completed in @gst{} 2.2.
+
+A fundamental part of the system is the recursive-descent parser which
+creates parse nodes in the form of instances of subclasses of
+@code{RBProgramNode}. 
+
+The parser's extreme flexibility can be exploited in three ways, all of
+which are demonstrated by source code available in the distribution:
+
+@itemize @bullet
+@item
+First, actions are not hard-coded in the parser itself: the parser
+creates a parse tree, then hands it to methods in @code{RBParser} that
+can be overridden in different @code{RBParser} subclasses.  This is done
+by the compiler itself, in which a subclass of @code{RBParser} (class
+@code{STFileInParser}) hands the parse trees to the @code{STCompiler}
+class.
+
+@item
+Second, an implementation of the ``visitor'' pattern is provided to help
+in dealing with parse trees created along the way; this approach is
+demonstrated by the Smalltalk code pretty-printer in class
+@code{RBFormatter}, by the syntax highlighting engine included
+with the browser, and by the compiler.
+
+@item
+The parser is able to perform complex tree searches and rewrites,
+through the ParseTreeSearcher and ParseTreeRewriter classes.  This
+mechanism is exploited by most of the tools loaded by the @code{STInST}
+package.
+@end itemize
+
+In addition, two applications were created on top of this library
+which are specific to @gst{}.  The first is a compiler for Smalltalk
+methods written in Smalltalk itself, whose source code provides good
+insights into the @gst{} virtual machine.
+
+The second is the automatic documentation extractor, contained in
+two files, @file{compiler/STLoader.st} and @file{compiler/STLoaderObjs.st}.
+To be able to create Texinfo files even if the library cannot be loaded
+(for example, @code{BLOX} requires a running X server) Smalltalk source code is
+interpreted and objects for the classes and methods being read in
+are created; then, polymorphism allows one to treat these exactly
+like usual classes which can be fed to @gst{}'s @code{ClassPublisher}
+(found in @file{examples/Publish.st}.
+
+@node Database
+@subsection Database connectivity
+
+@gst{} includes support for connecting to databases.  Currently this
+support is limited to retrieving result sets from @acronym{SQL} selection
+queries and executing @acronym{SQL} data manipulation queries; in the
+future however a full object model will be available that hides the
+usage of @acronym{SQL}.
+
+Classes that are independent of the database management system that is
+in use reside in package @code{DB}, while the drivers proper reside
+in separate packages which have @code{DB} as a prerequisite; currently,
+the only driver that is currently supplied is for @emph{MySQL} (loaded
+with package @emph{MySQL}).
+
+Using the library is fairly simple.  To execute a query you need to 
+create a connection to the database, create a statement on the connection,
+and execute your query.  For example, let's say I want to connect to the
+@file{test} database on the localhost.  My user name is @code{doe} and
+my password is @code{mypass}.
+
+@example
+| connection statement result |
+
+connection := Jdm MySQL JdmConnection on: 
+    (Jdm JdmConnectionSpec new initialize
+        user: 'doe'; password: 'mypass';
+        database: 'test').
+@end example
+
+You can see that the @acronym{DBMS}-specific classes live in a sub-namespace
+of @code{Jdm}, while @acronym{DBMS}-independent classes live in @code{Jdm}.
+@code{Jdm} are the initials of the original developer of the driver, and
+also an acronym for @emph{Just a Database Manager}---silly acronym, I know.
+
+Here is how I execute a query.
+
+@example
+statement := connection createStatement.
+result := statement
+    executeQuery: 'insert into aTable (aField) values (aValue)'.
+@end example
+
+The result that is returned is a @code{JdmResult}.  It holds two values:
+the result type and the actual result value.  For update queries
+the type is set to #update and the value is an integer designating the
+number of rows effected.  For read queries (such as selection queries)
+the type is set to #read and the value is a @code{JdmResultSet}.
+
+A @code{JdmResultSet} reads rows off the result stream.  It also contains a
+collection of column information (instances of @code{JdmColumn}) which
+describe the type, size, and other characteristics of the returned column.
+Generally you grab the columns by sending the "next" message to the result
+set.  The next message returns a Boolean which indicates whether or not
+there are any more rows to be read.  Do NOT read past the last row:
+currently the driver will block when this happens.
+
+A common usage of a JdmResultSet would be:
+
+@example
+| resultSet value |
+[resultSet next] whileFalse: [value := resultSet valueNamed: 'columnName'].
+@end example
+
+The result set has several accessing methods. They are:
+
+@table @code
+@item valueAt: anInteger
+returns the Smalltalk value at column number anInteger
+
+@item rawValueAt: anInteger
+returns the raw (String) value at column number anInteger
+
+@item valueNamed: aString
+returns the Smalltalk value for the column named aString.
+
+@item rawValueNamed: aString
+returns the raw (String) value for the column named aString
+@end table
+
+To run the test suites your mysql server needs to be on the local machine,
+the database "test" needs to exist, and a user named `utente' on the
+localhost need full access to the database "test".
+
+The aforementioned conditions are true when Mysql is first installed.
+
+The tests run fairly slow since each row consists of all possible
+Mysql types and many of the inserted values are generated.
+
+To run the tests execute the following:
+
+@example
+Jdm MySQL JdmMysqlTestSuite new run printNl
+@end example
+
+@node Locales
+@subsection Internationalization and localization support
+
+Different countries and cultures have varying conventions for how to
+communicate.  These conventions range from very simple ones, such as the
+format for representing dates and times, to very complex ones, such as
+the language spoken.  Provided the programs are written to obey the
+choice of conventions, they will follow the conventions preferred by the
+user.  @gst{} provides the @code{I18N} package to ease you in doing so.
+
+@dfn{Internationalizing} software means programming it to be able to
+adapt to the user's favorite conventions.  These conventions can get
+pretty complex; for example, the user might specify the locale
+`espana-castellano' for most purposes, but specify the locale
+`usa-english' for currency formatting: this might make sense if the user
+is a Spanish-speaking American, working in Spanish, but representing
+monetary amounts in US dollars.  You can see that this system is simple
+but, at the same time, very complete.  This manual, however, is not the
+right place for a thorough discussion of how an user would set up his
+system for these conventions; for more information, refer to your
+operating system's manual or to the @gnu{} C library's manual.
+
+@gst{} inherits from @sc{iso} C the concept of a @dfn{locale}, that is, a
+collection of conventions, one convention for each purpose, and maps each of
+these purposes to a Smalltalk class defined by the @code{I18N} package, and
+these classes form a small hierarchy with class @code{Locale}@footnote{All
+    the classes mentioned in this section reside in the
+    @code{I18N} namespace.} as its roots:
+
+@itemize @bullet
+@ignore
+@item
+Classes in the @code{Encoders} namespace implement decisions on which
+multibyte character sequences are valid, and how they are interpreted.
+Usually you will simply rely on the @code{EncodedStream} class.
+
+@item
+@code{LcCollate} defines the collating sequence for the local language and
+character set.
+@end ignore
+
+@item
+@code{LcNumeric} formats numbers; @code{LcMonetary} and @code{LcMonetaryISO}
+format currency amounts.
+
+@item
+@code{LcTime} formats dates and times.
+
+@item
+@code{LcMessages} translates your program's output.  Of course, the
+package can't automatically translate your program's output messages
+into other languages; the only way you can support output in the user's
+favorite language is to translate these messages by hand.  The package
+does, though, provide methods to easily handle translations into
+multiple languages.
+@end itemize
+
+Basic usage of the @code{I18N} package involves a single selector, the
+question mark (@code{?}), which is a rarely used yet valid character for
+a Smalltalk binary message.  The meaning of the question mark selector
+is ``Hey, how do you say @dots{} under your convention?''.  You can send
+@code{?} to either a specific instance of a subclass of @code{Locale},
+or to the class itself; in this case, rules for the default locale
+(which is specified via environment variables) apply.  You might say,
+for example, @code{LcTime ? Date today} or, for example,
+@code{germanMonetaryLocale ? account balance}.  This syntax can be at
+first confusing, but turns out to be convenient because of its
+consistency and overall simplicity.
+
+Here is how @code{?} works for different classes:
+
+@ignore
+@defmethod LcCollate ? aString
+Answer an instance of LcCollationKey; code like
+@code{LcCollate ? string1 < string2} will compare
+the two strings under the rules of the default locale
+@end defmethod
+@end ignore
+
+@defmethod LcTime ? aString
+Format a date, a time or a timestamp (@code{DateTime}
+object).
+@end defmethod
+
+@defmethod LcNumber ? aString
+Format a number.
+@end defmethod
+
+@defmethod LcMonetary ? aString
+Format a monetary value together with its currency symbol.
+@end defmethod
+
+@defmethod LcMonetaryISO ? aString
+Format a monetary value together with its @sc{iso} currency symbol.
+@end defmethod
+
+@defmethod LcMessages ? aString
+Answer an @code{LcMessagesDomain} that retrieves translations
+from the specified file.
+@end defmethod
+
+@defmethod LcMessagesDomain ? aString
+Retrieve the translation of the given string.@footnote{The @code{?} method
+   does not apply to the LcMessagesDomain class itself, but only to its
+   instances.  This is because LcMessagesDomain is not a subclass of
+   Locale.}
+@end defmethod
+
+The package provides much more functionality, including more advanced
+formatting options support for Unicode, and conversion to and from
+several character sets.  For more information, refer to @ref{I18N, ,
+I18N, gst-libs, the @gst{} Library Reference}.
+
+As an aside, the representation of locales that the package uses is
+exactly the same as the C library, which has many advantages: the burden
+of mantaining locale data is removed from @gst{}'s mantainers; the need
+of having two copies of the same data is removed from @gst{}'s users;
+and finally, uniformity of the conventions assumed by different
+internationalized programs is guaranteed to the end user.
+
+In addition, the representation of translated strings is the standard
+@sc{mo} file format adopted by the @gnu{} @code{gettext} library.
+
+@node SUnit
+@subsection The SUnit testing package
+
+@code{SUnit} is a framework to write and perform test cases in Smalltalk,
+originarily written by the father of Extreme Programming@footnote{Extreme
+   Programming is a software engineering technique that focuses on
+   team work (to the point that a programmer looks in real-time at
+   what another one is typing), frequent testing of the program,
+   and incremental design.},
+Kent Beck.  @code{SUnit} allows one to write the tests and check
+results in Smalltalk; while this approach has the disadvantage that
+testers need to be able to write simple Smalltalk programs, the
+resulting tests are very stable.
+
+What follows is a description of the philosophy of @code{SUnit} and
+a description of its usage, excerpted from Kent Beck's paper in which
+he describes @code{SUnit}.
+
+@subsubsection Where should you start?
+
+Testing is one of those impossible tasks. You'd like to be absolutely
+complete, so you can be sure the software will work.  On the other hand,
+the number of possible states of your program is so large that you can't
+possibly test all combinations.
+
+If you start with a vague idea of what you'll be testing, you'll never
+get started. Far better to @emph{start with a single configuration whose
+behavior is predictable}. As you get more experience with your software,
+you will be able to add to the list of configurations.
+
+Such a configuration is called a @dfn{fixture}.  Two example fixtures
+for testing Floats can be @code{1.0} and @code{2.0}; two fixtures for
+testing Arrays can be @code{#()} and @code{#(1 2 3)}.
+
+By choosing a fixture you are saying what you will and won't test for. A
+complete set of tests for a community of objects will have many
+fixtures, each of which will be tested many ways.
+
+To design a test fixture you have to
+@itemize
+@bulletize{Subclass TestCase}
+@bulletize{Add an instance variable for each known object in the fixture}
+@bulletize{Override setUp to initialize the variables}
+@end itemize
+
+@subsubsection How do you represent a single unit of testing?
+
+You can predict the results of sending a message to a fixture. You need
+to represent such a predictable situation somehow.  The simplest way to
+represent this is interactively. You open an Inspector on your fixture
+and you start sending it messages. There are two drawbacks to this
+method. First, you keep sending messages to the same fixture.  If a test
+happens to mess that object up, all subsequent tests will fail, even
+though the code may be correct.
+
+More importantly, though, you can't easily communicate interactive tests
+to others. If you give someone else your objects, the only way they have
+of testing them is to have you come and inspect them.
+
+By representing each predictable situation as an object, each with its
+own fixture, no two tests will ever interfere. Also, you can easily give
+tests to others to run. @emph{Represent a predictable reaction of a
+fixture as a method.}  Add a method to TestCase subclass, and stimulate
+the fixture in the method.
+
+@subsubsection How do you test for expected results?
+
+If you're testing interactively, you check for expected results
+directly, by printing and inspecting your objects.  Since tests are in
+their own objects, you need a way to programmatically look for
+problems. One way to accomplish this is to use the standard error
+handling mechanism (@code{#error:}) with testing logic to signal errors:
+
+@example
+2 + 3 = 5 ifFalse: [self error: 'Wrong answer']
+@end example
+
+When you're testing, you'd like to distinguish between errors you are
+checking for, like getting six as the sum of two and three, and errors
+you didn't anticipate, like subscripts being out of bounds or messages
+not being understood.
+
+There's not a lot you can do about unanticipated errors (if you did
+something about them, they wouldn't be unanticipated any more, would
+they?) When a catastrophic error occurs, the framework stops running the
+test case, records the error, and runs the next test case. Since each
+test case has its own fixture, the error in the previous case will not
+affect the next.
+
+The testing framework makes checking for expected values simple by
+providing a method, @code{#should:}, that takes a Block as an argument.
+If the Block evaluates to true, everything is fine. Otherwise, the test
+case stops running, the failure is recorded, and the next test case
+runs.
+
+So, you have to @emph{turn checks into a Block evaluating to a Boolean,
+and send the Block as the parameter to @code{#should:}}.
+
+In the example, after stimulating the fixture by adding an object to an
+empty Set, we want to check and make sure it's in there:
+
+@example
+SetTestCasee>>#testAdd
+    empty add: 5.
+    self should: [empty includes: 5]
+@end example
+
+There is a variant on
+@code{TestCase>>#should:}. @code{TestCase>>#shouldnt:} causes the test
+case to fail if the Block argument evaluates to true. It is there so you
+don't have to use @code{(...) not}.
+
+Once you have a test case this far, you can run it. Create an instance
+of your TestCase subclass, giving it the selector of the testing
+method. Send @code{run} to the resulting object:
+
+@example
+(SetTestCase selector: #testAdd) run
+@end example
+
+If it runs to completion, the test worked. If you get a walkback,
+something went wrong.
+
+@subsubsection How do you collect and run many different test cases?
+
+As soon as you have two test cases running, you'll want to run them both
+one after the other without having to execute two do it's. You could
+just string together a bunch of expressions to create and run test
+cases. However, when you then wanted to run ``this bunch of cases and
+that bunch of cases'' you'd be stuck.
+
+The testing framework provides an object to represent @dfn{a bunch of
+tests}, @code{TestSuite}. A @code{TestSuite} runs a collection of test
+cases and reports their results all at once. Taking advantage of
+polymorphism, @code{TestSuites} can also contain other
+@code{TestSuites}, so you can put Joe's tests and Tammy's tests together
+by creating a higher level suite.  @emph{Combine test cases into a test
+suite.}
+
+@example
+(TestSuite named: 'Money')
+    add: (MoneyTestCase selector: #testAdd);
+    add: (MoneyTestCase selector: #testSubtract);
+    run
+@end example
+
+The result of sending @code{#run} to a @code{TestSuite} is a
+@code{TestResult} object. It records all the test cases that caused
+failures or errors, and the time at which the suite was run.
+
+All of these objects are suitable for being stored in the image and
+retrieved.  You can easily store a suite, then bring it in and run it,
+comparing results with previous runs.
+
+@node Network support
+@subsection TCP, WebServer, NetClients
+
+@gst{} includes an almost complete abstraction of the @sc{tcp}, @sc{udp}
+and @sc{ip} protocols.  Although based on the standard @sc{bsd} sockets,
+this library provides facilities such as buffering and preemptive I/O
+which a C programmer usually has to implement manually.
+
+The distribution includes a few tests (mostly loopback tests that
+demonstrate both client and server connection), which are class methods
+in @code{Socket}.  This code should guide you in the process of creating
+and using both server and client sockets; after creation, sockets behave
+practically the same as standard Smalltalk streams, so you should not
+have particular problems.  For more information, refer to @ref{TCP, ,
+TCP, gst-libs, the @gst{} Library Reference}.
+
+In addition, package @code{WebServer} implements a servlet-based web
+serving framework engine, including support for file servers as well as
+Wiki-style servers@footnote{A Wiki is a kind of collaborative web site,
+which allows one to edit the contents of a page.}; each server is a
+subclass of @code{Servlet}, and different servers can live together
+under different paths.  See the class side examples protocol of
+WebServer to get it up and running quick.
+
+The server is based on the @sc{gpl}'ed WikiWorks project. For up to
+date/more info go see
+@url{http://wiki.cs.uiuc.edu/VisualWorks/WikiWorks>}.  Many thanks go to
+the various people who had worked on the version on which the server is
+based:
+
+@display
+Joseph Bacanskas @email{joeb@@mutual.navigant.com}
+Travis Griggs @email{tgriggs@@keyww.com}
+Ralph Johnson @email{johnson@@cs.uiuc.edu}
+Eliot Miranda @email{eliot@@objectshare.com}
+Ken Treis @email{ktreis@@keyww.com}
+John Brant @email{brant@@cs.uiuc.edu}
+Joe Whitesell @email{whitesell@@physsoft.com}
+@end display
+
+Apart from porting to @gst{}, a number of changes were made to the code,
+including refactoring of classes, better aesthetics, authentication
+support, virtual hosting, and @sc{http} 1.1 compliance.
+
+There is also code implementing the most popular Internet protocols:
+@sc{ftp}, @sc{http}, @sc{nntp}, @sc{smtp}, @sc{pop3} and @sc{imap}.
+These classes, loaded by the @code{NetClients} package, are derived
+from multiple public domain and free software packages available for
+other Smalltalk dialects and ported to @gst{}.  Future version of
+@gst{} will include documentation for these as well.
+
+@node XML
+@subsection An XML parser and object model for @gst{}
+
+The @sc{xml} parser library for Smalltalk, loaded as package XML
+includes a validating @sc{xml} parser and Document Object Model.
+This library is rapidly becoming a standard in the Smalltalk world
+and a @sc{xsl} interpreter based on it is bundled with @gst{} as
+well (see packages XPath and @sc{xsl}).
+
+@node Minor packages
+@subsection Minor packages
+
+Various other ``minor'' packages are provided, typically as examples of
+writing modules for @gst{} (@pxref{External modules, , Linking your
+libraries to the virtual machine}).  These are Regex, providing Perl5 
+regular expressions, @sc{gdbm}, which is an interface to the @gnu{}
+database manager, and @sc{md5}, which provides a simple class to 
+quickly compute cryptographically strong hash values.
+
+@node Emacs
+@chapter Smalltalk interface for @gnu{} Emacs
+
+@gst{} comes with its own Emacs mode for hacking Smalltalk
+code.  It also provides tools for interacting with a running Smalltalk
+system in an Emacs subwindow.
+
+@menu
+* Autoloading::       Autoloading @gst{} mode.
+* Editing::           Autoindent and more for @gst{}.
+* Interactor::        Smalltalk interactor mode.
+@end menu
+
+@node Autoloading
+@section Autoloading @gst{} mode
+
+To cause Emacs to automatically go into Smalltalk mode when you edit a
+Smalltalk file (one with the extension @file{.st}), you need to add
+the following lines to your @file{.emacs} file:
+
+@example
+(setq auto-mode-alist
+      (append  '(("\\.st\\'" . smalltalk-mode))
+               auto-mode-alist))
+
+(autoload 'smalltalk-mode "@var{path}smalltalk-mode.elc" "" t)
+@end example
+
+@noindent
+where @var{path} is the path to where the two Emacs Lisp files
+included with @gst{} are installed (by default, something like
+@file{/usr/local/share/emacs/site-lisp}).
+
+@node Editing
+@section Smalltalk editing mode
+
+The @gst{} editing mode is there to assist you in editing your
+Smalltalk code.  It tries to be smart about indentation and provides
+a few cooked templates to save you keystrokes.
+
+Since Smalltalk syntax is highly context sensitive,
+the Smalltalk editing mode will occasionally get confused when you are
+editing expressions instead of method definitions.  In particular,
+using local variables, thus:
+
+@example
+| foo |
+    foo := 3.
+    ^foo squared !
+@end example
+@noindent
+will confuse the Smalltalk editing mode, as this might also be a
+definition the binary operator @code{|}, with second argument called
+@var{foo}.  If you find yourself confused when editing this type of
+expression, put a dummy method name before the start of the expression,
+and take it out when you're done editing, thus:
+
+@example
+x
+| foo |
+    foo := 3.
+    ^foo squared !
+@end example
+
+
+@node Interactor
+@section Smalltalk interactor mode
+
+An interesting feature of Emacs Smalltalk is the Smalltalk interactor,
+which basically allows you run in @gnu{} Emacs with Smalltalk files in one
+window, and Smalltalk in the other.  You can, with a single command, edit
+and change method definitions in the live Smalltalk system, evaluate
+expressions, make image snapshots of the system so you can pick up where
+you left off, file in an entire Smalltalk file, etc.  It makes a tremendous
+difference in the productivity and enjoyment that you'll have when using
+@gst{}.
+
+To start up the Smalltalk interactor, you must be running @gnu{} Emacs
+and in a buffer that's in Smalltalk mode.  Then, if you type @kbd{C-c m}. 
+A second window will appear with @gst{} running in it. 
+
+This window is in most respects like a Shell mode window.  You can type 
+Smalltalk expressions to it directly and re-execute previous things
+in the window by moving the cursor back to the line that contains
+the expression that you wish to re-execute and typing return.
+
+Notice the status in the mode line (e.g. @samp{starting-up}, 
+@samp{idle}, etc).  This status will change when you issue various 
+commands from Smalltalk mode.
+
+When you first fire up the Smalltalk interactor, it puts you in the 
+window in which Smalltalk is running.  You'll want to switch
+back to the window with your file in it to explore the rest of the
+interactor mode, so do it now.
+
+To execute a range of code, mark the region around and type
+@kbd{C-c e}.  The expression in the region is sent to Smalltalk
+and evaluated.  The status will change to indicate that the
+expression is executing.  This will work for any region that you
+create.  If the region does not end with an exclamation point (which is
+syntactically required by Smalltalk), one will be added for you.
+
+There is also a shortcut, @kbd{C-c d} (also invokeable as
+@kbd{M-x smalltalk-doit}), which uses a simple heuristic to
+figure out the start and end of the expression: it searches forward
+for a line that begins with an exclamation point, and backward for
+a line that does not begin with space, tab, or the comment
+character, and sends all the text in between to Smalltalk.
+If you provide a prefix argument (by typing @kbd{C-u C-c d} for
+instance), it will bypass the heuristic and use the region instead
+(just like @kbd{C-c e} does).
+
+@kbd{C-c c} will compile a method; it uses a similar heuristic to
+determine the bounds of the method definition.  Typically, you'll
+change a method definition, type @kbd{C-c c} and move on to
+whatever's next.  If you want to compile a whole bunch of method
+definitions, you'll have to mark the entire set of method
+definitions (from the @code{methodsFor:} line to the
+@code{! !}) as the region and use @kbd{C-c e}.
+
+After you've compiled and executed some expressions, you may want to 
+take a snapshot of your work so that you don't have to re-do things
+next time you fire up Smalltalk.  To do this, you use the @kbd{C-c s}
+command, which invokes @code{ObjectMemory snapshot}.
+If you invoke this command with a prefix argument, you can specify
+a different name for the image file, and you can have that image file
+loaded instead of the default one by using the @code{-I} flag on the 
+command line when invoking Smalltalk.
+
+You can also evaluate an expression and have the result of the
+evaluation printed by using the @kbd{C-c p} command.  Mark the region
+and use the command.
+
+To file in an entire file (perhaps the one that you currently have in 
+the buffer that you are working on), type @kbd{C-c f}.  You can type
+the name of a file to load at the prompt, or just type return and
+the file associated with the current buffer will be loaded into Smalltalk.
+
+When you're ready to quit using @gst{}, you can quit cleanly by using
+the @kbd{C-c q} command.  If you want to fire up Smalltalk again, or
+if (heaven forbid) Smalltalk dies on you, you can use the @kbd{C-c m}
+command, and Smalltalk will be reincarnated.  Even if it's running,
+but the Smalltalk window is not visible, @kbd{C-c m} will cause it
+to be displayed right away.
+
+You might notice that as you use this mode, the Smalltalk window will scroll
+to keep the bottom of the buffer in focus, even when the Smalltalk
+window is not the current window.  This was a design choice that I
+made to see how it would work.  On the whole, I guess I'm pretty happy
+with it, but I am interested in hearing your opinions on the subject.
+
+
+@node C and Smalltalk
+@chapter Interoperability between C and @gst{}
+
+@menu
+* External modules::        Linking your libraries to the virtual machine
+* C callout::               Calls from Smalltalk to C
+* C data types::            Manipulating C data from Smalltalk
+* Smalltalk types::         Manipulating Smalltalk data from C
+* Smalltalk callin::        Calls from C to Smalltalk
+* Object representation::   Manipulating your own Smalltalk objects
+* Incubator::               Protecting newly created objects from garbage
+                            collections
+* Other C functions::       Handling and creating OOPs
+* Using Smalltalk::         The Smalltalk environment as an extension library
+
+@end menu
+
+
+
+@node External modules
+@section Linking your libraries to the virtual machine
+
+A nice thing you can do with @gst{} is enhancing it with your own
+goodies.  If they're written in Smalltalk only, no problem: getting them
+to work as packages (@pxref{Packages}), and to fit in with the @gst{}
+packaging system, is likely to be a five-minutes task.
+
+If your goodie is mostly written in C and you don't need particular glue
+to link it to Smalltalk (for example, there are no callbacks from C code
+to Smalltalk code), you can use the @code{dynamic library linking}
+system.  When using this system, you have to link @gst{} with the
+library at run-time using @sc{dld}; the method to be used here is
+@code{DLD class>>#addLibrary:}.
+
+But if you want to provide a more intimate link between C and Smalltalk,
+as is the case with Blox, you should use the @code{dynamic module
+linking} system.  This section explains what to do, taking the Blox
+library as a guide.
+
+Modules are searched for in the @file{gnu-smalltalk} subdirectory of the
+system library path, or in the directory that the
+@env{SMALLTALK_MODULES} environment variable points to.  A module is
+distinguished from a standard shared library because it has a function
+which Smalltalk calls to initialize the module; the name of this
+function must be @code{gst_initModule}.  Here is the initialization
+function used by Blox:
+
+@example
+void
+gst_initModule(proxy)
+     VMProxy *proxy;
+@{
+  vmProxy = proxy;
+  vmProxy->defineCFunc("Tcl_Eval", Tcl_Eval);
+  vmProxy->defineCFunc("Tcl_GetStringResult", Tcl_GetStringResult);
+  vmProxy->defineCFunc("tclInit", tclInit);
+  vmProxy->defineCFunc("bloxIdle", bloxIdle);
+@}
+@end example
+
+Note that the @code{defineCFunc} function is called through a function
+pointer in @code{gst_initModule}, and that Blox saves the value of its
+parameter to be used elsewhere in its code.  This is not strictly
+necessary on many platforms, namely those where the module is
+effectively @emph{linked with the Smalltalk virtual machine} at
+run-time; but since some@footnote{The most notable are @sc{aix} and
+Windows.} cannot obtain this, for maximum portability you must always
+call the virtual machine through the proxy and never refer to any symbol
+which the virtual machine exports.  For uniformity, even programs that
+link with @file{libgst.a} should not call these functions directly, but
+through a @code{VMProxy} exported by @file{libgst.a} and accessible
+through the @code{gst_interpreter_proxy} variable.
+
+First of all, you have to build your package as a shared library; using
+@gnu{} Automake and @code{libtool}, this is as easy as changing your
+@file{Makefile.am} file so that it reads like this
+
+@example
+pkglib_LTLIBRARIES = libblox.la
+libblox_la_LDFLAGS = -module -no-undefined @dfn{... more flags ...}
+libblox_la_SOURCES = @dfn{... your source files ...}
+@end example
+
+@noindent
+instead of reading like this
+
+@example
+pkglib_LIBRARIES = libblox.a
+libblox_a_LDFLAGS = @dfn{... more flags ...}
+libblox_a_SOURCES = @dfn{... your source files ...}
+@end example
+
+As you see, you only have to change @file{.a} extensions to @file{.la},
+@code{LIBRARIES} targets to @code{LTLIBRARIES}, and add appropriate
+options to @code{LDFLAGS}@footnote{Specifying @option{-no-undefined} is
+not necessary, but it does perform that the portability conditions
+explained above (no reference to symbols in the virtual machine) are
+satisfied}.  You will also have to run @code{libtoolize} and follow its
+instruction, but this is really simpler than it looks.
+
+Note that this example uses @file{pkglib} because @sc{tcp} is installed
+together with Smalltalk, but in general this is not necessary.  You can
+install the library wherever you want; @code{libtool} will even generate
+appropriate warnings to the installer if @code{ldconfig} (or an
+equivalent program) has to be re-run.
+
+Finally, you will have to specify the name of the module in the
+@file{packages} file.  In this case, the relevant entry in that file
+will be
+
+@example
+Blox
+    Kernel
+    Blox.st libblox
+    ../blox
+@end example
+
+Everything not ending with @file{.st} will be picked by the package
+loader as a module, and will be passed to @code{DLD class>>#addModule:}
+before attempting to file-in the Smalltalk source files.
+
+@node C callout
+@section Using the C callout mechanism
+
+To use the C callout mechanism, you first need to inform Smalltalk about
+the C functions that you wish to call.  You currently need to do this in
+two places: 1) you need to establish the mapping between your C
+function's address and the name that you wish to refer to it by, and 2)
+define that function along with how the argument objects should be
+mapped to C data types to the Smalltalk interpreter.  As an example, let
+us use the pre-defined (to @gst{}) functions of @code{system} and
+@code{getenv}.
+
+First, the mapping between these functions and string names for the
+functions needs to be established in your module.  If you are writing an
+external Smalltalk module (which can look at Smalltalk objects and
+manipulate them), see @ref{External modules, , Linking your libraries
+to the virtual machine}; if you are using function from a dynamically
+loaded library, see @ref{Dynamic loading}.
+
+Second, we need to define a method that will invoke these C functions
+and describe its arguments to the Smalltalk runtime system.  Such a
+method is automatically generated by calling a method which is available
+to every class,
+@code{defineCFunc:@-withSelectorArgs:@-returning:@-args:}.
+
+Here are the definitions for the two functions @code{system} and
+@code{getenv} (taken from @file{kernel/CFuncs.st})
+@example
+SystemDictionary defineCFunc: 'system'
+    withSelectorArgs: 'system: aString'
+    returning: #int
+    args: #(string)!
+
+SystemDictionary defineCFunc: 'getenv'
+    withSelectorArgs: 'getenv: aString'
+    returning: #string
+    args: #(string)!
+@end example
+
+The various keyword arguments are described below.
+
+The arguments are as follows:
+
+@table @b
+@item @code{SystemDictionary}
+This specifies where the new method should be stored.  In our case, the
+method will be installed in the SystemDictionary, so that we would
+invoke it thus:
+@example
+   Smalltalk system: 'lpr README' !
+@end example
+
+Again, there is no special significance to which class receives the
+method; it could have just as well been Float, but it might look kind of
+strange to see:
+@example
+   1701.0 system: 'mail sbb@@gnu.org' !
+@end example
+
+@item @code{defineCFunc: 'system'}
+This says that we are defining the C function @code{system}.  This name
+must be @strong{exactly} the same as the string passed to
+@code{defineCFunc}.
+
+@item @code{withSelectorArgs: 'system: aString'}
+This defines how this method will be invoked from Smalltalk.  The name
+of the method does not have to match the name of the C function; we
+could have just as easily defined the selector to be @code{'rambo:
+fooFoo'}; it's just good practice to define the method with a similar
+name and the argument names to reflect the data types that should be
+passed.
+
+@item @code{returning: #int}
+This defines the C data type that will be returned.  It is converted to
+the corresponding Smalltalk data type.  The set of valid return types
+is:
+@table @code
+@item char
+        Single C character value
+
+@item string      
+A C char *, converted to a Smalltalk string
+
+@item stringOut   
+A C char *, converted to a Smalltalk string and then freed.
+
+@item symbol      
+A C char *, converted to a Smalltalk symbol
+
+@item int         
+A C int value
+
+@item uInt
+A C unsigned int value
+
+@item long        
+A C long value
+
+@item uLong
+A C unsigned long value
+
+@item double      
+A C double, converted to an instance of FloatD
+
+@item void        
+No returned value
+
+@item cObject     
+An anonymous C pointer; useful to pass back to some C function later
+
+@item smalltalk   
+An anonymous (to C) Smalltalk object pointer; should have been passed to
+C at some point in the past or created by the program by calling other
+public @gst{} functions (@pxref{Smalltalk types}).
+
+@item @var{ctype}
+You can pass an instance of CType or one of its subclasses (@pxref{C
+data types}).  In this case the object will be sent @code{#narrow}
+before being returned: an example of this feature is given in the
+experimental Gtk+ bindings.
+@end table
+
+@item @code{args: #(string)}
+This is an array of symbols that describes the types of the arguments in
+order.  For example, to specify a call to open(2), the arguments might
+look something like:
+@example
+   args: #(string int int)
+@end example
+
+    The following argument types are supported; see above for details.
+
+@table @code
+@item unknown     
+Smalltalk will make the best conversion that it can guess for this
+object; see the mapping table below
+
+@item boolean     
+passed as @code{char}, which is promoted to @code{int}
+
+@item char        
+passed as @code{char}, which is promoted to @code{int}
+
+@item string      
+passed as @code{char *}
+
+@item stringOut   
+passed as @code{char *}, the contents are expected to be overwritten
+with a new C string, and the object that was passed becomes the new
+string on return
+
+@item symbol      
+passed as @code{char *}
+
+@item byteArray   
+passed as @code{char *}, even though may contain NUL's
+
+@item int         
+passed as @code{int}
+
+@item uInt
+passed as @code{unsigned int}
+
+@item long        
+passed as @code{long}
+
+@item uLong
+passed as @code{unsigned long}
+
+@item double      
+passed as @code{double}
+
+@item cObject     
+C object value passed as @code{long} or @code{void *}
+
+@item smalltalk   
+Pass the object pointer to C.  The C routine should treat the value as a
+pointer to anonymous storage.  This pointer can be returned to Smalltalk
+at some later point in time.
+
+@item variadic  
+@itemx variadicSmalltalk
+an Array is expected, each of the elements of the array will be
+converted like an @code{unknown} parameter if @code{variadic} is used,
+or passed as a raw object pointer for @code{variadicSmalltalk}.
+
+@item self
+@itemx selfSmalltalk
+Pass the receiver, converting it to C like an @code{unknown} parameter
+if @code{self} is used or passing the raw object pointer for
+@code{selfSmalltalk}.  Parameters passed this way don't map to the
+message's arguments, instead they map to the message's receiver.
+@end table
+@end table
+
+
+Table of parameter conversions:
+
+@multitable {Declared param type} {Boolean (True, False)} {@code{int} (C promotion rule)}
+@item Declared param type @tab Object type          @tab C parameter type used
+@item boolean             @tab Boolean (True, False)@tab int
+@item byteArray           @tab ByteArray            @tab char *
+@item cObject             @tab CObject              @tab void *
+@item char                @tab Boolean (True, False)@tab int
+@item char                @tab Character            @tab int (C promotion rule)
+@item char                @tab Integer              @tab int
+@item double              @tab Float                @tab double (C promotion)
+@item int                 @tab Boolean (True, False)@tab int
+@item int                 @tab Integer              @tab int
+@item uInt                @tab Boolean (True, False)@tab unsigned int
+@item uInt                @tab Integer              @tab unsigned int
+@item long                @tab Boolean (True, False)@tab long
+@item long                @tab Integer              @tab long
+@item uLong               @tab Boolean (True, False)@tab unsigned long
+@item uLong               @tab Integer              @tab unsigned long
+@item smalltalk, selfSmalltalk @tab anything             @tab OOP
+@item string              @tab String               @tab char *
+@item string              @tab Symbol               @tab char *
+@item stringOut           @tab String               @tab char *
+@item symbol              @tab Symbol               @tab char *
+@item unknown, self       @tab Boolean (True, False)@tab int
+@item unknown, self       @tab ByteArray            @tab char *
+@item unknown, self       @tab CObject              @tab void *
+@item unknown, self       @tab Character            @tab int
+@item unknown, self       @tab Float                @tab double
+@item unknown, self       @tab Integer              @tab long
+@item unknown, self       @tab String               @tab char *
+@item unknown, self       @tab Symbol               @tab char *
+@item unknown, self       @tab anything else        @tab OOP
+@item variadic            @tab Array                @tab each element is passed according to "unknown"
+@item variadicSmalltalk   @tab Array                @tab each element is passed as an OOP
+@end multitable
+
+When your call-out returns @code{#void}, depending on your
+application you might consider using @dfn{asynchronous
+call-outs}.  These are call-outs that do not suspend the process
+that initiated them, so the process might be scheduled again,
+executing the code that follows the call-out, during the execution
+of the call-out itself.  This is particularly handy when writing
+event loops (the most common place where you call back into Smalltalk)
+because then @emph{you can handle events that arrive during the
+handling of an outer event} before the outer event's processing
+has ended.  Depending on your application this might be correct or
+not, of course.  In the future, asynchronous call-outs might be
+started into a separate thread.
+
+An asynchronous call-out is defined using an alternate method,
+@code{defineAsyncCFunc:withSelectorArgs:args:}.  Note that
+the returned value parameter is missing because an asynchronous
+call-out always returns @code{nil}.
+
+@node C data types
+@section The C data type manipulation system
+
+@c rewrite this.....
+
+@code{CType} is a class used to represent C data types themselves (no
+storage, just the type). There are subclasses called things like
+@code{C@var{mumble}CType}.  The instances can answer their size and
+alignment.  Their @code{valueType} is the underlying type of data.  It's
+either an integer, which is interpreted by the interpreter as the scalar
+type, or the underlying element type, which is another @code{CType}
+subclass instance.
+
+To make life easier, there are global variables which hold onto
+instances of @code{CScalarCType}: they are called
+@code{C@var{mumble}Type} (like @code{CIntType}, not like
+@code{CIntCType}), and can be used wherever a C datatype is used.  If
+you had an array of strings, the elements would be CStringType's (a
+specific instance of CScalarCType).
+
+@code{CObject} is the base class of the instances of C data.  It has a
+subclass called @code{CScalar}, which has subclasses called
+@code{C@var{mumble}}.  These subclasses can answer size and alignment
+information.
+
+Instances of @code{CObject} holds a pointer to a C type variable.  The
+variable can be allocated from Smalltalk by doing @code{@var{type}
+new}, where @code{@var{type}} is a @code{CType} subclass instance, or it
+may have been returned through the C callout mechanism as a return
+value.  Remember that @code{CObject} and its subclasses represent a
+pointer to a C object and as such provide the full range of operations
+supported by C pointers.
+
+For example, @code{+} @code{anInteger} which returns a CObject which is
+higher in memory by @code{anInteger} times the size of each item. There
+is also @code{-} which acts like @code{+} if it is given an
+integer as its parameter.  If a CObject is given, it returns the
+difference between the two pointers.  @code{incr}, @code{decr},
+@code{incrBy:}, @code{decrBy:} adjust the string either forward or
+backward, by either 1 or @code{n} characters.  Only the pointer to the
+string is changed; the actual characters in the string remain untouched.
+
+CObjects can be divided into two families, scalars and non-scalars,
+just like C data types.  Scalars fetch a Smalltalk object when sent
+the @code{value} message, and change their value when sent the
+@code{value:} message.  Non-scalars do not support these two messages.
+
+@code{replaceWith:} @code{aString} replaces the string the instance
+points to with the new string.  Actually, it copies the bytes from the
+Smalltalk String instance aString into the C string object, and null
+terminates.  Be sure that the C string has enough room!  You can also
+use a Smalltalk ByteArray as the data source.
+
+Non-scalars include instances of @code{CArray}, @code{CPtr} and
+subclasses of @code{CStruct} and @code{CUnion}.
+
+CPtrs and CArrays get their underlying element type through a
+@code{CType} subclass instance which is associated with the
+@code{CArray} or @code{CPtr} instance.
+
+CPtr's also have @code{value} and @code{value:} which get or change the
+underlying value that's pointed to.  In practice, @code{value} dereferences
+the pointer.  CString is a subclass that answers a Smalltalk String when
+sent @code{value}, and automatically allocates storage to copy and
+null-terminate a Smalltalk @code{String} when sent @code{value:}.
+
+Note that a @code{CPtr} to @code{long} points to a place in memory where
+a pointer to long is stored.  In other words it is really a @code{long **}
+and must be dereferenced twice with @code{cPtr value value} to get the
+@code{long}.
+
+Finally, there are @code{CStruct} and @code{CUnion}, which are abstract
+subclasses of @code{CObject}@footnote{Actually they have a common superclass
+named @code{CCompound}.}.  In the following I will refer to CStruct, but the
+same considerations apply to CUnion as well, with the only difference that
+CUnions of course implement the semantics of a C union.
+
+These classes provide direct access to C data structures including
+@itemize @bullet
+@bulletize @code{long} (unsigned too)
+@bulletize @code{short} (unsigned too)
+@bulletize @code{char} (unsigned too) & byte type
+@bulletize @code{double} (and @code{float})
+@bulletize @code{string} (NUL terminated char *, with special accessors)
+@bulletize arrays of any type
+@bulletize pointers to any type
+@bulletize other structs containing any fixed size types
+@end itemize
+
+Here is an example struct decl in C:
+@example
+struct audio_prinfo @{
+    unsigned    channels;
+    unsigned    precision;
+    unsigned    encoding;
+    unsigned    gain;
+    unsigned    port;
+    unsigned    _xxx[4];
+    unsigned    samples;
+    unsigned    eof;
+    unsigned char       pause;
+    unsigned char       error;
+    unsigned char       waiting;
+    unsigned char       _ccc[3];
+    unsigned char       open;
+    unsigned char       active;
+@};
+
+struct audio_info @{
+    audio_prinfo_t      play;
+    audio_prinfo_t      record;
+    unsigned    monitor_gain;
+    unsigned    _yyy[4];
+@};
+@end example
+
+And here is a Smalltalk equivalent decision:
+@example
+CStruct subclass: #AudioPrinfo
+        declaration: #( (sampleRate uLong)
+                        (channels uLong)
+                        (precision uLong)
+                        (encoding uLong)
+                        (gain uLong)
+                        (port uLong)
+                        (xxx (array uLong 4))
+                        (samples uLong)
+                        (eof uLong)
+                        (pause uChar)
+                        (error uChar)
+                        (waiting uChar)
+                        (ccc (array uChar 3))
+                        (open uChar)
+                        (active uChar))
+        classVariableNames: ''
+        poolDictionaries: ''
+        category: 'C interface-Audio'
+!
+
+CStruct subclass: #AudioInfo
+        declaration: #( (play #@{AudioPrinfo@} )
+                        (record #@{AudioPrinfo@} )
+                        (monitorGain uLong)
+                        (yyy (array uLong 4)))
+        classVariableNames: ''
+        poolDictionaries: ''
+        category: 'C interface-Audio'
+!
+@end example
+
+This creates two new subclasses of @code{CStruct} called
+@code{AudioPrinfo} and @code{AudioInfo}, with the given fields.  The
+syntax is the same as for creating standard subclasses, with the
+@code{instanceVariableNames} replaced by @code{declaration}@footnote{The
+old @code{#newStruct:declaration:} method for creating CStructs is
+deprecated because it does not allow one to set the category.}.  You can
+make C functions return @code{CObject}s that are instances of these
+classes by passing @code{AudioPrinfo type} as the parameter to the
+@code{returning:} keyword.
+
+AudioPrinfo has methods defined on it like:
+@example
+    #sampleRate
+    #channels
+    #precision
+    #encoding
+@end example
+
+@noindent
+etc.  These access the various data members.  The array element
+accessors (xxx, ccc) just return a pointer to the array itself.
+
+For simple scalar types, just list the type name after the variable.
+Here's the set of scalars names, as defined in @file{kernel/CStruct.st}:
+@example
+   #long                   CLong
+   #uLong                  CULong
+   #ulong                  CULong
+   #byte                   CByte
+   #char                   CChar
+   #uChar                  CUChar
+   #uchar                  CUChar
+   #short                  CShort
+   #uShort                 CUShort
+   #ushort                 CUShort
+   #int                    CInt
+   #uInt                   CUInt
+   #uint                   CUInt
+   #float                  CFloat
+   #double                 CDouble
+   #string                 CString
+   #smalltalk              CSmalltalk
+   #@{...@}                  @r{A given subclass of @code{CObject}}
+@end example
+
+The @code{#@{@dots{}@}} syntax is not in the Blue Book, but it is
+present in @gst{} and other Smalltalks; it returns an Association object
+corresponding to a global variable.
+
+To have a pointer to a type, use something like:
+@example
+        (example (ptr long))
+@end example
+
+To have an array pointer of size @code{@var{size}}, use:
+@example
+        (example (array string @var{size}))
+@end example
+
+Note that this maps to @code{char *example[@var{size}]} in C.
+
+The objects returned by using the fields are CObjects; there is no
+implicit value fetching currently.  For example, suppose you somehow got
+ahold of an instance of class AudioPrinfo as described above (the
+instance is a CObject subclass and points to a real C structure
+somewhere).  Let's say you stored this object in variable
+@code{audioInfo}.  To get the current gain value, do
+@example
+    audioInfo gain value
+@end example
+
+to change the gain value in the structure, do
+@example
+    audioInfo gain value: 255
+@end example
+
+The structure member message just answers a @code{CObject} instance, so
+you can hang onto it to directly refer to that structure member, or you
+can use the @code{value} or @code{value:} methods to access or change
+the value of the member.
+
+Note that this is the same kind of access you get if you use the
+@code{addressAt:} method on CStrings or CArrays or CPtrs: they return a
+CObject which points to a C object of the right type and you need to use
+@code{value} and @code{value:} to access and modify the actual C
+variable.
+
+
+
+@node Smalltalk types
+@section Manipulating Smalltalk data from C
+
+@gst{} internally maps every object except Integers to a data structure
+named an @dfn{OOP} (which is not an acronym for anything, as far as I
+know).  An OOP is a pointer to an internal data structure; this data
+structure basically adds a level of indirection in the representation of
+objects, since it contains
+@itemize @bullet
+@item
+a pointer to the actual object data
+
+@item
+a bunch of flags, most of which interest the garbage collection process
+@end itemize
+
+This additional level of indirection makes garbage collection very
+efficient, since the collector is free to move an object in memory
+without updating every reference to that object in the heap, thereby
+keeping the heap fully compact and allowing very fast allocation of new
+objects.  However, it makes C code that wants to deal with objects even
+more messy than it would be without; if you want some examples, look at
+the hairy code in @gst{} that deals with processes.
+
+To shield you as much as possible from the complications of doing
+object-oriented programming in a non-object-oriented environment like C,
+@gst{} provides friendly functions to map between common Smalltalk
+objects and C types.  This way you can simply declare OOP variables and
+then use these functions to treat their contents like C data.
+
+These functions are passed to a module via the @code{VMProxy} struct a
+pointer to which is passed to the module, as shown in @ref{External
+modules, , Linking your libraries to the virtual machine}.  They can be
+divided in two groups, those that map @emph{from Smalltalk objects to C
+data types} and those that map @emph{from C data types to Smalltalk
+objects}.
+
+Here are those in the former group (Smalltalk to C); you can see that
+they all begin with @code{OOPTo}:
+
+@deftypefun long OOPToInt (OOP)
+This function assumes that the passed OOP is an Integer and returns the
+C @code{signed long} for that integer.
+@end deftypefun
+
+@deftypefun long OOPToId (OOP)
+This function returns an unique identifier for the given OOP, valid
+until the OOP is garbage-collected.
+@end deftypefun
+
+@deftypefun double OOPToFloat (OOP)
+This function assumes that the passed OOP is an Float and returns the C
+@code{double} for that integer.
+@end deftypefun
+
+@deftypefun int OOPToBool (OOP)
+This function returns a C integer which is true (i.e. @code{!= 0}) if
+the given OOP is the @code{true} object, false (i.e. @code{== 0})
+otherwise.
+@end deftypefun
+
+@deftypefun char OOPToChar (OOP)
+This function assumes that the passed OOP is a Character and returns the
+C @code{char} for that integer.
+@end deftypefun
+
+@deftypefun char *OOPToString (OOP)
+This function assumes that the passed OOP is a String or ByteArray and
+returns a C null-terminated @code{char *} with the same contents.  It is
+the caller's responsibility to free the pointer and to handle possible
+@samp{NUL} characters inside the Smalltalk object.
+@end deftypefun
+
+@deftypefun char *OOPToByteArray (OOP)
+This function assumes that the passed OOP is a String or ByteArray and
+returns a C @code{char *} with the same contents, without
+null-terminating it.  It is the caller's responsibility to free the
+pointer.
+@end deftypefun
+
+@deftypefun PTR OOPToCObject (OOP)
+This functions assumes that the passed OOP is a kind of CObject and
+returns a C @code{PTR} to the C data pointed to by the object. The
+caller should not free the pointer, nor assume anything about its size
+and contents, unless it @b{exactly} knows what it's doing.  A @code{PTR}
+is a @code{void *} if supported, or otherwise a @code{char *}.
+@end deftypefun
+
+@deftypefun long OOPToC (OOP)
+This functions assumes that the passed OOP is a String, a ByteArray, a
+CObject, or a built-in object (nil, true, false, character, integer).
+If the OOP is nil, it answers 0; else the mapping for each object is
+exactly the same as for the above functions.  Note that, even though the
+function is declared as returning a @code{long}, you might need to cast
+it to either a @code{char *} or @code{PTR}.
+@end deftypefun
+
+While special care is needed to use the functions above (you will
+probably want to know at least the type of the Smalltalk object you're
+converting), the functions below, which convert C data to Smalltalk
+objects, are easier to use and also put objects in the incubator so that
+they are not swept by a garbage collection (@pxref{Incubator}). These
+functions all @dfn{end} with @code{ToOOP}, except
+@code{cObjectToTypedOOP}:
+
+@deftypefun OOP intToOOP (long)
+This object returns a Smalltalk Integer which contains the same value as
+the passed C @code{long}.  Note that Smalltalk Integers are always
+signed and have a bit less of precision with respect to C longs.  On 32
+bit machines, their precision is 30 bits (if unsigned) or 31 bits (if
+signed); on 64 bit machines, their precision is 62 bits (if unsigned) or
+63 bits (if signed).
+@end deftypefun
+
+@deftypefun OOP idToOOP (OOP)
+This function returns an OOP from a unique identifier returned by
+@code{OOPToId}.  The OOP will be the same that was passed to
+@code{OOPToId} only if the original OOP has not been garbage-collected
+since the call to @code{OOPToId}.
+@end deftypefun
+
+@deftypefun OOP floatToOOP (double)
+This object returns a Smalltalk FloatD which contains the same value as
+the passed @code{double}.  Unlike Integers, FloatDs have exactly the same
+precision as C doubles.
+@end deftypefun
+
+@deftypefun OOP boolToOOP (int)
+This object returns a Smalltalk Boolean which contains the same boolean
+value as the passed C @code{int}.  That is, the returned OOP is the sole
+instance of either @code{False} or @code{True}, depending on where the
+parameter is zero or not.
+@end deftypefun
+
+@deftypefun OOP charToOOP (char)
+This object returns a Smalltalk Character which represents the same char
+as the passed C @code{char}.
+@end deftypefun
+
+@deftypefun OOP classNameToOOP (char *)
+This method returns the Smalltalk class (i.e. an instance of a subclass
+of Class) whose name is the given parameter.  This method is slow; you
+can safely cache its result.
+@end deftypefun
+
+@deftypefun OOP stringToOOP (char *)
+This method returns a String which maps to the given null-terminated C
+string, or the builtin object @code{nil} if the parameter points to
+address 0 (zero).
+@end deftypefun
+
+@deftypefun OOP byteArrayToOOP (char *, int)
+This method returns a ByteArray which maps to the bytes that the first
+parameters points to; the second parameter gives the size of the
+ByteArray.  The builtin object @code{nil} is returned if the first
+parameter points to address 0 (zero).
+@end deftypefun
+
+@deftypefun OOP symbolToOOP (char *)
+This method returns a String which maps to the given null-terminated C
+string, or the builtin object @code{nil} if the parameter points to
+address 0 (zero).
+@end deftypefun
+
+@deftypefun OOP cObjectToOOP (PTR)
+This method returns a CObject which maps to the given C pointer, or the
+builtin object @code{nil} if the parameter points to address 0 (zero).
+The returned value has no precise CType assigned. To assign one, use
+@code{cObjectToTypedOOP}.
+@end deftypefun
+
+@deftypefun OOP cObjectToTypedOOP (PTR, OOP)
+This method returns a CObject which maps to the given C pointer, or the
+builtin object @code{nil} if the parameter points to address 0 (zero).
+The returned value has the second parameter as its type; to get possible
+types you can use @code{typeNameToOOP}.
+@end deftypefun
+
+@deftypefun OOP typeNameToOOP (char *)
+All this method actually does is evaluating its parameter as Smalltalk
+code; so you can, for example, use it in any of these ways:
+@example
+cIntType = typeNameToOOP("CIntType");
+myOwnCStructType = typeNameToOOP("MyOwnCStruct type");
+@end example
+
+This method is primarily used by msgSendf (@pxref{Smalltalk callin}),
+but it can be useful if you use lower level call-in methods. This method
+is slow too; you can safely cache its result.
+@end deftypefun
+
+As said above, the C to Smalltalk layer automatically puts the objects
+it creates in the incubator which prevents objects from being collected
+as garbage.  A plugin, however, has limited control on the incubator,
+and the incubator itself is not at all useful when objects should be
+kept registered for a relatively long time, and whose lives in the
+registry typically overlap.
+
+To avoid garbage collection of such object, you can use these functions,
+which access a separate registry:
+
+@deftypefun void registerOOP (OOP)
+Puts the given OOP in the registry.  If you register an object multiple
+times, you will need to unregister it the same number of times.  You may
+want to register objects returned by Smalltalk call-ins.
+@end deftypefun
+
+@deftypefun void unregisterOOP (OOP)
+Removes an occurrence of the given OOP from the registry.
+@end deftypefun
+
+@deftypefun void registerOOPArray (OOP **, OOP **)
+Tells the garbage collector that an array of objects must be made part
+of the root set.  The two parameters point indirectly to the base and
+the top of the array; that is, they are pointers to variables holding
+the base and the top of the array: having indirect pointers allows you
+to dynamically change the size of the array and even to relocate it in
+memory without having to unregister and re-register it every time you
+modify it.  If you register an array multiple times, you will need to
+unregister it the same number of times.
+@end deftypefun
+
+@deftypefun void unregisterOOPArray (OOP **)
+Removes the array with the given base from the registry. 
+@end deftypefun
+
+
+
+@node Smalltalk callin
+@section Calls from C to Smalltalk
+
+
+@gst{} provides seven different function calls that allow you to call
+Smalltalk methods in a different execution context than the current
+one. The priority in which the method will execute will be the same as
+the one of Smalltalk process which is currently active.
+
+Four of these functions are more low level and are more suited when the
+Smalltalk program itself gave a receiver, a selector and maybe some
+parameters; the others, instead, are more versatile.  One of them
+(@code{msgSendf}) automatically handles most conversions between C data
+types and Smalltalk objects, while the others takes care of compiling full
+snippets of Smalltalk code.
+
+All these functions handle properly the case of specifying, say, 5 arguments
+for a 3-argument selector---see the description of the single functions
+for more information).
+
+
+@deftypefun OOP msgSend (OOP receiver, OOP selector, @dots{})
+This function sends the given selector (should be a Symbol, otherwise
+nilOOP is returned) to the given receiver.  The message arguments should
+also be OOPs (otherwise, an access violation exception is pretty likely)
+and are passed in a NULL-terminated list after the selector.  The value
+returned from the method is passed back as an OOP to the C program as
+the result of @code{msgSend}, or nilOOP if the number of arguments is
+wrong.  Example (same as @code{1 + 2}):
+
+@example
+    OOP shouldBeThreeOOP = vmProxy->msgSend(
+        intToOOP(1),
+        symbolToOOP("+"),
+        intToOOP(2),
+        nil);
+@end example
+@end deftypefun
+
+@deftypefun OOP strMsgSend (OOP receiver, char *selector, @dots{})
+This function is the same as above, but the selector is passed as a C
+string and is automatically converted to a Smalltalk symbol.
+
+Theoretically, this function is a bit slower than @code{msgSend} if your
+program has some way to cache the selector and avoiding a call to
+@code{symbolToOOP} on every call-in.  However, this is not so apparent
+in ``real'' code because the time spent in the Smalltalk interpreter
+will usually be much higher than the time spent converting the selector
+to a Symbol object.  Example:
+
+@example
+    OOP shouldBeThreeOOP = vmProxy->strMsgSend(
+        intToOOP(1),
+        "+",
+        intToOOP(2),
+        nil);
+@end example
+@end deftypefun
+
+@deftypefun OOP vmsgSend (OOP receiver, OOP selector, OOP *args)
+This function is the same as msgSend, but accepts a pointer to the
+NULL-terminated list of arguments, instead of being a variable-arguments
+functions.  Example:
+
+@example
+    OOP arguments[2], shouldBeThreeOOP;
+    arguments[0] = intToOOP(2);
+    arguments[1] = nil;
+    /* @dots{} some more code here @dots{} */
+
+    shouldBeThreeOOP = vmProxy->vmsgSend(
+        intToOOP(1),
+        symbolToOOP("+"),
+        arguments);
+@end example
+@end deftypefun
+
+@deftypefun OOP nvmsgSend (OOP receiver, OOP selector, OOP *args, int nargs)
+This function is the same as msgSend, but accepts an additional parameter
+containing the number of arguments to be passed to the Smalltalk method,
+instead of relying on the NULL-termination of args.  Example:
+
+@example
+    OOP argument, shouldBeThreeOOP;
+    argument = intToOOP(2);
+    /* @dots{} some more code here @dots{} */
+
+    shouldBeThreeOOP = vmProxy->nvmsgSend(
+        intToOOP(1),
+        symbolToOOP("+"),
+        &argument,
+        1);
+@end example
+@end deftypefun
+
+The two functions that directly accept Smalltalk code are named
+@code{evalCode} and @code{evalExpr}, and they're basically the same.
+They both accept a single parameter, a pointer to the code to be
+submitted to the parser.  The main difference is that @code{evalCode}
+discards the result, while @code{evalExpr} returns it to the caller
+as an OOP.
+
+@code{msgSendf}, instead, has a radically different syntax. Let's first
+look at some examples.
+
+@example
+    /* 1 + 2 */
+    int shouldBeThree;
+    vmProxy->msgSendf(&shouldBeThree, "%i %i + %i", 1, 2)
+
+    /* aCollection includes: 'abc' */
+    OOP aCollection;
+    int aBoolean;
+    vmProxy->msgSendf(&aBoolean, "%b %o includes: %s", aCollection, "abc")
+
+    /* 'This is a test' printNl -- in two different ways */
+    vmProxy->msgSendf(nil, "%v %s printNl", "This is a test");
+    vmProxy->msgSendf(nil, "%s %s printNl", "This is a test");
+
+    /* 'This is a test', ' ok?' */
+    char *str;
+    vmProxy->msgSendf(&str, "%s %s , %s", "This is a test", " ok?");
+@end example
+
+As you can see, the parameters to msgSendf are, in order:
+
+@itemize @bullet
+@item
+A pointer to the variable which will contain the record. If this pointer
+is nil, it is discarded.
+
+@item
+A description of the method's interface in this format (the object
+types, after percent signs, will be explained later in this section)
+
+@example
+%result_type %receiver_type selector %param1_type %param2_type
+@end example
+
+@item
+A C variable or Smalltalk object (depending on the type specifier) for
+the receiver
+
+@item
+If needed, The C variables and/or Smalltalk object (depending on the
+type specifiers) for the arguments.
+@end itemize
+
+Note that the receiver and parameters are NOT registered in the object
+registry (@pxref{Smalltalk types}).  @dfn{receiver_type} and
+@dfn{paramX_type} can be any of these characters, with these meanings:
+
+@example
+      Specifier        C data type        equivalent Smalltalk class
+          i                long           Integer (see intToOOP)
+          f               double          Float (see floatToOOP)
+          F            long double        Float (see floatToOOP)
+          b                int            True or False (see boolToOOP)
+          c                char           Character (see charToOOP)
+          C               PTR             CObject (see cObjToOOP)
+          s               char *          String (see stringToOOP)
+          S               char *          Symbol (see symbolToOOP)
+          o                OOP            any
+          t            char *, PTR        CObject (see below)
+          T              OOP, PTR         CObject (see below)
+@end example
+
+@noindent
+@samp{%t} and @samp{%T} are particular in the sense that you need to
+pass @dfn{two} additional arguments to @code{msgSendf}, not one.  The
+first will be a description of the type of the CObject to be created,
+the second instead will be the CObject's address.  If you specify
+@samp{%t}, the first of the two arguments will be converted to a
+Smalltalk @code{CType} via @code{typeNameToOOP} (@pxref{Smalltalk
+types}); instead, if you specify @samp{%T}, you will have to directly
+pass an OOP for the new CObject's type.
+
+The type specifiers you can pass for @dfn{result_type} are a bit
+different:
+
+@example
+            Result
+Specifier   if nil    C data type      expected result
+   i         0L          long          nil or an Integer
+   f         0.0        double         nil or a Float
+   b          0          int           nil or a Boolean
+   c        '\0'         char          nil or a Character
+   C        NULL        PTR            nil or a CObject
+   s        NULL        char *         nil, a String, or a Symbol
+   ?         0      char *, PTR        See oopToC
+   o       nilOOP        OOP           any (result is not converted)
+   v                      /            any (result is discarded)
+@end example
+
+Note that, if resultPtr is nil, the @dfn{result_type} is always treated
+as @samp{%v}.  If an error occurs, the value in the `result if nil'
+column is returned.
+
+@node Other C functions
+@section Other functions available to modules
+
+In addition to the functions above, the @code{VMProxy} that is made
+available to modules contains entry-points for many functions that aid
+in developing @gst{} extensions in C.  This node documents these
+functions and the macros that are defined by @file{libgst/gstpub.h}.
+
+@deftypefun void asyncSignal (OOP)
+This functions accepts an OOP for a @code{Semaphore} object and signals
+that object so that one of the processes waiting on that semaphore is
+waken up.  Since a Smalltalk call-in is not an atomic operation, the
+correct way to signal a semaphore is not to send the @code{signal}
+method to the object but, rather, to use:
+
+@example
+    asyncSignal(semaphoreOOP)
+@end example
+
+The signal request will be processed as soon as the next message send is
+executed.
+
+@emph{Caution:} This and the next one are the only functions in the
+@code{intepreterProxy} that can be called from within a signal handler.
+@end deftypefun
+
+@deftypefun void asyncSignalAndUnregister (OOP)
+This functions accepts an OOP for a @code{Semaphore} object and signals
+that object so that one of the processes waiting on that semaphore is
+waken up; the signal request will be processed as soon as the next
+message send is executed.  The object is then removed from the registry.
+@end deftypefun
+
+@deftypefun void syncWait (OOP)
+This functions accepts an OOP for a @code{Semaphore} object and puts the
+current process to sleep, unless the semaphore has excess signals on it.
+Since a Smalltalk call-in is not an atomic operation, the correct way to
+signal a semaphore is not to send the @code{wait} method to the object
+but, rather, to use:
+
+@example
+    syncWait(semaphoreOOP)
+@end example
+
+The @code{sync} in the name of this function distinguishes it from
+@code{asyncSignal}, in that it cannot be called from within a signal
+handler.
+@end deftypefun
+
+
+@deftypefun OOP objectAlloc (OOP, int)
+The @code{objectAlloc} function allocates an OOP for a newly created
+instance of the class whose OOP is passed as the first parameter; if
+that parameter is not a class the results are undefined (for now, read
+as ``the program will most likely core dump'', but that could change in
+a future version).
+
+The second parameter is used only if the class is an indexable one,
+otherwise it is discarded: it contains the number of indexed instance
+variables in the object that is going to be created.  Simple uses of
+@code{objectAlloc} include:
+
+@example
+OOP myClassOOP;
+OOP myNewObject;
+myNewObjectData obj;
+@dots{}
+myNewObject = objectAlloc(myClassOOP, 0);
+obj = (myNewObjectData) OOP_TO_OBJ (myNewObject);
+obj->arguments = objectAlloc(classNameToOOP("Array"), 10);
+@dots{}
+@end example
+@end deftypefun
+
+The macros are@footnote{IS_NIL and IS_CLASS have been removed because
+  they are problematic in shared libraries (modules), where they
+  caused undefined symbols to be present in the shared library.  These
+  are now private to @file{libgst.a}.}:
+
+@defmac mst_Object OOP_TO_OBJ (OOP)
+Dereference a pointer to an OOP into a pointer to the actual object data
+(@pxref{Object representation}).  The result of @code{OOP_TO_OBJ} is not
+valid anymore if a garbage-collection happens; for this reason, you
+should assume that a pointer to object data is not valid after doing a
+call-in, calling @code{objectAlloc}, and caling any of the ``C to
+Smalltalk'' functions (@pxref{Smalltalk types}).
+@end defmac
+
+@defmac OOP OOP_CLASS (OOP)
+Return the OOP for the class of the given object.  For example,
+@code{OOP_CLASS(proxy->stringToOOP("Wonderful @gst{}"))} is the
+@code{String} class, as returned by @code{classNameToOOP("String")}.
+@end defmac
+
+@defmac mst_Boolean IS_INT (OOP)
+Return a Boolean indicating whether or not the OOP is an Integer object;
+the value of SmallInteger objects is encoded directly in the OOP, not
+separately in a @code{mst_Object} structure.  It is not safe to use
+@code{OOP_TO_OBJ} and @code{OOP_CLASS} if @code{isInt} returns false.
+@end defmac
+
+@defmac mst_Boolean IS_OOP (OOP)
+Return a Boolean indicating whether or not the OOP is a `real' object
+(and not a SmallInteger).  It is safe to use @code{OOP_TO_OBJ} and
+@code{OOP_CLASS} only if @code{IS_OOP} returns true.
+@end defmac
+
+@defmac mst_Boolean ARRAY_OOP_AT (mst_Object, int)
+Access the character given in the second parameter of the given Array
+object.  Note that this is necessary because of the way
+@code{mst_Object} is defined, which prevents @code{indexedOOP} from
+working.
+@end defmac
+
+@defmac mst_Boolean STRING_OOP_AT (mst_Object, int)
+Access the character given in the second parameter of the given String
+or ByteArray object.  Note that this is necessary because of the way
+@code{mst_Object} is defined, which prevents @code{indexedByte} from
+working.
+@end defmac
+
+@defmac mst_Boolean INDEXED_WORD (@var{some-object-type}, int)
+Access the given indexed instance variable in a
+@code{variableWordSubclass}.  The first parameter must be a structure
+declared as described in @ref{Object representation}).
+@end defmac
+
+@defmac mst_Boolean INDEXED_BYTE (@var{some-object-type}, int)
+Access the given indexed instance variable in a
+@code{variableByteSubclass}.  The first parameter must be a structure
+declared as described in @ref{Object representation}).
+@end defmac
+
+@defmac mst_Boolean INDEXED_OOP (@var{some-object-type}, int)
+Access the given indexed instance variable in a @code{variableSubclass}.
+The first parameter must be a structure declared as described in
+@ref{Object representation}).
+@end defmac
+
+
+
+@node Object representation
+@section Manipulating instances of your own Smalltalk classes from C
+
+Although @gst{}'s library exposes functions to deal with instances of
+the most common base class, it's likely that, sooner or later, you'll
+want your C code to directly deal with instances of classes defined by
+your program.  There are three steps in doing so:
+
+@itemize @bullet
+@bulletize Defining the Smalltalk class
+@bulletize Defining a C @code{struct} that maps the representation of the class
+@bulletize Actually using the C struct
+@end itemize
+
+In this chapter you will be taken through these steps considering the
+hypotetical task of defining a Smalltalk interface to an SQL server.
+
+The first part is also the simplest, since defining the Smalltalk class
+can be done in a single way which is also easy and very practical; just
+evaluate the standard Smalltalk code that does that:
+
+@example
+    Object subclass: #SQLAction
+           instanceVariableNames: 'database request'
+           classVariableNames: ''
+           poolDictionaries: ''
+           category: 'SQL-C interface'
+
+    SQLAction subclass: #SQLRequest
+           instanceVariableNames: 'returnedRows'
+           classVariableNames: ''
+           poolDictionaries: ''
+           category: 'SQL-C interface'
+@end example
+
+To define the C @code{struct} for a class derived from Object, @gst{}'s
+@code{gstpub.h} include file defines an @code{OBJ_HEADER} macro which
+defines the fields that constitute the header of every object.  Defining
+a @code{struct} for SQLAction results then in the following code:
+
+@example
+    struct st_SQLAction @{
+        OBJ_HEADER;
+        OOP database;
+        OOP request;
+    @}
+@end example
+
+The representation of SQLRequest in memory is this:
+
+@example
+    .------------------------------.
+    |     common object header     |    2 longs
+    |------------------------------|
+    | SQLAction instance variables |
+    |           database           |    2 longs
+    |           request            |
+    |------------------------------|
+    | SQLRequest instance variable |
+    |         returnedRows         |    1 long
+    '------------------------------'
+@end example
+
+A first way to define the struct would then be:
+@example
+    typedef struct st_SQLAction @{
+        OBJ_HEADER;
+        OOP database;
+        OOP request;
+        OOP returnedRows;
+    @} *SQLAction;
+@end example
+
+but this results in a lot of duplicated code.  Think of what would
+happen if you had other subclasses of @code{SQLAction} such as
+@code{SQLObjectCreation}, @code{SQLUpdateQuery}, and so on! The
+solution, which is also the one used in @gst{}'s source code is to
+define a macro for each superclass, in this way:
+
+@example
+    /* SQLAction
+        |-- SQLRequest
+        |     `-- SQLUpdateQuery
+        `-- SQLObjectCreation       */
+
+    #define ST_SQLACTION_HEADER         \
+        OBJ_HEADER;                     \
+        OOP database;                   \
+        OOP request                     /* no semicolon */
+
+    #define ST_SQLREQUEST_HEADER        \
+        ST_SQLACTION_HEADER;            \
+        OOP returnedRows                /* no semicolon */
+
+    typedef struct st_SQLAction @{
+        ST_SQLACTION_HEADER;
+    @} *SQLAction;
+
+    typedef struct st_SQLRequest @{
+        ST_SQLREQUEST_HEADER;
+    @} *SQLRequest;
+
+    typedef struct st_SQLObjectCreation @{
+        ST_SQLACTION_HEADER;
+        OOP newDBObject;
+    @} *SQLObjectCreation;
+
+    typedef struct st_SQLUpdateQuery @{
+        ST_SQLREQUEST_HEADER;
+        OOP numUpdatedRows;
+    @} *SQLUpdateQuery;
+@end example
+
+Note that the macro you declare is used instead of @code{OBJ_HEADER} in
+the declaration of both the superclass and the subclasses.
+
+Although this example does not show that, please note that you should
+not declare anything if the class has indexed instance variables.
+
+The first step in actually using your structs is obtaining a pointer to
+an OOP which is an instance of your class.  Ways to do so include doing
+a call-in, receiving the object from a call-out (using
+@code{#smalltalk}, @code{#self} or @code{#selfSmalltalk} as the type
+specifier).
+
+Let's assume that the @code{oop} variable contains such an object.
+Then, you have to dereference the OOP (which, as you might recall from
+@ref{Smalltalk types}, point to the actual object only indirectly) and
+get a pointer to the actual data.  You do that with the
+@code{OOP_TO_OBJ} macro (note the type casting):
+
+@example
+    SQLAction action = (SQLAction) OOP_TO_OBJ(oop);
+@end example
+
+Now you can use the fields in the object like in this pseudo-code:
+
+@example
+    /* These are retrieved via classNameToOOP and then cached in global
+       variables */
+    OOP sqlUpdateQueryClass, sqlActionClass, sqlObjectCreationClass;
+    @dots{}
+    invoke_sql_query(
+        vmProxy->oopToCObject(action->database),
+        vmProxy->oopToString(action->request);
+        query_completed_callback,       /* Callback function */
+        oop);                           /* Passed to the callback */
+
+    @dots{}
+
+    /* Imagine that invoke_sql_query runs asynchronously and calls this
+       when the job is done. */
+    void
+    query_completed_callback(result, database, request, clientData)
+         struct query_result *result;
+         struct db *database;
+         char *request;
+         OOP clientData;
+    @{
+      SQLUpdateQuery query;
+      OOP rows;
+      OOP cObject;
+
+      /* Free the memory allocated by oopToString */
+      free(request);
+        
+      if (OOP_CLASS (oop) == sqlActionClass)
+        return;
+        
+      if (OOP_CLASS (oop) == sqlObjectCreationClass) 
+        @{
+          SQLObjectCreation oc;
+          oc = (SQLObjectCreation) OOP_TO_OBJ (clientData);
+          cObject = vmProxy->cObjectToOOP (result->dbObject)
+          oc->newDBObject = cObject;
+        @}
+      else
+        @{
+          /* SQLRequest or SQLUpdateQuery */
+          cObject = vmProxy->cObjectToOOP (result->rows);
+          query = (SQLUpdateQuery) OOP_TO_OBJ (clientData);
+          query->returnedRows = cObject;
+          if (OOP_CLASS (oop) == sqlUpdateQueryClass)
+            query->numReturnedRows = vmProxy->intToOOP (result->count);
+        @}
+
+    @}
+
+@end example
+
+Note that the result of @code{OOP_TO_OBJ} is not valid anymore if a
+garbage-collection happens; for this reason, you should assume that a
+pointer to object data is not valid after doing a call-in, calling
+@code{objectAlloc}, and using any of the ``C to Smalltalk'' functions
+except @code{intToOOP} (@pxref{Smalltalk types}).  That's why I passed
+the OOP to the callback, not the object pointer itself.
+
+If your class has indexed instance variables, you can use the
+@code{INDEXED_WORD}, @code{INDEXED_OOP} and @code{INDEXED_BYTE} macros
+declared in @code{gstpub.h}, which return an lvalue for the given
+indexed instance variable---for more information, @pxref{Other C
+functions}.
+
+
+@node Using Smalltalk
+@section Using the Smalltalk environment as an extension library
+
+If you are reading this chapter because you are going to write
+extensions to @gst{}, this section won't probably interest you.  But if
+you intend to use @gst{} as a scripting language or an extension
+language for your future marvellous software projects, you might be
+interest.
+
+How to initialize @gst{} is most briefly and easily explained by looking
+at @gst{}'s own source code.  For this reason, here is a snippet
+from @file{main.c}.
+
+@example
+
+/* From main.c */
+int main(argc, argv)
+int     argc;
+char    **argv;
+@{
+  int result;
+  gst_smalltalk_args(argc, argv);
+  result = gst_init_smalltalk();
+  if (result < 0)
+    result = 0;
+  else if (result == 0)
+    gst_top_level_loop();
+
+  exit(result);
+@}
+
+@end example
+
+Your initialization code will be almost the same as that in @gst{}'s
+@code{main()}, with the exception of the call to
+@code{gst_top_level_loop}.  All you'll have to do is to pass some
+arguments to the @gst{} library via @code{gst_smalltalk_args}, and then
+call @code{gst_init_smalltalk}.
+
+Note that @code{gst_init_smalltalk} will likely take some time (from a
+second to 30-40 seconds), because it has to check if the image file must
+be be rebuilt and, if so, it reloads and recompiles the 37000 lines of
+Smalltalk code in a basic image.  To avoid this check, pass a @option{-I}
+flag:
+
+@example
+char myArgv[][] = @{ "-I", "myprog.im", nil @};
+int myArgc;
+/* @dots{} */
+myArgc = sizeof(myArgv) / sizeof (char *) - 1;
+smalltalkArgs(myArgc, myArgv);
+@end example
+
+The result of @code{gst_init_smalltalk} is as follows: @code{0} means
+``go on'', @code{-1} means ``don't run the top-level loop, but exit with
+a zero error code'', while anything else is an error code to be passed
+to @code{exit}.  In practice, @code{-1} is answered when you pass the
+@code{--help} or @code{--version} options: if you don't pass them,
+you can safely ignore it.
+
+If you're using @gst{} as an extension library, you might also want to
+disable the two @code{ObjectMemory} class methods, @code{quit} and
+@code{quit:} method.  I advice you not to change the Smalltalk kernel
+code.  Instead, in the script that loads your extension classes add
+these two lines:
+
+@example
+ObjectMemory class compile: 'quit        self shouldNotImplement'!
+ObjectMemory class compile: 'quit: n     self shouldNotImplement'!
+@end example
+
+which will effectively disable the two offending methods.  Other
+possibilities include using @code{atexit} (from the C library) to exit
+your program in a less traumatic way, or redefining these two methods to
+exit through a call out to a C routine in your program.
+
+Also, note that it is not a problem if you develop the class libraries
+for your programs within @gst{}'s environment @b{without}
+@code{defineCFunc}-ing your own C call-outs, since @gst{} recalculates
+the addresses of the C call-outs every time it is started.
+
+
+
+@node Incubator
+@section Incubator support
+
+The incubator concept provides a mechanism to protect newly created
+objects from being accidentally garbage collected before they can be
+attached to some object which is reachable from the root set.
+
+If you are creating some set of objects which will not be immediately (that
+means, before the next object is allocated from the Smalltalk memory system) be
+attached to an object which is still ``live'' (reachable from the root set
+of objects), you'll need to use this interface.
+
+If you are writing a C call-out from Smalltalk (for example, inside a
+module), you will not have direct access to the incubator; instead
+the functions described in @ref{Smalltalk types} automatically put
+the objects that they create in the incubator, and the virtual machine
+takes care of wrapping C call-outs so that the incubator state is 
+restored at the end of the call.
+
+This section describes its usage from the point of view of a program
+that is linking with @code{libgst.a}.  Such a program has much finer
+control to the incubator.  The interface provides the following operations:
+
+@defmac void INC_ADD_OOP (OOP anOOP)
+Adds a new object to the protected set. 
+@end defmac
+
+@defmac inc_ptr INC_SAVE_POINTER ()
+Retrieves the current incubator pointer.  Think of the incubator as a
+stack, and this operation returns the current stack pointer for later
+use (restoration) with the incRestorePointer function.
+@end defmac
+
+@defmac void INC_RESTORE_POINTER (inc_ptr ptr)
+Sets (restores) the incubator pointer to the given pointer value. 
+@end defmac
+
+Typically, when you are within a function which allocates more than one
+object at a time, either directly or indirectly, you'd want to use the
+incubator mechanism.  First you'd save a copy of the current pointer in
+a local variable.  Then, for each object you allocate (except the last,
+if you want to be optimal), after you create the object you add it to
+the incubator's list.  When you return, you need to restore the
+incubator's pointer to the value you got with incSavePointer using the
+incRestorePointer function.
+
+Here's an example from cint.c:
+
+The old code was (the comments are added for this example):
+
+@example
+  desc = (_gst_cfunc_descriptor)
+     new_instance_with (cFuncDescriptorClass, numArgs);
+  desc->cFunction = _gst_cobject_new (funcAddr);    // 1
+  desc->cFunctionName = _gst_string_new (funcName); // 2
+  desc->numFixedArgs = FROM_INT (numArgs);
+  desc->returnType = _gst_classify_type_symbol (returnTypeOOP, true);
+  for (i = 1; i <= numArgs; i++) @{
+    desc->argTypes[i - 1] =
+     _gst_classify_type_symbol(ARRAY_AT(argsOOP, i), false);
+  @}
+
+  return (_gst_alloc_oop(desc));
+@end example
+
+@code{desc} is originally allocated via @code{newInstanceWith} and
+@code{allocOOP}, two private routines which are encapsulated by the
+public routine @code{objectAlloc}.  At ``1'', more storage is allocated,
+and the garbage collector has the potential to run and free (since no
+live object is referring to it) desc's storage.  At ``2'' another object
+is allocated, and again the potential for losing both @code{desc} and
+@code{desc->cFunction} is there if the GC runs (this actually
+happened!).
+
+To fix this code to use the incubator, modify it like this:
+
+@example
+  OOP     descOOP;
+  IncPtr  ptr;
+
+  incPtr = INC_SAVE_POINTER();
+  desc = (_gst_cfunc_descriptor)
+     new_instance_with (cFuncDescriptorClass, numArgs);
+  descOOP = _gst_alloc_oop(desc);
+  INC_ADD_OOP (descOOP);
+
+  desc->cFunction = _gst_cobject_new (funcAddr);    // 1
+  INC_ADD_OOP (desc->cFunction);
+
+  desc->cFunctionName = _gst_string_new (funcName); // 2
+  /* @r{since none of the rest of the function (or the functions it calls)}
+   * @r{allocates any storage, we don't have to add desc->cFunctionName}
+   * @r{to the incubator's set of objects, although we could if we wanted}
+   * @r{to be completely safe against changes to the implementations of}
+   * @r{the functions called from this function.}
+   */
+
+  desc->numFixedArgs = FROM_INT (numArgs);
+  desc->returnType = _gst_classify_type_symbol (returnTypeOOP, true);
+  for (i = 1; i <= numArgs; i++) @{
+    desc->argTypes[i - 1] =
+     _gst_classify_type_symbol(ARRAY_AT(argsOOP, i), false);
+  @}
+
+  return (_gst_alloc_oop(desc));
+@end example
+
+Note that it is permissible for two or more functions to cooperate with
+their use of the incubator.  For example, say function A allocates some
+objects, then calls function B which allocates some more objects, and
+then control returns to A where it does some more execution with the
+allocated objects.  If B is only called by A, B can leave the management
+of the incubator pointer up to A, and just register the objects it
+allocates with the incubator.  When A does a @code{INC_RESTORE_POINTER},
+it automatically clears out the objects that B has registered from the
+incubator's set of objects as well; the incubator doesn't know about
+functions A & B, so as far as it is concerned, all of the registered
+objects were registered from the same function.
+
+
+@node Tutorial
+@chapter Tutorial
+@include tutorial.texi
+
+@node Future
+@chapter Future directions for @gst{}
+
+Presented below is the set of tasks that I feel need to be performed to
+make @gst{} a more fully functional, viable system.  They are presented
+in no particular order; other tasks are listed in the @file{TODO} file,
+in the main distribution directory.
+
+I would @emph{very much} welcome any volunteers who would like to help
+with the implementation of one or more of these tasks.  Please write at
+@email{help-smalltalk@@gnu.org} if you are interested in adding your
+efforts to the @gst{} project.
+
+Tasks:
+@itemize @bullet
+@item
+Port software to @gst{}.  The class library has proven to be quite
+robust; it should be easy to port packages (especially free ones!) to
+@gst{} if the source dialect is reasonably @sc{ansi}-compliant.  One
+area which might give problems is namespaces, which is not standardized,
+and possibly exception handling for which most dialects have been
+cooking their own syntax for years.
+
+@item
+Port to other computers/operating systems.  The code thus far has shown
+itself to be relatively portable to various machines and Unix
+derivatives.  The architecture must support 32 or 64 bit pointers the
+same size as a long integers; in addition, the operating system had
+better be advanced enough to support asynchronous file polling and
+explicit allocation of virtual memory address ranges.
+
+@item
+Modify the Delay class primitive so that it does not fork a new process
+each time it is called when @code{setitimer} or a similar function call
+is not available; this involves using a pipe.  I want to do it somewhen,
+but if you do it before me, please tell me.
+
+@item
+Port Blox to @sc{gtk+}.
+
+@item
+More ideas are sketched in the @file{TODO} file, in the main distribution
+directory.
+@end itemize
+
+
+@iftex
+@contents
+@end iftex
+
+@bye
+
+Local Variables:
+compile-command: "makeinfo -fc 72 gst.texi"
+fill-column: 72
+End:

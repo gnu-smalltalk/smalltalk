@@ -1,0 +1,8 @@
+Authors of libsnprintfv.  See individual files for their licenses.
+
+Gary V. Vaughan <gary@gnu.org>:
+  Designed, implemented and maintained libsnprintfv up to the 0.98h release.
+
+Paolo Bonzini <bonzini@gnu.org> and
+Bruce Korb <bkorb@gnu.org>:
+  Are currently maintaining libsnprintfv (starting from Summer 2002).

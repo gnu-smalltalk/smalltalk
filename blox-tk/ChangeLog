@@ -1,0 +1,70 @@
+2004-01-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxCanvas.st, blox-tk/BloxText.st: fixed
+	erroneous use of ValueHolder class>>#value:.
+
+2003-06-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 2.1.3 released.
+
+2003-06-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxCanvas.st: fixed bug in BEmbeddedImage>>
+	#data:.  Thanks to Mike Anderson.
+
+2003-05-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 2.1.2 released.
+
+2003-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
+        *** Version 2.1.1 (stable) released.
+
+2003-04-12  Paolo Bonzini  <bonzini@gnu.org>
+
+        *** Version 2.1 (stable) released.
+
+2003-03-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxWidgets.st: adjust the wraplength of the label
+	in a BDialog as it changes size.
+
+2003-03-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxBasic.st: fix clipboard management
+
+2003-02-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxBasic.st: fix geometry management
+	under Windows when parent window is unmapped
+
+2003-01-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxWidgets.st: remove two Tcl calls that
+	took 2 seconds each!
+
+2002-12-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxBasic.st: bind events to both the
+	lowercase and the uppercase version of alphabetic
+	keysyms.
+
+2002-12-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxWidgets.st: trigger callbacks in
+	a list box when keys are pressed.
+
+2002-11-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxBasic.st: use asynchronous call-out
+	for bloxIdle.
+
+2002-11-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxBasic.st: rewritten event loop
+
+2002-10-22  Mike Castle  <dalgoda@ix.netcom.com>
+
+        * blox/tk/BloxTK.c: add some consts for Tcl 8.4.0
+
+Older entries in browser/ChangeLog.

@@ -1,0 +1,4 @@
+Authors of GNU libsigsegv.
+
+Bruno Haible <bruno@clisp.org>                   Versions 1.0 and 2.0
+Paolo Bonzini <bonzini@gnu.org>                  HP-UX, MacOS X, Cygwin support

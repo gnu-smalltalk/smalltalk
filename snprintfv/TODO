@@ -1,0 +1,26 @@
+#  -*- Mode: Outline -*-
+
+* namespace
+** decide whether it is fine to override the printf functions
+in the C library instead of prefixing them with snv_
+
+* performance
+** move handling of limit (and possibly buffering?) to the single
+streams.  This would give better performance and possibly turn
+stream_put into a macro that just dispatches to the put_func.
+
+* modules
+** the printf_load_module_callback i/face is kludgy: there
+is no provision to load only dlpreloaded modules (perhaps
+the loader field in lt_dlhandle_struct should be moved into
+lt_dlinfo so that the validation callback can decide?)
+
+* documentation
+** Write the non-generated docs with an examples of:
+*** custom streams
+*** dynamic loading
+
+* easy integration
+** wrap up an autoconf macro so that snprintfv can be distributed
+without the overhead of a subconfigure (see how we use libltdl for
+an example).

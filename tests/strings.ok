@@ -1,0 +1,44 @@
+
+Execution begins...
+returned value is String
+
+Execution begins...
+returned value is 'foo'
+
+Execution begins...
+returned value is 'foo on you'
+
+Execution begins...
+returned value is 'foo on
+multiple line string
+you'
+
+Execution begins...
+returned value is 'test embedded quote marks, can't I do this?'
+
+Execution begins...
+returned value is $B
+
+Execution begins...
+returned value is $Q
+
+Execution begins...
+returned value is 'Quem'
+
+Execution begins...
+'should be false 'false
+'should be false 'false
+'should be true  'true
+'should be true  'true
+'should be true  'true
+'should be true  'true
+'should be true  'true
+'should be true  'true
+'should be true  'true
+'should be true  'true
+'should be true  'true
+'should be true  'true
+'should be true  'true
+'should be false 'false
+'should be false 'false
+returned value is false

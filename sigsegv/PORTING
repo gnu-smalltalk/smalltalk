@@ -1,0 +1,190 @@
+Successfully tested platforms
+=============================
+
+__PLATFORM__________________________________SIGSEGV__STACK_OVERFLOW__VERSION___
+                                           |         |           |
+alpha-dec-osf4.0d                          |   yes   |   yes     | 2.1
+alpha-dec-osf4.0f                          |   yes   |   yes     | 2.0
+alpha-dec-osf4.0g                          |   yes   |   yes     | 2.1
+alpha-dec-osf5.1                           |   yes   |   yes     | 2.1
+alpha-unknown-freebsd4.8                   |   yes   |   yes     | 2.1
+alphaev67-unknown-linux2.4.17-gnu-glibc2.1 |   yes   |   yes     | 1.95
+alphaev6-unknown-linux2.2.19-gnu-glibc2.2  |   yes   |   yes     | 2.1
+alphaev67-unknown-linux2.4.4-gnu-glibc2.2  |   yes   |   yes     | 2.1
+alphaev6-unknown-linux2.4.9-gnu-glibc2.2   |   yes   |   yes     | 2.1
+alphaev67-unknown-linux2.4.9-gnu-glibc2.2  |   yes   |   yes     | 2.1
+alphaev6-unknown-linux2.4.18-gnu-glibc2.2  |   yes   |   yes     | 2.1
+alphaev67-unknown-linux2.4.18-gnu-glibc2.2 |   yes   |   yes     | 2.1
+alpha-unknown-netbsd1.6                    |   yes   |   yes     | 2.1
+armv4l-unknown-linux2.4.0-gnu-glibc2.2     |   no    |   yes     | 2.1
+armv4l-unknown-linux2.4.3-gnu-glibc2.2     |   yes   |   yes     | 2.1
+armv4l-unknown-linux2.4.9-gnu-glibc2.2     |   no    |   yes     | 2.0.1
+hppa2.0-hp-hpux10.20                       |   yes   |   yes     | 2.1
+hppa2.0w-hp-hpux11.00                      |   yes   |   yes     | 2.1
+hppa2.0w-hp-hpux11.11                      |   yes   |   yes     | 2.1
+hppa-unknown-linux2.4.19-gnu-glibc2.2      |   yes   |   yes     | 2.0.1
+hppa64-unknown-linux2.4.17-gnu-glibc2.2    |   yes   |   yes     | 2.1
+i586-pc-beos                               |   no    |   yes     | 2.1
+i686-pc-cygwin                             |   yes   |   yes     | 2.02
+i586-pc-linux2.2.14-gnu-glibc2.1           |   yes   |   yes     | 2.1
+i686-pc-linux2.2.14-gnu-glibc2.1           |   yes   |   yes     | 2.0
+i686-pc-linux2.2.19-gnu-glibc2.1           |   yes   |   yes     | 1.95
+i486-pc-linux2.2.21-gnu-glibc2.1           |   yes   |   yes     | 2.0
+i586-pc-linux2.4.18-gnu-glibc2.1           |   yes   |   yes     | 2.0
+i686-pc-linux2.2.16-gnu-glibc2.2           |   yes   |   yes     | 2.0
+i686-pc-linux2.2.19-gnu-glibc2.2           |   yes   |   yes     | 2.0
+i686-pc-linux2.4.7-gnu-glibc2.2            |   yes   |   yes     | 2.1
+i586-pc-linux2.4.9-gnu-glibc2.2            |   yes   |   yes     | 2.0
+i686-pc-linux2.4.9-gnu-glibc2.2            |   yes   |   yes     | 2.0
+i386-pc-linux2.4.18-gnu-glibc2.2           |   yes   |   yes     | 2.0
+i686-pc-linux2.4.18-gnu-glibc2.2           |   yes   |   yes     | 2.0
+i586-pc-linux2.4.19-gnu-glibc2.2           |   yes   |   yes     | 2.0
+i686-pc-linux2.4.19-gnu-glibc2.2           |   yes   |   yes     | 2.0
+i686-pc-linux2.4.20-gnu-glibc2.2           |   yes   |   yes     | 2.0
+i586-pc-linux2.2.19-gnu-glibc2.3           |   yes   |   yes     | 2.1
+i686-pc-linux2.4.18-gnu-glibc2.3           |   yes   |   yes     | 1.97
+i486-pc-linux2.4.20-gnu-glibc2.3           |   yes   |   yes     | 2.0
+i586-pc-linux2.4.20-gnu-glibc2.3           |   yes   |   yes     | 2.0
+i686-pc-linux2.4.20-gnu-glibc2.3           |   yes   |   yes     | 2.0
+i686-pc-linux2.4.21-gnu-glibc2.3           |   yes   |   yes     | 2.0
+i386-pc-mingw32                            |   yes   |   yes     | 2.0
+i686-pc-mingw32                            |   yes   |   yes     | 1.96
+i686-pc-win32-msvc6                        |   yes   |   yes     | 1.96
+i386-unknown-freebsd4.0                    |   yes   |   yes     | 2.1
+i386-unknown-freebsd4.0-gnu-glibc2.3       |   yes   |   yes     | 2.1
+i386-unknown-freebsd4.6                    |   yes   |   yes     | 1.95
+i386-unknown-freebsd4.7                    |   yes   |   yes     | 2.1
+i386-unknown-freebsd4.8                    |   yes   |   yes     | 2.1
+i386-unknown-netbsdelf1.6                  |   no    |   no      | 2.1
+i386-unknown-openbsd3.2                    |   yes   |   yes     | 2.1
+ia64-hp-hpux11.22                          |   yes   |   no      | 2.1
+ia64-unknown-linux2.4.18-gnu-glibc2.2      |   yes   |   yes     | 2.1
+mips-sgi-irix6.5                           |   yes   |   yes     | 2.1
+rs6000-ibm-aix3.2.5                        |   yes   |   no      | 2.1
+powerpc-ibm-aix4.3.3.0                     |   yes   |   yes     | 1.95
+powerpc-apple-darwin5.5                    |   yes   |   yes     | 2.2
+powerpc-apple-darwin6.8                    |   yes   |   yes     | 2.2
+powerpc-unknown-linux2.2.17-gnu-glibc2.1   |   no    |   yes     | 1.95
+powerpc-unknown-linux2.2.17-gnu-glibc2.2   |   yes   |   yes     | 2.0.1
+sparc-sun-solaris2.6                       |   yes   |   yes     | 2.0
+sparc-sun-solaris2.7                       |   yes   |   yes     | 2.1
+sparc-sun-solaris2.8                       |   yes   |   yes     | 2.1
+sparc-sun-solaris2.9                       |   yes   |   yes     | 2.1
+sparc64-unknown-linux2.2.18-gnu-glibc2.1   |   no    |   no      | 1.95
+
+
+Porting to new platforms
+========================
+
+On Unix systems, where faults are notified to the program through a signal
+handler, the core routines in handler-unix.c can be used without
+modifications. But they need the following bits of information. Each of
+them is stored in a platform dependent file; the file is chosen in configure.
+
+  * List of signals that are sent when an invalid virtual memory address
+    is accessed, or when the stack overflows.
+    This is a file among signals-*.h.
+    configure chooses and sets the variable CFG_SIGNALS.
+
+  * What arguments are passed to a fault handler.
+    This is a file among fault-*.h.
+    configure chooses and sets the variable CFG_FAULT.
+
+  * How to determine the stack's virtual memory area.
+    This is a file among stackvma-*.c.
+    configure chooses and sets the variable CFG_STACKVMA.
+
+  * How to determine if a fault is actually a stack overflow (more on
+    this later).  This is a file among heur-*.h.
+    configure chooses and sets the variable CFG_HEURISTICS.
+
+  * How to leave a signal handler that is executing on the alternate
+    signal stack.
+    This is a file among leave-*.c.
+    configure chooses and sets the variable CFG_LEAVE.
+
+For each of these, the approach should be:
+
+  - Find a way to implement the needed functionality.  This might involve
+    study of the system include files (in particular <signal.h> and
+    <ucontext.h>) and of the kernel sources.
+    For CFG_FAULT, the best starting point is to run the tests/sigsegv1
+    program with a breakpoint set at 'sigsegv_handler'.
+
+  - Add to configure.in a test whether your new code works.  This will
+    help portability to platforms similar to yours.
+    Then regenerate the configure script (run "autoconf") and verify
+    that the test says "yes" on your platform.
+
+  - Create a platform dependent file (e.g. fault-<os>-<cpu>.h) and change
+    configure.in to choose this particular file when your test says "yes".
+    Then regenerate the configure script (run "autoconf").
+
+  - Verify that "make" and "make check" pass.
+
+For non-Unix systems, a separate handler-<os>.c is likely to be needed.
+There are already two of them, namely handler-win32.c and handler-mach.c;
+the latter is configurable with a machfault-<os>-<cpu>.h file similarly to
+the generic Unix port.
+
+If this is the case, you should add code at the top of the configure script
+which chooses it depending on the host system's triplet.  There is a case
+statement with an arm for each such file, which also enables some or all of
+the other parts of the configuration by setting the CFG_* variables.  A
+value of "detect" will try to use the existing configuration machinery to
+detect the most appropriate file.
+
+Try to make the handler-<os>.c file as generic as possible; the
+handler-unix.c and handler-mach.c are good examples of this.  If possible,
+move the platform dependencies to CFG_FAULT, and maybe try to detect them
+as part of the configuration process.  If an operating system is composed
+of more than one layer (such as Darwin's BSD and Mach layers, or Cygwin's
+Win32 and POSIX layers) pick the most appropriate one instead of relying
+on both: otherwise, the code will probably be less maintainable and more
+subject to negative interactions between the various layers.
+
+Stack-overflow detection
+========================
+
+On the average platform, including Unix and Mach, we must distinguish
+stack overflow from other segmentation violations using some kind of
+heuristics.  At least two of the following must be true:
+
+      A) CFG_FAULT points to an include file which defines
+         SIGSEGV_FAULT_ADDRESS.
+      B) CFG_FAULT points to an include file which defines
+         SIGSEGV_FAULT_STACKPOINTER.
+      C) There is a stackvma-*.c, other than stackvma-none.c, which
+         defines sigsegv_get_vma.
+
+If we have A) and B), we use the
+
+     Heuristic AB: If the fault address is near the stack pointer, it's a
+     stack overflow.  This is implemented in heur-ab.h and takes special
+     care for the IA-64's special stack handling.
+
+If we have A) and C), we use the
+
+     Heuristic AC: If the fault address is near and beyond the bottom of
+     the stack's virtual memory area, it's a stack overflow.  This is
+     implemented in heur-ac.h.
+
+If we have B) and C), we use the
+
+     Heuristic BC: If the stack pointer is near the bottom of the stack's
+     virtual memory area, it's a stack overflow.  This is implemented in
+     heur-bc.h and comes in two flavours: on OSes which let the stack's
+     VMA grow continuously, we determine the bottom by use of getrlimit();
+     on OSes which preallocate the stack's VMA with its maximum size
+     (like BeOS), we use the stack's VMA directly.
+
+Using these heuristics is quite easy.  Just set CFG_STACKVMA to a file
+name or "detect" at the top of configure.in, and make sure that the
+appropriate #defines are made in your CFG_FAULT file.  Also make sure
+that you don't set sv_cv_have_stack_overflow_recovery: then, configure
+will do the appropriate checks automatically and define
+HAVE_STACK_OVERFLOW_RECOVERY to 1 if and only if one of the heuristics
+can be adopted.
+
+On the other hand, if you do not need any heuristics (like under Win32),
+be sure to set sv_cv_have_stack_overflow_recovery to yes.

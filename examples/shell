@@ -1,0 +1,182 @@
+#Smalltalk ==                     "start of -*- Smalltalk -*- comment
+exec gst "$0" -aQ $@              # end  of     Smalltalk     comment"!
+
+"======================================================================
+|
+|   Example of starting a Smalltalk program from the shell
+|
+ ======================================================================"
+
+" The first two lines above needs some explanations.
+|
+| The first line is nothing more than a comment to bash, so the first thing
+| bash sees is the second line, up to the hash sign: an `exec' command
+| which starts gst. And nothing more, since the child shell's execution
+| stops after it launches GNU Smalltalk.
+| 
+| Instead, what Smalltalk sees after you delete the Smalltalk comments, is
+| `#Smalltalk == $0!': a valid expression which is executed but produces no
+| visible results.
+| 
+| Also, note that you can put the -*- MODE -*- signature used by Emacs on the
+| first line.
+|
+| This technique should be used with script that you expect to take at least a
+| few seconds to run, since Smalltalk's startup is not exactly lightning fast.
+| 
+| Since we are talking about Unix, I'll put here some more magic:
+|
+| a) add this to your /usr/share/magic file:
+|  
+|    # GNU Smalltalk image, starting at version 1.6.2
+|    0	string		GSTIm\0\0	GNU Smalltalk image
+|
+| b) echo these two to /proc/sys/fs/binfmt_misc/register under Linux (maybe
+| from a startup script) -- nothing goes before the first colons, and
+| remember to use double backslashes from the shell!):
+|
+|    :GSTIm_Magic:M::GSTIm\x0\x0::/usr/bin/gst-startimage
+|    :GSTIm_Ext:E::.im::/usr/bin/gst-startimage
+|
+| putting this in /usr/bin/gst-startimage
+|
+|    #! /bin/sh
+|    exec gst -I $1
+|
+|
+| Now here is the file juggler by Alexander Lazarevic, the first Smalltalk
+| script known to me. <Alexander@Lazarevic.de>
+|
+| Usage: popoolate [inputdir] [pooldir]
+|
+| I assume everybody has this one kind of folder called temp, incoming,
+| files or whatever. There is all the rubble you've downloaded from the
+| web (and surprisingly much more). Once in a while you wade through
+| all the files and delete the ones you think you don't need
+| anymore. The rest stays in the folder and the folder grows and
+| grows...
+| This kind of folder is what popoolate expects as the inputdir
+| parameter. Basically popoolate just copies the files from inputdir to
+| pooldir, but in addition it creates subfolders in pooldir according
+| to the filenames.
+
+| For example I have a directory (in) where I have some snapshots of my
+| son, some karaoke music and some other stuff. After using popoolate
+| the folder in will be empty and the folder pool will have
+| the following structure:
+
+| in--Leon-0019.jpg     pool - l - leon  - leon-0019.jpg
+|     Leon-0030.jpg                        leon-0020.jpg
+|     PeSo-99.mp3                          leon10.jpg
+|     World_9.pdf              p - peso  - peso-99.mp3
+|     leon10.jpg                   pop   - pop10a.mp3
+|     pop10a.mp3                           pop10b.mp3
+|     pop10b.mp3                           pop10c.mp3
+|     pop10c.mp3               w - world - world-1.pdf
+|     world-1.pdf                          world_9.pdf
+"
+
+| error inputDir poolDir namePattern rightPattern |
+
+PackageLoader fileInPackages: #('Regex').
+
+error := [:message| stderr nextPutAll: message; nl.
+		    ObjectMemory quit: 1].
+
+Smalltalk arguments size ~= 2
+   ifTrue: [error value: 'usage: popoolate [inputdir] [pooldir]'].
+    
+inputDir := Directory name: (Smalltalk arguments first).
+inputDir isDirectory
+   ifFalse: [error value: '"', inputDir name, '" is no directory!'].
+inputDir isWriteable
+   ifFalse: [error value: '"', inputDir name, '" is unwriteable!'].
+inputDir isReadable
+   ifFalse: [error value: '"', inputDir name, '" is unreadable!'].
+inputDir isAccessible
+   ifFalse: [error value: '"', inputDir name, '" is unaccessible!'].
+    
+poolDir := Directory name: (Smalltalk arguments last).
+inputDir isDirectory
+   ifFalse: [error value: '"', inputDir name, '" is no directory!'].
+inputDir isWriteable
+   ifFalse: [error value: '"', inputDir name, '" is unwriteable!'].
+inputDir isAccessible
+   ifFalse: [error value: '"', inputDir name, '" is unaccessible!'].
+
+"Uncomment this to test....
+
+#('a' 'noep' 'aa' 'n' 'Bnm' 'HjKlo') do:
+   [:name|
+      1 to: 300 do:
+         [:num||file|
+	    file := FileStream
+		   open: '/tmp/in/', name, '-', num printString, '.tst'
+		   mode: FileStream write.
+	    file close]]
+]."
+
+namePattern := (
+   '[~]',       "Not allowed anywhere in the filename"
+   '|',
+   '^[!._]',    "Not allowed at the beginning"
+   '|',
+   '^.*\\',     "Cut DOS path"
+   '|',
+   '\s[^.]*$')  "Cut trailing garbage after extension"
+
+   asRegex.
+
+"This pattern assumes that a (lowercase) filename belongs to a
+ series of filenames and that it has a left and right side. The
+ left side is the stem part and is the same for all filenames in
+ the series. The right side consists of an index part and a file
+ extension (in that order). This pattern tries to match the index
+ part and file extension (right side), leaving the stem part (left
+ side)."
+
+rightPattern := (
+   '(',                    "Index part might start with"
+     '([_-])\d+',          "a _ or - and at least one digit"
+   '|',                    "or"
+   '(\d\d\d|\d\d|\d)',     "with exactly three, two or one
+                            digit(s) as an index number"
+   ')',
+   '[a-z]?',               "Between index part and extension might be"
+                           "a single letter"
+   '\..*')                 "The extension is anything including
+                            the first dot upto the end, eg. .pdf
+                            but also .tex.gz"
+   asRegex.
+    
+inputDir contents do:
+   [:origname|| file | 
+    file := inputDir at: origname.
+    ((origname first = $. or: [file isDirectory]) or: [file isReadable not])
+       ifTrue:  [stdout nextPutAll: 'Ignoring ', origname; nl]
+       ifFalse: [| cleanname series slot seriesDir slotDir|
+                 cleanname := origname asLowercase.
+                 cleanname := cleanname copyReplacingAllRegex: namePattern with: ''.
+                 series := cleanname copyReplacingAllRegex: rightPattern with: ''.
+                 (series isEmpty or: [series = cleanname])
+                    ifTrue:  [slot := 'single'.
+                              series := nil.]
+                    ifFalse: [series first isAlphaNumeric
+                                ifTrue:  [slot := series first asString]
+                                ifFalse: [slot := 'misc']].
+                 slotDir := (poolDir directoryAt: slot).
+                 slotDir exists
+		    ifFalse: [Directory create: slotDir name.
+                              stdout nextPutAll: slotDir name, ' created.';nl].
+                 series = nil
+                    ifTrue:  [seriesDir := slotDir]
+                    ifFalse: [seriesDir := (slotDir directoryAt: series).
+                              seriesDir exists
+		              ifFalse: [Directory create: seriesDir name.
+                                        stdout nextPutAll: seriesDir name, ' created.';nl]].
+                 stdout nextPutAll: origname, ' -> ', (seriesDir nameAt: cleanname); nl.
+                 file renameTo: '/', (seriesDir fullNameAt: cleanname).
+                ]].
+    ObjectMemory quit: 0.
+    
+!

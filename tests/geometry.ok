@@ -1,0 +1,87 @@
+
+Execution begins...
+'p1 = '123@456
+'p2 = '123@456
+returned value is Point new "<0>"
+
+Execution begins...
+'(p x) = '123
+'(p y) = '456
+'p = '321@456
+'p = '321@654
+returned value is Point new "<0>"
+
+Execution begins...
+'A < B = 'true
+'A < C = 'false
+'A > C = 'false
+'B > A = 'true
+'A max: B = '175@270
+'A min: B = '45@230
+returned value is Point new "<0>"
+
+Execution begins...
+'A + B = '220@530
+'A + 175 = '220@405
+'A - B = '-130@-70
+'D / 50 = '16/5@24/5
+'D // 50 = '3@4
+'D // C = '3@4
+'(A - B) abs = '130@70
+'120.5@220.7 rounded = '121@221
+'D truncateTo: 50 = '150@200
+returned value is Point new "<0>"
+
+Execution begins...
+'A dist: B = '136.014705087354
+'C dotProduct: D = '20000
+'C grid: D = '150@250
+'C normal = '-0.83205029433784@0.55470019622523
+'C truncatedGrid: D = '150@200
+'175@300 transpose = '300@175
+returned value is Point new "<0>"
+
+Execution begins...
+'5 lines should be the same: A = 100@100 corner: 200@200'
+'A = '100@100 corner: 200@200
+'A = '100@100 corner: 200@200
+'A = '100@100 corner: 200@200
+'A = '100@100 corner: 200@200
+'A = '100@100 corner: 200@200
+returned value is Rectangle new "<0>"
+
+Execution begins...
+'A = '100@100 corner: 250@250
+'topLeft = '100@100
+'top = '100
+'rightCenter = '250@175
+'bottom = '250
+'center = '175@175
+'extent = '150@150
+'area = '22500
+returned value is 22500
+
+Execution begins...
+50@250
+120@120 corner: 200@200
+100@300 corner: 300@400
+(120@50 corner: 200@120 50@50 corner: 120@200 )
+(300@20 corner: 400@400 20@20 corner: 100@400 100@20 corner: 300@300 )
+(120@20 corner: 260@120 260@20 corner: 400@400 120@240 corner: 260@400 20@20 corner: 120@400 )
+90@290 corner: 310@410
+110@320 corner: 290@380
+100@300 corner: 300@400
+returned value is Rectangle new "<0>"
+
+Execution begins...
+false
+true
+true
+returned value is true
+
+Execution begins...
+100@100 corner: 250@250
+200@300 corner: 350@450
+400@600 corner: 700@900
+100@200 corner: 250@350
+returned value is Rectangle new "<0>"

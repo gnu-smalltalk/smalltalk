@@ -1,0 +1,124 @@
+The program
+-----------
+
+Acknowledgments for the 1.1.5 release (Steve Byrne):
+
+Fritz Nordby, Michael Mellinger, Doug McCallum, Karl Berry, Dave
+Bodenstab, Brad Diller, Mark Wadsworth, Bill Trost, William Cook, Trip
+Becket, Alan Knight, Alistair Grant, Michael Richardson, Andrew Gelsey,
+Kevin Hester, David MacKenzie, Doug Peters, Michael Bushnell, Florin
+Spanachi, David England, Charles Johnson, David B. Serafini, R James
+Noble, David Duke, Mark S. Johnson, Gary Campbell, Peter Dobcsany, Kent
+Williams, Wilson Ho, Karl Kleinpaste, Len Tower, Paul Regenhardt, Joe
+Pallas, Peter Kropf, Mark Bush, Per Bothner, Kevin Rigotti, Lance
+Norskog, Pascal Meheut, Richard Goerwitz, Horst Duchene, Olivier Blanc,
+Jeff Baird, P. Lecoanet.
+
+
+
+Acknowledgements for Blox (Brad Diller):
+
+Steve Byrne                       <sbb@gnu.org>
+L. Peter Deutsch                  <ghost@aladdin.com>
+Eben Moglen                       <moglen@columbia.edu>
+Richard Stallman                  <rms@gnu.org>
+
+
+
+Acknowledgments from version 1.6 on (yours truly Paolo Bonzini):
+
+Mike Anderson                     <msasjf@yahoo.co.uk>
+Pahi Andras                       <pahi@info-m.hu>
+Simon Britnell                    <ughbash@yahoo.com>
+Nicolas Burrus                    <Nicolas.Burrus@epita.fr>
+Carlo Dapor                       <catull_us@yahoo.com>
+Ulf Dambacher                     <ulf.dambacher@mach.uni-karlsruhe.de>
+Federico Di Gregorio		  <fog@debian.org>
+Jeremy Dreese                     <jdreese@bucknell.edu>
+Mark Elbrecht                     <snowball@bigfoot.com>
+David Forster			  <dforste@m-net.arbornet.org>
+Markus Fritsche                   <marbusse@t-online.de>
+Norman Jordan			  <njordan@shaw.ca>
+GertJan Kersten                   <GertJan.Kersten@bolesian.nl>
+Casper Kit			  <casper.kit@holland.sun.com>
+Thorsten Klein                    <TK@Thorsten-Klein.de>
+Andreas Klimas			  <aklimas@iridium.de>
+Bruce Korb			  <bkorb@gnu.org>
+Alexander Lazarevic               <alexander@lazarevic.de>
+Fernando Lopez Hernandez          <fernando@macprogramadores.org>
+Peter William Lount		  <peter@smalltalk.org>
+Elisa Manara                      <e@entropika.net>
+David Mentre			  <david.mentre@wanadoo.fr>
+Dragomir Milivojevic              <dmilivoj@bigfoot.com>
+Eben Moglen                       <moglen@columbia.edu>
+Hiroshi Nanosecond                <aldomel@ix.netcom.com>
+Ryan Pavlik                       <rpav@users.sourceforge.net>
+Nicolas Pelletier		  <nicolas.pelletier3@wanadoo.fr>
+Ian Piumarta                      <piumarta@inria.fr>
+Jeff Rosenwald			  <jeffrose@acm.org>
+Alexander Shinn                   <foof@debian.org>
+Dirk Sondermann 		  <d.sondermann@freenet.de>
+Richard Stallman                  <rms@gnu.org>
+Montgomery F. Tidwell             <mtidwell@practicalmatters.com>
+Arjen van Elteren                 <arjen@and.nl>
+Tim van Holder			  <tim.van.holder@pandora.be>
+Zoltan Varga                      <zvarga@gw.cdk.bme.hu>
+Sven Verdolaage                   <skimo@kotlit.org>
+Albert Wagner                     <alwagner@tcac.net>
+Nigel Williams                    <nigelw@elder-gods.net>
+
+Plus all the people on comp.lang.smalltalk and Camp Smalltalk:
+
+John Brant
+Vassili Bykov
+Claus Gittinger
+Travis Griggs
+Richard A. Harmon
+Reinout Heeck
+Eliot Miranda
+Paul McDonough
+Joseph Pelrine
+James A. Robertson
+Don Roberts
+Peter van Roojen
+David Simmons
+
+(and many more)
+
+
+I also thank specially the two people who followed me patiently through 
+the revival of GNU Smalltalk as I worked out the alphas that eventually
+led to version 1.6: David V. Duccini (duccini@backpack.com), who helped
+a lot with his enthusiasm in the earliest phases of testing, as I grew
+more comfortable with Steve's code, and Andreas Klimas, who made available
+to me his knowledge of Smalltalk but, above all, his C and Unix expertise.
+
+And of course, last but definitely not the least, Steve Byrne
+(sbb@gnu.org), for his feedback in discussing issues related to GNU
+Smalltalk's implementation, for having put me in contact with all the
+people asking him about GNU Smalltalk, and for sharing with me the
+source code for his unpublished improvements to version 1.1.5 of GNU
+Smalltalk.  Steve, I sincerely hope you like what I do to your program.
+
+The tutorial
+------------
+
+Thanks to Steve Byrne for writing GNU Smalltalk in the first place.
+Great thanks to Mark Bush and Bob Roos for their meticulous jobs of
+proofreading this document, and the generous amounts of input they
+provided on refinements to the contents and structure. Thanks also to
+Andrew Berg for his comments on the early chapters of the document.
+
+This document is provided as-is, without warranty, but I will happily
+accept reports of any errors. If time permits, I will perhaps even
+release a corrected revision of the document.
+
+I release this document into the public domain, and simply request that
+you acknowledge me as the original author in any use or derivative work
+you make of this document.
+
+                         Andy Valencia
+                         325 Union Ave #359
+                         Campbell, CA 95008
+                         jtk@netcom.com (Not checked)
+                         November 27, 1992

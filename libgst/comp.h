@@ -1,0 +1,333 @@
+/******************************** -*- C -*- ****************************
+ *
+ *	Declarations for the byte code compiler.
+ *
+ *
+ ***********************************************************************/
+
+/***********************************************************************
+ *
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+ * Free Software Foundation, Inc.
+ * Written by Steve Byrne.
+ *
+ * This file is part of GNU Smalltalk.
+ *
+ * GNU Smalltalk is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2, or (at your option) any later 
+ * version.
+ * 
+ * GNU Smalltalk is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * GNU Smalltalk; see the file COPYING.  If not, write to the Free Software
+ * Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+ *
+ ***********************************************************************/
+
+
+#ifndef GST_COMP_H
+#define GST_COMP_H
+
+/* These next three defines are the number of bits in a method header for
+   the number of stack bits, the number of _gst_temporaries, and the number of
+   arguments that the method takes.  If the representation is changed, these
+   definitions need to be altered too */
+#define DEPTH_SCALE		2
+#define MAX_DEPTH		(((1 << MTH_DEPTH_BITS) - 1) << DEPTH_SCALE)
+#define MAX_NUM_TEMPS		((1 << MTH_TEMPS_BITS) - 1)
+#define MAX_NUM_ARGS		((1 << MTH_ARGS_BITS) - 1)
+#define NUM_PRIMITIVES		(1 << MTH_PRIM_BITS)
+
+/*
+ * This is the organization of a method header.  The 1 bit in the high end of
+ * the word indicates that this is an integer, so that the GC won't be tempted
+ * to try to scan the contents of this field, and so we can do bitwise operations
+ * on this value to extract component pieces.
+ * 
+ *    3                   2                   1 
+ *  1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |.|flags| prim index        | #temps    |   depth   | #args   |1|
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * 
+ * flags (30-28)
+ *   flags 0 -- nothing
+ *   flags 1 -- return _gst_self
+ *   flags 2 -- return instance variable (# in primitive index)
+ *   flags 3 -- return literal
+ *   flags 4 -- primitive index
+ */
+
+#define MTH_DEPTH_BITS		6
+#define MTH_TEMPS_BITS		6
+#define MTH_ARGS_BITS		5
+#define MTH_PRIM_BITS		10
+#define MTH_FLAG_BITS		3
+
+typedef struct method_header
+{
+#ifdef WORDS_BIGENDIAN
+#if SIZEOF_LONG == 8
+  unsigned dummy:32;		/* unused */
+#endif
+  unsigned:1;			/* sign - must be 0 */
+  unsigned headerFlag:MTH_FLAG_BITS;	/* prim _gst_self, etc. */
+  unsigned primitiveIndex:MTH_PRIM_BITS;	/* index of primitve,
+						   or 0 */
+  unsigned numTemps:MTH_TEMPS_BITS;
+  unsigned stack_depth:MTH_DEPTH_BITS;
+  unsigned numArgs:MTH_ARGS_BITS;
+  unsigned intMark:1;		/* flag this as an Int */
+#else
+  unsigned intMark:1;		/* flag this as an Int */
+  unsigned numArgs:MTH_ARGS_BITS;
+  unsigned stack_depth:MTH_DEPTH_BITS;
+  unsigned numTemps:MTH_TEMPS_BITS;
+  unsigned primitiveIndex:MTH_PRIM_BITS;	/* index of primitve,
+						   or 0 */
+  unsigned headerFlag:MTH_FLAG_BITS;	/* prim _gst_self, etc. */
+  unsigned:1;			/* sign - must be 0 */
+#if SIZEOF_LONG == 8
+  unsigned dummy:32;		/* unused */
+#endif
+#endif				/* WORDS_BIGENDIAN */
+}
+method_header;
+
+typedef struct gst_compiled_method
+{
+  OBJ_HEADER;
+  OOP literals;
+  method_header header;
+  OOP descriptor;
+  gst_uchar bytecodes[1];
+}
+ *gst_compiled_method;
+
+typedef struct gst_method_info
+{
+  OBJ_HEADER;
+  OOP sourceCode;
+  OOP category;
+  OOP class;
+  OOP selector;
+}
+ *gst_method_info;
+
+
+/*
+ * These definition parallel the above ones, but they are for blocks. Here is
+ * the organization of a block header.
+ * 
+ *    3                   2                   1 
+ *  1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |.|  #args  | #temps  |   depth   |      unused     | clean   |1|
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * 
+ */
+
+#define BLK_DEPTH_BITS		6
+#define BLK_TEMPS_BITS		5
+#define BLK_ARGS_BITS		5
+#define BLK_CLEAN_BITS		5
+#define BLK_UNUSED_BITS		9
+
+typedef struct block_header
+{
+#ifdef WORDS_BIGENDIAN
+#if SIZEOF_LONG == 8
+  unsigned dummy:32;		/* unused */
+#endif
+  unsigned:1;			/* sign - must be 0 */
+  unsigned numArgs:BLK_ARGS_BITS;	/* number of arguments we have */
+  unsigned numTemps:BLK_TEMPS_BITS;	/* number of _gst_temporaries
+					   we have */
+  unsigned depth:BLK_DEPTH_BITS;	/* number of stack slots needed 
+					 */
+  unsigned unused:BLK_UNUSED_BITS;
+  unsigned clean:BLK_CLEAN_BITS;	/* behavior of block */
+  unsigned intMark:1;		/* flag this as an Int */
+#else
+  unsigned intMark:1;		/* flag this as an Int */
+  unsigned clean:BLK_CLEAN_BITS;	/* behavior of block */
+  unsigned unused:BLK_UNUSED_BITS;
+  unsigned depth:BLK_DEPTH_BITS;	/* number of stack slots needed 
+					 */
+  unsigned numTemps:BLK_TEMPS_BITS;	/* number of _gst_temporaries
+					   we have */
+  unsigned numArgs:BLK_ARGS_BITS;	/* number of arguments we have */
+  unsigned:1;			/* sign - must be 0 */
+#if SIZEOF_LONG == 8
+  unsigned dummy:32;		/* unused */
+#endif
+#endif
+}
+block_header;
+
+typedef struct gst_compiled_block
+{
+  OBJ_HEADER;
+  OOP literals;
+  block_header header;
+  OOP method;
+  gst_uchar bytecodes[1];
+}
+ *gst_compiled_block;
+
+typedef struct gst_block_closure
+{
+  OBJ_HEADER;
+  OOP outerContext;		/* the parent gst_block_context or
+				   gst_method_context */
+  OOP block;			/* the gst_compiled_block */
+  OOP receiver;			/* the receiver in which the closure
+				   lives */
+}
+ *gst_block_closure;
+
+
+/* These hold the compiler's notions of the current class for compilations,
+   and the current category that compiled methods are to be placed into */
+extern OOP _gst_this_class, _gst_latest_compiled_method;
+
+/* This is the value most recently returned by
+   _gst_execute_statements.  It is used to communicate the returned
+   value past a _gst_parse_stream call, without pushing something on
+   the called context stack in the case of nested invocations of
+   _gst_prepare_execution_environment/_gst_finish_execution_environment.
+   Most often, the caller does not care about the returned value,
+   since it often is called from a radically different context. */
+extern OOP _gst_last_returned_value;
+
+/* This flag controls whether byte codes are printed after
+   compilation. */
+extern mst_Boolean _gst_declare_tracing;
+
+/* If true, the compilation of a set of methods will be skipped
+   completely; only syntax will be checked.  Set by primitive, cleared
+   by grammar. */
+extern mst_Boolean _gst_skip_compilation;
+
+/* This is set to true by the parser or the compiler if an error
+   (respectively, a parse error or a semantic error) is found, and
+   avoids that _gst_execute_statements tries to execute the result of
+   the compilation. */
+extern mst_Boolean _gst_had_error;
+
+/* Called to compile and execute an "immediate expression"; i.e. a set
+   of Smalltalk statements that are not part of a method definition.
+   The parse trees are in TEMPORARIES and STATEMENTS.  Return the object
+   that was returned by the expression. */
+extern OOP _gst_execute_statements (tree_node temporaries,
+				    tree_node statements,
+				    mst_Boolean quiet);
+
+/* This function will print a message describing the method category
+   and class being compiled.  The message can have the form "STRING
+   _GST_THIS_CATEGORY for _GST_THIS_CLASS" or "STRING for
+   _GST_THIS_CLASS", depending on the value of CATEGORY. */
+extern void _gst_display_compilation_trace (char *string,
+				  mst_Boolean category);
+
+/* This routine does a very interesting thing.  It installs the inital
+   method, which is the primitive for "methodsFor:".  It does this by
+   creating a string that contains the method definition and then
+   passing this to the parser as an expression to be parsed and
+   compiled.  Once this has been installed, we can go ahead and begin
+   loading the rest of the Smalltalk method definitions, but until the
+   "methodsFor:" method is defined, we cannot begin to deal with
+
+  	!Object methodsFor: 'primitives'!
+  
+   In addition, we also define the special
+   UndefinedObject>>#__terminate method here, because bytecode 143
+   cannot be compiled by parsing Smalltalk code. */
+extern void _gst_install_initial_methods (void);
+
+/* Sets the compiler's notion of the class to compile methods into. */
+extern void _gst_set_compilation_class (OOP class_oop);
+
+/* Sets the compiler's notion of the current method category. */
+extern void _gst_set_compilation_category (OOP categoryOOP);
+
+/* This function will send a message to ObjectMemory (a system
+   class) asking it to broadcast the event named HOOK. */
+extern void _gst_invoke_hook (char *hook);
+
+/* Store VALUEOOP as the INDEX-th literal of the CompiledMethod or
+   CompiledBlock METHODOOP. INDEX is 1-based. */
+extern void _gst_compiled_method_at_put (OOP methodOOP,
+			       long int index,
+			       OOP valueOOP);
+
+/* Retrieve and return the INDEX-th literal of the CompiledMethod or
+   CompiledBlock METHODOOP. */
+extern OOP _gst_compiled_method_at (OOP methodOOP,
+			   long int index);
+
+/* Prepares the compiler for execution, initializing some variables. */
+extern void _gst_init_compiler (void);
+
+/* Compile the code for a complete method definition.  This basically
+   walks the METHOD parse tree, but in addition it special cases for
+   methods that don't return a value explicitly by returning "self".
+   Also creates the CompiledMethod object and, if INSTALL is true,
+   installs it in the current method dictionary with the selector
+   derived from the method expression. */
+extern OOP _gst_compile_method (tree_node method,
+				mst_Boolean returnLast,
+				mst_Boolean install);
+
+/* Constructs and returns a new CompiledMethod instance.  It computes
+   the method header based on its arguments, and on the contents of
+   the method's byte codes (setting up the flags to optimize returns).
+   LITERALS is a Smalltalk Array containing the literals, or nil if we
+   retrieve it from the array internal to comp.c */
+extern OOP _gst_make_new_method (int primitiveIndex,
+			int numArgs,
+			int numTemps,
+			int maximumStackDepth,
+			OOP literals,
+			bytecodes bytecodes,
+			OOP class,
+			OOP selector);
+
+/* This function looks for the UndefinedObject>>#__terminate method
+   (if it is not cached already) and answers it.  This method is
+   executed by contexts created with
+   _gst_prepare_execution_environment. */
+extern OOP _gst_get_termination_method (void) ATTRIBUTE_PURE;
+
+/* Creates and returns a CompiledBlock.  The object is not completely
+   filled in, as we only know the method literals and enclosing method
+   when we create the outer CompiledMethod; the header is however
+   filled, analyzing the BYTECODES to check the block's cleanness. */
+extern OOP _gst_block_new (int numArgs,
+		  int numTemps,
+		  bytecodes bytecodes,
+		  int depth,
+		  OOP * literals);
+
+/* Adds OOP to the literal vector that's being created, unless it's
+   already there.  "Already there" is defined as the exact same object
+   is present in the literal vector.  The answer is the index into the
+   literal vector where the object was stored. */
+extern int _gst_add_forced_object (OOP oop);
+
+/* This routine is called during image loading to restore the
+   primitive number in a CompiledMethod.  This is because we achieve
+   better binary compatibility if we keep the primitives name
+   invariant, rather than the primitive index, across image loads.
+   This allows us to keep the primitive list in prims.inl in a logical
+   order rather than having to add at the end of the list.  MAP
+   associates primitive numbers in the saved image (obtained by the
+   saved VMPrimitives dictionary) to primitive numbers in this VM. */
+extern void _gst_restore_primitive_number (OOP methodOOP, int *map);
+
+#endif /* GST_COMP_H */

@@ -1,0 +1,57 @@
+
+Execution begins...
+returned value is Process
+
+Execution begins...
+Process('test 1' at userSchedulingPriority, suspended)
+'inside p'
+Process('test 1' at userSchedulingPriority, terminated)
+returned value is Process new "<0>"
+
+Execution begins...
+Process('test 2' at userSchedulingPriority, suspended)
+'inside p'
+Process('test 2' at userSchedulingPriority, suspended)
+'suspension finished'
+Process('test 2' at userSchedulingPriority, terminated)
+returned value is Process new "<0>"
+
+Execution begins...
+Process('test 3' at userSchedulingPriority, suspended)
+'inside p'
+Process('test 3' at userSchedulingPriority, ready to run)
+'yielded back to p'
+Process('test 3' at userSchedulingPriority, terminated)
+returned value is Process new "<0>"
+
+Execution begins...
+Process('test 4' at userSchedulingPriority, suspended)
+'inside p'
+Process('test 4' at userSchedulingPriority, waiting on a semaphore)
+'wait finished'
+Process('test 4' at userSchedulingPriority, terminated)
+returned value is Process new "<0>"
+
+Execution begins...
+Process('background' at userBackgroundPriority, active)
+Process('background' at userBackgroundPriority, ready to run)
+Process('background' at userBackgroundPriority, terminated)
+returned value is Process new "<0>"
+
+Execution begins...
+Process('interrupted' at userInterruptPriority, active)
+Process('interrupted' at userInterruptPriority, suspended)
+Process('interrupted' at userInterruptPriority, terminated)
+returned value is Process new "<0>"
+
+Execution begins...
+returned value is true
+
+Execution begins...
+returned value is true
+
+Execution begins...
+returned value is true
+
+Execution begins...
+returned value is true

@@ -1,0 +1,46 @@
+libtool patch
+-------------
+
+The version of libtool that was used to build the files distributed
+with GNU Smalltalk have been slightly modified with respect to libtool
+1.4.3; this patch is needed to provide a way to disable shared libraries
+selectively for libtool.m4.  You can use CVS libtool instead of this.
+
+In addition I have upgraded libltdl to use autoconf 2.53 (for
+coherency and because of the increased speed in config.status); this
+however should be completely transparent.
+
+diff -U3 -r libtool-1.4.3-orig/ltmain.sh libtool-1.4.3/ltmain.sh
+--- libtool-1.4.3-orig/ltmain.sh	Thu Apr 26 12:08:03 2001
++++ libtool-1.4.3/ltmain.sh	Thu Apr 26 12:10:04 2001
+@@ -119,6 +119,16 @@
+     execute_dlfiles)
+       execute_dlfiles="$execute_dlfiles $arg"
+       ;;
++ 
++    ### Changed by Paolo Bonzini (Apr 26 2001), this change
++    ### is compatible with libtool 1.4's multi-language branch
++    tag)
++      test "x$arg" = xdisable-shared && build_libtool_libs=no build_old_libs=yes
++      test "x$arg" = xdisable-static && build_old_libs=no build_libtool_libs=yes
++      test "x$arg" = xenable-shared && build_libtool_libs=yes
++      test "x$arg" = xenable-static && build_old_libs=yes
++      ;;
++ 
+     *)
+       eval "$prev=\$arg"
+       ;;
+@@ -152,6 +162,13 @@
+ 
+   --dry-run | -n)
+     run=:
++    ;;
++
++  ### Changed by Paolo Bonzini (Apr 26 2001), this change
++  ### is compatible with libtool 1.4's multi-language branch
++  --tag)
++    prevopt="--tag"
++    prev=tag
+     ;;
+ 
+   --features)

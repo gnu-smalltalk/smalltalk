@@ -1,0 +1,30 @@
+2003-06-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 2.1.3 released.
+
+2003-05-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 2.1.2 released.
+
+2003-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
+        *** Version 2.1.1 (stable) released.
+
+2003-04-12  Paolo Bonzini  <bonzini@gnu.org>
+
+        *** Version 2.1 (stable) released.
+
+2002-09-13  Paolo Bonzini  (bonzini@gnu.org)
+
+        *** Versions 2.0c (development) released
+
+2002-08-12  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 2.0b (development) released
+
+	* db/DB.st: new file
+	* db/MySQL.st: new file
+	* db/MySQLTests.st: new file
+	* db/mysql-test.st: new file
+
+

@@ -1,0 +1,90 @@
+"======================================================================
+|
+|   Smalltalk Gtk+ bindings examples
+|
+ ======================================================================"
+
+
+"======================================================================
+|
+| Copyright 2001, 2003 Free Software Foundation, Inc.
+| Written by Paolo Bonzini.
+|
+| This file is part of the GNU Smalltalk class library.
+|
+| The GNU Smalltalk class library is free software; you can redistribute it
+| and/or modify it under the terms of the GNU Lesser General Public License
+| as published by the Free Software Foundation; either version 2.1, or (at
+| your option) any later version.
+| 
+| The GNU Smalltalk class library is distributed in the hope that it will be
+| useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
+| General Public License for more details.
+| 
+| You should have received a copy of the GNU Lesser General Public License
+| along with the GNU Smalltalk class library; see the file COPYING.LESSER.
+| If not, write to the Free Software Foundation, 59 Temple Place - Suite
+| 330, Boston, MA 02111-1307, USA.  
+|
+ ======================================================================"
+
+Namespace current: GTK!
+
+
+Object subclass: #ArrowExample
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: nil!
+
+!GtkButton class methodsFor: 'creating arrow buttons'!
+
+createArrowButton: arrowType shadowType: shadowType
+    | button arrow |
+    button := self new.
+    arrow := GtkArrow new: arrowType shadowType: shadowType.
+    button add: arrow.
+    button show.
+    arrow show.
+    ^button
+! !
+
+!ArrowExample methodsFor: 'event handling'!
+
+destroy: object data: data
+    Gtk mainQuit
+! !
+
+!ArrowExample methodsFor: 'layout'!
+
+open
+    | window button box |
+    window := GtkWindow new: Gtk gtkWindowToplevel.
+    window setTitle: 'Arrow Buttons'.
+    window connectSignal: 'destroy' to: self selector: #destroy:data: userData: nil.
+    window setBorderWidth: 10.
+
+    box := GtkHBox new: false spacing: 0.
+    box setBorderWidth: 2.
+    window add: box.
+
+    button := GtkButton createArrowButton: Gtk gtkArrowUp shadowType: Gtk gtkShadowIn.
+    box packStart: button expand: false fill: false padding: 3.
+
+    button := GtkButton createArrowButton: Gtk gtkArrowDown shadowType: Gtk gtkShadowOut.
+    box packStart: button expand: false fill: false padding: 3.
+
+    button := GtkButton createArrowButton: Gtk gtkArrowLeft shadowType: Gtk gtkShadowEtchedIn.
+    box packStart: button expand: false fill: false padding: 3.
+
+    button := GtkButton createArrowButton: Gtk gtkArrowRight shadowType: Gtk gtkShadowEtchedOut.
+    box packStart: button expand: false fill: false padding: 3.
+
+    box show.
+    window show
+! !
+
+Gtk gstGtkInit!
+ArrowExample new open!
+Gtk main!

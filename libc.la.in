@@ -1,0 +1,18 @@
+# libc.la - a libtool library file
+# @configure_input@
+# Created for GNU Smalltalk's dynamic loading mechanism.
+
+# The name that we can dlopen(3).
+dlname='@LIBC_SO_NAME@'
+
+# Names of this library.
+library_names='@LIBC_SO_NAME@'
+
+# Libraries that this one depends upon.
+dependency_libs=''
+
+# Is this an already installed library?
+installed=yes
+
+# Directory that this library needs to be installed in:
+libdir='@LIBC_SO_DIR@'

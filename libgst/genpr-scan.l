@@ -1,0 +1,278 @@
+/******************************** -*- C -*- ****************************
+ *
+ *	GNU Smalltalk genprims tool - lexical analyzer
+ *
+ ***********************************************************************/
+
+/***********************************************************************
+ *
+ * Copyright 2002 Free Software Foundation, Inc.
+ * Written by Paolo Bonzini.
+ *
+ * This file is part of GNU Smalltalk.
+ *
+ * GNU Smalltalk is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2, or (at your option) any later 
+ * version.
+ * 
+ * GNU Smalltalk is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * GNU Smalltalk; see the file COPYING.  If not, write to the Free Software
+ * Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+ *
+ ***********************************************************************/
+
+%x C_COMMENT
+%x C_CHAR
+%x C_STRING
+%x CPP_CODE
+%x C_CODE
+
+%option nounput
+%option noyywrap
+%option never-interactive
+
+%{
+#include "genprims.h"
+#include "genpr-parse.h"
+
+static int from = 0, depth = 0;
+int yylineno = 1;
+
+/* This file implements a bit more than a lexical analyzer: it also writes
+   literal tokens to the output until a reserved word is found.  This is
+   done by this macro which decides whether to return the token to yyparse
+   and whether to append it to a filament (these two things are not mutually
+   exclusive, because braces are both written and returned, for example).
+
+   Note that whitespace should be written to the literal_fil filament,
+   but not returned to yyparse when there is no active literal_fil.
+
+   Also note that the ifs are resolved at compile time.  */
+#define IS_TOKEN(tok) \
+  do { \
+    if (literal_fil) \
+      { \
+        if (tok != PRIMITIVE && tok != PRIM_ID) \
+	  filcat (literal_fil, yytext); \
+	else \
+	  literal_fil = NULL; \
+        if (tok == PRIMITIVE || tok == PRIM_ID || tok == '{' || tok == '}') \
+	  return tok; \
+      } \
+    else \
+      { \
+	if (tok == '{') \
+	  literal_fil = stmt_fil; \
+	if (tok != WSPACE) \
+	  return tok; \
+      } \
+  } while(0)
+%}
+%%
+
+<INITIAL,C_COMMENT,C_CHAR,C_STRING,CPP_CODE,C_CODE>{
+  \n+				{
+    yylval.text = yytext;
+    yylineno += yyleng;
+    IS_TOKEN (WSPACE);
+  }
+  [ 	\f]+			{
+    yylval.text = yytext;
+    IS_TOKEN (WSPACE);
+  }
+
+}
+
+<INITIAL>{
+  primitive			{
+    yylval.text = yytext;
+    IS_TOKEN (PRIMITIVE);
+  }
+
+  "["				{
+    yylval.text = yytext;
+    IS_TOKEN ('[');
+  }
+
+  "]"				{
+    yylval.text = yytext;
+    IS_TOKEN (']');
+  }
+
+  ","				{
+    yylval.text = yytext;
+    IS_TOKEN (',');
+  }
+
+  "="				{
+    yylval.text = yytext;
+    IS_TOKEN ('=');
+  }
+
+  ":"				{
+    yylval.text = yytext;
+    IS_TOKEN (':');
+  }
+
+  "{"				{
+    yylval.text = yytext;
+    depth = 1;
+    BEGIN (C_CODE);
+    IS_TOKEN ('{');
+  }
+
+}
+
+<INITIAL,C_CODE>{
+  "'"				{
+    yylval.text = yytext;
+    from = YY_START;
+    BEGIN (C_CHAR);
+    IS_TOKEN (LITERAL);
+  }
+
+  "\""				{
+    yylval.text = yytext;
+    from = YY_START;
+    BEGIN (C_STRING);
+    IS_TOKEN (LITERAL);
+  }
+
+  "/*"				{
+    yylval.text = yytext;
+    from = YY_START;
+    BEGIN (C_COMMENT);
+    IS_TOKEN (WSPACE);
+   
+  }
+
+  ^[ 	]*#			{
+    yylval.text = yytext;
+    from = YY_START;
+    BEGIN (CPP_CODE);
+    IS_TOKEN (LITERAL);
+  }
+
+  "("				{
+    yylval.text = yytext;
+    IS_TOKEN ('(');
+  }
+
+  ")"				{
+    yylval.text = yytext;
+    IS_TOKEN (')');
+  }
+
+  prim_id			{
+    yylval.text = yytext;
+    IS_TOKEN (PRIM_ID);
+  }
+
+  [1-9][0-9]*			|
+  0x[0-9A-Fa-f]+		|
+  0[0-7]+			{
+    yylval.text = yytext;
+    IS_TOKEN (NUMBER);
+  }
+
+  [a-zA-Z_][a-zA-Z0-9_]*	{
+    yylval.text = yytext;
+    IS_TOKEN (ID);
+  }
+
+}
+
+<C_CODE>{
+  "{"				{
+    yylval.text = yytext;
+    depth++;
+    IS_TOKEN (LITERAL);
+  }
+
+  "}"				{
+    yylval.text = yytext;
+    if (--depth)
+      IS_TOKEN (LITERAL);
+    else
+      {
+        BEGIN (INITIAL);
+        IS_TOKEN ('}');
+      }
+  }
+
+  .				{
+    yylval.text = yytext;
+    IS_TOKEN (LITERAL);
+  }
+
+}
+
+<C_COMMENT>{
+  [^*\n]*"*"*\n			{
+    yylval.text = yytext;
+    yylineno++;
+    IS_TOKEN (WSPACE);
+  }
+
+  [^*\n]*"*"+[^/*]		{
+    yylval.text = yytext;
+    IS_TOKEN (WSPACE);
+  }
+
+  [^*\n]*"*"+"/"		{
+    yylval.text = yytext;
+    BEGIN (from);
+    IS_TOKEN (WSPACE);
+  }
+
+}
+
+<C_CHAR>{
+  "'"				{
+    yylval.text = yytext;
+    BEGIN (from);
+    IS_TOKEN (LITERAL);
+  }
+}
+
+<C_STRING>{
+  "\""				{
+    yylval.text = yytext;
+    BEGIN (from);
+    IS_TOKEN (LITERAL);
+  }
+}
+
+<C_STRING,C_CHAR>{
+  \\.				{
+    yylineno += (yytext[1] == '\n');
+    yylval.text = yytext;
+    IS_TOKEN (LITERAL);
+  }
+
+  .				{
+    yylineno += (yytext[0] == '\n');
+    yylval.text = yytext;
+    IS_TOKEN (LITERAL);
+  }
+}
+
+<CPP_CODE>{
+  [^\n]*"\\"[ 	]*$		{
+    yylval.text = yytext;
+    IS_TOKEN (LITERAL);
+  }
+
+  [^\n]*$                       {
+    yylval.text = yytext;
+    BEGIN (from);
+    IS_TOKEN (LITERAL);
+  }
+
+}

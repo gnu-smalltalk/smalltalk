@@ -1,0 +1,1113 @@
+/******************************** -*- C -*- ****************************
+ *
+ *	Input module: stream interface and Readline completion handling
+ *
+ *
+ ***********************************************************************/
+
+/***********************************************************************
+ *
+ * Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+ * Written by Paolo Bonzini.
+ *
+ * This file is part of GNU Smalltalk.
+ *
+ * GNU Smalltalk is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2, or (at your option) any later 
+ * version.
+ * 
+ * GNU Smalltalk is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * GNU Smalltalk; see the file COPYING.  If not, write to the Free Software
+ * Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+ *
+ ***********************************************************************/
+
+#include "gstpriv.h"
+
+#ifdef HAVE_READLINE
+# include <readline/readline.h>
+# include <readline/history.h>
+#endif
+
+#define EMACS_PROCESS_MARKER	'\001'	/* ^A as marker -- random
+					   choice */
+
+typedef struct string_stream
+{
+  char *strBase;		/* base of asciz string */
+  const char *str;		/* pointer into asciz string */
+}
+string_stream;
+
+typedef struct unix_file_stream
+{
+  int fd;
+  char *buf;
+  const char *ptr;
+  const char *end;
+}
+unix_file_stream;
+
+typedef struct oop_stream
+{
+  OOP  oop;
+  char *buf;
+  const char *ptr;
+  const char *end;
+}
+oop_stream;
+
+typedef struct input_stream
+{
+  stream_type type;
+  char pushedBackChars[3];	/* the 3 buffered characters */
+  int pushedBackCount;		/* number of chars pushed back */
+  int line;
+  int column;
+  const char *fileName;
+  int fileOffset;
+  OOP fileNameOOP;		/* the full path name for file */
+  mst_Boolean prompt;
+  union
+  {
+    unix_file_stream u_st_file;
+    string_stream u_st_str;
+    oop_stream u_st_oop;
+  }
+  st;
+  struct input_stream *prevStream;
+}
+ *input_stream;
+
+#define st_file		st.u_st_file
+#define st_str		st.u_st_str
+#define st_oop		st.u_st_oop
+
+/* The internal interface used by _gst_next_char. */
+static int my_getc (input_stream stream);
+
+/* Print a line indicator in front of an error message. */
+static void line_stamp (int line);
+
+/* Close the given stream */
+static void my_close (input_stream stream);
+
+/* Allocate and push a new stream of type TYPE on the stack; the new
+   stream is then available through IN_STREAM. */
+static input_stream push_new_stream (stream_type type);
+
+/* The topmost stream in the stack, and the head of the linked list
+   that implements the stack. */
+static input_stream in_stream = NULL;
+
+/* Controls the use of the changes file, for recording source text.
+   If NULL, no recording */
+char *_gst_change_file_name = NULL;
+
+static int change_str = -1;
+
+
+/* If true, the normal execution information is supressed, and the
+   prompt is emitted with a special marker character ahead of it to
+   let the process filter know that the execution has completed. */
+mst_Boolean _gst_emacs_process = false;
+
+/* >= 1 if completions are enabled, < 1 if they are not.  Available
+   for completeness even if Readline is not used. */
+static int completions_enabled = 1;
+
+
+#ifdef HAVE_READLINE
+/* Storage for the possible completions */
+static char **completions;
+
+/* Number of completions available. */
+static int count;
+
+/* Number of completions before the array must be resized. */
+static int free_items;
+
+/* Number of sorted completions.  Completions are not sorted until
+   we are requested to use them. */
+static int sorted_count;
+
+/* Internal functions */
+static void merge (char **a1,
+		   int count1,
+		   char **a2,
+		   int count2,
+		   mst_Boolean reallocate);
+
+static void add_completion (const char *str,
+			    int len);
+static int compare_strings (const PTR a,
+			    const PTR b);
+
+/* Readline callbacks */
+static int readline_getc (FILE * file);
+
+static char *readline_quote_filename (const char *s,
+				      int rtype,
+				      const char *qcp);
+static char *readline_dequote_filename (const char *s,
+					char qc);
+static char *symbol_generator (const char *text,
+				 int state);
+static char **readline_match_symbols (char *text,
+				      int start,
+				      int end);
+
+#endif
+
+
+/* Generic "stream" interface.  A stream is an abstraction for input
+   and output.  It is most like common lisp streams.  Basically, these
+   streams provide transparent reading from either a Smalltalk string,
+   or a UNIX file.  They stack, and the previous stream can be
+   restored by doing a "_gst_pop_stream" which optionally "closes" the
+   current stream and goes back to using the previous stream.
+
+   The `readline()' interface: The behavior is like the Smalltalk
+   String interface.  The end-of-string or a NULL strBase-pointer
+   decides to read in a new line.  The prompt is still shown by the
+   readline() call. */
+
+void
+_gst_pop_stream (mst_Boolean closeIt)
+{
+  input_stream oldStream;
+
+  oldStream = in_stream;
+  in_stream = in_stream->prevStream;
+
+  if (closeIt && oldStream)
+    {
+      my_close (oldStream);
+      xfree (oldStream);
+    }
+}
+
+void
+_gst_push_unix_file (int fd,
+		     const char *fileName)
+{
+  input_stream newStream;
+
+  newStream = push_new_stream (STREAM_FILE);
+  newStream->st_file.fd = fd;
+  newStream->st_file.buf = xmalloc (1024);
+  newStream->st_file.ptr = newStream->st_file.buf;
+  newStream->st_file.end = newStream->st_file.buf;
+  newStream->fileName = fileName;
+  newStream->prompt = isatty (fd);
+}
+
+void
+_gst_push_stream_oop (OOP oop)
+{
+  input_stream newStream;
+
+  newStream = push_new_stream (STREAM_OOP);
+  newStream->st_oop.oop = oop;
+  newStream->st_oop.buf = NULL;
+  newStream->st_oop.ptr = NULL;
+  newStream->st_oop.end = NULL;
+  newStream->fileName = "a Smalltalk Stream";
+  newStream->prompt = false;
+
+  _gst_register_oop (oop);
+}
+
+void
+_gst_push_smalltalk_string (OOP stringOOP)
+{
+  input_stream newStream;
+
+  newStream = push_new_stream (STREAM_STRING);
+
+  newStream->st_str.strBase = (char *) _gst_to_cstring (stringOOP);
+  newStream->st_str.str = newStream->st_str.strBase;
+  newStream->fileName = "a Smalltalk string";
+  newStream->prompt = false;
+}
+
+void
+_gst_push_cstring (const char *string)
+{
+  input_stream newStream;
+
+  newStream = push_new_stream (STREAM_STRING);
+
+  newStream->st_str.strBase = xstrdup (string);
+  newStream->st_str.str = newStream->st_str.strBase;
+  newStream->fileName = "a C string";
+  newStream->prompt = false;
+}
+
+void
+_gst_push_stdin_string (void)
+{
+#ifdef HAVE_READLINE
+  input_stream newStream;
+
+  if (_gst_emacs_process || !isatty (0))
+    {
+#endif
+      _gst_push_unix_file (0, "stdin");
+      return;
+#ifdef HAVE_READLINE
+    }
+
+  newStream = push_new_stream (STREAM_READLINE);
+
+  newStream->st_str.strBase = NULL;	/* force readline() but no free() */
+  newStream->st_str.str = NULL;
+  newStream->fileName = "stdin";	/* that's where we get input from */
+  newStream->prompt = true;
+#endif
+}
+
+input_stream
+push_new_stream (stream_type type)
+{
+  input_stream newStream;
+
+  newStream = (input_stream) xmalloc (sizeof (struct input_stream));
+
+  newStream->pushedBackCount = 0;
+  newStream->line = 1;
+  newStream->column = 0;
+  newStream->fileOffset = 0;
+  newStream->type = type;
+  newStream->fileNameOOP = _gst_nil_oop;
+  newStream->prevStream = in_stream;
+  in_stream = newStream;
+
+  return (newStream);
+}
+
+
+void
+_gst_set_stream_info (int line,
+		      const char *fileName,
+		      int fileOffset)
+{
+  in_stream->line = line;
+  in_stream->column = 0;
+  if (in_stream->type == STREAM_FILE)
+    {
+      in_stream->fileName = fileName;
+      in_stream->fileOffset = fileOffset;
+    }
+}
+
+int
+my_getc (input_stream stream)
+{
+  int ic = 0;
+
+  switch (stream->type)
+    {
+    case STREAM_STRING:
+      ic = (unsigned char) *stream->st_str.str;
+      if (!ic)
+	return EOF;
+      else
+	stream->st_str.str++;
+
+      return ic;
+
+    case STREAM_OOP:
+      /* Refill the buffer... */
+      if (stream->st_oop.ptr == stream->st_oop.end)
+	{
+	  if (stream->st_oop.buf)
+	    {
+	      xfree (stream->st_oop.buf);
+	      stream->st_oop.buf = NULL;
+	    }
+
+	  _gst_msg_sendf(stream->st_oop.buf, "%s %o nextHunk",
+			 stream->st_oop.oop);
+
+	  stream->st_oop.end = stream->st_oop.buf +
+	    strlen (stream->st_oop.buf);
+	  stream->st_oop.ptr = stream->st_oop.buf;
+	}
+
+      return (stream->st_oop.ptr == stream->st_oop.end)
+	? EOF : (unsigned char) *stream->st_oop.ptr++;
+
+    case STREAM_FILE:
+      if (in_stream->column == 0 && in_stream->prompt)
+	{
+	  if (_gst_emacs_process)
+	    printf ("%c", EMACS_PROCESS_MARKER);
+
+	  printf ("st> ");
+	  fflush(stdout);
+	}
+
+      /* Refill the buffer... */
+      if (stream->st_file.ptr == stream->st_file.end)
+	{
+	  int n;
+	  do
+	    {
+	      errno = 0;
+	      n = _gst_read (stream->st_file.fd, stream->st_file.buf, 1024);
+	    }
+	  while ((n == -1) && (errno == EINTR));
+	  if (n < 0)
+	    n = 0;
+
+	  stream->st_file.end = stream->st_file.buf + n;
+	  stream->st_file.ptr = stream->st_file.buf;
+	}
+
+      return (stream->st_file.ptr == stream->st_file.end)
+	? EOF : (unsigned char) *stream->st_file.ptr++;
+
+#ifdef HAVE_READLINE
+    case STREAM_READLINE:
+      {
+	char *r_line;
+	int r_len;
+
+	if (stream->st_str.strBase)
+	  {
+	    ic = (unsigned char) *stream->st_str.str++;
+	    if (ic)
+	      return (ic);
+
+	    /* If null, read a new line */
+	  }
+
+	if (stream->st_str.strBase)
+	  {
+	    xfree (stream->st_str.strBase);
+	    stream->st_str.strBase = NULL;
+	  }
+	r_line = readline ("st> ");
+	if (!r_line)
+	  {
+	    /* return value of NULL indicates EOF */
+	    return (EOF);
+	  }
+	if (*r_line)
+	  {
+	    /* add only non-empty lines. */
+	    add_history (r_line);
+	  }
+
+	/* tack on the newline, not returned by readline() */
+	r_len = strlen (r_line);
+	r_line = xrealloc (r_line, (unsigned) (r_len + 2));
+	if (!r_line)
+	  {
+	    _gst_errorf ("Out of memory reallocating linebuffer space");
+	    stream->st_str.str = stream->st_str.strBase = NULL;
+	    ic = '\n';		/* return a newline ... */
+	  }
+	else
+	  {
+	    r_line[r_len] = '\n';
+	    r_line[r_len + 1] = '\0';
+	    stream->st_str.str = stream->st_str.strBase = r_line;
+	    ic = (unsigned char) *stream->st_str.str++;
+	  }
+
+	break;
+      }
+#endif /* HAVE_READLINE */
+
+    default:
+      _gst_errorf ("Bad stream type passed to my_getc");
+      _gst_had_error = true;
+    }
+  return (ic);
+}
+
+void
+my_close (input_stream stream)
+{
+  if (!IS_NIL (stream->fileNameOOP))
+    _gst_unregister_oop (stream->fileNameOOP);
+
+  switch (stream->type)
+    {
+    case STREAM_STRING:
+      xfree (stream->st_str.strBase);
+      break;
+
+    case STREAM_OOP:
+      xfree (stream->st_oop.buf);
+      _gst_unregister_oop (stream->st_oop.oop);
+      break;
+
+    case STREAM_FILE:
+      xfree (stream->st_file.buf);
+      close (stream->st_file.fd);
+      break;
+
+#ifdef HAVE_READLINE
+    case STREAM_READLINE:
+      if (stream->st_str.strBase)
+	{
+	  xfree (stream->st_str.strBase);
+	  stream->st_str.strBase = NULL;
+	}
+      break;
+#endif /* HAVE_READLINE */
+
+    default:
+      _gst_errorf ("Bad stream type passed to my_close");
+      _gst_had_error = true;
+    }
+}
+
+
+mst_Boolean
+_gst_get_cur_stream_prompt (void)
+{
+  return (in_stream && in_stream->prompt);
+}
+
+stream_type
+_gst_get_cur_stream_type (void)
+{
+  if (in_stream)
+    return (in_stream->type);
+
+  else
+    return (STREAM_UNKNOWN);
+}
+
+OOP
+_gst_get_cur_string (void)
+{
+  if (in_stream && in_stream->type == STREAM_STRING)
+    return (_gst_string_new (in_stream->st_str.strBase));
+
+  else
+    return (_gst_nil_oop);
+}
+
+OOP
+_gst_get_cur_file_name (void)
+{
+  char *fullFileName;
+
+  if (!in_stream)
+    return _gst_nil_oop;
+
+  if (!IS_NIL (in_stream->fileNameOOP))
+    return in_stream->fileNameOOP;
+
+  if (in_stream->type != STREAM_FILE)
+    return (_gst_nil_oop);
+
+  if (strcmp (in_stream->fileName, "stdin") == 0)
+    fullFileName = strdup (in_stream->fileName);
+  else
+    fullFileName =
+      _gst_get_full_file_name (in_stream->fileName);
+
+  in_stream->fileNameOOP = _gst_string_new (fullFileName);
+  _gst_register_oop (in_stream->fileNameOOP);
+  return (in_stream->fileNameOOP);
+}
+
+#ifdef HAVE_READLINE
+OOP
+_gst_get_cur_readline (void)
+{
+  if (in_stream && in_stream->type == STREAM_READLINE)
+    return (_gst_string_new (in_stream->st_str.strBase));
+
+  else
+    return (_gst_nil_oop);
+}
+#endif /* HAVE_READLINE */
+
+
+void
+_gst_warningf_at (int line,
+		const char *str,
+	        ...)
+{
+  va_list ap;
+
+  va_start (ap, str);
+
+  if (!_gst_report_errors)
+    return;
+
+  fflush (stdout);
+  line_stamp (line);
+  vfprintf (stderr, str, ap);
+  fprintf (stderr, "\n");
+  fflush (stderr);
+  va_end (ap);
+}
+
+void
+_gst_warningf (const char *str,
+	       ...)
+{
+  va_list ap;
+
+  va_start (ap, str);
+
+  if (!_gst_report_errors)
+    return;
+
+  fflush (stdout);
+  line_stamp (0);
+  vfprintf (stderr, str, ap);
+  fprintf (stderr, "\n");
+  fflush (stderr);
+  va_end (ap);
+}
+
+void
+_gst_errorf_at (int line,
+		const char *str,
+	        ...)
+{
+  va_list ap;
+
+  va_start (ap, str);
+
+  if (_gst_report_errors)
+    fflush (stdout);
+
+  line_stamp (line);
+  if (_gst_report_errors)
+    {
+      vfprintf (stderr, str, ap);
+      fprintf (stderr, "\n");
+      fflush (stderr);
+    }
+  else
+    {
+      if (_gst_first_error_str == NULL)
+	vasprintf (&_gst_first_error_str, str, ap);
+    }
+
+  va_end (ap);
+}
+
+void
+_gst_errorf (const char *str,
+	     ...)
+{
+  va_list ap;
+
+  va_start (ap, str);
+
+  if (_gst_report_errors)
+    fflush (stdout);
+
+  line_stamp (0);
+  if (_gst_report_errors)
+    {
+      vfprintf (stderr, str, ap);
+      fprintf (stderr, "\n");
+      fflush (stderr);
+    }
+  else
+    {
+      if (_gst_first_error_str == NULL)
+	vasprintf (&_gst_first_error_str, str, ap);
+    }
+
+  va_end (ap);
+}
+
+void
+_gst_yyerror (const char *s)
+{
+  _gst_errorf ("%s", s);
+}
+
+void
+_gst_get_location (int *x, int *y)
+{
+  *x = in_stream->column;
+  *y = in_stream->line;
+}
+
+void
+line_stamp (int line)
+{
+  if (line <= 0 && in_stream)
+    line = in_stream->line;
+
+  if (_gst_report_errors)
+    {
+      if (in_stream)
+	{
+	  if (in_stream->fileName)
+	    fprintf (stderr, "%s:", in_stream->fileName);
+
+	  fprintf (stderr, "%d: ", line);
+	}
+      else
+	fprintf (stderr, "gst: ");
+    }
+  else
+    {				/* called internally with error
+				   handling */
+      if (in_stream)
+	{
+	  if (in_stream->fileName)
+	    {
+	      if (_gst_first_error_str == NULL)
+		_gst_first_error_file = strdup (in_stream->fileName);
+	    }
+	  if (_gst_first_error_str == NULL)
+	    _gst_first_error_line = line;
+	}
+      else
+	{
+	  if (_gst_first_error_str == NULL)
+	    _gst_first_error_line = -1;
+	}
+    }
+}
+
+
+
+int
+_gst_get_cur_file_pos (void)
+{
+  /* ### not sure about this particular use -- the current file pos
+     must be from the change log, but currently the FileSegments we
+     produce are from the input file... so they lose. The original
+     reason for implementing the change log was to make recompiles of 
+     a method lying in a changed file work... but this way not even
+     recompiles of methods lying in an unchanged file do work! */
+#ifdef not_working_for_now
+  if (change_str != -1)
+    return (lseek (change_str, 0, SEEK_CUR));
+  else
+#endif
+
+  if (in_stream && in_stream->type == STREAM_FILE)
+    {
+      return (lseek (in_stream->st_file.fd, 0, SEEK_CUR)
+	      + in_stream->st_file.ptr - in_stream->st_file.end
+	      + in_stream->fileOffset);
+    }
+  else
+    return (-1);
+}
+
+void
+_gst_init_changes_stream (void)
+{
+  if (_gst_change_file_name)
+    change_str = _gst_open_file (_gst_change_file_name, "a");
+}
+
+void
+_gst_reset_changes_file (void)
+{
+  if (!_gst_change_file_name)
+    return;
+  if (change_str != -1)
+    close (change_str);
+
+  remove (_gst_change_file_name);
+  if (change_str != -1)
+    _gst_init_changes_stream ();
+}
+
+
+int
+_gst_next_char (void)
+{
+  int ic;
+
+  if (in_stream->pushedBackCount > 0)
+    {
+      ic = in_stream->pushedBackChars[--in_stream->pushedBackCount];
+      return (ic);
+    }
+  else
+    {
+      ic = my_getc (in_stream);
+
+      if (change_str != -1)
+	_gst_full_write (change_str, &ic, 1);
+
+      if (ic == '\n')
+	{			/* a new line that was not pushed back */
+	  in_stream->line++;
+	  in_stream->column = 0;
+	}
+      else
+	in_stream->column++;
+
+      return (ic);
+    }
+}
+
+void
+_gst_unread_char (int ic)
+{
+  if (ic != EOF)
+    in_stream->pushedBackChars[in_stream->pushedBackCount++] = ic;
+}
+
+
+/* These two are not used, but are provided for additional flexibility. */
+void
+_gst_enable_completion (void)
+{
+  completions_enabled++;
+}
+
+void
+_gst_disable_completion (void)
+{
+  completions_enabled--;
+}
+
+#ifdef HAVE_READLINE
+/* Find apostrophes and double them */
+char *
+readline_quote_filename (const char *s,
+			 int rtype,
+			 const char *qcp)
+{
+  char *r, *base = alloca (strlen (s) * 2 + 2);
+  const char *p;
+
+  int quote;
+
+  r = base;
+  quote = *qcp;
+  if (!quote)
+    quote = *rl_completer_quote_characters;
+
+  *r++ = quote;
+  for (p = s; *p;)
+    {
+      if (*p == quote)
+	*r++ = quote;
+
+      *r++ = *p++;
+    }
+  *r++ = 0;
+  return (strdup (base));
+}
+
+/* Find double apostrophes and turn them to single ones */
+char *
+readline_dequote_filename (const char *s,
+			   char qc)
+{
+  char *r, *base = alloca (strlen (s) + 2);
+  const char *p;
+
+  if (!qc)
+    return strdup (s);
+
+  r = base;
+  for (p = s; *p;)
+    {
+      if (*p == qc)
+	p++;
+
+      *r++ = *p++;
+    }
+  *r++ = 0;
+  return (strdup (base));
+}
+
+/* Enter an item in the list */
+void
+add_completion (const char *str,
+		int len)
+{
+  char *s = xmalloc (len + 1);
+  memcpy (s, str, len);
+  s[len] = 0;
+
+  if (!free_items)
+    {
+      free_items += 50;
+      completions =
+	(char **) xrealloc (completions, SIZEOF_CHAR_P * (count + 50));
+    }
+
+  free_items--;
+  completions[count++] = s;
+}
+
+void
+_gst_add_symbol_completion (const char *str,
+			    int len)
+{
+  const char *base = str;
+  const char *p = str;
+
+  if (completions_enabled < 1)
+    return;
+
+  while (len-- && *p)
+    {
+      if (*p++ == ':' && (base != p - 1))
+	{
+	  add_completion (base, p - base);
+	  base = p;
+	}
+    }
+
+  /* We enter globals in the table, too */
+  if (base == str && !islower (*str))
+    add_completion (base, p - base);
+}
+
+/* Merge the contents of a1 with the contents of a2,
+ * storing the result in a2.  If a1 and a2 overlap,
+ * reallocate must be true.
+ */
+void
+merge (char **a1,
+       int count1,
+       char **a2,
+       int count2,
+       mst_Boolean reallocate)
+{
+  char *source, *dest;
+
+  /* Check if an array is empty */
+  if (!count1)
+    return;
+
+  if (!count2)
+    {
+      memmove (a1, a2, count1 * SIZEOF_CHAR_P);
+      return;
+    }
+
+  if (reallocate)
+    {
+      char **new = (char **) alloca (count1 * SIZEOF_CHAR_P);
+      memcpy (new, a1, count1 * SIZEOF_CHAR_P);
+      a1 = new;
+    }
+
+  source = a1[count1 - 1];
+  dest = a2[count2 - 1];
+  for (;;)
+    {
+      if (strcmp (source, dest) < 0)
+	{
+	  /* Take it from the destination array */
+	  a2[count2 + count1 - 1] = dest;
+	  if (--count2 == 0)
+	    {
+	      /* Any leftovers from the source array? */
+	      memcpy (a1, a2, count1 * SIZEOF_CHAR_P);
+	      return;
+	    }
+
+	  dest = a2[count2 - 1];
+	}
+      else
+	{
+	  /* Take it from the source array */
+	  a2[count2 + count1 - 1] = source;
+	  if (--count1 == 0)
+	    return;
+
+	  source = a1[count1 - 1];
+	}
+    }
+
+}
+
+/* Comparison function for qsort */
+int
+compare_strings (const PTR a,
+		 const PTR b)
+{
+  const char **s1 = (const char **) a;
+  const char **s2 = (const char **) b;
+
+  return strcmp (*s1, *s2);
+}
+
+/* Communication between symbol_generator and readline_match_symbols */
+static int matches_left, current_index;
+
+char *
+symbol_generator (const char *text,
+		  int state)
+{
+  if (matches_left == 0)
+    return (NULL);
+
+  /* Since we have to sort the array to perform the binary search, we
+     remove duplicates and avoid that readline resorts the result. */
+  while (matches_left > 1 &&
+	 strcmp (completions[current_index],
+		 completions[current_index + 1]) == 0)
+    {
+      current_index++;
+      matches_left--;
+    }
+
+  matches_left--;
+  return strdup (completions[current_index++]);
+}
+
+
+char **
+readline_match_symbols (char *text,
+			int start,
+			int end)
+{
+  int low, high, middle, len;
+
+  /* Check for strings (not matched) and for symbols (matched) */
+  if (start != 0 && rl_line_buffer[start - 1] == '\'')
+    {
+      if (start == 1 || rl_line_buffer[start - 2] != '#')
+	{
+	  return NULL;
+	}
+    }
+
+  /* Prepare for binary searching.  We use qsort when necessary, and
+     merge the result, instead of doing expensive (quadratic) insertion
+     sorts. */
+  if (sorted_count < count)
+    {
+      qsort (&completions[sorted_count], count - sorted_count,
+	     SIZEOF_CHAR_P, compare_strings);
+
+      merge (&completions[sorted_count], count - sorted_count,
+	     completions, sorted_count, true);
+
+      sorted_count = count;
+    }
+
+  /* Initialize current_index and matches_left with two binary
+     searches. */
+  len = strlen (text);
+
+  /* The first binary search gives the first matching item. */
+  low = -1;
+  high = count;
+  while (low + 1 != high)
+    {
+      middle = (low + high) / 2;
+      if (strncmp (completions[middle], text, len) < 0)
+	low = middle;
+      else
+	high = middle;
+    }
+  current_index = high;
+
+  /* This binary search gives the first non-matching item instead */
+  low = -1;
+  high = count;
+  while (low + 1 != high)
+    {
+      middle = (low + high) / 2;
+      if (strncmp (completions[middle], text, len) <= 0)
+	low = middle;
+      else
+	high = middle;
+    }
+
+  matches_left = high - current_index;
+  return matches_left ? rl_completion_matches (text,
+					       symbol_generator) : NULL;
+}
+
+int
+readline_getc (FILE * file)
+{
+  int result;
+  unsigned char ch;
+  struct pollfd pfd;
+
+  pfd.fd = fileno (file);
+  pfd.events = POLLIN;
+  pfd.revents = 0;
+
+  do
+    {
+      errno = 0;
+      result = poll (&pfd, 1, -1); /* Infinite wait */
+    }
+  while ((result == -1) && (errno == EINTR));
+
+  if (pfd.revents & POLLIN)
+    {
+      do
+	{
+	  errno = 0;
+	  result = _gst_read (fileno (file), &ch, 1);
+	}
+      while ((result == -1) && (errno == EINTR));
+      return (result < 1) ? EOF : (int) ch;
+    }
+  else
+    return EOF;
+}
+
+void
+_gst_initialize_readline (void)
+{
+  static char everything[255];
+  int i;
+
+  /* Allow conditional parsing of the ~/.inputrc file. */
+  rl_readline_name = "Smalltalk";
+
+  /* Always put filenames in quotes */
+  for (i = 0; i < 255; i++)
+    everything[i] = i + 1;
+
+  rl_filename_quote_characters = everything;
+  rl_completer_quote_characters = "'\"";
+  rl_basic_word_break_characters = "() []{};+-=*<>~'?%/@|&#^\"\\.";
+
+  /* Consider binary selectors both word-breaking characters and
+     candidates for completion */
+  rl_special_prefixes = "+-=*<>~?%/@|&\\";
+
+  /* Our rules for quoting are a bit different from the default */
+  rl_filename_quoting_function = (CPFunction *) readline_quote_filename;
+  rl_filename_dequoting_function =
+    (CPFunction *) readline_dequote_filename;
+
+  /* Try to match a symbol before a filename */
+  rl_attempted_completion_function =
+    (CPPFunction *) readline_match_symbols;
+
+  /* Since we have to sort the array to perform the binary search,
+     remove duplicates and avoid that readline resorts the result. */
+  rl_ignore_completion_duplicates = 0;
+
+  /* Set up to use read to read from stdin */
+  rl_getc_function = readline_getc;
+
+  if (count == 0)
+    _gst_add_all_symbol_completions ();
+}
+
+#endif /* HAVE_READLINE */

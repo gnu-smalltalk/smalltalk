@@ -1,0 +1,146 @@
+This directory contains some example GNU Smalltalk programs.
+
+The programs are:
+
+Application.st	Attempt at adding support for an ENVY-like organization of
+by pb		components into applications and subapplications.  Must be
+		integrated with the packaging system.
+
+bench.st	An extraordinarily precise low-level benchmark for Smalltalk,
+by His Majesty	contributed by Dwight Hughes and originarily prepared for
+Dan Ingalls! 	Squeak.  It executes two pieces of code and deduces the
+		system's speed in terms of bytecodes/second on bytecode-heavy
+		code (arithmetics - sieve in this case) and sends/second on
+		send-heavy code (a recursive Fibonacci computation in this
+		case) -- they usually coincide to two digits with the speeds
+		given by the GST runtime!
+
+Case.st		A nice object for C-switch like behavior. Although it is slower
+by Ulf		than compiler-optimized ifs, try it: it really works nice.
+Dambacher
+
+CStream.st	A stream providing functionality for writing C code.
+by sbb
+
+Debugger.st	Not yet tested attempt at creating a bytecode simulator which
+by pb/sbb	would be used in debugging Smalltalk methods.
+
+Dinner.st	The classic dining philosophers problem.  You need working 
+by pb		Delays to try this (alarm is not very good but maybe it works).
+		Try `(Philosophers new: 5) dine'.
+
+EditStream.st	A stream handling fast insertions, using a double buffer
+by Ulf		with a gap between the buffers.
+Dambacher
+
+Sync.st		Many kinds of synchronization devices.
+by pb
+
+GenClasses.st	Provides help in creating many similarly named classes.
+by sbb
+
+Lisp.st		A nice Lisp interpreter class; try LispInterpreter exampleXX
+by Aoki Atsushi	with XX going from 01 to 18.  I modified it to remove the
+Nishihara Satoshi	Smalltalk-subset compiler that was needed on commercial
+			systems that don't allow a compiler to be enclosed in
+			a run-time image -- it was 25% of the total code; this
+			way there is more focus on the Lisp stuff.
+
+MemUsage.st	This is really more of a test suite kind of program.  It
+by sbb		iterates through all the objects in the system, counting
+		up how much storage has been used by each, and printing a
+		total at the end.  It has found more bugs in the memory
+		management system than I (sbb) care to admit.
+
+MiniDebugger.st A simplified debugger which shows how to use the single step
+by pb           primitives to implement an interface that vaguely resembles
+                gdb.
+
+Prolog.st	This is absolutely stunning! A Prolog interpreter written in
+by Aoki Atsushi	Smalltalk, from the same author as the Lisp interpreter; try
+Nishihara Satoshi	PrologInterpreter exampleXX with XX going from 01 to
+			06
+
+PrtHier.st	prints out the class hierarchy, indented according to
+by sbb		the number of super classes a class has.
+
+Publish.st	An object-oriented, multiple format class file-out system.
+by pb/sbb	Currently includes Postscript for file-outs, and HTML/Texinfo
+		for documentation -- by the way, this example is used by the
+		makefile for GNU Smalltalk's info files.  And also an example
+		of namespaces.
+
+PushBack.st	A Stream with unlimited push-back capabilities.  Together with
+by sbb		Tokenizer.st, it is used in many places (C interface, compiler)
+
+Queens.st	An elegant solution of the queens and amazons problem (amazons
+by pb		can move like either the queen or the knight).  There are:
+		2 solutions (1 discarding rotations/reflections) on a 4x4 board
+		92 solutions (12) on a 8x8 board
+		no solutions (!) to the amazons problem on a 8x8 board
+		4 solutions (1) to the amazons problem on a 10x10 board
+
+		A few examples usages are at the end of the file.
+
+RandomInt.st	Provides methods that generate a random integer in a specific
+by Andy		range.
+Valencia
+
+Richards.st	The Richards benchmark (a simulation of an operating systems)
+by unknown	under Smalltalk, a classic in Smalltalk benchmarking because of
+		its use of polymorphism and OO.
+
+shell		An example of how to make a Smalltalk script work both if you
+by Alexander	file it in from GNU Smalltalk and if you launch it from the
+Lazarevic	shell; for it to work, the gst executable must be in the path.
+		If it is not, just do PATH=$PATH:<gst path> before running it.
+
+SortCriter.st	A very nice object that allows you to easily create
+by Peter	SortedCollections sorted using complex objects (specifying 
+William Lount	which fields are more important and which must be sorted in
+		descending order).
+
+Tokenizer.st	An abstract base class for lexical analyzers.
+by pb/sbb
+
+
+The `modules' directory contains some of the simplest packages that one could
+write for GNU Smalltalk, but nevertheless useful and interesting...  currently
+they are:
+- a wrapper for GDBM, the GNU Database Manager
+- a Perl5 regular expression matcher based on GNU regex
+- an MD5 class for computing MD5 checksums.
+
+The `blox' directory contains:
+
+Man.st		Man page viewer widget (example of using BExtended).  To test
+by pb		it evaluate "ManViewer openOn: 'path' "
+		Will somebody write a Smalltalk xman?!? (that means you...)
+		Send it to me if you do!
+
+Tetris.st	A Tetris game written using BLOX.  A few notes:
+by pb		1) you should have a precise version of Delays to use it
+		   (Win32 or an OS with setitimer, like BSD and Linux).  Simple
+		   `alarm' (which has only 1 second precision) is not enough.
+		2) Cursor keys move the piece, Up rotates it, Return drops it.
+
+		To start it, use "Tetris play"
+
+More examples can be found in the blox/BloxExtend.st and blox/test.st file
+
+In addition, this directory contains two scripts that can help converting
+from other Smalltalk source code formats to the traditional file in (chunk)
+format.  These are:
+- `pepe.sed', that converts from the Pepe format, a portable format consisting
+  exclusively of executable code (an example is in tests/ansi/ansi.pepe; this
+  script can be slow.
+- `xml.sed', that converts from an XML DTD designed for Smalltalk source.  This
+  script does not convert `statics' (that's how the DTD calls class variables)
+  yet.
+
+The `unsupported/misc' directory contains some other small example GNU
+Smalltalk programs which test more advanced aspects of Smalltalk, either
+various packages or the VM.  Among others, `torture.st' is Andreas Klimas'
+nice memory torture test program - like MemUsage.st it has found more bugs
+in the memory management system than I (pb) care to admit...
+

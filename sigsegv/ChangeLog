@@ -1,0 +1,304 @@
+2003-12-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* configure.in: Save results of heuristics detection
+	in CFG_HEURISTICS.
+	* src/heur-none.h: New file.
+	* src/heur-ab.h: New file.
+	* src/heur-ac.h: New file.
+	* src/heur-bc.h: New file.
+	* src/handler-macos.c (mach_initialize): Argh, had to
+	reintroduce signal (xxx, SIG_IGN).  Also, use
+	heuristics.h.
+	* src/handler-unix.c (sigsegv_handler): Replace
+	most ugly code with usage of heuristics.h.
+	* src/stackvma-mach.c (sigsegv_get_vma): Add
+	debugging printf.
+
+2003-12-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* src/handler-macos.c: Completed; removed dependency on
+	signals.
+	* src/machfault-macos-powerpc.h: Reorganized.
+
+2003-12-08  Paolo Bonzini  <bonzini@gnu.org>
+            Bruno Haible  <bruno@clisp.org>
+
+	* src/handler-macos.c: New file.
+	* src/machfault.h: New file.
+	* src/machfault-macos-powerpc.h: New file.
+
+2003-12-05  Bruno Haible  <bruno@clisp.org>
+
+	* m4/fault.m4: Tweak indentation. Bump serial number.
+	* m4/getpagesize.m4: Likewise.
+	* m4/mmap-anon.m4: Likewise.
+	* m4/sigaltstack.m4: Likewise.
+	* m4/sigaltstack-longjmp.m4: Likewise.
+	* m4/sigaltstack-siglongjmp.m4: Likewise.
+
+2003-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* aclocal.m4: Regenerate with Automake 1.7h.
+	* configure.in: Drop m4/Makefile from list of generated files.
+	* configure: Regenerate.
+	* Makefile.am (install-data-hook): New name of the install-am
+	target, for Automake 1.8 compatibility.  Other -am targets
+	are not affected because Automake does not have anything to
+	do to make them.
+	(AUTOMAKE_OPTIONS): Bump minimum Automake requirement to 1.7h.
+	(SUBDIRS): Remove m4.
+	($(srcdir)/config.h.msvc): New target for config.h.msvc.
+	* Makefile.in: Regenerate with Automake 1.7h.
+	* m4/Makefile.am: Delete, Automake 1.7h takes care of it.
+	* m4/Makefile.in: Delete.
+	* src/Makefile.am (installdirs): Delete, Automake 1.7h adds it.
+	* src/Makefile.in: Regenerate with Automake 1.7h.
+	* tests/Makefile.in: Regenerate with Automake 1.7h.
+
+	* autoconf/config.guess: Update from automake-1.7h.
+	* autoconf/config.sub: Likewise.
+	* autoconf/install.sh: Likewise.
+	* autoconf/missing: Likewise.
+	* autoconf/mkinstalldirs: Delete.
+	* m4/fault.m4: autoupdate and manually tweak.
+	* m4/sigaltstack.m4: Likewise.
+	* m4/sigaltstack-longjmp.m4: Likewise.
+	* m4/sigaltstack-siglongjmp.m4: Likewise.
+	* m4/mmap-anon.m4: Likewise.
+	* m4/getpagesize.m4: Likewise.
+
+2003-10-29  Bruno Haible  <bruno@clisp.org>
+
+	* tests/sigsegv1.c (main): Add a check whether mprotect with
+	PROT_READ_WRITE really works.
+	* tests/sigsegv2.c (main): Likewise.
+	Reported by Ullal Devappa Kini <wmbfqj@vsnl.net>.
+
+2003-08-21  Bruno Haible  <bruno@clisp.org>
+
+	* Version 2.1 released.
+
+2003-06-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* m4/fault.m4: Exit if we detect an infinite loop.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2003-06-18  Bruno Haible  <bruno@clisp.org>
+
+	* autoconf/install-sh: Update from automake-1.7.5.
+
+2003-05-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* configure.in: Use signals-bsd.h for OpenBSD and NetBSD too.
+	Support instruction decoding to get fault address for Alphas.
+	* src/fault-netbsd-alpha.h: New file.
+	* src/fault-netbsd-alpha.c: New file.
+	* src/Makefile.am (noinst_HEADERS): Add them.
+
+2003-05-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* src/dispatcher.c (insert): Fix lossage in 64-bit environments
+	(cast from void* to unsigned int).
+
+2003-05-10  Bruno Haible  <bruno@clisp.org>
+
+	* tests/Makefile.am (../src/libsigsegv.la): New rule.
+
+	* Makefile.msvc (handler.obj): Complete the dependencies.
+	(stackoverflow2.exe): New rule.
+	(check): Depend on it.
+	(clean): Remove it.
+
+2003-05-10  Paolo Bonzini  <bonzini@gnu.org>
+            Bruno Haible  <bruno@clisp.org>
+
+	* configure.in: AC_SUBST of CFG_STACKVMA, CFG_LEAVE, CFG_HANDLER.
+	* src/Makefile.am: Add dependencies for the object files.
+
+2003-05-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* configure.in: Add $srcdir/ to #include statements. Needed when
+	builddir != srcdir.
+
+	* src/signals-macos.h (SIGSEGV_FOR_ALL_SIGNALS): Add SIGSEGV.
+
+2003-05-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* configure.in: Tweak 2003-04-26 patch so that it works on mingw32 and
+	Cygwin.
+
+2003-05-02  Bruno Haible  <bruno@clisp.org>
+
+	* src/handler-unix.c: Add special case for stack handling on IA-64.
+	* src/fault-linux-ia64.h: Complete the port.
+	* configure.in: Improve Linux/IA-64 support.
+
+2003-05-01  Bruno Haible  <bruno@clisp.org>
+
+	* configure.in: Don't use fault-hurd.h on NetBSD/alpha. It does not
+	work.
+
+2003-05-01  Bruno Haible  <bruno@clisp.org>
+
+	Support for Linux/HPPA.
+	* fault-linux-hppa.h: Don't include <siginfo.h>.
+	(SIGSEGV_FAULT_ADDRESS): Change.
+	(SIGSEGV_FAULT_ADDRESS_FROM_SIGINFO): Define it, otherwise the value
+	passed for sip is 0.
+	(SIGSEGV_FAULT_CONTEXT, SIGSEGV_FAULT_STACKPOINTER): Remove macros.
+	* configure.in: Improve Linux/HPPA support.
+
+2003-05-01  Bruno Haible  <bruno@clisp.org>
+
+	Support for OpenBSD/i386.
+	* src/fault-openbsd.h: New file.
+	* src/fault-openbsd-i386.h: New file.
+	* src/Makefile.am (noinst_HEADERS): Add them.
+	* configure.in: If the POSIX test works and the OS is OpenBSD, use
+	fault-openbsd.h instead of fault-posix.h.
+
+2003-05-01  Bruno Haible  <bruno@clisp.org>
+
+	* src/fault-hpux-hppa.h: Make it work on machines with 64-bit registers
+	as well.
+	* configure.in: Likewise.
+
+2003-04-29  Bruno Haible  <bruno@clisp.org>
+
+	* configure.in: Define HAVE_STACKVMA if CFG_STACKVMA is nontrivial.
+	* src/handler-unix.c: Test HAVE_STACKVMA instead of CFG_STACKVMA.
+
+	* m4/fault.m4 (SV_TRY_FAULT): On HP-UX, always pass 0 as first argument
+	of mmap().
+	* tests/mmaputil.h (mmap_zeromap): Likewise.
+
+2003-04-28  Bruno Haible  <bruno@clisp.org>
+
+	* src/stackvma-freebsd.c (sigsegv_get_vma): Fix logic error.
+
+2002-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	Support for Cygwin.
+	* configure.in: Treat cygwin* like mingw*.
+	* src/handler-win32.c [CYGWIN] (exception_list, _except_list,
+	debug_get_except_list, cygwin_exception_handler,
+	libsigsegv_exception_handler, do_install_main_exception_filter): New
+	definitions.
+	(install_main_exception_filter): New function.
+	(sigsegv_install_handler, stackoverflow_install_handler): Call it.
+
+2003-04-26  Bruno Haible  <bruno@clisp.org>
+
+	* configure.in: Don't set sv_cv_have_stack_overflow_recovery=yes if
+	not all of the fault-*.h and stackvma-*.h premises are fulfilled.
+	Reported by Paolo Bonzini <bonzini@gnu.org> for NetBSD/Alpha.
+
+2003-04-03  Bruno Haible  <bruno@clisp.org>
+
+	* configure.in: Add --enable-relocatable option.
+	* m4/relocatable.m4: New file, from GNU gettext.
+	* m4/Makefile.am (EXTRA_DIST): Add it.
+
+	* m4/libtool.m4: Update from GNU gettext, based on libtool-1.4.3.
+	* autoconf/ltmain.sh: Likewise.
+
+2003-04-02  Bruno Haible  <bruno@clisp.org>
+
+	* configure.in: Bump version number to 2.1.
+
+	* tests/stackoverflow2.c: New file, based on code by Paolo Bonzini.
+	* tests/Makefile.am (TESTS, noinst_PROGRAMS): Add stackoverflow2.
+
+2003-04-02  Paolo Bonzini  <bonzini@gnu.org>
+            Bruno Haible  <bruno@clisp.org>
+
+	Complete the port to MacOS X (Darwin).
+	* m4/fault.m4: Include sys/signal.h. Have an exit status of 3 instead
+	of 1 if fault_address is misdetected.
+	* m4/sigaltstack.m4: Define stack_t to struct sigaltstack if absent.
+	Include <sys/signal.h>.
+	* configure.in: Add check for sys/signal.h.
+	Add support for catching stack overflow on MacOSX.
+	Add support for MacOSX on i386.
+	Provide a fallback for SS_ONSTACK before using it.
+	* src/fault-macos-i386.h: New file.
+	* src/stackvma-mach.c: New file.
+	* src/fault-macos-powerpc.h (SIGSEGV_FAULT_STACKPOINTER): Change.
+	* src/handler-unix.c: Include <sys/signal.h>.
+	(SS_DISABLE): Provide a fallback.
+	* src/leave-sigaltstack.c: Include sys/signal.h.
+	(SS_ONSTACK): Provide a fallback.
+	* src/Makefile.am (noinst_HEADERS): Add fault-macos-i386.h.
+	(EXTRA_DIST): Add stackvma-mach.c.
+	* tests/sigsegv1.c: Abort after 10 handler invocations.
+	(main): Drop SKIP message, now emitted by automake 1.7.x.
+	* tests/sigsegv2.c: Abort after 10 handler invocations.
+	(main): Drop SKIP message, now emitted by automake 1.7.x.
+	* tests/stackoverflow1.c (main): Drop SKIP message, now emitted by
+	automake 1.7.x.
+
+2002-10-14  Bruno Haible  <bruno@clisp.org>
+
+	* src/fault-none.h: New file.
+	* src/fault.h: Include CFG_FAULT unconditionally.
+	* src/leave-none.c: New file.
+	* src/leave.c: Include CFG_LEAVE unconditionally.
+	* src/stackvma.c: Include CFG_STACKVMA unconditionally.
+	* configure.in (CFG_LEAVE, CFG_STACKVMA): Define always.
+	* src/Makefile.am (noinst_HEADERS): Add fault-none.h.
+	(EXTRA_DIST): Add leave-none.c.
+	Reported by Paolo Bonzini <bonzini@gnu.org>.
+
+2002-09-30  Bruno Haible  <bruno@clisp.org>
+
+	* src/Makefile.am (noinst_HEADERS): Add fault-hurd.h,
+	fault-linux-m68k.c, fault-macos-powerpc.h, fault-macos-powerpc.c,
+	signals-hurd.h, signals-macos.h.
+
+2002-09-30  Bruno Haible  <bruno@clisp.org>
+
+	* Makefile.am (check-next): Don't ask for reports from i?86-*-linux*
+	platforms.
+
+2002-09-30  Bruno Haible  <bruno@clisp.org>
+
+	Better Linux/PowerPC support.
+	* configure.in: Change Linux/PowerPC support.
+	* src/fault-linux-powerpc.h (SIGSEGV_FAULT_ADDRESS): New macro.
+
+2002-09-30  Bruno Haible  <bruno@clisp.org>
+
+	Better Linux/m68k support.
+	* configure.in: Change Linux/m68k support.
+	* src/fault-linux-m68k.c: New file.
+	* src/fault-linux-m68k.h: Use it.
+
+2002-09-30  Bruno Haible  <bruno@clisp.org>
+
+	Tentative Hurd support.
+	* configure.in: Add Hurd support.
+	* src/signals-hurd.h: New file.
+	* src/fault-hurd.h: New file.
+
+2002-09-30  Bruno Haible  <bruno@clisp.org>
+
+	MacOSX/PowerPC support.
+	* configure.in: Add MacOSX/PowerPC support.
+	* src/signals-macos.h: New file.
+	* src/fault-macos-powerpc.c: New file.
+	* src/fault-macos-powerpc.h: New file.
+
+2002-09-16  Bruno Haible  <bruno@clisp.org>
+
+	* src/fault-posix.h: Don't include <siginfo.h>. Needed for hppa-linux.
+	Reported by Will Newton <will@misconception.org.uk>.
+
+2002-08-28  Bruno Haible  <bruno@clisp.org>
+
+	* Version 2.0 released.
+
+2002-07-28  Bruno Haible  <bruno@clisp.org>
+
+	Big reorganization and rewrite. Every file changed.
+

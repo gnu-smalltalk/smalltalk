@@ -1,0 +1,711 @@
+"======================================================================
+|
+|   Maps a line stream into a series of C (and C preprocessor) tokens
+|
+|
+ ======================================================================"
+
+
+"======================================================================
+|
+| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Written by Steve Byrne.
+|
+| This file is part of GNU Smalltalk.
+|
+| GNU Smalltalk is free software; you can redistribute it and/or modify it
+| under the terms of the GNU General Public License as published by the Free
+| Software Foundation; either version 2, or (at your option) any later version.
+| 
+| GNU Smalltalk is distributed in the hope that it will be useful, but WITHOUT
+| ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+| FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+| details.
+| 
+| You should have received a copy of the GNU General Public License along with
+| GNU Smalltalk; see the file COPYING.  If not, write to the Free Software
+| Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+|
+ ======================================================================"
+
+"
+|     Change Log
+| ============================================================================
+| Author       Date       Change 
+| sbb	      8 Sep 93	  Cloned from LineStream
+"
+
+FileStream fileIn: 'CToken.st'!
+FileStream fileIn: 'LineStream.st' ifMissing: #LineStream !
+
+PushBackStream subclass: #LineTokenStream
+       instanceVariableNames: 'lineStream'
+       classVariableNames: 'LexMethods LexExtra ReservedIds COperatorDict'
+       poolDictionaries: 'CKeywords'
+       category: nil
+!
+
+LineTokenStream comment:
+'I expect to read from a LineStream, and tokenize the characters that I 
+find there.  I yield, via my #next method, collections of tokens which
+correspond to those input lines' !
+
+
+!LineTokenStream class methodsFor: 'initialization'!
+
+initialize
+    LexMethods _ Array new: 128.
+    LexExtra _ Array new: 128.
+    LexMethods atAllPut: #ignoreTok:.
+    LexMethods at: (Character tab asciiValue) put: #whiteTok:.
+    LexMethods at: (Character nl asciiValue) put: #whiteTok:.
+    LexMethods at: (Character newPage asciiValue) put: #whiteTok:.
+    LexMethods at: (Character cr asciiValue) put: #whiteTok:.
+    #(
+      ($  $  #whiteTok:)
+	  ($! $! #opTok:)
+    	  ($" $" #stringTok:)
+	  ($# $# #opTok:)
+    	  ($' $' #charLitTok:)
+    	  ($% $& #opTok:)
+    	  ($( $( #oneCharTok: #OpenParen)
+    	  ($) $) #oneCharTok: #CloseParen)
+    	  ($* $- #opTok:)
+    	  ($. $. #floatTok:)
+    	  ($/ $/ #opTok:)
+    	  ($0 $9 #numberTok:)
+	  ($: $: #oneCharTok: #Colon) "may make this an operator"
+    	  ($; $; #oneCharTok: #Semi)
+	  ($< $> #opTok:)
+	  ($? $? #oneCharTok: #Question) "may make this an operator"
+	  "@ is illegal"
+	  ($A $Z #idTok:)
+    	  ($[ $[ #oneCharTok: #OpenBracket)
+	  ($\ $\ #quoteTok:)
+    	  ($] $] #oneCharTok: #CloseBracket)
+    	  ($^ $^ #opTok: )
+    	  ($_ $_ #idTok:)
+	  ($a $z #idTok:)
+	  (${ ${ #oneCharTok: #OpenBrace)
+	  ($| $| #opTok:)
+	  ($} $} #oneCharTok: #CloseBrace)
+	  ($~ $~ #opTok:)
+	  )
+	do: [ :range | self initRange: range ].
+    self initKeywords.
+
+    self initCOperators.
+!
+
+initKeywords
+    ReservedIds _ Dictionary new.
+    self initKeywords1.
+    self initKeywords2.
+    self initPreprocessorKeywords
+!
+
+initKeywords1
+    ReservedIds at: 'auto' put: AutoKey.
+    ReservedIds at: 'break' put: BreakKey.
+    ReservedIds at: 'case' put: CaseKey.
+    ReservedIds at: 'char' put: CharKey.
+    ReservedIds at: 'const' put: ConstKey.
+    ReservedIds at: 'continue' put: ContinueKey.
+    ReservedIds at: 'default' put: DefaultKey.
+    ReservedIds at: 'do' put: DoKey.
+    ReservedIds at: 'double' put: DoubleKey.
+    ReservedIds at: 'else' put: ElseKey.
+    ReservedIds at: 'enum' put: EnumKey.
+    ReservedIds at: 'extern' put: ExternKey.
+    ReservedIds at: 'float' put: FloatKey.
+    ReservedIds at: 'for' put: ForKey.
+    ReservedIds at: 'goto' put: GotoKey.
+    ReservedIds at: 'if' put: IfKey.
+    ReservedIds at: 'int' put: IntKey.
+!
+
+initKeywords2
+    ReservedIds at: 'long' put: LongKey.
+    ReservedIds at: 'register' put: RegisterKey.
+    ReservedIds at: 'return' put: ReturnKey.
+    ReservedIds at: 'short' put: ShortKey.
+    ReservedIds at: 'signed' put: SignedKey.
+    ReservedIds at: 'sizeof' put: SizeofKey.
+    ReservedIds at: 'static' put: StaticKey.
+    ReservedIds at: 'struct' put: StructKey.
+    ReservedIds at: 'switch' put: SwitchKey.
+    ReservedIds at: 'typedef' put: TypedefKey.
+    ReservedIds at: 'union' put: UnionKey.
+    ReservedIds at: 'unsigned' put: UnsignedKey.
+    ReservedIds at: 'void' put: VoidKey.
+    ReservedIds at: 'volatile' put: VolatileKey.
+    ReservedIds at: 'while' put: WhileKey.
+!
+
+initPreprocessorKeywords
+    ReservedIds at: 'ifdef' put: IfdefKey.
+    "ReservedIds at: 'defined' put: DefinedKey."
+    ReservedIds at: 'elif' put: ElifKey.
+    ReservedIds at: 'endif' put: EndifKey.
+    ReservedIds at: 'ifndef' put: IfndefKey.
+
+!
+
+initCOperators
+    COperatorDict _ Dictionary new.
+
+    #(
+	  '+'
+	  '-'
+	  '*'
+	  '&'
+	  '#' 
+	  '\' "only passes through tokenizer as a macro argument"
+      ) do: [ :op | COperatorDict at: op put: COperatorToken ].
+
+    #('~'
+	  '!'
+	  '++'
+	  '--'
+      ) do: [ :op | COperatorDict at: op put: CUnaryOperatorToken ].
+    #(
+      '.'
+	  '->'
+	  '/'
+	  '%'
+	  '^'
+	  ','
+	  '|'
+	  '||'
+	  '&&'
+	  '>'
+	  '<'
+	  '>>'
+	  '<<'
+	  '>='
+	  '<='
+	  '=='
+	  '!='
+	  '='
+	  '##'
+	  "The assignment guys are also binary operators"
+	  '*='
+	  '/='
+	  '+='
+	  '-='
+	  '>>='
+	  '<<='
+	  '&='
+	  '^='
+	  '|='
+	  '%='
+      ) do: [ :op | COperatorDict at: op put: CBinaryOperatorToken ].
+!
+
+initRange: aRange
+    | method |
+    method _ aRange at: 3.
+    (aRange at: 1) asciiValue to: (aRange at: 2) asciiValue do:
+	[ :ch | LexMethods at: ch put: method.
+    	    	aRange size = 4 ifTrue: 
+		    [ LexExtra at: ch put: (aRange at: 4) ]
+		]
+! !
+
+
+!LineTokenStream class methodsFor: 'instance creation'!
+
+on: aString
+    ^self onStream: (ReadStream on: aString)
+!
+
+onStream: aStream
+    ^self new setStream: aStream
+! !
+
+
+
+!LineTokenStream methodsFor: 'basic'!
+
+next
+    | token tempTok result lastWasWhite |
+    queue size > 0
+	ifTrue: [ ^queue removeFirst ].
+
+    result _ OrderedCollection new: 1.
+
+    lastWasWhite _ false.
+
+    "cases:
+     we start on a line boundary (we guarantee that to ourselves)
+     1) empty line
+     2) only blanks on the line
+     3) mixed stuff on the line
+
+     nextToken yields white-uncompressed stream of tokens.
+     
+     on empty line, we yield an empty collection
+     on line with blanks, we yield a collection containing a single white tok
+     we compress out other white tokens into a single white token
+     "
+
+
+    stream atEnd ifTrue: [ ^nil ].
+
+    lineStream _ PushBackStream on: (ReadStream on: stream next).
+
+    "collect and return a line of tokens"
+    [ token _ self nextToken.
+      token isNil ] 
+	whileFalse: 
+	    [ token class == WhitespaceTok
+		  ifTrue: 
+		      [ lastWasWhite 
+			    ifFalse: 
+				[ lastWasWhite _ true.
+				  result addLast: token ]
+			    ]
+		  ifFalse: [ lastWasWhite _ false.
+			     result addLast: token ]
+		  ].
+    ^result
+! !
+
+
+!LineTokenStream methodsFor: 'token parsing'!
+
+nextToken
+    | ch tok |
+
+    [ lineStream atEnd ifTrue: [ ^nil ].
+      ch _ lineStream next.
+      tok _ self perform: (LexMethods at: ch asciiValue) with: ch.
+      tok isNil ] whileTrue: [ ].
+    ^tok
+!
+
+ignoreTok: aChar
+    '[[[ IGNORING ]]]' printNl.
+    aChar printNl.
+    lineStream printNl.
+    lineStream do: [ :ch | ch printNl ].
+    stream next printNl.
+    ^CharLiteralTok value: '3'
+!
+
+whiteTok: aChar
+    ^WhitespaceTok new.
+!
+
+charLitTok: aChar
+    "Called with aChar == '"
+    | ch value |
+    value _ self parseStringoid: $'.
+    ^CharLiteralTok value: value.
+!			     
+
+idTok: aChar
+    lineStream putBack: aChar.
+    ^self parseIdent
+!
+
+stringTok: aChar
+    | value |
+    value _ self parseStringoid: $".
+    ^StringTok value: value
+
+!
+
+parseStringoid: delimitingChar
+    | bs ch quoted |
+
+    bs := WriteStream on: (String new: 10).
+    [ ch := lineStream next.
+      ch = delimitingChar ] whileFalse: [
+      
+      bs nextPut: ch.
+      ch == $\ ifTrue: [
+	  ch := lineStream peek.
+	  ch isNil ifFalse: [
+	      lineStream next. "gobble the quoted guy"
+	      bs nextPut: ch
+	  ]
+      ]
+    ].
+    ^bs contents 
+!
+
+oneCharTok: aChar
+    ^(Smalltalk at: ((LexExtra at: (aChar asciiValue)), 'Tok') asSymbol)
+	new
+!
+
+floatTok: aChar
+    "got '.', either have a floating point number, or a structure member"
+    | ch | 
+    ch _ lineStream peek.
+    (self isDigit: ch base: 10) 
+	ifTrue: [ "### revisit this "
+		  ^FloatTok value: (self parseFrac: 0.0) ].
+    ch == $.			"seen .., could be ...?"
+	ifFalse: [ ^DotTok ].
+    lineStream next.		"eat it"
+    ch _ lineStream peek.
+    ch == $.			"do we have '...'?"
+	ifTrue: [ ^DotDotDotTok ].
+	
+    "nope, false alarm.  put things back the way they were."
+    lineStream putBack: ch.
+    lineStream putBack: $. .
+
+    ^DotTok
+!
+
+"
+unary operators
+& ~ ! * - + ++ -- 
+
+pure unary operators
+~ ! ++ -- 
+
+doubled operators
++-<>|&#=
+
+binary operators 
+-> . % ^ , + - * / & | == != >> << > < <= >= = 
+
+
+assignment ops
+*/%+->><<&^|
+"
+
+
+opTok: aChar
+    | bs ch cont opStr |
+    bs _ WriteStream on: (String new: 2).
+    ch _ lineStream peek.
+    bs nextPut: aChar.
+
+    (aChar == $/ and: [ ch == $* ])
+	ifTrue: [ ^self parseComment ].
+
+    self handleNormalOperators: bs firstChar: aChar secondChar: ch.
+    "should be allowed to peek more than once, shouldn't I?"
+    ch _ lineStream peek.
+    opStr _ bs contents.
+    ch == $=
+	ifTrue: [ (self isAssignable: opStr) 
+		      ifTrue: [ "gobble assignment operator"
+				bs nextPut: lineStream next.
+				opStr _ bs contents ].
+		  ].
+    
+    "now look up the operator and return "
+   COperatorDict at: bs contents
+		 ifAbsent: [ 'could not find' print. bs contents printNl ].
+    ^(COperatorDict at: bs contents) value: opStr.
+!
+
+
+handleNormalOperators: bs firstChar: aChar secondChar: ch
+    (self isDoublable: aChar)
+	ifTrue: [ ch == aChar
+		      ifTrue: [ lineStream next.
+				^bs nextPut: aChar ] ].
+    self handleTwoCharCases: bs firstChar: aChar secondChar: ch. 
+!
+
+
+isDoublable: aChar
+    ^'+-<>|&#=' includes: aChar
+!
+
+handleTwoCharCases: bs firstChar: aChar secondChar: ch 
+    (aChar == $- and: [ ch == $> ]) ifTrue: [ ^bs nextPut: lineStream next ].
+    (aChar == $> and: [ ch == $= ]) ifTrue: [ ^bs nextPut: lineStream next ].
+    (aChar == $< and: [ ch == $= ]) ifTrue: [ ^bs nextPut: lineStream next ].
+    (aChar == $! and: [ ch == $= ]) ifTrue: [ ^bs nextPut: lineStream next ].
+!
+
+isAssignable: opStr
+    ^#('*' '/' '+' '-' '>>' '<<' '&' '^' '|' '%') includes: opStr
+!
+
+numberTok: aChar
+    | mantissaParsed isNegative dotSeen base exponent scale ch num 
+      floatExponent |
+    mantissaParsed _ isNegative _ dotSeen _ false.
+    
+    "note: no sign handling here"
+
+    "integers are:
+	  <digits>
+	  0<octal_digits>
+	  0x<hex_digits either case>
+	  0X<hex_digits either case>
+	  <whatever>[uUlL]
+	  <whatever>[uUlL][uUlL]"
+    "float are:
+	  <mant_digits>.<frac_digits>e<sign><exponent><suffix>
+	  mant_digits or frac_digits can be missing, but not both.
+	  '.' or 'e' can be missing, but not both.
+	  suffix is either empty or [lLfF]"
+	  
+
+    "first char:
+       if 0, is next char x or X?
+	    if so, parse remainder as hex integer and return
+	    else parse remainder as octal integer and return
+       assume integer.  parse some digits
+       stopped at e or E?
+	   if so, parse exponent and possible suffix and return
+       stopped at .?
+	   if so, know its a float. do the parseFrac thing as above
+
+	   parseFrac: needs the accumulated decimal value
+	      starts at char after .
+	      parses digits
+	      stopped at e or E?
+		  if so, parse exponent and return
+	      stopped at lLFf?
+		  discard it, compute value and return
+
+	   parseExponent mant_part, frac_part
+	      start after e
+		  is char -?
+		     accumulate sign and keep going
+		  parse decimal digits
+		  stopped at lLfF?
+		     discard it, compute value and return
+	    "
+		
+	 
+    ch _ aChar.
+    lineStream putBack: ch.
+    ch == $0 
+	ifTrue: 
+	     [ lineStream next. "gobble char"
+	       lineStream atEnd
+		   ifTrue: [ ^IntegerTok value: 0 ].
+
+	       ch _ lineStream peek.
+	       (ch == $x) | (ch == $X)
+		   ifTrue: [ lineStream next.
+			     ^self parseHexConstant ].
+	       (self isDigit: ch base: 8)
+		   ifTrue: [ ^self parseOctalConstant ].
+	       "restore the flow"
+	       ch _ aChar.
+	       lineStream putBack: aChar ].
+    
+    
+    
+    num _ self parseDigits: ch base: 10.
+    ch _ lineStream peek.
+    ch == $.
+	ifTrue: [ lineStream next. "gobble '.'"
+		  ^FloatTok value: (self parseFrac: num) ].
+		  
+    (ch == $e) | (ch == $E)
+	ifTrue: [ lineStream next. "gobble 'e'"
+		  ^FloatTok value: (self parseExponent: num) ].
+					 
+    "must have been an integer"
+	     
+    self gobbleIntegerSuffix.
+
+
+    ^IntegerTok value: num truncated.
+! !
+
+
+
+
+!LineTokenStream methodsFor: 'utility methods'!
+
+maybeLoadAnotherLine
+    [ (lineStream isNil or: [ lineStream atEnd ]) ]
+	whileTrue: 
+	    [ self atEnd
+		  ifTrue: [ ^nil ].
+	      lineStream _ PushBackStream on: (ReadStream on: stream next) ].
+!    
+
+
+parseComment
+    "Scanner is at /*<> ... "
+    | ch |
+    [ self maybeLoadAnotherLine isNil
+	  ifTrue: [ ^nil ].
+      
+      ch _ lineStream next.
+      ch == $* 
+	  ifTrue: [ lineStream peek == $/ 
+			ifTrue: [ "we're done!"
+				  lineStream next. 
+				  ^WhitespaceTok new ].
+		    ].
+      true] whileTrue: [ ].
+    ^WhitespaceTok new.
+!
+
+isSpecial: ch
+    ^'%&*+,-/<=>?@\|~' includes: ch
+! 
+
+parseHexConstant
+    "scanner at 0x<>..."
+    | num ch |
+    ch _ lineStream peek.
+    num _ self parseDigits: ch base: 16.
+    self gobbleIntegerSuffix.
+    ^IntegerTok value: num truncated.
+!
+
+
+parseOctalConstant
+    "scanner at 0<>..."
+    | num ch |
+    ch _ lineStream peek.
+    num _ self parseDigits: ch base: 8.
+    self gobbleIntegerSuffix.
+    ^IntegerTok value: num truncated.
+!
+
+gobbleIntegerSuffix
+    | ch |
+    "scanner at <digits><>...  may be [luLU][luLU]"
+    ch _ lineStream peek.
+    (ch == $l) | (ch == $L) | (ch == $U) | (ch == $u)
+	ifTrue: [ lineStream next.  "ignore it"
+		  ch _ lineStream peek.
+		  (ch == $l) | (ch == $L) | (ch == $U) | (ch == $u)
+		      ifTrue: [ lineStream next.  "ignore it" ].
+		  ].
+    
+!
+
+
+parseFrac: aNumber
+    "Scanner at ';;;;.<>;;;'"
+    | ch scale num |
+
+    num _ aNumber.
+    scale _ 1.0.
+    [ ch _ lineStream peek. self isDigit: ch base: 10 ] whileTrue:
+	[ num _ num * 10.0 + ch digitValue.
+	  lineStream next. 
+	  scale _ scale / 10.0 .
+	  ].
+
+    num _ num * scale.
+
+    (ch == $e) | (ch == $E)
+	ifTrue: 
+	    [ lineStream next.	"gobble the 'e' "
+	      num _ self parseExponent: num ]
+	ifFalse: 
+	    [ self gobbleFloatSuffix ].
+    ^num
+!
+
+parseExponent: aNumber
+    "scanner at ....e<>..."
+    | ch isNegative exponent | 
+    
+    ch _ lineStream peek.
+    ch == $-
+	ifTrue: [ lineStream next.	"gobble it"
+		  isNegative _ true. ]
+	ifFalse: [ isNegative _ false. ].
+    
+    exponent _ self parseDigits: ch base: 10.
+    self gobbleFloatSuffix.
+    ^aNumber raisedToInteger: (exponent truncated)
+!
+
+gobbleFloatSuffix
+    | ch |
+    ch _ lineStream peek.
+    (ch == $f) | (ch == $F) | (ch == $l) | (ch == $L)
+	ifTrue: [ lineStream next. ]
+! 
+
+parseDigits: ch base: base
+    | c num |
+    "assumes ch is peeked"
+    c _ ch.
+    num _ 0.0.			"accumulate FP in case we're really getting FP"
+    [ c notNil and: [ self isDigit: c base: base ] ] whileTrue:
+	[ num _ num * base + c asUppercase digitValue.
+	  lineStream next. 
+	  c _ lineStream peek ].
+    ^num
+!
+
+
+isDigit: aChar base: base
+    ^aChar class == Character
+	and: [ 
+	       ((aChar between: $0 and: $9)
+		    | (aChar between: $A and: $F) 
+		    | (aChar between: $a and: $f) )
+		   and: [ aChar asUppercase digitValue < base ] ]
+! !
+
+
+
+!LineTokenStream methodsFor: 'stream stack hacking'!
+
+pushStream: aStream
+    "Del-e-ga-tion 
+       -- a Milton Bradley game"
+    stream pushStream: aStream
+! !
+
+
+!LineTokenStream methodsFor: 'private'!
+
+parseIdent
+    | s ch id reservedId |
+    s _ WriteStream on: (String new: 1).
+    [ lineStream atEnd not
+	  and: [ ch _ lineStream peek.
+		 ch isLetter or: [ ch isDigit or: [ ch == $_ ] ] ] ]
+	whileTrue: [ s nextPut: ch.
+		     lineStream next ].
+    id _ s contents.
+    reservedId _ self isReserved: id.
+    reservedId notNil
+	ifTrue: [ ^reservedId ]
+	ifFalse: [ ^IdentifierTok value: id ]
+! 
+
+isReserved: aString
+    ^ReservedIds at: aString ifAbsent: [ nil ]
+! !
+
+
+!LineTokenStream methodsFor: 'private'!
+
+setStream: aStream
+    super init: aStream
+! !
+
+
+
+LineTokenStream initialize!
+
+
+"
+| s str |
+ 
+     s _ LineStream onStream: (FileStream open: '/usr/openwin/include/X11/Xlib.h' mode: 'r').
+     s _ LineTokenStream onStream: s.
+    s printNl.
+    s do: [ :line | line printNl. ].
+!
+
+     s _ LineStream onStream: (FileStream open: 'xl.h' mode: 'r').
+
+"

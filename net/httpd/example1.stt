@@ -1,0 +1,13 @@
+<html>
+<head><title>{%= self class %}</title></head>
+<body>
+	<table>
+		{% 1 to: 10 do: [ :each | %}
+	        <tr>
+			   <td>{%= each printString %}</td>
+			   <td>{%= (each * 2) printString %}</td>
+	        </tr>
+	   	{% ] %}
+	</table>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!-- GNU Smalltalk @VERSION@ package description file -->
+
+<packages>
+<package>
+  <name>Blox</name>
+  <prereq>@BLOX_IMPLEMENTATION@</prereq>
+  <filein>test.st</filein>
+  <directory>browser</directory>
+
+  <file>test.st</file>
+  <file>ChangeLog</file>
+</package>
+
+<@GTK_DISABLED@package>
+  <name>GTK</name>
+  <filein>GtkDecl.st</filein>
+  <module>gst-gtk</module>
+  <directory>gtk</directory>
+
+  <built-file>Structs.st</built-file>
+  <built-file>Enums.st</built-file>
+  <built-file>Funcs.st</built-file>
+  <built-file>Libs.st</file>
+  <file>GtkDecl.st</file>
+  <file>GtkImpl.st</file>
+  <file>MoreFuncs.st</file>
+  <file>MoreStructs.st</file>
+  <file>Types.st</file>
+  <file>example_arrow.st</file>
+  <file>example_aspectframe.st</file>
+  <file>example_buttonbox.st</file>
+  <file>example_entry.st</file>
+  <file>example_eventbox.st</file>
+  <file>example_hello.st</file>
+  <file>example_tictactoe.st</file>
+</@GTK_DISABLED@package>
+
+<package>
+  <name>BloxTK</name>
+  <filein>Blox.st</filein>
+  <module>blox-tk</module>
+  <directory>blox-tk</directory>
+
+  <file>Blox.st</file>
+  <file>BloxBasic.st</file>
+  <file>BloxCanvas.st</file>
+  <file>BloxExtend.st</file>
+  <file>BloxText.st</file>
+  <file>BloxWidgets.st</file>
+  <file>colors.txt</file>
+</package>
+
+<package>
+  <name>Browser</name>
+  <prereq>Blox</prereq>
+  <prereq>Parser</prereq>
+  <filein>Load.st</filein>
+  <directory>browser</directory>
+
+  <file>BrowShell.st</file>
+  <file>Inspector.st</file>
+  <file>Notifier.st</file>
+  <file>View.st</file>
+  <file>BrowserMain.st</file>
+  <file>Load.st</file>
+  <file>PCode.st</file>
+  <file>bear.gif</file>
+  <file>ClassBrow.st</file>
+  <file>Manager.st</file>
+  <file>PList.st</file>
+  <file>ButtonForm.st</file>
+  <file>test.st</file>
+  <file>ClassHierBrow.st</file>
+  <file>Menu.st</file>
+  <file>PText.st</file>
+  <file>DebugSupport.st</file>
+  <file>Debugger.st</file>
+  <file>MethInspect.st</file>
+  <file>RadioForm.st</file>
+  <file>NamespBrow.st</file>
+  <file>DictInspect.st</file>
+  <file>MethSetBrow.st</file>
+  <file>Run.st</file>
+  <file>GuiData.st</file>
+  <file>ModalDialog.st</file>
+  <file>StrcInspect.st</file>
+</package>
+
+<disabled-package>
+  <name>CInt</name>
+  <prereq>Tokenizer</prereq>
+  <filein>CPP.st</filein>
+  <filein>CParseType.st</filein>
+  <filein>CTok.st</filein>
+  <directory>unsupported/cint</directory>
+
+  <file>CDeclNode.st</file>
+  <file>CSymbol.st</file>
+  <file>ExpansionStream.st</file>
+  <file>CExpressionNode.st</file>
+  <file>CSymbolTable.st</file>
+  <file>ExpansionStreamStack.st</file>
+  <file>CPP.st</file>
+  <file>CTok.st</file>
+  <file>LineStream.st</file>
+  <file>CPStrConc.st</file>
+  <file>CToken.st</file>
+  <file>LineTokenStream.st</file>
+  <file>CPStrUnq.st</file>
+  <file>CTreeBuilder.st</file>
+  <file>README</file>
+  <file>CParseType.st</file>
+  <file>CollapsedStream.st</file>
+  <file>StreamStack.st</file>
+</disabled-package>
+
+<package>
+  <name>Compiler</name>
+  <prereq>Parser</prereq>
+  <filein>StartCompiler.st</filein>
+  <directory>compiler</directory>
+
+  <file>StartCompiler.st</file>
+  <file>test.st</file>
+  <file>ChangeLog</file>
+</package>
+
+<@I18N_DISABLED@package>
+  <name>I18N</name>
+  <filein>Load.st</filein>
+  <module>i18n</module>
+  <directory>i18n</directory>
+
+  <file>GetText.st</file>
+  <file>Load.st</file>
+  <file>Locale.st</file>
+  <file>Numbers.st</file>
+  <file>Times.st</file>
+  <file>Collation.st</file>
+  <file>Sets.st</file>
+  <file>Expression.st</file>
+  <file>ChangeLog</file>
+</@I18N_DISABLED@package>
+
+<package>
+  <name>DB</name>
+  <filein>DB.st</filein>
+  <directory>db</directory>
+
+  <file>DB.st</file>
+  <file>README</file>
+  <file>ChangeLog</file>
+</package>
+
+<package>
+  <name>DhbNumericalMethods</name>
+  <prereq>SUnit</prereq>
+  <filein>Load.st</filein>
+  <directory>numerics</directory>
+
+  <file>NumericsAdds.st</file>
+  <file>NumericsTests.st</file>
+  <file>Approximation.st</file>
+  <file>Basic.st</file>
+  <file>Distributions.st</file>
+  <file>Functions.st</file>
+  <file>Integration.st</file>
+  <file>Load.st</file>
+  <file>Matrixes.st</file>
+  <file>Optimization.st</file>
+  <file>RNG.st</file>
+  <file>Statistics.st</file>
+</package>
+
+<package>
+  <name>GDBM</name>
+  <filein>gdbm-c.st</filein>
+  <filein>gdbm.st</filein>
+  <module>gdbm</module>
+  <directory>examples</directory>
+
+  <file>gdbm.st</file>
+  <file>gdbm-c.st</file>
+</package>
+
+<package>
+  <name>MD5</name>
+  <filein>md5.st</filein>
+  <module>md5</module>
+  <directory>examples</directory>
+
+  <file>md5.st</file>
+</package>
+
+<package>
+  <name>MySQL</name>
+  <prereq>DB</prereq>
+  <prereq>TCP</prereq>
+  <prereq>SUnit</prereq>
+  <filein>MySQL.st</filein>
+  <filein>MySQLTests.st</filein>
+  <directory>db</directory>
+
+  <file>MySQL.st</file>
+  <file>MySQLTests.st</file>
+  <file>mysql-test.st</file>
+</package>
+
+<package>
+  <name>NetClients</name>
+  <prereq>TCP</prereq>
+  <prereq>SUnit</prereq>
+  <filein>Load.st</filein>
+  <directory>net</directory>
+
+  <file>Base.st</file>
+  <file>HTTP.st</file>
+  <file>Load.st</file>
+  <file>NetServer.st</file>
+  <file>MIME.st</file>
+  <file>ContentHandler.st</file>
+  <file>FTP.st</file>
+  <file>IMAP.st</file>
+  <file>NNTP.st</file>
+  <file>POP.st</file>
+  <file>SMTP.st</file>
+  <file>URIResolver.st</file>
+  <file>ChangeLog</file>
+</package>
+
+<package>
+  <name>Parser</name>
+  <filein>Load.st</filein>
+  <directory>compiler</directory>
+
+  <file>Load.st</file>
+  <file>ParseTreeSearcher.st</file>
+  <file>RBFormatter.st</file>
+  <file>RBParseNodes.st</file>
+  <file>RBParser.st</file>
+  <file>RBToken.st</file>
+  <file>STCompLit.st</file>
+  <file>STCompiler.st</file>
+  <file>STDecompiler.st</file>
+  <file>STLoader.st</file>
+  <file>STLoaderObjs.st</file>
+  <file>STSymTable.st</file>
+</package>
+
+<package>
+  <name>Regex</name>
+  <module>regex</module>
+  <filein>regex.st</filein>
+  <directory>examples</directory>
+
+  <file>regex.st</file>
+</package>
+
+<package>
+  <name>SUnit</name>
+  <filein>SUnitPreload.st</filein>
+  <filein>SUnit.st</filein>
+  <filein>SUnitTests.st</filein>
+  <filein>SUnitScript.st</filein>
+  <directory>sunit</directory>
+
+  <file>SUnit.st</file>
+  <file>SUnitPreload.st</file>
+  <file>SUnitTests.st</file>
+  <file>SUnitScript.st</file>
+</package>
+
+<package>
+  <name>TCP</name>
+  <filein>TCP.st</filein>
+  <module>tcp</module>
+  <directory>tcp</directory>
+
+  <file>SocketAddress.st</file>
+  <file>Datagram.st</file>
+  <file>AbstractSocketImpl.st</file>
+  <file>IPSocketImpl.st</file>
+  <file>Sockets.st</file>
+  <file>Tests.st</file>
+  <file>init.st</file>
+  <file>cfuncs.st</file>
+  <file>TCP.st</file>
+  <file>Buffers.st</file>
+  <file>ChangeLog</file>
+</package>
+
+<package>
+  <name>WebServer</name>
+  <prereq>NetClients</prereq>
+  <filein>Load.st</filein>
+  <directory>net/httpd</directory>
+
+  <file>FileServer.st</file>
+  <file>Haiku.st</file>
+  <file>Load.st</file>
+  <file>STT.st</file>
+  <file>WebServer.st</file>
+  <file>WikiServer.st</file>
+  <file>edit.jpg</file>
+  <file>example1.stt</file>
+  <file>example2.stt</file>
+  <file>find.jpg</file>
+  <file>head.jpg</file>
+  <file>help.jpg</file>
+  <file>history.jpg</file>
+  <file>next.jpg</file>
+  <file>prev.jpg</file>
+  <file>recent.jpg</file>
+  <file>rename.jpg</file>
+  <file>test.st</file>
+  <file>top.jpg</file>
+</package>
+
+<package>
+  <name>XML</name>
+  <filein>XML.st</filein>
+  <directory>xml</directory>
+
+  <file>XML.st</file>
+  <file>ChangeLog</file>
+</package>
+
+<package>
+  <name>XPath</name>
+  <prereq>XML</prereq>
+  <filein>XPath.st</filein>
+  <directory>xml</directory>
+  <file>XPath.st</file>
+</package>
+
+<package>
+  <name>XSL</name>
+  <prereq>XML</prereq>
+  <prereq>XPath</prereq>
+  <filein>XSL.st</filein>
+  <directory>xml</directory>
+  <file>XSL.st</file>
+</package>
+
+<disabled-package>
+  <name>OtherExamples</name>
+  <directory>unsupported</directory>
+  <file>BigExpr.st</file>
+  <file>CInt.st</file>
+  <file>CPP-test.st</file>
+  <file>CParseT1.st</file>
+  <file>CParseT2.st</file>
+  <file>CParseT3.st</file>
+  <file>CString.st</file>
+  <file>DLD.st</file>
+  <file>Extensn.st</file>
+  <file>IfError.st</file>
+  <file>Interr.st</file>
+  <file>ParseErr.st</file>
+  <file>Process1.st</file>
+  <file>Process2.st</file>
+  <file>Profile.st</file>
+  <file>Sorting.st</file>
+  <file>a.st</file>
+  <file>ba.st</file>
+  <file>binary.c</file>
+  <file>bug.st</file>
+  <file>bug2.st</file>
+  <file>bug4.st</file>
+  <file>er2.st</file>
+  <file>market.st</file>
+  <file>resolve.st</file>
+  <file>self.st</file>
+  <file>t.st</file>
+  <file>torture.st</file>
+</disabled-package>
+
+<disabled-package>
+  <name>Examples</name>
+  <directory>examples</directory>
+  <file>Man.st</file>
+  <file>Tetris.st</file>
+  <file>Application.st</file>
+  <file>Lisp.st</file>
+  <file>Queens.st</file>
+  <file>Richards.st</file>
+  <file>Bench.st</file>
+  <file>MiniDebugger.st</file>
+  <file>MemUsage.st</file>
+  <file>README</file>
+  <file>GenClasses.st</file>
+  <file>Dinner.st</file>
+  <file>Prolog.st</file>
+  <file>RandomInt.st</file>
+  <file>EditStream.st</file>
+  <file>PrtHier.st</file>
+  <file>RecursLit.st</file>
+  <file>Case.st</file>
+  <file>Publish.st</file>
+  <file>RegExp.st</file>
+  <file>StreamFilter.st</file>
+  <file>PushBack.st</file>
+  <file>SortCriter.st</file>
+  <file>shell</file>
+  <file>pepe.sed</file>
+  <file>xml.sed</file>
+  <file>Tokenizer.st</file>
+  <file>Timer.st</file>
+  <file>Sync.st</file>
+</disabled-package>
+
+<disabled-package>
+  <name>Kernel</name>
+  <directory>kernel</directory>
+
+  <file>Array.st</file>
+  <file>CompildMeth.st</file>
+  <file>LookupTable.st</file>
+  <file>RunArray.st</file>
+  <file>ArrayColl.st</file>
+  <file>CompiledBlk.st</file>
+  <file>Magnitude.st</file>
+  <file>Semaphore.st</file>
+  <file>Association.st</file>
+  <file>HomedAssoc.st</file>
+  <file>ContextPart.st</file>
+  <file>MappedColl.st</file>
+  <file>SeqCollect.st</file>
+  <file>Autoload.st</file>
+  <file>DLD.st</file>
+  <file>Memory.st</file>
+  <file>Set.st</file>
+  <file>Bag.st</file>
+  <file>Date.st</file>
+  <file>Message.st</file>
+  <file>SharedQueue.st</file>
+  <file>Behavior.st</file>
+  <file>Delay.st</file>
+  <file>Metaclass.st</file>
+  <file>SmallInt.st</file>
+  <file>BlkClosure.st</file>
+  <file>Dictionary.st</file>
+  <file>MethodDict.st</file>
+  <file>SortCollect.st</file>
+  <file>BlkContext.st</file>
+  <file>DirMessage.st</file>
+  <file>MethodInfo.st</file>
+  <file>Stream.st</file>
+  <file>Boolean.st</file>
+  <file>Directory.st</file>
+  <file>MthContext.st</file>
+  <file>String.st</file>
+  <file>ExcHandling.st</file>
+  <file>Namespace.st</file>
+  <file>SymLink.st</file>
+  <file>VFS.st</file>
+  <file>Builtins.st</file>
+  <file>False.st</file>
+  <file>Number.st</file>
+  <file>Symbol.st</file>
+  <file>ByteArray.st</file>
+  <file>File.st</file>
+  <file>ObjDumper.st</file>
+  <file>SysDict.st</file>
+  <file>ScaledDec.st</file>
+  <file>FileSegment.st</file>
+  <file>Object.st</file>
+  <file>Time.st</file>
+  <file>ByteStream.st</file>
+  <file>FileStream.st</file>
+  <file>OrderColl.st</file>
+  <file>TokenStream.st</file>
+  <file>CFuncs.st</file>
+  <file>Float.st</file>
+  <file>PkgLoader.st</file>
+  <file>Transcript.st</file>
+  <file>CObject.st</file>
+  <file>Fraction.st</file>
+  <file>Point.st</file>
+  <file>True.st</file>
+  <file>CStruct.st</file>
+  <file>IdentDict.st</file>
+  <file>PosStream.st</file>
+  <file>UndefObject.st</file>
+  <file>CType.st</file>
+  <file>IdentitySet.st</file>
+  <file>ProcSched.st</file>
+  <file>ValueAdapt.st</file>
+  <file>CharArray.st</file>
+  <file>Integer.st</file>
+  <file>Process.st</file>
+  <file>CallinProcess.st</file>
+  <file>WeakObjects.st</file>
+  <file>Character.st</file>
+  <file>Interval.st</file>
+  <file>RWStream.st</file>
+  <file>OtherArrays.st</file>
+  <file>Class.st</file>
+  <file>LargeInt.st</file>
+  <file>Random.st</file>
+  <file>WriteStream.st</file>
+  <file>ClassDesc.st</file>
+  <file>Link.st</file>
+  <file>ReadStream.st</file>
+  <file>ObjMemory.st</file>
+  <file>Collection.st</file>
+  <file>LinkedList.st</file>
+  <file>Rectangle.st</file>
+  <file>AnsiDates.st</file>
+  <file>CompildCode.st</file>
+  <file>LookupKey.st</file>
+  <file>BindingDict.st</file>
+  <file>AbstNamespc.st</file>
+  <file>RootNamespc.st</file>
+  <file>AnsiExcept.st</file>
+  <file>HashedColl.st</file>
+  <file>FileDescr.st</file>
+  <file>FloatD.st</file>
+  <file>FloatE.st</file>
+  <file>FloatQ.st</file>
+  <file>URL.st</file>
+  <file>VarBinding.st</file>
+  <file>RecursionLock.st</file>
+
+  <file>../vfs/</file>
+  <file>../vfs/README</file>
+  <file>../vfs/deb</file>
+  <file>../vfs/lslR</file>
+  <file>../vfs/mailfs</file>
+  <file>../vfs/patchfs</file>
+  <file>../vfs/uar</file>
+  <file>../vfs/urar</file>
+  <file>../vfs/uzip</file>
+  <file>../vfs/uzoo</file>
+  <file>../vfs/ulha</file>
+  <file>../vfs/ucpio</file>
+  <file>../vfs/utar</file>
+</disabled-package>
+
+</packages>

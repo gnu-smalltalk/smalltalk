@@ -1,0 +1,158 @@
+
+Execution begins...
+returned value is CoreException new "<0>"
+
+Execution begins...
+
+testResume...passed
+returned value is TextCollector new "<0>"
+
+Execution begins...
+
+testReturn...passed if nothing follows on this line
+returned value is TextCollector new "<0>"
+
+Execution begins...
+
+testPass...passing...passed if nothing follows on this line
+returned value is TextCollector new "<0>"
+
+Execution begins...
+
+testEnsure... error:  Ignore this error
+passed
+returned value is nil
+
+Execution begins...
+returned value is 0
+
+Execution begins...
+ error:  Ignore this error
+returned value is nil
+
+Execution begins...
+
+testIfCurtailed...passed
+returned value is TextCollector new "<0>"
+
+Execution begins...
+returned value is true
+
+Execution begins...
+returned value is true
+
+Execution begins...
+ error: did not understand #siz
+returned value is nil
+
+Execution begins...
+returned value is true
+
+Execution begins...
+returned value is true
+
+Execution begins...
+ error: An exceptional condition has occurred, and has prevented normal
+continuation of processing.
+returned value is nil
+
+Execution begins...
+returned value is true
+
+Execution begins...
+returned value is true
+
+Execution begins...
+returned value is 1
+
+Execution begins...
+#block
+#outer
+returned value is #block
+
+Execution begins...
+#block
+#outer
+returned value is #outer
+
+Execution begins...
+#block
+#inner
+#outer
+returned value is #block
+
+Execution begins...
+#block
+#inner
+#outer
+returned value is #outer
+
+Execution begins...
+#block
+#inner
+#outer
+returned value is #inner
+
+Execution begins...
+#block
+#inner
+#outer
+returned value is #outer
+
+Execution begins...
+#block
+returned value is #block
+
+Execution begins...
+#block
+returned value is #block
+
+Execution begins...
+#block
+returned value is #block
+
+Execution begins...
+#block
+returned value is #block
+
+Execution begins...
+#block
+returned value is #block
+
+Execution begins...
+#block
+returned value is #block
+
+Execution begins...
+#block
+#outer
+returned value is #block
+
+Execution begins...
+#block
+#outer
+returned value is #outer
+
+Execution begins...
+#block
+#inner
+#outer
+returned value is #block
+
+Execution begins...
+#block
+#inner
+#outer
+returned value is #outer
+
+Execution begins...
+#block
+#inner
+#outer
+returned value is #inner
+
+Execution begins...
+#block
+#inner
+#outer
+returned value is #outer

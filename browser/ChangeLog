@@ -1,0 +1,1035 @@
+2003-06-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 2.1.3 released.
+
+2003-05-14  Jan Hidders
+
+        * browser/PCode.st: syntax highlight unary and
+        binary methods correctly.
+
+2003-05-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 2.1.2 released.
+
+2003-05-08  Mike Anderson  <msasjf@yahoo.co.uk>
+
+	* browser/PList.st: add methods to copy elements
+	* browser/Notifier.st: add menu items to copy stack
+	trace
+
+2003-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
+        *** Version 2.1.1 (stable) released.
+
+2003-04-12  Paolo Bonzini  <bonzini@gnu.org>
+
+        *** Version 2.1 (stable) released.
+
+2003-03-25  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/PList.st: set selection = 0 when the
+	contents of the list box are changed.
+
+2003-03-23  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/PList.st: correctly send events when
+	#select: is used.
+	* browser/ClassHierBrow.st: evaluate expressions
+	in the context of the selected class.  Rewritten
+	"Search..." menu item.  Remove Bytecodes and
+	Hierarchy menu items, not so useful and they
+	complicate the code unnecessarily.
+
+2003-03-14  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/ClassHierBrow.st: need to remove
+	metaclass in addition to the class.
+	* browser/NamespBrow.st: namespace renaming does
+	not need to touch the associations.
+	
+2003-03-02  Markus Fritsche  (Fritsche.Markus@gmx.net)
+
+	* browser/NamespBrow.st: add Add Subspace.
+
+2003-03-01  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/NamespBrow.st: merge patch to add File Into
+	Namespace
+
+2003-02-25  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/BrowserMain.st: use #nextPutAllFlush: to
+	output to the transcript when the GUI is not being
+	used.
+
+	* browser/BrowShell.st: merge patch to add File In,
+	add Save Image As
+	* browser/BrowserMain.st: likewise
+
+	* browser/ClassHierBrow.st: prompt for category when
+	adding a method without a selected category
+
+2003-02-09  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/ButtonForm.st: new file
+	* browser/ClassHierBrow.st: remove add method menu item,
+	the thing is done whenever a protocol is picked
+	* browser/Debugger.st: add button box
+	* browser/PList.st: cleanup some dataMsg vs. listMsg issues
+
+2003-02-06  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/MethInspect.st: move code to start a browser on
+	references...
+	* browser/MethSetBrow.st: ...here.  Also use #dataMsg to
+	simplify code & fix bugs, and add a context menu to the
+	selector list.
+	* browser/ClassHierBrow.st: add inspect menu items for
+	classes and methods.
+	* browser/Inspector.st: fix title bar for browsing classes
+
+2003-01-09  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/PList.st: simplify code and don't change selection if
+	it is refused; hiliteItemInitMsg -> selectionMsg
+	* browser/ClassHierBrow.st: adjust
+	* browser/NamespaceBrow.st: adjust
+	* browser/Debugger.st: adjust
+
+	* browser/NamespaceBrow.st: clear protocol and method lists when
+	selected namespace changes
+
+2003-01-04  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/ClassHierBrow.st: fix thinko (inheritsFrom: -> isKindOf:)
+	* browser/PCode.st: highlight class definitions as well
+	* browser/PText.st: fix inverted check in #compileIt.
+
+2002-12-29  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/PText.st: use Meta-[DPI] instead of Control-Shift-[DPI]
+	for Do it, Print it, Inspect it
+
+2002-12-27  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/PText.st: map Control-S to Accept
+	* browser/ClassHierBrow.st: use the Control-S binding
+	* browser/MethSetBrow.st: likewise
+	* browser/Debugger.st: likewise
+
+	* browser/Inspector.st: don't pop a walkback when an error
+	happens in the inspector
+
+	* browser/ClassHierBrow.st: evaluate modifications to the
+	class template in the namespace of the current class.
+	* browser/MethSetBrow.st: report senders and implementors
+	from all over the system.
+
+	* browser/Notifier.st: don't print internal contexts
+	* browser/Debugger.st: terminate internal contexts when
+	the debugger is invoked
+
+2002-12-20  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/Notifier.st: start notifier in separate
+	process, keep other process in an instance variable,
+	don't override the handling of errors.
+	* browser/Debugger.st: keep process in an instance
+	variable, add support for single stepping (no UI yet)
+	and for changing the context list on the fly.
+	* browser/DebugSupport.st: namespace fix
+
+2002-11-06  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/NamespBrow.st: customize title bar
+	* browser/ClassBrow.st: likewise
+	* browser/ClassHierBrow.st: prepare for the above
+
+2002-10-05  Paolo Bonzini  (bonzini@gnu.org)
+
+	* browser/DebugSupport.st: new file
+	* browser/Debugger.st: highlight source code line.
+	New ambitious name of blox/CtxtInspect.st
+
+2002-10-04  Paolo Bonzini  (bonzini@gnu.org)
+
+        * browser/BrowShell.st: use a PWorksheetText
+        * browser/PText.st: define PWorksheetText and
+	WorksheetVariableTracker
+
+2002-09-25  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Inspector.st: refactoring, added dive/pop
+	* blox/StrcInspect.st: refactoring
+	* blox/DictInspect.st: refactoring
+	* blox/MethInspect.st: refactoring
+	* blox/CtxtInspect.st: update receiver/stack panes
+	on every selection from context list.  New class
+	PrimitiveInspectorFieldList.
+
+2002-09-22  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/CtxtInspect.st: show context list
+
+	* blox/PList.st: set font
+	* blox/PText.st: likewise
+	* blox/RadioForm.st: likewise
+
+2002-09-17  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/tk/BloxBasic.st: move underlining to BMenuObject,
+	so that menu bars are underlined as well.
+	* blox/tk/BloxWidgets.st: remove it from BMenuBar,
+	use it in BMenu.  Support callbacks in BMenu and
+	submenus in #newMenuItemFor:notifying:.
+
+	* blox/Menu.st: create menus for named pop-up menus
+	* blox/ClassHierBrow.st: give the pop-up a name
+	* blox/CtxtInspect.st: give the pop-up a name
+	* blox/DictInspect.st: give the pop-up a name
+	* blox/Inspector.st: give the pop-up a name
+	* blox/MethInspect.st: give the pop-up a name
+	* blox/MethSetBrow.st: give the pop-up a name
+	* blox/NamespBrow.st: give the pop-up a name
+	* blox/Notifier.st: give the pop-up a name
+	* blox/StrcInspect.st: give the pop-up a name
+	* blox/BrowShell.st: give the pop-up a name
+
+	* blox/Inspector.st: set evaluation key bindings
+	* blox/BrowShell.st: ditto
+	* blox/PText.st: taught how to do so.
+
+2002-09-17  Daniel A. Koepke  (dkoepke@circlemud.org)
+
+        * blox/tk/BloxBasic.st: convert Ctrl-KEY to Control-KEY.
+        * blox/tk/BloxText.st: convert LINE.0 lineend to LINE.end
+
+        * blox/PText.st: support choosing Doit etc. at the end of
+        a line.
+        * blox/Manager.st: add Ctrl+1/2/3 bindings for Worksheet,
+        Class Hierarchy Browser and Namespace Browser, respectively.
+
+2002-09-13  Paolo Bonzini  (bonzini@gnu.org)
+
+        *** Versions 2.0c (development) and 2.0.6 (stable) released
+
+2002-08-19  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BrowShell.st: reformatted
+	* blox/BrowserMain.st: reformatted
+	* blox/ClassBrow.st: reformatted
+	* blox/ClassHierBrow.st: reformatted
+	* blox/CtxtInspect.st: reformatted
+	* blox/DictInspect.st: reformatted
+	* blox/GuiData.st: reformatted
+	* blox/Inspector.st: reformatted
+	* blox/Manager.st: reformatted
+	* blox/Menu.st: reformatted
+	* blox/MethInspect.st: reformatted
+	* blox/MethSetBrow.st: reformatted
+	* blox/ModalDialog.st: reformatted
+	* blox/NamespBrow.st: reformatted
+	* blox/Notifier.st: reformatted
+	* blox/PCode.st: reformatted
+	* blox/List.st: reformatted
+	* blox/PText.st: reformatted
+	* blox/RadioForm.st: reformatted
+	* blox/StrcInspect.st: reformatted
+	* blox/View.st: reformatted
+
+2002-08-14  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 2.0.5 (stable) released
+
+2002-08-12  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 2.0b (development) released
+
+	* blox/tk/Blox.st: don't refer to the loading directory
+	explicitly
+	* blox/test.st: use the system kernel directory to find
+	bear.gif
+
+2002-08-07  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Versions 2.0a (development) and 2.0.4 (stable) released
+
+2002-07-17  Paolo Bonzini  (bonzini@gnu.org)
+
+        *** Version 2.0.3 released
+
+2002-07-16  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/PCode.st: rewritten to use BRProgramNodeVisitor
+
+2002-07-11  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 2.0.2 released
+	
+2002-07-06  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Notifier.st: skip disabled methods in backtraces
+
+2002-06-28  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 2.0.1 released
+	
+2002-06-25  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 2.0 released
+	
+2002-05-11  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.96.6 released
+	
+2002-05-10  Paolo Bonzini  (bonzini@gnu.org)
+
+        * blox/ClassHierBrow.st: new name of ClassBrow.st,
+        refactored the layout code, purged all non-namespace code
+        * blox/ClassBrow.st: new file
+        * blox/NamespBrow.st: new file
+        * blox/BrowserMain.st: use ClassHierarchyBrowser>>#open,
+        add method to open NamespaceBrowser
+        * blox/BrowShell.st: add menu item to open NamespaceBrowser
+
+2002-04-14  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.96.5 released
+	
+2002-03-12  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.96.4 released
+	
+2002-01-29  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.96.3 released.
+
+2002-01-22  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/tk/BloxCanvas.st: added a missing period
+	* blox/tk/BloxExtend.st: added a couple of missing periods
+
+2002-01-04  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.96.2 released
+
+	* blox/tk/BloxExtend.st: completed documentation
+
+2002-01-03  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/ModalDialog.st: removed obsolete calls to
+	#createToplevelWindow:
+	* blox/BrowserMain.st: likewise
+	* blox/ClassBrow.st: likewise
+
+	* blox/Notifier.st: fixed namespace references
+	* blox/Inspector.st: likewise
+	* blox/CtxtInspect.st: likewise
+	* blox/DictInspect.st: likewise
+	* blox/MethInspect.st: likewise
+	* blox/StrcInspect.st: likewise
+	
+	* blox/BloxText.st: completed documentation
+	* blox/BloxCanvas.st: likewise
+
+2002-01-02  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/tk/BloxBasic.st: accessing method are now included
+	in the source code rather than generated at file-in time
+	* blox/tk/BloxWidgets.st: likewise
+	* blox/tk/BloxCanvas.st: likewise
+	* blox/tk/BloxText.st: likewise
+
+	* blox/Load.st: put into namespace BLOX.BLOXBrowser
+	* blox/tk/Load.st: put into namespace BLOX
+	* examples/blox/Man.st: put into namespace BLOX
+	* examples/blox/Tetris.st: put into namespace BLOX
+	* blox/Run.st: use the correct namespace
+
+	* blox/PCode.st: use the correct namespace for STPluggableParser
+
+	* examples/blox/Tetris.st: don't load examples/RandomInt.st
+
+	* blox/tk/BloxBasic.st: completed documentation
+	* blox/tk/BloxWidgets.st: likewise
+
+2001-11-20  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.96.1 released
+	
+2001-11-13  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BrowShell.st: prefixed # to symbols in arrays
+	* blox/ClassBrow.st: prefixed # to symbols in arrays
+	* blox/CtxtInspect.st: prefixed # to symbols in arrays
+	* blox/DictInspect.st: prefixed # to symbols in arrays
+	* blox/Inspector.st: prefixed # to symbols in arrays
+	* blox/MethInspect.st: prefixed # to symbols in arrays
+	* blox/MethSetBrow.st: prefixed # to symbols in arrays
+	* blox/Notifier.st: prefixed # to symbols in arrays
+	* blox/StrcInspect.st: prefixed # to symbols in arrays
+	* blox/gtk/GtkDecl.st: prefixed # to symbols in arrays
+	* blox/gtk/GtkDecl.st.in: prefixed # to symbols in arrays
+	* blox/gtk/funcs: prefixed # to symbols in arrays
+	* blox/gtk/funcs.awk: prefixed # to symbols in arrays
+	* blox/tk/BloxBasic.st: prefixed # to symbols in arrays
+
+2001-03-01  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/tk/BloxBasic.st: use ObjectMemory instead of init blocks.
+	* blox/tk/Blox.st: use ObjectMemory instead of init blocks.
+	
+2001-02-23  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Released version 1.95.3
+
+	* blox/ClassBrow.st: update the class pane when a
+	class is created.
+	
+2001-02-16   Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: moved to blox/tk
+	* blox/BloxWidgets.st: moved to blox/tk
+	* blox/BloxCanvas.st: moved to blox/tk
+	* blox/BloxText.st: moved to blox/tk
+	* blox/BloxExtend.st: moved to blox/tk
+	* blox/Blox.st: moved to blox/tk
+	* blox/Blox.c: moved to blox/tk
+	
+	* blox/ClassBrow.st: use the new OrderedForm
+	* blox/Manager.st: created OrderedForm class
+	
+2001-02-15   Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: removed deprecated BMenuObject geometry
+	methods and added #inset:.
+	* blox/BloxWidgets.st: use the packer in BContainer.
+	* blox/Manager.st: declared OrderedForm.
+	* blox/test.st: use new geometry methods.
+	* blox/BloxExtend.st: ditto.
+	* blox/ClassBrow.st: ditto.
+	* blox/MethSetBrow.st: ditto.
+	* blox/Inspector.st: ditto.
+
+	* blox/BloxWidgets.st: destroy a BPopupWindow when the
+	contained child is destroyed.
+	* blox/BloxExtend.st: destroy the list object when a
+	BDropdown is destroyed.
+	
+2001-02-14   Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: add class-side #tclEval:with:...
+	* blox/BloxText.st: define the font protocol
+	* blox/MethInspect.st: fixed bug in currentVariableValue
+	(missing caret)
+	
+2001-02-13   Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.c: in bloxIdle, call Tcl_DoOneEvent until there are
+	no more events in the list.
+
+2001-02-12   Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.st: call `Blox onStartup'
+
+	* blox/Notifier.st: updated for changes to exception handling
+	* blox/BBrowser.st: updated for changes to exception handling
+	
+	* blox/BloxWidgets.st: adjust index positions by one (they
+	were skewed) in BList.
+	* blox/PList.st: don't adjust for skewed index positions in BList.
+
+2001-02-02   Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.c: use new VMProxy
+	* blox/cfuncs.h: removed
+	
+2001-01-30   Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Released version 1.95.1
+	
+2000-10-14  GertJan Kersten (GertJan.Kersten@bolesian.nl)
+
+	* blox/Blox.c: set tcl_library if TCL_LIBRARY is found
+	in the environment
+
+2000-08-13  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Inspector.st: added CollectionInspector
+
+2000-06-17  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Released versions 1.95 (development) and 1.7.5 (stable)
+
+2000-05-04  Paolo Bonzini (bonzini@gnu.org)
+
+	*** Version 1.94.90 released
+
+2000-04-12  Paolo Bonzini (bonzini@gnu.org)
+
+	*** Version 1.7.4 released
+
+2000-03-28  Paolo Bonzini (bonzini@gnu.org)
+
+	* blox/ClassBrow.st: removed debugging statement
+
+2000-03-23  Paolo Bonzini (bonzini@gnu.org)
+ 
+	*** Version 1.7.3 released
+
+2000-03-11  Paolo Bonzini (bonzini@gnu.org)
+ 
+	*** Version 1.7.2 released
+
+2000-02-22  Paolo Bonzini (bonzini@gnu.org)
+
+	*** Version 1.7.1 released
+
+2000-02-15  Paolo Bonzini (bonzini@gnu.org)
+
+	*** Version 1.7 released
+
+2000-01-31  Paolo Bonzini (bonzini@gnu.org)
+
+	*** Sixth beta of 1.7 (labeled 1.6.85) released
+
+2000-01-31  Paolo Bonzini (bonzini@gnu.org)
+
+	* blox/Notifier.st: updated for recent changes to the inner
+	workings of the interpreter (notably, the `terminate interpreter'
+	bytecode and the fact that execution environments no longer have
+	their selector set to nil)
+
+1999-12-29  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BrowShell.st: TranscriptInterface class changed to
+	TextCollector -- changed here too.  Also added the ability to
+	add custom menus to the browsers' window.
+
+1999-12-28  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Fifth beta of 1.7 (labeled 1.6.84) released
+
+1999-12-25  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Inspector.st: added Object>>#basicInspect before guests
+	arrive for Xmas...
+
+1999-12-21  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/PCode.st: moved the SyntaxHighlighter class (now called
+	STPluggableParser) to compiler/STParser.st.
+
+1999-11-26  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Fourth beta of 1.7 (labeled 1.6.83) released
+
+1999-11-06  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxWidgets.st: BContainer uses two sends to self to position
+	new children, instead of directly calling #posVert: and #posHoriz:.
+	I added this hook because I'm thinking of adding paned windows as
+	a subclass of BContainer...
+
+1999-11-01  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/ClassBrow.st: now works with namespaces.  This mainly meant
+	adapting the algorithm for preparing the class list (using the one
+	in examples/Publish.st).
+	* blox/Inspector.st: now works with namespaces.  This mainly meant
+	using #nameIn:
+	* blox/MethSetBrow.st: now works with namespaces.  This mainly meant
+	using #nameIn:
+
+1999-10-31  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: fixed bug in #fontHeight: -- was reporting space
+	for a line less than asked (that is, was always returning zero when
+	asked for the space occupied by a single line!)
+	* blox/BloxExtend.st: drop-down widgets in and working.
+	* blox/BloxWidgets.st: resizing a popup widget works (fixed usage of
+	the Tk packer in BPopupWindow).  Also, BLabels now use word wrapping.
+	* blox/test.st: added #dropdownTest.
+
+1999-10-31  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Third beta of 1.7 (labeled 1.6.82) released
+
+	* blox/CtxtInspect.st: for some reason, the context inspector was
+	broken; I had to add `self changeState: #text'.  The presence of
+	this statement is fine -- for example it is there in the class
+	browser too, but I don't understand why it was not needed before...
+	* blox/View.st: fixed bug in close (was not answering a Boolean)
+	* blox/Manager.st: simplified implementation of #close and #destroyed
+
+1999-10-30  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: fixed possible divide-by-zero problem in
+	geometry management; cached the window size; #posHoriz: and
+	#posVert: set and take into account the xOffset, yOffset,
+	widthOffset and heightOffset too; added accessors for the offset.
+	* blox/ClassBrow.st: fixed erroneous geometry management resulting
+	for the change to #posHoriz: and #posVert: (in blox/BloxBasic.st).
+	See the NEWS file for more information.
+
+1999-10-28  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxExtend.st: started implementing drop-down controls
+
+1999-10-26  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: new algorithm to get Tk widget names (instead of
+	`.wNNN' where NNN was an increasing number, `.wOOO' where OOO is the
+	base-36 representation of the OOP).  Allowed to implement lots of
+	interesting methods such as Blox>>#active, Blox>>#atMouse, ...
+
+1999-10-24  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: added methods to automatically or manually toggle
+	the scrollbars in a BViewport.
+	* blox/BloxText.st: added images.
+
+1999-10-22  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxExtend.st: changed implementation of the progress widget; the
+	new one looks nicer and shows some tricks.
+
+	* blox/BloxBasic.st: removed #bindWith:... when possible, replaced with
+	(new) #tclEval:with:... methods.
+	* blox/BloxWidgets.st: same as above.
+	* blox/BloxCanvas.st: same as above.
+	* blox/BloxText.st: same as above.
+
+	* blox/ClassBrow.st: added `print bytecodes' mode.
+	* blox/Inspector.st: split class into GenericInspector (superclass)
+	and Inspector (subclass)
+	* blox/DictInspect.st: derived from GenericInspector.
+	* blox/StrcInspect.st: derived from GenericInspector.
+	* blox/CtxtInspect.st: derived StackInspector from GenericInspector.
+	* blox/MethInspect.st: created.
+
+1999-10-20  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxExtend.st: added GNU image and file/directory icons.
+	* blox/BloxWidgets.st: use #displayString in BList.
+
+1999-10-17  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.st: removed declaration of forward references
+	to nil now that Undeclared is available.
+	* blox/Load.st: ditto
+
+	* blox/BloxBasic.st: added pluggable geometry behavior depending
+	on the parent widget.  Added #new to BWidget.
+	* blox/BloxCanvas.st: new feature above used.
+	* blox/BloxText.st: new feature above used.
+	* blox/BloxWidgets.st: new feature above used in BPopupWindow.
+	* blox/BloxExpand.st: change to BloxWidgets.st exploited in
+	BBalloon.
+
+1999-10-16  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxCanvas.st: Added BEmbeddedImage.
+	* blox/BloxWidgets.st: automatically choose a good letter
+	(possibly different for each item) to be underlined in a
+	menu item.  Also added callbacks to BEdit.
+	* blox/View.st: don't use #allSubinstances: (sloooow) to
+	iterate through all the views.
+	* blox/CtxtInspect.st: make StackInspector get temporaries
+	from outer block contexts too.
+
+1999-10-13  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/ErrInspect.st: became Notifier.st; also class name
+	changed to Notifier
+	* blox/Load.st: load Notifier.st instead of ErrInspect.st
+	* blox/PText.st: don't bring up a notifier when choosing
+	`senders' or `implementors' without a selection
+
+	* blox/PCode.st: added syntax highlightling
+
+	* blox/StkInspect.st: incorporated in blox/CtxtInspect.st
+	* blox/CtxtInspect.st: incorporated blox/StkInspect.st
+
+1999-10-11  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxText.st: added a few methods about attributes and lines,
+	needed for syntax highlighting.
+
+	* blox/ClassBrow.st: tell PCode the class of the method.
+	* blox/MethSetBrow.st: tell PCode the class of the method.
+	* blox/CtxtInspect.st: tell PCode the class of the method.
+	* blox/PCode.st: added code to let widgets tell PCode the class
+	of the method to show.
+
+	* blox/Form.st: incorporated in blox/Manager.st
+	* blox/GuiData.st: removed some methods defined in Gui
+	(they were unused), added new GuiState class.
+	* blox/Load.st: removed files incorporated in other files
+	* blox/Manager.st: incorporated blox/Form.st & blox/TopLevel.st
+	* blox/ModalDialog.st: incorporated blox/Prompter.st
+	* blox/PRadioBtn.st: incorporated in blox/RadioForm.st
+	* blox/Primitive.st: incorporated in blox/View.st
+	* blox/Prompter.st: incorporated in blox/ModalDialog.st
+	* blox/RadioForm.st: incorporated blox/PRadioBtn.st
+	* blox/TextMenu.st: removed (it could not be even filed in)
+	* blox/TopLevel.st: incorporated in blox/Manager.st
+	* blox/View.st: incorporated blox/Primitive.st, used
+	new GuiState class.
+
+1999-10-09  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Second beta of 1.7 (labeled 1.6.81) released
+
+1999-10-02  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: added methods to create CMYK and HSV colors;
+	commented.
+	* blox/BloxExtend.st: commented.
+	* blox/Blox.c: stop compilation if HAVE_TCLTK is not defined
+
+1999-09-30  Paolo Bonzini  (bonzini@gnu.org)
+
+	* examples/blox/Man.st: removed code to deal with non-reentrancy
+	of event dispatching loops.
+	* examples/blox/Tetris.st: removed code to deal with
+	non-reentrancy of event dispatching loops.
+	* blox/BloxBasic.st: #dispatchEvents and #dispatchEvents: are
+	now reentrant.
+	* blox/PCode.st: created
+	* blox/CtxtInspect.st: use PCode
+	* blox/ClassBrow.st: use PCode
+	* blox/MethSetBrow.st: use PCode
+
+1999-09-26  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: added BEventSet; ...Absolute geometry methods
+	refer to the container object (used to refer to the connected object);
+	added xRoot and yRoot to BWidget.  Use the grid geometry manager
+	in BViewport -- it looks nicer.
+	* blox/BloxWidgets.st: added BPopupWindow.
+	* blox/BloxExtend.st: created
+	* blox/BloxIcons.st: removed -- merged in BloxExtend.st
+	* blox/test.st: added tests for extended widgets
+	* examples/blox/Progress.st: removed -- merged in BloxExtend.st
+
+1999-09-25  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** First beta of 1.7 (labeled 1.6.80) released
+
+1999-09-20  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.c: incorporated XPM support (partly stolen from libXpm).
+	* blox/BloxBasic.st: added #borderWidth accessor.
+	* blox/BloxIcons.st: created.
+	* blox/rgbtab.h: created.
+	* blox/test.st: added #iconTest.
+
+1999-09-05  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: changed to use the new #idleAdd: method in
+	ProcessorScheduler.
+
+1999-08-29  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.6.2 released.
+
+1999-07-14  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/StructInspect.st: renamed to StrcInspect.st (was more than
+	14 chars long).
+
+1999-07-04  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.st: Added BTextBindings and BEdit classes.
+	* blox/BloxBasic.st: Added #cursor and #cursor:
+	* blox/BloxCanvas.st: Added #at:
+	* blox/BloxText.st: Added the ability to specify event handlers
+	in a BTextAttributes object.
+	* blox/BloxWidgets.st: Added BEdit.
+	* blox/test.st: Added #textEventsTest and #editTest.
+	
+1999-06-25  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Bug-fixing version 1.6.1 released.
+
+1999-06-17  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.6 released.
+
+1999-05-08  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Transcript.st: Moved to kernel (at last!).
+	* blox/Load.st: Removed Transcript.st.
+	* blox/BrowserMain.st: Modified code to set up the Transcript.st
+	to deal with the new interface for the Transcript object.
+
+1999-04-27  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.5.beta3 released.
+	
+1999-04-22  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.c: Renamed idle to bloxIdle -- idle was already defined
+	in unistd.h.  Signaled by Christopher Painter-Wakefield.
+
+1999-04-11  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.st: Removed BEventHandlers, added BEventTarget.
+	* blox/BloxBasic.st: Changed event handling design to
+	the new one using BEventTarget.  This resembles the old one
+	(before Apr 8), but its design is better (no code duplication)
+	and it is compatible with beta1.  Switched Blox superclass to
+	be BEventTarget.
+	* blox/BloxCanvas.st: Changed event handling design to
+	the new one using BEventTarget. Switched BCanvasObject superclass
+	to be BEventTarget.
+	* examples/blox/Progress.st: switched to new event handling system
+	(actually, back to the old one...)
+	* examples/blox/Tetris.st: switched to new event handling system
+	(actually, back to the old one...)
+
+1999-04-10  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.5.beta2 released.
+
+1999-04-08  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.st: Added BEventHandlers.
+	* blox/BloxBasic.st: Changed event handling design to
+	the new one using #events:/#events.
+	* blox/BloxCanvas.st: Changed event handling design to
+	the new one using #events:/#events.
+	* examples/blox/Progress.st: switched to new event handling system
+	* examples/blox/Tetris.st: switched to new event handling system.
+
+1999-03-15  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Version 1.5.beta1 released.
+
+1999-02-26  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: Added hook into Delay class>>#idle
+	* examples/blox/Tetris.st: Removed the `idle' process, whose
+	function is now embedded in Delay.st
+
+1999-02-26  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Run.st: Now automatically loads `Browser' if needed.
+	* blox/ClassBrow.st: #classString used #to:do: with a zero
+	argument block (1.1.5 did not find this error)!
+
+1999-02-22  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Transcript.st: Made thread-safe.
+
+1999-02-16  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxWidgets.st: added BWindow>>#resizable
+
+1999-02-14  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/ClassBrow.st: Happy Valentine! Switched to file prompters.
+	* blox/Prompter.st: Added file prompters.
+	* examples/blox/Progress.st: created.
+
+1999-02-09  Paolo Bonzini  (bonzini@gnu.org)
+
+	* examples/blox/Man.st: created.
+
+1999-02-05  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.c: Added idle. Calling TCL's `update' did not seem to
+	work.  The Blox.c file was created somewhen in November.
+	* examples/blox/Tetris.st: created.
+
+1999-02-04  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Transcript.st: Added #instance class method to allow
+	using print/printNl even if the GUI is not running.
+
+1999-02-03  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxCanvas.st: created.
+
+1999-02-02  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxWidgets.st: added BImage.
+
+1999-02-01  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxText.st: created from part of BloxWidgets.st.
+
+1999-01-26  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/ClassBrow.st: Moved instance/class radio buttons under
+	the category pane. First it seemed more logical to me, second
+	now they steal screen estate from the list box that is less
+	likely to scroll.
+
+1998-11-28  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: Small change to support reloading
+	images which used Blox.
+
+1998-11-27  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/ErrInspect.st: Modified to support unwinding
+
+1998-11-24  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Transcript.st: created.
+
+1998-11-15  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BloxBasic.st: First version of Tk Blox completed.
+
+1998-11-14  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/StructInspect.st: Created.
+
+1998-11-10  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BrowShell.st: created.
+	* blox/BrowserMain.st: Moved some parts to BrowserShell, so that
+	every window has a Smalltalk menu; in addition, the main window
+	is a worksheet
+	* blox/ClassBrow.st: Added support for classes derived from nil.
+
+1998-11-03  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Blox.st: created.
+	* blox/BloxBasic.st: Added BPrimitive and BExtended. The latter
+	is intended to provide a base for implementing megawidgets like
+	tree lists, tables, HTML viewers, etc. Also split old Blox.st
+	in BloxBasic.st and BloxWidgets.st.
+	* blox/BloxWidgets.st: created.
+
+1998-10-30  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Menu.st: Modified to add support for menu bars. The previous
+	version assumed that you could pass a >>Shell<<	to BMenu when
+	creating it. Instead, as BBrowser.st shows, you must pass it a
+	menu bar, and the new Tcl-based version enforces this.  The new
+	version uses the menuBar method I added to TopLevelShell, which
+	automatically creates a menu bar when you add the first menu.
+	Note that this change did not affect PopupMenu, because
+	BPopupMenu does accept a BWindow as the first parameter passed
+	to #new:label:
+	* blox/TopLevel.st: Same as above.  The new menuBar
+	variable is automatically created when you add a menu.
+
+1998-10-20  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/blox.c: rewritten.
+	* blox/BloxBasic.st: Switched to Tk for portability. Also
+	refactored hierarchy: BForm->BContainer->BRadioGroup, added
+	BWidget and BViewport, BButton->BRadioButton, Button->BToggle.
+	Added a few Tk features: rubber-sheet geometry management,
+	3d effects, fonts, for instance.  Also, previously
+	badly-documented C-only methods now expose a tidier interface.
+	Programs relying on those methods will fail (e.g. the browser
+	itself ;-) ).
+
+1998-09-14  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/Primitive.st: Capitalized class variable name.
+
+1998-09-12  Paolo Bonzini  (bonzini@gnu.org)
+
+	* blox/BBrowser.st: Modified to support exception handling.
+	* blox/ErrInspect.st: Modified to support exception handling.
+
+1998-09-02  Paolo Bonzini  (bonzini@gnu.org)
+
+	*** Began development of version 1.6
+
+1995-09-30  Steve Byrne  (sbb@gnu.org)
+
+	*** Version 1.1.5 released.
+
+1995-09-26  Brad Diller (bdiller@docent.com)
+
+	* blox/blox.c: Added support for Dialog and Form widgets. Extended
+	Text and List widget support. Corrected minor bugs.
+
+1995-08-29  Steve Byrne  (sbb@gnu.org)
+
+	* blox/Load.st: Converted to use new Smalltalk variable for location
+	of kernel files.
+
+1995-07-16  Steve Byrne  (sbb@gnu.org)
+
+	* blox/BBrowser.st: More updates to contextInspector>>init:
+	from Brad Diller (bdiller@docent.com).
+	* blox/BBrowser.st: Updated with Brad Diller's changes/fixes.  Removed
+	#changed:/#update: usage.
+
+1995-07-12  Brad Diller (bdiller@docent.com)
+
+	* blox/PList.st: Modified extensively to support revamped window
+	management system.
+	* blox/PRadioBtn.st: Modified extensively to support revamped window
+	management system.
+	* blox/Primitive.st: Modified extensively to support revamped window
+	management system.
+	* blox/TopLevel.st: Modified extensively to support revamped window
+	management system.
+	* blox/View.st: Modified extensively to support revamped window
+	management system.
+
+1995-05-01  Steve Byrne  (sbb@gnu.org)
+
+	* blox/Blox.st: Switched to using the new C type models.
+
+1995-02-25  Brad Diller (bdiller@docent.com)
+
+	* blox/ModalDialog.st: Created.
+
+1994-09-15  Steve Byrne  (sbb@gnu.org)
+
+	*** Version 1.2.alpha1 released.
+
+1994-07-12  Steve Byrne  (sbb@gnu.org)
+
+	* blox/Blox.st: Added insert at end.
+
+1994-07-09  Steve Byrne  (sbb@gnu.org)
+
+	* blox/BBrowser.st: Created about a week ago.
+
+1994-07-04  Steve Byrne  (sbb@gnu.org)
+
+	* blox/blox.c: Serious hacking this weekend to make it work properly.
+
+1994-02-04  Steve Byrne  (sbb@gnu.org)
+
+	* blox/blox.c: created (using Xaw Athena Widgets).
+
+1993-10-29  Brad Diller (bdiller@docent.com)
+
+	* blox/ClassBrow.st: Created.
+
+1993-10-27  Brad Diller (bdiller@docent.com)
+
+	* blox/DictInspect.st: Created.
+	* blox/Inspector.st: Created.
+
+1993-10-11  Brad Diller (bdiller@docent.com)
+
+	* blox/BrowserMain.st: created.
+	* blox/MethSetBrow.st: Created.
+	* blox/PRadioBtn.st: Created.
+
+1993-10-01  Brad Diller (bdiller@docent.com)
+
+	* blox/Menu.st: Created.
+
+1993-09-18  Brad Diller (bdiller@docent.com)
+
+	* blox/GuiData.st: Created.
+	* blox/PList.st: Created.
+	* blox/Primitive.st: Created.
+	* blox/Prompter.st: Created.
+	* blox/View.st: Created.
+

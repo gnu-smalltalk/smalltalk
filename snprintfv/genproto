@@ -1,0 +1,93 @@
+#! /bin/sh
+#  -*- Mode: Shell-script -*-
+# genproto.sh --- extract exported functions from sources
+# Copyright (C) 1999 Gary V. Vaughan
+# Originally by Gary V. Vaughan <gvv@techie.com>, 1998
+# This file is part of Snprintfv.
+#
+# Snprintfv is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2 of the
+# License, or (at your option) any later version.
+#
+# Snprintfv is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+#
+# As a special exception to the GNU General Public License, if you
+# distribute this file as part of a program that also links with and
+# uses the libopts library from AutoGen, you may include it under
+# the same distribution terms used by the libopts library.
+#
+# Copyright (C) 1999 Gary V. Vaughan
+# As a special exception to the GNU General Public License, if you
+# distribute this file as part of a program that also links with and
+# uses the libopts library from AutoGen, you may include it under
+# the same distribution terms used by the libopts library.
+
+# Commentary:
+#
+# USAGE: genproto [debug] <filter> source.h-in > source.h
+#
+# This program scans a C source file for special comments preceding
+# K&R function declarations, and generates commented function
+# declarations suitable for use in a header file.
+#
+# See the accompanying README for details of how to format function headers
+# for extraction by this script.
+
+# Code:
+
+debug=
+#debug="-v debug=1"
+if test "X$1" = Xdebug; then
+  debug="-v debug=1"
+  shift
+else
+  # cleanup temporary files on exit, hangup, interrupt, quit or terminate
+  trap 'rm -f genproto.*.$$' 0 1 2 3 15
+fi
+
+if test $# -lt 2; then
+  echo "USAGE: genproto <filter> source.h.in > source.h" >&2
+  exit 1
+fi
+
+file=$2
+dir=`echo $file | sed 's,/[^/]*$,,'`
+mode=`echo $file | sed 's,^.*/,,g;s,\.in$,.h,'`
+format=${FORMAT-GNUC_PRINTF}
+global=${GLOBAL-GLOBAL_DATA}
+scope=${SCOPE-SCOPE}
+
+filter="${AWK-awk} $debug -v mode=$mode -v format=$format -v global=$global -v scope=$scope -f $1"
+
+# Read in the source file expanding @protos foo.c lines using the
+# gendoc.awk script
+#
+${AWK-awk} '		     
+NR == 1 {
+    printf "#line 1 \"%s\"\n", FILENAME
+    do {
+        if (tolower($1) != "@protos") {
+	    print;
+	    continue;
+	}
+	source = "'"$dir"'/" $2;
+	while ((getline < source) > 0) {
+	    print | "'"$filter"'";
+	}
+	close("'"$filter"'");
+        printf "#line %d \"%s\"\n", NR + 1, FILENAME
+    } while (getline > 0)
+}' $file
+
+exit 0
+
+# genproto.sh ends here

@@ -1,0 +1,13 @@
+libsnprintfv would not be what it is without the invaluable help of
+these people:
+
+Everybody who was kind enough to spend time testing libsnprintfv,
+use it in their packages and report bugs.
+
+The following people made especially gracious contributions of their
+time and energy in helping to track down bugs, port to new systems,
+and generally assist in the maintainership process:
+
+Bruce Korb <bkorb@gnu.org>
+Kaveh R. Ghazi <ghazi@caip.rutgers.edu>
+Robert Lipe <robertlipe@usa.net>

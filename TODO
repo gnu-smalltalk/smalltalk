@@ -1,0 +1,74 @@
+* sometime
+
+** add check in/check out to the browser so that .st files remain
+in sync.  Maybe with CVS support (see Smalltalk/X).
+
+** cute BlockClosure implementations
+
+** implement SmallScript file-in?
+
+** port more software (Ref. Browser?)
+
+** use VFS to (re)implement packages?
+
+
+----------------------------------------------------------------------
+
+* code auditing
+
+** check endian-cleanness of ByteStream's float and double I/O.
+
+* VM
+
+** Use multiple malloc-ed areas for the OOP table, and make heap.c
+only an implementation detail of alloc.c (not really necessary
+anymore with MAP_NORESERVE, and quite complicated)
+
+** Implement polymorphic inline caching
+
+
+* Blox
+
+** Use GTK.  Might or might not use libgnomeui for the canvas
+widget.  I have already written a custom geometry manager compatible
+with Tk's placer.
+
+** Clean up the browser's code
+
+*** remove stray sends of #initialize.  A good project to learn
+about the reflection system (e.g. identify initializations from
+outside #new and so on).
+
+*** simplify UI creation (too many panes!)
+
+
+* other
+
+** follow the implementation lines of compiler/STLoader.st to implement
+SIF file-in.
+
+** implement a better packaging system allowing zipped source files with
+XML package descriptions to be delivered and installed.  Investigate
+using fastjar from gcj, and basing it on the Virtual File System
+infrastructure.
+
+** make the smalltalk cpp work - nothing less, nothing more ;-)
+
+** print entities correctly in the URIResolver.  A file named abc&def
+should print abc&amp;def in the file list.
+
+** support IPv6.  Not hard to do.
+
+
+* emacs mode
+
+** emacs isearch c-u c-s should search for a string anchored at the start of
+a line, to help finding method definitions.
+
+** fix $. to be handled specially -- indenter gets confused on 
+   ch == $.
+      <here>ifTrue: 
+
+** fix emacs mode so when a compile error occurs, it can be scanned ala C-x`
+
+** indent correctly ! at beginning of line

@@ -1,0 +1,14 @@
+<html>
+<head><title>{%= self class %}</title></head>
+
+{% 
+	out nextPutAll: 'This is another test'; nl.
+
+	1 to: 15 do: [:x |
+            out nextPutAll: '<p>This paragraph was manually sent out ',
+                            x printString, '</p>'; nl ].
+
+	out nextPutAll: 'After all this ST code goes the final HTML closing tag'.
+%}
+
+</html>

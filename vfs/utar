@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# Written by Paolo Bonzini 2002
+# bonzini@gnu.org
+# (C) 2002 The Free Software Foundation.
+#
+#
+
+uni_cat ()
+# $1 is the archive name
+{
+    case "$1" in
+    *.tar.Z)	compress -dc "$1"
+	;;
+    *.tar.gz)	gzip -dc "$1"
+	;;
+    *.tar)	cat "$1"
+	;;
+    *.tgz)	gzip -dc "$1"
+	;;
+    *)		echo "unknown extension"
+    esac
+}
+
+mctarfs_list ()
+# $1 is the archive name
+{
+    uni_cat "$1" | tar tvf - | gawk '
+	{
+	    y = substr($4, 1, 4)
+	    m = substr($4, 6, 2)
+	    d = substr($4, 9, 2)
+	    mm = substr("JanFebMarAprMayJunJulSepOctNovDec", m*3-2,3)
+	    $4 = mm " " d " " y
+	    $2 = "1 " substr($2, 1, index($2, "/")-1) " " substr($2, index($2, "/")+1)
+	    print
+	}'
+}
+
+mctarfs_copyout ()
+# $1 is the archive name
+# $2 is a name of a file within the archive
+# $3 is a name of a file within the system (to add from or extract to)
+{
+    TMPDIR=/tmp/mctmpdir.$$
+# FIXME: Try harder to generate a unique directory if this fails
+    mkdir -m 0700 $TMPDIR || exit 1
+    cd $TMPDIR
+    uni_cat "$1" | tar xvf - "$2" 2>/dev/null
+    mv "$2" "$3"
+    cd /
+    rm -rf $TMPDIR
+}
+
+#
+# main
+#
+    umask 077
+
+    case "$1" in
+    list)   mctarfs_list $2
+	    exit 0
+	    ;;
+    copyout) mctarfs_copyout $2 $3 $4
+	    exit 0
+	    ;;
+    esac
+
+    exit 1
+

@@ -1,0 +1,263 @@
+#! /bin/sh
+#######################################################################
+#
+#   Smalltalk package installer
+#
+#
+#######################################################################
+
+
+#######################################################################
+#
+# Copyright 1999,2000,2001,2002
+# Free Software Foundation, Inc.
+# Written by Paolo Bonzini.
+#
+# This file is part of GNU Smalltalk
+#
+# GNU Smalltalk is free software; you can redistribute it
+# and/or modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2, or (at
+# your option) any later version.
+# 
+# The GNU Smalltalk is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with the GNU Smalltalk; see the file COPYING.
+# If not, write to the Free Software Foundation, 59 Temple Place - Suite
+# 330, Boston, MA 02111-1307, USA.  
+#
+#######################################################################"
+
+
+: ${prefix:=@prefix@}
+: ${exec_prefix:=@exec_prefix@}
+: ${AWK:=gawk}
+: ${GST:=${exec_prefix}/bin/gst}
+IMAGE_PATH=${SMALLTALK_IMAGE:-@datadir@/@PACKAGE@}
+KERNEL_PATH=${SMALLTALK_KERNEL:-@datadir@/@PACKAGE@/kernel}
+MODULE_PATH=${SMALLTALK_MODULES:-@libdir@/@PACKAGE@}
+
+(cd $IMAGE_PATH 2> /dev/null & IMAGE_PATH=`pwd`)
+(cd $KERNEL_PATH 2> /dev/null & KERNEL_PATH=`pwd`)
+(cd $MODULE_PATH 2> /dev/null & MODULE_PATH=`pwd`)
+
+request_help=false
+request_version=false
+options_error=false
+load=:
+install=:
+uninstall=false
+dry_run=false
+DESTDIR=
+srcdir=.
+files=
+
+while [ -n "$1" ]; do
+  case $1 in
+	--v | --ve | --ver | --vers | --versi | --versio | \
+  	--version)	 request_version=:		   ;;
+
+	--h | --he | --hel | \
+  	--help)		 request_help=:			   ;;
+
+	--no-l | --no-lo | --no-loa | \
+  	--no-load)	 load=false			   ;;
+
+	--no-i | --no-in | --no-ins | --no-inst | \
+	--no-insta | --no-instal | \
+  	--no-install)	 install=false			   ;;
+
+        --u | --un | --uni | --unin | --unins | --uninst | \
+        --uninsta | --uninstal | \
+        --uninstall)     load=false; uninstall=:           ;;
+
+	--di | --dis | \
+  	--dist)		 load=false; built_files=false	   ;;
+
+	--s | --sr | --src | --srcd | --srcdi | \
+  	--srcdir)	 DESTDIR="$1"; shift		   ;;
+
+	--s=* | --sr=* | --src=* | --srcd=* | --srcdi=* | \
+  	--srcdir=*)	 srcdir="`echo $1 | sed s/.*=//`"  ;;
+
+	--de | --des | --dest | --destd | --destdi | \
+  	--destdir)	 DESTDIR="$1"; shift		   ;;
+
+	--de=* | --des=* | --dest=* | --destd=* | --destdi=* | \
+  	--destdir=*)	 DESTDIR="`echo $1 | sed s/.*=//`" ;;
+
+	-n | --dr | --dry | --dry- | --dry-r | --dry-ru | \
+  	--dry-run)	 dry_run=:			   ;;
+
+	-*)		 options_error=:		   ;;
+
+  	*)		 files="$files $1"		   ;;
+  esac
+  shift
+done
+
+if [ -z "$files" ] || $request_help || $options_error; then
+  cat <<EOF
+Syntax: gst-package [OPTION]... FILES...
+
+    -n, --dry-run         print commands rather than running them
+	--no-load         don\'t load the Smalltalk files in the image
+        --no-install      don\'t copy the files
+        --uninstall       remove the files mentioned in the FILES
+        --dist            create symbolic links of non-built files
+	--srcdir DIR      look for non-built files in directory DIR
+	--destdir DIR	  prefix the destination directory with DIR
+
+	--help            display this message and exit
+	--version         print version information and exit
+
+Except in uninstall mode, gst-package requires write access to the
+\`packages.xml\' file in the GNU Smalltalk image directory, and
+installs the packages whose description is contained contained in
+the given XML files.
+
+The image path is $IMAGE_PATH.
+The kernel path is $KERNEL_PATH.
+The module path is $MODULE_PATH.
+
+EOF
+  # If no options were passed, return an error.
+  $options_error && exit 1
+  $request_help && exit 0
+  exit 1
+fi
+
+if $request_version; then
+  echo GNU Smalltalk package installer, version @VERSION@
+  exit 0
+fi
+
+echo "Merging $files and $IMAGE_PATH/packages.xml..."
+$dry_run || {
+  sed -e '$i\' -e '</packages>' -e '/<.packages>/,/<packages>/d' $files > $IMAGE_PATH/packages.tmp
+  mv $IMAGE_PATH/packages.tmp $IMAGE_PATH/packages.xml
+}
+
+
+pkgs=`sed -e '/<name>/!d' \
+          -e 's,.*<name>\([^<]*\)<.name>,\1 ,' $files `
+
+if $uninstall; then
+  for i in $pkgs; do
+    dir=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files `
+
+    list=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	      -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' $files `
+    for j in $list; do
+      case $j in
+        /*) dest=$DESTDIR$j ;;
+	*) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
+      esac
+
+      echo "rm -f $dest"
+      $dry_run || rm -f "$dest"
+    done
+
+    list=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	      -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `
+    for j in $list; do
+      dest="$DESTDIR$IMAGE_PATH/$dir/$j"
+      echo "rm -f $dest"
+      $dry_run || rm -f "$dest"
+    done
+  done
+  exit 0
+fi
+
+if $install; then
+  for i in $pkgs; do
+    dir=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files `
+    dirs=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	      -e 's,.*<built-file>\([^<]*\)/<.built-file>,\1,p' \
+	      -e 's,.*<file>\([^<]*\)/<.file>,\1,p' $files `
+
+    for j in . $dirs; do
+      case $j in
+        /*) dest=$DESTDIR$j ;;
+	*) dest=$DESTDIR$IMAGE_PATH/$dir/$j ;;
+      esac
+
+      # The following part emulates the mkinstalldirs script
+      set fnord `echo "$dest" | sed -e 's/^\///' -e 's/\// /g'`
+      shift
+  
+      case $dest in
+	/*) pathcomp= ;;
+	*) pathcomp=. ;;
+      esac
+      for d
+      do
+        pathcomp="$pathcomp/$d"
+        case "$pathcomp" in
+          -* ) pathcomp=./$pathcomp ;;
+        esac
+
+        if test ! -d "$pathcomp"; then
+	  echo mkdir "$pathcomp"
+	  mkdir "$pathcomp"
+        fi
+      done
+    done
+
+    if $built_files; then
+      list=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	        -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' $files `
+      for j in $list; do
+        case $j in
+          /*) dest=$DESTDIR$j ;;
+	  *) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
+        esac
+
+        echo "@INSTALL@ -m 644 $dir/$j $dest"
+        $dry_run || (rm -f "$dest" && cp "$dir/$j" "$dest" && chmod 644 "$dest")
+      done
+
+      list=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	        -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `
+      for j in $list; do
+        case $j in
+          /*) dest=$DESTDIR$j ;;
+	  *) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
+        esac
+
+        echo "@INSTALL@ -m 644 $srcdir/$dir/$j $dest"
+        $dry_run || (rm -f "$dest" && cp "$srcdir/$dir/$j" "$dest" && chmod 644 "$dest")
+      done
+
+    else
+      list=`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+	        -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `
+      wd=`cd $srcdir && pwd`
+      for j in $list; do
+        case $j in
+          /*) dest=$DESTDIR$j ;;
+	  *) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
+        esac
+
+        echo @LN_S@ -f "$wd/$dir/$j" "$dest"
+        $dry_run || @LN_S@ -f "$wd/$dir/$j" "$dest"
+      done
+    fi
+  done
+fi
+
+if $load; then
+  pkgs=`sed -ne '/<disabled-package>/,/<.disabled-package>/ d' \
+            -e 's,.*<name>\([^<]*\)<.name>,\1 ,p' $files `
+
+  if [ -n "$pkgs" ]; then
+    echo $GST -qsK Load.st -a $pkgs
+    $dry_run || $GST -qsK Load.st -a $pkgs
+  fi
+fi

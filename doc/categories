@@ -1,0 +1,29 @@
+Here are the categories currently used in the image.  You should use one of
+these if you think your class matches it: for example, use 'System-Debugger'
+for a debugger, or 'Collections-External' for disk-based collections, or
+'Collections-Sequenceable' when implementing a BitArray...
+
+Category		    Example
+-------------------------------------------------------------------------------
+'Collections'		    Collection
+'Collections-Keyed'	    MappedCollection, Dictionary hierarchy
+'Collections-Unordered'	    Bag, Set, IdentitySet
+'Collections-Sequenceable'  SequenceableCollection hierarchy
+'Collections-Weak'	    WeakSet/WeakLookupTable hierarchies, WeakArray
+'Examples-Modules'	    examples/modules subdirectory
+'Examples-Useful'	    Autoload, GenClass, Tokenizer, ...
+'Examples-Cool'		    Philosophers, Queens, and other examples
+'Graphics-Browser'	    ClassHierarchyBrowser, BrowserShell, BrowserMain
+'Graphics-Windows'	    Blox and View hierarchies
+'Language-Implementation'   Behavior/ContextPart hierarchies, CompiledMethod
+'Language-Data types'	    Magnitude/Boolean hierarchies, String
+'Language-Processes'	    Process, Semaphore, ProcessorScheduler, ...
+'Language-Exceptions'       TrappableEvent hierarchy, ExceptionHandler, Signal
+'Language-C interface'      Memory, CObject and CType hierarchies
+'Streams'		    Stream, TextCollector
+'Streams-Collections'	    PositionableStream hierarchy
+'Streams-Files'		    FileStream, File, Directory, ObjectDumper
+'System-Compiler'	    Compiler hierarchy
+'Sockets-Streams'	    AbstractSocket, DatagramSocket, ...
+'Sockets-Protocols'	    AbstractSocketImpl, Datagram, UDPSocketImpl, ...
+'I18n-...'		    i18n subdirectory
