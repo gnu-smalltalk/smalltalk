@@ -1,3 +1,18 @@
+2005-03-24  Paolo Bonzini  <bonzini@gnu.org>
+  
+	Fix bug when an ephemeron was tenured directly from eden to
+	oldspace.
+
+	* libgst/oop.c (add_to_grey_list): Remove last parameter.
+	(add_grey_object): New function, for when the OOP parameter
+	of add_to_grey_list was non-nil.  Call scanned_fields_in from
+	here.
+	(_gst_copy_an_oop, tenure_one_object): Use add_grey_object.
+
+2005-03-24  Paolo Bonzini  <bonzini@gnu.org>
+  
+	* libgst/callin.c: Remove out-of-date comment.
+  
 2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/alloc.c (NO_MALLOC_OVERRIDE): New define.

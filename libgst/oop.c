@@ -168,8 +168,11 @@ static void scan_grey_objects ();
    until no new object is found in it.  */
 static void scan_grey_pages ();
 
-/* Greys N pointers starting at BASE.  */
-static void add_to_grey_list (OOP *base, int n, OOP oop);
+/* Greys a page worth of pointers starting at BASE.  */
+static void add_to_grey_list (OOP *base, int n);
+
+/* Greys the object OOP.  */
+static void add_grey_object (OOP oop);
  
 /* Do the breadth-first scanning of copied objects.  */
 static void cheney_scan (void);
@@ -783,7 +786,7 @@ oldspace_after_allocating (heap_data *h, heap_block *blk, size_t sz)
   printf ("Allocating oldspace page at %p (%d)\n", blk, sz);
 #endif
 
-  add_to_grey_list ((OOP *) blk, sz / SIZEOF_CHAR_P, NULL);
+  add_to_grey_list ((OOP *) blk, sz / SIZEOF_CHAR_P);
   _gst_mem.rememberedTableEntries++;
 }
 
@@ -864,7 +867,7 @@ int oldspace_sigsegv_handler (void* fault_address, int serious)
 #endif
 
   _gst_mem.rememberedTableEntries++;
-  add_to_grey_list ((PTR) page, getpagesize() / SIZEOF_CHAR_P, NULL);
+  add_to_grey_list ((PTR) page, getpagesize() / SIZEOF_CHAR_P);
   return !reentered;
 }
 #endif
@@ -1430,9 +1433,6 @@ tenure_one_object ()
      puts them in the tree of grey areas, we don't need to grey them.  */
   else if (_gst_mem.scan.queue_at == _gst_mem.tenuring_queue.tenurePtr)
     {
-      mst_Object obj;
-      int numFields;
-
 #if defined(GC_DEBUGGING)
       printf ("Tenured OOP %p had not been scanned yet\n", oop);
 #endif
@@ -1440,10 +1440,7 @@ tenure_one_object ()
       _gst_mem.scan.queue_at = QUEUE_NEXT (&_gst_mem.tenuring_queue,
 					   _gst_mem.scan.queue_at + 1);
       _gst_tenure_oop (oop);
-      obj = OOP_TO_OBJ (oop);
-      numFields = scanned_fields_in (obj, oop->flags);
-      if (numFields)
-        add_to_grey_list (&(obj->objClass), numFields, oop);
+      add_grey_object (oop);
     }
   else
     _gst_tenure_oop (oop);
@@ -1466,27 +1463,50 @@ _gst_grey_oop_range (PTR from, size_t size)
 
 
 void
-add_to_grey_list (OOP *base, int n, OOP oop)
+add_grey_object (OOP oop)
 {
   grey_area_node *entry;
-  grey_area_list *p;
+  mst_Object obj = OOP_TO_OBJ (oop);
+  int numFields = scanned_fields_in (obj, oop->flags);
+  OOP *base = &(obj->objClass);
 
-  if (oop)
-    p = &_gst_mem.grey_areas;
-  else
-    p = &_gst_mem.grey_pages;
+  if (!numFields)
+    return;
+
+  /* For ephemeron, skip the first field and the class.  */
+  if (oop->flags & F_EPHEMERON)
+    {
+      numFields -= &(obj->data[1]) - base;
+      base = &(obj->data[1]); 
+    }
 
   entry = (grey_area_node *) xmalloc (sizeof (grey_area_node));
   entry->base = base;
-  entry->n = n;
+  entry->n = numFields;
   entry->oop = oop;
   entry->next = NULL;
-  if (p->tail)
-    p->tail->next = entry;
+  if (_gst_mem.grey_areas.tail)
+    _gst_mem.grey_areas.tail->next = entry;
   else
-    p->head = entry;
+    _gst_mem.grey_areas.head = entry;
 
-  p->tail = entry;
+  _gst_mem.grey_areas.tail = entry;
+}
+
+void
+add_to_grey_list (OOP *base, int n)
+{
+  grey_area_node *entry = (grey_area_node *) xmalloc (sizeof (grey_area_node));
+  entry->base = base;
+  entry->n = n;
+  entry->oop = NULL;
+  entry->next = NULL;
+  if (_gst_mem.grey_pages.tail)
+    _gst_mem.grey_pages.tail->next = entry;
+  else
+    _gst_mem.grey_pages.head = entry;
+
+  _gst_mem.grey_pages.tail = entry;
 }
 
 void
@@ -1859,9 +1879,8 @@ _gst_copy_an_oop (OOP oop)
       n = scanned_fields_in (obj, oop->flags) - 1;
       if (oop->flags & F_EPHEMERON)
 	{
-	  /* For ephemerons, grey the instance variables after
-	     the first.  */
-          add_to_grey_list (&obj->data[1], n - 1, oop);
+	  /* For ephemerons, do the work later.  */
+          add_grey_object (oop);
 	  return;
 	}
 

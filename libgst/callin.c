@@ -323,8 +323,6 @@ _gst_msg_sendf (PTR resultPtr,
 	  break;
 
 	case 'C':
-	  /* !!! Fix this -- it is ugly, but OS/2 compilers don't like
-	     it without */
 	  *(PTR *) resultPtr =
 	    IS_NIL (result) ? NULL : COBJECT_VALUE (result);
 	  break;
