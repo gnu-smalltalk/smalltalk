@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005
 | Free Software Foundation, Inc.
 | Written by Steve Byrne, Brad Diller and Paolo Bonzini.
 |
@@ -146,6 +146,10 @@ allSharedPools
      its superclasses"
 
     ^self instanceClass allSharedPools
+!
+
+pragmaHandlerFor: aSymbol
+    ^self instanceClass pragmaHandlerFor: aSymbol
 ! !
 
 

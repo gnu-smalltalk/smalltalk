@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+| Copyright 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -78,6 +78,7 @@ initialize
      exception handling, ...) and then the binary image is saved."
 
     Object initialize.
+    Class initialize.
     Fraction initialize.
     LargeInteger initialize.
     Date initialize.

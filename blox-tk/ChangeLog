@@ -1,3 +1,7 @@
+2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxBasic.st: Switch to new C-call descriptions.
+
 2004-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
         * blox-tk/BloxWidgets.st, blox-tk/BloxText.st: set

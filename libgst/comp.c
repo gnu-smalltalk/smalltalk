@@ -1,5 +1,3 @@
-/* To do: extract the iterative solving of the loop jumps' size.  */
-
 /******************************** -*- C -*- ****************************
  *
  *	Byte code compiler.
@@ -9,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -32,6 +30,8 @@
  ***********************************************************************/
 
 #include "gstpriv.h"
+
+/* To do: extract the iterative solving of the loop jumps' size.  */
 
 /* Define this if you want declaration tracing to print the bytecodes
    both *before* and *after* the optimizer is ran.  Default behavior
@@ -2506,9 +2506,40 @@ install_method (OOP methodOOP)
   OOP oldMethod, selector, methodDictionaryOOP;
   gst_compiled_method method;
   gst_method_info descriptor;
+  int num_attrs, i;
 
   method = (gst_compiled_method) OOP_TO_OBJ (methodOOP);
   descriptor = (gst_method_info) OOP_TO_OBJ (method->descriptor);
+  num_attrs = NUM_INDEXABLE_FIELDS (method->descriptor);
+
+  for (i = 0; i < num_attrs; i++)
+    {
+      char *result;
+      OOP attributeOOP = descriptor->attributes[i];
+      gst_message attribute = (gst_message) OOP_TO_OBJ (attributeOOP);
+      OOP handlerBlockOOP = _gst_find_pragma_handler (_gst_this_class,
+						      attribute->selector);
+
+      if (!IS_NIL (handlerBlockOOP))
+	{
+	  _gst_msg_sendf (&result, "%s %o value: %o value: %o",
+			  handlerBlockOOP, methodOOP, attributeOOP);
+	  if (result != NULL)
+	    {
+	      _gst_errorf ("%s", result);
+	      EXIT_COMPILATION ();
+	    }
+	}
+
+      method = (gst_compiled_method) OOP_TO_OBJ (methodOOP);
+      descriptor = (gst_method_info) OOP_TO_OBJ (method->descriptor);
+      if (num_attrs != NUM_INDEXABLE_FIELDS (method->descriptor))
+	{
+	  _gst_errorf ("cannot modify method descriptor in pragma handler");
+	  EXIT_COMPILATION ();
+	}
+    }
+
   selector = descriptor->selector;
 
   /* methodDictionaryOOP is held onto by the class, which is already
@@ -2528,6 +2559,7 @@ install_method (OOP methodOOP)
 	}
     }
 
+  MAKE_OOP_READONLY (methodOOP, true);
   oldMethod = _gst_identity_dictionary_at_put (methodDictionaryOOP,
 					       selector, methodOOP);
 
@@ -2696,8 +2728,6 @@ method_new (method_header header,
       _gst_copy_bytecodes (method->bytecodes, bytecodes);
       _gst_free_bytecodes (bytecodes);
     }
-
-  MAKE_OOP_READONLY (methodOOP, true);
 
   return (methodOOP);
 }

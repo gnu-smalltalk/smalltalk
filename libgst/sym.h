@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -311,6 +311,11 @@ extern void _gst_push_new_scope (void)
 /* Convert a lightweight class (instance of Behavior) or a Metaclass
    into the corresponding Class object.  */
 extern OOP _gst_get_class_object (OOP classOOP)
+  ATTRIBUTE_HIDDEN;
+
+/* Find a pragma handler for the given selector into the class and its
+   superclasses.  */
+extern OOP _gst_find_pragma_handler (OOP classOOP, OOP symbolOOP)
   ATTRIBUTE_HIDDEN;
 
 /* This removes the outermost scope (corresponding to a level of block

@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
  * This file is part of GNU Smalltalk.
@@ -603,9 +603,10 @@ static const class_definition class_info[] = {
    "ClassDescription", NULL, NULL, NULL },
 
   {&_gst_class_class, &_gst_class_description_class,
-   ISP_FIXED, 7,
+   ISP_FIXED, 8,
    "Class",
-   "name comment category environment classVariables sharedPools securityPolicy",
+   "name comment category environment classVariables sharedPools "
+   "securityPolicy pragmaHandlers",
    NULL, NULL },
 
   {&_gst_metaclass_class, &_gst_class_description_class,
@@ -874,7 +875,8 @@ init_metaclass (OOP metaclassOOP)
     _gst_make_instance_variable_array (_gst_nil_oop,
 				       "superclass subClasses methodDictionary instanceSpec "
 				       "instanceVariables name comment category environment "
-				       "classVariables sharedPools securityPolicy");
+				       "classVariables sharedPools securityPolicy "
+				       "pragmaHandlers");
 
   metaclass->instanceSpec = ISP_INTMARK | ISP_FIXED |
     (((sizeof (struct gst_class) -
@@ -909,6 +911,7 @@ init_class (OOP class_oop, const class_definition *ci)
   class->comment = _gst_nil_oop;
   class->category = _gst_nil_oop;
   class->securityPolicy = _gst_nil_oop;
+  class->pragmaHandlers = _gst_nil_oop;
 }
 
 void

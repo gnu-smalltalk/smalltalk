@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -33,7 +33,7 @@
 
 
 ClassDescription subclass: #Class
-		 instanceVariableNames: 'name comment category environment classVariables sharedPools securityPolicy'
+		 instanceVariableNames: 'name comment category environment classVariables sharedPools securityPolicy pragmaHandlers'
 		 classVariableNames: ''
 		 poolDictionaries: ''
 		 category: 'Language-Implementation'
@@ -83,6 +83,12 @@ category
 category: aString
     "Change the class category to aString"
     category := aString
+!
+
+superclass: aClass
+    (aClass isNil and: [ self superclass notNil ])
+	ifTrue: [ self initializeAsRootClass ].
+    super superclass: aClass.
 ! !
 
 
@@ -169,10 +175,24 @@ sharedPools
     ^s
 !
 
+initializeAsRootClass
+    "Perform special initialization reserved to root classes."
+    self registerHandler: [ :method :ann |
+        method
+            rewriteAsCCall: (ann arguments at: 1)
+            returning: (ann arguments at: 2)
+            args: (ann arguments at: 3) ]
+        forPragma: #cCall:returning:args:.
+    self registerHandler: [ :method :ann |
+        method
+            rewriteAsAsyncCCall: (ann arguments at: 1)
+            args: (ann arguments at: 2) ]
+        forPragma: #asyncCCall:args:.
+!
+
 initialize			"redefined in children (?)"
     ^self
 ! !
-
 
 
 !Class methodsFor: 'testing'!
@@ -460,6 +480,26 @@ policy: aSecurityPolicy
 ! !
 
 
+!Class methodsFor: 'pragmas'!
+
+registerHandler: aBlock forPragma: pragma
+    pragmaHandlers isNil ifTrue: [ pragmaHandlers := IdentityDictionary new ].
+    pragmaHandlers at: pragma put: aBlock
+!
+
+pragmaHandlerFor: aSymbol
+    | handler |
+    pragmaHandlers isNil ifFalse: [
+	handler := self pragmaHandlers at: aSymbol ifAbsent: [ nil ]
+	handler isNil ifFalse: [ ^handler ].
+    ].
+    self superclass isNil ifFalse: [
+        ^self superclass pragmaHandlerFor: aSymbol
+    ].
+    ^nil
+! !
+
+
 !Class methodsFor: 'private'!
 
 classInstanceVariableNames: stringClassInstVarNames
@@ -658,3 +698,12 @@ convertFromVersion: version withFixedVariables: fixed
 
     indexed keysAndValuesDo: [ :i :obj | object basicAt: i put: obj ].
     ^object! !
+
+
+!Class class methodsFor: 'initialize'!
+
+initialize
+    "Perform the special initialization of root classes."
+    self subclassesDo: [ :each | each instanceClass initializeAsRootClass ]
+! !
+

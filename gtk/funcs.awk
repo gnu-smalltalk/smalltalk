@@ -9,7 +9,7 @@
 
 #######################################################################
 #
-# Copyright 2001, 2003 Free Software Foundation, Inc.
+# Copyright 2001, 2003, 2005 Free Software Foundation, Inc.
 # Written by Paolo Bonzini and Dragomir Milivojevic
 #
 # This file is part of the GNU Smalltalk class library.
@@ -286,11 +286,10 @@ match($0, /^[ \t]*([a-zA-Z][a-zA-Z0-9]*[ \t\*]+)((g[a-z]*|pango)_[a-zA-Z0-9_]*)[
 
   # print the declaration
 
-  print className (self ? "" : " class")
-  print "\tdefineCFunc: '" cFuncName "'"
-  print "\twithSelectorArgs: '" decl "'" 
-  print "\treturning: " retType
-  print "\targs: #(" argdecl " )!\n"
+  print "!" className (self ? "" : " class") " methodsFor: 'C call-outs'!"
+  print decl
+  print "    <cCall: '" cFuncName "' returning: " retType
+  print "\targs: #(" argdecl " )>! !\n"
 
   if (decl == "getType")
     print "GLib registerType: " className "!\n"

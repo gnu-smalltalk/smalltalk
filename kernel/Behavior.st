@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -127,23 +127,13 @@ defineAsyncCFunc: cFuncNameString
     withSelectorArgs: selectorAndArgs
     args: argsArray
 
-    "Please lookup the part on the C interface in the manual."
+    "Please lookup the part on the C interface in the manual.  This method
+     is deprecated, you should use the cCall:returning:args: attribute."
 
     | code |
-    code := ('%1
-    "Asynchronous C call-out to %2. Do not modify!"
-    ##(
-        (CFunctionDescriptor isFunction: ''%2'') ifFalse: [
-	    (''C function %2 not defined'') printNl
-        ].
-
-        CFunctionDescriptor
-	    for: ''%2''
-    	    returning: #void
-	    withArgs: #%3)
-
-		asyncCallFrom: thisContext')
-	
+    code := (
+'%1
+    <asyncCCall: ''%2'' args: #%3>')
 	bindWith: selectorAndArgs
 	with: cFuncNameString
 	with: argsArray printString.
@@ -156,30 +146,19 @@ defineCFunc: cFuncNameString
     returning: returnTypeSymbol 
     args: argsArray
 
-    "Please lookup the part on the C interface in the manual."
+    "Please lookup the part on the C interface in the manual.  This method
+     is deprecated, you should use the cCall:returning:args: attribute."
 
     | code |
-    code := ('%1
-    "C call-out to %2. Do not modify!"
-    ^(##(
-        (CFunctionDescriptor isFunction: ''%2'') ifFalse: [
-	    (''C function %2 not defined'') printNl
-        ].
-
-        CFunctionDescriptor
-	    for: ''%2''
-    	    returning: %3
-	    withArgs: #%4)
-
-		callFrom: thisContext
-		into: ValueHolder new) value')
-	
+    code := (
+'%1
+    <cCall: ''%2'' returning: %3 args: #%4>')
 	bindWith: selectorAndArgs
 	with: cFuncNameString
 	with: returnTypeSymbol storeString
 	with: argsArray printString.
 
-    returnTypeSymbol isSymbol ifFalse: [ code := code, ' narrow' ].
+    "TODO: returnTypeSymbol isSymbol ifFalse: [ code := code, ' narrow' ]."
     ^self compile: code ifError: [ :file :line :error | code error: error ].
 !
 

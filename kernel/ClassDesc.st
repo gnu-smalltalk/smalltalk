@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -75,23 +75,25 @@ createSetMethod: what
 defineAsyncCFunc: cFuncNameString
     withSelectorArgs: selectorAndArgs
     args: argsArray
-    "See documentation. Too complex to describe it here ;-)"
+    "See documentation.  This function is deprecated, you should use
+     the <asyncCCall: ... > special syntax instead."
 
     ^(super defineAsyncCFunc: cFuncNameString
 	     withSelectorArgs: selectorAndArgs
-	     args: argsArray) methodCategory: 'C functions'
+	     args: argsArray) methodCategory: 'C call-outs'
 !
 
 defineCFunc: cFuncNameString
     withSelectorArgs: selectorAndArgs
     returning: returnTypeSymbol 
     args: argsArray
-    "See documentation. Too complex to describe it here ;-)"
+    "See documentation.  This function is deprecated, you should use
+     the <asyncCCall: ... > special syntax instead."
 
     ^(super defineCFunc: cFuncNameString
 	     withSelectorArgs: selectorAndArgs
 	     returning: returnTypeSymbol 
-	     args: argsArray) methodCategory: 'C functions'
+	     args: argsArray) methodCategory: 'C call-outs'
 !
 
 classify: aSelector under: aString

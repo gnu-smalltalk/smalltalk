@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2001 Free Software Foundation, Inc.
+| Copyright 2001, 2005 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -79,79 +79,51 @@ free
 ! !
 
 
+!GDBM class methodsFor: 'C call-outs'!
 
-"     GDBM_FILE gdbm_open(name, block_size, flags, mode, fatal_func);	"
+open: fileName blockSize: size flags: flags
+    mode: modeInt fatalFunc: funcAddr
 
-GDBM class
-	defineCFunc: 'gdbm_open'
-	withSelectorArgs: 'open: fileName blockSize: size flags: flags
-                            mode: modeInt fatalFunc: funcAddr'
-	returning: GDBM type
-	args: #(#string #int #int #int #cObject)
+    "GDBM_FILE gdbm_open(name, block_size, flags, mode, fatal_func);"
+    <cCall: 'gdbm_open' returning: GDBM type
+	args: #(#string #int #int #int #cObject)>! !
+
+!GDBM methodsFor: 'C call-outs'!
+
+close
+    "void gdbm_close(dbf);"
+    <cCall: 'gdbm_close' returning: #int args: #(#self)>
 !
 
-"     void gdbm_close(dbf);						"
-
-GDBM
-	defineCFunc: 'gdbm_close'
-	withSelectorArgs: 'close'
-	returning: #int
-	args: #(#self)
+at: key put: value flag: aFlag
+    "int gdbm_store(dbf, key, content, flag);"
+    <cCall: 'gdbm_store' returning: #int args: #(#self #cObject #cObject #int)>
 !
 
-"     int gdbm_store(dbf, key, content, flag);				"
-
-GDBM
-	defineCFunc: 'gdbm_store'
-	withSelectorArgs: 'at: key put: value flag: aFlag' 
-	returning: #int
-	args: #(#self #cObject #cObject #int)
+at: key
+    "datum gdbm_fetch(dbf, key);"
+    <cCall: 'gdbm_fetch' returning: DatumStruct type args: #(#self #cObject)>
 !
 
-"     datum gdbm_fetch(dbf, key);					"
-
-GDBM
-	defineCFunc: 'gdbm_fetch'
-	withSelectorArgs: 'at: key' 
-	returning: DatumStruct type
-	args: #(#self #cObject)
+removeKey: key
+    "int gdbm_delete(dbf, key);"
+    <cCall: 'gdbm_delete' returning: #long args: #(#self #cObject)>
 !
 
-"     int gdbm_delete(dbf, key);					"
-
-GDBM
-	defineCFunc: 'gdbm_delete'
-	withSelectorArgs: 'removeKey: key' 
-	returning: #long
-	args: #(#self #cObject)
+firstKey
+    "datum gdbm_firstkey(dbf);"
+    <cCall: 'gdbm_firstkey' returning: DatumStruct type args: #(#self)>
 !
 
-"     datum gdbm_firstkey(dbf);						"
-
-GDBM
-	defineCFunc: 'gdbm_firstkey'
-	withSelectorArgs: 'firstKey' 
-	returning: DatumStruct type
-	args: #(#self)
+nextKey: afterDatum
+    "datum gdbm_nextkey(dbf, key);"
+    <cCall: 'gdbm_nextkey' returning: DatumStruct type args: #(#self #cObject)>
 !
 
-"     datum gdbm_nextkey(dbf, key);					"
-
-GDBM
-	defineCFunc: 'gdbm_nextkey'
-	withSelectorArgs: 'nextKey: afterDatum' 
-	returning: DatumStruct type
-	args: #(#self #cObject)
-!
-
-"     int gdbm_reorganize(dbf);						"
-
-GDBM
-	defineCFunc: 'gdbm_reorganize'
-	withSelectorArgs: 'reorganize'
-	returning: #int
-	args: #(#self)
-!
+reorganize
+    "int gdbm_reorganize(dbf);"
+    <cCall: 'gdbm_reorganize' returning: #int args: #(#self)>
+! !
 
 !GDBM class methodsFor: 'testing'!
 

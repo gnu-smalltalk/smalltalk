@@ -32,193 +32,138 @@
 "These differ from the standard implementation in that they run
  until all events are done.  We also need to redefine them so that
  they are asynchronous"
-Gtk class
-	defineAsyncCFunc: 'gstGtkMainIteration'
-	withSelectorArgs: 'mainIteration'
-	args: #( )!
 
-Gtk class
-	defineAsyncCFunc: 'gstGtkMainIterationDo'
-	withSelectorArgs: 'mainIterationDo: blocking'
-	args: #( #boolean )!
+!Gtk class methodsFor: 'C call-outs'!
 
-Gtk class
-	defineAsyncCFunc: 'gstGtkMain'
-	withSelectorArgs: 'main: aSemaphore'
-	args: #( #smalltalk )!
+mainIteration
+    <asyncCCall: 'gstGtkMainIteration' args: #()>!
 
-Gtk class
-	defineCFunc: 'gstGtkShouldQuit'
-	withSelectorArgs: 'shouldQuit'
-	returning: #boolean
-	args: #( )!
+mainIterationDo: blocking
+    <asyncCCall: 'gstGtkMainIterationDo' args: #(#boolean )>!
 
+main: aSemaphore
+    <asyncCCall: 'gstGtkMain' args: #(#smalltalk )>!
 
+shouldQuit
+    <cCall: 'gstGtkShouldQuit' returning: #boolean args: #()>!
 
-GLib class
-	defineCFunc: 'gstGtkRegisterForType'
-	withSelectorArgs: 'register: anObject forType: gType'
-	returning: #void
-	args: #( #smalltalk #unknown )!
+gstGtkInit
+    <cCall: 'gstGtkInit' returning: #void args: #()>! !
 
-Gtk class defineCFunc: 'gstGtkInit'
-        withSelectorArgs: 'gstGtkInit'
-        returning: #void
-        args: #()!
+!GLib class methodsFor: 'C call-outs'!
 
-GObject
-	defineCFunc: 'gstGtkConnectSignal'
-	withSelectorArgs: 'connectSignal: name to: handler selector: sel userData: userData'
-	returning: #void
-	args: #( #selfSmalltalk #string #smalltalk #smalltalk #smalltalk )!
+register: anObject forType: gType
+    <cCall: 'gstGtkRegisterForType' returning: #void
+	args: #(#smalltalk #unknown )>!
 
-GObject
-	defineCFunc: 'gstGtkNarrowGObjectOOP'
-	withSelectorArgs: 'narrow'
-	returning: #smalltalk
-	args: #(#self #selfSmalltalk)!
+!GObject methodsFor: 'C call-outs'!
 
-GObject
-	defineCFunc: 'gstGtkFreeGObjectOOP'
-	withSelectorArgs: 'free'
-	returning: #void
-	args: #(#self)!
+connectSignal: name to: handler selector: sel userData: userData
+    <cCall: 'gstGtkConnectSignal' returning: #void
+	args: #(#selfSmalltalk #string #smalltalk #smalltalk #smalltalk )>!
 
-GObject
-	defineCFunc: 'gstGtkGetProperty'
-	withSelectorArgs: 'propertiesAt: name'
-	returning: #smalltalk
-	args: #( #self #string )!
+narrow
+    <cCall: 'gstGtkNarrowGObjectOOP' returning: #smalltalk
+	args: #(#self #selfSmalltalk )>!
 
-GObject
-	defineCFunc: 'gstGtkSetProperty'
-	withSelectorArgs: 'propertiesAt: name put: anObject'
-	returning: #void
-	args: #( #self #string #smalltalk )!
+free
+    <cCall: 'gstGtkFreeGObjectOOP' returning: #void args: #(#self )>!
 
-GtkWidget
-	defineCFunc: 'gstGtkGetWindow'
-	withSelectorArgs: 'getWindow'
-	returning: GdkWindow type
-	args: #( #self )!
+propertiesAt: name
+    <cCall: 'gstGtkGetProperty' returning: #smalltalk args: #(#self #string )>!
 
-GtkWidget
-	defineCFunc: 'gstGtkGetState'
-	withSelectorArgs: 'getState'
-	returning: #int
-	args: #( #self )!
+propertiesAt: name put: anObject
+    <cCall: 'gstGtkSetProperty' returning: #void
+	args: #(#self #string #smalltalk )>! !
 
-GtkWidget
-	defineCFunc: 'gstGtkGetFlags'
-	withSelectorArgs: 'getFlags'
-	returning: #int
-	args: #( #self )!
+!GtkWidget methodsFor: 'C call-outs'!
 
-GtkWidget
-	defineCFunc: 'gstGtkSetFlags'
-	withSelectorArgs: 'setFlags: flags'
-	returning: #void
-	args: #( #self #int )!
+getAllocation
+    <cCall: 'gstGtkWidgetGetAllocation' returning: GtkAllocation type
+	args: #(#self )>!
 
-GtkWidget
-	defineCFunc: 'gstGtkUnsetFlags'
-	withSelectorArgs: 'unsetFlags: flags'
-	returning: #void
-	args: #( #self #int )!
+getWindow
+    <cCall: 'gstGtkGetWindow' returning: GdkWindow type args: #(#self )>!
 
-GtkContainer
-	defineCFunc: 'gstGtkGetChildProperty'
-	withSelectorArgs: 'child: widget propertiesAt: name'
-	returning: #smalltalk
-	args: #( #self #cObject #string )!
+getState
+    <cCall: 'gstGtkGetState' returning: #int args: #(#self )>!
 
-GtkContainer
-	defineCFunc: 'gstGtkSetChildProperty'
-	withSelectorArgs: 'child: widget propertiesAt: name put: anObject'
-	returning: #void
-	args: #( #self #cObject #string #smalltalk )!
+getFlags
+    <cCall: 'gstGtkGetFlags' returning: #int args: #(#self )>!
+
+setFlags: flags
+    <cCall: 'gstGtkSetFlags' returning: #void args: #(#self #int )>!
+
+unsetFlags: flags
+    <cCall: 'gstGtkUnsetFlags' returning: #void args: #(#self #int )>! !
+
+!GtkContainer methodsFor: 'C call-outs'!
+
+child: widget propertiesAt: name
+    <cCall: 'gstGtkGetChildProperty' returning: #smalltalk
+	args: #(#self #cObject #string )>!
+
+child: widget propertiesAt: name put: anObject
+    <cCall: 'gstGtkSetChildProperty' returning: #void
+	args: #(#self #cObject #string #smalltalk )>! !
+
+!GValue class methodsFor: 'C call-outs'!
+
+typeFromName: aName
+    <cCall: 'g_type_from_name' returning: #int args: #(#string )>!
+
+!GtkTreeModel methodsFor: 'C call-outs'!
+
+getOop: iter column: aColumn
+    <cCall: 'gstGtkTreeModelGetOOP' returning: #smalltalk
+	args: #(#self #cObject #int )>!
+
+!GtkTreeStore methodsFor: 'C call-outs'!
+
+setOop: iter column: aColumn value: aValue
+    <cCall: 'gstGtkTreeStoreSetOOP' returning: #void
+	args: #(#self #cObject #int #smalltalk )>!
+
+!GtkListStore methodsFor: 'C call-outs'!
+
+setOop: iter column: aColumn value: aValue
+    <cCall: 'gstGtkListStoreSetOOP' returning: #void
+	args: #(#self #cObject #int #smalltalk )>!
+
+!GtkDialog methodsFor: 'C call-outs'!
+
+getVBox
+    <cCall: 'gstGtkDialogGetVBox' returning: GtkWidget type args: #(#self )>!
+
+getActionArea
+    <cCall: 'gstGtkDialogGetActionArea' returning: GtkWidget type
+	args: #(#self )>! !
+
+!GtkScrolledWindow methodsFor: 'C call-outs'!
+
+getHscrollbarVisible
+    <cCall: 'gstGtkGetHscrollbarVisible' returning: #boolean args: #(#self )>!
+
+getVscrollbarVisible
+    <cCall: 'gstGtkGetVscrollbarVisible' returning: #boolean args: #(#self )>! !
+
+!GtkAdjustment methodsFor: 'C call-outs'!
+
+getLower
+    <cCall: 'gstGtkAdjustmentGetLower' returning: #int args: #(#self )>!
+
+getUpper
+    <cCall: 'gstGtkAdjustmentGetUpper' returning: #int args: #(#self )>!
+
+getPageSize
+    <cCall: 'gstGtkAdjustmentGetPageSize' returning: #int args: #(#self )>! !
+
+!GdkPixbufLoader methodsFor: 'C call-outs'!
+
+write: buf count: count error: error
+    "FIXME: funcs.awk is broken for this."
+    <cCall: 'gdk_pixbuf_loader_write' returning: #boolean
+	args: #(#self #byteArray #int #cObject )>! !
 
 GtkTreeStore superclass: GtkTreeModel!
-
 GtkListStore superclass: GtkTreeModel!
-
-GValue class
-	defineCFunc: 'g_type_from_name'
-	withSelectorArgs: 'typeFromName: aName'
-	returning: #int
-	args: #( #string )!
-
-GtkTreeModel 
-	defineCFunc: 'gstGtkTreeModelGetOOP'
-	withSelectorArgs: 'getOop: iter column: aColumn'
-	returning: #smalltalk
-	args: #( #self #cObject #int )!
-
-GtkTreeStore
-	defineCFunc: 'gstGtkTreeStoreSetOOP'
-	withSelectorArgs: 'setOop: iter column: aColumn value: aValue'
-	returning: #void
-	args: #( #self #cObject #int #smalltalk)!
-
-GtkListStore
-	defineCFunc: 'gstGtkListStoreSetOOP'
-	withSelectorArgs: 'setOop: iter column: aColumn value: aValue'
-	returning: #void
-	args: #( #self #cObject #int #smalltalk )!
-
-GtkWidget
-	defineCFunc: 'gstGtkWidgetGetAllocation'
-	withSelectorArgs: 'getAllocation'
-	returning: GtkAllocation type
-	args: #( #self )!
-
-GtkDialog
-	defineCFunc: 'gstGtkDialogGetVBox'
-	withSelectorArgs: 'getVBox'
-	returning: GtkWidget type
-	args: #( #self )!
-
-GtkDialog
-	defineCFunc: 'gstGtkDialogGetActionArea'
-	withSelectorArgs: 'getActionArea'
-	returning: GtkWidget type
-	args: #( #self )!
-
-GtkScrolledWindow
-	defineCFunc: 'gstGtkGetHscrollbarVisible'
-	withSelectorArgs: 'getHscrollbarVisible'
-	returning: #boolean
-	args: #( #self )!
-
-GtkScrolledWindow
-	defineCFunc: 'gstGtkGetVscrollbarVisible'
-	withSelectorArgs: 'getVscrollbarVisible'
-	returning: #boolean
-	args: #( #self )!
-
-GtkAdjustment
-	defineCFunc: 'gstGtkAdjustmentGetLower'
-	withSelectorArgs: 'getLower'
-	returning: #int
-	args: #( #self )!
-
-GtkAdjustment
-	defineCFunc: 'gstGtkAdjustmentGetUpper'
-	withSelectorArgs: 'getUpper'
-	returning: #int
-	args: #( #self )!
-
-GtkAdjustment
-	defineCFunc: 'gstGtkAdjustmentGetPageSize'
-	withSelectorArgs: 'getPageSize'
-	returning: #int
-	args: #( #self )!
-
-GdkPixbufLoader
-        "FIXME: funcs.awk is broken for this."
-	defineCFunc: 'gdk_pixbuf_loader_write'
-	withSelectorArgs: 'write: buf count: count error: error'
-	returning: #boolean
-	args: #( #self #byteArray #int #cObject )!
-
-	

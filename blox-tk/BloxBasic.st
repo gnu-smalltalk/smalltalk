@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2005 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -596,32 +596,23 @@ all Blox subclasses and may be included only for backwards compatibility
 towards 1.1.5 BLOX. You should use geometry methods only for subclasses of
 BWidget.'!
 
-Blox class
-        defineCFunc: 'tclInit'
-        withSelectorArgs: 'tclInit'
-        returning: #cObject
-        args: #()
+!Blox class methodsFor: 'C call-outs'!
+
+tclInit
+    <cCall: 'tclInit' returning: #cObject args: #()>
 !
 
-Blox class
-        defineCFunc: 'Tcl_Eval'
-        withSelectorArgs: 'evalIn: interp tcl: cmd'
-        returning: #int
-        args: #(#cObject #string)
+evalIn: interp tcl: cmd
+    <cCall: 'Tcl_Eval' returning: #int args: #(#cObject #string)>
 !
 
-Blox class
-        defineCFunc: 'Tcl_GetStringResult'
-        withSelectorArgs: 'resultIn: interp'
-        returning: #string
-        args: #(#cObject)
+resultIn: interp
+    <cCall: 'Tcl_GetStringResult' returning: #string args: #(#cObject)>
 !
 
-Blox class
-        defineAsyncCFunc: 'bloxIdle'
-        withSelectorArgs: 'idle'
-        args: #()
-!
+idle
+    <asyncCCall: 'bloxIdle' args: #()>
+! !
 
 !Blox class methodsFor: 'event dispatching'!
 

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1992,94,95,99,2000,2001,2002,2003
+| Copyright 1992,94,95,99,2000,2001,2002,2003,2005
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -50,23 +50,19 @@ Most of my actual functionality is used by redefinitions of methods
 in CFunctionDescriptor.'!
 
 
-DLD class defineCFunc: 'dldLink'
-	  withSelectorArgs: 'linkFile: aFileName'
-	  returning: #cObject
-	  args: #(#string)
+!DLD class methodsFor: 'C call-outs'!
+
+linkFile: aFileName
+    <cCall: 'dldLink' returning: #cObject args: #(#string)>
 !
 
-DLD class defineCFunc: 'dldGetFunc'
-	  withSelectorArgs: 'library: libHandle getFunc: aFuncString'
-	  returning: #cObject
-	  args: #(#cObject #string)
+library: libHandle getFunc: aFuncString
+    <cCall: 'dldGetFunc' returning: #cObject args: #(#cObject #string)>
 !
 
-DLD class defineCFunc: 'defineCFunc'
-	  withSelectorArgs: 'defineCFunc: aName as: aFuncAddr'
-	  returning: #void
-	  args: #(#string #cObject)
-!
+defineCFunc: aName as: aFuncAddr
+    <cCall: 'defineCFunc' returning: #void args: #(#string #cObject)>
+! !
 
 
 !CFunctionDescriptor class methodsFor: 'testing'!

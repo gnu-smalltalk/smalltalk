@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -179,32 +179,19 @@ callNoRetryFrom: aContext into: aValueHolder
 
 "A couple of simple, but useful callout functions, as examples."
 
-SystemDictionary
-	 defineCFunc: 'system'
-	 withSelectorArgs: 'system: aString'
-	 returning: #int
-	 args: #(#string)!
+!SystemDictionary methodsFor: 'c call-outs'!
 
-SystemDictionary
-	 defineCFunc: 'getenv'
-	 withSelectorArgs: 'getenv: aString'
-	 returning: #string
-	 args: #(#string)!
+system: aString
+    <cCall: 'system' returning: #int args: #(#string)>!
 
-SystemDictionary
-	 defineCFunc: 'putenv'
-	 withSelectorArgs: 'putenv: aString'
-	 returning: #int
-	 args: #(#string)!
+getenv: aString
+    <cCall: 'getenv' returning: #string args: #(#string)>!
 
-SystemDictionary
-	 defineCFunc: 'getArgc'
-	 withSelectorArgs: 'getArgc'
-	 returning: #int
-	 args: #()!
+putenv: aString
+    <cCall: 'putenv' returning: #int args: #(#string)>!
 
-SystemDictionary
-	 defineCFunc: 'getArgv'
-	 withSelectorArgs: 'getArgv: index'
-	 returning: #string
-	 args: #(#int)!
+getArgc
+    <cCall: 'getArgc' returning: #int args: #()>!
+
+getArgv: index
+    <cCall: 'getArgv' returning: #string args: #(#int)>! !

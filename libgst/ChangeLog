@@ -1,5 +1,17 @@
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c (install_method): Evaluate pragma handlers.
+	Make CompiledMethod read-only.
+	(method_new): Do not make CompiledMethod read-only here.
+	* libgst/dict.c (class_info): Include pragmaHandlers instance
+	variable for Class.
+	(init_class): Initialize it here.
+	* libgst/dict.h (gst_class): Include pragmaHandlers instance variable.
+	* libgst/sym.c (_gst_find_pragma_handler): New.
+	* libgst/sym.h (_gst_find_pragma_handler): Declare it.
+
+2005-03-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	Fix bug when an ephemeron was tenured directly from eden to
 	oldspace.
 
@@ -9,11 +21,11 @@
 	here.
 	(_gst_copy_an_oop, tenure_one_object): Use add_grey_object.
 
-2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
+2005-03-24  Paolo Bonzini  <bonzini@gnu.org>
 
-	* libgst/cint.c: Remove out-of-date comment.
+	* libgst/callin.c: Remove out-of-date comment.
 
-2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
+2005-03-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Load Transcript.st earlier.
 

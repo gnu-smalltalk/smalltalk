@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright (C) 2002 Free Software Foundation.
+| Copyright (C) 2002, 2005 Free Software Foundation.
 | Written by Paolo Bonzini
 |
 | This file is part of GNU Smalltalk.
@@ -74,23 +74,16 @@ CP value: CA.
 ^(CP value + 1) at: 0!
 ^(CP value + 1) - CA!
 
-Object
-	 defineCFunc: 'testCallin'
-	 withSelectorArgs: 'testCallin'
-	 returning: #void
-	 args: #(#selfSmalltalk).
+!Object methodsFor: 'C call-outs'!
 
-Object
-	 defineCFunc: 'testCString'
-	 withSelectorArgs: 'testCString: cString'
-	 returning: #void
-	 args: #(#cObject).
+testCallin
+    <cCall: 'testCallin' returning: #void args: #(#selfSmalltalk)>!
 
-Object
-	 defineCFunc: 'testCObjectPtr'
-	 withSelectorArgs: 'testCObjectPtr: cObject'
-	 returning: #void
-	 args: #(#cObjectPtr).
+testCString: cString
+    <cCall: 'testCString' returning: #void args: #(#cObject)>!
+
+testCObjectPtr: cObject
+    <cCall: 'testCObjectPtr' returning: #void args: #(#cObjectPtr)>! !
 
 true testCallin!
 nil testCString: (CString value: 'this is a test')!

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005
 | Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
@@ -45,18 +45,13 @@ manipulate such a path by splitting it into its components.  In addition,
 I expose information about files (both real and virtual) such as their
 size and timestamps.'!
 
-File class
-	defineCFunc: 'strerror'
-	withSelectorArgs: 'stringError: errno'
-	returning: #string
-	args: #(#int).
+!File class methodsFor: 'C functions'!
 
-File class
-	defineCFunc: 'errno'
-	withSelectorArgs: 'errno'
-	returning: #long
-	args: #()
-!
+stringError: errno
+    <cCall: 'strerror' returning: #string args: #(#int)>!
+
+errno
+    <cCall: 'errno' returning: #long args: #()>! !
 
 
 !File class methodsFor: 'file name management'!

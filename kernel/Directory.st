@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005
 | Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
@@ -46,17 +46,10 @@ of File and Directory.  In addition I have the notion of a current
 working directory (which alas must be a real directory and not a
 virtual one).'!
 
-Directory class
-	 defineCFunc: 'chdir'
-	 withSelectorArgs: 'primWorking: dirName'
-	 returning: #void
-	 args: #(#string).
+!Directory class methodsFor: 'C call-outs'!
 
-Directory class
-	 defineCFunc: 'getCurDirName'
-	 withSelectorArgs: 'working'
-	 returning: #stringOut
-	 args: #().
+primWorking: dirName
+    <cCall: 'chdir' returning: #void args: #(#string)>! !
 
 
 !Directory class methodsFor: 'reading system defaults'!
@@ -137,6 +130,9 @@ pathSeparatorString
 
 
 !Directory class methodsFor: 'file operations'!
+
+working
+    <cCall: 'getCurDirName' returning: #stringOut args: #()>!
 
 working: dirName
     "Change the current working directory to dirName."

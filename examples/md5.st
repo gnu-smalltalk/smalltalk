@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2001 Free Software Foundation, Inc.
+| Copyright 2001, 2005 Free Software Foundation, Inc.
 | Written by Paolo Bonzini
 |
 | This file is part of GNU Smalltalk.
@@ -34,25 +34,18 @@ Object subclass: #MD5
        poolDictionaries: ''
        category: 'Examples-Modules'!
 
-MD5
-	defineCFunc: 'MD5AllocOOP'
-	withSelectorArgs: 'newState'
-	returning: #smalltalk
-	args: #()
+!MD5 methodsFor: 'C call-outs'!
+
+newState
+    <cCall: 'MD5AllocOOP' returning: #smalltalk args: #()>
 !
 
-MD5
-	defineCFunc: 'MD5Update'
-	withSelectorArgs: 'combine: input size: len into: context'
-	returning: #void
-	args: #(#byteArray #int #byteArrayOut)
+combine: input size: len into: context
+    <cCall: 'MD5Update' returning: #void args: #(#byteArray #int #byteArrayOut)>
 !
 
-MD5
-	defineCFunc: 'MD5Final'
-	withSelectorArgs: 'finalize: state in: digest'
-	returning: #void
-	args: #(#byteArray #byteArrayOut)
+finalize: state in: digest
+    <cCall: 'MD5Final' returning: #void args: #(#byteArray #byteArrayOut)>
 ! !
 
 !MD5 class methodsFor: 'instance creation'!

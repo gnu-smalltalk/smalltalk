@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2002 Free Software Foundation, Inc.
+| Copyright 2002, 2005 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -120,91 +120,53 @@ CStruct
 !
 
 
-VFSHandler
-	defineCFunc: 'stat'
-	withSelectorArgs: 'statOn: fileName into: statStruct'
-	returning: #int
-	args: #(#string #cObject).
 
 "opendir and closedir needed to test for directories"
+!VFSHandler methodsFor: 'C call-outs'!
 
-VFSHandler
-	defineCFunc: 'opendir'
-	withSelectorArgs: 'openDir: dirName'
-	returning: #cObject
-	args: #(#string).
+statOn: fileName into: statStruct
+    <cCall: 'stat' returning: #int args: #(#string #cObject)>!
 
-VFSHandler
-	defineCFunc: 'closedir'
-	withSelectorArgs: 'closeDir: dirObject'
-	returning: #int
-	args: #(#cObject).
+openDir: dirName
+    <cCall: 'opendir' returning: #cObject args: #(#string)>!
 
-VFSHandler
-	defineCFunc: 'fileIsReadable'
-	withSelectorArgs: 'primIsReadable: name'
-	returning: #boolean
-	args: #(#string).
+closeDir: dirObject
+    <cCall: 'closedir' returning: #int args: #(#cObject)>!
 
-VFSHandler
-	defineCFunc: 'fileIsWriteable'
-	withSelectorArgs: 'primIsWriteable: name'
-	returning: #boolean
-	args: #(#string).
+primIsReadable: name
+    <cCall: 'fileIsReadable' returning: #boolean args: #(#string)>!
 
-VFSHandler
-	defineCFunc: 'fileIsExecutable'
-	withSelectorArgs: 'primIsExecutable: name'
-	returning: #boolean
-	args: #(#string).
+primIsWriteable: name
+    <cCall: 'fileIsWriteable' returning: #boolean args: #(#string)>!
 
-VFSHandler
-	defineCFunc: 'unlink'
-	withSelectorArgs: 'primUnlink: fileName'
-	returning: #void
-	args: #(#string).
+primIsExecutable: name
+    <cCall: 'fileIsExecutable' returning: #boolean args: #(#string)>!
 
-VFSHandler
-	defineCFunc: 'rename'
-	withSelectorArgs: 'primRename: oldFileName to: newFileName'
-	returning: #void
-	args: #(#string #string).
+primUnlink: fileName
+    <cCall: 'unlink' returning: #void args: #(#string)>!
 
-VFSHandler
-	 defineCFunc: 'rmdir'
-	 withSelectorArgs: 'primRemoveDir: fileName'
-	 returning: #void
-	 args: #(#string).
+primRename: oldFileName to: newFileName
+    <cCall: 'rename' returning: #void args: #(#string #string)>!
 
-VFSHandler
-	 defineCFunc: 'mkdir'
-	 withSelectorArgs: 'primCreateDir: dirName mode: mode'
-	 returning: #void
-	 args: #(#string #int).
+primRemoveDir: fileName
+    <cCall: 'rmdir' returning: #void args: #(#string)>!
 
-RealFileHandler class
-	 defineCFunc: 'getCurDirName'
-	 withSelectorArgs: 'working'
-	 returning: #stringOut
-	 args: #().
+primCreateDir: dirName mode: mode
+    <cCall: 'mkdir' returning: #void args: #(#string #int)>!
 
-VFSHandler
-	 defineCFunc: 'extractDirentName'
-	 withSelectorArgs: 'extractDirentName: dirent'
-	 returning: #string
-	 args: #(#cObject).
+extractDirentName: dirent
+    <cCall: 'extractDirentName' returning: #string args: #(#cObject)>!
 
-VFSHandler
-	 defineCFunc: 'readdir'
-	 withSelectorArgs: 'readDir: dirObject'
-	 returning: #cObject
-	 args: #(#cObject).
+readDir: dirObject
+    <cCall: 'readdir' returning: #cObject args: #(#cObject)>!
 
-VFSHandler
-	 defineCFunc: 'rewinddir'
-	 withSelectorArgs: 'rewindDir: dirObject'
-	 returning: #void
-	 args: #(#cObject)!
+rewindDir: dirObject
+    <cCall: 'rewinddir' returning: #void args: #(#cObject)>! !
+
+!RealFileHandler class methodsFor: 'C call-outs'!
+
+working
+    <cCall: 'getCurDirName' returning: #stringOut args: #()>! !
 
 
 

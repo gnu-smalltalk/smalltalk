@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -783,6 +783,33 @@ _gst_print_symbol_entry (symbol_entry * ent)
 }
 
 
+
+OOP
+_gst_find_pragma_handler (OOP classOOP,
+			  OOP symbolOOP)
+{
+  OOP class_oop, myClass;
+
+  myClass = _gst_get_class_object (_gst_this_class);
+
+  /* Now search in the class pools */
+  for (class_oop = myClass; !IS_NIL (class_oop);
+       class_oop = SUPERCLASS (class_oop))
+    {
+      gst_class class = (gst_class) OOP_TO_OBJ (class_oop);
+      OOP handlerOOP;
+
+      if (IS_NIL (class->pragmaHandlers))
+	continue;
+
+      handlerOOP = _gst_identity_dictionary_at (class->pragmaHandlers,
+                                                symbolOOP);
+      if (!IS_NIL (handlerOOP))
+	return handlerOOP;
+    }
+
+  return (_gst_nil_oop);
+}
 
 OOP
 _gst_make_instance_variable_array (OOP superclassOOP,

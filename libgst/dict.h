@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
  * This file is part of GNU Smalltalk.
@@ -221,6 +221,7 @@ typedef struct gst_class
   OOP classVariables;		/* dictionary of name->value pairs */
   OOP sharedPools;
   OOP securityPolicy;
+  OOP pragmaHandlers;
 }
  *gst_class;
 

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2003 Free Software Foundation, Inc.
+| Copyright 2001, 2003, 2005 Free Software Foundation, Inc.
 | Written by Dragomir Milivojevic.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -52,23 +52,20 @@ cache is sought for an equivalent, already constructed Regex).'.
 
 " --- external function definitions --- "
 
-Regex class
-	defineCFunc: 'reh_make_cacheable'
-	withSelectorArgs: 'fromString: aString'
-	returning: #smalltalk
-	args: #(#smalltalk).
+!Regex class methodsFor: 'C call-outs'!
 
-String
-	defineCFunc: 'reh_search'
-	withSelectorArgs: 'searchRegex: pattern from: from to: to'
-	returning: #int
-	args: #(#selfSmalltalk #smalltalk #int #int).
+fromString: aString
+    <cCall: 'reh_make_cacheable' returning: #smalltalk args: #(#smalltalk)>!
 
-String
-	defineCFunc: 'reh_match'
-	withSelectorArgs: 'lengthOfRegexMatch: pattern from: from to: to'
-	returning: #int
-	args: #(#selfSmalltalk #smalltalk #int #int)!
+!String methodsFor: 'C call-outs'!
+
+searchRegex: pattern from: from to: to
+    <cCall: 'reh_search' returning: #int
+	args: #(#selfSmalltalk #smalltalk #int #int)>!
+
+lengthOfRegexMatch: pattern from: from to: to
+    <cCall: 'reh_match' returning: #int
+	args: #(#selfSmalltalk #smalltalk #int #int)>! !
 
 "--------------------------------------------------------------------------"
 

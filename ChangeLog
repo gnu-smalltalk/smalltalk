@@ -1,5 +1,23 @@
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Class.st: Implement "active" method annotations and
+	C-call method annotations.
+	* kernel/CompildMeth.st: Implement C-call method annotations.
+	* kernel/ObjMemory.st: Call "Class initialize".
+
+	* examples/gdbm-c.st: Switch to new C-call description.
+	* examples/md5.st: Likewise.
+	* examples/regex.st: Likewise.
+	* kernel/Behavior.st: Likewise.
+	* kernel/CFuncs.st: Likewise.
+	* kernel/ClassDesc.st: Likewise.
+	* kernel/DLD.st: Likewise.
+	* kernel/Directory.st: Likewise.
+	* kernel/File.st: Likewise.
+	* kernel/VFS.st: Likewise.
+
+2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FileDescr.st: add #nextPutAllFlush:
 
 2005-02-02  Paolo Bonzini  <bonzini@gnu.org>

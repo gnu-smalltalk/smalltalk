@@ -114,11 +114,18 @@ o   CompiledCode>>#literalsDo: does what CompiledCode>>#allLiteralsDo:
     used to do.  CompiledCode>>#allLiteralsDo: recurses into literal
     arrays.
 
+o   Glorp, a layer for mapping objects to relational databases, is provided
+    and integrated with the MySQL driver.
+
 o   GNU Smalltalk includes a mechanism for defining security policies
     on a class-by-class basis.  See below for more information.
 
 o   #min: and #max: always return a NaN when one of the two operands is
     a NaN; previously they would always return the other operand.
+
+o   New syntax for C call-outs, can be transparently filed out from the
+    image and then filed back in.  See the documentation or the
+    kernel/CFuncs.st file for more information.
 
 o   PackageLoader can be told the namespace in which to load the package.
     Most package loading scripts are now no longer necessary or can be
@@ -157,13 +164,10 @@ o   When a non-existing message is sent with the wrong number of arguments
     Smalltalk language.
 
 
-Goodies:
+Work in progress:
 
-30% Blox-GTK interface, to use the browser under Gtk+.  Currently, only
+o   Blox-GTK interface, to use the browser under Gtk+.  Currently, only
     the browser works.  Thanks to Robert Collins.
-
-o   Glorp, a layer for mapping objects to relational databases,
-    integrated with the MySQL driver.
 
 o   GNU Smalltalk now supports executing (some) Java programs.  See the
     info documentation for more information.  The class library is based

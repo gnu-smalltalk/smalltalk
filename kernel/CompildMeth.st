@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -487,3 +487,76 @@ binaryRepresentationObject
 	arguments: (Array with: self selector)
 	receiver: self methodClass
 ! !
+
+!CompiledMethod methodsFor: 'c call-outs'!
+
+isValidCCall
+    ^(self bytecodeAt: 1) == 67
+        and: [ (self bytecodeAt: 2) == 0
+        and: [ self numLiterals == 0
+        and: [ self numTemps == 0
+        and: [ self flags == 5 ]]]]!
+
+rewriteAsCCall: func returning: returnType args: argsArray
+    | descr literals bytecodes newMethod |
+    self isValidCCall
+	ifFalse: [ ^'C call-out not empty' ].
+    (CFunctionDescriptor isFunction: func)
+	ifFalse: [ ^'C function not defined '].
+
+    descr := CFunctionDescriptor
+	for: func
+	returning: returnType
+	withArgs: argsArray.
+    literals := { descr. #{ContextPart}. #{ValueHolder}. }.
+
+    "^(descr callFrom: ContextPart thisContext into: ValueHolder now)
+	       value
+
+     or if the return type is not a symbol,
+
+     ^(descr callFrom: ContextPart thisContext into: ValueHolder now)
+	       value narrow"
+    bytecodes := returnType isSymbol
+	ifTrue: [ #[ 136 1 141 1 30 33 95 2 30 34 22 0 51 0 ] ]
+	ifFalse: [ #[ 136 1 141 1 30 33 95 2 30 34 22 0 30 35 51 0 ] ].
+
+    newMethod := CompiledMethod
+	literals: literals
+	numArgs: self numArgs
+	numTemps: self numTemps
+	attributes: self attributes
+	bytecodes: bytecodes
+	depth: self numArgs + 4.
+
+    newMethod descriptor: self descriptor.
+    self become: newMethod.
+    ^nil!
+
+rewriteAsAsyncCCall: func args: argsArray
+    | descr literals bytecodes newMethod |
+    self isValidCCall
+	ifFalse: [ ^'C call-out not empty' ].
+    (CFunctionDescriptor isFunction: func)
+	ifFalse: [ ^'C function not defined '].
+
+    descr := CFunctionDescriptor
+	for: func
+	returning: #void
+	withArgs: argsArray.
+    literals := { descr. #{ContextPart}. #asyncCallFrom: }.
+
+    "descr asyncCallFrom: ContextPart thisContext. ^self"
+    bytecodes := #[ 136 1 141 13 30 33 64 2 67 0 ].
+    newMethod := CompiledMethod
+	literals: literals
+	numArgs: self numArgs
+	numTemps: self numTemps
+	attributes: self attributes
+	bytecodes: bytecodes
+	depth: self numArgs + 3.
+
+    newMethod descriptor: self descriptor.
+    self become: newMethod.
+    ^nil! !
+

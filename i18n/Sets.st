@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2002 Free Software Foundation, Inc.
+| Copyright 2001, 2002, 2005 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -513,23 +513,18 @@ flush
     count := 0
 ! !
 
-Iconv
-	defineCFunc: 'iconv_open'
-	withSelectorArgs: 'iconvOpen: to from: from'
-	returning: #cObject
-	args: #(#string #string);
+!Iconv methodsFor: 'C call-outs'!
 
-	defineCFunc: 'iconv_close'
-	withSelectorArgs: 'iconvClose: handle'
-	returning: #void
-	args: #(#cObject);
+iconvOpen: to from: from
+    <cCall: 'iconv_open' returning: #cObject args: #(#string #string)>!
 
-	defineCFunc: 'iconvWrapper'
-	withSelectorArgs: 'iconvOn: handle from: readBuffer at: readPos
-			   size: readCount to: writeBuffer size: writeCount
-			   state: bytesLeft'
-	returning: #boolean
-	args: #(#cObject #smalltalk #int #int #smalltalk #int #smalltalk)!
+iconvClose: handle
+    <cCall: 'iconv_close' returning: #void args: #(#cObject)>!
+
+iconvOn: handle from: readBuffer at: readPos
+    size: readCount to: writeBuffer size: writeCount state: bytesLeft
+    <cCall: 'iconvWrapper' returning: #boolean
+	args: #(#cObject #smalltalk #int #int #smalltalk #int #smalltalk)>! !
 
 !Iconv methodsFor: 'stream operation'!
 

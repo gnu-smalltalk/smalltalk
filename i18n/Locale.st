@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2002 Free Software Foundation, Inc.
+| Copyright 2001, 2002, 2005 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -415,17 +415,13 @@ initialize: aString
      from a string describing the locale."
     id := self extractLocaleParts: aString! !
 
-Locale
-    defineCFunc: 'i18n_load'
-    withSelectorArgs: 'load: name'
-    returning: #string
-    args: #(#self #string)!
+!Locale methodsFor: 'C call-outs'!
 
-Locale class
-    defineCFunc: 'i18n_localeDirectory'
-    withSelectorArgs: 'primRootDirectory'
-    returning: #string
-    args: #()!
+load: name
+    <cCall: 'i18n_load' returning: #string args: #(#self #string)>!
+
+primRootDirectory
+    <cCall: 'i18n_localeDirectory' returning: #string args: #()>! !
 
 !Locale class methodsFor: 'initialization'!
 
