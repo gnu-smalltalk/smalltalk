@@ -8,7 +8,7 @@ library_la_SOURCES = \
        strspell.c signalx.c ltdl.c
 
 noinst_HEADERS = \
-       obstack.h poll.h getopt.h md5.h ansidecl.h strspell.h \
+       obstack.h poll_.h getopt.h md5.h ansidecl.h strspell.h \
        mathl.h trigl.h avltrees.h rbtrees.h trigl.c sincosl.c \
        signalx.h socketx.h ltdl.h
 

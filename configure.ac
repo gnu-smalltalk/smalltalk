@@ -116,10 +116,14 @@ AC_DEFINE(_GNU_SOURCE, 1, [We want the definition of every available function])
 AC_HEADER_STDC
 AC_HEADER_DIRENT
 AC_HEADER_TIME
-AC_CHECK_HEADERS(unistd.h sys/ioctl.h sys/resource.h \
+AC_CHECK_HEADERS(unistd.h poll.h sys/ioctl.h sys/resource.h \
 	sys/utsname.h stropts.h sys/param.h stddef.h limits.h \
 	sys/timeb.h termios.h sys/mman.h sys/file.h execinfo.h \
 	sys/wait.h fcntl.h)
+
+if test x$ac_cv_header_poll_h = xno; then
+  AC_CONFIG_LINKS([lib-src/poll.h:lib-src/poll_.h])
+fi
 
 AC_FUNC_ALLOCA
 AC_FUNC_MEMCMP
