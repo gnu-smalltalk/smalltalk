@@ -33,8 +33,7 @@
 #include "config.h"
 #include "gstpub.h"
 #include <gdbm.h>
-
-#include <malloc.h>
+#include <stdlib.h>
 
 /*
      GDBM_FILE gdbm_open(name, block_size, flags, mode, fatal_func);

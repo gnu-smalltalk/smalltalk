@@ -1,5 +1,9 @@
 2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/gdbm.c: Do not include malloc.h.
+
+2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/GenLibDoc.st: Remove debugging statement.
 
 2004-11-13  Paolo Bonzini  <bonzini@gnu.org>
