@@ -74,6 +74,7 @@ smalltalk-mode.el: smalltalk-mode.el.in
 # The \( ... \) below protect against substitution in config.status
 dist-hook: gst-package
 	sed -e "s/@\(I18N_DISABLED\)@/disabled-/" \
+	  -e "s/@\(GTK_DISABLED\)@/disabled-/" \
 	  -e "s/@\(VERSION\)@/@VERSION@/" \
 	  $(srcdir)/packages.xml.in > packages.tmp
 	SMALLTALK_IMAGE=$(distdir) \
