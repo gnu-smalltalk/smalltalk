@@ -113,6 +113,10 @@ append: fileName to: directory
     "Answer the name of a file named `fileName' which resides in a directory
      named `directory'."
     directory isEmpty ifTrue: [ ^fileName ].
+    (fileName at: 1) = self pathSeparator
+	ifTrue: [ ^fileName ].
+    (self pathSeparator = $\ and: [ fileName size >= 2 and: [
+	(fileName at: 2) = $: ]]) ifTrue: [ ^fileName ].
     ^(directory at: directory size) = self pathSeparator
 	ifTrue: [ directory, fileName ]
 	ifFalse: [ '%1%2%3'

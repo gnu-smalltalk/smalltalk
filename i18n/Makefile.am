@@ -20,9 +20,9 @@ i18n_la_SOURCES = i18n.c localcharset.c
 
 INCLUDES = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src
 
-stamp-classes: GetText.st	Load.st		Locale.st	\
-Numbers.st     Times.st		Collation.st	Sets.st		\
-Expression.st
+$(srcdir)/stamp-classes: \
+GetText.st	Load.st		Locale.st	Expression.st	\
+Numbers.st     Times.st		Collation.st	Sets.st
 	@echo Updating $@
 	@sed -n "s/.*'\([^']*\.st\)'.*/\1/p" $(srcdir)/Load.st>$@
 

@@ -87,7 +87,7 @@ AC_CACHE_CHECK(builtin preprocessor symbol set, gst_cv_machine_defines,
       echo "  exit (0);"				;\
       echo "}")						>conftest.$ac_ext
 
-      dnl Stolen from AC_TRY_RUN's definition
+      dnl Stolen from AC_RUN_IFELSE's definition
       AC_TRY_EVAL(ac_link) && gst_cv_machine_defines=`./conftest 2>/dev/null`
     fi
     if test -z "$gst_cv_machine_defines"; then

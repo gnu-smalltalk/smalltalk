@@ -1,5 +1,5 @@
 
-stamp-classes: \
+$(srcdir)/stamp-classes: \
 Array.st       CompildMeth.st  LookupTable.st  RunArray.st\
 ArrayColl.st   CompiledBlk.st  Magnitude.st    Semaphore.st\
 Association.st ContextPart.st  MappedColl.st   SeqCollect.st\
@@ -27,7 +27,6 @@ CompildCode.st LookupKey.st    RootNamespc.st  AnsiExcept.st\
 HashedColl.st  FileDescr.st    FloatD.st       FloatE.st\
 FloatQ.st      URL.st	       VarBinding.st   RecursionLock.st\
 BindingDict.st AbstNamespc.st
-
 	@echo Updating $@
 	@echo timestamp >$@
 

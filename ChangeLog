@@ -1,3 +1,9 @@
+2004-11-13  Paolo Bonzini  <bonzini@gnu.org>
+
+        * kernel/Directory.st: support passing an absolute path as the
+        file name in Directory>>#append:to:.
+        * kernel/PkgLoader.st: support source files in multiple directories.
+
 2004-09-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CObject.st: implement #narrow for UndefinedObject.

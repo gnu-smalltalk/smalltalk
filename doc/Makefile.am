@@ -28,9 +28,7 @@ $(srcdir)/gst.1: $(top_srcdir)/libgst/lib.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) --info-page gst \
 	  --name "the GNU Smalltalk virtual machine" $(top_builddir)/gst >$@
 
-# Must check whether this stuff works with VPATH builds
-
-blox.texi: $(top_builddir)/blox-tk/stamp-classes
+$(srcdir)/blox.texi: $(top_builddir)/blox-tk/stamp-classes
 	touch $(srcdir)/gst-libs.texi
 	builddir=`pwd`; top_builddir=$$builddir/$(top_builddir); \
 	SMALLTALK_IMAGE=$$top_builddir; export SMALLTALK_IMAGE; \
@@ -48,11 +46,11 @@ blox.texi: $(top_builddir)/blox-tk/stamp-classes
 	  Namespace current: Smalltalk. \
 	  ClassPublisher Texinfo \
 		publishAll: classes \
-		onFile: '$$builddir/$@'!" | $$GST -g \
+		onFile: '../doc/blox.texi'!" | $$GST -g \
 	  ../examples/Publish.st \
 	  ../examples/StreamFilter.st -
 
-tcp.texi: $(top_builddir)/tcp/stamp-classes
+$(srcdir)/tcp.texi: $(top_builddir)/tcp/stamp-classes
 	touch $(srcdir)/gst-libs.texi
 	builddir=`pwd`; top_builddir=$$builddir/$(top_builddir); \
 	SMALLTALK_IMAGE=$$top_builddir; export SMALLTALK_IMAGE; \
@@ -70,11 +68,11 @@ tcp.texi: $(top_builddir)/tcp/stamp-classes
 	  Namespace current: Smalltalk. \
 	  ClassPublisher Texinfo \
 		publishAll: classes \
-		onFile: '$$builddir/$@'!" | $$GST -g \
+		onFile: '../doc/tcp.texi'!" | $$GST -g \
 	  ../examples/Publish.st \
 	  ../examples/StreamFilter.st -
 
-i18n.texi: $(top_builddir)/i18n/stamp-classes
+$(srcdir)/i18n.texi: $(top_builddir)/i18n/stamp-classes
 	touch $(srcdir)/gst-libs.texi
 	builddir=`pwd`; top_builddir=$$builddir/$(top_builddir); \
 	SMALLTALK_IMAGE=$$top_builddir; export SMALLTALK_IMAGE; \
@@ -92,11 +90,11 @@ i18n.texi: $(top_builddir)/i18n/stamp-classes
 	  Namespace current: Smalltalk. \
 	  ClassPublisher Texinfo \
 		publishAll: classes \
-		onFile: '$$builddir/$@'!" | $$GST -g \
+		onFile: '../doc/i18n.texi'!" | $$GST -g \
 	  ../examples/Publish.st \
 	  ../examples/StreamFilter.st -
 
-classes.texi: $(top_builddir)/kernel/stamp-classes
+$(srcdir)/classes.texi: $(top_builddir)/kernel/stamp-classes
 	touch $(srcdir)/gst-base.texi
 	@builddir=`pwd`; top_builddir=$$builddir/$(top_builddir); \
 	SMALLTALK_IMAGE=$$top_builddir; export SMALLTALK_IMAGE; \

@@ -1,7 +1,7 @@
 
 dist_noinst_DATA = stamp-classes
 
-stamp-classes: Blox.st BloxBasic.st BloxCanvas.st BloxExtend.st \
+$(srcdir)/stamp-classes: Blox.st BloxBasic.st BloxCanvas.st BloxExtend.st \
 BloxText.st BloxWidgets.st
 	@echo Updating $@
 	@sed -n "s/.*'\([^']*\.st\)'.*/\1/p" $(srcdir)/Blox.st>$@

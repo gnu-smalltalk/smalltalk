@@ -3,7 +3,7 @@ tcpdir = $(pkgdatadir)/tcp
 
 dist_noinst_DATA = stamp-classes
 
-stamp-classes: \
+$(srcdir)/stamp-classes: \
 SocketAddress.st       Datagram.st      AbstractSocketImpl.st\
 IPSocketImpl.st        Sockets.st       Tests.st\
 init.st                cfuncs.st        TCP.st\

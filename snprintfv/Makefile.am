@@ -29,14 +29,7 @@
 ACLOCAL_AMFLAGS		= -I ../config
 AUTOMAKE_OPTIONS	= gnits
 
-dist-hook:
-if SUBDIR_SNPRINTFV
-	rm -rf $(distdir)/doc $(distdir)/tests
 SUBDIRS			= snprintfv
-else
-SUBDIRS                 = snprintfv doc tests
-endif
-
 DIST_SUBDIRS		= $(SUBDIRS)
 
 MAINTAINERCLEANFILES	= Makefile.in aclocal.m4 configure config.h.in \

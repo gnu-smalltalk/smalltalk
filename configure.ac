@@ -74,6 +74,7 @@ AC_C_INLINE
 AC_C_CONST
 AC_C_VOLATILE
 ACX_C_RESTRICT
+GST_C_WARN_LONG_DOUBLE
 GST_C_GOTO_VOID_P
 GST_C_SYMBOLSET
 
@@ -278,5 +279,16 @@ AC_CONFIG_FILES(Makefile doc/Makefile lib-src/Makefile libgst/Makefile lightning
 
 dnl Smalltalk makefiles
 AC_CONFIG_FILES(blox-tk/Makefile examples/Makefile i18n/Makefile kernel/Makefile tcp/Makefile gtk/Makefile)
+
+dnl Support VPATH builds off a CVS repository.  When building from
+dnl the tarball, a suitable packages.xml file is put in the root source
+dnl directory by `make dist'.
+AC_CONFIG_COMMANDS($srcdir/packages.xml, [
+  if test -f $srcdir/packages.xml; then
+    :
+  else
+    $as_ln_s `pwd`/packages.xml $srcdir/packages.xml
+  fi
+])
 
 AC_OUTPUT
