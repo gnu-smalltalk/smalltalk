@@ -1,3 +1,7 @@
+2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lib.c: Load Transcript.st earlier.
+
 2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/alloc.c (NO_MALLOC_OVERRIDE): New define.

@@ -522,6 +522,13 @@ nextPutAll: aCollection
     self write: aCollection asString
 !
 
+nextPutAllFlush: aCollection
+    "Put all the characters in aCollection in the file.  For compatibility
+     with FileStream (FileDescriptor is not buffered, thus this method is
+     equivalent to nextPutAll:"
+    self write: aCollection asString
+!
+
 nextByteArray: anInteger
     "Return the next 'anInteger' bytes from the stream, as a ByteArray."
     ^(self next: anInteger) asByteArray

@@ -1,3 +1,7 @@
+2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FileDescr.st: add #nextPutAllFlush:
+
 2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Add comments to undocumented methods.

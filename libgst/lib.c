@@ -352,6 +352,7 @@ static const char standard_files[] = {
   "ObjMemory.st\0"
 
   /* More core classes */
+  "Transcript.st\0"
   "WeakObjects.st\0"
   "RecursionLock.st\0"
   "Point.st\0"
@@ -378,7 +379,6 @@ static const char standard_files[] = {
   "VFS.st\0"
   "URL.st\0"
   "FileStream.st\0"
-  "Transcript.st\0"
 
   /* Goodies */
   "Autoload.st\0"
