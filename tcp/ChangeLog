@@ -1,3 +1,7 @@
+2004-11-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tcp/SocketAddress.st: fix typo in #newRawSocket.
+
 2003-11-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tcp/Buffers.st: force a buffer fill before triggering
