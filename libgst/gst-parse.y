@@ -271,33 +271,37 @@ attribute:
 		}
 	;
 
-attribute_body: keyword attribute_argument
+attribute_body: attribute_argument
 		{
-		  $$ = $2 ? _gst_make_keyword_list (&@$, $1, $2) : NULL; 
+		  $$ = $1;
 		}
-	| attribute_body keyword attribute_argument
+	| attribute_body attribute_argument
 		{
-		  if ($1 && $3)
-		    _gst_add_node ($1, _gst_make_keyword_list (&@$, $2, $3));
+		  if ($1 && $2)
+		    _gst_add_node ($1, $2);
 
-		  $$ = $1 ? $1 : $3; 
+		  $$ = $1 ? $1 : $2; 
 		}
 	;
 
-attribute_argument: unary_message_receiver
+/* As an optimization, split the two cases for unary_message_receiver, so
+   that we do not create a full-fledged method when a simple literal is
+   used as an attribute argument.  */
+attribute_argument: keyword unary_message_receiver
 		{
-		  OOP result;
-		  if ($1 && !_gst_had_error)
+		  if ($2
+		      && $2->nodeType == TREE_CONST_EXPR
+		      && !_gst_had_error)
+		    $$ = _gst_make_keyword_list (&@$, $1, $2);
+		  else if ($2
+			   && !_gst_had_error)
 		    {
-		      tree_node stmt = _gst_make_statement_list (&@$, $1); 
-		      result = _gst_execute_statements (NULL, stmt, true);
+		      tree_node stmt = _gst_make_statement_list (&@$, $2); 
+		      OOP result = _gst_execute_statements (NULL, stmt, true);
+		      tree_node arg = _gst_make_oop_constant (&@$, result); 
 		      _gst_had_error = !result;
+		      $$ = _gst_make_keyword_list (&@$, $1, arg);
 		    }
-		  else
-		    result = NULL;
-
-		  if (result)
-		    $$ = _gst_make_oop_constant (&@$, result); 
 		  else
 		    $$ = NULL;
 		}

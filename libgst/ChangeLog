@@ -1,5 +1,13 @@
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c (_gst_make_attribute): Use make_constant_oop.
+	* libgst/gst-parse.y (attribute_body): Do not include keyword.
+	(attribute_argument): Add it here.  Do not go through
+	_gst_execute_statements for TREE_CONST_EXPRs (greatly speeds up
+	C call-outs).
+
+2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c (install_method): Evaluate pragma handlers.
 	Make CompiledMethod read-only.
 	(method_new): Do not make CompiledMethod read-only here.

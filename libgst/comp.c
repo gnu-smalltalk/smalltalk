@@ -2296,7 +2296,7 @@ _gst_make_attribute (tree_node attribute_keywords)
 
   for (i = 0, keyword = attribute_keywords; keyword != NULL;
        i++, keyword = keyword->v_list.next)
-    argsArray->data[i] = keyword->v_list.value->v_const.val.oopVal;
+    argsArray->data[i] = make_constant_oop (keyword->v_list.value);
 
   messageOOP = _gst_message_new_args (selectorOOP, argsArrayOOP);
   INC_RESTORE_POINTER (incPtr);

@@ -81,7 +81,7 @@ typedef union YYSTYPE {
   tree_node	node;
 } YYSTYPE;
 /* Line 1248 of yacc.c.  */
-#line 84 "gst-parse.h"
+#line 84 "../../libgst/gst-parse.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
