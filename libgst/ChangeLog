@@ -1,3 +1,11 @@
+2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/alloc.c (NO_MALLOC_OVERRIDE): New define.
+	(malloc, realloc, free, calloc): Define only if NO_MALLOC_OVERRIDE
+	is not defined.
+	(morecore): Do not use the system heap (sbrk) if NO_MALLOC_OVERRIDE
+	is defined.
+
 2004-12-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.h (O_NONBLOCK): Unused, remove.
