@@ -48,7 +48,7 @@
 /* For internal functions, we can use the ELF hidden attribute to
    improve code generation.  Unluckily, this is only in GCC 3.2 and
    later */
-#if GNUC_PREREQ (3, 3)
+#if HAVE_VISIBILITY_HIDDEN
 #define ATTRIBUTE_HIDDEN __attribute__ ((visibility ("hidden")))
 #else
 #define ATTRIBUTE_HIDDEN

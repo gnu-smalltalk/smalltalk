@@ -1,3 +1,9 @@
+2004-11-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lib.c: Always print "file not found" error.
+	* libgst/gstpriv.h: Use autoconf test to look for
+	availability of __attribute__ ((visibility ("hidden"))).
+
 2004-11-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/poll_.h: New name of...

@@ -82,6 +82,8 @@ AC_C_INLINE
 AC_C_CONST
 AC_C_VOLATILE
 ACX_C_RESTRICT
+GST_C_HIDDEN_VISIBILITY
+GST_C_WARN_LONG_DOUBLE
 GST_C_SYMBOLSET
 GST_C_GOTO_VOID_P
 
@@ -93,11 +95,6 @@ GST_HEADER_STDINT(lib-src/stdintx.h)
 GST_CHECK_ALIGNMENT(double)
 GST_CHECK_ALIGNMENT(long double)
 AC_CHECK_SIZEOF(off_t)
-
-dnl We want to see the size of a pointer but our custom stdint.h
-dnl is only created in config.status.  So, we define intptr_t as
-dnl void *, but we have to guard against somebody else actually
-dnl including stdint.h or inttypes.h.
 AC_CHECK_SIZEOF(OOP, , [[
 typedef void *OOP;]])
 
@@ -331,13 +328,14 @@ AC_CONFIG_FILES(Makefile, [
     dir=`echo $i | sed s/:.*//`
 
     echo
-    echo "$dir/stamp-classes: \\"
+    echo "all-local: \$(top_srcdir)/$dir/stamp-classes"
+    echo "\$(top_srcdir)/$dir/stamp-classes: \\"
 
     ./gst-package --list-files $package packages.xml | \
       sed -n 's,.*\.st$,& \\,p'
 
     echo
-    echo "	echo timestamp > $dir/stamp-classes"
+    echo "	echo timestamp > \$(top_srcdir)/$dir/stamp-classes"
   done >> Makefile
 ])
 
@@ -357,8 +355,8 @@ AC_CONFIG_COMMANDS($srcdir/packages.xml, [
   if test -f $srcdir/packages.xml; then
     :
   else
-    $LN_S `pwd`/packages.xml $srcdir/packages.xml
+    $as_ln_s `pwd`/packages.xml $srcdir/packages.xml
   fi
-], [srcdir="$srcdir"])
+])
 
 AC_OUTPUT

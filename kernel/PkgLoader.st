@@ -194,18 +194,45 @@ callouts
     callouts isNil ifTrue: [ callouts := Set new ].
     ^callouts!
 
+baseDirs: baseDirs
+    | found |
+    files := self findBaseDirs: baseDirs for: self files.
+    fileIns := self findBaseDirs: baseDirs for: self fileIns.
+    builtFiles := self findBaseDirs: baseDirs for: self builtFiles.
+
+    found := nil.
+    baseDirs
+	do: [ :dir || name |
+            name := Directory append: self directory to: dir.
+            (Directory exists: name) ifTrue: [ found := name ] ].
+    directory := found.
+
+    ^files notNil & fileIns notNil & builtFiles notNil & directory notNil
+!
+
+findBaseDirs: baseDirs for: aCollection
+    ^aCollection collect: [ :fileName || name |
+        name := self findBaseDirs: baseDirs forFile: fileName.
+	name isNil ifTrue: [ ^nil ] ifFalse: [ name ]]
+!
+
+findBaseDirs: baseDirs forFile: fileName
+    | name |
+    baseDirs do: [ :dir |
+       name := Directory append: self directory to: dir.
+       name := Directory append: fileName to: name.
+       (File exists: name) ifTrue: [ ^name ] ].
+    ^nil
+!
+
+
 directory
     "Answer the base directory from which to load the package."
     ^directory!
 
-directory: dir forBaseDir: baseDir
-    "Set the base directory from which to load the package to dir.
-     If dir is a relative directory, store an absolute path composed
-     from the (already absolute) baseDir and from dir."
-    (dir size = 1 or: [ 
-        ((dir at: 1) ~= $/) & ((dir at: 1) ~= $\) & (dir includes: $:) not])
-	   ifTrue: [ directory := baseDir, '/', dir ]
-	   ifFalse: [ directory := dir ]!
+directory: dir
+    "Set the base directory from which to load the package to dir."
+    directory := dir!
 
 createNamespace
     "Private - Create the path of namespaces indicated by our
@@ -330,13 +357,15 @@ refreshDependencies
     Packages := LookupTable new.
     self
 	processPackageFile: self systemPackageFileName
-	baseDirectory: Directory systemKernel, '/..'.
+	baseDirectories: {
+	    Directory systemKernel, '/..'. Directory kernel, '/..'.
+	    Directory image }.
     self
 	processPackageFile: self packageFileName
-	baseDirectory: Directory kernel, '/..'.
+	baseDirectories: { Directory kernel, '/..'. Directory image }.
     self
 	processPackageFile: self localPackageFileName
-	baseDirectory: Directory image.
+	baseDirectories: { Directory image }.
 ! !
 
 
@@ -465,7 +494,7 @@ rebuildPackageFile
     ] ensure: [ file close ]
 !
 
-processPackageFile: fileName baseDirectory: baseDir
+processPackageFile: fileName baseDirectories: baseDirs
     "Private - Process the XML source in the packages file, creating
      Package objects along the way."
 
@@ -497,15 +526,13 @@ processPackageFile: fileName baseDirectory: baseDir
 	    tag = 'filein' ifTrue: [ package fileIns add: cdata ] ifFalse: [
 	    tag = 'prereq' ifTrue: [ package prerequisites add: cdata ] ifFalse: [
 	    tag = 'module' ifTrue: [ package modules add: cdata ] ifFalse: [
-	    tag = 'directory' ifTrue: [
-		package directory: cdata forBaseDir: baseDir.
-		(Directory name: package directory) exists
-		    ifTrue: [ Packages at: package name put: package ]
-	    ] ifFalse: [
+	    tag = 'directory' ifTrue: [ package directory: cdata ] ifFalse: [
 	    tag = 'name' ifTrue: [ package name: cdata ] ifFalse: [
 	    tag = 'namespace' ifTrue: [ package namespace: cdata ] ifFalse: [
 	    tag = 'library' ifTrue: [ package libraries add: cdata ] ifFalse: [
-	    tag = 'disabled-package' ifTrue: [ Packages removeKey: package name ifAbsent: [] ] ifFalse: [
+	    tag = 'package' ifTrue: [
+		(package baseDirs: baseDirs)
+		    ifTrue: [ Packages at: package name put: package ]] ifFalse: [
 	    tag = 'built-file' ifTrue: [ package builtFiles add: cdata ] ifFalse: [
 	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]].
 	    cdata := nil.

@@ -551,7 +551,7 @@ gst_top_level_loop (void)
       else
 	{
 	  _gst_use_undeclared++;
-	  if (!process_file (smalltalk_argv[0]) && _gst_verbosity > 0)
+	  if (!process_file (smalltalk_argv[0]))
 	    _gst_errorf ("Couldn't open file %s", smalltalk_argv[0]);
 
 	  _gst_use_undeclared--;

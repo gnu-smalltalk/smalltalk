@@ -111,10 +111,12 @@ DISTCLEANFILES += config.h
 gsticon.o: gsticon.ico
 	echo ProgramIcon ICON `cygpath -w gsticon.ico` | windres -o gsticon.o
 
-gst.im: $(bin_PROGRAMS) kernel/stamp-classes
+gst.im: $(bin_PROGRAMS) $(srcdir)/kernel/stamp-classes
 	SMALLTALK_KERNEL="`cd $(srcdir)/kernel; pwd`" \
 	SMALLTALK_IMAGE="`pwd`" \
-	  ./gst -iQ dummy_file
+	  ./gst -iQ /dev/null
+
+all-local:
 
 ###########################################################
 #
