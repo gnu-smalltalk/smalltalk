@@ -1,5 +1,9 @@
 2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PkgLoader.st: Add comments to undocumented methods.
+
+2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
+
 	* examples/gdbm.c: Do not include malloc.h.
 
 2005-02-02  Paolo Bonzini  <bonzini@gnu.org>
