@@ -1,13 +1,13 @@
 /******************************** -*- C -*- ****************************
  *
- *	Platform-independent layer inline functions (common part)
+ *	lightning disassembling support
  *
  ***********************************************************************/
 
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+ * Copyright 2000 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU lightning.
@@ -29,26 +29,37 @@
  *
  ***********************************************************************/
 
-#ifndef __lightning_funcs_common_h
-#define __lightning_funcs_common_h
-
 #include <stdio.h>
 #include <stdlib.h>
+#include "config.h"
+#include "dis-asm.h"
 
-static int jit_fail(const char *, const char*, int, const char *) JIT_UNUSED;
-
-int
-jit_fail(const char *msg, const char *file, int line, const char *function)
+void disassemble(stream, from, to)
+     FILE *stream;
+     char *from, *to;
 {
-  fprintf(stderr, "%s: In function `%s':\n", file, function);
-  fprintf(stderr, "%s:%d: %s\n", file, line, msg);
-  abort();
+  disassemble_info info;
+  bfd_vma pc = (bfd_vma) from;
+  bfd_vma end = (bfd_vma) to;
+
+  INIT_DISASSEMBLE_INFO(info, stream, fprintf);
+  info.buffer = NULL;
+  info.buffer_vma = 0;
+  info.buffer_length = end;
+
+  while (pc < end) {
+    fprintf_vma(stream, pc);
+    putc('\t', stream);
+#ifdef LIGHTNING_I386
+    pc += print_insn_i386(pc, &info);
+#endif
+#ifdef LIGHTNING_PPC
+    pc += print_insn_big_powerpc(pc, &info);
+#endif
+#ifdef LIGHTNING_SPARC
+    pc += print_insn_sparc(pc, &info);
+#endif
+    putc('\n', stream);
+  }
 }
 
-
-#ifndef jit_start_pfx
-#define jit_start_pfx()                 ( (jit_insn*)0x4)
-#define jit_end_pfx()                   ( (jit_insn*)0x0)
-#endif
-
-#endif /* __lightning_funcs_common_h */

@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU lightning.
@@ -35,129 +35,188 @@
 #ifndef __lightning_asm_fp_h
 #define __lightning_asm_fp_h
 
-#if 0
+#include <float.h>
 
-/* dummy for now */
+#define JIT_FPR_NUM	6
+#define JIT_FPR(i)	(30-(i)*2)
+#define JIT_FPTMP	18
 
-#define _FP1(RD, RS1, OPF, RS2)	_2f((RD), 52, (RS1), (OPF), (RS2))
-#define _FP2(RD, RS1, OPF, RS2)	_2f((RD), 53, (RS1), (OPF), (RS2))
+#define jit_addr_f(rd,s1,s2)	FADDSrrr((s1), (s2), (rd))
+#define jit_subr_f(rd,s1,s2)	FSUBSrrr((s1), (s2), (rd))
+#define jit_mulr_f(rd,s1,s2)	FMULSrrr((s1), (s2), (rd))
+#define jit_divr_f(rd,s1,s2)	FDIVSrrr((s1), (s2), (rd))
 
-#define FITODrr(FRS, FRD)		_FP1((FRD),  0, 200, (FRS))
-#define FDTOIrr(FRS, FRD)		_FP1((FRD),  0, 210, (FRS))
-#define FSTODrr(FRS, FRD)		_FP1((FRD),  0, 201, (FRS))
-#define FDTOSrr(FRS, FRD)		_FP1((FRD),  0, 198, (FRS))
-#define FMOVSrr(FRS, FRD)		_FP1((FRD),  0,   1, (FRS))
-#define FNEGSrr(FRS, FRD)		_FP1((FRD),  0,   5, (FRS))
-#define FABSSrr(FRS, FRD)		_FP1((FRD),  0,   9, (FRS))
-#define FSQRTDrr(FRS, FRD)		_FP1((FRD),  0,  74, (FRS))
+#define jit_addr_d(rd,s1,s2)	FADDDrrr((s1), (s2), (rd))
+#define jit_subr_d(rd,s1,s2)	FSUBDrrr((s1), (s2), (rd))
+#define jit_mulr_d(rd,s1,s2)	FMULDrrr((s1), (s2), (rd))
+#define jit_divr_d(rd,s1,s2)	FDIVDrrr((s1), (s2), (rd))
 
-#define FADDDrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  66, (FRS2))
-#define FSUBDrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  70, (FRS2))
-#define FMULDrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  82, (FRS2))
-#define FDIVDrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  86, (FRS2))
+#define jit_movr_f(rd,rs)	FMOVSrr((rs), (rd))
+#define jit_abs_d(rd,rs)	FABSSrr((rs), (rd))
+#define jit_negr_d(rd,rs)	FNEGSrr((rs), (rd))
+#define jit_sqrt_d(rd,rs)	FSQRTSrr((rs), (rd))
+#define jit_movr_d(rd,rs)	FMOVDrr((rs), (rd))
+#define jit_abs_f(rd,rs)	FABSDrr((rs), (rd))
+#define jit_negr_f(rd,rs)	FNEGDrr((rs), (rd))
+#define jit_sqrt_f(rd,rs)	FSQRTDrr((rs), (rd))
+#define jit_extr_f_d(rs, rd)	FSTODrr((rs), (rd))
+#define jit_extr_d_f(rs, rd)	FDTOSrr((rs), (rd))
 
-#define FCMPDrr(FRS1, FRS2)		_FP2(0,      (FRS1),  82, (FRS2))
+#define jit_movi_f(rd,immf)			  \
+    do {					  \
+      float _v = (immf);                          \
+      _1(_jit.x.pc + 3), LDFmr(_Ro(7), 8, (rd));  \
+      memcpy(_jit.x.uc_pc, &_v, sizeof (float));  \
+      _jit.x.uc_pc += sizeof (float);             \
+    } while(0)
 
-#define LDFxr(RS1, RS2, RD)	_3   ((RD), 32, (RS1), 0, 0, (RS2))
-#define LDFmr(RS1, IMM, RD)	_3i  ((RD), 32, (RS1), 1,    (IMM))
-#define LDDFxr(RS1, RS2, RD)	_3   ((RD), 35, (RS1), 0, 0, (RS2))
-#define LDDFmr(RS1, IMM, RD)	_3i  ((RD), 35, (RS1), 1,    (IMM))
-#define STFrx(RS, RD1, RD2)	_3   ((RS), 36, (RD1), 0, 0, (RD2))
-#define STFrm(RS, RD1, IMM)	_3i  ((RS), 36, (RD1), 1,    (IMM))
-#define STDFrx(RS, RD1, RD2)	_3   ((RS), 39, (RD1), 0, 0, (RD2))
-#define STDFrm(RS, RD1, IMM)	_3i  ((RS), 39, (RD1), 1,    (IMM))
-
-#define FBNi(DISP)		_0   (0,  0, 6, (DISP))
-#define FBN_Ai(DISP)		_0   (1,  0, 6, (DISP))
-#define FBNEi(DISP)		_0   (0,  1, 6, (DISP))
-#define FBNE_Ai(DISP)		_0   (1,  1, 6, (DISP))
-#define FBLGi(DISP)		_0   (0,  2, 6, (DISP))
-#define FBLG_Ai(DISP)		_0   (1,  2, 6, (DISP))
-#define FBULi(DISP)		_0   (0,  3, 6, (DISP))
-#define FBUL_Ai(DISP)		_0   (1,  3, 6, (DISP))
-#define FBLi(DISP)		_0   (0,  4, 6, (DISP))
-#define FBL_Ai(DISP)		_0   (1,  4, 6, (DISP))
-#define FBUGi(DISP)		_0   (0,  5, 6, (DISP))
-#define FBUG_Ai(DISP)		_0   (1,  5, 6, (DISP))
-#define FBGi(DISP)		_0   (0,  6, 6, (DISP))
-#define FBG_Ai(DISP)		_0   (1,  6, 6, (DISP))
-#define FBUi(DISP)		_0   (0,  7, 6, (DISP))
-#define FBU_Ai(DISP)		_0   (1,  7, 6, (DISP))
-#define FBAi(DISP)		_0   (0,  8, 6, (DISP))
-#define FBA_Ai(DISP)		_0   (1,  8, 6, (DISP))
-#define FBEi(DISP)		_0   (0,  9, 6, (DISP))
-#define FBE_Ai(DISP)		_0   (1,  9, 6, (DISP))
-#define FBUEi(DISP)		_0   (0, 10, 6, (DISP))
-#define FBUE_Ai(DISP)		_0   (1, 10, 6, (DISP))
-#define FBGEi(DISP)		_0   (0, 11, 6, (DISP))
-#define FBGE_Ai(DISP)		_0   (1, 11, 6, (DISP))
-#define FBUGEi(DISP)		_0   (0, 12, 6, (DISP))
-#define FBUGE_Ai(DISP)		_0   (1, 12, 6, (DISP))
-#define FBLEi(DISP)		_0   (0, 13, 6, (DISP))
-#define FBLE_Ai(DISP)		_0   (1, 13, 6, (DISP))
-#define FBULEi(DISP)		_0   (0, 14, 6, (DISP))
-#define FBULE_Ai(DISP)		_0   (1, 14, 6, (DISP))
-#define FBOi(DISP)		_0   (0, 15, 6, (DISP))
-#define FBO_Ai(DISP)		_0   (1, 15, 6, (DISP))
-
-#define FSKIPUG()		_0d  (1, 13, 6, 2)	/* fble,a .+8 */
-#define FSKIPUL()		_0d  (1, 11, 6, 2)	/* fbge,a .+8 */
-
-#define jit_add_two(reg0)	FADDDrrr(30 - (reg0) * 2, 28 - (reg0) * 2, 30 - (reg0) * 2)
-#define jit_sub_two(reg0)	FSUBDrrr(30 - (reg0) * 2, 28 - (reg0) * 2, 30 - (reg0) * 2)
-#define jit_mul_two(reg0)	FMULDrrr(30 - (reg0) * 2, 28 - (reg0) * 2, 30 - (reg0) * 2)
-#define jit_div_two(reg0)	FDIVDrrr(30 - (reg0) * 2, 28 - (reg0) * 2, 30 - (reg0) * 2)
-
-#define jit_abs(reg0)		FABSSrr(30 - (reg0) * 2, 30 - (reg0) * 2)
-#define jit_neg(reg0)		FNEGSrr(30 - (reg0) * 2, 30 - (reg0) * 2)
-#define jit_sqrt(reg0)		FSQRTDrr(30 - (reg0) * 2, 30 - (reg0) * 2)
-
-#define jit_fpimm(reg0, first, second)		\
-	(_1(4), NOP(), _L(first), _L(second),	\
-	 jit_ldxi_d((reg0), _Ro(7), 8))
-
-#define jit_ldxi_f(reg0, rs, is)	(jit_chk_imm((is), LDFmr((rs), (is), 30 - (reg0) * 2), LDFxr((rs), JIT_BIG, 30 - (reg0) * 2)), FSTODrr(30 - (reg0) * 2, 30 - (reg0) * 2))
-#define jit_ldxi_d(reg0, rs, is)	jit_chk_imm((is), LDDFmr((rs), (is), 30 - (reg0) * 2), LDDFxr((rs), JIT_BIG, 30 - (reg0) * 2))
-#define jit_ldxr_f(reg0, s1, s2)	(LDFxr((s1), (s2), 30 - (reg0) * 2), FSTODrr(30 - (reg0) * 2, 30 - (reg0) * 2))
-#define jit_ldxr_d(reg0, s1, s2)	LDDFxr((s1), (s2), 30 - (reg0) * 2)
-#define jit_stxi_f(id, rd, reg0)	(FDTOSrr(30 - (reg0) * 2, 30 - (reg0) * 2), jit_chk_imm((id), STFrm(30 - (reg0) * 2, (rd), (id)), STFrx(30 - (reg0) * 2, (rd),  JIT_BIG)))
-#define jit_stxi_d(id, rd, reg0)					  jit_chk_imm((id), STDFrm(30 - (reg0) * 2, (rd), (id)), STDFrx(30 - (reg0) * 2, (rd),  JIT_BIG))
-#define jit_stxr_f(d1, d2, reg0)	(FDTOSrr(30 - (reg0) * 2, 30 - (reg0) * 2), STFrx (30 - (reg0) * 2, (d1), (d2)))
-#define jit_stxr_d(d1, d2, reg0)					  STDFrx(30 - (reg0) * 2, (d1), (d2))
+#define jit_movi_d(rd,immd)			 	\
+    do {					 	\
+      double _v = (immd);                        	\
+      if ((long)_jit.x.pc & 4) NOP();			\
+      _1(_jit.x.pc + 4);				\
+      LDDFmr(_Ro(7), 8, (rd));				\
+      memcpy(_jit.x.uc_pc, &_v, sizeof (double));	\
+      _jit.x.uc_pc += sizeof (double);           	\
+    } while(0)
 
 
-#define jit_do_round(mode, rd, freg)	(			\
-	_1(3),							\
-	SETHIir(_HI(mode << 29), JIT_BIG),			\
-	NOP(),							\
-	STFSRm(_Ro(7), 8),		/* store fsr */		\
-	LDmr(_Ro(7), 8, rd),					\
-	XORrrr(rd, JIT_BIG, JIT_BIG),	/* adjust mode */	\
-	STrm(JIT_BIG, _Ro(7), 8),				\
-	LDFSRm(_Ro(7), 8),		/* load fsr */		\
-	FDTOIrr(freg, freg), 		/* truncate */		\
-	STrm(rd, _Ro(7), 8),		/* load old fsr */	\
-	LDFSRm(_Ro(7), 8),					\
-	STFrm(freg, _Ro(7), 8),		/* store truncated value */ \
-	LDmr(_Ro(7), 8, rd))		/* load it into rd */
+#define jit_ldxi_f(rd, rs, is)		jit_chk_imm((is), LDFmr((rs), (is), (rd)), LDFxr((rs), JIT_BIG, (rd)))
+#define jit_ldxi_d(rd, rs, is)		jit_chk_imm((is), LDDFmr((rs), (is), (rd)), LDDFxr((rs), JIT_BIG, (rd)))
+#define jit_ldxr_f(rd, s1, s2)		LDFxr((s1), (s2), (rd))
+#define jit_ldxr_d(rd, s1, s2)		LDDFxr((s1), (s2), (rd))
+#define jit_stxi_f(id, rd, rs)		jit_chk_imm((id), STFrm((rs), (rd), (id)), STFrx((rs), (rd),  JIT_BIG))
+#define jit_stxi_d(id, rd, rs)		jit_chk_imm((id), STDFrm((rs), (rd), (id)), STDFrx((rs), (rd),  JIT_BIG))
+#define jit_stxr_f(d1, d2, rs)		STFrx((rs), (d1), (d2))
+#define jit_stxr_d(d1, d2, rs)		STDFrx((rs), (d1), (d2))
 
+#define jit_truncr_f_i(rd, rs) (		\
+	_1(_jit.x.pc + 3),			\
+	FSTOIrr((rs), JIT_FPTMP),		\
+	NOP(),					\
+	STFrm(JIT_FPTMP, _Ro(7), 8),		\
+	LDmr(_Ro(7), 8, (rd)))
 
-/*					 call	delay slot			 data	,--- call lands here */
-#define jit_exti_d(reg0, rs)		(_1(3), NOP(), 				 NOP(), STrm((rs), _Ro(7), 8), LDFmr(_Ro(7), 8, 30 - (reg0) * 2), FITODrr(30 - (reg0) * 2, 30 - (reg0) * 2))
-#define jit_round(rd, reg0)		(_1(3), FDTOIrr(30 - (reg0) * 2, 30 - (reg0) * 2), NOP(), STFrm(30 - (reg0) * 2, _Ro(7), 8), LDmr(_Ro(7), 8, (rd)))
-#define jit_floor(rd, reg0)		jit_do_round(3, (rd), (30 - (reg0) * 2))
-#define jit_ceil(rd, reg0)		jit_do_round(2, (rd), (30 - (reg0) * 2))
-#define jit_trunc(rd, reg0)		jit_do_round(1, (rd), (30 - (reg0) * 2))
+#define jit_truncr_d_i(rd, rs) (		\
+	_1(_jit.x.pc + 3),			\
+	FDTOIrr((rs), JIT_FPTMP),		\
+	NOP(),					\
+	STFrm(JIT_FPTMP, _Ro(7), 8),		\
+	LDmr(_Ro(7), 8, (rd)))
 
-static double jit_zero = 0.0;
+#define jit_extr_i_d(rd, rs)		(_1 (_jit.x.pc + 3), NOP(), NOP(), STrm((rs), _Ro(7), 8), LDFmr(_Ro(7), 8, (rd)), FITODrr((rd), (rd)))
+#define jit_extr_i_f(rd, rs)		(_1 (_jit.x.pc + 3), NOP(), NOP(), STrm((rs), _Ro(7), 8), LDFmr(_Ro(7), 8, (rd)), FITOSrr((rd), (rd)))
 
-#define jit_cmp(le, ge, reg0)		(SETHIir(_HI(_UL(&jit_zero)), (le)), 			\
-					 LDDFmr((le), _LO(_UL(&jit_zero)), 28 - (reg0) * 2),	\
-					 FCMPDrr(30 - (reg0) * 2, 28 - (reg0) * 2),			\
-					 MOVir(0, (le)), MOVir(0, (ge)),			\
-					 FSKIPUL(), MOVir(1, (ge)),				\
-					 FSKIPUG(), MOVir(1, (le)))
+#define jit_do_round_f(rd, rs, fixup, mode) do {		\
+	jit_movi_f (JIT_FPTMP, fixup);				\
+        _1(_jit.x.pc + 4);                                      \
+        SETHIir(_HI(mode << 29), JIT_BIG);                      \
+        NOP();                                                  \
+        NOP();                                                  \
+        STFSRm(_Ro(7), 8);              /* store fsr */         \
+        LDmr(_Ro(7), 8, rd);                                    \
+        XORrrr(rd, JIT_BIG, JIT_BIG);   /* adjust mode */       \
+        STrm(JIT_BIG, _Ro(7), 12);                              \
+        LDFSRm(_Ro(7), 12);              /* load fsr */         \
+	FADDSrrr ((rs), JIT_FPTMP, JIT_FPTMP);			\
+        LDFSRm(_Ro(7), 8);                                      \
+        FSTOIrr(JIT_FPTMP, JIT_FPTMP);   		        \
+        STFrm(JIT_FPTMP, _Ro(7), 8);			        \
+        LDmr(_Ro(7), 8, (rd));					\
+	ADDCCrrr ((rd), (rd), 0);				\
+	SUBXrrr ((rd), 0, (rd));				\
+  } while (0);
 
-#endif
+#define jit_do_round_d(rd, rs, fixup, mode) do {		\
+	jit_movi_d (JIT_FPTMP, fixup);				\
+        _1(_jit.x.pc + 4);                                      \
+        SETHIir(_HI(mode << 29), JIT_BIG);                      \
+        NOP();                                                  \
+        NOP();                                                  \
+        STFSRm(_Ro(7), 8);              /* store fsr */         \
+        LDmr(_Ro(7), 8, rd);                                    \
+        XORrrr(rd, JIT_BIG, JIT_BIG);   /* adjust mode */       \
+        STrm(JIT_BIG, _Ro(7), 12);                              \
+        LDFSRm(_Ro(7), 12);              /* load fsr */         \
+	FADDDrrr ((rs), JIT_FPTMP, JIT_FPTMP);			\
+        LDFSRm(_Ro(7), 8);                                      \
+        FDTOIrr(JIT_FPTMP, JIT_FPTMP);   		        \
+        STFrm(JIT_FPTMP, _Ro(7), 8);			        \
+        LDmr(_Ro(7), 8, (rd));					\
+	ADDCCrrr ((rd), (rd), 0);				\
+	SUBXrrr ((rd), 0, (rd));				\
+  } while (0);
+
+#define jit_roundr_f_i(rd, rs) do {			\
+	jit_movi_f (JIT_FPTMP, 0.5);			\
+	FADDSrrr ((rs), JIT_FPTMP, JIT_FPTMP);		\
+	jit_truncr_f_i ((rd), JIT_FPTMP);		\
+	ADDCCrrr ((rd), (rd), 0);			\
+	SUBXrrr ((rd), 0, (rd));			\
+  } while (0)
+
+#define jit_roundr_d_i(rd, rs) do {			\
+	jit_movi_d (JIT_FPTMP, 0.5);			\
+	FADDDrrr ((rs), JIT_FPTMP, JIT_FPTMP);		\
+	jit_truncr_d_i ((rd), JIT_FPTMP);		\
+	ADDCCrrr ((rd), (rd), 0);			\
+	SUBXrrr ((rd), 0, (rd));			\
+  } while (0)
+
+#define jit_ceilr_f_i(rd, rs) 				\
+	jit_do_round_f ((rd), (rs), 1.0f - FLT_EPSILON, 3)
+
+#define jit_ceilr_d_i(rd, rs) 				\
+	jit_do_round_d ((rd), (rs), 1.0 - DBL_EPSILON, 3)
+
+#define jit_floorr_f_i(rd, rs) 				\
+	jit_do_round_f ((rd), (rs), FLT_EPSILON, 2)
+
+#define jit_floorr_d_i(rd, rs) 				\
+	jit_do_round_d ((rd), (rs), DBL_EPSILON, 2)
+
+#define jit_ltr_d(d, s1, s2)            (FCMPDrr ((s1), (s2)), FBLi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ltr_f(d, s1, s2)            (FCMPSrr ((s1), (s2)), FBLi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ler_d(d, s1, s2)            (FCMPDrr ((s1), (s2)), FBLEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ler_f(d, s1, s2)            (FCMPSrr ((s1), (s2)), FBLEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_eqr_d(d, s1, s2)            (FCMPDrr ((s1), (s2)), FBEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_eqr_f(d, s1, s2)            (FCMPSrr ((s1), (s2)), FBEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ner_d(d, s1, s2)            (FCMPDrr ((s1), (s2)), FBNEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ner_f(d, s1, s2)            (FCMPSrr ((s1), (s2)), FBNEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ger_d(d, s1, s2)            (FCMPDrr ((s1), (s2)), FBGEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ger_f(d, s1, s2)            (FCMPSrr ((s1), (s2)), FBGEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_gtr_d(d, s1, s2)            (FCMPDrr ((s1), (s2)), FBGi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_gtr_f(d, s1, s2)            (FCMPSrr ((s1), (s2)), FBGi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_unltr_d(d, s1, s2)          (FCMPDrr ((s1), (s2)), FBULi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_unltr_f(d, s1, s2)          (FCMPSrr ((s1), (s2)), FBULi(_jit.x.pc + 3), MOVir (1, (d), MOVir (0, (d)))
+#define jit_unler_d(d, s1, s2)          (FCMPDrr ((s1), (s2)), FBULEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_unler_f(d, s1, s2)          (FCMPSrr ((s1), (s2)), FBULEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_uneqr_d(d, s1, s2)          (FCMPDrr ((s1), (s2)), FBUEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_uneqr_f(d, s1, s2)          (FCMPSrr ((s1), (s2)), FBUEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ltgtr_d(d, s1, s2)          (FCMPDrr ((s1), (s2)), FBLGi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ltgtr_f(d, s1, s2)          (FCMPSrr ((s1), (s2)), FBLGi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_unger_d(d, s1, s2)          (FCMPDrr ((s1), (s2)), FBUGEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_unger_f(d, s1, s2)          (FCMPSrr ((s1), (s2)), FBUGEi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ungtr_d(d, s1, s2)          (FCMPDrr ((s1), (s2)), FBUGi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ungtr_f(d, s1, s2)          (FCMPSrr ((s1), (s2)), FBUGi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ordr_d(d, s1, s2)           (FCMPDrr ((s1), (s2)), FBOi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_ordr_f(d, s1, s2)           (FCMPSrr ((s1), (s2)), FBOi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_unordr_d(d, s1, s2)         (FCMPDrr ((s1), (s2)), FBUi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+#define jit_unordr_f(d, s1, s2)         (FCMPSrr ((s1), (s2)), FBUi(_jit.x.pc + 3), MOVir (1, (d)), MOVir (0, (d)))
+
+#define jit_prepare_f(num)              (_jitl.nextarg_put += (num))
+#define jit_prepare_d(num)              (_jitl.nextarg_put += 2 * (num))
+
+#define jit_arg_f()                     (_jitl.nextarg_get++)
+#define jit_arg_d()                     (_jitl.nextarg_get += _jitl.nextarg_get & 1, _jitl.nextarg_get += 2, _jitl.nextarg_get - 2)
+
+#define jit_getarg_f(rd, ofs)           (STrm(ofs, _Ri(6), -24), LDFmr (_Ri(6), -24, (rd)))
+#define jit_getarg_d(rd, ofs)           (STDrm(ofs, _Ri(6), -24), LDDFmr (_Ri(6), -24, (rd)))
+
+#define jit_pusharg_f(rs)               (STFrm((rs), _Ri(6), -24), --_jitl.nextarg_put, LDmr (_Ri(6), -24, _Ro(_jitl.nextarg_put)))
+#define jit_pusharg_d(rs)               (STDFrm((rs), _Ri(6), -24), _jitl.nextarg_put -= 2, LDmr (_Ri(6), -24, _Ro(_jitl.nextarg_put)))
+
+#define jit_retval_f(rs)	        jit_movr_f(0, rs)
+#define jit_retval_d(rs)	        jit_movr_d(0, rs)
 
 #endif /* __lightning_asm_fp_h */

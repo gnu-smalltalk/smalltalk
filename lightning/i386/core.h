@@ -34,15 +34,14 @@
 #ifndef __lightning_core_h
 #define __lightning_core_h
 
-#define JIT_R0			_EAX
-#define JIT_R1			_ECX
-#define JIT_R2			_EDX
-#define JIT_V0			_EBX
-#define JIT_V1			_ESI
-#define JIT_V2			_EDI
 #define JIT_FP			_EBP
 #define JIT_SP			_ESP
 #define JIT_RET			_EAX
+
+#define JIT_R_NUM		3
+#define JIT_V_NUM		3
+#define JIT_R(i)		(_EAX + (i))
+#define JIT_V(i)		((i) == 0 ? _EBX : _ESI + (i) - 1)
 
 struct jit_local_state {
   int	framesize;
@@ -265,10 +264,13 @@ struct jit_local_state {
 
 /* The += allows for stack pollution */
 
-#define jitfp_prepare(ni,nf,nd) ((void) (_jitl.argssize += (ni) + (nf) + 2*(nd)))
+#define jit_prepare_i(ni)	(_jitl.argssize += (ni))
+#define jit_prepare_f(nf)	(_jitl.argssize += (nf))
+#define jit_prepare_d(nd)	(_jitl.argssize += 2 * (nd))
 #define jit_pusharg_i(rs)	PUSHLr(rs)
 #define jit_finish(sub)		(jit_calli((sub)), ADDLir(4 * _jitl.argssize, JIT_SP), _jitl.argssize = 0)
-#define jit_retval(rd)		jit_movr_i ((rd), _EAX)
+#define jit_finishr(reg)	(jit_callr((reg)), ADDLir(4 * _jitl.argssize, JIT_SP), _jitl.argssize = 0)
+#define jit_retval_i(rd)	jit_movr_i ((rd), _EAX)
 
 #define	jit_arg_c()		((_jitl.framesize += sizeof(int)) - sizeof(int))
 #define	jit_arg_uc()		((_jitl.framesize += sizeof(int)) - sizeof(int))
@@ -289,6 +291,8 @@ struct jit_local_state {
 
 #define jit_movr_i(d, rs)	((rs) == (d) ? 0 : MOVLrr((rs), (d)))
 #define jit_movi_i(d, is)	((is) ? MOVLir((is), (d)) : XORLrr ((d), (d)) )
+#define jit_movi_p(d, is)	(MOVLir((is), (d)), _jit.x.pc)
+#define jit_patch_movi(pa,pv)   (*_PSL((pa) - 4) = _jit_SL((pv)))
 
 #define jit_ntoh_ui(d, rs)	jit_op_((d), (rs), BSWAPLr(d))
 #define jit_ntoh_us(d, rs)	jit_op_((d), (rs), RORWir(8, d))
@@ -311,7 +315,7 @@ struct jit_local_state {
 #define jit_gei_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETGEr, SETNSr )
 #define jit_eqi_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETEr,  SETEr  )
 #define jit_nei_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETNEr, SETNEr )
-#define jit_lti_ui(d, rs, is)	jit_bool_i ((d), (rs), (is), SETB	    )
+#define jit_lti_ui(d, rs, is)	jit_bool_i ((d), (rs), (is), SETBr	    )
 #define jit_lei_ui(d, rs, is)	jit_bool_i0((d), (rs), (is), SETBEr, SETEr  )
 #define jit_gti_ui(d, rs, is)	jit_bool_i0((d), (rs), (is), SETAr,  SETNEr )
 #define jit_gei_ui(d, rs, is)	jit_bool_i0((d), (rs), (is), SETAEr, INCLr  )
@@ -340,10 +344,10 @@ struct jit_local_state {
 #define jit_bgei_i(label, rs, is)	jit_bra_i0((rs), (is), JGEm(label,0,0,0), JNSm(label,0,0,0) )
 #define jit_beqi_i(label, rs, is)	jit_bra_i0((rs), (is), JEm(label, 0,0,0), JEm(label, 0,0,0) )
 #define jit_bnei_i(label, rs, is)	jit_bra_i0((rs), (is), JNEm(label,0,0,0), JNEm(label,0,0,0) )
-#define jit_blti_ui(label, rs, is)	jit_bra_i ((rs), (is), JLm(label, 0,0,0)		    )
-#define jit_blei_ui(label, rs, is)	jit_bra_i0((rs), (is), JLEm(label,0,0,0), JEm(label, 0,0,0) )
-#define jit_bgti_ui(label, rs, is)	jit_bra_i0((rs), (is), JGm(label, 0,0,0), JNEm(label,0,0,0) )
-#define jit_bgei_ui(label, rs, is)	jit_bra_i ((rs), (is), JGEm(label,0,0,0)		    )
+#define jit_blti_ui(label, rs, is)	jit_bra_i ((rs), (is), JBm(label, 0,0,0)		    )
+#define jit_blei_ui(label, rs, is)	jit_bra_i0((rs), (is), JBEm(label,0,0,0), JEm(label, 0,0,0) )
+#define jit_bgti_ui(label, rs, is)	jit_bra_i0((rs), (is), JAm(label, 0,0,0), JNEm(label,0,0,0) )
+#define jit_bgei_ui(label, rs, is)	jit_bra_i ((rs), (is), JAEm(label,0,0,0)		    )
 #define jit_boaddi_i(label, rs, is)	(ADDLir((is), (rs)), JOm(label,0,0,0), _jit.x.pc)
 #define jit_bosubi_i(label, rs, is)	(SUBLir((is), (rs)), JOm(label,0,0,0), _jit.x.pc)
 #define jit_boaddi_ui(label, rs, is)	(ADDLir((is), (rs)), JCm(label,0,0,0), _jit.x.pc)
@@ -354,9 +358,10 @@ struct jit_local_state {
 
 #define jit_jmpi(label)		(JMPm( ((unsigned long) (label)),	0, 0, 0), _jit.x.pc)
 #define jit_calli(label)	(CALLm( ((unsigned long) (label)),	0, 0, 0), _jit.x.pc)
+#define jit_callr(reg)		(CALLsr(reg))
 #define jit_jmpr(reg)		JMPsr(reg)
-#define jit_patch(jump_pc)	(*_PSL((jump_pc) - 4) = _jit_SL(_jit.x.pc - (jump_pc)))
-#define jit_ret()		(POPLr(_EDI), POPLr(_ESI), POPLr(_EBX), POPLr(_EBP), RET())
+#define jit_patch_at(jump_pc,v)	(*_PSL((jump_pc) - 4) = _jit_SL((v) - (jump_pc)))
+#define jit_ret()		(POPLr(_EDI), POPLr(_ESI), POPLr(_EBX), POPLr(_EBP), RET_())
 
 /* Memory */
 #define jit_ldi_c(d, is)		MOVSBLmr((is), 0,    0,    0, (d))
@@ -400,9 +405,9 @@ struct jit_local_state {
 #define jit_stxi_i(id, rd, rs)		MOVLrm((rs), (id), (rd), 0,    0)
 
 /* Extra */
-#define jit_nop()			NOP()
+#define jit_nop()			NOP_()
 
 #define _jit_alignment(pc, n)		(((pc ^ _MASK(4)) + 1) & _MASK(n))
-#define jit_align(n) 			_NOPi(_jit_alignment(_jit_UL(_jit.x.pc), (n)))
+#define jit_align(n) 			NOPi(_jit_alignment(_jit_UL(_jit.x.pc), (n)))
 
 #endif /* __lightning_core_h */

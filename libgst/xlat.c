@@ -604,7 +604,7 @@ generate_run_time_code (void)
   jit_align (2);
   _gst_return_from_native_code = jit_get_ip ().pptr;
   jit_prolog (1);
-  jit_set_ip (_gst_return_from_native_code);
+  jit_set_ip ((void *) _gst_return_from_native_code);
 
   jit_movi_i (JIT_RET, 0);
   jit_ret ();
@@ -652,7 +652,7 @@ finish_method_entry (void)
   jit_flush_code (current->nativeCode, codePtr);
 
   result =
-    (method_entry *) xrealloc (current, codePtr - ((char *) current));
+    (method_entry *) xrealloc (current, codePtr - (char *) current);
   current = NULL;
 
   /* Copy the IP map, adding a final dummy entry */
@@ -1844,7 +1844,7 @@ gen_dirty_block (code_tree *tree)
   jit_prepare (1);
   jit_pusharg_p (JIT_V0);
   jit_finish (_gst_make_block_closure);
-  jit_movr_p (JIT_V0, JIT_R0);
+  jit_retval (JIT_V0);
 
   rec_var_cached = false;
   stack_cached = -1;

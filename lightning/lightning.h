@@ -39,7 +39,6 @@ extern "C" {
 #endif
 
 #include <lightning/asm-common.h>
-#include <lightning/funcs-common.h>
 
 #ifndef LIGHTNING_DEBUG
 #include <lightning/asm.h>
@@ -48,11 +47,9 @@ extern "C" {
 #include <lightning/core.h>
 #include <lightning/core-common.h>
 #include <lightning/funcs.h>
+#include <lightning/funcs-common.h>
 #include <lightning/fp.h>
-
-#ifdef jit_cmp
 #include <lightning/fp-common.h>
-#endif
 
 #ifndef JIT_R0
 #error GNU lightning does not support the current target

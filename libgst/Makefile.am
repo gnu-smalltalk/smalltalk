@@ -1,19 +1,5 @@
 LIBTOOL += --tag LIBGST
 
-if HAVE_INSTALLED_LIGHTNING
-INCLIGHTNING =
-else
-INCLIGHTNING = -I$(top_srcdir)/lightning -I$(top_builddir)/lightning
-endif
-
-if HAVE_SIGSEGV
-INCSIGSEGV = -I$(top_srcdir)/sigsegv/src -I$(top_builddir)/sigsegv/src
-LIBSIGSEGV = $(top_builddir)/sigsegv/src/libsigsegv.la
-else
-INCSIGSEGV = 
-LIBSIGSEGV =
-endif
-
 LEX_OUTPUT_ROOT = lex.yy
 ## CFLAGS=-O0 -g
 AM_LFLAGS = -Cfe -o$(LEX_OUTPUT_ROOT).c
@@ -24,6 +10,15 @@ AM_CPPFLAGS = -DKERNEL_PATH=\"$(pkgdatadir)/kernel\" \
   -I$(top_builddir)/libffi/include $(INCLIGHTNING) \
   @INCSNPRINTFV@ $(INCSIGSEGV) -I$(top_builddir)/lib-src
 
+if !HAVE_INSTALLED_LIGHTNING
+AM_CPPFLAGS += -I$(top_srcdir)/lightning -I$(top_builddir)/lightning \
+  -I$(top_srcdir) -I$(top_builddir)
+endif
+
+if HAVE_SIGSEGV
+AM_CPPFLAGS += -I$(top_srcdir)/sigsegv/src -I$(top_builddir)/sigsegv/src
+endif
+
 include_HEADERS = gstpub.h gst.h
 noinst_PROGRAMS = genprims genbc genvm
 lib_LTLIBRARIES = libgst.la
@@ -31,15 +26,18 @@ lib_LTLIBRARIES = libgst.la
 # definitions for libgst.la
 
 libgst_la_LIBADD=$(top_builddir)/lib-src/library.la \
-	$(top_builddir)/libffi/libffi.la $(LIBSIGSEGV) \
-	@LIBSNPRINTFV@ @LIBREADLINE@ @LIBGMP@
+	$(top_builddir)/libffi/libffi.la @LIBSNPRINTFV@ @LIBREADLINE@ @LIBGMP@
+
+libgst_la_DEPENDENCIES=$(top_builddir)/lib-src/library.la \
+	$(top_builddir)/libffi/libffi.la @LIBSNPRINTFV@
+
+if HAVE_SIGSEGV
+libgst_la_LIBADD += $(top_builddir)/sigsegv/src/libsigsegv.la
+libgst_la_DEPENDENCIES += $(top_builddir)/sigsegv/src/libsigsegv.la
+endif
 
 libgst_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined \
 	-export-symbols-regex "^gst_.*"
-
-libgst_la_DEPENDENCIES=$(top_builddir)/lib-src/library.la \
-	$(top_builddir)/libffi/libffi.la $(LIBSIGSEGV) \
-	@LIBLTDL@ @LIBSNPRINTFV@
 
 libgst_la_SOURCES = \
        interp.c    lib.c         gst-parse.y    lex.c        \

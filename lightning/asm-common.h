@@ -88,12 +88,11 @@ typedef unsigned int	_ui;
 typedef long		_sl;
 typedef unsigned long	_ul;
 
-#define _jit_UC(X)		((_uc  )(X))
-#define _jit_US(X)		((_us  )(X))
-#define _jit_UI(X)		((_ui  )(X))
-#define _jit_SL(X)		((_sl  )(X))
-#define _jit_UL(X)		((_ul  )(X))
-
+#define _jit_UC(X)	((_uc  )(X))
+#define _jit_US(X)	((_us  )(X))
+#define _jit_UI(X)	((_ui  )(X))
+#define _jit_SL(X)	((_sl  )(X))
+#define _jit_UL(X)	((_ul  )(X))
 # define _PUC(X)	((_uc *)(X))
 # define _PUS(X)	((_us *)(X))
 # define _PUI(X)	((_ui *)(X))
@@ -104,6 +103,7 @@ typedef unsigned long	_ul;
 #define _jit_W(W)         _jit_UL(((*_jit.x.us_pc++)= _jit_US((W)&0xffff)))
 #define _jit_I(I)         _jit_UL(((*_jit.x.ui_pc++)= _jit_UI((I)       )))
 #define _jit_L(L)         _jit_UL(((*_jit.x.ul_pc++)= _jit_UL((L)       )))
+#define _jit_I_noinc(I)   _jit_UL(((*_jit.x.ui_pc)=   _jit_UI((I)       )))
 
 #define _MASK(N)	((unsigned)((1<<(N)))-1)
 #define _siP(N,I)	(!((((unsigned)(I))^(((unsigned)(I))<<1))&~_MASK(N)))

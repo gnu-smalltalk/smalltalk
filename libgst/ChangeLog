@@ -1,5 +1,10 @@
 2004-11-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/xlat.c (gen_dirty_block): Return value is not in JIT_R0
+	except on x86.
+
+2004-11-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/oop.c: Catch more errors out of mprotect.
 
 2004-11-25  Paolo Bonzini  <bonzini@gnu.org>

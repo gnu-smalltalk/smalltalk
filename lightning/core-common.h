@@ -45,14 +45,24 @@ typedef struct {
   struct jit_local_state jitl;
 } jit_state;
 
+#ifdef jit_init
+static jit_state 			_jit = jit_init ();
+#else
 static jit_state 			_jit;
+#endif
 
 #define JIT_NOREG			(-1)
+#define JIT_R0				JIT_R(0)
+#define JIT_R1				JIT_R(1)
+#define JIT_R2				JIT_R(2)
+#define JIT_V0				JIT_V(0)
+#define JIT_V1				JIT_V(1)
+#define JIT_V2				JIT_V(2)
 
 #define _jitl				_jit.jitl
 
 #define	jit_get_ip()			(*(jit_code *) &_jit.x.pc)
-#define	jit_set_ip(ptr)			(_jit.x.pc = (jit_insn *) ptr, jit_get_ip())
+#define	jit_set_ip(ptr)			(_jit.x.pc = (ptr), jit_get_ip ())
 #define	jit_get_label()			(_jit.x.pc)
 #define	jit_forward()			(_jit.x.pc)
 
@@ -138,16 +148,24 @@ typedef union jit_code {
 #define jit_subci_ul(d, rs, is)		jit_subci_l((d), (rs), (is))	
 #define jit_subcr_ul(d, s1, s2)		jit_subcr_l((d), (s1), (s2))
 #define jit_subxi_ui(d, rs, is)		jit_subxi_i((d), (rs), (is))	
+#define jit_subxi_ul(d, rs, is)		jit_subxi_l((d), (rs), (is))	
 #define jit_subxr_ui(d, s1, s2)		jit_subxr_i((d), (s1), (s2))
+#define jit_subxr_ul(d, s1, s2)		jit_subxr_i((d), (s1), (s2))
 #define jit_xori_ul(d, rs, is)		jit_xori_l((d), (rs), (is))	
 #define jit_xorr_ul(d, s1, s2)		jit_xorr_l((d), (s1), (s2))
 
 #define jit_addr_p(d, s1, s2)		jit_addr_ul((d), (s1), 	      (s2))
 #define jit_addi_p(d, rs, is)		jit_addi_ul((d), (rs), (long) (is))
 #define jit_movr_p(d, rs)		jit_movr_ul((d),              (rs))
-#define jit_movi_p(d, is)		jit_movi_ul((d),       (long) (is))
 #define jit_subr_p(d, s1, s2)		jit_subr_ul((d), (s1),        (s2))
 #define jit_subi_p(d, rs, is)		jit_subi_ul((d), (rs), (long) (is))
+#define jit_rsbi_p(d, rs, is)		jit_rsbi_ul((d), (rs), (long) (is))
+
+#ifndef jit_movi_p
+#define jit_movi_p(d, is)		(jit_movi_ul((d),       (long) (is)), _jit.x.pc)
+#endif
+
+#define jit_patch(pv)        		jit_patch_at ((pv), (_jit.x.pc))
 
 #ifndef jit_addci_i
 #define jit_addci_i(d, rs, is)		jit_addi_i((d), (rs), (is))	
@@ -190,8 +208,11 @@ typedef union jit_code {
 #define jit_subi_l(d, rs, is)		jit_addi_l((d), (rs), -(is))
 #define jit_subci_i(d, rs, is)		jit_addci_i((d), (rs), -(is))
 #define jit_subci_l(d, rs, is)		jit_addci_l((d), (rs), -(is))
+#define jit_rsbr_f(d, s1, s2)		jit_subr_f((d), (s2), (s1))
+#define jit_rsbr_d(d, s1, s2)		jit_subr_d((d), (s2), (s1))
 #define jit_rsbr_i(d, s1, s2)		jit_subr_i((d), (s2), (s1))
 #define jit_rsbr_l(d, s1, s2)		jit_subr_l((d), (s2), (s1))
+#define jit_rsbr_p(d, s1, s2)		jit_subr_p((d), (s2), (s1))
 
 /* Unary */
 #define jit_notr_c(d, rs)		jit_xori_c((d), (rs), 255)
@@ -216,22 +237,42 @@ typedef union jit_code {
 #define jit_extr_s_i(d, rs)		(jit_lshi_i((d), (rs), 16), jit_rshi_i((d), (d), 16))
 #endif
 
+#ifdef jit_addi_l /* sizeof(long) != sizeof(int) */
+#ifndef jit_extr_c_l
+#define jit_extr_c_l(d, rs)		(jit_lshi_l((d), (rs), 56), jit_rshi_l((d), (d), 56))
+#endif
+#ifndef jit_extr_s_l
+#define jit_extr_s_l(d, rs)		(jit_lshi_l((d), (rs), 48), jit_rshi_l((d), (d), 48))
+#endif
+#ifndef jit_extr_i_l
+#define jit_extr_i_l(d, rs)		(jit_lshi_l((d), (rs), 32), jit_rshi_l((d), (d), 32))
+#endif
+#ifndef jit_extr_c_ul
+#define jit_extr_c_ul(d, rs)		jit_andi_l((d), (rs), 0xFF)
+#endif
+#ifndef jit_extr_s_ul
+#define jit_extr_s_ul(d, rs)		jit_andi_l((d), (rs), 0xFFFF)
+#endif
+#ifndef jit_extr_i_ul
+#define jit_extr_i_ul(d, rs)		jit_andi_l((d), (rs), 0xFFFFFFFFUL)
+#endif
+#endif
 
+#define jit_extr_c_s(d, rs)		jit_extr_c_i((d), (rs))
+#define jit_extr_c_us(d, rs)		jit_extr_c_ui((d), (rs))
+#define jit_extr_uc_s(d, rs)		jit_extr_uc_i((d), (rs))
+#define jit_extr_uc_us(d, rs)		jit_extr_uc_ui((d), (rs))
 #define jit_extr_uc_i(d, rs)		jit_extr_c_ui((d), (rs))
 #define jit_extr_uc_ui(d, rs)		jit_extr_c_ui((d), (rs))
 #define jit_extr_us_i(d, rs)		jit_extr_s_ui((d), (rs))
 #define jit_extr_us_ui(d, rs)		jit_extr_s_ui((d), (rs))
-
-#ifndef jit_extr_i_ul
-#ifdef jit_addi_l /* sizeof(long) != sizeof(int) */
-#define jit_extr_i_ul(d, rs)		jit_andi_ui((d), (rs), 0xFF)
-#else /* sizeof(long) == sizeof(int) */
-#define jit_extr_i_ul(d, rs)		jit_movr_i(d, rs)
-#endif /* sizeof(long) == sizeof(int) */
-#endif
-
+#define jit_extr_uc_l(d, rs)		jit_extr_c_ul((d), (rs))
+#define jit_extr_uc_ul(d, rs)		jit_extr_c_ul((d), (rs))
+#define jit_extr_us_l(d, rs)		jit_extr_s_ul((d), (rs))
+#define jit_extr_us_ul(d, rs)		jit_extr_s_ul((d), (rs))
 #define jit_extr_ui_l(d, rs)		jit_extr_i_ul((d), (rs))
 #define jit_extr_ui_ul(d, rs)		jit_extr_i_ul((d), (rs))
+
 
 /* NTOH/HTON is not mandatory for big endian architectures */
 #ifndef jit_ntoh_ui /* big endian */
@@ -251,7 +292,7 @@ typedef union jit_code {
 #define jit_pushr_p(rs)			jit_pushr_ul(rs)
 #define jit_popr_p(rs)			jit_popr_ul(rs)		
 
-#define jit_prepare(nint)		jitfp_prepare((nint), 0, 0)
+#define jit_prepare(nint)		jit_prepare_i((nint))
 #define jit_pusharg_c(rs)		jit_pusharg_i(rs)
 #define jit_pusharg_s(rs)		jit_pusharg_i(rs)
 #define jit_pusharg_uc(rs)		jit_pusharg_i(rs)
@@ -388,8 +429,15 @@ typedef union jit_code {
 #define jit_retval_c(rd)		jit_retval_i((rd))
 #define jit_retval_s(rd)		jit_retval_i((rd))
 
+/* This was a bug, but we keep it.  */
+#define jit_retval(rd)			jit_retval_i ((rd))
+
 #ifndef jit_finish
 #define jit_finish(sub)			jit_calli(sub)
+#endif
+
+#ifndef jit_finishr
+#define jit_finishr(reg)		jit_callr(reg)
 #endif
 
 #ifndef jit_prolog
@@ -412,15 +460,15 @@ typedef union jit_code {
 #define jit_getarg_ul(reg, ofs)		jit_extr_uc_ul((reg), (ofs))
 #define jit_getarg_us(reg, ofs)		jit_extr_us_ul((reg), (ofs))
 #else
-#define jit_getarg_c(reg, ofs)	jit_ldxi_c((reg), JIT_FP, (ofs));
-#define jit_getarg_uc(reg, ofs)	jit_ldxi_uc((reg), JIT_FP, (ofs));
-#define jit_getarg_s(reg, ofs)	jit_ldxi_s((reg), JIT_FP, (ofs));
-#define jit_getarg_us(reg, ofs)	jit_ldxi_us((reg), JIT_FP, (ofs));
-#define jit_getarg_i(reg, ofs)	jit_ldxi_i((reg), JIT_FP, (ofs));
-#define jit_getarg_ui(reg, ofs)	jit_ldxi_ui((reg), JIT_FP, (ofs));
-#define jit_getarg_l(reg, ofs)	jit_ldxi_l((reg), JIT_FP, (ofs));
-#define jit_getarg_ul(reg, ofs)	jit_ldxi_ul((reg), JIT_FP, (ofs));
-#define jit_getarg_p(reg, ofs)	jit_ldxi_p((reg), JIT_FP, (ofs));
+#define jit_getarg_c(reg, ofs)		jit_ldxi_c((reg), JIT_FP, (ofs));
+#define jit_getarg_uc(reg, ofs)		jit_ldxi_uc((reg), JIT_FP, (ofs));
+#define jit_getarg_s(reg, ofs)		jit_ldxi_s((reg), JIT_FP, (ofs));
+#define jit_getarg_us(reg, ofs)		jit_ldxi_us((reg), JIT_FP, (ofs));
+#define jit_getarg_i(reg, ofs)		jit_ldxi_i((reg), JIT_FP, (ofs));
+#define jit_getarg_ui(reg, ofs)		jit_ldxi_ui((reg), JIT_FP, (ofs));
+#define jit_getarg_l(reg, ofs)		jit_ldxi_l((reg), JIT_FP, (ofs));
+#define jit_getarg_ul(reg, ofs)		jit_ldxi_ul((reg), JIT_FP, (ofs));
+#define jit_getarg_p(reg, ofs)		jit_ldxi_p((reg), JIT_FP, (ofs));
 #endif
 #endif
 
@@ -473,6 +521,14 @@ typedef union jit_code {
 #define jit_mulr_ul(d, s1, s2)		jit_mulr_ui((d), (s1), (s2))
 #define jit_rshi_ul(d, rs, is)		jit_rshi_ui((d), (rs), (is))	
 #define jit_rshr_ul(d, s1, s2)		jit_rshr_ui((d), (s1), (s2))
+
+/* Sign/Zero extension */
+#define jit_extr_c_l(d, rs)		jit_extr_c_i(d, rs)
+#define jit_extr_c_ul(d, rs)		jit_extr_c_ui(d, rs)
+#define jit_extr_s_l(d, rs)		jit_extr_s_i(d, rs)
+#define jit_extr_s_ul(d, rs)		jit_extr_s_ui(d, rs)
+#define jit_extr_i_l(d, rs)		jit_movr_i(d, rs)
+#define jit_extr_i_ul(d, rs)		jit_movr_i(d, rs)
 
 /* Unary */
 #define jit_movi_l(d, rs)		jit_movi_i((d), (rs))

@@ -244,9 +244,18 @@ AC_ARG_ENABLE(jit,
 enable_jit=no)
 
 LIGHTNING_CONFIGURE_IF_NOT_FOUND([], enable_jit=no)
-if test "$enable_jit" = yes; then
+if test "$enable_jit" != no; then
   AC_DEFINE(ENABLE_JIT_TRANSLATION, 1, 
     [Define to enable dynamic translation to machine code])
+fi
+
+AC_ARG_ENABLE(disassembler, 
+[  --enable-disassembler   include a disassembler in the gst executable], ,
+enable_disassembler=no)
+AM_CONDITIONAL(ENABLE_DISASSEMBLER, test "$enable_disassembler" != no)
+if test "$enable_disassembler" != no; then
+  AC_DEFINE(ENABLE_DISASSEMBLER, 1, 
+    [Define to include a disassembler in the gst executable])
 fi
 
 AC_ARG_ENABLE(emacs, 
@@ -341,7 +350,7 @@ AC_CONFIG_FILES(Makefile, [
 
 dnl VM makefiles
 AC_CONFIG_FILES(doc/Makefile lib-src/Makefile libgst/Makefile)
-AC_CONFIG_FILES(lightning/Makefile tests/Makefile)
+AC_CONFIG_FILES(opcode/Makefile lightning/Makefile tests/Makefile)
 
 dnl Modules makefiles
 AC_CONFIG_FILES(blox-tk/Makefile examples/Makefile)

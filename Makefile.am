@@ -21,11 +21,14 @@ ACLOCAL_AMFLAGS = -I config
 
 PACKAGE=smalltalk
 
-DIST_SUBDIRS = lib-src snprintfv lightning sigsegv libffi libgst \
+DIST_SUBDIRS = lib-src snprintfv lightning sigsegv libffi opcode libgst \
 	i18n tcp examples gtk blox-tk . doc tests
 
-SUBDIRS = lib-src lightning $(subdirs) libgst \
-	i18n tcp examples gtk blox-tk . doc tests
+SUBDIRS = lib-src lightning $(subdirs)
+if ENABLE_DISASSEMBLER
+SUBDIRS += opcode
+endif
+SUBDIRS += libgst i18n tcp examples gtk blox-tk . doc tests
 
 
 ###########################################################
@@ -96,13 +99,19 @@ bin_PROGRAMS = gst
 
 gst_SOURCES = main.c
 gst_LDADD = libgst/libgst.la @ICON@
+gst_DEPENDENCIES = libgst/libgst.la @ICON@
+AM_CPPFLAGS = -I$(top_srcdir)/libgst
+
+if ENABLE_DISASSEMBLER
+gst_LDADD += opcode/libdisass.la
+gst_DEPENDENCIES += opcode/libdisass.la
+AM_CPPFLAGS += -I$(top_srcdir)/opcode
+endif
 
 # By default, we do not build the installed VM as a shared library: it is
 # a bit slower, and on x86 we also exchange the PIC register for the frame
 # which makes the VM undebuggable except with very recent (3.4) gcc.
 gst_LDFLAGS = -export-dynamic -static
-gst_DEPENDENCIES = libgst/libgst.la @ICON@
-AM_CPPFLAGS = -I$(top_srcdir)/libgst
 
 nodist_noinst_HEADERS = config.h
 DISTCLEANFILES += config.h
