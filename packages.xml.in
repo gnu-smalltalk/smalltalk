@@ -20,7 +20,7 @@
   <built-file>Structs.st</built-file>
   <built-file>Enums.st</built-file>
   <built-file>Funcs.st</built-file>
-  <built-file>Libs.st</file>
+  <built-file>Libs.st</built-file>
   <file>GtkDecl.st</file>
   <file>GtkImpl.st</file>
   <file>MoreFuncs.st</file>
