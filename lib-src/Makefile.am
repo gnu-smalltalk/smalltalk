@@ -1,6 +1,5 @@
 noinst_LTLIBRARIES = library.la
 
-library_la_LDFLAGS =  -rpath $(pkglibdir)
 library_la_LIBADD =  @LTLIBOBJS@ @LTALLOCA@ $(LIBADD_DL)
 library_la_DEPENDENCIES =  @LTLIBOBJS@ @LTALLOCA@
 
