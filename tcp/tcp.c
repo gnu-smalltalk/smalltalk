@@ -57,6 +57,19 @@
 #include <sys/utsname.h>
 #endif
 
+#ifndef O_NONBLOCK             
+#ifdef O_NDELAY
+#define O_NONBLOCK O_NDELAY
+#else
+#ifdef FNDELAY
+#define O_NONBLOCK FNDELAY
+#else
+#warning Non-blocking I/O could not be enabled
+#define O_NONBLOCK 0
+#endif
+#endif
+#endif
+
 #ifndef ntohl
 #if WORDS_BIGENDIAN
 #define ntohl(x) (x)
