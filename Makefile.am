@@ -23,7 +23,7 @@ PACKAGE=smalltalk
 
 DIST_SUBDIRS = lib-src snprintfv lightning sigsegv \
 	libgst i18n config kernel tcp \
-	examples gtk blox-tk . doc tests
+	examples blox-tk . doc gtk tests
 
 SUBDIRS = lib-src lightning $(subdirs) \
 	libgst i18n config kernel tcp \

@@ -2425,19 +2425,25 @@ appropriate warnings to the installer if @code{ldconfig} (or an
 equivalent program) has to be re-run.
 
 Finally, you will have to specify the name of the module in the
-@file{packages} file.  In this case, the relevant entry in that file
+@file{packages.xml} file.  In this case, the relevant entry in that file
 will be
 
 @example
-Blox
-    Kernel
-    Blox.st libblox
-    ../blox
-@end example
+<package>
+  <name>BloxTK</name>
+  <filein>Blox.st</filein>
+  <module>blox-tk</module>
+  <directory>blox-tk</directory>
 
-Everything not ending with @file{.st} will be picked by the package
-loader as a module, and will be passed to @code{DLD class>>#addModule:}
-before attempting to file-in the Smalltalk source files.
+  <file>Blox.st</file>
+  <file>BloxBasic.st</file>
+  <file>BloxCanvas.st</file>
+  <file>BloxExtend.st</file>
+  <file>BloxText.st</file>
+  <file>BloxWidgets.st</file>
+  <file>colors.txt</file>
+</package>
+@end example
 
 @node C callout
 @section Using the C callout mechanism
