@@ -10,7 +10,7 @@
 
 "======================================================================
 |
-| Copyright 2003 Free Software Foundation, Inc.
+| Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -58,5 +58,4 @@ Smalltalk addSubspace: namespace.
 Namespace current: (Smalltalk at: namespace).
 classes := STInST.STClassLoader parseSmalltalkStream: source.
 Namespace current: Smalltalk.
-ClassPublisher.Texinfo publishAll: classes onFile: outTexinfo.
-Smalltalk at: #aaa put: classes!
+ClassPublisher.Texinfo publishAll: classes onFile: outTexinfo!
