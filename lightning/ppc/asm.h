@@ -61,6 +61,7 @@
 
 typedef unsigned int jit_insn;
 
+#ifndef LIGHTNING_DEBUG
 #define _cr0	0
 #define _cr1	1
 #define _cr2	2
@@ -76,22 +77,23 @@ typedef unsigned int jit_insn;
 #define _so	3
 #define _un	3
 
-#define _d16(D)		(_ck_d(16,(_UL(D)-_UL(_jit.x.pc))) & ~3)
-#define _d26(D)		(_ck_d(26,(_UL(D)-_UL(_jit.x.pc))) & ~3)
+#define _d16(D)		(_ck_d(16,(_jit_UL(D)-_jit_UL(_jit.x.pc))) & ~3)
+#define _d26(D)		(_ck_d(26,(_jit_UL(D)-_jit_UL(_jit.x.pc))) & ~3)
 
 /* primitive instruction forms [1, Section A.4] */
 
-#define _FB(  OP,         BD,AA,LK )	_I((_u6(OP)<<26)|                                            _d26(BD)|     (_u1(AA)<<1)|_u1(LK))
-#define _FBA( OP,         BD,AA,LK )	_I((_u6(OP)<<26)|                                           (_u26(BD)&~3)| (_u1(AA)<<1)|_u1(LK))
-#define _BB(   OP,BO,BI,   BD,AA,LK )  	_I((_u6(OP)<<26)|(_u5(BO)<<21)|(_u5(BI)<<16)|                _d16(BD)|     (_u1(AA)<<1)|_u1(LK))
-#define _D(   OP,RD,RA,         DD )  	_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|                _s16(DD)                          )
-#define _Du(  OP,RD,RA,         DD )  	_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|                _u16(DD)                          )
-#define _Ds(  OP,RD,RA,         DD )  	_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|                _su16(DD)                         )
-#define _X(   OP,RD,RA,RB,   XO,RC )  	_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|( _u5(RB)<<11)|              (_u10(XO)<<1)|_u1(RC))
-#define _XL(  OP,BO,BI,      XO,LK )  	_I((_u6(OP)<<26)|(_u5(BO)<<21)|(_u5(BI)<<16)|( _u5(00)<<11)|              (_u10(XO)<<1)|_u1(LK))
-#define _XFX( OP,RD,         SR,XO )  	_I((_u6(OP)<<26)|(_u5(RD)<<21)|              (_u10(SR)<<11)|              (_u10(XO)<<1)|_u1(00))
-#define _XO(  OP,RD,RA,RB,OE,XO,RC )  	_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|( _u5(RB)<<11)|(_u1(OE)<<10)|( _u9(XO)<<1)|_u1(RC))
-#define _M(   OP,RS,RA,SH,MB,ME,RC )  	_I((_u6(OP)<<26)|(_u5(RS)<<21)|(_u5(RA)<<16)|( _u5(SH)<<11)|(_u5(MB)<< 6)|( _u5(ME)<<1)|_u1(RC))
+#define _FB(  OP,         BD,AA,LK )    (_jit_I_noinc((_u6(OP)<<26)|                                            _d26(BD)|     (_u1(AA)<<1)|_u1(LK)), _jit.x.pc++, 0)
+#define _FBA( OP,         BD,AA,LK )	_jit_I((_u6(OP)<<26)|                                           (_u26(BD)&~3)| (_u1(AA)<<1)|_u1(LK))
+#define _BB(   OP,BO,BI,   BD,AA,LK )   (_jit_I_noinc((_u6(OP)<<26)|(_u5(BO)<<21)|(_u5(BI)<<16)|                _d16(BD)|     (_u1(AA)<<1)|_u1(LK)), _jit.x.pc++, 0)
+#define _D(   OP,RD,RA,         DD )  	_jit_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|                _s16(DD)                          )
+#define _Du(  OP,RD,RA,         DD )  	_jit_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|                _u16(DD)                          )
+#define _Ds(  OP,RD,RA,         DD )  	_jit_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|                _su16(DD)                         )
+#define _X(   OP,RD,RA,RB,   XO,RC )  	_jit_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|( _u5(RB)<<11)|              (_u10(XO)<<1)|_u1(RC))
+#define _XL(  OP,BO,BI,      XO,LK )  	_jit_I((_u6(OP)<<26)|(_u5(BO)<<21)|(_u5(BI)<<16)|( _u5(00)<<11)|              (_u10(XO)<<1)|_u1(LK))
+#define _XFX( OP,RD,         SR,XO )  	_jit_I((_u6(OP)<<26)|(_u5(RD)<<21)|              (_u10(SR)<<11)|              (_u10(XO)<<1)|_u1(00))
+#define _XO(  OP,RD,RA,RB,OE,XO,RC )  	_jit_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|( _u5(RB)<<11)|(_u1(OE)<<10)|( _u9(XO)<<1)|_u1(RC))
+#define _M(   OP,RS,RA,SH,MB,ME,RC )  	_jit_I((_u6(OP)<<26)|(_u5(RS)<<21)|(_u5(RA)<<16)|( _u5(SH)<<11)|(_u5(MB)<< 6)|( _u5(ME)<<1)|_u1(RC))
+
 
 /* special purpose registers (form XFX) [1, Section 8.2, page 8-138] */
 
@@ -121,7 +123,7 @@ typedef unsigned int jit_insn;
 
 #define Bi(BD)				_FB	(18, BD, 0, 0)
 #define BAi(BD)				_FBA	(18, BD, 1, 0)
-#define BLi(BD)				_FB	(18, BD, 0, 1)
+#define BLi(BD)				_FB     (18, BD, 0, 1)
 #define BLAi(BD)			_FBA	(18, BD, 1, 1)
 
 #define BCiii(BO,BI,BD)			_BB	(16, BO, BI, BD, 0, 0)
@@ -313,10 +315,10 @@ typedef unsigned int jit_insn;
 #define MOVEIri(R,I)			(_siP(16,I) ? LIri(R,I) :	\
 					MOVEIri2(R, _HI(I), _LO(I)) )
 
-#define SUBIrri(RD,RA,IM)		ADDIrri(RD,RA,-_L((IM)))	/* [1, Section F.2.1] */
-#define SUBISrri(RD,RA,IM)		ADDISrri(RD,RA,-_L((IM)))
-#define SUBICrri(RD,RA,IM)		ADDICrri(RD,RA,-_L((IM)))
-#define SUBIC_rri(RD,RA,IM)		ADDIC_rri(RD,RA,-_L((IM)))
+#define SUBIrri(RD,RA,IM)		ADDIrri(RD,RA,-_LO((IM)))	/* [1, Section F.2.1] */
+#define SUBISrri(RD,RA,IM)		ADDISrri(RD,RA,-_LO((IM)))
+#define SUBICrri(RD,RA,IM)		ADDICrri(RD,RA,-_LO((IM)))
+#define SUBIC_rri(RD,RA,IM)		ADDIC_rri(RD,RA,-_LO((IM)))
 
 #define SUBrrr(RD,RA,RB)		SUBFrrr(RD,RB,RA)	/* [1, Section F.2.2] */
 #define SUBOrrr(RD,RA,RB)		SUBFOrrr(RD,RB,RA)
@@ -350,17 +352,21 @@ typedef unsigned int jit_insn;
 #define CLRRWIrri(RA,RS,N)		RLWINMrriii(RA, RS,            0,	0,    31-(N))
 #define CLRLSLWIrrii(RA,RS,B,N)		RLWINMrriii(RA, RS,            N, (B)-(N),    31-(N))
 
-/* 9 below inverts the branch condition and the branch prediction.
- * This has an incestuous knowledge of the fact that register 26
- * is used as auxiliary!!! */
-#define BC_EXT(A, C, D)  (_siP(16, _UL(D)-_UL(_jit.x.pc)) \
-  ? BCiii((A), (C), (D)) \
-  : (BCiii((A)^9, (C), _jit.x.pc+5), LISri(26,_HI(D)), ORIrri(26,26,_LO(D)), \
-     MTLRr(26), BLR() ))
 
-#define B_EXT(D)         (_siP(16, _UL(D)-_UL(_jit.x.pc)) \
+/* 9 below inverts the branch condition and the branch prediction.
+ * This has an incestuous knowledge of JIT_AUX */
+#define BC_EXT(A, C, D)  (_siP(16, _jit_UL(D)-_jit_UL(_jit.x.pc)) \
+  ? BCiii((A), (C), (D)) \
+  : (BCiii((A)^9, (C), _jit.x.pc+5), \
+     LISri(JIT_AUX,_HI(D)), \
+     ORIrri(JIT_AUX,JIT_AUX,_LO(D)), \
+     MTLRr(JIT_AUX), BLR() ))
+
+#define B_EXT(D)         (_siP(16, _jit_UL(D)-_jit_UL(_jit.x.pc)) \
   ? Bi((D)) \
-  : (LISri(26,_HI(D)), ORIrri(26,26,_LO(D)), MTLRr(26), BLR()) )
+  : (LISri(JIT_AUX,_HI(D)), \
+     ORIrri(JIT_AUX,JIT_AUX,_LO(D)), \
+     MTLRr(JIT_AUX), BLR()) )
 
 #define BTii(C,D)			BC_EXT(12, C, D)		/* [1, Table F-5] */
 #define BFii(C,D)			BC_EXT( 4, C, D)
@@ -379,7 +385,7 @@ typedef unsigned int jit_insn;
 		
 
 #define BLTLRi(CR)			BCLRii(12, ((CR)<<2)+0)	/* [1, Table F-10] */
-#define BLELRi(CR)			BCLRii( 4  ((CR)<<2)+1)
+#define BLELRi(CR)			BCLRii( 4, ((CR)<<2)+1)
 #define BEQLRi(CR)			BCLRii(12, ((CR)<<2)+2)
 #define BGELRi(CR)			BCLRii( 4, ((CR)<<2)+0)
 #define BGTLRi(CR)			BCLRii(12, ((CR)<<2)+1)
@@ -405,7 +411,7 @@ typedef unsigned int jit_insn;
 #define BNULRLi(CR)			BCLRLii( 4, ((CR)<<2)+3)
 		
 #define BLTCTRi(CR)			BCCTRii(12, ((CR)<<2)+0)	/* [1, Table F-10] */
-#define BLECTRi(CR)			BCCTRii( 4  ((CR)<<2)+1)
+#define BLECTRi(CR)			BCCTRii( 4, ((CR)<<2)+1)
 #define BEQCTRi(CR)			BCCTRii(12, ((CR)<<2)+2)
 #define BGECTRi(CR)			BCCTRii( 4, ((CR)<<2)+0)
 #define BGTCTRi(CR)			BCCTRii(12, ((CR)<<2)+1)
@@ -511,7 +517,7 @@ typedef unsigned int jit_insn;
 #define BNUi(D)				BNUii(0,D)
 
 #define BLTLii(C,D)			BCLiii(12, ((C)<<2)+0, D)	/* [1, Table F-??] */
-#define BLELii(C,D)			BCLiii( 4  ((C)<<2)+1, D)
+#define BLELii(C,D)			BCLiii( 4, ((C)<<2)+1, D)
 #define BEQLii(C,D)			BCLiii(12, ((C)<<2)+2, D)
 #define BGELii(C,D)			BCLiii( 4, ((C)<<2)+0, D)
 #define BGTLii(C,D)			BCLiii(12, ((C)<<2)+1, D)
@@ -583,10 +589,53 @@ typedef unsigned int jit_insn;
 #define LArx(RD,RB,RA)			LArrr(RD,RB,RA)	
 
 
-#define _LO(I)          (_UL(I) & _MASK(16))
-#define _HI(I)          (_UL(I) >>     (16))
+#define _LO(I)          (_jit_UL(I) & _MASK(16))
+#define _HI(I)          (_jit_UL(I) >>     (16))
 
+#define _A(OP,RD,RA,RB,RC,XO,RCx)    _jit_I((_u6(OP)<<26)|(_u5(RD)<<21)|(_u5(RA)<<16)|( _u5(RB)<<11)|_u5(RC)<<6|(_u5(XO)<<1)|_u1(RCx))
 
+#define LFDrri(RD,RA,imm)       _D(50,RD,RA,imm)
+#define LFDUrri(RD,RA,imm)      _D(51,RD,RA,imm)
+#define LFDUxrrr(RD,RA,RB)      _X(31,RD,RA,RB,631,0)
+#define LFDxrrr(RD,RA,RB)       _X(31,RD,RA,RB,599,0)
+
+#define LFSrri(RD,RA,imm)       _D(48,RD,RA,imm)
+#define LFSUrri(RD,RA,imm)      _D(49,RD,RA,imm)
+#define LFSUxrrr(RD,RA,RB)      _X(31,RD,RA,RB,567,0)
+#define LFSxrrr(RD,RA,RB)       _X(31,RD,RA,RB,535,0)
+
+#define STFDrri(RS,RA,imm)      _D(54,RS,RA,imm)
+#define STFDUrri(RS,RA,imm)     _D(55,RS,RA,imm)
+#define STFDUxrrr(RS,RA,RB)     _X(31,RS,RA,RB,759,0)
+#define STFDxrrr(RS,RA,RB)      _X(31,RS,RA,RB,727,0)
+
+#define STFSrri(RS,RA,imm)      _D(52,RS,RA,imm)
+#define STFSUrri(RS,RA,imm)     _D(53,RS,RA,imm)
+#define STFSUxrrr(RS,RA,RB)     _X(31,RS,RA,RB,695,0)
+#define STFSxrrr(RS,RA,RB)      _X(31,RS,RA,RB,663,0)
+#define STFIWXrrr(RS,RA,RB)     _X(31,RS,RA,RB,983,0)
+
+#define FADDDrrr(RD,RA,RB)       _A(63,RD,RA,RB,0,21,0)
+#define FADDSrrr(RD,RA,RB)       _A(59,RD,RA,RB,0,21,0)
+#define FSUBDrrr(RD,RA,RB)       _A(63,RD,RA,RB,0,20,0)
+#define FSUBSrrr(RD,RA,RB)       _A(59,RD,RA,RB,0,20,0)
+#define FMULDrrr(RD,RA,RC)       _A(63,RD,RA,0,RC,25,0)
+#define FMULSrrr(RD,RA,RC)       _A(59,RD,RA,0,RC,25,0)
+#define FDIVDrrr(RD,RA,RB)       _A(63,RD,RA,RB,0,18,0)
+#define FDIVSrrr(RD,RA,RB)       _A(59,RD,RA,RB,0,25,0)
+#define FSQRTDrr(RD,RB)          _A(63,RD,0,RB,0,22,0)
+#define FSQRTSrr(RD,RB)          _A(59,RD,0,RB,0,22,0)
+#define FSELrrrr(RD,RA,RB,RC)    _A(63,RD,RA,RB,RC,23,0)
+#define FCTIWrr(RD,RB)           _X(63,RD,0,RB,14,0)
+#define FCTIWZrr(RD,RB)          _X(63,RD,0,RB,15,0)
+#define FRSPrr(RD,RB)            _X(63,RD,0,RB,12,0)
+#define FABSrr(RD,RB)            _X(63,RD,0,RB,264,0)
+#define FNABSrr(RD,RB)           _X(63,RD,0,RB,136,0)
+#define FNEGrr(RD,RB)            _X(63,RD,0,RB,40,0)
+#define FMOVErr(RD,RB)           _X(63,RD,0,RB,72,0)
+#define FCMPOrrr(CR,RA,RB)       _X(63,_u3((CR)<<2),RA,RB,32,0)
+#define FCMPUrrr(CR,RA,RB)       _X(63,_u3((CR)<<2),RA,RB,0,0)
+#define MTFSFIri(CR,IMM)          _X(63,_u5((CR)<<2),0,_u5((IMM)<<1),134,0)
 
 /*** References:
  *
@@ -594,4 +643,5 @@ typedef unsigned int jit_insn;
  */
 
 
+#endif
 #endif /* __ccg_asm_ppc_h */

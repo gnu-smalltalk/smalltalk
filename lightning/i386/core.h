@@ -34,15 +34,14 @@
 #ifndef __lightning_core_h
 #define __lightning_core_h
 
-#define JIT_R0			_EAX
-#define JIT_R1			_ECX
-#define JIT_R2			_EDX
-#define JIT_V0			_EBX
-#define JIT_V1			_ESI
-#define JIT_V2			_EDI
 #define JIT_FP			_EBP
 #define JIT_SP			_ESP
 #define JIT_RET			_EAX
+
+#define JIT_R_NUM		3
+#define JIT_V_NUM		3
+#define JIT_R(i)		(_EAX + (i))
+#define JIT_V(i)		((i) == 0 ? _EBX : _ESI + (i) - 1)
 
 struct jit_local_state {
   int	framesize;
@@ -74,16 +73,22 @@ struct jit_local_state {
 	 (rs == forced) ? op : (PUSHLr(forced), MOVLrr(rs, forced), op, POPLr(forced)))
 
 /* For LT, LE, ... */
+#define jit_replace8(d, op)						\
+	(jit_check8(d)							\
+	  ? (MOVLir(0, d), op(d))					\
+	  : (PUSHLr(_EAX), MOVLir(0, _EAX), op(_EAX), MOVLrr(_EAX, (d)), POPLr(_EAX)))
+
 #define jit_bool_r(d, s1, s2, op)					\
-	(CMPLrr(s2, s1), op, ANDLir(1, d))
+	(CMPLrr(s2, s1), jit_replace8(d, op))
 
 #define jit_bool_i(d, rs, is, op)					\
-	(CMPLir(is, rs), op, ANDLir(1, d))
+	(CMPLir(is, rs), jit_replace8(d, op))
 
 /* When CMP with 0 can be replaced with TEST */
-#define jit_bool_i0(d, rs, is, op, op0)					  \
-	( ((is) != 0 ? (CMPLir(is, rs), op) : (TESTLrr(rs, rs), op0)),    \
-	  ANDLir(1, d))
+#define jit_bool_i0(d, rs, is, op, op0)					\
+	((is) != 0							\
+	  ? (CMPLir(is, rs), jit_replace8(d, op)) 			\
+	  : (TESTLrr(rs, rs), jit_replace8(d, op0)))
 
 /* For BLT, BLE, ... */
 #define jit_bra_r(s1, s2, op)		(CMPLrr(s2, s1), op, _jit.x.pc)
@@ -95,19 +100,14 @@ struct jit_local_state {
 
 /* Used to implement ldc, stc, ... */
 #define jit_check8(rs)		( (rs) <= _EBX )
-#define jit_reg8(rs)		( ((rs) & _BH) | _AL )
+#define jit_reg8(rs)		( ((rs) == _SI || (rs) == _DI) ? _AL : ((rs) & _BH) | _AL )
 #define jit_reg16(rs)		( ((rs) & _BH) | _AX )
 
-#define jit_movbmr(sd, sb, si, ss, d, ext)			\
-	((jit_check8(d)						\
-		? MOVBmr(sd, sb, si, ss, jit_reg8(d))		\
-		: MOVWmr(sd, sb, si, ss, jit_reg16(d))), ext)
-
 /* In jit_replace below, _EBX is dummy */
-#define jit_movbrm(rs, dd, db, di, ds)						\
-	(jit_check8(rs)								\
-		? MOVBrm(jit_reg8(rs), dd, db, di, ds)				\
-		: jit_replace(_EBX, rs, _EAX, MOVBrm(_AL, dd, db, di, ds)))
+#define jit_movbrm(rs, dd, db, di, ds)                                                \
+	(jit_check8(rs)                                                         \
+	        ? MOVBrm(jit_reg8(rs), dd, db, di, ds)                          \
+	        : jit_replace(_EBX, rs, _EAX, MOVBrm(_AL, dd, db, di, ds)))
 
 /* Reduce arguments of XOR/OR/TEST */
 #define jit_reduce_(op)	op
@@ -213,25 +213,11 @@ struct jit_local_state {
 
 #define jit_muli_i(d, rs, is)	jit_op_ ((d), (rs),       IMULLir((is), (d)) 		       )
 #define jit_mulr_i(d, s1, s2)	jit_opr_((d), (s1), (s2), IMULLrr((s1), (d)), IMULLrr((s2), (d)) )
-#define jit_muli_ui(d, rs, is)	jit_op_ ((d), (rs),       IMULLir((is), (d)) 		       )
-#define jit_mulr_ui(d, s1, s2)	jit_opr_((d), (s1), (s2), IMULLrr((s1), (d)), IMULLrr((s2), (d)) )
 
 /* As far as low bits are concerned, signed and unsigned multiplies are
- * exactly the same. */
-#ifdef not_needed
-#undef jit_muli_i
-#undef jit_muli_ui
-
-#define jit_muli_ui(d, rs, is)															\
-	((d) == _EDX ? (	      PUSHLr(_EAX), MOVLir((is), _EAX), MULLr(rs), MOVLrr(_EAX, _EDX), POPLr(_EAX)		) :	\
-	((d) == _EAX ? (PUSHLr(_EDX),		    MOVLir((is), _EAX), MULLr(rs),				    POPLr(_EDX) ) :	\
-	               (PUSHLr(_EDX), PUSHLr(_EAX), MOVLir((is), _EAX), MULLr(rs), MOVLrr(_EAX, (d)),  POPLr(_EAX), POPLr(_EDX) )))
-
-#define jit_mulr_ui(d, s1, s2)													\
-	((d) == _EDX ? (	      PUSHLr(_EAX), jit_mulr_ui_((s1), (s2)), MOVLrr(_EAX, _EDX), POPLr(_EAX)		    ) :	\
-	((d) == _EAX ? (PUSHLr(_EDX),		    jit_mulr_ui_((s1), (s2)),  				       POPLr(_EDX)  ) :	\
-	 	       (PUSHLr(_EDX), PUSHLr(_EAX), jit_mulr_ui_((s1), (s2)), MOVLrr(_EAX, (d)),  POPLr(_EAX), POPLr(_EDX)  )))
-#endif /* not_needed */
+   exactly the same. */
+#define jit_muli_ui(d, rs, is)	jit_op_ ((d), (rs),       IMULLir((is), (d)) 		       )
+#define jit_mulr_ui(d, s1, s2)	jit_opr_((d), (s1), (s2), IMULLrr((s1), (d)), IMULLrr((s2), (d)) )
 
 #define jit_hmuli_i(d, rs, is)														\
 	((d) == _EDX ? (	      PUSHLr(_EAX), jit_muli_i_((is), (rs)), 				     POPLr(_EAX)		) :	\
@@ -278,10 +264,13 @@ struct jit_local_state {
 
 /* The += allows for stack pollution */
 
-#define jitfp_prepare(ni,nf,nd) ((void) (_jitl.argssize += (ni) + (nf) + 2*(nd)))
+#define jit_prepare_i(ni)	(_jitl.argssize += (ni))
+#define jit_prepare_f(nf)	(_jitl.argssize += (nf))
+#define jit_prepare_d(nd)	(_jitl.argssize += 2 * (nd))
 #define jit_pusharg_i(rs)	PUSHLr(rs)
 #define jit_finish(sub)		(jit_calli((sub)), ADDLir(4 * _jitl.argssize, JIT_SP), _jitl.argssize = 0)
-#define jit_retval(rd)		((void) ( (rd) == _EAX ? 0 : MOVLrr(_EAX, (rd)) ))
+#define jit_finishr(reg)	(jit_callr((reg)), ADDLir(4 * _jitl.argssize, JIT_SP), _jitl.argssize = 0)
+#define jit_retval_i(rd)	jit_movr_i ((rd), _EAX)
 
 #define	jit_arg_c()		((_jitl.framesize += sizeof(int)) - sizeof(int))
 #define	jit_arg_uc()		((_jitl.framesize += sizeof(int)) - sizeof(int))
@@ -300,34 +289,36 @@ struct jit_local_state {
 #define jit_negr_i(d, rs)	jit_opi_((d), (rs), NEGLr(d), (XORLrr((d), (d)), SUBLrr((rs), (d))) )
 #define jit_negr_l(d, rs)	jit_opi_((d), (rs), NEGLr(d), (XORLrr((d), (d)), SUBLrr((rs), (d))) )
 
-#define jit_movr_i(d, rs)		MOVLrr((rs), (d))
+#define jit_movr_i(d, rs)	((rs) == (d) ? 0 : MOVLrr((rs), (d)))
 #define jit_movi_i(d, is)	((is) ? MOVLir((is), (d)) : XORLrr ((d), (d)) )
+#define jit_movi_p(d, is)	(MOVLir((is), (d)), _jit.x.pc)
+#define jit_patch_movi(pa,pv)   (*_PSL((pa) - 4) = _jit_SL((pv)))
 
 #define jit_ntoh_ui(d, rs)	jit_op_((d), (rs), BSWAPLr(d))
 #define jit_ntoh_us(d, rs)	jit_op_((d), (rs), RORWir(8, d))
 
 /* Boolean */
-#define jit_ltr_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETLr(jit_reg8(d))  )
-#define jit_ler_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETLEr(jit_reg8(d)) )
-#define jit_gtr_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETGr(jit_reg8(d))  )
-#define jit_ger_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETGEr(jit_reg8(d)) )
-#define jit_eqr_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETEr(jit_reg8(d))  )
-#define jit_ner_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETNEr(jit_reg8(d)) )
-#define jit_ltr_ui(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETBr(jit_reg8(d))  )
-#define jit_ler_ui(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETBEr(jit_reg8(d)) )
-#define jit_gtr_ui(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETAr(jit_reg8(d))  )
-#define jit_ger_ui(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETAEr(jit_reg8(d)) )
+#define jit_ltr_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETLr  )
+#define jit_ler_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETLEr )
+#define jit_gtr_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETGr  )
+#define jit_ger_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETGEr )
+#define jit_eqr_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETEr  )
+#define jit_ner_i(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETNEr )
+#define jit_ltr_ui(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETBr  )
+#define jit_ler_ui(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETBEr )
+#define jit_gtr_ui(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETAr  )
+#define jit_ger_ui(d, s1, s2)	jit_bool_r((d), (s1), (s2), SETAEr )
 
-#define jit_lti_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETLr(jit_reg8(d)),  SETSr(jit_reg8(d))  )
-#define jit_lei_i(d, rs, is)	jit_bool_i ((d), (rs), (is), SETLEr(jit_reg8(d))		      )
-#define jit_gti_i(d, rs, is)	jit_bool_i ((d), (rs), (is), SETGr(jit_reg8(d)) 		      )
-#define jit_gei_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETGEr(jit_reg8(d)), SETNSr(jit_reg8(d)) )
-#define jit_eqi_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETEr(jit_reg8(d)),  SETEr(jit_reg8(d))  )
-#define jit_nei_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETNEr(jit_reg8(d)), SETNEr(jit_reg8(d)) )
-#define jit_lti_ui(d, rs, is)	jit_bool_i0((d), (rs), (is), SETBr(jit_reg8(d)),  XORLrr((d), (d))    )
-#define jit_lei_ui(d, rs, is)	jit_bool_i0((d), (rs), (is), SETBEr(jit_reg8(d)), SETEr(jit_reg8(d))  )
-#define jit_gti_ui(d, rs, is)	jit_bool_i0((d), (rs), (is), SETAr(jit_reg8(d)),  SETNEr(jit_reg8(d)) )
-#define jit_gei_ui(d, rs, is)	jit_bool_i0((d), (rs), (is), SETAEr(jit_reg8(d)), INCLr((d))	      )
+#define jit_lti_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETLr,  SETSr  )
+#define jit_lei_i(d, rs, is)	jit_bool_i ((d), (rs), (is), SETLEr	    )
+#define jit_gti_i(d, rs, is)	jit_bool_i ((d), (rs), (is), SETGr 	    )
+#define jit_gei_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETGEr, SETNSr )
+#define jit_eqi_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETEr,  SETEr  )
+#define jit_nei_i(d, rs, is)	jit_bool_i0((d), (rs), (is), SETNEr, SETNEr )
+#define jit_lti_ui(d, rs, is)	jit_bool_i ((d), (rs), (is), SETBr	    )
+#define jit_lei_ui(d, rs, is)	jit_bool_i0((d), (rs), (is), SETBEr, SETEr  )
+#define jit_gti_ui(d, rs, is)	jit_bool_i0((d), (rs), (is), SETAr,  SETNEr )
+#define jit_gei_ui(d, rs, is)	jit_bool_i0((d), (rs), (is), SETAEr, INCLr  )
 
 /* Jump */
 #define jit_bltr_i(label, s1, s2)	jit_bra_r((s1), (s2), JLm(label, 0,0,0) )
@@ -353,10 +344,10 @@ struct jit_local_state {
 #define jit_bgei_i(label, rs, is)	jit_bra_i0((rs), (is), JGEm(label,0,0,0), JNSm(label,0,0,0) )
 #define jit_beqi_i(label, rs, is)	jit_bra_i0((rs), (is), JEm(label, 0,0,0), JEm(label, 0,0,0) )
 #define jit_bnei_i(label, rs, is)	jit_bra_i0((rs), (is), JNEm(label,0,0,0), JNEm(label,0,0,0) )
-#define jit_blti_ui(label, rs, is)	jit_bra_i ((rs), (is), JLm(label, 0,0,0)		    )
-#define jit_blei_ui(label, rs, is)	jit_bra_i0((rs), (is), JLEm(label,0,0,0), JEm(label, 0,0,0) )
-#define jit_bgti_ui(label, rs, is)	jit_bra_i0((rs), (is), JGm(label, 0,0,0), JNEm(label,0,0,0) )
-#define jit_bgei_ui(label, rs, is)	jit_bra_i ((rs), (is), JGEm(label,0,0,0)		    )
+#define jit_blti_ui(label, rs, is)	jit_bra_i ((rs), (is), JBm(label, 0,0,0)		    )
+#define jit_blei_ui(label, rs, is)	jit_bra_i0((rs), (is), JBEm(label,0,0,0), JEm(label, 0,0,0) )
+#define jit_bgti_ui(label, rs, is)	jit_bra_i0((rs), (is), JAm(label, 0,0,0), JNEm(label,0,0,0) )
+#define jit_bgei_ui(label, rs, is)	jit_bra_i ((rs), (is), JAEm(label,0,0,0)		    )
 #define jit_boaddi_i(label, rs, is)	(ADDLir((is), (rs)), JOm(label,0,0,0), _jit.x.pc)
 #define jit_bosubi_i(label, rs, is)	(SUBLir((is), (rs)), JOm(label,0,0,0), _jit.x.pc)
 #define jit_boaddi_ui(label, rs, is)	(ADDLir((is), (rs)), JCm(label,0,0,0), _jit.x.pc)
@@ -367,35 +358,36 @@ struct jit_local_state {
 
 #define jit_jmpi(label)		(JMPm( ((unsigned long) (label)),	0, 0, 0), _jit.x.pc)
 #define jit_calli(label)	(CALLm( ((unsigned long) (label)),	0, 0, 0), _jit.x.pc)
+#define jit_callr(reg)		(CALLsr(reg))
 #define jit_jmpr(reg)		JMPsr(reg)
-#define jit_patch(jump_pc)	(*_PSL((jump_pc) - 4) = _SL(_jit.x.pc - (jump_pc)))
-#define jit_ret()		(POPLr(_EDI), POPLr(_ESI), POPLr(_EBX), POPLr(_EBP), RET())
+#define jit_patch_at(jump_pc,v)	(*_PSL((jump_pc) - 4) = _jit_SL((v) - (jump_pc)))
+#define jit_ret()		(POPLr(_EDI), POPLr(_ESI), POPLr(_EBX), POPLr(_EBP), RET_())
 
 /* Memory */
-#define jit_ldi_c(d, is)		jit_movbmr((is), 0,    0,    0, (d), jit_extr_c_i((d), (d)))
-#define jit_ldr_c(d, rs)		jit_movbmr(0,    (rs), 0,    0, (d), jit_extr_c_i((d), (d)))
-#define jit_ldxr_c(d, s1, s2)		jit_movbmr(0,    (s1), (s2), 1, (d), jit_extr_c_i((d), (d)))
-#define jit_ldxi_c(d, rs, is)		jit_movbmr((is), (rs), 0,    0, (d), jit_extr_c_i((d), (d)))
+#define jit_ldi_c(d, is)		MOVSBLmr((is), 0,    0,    0, (d))
+#define jit_ldr_c(d, rs)		MOVSBLmr(0,    (rs), 0,    0, (d))
+#define jit_ldxr_c(d, s1, s2)		MOVSBLmr(0,    (s1), (s2), 1, (d))
+#define jit_ldxi_c(d, rs, is)		MOVSBLmr((is), (rs), 0,    0, (d))
 
-#define jit_ldi_uc(d, is)		jit_movbmr((is), 0,    0,    0, (d), jit_extr_uc_ui((d), (d)))
-#define jit_ldr_uc(d, rs)		jit_movbmr(0,    (rs), 0,    0, (d), jit_extr_uc_ui((d), (d)))
-#define jit_ldxr_uc(d, s1, s2)		jit_movbmr(0,    (s1), (s2), 1, (d), jit_extr_uc_ui((d), (d)))
-#define jit_ldxi_uc(d, rs, is)		jit_movbmr((is), (rs), 0,    0, (d), jit_extr_uc_ui((d), (d)))
+#define jit_ldi_uc(d, is)		MOVZBLmr((is), 0,    0,    0, (d))
+#define jit_ldr_uc(d, rs)		MOVZBLmr(0,    (rs), 0,    0, (d))
+#define jit_ldxr_uc(d, s1, s2)		MOVZBLmr(0,    (s1), (s2), 1, (d))
+#define jit_ldxi_uc(d, rs, is)		MOVZBLmr((is), (rs), 0,    0, (d))
 
-#define jit_sti_c(id, rs)		jit_movbrm((rs), (id), 0,    0,    0)
-#define jit_str_c(rd, rs)		jit_movbrm((rs), 0,    (rd), 0,    0)
-#define jit_stxr_c(d1, d2, rs)		jit_movbrm((rs), 0,    (d1), (d2), 1)
-#define jit_stxi_c(id, rd, rs)		jit_movbrm((rs), (id), (rd), 0,    0)
+#define jit_sti_c(id, rs)               jit_movbrm((rs), (id), 0,    0,    0)
+#define jit_str_c(rd, rs)               jit_movbrm((rs), 0,    (rd), 0,    0)
+#define jit_stxr_c(d1, d2, rs)          jit_movbrm((rs), 0,    (d1), (d2), 1)
+#define jit_stxi_c(id, rd, rs)          jit_movbrm((rs), (id), (rd), 0,    0)
 
-#define jit_ldi_s(d, is)		(MOVWmr((is), 0,    0,    0,  jit_reg16(d)), jit_extr_s_i((d), (d)))
-#define jit_ldr_s(d, rs)		(MOVWmr(0,    (rs), 0,    0,  jit_reg16(d)), jit_extr_s_i((d), (d)))
-#define jit_ldxr_s(d, s1, s2)		(MOVWmr(0,    (s1), (s2), 1,  jit_reg16(d)), jit_extr_s_i((d), (d)))
-#define jit_ldxi_s(d, rs, is)		(MOVWmr((is), (rs), 0,    0,  jit_reg16(d)), jit_extr_s_i((d), (d)))
+#define jit_ldi_s(d, is)		MOVSWLmr((is), 0,    0,    0, (d))
+#define jit_ldr_s(d, rs)		MOVSWLmr(0,    (rs), 0,    0, (d))
+#define jit_ldxr_s(d, s1, s2)		MOVSWLmr(0,    (s1), (s2), 1, (d))
+#define jit_ldxi_s(d, rs, is)		MOVSWLmr((is), (rs), 0,    0, (d))
 
-#define jit_ldi_us(d, is)		(XORLrr((d), (d)), MOVWmr((is), 0,    0,    0,  jit_reg16(d)))
-#define jit_ldr_us(d, rs)		(XORLrr((d), (d)), MOVWmr(0,    (rs), 0,    0,  jit_reg16(d)))
-#define jit_ldxr_us(d, s1, s2)		(XORLrr((d), (d)), MOVWmr(0,    (s1), (s2), 1,  jit_reg16(d)))
-#define jit_ldxi_us(d, rs, is)		(XORLrr((d), (d)), MOVWmr((is), (rs), 0,    0,  jit_reg16(d)))
+#define jit_ldi_us(d, is)		MOVZWLmr((is), 0,    0,    0,  (d))
+#define jit_ldr_us(d, rs)		MOVZWLmr(0,    (rs), 0,    0,  (d))
+#define jit_ldxr_us(d, s1, s2)		MOVZWLmr(0,    (s1), (s2), 1,  (d))
+#define jit_ldxi_us(d, rs, is)		MOVZWLmr((is), (rs), 0,    0,  (d))
 
 #define jit_sti_s(id, rs)		MOVWrm(jit_reg16(rs), (id), 0,    0,    0)
 #define jit_str_s(rd, rs)		MOVWrm(jit_reg16(rs), 0,    (rd), 0,    0)
@@ -413,9 +405,9 @@ struct jit_local_state {
 #define jit_stxi_i(id, rd, rs)		MOVLrm((rs), (id), (rd), 0,    0)
 
 /* Extra */
-#define jit_nop()			NOP()
+#define jit_nop()			NOP_()
 
 #define _jit_alignment(pc, n)		(((pc ^ _MASK(4)) + 1) & _MASK(n))
-#define jit_align(n) 			_NOPi(_jit_alignment(_UL(_jit.x.pc), (n)))
+#define jit_align(n) 			NOPi(_jit_alignment(_jit_UL(_jit.x.pc), (n)))
 
 #endif /* __lightning_core_h */

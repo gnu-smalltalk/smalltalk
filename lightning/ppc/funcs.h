@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU lightning.
@@ -65,17 +65,17 @@ jit_flush_code(void *start, void *end)
         break;
   }
 
-  start -= ((long) start) & (cache_line_size - 1);
-  end -= ((long) end) & (cache_line_size - 1);
+  start = (void *) (((long) start) & ~(cache_line_size - 1));
+  end = (void *) (((long) end) & ~(cache_line_size - 1));
 
   /* Force data cache write-backs */
-  for (ddest = start; ddest <= (char *) end; ddest += cache_line_size) {
+  for (ddest = (char *) start; ddest <= (char *) end; ddest += cache_line_size) {
     __asm__ __volatile__ ("dcbst 0,%0" : : "r"(ddest));
   }
   __asm__ __volatile__ ("sync" : : );
 
   /* Now invalidate the instruction cache */
-  for (idest = start; idest <= (char *) end; idest += cache_line_size) {
+  for (idest = (char *) start; idest <= (char *) end; idest += cache_line_size) {
     __asm__ __volatile__ ("icbi 0,%0" : : "r"(idest));
   }
   __asm__ __volatile__ ("isync" : : );
@@ -85,75 +85,78 @@ jit_flush_code(void *start, void *end)
 
 #define _jit (*jit)
 
-/* Emit a trampoline for a function.
- * Upon entrance to the trampoline:
- *   - R0      = return address for the function
- *   - LR      = address where the real code for the function lies
- *   - R3-R8   = parameters
- * After jumping to the address pointed to by R10:
- *   - LR      = address where the epilog lies (the function must return there)
- *   - R25-R20 = parameters (order is reversed, 1st argument is R25)
- */
-static jit_insn *
-_jit_trampoline(jit, n)
-     register jit_state *jit;
-     register int	n;
+static void
+_jit_epilog(jit_state *jit)
 {
-  static jit_insn	trampolines[200];
-  static jit_insn	*p_trampolines[6], *free = trampolines;
-  jit_insn		*trampo;
-  int			i, ofs, frame_size;
+  int n = _jitl.nbArgs;
+  int frame_size, ofs;
+  int first_saved_reg = JIT_AUX - n;
+  int num_saved_regs = 32 - first_saved_reg;
 
-  if (!p_trampolines[n]) {
-    _jit.x.pc = trampo = p_trampolines[n] = free;
+  frame_size = 24 + 32 + num_saved_regs * 4;	/* r24..r31 + args		   */
+  frame_size += 15;			/* the stack must be quad-word     */
+  frame_size &= ~15;			/* aligned			   */
 
-    frame_size = 24 + (6 + n) * 4;	/* r26..r31 + args		   */
-    frame_size += 15;			/* the stack must be quad-word     */
-    frame_size &= ~15;			/* aligned			   */
+#ifdef _CALL_DARWIN
+  LWZrm(0, frame_size + 8, 1);	/* lwz   r0, x+8(r1)  (ret.addr.)  */
+#else
+  LWZrm(0, frame_size + 4, 1);	/* lwz   r0, x+4(r1)  (ret.addr.)  */
+#endif
+  MTLRr(0);				/* mtspr LR, r0			   */
 
-    STWUrm(1, -frame_size, 1);		/* stwu  r1, -x(r1)		   */
-
-    for (ofs = frame_size - (6 + n) * 4, i = 26 - n; i <= 31; ofs += 4, i++) {
-      STWrm(i, ofs, 1);			/* stw   rI, ofs(r1)		   */
-    }
-    STWrm(0, ofs+4, 1);			/* stw   r0, x(r1)		   */
-    for (i = 0; i < n; i++) {
-      MRrr(25-i, 3+i);			/* save parameters in r25..r20	   */
-    }
-    BLRL();				/* blrl				   */
-    LWZrm(0, ofs+4, 1);			/* lwz   r0, x(r1)  (ret.addr.)    */
-    MTLRr(0);				/* mtspr LR, r0			   */
-
-    for (ofs = frame_size - (6 + n) * 4, i = 26 - n; i <= 31; ofs += 4, i++) {
-      LWZrm(i, ofs, 1);			/* lwz   rI, ofs(r1)		   */
-    }
-    ADDIrri(1, 1, frame_size);		/* addi  r1, r1, x		   */
-    BLR();				/* blr				   */
-
-    jit_flush_code(trampo, _jit.x.pc);
-    free = _jit.x.pc;
-  }
-
-  return p_trampolines[n];
+  ofs = frame_size - num_saved_regs * 4;
+  LMWrm(first_saved_reg, ofs, 1);	/* lmw   rI, ofs(r1)		   */
+  ADDIrri(1, 1, frame_size);		/* addi  r1, r1, x		   */
+  BLR();				/* blr				   */
 }
 
+/* Emit a prolog for a function.
+   Upon entrance to the trampoline:
+     - LR      = address where the real code for the function lies
+     - R3-R8   = parameters
+   Upon finishing the trampoline:
+     - R0      = return address for the function
+     - R25-R20 = parameters (order is reversed, 1st argument is R25)
+  
+   The +32 in frame_size computation is to accound for the parameter area of
+   a function frame. 
+
+   On PPC the frame must have space to host the arguments of any callee.
+   However, as it currently stands, the argument to jit_trampoline (n) is
+   the number of arguments of the caller we generate. Therefore, the
+   callee can overwrite a part of the stack (saved register area when it
+   flushes its own parameter on the stack. The addition of a constant 
+   offset = 32 is enough to hold eight 4 bytes arguments.  This is less
+   than perfect but is a reasonable work around for now. 
+   Better solution must be investigated.  */
 static void
-_jit_prolog(jit, n)
-     register jit_state *jit;
-     register int	n;
+_jit_prolog(jit_state *jit, int n)
 {
-  register jit_insn	*save_pc, *trampo;
+  int frame_size;
+  int ofs, i;
+  int first_saved_reg = JIT_AUX - n;
+  int num_saved_regs = 32 - first_saved_reg;
 
-  save_pc = _jit.x.pc;
-  trampo = _jit_trampoline(jit, n);
-  _jit.x.pc = save_pc;
+  _jitl.nextarg_geti = JIT_AUX - 1;
+  _jitl.nextarg_getd = 1;
+  _jitl.nbArgs = n;
 
-  _jitl.nextarg_get = 25;
+  frame_size = 24 + 32 + num_saved_regs * 4;	/* r27..r31 + args		   */
+  frame_size += 15;			/* the stack must be quad-word     */
+  frame_size &= ~15;			/* aligned			   */
+
   MFLRr(0);
-  MOVEIri(10, trampo);
-  MTLRr(10);
-  BLRL();				/* blrl				  */
-  MFLRr(31);				/* mflr  r31			  */
+  STWUrm(1, -frame_size, 1);		/* stwu  r1, -x(r1)		   */
+
+  ofs = frame_size - num_saved_regs * 4;
+  STMWrm(first_saved_reg, ofs, 1);		/* stmw  rI, ofs(r1)		   */
+#ifdef _CALL_DARWIN
+  STWrm(0, frame_size + 8, 1);		/* stw   r0, x+8(r1)		   */
+#else
+  STWrm(0, frame_size + 4, 1);		/* stw   r0, x+4(r1)		   */
+#endif
+  for (i = 0; i < n; i++)
+    MRrr(JIT_AUX-1-i, 3+i);		/* save parameters below r24	   */
 }
 
 #undef _jit

@@ -49,11 +49,12 @@
 
 typedef unsigned int jit_insn;
 
-#define _d30(BD)	((_UL(BD) - _UL(_jit.x.pc))>>2)
+#ifndef LIGHTNING_DEBUG
+#define _d30(BD)	((_jit_UL(BD) - _jit_UL(_jit.x.pc))>>2)
 #define _d22(BD)	_ck_d(22, _d30(BD))
 
-#define _HI(I)		(_UL(I) >>     (10))
-#define _LO(I)		(_UL(I) & _MASK(10))
+#define _HI(I)		(_jit_UL(I) >>     (10))
+#define _LO(I)		(_jit_UL(I) & _MASK(10))
 
 /* register names */
 
@@ -69,18 +70,21 @@ typedef unsigned int jit_insn;
 /* instruction formats -- Figure 5-1, page 44 in */
 /* SPARC International, "The SPARC Architecture Manual, Version 8", Prentice-Hall, 1992.  */
 
-#define _0i(RD,     OP2,	  IMM)	_I((0<<30)|		(_u5(RD)<<25)|(_u3(OP2)<<22)|					       _u22(IMM))
-#define _0(  A, CC, OP2,	  DSP)	_I((0<<30)|(_u1(A)<<29)|(_u4(CC)<<25)|(_u3(OP2)<<22)|					       _d22(DSP))
-#define _0d( A, CC, OP2,	  DSP)	_I((0<<30)|(_u1(A)<<29)|(_u4(CC)<<25)|(_u3(OP2)<<22)|					       _u22(DSP))
+#define _0i(RD,     OP2,	  IMM)	_jit_I((0<<30)|		(_u5(RD)<<25)|(_u3(OP2)<<22)|					       _u22(IMM))
+#define _0(  A, CC, OP2,	  DSP)	_jit_I((0<<30)|(_u1(A)<<29)|(_u4(CC)<<25)|(_u3(OP2)<<22)|					       _d22(DSP))
+#define _0d( A, CC, OP2,	  DSP)	_jit_I((0<<30)|(_u1(A)<<29)|(_u4(CC)<<25)|(_u3(OP2)<<22)|					       _u22(DSP))
 
-#define _1(			  DSP)	_I((1<<30)|										       _d30(DSP))
+#define _1(			  DSP)	_jit_I((1<<30)|										       _d30(DSP))
 
-#define _2( RD, OP3, RS1, I, ASI, RS2)	_I((2<<30)|		(_u5(RD)<<25)|(_u6(OP3)<<19)|(_u5(RS1)<<14)|(_u1(I)<<13)|(_u8(ASI)<<5)|_u5 (RS2))
-#define _2i(RD, OP3, RS1, I,	  IMM)	_I((2<<30)|		(_u5(RD)<<25)|(_u6(OP3)<<19)|(_u5(RS1)<<14)|(_u1(I)<<13)|	       _s13(IMM))
-#define _2f(RD, OP3, RS1,    OPF, RS2)	_I((2<<30)|		(_u5(RD)<<25)|(_u6(OP3)<<19)|(_u5(RS1)<<14)|		 (_u9(OPF)<<5)|_u5 (RS2))
+#define _2( RD, OP3, RS1, I, ASI, RS2)	_jit_I((2<<30)|		(_u5(RD)<<25)|(_u6(OP3)<<19)|(_u5(RS1)<<14)|(_u1(I)<<13)|(_u8(ASI)<<5)|_u5 (RS2))
+#define _2i(RD, OP3, RS1, I,	  IMM)	_jit_I((2<<30)|		(_u5(RD)<<25)|(_u6(OP3)<<19)|(_u5(RS1)<<14)|(_u1(I)<<13)|	       _s13(IMM))
+#define _2f(RD, OP3, RS1,    OPF, RS2)	_jit_I((2<<30)|		(_u5(RD)<<25)|(_u6(OP3)<<19)|(_u5(RS1)<<14)|		 (_u9(OPF)<<5)|_u5 (RS2))
 
-#define _3( RD, OP3, RS1, I, ASI, RS2)	_I((3<<30)|		(_u5(RD)<<25)|(_u6(OP3)<<19)|(_u5(RS1)<<14)|(_u1(I)<<13)|(_u8(ASI)<<5)|_u5 (RS2))
-#define _3i(RD, OP3, RS1, I,	  IMM)	_I((3<<30)|		(_u5(RD)<<25)|(_u6(OP3)<<19)|(_u5(RS1)<<14)|(_u1(I)<<13)|	       _s13(IMM))
+#define _3( RD, OP3, RS1, I, ASI, RS2)	_jit_I((3<<30)|		(_u5(RD)<<25)|(_u6(OP3)<<19)|(_u5(RS1)<<14)|(_u1(I)<<13)|(_u8(ASI)<<5)|_u5 (RS2))
+#define _3i(RD, OP3, RS1, I,	  IMM)	_jit_I((3<<30)|		(_u5(RD)<<25)|(_u6(OP3)<<19)|(_u5(RS1)<<14)|(_u1(I)<<13)|	       _s13(IMM))
+
+#define _FP1(RD, RS1, OPF, RS2)	_2f((RD), 52, (RS1), (OPF), (RS2))
+#define _FP2(RD, RS1, OPF, RS2)	_2f((RD), 53, (RS1), (OPF), (RS2))
 
 /* basic instructions  [Section B, page 87] */
 
@@ -300,4 +304,80 @@ typedef unsigned int jit_insn;
 #define WRii(IMM, RD)		WRrii(0, (IMM), (RD))
 #define WRri(RS2, RD)		WRrri(0, (RS2), (RD))
 
+#define LDFSRx(RS1, RS2)	_3   (0, 33, (RS1), 0, 0, (RS2))
+#define LDFSRm(RS1, IMM)	_3i  (0, 33, (RS1), 1,    (IMM))
+#define STFSRx(RD1, RD2)	_3   (0, 37, (RD1), 0, 0, (RD2))
+#define STFSRm(RD, IMM)		_3i  (0, 37, (RD),  1,    (IMM))
+
+#define FITODrr(FRS, FRD)		_FP1((FRD),  0, 200, (FRS))
+#define FITOSrr(FRS, FRD)		_FP1((FRD),  0, 196, (FRS))
+#define FDTOIrr(FRS, FRD)		_FP1((FRD),  0, 210, (FRS))
+#define FSTOIrr(FRS, FRD)		_FP1((FRD),  0, 209, (FRS))
+#define FSTODrr(FRS, FRD)		_FP1((FRD),  0, 201, (FRS))
+#define FDTOSrr(FRS, FRD)		_FP1((FRD),  0, 198, (FRS))
+#define FMOVSrr(FRS, FRD)		_FP1((FRD),  0,   1, (FRS))
+#define FNEGSrr(FRS, FRD)		_FP1((FRD),  0,   5, (FRS))
+#define FABSSrr(FRS, FRD)		_FP1((FRD),  0,   9, (FRS))
+#define FMOVDrr(FRS, FRD)		_FP1((FRD),  0,   2, (FRS))
+#define FNEGDrr(FRS, FRD)		_FP1((FRD),  0,   6, (FRS))
+#define FABSDrr(FRS, FRD)		_FP1((FRD),  0,  10, (FRS))
+#define FSQRTDrr(FRS, FRD)		_FP1((FRD),  0,  42, (FRS))
+#define FSQRTSrr(FRS, FRD)		_FP1((FRD),  0,  41, (FRS))
+
+#define FADDSrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  65, (FRS2))
+#define FSUBSrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  69, (FRS2))
+#define FMULSrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  73, (FRS2))
+#define FDIVSrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  77, (FRS2))
+
+#define FADDDrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  66, (FRS2))
+#define FSUBDrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  70, (FRS2))
+#define FMULDrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  74, (FRS2))
+#define FDIVDrrr(FRS1, FRS2, FRD)	_FP1((FRD),  (FRS1),  78, (FRS2))
+
+#define FCMPSrr(FRS1, FRS2)		_FP2(0,      (FRS1),  81, (FRS2))
+#define FCMPDrr(FRS1, FRS2)		_FP2(0,      (FRS1),  82, (FRS2))
+
+#define LDFxr(RS1, RS2, RD)	_3   ((RD), 32, (RS1), 0, 0, (RS2))
+#define LDFmr(RS1, IMM, RD)	_3i  ((RD), 32, (RS1), 1,    (IMM))
+#define LDDFxr(RS1, RS2, RD)	_3   ((RD), 35, (RS1), 0, 0, (RS2))
+#define LDDFmr(RS1, IMM, RD)	_3i  ((RD), 35, (RS1), 1,    (IMM))
+#define STFrx(RS, RD1, RD2)	_3   ((RS), 36, (RD1), 0, 0, (RD2))
+#define STFrm(RS, RD1, IMM)	_3i  ((RS), 36, (RD1), 1,    (IMM))
+#define STDFrx(RS, RD1, RD2)	_3   ((RS), 39, (RD1), 0, 0, (RD2))
+#define STDFrm(RS, RD1, IMM)	_3i  ((RS), 39, (RD1), 1,    (IMM))
+
+#define FBNi(DISP)		_0   (0,  0, 6, (DISP))
+#define FBN_Ai(DISP)		_0   (1,  0, 6, (DISP))
+#define FBNEi(DISP)		_0   (0,  1, 6, (DISP))
+#define FBNE_Ai(DISP)		_0   (1,  1, 6, (DISP))
+#define FBLGi(DISP)		_0   (0,  2, 6, (DISP))
+#define FBLG_Ai(DISP)		_0   (1,  2, 6, (DISP))
+#define FBULi(DISP)		_0   (0,  3, 6, (DISP))
+#define FBUL_Ai(DISP)		_0   (1,  3, 6, (DISP))
+#define FBLi(DISP)		_0   (0,  4, 6, (DISP))
+#define FBL_Ai(DISP)		_0   (1,  4, 6, (DISP))
+#define FBUGi(DISP)		_0   (0,  5, 6, (DISP))
+#define FBUG_Ai(DISP)		_0   (1,  5, 6, (DISP))
+#define FBGi(DISP)		_0   (0,  6, 6, (DISP))
+#define FBG_Ai(DISP)		_0   (1,  6, 6, (DISP))
+#define FBUi(DISP)		_0   (0,  7, 6, (DISP))
+#define FBU_Ai(DISP)		_0   (1,  7, 6, (DISP))
+#define FBAi(DISP)		_0   (0,  8, 6, (DISP))
+#define FBA_Ai(DISP)		_0   (1,  8, 6, (DISP))
+#define FBEi(DISP)		_0   (0,  9, 6, (DISP))
+#define FBE_Ai(DISP)		_0   (1,  9, 6, (DISP))
+#define FBUEi(DISP)		_0   (0, 10, 6, (DISP))
+#define FBUE_Ai(DISP)		_0   (1, 10, 6, (DISP))
+#define FBGEi(DISP)		_0   (0, 11, 6, (DISP))
+#define FBGE_Ai(DISP)		_0   (1, 11, 6, (DISP))
+#define FBUGEi(DISP)		_0   (0, 12, 6, (DISP))
+#define FBUGE_Ai(DISP)		_0   (1, 12, 6, (DISP))
+#define FBLEi(DISP)		_0   (0, 13, 6, (DISP))
+#define FBLE_Ai(DISP)		_0   (1, 13, 6, (DISP))
+#define FBULEi(DISP)		_0   (0, 14, 6, (DISP))
+#define FBULE_Ai(DISP)		_0   (1, 14, 6, (DISP))
+#define FBOi(DISP)		_0   (0, 15, 6, (DISP))
+#define FBO_Ai(DISP)		_0   (1, 15, 6, (DISP))
+
+#endif
 #endif /* __ccg_asm_sparc_h */

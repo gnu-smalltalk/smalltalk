@@ -33,14 +33,13 @@
 #ifndef __lightning_core_h
 #define __lightning_core_h
 
-#define JIT_R0			_Rl(0)
-#define JIT_R1			_Rl(1)
-#define JIT_R2			_Rl(2)
-#define JIT_V0			_Rl(3)
-#define JIT_V1			_Rl(4)
-#define JIT_V2			_Rl(5)
+#define JIT_R_NUM		3
+#define JIT_V_NUM		6
+#define JIT_R(i)		((i) ? _Rl((i) - 1) : _Rg(2))
+#define JIT_V(i)		_Rl((i)+2)
+
 #define JIT_BIG			_Rg(1)	/* %g1 used to make 32-bit operands */
-#define JIT_BIG2		_Rg(2)	/* %g2 used to make 32-bit compare operands */
+#define JIT_BIG2		_Ro(7)	/* %o7 used to make 32-bit compare operands */
 #define JIT_SP			_Ro(6)
 #define JIT_RZERO		_Rg(0)
 #define JIT_RET			_Ri(0)
@@ -94,57 +93,37 @@ struct jit_local_state {
 #define jit_prepare_y(rs, is)		(SRArir(rs, 31, JIT_BIG), WRri(JIT_BIG, _y), NOP(), NOP(), NOP(), _jit.x.pc -= jit_immsize(is))
 #define jit_clr_y(rs, is)		(			  WRri(0,	_y), NOP(), NOP(), NOP(), _jit.x.pc -= jit_immsize(is))
 
-/* How many instruction are needed by `set imm, %l6' */
-#define jit_immsize(imm)		(_siP(13, (imm)) ? 0 :		\
-					((imm) & 0x3ff   ? 2 : 1))
+#define jit_modr(jit_div, jit_mul, d, s1, s2)   \
+        (jit_div (JIT_BIG, s1, s2),             \
+         jit_mul (JIT_BIG, JIT_BIG, s2),        \
+         jit_subr_i (d, s1, JIT_BIG))
+
+#define jit_modi(jit_divi, jit_muli, jit_divr, jit_mulr, d, rs, is)     \
+        (_siP(13,(imm))                                                 \
+         ? (jit_divi (JIT_BIG, rs, is),                                 \
+            jit_muli (JIT_BIG, JIT_BIG, is),                            \
+            jit_subr_i (d, rs, JIT_BIG))                                \
+         : (SETir ((is), JIT_BIG2),                                     \
+            jit_modr (jit_divr, jit_mulr, d, rs, JIT_BIG2)))
+
+/* How many instruction are needed to put imm in a register.  */
+#define jit_immsize(imm)	(!(imm) ? 0 :			\
+				(!_siP((imm), 13) && ((imm) & 0x3ff)  ? 2 : 1))
 
 
 /* branch instructions return the address of the *delay* instruction -- this
  * is just a helper macro that makes jit_patch more readable.
  */
-#define jit_patch_(jump_pc)						\
+#define jit_patch_(jump_pc,pv)						\
 	(*jump_pc &= ~_MASK(22),					\
-	 *jump_pc |= ((_UL(_jit.x.pc) - _UL(jump_pc)) >> 2) & _MASK(22))
+	 *jump_pc |= ((_jit_UL((pv)) - _jit_UL(jump_pc)) >> 2) & _MASK(22))
 
-/* helper macros for remainder -- it is said that _rem and _urem
- * trash the output registers
- *
- *  jit_modr			jit_modi
- *-----------------------------------------------------------------------------
- *  mov  %o0, %l7		mov  %o0, %l7		! save o0
- *  mov  s1, %o0		mov  rs,  %o0
- *  mov  %o1, %l6					! save o1
- *  mov  s2, %o1
- *  save %sp, -96, %sp		save %sp, -96, %sp	! switch window
- *  mov  %i1, %o1		set  is, %o1		! transfer/set divisor
- *  call f						! call the function
- *  mov  %i0, %o0		mov  %i0, %o0		! transfer dividend
- *  mov  %o0, %i0		mov  %o0, %i0		! transfer result
- *  restore			restore			! switch to old window
- *  mov  %o0, d			mov  %o0, d		! store result
- *  mov  %l7, %o0		mov  %o0, %l7		! restore o0
- *  mov  %l6, %o1					! restore o1
- */
-#define jit_mod(d, rs, f, before_save, set_o1, at_end)	(		\
-	MOVrr(_Ro(0),	_Rl(7)),					\
-	MOVrr(rs,	_Ro(0)),					\
-	before_save,							\
-	SAVErir(JIT_SP, -96, JIT_SP),					\
-	set_o1,								\
-	CALLi( (unsigned long) f),					\
-	MOVrr(_Ri(0),	_Ro(0)),					\
-	MOVrr(_Ro(0),	_Ri(0)),					\
-	RESTORE(),							\
-	MOVrr(_Ro(0),	d),						\
-	MOVrr(_Rl(7),	_Ro(0)),					\
-	at_end)								\
+#define jit_patch_set(sethi_pc, or_pc, dest)			\
+	(*(sethi_pc) &= ~_MASK(22), *(sethi_pc) |= _HI(dest),	\
+	 *(or_pc) &= ~_MASK(13), *(or_pc) |= _LO(dest))		\
 
-#define jit_modi(d, rs, is, f)	jit_mod(d, s1, f, 0,					     SETir((is), _Ro(1)),   0)
-#define jit_modr(d, s1, s2, f)	jit_mod(d, s1, f, (MOVrr(_Ro(1), _Rl(6)), MOVrr(s2, _Ro(1)),  MOVrr(_Ri(1), _Ro(1)), MOVrr(_Rl(6), _Ro(1)) )) 
-
-
-
-
+#define jit_patch_movi(movi_pc, val)				\
+	jit_patch_set((movi_pc) - 2, (movi_pc) - 1, (val))
 
 #define	jit_arg_c()			(_jitl.nextarg_get++)
 #define	jit_arg_i()			(_jitl.nextarg_get++)
@@ -196,10 +175,12 @@ struct jit_local_state {
 #define jit_boaddr_ui(label, s1, s2)	(		   ADDCCrrr((s1), (s2), (s1)),			         BCSi((label)), NOP(), _jit.x.pc - 1)
 #define jit_bosubr_ui(label, s1, s2)	(		   SUBCCrrr((s1), (s2), (s1)),			         BCSi((label)), NOP(), _jit.x.pc - 1)
 #define jit_calli(label)		(CALLi(label), NOP(), _jit.x.pc - 1)
-#define jit_divi_i(d, rs, is)		(jit_prepare_y((rs), (is)), jit_chk_imm((is), SDIVrir((rs), (is), (d)), SDIVrrr((rs), JIT_BIG, (d))) )
-#define jit_divi_ui(d, rs, is)		(jit_clr_y((rs)),    (is)), jit_chk_imm((is), UDIVrir((rs), (is), (d)), UDIVrrr((rs), JIT_BIG, (d))) )
-#define jit_divr_i(d, s1, s2)		(jit_prepare_y((s1), 	3),				    SDIVrrr((s1), (s2), (d)))
-#define jit_divr_ui(d, s1, s2)		(jit_clr_y((s1),     	3),				    UDIVrrr((s1), (s2), (d)))
+#define jit_callr(reg)			(CALLx((reg), 0), NOP())
+
+#define jit_divi_i(d, rs, is)		(jit_prepare_y((rs), 0x12345678), SETir((is), JIT_BIG), SDIVrrr((rs), JIT_BIG, (d)) )
+#define jit_divi_ui(d, rs, is)		(jit_clr_y((rs),     0x12345678), SETir((is), JIT_BIG), UDIVrrr((rs), JIT_BIG, (d)) )
+#define jit_divr_i(d, s1, s2)		(jit_prepare_y((s1), 0), 				SDIVrrr((s1), (s2), (d)))
+#define jit_divr_ui(d, s1, s2)		(jit_clr_y((s1),     0), 				UDIVrrr((s1), (s2), (d)))
 #define jit_eqi_i(d, rs, is)		jit_chk_imm((is), \
   (SUBCCrir((rs), (is), (d)), ADDXCCrir((d), -1, JIT_BIG), SUBXrir(0,-1,(d))),\
   jit_eqr_i(d, rs, JIT_BIG))
@@ -242,11 +223,12 @@ struct jit_local_state {
 #define jit_lti_ui(d, rs, is)		jit_booli ((d), (rs), (is), BLUi(_jit.x.pc + 3) )
 #define jit_ltr_i(d, s1, s2)		jit_boolr ((d), (s1), (s2), BLi(_jit.x.pc + 3)  )
 #define jit_ltr_ui(d, s1, s2)		jit_boolr ((d), (s1), (s2), BLUi(_jit.x.pc + 3) )
-#define jit_modi_i(d, rs, is)		jit_modi((d), (rs), (is), _rem)
-#define jit_modi_ui(d, rs, is)		jit_modi((d), (rs), (is), _urem)
-#define jit_modr_i(d, s1, s2)		jit_modr((d), (s1), (s2), _rem)
-#define jit_modr_ui(d, s1, s2)		jit_modr((d), (s1), (s2), _urem)
+#define jit_modi_i(d, rs, is)           jit_modi(jit_divi_i, jit_muli_i, jit_divr_i, jit_mulr_i, (d), (rs), (is))
+#define jit_modi_ui(d, rs, is)          jit_modi(jit_divi_ui, jit_muli_ui, jit_divr_ui, jit_mulr_ui, (d), (rs), (is))
+#define jit_modr_i(d, s1, s2)           jit_modr(jit_divr_i, jit_mulr_i, (d), (s1), (s2))
+#define jit_modr_ui(d, s1, s2)          jit_modr(jit_divr_ui, jit_mulr_ui, (d), (s1), (s2))
 #define jit_movi_i(d, is)		SETir((is), (d))
+#define jit_movi_p(d, is)		(SETir2(_HI((is)), _LO((is)), (d)), _jit.x.pc)
 #define jit_movr_i(d, rs)		MOVrr((rs), (d))
 #define jit_muli_i(d, rs, is)		jit_chk_imm((is), SMULrir((rs), (is), (d)), SMULrrr((rs), JIT_BIG, (d)))
 #define jit_muli_ui(d, rs, is)		jit_chk_imm((is), UMULrir((rs), (is), (d)), UMULrrr((rs), JIT_BIG, (d)))
@@ -255,14 +237,14 @@ struct jit_local_state {
 #define jit_nop()			NOP()
 #define jit_ori_i(d, rs, is)		jit_chk_imm((is), ORrir((rs), (is), (d)), ORrrr((rs), JIT_BIG, (d)))
 #define jit_orr_i(d, s1, s2)				  ORrrr((s1), (s2), (d))
-#define jit_patch(delay_pc)		jit_patch_ ( ((delay_pc) - 1) )
+#define jit_patch_at(delay_pc, pv)	jit_patch_ (((delay_pc) - 1) , (pv))
 #define jit_popr_i(rs)			(LDmr(JIT_SP, 0, (rs)), ADDrir(JIT_SP, 8, JIT_SP))
-#define jitfp_prepare(numargs, nf, nd)	(_jitl.nextarg_put = (numargs))
-#define jit_prolog(numargs)		(SAVErir(JIT_SP, -96, JIT_SP), _jitl.nextarg_get = _Ri(0))
+#define jit_prepare_i(num)		(_jitl.nextarg_put += (num))
+#define jit_prolog(numargs)		(SAVErir(JIT_SP, -120, JIT_SP), _jitl.nextarg_get = _Ri(0))
 #define jit_pushr_i(rs)			(STrm((rs), JIT_SP, -8), SUBrir(JIT_SP, 8, JIT_SP))
 #define jit_pusharg_i(rs)		(--_jitl.nextarg_put, MOVrr((rs), _Ro(_jitl.nextarg_put)))
 #define jit_ret()			(RET(), RESTORE())
-#define jit_retval(rd)			MOVrr(_Ro(0), (rd))
+#define jit_retval_i(rd)		MOVrr(_Ro(0), (rd))
 #define jit_rshi_i(d, rs, is)		SRArir((rs), (is), (d))
 #define jit_rshi_ui(d, rs, is)		SRLrir((rs), (is), (d))
 #define jit_rshr_i(d, r1, r2)		SRArrr((r1), (r2), (d))
