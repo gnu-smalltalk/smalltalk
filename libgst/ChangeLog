@@ -1,3 +1,8 @@
+2004-11-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/alloc.h: Use char for the type of large.data
+	in struct heap_block.
+
 2004-11-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/poll_.h: New name of...

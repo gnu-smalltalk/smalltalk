@@ -54,8 +54,9 @@ typedef struct heap_block
     struct {
       struct heap_block *next;	 /* Next block in freelist */
     } free;
-    struct {
-      long double data[1];	 /* Give appropriate alignment */
+    union {
+      long double align;	 /* Give appropriate alignment */
+      char data[1];
     } large;
   } var;
 }
