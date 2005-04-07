@@ -2207,11 +2207,12 @@ startPrefixMapping: prefix uri: uri
 
 !SAXDriver methodsFor: 'error handler'!
 
+
 fatalError: anException
-    anException raiseSignal!
+    anException signal!
 
 nonFatalError: anException
-    anException raiseSignal!
+    anException signal!
 
 warning: anException
     Transcript nl; show: anException messageText! !
@@ -3777,7 +3778,7 @@ pubIdLiteral
     	((' -''()+,./:=?;!*#@$_%' includes: ch)
     			or: [ch asInteger = 10
     			or: [ch asInteger = 13
-    			or: [ch < 127
+    			or: [ch asciiValue < 127
     			and: [ch isLetter or: [ch isDigit]]]]])
     		ifFalse: [self malformed: 'Invalid public id character found']].
     str replaceAll: Character tab with: Character space.
@@ -4112,7 +4113,7 @@ completeComment: str1
     buffer nextPutAll: (str copyFrom: 1 to: str size - 1).
     comment := buffer collection.
     size := buffer position.
-    index := comment findString: '--' startingAt: 1.
+    index := comment indexOfSubCollection: '--' startingAt: 1.
     (index = 0 or: [index >= size])
     	ifFalse: [self malformed: 'Doubled hyphens in comments are not permitted'].
     (size > 0 and: [(comment at: size) = $-])
@@ -5026,10 +5027,11 @@ atFeature: aURIstring
     aURIstring = SAXNamespacePrefixes
     	ifTrue: [^self showNamespaceDeclarations].
     aURIstring = SAXExternalGeneralEntities
-    	ifTrue: [^SAXNotSupportedException raiseSignal].
+    	ifTrue: [^SAXNotSupportedException signal].
     aURIstring = SAXExternalParameterEntities
-    	ifTrue: [^SAXNotSupportedException raiseSignal].
-    SAXNotRecognizedException new raiseSignal!
+    	ifTrue: [^SAXNotSupportedException signal].
+    SAXNotRecognizedException new signal
+!
 
 atFeature: aURIstring put: aBoolean
     aURIstring = SAXValidate
@@ -5039,16 +5041,19 @@ atFeature: aURIstring put: aBoolean
     aURIstring = SAXNamespacePrefixes
     	ifTrue: [^self showNamespaceDeclarations: aBoolean].
     aURIstring = SAXExternalGeneralEntities
-    	ifTrue: [^SAXNotSupportedException raiseSignal].
+    	ifTrue: [^SAXNotSupportedException signal].
     aURIstring = SAXExternalParameterEntities
-    	ifTrue: [^SAXNotSupportedException raiseSignal].
-    SAXNotRecognizedException new raiseSignal!
+    	ifTrue: [^SAXNotSupportedException signal].
+    SAXNotRecognizedException new signal
+!
 
 atProperty: aURIstring
-    SAXNotRecognizedException new raiseSignal!
+    SAXNotRecognizedException new signal
+!
 
 atProperty: aURIstring put: anObject
-    SAXNotRecognizedException new raiseSignal!
+    SAXNotRecognizedException new signal
+!
 
 contentHandler
     ^sax contentHandler!

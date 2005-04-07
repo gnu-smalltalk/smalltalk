@@ -1090,7 +1090,7 @@ initializeStrings
     			fn arguments size = 2 ifFalse: [self error: 'contains() takes two arguments'].
     			s1 := (fn arguments at: 1) xpathEvalIn: ns.
     			s2 := (fn arguments at: 2) xpathEvalIn: ns.
-    			i := s1 xpathAsString findString: s2 xpathAsString startingAt: 1.
+    			i := s1 xpathAsString indexOfSubCollection: s2 xpathAsString startingAt: 1.
     			i > 0]).
     functions at: 'translate' put: (self new
     		name: 'translate';
@@ -1129,14 +1129,14 @@ initializeStrings
     			fn arguments size = 2 ifFalse: [self error: 'starts-with() takes two arguments'].
     			s1 := ((fn arguments at: 1) xpathEvalIn: ns) xpathAsString.
     			s2 := ((fn arguments at: 2) xpathEvalIn: ns) xpathAsString.
-    			(s1 findString: s2 startingAt: 1) = 1]).
+    			(s1 indexOfSubCollection: s2 startingAt: 1) = 1]).
     functions at: 'substring-before' put: (self new
     		name: 'substring-before';
     		valueBlock: [:fn :ns || s1 s2 i |
     			fn arguments size = 2 ifFalse: [self error: 'substring-before() takes two arguments'].
     			s1 := ((fn arguments at: 1) xpathEvalIn: ns) xpathAsString.
     			s2 := ((fn arguments at: 2) xpathEvalIn: ns) xpathAsString.
-    			i := s1 findString: s2 startingAt: 1.
+    			i := s1 indexOfSubCollection: s2 startingAt: 1.
     			(i = 0 ifTrue: [''] ifFalse: [s1 copyFrom: 1 to: i - 1])]).
     functions at: 'substring-after' put: (self new
     		name: 'substring-after';
@@ -1144,7 +1144,7 @@ initializeStrings
     			fn arguments size = 2 ifFalse: [self error: 'substring-after() takes two arguments'].
     			s1 := ((fn arguments at: 1) xpathEvalIn: ns) xpathAsString.
     			s2 := ((fn arguments at: 2) xpathEvalIn: ns) xpathAsString.
-    			i := s1 findString: s2 startingAt: 1.
+    			i := s1 indexOfSubCollection: s2 startingAt: 1.
     			(i = 0 ifTrue: [''] ifFalse: [s1 copyFrom: i+s2 size to: s1 size])]).
     functions at: 'normalize-space' put: (self new
     		name: 'normalize-space';

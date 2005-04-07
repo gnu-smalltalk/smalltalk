@@ -1,3 +1,7 @@
+2005-04-07  Mike Anderson  <msasjf@yahoo.co.ul>
+
+	* kernel/PosStream.st: Fix bug in #peekFor:.
+
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Class.st: Implement "active" method annotations and
