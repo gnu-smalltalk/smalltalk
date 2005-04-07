@@ -99,7 +99,7 @@ peekFor: anObject
     "Returns true and gobbles the next element from the stream of it is
     equal to anObject, returns false and doesn't gobble the next element
     if the next element is not equal to anObject."
-    ptr > endPtr ifTrue: [ ^false ].
+    self atEnd ifTrue: [ ^false ].
     ^self next = anObject
     	ifTrue: [ true ]
     	ifFalse: [ self skip: -1. false ]
