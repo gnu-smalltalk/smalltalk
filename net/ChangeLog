@@ -1,3 +1,7 @@
+2005-04-07  Brett Cundal <bcundal@cundal.net>
+
+	* net/NetServer.st: Fix typo in printOn:
+ 
 2003-08-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/NetServer.st: give a name to each NetThread process.
