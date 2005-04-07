@@ -1,3 +1,7 @@
+2005-04-07  Brett Cundal <bcundal@cundal.net>
+
+	* net/NetServer.st: Fix typo in printOn:
+
 2003-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.1.3 released.

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2005 Free Software Foundation, Inc.
 | Written by Paolo Bonzini
 |
 | This file is part of the GNU Smalltalk class library.
@@ -82,7 +82,7 @@ release
 
 printOn: aStream
     aStream print: self class; nextPut: $:.
-    self isServing ifFalse: [ ^aStream nextPutAll: 'idle' ].
+    self isRunning ifFalse: [ ^aStream nextPutAll: 'idle' ].
     aStream print: self socket port
 ! !
 
