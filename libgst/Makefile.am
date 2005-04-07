@@ -40,7 +40,7 @@ libgst_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined \
 	-export-symbols-regex "^gst_.*"
 
 libgst_la_SOURCES = \
-       interp.c    lib.c         gst-parse.y    lex.c        \
+       interp.c    lib.c         gst-parse.c    lex.c        \
        str.c       tree.c        byte.c         comp.c       \
        sym.c       dict.c        oop.c  	opt.c        \
        save.c      cint.c    	 heap.c	        input.c      \
@@ -69,9 +69,6 @@ genvm_SOURCES = \
 genvm_LDADD = @LIBSNPRINTFV@ $(top_builddir)/lib-src/library.la
 
 # other definitions
-
-gst-parse.h: gst-parse.c
-	@:
 
 genpr-parse.h: genpr-parse.c
 	@:

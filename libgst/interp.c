@@ -312,7 +312,7 @@ static void stop_executing (const char *msg);
 static void set_preemption_timer (void);
 
 /* Same as _gst_parse_stream, but creating a reentrancy_jmpbuf.  */
-static void parse_stream_with_protection ();
+static void parse_stream_with_protection (mst_Boolean method);
 
 /* Put the given process to sleep by rotating the list of processes for
    PROCESSOOP's priority (i.e. it was the head of the list and becomes
@@ -2554,10 +2554,10 @@ _gst_get_primitive_attributes (int primitive)
 }
 
 void
-parse_stream_with_protection ()
+parse_stream_with_protection (mst_Boolean method)
 {
   interp_jmp_buf localJmpBuf;
 
   PROTECT_CURRENT_PROCESS_WITH (&localJmpBuf)
-    _gst_parse_stream ();
+    _gst_parse_stream (method);
 }

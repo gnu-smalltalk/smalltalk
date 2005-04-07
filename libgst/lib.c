@@ -81,7 +81,6 @@ static const char help_text[] =
   "\n   -S --snapshot\t\t Save a snapshot just before exiting"
   "\n   -v --version\t\t\t Print the Smalltalk version number and exit"
   "\n   -V --verbose\t\t\t Print names of loaded files and execution stats"
-  "\n   -y --yacc-debug\t\t Turn on debugging in the parser"
   "\n   -\t\t\t\t Read input from standard input explicitly"
   "\n"
   "\nFiles are loaded one after the other.  After the last one is loaded,"
@@ -125,7 +124,6 @@ static const struct option long_options[] = {
   {"snapshot", 0, 0, 'S'},
   {"version", 0, 0, 'v'},
   {"verbose", 0, 0, 'V'},
-  {"yacc-debug", 0, 0, 'y'},
   {NULL, 0, 0, 0}
 };
 
@@ -744,7 +742,7 @@ process_stdin ()
 
   _gst_non_interactive = false;
   _gst_push_stdin_string ();
-  _gst_parse_stream ();
+  _gst_parse_stream (false);
   _gst_pop_stream (true);
   _gst_non_interactive = true;
 }
@@ -762,7 +760,7 @@ process_file (const char *fileName)
     printf ("Processing %s\n", fileName);
 
   _gst_push_unix_file (fd, fileName);
-  _gst_parse_stream ();
+  _gst_parse_stream (false);
   _gst_pop_stream (true);
   return (true);
 }
@@ -776,9 +774,9 @@ parse_args (int argc,
   int ch, prev_optind = 1, minus_a_optind = -1;
 
 #ifndef ENABLE_DYNAMIC_TRANSLATION
-# define OPTIONS "-acdDeEf:ghiI:K:lL:pQqrSvVy"
+# define OPTIONS "-acdDeEf:ghiI:K:lL:pQqrSvV"
 #else
-# define OPTIONS "-acdDf:ghiI:K:lL:pQqrSvVy"
+# define OPTIONS "-acdDf:ghiI:K:lL:pQqrSvV"
 #endif
 
   /* get rid of getopt's own error reporting for invalid options */
@@ -834,9 +832,6 @@ parse_args (int argc,
 	  break;
 	case 'V':
 	  _gst_verbosity = 3;
-	  break;
-	case 'y':
-	  _gst_yydebug = 1;
 	  break;
 
 	case 'f':

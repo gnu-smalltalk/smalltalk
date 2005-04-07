@@ -476,8 +476,8 @@ _gst_install_initial_methods (void)
   /* Define the termination method first of all, because
      compiling #methodsFor: will invoke an evaluation
      (to get the argument of the <primitive: ...> attribute.  */
-  _gst_set_compilation_category (_gst_undefined_object_class,
-				 _gst_string_new ("private"));
+  _gst_set_compilation_class (_gst_undefined_object_class);
+  _gst_set_compilation_category (_gst_string_new ("private"));
   _gst_alloc_bytecodes ();
   _gst_compile_byte (EXIT_INTERPRETER, 0);
   _gst_compile_byte (RETURN_CONTEXT_STACK_TOP, 0);
@@ -497,13 +497,10 @@ methodsFor: aCategoryString \
       The methods are put in the category identified by the parameter.\" \
     <primitive: VMpr_Behavior_methodsFor> \
 ";
-  _gst_compile_code = true;	/* tell the lexer we do internal
-				   compiles */
-
-  _gst_set_compilation_category (_gst_behavior_class,
-				 _gst_string_new ("compiling methods"));
+  _gst_set_compilation_class (_gst_behavior_class);
+  _gst_set_compilation_category (_gst_string_new ("compiling methods"));
   _gst_push_smalltalk_string (_gst_string_new (methodsForString));
-  _gst_parse_stream ();
+  _gst_parse_stream (true);
   _gst_pop_stream (true);
 
   _gst_reset_compilation_category ();
@@ -549,15 +546,21 @@ _gst_init_compiler (void)
 }
 
 void
-_gst_set_compilation_category (OOP class_oop, OOP categoryOOP)
+_gst_set_compilation_class (OOP class_oop)
+{
+  _gst_unregister_oop (_gst_this_class);
+  _gst_this_class = class_oop;
+  _gst_register_oop (_gst_this_class);
+
+  _gst_untrusted_methods = (IS_OOP_UNTRUSTED (_gst_this_context_oop)
+			    || IS_OOP_UNTRUSTED (_gst_this_class));
+}
+
+void
+_gst_set_compilation_category (OOP categoryOOP)
 {
   _gst_unregister_oop (_gst_this_category);
-  _gst_unregister_oop (_gst_this_class);
-
-  _gst_this_class = class_oop;
   _gst_this_category = categoryOOP;
-
-  _gst_register_oop (_gst_this_class);
   _gst_register_oop (_gst_this_category);
 
   _gst_untrusted_methods = (IS_OOP_UNTRUSTED (_gst_this_context_oop)
@@ -567,7 +570,8 @@ _gst_set_compilation_category (OOP class_oop, OOP categoryOOP)
 void
 _gst_reset_compilation_category ()
 {
-  _gst_set_compilation_category (_gst_undefined_object_class, _gst_nil_oop);
+  _gst_set_compilation_class (_gst_undefined_object_class);
+  _gst_set_compilation_category (_gst_nil_oop);
   _gst_untrusted_methods = false;
 }
 
@@ -613,7 +617,8 @@ _gst_execute_statements (tree_node temporaries,
   _gst_register_oop (oldClass);
   _gst_register_oop (oldCategory);
 
-  _gst_set_compilation_category (_gst_undefined_object_class, _gst_nil_oop);
+  _gst_set_compilation_class (_gst_undefined_object_class);
+  _gst_set_compilation_category (_gst_nil_oop);
 
   messagePattern = _gst_make_unary_expr (&statements->location,
 					 NULL,
@@ -634,7 +639,8 @@ _gst_execute_statements (tree_node temporaries,
   SET_CLASS_ENVIRONMENT (_gst_undefined_object_class,
 			 _gst_smalltalk_dictionary);
 
-  _gst_set_compilation_category (oldClass, oldCategory);
+  _gst_set_compilation_class (oldClass);
+  _gst_set_compilation_category (oldCategory);
   _gst_unregister_oop (oldClass);
   _gst_unregister_oop (oldCategory);
 
@@ -2289,6 +2295,9 @@ _gst_make_attribute (tree_node attribute_keywords)
 
   incPtr = INC_SAVE_POINTER ();
   
+  if (_gst_had_error)
+    return _gst_nil_oop;
+
   selectorOOP = compute_keyword_selector (attribute_keywords);
   numArgs = list_length (attribute_keywords);
   argsArray = new_instance_with (_gst_array_class, numArgs, &argsArrayOOP);
@@ -2296,7 +2305,22 @@ _gst_make_attribute (tree_node attribute_keywords)
 
   for (i = 0, keyword = attribute_keywords; keyword != NULL;
        i++, keyword = keyword->v_list.next)
-    argsArray->data[i] = make_constant_oop (keyword->v_list.value);
+    {
+      tree_node value = keyword->v_list.value;
+      if (value->nodeType != TREE_CONST_EXPR)
+	{
+          tree_node stmt = _gst_make_statement_list (&value->location, value);
+          OOP result = _gst_execute_statements (NULL, stmt, true);
+          value = _gst_make_oop_constant (&stmt->location, result);
+          if (!result)
+	    {
+	      _gst_had_error = true;
+	      return _gst_nil_oop;
+	    }
+	}
+
+      argsArray->data[i] = make_constant_oop (value);
+    }
 
   messageOOP = _gst_message_new_args (selectorOOP, argsArrayOOP);
   INC_RESTORE_POINTER (incPtr);

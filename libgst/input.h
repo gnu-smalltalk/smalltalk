@@ -128,7 +128,7 @@ extern void _gst_errorf_at (int line,
   ATTRIBUTE_HIDDEN;
 
 /* Interface to the Bison-generated parser.  */
-extern void _gst_yyerror (const char *s) 
+extern void _gst_yyerror (const char *s)
   ATTRIBUTE_HIDDEN;
 
 /* Push character 'ic' back into the input queue.  Allows for two

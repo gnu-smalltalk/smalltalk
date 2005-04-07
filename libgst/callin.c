@@ -387,9 +387,8 @@ _gst_eval_code (const char *str)
   if (!_gst_smalltalk_initialized)
     gst_init_smalltalk ();
 
-  _gst_compile_code = true;
   _gst_push_cstring (str);
-  _gst_parse_stream ();
+  _gst_parse_stream (false);
   _gst_pop_stream (true);
 }
 
@@ -402,9 +401,8 @@ _gst_eval_expr (const char *str)
   if (!_gst_smalltalk_initialized)
     gst_init_smalltalk ();
 
-  _gst_compile_code = false;
   _gst_push_cstring (str);
-  _gst_parse_stream ();
+  _gst_parse_stream (false);
   _gst_pop_stream (true);
   result = _gst_last_returned_value;
 

@@ -3487,28 +3487,35 @@ primitive VMpr_Memory_atPut [succeed,fail]
 
 
 /* methodsFor: category */
-primitive VMpr_Behavior_methodsFor [succeed]
+primitive VMpr_Behavior_methodsFor [succeed,fail]
 {
   OOP oop2 = POP_OOP ();
   OOP oop1 = STACKTOP ();
 
   _gst_primitives_executed++;
-  _gst_set_compilation_category (oop1, oop2);
+  if (!_gst_current_parser || _gst_current_parser->state != PARSE_DOIT)
+    PRIM_FAILED;
+
+  _gst_set_compilation_class (oop1);
+  _gst_set_compilation_category (oop2);
   _gst_display_compilation_trace ("Compiling", true);
-  _gst_compile_code = true;
+  _gst_current_parser->state = PARSE_METHOD_LIST;
   PRIM_SUCCEEDED;
 }
 
 /* methodsFor: category ifTrue: condition */
-primitive VMpr_Behavior_methodsForIfTrue [succeed]
+primitive VMpr_Behavior_methodsForIfTrue [succeed,fail]
 {
   OOP oop3 = POP_OOP ();
   OOP oop2 = POP_OOP ();
   OOP oop1 = STACKTOP ();
 
   _gst_primitives_executed++;
+  if (!_gst_current_parser || _gst_current_parser->state != PARSE_DOIT)
+    PRIM_FAILED;
 
-  _gst_set_compilation_category (oop1, oop2);
+  _gst_set_compilation_class (oop1);
+  _gst_set_compilation_category (oop2);
   if (oop3 == _gst_true_oop)
     _gst_display_compilation_trace ("Conditionally compiling", true);
   else
@@ -3516,7 +3523,7 @@ primitive VMpr_Behavior_methodsForIfTrue [succeed]
       _gst_skip_compilation = true;
       _gst_display_compilation_trace ("Conditionally skipping", true);
     }
-  _gst_compile_code = true;
+  _gst_current_parser->state = PARSE_METHOD_LIST;
   PRIM_SUCCEEDED;
 }
 
@@ -4795,15 +4802,14 @@ primitive VMpr_Behavior_compileString [succeed]
 
   oop2 = POP_OOP ();
   oop1 = POP_OOP ();
-  _gst_compile_code = true;	/* tell the lexer we do internal
-				   compiles */
   if (IS_CLASS (oop2, _gst_string_class))
     _gst_push_smalltalk_string (oop2);
   else
     _gst_push_stream_oop (oop2);
 
-  _gst_set_compilation_category (oop1, _gst_string_new ("still unclassified"));
-  parse_stream_with_protection ();
+  _gst_set_compilation_class (oop1);
+  _gst_set_compilation_category (_gst_string_new ("still unclassified"));
+  parse_stream_with_protection (true);
   _gst_pop_stream (true);
   PUSH_OOP (_gst_latest_compiled_method);
   PRIM_SUCCEEDED;
@@ -4830,16 +4836,14 @@ primitive VMpr_Behavior_compileStringIfError [fail,succeed,reload_ip]
 	  _gst_first_error_str = _gst_first_error_file = NULL;
 	}
       _gst_report_errors = false;
-      _gst_compile_code = true;	/* tell the lexer we do internal
-				   compiles */
-
       if (IS_CLASS (oop2, _gst_string_class))
 	_gst_push_smalltalk_string (oop2);
       else
 	_gst_push_stream_oop (oop2);
 
-      _gst_set_compilation_category (oop1, _gst_string_new ("still unclassified"));
-      parse_stream_with_protection ();
+      _gst_set_compilation_class (oop1);
+      _gst_set_compilation_category (_gst_string_new ("still unclassified"));
+      parse_stream_with_protection (true);
       _gst_pop_stream (true);
 
       if (_gst_first_error_str != NULL)
@@ -5252,7 +5256,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	  {
 	    _gst_push_unix_file (fd, fileName);
 	    _gst_use_undeclared++;
-	    parse_stream_with_protection ();
+	    parse_stream_with_protection (false);
 	    _gst_use_undeclared--;
 	    _gst_pop_stream (false);	/* we didn't open it, so we
 					   don't close it */
@@ -5290,7 +5294,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 
 		_gst_push_unix_file (fd, fileName);
 		_gst_set_stream_info (arg2, realFileName, arg4);
-		parse_stream_with_protection ();
+		parse_stream_with_protection (false);
 		_gst_pop_stream (false);	/* we didn't open it,
 						   so we don't close it 
 						 */

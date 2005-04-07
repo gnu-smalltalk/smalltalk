@@ -246,10 +246,11 @@ extern tree_node _gst_make_keyword_list (YYLTYPE *location,
 					 tree_node expression)
   ATTRIBUTE_HIDDEN;
 
-/* Given a constant object node, convert it to an attribute list tree node
-   with a NULL next link.  */
+/* Given a keyword list node, modify it in place to make an attribute list
+   tree node; evaluate all non-constant arguments and return NULL if
+   any evaluation fails.  */
 extern tree_node _gst_make_attribute_list (YYLTYPE *location,
-				  	   tree_node attribute)
+					   tree_node keywords)
   ATTRIBUTE_HIDDEN;
 
 /* Given a variable tree node, convert it to a variable list tree node
@@ -393,8 +394,8 @@ extern tree_node _gst_make_message_list (YYLTYPE *location,
    address of the last NEXT field in the chain, so storing N2 into
    there indirectly and then making that NEXT field point to N2's NEXT
    field works properly.  */
-extern void _gst_add_node (tree_node n1,
-			   tree_node n2)
+extern tree_node _gst_add_node (tree_node n1,
+				tree_node n2)
   ATTRIBUTE_HIDDEN;
 
 /* Free the objects on the compilation obstack.  */

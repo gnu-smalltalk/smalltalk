@@ -446,15 +446,16 @@ _gst_make_binding_constant (YYLTYPE *location,
   return (result);
 }
 
-void
+tree_node
 _gst_add_node (tree_node n1,
 	       tree_node n2)
 {
-  n1->location.last_line = n2->location.last_line;
-  n1->location.last_column = n2->location.last_column;
+  if (n1 == NULL)
+    return n2;
 
   *(n1->v_list.nextAddr) = n2;
   n1->v_list.nextAddr = n2->v_list.nextAddr;
+  return n1;
 }
 
 void

@@ -632,6 +632,7 @@ extern OOP _gst_nil_oop
 #include "gstpub.h"
 #include "heap.h"
 #include "lex.h"
+#include "gst-parse.h"
 #include "lib.h"
 #include "oop.h"
 #include "byte.h"

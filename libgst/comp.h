@@ -274,9 +274,12 @@ extern void _gst_display_compilation_trace (const char *string,
 extern void _gst_install_initial_methods (void) 
   ATTRIBUTE_HIDDEN;
 
-/* Sets the compiler's notion of the class and category to compile
-   methods into.  */
-extern void _gst_set_compilation_category (OOP class_oop, OOP categoryOOP) 
+/* Sets the compiler's notion of the class to compile methods into.  */
+extern void _gst_set_compilation_class (OOP class_oop) 
+  ATTRIBUTE_HIDDEN;
+
+/* Sets the compiler's notion of the category to compile methods into.  */
+extern void _gst_set_compilation_category (OOP categoryOOP) 
   ATTRIBUTE_HIDDEN;
 
 /* Clears the compiler's notion of the class and category to compile

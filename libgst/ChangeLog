@@ -1,3 +1,39 @@
+2005-04-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/callin.c (_gst_eval_code, _gst_eval_expr): Do not use
+	_gst_compile_code for communication to _gst_parse_stream, use a
+	parameter to it instead.
+	* libgst/comp.c (_gst_set_compilation_class): Extract out of
+	_gst_set_compilation_category.
+	(_gst_install_initial_methods, _gst_execute_statements): Adjust.
+	(_gst_make_attribute): Execute statements for the arguments here.
+	* comp.h (_gst_set_compilation_class): New prototype.
+	(_gst_set_compilation_category): Adjust prototype.
+	* libgst/gst-parse.c: Rewritten.
+	* libgst/gst-parse.h: Rewritten based on Bison output.
+	* libgst/gstpriv.h: Include gst-parse.h.
+	* libgst/interp.c (parse_stream_with_protection): Add new parameter
+	of _gst_parse_stream and forward it.
+	* libgst/lex.c (parse_*): Rename to scan_*.
+	(_gst_compile_code): Remove.
+	(_gst_parse_stream): Add parameter to pick top production.
+	(_gst_yylex): Remove INTERNAL_TOKEN hacks.  Do not compute last_line
+	and last_column.
+	(print_token): Remove INTERNAL_TOKEN.
+	* libgst/lex.h (_gst_compile_code, _gst_yydebug): Remove.
+	(_gst_parse_stream): Adjust prototype.
+	* libgst/lib.c (help_text, parse_args, long_options): Remove -y.
+	(process_stdin, process_file): Adjust call to _gst_parse_stream.
+	* libgst/prims.def: Adjust for changes to _gst_set_compilation_category
+	and parse_stream_with_production.  Do not use _gst_compile_code,
+	refer to _gst_current_parser->state instead and fail if methodsFor
+	is used while not parsing.
+	* libgst/tree.c (_gst_add_node): Support case where N1 is NULL.
+	* libgst/tree.h (_gst_add_node): Return a tree_node.
+	
+	* libgst/gst-parse.y: Remove.
+	* libgst/Makefile.am: Replace it with gst-parse.c.
+
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c (_gst_make_attribute): Use make_constant_oop.
