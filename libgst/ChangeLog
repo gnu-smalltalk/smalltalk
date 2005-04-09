@@ -1,3 +1,9 @@
+2005-04-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gst-parse.c (expected): Fix spacing.
+	(parse_block): Fix "expected" error message.
+	(parse_block_variables): Remove useless check for EOF.
+
 2005-04-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c (_gst_eval_code, _gst_eval_expr): Do not use

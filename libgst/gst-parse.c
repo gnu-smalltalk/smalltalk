@@ -244,7 +244,7 @@ expected (gst_parser *p, int token, ...)
       if (token < 256)
 	{
           filprintf (out_fil, "%s '%c'", sep, token);
-	  sep = "or";
+	  sep = " or";
 	}
       else
 	named_tokens |= 1 << (token - FIRST_TOKEN);
@@ -258,7 +258,7 @@ expected (gst_parser *p, int token, ...)
 	  || (named_tokens & (1 << (subsume - FIRST_TOKEN))) == 0))	\
     {									\
       filprintf (out_fil, "%s %s", sep, str);				\
-      sep = "or";							\
+      sep = " or";							\
     }
 
   TOKEN_DEFS
@@ -908,7 +908,7 @@ parse_block (gst_parser *p)
 	  lex (p);
 	}
       else
-	expected (p, '|', -1);
+	expected (p, ':', '|', -1);
     }
   else
     {
@@ -934,11 +934,7 @@ parse_block_variables (gst_parser *p)
   assert (p->token == ':');
 
   while (lex_skip_if (p, ':', false))
-    {
-      if (p->token == EOF)
-	expected (p, ':', '|', -1);
-      vars = _gst_add_node (vars, parse_variable (p));
-    }
+    vars = _gst_add_node (vars, parse_variable (p));
 
   return vars;
 }
