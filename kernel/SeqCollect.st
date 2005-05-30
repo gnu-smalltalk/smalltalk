@@ -381,7 +381,7 @@ replaceFrom: start to: stop with: replacementCollection
     | i |
     i := start - 1.
     stop - i = replacementCollection size
-        ifFalse: [ ^SystemExceptions.InvalidSize signalOn: replacementCollection ].
+        ifFalse: [ ^SystemExceptions.InvalidSize signalOn: replacementCollection  size ].
 
     replacementCollection do: [ :each |
         self at: (i := i + 1) put: each

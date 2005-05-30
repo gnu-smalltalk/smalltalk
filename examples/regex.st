@@ -9,7 +9,7 @@
 "======================================================================
 |
 | Copyright 2001, 2003, 2005 Free Software Foundation, Inc.
-| Written by Dragomir Milivojevic.
+| Written by Dragomir Milevojevic, Paolo Bonzini, Mike Anderson.
 |
 | This file is part of the GNU Smalltalk class library.
 |
@@ -50,6 +50,91 @@ them outside the loop, but special care is taken so that the same Regex
 object is used whenever possible (when converting Strings to Regex, the
 cache is sought for an equivalent, already constructed Regex).'.
 
+CStruct subclass: #CRegexRegisters
+        declaration: #( (#allocated #int)
+			(#numRegs #int)
+			(#beg (#ptr #int))
+			(#end (#ptr #int)) )
+        classVariableNames: ''
+        poolDictionaries: ''
+        category: 'Regex'
+!
+
+Object subclass: #RegexResults
+        instanceVariableNames: 'subject from to registers match cache'
+        classVariableNames: ''
+        poolDictionaries: ''
+        category: 'Regex'
+!
+
+!RegexResults methodsFor: 'accessing'!
+
+subject
+    ^subject!
+
+size
+    ^registers size!
+
+from
+    ^from!
+
+fromAt: anIndex
+    | reg |
+    anIndex = 0 ifTrue: [ ^from ].
+    reg := registers at: anIndex.
+    ^reg isNil ifTrue: [ nil ] ifFalse: [ reg first ]!
+
+to
+    ^to!
+
+toAt: anIndex
+    | reg |
+    anIndex = 0 ifTrue: [ ^from ].
+    reg := registers at: anIndex.
+    ^reg isNil ifTrue: [ nil ] ifFalse: [ reg last ]!
+
+match
+    match isNil
+	ifTrue: [ match := self subject copyFrom: from to: to ].
+    ^match!
+
+matchInterval
+    ^from to: to!
+
+at: anIndex
+    | reg text |
+    anIndex = 0 ifTrue: [ ^self match ].
+    (cache at: anIndex) isNil
+	ifTrue: [
+	    reg := registers at: anIndex.
+	    text := reg isNil
+		ifTrue: [ nil ]
+		ifFalse: [ self subject copyFrom: reg first to: reg last ].
+	    cache at: anIndex put: text ].
+    ^cache at: anIndex!
+
+intervalAt: anIndex
+    ^anIndex = 0
+	ifTrue: [ from to: to ]
+	ifFalse: [ registers at: anIndex ]!
+
+size
+    ^registers size! !
+
+!RegexResults methodsFor: 'private'!
+
+initialize: regs subject: aString
+    from := regs matchBeg.
+    to := regs matchEnd.
+    registers := (1 to: regs numRegs value - 1) collect: [ :i |
+	| beg end |
+	beg := (regs begAt: i).
+	end := (regs endAt: i).
+	end < 0 ifTrue: [ nil ] ifFalse: [ beg to: end ] ].
+    cache := Array new: registers size.
+    subject := aString!
+
+    
 " --- external function definitions --- "
 
 !Regex class methodsFor: 'C call-outs'!
@@ -59,13 +144,41 @@ fromString: aString
 
 !String methodsFor: 'C call-outs'!
 
-searchRegex: pattern from: from to: to
-    <cCall: 'reh_search' returning: #int
-	args: #(#selfSmalltalk #smalltalk #int #int)>!
-
 lengthOfRegexMatch: pattern from: from to: to
     <cCall: 'reh_match' returning: #int
+	args: #(#selfSmalltalk #smalltalk #int #int)>!
+
+searchRegexInternal: pattern from: from to: to
+    <cCall: 'reh_search' returning: CRegexRegisters type
 	args: #(#selfSmalltalk #smalltalk #int #int)>! !
+
+!CRegexRegisters methodsFor: 'C call-outs'!
+
+begAt: i
+    ^(self beg value + i) value + 1!
+
+matchBeg
+    | begValue matchBeg |
+    begValue := self beg value.
+    begValue isNil ifTrue: [ ^-1 ].
+    matchBeg := begValue value.
+    matchBeg = -1 ifTrue: [ ^-1 ].
+    ^begValue value + 1!
+
+endAt: i
+    ^(self end value + i) value!
+
+matchEnd
+    | endValue matchEnd |
+    endValue := self end value.
+    endValue isNil ifTrue: [ ^-1 ].
+    matchEnd := endValue value.
+    matchEnd = -1 ifTrue: [ ^-1 ].
+    ^endValue value!
+
+free
+    <cCall: 'reh_free_registers' returning: #void
+	args: #(#self)>! !
 
 "--------------------------------------------------------------------------"
 
@@ -138,7 +251,11 @@ printOn: aStream
 
 =~ regexString
     "Answer whether an occurrence of the regex is present in the receiver"
-    ^(self searchRegex: regexString from: 1 to: self size) > 0
+    | regs gotIt |
+    regs := self searchRegexInternal: regexString from: 1 to: self size.
+    gotIt := regs matchBeg > 0.
+    regs free.
+    ^gotIt
 !
 
 asRegex
@@ -146,60 +263,92 @@ asRegex
     ^Regex fromString: self
 !
 
+searchRegex: pattern
+    | regs |
+    regs := self searchRegexInternal: pattern from: 1 to: self size.
+    regs matchBeg = -1 ifTrue: [ regs free. ^nil ].
+    ^[ RegexResults new initialize: regs subject: self ]
+	ensure: [ regs free ]!
+
+searchRegex: pattern startingAt: anIndex
+    | regs |
+    regs := self searchRegexInternal: pattern from: anIndex to: self size.
+    regs matchBeg = -1 ifTrue: [ regs free. ^nil ].
+    ^[ RegexResults new initialize: regs subject: self ]
+	ensure: [ regs free ]!
+
+searchRegex: pattern from: from to: to
+    | regs |
+    regs := self searchRegexInternal: pattern from: from to: to.
+    regs matchBeg = -1 ifTrue: [ regs free. ^nil ].
+    ^[ RegexResults new initialize: regs subject: self ]
+	ensure: [ regs free ]!
+
 indexOfRegex: regexString ifAbsent: excBlock
     "Answer whether an occurrence of the regex is present in the receiver"
-    | start len |
-    start := self searchRegex: regexString from: 1 to: self size.
-    start > 0 ifFalse: [ ^excBlock value ].
-
-    len := self lengthOfRegexMatch: regexString from: start to: self size.
-    ^start to: start + len - 1
+    | regs beg end |
+    regs := self searchRegexInternal: regexString from: 1 to: self size.
+    beg := regs matchBeg.
+    end := regs matchEnd.
+    regs free.
+    ^beg >= 1
+	ifTrue: [ beg to: end ]
+	ifFalse: [ excBlock value ]
 !
 
 indexOfRegex: regexString startingAt: index ifAbsent: excBlock
-    | start len |
-    start := self searchRegex: regexString from: index to: self size.
-    start > 0 ifFalse: [ ^excBlock value ].
-
-    len := self lengthOfRegexMatch: regexString from: start to: self size.
-    ^start to: start + len - 1
+    | regs beg end |
+    regs := self searchRegexInternal: regexString from: index to: self size.
+    beg := regs matchBeg.
+    end := regs matchEnd.
+    regs free.
+    ^beg >= 1
+	ifTrue: [ beg to: end ]
+	ifFalse: [ excBlock value ]
 !
 
-indexOfRegex: regexString from: start to: end ifAbsent: excBlock
-    | idx len |
-    idx := self searchRegex: regexString from: idx to: end.
-    idx > 0 ifFalse: [ ^excBlock value ].
-    
-    len := self lengthOfRegexMatch: regexString from: idx to: self size.
-    ^start to: start + len - 1
+indexOfRegex: regexString from: from to: to ifAbsent: excBlock
+    | regs beg end |
+    regs := self searchRegexInternal: regexString from: from to: to.
+    beg := regs matchBeg.
+    end := regs matchEnd.
+    regs free.
+    ^beg >= 1
+	ifTrue: [ beg to: end ]
+	ifFalse: [ excBlock value ]
 !
 
 indexOfRegex: regexString
-    "Answer whether an occurrence of the regex is present in the receiver"
-    | start len |
-    start := self searchRegex: regexString from: 1 to: self size.
-    start > 0 ifFalse: [ ^nil ].
-
-    len := self lengthOfRegexMatch: regexString from: start to: self size.
-    ^start to: start + len - 1
+    | regs beg end |
+    regs := self searchRegexInternal: regexString from: 1 to: self size.
+    beg := regs matchBeg.
+    end := regs matchEnd.
+    regs free.
+    ^beg >= 1
+	ifTrue: [ beg to: end ]
+	ifFalse: [ nil ]
 !
 
 indexOfRegex: regexString startingAt: index
-    | start len |
-    start := self searchRegex: regexString from: index to: self size.
-    start > 0 ifFalse: [ ^nil ].
-
-    len := self lengthOfRegexMatch: regexString from: start to: self size.
-    ^start to: start + len - 1
+    | regs beg end |
+    regs := self searchRegexInternal: regexString from: index to: self size.
+    beg := regs matchBeg.
+    end := regs matchEnd.
+    regs free.
+    ^beg >= 1
+	ifTrue: [ beg to: end ]
+	ifFalse: [ nil ]
 !
 
-indexOfRegex: regexString from: start to: end
-    | idx len |
-    idx := self searchRegex: regexString from: idx to: end.
-    idx > 0 ifFalse: [ ^nil ].
-    
-    len := self lengthOfRegexMatch: regexString from: start to: self size.
-    ^start to: start + len - 1
+indexOfRegex: regexString from: from to: to
+    | regs beg end |
+    regs := self searchRegexInternal: regexString from: from to: to.
+    beg := regs matchBeg.
+    end := regs matchEnd.
+    regs free.
+    ^beg >= 1
+	ifTrue: [ beg to: end ]
+	ifFalse: [ nil ]
 !
 
 matchRegex: pattern
@@ -217,20 +366,18 @@ matchRegex: pattern from: from to: to
 occurrencesOfRegex: pattern from: from to: to
     "Returns count of how many times pattern repeats in string"
 
-    | res idx len regex |
+    | res idx regex beg end regs |
     regex := pattern asRegex.
     res := 0.
     idx := from.
     [
-	idx <= to and: [
-	    idx := self searchRegex: regex from: idx to: to.
-	    idx > 0 ]
+        regs := self searchRegexInternal: regex from: idx to: to.
+        beg := regs matchBeg.
+        end := regs matchEnd.
+        regs free.
+        beg >= 1
     ] whileTrue: [
-	
-	len := self lengthOfRegexMatch: regex from: idx to: to.
-	len = 0 ifTrue: [ len := 1 ].
-	
-	idx := idx + len.
+	idx := end max: beg + 1.
 	res := res + 1.
     ].
 
@@ -252,23 +399,21 @@ occurrencesOfRegex: pattern
 copyFrom: from to: to replacingRegex: pattern with: str
     "Replaces first occurance of pattern with provided string"
 
-    | res idx len |
+    | regs beg end repl res |
+    regs := self searchRegex: pattern from: from to: to.
 
-    idx := self searchRegex: pattern from: from to: to.
+    regs notNil
+	ifTrue: [
+	    beg := regs from.
+	    end := regs to.
+	    repl := str bindWithArguments: regs.
+	    res := self species new: (to - from) - (end - beg) + repl size.
+	    res replaceFrom: 1 to: beg - from with: self startingAt: from.
+	    res replaceFrom: beg - from + 1 to: beg - from + repl size with: repl.
+	    res replaceFrom: beg - from + repl size + 1 to: res size with: self startingAt: end - from + 2 ]
+	ifFalse: [ res := self copyFrom: from to: to ].
 
-    idx > 0 ifTrue: [
-	res := self copyFrom: from to: idx - 1.
-	res := res, str.
-
-	idx := idx + (self lengthOfRegexMatch: pattern from: idx to: to).
-
-	idx <= to ifTrue: 
-	    [ res := res, (self copyFrom: idx to: to) ].
-
-	^ res
-    ].
-	
-    ^self copyFrom: from to: to
+    ^res
 !
 
 copyReplacingRegex: pattern with: str
@@ -280,29 +425,24 @@ copyReplacingRegex: pattern with: str
 copyFrom: from to: to replacingAllRegex: pattern with: str
     "Replaces all occurances of pattern between boundaries with specified string"
 
-    | res oldIdx idx len regex |
-    idx := from.
-    res := WriteStream on: self copyEmpty.
+    | res idx regex beg end regs |
     regex := pattern asRegex.
-
+    res := WriteStream on: (String new: to - from + 1).
+    idx := from.
     [
-	oldIdx := idx.
-	idx <= to and: [
-	    idx := self searchRegex: regex from: idx to: to.
-	    idx > 0 ]
+        regs := self searchRegex: regex from: idx to: to.
+        beg >= 1
+	regs notNil
     ] whileTrue: [
-	oldIdx to: idx - 1 do: [ :each |
-	    res nextPut: (self at: each) ].
-	    
-	len := self lengthOfRegexMatch: regex from: idx to: to.
-	len = 0 ifTrue: [ len := 1 ].
-	
-	res nextPutAll: str.
-	idx := idx + len.
+	beg := regs from.
+	end := regs to.
+	res next: beg - idx putAll: self startingAt: idx.
+	res nextPutAll: (str bindWithArguments: regs).
+	idx := end + 1.
+	beg > end ifTrue: [ res nextPut: (self at: idx). idx := idx + 1 ].
+	idx > self size ifTrue: [ ^res contents ].
     ].
-
-    oldIdx to: to do: [ :each |
-	res nextPut: (self at: each) ].
+    res next: to - idx + 1 putAll: self startingAt: idx.
 
     ^res contents
 !
@@ -316,20 +456,18 @@ copyReplacingAllRegex: pattern with: str
 onOccurrencesOfRegex: pattern from: from to: to do: body
 "Searches for pattern and executed passed instruction-body (as a trigger)"
 
-    | idx len res regex |
-    idx := from.
+    | idx regex beg end regs |
     regex := pattern asRegex.
-    
+    idx := from.
     [
-	idx <= to and: [
-	    idx := self searchRegex: regex from: idx to: to.
-	    idx > 0 ]
+        regs := self searchRegexInternal: regex from: idx to: to.
+        beg := regs matchBeg.
+        end := regs matchEnd.
+        regs free.
+        beg >= 1
     ] whileTrue: [
-	len := self lengthOfRegexMatch: regex from: idx to: to.
-	
-	body value: idx value: len.
-	len = 0 ifTrue: [ len := 1 ].
-	idx := idx + len.
+	body value: beg value: end - beg + 1.
+	idx := end + 1 max: beg + 1.
     ].
 !
 
@@ -340,28 +478,24 @@ onOccurrencesOfRegex: pattern do: body
 !
 
 tokenize: pattern from: from to: to
-
-    | res oldIdx idx len regex |
-    idx := from.
-    res := WriteStream on: (Array new: 10).
+    | res idx regex beg end regs tokStart |
     regex := pattern asRegex.
-    
+    res := WriteStream on: (Array new: 10).
+    idx := from.
+    tokStart := 1.
     [
-	oldIdx := idx.
-	idx <= to and: [
-	    idx := self searchRegex: regex from: idx to: to.
-	    idx > 0 ]
+        regs := self searchRegexInternal: regex from: idx to: to.
+        beg := regs matchBeg.
+        end := regs matchEnd.
+        regs free.
+        beg >= 1
     ] whileTrue: [
-	len := self lengthOfRegexMatch: regex from: idx to: to.
-	res nextPut: (self copyFrom: oldIdx to: idx - 1).
-
-	len = 0 ifTrue: [ len := 1 ].
-	idx := idx + len.
+	res nextPut: (self copyFrom: tokStart to: beg - 1).
+	tokStart := end + 1.
+	idx := beg + 1 max: end + 1.
     ].
 
-    oldIdx <= to ifTrue: [
-	res nextPut: (self copyFrom: oldIdx to: to)
-    ].
+    res nextPut: (self copyFrom: tokStart to: to).
     ^res contents
 !
 
@@ -374,7 +508,6 @@ tokenize: pattern
 !
 
 tokenize
-
     ^self tokenize: '[\n\t ]+' from: 1 to: self size
 ! !
 

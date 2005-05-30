@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -219,6 +219,18 @@ printOn: aStream
 	    print: stop
     ].
     aStream nextPut: $)
+!
+
+first
+    ^first
+!
+
+last
+    ^stop - ((stop - start) \\ step)
+!
+
+increment
+    ^step
 ! !
 
 
@@ -252,17 +264,5 @@ initializeFrom: startInteger to: stopInteger by: stepInteger
     start := startInteger.
     stop := stopInteger.
     step := stepInteger
-!
-
-start
-    ^start
-!
-
-stop
-    ^stop
-!
-
-step
-    ^step
 ! !
 

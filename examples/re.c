@@ -71,8 +71,10 @@ static void markRegexAsMRU (int i);
 /* Functions exported to Smalltalk */
 static OOP reh_make_cacheable (OOP patternOOP);
 
-static int reh_search (OOP srcOOP, OOP patternOOP, int from, int to),
-reh_match (OOP srcOOP, OOP patternOOP, int from, int to);
+static struct pre_registers *reh_search (OOP srcOOP, OOP patternOOP,
+					 int from, int to);
+static int reh_match (OOP srcOOP, OOP patternOOP, int from, int to);
+static void reh_free_registers(struct pre_registers *regs);
 
 static RegexCacheEntry cache[REGEX_CACHE_SIZE];
 
@@ -230,26 +232,35 @@ reh_make_cacheable (OOP patternOOP)
 }
 
 /* Search helper function */
-int
+struct pre_registers *
 reh_search (OOP srcOOP, OOP patternOOP, int from, int to)
 {
   int res = 0;
   const char *src;
   struct pre_pattern_buffer *regex;
+  struct pre_registers *regs;
   RegexCaching caching;
 
   caching = lookupRegex (patternOOP, &regex);
   if (caching != REGEX_CACHE_HIT && compileRegex (patternOOP, regex) != NULL)
-    return -100;
+    return NULL;
 
   /* now search */
   src = &STRING_OOP_AT (OOP_TO_OBJ (srcOOP), 1);
-  res = pre_search (regex, src, to, from - 1, to - from + 1, NULL);
+  regs = (struct pre_registers *) calloc (1, sizeof (struct pre_registers));
+  res = pre_search (regex, src, to, from - 1, to - from + 1, regs);
 
   if (caching == REGEX_NOT_CACHED)
     pre_free_pattern (regex);
 
-  return res + 1;
+  return regs;
+}
+
+void 
+reh_free_registers(struct pre_registers *regs)
+{
+	pre_free_registers(regs);
+	free(regs);
 }
 
 /* Match helper function */
@@ -281,6 +292,7 @@ gst_initModule (VMProxy * proxy)
   vmProxy = proxy;
   vmProxy->defineCFunc ("reh_search", reh_search);
   vmProxy->defineCFunc ("reh_match", reh_match);
+  vmProxy->defineCFunc ("reh_free_registers", reh_free_registers);
   vmProxy->defineCFunc ("reh_make_cacheable", reh_make_cacheable);
 
   regexClass = vmProxy->classNameToOOP ("Regex");

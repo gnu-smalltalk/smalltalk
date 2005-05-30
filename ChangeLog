@@ -1,4 +1,17 @@
-2005-04-07  Mike Anderson  <msasjf@yahoo.co.ul>
+2005-05-27  Paolo Bonzini  <bonzini@gnu.org>
+            Mike Anderson  <msasjf@yahoo.co.uk>
+
+	* kernel/Interval.st: Add #first, #last, #increment.
+	* kernel/SeqCollect.st: Fix exceptional case in #replaceFrom:to:with:.
+
+	* examples/re.c (): Return a struct pre_registers * from reh_search.
+	New reh_free_registers function, register it.
+	* examples/regex.st: New class CRegexRegisters, modify all the methods
+	to use it.  Name the C call-out method #searchRegexInternal:from:to:.
+	New class RegexResults, return it from #searchRegex:from:to:,
+	#searchRegex:startingAt:, #searchRegex:.
+
+2005-04-07  Mike Anderson  <msasjf@yahoo.co.uk>
 
 	* kernel/PosStream.st: Fix bug in #peekFor:.
 
