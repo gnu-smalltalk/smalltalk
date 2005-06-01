@@ -1,3 +1,8 @@
+2005-06-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/regex.st: Always return a RegexResults object from =~.
+	Create a small hierarchy rooted at RegexResults.
+
 2005-05-27  Paolo Bonzini  <bonzini@gnu.org>
             Mike Anderson  <msasjf@yahoo.co.uk>
 

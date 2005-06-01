@@ -61,19 +61,103 @@ CStruct subclass: #CRegexRegisters
 !
 
 Object subclass: #RegexResults
+        instanceVariableNames: ''
+        classVariableNames: ''
+        poolDictionaries: ''
+        category: 'Regex'
+!
+
+RegexResults subclass: #MatchingRegexResults
         instanceVariableNames: 'subject from to registers match cache'
         classVariableNames: ''
         poolDictionaries: ''
         category: 'Regex'
 !
 
-!RegexResults methodsFor: 'accessing'!
+RegexResults subclass: #FailedMatchRegexResults
+        instanceVariableNames: ''
+        classVariableNames: 'NotMatched'
+        poolDictionaries: ''
+        category: 'Regex'
+!
 
-subject
-    ^subject!
+!FailedMatchRegexResults class methodsFor: 'private'!
+
+initialize
+    NotMatched := self new
+!
+
+notMatched
+    ^NotMatched
+! !
+
+!FailedMatchRegexResults methodsFor: 'testing'!
+
+matched
+    ^false
+!
+
+ifMatched: oneArgBlock ifNotMatched: zeroArgBlock
+    ^zeroArgBlock value
+!
+
+ifNotMatched: zeroArgBlock ifMatched: oneArgBlock
+    ^zeroArgBlock value
+!
+
+ifNotMatched: zeroArgBlock
+    ^zeroArgBlock value
+!
+
+ifMatched: oneArgBlock
+    ^nil
+! !
+
+!MatchingRegexResults methodsFor: 'printing'!
+
+printOn: aStream
+    "Print a represention of the receiver on aStream."
+    | ch |
+    aStream
+	nextPutAll: self class name;
+        nextPut: $:;
+        print: self match.
+    ch := $(.
+    1 to: self size do: [ :each |
+	aStream nextPut: ch; print: (self at: each).
+    ].
+    self size > 0 ifTrue: [ aStream nextPut: $) ].
+! !
+
+!MatchingRegexResults methodsFor: 'testing'!
+
+matched
+    ^true
+!
+
+ifMatched: oneArgBlock ifNotMatched: zeroArgBlock
+    ^oneArgBlock value: self
+!
+
+ifNotMatched: zeroArgBlock ifMatched: oneArgBlock
+    ^oneArgBlock value: self
+!
+
+ifNotMatched: zeroArgBlock
+    ^nil
+!
+
+ifMatched: oneArgBlock
+    ^oneArgBlock value: self
+! !
+
+!MatchingRegexResults methodsFor: 'accessing'!
 
 size
     ^registers size!
+
+subject
+    ^subject!
 
 from
     ^from!
@@ -121,7 +205,7 @@ intervalAt: anIndex
 size
     ^registers size! !
 
-!RegexResults methodsFor: 'private'!
+!MatchingRegexResults methodsFor: 'private'!
 
 initialize: regs subject: aString
     from := regs matchBeg.
@@ -132,7 +216,7 @@ initialize: regs subject: aString
 	end := (regs endAt: i).
 	end < 0 ifTrue: [ nil ] ifFalse: [ beg to: end ] ].
     cache := Array new: registers size.
-    subject := aString!
+    subject := aString! !
 
     
 " --- external function definitions --- "
@@ -249,40 +333,69 @@ printOn: aStream
 
 !String methodsFor: 'regex'!
 
-=~ regexString
-    "Answer whether an occurrence of the regex is present in the receiver"
-    | regs gotIt |
-    regs := self searchRegexInternal: regexString from: 1 to: self size.
-    gotIt := regs matchBeg > 0.
-    regs free.
-    ^gotIt
-!
-
 asRegex
     "Answer the receiver, converted to a Regex object."
     ^Regex fromString: self
 !
 
-searchRegex: pattern
+=~ pattern
+    "Answer a RegexResults object for matching the receiver against
+     the Regex or String object pattern."
     | regs |
     regs := self searchRegexInternal: pattern from: 1 to: self size.
-    regs matchBeg = -1 ifTrue: [ regs free. ^nil ].
-    ^[ RegexResults new initialize: regs subject: self ]
-	ensure: [ regs free ]!
+    ^regs matchBeg = -1
+	ifTrue: [
+	    regs free.
+	    FailedMatchRegexResults notMatched
+	]
+	ifFalse: [
+	    [ MatchingRegexResults new initialize: regs subject: self ]
+		ensure: [ regs free ]
+	]
+!
+
+searchRegex: pattern
+    "A synonym for #=~"
+    | regs |
+    regs := self searchRegexInternal: pattern from: 1 to: self size.
+    ^regs matchBeg = -1
+	ifTrue: [
+	    regs free.
+	    FailedMatchRegexResults notMatched
+	]
+	ifFalse: [
+	    [ MatchingRegexResults new initialize: regs subject: self ]
+		ensure: [ regs free ]
+	]
+!
 
 searchRegex: pattern startingAt: anIndex
     | regs |
     regs := self searchRegexInternal: pattern from: anIndex to: self size.
-    regs matchBeg = -1 ifTrue: [ regs free. ^nil ].
-    ^[ RegexResults new initialize: regs subject: self ]
-	ensure: [ regs free ]!
+    ^regs matchBeg = -1
+	ifTrue: [
+	    regs free.
+	    FailedMatchRegexResults notMatched
+	]
+	ifFalse: [
+	    [ MatchingRegexResults new initialize: regs subject: self ]
+		ensure: [ regs free ]
+	]
+!
 
 searchRegex: pattern from: from to: to
     | regs |
     regs := self searchRegexInternal: pattern from: from to: to.
-    regs matchBeg = -1 ifTrue: [ regs free. ^nil ].
-    ^[ RegexResults new initialize: regs subject: self ]
-	ensure: [ regs free ]!
+    ^regs matchBeg = -1
+	ifTrue: [
+	    regs free.
+	    FailedMatchRegexResults notMatched
+	]
+	ifFalse: [
+	    [ MatchingRegexResults new initialize: regs subject: self ]
+		ensure: [ regs free ]
+	]
+!
 
 indexOfRegex: regexString ifAbsent: excBlock
     "Answer whether an occurrence of the regex is present in the receiver"
@@ -431,7 +544,6 @@ copyFrom: from to: to replacingAllRegex: pattern with: str
     idx := from.
     [
         regs := self searchRegex: regex from: idx to: to.
-        beg >= 1
 	regs notNil
     ] whileTrue: [
 	beg := regs from.
@@ -511,3 +623,4 @@ tokenize
     ^self tokenize: '[\n\t ]+' from: 1 to: self size
 ! !
 
+FailedMatchRegexResults initialize!

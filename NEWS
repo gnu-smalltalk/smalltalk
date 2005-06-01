@@ -120,6 +120,11 @@ o   Glorp, a layer for mapping objects to relational databases, is provided
 o   GNU Smalltalk includes a mechanism for defining security policies
     on a class-by-class basis.  See below for more information.
 
+o   Interval can return a #first and #last even if the Interval is empty.
+    These are the start and stop object that it was created with.  The
+    private methods #start, #stop and #step have thus been superseded by
+    #first, #last and #increment.
+
 o   #min: and #max: always return a NaN when one of the two operands is
     a NaN; previously they would always return the other operand.
 
