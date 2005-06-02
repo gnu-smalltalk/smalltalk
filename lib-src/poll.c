@@ -39,7 +39,7 @@
 #include <errno.h>
 
 int
-poll (struct pollfd *pfd, int nfd, int timeout)
+rpl_poll (struct pollfd *pfd, int nfd, int timeout)
 {
   fd_set rfds, wfds, efds;
   struct timeval tv, *ptv;

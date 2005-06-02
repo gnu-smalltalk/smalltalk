@@ -1,3 +1,8 @@
+2005-05-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c (poll): Rename to rpl_poll, we use it also
+	where poll is defined but broken (e.g. MacOS X 10.4).
+
 2005-04-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.c (expected): Fix spacing.

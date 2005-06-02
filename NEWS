@@ -237,7 +237,7 @@ o   Primitives cannot be declared for untrusted objects (this might be
 
 -----------------------------------------------------------------------------
 
-NEWS FROM 2.1.5 TO 2.1.8
+NEWS FROM 2.1.5 TO 2.1.9
 
 These are bugfix releases.  The only visible changes are:
 
@@ -255,10 +255,11 @@ o   Fixes to the JIT compiler (2.1.8).
 
 o   libltdl is no longer configured in a separate subdirectory (2.1.6).
 
-o   Updated to Automake 1.8, Libtool 1.5 (CVS checkout on 2003-08-01),
-    Autoconf 2.59a, snprintfv 1.1 (2.1.6).
+o   Updated version of Automake, Libtool, Autoconf, snprintfv.
 
 o   Updates to Emacs mode (2.1.6).
+
+o   Work around bugs in MacOS X Tiger's poll function (2.1.9).
 
 -----------------------------------------------------------------------------
 
