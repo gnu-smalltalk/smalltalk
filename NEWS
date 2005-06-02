@@ -2,7 +2,7 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS IN 2.1.10
 
-This is a bugfix release, but with these visible change:
+This is a bugfix release, but with this visible change:
 
 o   PackageLoader supports loading package source code from multiple
     directories.
@@ -18,7 +18,11 @@ o   PackageLoader supports loading package source code from multiple
 o   Directory>>#append:to: supports passing an absolute path as the file
     name (first argument).  In this case, the file name itself is returned.
 
-This release works under MacOS X (Darwin) 10.3 as well.
+This release works under MacOS X 10.3 and 10.4 as well.  It also works
+around bugs in MacOS X Tiger's poll function.
+
+
+-----------------------------------------------------------------------------
 
 NEWS FROM 2.1.5 TO 2.1.9
 
@@ -42,8 +46,7 @@ o   libltdl is no longer configured in a separate subdirectory (2.1.6).
 
 o   Portability improvements (2.1.8).
 
-o   Updated to Automake 1.8, Libtool 1.5 (CVS checkout on 2003-08-01),
-    Autoconf 2.59a, snprintfv 1.1 (2.1.6).
+o   Updated version of Automake, Libtool, Autoconf, snprintfv.
 
 o   Updates to Emacs mode (2.1.6).
 
