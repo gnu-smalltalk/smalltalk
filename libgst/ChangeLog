@@ -1,4 +1,9 @@
-2005-05-01  Paolo Bonzini  <bonzini@gnu.org>
+2005-06-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c: More fixes for Tiger.
+	* lib-src/poll_.h: More fixes for Tiger.
+
+2005-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/poll.c (poll): Rename to rpl_poll, we use it also
 	where poll is defined but broken (e.g. MacOS X 10.4).

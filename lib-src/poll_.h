@@ -35,6 +35,11 @@
 #include "config.h"
 #endif
 
+#ifdef poll
+#define need_poll
+#undef poll
+#endif
+
 #ifdef HAVE_POLL
 
 /* use vendor poll(2) environment */
@@ -60,6 +65,11 @@ struct pollfd
   short revents;		/* events found on return        */
 };
 
+#endif
+
+#ifdef need_poll
+#define poll rpl_poll
+#undef need_poll
 #endif
 
 #ifndef INFTIM

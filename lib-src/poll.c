@@ -28,8 +28,9 @@
  *
  ***********************************************************************/
 
-#include "config.h"
 #include "poll.h"
+
+#include "config.h"
 #include <sys/types.h>
 #include <string.h>
 #include <sys/select.h>
@@ -62,7 +63,7 @@ rpl_poll (struct pollfd *pfd, int nfd, int timeout)
       ptv->tv_sec = 0;
       ptv->tv_usec = 0;
     }
-  else if (timeout == INFTIM /* (-1) */ )
+  else if (timeout == -1)
     {
       /* wait forever */
       ptv = NULL;
