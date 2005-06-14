@@ -1,6 +1,6 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 2.1.9 TO 2.2
+NEWS FROM 2.1.10 TO 2.2
 
 Scripting improvements:
 
@@ -34,8 +34,8 @@ o   The #class method can be overridden.  This is useful for example
 o   Code for decoding/interpreting the bytecode set is for the most part
     automatically generated.  Take a look at the ``genbc'' and ``genvm''
     programs if you are going to write an high performance interpreter, and
-    write to me for any information on them or on the other program
-    ``superops'' (this one is much more specialized).
+    write to the mailing list for any information on them or on the other
+    program ``superops'' (this one is much more specialized).
 
 o   CompiledBlocks and CompiledMethods are read-only.
 
@@ -233,6 +233,30 @@ o   Permissions can be granted by a method to its callees if the method's
 
 o   Primitives cannot be declared for untrusted objects (this might be
     fine-grained in the future).
+
+
+-----------------------------------------------------------------------------
+
+NEWS IN 2.1.10
+
+This is a bugfix release, but with this visible change:
+
+o   PackageLoader supports loading package source code from multiple
+    directories.
+
+    Directory packages.xml is in       Directories looked in
+    /usr/share/smalltalk               /usr/share/smalltalk
+                                       parent of local kernel directory, if any
+                                       image directory
+    parent of local kernel directory   parent of local kernel directory
+                                       image directory
+    image directory                    image directory
+
+o   Directory>>#append:to: supports passing an absolute path as the file
+    name (first argument).  In this case, the file name itself is returned.
+
+This release works under MacOS X 10.3 and 10.4 as well.  It also works
+around bugs in MacOS X Tiger's poll function.
 
 
 -----------------------------------------------------------------------------

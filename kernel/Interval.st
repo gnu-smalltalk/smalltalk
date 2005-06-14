@@ -222,7 +222,7 @@ printOn: aStream
 !
 
 first
-    ^first
+    ^start
 !
 
 last
