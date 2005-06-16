@@ -32,9 +32,119 @@
  ======================================================================"
 
 
+Stream subclass: #RoundRobinStream
+       instanceVariableNames: 'stream first last'
+       classVariableNames: ''
+       poolDictionaries: ''
+       category: 'Language-C interface'
+!
+
+RoundRobinStream comment:
+'This class implements a peculiar stream that optimizes the order
+in which symbols are searched in dynamically linked libraries.
+When using #next, the stream will restart from the first element
+after returning nil once.  When you use #do:, the stream starts
+from the *last* element that was either returned by #next or passed
+to #do: in the previous iteration.
+
+Since the #primDefineExternFunc: leaves the #do: in advance if it
+succeeds in finding a symbol, the next time it will restart from
+the library in which it found a symbol.  Usually symbols have a
+very good locality (you find all the symbols in a library, or at
+least symbols in the same #methodsFor: come from the same library):
+so this avoids looking for symbols in the wrong library.'!
+
+!RoundRobinStream class methodsFor: 'demo'!
+
+test: s get: n
+    n timesRepeat: [ s next print ].
+    Transcript nl.
+!
+
+test: s leaveAfter: n
+    | i |
+    i := 0.
+    s do: [ :each |
+        each print.
+        (i := i + 1) = n ifTrue: [ Transcript nl. ^nil ]
+    ].
+    Transcript nl.
+!
+
+testOn: anArray
+    "RoundRobinStream testOn: #(1 2 3 4 5 6)"
+    | s |
+    s := RoundRobinStream on: anArray readStream.
+    self test: s get: anArray size + 1.
+    self test: s get: anArray size + 1.
+    self test: s get: anArray size + 1 * 2.
+    self test: s get: 2.
+    self test: s leaveAfter: anArray size + 1.
+    self test: s leaveAfter: anArray size + 1.
+    self test: s leaveAfter: 1.
+    self test: s leaveAfter: 1.
+    self test: s leaveAfter: 2.
+    self test: s leaveAfter: 2.
+    self test: s leaveAfter: anArray size + 1.
+    self test: s leaveAfter: anArray size + 1.
+    Transcript nl!
+! !
+
+!RoundRobinStream class methodsFor: 'accessing'!
+
+on: aStream
+    ^self new stream: aStream! !
+
+!RoundRobinStream methodsFor: 'accessing'!
+
+stream
+    ^stream!
+
+stream: aStream
+    stream := aStream! !
+
+!RoundRobinStream methodsFor: 'basic'!
+
+atEnd
+    stream atEnd ifTrue: [
+	stream reset.
+	"If there is no established first, we started iterating from the
+	 first element in the stream."
+	first isNil ifTrue: [ ^true ].
+    ].
+    ^(last := stream peek) = first
+!
+
+next
+    ^self atEnd
+	ifTrue: [ SystemExceptions.EndOfStream signalOn: self ]
+	ifFalse: [ stream next ]
+!
+
+do: aBlock
+    "Iterate on all the items in the Stream.  If it is not the first iteration,
+     and the last item was retrieved with #next or passed to a #do: block *that
+     did a global return*, return from there."
+    stream atEnd
+	ifTrue: [
+	   stream reset.
+	   stream atEnd ifTrue: [ ^self ] ].
+
+    "Establish the item at which we'll stop iterating.  Start from that one."
+    last isNil ifTrue: [ last := stream next ].
+    first := last.
+    aBlock value: last.
+    super do: aBlock.
+
+    "Make sure we will not restart from the last item we passed to aBlock,
+     because aBlock did not return."
+    last := nil.
+! !
+
+
 Object subclass: #DLD
        instanceVariableNames: ''
-       classVariableNames: 'LibraryList ModuleList'
+       classVariableNames: 'LibraryList LibraryStream ModuleList'
        poolDictionaries: ''
        category: 'Language-C interface'
 !
@@ -107,11 +217,9 @@ primDefineExternFunc: aFuncName
     "This method tries to link to a function with the given name, and answers
      whether the linkage was successful. It should not be overridden."
     
-    LibraryList do: [ :lib || funcAddr |
-	(lib value notNil or: [
-	    lib value: (self linkFile: lib key).
-	    lib value notNil ])
-
+    | couldNotLink |
+    LibraryStream do: [ :lib || funcAddr |
+	lib value notNil
 	    ifTrue: [
 	        funcAddr := self library: lib value getFunc: aFuncName.
 	        funcAddr notNil ifTrue: [ 
@@ -136,7 +244,7 @@ update: aspect
      all the externally defined functions"
     | notLoaded |
     aspect == #returnFromSnapshot ifFalse: [ ^self ].
-    LibraryList do: [ :each | each value: nil ].
+    LibraryList do: [ :lib | lib value: (self linkFile: lib key) ].
 
     notLoaded := WriteStream on: Array new.
 
@@ -163,7 +271,9 @@ moduleList
 addLibrary: library
     "Add library to the search path of libraries to be used by DLD."
     (LibraryList anySatisfy: [ :anAssociation | anAssociation key = library ])
-       ifFalse: [ LibraryList add: library -> nil ]
+	ifFalse: [
+	    LibraryList add: library -> (self linkFile: library).
+	    LibraryStream := RoundRobinStream on: LibraryList readStream ].
 !
 
 addModule: library

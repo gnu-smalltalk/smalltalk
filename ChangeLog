@@ -1,3 +1,8 @@
+2005-06-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/DLD.st: Restart search from the last library where
+	we found a function.
+
 2005-04-07  Mike Anderson  <msasjf@yahoo.co.ul>
 
 	* kernel/PosStream.st: Fix bug in #peekFor:.
