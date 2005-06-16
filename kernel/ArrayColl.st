@@ -191,21 +191,6 @@ copyWith: anElement
 
 !ArrayedCollection methodsFor: 'enumerating the elements of a collection'!
 
-readStream
-    "Answer a ReadStream streaming on the receiver"
-    ^ReadStream on: self
-!
-
-readWriteStream
-    "Answer a ReadWriteStream which streams on the receiver"
-    ^ReadWriteStream on: self
-!
-
-writeStream
-    "Answer a WriteStream streaming on the receiver"
-    ^WriteStream on: self
-!
-
 select: aBlock
     "Answer a new instance of an ArrayedCollection containing all the elements
      in the receiver which, when passed to aBlock, answer true"

@@ -539,6 +539,21 @@ copyReplaceFrom: start to: stop with: replacementCollection
 
 !SequenceableCollection methodsFor: 'enumerating'!
 
+readStream
+    "Answer a ReadStream streaming on the receiver"
+    ^ReadStream on: self
+! 
+
+readWriteStream
+    "Answer a ReadWriteStream which streams on the receiver"
+    ^ReadWriteStream on: self
+! 
+
+writeStream
+    "Answer a WriteStream streaming on the receiver"
+    ^WriteStream on: self
+! 
+
 anyOne
     "Answer an unspecified element of the collection."
 
