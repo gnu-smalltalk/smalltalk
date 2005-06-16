@@ -186,6 +186,7 @@ void
 _gst_parse_method ()
 {
   gst_parser p, *prev_parser = _gst_current_parser;
+  _gst_clear_method_start_pos ();
   _gst_current_parser = &p;
   p.state = PARSE_METHOD;
   lex (&p);
@@ -201,6 +202,7 @@ void
 _gst_parse_chunks ()
 {
   gst_parser p, *prev_parser = _gst_current_parser;
+  _gst_clear_method_start_pos ();
   _gst_current_parser = &p;
   p.state = PARSE_DOIT;
   lex (&p);
@@ -353,7 +355,6 @@ parse_method (gst_parser *p)
   if (!_gst_had_error && !_gst_skip_compilation)
     {
       _gst_compile_method (method, false, true);
-      _gst_clear_method_start_pos ();
     }
 
   _gst_free_tree ();

@@ -1090,7 +1090,6 @@ _gst_parse_stream (mst_Boolean method)
     _gst_had_error = false;
     if (method)
       {
-	_gst_clear_method_start_pos ();
 	_gst_parse_method ();
 	_gst_reset_compilation_category ();
       }

@@ -1,3 +1,9 @@
+2005-06-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Fix bugs in creation of FileSegments.
+	* libgst/gst-parse.c: Fix bugs in creation of FileSegments.
+	* libgst/gstpriv.h: Fixes for GCC 4.0.0.
+
 2005-06-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/poll.c: More fixes for Tiger.

@@ -48,7 +48,7 @@
 /* For internal functions, we can use the ELF hidden attribute to
    improve code generation.  Unluckily, this is only in GCC 3.2 and
    later */
-#if HAVE_VISIBILITY_HIDDEN
+#ifdef HAVE_VISIBILITY_HIDDEN
 #define ATTRIBUTE_HIDDEN __attribute__ ((visibility ("hidden")))
 #else
 #define ATTRIBUTE_HIDDEN
@@ -139,7 +139,7 @@
    because the corresponding primitives will be made non-working.
    It is undefined because the Makefiles take care of defining it for
    security-enabled builds.  */
-#define ENABLE_SECURITY
+/* #define ENABLE_SECURITY */
 
 /* OPTIMIZE disables many checks, including consistency checks at GC
    time and bounds checking on instance variable accesses (not on #at:
@@ -305,8 +305,8 @@ enum {
    ((oop)->flags |= (untr) ? F_UNTRUSTED : 0))
 
 #else
-#define IS_OOP_UNTRUSTED(oop) 0
-#define MAKE_OOP_UNTRUSTED(oop, untr) 0
+#define IS_OOP_UNTRUSTED(oop) (false)
+#define MAKE_OOP_UNTRUSTED(oop, untr) ((void)0)
 #endif
 
 /* Set whether an object, OOP, has ephemeron semantics.  */

@@ -2319,6 +2319,7 @@ _gst_make_attribute (tree_node attribute_keywords)
 	    }
 	}
 
+      argsArray = OOP_TO_OBJ (argsArrayOOP);
       argsArray->data[i] = make_constant_oop (value);
     }
 
@@ -2857,6 +2858,7 @@ file_segment_new (void)
       fileSegment->length =
         FROM_INT (_gst_get_cur_file_pos () - startPos - 1);
 
+      assert (TO_INT (fileSegment->length) >= 0);
       INC_RESTORE_POINTER (incPtr);
       return (fileSegmentOOP);
 
