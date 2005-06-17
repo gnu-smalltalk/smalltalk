@@ -688,7 +688,11 @@ get_ffi_type (OOP returnTypeOOP)
 
     case CDATA_LONG:
     case CDATA_ULONG:
-      return &ffi_type_slong;
+#if LONG_MAX == 2147483647
+      return &ffi_type_sint32;
+#else
+      return &ffi_type_sint64;
+#endif
 
     case CDATA_VOID:
     case CDATA_INT:
@@ -760,7 +764,11 @@ push_smalltalk_obj (OOP oop,
         case CDATA_LONG:
 	case CDATA_ULONG:
 	  cp->u.longVal = TO_C_LONG (oop);
-	  SET_TYPE (&ffi_type_slong);
+#if LONG_MAX == 2147483647
+          SET_TYPE (&ffi_type_sint32);
+#else
+          SET_TYPE (&ffi_type_sint64);
+#endif
 	  return;
 
         case CDATA_INT:
@@ -789,7 +797,11 @@ push_smalltalk_obj (OOP oop,
         case CDATA_LONG:
 	case CDATA_ULONG:
 	  cp->u.longVal = (oop == _gst_true_oop);
-	  SET_TYPE (&ffi_type_slong);
+#if LONG_MAX == 2147483647
+          SET_TYPE (&ffi_type_sint32);
+#else
+          SET_TYPE (&ffi_type_sint64);
+#endif
 	  return;
 
         case CDATA_INT:

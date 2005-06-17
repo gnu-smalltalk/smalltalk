@@ -1,9 +1,9 @@
-2005-06-12  Paolo Bonzini  <bonzini@gnu.org>
+2005-06-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ArrayColl.st: remove #...stream methods.
 	* kernel/SeqCollect.st: move them here.
 
-2005-06-12  Paolo Bonzini  <bonzini@gnu.org>
+2005-06-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/DLD.st: Restart search from the last library where
 	we found a function.

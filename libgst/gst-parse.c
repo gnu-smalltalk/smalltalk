@@ -186,7 +186,6 @@ void
 _gst_parse_method ()
 {
   gst_parser p, *prev_parser = _gst_current_parser;
-  _gst_clear_method_start_pos ();
   _gst_current_parser = &p;
   p.state = PARSE_METHOD;
   lex (&p);
@@ -202,7 +201,7 @@ void
 _gst_parse_chunks ()
 {
   gst_parser p, *prev_parser = _gst_current_parser;
-  _gst_clear_method_start_pos ();
+
   _gst_current_parser = &p;
   p.state = PARSE_DOIT;
   lex (&p);
@@ -304,9 +303,8 @@ recover_error (gst_parser *p)
 static void
 parse_doit (gst_parser *p)
 {
-  tree_node temps, statements;
-  temps = parse_temporaries (p, false);
-  statements = parse_statements (p, true);
+  tree_node temps = parse_temporaries (p, false);
+  tree_node statements = parse_statements (p, true);
 
   if (p->token != EOF && p->token != '!')
     expected (p, '!', -1);
@@ -318,6 +316,7 @@ parse_doit (gst_parser *p)
   _gst_had_error = false;
 
   /* Do not lex until after _gst_free_tree, or we lose a token!  */
+  _gst_clear_method_start_pos ();
   lex (p);
 }
 
@@ -350,13 +349,11 @@ parse_method (gst_parser *p)
   tree_node temps = parse_temporaries (p, false);
   tree_node attrs = parse_attributes (p);
   tree_node stmts = parse_statements (p, true);
-
   tree_node method = _gst_make_method (&pat->location, pat, temps, attrs, stmts);
   if (!_gst_had_error && !_gst_skip_compilation)
-    {
-      _gst_compile_method (method, false, true);
-    }
+    _gst_compile_method (method, false, true);
 
+  _gst_clear_method_start_pos ();
   _gst_free_tree ();
   _gst_had_error = false;
 }
