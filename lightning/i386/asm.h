@@ -24,7 +24,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with GNU lightning; see the file COPYING.LESSER; if not, write to the
  * Free Software Foundation, 59 Temple Place - Suite 330, Boston,
- * MA 02111-1307, USA.
+ * MA 02110-1301, USA.
  *
  ***********************************************************************/
 

@@ -1,5 +1,5 @@
 /* Test the stack overflow handler.
-   Copyright (C) 2002-2003  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 2002-2005  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,10 +13,11 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 #include "sigsegv.h"
 #include <stdio.h>
+#include <limits.h>
 
 #if HAVE_STACK_OVERFLOW_RECOVERY
 
@@ -43,7 +44,7 @@
 jmp_buf mainloop;
 sigset_t mainsigset;
 
-int pass = 0;
+volatile int pass = 0;
 
 void
 stackoverflow_handler (int emergency, stackoverflow_context_t scp)
@@ -55,13 +56,18 @@ stackoverflow_handler (int emergency, stackoverflow_context_t scp)
   longjmp (mainloop, emergency ? -1 : pass);
 }
 
-int
-recurse (int n)
+volatile int *
+recurse_1 (int n, volatile int *p)
 {
-  if (n >= 0)
-    return n + recurse (n + 1);
-  else
-    return 0;
+  if (n < INT_MAX)
+    *recurse_1 (n + 1, p) += n;
+  return p;
+}
+
+volatile int
+recurse (volatile int n)
+{
+  return *recurse_1 (n, (volatile int *) &n);
 }
 
 int
