@@ -17,28 +17,22 @@
 \a\
 @end macro
 
-@macro setifinfo{var, value}
-@iftex
-@set \var\
-@end iftex
-@ifinfo
-@set \var\ \value\
-@end ifinfo
-@ifhtml
-@set \var\
-@end ifhtml
-@end macro
-
 @c Redefine @var to produce <xxx> in the Info file, and italics in TeX
-@setifinfo{L_var, <}
-@setifinfo{R_var, >}
+@ifinfo
+@set L_var <
+@set R_var <
+@set SMILE ;-)
+@end ifinfo
+@ifnotinfo
+@set L_var
+@set R_var
+@set SMILE
+@end ifnotinfo
+  
 @macro var{x}
 @value{L_var}@i{@t{\x\}}@value{R_var}
 @end macro
-
-@comment Not appropriate for a printed manual...
-@setifinfo{SMILE, ;-)}
-
+  
 @c Preferred layout than @uref's
 @macro hlink{url, link}
 \link\@footnote{\link\, \url\}
