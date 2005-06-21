@@ -25,7 +25,7 @@
 |
 | You should have received a copy of the GNU Lesser General Public License 
 | along with GNU Smalltalk; see the file COPYING.LIB.  If not, write to 
-| the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+| the Free Software Foundation, 51 Franklin Street, Fifth Floor, Boston, MA
 | 02110-1301, USA.
 |
  ======================================================================"
