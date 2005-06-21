@@ -1,5 +1,11 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS IN 2.1.11
+
+This is a bugfix release.
+
+-----------------------------------------------------------------------------
+
 NEWS IN 2.1.10
 
 This is a bugfix release, but with this visible change:
@@ -18,8 +24,7 @@ o   PackageLoader supports loading package source code from multiple
 o   Directory>>#append:to: supports passing an absolute path as the file
     name (first argument).  In this case, the file name itself is returned.
 
-This release works under MacOS X 10.3 and 10.4 as well.  It also works
-around bugs in MacOS X Tiger's poll function.
+This release works under MacOS X (Darwin) 10.3 as well.
 
 
 -----------------------------------------------------------------------------
