@@ -5,7 +5,7 @@ gst_module_ldflags = -rpath $(pkglibdir) -release $(VERSION) -module \
 	-no-undefined -export-symbols-regex gst_initModule
 
 i18n_la_LDFLAGS = $(gst_module_ldflags)
-i18n_la_LIBADD = $(LIBICONV) $(top_builddir)/lib-src/library.la
+i18n_la_LIBADD = $(LTLIBICONV) $(top_builddir)/lib-src/library.la
 i18n_la_SOURCES = i18n.c localcharset.c
 
 AM_CPPFLAGS = -I$(top_srcdir)/libgst -I$(top_srcdir)/lib-src \
