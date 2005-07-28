@@ -42,7 +42,6 @@
 #include "genpr-parse.h"
 
 static int from = 0, depth = 0;
-int yylineno = 1;
 
 /* This file implements a bit more than a lexical analyzer: it also writes
    literal tokens to the output until a reserved word is found.  This is
@@ -79,10 +78,9 @@ int yylineno = 1;
 <INITIAL,C_COMMENT,C_CHAR,C_STRING,CPP_CODE,C_CODE>{
   \n+				{
     yylval.text = yytext;
-    yylineno += yyleng;
     IS_TOKEN (WSPACE);
   }
-  [ 	\f]+			{
+  [ 	\n\f]+			{
     yylval.text = yytext;
     IS_TOKEN (WSPACE);
   }
@@ -216,7 +214,6 @@ int yylineno = 1;
 <C_COMMENT>{
   [^*\n]*"*"*\n			{
     yylval.text = yytext;
-    yylineno++;
     IS_TOKEN (WSPACE);
   }
 
@@ -251,13 +248,11 @@ int yylineno = 1;
 
 <C_STRING,C_CHAR>{
   \\.				{
-    yylineno += (yytext[1] == '\n');
     yylval.text = yytext;
     IS_TOKEN (LITERAL);
   }
 
   .				{
-    yylineno += (yytext[0] == '\n');
     yylval.text = yytext;
     IS_TOKEN (LITERAL);
   }

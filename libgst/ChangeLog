@@ -1,3 +1,7 @@
+2005-07-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/genpr-scan.l: Do not compute yylineno manually.
+
 2005-06-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/poll.c: More fixes for Tiger.
