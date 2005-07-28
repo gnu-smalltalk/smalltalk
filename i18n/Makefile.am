@@ -13,7 +13,7 @@ pkglib_LTLIBRARIES = @MODULES_I18N@
 
 AM_CPPFLAGS = -DLOCALEDIR="\"$(localedir)\"" -DLIBDIR="\"$(libdir)\""
 
-i18n_la_LIBADD = $(LIBICONV) $(top_builddir)/lib-src/library.la
+i18n_la_LIBADD = $(LTLIBICONV) $(top_builddir)/lib-src/library.la
 i18n_la_LDFLAGS = -module -rpath $(pkglibdir) -no-undefined \
 	-release $(VERSION)
 i18n_la_SOURCES = i18n.c localcharset.c

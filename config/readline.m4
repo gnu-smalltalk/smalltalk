@@ -21,10 +21,17 @@ if test "$with_readline" != no; then
       cat > conftest.$ac_ext <<\EOF
 #include <stdio.h>
 #include <readline/readline.h>
+char *readline_quote_filename (const char *s, int rtype, const char *qcp)
+{
+  return (NULL);
+}
+
 int
 main()
 {
   rl_bind_key ('\t', rl_insert);
+  /* This is missing in BSD libedit!  */
+  rl_filename_quoting_function = (CPFunction *) readline_quote_filename;
   exit(0);
 }
 EOF
