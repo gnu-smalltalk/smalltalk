@@ -1,3 +1,8 @@
+2005-07-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ClassDesc.st: Add #fileOutHeaderOn:
+	* kernel/Class.st: Remove it.
+
 2005-06-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/DLD.st: Restart search from the last library where

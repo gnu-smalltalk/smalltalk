@@ -484,20 +484,6 @@ isClass
 
 !Class methodsFor: 'filing'!
 
-fileOutHeaderOn: aFileStream
-    "Write date and time stamp to aFileStream"
-    | now |
-    aFileStream nextPutAll: '"Filed out from ';
-	nextPutAll: Smalltalk version;
-	nextPutAll: ' on '.
-    now := Date dateAndTimeNow.
-    aFileStream print: now asDate;
-	nextPutAll:  '  ';
-	print: now asTime;
-	nextPutAll: '"!
-
-'!
-
 fileOutDeclarationOn: aFileStream
     "File out class definition to aFileStream"
     | aSet printFormattedSet superclassName |
