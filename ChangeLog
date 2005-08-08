@@ -1,3 +1,7 @@
+2005-08-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFS.st: Do my math correctly.
+
 2005-07-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ClassDesc.st: Add #fileOutHeaderOn:

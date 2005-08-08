@@ -438,7 +438,7 @@ do: aBlock
 
 initialize
     "Initialize the receiver's class variables"
-    Epoch := DateTime year: 2000 day: 2 hour: 0 minute: 0 second: 0.
+    Epoch := DateTime year: 2000 day: 1 hour: 0 minute: 0 second: 0.
 ! !
 
 

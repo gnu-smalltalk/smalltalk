@@ -339,12 +339,9 @@ my_stat (const char *name,
       errno = 0;
       out->st_mode = statOut.st_mode;
       out->st_size = statOut.st_size;
-      out->st_aTime =
-	_gst_adjust_time_zone (statOut.st_atime) - 86400 * 10959;
-      out->st_mTime =
-	_gst_adjust_time_zone (statOut.st_mtime) - 86400 * 10959;
-      out->st_cTime =
-	_gst_adjust_time_zone (statOut.st_ctime) - 86400 * 10959;
+      out->st_aTime = _gst_adjust_time_zone (statOut.st_atime) - 86400 * 10957;
+      out->st_mTime = _gst_adjust_time_zone (statOut.st_mtime) - 86400 * 10957;
+      out->st_cTime = _gst_adjust_time_zone (statOut.st_ctime) - 86400 * 10957;
     }
   return (result);
 }
