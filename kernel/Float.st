@@ -145,7 +145,7 @@ isNaN
 
 isFinite
     "Answer whether the receiver does not represent infinity, nor a NaN"
-    ^(self * self zero) = (self * self zero)
+    ^self - self = self zero
 !
 
 isInfinite

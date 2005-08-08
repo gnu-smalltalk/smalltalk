@@ -1,3 +1,7 @@
+2005-08-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Float.st: Use x - x == 0 to implement #isFinite.
+
 2005-07-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ClassDesc.st: Add #fileOutHeaderOn:
