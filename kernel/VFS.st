@@ -46,7 +46,7 @@ delegate to the appropriate handler, which is in charge of
 actually accessing or ``molding'''' the filesystem.'!
 
 VFSHandler subclass: #RealFileHandler
-       instanceVariableNames: 'stat'
+       instanceVariableNames: 'stat isSymbolicLink'
        classVariableNames: 'Epoch'
        poolDictionaries: ''
        category: 'Streams-Files'
@@ -123,6 +123,9 @@ CStruct
 
 "opendir and closedir needed to test for directories"
 !VFSHandler methodsFor: 'C call-outs'!
+
+lstatOn: fileName into: statStruct
+    <cCall: 'lstat' returning: #int args: #(#string #cObject)>!
 
 statOn: fileName into: statStruct
     <cCall: 'stat' returning: #int args: #(#string #cObject)>!
@@ -321,6 +324,11 @@ exists
     ^true
 !
 
+isSymbolicLink
+    "Answer whether the file is a symbolic link."
+    ^false
+!
+
 isDirectory
     "Answer whether a file with the name contained in the receiver does exist
     and identifies a directory."
@@ -416,6 +424,12 @@ size
     ^self stat stSize value
 !
 
+isSymbolicLink
+    "Answer whether the file is a symbolic link."
+    isSymbolicLink isNil ifTrue: [ self refresh ].
+    ^isSymbolicLink
+!
+
 lastAccessTime
     "Answer the last access time of the file identified by the receiver"
     ^self getDateAndTime: self stat stAtime value
@@ -449,8 +463,12 @@ refresh
         stat := CStatStruct new.
         stat addToBeFinalized
     ].
-    self statOn: self realFileName into: stat.
-    File checkError
+    self lstatOn: self realFileName into: stat.
+    File checkError.
+    isSymbolicLink := (stat stMode value bitAnd: 8r120000) = 8r120000. "S_IFLNK"
+    isSymbolicLink ifTrue: [
+	self statOn: self realFileName into: stat.
+	File checkError ]
 ! !
 
 

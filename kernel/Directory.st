@@ -140,6 +140,11 @@ working: dirName
     self checkError
 !
 
+allFilesMatching: aPattern do: aBlock
+    (self name: (self working))
+	allFilesMatching: aPattern do: aBlock
+!
+
 create: dirName
     "Create a directory named dirName."
     ^(VFS.VFSHandler for: (File pathFor: dirName))
@@ -149,10 +154,22 @@ create: dirName
 
 !Directory methodsFor: 'accessing'!
 
-at: aName
-    "Answer a File object for a file named `aName' residing in the directory
-     represented by the receiver."
+fileAt: aName
+    "Answer a File object for a file named `aName' residing in the
+     directory represented by the receiver."
     ^File on: (vfsHandler at: aName)
+!
+
+
+at: aName
+	"Answer a File or Directory object as appropriate for a file named
+	 'aName' in the directory represented by the receiver."
+	| f |
+	f := vfsHandler at: aName.
+	^((f exists and: [f isDirectory]) 
+		ifTrue: [ Directory ] 
+		ifFalse: [ File ]) 
+		on: f
 !
 
 directoryAt: aName
@@ -181,6 +198,22 @@ nameAt: aName
 
 
 !Directory methodsFor: 'enumerating'!
+
+allFilesMatching: aPattern do: aBlock
+    "Evaluate aBlock on the File objects that match aPattern (according to
+     String>>#match:) in the directory named by the receiver. Recursively
+	 descend into directories."
+
+    self do: [ :name || f | 
+	f := self at: name.
+	f isDirectory 
+	    ifTrue: [
+		((#('.' '..') includes: name) or: [ f isSymbolicLink ])
+		    ifFalse: [ f allFilesMatching: aPattern do: aBlock ] ]
+	    ifFalse: [
+		(aPattern match: name)
+		    ifTrue: [ aBlock value: f ] ] ]
+!
 
 contents
     "Answer an Array with the names of the files in the directory

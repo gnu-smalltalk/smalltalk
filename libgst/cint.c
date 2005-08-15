@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -198,6 +198,8 @@ static int get_errno (void);
 /* Encapsulate binary incompatibilities between various C libraries.  */
 static int my_stat (const char *name,
 		    gst_stat * out);
+static int my_lstat (const char *name,
+		     gst_stat * out);
 static int my_putenv (const char *str);
 static int my_chdir (const char *str);
 static DIR *my_opendir (const char *str);
@@ -311,6 +313,30 @@ my_stat (const char *name,
     }
   return (result);
 }
+
+#ifdef HAVE_LSTAT
+int
+my_lstat (const char *name,
+	 gst_stat * out)
+{
+  int result;
+  static struct stat statOut;
+
+  result = lstat (name, &statOut);
+  if (!result)
+    {
+      errno = 0;
+      out->st_mode = statOut.st_mode;
+      out->st_size = statOut.st_size;
+      out->st_aTime = _gst_adjust_time_zone (statOut.st_atime) - 86400 * 10957;
+      out->st_mTime = _gst_adjust_time_zone (statOut.st_mtime) - 86400 * 10957;
+      out->st_cTime = _gst_adjust_time_zone (statOut.st_ctime) - 86400 * 10957;
+    }
+  return (result);
+}
+#else
+#define my_lstat my_stat
+#endif
 
 int
 my_putenv (const char *str)
@@ -459,9 +485,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("errno", get_errno);
   _gst_define_cfunc ("strerror", strerror);
   _gst_define_cfunc ("stat", my_stat);
-#if 0
   _gst_define_cfunc ("lstat", my_lstat);
-#endif
 
   _gst_define_cfunc ("opendir", my_opendir);
   _gst_define_cfunc ("closedir", closedir);

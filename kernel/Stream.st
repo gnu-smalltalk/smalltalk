@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -224,6 +224,13 @@ isExternalStream
 
 
 !Stream methodsFor: 'enumerating'!
+
+linesDo: aBlock
+    "Evaluate aBlock once for every line in the receiver (assuming the
+     receiver is streaming on Characters)."
+    [self atEnd] whileFalse:
+	[aBlock value: self nextLine].
+!
 
 do: aBlock
     "Evaluate aBlock once for every object in the receiver"

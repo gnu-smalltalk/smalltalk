@@ -284,6 +284,12 @@ exists
     ^vfsHandler exists
 !
 
+isSymbolicLink
+    "Answer whether a file with the name contained in the receiver does exist
+    and does not identify a directory."
+    ^vfsHandler exists and: [ vfsHandler isSymbolicLink ]
+!
+
 isFile
     "Answer whether a file with the name contained in the receiver does exist
     and does not identify a directory."

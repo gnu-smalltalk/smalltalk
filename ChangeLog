@@ -1,3 +1,11 @@
+2005-08-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFS.st: Add #isSymbolicLink and lstat.
+	* kernel/File.st: Add #isSymbolicLink.
+	* kernel/Directory.st: Add #allFilesMatching:do: and #fileAt:,
+	return File or Directory from #at:.
+	* kernel/Stream.st: Add #linesDo:.
+
 2005-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFS.st: Do my math correctly.

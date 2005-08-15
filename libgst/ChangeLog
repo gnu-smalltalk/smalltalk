@@ -1,3 +1,7 @@
+2005-08-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Add lstat.
+
 2005-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Do my math correctly.
