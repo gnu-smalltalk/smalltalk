@@ -1,3 +1,7 @@
+2005-08-23  Mike Anderson  <msasjf@yahoo.co.uk>
+
+        * tcp/Sockets.st: Fix thinkos.
+
 2004-12-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tcp/tcp.c (O_NONBLOCK): Add here from sysdep.h.
