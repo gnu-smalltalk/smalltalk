@@ -397,7 +397,7 @@ exceptionalCondition
      as presence of out of band data) has occurred on it"
     | result |
     self isOpen ifFalse: [ ^false ].
-    result := self fileOp: 13 with: 2 ifFail: [ self close. 1 ].
+    result := self fileOp: 13 with: 2 ifFail: [ self close. 0 ].
     ^result == 1
 !
 
@@ -405,7 +405,7 @@ canWrite
     "Answer whether the file is open and we can write from it"
     | result |
     self isOpen ifFalse: [ ^false ].
-    result := self fileOp: 13 with: 1 ifFail: [ self close. 1 ].
+    result := self fileOp: 13 with: 1 ifFail: [ self close. 0 ].
     ^result == 1
 !
 
@@ -413,7 +413,7 @@ canRead
     "Answer whether the file is open and we can read from it"
     | result |
     self isOpen ifFalse: [ ^false ].
-    result := self fileOp: 13 with: 0 ifFail: [ self close. 1 ].
+    result := self fileOp: 13 with: 0 ifFail: [ self close. 0 ].
     ^result == 1
 !
 

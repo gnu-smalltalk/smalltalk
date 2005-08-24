@@ -1,3 +1,7 @@
+2005-08-23  Mike Anderson  <msasjf@yahoo.co.uk>
+
+	* kernel/FileDescr.st: Fix thinkos.
+	
 2005-08-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFS.st: Add #isSymbolicLink and lstat.

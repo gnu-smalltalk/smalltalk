@@ -186,7 +186,7 @@ flush
 isOpen
     "Answer whether the connection between the receiver and the remote
      endpoint is still alive."
-    self implementation isNil ifFalse: [ ^false ].
+    self implementation isNil ifTrue: [ ^false ].
     ^self implementation isOpen
 !
 
