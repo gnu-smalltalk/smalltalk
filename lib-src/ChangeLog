@@ -1,3 +1,7 @@
+2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/dup2.c: Remove, every system has it.
+
 2005-06-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/poll.c: More fixes for Tiger.

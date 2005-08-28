@@ -171,12 +171,11 @@ AC_FUNC_OBSTACK
 
 AC_CHECK_LIB(m, atan)
 GST_REPLACE_POLL
-AC_REPLACE_FUNCS(putenv strdup strerror strsignal memmove \
-	mkstemp getpagesize getdtablesize dup2 strstr \
-	ftruncate floorl ceill sqrtl frexpl ldexpl asinl acosl \
-	atanl logl expl tanl sinl cosl)
+AC_REPLACE_FUNCS(putenv strdup strerror strsignal memmove mkstemp getpagesize \
+	getdtablesize strstr ftruncate floorl ceill sqrtl frexpl ldexpl asinl \
+	acosl atanl logl expl tanl sinl cosl)
 AC_CHECK_FUNCS(gethostname memcpy sighold uname sbrk usleep lstat \
-	grantpt popen getrusage gettimeofday getcwd fork strchr	 \
+	grantpt popen getrusage gettimeofday getcwd fork strchr	\
 	sigsetmask alarm select mprotect madvise nl_langinfo waitpid \
 	setsid spawnl nanosleep)
 
