@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+ * Copyright 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -66,12 +66,22 @@ oop_stream;
 typedef struct input_stream
 {
   stream_type type;
-  char pushedBackChars[3];	/* the 3 buffered characters */
-  int pushedBackCount;		/* number of chars pushed back */
+  /* the 3 buffered characters */
+  char pushedBackChars[3];
+
+  /* number of chars pushed back */
+  int pushedBackCount;
+
   int line;
   int column;
   const char *fileName;
   int fileOffset;
+
+  /* The starting-position state.  If this is <0, as soon as another
+     token is lexed, the flag is reinitialized to the starting position
+     of the next token.  */
+  off_t method_start_pos;
+
   OOP fileNameOOP;		/* the full path name for file */
   mst_Boolean prompt;
   union
@@ -289,6 +299,7 @@ push_new_stream (stream_type type)
   newStream->prevStream = in_stream;
   in_stream = newStream;
 
+  _gst_clear_method_start_pos ();
   return (newStream);
 }
 
@@ -300,11 +311,24 @@ _gst_set_stream_info (int line,
 {
   in_stream->line = line;
   in_stream->column = 0;
+  _gst_clear_method_start_pos ();
   if (in_stream->type == STREAM_FILE)
     {
       in_stream->fileName = fileName;
       in_stream->fileOffset = fileOffset;
     }
+}
+ 
+off_t
+_gst_get_method_start_pos (void)
+{
+  return (in_stream->method_start_pos);
+}
+ 
+void
+_gst_clear_method_start_pos (void)
+{
+  in_stream->method_start_pos = -1;
 }
 
 int
@@ -636,6 +660,10 @@ _gst_get_location (int *x, int *y)
 {
   *x = in_stream->column;
   *y = in_stream->line;
+
+  /* Subtract 1 to mark the position of the last character we read.  */
+  if (in_stream->method_start_pos < 0)
+    in_stream->method_start_pos = _gst_get_cur_file_pos () - 1;
 }
 
 void
@@ -678,7 +706,7 @@ line_stamp (int line)
 }
 
 
-int
+off_t
 _gst_get_cur_file_pos (void)
 {
   /* ### not sure about this particular use -- the current file pos

@@ -18,24 +18,24 @@
 
         *** Version 2.1 (stable) released.
 
-2003-03-02  Paolo Bonzini  (bonzini@gnu.org)
+2003-03-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/FTP.st: bring things back in good shape.
 	* net/Base.st: likewise.
 	* net/NNTP.st: do something to fix its most blatant
 	brokenness.
 
-2002-09-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
         *** Versions 2.0c (development) and 2.0.6 (stable) released
 
 	* net/URIResolver.st: added WebEntity>>#stream and used it
 
-2002-08-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.5 (stable) released
 
-2002-08-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0b (development) released
 
@@ -43,41 +43,41 @@
 	* net/httpd/Load.st: load STT.st
 	* net/httpd/STT.st: new file
 
-2002-08-07  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Versions 2.0a (development) and 2.0.4 (stable) released
 
-2002-07-17  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
         *** Version 2.0.3 released
 
-2002-07-16  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/httpd/WebServer.st: support virtual hosting
 
-2002-07-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/URL.st: now part of the base image
 
-2002-07-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.2 released
 	
-2002-07-06  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/httpd/Load.st: adapt to namespaces
 	* net/NetServer.st: use the new #waitForConnection method
 	on ServerSocket.
 	
-2002-06-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.1 released
 	
-2002-06-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0 released
 	
-2002-06-21  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/HTTP.st: done some refactory and added HTTP/1.1 support
 	* net/POP.st: souped up POP3 support
@@ -85,7 +85,7 @@
 	* net/URIResolver.st: use ContentHandler to guess MIME types
 	* net/URL.st: merged some functionality from TCP's old URL.st
 
-2002-06-20  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/Base.st: changed NetClient to NetProtocolInterpreter,
 	moved NetClient here
@@ -103,7 +103,7 @@
 	* net/URIResolver.st: added some state, and saved some
 	100-character-long source code lines doing this
 
-2002-06-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/URL.st: support URLs with both the fragment and the query
 	parts, and store the user and password parts
@@ -118,25 +118,25 @@
 	disk until it is requested; URIResolver loads it and removes the
 	temporary file, if any.
 
-2002-06-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/IMAP.st: fixed continuation responses -- passes the
 	IMAPProtocolInterprerTest but I doubt that something so complicated
 	works first time on a real IMAP server...
 
-2002-06-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/MIME.st: drop the blank line after the headers; more fixes
 	for IMAP
 	* net/IMAP.st: some fixes, passes IMAPScannerTest and IMAPResponseTest
 	* net/HTTP.st: basic functionality is in
 
-2002-05-30  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/URIResolver.st: override appropriately the code
 	installed by URL.st
 	
-2002-05-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/MIME.st: basic functionality is in
 	* net/Base.st: code cleanup
@@ -152,21 +152,21 @@
 	* net/URIResolver.st: code cleanup
 	* net/URL.st: code cleanup
 
-2002-05-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.6 released
 	
-2002-04-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.5 released
 	
-2002-03-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/MIME.st: added accessors for common headers.
 	* net/SMTP.st: more fixes.  Must look up what method must be used
 	to print headers, the rest is fine.
 
-2002-03-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.4 released
 	
@@ -176,11 +176,11 @@
 	* net/MIME.st: some fixes make it work worse than earlier,
 	but we're on the way :-)
 
-2002-01-29  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.3 released.
 
-2002-01-04  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.2 released
 	
@@ -189,7 +189,7 @@
 	* net/Base.st: include TCP in NetworkClient's pool dictionary
 	* net/NetServer.st: include TCP in NetworkServer's pool dictionary
 	
-2001-11-20  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.1 released
 	
@@ -218,7 +218,7 @@
 	* net/Base.st: created from NetKit.st, moved into separate namespace
 	* net/RFC822.st: moved into separate namespace
 
-2001-04-11  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/FTP.st: adapted to ANSI exception handling
 	* net/Mail.st: likewise
@@ -228,7 +228,7 @@
 	* net/NetKit.st: likewise
 	* net/RFC822.st: likewise
 
-2001-04-07  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/httpd/FileServer.st: moved from web
 	* net/httpd/WikiServer.st: moved from web
@@ -248,11 +248,11 @@
 	* net/NetKit.st: created from Kazuki Yasumatsu's NetworkClients
 	* net/RFC822.st: created from Cincom's Internet Connectivity Toolkit
 
-2001-02-23  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released version 1.95.3
 
-2001-01-30  Paolo Bonzini  (bonzini@gnu.org)
+2001-01-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* web/FileServer.st: treat . and .. specially; don't list
 	files for which the users has no read access.
@@ -260,11 +260,11 @@
 	* web/WebServer.st: use NetServer.st's services
 	* web/Load.st: load NetServer.st
 
-2001-01-30   Paolo Bonzini  (bonzini@gnu.org)
+2001-01-30   Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released version 1.95.1
 	
-2000-07-15  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* web/WebServer.st: #error -> #errorCode and #error: -> #errorCode:
 	in ErrorResponse.  Plus, support the If-Modified-Since request
@@ -273,38 +273,38 @@
 	#sendStandardHeaders.
 
 
-2000-07-10  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* web/WebServer.st: in #extractPostData: don't process data
 	if the client specified an empty Content-Type.  Terminate 100
 	(Continue) responses with a *double* line-feed.
 
-2000-07-04  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-04  Paolo Bonzini  <bonzini@gnu.org>
  
 	* web/*.st: use the new DateTime and Duration classes
 
-2000-06-17  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released versions 1.95 (development) and 1.7.5 (stable)
 
-2000-04-08  Paolo Bonzini  (bonzini@gnu.org)
+2000-04-08  Paolo Bonzini  <bonzini@gnu.org>
 
         * web/FileServer.st: implemented "Range:" (RangeResponse,
         MultiRangeResponse, RangeSpecification hierarchy)
 
-2000-04-01  Paolo Bonzini  (bonzini@gnu.org)
+2000-04-01  Paolo Bonzini  <bonzini@gnu.org>
 
         * web/WikiServer.st: check for `.html' extension in the page URLs.
 
-2000-03-23  Paolo Bonzini  (bonzini@gnu.org)
+2000-03-23  Paolo Bonzini  <bonzini@gnu.org>
 
         *** Version 1.7.3 released
 
-2000-03-11  Paolo Bonzini  (bonzini@gnu.org)
+2000-03-11  Paolo Bonzini  <bonzini@gnu.org>
 
         *** Version 1.7.2 released
 
-2000-03-02  Paolo Bonzini  (bonzini@gnu.org)
+2000-03-02  Paolo Bonzini  <bonzini@gnu.org>
 
         * web/Haiku.st: created
         * web/Load.st: load Haiku.st too

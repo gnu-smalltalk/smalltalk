@@ -1,0 +1,123 @@
+2005-06-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c: More fixes for Tiger.
+	* lib-src/poll_.h: More fixes for Tiger.
+
+2005-06-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c (poll): Rename to rpl_poll, we use it also
+	where poll is defined but broken (e.g. MacOS X 10.4).
+
+2004-11-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll_.h: New name of...
+	* lib-src/poll.h: ... this removed file.
+
+2004-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/obstack.h: Get current version.
+
+2003-12-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/ltdl.c: Moved from libltdl.
+	* lib-src/ltdl.h: Moved from libltdl.
+
+2003-03-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/socketx.h: New file.
+	* lib-src/poll.c: Include it.
+
+2003-02-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/signalx.h: New file.
+	* lib-src/signalx.c: New file.
+
+2002-11-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/md5.c: Remove warnings in -Wtraditional mode.
+
+2002-11-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c, lib-src/poll.h: Support XPG4 just in case
+
+2002-10-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/strspell.c: new file
+	* lib-src/strspell.h: new file
+
+2002-09-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/alloc.c: Removed.
+	* lib-src/alloc.h: Removed.
+
+2002-08-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/avltrees.c: Removed innocuous uninitialized memory access.
+
+2002-07-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/floorl.c: New file.
+	* lib-src/ceill.c: New file.
+	* lib-src/sqrtl.c: New file.
+	* lib-src/frexpl.c: New file.
+	* lib-src/ldexpl.c: New file.
+	* lib-src/asinl.c: New file.
+	* lib-src/acosl.c: New file.
+	* lib-src/atanl.c: New file.
+	* lib-src/logl.c: New file.
+	* lib-src/expl.c: New file.
+	* lib-src/sinl.c: New file.
+	* lib-src/cosl.c: New file.
+	* lib-src/tanl.c: New file.
+
+2002-06-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/asprintf.c: Removed.
+	* lib-src/snprintf.c: Removed.
+
+2002-04-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/avltrees.c: Traverse correctly when avl_left && !avl_right.
+	* lib-src/rbtrees.c: Likewise.
+
+2002-03-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/snprintf.c: New file.
+
+2002-02-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/avltrees.c: New file.
+	* lib-src/avltrees.h: New file.
+	* lib-src/rbtrees.c: New file.
+	* lib-src/rbtrees.h: New file.
+	
+2001-06-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c: Provide select-based implementation of poll
+	* lib-src/poll.h: To be used instead of sys/poll.h
+	
+2001-04-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/dup2.c: New file.
+	
+2000-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/alloc.c: Don't exit on malloc(0).
+
+2000-05-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/alloc.c: Moved here from lib.
+	* lib-src/alloc.h: Moved here from lib.
+	* lib-src/alloca.c: Moved here from lib.
+	* lib-src/getdtablesize.c: Moved here from lib.
+	* lib-src/getpagesize.c: Moved here from lib.
+	* lib-src/memmove.c: Moved here from lib.
+	* lib-src/obstack.c: Moved here from lib.
+	* lib-src/obstack.h: Moved here from lib.
+	* lib-src/putenv.c: Moved here from lib.
+	* lib-src/qsort.c: Moved here from lib.
+	* lib-src/strdup.c: Moved here from lib.
+	* lib-src/strerror.c: Moved here from lib.
+	* lib-src/strtoul: Moved here from lib.
+	* lib-src/usleep.c: Moved here from lib.
+	* lib-src/waitpid.c: Moved here from lib.

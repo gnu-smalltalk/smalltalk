@@ -69,15 +69,9 @@ Execution begins...
 returned value is 1
 
 Execution begins...
+returned value is Object
 
 Execution begins...
-returned value is CFunctionDescriptor new: 1 "<0>"
-
-Execution begins...
-returned value is CFunctionDescriptor new: 1 "<0>"
-
-Execution begins...
-returned value is CFunctionDescriptor new: 1 "<0>"
 true
 'abcabc'
 'this is a test'

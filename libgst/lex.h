@@ -66,15 +66,4 @@ extern void _gst_yyprint (FILE * file,
 			  PTR lval) 
   ATTRIBUTE_HIDDEN;
 
-/* Return the position in the stream where the method had started.  */
-extern int _gst_get_method_start_pos (void)
-  ATTRIBUTE_PURE 
-  ATTRIBUTE_HIDDEN;
-
-/* Clear the starting-position state.  As soon as another token is
-   lexed, the flag is reinitialized to the starting position of the
-   next token.  */
-extern void _gst_clear_method_start_pos (void) 
-  ATTRIBUTE_HIDDEN;
-
 #endif /* GST_LEX_H */

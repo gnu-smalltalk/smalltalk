@@ -182,9 +182,9 @@ at: index put: anObject
 = anInterval
     "Answer whether anInterval is the same interval as the receiver"
     self class == anInterval class ifFalse: [ ^false ].
-    ^(start = anInterval start) &
-	(stop = anInterval stop) &
-	(step = anInterval step)
+    ^(self first = anInterval first) &
+	(self last = anInterval last) &
+	(self increment = anInterval increment)
 !
 
 hash

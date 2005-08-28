@@ -1,3 +1,7 @@
+2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Interval.st: Fix #= after 2005-05-27 changes.
+
 2005-08-23  Mike Anderson  <msasjf@yahoo.co.uk>
 
 	* kernel/FileDescr.st: Fix thinkos.
@@ -451,25 +455,25 @@
 
 	*** Version 2.1 (stable) released.
 
-2003-03-22  Paolo Bonzini  (bonzini@gnu.org)
+2003-03-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sunit/SUnitPreload.st: Upgrade to SUnit 3.1RC2.
 	* sunit/SUnitTests.st: Upgrade to SUnit 3.1RC2.
 	* sunit/SUnitLog.st: Included into SUnit.st.
 	* sunit/SUnit.st: Upgrade to SUnit 3.1RC2, include SUnitLog.st
 
-2003-03-20  Paolo Bonzini  (bonzini@gnu.org)
+2003-03-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Ensure that the whole data is
 	written on the file (for #write:... methods) -- previously
 	done in the VM.
 
-2003-03-04  Paolo Bonzini  (bonzini@gnu.org)
+2003-03-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFS.st: Wrap loading of filesystems with
 	exception handlers.
 
-2003-03-02  Paolo Bonzini  (bonzini@gnu.org)
+2003-03-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Implement #printOn:in:
 	* kernel/BindingDict.st: Implement #printOn:in:
@@ -480,7 +484,7 @@
 	* kernel/SysDict.st: Implement #printOn:in:
 	* kernel/CompildMeth.st: use #printOn:in: when printing
 
-2003-02-08  Paolo Bonzini  (bonzini@gnu.org)
+2003-02-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/DLD.st: Do not relink DLD functions at startup
 	* kernel/CFuncs.st: Do that here on demand
@@ -488,34 +492,34 @@
 	* kernel/CFuncs.st: use #printStringRadix: instead of #radix:
 	* kernel/CObject.st: Ditto
 
-2003-02-07  Paolo Bonzini  (bonzini@gnu.org)
+2003-02-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/processes.st: Add process names and a few other
 	simplifications.
 
 	* kernel/URL.st: Add comments.
 
-2003-01-17  Paolo Bonzini  (bonzini@gnu.org)
+2003-01-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Fix off-by-one error in #resetHandler
 
 	* kernel/CompildCode.st: Also send #postCopy to super
 	* kernel/ExcHandling.st: Override #postCopy rather than #copy
 
-2003-01-16  Paolo Bonzini  (bonzini@gnu.org)
+2003-01-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Process.st: Don't suspend an interrupted process if
 	the interruption has caused it to terminate (!)
 
-2003-01-15  Paolo Bonzini  (bonzini@gnu.org)
+2003-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Support dynamically loaded libraries.
 
-2003-01-02  Paolo Bonzini  (bonzini@gnu.org)
+2003-01-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkClosure.st: Remove workaround for JIT bug.
 
-2002-12-31  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/processes.st: Fix for expected change in behavior.
 
@@ -552,7 +556,7 @@
 	* kernel/LargeInt.st: Fix bugs in Smalltalk implementation
 	of LargeIntegers.
 
-2002-12-27  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ContextPart.st: Implement #isInternalExceptionHandlingContext
 	* kernel/ExcHandling.st: Hide internal aspects of exception handling
@@ -560,17 +564,17 @@
 	* examples/MiniDebugger.st: Terminate internal exception handling
 	contexts when entering the debugger.
 
-2002-12-24  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Raise an error when the #addressOf:
 	and #addressOfOOP: primitives fail.
 	* kernel/ByteArray.st: send #addressOf: to ObjectMemory
 
-2002-12-20  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Debugger.st: Removed
 
-2002-12-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Implement ObjectMemory>>#abort
 	* kernel/CompildCode.st: If a method does not have
@@ -584,24 +588,24 @@
 
 	* examples/MiniDebugger.st: New file
 
-2002-12-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ArrayColl.st: Implement #copyEmpty using #size
 	for the size of the new collection (instead of #basicSize).
 
-2002-11-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Implement asyncronous call-outs
 	* kernel/CFuncs.st: Implement asyncronous call-out primitive
 
-2002-11-20  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Class.st: Look in the current namespace for
 	a class to redefine (#metaclassFor:) instead of looking
 	in Smalltalk
 	* kernel/UndefObject.st: Likewise
 
-2002-11-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Use compile-time constant to
 	define call-outs
@@ -611,16 +615,16 @@
 	pools.  Avoids autoloading classes when there are
 	any in the same environment as the shared pools'.
 
-2002-11-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CFuncs.st: Define new call-out primitive
 	* kernel/Behavior.st: Use it
 
-2002-11-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Added Semaphore>>#lock
 
-2002-11-09  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Delay.st: Ensure that the idle process is
 	started and placed on the process lists.
@@ -628,26 +632,26 @@
 	* kernel/Process.st: Add method to add an handler
 	for ProcessTerminated into every call-in from C.
 
-2002-10-21  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ObjMemory.st: Adjusted for new memory manager
 
-2002-10-18  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Don't call #initialize
 	* kernel/Object.st: Don't do anything if self ~~ Object
 	in #initialize.
 
-2002-10-17  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Adjusted for new memory manager
 
-2002-10-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Stream.st: Use Knuth-Morris-Pratt algorithm to
 	implement #skipToAll: and #upToAll:.
 
-2002-10-08  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Autoload.st: Rewritten
 
@@ -659,7 +663,7 @@
 	* kernel/Builtins.st: send #new: or #basicNew: if #new or
 	#basicNew fail because the class is fixed.
 
-2002-10-07  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Bag.st: Replace Dictionary with LookupTable,
 	#associationsDo: with #keysAndValuesDo:
@@ -668,7 +672,7 @@
 	* kernel/PkgLoader.st: Replace Dictionary with LookupTable
 	* kernel/URL.st: Replace Dictionary with LookupTable
 
-2002-10-06  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Namespace.st: Inherit from AbstractNamespace
 	* kernel/RootNamespc.st: Moved parts to AbstractNamespace
@@ -681,20 +685,20 @@
 	* kernel/CompildCode.st: Show line number bytecodes;
 	added #sourceCodeMap.
 
-2002-10-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Check the availability of
 	call-outs after modules have been loaded.
 
-2002-10-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Adopted XML input format
 
-2002-09-29  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/OrderColl.st: Shrink
 
-2002-09-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Association.st: Don't hardcode the class in
 	#storeOn:
@@ -720,17 +724,17 @@
 	* kernel/Semaphore.st: Doc fixes
 	* kernel/VFS.st: Doc fixes
 
-2002-09-26  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Revert to #basicAt:/#basicAt:put:
 	to access indexed instance variables in #instVarAt:
 	and #instVarAt:put:
 
-2002-09-22  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkContext.st: Changed printing of block contexts
 
-2002-09-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildCode.st: Rewritten printing to adopt
 	parameterized dispatch.
@@ -738,7 +742,7 @@
 	#queueInterrupt: so that it interrupts suspended processes
 	as well.
 
-2002-09-18  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SharedQueue.st: Added #isEmpty
 	* kernel/Delay.st: Solved a race condition
@@ -755,12 +759,12 @@
 	* kernel/BlkClosure.st: ...to here, as it is needed to start
 	the delay and idle processes.
 
-2002-09-16  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CharArray.st: Add support for %<string1|string2>n.
 	* kernel/Semaphore.st: Demonstrate %<string1|string2>n.
 
-2002-09-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Versions 2.0c (development) and 2.0.6 (stable) released
 
@@ -769,14 +773,14 @@
 	* kernel/Builtins.st: Allow specifying a class as the
 	current namespace
 
-2002-09-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ClassDesc.st: Answer dot-separated names in #nameIn:
 	* kernel/RootNamespc.st: Likewise
 	* kernel/VarBinding.st: Don't replace spaces with
 	periods
 
-2002-09-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Add interrupt handling methods
 	* kernel/BlkClosure.st: Implement #valueWithoutPreemption,
@@ -788,7 +792,7 @@
 	and a nice #printOn: method.
 	* kernel/RecursionLock.st: New file
 
-2002-09-10  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* numerics/Approximation.st: New file
 	* numerics/Basic.st: New file
@@ -803,7 +807,7 @@
 	* numerics/RNG.st: New file
 	* numerics/Statistics.st: New file
 
-2002-09-09  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sunit/SUnitLog.st: New file
 
@@ -814,14 +818,14 @@
 	* kernel/RootNamespc.st: Add VariableBindings, not Associations
 	* kernel/VarBinding.st: New file
 
-2002-09-08  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sunit/SUnit.st: Made logging less verbose
 	* kernel/RootNamespc.st: Remove duplicates in #allBehaviorsDo:
 	* kernel/Class.st: Store classes as how they are found in the
 	current namespace.
 
-2002-09-06  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildCode.st: Remove references to the Debugger
 	symbol
@@ -836,7 +840,7 @@
 	* kernel/MethodDict.st: Implement #remove:
 	* kernel/Namespace.st: use #remove: instead of #removeAssociation:
 
-2002-09-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildCode.st: Print 8-bit push bytecodes.
 
@@ -847,20 +851,20 @@
 	* sunit/SUnitTests.st: Ditto
 	* sunit/SUnitPreload.st: Ditto
 	
-2002-08-22  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Reimplement #allSubinstancesDo:
 	to scan the OOP table just once.
 	* kernel/SeqCollect.st: Reimplement #includes:
 	and #identityIncludes: to avoid creating a full block.
 
-2002-08-21  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Raise events through #changed:
 	before and after closing
 	* kernel/VFS.st: Use this mechanism
 
-2002-08-20  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Association.st: Make sure that hash values are
 	SmallIntegers.
@@ -877,7 +881,7 @@
 	* kernel/Time.st: Delimit the parsed time by a space
 	in #readFrom:
 
-2002-08-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Directory.st: Accessor methods rely on VFSHandler>>#at:
 	* kernel/File.st: Added #on:
@@ -885,25 +889,25 @@
 	Created ArchiveMemberHandler and added abstract methods to
 	VFSHandler.
 
-2002-08-17  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ValueAdapt.st: Add Object>>#asValue.
 	* kernel/PosStream.st: Add the #pastEnd hook.
 	* kernel/AnsiExcept.st: Make EndOfStream a subclass of
 	Notification.
 
-2002-08-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.5 (stable) released
 
 	* kernel/Builtins.st: Implement ByteArray>>
 	#replaceFrom:to:with:startingAt: as a primitive
 
-2002-08-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0b (development) released
 
-2002-08-07  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Versions 2.0a (development) and 2.0.4 (stable) released
 
@@ -913,37 +917,37 @@
 	* kernel/FileDescr.st: Use it; added #peek.
 	* kernel/FileStream.st: Added #peek.
 
-2002-07-24  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Use the correct type when
 	storing a CObject into another CObject
 	* kernel/CObject.st: Rework things
 	* examples/modules/gdbm-c.st: Fix memory leak
 
-2002-07-22  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Browser.st: Removed
 
-2002-07-17  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.3 released
 
-2002-07-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/StreamFilter.st: Implement ConcatenatedStream>>#peek
 	* kernel/URL.st: Moved here from net/URL.st
 	* kernel/FileStream.st: Support opening URLs
 
-2002-07-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.2 released
 	
-2002-07-10  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Moved definition of #ifCurtailed:
 	* kernel/BlkClosure.st: Here (and fixed the method comment)
 
-2002-07-06  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ContextPart.st: Skip disabled contexts on
 	backtraces.
@@ -952,7 +956,7 @@
 
 	* kernel/Behavior.st: Use free methods to do evaluations
 
-2002-07-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Class.st: File out declaration of classes
 	derived from nil correctly.
@@ -966,7 +970,7 @@
 	* kernel/CharArray.st: Likewise
 	* kernel/ContextPart.st: Likewise
 
-2002-07-04  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Define ContextPart>>#continue:
 	and BlockClosure>>#valueAndResumeOnUnwind
@@ -974,11 +978,11 @@
 	through the new primitives.
 	* kernel/ContextPart.st: Likewise
 
-2002-07-03  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Store absolute paths
 
-2002-07-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ScaledDec.st: Define #ceiling, compare only to
 	the lowest scale in equality and inequality
@@ -996,7 +1000,7 @@
 	divisions by zero on #/, and corrected the order of computations
 	and generality comparisons on most division methods
 
-2002-06-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Float -> FloatD
 	* kernel/Float.st: Moved some parts into
@@ -1013,20 +1017,20 @@
 	* kernel/Integer.st: Use #asFloatD
 	* kernel/SortCollect.st: Use #asFloatD
 
-2002-06-29  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.1 released
 	
-2002-06-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0 released
 	
-2002-06-21  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Fixes for vpath builds.  Always compute
 	directories relative to the package file they are found in.
 
-2002-06-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiExcept.st: added the #goodness: method
 	* kernel/ExcHandling.st: Use best-fit rather than first-fit
@@ -1036,7 +1040,7 @@
 	structure contents) if there are returns in exception handlers.
 	* kernel/Process.st: Removed the exceptionHandlers variable
 
-2002-06-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ValueAdapt.st: Fixed race condition
 	* kernel/CharArray.st: Added #match:ignoreCase:
@@ -1044,19 +1048,19 @@
 	#address:, new method #new to provide an instance initialized
 	to NULL.
 
-2002-06-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/UndefObject.st: Removed references to CFunctionDescs
 	* kernel/Behavior.st: Use full path to refer to CFunctionsDescs
 	* kernel/AnsiExcept.st: Don't show ArgumentOutOfRange limits
 	in regression testing mode
 
-2002-05-30  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Fraction.st: Small bug fix, sometimes subtraction
 	actually summed...
 
-2002-05-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Class.st: File out the superclass' name *in the context
 	of the filed out class*.
@@ -1064,13 +1068,13 @@
 	not a number
 	* kernel/Dictionary.st: Add inspect method
 	
-2002-05-26  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileSegment.st: use #ensure: in #withFileDo:,
 	add a map of original file names to modified file names in
 	the relocation code.
 
-2002-05-23  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Declare a primitive to scramble the bits
 	of a SmallInteger
@@ -1078,16 +1082,16 @@
 	* kernel/WeakObjects.st: Ditto
 	* kernel/HashedColl.st: Ditto, and keep the size a power of two
 	
-2002-05-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Trap #afterEvaluation and flush the standard
 	handles
 
-2002-05-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.6 released
 	
-2002-05-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Integer.st: Add binomial coefficient computation
 	* kernel/RunArray.st: Fix category to be "Collections-Sequenceable"
@@ -1095,18 +1099,18 @@
 	* kernel/ScaledDec.st: Fix category to be "Language-Data types"
 	* kernel/ByteArray.st: Fix category to be "Collections-Sequenceable"
 
-2002-05-10  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Don't raise an error if replacing
 	with an empty collection
 
-2002-05-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/HashedColl.st: Don't use #copy when rehashing, since
 	namespaces are identity objects
 	* kernel/LookupTable.st: Don't do that here as well, just in case
 
-2002-05-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/MemUsage.st: Removed stale reference to WordMemory
 	(eliminated in Sep 2000...)
@@ -1116,12 +1120,12 @@
 	definitive shape it makes no sense to lose time (or do harm)
 	with post-load fixups.
 
-2002-05-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Add primitives to tune allocation
 	of big objects outside the main heap.
 	
-2002-05-01  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ByteArray.st: Add CSymbols pool dictionary
 	* kernel/CObject.st: Add CSymbols pool dictionary
@@ -1136,7 +1140,7 @@
 	* kernel/Fraction.st: Use the new characterization methods
 	in Float.
 
-2002-04-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFS.st: Added #openDescriptor:ifFail:	
 	* kernel/File.st: Added #openDescriptor:ifFail:, #open:ifFail:,
@@ -1144,13 +1148,13 @@
 	* kernel/FileDescr.st: Open files with #openDescriptor:ifFail:
 	* kernel/FileStream.st: Open files with #open:ifFail:
 
-2002-04-18  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFS.st: Fix bug in mkdir
 	* examples/shell: Replace with nice script by Alexander
 	Lazarevic.
 	
-2002-04-16  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ArrayColl.st: Move implementation of copying methods
 	from SequenceableCollection to here.
@@ -1172,11 +1176,11 @@
 	values of the collection, truncate when answering the #contents
 	instead.
 
-2002-04-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.5 released
 	
-2002-04-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sunit/SUnit.st: Show assertion results
 	* kernel/SeqCollect.st: correct #replaceFrom:to:with: to accept
@@ -1184,7 +1188,7 @@
 	* kernel/CharArray.st: Added #startsWith:
 	* kernel/ExcHandling.st: Bug fixes
 	
-2002-04-10  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Implemented #negated to behave correctly
 	with respect to negative zeros.  Print minus sign in front
@@ -1194,7 +1198,7 @@
 	to behave correctly with respect to NaNs.  Added remarks
 	on negative zeros
 	
-2002-04-06  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Fraction.st: Skip GCDs when computing squared
 	fractions, do them on lower numbers when adding and
@@ -1207,7 +1211,7 @@
 	result for negative powers of two
 	* kernel/Integer.st: Removed generic implementation of #highBit
 
-2002-04-01  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/LargeInt.st: Define / in terms of GCD
 	* kernel/Fraction.st: Fix typo in #estimatedLog; compute
@@ -1215,21 +1219,21 @@
 	#floor and #ceiling in terms of operations on the numerator
 	and denominator.
 	
-2002-03-27  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/LargeInt.st: Added support for primitives
 
-2002-03-23  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Integer.st: Implemented better factorial algorithm
 	* examples/Publish.st: Add `writing documentation for' in
 	front of class names
 	
-2002-03-21  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/STTok.st: Skip _ inside numeric literals
 
-2002-03-17  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFS.st: Created from File.st and Directory.st
 	* kernel/FileStream.st: Put in some VFS hooks
@@ -1246,11 +1250,11 @@
 	* kernel/ValueAdapt.st: Added missing class comments
 	* kernel/ObjDumper.st: Added missing class comments
 
-2002-03-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Support a system-wide package file
 
-2002-03-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.4 released
 	
@@ -1258,7 +1262,7 @@
 	it was not very predictable) in the filename-manipulation
 	methods.
 
-2002-02-26  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Object.st: Removed calls to #debug
 	* kernel/CObject.st: Removed calls to #debug
@@ -1281,7 +1285,7 @@
 	* kernel/Object.st: Removed CFunctionDescs from the
 	pool dictionary list
 	
-2002-02-07  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Was not assigning to `count' in
 	#read:numBytes:
@@ -1290,56 +1294,56 @@
 	because not all devices support sending SIGIO's when they
 	become writeable -- notably, tty's under Linux :-(
 
-2002-02-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Fix imprecise error message
 
-2002-01-29  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.3 released.
 
-2002-01-22  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Added a missing period
 	* kernel/ExcHandling.st: Added a missing period
 	* kernel/RootNamespc.st: Added a missing period
 
-2002-01-18  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Removed duplicated methods in
 	ObjectMemory and SystemDictionary.
 	* kernel/SysDict.st: Removed initialization blocks
 	* tests/low-level/objects.st: Adapt
 
-2002-01-17  Nigel Williams  (nigelw@wizardis.com.au)
+2002-01-17  Nigel Williams  <nigelw@wizardis.com.au>
 
 	* kernel/FileDescr.st: Use exact rather than conservative
 	implementations of #isPipe and of end-of-file detection
 	for pipes.
 	* kernel/ProcSched.st: Added timeSlice instance variable
 	
-2002-01-09  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SortCollect.st: To #beConsistent, use quicksort if
 	nothing in the collection is sorted.
 
-2002-01-04  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.2 released
 	
-2002-01-03  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Namespace.st: #associationAt: was returning
 	the value.
 	* kernel/Collection.st: Use #copyEmptyForCollect
 	to create the result collection
 
-2002-01-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/RandomInt.st: Removed
 	* kernel/Random.st: Merged examples/RandomInt.st's features.
 
-2001-12-11  Paolo Bonzini  (bonzini@gnu.org)
+2001-12-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Process correctly methods whose source
 	code starts with whitespace (the compiler does not generate
@@ -1347,7 +1351,7 @@
 	* examples/StreamFilter.st: New file
 	* kernel/HashedColl.st: use #copyEmpty: while growing
 
-2001-11-29  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Use #asMetaclass to retrieve class methods
 	since #class is inlined by the VM and cannot be overriden by
@@ -1356,24 +1360,24 @@
 	* kernel/Metaclass.st: Accept dot notation to indicate nested
 	namespaces in the pool dictionaries string
 
-2001-11-20  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.1 released
 	
 	* kernel/SysDict.st: Smalltalk usually contains a
 	reference to itself, avoid infinite loops in #hash
 
-2001-11-19  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: wrap #recompile: in an exception
 	handler
 
-2001-11-19  Nigel Williams  (nigelw@wizardis.com.au)
+2001-11-19  Nigel Williams  <nigelw@wizardis.com.au>
 
 	* kernel/WriteStream.st: don't do #become: when growing
 	a collection.
 	
-2001-11-13  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Debugger.st: Prefixed # to symbols in arrays
 	* examples/Lisp.st: Prefixed # to symbols in arrays
@@ -1391,7 +1395,7 @@
 	* kernel/ExcHandling.st: Prefixed # to symbols in arrays
 	* kernel/File.st: Prefixed # to symbols in arrays
 
-2001-11-04  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileStream.st: Adjust position after #next:
 	
@@ -1415,7 +1419,7 @@
 
 	* kernel/AnsiExcept.st: Implemented EndOfStream.
 
-2001-10-16  Paolo Bonzini  (bonzini@gnu.org)
+2001-10-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/RootNamespc.st: Added #nameIn:
 	* kernel/Namespace.st: Added #nameIn:
@@ -1424,25 +1428,25 @@
 	in ClassDescription>>#nameIn:
 	* examples/Publish.st: Support publication of entire namespaces
 
-2001-09-15  Paolo Bonzini  (bonzini@gnu.org)
+2001-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiExcept.st: Implement system exceptions
 
-2001-08-28  Paolo Bonzini  (bonzini@gnu.org)
+2001-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CharArray.st: Allow one to specify numbers
 	or other objects as parameters to #bindWith:
 	
-2001-06-20  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Bench.st: Modified results to those obtained
 	with GCC 3.0's new back end (+15%!!!).
 	
-2001-06-12  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/MappedColl.st: Doc fixes.
 	
-2001-06-07  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiDates.st: Use exception handling instead of #error:
 	* kernel/AnsiExcept.st: Likewise
@@ -1487,7 +1491,7 @@
 	* kernel/UndefObject.st: Likewise
 	* kernel/WriteStream.st: Likewise
 
-2001-06-05  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SortCollect.st: Fix methods whose parameters
 	need not be sortable so that they do not fail.  Fix
@@ -1495,46 +1499,46 @@
 	do not establish a total sort (a sorts before b, and
 	vice versa, does not imply a = b).
 	
-2001-05-22  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Bench.st: Adjusted for the new great
 	performance improvements (inlined primitives).
 	
-2001-05-20  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/DLD.st: Show failed linkages without duplicates.
 	
-2001-05-17  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Number.st: Fixed bug in inequality (2 ~= 1.0).
 	* kernel/FileStream.st: Fixed bug in positioning the
 	file pointer before flushing the write buffer.
 	* kernel/Delay.st: Removed a couple of debug printNls.
 
-2001-05-17  Pahi Andras  (pahi@info-m.hu)
+2001-05-17  Pahi Andras  <pahi@info-m.hu>
 
 	* kernel/Builtins.st: Return correct value for #perform:...
 	if #doesNotUnderstand: is called.
 	
-2001-05-15  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96 (alpha) released
 
-2001-05-04  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/modules/regex.st: Added a Regex class
 	and declared reh_make_cacheable
 	
-2001-05-02  Dragomir Milivojevic  (dmilivoj@bigfoot.com)
+2001-05-02  Dragomir Milivojevic  <dmilivoj@bigfoot.com>
 
 	* examples/modules/regex.st: Added more juice...
 
-2001-04-28  Simon Britnell  (ughbash@yahoo.com)
+2001-04-28  Simon Britnell  <ughbash@yahoo.com>
 
 	* kernel/DLD.st: Ensure that each library and
 	module is included in the DLD lists only once.
 
-2001-04-24  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SharedQueue.st: Add support for priority queues
 	and #peek.
@@ -1544,12 +1548,12 @@
 	occurs)
 	* kernel/Semaphore.st: use #ensure: in #critical:
 
-2001-04-16  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Created from part of FileStream.st
 	* kernel/FileStream.st: Partially moved to FileDescr.st
 	
-2001-04-15  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/modules/md5.st: Created
 
@@ -1557,7 +1561,7 @@
 	* kernel/Builtins.st: Removed the definition of
 	ObjectMemory>>#enableGC:.
 	
-2001-04-02  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Copied a few builtins to ObjectMemory,
 	marked them as deprecated for SystemDictionary.
@@ -1572,7 +1576,7 @@
 	* Load.st: Use ObjectMemory class>>#snapshot
 	* Reload.st: Use ObjectMemory class>>#snapshot
 	
-2001-03-28  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/ansi/AnsiProtos.st: Removed
 	* tests/ansi/AnsiSUnit.st: Removed
@@ -1581,34 +1585,34 @@
 	* examples/pepe.sed: Added
 	* examples/xml.sed: Added
 
-2001-03-20  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Removed the file-in primitives, added
 	three-argument #fileOp: variants.
 	* kernel/FileStream.st: Rewritten for new buffering scheme,
 	use #fileOp:... to file-in too.
 	
-2001-03-14  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CStruct.st: Factored most of CStruct into CCompound.
 	Added CUnion.
 	
-2001-02-23  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released version 1.95.3
 
-2001-02-19  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Documented the ability of #perform: &
 	friends to receive a CompiledMethod as their first parameter.
 	* kernel/CStruct.st: Made CStruct accept #{...} literals
 	in the declaration.
 	
-2001-02-15   Paolo Bonzini  (bonzini@gnu.org)
+2001-02-15   Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Raise an error on invalid C call-outs
 	
-2001-02-14   Paolo Bonzini  (bonzini@gnu.org)
+2001-02-14   Paolo Bonzini  <bonzini@gnu.org>
 
 	* gdbm/gdbm-c.st: New file (old gdbm.st)
 	* gdbm/gdbm.st: New file
@@ -1617,7 +1621,7 @@
 	generated.
 	* kernel/File.st: Use new syntax for generating CStructs
 	
-2001-02-13   Paolo Bonzini  (bonzini@gnu.org)
+2001-02-13   Paolo Bonzini  <bonzini@gnu.org>
 
 	* sunit/SUnitTests.st: Upgraded to version 3.0
 	* sunit/SUnitPreload.st: Ditto
@@ -1629,7 +1633,7 @@
 	* kernel/SeqCollect.st: Raise an error if the starting index in
 	#indexOf:startingAt:ifAbsent: is out of range.
 	
-2001-02-09   Paolo Bonzini  (bonzini@gnu.org)
+2001-02-09   Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PosStream.st: Added #isExternalStream
 	* kernel/FileStream.st: Added #isExternalStream
@@ -1643,17 +1647,17 @@
 	instead of separate Dictionaries (faster, neater & less buggy).
 	* kernel/Process.st: Defined unwindPoints and its accessors.
 
-2001-02-08   Paolo Bonzini  (bonzini@gnu.org)
+2001-02-08   Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/HashedColl.st: Keep the size of the collection
 	a prime number (stolen from GLib).
 
-2001-02-06   Paolo Bonzini  (bonzini@gnu.org)
+2001-02-06   Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: correct #copyReplaceAll:with: which
 	created wrong-sized collections.
 
-2001-02-05   Paolo Bonzini  (bonzini@gnu.org)
+2001-02-05   Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Avoid overfull hboxes due to missing
 	hyphenation.  Also emit indexes.
@@ -1674,14 +1678,14 @@
 	* kernel/Symbol.st: Added missing comments.
 	* kernel/Time.st: Added missing comments.
 
-2001-02-01   Paolo Bonzini  (bonzini@gnu.org)
+2001-02-01   Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/DLD.st: Added support for dynamically-loaded modules,
 	removed the need for the ExternalFunctions variable.
 	* kernel/PkgLoader.st: Added support for dynamically-loaded modules
 	* kernel/Directory.st: Added class method #module
 
-2001-01-31   Paolo Bonzini  (bonzini@gnu.org)
+2001-01-31   Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Moved Set builtins to HashedCollection
 	* kernel/File.st: Added #isExecutable/#isAccessible
@@ -1690,16 +1694,16 @@
 	* kernel/Set.st: Moved lots of it to HashedColl.st;
 	added methods to do arithmetic.
 	
-2001-01-30   Paolo Bonzini  (bonzini@gnu.org)
+2001-01-30   Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Directory.st: Added #systemKernel
 	* kernel/Time.st: Fixed one-second skews in the millisecond clock
 
-2001-01-30   Paolo Bonzini  (bonzini@gnu.org)
+2001-01-30   Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released version 1.95.1
 	
-2001-01-14  Paolo Bonzini  (bonzini@gnu.org)
+2001-01-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/LargeInt.st: Fixed bugs in GCD computation which
 	caused it to be underestimated (bugs were in #bytesLeftShift:big:
@@ -1709,7 +1713,7 @@
 	* kernel/Dictionary.st: Likewise.
 	* kernel/LookupTable.st: Likewise.
 
-2001-01-11  Paolo Bonzini  (bonzini@gnu.org)
+2001-01-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileStream.st: Removed declaration of #species
 	* kernel/ByteStream.st: Declared #species to return String
@@ -1722,7 +1726,7 @@
 	* kernel/Object.st: #ifNotNil:ifNotNil: --> #ifNotNil:ifNil:
 	* kernel/UndefObject.st: #ifNotNil:ifNotNil: --> #ifNotNil:ifNil:
 
-2000-11-01  Paolo Bonzini  (bonzini@gnu.org)
+2000-11-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Quine.st: New file -- sorry for lack of updates (the
 	longest since I picked up maintenance), but I really had no free
@@ -1737,7 +1741,7 @@
 	* kernel/SymLink.st: Define a creation method, #symbol:nextLink:
 	-- this is probably the least modified file in GNU Smalltalk!!!
 
-2000-09-11  Paolo Bonzini  (bonzini@gnu.org)
+2000-09-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Dictionary.st: Tried to lessen usage of dirty blocks
 	* kernel/LookupTable.st: Same as above
@@ -1745,14 +1749,14 @@
 	* kernel/Set.st: Same as above; plus, added #postLoad/#postStore
 	* kernel/WeakObjects.st: Same as above
 
-2000-09-09  Paolo Bonzini  (bonzini@gnu.org)
+2000-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: New meaning of primitive 90, so the name
 	of the method that invokes it has changed to discardTranslation
 	* kernel/MethodDict.st: Use CompiledCode>>#discardTranslation
 	* kernel/Point.st: Fixed bug in #=
 
-2000-09-09  Paolo Bonzini  (bonzini@gnu.org)
+2000-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CharArray.st: Use {} syntax.
 	* kernel/Class.st: Use {} syntax.
@@ -1763,7 +1767,7 @@
 	* kernel/Rectangle.st: Use {} syntax.
 	* kernel/PkgLoader.st: Use {} syntax.
 
-2000-09-07  Paolo Bonzini  (bonzini@gnu.org)
+2000-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.8.3 released
 
@@ -1775,11 +1779,11 @@
 	(#uintAt: for #unsignedIntAt: etc.)
 	* kernel/WordMemory.st: Removed
 
-2000-09-01  Nigel Williams  (nigelw@wizardis.com.au)
+2000-09-01  Nigel Williams  <nigelw@wizardis.com.au>
 
 	* kernel/DLD.st: Fixed typo
 
-2000-08-13  Paolo Bonzini  (bonzini@gnu.org)
+2000-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ArrayColl.st: Moved here old SequenceableCollection>>#copyFrom:to:
 	* kernel/Collection.st: Added #beConsistent
@@ -1789,19 +1793,19 @@
 	* kernel/SortCollect.st: Modified to use #beConsistent, fixed several
 	buglets.
 
-2000-08-06  Paolo Bonzini  (bonzini@gnu.org)
+2000-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Added #basicNewInFixedSpace, #basicNewInFixedSpace:
 	and #makeFixed.  Also added error handling to #become:
 	* kernel/Behavior.st: Added #newInFixedSpace and #newInFixedSpace:.
 
-2000-07-18  Nigel Williams  (nigelw@wizardis.com.au)
+2000-07-18  Nigel Williams  <nigelw@wizardis.com.au>
 
 	* kernel/CFuncs.st: Added #address:
 	* kernel/DLD.st: Re-link and reset the addresses of
 	all the externally defined functions.
 
-2000-07-10  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Since usage of Undeclared in the kernel's
 	source is now allowed, I removed the forward declarations.
@@ -1815,7 +1819,7 @@
 	parts to avoid non-local returns.
 	* kernel/Processor.st: implemented #printOn: and #storeOn:
 
-2000-07-09  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/DirMessage.st: Added methods for PluggableProxy support.
 	* kernel/ObjDumper.st: Implemented AlternativeObjectProxy,
@@ -1825,7 +1829,7 @@
 	* kernel/Object.st: Added #postStore and methods for PluggableProxy
 	support.
 
-2000-07-04  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-04  Paolo Bonzini  <bonzini@gnu.org>
  
 	* kernel/File.st: Use the new DateTime and Duration classes
 	* kernel/PkgLoader.st: Use the new DateTime class
@@ -1840,7 +1844,7 @@
 	to #addAll:
 
 
-2000-07-03  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiExcept.st: New file
 	* kernel/Bag.st: Added #new: (incredible that it was not here)
@@ -1862,7 +1866,7 @@
 	* test/ansi/SUnitTests.st: New file
 	* test/ansi/run-tests.st: New file
 
-2000-07-02  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Number.st: Implemented additional #retry... methods
 	because the JIT does not like #perform:, which is used in
@@ -1881,7 +1885,7 @@
 	* kernel/AnsiDates.st: New file
 	* kernel/ScaledDec.st: New file
 
-2000-06-21  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkClosure.st: adjust #asContext: because of the
 	change below.
@@ -1891,7 +1895,7 @@
 	* test/intmath.st: Fixed a couple of "must return..." comments
 	which were actually wrong.
 
-2000-06-19  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Collection.st: Rewritten #as... methods to use cascading
 	and to use the change to #replaceFrom:to:with: below.
@@ -1901,7 +1905,7 @@
 	collection, set firstIndex to 1 in #initIndices and #makeRoomLastFor:
 	(new method).  Implemented heap algorithms.
 
-2000-06-18  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Collection.st: No need to call #firstIndex:lastIndex:
 	in #asSortedCollection: because of the change in SortCollect.st
@@ -1913,18 +1917,18 @@
 	* kernel/OrderColl.st: When removing the last item, call
 	#initIndices
 
-2000-06-17  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released versions 1.95 (development) and 1.7.5 (stable)
 
-2000-06-03  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Bench.st: Do one more iteration (9 instead of 8) if the
 	JIT compiler is detected (eh eh eh...)
 	* kernel/ContextPart.st: Added methods to detect the presence of the
 	JIT compiler
 
-2000-06-03  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Array.st: #isArray returned false instead of true
 	* kernel/BlkContext.st: Initialize returnIP in #initBlock:, using
@@ -2017,7 +2021,7 @@
 
 	*** Sixth beta of 1.7 (labeled 1.6.85) released
 
-1999-12-31  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Use identity for RootNamespaces' equality
 	and the #identityHash for hashing
@@ -2032,7 +2036,7 @@
 	* kernel/CObject.st: implemented #adjPtrBy: and #ptrDiff:... in
 	Smalltalk
 
-2000-01-24  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkClosure.st: Access lots of things through CompiledBlocks.
 	* kernel/CompiledBlk.st: Created.
@@ -2043,7 +2047,7 @@
 	kernel/CompildCode.st
 	* kernel/MethodInfo.st: Added `class' and `selector' variables
 
-2000-01-20  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Integer primitives now defined in
 	SmallInteger.
@@ -2056,7 +2060,7 @@
 	* test/intmath.st: `Integer largest' --> `SmallInteger largest';
 	`Integer smallest' --> `SmallInteger smallest';
 
-2000-01-15  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ByteArray.st: C-like accessors (e.g. #intAt:) had
 	sizeof(long) hardcoded as 4. Fixed.
@@ -2067,7 +2071,7 @@
 	* kernel/Date.st: Use ByteArray literal in
 	#daysInMonthIndex:forYear: just to show that it is possible.
 
-2000-01-08  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkContext.st: Added #isEnvironment
 	* kernel/ContextPart.st: Use #isEnvironment in #environment,
@@ -2076,7 +2080,7 @@
 
 	* kernel/CompildMeth.st: Print new bytecode 143
 
-1999-12-29  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ContextPart.st: Set to nil the stack slots that become
 	accessible because of sending #sp: to a context.
@@ -2085,18 +2089,18 @@
 	* kernel/Transcript.st: Class name changed to TextCollector
 	for consistency with other environments
 
-1999-12-28  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Fifth beta of 1.7 (labeled 1.6.84) released
 
-1999-12-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Debugger.st: New implementation of #blockCopy: (bytecode
 	200).
 	* kernel/Builtins.st: Primitive 80 (blockCopy:) is now used by
 	BlockClosure.
 
-1999-12-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkClosure.st: New `method' instance variable
 	* kernel/ContextPart.st: Removed methodClass variable,
@@ -2104,7 +2108,7 @@
 	from the method.
 	* kernel/MthContext.st: New implementation of #selector.
 
-1999-12-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Support for the new `class' and `selector'
 	variables in CompiledMethods.
@@ -2115,7 +2119,7 @@
 	* kernel/MethodDict.st: encapsulated #removeAssociation: which
 	can be dangerous just like #removeKey:ifAbsent:.
 
-1999-12-19  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkContext.st: Removed home, moved receiver to ContextPart.
 	* kernel/ContextPart.st: Removed hasBlock, made the structure of
@@ -2123,17 +2127,17 @@
 	* kernel/MthContext.st: Moved method, methodClass, receiver to
 	ContextPart.
 
-1999-12-06  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Hacked Float>>#hash so that '2 hash = 2.0 hash'
 	* kernel/CompildMeth.st: Bit 30 is now part of the method flags.
 
-1999-12-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/WordMemory.st: Added accessor for the `Bigendian' global
 	variable.
 
-1999-12-05  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: ANSI asks for 65535 instance variables, so I
 	shifted the instance specification's `number of instance vars' field
@@ -2145,11 +2149,11 @@
 	* kernel/File.st: Added methods to manage file names; plus,
 	use the strerror C function.
 
-1999-11-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Fourth beta of 1.7 (labeled 1.6.83) released
 
-1999-11-23  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Fixes for Texinfo 4.0 (which produces
 	HTML too, not just TeX and Info).
@@ -2157,7 +2161,7 @@
 	are actually IBM Smalltalk's #variableLongSubclasses: (fix
 	to the compatibility methods).
 
-1999-11-21  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/bench.st: Fixes to make measurements more constant.
 	See `e)' in the discussion of the results at the top of the
@@ -2168,18 +2172,18 @@
 	* kernel/Transcript.st: use #nextPutAllFlush: when stdout is
 	the transcript.
 
-1999-11-19  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Prolog.st: Added
 
-1999-11-18  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Better handling of mutation -- create
 	a lightweight class with the old representation, change the
 	object to it and forget #specialBasicAt:.
 	* kernel/Object.st: Better handling of mutation -- see above.
 
-1999-11-17  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Lisp.st: Added
 	* kernel/CharArray.st: Moved implementation of #asNumber to
@@ -2187,7 +2191,7 @@
 	* kernel/Number.st: #readFrom: reads a Number from the current
 	stream position, not from its start (correct semantics)
 
-1999-11-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Bench.st: More comparisons added
 	* kernel/CompildMeth.h: Move flag bits to high end, so that there is
@@ -2195,44 +2199,44 @@
 	* kernel/BlkContext.c: BlockContexts now hold the receiver and the
 	BlockClosure instead of the number of arguments and temporaries.
 
-1999-11-06  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Support for namespaces
 
-1999-11-01  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ClassDesc.st: moved #nameIn: from Class.
 	* kernel/Class.st: moved #nameIn: to ClassDescription.
 
-1999-10-31  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Third beta of 1.7 (labeled 1.6.82) released
 
-1999-10-25  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Added optimized version of #anyOne
 
-1999-10-22  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Use the last decimal digit as a guard digit
 	when printing
 	* kernel/SeqCollect.st: Added #do:separatedBy:
 
-1999-10-21  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Moved a few String primitives to CharacterArray
 	* kernel/Object.st: Added #isCharacterArray
 	* kernel/String.st: Moved most code to CharArray.st
 	* kernel/CharArray.st: Created by refactoring of String.
 
-1999-10-20  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Object.st: Added #display* methods.
 	* kernel/String.st: added #displayOn: and #displayString methods.
 	* kernel/Symbol.st: added #displayOn: and #displayString methods.
 	* kernel/Character.st: added #displayOn: methods.
 
-1999-10-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Buffers.st: Created from tcp/ReadBuffer.st and
 	tcp/WriteBuffer.st
@@ -2241,7 +2245,7 @@
 	* kernel/Float.st: #hash was not always returning integers
 	* kernel/Set.st: Removed #primXXX
 
-1999-10-11  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Added missing #integerPart (`num := self
 	integerPart' was `num := self') in code to print the Float's
@@ -2250,7 +2254,7 @@
 	* kernel/WeakObjects.st: Added #postLoad to WeakArray to make
 	the array weak again.
 
-1999-10-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Association.st: Parts moved to kernel/LookupKey.st.
 	* kernel/Builtins.st: Added comment for the new behavior of file-ins
@@ -2260,7 +2264,7 @@
 	* kernel/PkgLoader.st: Added ability to ignore undeclared call-outs
 	(useful for producing documentation without recompiling the VM).
 
-1999-10-09  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Second beta of 1.7 (labeled 1.6.81) released
 
@@ -2268,7 +2272,7 @@
 	translator's code cache. Fail on `anInteger asOop'.
 	* kernel/CompildMeth.st: Use the primitive above.
 
-1999-10-07  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Use MethodDictionaries; removed calls to
 	#flushCache since they are in MethodDict.st
@@ -2277,7 +2281,7 @@
 	inside the MethodDictionary of a class crashed the system.
 	* kernel/MethodDict.st: Created
 
-1999-10-05  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Added helper class ActiveHandlersList
 	to avoid messy usage of ReadStreams and #copy.
@@ -2285,14 +2289,14 @@
 	* kernel/Number.st: Added #log.
 	* kernel/ObjDumper.st: Fixed bugs in namespace handling.
 
-1999-10-04  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Remove subclasses of CStruct from
 	the manual.
 	* kernel/CompildMeth.st: #literals was erroneously going
 	into an infinite loop (^self literals).
 
-1999-10-02  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Fixed \\ (was returning the floor of
 	the result) and printing (the last integer digit of numbers
@@ -2303,7 +2307,7 @@
 	* test/intmath.st: Added more // and \\ tests.
 	* test/floatmath.st: Added // and \\ tests.
 
-1999-09-30  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkClosure.st: Added #repeat
 	* kernel/Date.st: Added #shortNameOfMonth
@@ -2312,18 +2316,18 @@
 	PositionableStream protocol, here; added #splitAt:
 	* kernel/PosStream.st: Opposite of above
 
-1999-09-25  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** First beta of 1.7 (labeled 1.6.80) released
 
-1999-09-23  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Set.st: Initialize in new method #initialize:
 	* kernel/LookupTbl.st: Initialize in #initialize:
 	* kernel/WeakObjs.st: Initialize hashed collections in #initialize:
 	* kernel/RootNamespc.st: Initialize #Super key in #setSuperspace:
 
-1999-09-19  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Use a WeakArray in #allInstances
 	* kernel/Builtins.st: moved all `Smalltalk at: #... put: nil' declarations
@@ -2336,14 +2340,14 @@
 	* kernel/SortCollect.st: #swap:with: moved here.
 	* kernel/WeakObjects.st: Created
 
-1999-09-18  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Bag.st: Added #sortedByCount.
 	* kernel/BlockClosure.st: Don't make copies (answer the original object)
 	* kernel/Character.st: Added #isPunctuation
 	* kernel/UndefObj.st: Nil should not have dependents
 
-1999-09-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Directory.st: Added #create:
 	* kernel/Object.st: Added #broadcast:with:with:
@@ -2353,7 +2357,7 @@
 	* test/sets.st: Added
 	* test/*.base: Renamed to *.ok for easier life on 14-char systems.
 
-1999-09-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Case.st: Added #ifEqualTo:do:
 	* examples/SortCriter.st: Added
@@ -2362,7 +2366,7 @@
 	* kernel/SortCollect.st: Added DefaultSortBlock to SortedCollection;
 	uses preStore and postLoad.
 
-1999-09-12  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Variable instanceVariables came here from
 	ClassDescription.
@@ -2371,7 +2375,7 @@
 	in ClassDescription?)
 	* kernel/ClassDesc.st: Combination of the two above.
 
-1999-09-11  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ClassDesc.st: Implementation of namespaces
 	* kernel/Class.st: Implementation of namespaces
@@ -2381,7 +2385,7 @@
 	* kernel/SysDict.st: Moved something to Namespace.st and RootNamespc.st
 	* kernel/UndefObject.st: Implementation of namespaces
 
-1999-09-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Queens.st: added #do: to NullQueen.
 	* kernel/BlkClosure.st: BlockClosures are now variableWordSubclasses
@@ -2389,22 +2393,22 @@
 	the endianness in a saved image.
 	* kernel/PosStream.st: Added support for Cr/Lf terminators in #nextLine.
 
-1999-09-06  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Delay.st: #idle method now lies in ProcessorScheduler.
 	* kernel/ProcSched.st: Added support for idle block registration.
 
-1999-08-31  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Collection.st: Added #with:collect:
 	* kernel/ArrayColl.st: Added #with:collect:, removed duplicate definition
 	of #copyWith:
 
-1999-08-29  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.6.2 released.
 
-1999-08-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Finally got hierarchy tree formatting to work.
 	* kernel/DLD.st: Don't define the `DLD' feature since DLD.st is always
@@ -2414,7 +2418,7 @@
 	* kernel/PkgLoader.st: More meaningful error messages (`package
 	not available' instead of `key not found').
 
-1999-08-08  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: `Smalltalk snapshot' primitive (250) removed
 	-- the new ImageFileName global makes it redundant.
@@ -2423,13 +2427,13 @@
 	* kernel/SysDict.st: `Smalltalk snapshot' primitive (250) is now
 	implemented in terms of the new ImageFileName global.
 
-1999-08-07  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/File.st: Declare `unlink' (valid only for files) instead of
 	`remove' (which works for directories too) to be used to implement
 	File class>>#primRemove:
 
-1999-08-07  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Case.st: Provided by Ulf Dambacher.
 	* examples/EditStream.st: Provided by Ulf Dambacher.
@@ -2440,22 +2444,22 @@
 	exist) was sent to String instead of #new:withAll:
 	* kernel/ValueAdapt.st: Added NullValueHolder.
 
-1999-07-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-07-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Removed conditional code so that images produced
 	by computers with different endianness can be used.
 	* test/delays.st: Created from test/processes.st since it is the
 	only part that fails under some architectures (e.g. SunOS)
 
-1999-06-25  Paolo Bonzini  (bonzini@gnu.org)
+1999-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Bug-fixing version 1.6.1 released.
 
-1999-06-17  Paolo Bonzini  (bonzini@gnu.org)
+1999-06-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.6 released.
 
-Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
+1999-06-09  Pahi Andras  <pahi@mozart.eet.bme.hu>
 
 	* kernel/DLD.st: Fixed lots of stupid bugs (misspelled method names
 	and more)
@@ -2464,7 +2468,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* test/classes.st: Renamed (used to be class.st) for same reason.
 	* test/processes.st: Renamed (used to be process.st) for same reason.
 
-1999-06-03  Paolo Bonzini  (bonzini@gnu.org)
+1999-06-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: #at:put: for C strings and aggregates
 	(arrays/ptrs) can take both a smalltalk object and a CObject.
@@ -2473,33 +2477,33 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	Array (not a ByteArray).
 	* kernel/Object.st: #storeOn: now uses the Object's validSize.
 
-1999-05-31  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildMeth.st: Added #stripSourceCode.
 	* kernel/Date.st: Some bug fixes.
 	* kernel/MethodInfo.st: Added #stripSourceCode.
 
-1999-05-24  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Date.st: Removed iterative algorithms, replaced with numerical
 	ones proposed by Jeff Rosenwald (JeffRose@acm.org).
 
-1999-05-23  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Debugger.st: Added new bytecodes
 
-1999-05-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Finished revamped Floats -- added #hash
 
-1999-05-08  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Transcript.st: Moved here from blox. Modified to initially
 	set up a Transcript on stdout.
 	* kernel/Object.st: Changed #print and #store to work with the Transcript
 	object.
 
-1999-05-06  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Exception handlers are now per process.
 	* kernel/Fraction.st: Added code to test for NaNs in #asFloat.  Also, now
@@ -2509,7 +2513,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/Object.st: added #ifNil:, #ifNotNil: and companions.
 	* kernel/UndefObject.st: added #ifNil:, #ifNotNil: and companions.
 
-1999-05-05  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Added stuff to print/store infinite values and NaNs
 	* kernel/LargeInt.st: changed divide:using: and reverseStringBase:on:
@@ -2517,34 +2521,34 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/WriteStream.st: Fixed #size -- was returning 1 more than the
 	correct value. For example, "String new writeStream size" returned 1.
 
-1999-05-03  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Changed the system message #booleanRequired to
 	#mustBeBoolean for coherence with the Blue Book (I had not noted
 	that passage).
 
-1999-05-02  Luciano Esteban Notarfrancesco  (lnotarfr@dc.uba.ar)
+1999-05-02  Luciano Esteban Notarfrancesco  <lnotarfr@dc.uba.ar>
 
-	* kernel/SortCollect.st: new algorithm for includes: and
-	occurrencesOf:
-	* kernel/Number.st: new algorithm for raisedToInteger: and
-	raisedTo:.  Added isRational.
-	* kernel/Fraction.st: Added isRational.  Generality multiplied by 100.
-	* kernel/Integer.st: gcd: and lcm: always return positive numbers.
-	Added isRational.  Generality multiplied by 100.
+	* kernel/SortCollect.st: new algorithm for #includes: and
+	#occurrencesOf:
+	* kernel/Number.st: new algorithm for #raisedToInteger: and
+	#raisedTo:.  Added #isRational.
+	* kernel/Fraction.st: Added #isRational.  Generality multiplied by 100.
+	* kernel/Integer.st: #gcd: and #lcm: always return positive numbers.
+	Added #isRational.  Generality multiplied by 100.
 	* kernel/Float.st: Generality multiplied by 100.
 	* kernel/LargeInt.st: Generality multiplied by 100.
 
-1999-04-29  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildMeth.st: Added code to handle the 142 (replace stack
 	top) bytecode in the #accesses: method.
 
-1999-04-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.5.beta3 released.
 
-1999-04-22  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ArrayColl.st: Added #new:withAll: .
 	* kernel/Builtins.st: added #at:/#at:put:/#basicAt:/#basicAt:put: to
@@ -2554,11 +2558,11 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	this happens when removing Collection's #inspect method, during Blox's
 	load).  Thanks to Christopher Painter-Wakefield for signaling this.
 
-1999-04-20  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildMeth.st: Added code to print the nop bytecode (139)
 
-1999-04-16  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ContextPart.st: Added hasBlock instance variable, moved
 	its accessor here (used to be in the subclasses)
@@ -2573,12 +2577,12 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	DLD is used, unresolved functions are searched in dynamically linked
 	libraries.  One day I'll make it use dlopen and dlsym.
 
-1999-04-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.5.beta2 released.
 	* kernel/Time.st: Remove GMT from printOn: (see changes in sysdep.c).
 
-1999-04-08  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Added some comment guessing.
 	* kernel/CObject.st: Merged CPtr and CArray into CAggregate at last.
@@ -2587,18 +2591,18 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	to avoid possible overflows (which would have happened around 2004
 	on 32-bit machine, and around 8.000.000.000 AD on 64-bit ones...).
 
-1999-03-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-03-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.5.beta1 released.
 	* examples/Publish.st: Some bug fixes now that we use it to generate
 	GST's manual.
 
-1999-03-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-03-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Added DocumentationClassPublisher (refactored
 	from HTMLClassPublisher) and TexinfoClassPublisher.
 
-1999-02-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Added ProcessorScheduler>>#isTimeoutProgrammed
 	as part of the changes below for Delay.
@@ -2610,17 +2614,17 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	new ones) works.
 	* examples/Dinner.st: Ditto
 
-1999-02-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Class.st: #removeClassVarName: referred to non-
 	existent method #classVariables (instead of #classPool)
 
-1999-02-23  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Symbol.st: Changed storeOn: to properly handle #'ab cd'
 	symbols and printOn: to use the version inherited from String
 
-1999-02-22  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Bag.st: printOn: sent `print: ($ )' instead of `space'
 	* examples/Dinner.st: Created.
@@ -2631,31 +2635,31 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	changes in Process.
 	* kernel/Builtins.st: Moved #blockCopy:... to ContextPart
 
-1999-02-19  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Queens.st: Created.
 
-1999-02-17  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SysDict.st: Added class accessors (eg allBehaviorsDo:)
 
-1999-02-16  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildMeth.st: Changed for new representation of
 	literals
 
-1999-02-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PosStream.st: Fixed #reset to use #position:
 	* kernel/FileStream.st: Added selectors for new style opening
 	modes (FileStream open: 'foo' mode: FileStream read)
 
-1999-02-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ContextPart.st: Finally got the unwinding system to
 	work.
 
-1999-02-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Symbol.st: Added isSymbolString:
 	* kernel/CType.st: Great! Factored out everything in CScalarCType!
@@ -2663,11 +2667,11 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	confusion (is it CByteCType or CByteType?!?) and ten classes which
 	were carbon copies.
 
-1999-02-12  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Added HTML output
 
-1999-02-09  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Tokenizer.st: Removed recording, which was way too
 	slow and in fact not even needed by the compiler.
@@ -2675,7 +2679,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	handling unterminated string literals.
 	* kernel/Collection.st: Added #removeAll:ifAbsent:
 
-1999-02-08  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: fixed bug with unwind mechanism: in
 	code like [ [ 1/0 ] valueWithUnwind ] on: ExAll do: [ :sig | ... ]
@@ -2686,18 +2690,18 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* Load.st: Created.
 	* Reload.st: Created.
 
-1999-02-05  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Added ExUserBreak.
 	* kernel/LinkedList.st: Fixed missing dot problem - probably I
 	had introduced it earlier.
 
-1999-02-04  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ContextPart.st: Fixed bug in the unwinding system
 	(using SystemDictionary>>#halt did not work properly)
 
-1999-02-01  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: 'self perform: <a Message>' now acts
 	like '<a Message> sendTo: self' - stole from Dolphin Smalltalk:
@@ -2713,7 +2717,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/FileStream.st: Fixed open and popen to use basicNew
 	instead of new. new is now disabled.
 
-1999-01-31  Steve Byrne  (sbb@gnu.org)
+1999-01-31  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Switched FileStream to returning nil on
 	failure only if errno = 0. If not, it is probably better to check
@@ -2723,7 +2727,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	b) by using new exception handling mechanisms
 	c) by using methods like fileOp:ifFail: - see open:mode:ifFail:
 
-1999-01-29  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CObject.st: Added CBoolean.
 	* kernel/CType.st: Added CBooleanCType
@@ -2732,7 +2736,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/Browser.st: Changed the BrowserClassesValid global
 	(brrr!!!!) to a more sedate-sounding class variable.
 
-1999-01-28  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileStream.st: #close now sets the `file' instance variable
 	to nil, to prevent multiple closes of the same file. At least under
@@ -2743,13 +2747,13 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	classes work a little better (#new class method, #name instance method)
 	* kernel/LargeInt.st: Added ~=
 
-1999-01-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Date.st: Changed now that assignment to argument is invalid.
 	Fixed asSeconds to answer seconds from 1/1/1901 - with LargeIntegers,
 	there's no reason to answer seconds from 1/1/1970.
 
-1999-01-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/File.st: Changed now that assignment to argument is invalid
 	* kernel/CompildMeth.st: Also
@@ -2767,7 +2771,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/SortCollect.st: Changed now that assignment to argument is
 	invalid. Switched to quicksort for implementing #asSortedCollection:.
 
-1999-01-18  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Fixed up floating point printing to round
 	correctly. It should work now...
@@ -2778,56 +2782,56 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/Integer.st: Added special floorLog: implementation. Added
 	largest/smallest.
 
-1999-01-16  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Tokenizer.st: Added line counting
 	* kernel/ByteStream.st: Created.
 	* kernel/ByteArray.st: Added Memory-style accessors. Very
 	interesting!!
 
-1999-01-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/WriteStream.st: Removed maxSize instance variable
 
-1999-01-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SysDict.st: Added access to the command line arguments.
 	* kernel/CFuncs.st: Added getArgc and getArgv
 
-1998-12-15  Paolo Bonzini  (bonzini@gnu.org)
+1998-12-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Publish.st: Added class hierarchy (previously methods
 	laid in ClassDescription).
 
-1998-12-10  Paolo Bonzini  (bonzini@gnu.org)
+1998-12-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ObjDumper.st: Added support for byte objects with fixed
 	instance variables.
 
-1998-12-09  Paolo Bonzini  (bonzini@gnu.org)
+1998-12-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/File.st: Changed struct Stat format for portability.
 	* kernel/LargeInt.st: Fixed bug in basicRightShift:
 
-1998-12-01  Paolo Bonzini  (bonzini@gnu.org)
+1998-12-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Object.st: Added postCopy
 
-1998-11-29  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Metaclass.st: Finished integration of class-instance
 	variables
 
-1998-11-27  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Character.st: Added lookup table for speed
 
-1998-11-25  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Rectangle.st: Changed #intersect to make it work ;-)
 	* kernel/Builtins.st: Added String>>hash and ByteArray>>hash
 
-1998-11-24  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Now uses ContextPart class>>#unwind
 	mechanism
@@ -2835,39 +2839,39 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/Metaclass.st: Added methods for class pool/shared pools,
 	which delegate their work to Class
 
-1998-11-23  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkContext.st: Switched superclass to ContextPart.
 	* kernel/MthContext.st: Switched superclass to ContextPart.
 	* kernel/ContextPart.st: Created.
 
-1998-11-18  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Debugger.st: Added experimental bytecode simulator.
 
-1998-11-14  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CStruct.st: Changed to subclass of CObject and changed
 	implementation of inspection for easier port to Blox.
 
-1998-11-10  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/UndefObject.st: Added class creation methods.
 	* kernel/Object.st: Added class declaration now that nil defines
 	class creation statements
 	* kernel/Autoload.st: Class directly created as subclass of nil.
 
-1998-11-05  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Metaclass.st: Added instanceVariableNames: for class-instance
 	variables. Modified mutation policy to be a bit more restrictive but
 	logical.
 
-1998-10-21  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/CompFileSeg.st: Created.
 
-1998-10-15  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CObject.st: Added CSmalltalk.  Turned to a variable word
 	subclass to make access to the address simpler and not cause SIGSEGVs
@@ -2875,12 +2879,12 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/CType.st: Added various storeOn: methods, and classes
 	CScalarCType and CSmalltalkCType
 
-1998-10-13  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Changed to a variable byte subclass.
 	* kernel/Number.st: Added #zero and #unity
 
-1998-10-12  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkClosure.st: Created from BlkContext.st.
 	* kernel/SeqCollect.st: Switched to copyEmpty: about a week ago.
@@ -2888,7 +2892,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	at gaining more speed ;-)
 	* kernel/BlkContext.st: Changed to support blocks as closures
 
-1998-10-11  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Collection.st: Added copyEmpty:, copyEmpty now uses it.
 	* kernel/Dictionary.st: Changed growing mechanism and other methods
@@ -2899,24 +2903,24 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/OrderColl.st: Switched to using copyEmpty: when growing.
 	* kernel/Set.st: Switched to using copyEmpty: when growing.
 
-1998-10-10  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/LargeInt.st: Removed 'self sign = 0' tests, replaced
 	with overridden methods in LargeZeroInteger.
 
-1998-10-08  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ArrayColl.st: Moved here the growing methods that used to
 	be in SequenceableCollection. Why weren't they
 	here? OrderedCollection has a different growing
 	system...
 
-1998-10-04  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Fixed symbol that was being printed instead of
 	nextPutAll:'d in definition of C functions.
 
-1998-09-30  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Rectangle.st: Made #origin, #corner, #bottomRight and
 	#topLeft return copies of the origin and corner. This is for
@@ -2924,12 +2928,12 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/TokenStream.st: Removed a few methods whose implementation
 	was the same as Stream's.
 
-1998-09-29  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Object.st: Switched dependancy mechanism to use IdentitySets.
 	Also declared Dependencies as part of Smalltalk.
 
-1998-09-28  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Set.st: Changed storeOn: to avoid hard coding Set as the
 	class name.
@@ -2939,11 +2943,11 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/Directory.st: Promoted to kernel from cxtnsn.
 	* kernel/File.st: Promoted to kernel from cxtnsn.
 
-1998-09-25  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ValueAdapt.st: Created.
 
-1998-09-18  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Time.st: Fixed possible secondClock overflow.
 	Added #asSeconds
@@ -2951,7 +2955,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	will overflow somewhen in 2038. Hope 64-bit machines are
 	widespread enough by that time... I'll be 58.
 
-1998-09-15  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Added CObject>>free, String>>valueAt:,
 	String>>valueAt:put:
@@ -2964,7 +2968,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	overflowing; I know about one of them, but it only works with 32 bit
 	words and ours only have 30 bits.  Tell me if you can find one!
 
-1998-09-14  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkContext.st: Added accessr functions; there didn't seem to be a
 	good reason why they weren't there in the first place.
@@ -2975,7 +2979,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	make them work with special streams such as stdin.
 	* kernel/MthContext.st: Added printOn:, home and backtrace methods
 
-1998-09-10  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Added support for LargeIntegers. This
 	included adding a 'fail' section to Integer>>asFloat. Also changed
@@ -2988,11 +2992,11 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	of a word is now CLongSize instead of always 4 bytes.
 	* kernel/Time.st: Fixed secondClock to use LargeIntegers.
 
-1998-09-09  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/initialize.st: Modified to initialize LargeInteger.
 
-1998-09-08  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Builtins.st: Added Behavior>>#flushCache.
 	* examples/Tokenizer.st: Created from Tok
@@ -3000,16 +3004,16 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	expensive in terms of performance, and moved it to Tokenizer.
 	* kernel/LargeInt.st: Created.
 
-1998-09-07  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/WriteStream.st: Changed the growing policy so that
 	WriteStreams are more efficient at concatenating data.
 
-1998-09-06  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/MethodInfo.st: Added setSourceCode: to support compiler.
 
-1998-09-03  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Set.st: Merged changes by Brad Diller to solve rehash bug.
 	Added primAt:/primAt:put: to support subclasses that for example
@@ -3019,45 +3023,46 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/Date.st: Extended to make it more flexible.
 	* kernel/Interval.st: Fixed bug in #size, returning negative sizes
 	if step < 0.  Changed superclass to ArrayedCollection.
-	* kernel/Fraction.st: Integrated changes.st
-	* kernel/Behavior.st: Merged changes by Brad Diller
-	* kernel/Builtins.st: Merged changes by Brad Diller
-	* kernel/ClassDesc.st: Merged changes by Brad Diller
-	* kernel/Metaclass.st: Merged changes by Brad Diller
-	* kernel/Object.st: Merged changes by Brad Diller
+	* kernel/Fraction.st: Integrated changes.st.
+	* kernel/Behavior.st: Merged changes by Brad Diller.
+	* kernel/Builtins.st: Merged changes by Brad Diller.
+	* kernel/ClassDesc.st: Merged changes by Brad Diller.
+	* kernel/Metaclass.st: Merged changes by Brad Diller.
+	* kernel/Object.st: Merged changes by Brad Diller.
 	* kernel/IdentDict.st: Merged changes by Brad Diller to solve rehash
-	bug
+	bug.
 	* kernel/Dictionary.st: Merged changes by Brad Diller to solve rehash
 	bug.  Also modified add: to resuse the existing Association if there
 	is one, rather than always using the parameter.  Changed hashing so
 	that hashing a dictionary that contains itself is not a problem.
-	* kernel/Class.st: Merged corrections by Brad Diller
+	* kernel/Class.st: Merged corrections by Brad Diller.
 	* kernel/Association.st: Switched superclass to be Magnitude.  Added
 	class equality test to Association>>#=
-	* kernel/RunArray.st: Created around January 97.
-	* kernel/DirMessage.st: Created.
-	* kernel/ObjDumper.st: Created around March 97.
-	* kernel/ExcHandling.st: Now uses SystemDictionary>>#halt. Thanks
-	Brad Diller
 
-1998-09-02  Paolo Bonzini  (bonzini@gnu.org)
+	* kernel/DirMessage.st: Created.
+	* kernel/RunArray.st: Created around January 1997.
+	* kernel/ObjDumper.st: Created around March 1997.
+	* kernel/ExcHandling.st: Now uses SystemDictionary>>#halt. Thanks
+	Brad Diller.
+
+1998-09-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Began development of version 1.6
 
-1997-07-23  Paolo Bonzini  (bonzini@gnu.org)
+1997-07-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Created.
 
-1996-04-15  Paolo Bonzini  (bonzini@gnu.org)
+1996-04-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Set.st: Refactored to reduce duplicated code
 	in Dictionary and IdentityDictionary.
 
-1995-09-30  Steve Byrne  (sbb@gnu.org)
+1995-09-30  Steve Byrne  <sbb@gnu.org>
 
 	*** Version 1.1.5 released.
 
-1995-09-16  Steve Byrne  (sbb@gnu.org)
+1995-09-16  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CType.st: Removed separate valueType defintion for
 	pointers and arrays (returning eltCType); using the inherited
@@ -3068,59 +3073,59 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	pointers which are GC'ed, and saying word: true was just plain 100%
 	wrong.
 
-1995-09-09  Steve Byrne  (sbb@gnu.org)
+1995-09-09  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CType.st: Adjusted sizes of scalar types to use actual
 	values for the platform instead of constant values that	Smalltalk
 	made up.
 
-1995-09-04  Steve Byrne  (sbb@gnu.org)
+1995-09-04  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Class.st: Incorporated (finally) Jim Fulton's fix to the =
 	operator.
 	* kernel/Object.st: Incorporated (finally) Jim Fulton's fixes to
 	removeDependent:
 
-1995-08-26  Steve Byrne  (sbb@gnu.org)
+1995-08-26  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Modified Behavior #new & friends (primitives
 	70 & 71) to issue errors when they are used inappropriately
 	(such as sending #new to an indexable class).
 
-1995-07-23  Steve Byrne  (sbb@gnu.org)
+1995-07-23  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CStruct.st: Added struct datatypes int and uInt.
 
-1995-07-16  Steve Byrne  (sbb@gnu.org)
+1995-07-16  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Behavior.st: Fixed instsize to correctly shift by 4, now
 	that bit 0 (st) is reserved for the hasFinalize flag.
 
-1995-07-14  Steve Byrne  (sbb@gnu.org)
+1995-07-14  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Metaclass.st: Fixed so that invalid variable names cannot
 	be declared.
 
-1995-05-29  Steve Byrne  (sbb@gnu.org)
+1995-05-29  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Boolean.st: Fixed to have a simple deep copy and shallow
 	copy.
 
-1995-05-07  Steve Byrne  (sbb@gnu.org)
+1995-05-07  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CObject.st: Added usage of more machine size constants
 	(float,long, ptr, double).
 
-1995-05-06  Steve Byrne  (sbb@gnu.org)
+1995-05-06  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CStruct.st: Updated for new C type system.
 
-1995-05-01  Steve Byrne  (sbb@gnu.org)
+1995-05-01  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CType.st: Changed CType>>cObjectType to return CObject
 	instead of subclass responsibility.
 
-1995-04-29  Steve Byrne  (sbb@gnu.org)
+1995-04-29  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CType.st: Added cObjectType -- may be replacing
 	what the baseType method was, but this is more
@@ -3136,43 +3141,43 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/CType.st: Removed baseType -- it appears to have no function
 	now.
 
-1995-01-08  Steve Byrne  (sbb@gnu.org)
+1995-01-08  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CObject.st: Converted to new types.
 	* kernel/CObject.st: Fixed some bugs with pointer subtraction.
 
-1995-01-02  Steve Byrne  (sbb@gnu.org)
+1995-01-02  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CType.st: Hacked for new type architecture.
 
-1994-10-08  Steve Byrne  (sbb@gnu.org)
+1994-10-08  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added SystemDictionary>>growTo:
 
-1994-09-15  Steve Byrne  (sbb@gnu.org)
+1994-09-15  Steve Byrne  <sbb@gnu.org>
 
 	*** Version 1.2.alpha1 released.
 
-1994-08-30  Steve Byrne  (sbb@gnu.org)
+1994-08-30  Steve Byrne  <sbb@gnu.org>
 
 	* examples/MemUsage.st: Added header stuff
 	* examples/PrtHier.st: Added header stuff.
 
-1994-08-21  Steve Byrne  (sbb@gnu.org)
+1994-08-21  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Behavior.st: Adjusted tests for low bit int marking.
 	* kernel/CompildMeth.st: Fixed for low bit int marking
 
-1994-08-14  Steve Byrne  (sbb@gnu.org)
+1994-08-14  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Fixed ~~ on integers to return true (the
 	objects did not match) if the primitve failed.
 
-1994-07-24  Steve Byrne  (sbb@gnu.org)
+1994-07-24  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/FileStream.st: Added class>>require:
 
-1994-07-10  Steve Byrne  (sbb@gnu.org)
+1994-07-10  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/ClassDesc.st: Fixed instVarNames to deal properly with
 	classes which have no instance variables.
@@ -3182,45 +3187,45 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	properly deal with nil collections of class variables or
 	pool dictionaries.
 
-1994-07-02  Steve Byrne  (sbb@gnu.org)
+1994-07-02  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/SysDict.st: Fixed dependenciesAt: to return nil if there
 	was no dependency already present.
 
-1994-06-12  Steve Byrne  (sbb@gnu.org)
+1994-06-12  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CObject.st: Added adjPtrBy:, derefAt:, etc. (finally).
 
-1994-04-30  Steve Byrne  (sbb@gnu.org)
+1994-04-30  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added incrBy:
 
-1994-04-09  Steve Byrne  (sbb@gnu.org)
+1994-04-09  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CObject.st: Added CScalar, value: methods on scalar
 	instances as a shorthand notation for instance creation, started
 	folding in the effects of the CType new method.
 	* kernel/CType.st: Added alloc:type:
 
-1994-04-05  Steve Byrne  (sbb@gnu.org)
+1994-04-05  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added CObject>>alloc:type:
 
-1994-03-26  Steve Byrne  (sbb@gnu.org)
+1994-03-26  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/WordMemory.st: Added little endian support.
 
-1994-02-06  Steve Byrne  (sbb@gnu.org)
+1994-02-06  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/ProcSched.st: Fixed the 'symbolic constants' for priority to
 	actually return their values, instead of returning
 	self (duh!).
 
-1993-10-17  Steve Byrne  (sbb@gnu.org)
+1993-10-17  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Message.st: Added accessors for the components.
 
-1993-10-16  Steve Byrne  (sbb@gnu.org)
+1993-10-16  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/ProcSched.st: Fixed yield to operate correctly in the
 	presence of repeated higher priority interrupts.
@@ -3228,19 +3233,19 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	classes and grow their single class instances when new instance
 	variables are added to the class.
 
-1993-10-03  Steve Byrne  (sbb@gnu.org)
+1993-10-03  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/ArrayColl.st: Put in #copy, to use replace from to get the
 	nice efficient copy that we can have if we are an array.
 
-1993-10-01  Steve Byrne  (sbb@gnu.org)
+1993-10-01  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Dictionary.st: Fixed removeKey:ifAbsent: to evaluate the
 	ifAbsent block if the key actually was absent.  Previously,
 	this was being evaludated only if the entire dictionary was full
 	and the key was not found.
 
-1993-09-26  Steve Byrne  (sbb@gnu.org)
+1993-09-26  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Collection.st: Made exceptionBlock's value in
 	detect:ifNone: be returned, so the exception handler could just
@@ -3248,7 +3253,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/String.st: Fixed some methods to check its second
 	operand's type before calling into primitives which don't check type.
 
-1992-11-27  Steve Byrne  (sbb@gnu.org)
+1992-11-27  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Class.st: Fixed variableSubclass:... to correctly mark new
 	subclasses as being pointers and indexable, but not words (words
@@ -3256,15 +3261,15 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* cxtnsn/DLD.st: Added support to DLD for searching through a list of
 	libraries to resolve references, with the default being libc.
 
-1992-05-25  Steve Byrne  (sbb@gnu.org)
+1992-05-25  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Browser.st: Added support for Emacs caching class names
 
-1992-02-23  Steve Byrne  (sbb@gnu.org)
+1992-02-23  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/String.st: Added asInteger and asByteArray.
 
-1992-02-16  Steve Byrne  (sbb@gnu.org)
+1992-02-16  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Autoload.st: Created in the 1.1 timeframe
 	* kernel/Fraction.st: Created in the 1.1 timeframe
@@ -3274,19 +3279,19 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/CObject.st: Created summer 90.
 	* kernel/CStruct.st: Created summer 90.
 
-1992-02-15  Steve Byrne  (sbb@gnu.org)
+1992-02-15  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Collection.st: Switched the collection creating enumerators
 	to use the copyEmpty message, so it can be overridden by subclasses
 	(like SortedCollection) when copying empty involves more than
 	just doing a new.
 
-1991-12-14  Steve Byrne  (sbb@gnu.org)
+1991-12-14  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/ByteArray.st: Added asString -- generally useful functionality,
 	but especially for STIX.
 
-1991-11-28  Steve Byrne  (sbb@gnu.org)
+1991-11-28  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added SystemDictionary byteCodeCounter.
 	* kernel/ByteArray.st: Added growSize method -- 10 wasn't right, and
@@ -3294,18 +3299,18 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	question.
 	* kernel/ByteArray.st: Switched shallowCopy to use faster primitives.
 
-1991-11-02  Steve Byrne  (sbb@gnu.org)
+1991-11-02  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Fixed == and ~~ definitions for Integer to fail
 	if the integers aren't = (including the case where they aren't both
 	integers).  Used to retry:coercing: which lost badly.
 
-1991-10-20  Steve Byrne  (sbb@gnu.org)
+1991-10-20  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added support for user level control of GC growth
 	rate flags.
 
-1991-09-22  Steve Byrne  (sbb@gnu.org)
+1991-09-22  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/FileStream.st: Added #popen:dir:ifFail: and #open:mode:ifFail:
 	so that open failures can be explicitly handled.
@@ -3316,12 +3321,12 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	level functions can handle failure, things like search paths, etc,
 	can be trivially implemented.
 
-1991-09-15  Steve Byrne  (sbb@gnu.org)
+1991-09-15  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CompildMeth.st: Adjusted to account for larger numbers of
 	primitives, literals, and temporaries.
 
-1991-07-28  Steve Byrne  (sbb@gnu.org)
+1991-07-28  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Dictionary.st: Fixed #= to check argument class.  Also
 	fixed printing and storing to use cascaded messages.
@@ -3330,17 +3335,17 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/IdentDict.st: Fixed #= to check argument class.  Converted
 	to use cascaded printing.
 
-1991-07-19  Steve Byrne  (sbb@gnu.org)
+1991-07-19  Steve Byrne  <sbb@gnu.org>
 
 	* cxtnsn/DLD.st: Created
 
-1991-07-12  Steve Byrne  (sbb@gnu.org)
+1991-07-12  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Date.st: Added methods for comparing, and for hashing
 	dates. Also fixed storing to use cascaded messages.
 	* kernel/Time.st: Added methods for comparing, including #= and #hash.
 
-1991-07-10  Steve Byrne  (sbb@gnu.org)
+1991-07-10  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Rectangle.st: Added #= and #hash methods.
 	* kernel/Point.st: Added = for Points (= from Object isn't right)
@@ -3349,7 +3354,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/Rectangle.st: Altered the printing and storing to use
 	cascaded messages.
 
-1991-07-05  Steve Byrne  (sbb@gnu.org)
+1991-07-05  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/FileStream.st: Added fileIn:line:from:at: so that when
 	Emacs sends out an expression or a method definition to Smalltalk
@@ -3358,43 +3363,43 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	reporting and recording of file position information for later
 	browsing.
 
-1991-06-26  Steve Byrne  (sbb@gnu.org)
+1991-06-26  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/False.st: Fixed ifFalse: to send value to falseBlock
 
-1991-06-06  Steve Byrne  (sbb@gnu.org)
+1991-06-06  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/FileStream.st: Fixed open and popen to use self new instead
 	of FileStream explicitly.
 	* kernel/Builtins.st: Switched declare and execution tracing from
 	being direct primitives to a more general primitive mechanism.
 
-1991-05-18  Steve Byrne  (sbb@gnu.org)
+1991-05-18  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Delay.st: Actually implemented the thing.
 
-1991-04-20  Steve Byrne  (sbb@gnu.org)
+1991-04-20  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/SysDict.st: Added some methods for testing and modifying
 	implementation specific features.
 	* kernel/Behavior.st: Added methodsFor:ifFeatures:
 
-1991-03-25  Steve Byrne  (sbb@gnu.org)
+1991-03-25  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Object.st: Added -> operator.
 
-1991-03-24  Steve Byrne  (sbb@gnu.org)
+1991-03-24  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Float.st: Fixed up floating point printing to take
 	account of the number of digits printed in the integer part
 	when printing the fractional part.
 
-1991-03-23  Steve Byrne  (sbb@gnu.org)
+1991-03-23  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added Integer primitives == and ~~ for more
 	efficient operation.
 
-1991-03-16  Steve Byrne  (sbb@gnu.org)
+1991-03-16  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Array.st: Fixed class creation to be separate statement from
 	class commenting.
@@ -3450,63 +3455,63 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/WordMemory.st: Class creation now separate statement.
 	* kernel/WriteStream.st: Class creation now separate statement.
 
-1991-03-04  Steve Byrne  (sbb@gnu.org)
+1991-03-04  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/FileStream.st: Added verbose flag.
 
-1991-02-16  Steve Byrne  (sbb@gnu.org)
+1991-02-16  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Dictionary.st: Override the #new method from builtins when
 	this file is loaded so that subclasses of Dictionary have a proper
 	#new method instead of the built-in one that only creates Dictionary instances.
 
-1991-02-07  Steve Byrne  (sbb@gnu.org)
+1991-02-07  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Collection.st: Fixed detect: to return the value
 	that detect:ifNone: returns.
 
-1991-02-04  Steve Byrne  (sbb@gnu.org)
+1991-02-04  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/String.st: Fixed duplicate fileName definition to
 	be filePos
 
-1991-01-22  Steve Byrne  (sbb@gnu.org)
+1991-01-22  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CFuncs.st: Added putenv.
 
-1991-01-01  Steve Byrne  (sbb@gnu.org)
+1991-01-01  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/WriteStream.st: Added print: and store: so that printing
 	and storing can be cascaded.
 
-1990-12-29  Steve Byrne  (sbb@gnu.org)
+1990-12-29  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/SeqCollect.st: Added = test to check sub elements for equality.
 	* kernel/SeqCollect.st: Added hash function.
 	* kernel/ArrayColl.st: Removed = and hash (put them into
 	SequenceableCollection).
 
-1990-11-10  Steve Byrne  (sbb@gnu.org)
+1990-11-10  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/ClassDesc.st: Implemented compile:classified: and
 	compile:classified:notifying:.
 	* kernel/Behavior.st: Implemented compile:notifying:
 
-1990-11-09  Steve Byrne  (sbb@gnu.org)
+1990-11-09  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Integer.st: Converted to use fractions.
 	* kernel/Number.st: Put in changes for fractions.
 
-1990-11-05  Steve Byrne  (sbb@gnu.org)
+1990-11-05  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Object.st: Fixed bug with addDependent: -- syntax error.
 
-1990-11-01  Steve Byrne  (sbb@gnu.org)
+1990-11-01  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Behavior.st: Fixed isBytes to return true only if the
 	object is not pointers and not words.
 
-1990-09-22  Steve Byrne  (sbb@gnu.org)
+1990-09-22  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/False.st: Changed printOn: to reflect changes in
 	String>>#printOn:.
@@ -3521,7 +3526,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/Class.st: Implemented classVarNames and allClassVarNames.
 	Implemented sharedPools and allSharedPools.
 
-1990-09-21  Steve Byrne  (sbb@gnu.org)
+1990-09-21  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Bag.st: Removed printOn: method; the one from Collection does
 	the right thing.
@@ -3550,38 +3555,38 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	is the proper behavior (sigh).
 	* kernel/UndefObject.st: Fixed due to String printOn: change.
 
-1990-09-20  Steve Byrne  (sbb@gnu.org)
+1990-09-20  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/SeqCollect.st: Fixed indexOfSubCollection (it was off by one and
 	did too much computation.
 	* kernel/Float.st: Fixed storeOn: to not be recursive.
 
-1990-09-16  Steve Byrne  (sbb@gnu.org)
+1990-09-16  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Behavior.st: Implemented whichSelectorsReferTo: and
 	scopeHas:ifTrue:.
 
-1990-08-03  Steve Byrne  (sbb@gnu.org)
+1990-08-03  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added definition of CObject class alloc:.
 
-1990-05-22  Steve Byrne  (sbb@gnu.org)
+1990-05-22  Steve Byrne  <sbb@gnu.org>
 
 	*** Version 1.1.1 released (I think. I added this on 05 10th, 1999... --- pb)
 
-1990-05-20  Steve Byrne  (sbb@gnu.org)
+1990-05-20  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/WriteStream.st: Fixed semantics of write streams so that they return
 	only the characters that have been written to them.
 	* kernel/RWStream.st: Fixed to accomodate changes in WriteStream.
 
-1990-05-19  Steve Byrne  (sbb@gnu.org)
+1990-05-19  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/FileStream.st: Rewrite contents to take advantage of the new
 	FileStream>>size method.
 	* kernel/Stream.st: Added print: for streams.
 
-1990-05-16  Steve Byrne  (sbb@gnu.org)
+1990-05-16  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Character.st: Changed from being variableSubclass to
 	variableWordSubclass.
@@ -3596,31 +3601,31 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	definition method, it tries to re-use the existing class if
 	possible).
 
-1990-05-14  Steve Byrne  (sbb@gnu.org)
+1990-05-14  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/TokenStream.st: Removed isWhiteSpace:;replaced uses with
 	Character isSeparator.
 
-1990-04-07  Steve Byrne  (sbb@gnu.org)
+1990-04-07  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Dictionary.st: Modified at:put: to resuse the existing
 	Association if there is one, rather than create a new one all
 	the time.  This was causing lossage when setting global variables
 	in Smalltalk that previous usages weren't being changed.
 
-1990-05-06  Steve Byrne  (sbb@gnu.org)
+1990-05-06  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Dictionary.st: Fixed grow method to preserve associations
 	in use in the dictionary instead of making new ones.  This should
 	be faster, and doesn't break compiled methods that reference global
 	variables when Smalltalk grows.
 
-1990-04-26  Steve Byrne  (sbb@gnu.org)
+1990-04-26  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Object.st: Fixed shallowCopy to send new messages to the
 	object's class instead of the object itself.
 
-1990-04-25  Steve Byrne  (sbb@gnu.org)
+1990-04-25  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Integer.st: Fixed (oh...happy birthday, Integer.st!)
 	bitInvert.  After fixing the lexer to be pickier about integer
@@ -3628,13 +3633,13 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	literals, the previous code (which xored with 7fffffff) broke,
 	so we xor -1.
 
-1990-04-24  Steve Byrne  (sbb@gnu.org)
+1990-04-24  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Dictionary.st: Fix at:ifAbsent: to deal with failure
 	better (and be a tad more efficient).  Kudos (or BarNone's,
 	depending on preference) to Andy Valencia.
 
-1990-04-22  Steve Byrne  (sbb@gnu.org)
+1990-04-22  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/SysDict.st: Fixed Dependencies to be an IdentityDictionary
 	instead of a regular Dictionary.  This has better semantics and
@@ -3649,59 +3654,59 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 
 	* kernel/Point.st: Created basic Point class.
 
-1990-04-15  Steve Byrne  (sbb@gnu.org)
+1990-04-15  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added sqrt primitive (I'm sure this was here
 	before) must have got lost during breaking out from builtins.
 
-1990-04-07  Steve Byrne  (sbb@gnu.org)
+1990-04-07  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added declare tracing primitive.
 
-1990-04-15  Steve Byrne  (sbb@gnu.org)
+1990-04-15  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Float.st: Added asFloat...I could have sworn this was
 	already here...must have been lost in an edit.
 
-1990-04-20  Steve Byrne  (sbb@gnu.org)
+1990-04-20  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added SystemDictionary debug to help out
 	with DBX level debugging.
 
-1990-02-11  Steve Byrne  (sbb@gnu.org)
+1990-02-11  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Boolean.st: Converted to printOn: representation.
 
-1990-01-13  Steve Byrne  (sbb@gnu.org)
+1990-01-13  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Class.st: Began experimental addition of actual class
 	definitions.
 	* kernel/Builtins.st: Experimental Class self-definition.
 
-1989-12-27  Steve Byrne  (sbb@gnu.org)
+1989-12-27  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CompildMeth.st: Added real print method for compiled
 	methods.
 
-1989-12-25  Steve Byrne  (sbb@gnu.org)
+1989-12-25  Steve Byrne  <sbb@gnu.org>
 
 	* examples/Debugger.st: Created.
 
-1989-12-22  Steve Byrne  (sbb@gnu.org)
+1989-12-22  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/SymLink.st: Created.
 
-1989-12-19  Steve Byrne  (sbb@gnu.org)
+1989-12-19  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added filein primitive.
 	* kernel/FileStream.st: added fileIn: and primitive file in.
 
-1989-09-23  Steve Byrne  (sbb@gnu.org)
+1989-09-23  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/ClassDesc.st: fileOutCategory: is dangerous, so I make it
 	write to a subdirectory called './categories'.
 
-1989-09-19  Steve Byrne  (sbb@gnu.org)
+1989-09-19  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/SortCollect.st: Changed to use real method categories.
 	* kernel/Stream.st: Changed to use real method categories.
@@ -3722,64 +3727,64 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/SeqCollect.st: Converted to use real method categories.
 	* kernel/Set.st: Converted to use real method categories.
 
-1989-09-06  Steve Byrne  (sbb@gnu.org)
+1989-09-06  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CompildMeth.st: Added lots of methods: inspect, =, hash,
 	methodCategory, methodSourceCode, methodSourceString,
 	and some private accessors such as bytecodeAt:.
 
-1989-09-03  Steve Byrne  (sbb@gnu.org)
+1989-09-03  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/String.st: Added asString for method source package
 	* kernel/FileSegment.st: Created.
 	* kernel/MethodInfo.st: Created.
 
-1989-08-12  Steve Byrne  (sbb@gnu.org)
+1989-08-12  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Added process and semaphore builtins.
 	* kernel/Time.st: Implemented many methods.  The book is
 	exceptionally vague here, so please feel free to change the behavior
 	to something which is more correct.
 
-1989-07-12  Steve Byrne  (sbb@gnu.org)
+1989-07-12  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/TokenStream.st: Created.
 
-1989-07-08  Steve Byrne  (sbb@gnu.org)
+1989-07-08  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/CFuncs.st: Created.
 
-1989-07-04  Steve Byrne  (sbb@gnu.org)
+1989-07-04  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Object.st: Added support for dependence relationships. (-:
 	how appropriate: on INdependence day :-)
 	* kernel/SysDict.st: Added initBlocks methods.
 
-1989-07-03  Steve Byrne  (sbb@gnu.org)
+1989-07-03  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Random.st: Created.
 
-1989-06-04  Steve Byrne  (sbb@gnu.org)
+1989-06-04  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Stream.st: Made more of the methods defined here, but the
 	class itself stays abstract; no implementations are given
 	for next, nextPut:, etc.
 
-1989-05-29  Steve Byrne  (sbb@gnu.org)
+1989-05-29  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/ByteMemory.st: Created.
 	* kernel/Memory.st: Created.
 	* kernel/WordMemory.st: Created.
 
-1989-05-24  Steve Byrne  (sbb@gnu.org)
+1989-05-24  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/initialize.st: Created.
 
-1989-05-21  Steve Byrne  (sbb@gnu.org)
+1989-05-21  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/FileStream.st: Created.
 
-1989-04-25  Steve Byrne  (sbb@gnu.org)
+1989-04-25  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Array.st: Created.
 	* kernel/ArrayColl.st: Created.
@@ -3831,7 +3836,7 @@ Wed 06 09  12:48:21 1999  Pahi Andras  (pahi@mozart.eet.bme.hu)
 	* kernel/UndefObject.st: Created.
 	* kernel/WriteStream.st: Created.
 
-1989-02-06  Steve Byrne  (sbb@gnu.org)
+1989-02-06  Steve Byrne  <sbb@gnu.org>
 
 	* kernel/Builtins.st: Created.
 

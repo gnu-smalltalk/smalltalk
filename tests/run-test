@@ -22,7 +22,7 @@ case $1 in
     ;;
 
   *Test)
-    grep $base $builddir/ANSI.log > /dev/null 2>&1 && rm $builddir/ANSI.log
+    grep ^$base $builddir/ANSI.log > /dev/null 2>&1 && rm $builddir/ANSI.log
     $top_builddir/gst -QI $builddir/gst.im AnsiRun.st -a $base >> $builddir/ANSI.log 2>&1
     exit $?
     ;;

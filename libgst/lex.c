@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2004,2005
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -54,10 +54,6 @@
 #define BIN_OP_CHAR		8
 #define SYMBOL_CHAR		16
 
-#if defined(WIN32) || defined(__OS2__) || defined(MSDOS)
-#define HAVE_DOS_STYLE_PATH_NAMES
-#endif
-
 /* The obstack containing parse tree nodes.  */
 struct obstack *_gst_compilation_obstack = NULL;
 
@@ -71,11 +67,6 @@ mst_Boolean _gst_report_errors = true;
 char *_gst_first_error_str = NULL;
 char *_gst_first_error_file = NULL;
 int _gst_first_error_line = 0;
-
-/* The starting-position state.  If this is <0, as soon as another
-   token is lexed, the flag is reinitialized to the starting position
-   of the next token.  */
-static int method_start_pos = -1;
 
 /* Answer true if IC is a valid base-10 digit.  */
 static mst_Boolean is_digit (int ic);
@@ -328,7 +319,7 @@ _gst_yylex (PTR lvalp, YYLTYPE *llocp)
 int
 _gst_yylex (PTR lvalp, YYLTYPE *llocp)
 {
-  int ic, result, tokenStartPos = 0;
+  int ic, result;
   const lex_tab_elt *ct;
 
   while ((ic = _gst_next_char ()) != EOF)
@@ -337,30 +328,16 @@ _gst_yylex (PTR lvalp, YYLTYPE *llocp)
       if ((ct->char_class & WHITE_SPACE) == 0)
 	{
 	  _gst_get_location (&llocp->first_column, &llocp->first_line);
-	  if (method_start_pos < 0)
-	    tokenStartPos = _gst_get_cur_file_pos ();
 
+	  assert (ct->lexFunc || ct->retToken);
 	  if (ct->lexFunc)
 	    {
 	      result = (*ct->lexFunc) (ic, (YYSTYPE *) lvalp);
 	      if (result)
-		{
-		  if (method_start_pos < 0)
-		    /* only do this here to ignore comments */
-		    method_start_pos = tokenStartPos - 1;
-
-		  return (result);
-		}
+		return (result);
 	    }
 	  else if (ct->retToken)
 	    return (ct->retToken);
-
-	  else
-	    {
-	      _gst_errorf
-		("Unknown character %d in input stream, ignoring", ic);
-	      _gst_had_error = true;
-	    }
 	}
     }
 
@@ -1102,18 +1079,6 @@ _gst_parse_stream (mst_Boolean method)
   _gst_compilation_obstack = oldObstack;
 }
 
-
-int
-_gst_get_method_start_pos (void)
-{
-  return (method_start_pos);
-}
-
-void
-_gst_clear_method_start_pos (void)
-{
-  method_start_pos = -1;
-}
 
 
 #ifdef LEXDEBUG

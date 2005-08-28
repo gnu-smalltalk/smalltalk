@@ -17,12 +17,12 @@
 
         *** Version 2.1 (stable) released.
 
-2002-09-18  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* xml/XML.st: removed i18n markup
 	* xml/XSL.st: NumberFormat not a #variableSubclass: anymore.
 
-2002-09-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
         *** Versions 2.0c (development) and 2.0.6 (stable) released
 
@@ -30,100 +30,100 @@
 	* xml/XSL.st: upgraded to VW7
 	* xml/XML.st: upgraded to VW7
 
-2002-08-18  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* xml/XPath.st: new file
 	* xml/XSL.st: new file
 	* xml/XML.st: put class declarations before the actual code;
 	implement XML Document>>#indexOf:
 
-2002-08-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.5 (stable) released
 
-2002-08-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0b (development) released
 
-2002-08-07  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Versions 2.0a (development) and 2.0.4 (stable) released
 
-2002-07-17  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
         *** Version 2.0.3 released
 
-2002-07-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.2 released
 	
-2002-06-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.1 released
 	
-2002-06-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0 released
 	
-2002-06-20  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* xml/XML.st: #expandMacrosWith: -> #bindWith:
 
-2002-05-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.6 released
 	
-2002-05-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* xml/Id-*.st: removed remaining vestiges
 
-2002-04-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.5 released
 	
-2002-03-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.4 released
 	
-2002-01-29  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.3 released.
 
-2002-01-04  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.2 released
 	
-2001-11-20  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.1 released
 	
-2001-10-26  Paolo Bonzini  (bonzini@gnu.org)
+2001-10-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* xml/XML.st: removed URIResolver and imported it
 	from NetClients instead.
 
-2001-03-16  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* xml/XML.st: added XML Element>>#addAttribute:,
 	#removeAttribute:, #removeNode:.  Use &apos; in
 	printCanonicalText:on:
 	
-2001-02-23  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released version 1.95.3
 
-2001-02-09   Paolo Bonzini  (bonzini@gnu.org)
+2001-02-09   Paolo Bonzini  <bonzini@gnu.org>
 
 	* xml/GST-XML.st: added XML Document>>#setRoot: and
 	PredefinedEntities
 
-2001-01-30   Paolo Bonzini  (bonzini@gnu.org)
+2001-01-30   Paolo Bonzini  <bonzini@gnu.org>
 
 	* xml/GST-XML.st: imported.
 	* xml/Id-XWalker.st: new name of XWalker.st
 	* xml/Id-DOM.st: new name of DOM.st	
 
-1999-09-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* xml/XWalker.st: added
 	* xml/DOM.st: added

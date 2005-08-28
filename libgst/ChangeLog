@@ -1,3 +1,16 @@
+2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/input.c: Add to input_stream a method_start_pos
+	member.  Clear it in push_new_stream and _gst_set_stream_info.
+	Set it in _gst_get_location.  Move _gst_get_method_start_pos
+	and _gst_clear_method_start_pos here from lex.c.
+	* libgst/lex.c: Remove the aforementioned two functions and
+	the code mentioning the local variable method_start_pos.
+	* libgst/lex.h: Move the functions from here...
+	* libgst/input.h: ... to here and make _gst_get_method_start_pos
+	and _gst_get_cur_file_pos return off_t.
+	* libgst/comp.c: Make usage of these two functions 64-bit safe.
+
 2005-08-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Add lstat.
@@ -16,16 +29,6 @@
 	* libgst/lex.c: Fix bugs in creation of FileSegments.
 	* libgst/gst-parse.c: Fix bugs in creation of FileSegments.
 	* libgst/gstpriv.h: Fixes for GCC 4.0.0.
-
-2005-06-10  Paolo Bonzini  <bonzini@gnu.org>
-
-	* lib-src/poll.c: More fixes for Tiger.
-	* lib-src/poll_.h: More fixes for Tiger.
-
-2005-06-01  Paolo Bonzini  <bonzini@gnu.org>
-
-	* lib-src/poll.c (poll): Rename to rpl_poll, we use it also
-	where poll is defined but broken (e.g. MacOS X 10.4).
 
 2005-04-09  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -140,11 +143,6 @@
 	* libgst/gstpriv.h: Use autoconf test to look for
 	availability of __attribute__ ((visibility ("hidden"))).
 
-2004-11-03  Paolo Bonzini  <bonzini@gnu.org>
-
-	* lib-src/poll_.h: New name of...
-	* lib-src/poll.h: ... this removed file.
-
 2004-09-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/save.c: Remove code left by mistake.
@@ -172,7 +170,6 @@
 
 2004-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* lib-src/obstack.h: Get current version.
 	* libgst/prims.def: Fix C99-ism.
 	* libgst/lib.c: Simplify handling of -a.
 
@@ -244,12 +241,6 @@
 	with _gst_verbosity == 3, don't set _gst_gc_message on -Q.
 	* libgst/oop.c: Don't print gc messages if _gst_quiet_execution == 0.
 
-2003-12-03  Paolo Bonzini  <bonzini@gnu.org>
-
-	* libltdl: Die die die
-	* lib-src/ltdl.c: Moved from libltdl.
-	* lib-src/ltdl.h: Moved from libltdl.
-
 2003-11-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/byte.def: New bytecodes 25 and 26
@@ -291,8 +282,7 @@
 
 2003-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* libgst/comp.c: Raise errors on duplicate arguments
-	or temporaries
+	* libgst/comp.c: Raise errors on duplicate arguments or temporaries.
 	* libgst/sym.c: Add third parameter to _gst_declare_name,
 	use it in _gst_declare_arguments or _gst_declare_temporaries
 	* libgst/sym.h: Adjust declaration of _gst_declare_name.
@@ -333,29 +323,27 @@
 	* libgst/oop.c: Make grow_memory_no_capact and oop_heap static.
 	* libgst/sym.c: Make check_symbol_chain static.
 
-	* libgst/sym.c: Initialize global variables so as to make
-	them uncommon
-	* libgst/comp.c: Likewise
-	* libgst/lib.c: Likewise
-	* libgst/save.c: Likewise
-	* libgst/oop.c: Likewise
-	* libgst/dict.c: Likewise
-	* libgst/interp.c: Likewise
-	* libgst/cint.c: Likewise
-	* libgst/lex.c: Likewise
+	* libgst/sym.c: Initialize global variables so as to make them uncommon.
+	* libgst/comp.c: Likewise.
+	* libgst/lib.c: Likewise.
+	* libgst/save.c: Likewise.
+	* libgst/oop.c: Likewise.
+	* libgst/dict.c: Likewise.
+	* libgst/interp.c: Likewise.
+	* libgst/cint.c: Likewise.
+	* libgst/lex.c: Likewise.
 
 2003-11-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.c: Avoid SIGSEGV if character in range
 	128..255 is pushed back by the lexer.
-	* libgst/lex.c: Tweak output of invalid characters
+	* libgst/lex.c: Tweak output of invalid characters.
 
-	* libgst/alloc.c: Tweak pool sizes to obtain cacheline
-	alignment.
-	* libgst/lib.c: Tweak for more shared library friendliness
-	* libgst/tree.c: Tweak for more shared library friendliness
-	* libgst/builtins.inl: Rebuild for shared library friendliness
-	* libgst/sym.c: Adapt
+	* libgst/alloc.c: Tweak pool sizes to obtain cacheline alignment.
+	* libgst/lib.c: Tweak for more shared library friendliness.
+	* libgst/tree.c: Tweak for more shared library friendliness.
+	* libgst/builtins.inl: Rebuild for shared library friendliness.
+	* libgst/sym.c: Adapt.
 
 2003-11-07  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -1038,32 +1026,27 @@
 
 2003-03-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* libgst/heap.c: Move system dependent stuff
+	* libgst/heap.c: Move system dependent stuff...
 	* libgst/sysdep.c: ...here
-	* libgst/sysdep.h: Make it public
-
-	* lib-src/socketx.h: New file
-	* lib-src/poll.c: Include it
+	* libgst/sysdep.h: Make it public.
 
 	* libgst/prims.def: Move enum with file operations...
-	* libgst/interp.h: ...here
+	* libgst/interp.h: ...here.
 
-	* libgst/prims.def: Define primitive for sockets
-	* libgst/sysdep.c: Define _gst_full_send
-	* libgst/sysdep.h: Declare _gst_full_send
+	* libgst/prims.def: Define primitive for sockets.
+	* libgst/sysdep.c: Define _gst_full_send.
+	* libgst/sysdep.h: Declare _gst_full_send.
 
-	* libgst/heap.c: Define routines for mmap/munmap
-	* libgst/heap.h: Declare them
-	* libgst/alloc.c: Use them
+	* libgst/heap.c: Define routines for mmap/munmap.
+	* libgst/heap.h: Declare them.
+	* libgst/alloc.c: Use them.
 
 2003-02-28  Paolo Bonzini  <bonzini@gnu.org>
 
-	* lib-src/signalx.h: New file
-	* lib-src/signalx.c: New file
-	* libgst/events.c: Include signalx.h
-	* libgst/heap.c: Include signalx.h
-	* libgst/interp.c: Include signalx.h
-	* libgst/sysdep.c: Include signalx.h
+	* libgst/events.c: Include signalx.h.
+	* libgst/heap.c: Include signalx.h.
+	* libgst/interp.c: Include signalx.h.
+	* libgst/sysdep.c: Include signalx.h.
 
 2003-02-28  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -1111,12 +1094,12 @@
 	* libgst/save.c: Disable mmap-ing under WIN32
 	* libgst/sysdep.c: Add WIN32_LEAN_AND_MEAN
 
-2003-03-09  Paolo Bonzini  (bonzini@gnu.org)
+2003-03-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Don't print C backtrace during
 	compilation if SIGINT is received.
 
-2003-02-07  Paolo Bonzini  (bonzini@gnu.org)
+2003-02-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/heap.c: Fix brokenness of Win32 implementation.
 	* libgst/alloc.c: Add a very basic logging mechanism.
@@ -1127,7 +1110,7 @@
 	* libgst/print.c: Print FloatD and FloatQ objects with
 	the correct letter for the exponent
 
-2003-02-06  Paolo Bonzini  (bonzini@gnu.org)
+2003-02-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/alloc.c: Abort on an evident double free (two
 	frees of the same object without any free on the same
@@ -1137,7 +1120,7 @@
 	* libgst/events.c: Use pointer to tail's next pointer
 	instead of pointer to tail.  Suggested by Carlos Moran.
 
-2003-02-03  Paolo Bonzini  (bonzini@gnu.org)
+2003-02-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/alloc.c: Allow one to free the NULL pointer
 	liberally.
@@ -1145,18 +1128,18 @@
 	* libgst/opt.h: Adjust prototypes
 	* libgst/xlat.c: Adjust users
 
-2003-01-20  Paolo Bonzini  (bonzini@gnu.org)
+2003-01-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Keep the returned value of a doit in
 	the incubator until after the #afterEvaluation hook is
 	completed.
 
-2003-01-17  Paolo Bonzini  (bonzini@gnu.org)
+2003-01-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-jit.inl: Check for code not having been
 	compiled yet moved before check for native_ip == 0
 
-2003-01-16  Paolo Bonzini  (bonzini@gnu.org)
+2003-01-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: While loading standard files disable
 	_gst_regression_testing.
@@ -1168,12 +1151,12 @@
 
 	* libgst/save.c: Never read past the end of the file
 
-2003-01-12  Paolo Bonzini  (bonzini@gnu.org)
+2003-01-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.c: Make child process a session group
 	leader
 
-2003-01-09  Paolo Bonzini  (bonzini@gnu.org)
+2003-01-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Fix bug in _gst_execute_statements
 
@@ -1181,7 +1164,7 @@
 	* libgst/sym.h: Declare it
 	* libgst/comp.c: Use it
 
-2003-01-02  Paolo Bonzini  (bonzini@gnu.org)
+2003-01-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.y: Get rid of right recursion and
 	shift/reduce conflicts.
@@ -1195,18 +1178,18 @@
 	* libgst/prims.def: ValueAndResumeOnUnwind loses the
 	cache_new_ip attribute.
 
-2002-12-31  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Always use PUSH_OOP to push the
 	result in VMpr_CObject_at.  Thanks to David Forster.
 
-2002-12-29  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Strdup the name of the function in
 	_gst_define_cunc (it is freed when the call happens
 	from Smalltalk).  Thanks to David Forster.
 
-2002-12-27  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0g released
 
@@ -1214,19 +1197,19 @@
 	* libgst/input.c: Fix compilation error when readline
 	is not there
 
-2002-12-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Don't print negative percentages
 	* libgst/prims.def: Add ObjectMemory>>#abort primitive
 	* libgst/interp-bc.inl: Fix single step mode
 	* libgst/interp-jit.inl: Fix single step mode
 
-2002-12-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Incubate everything sent through
 	_gst_msg_sendf.
 
-2002-12-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.10 released
 
@@ -1235,7 +1218,7 @@
 	* libgst/oop.c: Add more assertions
 	* libgst/save.c: Add more assertions
 
-2002-12-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.y: New name of gst.y
 	* libgst/tree.h: Adjust
@@ -1248,7 +1231,7 @@
 	* libgst/interp.c: Remove cruft for multiple inclusions
 	of prims.def, we only include the generated prims.inl
 
-2002-12-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.9 (stable) and 2.0f (development) released
 
@@ -1258,7 +1241,7 @@
 	* libgst/interp.c: Do suspend_process correctly when
 	the process is in the middle of the process list.
 
-2002-12-04  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/alloc.c: Abort instead of asserting
 	* libgst/save.c: Likewise
@@ -1274,12 +1257,12 @@
 	* libgst/prims.inl: Abort on a bootstrapping error
 	* libgst/interp.c: Catch SIGABRT instead of SIGSEGV
 
-2002-12-01  Paolo Bonzini  (bonzini@gnu.org)
+2002-12-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/heap.c: Provide a fallback whenever
 	MAP_NORESERVE is used.
 
-2002-11-29  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.y: Fix a couple of shift/reduce conflicts
 
@@ -1293,11 +1276,7 @@
 	* libgst/prims.inl: Implement asynchronous call-out.
 	* libgst/prims.def: Implement asynchronous call-out.
 
-2002-11-26  Paolo Bonzini  (bonzini@gnu.org)
-
-	* lib-src/md5.c: Remove warnings in -Wtraditional mode.
-
-2002-11-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0e released
 
@@ -1305,14 +1284,14 @@
 	* libgst/oop.h: Declare it
 	* libgst/prims.inl: Check for EFAULT and abort if so.
 
-2002-11-16  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.c: Always do the F_SETOWN fcntl after F_SETFL
 	for the benefit of FreeBSD (thanks to Danilo Fiorenzano).
 	And always do the F_SETFL fcntl before FIOASYNC for the
 	benefit of Cygwin.
 
-2002-11-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.8 (stable) released
 
@@ -1327,7 +1306,7 @@
 
 	* libgst/dict.c: Get rid of CFunctionDescs
 
-2002-11-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.inl: New C callout primitive, removed
 	methodOOP parameter from primitives
@@ -1341,7 +1320,7 @@
 	* libgst/lib.c: Load additional core classes *before* the C interface
 	since it now uses ValueHolder.
 
-2002-11-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Define identity_dictionary_find_key
 	* libgst/dict.c: Use it
@@ -1350,11 +1329,11 @@
 	* libgst/prims.def: Created from prims.inl
 	* libgst/interp.c: Added parts of prims.inl
 
-2002-11-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.inl: Add VMpr_Semaphore_lock
 
-2002-11-09  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Start a new process in
 	_gst_prepare_execution_environment,
@@ -1378,22 +1357,20 @@
 	* libgst/xlat.c: Fix some bit-rot
 	* libgst/opt.c: Fix off-by-one error in _gst_compute_stack_positions
 
-2002-11-08  Paolo Bonzini  (bonzini@gnu.org)
-
-	* lib-src/poll.c, lib-src/poll.h: Support XPG4 just in case
+2002-11-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/heap.c: Use MAP_NORESERVE if available.
 	* libgst/alloc.c: Resort to mmap-ed areas once we cannot
 	use sbrk anymore.
 
-2002-11-06  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Unprotect freed pages, fix bug in removing
 	pages from remembered table upon freeing.  Blox up and running
 	with generational and incremental GC.
 	* libgst/save.c: Use buffered I/O.
 
-2002-11-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.c: Strdup in _gst_push_string_stream
 	* libgst/callin.c: So we have to close the streams
@@ -1408,27 +1385,27 @@
 	object that used to point to the old-space object are not recorded
 	in the remembered set.
 
-2002-11-04  Paolo Bonzini  (bonzini@gnu.org)
+2002-11-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0e (development) released
 
-2002-10-26  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/alloc.c: More hooks
 	* libgst/oop.c: Use them
 
-2002-10-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-bc.inl: Fix an obscure re-entrancy bug
 	in _gst_send_message_internal, which was commonly
 	triggered by the new garbage collector in the ANSI test
 	suite.
 
-2002-10-23  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Put back support for growing the OOP table.
 
-2002-10-22  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sym.c: Add more consts
 	* libgst/sym.h: Likewise
@@ -1438,7 +1415,7 @@
 	* libgst/callin.h: Likewise
 	* libgst/gstpub.h: Likewise
 
-2002-10-22  Mike Castle  (dalgoda@ix.netcom.com)
+2002-10-22  Mike Castle  <dalgoda@ix.netcom.com>
 
 	* libgst/callin.c: Fixes for Tcl 8.4.0 (add some consts)
 	* libgst/callin.h: Fixes for Tcl 8.4.0 (add some consts)
@@ -1446,7 +1423,7 @@
 	* libgst/dict.h: Fixes for Tcl 8.4.0 (add some consts)
 	* libgst/gstpub.h: Fixes for Tcl 8.4.0 (add some consts)
 
-2002-10-21  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/alloc.c: Collect statistics
 	* libgst/dict.c: Add instance variables to ObjectMemory
@@ -1454,7 +1431,7 @@
 	* libgst/oop.h: Declare functions to export statistics
 	* libgst/prims.inl: Adjust for statistic collection
 
-2002-10-17  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.7 (stable) released
 
@@ -1478,30 +1455,28 @@
        * libgst/interp-bc.inl: fix syntax error for !OPTIMIZE.
        * libgst/lib.c: load FileDescr.st before ObjectMemory.
 
-2002-10-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-15  Paolo Bonzini  <bonzini@gnu.org>
 
-       * libgst/lib.c: print "GNU Smalltalk ready" only before
+       * libgst/lib.c: Print "GNU Smalltalk ready" only before
        reading from stdin.  `verbose' --> _gst_verbose.
-       * libgst/lib.h: declare _gst_verbose.
-       * libgst/comp.c: conditionalize printing of stats and
+       * libgst/lib.h: Declare _gst_verbose.
+       * libgst/comp.c: Conditionalize printing of stats and
        explanations on _gst_verbose and _gst_regression_testing.
-       * libgst/comp.h: remove `quiet' parameter to
+       * libgst/comp.h: Remove `quiet' parameter to
        _gst_execute_statements.
-       * libgst/gst.y: caller adjusted
+       * libgst/gst.y: Caller adjusted.
 
-2002-10-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-13  Paolo Bonzini  <bonzini@gnu.org>
 
-       * libgst/interp.c: include strspell.h
-       * lib-src/strspell.c: new file
-       * lib-src/strspell.h: new file
-       * libgst/prims.inl: define VMpr_String_similarityTo
+       * libgst/interp.c: Include strspell.h.
+       * libgst/prims.inl: Define VMpr_String_similarityTo.
 
-2002-10-08  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/print.c: Don't segfault when printing a Metaclass
 	that has no class yet.
 
-2002-10-06  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.c: Add the period to the word-termination
 	characters.
@@ -1526,27 +1501,25 @@
 	* libgst/interp-bc.c: Treat LINE_NUMBER_BYTECODE as nop
 	* libgst/xlat.c: Treat LINE_NUMBER_BYTECODE as nop
 
-2002-10-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Set F_XLAT_REACHABLE in the method
 	and block prolog.
 	* libgst/oop.c: GC unused JITted code.
 
-2002-10-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-10-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/heap.c: Use EFAULT as an addition to SIGSEGV instead
-	of an alternative method to detect unmapped memory areas
+	of an alternative method to detect unmapped memory areas.
 	* libgst/interp-bc.inl: Don't use [ a ... b ] initializers
 	because Apple's gcc is actually an Objective C compiler.
 
-2002-09-29  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-29  Paolo Bonzini  <bonzini@gnu.org>
 
-	* lib-src/alloc.c: Removed
-	* lib-src/alloc.h: Removed
-	* libgst/alloc.c: New file
-	* libgst/alloc.h: New file
+	* libgst/alloc.c: New file, from lib-src.
+	* libgst/alloc.h: New file, from lib-src.
 
-2002-09-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Added HomedAssociation and associated
 	declarations
@@ -1562,23 +1535,23 @@
 	* libgst/lib.c: Set line-based buffering for stdout in
 	regression testing mode.
 
-2002-09-26  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Simplify inst_var_at and inst_var_at_put
 	* libgst/prims.inl: Inst_var_at_put now void, adjust caller.
 
-2002-09-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.y: Better error recovery
 
-2002-09-23  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Do memcpy to char * instead of to
 	double * (because that does not solve double unalignment
 	problems).
 	* libgst/input.c: My_getc reads unsigned chars.
 
-2002-09-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Added interruptLock variable to Process
 	* libgst/interp.h: Added interruptLock field to gst_process
@@ -1586,20 +1559,20 @@
 	for the initial number of signals.  Create the interruptLock
 	when a new Process is created.
 
-2002-09-18  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: The highest priority process was being
 	put in the process list for priority 4 even if it did
 	not belong there.
 
-2002-09-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Versions 2.0c (development) and 2.0.6 (stable) released
 
 	* libgst/prims.inl: Allow specifying a class as the
 	current namespace
 
-2002-09-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: support :: As well as . to separate
 	namespaces
@@ -1636,7 +1609,7 @@
 	* libgst/prims.inl: Callers adjusted
 	* libgst/interp.c: Callers adjusted
 
-2002-09-10  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Compute stack depth correctly in the
 	presence of cascades.
@@ -1644,7 +1617,7 @@
 	fix _gst_alloc_words (was not always converting size
 	from words to bytes)
 
-2002-09-09  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Pass flags to alloc_oop
 	* libgst/interp.c: Pass flags to alloc_oop
@@ -1664,7 +1637,7 @@
 	* libgst/sym.c: Use NAMESPACE_AT_PUT
 	* libgst/lib.c: Load VarBinding.st
 
-2002-09-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Support push 8-bit value bytecodes
 	* libgst/opt.c: Support push 8-bit value bytecodes
@@ -1679,7 +1652,7 @@
 	* libgst/interp-jit.inl: Support single step mode.
 	* libgst/prims.inl: Add single stepping primitive.
 
-2002-08-21  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Walk the OOP table forwards in
 	sweep_pooled_contexts.  Correct off-by-one error
@@ -1688,16 +1661,14 @@
 	where a too short replacement collection caused
 	the String>>#replaceFrom:to:with:startingAt: primitive
 	to succeed without making changes to the receiver.
-	* lib-src/avltrees.c: Removed uninitialized memory
-	access (innocuous)
 
-2002-08-20  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.c: Pass SIGCHLD to the signal handler
 	for asynchronous file polling, as it might reveal a
 	POLLHUP event.
 
-2002-08-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Accept -1 for isPipe in
 	_gst_set_file_stream_file
@@ -1707,12 +1678,12 @@
 	makes FileDescriptor and FileStream consider /proc
 	entries as pipes.
 
-2002-08-18  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.y: Give an error message if a binding
 	to an undeclared class is used.
 
-2002-08-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.5 (stable) released
 
@@ -1722,58 +1693,42 @@
 	* libgst/gstpub.h: Adjust documentation and prototype
 	* main.c: Adjust caller
 
-2002-08-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0b (development) released
 
-2002-08-07  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Versions 2.0a (development) and 2.0.4 (stable) released
 
-2002-07-24  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.inl: Added missing `break' statement
 
-2002-07-22  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Don't load Browser.st
 
-2002-07-22  Paolo Bonzini  (bonzini@gnu.org)
-
-	* lib-src/floorl.c: New file
-	* lib-src/ceill.c: New file
-	* lib-src/sqrtl.c: New file
-	* lib-src/frexpl.c: New file
-	* lib-src/ldexpl.c: New file
-	* lib-src/asinl.c: New file
-	* lib-src/acosl.c: New file
-	* lib-src/atanl.c: New file
-	* lib-src/logl.c: New file
-	* lib-src/expl.c: New file
-	* lib-src/sinl.c: New file
-	* lib-src/cosl.c: New file
-	* lib-src/tanl.c: New file
-
-2002-07-17  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-17  Paolo Bonzini  <bonzini@gnu.org>
   
   	*** Version 2.0.3 released
 
-2002-07-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Don't do class checks on global variables
 	(they refer to the associations!)
 
-2002-07-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.2 released
 	
-2002-07-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Define _gst_object_copy instead of
 	_gst_dictionary_copy
 	* libgst/prims.inl: Define a fast VMpr_Object_shallowCopy
 
-2002-07-04  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.h: Define MCF_ flags
 	* libgst/prims.inl: Define VMpr_BlockClosure_valueAndResumeOnUnwind
@@ -1784,7 +1739,7 @@
 	* libgst/interp-bc.inl: Use MCF_ flags
 	* libgst/xlat.c: Use MCF_ flags
 	
-2002-07-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Parse negative scaled decimal constants
 	as negative; in general, parse them exactly without
@@ -1795,7 +1750,7 @@
 	gst_mpz objects is not zero
 	* libgst/dict.c: Fix GC bug in _gst_grow_identity_dictionary
 
-2002-06-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Load FloatD.st/FloatE.st/FloatQ.st
 
@@ -1820,58 +1775,54 @@
 	* libgst/interp-bc.inl: Change open-coded math operations to use
 	FloatD
 
-2002-06-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.1 released
 	
-2002-06-27  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-27  Paolo Bonzini  <bonzini@gnu.org>
 
-	* libgst/lib.c: Don't require the image directory to
-	be world-writable
-	* libgst/xlat.c: Fixed embarrassing syntax error
+	* libgst/lib.c: Don't require the image directory to be world-writable.
+	* libgst/xlat.c: Fixed embarrassing syntax error.
 	
-	* libgst/tree.c: Use %O
-	* libgst/sym.c: Likewise
-	* libgst/prims.inl: Likewise
-	* libgst/byte.c: Likewise
-	* libgst/comp.c: Likewise
-	* libgst/dict.c: Likewise
-	* libgst/dict.h: Likewise
-	* libgst/interp-bc.inl: Likewise
-	* libgst/interp.c: Likewise
-	* libgst/xlat.c: Likewise
+	* libgst/tree.c: Use %O.
+	* libgst/sym.c: Likewise.
+	* libgst/prims.inl: Likewise.
+	* libgst/byte.c: Likewise.
+	* libgst/comp.c: Likewise.
+	* libgst/dict.c: Likewise.
+	* libgst/dict.h: Likewise.
+	* libgst/interp-bc.inl: Likewise.
+	* libgst/interp.c: Likewise.
+	* libgst/xlat.c: Likewise.
 
-2002-06-26  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-26  Paolo Bonzini  <bonzini@gnu.org>
 
-	* lib-src/asprintf.c: Removed
-	* lib-src/snprintf.c: Removed
+	* libgst/oop.c: Remove printing functions.
+	* libgst/oop.h: Likewise.
+	* libgst/dict.c: Likewise.
+	* libgst/dict.h: Likewise.
+	* libgst/sym.c: Likewise.
+	* libgst/sym.h: Likewise.
+	* libgst/print.c: Move them here...
+	* libgst/print.h: ... and here.
+	* libgst/lib.c: Call _gst_init_snprintfv.
 
-	* libgst/oop.c: Remove printing functions
-	* libgst/oop.h: Likewise
-	* libgst/dict.c: Likewise
-	* libgst/dict.h: Likewise
-	* libgst/sym.c: Likewise
-	* libgst/sym.h: Likewise
-	* libgst/print.c: Move them here
-	* libgst/print.h: And here
-	* libgst/lib.c: Call _gst_init_snprintfv
-
-2002-06-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0 released
 	
-2002-06-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Removed exceptionHandlers variable from
 	the Process class.
 	* libgst/lib.c: Search in the class namespace before
 	looking in the class pools
 
-2002-06-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-13  Paolo Bonzini  <bonzini@gnu.org>
   
   	* libgst/lib.c: reformat help message
 
-2002-06-06  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Always define 32-bit and 64-bit
 	int<->OOP conversion functions
@@ -1880,13 +1831,13 @@
 	
 	* libgst/interp-bc.inl: Added more branch prediction hints
 
-2002-06-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Define _gst_set_c_object
 	* libgst/callin.h: Declare _gst_set_c_object
 	* libgst/gstpub.h: Define setCObject in the VMProxy struct
 	
-2002-05-30  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/save.c: Made some functions inline; remove amount
 	of checks on wrong_endianness; store number of pointer
@@ -1895,7 +1846,7 @@
 	F_COUNT (which will be used by GC in 2.1 to drop the
 	recursive calls in the mark phase).
 
-2002-05-30  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/save.c: Loop in the used part of the OOP table only
 	(+15% average speedup on image loading time).
@@ -1911,12 +1862,12 @@
 	* libgst/interp-jit.inl: Include jitpriv.h instead of internal.h
 	* libgst/gstpriv.h: Don't include internal.h
 
-2002-05-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Don't cache the VMPrimitives dictionary, it
 	causes bugs.
 
-2002-05-23  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.h: Changed _gst_invoke_init_block to
 	_gst_invoke_hook.
@@ -1936,7 +1887,7 @@
 	* libgst/sym.h: Keep symbol table size a power of two
 	* libgst/sym.c: Use a simpler hash and scramble its bits
 	
-2002-05-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/mpz.c: Fix multiple evaluation of arguments
 	of BYTE_INVERT; work around misinterpretation of
@@ -1945,7 +1896,7 @@
 	values in _gst_print_object, to avoid false regressions
 	due to libc differences
 
-2002-05-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Fire ObjectMemory events before
 	and after evaluation in _gst_execute_statements
@@ -1953,16 +1904,16 @@
 	* libgst/lib.c: Set _gst_kernel_initialized before
 	invoking the #returnFromSnapshot event.
 
-2002-05-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.6 released
 	
-2002-05-10  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.c: Fix spurious error from my_close
 	when stdin is passed on the command line (via -)
 
-2002-05-08  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/internal.h: _gst_internal_funcs now const
 	* libgst/interp.c: Always mark thisContext (at worst,
@@ -1971,7 +1922,7 @@
 	mistake when switching to gstpriv.h; add const in
 	dcd_send_special
 
-2002-05-05  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.h: ObjSize now an OOP
 	* libgst/dict.inl: Likewise
@@ -1983,7 +1934,7 @@
 	* libgst/dict.c: Likewise
 	* libgst/comp.c: Likewise
 
-2002-05-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gstpriv.h: Declare macros for branch prediction hints
 	* libgst/interp-bc.inl: Use them
@@ -2017,7 +1968,7 @@
 	* libgst/dict.c: Callers adjusted.
 	* libgst/prims.inl: Callers adjusted.
 
-2002-05-01  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Move C...Size et al. into CSymbols,
 	refer to CSymbols as to a pool dictionary of ByteArray,
@@ -2025,43 +1976,39 @@
 	not needed here.  Create a RegressionTesting global
 	variable that suppresses more sources of variance.
 
-2002-04-18  Paolo Bonzini  (bonzini@gnu.org)
-
-	* lib-src/avltrees.c: Traverse correctly when
-	avl_left && !avl_right
-	* lib-src/rbtrees.c: Likewise
+2002-04-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Don't set writePtr and writeEnd
 	for FileDescriptors in _gst_set_stream_file
 
-2002-04-16  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.inl: Return NaN when transcendental
 	functions fail.  Removed VMpr_LargeInteger_divide.
 	
-2002-04-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.5 released
 	
-2002-04-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Print a backtrace on SIGUSR1
 	* libgst/oop.c: Gc_running -> _gst_gc_running
 	* libgst/oop.h: Declare _gst_gc_running
 	
-2002-04-06  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-bc.inl: Properly check for overflows on
 	bitshifts (used to return 0 instead of 16r-80000000)
 	* libgst/prims.inl: Likewise
 
-2002-03-27  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/mpz.c: New file
 	* libgst/mpz.h: New file
 	* libgst/prims.inl: Implemented primitives for large integers
 	
-2002-03-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/md-config.h: Added cacheline definitions
 	* libgst/interp.c: Added cacheline definitions
@@ -2070,9 +2017,8 @@
 
 	* libgst/interp.inl: Use inttypes.h rather than stdint.h
 
-2002-03-21  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-21  Paolo Bonzini  <bonzini@gnu.org>
 
-	* lib-src/snprintf.c: New file
 	* libgst/events.c: Don't include sys/select.h, we don't need it
 	* libgst/gstpub.h: Don't include sys/select.h, we don't need it
 	* libgst/sysdep.c: Support HP/UX's FIOSSAIOSTAT and
@@ -2082,12 +2028,12 @@
 
 	* libgst/lex.c: Skip _ inside numeric literals
 
-2002-03-17  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Updated list of files for virtual filesystem layer
 	* libgst/prims.inl: Implement the PRIM_MK_TEMP file operation.
 
-2002-03-16  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.h: Added _gst_push_stream_oop
 	* libgst/input.c: Implement stream operations for
@@ -2095,11 +2041,11 @@
 	* libgst/prims.inl: Remove checks for String-ness
 	in compilation primitives.
 
-2002-03-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.4 released
 	
-2002-03-10  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.h: _gst_gc_flip -> _gst_scavenge,
 	_gst_minor_gcflip -> _gst_minor_scavenge
@@ -2111,7 +2057,7 @@
 
 	* libgst/oop.c: GC flip -> scavenging
 	
-2002-02-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.h: Removed private stuff
 	* libgst/gstpriv.h: Private stuff from gst.h + inclusion
@@ -2137,12 +2083,12 @@
 	* tree.c: Include gstpriv.h
 	* xlat.c: Include gstpriv.h
 
-2002-02-26  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Fixed a code generation bug for {} array
 	constructors (two consecutive updates of the stack pointer).
 	
-2002-02-26  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	Named primitives: interpreter changes
 	-------------------------------------
@@ -2182,7 +2128,7 @@
 	* libgst/comp.c: Added _gst_restore_primitive_number
 	* libgst/comp.h: Declared _gst_restore_primitive_number
 	
-2002-02-26  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Implemented _gst_register_oop_array & co
 	* libgst/callin.h: Declared _gst_register_oop_array & co
@@ -2195,17 +2141,13 @@
 	_gst_register_oop_array.
 
 	* libgst/dict.c: Removed CFunctionDescs from the list of pool
-	dictionaries for Object
+	dictionaries for Object.
 
 	* libgst/interp-bc.inl: Fixed a rare bug by invalidating
-	last_primitive before exiting the interpreter
+	last_primitive before exiting the interpreter.
 	
-2002-02-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* lib-src/avltrees.c: New file
-	* lib-src/avltrees.h: New file
-	* lib-src/rbtrees.c: New file
-	* lib-src/rbtrees.h: New file
 	* libgst/cint.c: Use AVL trees for the C function registry;
 	get rid of _gst_init_cfunc_vec.
 	* libgst/callin.c: Use red-black trees for the OOP registry;
@@ -2233,7 +2175,7 @@
 	* libgst/interp-bc.inl: Added glue for _gst_async_signal_and_unregister
 	* libgst/interp-jit.inl: Added glue for _gst_async_signal_and_unregister
 	
-2002-02-23  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Document the functions and variables
 	* libgst/lex.h: Likewise
@@ -2247,7 +2189,7 @@
 	* libgst/sym.c: Allow _ for variable names in the bootstrapping
 	declarations.
 	
-2002-02-22  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Remove the routines to disable the GC
 	* libgst/oop.h: Remove the routines to disable the GC
@@ -2258,7 +2200,7 @@
 	* libgst/oop.h: Likewise
 	* libgst/oop.inl: Likewise
 
-2002-02-21  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Document the functions and variables
 	* libgst/comp.inl: Likewise
@@ -2268,14 +2210,14 @@
 	* libgst/dict.c: Likewise
 	* libgst/dict.h: Likewise
 
-2002-02-20  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Document the functions and variables
 	* libgst/comp.h: Likewise
 	* libgst/input.c: Flush stdout after printing the prompt,
 	if readline is not used.
 
-2002-02-19  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Remove conditional on PICKY_VA_ARG,
 	ANSI says it should really be picky (i.e. not accept
@@ -2300,11 +2242,11 @@
 	* libgst/cint.c: Likewise
 	* libgst/cint.h: Likewise
 
-2002-02-16  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Document the functions and variables
 
-2002-02-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/save.c: Document the functions and variables
 	* libgst/save.h: Likewise
@@ -2352,7 +2294,7 @@
 	* libgst/interp.inl: Likewise
 	* libgst/oop.inl: Likewise
 
-2002-02-07  Paolo Bonzini  (bonzini@gnu.org)
+2002-02-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Show only the last copyright year.
 	
@@ -2366,7 +2308,7 @@
 	accessing async_queue_index (even though it is volatile)
 	* libgst/interp-jit.inl: Likewise
 
-2002-01-29  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.3 released.
 
@@ -2431,17 +2373,17 @@
 	* libgst/oop.inl: Likewise
 	* libgst/prims.inl: Likewise
 	
-2002-01-22  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.y: Signal a warning if self, super, true, false,
 	nil, or thisContext are sent.  General reformatting of the
 	source code.
 
-2002-01-18  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Removed initialization blocks
 
-2002-01-17  Nigel Williams  (nigelw@wizardis.com.au)
+2002-01-17  Nigel Williams  <nigelw@wizardis.com.au>
 
 	* libgst/dict.c: Added atEnd variable to FileDescriptor
 	* libgst/prims.inl: Provide a primitive to check if a
@@ -2461,17 +2403,17 @@
 	* libgst/sysdep.c: Added support for process-time timers (like
 	ITIMER_VIRTUAL)
 	
-2002-01-15  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Ensure that the image path is the directory
 	from which we loaded the image, rather than the default image
 	path.
 
-2002-01-04  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.2 released
 	
-2002-01-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Add the Source class variable to the Random
 	class.
@@ -2479,58 +2421,57 @@
 	* libgst/lib.c: Changed banner to "GNU Smalltalk ready"
 	(lowercase r)
 
-2001-12-12  Paolo Bonzini  (bonzini@gnu.org)
+2001-12-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/events.c: Poll until there are no pending events
 
-2001-11-20  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.1 released
 	
-2001-11-13  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.y: Implement #(true false nil) as per the ANSI
 	standard.
 
-2001-10-24  Paolo Bonzini  (bonzini@gnu.org)
+2001-10-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.c: Define O_ASYNC as FASYNC if not found.
 
-2001-10-17  David Forster  (dforste@qwest.net)
+2001-10-17  David Forster  <dforste@qwest.net>
 
 	* libgst/cint.c: Add uInt and uLong support for C interface.
 	Change longType return to use fromCLong.
 	* libgst/sym.c: Add uIntSymbol and uLongSymbol.
 
-2001-10-16  Paolo Bonzini  (bonzini@gnu.org)
+2001-10-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.95.5 released.
 	
 	* libgst/lib.c: Observe quietExecution when loading
 	.stinit and .stpre.
 
-2001-10-06  Paolo Bonzini  (bonzini@gnu.org)
+2001-10-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Fixed bugs after applying the two
 	patches below.
 	
-2001-10-06  Nigel Williams  (nigelw@elder-gods.net)
+2001-10-06  Nigel Williams  <nigelw@elder-gods.net>
 
 	* libgst/lib.c: Show error message if file not found
 	
-2001-08-28  Carlo Dapor  (catull_us@yahoo.com)
+2001-08-28  Carlo Dapor  <catull_us@yahoo.com>
 
-	* libgst/lex.c: Reset floating point exception mask
-	under FreeBSD.
-	* libgst/lib.c: Switch to getopt_long for parsing
-	long command line options.
+	* libgst/lex.c: Reset floating point exception mask under FreeBSD.
+	* libgst/lib.c: Switch to getopt_long for parsing long command line
+	options.
 	
-2001-07-14  Paolo Bonzini  (bonzini@gnu.org)
+2001-07-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.h: Gee, what a hiatus!  Fixed for C++.
 	* libgst/gstpub.h: Likewise
 	
-2001-06-16  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.h: Defined PRIM_CHECK_INTERRUPT
 	* libgst/prims.inl: Added PRIM_CHECK_INTERRUPT
@@ -2538,7 +2479,7 @@
 	* libgst/xlat.c: EmitInterruptCheck called from
 	emitPrimitive only if PRIM_CHECK_INTERRUPT
 	
-2001-06-13  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Create the IPMap when translating.
 	Defined mapVirtualIP.  Store the IP at every possible
@@ -2551,7 +2492,7 @@
 	* libgst/xlat.c: Generate an interrupt check as part of
 	the prolog rather than of the return bytecodes.
 	
-2001-06-12  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-jit.inl: Defined refreshNativeIPs.
 	* libgst/interp.c: ReturnIP --> nativeIP
@@ -2559,11 +2500,11 @@
 	* libgst/dict.c: ReturnIP --> nativeIP
 	* libgst/save.c: Reset a context's nativeIP upon image load.
 	
-2001-06-08  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.c: Open the slave pty before forking
 	
-2001-06-06  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/md-config.h: Define BRANCH_REGISTER for every
 	architecture
@@ -2575,7 +2516,7 @@
 	* libgst/prims.inl: Removed unused variable in primitive 254
 	* libgst/sysdep.h: Declared fullWrite
 	
-2001-06-05  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: GetMethodBase became initTranslator
 	* libgst/xlat.h: Likewise
@@ -2584,21 +2525,19 @@
 
 	* libgst/sysdep.c: Set the CLOEXEC flag in openFile
 	
-2001-06-01  Paolo Bonzini  (bonzini@gnu.org)
+2001-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/events.c: Use poll(2) instead of select(2),
 	I am told it is more scalable.
 	* libgst/input.c: Likewise, for coherency.
-	* lib-src/poll.c: Provide select-based implementation of poll
-	* lib-src/poll.h: To be used instead of sys/poll.h
 	
-2001-05-26  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.c: Use ptys to create a pipe; when
 	setting file interrupt with SIOCSGRP and FIOASYNC,
 	check that both ioctls succeed.
 
-2001-05-24  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Make unwindMethod return whether
 	the return was successful
@@ -2609,27 +2548,27 @@
 	* libgst/interp-jit.inl: Added a comment re. the only
 	serious bug remaining.
 
-2001-05-23  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/heap.c: _WIN32 --> WIN32
 	* libgst/gst.h: Define WIN32 if __CYGWIN__ or __CYGWIN32__
 	* libgst/sysdep.c: _WIN32 --> WIN32
 
-2001-05-22  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Added support for inlined primitives
 	* libgst/prims.inl: Marked a few primitives as inlined
 	* libgst/dict.inl: Added accessors for the ISP_ISWORDS
 	bit.
 	
-2001-05-20  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Remove calls to moncontrol; will be
 	replaced by new profiling stuff.
 	* libgst/prims.inl: Temporarily embed the moncontrol
 	primitive into #if 0.
 
-2001-05-17  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Recycle existing std{in,out,err}.
 	* libgst/input.c: Wait for a character to be available
@@ -2637,16 +2576,16 @@
 	* libgst/prims.inl: Reset errno to 0 after calling
 	lseek.
 	
-2001-05-15  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-jit.inl: In sendMessageInternal force
 	a call to getNativeCode upon a cache miss
 	
-2001-05-11  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Fixes for PowerPC (sizeof(jit_insn) > 1)
 	
-2001-05-04  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Support selfSmalltalk and variadicSmalltalk
 	as additional parameter types
@@ -2655,12 +2594,12 @@
 	* libgst/sym.h: Declared selfSmalltalkSymbol and
 	variadicSmalltalkSymbol
 	
-2001-04-30  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.inl: Fixed buffer overflows involving
 	oopVec.
 	
-2001-04-28  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.h: Fixed isFinite, it reported -2.0 as
 	infinite!
@@ -2669,11 +2608,7 @@
 	* libgst/callin.c: Defined basicSize
 	* libgst/gstpub.h: Added basicSize to the InterpreterProxy
 	
-2001-04-26  Paolo Bonzini  (bonzini@gnu.org)
-
-	* lib-src/dup2.c: New file
-	
-2001-04-23  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Extrapolated a part of it into events.c,
 	include events.h
@@ -2690,7 +2625,7 @@
 
 	* libgst/sysdep.c: Use socketpair to create a pipe
 	
-2001-04-16  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.h: Declared fileDescriptorClass
 	* libgst/dict.c: Declared fileDescriptorClass
@@ -2700,7 +2635,7 @@
 	two equal `pop/store into instance variable of new stack top'
 	bytecodes, the second became a `duplicate stack top' bytecode
 
-2001-04-15  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Use incAddOOP everywhere instead of
 	registerOOP.  Added objectAlloc to the interpreterProxy
@@ -2716,7 +2651,7 @@
 	change left it unused.
 	* libgst/prims.inl: Removed primitive 264 (#enableGC:)
 	
-2001-04-02  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Declared objectMemoryClass
 	* libgst/dict.h: Declared objectMemoryClass
@@ -2726,7 +2661,7 @@
 	* libgst/oop.c: Raise ObjectMemory events
 	* libgst/prims.inl: Raise ObjectMemory events
 	
-2001-03-31  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Implemented byteArrayToOOP and OOPToByteArray
 	* libgst/gstpub.h: Declared byteArrayToOOP and OOPToByteArray in
@@ -2734,20 +2669,20 @@
 	* libgst/sysdep.c: Removed code to set the LANG environment
 	variable on Win32 systems.
 	
-2001-03-28  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Added an `access' parameter to setFileStreamFile
 	* libgst/prims.inl: Pass the `access' parameter to setFileStreamFile
 	from primitive 254
 	
-2001-03-20  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Set up FileStream for new buffering scheme,
 	and updated setFileStreamFile.
 	* libgst/prims.inl: Implemented primitive 254 for new buffering
 	scheme.  Incorporated primitives 247/248 (file-in) into 254.
 	
-2001-03-17  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.c: Implemented pushUNIXFile & co. in terms
 	of file descriptors.
@@ -2757,18 +2692,18 @@
 	* libgst/sysdep.c: Modified openFile/openPipe to use
 	file descriptors.
 	
-2001-03-05  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-05  Paolo Bonzini  <bonzini@gnu.org>
 
-	* libgst/comp.c: Bindings are simple oopConsts now
-	* libgst/tree.c: Resolve bindings as oopConsts
-	* libgst/tree.h: Removed bindingConst
-	* libgst/gst.y: Raise an error on an invalid binding
+	* libgst/comp.c: Bindings are simple oopConsts now.
+	* libgst/tree.c: Resolve bindings as oopConsts.
+	* libgst/tree.h: Removed bindingConst.
+	* libgst/gst.y: Raise an error on an invalid binding.
 
-	* libgst/comp.c: InitCompiler is now public
-	* libgst/comp.h: InitCompiler is now public
-	* libgst/lib.c: Call initCompiler
+	* libgst/comp.c: initCompiler is now public.
+	* libgst/comp.h: initCompiler is now public.
+	* libgst/lib.c: Call initCompiler.
 
-2001-03-01  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/md-config.h: Fixed typo in register allocation
 	for the SPARC.
@@ -2778,11 +2713,11 @@
 	* libgst/md-config.h: Disable register allocation on the
 	SPARC (possibly temporary change).
 	
-2001-02-23  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released version 1.95.3
 
-2001-02-19  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.h: Declare sendMethod.
 	* libgst/interp.c: Added sendMethod to list of routines
@@ -2797,7 +2732,7 @@
 	in executeStatements.
 	* libgst/gst.y: Pass `install' parameter to compileMethod
 	
-2001-02-17  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.c: Made from complete.c and part of lex.c
 	* libgst/input.h: Made from complete.h and part of lex.h
@@ -2828,7 +2763,7 @@
 
 	* libgst/heap.c: Fixed for Solaris
 	
-2001-02-16  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/complete.c: New file
 	* libgst/complete.h: New file
@@ -2839,20 +2774,19 @@
 	added addAllSymbolCompletions.
 	* libgst/sym.h: Declared addAllSymbolCompletions
 	
-2001-02-15  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Made invokeCRoutine return whether the
 	call-out was successful.
 	* libgst/cint.h: Made invokeCRoutine return a boolean.
-	* libgst/prims.inl: On invalid C call-outs, primitive 255
-	fails.
+	* libgst/prims.inl: On invalid C call-outs, primitive 255 fails.
 	
-2001-02-14  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.inl: In primitive 255 (C call-out) check
 	that we were not called from the at-cache.
 	
-2001-02-13  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Keep dictionaries no more than 75% full,
 	* libgst/dict.h: Ditto
@@ -2860,13 +2794,13 @@
 	* libgst/dict.c: Keep dictionary sizes prime (new function
 	newNumFields).
 
-2001-02-12  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.h: Moved F_FINALIZE into the runtime flags
 	(not preserved between the time an image is saved and
 	the time it is loaded)
 	
-2001-02-06  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: PushReadlineString became pushStdinString,
 	and calls pushUNIXFile if emacsProcess is true or readline
@@ -2875,7 +2809,7 @@
 	* libgst/lib.c: Instead of using #ifdef to decide between
 	pushReadlineString or pushUNIXFile, use pushStdinString.
 	
-2001-02-02  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Added idToOOP/OOPToId, declaration of
 	interpreterProxy
@@ -2891,7 +2825,7 @@
 	* libgst/cint.c: Search the cFuncInfo array backwards,
 	so that new definitions override the old ones.
 	
-2001-01-31  Paolo Bonzini  (bonzini@gnu.org)
+2001-01-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Declared a wrapper around opendir, which
 	returns ENOSYS under Linux!  Also declared isExecutable
@@ -2899,7 +2833,7 @@
 	* libgst/sysdep.h: Declared fileIsExecutable
 	* libgst/sysdep.c: Defined fileIsExecutable
 	
-2001-01-31  Paolo Bonzini  (bonzini@gnu.org)
+2001-01-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Compile bindingConsts.
 	* libgst/gst.y: Added #{...} literals
@@ -2908,17 +2842,17 @@
 	* libgst/tree.c: Defined makeBindingConstant
 	* libgst/tree.h: Declared makeBindingConstant and bindingConst
 
-2001-01-30  Paolo Bonzini  (bonzini@gnu.org)
+2001-01-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Define KernelFileSystemPath in
 	initDictionaryOnImageLoad, and KernelFilePath in
 	initDictionary
 
-2001-01-30  Paolo Bonzini  (bonzini@gnu.org)
+2001-01-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released version 1.95.1
 	
-2001-01-16  Paolo Bonzini  (bonzini@gnu.org)
+2001-01-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-bc.inl: Define different optimization levels
 	depending on REG_AVAILABILITY.
@@ -2926,40 +2860,40 @@
 	* libgst/interp.c: Include md-config.h instead of register.h
 	* libgst/md-config.h: New name of register.h
 
-2001-01-14  Paolo Bonzini  (bonzini@gnu.org)
+2001-01-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Use incubator in makeBlockClosure.
 	* libgst/oop.inl: IsObjAddr returns false if the address lies beyond
 	the allocPtr (used to be beyond the maxPtr)
 
-2001-01-12  Paolo Bonzini  (bonzini@wbkst15.mach.uni-karlsruhe.de)
+2001-01-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-bc.inl: Fixed pipelining bugs; added more caching
 	opportunities
 
-2001-01-09  Paolo Bonzini  (bonzini@gnu.org)
+2001-01-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-bc.inl: Implementation of pipelining
 	* libgst/interp.c: Defined and explained PIPELINING
 
-2001-01-08  Paolo Bonzini  (bonzini@wbkst15.mach.uni-karlsruhe.de)
+2001-01-08  Paolo Bonzini  <bonzini@gnu.org>
 
-	* libgst/dict.inl: Added cast to arrayNew to work on 64-bit machines
-	* libgst/gst.h: Removed warning for 64-bit machines
+	* libgst/dict.inl: Added cast to arrayNew to work on 64-bit machines.
+	* libgst/gst.h: Removed warning for 64-bit machines.
 	* libgst/interp.c: Fixed prepareContext to work on 64-bit machines
-	(num is now a long)
-	* libgst/oop.c: Make data spaces twice as big on 64-bit machines
-	* libgst/oop.h: Make data spaces twice as big on 64-bit machines
+	(num is now a long).
+	* libgst/oop.c: Make data spaces twice as big on 64-bit machines.
+	* libgst/oop.h: Make data spaces twice as big on 64-bit machines.
 	* libgst/register.h: Removed warning for unsupported architectures,
 	was much more a burden than I had expected.
 
-2000-12-16  Paolo Bonzini  (bonzini@gnu.org)
+2000-12-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/opt.c: Finished first draft of type inferencing.
 	* libgst/xlat.c: Adapted to use opt.c; nothing was broken for
 	disabled type inferencing.
 
-2000-12-05  Paolo Bonzini  (bonzini@gnu.org)
+2000-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/heap.c: Moved the process of guessing the heap base from
 	configure.in to here.
@@ -2967,7 +2901,7 @@
 	* libgst/sysdep.c: Made setSignalHandler return the previous signal
 	handler.
 
-2000-11-01  Paolo Bonzini  (bonzini@gnu.org)
+2000-11-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Changed bug reporting address
 
@@ -2976,19 +2910,19 @@
 	* libgst/cint.c: Fix brokenness in Cygwin's stat and chdir
 	(which set errno even if the function succeeds).
 
-2000-09-12  Paolo Bonzini  (bonzini@gnu.org)
+2000-09-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/opt.c: Started implementation of type inferencing
 	(have basic block detection now).  Finally succeded in
 	passing Physics yesterday.
 
-2000-09-10  Paolo Bonzini  (bonzini@gnu.org)
+2000-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.h: Added declarations for primitive attributes. 
 	* libgst/prims.inl: Added primitive attributes.
 	* libgst/xlat.c: Use primitive attributes in emitPrimitive.
 
-2000-09-09  Paolo Bonzini  (bonzini@gnu.org)
+2000-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Added discardNativeCode and modified other
 	function to use the `discarded' list.
@@ -3002,7 +2936,7 @@
 	different semantics -- but the old one had no use since
 	the Smalltalk program had no interesting use of the result).
 
-2000-09-09  Paolo Bonzini  (bonzini@gnu.org)
+2000-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/byte.c: Modified bytecode 134 for pop-into-array
 	* libgst/byte.h: Modified bytecode 134 for pop-into-array
@@ -3020,7 +2954,7 @@
 	* libgst/tree.h: Declared makeArrayConstructor, added
 	arrayConstructorType, removed charConst, symbolConst -> oopConst
 
-2000-09-08  Paolo Bonzini  (bonzini@gnu.org)
+2000-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Method cache is no longer static; moved
 	MethodCacheEntry declaration to interp.h.  Also found bug
@@ -3034,7 +2968,7 @@
 	(now called gen_binaryBool); renamed gen_intOperation to
 	gen_binaryInt and TREE_ARIT_* to TREE_BINARY_*
 
-2000-09-07  Paolo Bonzini  (bonzini@gnu.org)
+2000-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.8.3 released
 
@@ -3043,16 +2977,16 @@
 	* libgst/lib.c: Don't load ByteMemory and WordMemory definitions.
 	* libgst/prims.inl: Removed ByteMemory primitives.
 
-2000-09-07  Nigel Williams  (nigelw@wizardis.com.au)
+2000-09-07  Nigel Williams  <nigelw@wizardis.com.au>
 
 	* libgst/cint.c: Allow to pass nil for stringOut, byteArray and
 	byteArrayOut too.
 
-2000-09-01  Nigel Williams  (nigelw@wizardis.com.au)
+2000-09-01  Nigel Williams  <nigelw@wizardis.com.au>
 
-	* libgst/prims.inl: Corrected class check for primitive 203/204
+	* libgst/prims.inl: Corrected class check for primitive 203/204.
 
-2000-08-15  Paolo Bonzini  (bonzini@gnu.org)
+2000-08-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/opt.c: Added stub implementation of inferSmallIntegerOps.
 	* libgst/opt.h: Declare inferSmallIntegerOps and the constants it uses.
@@ -3060,7 +2994,7 @@
 	to omit overflow checks if the result of an inlined operation is
 	known to be a SmallInteger.
 
-2000-08-08  Paolo Bonzini  (bonzini@gnu.org)
+2000-08-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Renamed compileSubexpressionWithGoto to
 	compileSubexpressionAndJump
@@ -3070,7 +3004,7 @@
 	goto statements (my life is passing through a phase of structured
 	programming mania).
 
-2000-08-06  Paolo Bonzini  (bonzini@gnu.org)
+2000-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/byte.c: Moved part to opt.c
 	* libgst/byte.h: Moved part to opt.h
@@ -3096,11 +3030,11 @@
 	when the image was saved, but were not compiled when GC was
 	invoked.  Also implemented saving F_FIXED objects.
 
-2000-07-10  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Allow usage of Undeclared in the kernel's source
 
-2000-07-04  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/heap.c: Support MAP_ANON and MAP_ANONYMOUS (thanks to
 	John David Anglin)
@@ -3111,7 +3045,7 @@
 	* libgst/oop.inl: In allocOOP, check low-water condition by
 	looking at numFreeOOPs, not firstFreeOOP.
 
-2000-07-02  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.y: Add `oval' to the union, and define (and parse)
 	SCALED_DECIMAL_LITERAL 
@@ -3121,7 +3055,7 @@
 	* libgst/tree.c: Defined makeOOPConstant
 	* libgst/tree.h: Declared makeOOPConstant
 
-2000-07-01  Paolo Bonzini  (bonzini@gnu.org)
+2000-07-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Don't overwrite the method cache until we
 	are sure that the receiver understands the message (lookupMethod)
@@ -3133,7 +3067,7 @@
 	algorithm.  If adjust is true, fixing the dividend if the signs
 	mismatch produces an incorrect result.
 
-2000-06-26  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.inl: Restored divide-by-zero check in //, \\ and
 	/ (removed by mistake June 21st)
@@ -3148,7 +3082,7 @@
 	message.  There are no regressions with respect to the bytecode
 	interpreter now.
 
-2000-06-21  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: When compiling a #repeat loop, add a dummy
 	`push nil' bytecode at the end to please the JIT compiler
@@ -3165,20 +3099,20 @@
 	fixed overflow detection in multiplication; align interrupt checks
 	to 4 bytes.
 
-2000-06-18  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Added to SortedCollection two instance variables
 	needed to be able to amortize sorting cost (through heaps & merging).
 
-2000-06-17  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Fixed doesNotUnderstand
 
-2000-06-17  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released versions 1.95 (development) and 1.7.5 (stable)
 
-2000-06-10  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/byte.c: Fixed bug in optimizeByteCodes (|| was there
 	instead of &&) which upset the JIT compiler
@@ -3196,7 +3130,7 @@
 	* libgst/interp-bc.inl: Added validateMethodCacheEntries (no-op)
 	* libgst/interp-jit.inl: Added validateMethodCacheEntries
 
-2000-06-07  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Fixed behavior of emptyContextStack with
 	regard to the returnIP field.
@@ -3206,7 +3140,7 @@
 	declared TREE_ALT_PUSH and implemented the gen_alt* functions.
 	Still missing: processes, doesNotUnderstand:
 
-2000-06-06  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.inl: Use a huge table of functions instead of
 	a huge switch statement
@@ -3218,7 +3152,7 @@
 	executePrimitiveOperation
 	* libgst/xlat.c: Same as above.
 
-2000-06-04  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/byte.c: New function computeStackPositions.
 	* libgst/byte.h: Declared computeStackPositions.
@@ -3226,7 +3160,7 @@
 	if the method has no arguments and no temporaries.  Plus,
 	use computeStackPositions.
 
-2000-06-03  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Support #valueWithArguments: and other
 	primitives (other than 81) which use sendBlockValue.  Wrote
@@ -3236,7 +3170,7 @@
 	* libgst/prims.inl: Added primitive 90 to retrieve the
 	native code for a method.
 
-2000-06-02  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: If USE_JIT_TRANSLATION is defined,
 	executeStatements skips some values which aren't mantained in
@@ -3253,20 +3187,20 @@
 	of JIT-compiled native code is interrupted.  The interpreter
 	is now able to create an image and then restore it.
 
-2000-06-01  Paolo Bonzini  (bonzini@gnu.org)
+2000-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Support losing systems which don't allow
 	va_arg(..., char)
 	* libgst/dld_beos.c: New file.
 
-2000-05-29  Paolo Bonzini  (bonzini@gnu.org)
+2000-05-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Added some inlining (==, isNil, notNil,
 	blockCopy:); modified suboperation codes so that `2' is reserved
 	to literals (which aids a lot when inlining).  Blocks done, they
 	were easy.
 
-2000-05-28  Paolo Bonzini  (bonzini@gnu.org)
+2000-05-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Moved here a ChangeLog comment that actually
 	described the code; gave a category to Behavior>>#methodsFor:
@@ -3285,7 +3219,7 @@
 	* libgst/prims.inl: Use showStackContents in the temporary definition
 	of #error: and #doesNotUnderstand: (useful for debugging)
 
-2000-05-24  Paolo Bonzini  (bonzini@gnu.org)
+2000-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/xlat.c: More tons of fixes.  Crashes at Character.st
 	* lib/xlat.h: Export returnFromNativeCode
@@ -3293,12 +3227,11 @@
 	* lib/interp.c: Fixed behavior of `execution environment' contexts
 	with the JIT compiler.
 
-2000-05-24  Paolo Bonzini  (bonzini@gnu.org)
+2000-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
-	* lib-src/alloc.c: Don't exit on malloc(0)
 	* lib/xlat.c: Tons of fixes; renamed from lib/dynamic.c
 
-2000-05-17  Paolo Bonzini  (bonzini@gnu.org)
+2000-05-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Added a couple of flags (F_XLAT_2NDCHANCE and
 	F_XLAT_REACHABLE) for dealing with the changes to lib/oop.c.
@@ -3312,7 +3245,7 @@
 	of methods whose native code translations are not referenced by any
 	context.
 
-2000-05-13  Paolo Bonzini  (bonzini@gnu.org)
+2000-05-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/alloc.c: Moved to lib-src
 	* lib/alloc.h: Moved to lib-src
@@ -3330,12 +3263,12 @@
 	* lib/usleep.c: Moved to lib-src
 	* lib/waitpid.c: Moved to lib-src
 
-2000-05-12  Paolo Bonzini  (bonzini@gnu.org)
+2000-05-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/heap.c: Derive baseaddr by trying to mmap a page, rather than
 	blindly getting sbrk(0)
 
-2000-05-09  Paolo Bonzini  (bonzini@gnu.org)
+2000-05-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Abort compilation if a method turns out to be too
 	complex for the bytecode set (i.e. if it jumps too far).
@@ -3347,11 +3280,11 @@
 	* lib/lib.c: Better error message when the Kernel files can't be
 	found (image bootstrap failed).
 
-2000-05-04  Paolo Bonzini  (bonzini@gnu.org)
+2000-05-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.94.90 released
 
-2000-05-02  Paolo Bonzini  (bonzini@gnu.org)
+2000-05-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.y: Fixed errors in parsing #( () ) and #[]; the
 	former was parsed to (Array with: nil), the last crashed (!)
@@ -3361,25 +3294,25 @@
 	* lib/sysdep.c: Added code to set the `LANG' environment
 	variable under Win32.
 
-2000-04-27  Paolo Bonzini  (bonzini@gnu.org)
+2000-04-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/register.h: Issue the #warning only if using GCC
 
-Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
+Wed Apr 26 14:42.52 2000  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/sysdep.h: Relinquish -> usleep, added getpagesize
 	* lib/sysdep.c: Same as above
 	* lib/prims.inl: Relinquish -> usleep
 
-2000-04-23  Paolo Bonzini  (bonzini@gnu.org)
+2000-04-23  Paolo Bonzini  <bonzini@gnu.org>
  
 	* lib/dict.c: Changed `length' variable to `size' in FileSegment
 
-2000-04-12  Paolo Bonzini  (bonzini@gnu.org)
+2000-04-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.7.4 released
 
-2000-04-01  Paolo Bonzini  (bonzini@gnu.org)
+2000-04-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/oop.c: Completed switch to heaps, using heap_sbrk instead of
 	heap_malloc and	heap_realloc.  Removed maxSpaceSize variable.
@@ -3389,7 +3322,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 
 	* lib/comp.h: Fixed bogus error on big-endian machines
 
-2000-03-25  Paolo Bonzini  (bonzini@gnu.org)
+2000-03-25  Paolo Bonzini  <bonzini@gnu.org>
  
 	* lib/byte.c: Added bytecode 134 (for lots of instance variables).
 	* lib/byte.h: Added bytecode 134.
@@ -3397,23 +3330,23 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/dynamic.c: Added bytecode 134.
 	* lib/interp-bc.inl: Added bytecode 134.
 
-2000-03-24  Paolo Bonzini  (bonzini@gnu.org)
+2000-03-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/alloc.c: Removed code for the BSD memory allocator.
 	* lib/heap.c: Added.
 	* lib/heap.h: Added.
 	* lib/oop.c: Use heaps to allow the OOP table to grow.
 
-2000-03-23  Paolo Bonzini  (bonzini@gnu.org)
+2000-03-23  Paolo Bonzini  <bonzini@gnu.org>
  
 	*** Version 1.7.3 released
 
-2000-03-22  Paolo Bonzini  (bonzini@gnu.org)
+2000-03-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Added F_XLAT and F_RUNTIME
 	* lib/save.c: Remove F_RUNTIME flags upon image load
 
-2000-03-21  Paolo Bonzini  (bonzini@gnu.org)
+2000-03-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.h: Include comp.inl
 	* lib/comp.inl: Created
@@ -3428,7 +3361,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Added mustBeBooleanSymbol and badReturnErrorSymbol
 	* lib/sym.h: Added mustBeBooleanSymbol and badReturnErrorSymbol
 
-2000-03-16  Paolo Bonzini  (bonzini@gnu.org)
+2000-03-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.h: Since I added atSignSymbol, I put atSignSpecial here.
 	* lib/bytecode.inl: Since I added atSignSymbol, I use it instead of
@@ -3439,7 +3372,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Added atSignSymbol (for JIT).
 	* lib/sym.h: Added atSignSymbol (for JIT).
 
-2000-03-11  Paolo Bonzini  (bonzini@gnu.org)
+2000-03-11  Paolo Bonzini  <bonzini@gnu.org>
  
 	*** Version 1.7.2 released
 
@@ -3448,12 +3381,12 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/dynamic.c: Began implementing new version
 	* lib/dynamic.h: New version
 
-2000-02-25  Paolo Bonzini  (bonzini@gnu.org)
+2000-02-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/lib.c: Use the Undeclared dictionary for files loaded
 	from the command line too.
 	 
-2000-02-24  Paolo Bonzini  (bonzini@gnu.org)
+2000-02-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Better output from badType.  Plus, ByteArrays
 	passed as Strings are considered null-terminated, and Strings
@@ -3462,37 +3395,37 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	on sends to super from a block.
 	* lib/interp.h: Declare showBacktrace.
 
-2000-02-22  Paolo Bonzini  (bonzini@gnu.org)
+2000-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.7.1 released
 
-2000-02-22  Paolo Bonzini  (bonzini@gnu.org)
+2000-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Added defineCFuncs to test file accessing modes.
 
-2000-02-21  Paolo Bonzini  (bonzini@gnu.org)
+2000-02-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/prims.inl: Added time-zone primitives for Time
 	* lib/sysdep.c: Added currentTimeZoneName
 	* lib/sysdep.h: Added currentTimeZoneName
 
-2000-02-17  Paolo Bonzini  (bonzini@gnu.org)
+2000-02-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/bytecode.inl: Fixed crash on blocks returning from non-existent
 	method contexts; fixed bug in detecting overflows on bit shifts.
 	* lib/prims.inl: Fixed bug in detecting overflows on bit shifts.
 
-2000-02-15  Paolo Bonzini  (bonzini@gnu.org)
+2000-02-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.7 released
 
-2000-02-06  Thorsten Klein  (TK@Thorsten-Klein.de)
+2000-02-06  Thorsten Klein  <TK@Thorsten-Klein.de>
 
 	* lib/dld_gst.c: Missing asterisk in `i' for loop (second
 	expression was `i', now is `*i').  Caused SIGSEGV when a missing
 	library name was passed.
 
-2000-02-01  Paolo Bonzini  (bonzini@gnu.org)
+2000-02-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.h: Subsumed bytecodes 132 and 134 (a whole byte for
 	the argument count is way too much, and it does not matter if
@@ -3501,11 +3434,11 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/bytecode.inl: Interpret new coding for bytecode 132
 	* lib/comp.c: Emit new coding for bytecode 132
 
-2000-01-31  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Sixth beta of 1.7 (labeled 1.6.85) released
 
-2000-01-31  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Worked out bugs in call-ins that were added
 	after the introduction of the `terminate interpreter' bytecode
@@ -3517,7 +3450,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.c: Moved debug() here from oop.c
 	* lib/sysdep.h: Moved debug() here from oop.h
 
-2000-01-28  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Fixed bug with double-freeing of block bytecodes
 	(this is also due to a very permissive allocator)
@@ -3526,7 +3459,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/prims.inl: Fixed Memory primitives to return and accept
 	LargeIntegers for addresses when needed.
 
-2000-01-24  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Changed the clean block detection machinery to work
 	with CompiledBlocks.  Previously, we emitted a fixed sequence of
@@ -3547,7 +3480,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/lib.c: Load CompildCode.st and CompiledBlk.st
 	* lib/prims.inl: Added primitive 68 to create CompiledBlocks.
 
-2000-01-20  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Fixed crash on methods whose last act was
 	returning a clean block.  It turned out that evaluating those
@@ -3557,7 +3490,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	Also, introduced a `pVoidFunc' typedef to avoid Lisp-like
 	abundance of parentheses when passing C function addresses.
 
-2000-01-20  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/bytecode.inl: IntegerClass -> smallIntegerClass
 	* lib/dict.c: IntegerClass -> smallIntegerClass, plus
@@ -3569,7 +3502,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/lib.c: Load SmallInt.st too.
 	* lib/prims.inl: IntegerClass -> smallIntegerClass
 
-2000-01-15  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Adapted large integer compilation stuff in
 	makeConstantOOP to compile ByteArrays too.
@@ -3580,7 +3513,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	integers between 0 and 255
 	* lib/tree.c: Added makeByteArrayConstant
 
-2000-01-09  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/lex.c: CurStrBuf -> obstack_curStrBuf; plus, added
 	the compilationObstack variable which is initialized in
@@ -3594,7 +3527,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/lib.c: Solved SIGSEGV when gst.im was not in the
 	current directory and SMALLTALK_IMAGE was not set.
 
-2000-01-09  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Added code to create Smalltalk LargeInteger
 	objects from large integer ConstNodes in makeConstantOOP.
@@ -3604,7 +3537,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/tree.h: Added declaration of the LargeInteger struct
 	and of large integer ConstNodes
 
-2000-01-08  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.h: Added `exitInterpreter' bytecode.
 	* lib/comp.h: Declared `getTerminationMethod'.
@@ -3617,7 +3550,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Added terminateSymbol.
 	* lib/sym.h: Added terminateSymbol.
 
-2000-01-02  Paolo Bonzini  (bonzini@gnu.org)
+2000-01-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Gst enters the new millennium!!! (yeah, I know it
 	actually starts in 2001 but I don't want to wait another year... ;-)
@@ -3631,14 +3564,14 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.h: Added macros for frexp and ldexp where they aren't
 	available
 	 
-1999-12-28  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Fifth beta of 1.7 (labeled 1.6.84) released
 
 	* lib/byte.c: New functions checkKindOfBlock and patchCleanBlocks.
 	* lib/byte.h: Declaration of patchCleanBlocks.
 
-1999-12-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: New function fixupBlockClosures.
 	* lib/comp.c: New way of compiling blocks.
@@ -3649,7 +3582,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	added machinery to reveal `clean' blocks
 	* lib/sym.h: Removed #blockCopy:temporaries: (replaced with #blockCopy:)
 
-1999-12-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Added method to BlockClosure, changed to new
 	context structure (methodClass/selector retrieved from the
@@ -3657,7 +3590,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/interp.c: Changed to new context and BlockClosure structure
 	* lib/prims.inl: Changed to new BlockClosure structure
 
-1999-12-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Store the class and selector in the created
 	CompiledMethods.  A first step towards leaner context objects
@@ -3669,7 +3602,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/dict.c: Added `class' and `selector' to CompiledMethod.
 	* lib/prims.inl: Pass class and selector to makeNewMethod.
 
-1999-12-19  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/bytecode.inl: Removed hasBlock (can be replaced with a
 	test on whether the context lies in the main OOP table); this
@@ -3684,13 +3617,13 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/interp.h: Same as above
 	* lib/prims.inl: Same as above
 
-1999-12-17  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Various changes, notably to getMethodContext and
 	its users, to avoid using oopToObj more than once on the same
 	object.
 
-1999-12-17  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Nil is now 0L (used to be 0), which is better when
 	used as a pointer.
@@ -3704,7 +3637,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	tried to avoid -- 1.1.5 copied the whole objects to the main heap,
 	causing way too many GCs.
 
-1999-12-16  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: F_FAKE --> F_POOLED, isFake --> isPooled
 	* lib/interp.h: ResetFakeContexts --> emptyContextsPool
@@ -3712,12 +3645,12 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	fakeList --> contextPool, plus changes above
 	* lib/oop.c: RealizeOOPs --> sweepPooledObjects, plus changes above
 
-1999-12-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/sym.c: Modified hashString to reduce likeliness that
 	hash be zero.
 
-1999-12-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/bytecode.inl: Use the new procedures below
 	* lib/comp.c: Allocated one more bit for the method flags.  If
@@ -3727,7 +3660,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	explicit `return from method', the other does less job and returns
 	to the parent context upon a `return from context'
 
-1999-12-11  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Moved findClassMethod here from lib/dict.inl
 	* lib/dict.h: Restored declaration of findClassMethod
@@ -3739,7 +3672,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	address to jump to (hoping to save address generation interlocks)
 	* lib/interp.c: Support for prefetching
 
-1999-12-06  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/bytecode.inl: Hard-code register allocation of ivar2
 	and tempOOP only where they are actually used
@@ -3748,7 +3681,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	register.h and is used in sendMessageInternal/sendBlockValue.
 	* lib/register.h: Created
 
-1999-12-05  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: ReturnMethodStackTop became returnContextStackTop
 	in isSimpleReturn.
@@ -3762,7 +3695,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/memzero.h: Removed a conditional by using LONG_SHIFT in the
 	generic version of memzero.
 
-1999-12-05  Paolo Bonzini  (bonzini@gnu.org)
+1999-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/bytecode.inl: The `hasBlock' instance variable in a context
 	is now an integer (0 or 1).  This eliminated several lookups for
@@ -3770,7 +3703,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/interp.c: Same as above
 	* lib/prims.inl: Same as above
 
-1999-11-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Fourth beta of 1.7 (labeled 1.6.83) released
 
@@ -3779,12 +3712,12 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/interp.c: Same as above
 	* lib/prims.inl: Same as above
 
-1999-11-22  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Fixed floating-point exception on operations
 	with infinity and NaN, under FreeBSD.
 
-1999-11-21  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/alloc.c: Use memzero instead of memset; also, xmalloc
 	doesn't zero memory
@@ -3799,7 +3732,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	must be resized), so it is sufficient that it be correct
 	after a GC.
 
-1999-11-20  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: RestoreCFuncDescriptor was called at the wrong
 	time in save.c -- before the xxxClass variables were loaded
@@ -3813,7 +3746,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	Also, no need to push and pop the object for the `return
 	self/true/false/nil' bytecodes -- a simple assignment will do.
 
-1999-11-19  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Removed initNilVec and nilVec
 	* lib/dict.inl: Implemented nilFill as an unrolled loop (memcpy
@@ -3823,7 +3756,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	whole context stack (arguments+temporaries) and is called
 	prepareContext.  Another +10% for this on send-heavy benchmark!!!
 
-1999-11-18  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.h: ReturnBlockStackTop became returnContextStackTop
 	* lib/comp.c: Compile returns from methods as returnContextStackTop
@@ -3831,7 +3764,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/bytecode.inl: `return self' and other similar bytecodes
 	fall into returnContextStackTop, not returnMethodStackTop.
 
-1999-11-18  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Changed to account for removal of cacheHits and
 	messagesSent.
@@ -3842,7 +3775,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/prims.inl: New implementation of mutation does not need
 	primitive 263 (#specialBasicAt:).
 
-1999-11-17  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.inl: Access functions test subscript bounds -- this
 	eliminates an instanceSpec lookup.
@@ -3851,7 +3784,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/gst.y: Support for the #(1 2 3 #a #b #'cdef' 45) syntax
 					     ^^ ^^ ^^^^^^^
 
-1999-11-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: `return instance variable' stores index in the
 	`primitive' field of the method header (allows more optimizations
@@ -3864,7 +3797,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	code for ACCESSOR_DEBUGGING.
 	* lib/interp.h: Same as dict.c above
 
-1999-11-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: NilVec contains now 128 OOPs
 	* lib/dict.inl: NilVec contains now 128 OOPs
@@ -3872,7 +3805,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	handling fake contexts; finally, the method cache now includes
 	the method header (+5/10% performance).
 
-1999-11-11  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dynamic.c: Move method whose threaded code representation
 	is requested to the head of the methodsTable.
@@ -3887,7 +3820,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	ACCESSOR_DEBUGGING preprocessor symbol and explained what it was
 	for.
 
-1999-11-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/bytecode.inl: In most bytecodes that are implemented with a
 	switch statement, the switch statement is resolved at translation
@@ -3904,7 +3837,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	therefore moved there.
 	* lib/lex.c: Moved declaration of Stream from gst.h
 
-1999-11-09  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dynamic.c: Invalidating the macro opcode cache is now
 	separated from invalidating the threaded code cache. Also,
@@ -3914,7 +3847,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	invalidateMethodCache). Everything works if no optimization 
 	options are set when compiling.
 
-1999-11-09  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/callin.c: SelectorNumArgs used; in addition, the result
 	is checked to be the `nil' object in msgSendf is checked and,
@@ -3928,7 +3861,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Added selectorNumArgs
 	* lib/sym.h: Added selectorNumArgs
 
-1999-11-08  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Fixed bug in makeDestinationTable that caused
 	macro-opcode inlining to lose as soon as a jump was found.
@@ -3938,7 +3871,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	bug-free (except for problems arising from inlining code
 	optimized by GCC, which I have not tackled yet).
 
-1999-11-06  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/bytecode.inl: Jump bytecodes must be `PROTECT' bytecodes,
 	isNil and notNil sends need not.  Found two unused variables.
@@ -3949,7 +3882,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	enableGC to cint.c
 	* lib/interp.inl: Moved getMethodLiterals from interp.c
 
-1999-11-05  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Can print bytecodes without a vector of literals
 	* lib/dynamic.c: Added debugging support; offsetToFill was not reset
@@ -3958,7 +3891,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	(#initialize in Character.st), or up to MethodDict.st
 	with macro-opcode inlining disabled.
 
-1999-11-02  Paolo Bonzini  (bonzini@gnu.org)
+1999-11-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dynamic.c: Work on the dynamic translator restarted. The first
 	correct dynamically code was generated today: a small step for
@@ -3967,32 +3900,32 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	inlined opcode' pattern (line 1358 of Builtins.st)
 	* lib/interp.c: Work on the dynamic translator restarted
 
-1999-10-31  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Fixed bug when compiling an integer constant
 	that did not fit in the first 31 literals (`push instance
 	variable[x]' was emitted instead of `push literal[x]')
 
-1999-10-31  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Third beta of 1.7 (labeled 1.6.82) released
 
-1999-10-30  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: A few bytecodes were still sending #booleanRequired
 	instead of #mustBeBoolean (see May 3rd change).
 
-1999-10-22  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/save.c: Ensure that upon load the heap is at least 50% free.
 
-1999-10-21  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Added characterArrayClass
 	* lib/dict.h: Added characterArrayClass
 	* lib/lib.c: Added CharArray.st
 
-1999-10-20  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: The new startup sequence (Oct 9) allowed to
 	make the dictInit function (now called initNilVec) static.
@@ -4003,7 +3936,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/dict.h: Removed declaration of dictInit.
 	* lib/oop.c: Removed call to dictInit.
 
-1999-10-12  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dld_hpux.c: `return 0' was missing in gst_dld_init
 	* lib/lib.c: Put the image in the local directory if the
@@ -4011,7 +3944,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.c: Added fileIsWriteable, plus usage of time_t;
 	strdup was erroneously declared in getFullFileName.
 
-1999-10-11  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-11  Paolo Bonzini  <bonzini@gnu.org>
 	
 	* lib/comp.c: Removed addForcedSelector (a copy of addForcedObject).
 	Open coding of #whileTrue, #whileFalse, #repeat; removed open
@@ -4021,7 +3954,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	definition (doesn't include key instance variable anymore).
 	* lib/dict.h: Same as above
 
-1999-10-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/oop.c: Added reallocOOPTable.
 	* lib/oop.inl: Call reallocOOPTable instead of exiting when
@@ -4034,7 +3967,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	that required the parameters to be OOPs).
 	* lib/save.h: FixupObject and restoreObject are now public.
 
-1999-10-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Define the `min' and `max' macros.
 	* lib/lib.c: Used oopTableSize instead of OOP_TABLE_SIZE;
@@ -4049,7 +3982,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/save.c: Used oopTableSize instead of OOP_TABLE_SIZE;
 	use additional parameter to initOOPTable.
 
-1999-10-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/oop.c: Moved builtin objects at the front of the oop table;
 	this is a first step towards a variable-sized oop table
@@ -4060,7 +3993,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/save.c: Same as above.
 	* lib/sym.c: Same as above.
 
-1999-10-09  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Second beta of 1.7 (labeled 1.6.81) released
 
@@ -4083,7 +4016,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Added undeclaredSymbol, and used in findClassVariable.
 	* lib/sym.h: Added undeclaredSymbol.
 
-1999-10-07  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Restored old MethodDictionary class (see
 	March 29th, 1989 entry!) It was needed after all.
@@ -4093,7 +4026,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.c: Fixed faked closePipe to return status of child
 	process.
 
-1999-10-02  Paolo Bonzini  (bonzini@gnu.org)
+1999-10-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Was trimming the last character of the method's
 	source code in FileSegments.
@@ -4103,7 +4036,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/lib.c: Added -K option, don't crash on -I/-L/-K without
 	mandatory argument.
 
-1999-09-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: InitProcessSystem removed the initial process from
 	its own process list -- result: as soon as `Processor yield' was
@@ -4114,7 +4047,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.h: Declaration of `relinquish'.
 	* lib/sysdep.c: Implemented `relinquish'.
 
-1999-09-25  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** First beta of 1.7 (labeled 1.6.80) released
 
@@ -4128,7 +4061,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/waitpid.c: Added
 	* lib/strtoul.c: Added
 
-1999-09-23  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dynamic.c: Created.
 	* lib/dynamic.h: Created.
@@ -4138,13 +4071,13 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.c: Added flushCode & signalAfter implementation using
 	fork()+getMilliTime().
 
-1999-09-19  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Declare lookupTableClass
 	* lib/dict.h: Declare lookupTableClass
 	* lib/lib.c: Load LookupTbl.st and WeakObjects.st
 
-1999-09-18  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.y: Include "lib.h", define YYPRINT
 	* lib/lex.c: Define yyprint
@@ -4152,11 +4085,11 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/lib.h: Added declaration of "quietExecution", previously only
 	in lib.c
 
-1999-09-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Added mkdir declaration.
 
-1999-09-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Added DefaultSortBlock to SortedCollection.
 	* lib/lex.c: Fixed bug; 8-bit characters *outside* string literals
@@ -4165,18 +4098,18 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	getwd otherwise.  Old behavior was to use getcwd if HAVE_UNISTD_H
 	was set and getwd if HAVE_GETWD was set
 
-1999-09-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Compile doits in UndefinedObject.
 
-1999-09-12  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Moved variables from ClassDescription; instanceVariables to
 	Behavior; name/comment/category/environment to Class (they make no sense
 	in Metaclass!).
 	* lib/dict.h: Same as above.
 
-1999-09-11  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Changes for namespaces (execute doits in the current namespace).
 	* lib/dict.c: Same as above (shared pool variable search algorithm,
@@ -4190,7 +4123,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Same as above (shared pool variable search algorithm).
 	* lib/sym.h: Same as above (added uppercaseSuperSymbol).
 
-1999-09-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: VariableWordSubclasses use accessors for 32-bit integers.
 	BlockClosures are now variableWordSubclasses since the previous encoding
@@ -4202,11 +4135,11 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/prims.inl: C object and memory address primitives use the above
 	accessors.
 
-1999-09-08  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/prims.inl: Flush the FileStream before reading its size.
 
-1999-09-06  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Added idleTasks variable to ProcessorScheduler.
 	* lib/interp.h: Added idleTasks variable to ProcessorScheduler.
@@ -4215,7 +4148,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	code for alarms now uses kill(2) instead of manually calling the
 	handler.
 
-1999-09-02  Paolo Bonzini  (bonzini@gnu.org)
+1999-09-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.y: Added support for [ :a :b || temp1 temp2 | ].
 	* lib/lex.c: UnreadChar not static anymore.  Also removed scanStringoid
@@ -4229,7 +4162,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/str.c: Removed resizeString, curStrBuf now returns a copy of the
 	string (previously it was a chore left to its caller through strdup).
 
-1999-08-31  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Registers where the interpreter's ip and sp stay are
 	hard-coded for most architectures.  Added definitions for the high
@@ -4238,7 +4171,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	equality and hashing functions to dict.inl (the only places where they
 	were actually used).
 
-1999-08-30  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/bytecode.inl: Created from part of interp.c
 	* lib/gst.h: Removed `extern' definition of the instruction pointer.
@@ -4248,23 +4181,23 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/interp.inl: Removed relativeByteIndex.
 	* lib/prims.inl: RelativeByteIndex is replaced by currentBytecodeIndex.
 
-1999-08-29  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.6.2 released.
 
-1999-08-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Always define DLD functions (at worst they're stubs)
 	* lib/dld_none.c: Created.
 	* lib/lib.c: Always load DLD.st (at worst it refers to C stubs)
 
-1999-08-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Put CDoubleMin and CDoubleMax in the Smalltalk dictionary.
 	* lib/interp.c: NEXT_BYTECODE was not defined for old (switch statement)
 	dispatching.
 
-1999-08-08  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: In initRuntimeObjects, define the ImageFileName global
 	as equal to binaryImageName.
@@ -4278,7 +4211,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/save.c: LoadFromFile now expects a full path to the image just like
 	saveToFile, does not call findImageFile.
 
-1999-08-07  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Declare `unlink' (valid only for files) instead of `remove'
 	(which nukes whole directories too) to be used to implement
@@ -4286,7 +4219,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.c: Added simulation of popen and pclose in openPipe
 	and closePipe.
 
-1999-08-07  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.h: InitSTDIOObjects became initRuntimeObjects
 	* lib/dict.c: InitSTDIOObjects became initRuntimeObjects, and various
@@ -4294,7 +4227,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	initSmalltalkDictionary.  This completes the change made on July 14th.
 	* lib/lib.c: InitSTDIOObjects became initRuntimeObjects
 
-1999-08-06  Paolo Bonzini  (bonzini@gnu.org)
+1999-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.inl: RelativeByteIndex now explicitly casts to int for
 	Alpha compatibility.
@@ -4303,7 +4236,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/dict.c: Switched from int to long when dealing with differences
 	between addresses, for Alpha compatibility.
 
-1999-07-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dld_gnu.c: Added gst_dld_exts (.o, .a)
 	* lib/dld_gst.h: Added gst_dld_exts
@@ -4313,7 +4246,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/dld_libdl.c: Added gst_dld_exts (.so, .a)
 	* lib/dld_win32.c: Added gst_dld_exts (.dll, .exe)
 
-1999-07-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-07-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Added F_BYTE, used while saving to ease reloading
 	if the endianness changes.
@@ -4324,7 +4257,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/dld_ltdl.c: Created (thanks to Alexander Shinn for pointing
 	me to libtool!)
 
-1999-07-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-07-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: InterruptHandler should set again the handler
 	for SIGINT
@@ -4333,7 +4266,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	that way.
 	* lib/sysdep.c: #define SIGALRM if not provided by C headers.
 
-1999-07-05  Paolo Bonzini  (bonzini@gnu.org)
+1999-07-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gstconf.h.in: Changed USE_READLINE to HAVE_READLINE (more coherent)
 	* gstconf.h: Same as above
@@ -4342,22 +4275,22 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/lex.h: Same as above
 	* lib/lib.c: Same as above
 
-1999-07-04  Paolo Bonzini  (bonzini@gnu.org)
+1999-07-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/sysdep.c: Renamed dprintf to debugf. glibc 2.0 defines
 	a different prototype for a function with the same name (glibc 2.1
 	only defines it if __USE_GNU is defined and does not break gst).
 
-1999-06-28  Paolo Bonzini  (bonzini@gnu.org)
+1999-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/qsort.c: Added standard stuff to make alloca work.
 	* lib/gstpub.h: Moved inclusion of gst.h *inside* `extern "C"'
 
-1999-06-25  Paolo Bonzini  (bonzini@gnu.org)
+1999-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Bug-fixing version 1.6.1 released.
 
-1999-06-21  Paolo Bonzini  (bonzini@gnu.org)
+1999-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/alloc.c: In xrealloc, we must call malloc explicitly when
 	the first argument is 0, since some reallocs don't do this.
@@ -4365,28 +4298,28 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	`#define st_atime st_atim.tv_sec')
 	* lib/qsort.c: Added (from GCC).
 
-1999-06-17  Mark Elbrecht  (snowball@bigfoot.com)
+1999-06-17  Mark Elbrecht  <snowball@bigfoot.com>
 
 	*** Version 1.6 released.
 	* lib/lex.c: Fix crash when using drive letters in isKernelFile.
 	* lib/lib.c: For DOS, use '_stinit' and '_stpre' as init files since
 	DOS doesn't allow a period to start a filename.
 
-1999-06-09  Pahi Andras  (pahi@mozart.eet.bme.hu)
+1999-06-09  Pahi Andras  <pahi@mozart.eet.bme.hu>
 
 	* lib/cint.c: DefineCFunc makes a private copy with strdup of the
 	C function's name. The problem is likely to root to the pre-DLD days
 	(1989-1990) when only string constants were passed to defineCFunc, so
 	strdup was unnecessary.
 
-1999-06-03  Paolo Bonzini  (bonzini@gnu.org)
+1999-06-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Added displayCompilationTrace
 	* lib/comp.h: Added declaration of displayCompilationTrace
 	* lib/prims.inl: If declaration tracing is on, shows new
 	categories as encountered.
 
-1999-05-30  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Added default values for the definitions that used to
 	be in gstpaths.h
@@ -4398,7 +4331,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/lib.h: DefaultImageName is now a variable
 	* lib/str.c: Added resizeString
 
-1999-05-28  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Object passed as `unknown' or `self', whose class is not
 	recognized, are now passed as an OOP (they used to be skipped).
@@ -4406,7 +4339,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/prims.inl: The base date for secondClock was 2 Jan 2000 instead
 	of 1 Jan 2000.  This was apparent after the fix above.
 
-1999-05-20  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/alloc.c: Moved platform-dependent definitions here.  Modified
 	so that, if we replace libc's allocator, we define calloc too (see
@@ -4414,7 +4347,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/alloc.h: Removed platform-dependent definitions.  Now this
 	file only contains extern declarations (correctly).
 
-1999-05-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Added code to #define `volatile' to nothing if it is
 	not supported.
@@ -4423,7 +4356,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	sendMessageInternal: the setjmp/longjmps in executePrimitiveOperation
 	could have clobbered methodOOP, which is now declared volatile.
 
-1999-05-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Modified to (almost) pass through -Wall.
 	* lib/cint.c: Modified to pass through -Wall.
@@ -4438,7 +4371,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/save.c: Modified to pass through -Wall.
 	* lib/sym.c: Modified to pass through -Wall.
 
-1999-05-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/callin.c: Added objectAlloc.
 	* lib/gst.h: Added guards to avoid including heavily implementation
@@ -4453,7 +4386,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	completion feature, not supported by gst (initializeReadline).
 
 
-1999-05-11  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Various performance counters are now unsigned longs.
 	* lib/comp.h: Various performance counters are now unsigned longs.
@@ -4461,7 +4394,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	have been a Boolean, as the Blue Book says.  Plus, same as above.
 	* lib/interp.h: Various performance counters are now unsigned longs.
 
-1999-05-09  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/id.c: Removed -- I'm very sorry to do it, since it was created
 	10 1/2 years ago, but it was a copy of str.c
@@ -4475,7 +4408,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.h: Added portable macros to test for nan and infinity.
 	Not all libc's have isnan, isinfinity and the like.
 
-1999-05-08  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: fixed bug when compiling to:do:/to:by:do: And the loop
 	index temporary was in position 15 (a 2-byte push was erroneously
@@ -4485,14 +4418,14 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/oop.c: Character objects' objSize field was uninitialized. Fixed.
 	* lib/prims.inl: fixed SIGSEGV on (IndexableClass new: ANegativeNumber).
 
-1999-05-06  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Added exceptionHandlers variable to Process.
 	* lib/gst.y: Fixed bug with conditional compilation -- conditional
 	exclusion was not disabled by the double bang sequence.
 	* lib/interp.h: Added exceptionHandlers variable to Process.
 
-1999-05-03  Paolo Bonzini  (bonzini@gnu.org)
+1999-05-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Changed the system message #booleanRequired to
 	#mustBeBoolean for coherence with the Blue Book (I had not noted
@@ -4513,7 +4446,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	and everything is done inside the current directory (maybe I'll
 	switch to the executable directory in the future...)
 
-1999-04-29  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Now does compile correctly optimized selectors whose
 	block arguments have arguments or temporaries.  In fact I simply
@@ -4527,7 +4460,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Same as above.
 	* lib/sym.h: Same as above.
 
-1999-04-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.5.beta3 released.
 	* lib/alloc.c: Added inclusion of stdlib.h (or malloc.h for old C's)
@@ -4540,7 +4473,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	matic #undef-ining of USE_OLD_DISPATCH is now based on the new
 	gstconf.h definition HAVE_GOTO_VOID_P (used to simply check __GNUC__).
 
-1999-04-25  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Added optimization of nopBytecode.  Added `replace
 	stack top' bytecodes 140-142 in optimizeBasicBlock.
@@ -4554,7 +4487,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Added yourselfSymbol.
 	* lib/save.c: Added yourselfSymbol.
 
-1999-04-23  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Cleaned up some definitions for ANSI features which
 	can be checked by autoconf -- the old #ifdef method only makes things
@@ -4568,7 +4501,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	to be integers -- because they are now checked in allocObj and doubles
 	are more expensive in busy code, I think.
 
-1999-04-22  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.h: Merged bytecodes 138-139 (push/store outer temp) into a
 	single bytecode 138, which can also do a `pop and store outer temp'.
@@ -4579,7 +4512,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/interp.c: Same as above. Moved various optimization #define's at
 	the top of the file.
 
-1999-04-20  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Optimizer in and working.  Fixed challenging cases in
 	the flow analyzer which were apparent now because the peephole
@@ -4588,7 +4521,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	Performance +5-10%, but some interesting optimizations are not there
 	yet (e.g. pop-store/push --> store, and push/push --> dup).
 
-1999-04-19  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Added to the flow analysis some support for optimizing
 	#ifTrue: and #ifFalse: in the common case where their result is
@@ -4601,7 +4534,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	simpler and is removed by the peephole optimizer if unnecessary.
 	* lib/interp.c: Added nop bytecode 139
 
-1999-04-18  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: The new optimization scheme proved to be easily
 	extendable (which is what I wanted). I added jump optimization
@@ -4615,7 +4548,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	amount of memory to be allocated.
 	* lib/cint.c: Call initDldLib if HAVE_DLD is defined.
 
-1999-04-16  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dld_gst.c: Created from old cxtnsn/dld.c
 	* lib/dld_gst.h: Created
@@ -4632,7 +4565,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	MethodContexts and BlockContexts) so that we can put it in ContextPart.
 	* lib/lib.c: Load DLD.st from kernel if HAVE_DLD is defined.
 
-1999-04-12  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/sysdep.c: Functions handling time_t's now use signed longs.
 	* lib/sysdep.c: Stole more portable implementations of adjustTimeZone
@@ -4640,20 +4573,20 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	versions of localTime(3) that cache the time zone.
 	* lib/sysdep.h: Functions handling time_t's now use signed longs.
 
-1999-04-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.5.beta2 released.
 	* lib/cint.c: My_stat now adjusts file times to local times.
 	* lib/sysdep.c: Added adjustTimeZone and currentTimeZoneBias.
 	* lib/sysdep.h: Added adjustTimeZone and currentTimeZoneBias.
 
-1999-04-09  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Fixed my_stat to return times relative to 1/1/2000
 	to avoid possible overflows (which would have happened around 2004
 	on 32-bit machine, and around 8.000.000.000 AD on 64-bit ones...).
 
-1999-04-08  Paolo Bonzini  (bonzini@gnu.org)
+1999-04-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Fixed bug in sendMessageInternal and sendBlockValue.
 	Basically, we now make sure that sp and thisContext->spOffset are
@@ -4661,23 +4594,23 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	recomputes thisContext->spOffset from sp, storing an erroneous value
 	into the former.
 
-1999-03-29  Paolo Bonzini  (bonzini@gnu.org)
+1999-03-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Added definition of WIN32 because Cygwin only defines
 	_WIN32, but many programs rely on WIN32 instead.
 
-1999-03-22  Paolo Bonzini  (bonzini@gnu.org)
+1999-03-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/sysdep.c: Fixed Win32 version of Delays, which was buggy if a
 	delay had to cancel the previous one.  The new version is also much
 	more precise.
 
-1999-03-21  Paolo Bonzini  (bonzini@gnu.org)
+1999-03-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Changed Integer relational operators to not do a
 	toInt() (instead we use a simple typecast).
 
-1999-03-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-03-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.5.beta1 released.
 	* lib/dict.c: Changed to use setCObjectValueObj and cObjectValueObj.
@@ -4690,7 +4623,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	additional instance variables.
 	* lib/prims.inl: Changed to use setCObjectValueObj and cObjectValueObj.
 
-1999-03-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-03-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Was crashing if a call-out to a non-existent function
 	was attempted.
@@ -4700,11 +4633,11 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	contained bogus data and GST would lose.  I don't think it was there
 	before my March 3rd change...
 
-1999-03-11  Paolo Bonzini  (bonzini@gnu.org)
+1999-03-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/lib.c: Added --silent as a synonim of --quiet and -q.
 
-1999-03-03  Paolo Bonzini  (bonzini@gnu.org)
+1999-03-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Added stack depth tracing (variables and macros
 	containing stackDepth).  Made makeNewMethod public, to avoid lots of
@@ -4721,7 +4654,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/oop.c: In minorGCFlip, call resetFakeContexts at the end instead
 	of using deallocFakeContext for every context.
 
-1999-02-28  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Modified compileAssignments to use preferrably the
 	`storeIndexed' bytecode. This is faster and also makes the task
@@ -4731,7 +4664,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	it some (working but currently not used) code.
 	* lib/byte.h: Added optimizeByteCodes and truncateByteCodes
 
-1999-02-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/prims.inl: Added primitive 101 (ProcessorScheduler>>
 	isTimeoutProgrammed).
@@ -4740,7 +4673,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/interp.c: In initProcessSystem, leave the processes the way
 	they were unless we get here after a deadlock.
 
-1999-02-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Changes to have an error-free compile with
 	-pedantic.  Also fixed highestPriorityProcess to return the
@@ -4752,20 +4685,20 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/lib.c: Added -s command line option.
 	* lib/oop.c: Removed arithmetics on void * in realizeOOPs.
 
-1999-02-23  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.y: Added #'abcd' symbols (not in Smalltalk-80,
 	but ANSI and common in many commercial Smalltalk
 	implementations).
 
-1999-02-22  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/lib.c: Moved some initializations *after* parsing the
 	command line (obviously *before* loading user files),
 	so that parameters on the cmdline can influence the
 	initialization process.
 
-1999-02-21  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Added printing of what is the erroneous method in
 	sendMessageInternal.  Also renamed global SP/IP to outerSP and
@@ -4774,13 +4707,13 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	ones; and eliminating ipAddr/spAddr we get some more speed. But
 	remember this when using GDB!!
 
-1999-02-18  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Struggled to make the process system work as
 	intended; it still has a few bugs but it mostly works (for
 	example, philosophers now work).
 
-1999-02-16  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/oop.c: Started switching to generational GC!! In short,
 	minor GCs only take care of fake contexts and are faster 
@@ -4788,7 +4721,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	fake contexts (they assume there are none) and deal with 
 	removing real unused objects.
 
-1999-02-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.h: Added bigLiteral bytecode.
 	* lib/comp.c: Changed so that methods are normal objects - no
@@ -4809,7 +4742,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	variable classes and variable byte classes at the
 	same time.
 
-1999-02-14  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/oop.c: Experimentally moved markGlobalOOPs at the START
 	of the marking phase, so that by the time the other
@@ -4823,24 +4756,24 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	recursion will be more shallow; this might improve
 	a bit GC locality of reference.
 
-1999-02-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/sysdep.c: Using setSignalHandler() inside signalAfter().
 
-1999-02-12  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/sysdep.c: GetCurDirName, now performs special error handling
 	when getcwd is used (code stolen from the gettext
 	library's source code, by David MacKenzie).
 
-1999-02-09  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Moved incubator here from oop.h so that it is public
 	* lib/oop.h: Moved incubator to gst.h so that it is public (see
 	comment in GST 1.1.5 - "it is likely that this
 	interface will be moved..."
 
-1999-02-08  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Print new bytecode 126 for many literals, > 64.
 	* lib/cint.c: Removed code to print "function not registered"
@@ -4849,12 +4782,12 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	a logical choice since C function declarations could
 	use CTypes.  Added PkgLoader.
 
-1999-02-06  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/prims.inl: Sped up nextInstance by avoiding to search in the
 	unused OOPs.
 
-1999-02-05  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Added callbacks #booleanRequired and #interrupt.
 	Implemented bytecode 126 for many literals, > 64.
@@ -4862,13 +4795,13 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	false if a C callout made a callin which in turn made
 	a callout.
 
-1999-02-04  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/lex.c: Modified so that a bang is not part of a binary op.
 	It's just a one-char token like [ and #.  Needs
 	fixing, though.
 
-1999-02-03  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/callin.c: Changed calls to yyparse() to parseStream().
 	* lib/comp.c: Changed calls to yyparse() to parseStream().
@@ -4891,7 +4824,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	instead of yyparse().
 	* lib/lib.c: Updated lex debugging and moved it to lex.c
 
-1999-02-02  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/alloc.c: Added custom allocator, currently used only under
 	Win32.  See comment in the file.
@@ -4899,13 +4832,13 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	Win32.  See comment in the file.
 	* lib/sym.c: internCountedString: The symbol OOP is now read only.
 
-1999-02-01  Paolo Bonzini  (bonzini@gnu.org)
+1999-02-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/oop.c: Fix in growMemory. Now it seems to work right -
 	previously, it failed if thisContext was not a fake
 	and the heap moved.
 
-1999-01-29  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Modified isSimpleReturn so that a "return literal[0]"
 	method is optimized.
@@ -4914,7 +4847,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	be executed" case, which was previously identified by
 	flags == 3, is now identified by primitiveIndex != 0.
 
-1999-01-28  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Moved regressionTesting to lib.c; it seems more
 	logical to me.
@@ -4938,7 +4871,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	it did not work correctly, at least under Cygnus'
 	Win32 port.
 
-1999-01-27  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Smalltalk dictionary is now created with a larger
 	size than it used to be (see the definition of INITIAL_SMALLTALK_SIZE).
@@ -4946,7 +4879,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	five different arrays.  A "return literal" method is
 	optimized like "return self" and "return inst. var".
 
-1999-01-26  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/comp.c: Removed code for evaluating (parse last statement as
 	return) - not needed since Smalltalk code implements
@@ -4962,7 +4895,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Modified findVariable and localVarIndex so that
 	assignments to arguments are detected.
 
-1999-01-25  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.inl: Spiffed it up with a few register clauses.
 	Also removed modulus operator (%) when possible.
@@ -4970,7 +4903,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	sends) only by 5%, but it was so easy I could not
 	but do it!
 
-1999-01-24  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/alloc.c: Added this banner.
 	* lib/alloc.h: Created.
@@ -4978,19 +4911,19 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	with GCC and other GNU programs: for example,
 	"Integer.st:115: parse error")
 
-1999-01-22  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Moved SIG_ARG_TYPE from sysdep.c here.  Added paranoic
 	checking of memset arguments when bzero is used.
 	* lib/interp.c: Moved SIG_ARG_TYPE to gst.h
 	* lib/sysdep.c: Moved SIG_ARG_TYPE to gst.h
 
-1999-01-18  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.inl: Fixed bug in large integers.  I was not considering
 	that the product of the low-order 15 bits could exceed 15 bits!
 
-1999-01-16  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.h: Added byteStreamClass.
 	* lib/interp.c: Yesterday I removed maxSize instance variable from
@@ -4999,21 +4932,21 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/lib.c: Added ByteStream.st.
 	* lib/save.c: Added byteStreamClass.
 
-1999-01-15  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Removed maxSize instance variable from WriteStream.
 	Fixed missing isPipe parameter in addSTDIOObject.
 	Added ByteStream.  Added CShortSize global.
 
-1999-01-13  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Added getArgc and getArgv
 	* lib/lib.c: Added ability to get argc/argv from Smalltalk code.
 	* lib/sysdep.c: Fixed a small & invisible error, a 'start of comment'
-	misplaced for a 'end of comment' (note by Paolo Bonzini  (bonzini@gnu.org):
+	misplaced for a 'end of comment' (note by Paolo Bonzini  <bonzini@gnu.org>:
 	congratulations for your sharp eye!!)
 
-1999-01-11  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Yeah! Removed bitfields from InstanceSpec!!
 	* lib/dict.h: Yeah! Removed bitfields from InstanceSpec!!
@@ -5021,7 +4954,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/gst.h: Yeah! Removed bitfields from InstanceSpec!!
 	* lib/prims.inl: Yeah! Removed bitfields from InstanceSpec!!
 
-1999-01-10  Paolo Bonzini  (bonzini@gnu.org)
+1999-01-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Good!!  First change in 1999!!  Optimized out send to
 	super.  I renamed sendMessage to sendMessageInternal
@@ -5036,36 +4969,34 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	in interp.c and created two macros (sendMessage and
 	sendToSuper) here.
 
-1998-12-09  Paolo Bonzini  (bonzini@gnu.org)
+1998-12-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Added my_stat for portability
 	* lib/oop.c: Moved the code to nil out weak references *before*
 	sweeping is done.  This is needed so that finalize
 	methods which refer to weak objects already see nils.
 
-1998-12-03  Paolo Bonzini  (bonzini@gnu.org)
+1998-12-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/prims.inl: Added ability to create subclasses of CompiledMethod
 	(for now, cannot add instance variables)
 
-1998-11-28  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-28  Paolo Bonzini  <bonzini@gnu.org>
 
-	* lib/comp.c: The method cache was not properly updated:
-	test 1 to: 5 do: [ :i | Object compile: 'foo ^',
-	i printString. (nil foo) printNl] now I'm using
-	invalidateMethodCache instead of updateMethodCache
+	* lib/comp.c: The method cache was not properly updated: test is
+	1 to: 5 do: [ :i | Object compile: 'foo ^',
+	i printString. (nil foo) printNl]
+	Now I'm using invalidateMethodCache instead of updateMethodCache
 	(see interp.c).
 	* lib/interp.c: fix: Since updateMethodCache did not always work
-	I replaced it with invalidateMethodCache, which
-	is not as gentle but works (anyway compiles are
-	not so frequent and it takes nothing to rebuild a
-	good cache).  Also, thisContext's ip and sp (in
-	sendMessage and sendBlockValue) are now updated
-	*after* thisContextOOP is set to the newly created
-	context.  The previous implementation caused mess if
+	I replaced it with invalidateMethodCache, which is not as gentle but
+	works (anyway compiles are not so frequent and it takes nothing to
+	rebuild a good cache).  Also, thisContext's ip and sp (in sendMessage
+	and sendBlockValue) are now updated *after* thisContextOOP is set to
+	the newly created context.  The previous implementation caused mess if
 	allocFakeContext() triggered a GC.
 
-1998-11-27  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Added the Table class variable to Character.
 	* lib/gst.h: Added finalization.
@@ -5082,11 +5013,11 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Added finalizeSymbol.
 	* lib/sym.h: Added finalizeSymbol
 
-1998-11-26  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.inl: Created
 
-1998-11-25  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Moved many routines to dict.inl for speed.  Changed
 	BlockClosure to a byte-subclass to save eight bytes.
@@ -5107,22 +5038,22 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/prims.inl: Created from interp.c
 	* lib/sym.c: Modified hashString to be more effective.
 
-1998-11-24  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/lib.c: Added ContextPart.st, changed to try loading .stinit
 	and .stpre from the current directory if the HOME
 	environment variable is not found (fix for Win32).
 
-1998-11-11  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Fixed bug in asObject primitive.  Was erroneously
 	using oopAt(arg1-1) instead of oopAt(arg1).
 
-1998-11-10  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/lex.c: Fixed so that _ *inside* an identifier is OK.
 
-1998-11-08  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/byte.c: Added notNilSymbol and isNilSymbol.
 	* lib/byte.h: Added notNilSymbol and isNilSymbol
@@ -5139,15 +5070,15 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.c: Added notNilSymbol and isNilSymbol.
 	* lib/sym.h: Added notNilSymbol and isNilSymbol
 
-1998-11-01  Paolo Bonzini  (bonzini@gnu.org)
+1998-11-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/callin.c: Added vmsgSend.  Moved mstMalloc and mstGetCData here.
 
-1998-10-26  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gstpub.h: Added vmsgSend.
 
-1998-10-18  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Changed fake OOPs so that they have entries in the
 	real OOP table.  This allows me to never realize
@@ -5157,33 +5088,33 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	setOOPObject to a macro for SPEED!!
 	* lib/oop.h: Added freeOOP(), realizeAllOOPs()
 
-1998-10-16  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/cint.c: Added stringOut return type (frees string)
 
-1998-10-15  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Added type 9 for CObjects and Memory (smalltalk OOP)
 
-1998-10-12  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Added BlockClosure.  Changed BlockContext to reflect
 	new architecture.  Changed Float to a variable
 	byte class.
 	* lib/interp.c: Added support for blocks as closures (partly I wrote
-	it, part I stole it from Steve Byrne  (sbb@gnu.org)'s never made public
+	it, part I stole it from Steve Byrne  <sbb@gnu.org>'s never made public
 	1.1.6 version).  Started adding support for fake
 	block contexts (see 1   Jan  91)
 
-1998-10-10  Paolo Bonzini  (bonzini@gnu.org)
+1998-10-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Added support for read-only objects (prims 233-234)
 
-1998-09-26  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Fixed allocCObject.  Added IdentitySet.
 
-1998-09-25  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Added a few register clauses.  Also changed
 	implementation of "send ==" so it doesn't actually do
@@ -5196,7 +5127,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	the number of bytecodes per second doubled)
 	* lib/oop.h: Added refreshOOPFreeList(), to be used by save.c
 
-1998-09-18  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/gst.h: Started adding support for read-only objects.
 	* lib/interp.c: Removed last vestiges of previous garbage
@@ -5211,24 +5142,24 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/oop.h: Fixed incubator bug (incAddOOP not in braces),
 	removed maybeMoveOOP and localMaybeMoveOOP.
 
-1998-09-10  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Added LargeIntegers and Fractions.  Tried to make
 	nilFill faster.
 	* lib/lib.c: Added LargeInteger.st, removed changes.st since its
 	changes are incorporated in Fraction.st
 
-1998-09-09  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Started adding support for LargeIntegers!!!
 
-1998-09-07  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: Added Behavior>>#flushCache (primitive 89,
 	as in the Blue Book).  Added bounds checking to	spaceGrowRate:
 	(between 0 and 500)
 
-1998-09-06  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/interp.c: FileStream>>nextPutAll: Primitive was giving access
 	violations (!) if Integers were passed... definitely
@@ -5236,7 +5167,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	that it handles the case, but anyway now the primitive
 	fails.  On 3 Sep 98 I had broken Floats; fixed.
 
-1998-09-03  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/dict.c: Added extensions to Date, modified Collection and
 	SequenceableCollection so they are not indexable.
@@ -5249,7 +5180,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	method context" errors.
 	* lib/lib.c: Modified to use openFile, added a few loaded modules.
 
-1998-09-02  Paolo Bonzini  (bonzini@gnu.org)
+1998-09-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Began development of version 1.6
 	* lib/save.c: Switched to using openFile to open files
@@ -5260,24 +5191,24 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	an environment that does not fully comply to POSIX,
 	I had to.
 
-1995-12-16  Steve Byrne  (sbb@gnu.org)
+1995-12-16  Steve Byrne  <sbb@gnu.org>
 
 	* lib/comp.c: Changed name to blockCopyColonTemporariesColonSymbol.
 	* lib/sym.c: Changed name to blockCopyColonTemporariesColonSymbol.
 	* lib/sym.h: Changed name to blockCopyColonTemporariesColonSymbol.
 
-1995-11-04  Steve Byrne  (sbb@gnu.org)
+1995-11-04  Steve Byrne  <sbb@gnu.org>
 
 	* lib/oop.c: Fixed allocObj to have what I think is the *right*
 	algorithm -- simple, grows when needed.
 
-1995-11-02  Steve Byrne  (sbb@gnu.org)
+1995-11-02  Steve Byrne  <sbb@gnu.org>
 
 	* lib/oop.c: Fixed allocObj to properly grow when not enough
 	space is required, and to terminate if the allocation
 	cannot succeed.
 
-1995-10-15  Steve Byrne  (sbb@gnu.org)
+1995-10-15  Steve Byrne  <sbb@gnu.org>
 
 	* lib/byte.h: Added pushOuterTempVariable and storeOuterTempVariable
 	byte codes.
@@ -5286,24 +5217,24 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.h: Converted to new architecture; introduced the notion
 	of scopes.
 
-1995-10-14  Steve Byrne  (sbb@gnu.org)
+1995-10-14  Steve Byrne  <sbb@gnu.org>
 
 	* lib/gst.y: Began adding block temporary syntax.
 	* lib/tree.c: Added support for block node type for new
 	architecture.
 	* lib/tree.h: Added block node type for new architecture support.
 
-1995-09-30  Steve Byrne  (sbb@gnu.org)
+1995-09-30  Steve Byrne  <sbb@gnu.org>
 
 	*** Version 1.1.5 released.
 
-1995-09-16  Steve Byrne  (sbb@gnu.org)
+1995-09-16  Steve Byrne  <sbb@gnu.org>
 
 	* lib/interp.c: Moved lots of system dependent functions out to
 	sysdep.
 	* lib/sysdep.h: Added openPipe, closePipe, getOpenFileSize.
 
-1995-09-10  Steve Byrne  (sbb@gnu.org)
+1995-09-10  Steve Byrne  <sbb@gnu.org>
 
 	* lib/interp.c: Switched to fileIsReadable sysdep routine.
 	* lib/lib.c: Added -g command line flag to suppress printing of
@@ -5313,7 +5244,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.c: Added fileIsReadable, also setSignalHandler, and
 	initSysdep.
 
-1995-09-09  Steve Byrne  (sbb@gnu.org)
+1995-09-09  Steve Byrne  <sbb@gnu.org>
 
 	* lib/callin.c: Added incubator usage.
 	* lib/cint.c: Added incubator support for created objects.
@@ -5323,17 +5254,17 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	handling of reentering the interpreter from C callout
 	code and then calling out to more C code.
 
-1995-09-08  Steve Byrne  (sbb@gnu.org)
+1995-09-08  Steve Byrne  <sbb@gnu.org>
 
 	* lib/dict.c: Added incubator support for newly created objects.
 
-1995-09-07  Steve Byrne  (sbb@gnu.org)
+1995-09-07  Steve Byrne  <sbb@gnu.org>
 
 	* lib/comp.c: Added usage of OOP incubator.
 	* lib/oop.c: Added incubator support.
 	* lib/oop.h: Added incubator support.
 
-1995-08-30  Steve Byrne  (sbb@gnu.org)
+1995-08-30  Steve Byrne  <sbb@gnu.org>
 
 	* lib/gst.h: Merged in Visual C++ changes.
 	* lib/oop.c: Merged NT changes back in.  Code now contains some
@@ -5341,7 +5272,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	becomes = *) to shut the Visual C++ compiler's
 	warnings off.
 
-1995-08-26  Steve Byrne  (sbb@gnu.org)
+1995-08-26  Steve Byrne  <sbb@gnu.org>
 
 	* lib/comp.c: Merged Brad Diller's changes for dealing with parsing
 	specially in the browser.
@@ -5352,7 +5283,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.c: Fixed to have the __cursigmask definition be
 	conditional on HAVE_SIGHOLD.
 
-1995-08-20  Steve Byrne  (sbb@gnu.org)
+1995-08-20  Steve Byrne  <sbb@gnu.org>
 
 	* lib/oop.c: Added growMemoryTo(); it's a variant of growTo which
 	does not involve the garbage collector.
@@ -5367,17 +5298,17 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	that if the saved image space is larger than the
 	normal memory space, the space is grown to fit.
 
-1995-07-26  Steve Byrne  (sbb@gnu.org)
+1995-07-26  Steve Byrne  <sbb@gnu.org>
 
 	* lib/cint.c: Fixed the makeDescriptor function to issue an error if
 	it cannot find a named C function.  Already located
 	some bugs in UnixStream.st which have been there
 	since it's inception.
 
-1995-07-23  Steve Byrne  (sbb@gnu.org)
+1995-07-23  Steve Byrne  <sbb@gnu.org>
 
 	* lib/comp.c: Removed apostrophes in comments -- OS/2 doesnt
-	like them.  (Incredible!)
+	like them (incredible!).
 	* lib/dict.c: Added CIntSize so that C struct can understand
 	int size.
 	* lib/gst.h: Removed mstconfig.h!!! Code is now not conditional
@@ -5389,14 +5320,14 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	(OS/2 doesn't understand).
 	* lib/save.c: Removed extra stdio.h include
 
-1995-07-13  Steve Byrne  (sbb@gnu.org)
+1995-07-13  Steve Byrne  <sbb@gnu.org>
 
 	* lib/comp.c: Removed HAVE_ALLOCA_H.
 	* lib/save.c: Removed HAVE_ALLOCA_H include of alloca.h (done in
 	gst.h now).
 	* lib/sym.c: Removed HAVE_ALLOCA_H.
 
-1995-07-11  Steve Byrne  (sbb@gnu.org)
+1995-07-11  Steve Byrne  <sbb@gnu.org>
 
 	* lib/cint.c: Added John Stanhope (jehu@vt.edu)'s changes for
 	Objective-C calling (Thanks John!!!)
@@ -5408,7 +5339,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sym.h: Added John Stanhope (jehu@vt.edu)'s changes for
 	Objective-C calling (Thanks John!!!)
 
-1995-07-09  Steve Byrne  (sbb@gnu.org)
+1995-07-09  Steve Byrne  <sbb@gnu.org>
 
 	* lib/byte.c: Fixed to include proper headers.
 	* lib/callin.c: Fixed to include correct header files.
@@ -5425,23 +5356,23 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	declarations.
 	* lib/tree.c: Fixed to include correct files.
 
-1995-07-08  Steve Byrne  (sbb@gnu.org)
+1995-07-08  Steve Byrne  <sbb@gnu.org>
 
 	* lib/lib.c: Fixed a bunch of declarations and includes so that
 	functions are now explictly declared always.
 
-1995-06-29  Steve Byrne  (sbb@gnu.org)
+1995-06-29  Steve Byrne  <sbb@gnu.org>
 
 	* lib/sym.c: Fixed pool dictionary allocation to not allocate a
 	large number of immediately thrown away arrays.
 
-1995-06-26  Steve Byrne  (sbb@gnu.org)
+1995-06-26  Steve Byrne  <sbb@gnu.org>
 
 	* lib/gst.h: Switched EMPTY_BYTES to be 8 byte into the word
 	instead of the low bytes to make the low bytes unused
 	for use with the mark/sweep GC.
 
-1995-06-23  Steve Byrne  (sbb@gnu.org)
+1995-06-23  Steve Byrne  <sbb@gnu.org>
 
 	* lib/cint.h: Switched guard prefix to GST
 	* lib/comp.h: Switched to GST guard prefix
@@ -5460,7 +5391,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.h: Switched to GST header guard prefix.
 	* lib/tree.h: Switched to GST header guard prefix.
 
-1995-06-15  Brad Diller
+1995-06-15  Brad Diller  <bdiller@docent.com>
 
 	* lib/comp.c: Modified executeStatements() to support browser
 	expression evaluation.  Added getByteCodeForSpecialSelector() to
@@ -5475,12 +5406,12 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	indirectly from saved file information.
 	* lib/lex.h: Added isKernelFile() and getMethodSourceFromCurFile().
 
-1995-06-09  Steve Byrne  (sbb@gnu.org)
+1995-06-09  Steve Byrne  <sbb@gnu.org>
 
 	* lib/oop.c: Began switching to compacting mark & sweep gc.
 	* lib/oop.h: Began the conversion to single GC space.
 
-1995-06-06  Steve Byrne  (sbb@gnu.org)
+1995-06-06  Steve Byrne  <sbb@gnu.org>
 
 	* lib/byte.c: Switched to new file naming scheme.
 	* lib/callin.c: Switched to new file naming scheme.
@@ -5502,11 +5433,11 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/sysdep.c: Switched to new file naming scheme.
 	* lib/tree.c: Switched to new file naming scheme.
 
-1995-06-05  Steve Byrne  (sbb@gnu.org)
+1995-06-05  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstpub.h: Merged in Brad Diller's changes.
 
-1995-05-31  Steve Byrne  (sbb@gnu.org)
+1995-05-31  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcint.c: Fixed cFuncInfo to grow dynamically.
 	* lib/mst.h: Boolean replaced with mst_Boolean, objectClass =>
@@ -5516,7 +5447,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/mst.h: Removed the old sysVersionMajor etc definitions --
 	they are now defined in configure.in.
 
-1995-05-30  Steve Byrne  (sbb@gnu.org)
+1995-05-30  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcomp.c: Replaced objectClass with mst_objectClass.  Boolean =>
 	mst_Boolean.
@@ -5541,7 +5472,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/mstsym.c: Boolean => mst_Boolean.
 	* lib/msttree.h: Boolean => mst_Boolean.
 
-1995-05-28  Steve Byrne  (sbb@gnu.org)
+1995-05-28  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.c: Finally hacked floatNew to deal properly on
 	architectures where double alignment requirements
@@ -5551,19 +5482,19 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/mstsysdep.c: Fixed getCurDirName to selectively use getwd or getcwd
 	depending on what is supported.
 
-1995-05-15  Brad Diller
+1995-05-15  Brad Diller  <bdiller@docent.com>
 
 	* lib/mstinterp.c: Added primitives 256-264 to support expression
 	evaluation and other functions for the class browser.
 
-1995-05-07  Steve Byrne  (sbb@gnu.org)
+1995-05-07  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.c: Added more machine specific datatype constants (size
 	and alignment).
 	* lib/msttree.h: Removed trailing comma from NodeType enum literals
 	list -- some compilers are picky.
 
-1995-04-29  Steve Byrne  (sbb@gnu.org)
+1995-04-29  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.c: Added CDoubleAlignment as a 'global' value for the
 	required alignment of C type 'double'.
@@ -5571,7 +5502,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	better reflect the type (and symbol definition)
 	dependencies.
 
-1995-03-31  Steve Byrne  (sbb@gnu.org)
+1995-03-31  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcomp.c: Compiler now uses the initEmptyBytes macro to set
 	the empty bytes of the byte code length of a method.
@@ -5584,43 +5515,43 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/mstsym.c: Adjusted a reference to the empty bytes to use the
 	new, architecture independent macro definitions.
 
-1995-03-19  Brad Diller
+1995-03-19  Brad Diller  <bdiller@docent.com>
 
 	* lib/mstcint.c: Conditionally enable GC of Smalltalk objects
 	referenced in callouts.
 
-1995-03-15  Brad Diller
+1995-03-15  Brad Diller  <bdiller@docent.com>
 
 	* lib/mstdict.c: Added mstMalloc mstGetCData.
 
-1995-03-01  Steve Byrne  (sbb@gnu.org)
+1995-03-01  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcomp.c: Fixed makeConstantOOP to handle NIL which is passed
 	in from empty array literals.
 
-1995-01-21  Steve Byrne  (sbb@gnu.org)
+1995-01-21  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstlex.c: Some changes for architectural independence (64 bit).
 
-1995-01-20  Steve Byrne  (sbb@gnu.org)
+1995-01-20  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.h: Added 64 bit support.
 	* lib/mst.h: More changes for DEC Alpha 64bit architecture.
 	* lib/mstinterp.c: Adjusted for DEC Alpha 64bit architecture.
 	* lib/mstinterp.h: Added padding for 64bit architectures.
 
-1995-01-14  Steve Byrne  (sbb@gnu.org)
+1995-01-14  Steve Byrne  <sbb@gnu.org>
 
 	* cxtnsn/dld.c: Changed the name from DLD to USE_DLD to avoid
 	conflicts with symbols defined by the DLD package in the future.
 
-1995-01-05  Steve Byrne  (sbb@gnu.org)
+1995-01-05  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstinterp.c: Fixed a bug when copying a fake method context
 	(ip wasn't being updated, and so was pointing to
 	dead storage).
 
-1995-01-02  Steve Byrne  (sbb@gnu.org)
+1995-01-02  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.c: Fixed CType to use the new type model.
 	* lib/mstdict.h: Switched to the new CType model.
@@ -5628,18 +5559,18 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	anyway, and now with the new CType model they no
 	longer function.
 
-1994-12-03  Steve Byrne  (sbb@gnu.org)
+1994-12-03  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstinterp.c: Added code stubs for asCData: Primitives.
 
-1994-11-16  Steve Byrne  (sbb@gnu.org)
+1994-11-16  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstinterp.c: Finally tracked down some problems with prims 183-185
 	-- they were using the wrong variable to access the
 	contents of the cobject, and it was just luck that
 	it worked on Linux.
 
-1994-10-08  Steve Byrne  (sbb@gnu.org)
+1994-10-08  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcomp.c: Fixed some bugs related to getting a GC during
 	compilation (literals during compilation are part of
@@ -5649,7 +5580,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/mstsym.c: Fixed the internCountedString bug by deferring OOP
 	allocation until all instances have ben allocated.
 
-1994-10-02  Steve Byrne  (sbb@gnu.org)
+1994-10-02  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstoop.c: Made sure to turn off the free bit in moveOOP (no
 	sense in moving an object that's freed, and moveOOP
@@ -5670,15 +5601,15 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	the allocOOP before you call the second instantiate
 	or other allocation primitive.
 
-1994-09-20  Steve Byrne  (sbb@gnu.org)
+1994-09-20  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstinterp.c: Added empty statement to the tail of a case statement.
 
-1994-09-15  Steve Byrne  (sbb@gnu.org)
+1994-09-15  Steve Byrne  <sbb@gnu.org>
 
 	*** Version 1.2.alpha1 released.
 
-1994-09-04  Steve Byrne  (sbb@gnu.org)
+1994-09-04  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcomp.c: Fixed some of the printing at the end of
 	executeStatements to avoid dividing by zero.
@@ -5687,7 +5618,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	definitions, and switched more towards the autoconf
 	based implementation.
 
-1994-09-03  Steve Byrne  (sbb@gnu.org)
+1994-09-03  Steve Byrne  <sbb@gnu.org>
 
 	* lib/cfuncs.c: Created.
 	* lib/cfuncs.c: This is the first file in the distribution to not
@@ -5702,11 +5633,11 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/mst.h: Switched to having version defines coming from the
 	config.h file, and added the edit prefix string.
 
-1994-08-31  Steve Byrne  (sbb@gnu.org)
+1994-08-31  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mst.h: Began switching to autoconf based approach.
 
-1994-08-24  Steve Byrne  (sbb@gnu.org)
+1994-08-24  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mst.h: Added symbolic constants for max and min integer
 	values representable in a Smalltalk Integer object.
@@ -5714,18 +5645,18 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	if converting a number that is outside the range
 	of integers.
 
-1994-08-21  Steve Byrne  (sbb@gnu.org)
+1994-08-21  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcomp.h: Switched to using low bit int marking.
 	* lib/mstdict.h: Switched to low order bit for int flagging.
 	* lib/mst.h: Switched to low order bit for int flagging.
 
-1994-07-10  Steve Byrne  (sbb@gnu.org)
+1994-07-10  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstlex.c: Reinstated the use of changes (it was dyked out)
 	as an optional mechanism.
 
-1994-07-09  Steve Byrne  (sbb@gnu.org)
+1994-07-09  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.c: Fixed findKey to check all elements even when the
 	dictionary is full.  Previously it would check all but
@@ -5733,20 +5664,20 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	behavior (the last class declared didn't seem to be
 	there as far as the compiler was concerned).
 
-1994-06-22  Steve Byrne  (sbb@gnu.org)
+1994-06-22  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcint.c: Added support for cObjectPtr type, to allow for
 	passing CObject parameters by reference.  It is up
 	to the client to ensure that the passed CObject type
 	corresponds to the desired C datatype.
 
-1994-06-20  Steve Byrne  (sbb@gnu.org)
+1994-06-20  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcint.c: Fixed stringInfo to be local to the call stack,
 	instead of using a static, to allow recursive
 	invocations.
 
-1994-06-11  Steve Byrne  (sbb@gnu.org)
+1994-06-11  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstinterp.c: Added new-style CObject accessors functions, currently
 	in the range 182 -- 189.
@@ -5754,34 +5685,34 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	passing mode.
 	* lib/mstsym.h: Added cObjectPtrSymbol.
 
-1994-04-30  Steve Byrne  (sbb@gnu.org)
+1994-04-30  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstinterp.c: Added CPtr incrBy:
 
-1994-03-19  Steve Byrne  (sbb@gnu.org)
+1994-03-19  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcallin.c: Added %t and %T for more direct control over
 	types. Also, added typeNameToOOP for mapping string
 	type names to actual CType subclass instances.
 
-1993-10-16  Steve Byrne  (sbb@gnu.org)
+1993-10-16  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstinterp.h: Changed to have 9 priority levels, as part of the
 	fix for ProcessorScheduler>>yield.
 
-1993-10-10  Steve Byrne  (sbb@gnu.org)
+1993-10-10  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstinterp.c: Doing some experimental hacks on the process system
 	to try to recover from the case where there are no
 	runnable processes.
 	* lib/mstinterp.h: Fixed definition of initProcessSystem.
 
-1993-04-04  Steve Byrne  (sbb@gnu.org)
+1993-04-04  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.c: Made printAssociationKey more bullet-proof when passed
 	a non-association.
 
-1992-11-22  Steve Byrne  (sbb@gnu.org)
+1992-11-22  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.c: Added isPipe member to FileStream.
 	* lib/mstinterp.c: Fixed FileStream to have a buffer instance variable,
@@ -5789,26 +5720,26 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	a regular file or a pipe, so FileStream>>close could
 	do the right thing.
 
-1992-07-18  Steve Byrne  (sbb@gnu.org)
+1992-07-18  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.c: Added byteArrayNew.
 	* lib/mstdict.c: Added countedStringNew.
 
-1992-07-16  Steve Byrne  (sbb@gnu.org)
+1992-07-16  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.c: Added freeCObject.
 
-1992-05-25  Steve Byrne  (sbb@gnu.org)
+1992-05-25  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstdict.c: Added support for Emacs caching class names.
 	* lib/mstinterp.c: Made system interruptable when non-interactive
 	(interrupts work, that is).
 
-1992-02-23  Steve Byrne  (sbb@gnu.org)
+1992-02-23  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcint.c: Added support for reading and writing scalar types.
 
-1992-01-01  Steve Byrne  (sbb@gnu.org)
+1992-01-01  Steve Byrne  <sbb@gnu.org>
 
 	* lib/mstcallin.c: Fixed to auto-initialize Smalltalk when the public
 	routines are invoked.
@@ -5817,7 +5748,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* lib/mstlib.h: Renamed from mstmain.h
 	* main.c: Created from old mstmain.c (now mstlib.c)
 
-1991-12-31  Steve Byrne  (sbb@gnu.org)
+1991-12-31  Steve Byrne  <sbb@gnu.org>
 
 	* mstcallin.c: Created.
 	* mstcallin.h: Created.
@@ -5829,7 +5760,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* mstoop.c: OopTable now allocated from memory instead of being
 	stored as part of the executable.
 
-1991-12-29  Steve Byrne  (sbb@gnu.org)
+1991-12-29  Steve Byrne  <sbb@gnu.org>
 
 	* mstlex.c: Added support for readline's conditional .inputrc
 	definitions, keyed off of "Smalltalk".
@@ -5838,36 +5769,36 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 
 	* mstbyte.c: Fixed byteCodeLength failing to return 0
 
-1991-12-08  Steve Byrne  (sbb@gnu.org)
+1991-12-08  Steve Byrne  <sbb@gnu.org>
 
 	* mstoop.c: Changed oopValid to only check the FREE bit, instead
 	of worrying about the even odd flags, which may not
 	be valid.
 
-1991-11-29  Steve Byrne  (sbb@gnu.org)
+1991-11-29  Steve Byrne  <sbb@gnu.org>
 
 	* mstlex.c: Added fileNameOOP to hold full path name for files,
 	so that all methods share the same file name string.
 	Also, adjusted getCurFileName to return the full
 	path name.
 
-1991-11-28  Steve Byrne  (sbb@gnu.org)
+1991-11-28  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Added SystemDictionary byteCodeCounter primitive.
 	* mstsysdep.c: Added getCurDirName() for allowing compiler to record
 	the full file name that is used.
 
-1991-11-24  Steve Byrne  (sbb@gnu.org)
+1991-11-24  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.h: Context size increased to 64 (still not enough),
 	to prevent inadvertent stomping of memory past the
 	end of the stack.
 
-1991-11-09  Steve Byrne  (sbb@gnu.org)
+1991-11-09  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Fixed new: To indicate failure when failure occurs.
 
-1991-11-02  Steve Byrne  (sbb@gnu.org)
+1991-11-02  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Altered the logic in the primitive replace from code
 	-- I don't think it was really wrong, but it wasn't
@@ -5875,7 +5806,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* mstinterp.c: Fixed instVarAt: To obey real stack conventions
 	(was pushing instead of setting the stack top).
 
-1991-10-20  Steve Byrne  (sbb@gnu.org)
+1991-10-20  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Added support for user level control of memory space
 	growth rate parameters.
@@ -5884,7 +5815,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	problems; free time has been nil).  Also removed more
 	vestiges of the incremental GC.
 
-1991-09-15  Steve Byrne  (sbb@gnu.org)
+1991-09-15  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Fixed dictionaryAssociationAt: To not loop when the
 	dictionary is full.  Thanks to Michael Richardson
@@ -5894,7 +5825,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* mstoop.c: Added support for loading larger semispaces from
 	saved images.
 
-1991-09-14  Steve Byrne  (sbb@gnu.org)
+1991-09-14  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Switched to global version string.
 	* mst.h: Added edit version support.
@@ -5905,28 +5836,28 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* mstmain.h: Added edit version support.
 	* mstsave.c: Added support for edit version.
 
-1991-09-12  Steve Byrne  (sbb@gnu.org)
+1991-09-12  Steve Byrne  <sbb@gnu.org>
 
 	* mstmain.c: Fixed -I argument parsing code to properly gobble up
 	the file name.
 
-1991-08-04  Steve Byrne  (sbb@gnu.org)
+1991-08-04  Steve Byrne  <sbb@gnu.org>
 
 	* mstoop.c: Removed more vestiges of the incremental GC, began
 	switchover to automatically growing semi-spaces.
 
-1991-07-19  Steve Byrne  (sbb@gnu.org)
+1991-07-19  Steve Byrne  <sbb@gnu.org>
 
 	* mstcint.c: Started adding support for the DLD package.
 	* mstmain.c: Started adding conditional support for the DLD
 	package.
 
-1991-07-06  Steve Byrne  (sbb@gnu.org)
+1991-07-06  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Added newString (create uninitialized string of a
 	given length).
 
-1991-07-05  Steve Byrne  (sbb@gnu.org)
+1991-07-05  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Added primitive 248: `FileStream fileInLine: LineNum
 	fileName: aString at: charPosInt'; this helps improve
@@ -5940,30 +5871,30 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	number in the buffer instead of the line number in
 	the temporary file.
 
-1991-07-02  Steve Byrne  (sbb@gnu.org)
+1991-07-02  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Fixed handling of jump true and jump false opcodes:
 	they now issue an error if invoked with non trueOOP
 	or falseOOP.
 
-1991-04-19  Steve Byrne  (sbb@gnu.org)
+1991-04-19  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Added skipCompilation boolean, for conditional
 	compilation.
 	* mstinterp.c: Added primitive to support conditional compilation.
 
-1991-04-13  Steve Byrne  (sbb@gnu.org)
+1991-04-13  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Added Features global variable.  This allows for
 	conditional execution based on operating system or
 	machine architecture, and at some point, conditional
 	compilation.
 
-1991-03-25  Steve Byrne  (sbb@gnu.org)
+1991-03-25  Steve Byrne  <sbb@gnu.org>
 
 	* mstlex.c: Added -> operator.
 
-1991-03-24  Steve Byrne  (sbb@gnu.org)
+1991-03-24  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Float's class definition said that it was not
 	pointers, not words, and not indexable.  When new
@@ -5972,7 +5903,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* mstlex.c: Fixed lexing of foo:= to be seen as foo :=.
 	* mstmain.c: Added loading of changes.st
 
-1991-03-23  Steve Byrne  (sbb@gnu.org)
+1991-03-23  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Fixed a bug with process switching: You can't depend
 	on objects gotten with oopToObj after a prepareToStore
@@ -5981,28 +5912,28 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* mstinterp.c: Improved speed another 50% by "inlining" many of the
 	special selectors that the compiler uses.
 
-1991-03-17  Steve Byrne  (sbb@gnu.org)
+1991-03-17  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Added support for C-style interrupts (signals) and
 	timed interrupts to help with time slicing.
 
-1991-02-16  Steve Byrne  (sbb@gnu.org)
+1991-02-16  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Recursive calls to equalConstant had the arguments
 	reversed.
 
-1991-01-27  Steve Byrne  (sbb@gnu.org)
+1991-01-27  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Modified the definition of the inline-controlling
 	macro so that inlining is always selected when compiling for
 	debugging.
 	* mstoop.h: Force ACCESSOR_DEBUGGING off when optimizing.
 
-1991-01-22  Steve Byrne  (sbb@gnu.org)
+1991-01-22  Steve Byrne  <sbb@gnu.org>
 
 	* mstcint.c: Added putenv().
 
-1991-01-05  Steve Byrne  (sbb@gnu.org)
+1991-01-05  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Converted executePrimitiveOperation to do returns as
 	soon as possible, to not use the failed variable,
@@ -6013,31 +5944,31 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	only, no real method invocation).
 	* mstsysdep.c: Added getMilliTime().
 
-1991-01-01  Steve Byrne  (sbb@gnu.org)
+1991-01-01  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Switched to not creating MethodContexts always...just
 	use a cache of pre-made fake method contexts and only
 	create real method contexts when someone will get a
 	reference to one of the method contexts.
 
-1990-11-26  Steve Byrne  (sbb@gnu.org)
+1990-11-26  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Fixed whileTrue: and whileFalse: To loop only if the
 	value returned by the receiver is the expected one,
 	instead of if it's the boolean not of the expected
 	value.
 
-1990-11-24  Steve Byrne  (sbb@gnu.org)
+1990-11-24  Steve Byrne  <sbb@gnu.org>
 
 	* mstmain.c: Fixed to set quietExecution using || instead of |
 	(HP doesn't like it otherwise).
 
-1990-11-17  Steve Byrne  (sbb@gnu.org)
+1990-11-17  Steve Byrne  <sbb@gnu.org>
 
 	* mstcint.c: Added support for UnixStream primitives.
 	* mstmain.c: Added UnixStream and IOCtl to kernel files.
 
-1990-11-10  Steve Byrne  (sbb@gnu.org)
+1990-11-10  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Added support for retaining the latest compiled method
 	so the interpreter can return it from the compile:
@@ -6046,52 +5977,52 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	compile methods can get the method that they just
 	compiled and set its category.
 
-1990-11-06  Steve Byrne  (sbb@gnu.org)
+1990-11-06  Steve Byrne  <sbb@gnu.org>
 
 	* mstmain.c: Added the per-user pre-image file...this may turn
 	into a kind of site defaults thing, but this is what
 	I've wanted for a while.
 
-1990-10-13  Steve Byrne  (sbb@gnu.org)
+1990-10-13  Steve Byrne  <sbb@gnu.org>
 
 	* mstoop.c: Converted to use bit masks instead of bit fields,
 	hoping to improve performance somewhat.
 
-1990-10-02  Steve Byrne  (sbb@gnu.org)
+1990-10-02  Steve Byrne  <sbb@gnu.org>
 
 	* mstmain.c: Fixed okToLoadBinary so that it returns false if
 	there is a Smalltalk file found locally, but there
 	is no image file locally (the stix problem).
 	* mstmain.h: FindImageFile was changed to return Boolean.
 
-1990-09-21  Steve Byrne  (sbb@gnu.org)
+1990-09-21  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Fixed so that a block that contains no statements
 	properly returns nil.
 
-1990-08-21  Steve Byrne  (sbb@gnu.org)
+1990-08-21  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Added support for subtypes of CObject to provide
 	direct access to C data.
 
-1990-08-11  Steve Byrne  (sbb@gnu.org)
+1990-08-11  Steve Byrne  <sbb@gnu.org>
 
 	* mstcint.c: Added knowledge of byteArrayOut type.
 
-1990-08-03  Steve Byrne  (sbb@gnu.org)
+1990-08-03  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Added allocCObject.
 	* mstinterp.c: Added support for primitive C object allocation
 	routine.
 
-1990-05-22  Steve Byrne  (sbb@gnu.org)
+1990-05-22  Steve Byrne  <sbb@gnu.org>
 
 	*** Version 1.1.1 released (I think. I added this on May 10th, 1999... --- pb)
 	* mstmain.c: Improved on Doug's mapping with macro to improve
 	readability.
 	* mstmain.c: Short name stuff added, thanks to Doug McCallum.
 
-1990-05-20  Steve Byrne  (sbb@gnu.org)
+1990-05-20  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Improved error handling...compiler errors set a flag,
 	and execution does not occur if the expression to be
@@ -6100,13 +6031,13 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	doesNotUnderstand: occurs.  Also, added ^C handling
 	to abort execution.
 
-1990-05-17  Steve Byrne  (sbb@gnu.org)
+1990-05-17  Steve Byrne  <sbb@gnu.org>
 
 	* mstsysdep.c: Added enableInterrupts and disableInterrupts.
 	System V.3 code signal support from Doug McCallum
 	(thanks, Doug!).
 
-1990-05-16  Steve Byrne  (sbb@gnu.org)
+1990-05-16  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Added usage of emacsProcess.
 	* mstsym.c: Changed usages of "entry" to "ent" to prevent
@@ -6115,17 +6046,17 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* mstsysdep.c: Created.
 	* mstsysdep.h: Created.
 
-1990-04-24  Steve Byrne  (sbb@gnu.org)
+1990-04-24  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Improved error handling for fopen/popen primitives.
 	* mstlex.c: Error checking for integers too large.
 
-1990-04-21  Steve Byrne  (sbb@gnu.org)
+1990-04-21  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Added toByteArray.
 	* mstsym.c: Addded byteArraySymbol.
 
-1990-04-20  Steve Byrne  (sbb@gnu.org)
+1990-04-20  Steve Byrne  <sbb@gnu.org>
 
 	* mstbyte.c: Added initByteCodes to fix a robustness issue with
 	the compiler.
@@ -6140,14 +6071,14 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	closing behavior could be separated from the popping
 	behavior (in particular, for fileIn).
 
-1990-04-17  Steve Byrne  (sbb@gnu.org)
+1990-04-17  Steve Byrne  <sbb@gnu.org>
 
 	* mstsave.c: Fixing binary save to save only to the maximum used
 	OOP slot, instead of saving the entire OOP table. This
 	should improve load time and decrease disk storage
 	requirements.
 
-1990-04-08  Steve Byrne  (sbb@gnu.org)
+1990-04-08  Steve Byrne  <sbb@gnu.org>
 
 	* mstoop.c: Changed oopFree to oopValid to fix the bug with
 	someInstance losing after GC's due to objects that
@@ -6156,7 +6087,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* mstoop.h: Changed oopFree to oopValid to better reflect the
 	semantics.
 
-1990-04-07  Steve Byrne  (sbb@gnu.org)
+1990-04-07  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Added declaration tracing primitive.
 	* mstinterp.c: Fixed fileIn: To check for existence of the file
@@ -6168,7 +6099,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	* mstoop.c: Increased mem space size to 4M.  This can be decreased
 	as necessary.
 
-1990-03-25  Steve Byrne  (sbb@gnu.org)
+1990-03-25  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Changed cache hit ratio reporting to check for divide
 	by zero, and to cast the byte counter to double
@@ -6182,37 +6113,37 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	set to false (since the loading of the quiet things
 	is over).
 
-1990-02-24  Steve Byrne  (sbb@gnu.org)
+1990-02-24  Steve Byrne  <sbb@gnu.org>
 
 	* mstoop.c: Update to change log: There are no longer any
 	explicitly allocated OOPs due to the new symbol table
 	structure; the September 20th, 1989 comment below is now a noop.
 
-1990-02-15  Steve Byrne  (sbb@gnu.org)
+1990-02-15  Steve Byrne  <sbb@gnu.org>
 
 	* mstlex.c: Added support for := as alternative assignment
 	operator.
 
-1990-02-11  Steve Byrne  (sbb@gnu.org)
+1990-02-11  Steve Byrne  <sbb@gnu.org>
 
 	* mstsave.c: Changed the header to record the size of the oop
 	table, since trying to load back into a system with
 	a different sized oop table loses bigtime.
 
-1990-01-13  Steve Byrne  (sbb@gnu.org)
+1990-01-13  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Added support for "thisContext" as a compiler built-in
 	variable.
 	* mstsym.c: Added thisContextSymbol.
 	* mstsym.h: Added thisContextSymbol.
 
-1990-01-07  Steve Byrne  (sbb@gnu.org)
+1990-01-07  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Added more commentary to classes, added new global
 	Smalltalk variable: Bigendian, which allows code to
 	be conditional based on the architecture type.
 
-1989-12-28  Steve Byrne  (sbb@gnu.org)
+1989-12-28  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Compiled methods now record their exact number of
 	byte codes.  Previously, if the byte codes didn't
@@ -6221,14 +6152,14 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	dumping byte codes from within Smalltalk, this has
 	become a necessity.
 
-1989-12-27  Steve Byrne  (sbb@gnu.org)
+1989-12-27  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Realloc literal vec wasn't reallocing in units of
 	sizeof(OOP), so after a while, the literal vector
 	wasn't big enough.  Typically most methods don't have
 	a lot of literals, so this was not a problem.
 
-1989-12-19  Steve Byrne  (sbb@gnu.org)
+1989-12-19  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Added suport for primitive filein (for use with
 	autoload -- "12 gauge autoloader", A. Swartzenegger,
@@ -6240,7 +6171,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	special precautions need be taken by the GC system
 	or the image save/restore facility.
 
-1989-10-15  Steve Byrne  (sbb@gnu.org)
+1989-10-15  Steve Byrne  <sbb@gnu.org>
 
 	* mstpaths.h: Created.
 	* mstmain.c: Added support for creating an "installed" version
@@ -6252,21 +6183,21 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	in the user's current directory, or b) environment
 	variables SMALLTALK_KERNEL and SMALLTALK_IMAGE.
 
-1989-10-02  Steve Byrne  (sbb@gnu.org)
+1989-10-02  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Fixed a bug with compilation of cascaded messages. see
 	HACK ALERT in the file.
 
-1989-09-23  Steve Byrne  (sbb@gnu.org)
+1989-09-23  Steve Byrne  <sbb@gnu.org>
 
 	* mst.h: Modifications to support operation on a DECstation 3100.
 
-1989-09-21  Steve Byrne  (sbb@gnu.org)
+1989-09-21  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Made compilation of methods from strings record the
 	source string.
 
-1989-09-20  Steve Byrne  (sbb@gnu.org)
+1989-09-20  Steve Byrne  <sbb@gnu.org>
 
 	* mstoop.c: Added oop table slot GC'ing.  I'm not dealing with oop
 	table slots that are explictly allocated; I believe
@@ -6274,14 +6205,14 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	not running the incremental reclaimer for that case
 	shouldn't hurt us.
 
-1989-09-13  Steve Byrne  (sbb@gnu.org)
+1989-09-13  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Various changes for garbage collector.
 	* mst.h: Sigh!!! modified pushOOP and setStackTop to move
 	the objects that they refer to to toSpace...good
 	bye performance!
 
-1989-09-12  Steve Byrne  (sbb@gnu.org)
+1989-09-12  Steve Byrne  <sbb@gnu.org>
 
 	* mstoop.c: Much of the garbage collector's operation depends on
 	the fact that only 1 flip will occur between any two
@@ -6292,20 +6223,20 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	is code in this routine to check for that eventuality
 	and to halt the system if it occurs.
 
-1989-09-07  Steve Byrne  (sbb@gnu.org)
+1989-09-07  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Started adding garbage collection support.
 
-1989-09-06  Steve Byrne  (sbb@gnu.org)
+1989-09-06  Steve Byrne  <sbb@gnu.org>
 
 	* mstoop.c: Started implementing the garbage collector (YAY!!!)
 
-1989-09-03  Steve Byrne  (sbb@gnu.org)
+1989-09-03  Steve Byrne  <sbb@gnu.org>
 
 	* mstlex.c: Added getCurFileName
 	* mstlex.h: Added getCurFileName
 
-1989-09-02  Steve Byrne  (sbb@gnu.org)
+1989-09-02  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Began adding support for the method descriptor
 	instance variable.
@@ -6316,17 +6247,17 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	to compiled methods with descriptor instance variable
 	in addition to header.
 
-1989-08-30  Steve Byrne  (sbb@gnu.org)
+1989-08-30  Steve Byrne  <sbb@gnu.org>
 
 	* mstlex.c: Fixed a bug in parseIdent which was parsing foo:2 note
 	no space) not as foo: and 2, but as a mixed up token.
 
-1989-08-09  Steve Byrne  (sbb@gnu.org)
+1989-08-09  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Conversion completed.  Performance now 40k
 	bytecodes/sec; was 43k bytecodes/sec.
 
-1989-07-25  Steve Byrne  (sbb@gnu.org)
+1989-07-25  Steve Byrne  <sbb@gnu.org>
 
 	* mstsym.c: Changed undeclareName to take a parameter that
 	controls whether the frame index is decremented
@@ -6335,7 +6266,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	block is used in a process, other blocks won't have
 	strange things happening to their arguments.
 
-1989-07-18  Steve Byrne  (sbb@gnu.org)
+1989-07-18  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Began conversion from stack based method contexts and
 	blocks to more traditional method contexts and blocks.
@@ -6346,13 +6277,13 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	traditional definition of method contexts and block
 	contexts.
 
-1989-07-08  Steve Byrne  (sbb@gnu.org)
+1989-07-08  Steve Byrne  <sbb@gnu.org>
 
 	* mstlex.c: Added prompt when input is a terminal.  This should
 	help Emacs's shell mode determine what has been typed
 	as input to the system.
 
-1989-07-04  Steve Byrne  (sbb@gnu.org)
+1989-07-04  Steve Byrne  <sbb@gnu.org>
 
 	* mstmain.c: Added support for user init files (in ~/.stinit),
 	which are invoked on every startup.  Also, added
@@ -6362,31 +6293,31 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	measure for declaring C callouts until the callout
 	descriptor is converted to a Smalltalk object).
 
-1989-06-04  Steve Byrne  (sbb@gnu.org)
+1989-06-04  Steve Byrne  <sbb@gnu.org>
 
 	* mstcint.c: Added Smalltalk data conversion type.
 
-1989-05-29  Steve Byrne  (sbb@gnu.org)
+1989-05-29  Steve Byrne  <sbb@gnu.org>
 
 	* mstcint.c: Created.
 	* mstcint.h: Created.
 	* mstdict.c: Added the memory classes.  Added the FileStream about
 	a week ago.
 
-1989-05-26  Steve Byrne  (sbb@gnu.org)
+1989-05-26  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Added method cache!  Why didn't I spend the 1/2
 	hour sooner?
 
-1989-05-14  Steve Byrne  (sbb@gnu.org)
+1989-05-14  Steve Byrne  <sbb@gnu.org>
 
 	* mstlex.h: Created.
 
-1989-04-29  Steve Byrne  (sbb@gnu.org)
+1989-04-29  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Author changed from single to married.
 
-1989-04-05  Steve Byrne  (sbb@gnu.org)
+1989-04-05  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Restructured Class and Metaclass creation.  Is now
 	table driven, and metaclasses are created containing
@@ -6395,68 +6326,68 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  (bonzini@gnu.org)
 	is a Smalltalk string; before, it was a C string that
 	had to be saved specially.
 
-1989-03-29  Steve Byrne  (sbb@gnu.org)
+1989-03-29  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Removed MethodDictionary as a separate type; it is
 	an IdentityDictionary.
 
-1989-03-11  Steve Byrne  (sbb@gnu.org)
+1989-03-11  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Smalltalk is now an instance of SystemDictionary.
 
-1989-03-10  Steve Byrne  (sbb@gnu.org)
+1989-03-10  Steve Byrne  <sbb@gnu.org>
 
 	* mstmain.c: Added support for automatically loading image file
 	if it's newer than and of the system source files.
 
-1989-03-04  Steve Byrne  (sbb@gnu.org)
+1989-03-04  Steve Byrne  <sbb@gnu.org>
 
 	* mstmain.h: Created.
 	* mstsave.c: Created.
 	* mstsave.h: Created.
 
-1989-01-24  Steve Byrne  (sbb@gnu.org)
+1989-01-24  Steve Byrne  <sbb@gnu.org>
 
 	* mstlex.c: Added 2 chars of push back, because 3. needs to look
 	ahead one more character to see if its 3.DIGIT or
 	3. next statement.
 
-1989-01-13  Steve Byrne  (sbb@gnu.org)
+1989-01-13  Steve Byrne  <sbb@gnu.org>
 
 	* mstdict.c: Created.
 	* mstdict.h: Created.
 	* mstoop.c: Created.
 	* mstoop.h: Created.
 
-1989-01-07  Steve Byrne  (sbb@gnu.org)
+1989-01-07  Steve Byrne  <sbb@gnu.org>
 
 	* mstinterp.c: Created.
 	* mstinterp.h: Created.
 
-1989-01-05  Steve Byrne  (sbb@gnu.org)
+1989-01-05  Steve Byrne  <sbb@gnu.org>
 
 	* mstsym.c: Created.
 
-1989-01-02  Steve Byrne  (sbb@gnu.org)
+1989-01-02  Steve Byrne  <sbb@gnu.org>
 
 	* mstbyte.h: Created.
 
-1989-01-01  Steve Byrne  (sbb@gnu.org)
+1989-01-01  Steve Byrne  <sbb@gnu.org>
 
 	* mstcomp.c: Created.
 	* mstcomp.h: Created.
 	* mstsym.h: Created.
 
-1988-12-30  Steve Byrne  (sbb@gnu.org)
+1988-12-30  Steve Byrne  <sbb@gnu.org>
 
 	* msttree.c: Created.
 	* msttree.h: Created.
 
-1988-12-29  Steve Byrne  (sbb@gnu.org)
+1988-12-29  Steve Byrne  <sbb@gnu.org>
 
 	* mst.h: Created.
 
-1988-12-27  Steve Byrne  (sbb@gnu.org)
+1988-12-27  Steve Byrne  <sbb@gnu.org>
 
 	* mstbyte.c: Created.
 	* mstid.c: Created.

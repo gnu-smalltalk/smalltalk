@@ -2835,7 +2835,7 @@ file_segment_new (void)
 {
   OOP fileName, stringContents, fileSegmentOOP;
   gst_file_segment fileSegment;
-  int startPos;
+  int64_t startPos;
   inc_ptr incPtr;
 
   switch (_gst_get_cur_stream_type ())
@@ -2854,11 +2854,11 @@ file_segment_new (void)
 
       fileSegment->fileName = fileName;
       startPos = _gst_get_method_start_pos ();
-      fileSegment->startPos = FROM_INT (startPos);
+      fileSegment->startPos = from_c_int_64 (startPos);
       fileSegment->length =
-        FROM_INT (_gst_get_cur_file_pos () - startPos - 1);
+        from_c_int_64 (_gst_get_cur_file_pos () - startPos - 1);
 
-      assert (TO_INT (fileSegment->length) >= 0);
+      assert (to_c_int_64 (fileSegment->length) >= 0);
       INC_RESTORE_POINTER (incPtr);
       return (fileSegmentOOP);
 

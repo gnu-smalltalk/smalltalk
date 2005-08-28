@@ -24,83 +24,83 @@
 
        * i18n/Locale.st: support files outside the system locale directory.
 
-2002-09-13  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
         *** Versions 2.0c (development) and 2.0.6 (stable) released
 
-2002-09-06  Bruno Haible  (haible@ilog.fr)
+2002-09-06  Bruno Haible  <haible@ilog.fr>
 
         * i18n/GetText.st: support MO files outside the system
         locale directory, more fixes
 
-2002-09-09  Paolo Bonzini  (bonzini@gnu.org)
+2002-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
         * i18n/GetText.st: more fixes and API stabilization
 
-2002-09-05  Bruno Haible  (haible@ilog.fr)
+2002-09-05  Bruno Haible  <haible@ilog.fr>
 
 	* i18n/Locale.st: fix bugs
 	* i18n/GetText.st: fix bugs
 
-2002-08-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.5 (stable) released
 
-2002-08-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0b (development) released
 
-2002-08-07  Paolo Bonzini  (bonzini@gnu.org)
+2002-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Versions 2.0a (development) and 2.0.4 (stable) released
 
-2002-07-17  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
         *** Version 2.0.3 released
 
-2002-07-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.2 released
 	
-2002-06-28  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0.1 released
 	
-2002-06-25  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0 released
 	
-2002-06-07  Paolo Bonzini  (bonzini@gnu.org)
+2002-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Expression.st: parse != correctly
 	* i18n/GetText.st: add a table of default plural expressions
 	
-2002-05-11  Paolo Bonzini  (bonzini@gnu.org)
+2002-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.6 released
 	
-2002-04-14  Paolo Bonzini  (bonzini@gnu.org)
+2002-04-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.5 released
 	
-2002-03-12  Paolo Bonzini  (bonzini@gnu.org)
+2002-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.4 released
 	
-2002-01-29  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.3 released.
 
-2002-01-04  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.2 released
 	
-2002-01-02  Paolo Bonzini  (bonzini@gnu.org)
+2002-01-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Load.st: load into the I18N namespace
 	* i18n/Sets.st: load into the I18N namespace
 
-2001-12-05  Paolo Bonzini  (bonzini@gnu.org)
+2001-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Locale.st: completed documentation
 	* i18n/Time.st: completed documentation
@@ -111,12 +111,12 @@
 	* i18n/Sets.st: completed documentation, added exception
 	handling
 
-2001-11-13  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Locale.st: prefixed # to symbols in arrays
 	* i18n/Sets.st: prefixed # to symbols in arrays
 
-2001-11-06  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Locale.st: name -> id
 	* i18n/GetText.st: LcMessagesDomain now subclass of LocaleData.
@@ -130,18 +130,18 @@
 	* i18n/i18n.c: return result of locale_charset() in i18n_load
 	
 
-2001-11-04  Paolo Bonzini  (bonzini@gnu.org)
+2001-11-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/i18n.c: fixed small memory leak when locale was not
 	found.  Added i18n_localeDirectory.
 	* i18n/Locale.st: use i18n_localeDirectory.
 
-2001-10-19  Paolo Bonzini  (bonzini@gnu.org)
+2001-10-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Expression.st: created to support plurals
 	* i18n/GetText.st: support plurals
 
-2001-05-19  Paolo Bonzini  (bonzini@gnu.org)
+2001-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Locale.st: changed the DefaultCharsets to match
 	names supported by iconv.
@@ -151,17 +151,17 @@
 	ability to read 32-bit UCS-4 codes one at a time instead of
 	having them split across four bytes.
 	
-2001-04-17  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Locale.st: remove references to the Charset dictionary
 	* i18n/Sets.st: rewritten once more...
 	* i18n/i18n.c: added the iconv wrapper
 	
-2001-04-02  Paolo Bonzini  (bonzini@gnu.org)
+2001-04-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Locale.st: use ObjectMemory instead of init blocks.
 
-2001-03-31  Paolo Bonzini  (bonzini@gnu.org)
+2001-03-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/i18n.c: created
 	* i18n/Locale.st: adapted to use the C module
@@ -170,7 +170,7 @@
 	* i18n/GetText.st: adapted to use the C module
 	* i18n/Load.st: don't load Collation.st
 	
-2001-02-23  Paolo Bonzini  (bonzini@gnu.org)
+2001-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Released version 1.95.3
 
