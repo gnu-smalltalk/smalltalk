@@ -30,7 +30,7 @@ dnl ------------------------------- PROGRAMS ------------------
 GST_PROG_CC(strict-aliasing,    				 dnl enabled optimizations
     gcse,               		                         dnl disabled optimizations
     all pointer-arith declaration-after-statement,	         dnl enabled warnings
-    strict-aliasing long-double format switch parentheses)       dnl disabled warnings
+    strict-aliasing pointer-sign long-double format switch parentheses)       dnl disabled warnings
 
 AC_PROG_AWK
 AC_PROG_LN_S

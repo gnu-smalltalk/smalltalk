@@ -1,3 +1,7 @@
+2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
+        * i18n/i18n.c: Add const to iconvWrapper.
+
 2004-08-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/i18n.c: support preprocessor symbols other than WIN32
