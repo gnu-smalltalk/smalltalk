@@ -136,10 +136,10 @@
    special marking of untrusted objects.  Note that the code in the
    class library to perform the security checks will be present
    notwithstanding the setting of this flag, but they will be disabled
-   because the corresponding primitives will be made non-working.
-   It is undefined because the Makefiles take care of defining it for
-   security-enabled builds.  */
-/* #define ENABLE_SECURITY */
+   because the corresponding primitives will be made non-working.  We
+   define it here with no configure-time options because it causes
+   testsuite failures.  */
+#define ENABLE_SECURITY
 
 /* OPTIMIZE disables many checks, including consistency checks at GC
    time and bounds checking on instance variable accesses (not on #at:

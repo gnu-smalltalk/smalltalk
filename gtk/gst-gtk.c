@@ -111,22 +111,22 @@ static void fill_g_value_from_oop (GValue *val,
 /* Create a GClosure that invokes the selector, SELECTOR, on the given
    object.  DATA is inserted as the second parameter (or is passed as the
    only one is the closure's arity is 0).  */
-static GClosure * create_smalltalk_closure(OOP receiver,	
+static GClosure *create_smalltalk_closure (OOP receiver,	
 					   OOP selector,
 					   OOP data);
 
 /* The finalization notifier for Smalltalk GClosures.  Unregisters the
    receiver and user data for the CLOSURE.  */
-static void finalize_smalltalk_closure(gpointer      data,
-				       GClosure     *closure);
+static void finalize_smalltalk_closure (gpointer      data,
+				        GClosure     *closure);
 
 /* The marshalling routine for Smalltalk GClosures.  */
-static void invoke_smalltalk_closure(GClosure     *closure,
-				     GValue       *return_value,
-				     guint         n_param_values,
-				     const GValue *param_values,
-				     gpointer      invocation_hint,
-				     gpointer      marshal_data);
+static void invoke_smalltalk_closure (GClosure     *closure,
+				      GValue       *return_value,
+				      guint         n_param_values,
+				      const GValue *param_values,
+				      gpointer      invocation_hint,
+				      gpointer      marshal_data);
 
 /* A wrapper around g_signal_connect_closure that looks up the
    selector and creates a Smalltalk GClosure.  */
@@ -338,78 +338,78 @@ fill_g_value_from_oop (GValue *return_value, OOP oop)
       break;
 
     case G_TYPE_CHAR:
-      v_char = _gst_vm_proxy->OOPToChar(oop);
+      v_char = _gst_vm_proxy->OOPToChar (oop);
       g_value_set_char (return_value, v_char);
       break;
 
     case G_TYPE_BOOLEAN:
-      v_boolean = _gst_vm_proxy->OOPToBool(oop);
+      v_boolean = _gst_vm_proxy->OOPToBool (oop);
       g_value_set_boolean (return_value, v_boolean);
       break;
 
     case G_TYPE_UCHAR:
-      v_int = _gst_vm_proxy->OOPToInt(oop);
+      v_int = _gst_vm_proxy->OOPToInt (oop);
       g_value_set_uchar (return_value, v_int);
       break;
 
     case G_TYPE_INT:
-      v_int = _gst_vm_proxy->OOPToInt(oop);
+      v_int = _gst_vm_proxy->OOPToInt (oop);
       g_value_set_int (return_value, v_int);
       break;
 
     case G_TYPE_UINT:
-      v_int = _gst_vm_proxy->OOPToInt(oop);
+      v_int = _gst_vm_proxy->OOPToInt (oop);
       g_value_set_uint (return_value, v_int);
       break;
 
     case G_TYPE_LONG:
-      v_int = _gst_vm_proxy->OOPToInt(oop);
+      v_int = _gst_vm_proxy->OOPToInt (oop);
       g_value_set_long (return_value, v_int);
       break;
 
     case G_TYPE_ULONG:
-      v_int = _gst_vm_proxy->OOPToInt(oop);
+      v_int = _gst_vm_proxy->OOPToInt (oop);
       g_value_set_ulong (return_value, v_int);
       break;
 
     case G_TYPE_ENUM:
-      v_int = _gst_vm_proxy->OOPToInt(oop);
+      v_int = _gst_vm_proxy->OOPToInt (oop);
       g_value_set_enum (return_value, v_int);
       break;
 
     case G_TYPE_FLAGS:
-      v_int = _gst_vm_proxy->OOPToInt(oop);
+      v_int = _gst_vm_proxy->OOPToInt (oop);
       g_value_set_flags (return_value, v_int);
       break;
 
     case G_TYPE_FLOAT:
-      v_float = _gst_vm_proxy->OOPToFloat(oop);
+      v_float = _gst_vm_proxy->OOPToFloat (oop);
       g_value_set_float (return_value, v_float);
       break;
 
     case G_TYPE_DOUBLE:
-      v_float = _gst_vm_proxy->OOPToFloat(oop);
+      v_float = _gst_vm_proxy->OOPToFloat (oop);
       g_value_set_double (return_value, v_float);
       break;
 
     case G_TYPE_STRING:
-      v_ptr = _gst_vm_proxy->OOPToString(oop);
+      v_ptr = _gst_vm_proxy->OOPToString (oop);
       g_value_set_string_take_ownership (return_value, v_ptr);
       break;
 
     case G_TYPE_POINTER:
-      v_ptr = _gst_vm_proxy->OOPToCObject(oop);
+      v_ptr = _gst_vm_proxy->OOPToCObject (oop);
       g_value_set_pointer (return_value, v_ptr);
       break;
 
     case G_TYPE_BOXED:
-      v_ptr = _gst_vm_proxy->OOPToCObject(oop);
+      v_ptr = _gst_vm_proxy->OOPToCObject (oop);
       g_value_set_boxed (return_value, v_ptr);
       break;
 
     case G_TYPE_OBJECT:
     case G_TYPE_INTERFACE:
-      v_ptr = _gst_vm_proxy->OOPToCObject(oop);
+      v_ptr = _gst_vm_proxy->OOPToCObject (oop);
       g_value_set_object (return_value, v_ptr);
       break;
 
@@ -420,9 +420,9 @@ fill_g_value_from_oop (GValue *return_value, OOP oop)
 }
 
 GClosure *
-create_smalltalk_closure(OOP receiver,	
-			 OOP selector,
-			 OOP data)
+create_smalltalk_closure (OOP receiver,	
+			  OOP selector,
+			  OOP data)
 {
   GClosure *closure = g_closure_new_simple (sizeof (SmalltalkClosure), NULL);
   SmalltalkClosure *stc = (SmalltalkClosure *) closure;
@@ -440,8 +440,8 @@ create_smalltalk_closure(OOP receiver,
 }
 
 void
-finalize_smalltalk_closure(gpointer      data,
-			   GClosure     *closure)
+finalize_smalltalk_closure (gpointer      data,
+			    GClosure     *closure)
 {
   SmalltalkClosure *stc = (SmalltalkClosure *) closure;
 
@@ -450,12 +450,12 @@ finalize_smalltalk_closure(gpointer      data,
 }
 
 void
-invoke_smalltalk_closure(GClosure     *closure,
-			 GValue       *return_value,
-			 guint         n_param_values,
-			 const GValue *param_values,
-			 gpointer      invocation_hint,
-			 gpointer      marshal_data)
+invoke_smalltalk_closure (GClosure     *closure,
+			  GValue       *return_value,
+			  guint         n_param_values,
+			  const GValue *param_values,
+			  gpointer      invocation_hint,
+			  gpointer      marshal_data)
 {
   OOP *args = alloca (sizeof (OOP) * (1 + n_param_values));
   SmalltalkClosure *stc = (SmalltalkClosure *) closure;
@@ -480,7 +480,7 @@ invoke_smalltalk_closure(GClosure     *closure,
     }
   args[n_param_values] = stc->data;
 
-  resultOOP = _gst_vm_proxy->nvmsgSend(stc->receiver, stc->selector, args,
+  resultOOP = _gst_vm_proxy->nvmsgSend (stc->receiver, stc->selector, args,
 					1 + n_param_values);
 
   /* FIXME Need to init return_value's type? */
@@ -503,20 +503,25 @@ connect_signal (OOP widget,
   OOP           oop_sel_args;
 
   /* Check parameters */
-  if (!G_IS_OBJECT(cWidget)) { return (-1); } /* Invalid widget passed */
-  sig_id = g_signal_lookup(event_name, G_OBJECT_TYPE(G_OBJECT(cWidget)));
-  if (sig_id = 0) { return (-2); } /* Invalid event name */
+  if (!G_IS_OBJECT(cWidget))
+     return (-1); /* Invalid widget passed */
 
-  g_signal_query(sig_id, &qry);
-  oop_sel_args = _gst_vm_proxy->strMsgSend(selector, "numArgs", NULL);
-  if (oop_sel_args == _gst_vm_proxy->nilOOP) { return (-3); } /* Invalid selector */ 
+  sig_id = g_signal_lookup (event_name, G_OBJECT_TYPE(G_OBJECT(cWidget)));
+  if (sig_id == 0) 
+    return (-2); /* Invalid event name */
+
+  g_signal_query (sig_id, &qry);
+  oop_sel_args = _gst_vm_proxy->strMsgSend (selector, "numArgs", NULL);
+  if (oop_sel_args == _gst_vm_proxy->nilOOP)
+    return (-3); /* Invalid selector */ 
 
   /* Check the number of arguments in the selector against the number of 
      arguments in the event callback */
   /* We can return fewer arguments than are in the event, if the others aren't 
      wanted, but we can't return more, and returning nilOOPs instead is not 
      100% satisfactory, so fail. */
-  if (_gst_vm_proxy->OOPToInt(oop_sel_args) > qry.n_params) { return (-4); }
+  if (_gst_vm_proxy->OOPToInt (oop_sel_args) > qry.n_params)
+    return (-4);
 
   /* Receiver is assumed to be OK, no matter what it is */
   /* Parameters OK, so carry on and connect the signal */
@@ -579,7 +584,8 @@ should_quit ()
 
 /* Wrappers for GValue users.  */
 OOP
-object_get_property(GObject *anObject, const char *aProperty)
+object_get_property (GObject *anObject,
+		     const char *aProperty)
 {
   GParamSpec *spec;
   GValue result = {0,};
@@ -593,7 +599,9 @@ object_get_property(GObject *anObject, const char *aProperty)
 }
 
 void
-object_set_property(GObject *anObject, const char *aProperty, OOP aValue)
+object_set_property (GObject *anObject,
+		     const char *aProperty,
+		     OOP aValue)
 {
   GParamSpec *spec;
   GObject *obj;
@@ -607,7 +615,9 @@ object_set_property(GObject *anObject, const char *aProperty, OOP aValue)
 }
 
 OOP
-container_get_child_property(GtkContainer *aParent, GtkWidget *aChild, const char *aProperty)
+container_get_child_property (GtkContainer *aParent,
+			      GtkWidget *aChild,
+			      const char *aProperty)
 {
   GParamSpec *spec;
   GValue result = {0,};
@@ -619,13 +629,16 @@ container_get_child_property(GtkContainer *aParent, GtkWidget *aChild, const cha
   spec = gtk_container_class_find_child_property (G_OBJECT_GET_CLASS (aParent),
 					          aProperty);
 
-  g_value_init(&result, spec->value_type);
-  gtk_container_child_get_property(aParent, aChild, aProperty, &result);
+  g_value_init (&result, spec->value_type);
+  gtk_container_child_get_property (aParent, aChild, aProperty, &result);
   return (convert_g_value_to_oop (&result));
 }
 
 void
-container_set_child_property(GtkContainer *aParent, GtkWidget *aChild, const char *aProperty, OOP aValue)
+container_set_child_property (GtkContainer *aParent,
+			      GtkWidget *aChild,
+			      const char *aProperty,
+			      OOP aValue)
 {
   GParamSpec *spec;
   GValue value = {0,};
@@ -638,119 +651,128 @@ container_set_child_property(GtkContainer *aParent, GtkWidget *aChild, const cha
 
   g_value_init (&value, spec->value_type);
   fill_g_value_from_oop (&value, aValue);
-  gtk_container_child_set_property(aParent, aChild, aProperty, &value);
+  gtk_container_child_set_property (aParent, aChild, aProperty, &value);
 }
 
 OOP 
-tree_model_get_oop(GtkTreeModel *model, GtkTreeIter *iter, int col) 
+tree_model_get_oop (GtkTreeModel *model,
+		    GtkTreeIter *iter,
+		    int col) 
 { 
-  GValue gval = { 0, }; 
+  GValue gval = { 0 }; 
   OOP result; 
 
-  gtk_tree_model_get_value(model, iter, col, &gval); 
-  result = convert_g_value_to_oop(&gval);
-  g_value_unset(&gval);
+  gtk_tree_model_get_value (model, iter, col, &gval); 
+  result = convert_g_value_to_oop (&gval);
+  g_value_unset (&gval);
   return (result); 
 } 
 
 void 
-list_store_set_oop(GtkListStore *store, GtkTreeIter *iter, int col, OOP value) 
+list_store_set_oop (GtkListStore *store,
+		    GtkTreeIter *iter,
+		    int col,
+		    OOP value) 
 { 
-    GValue gval = { 0, };
-    g_value_init (&gval, gtk_tree_model_get_column_type(GTK_TREE_MODEL(store), col));
-    fill_g_value_from_oop(&gval, value);
+    GValue gval = { 0 };
+    g_value_init (&gval,
+		  gtk_tree_model_get_column_type (GTK_TREE_MODEL(store), col));
+    fill_g_value_from_oop (&gval, value);
     gtk_list_store_set_value (store, iter, col, &gval); 
-    g_value_unset(&gval);
+    g_value_unset (&gval);
 } 
 
 void 
-tree_store_set_oop(GtkTreeStore *store, GtkTreeIter *iter, int col, OOP value) 
+tree_store_set_oop (GtkTreeStore *store,
+		    GtkTreeIter *iter,
+		    int col,
+		    OOP value) 
 { 
-    GValue gval = { 0, }; 
-    g_value_init (&gval, gtk_tree_model_get_column_type(GTK_TREE_MODEL(store), col));
-    fill_g_value_from_oop(&gval, value);
+    GValue gval = { 0 }; 
+    g_value_init (&gval, gtk_tree_model_get_column_type (GTK_TREE_MODEL(store), col));
+    fill_g_value_from_oop (&gval, value);
     gtk_tree_store_set_value (store, iter, col, &gval); 
-    g_value_unset(&gval);
+    g_value_unset (&gval);
 }
 
 
 /* Wrappers for macros and missing accessor functions.  */
 
 static GdkWindow *
-widget_get_window(GtkWidget *widget)
+widget_get_window (GtkWidget *widget)
 {
   return widget->window;
 }
 
 static int
-widget_get_state(GtkWidget *widget)
+widget_get_state (GtkWidget *widget)
 {
   return GTK_WIDGET_STATE (widget);
 }
 
 static int
-widget_get_flags(GtkWidget *widget)
+widget_get_flags (GtkWidget *widget)
 {
   return GTK_WIDGET_FLAGS (widget);
 }
 
 static void
-widget_set_flags(GtkWidget *widget, int flags)
+widget_set_flags (GtkWidget *widget, int flags)
 {
   GTK_WIDGET_SET_FLAGS (widget, flags);
 }
 
 static void
-widget_unset_flags(GtkWidget *widget, int flags)
+widget_unset_flags (GtkWidget *widget, int flags)
 {
   GTK_WIDGET_UNSET_FLAGS (widget, flags);
 }
 
 
 static GtkAllocation *
-widget_get_allocation(GtkWidget *wgt)
+widget_get_allocation (GtkWidget *wgt)
 {
   return &(GTK_WIDGET(wgt)->allocation);
 }
 
 static GtkWidget *
-dialog_get_vbox(GtkDialog *dlg)
+dialog_get_vbox (GtkDialog *dlg)
 {
   return (GTK_DIALOG(dlg)->vbox);
 }
 
 static GtkWidget *
-dialog_get_action_area(GtkDialog *dlg)
+dialog_get_action_area (GtkDialog *dlg)
 {
   return (GTK_DIALOG(dlg)->action_area);
 }
 
 static int
-scrolled_window_get_hscrollbar_visible(GtkScrolledWindow *swnd)
+scrolled_window_get_hscrollbar_visible (GtkScrolledWindow *swnd)
 {
   return (GTK_SCROLLED_WINDOW(swnd)->hscrollbar_visible);
 }
 
 static int
-scrolled_window_get_vscrollbar_visible(GtkScrolledWindow *swnd)
+scrolled_window_get_vscrollbar_visible (GtkScrolledWindow *swnd)
 {
   return (GTK_SCROLLED_WINDOW(swnd)->vscrollbar_visible);
 }
 
 static int
-adjustment_get_lower(GtkAdjustment *adj)
+adjustment_get_lower (GtkAdjustment *adj)
 {
   return (GTK_ADJUSTMENT(adj)->lower);
 }
 
 static int
-adjustment_get_upper(GtkAdjustment *adj)
+adjustment_get_upper (GtkAdjustment *adj)
 {
   return (GTK_ADJUSTMENT(adj)->upper);
 }
 
 static int
-adjustment_get_page_size(GtkAdjustment *adj)
+adjustment_get_page_size (GtkAdjustment *adj)
 {
   return (GTK_ADJUSTMENT(adj)->page_size);
 }

@@ -809,8 +809,9 @@ parse_byte_array_literal (gst_parser *p)
 
   while (!lex_skip_if (p, ']', true))
     {
+      tree_node lit;
       lex_must_be (p, BYTE_LITERAL);
-      tree_node lit = _gst_make_int_constant (&p->loc, p->val.ival);
+      lit = _gst_make_int_constant (&p->loc, p->val.ival);
       lex (p);
       elts = _gst_add_node (elts, _gst_make_array_elt (&lit->location, lit));
     }
@@ -1101,8 +1102,9 @@ parse_keyword_list (gst_parser *p, enum expr_kinds kind)
     {
       YYLTYPE loc = p->loc;
       char *sval = p->val.sval;
+      tree_node arg;
       lex (p);
-      tree_node arg = parse_expression (p, kind & ~EXPR_KEYWORD);
+      arg = parse_expression (p, kind & ~EXPR_KEYWORD);
       if (!arg)
 	{
 	  _gst_errorf ("expected object");

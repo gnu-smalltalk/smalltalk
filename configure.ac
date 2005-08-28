@@ -30,7 +30,7 @@ dnl ------------------------------- PROGRAMS ------------------
 GST_PROG_CC(strict-aliasing,	   	 		           dnl enabled optimizations
     gcse,                               	                   dnl disabled optimizations
     all write-strings pointer-arith declaration-after-statement,   dnl enabled warnings
-    strict-aliasing long-double format switch parentheses)	   dnl disabled warnings
+    strict-aliasing pointer-sign long-double format switch)	   dnl disabled warnings
 
 if test "$GCC" != yes; then
   AC_MSG_ERROR([Please use GCC to compile GNU Smalltalk.])

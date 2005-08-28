@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2001, 2002, 2004 Free Software Foundation, Inc.
+ * Copyright 2001, 2002, 2004, 2005 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -254,7 +254,7 @@ iconvWrapper (iconv_t handle, OOP readBufferOOP, int readPos,
 	      int readCount, OOP writeBufferOOP, int writeCount,
 	      OOP bytesLeftOOP)
 {
-  char *inbuf;
+  const char *inbuf;
   size_t inbytesleft;
   char *outbuf;
   size_t outbytesleft;

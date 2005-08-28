@@ -1,3 +1,7 @@
+2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* i18n/i18n.c: Add const to iconvWrapper.
+
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Locale.st: Switch to new C-call descriptions.

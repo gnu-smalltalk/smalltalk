@@ -49,7 +49,7 @@
 /* #define NO_SUPEROPERATORS */
 
 /* Define this to disable bytecode verification.  */
-#define NO_VERIFIER
+/* #define NO_VERIFIER */
 
 /* The JIT compiler prefers optimized bytecodes, because they are
    more regular.  */

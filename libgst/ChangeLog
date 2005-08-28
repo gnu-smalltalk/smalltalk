@@ -1,5 +1,11 @@
 2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/gstpriv.h: Define ENABLE_SECURITY.
+	* libgst/gst-parse.c: Fix warnings.
+	* libgst/opt.c: Reenable verifier.
+
+2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/input.c: Add to input_stream a method_start_pos
 	member.  Clear it in push_new_stream and _gst_set_stream_info.
 	Set it in _gst_get_location.  Move _gst_get_method_start_pos
@@ -63,7 +69,7 @@
 	* libgst/lib.c (help_text, parse_args, long_options): Remove -y.
 	(process_stdin, process_file): Adjust call to _gst_parse_stream.
 	* libgst/prims.def: Adjust for changes to _gst_set_compilation_category
-	and parse_stream_with_production.  Do not use _gst_compile_code,
+	and parse_stream_with_protection.  Do not use _gst_compile_code,
 	refer to _gst_current_parser->state instead and fail if methodsFor
 	is used while not parsing.
 	* libgst/tree.c (_gst_add_node): Support case where N1 is NULL.
