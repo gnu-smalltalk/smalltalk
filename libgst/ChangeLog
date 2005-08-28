@@ -1,5 +1,9 @@
 2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/gst-parse.c: Remove last parameter to parse_cascaded_messages.
+
+2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/gstpriv.h: Define ENABLE_SECURITY.
 	* libgst/gst-parse.c: Fix warnings.
 	* libgst/opt.c: Reenable verifier.

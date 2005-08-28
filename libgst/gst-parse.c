@@ -102,8 +102,7 @@ static tree_node parse_block_variables (gst_parser *p);
 static tree_node parse_message_expression (gst_parser *p,
 					   tree_node receiver,
 					   enum expr_kinds kind);
-static tree_node parse_cascaded_messages (gst_parser *p,
-					  enum expr_kinds kind);
+static tree_node parse_cascaded_messages (gst_parser *p);
 static tree_node parse_unary_expression (gst_parser *p,
 					 tree_node receiver,
 					 enum expr_kinds kind);
@@ -988,8 +987,7 @@ parse_message_expression (gst_parser *p, tree_node receiver, enum expr_kinds kin
 	  if (n == 0 || (kind & EXPR_CASCADE) == 0)
 	    return node;
 	  return _gst_make_cascaded_message (&node->location, node,
-					     parse_cascaded_messages (p,
-						EXPR_CASCADED));
+					     parse_cascaded_messages (p));
 
         default:
           return node;
@@ -1004,7 +1002,7 @@ parse_message_expression (gst_parser *p, tree_node receiver, enum expr_kinds kin
 		    | empty */
 
 static tree_node
-parse_cascaded_messages (gst_parser *p, enum expr_kinds kind)
+parse_cascaded_messages (gst_parser *p)
 {
   tree_node cascade = NULL;
   while (lex_skip_if (p, ';', false))
@@ -1013,21 +1011,18 @@ parse_cascaded_messages (gst_parser *p, enum expr_kinds kind)
       switch (p->token)
 	{
         case IDENTIFIER:
-          node = parse_unary_expression (p, NULL, kind);
+          node = parse_unary_expression (p, NULL, EXPR_CASCADED);
           break;
 
         case '>':
-	  assert (kind & EXPR_GREATER);
         case BINOP:
         case '<':
         case '|':
-	  assert (kind & EXPR_BINOP);
-          node = parse_binary_expression (p, NULL, kind);
+          node = parse_binary_expression (p, NULL, EXPR_CASCADED);
           break;
 
         case KEYWORD:
-	  assert (kind & EXPR_KEYWORD);
-          node = parse_keyword_expression (p, NULL, kind);
+          node = parse_keyword_expression (p, NULL, EXPR_CASCADED);
           break;
 
         default:
