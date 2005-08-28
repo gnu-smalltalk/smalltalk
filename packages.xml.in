@@ -552,6 +552,7 @@
 <disabled-package>
   <name>Examples</name>
   <directory>examples</directory>
+  <file>Continuations.st</file>
   <file>Debugger.st</file>
   <file>Man.st</file>
   <file>Tetris.st</file>

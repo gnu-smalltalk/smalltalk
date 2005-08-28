@@ -1,5 +1,9 @@
 2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/Continuations.st: New.
+
+2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Interval.st: Fix #= after 2005-05-27 changes.
 
 2005-08-23  Mike Anderson  <msasjf@yahoo.co.uk>

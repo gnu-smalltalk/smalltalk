@@ -282,15 +282,6 @@ if test "$enable_checking" = no; then
     [Define to disable assertion checking at runtime])
 fi
 
-AC_ARG_ENABLE(security,
-[  --enable-security       enable security checks at runtime], ,
-enable_security=no)
-
-if test "$enable_security" != no; then
-  AC_DEFINE(ENABLE_SECURITY, 1,
-    [Define to enable security checks at runtime])
-fi
-
 AC_ARG_ENABLE(preemption,
 [  --enable-preemption     enable preemptive multitasking], ,
 enable_preemption=no)
