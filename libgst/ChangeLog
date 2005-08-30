@@ -1,3 +1,7 @@
+2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Compute alignment based on ints, not longs.
+
 2005-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Do my math correctly.

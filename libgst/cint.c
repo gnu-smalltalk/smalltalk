@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -34,7 +34,7 @@
 
 #include <ltdl.h>
 
-#define ARG_VEC_SIZE		20	/* 20 shorts, 10 longs or ptrs, 5 dbls */
+#define ARG_VEC_SIZE		20	/* 20 ints, 10 dbls */
 
 typedef enum
 {
@@ -120,7 +120,7 @@ typedef union cparam_union
   PTR ptrVal;
   float floatVal;
   double doubleVal;
-  long valueVec[sizeof (double) / sizeof (int)];
+  int valueVec[sizeof (double) / sizeof (int)];
 }
 cparam_union;
 
@@ -211,8 +211,8 @@ static cfunc_info *c_func_root = NULL;
 
 /* The arguments as they are passed to push_obj. The first
    free argument is pointed to by c_arg. */
-static long c_arg_vec[ARG_VEC_SIZE];
-static long *c_arg;
+static int c_arg_vec[ARG_VEC_SIZE];
+static int *c_arg;
 
 /* The information on the char * parameters to be filled back on
    output from a callOut.  Again, sip is the first free item.
@@ -896,13 +896,13 @@ push_obj (cparam_union * up,
   unsigned i;
   int alignInts;
 
-  alignInts = alignments[typ] / sizeof (long);
+  alignInts = alignments[typ] / sizeof (int);
 
   /* Align the stack properly */
   if ((c_arg - c_arg_vec) % alignInts)
     c_arg += alignInts - ((c_arg - c_arg_vec) % alignInts);
 
-  for (i = 0; i < type_sizes[typ] / sizeof (long); i++)
+  for (i = 0; i < type_sizes[typ] / sizeof (int); i++)
     {
       if (c_arg - c_arg_vec >= ARG_VEC_SIZE)
 	{
