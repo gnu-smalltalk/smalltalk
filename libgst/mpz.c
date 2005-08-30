@@ -1541,7 +1541,7 @@ _gst_mpz_from_oop(gst_mpz *mpz, OOP srcOOP)
 
   if (IS_INT(srcOOP))
     {
-      int i = TO_INT(srcOOP);
+      long i = TO_INT(srcOOP);
       gst_mpz_realloc (mpz, 1);
       mpz->size = i < 0 ? -1 : 1;
       mpz->d[0] = i < 0 ? -i : i;

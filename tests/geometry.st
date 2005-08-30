@@ -10,7 +10,7 @@
 
 "======================================================================
 |
-| Copyright (C) 1995, 1999  Free Software Foundation.
+| Copyright (C) 1995, 1999, 2005  Free Software Foundation.
 | Written by Doug McCallum.
 |
 | This file is part of GNU Smalltalk.
@@ -30,6 +30,13 @@
 |
  ======================================================================"
 
+!Rectangle methodsFor: 'testing'!
+
+myAreasOutside: a
+    | ans |
+    ans := self areasOutside: a.
+    ans := ans asSortedCollection: [ :x :y | x printString < y printString ].
+    ^ans asArray! !
 
 "Creation methods and printing"
 | p1 p2 |
@@ -175,9 +182,9 @@
     (A amountToTranslateWithin: C) printNl.
     (A intersect: B) printNl.
     (D intersect: C) printNl.
-    (A areasOutside: B) printNl.
-    (D areasOutside: C) printNl.
-    (D areasOutside: B) printNl.
+    (A myAreasOutside: B) printNl.
+    (D myAreasOutside: C) printNl.
+    (D myAreasOutside: B) printNl.
     (C expandBy: 10) printNl.
     (C insetBy: 10@20) printNl.
     (B merge: C) printNl!

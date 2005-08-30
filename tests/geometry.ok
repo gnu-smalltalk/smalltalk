@@ -1,5 +1,8 @@
 
 Execution begins...
+returned value is Rectangle
+
+Execution begins...
 'p1 = '123@456
 'p2 = '123@456
 returned value is Point new "<0>"
@@ -66,8 +69,8 @@ Execution begins...
 120@120 corner: 200@200
 100@300 corner: 300@400
 (120@50 corner: 200@120 50@50 corner: 120@200 )
-(300@20 corner: 400@400 20@20 corner: 100@400 100@20 corner: 300@300 )
-(120@20 corner: 260@120 260@20 corner: 400@400 120@240 corner: 260@400 20@20 corner: 120@400 )
+(100@20 corner: 300@300 20@20 corner: 100@400 300@20 corner: 400@400 )
+(120@20 corner: 260@120 120@240 corner: 260@400 20@20 corner: 120@400 260@20 corner: 400@400 )
 90@290 corner: 310@410
 110@320 corner: 290@380
 100@300 corner: 300@400
