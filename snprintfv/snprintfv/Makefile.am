@@ -49,6 +49,7 @@ nodist_noinst_HEADERS     = compat.h
 endif
 
 dist_noinst_DATA          = filament.stamp stream.stamp printf.stamp dl.stamp
+CLEANFILES                = $(dist_noinst_DATA)
 
 EXTRA_LTLIBRARIES       = libsnprintfv.la libsnprintfvc.la
 noinst_LTLIBRARIES	= $(convenience_libsnprintfv)
@@ -112,7 +113,7 @@ $(srcdir)/%.h: %.stamp
 
 %.stamp: %.in
 	@file=`echo $@ | sed 's,\.stamp$$,.h,'`; \
-	$(GENPROTO_ENVIRONMENT) $(GENPROTO) $(GENPROTO_FLAGS) $(srcdir)/$^ > \
+	$(GENPROTO_ENVIRONMENT) $(GENPROTO) $(GENPROTO_FLAGS) $^ > \
 	  $${file}T; \
 	if cmp -s $(srcdir)/$$file $${file}T; then \
 	  echo $$file is unchanged; rm -f $${file}T; \
