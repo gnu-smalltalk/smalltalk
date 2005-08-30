@@ -5,11 +5,12 @@ ACLOCAL_AMFLAGS = -I ../config
 
 SUBDIRS = include
 
-EXTRA_DIST = LICENSE ChangeLog.v1 \
+EXTRA_DIST = LICENSE ChangeLog.v1 src/ffitest.c \
 	src/alpha/ffi.c src/alpha/osf.S src/alpha/ffitarget.h \
 	src/arm/ffi.c src/arm/sysv.S src/arm/ffitarget.h \
 	src/mips/ffi.c src/mips/n32.S src/mips/o32.S \
-	src/mips/ffitarget.h \
+	src/mips/ffitarget.h src/ia64/ffi.c src/ia64/ffitarget.h \
+	src/ia64/ia64_flags.h src/ia64/unix.S \
 	src/m68k/ffi.c src/m68k/sysv.S src/m68k/ffitarget.h \
 	src/powerpc/ffi.c src/powerpc/sysv.S \
 	src/powerpc/linux64.S src/powerpc/linux64_closure.S \
@@ -24,7 +25,7 @@ EXTRA_DIST = LICENSE ChangeLog.v1 \
 	src/sparc/ffi.c \
 	src/x86/ffi.c src/x86/sysv.S src/x86/win32.S \
 	src/x86/ffi64.c src/x86/unix64.S src/x86/ffitarget.h \
-	src/pa/ffi.c src/pa/linux.S
+	src/pa/ffi.c src/pa/linux.S src/pa/ffitarget.h
 
 ## ################################################################
 
