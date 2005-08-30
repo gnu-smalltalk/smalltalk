@@ -1,3 +1,7 @@
+2005-08-30 Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintfv/Makefile.am: Make more portable.
+
 2003-12-03 Paolo Bonzini  <bonzini@gnu.org>
 
 	* libltdl: die die die
