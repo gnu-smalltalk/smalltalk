@@ -1,5 +1,10 @@
 2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/cint.c: Revert the last patch and push correctly objects
+	that are smaller than a long.  Based on a patch by Jim White.
+
+2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/cint.c: Compute alignment based on ints, not longs.
 
 2005-08-07  Paolo Bonzini  <bonzini@gnu.org>
