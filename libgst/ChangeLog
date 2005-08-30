@@ -1,5 +1,13 @@
 2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/oop.c: Fix pasto (SIZEOF_LONG instead of SIZEOF_OOP).
+	* libgst/comp.c: Do not emit PUSH_INTEGER for integers equal or
+	bigger than 2^31.
+	* libgst/byte.h: Change final argument of compile_byte to int.
+	* libgst/byte.c: Likewise.
+
+2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/mpz.c: Fix 64-bit cleanliness problem.
 
 2005-08-28  Paolo Bonzini  <bonzini@gnu.org>

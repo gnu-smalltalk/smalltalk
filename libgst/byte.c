@@ -79,7 +79,7 @@ _gst_line_number (int n, mst_Boolean force)
 }
 
 void
-_gst_compile_byte (gst_uchar byte, long arg)
+_gst_compile_byte (gst_uchar byte, int arg)
 {
   int num_bytes;
   long n;

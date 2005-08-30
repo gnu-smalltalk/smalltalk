@@ -187,7 +187,7 @@ extern void _gst_line_number (int line, mst_Boolean force)
 
 /* This tacks the bytecode BYTE, with argument ARG, at the end of the
    current bytecode array.  */
-extern void _gst_compile_byte (gst_uchar byte, long arg) 
+extern void _gst_compile_byte (gst_uchar byte, int arg) 
   ATTRIBUTE_HIDDEN;
 
 /* This tacks the contents of the BYTECODES array at the end of the

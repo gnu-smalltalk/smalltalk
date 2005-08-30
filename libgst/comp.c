@@ -1076,7 +1076,7 @@ compile_constant (tree_node constExpr)
       if (IS_INT (constantOOP))
         {
           intVal = TO_INT (constantOOP);
-          if (intVal >= 0 && intVal < MAX_ST_INT)
+          if (intVal >= 0 && intVal <= 0x7FFFFFFFL)
             {
 	      INCR_STACK_DEPTH ();
 	      _gst_compile_byte (PUSH_INTEGER, intVal);
