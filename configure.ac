@@ -7,7 +7,7 @@ dnl with this software.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.52)
-AC_INIT([GNU Smalltalk], 2.1g, help-smalltalk@gnu.org, smalltalk)
+AC_INIT([GNU Smalltalk], 2.1h, help-smalltalk@gnu.org, smalltalk)
 MAINTAINER="bonzini@gnu.org"
 
 dnl CURRENT:REVISION:AGE means this is the REVISION-th version of

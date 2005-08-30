@@ -1,3 +1,8 @@
+2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/geometry.st: Make more resilient to #basicHash vagaries.
+	* tests/geometry.ok: Adapt.
+
 2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Continuations.st: New.

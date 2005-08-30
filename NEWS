@@ -1,6 +1,6 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 2.1.10 TO 2.2
+NEWS FROM 2.1.12 TO 2.2
 
 Scripting improvements:
 
@@ -236,6 +236,18 @@ o   Primitives cannot be declared for untrusted objects (this might be
 
 
 -----------------------------------------------------------------------------
+
+NEWS IN 2.1.12
+
+This is a bugfix release.  It fixes several problems on 64-bit systems.
+
+-----------------------------------------------------------------------------
+
+NEWS IN 2.1.11
+
+This is a bugfix release.
+
+-----------------------------------------------------------------
 
 NEWS IN 2.1.10
 

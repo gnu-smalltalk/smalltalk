@@ -1,3 +1,7 @@
+2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/mpz.c: Fix 64-bit cleanliness problem.
+
 2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.c: Remove last parameter to parse_cascaded_messages.
