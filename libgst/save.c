@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -71,7 +71,7 @@
 	global oop variable data
 	object data */
 
-#define EXECUTE      "#! /bin/sh\nexec gst -I $0 -a $@\n"
+#define EXECUTE      "#! /usr/bin/env gst -aI\nexec gst -I \"$0\" -a \"$@\"\n"
 #define SIGNATURE    "GSTIm"
 
 typedef struct save_file_header

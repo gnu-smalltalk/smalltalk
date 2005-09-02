@@ -1,3 +1,7 @@
+2005-09-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/save.c: Use a better #! sequence.
+
 2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Fix pasto (SIZEOF_LONG instead of SIZEOF_OOP).
