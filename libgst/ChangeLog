@@ -1,3 +1,7 @@
+2005-09-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gst-parse.c: Do not crash on #[].
+
 2005-09-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/save.c: Use a better #! sequence.

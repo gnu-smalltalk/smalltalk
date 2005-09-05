@@ -815,7 +815,7 @@ parse_byte_array_literal (gst_parser *p)
       elts = _gst_add_node (elts, _gst_make_array_elt (&lit->location, lit));
     }
 
-  return _gst_make_byte_array_constant (&elts->location, elts);
+  return _gst_make_byte_array_constant (elts ? &elts->location : &p->loc, elts);
 }
 
 

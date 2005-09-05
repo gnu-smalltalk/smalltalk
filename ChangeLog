@@ -1,3 +1,11 @@
+2005-09-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/StreamFilter.st: reimplement #peek and add #peekFor: to
+	ConcatenedStream.
+
+	* kernel/Character.st: new method #isDigit:.
+	* kernel/Integer.st: new method #readFrom:radix:.
+
 2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/geometry.st: Make more resilient to #basicHash vagaries.

@@ -9,7 +9,7 @@
 "======================================================================
 |
 | Based on code copyright (c) Kazuki Yasumatsu, and in the public domain
-| Copyright (c) 2002 Free Software Foundation, Inc.
+| Copyright (c) 2002, 2005 Free Software Foundation, Inc.
 | Adapted by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -110,8 +110,13 @@ getBinary: urlString
 getText: urlString
     ^self clientPI decode: (self getBinary: urlString)!
 
+head: urlString requestHeaders: requestHeaders
+    ^self clientPI head: urlString requestHeaders: requestHeaders!
+
 head: urlString requestHeaders: requestHeaders into: aStream
-    ^self clientPI head: urlString requestHeaders: requestHeaders into: aStream!
+    "This method is deprecated in favor of #head:requestHeaders:, because the
+     last parameter is effectively unused."
+    ^self clientPI head: urlString requestHeaders: requestHeaders!
 
 post: urlString type: type data: data binary: binary requestHeaders: requestHeaders into: aStream
     ^self clientPI
@@ -137,41 +142,92 @@ get: urlString requestHeaders: requestHeaders into: aStream
     ^self readResponseInto: aStream
 !
 
+readResponseStream: aResponseStream into: aStream length: aContentLength
+	| remaining |
+	remaining := aContentLength.
+	[ remaining = 0 ]
+		whileFalse:
+		[ | data |
+		data := aResponseStream next: (4096 min: remaining).
+		remaining := remaining - data size.
+		self reporter readByte: data size.
+		aStream nextPutAll: data ].
+!
+
+readChunkedResponseStream: aResponseStream into: aStream
+    | cr lf chunkSize chunkExt i remaining s |
+    "Happily, aResponseStream should be buffered."
+    cr := Character cr.
+    lf := Character lf.
+    [
+	(aResponseStream peek asUppercase isDigit: 16) ifFalse: 
+	    [ self error: 'Expecting chunk-size, but found ',
+		aResponseStream peek printString, '.' ].
+	chunkSize := Integer readFrom: aResponseStream radix: 16.
+
+	"Technically, a chunk-extension should start with $;, but we'll
+	 ignore everything to the CRLF for simplicity (we don't understand
+	 any chunk extensions, so we have to ignore them)."
+	[ aResponseStream next = cr and: [ aResponseStream next = lf ] ] 
+	    whileFalse.
+
+	chunkSize = 0
+    ] whileFalse: [
+	"Possibly we should just read it all?"
+	self readResponseStream: aResponseStream into: aStream length: chunkSize.
+		
+	(aResponseStream next = cr and: [ aResponseStream next = lf ])
+	    ifFalse:  [
+		self error: ('Expected CRLF but found: ', s printString).
+		"We could try to recover by reading to the next CRLF, I suppose..." ].
+	
+	chunkSize = 0
+    ].
+
+    aResponseStream peekFor: cr.
+    aResponseStream peekFor: lf.
+    "There shouldn't be a trailer as we didn't say it was acceptable in the request."
+!
+
 readResponseInto: aStream
     | response totalByte readStream |
     response := self getResponse.
     self checkResponse: response.
 
     totalByte := response fieldAt: 'Content-Length' ifAbsent: [nil].
-    totalByte notNil ifTrue: [
-	totalByte := totalByte value trimSeparators asInteger.
-	self reporter totalByte: totalByte ].
+    totalByte notNil 
+		ifTrue: 
+			[ "#asInteger strips 'Content-Length' from the front of the string."
+			totalByte := totalByte value trimSeparators asInteger.
+			self reporter totalByte: totalByte. ].
     self reporter startTransfer.
-    response preReadBytes isEmpty ifFalse:
-    	[self reporter readByte: response preReadBytes size.
-    	aStream nextPutAll: response preReadBytes].
 
     readStream := connectionStream stream.
-    [totalByte isNil
-	ifTrue: [readStream atEnd]
-	ifFalse: [totalByte = 0]
+    response preReadBytes isEmpty ifFalse: [
+    	self reporter readByte: response preReadBytes size.
+	readStream := ConcatenatedStream 
+			  with: response preReadBytes readStream 
+			  with: readStream ].
 
-    ]	whileFalse:
-    		[| data |
-    		data := totalByte notNil 
-		    ifTrue: [ readStream next: (4096 min: totalByte) ]
-		    ifFalse: [ readStream nextHunk ].
-
-    		totalByte notNil
-		    ifTrue: [ totalByte := totalByte - data size ].
-		self reporter readByte: data size.
-    		aStream nextPutAll: data ].
+    totalByte notNil 
+	ifTrue: [
+	    self readResponseStream: readStream into: aStream length: totalByte ]
+	ifFalse: [
+	    | te s |
+	    self readChunkedResponseStream: readStream into: aStream.
+	    "Remove 'chunked' from transfer-encoding header"
+	    te := response fieldAt: 'transfer-encoding' ifAbsent: [ nil ].
+	    te notNil ifTrue: [
+		s := te value.
+		(s indexOf: 'chunked' matchCase: false startingAt: 1) ifNotNil: [ :i |
+		    te value: (s copyFrom: 1 to: i first - 1), (s copyFrom: i last + 1) ] ] ].
 
     self reporter endTransfer.
     response keepAlive ifFalse: [ self close ]. 
-    ^response!
+    ^response
+!
 
-head: urlString requestHeaders: requestHeaders into: aStream
+head: urlString requestHeaders: requestHeaders
     | response |
     self connectIfClosed.
     self reporter startTransfer.
@@ -193,9 +249,9 @@ putRequestHeaders: requestHeaders
     ].
 
     "The Host header is necessary to support virtual hosts"
-    host ifFalse: [
-	self nextPutAll: 'Host: ', self client hostName; cr
-    ].
+    host
+	ifFalse: [ self nextPutAll: 'Host: ', self client hostName; cr ].
+
     self cr!
 
 post: urlString type: type data: data binary: binary requestHeaders: requestHeaders into: aStream

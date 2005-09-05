@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -51,6 +51,22 @@ efficiency.' !
 coerce: aNumber
     "Answer aNumber converted to a kind of Integer"
     ^aNumber truncated
+! 
+
+readFrom: aStream radix: radix
+    "Read a possibly negative number in the given radix from aStream,
+     and answer its value."
+    | value ch scale |
+    value := 0.
+    scale := (aStream peekFor: $-) ifTrue: [ -1 ] ifFalse: [ 1 ].
+    [
+	(ch := aStream peek) notNil and: 
+	    [ (ch := ch asUppercase) isDigit: radix ]
+    ] whileTrue: [
+	value := (value * radix) + ch digitValue.
+	aStream next
+    ].
+    ^value * scale
 ! !
 
 

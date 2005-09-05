@@ -1,3 +1,8 @@
+2005-05-09  Paolo Bonzini  <bonzini@gnu.org>
+
+        * tcp/Sockets.st: Do not fail on #flush or #fill if the peer is
+	not alive anymore.
+
 2005-08-23  Mike Anderson  <msasjf@yahoo.co.uk>
 
         * tcp/Sockets.st: Fix thinkos.
