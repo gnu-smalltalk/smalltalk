@@ -1,3 +1,8 @@
+2005-09-12  Mike Anderson  <msasjf@yahoo.co.uk>
+
+	* libgst/events.c: Fix bug with pollfds being lost if a previous
+	one has an error.
+
 2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/mpz.c: Fix 64-bit cleanliness problem.
