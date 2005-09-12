@@ -465,7 +465,7 @@ refresh
     ].
     self lstatOn: self realFileName into: stat.
     File checkError.
-    isSymbolicLink := (stat stMode value bitAnd: 8r120000) = 8r120000. "S_IFLNK"
+    isSymbolicLink := (stat stMode value bitAnd: 8r170000) = 8r120000. "S_IFLNK"
     isSymbolicLink ifTrue: [
 	self statOn: self realFileName into: stat.
 	File checkError ]

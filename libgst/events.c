@@ -193,7 +193,7 @@ file_polling_handler (int sig)
 	return;
 
       num_used_pollfds = 0;
-      for (node = head, pprev = &head; node && n; node = *pprev)
+      for (node = head, pprev = &head; node; node = *pprev)
 	{
 	  struct pollfd *poll = &pollfds[node->poll];
 
@@ -209,7 +209,6 @@ file_polling_handler (int sig)
 		p_tail_next = pprev;
 
 	      xfree (node);
-	      n--;
 	    }
 	  else
 	    {
