@@ -1,3 +1,13 @@
+2005-09-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/callin.h: New methods for the interpreter proxy.
+	* libgst/callin.c: New methods for the interpreter proxy.
+	* libgst/gstpub.h: New methods for the interpreter proxy.
+	* libgst/interp.h: New function _gst_find_method, moved from
+	interp.c.  Declare method_cache_entry.
+	* libgst/interp.c: Rename find_method to _gst_find_method,
+	remove declarations of find_method and method_cache_entry.
+
 2005-09-12  Mike Anderson  <msasjf@yahoo.co.uk>
 
 	* libgst/events.c: Fix bug with pollfds being lost if a previous

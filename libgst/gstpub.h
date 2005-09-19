@@ -40,8 +40,12 @@
 #endif
 
 #ifdef __cplusplus
+#include <cstddef>
 extern "C"
 {
+#else
+
+#include <stddef.h>
 #endif
 
 #include "gst.h"
@@ -130,6 +134,31 @@ typedef struct VMProxy
   /* More conversions.  */
   long double (*OOPToLongDouble) __PROTO ((OOP oop));
   OOP (*longDoubleToOOP) __PROTO ((long double f));
+
+  /* More functions, added in 2.2.  */
+  OOP (*getObjectClass) __PROTO ((OOP oop));
+  OOP (*getSuperclass) __PROTO ((OOP oop));
+  mst_Boolean (*classIsKindOf) __PROTO ((OOP oop, OOP candidate));
+  mst_Boolean (*objectIsKindOf) __PROTO ((OOP oop, OOP candidate));
+  OOP (*perform) __PROTO ((OOP oop, OOP selector));
+  OOP (*performWith) __PROTO ((OOP oop, OOP selector, OOP arg));
+  mst_Boolean (*classImplementsSelector) __PROTO ((OOP classOOP, OOP selector));
+  mst_Boolean (*classCanUnderstand) __PROTO ((OOP classOOP, OOP selector));
+  mst_Boolean (*respondsTo) __PROTO ((OOP oop, OOP selector));
+  size_t (*OOPSize) __PROTO ((OOP oop));
+  OOP (*OOPAt) __PROTO ((OOP oop, size_t index));
+  OOP (*OOPAtPut) __PROTO ((OOP oop, size_t index, OOP new));
+
+  /* Some system classes.  */
+  OOP objectClass, arrayClass, stringClass, characterClass, smallIntegerClass,
+    floatDClass, floatEClass, byteArrayClass, objectMemoryClass, classClass,
+    behaviorClass, blockClosureClass, contextPartClass, blockContextClass,
+    methodContextClass, compiledMethodClass, compiledBlockClass,
+    fileDescriptorClass, fileStreamClass, processClass, semaphoreClass,
+    cObjectClass;
+
+  /* More system objects.  */
+  OOP processorOOP;
 } VMProxy;
 
 #define INDEXED_WORD(obj, n)   ( ((long *) ((obj) + 1))		    [(n)-1] )

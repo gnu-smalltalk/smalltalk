@@ -179,6 +179,31 @@ extern PTR _gst_oop_to_cobject (OOP oop)
   ATTRIBUTE_HIDDEN;
 extern long double _gst_oop_to_long_double (OOP oop) 
   ATTRIBUTE_HIDDEN;
+extern OOP _gst_get_object_class (OOP oop)
+  ATTRIBUTE_HIDDEN;
+extern OOP _gst_get_superclass (OOP oop)
+  ATTRIBUTE_HIDDEN;
+extern mst_Boolean _gst_class_is_kind_of (OOP candidate, OOP superclass)
+  ATTRIBUTE_HIDDEN;
+extern mst_Boolean _gst_object_is_kind_of (OOP candidate, OOP superclass)
+  ATTRIBUTE_HIDDEN;
+extern OOP _gst_perform (OOP receiver, OOP selector)
+  ATTRIBUTE_HIDDEN;
+extern OOP _gst_perform_with (OOP receiver, OOP selector, OOP arg)
+  ATTRIBUTE_HIDDEN;
+extern mst_Boolean _gst_class_implements_selector (OOP classOOP, OOP selector)
+  ATTRIBUTE_HIDDEN;
+extern mst_Boolean _gst_class_can_understand (OOP classOOP, OOP selector)
+  ATTRIBUTE_HIDDEN;
+extern mst_Boolean _gst_responds_to (OOP oop, OOP selector)
+  ATTRIBUTE_HIDDEN;
+extern size_t _gst_oop_size (OOP oop)
+  ATTRIBUTE_HIDDEN;
+extern OOP _gst_oop_at (OOP oop, size_t index)
+  ATTRIBUTE_HIDDEN;
+extern OOP _gst_oop_at_put (OOP oop, size_t index, OOP new)
+  ATTRIBUTE_HIDDEN;
+
 
 /* Marks/copies the registered OOPs (they are part of the rootset by
    definition) */

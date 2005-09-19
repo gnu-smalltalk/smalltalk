@@ -80,8 +80,7 @@ typedef struct gst_context_part
   OOP method;			/* the method that we're executing */
   OOP x;			/* depends on the subclass */
   OOP contextStack[1];
-}
- *gst_context_part;
+} *gst_context_part;
 
 typedef struct gst_method_context
 {
@@ -97,8 +96,24 @@ typedef struct gst_method_context
 				   gst_compiled_block/gst_method_context 
 				 */
   OOP contextStack[1];
-}
- *gst_method_context;
+} *gst_method_context;
+
+/* CompiledMethod cache (see descriptions in interp-bc.inl and
+   interp-jit.inl) */
+typedef struct method_cache_entry
+{
+  OOP selectorOOP;
+  OOP startingClassOOP;
+  OOP methodOOP; 
+  OOP methodClassOOP; 
+  method_header methodHeader;
+#ifdef ENABLE_JIT_TRANSLATION
+  OOP receiverClass;
+  PTR nativeCode;
+  PTR dummy;                    /* 32 bytes are usually a sweet spot */
+#endif
+} method_cache_entry;
+ 
 
 /* MCF stands for MethodContext Flag.  */
 
@@ -440,6 +455,12 @@ extern void _gst_validate_method_cache_entries (void)
 
 /* Terminate execution of the given PROCESSOOP.  */
 extern void _gst_terminate_process (OOP processOOP) 
+  ATTRIBUTE_HIDDEN;
+
+/* This is a further simplified lookup_method which does not care
+   about preparing for #doesNotUnderstand:.  */
+extern mst_Boolean _gst_find_method (OOP classOOP, OOP sendSelector,
+				     method_cache_entry *mce) 
   ATTRIBUTE_HIDDEN;
 
 /* Similar to _gst_send_message_internal, but forces the specified

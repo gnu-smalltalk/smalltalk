@@ -88,6 +88,9 @@ o   Instances of subclasses of CompiledBlock and CompiledMethod can be
     created using the same primitive that creates CompiledBlocks and
     CompiledMethods, but sent to the subclass.
 
+o   Several important bug fixes in event handling and asynchronous file
+    input/output.
+
 o   Subclasses of MethodInfo can be used as the descriptors for CompiledMethod
     objects.
 
@@ -102,6 +105,10 @@ o   When GCC 3.3 or later is used, a shared library is also built.  The
     shared library is undebuggable (-fomit-frame-pointer) with GCC < 4.0
     because of the dearth of registers.  The installed virtual machine is not
     linked to the shared library for optimal speed.
+
+o   Wider set of operations available to modules that plug into GNU Smalltalk,
+    including access to system classes, queries on the method dictionaries,
+    and access to indexed instance variables.
 
 
 
@@ -176,9 +183,9 @@ o   Blox-GTK interface, to use the browser under Gtk+.  Currently, only
 
 o   GNU Smalltalk now supports executing (some) Java programs.  See the
     info documentation for more information.  The class library is based
-    on GCJ 3.4.  There is no AWT nor JNI support (and it is not planned);
-    reflection and serialization are not there but will be added in the
-    future.
+    on GCJ 3.4, but should be reasonably upwards-compatible.  There is no
+    AWT nor JNI support, and it is not planned; networking, reflection and
+    serialization are not there but should be added in the future.
 
 
 Overview of the security mechanism:
@@ -207,18 +214,17 @@ o   Implemented class-level permissions.  Each class can have its own
 	ObjectMemory>>#setGrowThresholdPercent:	[#system]
 	ObjectMemory>>#setBigObjectThreshold:	[#system]
 	ObjectMemory>>#growTo:			[#system]
-	Object>>#makeUntrusted:	(given true)	[#securityManagement]
-	Object>>#instVarAt: (not self)		[#debugging]
+	Object>>#makeUntrusted:			[#securityManagement]
+	Object>>#instVarAt: 			[#debugging]
 	Object>>#instVarAt:put:	           	[#debugging]
-	Object>>#perform:... (given a method)	[#debugging]
+	Object>>#perform:... 			[#debugging]
 	Object>>#changeClassTo:			[#debugging]
 	Process>>#suspend			[#processManagement]
 	Process>>#resume			[#processManagement]
 	UndefinedObject>>#subclass:... etc...	[#system]
 	Class>>#subclass:... etc... (mutation)	[#system]
-	Metaclass>>#instanceVariableNames: (mutation)	[#system]
-	MethodDictionary>>#at:put:...		[#system]
-	... (maybe more?) ...
+	Metaclass>>#instanceVariableNames: 	[#system]
+	MethodDictionary>>#at:put:		[#system]
 
 o   Instance variables of an untrusted class that are declared by a trusted
     class are read-only.  This is necessary to avoid that a misbehaving

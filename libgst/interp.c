@@ -97,23 +97,6 @@
 #define ASYNC_QUEUE_SIZE		100
 
 
-/* CompiledMethod cache (see descriptions in interp-bc.inl and
-   interp-jit.inl) */
-typedef struct method_cache_entry
-{
-  OOP selectorOOP;
-  OOP startingClassOOP;
-  OOP methodOOP;
-  OOP methodClassOOP;
-  method_header methodHeader;
-#ifdef ENABLE_JIT_TRANSLATION
-  OOP receiverClass;
-  PTR nativeCode;
-  PTR dummy;			/* 32 bytes are usually a sweet spot */
-#endif
-}
-method_cache_entry;
-
 typedef struct async_queue_entry
 {
   OOP sem;
@@ -408,12 +391,6 @@ static mst_Boolean lookup_method (OOP sendSelector,
 				  method_cache_entry *methodData,
 				  int sendArgs,
 				  OOP method_class);
-
-/* This is a further simplified lookup_method which does not care
-   about preparing for #doesNotUnderstand:.  */
-static inline mst_Boolean find_method (OOP receiverClass,
-				       OOP sendSelector,
-				       method_cache_entry *methodData);
 
 /* This tenures context objects from the stack to the context pools
    (see below for a description).  */
@@ -936,7 +913,7 @@ lookup_method (OOP sendSelector,
   inc_ptr inc;
   OOP argsArrayOOP;
 
-  if (find_method (method_class, sendSelector, methodData))
+  if (_gst_find_method (method_class, sendSelector, methodData))
     return (true);
 
   inc = INC_SAVE_POINTER ();
@@ -948,9 +925,9 @@ lookup_method (OOP sendSelector,
 }
 
 mst_Boolean
-find_method (OOP receiverClass,
-	     OOP sendSelector,
-	     method_cache_entry *methodData)
+_gst_find_method (OOP receiverClass,
+	          OOP sendSelector,
+	          method_cache_entry *methodData)
 {
   OOP method_class = receiverClass;
   for (; !IS_NIL (method_class);
@@ -1012,7 +989,7 @@ check_send_correctness (OOP receiver,
     {
       /* If we do not find the method, don't worry and fire
 	 #doesNotUnderstand:  */
-      if (!find_method (receiverClass, sendSelector, methodData))
+      if (!_gst_find_method (receiverClass, sendSelector, methodData))
 	return (true);
 
       methodData = &method_cache[hashIndex];

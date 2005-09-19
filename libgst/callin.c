@@ -94,8 +94,13 @@ VMProxy gst_interpreter_proxy = {
   _gst_register_oop_array, _gst_unregister_oop_array,
 
 /* Convert Smalltalk datatypes to C data types (2) */
-  _gst_oop_to_long_double, _gst_long_double_to_oop
+  _gst_oop_to_long_double, _gst_long_double_to_oop,
 
+  _gst_get_object_class, _gst_get_superclass,
+  _gst_class_is_kind_of, _gst_object_is_kind_of,
+  _gst_perform, _gst_perform_with, _gst_class_implements_selector,
+  _gst_class_can_understand, _gst_responds_to,
+  _gst_oop_size, _gst_oop_at, _gst_oop_at_put
 };
 
 OOP
@@ -701,6 +706,168 @@ _gst_oop_to_cobject (OOP oop)
   else
     return (COBJECT_VALUE (oop));
 }
+
+OOP
+_gst_get_object_class (OOP oop)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  return OOP_INT_CLASS (oop);
+}
+
+OOP
+_gst_get_superclass (OOP oop)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  /* Quick tests for "class-ness".  */
+  assert (IS_OOP (oop));
+  assert (OOP_CLASS (oop) == _gst_behavior_class
+	  || OOP_CLASS (OOP_CLASS (oop)) == _gst_metaclass_class);
+
+  return SUPERCLASS (oop);
+}
+
+mst_Boolean
+_gst_class_is_kind_of (OOP candidate, OOP superclass)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  /* Quick tests for "class-ness".  */
+  assert (IS_OOP (candidate) && IS_OOP (superclass));
+  assert (OOP_CLASS (candidate) == _gst_behavior_class
+	  || OOP_CLASS (OOP_CLASS (candidate)) == _gst_metaclass_class);
+
+  if (superclass == _gst_nil_oop || candidate == superclass)
+    return true;
+
+  assert (OOP_CLASS (superclass) == _gst_behavior_class
+	  || OOP_CLASS (OOP_CLASS (superclass)) == _gst_metaclass_class);
+
+  return is_a_kind_of (candidate, superclass);
+}
+
+
+mst_Boolean
+_gst_object_is_kind_of (OOP candidate, OOP superclass)
+{
+  OOP its_class;
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  if (IS_INT (candidate))
+    {
+      its_class = _gst_small_integer_class;
+      if (superclass == _gst_small_integer_class
+	  || superclass == _gst_object_class)
+	return true;
+    }
+  else
+    its_class = OOP_CLASS (candidate);
+
+  if (superclass == _gst_nil_oop || its_class == superclass)
+    return true;
+
+  /* Quick tests for "class-ness".  */
+  assert (IS_OOP (superclass));
+  assert (OOP_CLASS (superclass) == _gst_behavior_class
+	  || OOP_CLASS (OOP_CLASS (superclass)) == _gst_metaclass_class);
+
+  return is_a_kind_of (its_class, superclass);
+}
+
+OOP
+_gst_perform (OOP receiver, OOP selector)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  return _gst_nvmsg_send (receiver, selector, NULL, 0);
+}
+
+OOP
+_gst_perform_with (OOP receiver, OOP selector, OOP arg)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  return _gst_nvmsg_send (receiver, selector, &arg, 1);
+}
+
+mst_Boolean
+_gst_class_implements_selector (OOP classOOP, OOP selector)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  assert (IS_OOP (classOOP));
+  assert (OOP_CLASS (classOOP) == _gst_behavior_class
+          || OOP_CLASS (OOP_CLASS (classOOP)) == _gst_metaclass_class);
+
+  return _gst_find_class_method (classOOP, selector) != _gst_nil_oop;
+}
+
+mst_Boolean
+_gst_class_can_understand (OOP classOOP, OOP selector)
+{
+  method_cache_entry dummy;
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  /* Quick test for "class-ness".  */
+  assert (IS_OOP (classOOP));
+  assert (OOP_CLASS (classOOP) == _gst_behavior_class
+          || OOP_CLASS (OOP_CLASS (classOOP)) == _gst_metaclass_class);
+
+  return _gst_find_method (classOOP, selector, &dummy);
+}
+
+mst_Boolean
+_gst_responds_to (OOP oop, OOP selector)
+{
+  method_cache_entry dummy;
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  return _gst_find_method (OOP_INT_CLASS (oop), selector, &dummy);
+}
+
+size_t
+_gst_oop_size (OOP oop)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  return NUM_INDEXABLE_FIELDS (oop);
+}
+
+OOP
+_gst_oop_at (OOP oop, size_t index)
+{
+  OOP result;
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  result = index_oop (oop, index + 1);
+  assert (result);
+  return result;
+}
+
+OOP
+_gst_oop_at_put (OOP oop, size_t index, OOP new)
+{
+  OOP old;
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  old = index_oop (oop, index + 1);
+  assert (old);
+  index_oop_put (oop, index, new);
+  return old;
+}
 
 
 
@@ -889,4 +1056,31 @@ _gst_init_vmproxy (void)
   gst_interpreter_proxy.nilOOP = _gst_nil_oop;
   gst_interpreter_proxy.trueOOP = _gst_true_oop;
   gst_interpreter_proxy.falseOOP = _gst_false_oop;
+
+  gst_interpreter_proxy.objectClass = _gst_object_class;
+  gst_interpreter_proxy.arrayClass = _gst_array_class;
+  gst_interpreter_proxy.stringClass = _gst_string_class;
+  gst_interpreter_proxy.characterClass = _gst_char_class;
+  gst_interpreter_proxy.smallIntegerClass = _gst_small_integer_class;
+  gst_interpreter_proxy.floatDClass = _gst_floatd_class;
+  gst_interpreter_proxy.floatEClass = _gst_floate_class;
+  gst_interpreter_proxy.byteArrayClass = _gst_byte_array_class;
+  gst_interpreter_proxy.objectMemoryClass = _gst_object_memory_class;
+  gst_interpreter_proxy.classClass = _gst_class_class;
+  gst_interpreter_proxy.behaviorClass = _gst_behavior_class;
+  gst_interpreter_proxy.blockClosureClass = _gst_block_closure_class;
+  gst_interpreter_proxy.contextPartClass = _gst_context_part_class;
+  gst_interpreter_proxy.blockContextClass = _gst_block_context_class;
+  gst_interpreter_proxy.methodContextClass = _gst_method_context_class;
+  gst_interpreter_proxy.compiledMethodClass = _gst_compiled_method_class;
+  gst_interpreter_proxy.compiledBlockClass = _gst_compiled_block_class;
+  gst_interpreter_proxy.fileDescriptorClass = _gst_file_descriptor_class;
+  gst_interpreter_proxy.fileStreamClass = _gst_file_stream_class;
+  gst_interpreter_proxy.processClass = _gst_process_class;
+  gst_interpreter_proxy.semaphoreClass = _gst_semaphore_class;
+  gst_interpreter_proxy.cObjectClass = _gst_c_object_class;
+
+  /* And system objects.  */
+  gst_interpreter_proxy.processorOOP = _gst_processor_oop;
+
 }

@@ -3155,11 +3155,11 @@ for more information).
 
 @deftypefun OOP msgSend (OOP receiver, OOP selector, @dots{})
 This function sends the given selector (should be a Symbol, otherwise
-nilOOP is returned) to the given receiver.  The message arguments should
+@code{nilOOP} is returned) to the given receiver.  The message arguments should
 also be OOPs (otherwise, an access violation exception is pretty likely)
 and are passed in a NULL-terminated list after the selector.  The value
 returned from the method is passed back as an OOP to the C program as
-the result of @code{msgSend}, or nilOOP if the number of arguments is
+the result of @code{msgSend}, or @code{nilOOP} if the number of arguments is
 wrong.  Example (same as @code{1 + 2}):
 
 @example
@@ -3225,6 +3225,17 @@ instead of relying on the NULL-termination of args.  Example:
         &argument,
         1);
 @end example
+@end deftypefun
+
+@deftypefun OOP perform (OOP, OOP)
+Shortcut function to invoke a unary selector.  The first parameter
+is the receiver, and the second is the selector.
+@end deftypefun
+
+@deftypefun OOP performWith (OOP, OOP, OOP)
+Shortcut function to invoke a one-argument selector.  The first parameter
+is the receiver, the second is the selector, the third is the sole
+argument.
 @end deftypefun
 
 The two functions that directly accept Smalltalk code are named
@@ -3405,10 +3416,83 @@ obj->arguments = objectAlloc(classNameToOOP("Array"), 10);
 @end example
 @end deftypefun
 
+@deftypefun size_t OOPSize (OOP)
+Return the number of indexed instance variables in the given object.
+@end deftypefun
+
+@deftypefun OOP OOPAt (OOP, size_t)
+Return an indexed instance variable of the given object.  The index is
+in the second parameter and is zero-based.  The function aborts if the index
+is out of range.
+@end deftypefun
+
+@deftypefun OOP OOPAtPut (OOP, size_t, OOP)
+Put the object given as the third parameter into an indexed instance variable
+of the object given as the first parameter.  The index in the second parameter
+and is zero-based.  The function aborts if the index is out of range.
+
+The function returns the old value of the indexed instance variable.
+@end deftypefun
+
+
+@deftypefun OOP getObjectClass (OOP)
+Return the class of the Smalltalk object passed as a parameter.
+@end deftypefun
+
+@deftypefun OOP getSuperclass (OOP)
+Return the superclass of the class given by the Smalltalk object,
+that is passed as a parameter.
+@end deftypefun
+
+@deftypefun mst_Boolean classIsKindOf (OOP, OOP)
+Return true if the class given as the first parameter, is the same
+or a superclass of the class given as the second parameter.
+@end deftypefun
+
+@deftypefun mst_Boolean objectIsKindOf (OOP, OOP)
+Return true if the object given as the first parameter is an
+instance of the class given as the second parameter, or of any
+of its subclasses.
+@end deftypefun
+
+@deftypefun mst_Boolean classImplementsSelector (OOP, OOP)
+Return true if the class given as the first parameter implements
+or overrides the method whose selector is given as the second parameter.
+@end deftypefun
+
+@deftypefun mst_Boolean classCanUnderstand (OOP, OOP)
+Return true if instances of the class given as the first parameter 
+respond to the message whose selector is given as the second parameter.
+@end deftypefun
+
+@deftypefun mst_Boolean respondsTo (OOP, OOP)
+Return true if the object given as the first parameter 
+responds to the message whose selector is given as the second parameter.
+@end deftypefun
+
+Finally, several slots of the interpreter proxy provide access to the
+system objects and to the most important classes.  These are:
+@itemize
+@item @code{nilOOP}, @code{trueOOP}, @code{falseOOP}, @code{processorOOP}
+@item @code{objectClass}, @code{arrayClass}, @code{stringClass},
+    @code{characterClass}, @code{smallIntegerClass}, @code{floatDClass},
+    @code{floatEClass}, @code{byteArrayClass}, @code{objectMemoryClass},
+    @code{classClass}, @code{behaviorClass}, @code{blockClosureClass},
+    @code{contextPartClass}, @code{blockContextClass},
+    @code{methodContextClass}, @code{compiledMethodClass},
+    @code{compiledBlockClass}, @code{fileDescriptorClass},
+    @code{fileStreamClass}, @code{processClass}, @code{semaphoreClass},
+    @code{cObjectClass}
+@end itemize
+
+More may be added in the future
+
+
 The macros are@footnote{IS_NIL and IS_CLASS have been removed because
   they are problematic in shared libraries (modules), where they
   caused undefined symbols to be present in the shared library.  These
-  are now private to @file{libgst.a}.}:
+  are now private to @file{libgst.a}.  You should use the @code{nilOOP}
+  field of the interpreter proxy, or @code{getObjectClass}.}:
 
 @defmac mst_Object OOP_TO_OBJ (OOP)
 Dereference a pointer to an OOP into a pointer to the actual object data
@@ -3469,7 +3553,6 @@ Access the given indexed instance variable in a @code{variableSubclass}.
 The first parameter must be a structure declared as described in
 @ref{Object representation}).
 @end defmac
-
 
 
 @node Object representation
