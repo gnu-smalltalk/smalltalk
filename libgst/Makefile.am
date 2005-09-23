@@ -74,80 +74,77 @@ genpr-parse.h: genpr-parse.c
 	@:
 
 BUILT_SOURCES = prims.inl match.h builtins.inl vm.inl
-CLEANFILES = prims.inl prims.stamp match.h match.stamp vm.inl vm.stamp
-dist_noinst_DATA = valgrind.supp prims.def byte.def vm.def builtins.gperf
-
-nodist_noinst_HEADERS = \
-	prims.inl match.h vm.inl
+dist_noinst_DATA = valgrind.supp prims.def byte.def vm.def builtins.gperf \
+	prims.stamp match.stamp vm.stamp
 
 noinst_HEADERS = \
-       gstpriv.h lib.h lex.h str.h \
-       tree.h byte.h interp.h comp.h memzero.h \
-       sym.h dict.h oop.h save.h cint.h xlat.h \
-       sysdep.h callin.h gstpub.h opt.h mpz.h \
-       md-config.h heap.h jitpriv.h oop.inl \
-       dict.inl interp.inl interp-bc.inl \
-       interp-jit.inl comp.inl input.h events.h \
-       print.h alloc.h genprims.h gst-parse.h \
-       genpr-parse.h genbc.h genbc-decl.h \
-       genbc-impl.h genvm-parse.h genvm.h \
-       security.h builtins.inl \
-       superop1.inl superop2.inl
+	gstpriv.h lib.h lex.h str.h \
+	tree.h byte.h interp.h comp.h memzero.h \
+	sym.h dict.h oop.h save.h cint.h xlat.h \
+	sysdep.h callin.h gstpub.h opt.h mpz.h \
+	md-config.h heap.h jitpriv.h oop.inl \
+	dict.inl interp.inl interp-bc.inl \
+	interp-jit.inl comp.inl input.h events.h \
+	print.h alloc.h genprims.h gst-parse.h \
+	genpr-parse.h genbc.h genbc-decl.h \
+	genbc-impl.h genvm-parse.h genvm.h \
+	security.h superop1.inl superop2.inl \
+	$(BUILT_SOURCES)
 
 # rules for invoking genbc
 # Try to economize in the rebuilds, by avoiding unnecessary
 # changes to the timestamp of match.h
 
-match.h: match.stamp
+$(srcdir)/match.h: $(srcdir)/match.stamp
 	@:
 
-match.stamp: byte.def byte.c opt.c xlat.c genbc$(EXEEXT)
+$(srcdir)/match.stamp: byte.def byte.c opt.c xlat.c genbc$(EXEEXT)
 	@echo "./genbc $(srcdir)/byte.def $(srcdir)/byte.c $(srcdir)/opt.c $(srcdir)/xlat.c > match.h"; \
 	  ./genbc $(srcdir)/byte.def $(srcdir)/byte.c $(srcdir)/opt.c $(srcdir)/xlat.c > _match.h
-	@if cmp _match.h match.h > /dev/null 2>&1; then \
+	@if cmp _match.h $(srcdir)/match.h > /dev/null 2>&1; then \
 	  echo match.h is unchanged; \
 	  rm _match.h; \
 	else \
-	  mv _match.h match.h; \
+	  mv _match.h $(srcdir)/match.h; \
 	fi
-	@echo timestamp > match.stamp
+	@echo timestamp > $(srcdir)/match.stamp
 
 
 # rules for invoking genprims
 # Try to economize in the rebuilds, by avoiding unnecessary
 # changes to the timestamp of prims.inl
 
-prims.inl: prims.stamp
+$(srcdir)/prims.inl: $(srcdir)/prims.stamp
 	@:
 
-prims.stamp: prims.def genprims$(EXEEXT)
+$(srcdir)/prims.stamp: prims.def genprims$(EXEEXT)
 	@echo "./genprims < $(srcdir)/prims.def > prims.inl"; \
 	  ./genprims < $(srcdir)/prims.def > _prims.inl
-	@if cmp _prims.inl prims.inl > /dev/null 2>&1; then \
+	@if cmp _prims.inl $(srcdir)/prims.inl > /dev/null 2>&1; then \
 	  echo prims.inl is unchanged; \
 	  rm _prims.inl; \
 	else \
-	  mv _prims.inl prims.inl; \
+	  mv _prims.inl $(srcdir)/prims.inl; \
 	fi
-	@echo timestamp > prims.stamp
+	@echo timestamp > $(srcdir)/prims.stamp
 
 # rules for invoking genvm
 # Try to economize in the rebuilds, by avoiding unnecessary
 # changes to the timestamp of vm.inl
 
-vm.inl: vm.stamp
+$(srcdir)/vm.inl: $(srcdir)/vm.stamp
 	@:
 
-vm.stamp: vm.def genvm$(EXEEXT)
+$(srcdir)/vm.stamp: vm.def genvm$(EXEEXT)
 	@echo "./genvm < $(srcdir)/vm.def | awk '{ /^#/ && gsub(/__oline__/,NR+1); print }' > vm.inl"; \
 	  ./genvm < $(srcdir)/vm.def | awk '{ /^#/ && gsub(/__oline__/,NR+1); print }' > _vm.inl
-	@if cmp _vm.inl vm.inl > /dev/null 2>&1; then \
+	@if cmp _vm.inl $(srcdir)/vm.inl > /dev/null 2>&1; then \
 	  echo vm.inl is unchanged; \
 	  rm _vm.inl; \
 	else \
-	  mv _vm.inl vm.inl; \
+	  mv _vm.inl $(srcdir)/vm.inl; \
 	fi
-	@echo timestamp > vm.stamp
+	@echo timestamp > $(srcdir)/vm.stamp
 
 # rules for invoking gperf
 # not fully idiot-proof but only to be run by maintainers
