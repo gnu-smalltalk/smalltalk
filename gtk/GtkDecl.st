@@ -29,6 +29,9 @@
 |
  ======================================================================"
 
+Smalltalk addSubspace: #GTK!
+Namespace current: GTK!
+
 Object subclass: #Pango
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -105,3 +108,4 @@ FileStream fileIn: 'MoreFuncs.st'!
 FileStream fileIn: 'GtkImpl.st'!
 
 GLib registerAllTypes!
+Namespace current: Smalltalk!

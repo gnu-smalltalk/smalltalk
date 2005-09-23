@@ -34,6 +34,8 @@
 #! @AWK@ -f
 
 BEGIN {
+    print "/* Automatically generated, do not edit! */"
+    print "#define GDK_PIXBUF_ENABLE_BACKEND 1"
     print "#include <stdio.h>"
     print "#include <stdlib.h>"
     print "#include <glib.h>"

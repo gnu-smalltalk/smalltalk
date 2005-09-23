@@ -1,3 +1,9 @@
+2005-09-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gtk/mk_sizeof.awk: GTK+ 2.6 update.
+	* gtk/mk_enums.awk: GTK+ 2.6 update.
+	* gtk/GtkDecl.st: Wrap into namespace GTK.
+
 2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gtk/gst-gtk.c: Fix warnings.
