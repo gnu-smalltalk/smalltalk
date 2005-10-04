@@ -1,3 +1,8 @@
+2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gtk/funcs.awk: GTK+ 2.6 has functions with internal visibility.
+	* gtk/structs.awk: GTK+ 2.6 widgets use a couple more GLib data types.
+
 2005-09-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gtk/mk_sizeof.awk: GTK+ 2.6 update.

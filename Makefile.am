@@ -28,7 +28,7 @@ SUBDIRS = lib-src lightning $(subdirs)
 if ENABLE_DISASSEMBLER
 SUBDIRS += opcode
 endif
-SUBDIRS += libgst i18n tcp examples gtk blox-tk . doc tests
+SUBDIRS += libgst i18n tcp examples blox-tk . doc gtk tests
 
 
 ###########################################################

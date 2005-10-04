@@ -1,5 +1,5 @@
 CLEANFILES = $(nodist_noinst_SCRIPTS) $(nodist_noinst_HEADERS) \
-	$(BUILT_SOURCES) $(nodist_noinst_DATA) .order
+	$(BUILT_SOURCES) $(nodist_noinst_DATA) order
 
 EXTRA_DIST = cpp.awk structs.awk funcs.awk mk_enums.awk mk_sizeof.awk order.st
 
@@ -27,6 +27,10 @@ AM_CFLAGS = $(GLIB_CFLAGS) $(GTK_CFLAGS) $(PANGO_CFLAGS) $(ATK_CFLAGS)
 GTK_FILES = \
 	  glib-object.h gdk/gdk.h \
 	  gdk-pixbuf/gdk-pixbuf.h gtk/gtk.h atk/atk.h pango/pango.h
+
+# We don't want to include all of GLib for obvious reasons...
+GLIB_FILES = \
+	  glib/goption.h glib/gdate.h
 
 LOCAL_FILES = $(srcdir)/placer.h
 
@@ -72,23 +76,23 @@ Libs.st: Makefile
 	  esac; \
 	done
 
-Structs.st: structs sizeof$(EXEEXT) cpp .order
-	xargs ./cpp < .order | ./structs > Structs.st
+Structs.st: structs sizeof$(EXEEXT) cpp order
+	xargs ./cpp < order | ./structs > Structs.st
 	./sizeof >> Structs.st
 
 Enums.st: enums$(EXEEXT)
 	./enums > Enums.st
 
-Funcs.st: funcs cpp .order
-	xargs ./cpp < .order | ./funcs > Funcs.st
+Funcs.st: funcs cpp order
+	xargs ./cpp < order | ./funcs > Funcs.st
 
-sizeof.c: mk_sizeof cpp .order
-	xargs ./cpp < .order | ./mk_sizeof > sizeof.c
+sizeof.c: mk_sizeof cpp order
+	xargs ./cpp < order | ./mk_sizeof > sizeof.c
 
-enums.c: mk_enums cpp .order
-	xargs ./cpp < .order | ./mk_enums > enums.c
+enums.c: mk_enums cpp order
+	xargs ./cpp < order | ./mk_enums > enums.c
 
-.order: order.st Makefile $(LOCAL_FILES)
+order: order.st Makefile $(LOCAL_FILES)
 	PKG_CONFIG='$(PKG_CONFIG)' ../gst \
 	  -I ../gst.im $(srcdir)/order.st -a \
 	  `$(PKG_CONFIG) --cflags-only-I gobject-2.0` \
@@ -98,7 +102,20 @@ enums.c: mk_enums cpp .order
 	  `$(PKG_CONFIG) --cflags-only-I gtk+-2.0` \
 	  `$(PKG_CONFIG) --cflags-only-I atk` \
 	  $(GTK_FILES) \
-	  $(LOCAL_FILES) | sed -e '/gobject/b' -e '/glib/d' > .order
+	  $(LOCAL_FILES) | while read i; do \
+	    case "$$i" in \
+	      */gobject/*) \
+	        echo "$$i" ;; \
+	      */glib/*) \
+	        case " $(GLIB_FILES) " in \
+		  *" glib/`basename $$i` "*) echo "$$i" ;; \
+		  *) ;; \
+		esac ;; \
+	      *) \
+		echo "$$i" ;; \
+	    esac; \
+	  done > order
+
 endif   # HAVE_GTK
 
 dist-hook:

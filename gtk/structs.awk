@@ -45,6 +45,10 @@ BEGIN {
   known_parent["GObject"] = "GTypeInstance"
   known_parent["GtkObject"] = "GObject"
 
+  # A couple of things that we need from GLib
+  known_parent["GOptionGroup"] = "CObject"
+  known_parent["GDate"] = "CObject"
+
   # Here starts the class hierarchy
   emitted["CObject"] = ""
 }
