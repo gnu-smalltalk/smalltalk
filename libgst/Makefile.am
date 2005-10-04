@@ -20,8 +20,9 @@ AM_CPPFLAGS += -I$(top_srcdir)/sigsegv/src -I$(top_builddir)/sigsegv/src
 endif
 
 include_HEADERS = gstpub.h gst.h
-noinst_PROGRAMS = genprims genbc genvm
 lib_LTLIBRARIES = libgst.la
+EXTRA_PROGRAMS = genprims genbc genvm
+CLEANFILES = genprims$(EXEEXT) genbc$(EXEEXT) genvm$(EXEEXT)
 
 # definitions for libgst.la
 
@@ -98,7 +99,8 @@ noinst_HEADERS = \
 $(srcdir)/match.h: $(srcdir)/match.stamp
 	@:
 
-$(srcdir)/match.stamp: byte.def byte.c opt.c xlat.c genbc$(EXEEXT)
+$(srcdir)/match.stamp: byte.def byte.c opt.c xlat.c
+	@$(MAKE) genbc$(EXEEXT)
 	@echo "./genbc $(srcdir)/byte.def $(srcdir)/byte.c $(srcdir)/opt.c $(srcdir)/xlat.c > match.h"; \
 	  ./genbc $(srcdir)/byte.def $(srcdir)/byte.c $(srcdir)/opt.c $(srcdir)/xlat.c > _match.h
 	@if cmp _match.h $(srcdir)/match.h > /dev/null 2>&1; then \
@@ -117,7 +119,8 @@ $(srcdir)/match.stamp: byte.def byte.c opt.c xlat.c genbc$(EXEEXT)
 $(srcdir)/prims.inl: $(srcdir)/prims.stamp
 	@:
 
-$(srcdir)/prims.stamp: prims.def genprims$(EXEEXT)
+$(srcdir)/prims.stamp: prims.def
+	@$(MAKE) genprims$(EXEEXT)
 	@echo "./genprims < $(srcdir)/prims.def > prims.inl"; \
 	  ./genprims < $(srcdir)/prims.def > _prims.inl
 	@if cmp _prims.inl $(srcdir)/prims.inl > /dev/null 2>&1; then \
@@ -135,7 +138,8 @@ $(srcdir)/prims.stamp: prims.def genprims$(EXEEXT)
 $(srcdir)/vm.inl: $(srcdir)/vm.stamp
 	@:
 
-$(srcdir)/vm.stamp: vm.def genvm$(EXEEXT)
+$(srcdir)/vm.stamp: vm.def
+	@$(MAKE) genvm$(EXEEXT)
 	@echo "./genvm < $(srcdir)/vm.def | awk '{ /^#/ && gsub(/__oline__/,NR+1); print }' > vm.inl"; \
 	  ./genvm < $(srcdir)/vm.def | awk '{ /^#/ && gsub(/__oline__/,NR+1); print }' > _vm.inl
 	@if cmp _vm.inl $(srcdir)/vm.inl > /dev/null 2>&1; then \
