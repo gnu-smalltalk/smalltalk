@@ -75,8 +75,8 @@ genpr-parse.h: genpr-parse.c
 	@:
 
 BUILT_SOURCES = prims.inl match.h builtins.inl vm.inl
-dist_noinst_DATA = valgrind.supp prims.def byte.def vm.def builtins.gperf \
-	prims.stamp match.stamp vm.stamp
+dist_noinst_DATA = valgrind.supp prims.def byte.def vm.def builtins.gperf
+STAMP_FILES = prims.stamp match.stamp vm.stamp
 
 noinst_HEADERS = \
 	gstpriv.h lib.h lex.h str.h \
@@ -169,7 +169,7 @@ $(srcdir)/vm.stamp: vm.def
 builtins.inl: builtins.gperf
 
 dist-hook:
-	for i in $(distdir)/*.stamp; do \
-	  echo timestamp > $$i; \
+	for i in $(STAMP_FILES); do \
+	  echo timestamp > $(distdir)/$$i; \
 	done
 
