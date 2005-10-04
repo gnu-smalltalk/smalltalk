@@ -1,3 +1,7 @@
+2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/obstack.c: Include config.h if available.
+
 2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/dup2.c: Remove, every system has it.
