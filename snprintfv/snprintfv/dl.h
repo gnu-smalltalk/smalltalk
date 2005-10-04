@@ -1,4 +1,4 @@
-#line 1 "./dl.in"
+#line 1 "../../../snprintfv/snprintfv/dl.in"
 /*  -*- Mode: C -*-  */
 
 /* ltdl.c --- dynamic loading header file for Snprintfv
@@ -40,4 +40,4 @@
 extern void snv_load_all_modules (void);
 
 
-#line 31 "./dl.in"
+#line 31 "../../../snprintfv/snprintfv/dl.in"

@@ -1,4 +1,4 @@
-#line 1 "./printf.in"
+#line 1 "../../../snprintfv/snprintfv/printf.in"
 /*  -*- Mode: C -*-  */
 
 /* printf.in --- printf clone for argv arrays
@@ -266,7 +266,7 @@ enum
       } \
   } SNV_STMT_END
 
-#line 269 "./printf.in"
+#line 269 "../../../snprintfv/snprintfv/printf.in"
 /**
  * printf_generic_info:   
  * @pinfo: the current state information for the format
@@ -302,7 +302,7 @@ extern int printf_generic_info (struct printf_info *const pinfo, size_t n, int *
 extern int printf_generic (STREAM *stream, struct printf_info *const pinfo, union printf_arg const *args);
 
 
-#line 270 "./printf.in"
+#line 270 "../../../snprintfv/snprintfv/printf.in"
 /**
  * register_printf_function:  
  * @spec: the character which will trigger @func, cast to an unsigned int.
@@ -789,7 +789,7 @@ extern int snv_vasprintf (char **result, const char *format, va_list ap);
 extern int snv_asprintfv (char **result, const char *format, snv_constpointer const args[]);
 
 
-#line 271 "./printf.in"
+#line 271 "../../../snprintfv/snprintfv/printf.in"
 
 /* If you don't want to use snprintfv functions for *all* of your string
    formatting API, then define COMPILING_SNPRINTFV_C and use the snv_

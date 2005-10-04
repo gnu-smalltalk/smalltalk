@@ -1,4 +1,4 @@
-#line 1 "./stream.in"
+#line 1 "../../../snprintfv/snprintfv/stream.in"
 /*  -*- Mode: C -*-  */
 
 /* stream.h --- customizable stream routines
@@ -180,7 +180,7 @@ extern int stream_puts (char *s, STREAM *stream);
 extern int stream_get (STREAM *stream);
 
 
-#line 88 "./stream.in"
+#line 88 "../../../snprintfv/snprintfv/stream.in"
 #ifdef __cplusplus
 #if 0
 /* This brace is so that emacs can still indent properly: */

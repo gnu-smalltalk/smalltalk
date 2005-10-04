@@ -17,40 +17,31 @@
 \a\
 @end macro
 
-@c Redefine @var to produce <xxx> in the Info file, and italics in TeX
 @ifinfo
-@set L_var <
-@set R_var <
 @set SMILE ;-)
 @end ifinfo
 @ifnotinfo
-@set L_var
-@set R_var
 @set SMILE
 @end ifnotinfo
-  
-@macro var{x}
-@value{L_var}@i{@t{\x\}}@value{R_var}
-@end macro
   
 @c Preferred layout than @uref's
 @macro hlink{url, link}
 \link\@footnote{\link\, \url\}
 @end macro
 
-@macro email{mail}
+@macro mailto{mail}
 \mail\
 @end macro
 
 @ifhtml
 @unmacro hlink
-@unmacro email
+@unmacro mailto
 
 @macro hlink{url, link}
 @uref{\url\, \link\}
 @end macro
 
-@macro email{mail}
+@macro mailto{mail}
 @uref{mailto:\mail\, , \mail\}
 @end macro
 
@@ -161,7 +152,7 @@ Packages
 * Network support::        An interface to TCP/IP and UDP and support for
                            popular network protocols.
 * XML::                    An XML parser and XSL processor.
-* Minor packages::         Various interesting modules.
+* Other packages::         Various interesting modules.
 
 Emacs
 * Autoloading::       Autoloading @gst{} mode.
@@ -278,7 +269,7 @@ the resulting data in a position independent format.  Your first
 invocation should look something like this:
 
 @display
-"Major scavenging@dots{} done, used space = 51%"
+"Scavenging@dots{} done, used space = 51%"
 @gst{} Ready
 
 st>
@@ -383,7 +374,7 @@ beginning of a file, as in
 @example
 #! /usr/bin/env gst -f
 
-@var{@dots{} Smalltalk source code @dots{}}
+@r{@i{@dots{} Smalltalk source code @dots{}}}
 @end example
 
 The first line is specially parsed by @gst{} as a comment, and the
@@ -533,21 +524,21 @@ Smalltalk quitPrimitive !
 exits from the system.  You can also type a @kbd{C-d} to exit from
 Smalltalk if it's reading statements from standard input.
 
-@example
-! @var{class expression} methodsFor: @var{category name} !
-@var{method definition 1} !
-@var{method definition 2} !
+@display
+@t{!} @var{class-expression} @t{methodsFor:} @var{category-name} @t{!}
+@var{method-definition-1} @t{!}
+@var{method-definition-2} @t{!}
 @dots{}
-@var{method definition n} ! !
-@end example
+@var{method-definition-n} @t{! !}
+@end display
 
 This syntax is used to define new methods in a given class.  The
-@var{class expression} is an expression that evaluates to a class
+@var{class-expression} is an expression that evaluates to a class
 object, which is typically just the name of a class, although it can be
 the name of a class followed by the word @code{class}, which causes the
 method definitions that follow to apply to the named class itself,
 rather than to its instances.  Two consecutive bangs terminate the set
-of method definitions.  @var{category name} should be a string object
+of method definitions.  @var{category-name} should be a string object
 that describes what category to file the methods in.
 
 @example
@@ -1539,7 +1530,7 @@ The rest of this chapter discusses the packages provided with @gst{}.
 * SUnit:                                 SUnit.
 * TCP, WebServer, NetClients:            Network support.
 * XML, XPath, XSL:                       XML.
-* Minor packages:                        Minor packages.
+* Other packages:                        Other packages.
 @end menu
 
 @node Blox
@@ -1585,7 +1576,7 @@ loop, support variables that live across multiple evaluations:
 @end example
 
 This browser evolved from an Xt-based version developed around 1993
-written by Brad Diller (@email{bdiller@@docent.com}). Because of legal
+written by Brad Diller (@mailto{bdiller@@docent.com}). Because of legal
 concerns about possible copyright infringement because his initial
 implementation used parts of ParcPlace's Model-View-Controller (MVC)
 message interface, he and Richard Stallman devised a new window update
@@ -2081,13 +2072,13 @@ the various people who had worked on the version on which the server is
 based:
 
 @display
-Joseph Bacanskas @email{joeb@@mutual.navigant.com}
-Travis Griggs @email{tgriggs@@keyww.com}
-Ralph Johnson @email{johnson@@cs.uiuc.edu}
-Eliot Miranda @email{eliot@@objectshare.com}
-Ken Treis @email{ktreis@@keyww.com}
-John Brant @email{brant@@cs.uiuc.edu}
-Joe Whitesell @email{whitesell@@physsoft.com}
+Joseph Bacanskas @mailto{joeb@@mutual.navigant.com}
+Travis Griggs @mailto{tgriggs@@keyww.com}
+Ralph Johnson @mailto{johnson@@cs.uiuc.edu}
+Eliot Miranda @mailto{eliot@@objectshare.com}
+Ken Treis @mailto{ktreis@@keyww.com}
+John Brant @mailto{brant@@cs.uiuc.edu}
+Joe Whitesell @mailto{whitesell@@physsoft.com}
 @end display
 
 Apart from porting to @gst{}, a number of changes were made to the code,
@@ -2110,8 +2101,8 @@ This library is rapidly becoming a standard in the Smalltalk world
 and a @sc{xsl} interpreter based on it is bundled with @gst{} as
 well (see packages XPath and @sc{xsl}).
 
-@node Minor packages
-@subsection Minor packages
+@node Other packages
+@subsection Other packages
 
 Various other ``minor'' packages are provided, typically as examples of
 writing modules for @gst{} (@pxref{External modules, , Linking your
@@ -2145,7 +2136,7 @@ the following lines to your @file{.emacs} file:
       (append  '(("\\.st\\'" . smalltalk-mode))
                auto-mode-alist))
 
-(autoload 'smalltalk-mode "@var{path}smalltalk-mode.elc" "" t)
+(autoload 'smalltalk-mode "@var{path}/smalltalk-mode.elc" "" t)
 @end example
 
 @noindent
@@ -2173,7 +2164,7 @@ using local variables, thus:
 @noindent
 will confuse the Smalltalk editing mode, as this might also be a
 definition the binary operator @code{|}, with second argument called
-@var{foo}.  If you find yourself confused when editing this type of
+@samp{foo}.  If you find yourself confused when editing this type of
 expression, put a dummy method name before the start of the expression,
 and take it out when you're done editing, thus:
 
@@ -2680,7 +2671,7 @@ information.
 
 Instances of @code{CObject} holds a pointer to a C type variable.  The
 variable can be allocated from Smalltalk by doing @code{@var{type}
-new}, where @code{@var{type}} is a @code{CType} subclass instance, or it
+new}, where @var{type} is a @code{CType} subclass instance, or it
 may have been returned through the C callout mechanism as a return
 value.  Remember that @code{CObject} and its subclasses represent a
 pointer to a C object and as such provide the full range of operations
@@ -2772,31 +2763,31 @@ struct audio_info @{
 And here is a Smalltalk equivalent decision:
 @example
 CStruct subclass: #AudioPrinfo
-        declaration: #( (sampleRate uLong)
-                        (channels uLong)
-                        (precision uLong)
-                        (encoding uLong)
-                        (gain uLong)
-                        (port uLong)
-                        (xxx (array uLong 4))
-                        (samples uLong)
-                        (eof uLong)
-                        (pause uChar)
-                        (error uChar)
-                        (waiting uChar)
-                        (ccc (array uChar 3))
-                        (open uChar)
-                        (active uChar))
+        declaration: #( (#sampleRate #uLong)
+                        (#channels #uLong)
+                        (#precision #uLong)
+                        (#encoding #uLong)
+                        (#gain #uLong)
+                        (#port #uLong)
+                        (#xxx (#array #uLong 4))
+                        (#samples #uLong)
+                        (#eof #uLong)
+                        (#pause #uChar)
+                        (#error #uChar)
+                        (#waiting #uChar)
+                        (#ccc (#array #uChar 3))
+                        (#open #uChar)
+                        (#active #uChar))
         classVariableNames: ''
         poolDictionaries: ''
         category: 'C interface-Audio'
 !
 
 CStruct subclass: #AudioInfo
-        declaration: #( (play #@{AudioPrinfo@} )
-                        (record #@{AudioPrinfo@} )
-                        (monitorGain uLong)
-                        (yyy (array uLong 4)))
+        declaration: #( (#play #@{AudioPrinfo@} )
+                        (#record #@{AudioPrinfo@} )
+                        (#monitorGain #uLong)
+                        (#yyy (#array #uLong 4)))
         classVariableNames: ''
         poolDictionaries: ''
         category: 'C interface-Audio'
@@ -2855,12 +2846,12 @@ corresponding to a global variable.
 
 To have a pointer to a type, use something like:
 @example
-        (example (ptr long))
+        (#example (#ptr #long))
 @end example
 
-To have an array pointer of size @code{@var{size}}, use:
+To have an array pointer of size @var{size}, use:
 @example
-        (example (array string @var{size}))
+        (#example (#array #string @var{size}))
 @end example
 
 Note that this maps to @code{char *example[@var{size}]} in C.
@@ -3976,7 +3967,7 @@ in the main distribution directory.
 
 I would @emph{very much} welcome any volunteers who would like to help
 with the implementation of one or more of these tasks.  Please write at
-@email{help-smalltalk@@gnu.org} if you are interested in adding your
+@mailto{help-smalltalk@@gnu.org} if you are interested in adding your
 efforts to the @gst{} project.
 
 Tasks:

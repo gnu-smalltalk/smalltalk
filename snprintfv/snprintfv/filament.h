@@ -1,4 +1,4 @@
-#line 1 "./filament.in"
+#line 1 "../../../snprintfv/snprintfv/filament.in"
 /*  -*- Mode: C -*-  */
 
 /* filament.h --- a bit like a string but different =)O|
@@ -118,7 +118,7 @@ extern char * fildelete (Filament *fil);
 extern void _fil_extend (Filament *fil, size_t len, boolean copy);
 
 
-#line 61 "./filament.in"
+#line 61 "../../../snprintfv/snprintfv/filament.in"
 
 /* Save the overhead of a function call in the great majority of cases. */
 #define fil_maybe_extend(fil, len, copy)  \

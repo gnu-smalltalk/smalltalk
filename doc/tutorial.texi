@@ -3296,7 +3296,7 @@ commercial Smalltalk implementations; you can buy support for
 these, though it isn't cheap.  For the @gst{} system in
 particular, you can try the mailing list at:
 @example
-   @email{help-smalltalk@@gnu.org}
+   @mailto{help-smalltalk@@gnu.org}
 @end example
 
 No guarantees, but the subscribers will surely do their best!  
