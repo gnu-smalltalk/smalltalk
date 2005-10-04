@@ -163,3 +163,9 @@ $(srcdir)/vm.stamp: vm.def genvm$(EXEEXT)
 	  done
 
 builtins.inl: builtins.gperf
+
+dist-hook:
+	for i in $(distdir)/*.stamp; do \
+	  echo timestamp > $$i; \
+	done
+
