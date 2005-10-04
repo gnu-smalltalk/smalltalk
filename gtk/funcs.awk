@@ -41,16 +41,12 @@ BEGIN {
     type["double"] = "#double"
     type["gconstpointer"] = "#cObject"
     type["gpointer"] = "#cObject"
+    type["GStrv"] = "#cObject"
 
     type["va_list"] = "__skip_this__"
     type["GCallback"] = "__skip_this__"
     type["GClosure"] = "__skip_this__"
     type["GCClosure"] = "__skip_this__"
-    type["GCompareDataFunc"] = "__skip_this__"
-    type["GCompareFunc"] = "__skip_this__"
-    type["GDestroyNotify"] = "__skip_this__"
-    type["GFunc"] = "__skip_this__"
-    type["GWeakNotify"] = "__skip_this__"
 
     # Skip GLib artifacts
     type["GFlags"] = "__skip_this__"
@@ -184,6 +180,10 @@ match($0, /^[ \t]*([a-zA-Z][a-zA-Z0-9]*[ \t\*]+)((g[a-z]*|pango)_[a-zA-Z0-9_]*)[
     decl = decl " " $0
   }
 
+  # Check for non-default visibility
+  if (decl ~ /G_GNUC_INTERNAL/)
+    next
+
   # Check for presence of pointers to functions
   if (decl ~ /\([ \t]*\*/)
     next
@@ -278,6 +278,7 @@ match($0, /^[ \t]*([a-zA-Z][a-zA-Z0-9]*[ \t\*]+)((g[a-z]*|pango)_[a-zA-Z0-9_]*)[
   # skip some functions that we don't have bindings for
 
   if (type[className] == "__skip_this__" \
+      || classname ~ /^G.*(Func|Notify)$/ \
       || className == "GType" \
       || className == "GtkType" \
       || argdecl ~ /__skip_this__/ \

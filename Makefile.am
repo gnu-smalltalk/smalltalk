@@ -27,7 +27,7 @@ DIST_SUBDIRS = lib-src snprintfv lightning sigsegv \
 
 SUBDIRS = lib-src lightning $(subdirs) \
 	libgst i18n config kernel tcp \
-	examples gtk blox-tk . doc tests
+	examples blox-tk . doc gtk tests
 
 pkglib_DATA = libc.la
 pkgdata_DATA = Load.st Reload.st packages.xml
