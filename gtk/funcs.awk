@@ -101,8 +101,8 @@ BEGIN {
     class["g_param_values_"] = "GParamSpec"
     class["g_param_type_"] = "GParamSpec"
 
-    # Not yet used
-    method_skip_regexp = /^$/
+    # Methods that we do not need
+    method_skip_regexp = "(^$)|(_error_quark$)"
 
     # Not really exact, this belongs in GtkFileChooserWidget too.
     # We need a way to do interfaces.
@@ -132,13 +132,13 @@ match ($0, /^G_CONST_RETURN[ \t]*/) {
   $0 = substr ($0, RLENGTH + 1)
 }
 
-match($0, /^[ \t]*([a-zA-Z][a-zA-Z0-9]*[ \t\*]+)((g[a-z]*|pango)_[a-zA-Z0-9_]*)[ \t]*(\(.*)/, first_line) { 
+match($0, /^[ \t]*([a-zA-Z][a-zA-Z0-9]*[ \t\*]+)((g[a-z]*|pango)_[a-zA-Z0-9_]*)[ \t]*(\(.*)/, first_line) {
   
   first_line[1] = gensub(/[ \t]+/, "", "G", first_line[1])
 
   cFuncName = first_line[2]
 
-  if (match(first_line[2], method_skip_regexp))
+  if (first_line[2] ~ method_skip_regexp)
     next
   else if (match(first_line[2], method_regexp))
     className = class[substr(first_line[2], 1, RLENGTH)]
@@ -149,10 +149,15 @@ match($0, /^[ \t]*([a-zA-Z][a-zA-Z0-9]*[ \t\*]+)((g[a-z]*|pango)_[a-zA-Z0-9_]*)[
     className = correct_case[tolower(className)]
 
   first_line[2] = substr(first_line[2], RLENGTH + 1)
-  creation = first_line[2] ~ /^(newv?|alloc)($|_)/
 
-  # special case for the one API exception: gtk_ui_manager_new_merge_id
+  # For types that are not classes, do not create the getType method
+  if (first_line[2] == "get_type" && (className in type))
+    next
+
+  # Move object creation methods to the class side.  We have a single
+  # special case for an API exception: gtk_ui_manager_new_merge_id
   # doesn't make a new ui_manager
+  creation = first_line[2] ~ /^(newv?|alloc)($|_)/
   if (first_line[2] == "new_merge_id")
     creation = 0
 

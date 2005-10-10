@@ -1,3 +1,9 @@
+2005-10-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gtk/funcs.awk: Do not include error_quark functions, they are
+	related to a GLib module and not to a class.  Do not include
+	get_type functions if the type is not mapped to a Smalltalk class.
+
 2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gtk/funcs.awk: GTK+ 2.6 has functions with internal visibility.
