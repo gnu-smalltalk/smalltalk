@@ -545,7 +545,8 @@ getDateAndTime: time
     "Private - Convert a time expressed in seconds from 1/1/2000 to
      an array of two Smalltalk Date and Time objects"
 
-    ^Epoch + (Duration seconds: time)
+    ^(Epoch + (Duration seconds: time))
+	offset: (Duration seconds: Time timezoneBias)
 !
 
 stat

@@ -1,10 +1,14 @@
+2005-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFS.st: Give the current timezone to the file timestamps.
+
 2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/regex.c: Constify bm_search.
 
 2005-09-05  Paolo Bonzini  <bonzini@gnu.org>
 
-	* examples/StreamFilter.st: reimplement #peek and add #peekFor: to
+	* examples/StreamFilter.st: Reimplement #peek and add #peekFor: to
 	ConcatenedStream.
 
 	* kernel/Character.st: new method #isDigit:.
