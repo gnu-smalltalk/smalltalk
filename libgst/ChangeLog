@@ -1,3 +1,7 @@
+2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/obstack.c: Include config.h if available.
+
 2005-09-12  Mike Anderson  <msasjf@yahoo.co.uk>
 
 	* libgst/events.c: Fix bug with pollfds being lost if a previous

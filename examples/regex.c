@@ -2529,12 +2529,12 @@ bm_init_skip (skip, pat, m, translate)
 
 static int
 bm_search (little, llen, big, blen, skip, translate)
-     unsigned char *little;
+     const unsigned char *little;
      int llen;
-     unsigned char *big;
+     const unsigned char *big;
      int blen;
      int *skip;
-     unsigned char *translate;
+     const unsigned char *translate;
 {
   int i, j, k;
 

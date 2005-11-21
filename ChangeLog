@@ -1,3 +1,7 @@
+2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/regex.c: Constify bm_search.
+
 2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/geometry.st: Make more resilient to #basicHash vagaries.

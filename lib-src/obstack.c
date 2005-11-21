@@ -24,6 +24,10 @@
 #include <config.h>
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "obstack.h"
 
 /* NOTE BEFORE MODIFYING THIS FILE: This version number must be
