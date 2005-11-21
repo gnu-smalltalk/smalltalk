@@ -1,3 +1,10 @@
+2005-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* dict.c (_gst_string_new, _gst_counted_string_new): Handle
+	zero-length strings.
+	* interp.c (_gst_init_signals): Handle SIGTERM.
+	(interrupt_handler): Exit on SIGINT or SIGTERM.
+
 2005-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.h: New methods for the interpreter proxy.
