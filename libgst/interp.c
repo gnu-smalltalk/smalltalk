@@ -2425,10 +2425,6 @@ interrupt_handler (int sig)
 
   switch (sig)
     {
-    case SIGTERM:
-      is_serious_error = false;
-      break;
-
     case SIGUSR1:
       return;
 
