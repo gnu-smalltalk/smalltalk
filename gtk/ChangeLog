@@ -1,3 +1,8 @@
+2005-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gtk/gst-gtk.c: Support 2 extra arguments to the signal function,
+	i.e. the widget and the user data.
+
 2005-10-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gtk/funcs.awk: Do not include error_quark functions, they are

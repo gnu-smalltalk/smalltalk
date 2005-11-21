@@ -59,7 +59,10 @@ if test $# -lt 2; then
   exit 1
 fi
 
-file=$2
+case $2 in
+  */*) file=$2 ;;
+  *) file=./$2 ;;
+esac
 dir=`echo $file | sed 's,/[^/]*$,,'`
 mode=`echo $file | sed 's,^.*/,,g;s,\.in$,.h,'`
 format=${FORMAT-GNUC_PRINTF}

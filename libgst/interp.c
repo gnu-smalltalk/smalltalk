@@ -2342,6 +2342,7 @@ _gst_init_signals (void)
 #endif
       _gst_set_signal_handler (SIGABRT, interrupt_handler);
     }
+  _gst_set_signal_handler (SIGTERM, interrupt_handler);
   _gst_set_signal_handler (SIGINT, interrupt_handler);
   _gst_set_signal_handler (SIGFPE, interrupt_handler);
   _gst_set_signal_handler (SIGUSR1, interrupt_handler);
@@ -2367,6 +2368,10 @@ interrupt_handler (int sig)
 
   switch (sig)
     {
+    case SIGTERM:
+      is_serious_error = false;
+      break;
+
     case SIGUSR1:
       is_serious_error = false;
       _gst_set_signal_handler (sig, interrupt_handler);
@@ -2378,7 +2383,7 @@ interrupt_handler (int sig)
 
     case SIGINT:
       is_serious_error = false;
-      if (!_gst_non_interactive)
+      if (!_gst_non_interactive && in_interpreter)
 	{
 	  _gst_set_signal_handler (sig, interrupt_handler);
 	  stop_executing ("userInterrupt");
@@ -2418,11 +2423,23 @@ interrupt_handler (int sig)
 #endif
     }
 
-  if (sig == SIGUSR1)
-    return;
+  switch (sig)
+    {
+    case SIGTERM:
+      is_serious_error = false;
+      break;
 
-  _gst_set_signal_handler (sig, SIG_DFL);
-  raise (sig);
+    case SIGUSR1:
+      return;
+
+    case SIGTERM:
+    case SIGINT:
+      exit (0);
+
+    default:
+      _gst_set_signal_handler (sig, SIG_DFL);
+      raise (sig);
+    }
 }
 
 void

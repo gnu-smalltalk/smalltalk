@@ -1831,11 +1831,17 @@ _gst_string_new (const char *s)
   size_t len;
   OOP stringOOP;
 
-  len = strlen (s);
-  string = (gst_string) new_instance_with (_gst_string_class, len,
-					   &stringOOP);
+  if (s)
+    {
+      len = strlen (s);
+      string = (gst_string) new_instance_with (_gst_string_class, len,
+					       &stringOOP);
 
-  strncpy (string->chars, s, len);
+      strncpy (string->chars, s, len);
+    }
+  else
+    string = (gst_string) new_instance_with (_gst_string_class, 0,
+					     &stringOOP);
   return (stringOOP);
 }
 
@@ -1849,7 +1855,9 @@ _gst_counted_string_new (const char *s,
   string = (gst_string) new_instance_with (_gst_string_class, len,
 					   &stringOOP);
 
-  memcpy (string->chars, s, len);
+  if (len)
+    memcpy (string->chars, s, len);
+
   return (stringOOP);
 }
 
