@@ -53,6 +53,7 @@ typedef struct SmalltalkClosure
   OOP      selector;
   OOP      data;
   OOP      widget;
+  int      n_params;
 } SmalltalkClosure;
 
 VMProxy *_gst_vm_proxy;
@@ -113,7 +114,9 @@ static void fill_g_value_from_oop (GValue *val,
    only one is the closure's arity is 0).  */
 static GClosure *create_smalltalk_closure (OOP receiver,	
 					   OOP selector,
-					   OOP data);
+					   OOP widget,
+					   OOP data,
+					   int n_params);
 
 /* The finalization notifier for Smalltalk GClosures.  Unregisters the
    receiver and user data for the CLOSURE.  */
@@ -422,17 +425,22 @@ fill_g_value_from_oop (GValue *return_value, OOP oop)
 GClosure *
 create_smalltalk_closure (OOP receiver,	
 			  OOP selector,
-			  OOP data)
+			  OOP data,
+			  OOP widget,
+			  int n_params)
 {
   GClosure *closure = g_closure_new_simple (sizeof (SmalltalkClosure), NULL);
   SmalltalkClosure *stc = (SmalltalkClosure *) closure;
 
   _gst_vm_proxy->registerOOP (receiver);
+  _gst_vm_proxy->registerOOP (widget);
   _gst_vm_proxy->registerOOP (data);
 
   stc->receiver = receiver;
   stc->selector = selector;
   stc->data = data;
+  stc->widget = widget;
+  stc->n_params = n_params;
 
   g_closure_set_marshal (closure, invoke_smalltalk_closure);
   g_closure_add_finalize_notifier (closure, NULL, finalize_smalltalk_closure);
@@ -446,6 +454,7 @@ finalize_smalltalk_closure (gpointer      data,
   SmalltalkClosure *stc = (SmalltalkClosure *) closure;
 
   _gst_vm_proxy->unregisterOOP (stc->receiver);
+  _gst_vm_proxy->unregisterOOP (stc->widget);
   _gst_vm_proxy->unregisterOOP (stc->data);
 }
 
@@ -457,10 +466,15 @@ invoke_smalltalk_closure (GClosure     *closure,
 			  gpointer      invocation_hint,
 			  gpointer      marshal_data)
 {
-  OOP *args = alloca (sizeof (OOP) * (1 + n_param_values));
   SmalltalkClosure *stc = (SmalltalkClosure *) closure;
+  OOP *args = alloca (sizeof (OOP) * stc->n_params);
+
   OOP resultOOP;
   int i;
+
+  /* Less parameters than the event has, discard the ones in excess.  */
+  if (stc->n_params < n_param_values)
+    n_param_values = stc->n_params;
 
   /* Maintain the Gtk order of parameters, even if we end up discarding 
      the sender (first parameter, usually) most of the time */
@@ -478,10 +492,13 @@ invoke_smalltalk_closure (GClosure     *closure,
 	}
       args[i] = oop;
     }
-  args[n_param_values] = stc->data;
 
-  resultOOP = _gst_vm_proxy->nvmsgSend (stc->receiver, stc->selector, args,
-					1 + n_param_values);
+  if (stc->n_params > n_param_values + 1)
+    args[i++] = stc->widget;
+  if (stc->n_params > n_param_values)
+    args[i++] = stc->data;
+
+  resultOOP = _gst_vm_proxy->nvmsgSend (stc->receiver, stc->selector, args, i);
 
   /* FIXME Need to init return_value's type? */
   if (return_value)
@@ -500,6 +517,7 @@ connect_signal (OOP widget,
   GClosure     *closure;
   GSignalQuery  qry;
   guint         sig_id;
+  int		n_params;
   OOP           oop_sel_args;
 
   /* Check parameters */
@@ -520,15 +538,17 @@ connect_signal (OOP widget,
   /* We can return fewer arguments than are in the event, if the others aren't 
      wanted, but we can't return more, and returning nilOOPs instead is not 
      100% satisfactory, so fail. */
-  if (_gst_vm_proxy->OOPToInt (oop_sel_args) > qry.n_params)
+  n_params = _gst_vm_proxy->OOPToInt (oop_sel_args);
+  if (n_params - qry.n_params > 2)
     return (-4);
 
   /* Receiver is assumed to be OK, no matter what it is */
   /* Parameters OK, so carry on and connect the signal */
   
-  associate_oop_to_g_object (G_OBJECT (cWidget), widget);
+  widget = narrow_oop_for_g_object (G_OBJECT (cWidget), widget);
+  closure = create_smalltalk_closure (receiver, selector, user_data,
+				      widget, n_params);
 
-  closure = create_smalltalk_closure (receiver, selector, user_data);
   g_signal_connect_closure (cWidget, event_name, closure, FALSE);
   return (0);
 }
