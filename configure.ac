@@ -218,22 +218,25 @@ AC_SUBST(I18N_DISABLED)
 AC_CHECK_HEADER(gdbm.h, MODULES_EXAMPLE="$MODULES_EXAMPLE gdbm.la")
 
 AC_ARG_ENABLE(gtk,
-[  --disable-gtk           disable GTK+ bindings], ,
+[  --enable-gtk={yes,no,blox}
+                          enable GTK+ bindings.  Blox/GTK is experimental.], ,
 enable_gtk=yes)
 
 if test "$enable_gtk" != no; then
+  maybe_enable_gtk=$enable_gtk
   enable_gtk=no
   AM_PATH_GLIB_2_0(2.0.0, [
     AM_PATH_GTK_2_0(2.0.0, [
       PKG_CHECK_MODULES(ATK, atk >= 1.0.0, [
-        PKG_CHECK_MODULES(PANGO, pango >= 1.0.0, [enable_gtk=yes])
+        PKG_CHECK_MODULES(PANGO, pango >= 1.0.0, [enable_gtk=$maybe_enable_gtk])
       ])
     ])
   ], [], gobject)
 fi
  
 AM_CONDITIONAL(HAVE_GTK, test "$enable_gtk" != no)
-test "$enable_gtk" != no && MODULES_GTK="gst-gtk.la" GTK_DISABLED="" BLOX_IMPLEMENTATION=BloxGTK
+test "$enable_gtk" != no && MODULES_GTK="gst-gtk.la" GTK_DISABLED=""
+test "$enable_gtk" = blox && BLOX_IMPLEMENTATION=BloxGTK
 test "$gst_cv_tcltk_libs" != "not found" && MODULES_TK="blox-tk.la"
 test "$gst_cv_inet_sockets" != "no" && MODULES_TCP="tcp.la"
 test "$ac_cv_func_nl_langinfo" = yes && \

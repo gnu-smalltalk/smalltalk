@@ -179,7 +179,8 @@ o   When a non-existing message is sent with the wrong number of arguments
 Work in progress:
 
 o   Blox-GTK interface, to use the browser under Gtk+.  Currently, only
-    the browser works.  Thanks to Robert Collins.
+    the browser works; to try it, configure with --enable-gtk=blox or
+    load the BloxGTK package.  Thanks to Robert Collins.
 
 o   GNU Smalltalk now supports executing (some) Java programs.  See the
     info documentation for more information.  The class library is based
