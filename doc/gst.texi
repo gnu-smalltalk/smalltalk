@@ -1479,46 +1479,70 @@ To provide support for this system, you have to give away with your GST
 goodies a small file (say you call it @file{mypkg}) which looks like
 this:
 @example
-<!-- This is the comment for the package file for
-     the absolutely WONDERFUL package MyPackage -->
-
 <packages>
 <package>
-  <name>MyPackage</name>
-  <prereq>MyPrereq1</prereq>
-  <prereq>MyPrereq2</prereq>
-  <callout>MyCallout1</callout>
-  <callout>MyCallout2</callout>
-  <filein>Load.st</filein>
-  <filein>Finish.st</filein>
-  <module>libmymodule</module>
-  <directory>yourDirectoryName</directory>
+  <name>BloxGTK</name>
+  <namespace>BLOX</namespace>
+  <directory>blox-gtk</directory>
 
-  <file>Load.st</file>
-  <file>Finish.st</file>
-  <file>MyFile1.st</file>
-  <file>MyFile2.st</file>
-  <!-- @i{@r{More files may follow}} -->
+  <!-- @i{@r{The @code{prereq} tag identifies packages that
+       must be loaded before this one.}} -->
+  <prereq>GTK</prereq>
+
+  <!-- @i{@r{The @code{provides} tag identifies packages that
+       need not be loaded once this one is.}} -->
+  <provides>BLOX</provides>
+  
+  <!-- @i{@r{The @code{filein} tag identifies packages that
+       compose this package and that should be loaded in the
+       image in this order.}} -->
+  <filein>BloxBasic.st</filein>
+  <filein>BloxWidgets.st</filein>
+  <filein>BloxText.st</filein>
+  <filein>BloxExtend.st</filein>
+  <filein>Blox.st</filein>
+  <filein>../browser/test.st</filein>
+  
+  <!-- @i{@r{The @code{file} tag identifies packages that
+       compose this package's distribution.}} -->
+  <file>Blox.st</file>
+  <file>BloxBasic.st</file>
+  <file>BloxWidgets.st</file>
+  <file>BloxText.st</file>
+  <file>BloxExtend.st</file>
 </package>
-
-<!-- @i{@r{More packages may follow}} -->
-
 </packages>
 @end example
 
-then people who install your package will only have to do
+Other tags exist:
+@table @code
+@item module
+Loads a dynamic shared object and calls the @code{gst_initModule}
+function in it.  Modules can register functions so that Smalltalk
+code can call them, and can interact with or manipulate Smalltalk
+objects.  The @code{TCP} package uses a module to provide a bridge
+to the socket functions.
+
+@item library
+Loads a dynamic shared object and registers the functions in it
+so that they can all be called from Smalltalk code.  The @code{GTK}
+package registers the GTK+ library in this way, so that the
+bindings can use them.
+
+@item callout
+Refuse to load the package if the function whose name is within
+the tags is not available to be called from Smalltalk code.
+@end table
+
+To install your package, you only have to do
 @example
-    gst-package mypkg
+    gst-package mypkg.xml
 @end example
 
-which is a small shell script which will merge the file
-with @file{packages.xml}, install the files specified in
-the @code{file} tags and load the packages.
-
-Simple, isn't it?  For examples of package declarations, have a look at
-the @file{packages.xml} file as distributed with @gst{}.  The @gst{}
-makefile also use @file{gst-package} to install packages and to
-prepare the distribution tarballs.
+which is a small shell script which will merge the file with
+@file{packages.xml}, install the files specified in the @code{file} tags
+and load the packages.  The @gst{} makefile also use @file{gst-package}
+to install packages and to prepare the distribution tarballs.
 
 The rest of this chapter discusses the packages provided with @gst{}.
 

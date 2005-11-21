@@ -4,7 +4,6 @@
 <package>
   <name>Blox</name>
   <prereq>@BLOX_IMPLEMENTATION@</prereq>
-  <filein>test.st</filein>
   <namespace>BLOX</namespace>
   <directory>browser</directory>
 
@@ -49,11 +48,14 @@
   <name>BloxGTK</name>
   <namespace>BLOX</namespace>
   <prereq>GTK</prereq>
+  <provides>Blox</provides>
+
   <filein>BloxBasic.st</filein>
   <filein>BloxWidgets.st</filein>
   <filein>BloxText.st</filein>
   <filein>BloxExtend.st</filein>
   <filein>Blox.st</filein>
+  <filein>../browser/test.st</filein>
   <directory>blox-gtk</directory>
 
   <file>Blox.st</file>
@@ -66,12 +68,15 @@
 <package>
   <name>BloxTK</name>
   <namespace>BLOX</namespace>
+  <provides>Blox</provides>
+
   <filein>BloxBasic.st</filein>
   <filein>BloxWidgets.st</filein>
   <filein>BloxText.st</filein>
   <filein>BloxCanvas.st</filein>
   <filein>BloxExtend.st</filein>
   <filein>Blox.st</filein>
+  <filein>../browser/test.st</filein>
   <module>blox-tk</module>
   <directory>blox-tk</directory>
 

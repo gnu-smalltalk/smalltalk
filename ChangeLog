@@ -1,5 +1,12 @@
 2005-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PkgLoader.st: Add `features' instance variables and accessors
+	to the Package class.  Use it in #fileInPackage: and when computing
+	the dependencies.  Fix the printXmlOn: method.  Parse the <provides>
+	tag when reading the packages file.
+
+2005-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/VFS.st: Give the current timezone to the file timestamps.
 
 2005-10-04  Paolo Bonzini  <bonzini@gnu.org>

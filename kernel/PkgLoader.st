@@ -32,7 +32,7 @@
 
 
 Object subclass: #Package
-	instanceVariableNames: 'name prerequisites builtFiles files fileIns directory libraries modules callouts namespace'
+	instanceVariableNames: 'name features prerequisites builtFiles files fileIns directory libraries modules callouts namespace'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Language-Packaging'
@@ -85,6 +85,11 @@ printOn: aStream
 	    nextPutAll: '</namespace>';
 	    nl.
     ].
+
+    self
+	printXmlOn: aStream
+	collection: self features asSortedCollection
+	tag: 'provides'.
 
     self
 	printXmlOn: aStream
@@ -145,6 +150,11 @@ namespace
 namespace: aString
     "Set to aString the namespace in which the package is loaded."
     namespace := aString!
+
+features
+    "Answer a (modifiable) Set of features provided by the package."
+    features isNil ifTrue: [ features := Set new ].
+    ^features!
 
 prerequisites
     "Answer a (modifiable) Set of prerequisites."
@@ -292,7 +302,9 @@ fileIn
     self fileIns do: [ :each | FileStream fileIn: each ].
     Directory working: dir.
     Namespace current: namespace.
-    Smalltalk addFeature: self name asSymbol! !
+    Smalltalk addFeature: self name asSymbol.
+    self features do: [ :each | Smalltalk addFeature: each asSymbol ].
+! !
 
 !PackageLoader class methodsFor: 'accessing'!
 
@@ -342,6 +354,12 @@ modulesFor: package
     "Answer a Set of Strings containing the filenames of the given package's
      modules (relative to the directory answered by #directoryFor:)"
     ^(self packageAt: package) modules.
+!
+
+featuresFor: package
+    "Answer a Set of Strings containing the features provided by the given
+     package."
+    ^(self packageAt: package) features.
 !
 
 prerequisitesFor: package
@@ -411,15 +429,19 @@ extractDependenciesFor: packagesList onError: aBlock
      Pass an error message to aBlock if one or more packages need
      prerequisites which are not available."
 
-    | toBeLoaded oldDep newDep |
+    | toBeLoaded featuresFound dependencies allPrereq allFeatures |
     toBeLoaded := packagesList asOrderedCollection.
-    oldDep := packagesList.
-    [   newDep := Set new.
-	oldDep do: [ :each |
-	    (Smalltalk hasFeatures: each asSymbol) ifFalse: [
+    featuresFound := Set withAll: Smalltalk.Features.
+    dependencies := packagesList.
+    [
+	allPrereq := Set new.
+	allFeatures := Set new.
+	dependencies do: [ :each |
+	    (featuresFound includes: each asSymbol) ifFalse: [
 		(self isLoadable: each)
 		    ifFalse: [ ^aBlock value: 'package not available: ', each ].
-		newDep addAll: (self prerequisitesFor: each)
+		allPrereq addAll: (self prerequisitesFor: each).
+		allFeatures addAll: (self featuresFor: each)
 	    ]
 	].
 
@@ -428,14 +450,17 @@ extractDependenciesFor: packagesList onError: aBlock
 	 this naive way.
 	 Note that we remove duplicates from toBeLoaded so that prerequisites
 	 are always loaded *before*."
-	toBeLoaded removeAll: newDep ifAbsent: [ :doesNotMatter | ].
-	newDep isEmpty
-    ]   whileFalse: [
-	toBeLoaded addAllFirst: newDep.
-	
-	"Proceed recursively with the prerequisites for newDep"
-	oldDep := newDep.
-    ].
+	toBeLoaded removeAll: allPrereq ifAbsent: [ :doesNotMatter | ].
+	toBeLoaded removeAll: allFeatures ifAbsent: [ :doesNotMatter | ].
+
+	allPrereq removeAll: allFeatures ifAbsent: [ :doesNotMatter | ].
+	featuresFound addAll: allFeatures.
+	toBeLoaded addAllFirst: allPrereq.
+
+	"Proceed recursively with the prerequisites for allPrereq"
+	dependencies := allPrereq.
+	dependencies notEmpty
+    ] whileTrue.
 
     ^toBeLoaded
 !
@@ -497,13 +522,12 @@ localPackageFileName
 printXmlOn: aStream
     "Print the XML source code for the information that the PackageLoader
      holds on aStream."
-    | before |
-    before := '<packages>'.
+    aStream nextPutAll: '<packages>'.
     Packages keys asSortedCollection do: [ :each |
-	aStream nextPutAll: before; print: aStream.
-	before := ''.
+	(self packageAt: each) printOn: aStream.
     ].
-    aStream nextPutAll: '</packages>'!
+    aStream nextPutAll: '</packages>'
+!
 
 rebuildPackageFile
     "Recreate the XML file from the information that the PackageLoader
@@ -552,6 +576,7 @@ processPackageFile: fileName baseDirectories: baseDirs
 	    tag = 'file' ifTrue: [ package files add: cdata ] ifFalse: [
 	    tag = 'filein' ifTrue: [ package fileIns add: cdata ] ifFalse: [
 	    tag = 'prereq' ifTrue: [ package prerequisites add: cdata ] ifFalse: [
+	    tag = 'provides' ifTrue: [ package features add: cdata ] ifFalse: [
 	    tag = 'module' ifTrue: [ package modules add: cdata ] ifFalse: [
 	    tag = 'directory' ifTrue: [ package directory: cdata ] ifFalse: [
 	    tag = 'name' ifTrue: [ package name: cdata ] ifFalse: [
@@ -561,7 +586,7 @@ processPackageFile: fileName baseDirectories: baseDirs
 		(package baseDirs: baseDirs)
 		    ifTrue: [ Packages at: package name put: package ]] ifFalse: [
 	    tag = 'built-file' ifTrue: [ package builtFiles add: cdata ] ifFalse: [
-	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]].
+	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]]].
 	    cdata := nil.
 	].
 	ch isAlphaNumeric ifTrue: [
