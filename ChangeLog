@@ -1,3 +1,7 @@
+2005-11-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/shell: Change the invocation method once more.
+
 2005-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Add `features' instance variables and accessors
