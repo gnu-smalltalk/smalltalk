@@ -417,16 +417,21 @@ asByteArray
 asInteger
     "Parse an Integer number from the receiver until the input character
      is invalid and answer the result at this point"
-    | result i sign |
-    result := 0.
-    self isEmpty ifTrue: [ ^result ].
+    | result i sign ch |
+    self isEmpty ifTrue: [ ^0 ].
 
-    sign := (self at: 1) = $-
-	ifTrue: [ i := 2. -1 ]
-	ifFalse: [ i := 1. 1 ].
-    self from: i to: self size do: 
-	[ :ch | ch isDigit ifFalse: [ ^result ].
-		result := result * 10 + (ch digitValue * sign) ].
+    ch := self at: 1.
+    ch = $-
+	ifTrue: [
+	    sign := -1. result := 0 ]
+	ifFalse: [
+	    ch isDigit ifFalse: [ ^0 ].
+	    sign := 1. result := ch digitValue ].
+
+    2 to: self size do: [ :i |
+	ch := self at: i.
+	ch isDigit ifFalse: [ ^result ].
+	result := result * 10 + (ch digitValue * sign) ].
     ^result
 !
 
