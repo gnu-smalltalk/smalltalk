@@ -1,5 +1,26 @@
 2005-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/dict.c (class_info): Use ISP_CHARACTER shape for
+	String and Symbol.
+	(_gst_log2_sizes): Adjust for ISP_CHARACTER.
+	* libgst/dict.inl (index_oop_put_spec, index_oop_spec): New,
+	from index_oop_put and index_oop.  Fix typos in handling of
+	ISP_FLOAT and ISP_DOUBLE.  Handle ISP_CHARACTER.
+	(index_oop_put, index_oop): Use them.
+	(index_string_oop_put, index_string_oop): Delete.
+	* libgst/gstpriv.h: Define ISP_CHARACTER.
+	* libgst/prims.def (VMpr_String_basicAt,
+	VMpr_String_basicAtPut): Delete.
+	(VMpr_String_similarityTo): Accept ISP_CHARACTER shaped classes.
+	(VMpr_ByteArray_replaceFromToWithStartingAt): Accept ISP_SCHAR and
+	ISP_CHARACTER shaped classes as well.
+	* libgst/xlat.c (emit_basic_size_in_r0): Accept ISP_SCHAR and
+	ISP_CHARACTER shaped classes as well.
+	(emit_inlined_primitive): Accept ISP_SCHAR and ISP_CHARACTER
+	shaped classes as well.
+
+2005-11-29  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/interp.h (execute_primitive_operation): Do not declare.
 	* libgst/interp.c (execute_primitive_operation): New name
 	of _gst_execute_primitive_operation.  Make static and inline.
@@ -9,9 +30,9 @@
 
 2005-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
-	* dict.c (_gst_string_new, _gst_counted_string_new): Handle
+	* libgst/dict.c (_gst_string_new, _gst_counted_string_new): Handle
 	zero-length strings.
-	* interp.c (_gst_init_signals): Handle SIGTERM.
+	* libgst/interp.c (_gst_init_signals): Handle SIGTERM.
 	(interrupt_handler): Exit on SIGINT or SIGTERM.
 
 2005-09-18  Paolo Bonzini  <bonzini@gnu.org>

@@ -32,7 +32,7 @@
  ======================================================================"
 
 
-CharacterArray variableByteSubclass: #String
+CharacterArray variable: #character subclass: #String
 		  instanceVariableNames: ''
 		  classVariableNames: ''
 		  poolDictionaries: ''

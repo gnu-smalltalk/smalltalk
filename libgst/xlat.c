@@ -2471,7 +2471,10 @@ emit_basic_size_in_r0 (OOP classOOP, mst_Boolean tagged, int objectReg)
     }
 
   /* Not yet implemented.  */
-  if (shape != ISP_POINTER && shape != ISP_UCHAR)
+  if (shape != ISP_POINTER
+      && shape != ISP_SCHAR
+      && shape != ISP_CHARACTER
+      && shape != ISP_UCHAR)
     abort ();
 
   adjust = CLASS_FIXED_FIELDS (classOOP) +
@@ -2485,7 +2488,7 @@ emit_basic_size_in_r0 (OOP classOOP, mst_Boolean tagged, int objectReg)
 
   jit_ldxi_l (JIT_R0, objectReg, jit_ptr_field (mst_Object, objSize));
 
-  if (shape == ISP_UCHAR)
+  if (shape != ISP_POINTER)
     jit_ldxi_p (JIT_V1, JIT_V0, jit_ptr_field (OOP, flags));
 
   if (!tagged)
@@ -2494,7 +2497,7 @@ emit_basic_size_in_r0 (OOP classOOP, mst_Boolean tagged, int objectReg)
   else
     adjust = adjust * 2;
 
-  if (shape == ISP_UCHAR)
+  if (shape != ISP_POINTER)
     {
       jit_andi_l (JIT_V1, JIT_V1, EMPTY_BYTES);
       jit_lshi_l (JIT_R0, JIT_R0, LONG_SHIFT);
@@ -2540,7 +2543,8 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	    return PRIM_FAIL | PRIM_INLINED;
 	  }
 
-	else if (shape != ISP_POINTER && shape != ISP_UCHAR)
+	else if (shape != ISP_POINTER && shape != ISP_UCHAR
+		 && shape != ISP_SCHAR && shape != ISP_CHARACTER)
 	  /* too complicated to return LargeIntegers */
 	  break;
 
@@ -2563,20 +2567,40 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	/* adjust stack top */
 	jit_subi_l (JIT_R1, JIT_R1, sizeof (PTR));
 
-	if (shape == ISP_POINTER)
-	  jit_lshi_ul (JIT_V1, JIT_V1, LONG_SHIFT);
-
-	/* Now R2 + V1 contains the pointer to the slot */
-	if (shape == ISP_UCHAR)
+	/* Now R2 + V1 << SOMETHING contains the pointer to the slot
+	   (SOMETHING depends on the shape).  */
+	switch (shape)
 	  {
+	  case ISP_POINTER:
+	    jit_lshi_ul (JIT_V1, JIT_V1, LONG_SHIFT);
+	    jit_ldxr_p (JIT_R0, JIT_R2, JIT_V1);
+	    break;
+
+	  case ISP_UCHAR:
 	    jit_ldxr_uc (JIT_R0, JIT_R2, JIT_V1);
 
 	    /* Tag the byte we read */
 	    jit_addr_ul (JIT_R0, JIT_R0, JIT_R0);
 	    jit_addi_ul (JIT_R0, JIT_R0, 1);
+	    break;
+
+	  case ISP_SCHAR:
+	    jit_ldxr_c (JIT_R0, JIT_R2, JIT_V1);
+
+	    /* Tag the byte we read */
+	    jit_addr_ul (JIT_R0, JIT_R0, JIT_R0);
+	    jit_addi_ul (JIT_R0, JIT_R0, 1);
+	    break;
+
+	  case ISP_CHARACTER:
+	    {
+	      jit_ldxr_c (JIT_R0, JIT_R2, JIT_V1);
+
+              /* Convert to a character */
+              jit_lshi_l (JIT_R0, JIT_R0, LONG_SHIFT + 1);
+              jit_addi_p (JIT_R0, JIT_R0, charBase);
+	    }
 	  }
-	else
-	  jit_ldxr_p (JIT_R0, JIT_R2, JIT_V1);
 
 	/* Store the result and the new stack pointer */
 	jit_str_p (JIT_R1, JIT_R0);
@@ -2647,17 +2671,29 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	jit_addr_l (JIT_R2, JIT_R2, JIT_V1);
 	jit_ldr_l (JIT_V1, JIT_R1);
 
-	if (shape == ISP_UCHAR)
+	switch (shape)
 	  {
+	  case ISP_UCHAR:
 	    /* Check and untag the byte we store */
 	    fail3 = jit_bmci_l (jit_get_label (), JIT_V1, 1);
 	    jit_rshi_ul (JIT_R0, JIT_V1, 1);
 	    fail4 = jit_bmsi_ul (jit_get_label (), JIT_R0, ~255);
 
 	    jit_str_uc (JIT_R2, JIT_R0);
-	  }
-	else
-	  {
+	    break;
+
+	  case ISP_CHARACTER:
+	    /* Check the character we store */
+	    fail3 = jit_bmsi_l (jit_get_label (), JIT_V1, 1);
+
+	    jit_subi_p (JIT_R0, JIT_V1, charBase);
+	    jit_rshi_ul (JIT_R0, JIT_R0, LONG_SHIFT + 1);
+	    fail4 = jit_bmsi_ul (jit_get_label (), JIT_R0, ~255);
+
+	    jit_str_uc (JIT_R2, JIT_R0);
+	    break;
+
+	  case ISP_POINTER:
 	    fail3 = fail4 = NULL;
 	    jit_str_p (JIT_R2, JIT_V1);
 	  }
@@ -2704,150 +2740,6 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
         jit_str_p (JIT_R1, JIT_R0);
         return (PRIM_SUCCEED | PRIM_INLINED);
       }
-
-    case 63:
-      {
-	jit_insn *fail1, *fail2;
-	OOP charBase = CHAR_OOP_AT (0);
-
-	int numFixed = CLASS_FIXED_FIELDS (current->receiverClass) +
-	  sizeof (gst_object_header) / sizeof (PTR);
-
-	int shape = CLASS_INSTANCE_SPEC (current->receiverClass) & ISP_INDEXEDVARS;
-
-	if (numArgs != 1
-	    || (shape != ISP_UCHAR && shape != ISP_SCHAR))
-	  break;
-
-	if (!CLASS_IS_INDEXABLE (current->receiverClass))
-	  {
-	    /* return failure */
-	    jit_movi_p (JIT_R0, -1);
-	    return PRIM_FAIL | PRIM_INLINED;
-	  }
-
-	jit_ldi_p (JIT_R1, &sp);
-	emit_basic_size_in_r0 (current->receiverClass, false, JIT_NOREG);
-
-	/* Point R2 to the first indexed slot */
-	jit_addi_ui (JIT_R2, JIT_R2, numFixed * sizeof (PTR));
-
-	/* Load the index and test it: remove tag bit, then check if
-	   (unsigned) (V1 - 1) >= R0 */
-
-	jit_ldr_l (JIT_V1, JIT_R1);
-	fail1 = jit_bmci_l (jit_get_label (), JIT_V1, 1);
-
-	jit_rshi_ul (JIT_V1, JIT_V1, 1);
-	jit_subi_ul (JIT_V1, JIT_V1, 1);
-	fail2 = jit_bger_ul (jit_get_label (), JIT_V1, JIT_R0);
-
-	/* adjust stack top */
-	jit_subi_l (JIT_R1, JIT_R1, sizeof (PTR));
-
-	/* Now R2 + V1 contains the pointer to the slot */
-	jit_ldxr_uc (JIT_R0, JIT_R2, JIT_V1);
-
-	/* Convert to a character */
-	jit_lshi_l (JIT_R0, JIT_R0, LONG_SHIFT + 1);
-	jit_addi_p (JIT_R0, JIT_R0, charBase);
-
-	/* Store the result and the new stack pointer */
-	jit_str_p (JIT_R1, JIT_R0);
-	jit_sti_p (&sp, JIT_R1);
-
-	jit_movi_l (JIT_R0, -1);
-
-	jit_patch (fail1);
-	jit_patch (fail2);
-
-	/* We get here with the _gst_basic_size in R0 upon failure,
-	   with -1 upon success.  We need to get 0 upon success and -1
-	   upon failure.  */
-	jit_rshi_l (JIT_R0, JIT_R0, 31);
-	jit_notr_l (JIT_R0, JIT_R0);
-
-	return PRIM_FAIL | PRIM_SUCCEED | PRIM_INLINED;
-      }
-      break;
-
-    case 64:
-      {
-	jit_insn *fail0, *fail1, *fail2, *fail3, *fail4;
-	OOP charBase = CHAR_OOP_AT (0);
-
-	int numFixed = CLASS_FIXED_FIELDS (current->receiverClass) +
-	  sizeof (gst_object_header) / sizeof (PTR);
-
-	int shape = CLASS_INSTANCE_SPEC (current->receiverClass) & ISP_INDEXEDVARS;
-
-	if (numArgs != 2
-	    || (shape != ISP_UCHAR && shape != ISP_SCHAR))
-	  break;
-
-	if (!CLASS_IS_INDEXABLE (current->receiverClass))
-	  {
-	    /* return failure */
-	    jit_movi_p (JIT_R0, -1);
-	    return PRIM_FAIL | PRIM_INLINED;
-	  }
-
-	jit_ldxi_ul (JIT_V1, JIT_V0, jit_ptr_field (OOP, flags));
-	fail0 = jit_bmsi_ul (jit_get_label (), JIT_V1, F_READONLY);
-
-	jit_ldi_p (JIT_R1, &sp);
-	emit_basic_size_in_r0 (current->receiverClass, false, JIT_NOREG);
-
-	/* Point R2 to the first indexed slot */
-	jit_addi_ui (JIT_R2, JIT_R2, numFixed * sizeof (PTR));
-
-	/* Load the index and test it: remove tag bit, then check if
-	   (unsigned) (V1 - 1) >= R0 */
-
-	jit_ldxi_l (JIT_V1, JIT_R1, -sizeof (PTR));
-
-	fail1 = jit_bmci_l (jit_get_label (), JIT_V1, 1);
-
-	jit_rshi_ul (JIT_V1, JIT_V1, 1);
-	jit_subi_ul (JIT_V1, JIT_V1, 1);
-	fail2 = jit_bger_ul (jit_get_label (), JIT_V1, JIT_R0);
-
-	/* Compute the effective address to free V1 for the operand */
-	jit_addr_l (JIT_R2, JIT_R2, JIT_V1);
-	jit_ldr_l (JIT_V1, JIT_R1);
-
-	/* Check and untag the byte we store */
-	fail3 = jit_bmsi_l (jit_get_label (), JIT_V1, 1);
-
-	jit_subi_p (JIT_R0, JIT_V1, charBase);
-	jit_rshi_ul (JIT_R0, JIT_R0, LONG_SHIFT + 1);
-
-	fail4 = jit_bmsi_ul (jit_get_label (), JIT_R0, ~255);
-
-	jit_str_uc (JIT_R2, JIT_R0);
-
-	/* Store the result and the new stack pointer */
-	jit_subi_l (JIT_R1, JIT_R1, sizeof (PTR) * 2);
-	jit_str_p (JIT_R1, JIT_V1);
-	jit_sti_p (&sp, JIT_R1);
-
-	jit_movi_l (JIT_R0, -1);
-
-	jit_patch (fail0);
-	jit_patch (fail1);
-	jit_patch (fail2);
-	jit_patch (fail3);
-	jit_patch (fail4);
-
-	/* We get here with the _gst_basic_size in R0 upon failure,
-	   with -1 upon success.  We need to get 0 upon success and -1
-	   upon failure.  */
-	jit_rshi_l (JIT_R0, JIT_R0, 31);
-	jit_notr_l (JIT_R0, JIT_R0);
-
-	return PRIM_FAIL | PRIM_SUCCEED | PRIM_INLINED;
-      }
-      break;
 
 #if 0
     case 70:

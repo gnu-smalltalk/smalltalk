@@ -375,8 +375,8 @@ variable: shape subclass: classNameString
     "Define a variable pointer subclass of the receiver with the given
      name, instance variables, class variables, pool dictionaries and
      category. If the class is already defined, if necessary, recompile
-     everything needed.  The shape can be one of #byte #int8 #short #ushort
-     #int #uint #float #int64 #uint64 #double or #pointer."
+     everything needed.  The shape can be one of #byte #int8 #character
+     #short #ushort #int #uint #float #int64 #uint64 #double or #pointer."
 
     | meta |
     KernelInitialized ifFalse: [
