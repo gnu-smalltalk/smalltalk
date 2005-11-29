@@ -84,7 +84,7 @@
    or executing a primitive method definition.  In the first three
    cases, the method does not create a context, and immediately jumps
    back to the caller.  In the latter case, the method calls
-   _gst_execute_primitive_operation, examines its return value, and
+   execute_primitive_operation, examines its return value, and
    does one of three things: 
    - jumping back to the caller
    - creating a context and executing the Smalltalk code (failure)
