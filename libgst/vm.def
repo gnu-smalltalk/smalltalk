@@ -425,7 +425,7 @@ operation AT_COLON_SPECIAL ( rec idx -- val ) {
     }
 
   if COMMON (at_cache_class == (classOOP = OOP_CLASS (rec))
-             && !_gst_execute_primitive_operation (at_cache_prim, 1))
+             && !execute_primitive_operation (at_cache_prim, 1))
     {
       IMPORT_REGS ();
       NEXT_BC;
@@ -458,7 +458,7 @@ operation AT_COLON_PUT_COLON_SPECIAL ( rec idx val -- res ) {
     }
 
   if COMMON (at_put_cache_class == (classOOP = OOP_CLASS (rec))
-             && !_gst_execute_primitive_operation (at_put_cache_prim, 2))
+             && !execute_primitive_operation (at_put_cache_prim, 2))
     {
       IMPORT_REGS ();
       NEXT_BC;
@@ -491,7 +491,7 @@ operation SIZE_SPECIAL ( rec -- val ) {
     }
 
   if COMMON (size_cache_class == (classOOP = OOP_CLASS (rec))
-             && !_gst_execute_primitive_operation (size_cache_prim, 0))
+             && !execute_primitive_operation (size_cache_prim, 0))
     {
       IMPORT_REGS ();
       NEXT_BC;
@@ -524,7 +524,7 @@ operation CLASS_SPECIAL ( rec -- val ) {
     }
 
   if COMMON (class_cache_class == (classOOP = OOP_CLASS (rec))
-             && !_gst_execute_primitive_operation (class_cache_prim, 1))
+             && !execute_primitive_operation (class_cache_prim, 1))
     {
       IMPORT_REGS ();
       NEXT_BC;

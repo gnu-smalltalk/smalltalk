@@ -94,7 +94,7 @@
    special cases are primitive return of _gst_self, return of an
    instance variable, return of a literal object, or execution of a
    primitive method definition. This latter operation is performed by
-   the _gst_execute_primitive_operation routine.  If the execution of
+   the execute_primitive_operation routine.  If the execution of
    this primitive interpreter fails, the normal message send operation
    is performed.
 
@@ -247,8 +247,8 @@ _gst_send_message_internal (OOP sendSelector,
 	  }
 
 	case MTH_PRIMITIVE:
-	  if COMMON (!_gst_execute_primitive_operation(header.primitiveIndex,
-						       sendArgs))
+	  if COMMON (!execute_primitive_operation(header.primitiveIndex,
+						  sendArgs))
 	    /* primitive succeeded.  Continue with the parent context */
 	    return;
 
@@ -333,8 +333,8 @@ _gst_send_method (OOP methodOOP)
 	  }
 
 	case MTH_PRIMITIVE:
-	  if COMMON (!_gst_execute_primitive_operation(header.primitiveIndex, 
-						       sendArgs))
+	  if COMMON (!execute_primitive_operation(header.primitiveIndex, 
+						  sendArgs))
 	    /* primitive succeeded.  Continue with the parent context */
 	    return;
 

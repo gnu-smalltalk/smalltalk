@@ -1,3 +1,12 @@
+2005-11-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp.h (execute_primitive_operation): Do not declare.
+	* libgst/interp.c (execute_primitive_operation): New name
+	of _gst_execute_primitive_operation.  Make static and inline.
+	* libgst/interp-bc.inl: Adjust.
+	* libgst/interp-jit.inl: Adjust.
+	* libgst/vm.def: Adjust.
+
 2005-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* dict.c (_gst_string_new, _gst_counted_string_new): Handle

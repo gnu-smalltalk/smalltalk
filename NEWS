@@ -1,5 +1,13 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 2.2 TO 2.2.1
+
+Improvements:
+
+o   Sped up CharacterArray>>#asInteger.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 2.1.12 TO 2.2
 
 Scripting improvements:

@@ -372,14 +372,24 @@ This is meant to be used in the so called ``sharp-bang'' sequence at the
 beginning of a file, as in
 
 @example
-#! /usr/bin/env gst -f
+#! /usr/bin/gst -f
 
 @r{@i{@dots{} Smalltalk source code @dots{}}}
 @end example
 
 The first line is specially parsed by @gst{} as a comment, and the
 @option{-f} option ensures that the arguments are passed properly to
-the script.
+the script.  Another possibility, one that does not require hard-coding
+the path to the interpreter, is as follows@footnote{The words in
+the shell command @command{exec} are all quoted, so GNU Smalltalk parses
+them as five separate comments.}:
+
+@example
+#! /bin/sh
+"exec" "gst" "-f" "$0" "$@" 
+
+@r{@i{@dots{} Smalltalk source code @dots{}}}
+@end example
 
 @item -g --no-gc-messages
 Suppress garbage collection messages. 

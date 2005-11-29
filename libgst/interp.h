@@ -518,14 +518,6 @@ prim_table_entry;
 #define PRIM_RETURN_SMALL_INTEGER	0x0100	/* 31 or 63 bits */
 #define PRIM_RETURN_SMALL_SMALLINTEGER	0x0300	/* 30 or 62 bits */
 
-/* This is the bridge to the primitive operations in the GNU Smalltalk
-   system.  This function invokes the proper primitive_func with the
-   correct id and the same NUMARGS and METHODOOP with which it was
-   invoked.  */
-extern intptr_t _gst_execute_primitive_operation (int primitive,
-					          volatile int numArgs) 
-  ATTRIBUTE_HIDDEN;
-
 /* This can be used to obtain information on a particular primitive
    operations in the GNU Smalltalk system.  */
 extern prim_table_entry * _gst_get_primitive_attributes (int primitive)

@@ -256,6 +256,13 @@ static interp_jmp_buf *reentrancy_jmp_buf = NULL;
    the stack is printed as well as the byte code */
 static mst_Boolean verbose_exec_tracing = false;
 
+/* This is the bridge to the primitive operations in the GNU Smalltalk
+   system.  This function invokes the proper primitive_func with the
+   correct id and the same NUMARGS and METHODOOP with which it was
+   invoked.  */
+static inline intptr_t execute_primitive_operation (int primitive,
+						    volatile int numArgs);
+
 /* Locates in the ProcessorScheduler's process lists and returns the
    highest priority process different from the current process.  */
 static OOP highest_priority_process (void) ATTRIBUTE_PURE;
@@ -2527,8 +2534,8 @@ _gst_show_stack_contents (void)
 }
 
 
-intptr_t _gst_execute_primitive_operation (int primitive,
-                                           volatile int numArgs)
+static inline
+intptr_t execute_primitive_operation (int primitive, volatile int numArgs)
 {
   prim_table_entry *pte = &_gst_primitive_table[primitive];
 

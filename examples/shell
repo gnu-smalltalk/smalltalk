@@ -1,4 +1,5 @@
-#! /usr/bin/env gst -f
+#! /bin/sh
+"exec" "gst" "-f" "$0" "$@"
 
 "======================================================================
 |
@@ -10,7 +11,10 @@
 | is similar to passing -aQ after the first argument, so the net result
 | is that of executing
 |
-|    /path/to/gst /path/to/this/script -aQ param1 param2 paramN
+|    gst /path/to/this/script -aQ param1 param2 paramN
+|
+| Also, GNU Smalltalk sees five comments instead of the shell command
+| `exec gst -f $0 "$@"'.
 |
 | Now here is the file juggler by Alexander Lazarevic, the first Smalltalk
 | script known to me. <Alexander@Lazarevic.de>
