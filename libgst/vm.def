@@ -425,7 +425,7 @@ operation AT_COLON_SPECIAL ( rec idx -- val ) {
     }
 
   if COMMON (at_cache_class == (classOOP = OOP_CLASS (rec))
-             && !execute_primitive_operation (at_cache_prim, 1))
+             && !cached_index_oop_primitive (rec, idx, at_cache_spec))
     {
       IMPORT_REGS ();
       NEXT_BC;
@@ -437,9 +437,9 @@ operation AT_COLON_SPECIAL ( rec idx -- val ) {
   last_primitive = 0;
   SEND_MESSAGE (_gst_at_symbol, 1);
   IMPORT_REGS ();
-  if COMMON (last_primitive)
+  if (_gst_primitive_table[last_primitive].id == 60)
     {
-      at_cache_prim = last_primitive;
+      at_cache_spec = CLASS_INSTANCE_SPEC (classOOP);
       at_cache_class = classOOP;
       NEXT_BC;
     }
@@ -458,7 +458,7 @@ operation AT_COLON_PUT_COLON_SPECIAL ( rec idx val -- res ) {
     }
 
   if COMMON (at_put_cache_class == (classOOP = OOP_CLASS (rec))
-             && !execute_primitive_operation (at_put_cache_prim, 2))
+             && !cached_index_oop_put_primitive (rec, idx, val, at_put_cache_spec))
     {
       IMPORT_REGS ();
       NEXT_BC;
@@ -470,9 +470,9 @@ operation AT_COLON_PUT_COLON_SPECIAL ( rec idx val -- res ) {
   last_primitive = 0;
   SEND_MESSAGE (_gst_at_put_symbol, 2);
   IMPORT_REGS ();
-  if COMMON (last_primitive)
+  if (_gst_primitive_table[last_primitive].id == 61)
     {
-      at_put_cache_prim = last_primitive;
+      at_put_cache_spec = CLASS_INSTANCE_SPEC (classOOP);
       at_put_cache_class = classOOP;
       NEXT_BC;
     }

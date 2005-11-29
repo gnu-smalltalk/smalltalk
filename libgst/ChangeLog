@@ -1,5 +1,12 @@
 2005-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/vm.def: Make the #at: and #at:put: cache store the spec,
+	and only work on primitives 60/61.
+	* libgst/interp.c: Adjust.  New functions cached_index_oop_primitive
+	and cached_index_oop_put_primitive.
+
+2005-11-29  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/dict.c (class_info): Use ISP_CHARACTER shape for
 	String and Symbol.
 	(_gst_log2_sizes): Adjust for ISP_CHARACTER.

@@ -1,5 +1,14 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 2.2 TO 2.2.1
+
+o   Various speedups.
+
+o   Introduced another class shape, #character, that can be used for String.
+    This makes images incompatible with the 2.2 format.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 2.1.12 TO 2.2
 
 Scripting improvements:
