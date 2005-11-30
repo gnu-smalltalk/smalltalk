@@ -1,3 +1,16 @@
+2005-11-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Add #character shape.
+	* kernel/Builtins.st: Copy implementation of #at: and friends from
+	Object.  Add here a stub implementation of
+	#variable:subclass:instanceVariableNames:classVariableNames:
+	poolDictionaries:category:.
+	* kernel/Class.st: Fix comment to add #character shape.
+	* kernel/ObjDumper.st: Look for #character shape instead of String.
+	* kernel/String.st: Use #character shape.
+	* kernel/Symbol.st: Use #character shape.
+	* kernel/UndefObject.st: Fix comment to add #character shape.
+
 2005-11-23  Paolo Bonzini  <bonzini@gnu.org>
 
         * kernel/CharArray.st: Optimize #asInteger.

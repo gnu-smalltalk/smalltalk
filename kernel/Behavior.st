@@ -900,8 +900,8 @@ kindOfSubclass
 !
 
 shapes
-    ^#(#int8 #byte #short #ushort #int #uint #float #int64 #uint64 #double
-       nil nil nil nil nil #pointer)
+    ^#(#int8 #byte #character #short #ushort #int #uint #float #int64 #uint64
+       #double nil nil nil nil #pointer)
 !
 
 shape

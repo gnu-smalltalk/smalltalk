@@ -212,10 +212,10 @@ static int last_primitive;
    enabled.  */
 #ifndef ENABLE_JIT_TRANSLATION
 static OOP at_cache_class;
-static int at_cache_prim;
+static intptr_t at_cache_spec;
 
 static OOP at_put_cache_class;
-static int at_put_cache_prim;
+static intptr_t at_put_cache_spec;
 
 static OOP size_cache_class;
 static int size_cache_prim;
@@ -262,6 +262,19 @@ static mst_Boolean verbose_exec_tracing = false;
    invoked.  */
 static inline intptr_t execute_primitive_operation (int primitive,
 						    volatile int numArgs);
+
+/* Execute a #at: primitive, with arguments REC and IDX, knowing that
+   the receiver's class has an instance specification SPEC.  */
+static inline mst_Boolean cached_index_oop_primitive (OOP rec,
+						      OOP idx,
+						      intptr_t spec);
+
+/* Execute a #at:put: primitive, with arguments REC/IDX/VAL, knowing that
+   the receiver's class has an instance specification SPEC.  */
+static inline mst_Boolean cached_index_oop_put_primitive (OOP rec,
+							  OOP idx,
+							  OOP val,
+							  intptr_t spec);
 
 /* Locates in the ProcessorScheduler's process lists and returns the
    highest priority process different from the current process.  */
@@ -2534,8 +2547,39 @@ _gst_show_stack_contents (void)
 }
 
 
-static inline
-intptr_t execute_primitive_operation (int primitive, volatile int numArgs)
+static inline mst_Boolean
+cached_index_oop_primitive (OOP rec, OOP idx, intptr_t spec)
+{
+  OOP result;
+  if (!IS_INT (idx))
+    return (true);
+
+  result = index_oop_spec (rec, OOP_TO_OBJ (rec), TO_INT (idx), spec);
+  if UNCOMMON (!result)
+    return (true);
+
+  POP_N_OOPS (1);
+  SET_STACKTOP (result);
+  return (false);
+}
+
+static inline mst_Boolean
+cached_index_oop_put_primitive (OOP rec, OOP idx, OOP val, intptr_t spec)
+{
+  if (!IS_INT (idx))
+    return (true);
+
+  if UNCOMMON (!index_oop_put_spec (rec, OOP_TO_OBJ (rec), TO_INT (idx),
+				    val, spec))
+    return (true);
+
+  POP_N_OOPS (2);
+  SET_STACKTOP (val);
+  return (false);
+}
+
+static inline intptr_t
+execute_primitive_operation (int primitive, volatile int numArgs)
 {
   prim_table_entry *pte = &_gst_primitive_table[primitive];
 

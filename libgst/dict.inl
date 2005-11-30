@@ -48,6 +48,16 @@ static inline mst_Boolean is_a_kind_of (OOP testedOOP,
    byte or word objects) into the INDEX-th indexed instance variable
    of the Object pointed to by OOP.  Returns whether the INDEX is
    correct and the VALUE has the appropriate class and/or range.  */
+static inline mst_Boolean index_oop_put_spec (OOP oop,
+				              mst_Object object,
+				              size_t index,
+					      OOP value,
+				              intptr_t instanceSpec);
+
+/* Stores the VALUE Object (which must be an appropriate Integer for
+   byte or word objects) into the INDEX-th indexed instance variable
+   of the Object pointed to by OOP.  Returns whether the INDEX is
+   correct and the VALUE has the appropriate class and/or range.  */
 static inline mst_Boolean index_oop_put (OOP oop,
 					 size_t index,
 					 OOP value);
@@ -64,14 +74,6 @@ static inline void inst_var_at_put (OOP oop,
    OOP.  No range checks are done in INDEX.  */
 static inline OOP inst_var_at (OOP oop,
 			       int index);
-
-/* Stores VALUE, which must be a Character, into the INDEX-th indexed
-   instance variable of the String pointed to by OOP.  Returns whether
-   the INDEX is correct and the VALUE has the appropriate class and/or
-   range.  */
-static inline mst_Boolean index_string_oop_put (OOP oop,
-						size_t index,
-						OOP value);
 
 /* Returns the number of instance variables (both fixed and indexed) in OOP.  */
 static inline int oop_num_fields (OOP oop);
@@ -141,15 +143,20 @@ static inline OOP variable_binding_new (OOP key,
 
 /* Returns an Object (an Integer for byte or word objects) containing
    the value of the INDEX-th indexed instance variable of the Object
-   pointed to by OOP.  No range checks are done in INDEX.  */
+   pointed to by OOP.  Range checks are done in INDEX and NULL is returned
+   if this is the checking fails.  */
 static inline OOP index_oop (OOP oop,
 			     size_t index);
 
-/* Returns a Character containing the value of the INDEX-th indexed
-   instance variable of the String pointed to by OOP.  No range checks
-   are done in INDEX.  */
-static inline OOP index_string_oop (OOP oop,
-				    size_t index);
+/* Returns an Object (an Integer for byte or word objects) containing
+   the value of the INDEX-th indexed instance variable of the Object
+   pointed to by OOP.  Range checks are done in INDEX and NULL is returned
+   if this is the checking fails.  OBJECT and INSTANCESPEC are cached
+   out of OOP and its class.  */
+static inline OOP index_oop_spec (OOP oop,
+		                  mst_Object object,
+		                  size_t index,
+		                  intptr_t instanceSpec);
 
 /* Returns whether the SCANNEDOOP points to TARGETOOP.  */
 static inline mst_Boolean is_owner (OOP scannedOOP,
@@ -846,16 +853,22 @@ OOP
 index_oop (OOP oop,
 	   size_t index)
 {
-  intptr_t instanceSpec;
-  mst_Object object;
+  mst_Object object = OOP_TO_OBJ (oop);
+  intptr_t instanceSpec = GET_INSTANCE_SPEC (object);
+  return index_oop_spec (oop, object, index, instanceSpec);
+}
+
+OOP
+index_oop_spec (OOP oop,
+		mst_Object object,
+	        size_t index,
+		intptr_t instanceSpec)
+{
   size_t maxIndex, maxByte;
   char *src;
 
   if UNCOMMON (index < 1)
     return (NULL);
-
-  object = OOP_TO_OBJ (oop);
-  instanceSpec = GET_INSTANCE_SPEC (object);
 
   index--;
 
@@ -892,6 +905,12 @@ index_oop (OOP oop,
         uint8_t i;
         DO_INDEX_OOP (uint8_t, i);
         return FROM_INT (i);
+      }
+
+      case ISP_CHARACTER: {
+        uint8_t i;
+        DO_INDEX_OOP (uint8_t, i);
+        return CHAR_OOP_AT (i);
       }
 
       case ISP_SHORT: {
@@ -960,15 +979,23 @@ index_oop_put (OOP oop,
 	       size_t index,
 	       OOP value)
 {
-  intptr_t instanceSpec;
-  mst_Object object;
+  mst_Object object = OOP_TO_OBJ (oop);
+  intptr_t instanceSpec = GET_INSTANCE_SPEC (object);
+  return index_oop_put_spec (oop, object, index, value, instanceSpec);
+}
+
+mst_Boolean
+index_oop_put_spec (OOP oop,
+		    mst_Object object,
+		    size_t index,
+		    OOP value,
+		    intptr_t instanceSpec)
+{
   size_t maxIndex;
 
   if UNCOMMON (index < 1)
     return (false);
 
-  object = OOP_TO_OBJ (oop);
-  instanceSpec = GET_INSTANCE_SPEC (object);
   index--;
 
 #define DO_INDEX_OOP_PUT(type, cond, src)				\
@@ -1022,6 +1049,14 @@ index_oop_put (OOP oop,
         return (false);
       }
 
+      case ISP_CHARACTER: {
+        DO_INDEX_OOP_PUT (uint8_t,
+			  !IS_INT (value)
+			  && OOP_CLASS (value) == _gst_char_class,
+			  CHAR_OOP_VALUE (value));
+        return (false);
+      }
+
       case ISP_SHORT: {
         DO_INDEX_OOP_PUT (uint16_t,
 			  IS_INT (value)
@@ -1052,11 +1087,11 @@ index_oop_put (OOP oop,
 
       case ISP_FLOAT: {
         DO_INDEX_OOP_PUT (float, IS_INT (value), TO_INT (value));
-        DO_INDEX_OOP_PUT (float, OOP_CLASS (value) = _gst_floate_class,
+        DO_INDEX_OOP_PUT (float, OOP_CLASS (value) == _gst_floate_class,
 			  FLOATE_OOP_VALUE (value));
-        DO_INDEX_OOP_PUT (float, OOP_CLASS (value) = _gst_floatd_class,
+        DO_INDEX_OOP_PUT (float, OOP_CLASS (value) == _gst_floatd_class,
 			  FLOATD_OOP_VALUE (value));
-        DO_INDEX_OOP_PUT (float, OOP_CLASS (value) = _gst_floatq_class,
+        DO_INDEX_OOP_PUT (float, OOP_CLASS (value) == _gst_floatq_class,
 			  FLOATQ_OOP_VALUE (value));
         return (false);
       }
@@ -1073,11 +1108,11 @@ index_oop_put (OOP oop,
 
       case ISP_DOUBLE: {
         DO_INDEX_OOP_PUT (double, IS_INT (value), TO_INT (value));
-        DO_INDEX_OOP_PUT (double, OOP_CLASS (value) = _gst_floatd_class,
+        DO_INDEX_OOP_PUT (double, OOP_CLASS (value) == _gst_floatd_class,
 			  FLOATD_OOP_VALUE (value));
-        DO_INDEX_OOP_PUT (double, OOP_CLASS (value) = _gst_floate_class,
+        DO_INDEX_OOP_PUT (double, OOP_CLASS (value) == _gst_floate_class,
 			  FLOATE_OOP_VALUE (value));
-        DO_INDEX_OOP_PUT (double, OOP_CLASS (value) = _gst_floatq_class,
+        DO_INDEX_OOP_PUT (double, OOP_CLASS (value) == _gst_floatq_class,
 			  FLOATQ_OOP_VALUE (value));
         return (false);
       }
@@ -1094,52 +1129,6 @@ index_oop_put (OOP oop,
 #undef DO_INDEX_OOP_PUT
 
   return (false);
-}
-
-OOP
-index_string_oop (OOP oop,
-		  size_t index)
-{
-  intptr_t instanceSpec;
-  mst_Object object;
-  size_t maxIndex;
-
-  if UNCOMMON (index < 1)
-    return (NULL);
-
-  object = OOP_TO_OBJ (oop);
-  instanceSpec = GET_INSTANCE_SPEC (object);
-  maxIndex = OBJECT_SIZE_BYTES (object) - (oop->flags & EMPTY_BYTES);
-  index += (instanceSpec >> ISP_NUMFIXEDFIELDS) * sizeof (OOP);
-
-  if UNCOMMON (index > maxIndex)
-    return (NULL);
-
-  return (CHAR_OOP_AT (((gst_uchar *) object->data)[index - 1]));
-}
-
-mst_Boolean
-index_string_oop_put (OOP oop,
-		      size_t index,
-		      OOP value)
-{
-  intptr_t instanceSpec;
-  mst_Object object;
-  size_t maxIndex;
-
-  if UNCOMMON (index < 1)
-    return (false);
-
-  object = OOP_TO_OBJ (oop);
-  instanceSpec = GET_INSTANCE_SPEC (object);
-  maxIndex = OBJECT_SIZE_BYTES (object) - (oop->flags & EMPTY_BYTES);
-  index += (instanceSpec >> ISP_NUMFIXEDFIELDS) * sizeof (OOP);
-
-  if UNCOMMON (index > maxIndex)
-    return (false);
-
-  ((gst_uchar *) object->data)[index - 1] = CHAR_OOP_VALUE (value);
-  return (true);
 }
 
 OOP

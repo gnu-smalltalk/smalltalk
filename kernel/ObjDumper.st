@@ -537,10 +537,10 @@ primDump: anObject
     class isPointers
 	ifTrue: [ ^self store: anObject through: [ :obj | self dump: obj ] ].
 
-    anObject isString
+    shape := class shape.
+    shape == #character
 	ifTrue: [ ^self store: anObject through: [ :char | stream nextPut: char ] ].
 
-    shape := class shape.
     (shape == #byte or: [ shape == #int8 ])
 	ifTrue: [ ^self store: anObject through: [ :byte | stream nextPutByte: byte ] ].
 
@@ -585,11 +585,11 @@ loadFromVersion: version fixedSize: instSize
     (1 to: realSize) collect: [ :i | self load ].
 
     class isVariable ifTrue: [
-        shape := class shape.
 	class isPointers
 	    ifTrue: [ indexed := (1 to: size) collect: [ :i | self load ] ].
 
-	class == String
+	shape := class shape.
+	shape == #character
 	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream next ] ].
 
 	(shape == #byte and: [ indexed isNil ])
@@ -651,10 +651,10 @@ primLoad: index
     class isPointers
 	ifTrue: [ ^self load: object through: [ self load ] ].
 
-    class == String
+    shape := class shape.
+    shape == #character
 	ifTrue: [ ^self load: object through: [ stream next ] ].
 
-    shape := class shape.
     shape == #byte
 	ifTrue: [ ^self load: object through: [ stream nextByte ] ].
 

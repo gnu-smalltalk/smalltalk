@@ -32,7 +32,7 @@
  ======================================================================"
 
 
-String variableByteSubclass: #Symbol
+String variable: #character subclass: #Symbol
        instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''

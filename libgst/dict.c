@@ -421,11 +421,11 @@ static const class_definition class_info[] = {
    "CharacterArray", NULL, NULL, NULL },
 
   {&_gst_string_class, &_gst_character_array_class,
-   ISP_UCHAR, 0,
+   ISP_CHARACTER, 0,
    "String", NULL, NULL, NULL },
 
   {&_gst_symbol_class, &_gst_string_class,
-   ISP_UCHAR, 0,
+   ISP_CHARACTER, 0,
    "Symbol", NULL, NULL, NULL },
 
   {&_gst_byte_array_class, &_gst_arrayed_collection_class,
@@ -677,11 +677,11 @@ static const class_definition class_info[] = {
 };
 
 signed char _gst_log2_sizes[32] = {
-  0, -1, 0, -1, 
+  0, -1, 0, -1, 0, -1,
   1, -1, 1, -1, 
   2, -1, 2, -1, 2, -1, 
   3, -1, 3, -1, 3, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
   sizeof (long) == 4 ? 2 : 3, -1
 };
 

@@ -726,6 +726,9 @@ checkIndexableBounds: index put: object
     (shape == #float or: [ shape == #double ]) ifTrue: [
 	SystemExceptions.WrongClass signalOn: object mustBe: { Float. SmallInteger } ].
 
+    shape == #character ifTrue: [
+	SystemExceptions.WrongClass signalOn: object mustBe: Character ].
+
     shape == #byte ifTrue: [ size := 8 ].
     shape == #int8 ifTrue: [ size := 7 ].
     shape == #ushort ifTrue: [ size := 16 ].
@@ -1731,54 +1734,6 @@ size
     ^self primitiveFailed
 !
 
-at: index
-    "Answer the index-th character of the receiver."
-    <primitive: VMpr_String_basicAt>
-    self checkIndexableBounds: index
-!
-
-basicAt: index
-    "Answer the index-th character of the receiver. This method must
-     not be overridden; override at: instead. String overrides it so
-     that it looks like it contains character objects even though it
-     contains bytes"
-    <primitive: VMpr_String_basicAt>
-    self checkIndexableBounds: index
-!
-
-at: index put: value
-    "Change the index-th character of the receiver."
-    <primitive: VMpr_String_basicAtPut>
-
-    self class isFixed ifTrue: [ ^SystemExceptions.NotIndexable signalOn: self ].
-
-    self isReadOnly ifTrue: [ ^SystemExceptions.ReadOnlyObject signal ].
-
-    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger ].
-    (index < 1) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
-    (index > self basicSize) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
-
-    ^SystemExceptions.WrongClass signalOn: value mustBe: Character
-!
-
-basicAt: index put: value
-    "Change the index-th character of the receiver. This method must
-     not be overridden; override at: instead. String overrides it so
-     that it looks like it contains character objects even though it
-     contains bytes"
-    <primitive: VMpr_String_basicAtPut>
-
-    self class isFixed ifTrue: [ ^SystemExceptions.NotIndexable signalOn: self ].
-
-    self isReadOnly ifTrue: [ ^SystemExceptions.ReadOnlyObject signal ].
-
-    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger ].
-    (index < 1) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
-    (index > self basicSize) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
-
-    ^SystemExceptions.WrongClass signalOn: value mustBe: Character
-!
-
 replaceFrom: start to: stop withByteArray: byteArray startingAt: replaceStart
     "Replace the characters from start to stop with new characters whose
      ASCII codes are contained in byteArray, starting at the replaceStart
@@ -1805,6 +1760,45 @@ primReplaceFrom: start to: stop with: replacementString
     ^self primitiveFailed
 !
 
+at: anIndex
+    "Answer the index-th indexed instance variable of the receiver"
+    <primitive: VMpr_Object_basicAt>
+    self checkIndexableBounds: anIndex
+!
+
+basicAt: anIndex
+    "Answer the index-th indexed instance variable of the receiver.
+     This method must not be overridden, override at: instead"
+    <primitive: VMpr_Object_basicAt>
+    self checkIndexableBounds: anIndex
+!
+
+at: anIndex put: value
+    "Store value in the index-th indexed instance variable of the receiver"
+    <primitive: VMpr_Object_basicAtPut>
+   self checkIndexableBounds: anIndex put: value
+!
+
+basicAt: anIndex put: value
+    "Store value in the index-th indexed instance variable of the receiver
+     This method must not be overridden, override at:put: instead"
+
+    <primitive: VMpr_Object_basicAtPut>
+    self checkIndexableBounds: anIndex put: value
+!
+
+valueAt: index
+    "Answer the ascii value of index-th character variable of the receiver"
+    ^(self at: index) value
+!
+
+valueAt: index put: value
+     "Store (Character value: value) in the index-th indexed instance variable
+      of the receiver"
+    self at: index put: (Character value: value).
+    ^value
+!
+
 asCData: aCType
     "Convert the receiver to a CObject with the given type"
     <primitive: VMpr_String_asCData>
@@ -1819,7 +1813,7 @@ valueAt: index
     <primitive: VMpr_Object_basicAt>
     self checkIndexableBounds: index
 !
-
+ 
 valueAt: index put: value
     "Store (Character value: value) in the index-th indexed instance variable
      of the receiver"
@@ -1827,7 +1821,6 @@ valueAt: index put: value
 
     self checkIndexableBounds: index put: value
 ! !
-
 
 
 !Symbol class methodsFor: 'built ins'!
@@ -2533,6 +2526,14 @@ subclass: classNameString
     (Smalltalk at: classNameString) category: categoryNameString
 !
 
+variable: shape subclass: classNameString
+  instanceVariableNames: stringInstVarNames
+  classVariableNames: stringOfClassVarNames
+  poolDictionaries: stringOfPoolNames
+  category: categoryNameString
+    (Smalltalk at: classNameString) category: categoryNameString
+!
+
 variableSubclass: classNameString
   instanceVariableNames: stringInstVarNames
   classVariableNames: stringOfClassVarNames
@@ -2562,6 +2563,14 @@ variableByteSubclass: classNameString
 !UndefinedObject methodsFor: 'builtins'!
 
 subclass: classNameString
+  instanceVariableNames: stringInstVarNames
+  classVariableNames: stringOfClassVarNames
+  poolDictionaries: stringOfPoolNames
+  category: categoryNameString
+    (Smalltalk at: classNameString) category: categoryNameString
+!
+
+variable: shape subclass: classNameString
   instanceVariableNames: stringInstVarNames
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
