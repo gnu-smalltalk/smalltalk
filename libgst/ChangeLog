@@ -1,5 +1,15 @@
 2005-11-30  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/vm.def: Refine previous change using OOP_CLASS instead of
+	IS_CLASS.
+
+2005-11-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/vm.def: Shortcut FloatD/Integer mixed math, and
+	FloatD division.
+
+2005-11-30  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/xlat.c: Fix ISP_CHARACTER typo.
 
 2005-11-29  Paolo Bonzini  <bonzini@gnu.org>

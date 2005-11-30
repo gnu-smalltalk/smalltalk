@@ -98,8 +98,8 @@
 #define RAW_FLOATD_OP(op, op1, op2, fop)                        \
 {                                                               \
   double farg1, farg2;                                          \
-  farg1 = FLOATD_OOP_VALUE(op1);                                \
-  farg2 = FLOATD_OOP_VALUE(op2);                                \
+  farg1 = IS_INT (op1) ? TO_INT (op1) : FLOATD_OOP_VALUE(op1);  \
+  farg2 = IS_INT (op2) ? TO_INT (op2) : FLOATD_OOP_VALUE(op2);  \
   EXPORT_REGS();                                                \
   op = floatd_new(fop);                                         \
   IMPORT_REGS();                                                \
@@ -109,10 +109,9 @@
 #define INTERP_BASIC_OP(op, op1, op2, iop, fop) {               \
   if COMMON (ARE_INTS(op1, op2)) {                              \
     RAW_INT_OP(op, op1, op2, iop);                              \
-  } else if COMMON (IS_CLASS(op1, _gst_floatd_class)            \
-                    && IS_CLASS(op2, _gst_floatd_class)) {      \
+  } else if COMMON ((IS_INT (op1) || OOP_CLASS(op1) == _gst_floatd_class)     \
+                    && (IS_INT (op2) || OOP_CLASS(op2) == _gst_floatd_class)) \
     RAW_FLOATD_OP(op, op1, op2, fop);                           \
-  }                                                             \
 }
 
 #define INTERP_BASIC_BOOL(op, op1, op2, operator) {             \
@@ -122,10 +121,10 @@
       DISPATCH(true_byte_codes);				\
     else							\
       DISPATCH(false_byte_codes);				\
-  } else if COMMON (IS_CLASS(op1, _gst_floatd_class)            \
-                    && IS_CLASS(op2, _gst_floatd_class)) {      \
-    double farg1 = FLOATD_OOP_VALUE(op1);			\
-    double farg2 = FLOATD_OOP_VALUE(op2);			\
+  } else if COMMON ((IS_INT (op1) || OOP_CLASS(op1) == _gst_floatd_class)       \
+                    && (IS_INT (op2) || OOP_CLASS(op2) == _gst_floatd_class)) { \
+    double farg1 = IS_INT (op1) ? TO_INT (op1) : FLOATD_OOP_VALUE(op1);	     \
+    double farg2 = IS_INT (op2) ? TO_INT (op2) : FLOATD_OOP_VALUE(op2);	     \
     POP_N_OOPS (2);						\
     if (farg1 operator farg2)					\
       DISPATCH(true_byte_codes);				\
@@ -294,13 +293,22 @@ operation TIMES_SPECIAL ( op1 op2 -- op ) {
 }
 
 operation DIVIDE_SPECIAL ( op1 op2 -- op ) {
+  if COMMON (!ARE_INTS (op1, op2)
+	     && (IS_INT (op1) || OOP_CLASS(op1) == _gst_floatd_class)
+             && (IS_INT (op2) || OOP_CLASS(op2) == _gst_floatd_class))
+    {
+      RAW_FLOATD_OP(op, op1, op2, farg1 / farg2);
+    }
+
   PREPARE_STACK ();
   EXPORT_REGS();
-  if (IS_INT (op1) && IS_INT (op2)
-      && !VMpr_SmallInteger_divide (10, 1))
+  if (COMMON (ARE_INTS (op1, op2)))
     {
-      IMPORT_REGS ();
-      NEXT_BC;
+      if (!VMpr_SmallInteger_divide (10, 1))
+	{
+	  IMPORT_REGS ();
+	  NEXT_BC;
+	}
     }
 
   SEND_MESSAGE (_gst_divide_symbol, 1);
