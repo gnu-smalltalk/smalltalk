@@ -1,5 +1,15 @@
 2005-11-30  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/vm.def: Refine previous change using OOP_CLASS instead of
+	IS_CLASS.
+
+2005-11-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/vm.def: Shortcut FloatD/Integer mixed math, and
+	FloatD division.
+
+2005-11-30  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/vm.def: Make the #at: and #at:put: cache store the spec,
 	and only work on primitives 60/61.
 	* libgst/interp.c: Adjust.  New functions cached_index_oop_primitive
