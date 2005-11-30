@@ -2527,7 +2527,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
     case 60:
       {
 	jit_insn *fail1, *fail2;
-
+	OOP charBase = CHAR_OOP_AT (0);
 	int numFixed = CLASS_FIXED_FIELDS (current->receiverClass) +
 	  sizeof (gst_object_header) / sizeof (PTR);
 
@@ -2624,7 +2624,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
     case 61:
       {
 	jit_insn *fail0, *fail1, *fail2, *fail3, *fail4;
-
+	OOP charBase = CHAR_OOP_AT (0);
 	int numFixed = CLASS_FIXED_FIELDS (current->receiverClass) +
 	  sizeof (gst_object_header) / sizeof (PTR);
 

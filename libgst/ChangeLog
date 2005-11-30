@@ -1,3 +1,7 @@
+2005-11-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/xlat.c: Fix ISP_CHARACTER typo.
+
 2005-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/vm.def: Make the #at: and #at:put: cache store the spec,
