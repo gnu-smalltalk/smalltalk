@@ -515,7 +515,7 @@ copyFrom: from to: to replacingRegex: pattern with: str
     | regs beg end repl res |
     regs := self searchRegex: pattern from: from to: to.
 
-    regs notNil
+    regs matched
 	ifTrue: [
 	    beg := regs from.
 	    end := regs to.
@@ -544,7 +544,7 @@ copyFrom: from to: to replacingAllRegex: pattern with: str
     idx := from.
     [
         regs := self searchRegex: regex from: idx to: to.
-	regs notNil
+	regs matched
     ] whileTrue: [
 	beg := regs from.
 	end := regs to.
