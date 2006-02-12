@@ -1,9 +1,13 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS IN 2.1.12
+NEWS IN 2.1.13
 
-This is a bugfix release.  It fixes a problem preventing the loading of
-the GTK+ bindings.
+This is a bugfix release.
+
+o   Fix a problem preventing the loading of the GTK+ bindings.
+
+o   Fixed bug in methods containing both -0.0 and 0.0 (positive and negative
+    floating-point zero).
 
 -----------------------------------------------------------------------------
 NEWS IN 2.1.12

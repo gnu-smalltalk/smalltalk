@@ -97,3 +97,29 @@ ObjectMemory globalGarbageCollect.
 ^(( 0.4 \\ -1) * 10) rounded == ( 4 \\ -10)!
 ^((-0.4 \\  1) * 10) rounded == (-4 \\  10)!
 ^((-0.4 \\ -1) * 10) rounded == (-4 \\ -10)!
+
+" Fun with signed zeros"
+
+ #(( -0.0d -0.0d) (-0.0d 0.0d) (0.0d -0.0d) (0.0d 0.0d)) do: [ :x ||a b|
+   a := x first. b := x last.
+   { a. b. a negated + b. b - a.
+   ((a negated + b) = (b - a)).
+   a + b negated. a - b.
+   ((a + b negated) = (a - b)) } printNl ]!
+
+
+ #(( -0.0e -0.0e) (-0.0e 0.0e) (0.0e -0.0e) (0.0e 0.0e)) do: [ :x ||a b|
+   a := x first. b := x last.
+   { a. b. a negated + b. b - a.
+   ((a negated + b) = (b - a)).
+   a + b negated. a - b.
+   ((a + b negated) = (a - b)) } printNl ]!
+
+
+ #(( -0.0q -0.0q) (-0.0q 0.0q) (0.0q -0.0q) (0.0q 0.0q)) do: [ :x ||a b|
+   a := x first. b := x last.
+   { a. b. a negated + b. b - a.
+   ((a negated + b) = (b - a)).
+   a + b negated. a - b.
+   ((a + b negated) = (a - b)) } printNl ]!
+

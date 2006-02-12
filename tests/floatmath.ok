@@ -109,3 +109,24 @@ returned value is true
 
 Execution begins...
 returned value is true
+
+Execution begins...
+(-0.0 -0.0 0.0 0.0 true 0.0 0.0 true )
+(-0.0 0.0 0.0 0.0 true -0.0 -0.0 true )
+(0.0 -0.0 -0.0 -0.0 true 0.0 0.0 true )
+(0.0 0.0 0.0 0.0 true 0.0 0.0 true )
+returned value is Array new: 4 "<0>"
+
+Execution begins...
+(-0.0 -0.0 0.0 0.0 true 0.0 0.0 true )
+(-0.0 0.0 0.0 0.0 true -0.0 -0.0 true )
+(0.0 -0.0 -0.0 -0.0 true 0.0 0.0 true )
+(0.0 0.0 0.0 0.0 true 0.0 0.0 true )
+returned value is Array new: 4 "<0>"
+
+Execution begins...
+(-0.0 -0.0 0.0 0.0 true 0.0 0.0 true )
+(-0.0 0.0 0.0 0.0 true 0.0 0.0 true )
+(0.0 -0.0 0.0 0.0 true 0.0 0.0 true )
+(0.0 0.0 0.0 0.0 true 0.0 0.0 true )
+returned value is Array new: 4 "<0>"

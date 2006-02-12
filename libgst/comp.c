@@ -2154,21 +2154,30 @@ equal_constant (OOP oop,
       break;
 
     case CONST_FLOATD:
-      if (IS_OOP (oop) && OOP_CLASS (oop) == _gst_floatd_class
-	  && (double) constExpr->v_const.val.fVal == FLOATD_OOP_VALUE (oop))
-	return (true);
+      if (IS_OOP (oop) && OOP_CLASS (oop) == _gst_floatd_class)
+	{
+	  double d = (double) constExpr->v_const.val.fVal;
+	  if (!memcmp (&d, &OOP_TO_OBJ (oop)->data, sizeof (double)))
+	    return (true);
+	}
       break;
 
     case CONST_FLOATE:
-      if (IS_OOP (oop) && OOP_CLASS (oop) == _gst_floate_class
-	  && (float) constExpr->v_const.val.fVal == FLOATE_OOP_VALUE (oop))
-	return (true);
+      if (IS_OOP (oop) && OOP_CLASS (oop) == _gst_floate_class)
+	{
+	  float f = (float) constExpr->v_const.val.fVal;
+	  if (!memcmp (&f, &OOP_TO_OBJ (oop)->data, sizeof (float)))
+	    return (true);
+	}
       break;
 
     case CONST_FLOATQ:
-      if (IS_OOP (oop) && OOP_CLASS (oop) == _gst_floatq_class
-	  && constExpr->v_const.val.fVal == FLOATQ_OOP_VALUE (oop))
-	return (true);
+      if (IS_OOP (oop) && OOP_CLASS (oop) == _gst_floatq_class)
+	{
+	  long double ld = (long double) constExpr->v_const.val.fVal;
+	  if (!memcmp (&ld, &OOP_TO_OBJ (oop)->data, sizeof (long double)))
+	    return (true);
+	}
       break;
 
     case CONST_STRING:
