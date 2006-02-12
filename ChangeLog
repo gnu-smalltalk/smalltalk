@@ -7,7 +7,7 @@
 
 	* kernel/Behavior.st: Add #character shape.
 	* kernel/Builtins.st: Copy implementation of #at: and friends from
-	Object.  Add here a stub implementation of
+	Object to String.  Add here a stub implementation of
 	#variable:subclass:instanceVariableNames:classVariableNames:
 	poolDictionaries:category:.
 	* kernel/Class.st: Fix comment to add #character shape.
