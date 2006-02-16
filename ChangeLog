@@ -1,8 +1,13 @@
+2006-06-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/regex.st: Fix methods expecting nil rather than
+	FailedMatchRegexResults.
+
 2005-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Add #character shape.
 	* kernel/Builtins.st: Copy implementation of #at: and friends from
-	Object.  Add here a stub implementation of
+	Object to String.  Add here a stub implementation of
 	#variable:subclass:instanceVariableNames:classVariableNames:
 	poolDictionaries:category:.
 	* kernel/Class.st: Fix comment to add #character shape.

@@ -91,7 +91,7 @@ AC_DEFINE_UNQUOTED(HOST_SYSTEM, "$host",
   [Define to the host triplet.])
 
 AC_C_BIGENDIAN
-GST_HEADER_STDINT(lib-src/stdintx.h)
+GCC_HEADER_STDINT(lib-src/stdintx.h)
 GST_CHECK_ALIGNMENT(double)
 GST_CHECK_ALIGNMENT(long double)
 AC_CHECK_SIZEOF(off_t)
