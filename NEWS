@@ -2,13 +2,13 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 2.2 TO 2.2.1
 
-o   Various speedups.
-
 o   Fixed bug in methods containing both -0.0 and 0.0 (positive and negative
     floating-point zero).
 
 o   Introduced another class shape, #character, that can be used for String.
     This makes images incompatible with the 2.2 format.
+
+o   Various speedups.
 
 -----------------------------------------------------------------------------
 
