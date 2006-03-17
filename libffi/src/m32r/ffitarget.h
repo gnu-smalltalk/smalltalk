@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------*-C-*-
-   ffitarget.h - Copyright (c) 1996-2003  Red Hat, Inc.
-   Target configuration macros for IA-64.
+   ffitarget.h - Copyright (c) 2004  Renesas Technology.
+   Target configuration macros for M32R.
 
    Permission is hereby granted, free of charge, to any person obtaining
    a copy of this software and associated documentation files (the
@@ -16,7 +16,7 @@
    THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS
    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-   IN NO EVENT SHALL CYGNUS SOLUTIONS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+   IN NO EVENT SHALL RENESAS TECHNOLOGY BE LIABLE FOR ANY CLAIM, DAMAGES OR
    OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
    ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
    OTHER DEALINGS IN THE SOFTWARE.
@@ -26,24 +26,23 @@
 #ifndef LIBFFI_TARGET_H
 #define LIBFFI_TARGET_H
 
+/* ---- Generic type definitions ----------------------------------------- */
+
 #ifndef LIBFFI_ASM
-typedef unsigned long long          ffi_arg;
-typedef signed long long            ffi_sarg;
+typedef unsigned long          ffi_arg;
+typedef signed long            ffi_sarg;
 
-typedef enum ffi_abi {
-  FFI_FIRST_ABI = 0,
-  FFI_UNIX,   	/* Linux and all Unix variants use the same conventions	*/
-  FFI_DEFAULT_ABI = FFI_UNIX,
-  FFI_LAST_ABI = FFI_DEFAULT_ABI + 1
-} ffi_abi;
+typedef enum ffi_abi
+  {
+    FFI_FIRST_ABI = 0,
+    FFI_SYSV,
+    FFI_DEFAULT_ABI = FFI_SYSV,
+    FFI_LAST_ABI = FFI_DEFAULT_ABI + 1
+  } ffi_abi;
 #endif
 
-/* ---- Definitions for closures ----------------------------------------- */
-
-#define FFI_CLOSURES 1
-#define FFI_TRAMPOLINE_SIZE 24  /* Really the following struct, which 	*/
-				/* can be interpreted as a C function	*/
-				/* descriptor:				*/
+#define FFI_CLOSURES 		0
+#define FFI_TRAMPOLINE_SIZE	24
+#define FFI_NATIVE_RAW_API 	0
 
 #endif
-

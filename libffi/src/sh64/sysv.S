@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------
-   sysv.S - Copyright (c) 2003 Kaz Kojima
+   sysv.S - Copyright (c) 2003, 2004, 2006 Kaz Kojima
    
    SuperH SHmedia Foreign Function Interface 
 
@@ -64,8 +64,9 @@ ENTRY(ffi_call_SYSV)
 	st.q	r15, 8, r28
 	st.l	r15, 4, r18
 	st.l	r15, 0, r14
-	add.l	r15, r63, r14
 .LCFI1:
+	add.l	r15, r63, r14
+.LCFI2:
 #	add	r4, r63, r28
 	add	r5, r63, r29
 	add	r6, r63, r30
@@ -83,6 +84,7 @@ ENTRY(ffi_call_SYSV)
 	addi	r15, 64, r22
 	movi	0, r0
 	movi	0, r1
+	movi	-1, r23
 
 	pt/l	1f, tr1
 	bnei/l	r29, FFI_TYPE_STRUCT, tr1
@@ -105,9 +107,6 @@ ENTRY(ffi_call_SYSV)
 
 .L_pass_d:
 	addi	r0, 1, r0
-	addi	r1, 1, r1
-	andi	r1, ~1, r1
-
 	pt/l	3f, tr0
 	movi	12, r20
 	bge/l	r1, r20, tr0
@@ -157,13 +156,23 @@ ENTRY(ffi_call_SYSV)
 	addi.l	r15, 8, r15
 3:
 	pt/l	.L_pass, tr0
-	addi	r1, 1, r1
 	blink	tr0, r63
 
 .L_pop_f:
 	pt/l	.L_pop_f_tbl, tr1
+	pt/l	5f, tr2
 	gettr	tr1, r20
+	bge/l	r23, r63, tr2
+	add	r1, r63, r23 
 	shlli	r1, 3, r21
+	addi	r1, 2, r1
+	add	r20, r21, r20
+	ptabs/l	r20, tr1
+	blink	tr1, r63
+5:
+	addi	r23, 1, r21
+	movi	-1, r23
+	shlli	r21, 3, r21
 	add	r20, r21, r20
 	ptabs/l	r20, tr1
 	blink	tr1, r63
@@ -252,10 +261,17 @@ ENTRY(ffi_call_SYSV)
 	pt/l	.L_epilogue, tr4
 
 	beqi/l	r29, FFI_TYPE_INT, tr0
+	beqi/l	r29, FFI_TYPE_UINT32, tr0
 	beqi/l	r29, FFI_TYPE_SINT64, tr1
 	beqi/l	r29, FFI_TYPE_UINT64, tr1
 	beqi/l	r29, FFI_TYPE_DOUBLE, tr2
 	beqi/l	r29, FFI_TYPE_FLOAT, tr3
+
+	pt/l	.L_ret_q, tr0
+	pt/l	.L_ret_h, tr1
+
+	beqi/l	r29, FFI_TYPE_UINT8, tr0
+	beqi/l	r29, FFI_TYPE_UINT16, tr1
 	blink	tr4, r63
 
 .L_ret_d:
@@ -268,6 +284,14 @@ ENTRY(ffi_call_SYSV)
 
 .L_ret_f:
 	fst.s	r31, OFS_FLT, fr0
+	blink	tr4, r63
+
+.L_ret_q:
+	st.b	r31, 0, r2
+	blink	tr4, r63
+
+.L_ret_h:
+	st.w	r31, 0, r2
 	blink	tr4, r63
 
 .L_ret_i:
@@ -297,12 +321,13 @@ ENTRY(ffi_call_SYSV)
 ENTRY(ffi_closure_SYSV)
 .LFB2:
 	addi.l	r15, -136, r15
-.LCFI2:
+.LCFI3:
 	st.l	r15, 12, r18
 	st.l	r15, 8, r14
 	st.l	r15, 4, r12
+.LCFI4:
 	add	r15, r63, r14
-.LCFI3:
+.LCFI5:
 	/* Stack layout:	
 	   ...
 	   64 bytes (register parameters)
@@ -418,12 +443,18 @@ __FRAME_BEGIN__:
 .LSCIE1:
 	.4byte	0x0	/* CIE Identifier Tag */
 	.byte	0x1	/* CIE Version */
+#ifdef PIC
 	.ascii "zR\0"	/* CIE Augmentation */
+#else
+	.byte	0x0	/* CIE Augmentation */
+#endif
 	.uleb128 0x1	/* CIE Code Alignment Factor */
 	.sleb128 -4	/* CIE Data Alignment Factor */
 	.byte	0x12	/* CIE RA Column */
+#ifdef PIC
 	.uleb128 0x1	/* Augmentation size */
-	.byte	0x1b	/* FDE Encoding (pcrel sdata4) */
+	.byte	0x10	/* FDE Encoding (pcrel) */
+#endif
 	.byte	0xc	/* DW_CFA_def_cfa */
 	.uleb128 0xf
 	.uleb128 0x0
@@ -433,8 +464,15 @@ __FRAME_BEGIN__:
 	.4byte	datalabel .LEFDE1-datalabel .LASFDE1	/* FDE Length */
 .LASFDE1:
 	.4byte	datalabel .LASFDE1-datalabel __FRAME_BEGIN__
-	.4byte	datalabel .LFB1-.		/* FDE initial location */
+#ifdef PIC
+	.4byte	.LFB1-.	/* FDE initial location */
+#else
+	.4byte	.LFB1	/* FDE initial location */
+#endif
 	.4byte	datalabel .LFE1-datalabel .LFB1	/* FDE address range */
+#ifdef PIC
+	.uleb128 0x0	/* Augmentation size */
+#endif
 	.byte	0x4	/* DW_CFA_advance_loc4 */
 	.4byte	datalabel .LCFI0-datalabel .LFB1
 	.byte	0xe	/* DW_CFA_def_cfa_offset */
@@ -455,6 +493,8 @@ __FRAME_BEGIN__:
 	.uleb128 0x4
 	.byte   0xa0	/* DW_CFA_offset, column 0x20 */
 	.uleb128 0x2
+	.byte	0x4	/* DW_CFA_advance_loc4 */
+	.4byte	datalabel .LCFI2-datalabel .LCFI1
 	.byte	0xd	/* DW_CFA_def_cfa_register */
 	.uleb128 0xe
 	.align	2
@@ -464,20 +504,29 @@ __FRAME_BEGIN__:
 	.4byte	datalabel .LEFDE3-datalabel .LASFDE3	/* FDE Length */
 .LASFDE3:
 	.4byte	datalabel .LASFDE3-datalabel __FRAME_BEGIN__
-	.4byte	datalabel .LFB2-.		/* FDE initial location */
+#ifdef PIC
+	.4byte	.LFB2-.	/* FDE initial location */
+#else
+	.4byte	.LFB2	/* FDE initial location */
+#endif
 	.4byte	datalabel .LFE2-datalabel .LFB2	/* FDE address range */
+#ifdef PIC
+	.uleb128 0x0	/* Augmentation size */
+#endif
 	.byte	0x4	/* DW_CFA_advance_loc4 */
-	.4byte	datalabel .LCFI2-datalabel .LFB2
+	.4byte	datalabel .LCFI3-datalabel .LFB2
 	.byte	0xe	/* DW_CFA_def_cfa_offset */
 	.uleb128 0x88
 	.byte	0x4	/* DW_CFA_advance_loc4 */
-	.4byte	datalabel .LCFI3-datalabel .LCFI2
+	.4byte	datalabel .LCFI4-datalabel .LCFI3
 	.byte   0x8c	/* DW_CFA_offset, column 0xc */
 	.uleb128 0x21
 	.byte   0x8e	/* DW_CFA_offset, column 0xe */
 	.uleb128 0x20
 	.byte   0x92	/* DW_CFA_offset, column 0x12 */
 	.uleb128 0x1f
+	.byte	0x4	/* DW_CFA_advance_loc4 */
+	.4byte	datalabel .LCFI5-datalabel .LCFI4
 	.byte	0xd	/* DW_CFA_def_cfa_register */
 	.uleb128 0xe
 	.align	2

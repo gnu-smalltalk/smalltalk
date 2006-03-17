@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------
-   ffi.c - Copyright (c) 2002, 2003 Kaz Kojima
+   ffi.c - Copyright (c) 2002, 2003, 2004, 2005, 2006 Kaz Kojima
    
    SuperH Foreign Function Interface 
 
@@ -210,15 +210,11 @@ void ffi_prep_args(char *stack, extended_cif *ecif)
 #if defined(__SH4__)
 	  if (greg + n - 1 >= NGREGARG)
 	    continue;
-	  greg += n;
 #else
 	  if (greg >= NGREGARG)
 	    continue;
-	  else if (greg + n - 1 >= NGREGARG)
-	    greg = NGREGARG;
-	  else
-	    greg += n;
 #endif
+	  greg += n;
 	  memcpy (argp, *p_argv, z);
 	  argp += n * sizeof (int);
 	}
@@ -380,9 +376,8 @@ ffi_status ffi_prep_cif_machdep(ffi_cif *cif)
       if (greg >= NGREGARG)
 	continue;
       else if (greg + n - 1 >= NGREGARG)
-	greg = NGREGARG;
-      else
-	greg += n;
+	n = NGREGARG - greg;
+      greg += n;
       for (m = 0; m < n; m++)
         cif->flags += FFI_TYPE_INT << (2 * j++);
     }
@@ -427,6 +422,7 @@ void ffi_call(/*@dependent@*/ ffi_cif *cif,
 	      /*@dependent@*/ void **avalue)
 {
   extended_cif ecif;
+  UINT64 trvalue;
 
   ecif.cif = cif;
   ecif.avalue = avalue;
@@ -434,7 +430,10 @@ void ffi_call(/*@dependent@*/ ffi_cif *cif,
   /* If the return value is a struct and we don't have a return	*/
   /* value address then we need to make one		        */
 
-  if ((rvalue == NULL) && 
+  if (cif->rtype->type == FFI_TYPE_STRUCT
+      && return_type (cif->rtype) != FFI_TYPE_STRUCT)
+    ecif.rvalue = &trvalue;
+  else if ((rvalue == NULL) && 
       (cif->rtype->type == FFI_TYPE_STRUCT))
     {
       /*@-sysunrecog@*/
@@ -443,7 +442,6 @@ void ffi_call(/*@dependent@*/ ffi_cif *cif,
     }
   else
     ecif.rvalue = rvalue;
-    
 
   switch (cif->abi) 
     {
@@ -457,6 +455,11 @@ void ffi_call(/*@dependent@*/ ffi_cif *cif,
       FFI_ASSERT(0);
       break;
     }
+
+  if (rvalue
+      && cif->rtype->type == FFI_TYPE_STRUCT
+      && return_type (cif->rtype) != FFI_TYPE_STRUCT)
+    memcpy (rvalue, &trvalue, cif->rtype->size);
 }
 
 extern void ffi_closure_SYSV (void);
@@ -471,16 +474,22 @@ ffi_prep_closure (ffi_closure* closure,
 		  void *user_data)
 {
   unsigned int *tramp;
+  unsigned short insn;
 
   FFI_ASSERT (cif->abi == FFI_GCC_SYSV);
 
   tramp = (unsigned int *) &closure->tramp[0];
+  /* Set T bit if the function returns a struct pointed with R2.  */
+  insn = (return_type (cif->rtype) == FFI_TYPE_STRUCT
+	  ? 0x0018 /* sett */
+	  : 0x0008 /* clrt */);
+
 #ifdef __LITTLE_ENDIAN__
-  tramp[0] = 0xd301d202;
-  tramp[1] = 0x0009422b;
+  tramp[0] = 0xd301d102;
+  tramp[1] = 0x0000412b | (insn << 16);
 #else
-  tramp[0] = 0xd202d301;
-  tramp[1] = 0x422b0009;
+  tramp[0] = 0xd102d301;
+  tramp[1] = 0x412b0000 | insn;
 #endif
   *(void **) &tramp[2] = (void *)closure;          /* ctx */
   *(void **) &tramp[3] = (void *)ffi_closure_SYSV; /* funaddr */
@@ -526,7 +535,6 @@ ffi_closure_helper_SYSV (ffi_closure *closure, void *rvalue,
   int freg = 0;
 #endif
   ffi_cif *cif; 
-  double temp; 
 
   cif = closure->cif;
   avalue = alloca(cif->nargs * sizeof(void *));
@@ -535,7 +543,7 @@ ffi_closure_helper_SYSV (ffi_closure *closure, void *rvalue,
      returns the data directly to the caller.  */
   if (cif->rtype->type == FFI_TYPE_STRUCT && STRUCT_VALUE_ADDRESS_WITH_ARG)
     {
-      rvalue = *pgr++;
+      rvalue = (void *) *pgr++;
       ireg = 1;
     }
   else
@@ -602,6 +610,8 @@ ffi_closure_helper_SYSV (ffi_closure *closure, void *rvalue,
 	{
 	  if (freg + 1 >= NFREGARG)
 	    continue;
+	  if (freg & 1)
+	    pfr++;
 	  freg = (freg + 1) & ~1;
 	  freg += 2;
 	  avalue[i] = pfr;
@@ -614,15 +624,11 @@ ffi_closure_helper_SYSV (ffi_closure *closure, void *rvalue,
 #if defined(__SH4__)
 	  if (greg + n - 1 >= NGREGARG)
 	    continue;
-	  greg += n;
 #else
 	  if (greg >= NGREGARG)
 	    continue;
-	  else if (greg + n - 1 >= NGREGARG)
-	    greg = NGREGARG;
-	  else
-	    greg += n;
 #endif
+	  greg += n;
 	  avalue[i] = pgr;
 	  pgr += n;
 	}
@@ -706,7 +712,8 @@ ffi_closure_helper_SYSV (ffi_closure *closure, void *rvalue,
 #if (! defined(__SH4__))
 	  else if (greg < NGREGARG)
 	    {
-	      greg = NGREGARG;
+	      greg += n;
+	      pst += greg - NGREGARG;
 	      continue;
 	    }
 #endif
