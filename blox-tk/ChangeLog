@@ -1,3 +1,11 @@
+2006-03-17  Paolo Bonzini  <bonzini@gnu.org>
+	    Jiro Yamamoto <jyamamoto@katch.ne.jp>
+
+	* blox-tk/BloxBasic.st: Support specifying different default fonts
+	on different platforms.
+	* blox-tk/BloxWidgets.st: Likewise.
+	* blox-tk/BloxText.st: Likewise.
+
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* blox-tk/BloxBasic.st: Switch to new C-call descriptions.

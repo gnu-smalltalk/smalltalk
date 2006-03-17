@@ -89,7 +89,7 @@ createWindowFrom: notifier
     | toplevel container text buttonView lowerpane pane list context urpane lrpane |
     topView := (BrowserShell new: 'Debugger') data: self.
     toplevel := topView blox.
-    toplevel width: 500 height: 350.
+    toplevel x: 20 y: 50 width: 500 height: 350.
     pane := Form new: 'panes' in: topView.
     topView addChildView: pane.
     pane blox width: 500 height: 125.

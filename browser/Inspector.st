@@ -137,7 +137,7 @@ open
 	with: (fieldList value class nameIn: Namespace current)).
     topView data: self.
     topView blox 
-	x: 0
+	x: 20
 	y: 330
 	width: 300
 	height: 100.
