@@ -1,3 +1,7 @@
+2006-03-27  Robert Collins  <robertc@robertcollins.net>
+
+	* gtk/cpp.awk: Do not include #ifndef GDK_PIXBUF_ENABLE_BACKEND stuff.
+
 2005-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gtk/gst-gtk.c: Support 2 extra arguments to the signal function,

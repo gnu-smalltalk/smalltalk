@@ -22,7 +22,7 @@ ACLOCAL_AMFLAGS = -I config
 PACKAGE=smalltalk
 
 DIST_SUBDIRS = lib-src snprintfv lightning sigsegv libffi opcode libgst \
-	i18n tcp examples blox-tk . doc gtk tests
+	i18n tcp examples blox-tk . gtk tests doc
 
 SUBDIRS = lib-src lightning $(subdirs)
 if ENABLE_DISASSEMBLER
