@@ -1,8 +1,12 @@
-2005-08-30 Paolo Bonzini  <bonzini@gnu.org>
+2006-03-27  Bruce Korb  <bkorb@gnu.org>
+
+	* snprintfv/printf.c: Fix problems with uninitialized memory.
+
+2005-08-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* snprintfv/Makefile.am: Make more portable.
 
-2003-12-03 Paolo Bonzini  <bonzini@gnu.org>
+2003-12-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libltdl: die die die
 	* configure.ac: always do the libltdl tests.
@@ -12,12 +16,12 @@
 	the library, and ltdl.h in noinst_HEADERS.
 	Death to INCLTDL and LIBLTDL.
 
-2003-07-25 Paolo Bonzini  <bonzini@gnu.org>
+2003-07-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* configure.ac: generate unlocked I/O macros
 	* snprintfv/printf.c: use them
 
-2003-07-24 Paolo Bonzini  <bonzini@gnu.org>
+2003-07-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* snprintfv/format.c: support *n$ notation, merge printf_flag
 	and printf_flag_info, printf_numeric_param and
@@ -31,18 +35,18 @@
 	state.
 	* tests/Makefile.am: enable width-test
 
-2003-06-19 Paolo Bonzini  <bonzini@gnu.org>
+2003-06-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* snprintfv/format.c: fix %hhd to work on a signed char.
 
-2003-04-18 Paolo Bonzini  <bonzini@gnu.org>
+2003-04-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* snprintfv/format.c: extracted *_generic_*
 	* snprintfv/custom.c: to here
 	* snprintfv/filament.in: change argument of
 	filelt to ssize_t.
 
-2003-04-12 Paolo Bonzini  <bonzini@gnu.org>
+2003-04-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.0 released
 
