@@ -90,3 +90,21 @@ phoneNumber
 ! !
 
 '(111) 111-1111' phoneNumber!
+
+"Various errors in the recursive-descent parser"
+!BugTest class methodsFor: 'bugs'!
+
+c
+    ^'No crashes'!
+
+a
+    ^#[]!
+
+b
+    ^{}!
+
+c
+    <3 4>
+    ^'foo'! !
+
+^BugTest c!
