@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne and Paolo Bonzini.
 |
@@ -34,7 +34,7 @@
 
 OrderedCollection variableSubclass: #SortedCollection
 		  instanceVariableNames: 'lastOrdered sorted sortBlock'
-		  classVariableNames: 'DefaultSortBlock'
+		  classVariableNames: 'DefaultSortBlock Marker'
 		  poolDictionaries: ''
 		  category: 'Collections-Sequenceable'
 !
@@ -119,6 +119,21 @@ last
     ^sorted
 	ifTrue: [ self basicAt: lastIndex ]
 	ifFalse: [ self basicAt: firstIndex ]
+!
+
+removeAtIndex: anIndex
+    "Remove the object at index anIndex from the receiver. Fail if the
+     index is out of bounds." 
+
+    | answer |
+    answer := super removeAtIndex: anIndex.
+
+    "Ensure the invariant that lastOrdered <= lastIndex, otherwise
+     remove+add would leave lastIndex = lastOrdered even if the add was
+     done out of order.  Unlike lastOrdered := lastOrdered - 1, this works
+     even if there was an exception and execution resumed here."
+    lastOrdered := lastIndex.
+    ^answer
 !
 
 removeLast

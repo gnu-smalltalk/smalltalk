@@ -96,3 +96,7 @@ returned value is WordArray new: 1 "<0>"
 Execution begins...
  error: Invalid argument 18446744073709551616: argument out of range
 returned value is nil
+
+Execution begins...
+SortedCollection (8->1 12->1 4->2 7->2 5->3 6->3 9->8 )
+returned value is SortedCollection new: 10 "<0>"
