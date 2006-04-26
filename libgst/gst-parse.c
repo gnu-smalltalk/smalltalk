@@ -316,7 +316,8 @@ parse_doit (gst_parser *p)
 
   /* Do not lex until after _gst_free_tree, or we lose a token!  */
   _gst_clear_method_start_pos ();
-  lex (p);
+  if (p->token != EOF)
+    lex (p);
 }
 
 

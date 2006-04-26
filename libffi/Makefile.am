@@ -5,7 +5,7 @@ ACLOCAL_AMFLAGS = -I ../config
 
 SUBDIRS = include
 
-EXTRA_DIST = LICENSE ChangeLog.v1 \
+EXTRA_DIST = LICENSE ChangeLog.v1 configure.host \
 	src/alpha/ffi.c src/alpha/osf.S src/alpha/ffitarget.h \
 	src/arm/ffi.c src/arm/sysv.S src/arm/ffitarget.h \
 	src/cris/ffi.c src/cris/sysv.S src/cris/ffitarget.h \
