@@ -264,6 +264,7 @@ fi
 AC_ARG_ENABLE(emacs, 
 [  --without-emacs         disable Emacs modes for Smalltalk], ,
 with_emacs=yes)
+test "$with_emacs" = no && EMACS=no
 AM_CONDITIONAL(WITH_EMACS, test "$with_emacs" != no)
 
 AC_ARG_ENABLE(dld,
