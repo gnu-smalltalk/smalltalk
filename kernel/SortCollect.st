@@ -121,21 +121,6 @@ last
 	ifFalse: [ self basicAt: firstIndex ]
 !
 
-removeAtIndex: anIndex
-    "Remove the object at index anIndex from the receiver. Fail if the
-     index is out of bounds." 
-
-    | answer |
-    answer := super removeAtIndex: anIndex.
-
-    "Ensure the invariant that lastOrdered <= lastIndex, otherwise
-     remove+add would leave lastIndex = lastOrdered even if the add was
-     done out of order.  Unlike lastOrdered := lastOrdered - 1, this works
-     even if there was an exception and execution resumed here."
-    lastOrdered := lastIndex.
-    ^answer
-!
-
 removeLast
     "Remove an object from the end of the receiver. Fail if the receiver
      is empty"
@@ -278,6 +263,21 @@ copyEmpty: newSize
 
 
 !SortedCollection methodsFor: 'private methods'!
+
+basicRemoveAtIndex: anIndex
+    "Remove the object at index anIndex from the receiver. Fail if the
+     index is out of bounds." 
+
+    | answer |
+    answer := super basicRemoveAtIndex: anIndex.
+
+    "Ensure the invariant that lastOrdered <= lastIndex, otherwise
+     remove+add would leave lastIndex = lastOrdered even if the add was
+     done out of order.  Unlike lastOrdered := lastOrdered - 1, this works
+     even if there was an exception and execution resumed here."
+    lastOrdered := lastIndex.
+    ^answer
+!
 
 copyEmptyForCollect
     "Answer an empty copy of the receiver, with the class answered by the
