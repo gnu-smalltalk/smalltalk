@@ -93,6 +93,10 @@ in_ifndef("GTK_DISABLE_DEPRECATED") {
   next
 }
 
+in_ifndef("GDK_PIXBUF_ENABLE_BACKEND") {
+  next
+}
+
 in_ifdef("__cplusplus") {
   next
 }

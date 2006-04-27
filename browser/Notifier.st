@@ -136,7 +136,9 @@ createWindow
     topView := (BrowserShell new: errMessage) data: self.
     topLevel := topView blox.
     topLevel
-	width: 300;
+	x: 20
+	y: 50
+	width: 300
 	height: 100.
     topView addChildView: ((listView := PList new: 'MethodSet' in: topView)
 		initialize;

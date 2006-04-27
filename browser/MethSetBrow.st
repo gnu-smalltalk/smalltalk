@@ -169,7 +169,7 @@ openOn: aSortedCollection title: name selection: aSymbol
     topView := BrowserShell 
 		new: name , ' (' , aSortedCollection size printString , ')'.
     topView data: self.
-    topView blox x: 0.
+    topView blox x: 20.
     topView blox y: 330.
     topView blox height: 308.
     topView blox width: 408.

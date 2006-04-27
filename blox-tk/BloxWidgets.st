@@ -340,7 +340,7 @@ selectForeground: value
 create
     "Private - Set up the widget and Tcl hooks to get callbacks from
      it."
-    self create: ' -width 0 -font {Helvetica 10}'.
+    self create: ' -width 0 -font {', self class defaultFont, '}'.
     Initialized ifFalse: [ self defineCallbackProcedure ].
     self tclEval: '
 	set var%1 {}
@@ -690,7 +690,7 @@ anchor: value
     self properties at: #anchor put: value!
 
 create
-    self create: '-anchor nw -takefocus 0 -font {Helvetica 10}'.
+    self create: '-anchor nw -takefocus 0 -font {', self class defaultFont, '}'.
     self tclEval: 'bind %1 <Configure> "+%1 configure -wraplength %%w"'
 	with: self connected
 !
@@ -879,7 +879,7 @@ label: value
 !BButton methodsFor: 'private'!
 
 create
-    self create: ('-highlightthickness 0 -takefocus 1 -command {callback %1 invokeCallback} -font {Helvetica 10}'
+    self create: ('-highlightthickness 0 -takefocus 1 -command {callback %1 invokeCallback} -font {', self class defaultFont, '}'
 	bindWith: self asOop printString)
 !
 
@@ -2441,7 +2441,7 @@ itemSelected: receiver at: index
 create
     self
 	create: '-highlightthickness 0 -takefocus 1 -bg white \
-		 -exportselection no -font {Helvetica 10}';
+		 -exportselection no -font {', self class defaultFont, '}';
 	horizontal: true; vertical: true.
 
     "Tcl hack to get the callback upon activate. See analogous
@@ -2768,7 +2768,7 @@ resized
 !
 
 setInitialSize
-    self x: 0 y: 0 width: 300 height: 300.
+    self x: 20 y: 20 width: 300 height: 300.
 !
 
 widgetType
@@ -3536,7 +3536,8 @@ initialize: parentWidget
 	ifFalse: [ self parent container, '.menu' ].
 
     "BMenuBar is NOT a BPrimitive, so it has to explicitly create itself"
-    self tclEval: 'menu ', self connected, ' -font {Helvetica 10} -tearoff 0'.
+    self tclEval: 'menu ', self connected, ' -font {', self class defaultFont,
+		  '} -tearoff 0'.
     self parent isNil ifFalse: [ self parent menu: self ]
 ! !
 
@@ -3850,7 +3851,8 @@ initialize: parentWidget label: label
     s := WriteStream on: (String new: 80).
     s
 	nextPutAll: self container;
-	nextPutAll: ' add %2 -label %1 -font {Helvetica 10} -underline ';
+	nextPutAll: ' add %2 -label %1 -font {', self class defaultFont,
+                    '} -underline ';
 	print:	    (self parent underline: label);
 	nextPutAll: ' -command { callback ';
 	print:      self asOop;

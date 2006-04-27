@@ -1,4 +1,14 @@
-2006-06-02  Paolo Bonzini  <bonzini@gnu.org>
+2006-04-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/OrderColl.st: Split part of #removeAtIndex: into
+	#basicRemoveAtIndex:.
+	* kernel/SortCollect.st: Rename #removeAtIndex: to #basicRemoveAtIndex:.
+
+2006-04-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/SortCollect.st: Provide #removeAtIndex:.
+
+2006-01-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/regex.st: Fix methods expecting nil rather than
 	FailedMatchRegexResults.

@@ -26,17 +26,13 @@
 #ifndef LIBFFI_TARGET_H
 #define LIBFFI_TARGET_H
 
-#ifndef LIBFFI_ASM
-#include <sgidefs.h>
-#endif
-
 #if !defined(_MIPS_SIM)
 -- something is very wrong --
 #else
 #  if (_MIPS_SIM==_ABIN32 && defined(_ABIN32)) || (_MIPS_SIM==_ABI64 && defined(_ABI64))
 #    define FFI_MIPS_N32
 #  else
-#    if _MIPS_SIM==_ABIO32 && defined(_ABIO32)
+#    if (_MIPS_SIM==_ABIO32 && defined(_ABIO32))
 #      define FFI_MIPS_O32
 #    else
 -- this is an unsupported platform --
@@ -138,9 +134,14 @@ typedef enum ffi_abi {
   FFI_O32,
   FFI_N32,
   FFI_N64,
+  FFI_O32_SOFT_FLOAT,
 
 #ifdef FFI_MIPS_O32
+#ifdef __mips_soft_float
+  FFI_DEFAULT_ABI = FFI_O32_SOFT_FLOAT,
+#else
   FFI_DEFAULT_ABI = FFI_O32,
+#endif
 #else
   FFI_DEFAULT_ABI = FFI_N32,
 #endif
@@ -153,7 +154,13 @@ typedef enum ffi_abi {
 
 /* ---- Definitions for closures ----------------------------------------- */
 
+#if defined(FFI_MIPS_O32)
+#define FFI_CLOSURES 1
+#define FFI_TRAMPOLINE_SIZE 20
+#else
+/* N32/N64 not implemented yet. */
 #define FFI_CLOSURES 0
+#endif /* FFI_MIPS_O32 */
 #define FFI_NATIVE_RAW_API 0
 
 #endif

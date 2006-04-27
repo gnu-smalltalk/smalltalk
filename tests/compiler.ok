@@ -14,3 +14,10 @@ returned value is String
 
 Execution begins...
 returned value is Array new: 3 "<0>"
+
+Execution begins...
+returned value is BugTest class
+compiler.st:107: parse error, expected keyword
+
+Execution begins...
+returned value is 'No crashes'

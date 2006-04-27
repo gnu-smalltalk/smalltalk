@@ -771,7 +771,7 @@ addChild: child
 
 create
     self
-	create: ' -bg white -wrap word -font {Helvetica 10} \
+	create: ' -bg white -wrap word -font {', self class defaultFont, '} \
 		  -state normal -highlightthickness 0 -takefocus 1';
 	horizontal: true;
 	vertical: true.

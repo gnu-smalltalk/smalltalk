@@ -989,6 +989,13 @@ mousePointer
     ^x @ stream upToEnd asInteger
 !
 
+defaultFont
+    "Answer the default font used by Blox."
+    ^self platform = #macintosh
+	ifTrue: 'lucida 13'
+	ifFalse: 'helvetica 10'
+!
+
 platform
     "Answer the platform on which Blox is running; it can be either
     #unix, #macintosh or #windows."

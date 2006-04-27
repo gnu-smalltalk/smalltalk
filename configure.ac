@@ -7,7 +7,7 @@ dnl with this software.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.52)
-AC_INIT([GNU Smalltalk], 2.2, help-smalltalk@gnu.org, smalltalk)
+AC_INIT([GNU Smalltalk], 2.2.1, help-smalltalk@gnu.org, smalltalk)
 MAINTAINER="bonzini@gnu.org"
 
 dnl CURRENT:REVISION:AGE means this is the REVISION-th version of
@@ -264,6 +264,7 @@ fi
 AC_ARG_ENABLE(emacs, 
 [  --without-emacs         disable Emacs modes for Smalltalk], ,
 with_emacs=yes)
+test "$with_emacs" = no && EMACS=no
 AM_CONDITIONAL(WITH_EMACS, test "$with_emacs" != no)
 
 AC_ARG_ENABLE(dld,

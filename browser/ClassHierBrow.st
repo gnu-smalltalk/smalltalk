@@ -849,7 +849,7 @@ open
     win := topView blox.
     win 
 	x: 20
-	y: 0
+	y: 50
 	width: 604
 	height: 404.
     upper := Form new: 'ListForms' in: topView.

@@ -316,7 +316,8 @@ parse_doit (gst_parser *p)
 
   /* Do not lex until after _gst_free_tree, or we lose a token!  */
   _gst_clear_method_start_pos ();
-  lex (p);
+  if (p->token != EOF)
+    lex (p);
 }
 
 
@@ -449,7 +450,9 @@ parse_attributes (gst_parser *p)
 
   while (lex_skip_if (p, '<', false))
     {
-      tree_node attr = parse_keyword_list (p, EXPR_BINOP);
+      tree_node attr;
+      lex_must_be (p, KEYWORD);
+      attr = parse_keyword_list (p, EXPR_BINOP);
       attr = _gst_make_attribute_list (&attr->location, attr);
       lex_skip_mandatory (p, '>');
       if (attr)
@@ -870,13 +873,14 @@ static tree_node
 parse_array_constructor (gst_parser *p)
 {
   tree_node stmts;
+  YYLTYPE loc = p->loc;
 
   assert (p->token == '{');
   lex (p);
 
   stmts = parse_statements (p, false);
   lex_skip_mandatory (p, '}');
-  return _gst_make_array_constructor (&stmts->location, stmts); 
+  return _gst_make_array_constructor (&loc, stmts); 
 }
 
 
@@ -1092,6 +1096,7 @@ static tree_node
 parse_keyword_list (gst_parser *p, enum expr_kinds kind)
 {
   tree_node expr = NULL;
+  assert (p->token == KEYWORD);
 
   do
     {

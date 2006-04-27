@@ -163,8 +163,10 @@ match($0, /^[ \t]*([a-zA-Z][a-zA-Z0-9]*[ \t\*]+)((g[a-z]*|pango)_[a-zA-Z0-9_]*)[
 
   # Lose some symmetry for the sake of intuitiveness
   self = first_line[2] ~ /(^|_)((un)?ref$|(dis)?connect)/
-  if (match(first_line[2], /^(draw|paint)_/))
+  if (match(first_line[2], /^paint_/))
     className = "GtkStyle"
+  if (match(first_line[2], /^draw_/))
+    className = (className == "Gdk" ? "GdkDrawable" : "GtkStyle")
 
   smalltalkFuncName = smalltalkize(first_line[2])
 

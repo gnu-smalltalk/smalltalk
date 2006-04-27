@@ -1,3 +1,13 @@
+2006-03-17  Paolo Bonzini  <bonzini@gnu.org>
+            Jiro Yamamoto <jyamamoto@katch.ne.jp>
+
+	* browser/ClassHierBrow.st: Move the windows a bit off the top-left
+	corner.
+	* browser/Debugger.st: Likewise.
+	* browser/Inspector.st: Likewise.
+	* browser/MethSetBrow.st: Likewise.
+	* browser/Notifier.st: Likewise.
+
 2004-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* browser/ButtonForm.st: Remove setting of the Helvetica font.

@@ -231,6 +231,7 @@ primDefineExternFunc: aFuncName
 initialize
     "Private - Initialize the receiver's class variables"
     LibraryList := OrderedCollection new.
+    LibraryStream := RoundRobinStream on: LibraryList readStream.
     ModuleList := OrderedCollection new.
     ObjectMemory addDependent: DLD
 !
