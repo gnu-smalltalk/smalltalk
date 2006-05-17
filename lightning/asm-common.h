@@ -37,17 +37,21 @@
 #ifndef _ASM_SAFETY
 #define JITFAIL(MSG) 0
 #else
-#if defined __GNUC__ && (__GNUC__ == 3 ? __GNUC_MINOR__ >= 2 : __GNUC__ > 3)
+#if (defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L) || (defined __GNUC__ && (__GNUC__ == 3 ? __GNUC_MINOR__ >= 2 : __GNUC__ > 3))
 #define JITFAIL(MSG) jit_fail(MSG, __FILE__, __LINE__, __func__)
-#else
+#elif defined __GNUC__
 #define JITFAIL(MSG) jit_fail(MSG, __FILE__, __LINE__, __FUNCTION__)
+#else
+#define JITFAIL(MSG) jit_fail(MSG, __FILE__, __LINE__, "(unknown)")
 #endif
 #endif
 
-#if defined __GNUC__ && (__GNUC__ == 3 ? __GNUC_MINOR__ >= 2 : __GNUC__ > 3)
+#if (defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L) || (defined __GNUC__ && (__GNUC__ == 3 ? __GNUC_MINOR__ >= 2 : __GNUC__ > 3))
 #define JITSORRY(MSG) jit_fail("sorry, unimplemented: " MSG, __FILE__, __LINE__, __func__)
-#else
+#elif defined __GNUC__
 #define JITSORRY(MSG) jit_fail("sorry, unimplemented: " MSG, __FILE__, __LINE__, __FUNCTION__)
+#else
+#define JITSORRY(MSG) jit_fail("sorry, unimplemented: " MSG, __FILE__, __LINE__, "(unknown)")
 #endif
 
 #ifdef __GNUC__
