@@ -74,12 +74,13 @@ jit_flush_code(void *dest, void *end)
 
   /* See if we can extend the previously mprotect'ed memory area towards
      higher addresses: the starting address remains the same as before.  */
-  if (page >= prev_page && page <= prev_page + prev_length)
+  else if (page >= prev_page && page <= prev_page + prev_length)
     prev_length = page + length - prev_page;
 
   /* See if we can extend the previously mprotect'ed memory area towards
      lower addresses: the highest address remains the same as before.  */
-  else if (page < prev_page && page + length <= prev_page + prev_length)
+  else if (page < prev_page && page + length >= prev_page
+          && page + length <= prev_page + prev_length)
     prev_length += prev_page - page, prev_page = page;
 
   /* Nothing to do, replace the area.  */
