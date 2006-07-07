@@ -1,6 +1,6 @@
 /******************************** -*- C -*- ****************************
  *
- *	Run-time assembler & support macros for the Sparc math unit
+ *	Run-time assembler & support macros for the PowerPC math unit
  *
  ***********************************************************************/
 

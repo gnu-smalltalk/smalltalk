@@ -7,9 +7,9 @@
 
 "======================================================================
 |
-| Copyright 1992,94,95,99,2000,2001,2002
+| Copyright 1992,94,95,99,2000,2001,2002,2006
 | Free Software Foundation, Inc.
-| By Doug McCallum <uunet!ico.isc.com!dougm>
+| Written by Doug McCallum.
 | Additions by Steve Byrne and Paolo Bonzini
 |
 | This file is part of the GNU Smalltalk class library.

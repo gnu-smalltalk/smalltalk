@@ -33,6 +33,9 @@ EditStream.st	A stream handling fast insertions, using a double buffer
 by Ulf		with a gap between the buffers.
 Dambacher
 
+LazyCollection.st  Implementation of #collect:, #select:, #reject: that do not
+by pb		create a new collection unless really necessary.
+
 Sync.st		Many kinds of synchronization devices.
 by pb
 
