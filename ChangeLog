@@ -1,3 +1,13 @@
+2006-07-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/LazyCollection.st: New.
+
+2006-07-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Point.st: Fix #min: and #max:.
+	* kernel/Rectangle.st: Deal more gracefully with non-normalized
+	rectangles.
+
 2006-04-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/OrderColl.st: Split part of #removeAtIndex: into

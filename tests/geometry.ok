@@ -73,7 +73,7 @@ Execution begins...
 (120@20 corner: 260@120 120@240 corner: 260@400 20@20 corner: 120@400 260@20 corner: 400@400 )
 90@290 corner: 310@410
 110@320 corner: 290@380
-100@300 corner: 300@400
+100@120 corner: 300@400
 returned value is Rectangle new "<0>"
 
 Execution begins...

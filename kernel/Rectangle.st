@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2006
 | Free Software Foundation, Inc.
 | Written by Doug McCallum.
 |
@@ -272,19 +272,19 @@ intersects: aRectangle
     "Answer true if the receiver intersect aRectangle, i.e. if it contains
      (see containsPoint:) any of aRectangle corners or if aRectangle contains
      the receiver"
-    | pnt |
-    pnt := aRectangle topRight.
-    (self containsPoint: pnt) ifTrue: [ ^true ].
 
-    pnt x: aRectangle left.
-    (self containsPoint: pnt) ifTrue: [ ^true ].
+    | selfNorm rectNorm left top right bottom |
 
-    pnt y: aRectangle bottom.
-    (self containsPoint: pnt) ifTrue: [ ^true ].
+    selfNorm := self       normalized.
+    rectNorm := aRectangle normalized.
 
-    pnt x: aRectangle right.
-    ^(self containsPoint: pnt) or: [ aRectangle contains: self ]
-!
+    right  := selfNorm right  min: rectNorm right.
+    left   := selfNorm left   max: rectNorm left.
+    right <= left ifTrue: [ ^false ].
+
+    bottom := selfNorm bottom min: rectNorm bottom.
+    top    := selfNorm top    max: rectNorm top.
+    ^bottom > top! !
 
 = aRectangle
     "Answer whether the receiver is equal to aRectangle"
@@ -327,31 +327,33 @@ areasOutside: aRectangle
      aRectangle, exactly one rectangle in the collection will contain that
      point."
      
-    "----------------------------------------------------------------
-    | The basic methodology is to first determine that there is an
-    | intersection by finding the overlapping rectangle.  From the
-    | overlapping rectangle, determine which edges it runs along.
-    | For each edge, if it doesn't run along that edge, add a new
-    | rectangle to the collection.
-    | Most times 2 or 3 rectangles get formed, some times 0, 1 or 4.
-     ----------------------------------------------------------------"
-    | ansSet rect2 xsect |
-    rect2 := self normalized.
-    xsect := rect2 intersect: aRectangle normalized.
+    "The basic algorithm is to first determine that there is an
+     intersection by finding the overlapping rectangle.  From the
+     overlapping rectangle, determine which edges it runs along.
+     For each edge, if it doesn't run along that edge, add a new
+     rectangle to the collection.
+     Most times 2 or 3 rectangles get formed, some times 0, 1 or 4."
+
+    | ansSet l t r b xsect |
+    xsect := self intersect: aRectangle.
     xsect area = 0 ifTrue: [ ^{self copy} ].
 
     ansSet := Set new: 8.
-    rect2 left = xsect left ifFalse: [
-	 ansSet add: (self topLeft corner: xsect left @ self bottom)
+    l := self left min: self right.
+    r := self left max: self right.
+    t := self top min: self bottom.
+    b := self top max: self bottom.
+    l = xsect left ifFalse: [
+	 ansSet add: (l @ t corner: xsect left @ b)
     ].
-    rect2 top = xsect top ifFalse: [
-	 ansSet add: (xsect left @ self top corner: xsect topRight)
+    t = xsect top ifFalse: [
+	 ansSet add: (xsect left @ t corner: xsect topRight)
     ].
-    rect2 bottom = xsect bottom ifFalse: [
-	 ansSet add: (xsect bottomLeft corner: xsect right @ self bottom)
+    b = xsect bottom ifFalse: [
+	 ansSet add: (xsect bottomLeft corner: xsect right @ b)
     ].
-    rect2 right = xsect right ifFalse: [
-	 ansSet add: (xsect right @ self top corner: self bottomRight)
+    r = xsect right ifFalse: [
+	 ansSet add: (xsect right @ t corner: r @ b)
     ].
     ^ansSet asArray
 !
@@ -410,42 +412,30 @@ merge: aRectangle
     "Answer a new rectangle which is the smallest rectangle containing
      both the receiver and aRectangle."
     
-    "This seems to be the right definition..."
     ^Rectangle 
 	origin: (origin min: aRectangle origin)
 	corner: (corner max: aRectangle corner)
-
-    "| orig corn |
-    orig := Point x: ((origin x) min: (aRectangle origin x))
-		y: ((origin y) min: (aRectangle origin y)).
-    corn := Point x: ((corner x) max: (aRectangle corner x))
-		y: ((corner y) max: (aRectangle corner y)).
-    ^Rectangle origin: orig corner: corn"
 !
 
 intersect: aRectangle
-    "Returns the rectangle (if any) created by the overlap of
-     rectangles A and B."
+    "Answers the rectangle (if any) created by the overlap of
+     rectangles A and B.  Answers nil if the rectangles do not
+     overlap"
 
-    "This seems to be the right definition..."
-    ^Rectangle 
-	origin: (origin max: aRectangle origin)
-	corner: (corner min: aRectangle corner)
-
-    "| selfNorm rectNorm left top right bottom |
+    | selfNorm rectNorm left top right bottom |
 
     selfNorm := self       normalized.
     rectNorm := aRectangle normalized.
 
     right  := selfNorm right  min: rectNorm right.
     left   := selfNorm left   max: rectNorm left.
-    right < left ifTrue: [ ^Rectangle new ].
+    right <= left ifTrue: [ ^nil ].
 
     bottom := selfNorm bottom min: rectNorm bottom.
     top    := selfNorm top    max: rectNorm top.
-    bottom < top ifTrue: [ ^Rectangle new ].
+    bottom <= top ifTrue: [ ^nil ].
 
-    ^Rectangle origin: left @ top corner: right @ bottom"
+    ^Rectangle origin: left @ top corner: right @ bottom
 ! !
 
 
@@ -480,14 +470,21 @@ storeOn: aStream
 
 normalize
     "Normalize the receiver (make origin < corner)"
-    | t |
-    (origin > corner)
-	ifTrue: [t := corner. corner := origin. origin := t]
+    self right > self left
+        ifTrue: [ temp := self left. origin x: corner x. corner x: temp ].
+    self bottom > self top
+        ifTrue: [ temp := self top. origin y: corner y. corner y: temp ].
 !
 
 normalized
-    "Answer a copy of the receiver which is normalized (has origin < corner)"
-    ^self copy normalize
+    "Answer the receiver if it is normalized, otherwise create and
+     return a copy which is normalized (has origin < corner)"
+    (self right > self left and: [ self bottom > self top ])
+        ifTrue: [ ^self ].
+
+    ^Rectangle
+        origin: (origin min: corner)
+        corner: (origin max: corner)
 !
 
 xCenter

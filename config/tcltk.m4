@@ -24,9 +24,11 @@ if test "x$with_tcl" = x || test "$with_tcl" = yes; then
 	  TCLSH=$i
           test -f "$with_tcl/tclConfig.sh" && break
           test -f "$with_tcl/../tclConfig.sh" && with_tcl="$with_tcl/.." && break
+          test -f "$with_tcl/../../tclConfig.sh" && with_tcl="$with_tcl/../.." && break
           with_tcl=`echo "$with_tcl" | sed 's,\(.*\)/share,\1/lib,'`
           test -f "$with_tcl/tclConfig.sh" && break
           test -f "$with_tcl/../tclConfig.sh" && with_tcl="$with_tcl/.." && break
+          test -f "$with_tcl/../../tclConfig.sh" && with_tcl="$with_tcl/../.." && break
         fi
 	with_tcl=no
 	TCLSH=no
@@ -39,7 +41,7 @@ if test "x$with_tcl" = x || test "$with_tcl" = yes; then
   AC_MSG_RESULT($TCLSH)
 fi
 if test "x$with_tk" = x || test "$with_tk" = yes; then
-  with_tk=`echo "$with_tcl" | sed 's/\(.*\)tcl/\1tk/'`
+  with_tk=`echo "$with_tcl" | sed -e 's/tcl/tk/g' -e 's/Tcl/Tk/g'`
   test -f "$with_tk/tkConfig.sh" || with_tk=no
 fi
 if test "$with_tcl" != no; then
