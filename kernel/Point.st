@@ -228,16 +228,12 @@ truncateTo: grid
 
 max: aPoint
     "Answer self if it is lower and to the right of aPoint, aPoint otherwise"
-    (self > aPoint)
-       ifTrue: [ ^self ]
-       ifFalse:[ ^aPoint ]
+    ^(self x max: aPoint x) @ (self y max: aPoint y)
 !
 
 min: aPoint
     "Answer self if it is higher and to the left of aPoint, aPoint otherwise"
-    (self < aPoint)
-       ifTrue: [^ self ]
-       ifFalse:[^ aPoint ]
+    ^(self x min: aPoint x) @ (self y min: aPoint y)
 ! !
 
 
