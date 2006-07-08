@@ -1,3 +1,7 @@
+2006-07-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Rectangle.st: Fix incorrect checkin.
+
 2006-07-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/LazyCollection.st: New.
