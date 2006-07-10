@@ -1,3 +1,8 @@
+2006-07-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/STLoaderObjs.st: new class OverlayDictionary
+	allows to add extensions and redefinitions to base classes.
+
 2003-09-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/STCompiler.st: adapt to new bytecode set.

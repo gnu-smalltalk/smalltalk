@@ -41,8 +41,82 @@ PseudoBehavior comment:
 'This class represent a proxy for a class that is found by an
 STClassLoader in the source code it parses.'!
 
+Collection subclass: #OverlayDictionary
+           instanceVariableNames: 'primary secondary additionalSize'
+           classVariableNames: ''
+           poolDictionaries: ''
+           category: 'System-Compiler'!
+
+OverlayDictionary comment:
+'This class can access multiple Dictionaries and return keys from
+any of them'!
+
+!OverlayDictionary class methodsFor: 'instance creation'!
+
+on: backupDictionary
+    backupDictionary isNil ifTrue: [ ^LookupTable new ].
+    ^self new primary: LookupTable new; secondary: backupDictionary
+! !
+
+!OverlayDictionary methodsFor: 'accessing'!
+
+do: aBlock
+    primary do: aBlock.
+    secondary keysAndValuesDo: [ :k :v |
+        (primary includes: k) ifFalse: [ aBlock value: v ] ]!
+
+keysDo: aBlock
+    primary keysDo: aBlock.
+    secondary keysAndValuesDo: [ :k :v |
+        (primary includes: k) ifFalse: [ aBlock value: k ] ]!
+
+keysAndValuesDo: aBlock
+    primary keysAndValuesDo: aBlock.
+    secondary keysAndValuesDo: [ :k :v |
+        (primary includes: k) ifFalse: [ aBlock value: k value: v ] ]!
+
+keys
+    ^primary keys addAll: secondary keys; yourself!
+
+values
+    ^self asOrderedCollection!
+
+size
+    ^primary size + additionalSize!
+
+at: key
+    ^primary at: key ifAbsent: [ secondary at: key ]!
+
+at: key put: value
+    primary at: key ifAbsent: [
+        (secondary includesKey: key)
+	    ifTrue: [ additionalSize := additionalSize - 1 ] ].
+    ^primary at: key put: value!
+
+at: key ifAbsent: aBlock
+    ^primary at: key ifAbsent: [ secondary at: key ifAbsent: aBlock ]!
+
+at: key ifAbsentPut: aBlock
+    ^primary at: key ifAbsent: [
+        (secondary includesKey: key)
+	    ifTrue: [ secondary at: key ]
+	    ifFalse: [ primary at: key put: aBlock value ] ]! !
+
+
+
+!OverlayDictionary methodsFor: 'initializing'!
+
+primary: aDictionary
+    primary := aDictionary!
+
+secondary: aDictionary
+    secondary := aDictionary.
+    additionalSize := secondary size.
+! !
+
+
 PseudoBehavior subclass: #ProxyClass
-        instanceVariableNames: 'proxy'
+        instanceVariableNames: 'proxy methods'
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -51,7 +125,7 @@ ProxyClass comment:
 'This class represent a proxy for a preexisting class that is found by an
 STClassLoader as a superclass while parsing source code.  Proxying
 preexisting classes is necessary to correctly augment their subclasses
-with the new classes.'!
+with the new classes, and to handle extension methods.'!
 
 PseudoBehavior subclass: #LoadedBehavior
         instanceVariableNames: 'instVars superclass methods comment '
@@ -551,7 +625,9 @@ superclass
 !
 
 methodDictionary
-    ^self asClass methodDictionary
+    methods isNil ifTrue: [
+         methods := OverlayDictionary on: self asClass methodDictionary ].
+    ^methods
 !
 
 doesNotUnderstand: aMessage
@@ -860,6 +936,11 @@ methodSourceCode
 
 methodSourceString
     ^source asString
+! !
+
+!LoadedMethod methodsFor: 'empty stubs'!
+
+discardTranslation
 ! !
 
 !LoadedMethod methodsFor: 'initializing'!
