@@ -1,3 +1,8 @@
+2006-07-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/events.c (_gst_sync_file_polling): Prepare pfd.revents by
+	zeroing it.
+
 2006-04-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.c (parse_doit): Do not read other tokens
@@ -656,10 +661,10 @@
 
 2003-07-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* libgst/dict.c: Make Character not indexed
-	* libgst/oop.c: Store an OOP in characters
-	* libgst/oop.h: Store an OOP in characters
-	* libgst/prims.def: Remove Character>>#asciiValue primitive
+	* libgst/dict.c: Make Character not indexed.
+	* libgst/oop.c: Make Character's asciiValue an OOP.
+	* libgst/oop.h: Make Character's asciiValue an OOP.
+	* libgst/prims.def: Remove Character>>#asciiValue primitive.
 
 2003-07-10  Paolo Bonzini  <bonzini@gnu.org>
 
