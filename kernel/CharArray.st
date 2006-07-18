@@ -8,8 +8,8 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
-| Written by Steve Byrne.
+| Copyright 1999, 2000, 2001, 2002, 2006 Free Software Foundation, Inc.
+| Written by Steve Byrne and Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
 |
@@ -61,26 +61,6 @@ lineDelimiter
     "Answer a CharacterArray which one can use as a line delimiter."
     ^self with: Character nl
 ! !
-
-
-!CharacterArray methodsFor: 'basic'!
-
-basicAt: index
-    "Answer the index-th character of the receiver. This is an exception
-     to the `do not override' rule that allows storage optimization by
-     storing the characters as values instead of as objects."
-    ^super basicAt: index put: ((self valueAt: index) asCharacter)
-!
-
-basicAt: index put: anObject
-    "Set the index-th character of the receiver to be anObject. This
-     method must not be overridden; override at: instead. String overrides it so
-     that it looks like it contains character objects even though it
-     contains bytes"
-    self valueAt: index put: anObject asInteger.
-    ^anObject
-! !
-
 
 
 !CharacterArray methodsFor: 'comparing'!
@@ -181,6 +161,13 @@ indexOf: aCharacterArray matchCase: aBoolean startingAt: anIndex
     ].
     ^nil
 ! !
+
+
+!CharacterArray methodsFor: 'multibyte encodings'!
+
+numberOfCharacters
+    "Answer the number of Unicode characters in the receiver."
+    self subclassResponsibility! !
 
 
 !CharacterArray methodsFor: 'string processing'!
@@ -483,47 +470,6 @@ trimSeparators
 	]
     ]. "to:do:"
     ^''
-! !
-
-
-
-!CharacterArray methodsFor: 'printing'!
-
-displayString
-    "Answer a String representing the receiver. For most objects
-     this is simply its #printString, but for CharacterArrays and characters,
-     superfluous dollars or extra pair of quotes are stripped."
-    ^self
-!
-
-displayOn: aStream
-    "Print a representation of the receiver on aStream. Unlike
-     #printOn:, this method strips extra quotes."
-    aStream nextPutAll: self
-!
-
-printOn: aStream
-    "Print a representation of the receiver on aStream"
-    aStream nextPut: $'.
-    self do:
-    	[ :char | char == $' ifTrue: [ aStream nextPut: char ].
-	    	  aStream nextPut: char ].
-    aStream nextPut: $'
-! !
-
-
-
-!CharacterArray methodsFor: 'storing'!
-
-storeOn: aStream
-    "Print Smalltalk code compiling to the receiver on aStream"
-    
-    aStream
-	nextPut: $(;
-	print: self class;
-	nextPut: ' fromString: ';
-	store: self asString;
-	nextPut: $)
 ! !
 
 

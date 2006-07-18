@@ -6,7 +6,7 @@
 
 /***********************************************************************
  *
- * Copyright 2005 Free Software Foundation, Inc.
+ * Copyright 2005, 2006 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -592,7 +592,6 @@ parse_primary (gst_parser *p)
     case SYMBOL_LITERAL:
     case INTEGER_LITERAL:
     case LARGE_INTEGER_LITERAL:
-    case BYTE_LITERAL:
     case FLOATD_LITERAL:
     case FLOATE_LITERAL:
     case FLOATQ_LITERAL:
@@ -662,6 +661,8 @@ static tree_node
 parse_literal (gst_parser *p, mst_Boolean array)
 {
   tree_node node;
+  int ival;
+
   switch (p->token)
     {
     case '(':
@@ -688,7 +689,6 @@ parse_literal (gst_parser *p, mst_Boolean array)
       break;
 
     case INTEGER_LITERAL:
-    case BYTE_LITERAL:
       node = _gst_make_int_constant (&p->loc, p->val.ival);
       break;
 
@@ -713,8 +713,25 @@ parse_literal (gst_parser *p, mst_Boolean array)
       break;
 
     case CHAR_LITERAL:
-      node = _gst_make_char_constant (&p->loc, p->val.cval);
-      break;
+      ival = p->val.ival;
+      lex (p);
+
+      /* Special case $< INTEGER_LITERAL > where the integer literal
+	 is positive.  */
+      if (ival == '<' && p->token == INTEGER_LITERAL && p->val.ival >= 0)
+        {
+	  ival = p->val.ival;
+          lex (p);
+	  lex_skip_mandatory (p, '>');
+
+          if (ival > 0x10FFFF)
+	    {
+	      _gst_errorf ("character code point out of range");
+	      recover_error (p);
+	    }
+        }
+
+      return _gst_make_char_constant (&p->loc, ival);
 
     case '#':
       lex (p);
@@ -799,7 +816,7 @@ parse_builtin_identifier (gst_parser *p)
 
 
 /* byte_array_literal: '[' byte_array_literal_elts ']'
-   byte_array_literal_elts: byte_array_literal_elts BYTE_LITERAL
+   byte_array_literal_elts: byte_array_literal_elts INTEGER_LITERAL
 			  | empty  */
 
 static tree_node
@@ -812,7 +829,12 @@ parse_byte_array_literal (gst_parser *p)
   while (!lex_skip_if (p, ']', true))
     {
       tree_node lit;
-      lex_must_be (p, BYTE_LITERAL);
+      lex_must_be (p, INTEGER_LITERAL);
+      if (p->val.ival < 0 || p->val.ival > 255)
+	{
+	  _gst_errorf ("byte constant out of range");
+	  recover_error (p);
+	}
       lit = _gst_make_int_constant (&p->loc, p->val.ival);
       lex (p);
       elts = _gst_add_node (elts, _gst_make_array_elt (&lit->location, lit));

@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -34,6 +34,10 @@
 #include "snprintfv/mem.h"
 
 
+/* Print a Character OOP to a snprintfv stream, STREAM.  */
+static void print_char_to_stream (STREAM *stream,
+				  OOP oop);
+
 /* Print a String OOP to a snprintfv stream, STREAM.  */
 static void print_string_to_stream (STREAM *stream,
 				    OOP string);
@@ -69,6 +73,21 @@ _gst_print_object (OOP oop)
 {
   printf ("%O", oop);
   fflush (stdout);
+}
+
+void
+print_char_to_stream (STREAM *stream, OOP oop)
+{
+  int val = CHAR_OOP_VALUE (oop);
+  if (OOP_CLASS (oop) == _gst_char_class && val > 127)
+    stream_printf (stream, "Character value: 16r%02X", val);
+
+  else if (val >= 32 && val <= 126)
+    stream_printf (stream, "$%c", val);
+  else if (val < 32)
+    stream_printf (stream, "$<%d>", val);
+  else
+    stream_printf (stream, "$<16r%04X>", val);
 }
 
 void
@@ -167,8 +186,9 @@ printf_oop (STREAM *stream,
   else if (oop == _gst_false_oop)
     stream_printf (stream, "false");
 
-  else if (OOP_CLASS (oop) == _gst_char_class)
-    stream_printf (stream, "$%c", CHAR_OOP_VALUE (oop));
+  else if (OOP_CLASS (oop) == _gst_char_class
+	   || OOP_CLASS (oop) == _gst_unicode_character_class)
+    print_char_to_stream (stream, oop);
 
   else if (OOP_CLASS (oop) == _gst_floatd_class)
     {

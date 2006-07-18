@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -40,10 +40,10 @@ typedef enum
   CDATA_UNKNOWN,		/* when there is no type a priori */
   CDATA_CHAR,
   CDATA_STRING,
-  CDATA_STRINGOUT,		/* for things that modify string params */
+  CDATA_STRING_OUT,		/* for things that modify string params */
   CDATA_SYMBOL,
   CDATA_BYTEARRAY,
-  CDATA_BYTEARRAYOUT,
+  CDATA_BYTEARRAY_OUT,
   CDATA_BOOLEAN,
   CDATA_INT,
   CDATA_UINT,
@@ -66,7 +66,11 @@ typedef enum
   CDATA_OOP,			/* no conversion to-from C (OOP) */
   CDATA_SELF,			/* pass self as the corresponding
 				   argument */
-  CDATA_SELF_OOP		/* pass self as an OOP */
+  CDATA_SELF_OOP,		/* pass self as an OOP */
+  CDATA_WCHAR,
+  CDATA_WSTRING,
+  CDATA_WSTRING_OUT,
+  CDATA_SYMBOL_OUT
 }
 cdata_type;
 
@@ -220,10 +224,10 @@ static const char *c_type_name[] = {
   "void?",			/* CDATA_UNKNOWN */
   "char",			/* CDATA_CHAR */
   "char *",			/* CDATA_STRING */
-  "char *",			/* CDATA_STRINGOUT */
+  "char *",			/* CDATA_STRING_OUT */
   "char *",			/* CDATA_SYMBOL */
   "char *",			/* CDATA_BYTEARRAY */
-  "char *",			/* CDATA_BYTEARRAYOUT */
+  "char *",			/* CDATA_BYTEARRAY_OUT */
   "int",			/* CDATA_BOOLEAN */
   "int",			/* CDATA_INT */
   "unsigned int",		/* CDATA_UINT */
@@ -240,6 +244,9 @@ static const char *c_type_name[] = {
   "OOP",			/* CDATA_OOP */
   "void?",			/* CDATA_SELF */
   "OOP",			/* CDATA_SELF_OOP */
+  "wchar_t",			/* CDATA_WCHAR */
+  "wchar_t *",			/* CDATA_WSTRING */
+  "wchar_t *",			/* CDATA_WSTRING_OUT */
 };
 
 /* A map between symbols and the cdata_type enum.  */
@@ -247,10 +254,11 @@ static const symbol_type_map type_map[] = {
   {&_gst_unknown_symbol, CDATA_UNKNOWN},
   {&_gst_char_symbol, CDATA_CHAR},
   {&_gst_string_symbol, CDATA_STRING},
-  {&_gst_string_out_symbol, CDATA_STRINGOUT},
+  {&_gst_string_out_symbol, CDATA_STRING_OUT},
   {&_gst_symbol_symbol, CDATA_SYMBOL},
+  {&_gst_symbol_out_symbol, CDATA_SYMBOL_OUT},
   {&_gst_byte_array_symbol, CDATA_BYTEARRAY},
-  {&_gst_byte_array_out_symbol, CDATA_BYTEARRAYOUT},
+  {&_gst_byte_array_out_symbol, CDATA_BYTEARRAY_OUT},
   {&_gst_boolean_symbol, CDATA_BOOLEAN},
   {&_gst_int_symbol, CDATA_INT},
   {&_gst_uint_symbol, CDATA_UINT},
@@ -267,6 +275,9 @@ static const symbol_type_map type_map[] = {
   {&_gst_smalltalk_symbol, CDATA_OOP},
   {&_gst_self_symbol, CDATA_SELF},
   {&_gst_self_smalltalk_symbol, CDATA_SELF_OOP},
+  {&_gst_wchar_symbol, CDATA_WCHAR},
+  {&_gst_wstring_symbol, CDATA_WSTRING},
+  {&_gst_wstring_out_symbol, CDATA_WSTRING_OUT},
   {NULL, CDATA_UNKNOWN}
 };
 
@@ -669,11 +680,15 @@ _gst_invoke_croutine (OOP cFuncOOP,
 	    SET_COBJECT_VALUE (arg->oop, arg->u.cObjectPtrVal.ptrVal);
 	    continue;
 
-          case CDATA_STRINGOUT:
+          case CDATA_WSTRING_OUT:
+	    _gst_set_oop_unicode_string (arg->oop, arg->u.ptrVal);
+	    break;
+
+          case CDATA_STRING_OUT:
 	    _gst_set_oopstring (arg->oop, arg->u.ptrVal);
 	    break;
 
-          case CDATA_BYTEARRAYOUT:
+          case CDATA_BYTEARRAY_OUT:
 	    _gst_set_oop_bytes (arg->oop, arg->u.ptrVal);
 	    break;
 
@@ -700,10 +715,13 @@ get_ffi_type (OOP returnTypeOOP)
     case CDATA_COBJECT:
     case CDATA_COBJECT_PTR:
     case CDATA_SYMBOL:
+    case CDATA_SYMBOL_OUT:
+    case CDATA_WSTRING:
+    case CDATA_WSTRING_OUT:
     case CDATA_STRING:
-    case CDATA_STRINGOUT:
+    case CDATA_STRING_OUT:
     case CDATA_BYTEARRAY:
-    case CDATA_BYTEARRAYOUT:
+    case CDATA_BYTEARRAY_OUT:
     default:
       return &ffi_type_pointer;
 
@@ -719,6 +737,7 @@ get_ffi_type (OOP returnTypeOOP)
     case CDATA_INT:
     case CDATA_UINT:
     case CDATA_CHAR:
+    case CDATA_WCHAR:
     case CDATA_BOOLEAN:
       return &ffi_type_sint;
 
@@ -760,9 +779,11 @@ push_smalltalk_obj (OOP oop,
 	(oop == _gst_true_oop || oop == _gst_false_oop) ? CDATA_BOOLEAN :
 	oop == _gst_nil_oop ? CDATA_COBJECT :
 	class == _gst_char_class ? CDATA_CHAR :
+	class == _gst_unicode_character_class ? CDATA_WCHAR :
 	class == _gst_byte_array_class ? CDATA_BYTEARRAY : 
 	is_a_kind_of (class, _gst_integer_class) ? CDATA_LONG :
 	is_a_kind_of (class, _gst_string_class) ? CDATA_STRING :
+	is_a_kind_of (class, _gst_unicode_string_class) ? CDATA_WSTRING :
 	is_a_kind_of (class, _gst_c_object_class) ? CDATA_COBJECT :
 	is_a_kind_of (class, _gst_float_class) ? CDATA_DOUBLE :
 	CDATA_OOP;
@@ -835,7 +856,9 @@ push_smalltalk_obj (OOP oop,
 	}
     }
 
-  else if (class == _gst_char_class && cType == CDATA_CHAR)
+  else if ((class == _gst_char_class
+	    && (cType == CDATA_CHAR || cType == CDATA_WCHAR))
+           || (class == _gst_unicode_character_class && cType == CDATA_WCHAR))
     {
       cp->u.intVal = CHAR_OOP_VALUE (oop);
       SET_TYPE (&ffi_type_sint);
@@ -843,17 +866,28 @@ push_smalltalk_obj (OOP oop,
     }
 
   else if (((class == _gst_string_class || class == _gst_byte_array_class)
-            && (cType == CDATA_STRING || cType == CDATA_STRINGOUT
-	        || cType == CDATA_BYTEARRAY || cType == CDATA_BYTEARRAYOUT))
+            && (cType == CDATA_STRING || cType == CDATA_STRING_OUT
+	        || cType == CDATA_BYTEARRAY || cType == CDATA_BYTEARRAY_OUT))
            || (class == _gst_symbol_class
                && (cType == CDATA_SYMBOL || cType == CDATA_STRING)))
     {
       cp->oop = oop;
 
-      if (cp->cType == CDATA_BYTEARRAY || cp->cType == CDATA_BYTEARRAYOUT)
+      if (cp->cType == CDATA_BYTEARRAY || cp->cType == CDATA_BYTEARRAY_OUT)
 	cp->u.ptrVal = _gst_to_byte_array (oop);
       else
         cp->u.ptrVal = (gst_uchar *) _gst_to_cstring (oop);
+
+      c_func_cur->needPostprocessing = true;
+      SET_TYPE (&ffi_type_pointer);
+      return;
+    }
+
+  else if (class == _gst_unicode_string_class
+           && (cType == CDATA_WSTRING || cType == CDATA_WSTRING_OUT))
+    {
+      cp->oop = oop;
+      cp->u.ptrVal = (gst_uchar *) _gst_to_wide_cstring (oop);
 
       c_func_cur->needPostprocessing = true;
       SET_TYPE (&ffi_type_pointer);
@@ -909,9 +943,9 @@ push_smalltalk_obj (OOP oop,
 	{
 	case CDATA_COBJECT:
 	case CDATA_BYTEARRAY:
-	case CDATA_BYTEARRAYOUT:
+	case CDATA_BYTEARRAY_OUT:
 	case CDATA_STRING:
-	case CDATA_STRINGOUT:
+	case CDATA_STRING_OUT:
 	case CDATA_SYMBOL:
 	  cp->u.ptrVal = NULL;
 	  SET_TYPE (&ffi_type_pointer);
@@ -963,6 +997,10 @@ c_to_smalltalk (cparam *result, OOP returnTypeOOP)
       resultOOP = CHAR_OOP_AT ((gst_uchar) result->u.intVal);
       break;
 
+    case CDATA_WCHAR:
+      resultOOP = char_new ((wchar_t) result->u.intVal);
+      break;
+
     case CDATA_BOOLEAN:
       resultOOP = result->u.intVal ? _gst_true_oop : _gst_false_oop;
       break;
@@ -984,8 +1022,11 @@ c_to_smalltalk (cparam *result, OOP returnTypeOOP)
       break;
 
     case CDATA_STRING:
-    case CDATA_STRINGOUT:
+    case CDATA_STRING_OUT:
+    case CDATA_WSTRING:
+    case CDATA_WSTRING_OUT:
     case CDATA_SYMBOL:
+    case CDATA_SYMBOL_OUT:
     case CDATA_COBJECT:
     case CDATA_OOP:
       if (!result->u.ptrVal)
@@ -993,9 +1034,11 @@ c_to_smalltalk (cparam *result, OOP returnTypeOOP)
 	  resultOOP = _gst_nil_oop;
 	  break;
 	}
-      if (returnType == CDATA_SYMBOL)
+      if (returnType == CDATA_SYMBOL || returnType == CDATA_SYMBOL_OUT)
 	{
 	  resultOOP = _gst_intern_string ((char *) result->u.ptrVal);
+	  if (returnType == CDATA_SYMBOL_OUT)
+	    xfree (result->u.ptrVal);
 	  break;
 	}
       if (returnType == CDATA_COBJECT)
@@ -1011,9 +1054,18 @@ c_to_smalltalk (cparam *result, OOP returnTypeOOP)
 	  resultOOP = (OOP) result->u.ptrVal;
 	  break;
 	}
-      resultOOP = _gst_string_new ((char *) result->u.ptrVal);
-      if (returnType == CDATA_STRINGOUT)
-	xfree (result->u.ptrVal);
+      if (returnType == CDATA_STRING || returnType == CDATA_STRING_OUT)
+	{
+	  resultOOP = _gst_string_new ((char *) result->u.ptrVal);
+	  if (returnType == CDATA_STRING_OUT)
+	    xfree (result->u.ptrVal);
+	}
+      if (returnType == CDATA_WSTRING || returnType == CDATA_WSTRING_OUT)
+	{
+	  resultOOP = _gst_unicode_string_new ((wchar_t *) result->u.ptrVal);
+	  if (returnType == CDATA_WSTRING_OUT)
+	    xfree (result->u.ptrVal);
+	}
       break;
 
     case CDATA_DOUBLE:

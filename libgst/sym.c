@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -143,6 +143,7 @@ OOP _gst_string_out_symbol = NULL;
 OOP _gst_string_symbol = NULL;
 OOP _gst_super_symbol = NULL;
 OOP _gst_symbol_symbol = NULL;
+OOP _gst_symbol_out_symbol = NULL;
 OOP _gst_symbol_table = NULL;
 OOP _gst_terminate_symbol = NULL;
 OOP _gst_this_context_symbol = NULL;
@@ -165,6 +166,9 @@ OOP _gst_variadic_smalltalk_symbol = NULL;
 OOP _gst_variadic_symbol = NULL;
 OOP _gst_vm_primitives_symbol = NULL;
 OOP _gst_void_symbol = NULL;
+OOP _gst_wchar_symbol = NULL;
+OOP _gst_wstring_symbol = NULL;
+OOP _gst_wstring_out_symbol = NULL;
 OOP _gst_while_false_colon_symbol = NULL;
 OOP _gst_while_false_symbol = NULL;
 OOP _gst_while_true_colon_symbol = NULL;
@@ -323,6 +327,7 @@ static const symbol_info sym_info[] = {
   {&_gst_string_symbol, "string"},
   {&_gst_super_symbol, "super"},
   {&_gst_symbol_symbol, "symbol"},
+  {&_gst_symbol_out_symbol, "symbolOut"},
   {&_gst_terminate_symbol, "__terminate"},
   {&_gst_this_context_symbol, "thisContext"},
   {&_gst_times_symbol, "*"},
@@ -344,6 +349,9 @@ static const symbol_info sym_info[] = {
   {&_gst_variadic_smalltalk_symbol, "variadicSmalltalk"},
   {&_gst_vm_primitives_symbol, "VMPrimitives"},
   {&_gst_void_symbol, "void"},
+  {&_gst_wchar_symbol, "wchar"},
+  {&_gst_wstring_symbol, "wstring"},
+  {&_gst_wstring_out_symbol, "wstringOut"},
   {&_gst_while_false_colon_symbol, "whileFalse:"},
   {&_gst_while_false_symbol, "whileFalse"},
   {&_gst_while_true_colon_symbol, "whileTrue:"},

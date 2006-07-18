@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2003, 2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -292,7 +292,11 @@ initialize
 	    index = 0
 		ifTrue: [ client register: (client loadGlobal loadFrom: client) ]
 		ifFalse: [ client lookupIndex: index ]
-	]
+	];
+
+	specialCaseIf: [ :object | object class == UnicodeCharacter ]
+	dump: [ :client :object | client stream nextPutLong: object codePoint ]
+	load: [ :client | client stream nextLong asCharacter ]
 ! !
 
 
@@ -553,6 +557,9 @@ primDump: anObject
     (shape == #int64 or: [ shape == #uint64 ])
 	ifTrue: [ ^self store: anObject through: [ :int64 | stream nextPutInt64: int64 ] ].
 
+    shape == #utf32
+	ifTrue: [ ^self store: anObject through: [ :char | stream nextPutLong: char codePoint ] ].
+
     shape == #float
 	ifTrue: [ ^self store: anObject through: [ :float | stream nextPutFloat: float ] ].
 
@@ -616,6 +623,9 @@ loadFromVersion: version fixedSize: instSize
         shape == #uint64
 	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextUint64 ] ].
 
+	shape == #utf32
+	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextLong asCharacter ] ].
+
         shape == #float
 	    ifTrue: [ indexed := (1 to: size) collect: [ :i | stream nextFloat ] ].
 
@@ -678,6 +688,9 @@ primLoad: index
 
     shape == #uint64
 	ifTrue: [ ^self load: object through: [ stream nextUint64 ] ].
+
+    shape == #utf32
+	ifTrue: [ ^self load: object through: [ stream nextLong asCharacter ] ].
 
     shape == #float
 	ifTrue: [ ^self load: object through: [ stream nextFloat ] ].

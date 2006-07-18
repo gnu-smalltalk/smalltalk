@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2004,2005
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2004,2005,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -410,7 +410,7 @@ char_literal (int c,
     }
   else
     {
-      lvalp->cval = ic;
+      lvalp->ival = ic;
       return (CHAR_LITERAL);
     }
 }
@@ -830,12 +830,6 @@ scan_number (int c,
       lvalp->boval = scan_large_integer (isNegative, base);
       return (LARGE_INTEGER_LITERAL);
     }
-  else if (num >= 0 && num <= 255)
-    {
-      lvalp->ival = (intptr_t) num;
-      return (BYTE_LITERAL);
-    }
-  else
     {
       lvalp->ival = (intptr_t) num;
       return (INTEGER_LITERAL);
@@ -1137,7 +1131,10 @@ print_token (token,
       printf ("FLOATQ_LITERAL: %Lg\n", yylval->fval);
       break;
     case CHAR_LITERAL:
-      printf ("CHAR_LITERAL: %d ($%c)\n", yylval->cval, yylval->cval);
+      printf ("CHAR_LITERAL: %d", yylval->ival, 
+      if (yylval->ival >= 32 && yylval->ival <= 126)
+	printf (" ($%c)", (char) yylval->ival);
+      printf ("\n");
       break;
     case STRING_LITERAL:
       printf ("STRING_LITERAL: '%s'\n", yylval->sval);
@@ -1182,7 +1179,10 @@ _gst_yyprint (FILE * file,
       fprintf (file, ": %Lg", yylval->fval);
       break;
     case CHAR_LITERAL:
-      fprintf (file, ": %d ($%c)\n", yylval->cval, yylval->cval);
+      fprintf (file, ": %d", yylval->ival);
+      if (yylval->ival >= 32 && yylval->ival <= 126)
+	fprintf (file, " ($%c)", (char) yylval->ival);
+      fprintf (file, "\n");
       break;
     default:
       break;

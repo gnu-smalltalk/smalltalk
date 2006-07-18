@@ -6,7 +6,7 @@
 
 /***********************************************************************
  *
- * Copyright 2005 Free Software Foundation, Inc.
+ * Copyright 2005, 2006 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -63,7 +63,6 @@ enum yytokentype {
 #undef TOKEN_DEF
 
 typedef union YYSTYPE {
-  char		       cval;
   long double	       fval;
   intptr_t	       ival;
   char		      *sval;

@@ -1,3 +1,20 @@
+2006-07-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* i18n/Locale.st: Add #defaultCharset, #defaultCharset:, make
+	it be 'UTF-8' by default.  Override CharacterArray class>>
+	#defaultDefaultEncoding.
+	* i18n/Sets.st: Change UCS2/UCS4 to UTF-16/UTF-32.  Consider
+	the default encoding to be big-endian in absence of a byte-order
+	mark.  Change #compose:/#split: to #compose:from:/#split:to:
+	to optimize conversions of UTF-32 (with specific endianness)
+	to/from UnicodeString.  Add methods to encode to/from
+	UnicodeString.  Use Characters, not Integers, to communicate to/from
+	non-iconv encoders.  Add CharacterArray class>>#defaultDefaultEncoding
+	and #utf32Encoding.  Override various methods to deal with MBCS
+	(numberOfCharacters, asUnicodeString, ...) for Character, String,
+	UnicodeString.  Recognize BOM in UTF-8 and UTF-32.  Add methods to
+	detect UTF-{16,32} encodings on Streams.
+
 2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/i18n.c: Add const to iconvWrapper.

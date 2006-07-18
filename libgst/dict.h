@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
  * This file is part of GNU Smalltalk.
@@ -203,6 +203,13 @@ typedef struct gst_string
 }
  *gst_string;
 
+typedef struct gst_unicode_string
+{
+  OBJ_HEADER;
+  uint32_t chars[1];
+}
+ *gst_unicode_string;
+
 typedef struct gst_byte_array
 {
   OBJ_HEADER;
@@ -231,6 +238,12 @@ typedef struct gst_metaclass
   OOP instanceClass;
 }
  *gst_metaclass;
+
+typedef struct gst_char
+{
+  OBJ_HEADER;
+  OOP codePoint;
+} *gst_char;
 
 typedef struct gst_ordered_collection
 {
@@ -347,6 +360,8 @@ extern OOP _gst_time_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_token_stream_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_true_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_undefined_object_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_unicode_character_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_unicode_string_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_variable_binding_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_write_stream_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_processor_oop ATTRIBUTE_HIDDEN;
@@ -402,6 +417,11 @@ extern OOP _gst_identity_dictionary_at (OOP identityDictionaryOOP,
 /* Creates a String object starting from the NUL-terminated string
    S.  */
 extern OOP _gst_string_new (const char *s) 
+  ATTRIBUTE_HIDDEN;
+
+/* Creates a String object starting from the NUL-terminated wide
+   string S.  */
+extern OOP _gst_unicode_string_new (const wchar_t *s) 
   ATTRIBUTE_HIDDEN;
 
 /* Look in the Smalltalk dictionary for a class whose name is in the
@@ -508,10 +528,17 @@ extern mst_Object _gst_grow_dictionary (OOP dictionaryOOP)
 extern gst_identity_dictionary _gst_grow_identity_dictionary (OOP identityDictionaryOOP) 
   ATTRIBUTE_HIDDEN;
 
-/* Allocates and returns a new C (ASCIZ) string that has the same
+/* Allocates and returns a new C (NULL-terminated) string that has the same
    contents as STRINGOOP.  Even if there are embedded NULs, the
    allocated area has always a size of "stringOOP size + 1" bytes.  */
 extern char *_gst_to_cstring (OOP stringOOP) 
+  ATTRIBUTE_HIDDEN;
+
+/* Allocates and returns a new wide C string that has the same
+   contents as STRINGOOP.  Even if there are embedded NULs, the
+   allocated area has always a size of "unicodeStringOOP size + 1"
+   bytes.  */
+extern wchar_t *_gst_to_wide_cstring (OOP unicodeStringOOP) 
   ATTRIBUTE_HIDDEN;
 
 /* Allocates and returns a new memory block that has the same contents
@@ -531,6 +558,12 @@ extern void _gst_init_dictionary (void)
    OOP can hold).  */
 extern void _gst_set_oopstring (OOP stringOOP,
 				const char *s) 
+  ATTRIBUTE_HIDDEN;
+
+/* Copies the first bytes of S into STRINGOOP (as many bytes as the
+   OOP can hold).  */
+extern void _gst_set_oop_unicode_string (OOP stringOOP,
+					 const wchar_t *s) 
   ATTRIBUTE_HIDDEN;
 
 /* Set the instance variables of the FileStream object,

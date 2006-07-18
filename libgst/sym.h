@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -137,6 +137,7 @@ extern OOP _gst_string_out_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_string_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_super_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_symbol_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_symbol_out_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_terminate_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_this_context_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_times_repeat_symbol ATTRIBUTE_HIDDEN;
@@ -158,6 +159,9 @@ extern OOP _gst_variadic_smalltalk_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_variadic_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_vm_primitives_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_void_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_wchar_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_wstring_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_wstring_out_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_while_false_colon_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_while_false_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_while_true_colon_symbol ATTRIBUTE_HIDDEN;

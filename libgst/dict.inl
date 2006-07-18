@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2003, 2006 Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
  * This file is part of GNU Smalltalk.
@@ -119,6 +119,9 @@ static inline mst_Object instantiate_with (OOP class_oop,
    to the object data is returned, the OOP is stored in P_OOP.  */
 static inline mst_Object instantiate (OOP class_oop,
 				      OOP *p_oop);
+
+/* Return the Character object for the Unicode value C.  */
+static inline OOP char_new (int codePoint);
 
 /* Answer the associated containing KEYOOP in the Dictionary (or a
    subclass having the same representation) DICTIONARYOOP.  */
@@ -247,6 +250,13 @@ static inline int64_t to_c_int_64 (OOP oop);
 
 #define IS_SYMBOL(oop) \
   ( !IS_NIL(oop) && (OOP_CLASS(oop) ==  _gst_symbol_class) )
+
+/* Return the Character object for ASCII value C.  */
+#define CHAR_OOP_AT(c)      (&_gst_mem.ot[(c) + CHAR_OBJECT_BASE])
+
+/* Answer the code point of the character OOP, charOOP.  */
+#define CHAR_OOP_VALUE(charOOP) \
+  TO_INT (((gst_char)OOP_TO_OBJ (charOOP))->codePoint)
 
 /* Answer a pointer to the first character of STRINGOOP.  */
 #define STRING_OOP_CHARS(stringOOP) \
@@ -520,6 +530,21 @@ floatq_new (long double f)
   return (floatOOP);
 }
 
+OOP
+char_new (int codePoint)
+{
+  gst_char charObject;
+  OOP charOOP;
+
+  assert (codePoint >= 0 && codePoint <= 0x10FFFF);
+  if (codePoint <= 127)
+    return CHAR_OOP_AT (codePoint);
+
+  charObject = (gst_char) new_instance (_gst_unicode_character_class, &charOOP);
+
+  charObject->codePoint = FROM_INT (codePoint);
+  return (charOOP);
+}
 
 uintptr_t
 scramble (uintptr_t x)
@@ -961,6 +986,12 @@ index_oop_spec (OOP oop,
         return floatd_new (d);
       }
 
+      case ISP_UTF32: {
+        uint32_t i;
+        DO_INDEX_OOP (uint32_t, i);
+        return char_new (i);
+      }
+
       case ISP_POINTER:
         maxIndex = NUM_WORDS (object);
         index += instanceSpec >> ISP_NUMFIXEDFIELDS;
@@ -1114,6 +1145,16 @@ index_oop_put_spec (OOP oop,
 			  FLOATE_OOP_VALUE (value));
         DO_INDEX_OOP_PUT (double, OOP_CLASS (value) == _gst_floatq_class,
 			  FLOATQ_OOP_VALUE (value));
+        return (false);
+      }
+
+      case ISP_UTF32: {
+        DO_INDEX_OOP_PUT (uint32_t,
+			  !IS_INT (value)
+			  && (OOP_CLASS (value) == _gst_unicode_character_class
+			      || (OOP_CLASS (value) == _gst_char_class
+			          && CHAR_OOP_VALUE (value) <= 127)),
+			  CHAR_OOP_VALUE (value));
         return (false);
       }
 

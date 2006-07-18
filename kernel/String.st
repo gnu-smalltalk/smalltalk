@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001
+| Copyright 1988,92,94,95,99,2000,2001,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -101,6 +101,12 @@ asSymbol
 asString
     "But I already am a String!  Really!"
     ^self
+!
+
+asUnicodeString 
+    "Answer a UnicodeString whose character's codes are the receiver's contents.
+     This is not implemented unless you load the I18N package."
+    self shouldNotImplement
 ! !
 
 
@@ -109,5 +115,61 @@ asString
 
 isString
     ^true
+! !
+
+
+!String methodsFor: 'multibyte encodings'!
+
+numberOfCharacters
+    "Answer the number of Unicode characters in the receiver.  This is
+     not defined for String unless you load the I18N package."
+    self shouldNotImplement! !
+
+
+!String methodsFor: 'printing'!
+
+displayString
+    "Answer a String representing the receiver. For most objects
+     this is simply its #printString, but for CharacterArrays and characters,
+     superfluous dollars or extra pair of quotes are stripped."
+    ^self
+!
+
+displayOn: aStream
+    "Print a representation of the receiver on aStream. Unlike
+     #printOn:, this method strips extra quotes."
+    aStream nextPutAll: self
+!
+
+storeOn: aStream
+    "Store Smalltalk code compiling to the receiver on aStream"
+    aStream nextPut: $'.
+    self do:
+    	[ :char | char == $' ifTrue: [ aStream nextPut: char ].
+	    	  aStream nextPut: char ].
+    aStream nextPutAll: ''' copy'
+!
+
+printOn: aStream
+    "Print a representation of the receiver on aStream"
+    aStream nextPut: $'.
+    self do:
+    	[ :char | char == $' ifTrue: [ aStream nextPut: char ].
+	    	  aStream nextPut: char ].
+    aStream nextPut: $'
+! !
+
+
+!String methodsFor: 'accessing'!
+
+byteAt: index
+    "Answer the ascii value of index-th character variable of the receiver"
+    ^self valueAt: index
+!
+ 
+byteAt: index put: value
+    "Store (Character value: value) in the index-th indexed instance variable
+     of the receiver"
+    ^self valueAt: index put: value
 ! !
 

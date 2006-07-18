@@ -24,9 +24,43 @@ o   New example, lazy callections.  When loaded, #select:, #reject: and
 	a := a reject: [ :each | ... ].
 	a := a select: [ :each | ... ].
 
-    are much faster when this example is loaded.
+    can be much faster when this example is loaded.
 
 o   Various speedups.
+
+Unicode support:
+
+o   Characters above 127 are no longer used to represent extended ASCII
+    characters.  Instead, they are only used to represent a byte in
+    the encoding of the Unicode characters from 128 on.  To create
+    them use the Blue Book method Character class>>#value:.
+
+    To represent Unicode characters above 127 use the (ANSI Smalltalk)
+    Character class>>#codePoint: method.  Note that these characters
+    *cannot* be shown on a stream with #nextPut: (use #display: instead)
+    nor compared with #== (use #= instead).
+
+    Character constants like $+ or $A are guaranteed to create normal
+    "Character" objects, for which you can safely use #nextPut:.
+
+    There is no way to represent extended ASCII characters: with the Iconv
+    and I18N modules, you can use something like
+    
+        (String with: (Character value: 128)) asUnicodeString first
+
+    (This snippet has no shortcut by design because, in general, converting
+    a Character to a UnicodeCharacter is not a well-defined operation).
+
+o   New UnicodeCharacter and UnicodeString classes.  These new classes
+    can also be passed to and received from C functions.  See the
+    manual for more information.
+
+o   New syntax $<13> to express characters using their Unicode code point.
+    Note that this syntax will create instances of the new UnicodeCharacter
+    class when the number is > 127.
+
+o   Part of the I18N module was separated into the Iconv module, which
+    provides support for printing Unicode characters and strings correctly.
 
 -----------------------------------------------------------------------------
 

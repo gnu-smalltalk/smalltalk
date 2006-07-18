@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2005
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -32,8 +32,8 @@
  ======================================================================"
 
 Magnitude subclass: #Character 
-	  instanceVariableNames: 'asciiValue'
-	  classVariableNames: 'Table'
+	  instanceVariableNames: 'codePoint'
+	  classVariableNames: 'Table UpperTable LowerTable'
 	  poolDictionaries: ''
 	  category: 'Language-Data types'
 !
@@ -41,15 +41,16 @@ Magnitude subclass: #Character
 Character comment: 
 'My instances represent the 256 characters of the character set.  I provide
 messages to translate between integers and character objects, and provide
-names for some of the common unprintable characters.' !
+names for some of the common unprintable characters.
+
+Character is always used (mostly for performance reasons) when referring
+to characters whose code point is between 0 and 127.  Above 127, instead,
+more care is needed: Character refers to bytes that are used as part of
+encoding of a character, while UnicodeCharacter refers to the character
+itself.' !
 
 
 !Character class methodsFor: 'testing'!
-
-isIdentity
-    "Answer whether x = y implies x == y for instances of the receiver"
-    ^true
-!
 
 isImmediate
     "Answer whether, if x is an instance of the receiver, x copy == x"
@@ -68,20 +69,21 @@ initialize
      indices 513-768 map to uppercase chars."
 
     Table := ByteArray new: 768.
+    UpperTable := ByteArray new: 256.
+    LowerTable := ByteArray new: 256.
 
     1 to: 256 do: [ :value |
-	Table
-	    at: value + 256 put: value - 1;
-	    at: value + 512 put: value - 1.
+	UpperTable at: value put: value - 1.
+	LowerTable at: value put: value - 1.
 
 	(value between: 49 and: 58)
 	    ifTrue: [ Table at: value put: 48 ].
 
 	(value between: 66 and: 91)
-	    ifTrue: [ Table at: value put: 55; at: value + 512 put: value + 31 ].
+	    ifTrue: [ Table at: value put: 55. LowerTable at: value put: value + 31 ].
 
 	(value between: 98 and: 123)
-	    ifTrue: [ Table at: value put: 3; at: value + 256 put: value - 33 ]
+	    ifTrue: [ Table at: value put: 3. UpperTable at: value put: value - 33 ]
     ].
     Table
 	at: Character space	value + 1 put: 2;
@@ -183,9 +185,9 @@ digitValue
     "Returns the value of self interpreted as a digit.  Here, 'digit' means
     either 0-9, or A-Z, which maps to 10-35."
     | result |
-    result := Table at: 1 + asciiValue.
+    result := Table at: 1 + codePoint ifAbsent: [ -1 ].
     ^result > 32
-	ifTrue: [ asciiValue - result ]
+	ifTrue: [ codePoint - result ]
 	ifFalse: [ SystemExceptions.InvalidValue signalOn: self reason: 'Not a digit character' ]
 ! !
 
@@ -196,25 +198,25 @@ digitValue
 < aCharacter
     "Compare the character's ASCII value. Answer whether the receiver's
      is the least."
-    ^asciiValue < aCharacter asciiValue
+    ^codePoint < aCharacter codePoint
 !
 
 <= aCharacter
     "Compare the character's ASCII value. Answer whether the receiver's
      is the least or their equal."
-    ^asciiValue <= aCharacter asciiValue
+    ^codePoint <= aCharacter codePoint
 !
 
 > aCharacter
     "Compare the character's ASCII value. Answer whether the receiver's
      is the greatest."
-    ^asciiValue > aCharacter asciiValue
+    ^codePoint > aCharacter codePoint
 !
 
 >= aCharacter
     "Compare the character's ASCII value. Answer whether the receiver's
      is the greatest or their equal."
-    ^asciiValue >= aCharacter asciiValue
+    ^codePoint >= aCharacter codePoint
 ! !
 
 
@@ -223,37 +225,37 @@ digitValue
 
 isDigit
     "True if self is a 0-9 digit"
-    ^(Table at: 1 + asciiValue) = 48
+    ^(Table at: 1 + codePoint ifAbsent: [ 0 ]) = 48
 !
 
 isLetter
     "True if self is an upper- or lowercase letter"
-    ^((Table at: 1 + asciiValue) bitAnd: 1) = 1
+    ^((Table at: 1 + codePoint ifAbsent: [ 0 ]) bitAnd: 1) = 1
 !
 
 isAlphaNumeric
     "True if self is a letter or a digit"
-    ^((Table at: 1 + self asciiValue) bitAnd: 17) > 0
+    ^((Table at: 1 + self codePoint ifAbsent: [ 0 ]) bitAnd: 17) > 0
 !
 
 isLowercase
     "True if self is a lowercase letter"
-    ^(Table at: 1 + asciiValue) = 3
+    ^(Table at: 1 + codePoint ifAbsent: [ 0 ]) = 3
 !
 
 isUppercase
     "True if self is uppercase"
-    ^(Table at: 1 + asciiValue) = 55
+    ^(Table at: 1 + codePoint ifAbsent: [ 0 ]) = 55
 !
 
 isSeparator
     "Returns true if self is a space, cr, tab, nl, or newPage"
-    ^(Table at: 1 + asciiValue) = 2
+    ^(Table at: 1 + codePoint ifAbsent: [ 0 ]) = 2
 !
 
 isPunctuation
     "Returns true if self is one of '.,:;!?'"
-    ^(Table at: 1 + asciiValue) = 4
+    ^(Table at: 1 + codePoint ifAbsent: [ 0 ]) = 4
 !
 
 isVowel
@@ -274,8 +276,8 @@ isDigit: radix
     | result |
     (radix between: 2 and: 36)
 	ifFalse: [ SystemExceptions.ArgumentOutOfRange signalOn: radix mustBeBetween: 2 and: 36 ].
-    result := Table at: 1 + asciiValue.
-    ^result > 32 and: [ asciiValue - result between: 0 and: radix - 1 ]
+    result := Table at: 1 + codePoint ifAbsent: [ 0 ].
+    ^result > 32 and: [ codePoint - result between: 0 and: radix - 1 ]
 ! !
 
 
@@ -284,18 +286,24 @@ isDigit: radix
 asLowercase
     "Returns self as a lowercase character if it's an uppercase letter,
      otherwise returns the character unchanged."
-    ^Character value: (Table at: 513 + asciiValue)
+    ^Character value: (LowerTable at: 1 + codePoint ifAbsent: [ codePoint ])
 !
 
 asUppercase
     "Returns self as a uppercase character if it's an lowercase letter,
      otherwise returns the character unchanged."
-    ^Character value: (Table at: 257 + asciiValue)
+    ^Character value: (UpperTable at: 1 + codePoint ifAbsent: [ codePoint ])
 !
 
 asString
-    "Returns the character self as a string."
+    "Returns the character self as a string.  Only valid if the character
+     is between 0 and 255."
     ^String with: self
+!
+
+asUnicodeString
+    "Returns the character self as a Unicode string."
+    ^UnicodeString with: self
 !
 
 asSymbol
@@ -310,13 +318,16 @@ asSymbol
 displayOn: aStream
     "Print a representation of the receiver on aStream. Unlike
      #printOn:, this method strips the leading dollar."
-    aStream nextPut: self
-!
+    (codePoint between: 0 and: 127)
+	ifTrue: [ aStream nextPut: self ]
+	ifFalse: [
+	    aStream nextPut: $<.
+	    self printCodePointOn: aStream.
+	    aStream nextPut: $> ]!
 
 printOn: aStream
-    "Store a representation of the receiver on aStream"
-    self storeOn: aStream
-! !
+    "Print a representation of the receiver on aStream"
+    self storeOn: aStream! !
 
 
 
@@ -325,16 +336,27 @@ printOn: aStream
 storeOn: aStream
     "Store Smalltalk code compiling to the receiver on aStream"
     aStream nextPut: $$.
-    aStream nextPut: self
+    (codePoint between: 32 and: 126)
+	ifTrue: [ aStream nextPut: self. ^self ].
+    aStream nextPut: $<.
+    self printCodePointOn: aStream.
+    aStream nextPut: $>
 ! !
 
 
 !Character methodsFor: 'private'!
 
+printCodePointOn: aStream
+    codePoint < 32 ifTrue: [ aStream print: codePoint. ^self ].
+    aStream nextPutAll: '16r'.
+    codePoint <= 255 ifTrue: [ aStream nextPut: $0 ].
+    codePoint <= 4095 ifTrue: [ aStream nextPut: $0 ].
+    aStream nextPutAll: (codePoint printString: 16)!
+
 asLowercaseValue
     "Returns the ASCII value of the receiver converted to a lowercase character
      if it's an uppercase letter, otherwise returns the ASCII value unchanged."
-    ^Table at: 513 + asciiValue
+    ^LowerTable at: 1 + codePoint ifAbsent: [ codePoint ]
 ! !
 
 

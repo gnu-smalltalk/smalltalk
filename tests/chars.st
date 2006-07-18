@@ -48,9 +48,9 @@ c := b collect: [ :each | each asInteger ].
 
 
 | allChars |
-allChars := (0 to: 255) asByteArray asString.
+allChars := (0 to: 127) asByteArray asString.
 
-^(0 to: 255) allSatisfy: [ :index |
+^(0 to: 127) allSatisfy: [ :index |
     (allChars at: index + 1) == index asCharacter ]!
 
 

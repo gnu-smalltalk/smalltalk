@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -367,12 +367,12 @@ odd
 !Integer methodsFor: 'converting'!
 
 asCharacter
-    "Return self as an ascii character"
-    ^Character value: self
+    "Return self as a Character or UnicodeCharacter object."
+    ^Character codePoint: self
 !
 
 coerce: aNumber
-    "Coerce aNumber to the receiver's class"
+    "Coerce aNumber to the receiver's class."
     ^aNumber truncated
 !
 

@@ -9,7 +9,7 @@
 
 #######################################################################
 #
-# Copyright 2001, 2003, 2005 Free Software Foundation, Inc.
+# Copyright 2001, 2003, 2005, 2006 Free Software Foundation, Inc.
 # Written by Paolo Bonzini and Dragomir Milivojevic
 #
 # This file is part of the GNU Smalltalk class library.
@@ -38,6 +38,7 @@ BEGIN {
     type["void"] = "#void"
     type["int"] = "#int"
     type["char"] = "#char"
+    type["wchar_t"] = "#wchar"
     type["double"] = "#double"
     type["gconstpointer"] = "#cObject"
     type["gpointer"] = "#cObject"
@@ -92,6 +93,7 @@ BEGIN {
     ptr_type["#float"] = "CFloat type"
     ptr_type["#double"] = "CDouble type"
     ptr_type["#char"] = "#string"
+    ptr_type["#wchar"] = "#wstring"
     ptr_type["__byte__"] = "#byteArray"
     ptr_type["#cObject"] = "#cObject"
 

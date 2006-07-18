@@ -42,7 +42,7 @@
 This file documents GNU Smalltalk Version @value{VERSION}.
 It was last updated on @value{UPDATED}.
 
-Copyright @copyright{} 1988-92, 1994-95, 1999-2001 Free Software Foundation, Inc.
+Copyright @copyright{} 1988-92, 1994-95, 1999-2006 Free Software Foundation, Inc.
 
 This document is released under the terms of the GNU Free Documentation
 License as published by the Free Software Foundation; either version 1.1, or
@@ -84,7 +84,7 @@ together with the @gst{} programming language.
 @menu
 * BLOX::                The GUI library
 * TCP::                 The sockets library
-* I18N::                The internationalization library
+* Iconv/I18N::          The internationalization library
 * XML::                 Using the XML library
 
 * Class index::         Index to the classes in the class reference
@@ -93,15 +93,15 @@ together with the @gst{} programming language.
 @end menu
 
 @node BLOX
-@chapter BLOX
+@chapter Graphical users interfaces with BLOX
 @include blox.texi
 
 @node TCP
-@chapter TCP
+@chapter Network programming with TCP
 @include tcp.texi
 
-@node I18N
-@chapter I18N
+@node Iconv/I18N
+@chapter Multilingual and international support with Iconv and I18N
 @include i18n.texi
 
 @node XML

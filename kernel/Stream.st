@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2005
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -250,6 +250,13 @@ species
 
 !Stream methodsFor: 'character writing'!
 
+isUnicode
+    "Answer whether the receiver is able to store Unicode characters.
+     Note that if this method returns true, the stream may or may not
+     be able to store Characters (as opposed to UnicodeCharacters)
+     whose value is above 127."
+    ^self species shape ~~ #character!
+
 cr
     "Store a cr on the receiver"
     self nextPut: Character cr
@@ -350,6 +357,11 @@ fileOut: aClass
 
 
 !Stream methodsFor: 'positioning'!
+
+isPositionable
+    "Answer true if the stream supports moving backwards with #skip:."
+    ^false
+!
 
 skip: anInteger
     "Move the position forwards by anInteger places"

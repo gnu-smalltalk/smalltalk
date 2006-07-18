@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -112,6 +112,7 @@ typedef enum
 {
   CONST_BYTE_OBJECT,
   CONST_INT,
+  CONST_CHAR,
   CONST_FLOATD,
   CONST_FLOATE,
   CONST_FLOATQ,
@@ -289,9 +290,9 @@ extern tree_node _gst_make_float_constant (YYLTYPE *location,
 					   int type)
   ATTRIBUTE_HIDDEN;
 
-/* Create a const_node storing a char, CVAL.  */
+/* Create a const_node storing a char, IVAL.  */
 extern tree_node _gst_make_char_constant (YYLTYPE *location,
-				  	  char cval)
+				  	  int ival)
   ATTRIBUTE_HIDDEN;
 
 /* Create a const_node storing a symbol, pointed to by the 

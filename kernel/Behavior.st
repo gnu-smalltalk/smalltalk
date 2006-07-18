@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005
+| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -128,7 +128,7 @@ defineAsyncCFunc: cFuncNameString
     args: argsArray
 
     "Please lookup the part on the C interface in the manual.  This method
-     is deprecated, you should use the cCall:returning:args: attribute."
+     is deprecated, you should use the asyncCCall:args: attribute."
 
     | code |
     code := (
@@ -158,7 +158,6 @@ defineCFunc: cFuncNameString
 	with: returnTypeSymbol storeString
 	with: argsArray printString.
 
-    "TODO: returnTypeSymbol isSymbol ifFalse: [ code := code, ' narrow' ]."
     ^self compile: code ifError: [ :file :line :error | code error: error ].
 !
 
@@ -901,7 +900,7 @@ kindOfSubclass
 
 shapes
     ^#(#int8 #byte #character #short #ushort #int #uint #float #int64 #uint64
-       #double nil nil nil nil #pointer)
+       #double #utf32 nil nil nil #pointer)
 !
 
 shape

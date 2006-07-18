@@ -2367,10 +2367,12 @@ which we'll cover later in the chapter.
 @end example
 
 There should be surprisingly little which is actually
-new in this example.  The printing method uses both printOn:
-as well as nextPut: to do its printing.  While we haven't
+new in this example.  The printing method uses both @code{printOn:}
+as well as @code{nextPut:} to do its printing.  While we haven't
 covered it, it's pretty clear that @code{$(} generates the ASCII
-character @code{(} as an object, and nextPut: puts its argument
+character @code{(} as an object@footnote{A GNU Smalltalk extension
+  allows you to type characters by ASCII code too, as in
+  @code{$<40>}.}, and @code{nextPut:} puts its argument
 as the next thing on the stream.
 
 The math operations all generate a new object, calculating
@@ -3476,7 +3478,7 @@ specified at their front, and a trailing scientific notation.
 We have seen examples of character, string, and symbol constants.
 Array constants are simple enough; they would look like:
 @example
-   Smalltalk at: #a put: #(1 2 'Hi' $x $Hello 4 26r5H) !
+   Smalltalk at: #a put: #(1 2 'Hi' $x #Hello 4 16r3F) !
 @end example
 
 There are also ByteArray constants, whose elements are constrained

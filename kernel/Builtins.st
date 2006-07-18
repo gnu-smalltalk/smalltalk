@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -726,8 +726,21 @@ checkIndexableBounds: index put: object
     (shape == #float or: [ shape == #double ]) ifTrue: [
 	SystemExceptions.WrongClass signalOn: object mustBe: { Float. SmallInteger } ].
 
+    (object isKindOf: Character) ifFalse: [
+        (shape == #character or: [ shape == #utf32 ]) ifTrue: [
+	    SystemExceptions.WrongClass signalOn: object mustBe: Character ] ].
+
     shape == #character ifTrue: [
-	SystemExceptions.WrongClass signalOn: object mustBe: Character ].
+        ^SystemExceptions.ArgumentOutOfRange
+	    signalOn: object
+	    mustBeBetween: 0 asCharacter
+	    and: 255 asCharacter ].
+
+    shape == #utf32 ifTrue: [
+        ^SystemExceptions.ArgumentOutOfRange
+	    signalOn: object
+	    mustBeBetween: 0 asCharacter
+	    and: 16r10FFFF asCharacter ].
 
     shape == #byte ifTrue: [ size := 8 ].
     shape == #int8 ifTrue: [ size := 7 ].
@@ -738,10 +751,11 @@ checkIndexableBounds: index put: object
     shape == #uint64 ifTrue: [ size := 64 ].
     shape == #int64 ifTrue: [ size := 63 ].
     size isNil ifTrue: [ ^self primtiveFailed ].
+
     ^SystemExceptions.ArgumentOutOfRange
-	signalOn: object
-	mustBeBetween: (size odd ifTrue: [ -1 bitShift: size ] ifFalse: [ 0 ])
-	and: (1 bitShift: size) - 1
+        signalOn: object
+        mustBeBetween: (size odd ifTrue: [ -1 bitShift: size ] ifFalse: [ 0 ])
+        and: (1 bitShift: size) - 1
 !
 
 at: anIndex
@@ -1787,18 +1801,6 @@ basicAt: anIndex put: value
     self checkIndexableBounds: anIndex put: value
 !
 
-valueAt: index
-    "Answer the ascii value of index-th character variable of the receiver"
-    ^(self at: index) value
-!
-
-valueAt: index put: value
-     "Store (Character value: value) in the index-th indexed instance variable
-      of the receiver"
-    self at: index put: (Character value: value).
-    ^value
-!
-
 asCData: aCType
     "Convert the receiver to a CObject with the given type"
     <primitive: VMpr_String_asCData>
@@ -1810,16 +1812,42 @@ asCData: aCType
 
 valueAt: index
     "Answer the ascii value of index-th character variable of the receiver"
-    <primitive: VMpr_Object_basicAt>
-    self checkIndexableBounds: index
+    | shape size |
+
+    <primitive: VMpr_CharacterArray_valueAt>
+
+    shape := self class shape.
+    (shape == #character or: [ shape == #utf32 ]) ifFalse: [ ^self subclassResponsibility ].
+    self class isFixed ifTrue: [ ^self subclassResponsibility ].
+
+    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger ].
+    ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index
 !
  
 valueAt: index put: value
     "Store (Character value: value) in the index-th indexed instance variable
      of the receiver"
-    <primitive: VMpr_Object_basicAtPut>
+    | shape size |
 
-    self checkIndexableBounds: index put: value
+    <primitive: VMpr_CharacterArray_valueAtPut>
+
+    shape := self class shape.
+    (shape == #character or: [ shape == #utf32 ]) ifFalse: [ ^self subclassResponsibility ].
+    self class isFixed ifTrue: [ ^self subclassResponsibility ].
+
+    self isReadOnly ifTrue: [ ^SystemExceptions.ReadOnlyObject signal ].
+
+    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger ].
+    (index < 1) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+    (index > self basicSize) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+
+    value isInteger ifFalse: [
+            SystemExceptions.WrongClass signalOn: value mustBe: SmallInteger ].
+
+    shape == #character ifTrue: [
+        ^SystemExceptions.ArgumentOutOfRange signalOn: value mustBeBetween: 0 and: 255 ].
+
+    ^SystemExceptions.ArgumentOutOfRange signalOn: value mustBeBetween: 0 and: 16r10FFFF
 ! !
 
 
@@ -1850,39 +1878,56 @@ hash
 
 
 
+!UnicodeCharacter class methodsFor: 'built ins'!
+
+value: anInteger
+    "Returns the character object, possibly a Character, corresponding
+     to anInteger.  Error if anInteger is not an integer, or not in
+     0..16r10FFFF.
+
+     This is only a primitive for speed.  UnicodeCharacter's #value:
+     method is equivalent to #codePoint: (which is the same for
+     Character and UnicodeCharacter)."
+     <primitive: VMpr_UnicodeCharacter_create>
+
+    anInteger isInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ]
+	ifTrue: [ SystemExceptions.ArgumentOutOfRange signalOn: anInteger mustBeBetween: 0 and: 16r10FFFF ]
+! !
+
+
 !Character class methodsFor: 'built ins'!
 
 codePoint: anInteger
+    "Returns the character object, possibly an UnicodeCharacter, corresponding
+     to anInteger.  Error if anInteger is not an integer, or not in 0..16r10FFFF."
+     <primitive: VMpr_UnicodeCharacter_create>
+
+    anInteger isInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ]
+	ifTrue: [ SystemExceptions.ArgumentOutOfRange signalOn: anInteger mustBeBetween: 0 and: 16r10FFFF ]
+!
+
+asciiValue: anInteger
     "Returns the character object corresponding to anInteger.  Error if
-     anInteger is not an integer, or not in 0..255.  #codePoint:,
-     #asciiValue: and #value: are synonyms."
+     anInteger is not an integer, or not in 0..127."
+
+    anInteger isInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ].
+
+    ^(self between: 0 and: 127)
+	ifTrue: [ self value: anInteger ]
+	ifFalse: [ SystemExceptions.ArgumentOutOfRange signalOn: anInteger mustBeBetween: 0 and: 127 ]
+!
+
+value: anInteger
+    "Returns the character object corresponding to anInteger.  Error if
+     anInteger is not an integer, or not in 0..255."
      <primitive: VMpr_Character_create>
 
     anInteger isInteger
 	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ]
 	ifTrue: [ SystemExceptions.ArgumentOutOfRange signalOn: anInteger mustBeBetween: 0 and: 255 ]
-!
-
-asciiValue: anInteger
-    "Returns the character object corresponding to anInteger.  Error if
-     anInteger is not an integer, or not in 0..255.  #codePoint:,
-     #asciiValue: and #value: are synonyms."
-     <primitive: VMpr_Character_create>
-
-    anInteger isInteger
-	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ]
-	ifTrue: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger ]
-!
-
-value: anInteger
-    "Returns the character object corresponding to anInteger.  Error if
-     anInteger is not an integer, or not in 0..255.  #codePoint:,
-     #asciiValue: and #value: are synonyms."
-     <primitive: VMpr_Character_create>
-
-    anInteger isInteger
-	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ]
-	ifTrue: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger ]
 ! !
 
 
@@ -1891,31 +1936,31 @@ value: anInteger
 
 = char
     "Boolean return value; true if the characters are equal"
-    <primitive: VMpr_Object_identity>
+    <primitive: VMpr_Character_equal>
 !
 
 asciiValue
     "Returns the integer value corresponding to self.  #codePoint,
      #asciiValue, #value, and #asInteger are synonyms."
-    ^asciiValue
+    ^codePoint
 !
 
 asInteger
     "Returns the integer value corresponding to self.  #codePoint,
      #asciiValue, #value, and #asInteger are synonyms."
-    ^asciiValue
+    ^codePoint
 !
 
 codePoint
     "Returns the integer value corresponding to self.  #codePoint,
      #asciiValue, #value, and #asInteger are synonyms."
-    ^asciiValue
+    ^codePoint
 !
 
 value
     "Returns the integer value corresponding to self.  #codePoint,
      #asciiValue, #value, and #asInteger are synonyms."
-    ^asciiValue
+    ^codePoint
 ! !
 
 

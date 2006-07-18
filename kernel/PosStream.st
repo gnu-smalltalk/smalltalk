@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -208,6 +208,11 @@ setToEnd
 size
     "Answer the size of data on which we are streaming."
     ^endPtr
+!
+
+isPositionable
+    "Answer true if the stream supports moving backwards with #skip:."
+    ^true
 !
 
 skip: anInteger

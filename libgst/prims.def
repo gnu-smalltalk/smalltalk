@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -2046,6 +2046,90 @@ primitive VMpr_Object_basicSize = 62 [succeed,return_small_smallinteger,inlined]
   PRIM_SUCCEEDED;
 }
 
+/* CharacterArray valueAt: */
+
+primitive VMpr_CharacterArray_valueAt = 60 [succeed,fail]
+{
+  OOP oop1;
+  OOP oop2;
+  intptr_t spec;
+
+  _gst_primitives_executed++;
+
+  oop2 = POP_OOP ();
+  oop1 = STACKTOP ();
+  spec = CLASS_INSTANCE_SPEC (OOP_CLASS (oop1));
+
+  switch (spec & ISP_INDEXEDVARS)
+    {
+    case ISP_CHARACTER:
+      spec ^= ISP_CHARACTER ^ ISP_UCHAR;
+      break;
+    case ISP_UTF32:
+      spec ^= ISP_UTF32 ^ ISP_UINT;
+      break;
+    default:
+      UNPOP (1);
+      PRIM_FAILED;
+    }
+
+  if COMMON (IS_INT (oop2))
+    {
+      intptr_t arg2;
+      arg2 = TO_INT (oop2);
+      oop1 = index_oop_spec (oop1, OOP_TO_OBJ (oop1), arg2, spec);
+      if COMMON (oop1)
+	{
+	  SET_STACKTOP (oop1);
+	  PRIM_SUCCEEDED;
+	}
+    }
+  UNPOP (1);
+  PRIM_FAILED;
+}
+
+/* CharacterArray valueAt:put: */
+primitive VMpr_CharacterArray_valueAtPut = 61 [succeed,fail,inlined]
+{
+  OOP oop1;
+  OOP oop2;
+  OOP oop3;
+  intptr_t spec;
+  _gst_primitives_executed++;
+
+  oop3 = POP_OOP ();
+  oop2 = POP_OOP ();
+  oop1 = STACKTOP ();
+  spec = CLASS_INSTANCE_SPEC (OOP_CLASS (oop1));
+
+  switch (spec & ISP_INDEXEDVARS)
+    {
+    case ISP_CHARACTER:
+      spec ^= ISP_CHARACTER ^ ISP_UCHAR;
+      break;
+    case ISP_UTF32:
+      spec ^= ISP_UTF32 ^ ISP_UINT;
+      break;
+    default:
+      UNPOP (2);
+      PRIM_FAILED;
+    }
+
+  if COMMON (IS_INT (oop2) && !IS_OOP_READONLY (oop1))
+    {
+      intptr_t arg2;
+      arg2 = TO_INT (oop2);
+      if COMMON (index_oop_put_spec (oop1, OOP_TO_OBJ (oop1), arg2, oop3, spec))
+	{
+	  SET_STACKTOP (oop3);
+	  PRIM_SUCCEEDED;
+	}
+    }
+
+  UNPOP (2);
+  PRIM_FAILED;
+}
+
 
 
 /* CompiledCode verificationResult */
@@ -2945,7 +3029,7 @@ primitive VMpr_ByteArray_replaceFromToWithStartingAt [succeed,fail]
   PRIM_FAILED;
 }
 
-/* Object ==, Character = */
+/* Object == */
 
 primitive VMpr_Object_identity = 110 [succeed,inlined]
 {
@@ -3084,6 +3168,46 @@ primitive VMpr_Character_create [succeed,fail]
     }
   UNPOP (1);
   PRIM_FAILED;
+}
+
+/* UnicodeCharacter class value: */
+
+primitive VMpr_UnicodeCharacter_create [succeed,fail]
+{
+  OOP oop1;
+  OOP oop2;
+  _gst_primitives_executed++;
+
+  oop2 = POP_OOP ();
+  oop1 = STACKTOP ();
+  if (IS_INT (oop2))
+    {
+      intptr_t arg2;
+      arg2 = TO_INT (oop2);
+      if (arg2 >= 0 && arg2 <= 0x10FFFF)
+	{
+	  SET_STACKTOP (char_new (arg2));
+	  PRIM_SUCCEEDED;
+	}
+    }
+  UNPOP (1);
+  PRIM_FAILED;
+}
+
+/* Character = */
+primitive VMpr_Character_equal [succeed]
+{
+  OOP oop1;
+  OOP oop2;
+  _gst_primitives_executed++;
+
+  oop2 = POP_OOP ();
+  oop1 = POP_OOP ();
+  PUSH_BOOLEAN (IS_OOP (oop2) && is_a_kind_of (OOP_CLASS (oop2), _gst_char_class)
+		&& CHAR_OOP_VALUE (oop2) == CHAR_OOP_VALUE (oop1)
+		&& (CHAR_OOP_VALUE (oop1) <= 127
+		    || OOP_CLASS (oop2) == OOP_CLASS (oop1)));
+  PRIM_SUCCEEDED;
 }
 
 /* Symbol class intern: aString */
@@ -3259,9 +3383,6 @@ primitive VMpr_Memory_at [succeed,fail]
       switch (arg1)
 	{
 	case 0:		/* char */
-	  /* may want to use Character instead? */
-	  PUSH_OOP (CHAR_OOP_AT (*(char *) arg2));
-	  PRIM_SUCCEEDED;
 	case 1:		/* unsigned char */
 	  PUSH_OOP (CHAR_OOP_AT (*(unsigned char *) arg2));
 	  PRIM_SUCCEEDED;
@@ -3331,7 +3452,9 @@ primitive VMpr_Memory_atPut [succeed,fail]
 	case 0:		/* char */
 	case 1:		/* unsigned char */
 	  /* may want to use Character instead? */
-	  if (IS_CLASS (oop4, _gst_char_class))
+	  if (IS_CLASS (oop3, _gst_char_class)
+	      || (IS_CLASS (oop3, _gst_unicode_character_class)
+		  && CHAR_OOP_VALUE (oop3) <= 127))
 	    {
 	      *(char *) arg2 = CHAR_OOP_VALUE (oop4);
 	      PRIM_SUCCEEDED;
@@ -4239,9 +4362,6 @@ primitive VMpr_CObject_at :
 	  switch (arg3)
 	    {
 	    case 0:
-	      PUSH_OOP (CHAR_OOP_AT (*(gst_uchar *) addr));
-	      PRIM_SUCCEEDED;
-
 	    case 1:
 	      PUSH_OOP (CHAR_OOP_AT (*(gst_uchar *) addr));
 	      PRIM_SUCCEEDED;
@@ -4361,7 +4481,9 @@ primitive VMpr_CObject_atPut :
 	    {
 	    case 0:		/* char */
 	    case 1:		/* uchar */
-	      if (IS_CLASS (oop3, _gst_char_class))
+	      if (IS_CLASS (oop3, _gst_char_class)
+		  || (IS_CLASS (oop3, _gst_unicode_character_class)
+		      && CHAR_OOP_VALUE (oop3) <= 127))
 		{
 		  *addr = CHAR_OOP_VALUE (oop3);
 		  PRIM_SUCCEEDED;

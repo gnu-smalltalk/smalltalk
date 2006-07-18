@@ -67,7 +67,7 @@ This file documents @sc{gnu} Smalltalk Version @value{VERSION}.
 It was last updated on @value{UPDATED}.
 
 Copyright @copyright{} 1988, 1989, 1991, 1992, 1994, 1995, 1999,
-2000, 2001, 2002 Free Software Foundation, Inc.
+2000, 2001, 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
 
 This document is released under the terms of the @sc{gnu} Free
 Documentation License as published by the Free Software Foundation;
@@ -1576,9 +1576,9 @@ Writing to the Blox interface means your GUI based application will be
 portable to any platform where Blox is supported.
 
 The Blox classes, which reside in the @code{BLOX} namespace and are
-fully documented in @ref{BLOX, , BLOX, gst-libs, the @gst{}
-Library Reference}, act as wrappers around other toolkits, which
-constitute the required portability layer; currently the only one
+fully documented in @ref{BLOX, , Graphical users interfaces with BLOX,
+gst-libs, the @gst{} Library Reference}, act as wrappers around other toolkits,
+which constitute the required portability layer; currently the only one
 supported is Tcl/Tk but alternative versions of Blox, for example based
 on Gtk+ and GNOME, have been considered and might even replace Tcl/Tk
 in the future@footnote{The Gtk+ bindings for @gst{} are
@@ -1806,9 +1806,83 @@ communicate.  These conventions range from very simple ones, such as the
 format for representing dates and times, to very complex ones, such as
 the language spoken.  Provided the programs are written to obey the
 choice of conventions, they will follow the conventions preferred by the
-user.  @gst{} provides the @code{I18N} package to ease you in doing so.
+user.  @gst{} provides two packages to ease you in doing so.
+The @code{I18N} package covers both @dfn{internationalization} and
+@dfn{multilingualization}; the lighter-weight @code{Iconv} package
+covers only the latter, as it is a prerequisite for correct
+internationalization.
 
-@dfn{Internationalizing} software means programming it to be able to
+@dfn{Multilingualizing} software means programming it to be able to
+support languages from every part of the world.  In particular, it
+includes understanding multi-byte character sets (such as UTF-8)
+and Unicode characters whose @dfn{code point} (the equivalent of the
+ASCII value) is above 127.  To this end, @gst{} provides the
+@code{UnicodeString} class that stores its data as 32-bit Unicode
+values.  In addition, @code{Character} will provide support for
+all the over one million available code points in Unicode.
+
+Loading the @code{I18N} package improves this support through
+the @code{EncodedStream} class@footnote{All
+    the classes mentioned in this section reside in the
+    @code{I18N} namespace.}, which interprets and transcodes
+non-ASCII Unicode characters.  This support is mostly transparent,
+because the base classes @code{Character}, @code{UnicodeCharacter}
+and @code{UnicodeString} are enhanced to use it.  Sending @code{asString}
+or @code{printString} to an instance of @code{Character} and
+@code{UnicodeString} will convert Unicode characters so that they
+are printed correctly in the current locale.  For example,
+@samp{$<279> printNl} will print a small Latin letter @samp{e} with
+a dot above, when the @code{I18N} package is loaded.
+
+Dually, you can convert @code{String} or @code{ByteArray} objects to
+Unicode with a single method call.  If the current locale's encoding is
+UTF-8, @samp{#[196 151] asUnicodeString} will return a Unicode string
+with the same character as above, the small Latin letter @samp{e} with
+a dot above.
+
+The implementation of multilingualization support is not yet
+complete.  For example, methods such as @code{asLowercase},
+@code{asUppercase}, @code{isLetter} do not yet recognize Unicode
+characters.
+
+You need to exercise some care, or your program will be buggy when
+Unicode characters are used.  In particular, Characters must
+@strong{not} be compared with @code{==}@footnote{Character equality
+  with @code{=} will be as fast as with @code{==}.} and should
+be printed on a Stream with @code{display:} rather than
+@code{nextPut:}.
+
+Also, Characters need to be created with
+the class method @code{codePoint:} if you are referring to their
+Unicode value; @code{codePoint:} is also the only method to create
+characters that is accepted by the ANSI Standard for Smalltalk.
+The method @code{value:}, instead, should be used if you are referring
+to a byte in a particular encoding.  This subtle difference means
+that, for example, the last two of the following examples will fail:
+
+@example
+    "Correct.  Use #value: with Strings, #codePoint: with UnicodeString."
+    String with: (Character value: 65)
+    String with: (Character value: 128)
+    UnicodeString with: (Character codePoint: 65)
+    UnicodeString with: (Character codePoint: 128)
+
+    "Correct.  Only works for characters in the 0-127 range, which may
+     be considered as defensive programming."
+    String with: (Character codePoint: 65)
+
+    "Dubious, and only works for characters in the 0-127 range.  With
+     UnicodeString, probably you always want #codePoint:."
+    UnicodeString with: (Character value: 65)
+
+    "Fails, we try to use a high character in a String"
+    String with: (Character codePoint: 128)
+
+    "Fails, we try to use an encoding in a Unicode string"
+    UnicodeString with: (Character value: 128)
+@end example
+
+@dfn{Internationalizing} software, instead, means programming it to be able to
 adapt to the user's favorite conventions.  These conventions can get
 pretty complex; for example, the user might specify the locale
 `espana-castellano' for most purposes, but specify the locale
@@ -1823,17 +1897,10 @@ operating system's manual or to the @gnu{} C library's manual.
 @gst{} inherits from @sc{iso} C the concept of a @dfn{locale}, that is, a
 collection of conventions, one convention for each purpose, and maps each of
 these purposes to a Smalltalk class defined by the @code{I18N} package, and
-these classes form a small hierarchy with class @code{Locale}@footnote{All
-    the classes mentioned in this section reside in the
-    @code{I18N} namespace.} as its roots:
+these classes form a small hierarchy with class @code{Locale} as its roots:
 
 @itemize @bullet
 @ignore
-@item
-Classes in the @code{Encoders} namespace implement decisions on which
-multibyte character sequences are valid, and how they are interpreted.
-Usually you will simply rely on the @code{EncodedStream} class.
-
 @item
 @code{LcCollate} defines the collating sequence for the local language and
 character set.
@@ -1906,10 +1973,11 @@ Retrieve the translation of the given string.@footnote{The @code{?} method
    Locale.}
 @end defmethod
 
-The package provides much more functionality, including more advanced
-formatting options support for Unicode, and conversion to and from
-several character sets.  For more information, refer to @ref{I18N, ,
-I18N, gst-libs, the @gst{} Library Reference}.
+These two packages provides much more functionality, including more
+advanced formatting options support for Unicode, and conversion to and
+from several character sets.  For more information, refer to
+@ref{I18N, , Multilingual and international support with Iconv and I18N,
+gst-libs, the @gst{} Library Reference}.
 
 As an aside, the representation of locales that the package uses is
 exactly the same as the C library, which has many advantages: the burden
@@ -2089,7 +2157,7 @@ in @code{Socket}.  This code should guide you in the process of creating
 and using both server and client sockets; after creation, sockets behave
 practically the same as standard Smalltalk streams, so you should not
 have particular problems.  For more information, refer to @ref{TCP, ,
-TCP, gst-libs, the @gst{} Library Reference}.
+Network programming with TCP, gst-libs, the @gst{} Library Reference}.
 
 In addition, package @code{WebServer} implements a servlet-based web
 serving framework engine, including support for file servers as well as
@@ -2494,7 +2562,7 @@ the corresponding Smalltalk data type.  The set of valid return types
 is:
 @table @code
 @item char
-        Single C character value
+Single C character value
 
 @item string      
 A C char *, converted to a Smalltalk string
@@ -2504,6 +2572,9 @@ A C char *, converted to a Smalltalk string and then freed.
 
 @item symbol      
 A C char *, converted to a Smalltalk symbol
+
+@item symbolOut   
+A C char *, converted to a Smalltalk symbol and then freed.
 
 @item int         
 A C int value
@@ -2525,6 +2596,15 @@ A C long double, converted to an instance of FloatQ
 
 @item void        
 No returned value
+
+@item wchar
+Single C wide character (@code{wchar_t}) value
+
+@item wstring
+Wide C string (@code{wchar_t *}), converted to a UnicodeString
+
+@item wstringOut
+Wide C string (@code{wchar_t *}), converted to a UnicodeString and then freed
 
 @item cObject     
 An anonymous C pointer; useful to pass back to some C function later
@@ -2562,12 +2642,23 @@ passed as @code{char}, which is promoted to @code{int}
 @item char        
 passed as @code{char}, which is promoted to @code{int}
 
+@item wchar        
+passed as @code{wchar_t}
+
 @item string      
 passed as @code{char *}
 
 @item stringOut   
 passed as @code{char *}, the contents are expected to be overwritten
 with a new C string, and the object that was passed becomes the new
+string on return
+
+@item wstring      
+passed as @code{wchar_t *}
+
+@item wstringOut   
+passed as @code{wchar_t *}, the contents are expected to be overwritten
+with a new C wide string, and the object that was passed becomes the new
 string on return
 
 @item symbol      
@@ -2659,6 +2750,9 @@ Table of parameter conversions:
 @item unknown, self       @tab anything else        @tab OOP
 @item variadic            @tab Array                @tab each element is passed according to "unknown"
 @item variadicSmalltalk   @tab Array                @tab each element is passed as an OOP
+@item wchar               @tab Character            @tab wchar_t
+@item wstring             @tab UnicodeString        @tab wchar_t *
+@item wstringOut          @tab UnicodeString        @tab wchar_t *
 @end multitable
 
 When your call-out returns @code{#void}, depending on your
@@ -2989,9 +3083,21 @@ This function assumes that the passed OOP is a Character and returns the
 C @code{char} for that integer.
 @end deftypefun
 
+@deftypefun wchar_t OOPToWChar (OOP)
+This function assumes that the passed OOP is a Character or
+UnicodeCharacter and returns the C @code{wchar_t} for that integer.
+@end deftypefun
+
 @deftypefun char *OOPToString (OOP)
 This function assumes that the passed OOP is a String or ByteArray and
 returns a C null-terminated @code{char *} with the same contents.  It is
+the caller's responsibility to free the pointer and to handle possible
+@samp{NUL} characters inside the Smalltalk object.
+@end deftypefun
+
+@deftypefun wchar_t *OOPToWString (OOP)
+This function assumes that the passed OOP is a UnicodeString and
+returns a C null-terminated @code{wchar_t *} with the same contents.  It is
 the caller's responsibility to free the pointer and to handle possible
 @samp{NUL} characters inside the Smalltalk object.
 @end deftypefun
@@ -3068,6 +3174,11 @@ This object returns a Smalltalk Character which represents the same char
 as the passed C @code{char}.
 @end deftypefun
 
+@deftypefun OOP charToOOP (wchar_t)
+This object returns a Smalltalk Character which represents the same char
+as the passed C @code{wchar_t}.
+@end deftypefun
+
 @deftypefun OOP classNameToOOP (char *)
 This method returns the Smalltalk class (i.e. an instance of a subclass
 of Class) whose name is the given parameter.  This method is slow; you
@@ -3077,6 +3188,12 @@ can safely cache its result.
 @deftypefun OOP stringToOOP (char *)
 This method returns a String which maps to the given null-terminated C
 string, or the builtin object @code{nil} if the parameter points to
+address 0 (zero).
+@end deftypefun
+
+@deftypefun OOP wstringToOOP (wchar_t *)
+This method returns a UnicodeString which maps to the given null-terminated C
+wide string, or the builtin object @code{nil} if the parameter points to
 address 0 (zero).
 @end deftypefun
 
@@ -3333,6 +3450,8 @@ registry (@pxref{Smalltalk types}).  @dfn{receiver_type} and
           o                OOP            any
           t            char *, PTR        CObject (see below)
           T              OOP, PTR         CObject (see below)
+          w              wchar_t          Character (see wcharToOOP)
+          W             wchar_t *         UnicodeString (see wstringToOOP)
 @end example
 
 @noindent
@@ -3360,6 +3479,8 @@ Specifier   if nil    C data type      expected result
    s        NULL        char *         nil, a String, or a Symbol
    ?         0      char *, PTR        See oopToC
    o       nilOOP        OOP           any (result is not converted)
+   w        '\0'       wchar_t         nil or a Character
+   W        NULL      wchar_t *        nil, a UnicodeString
    v                      /            any (result is discarded)
 @end example
 

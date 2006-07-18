@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -140,9 +140,13 @@ extern OOP _gst_bool_to_oop (int b)
   ATTRIBUTE_HIDDEN;
 extern OOP _gst_char_to_oop (char c) 
   ATTRIBUTE_HIDDEN;
+extern OOP _gst_wchar_to_oop (wchar_t c) 
+  ATTRIBUTE_HIDDEN;
 extern OOP _gst_class_name_to_oop (const char *name) 
   ATTRIBUTE_HIDDEN;
 extern OOP _gst_string_to_oop (const char *str) 
+  ATTRIBUTE_HIDDEN;
+extern OOP _gst_wstring_to_oop (const wchar_t *str) 
   ATTRIBUTE_HIDDEN;
 extern OOP _gst_byte_array_to_oop (const char *str,
 				   int n) 
@@ -171,7 +175,11 @@ extern int _gst_oop_to_bool (OOP oop)
   ATTRIBUTE_HIDDEN;
 extern char _gst_oop_to_char (OOP oop) 
   ATTRIBUTE_HIDDEN;
+extern wchar_t _gst_oop_to_wchar (OOP oop) 
+  ATTRIBUTE_HIDDEN;
 extern char *_gst_oop_to_string (OOP oop) 
+  ATTRIBUTE_HIDDEN;
+extern wchar_t *_gst_oop_to_wstring (OOP oop) 
   ATTRIBUTE_HIDDEN;
 extern char *_gst_oop_to_byte_array (OOP oop) 
   ATTRIBUTE_HIDDEN;

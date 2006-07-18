@@ -8,7 +8,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne and Paolo Bonzini.
  *
@@ -159,6 +159,12 @@ typedef struct VMProxy
 
   /* More system objects.  */
   OOP processorOOP;
+
+  /* More functions, added in 2.3.  */
+  OOP (*wcharToOOP) __PROTO ((wchar_t wc));
+  OOP (*wstringToOOP) __PROTO ((const wchar_t *str));
+  wchar_t (*OOPToWChar) __PROTO ((OOP oop));
+  wchar_t *(*OOPToWString) __PROTO ((OOP oop));
 } VMProxy;
 
 #define INDEXED_WORD(obj, n)   ( ((long *) ((obj) + 1))		    [(n)-1] )

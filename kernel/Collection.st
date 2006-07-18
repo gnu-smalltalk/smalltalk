@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -376,6 +376,20 @@ asSet
 
     ^(Set new: self size * 2)
 	addAll: self;
+	yourself!
+
+asString
+    "Answer a String containing all the elements in the receiver"
+
+    ^(String new: self size)
+	replaceFrom: 1 to: self size with: self;
+	yourself!
+
+asUnicodeString
+    "Answer a UnicodeString containing all the elements in the receiver"
+
+    ^(UnicodeString new: self size)
+	replaceFrom: 1 to: self size with: self;
 	yourself!
 
 asOrderedCollection

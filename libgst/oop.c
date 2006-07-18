@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne and Paolo Bonzini.
  *
@@ -85,7 +85,7 @@ static heap oop_heap;
 /* This vector holds the storage for all the Character objects in the
    system.  Since all character objects are unique, we pre-allocate
    space for 256 of them, and treat them as special built-ins when
-   doing garbage collection.*/
+   doing garbage collection.  */
 static struct gst_character _gst_char_object_table[NUM_CHAR_OBJECTS];
 
 /* This is "nil" object in the system.  That is, the single instance

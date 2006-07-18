@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -264,6 +264,12 @@ displayOn: aStream
     "Print a represention of the receiver on aStream. For most objects
      this is simply its #printOn: representation, but for strings and
      characters, superfluous dollars or extra pairs of quotes are stripped."
+    self printOn: aStream
+!
+
+storeOn: aStream
+    "Print Smalltalk code on aStream that compiles
+     to the same symbol as the receiver."
     self printOn: aStream
 !
 

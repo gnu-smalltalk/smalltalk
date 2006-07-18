@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -331,14 +331,13 @@ _gst_make_oop_constant (YYLTYPE *location,
 }
 
 tree_node
-_gst_make_char_constant (YYLTYPE *location,
-		     char cval)
+_gst_make_char_constant (YYLTYPE *location, int ival)
 {
   tree_node result;
 
   result = make_tree_node (location, TREE_CONST_EXPR);
-  result->v_const.constType = CONST_OOP;
-  result->v_const.val.oopVal = CHAR_OOP_AT (cval);
+  result->v_const.constType = CONST_CHAR;
+  result->v_const.val.iVal = ival;
 
   return (result);
 }

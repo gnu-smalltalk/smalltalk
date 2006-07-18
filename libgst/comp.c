@@ -2041,6 +2041,12 @@ equal_constant (OOP oop,
 	return (true);
       break;
 
+    case CONST_CHAR:
+      if (IS_OOP (oop) && is_a_kind_of (OOP_CLASS (oop), _gst_char_class)
+	  && CHAR_OOP_VALUE (oop) == constExpr->v_const.val.iVal)
+	return (true);
+      break;
+
     case CONST_FLOATD:
       if (IS_OOP (oop) && OOP_CLASS (oop) == _gst_floatd_class)
 	{
@@ -2161,6 +2167,9 @@ make_constant_oop (tree_node constExpr)
     {
     case CONST_INT:
       return (FROM_INT (constExpr->v_const.val.iVal));
+
+    case CONST_CHAR:
+      return (char_new (constExpr->v_const.val.iVal));
 
     case CONST_FLOATD:
       return (floatd_new (constExpr->v_const.val.fVal));

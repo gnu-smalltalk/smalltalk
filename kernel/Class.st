@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -376,7 +376,8 @@ variable: shape subclass: classNameString
      name, instance variables, class variables, pool dictionaries and
      category. If the class is already defined, if necessary, recompile
      everything needed.  The shape can be one of #byte #int8 #character
-     #short #ushort #int #uint #float #int64 #uint64 #double or #pointer."
+     #short #ushort #int #uint #int64 #uint64 #utf32 #float #double or
+     #pointer."
 
     | meta |
     KernelInitialized ifFalse: [

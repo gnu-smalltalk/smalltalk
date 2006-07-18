@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2002, 2005 Free Software Foundation, Inc.
+| Copyright 2001, 2002, 2005, 2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -89,70 +89,70 @@ construct an appropriate pipe.'!
 
 Namespace current: Smalltalk.I18N.Encoders!
 
-Encoder subclass: #FromUCS4
+Encoder subclass: #FromUTF32
        instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: 'i18n-Character sets'!
 
-FromUCS4 comment:
-'This class is a superclass for classes that convert from UCS4
+FromUTF32 comment:
+'This class is a superclass for classes that convert from UTF-32
 characters (encoded as 32-bit Integers) to bytes in another
 encoding (encoded as Characters).'!
 
-Encoder subclass: #ToUCS4
+Encoder subclass: #ToUTF32
        instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: 'i18n-Character sets'!
 
-ToUCS4 comment:
+ToUTF32 comment:
 'This class is a superclass for classes that convert from bytes
-(encoded as Characters) to UCS4 characters (encoded as 32-bit
+(encoded as Characters) to UTF-32 characters (encoded as 32-bit
 Integers to simplify the code and to avoid endianness conversions).'!
 
-ToUCS4 subclass: #ComposeUCS4LE
+ToUTF32 subclass: #ComposeUTF32LE
        instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: 'i18n-Character sets'!
 
-ComposeUCS4LE comment:
-'This class is used internally to provide UCS4 characters encoded as
-32-bit integers for a descendent of FromUCS4, when the starting
+ComposeUTF32LE comment:
+'This class is used internally to provide UTF-32 characters encoded as
+32-bit integers for a descendent of FromUTF32, when the starting
 encoding is little-endian.'!
 
-ToUCS4 subclass: #ComposeUCS4BE
+ToUTF32 subclass: #ComposeUTF32BE
        instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: 'i18n-Character sets'!
 
-ComposeUCS4BE comment:
-'This class is used internally to provide UCS4 characters encoded as
-32-bit integers for a descendent of FromUCS4, when the starting
+ComposeUTF32BE comment:
+'This class is used internally to provide UTF-32 characters encoded as
+32-bit integers for a descendent of FromUTF32, when the starting
 encoding is big-endian.'!
 
-FromUCS4 subclass: #SplitUCS4LE
+FromUTF32 subclass: #SplitUTF32LE
        instanceVariableNames: 'wch'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'i18n-Character sets'!
 
-SplitUCS4LE comment:
+SplitUTF32LE comment:
 'This class is used internally to split into four 8-bit characters
-the 32-bit UCS4 integers coming from a descendent of ToUCS4, when
+the 32-bit UTF-32 integers coming from a descendent of ToUTF32, when
 the destination encoding is little-endian.'!
 
-FromUCS4 subclass: #SplitUCS4BE
+FromUTF32 subclass: #SplitUTF32BE
        instanceVariableNames: 'count wch'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'i18n-Character sets'!
 
-SplitUCS4BE comment:
+SplitUTF32BE comment:
 'This class is used internally to split into four 8-bit characters
-the 32-bit UCS4 integers coming from a descendent of ToUCS4, when
+the 32-bit UTF-32 integers coming from a descendent of ToUTF32, when
 the destination encoding is big-endian.'!
 
 Encoder subclass: #Iconv
@@ -166,21 +166,21 @@ Iconv comment:
 'This class is used to delegate the actual character set conversion
 to the C library''s iconv function.  Most conversions use iconv as
 the only step in the conversions, sometimes the structure is 
-ToUCS4+SplitUCS4xx+Iconv or Iconv+ComposeUCS4xx+FromUCS4, rarely
+ToUTF32+SplitUTF32xx+Iconv or Iconv+ComposeUTF32xx+FromUTF32, rarely
 Iconv is skipped altogether and only Smalltalk converters are used.'!
 
-FromUCS4 subclass: #ToUTF7
+FromUTF32 subclass: #ToUTF7
 	instanceVariableNames: 'left value lookahead'
 	classVariableNames: 'Base64Characters DirectCharacters ToBase64'
 	poolDictionaries: ''
 	category: 'i18n-Encodings'!
 
 ToUTF7 comment:
-'This class implements a converter that transliterates UCS4
+'This class implements a converter that transliterates UTF-32
 characters (encoded as 32-bit Integers) to UTF-7 encoded
 characters.'!
 
-ToUCS4 subclass: #FromUTF7
+ToUTF32 subclass: #FromUTF7
 	instanceVariableNames: 'shift wch lookahead'
 	classVariableNames: 'DirectCharacters FromBase64'
 	poolDictionaries: ''
@@ -188,7 +188,7 @@ ToUCS4 subclass: #FromUTF7
 
 ToUTF7 comment:
 'This class implements a converter that transliterates UTF-7
-encoded characters to UCS4 values (encoded as 32-bit Integers).'!
+encoded characters to UTF-32 values (encoded as 32-bit Integers).'!
 
 Namespace current: Smalltalk.I18N!
 
@@ -241,9 +241,9 @@ species
 !Encoder methodsFor: 'private - initialization'!
 
 initializeFrom: fromEncoding to: toEncoding origin: aStringOrStream
-    origin := aStringOrStream isString
-	ifTrue: [ aStringOrStream readStream ]
-	ifFalse: [ aStringOrStream ].
+    origin := (aStringOrStream isKindOf: Stream)
+	ifFalse: [ aStringOrStream readStream ]
+	ifTrue: [ aStringOrStream ].
 
     self flush
 ! !
@@ -258,27 +258,27 @@ initialize
     }
 !
 
-registerEncoderFor: arrayOfAliases toUCS4: toUCS4Class fromUCS4: fromUCS4Class
+registerEncoderFor: arrayOfAliases toUTF32: toUTF32Class fromUTF32: fromUTF32Class
     "Register the two classes that will respectively convert from the
-     charsets in arrayOfAliases to UCS4 and vice versa.
+     charsets in arrayOfAliases to UTF-32 and vice versa.
 
      The former class is a stream that accepts characters and returns
-     (via #next) integers representing UCS-4 character codes, while
-     the latter accepts UCS-4 character codes and converts them to
+     (via #next) integers representing UTF-32 character codes, while
+     the latter accepts UTF-32 character codes and converts them to
      characters.  For an example see respectively FromUTF7 and ToUTF7
      (I admit it is not a trivial example)."
 
     EncodersRegistry := EncodersRegistry copyWith:
-	{ arrayOfAliases. toUCS4Class. fromUCS4Class }
+	{ arrayOfAliases. toUTF32Class. fromUTF32Class }
 ! !
 
 !EncodedStream class methodsFor: 'private - triangulating'!
 
 bigEndianPivot
     "When only one of the sides is implemented in Smalltalk
-     and the other is obtained via iconv, we use UCS-4 to
+     and the other is obtained via iconv, we use UTF-32 to
      marshal data from Smalltalk to iconv; answer whether we
-     should encode UCS-4 characters as big-endian."
+     should encode UTF-32 characters as big-endian."
     ^Memory bigEndian
 !
 
@@ -287,28 +287,115 @@ pivotEncoding
      and the other is obtained via iconv, we need a common
      pivot encoding to marshal data from Smalltalk to iconv.
      Answer the iconv name of this encoding."
-    ^self bigEndianPivot ifTrue: [ 'UCS-4BE' ] ifFalse: [ 'UCS-4LE' ]
+    ^self bigEndianPivot ifTrue: [ 'UTF-32BE' ] ifFalse: [ 'UTF-32LE' ]
 !
 
-split: input
+split: input to: encoding
     "Answer a pipe with the given input stream (which produces
-     UCS-4 character codes as integers) and whose output is
+     UTF-32 character codes as integers) and whose output is
      a series of Characters in the required pivot encoding"
-    ^self bigEndianPivot
-	ifTrue: [ SplitUCS4BE on: input from: 'words' to: 'UCS4-BE' ]
-	ifFalse: [ SplitUCS4LE on: input from: 'words' to: 'UCS4-LE' ].
+    ^(encoding = 'UCS-4BE' or: [ encoding = 'UTF-32BE' ])
+	ifTrue: [ SplitUTF32BE on: input from: 'UTF-32' to: encoding ]
+	ifFalse: [ SplitUTF32LE on: input from: 'UTF-32' to: encoding ].
 !
 
-compose: input
+compose: input from: encoding
     "Answer a pipe with the given input stream (which produces
      Characters in the required pivot encoding) and whose output
-     is a series of integer UCS-4 character codes."
-    ^self bigEndianPivot
-	ifTrue: [ ComposeUCS4BE on: input from: 'UCS4-BE' to: 'words' ]
-	ifFalse: [ ComposeUCS4LE on: input from: 'UCS4-LE' to: 'words' ].
+     is a series of integer UTF-32 character codes."
+    ^(encoding = 'UCS-4BE' or: [ encoding = 'UTF-32BE' ])
+	ifTrue: [ ComposeUTF32BE on: input from: encoding to: 'UTF-32' ]
+	ifFalse: [ ComposeUTF32LE on: input from: encoding to: 'UTF-32' ].
 ! !
 
 !EncodedStream class methodsFor: 'instance creation'!
+
+encoding: anUnicodeString
+    "Answer a pipe of encoders that converts anUnicodeString to default
+     encoding for strings (the current locale's default charset if none
+     is specified)."
+    ^self
+	encoding: anUnicodeString
+	as: String defaultEncoding
+!
+
+encoding: aStringOrStream as: toEncoding
+    "Answer a pipe of encoders that converts anUnicodeString (which contains
+     to the supplied encoding (which can be an ASCII String or Symbol)."
+    | pivot to encoderTo pipe |
+
+    "Adopt an uniform naming"
+    to := toEncoding asString.
+    (to = 'UTF-32' or: [ to = 'UCS-4' ]) ifTrue: [ to := 'UTF-32BE' ].
+    (to = 'UTF-16' or: [ to = 'UCS-2' ]) ifTrue: [ to := 'UTF-16BE' ].
+
+    "If converting to the pivot encoding, we're done."
+    pivot := ((to startsWith: 'UCS-4') or: [ to startsWith: 'UTF-32' ])
+	ifTrue: [ to ].
+	ifFalse: [ self pivotEncoding ].
+
+    encoderTo := Iconv.
+    EncodersRegistry do: [ :each |
+	((each at: 1) includes: to)
+	    ifTrue: [ encoderTo := each at: 2 ]
+    ].
+
+    pipe := aStringOrStream.
+
+    "Split UTF-32 character codes into bytes if needed by iconv."
+    encoderTo == Iconv ifTrue: [ pipe := self split: pipe to: pivot ].
+
+    "If not converting to the pivot encoding, we need one more step."
+    to = pivot ifFalse: [
+        pipe := encoderTo on: pipe from: pivot to: toEncoding ].
+    ^pipe
+!
+
+unicodeOn: aStringOrStream
+    "Answer a pipe of encoders that converts aStringOrStream (which can
+     be a string or another stream) from its encoding (or the current
+     locale's default charset, if the encoding cannot be determined)
+     to integers representing Unicode character codes."
+    ^self
+	unicodeOn: aStringOrStream
+	encoding: aStringOrStream encoding
+!
+
+unicodeOn: aStringOrStream encoding: fromEncoding
+    "Answer a pipe of encoders that converts aStringOrStream
+     (which can be a string or another stream) from the supplied
+     encoding (which can be an ASCII String or Symbol) to
+     integers representing Unicode character codes."
+    | from pivot encoderFrom pipe |
+
+    "Adopt an uniform naming"
+    from := fromEncoding asString.
+    (from = 'UTF-32' or: [ from = 'UCS-4' ])
+	ifTrue: [ from := aStringOrStream utf32Encoding ].
+    (from = 'UTF-16' or: [ from = 'UCS-2' ])
+	ifTrue: [ from := aStringOrStream utf16Encoding ].
+
+    pivot := 'UTF-32'.
+    ((from startsWith: 'UCS-4') or: [ from startsWith: 'UTF-32' ])
+	ifTrue: [ pivot := from ].
+    pivot = 'UTF-32' ifTrue: [ pivot := self pivotEncoding ].
+
+    encoderFrom := Iconv.
+    EncodersRegistry do: [ :each |
+	((each at: 1) includes: from)
+	    ifTrue: [ encoderFrom := each at: 2 ]
+    ].
+
+    pipe := aStringOrStream.
+
+    "If not converting from the pivot encoding, we need one more step."
+    from = pivot ifFalse: [
+        pipe := encoderFrom on: pipe from: fromEncoding to: pivot ].
+
+    "Compose iconv-produced bytes into UTF-32 character codes if needed."
+    encoderFrom == Iconv ifTrue: [ pipe := self compose: pipe from: pivot ].
+    ^pipe
+!
 
 on: aStringOrStream from: fromEncoding
     "Answer a pipe of encoders that converts aStringOrStream
@@ -317,7 +404,7 @@ on: aStringOrStream from: fromEncoding
     ^self
 	on: aStringOrStream
 	from: fromEncoding
-	to: Locale default charset
+	to: String defaultEncoding
 !
 
 on: aStringOrStream to: toEncoding
@@ -340,8 +427,20 @@ on: aStringOrStream from: fromEncoding to: toEncoding
     "Adopt an uniform naming"
     from := fromEncoding asString.
     to := toEncoding asString.
-    from = 'UCS-4' ifTrue: [ from := 'UCS-4BE' ].
-    to = 'UCS-4' ifTrue: [ to := 'UCS-4BE' ].
+    (from = 'UTF-32' or: [ from = 'UCS-4' ])
+	ifTrue: [ from := aStringOrStream utf32Encoding ].
+    (from = 'UTF-16' or: [ from = 'UCS-2' ])
+	ifTrue: [ from := aStringOrStream utf16Encoding ].
+
+    (to = 'UTF-32' or: [ to = 'UCS-4' ]) ifTrue: [ to := 'UTF-32BE' ].
+    (to = 'UTF-16' or: [ to = 'UCS-2' ]) ifTrue: [ to := 'UTF-32BE' ].
+
+    pivot := 'UTF-32'.
+    ((from startsWith: 'UCS-4') or: [ from startsWith: 'UTF-32' ])
+	ifTrue: [ pivot := from ].
+    ((to startsWith: 'UCS-4') or: [ to startsWith: 'UTF-32' ])
+	ifTrue: [ pivot := to ].
+    pivot = 'UTF-32' ifTrue: [ pivot := self pivotEncoding ].
 
     encoderFrom := encoderTo := Iconv.
     EncodersRegistry do: [ :each |
@@ -358,22 +457,21 @@ on: aStringOrStream from: fromEncoding to: toEncoding
     "Else answer a `pipe' that takes care of triangulating.
      There is an additional complication: Smalltalk encoders
      read or provide a stream of character codes (respectively
-     if the source is UCS-4, or the target is UCS-4), while iconv
+     if the source is UTF-32, or the target is UTF-32), while iconv
      expects raw bytes.  So we add an intermediate layer if
      a mixed Smalltalk+iconv conversion is done: it converts
-     character codes --> bytes (SplitUCS4xx, used if iconv will
-     convert from UCS-4) or bytes --> character code (ComposeUCS4xx,
-     used if iconv will convert to UCS-4).
+     character codes --> bytes (SplitUTF32xx, used if iconv will
+     convert from UTF-32) or bytes --> character code (ComposeUTF32xx,
+     used if iconv will convert to UTF-32).
 
      There are five different cases (remember that at least one converter
      is not iconv, so `both use iconv' and `from = pivot = to' are banned):
-	from = pivot    --> Compose + non-iconv
-	pivot = to      --> non-iconv + Split
-	to uses iconv   --> non-iconv + Split + iconv (implies from ~= pivot)
-	from uses iconv --> iconv + Compose + non-iconv (implies to ~= pivot)
-	none uses iconv --> non-iconv + non-iconv (implies neither = pivot)"
+	from = pivot    --> Compose + encoderTo
+	pivot = to      --> encoderFrom + Split
+	to uses iconv   --> encoderFrom + Split + iconv (from ~= pivot)
+	from uses iconv --> iconv + Compose + encoderTo (to ~= pivot)
+	none uses iconv --> encoderFrom + encoderTo (implies neither = pivot)"
 
-    pivot := self pivotEncoding.
     pipe := aStringOrStream.
     from = pivot
 	ifFalse: [
@@ -382,16 +480,16 @@ on: aStringOrStream from: fromEncoding to: toEncoding
 
 	    pipe := encoderFrom on: pipe from: fromEncoding to: pivot.
 	    encoderTo == Iconv ifTrue: [
-		pipe := self split: pipe.
+		pipe := self split: pipe to: pivot.
 
 		"Check if we already reached the destination format."
 		to = pivot ifTrue: [ ^pipe ].
 	    ].
 	].
 
-    "Compose iconv-produced bytes into UCS-4 character codes if needed."
+    "Compose iconv-produced bytes into UTF-32 character codes if needed."
     encoderFrom == Iconv ifTrue: [
-	pipe := self compose: pipe
+	pipe := self compose: pipe from: pivot
     ].
 
     ^encoderTo on: pipe from: pivot to: toEncoding.
@@ -399,7 +497,7 @@ on: aStringOrStream from: fromEncoding to: toEncoding
 
 Namespace current: Smalltalk.I18N.Encoders!
 
-!FromUCS4 methodsFor: 'stream operation'!
+!FromUTF32 methodsFor: 'stream operation'!
 
 species
     "We answer a string of Characters encoded in our destination
@@ -407,39 +505,38 @@ species
     ^String
 ! !
 
-!ToUCS4 methodsFor: 'stream operation'!
+!ToUTF32 methodsFor: 'stream operation'!
 
 species
-    "We answer a WordArray of UCS4 characters encoded as a series of
-     32-bit Integers."
-    ^WordArray
+    "We answer a UnicodeString of Unicode characters encoded as UTF-32."
+    ^UnicodeString
 ! !
 
-!ComposeUCS4LE methodsFor: 'stream operation'!
+!ComposeUTF32LE methodsFor: 'stream operation'!
 
 next
     "Answer a 32-bit integer obtained by reading four 8-bit character
      codes in little-endian order and putting them together"
-    ^self nextInput asInteger +
-     (self nextInput asInteger bitShift: 8) +
-     (self nextInput asInteger bitShift: 16) +
-     (self nextInput asInteger bitShift: 24)
+    ^(self nextInput asInteger +
+      (self nextInput asInteger bitShift: 8) +
+      (self nextInput asInteger bitShift: 16) +
+      (self nextInput asInteger bitShift: 24)) asCharacter
 ! !
 
-!ComposeUCS4BE methodsFor: 'stream operation'!
+!ComposeUTF32BE methodsFor: 'stream operation'!
 
 next
     "Answer a 32-bit integer obtained by reading four 8-bit character
      codes in big-endian order and putting them together"
 
     "This code attempts to create as few large integers as possible"
-    ^(((((self nextInput asInteger bitShift: 8) bitOr:
-          self nextInput asInteger) bitShift: 8) bitOr:
-          self nextInput asInteger) bitShift: 8) bitOr:
-          self nextInput asInteger     
+    ^((((((self nextInput asInteger bitShift: 8) bitOr:
+           self nextInput asInteger) bitShift: 8) bitOr:
+           self nextInput asInteger) bitShift: 8) bitOr:
+           self nextInput asInteger) asCharacter
 ! !
 
-!SplitUCS4LE methodsFor: 'stream operation'!
+!SplitUTF32LE methodsFor: 'stream operation'!
 
 atEnd
     "Answer whether the receiver can produce more characters"
@@ -457,7 +554,7 @@ next
 	"Answer the LSB.  This code will create as few LargeIntegers
          as possible by setting the mark bit only after the LSB has
          been extracted."
-	wch := answer := self nextInput.
+	wch := answer := self nextInput codePoint.
 	wch := (wch bitShift: -8) + 16r1000000.
 	^(answer bitAnd: 255) asCharacter
     ].
@@ -474,7 +571,7 @@ flush
     wch := 1
 ! !
 
-!SplitUCS4BE methodsFor: 'stream operation'!
+!SplitUTF32BE methodsFor: 'stream operation'!
 
 atEnd
     "Answer whether the receiver can produce more characters"
@@ -492,7 +589,7 @@ next
 	"Answer the MSB.  This code will create as few LargeIntegers
          as possible by discarding the bits we answer and operating
          on SmallIntegers once only bits 0..23 remain."
-	wch := answer := self nextInput.
+	wch := answer := self nextInput codePoint.
 	wch := wch bitAnd: 16rFFFFFF.
 	count := 3.
 	^(answer bitShift: -24) asCharacter
@@ -670,7 +767,7 @@ convertMore
 !ToUTF7 class methodsFor: 'initialization'!
 
 initialize
-    "Initialize the tables used by the UCS4-to-UTF7 converter"
+    "Initialize the tables used by the UTF-32-to-UTF-7 converter"
 
     Base64Characters := #[
         16r00 16r00 16r00 16r00 16r00 16rA8 16rFF 16r03
@@ -719,7 +816,7 @@ next
     | ch |
     left = 0 ifTrue: [
 	"Base64 encoding inactive"
-	ch := self nextInput.
+	ch := self nextInput codePoint.
         (self isDirect: ch) ifTrue: [ ^ch asCharacter ].
 
 	ch = 43
@@ -766,7 +863,7 @@ next
         "TODO:  should deactivate base64 encoding"
 
 	(self atEndOfInput or: [
-	    self isDirect: (ch := self nextInput) ])
+	    self isDirect: (ch := self nextInput codePoint) ])
 	    ifTrue: [
 		"Terminate the stream by left-aligning the last byte"
 		value := value bitShift: 6 - (left \\ 6).
@@ -806,7 +903,7 @@ next
 !FromUTF7 class methodsFor: 'initialization'!
 
 initialize
-    "Initialize the tables used by the UTF7-to-UCS4 converter"
+    "Initialize the tables used by the UTF-7-to-UTF-32 converter"
 
     FromBase64 := #[
 	62 99 99 99 63
@@ -842,7 +939,7 @@ fromBase64Char: aCharacter
 !FromUTF7 methodsFor: 'converting'!
 
 atEnd
-    "Answer whether the receiver can produce another UCS4 32-bit
+    "Answer whether the receiver can produce another UTF-32 32-bit
      encoded integer"
     ^lookahead isNil
 !
@@ -878,7 +975,7 @@ flush
     "Flush any remaining state left in the encoder by the last character
      (this is because UTF-7 encodes 6 bits at a time, so it takes three
      characters before it can provide a single 16-bit character and
-     up to six characters before it can provide a full UCS-4 character)."
+     up to six characters before it can provide a full UTF-32 character)."
     shift := 0.
     lookahead := self getNext.
 ! !
@@ -890,11 +987,11 @@ getNext
     self atEndOfInput ifTrue: [ ^nil ].
     ch := self nextInput value.
     shift = 0 ifTrue: [
-        (self isDirect: ch) ifTrue: [ ^ch ].
+        (self isDirect: ch) ifTrue: [ ^Character codePoint: ch ].
 	ch == 43 "plus" ifFalse: [ InvalidSequenceError signal ].
 
 	ch := self nextInput value.
-	ch == 45 "minus" ifTrue: [ ^43 ].
+	ch == 45 "minus" ifTrue: [ ^$+ ].
 
 	"Else switch into base64 mode"
 	shift := 32.
@@ -912,7 +1009,7 @@ getNext
 		InvalidSequenceError signal ].
 
 	    shift := 0.
-	    ch = 45 "minus" ifFalse: [ ^ch ].
+	    ch = 45 "minus" ifFalse: [ ^$- ].
 
 	    "Discard the -"
 	    ^self getNext
@@ -932,7 +1029,7 @@ getNext
 	    (wc1 between: 16rD800 and: 16rDBFF) ifFalse: [
 		wch := (wch bitAnd: 65535) bitShift: 16.
 		shift := shift + 16.
-		^wc1
+		^Character codePoint: wc1
 	    ].
 	].
 
@@ -954,7 +1051,7 @@ getNext
     wc1 := (wc1 bitShift: 10) + wch - 16r35FDC00.
 
     wch := ((value bitShift: shift) bitAnd: 16r3F) bitShift: 26.
-    ^wc1
+    ^Character codePoint: wc1
 ! !
 
 
@@ -977,7 +1074,7 @@ description
 description
     "Answer a textual description of the exception."
     ^'unknown encoding specified'! !
-
+
 
 "Now add some extensions to the system classes"
 
@@ -986,11 +1083,14 @@ description
 
 !CharacterArray class methodsFor: 'converting'!
 
-defaultEncoding
-    "Answer the default locale's default charset"
-    DefaultEncoding isNil
-	ifTrue: [ DefaultEncoding := Locale default charset ].
+defaultDefaultEncoding
+    "Answer the encoding that is used in case the user specifies none."
+    ^'UTF-8'
+!
 
+defaultEncoding
+    "Answer the default encoding that is used for transcoding."
+    DefaultEncoding isNil ifTrue: [ ^self defaultDefaultEncoding ].
     ^DefaultEncoding
 !
 
@@ -1005,33 +1105,194 @@ encoding
     "Answer the encoding of the receiver, assuming it is in the
      default locale's default charset"
 
-    ^self class defaultEncoding asString = 'UTF-16'
-	ifTrue: [ self utf16Encoding ]
-	ifFalse: [ self class defaultEncoding ]
+    | encoding |
+    encoding := self class defaultEncoding.
+    encoding asString = 'UTF-16' ifTrue: [ ^self utf16Encoding ].
+    encoding asString = 'UTF-32' ifTrue: [ ^self utf32Encoding ].
+    ^encoding!
+
+utf16Encoding
+    "Answer the encoding of the receiver, assuming it's UTF-16"
+    ^'UTF-16BE'!
+
+utf32Encoding
+    "Answer the encoding of the receiver, assuming it's UTF-32"
+    ^'UTF-32BE'!
+
+
+!String methodsFor: 'multibyte encodings'!
+
+numberOfCharacters
+    "Answer the number of Unicode characters in the receiver, interpreting it
+     as the default locale character set."
+    ^self asUnicodeString numberOfCharacters!
+
+numberOfCharacters: aString
+    "Answer the number of Unicode characters in the receiver, interpreting it
+     in the character encoding aString."
+    ^(self asUnicodeString: aString) numberOfCharacters! !
+
+
+!String methodsFor: 'converting'!
+
+asUnicodeString
+    "Return an UnicodeString with the contents of the receiver, interpreted
+     as the default locale character set."
+    ^(I18N.EncodedStream unicodeOn: self) contents!
+
+asUnicodeString: aString
+    "Return an UnicodeString with the contents of the receiver, interpreted
+     as the default locale character set."
+    ^(I18N.EncodedStream unicodeOn: self encoding: aString) contents! !
+
+!String methodsFor: 'converting'!
+
+encoding
+    "Answer the encoding of the receiver, assuming it is in the
+     default locale's default charset"
+
+    (self size >= 4 and: [ (self at: 1) = 0 and: [ (self at: 2) = 0 and: [
+    	(self at: 3) = 254 and: [
+    	(self at: 4) = 255 ]]]]) ifTrue: [ ^'UTF-32BE' ].
+    (self size >= 4 and: [ (self at: 4) = 0 and: [ (self at: 3) = 0 and: [
+    	(self at: 2) = 254 and: [
+    	(self at: 1) = 255 ]]]]) ifTrue: [ ^'UTF-32LE' ].
+    (self size >= 2 and: [
+    	(self at: 1) = 254 and: [
+    	(self at: 2) = 255 ]]) ifTrue: [ ^'UTF-16BE' ].
+    (self size >= 2 and: [
+    	(self at: 2) = 254 and: [
+    	(self at: 1) = 255 ]]) ifTrue: [ ^'UTF-16LE' ].
+    (self size >= 3 and: [ (self at: 1) = 16rEF and: [
+    	(self at: 2) = 16rBB and: [
+    	(self at: 3) = 16rBF ]]]) ifTrue: [ ^'UTF-8' ].
+
+    ^super encoding!
+
+utf32Encoding
+    "Assuming the receiver is encoded as UTF-16 with a proper
+     endianness marker, answer the correct encoding of the receiver."
+
+    (self size >= 4 and: [ (self at: 4) = 0 and: [ (self at: 3) = 0 and: [
+    	(self at: 2) = 254 and: [
+    	(self at: 1) = 255 ]]]]) ifTrue: [ ^'UTF-32LE' ].
+    ^'UTF-32BE'
 !
 
 utf16Encoding
     "Assuming the receiver is encoded as UTF-16 with a proper
      endianness marker, answer the correct encoding of the receiver."
 
-    | b1 b2 bigEndian |
-    b1 := self at: 1.		"Low byte"
-    b2 := self at: 2.		"High byte"
-
-    "If we read FFFE, it is big-endian; if we read FEFF, it is little-endian"
-    bigEndian := b1 * b2 = 16rFD02
-	ifTrue: [ b1 = 255 ]
-	ifFalse: [ Memory bigEndian ].
-
-    ^bigEndian ifTrue: [ 'UTF-16BE' ] ifFalse: [ 'UTF-16LE' ]
+    (self size >= 2 and: [
+    	(self at: 2) = 254 and: [
+    	(self at: 1) = 255 ]]) ifTrue: [ ^'UTF-16LE' ].
+    ^'UTF-16BE'
 ! !
 
+
+!Character methodsFor: 'converting'!
+
+asString
+    "Return a String with the contents of the receiver, converted
+     into the default locale character set."
+    ^(I18N.EncodedStream encoding: (UnicodeString with: self)) contents!
+
+!UnicodeCharacter methodsFor: 'converting'!
+
+asString
+    "Return a String with the contents of the receiver, converted
+     into the default locale character set."
+    ^(I18N.EncodedStream encoding: (UnicodeString with: self)) contents! !
+
+
+!UnicodeCharacter methodsFor: 'printing'!
+
+displayOn: aStream
+    "Print a representation of the receiver on aStream. Unlike
+     #printOn:, this method does not display a leading dollar."
+    aStream isUnicode
+	ifTrue: [ aStream nextPut: self ]
+	ifFalse: [ aStream nextPutAll: self asString ]!
+
+printOn: aStream
+    "Print a representation of the receiver on aStream."
+    aStream nextPut: $$.
+    self displayOn: aStream!
+
+
+!ByteArray methodsFor: 'converting'!
+
+asUnicodeString
+    "Return an UnicodeString with the contents of the receiver, interpreted
+     as the default locale character set."
+    ^self asString asUnicodeString
+!
+
+asUnicodeString: aString
+    "Return an UnicodeString with the contents of the receiver, interpreted
+     as the default locale character set."
+    ^self asString asUnicodeString: aString! !
+! !
+
+
+!UnicodeString methodsFor: 'converting'!
+
+encoding
+    ^'UTF-32BE'! !
+
+!UnicodeString methodsFor: 'converting'!
+
+asString
+    "Return a String with the contents of the receiver, converted
+     into the default locale character set."
+    ^(I18N.EncodedStream encoding: self) contents!
+
+asString: aString
+    "Return a String with the contents of the receiver, converted
+     into the aString locale character set."
+    ^(I18N.EncodedStream encoding: self as: aString) contents!
+
+displayOn: aStream
+    "Print a representation of the receiver on aStream. Unlike
+     #displayOn:, this method does not include quotes."
+    aStream isUnicode
+	ifTrue: [ aStream nextPutAll: self ]
+	ifFalse: [ self asString displayOn: aStream ]!
+
+printOn: aStream
+    "Print a representation of the receiver on aStream."
+    aStream isUnicode
+	ifTrue: [
+	    aStream nextPut: $'.
+	    aStream nextPutAll: (self copyReplaceAll: '''' with: '''''').
+	    aStream nextPut: $' ]
+	ifFalse: [
+	    self asString printOn: aStream ]!
+
+
 !PositionableStream methodsFor: 'converting'!
 
 encoding
     "Answer the encoding of the underlying collection"
-    ^collection encoding
-! !
+    ^collection encoding!
+
+utf16Encoding
+    "Answer the encoding of the underlying collection, assuming it's UTF-16"
+    ^collection utf16Encoding!
+
+utf32Encoding
+    "Answer the encoding of the underlying collection, assuming it's UTF-32"
+    ^collection utf32Encoding! !
+
+!Stream methodsFor: 'converting'!
+
+utf16Encoding
+    "Answer the encoding of the underlying collection, assuming it's UTF-16"
+    ^'UTF-16BE'!
+
+utf32Encoding
+    "Answer the encoding of the underlying collection, assuming it's UTF-32"
+    ^'UTF-32BE'! !
 
 Encoders.ToUTF7 initialize!
 Encoders.FromUTF7 initialize!

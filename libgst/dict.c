@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
  * This file is part of GNU Smalltalk.
@@ -143,6 +143,8 @@ OOP _gst_time_class = NULL;
 OOP _gst_token_stream_class = NULL;
 OOP _gst_true_class = NULL;
 OOP _gst_undefined_object_class = NULL;
+OOP _gst_unicode_character_class = NULL;
+OOP _gst_unicode_string_class = NULL;
 OOP _gst_variable_binding_class = NULL;
 OOP _gst_write_stream_class = NULL;
 OOP _gst_processor_oop = NULL;
@@ -293,7 +295,11 @@ static const class_definition class_info[] = {
 
   {&_gst_char_class, &_gst_magnitude_class,
    ISP_FIXED, 1,
-   "Character", "asciiValue", "Table", NULL },
+   "Character", "codePoint", "Table UpperTable LowerTable", NULL },
+
+  {&_gst_unicode_character_class, &_gst_char_class,
+   ISP_FIXED, 0,
+   "UnicodeCharacter", NULL, NULL, NULL },
 
   {&_gst_time_class, &_gst_magnitude_class,
    ISP_FIXED, 1,
@@ -423,6 +429,10 @@ static const class_definition class_info[] = {
   {&_gst_string_class, &_gst_character_array_class,
    ISP_CHARACTER, 0,
    "String", NULL, NULL, NULL },
+
+  {&_gst_unicode_string_class, &_gst_character_array_class,
+   ISP_UTF32, 0,
+   "UnicodeString", NULL, NULL, NULL },
 
   {&_gst_symbol_class, &_gst_string_class,
    ISP_CHARACTER, 0,
@@ -681,7 +691,8 @@ signed char _gst_log2_sizes[32] = {
   1, -1, 1, -1, 
   2, -1, 2, -1, 2, -1, 
   3, -1, 3, -1, 3, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
+  2, -1,
+  -1, -1, -1, -1, -1, -1,
   sizeof (long) == 4 ? 2 : 3, -1
 };
 
@@ -1837,11 +1848,38 @@ _gst_string_new (const char *s)
       string = (gst_string) new_instance_with (_gst_string_class, len,
 					       &stringOOP);
 
-      strncpy (string->chars, s, len);
+      memcpy (string->chars, s, len);
     }
   else
     string = (gst_string) new_instance_with (_gst_string_class, 0,
 					     &stringOOP);
+  return (stringOOP);
+}
+
+OOP
+_gst_unicode_string_new (const wchar_t *s)
+{
+  int i;
+  gst_unicode_string string;
+  size_t len;
+  OOP stringOOP;
+
+  if (s)
+    {
+      len = wcslen (s);
+      string = (gst_unicode_string)
+	new_instance_with (_gst_unicode_string_class, len, &stringOOP);
+
+      if (sizeof (wchar_t) == sizeof (string->chars[0]))
+	memcpy (string->chars, s, len * sizeof (wchar_t));
+      else
+	for (i = 0; i < len; i++)
+	  string->chars[i] = *s++;
+    }
+  else
+    string = (gst_unicode_string)
+      new_instance_with (_gst_unicode_string_class, 0, &stringOOP);
+
   return (stringOOP);
 }
 
@@ -1871,6 +1909,16 @@ _gst_set_oopstring (OOP stringOOP,
   _gst_swap_objects (stringOOP, newStringOOP);
 }
 
+void
+_gst_set_oop_unicode_string (OOP unicodeStringOOP,
+			     const wchar_t *s)
+{
+  OOP newStringOOP;
+
+  newStringOOP = _gst_unicode_string_new (s);
+  _gst_swap_objects (unicodeStringOOP, newStringOOP);
+}
+
 char *
 _gst_to_cstring (OOP stringOOP)
 {
@@ -1881,7 +1929,28 @@ _gst_to_cstring (OOP stringOOP)
   string = (gst_string) OOP_TO_OBJ (stringOOP);
   len = oop_num_fields (stringOOP);
   result = (char *) xmalloc (len + 1);
-  strncpy (result, string->chars, len);
+  memcpy (result, string->chars, len);
+  result[len] = '\0';
+
+  return (result);
+}
+
+wchar_t *
+_gst_to_wide_cstring (OOP stringOOP)
+{
+  wchar_t *result, *p;
+  size_t len;
+  gst_unicode_string string;
+  int i;
+
+  string = (gst_unicode_string) OOP_TO_OBJ (stringOOP);
+  len = oop_num_fields (stringOOP);
+  result = (wchar_t *) xmalloc (len + 1);
+  if (sizeof (wchar_t) == 4)
+    memcpy (result, string->chars, len * sizeof (wchar_t));
+  else
+    for (p = result, i = 0; i < len; i++)
+      *p++ = string->chars[i];
   result[len] = '\0';
 
   return (result);

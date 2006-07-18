@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2006 Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
  * This file is part of GNU Smalltalk.
@@ -124,13 +124,6 @@ static inline OOP alloc_oop (PTR obj, intptr_t flags);
 #define IS_SURVIVOR_ADDR(addr, n)				\
   ((OOP *)(addr) >= _gst_mem.surv[(n)].minPtr && 		\
    (OOP *)(addr) < _gst_mem.surv[(n)].maxPtr)
-
-/* Return the Character object for ASCII value C.  */
-#define CHAR_OOP_AT(c)      (&_gst_mem.ot[(c) + CHAR_OBJECT_BASE])
-
-/* Return the ASCII value corresponding to the Character object
-   OOP.  */
-#define CHAR_OOP_VALUE(oop) ((oop) - &_gst_mem.ot[CHAR_OBJECT_BASE])
 
 #define INC_ADD_OOP(oop)					\
   ((_gst_mem.inc_ptr >= _gst_mem.inc_end ?			\

@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -284,6 +284,7 @@ static const char standard_files[] = {
   "LargeInt.st\0"
   "SmallInt.st\0"
   "Character.st\0"
+  "UniChar.st\0"
   "LookupKey.st\0"
   "Association.st\0"
   "HomedAssoc.st\0"
@@ -304,6 +305,7 @@ static const char standard_files[] = {
   "CharArray.st\0"
   "String.st\0"
   "Symbol.st\0"
+  "UniString.st\0"
   "Interval.st\0"
   "OrderColl.st\0"
   "SortCollect.st\0"

@@ -880,6 +880,7 @@ scanNumberValue
     (currentCharacter == $_ or: [ currentCharacter isLetter ])
         ifTrue: [ stream skip: -1. currentCharacter := ch ].
 
+    exponent isNil ifTrue: [ exponent := 0 ].
     currentCharacter == $-
         ifTrue: [
 	    self step.
@@ -1027,13 +1028,28 @@ scanLiteralArrayParts
     ^self scannerError: 'Unknown character in literal array'!
 
 scanLiteralCharacter
-    | token |
+    | token value char tokenStop |
     self step.    "$"
-    token := RBLiteralToken value: currentCharacter
-		start: tokenStart
-		stop: stream position.
+    tokenStop := stream position.
+    char := currentCharacter.
     self step.    "char"
-    ^token!
+    char = $< ifTrue: [
+	self stripSeparators.
+	characterType == #digit ifTrue: [
+	    value := self scanNumberValue.
+	    (value isInteger and: [ value between: 0 and: 16r10FFFF ])
+	        ifFalse: [ ^self scannerError: 'Integer between 0 and 16r10FFFF expected'].
+
+	    char := Character codePoint: value.
+	    self stripSeparators.
+	    tokenStop := stream position.
+	    currentCharacter = $>
+		ifTrue: [ self step ]
+		ifFalse: [ ^self scannerError: '''>'' expected' ] ] ].
+
+    ^RBLiteralToken value: char
+	start: tokenStart
+	stop: tokenStop!
 
 scanLiteralString
     self step.

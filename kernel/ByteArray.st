@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -55,6 +55,12 @@ asString
     string := String new: size.
     string replaceFrom: 1 to: size withByteArray: self startingAt: 1.
     ^string
+!
+
+asUnicodeString
+    "Answer a UnicodeString whose character's codes are the receiver's contents.
+     This is not implemented unless you load the I18N package."
+    self shouldNotImplement
 ! !
 
 

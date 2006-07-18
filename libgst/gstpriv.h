@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -348,7 +348,8 @@ enum {
   ISP_INT64 = 48,
   ISP_UINT64 = 50,
   ISP_DOUBLE = 52,
-  ISP_LAST_SCALAR = 52,
+  ISP_UTF32 = 54,
+  ISP_LAST_SCALAR = 54,
   ISP_POINTER = 62,
 
 #if SIZEOF_OOP == 8
@@ -567,6 +568,7 @@ extern OOP _gst_nil_oop
 #include <limits.h>
 #include <poll.h>
 #include <ctype.h>
+#include <wchar.h>
 
 #ifdef HAVE_DIRENT_H
 # include <dirent.h>

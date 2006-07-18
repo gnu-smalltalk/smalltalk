@@ -191,9 +191,22 @@
 </package>
 
 <@I18N_DISABLED@package>
+  <name>Iconv</name>
+  <namespace>I18N</namespace>
+
+  <filein>Sets.st</filein>
+
+  <module>i18n</module>
+  <directory>i18n</directory>
+
+  <file>Sets.st</file>
+</@I18N_DISABLED@package>
+
+<@I18N_DISABLED@package>
   <name>I18N</name>
   <namespace>I18N</namespace>
-  <filein>Sets.st</filein>
+  <prereq>Iconv</prereq>
+
   <filein>Locale.st</filein>
   <filein>Expression.st</filein>
   <filein>GetText.st</filein>
@@ -203,7 +216,6 @@
   <module>i18n</module>
   <directory>i18n</directory>
 
-  <file>Sets.st</file>
   <file>Locale.st</file>
   <file>Expression.st</file>
   <file>GetText.st</file>
@@ -634,6 +646,7 @@
   <file>Directory.st</file>
   <file>MthContext.st</file>
   <file>String.st</file>
+  <file>UniString.st</file>
   <file>ExcHandling.st</file>
   <file>Namespace.st</file>
   <file>SymLink.st</file>
@@ -677,6 +690,7 @@
   <file>CallinProcess.st</file>
   <file>WeakObjects.st</file>
   <file>Character.st</file>
+  <file>UniChar.st</file>
   <file>Interval.st</file>
   <file>RWStream.st</file>
   <file>OtherArrays.st</file>

@@ -1,3 +1,42 @@
+2006-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/callin.c: Support wchars and wstrings.
+	* libgst/callin.h: Likewise.
+	* libgst/cint.c: Likewise.
+	* libgst/gstpub.h: Likewise.
+	* libgst/sym.c: Add new symbols.
+	* libgst/sym.h: Likewise.
+
+	* libgst/comp.c: Support CONST_CHAR in equal_constant and
+	make_constant_oop.
+	* libgst/dict.c: Add UnicodeCharacter and UnicodeString.  Change
+	instance and class variable names for Character.  Add #utf32 shape
+	element size in _gst_log2_sizes.  Add helper functions for callin.c
+	and cint.c changes above.
+	* libgst/dict.h: Add gst_char and gst_unicode_string, and declare
+	the helper functions.
+	* libgst/dict.inl: Move here CHAR_OOP_AT from oop.inl; provide
+	CHAR_OOP_VALUE here with a new definition.  Add char_new.  Support
+	#utf32 shape.
+	* libgst/gst-parse.c: Drop BYTE_LITERAL tokens.  Check range of
+	integers instead.  Support $< INTEGER_LITERAL > tokens.
+	* libgst/gst-parse.h: Remove cval from YYSTYPE.
+	* libgst/gstpriv.h: Add ISP_UTF32; include wchar.h.
+	* libgst/lex.c: Match the gst-parse.c changes.  Use ival instead of
+	cval.  Support printing non-ASCII CHAR_LITERALs with their code points.
+	* libgst/lib.c: Load UniChar.st and UniString.st.
+	* libgst/oop.c: Fix a comment's spacing.
+	* libgst/oop.inl: Remove CHAR_OOP_AT and CHAR_OOP_VALUE.
+	* libgst/prims.def: Define VMpr_CharacterArray_valueAt,
+	VMpr_CharacterArray_valueAtPut, VMpr_UnicodeCharacter_create,
+	VMpr_Character_equal.  Accept some UnicodeCharacters in
+	VMpr_Memory_atPut and VMpr_CObject_atPut.
+	* libgst/print.c: Print non-ASCII Characters and UnicodeCharacters
+	with their code points.
+	* libgst/tree.c: Make a CONST_CHAR in _gst_make_char_constant, not
+	a CONST_OOP (partly undoing 2000-09-09 change), and accept an int.
+	* libgst/tree.h: Add back CONST_CHAR.
+
 2006-07-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/events.c (_gst_sync_file_polling): Prepare pfd.revents by

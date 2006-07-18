@@ -1,3 +1,35 @@
+2006-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Add #utf32 shape.
+	* kernel/Builtins.st: Recognize ranges correctly for #character
+	and #utf32 shapes.  Implement CharacterArray>>#valueAt: and
+	#valueAt:put: as primitives.  Add UnicodeCharacter methods and
+	distinguish Character class>>#codePoint: from #value:.  Adjust
+	instance variable name for character.  Use specific primitive
+	for Character equality.
+	* kernel/ByteArray.st: Do not implement #asUnicodeString.
+	* kernel/CharArray.st: Remove #basicAt:/#basicAt:put:.  Add
+	(abstract) #numberOfCharacters and #printOn:/#displayOn:/#storeOn:.
+	* kernel/Character.st: Use separate tables for classification
+	and case mapping.  Answer false for #isIdentity.  Change name
+	of instance variable.  Add #asUnicodeString.  Adjust printing
+	to support Unicode characters.
+	* kernel/Class.st: Document #utf32 shape.
+	* kernel/Collection.st: Add #asString and #asUnicodeString.
+	* kernel/Integer.st: Use #codePoint: in #asCharacter.
+	* kernel/ObjDumper.st: Add UnicodeCharacter storing.  Add support
+	for #utf32 shape.
+	* kernel/PosStream.st: Add #isPositionable.
+	* kernel/Stream.st: Add #isPositionable and #isUnicode.
+	* kernel/String.st: Do not implement #asUnicodeString.  Add printing
+	methods removed from CharacterArray.  Add #byteAt:/#byteAt:put:.
+	* kernel/UndefObject.st: Document #utf32 shape.
+	* kernel/UniChar.st: New.
+	* kernel/UniString.st: New.
+
+	* tests/Ansi.st: Raise the codePoint needed to get an Error.
+	* tests/chars.st: Only test ASCII characters for #asCharacter.
+
 2006-07-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/regex.st: Define with correct shape.

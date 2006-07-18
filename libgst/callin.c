@@ -12,7 +12,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -100,7 +100,15 @@ VMProxy gst_interpreter_proxy = {
   _gst_class_is_kind_of, _gst_object_is_kind_of,
   _gst_perform, _gst_perform_with, _gst_class_implements_selector,
   _gst_class_can_understand, _gst_responds_to,
-  _gst_oop_size, _gst_oop_at, _gst_oop_at_put
+  _gst_oop_size, _gst_oop_at, _gst_oop_at_put,
+
+  /* System objects.  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+
+  /* New in 2.3.  */
+  _gst_wchar_to_oop, _gst_wstring_to_oop,
+  _gst_oop_to_wchar, _gst_oop_to_wstring,
 };
 
 OOP
@@ -313,6 +321,16 @@ _gst_msg_sendf (PTR resultPtr,
 	    INC_ADD_OOP (args[i]);
           }
           break;
+
+        case 'w':
+          args[++i] = char_new ((char) va_arg (ap, wchar_t));
+	  INC_ADD_OOP (args[i]);
+          break;
+
+        case 'W':
+          args[++i] = _gst_unicode_string_new (va_arg (ap, const wchar_t *));
+	  INC_ADD_OOP (args[i]);
+          break;
 	}
     }
 
@@ -361,6 +379,16 @@ _gst_msg_sendf (PTR resultPtr,
 
 	case '?':
 	  *(long *) resultPtr = _gst_oop_to_c (result);
+	  break;
+
+	case 'w':
+	  *(wchar_t *) resultPtr =
+	    IS_NIL (result) ? 0 : CHAR_OOP_VALUE (result);
+	  break;
+
+	case 'W':
+	  *(wchar_t **) resultPtr =
+	    IS_NIL (result) ? NULL : _gst_to_wide_cstring (result);
 	  break;
 
 	case 'o':
@@ -505,6 +533,15 @@ _gst_char_to_oop (char c)
   return (CHAR_OOP_AT (c));
 }
 
+OOP
+_gst_wchar_to_oop (wchar_t wc)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  return (char_new (wc));
+}
+
 
 /* !!! Add in byteArray support sometime soon */
 
@@ -518,6 +555,18 @@ _gst_string_to_oop (const char *str)
     return (_gst_nil_oop);
   else
     return (INC_ADD_OOP (_gst_string_new (str)));
+}
+
+OOP
+_gst_wstring_to_oop (const wchar_t *str)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  if (str == NULL)
+    return (_gst_nil_oop);
+  else
+    return (INC_ADD_OOP (_gst_unicode_string_new (str)));
 }
 
 OOP
@@ -590,7 +639,8 @@ _gst_oop_to_c (OOP oop)
 	   || OOP_CLASS (oop) == _gst_false_class)
     return (oop == _gst_true_oop);
 
-  else if (OOP_CLASS (oop) == _gst_char_class)
+  else if (OOP_CLASS (oop) == _gst_char_class
+           || OOP_CLASS (oop) == _gst_unicode_character_class)
     return (CHAR_OOP_VALUE (oop));
 
   else if (IS_NIL (oop))
@@ -671,6 +721,15 @@ _gst_oop_to_char (OOP oop)
   return (CHAR_OOP_VALUE (oop));
 }
 
+wchar_t
+_gst_oop_to_wchar (OOP oop)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  return (CHAR_OOP_VALUE (oop));
+}
+
 char *
 _gst_oop_to_string (OOP oop)
 {
@@ -681,6 +740,18 @@ _gst_oop_to_string (OOP oop)
     return (NULL);
   else
     return ((char *) _gst_to_cstring (oop));
+}
+
+wchar_t *
+_gst_oop_to_wstring (OOP oop)
+{
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  if (IS_NIL (oop))
+    return (NULL);
+  else
+    return ((wchar_t *) _gst_to_wide_cstring (oop));
 }
 
 char *

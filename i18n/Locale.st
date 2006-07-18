@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2002, 2005 Free Software Foundation, Inc.
+| Copyright 2001, 2002, 2005, 2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -123,10 +123,18 @@ languages
 	'ber' 'bin' 'bnt' 'chr' 'cpe' 'div' 'ful' 'ibo' 'kau'
 	'kok' 'mni' 'nic' 'pap' 'sit' 'syr' 'ven' 'wen')!
 
+defaultCharset
+    "Answer the default charset used when nothing is specified."
+    ^DefaultCharsets at: 'POSIX'!
+
+defaultCharset: aString
+    "Set the default charset used when nothing is specified."
+    DefaultCharsets at: 'POSIX' put: aString asSymbol!
+
 defaults
     "Answer the default territory-language and language-charset
      associations."
-    ^#(	('POSIX' ''	#'ISO-8859-1')
+    ^#(	('POSIX' ''	#'UTF-8')
 	('af' 'ZA'	#'ISO-8859-1')
 	('am' 'ET'	#'UTF-8')	"not yet seen on Unix"
 	('ar' 'SA'	#'ISO-8859-6')
@@ -359,7 +367,7 @@ extractLocaleParts: string
 
 charset
     "Return the charset supported by the receiver."
-    ^id isNil ifTrue: [ nil ] ifFalse: [ id at: 3 ]!
+    ^id isNil ifTrue: [ self class defaultCharset ] ifFalse: [ id at: 3 ]!
 
 language
     "Return the language supported by the receiver."
@@ -557,6 +565,14 @@ print: anObject on: aStream
     self subclassResponsibility! !
 
 
+!CharacterArray class methodsFor: 'converting'!
+
+defaultDefaultEncoding
+    "Answer the default encoding that is used when the user specifies
+     none."
+    ^I18N.Locale default charset
+! !
+
 !CharacterArray methodsFor: 'comparing'!
 
 compareTo: aCharacterArray

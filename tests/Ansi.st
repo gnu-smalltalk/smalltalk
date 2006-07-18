@@ -1246,7 +1246,7 @@ testXcodePointX
 	self value: [Character codePoint: ($a codePoint)] should: [:r | r = $a]
 		conformTo: #'Character factory' selector: #'codePoint:'.
 
-	self value: [Character codePoint: 300] shouldRaise: Error.! !
+	self value: [Character codePoint: 3000000] shouldRaise: Error.! !
 
 !ArrayANSITest methodsFor: nil!
 
