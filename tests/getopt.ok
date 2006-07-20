@@ -1,0 +1,187 @@
+
+Execution begins...
+returned value is Getopt class
+
+Execution begins...
+returned value is Getopt
+
+Execution begins...
+SortedCollection ()
+$B->#noArg
+returned value is Getopt new "<0>"
+
+Execution begins...
+SortedCollection ('l' 'lo' 'lon' 'long' )
+'long'->#noArg
+returned value is Getopt new "<0>"
+
+Execution begins...
+SortedCollection ('longe' 'longer' 'longi' 'longis' 'longish' )
+'longer'->#noArg
+'longish'->#noArg
+returned value is Getopt new "<0>"
+
+Execution begins...
+SortedCollection ('long' 'longe' 'longer' )
+'long'->#noArg
+'longer'->#noArg
+returned value is Getopt new "<0>"
+
+Execution begins...
+SortedCollection ()
+$B->#mandatoryArg
+returned value is Getopt new "<0>"
+
+Execution begins...
+SortedCollection ()
+$B->#optionalArg
+returned value is Getopt new "<0>"
+
+Execution begins...
+SortedCollection ()
+$a->$b
+$b->#noArg
+returned value is Getopt new "<0>"
+
+Execution begins...
+SortedCollection ('l' 'lo' 'lon' 'long' )
+$a->'long'
+'long'->#noArg
+returned value is Getopt new "<0>"
+
+Execution begins...
+SortedCollection ('l' 'lo' 'lon' 'long' 'v' 've' 'ver' 'very' 'very-' 'very-l' 'very-lo' 'very-lon' 'very-long' )
+$a->'long'
+'long'->#noArg
+'very-long'->'long'
+returned value is Getopt new "<0>"
+
+Execution begins...
+$a->nil
+
+$b->nil
+
+$a->nil
+$b->nil
+
+$a->nil
+$b->nil
+
+returned value is Getopt
+
+Execution begins...
+'-a'->'error'
+
+$b->nil
+
+$a->'b'
+
+$a->'-b'
+
+returned value is Getopt
+
+Execution begins...
+$a->nil
+
+$b->nil
+
+$a->'b'
+
+$a->nil
+$b->nil
+
+returned value is Getopt
+
+Execution begins...
+'longish'->nil
+
+'longer'->nil
+
+'longish'->nil
+
+'longer'->nil
+
+'--lo'->'error'
+
+'-longer'->'error'
+
+returned value is Getopt
+
+Execution begins...
+'--lo'->'error'
+
+'long'->nil
+
+'longer'->nil
+
+'longer'->nil
+
+returned value is Getopt
+
+Execution begins...
+'noarg'->nil
+
+'--mandatory'->'error'
+
+'mandatory'->'foo'
+
+'mandatory'->''
+
+'mandatory'->'foo'
+
+'optional'->nil
+
+'optional'->nil
+nil->'foo'
+
+returned value is Getopt
+
+Execution begins...
+$b->nil
+
+$b->nil
+
+returned value is Getopt
+
+Execution begins...
+'long'->nil
+
+'long'->nil
+
+returned value is Getopt
+
+Execution begins...
+'long'->'x'
+
+'long'->'x'
+
+returned value is Getopt
+
+Execution begins...
+'long'->nil
+
+'long'->nil
+
+'long'->nil
+
+returned value is Getopt
+
+Execution begins...
+'long'->'x'
+
+'long'->'x'
+
+'long'->'x'
+
+returned value is Getopt
+
+Execution begins...
+$b->nil
+nil->'-b'
+
+nil->'-b'
+
+nil->'-b'
+nil->'-b'
+
+returned value is Getopt

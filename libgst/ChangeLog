@@ -1,5 +1,9 @@
 2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/lib.c: Load Getopt.st.
+
+2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/input.c: Merge my_close into _gst_pop_stream.  Always
 	free memory.  Initialize fileNameOOP for FileDescriptors in
 	_gst_push_stream_oop.  Clear the fileName field in push_new_stream.

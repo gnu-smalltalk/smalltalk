@@ -382,6 +382,7 @@ static const char standard_files[] = {
 
   /* Goodies */
   "Autoload.st\0"
+  "Getopt.st\0"
   "ObjDumper.st\0"
   "PkgLoader.st\0"
   "DLD.st\0"

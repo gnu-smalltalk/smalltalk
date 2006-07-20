@@ -1,5 +1,10 @@
 2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Getopt.st: New.
+	* tests/getopt.st: New.
+
+2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Builtins.st: Define Stream>>#fileIn and #fileInLine:fileName:at:.
 	* kernel/FileDescr.st: Redefine #nextHunk.
 	* kernel/FileStream.st: Fix bug in #nextHunk.  Remove file-in methods.

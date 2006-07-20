@@ -5,7 +5,7 @@ low_level_tests = arrays.st classes.st blocks.st \
 	intmath.st floatmath.st dates.st \
 	objects.st strings.st chars.st objdump.st \
 	delays.st geometry.st cobjects.st compiler.st \
-	fileext.st mutate.st untrusted.st
+	fileext.st mutate.st untrusted.st getopt.st
 
 benchmark_tests = ackermann.st ary3.st except.st \
 	fibo.st hash.st hash2.st heapsort.st \
@@ -117,7 +117,8 @@ regress:
 	done
 
 gst.im: ../kernel/stamp-classes AnsiLoad.st Ansi.st AnsiDB.st
-	builddir=`pwd`; cd $(srcdir) && \
-	  SMALLTALK_IMAGE=$$builddir SMALLTALK_KERNEL=../kernel \
-	    $$builddir/../gst -QSi AnsiLoad.st
+	cp ../gst.im .
+	builddir=`pwd` && \
+	cd $(srcdir) && \
+	$$builddir/../gst -QSI $$builddir/gst.im AnsiLoad.st
 

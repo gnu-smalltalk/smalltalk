@@ -22,6 +22,9 @@ o   Introduced another class shape, #character, that can be used for String.
 o   More reliable detection of at-end-of-file condition for pipes, TTYs,
     and so on (especially on Mac OS X).
 
+o   New goodie to parse the command line.  Look at the documentation for
+    the Getopt class and for SystemDictionary>>#arguments:do:.
+
 o   New example, lazy callections.  When loaded, #select:, #reject: and
     #collect: do not create a new collection unless necessary.  Idioms like
 
