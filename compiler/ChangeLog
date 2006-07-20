@@ -1,3 +1,7 @@
+2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/StartCompiler.st: define #fileIn in Stream.
+
 2006-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/RBParser.st: support $<123> syntax.

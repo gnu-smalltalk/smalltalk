@@ -1,5 +1,15 @@
 2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/input.c: Merge my_close into _gst_pop_stream.  Always
+	free memory.  Initialize fileNameOOP for FileDescriptors in
+	_gst_push_stream_oop.  Clear the fileName field in push_new_stream.
+	Fix STREAM_OOP case in my_getc.  Use fileNameOOP to print error
+	messages.
+	* libgst/prims.def: New primitives VMpr_Stream_fileIn and
+	VMpr_Stream_fileInLine, extracted from the fileOp primitive.
+
+2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* lib-src/poll.c: Import from gnulib.
 	* libgst/dict.c: Add 'peek' variable to FileDescriptor.
 	* libgst/dict.h: Add 'peek' variable to struct gst_file_stream.

@@ -2132,6 +2132,30 @@ asCData: aCType
 
 
 
+!Stream methodsFor: 'built ins'!
+
+fileIn
+    "File in the contents of the receiver.
+     During a file in operation, global variables (starting with an
+     uppercase letter) that are not declared don't yield an `unknown
+     variable' error. Instead, they are defined as nil in the `Undeclared'
+     dictionary (a global variable residing in Smalltalk).
+     As soon as you add the variable to a namespace (for example by creating
+     a class) the Association will be removed from Undeclared and reused
+     in the namespace, so that the old references will automagically point
+     to the new value."
+
+    <primitive: VMpr_Stream_fileIn>
+    self primitiveFailed!
+
+fileInLine: lineNum fileName: aString at: charPosInt
+    "Private - Much like a preprocessor #line directive; it is used
+     by the Emacs Smalltalk mode."
+
+    <primitive: VMpr_Stream_fileInLine>
+    self primitiveFailed
+! !
+
 !FileDescriptor methodsFor: 'built ins'!
 
 fileOp: ioFuncIndex

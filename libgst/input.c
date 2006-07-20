@@ -105,9 +105,6 @@ static int my_getc (input_stream stream);
 /* Print a line indicator in front of an error message.  */
 static void line_stamp (int line);
 
-/* Close the given stream */
-static void my_close (input_stream stream);
-
 /* Allocate and push a new stream of type TYPE on the stack; the new
    stream is then available through IN_STREAM.  */
 static input_stream push_new_stream (stream_type type);
@@ -191,16 +188,43 @@ static char **readline_match_symbols (char *text,
 void
 _gst_pop_stream (mst_Boolean closeIt)
 {
-  input_stream oldStream;
+  input_stream stream;
 
-  oldStream = in_stream;
+  stream = in_stream;
   in_stream = in_stream->prevStream;
 
-  if (closeIt && oldStream)
+  if (!IS_NIL (stream->fileNameOOP))
+    _gst_unregister_oop (stream->fileNameOOP);
+
+  switch (stream->type)
     {
-      my_close (oldStream);
-      xfree (oldStream);
+    case STREAM_STRING:
+      xfree (stream->st_str.strBase);
+      break;
+
+    case STREAM_OOP:
+      xfree (stream->st_oop.buf);
+      _gst_unregister_oop (stream->st_oop.oop);
+      break;
+
+    case STREAM_FILE:
+      xfree (stream->st_file.buf);
+      if (closeIt)
+        close (stream->st_file.fd);
+      break;
+
+#ifdef HAVE_READLINE
+    case STREAM_READLINE:
+      if (stream->st_str.strBase)
+	{
+	  xfree (stream->st_str.strBase);
+	  stream->st_str.strBase = NULL;
+	}
+      break;
+#endif /* HAVE_READLINE */
     }
+
+  xfree (stream);
 }
 
 void
@@ -228,9 +252,15 @@ _gst_push_stream_oop (OOP oop)
   newStream->st_oop.buf = NULL;
   newStream->st_oop.ptr = NULL;
   newStream->st_oop.end = NULL;
-  newStream->fileName = "a Smalltalk Stream";
-  newStream->prompt = false;
+  if (is_a_kind_of (OOP_CLASS (oop), _gst_file_descriptor_class))
+    {
+      newStream->fileNameOOP = ((gst_file_stream) OOP_TO_OBJ (oop))->name;
+      _gst_register_oop (newStream->fileNameOOP);
+    }
+  else
+    newStream->fileName = "a Smalltalk Stream";
 
+  newStream->prompt = false;
   _gst_register_oop (oop);
 }
 
@@ -295,6 +325,7 @@ push_new_stream (stream_type type)
   newStream->column = 0;
   newStream->fileOffset = 0;
   newStream->type = type;
+  newStream->fileName = NULL;
   newStream->fileNameOOP = _gst_nil_oop;
   newStream->prevStream = in_stream;
   in_stream = newStream;
@@ -312,11 +343,12 @@ _gst_set_stream_info (int line,
   in_stream->line = line;
   in_stream->column = 0;
   _gst_clear_method_start_pos ();
-  if (in_stream->type == STREAM_FILE)
+  if (fileName)
     {
       in_stream->fileName = fileName;
-      in_stream->fileOffset = fileOffset;
+      in_stream->fileNameOOP = _gst_nil_oop;
     }
+  in_stream->fileOffset = fileOffset;
 }
  
 off_t
@@ -352,17 +384,15 @@ my_getc (input_stream stream)
       if (stream->st_oop.ptr == stream->st_oop.end)
 	{
 	  if (stream->st_oop.buf)
-	    {
-	      xfree (stream->st_oop.buf);
-	      stream->st_oop.buf = NULL;
-	    }
+	    xfree (stream->st_oop.buf);
 
-	  _gst_msg_sendf(stream->st_oop.buf, "%s %o nextHunk",
+	  _gst_msg_sendf(&stream->st_oop.buf, "%s %o nextHunk",
 			 stream->st_oop.oop);
 
-	  stream->st_oop.end = stream->st_oop.buf +
-	    strlen (stream->st_oop.buf);
 	  stream->st_oop.ptr = stream->st_oop.buf;
+	  stream->st_oop.end = stream->st_oop.buf;
+	  if (stream->st_oop.buf)
+	    stream->st_oop.end += strlen (stream->st_oop.buf);
 	}
 
       return (stream->st_oop.ptr == stream->st_oop.end)
@@ -450,44 +480,6 @@ my_getc (input_stream stream)
       _gst_had_error = true;
     }
   return (ic);
-}
-
-void
-my_close (input_stream stream)
-{
-  if (!IS_NIL (stream->fileNameOOP))
-    _gst_unregister_oop (stream->fileNameOOP);
-
-  switch (stream->type)
-    {
-    case STREAM_STRING:
-      xfree (stream->st_str.strBase);
-      break;
-
-    case STREAM_OOP:
-      xfree (stream->st_oop.buf);
-      _gst_unregister_oop (stream->st_oop.oop);
-      break;
-
-    case STREAM_FILE:
-      xfree (stream->st_file.buf);
-      close (stream->st_file.fd);
-      break;
-
-#ifdef HAVE_READLINE
-    case STREAM_READLINE:
-      if (stream->st_str.strBase)
-	{
-	  xfree (stream->st_str.strBase);
-	  stream->st_str.strBase = NULL;
-	}
-      break;
-#endif /* HAVE_READLINE */
-
-    default:
-      _gst_errorf ("Bad stream type passed to my_close");
-      _gst_had_error = true;
-    }
 }
 
 
@@ -678,6 +670,11 @@ line_stamp (int line)
 	{
 	  if (in_stream->fileName)
 	    fprintf (stderr, "%s:", in_stream->fileName);
+	  else if (in_stream->fileNameOOP != _gst_nil_oop)
+	    {
+	      char *s = _gst_to_cstring (in_stream->fileNameOOP);
+	      fprintf (stderr, "%s:", s);
+	    }
 
 	  fprintf (stderr, "%d: ", line);
 	}

@@ -643,20 +643,11 @@ nextHunk
     "Answer the next buffers worth of stuff in the Stream represented
      by the receiver.  Do at most one actual input operation."
 
-    | answer count |
-    count := self fileOp: 3
-        with: collection
-        with: endPtr + 1
-        with: collection size - endPtr
-	ifFail: [ self checkError ].
-
-    count = 0 ifTrue: [ atEnd := true. ].
-    endPtr := endPtr + count.
-    answer := collection copyFrom: ptr to: endPtr.
-    ptr := 1.
-    endPtr := 0.
-    ^answer
-!
+    | count answer |
+    count := self read: (answer := String new: 1024).
+    count < answer size ifTrue: [ answer := answer copyFrom: 1 to: count ].
+    count = 0 ifTrue: [ atEnd := true. ^self pastEnd ].
+    ^answer copyFrom: 1 to: count!
 
 read: byteArray
     "Ignoring any buffering, try to fill byteArray with the

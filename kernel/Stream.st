@@ -413,6 +413,16 @@ skipToAll: aCollection
 
 !Stream methodsFor: 'private'!
 
+nextHunk
+    "Private - Used internally by the VM when we file in a stream."
+    | s |
+    s := self species new: 1024.
+    1 to: 1024 do: [ :i |
+	self atEnd ifTrue: [ ^s copyFrom: 1 to: i ].
+	s at: i put: self next ].
+    ^s
+!
+
 prefixTableFor: aCollection
     "Private - Answer the prefix table for the Knuth-Morris-Pratt algorithm.
      After a failure, the table is looked up to see how the longest prefix

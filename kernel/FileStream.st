@@ -359,41 +359,6 @@ copyFrom: from to: to
 ! !
 
 
-!FileStream methodsFor: 'filing in'!
-
-fileIn
-    "File in the contents of the receiver.
-     During a file in operation, global variables (starting with an
-     uppercase letter) that are not declared don't yield an `unknown
-     variable' error. Instead, they are defined as nil in the `Undeclared'
-     dictionary (a global variable residing in Smalltalk).
-     As soon as you add the variable to a namespace (for example by creating
-     a class) the Association will be removed from Undeclared and reused
-     in the namespace, so that the old references will automagically point
-     to the new value."
-
-    self flush.
-    self fileOp: 11 ifFail: [
-        file isNil ifTrue: [ SystemExceptions.FileError signal: 'file already closed' ].
-        self checkError.
-        ^nil
-    ]
-!
-
-fileInLine: lineNum fileName: aString at: charPosInt
-    "Private - Much like a preprocessor #line directive; it is used
-     by the Emacs Smalltalk mode."
-
-    self flush.
-    self fileOp: 12 with: lineNum with: aString with: charPosInt ifFail: [
-        file isNil ifTrue: [ SystemExceptions.FileError signal: 'file already closed' ].
-        self checkError.
-        ^nil
-    ]
-! !
-
-    
-
 !FileStream methodsFor: 'overriding inherited methods'!
 
 nextPutAllFlush: aCollection
@@ -573,8 +538,9 @@ nextHunk
 
     | result |
     writePtr notNil ifTrue: [ self flush ].
-    endPtr = collection size ifFalse: [ self fill ].
-    result := self copyFrom: ptr to: endPtr.
+    (ptr > endPtr or: [ endPtr < collection size ]) ifTrue: [ self fill ].
+    ptr > endPtr ifTrue: [ ^self pastEnd ].
+    result := collection copyFrom: ptr to: endPtr.
     ptr := endPtr + 1.
     ^result
 !

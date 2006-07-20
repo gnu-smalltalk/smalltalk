@@ -112,7 +112,7 @@ endMethodList
 
 evaluate: node
     | method |
-    method := STCompiler
+    method := evalFor class compilerClass
 	compile: node
 	asMethodOf: evalFor class
 	classified: nil
@@ -149,12 +149,13 @@ parserClass
 
 "Final definitions to start the compiler..."
 
-!Smalltalk.FileStream methodsFor: 'file-in'!
+!Smalltalk.Stream methodsFor: 'file-in'!
 
 fileIn
-    STInST.STSymbolTable nowInsideFileIn.
-    STInST.STFileInParser parseSmalltalkStream: self.
-    STInST.STSymbolTable nowOutsideFileIn.
+    [
+	STInST.STSymbolTable nowInsideFileIn.
+	STInST.STFileInParser parseSmalltalkStream: self ]
+	    ensure: [ STInST.STSymbolTable nowOutsideFileIn ]
 ! !
 
 !Smalltalk.Behavior methodsFor: 'compiling'!
