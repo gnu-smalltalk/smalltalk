@@ -1,3 +1,14 @@
+2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c: Import from gnulib.
+	* libgst/dict.c: Add 'peek' variable to FileDescriptor.
+	* libgst/dict.h: Add 'peek' variable to struct gst_file_stream.
+	* libgst/input.c: Leave poll_and_read upon POLLHUP.
+	* libgst/interp.h: Add PRIM_GET_CHARS_AT and PRIM_PUT_CHARS_AT.
+	* libgst/prims.def: Remove useless fstat call, accept any byte
+	or character class in read/write primitives, implement pread
+	and pwrite primitives.
+
 2006-07-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Support wchars and wstrings.

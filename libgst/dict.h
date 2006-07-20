@@ -54,6 +54,7 @@ typedef struct gst_file_stream
   OOP file;
   OOP name;
   OOP isPipe;
+  OOP peek;
   OOP writePtr;
   OOP writeEnd;
 }

@@ -1,55 +1,94 @@
-/******************************** -*- C -*- ****************************
- *
- *	poll(2) emulation
- *
- *
- ***********************************************************************/
+/* Emulation for poll(2)
+   Contributed by Paolo Bonzini.
 
-/***********************************************************************
- *
- * Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
- * Written by Paolo Bonzini.
- *
- * This file is part of GNU Smalltalk.
- *
- * GNU Smalltalk is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the Free
- * Software Foundation; either version 2, or (at your option) any later 
- * version.
- * 
- * GNU Smalltalk is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- * 
- * You should have received a copy of the GNU General Public License along with
- * GNU Smalltalk; see the file COPYING.  If not, write to the Free Software
- * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  
- *
- ***********************************************************************/
+   Copyright 2001, 2002, 2003, 2006 Free Software Foundation, Inc.
 
-#include "poll.h"
+   This file is part of gnulib.
 
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation,
+   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#include <stdio.h>
 #include <sys/types.h>
-#include <string.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <unistd.h>
+#include "poll.h"
 #include <errno.h>
+#include <limits.h>
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <unistd.h>
+
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
+#ifdef HAVE_SYS_FILIO_H
+#include <sys/filio.h>
+#endif
+
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
+#ifndef INFTIM
+#define INFTIM (-1)
+#endif
+
+#ifndef EOVERFLOW
+#define EOVERFLOW EINVAL
+#endif
 
 int
-rpl_poll (struct pollfd *pfd, int nfd, int timeout)
+poll (pfd, nfd, timeout)
+     struct pollfd *pfd;
+     nfds_t nfd;
+     int timeout;
 {
   fd_set rfds, wfds, efds;
   struct timeval tv, *ptv;
-  int maxfd, rc, ok;
-  unsigned int i;
+  int maxfd, rc, happened;
+  nfds_t i;
   char data[64];
 
-  /* poll(2) semantics */
-  if (pfd == NULL)
+#ifdef _SC_OPEN_MAX
+  if (nfd > sysconf (_SC_OPEN_MAX))
+    {
+      errno = EINVAL;
+      return -1;
+    }
+#else /* !_SC_OPEN_MAX */
+#ifdef OPEN_MAX
+  if (nfd > OPEN_MAX)
+    {
+      errno = EINVAL;
+      return -1;
+    }
+#endif /* OPEN_MAX -- else, no check is needed */
+#endif /* !_SC_OPEN_MAX */
+
+  /* EFAULT is not necessary to implement, but let's do it in the
+     simplest case. */
+  if (!pfd)
     {
       errno = EFAULT;
       return -1;
@@ -57,23 +96,15 @@ rpl_poll (struct pollfd *pfd, int nfd, int timeout)
 
   /* convert timeout number into a timeval structure */
   ptv = &tv;
-  if (timeout == 0)
+  if (timeout >= 0)
     {
-      /* return immediately */
-      ptv->tv_sec = 0;
-      ptv->tv_usec = 0;
-    }
-  else if (timeout == -1)
-    {
-      /* wait forever */
-      ptv = NULL;
-    }
-  else if (timeout > 0)
-    {
-      /* return after timeout */
+      /* return immediately or after timeout */
       ptv->tv_sec = timeout / 1000;
       ptv->tv_usec = (timeout % 1000) * 1000;
     }
+  else if (timeout == INFTIM)
+    /* wait forever */
+    ptv = NULL;
   else
     {
       errno = EINVAL;
@@ -100,16 +131,18 @@ rpl_poll (struct pollfd *pfd, int nfd, int timeout)
 	FD_SET (pfd[i].fd, &wfds);
       if (pfd[i].events & (POLLPRI | POLLRDBAND))
 	FD_SET (pfd[i].fd, &efds);
-      if (pfd[i].fd >= maxfd &&
-	  (pfd[i].events & (POLLIN | POLLOUT | POLLPRI |
-			    POLLRDNORM | POLLRDBAND |
-			    POLLWRNORM | POLLWRBAND)))
-	maxfd = pfd[i].fd;
-    }
-  if (maxfd == -1)
-    {
-      errno = EINVAL;
-      return -1;
+      if (pfd[i].fd >= maxfd
+	  && (pfd[i].events & (POLLIN | POLLOUT | POLLPRI
+			       | POLLRDNORM | POLLRDBAND
+			       | POLLWRNORM | POLLWRBAND)))
+	{
+	  maxfd = pfd[i].fd;
+	  if (maxfd > FD_SETSIZE)
+	    {
+	      errno = EOVERFLOW;
+	      return -1;
+	    }
+	}
     }
 
   /* examine fd sets */
@@ -121,42 +154,52 @@ rpl_poll (struct pollfd *pfd, int nfd, int timeout)
       rc = 0;
       for (i = 0; i < nfd; i++)
 	{
-	  ok = 0;
 	  pfd[i].revents = 0;
 	  if (pfd[i].fd < 0)
-	    {
-	      pfd[i].revents |= POLLNVAL;
-	      continue;
-	    }
+	    continue;
+
+	  happened = 0;
 	  if (FD_ISSET (pfd[i].fd, &rfds))
 	    {
-	      /* support for POLLHUP */
-	      int save_errno = errno;
-	      if ((recv (pfd[i].fd, data, 64, MSG_PEEK) == -1)
-		  && (errno == ESHUTDOWN || errno == ECONNRESET ||
-		      errno == ECONNABORTED || errno == ENETRESET))
+	      int r;
+	      long avail = -1;
+	      /* support for POLLHUP.  */
+#if defined __MACH__ && defined __APPLE__
+	      /* There is a bug in Mac OS X that causes it to ignore MSG_PEEK for
+		 some kinds of descriptors.  Use FIONREAD to emulate POLLHUP,
+		 but not on TTYs or it screws up the TTY attributes... */
+	      do
+		r = ioctl (pfd[i].fd, FIONREAD, &avail);
+	      while (r == -1 && (errno == EAGAIN || errno == EINTR));
+	      if (avail < 0)
+	        avail = 0;
+#else
+	      r = recv (pfd[i].fd, data, 64, MSG_PEEK);
+	      if (r == -1)
+		{
+		  avail = (errno == ESHUTDOWN || errno == ECONNRESET ||
+	                   errno == ECONNABORTED || errno == ENETRESET) ? 0 : -1;
+		  errno = 0;
+		}
+	      else
+	        avail = r;
+#endif
+
+	      /* An hung up descriptor does not increase the return value! */
+	      if (avail == 0)
 		pfd[i].revents |= POLLHUP;
 	      else
-		{
-		  pfd[i].revents |= pfd[i].events & (POLLIN | POLLRDNORM);
-		  ok++;
-		}
+		happened |= POLLIN | POLLRDNORM;
+	    }
 
-	      errno = save_errno;
-	    }
 	  if (FD_ISSET (pfd[i].fd, &wfds))
-	    {
-	      pfd[i].revents |=
-		pfd[i].events & (POLLOUT | POLLWRNORM | POLLWRBAND);
-	      ok++;
-	    }
+	    happened |= POLLOUT | POLLWRNORM | POLLWRBAND;
+
 	  if (FD_ISSET (pfd[i].fd, &efds))
-	    {
-	      pfd[i].revents |= pfd[i].events & (POLLPRI | POLLRDBAND);
-	      ok++;
-	    }
-	  if (ok)
-	    rc++;
+	    happened |= POLLPRI | POLLRDBAND;
+
+	  pfd[i].revents |= pfd[i].events & happened;
+	  rc += (happened > 0);
 	}
     }
 

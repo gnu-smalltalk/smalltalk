@@ -2,6 +2,12 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 2.2 TO 2.2.1
 
+o   FileStreams can now use pwrite for more efficient operation on files
+    opened for read/write, and will do many less gratuitous lseek
+    operations.  pread will also be used by FileStream>>#copyFrom:to:.
+    The number of system calls issued when generating the documentation,
+    for example, is reduced by a third.
+
 o   Moved gdk_draw_ functions to GdkDrawable.
 
 o   Fixed bug in methods containing both -0.0 and 0.0 (positive and negative
@@ -13,6 +19,9 @@ o   Fixed bug in SortedCollection.  After #removeAtIndex:, adds would leave
 o   Introduced another class shape, #character, that can be used for String.
     Warning: this makes images incompatible with the 2.2 format.
 
+o   More reliable detection of at-end-of-file condition for pipes, TTYs,
+    and so on (especially on Mac OS X).
+
 o   New example, lazy callections.  When loaded, #select:, #reject: and
     #collect: do not create a new collection unless necessary.  Idioms like
 
@@ -23,6 +32,7 @@ o   New example, lazy callections.  When loaded, #select:, #reject: and
 	a := a select: [ :each | ... ].
 	a := a reject: [ :each | ... ].
 	a := a select: [ :each | ... ].
+	^a size
 
     can be much faster when this example is loaded.
 

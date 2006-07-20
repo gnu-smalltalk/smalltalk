@@ -5112,15 +5112,6 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	  PRIM_FAILED;
         }
 
-      if (!is_pipe)
-        {
-	  memzero (&st, sizeof (st));
-          fstat (fd, &st);
-	  is_pipe =
-	    S_ISFIFO(st.st_mode) ? true :
-	    S_ISREG(st.st_mode) && st.st_size > 0 ? false : -1;
-	}
-
       _gst_set_file_stream_file (oop1, fd, oopVec[1],
 			         is_pipe, access, false);
     }
@@ -5158,12 +5149,11 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
   switch (arg1)
     {
 
-    case PRIM_CLOSE_FILE:	/* FileStream close */
+    case PRIM_CLOSE_FILE:	/* FileDescriptor close */
       SET_STACKTOP_INT (close (fd));
       PRIM_SUCCEEDED;
 
-    case PRIM_FSEEK_SET:		/* like gst_file_stream position:
-					   position */
+    case PRIM_FSEEK_SET:		/* FileDescriptor position: position */
       if (IS_OFF_T (oopVec[1]) &&
 	  lseek (fd, TO_OFF_T (oopVec[1]), SEEK_SET) < 0)
 	{
@@ -5173,7 +5163,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       else
 	PRIM_SUCCEEDED;
 
-    case PRIM_FTELL:		/* FileStream position */
+    case PRIM_FTELL:		/* FileDescriptor position */
       {
 	off_t off = lseek(fd, 0, SEEK_CUR);
         if (off < 0)
@@ -5187,7 +5177,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       }
 
     case PRIM_FEOF:
-      {				/* FileStream atEnd */
+      {				/* FileDescriptor atEnd */
 	off_t oldPos;
 	oldPos = lseek (fd, 0, SEEK_CUR);
 	SET_STACKTOP_BOOLEAN (oldPos >= 0
@@ -5210,8 +5200,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       }
 
     case PRIM_PUT_CHARS:
-      if (is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class)
-          || is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_byte_array_class))
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+          && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
 	  intptr_t from = TO_INT (oopVec[2]);
@@ -5231,8 +5221,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       break;
 
     case PRIM_GET_CHARS:		/* only works for strings */
-      if (is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class)
-          || is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_byte_array_class))
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+          && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
 	  intptr_t from = TO_INT (oopVec[2]);
@@ -5246,6 +5236,86 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 		 touch them manually.  */
 	      _gst_grey_oop_range (data + from - 1, to - from + 1);
 	      result = _gst_read (fd, data + from - 1, to - from + 1);
+
+	      if (result >= 0)
+		{
+		  SET_STACKTOP_INT (result);
+		  PRIM_SUCCEEDED;
+		}
+	    }
+	}
+      break;
+
+    case PRIM_GET_CHARS_AT:
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+          && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0
+	  && IS_OFF_T (oopVec[4]))
+	{
+	  char *data = STRING_OOP_CHARS (oopVec[1]);
+	  intptr_t from = TO_INT (oopVec[2]);
+	  intptr_t to = TO_INT (oopVec[3]);
+	  off_t ofs = TO_OFF_T (oopVec[4]);
+	  int result;
+
+	  if (to >= from - 1
+	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
+	    {
+	      /* Parameters to system calls are not guaranteed to
+		 generate a SIGSEGV and for this reason we must
+		 touch them manually.  */
+	      _gst_grey_oop_range (data + from - 1, to - from + 1);
+#if HAVE_PREAD
+	      result = pread (fd, data + from - 1, to - from + 1, ofs);
+#else
+	      {
+		off_t save = lseek (fd, ofs, SEEK_SET);
+		if (save != -1)
+		  {
+		    result = _gst_read (fd, data + from - 1, to - from + 1);
+		    lseek (fd, save, SEEK_SET);
+		  }
+	      }
+#endif
+
+	      if (result >= 0)
+		{
+		  SET_STACKTOP_INT (result);
+		  PRIM_SUCCEEDED;
+		}
+	    }
+	}
+      break;
+
+    case PRIM_PUT_CHARS_AT:
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+          && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0
+	  && IS_OFF_T (oopVec[4]))
+	{
+	  char *data = STRING_OOP_CHARS (oopVec[1]);
+	  intptr_t from = TO_INT (oopVec[2]);
+	  intptr_t to = TO_INT (oopVec[3]);
+	  off_t ofs = TO_OFF_T (oopVec[4]);
+	  int result;
+
+	  if (to >= from - 1
+	      && from > 0 && to <= NUM_INDEXABLE_FIELDS (oopVec[1]))
+	    {
+	      /* Parameters to system calls are not guaranteed to
+		 generate a SIGSEGV and for this reason we must
+		 touch them manually.  */
+	      _gst_grey_oop_range (data + from - 1, to - from + 1);
+#if HAVE_PWRITE
+	      result = pwrite (fd, data + from - 1, to - from + 1, ofs);
+#else
+	      {
+		off_t save = lseek (fd, ofs, SEEK_SET);
+		if (save != -1)
+		  {
+		    result = _gst_write (fd, data + from - 1, to - from + 1);
+		    lseek (fd, save, SEEK_SET);
+		  }
+	      }
+#endif
 
 	      if (result >= 0)
 		{
@@ -5340,7 +5410,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	break;
       }
 
-      /* FileStream fileInLine: lineNum fileName: aString at:
+      /* FileDescriptor fileInLine: lineNum fileName: aString at:
          charPosInt */
     case PRIM_FILEIN_AT:
       {
@@ -5426,7 +5496,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
   switch (arg1)
     {
 
-    case PRIM_CLOSE_FILE:	/* FileStream close */
+    case PRIM_CLOSE_FILE:	/* FileDescriptor close */
       {
         int result = closesocket (fd);
         SET_STACKTOP_INT (result);
@@ -5434,7 +5504,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       }
 
     case PRIM_PUT_CHARS:
-      if (is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class))
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+          && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
 	  intptr_t from = TO_INT (oopVec[2]);
@@ -5457,7 +5528,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       break;
 
     case PRIM_GET_CHARS:		/* only works for strings */
-      if (is_a_kind_of (OOP_CLASS (oopVec[1]), _gst_string_class))
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+          && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
 	  intptr_t from = TO_INT (oopVec[2]);

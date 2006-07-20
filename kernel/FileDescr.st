@@ -32,7 +32,7 @@
 
 
 ByteStream subclass: #FileDescriptor
-		instanceVariableNames: 'file name isPipe atEnd'
+		instanceVariableNames: 'file name isPipe atEnd peek'
 		classVariableNames: ''
 		poolDictionaries: ''
 		category: 'Streams-Files'
@@ -284,7 +284,9 @@ finalize
 next
     "Return the next character in the file, or nil at eof"
     | result | 
-    result := self read: collection.
+    peek isNil
+	ifFalse: [ collection at: 1 put: peek. peek := nil. result := 1 ]
+        ifTrue: [ result := self read: collection from: 1 to: 1 ].
     ^result > 0
 	ifTrue: [ collection at: 1 ]
 	ifFalse: [ atEnd := true. self pastEnd ].
@@ -295,10 +297,10 @@ peek
     Returns nil when at end of stream."
 
     | result |
-    result := self read: collection.
-    self skip: -1.
+    peek isNil ifFalse: [ ^peek ].
+    result := self read: collection from: 1 to: 1.
     ^result > 0
-	ifTrue: [ collection at: 1 ]
+	ifTrue: [ peek := collection at: 1 ]
 	ifFalse: [ atEnd := true. self pastEnd ]!
 
 nextByte
@@ -334,16 +336,16 @@ reset
 
 position
     "Answer the zero-based position from the start of the file"
-    ^self
-	checkIfPipe;
-	fileOp: 5
+    self checkIfPipe.
+    peek isNil ifFalse: [ self skip: -1. peek := nil ].
+    ^self fileOp: 5
 !
 
 position: n
     "Set the file pointer to the zero-based position n"
-    self
-	checkIfPipe;
-	fileOp: 4 with: n.
+    self checkIfPipe.
+    peek := nil.
+    ^self fileOp: 4 with: n
 !
 
 size
@@ -556,7 +558,10 @@ atEnd
     "Answer whether data has come to an end"
     self isOpen ifFalse: [ ^true ].
     self isPipe ifFalse: [ ^self fileOp: 6 ].
-    atEnd isNil ifTrue: [ atEnd := false ].
+    atEnd isNil ifTrue: [
+        self ensureReadable.
+	self peek.
+	atEnd isNil ifTrue: [ ^false ] ].
     ^atEnd
 !
 
@@ -656,15 +661,20 @@ nextHunk
 read: byteArray
     "Ignoring any buffering, try to fill byteArray with the
      contents of the file"
-    | count |
+    | count available |
     self ensureReadable.
+    available := peek isNil ifTrue: [ 0 ] ifFalse: [ 1 ].
     count := self
 	fileOp: 3
 	with: byteArray
-        with: 1
+        with: available + 1
 	with: byteArray size
 	ifFail: [ self checkError ].
 
+    peek isNil ifFalse: [
+	byteArray byteAt: 1 put: peek value. peek := nil ].
+
+    count := count + available.
     count = 0 ifTrue: [ atEnd := true ].
     ^count
 !
@@ -672,15 +682,20 @@ read: byteArray
 read: byteArray numBytes: anInteger
     "Ignoring any buffering, try to fill anInteger bytes of byteArray
      with the contents of the file"
-    | count |
+    | count available |
     self ensureReadable.
+    available := peek isNil ifTrue: [ 0 ] ifFalse: [ 1 ].
     count := self
 	fileOp: 3
 	with: byteArray
-        with: 1
+        with: 1 + available
 	with: (anInteger min: byteArray size)
 	ifFail: [ self checkError ].
 
+    peek isNil ifFalse: [
+	byteArray byteAt: 1 put: peek value. peek := nil ].
+
+    count := count + available.
     count = 0 ifTrue: [ atEnd := true ].
     ^count
 !
@@ -688,15 +703,20 @@ read: byteArray numBytes: anInteger
 read: byteArray from: position to: end
     "Ignoring any buffering, try to fill the given range of byteArray
      with the contents of the file"
-    | count |
+    | count available |
     self ensureReadable.
+    available := peek isNil ifTrue: [ 0 ] ifFalse: [ 1 ].
     count := self
 	fileOp: 3
 	with: byteArray
-        with: position
+        with: position + available
 	with: (end min: byteArray size)
 	ifFail: [ self checkError ].
 
+    peek isNil ifFalse: [
+	byteArray byteAt: 1 put: peek value. peek := nil ].
+
+    count := count + available.
     count = 0 ifTrue: [ atEnd := true ].
     ^count
 !

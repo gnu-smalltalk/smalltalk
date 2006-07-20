@@ -800,7 +800,7 @@ poll_and_read (int fd, char *buf, int n)
       errno = 0;
       result = poll (&pfd, 1, -1); /* Infinite wait */
     }
-  while (result == 0
+  while ((result == 0 && (pfd.revents & POLLHUP) == 0)
 	 || ((result == -1) && (errno == EINTR)));
 
   if (pfd.revents & POLLIN)

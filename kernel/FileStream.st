@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2006
 | Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
@@ -231,7 +231,7 @@ peek
     "Return the next character in the file, or nil at eof.
      Don't advance the file pointer."
 
-    writePtr notNil ifTrue: [ self basicFlush ].
+    writePtr notNil ifTrue: [ self flush ].
     ptr > endPtr ifTrue: [
 	self fill.
 	self atEnd ifTrue: [ ^self pastEnd ].
@@ -243,7 +243,7 @@ next
     "Return the next character in the file, or nil at eof"
 
     | element |
-    writePtr notNil ifTrue: [ self basicFlush ].
+    writePtr notNil ifTrue: [ self flush ].
     ptr > endPtr ifTrue: [
 	self fill.
 	self atEnd ifTrue: [ ^self pastEnd ].
@@ -271,11 +271,11 @@ nextPut: aCharacter
 	    (access bitAnd: 2) = 0
 	    	ifTrue: [ ^self shouldNotImplement ].
 
-	    writePtr := writeEnd := ptr ]
-        ifFalse: [ writeEnd := writeEnd + 1 ].
+	    writePtr := ptr. writeEnd := ptr - 1 ].
 
     collection at: ptr put: aCharacter.
     ptr := ptr + 1.
+    writeEnd := ptr - 1.
 !
 
 nextPutByte: anInteger
@@ -288,53 +288,74 @@ nextPutByteArray: aByteArray
     ^self nextPutAll: aByteArray asString
 !
 
+bufferStart
+    "Private - Answer the offset from the start of the file corresponding
+     to the beginning of the read buffer."
+    ^super position - endPtr
+!
+
 position
     "Answer the zero-based position from the start of the file"
-    ^super position + (ptr - 1) - endPtr
+    ^self bufferStart + ptr - 1
 !
 
 position: n
     "Set the file pointer to the zero-based position n"
-    writePtr notNil ifTrue: [ self basicFlush ].
+
+    "There is a lot of duplicate code between here and #flush."
+    | pos bufferStart |
+    writePtr notNil ifTrue: [
+	bufferStart := self bufferStart.
+	pos := bufferStart + endPtr.
+        self
+	    fileOp: 18
+	    with: collection
+	    with: writePtr
+	    with: writeEnd
+	    with: bufferStart + writePtr - 1 ].
+
+    "If we didn't write, pos is nil and we always do the lseek.  It makes
+     no sense to do an lseek (to get the current file pointer in #bufferStart)
+     only to possibly skip this other lseek."
+    pos = n ifFalse: [ super position: n ].
     ptr := 1.
     endPtr := 0.
-    super position: n.
+    writePtr := nil.
 !
 
 size
     "Return the current size of the file, in bytes"
-    writePtr notNil ifTrue: [ self basicFlush ].
+    writePtr notNil ifTrue: [ self flush ].
     ^super size
 !
 
 truncate
     "Truncate the file at the current position"
-    writePtr notNil ifTrue: [ self basicFlush ].
+    writePtr notNil ifTrue: [ self flush ].
     super truncate
 !
 
 copyFrom: from to: to
     "Answer the contents of the file between the two given positions"
-    | offset fromPos toPos savePos |
+    | offset fromPos toPos result |
     from > to ifTrue: [
         to + 1 = from ifTrue: [ ^self species new ].
         ^SystemExceptions.ArgumentOutOfRange signalOn: from mustBeBetween: 1 and: to + 1
     ].
 
-    savePos := self fileOp: 5.
-    offset := savePos - endPtr + 1.
-    fromPos := from - offset.
-    toPos := to - offset.
+    self checkIfPipe.
+    endPtr = 0 ifFalse: [
+        offset := self bufferStart - 1.
+        fromPos := from - offset.
+        toPos := to - offset.
 
-    (fromPos >= 1 and: [ toPos <= collection size ])
-        ifTrue: [ ^collection copyFrom: fromPos to: toPos ].
+        (fromPos >= 1 and: [ toPos <= endPtr ])
+            ifTrue: [ ^collection copyFrom: fromPos to: toPos ] ].
 
-    ^[
-        self position: fromPos.
-        self next: toPos - fromPos + 1
-    ] ensure: [
-        self position: savePos
-    ]
+    writePtr notNil ifTrue: [ self flush ].
+    result := self species new: to - from + 1.
+    self fileOp: 17 with: result with: 1 with: result size with: from.
+    ^result
 ! !
 
 
@@ -351,7 +372,7 @@ fileIn
      in the namespace, so that the old references will automagically point
      to the new value."
 
-    self clean.
+    self flush.
     self fileOp: 11 ifFail: [
         file isNil ifTrue: [ SystemExceptions.FileError signal: 'file already closed' ].
         self checkError.
@@ -363,7 +384,7 @@ fileInLine: lineNum fileName: aString at: charPosInt
     "Private - Much like a preprocessor #line directive; it is used
      by the Emacs Smalltalk mode."
 
-    self clean.
+    self flush.
     self fileOp: 12 with: lineNum with: aString with: charPosInt ifFail: [
         file isNil ifTrue: [ SystemExceptions.FileError signal: 'file already closed' ].
         self checkError.
@@ -378,69 +399,39 @@ fileInLine: lineNum fileName: aString at: charPosInt
 nextPutAllFlush: aCollection
     "Put all the characters in aCollection in the file, then flush the
      file buffers"
-    | n storedCollection |
-    writePtr notNil ifTrue: [ self basicFlush ].
-
-    storedCollection := aCollection asString.
-    self write: storedCollection.
-    ptr := 1.
-    endPtr := 0.
+    | n coll written |
+    coll := aCollection asString.
+    n := coll size.
+    written := collection size - ptr + 1 min: n.
+    self next: written bufferAll: coll startingAt: 1; flush.
+    written = n ifFalse: [ self write: coll from: written + 1 to: n ].
 !
 
 nextPutAll: aCollection
     "Put all the characters in aCollection in the file"
-    | n storedCollection |
-    writePtr isNil
-        ifTrue: [
-	    (access bitAnd: 2) = 0
-	    	ifTrue: [ ^self shouldNotImplement ].
+    | n coll written |
+    coll := aCollection asString.
+    n := coll size.
+    written := collection size - ptr + 1 min: n.
+    self next: written bufferAll: coll startingAt: 1.
+    written = n ifTrue: [ ^self ].
 
-	    writePtr := ptr. writeEnd := ptr - 1 ].
-
-    storedCollection := aCollection asString.
-    n := storedCollection size.
-    writeEnd + n > collection size ifFalse: [
-        collection
-            replaceFrom: writeEnd + 1
-            to: writeEnd + n
-            with: storedCollection
-            startingAt: 1.
-
-	writeEnd := writeEnd + n.
-	ptr := writeEnd + 1.
-        ^self
-    ].
-
-    self basicFlush.
-    self write: storedCollection.
+    self flush.
+    n - written < collection size
+        ifTrue: [ self next: n - written bufferAll: coll startingAt: written + 1 ]
+	ifFalse: [ self write: coll from: written + 1 to: n ].
 !
 
-nextByteArray: anInteger
-    "Return the next 'anInteger' bytes from the stream, as a ByteArray."
-    | answer from n |
-    writePtr notNil ifTrue: [ self basicFlush ].
+next: n putAll: aCollection startingAt: pos
+    | written |
+    written := collection size - ptr + 1 min: n.
+    self next: written bufferAll: aCollection startingAt: pos.
+    written = n ifTrue: [ ^self ].
 
-    n := anInteger.
-    answer := ByteArray new: n.
-    from := 1.
-    [ (ptr + n - 1) > endPtr ] whileFalse: [
-        answer
-            replaceFrom: from
-            to: from + (endPtr - ptr)
-            with: collection
-            startingAt: ptr.
-
-        from := from + endPtr - ptr - 1.
-	n := n - ptr + endPtr - 1.
-        self fill.
-    ].
-    answer
-        replaceFrom: from
-        to: answer size
-        with: collection
-        startingAt: ptr.
-
-    ^answer
+    self flush.
+    n - written < collection size
+        ifTrue: [ self next: n - written bufferAll: aCollection startingAt: pos + written ]
+	ifFalse: [ self write: aCollection asString from: pos + written to: pos + n - 1 ].
 !
 
 nextLine
@@ -448,7 +439,7 @@ nextLine
      the next line up to the next new-line character.  Returns the entire rest of the
      stream's contents if no new-line character is found. "
     | n resultStream result ch |
-    writePtr notNil ifTrue: [ self basicFlush ].
+    writePtr notNil ifTrue: [ self flush ].
     ptr > endPtr ifTrue: [
 	self fill.
 	self atEnd ifTrue: [ ^self pastEnd ].
@@ -477,6 +468,7 @@ nextLine
 	    resultStream := WriteStream on: (self species new: endPtr - ptr + 20)
 	].
 	resultStream next: endPtr - ptr + 1 putAll: collection startingAt: ptr.
+	ptr := endPtr + 1.
 	self fill.
 	self atEnd
     ] whileFalse.
@@ -484,33 +476,14 @@ nextLine
     ^resultStream contents
 !
 
+nextByteArray: anInteger
+    "Return the next 'anInteger' bytes from the stream, as a ByteArray."
+    ^self next: anInteger into: (ByteArray new: anInteger).
+!
+
 next: anInteger
     "Return the next 'anInteger' characters from the stream, as a String."
-    | answer from n |
-    writePtr notNil ifTrue: [ self basicFlush ].
-
-    n := anInteger.
-    answer := self species new: n.
-    from := 1.
-    [ (ptr + n - 1) > endPtr ] whileTrue: [
-        answer
-            replaceFrom: from
-            to: from + (endPtr - ptr)
-            with: collection
-            startingAt: ptr.
-
-        from := from + (endPtr - ptr + 1).
-	n := n - (endPtr - ptr + 1).
-        self fill.
-    ].
-    answer
-        replaceFrom: from
-        to: answer size
-        with: collection
-        startingAt: ptr.
-
-    ptr := ptr + (answer size - from + 1).
-    ^answer
+    ^self next: anInteger into: (self species new: anInteger).
 ! !
 
 
@@ -543,53 +516,139 @@ newBuffer
 !
 
 flush
-    "Flush the output buffer"
-    writePtr notNil ifTrue: [ self basicFlush ].
+    "Flush the output buffer."
+
+    "Decide whether to use a pwrite or a write.  In many cases, a regular
+     write can be better than a pwrite+lseek.
+
+     We are now at (self bufferStart + endPtr).  The position we will
+     set is (self bufferStart + ptr - 1).  If we perform a write, we
+     will do a single seek from (self bufferStart + endPtr) to (self
+     bufferStart + writePtr - 1), and then issue the write which will
+     set the file pointer to (self bufferStart + writeEnd): That's why
+     if writeEnd = ptr - 1, we use write.  Otherwise we use pwrite
+     and possibly an lseek after it."
+
+    (self isPipe or: [ writePtr notNil and: [ ptr - 1 = writeEnd ] ])
+	ifTrue: [
+	    writePtr notNil ifTrue: [
+	        (self isPipe or: [ writePtr - 1 = endPtr ]) ifFalse: [
+	            super skip: writePtr - 1 - endPtr ].
+
+	        self
+		    write: collection
+		    from: writePtr
+		    to: writeEnd ] ]
+	ifFalse: [
+	    writePtr notNil ifTrue: [
+	        self
+		    fileOp: 18
+		    with: collection
+		    with: writePtr
+		    with: writeEnd
+		    with: self bufferStart + writePtr - 1 ].
+
+	    ptr - 1 = endPtr
+		ifFalse: [ super skip: ptr - 1 - endPtr ] ].
+
+    ptr := 1.
+    endPtr := 0.
+    writePtr := nil.
 !
 
 pendingWrite
-    "Answer whether the output buffer is full"
+    "Answer whether the output buffer is full."
     ^writePtr notNil
 !
 
 clean
     "Synchronize the file descriptor's state with the object's state."
-    writePtr notNil ifTrue: [ self basicFlush ].
-    self position: self position.
-!
-
-basicFlush
-    "Private - Flush the output buffer, fail if it is empty"
-    | move |
-    move := 8.
-
-    endPtr + 1 = writePtr ifFalse: [
-	self fileOp: move with: writePtr - endPtr - 1
-    ].
-    self write: collection from: writePtr to: writeEnd.
-    writeEnd + 1 = ptr ifFalse: [
-	self fileOp: move with: ptr - writeEnd - 1.
-    ].
-
-    writePtr := nil.
-    ptr := 1.
-    endPtr := 0.
+    self flush
 !
 
 nextHunk
     "Answer the next buffers worth of stuff in the Stream represented
-     by the receiver.  Do at most one actual input operation."
+     by the receiver.  For n consecutive calls to this method, we do
+     n - 1 or n actual input operation."
 
-    | answer |
-    endPtr := endPtr + (self fileOp: 3
-        with: collection
-        with: endPtr + 1
-        with: collection size - endPtr
-	ifFail: [ self checkError ]).
+    | result |
+    writePtr notNil ifTrue: [ self flush ].
+    endPtr = collection size ifFalse: [ self fill ].
+    result := self copyFrom: ptr to: endPtr.
+    ptr := endPtr + 1.
+    ^result
+!
 
-    answer := collection copyFrom: ptr to: endPtr.
-    ptr := 1.
-    endPtr := 0.
+next: n bufferAll: aCollection startingAt: pos
+    "Private - Assuming that the buffer has space for n characters, store
+     n characters of aCollection in the buffer, starting from the pos-th."
+    writePtr isNil
+        ifTrue: [
+	    (access bitAnd: 2) = 0
+	    	ifTrue: [ ^self shouldNotImplement ].
+
+	    writePtr := ptr. writeEnd := ptr - 1 ].
+
+    n = 0 ifTrue: [ ^self ].
+
+    collection
+        replaceFrom: ptr
+        to: ptr + n - 1
+        with: aCollection
+        startingAt: pos.
+
+    ptr := ptr + n.
+    writeEnd := ptr - 1.
+!
+
+next: anInteger into: answer
+    "Private - Read up to anInteger bytes from the stream and store them
+     into answer.  Return `answer' itself, possibly truncated if we could not
+     read the full amount of data."
+    | read last |
+    writePtr notNil ifTrue: [ self flush ].
+    read := 0.
+
+    "Exhaust the remaining contents of the buffer if they cannot satisfy
+     the whole request."
+    (ptr + anInteger - 1) > endPtr
+	ifTrue: [
+	    answer
+	        replaceFrom: 1
+	        to: endPtr - ptr + 1
+	        with: collection
+	        startingAt: ptr.
+
+	    read := endPtr - ptr + 1.
+	    ptr := endPtr + 1 ].
+
+    "If we did not read everything, but what's left is less than the size of
+     the buffer, try once more filling it..."
+    anInteger - read < collection size
+	ifTrue: [
+	    ptr > endPtr ifTrue: [ self fill ].
+	    last := (read + endPtr - ptr + 1) min: answer size.
+	    answer
+	        replaceFrom: read + 1
+	        to: last
+	        with: collection
+	        startingAt: ptr.
+
+	    ptr := ptr + last - read.
+	    read := last ].
+
+    "Anything more?  We read it from the file.  We can come here only if the
+     buffer cannot be filled completely, or if we want to read really a
+     lot of data."
+    read = anInteger
+	ifFalse: [
+	    self atEnd
+		ifFalse: [ read := read + (self read: answer from: read + 1 to: answer size) ].
+	    read = anInteger
+		ifFalse: [
+		    self atEnd ifTrue: [ self pastEnd ].
+		    ^answer copyFrom: 1 to: read ] ].
+
     ^answer
 !
 
@@ -598,8 +657,8 @@ fill
     (access bitAnd: 1) = 0
     	ifTrue: [ ^self shouldNotImplement ].
 
-    ptr := 1.
-    endPtr := self read: collection.
+    ptr > endPtr ifTrue: [ self flush ].
+    endPtr := endPtr + (self read: collection from: endPtr + 1 to: collection size).
 ! !
 
 FileStream initialize!

@@ -558,8 +558,8 @@ static const class_definition class_info[] = {
    "ByteStream", NULL, NULL, NULL },
 
   {&_gst_file_descriptor_class, &_gst_byte_stream_class,
-   ISP_FIXED, 4,
-   "FileDescriptor", "file name isPipe atEnd", NULL, NULL },
+   ISP_FIXED, 5,
+   "FileDescriptor", "file name isPipe atEnd peek", NULL, NULL },
 
   {&_gst_file_stream_class, &_gst_file_descriptor_class,
    ISP_FIXED, 2,

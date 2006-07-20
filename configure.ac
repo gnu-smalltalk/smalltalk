@@ -177,7 +177,7 @@ AC_REPLACE_FUNCS(putenv strdup strerror strsignal memmove mkstemp getpagesize \
 AC_CHECK_FUNCS(gethostname memcpy sighold uname sbrk usleep lstat \
 	grantpt popen getrusage gettimeofday getcwd fork strchr	\
 	sigsetmask alarm select mprotect madvise nl_langinfo waitpid \
-	setsid spawnl nanosleep)
+	setsid spawnl nanosleep pread pwrite)
 
 GST_FUNC_STRTOUL
 GST_FUNC_LOCALTIME

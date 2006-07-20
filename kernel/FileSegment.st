@@ -72,10 +72,8 @@ on: aFile startingAt: startPos for: sizeInteger
 
 asString
     "Answer a String containing the required segment of the file"
-    ^self withFileDo: [ :fileStream |
-	fileStream position: startPos.
-	fileStream next: size.
-    ]
+    ^self withFileDo: [ :fileStream | 
+	fileStream copyFrom: startPos to: startPos + size - 1 ]
 !
 
 relocateFrom: startPath to: endPath map: map

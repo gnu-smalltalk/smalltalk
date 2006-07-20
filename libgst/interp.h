@@ -57,7 +57,9 @@ enum
   PRIM_SYNC_POLL,               /* read/write/exception */
   PRIM_ASYNC_POLL,              /* operation:semaphore: */
   PRIM_IS_PIPE,                 /* no args */
-  PRIM_MK_TEMP                  /* base: */
+  PRIM_MK_TEMP,                 /* base: */
+  PRIM_GET_CHARS_AT,            /* data:from:to:absOfs: */
+  PRIM_PUT_CHARS_AT             /* data:from:to:absOfs: */
 };
 
 /* These macros are used to quickly compute the number of words needed

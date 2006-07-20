@@ -1,3 +1,13 @@
+2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Builtins.st: Add four-argument #fileOp: primitive.
+	* kernel/FileDescr.st: Look ahead one character in #atEnd for pipes.
+	* kernel/FileSegment.st: Use FileStream>>#copyFrom:to:.
+	* kernel/FileStream.st: Rewrite buffer flushing and collection
+	read/write.  Do not use any fileOp: directly except for pread/pwrite
+	(which are not used for pipes -- see kernel/FileDescr.st) and
+	fileIn (which will disappear before the release).
+
 2006-07-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Add #utf32 shape.
