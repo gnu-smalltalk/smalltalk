@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -148,7 +148,7 @@ copyFrom: start to: stop
      start-th and to the stop-th"
 
     | len |
-    stop < start ifTrue: [^self species new].
+    stop < start ifTrue: [^self copyEmpty: 0].
     len := stop - start + 1.
     ^(self copyEmpty: len)
 	replaceFrom: 1 to: len with: self startingAt: start;

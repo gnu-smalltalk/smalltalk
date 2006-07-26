@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -131,7 +131,7 @@ reject: aBlock
     "Answer the objects in the domain for which aBlock returns false"
 
     | aStream map |
-    aStream := WriteStream on: (domain species new: self size).
+    aStream := WriteStream on: (domain copyEmpty: self size).
     self do: [ :value | (aBlock value: value) ifFalse:
     	    	[ aStream nextPut: value ] ].
 
@@ -142,7 +142,7 @@ select: aBlock
     "Answer the objects in the domain for which aBlock returns true"
 
     | aStream |
-    aStream := WriteStream on: (domain species new: self size).
+    aStream := WriteStream on: (domain copyEmpty: self size).
     self do: [ :value | (aBlock value: value) ifFalse:
     	    	[ aStream nextPut: value ] ].
 

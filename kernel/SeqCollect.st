@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -458,7 +458,7 @@ copyFrom: start
     "Answer a new collection containing all the items in the receiver from the
      start-th."
     | sz |
-    start > (sz := self size) ifTrue: [^self species new].
+    start > (sz := self size) ifTrue: [^self copyEmpty: 0].
     ^self copyFrom: (start max: 1) to: sz!
 
 copyFrom: start to: stop
@@ -466,9 +466,9 @@ copyFrom: start to: stop
      start-th and to the stop-th"
 
     | len coll |
-    stop < start ifTrue: [^self species new].
+    stop < start ifTrue: [^self copyEmpty: 0].
     len := stop - start + 1.
-    coll := self species new: len + 10.
+    coll := self copyEmpty: len + 10.
     self from: start to: stop do: [ :each | coll add: each ].
     ^coll
 !

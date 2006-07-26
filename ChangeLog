@@ -1,3 +1,9 @@
+2006-07-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/MappedColl.st: Don't use #species.
+	* kernel/SeqCollect.st: Don't use #species.
+	* kernel/ArrayColl.st: Don't use #species.
+
 2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Getopt.st: New.
