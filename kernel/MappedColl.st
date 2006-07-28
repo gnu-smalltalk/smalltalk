@@ -114,6 +114,11 @@ domain
     ^domain
 !
 
+keys
+    "Answer the keys that can be used to access this collection."
+    ^map keys
+!
+
 map
     "Answer the map"
     ^map

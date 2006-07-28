@@ -607,6 +607,11 @@ fold: binaryBlock
     ^result
 !
 
+keys
+    "Return an Interval corresponding to the valid indices in the receiver."
+    ^1 to: self size
+!
+
 keysAndValuesDo: aBlock
     "Evaluate aBlock for all the elements in the sequenceable collection,
      passing the index of each element as the first parameter and the
