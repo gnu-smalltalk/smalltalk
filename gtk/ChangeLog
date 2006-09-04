@@ -1,3 +1,7 @@
+2006-09-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gtk/order.st: Use Getopt, add -P flag instead of hardcoding prefixes.
+
 2006-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gtk/funcs.awk: support wchar_t.

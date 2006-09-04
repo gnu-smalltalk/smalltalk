@@ -30,22 +30,11 @@
  ======================================================================"
 
 Object subclass: #IncludesScanner 
-       instanceVariableNames: 'paths ordered processed'
+       instanceVariableNames: 'paths ordered processed prefixes'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Gtk-Building bindings'
 !
-
-!CharacterArray methodsFor: 'testing'!
-
-gPrefixes
-    ^#('g' 'atk' 'pango')!
-
-isGName
-    | name |
-    name := File stripPathFrom: self.
-    ^self gPrefixes anySatisfy: [ :each | name startsWith: each ]
-! !
 
 !SystemDictionary methodsFor: 'utility'!
 
@@ -72,22 +61,26 @@ initialize
     ordered := OrderedCollection new.
     paths := OrderedCollection with: '.'.
     processed := Set new. "Same as order, but a set for faster lookup"
+    prefixes := OrderedCollection new.
 !
 
 process: args
-    args do: [ :arg |
-	[ self processArgument: arg ]
-	    ifCurtailed: [ ('while processing ', arg) displayNl ]
-    ]!
+    Getopt
+	parse: args
+	with: '--include|-I: -L: --prefix|-P:'
+	do: [ :opt :arg |
+	    [ self processArgument: opt with: arg ]
+	        ifCurtailed: [ ('while processing -', opt asString, arg) displayNl ] ]!
 
-processArgument: arg
-    (arg startsWith: '-L') 
-	ifTrue: [ ^self processLib: (arg copyFrom: 3) ].
-
-    (arg startsWith: '-I')
-	ifTrue: [ ^self processPath: (arg copyFrom: 3) ].
-
+processArgument: opt with: arg
+    opt = $P ifTrue: [ ^self processPrefix: arg ].
+    opt = $L ifTrue: [ ^self processLib: arg ].
+    opt = $I ifTrue: [ ^self processPath: arg ].
     self processFile: arg
+!
+
+processPrefix: aString
+    prefixes add: aString
 !
 
 processPath: aPath
@@ -106,13 +99,18 @@ processLib: aLib
     ].
 !
 
+hasCorrectPrefix: aString
+    prefixes isEmpty ifTrue: [ ^true ].
+    ^prefixes anySatisfy: [ :each | aString startsWith: each ]
+!
+
 processFile: aFileName
     | incs file |
     (processed includes: aFileName) ifTrue: [ ^self ].
     processed add: aFileName.
     file := self findFile: aFileName.
     incs := self scanForIncludes: file.
-    incs do: [ :each | each isGName ifTrue: [ self processFile: each ] ].
+    incs do: [ :each | self processFile: each ].
     ordered add: file fullName.
 !
 
@@ -134,7 +132,7 @@ findFile: aFile
 !
 
 scanForIncludes: aFile
-    | fs r line last dir prefix f |
+    | fs r line last dir prefix f fname lastCh |
     "Get the path for quote-delimited #include directives."
     dir := (File pathFor: aFile name) copyWith: $/.
     fs := aFile readStream.
@@ -145,20 +143,22 @@ scanForIncludes: aFile
 	    (line startsWith: '#include') 
 		ifTrue: [
 		    line := (line copyFrom: 9) trimSeparators.
-		    (line size > 2 and: [ (line at: 1) = $< ])
-			ifTrue: [ prefix := ''. last := line indexOf: $> ].
-		    (line size > 2 and: [ (line at: 1) = $" ])
-			ifTrue: [
-			    last := line indexOf: $" startingAt: 2.
+		    prefix := ''.
+		    line first = $< ifTrue: [ lastCh := $> ].
+		    line first = $" ifTrue: [ lastCh := $" ].
+		    last := line indexOf: lastCh startingAt: 2.
+		    fname := line copyFrom: 2 to: last - 1.
 
+		    lastCh = $"
+			ifTrue: [
 			    "Try getting the file from the same directory as the
 			     one with the #include directory.  If it succeeds, use
 			     an absolute path."
-			    f := File name: dir, (line copyFrom: 2 to: last - 1).
-			    prefix := f isReadable ifTrue: [ dir ] ifFalse: [ '' ].
+			    f := File name: (Directory append: fname to: dir).
+			    f isReadable ifTrue: [ prefix := dir ].
 			].
 
-		    r add: prefix, (line copyFrom: 2 to: last - 1)
+		    (self hasCorrectPrefix: fname) ifTrue: [ r add: prefix, fname ].
 		].
 	].
     ^r
