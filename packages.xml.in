@@ -240,7 +240,6 @@
   <name>DhbNumericalMethods</name>
   <namespace>Dhb</namespace>
   <prereq>SUnit</prereq>
-  <prereq>DhbNumericalMethodsExtensions</prereq>
   <filein>Basic.st</filein>
   <filein>Statistics.st</filein>
   <filein>RNG.st</filein>
