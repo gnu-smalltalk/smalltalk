@@ -84,7 +84,7 @@ DISTCLEANFILES = sigsegv.h
 # Rules for "make dist".
 
 sigsegv.h.msvc : sigsegv.h.in
-	sed -e 's/@''FAULT_CONTEXT_INCLUDE''@/#include <windows.h>/' \
+	$(SED) -e 's/@''FAULT_CONTEXT_INCLUDE''@/#include <windows.h>/' \
 	    -e 's/@''FAULT_CONTEXT''@/CONTEXT/' \
 	    -e 's/@''HAVE_SIGSEGV_RECOVERY''@/1/' \
 	    -e 's/@''HAVE_STACK_OVERFLOW_RECOVERY''@/1/' \

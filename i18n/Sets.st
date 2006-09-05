@@ -331,7 +331,7 @@ encoding: aStringOrStream as: toEncoding
 
     "If converting to the pivot encoding, we're done."
     pivot := ((to startsWith: 'UCS-4') or: [ to startsWith: 'UTF-32' ])
-	ifTrue: [ to ].
+	ifTrue: [ to ]
 	ifFalse: [ self pivotEncoding ].
 
     encoderTo := Iconv.

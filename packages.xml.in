@@ -719,6 +719,7 @@
   <file>URL.st</file>
   <file>VarBinding.st</file>
   <file>RecursionLock.st</file>
+  <file>Getopt.st</file>
 
   <file>../vfs/</file>
   <file>../vfs/README</file>

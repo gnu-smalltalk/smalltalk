@@ -55,8 +55,8 @@ BUILT_SOURCES = enums.c sizeof.c
 	      test -f $$i/$(AWK) && AWK="$$i/$(AWK)" && break; \
 	    done ;; \
 	esac; \
-	echo "sed -e \"1s,@AWK\@,$$AWK,\" < $< > $@"; \
-	sed -e "1s,@AWK\@,$$AWK," < $< > $@
+	echo "$(SED) -e \"1s,@AWK\@,$$AWK,\" < $< > $@"; \
+	$(SED) -e "1s,@AWK\@,$$AWK," < $< > $@
 	chmod +x $@
 
 cpp: $(srcdir)/cpp.awk
@@ -71,7 +71,7 @@ Libs.st: Makefile
 	echo '"Automatically generated file, do not edit!"' > Libs.st; \
 	for i in $(ALL_LIBS); do \
 	  case $$i in \
-	    -lg*|-latk*|-lpango*) echo "DLD addLibrary: 'lib$$i'!" | sed 's/-l//' >> Libs.st ;; \
+	    -lg*|-latk*|-lpango*) echo "DLD addLibrary: 'lib$$i'!" | $(SED) 's/-l//' >> Libs.st ;; \
 	    *) ;; \
 	  esac; \
 	done

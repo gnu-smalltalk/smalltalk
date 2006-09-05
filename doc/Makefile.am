@@ -9,13 +9,13 @@ HTML_IMAGES = images/backon.png images/back.png images/blankon.png \
 	images/toc.png images/upon.png images/up.png
 
 dist_man_MANS = gst.1
-HELP2MAN = $(top_srcdir)/config/help2man
+HELP2MAN = $(top_srcdir)/build-aux/help2man
 
 info_TEXINFOS = gst.texi gst-base.texi gst-libs.texi
 gst_TEXINFOS = tutorial.texi vers-gst.texi
 gst_libs_TEXINFOS = blox.texi tcp.texi i18n.texi using-xml.texi vers-libs.texi
 gst_base_TEXINFOS = classes.texi vers-base.texi
-TEXI2DVI=pool_size=750000 $(top_srcdir)/config/texi2dvi --expand
+TEXI2DVI=pool_size=750000 $(top_srcdir)/build-aux/texi2dvi --expand
 
 MOSTLYCLEANFILES = gst-libs.me gst-libs.mes gst-base.me gst-base.mes \
 	gst-libs.cl gst-libs.cls gst-base.cl gst-base.cls \
@@ -76,10 +76,10 @@ $(srcdir)/classes.texi: $(top_srcdir)/kernel/stamp-classes
 # colons with underscores in the info file.
 .texi.info:
 	@cd $(srcdir) && rm -f $@ $@-[0-9] $@-[0-9][0-9]
-	fixed=`pwd`/`echo $< | sed 's/\.texi/-fixed&/' `; \
+	fixed=`pwd`/`echo $< | $(SED) 's/\.texi/-fixed&/' `; \
 	  cd $(srcdir) && \
-	  $(MAKEINFO) `echo $< | sed 's,.*/,,'` -E - -o /dev/null | \
-	  sed '/^@..index/ s/:/_/g' > $$fixed && \
+	  $(MAKEINFO) `echo $< | $(SED) 's,.*/,,'` -E - -o /dev/null | \
+	  $(SED) '/^@..index/ s/:/_/g' > $$fixed && \
 	  $(MAKEINFO) $$fixed > /dev/null 2>&1 && \
 	  rm -f $$fixed
 
@@ -116,9 +116,9 @@ html: $(srcdir)/gst.texi $(srcdir)/gst-base.texi $(srcdir)/gst-libs.texi
 	  $(MAKEINFO) gst-base.texi -E $$htmldir/gst-base.texi \
 	    $${makeinfo4+--no-iftex --no-ifinfo --ifhtml} -o /dev/null && \
 	  cd $$htmldir && \
-	  $$srcdir/../config/texi2html -Verbose -split section gst.texi && \
-	  $$srcdir/../config/texi2html -Verbose -split section gst-libs.texi && \
-	  $$srcdir/../config/texi2html -Verbose -split section gst-base.texi && \
+	  $$srcdir/../build-aux/texi2html -Verbose -split section gst.texi && \
+	  $$srcdir/../build-aux/texi2html -Verbose -split section gst-libs.texi && \
+	  $$srcdir/../build-aux/texi2html -Verbose -split section gst-base.texi && \
 	  ln -sf $$srcdir/images $$htmldir/images && \
 	  $(RM) $$htmldir/gst.texi $$htmldir/gst-libs.texi $$htmldir/gst-base.texi
 

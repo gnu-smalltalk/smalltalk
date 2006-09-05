@@ -248,9 +248,6 @@ static void init_primitives_dictionary (void);
 static void init_c_symbols (void);
 
 static const char *feature_strings[] = {
-#ifdef MACHINE_DEFINES
-  MACHINE_DEFINES
-#endif
 #ifdef ENABLE_DLD
     "DLD",
 #endif
@@ -1088,7 +1085,7 @@ init_c_symbols ()
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CDoubleMaxExp"),
 		    FROM_INT (DBL_MAX_EXP));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CDoubleAlignment"),
-		    FROM_INT (DOUBLE_ALIGNMENT));
+		    FROM_INT (ALIGNOF_DOUBLE));
 
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CFloatPInf"),
 		    floate_new ((float) INFINITY));
@@ -1130,7 +1127,7 @@ init_c_symbols ()
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CLongDoubleMaxExp"),
 		    FROM_INT (LDBL_MAX_EXP));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CLongDoubleAlignment"),
-		    FROM_INT (LONG_DOUBLE_ALIGNMENT));
+		    FROM_INT (ALIGNOF_LONG_DOUBLE));
 }
 
 void

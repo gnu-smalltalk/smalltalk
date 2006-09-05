@@ -6,7 +6,7 @@ dnl Please see COPYING for a description your rights and responsibilities
 dnl with this software.
 dnl Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.52)
+AC_PREREQ(2.60)
 AC_INIT([GNU Smalltalk], 2.2a, help-smalltalk@gnu.org, smalltalk)
 MAINTAINER="bonzini@gnu.org"
 
@@ -14,7 +14,8 @@ dnl CURRENT:REVISION:AGE means this is the REVISION-th version of
 dnl the CURRENT-th interface; all the interface from CURRENT-AGE
 dnl to CURRENT are supported.
 GST_REVISION(6:0:2)
-AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([build-aux])
 AC_CONFIG_SRCDIR([main.c])
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE
@@ -36,11 +37,22 @@ if test "$GCC" != yes; then
   AC_MSG_ERROR([Please use GCC to compile GNU Smalltalk.])
 fi
 
+AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_LN_S
 GST_PROG_LN
 AC_PATH_PROG(INSTALL_INFO, install-info, :, $PATH:/sbin)
+
+AC_ARG_WITH(emacs, 
+[  --without-emacs         disable Emacs modes for Smalltalk], ,
+with_emacs=yes)
+test "$with_emacs" = no && EMACS=no
+
 AM_PATH_LISPDIR
+GST_EMACS_PACKAGE(comint)
+
+AM_CONDITIONAL(WITH_EMACS, test "$EMACS" != no)
+AM_CONDITIONAL(WITH_EMACS_COMINT, test "$ac_cv_emacs_comint" != no)
 
 dnl We only want the GNU implementations
 AM_MISSING_PROG(LEX, flex, $missing_dir)
@@ -79,21 +91,17 @@ dnl ------------------------------ C COMPILER / OS ------------
 
 AC_SYS_LARGEFILE
 AC_C_INLINE
-AC_C_CONST
-AC_C_VOLATILE
-ACX_C_RESTRICT
+AC_C_RESTRICT
 GST_C_HIDDEN_VISIBILITY
 GST_C_WARN_LONG_DOUBLE
-GST_C_SYMBOLSET
 GST_C_GOTO_VOID_P
 
 AC_DEFINE_UNQUOTED(HOST_SYSTEM, "$host",
   [Define to the host triplet.])
 
 AC_C_BIGENDIAN
-GCC_HEADER_STDINT(lib-src/stdintx.h)
-GST_CHECK_ALIGNMENT(double)
-GST_CHECK_ALIGNMENT(long double)
+AC_CHECK_ALIGNOF(double)
+AC_CHECK_ALIGNOF(long double)
 AC_CHECK_SIZEOF(off_t)
 AC_CHECK_SIZEOF(OOP, , [[
 typedef void *OOP;]])
@@ -153,28 +161,38 @@ AC_TYPE_SIZE_T
 
 AC_DEFINE(_GNU_SOURCE, 1, [We want the definition of every available function])
 
-AC_HEADER_STDC
-AC_HEADER_DIRENT
-AC_HEADER_TIME
-AC_CHECK_HEADERS(unistd.h poll.h sys/ioctl.h sys/resource.h \
-	sys/utsname.h stropts.h sys/param.h stddef.h limits.h \
+AC_HEADER_ASSERT
+AC_CHECK_HEADERS_ONCE(stdint.h inttypes.h unistd.h poll.h sys/ioctl.h \
+	sys/resource.h sys/utsname.h stropts.h sys/param.h stddef.h limits.h \
 	sys/timeb.h termios.h sys/mman.h sys/file.h execinfo.h \
 	sys/wait.h fcntl.h, [], [], [AC_INCLUDES_DEFAULT])
+
+AC_TYPE_INT8_T
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_INT64_T
+AC_TYPE_INTMAX_T
+AC_TYPE_INTPTR_T
+AC_TYPE_UINT8_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
+AC_TYPE_UINTMAX_T
+AC_TYPE_UINTPTR_T
 
 if test x$ac_cv_header_poll_h = xno; then
   AC_CONFIG_LINKS([lib-src/poll.h:lib-src/poll_.h])
 fi
 
 AC_FUNC_ALLOCA
-AC_FUNC_MEMCMP
 AC_FUNC_OBSTACK
 
 AC_CHECK_LIB(m, atan)
 GST_REPLACE_POLL
-AC_REPLACE_FUNCS(putenv strdup strerror strsignal memmove mkstemp getpagesize \
+AC_REPLACE_FUNCS(putenv strdup strerror strsignal mkstemp getpagesize \
 	getdtablesize strstr ftruncate floorl ceill sqrtl frexpl ldexpl asinl \
 	acosl atanl logl expl tanl sinl cosl)
-AC_CHECK_FUNCS(gethostname memcpy sighold uname sbrk usleep lstat \
+AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname sbrk usleep lstat \
 	grantpt popen getrusage gettimeofday getcwd fork strchr	\
 	sigsetmask alarm select mprotect madvise nl_langinfo waitpid \
 	setsid spawnl nanosleep pread pwrite)
@@ -260,12 +278,6 @@ if test "$enable_disassembler" != no; then
   AC_DEFINE(ENABLE_DISASSEMBLER, 1, 
     [Define to include a disassembler in the gst executable])
 fi
-
-AC_ARG_ENABLE(emacs, 
-[  --without-emacs         disable Emacs modes for Smalltalk], ,
-with_emacs=yes)
-test "$with_emacs" = no && EMACS=no
-AM_CONDITIONAL(WITH_EMACS, test "$with_emacs" != no)
 
 AC_ARG_ENABLE(dld,
 [  --disable-dld           disable loading of external modules at runtime], ,

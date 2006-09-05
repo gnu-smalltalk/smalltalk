@@ -13,5 +13,5 @@ noinst_HEADERS = \
        mathl.h trigl.h avltrees.h rbtrees.h trigl.c sincosl.c \
        signalx.h socketx.h ltdl.h
 
-DISTCLEANFILES = stdintx.h poll.h
+DISTCLEANFILES = poll.h
 

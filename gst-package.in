@@ -35,6 +35,7 @@
 
 : ${prefix:=@prefix@}
 : ${exec_prefix:=@exec_prefix@}
+: ${datarootdir:=@datarootdir@}
 : ${AWK:=gawk}
 : ${GST_LOAD:=${exec_prefix}/bin/gst-load}
 

@@ -442,7 +442,7 @@ floate_new (double f)
   return (floatOOP);
 }
 
-#if (DOUBLE_ALIGNMENT <= SIZEOF_OOP)
+#if (ALIGNOF_DOUBLE <= SIZEOF_OOP)
 #define FLOATD_OOP_VALUE(floatOOP) \
 	(((gst_floatd)OOP_TO_OBJ(floatOOP))->value)
 
@@ -468,7 +468,7 @@ OOP
 floatd_new (double f)
 {
   OOP floatOOP;
-#if (DOUBLE_ALIGNMENT <= SIZEOF_OOP)
+#if (ALIGNOF_DOUBLE <= SIZEOF_OOP)
   gst_floatd floatObject;
 
   floatObject = (gst_floatd) new_instance_with 
@@ -486,7 +486,7 @@ floatd_new (double f)
   return (floatOOP);
 }
 
-#if (LONG_DOUBLE_ALIGNMENT <= SIZEOF_OOP)
+#if (ALIGNOF_LONG_DOUBLE <= SIZEOF_OOP)
 #define FLOATQ_OOP_VALUE(floatOOP) \
 	(((gst_floatq)OOP_TO_OBJ(floatOOP))->value)
 
@@ -512,7 +512,7 @@ OOP
 floatq_new (long double f)
 {
   OOP floatOOP;
-#if (LONG_DOUBLE_ALIGNMENT <= SIZEOF_OOP)
+#if (ALIGNOF_LONG_DOUBLE <= SIZEOF_OOP)
   gst_floatq floatObject;
 
   floatObject = (gst_floatq) new_instance_with 

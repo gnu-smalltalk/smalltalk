@@ -5,7 +5,8 @@ AC_PREREQ(2.59)
 AC_INIT([libffi], [2.1], [http://gcc.gnu.org/bugs.html])
 AC_CONFIG_HEADERS([fficonfig.h])
 
-AC_CONFIG_AUX_DIR(../config)
+AC_CONFIG_AUX_DIR(../build-aux)
+AC_CONFIG_MACRO_DIR(../build-aux)
 
 AC_CANONICAL_SYSTEM
 target_alias=${target_alias-$host_alias}

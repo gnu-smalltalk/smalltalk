@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
 AUTOMAKE_OPTIONS = no-dependencies foreign
-ACLOCAL_AMFLAGS = -I ../../config
+ACLOCAL_AMFLAGS = -I ../../build-aux
 
 if INSTALL_LTDL
 include_HEADERS = ltdl.h

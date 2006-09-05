@@ -88,8 +88,8 @@ dist_noinst_DATA = \
 ackermann.ok ackermann.st arrays.ok arrays.st ary3.ok ary3.st blocks.ok \
 blocks.st chars.ok chars.st classes.ok classes.st cobjects.ok cobjects.st \
 compiler.ok compiler.st dates.ok dates.st delays.ok delays.st except.ok \
-except.st exceptions.ok exceptions.st fibo.ok fibo.st fileext.ok \
-fileext.st floatmath.ok floatmath.st geometry.ok geometry.st hash.ok \
+except.st exceptions.ok exceptions.st fibo.ok fibo.st fileext.ok fileext.st \
+floatmath.ok floatmath.st getopt.ok getopt.st geometry.ok geometry.st hash.ok \
 hash.st hash2.ok hash2.st heapsort.ok heapsort.st intmath.ok intmath.st \
 lists.ok lists.st lists1.ok lists1.st lists2.ok lists2.st matrix.ok \
 matrix.st methcall.ok methcall.st mutate.ok mutate.st nestedloop.ok \
@@ -111,7 +111,7 @@ regress:
 	SMALLTALK_KERNEL="$(top_srcdir)/kernel/"; \
 	export SMALLTALK_KERNEL; \
 	for test in $(low_level_tests) $(benchmark_tests); do \
-	  result=`echo $$test|sed 's/st$$/ok/'`; \
+	  result=`echo $$test | $(SED) 's/st$$/ok/'`; \
 	  $(top_builddir)/gst -I $(top_builddir)/gst.im \
 		-r $$test 2>&1 | tee $$result; \
 	done

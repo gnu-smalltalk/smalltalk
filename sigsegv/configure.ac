@@ -17,10 +17,11 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program; if not, write to the Free Software Foundation,
 dnl Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-AC_PREREQ(2.52)
+AC_PREREQ(2.60)
 AC_INIT
 AC_CONFIG_SRCDIR(src/sigsegv.h.in)
-AC_CONFIG_AUX_DIR(../config)
+AC_CONFIG_AUX_DIR(../build-aux)
+AC_CONFIG_MACRO_DIR(../build-aux)
 
 RSE_BOLD
 
@@ -58,6 +59,7 @@ PLATFORM="$sv_cv_host"
 AC_SUBST(PLATFORM)
 
 AC_PROG_INSTALL
+AC_PROG_SED
 
 AM_DISABLE_SHARED
 AC_LIBTOOL_TAGS([])

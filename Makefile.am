@@ -17,7 +17,7 @@
 
 # Automake requirements
 AUTOMAKE_OPTIONS = gnu 1.8
-ACLOCAL_AMFLAGS = -I config
+ACLOCAL_AMFLAGS = -I build-aux
 
 PACKAGE=smalltalk
 
@@ -38,10 +38,10 @@ SUBDIRS += libgst i18n tcp examples blox-tk . doc gtk tests
 ###########################################################
 
 aclocaldir = $(datadir)/aclocal
-dist_aclocal_DATA = config/gst.m4
+dist_aclocal_DATA = build-aux/gst.m4
 dist_noinst_DATA = Doxyfile
-dist_noinst_SCRIPTS = config/texi2dvi config/texi2html config/help2man \
-	config/config.rpath 
+dist_noinst_SCRIPTS = build-aux/texi2dvi build-aux/texi2html \
+	build-aux/help2man build-aux/config.rpath 
 
 ###########################################################
 #
@@ -61,7 +61,10 @@ dist_noinst_DATA += smalltalk-mode.el.in gst-mode.el.in .gdbinit \
 	scripts/GenBaseDoc.st gnu-smalltalk.spec gsticon.ico
 
 if WITH_EMACS
-nodist_lisp_LISP = smalltalk-mode.el gst-mode.el
+nodist_lisp_LISP = smalltalk-mode.el
+if WITH_EMACS_COMINT
+nodist_lisp_LISP += gst-mode.el
+endif
 endif
 
 bin_SCRIPTS = gst-package gst-config
@@ -69,19 +72,22 @@ DISTCLEANFILES = termbold termnorm smalltalk-mode.el gst-mode.el
 CLEANFILES = gst.im $(lisp_LISP)
 
 smalltalk-mode.el: smalltalk-mode.el.in
-	sed -e "s,@\(lispdir\)@,$(lispdir)," < $(srcdir)/smalltalk-mode.el.in \
+	$(SED) -e "s,@\(lispdir\)@,$(lispdir)," $(srcdir)/smalltalk-mode.el.in \
 	  > smalltalk-mode.el
 
 gst-mode.el: gst-mode.el.in
-	sed -e "s,@\(bindir\)@,$(bindir)," < $(srcdir)/gst-mode.el.in \
+	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/gst-mode.el.in \
 	  > gst-mode.el
 
 install-exec-hook:
-	sed -e "s,@\(bindir\)@,$(bindir)," < $(srcdir)/scripts/Load.st > $(DESTDIR)$(bindir)/gst-load
+	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/scripts/Load.st \
+	  > $(DESTDIR)$(bindir)/gst-load
 	chmod +x $(DESTDIR)$(bindir)/gst-load
-	sed -e "s,@\(bindir\)@,$(bindir)," < $(srcdir)/scripts/Reload.st > $(DESTDIR)$(bindir)/gst-reload
+	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/scripts/Reload.st \
+	  > $(DESTDIR)$(bindir)/gst-reload
 	chmod +x $(DESTDIR)$(bindir)/gst-reload
-	sed -e "s,@\(bindir\)@,$(bindir)," < $(srcdir)/scripts/Test.st > $(DESTDIR)$(bindir)/gst-sunit
+	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/scripts/Test.st \
+	  > $(DESTDIR)$(bindir)/gst-sunit
 	chmod +x $(DESTDIR)$(bindir)/gst-sunit
 
 uninstall-local::
@@ -156,7 +162,7 @@ dist_noinst_DATA += \
 # so that the packages are found in subdirectories of the srcdir
 # The \( ... \) below protect against substitution in config.status
 dist-hook: gst-package
-	sed -e "s/@\(I18N_DISABLED\)@/disabled-/" \
+	$(SED) -e "s/@\(I18N_DISABLED\)@/disabled-/" \
 	  -e "s/@\(GTK_DISABLED\)@/disabled-/" \
 	  -e "s/@\(VERSION\)@/@VERSION@/" \
 	  $(srcdir)/packages.xml.in > $(distdir)/packages.xml

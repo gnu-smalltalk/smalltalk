@@ -18,7 +18,7 @@
 ## Process this file with automake to produce Makefile.in.
 
 AUTOMAKE_OPTIONS = 1.8 gnu no-dependencies
-ACLOCAL_AMFLAGS = -I ../config
+ACLOCAL_AMFLAGS = -I ../build-aux
 
 SUBDIRS = src tests
 
@@ -71,4 +71,4 @@ install-next:
 # Rules for "make dist".
 
 $(srcdir)/config.h.msvc : config.h.in
-	sed -e 's/#undef CFG_HANDLER/#define CFG_HANDLER "handler-win32.c"/' < $(srcdir)/config.h.in > $@
+	$(SED) -e 's/#undef CFG_HANDLER/#define CFG_HANDLER "handler-win32.c"/' < $(srcdir)/config.h.in > $@

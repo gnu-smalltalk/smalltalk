@@ -569,30 +569,9 @@ extern OOP _gst_nil_oop
 #include <poll.h>
 #include <ctype.h>
 #include <wchar.h>
-
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>
-# define NAMLEN(dirent) strlen((dirent)->d_name)
-#else
-# define dirent direct
-# define NAMLEN(dirent) (dirent)->d_namlen
-# ifdef HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# ifdef HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# ifdef HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
-
-#if defined(HAVE_SYS_TIME_H) || defined(TIME_WITH_SYS_TIME)
-# include <sys/time.h>
-#endif
-#if !defined(HAVE_SYS_TIME_H) || defined(TIME_WITH_SYS_TIME)
-# include <time.h>
-#endif
+#include <dirent.h>
+#include <sys/time.h>
+#include <time.h>
 
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
@@ -614,7 +593,14 @@ extern OOP _gst_nil_oop
 #include <sys/mman.h>
 #endif
 
-#include "stdintx.h"
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
 #include "ansidecl.h"
 #include "signalx.h"
 #include "mathl.h"
@@ -658,13 +644,13 @@ extern OOP _gst_nil_oop
 
 #undef obstack_init
 #define obstack_init(h)                                         \
-  _obstack_begin ((h), 0, LONG_DOUBLE_ALIGNMENT,                \
+  _obstack_begin ((h), 0, ALIGNOF_LONG_DOUBLE,                \
                   (void *(*) (long)) obstack_chunk_alloc,       \
                   (void (*) (void *)) obstack_chunk_free)
 
 #undef obstack_begin
 #define obstack_begin(h, size)                                  \
-  _obstack_begin ((h), (size), LONG_DOUBLE_ALIGNMENT,           \
+  _obstack_begin ((h), (size), ALIGNOF_LONG_DOUBLE,           \
                   (void *(*) (long)) obstack_chunk_alloc,       \
                   (void (*) (void *)) obstack_chunk_free)
 

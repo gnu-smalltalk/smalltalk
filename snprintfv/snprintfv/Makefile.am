@@ -112,7 +112,7 @@ $(srcdir)/%.h: %.stamp
 	@:
 
 %.stamp: %.in
-	@file=`echo $@ | sed 's,\.stamp$$,.h,'`; \
+	@file=`echo $@ | $(SED) 's,\.stamp$$,.h,'`; \
 	$(GENPROTO_ENVIRONMENT) $(GENPROTO) $(GENPROTO_FLAGS) $^ > \
 	  $${file}T; \
 	if cmp -s $(srcdir)/$$file $${file}T; then \

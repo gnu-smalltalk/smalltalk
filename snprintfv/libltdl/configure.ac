@@ -3,7 +3,8 @@ dnl Process this file with autoconf to create configure.
 AC_INIT
 AC_CONFIG_SRCDIR([ltdl.c])
 
-AC_CONFIG_AUX_DIR(../../config)
+AC_CONFIG_AUX_DIR(../../build-aux)
+AC_CONFIG_MACRO_DIR(../../build-aux)
 
 if test -z "$enable_ltdl_install$enable_ltdl_convenience"; then
   if test -f ${srcdir}/ltmain.sh; then

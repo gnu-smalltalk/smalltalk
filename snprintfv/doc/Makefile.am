@@ -28,7 +28,7 @@ $(srcdir)/%.texi: %.stamp
 	@:
 
 %.stamp: $(top_builddir)/snprintfv/%.h
-	@file=`echo $@ | sed 's,\.stamp$$,.texi,'`; \
+	@file=`echo $@ | $(SED) 's,\.stamp$$,.texi,'`; \
 	$(GENDOC) $< > $${file}T; \
 	if cmp -s $(srcdir)/$$file $${file}T; then \
 	  rm -f $${file}T; \

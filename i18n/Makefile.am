@@ -17,10 +17,8 @@ EXTRA_DIST = ref-add.sin ref-del.sin config.charset
 noinst_SCRIPTS = ref-add.sed ref-del.sed
 CLEANFILES = ref-add.sed ref-del.sed charset.alias
 
-localedir = $(datadir)/locale
-
 .sin.sed:
-	sed -e '/^#/d' -e 's/@''PACKAGE''@/@PACKAGE@/g' $< > t-$@
+	$(SED) -e '/^#/d' -e 's/@''PACKAGE''@/@PACKAGE@/g' $< > t-$@
 	mv t-$@ $@
 
 charset.alias: config.charset
@@ -34,13 +32,13 @@ install-data-local:
 	dest=$(DESTDIR)$(libdir)/charset.alias; \
 	if test -f $(DESTDIR)$(libdir)/charset.alias; then \
 	  orig=$(DESTDIR)$(libdir)/charset.alias; \
-	  sed -f ref-add.sed $$orig > $$temp; \
+	  $(SED) -f ref-add.sed $$orig > $$temp; \
 	  $(INSTALL_DATA) $$temp $$dest; \
 	  rm -f $$temp; \
 	else \
 	  if test @GLIBC21@ = no; then \
 	    orig=charset.alias; \
-	    sed -f ref-add.sed $$orig > $$temp; \
+	    $(SED) -f ref-add.sed $$orig > $$temp; \
 	    $(INSTALL_DATA) $$temp $$dest; \
 	    rm -f $$temp; \
 	  fi; \
@@ -51,7 +49,7 @@ uninstall-local:
 	if test -f $(DESTDIR)$(libdir)/charset.alias; then \
 	  temp=$(DESTDIR)$(libdir)/t-charset.alias; \
 	  dest=$(DESTDIR)$(libdir)/charset.alias; \
-	  sed -f ref-del.sed $$dest > $$temp; \
+	  $(SED) -f ref-del.sed $$dest > $$temp; \
 	  if grep '^# Packages using this file: $$' $$temp > /dev/null; then \
 	    rm -f $$dest; \
 	  else \

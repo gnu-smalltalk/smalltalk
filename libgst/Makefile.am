@@ -154,8 +154,8 @@ $(srcdir)/vm.stamp: vm.def
 # not fully idiot-proof but only to be run by maintainers
 
 .gperf.inl:
-	@opts="$< `sed -ne /.*gperf/!d -e s///p -e q $< | \
-	    sed 's,$$(srcdir),$(srcdir),g'`"; \
+	@opts="$< `$(SED) -ne /.*gperf/!d -e s///p -e q $< | \
+	    $(SED) 's,$$(srcdir),$(srcdir),g'`"; \
 	  echo $(GPERF) $$opts " > $@"; \
 	  for i in a b c d e f g h j; do \
 	    if test $$i = j; then \

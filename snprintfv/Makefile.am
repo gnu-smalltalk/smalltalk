@@ -26,7 +26,7 @@
 
 ## Code:
 
-ACLOCAL_AMFLAGS		= -I ../config
+ACLOCAL_AMFLAGS		= -I ../build-aux
 AUTOMAKE_OPTIONS	= gnits
 
 ## BEGIN GNU SMALLTALK LOCAL

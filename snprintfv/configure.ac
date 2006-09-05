@@ -25,10 +25,12 @@ dnl  the same distribution terms used by the libopts library.
 
 dnl Code:
 
+AC_PREREQ(2.60)
 AC_INIT(snprintfv, 1.1, bonzini@gnu.org)
 AC_CONFIG_SRCDIR(snprintfv/printf.h)
 AC_CONFIG_HEADERS(config.h)
-AC_CONFIG_AUX_DIR(../config)
+AC_CONFIG_AUX_DIR(../build-aux)
+AC_CONFIG_MACRO_DIR(../build-aux)
 
 AC_ARG_ENABLE(subdir,
 [  --enable-subdir     used in a package, libltdl+texinfo+testsuite stripped], ,
@@ -44,6 +46,8 @@ SNV_AGE=0;	AC_SUBST(SNV_AGE)
 AC_LIBTOOL_TAGS([])
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
+
+AC_PROG_SED
 
 # ----------------------------------------------------------------------
 # If `configure' is invoked (in)directly via `make', ensure that it

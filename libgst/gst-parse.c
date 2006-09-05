@@ -31,9 +31,7 @@
 #include "gstpriv.h"
 #include "gst-parse.h"
 #include <stdio.h>
-#if defined (STDC_HEADERS)
 #include <string.h>
-#endif
 
 typedef enum expr_kinds {
   EXPR_ASSIGNMENT = 1,
