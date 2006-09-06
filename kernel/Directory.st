@@ -147,7 +147,7 @@ allFilesMatching: aPattern do: aBlock
 
 create: dirName
     "Create a directory named dirName."
-    ^(VFS.VFSHandler for: (File pathFor: dirName))
+    ^(VFS.VFSHandler for: (File pathFor: dirName ifNone: [ Directory working ]))
 	createDir: (File stripPathFrom: dirName)
 ! !
 

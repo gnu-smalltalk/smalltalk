@@ -97,16 +97,24 @@ stripPathFrom: aString
     ^aString copyFrom: index + 1 to: aString size
 !
 
+pathFor: aString ifNone: aBlock
+    "Determine the path of the name of a file called `aString', and
+     answer the result.  With the exception of the root directory, the
+     final slash is stripped.  If there is no path, evaluate aBlock and
+     return the result."
+    | index |
+    aString isEmpty ifTrue: [ ^aBlock value ].
+    index := aString findLast: [ :each | each = Directory pathSeparator ].
+    index = 0 ifTrue: [ ^aBlock value ].
+    index = 1 ifTrue: [ ^Directory pathSeparatorString ].
+    ^aString copyFrom: 1 to: index - 1.
+!
+
 pathFor: aString
     "Determine the path of the name of a file called `aString', and
      answer the result.  With the exception of the root directory, the
      final slash is stripped."
-    | index |
-    aString isEmpty ifTrue: [ ^'' ].
-    index := aString findLast: [ :each | each = Directory pathSeparator ].
-    index = 0 ifTrue: [ ^'' ].
-    index = 1 ifTrue: [ ^Directory pathSeparatorString ].
-    ^aString copyFrom: 1 to: index - 1.
+    ^self pathFor: aString ifNone: [ '' ]
 !
 
 stripFileNameFor: aString

@@ -13,6 +13,9 @@ o   Moved gdk_draw_ functions to GdkDrawable.
 o   Fixed bug in methods containing both -0.0 and 0.0 (positive and negative
     floating-point zero).
 
+o   Fixed bug in Directory class>>#create:, that could not create a
+    directory relative to the current directory.
+
 o   Fixed bug in SortedCollection.  After #removeAtIndex:, adds would leave
     the collection unordered.
 
