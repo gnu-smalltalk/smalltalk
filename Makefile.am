@@ -178,7 +178,8 @@ install-data-hook: gst-package
 	rm -f gst.im; \
 	SMALLTALK_KERNEL="`pwd`/kernel" \
 	SMALLTALK_IMAGE="`pwd`" \
-	  $(DESTDIR)$(bindir)/gst -f $$srcdir/scripts/Finish.st "$(DESTDIR)" $(MODULES)
+	  $(DESTDIR)$(bindir)/gst -f $$srcdir/scripts/Finish.st \
+	    "$(DESTDIR)$(pkgdatadir)" "$(pkgdatadir)" $(MODULES)
 
 uninstall-local:: gst-package
 	./gst-package --uninstall --destdir="$(DESTDIR)" packages.xml
