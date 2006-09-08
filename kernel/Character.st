@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -262,8 +262,16 @@ isVowel
     char = $o ifTrue: [ ^true ].    
     char = $u ifTrue: [ ^true ].    
     ^false
-! !
+! 
 
+isDigit: radix
+    "Answer whether the receiver is a valid character in the given radix."
+    | result |
+    (radix between: 2 and: 36)
+	ifFalse: [ SystemExceptions.ArgumentOutOfRange signalOn: radix mustBeBetween: 2 and: 36 ].
+    result := Table at: 1 + asciiValue.
+    ^result > 32 and: [ asciiValue - result between: 0 and: radix - 1 ]
+! !
 
 
 !Character methodsFor: 'coercion methods'!

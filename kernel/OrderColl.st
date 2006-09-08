@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2006
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -323,7 +323,22 @@ remove: anObject ifAbsent: aBlock
 
 removeAtIndex: anIndex
     "Remove the object at index anIndex from the receiver. Fail if the
-     index is out of bounds"
+     index is out of bounds."
+
+    | answer |
+    answer := self basicRemoveAtIndex: anIndex.
+    self size < self shrinkSize
+	ifTrue: [ self shrink ].
+
+    ^answer
+! !
+
+
+!OrderedCollection methodsFor: 'private methods'!
+
+basicRemoveAtIndex: anIndex
+    "Remove the object at index anIndex from the receiver. Fail if the
+     index is out of bounds."
 
     | answer |
     self beConsistent.
@@ -342,14 +357,7 @@ removeAtIndex: anIndex
 	ifTrue: [ self initIndices ]
 	ifFalse: [ lastIndex := lastIndex - 1 ].
 
-    self size < self shrinkSize
-	ifTrue: [ self shrink ].
-
-    ^answer
-! !
-
-
-!OrderedCollection methodsFor: 'private methods'!
+    ^answer!
 
 basicAddLast: newObject
     "Private - Add to the end of the receiver newObject, answer newObject.

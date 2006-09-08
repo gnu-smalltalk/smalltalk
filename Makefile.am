@@ -95,7 +95,8 @@ install-data-hook: gst-package
 	cd $(DESTDIR)$(pkgdatadir); \
 	SMALLTALK_KERNEL="`pwd`/kernel"; \
 	SMALLTALK_IMAGE="`pwd`"; \
-	  $(DESTDIR)$(bindir)/gst $$srcdir/Finish.st -VisqS -a "$(DESTDIR)" $(MODULES)
+	  $(DESTDIR)$(bindir)/gst $$srcdir/Finish.st -VisqS \
+	    -a "$(DESTDIR)$(pkgdatadir)" "$(pkgdatadir)" $(MODULES)
 
 uninstall-local: gst-package
 	./gst-package --uninstall --destdir="$(DESTDIR)" packages.xml

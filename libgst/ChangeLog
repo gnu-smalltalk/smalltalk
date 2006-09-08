@@ -1,7 +1,12 @@
+2006-07-13  Paolo Bonzini  <bonzini@gnu.org>
+
+        * libgst/events.c (_gst_sync_file_polling): Prepare pfd.revents by
+        zeroing it.
+
 2006-02-12  Paolo Bonzini  <bonzini@gnu.org>
 
-      * libgst/comp.c (equal_constant): Compare floating point constants
-      with memcmp.
+        * libgst/comp.c (equal_constant): Compare floating point constants
+        with memcmp.
 
 2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
 

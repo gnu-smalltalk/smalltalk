@@ -207,11 +207,13 @@ call_argtype_function (struct printf_info *const pinfo, int **argtypes, spec_ent
 
       if (n < 0)
 	return n;
-      else if (argindex + n > pinfo->argc)
+      if (argindex + n > pinfo->argc)
         {
-	  *argtypes = snv_renew (int, *argtypes, argindex + n);
+          int new_ct = argindex + n;
+	  *argtypes = snv_renew (int, *argtypes, new_ct);
+          memset(*argtypes + pinfo->argc, PA_UNKNOWN,
+                 (new_ct - pinfo->argc) * sizeof(**argtypes));
 	  pinfo->argc = argindex + n;
-
 	  /* Call again... */
 	  pinfo->argindex = save_argindex;
 	  pinfo->format = save_format;
@@ -641,18 +643,36 @@ stream_printfv (STREAM *stream, const char *format, snv_constpointer const *ap)
       /* We scanned the format string to find the type of the arguments,
          so we can now cast it and store it correctly.  */
       for (index = 0; index < info.argc; index++)
-       switch (argtypes[index] & ~PA_FLAG_UNSIGNED)
+        {
+          int tp = argtypes[index];
+          if ((tp & PA_TYPE_MASK) == PA_TYPE_MASK)
+            {
+              if (index + 1 == info.argc)
+                {
+                  info.argc--;
+                }
+              else
+                {
+                  info.error = EINVAL;
+                  index = info.argc;
+                }
+              break;
+            }
+
+          switch (tp & ~PA_FLAG_UNSIGNED)
          {
           case PA_CHAR:
            args[index].pa_char = (char) *(const long int *)(ap + index);
             break;
 
           case PA_WCHAR:
-           args[index].pa_wchar = (snv_wchar_t) *(const long int *)(ap + index);
+              args[index].pa_wchar =
+                (snv_wchar_t) *(const long int *)(ap + index);
             break;
 
           case PA_INT|PA_FLAG_SHORT:
-           args[index].pa_short_int = (short int) *(const long int *)(ap + index);
+              args[index].pa_short_int =
+                (short int) *(const long int *)(ap + index);
             break;
 
           case PA_INT:
@@ -702,6 +722,7 @@ stream_printfv (STREAM *stream, const char *format, snv_constpointer const *ap)
               args[index].pa_long_double = 0.0;
             break;
          }
+    }
     }
 
   if (printf_last_error)

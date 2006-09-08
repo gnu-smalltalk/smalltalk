@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2006 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU lightning.
@@ -81,18 +81,23 @@ struct jit_local_state {
 #define jit_ubooli2(d, rs, is, jmp)		(jit_chk_imu (is, CMPLWIri(rs, is), CMPLWrr(rs, JIT_AUX)), MFCRr((d)), EXTRWIrrii((d), (d), 1, (jmp)), XORIrri((d), (d), 1))
 #define jit_uboolr2(d, s1, s2, jmp)		(		  CMPLWrr (s1, s2), 		           MFCRr((d)), EXTRWIrrii((d), (d), 1, (jmp)), XORIrri((d), (d), 1))
 
-/* modulus with immediate
- * movei r26, imm
+/* modulus with big immediate                    with small immediate
+ * movei r24, imm                                movei r24, imm
  * mtlr  r31
- * divw  r31, rs, r26		(or divwu)
- * mullw r31, r31, r26
- * sub   rs, rs, r26
+ * divw  r31, rs, r24		(or divwu)       divw r24, rs, r24
+ * mullw r31, r31, r24                           mulli r24, r24, imm
+ * sub   d, rs, r31                              sub   d, rs, r24
  * mflr  r31
- */
+ *
+ *
+ * jit_mod_big expects immediate in JIT_AUX.  */
 
-#define _jit_mod(div, rs, imm)			(MOVEIri(JIT_AUX, (imm)), MTLRr(31), (div), \
-						MULLWrrr(31, 31, JIT_AUX), SUBrrr((rs), (rs), JIT_AUX), \
+#define _jit_mod_big(div, d, rs)		(MTLRr(31), div(31, (rs), JIT_AUX), \
+						MULLWrrr(31, 31, JIT_AUX), SUBrrr((d), (rs), 31), \
 						MFLRr(31))
+
+#define _jit_mod_small(div, d, rs, imm)		(MOVEIri(JIT_AUX, (imm)), div(JIT_AUX, (rs), JIT_AUX), \
+						 MULLIrri(JIT_AUX, JIT_AUX, (imm)), SUBrrr((d), (rs), JIT_AUX))
 
 /* Patch a movei instruction made of a LIS at lis_pc and an ORI at ori_pc. */
 #define jit_patch_movei(lis_pc, ori_pc, dest)			\
@@ -220,8 +225,8 @@ struct jit_local_state {
 #define jit_lti_ui(d, rs, is)		jit_ubooli ((d), (rs), (is), _lt )
 #define jit_ltr_i(d, s1, s2)		jit_sboolr ((d), (s1), (s2), _lt )
 #define jit_ltr_ui(d, s1, s2)		jit_uboolr ((d), (s1), (s2), _lt )
-#define jit_modi_i(d, rs, is)		_jit_mod(jit_divi_i (31, (rs), JIT_AUX), (rs), (is))
-#define jit_modi_ui(d, rs, is)		_jit_mod(jit_divi_ui(31, (rs), JIT_AUX), (rs), (is))
+#define jit_modi_i(d, rs, is)		jit_chk_ims  ((is), _jit_mod_small(jit_divr_i , (d), (rs), (is)), _jit_mod_big(jit_divr_i , (d), (rs)))
+#define jit_modi_ui(d, rs, is)		jit_chk_imu15((is), _jit_mod_small(jit_divr_ui, (d), (rs), (is)), _jit_mod_big(jit_divr_ui, (d), (rs)))
 #define jit_modr_i(d, s1, s2)		(DIVWrrr(JIT_AUX, (s1), (s2)), MULLWrrr(JIT_AUX, JIT_AUX, (s2)), SUBrrr((d), (s1), JIT_AUX))
 #define jit_modr_ui(d, s1, s2)		(DIVWUrrr(JIT_AUX, (s1), (s2)), MULLWrrr(JIT_AUX, JIT_AUX, (s2)), SUBrrr((d), (s1), JIT_AUX))
 #define jit_movi_i(d, is)		MOVEIri((d), (is))

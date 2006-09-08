@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2002 Free Software Foundation, Inc.
+| Copyright 2001, 2002, 2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -101,16 +101,22 @@ name
 !
     
 next
-    self atEnd ifTrue: [ ^nil ].
+    self atEnd ifTrue: [ ^self pastEnd ].
     curPos := curPos + 1.
     ^streams first next
 !
 
+peekFor: aCharacter
+    | result |
+    self atEnd ifTrue: [ self pastEnd. ^false ].
+    result := streams first peekFor: aCharacter.
+    result ifTrue: [ curPos := curPos + 1 ].
+    ^result
+!
+
 peek
-    streams do: [ :each |
-	each atEnd ifFalse: [ ^each peek ]
-    ].
-    ^nil
+    self atEnd ifTrue: [ ^self pastEnd ].
+    ^streams first peek
 !
 
 position
@@ -134,6 +140,15 @@ segmentFrom: start to: end
 	ifFalse: [ stream := streams first. adjust := startPos ].
     ^stream segmentFrom: (start - adjust max: 0) to: end - adjust
 !
+
+!ConcatenatedStream methodsFor: 'private'!
+
+pastEnd
+    "The end of the stream has been reached.  Signal a Notification"
+
+    SystemExceptions.EndOfStream signalOn: self.
+    ^nil
+! !
 
 !ConcatenatedStream methodsFor: 'initializing'!
 

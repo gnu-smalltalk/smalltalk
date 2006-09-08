@@ -28,12 +28,12 @@
 |
  ======================================================================"
 
-"Invoked as Finish.st DESTDIR [MODULES]..."
+"Invoked as Finish.st DESTDIR/PKGDATADIR PKGDATADIR [MODULES]..."
 
 | ok |
 ok := false.
 [
-    PackageLoader fileInPackages: (Smalltalk arguments copyFrom: 2).
+    PackageLoader fileInPackages: (Smalltalk arguments copyFrom: 3).
     ok := true
 ] valueWithUnwind.
 
@@ -42,5 +42,8 @@ ok ifFalse: [ ObjectMemory quit: 1 ]!
 "Symbol rebuildTable."
 
 "Remove DESTDIR from the paths stored in the image"
-FileSegment relocateFrom: Smalltalk arguments first to: ''.
-KernelFilePath := KernelFilePath copyFrom: Smalltalk arguments first size + 1!
+| old new |
+old := Smalltalk arguments first.
+new := Smalltalk arguments at: 2.
+old = new ifFalse: [ FileSegment relocateFrom: old to: new ].
+KernelFilePath := new, '/kernel'!

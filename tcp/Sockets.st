@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999,2000,2001,2002,2005,2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -834,12 +834,12 @@ close
 
 fill
     "Fill the read buffer with data read from the socket"
-    self readBuffer fill
+    self readBuffer notNil ifTrue: [ self readBuffer fill ]
 !
 
 flush
     "Flush the write buffer to the operating system"
-    self writeBuffer flush
+    self writeBuffer notNil ifTrue: [ self writeBuffer flush ]
 !
 
 isPeerAlive

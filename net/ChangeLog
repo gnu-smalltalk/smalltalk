@@ -1,3 +1,7 @@
+2005-09-05  Mike Anderson  <msasjf@yahoo.co.uk>
+
+	* net/HTTP.st: Fix bugs and support chunked encoding.
+
 2005-04-07  Brett Cundal <bcundal@cundal.net>
 
 	* net/NetServer.st: Fix typo in printOn:

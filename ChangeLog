@@ -1,3 +1,38 @@
+2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/LinkedList.st: Fix quadraticness of #includes:.
+
+2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Builtins.st: Add checks to "Namespace current:"
+
+2006-09-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Finish.st: Accept the full $(DESTDIR)$(pkgdatadir) and $(pkgdatadir).
+
+2006-09-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/File.st: Add #pathFor:ifNone:.
+	* kernel/Directory.st: Use it in #create:.
+
+2005-09-05  Paolo Bonzini  <bonzini@gnu.org>
+
+        * examples/StreamFilter.st: reimplement #peek and add #peekFor: to
+        ConcatenedStream.
+
+        * kernel/Character.st: new method #isDigit:.
+        * kernel/Integer.st: new method #readFrom:radix:.
+
+2006-07-13  Paolo Bonzini  <bonzini@gnu.org>
+
+        * kernel/OrderColl.st: Split part of #removeAtIndex: into
+        #basicRemoveAtIndex:.
+        * kernel/SortCollect.st: Rename #removeAtIndex: to #basicRemoveAtIndex:.
+
+2006-07-13  Paolo Bonzini  <bonzini@gnu.org>
+
+        * kernel/SortCollect.st: Provide #removeAtIndex:.
+
 2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/regex.c: Constify bm_search.

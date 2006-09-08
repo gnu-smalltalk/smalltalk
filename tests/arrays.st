@@ -116,3 +116,23 @@ newArray2
 ^WordArray with: 256!
 ^WordArray with: (1 bitShift: 64)!
 
+"-----------------"
+
+"This test used to fail because #removeAtIndex: was not implemented
+ in SortedCollection."
+
+| n4 n5 n6 n7 n8 n9 n10 n12 sc |
+n4 := 4->2. n5 := 5->3. n6 := 6->3.
+n7 := 7->2. n8 := 8->1. n9 := 9->8.
+n10 := 10->8. n12 := 12->1.
+
+sc := SortedCollection new: 10.
+sc sortBlock: [ :a :b |
+    a value < b value
+	or: [ a value = b value and: [ a key <= b key ] ] ].
+
+sc addAll: { n8. n12. n4. n7. n5. n6. n9. n10 }.
+sc remove: n10.
+sc remove: n8.
+sc add: n8.
+sc printNl!

@@ -453,8 +453,10 @@ typedef _uc		jit_insn;
 
 #define JOSm(D,B,I,S)			JCCSim(0x0,D,B,I,S)
 #define JNOSm(D,B,I,S)			JCCSim(0x1,D,B,I,S)
+#define JCSm(D,B,I,S)			JCCSim(0x2,D,B,I,S)
 #define JBSm(D,B,I,S)			JCCSim(0x2,D,B,I,S)
 #define JNAESm(D,B,I,S)			JCCSim(0x2,D,B,I,S)
+#define JNCSm(D,B,I,S)			JCCSim(0x3,D,B,I,S)
 #define JNBSm(D,B,I,S)			JCCSim(0x3,D,B,I,S)
 #define JAESm(D,B,I,S)			JCCSim(0x3,D,B,I,S)
 #define JESm(D,B,I,S)			JCCSim(0x4,D,B,I,S)
@@ -485,8 +487,10 @@ typedef _uc		jit_insn;
 
 #define JOm(D,B,I,S)			JCCim(0x0,D,B,I,S)
 #define JNOm(D,B,I,S)			JCCim(0x1,D,B,I,S)
+#define JCm(D,B,I,S)			JCCim(0x2,D,B,I,S)
 #define JBm(D,B,I,S)			JCCim(0x2,D,B,I,S)
 #define JNAEm(D,B,I,S)			JCCim(0x2,D,B,I,S)
+#define JNCm(D,B,I,S)			JCCim(0x3,D,B,I,S)
 #define JNBm(D,B,I,S)			JCCim(0x3,D,B,I,S)
 #define JAEm(D,B,I,S)			JCCim(0x3,D,B,I,S)
 #define JEm(D,B,I,S)			JCCim(0x4,D,B,I,S)

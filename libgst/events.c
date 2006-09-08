@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+ * Copyright 2001, 2002, 2003, 2006 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -155,6 +155,7 @@ _gst_sync_file_polling (int fd,
   do
     {
       errno = 0;
+      pfd.revents = 0;
       result = poll (&pfd, 1, 0);
     }
   while ((result == -1) && (errno == EINTR));
