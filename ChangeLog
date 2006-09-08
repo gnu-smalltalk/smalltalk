@@ -1,5 +1,9 @@
 2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ExcHandling.st: Reinstate skipping internal contexts.
+
+2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Builtins.st: Add checks to "Namespace current:"
 	* kernel/AnsiExcept.st: Accept classes in addition to VariableBindings.
 

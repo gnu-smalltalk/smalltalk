@@ -737,8 +737,8 @@ primError: message
 
     RegressionTesting ifFalse: [
         context := thisContext.
-        "[ context isInternalExceptionHandlingContext ]
-            whileTrue: [ context := context parentContext ]."
+        [ context isInternalExceptionHandlingContext ]
+            whileTrue: [ context := context parentContext ].
 
         context backtraceOn: stdout
     ].

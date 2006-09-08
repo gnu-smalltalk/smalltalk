@@ -42,6 +42,9 @@ o   New example, lazy callections.  When loaded, #select:, #reject: and
 
     can be much faster when this example is loaded.
 
+o   The backtraces now omit again the internal methods in the exception
+    handling system.
+
 o   Various speedups.
 
 Unicode support:
