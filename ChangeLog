@@ -1,3 +1,40 @@
+2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/LinkedList.st: Fix quadraticness of #includes:.
+
+2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/File.st: Add methods to wrap utime and use them in #touch.
+	* kernel/VFS.st: Add methods to wrap utime.
+	* kernel/FileStream.st: Fix typo.
+
+2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ExcHandling.st: Reinstate skipping internal contexts.
+
+2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Builtins.st: Add checks to "Namespace current:"
+	* kernel/AnsiExcept.st: Accept classes in addition to VariableBindings.
+
+2006-09-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Finish.st: Accept the full $(DESTDIR)$(pkgdatadir)
+	and $(pkgdatadir).
+
+2006-09-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/File.st: Add #pathFor:ifNone:.
+	* kernel/Directory.st: Use it in #create:.
+
+2006-07-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/regex.st: Define with correct shape.
+
+2006-07-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Rectangle.st: Fix incorrect checkin.
+
 2006-07-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/LazyCollection.st: New.

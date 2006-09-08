@@ -15,6 +15,12 @@ o   Moved gdk_draw_ functions to GdkDrawable.
 o   Fixed bug in methods containing both -0.0 and 0.0 (positive and negative
     floating-point zero).
 
+o   Fixed bug in Directory class>>#create:, that could not create a
+    directory relative to the current directory.
+
+o   Fixed bug in File>>#touch, which did not work really.  There are also
+    methods to modify a file's atime and mtime.
+
 o   Fixed bug in SortedCollection.  After #removeAtIndex:, adds would leave
     the collection unordered.
 
@@ -33,6 +39,9 @@ o   New example, lazy callections.  When loaded, #select:, #reject: and
 	a := a select: [ :each | ... ].
 
     are much faster when this example is loaded.
+
+o   The backtraces now omit again the internal methods in the exception
+    handling system.
 
 o   Various speedups.
 

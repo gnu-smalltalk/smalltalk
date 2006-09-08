@@ -386,7 +386,7 @@ them as five separate comments.}:
 
 @example
 #! /bin/sh
-"exec" "gst" "-f" "$0" "$@" 
+"exec" "gst" "-f" "$0" "$@@" 
 
 @r{@i{@dots{} Smalltalk source code @dots{}}}
 @end example

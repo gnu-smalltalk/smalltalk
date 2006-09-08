@@ -31,8 +31,8 @@
 
 (defvar *gst-process* nil
   "Holds the GNU Smalltalk process")
-(defvar  gst-args '("-Vp")
-  "Arguments to pass to GNU Smalltalk")
+(defvar gst-program-name "@bindir@/gst -V"
+  "GNU Smalltalk command to run.  Do not use the -a, -f or -- options.")
 
 (defvar smalltalk-command-string nil
   "Non nil means that we're accumulating output from Smalltalk")
@@ -54,33 +54,38 @@
     keymap)
   "Keymap used in Smalltalk interactor mode.")
 
-(defun gst (args)
+(defun gst (command-line)
   "Invoke GNU Smalltalk"
   (interactive (list (if (null current-prefix-arg)
-			 gst-args
-		       (read-smalltalk-args))))
-  (setq gst-args args)
-  (if (not (eq major-mode 'gst-mode))
-      (switch-to-buffer-other-window
-       (apply 'make-gst "gst" gst-args))
-    ;; invoked from a Smalltalk interactor window, so stay there
-    (apply 'make-gst "gst" gst-args))
+			 gst-program-name
+		       (read-smalltalk-command))))
+  (setq gst-program-name command-line)
+  (funcall (if (not (eq major-mode 'gst-mode))
+	       #'switch-to-buffer-other-window
+	     ;; invoked from a Smalltalk interactor window, so stay
+	     ;; there
+	     #'identity)
+	   (apply 'make-gst "gst" (parse-smalltalk-command gst-program-name)))
   (setq *smalltalk-process* (get-buffer-process (current-buffer))))
 
-(defun read-smalltalk-args ()
-  "Reads the arguments to pass to Smalltalk as a string, returns a list."
-  (let (str args args-str result-args start end)
-    (setq args gst-args)
-    (setq args-str "")
-    (while args
-      (setq args-str (concat args-str " " (car args)))
-      (setq args (cdr args)))
-    (setq str (read-string "Invoke Smalltalk: " args-str))
-    (while (setq start (string-match "[^ ]" str))
+(defun read-smalltalk-command (&optional command-line)
+  "Reads the program name and arguments to pass to Smalltalk,
+providing COMMAND-LINE as a default (which itself defaults to
+`gst-program-name'), answering the string."
+  (read-string "Invoke Smalltalk: " (or command-line gst-program-name)))
+
+(defun parse-smalltalk-command (&optional str)
+  "Parse a list of command-line arguments from STR (default
+`gst-program-name'), adding --emacs-mode and answering the list."
+  (unless str (setq str gst-program-name))
+  (let (start end result-args)
+    (while (setq start (string-match "[^ \t]" str))
       (setq end (or (string-match " " str start) (length str)))
-      (setq result-args (cons (substring str start end) result-args))
+      (push (substring str start end) result-args)
       (setq str (substring str end)))
-    (reverse result-args)))
+    ;; This is an heuristic to insert option --emacs-mode into the gst
+    ;; argument list.  Don't use -f or -- or anything silly like that.
+    (nreverse (cons "--emacs-mode" result-args))))
 
 (defun make-gst (name &rest switches)
   (let ((buffer (get-buffer-create (concat "*" name "*")))
@@ -102,7 +107,6 @@
 				   (frame-width))
 			   "TERM=emacs"
 			   "EMACS=t"
-			   "@bindir@/gst"
 			   switches))
 	(setq name (process-name proc)))
       (goto-char (point-max))
@@ -143,12 +147,12 @@ text."
 					;  (save-excursion
 					;      (set-buffer (process-buffer process))
 					;      (goto-char (point-max))
-  ;;      (set-window-dot (get-buffer-window (current-buffer)) (point-max))
+  ;;      (set-window-point (get-buffer-window (current-buffer)) (point-max))
 					;      (sit-for 0))
   (let ((buf (current-buffer)))
     (set-buffer (process-buffer process))
     (goto-char (point-max)) (sit-for 0)
-    (set-window-dot (get-buffer-window (current-buffer)) (point-max))
+    (set-window-point (get-buffer-window (current-buffer)) (point-max))
     (set-buffer buf)))
 
 (defun smalltalk-accum-command (string)
@@ -475,7 +479,7 @@ running."
       )
     (kill-buffer buf)
     ;; this should probably be conditional
-    (save-window-excursion (gst gst-args))
+    (save-window-excursion (gst gst-program-name))
 ;;; why is this like this?
 ;;    (if mode
 ;;	(progn

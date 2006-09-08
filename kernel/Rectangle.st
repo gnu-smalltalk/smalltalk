@@ -284,7 +284,7 @@ intersects: aRectangle
 
     bottom := selfNorm bottom min: rectNorm bottom.
     top    := selfNorm top    max: rectNorm top.
-    ^bottom > top! !
+    ^bottom > top!
 
 = aRectangle
     "Answer whether the receiver is equal to aRectangle"
@@ -469,6 +469,8 @@ storeOn: aStream
 !Rectangle methodsFor: 'private'!
 
 normalize
+    | temp |
+
     "Normalize the receiver (make origin < corner)"
     self right > self left
         ifTrue: [ temp := self left. origin x: corner x. corner x: temp ].

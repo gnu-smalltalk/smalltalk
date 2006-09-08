@@ -30,7 +30,7 @@
 |
  ======================================================================"
 
-String variableByteSubclass: #Regex
+String variable: #character subclass: #Regex
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''

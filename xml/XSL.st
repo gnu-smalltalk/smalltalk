@@ -2814,10 +2814,11 @@ process: aNodeContext into: aProxy arguments: arguments
 !Rule class methodsFor: 'formatting'!
 
 formatText: aNode
-    | text tab a |
+    | text tab a nbsp |
     a := Attribute new name: 'CLASS' value: 'body'.
     text := aNode characterData.
-    tab := String new: 4 withAll: (Character value: 160). "nbsp"
+    nbsp := (Character codePoint: 160) asString.
+    tab := nbsp, nbsp, nbsp, nbsp.
     text := text copyReplaceAll: 9 asCharacter asString with: tab.
     text := text substrings: Character nl.
     ^text collect: [:t |

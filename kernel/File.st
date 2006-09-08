@@ -97,16 +97,24 @@ stripPathFrom: aString
     ^aString copyFrom: index + 1 to: aString size
 !
 
+pathFor: aString ifNone: aBlock
+    "Determine the path of the name of a file called `aString', and
+     answer the result.  With the exception of the root directory, the
+     final slash is stripped.  If there is no path, evaluate aBlock and
+     return the result."
+    | index |
+    aString isEmpty ifTrue: [ ^aBlock value ].
+    index := aString findLast: [ :each | each = Directory pathSeparator ].
+    index = 0 ifTrue: [ ^aBlock value ].
+    index = 1 ifTrue: [ ^Directory pathSeparatorString ].
+    ^aString copyFrom: 1 to: index - 1.
+!
+
 pathFor: aString
     "Determine the path of the name of a file called `aString', and
      answer the result.  With the exception of the root directory, the
      final slash is stripped."
-    | index |
-    aString isEmpty ifTrue: [ ^'' ].
-    index := aString findLast: [ :each | each = Directory pathSeparator ].
-    index = 0 ifTrue: [ ^'' ].
-    index = 1 ifTrue: [ ^Directory pathSeparatorString ].
-    ^aString copyFrom: 1 to: index - 1.
+    ^self pathFor: aString ifNone: [ '' ]
 !
 
 stripFileNameFor: aString
@@ -243,6 +251,18 @@ size
     ^vfsHandler size
 !
 
+lastAccessTime: aDateTime
+    "Update the last access time of the file corresponding to the receiver,
+     to be aDateTime."
+    vfsHandler lastAccessTime: aDateTime lastModifyTime: self lastModifyTime
+!
+
+lastAccessTime: accessDateTime lastModifyTime: modifyDateTime
+    "Update the timestamps of the file corresponding to the receiver, to be
+     accessDateTime and modifyDateTime."
+    vfsHandler lastAccessTime: accessDateTime lastModifyTime: modifyDateTime
+!
+
 lastAccessTime
     "Answer the last access time of the file identified by the receiver"
     ^vfsHandler lastAccessTime
@@ -262,6 +282,12 @@ creationTime
     (the `last change time' has to do with permissions, ownership and the
     like)."
     ^vfsHandler creationTime
+!
+
+lastModifyTime: aDateTime
+    "Update the last modification timestamp of the file corresponding to the
+     receiver, to be aDateTime."
+    vfsHandler lastAccessTime: self lastAccessTime lastModifyTime: aDateTime
 !
 
 lastModifyTime
@@ -373,8 +399,10 @@ contents
 !
 
 touch
-    "Update the timestamp of the file with the given path name."
-    (self openDescriptor: FileStream append) close
+    "Update the timestamp of the file corresponding to the receiver."
+    | now |
+    now := DateTime now.
+    self lastAccessTime: now lastModifyTime: now
 !
 
 open: mode
