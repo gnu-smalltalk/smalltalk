@@ -170,7 +170,7 @@ verbose: verboseFlag
 !
 
 record: recordFlag
-    "Set whether Smalltalk should record information aboutnested file-ins.
+    "Set whether Smalltalk should record information about nested file-ins.
      When recording is enabled, use #generateMakefileOnto: to automatically
      generate a valid makefile for the intervening file-ins."
     | oldRecord |

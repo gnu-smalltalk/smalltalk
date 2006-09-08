@@ -168,6 +168,9 @@ rewindDir: dirObject
 
 !RealFileHandler class methodsFor: 'C call-outs'!
 
+setTimeFor: file atime: atimeSeconds mtime: mtimeSeconds
+    <cCall: 'utime' returning: #int args: #(#string #long #long)>!
+
 working
     <cCall: 'getCurDirName' returning: #stringOut args: #()>! !
 
@@ -357,6 +360,12 @@ isAccessible
 
 !VFSHandler methodsFor: 'file operations'!
 
+lastAccessTime: accessDateTime lastModifyTime: modifyDateTime
+    "Set the receiver's timestamps to be accessDateTime and modifyDateTime.
+     If your file system does not support distinct access and modification
+     times, you should discard accessDateTime."
+    self subclassResponsibility!
+
 open: class mode: mode ifFail: aBlock
     "Open the receiver in the given mode (as answered by FileStream's
     class constant methods)"
@@ -518,6 +527,14 @@ isExecutable
 
 !RealFileHandler methodsFor: 'file operations'!
 
+lastAccessTime: accessDateTime lastModifyTime: modifyDateTime
+    "Set the receiver's timestamps to be accessDateTime and modifyDateTime."
+    self class
+	setTimeFor: self realFileName
+	atime: (self secondsFromDateTime: accessDateTime)
+	mtime: (self secondsFromDateTime: modifyDateTime).
+    File checkError!
+
 open: class mode: mode ifFail: aBlock
     "Open the receiver in the given mode (as answered by FileStream's
     class constant methods)"
@@ -541,9 +558,16 @@ renameTo: newFileName
 
 !RealFileHandler methodsFor: 'private'!
 
-getDateAndTime: time
+secondsFromDateTime: aDateTime
     "Private - Convert a time expressed in seconds from 1/1/2000 to
      an array of two Smalltalk Date and Time objects"
+    ^(aDateTime asSeconds - Epoch asSeconds)
+	- (aDateTime offset asSeconds - Epoch offset asSeconds)
+!
+
+getDateAndTime: time
+    "Private - Convert a time expressed in seconds from 1/1/2000 to
+     a Smalltalk DateTime object."
 
     ^(Epoch + (Duration seconds: time))
 	offset: (Duration seconds: Time timezoneBias)

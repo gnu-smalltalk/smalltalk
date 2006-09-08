@@ -200,6 +200,9 @@ static OOP classify_type_symbol (OOP symbolOOP,
 static int get_errno (void);
 
 /* Encapsulate binary incompatibilities between various C libraries.  */
+static int my_utime (const char *name,
+		     long new_atime,
+		     long new_mtime);
 static int my_stat (const char *name,
 		    gst_stat * out);
 static int my_lstat (const char *name,
@@ -303,6 +306,22 @@ get_errno (void)
   old = _gst_errno;
   _gst_errno = 0;
   return (old);
+}
+
+int
+my_utime (const char *name,
+	  long new_atime,
+	  long new_mtime)
+{
+  struct timeval times[2];
+  int result;
+  times[0].tv_sec = new_atime + 86400 * 10957;
+  times[1].tv_sec = new_mtime + 86400 * 10957;
+  times[0].tv_usec = times[1].tv_usec = 0;
+  result = utimes (name, times);
+  if (!result)
+    errno = 0;
+  return (result);
 }
 
 int
@@ -497,6 +516,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("strerror", strerror);
   _gst_define_cfunc ("stat", my_stat);
   _gst_define_cfunc ("lstat", my_lstat);
+  _gst_define_cfunc ("utime", my_utime);
 
   _gst_define_cfunc ("opendir", my_opendir);
   _gst_define_cfunc ("closedir", closedir);

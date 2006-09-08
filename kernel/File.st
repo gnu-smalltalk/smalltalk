@@ -251,6 +251,18 @@ size
     ^vfsHandler size
 !
 
+lastAccessTime: aDateTime
+    "Update the last access time of the file corresponding to the receiver,
+     to be aDateTime."
+    vfsHandler lastAccessTime: aDateTime lastModifyTime: self lastModifyTime
+!
+
+lastAccessTime: accessDateTime lastModifyTime: modifyDateTime
+    "Update the timestamps of the file corresponding to the receiver, to be
+     accessDateTime and modifyDateTime."
+    vfsHandler lastAccessTime: accessDateTime lastModifyTime: modifyDateTime
+!
+
 lastAccessTime
     "Answer the last access time of the file identified by the receiver"
     ^vfsHandler lastAccessTime
@@ -270,6 +282,12 @@ creationTime
     (the `last change time' has to do with permissions, ownership and the
     like)."
     ^vfsHandler creationTime
+!
+
+lastModifyTime: aDateTime
+    "Update the last modification timestamp of the file corresponding to the
+     receiver, to be aDateTime."
+    vfsHandler lastAccessTime: self lastAccessTime lastModifyTime: aDateTime
 !
 
 lastModifyTime
@@ -381,8 +399,10 @@ contents
 !
 
 touch
-    "Update the timestamp of the file with the given path name."
-    (self openDescriptor: FileStream append) close
+    "Update the timestamp of the file corresponding to the receiver."
+    | now |
+    now := DateTime now.
+    self lastAccessTime: now lastModifyTime: now
 !
 
 open: mode

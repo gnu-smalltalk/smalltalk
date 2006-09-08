@@ -1,5 +1,11 @@
 2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/File.st: Add methods to wrap utime and use them in #touch.
+	* kernel/VFS.st: Add methods to wrap utime.
+	* kernel/FileStream.st: Fix typo.
+
+2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ExcHandling.st: Reinstate skipping internal contexts.
 
 2006-09-08  Paolo Bonzini  <bonzini@gnu.org>

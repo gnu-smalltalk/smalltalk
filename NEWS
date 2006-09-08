@@ -16,6 +16,9 @@ o   Fixed bug in methods containing both -0.0 and 0.0 (positive and negative
 o   Fixed bug in Directory class>>#create:, that could not create a
     directory relative to the current directory.
 
+o   Fixed bug in File>>#touch, which did not work really.  There are also
+    methods to modify a file's atime and mtime.
+
 o   Fixed bug in SortedCollection.  After #removeAtIndex:, adds would leave
     the collection unordered.
 
