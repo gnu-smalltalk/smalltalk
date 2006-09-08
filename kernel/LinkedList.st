@@ -129,6 +129,24 @@ do: aBlock
      behavior might depend on the subclass of Link that is being used)."
 
     self isEmpty ifFalse: [ firstLink do: aBlock ]
+! 
+
+includes: anObject 
+    "Answer whether we include anObject"
+
+    "Blah, this is roughly the same implementation as in Collection."
+    self isEmpty ifTrue: [ ^false ].
+    firstLink do: [ :element | anObject = element ifTrue: [ ^true ] ].
+    ^false
+! 
+
+identityIncludes: anObject
+    "Answer whether we include the anObject object"
+
+    "Blah, this is roughly the same implementation as in Collection."
+    self isEmpty ifTrue: [ ^false ].
+    firstLink do: [ :element | anObject == element ifTrue: [ ^true ] ].
+    ^false
 ! !
 
 

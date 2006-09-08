@@ -1,5 +1,9 @@
 2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/LinkedList.st: Fix quadraticness of #includes:.
+
+2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/File.st: Add methods to wrap utime and use them in #touch.
 	* kernel/VFS.st: Add methods to wrap utime.
 	* kernel/FileStream.st: Fix typo.
