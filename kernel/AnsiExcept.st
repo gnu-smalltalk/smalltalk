@@ -1083,14 +1083,16 @@ validClassesString
     "Answer the list of classes whose instances would have been valid,
     formatted as a string."
     ^String streamContents: [ :str |
-	validClasses keysAndValuesDo: [ :idx :binding |
+	validClasses keysAndValuesDo: [ :idx :classOrBinding |
 	    | name class |
 	    idx > 1 ifTrue: [
 		idx = validClasses size
 		    ifFalse: [ str nextPutAll: ', ' ]
 		    ifTrue: [ str nextPutAll: ' or ' ]
 	    ].
-	    class := binding value.
+	    class := classOrBinding isClass
+		ifTrue: [ classOrBinding ]
+		ifFalse: [ classOrBinding value ].
 	    name := class nameIn: Namespace current.
 	    name first isVowel
 		ifTrue: [ str nextPutAll: 'an ' ]
