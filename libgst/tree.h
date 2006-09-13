@@ -328,7 +328,7 @@ extern tree_node _gst_make_byte_array_constant (YYLTYPE *location,
   ATTRIBUTE_HIDDEN;
 
 /* Create a const_node for an object, OVAL, which is typically a
-   ScaledDecimal.  */
+   Class or ScaledDecimal.  */
 extern tree_node _gst_make_oop_constant (YYLTYPE *location,
 				  	 OOP oval)
   ATTRIBUTE_HIDDEN;

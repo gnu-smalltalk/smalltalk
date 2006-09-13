@@ -49,8 +49,19 @@ In some sense, I am the best of both ReadStream and WriteStream.' !
 
 on: aCollection
     "Answer a new stream working on aCollection from its start. The
-    stream starts at the front of aCollection"
-    ^(super on: aCollection) beReadWrite; useWholeStream
+    stream starts at the front of aCollection."
+    ^(super on: aCollection) beReadWrite; limit: aCollection size
+!
+
+on: aCollection from: firstIndex to: lastIndex
+    "Answer an instance of the receiver streaming from
+     the firstIndex-th item of aCollection to the lastIndex-th"
+    firstIndex = 1 ifFalse: [
+        ^super on: aCollection from: firstIndex to: lastIndex ].
+    lastIndex > aCollection size ifTrue: [
+        ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: lastIndex ].
+
+    ^(super on: aCollection) beReadWrite; limit: lastIndex
 !
 
 with: aCollection
@@ -75,9 +86,9 @@ skip: anInteger
 
 !ReadWriteStream methodsFor: 'private'!
 
-useWholeStream
+limit: anInteger
     "Private - Makes sure that the contents message to this object
-     returns the whole contents, not just that which has been written
+     returns anInteger objects, not just what has been written
      so far."
     endPtr := collection size
 ! !

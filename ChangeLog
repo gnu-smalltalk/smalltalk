@@ -1,3 +1,16 @@
+2006-09-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Use #readStream to convert a WriteStream
+	into a ReadStream.
+	* kernel/PosStream.st: Add #readStream.
+	* kernel/RWStream.st: Replace #useWholeStream with new method
+	#limit:.  Define #on:from:to:.
+	* kernel/ReadStream.st: Optimize #on:from:to: with new method
+	#initCollection:limit:.  Remove useless #reverseContents.
+	* kernel/WriteStream.st: Add #readStream.
+
+	* kernel/File.st: Create new file in #touch if not existing.
+
 2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/LinkedList.st: Fix quadraticness of #includes:.

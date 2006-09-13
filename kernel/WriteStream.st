@@ -104,6 +104,11 @@ contents
     ^collection copyFrom: 1 to: ptr - 1
 !
 
+readStream
+    "Answer a ReadStream on the same contents as the receiver"
+    ^ReadStream on: collection from: 1 to: ptr - 1
+!
+
 reverseContents
     "Returns a collection of the same type that the stream accesses, up to 
     and including the final element, but in reverse order."

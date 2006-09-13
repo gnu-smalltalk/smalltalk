@@ -47,13 +47,8 @@
   Preprocessor statements are passed through without any change.  */
 
 
-#define SEND_TO_SUPER(sendSelector, sendArgs)			\
-  do {								\
-    OOP _methodClass;						\
-    _methodClass = GET_METHOD_CLASS (_gst_this_method);		\
-    _methodClass = SUPERCLASS (_methodClass);			\
-    _gst_send_message_internal(sendSelector, sendArgs, _gst_self, _methodClass); \
-  } while(0)
+#define SEND_TO_SUPER(sendSelector, sendArgs, methodClass)			\
+  _gst_send_message_internal(sendSelector, sendArgs, _gst_self, methodClass)
 
 #if REG_AVAILABILITY >= 2 && defined(LOCAL_REGS)
 #define RECEIVER_VARIABLE(index)            INSTANCE_VARIABLE (self_cache, index)
@@ -629,9 +624,12 @@ operation SEND sel n ( -- ) {
 }
 
 operation SEND_SUPER sel n ( -- ) {
+  OOP classOOP;
   PREPARE_STACK ();
+  classOOP = POP_OOP ();
+
   EXPORT_REGS ();
-  SEND_TO_SUPER (METHOD_LITERAL (sel), n);
+  SEND_TO_SUPER (METHOD_LITERAL (sel), n, SUPERCLASS (classOOP));
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -646,10 +644,13 @@ operation SEND_IMMEDIATE n ( -- ) {
 }
 
 operation SEND_SUPER_IMMEDIATE n ( -- ) {
+  OOP classOOP;
   const struct builtin_selector *bs = _gst_builtin_selectors[n];
   PREPARE_STACK ();
+  classOOP = POP_OOP ();
+
   EXPORT_REGS ();
-  SEND_TO_SUPER (bs->symbol, bs->numArgs);
+  SEND_TO_SUPER (bs->symbol, bs->numArgs, SUPERCLASS (classOOP));
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }

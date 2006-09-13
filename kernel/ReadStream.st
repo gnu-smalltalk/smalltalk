@@ -48,37 +48,26 @@ my objects, but you may not write to them.' !
 
 on: aCollection
     "Answer a new stream working on aCollection from its start."
-    ^(self basicNew initCollection: aCollection) beReadOnly
-! !
-
-
-
-!ReadStream methodsFor: 'accessing-reading'!
-
-size
-    "Answer the receiver's size."
-    ^collection size
+    ^(self basicNew initCollection: aCollection limit: aCollection size) beReadOnly
 !
 
-reverseContents
-    "May be faster than generic stream reverseContents."
-    | aCollection i numElts |
-    numElts := collection size.
-    aCollection := collection copyEmpty: numElts.
-    i := 0.
-    [ i := i + 1. 
-      i <= endPtr ] whileTrue:
-    	[ aCollection at: numElts - i + 1
-	    	      put: (collection at: i) ].
-    ^aCollection
+on: aCollection from: firstIndex to: lastIndex
+    "Answer an instance of the receiver streaming from
+     the firstIndex-th item of aCollection to the lastIndex-th"
+    firstIndex = 1 ifFalse: [
+	^super on: aCollection from: firstIndex to: lastIndex ].
+    lastIndex > aCollection size ifTrue: [
+        ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: lastIndex ].
+
+    ^(self basicNew initCollection: aCollection limit: lastIndex) beReadOnly
 ! !
 
 
 
 !ReadStream methodsFor: 'private methods'!
 
-initCollection: aCollection
+initCollection: aCollection limit: anInteger
     collection := aCollection.
     ptr := 1.
-    endPtr := collection size
+    endPtr := anInteger.
 ! !

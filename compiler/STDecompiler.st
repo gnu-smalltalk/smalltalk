@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2003, 2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -113,8 +113,7 @@ buildCFG
     "Build the control-flow graph of the object to be decompiled."
 
     | basicBlockBoundaries n |
-    basicBlockBoundaries := jumps keys collect: [ :each |
-	method nextByteCodeIndex: each ].
+    basicBlockBoundaries := jumps keys collect: [ :each | each + 2 ].
     basicBlockBoundaries addAll: (jumps values collect: [ :each |
 	each value ]).
     basicBlockBoundaries add: method size + 2.
@@ -151,7 +150,7 @@ buildCFG
     ].
 
     "Sort in depth-first order"
-    (cfg at: 1) computeDfnums: 1
+    (cfg at: 1) computeDfnums: 1.
 ! !
 
 !STDecompilationContext methodsFor: 'accessing'!
@@ -330,6 +329,9 @@ jumpTo: destination with: unused
     "Record the jump"
 
     jumps at: current put: #jump->destination!
+
+lineNo: n with: unused
+!
 
 superSend: aSymbol numArgs: anInteger with: unused
 !
@@ -618,28 +620,34 @@ disconnectSuccessorsAndMerge: newSucc
     self merge: newSucc
 !
 
-merge: newSucc
+merge: succSet
      "Try to merge the receiver with its predecessor
      (if there is only one after the disconnection) and
-     possibly with the new successors, newSucc (if there
+     possibly with the new successors, succSet (if there
      is only one and it has no other predecessors than the
      receiver)."
 
-    | newSelf |
+    | newSelf newSucc theSucc |
+
+    newSucc := succSet.
+    newSelf := self.
 
     self succ: newSucc.
-    newSelf := pred size = 1
-	ifFalse: [ newSelf := self ]
+    newSelf pred size = 1
 	ifTrue: [
-	    (newSelf := pred at: 1) statements
-	        addAllLast: self statements.
+	    newSelf := pred at: 1.
+	    newSelf statements addAllLast: self statements.
 	    self disconnect.
-	    newSelf succ: newSucc.
-	].
+	    newSelf succ: newSucc ].
 
-    newSucc size = 1 ifFalse: [ ^self ].
-    (newSucc at: 1) value pred size = 1
-	ifTrue: [ newSelf merge: (newSucc at: 1) value succ ]!
+    [
+        newSucc size = 1 ifFalse: [ ^self ].
+	theSucc := (newSucc at: 1) value.
+        theSucc pred size = 1 ifFalse: [ ^self ].
+
+        newSelf statements addAllLast: theSucc statements.
+	newSucc := theSucc succ.
+	theSucc disconnect ] repeat!
 
 simplify
     "Recognize simple control structures in the receiver and
@@ -737,20 +745,45 @@ simplifyWhile: body whileTrue: whileTrue
 	        ifFalse: [ #whileFalse: ])))
 !
 
-simplifyToByDo: body
+simplifyTimesRepeat: body newSucc: newSucc
+    "Simplify a #timesRepeat: control structure."
+
+    | to block |
+
+    "'resolving timesRepeat' displayNl."
+
+    newSucc statements removeFirst; removeFirst.
+    self statements removeLast; removeLast.
+    body statements removeLast; removeLast.
+    (self pred at: 2) statements removeLast; removeLast.
+
+    to := self statements removeLast.
+    block := self blkNode: body statements.
+
+    self statements addLast: (self
+	msgNode: { block }
+	receiver: to
+	selector: #timesRepeat:)
+!
+
+simplifyToByDo: body newSucc: newSucc
     "Simplify a #to:do: or #to:by:do: control structure."
 
     | variable from to by block |
 
+    (self statements at: self statements size - 2) isAssignment
+	ifFalse: [ ^self simplifyTimesRepeat: body newSucc: newSucc ].
+
     "'resolving to/by/do' displayNl."
 
+    newSucc statements removeFirst; removeFirst.
     self statements removeLast.
     to := self statements removeLast.
     from := self statements last value.
     variable := self statements removeLast variable.
     by := body statements removeLast value arguments at: 1.
-
     body statements removeLast; removeLast; removeLast.
+
     (self pred at: 2) statements removeLast; removeLast; removeLast; removeLast.
     block := self blkNode: body statements arguments: { variable }.
 
@@ -778,11 +811,14 @@ simplifyLoop
     middle := succ detect: [ :each | each ~= bottom ].
 
     middle value statements size = 0
-	ifFalse: [ self simplifyToByDo: bottom value ]
-	ifTrue: [ self simplifyWhile: bottom value
-			whileTrue: self fallThroughIfFalse ].
+	ifFalse: [
+	    self simplifyToByDo: bottom value newSucc: middle value.
+	    self disconnectSuccessorsAndMerge: { middle } ]
+	ifTrue: [
+	    self simplifyWhile: bottom value
+		whileTrue: self fallThroughIfFalse.
+	    self disconnectSuccessorsAndMerge: middle value succ ].
 
-    self disconnectSuccessorsAndMerge: middle value succ.
     ^true
 !
 
@@ -1043,8 +1079,10 @@ returnFromContext: unused
 	ifFalse: [ self returnFromMethod: unused ]!
 
 returnFromMethod: unused
-    stack addLast: (RBReturnNode value: stack removeLast).
-    self endStatement!
+    | retVal |
+    retVal := stack removeLast.
+    stack size timesRepeat: [ statements addAllLast: stack removeFirst ].
+    statements addLast: (RBReturnNode value: retVal)!
 
 popJumpIfFalseTo: destination with: unused
 !
@@ -1055,7 +1093,12 @@ popJumpIfTrueTo: destination with: unused
 jumpTo: destination with: unused
 !
 
+lineNo: n with: unused
+!
+
 superSend: aSymbol numArgs: anInteger with: unused
+    "Pop the class at which we start the search."
+    stack removeLast.
     stack at: stack size - anInteger put: (self varNode: 'super').
     ^self send: aSymbol numArgs: anInteger with: unused!
 

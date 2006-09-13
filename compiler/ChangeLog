@@ -1,3 +1,13 @@
+2006-09-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/STCompiler.st: Adapt for new super send.
+	* compiler/StartCompiler.st: Support streams in #compile:
+	* compiler/STDecompiler: Don't use dead method nextByteCodeIndex:,
+	add new hook #lineNo:with:, rewrite #merge:, support #timesRepeat:
+	decompilation, fix case where return bytecodes leave the previous
+	sdtatement on the stack.  Last but not least, adapt for new
+	super send. 
+
 2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/StartCompiler.st: define #fileIn in Stream.

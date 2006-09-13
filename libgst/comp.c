@@ -1460,6 +1460,9 @@ compile_send (tree_node expr,
       EXIT_COMPILATION ();
     }
 
+  if (super)
+    compile_constant (_gst_make_oop_constant (&expr->location, _gst_this_class));
+
   if (!bs)
     {
       int selectorIndex = _gst_add_forced_object (selector);

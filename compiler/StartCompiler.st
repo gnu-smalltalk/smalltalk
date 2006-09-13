@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -182,24 +182,31 @@ evalString: aString to: anObject ifError: aBlock
 
 compileString: aString
     | codeWithHeader |
-    codeWithHeader := '!%1 methodsFor: nil!%2! !'
-	bindWith: self printString
-	with: aString.
+    codeWithHeader := WriteStream on: (String new: aString size + 50).
+    codeWithHeader
+	nextPut: $!;
+	print: self;
+	nextPutAll: ' methodsFor: nil!';
+	nextPutAll: aString;
+	nextPutAll: '! !'.
 
-    ^STInST.STFileInParser parseSmalltalk: codeWithHeader
+    ^STInST.STFileInParser parseSmalltalkStream: codeWithHeader readStream
 !
 
 compileString: aString ifError: aBlock
     | codeWithHeader |
-    codeWithHeader := '!%1 methodsFor: nil!
-%2! !'
-	bindWith: self name
-	with: aString.
+    codeWithHeader := WriteStream on: (String new: aString size + 50).
+    codeWithHeader
+	nextPut: $!;
+	print: self;
+	nextPutAll: ' methodsFor: nil!';
+	nextPutAll: aString;
+	nextPutAll: '! !'.
 
     ^STInST.STFileInParser
-	parseSmalltalk: codeWithHeader
+	parseSmalltalkStream: codeWithHeader readStream
 	onError: [ :f :l :m |
-	    ^aBlock value: 'a Smalltalk String' value: l - 1 value: m.
+	    ^aBlock value: 'a Smalltalk ', aString class printString value: l - 1 value: m.
 	]
 !
 

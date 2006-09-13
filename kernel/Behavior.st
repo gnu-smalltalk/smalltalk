@@ -218,22 +218,24 @@ removeSelector: selector ifAbsent: aBlock
 compile: code
     "Compile method source.  If there are parsing errors, answer nil.
      Else, return a CompiledMethod result of compilation"
-    (code isKindOf: PositionableStream)
-    	ifTrue: [ ^self compileString: code contents ].
-    (code isMemberOf: String)
-    	ifFalse: [ ^self compileString: code asString ].
-    ^self compileString: code
+    (code isKindOf: WriteStream)
+    	ifTrue: [ ^self compileString: code readStream ].
+    ((code isKindOf: Stream) or: [ code class == String ])
+    	ifTrue: [ ^self compileString: code ].
+
+    ^self compileString: code asString
 !
 
 compile: code ifError: block
     "Compile method source.  If there are parsing errors, invoke
      exception block, 'block' passing file name, line number and error.
      description. Return a CompiledMethod result of compilation"
-    (code isKindOf: PositionableStream)
-	ifTrue: [ ^self compileString: code contents ifError: block ].
-    (code isMemberOf: String)
-	ifFalse: [ ^self compileString: code asString ifError: block ].
-    ^self compileString: code ifError: block.
+    (code isKindOf: WriteStream)
+    	ifTrue: [ ^self compileString: code readStream ].
+    ((code isKindOf: Stream) or: [ code class == String ])
+    	ifTrue: [ ^self compileString: code ].
+
+    ^self compileString: code asString
 !
 
 compile: code notifying: requestor
@@ -421,7 +423,9 @@ evalString: aString to: anObject ifError: aBlock
 evaluate: code
     "Evaluate Smalltalk expression in 'code' and return result."
 
-    (code isKindOf: PositionableStream)
+    (code isKindOf: WriteStream)
+    	ifTrue: [ ^self compileString: code readStream ].
+    (code isKindOf: Stream)
 	ifTrue: [ ^self evalString: code contents to: nil ].
     (code isMemberOf: String)
 	ifFalse: [ ^self evalString: code asString to: nil ].
@@ -432,7 +436,9 @@ evaluate: code
 evaluate: code ifError: block
     "Evaluate 'code'.  If a parsing error is detected, invoke 'block'"
 
-    (code isKindOf: PositionableStream)
+    (code isKindOf: WriteStream)
+    	ifTrue: [ ^self compileString: code readStream ].
+    (code isKindOf: Stream)
 	ifTrue: [ ^self evalString: code contentsto: nil ifError: block ].
     (code isMemberOf: String)
 	ifFalse: [ ^self evalString: code asString to: nil ifError: block ].
@@ -444,7 +450,9 @@ evaluate: code to: anObject ifError: block
     method is used to support Inspector expression evaluation.  If a parsing error 
     is encountered, invoke error block, 'block'" 
 
-   (code isKindOf: PositionableStream)
+    (code isKindOf: WriteStream)
+    	ifTrue: [ ^self compileString: code readStream ].
+   (code isKindOf: Stream)
 	ifTrue: [ ^self evalString: code contents to: anObject ifError: block ].
     (code isMemberOf: String)
 	ifFalse: [ ^self evalString: code asString to: anObject ifError: block ].
@@ -454,7 +462,9 @@ evaluate: code to: anObject ifError: block
 evaluate: code to: anObject 
     "Evaluate Smalltalk expression as part of anObject's method definition"
 
-    (code isKindOf: PositionableStream)
+    (code isKindOf: WriteStream)
+    	ifTrue: [ ^self compileString: code readStream ].
+    (code isKindOf: Stream)
 	ifTrue: [ ^self evalString: code contents to: anObject ].
     (code isMemberOf: String)
 	ifFalse: [ ^self evalString: code asString to: anObject ].

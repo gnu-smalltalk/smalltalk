@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2003 Free Software Foundation, Inc.
+| Copyright 2003, 2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -748,6 +748,10 @@ currentEntryBasicBlock
 
 currentEntryBasicBlock: anObject
     currentEntryBasicBlock := anObject
+!
+
+javaClass
+    ^javaMethod javaClass
 !
 
 javaMethod
@@ -2145,6 +2149,10 @@ initialAStore: local
      local holding the exception."
 !
 
+javaClass
+    ^self methodTranslator javaClass
+!
+
 javaMethod
     ^self methodTranslator javaMethod
 !
@@ -2454,6 +2462,7 @@ storeTemporary: index outer: scopes
 
 superSend: aSymbol numArgs: numArgs 
     | specialBytecode literalIndex |
+    self pushLiteral: self javaClass asSmalltalkClass.
     specialBytecode := SpecialSelectorMap at: aSymbol ifAbsent: [nil].
     specialBytecode isNil 
 	ifTrue: 

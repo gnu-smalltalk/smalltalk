@@ -1,3 +1,17 @@
+2006-09-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c (compile_send): Compile receiver class for sends
+	to super.
+	* libgst/opt.c: Add receiver class to balance for send to super.
+	Replace "+= -x" with "-= x" throughout.
+	* libgst/tree.h: Adjust _gst_make_oop_constant comment.
+	* libgst/vm.def (SEND_SUPER, SEND_SUPER_IMMEDIATE): Pop class OOP.
+	(SEND_TO_SUPER): Get methodClass argument.
+
+2006-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Wrap utime.
+
 2006-09-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c, libgst/dict.inl, libgst/gstpriv.h,

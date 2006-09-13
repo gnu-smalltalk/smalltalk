@@ -118,11 +118,16 @@ contents
     ^collection copyFrom: 1 to: endPtr
 !
 
+readStream
+    "Answer a ReadStream on the same contents as the receiver"
+    ^ReadStream on: collection from: 1 to: endPtr
+!
+
 reverseContents
     "Returns a collection of the same type that the stream accesses, up to 
     and including the final element, but in reverse order."
     | newCollection |
-    newCollection := self species new: endPtr.
+    newCollection := collection copyEmpty: endPtr.
     1 to: endPtr do:
 	[ :i | newCollection at: i put: (collection at: endPtr - i + 1) ].
     ^newCollection

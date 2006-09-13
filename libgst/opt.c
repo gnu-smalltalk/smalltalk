@@ -909,15 +909,19 @@ _gst_compute_stack_positions (gst_uchar * bp,
             MAKE_DIRTY_BLOCK { }
 
             SEND {
-	      balance += -num_args;
+	      balance -= super + num_args;
 	    }
 
-	    SEND_ARITH, SEND_IMMEDIATE {
-	      balance += -_gst_builtin_selectors[n]->numArgs;
+	    SEND_ARITH {
+	      balance -= _gst_builtin_selectors[n]->numArgs;
+	    }
+
+	    SEND_IMMEDIATE {
+	      balance -= super + _gst_builtin_selectors[n]->numArgs;
 	    }
 
             SEND_SPECIAL {
-	      balance += -_gst_builtin_selectors[n + 16]->numArgs;
+	      balance -= _gst_builtin_selectors[n + 16]->numArgs;
 	    }
 
             INVALID {
@@ -1357,7 +1361,7 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
             MAKE_DIRTY_BLOCK { }
 
             SEND {
-	      balance += -num_args;
+	      balance -= super + num_args;
 
 	      /* Sends touch the new stack top, so they require an extra slot.  */
 	      if (curr_sp + balance < 1)
@@ -1368,7 +1372,7 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 	      if (!_gst_builtin_selectors[n])
 		return ("invalid immediate send");
 
-	      balance += -_gst_builtin_selectors[n]->numArgs;
+	      balance -= _gst_builtin_selectors[n]->numArgs;
 
 	      /* Sends touch the new stack top, so they require an extra slot.  */
 	      if (curr_sp + balance < 1)
@@ -1379,7 +1383,7 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 	      if (!_gst_builtin_selectors[n + 16])
 		return ("invalid immediate send");
 
-	      balance += -_gst_builtin_selectors[n + 16]->numArgs;
+	      balance -= _gst_builtin_selectors[n + 16]->numArgs;
 
 	      /* Sends touch the new stack top, so they require an extra slot.  */
 	      if (curr_sp + balance < 1)
@@ -1390,7 +1394,7 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 	      if (!_gst_builtin_selectors[n])
 		return ("invalid immediate send");
 
-	      balance += -_gst_builtin_selectors[n]->numArgs;
+	      balance -= super + _gst_builtin_selectors[n]->numArgs;
 
 	      /* Sends touch the new stack top, so they require an extra slot.  */
 	      if (curr_sp + balance < 1)
@@ -1614,7 +1618,7 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 
 	    SEND {
 	      last_used_literal = NULL;
-	      sp -= num_args;
+	      sp -= super + num_args;
 	      if (super && sp[-1] != FROM_INT (SELF))
 		return ("Invalid send to super");
 
@@ -1726,7 +1730,10 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 		}
 	      else
 	        {
-	          sp -= _gst_builtin_selectors[n]->numArgs;
+	          sp -= super + _gst_builtin_selectors[n]->numArgs;
+	          if (super && sp[-1] != FROM_INT (SELF))
+		    return ("Invalid send to super");
+
 	          sp[-1] = FROM_INT (VARYING);
 		}
 	    }

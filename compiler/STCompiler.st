@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2003, 2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -55,7 +55,7 @@ compile: methodDefNode for: aBehavior classified: aString parser: aParser
 ! !
 
 STFakeCompiler subclass: #STCompiler
-       instanceVariableNames: 'node symTable parser bytecodes depth maxDepth isInsideBlock dupReceiver'
+       instanceVariableNames: 'node destClass symTable parser bytecodes depth maxDepth isInsideBlock dupReceiver'
        classVariableNames: 'OneNode TrueNode FalseNode NilNode SuperVariable SelfVariable ThisContextVariable DoitToken'
        poolDictionaries: ''
        category: 'System-Compiler'
@@ -151,6 +151,7 @@ compile: methodNode asMethodOf: aBehavior classified: aString parser: aParser
 !STCompiler methodsFor: 'private'!
 
 class: aBehavior parser: aParser
+    destClass := aBehavior.
     symTable := STSymbolTable new.
     parser := aParser.
     bytecodes := WriteStream on: (ByteArray new: 240).
@@ -705,6 +706,7 @@ compileSendToSuper: aNode
     | litIndex args |
     self depthIncr; compileByte: PushSelf.
     aNode arguments do: [ :each | each acceptVisitor: self ].
+    self pushLiteral: destClass.
     VMSpecialSelectors at: aNode selector ifPresent: [ :idx |
 	self compileByte: SendSuperImmediate arg: idx.
 	^aNode

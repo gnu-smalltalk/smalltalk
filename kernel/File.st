@@ -401,8 +401,12 @@ contents
 touch
     "Update the timestamp of the file corresponding to the receiver."
     | now |
-    now := DateTime now.
-    self lastAccessTime: now lastModifyTime: now
+    self exists
+	ifTrue: [
+	    now := DateTime now.
+	    self lastAccessTime: now lastModifyTime: now ]
+	ifFalse: [
+	    (self open: FileStream append) close ]
 !
 
 open: mode
@@ -425,11 +429,10 @@ open: mode ifFail: aBlock
     ^vfsHandler open: mode ifFail: aBlock
 !
 
-openDescriptor: mode
+openDescriptor: mode ifFail: aBlock
     "Open the receiver in the given mode (as answered by FileStream's
     class constant methods). Upon failure, evaluate aBlock."
-    ^vfsHandler openDescriptor: mode ifFail: [
- 	    SystemExceptions.FileError signal: 'could not open ', self name ]
+    ^vfsHandler openDescriptor: mode ifFail: aBlock
 !
 
 readStream
@@ -448,7 +451,7 @@ remove
 !
 
 renameTo: newName
-    "Remove the file identified by the receiver"
+    "Rename the file identified by the receiver to newName"
     vfsHandler renameTo: newName
 ! !
 
