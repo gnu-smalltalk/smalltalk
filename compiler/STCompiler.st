@@ -706,7 +706,7 @@ compileSendToSuper: aNode
     | litIndex args |
     self depthIncr; compileByte: PushSelf.
     aNode arguments do: [ :each | each acceptVisitor: self ].
-    self pushLiteral: destClass.
+    self pushLiteral: destClass superclass.
     VMSpecialSelectors at: aNode selector ifPresent: [ :idx |
 	self compileByte: SendSuperImmediate arg: idx.
 	^aNode

@@ -30,6 +30,7 @@
  ***********************************************************************/
 
 #include "gstpriv.h"
+#include "match.h"
 
 #define BYTECODE_CHUNK_SIZE  64
 

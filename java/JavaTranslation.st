@@ -2462,7 +2462,7 @@ storeTemporary: index outer: scopes
 
 superSend: aSymbol numArgs: numArgs 
     | specialBytecode literalIndex |
-    self pushLiteral: self javaClass asSmalltalkClass.
+    self pushLiteral: self javaClass asSmalltalkClass superclass.
     specialBytecode := SpecialSelectorMap at: aSymbol ifAbsent: [nil].
     specialBytecode isNil 
 	ifTrue: 

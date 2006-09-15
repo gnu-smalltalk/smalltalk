@@ -29,6 +29,7 @@
  ***********************************************************************/
 
 #include "gstpriv.h"
+#include "match.h"
 
 #ifdef ENABLE_JIT_TRANSLATION
 #include "lightning.h"

@@ -1,3 +1,7 @@
+2006-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/STCompiler.st: Rethink previous change.
+
 2006-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/STCompiler.st: Adapt for new super send.

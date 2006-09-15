@@ -44,20 +44,26 @@ Object subclass: #CollectionFilter
        poolDictionaries: ''
        category: 'Examples-Collections'!
 
-CollectionFilter subclass: #SelectCollectionFilter
-       instanceVariableNames: 'selectBlock'
+CollectionFilter subclass: #BlockCollectionFilter
+       instanceVariableNames: 'block'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Examples-Collections'!
 
-CollectionFilter subclass: #RejectCollectionFilter
-       instanceVariableNames: 'rejectBlock'
+BlockCollectionFilter subclass: #SelectFilter
+       instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Examples-Collections'!
 
-CollectionFilter subclass: #CollectCollectionFilter
-       instanceVariableNames: 'collectBlock'
+BlockCollectionFilter subclass: #RejectFilter
+       instanceVariableNames: ''
+       classVariableNames: ''
+       poolDictionaries: ''
+       category: 'Examples-Collections'!
+
+BlockCollectionFilter subclass: #CollectFilter
+       instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Examples-Collections'!
@@ -87,21 +93,20 @@ CollectionProxy subclass: #DictionaryProxy
 on: anObject
     ^self new initialize: anObject!
 	
-on: anObject select: aBlock
-    ^(SelectCollectionFilter on: anObject) selectBlock: aBlock!
-
-on: anObject reject: aBlock
-    ^(RejectCollectionFilter on: anObject) rejectBlock: aBlock!
-
-on: anObject collect: aBlock
-    ^(CollectCollectionFilter on: anObject) collectBlock: aBlock! !
-
 !CollectionFilter methodsFor: 'applying'!
 
 map: anObject ifRemovedReturn: removedMarker
+    | newObject |
+    newObject := prev isNil
+	ifTrue: [ anObject ]
+	ifFalse: [ prev map: anObject ifRemovedReturn: removedMarker ].
+    newObject == removedMarker ifTrue: [ ^removedMarker ].
+    ^self value: newObject ifRemovedReturn: removedMarker!
+
+value: anObject ifRemovedReturn: removedMarker
     self subclassResponsibility!
 
-size
+sizeFrom: aCollection
     ^nil! !
 
 
@@ -117,56 +122,46 @@ initialize: prevFilter
     prev := prevFilter! !
 
 
-!SelectCollectionFilter methodsFor: 'applying'!
+!BlockCollectionFilter class methodsFor: 'instance creation'!
 
-map: anObject ifRemovedReturn: removedMarker
-    | newObject |
-    newObject := prev isNil
-	ifTrue: [ anObject ]
-	ifFalse: [ prev map: anObject ifRemovedReturn: removedMarker ].
-    newObject == removedMarker ifTrue: [ ^removedMarker ].
-    (selectBlock value: anObject) ifFalse: [ ^removedMarker ].
-    ^anObject!
+on: anObject value: aBlock
+    ^(self on: anObject) block: aBlock!
 
-selectBlock: aBlock
-    selectBlock := aBlock! !
+!BlockCollectionFilter methodsFor: 'accessing'!
 
+value: anObject ifRemovedReturn: removedMarker
+    ^block value: anObject!
 
-!RejectCollectionFilter methodsFor: 'applying'!
+!BlockCollectionFilter methodsFor: 'initialization'!
 
-map: anObject ifRemovedReturn: removedMarker
-    | newObject |
-    newObject := prev isNil
-	ifTrue: [ anObject ]
-	ifFalse: [ prev map: anObject ifRemovedReturn: removedMarker ].
-    newObject == removedMarker ifTrue: [ ^removedMarker ].
-    (rejectBlock value: anObject) ifTrue: [ ^removedMarker ].
-    ^anObject!
+block: aBlock
+    block := aBlock! !
 
-rejectBlock: aBlock
-    rejectBlock := aBlock! !
+!SelectFilter methodsFor: 'applying'!
+
+value: anObject ifRemovedReturn: removedMarker
+    ^(super value: anObject ifRemovedReturn: removedMarker)
+	ifFalse: [ removedMarker ]
+	ifTrue: [ anObject ]! !
 
 
-!CollectCollectionFilter methodsFor: 'applying'!
+!RejectFilter methodsFor: 'applying'!
 
-map: anObject ifRemovedReturn: removedMarker
-    | newObject |
-    newObject := prev isNil
-	ifTrue: [ anObject ]
-	ifFalse: [ prev map: anObject ifRemovedReturn: removedMarker ].
-    newObject == removedMarker ifTrue: [ ^removedMarker ].
-    ^collectBlock value: anObject!
+value: anObject ifRemovedReturn: removedMarker
+    ^(super value: anObject ifRemovedReturn: removedMarker)
+	ifTrue: [ removedMarker ]
+	ifFalse: [ anObject ]! !
 
-size
+
+!CollectFilter methodsFor: 'applying'!
+
+sizeFrom: aCollection
     ^prev isNil
-	ifTrue: [ collection size ]
-	ifFalse: [ prev size ]!
-
-collectBlock: aBlock
-    collectBlock := aBlock! !
+	ifTrue: [ aCollection size ]
+	ifFalse: [ prev sizeFrom: aCollection ]! !
 
 
-!CollectCollectionFilter methodsFor: 'querying classes'!
+!CollectFilter methodsFor: 'querying classes'!
 
 copyEmpty: collection
     ^collection copyEmptyForCollect!
@@ -243,7 +238,7 @@ asCollection
     ^self become: builtCollection!
 
 size
-    ^filter size ifNil: [ self asCollection size ]!
+    ^(filter sizeFrom: collection) ifNil: [ self asCollection size ]!
 
 
 !CollectionProxy methodsFor: 'iterating'!
@@ -323,15 +318,15 @@ inject: anObject into: aBlock
 
 select: aBlock
     ^self class
-	on: collection filter: (CollectionFilter on: filter select: aBlock)!
+	on: collection filter: (SelectFilter on: filter value: aBlock)!
 
 reject: aBlock
     ^self class
-	on: collection filter: (CollectionFilter on: filter reject: aBlock)!
+	on: collection filter: (RejectFilter on: filter value: aBlock)!
 
 collect: aBlock
     ^self class
-	on: collection filter: (CollectionFilter on: filter collect: aBlock)! !
+	on: collection filter: (CollectFilter on: filter value: aBlock)! !
 
 
 !CollectionProxy methodsFor: 'initializing'!
@@ -371,43 +366,43 @@ asCollection
 
 select: aBlock
     ^VariableSizeCollectionProxy
-	on: self filter: (CollectionFilter on: nil select: aBlock)!
+	on: self filter: (SelectFilter on: nil value: aBlock)!
 
 reject: aBlock
     ^VariableSizeCollectionProxy
-	on: self filter: (CollectionFilter on: nil reject: aBlock)!
+	on: self filter: (RejectFilter on: nil value: aBlock)!
 
 collect: aBlock
     ^VariableSizeCollectionProxy
-	on: self filter: (CollectionFilter on: nil collect: aBlock)! !
+	on: self filter: (CollectFilter on: nil value: aBlock)! !
 
 
 !ArrayedCollection methodsFor: 'iterating'!
 
 select: aBlock
     ^ArrayedCollectionProxy
-	on: self filter: (CollectionFilter on: nil select: aBlock)!
+	on: self filter: (SelectFilter on: nil value: aBlock)!
 
 reject: aBlock
     ^ArrayedCollectionProxy
-	on: self filter: (CollectionFilter on: nil reject: aBlock)!
+	on: self filter: (RejectFilter on: nil value: aBlock)!
 
 collect: aBlock
     ^ArrayedCollectionProxy
-	on: self filter: (CollectionFilter on: nil collect: aBlock)! !
+	on: self filter: (CollectFilter on: nil value: aBlock)! !
 
 
 !Dictionary methodsFor: 'iterating'!
 
 select: aBlock
     ^DictionaryProxy
-	on: self filter: (CollectionFilter on: nil select: aBlock)!
+	on: self filter: (SelectFilter on: nil value: aBlock)!
 
 reject: aBlock
     ^DictionaryProxy
-	on: self filter: (CollectionFilter on: nil reject: aBlock)!
+	on: self filter: (RejectFilter on: nil value: aBlock)!
 
 collect: aBlock
     ^DictionaryProxy
-	on: self filter: (CollectionFilter on: nil collect: aBlock)! !
+	on: self filter: (CollectFilter on: nil value: aBlock)! !
 

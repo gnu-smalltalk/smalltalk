@@ -30,6 +30,7 @@
 
 
 #include "gstpriv.h"
+#include "match.h"
 
 /* Define this to have verbose messages from the JIT compiler's
    basic-block split phase.  */
@@ -1092,7 +1093,7 @@ typedef struct partially_constructed_array {
   /* Todo: recurse into BlockClosures! */ \
   last_used_literal = literals[n]; \
   if ((n) >= num_literals) \
-    return (_gst_debug(), "literal out of range");
+    return ("literal out of range");
 
 #define CHECK_TEMP(n) \
   last_used_literal = NULL; \
@@ -1115,10 +1116,10 @@ typedef struct partially_constructed_array {
     return ("Invalid global variable access");
 
 #define LIT_VARIABLE_CLASS(n) \
-  /* Special case Array because it is used to compile {...} */ \
-  (ASSOCIATION_VALUE (literals[(n)]) == _gst_array_class \
-    ? OOP_CLASS (_gst_array_class) \
-    : FROM_INT (VARYING))
+  /* Special case classes because of super and {...} */ \
+  (IS_A_CLASS (ASSOCIATION_VALUE (literals[(n)])) \
+   ? OOP_CLASS (ASSOCIATION_VALUE (literals[(n)])) \
+   : FROM_INT (VARYING))
 
 #define LITERAL_CLASS(n) \
   OOP_INT_CLASS (literals[(n)])
@@ -1617,6 +1618,13 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 	    }
 
 	    SEND {
+	      if (super
+		  && (!last_used_literal
+		      || (!IS_A_CLASS (last_used_literal)
+		          && !IS_A_METACLASS (last_used_literal))
+		      || !is_a_kind_of (methodClass, last_used_literal)))
+		return ("Invalid send to super");
+
 	      last_used_literal = NULL;
 	      sp -= super + num_args;
 	      if (super && sp[-1] != FROM_INT (SELF))
@@ -1730,6 +1738,14 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 		}
 	      else
 	        {
+		  if (super
+		      && (!last_used_literal
+			  || (!IS_A_CLASS (last_used_literal)
+			      && !IS_A_METACLASS (last_used_literal))
+			  || !is_a_kind_of (methodClass, last_used_literal)))
+		    return (_gst_debug (), "Invalid send to super");
+
+		  last_used_literal = NULL;
 	          sp -= super + _gst_builtin_selectors[n]->numArgs;
 	          if (super && sp[-1] != FROM_INT (SELF))
 		    return ("Invalid send to super");

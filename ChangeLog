@@ -1,3 +1,7 @@
+2006-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/LazyCollect.st: Refactor.
+
 2006-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Use #readStream to convert a WriteStream

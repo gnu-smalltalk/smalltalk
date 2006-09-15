@@ -1,7 +1,22 @@
+2006-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/byte.c: Include match.h.
+	* libgst/opt.c: Include match.h.
+	* libgst/xlat.c: Include match.h.
+	* libgst/gstpriv.h: Don't.
+
+	* libgst/cint.c: Avoid stupid warning.
+
+	* libgst/dict.inl: Make IS_A_CLASS/IS_A_METACLASS more robust.
+	* libgst/opt.c: Detect invalid sends to super.
+
+	* libgst/comp.c: Push class, not superclass for send to super.
+	* libgst/vm.def: Adapt.
+
 2006-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* libgst/comp.c (compile_send): Compile receiver class for sends
-	to super.
+	* libgst/comp.c (compile_send): Compile receiver superclass for
+	sends to super.
 	* libgst/opt.c: Add receiver class to balance for send to super.
 	Replace "+= -x" with "-= x" throughout.
 	* libgst/tree.h: Adjust _gst_make_oop_constant comment.

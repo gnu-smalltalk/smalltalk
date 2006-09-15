@@ -351,7 +351,9 @@ static inline int64_t to_c_int_64 (OOP oop);
 /* Answer whether OOP is a class, that is, the instance of the
    metaclass.  */
 #define IS_A_CLASS(oop) \
-  (IS_OOP(oop) && OOP_CLASS(OOP_CLASS(oop)) == _gst_metaclass_class)
+  (IS_OOP(oop) && \
+   IS_OOP(OOP_CLASS(oop)) && \
+   OOP_CLASS(OOP_CLASS(oop)) == _gst_metaclass_class)
 
 /* Answer the sole instance of the metaclass, METACLASSOOP.  */
 #define METACLASS_INSTANCE(metaclassOOP) \

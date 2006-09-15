@@ -629,7 +629,7 @@ operation SEND_SUPER sel n ( -- ) {
   classOOP = POP_OOP ();
 
   EXPORT_REGS ();
-  SEND_TO_SUPER (METHOD_LITERAL (sel), n, SUPERCLASS (classOOP));
+  SEND_TO_SUPER (METHOD_LITERAL (sel), n, classOOP);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -650,7 +650,7 @@ operation SEND_SUPER_IMMEDIATE n ( -- ) {
   classOOP = POP_OOP ();
 
   EXPORT_REGS ();
-  SEND_TO_SUPER (bs->symbol, bs->numArgs, SUPERCLASS (classOOP));
+  SEND_TO_SUPER (bs->symbol, bs->numArgs, classOOP);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }

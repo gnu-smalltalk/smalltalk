@@ -1050,42 +1050,37 @@ c_to_smalltalk (cparam *result, OOP returnTypeOOP)
     case CDATA_COBJECT:
     case CDATA_OOP:
       if (!result->u.ptrVal)
-	{
-	  resultOOP = _gst_nil_oop;
-	  break;
-	}
-      if (returnType == CDATA_SYMBOL || returnType == CDATA_SYMBOL_OUT)
+	resultOOP = _gst_nil_oop;
+      else if (returnType == CDATA_OOP)
+	resultOOP = (OOP) result->u.ptrVal;
+
+      else if (returnType == CDATA_SYMBOL || returnType == CDATA_SYMBOL_OUT)
 	{
 	  resultOOP = _gst_intern_string ((char *) result->u.ptrVal);
 	  if (returnType == CDATA_SYMBOL_OUT)
 	    xfree (result->u.ptrVal);
-	  break;
 	}
-      if (returnType == CDATA_COBJECT)
+      else if (returnType == CDATA_COBJECT)
 	{
 	  if (IS_INT (returnTypeOOP))
 	    resultOOP = COBJECT_NEW (result->u.ptrVal);
 	  else
 	    resultOOP = _gst_c_object_new_typed (result->u.ptrVal, returnTypeOOP);
-	  break;
 	}
-      if (returnType == CDATA_OOP)
-	{
-	  resultOOP = (OOP) result->u.ptrVal;
-	  break;
-	}
-      if (returnType == CDATA_STRING || returnType == CDATA_STRING_OUT)
+      else if (returnType == CDATA_STRING || returnType == CDATA_STRING_OUT)
 	{
 	  resultOOP = _gst_string_new ((char *) result->u.ptrVal);
 	  if (returnType == CDATA_STRING_OUT)
 	    xfree (result->u.ptrVal);
 	}
-      if (returnType == CDATA_WSTRING || returnType == CDATA_WSTRING_OUT)
+      else if (returnType == CDATA_WSTRING || returnType == CDATA_WSTRING_OUT)
 	{
 	  resultOOP = _gst_unicode_string_new ((wchar_t *) result->u.ptrVal);
 	  if (returnType == CDATA_WSTRING_OUT)
 	    xfree (result->u.ptrVal);
 	}
+      else
+	abort ();
       break;
 
     case CDATA_DOUBLE:

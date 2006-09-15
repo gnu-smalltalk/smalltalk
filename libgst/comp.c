@@ -1461,7 +1461,8 @@ compile_send (tree_node expr,
     }
 
   if (super)
-    compile_constant (_gst_make_oop_constant (&expr->location, _gst_this_class));
+    compile_constant (_gst_make_oop_constant (&expr->location,
+					      SUPERCLASS (_gst_this_class)));
 
   if (!bs)
     {
