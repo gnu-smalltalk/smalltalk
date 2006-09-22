@@ -44,7 +44,7 @@ in_comment {
 
 /\/\*/ {
    # Remove sequences of asterisks in the middle of a single-line comment
-   while (sub (/\/\*[^*]*\*+[^/*]/, "/* "))
+   while (sub (/\/\*[^*]*\*+[^\/*]/, "/* "))
      0;
    gsub (/\/\*[^*]*\*+\//, "")
 

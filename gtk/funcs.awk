@@ -136,8 +136,7 @@ match ($0, /^G_CONST_RETURN[ \t]*/) {
 
 match($0, /^[ \t]*([a-zA-Z][a-zA-Z0-9]*[ \t\*]+)((g[a-z]*|pango)_[a-zA-Z0-9_]*)[ \t]*(\(.*)/, first_line) {
   
-  first_line[1] = gensub(/[ \t]+/, "", "G", first_line[1])
-
+  gsub(/[ \t]+/, "", first_line[1])
   cFuncName = first_line[2]
 
   if (first_line[2] ~ method_skip_regexp)
