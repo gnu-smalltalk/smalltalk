@@ -30,11 +30,12 @@
 |
  ======================================================================"
 
+
 String variable: #character subclass: #Regex
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
-	category: 'Examples-Modules'
+	category: 'Collections-Text'
 !
 
 Regex comment: '
@@ -50,6 +51,23 @@ them outside the loop, but special care is taken so that the same Regex
 object is used whenever possible (when converting Strings to Regex, the
 cache is sought for an equivalent, already constructed Regex).'.
 
+Object subclass: #RegexResults
+        instanceVariableNames: ''
+        classVariableNames: ''
+        poolDictionaries: ''
+        category: 'Collections-Text'
+!
+
+RegexResults comment: '
+I hold the results of a regular expression match, and I can reconstruct
+which parts of the matched string were assigned to each subexpression.
+Methods such as #=~ return RegexResults objects, while others transform
+the string directly without passing the results object back to the
+caller.'!
+
+
+Namespace current: Kernel!
+
 CStruct subclass: #CRegexRegisters
         declaration: #( (#allocated #int)
 			(#numRegs #int)
@@ -57,31 +75,112 @@ CStruct subclass: #CRegexRegisters
 			(#end (#ptr #int)) )
         classVariableNames: ''
         poolDictionaries: ''
-        category: 'Regex'
-!
-
-Object subclass: #RegexResults
-        instanceVariableNames: ''
-        classVariableNames: ''
-        poolDictionaries: ''
-        category: 'Regex'
+        category: 'Collections-Text'
 !
 
 RegexResults subclass: #MatchingRegexResults
         instanceVariableNames: 'subject from to registers match cache'
         classVariableNames: ''
         poolDictionaries: ''
-        category: 'Regex'
+        category: 'Collections-Text'
 !
 
 RegexResults subclass: #FailedMatchRegexResults
         instanceVariableNames: ''
         classVariableNames: 'NotMatched'
         poolDictionaries: ''
-        category: 'Regex'
+        category: 'Collections-Text'
 !
 
-!FailedMatchRegexResults class methodsFor: 'private'!
+Namespace current: Smalltalk!
+
+!RegexResults methodsFor: 'testing'!
+
+matched
+    "Answer whether the regular expression was matched"
+    self subclassResponsibility
+!
+
+ifMatched: oneArgBlock ifNotMatched: zeroArgBlock
+    "If the regular expression was matched, evaluate oneArgBlock with the
+     receiver as the argument.  If it was not, evaluate zeroArgBlock.
+     Answer the result of the block's evaluation."
+    self subclassResponsibility
+!
+
+ifNotMatched: zeroArgBlock ifMatched: oneArgBlock
+    "If the regular expression was matched, evaluate oneArgBlock with the
+     receiver as the argument.  If it was not, evaluate zeroArgBlock.
+     Answer the result of the block's evaluation."
+    self subclassResponsibility
+!
+
+ifNotMatched: zeroArgBlock
+    "If the regular expression was matched, return the receiver.  If it was
+     not, evaluate zeroArgBlock and return its result."
+    ^self ifNotMatched: zeroArgBlock ifMatched: [ :results | results ]
+!
+
+ifMatched: oneArgBlock
+    "If the regular expression was matched, pass the receiver to
+     oneArgBlock and return its result.  Otherwise, return nil."
+    ^self ifNotMatched: [ nil ] ifMatched: oneArgBlock
+! !
+
+!RegexResults methodsFor: 'accessing'!
+
+size
+    "If the regular expression was matched, return the number
+     of subexpressions that were present in the regular expression."
+    self subclassResponsibility!
+
+subject
+    "If the regular expression was matched, return the text
+     that was matched against it."
+    self subclassResponsibility!
+
+from
+    "If the regular expression was matched, return the index
+     of the first character in the successful match."
+    self subclassResponsibility!
+
+fromAt: anIndex
+    "If the regular expression was matched, return the index of the first
+     character of the anIndex-th subexpression in the successful match."
+    self subclassResponsibility!
+
+to
+    "If the regular expression was matched, return the index
+     of the last character in the successful match."
+    self subclassResponsibility!
+
+toAt: anIndex
+    "If the regular expression was matched, return the index of the last
+     character of the anIndex-th subexpression in the successful match."
+    self subclassResponsibility!
+
+match
+    "If the regular expression was matched, return the text of the
+     successful match."
+    self subclassResponsibility!
+
+matchInterval
+    "If the regular expression was matched, return an Interval for the
+     range of indices of the successful match."
+    self subclassResponsibility!
+
+at: anIndex
+    "If the regular expression was matched, return the text of the
+     anIndex-th subexpression in the successful match."
+    self subclassResponsibility!
+
+intervalAt: anIndex
+    "If the regular expression was matched, return an Interval for the range
+     of indices in the anIndex-th subexpression of the successful match."
+    self subclassResponsibility! !
+
+
+!Kernel.FailedMatchRegexResults class methodsFor: 'private'!
 
 initialize
     NotMatched := self new
@@ -91,7 +190,7 @@ notMatched
     ^NotMatched
 ! !
 
-!FailedMatchRegexResults methodsFor: 'testing'!
+!Kernel.FailedMatchRegexResults methodsFor: 'testing'!
 
 matched
     ^false
@@ -103,17 +202,42 @@ ifMatched: oneArgBlock ifNotMatched: zeroArgBlock
 
 ifNotMatched: zeroArgBlock ifMatched: oneArgBlock
     ^zeroArgBlock value
-!
-
-ifNotMatched: zeroArgBlock
-    ^zeroArgBlock value
-!
-
-ifMatched: oneArgBlock
-    ^nil
 ! !
 
-!MatchingRegexResults methodsFor: 'printing'!
+!RegexResults methodsFor: 'accessing'!
+
+size
+    self shouldNotImplement!
+
+subject
+    self shouldNotImplement!
+
+from
+    self shouldNotImplement!
+
+fromAt: anIndex
+    self shouldNotImplement!
+
+to
+    self shouldNotImplement!
+
+toAt: anIndex
+    self shouldNotImplement!
+
+match
+    self shouldNotImplement!
+
+matchInterval
+    self shouldNotImplement!
+
+at: anIndex
+    self shouldNotImplement!
+
+intervalAt: anIndex
+    self shouldNotImplement! !
+
+
+!Kernel.MatchingRegexResults methodsFor: 'printing'!
 
 printOn: aStream
     "Print a represention of the receiver on aStream."
@@ -129,7 +253,7 @@ printOn: aStream
     self size > 0 ifTrue: [ aStream nextPut: $) ].
 ! !
 
-!MatchingRegexResults methodsFor: 'testing'!
+!Kernel.MatchingRegexResults methodsFor: 'testing'!
 
 matched
     ^true
@@ -141,17 +265,9 @@ ifMatched: oneArgBlock ifNotMatched: zeroArgBlock
 
 ifNotMatched: zeroArgBlock ifMatched: oneArgBlock
     ^oneArgBlock value: self
-!
-
-ifNotMatched: zeroArgBlock
-    ^nil
-!
-
-ifMatched: oneArgBlock
-    ^oneArgBlock value: self
 ! !
 
-!MatchingRegexResults methodsFor: 'accessing'!
+!Kernel.MatchingRegexResults methodsFor: 'accessing'!
 
 size
     ^registers size!
@@ -200,12 +316,9 @@ at: anIndex
 intervalAt: anIndex
     ^anIndex = 0
 	ifTrue: [ from to: to ]
-	ifFalse: [ registers at: anIndex ]!
+	ifFalse: [ registers at: anIndex ]! !
 
-size
-    ^registers size! !
-
-!MatchingRegexResults methodsFor: 'private'!
+!Kernel.MatchingRegexResults methodsFor: 'private'!
 
 initialize: regs subject: aString
     from := regs matchBeg.
@@ -219,24 +332,8 @@ initialize: regs subject: aString
     subject := aString! !
 
     
-" --- external function definitions --- "
-
-!Regex class methodsFor: 'C call-outs'!
-
-fromString: aString
-    <cCall: 'reh_make_cacheable' returning: #smalltalk args: #(#smalltalk)>!
-
-!String methodsFor: 'C call-outs'!
-
-lengthOfRegexMatch: pattern from: from to: to
-    <cCall: 'reh_match' returning: #int
-	args: #(#selfSmalltalk #smalltalk #int #int)>!
-
-searchRegexInternal: pattern from: from to: to
-    <cCall: 'reh_search' returning: CRegexRegisters type
-	args: #(#selfSmalltalk #smalltalk #int #int)>! !
-
-!CRegexRegisters methodsFor: 'C call-outs'!
+
+!Kernel.CRegexRegisters methodsFor: 'C call-outs'!
 
 begAt: i
     ^(self beg value + i) value + 1!
@@ -264,9 +361,11 @@ free
     <cCall: 'reh_free_registers' returning: #void
 	args: #(#self)>! !
 
-"--------------------------------------------------------------------------"
-
+
 !Regex class methodsFor: 'instance creation'!
+
+fromString: aString
+    <cCall: 'reh_make_cacheable' returning: #smalltalk args: #(#smalltalk)>!
 
 new
     self error: 'please use #fromString: to create instances'! !
@@ -274,6 +373,7 @@ new
 !Regex methodsFor: 'basic'!
 
 at: anIndex put: anObject
+    "Fail.  Regex objects are read-only."
     self shouldNotImplement
 !
 
@@ -293,7 +393,7 @@ asRegex
 
 asString
     "Answer the receiver, converted back to a String"
-    ^self collect: [ :each | each ]
+    ^String new: self size withAll: self
 !
 
 species
@@ -329,13 +429,32 @@ printOn: aStream
     aStream nextPut: $/.
 ! !
 
-"--------------------------------------------------------------------------"
+
+!String methodsFor: 'C call-outs'!
+
+lengthOfRegexMatch: pattern from: from to: to
+    <cCall: 'reh_match' returning: #int
+	args: #(#selfSmalltalk #smalltalk #int #int)>!
+
+searchRegexInternal: pattern from: from to: to
+    <cCall: 'reh_search' returning: Kernel.CRegexRegisters type
+	args: #(#selfSmalltalk #smalltalk #int #int)>! !
 
 !String methodsFor: 'regex'!
 
 asRegex
     "Answer the receiver, converted to a Regex object."
     ^Regex fromString: self
+!
+
+~ pattern
+    "Answer whether the receiver matched against the Regex or String
+    object pattern."
+    | ok regs |
+    regs := self searchRegexInternal: pattern from: 1 to: self size.
+    ok := regs matchBeg > -1.
+    regs free.
+    ^ok
 !
 
 =~ pattern
@@ -346,59 +465,68 @@ asRegex
     ^regs matchBeg = -1
 	ifTrue: [
 	    regs free.
-	    FailedMatchRegexResults notMatched
+	    Kernel.FailedMatchRegexResults notMatched
 	]
 	ifFalse: [
-	    [ MatchingRegexResults new initialize: regs subject: self ]
+	    [ Kernel.MatchingRegexResults new initialize: regs subject: self ]
 		ensure: [ regs free ]
 	]
 !
 
 searchRegex: pattern
-    "A synonym for #=~"
+    "A synonym for #=~.  Answer a RegexResults object for matching the receiver
+     against the Regex or String object pattern."
     | regs |
     regs := self searchRegexInternal: pattern from: 1 to: self size.
     ^regs matchBeg = -1
 	ifTrue: [
 	    regs free.
-	    FailedMatchRegexResults notMatched
+	    Kernel.FailedMatchRegexResults notMatched
 	]
 	ifFalse: [
-	    [ MatchingRegexResults new initialize: regs subject: self ]
+	    [ Kernel.MatchingRegexResults new initialize: regs subject: self ]
 		ensure: [ regs free ]
 	]
 !
 
 searchRegex: pattern startingAt: anIndex
+    "Answer a RegexResults object for matching the receiver
+     against the Regex or String object pattern, starting the match
+     at index anIndex."
     | regs |
     regs := self searchRegexInternal: pattern from: anIndex to: self size.
     ^regs matchBeg = -1
 	ifTrue: [
 	    regs free.
-	    FailedMatchRegexResults notMatched
+	    Kernel.FailedMatchRegexResults notMatched
 	]
 	ifFalse: [
-	    [ MatchingRegexResults new initialize: regs subject: self ]
+	    [ Kernel.MatchingRegexResults new initialize: regs subject: self ]
 		ensure: [ regs free ]
 	]
 !
 
 searchRegex: pattern from: from to: to
+    "Answer a RegexResults object for matching the receiver
+     against the Regex or String object pattern, restricting the match
+     to the specified range of indices."
     | regs |
     regs := self searchRegexInternal: pattern from: from to: to.
     ^regs matchBeg = -1
 	ifTrue: [
 	    regs free.
-	    FailedMatchRegexResults notMatched
+	    Kernel.FailedMatchRegexResults notMatched
 	]
 	ifFalse: [
-	    [ MatchingRegexResults new initialize: regs subject: self ]
+	    [ Kernel.MatchingRegexResults new initialize: regs subject: self ]
 		ensure: [ regs free ]
 	]
 !
 
 indexOfRegex: regexString ifAbsent: excBlock
-    "Answer whether an occurrence of the regex is present in the receiver"
+    "If an occurrence of the regex is present in the receiver, return
+     the Interval corresponding to the leftmost-longest match.  Otherwise,
+     evaluate excBlock and return the result."
     | regs beg end |
     regs := self searchRegexInternal: regexString from: 1 to: self size.
     beg := regs matchBeg.
@@ -410,6 +538,9 @@ indexOfRegex: regexString ifAbsent: excBlock
 !
 
 indexOfRegex: regexString startingAt: index ifAbsent: excBlock
+    "If an occurrence of the regex is present in the receiver, return
+     the Interval corresponding to the leftmost-longest match starting after
+     the given index.  Otherwise, evaluate excBlock and return the result."
     | regs beg end |
     regs := self searchRegexInternal: regexString from: index to: self size.
     beg := regs matchBeg.
@@ -421,6 +552,9 @@ indexOfRegex: regexString startingAt: index ifAbsent: excBlock
 !
 
 indexOfRegex: regexString from: from to: to ifAbsent: excBlock
+    "If an occurrence of the regex is present in the receiver, return the
+     Interval corresponding to the leftmost-longest match occurring within
+     the given indices.  Otherwise, evaluate excBlock and return the result."
     | regs beg end |
     regs := self searchRegexInternal: regexString from: from to: to.
     beg := regs matchBeg.
@@ -432,6 +566,9 @@ indexOfRegex: regexString from: from to: to ifAbsent: excBlock
 !
 
 indexOfRegex: regexString
+    "If an occurrence of the regex is present in the receiver, return the
+     Interval corresponding to the leftmost-longest match.  Otherwise return
+     nil."
     | regs beg end |
     regs := self searchRegexInternal: regexString from: 1 to: self size.
     beg := regs matchBeg.
@@ -443,6 +580,9 @@ indexOfRegex: regexString
 !
 
 indexOfRegex: regexString startingAt: index
+    "If an occurrence of the regex is present in the receiver, return the
+     Interval corresponding to the leftmost-longest match starting after
+     the given index.  Otherwise return nil."
     | regs beg end |
     regs := self searchRegexInternal: regexString from: index to: self size.
     beg := regs matchBeg.
@@ -454,6 +594,9 @@ indexOfRegex: regexString startingAt: index
 !
 
 indexOfRegex: regexString from: from to: to
+    "If an occurrence of the regex is present in the receiver, return the
+     Interval corresponding to the leftmost-longest match occurring within
+     the given range of indices.  Otherwise return nil."
     | regs beg end |
     regs := self searchRegexInternal: regexString from: from to: to.
     beg := regs matchBeg.
@@ -465,19 +608,22 @@ indexOfRegex: regexString from: from to: to
 !
 
 matchRegex: pattern
+    "Answer whether the receiver is an exact match for the pattern.
+     This means that the pattern is implicitly anchored at the beginning
+     and the end."
     ^(self lengthOfRegexMatch: pattern from: 1 to: self size) = self size
 !
 
-matchRegex: pattern startingAt: idx
-    ^(self lengthOfRegexMatch: pattern from: idx to: self size) > 0
-!
-
 matchRegex: pattern from: from to: to
+    "Answer whether the given range of indices is an exact match for the
+     pattern.  This means that there is a match starting at from and ending
+     at to (which is not necessarily the longest match starting at from)."
     ^(self lengthOfRegexMatch: pattern from: from to: to) = (to - from + 1)
 !
 
 occurrencesOfRegex: pattern from: from to: to
-    "Returns count of how many times pattern repeats in string"
+    "Return a count of how many times pattern repeats in the receiver within
+     the given range of index."
 
     | res idx regex beg end regs |
     regex := pattern asRegex.
@@ -498,20 +644,23 @@ occurrencesOfRegex: pattern from: from to: to
 !
     
 occurrencesOfRegex: pattern startingAt: index
-    "Returns count of how many times pattern repeats in string"
+    "Returns count of how many times pattern repeats in the receiver, starting
+     the search at the given index."
 
     ^self occurrencesOfRegex: pattern from: index to: self size.
 !
 
 occurrencesOfRegex: pattern
-    "Returns count of how many times pattern repeats in string"
+    "Returns count of how many times pattern repeats in the receiver."
 
     ^self occurrencesOfRegex: pattern from: 1 to: self size.
 !
 
 copyFrom: from to: to replacingRegex: pattern with: str
-    "Replaces first occurance of pattern with provided string"
-
+    "Returns the substring of the receiver between from and to.  
+     If pattern has a match in that part of the string, the match
+     is replaced with str after substituting %n sequences with the 
+     captured subexpressions of the match (as in #bindWithArguments:)."
     | regs beg end repl res |
     regs := self searchRegex: pattern from: from to: to.
 
@@ -530,13 +679,18 @@ copyFrom: from to: to replacingRegex: pattern with: str
 !
 
 copyReplacingRegex: pattern with: str
-    "Searches for pattern and replaces it with another string value"
+    "Returns the receiver after replacing the first match of pattern (if
+     any) with str.  %n sequences present in str are substituted with the 
+     captured subexpressions of the match (as in #bindWithArguments:)."
 
     ^self copyFrom: 1 to: self size replacingRegex: pattern with: str
 !
 
 copyFrom: from to: to replacingAllRegex: pattern with: str
-    "Replaces all occurances of pattern between boundaries with specified string"
+    "Returns the substring of the receiver between from and to.  
+     Any match of pattern in that part of the string is replaced with
+     str after substituting %n sequences with the captured subexpressions
+     of the match (as in #bindWithArguments:)."
 
     | res idx regex beg end regs |
     regex := pattern asRegex.
@@ -560,36 +714,47 @@ copyFrom: from to: to replacingAllRegex: pattern with: str
 !
 
 copyReplacingAllRegex: pattern with: str
-    "Searches for pattern and replaces it with another string value"
+    "Returns the receiver after replacing all the matches of pattern (if
+     any) with str.  %n sequences present in str are substituted with the 
+     captured subexpressions of the match (as in #bindWithArguments:)."
 
     ^self copyFrom: 1 to: self size replacingAllRegex: pattern with: str
 !
 
-onOccurrencesOfRegex: pattern from: from to: to do: body
-"Searches for pattern and executed passed instruction-body (as a trigger)"
+onOccurrencesOfRegex: pattern from: from to: to do: aBlock
+    "Find all the matches of pattern within the receiver and within the
+     given range of indices.  For each match, pass the RegexResults object 
+     to aBlock."
 
-    | idx regex beg end regs |
+    | idx regex beg end regs results |
     regex := pattern asRegex.
     idx := from.
     [
         regs := self searchRegexInternal: regex from: idx to: to.
         beg := regs matchBeg.
         end := regs matchEnd.
-        regs free.
         beg >= 1
     ] whileTrue: [
-	body value: beg value: end - beg + 1.
+	results := Kernel.MatchingRegexResults new
+	    initialize: regs subject: self.
+	regs free.
+	aBlock value: results.
 	idx := end + 1 max: beg + 1.
     ].
+    regs free.
 !
 
 onOccurrencesOfRegex: pattern do: body
-"Searches for pattern and executed passed instruction-body (as a trigger)"
+    "Find all the matches of pattern within the receiver and, for each match,
+     pass the RegexResults object to aBlock."
 
     ^self onOccurrencesOfRegex: pattern from: 1 to: self size do: body
 !
 
 tokenize: pattern from: from to: to
+    "Split the receiver at every occurrence of pattern (considering only
+     the indices between from and to).  All parts that do not match pattern
+     are separated and stored into an Array of Strings that is returned."
     | res idx regex beg end regs tokStart |
     regex := pattern asRegex.
     res := WriteStream on: (Array new: 10).
@@ -611,16 +776,11 @@ tokenize: pattern from: from to: to
     ^res contents
 !
 
-tokenizeFrom: from to: to
-    ^self tokenize: '[\n\t ]+' from: from to: to
-!
-
 tokenize: pattern
+    "Split the receiver at every occurrence of pattern.  All parts that do not
+     match pattern are separated and stored into an Array of Strings that is
+     returned."
     ^self tokenize: pattern from: 1 to: self size
-!
-
-tokenize
-    ^self tokenize: '[\n\t ]+' from: 1 to: self size
 ! !
 
-FailedMatchRegexResults initialize!
+Kernel.FailedMatchRegexResults initialize!

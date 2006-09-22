@@ -46,7 +46,8 @@ libgst_la_SOURCES = \
        sym.c       dict.c        oop.c  	opt.c        \
        save.c      cint.c    	 heap.c	        input.c      \
        sysdep.c    callin.c      xlat.c         events.c     \
-       mpz.c       print.c	 alloc.c	security.c
+       mpz.c       print.c	 alloc.c	security.c   \
+       re.c
 
 # definitions for genprims
 
@@ -79,7 +80,7 @@ dist_noinst_DATA = valgrind.supp prims.def byte.def vm.def builtins.gperf
 STAMP_FILES = prims.stamp match.stamp vm.stamp
 
 noinst_HEADERS = \
-	gstpriv.h lib.h lex.h str.h \
+	gstpriv.h lib.h lex.h str.h re.h \
 	tree.h byte.h interp.h comp.h memzero.h \
 	sym.h dict.h oop.h save.h cint.h xlat.h \
 	sysdep.h callin.h gstpub.h opt.h mpz.h \

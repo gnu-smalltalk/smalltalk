@@ -252,13 +252,14 @@ _gst_send_message_internal (OOP sendSelector,
 	    /* primitive succeeded.  Continue with the parent context */
 	    return;
 
+	  /* primitive failed.  Invoke the normal method.  */
 	  last_primitive = 0;
 	  break;
 
 	case MTH_USER_DEFINED:
 	  {
 	    OOP argsArrayOOP = create_args_array (sendArgs);
-	    POP_OOP ();  /* pop the receiver */
+	    (void) POP_OOP ();  /* pop the receiver */
 	    PUSH_OOP (methodData->methodOOP);
 	    PUSH_OOP (receiver);
 	    PUSH_OOP (argsArrayOOP);
@@ -339,12 +340,13 @@ _gst_send_method (OOP methodOOP)
 	    return;
 
 	  /* primitive failed.  Invoke the normal method.  */
+	  last_primitive = 0;
 	  break;
 
 	case MTH_USER_DEFINED:
 	  {
 	    OOP argsArrayOOP = create_args_array (sendArgs);
-	    POP_OOP ();  /* pop the receiver */
+	    (void) POP_OOP ();  /* pop the receiver */
 	    PUSH_OOP (methodOOP);
 	    PUSH_OOP (receiver);
 	    PUSH_OOP (argsArrayOOP);

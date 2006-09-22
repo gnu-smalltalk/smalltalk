@@ -63,6 +63,14 @@ $(srcdir)/i18n.texi: $(top_srcdir)/i18n/stamp-classes
 	    I18N I18N i18n.texi Load.st Collation.st
 	test -f $(srcdir)/i18n.texi && touch $(srcdir)/gst-libs.texi 
 
+$(srcdir)/regex.texi: $(top_srcdir)/examples/regex.st
+	rm -f $(srcdir)/regex.texi
+	builddir=`pwd`; gst=$$builddir/../gst; gst_im=$$builddir/../gst.im; \
+	cd $(srcdir) && \
+	  $$gst -I $$gst_im -f ../scripts/GenLibDoc.st \
+	    Regex Regex regex.texi
+	test -f $(srcdir)/regex.texi && touch $(srcdir)/gst-libs.texi 
+
 $(srcdir)/classes.texi: $(top_srcdir)/kernel/stamp-classes
 	rm -f $(srcdir)/classes.texi
 	builddir=`pwd`; gst=$$builddir/../gst; gst_im=$$builddir/../gst.im; \

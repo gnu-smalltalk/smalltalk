@@ -32,15 +32,14 @@
 #include "config.h"
 #endif
 
-#include "gstpub.h"
+#include "gstpriv.h"
 #include "regex.h"
+#include "re.h"
 
 #if STDC_HEADERS
 #include <stdlib.h>
 #include <string.h>
 #endif
-
-static VMProxy *vmProxy;
 
 /* Regex caching facility */
 
@@ -67,14 +66,6 @@ static const char *compileRegex (OOP patternOOP,
 				 struct pre_pattern_buffer *regex);
 static struct pre_pattern_buffer *allocateNewRegex (void);
 static void markRegexAsMRU (int i);
-
-/* Functions exported to Smalltalk */
-static OOP reh_make_cacheable (OOP patternOOP);
-
-static struct pre_registers *reh_search (OOP srcOOP, OOP patternOOP,
-					 int from, int to);
-static int reh_match (OOP srcOOP, OOP patternOOP, int from, int to);
-static void reh_free_registers(struct pre_registers *regs);
 
 static RegexCacheEntry cache[REGEX_CACHE_SIZE];
 
@@ -104,7 +95,7 @@ compileRegex (OOP patternOOP, struct pre_pattern_buffer *regex)
   const char *ress;
 
   pattern = &STRING_OOP_AT (OOP_TO_OBJ (patternOOP), 1);
-  patternLength = vmProxy->basicSize (patternOOP);
+  patternLength = gst_interpreter_proxy.basicSize (patternOOP);
 
   /* compile pattern */
   ress = pre_compile_pattern (pattern, patternLength, regex);
@@ -141,6 +132,9 @@ lookupRegex (OOP patternOOP, struct pre_pattern_buffer **pRegex)
   int i;
   RegexCaching result;
 
+  if (!regexClass)
+    regexClass = _gst_class_name_to_oop ("Regex");
+
   if (OOP_CLASS (patternOOP) != regexClass)
     {
       *pRegex = allocateNewRegex ();
@@ -163,9 +157,9 @@ lookupRegex (OOP patternOOP, struct pre_pattern_buffer **pRegex)
 
       /* Register the objects we're caching with the virtual machine */
       if (cache[i].patternOOP)
-	vmProxy->unregisterOOP (cache[i].patternOOP);
+	gst_interpreter_proxy.unregisterOOP (cache[i].patternOOP);
 
-      vmProxy->registerOOP (patternOOP);
+      gst_interpreter_proxy.registerOOP (patternOOP);
       cache[i].patternOOP = patternOOP;
     }
 
@@ -185,7 +179,7 @@ lookupRegex (OOP patternOOP, struct pre_pattern_buffer **pRegex)
  * are read-only so that we can support this kind of "interning" them.
  */
 OOP
-reh_make_cacheable (OOP patternOOP)
+_gst_re_make_cacheable (OOP patternOOP)
 {
   OOP regexOOP;
   const char *pattern;
@@ -194,11 +188,14 @@ reh_make_cacheable (OOP patternOOP)
   int patternLength;
   int i;
 
+  if (!regexClass)
+    regexClass = _gst_class_name_to_oop ("Regex");
+
   if (OOP_CLASS (patternOOP) == regexClass)
     return patternOOP;
 
   /* Search in the cache */
-  patternLength = vmProxy->basicSize (patternOOP);
+  patternLength = gst_interpreter_proxy.basicSize (patternOOP);
   pattern = &STRING_OOP_AT (OOP_TO_OBJ (patternOOP), 1);
 
   for (i = 0; i < REGEX_CACHE_SIZE; i++)
@@ -208,7 +205,7 @@ reh_make_cacheable (OOP patternOOP)
 
       regexOOP = cache[i].patternOOP;
       regex = &STRING_OOP_AT (OOP_TO_OBJ (regexOOP), 1);
-      if (vmProxy->basicSize (regexOOP) == patternLength &&
+      if (gst_interpreter_proxy.basicSize (regexOOP) == patternLength &&
 	  memcmp (regex, pattern, patternLength) == 0)
 	{
 	  markRegexAsMRU (i);
@@ -217,7 +214,7 @@ reh_make_cacheable (OOP patternOOP)
     }
 
   /* No way, must allocate a new Regex object */
-  regexOOP = vmProxy->objectAlloc (regexClass, patternLength);
+  regexOOP = gst_interpreter_proxy.objectAlloc (regexClass, patternLength);
   regex = &STRING_OOP_AT (OOP_TO_OBJ (regexOOP), 1);
   memcpy (regex, pattern, patternLength);
 
@@ -226,14 +223,14 @@ reh_make_cacheable (OOP patternOOP)
    */
   lookupRegex (regexOOP, &compiled);
   if (compileRegex (patternOOP, compiled) != NULL)
-    return vmProxy->nilOOP;
+    return _gst_nil_oop;
   else
     return regexOOP;
 }
 
 /* Search helper function */
 struct pre_registers *
-reh_search (OOP srcOOP, OOP patternOOP, int from, int to)
+_gst_re_search (OOP srcOOP, OOP patternOOP, int from, int to)
 {
   int res = 0;
   const char *src;
@@ -257,7 +254,7 @@ reh_search (OOP srcOOP, OOP patternOOP, int from, int to)
 }
 
 void 
-reh_free_registers(struct pre_registers *regs)
+_gst_re_free_registers(struct pre_registers *regs)
 {
 	pre_free_registers(regs);
 	free(regs);
@@ -265,7 +262,7 @@ reh_free_registers(struct pre_registers *regs)
 
 /* Match helper function */
 int
-reh_match (OOP srcOOP, OOP patternOOP, int from, int to)
+_gst_re_match (OOP srcOOP, OOP patternOOP, int from, int to)
 {
   int res = 0;
   const char *src;
@@ -286,14 +283,3 @@ reh_match (OOP srcOOP, OOP patternOOP, int from, int to)
   return res;
 }
 
-void
-gst_initModule (VMProxy * proxy)
-{
-  vmProxy = proxy;
-  vmProxy->defineCFunc ("reh_search", reh_search);
-  vmProxy->defineCFunc ("reh_match", reh_match);
-  vmProxy->defineCFunc ("reh_free_registers", reh_free_registers);
-  vmProxy->defineCFunc ("reh_make_cacheable", reh_make_cacheable);
-
-  regexClass = vmProxy->classNameToOOP ("Regex");
-}

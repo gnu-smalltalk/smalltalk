@@ -1,5 +1,11 @@
 2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/regex.st: Move ...
+	* kernel/Regex.st: ... here.  Move private classes into Kernel
+	namespace.  Add documentation.
+
+2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Builtins.st: Add UnicodeString>>#hash.
 	* kernel/UniString.st: Add #fromString: and #encoding methods.
 	* kernel/CharArray.st: Add #=, #encoding, #asUnicodeString.

@@ -142,3 +142,6 @@ version
 isSmalltalk
     ^true
 ! !
+
+Smalltalk addSubspace: #Kernel!
+

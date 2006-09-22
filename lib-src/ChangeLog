@@ -1,3 +1,7 @@
+2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/regex.c, lib-src/regex.h: Move from examples.
+
 2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/obstack.c: Include config.h if available.

@@ -1,3 +1,12 @@
+2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp-bc.inl: Shut up compiler warnings.
+
+	* libgst/cint.c: Declare regex functions.
+	* libgst/re.c, libgst/re.h: Move from examples.  Adapt since it
+`	is not anymore a module.
+	* libgst/lib.c: Add Regex.st.
+
 2006-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/byte.c: Include match.h.

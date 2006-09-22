@@ -47,13 +47,20 @@ o   New example, lazy callections.  When loaded, #select:, #reject: and
 
     can be much faster when this example is loaded.
 
-o   The class above which super-send bytecodes start searching is now embedded
-    in the bytecode stream.  This provides the infrastructure to implement things
-    such as 'here' in Smalltalk/X (not implemented) or 'self.Foo b' to execute
-    the Foo>>#b method (also not implemented).
+o   Regular expressions are now included in the default image.  The interface
+    is now definitive and is similar to 2.2.  The concrete classes for
+    RegexResults are in a private namespace (since the user need not
+    instantiate them anyway).  Right now, regular expressions are only
+    usable for String objects (see Unicode support below).  This may
+    change in the future.
 
 o   The backtraces now omit again the internal methods in the exception
     handling system.
+
+o   The class above which super-send bytecodes start searching is now embedded
+    in the bytecode stream.  This provides the infrastructure to implement
+    'here' in Smalltalk/X (not implemented) or 'self.Foo b' to execute
+    the Foo>>#b method (also not implemented).
 
 o   Various speedups.
 

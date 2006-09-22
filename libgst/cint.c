@@ -31,6 +31,7 @@
 
 
 #include "gstpriv.h"
+#include "re.h"
 
 #include "../libffi/include/ffi.h"
 #include <ltdl.h>
@@ -536,6 +537,12 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("fileIsExecutable", _gst_file_is_executable);
 
   init_dld ();
+
+  /* regex routines */
+  _gst_define_cfunc ("reh_search", _gst_re_search);
+  _gst_define_cfunc ("reh_match", _gst_re_match);
+  _gst_define_cfunc ("reh_free_registers", _gst_re_free_registers);
+  _gst_define_cfunc ("reh_make_cacheable", _gst_re_make_cacheable);
 
   /* Non standard routines */
   _gst_define_cfunc ("marli", marli);

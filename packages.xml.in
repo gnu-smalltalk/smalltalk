@@ -371,11 +371,7 @@
 
 <package>
   <name>Regex</name>
-  <module>regex</module>
-  <filein>regex.st</filein>
   <directory>examples</directory>
-
-  <file>regex.st</file>
 </package>
 
 <package>
@@ -720,6 +716,7 @@
   <file>VarBinding.st</file>
   <file>RecursionLock.st</file>
   <file>Getopt.st</file>
+  <file>Regex.st</file>
 
   <file>../vfs/</file>
   <file>../vfs/README</file>

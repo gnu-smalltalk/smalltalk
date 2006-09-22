@@ -25,7 +25,6 @@
 #endif
 
 #include "config.h"
-#include "snprintfv/printf.h"
 
 #ifdef HAVE_STRING_H
 # include <string.h>
@@ -40,6 +39,8 @@
 
 /* We write fatal error messages on standard error.  */
 #include <stdio.h>
+
+#include <stdlib.h>
 
 /* isalpha(3) etc. are used for the character classes.  */
 #include <ctype.h>
