@@ -134,8 +134,7 @@ match ($0, /^G_CONST_RETURN[ \t]*/) {
   $0 = substr ($0, RLENGTH + 1)
 }
 
-match($0, /^[ \t]*([a-zA-Z][a-zA-Z0-9]*[ \t\*]+)((g[a-z]*|pango)_[a-zA-Z0-9_]*)[ \t]*(\(.*)/, first_line) {
-  
+match_function_first_line($0) {
   gsub(/[ \t]+/, "", first_line[1])
   cFuncName = first_line[2]
 
@@ -377,7 +376,7 @@ function smalltalkize( res )
 }
 
 function define_class(name) {
-  if (name ~ /(Class|Iface)$/)
+  if (name ~ /(Class|Iface)$/ || name ~ /[^A-Za-z_]/)
     return
 
   # Bug report from GTK+ 2.2.2.  This can be dropped if it is safe.
@@ -444,3 +443,28 @@ function break_word_before_uppercase(name, cur_index, prev_up, prev_notup)
   return ch < "A" || ch > "Z"
 }
 
+# emulate gawk match(word, REGEX, first_line)
+# where REGEX is /^[ \t]*([a-zA-Z][a-zA-Z0-9]*[ \t\*]+)((g[a-z]*|pango)_[a-zA-Z0-9_]*)[ \t]*(\(.*)/
+function match_function_first_line(word) {
+  if (!match (word, /^[ \t]*[a-zA-Z][a-zA-Z0-9]*[ \t\*]+(g[a-z]*|pango)_[a-zA-Z0-9_]*[ \t]*\(/))
+    return 0
+
+  split ("", first_line)
+
+  first_line[4] = substr (word, RSTART + RLENGTH - 1)
+  word = substr (word, 1, RSTART + RLENGTH - 2)
+
+  # Remove spaces
+  sub (/^[ \t]*/, "", word)
+  sub (/[ \t]*$/, "", word)
+
+  # Extract function name
+  match (word, /(g[a-z]*|pango)_[a-zA-Z0-9_]*$/)
+  first_line[1] = substr (word, 1, RSTART - 1)
+  first_line[2] = substr (word, RSTART)
+
+  # Extract package name
+  match (first_line[2], /^(g[a-z]*|pango)_/)
+  first_line[3] = substr (first_line[2], 1, RLENGTH - 1)
+  return 1
+}
