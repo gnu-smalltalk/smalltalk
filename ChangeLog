@@ -1,3 +1,10 @@
+2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Builtins.st: Add UnicodeString>>#hash.
+	* kernel/UniString.st: Add #fromString: and #encoding methods.
+	* kernel/CharArray.st: Add #=, #encoding, #asUnicodeString.
+	* kernel/String.st: Add fast version of #=, remove #asUnicodeString.
+
 2006-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/LazyCollect.st: Refactor.

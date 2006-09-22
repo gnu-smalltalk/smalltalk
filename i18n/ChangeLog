@@ -1,3 +1,9 @@
+2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* i18n/Locale.st: Move defaultDefaultEncoding to String.
+	* i18n/Sets.st: Add EncodedString and EncodedStringFactory.
+	Store from/to encodings in Encoder.
+
 2006-09-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Sets.st: Fix typo.

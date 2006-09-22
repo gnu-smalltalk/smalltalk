@@ -35,7 +35,7 @@ ArrayedCollection variableWordSubclass: #CharacterArray
 		  instanceVariableNames: ''
 		  classVariableNames: ''
 		  poolDictionaries: ''
-		  category: 'Language-Data types'
+		  category: 'Collections-Text'
 !
 
 CharacterArray comment: 
@@ -64,6 +64,25 @@ lineDelimiter
 
 
 !CharacterArray methodsFor: 'comparing'!
+
+= aString
+    "Answer whether the receiver's items match those in aCollection"
+    aString isSymbol ifTrue: [ ^self == aString ].
+
+    aString isCharacterArray ifFalse: [ ^false ].
+
+    self encoding == aString encoding
+	ifFalse: [ ^self asUnicodeString = aString asUnicodeString ].
+
+    "Encoding matches, check the characters."
+    self size = aString size ifFalse: [ ^false ].
+    self hash == aString hash ifFalse: [ ^false ].
+
+    1 to: self size do: [ :i |
+        (self at: i) = (aString at: i) ifFalse: [ ^false ]
+    ].
+    ^true
+!
 
 < aCharacterArray
     "Return true if the receiver is less than aCharacterArray, ignoring case
@@ -164,6 +183,10 @@ indexOf: aCharacterArray matchCase: aBoolean startingAt: anIndex
 
 
 !CharacterArray methodsFor: 'multibyte encodings'!
+
+encoding
+    "Answer the encoding used by the receiver."
+    self subclassResponsibility!
 
 numberOfCharacters
     "Answer the number of Unicode characters in the receiver."
@@ -356,6 +379,12 @@ asNumber
      and answer the result at this point"
 
     ^Number readFrom: (ReadStream on: self)
+!
+
+asUnicodeString
+    "Answer a UnicodeString whose character's codes are the receiver's contents
+          This is not implemented unless you load the I18N package."
+    self shouldNotImplement
 !
 
 asUppercase

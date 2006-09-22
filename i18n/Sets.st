@@ -64,8 +64,30 @@ InvalidCharsetError comment:
 'I am raised if the user tries to encode from or to an unknown
 encoding'!
 
+CharacterArray subclass: #EncodedString
+       instanceVariableNames: 'string encoding'
+       classVariableNames: ''
+       poolDictionaries: ''
+       category: 'i18n-Character sets'!
+
+EncodedString comment:
+'An EncodedString, like a String, is a sequence of bytes representing
+a specific encoding of a UnicodeString.  Unlike a String, however,
+the encoding name is known, rather than detected, irrelevant or
+assumed to be the system default.'!
+
+Object subclass: #EncodedStringFactory
+       instanceVariableNames: 'encoding'
+       classVariableNames: ''
+       poolDictionaries: ''
+       category: 'i18n-Character sets'!
+
+EncodedStringFactory comment:
+'An EncodedStringFactory is used (in place of class objects) so that
+Encoders can return EncodedString objects with the correct encoding.'!
+
 Stream subclass: #Encoder
-       instanceVariableNames: 'origin'
+       instanceVariableNames: 'origin from to factory'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'i18n-Character sets'!
@@ -156,7 +178,7 @@ the 32-bit UTF-32 integers coming from a descendent of ToUTF32, when
 the destination encoding is big-endian.'!
 
 Encoder subclass: #Iconv
-       instanceVariableNames: 'from to iconvHandle readBuffer readPos readEnd
+       instanceVariableNames: 'iconvHandle readBuffer readPos readEnd
 			       recodedBuffer recodedPos recodedEnd'
        classVariableNames: ''
        poolDictionaries: ''
@@ -191,6 +213,142 @@ ToUTF7 comment:
 encoded characters to UTF-32 values (encoded as 32-bit Integers).'!
 
 Namespace current: Smalltalk.I18N!
+
+
+!EncodedStringFactory class methodsFor: 'instance creation'!
+
+encoding: aString
+    "Answer a new EncodedStringFactory, creating strings with the
+     given encoding."
+    ^self new encoding: aString!
+
+!EncodedStringFactory methodsFor: 'instance creation'!
+
+fromString: aString
+    "Answer an EncodedString based on aString and in the encoding
+     represented by the receiver."
+    ^EncodedString fromString: aString encoding: self encoding!
+
+new
+    "Answer a new, empty EncodedString using the encoding
+     represented by the receiver."
+    ^EncodedString fromString: String new encoding: self encoding!
+
+new: size
+    "Answer a new EncodedString of the given size, using the encoding
+     represented by the receiver."
+    ^EncodedString fromString: (String new: size) encoding: self encoding! !
+
+!EncodedStringFactory methodsFor: 'instance creation'!
+
+encoding
+    "Answer the encoding used for the created Strings."
+    ^encoding!
+
+encoding: aString
+    "Set the encoding used for the created Strings."
+    encoding := aString! !
+
+!EncodedString class methodsFor: 'instance creation'!
+
+fromString: aString
+    | str |
+    str := aString asString.
+    ^self fromString: str encoding: str encoding!
+
+fromString: aString encoding: encoding
+    | str |
+    str := aString isString
+	ifTrue: [ aString ]
+	ifFalse: [ aString asString: encoding ].
+    ^self basicNew setString: aString; encoding: encoding!
+
+new
+    self shouldNotImplement!
+
+new: size
+    self shouldNotImplement! !
+
+
+!EncodedString methodsFor: 'accessing'!
+
+asString
+    ^string!
+
+at: anIndex
+    ^string at: anIndex!
+
+at: anIndex put: anObject
+    ^string at: anIndex put: anObject!
+
+do: aBlock
+    string do: aBlock!
+
+encoding
+    ^encoding!
+
+hash
+    ^string hash bitXor: encoding hash!
+
+species
+    ^EncodedStringFactory encoding: self encoding!
+
+size
+    ^string size!
+
+utf16Encoding
+    ^string utf16Encoding!
+
+utf32Encoding
+    ^string utf32Encoding!
+
+valueAt: anIndex
+    ^string valueAt: anIndex!
+
+valueAt: anIndex put: anObject
+    ^string valueAt: anIndex put: anObject! !
+
+!EncodedString methodsFor: 'printing'!
+
+displayOn: aStream
+    "Print a representation of the receiver on aStream. Unlike
+     #printOn:, this method does not display the encoding and
+     the leading dollar."
+    string displayOn: aStream!
+
+printOn: aStream
+    "Print a representation of the receiver on aStream."
+    aStream nextPutAll: encoding; nextPut: $[.
+    string printOn: aStream.
+    aStream nextPut: $]!
+
+!EncodedString methodsFor: 'copying'!
+
+copy
+    ^self class
+	fromString: string copy
+	encoding: self encoding!
+
+copyEmpty
+    ^self class
+	fromString: (string copyEmpty: string size)
+	encoding: self encoding!
+
+copyEmpty: size
+    ^self class
+	fromString: (string copyEmpty: size)
+	encoding: self encoding! !
+
+!EncodedString methodsFor: 'initializing'!
+
+setString: aString
+    string := aString!
+
+encoding: aString
+    aString = 'UTF-32' ifTrue: [ encoding := string utf32Encoding. ^self ].
+    aString = 'UTF-16' ifTrue: [ encoding := string utf16Encoding. ^self ].
+    encoding := aString! !
+
 
 !Encoder class methodsFor: 'instance creation'!
 
@@ -234,13 +392,21 @@ nextInput
 !
 
 species
-    "Answer the kind of data that is answered, which is the same kind
-     of data that the origin answers"
-    ^origin species! !
+    "We answer a string of Characters encoded in our destination
+     encoding."
+    factory isNil
+	ifTrue: [
+	    factory := to = String defaultEncoding
+		ifTrue: [ String ]
+		ifFalse: [ EncodedStringFactory encoding: to ] ].
+    ^factory
+! !
 
 !Encoder methodsFor: 'private - initialization'!
 
 initializeFrom: fromEncoding to: toEncoding origin: aStringOrStream
+    from := fromEncoding.
+    to := toEncoding.
     origin := (aStringOrStream isKindOf: Stream)
 	ifFalse: [ aStringOrStream readStream ]
 	ifTrue: [ aStringOrStream ].
@@ -248,6 +414,7 @@ initializeFrom: fromEncoding to: toEncoding origin: aStringOrStream
     self flush
 ! !
 
+
 !EncodedStream class methodsFor: 'initializing'!
 
 initialize
@@ -495,15 +662,8 @@ on: aStringOrStream from: fromEncoding to: toEncoding
     ^encoderTo on: pipe from: pivot to: toEncoding.
 ! !
 
+
 Namespace current: Smalltalk.I18N.Encoders!
-
-!FromUTF32 methodsFor: 'stream operation'!
-
-species
-    "We answer a string of Characters encoded in our destination
-     encoding."
-    ^String
-! !
 
 !ToUTF32 methodsFor: 'stream operation'!
 
@@ -512,6 +672,7 @@ species
     ^UnicodeString
 ! !
 
+
 !ComposeUTF32LE methodsFor: 'stream operation'!
 
 next
@@ -536,6 +697,7 @@ next
            self nextInput asInteger) asCharacter
 ! !
 
+
 !SplitUTF32LE methodsFor: 'stream operation'!
 
 atEnd
@@ -610,6 +772,7 @@ flush
     count := 0
 ! !
 
+
 !Iconv methodsFor: 'C call-outs'!
 
 iconvOpen: to from: from
@@ -639,12 +802,6 @@ next
     answer := recodedBuffer at: recodedPos.
     recodedPos := recodedPos + 1.
     ^answer
-!
-
-species
-    "We answer a string of Characters encoded in our destination
-     encoding."
-    ^String
 ! !
 
 !Iconv methodsFor: 'private - living across snapshots'!
@@ -704,8 +861,6 @@ refill
 
 initializeFrom: fromEncoding to: toEncoding origin: aStringOrStream
     super initializeFrom: fromEncoding to: toEncoding origin: aStringOrStream.
-    from := fromEncoding.
-    to := toEncoding.
     readPos := 1.
     readEnd := 0.
     recodedPos := 1.
@@ -764,6 +919,7 @@ convertMore
     ^false
 ! !
 
+
 !ToUTF7 class methodsFor: 'initialization'!
 
 initialize
@@ -900,6 +1056,7 @@ next
     ^self toBase64Char: ch
 ! !
 
+
 !FromUTF7 class methodsFor: 'initialization'!
 
 initialize
@@ -1055,6 +1212,7 @@ getNext
 ! !
 
 
+
 Namespace current: I18N!
 
 !InvalidSequenceError methodsFor: 'accessing'!
@@ -1078,10 +1236,10 @@ description
 
 "Now add some extensions to the system classes"
 
-(CharacterArray classPool includesKey: #DefaultEncoding)
-    ifFalse: [ CharacterArray addClassVarName: #DefaultEncoding ]!
+(String classPool includesKey: #DefaultEncoding)
+    ifFalse: [ String addClassVarName: #DefaultEncoding ]!
 
-!CharacterArray class methodsFor: 'converting'!
+!String class methodsFor: 'converting'!
 
 defaultDefaultEncoding
     "Answer the encoding that is used in case the user specifies none."
@@ -1099,46 +1257,25 @@ defaultEncoding: aString
     DefaultEncoding := aString
 ! !
 
-!CharacterArray methodsFor: 'converting'!
-
-encoding
-    "Answer the encoding of the receiver, assuming it is in the
-     default locale's default charset"
-
-    | encoding |
-    encoding := self class defaultEncoding.
-    encoding asString = 'UTF-16' ifTrue: [ ^self utf16Encoding ].
-    encoding asString = 'UTF-32' ifTrue: [ ^self utf32Encoding ].
-    ^encoding!
-
-utf16Encoding
-    "Answer the encoding of the receiver, assuming it's UTF-16"
-    ^'UTF-16BE'!
-
-utf32Encoding
-    "Answer the encoding of the receiver, assuming it's UTF-32"
-    ^'UTF-32BE'!
 
-
-!String methodsFor: 'multibyte encodings'!
+!CharacterArray methodsFor: 'multibyte encodings'!
 
 numberOfCharacters
     "Answer the number of Unicode characters in the receiver, interpreting it
      as the default locale character set."
     ^self asUnicodeString numberOfCharacters!
 
-numberOfCharacters: aString
-    "Answer the number of Unicode characters in the receiver, interpreting it
-     in the character encoding aString."
-    ^(self asUnicodeString: aString) numberOfCharacters! !
-
-
-!String methodsFor: 'converting'!
-
 asUnicodeString
     "Return an UnicodeString with the contents of the receiver, interpreted
      as the default locale character set."
     ^(I18N.EncodedStream unicodeOn: self) contents!
+
+!String methodsFor: 'multibyte encodings'!
+
+numberOfCharacters: aString
+    "Answer the number of Unicode characters in the receiver, interpreting it
+     in the character encoding aString."
+    ^(self asUnicodeString: aString) numberOfCharacters!
 
 asUnicodeString: aString
     "Return an UnicodeString with the contents of the receiver, interpreted
@@ -1151,6 +1288,7 @@ encoding
     "Answer the encoding of the receiver, assuming it is in the
      default locale's default charset"
 
+    | encoding |
     (self size >= 4 and: [ (self at: 1) = 0 and: [ (self at: 2) = 0 and: [
     	(self at: 3) = 254 and: [
     	(self at: 4) = 255 ]]]]) ifTrue: [ ^'UTF-32BE' ].
@@ -1167,7 +1305,10 @@ encoding
     	(self at: 2) = 16rBB and: [
     	(self at: 3) = 16rBF ]]]) ifTrue: [ ^'UTF-8' ].
 
-    ^super encoding!
+    encoding := self class defaultEncoding.
+    encoding asString = 'UTF-16' ifTrue: [ ^self utf16Encoding ].
+    encoding asString = 'UTF-32' ifTrue: [ ^self utf32Encoding ].
+    ^encoding!
 
 utf32Encoding
     "Assuming the receiver is encoded as UTF-16 with a proper
@@ -1191,6 +1332,13 @@ utf16Encoding
 
 
 !Character methodsFor: 'converting'!
+
+asString: encoding
+    "Return a String with the contents of the receiver, converted
+     into the requested encoding."
+    ^(I18N.EncodedStream
+	encoding: (UnicodeString with: self)
+	as: encoding) contents!
 
 asString
     "Return a String with the contents of the receiver, converted
@@ -1235,11 +1383,6 @@ asUnicodeString: aString
 ! !
 
 
-!UnicodeString methodsFor: 'converting'!
-
-encoding
-    ^'UTF-32BE'! !
-
 !UnicodeString methodsFor: 'converting'!
 
 asString

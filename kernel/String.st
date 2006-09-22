@@ -36,26 +36,33 @@ CharacterArray variable: #character subclass: #String
 		  instanceVariableNames: ''
 		  classVariableNames: ''
 		  poolDictionaries: ''
-		  category: 'Language-Data types'
+		  category: 'Collections-Text'
 !
 
 String comment: 
-'My instances represent ASCII string data types.  Being a very common
-case, they are particularly optimized.' !
+'My instances represent 8-bit character strings.  Being a very common
+case, they are particularly optimized.
+
+Note that, if you care about multilingualization, you should treat
+String only as an encoded representation of a UnicodeString.  The I18N
+package adds more Unicode-friendliness to the system so that encoding
+and decoding is performed automatically in more cases.  In that case,
+String represents a case when the encoding is either unknown, irrelevant,
+or assumed to be the system default.'!
 
 
-!String class methodsFor: 'basic'!
+!String methodsFor: 'basic'!
 
 = aString
     "Answer whether the receiver's items match those in aCollection"
-    | newString mySize |
 
-    self class == aString class ifFalse: [^false].
-    self size = aString size ifFalse: [^false].
-    self hash == aString hash ifFalse: [^false].
+    aString isString ifFalse: [ ^super = aString ].
 
+    "Also a String, no need to check the encoding."
+    self size = aString size ifFalse: [ ^false ].
+    self hash == aString hash ifFalse: [ ^false ].
     1 to: self size do: [ :i |
-	(self at: i) == (aString at: i) ifFalse: [^false]
+        (self at: i) == (aString at: i) ifFalse: [ ^false ]
     ].
     ^true
 !
@@ -101,12 +108,6 @@ asSymbol
 asString
     "But I already am a String!  Really!"
     ^self
-!
-
-asUnicodeString 
-    "Answer a UnicodeString whose character's codes are the receiver's contents.
-     This is not implemented unless you load the I18N package."
-    self shouldNotImplement
 ! !
 
 

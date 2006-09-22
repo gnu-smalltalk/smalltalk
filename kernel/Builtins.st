@@ -1807,6 +1807,15 @@ asCData: aCType
     ^self primitiveFailed
 ! !
 
+!UnicodeString methodsFor: 'built-ins'!
+
+hash
+    "Answer an hash value for the receiver"
+    <primitive: VMpr_String_hash>
+    ^0
+!
+
+
 
 !CharacterArray methodsFor: 'built ins'!
 

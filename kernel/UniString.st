@@ -35,7 +35,7 @@ CharacterArray variable: #utf32 subclass: #UnicodeString
 		  instanceVariableNames: ''
 		  classVariableNames: ''
 		  poolDictionaries: ''
-		  category: 'Language-Data types'
+		  category: 'Collections-Text'
 !
 
 UnicodeString comment: 
@@ -43,6 +43,21 @@ UnicodeString comment:
 as 4-byte UTF-32 characters' !
 
 
+!UnicodeString class methodsFor: 'converting'!
+
+fromString: aString
+    "Return the String, aString, converted to its Unicode representation.
+     Unless the I18N package is loaded, this is not implemented."
+    ^aString asUnicodeString!
+
+!UnicodeString class methodsFor: 'multibyte encodings'!
+
+defaultEncoding
+    "Answer the encoding used by the receiver.  Conventionally, we
+     answer 'Unicode' to ensure that two UnicodeStrings always have
+     the same encoding."
+    ^'Unicode'!
+
 !UnicodeString methodsFor: 'converting'!
 
 asString
@@ -86,6 +101,12 @@ printOn: aStream
 ! !
 
 !UnicodeString methodsFor: 'multibyte encodings'!
+
+encoding
+    "Answer the encoding used by the receiver.  Conventionally, we
+     answer 'Unicode' to ensure that two UnicodeStrings always have
+     the same encoding."
+    ^'Unicode'!
 
 numberOfCharacters
     "Answer the number of Unicode characters in the receiver.  This is

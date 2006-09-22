@@ -565,7 +565,7 @@ print: anObject on: aStream
     self subclassResponsibility! !
 
 
-!CharacterArray class methodsFor: 'converting'!
+!String class methodsFor: 'converting'!
 
 defaultDefaultEncoding
     "Answer the default encoding that is used when the user specifies
