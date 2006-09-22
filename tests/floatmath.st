@@ -140,11 +140,20 @@ ObjectMemory globalGarbageCollect.
    a + b negated. a - b.
    ((a + b negated) = (a - b)) } printNl ]!
 
+"This is less strict because it behaves differently on different long double
+ formats."
 
- #(( -0.0q -0.0q) (-0.0q 0.0q) (0.0q -0.0q) (0.0q 0.0q)) do: [ :x ||a b|
+ #(( -0.0q -0.0q) (0.0q 0.0q)) do: [ :x ||a b|
    a := x first. b := x last.
    { a. b. a negated + b. b - a.
    ((a negated + b) = (b - a)).
    a + b negated. a - b.
+   ((a + b negated) = (a - b)) } printNl ]!
+
+ #((-0.0q 0.0q) (0.0q -0.0q)) do: [ :x ||a b|
+   a := x first. b := x last.
+   { a. b.
+   ((b - a) negated = (a - b)).
+   ((a negated + b) = (b - a)).
    ((a + b negated) = (a - b)) } printNl ]!
 
