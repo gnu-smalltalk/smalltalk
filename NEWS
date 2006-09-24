@@ -1,6 +1,6 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 2.2 TO 2.2.1
+NEWS FROM 2.2 TO 2.3
 
 o   FileStreams can now use pwrite for more efficient operation on files
     opened for read/write, and will do many less gratuitous lseek
@@ -33,7 +33,7 @@ o   Moved gdk_draw_ functions to GdkDrawable.
 o   New goodie to parse the command line.  Look at the documentation for
     the Getopt class and for SystemDictionary>>#arguments:do:.
 
-o   New example, lazy callections.  When loaded, #select:, #reject: and
+o   New example, lazy collections.  When loaded, #select:, #reject: and
     #collect: do not create a new collection unless necessary.  Idioms like
 
 	(a select: [ :each | ... ]) do: [ : each | ... ]

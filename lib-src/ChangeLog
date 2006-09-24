@@ -1,3 +1,7 @@
+2006-09-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c: Some touches for moving it to gnulib.
+
 2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/regex.c, lib-src/regex.h: Move from examples.

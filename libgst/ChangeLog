@@ -1,3 +1,7 @@
+2006-09-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.inl: Fix checking builds.
+
 2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-bc.inl: Shut up compiler warnings.

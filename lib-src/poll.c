@@ -68,7 +68,6 @@ poll (pfd, nfd, timeout)
   struct timeval tv, *ptv;
   int maxfd, rc, happened;
   nfds_t i;
-  char data[64];
 
 #ifdef _SC_OPEN_MAX
   if (nfd > sysconf (_SC_OPEN_MAX))
@@ -166,14 +165,18 @@ poll (pfd, nfd, timeout)
 	      /* support for POLLHUP.  */
 #if defined __MACH__ && defined __APPLE__
 	      /* There is a bug in Mac OS X that causes it to ignore MSG_PEEK for
-		 some kinds of descriptors.  Use FIONREAD to emulate POLLHUP,
-		 but not on TTYs or it screws up the TTY attributes... */
+		 some kinds of descriptors.  Use FIONREAD to emulate POLLHUP.
+		 It is still not completely POSIX compliant (it does not fully
+		 work on TTYs), but at least it does not delete data!  For other
+		 platforms, we still use MSG_PEEK because it was proved to be
+		 reliable, and I a leery of changing it.  */
 	      do
 		r = ioctl (pfd[i].fd, FIONREAD, &avail);
 	      while (r == -1 && (errno == EAGAIN || errno == EINTR));
 	      if (avail < 0)
 	        avail = 0;
 #else
+	      char data[64];
 	      r = recv (pfd[i].fd, data, 64, MSG_PEEK);
 	      if (r == -1)
 		{
@@ -188,7 +191,7 @@ poll (pfd, nfd, timeout)
 	      /* An hung up descriptor does not increase the return value! */
 	      if (avail == 0)
 		pfd[i].revents |= POLLHUP;
-	      else
+	      else if (avail != -1)
 		happened |= POLLIN | POLLRDNORM;
 	    }
 
