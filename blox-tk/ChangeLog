@@ -1,3 +1,7 @@
+2006-09-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxBasic.st: Fix previous checkin... half a year later.
+
 2006-03-17  Paolo Bonzini  <bonzini@gnu.org>
 	    Jiro Yamamoto <jyamamoto@katch.ne.jp>
 
