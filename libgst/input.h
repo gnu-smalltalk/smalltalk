@@ -177,7 +177,7 @@ extern off_t _gst_get_cur_file_pos (void)
   ATTRIBUTE_HIDDEN;
 
 /* Returns an OOP containing the string of the topmost stream if it is
-   of type STREAM_STRING; nil otherwise.  */
+   a STREAM_STRING, STREAM_OOP or STREAM_READLINE; nil otherwise.  */
 extern OOP _gst_get_cur_string (void)
   ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
@@ -192,13 +192,6 @@ extern void _gst_initialize_readline (void)
    uppercase character AND it contains no colons.  */
 extern void _gst_add_symbol_completion (const char *str,
 					int len) 
-  ATTRIBUTE_HIDDEN;
-
-/* Returns a Smalltalk String for the data read by the Readline
-   interface, or nil if the stream does not have type
-   STREAM_READLINE.  */
-extern OOP _gst_get_cur_readline (void)
-  ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
 
 /* Add 1 to the completion-enabling flag.  The flag starts at 1

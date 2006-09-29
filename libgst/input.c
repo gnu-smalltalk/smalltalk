@@ -58,7 +58,7 @@ typedef struct oop_stream
 {
   OOP  oop;
   char *buf;
-  const char *ptr;
+  char *ptr;
   const char *end;
 }
 oop_stream;
@@ -254,11 +254,16 @@ _gst_push_stream_oop (OOP oop)
   newStream->st_oop.end = NULL;
   if (is_a_kind_of (OOP_CLASS (oop), _gst_file_descriptor_class))
     {
-      newStream->fileNameOOP = ((gst_file_stream) OOP_TO_OBJ (oop))->name;
+      gst_file_stream fileStream = (gst_file_stream) OOP_TO_OBJ (oop);
+      newStream->fileNameOOP = fileStream->name;
+      in_stream->fileOffset = lseek (TO_INT (fileStream->file), 0, SEEK_CUR);
       _gst_register_oop (newStream->fileNameOOP);
     }
   else
-    newStream->fileName = "a Smalltalk Stream";
+    {
+      newStream->fileName = "a Smalltalk Stream";
+      in_stream->fileOffset = -1;
+    }
 
   newStream->prompt = false;
   _gst_register_oop (oop);
@@ -354,7 +359,7 @@ _gst_set_stream_info (int line,
 off_t
 _gst_get_method_start_pos (void)
 {
-  return (in_stream->method_start_pos);
+  return (in_stream ? in_stream->method_start_pos : -1);
 }
  
 void
@@ -383,20 +388,26 @@ my_getc (input_stream stream)
       /* Refill the buffer...  */
       if (stream->st_oop.ptr == stream->st_oop.end)
 	{
-	  if (stream->st_oop.buf)
-	    xfree (stream->st_oop.buf);
+	  char *buf;
+	  int old_size;
+	  int size;
+	  _gst_msg_sendf(&buf, "%s %o nextHunk", stream->st_oop.oop);
+	  if (!buf || !*buf)
+	    return EOF;
 
-	  _gst_msg_sendf(&stream->st_oop.buf, "%s %o nextHunk",
-			 stream->st_oop.oop);
+	  old_size = stream->st_oop.ptr - stream->st_oop.buf;
+	  size = old_size + strlen (buf);
 
-	  stream->st_oop.ptr = stream->st_oop.buf;
-	  stream->st_oop.end = stream->st_oop.buf;
-	  if (stream->st_oop.buf)
-	    stream->st_oop.end += strlen (stream->st_oop.buf);
+	  /* Leave space for the '\0' at the end.  */
+	  stream->st_oop.buf = xrealloc (stream->st_oop.buf, size + 1);
+	  stream->st_oop.ptr = stream->st_oop.buf + old_size;
+	  stream->st_oop.end = stream->st_oop.buf + size;
+
+	  memcpy (stream->st_oop.ptr, buf, size - old_size + 1);
+	  free (buf);
 	}
 
-      return (stream->st_oop.ptr == stream->st_oop.end)
-	? EOF : (unsigned char) *stream->st_oop.ptr++;
+      return (unsigned char) *stream->st_oop.ptr++;
 
     case STREAM_FILE:
       if (in_stream->column == 0 && in_stream->prompt)
@@ -502,11 +513,35 @@ _gst_get_cur_stream_type (void)
 OOP
 _gst_get_cur_string (void)
 {
-  if (in_stream && in_stream->type == STREAM_STRING)
-    return (_gst_string_new (in_stream->st_str.strBase));
+  OOP result;
+  int size;
 
-  else
+  if (!in_stream)
     return (_gst_nil_oop);
+
+  switch (in_stream->type)
+    {
+    case STREAM_STRING:
+#ifdef HAVE_READLINE
+    case STREAM_READLINE:
+#endif /* HAVE_READLINE */
+      return (_gst_string_new (in_stream->st_str.strBase));
+
+    case STREAM_OOP:
+      result = _gst_string_new (in_stream->st_oop.buf);
+
+      /* Copy back to the beginning of the buffer to save memory.
+         TODO: might want to do so at the first overflow instead.  */
+      size = in_stream->st_oop.end - in_stream->st_oop.ptr + 1;
+      memmove (in_stream->st_oop.buf, in_stream->st_oop.ptr, size);
+      in_stream->fileOffset += in_stream->st_oop.ptr - in_stream->st_oop.buf;
+      in_stream->st_oop.ptr = in_stream->st_oop.buf;
+      in_stream->st_oop.end = in_stream->st_oop.buf + size;
+      return (result);
+
+    default:
+      return (_gst_nil_oop);
+    }
 }
 
 OOP
@@ -534,17 +569,6 @@ _gst_get_cur_file_name (void)
   return (in_stream->fileNameOOP);
 }
 
-#ifdef HAVE_READLINE
-OOP
-_gst_get_cur_readline (void)
-{
-  if (in_stream && in_stream->type == STREAM_READLINE)
-    return (_gst_string_new (in_stream->st_str.strBase));
-
-  else
-    return (_gst_nil_oop);
-}
-#endif /* HAVE_READLINE */
 
 
 void
@@ -653,9 +677,15 @@ _gst_get_location (int *x, int *y)
   *x = in_stream->column;
   *y = in_stream->line;
 
-  /* Subtract 1 to mark the position of the last character we read.  */
   if (in_stream->method_start_pos < 0)
-    in_stream->method_start_pos = _gst_get_cur_file_pos () - 1;
+    {
+      int last_char_pos = _gst_get_cur_file_pos ();
+
+      /* Subtract 1 to mark the position of the last character we read.  */
+      if (last_char_pos != -1)
+	last_char_pos--;
+      in_stream->method_start_pos = last_char_pos;
+    }
 }
 
 void
@@ -706,26 +736,26 @@ line_stamp (int line)
 off_t
 _gst_get_cur_file_pos (void)
 {
-  /* ### not sure about this particular use -- the current file pos
-     must be from the change log, but currently the FileSegments we
-     produce are from the input file... so they lose. The original
-     reason for implementing the change log was to make recompiles of 
-     a method lying in a changed file work... but this way not even
-     recompiles of methods lying in an unchanged file do work! */
-#ifdef not_working_for_now
-  if (change_str != -1)
-    return (lseek (change_str, 0, SEEK_CUR));
-  else
-#endif
+  if (!in_stream)
+    return (-1);
 
-  if (in_stream && in_stream->type == STREAM_FILE)
+  switch (in_stream->type)
     {
+    case STREAM_FILE:
       return (lseek (in_stream->st_file.fd, 0, SEEK_CUR)
 	      + in_stream->st_file.ptr - in_stream->st_file.end
 	      + in_stream->fileOffset);
+
+    case STREAM_OOP:
+      if (in_stream->fileOffset != -1)
+	return (in_stream->st_file.ptr - in_stream->st_file.buf
+		+ in_stream->fileOffset);
+      else
+	return (-1);
+
+    default:
+      return (-1);
     }
-  else
-    return (-1);
 }
 
 

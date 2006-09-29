@@ -172,6 +172,8 @@ end
 
 
 define pbctx
+printf "Parent: "
+pofield gst_block_context $arg0 parentContext
 printf "Block: "
 pofield gst_block_context $arg0 method
 pblock $
@@ -189,6 +191,8 @@ end
 
 
 define pmctx
+printf "Parent: "
+pofield gst_method_context $arg0 parentContext
 printf "Method: "
 pofield gst_method_context $arg0 method
 pmeth ((gst_method_context)$arg0->object)->method

@@ -365,15 +365,15 @@ asCollection
 !Collection methodsFor: 'iterating'!
 
 select: aBlock
-    ^VariableSizeCollectionProxy
+    ^CollectionProxy
 	on: self filter: (SelectFilter on: nil value: aBlock)!
 
 reject: aBlock
-    ^VariableSizeCollectionProxy
+    ^CollectionProxy
 	on: self filter: (RejectFilter on: nil value: aBlock)!
 
 collect: aBlock
-    ^VariableSizeCollectionProxy
+    ^CollectionProxy
 	on: self filter: (CollectFilter on: nil value: aBlock)! !
 
 

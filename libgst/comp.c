@@ -2855,45 +2855,29 @@ method_info_new (OOP class,
 OOP
 file_segment_new (void)
 {
-  OOP fileName, stringContents, fileSegmentOOP;
+  OOP fileName, fileSegmentOOP;
   gst_file_segment fileSegment;
-  int64_t startPos;
+  int64_t startPos = _gst_get_method_start_pos ();
   inc_ptr incPtr;
 
-  switch (_gst_get_cur_stream_type ())
-    {
-    case STREAM_UNKNOWN:
-    default:
-      return (_gst_nil_oop);
+  if (startPos == -1)
+    return _gst_get_cur_string ();
 
-    case STREAM_FILE:
-      incPtr = INC_SAVE_POINTER ();
-      fileName = _gst_get_cur_file_name ();
-      INC_ADD_OOP (fileName);
+  incPtr = INC_SAVE_POINTER ();
+  fileName = _gst_get_cur_file_name ();
+  INC_ADD_OOP (fileName);
 
-      fileSegment = (gst_file_segment) new_instance (_gst_file_segment_class,
-    						 &fileSegmentOOP);
+  fileSegment = (gst_file_segment) new_instance (_gst_file_segment_class,
+						 &fileSegmentOOP);
 
-      fileSegment->fileName = fileName;
-      startPos = _gst_get_method_start_pos ();
-      fileSegment->startPos = from_c_int_64 (startPos);
-      fileSegment->length =
-        from_c_int_64 (_gst_get_cur_file_pos () - startPos - 1);
+  fileSegment->fileName = fileName;
+  fileSegment->startPos = from_c_int_64 (startPos);
+  fileSegment->length =
+    from_c_int_64 (_gst_get_cur_file_pos () - startPos - 1);
 
-      assert (to_c_int_64 (fileSegment->length) >= 0);
-      INC_RESTORE_POINTER (incPtr);
-      return (fileSegmentOOP);
-
-    case STREAM_STRING:
-      stringContents = _gst_get_cur_string ();
-      return (stringContents);
-
-#ifdef HAVE_READLINE
-    case STREAM_READLINE:
-      stringContents = _gst_get_cur_readline ();
-      return (stringContents);
-#endif /* HAVE_READLINE */
-    }
+  assert (to_c_int_64 (fileSegment->length) >= 0);
+  INC_RESTORE_POINTER (incPtr);
+  return (fileSegmentOOP);
 }
 
 void _gst_restore_primitive_number (OOP methodOOP, int *map)

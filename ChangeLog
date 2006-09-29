@@ -1,3 +1,7 @@
+2006-09-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/LazyCollect.st: Fix reference to deleted class.
+
 2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/regex.st: Move ...

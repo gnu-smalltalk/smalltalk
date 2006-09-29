@@ -1,3 +1,14 @@
+2006-09-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Use _gst_get_method_start_pos to find if we can
+	use _gst_get_cur_file_pos.
+	* libgst/input.c: Track file offset of FileStream objects.  Extend
+	buffers when a new hunk is needed, shrink it on _gst_get_cur_string.
+	Use buffer and file offset tracking it to support _gst_get_cur_file_pos
+	and _gst_get_cur_string for STREAM_OOP streams.  Delete
+	_gst_get_cur_readline as it is the same as _gst_get_cur_string
+	* libgst/input.h: Delete _gst_get_cur_readline.
+
 2006-09-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Fix checking builds.
