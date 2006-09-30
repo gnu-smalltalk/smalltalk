@@ -86,6 +86,7 @@ BEGIN {
     type["gboolean"] = "#boolean"
     type["gfloat"] = "#float"
     type["gdouble"] = "#double"
+    type["GdkAtom"] = "#cObject"
 
     ptr_type["#int"] = "CInt type"
     ptr_type["#long"] = "CLong type"

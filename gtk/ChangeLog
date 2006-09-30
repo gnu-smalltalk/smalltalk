@@ -1,3 +1,7 @@
+2006-09-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gtk/funcs.awk: Fix for newer GTK+.
+
 2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gtk/funcs.awk: Fix more non-portable code.
