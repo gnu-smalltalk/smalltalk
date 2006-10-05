@@ -48,6 +48,7 @@ BEGIN {
     type["GCallback"] = "__skip_this__"
     type["GClosure"] = "__skip_this__"
     type["GCClosure"] = "__skip_this__"
+    type["GHash"] = "__skip_this__"
 
     # Skip GLib artifacts
     type["GFlags"] = "__skip_this__"
