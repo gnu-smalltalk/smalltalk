@@ -9,7 +9,7 @@
 
 #######################################################################
 #
-# Copyright 2003, 2004 Free Software Foundation, Inc.
+# Copyright 2003, 2004, 2006 Free Software Foundation, Inc.
 # Written by Paolo Bonzini
 #
 # This file is part of the GNU Smalltalk class library.
