@@ -1,3 +1,13 @@
+2006-10-05  Mike Anderson  <msasjf@yahoo.co.uk>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* net/NetServer: Fix #at:, add #isPeerAlive and use it.
+	* net/ContentHandler.st: Add svg.
+	* net/WebServer.st: Add #named:, parse If-Modified-Since times,
+	Parse Content-Length for POST requests.  Add #hasPostData,
+	#postDataAt:ifPresent:.  Use #subStrings:, fix printing of
+	100 status codes.  Support query data without a value.
+
 2005-09-05  Mike Anderson  <msasjf@yahoo.co.uk>
 
 	* net/HTTP.st: Fix bugs and support chunked encoding.

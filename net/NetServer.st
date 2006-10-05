@@ -42,7 +42,7 @@ NetThread comment:
 'A NetThread runs a process attached to a specified socket.'!
 
 NetThread subclass:  #NetServer
-	instanceVariableNames: 'port process '
+	instanceVariableNames: 'port '
 	classVariableNames: 'Servers '
 	poolDictionaries: ''
 	category: 'Sockets-Serving framework'!
@@ -100,6 +100,10 @@ startNewProcess
 
     process resume!
 
+isPeerAlive
+    ^socket notNil and: [ socket isPeerAlive ]
+!
+
 socket
     ^socket
 ! !
@@ -134,7 +138,7 @@ stop
 at: port
     | server |
     Servers isNil ifTrue: [ Servers := Dictionary new ].
-    ^Servers at: port ifAbsentPut: [ self new ].
+    ^Servers at: port ifAbsentPut: [ (self new) port: port; yourself ].
 !
 
 initializeServer: port
@@ -186,7 +190,7 @@ startOn: aPortNumber
 !NetServer methodsFor: 'private'!
 
 createSocket
-    ^ServerSocket port: port
+    ^(ServerSocket port: port)
 !
 
 defaultPriority
@@ -240,13 +244,13 @@ run
 	]   on: ExAll
 	    do: [ :ex |
 		"Ignore errors due to bad communication lines."
-		self socket isPeerAlive ifFalse: [ ex return ].
+		self isPeerAlive ifFalse: [ ex return ].
 		ex pass
 	    ].
 
 	self log: req time: time.
 
-	self socket isPeerAlive
+	self isPeerAlive
     ] whileTrue
 !
 

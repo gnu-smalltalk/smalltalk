@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+| Copyright 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -67,6 +67,16 @@ snapshot
 
 
 !ObjectMemory class methodsFor: 'initialization'!
+
+changed: aSymbol
+    aSymbol == #aboutToQuit
+	ifTrue: [
+	    "Wait until all processes are done"
+	    Processor activeProcess priority: Processor rockBottomPriority.
+	    [ super changed: aSymbol ]
+		forkAt: Processor userSchedulingPriority ]
+	ifFalse: [
+	    super changed: aSymbol ]!
 
 initialize
     "Initialize the globals"

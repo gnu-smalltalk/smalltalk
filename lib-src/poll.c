@@ -58,8 +58,10 @@
 #define EOVERFLOW EINVAL
 #endif
 
+#undef poll
+
 int
-poll (pfd, nfd, timeout)
+rpl_poll (pfd, nfd, timeout)
      struct pollfd *pfd;
      nfds_t nfd;
      int timeout;
@@ -175,6 +177,19 @@ poll (pfd, nfd, timeout)
 	      while (r == -1 && (errno == EAGAIN || errno == EINTR));
 	      if (avail < 0)
 	        avail = 0;
+
+	      if (avail == 0)
+	        {
+		  /* The above fails for listening sockets; of course, BSD
+		     derivatives have a bug and don't expose SO_ACCEPTCONN to
+		     user programs!  So we rely on Apple's broken poll(2) in
+		     this case.  It can't be worse than what we did so far.  */
+		  struct pollfd pfd_for_apple_poll = pfd[0];
+		  extern int poll (struct pollfd *, nfds_t, int);
+		  r = poll (&pfd_for_apple_poll, 1, 0);
+		  if (r != -1 && (pfd_for_apple_poll.revents & POLLHUP) == 0)
+		    avail = 1;
+		}
 #else
 	      char data[64];
 	      r = recv (pfd[i].fd, data, 64, MSG_PEEK);

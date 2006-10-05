@@ -176,6 +176,7 @@ defaultFileExtensionMap
 	('spl' 'application/futuresplash')
 	('st' 'text/plain')			"Of course!"
 	('swf' 'application/x-shockwave-flash')
+	('svg' 'image/svg+xml')
 	('tar' 'application/x-tar')
 	('tgz' 'application/x-compressed')
 	('tif' 'image/tiff')

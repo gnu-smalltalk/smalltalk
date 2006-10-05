@@ -12,4 +12,5 @@ WebServer publishMyFileSystem.
 "WebServer restartWiki."
 
 "leave the other processes running"
-Processor activeProcess terminate!
+Processor activeProcess priority: Processor rockBottomPriority.
+[ Processor yield ] repeat!

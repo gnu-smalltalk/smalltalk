@@ -148,7 +148,7 @@ HTTP request using the Basic authentication scheme.'!
 version
     | number |
     Version isNil ifFalse: [ ^Version ].
-    number := Smalltalk version substrings
+    number := Smalltalk version subStrings
 	detect: [ :each | (each at: 1) isDigit ]
 	ifNone: [ '0.0' "???" ].
 
@@ -227,6 +227,12 @@ next
 
 log: req time: time
     self server log: req action uri: req location time: time.
+! !
+
+Servlet class methodsFor: 'instance creation'!
+
+named: aString
+    ^(self new) name: aString; yourself
 ! !
 
 
@@ -369,8 +375,9 @@ respondTo: aRequest
 
 notModified
     | ifModSince modTime |
-    ifModSince := request at: #'IF-MODIFIED-SINCE' ifAbsent: [ nil ].
-    ^ifModSince notNil and: [ self modifiedTime <= ifModSince ]!
+    ifModSince := request dateTimeAt: #'IF-MODIFIED-SINCE' ifAbsent: [ nil ].
+    modTime := self modifiedTime.
+    ^ifModSince notNil and: [ modTime <= ifModSince ]!
 
 request
     ^request!
@@ -589,6 +596,19 @@ at: aSymbol
 at: aSymbol ifAbsent: aBlock
     ^clientData at: aSymbol ifAbsent: aBlock!
 
+at: aSymbol ifPresent: aBlock
+    ^clientData at: aSymbol ifPresent: aBlock!
+
+dateTimeAt: aSymbol
+    ^self parseTimestamp: (clientData at: aSymbol)!
+
+dateTimeAt: aSymbol ifAbsent: aBlock
+    ^self parseTimestamp: (clientData at: aSymbol ifAbsent: [ ^aBlock value ])!
+
+dateTimeAt: aSymbol ifPresent: aBlock
+    ^clientData at: aSymbol ifPresent: [ :value |
+	aBlock value: (self parseTimestamp: value) ]!
+
 enumeratePostData: aBlock
     postData keysAndValuesDo: aBlock!
 
@@ -603,10 +623,21 @@ getRequest
     stream next.				"Get nl"
 
     self extractClientData: version.
-    (action sameAs: 'POST') ifTrue: [ self extractPostData: version ].
-    
+		
+    (action sameAs: 'POST') ifTrue: [
+	self 
+	    extractPostData: version 
+	    contentLength: (clientData at: #'CONTENT-LENGTH' ifAbsent: [ nil ])
+    ].
+
     "Get back to binary mode"
-    stream := saveStream!
+    stream := saveStream.!
+
+hasPostData
+    ^postData notEmpty!
+
+postDataAt: aSymbol ifPresent: aBlock
+    ^postData at: aSymbol ifPresent: aBlock!
 
 location
     ^location!
@@ -619,35 +650,6 @@ originator
 
 pageFollows
     WebResponse new respondTo: self!
-
-parseTimestamp: ts
-    | tok d m y time |
-    tok := ts substrings.
-    (tok at: 1) last = $, ifFalse: [ "asctime:  Sun Nov  6 08:49:37 1994"
-         ts size = 5 ifFalse: [ ^nil ].
-         m := (ts at: 2) asSymbol.
-         d := (ts at: 3) asInteger.
-         y := (ts at: 5) asInteger.
-         time := ts at: 4.
-         ^self makeTimestamp: d month: m year: y time: time
-    ].
-    (tok at: 1) size = 4 ifTrue: [ "RFC 822:  Sun, 06 Nov 1994 08:49:37 GMT"
-         ts size = 6 ifFalse: [ ^nil ].
-         d := (ts at: 2) asInteger.
-         m := (ts at: 3) asSymbol.
-         y := (ts at: 4) asInteger.
-         time := ts at: 5.
-         ^self makeTimestamp: d month: m year: y time: time
-    ].
-    "RFC 850 (obsolete):  Sunday, 06-Nov-94 08:49:37 GMT"
-    ts size = 4 ifFalse: [ ^nil ].
-    d := ts at: 2.
-    time := ts at: 3.
-    d size = 9 ifFalse: [ ^nil ].
-    y := (d at: 8) base10DigitValue * 10 + (d at: 9) base10DigitValue + 1900.
-    m := (d copyFrom: 4 to: 6) asSymbol.
-    d := (d at: 1) base10DigitValue * 10 + (d at: 2) base10DigitValue.
-    ^self makeTimestamp: d month: m year: y time: time!
 
 moreRequests
     ^(self at: #Connection) sameAs: 'keep-alive'
@@ -694,20 +696,51 @@ release
 
 !WebRequest methodsFor: 'private'!
 
-at: aSymbol put: aValue
-    ^clientData at: aSymbol put: aValue!
+parseTimestamp: ts
+    | tok d m y time |
+    tok := ts subStrings.
+    (tok at: 1) last = $, ifFalse: [ "asctime:  Sun Nov  6 08:49:37 1994"
+         ts size = 5 ifFalse: [ ^nil ].
+         m := (ts at: 2) asSymbol.
+         d := (ts at: 3) asInteger.
+         y := (ts at: 5) asInteger.
+         time := ts at: 4.
+         ^self makeTimestamp: d month: m year: y time: time
+    ].
+    (tok at: 1) size = 4 ifTrue: [ "RFC 822:  Sun, 06 Nov 1994 08:49:37 GMT"
+         ts size = 6 ifFalse: [ ^nil ].
+         d := (ts at: 2) asInteger.
+         m := (ts at: 3) asSymbol.
+         y := (ts at: 4) asInteger.
+         time := ts at: 5.
+         ^self makeTimestamp: d month: m year: y time: time
+    ].
+    "RFC 850 (obsolete):  Sunday, 06-Nov-94 08:49:37 GMT"
+    ts size = 4 ifFalse: [ ^nil ].
+    d := ts at: 2.
+    time := ts at: 3.
+    d size = 9 ifFalse: [ ^nil ].
+    y := (d at: 8) base10DigitValue * 10 + (d at: 9) base10DigitValue + 1900.
+    m := (d copyFrom: 4 to: 6) asSymbol.
+    d := (d at: 1) base10DigitValue * 10 + (d at: 2) base10DigitValue.
+    ^self makeTimestamp: d month: m year: y time: time!
 
 makeTimestamp: d month: m year: y time: t
-    | month |
+    | month sec |
     t size = 8 ifFalse: [ ^nil ].
 
     month := #(#Jan #Feb #Mar #Apr #May #Jun #Jul #Aug #Sep #Oct #Nov #Dec)
 	indexOf: m ifAbsent: [ ^nil ].
 
-    ^(((t at: 1) base10DigitValue * 10 + (t at: 2) base10DigitValue) * 3600)
-     + (((t at: 4) base10DigitValue * 10 + (t at: 5) base10DigitValue) * 60)
-     + (((t at: 7) base10DigitValue * 10 + (t at: 8) base10DigitValue))
-     + (Date newDay: d monthIndex: month year: y) asSeconds!
+    sec :=
+	(((t at: 1) base10DigitValue * 10 + (t at: 2) base10DigitValue) * 3600)
+      + (((t at: 4) base10DigitValue * 10 + (t at: 5) base10DigitValue) * 60)
+      + (((t at: 7) base10DigitValue * 10 + (t at: 8) base10DigitValue)).
+
+    ^(DateTime newDay: d monthIndex: month year: y) addSeconds: sec!
+
+at: aSymbol put: aValue
+    ^clientData at: aSymbol put: aValue!
 
 endOfLine
     ^EndOfLine!
@@ -734,28 +767,36 @@ extractClientData: clientVersion
 
 extractLocation
     uri := (stream upToAll: 'HTTP/') trimSeparators.
-    location := uri substrings: $?.
+    location := uri subStrings: $?.
+	location isEmpty ifTrue:
+		[ self error: 'Empty uri: ', uri, '.' ].
     location size = 2 ifTrue: [ self extractQueryData: (location at: 2) ].
-    location := (location at: 1) substrings: $/.
+    location := (location at: 1) subStrings: $/.
     location := location collect: [:each | (URL decode: each) ].
     location := location reject: [:each | each isEmpty ]!
 
-extractPostData: clientVersion
+extractPostData: clientVersion contentLength: contentLength
+    | s |
     clientVersion ~= '1.0'
-	ifTrue: [ stream nextPut: 'HTTP/1.1 100 Continue'; nl; nl ].
+	ifTrue: [ stream nextPutAll: 'HTTP/1.1 100 Continue'; nl; nl ].
 
     (self at: #'CONTENT-TYPE' ifAbsent: [ nil ]) ~=
-	'application/x-www-form-urlencoded' ifTrue: [ ^self ].
-
-    ^self extractQueryData: (stream upTo: Character cr)!
+		'application/x-www-form-urlencoded' ifTrue: [ ^self ].
+	
+    "TODO: Parse the stream directly, rather than loading it all into 
+    memory, because it could be large."
+    s := contentLength notNil 
+	ifTrue: [ stream next: contentLength asInteger ]
+	ifFalse: [ stream upTo: Character cr ].
+	
+    ^self extractQueryData: s!
 
 extractQueryData: query
-    (query substrings: $&) do: [ :each || pair |
-	pair := each substrings: $=.
+    (query subStrings: $&) do: [ :each || pair |
+	pair := each subStrings: $=.
 	self
 	    postDataAt: (URL decode: pair first) asSymbol
-	    put: (URL decode: pair last)
-    ]!
+	    put: (URL decode: (pair at: 2 ifAbsent: [ '' ])) ]!
 
 postDataAt: aSymbol put: aValue
     ^postData at: aSymbol put: aValue! !
