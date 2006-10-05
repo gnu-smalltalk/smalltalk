@@ -1115,7 +1115,7 @@ _gst_scavenge (void)
 
   if (!_gst_gc_running++
       && _gst_gc_message
-      && _gst_verbosity > 0
+      && _gst_verbosity > 2
       && !_gst_regression_testing)
     {
       /* print the first part of this message before we finish
@@ -1155,7 +1155,7 @@ _gst_scavenge (void)
 
   if (!--_gst_gc_running
       && _gst_gc_message
-      && _gst_verbosity > 0
+      && _gst_verbosity > 2
       && !_gst_regression_testing)
     {
       fprintf (stderr, "%d%% reclaimed, done\"\n", reclaimedPercent);

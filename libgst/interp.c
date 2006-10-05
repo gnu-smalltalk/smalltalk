@@ -2434,7 +2434,8 @@ interrupt_handler (int sig)
 #ifdef HAVE_EXECINFO_H
       /* Don't print a backtrace, for example, if exiting during a
 	 compilation.  */
-      if (ip || _gst_gc_running || is_serious_error || sig == SIGUSR1)
+      if ((_gst_verbosity > 2 && (ip || _gst_gc_running))
+	  || is_serious_error || sig == SIGUSR1)
 	{
           PTR array[11];
           size_t size = backtrace (array, 11);

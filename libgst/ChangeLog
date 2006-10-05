@@ -1,3 +1,8 @@
+2006-10-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp.c: Make less verbose on backtraces.
+	* libgst/oop.c: Make less verbose on scavenging.
+
 2006-09-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Use _gst_get_method_start_pos to find if we can
