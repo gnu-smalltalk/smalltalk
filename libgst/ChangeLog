@@ -1,5 +1,9 @@
 2006-10-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/lib.c: Improve help message to document -f.
+
+2006-10-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/interp.c: Make less verbose on backtraces.
 	* libgst/oop.c: Make less verbose on scavenging.
 
