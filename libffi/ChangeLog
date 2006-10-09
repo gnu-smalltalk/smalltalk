@@ -1,3 +1,154 @@
+2006-08-17  Andreas Tobler  <a.tobler@schweiz.ch>
+
+	* include/ffi_common.h (struct): Revert accidental commit.
+
+2006-08-15  Andreas Tobler  <a.tobler@schweiz.ch>
+
+	* include/ffi_common.h: Remove lint directives.
+	* include/ffi.h.in: Likewise.
+
+2006-07-25  Torsten Schoenfeld  <kaffeetisch@gmx.de>
+
+	* include/ffi.h.in (ffi_type_ulong, ffi_type_slong): Define correctly
+	for 32-bit architectures.
+	* testsuite/libffi.call/return_ul.c: New test case.
+
+2006-07-19  David Daney  <ddaney@avtrex.com>
+
+	* testsuite/libffi.call/closure_fn6.c: Remove xfail for mips,
+	xfail remains for mips64.
+
+2006-05-23  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* Makefile.am: Add install-html target. Add install-html to .PHONY
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* include/Makefile.in: Regenerate.
+	* testsuite/Makefile.in: Regenerate.
+
+2006-05-18  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* pa/ffi.c (ffi_prep_args_pa32): Load floating point arguments from
+	stack slot.
+
+2006-04-22  Andreas Tobler  <a.tobler@schweiz.ch>
+
+	* README: Remove notice about 'Crazy Comments'.
+	* src/debug.c: Remove lint directives. Cleanup white spaces.
+	* src/java_raw_api.c: Likewise.
+	* src/prep_cif.c: Likewise.
+	* src/raw_api.c: Likewise.
+	* src/ffitest.c: Delete. No longer needed, all test cases migrated
+	to the testsuite.
+	* src/arm/ffi.c: Remove lint directives.
+	* src/m32r/ffi.c: Likewise.
+	* src/pa/ffi.c: Likewise.
+	* src/powerpc/ffi.c: Likewise.
+	* src/powerpc/ffi_darwin.c: Likewise.
+	* src/sh/ffi.c: Likewise.
+	* src/sh64/ffi.c: Likewise.
+	* src/x86/ffi.c: Likewise.
+	* testsuite/libffi.call/float2.c: Likewise.
+	* testsuite/libffi.call/promotion.c: Likewise.
+	* testsuite/libffi.call/struct1.c: Likewise.
+
+2006-04-13  Andreas Tobler  <a.tobler@schweiz.ch>
+
+	* src/pa/hpux32.S: Correct unwind offset calculation for
+	ffi_closure_pa32.
+	* src/pa/linux.S: Likewise.
+
+2006-04-12  James E Wilson  <wilson@specifix.com>
+
+	PR libgcj/26483
+	* src/ia64/ffi.c (stf_spill, ldf_fill): Rewrite as macros.
+	(hfa_type_load): Call stf_spill.
+	(hfa_type_store): Call ldf_fill.
+	(ffi_call): Adjust calls to above routines.  Add local temps for
+	macro result.
+
+2006-04-10  Matthias Klose  <doko@debian.org>
+
+	* testsuite/lib/libffi-dg.exp (libffi-init): Recognize multilib
+	directory names containing underscores.
+
+2006-04-07  James E Wilson  <wilson@specifix.com>
+
+	* testsuite/libffi.call/float4.c: New testcase.
+
+2006-04-05  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+	    Andreas Tobler  <a.tobler@schweiz.ch>
+
+	* Makefile.am: Add PA_HPUX port.
+	* Makefile.in: Regenerate.
+	* include/Makefile.in: Likewise.
+	* testsuite/Makefile.in: Likewise.
+	* configure.ac: Add PA_HPUX rules.
+	* configure: Regenerate.
+	* src/pa/ffitarget.h: Rename linux target to PA_LINUX.
+	Add PA_HPUX and PA64_HPUX.
+	Rename FFI_LINUX ABI to FFI_PA32 ABI.
+	(FFI_TRAMPOLINE_SIZE): Define for 32-bit HP-UX targets.
+	(FFI_TYPE_SMALL_STRUCT2): Define.
+	(FFI_TYPE_SMALL_STRUCT4): Likewise.
+	(FFI_TYPE_SMALL_STRUCT8): Likewise.
+	(FFI_TYPE_SMALL_STRUCT3): Redefine.
+	(FFI_TYPE_SMALL_STRUCT5): Likewise.
+	(FFI_TYPE_SMALL_STRUCT6): Likewise.
+	(FFI_TYPE_SMALL_STRUCT7): Likewise.
+	* src/pa/ffi.c (ROUND_DOWN): Delete.
+	(fldw, fstw, fldd, fstd): Use '__asm__'.
+	(ffi_struct_type): Add support for FFI_TYPE_SMALL_STRUCT2,
+	FFI_TYPE_SMALL_STRUCT4 and FFI_TYPE_SMALL_STRUCT8.
+	(ffi_prep_args_LINUX): Rename to ffi_prep_args_pa32. Update comment.
+	Simplify incrementing of stack slot variable. Change type of local
+	'n' to unsigned int.
+	(ffi_size_stack_LINUX): Rename to ffi_size_stack_pa32. Handle long
+	double on PA_HPUX.
+	(ffi_prep_cif_machdep): Likewise.
+	(ffi_call): Likewise.
+	(ffi_closure_inner_LINUX): Rename to ffi_closure_inner_pa32. Change
+	return type to ffi_status. Simplify incrementing of stack slot
+	variable. Only copy floating point argument registers when PA_LINUX
+	is true. Reformat debug statement.
+	Add support for FFI_TYPE_SMALL_STRUCT2, FFI_TYPE_SMALL_STRUCT4 and
+	FFI_TYPE_SMALL_STRUCT8.
+	(ffi_closure_LINUX): Rename to ffi_closure_pa32. Add 'extern' to
+	declaration.
+	(ffi_prep_closure): Make linux trampoline conditional on PA_LINUX.
+	Add nops to cache flush.  Add trampoline for PA_HPUX.
+	* src/pa/hpux32.S: New file.
+	* src/pa/linux.S (ffi_call_LINUX): Rename to ffi_call_pa32. Rename
+	ffi_prep_args_LINUX to ffi_prep_args_pa32.
+	Localize labels. Add support for 2, 4 and 8-byte small structs. Handle
+	unaligned destinations in 3, 5, 6 and 7-byte small structs. Order
+	argument type checks so that common argument types appear first.
+	(ffi_closure_LINUX): Rename to ffi_closure_pa32. Rename
+	ffi_closure_inner_LINUX to ffi_closure_inner_pa32.
+
+2006-03-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* src/powerpc/ffitarget.h (enum ffi_abi): Add FFI_LINUX.  Default
+	for 32-bit using IBM extended double format.  Fix FFI_LAST_ABI.
+	* src/powerpc/ffi.c (ffi_prep_args_SYSV): Handle linux variant of
+	FFI_TYPE_LONGDOUBLE.
+	(ffi_prep_args64): Assert using IBM extended double.
+	(ffi_prep_cif_machdep): Don't munge FFI_TYPE_LONGDOUBLE type.
+	Handle FFI_LINUX FFI_TYPE_LONGDOUBLE return and args.
+	(ffi_call): Handle FFI_LINUX.
+	(ffi_closure_helper_SYSV): Non FFI_LINUX long double return needs
+	gpr3 return pointer as for struct return.  Handle FFI_LINUX
+	FFI_TYPE_LONGDOUBLE return and args.  Don't increment "nf"
+	unnecessarily.
+	* src/powerpc/ppc_closure.S (ffi_closure_SYSV): Load both f1 and f2
+	for FFI_TYPE_LONGDOUBLE.  Move epilogue insns into case table.
+	Don't use r6 as pointer to results, instead use sp offset.  Don't
+	make a special call to load lr with case table address, instead
+	use offset from previous call.
+	* src/powerpc/sysv.S (ffi_call_SYSV): Save long double return.
+	* src/powerpc/linux64.S (ffi_call_LINUX64): Simplify long double
+	return.
+
 2006-03-15  Kaz Kojima  <kkojima@gcc.gnu.org>
 
 	* src/sh64/ffi.c (ffi_prep_cif_machdep): Handle float arguments

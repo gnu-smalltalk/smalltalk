@@ -5,7 +5,8 @@ Smalltalk \- the GNU Smalltalk virtual machine
 .SH DESCRIPTION
 GNU Smalltalk usage:
 .IP
-gst [ flag ... ] [ file ...]
+gst [ flag ... ] [ file ... ]
+gst [ flag ... ] { \fB\-f\fR | \fB\-\-file\fR } file [ args ... ]
 .PP
 Short flags can appear either as \fB\-xyz\fR or as \fB\-x\fR \fB\-y\fR \fB\-z\fR.  If an option is
 mandatory for a long option, it is also mandatory for a short one. The
@@ -73,6 +74,9 @@ Read input from standard input explicitly
 Files are loaded one after the other.  After the last one is loaded,
 Smalltalk will exit.  If no files are specified, Smalltalk reads from
 the terminal, with prompts.
+.PP
+In the second form, the file after \fB\-f\fR is the last loaded file; any
+parameter after that file is passed to the Smalltalk program.
 .SH AUTHOR
 Written by Steve Byrne (sbb@gnu.org) and Paolo Bonzini (bonzini@gnu.org)
 .PP
@@ -86,7 +90,7 @@ Using default image path: /usr/local/share/smalltalk
 .SH "REPORTING BUGS"
 Report bugs to help-smalltalk@gnu.org
 .PP
-Copyright 2003 Free Software Foundation, Inc.
+Copyright 2006 Free Software Foundation, Inc.
 .SH "SEE ALSO"
 The full documentation for
 .B Smalltalk
