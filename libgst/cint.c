@@ -797,11 +797,11 @@ push_smalltalk_obj (OOP oop,
   int i;
   cparam *cp = &c_func_cur->args[c_func_cur->arg_idx];
 
-  cp->oop = NULL;
   class = OOP_INT_CLASS (oop);
 
-  if (cType == CDATA_UNKNOWN)
+  switch (cType)
     {
+    case CDATA_UNKNOWN:
       cType =
 	(oop == _gst_true_oop || oop == _gst_false_oop) ? CDATA_BOOLEAN :
 	oop == _gst_nil_oop ? CDATA_COBJECT :
@@ -814,8 +814,34 @@ push_smalltalk_obj (OOP oop,
 	is_a_kind_of (class, _gst_c_object_class) ? CDATA_COBJECT :
 	is_a_kind_of (class, _gst_float_class) ? CDATA_DOUBLE :
 	CDATA_OOP;
+      break;
+
+    case CDATA_VARIADIC:
+      if (class == _gst_array_class)
+	{
+	  c_func_cur->cacheVariadic = true;
+	  for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
+	    push_smalltalk_obj (ARRAY_AT (oop, i), CDATA_UNKNOWN);
+	}
+      else
+        bad_type (class, cType);
+
+      return;
+
+    case CDATA_VARIADIC_OOP:
+      if (class == _gst_array_class)
+	{
+	  c_func_cur->cacheVariadic = true;
+	  for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
+	    push_smalltalk_obj (ARRAY_AT (oop, i), CDATA_OOP);
+	}
+      else
+        bad_type (class, cType);
+
+      return;
     }
 
+  cp->oop = NULL;
   cp->cType = cType;
 
   if (cType == CDATA_OOP)
@@ -980,25 +1006,6 @@ push_smalltalk_obj (OOP oop,
 	}
     }
 
-  else if (class == _gst_array_class)
-    {
-      switch (cType)
-	{
-	case CDATA_VARIADIC:
-	  c_func_cur->cacheVariadic = true;
-	  for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
-	    push_smalltalk_obj (ARRAY_AT (oop, i), CDATA_UNKNOWN);
-
-	  return;
-
-        case CDATA_VARIADIC_OOP:
-	  c_func_cur->cacheVariadic = true;
-	  for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
-	    push_smalltalk_obj (ARRAY_AT (oop, i), CDATA_OOP);
-
-	  return;
-	}
-    }
 
   bad_type (class, cType);
 }
