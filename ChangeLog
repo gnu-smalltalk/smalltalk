@@ -1,3 +1,7 @@
+2006-10-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Regex.st: Fix Regex>>#asString, reported by J Pfersich.
+
 2006-10-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ObjMemory.st: Wait for the completion of other processes

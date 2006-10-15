@@ -393,7 +393,9 @@ asRegex
 
 asString
     "Answer the receiver, converted back to a String"
-    ^String new: self size withAll: self
+    ^(String new: self size)
+	replaceFrom: 1 to: self size with: self startingAt: 1;
+	yourself
 !
 
 species
