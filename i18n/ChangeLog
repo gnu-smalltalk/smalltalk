@@ -1,5 +1,9 @@
 2006-10-16  Paolo Bonzini  <bonzini@gnu.org>
 
+	* i18n/Sets.st: Fix BOM detection bug.
+
+2006-10-16  Paolo Bonzini  <bonzini@gnu.org>
+
 	* i18n/Sets.st: Fix bug in Split* encoders.
 
 2006-09-22  Paolo Bonzini  <bonzini@gnu.org>

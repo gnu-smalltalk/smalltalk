@@ -1289,21 +1289,21 @@ encoding
      default locale's default charset"
 
     | encoding |
-    (self size >= 4 and: [ (self at: 1) = 0 and: [ (self at: 2) = 0 and: [
-    	(self at: 3) = 254 and: [
-    	(self at: 4) = 255 ]]]]) ifTrue: [ ^'UTF-32BE' ].
-    (self size >= 4 and: [ (self at: 4) = 0 and: [ (self at: 3) = 0 and: [
-    	(self at: 2) = 254 and: [
-    	(self at: 1) = 255 ]]]]) ifTrue: [ ^'UTF-32LE' ].
+    (self size >= 4 and: [ (self valueAt: 1) = 0 and: [ (self valueAt: 2) = 0 and: [
+    	(self valueAt: 3) = 254 and: [
+    	(self valueAt: 4) = 255 ]]]]) ifTrue: [ ^'UTF-32BE' ].
+    (self size >= 4 and: [ (self valueAt: 4) = 0 and: [ (self valueAt: 3) = 0 and: [
+    	(self valueAt: 2) = 254 and: [
+    	(self valueAt: 1) = 255 ]]]]) ifTrue: [ ^'UTF-32LE' ].
     (self size >= 2 and: [
-    	(self at: 1) = 254 and: [
-    	(self at: 2) = 255 ]]) ifTrue: [ ^'UTF-16BE' ].
+    	(self valueAt: 1) = 254 and: [
+    	(self valueAt: 2) = 255 ]]) ifTrue: [ ^'UTF-16BE' ].
     (self size >= 2 and: [
-    	(self at: 2) = 254 and: [
-    	(self at: 1) = 255 ]]) ifTrue: [ ^'UTF-16LE' ].
-    (self size >= 3 and: [ (self at: 1) = 16rEF and: [
-    	(self at: 2) = 16rBB and: [
-    	(self at: 3) = 16rBF ]]]) ifTrue: [ ^'UTF-8' ].
+    	(self valueAt: 2) = 254 and: [
+    	(self valueAt: 1) = 255 ]]) ifTrue: [ ^'UTF-16LE' ].
+    (self size >= 3 and: [ (self valueAt: 1) = 16rEF and: [
+    	(self valueAt: 2) = 16rBB and: [
+    	(self valueAt: 3) = 16rBF ]]]) ifTrue: [ ^'UTF-8' ].
 
     encoding := self class defaultEncoding.
     encoding asString = 'UTF-16' ifTrue: [ ^self utf16Encoding ].
@@ -1314,9 +1314,9 @@ utf32Encoding
     "Assuming the receiver is encoded as UTF-16 with a proper
      endianness marker, answer the correct encoding of the receiver."
 
-    (self size >= 4 and: [ (self at: 4) = 0 and: [ (self at: 3) = 0 and: [
-    	(self at: 2) = 254 and: [
-    	(self at: 1) = 255 ]]]]) ifTrue: [ ^'UTF-32LE' ].
+    (self size >= 4 and: [ (self valueAt: 4) = 0 and: [ (self valueAt: 3) = 0 and: [
+    	(self valueAt: 2) = 254 and: [
+    	(self valueAt: 1) = 255 ]]]]) ifTrue: [ ^'UTF-32LE' ].
     ^'UTF-32BE'
 !
 
@@ -1325,8 +1325,8 @@ utf16Encoding
      endianness marker, answer the correct encoding of the receiver."
 
     (self size >= 2 and: [
-    	(self at: 2) = 254 and: [
-    	(self at: 1) = 255 ]]) ifTrue: [ ^'UTF-16LE' ].
+    	(self valueAt: 2) = 254 and: [
+    	(self valueAt: 1) = 255 ]]) ifTrue: [ ^'UTF-16LE' ].
     ^'UTF-16BE'
 ! !
 
