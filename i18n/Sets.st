@@ -718,13 +718,13 @@ next
          been extracted."
 	wch := answer := self nextInput codePoint.
 	wch := (wch bitShift: -8) + 16r1000000.
-	^(answer bitAnd: 255) asCharacter
+	^Character value: (answer bitAnd: 255)
     ].
 
     "Answer any other byte"
     answer := wch bitAnd: 255.
     wch := wch bitShift: -8.
-    ^answer asCharacter
+    ^Character value: answer
 !
 
 flush
@@ -754,7 +754,7 @@ next
 	wch := answer := self nextInput codePoint.
 	wch := wch bitAnd: 16rFFFFFF.
 	count := 3.
-	^(answer bitShift: -24) asCharacter
+	^Character value: (answer bitShift: -24)
     ].
 
     "Answer any other byte.  We keep things so that the byte we answer
@@ -763,7 +763,7 @@ next
     wch := wch bitAnd: 16rFFFF.
     wch := wch bitShift: 8.
     count := count - 1.
-    ^answer asCharacter
+    ^Character value: answer
 !
 
 flush
