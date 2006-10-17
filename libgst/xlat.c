@@ -508,11 +508,6 @@ generate_do_super_code (void)
   jit_ldxi_uc (JIT_R2, JIT_V1, jit_field (inline_cache, numArgs));
   jit_ldxi_p (JIT_R0, JIT_V1, jit_field (inline_cache, selector));
 
-  /* the method class is the superclass of the current method's
-     method_class */
-  jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (OOP, object));
-  jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (gst_class, superclass));
-
   jit_prepare (4);
   jit_pusharg_p (JIT_V0);	/* method_class */
   jit_pusharg_p (JIT_R1);	/* receiver */
@@ -773,6 +768,7 @@ code_tree *
 push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int operation, int imm)
 {
   code_tree *args, *node;
+  int tot_args;
 
   curr_inline_cache->numArgs = numArgs;
   curr_inline_cache->selector = selector;
@@ -782,7 +778,8 @@ push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int
   curr_inline_cache->imm = imm;
 
   /* Remember that we must pop an extra node for the receiver! */
-  for (args = pop_tree_node (NULL); numArgs--;)
+  tot_args = numArgs + (super ? 2 : 1);
+  for (args = NULL; tot_args--;)
     args = pop_tree_node (args);
 
   node =
@@ -1178,6 +1175,19 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
   }									\
 } while(0)
 
+/* Export V2 (the stack pointer) into the sp variable, without pushing
+ * the value cached in V0.  */
+#define KEEP_V0_EXPORT_SP do {						\
+  if (sp_delta < 0) {							\
+    jit_ldr_p(JIT_V0, JIT_V2);						\
+  }									\
+  if (sp_delta != 0) {							\
+    jit_addi_p(JIT_V2, JIT_V2, sp_delta);				\
+  }									\
+  jit_sti_p(&sp, JIT_V2);						\
+  sp_delta = -sizeof (PTR);						\
+} while(0)
+
 /* Export V2 (the stack pointer) into the sp variable, without
  * saving the old stack top if it was cached in V0.  */
 #define POP_EXPORT_SP do {						\
@@ -1374,13 +1384,14 @@ gen_send (code_tree *tree)
 
   PUSH_CHILDREN;
   jit_movi_p (JIT_V1, ic);
-  EXPORT_SP;
-
-  jit_movi_ul (JIT_V0, tree->bp - bc + BYTECODE_SIZE);
-  jit_ldxi_p (JIT_R1, JIT_V1, jit_field (inline_cache, cachedIP));
-  jit_sti_ul (&ip, JIT_V0);
   if (ic->is_super)
-    jit_movi_p (JIT_V0, method_class);
+    KEEP_V0_EXPORT_SP;
+  else
+    EXPORT_SP;
+
+  jit_movi_ul (JIT_R0, tree->bp - bc + BYTECODE_SIZE);
+  jit_ldxi_p (JIT_R1, JIT_V1, jit_field (inline_cache, cachedIP));
+  jit_sti_ul (&ip, JIT_R0);
 
   jit_jmpr (JIT_R1);
   jit_align (2);
@@ -2201,6 +2212,9 @@ gen_alt_self (code_tree *tree)
   if (!self_cached)
     jit_ldi_p (JIT_V1, &_gst_self);
 
+  else
+    jit_movr_p (JIT_V1, JIT_V0);
+
   stack_cached = -1;
 }
 
@@ -2381,6 +2395,7 @@ emit_deferred_sends (deferred_send *ds)
 
   tree = ds->tree;
   ic = (inline_cache *) tree->data;
+  assert (!ic->is_super);
 
   lbl_define (ds->address);
   if (ds->reg1 == JIT_NOREG)
@@ -2398,8 +2413,6 @@ emit_deferred_sends (deferred_send *ds)
   jit_movi_ul (JIT_V0, tree->bp - bc);
   jit_ldxi_p (JIT_R1, JIT_V1, jit_field (inline_cache, cachedIP));
   jit_sti_ul (&ip, JIT_V0);
-  if (ic->is_super)
-    jit_movi_p (JIT_V0, method_class);
 
   jit_jmpr (JIT_R1);
   jit_align (2);
@@ -2595,7 +2608,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 
 	  case ISP_CHARACTER:
 	    {
-	      jit_ldxr_c (JIT_R0, JIT_R2, JIT_V1);
+	      jit_ldxr_uc (JIT_R0, JIT_R2, JIT_V1);
 
               /* Convert to a character */
               jit_lshi_l (JIT_R0, JIT_R0, LONG_SHIFT + 1);
@@ -3097,9 +3110,8 @@ emit_method_prolog (OOP methodOOP,
 
     case MTH_RETURN_INSTVAR:
       {
-	      _gst_debug ();
-	jit_ldxi_p (JIT_V1, JIT_V1, jit_field (inline_cache, native_ip));
 	int ofs = jit_ptr_field (mst_Object, data[header.primitiveIndex]);
+	jit_ldxi_p (JIT_V1, JIT_V1, jit_field (inline_cache, native_ip));
 	jit_ldxi_p (JIT_R2, JIT_R2, ofs);	/* Remember? R2 is _gst_self->object */
 	jit_str_p (JIT_V2, JIT_R2);	/* Make it the stack top */
 	jit_jmpr (JIT_V1);

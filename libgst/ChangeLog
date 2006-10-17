@@ -1,3 +1,11 @@
+2006-10-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/xlat.c: Update gen_send for new super-send implementation.
+	Disallow deferred super sends.  Fix bug in String>>#at: inlining
+	and in compiling a gen_push_self+gen_alt_self sequence.  Remove
+	C99-ism in emit_method_prolog.
+	* libgst/xlat.h: Fix IS_VALID_IP for methodStart == 0.
+
 2006-10-16  Roman Zippel  <zippel@linux-m68k.org>
 
 	* libgst/alloc.h: Add padding to the bitfields.
