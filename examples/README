@@ -3,7 +3,7 @@ This directory contains some example GNU Smalltalk programs.
 The programs are:
 
 Application.st	Attempt at adding support for an ENVY-like organization of
-by pb		components into applications and subapplications.  Must be
+by me		components into applications and subapplications.  Must be
 		integrated with the packaging system.
 
 bench.st	An extraordinarily precise low-level benchmark for Smalltalk,
@@ -23,10 +23,10 @@ CStream.st	A stream providing functionality for writing C code.
 by sbb
 
 Debugger.st	Not yet tested attempt at creating a bytecode simulator which
-by pb/sbb	would be used in debugging Smalltalk methods.
+by me/sbb	would be used in debugging Smalltalk methods.
 
 Dinner.st	The classic dining philosophers problem.  You need working 
-by pb		Delays to try this (alarm is not very good but maybe it works).
+by me		Delays to try this (alarm is not very good but maybe it works).
 		Try `(Philosophers new: 5) dine'.
 
 EditStream.st	A stream handling fast insertions, using a double buffer
@@ -34,10 +34,10 @@ by Ulf		with a gap between the buffers.
 Dambacher
 
 LazyCollection.st  Implementation of #collect:, #select:, #reject: that do not
-by pb		create a new collection unless really necessary.
+by me		create a new collection unless really necessary.
 
 Sync.st		Many kinds of synchronization devices.
-by pb
+by me
 
 GenClasses.st	Provides help in creating many similarly named classes.
 by sbb
@@ -55,8 +55,12 @@ by sbb		iterates through all the objects in the system, counting
 		total at the end.  It has found more bugs in the memory
 		management system than I (sbb) care to admit.
 
+Methods.st      Examples of subclassing CompiledMethod...  'nuff said!
+by Ian Piumarta
+and me
+
 MiniDebugger.st A simplified debugger which shows how to use the single step
-by pb           primitives to implement an interface that vaguely resembles
+by me           primitives to implement an interface that vaguely resembles
                 gdb.
 
 Prolog.st	This is absolutely stunning! A Prolog interpreter written in
@@ -68,7 +72,7 @@ PrtHier.st	prints out the class hierarchy, indented according to
 by sbb		the number of super classes a class has.
 
 Publish.st	An object-oriented, multiple format class file-out system.
-by pb/sbb	Currently includes Postscript for file-outs, and HTML/Texinfo
+by me/sbb	Currently includes Postscript for file-outs, and HTML/Texinfo
 		for documentation -- by the way, this example is used by the
 		makefile for GNU Smalltalk's info files.  And also an example
 		of namespaces.
@@ -77,7 +81,7 @@ PushBack.st	A Stream with unlimited push-back capabilities.  Together with
 by sbb		Tokenizer.st, it is used in many places (C interface, compiler)
 
 Queens.st	An elegant solution of the queens and amazons problem (amazons
-by pb		can move like either the queen or the knight).  There are:
+by me		can move like either the queen or the knight).  There are:
 		2 solutions (1 discarding rotations/reflections) on a 4x4 board
 		92 solutions (12) on a 8x8 board
 		no solutions (!) to the amazons problem on a 8x8 board
@@ -104,7 +108,7 @@ William Lount	which fields are more important and which must be sorted in
 		descending order).
 
 Tokenizer.st	An abstract base class for lexical analyzers.
-by pb/sbb
+by me/sbb
 
 
 The `modules' directory contains some of the simplest packages that one could
@@ -117,12 +121,12 @@ they are:
 The `blox' directory contains:
 
 Man.st		Man page viewer widget (example of using BExtended).  To test
-by pb		it evaluate "ManViewer openOn: 'path' "
+by me		it evaluate "ManViewer openOn: 'path' "
 		Will somebody write a Smalltalk xman?!? (that means you...)
 		Send it to me if you do!
 
 Tetris.st	A Tetris game written using BLOX.  A few notes:
-by pb		1) you should have a precise version of Delays to use it
+by me		1) you should have a precise version of Delays to use it
 		   (Win32 or an OS with setitimer, like BSD and Linux).  Simple
 		   `alarm' (which has only 1 second precision) is not enough.
 		2) Cursor keys move the piece, Up rotates it, Return drops it.
@@ -145,5 +149,6 @@ The `unsupported/misc' directory contains some other small example GNU
 Smalltalk programs which test more advanced aspects of Smalltalk, either
 various packages or the VM.  Among others, `torture.st' is Andreas Klimas'
 nice memory torture test program - like MemUsage.st it has found more bugs
-in the memory management system than I (pb) care to admit...
+in the memory management system than I care to admit...
 
+Paolo Bonzini

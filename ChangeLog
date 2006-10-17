@@ -1,5 +1,9 @@
 2006-10-16  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/Methods.st: New.
+
+2006-10-16  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/String.st: Fix storeString of read-only literals.
 
 2006-10-15  Paolo Bonzini  <bonzini@gnu.org>

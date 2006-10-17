@@ -579,6 +579,7 @@
   <file>Bench.st</file>
   <file>MiniDebugger.st</file>
   <file>MemUsage.st</file>
+  <file>Methods.st</file>
   <file>README</file>
   <file>GenClasses.st</file>
   <file>Dinner.st</file>
