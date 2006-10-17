@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2002, 2004 Free Software Foundation, Inc.
+ * Copyright 2002, 2004, 2006 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -43,6 +43,7 @@ typedef struct heap_block
   size_t size;			 /* Size of objects in this block */
   unsigned mmap_block : 1;	 /* Whether the block was mmap-ed */
   unsigned user : 1;
+  unsigned pad : 30;		 /* needed for linux/m68k?  */
   union {
     struct {
       int nr;			 /* Nr of objects in block */

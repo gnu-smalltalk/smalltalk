@@ -156,21 +156,18 @@ case "$host" in
       [int sig, unsigned int more],
       [((unsigned long *) &more) [21]])
   
-    dnl FIXME: Put in some more known values into the third argument.
-    SV_TRY_FAULT([Linux/m68k], sv_cv_fault_linux_m68k, [],
+    SV_TRY_FAULT([Linux/m68k], sv_cv_fault_linux_m68k, [m68k-*-linux*],
       [#include <asm/sigcontext.h>
     #include "$srcdir/src/fault-linux-m68k.c"],
       [int sig, int code, struct sigcontext *scp],
       [get_fault_addr (scp)])
   
-    dnl FIXME: Put in some more known values into the third argument.
-    SV_TRY_FAULT([Linux/PowerPC], sv_cv_fault_linux_powerpc, [],
+    SV_TRY_FAULT([Linux/PowerPC], sv_cv_fault_linux_powerpc, [powerpc*-*-linux*],
       [#include <asm/sigcontext.h>],
       [int sig, struct sigcontext *scp],
       [scp->regs->dar])
   
-    dnl FIXME: Put in some more known values into the third argument.
-    SV_TRY_FAULT([Linux/HPPA], sv_cv_fault_linux_hppa, [],
+    SV_TRY_FAULT([Linux/HPPA], sv_cv_fault_linux_hppa, [hppa*-*-linux*],
       [],
       [int sig, siginfo_t *sip, void *ucp],
       [sip->si_ptr],
@@ -281,6 +278,12 @@ case "$host" in
       esac
       FAULT_CONTEXT='struct sigcontext'
     fi
+    if test "$CFG_FAULT" = fault-none.h && test "$sv_cv_fault_linux_m68k" = yes; then
+      case "$host_cpu" in
+        m68*) CFG_FAULT=fault-linux-m68k.h ;;
+      esac
+      FAULT_CONTEXT='struct sigcontext'
+    fi
     if test "$CFG_FAULT" = fault-none.h && test "$sv_cv_fault_linux_powerpc" = yes; then
       case "$host_cpu" in
         powerpc* | rs6000) CFG_FAULT=fault-linux-powerpc.h ;;
@@ -361,14 +364,6 @@ case "$host" in
     dnl Next, the cases where there is a hairy CPU dependent way to get the
     dnl fault address.
     dnl
-    if test "$CFG_FAULT" = fault-none.h && test "$sv_cv_fault_linux_m68k" = yes; then
-      case "$host_cpu" in
-        m68*)
-          CFG_FAULT=fault-linux-m68k.h
-          FAULT_CONTEXT='struct sigcontext'
-          ;;
-      esac
-    fi
     if test "$CFG_FAULT" = fault-none.h; then
       sv_cv_have_sigsegv_recovery=no
       dnl
