@@ -36,6 +36,7 @@ BEGIN {
 
   # These are implemented strangely...
   classNames["GValue"] = ""
+  classNames["GdkAtom"] = ""
   classNames["GtkObject"] = ""
   classNames["GtkEditable"] = ""
 

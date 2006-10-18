@@ -97,13 +97,18 @@ open
 	userData: nil.
     vbox packStart: button expand: false fill: false padding: 0.
 
-    typs := (CArrayCType elementType: CIntType numberOfElements: 3) new.
+    "typs := (CArrayCType elementType: CIntType numberOfElements: 3) new.
     typs 
 	at: 0 put: (GValue typeFromName: 'gint');
         at: 1 put: (GValue typeFromName: 'gchararray');
 	at: 2 put: (GValue typeFromName: 'gchararray').
 
-    tree := GtkTreeStore newv: 3 types: typs.
+    tree := GtkTreeStore newv: 3 types: typs."
+
+    tree := GtkTreeStore new: 3 varargs: {
+        GValue gTypeInt.
+        GValue gTypeString.
+        GValue gTypeString}.
 
     "TreeStore"
     col := GtkTreeViewColumn new.

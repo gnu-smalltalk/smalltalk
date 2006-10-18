@@ -992,8 +992,8 @@ mousePointer
 defaultFont
     "Answer the default font used by Blox."
     ^self platform = #macintosh
-	ifTrue: 'lucida 13'
-	ifFalse: 'helvetica 10'
+	ifTrue: [ 'lucida 13' ]
+	ifFalse: [ 'helvetica 10' ]
 !
 
 platform

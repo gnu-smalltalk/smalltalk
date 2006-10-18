@@ -78,7 +78,7 @@ extern PTR (*_gst_return_from_native_code) ()
   ((char *) nativeCodeStart) - (sizeof(method_entry) - sizeof(int))  ))
 
 #define IS_VALID_IP(nativeCodeStart) 					\
-  (GET_METHOD_ENTRY(nativeCodeStart)->receiverClass)
+  ((nativeCodeStart) && GET_METHOD_ENTRY((nativeCodeStart))->receiverClass)
 
 #endif /* ENABLE_JIT_TRANSLATION */
 

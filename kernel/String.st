@@ -78,7 +78,8 @@ case, they are particularly optimized.' !
 
 storeOn: aStream
     "Print Smalltalk code compiling to the receiver on aStream"
-    self printOn: aStream
+    self printOn: aStream.
+    self isReadOnly ifFalse: [ aStream nextPutAll: ''' copy' ]
 ! !
 
 

@@ -1,3 +1,10 @@
+2006-10-16  Roman Zippel  <zippel@linux-m68k.org>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* configure.ac: m68k ugly code to get fault address, is not that ugly.
+	Plus, add cross compilation defaults.
+	* src/handler-win32.c: Merge from upstream.
+
 2003-12-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* configure.in: Save results of heuristics detection

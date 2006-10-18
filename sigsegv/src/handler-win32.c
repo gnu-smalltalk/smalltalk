@@ -161,15 +161,23 @@ main_exception_filter (EXCEPTION_POINTERS *ExceptionInfo)
               && ExceptionInfo->ExceptionRecord->ExceptionCode == STATUS_STACK_OVERFLOW)
             {
               char *address = (char *) ExceptionInfo->ExceptionRecord->ExceptionInformation[1];
-              /* Restart the program, giving it a sane value for %esp.  */
+              /* Restart the program, giving it a sane value for %esp.
+                 At the same time, copy the contents of
+                 ExceptionInfo->ContextRecord (which, on Windows XP, happens
+                 to be allocated in the guard page, where it will be
+                 inaccessible as soon as we restore the PAGE_GUARD bit!) to
+                 this new stack.  */
               unsigned long faulting_page_address = (unsigned long)address & -0x1000;
-              unsigned long new_safe_esp = ((stk_extra_stack + stk_extra_stack_size) & -8);
+              unsigned long new_safe_esp = ((stk_extra_stack + stk_extra_stack_size) & -16);
+              CONTEXT *orig_context = ExceptionInfo->ContextRecord;
+              CONTEXT *safe_context = (CONTEXT *) (new_safe_esp -= sizeof (CONTEXT)); /* make room */
+              memcpy (safe_context, orig_context, sizeof (CONTEXT));
               new_safe_esp -= 12; /* make room for arguments */
               ExceptionInfo->ContextRecord->Esp = new_safe_esp;
-              /* Call stack_overflow_handler(faulting_page_address).  */
+              /* Call stack_overflow_handler(faulting_page_address,safe_context).  */
               ExceptionInfo->ContextRecord->Eip = (unsigned long)&stack_overflow_handler;
-              *(unsigned long *)(new_safe_esp + 8) = faulting_page_address;
-              *(unsigned long *)(new_safe_esp + 4) = (unsigned long) ExceptionInfo->ContextRecord;
+              *(unsigned long *)(new_safe_esp + 4) = faulting_page_address;
+              *(unsigned long *)(new_safe_esp + 8) = (unsigned long) safe_context;
               return EXCEPTION_CONTINUE_EXECUTION;
             }
           if (user_handler != (sigsegv_handler_t) NULL

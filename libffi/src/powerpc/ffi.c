@@ -80,10 +80,8 @@ enum { ASM_NEEDS_REGISTERS = 4 };
 
 */
 
-/*@-exportheader@*/
 void
 ffi_prep_args_SYSV (extended_cif *ecif, unsigned *const stack)
-/*@=exportheader@*/
 {
   const unsigned bytes = ecif->cif->bytes;
   const unsigned flags = ecif->cif->flags;
@@ -197,6 +195,38 @@ ffi_prep_args_SYSV (extended_cif *ecif, unsigned *const stack)
 	  FFI_ASSERT (flags & FLAG_FP_ARGUMENTS);
 	  break;
 
+#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
+	case FFI_TYPE_LONGDOUBLE:
+	  if (ecif->cif->abi != FFI_LINUX)
+	    goto do_struct;
+	  double_tmp = (*p_argv.d)[0];
+
+	  if (fparg_count >= NUM_FPR_ARG_REGISTERS - 1)
+	    {
+	      if (intarg_count >= NUM_GPR_ARG_REGISTERS
+		  && intarg_count % 2 != 0)
+		{
+		  intarg_count++;
+		  next_arg.u++;
+		}
+	      *next_arg.d = double_tmp;
+	      next_arg.u += 2;
+	      double_tmp = (*p_argv.d)[1];
+	      *next_arg.d = double_tmp;
+	      next_arg.u += 2;
+	    }
+	  else
+	    {
+	      *fpr_base.d++ = double_tmp;
+	      double_tmp = (*p_argv.d)[1];
+	      *fpr_base.d++ = double_tmp;
+	    }
+
+	  fparg_count += 2;
+	  FFI_ASSERT (flags & FLAG_FP_ARGUMENTS);
+	  break;
+#endif
+
 	case FFI_TYPE_UINT64:
 	case FFI_TYPE_SINT64:
 	  if (intarg_count == NUM_GPR_ARG_REGISTERS-1)
@@ -232,7 +262,7 @@ ffi_prep_args_SYSV (extended_cif *ecif, unsigned *const stack)
 
 	case FFI_TYPE_STRUCT:
 #if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
-	case FFI_TYPE_LONGDOUBLE:
+	do_struct:
 #endif
 	  struct_copy_size = ((*ptr)->size + 15) & ~0xF;
 	  copy_space.c -= struct_copy_size;
@@ -322,10 +352,8 @@ enum { ASM_NEEDS_REGISTERS64 = 4 };
 
 */
 
-/*@-exportheader@*/
 void FFI_HIDDEN
 ffi_prep_args64 (extended_cif *ecif, unsigned long *const stack)
-/*@=exportheader@*/
 {
   const unsigned long bytes = ecif->cif->bytes;
   const unsigned long flags = ecif->cif->flags;
@@ -433,6 +461,7 @@ ffi_prep_args64 (extended_cif *ecif, unsigned long *const stack)
 	  if (fparg_count < NUM_FPR_ARG_REGISTERS64)
 	    *fpr_base.d++ = double_tmp;
 	  fparg_count++;
+	  FFI_ASSERT (__LDBL_MANT_DIG__ == 106);
 	  FFI_ASSERT (flags & FLAG_FP_ARGUMENTS);
 	  break;
 #endif
@@ -536,11 +565,6 @@ ffi_prep_cif_machdep (ffi_cif *cif)
 
       /* Space for the mandatory parm save area and general registers.  */
       bytes += 2 * NUM_GPR_ARG_REGISTERS64 * sizeof (long);
-
-#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
-      if (type == FFI_TYPE_LONGDOUBLE)
-	type = FFI_TYPE_DOUBLE;
-#endif
     }
 
   /* Return value handling.  The rules for SYSV are as follows:
@@ -549,14 +573,24 @@ ffi_prep_cif_machdep (ffi_cif *cif)
      - 64-bit integer values and structures between 5 and 8 bytes are returned
      in gpr3 and gpr4;
      - Single/double FP values are returned in fpr1;
-     - Larger structures and long double (if not equivalent to double) values
-     are allocated space and a pointer is passed as the first argument.
+     - Larger structures are allocated space and a pointer is passed as
+     the first argument.
+     - long doubles (if not equivalent to double) are returned in
+     fpr1,fpr2 for Linux and as for large structs for SysV.
      For LINUX64:
      - integer values in gpr3;
      - Structures/Unions by reference;
      - Single/double FP values in fpr1, long double in fpr1,fpr2.  */
   switch (type)
     {
+#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
+    case FFI_TYPE_LONGDOUBLE:
+      if (cif->abi != FFI_LINUX && cif->abi != FFI_LINUX64)
+	goto byref;
+
+      flags |= FLAG_RETURNS_128BITS;
+      /* Fall through.  */
+#endif
     case FFI_TYPE_DOUBLE:
       flags |= FLAG_RETURNS_64BITS;
       /* Fall through.  */
@@ -598,15 +632,8 @@ ffi_prep_cif_machdep (ffi_cif *cif)
 		}
 	    }
 	}
-      /* else fall through.  */
 #if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
-    case FFI_TYPE_LONGDOUBLE:
-      if (type == FFI_TYPE_LONGDOUBLE && cif->abi == FFI_LINUX64)
-	{
-	  flags |= FLAG_RETURNS_128BITS;
-	  flags |= FLAG_RETURNS_FP;
-	  break;
-	}
+    byref:
 #endif
       intarg_count++;
       flags |= FLAG_RETVAL_REFERENCE;
@@ -635,6 +662,13 @@ ffi_prep_cif_machdep (ffi_cif *cif)
 	    /* floating singles are not 8-aligned on stack */
 	    break;
 
+#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
+	  case FFI_TYPE_LONGDOUBLE:
+	    if (cif->abi != FFI_LINUX)
+	      goto do_struct;
+	    fparg_count++;
+	    /* Fall thru */
+#endif
 	  case FFI_TYPE_DOUBLE:
 	    fparg_count++;
 	    /* If this FP arg is going on the stack, it must be
@@ -664,7 +698,7 @@ ffi_prep_cif_machdep (ffi_cif *cif)
 
 	  case FFI_TYPE_STRUCT:
 #if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
-	  case FFI_TYPE_LONGDOUBLE:
+	  do_struct:
 #endif
 	    /* We must allocate space for a copy of these to enforce
 	       pass-by-value.  Pad the space up to a multiple of 16
@@ -751,24 +785,14 @@ ffi_prep_cif_machdep (ffi_cif *cif)
   return FFI_OK;
 }
 
-/*@-declundef@*/
-/*@-exportheader@*/
-extern void ffi_call_SYSV(/*@out@*/ extended_cif *,
-			  unsigned, unsigned,
-			  /*@out@*/ unsigned *,
+extern void ffi_call_SYSV(extended_cif *, unsigned, unsigned, unsigned *,
 			  void (*fn)());
-extern void FFI_HIDDEN ffi_call_LINUX64(/*@out@*/ extended_cif *,
-					unsigned long, unsigned long,
-					/*@out@*/ unsigned long *,
+extern void FFI_HIDDEN ffi_call_LINUX64(extended_cif *, unsigned long,
+					unsigned long, unsigned long *,
 					void (*fn)());
-/*@=declundef@*/
-/*@=exportheader@*/
 
 void
-ffi_call(/*@dependent@*/ ffi_cif *cif,
-	 void (*fn)(),
-	 /*@out@*/ void *rvalue,
-	 /*@dependent@*/ void **avalue)
+ffi_call(ffi_cif *cif, void (*fn)(), void *rvalue, void **avalue)
 {
   extended_cif ecif;
 
@@ -780,9 +804,7 @@ ffi_call(/*@dependent@*/ ffi_cif *cif,
 
   if ((rvalue == NULL) && (cif->rtype->type == FFI_TYPE_STRUCT))
     {
-      /*@-sysunrecog@*/
       ecif.rvalue = alloca(cif->rtype->size);
-      /*@=sysunrecog@*/
     }
   else
     ecif.rvalue = rvalue;
@@ -793,15 +815,12 @@ ffi_call(/*@dependent@*/ ffi_cif *cif,
 #ifndef POWERPC64
     case FFI_SYSV:
     case FFI_GCC_SYSV:
-      /*@-usedef@*/
+    case FFI_LINUX:
       ffi_call_SYSV (&ecif, -cif->bytes, cif->flags, ecif.rvalue, fn);
-      /*@=usedef@*/
       break;
 #else
     case FFI_LINUX64:
-      /*@-usedef@*/
       ffi_call_LINUX64 (&ecif, -(long) cif->bytes, cif->flags, ecif.rvalue, fn);
-      /*@=usedef@*/
       break;
 #endif
     default:
@@ -920,14 +939,17 @@ ffi_closure_helper_SYSV (ffi_closure *closure, void *rvalue,
      For FFI_SYSV the result is passed in r3/r4 if the struct size is less
      or equal 8 bytes.  */
 
-  if (cif->rtype->type == FFI_TYPE_STRUCT)
+  if ((cif->rtype->type == FFI_TYPE_STRUCT
+       && !((cif->abi == FFI_SYSV) && (size <= 8)))
+#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
+      || (cif->rtype->type == FFI_TYPE_LONGDOUBLE
+	  && cif->abi != FFI_LINUX)
+#endif
+      )
     {
-      if (!((cif->abi == FFI_SYSV) && (size <= 8)))
-	{
-	  rvalue = (void *) *pgr;
-	  ng++;
-	  pgr++;
-	}
+      rvalue = (void *) *pgr;
+      ng++;
+      pgr++;
     }
 
   i = 0;
@@ -989,6 +1011,9 @@ ffi_closure_helper_SYSV (ffi_closure *closure, void *rvalue,
 	  break;
 
 	case FFI_TYPE_STRUCT:
+#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
+	do_struct:
+#endif
 	  /* Structs are passed by reference. The address will appear in a
 	     gpr if it is one of the first 8 arguments.  */
 	  if (ng < 8)
@@ -1060,7 +1085,6 @@ ffi_closure_helper_SYSV (ffi_closure *closure, void *rvalue,
 	       * naughty thing to do but...
 	       */
 	      avalue[i] = pst;
-	      nf++;
 	      pst += 1;
 	    }
 	  break;
@@ -1080,10 +1104,31 @@ ffi_closure_helper_SYSV (ffi_closure *closure, void *rvalue,
 	      if (((long) pst) & 4)
 		pst++;
 	      avalue[i] = pst;
-	      nf++;
 	      pst += 2;
 	    }
 	  break;
+
+#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
+	case FFI_TYPE_LONGDOUBLE:
+	  if (cif->abi != FFI_LINUX)
+	    goto do_struct;
+
+	  if (nf < 7)
+	    {
+	      avalue[i] = pfr;
+	      pfr += 2;
+	      nf += 2;
+	    }
+	  else
+	    {
+	      if (((long) pst) & 4)
+		pst++;
+	      avalue[i] = pst;
+	      pst += 4;
+	      nf = 8;
+	    }
+	  break;
+#endif
 
 	default:
 	  FFI_ASSERT (0);
@@ -1101,8 +1146,12 @@ ffi_closure_helper_SYSV (ffi_closure *closure, void *rvalue,
   if (cif->abi == FFI_SYSV && cif->rtype->type == FFI_TYPE_STRUCT
       && size <= 8)
     return FFI_SYSV_TYPE_SMALL_STRUCT + size;
+#if FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE
+  else if (cif->rtype->type == FFI_TYPE_LONGDOUBLE
+	   && cif->abi != FFI_LINUX)
+    return FFI_TYPE_STRUCT;
+#endif
   return cif->rtype->type;
-
 }
 
 int FFI_HIDDEN ffi_closure_helper_LINUX64 (ffi_closure *, void *,

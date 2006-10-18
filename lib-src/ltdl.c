@@ -856,6 +856,10 @@ static	const char	objdir[]		= LTDL_OBJDIR;
 static	const char	archive_ext[]		= LTDL_ARCHIVE_EXT;
 #ifdef	LTDL_SHLIB_EXT
 static	const char	shlib_ext[]		= LTDL_SHLIB_EXT;
+static	const char	all_lib_exts[]		= LTDL_ARCHIVE_EXT "\0"
+						  LTDL_SHLIB_EXT "\0";
+#else
+static	const char	all_lib_exts[]		= LTDL_ARCHIVE_EXT "\0";
 #endif
 #ifdef	LTDL_SYSSEARCHPATH
 static	const char	sys_search_path[]	= LTDL_SYSSEARCHPATH;
@@ -3437,7 +3441,10 @@ lt_dlopenext (filename)
   lt_dlhandle	handle		= 0;
   char *	tmp		= 0;
   char *	ext		= 0;
+  const char *  try_ext;
   size_t	len;
+  int		last;
+  int		first;
   int		errors		= 0;
 
   if (!filename)
@@ -3452,67 +3459,40 @@ lt_dlopenext (filename)
 
   /* If FILENAME already bears a suitable extension, there is no need
      to try appending additional extensions.  */
-  if (ext && ((strcmp (ext, archive_ext) == 0)
-#ifdef LTDL_SHLIB_EXT
-	      || (strcmp (ext, shlib_ext) == 0)
-#endif
-      ))
-    {
-      return lt_dlopen (filename);
-    }
+  if (ext)
+    for (try_ext = all_lib_exts; *try_ext; try_ext += LT_STRLEN (try_ext) + 1)
+      if (strcmp (ext, try_ext) == 0)
+        return lt_dlopen (filename);
 
   /* First try appending ARCHIVE_EXT.  */
-  tmp = LT_EMALLOC (char, len + LT_STRLEN (archive_ext) + 1);
-  if (!tmp)
-    return 0;
-
-  strcpy (tmp, filename);
-  strcat (tmp, archive_ext);
-  errors = try_dlopen (&handle, tmp);
-
-  /* If we found FILENAME, stop searching -- whether we were able to
-     load the file as a module or not.  If the file exists but loading
-     failed, it is better to return an error message here than to
-     report FILE_NOT_FOUND when the alternatives (foo.so etc) are not
-     in the module search path.  */
-  if (handle || ((errors > 0) && !file_not_found ()))
+  for (first = 1, try_ext = all_lib_exts; *try_ext; first = 0)
     {
-      LT_DLFREE (tmp);
-      return handle;
-    }
-
-#ifdef LTDL_SHLIB_EXT
-  /* Try appending SHLIB_EXT.   */
-  if (LT_STRLEN (shlib_ext) > LT_STRLEN (archive_ext))
-    {
-      LT_DLFREE (tmp);
-      tmp = LT_EMALLOC (char, len + LT_STRLEN (shlib_ext) + 1);
+      tmp = LT_EMALLOC (char, len + LT_STRLEN (try_ext) + 1);
       if (!tmp)
-	return 0;
+        return 0;
 
       strcpy (tmp, filename);
-    }
-  else
-    {
-      tmp[len] = LT_EOS_CHAR;
-    }
+      strcat (tmp, try_ext);
+      errors = try_dlopen (&handle, tmp);
 
-  strcat(tmp, shlib_ext);
-  errors = try_dlopen (&handle, tmp);
+      try_ext += LT_STRLEN (try_ext) + 1;
+      last = (*try_ext == 0);
 
-  /* As before, if the file was found but loading failed, return now
-     with the current error message.  */
-  if (handle || ((errors > 0) && !file_not_found ()))
-    {
       LT_DLFREE (tmp);
-      return handle;
+
+      /* If we found FILENAME, stop searching -- whether we were able to
+         load the file as a module or not.  If the file exists but loading
+         failed, it is better to return an error message here than to
+         report FILE_NOT_FOUND when the alternatives (foo.so etc) are not
+         in the module search path.  */
+      if (handle
+	  || (errors > 0 && (last || (first && !file_not_found ()))))
+        return handle;
     }
-#endif
 
   /* Still here?  Then we really did fail to locate any of the file
      names we tried.  */
   LT_DLMUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
-  LT_DLFREE (tmp);
   return 0;
 }
 

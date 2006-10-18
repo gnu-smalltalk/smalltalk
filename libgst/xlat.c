@@ -2200,6 +2200,9 @@ gen_alt_self (code_tree *tree)
   if (!self_cached)
     jit_ldi_p (JIT_V1, &_gst_self);
 
+  else
+    jit_movr_p (JIT_V1, JIT_V0);
+
   stack_cached = -1;
 }
 
@@ -3096,9 +3099,8 @@ emit_method_prolog (OOP methodOOP,
 
     case MTH_RETURN_INSTVAR:
       {
-	      _gst_debug ();
-	jit_ldxi_p (JIT_V1, JIT_V1, jit_field (inline_cache, native_ip));
 	int ofs = jit_ptr_field (mst_Object, data[header.primitiveIndex]);
+	jit_ldxi_p (JIT_V1, JIT_V1, jit_field (inline_cache, native_ip));
 	jit_ldxi_p (JIT_R2, JIT_R2, ofs);	/* Remember? R2 is _gst_self->object */
 	jit_str_p (JIT_V2, JIT_R2);	/* Make it the stack top */
 	jit_jmpr (JIT_V1);

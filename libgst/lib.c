@@ -56,7 +56,8 @@
 static const char help_text[] =
   "GNU Smalltalk usage:"
   "\n"
-  "\n    gst [ flag ... ] [ file ...]"
+  "\n    gst [ flag ... ] [ file ... ]"
+  "\n    gst [ flag ... ] { -f | --file } file [ args ... ]"
   "\n"
   "\nShort flags can appear either as -xyz or as -x -y -z.  If an option is"
   "\nmandatory for a long option, it is also mandatory for a short one. The"
@@ -86,11 +87,14 @@ static const char help_text[] =
   "\nFiles are loaded one after the other.  After the last one is loaded,"
   "\nSmalltalk will exit.  If no files are specified, Smalltalk reads from"
   "\nthe terminal, with prompts."
+  "\n"
+  "\nIn the second form, the file after -f is the last loaded file; any"
+  "\nparameter after that file is passed to the Smalltalk program."
   "\n" "\nReport bugs to help-smalltalk@gnu.org\n";
 
 static const char copyright_and_legal_stuff_text[] =
   "GNU Smalltalk version %s"
-  "\nCopyright 2003 Free Software Foundation, Inc."
+  "\nCopyright 2006 Free Software Foundation, Inc."
   "\nWritten by Steve Byrne (sbb@gnu.org) and Paolo Bonzini (bonzini@gnu.org)"
   "\n"
   "\nGNU Smalltalk comes with NO WARRANTY, to the extent permitted by law."

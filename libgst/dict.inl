@@ -650,6 +650,12 @@ instantiate_with (OOP class_oop,
 	       indexedBytes);
     }
 
+#ifndef OPTIMIZE
+  if (!(instanceSpec & ISP_ISINDEXABLE))
+    _gst_errorf
+      ("class without indexed instance variables passed to instantiate_with");
+#endif
+
   return p_instance;
 }
 
@@ -671,7 +677,7 @@ instantiate (OOP class_oop,
   (*p_oop)->flags |= (class_oop->flags & F_UNTRUSTED);
 
 #ifndef OPTIMIZE
-  if (!(instanceSpec & ISP_ISINDEXED))
+  if (instanceSpec & ISP_ISINDEXABLE)
     _gst_errorf
       ("class with indexed instance variables passed to instantiate");
 #endif

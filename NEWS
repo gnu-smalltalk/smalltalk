@@ -4,12 +4,6 @@ NEWS FROM 2.2 TO 2.2.1
 
 Improvements:
 
-o   Sped up CharacterArray>>#asInteger.
-
------------------------------------------------------------------------------
-
-NEWS FROM 2.2 TO 2.2.1
-
 o   Moved gdk_draw_ functions to GdkDrawable.
 
 o   Fixed bug in methods containing both -0.0 and 0.0 (positive and negative
@@ -27,7 +21,7 @@ o   Fixed bug in SortedCollection.  After #removeAtIndex:, adds would leave
 o   Introduced another class shape, #character, that can be used for String.
     Warning: this makes images incompatible with the 2.2 format.
 
-o   New example, lazy callections.  When loaded, #select:, #reject: and
+o   New example, lazy collections.  When loaded, #select:, #reject: and
     #collect: do not create a new collection unless necessary.  Idioms like
 
 	(a select: [ :each | ... ]) do: [ : each | ... ]
