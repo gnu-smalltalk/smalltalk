@@ -152,7 +152,7 @@ stream_put (int ch, STREAM *stream)
     return 1;
 
   stream->limit -= 1;
-  ch_or_errorcode = (*stream->put_func) (ch, stream);
+  ch_or_errorcode = (*stream->put_func) ((unsigned char) ch, stream);
 
   return (ch_or_errorcode < 0) ? ch_or_errorcode : 1;
 }
@@ -188,7 +188,7 @@ stream_puts (char *s, STREAM *stream)
         return num + strlen (s);
 
       stream->limit -= 1;
-      ch_or_errorcode = (*stream->put_func) (*s, stream);
+      ch_or_errorcode = (*stream->put_func) ((unsigned char) *s, stream);
 
       if (ch_or_errorcode < 0)
 	return ch_or_errorcode;

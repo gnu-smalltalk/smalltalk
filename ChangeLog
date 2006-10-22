@@ -1,3 +1,9 @@
+2006-10-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CharArray.st: Make #numberOfCharacters notYetImplemented
+	and #asUnicodeString subclassResponsibility.
+	* kernel/String.st: Remove #numberOfCharacters.
+
 2006-10-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Methods.st: New.

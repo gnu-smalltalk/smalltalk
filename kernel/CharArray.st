@@ -189,8 +189,9 @@ encoding
     self subclassResponsibility!
 
 numberOfCharacters
-    "Answer the number of Unicode characters in the receiver."
-    self subclassResponsibility! !
+    "Answer the number of Unicode characters in the receiver.
+     This is not implemented unless you load the I18N package."
+    self notYetImplemented! !
 
 
 !CharacterArray methodsFor: 'string processing'!
@@ -383,8 +384,8 @@ asNumber
 
 asUnicodeString
     "Answer a UnicodeString whose character's codes are the receiver's contents
-          This is not implemented unless you load the I18N package."
-    self shouldNotImplement
+     This is not implemented unless you load the I18N package."
+    self subclassResponsibility
 !
 
 asUppercase

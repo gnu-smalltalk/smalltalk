@@ -1,3 +1,9 @@
+2006-10-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* i18n/Sets.st: Add EncodedString>>#asUnicodeString, transliterate
+	in EncodedString>>#printOn:, fix several String/UnicodeString/
+	Character/UnicodeCharacter conversion methods.
+
 2006-10-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n/Sets.st: Fix BOM detection bug.

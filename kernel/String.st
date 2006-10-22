@@ -91,6 +91,12 @@ storeOn: aStream
 
 !String methodsFor: 'converting'!
 
+encoding
+    "Answer the encoding of the receiver.  This is not implemented unless
+     you load the Iconv package."
+    self notYetImplemented
+!
+
 asByteArray
     "Return the receiver, converted to a ByteArray of ASCII values"
     | byteArray size |
@@ -117,14 +123,6 @@ asString
 isString
     ^true
 ! !
-
-
-!String methodsFor: 'multibyte encodings'!
-
-numberOfCharacters
-    "Answer the number of Unicode characters in the receiver.  This is
-     not defined for String unless you load the I18N package."
-    self shouldNotImplement! !
 
 
 !String methodsFor: 'printing'!

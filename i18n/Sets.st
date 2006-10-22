@@ -275,6 +275,9 @@ new: size
 asString
     ^string!
 
+asUnicodeString
+    ^(string asUnicodeString: encoding)!
+
 at: anIndex
     ^string at: anIndex!
 
@@ -313,13 +316,13 @@ valueAt: anIndex put: anObject
 displayOn: aStream
     "Print a representation of the receiver on aStream. Unlike
      #printOn:, this method does not display the encoding and
-     the leading dollar."
+     enclosing quotes."
     string displayOn: aStream!
 
 printOn: aStream
     "Print a representation of the receiver on aStream."
     aStream nextPutAll: encoding; nextPut: $[.
-    string printOn: aStream.
+    (string asUnicodeString: encoding) asString printOn: aStream.
     aStream nextPut: $]!
 
 !EncodedString methodsFor: 'copying'!
@@ -1265,12 +1268,12 @@ numberOfCharacters
      as the default locale character set."
     ^self asUnicodeString numberOfCharacters!
 
+!String methodsFor: 'multibyte encodings'!
+
 asUnicodeString
     "Return an UnicodeString with the contents of the receiver, interpreted
      as the default locale character set."
     ^(I18N.EncodedStream unicodeOn: self) contents!
-
-!String methodsFor: 'multibyte encodings'!
 
 numberOfCharacters: aString
     "Answer the number of Unicode characters in the receiver, interpreting it
@@ -1331,7 +1334,12 @@ utf16Encoding
 ! !
 
 
-!Character methodsFor: 'converting'!
+!UnicodeCharacter methodsFor: 'converting'!
+
+asString
+    "Return a String with the contents of the receiver, converted
+     into the default locale character set."
+    ^(I18N.EncodedStream encoding: (UnicodeString with: self)) contents!
 
 asString: encoding
     "Return a String with the contents of the receiver, converted
@@ -1340,17 +1348,39 @@ asString: encoding
 	encoding: (UnicodeString with: self)
 	as: encoding) contents!
 
+asUnicodeString
+    "Return a UnicodeString with the contents of the receiver, converted
+     from the default locale character set.  Raise an exception if the
+     receiver is not a valid 1-byte character in the given character set."
+     ^(UnicodeString with: self)!
+
+asUnicodeString: encoding
+    self shouldNotImplement!
+
+
+!Character methodsFor: 'converting'!
+
+asString: encoding
+    "Return a String with the contents of the receiver, interpreted
+     into the requested encoding."
+    ^I18N.EncodedString fromString: (String with: self) encoding: encoding!
+
 asString
     "Return a String with the contents of the receiver, converted
      into the default locale character set."
-    ^(I18N.EncodedStream encoding: (UnicodeString with: self)) contents!
+    ^String with: self!
 
-!UnicodeCharacter methodsFor: 'converting'!
+asUnicodeString
+    "Return a UnicodeString with the contents of the receiver, converted
+     from the default locale character set.  Raise an exception if the
+     receiver is not a valid 1-byte character in the given character set."
+     ^(String with: self) asUnicodeString!
 
-asString
-    "Return a String with the contents of the receiver, converted
-     into the default locale character set."
-    ^(I18N.EncodedStream encoding: (UnicodeString with: self)) contents! !
+asUnicodeString: encoding
+    "Return a UnicodeString with the contents of the receiver, converted
+     from the given character set.  Raise an exception if the receiver
+     is not a valid 1-byte character in the given character set."
+     ^(String with: self) asUnicodeString: encoding!
 
 
 !UnicodeCharacter methodsFor: 'printing'!

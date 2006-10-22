@@ -1,3 +1,8 @@
+2006-10-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* snprintf/stream.c (stream_put, stream_puts): Cast printed char
+	to unsigned char.
+
 2006-03-27  Bruce Korb  <bkorb@gnu.org>
 
 	* snprintfv/printf.c: Fix problems with uninitialized memory.
