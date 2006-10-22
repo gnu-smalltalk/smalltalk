@@ -1,5 +1,3 @@
-#! /usr/bin/env gst -f
-
 "======================================================================
 |
 |   Smalltalk documentation publisher (utility script)
