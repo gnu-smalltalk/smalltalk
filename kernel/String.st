@@ -146,7 +146,9 @@ storeOn: aStream
     self do:
     	[ :char | char == $' ifTrue: [ aStream nextPut: char ].
 	    	  aStream nextPut: char ].
-    self isReadOnly ifFalse: [ aStream nextPutAll: ''' copy' ]
+    aStream nextPut: $'.
+    self isReadOnly
+	ifFalse: [ aStream nextPutAll: ' copy' ]
 !
 
 printOn: aStream

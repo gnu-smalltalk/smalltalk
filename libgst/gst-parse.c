@@ -435,10 +435,10 @@ parse_variable (gst_parser *p)
 }
 
 
-/* attributes: attributes '<' attribute '>'
+/* attributes: attributes '<' attribute_keywords '>'
 	     | empty
 
-   attribute: attribute KEYWORD binary_expr 
+   attribute_keywords: attribute KEYWORD binary_expr 
 	    | KEYWORD binary_expr */
 
 static tree_node
@@ -625,11 +625,12 @@ parse_primary (gst_parser *p)
 		   | IDENTIFIER  */
 
 static tree_node
-parse_variable_primary (gst_parser *p)
+parse_variable_primary_1 (gst_parser *p, YYLTYPE *first_loc,
+			  const char *first_val)
 {
   tree_node node;
   assert (p->token == IDENTIFIER);
-  node = _gst_make_variable (&p->loc, p->val.sval);
+  node = _gst_make_variable (first_loc, first_val);
   for (;;)
     {
       lex (p);
@@ -641,6 +642,12 @@ parse_variable_primary (gst_parser *p)
     }
 
   return node;
+}
+
+static tree_node
+parse_variable_primary (gst_parser *p)
+{
+  return parse_variable_primary_1 (p, &p->loc, p->val.sval);
 }
 
 

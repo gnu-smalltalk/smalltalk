@@ -330,7 +330,7 @@ AC_SUBST(LTALLOCA)
 AC_SUBST(LTLIBOBJS)
 
 dnl Scripts & data files
-AC_CONFIG_FILES(gnu-smalltalk.spec gnu-smalltalk.pc)
+AC_CONFIG_FILES(gnu-smalltalk.pc)
 AC_CONFIG_FILES(gst-config, chmod +x gst-config)
 AC_CONFIG_FILES(gst-package, chmod +x gst-package)
 AC_CONFIG_FILES(packages.xml)
