@@ -2,6 +2,11 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 2.2 TO 2.3
 
+o   Due to incompatibilities between various OSes, you are advised to test
+    end-of-stream conditions *before* rather than after reading a character
+    from stdin.  In 2.2, either way would work, but serious bugs were
+    found on Mac OS X unless stdin was redirected from a file.
+
 o   FileStreams can now use pwrite for more efficient operation on files
     opened for read/write, and will do many less gratuitous lseek
     operations.  pread will also be used by FileStream>>#copyFrom:to:.
@@ -21,7 +26,7 @@ o   Fixed bug in SortedCollection.  After #removeAtIndex:, adds would leave
     the collection unordered.
 
 o   Introduced a method to efficiently convert a WriteStream into a ReadStream.
-    It is called #readStream and makes WriteStream more polymorphic with ReadStream.
+    It is called #readStream and makes WriteStream more polymorphic with String.
 
 o   Introduced another class shape, #character, that can be used for String.
 

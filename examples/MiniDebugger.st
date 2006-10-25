@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2002 Free Software Foundation, Inc.
+| Copyright 2002, 2006 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -111,8 +111,10 @@ getCommand
     | cmd |
     self showPrompt.
 
-    cmd := stdin nextLine substrings.
-    stdin atEnd ifTrue: [ cmd := { self eofCommand } ].
+    cmd := stdin atEnd
+        ifTrue: [ { self eofCommand } ]
+	ifFalse: [ stdin nextLine substrings ].
+
     cmd isEmpty ifFalse: [
 	command := (cmd at: 1) at: 1.
 	commandArg := cmd copyFrom: 2.

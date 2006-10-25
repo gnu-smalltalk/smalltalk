@@ -1,5 +1,9 @@
 2006-10-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/MiniInspector.st: Test #atEnd before reading next line.
+
+2006-10-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* examples/Prolog.st: Enjoy the wonders of polymorphism.
 
 2006-10-23  Paolo Bonzini  <bonzini@gnu.org>
