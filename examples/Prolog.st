@@ -52,6 +52,12 @@ PrologList subclass: #PrologClause
 	poolDictionaries: ''
 	category: 'Examples-Prolog'!
 
+PrologClause subclass: #PrologResolveClause
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Examples-Prolog'!
+
 PrologList subclass: #PrologDefinition
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -575,9 +581,23 @@ printPrologOn: aStream
     aStream nextPut: $)!
 
 printPrologOn: aStream level: anInteger
-    self printPrologOn: aStream!
+    self printPrologOn: aStream! !
 
-questionPrintPrologOn: aStream 
+!PrologClause methodsFor: 'private'!
+
+head: aPrologStructure body: aPrologBody 
+    self head: aPrologStructure.
+    self body: aPrologBody! !
+
+
+!PrologClause methodsFor: 'polymorphism'!
+
+isResolveClause
+    ^false! !
+
+!PrologResolveClause methodsFor: 'polymorphism'!
+
+printPrologOn: aStream 
     | head body |
     head := self head.
     body := self body.
@@ -587,15 +607,10 @@ questionPrintPrologOn: aStream
 	ifTrue: 
 	    [aStream nextPutAll: ', '.
 	    body printPrologOn: aStream].
-    aStream nextPut: $.! !
+    aStream nextPut: $.!
 
-!PrologClause methodsFor: 'private'!
-
-head: aPrologStructure body: aPrologBody 
-    self head: aPrologStructure.
-    self body: aPrologBody! !
-
-
+isResolveClause
+    ^true! !
 
 !PrologDefinition class methodsFor: 'copyright'!
 
@@ -957,9 +972,9 @@ scan
     source atEnd ifTrue: [^#eof].
     self nextToken.
     tokenType == #eof ifTrue: [^#eof].
-    tokenType == #neck ifTrue: [^true cons: self scanClause]. "resolve clause"
+    tokenType == #neck ifTrue: [^self scanClause: PrologResolveClause]. "resolve clause"
     self unNextToken.
-    ^false cons: self scanClause "assert clause"!
+    ^self scanClause: PrologClause!
 
 scanBody
     | list |
@@ -973,14 +988,14 @@ scanBody
 	    tokenType ~~ #comma ifTrue: [failBlock value: 'Syntax error']].
     failBlock value: 'Unexpected eof'!
 
-scanClause
+scanClause: class
     | head |
     head := self scanStructure.
     self nextToken.
-    tokenType == #neck ifTrue: [^PrologClause head: head body: self scanBody].
-    tokenType == #comma ifTrue: [^PrologClause head: head body: self scanBody].
-    tokenType == #period ifTrue: [^PrologClause head: head body: nil].
-    tokenType == #rightParenthesis ifTrue: [^PrologClause head: head body: nil].
+    tokenType == #neck ifTrue: [^class head: head body: self scanBody].
+    tokenType == #comma ifTrue: [^class head: head body: self scanBody].
+    tokenType == #period ifTrue: [^class head: head body: nil].
+    tokenType == #rightParenthesis ifTrue: [^class head: head body: nil].
     self unNextToken.
     failBlock value: 'Syntax error'!
 
@@ -993,7 +1008,7 @@ scanExpression
     tokenType == #string ifTrue: [^token].
     tokenType == #object ifTrue: [^PrologObject source: token object: (self compileAndEvaluate: token)].
     tokenType == #leftBracket ifTrue: [^self scanList].
-    tokenType == #leftParenthesis ifTrue: [^self scanClause].
+    tokenType == #leftParenthesis ifTrue: [^self scanClause: PrologClause].
     (tokenType == #symbol or: [tokenType == #variable])
 	ifTrue: 
 	    [symbol := token.
@@ -2971,11 +2986,11 @@ consult: readStream action: aBlock
     [node := parser parse: readStream.
     node == #eof]
 	whileFalse: 
-	    [hornClause := node cdr.
-	    node car
+	    [hornClause := node.
+	    node isResolveClause
 		ifTrue: 
 		    [stream := WriteStream on: (String new: 20).
-		    hornClause questionPrintPrologOn: stream.
+		    hornClause printPrologOn: stream.
 		    textCollector show: stream contents.
 		    textCollector nl.
 		    result := self resolve: hornClause action: aBlock]
@@ -2999,11 +3014,11 @@ reconsult: readStream action: aBlock
     [node := parser parse: readStream.
     node == #eof]
 	whileFalse: 
-	    [hornClause := node cdr.
-	    node car
+	    [hornClause := node.
+	    node isResolveClause
 		ifTrue: 
 		    [stream := WriteStream on: (String new: 20).
-		    hornClause questionPrintPrologOn: stream.
+		    hornClause printPrologOn: stream.
 		    textCollector show: stream contents.
 		    textCollector nl.
 		    result := self resolve: hornClause action: aBlock]
@@ -3056,8 +3071,8 @@ systemConsult: readStream
     [node := parser parse: readStream.
     node == #eof]
 	whileFalse: 
-	    [hornClause := node cdr.
-	    node car
+	    [hornClause := node.
+	    node isResolveClause
 		ifTrue: [self resolve: hornClause]
 		ifFalse: 
 		    [functor := hornClause car car.
@@ -3078,8 +3093,8 @@ systemReconsult: readStream
     [node := parser parse: readStream.
     node == #eof]
 	whileFalse: 
-	    [hornClause := node cdr.
-	    node car
+	    [hornClause := node.
+	    node isResolveClause
 		ifTrue: [self resolve: hornClause]
 		ifFalse: 
 		    [functor := hornClause car car.
