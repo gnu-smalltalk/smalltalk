@@ -221,7 +221,7 @@ asFraction
     "Convert the receiver into a fraction with a good (but undefined)
      approximation"
 
-    | a x n2 d2 n1 d1 n0 d0 eps abs |
+    | a x n2 d2 n1 d1 n0 d0 eps abs gcd |
 
     self checkCoercion.
 
@@ -232,8 +232,8 @@ asFraction
 
     n1  := d0 := 0.
     n0  := d1 := 1.
-    abs := self abs.
-    eps := self class epsilon * 1024.	"Number out of a hat"
+    abs := self abs timesTwoPower: self exponent negated.
+    eps := self class epsilon.
     x   := abs.
 
     [   a := x truncated.
@@ -244,6 +244,14 @@ asFraction
 	(x := self unity / x fractionPart) isInfinite or: [
 	    ((self coerce: n0) / (self coerce: d0) - abs) abs < eps ]
     ]   whileFalse.
+
+    self abs < 1
+	ifTrue: [ d0 := d0 * (2 raisedToInteger: self exponent negated) ]
+	ifFalse: [ n0 := n0 * (2 raisedToInteger: self exponent) ].
+
+    gcd := n0 gcd: d0.
+    n0 := n0 quo: gcd.
+    d0 := d0 quo: gcd.
 
     ^Fraction
 	numerator: (self < 0 ifTrue: [ n0 negated ] ifFalse: [ n0 ])

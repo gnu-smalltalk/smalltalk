@@ -39,10 +39,8 @@ Float variableByteSubclass: #FloatE
 !
 
 FloatE comment: 
-'My instances represent floating point numbers that have 64 bits of 
-precision (well, less than that in precision; they are precisely the same
-as C''s "double" datatype).  Besides the standard numerical operations,
-I provide transcendental operations too.'  !
+'My instances represent floating point numbers that have the same
+accuracy as C''s "float" numbers.'  !
 
 
 !FloatE class methodsFor: 'converting'!

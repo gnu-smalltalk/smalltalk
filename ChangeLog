@@ -1,3 +1,10 @@
+2006-10-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Float.st: Run #asFraction loop after stripping the exponent.
+	* kernel/FloatD.st: Fix comment.  Reported by J Pfersich.
+	* kernel/FloatE.st: Likewise.
+	* kernel/FloatQ.st: Likewise.
+
 2006-10-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/MiniInspector.st: Test #atEnd before reading next line.
