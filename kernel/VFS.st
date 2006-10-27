@@ -335,7 +335,8 @@ isSymbolicLink
 isDirectory
     "Answer whether a file with the name contained in the receiver does exist
     and identifies a directory."
-    self subclassResponsibility!
+    ^false
+!
 
 isReadable
     "Answer whether a file with the name contained in the receiver does exist
@@ -433,6 +434,11 @@ size
     ^self stat stSize value
 !
 
+isDirectory
+    "Answer whether the file is a directory."
+    ^(self stat stMode value bitAnd: 8r170000) = 8r040000
+!
+
 isSymbolicLink
     "Answer whether the file is a symbolic link."
     isSymbolicLink isNil ifTrue: [ self refresh ].
@@ -492,21 +498,6 @@ exists
     ].
     self statOn: self realFileName into: stat.
     ^File errno == 0
-!
-
-isDirectory
-    "Answer whether a file with the name contained in the receiver does exist
-    and identifies a directory."
-    | dir errno |
-    dir := self openDir: self realFileName.
-    errno := File errno.
-    (errno = 0) ifTrue: [
-        self closeDir: dir.
-        ^true
-    ].
-    errno = 20 ifTrue: [ ^false ].
-    errno = 13 ifTrue: [ ^true ].
-    File checkError: errno
 !
 
 isReadable
