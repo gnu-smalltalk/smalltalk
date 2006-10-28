@@ -1,3 +1,8 @@
+2006-10-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CharArray.st: Add missing period in #isNumeric.
+	Patch by J Pfersich.
+
 2006-10-27  Paolo Bonzini  <bonzini@gnu.org>
 
         * kernel/VFS.st: Implement isDirectory by accessing struct stat.

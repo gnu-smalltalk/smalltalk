@@ -474,7 +474,7 @@ isNumeric
     ch = $. ifFalse: [^false].
 
     [   ch := stream next.
-	ch isDigit ifFalse: [ ^false ]
+	ch isDigit ifFalse: [ ^false ].
 	stream atEnd] whileFalse.
     ^true
 !
