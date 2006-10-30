@@ -84,8 +84,8 @@
 		FST  ST3
 
 	move FPR3 to FPR1
-                FLD  ST1
-                FST  ST4   Stack is rotated, so FPRn becomes STn+1 */
+                FLD  ST3
+                FST  ST2   Stack is rotated, so FPRn becomes STn+1 */
 
 #define jit_movr_d(rd,s1)                              \
        ((s1) == (rd) ? 0                               \

@@ -31,8 +31,8 @@
 
 
 
-#ifndef __lightning_asm_h
-#define __lightning_asm_h
+#ifndef __lightning_asm_i386_h
+#define __lightning_asm_i386_h
 
 /*	OPCODE	+ i		= immediate operand
  *		+ r		= register operand
@@ -147,7 +147,6 @@ typedef _uc		jit_insn;
 
 /* memory subformats - urgh! */
 
-#define _r_D(	R, D	  )	(_Mrm(_b00,_rN(R),_b101 )		             ,_jit_L((long)(D)))
 #define _r_0B(	R,   B    )	(_Mrm(_b00,_rN(R),_r4(B))			           )
 #define _r_0BIS(R,   B,I,S)	(_Mrm(_b00,_rN(R),_b100 ),_SIB(_SCL(S),_r4(I),_r4(B))      )
 #define _r_1B(	R, D,B    )	(_Mrm(_b01,_rN(R),_r4(B))		             ,_jit_B((long)(D)))
@@ -334,9 +333,6 @@ typedef _uc		jit_insn;
 #define BTSLrm(RS,MD,MB,MI,MS)		_OO_r_X		(0x0fab		     ,_r4(RS)		,MD,MB,MI,MS		)
 
 
-#define CALLm(D,B,I,S)			((_r0P(B) && _r0P(I)) ? _O_D32	(0xe8			,(int)(D)		) : \
-								JITFAIL("illegal mode in direct jump"))
-
 #define CALLsr(R)			_O_Mrm	(0xff	,_b11,_b010,_r4(R)			)
 
 #define CALLsm(D,B,I,S)			_O_r_X	(0xff	     ,_b010	,(int)(D),B,I,S		)
@@ -482,9 +478,6 @@ typedef _uc		jit_insn;
 #define JNLESm(D,B,I,S)			JCCSim(0xf,D,B,I,S)
 #define JGSm(D,B,I,S)			JCCSim(0xf,D,B,I,S)
 
-#define JCCim(CC,D,B,I,S)		((_r0P(B) && _r0P(I)) ? _OO_D32	(0x0f80|(CC)		,(int)(D)		) : \
-								JITFAIL("illegal mode in conditional jump"))
-
 #define JOm(D,B,I,S)			JCCim(0x0,D,B,I,S)
 #define JNOm(D,B,I,S)			JCCim(0x1,D,B,I,S)
 #define JCm(D,B,I,S)			JCCim(0x2,D,B,I,S)
@@ -519,9 +512,6 @@ typedef _uc		jit_insn;
 
 #define JMPSm(D,B,I,S)			((_r0P(B) && _r0P(I)) ? _O_D8	(0xeb			,(int)(D)		) : \
 								JITFAIL("illegal mode in short jump"))
-
-#define JMPm(D,B,I,S)			((_r0P(B) && _r0P(I)) ? _O_D32	(0xe9			,(int)(D)		) : \
-								JITFAIL("illegal mode in direct jump"))
 
 #define JMPsr(R)			_O_Mrm	(0xff	,_b11,_b100,_r4(R)			)
 
@@ -1062,5 +1052,5 @@ typedef _uc		jit_insn;
 /*     Intel Corporation 1997.									*/
 
 #endif
-#endif /* __lightning_asm_h */
+#endif /* __lightning_asm_i386_h */
 

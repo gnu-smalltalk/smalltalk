@@ -480,8 +480,12 @@ typedef union jit_code {
 /* ALU */
 #define jit_addi_l(d, rs, is)		jit_addi_i((d), (rs), (is))	
 #define jit_addr_l(d, s1, s2)		jit_addr_i((d), (s1), (s2))
+#ifndef jit_addci_l
 #define jit_addci_l(d, rs, is)		jit_addci_i((d), (rs), (is))	
+#endif
+#ifndef jit_addcr_l
 #define jit_addcr_l(d, s1, s2)		jit_addcr_i((d), (s1), (s2))
+#endif
 #define jit_addxi_l(d, rs, is)		jit_addxi_i((d), (rs), (is))	
 #define jit_addxr_l(d, s1, s2)		jit_addxr_i((d), (s1), (s2))
 #define jit_andi_l(d, rs, is)		jit_andi_i((d), (rs), (is))	
@@ -496,6 +500,7 @@ typedef union jit_code {
 #define jit_modr_l(d, s1, s2)		jit_modr_i((d), (s1), (s2))
 #define jit_muli_l(d, rs, is)		jit_muli_i((d), (rs), (is))	
 #define jit_mulr_l(d, s1, s2)		jit_mulr_i((d), (s1), (s2))
+#define jit_negr_l(d, s1)		jit_negr_i((d), (s1))
 #define jit_ori_l(d, rs, is)		jit_ori_i((d), (rs), (is))	
 #define jit_orr_l(d, s1, s2)		jit_orr_i((d), (s1), (s2))
 #define jit_rshi_l(d, rs, is)		jit_rshi_i((d), (rs), (is))	

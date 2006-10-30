@@ -34,6 +34,8 @@
 #ifndef __lightning_funcs_h
 #define __lightning_funcs_h
 
+#include <string.h>
+
 #if !defined(__GNUC__) && !defined(__GNUG__)
 #error Go get GNU C, I do not know how to flush the cache
 #error with this compiler.
@@ -97,7 +99,7 @@ _jit_epilog(jit_state *jit)
   frame_size += 15;			/* the stack must be quad-word     */
   frame_size &= ~15;			/* aligned			   */
 
-#ifdef _CALL_DARWIN
+#ifdef __APPLE__
   LWZrm(0, frame_size + 8, 1);	/* lwz   r0, x+8(r1)  (ret.addr.)  */
 #else
   LWZrm(0, frame_size + 4, 1);	/* lwz   r0, x+4(r1)  (ret.addr.)  */
@@ -150,7 +152,7 @@ _jit_prolog(jit_state *jit, int n)
 
   ofs = frame_size - num_saved_regs * 4;
   STMWrm(first_saved_reg, ofs, 1);		/* stmw  rI, ofs(r1)		   */
-#ifdef _CALL_DARWIN
+#ifdef __APPLE__
   STWrm(0, frame_size + 8, 1);		/* stw   r0, x+8(r1)		   */
 #else
   STWrm(0, frame_size + 4, 1);		/* stw   r0, x+4(r1)		   */

@@ -1,6 +1,46 @@
 dnl I'd like this to be edited in -*- Autoconf -*- mode...
 dnl
-# serial 1 LIGHTNING_CONFIGURE_IF_NOT_FOUND
+# serial 2 LIGHTNING_CONFIGURE_IF_NOT_FOUND
+m4_define([LIGHTNING_BACKENDS], [i386:-32 i386:-64 sparc ppc])
+
+AC_DEFUN([LIGHTNING_CONFIGURE_LINKS], [
+
+suffix=
+case "$host_cpu" in
+  i?86)	   cpu=i386; suffix=-32 ;;
+  x86_64)  cpu=i386; suffix=-64 ;;
+  sparc*)  cpu=sparc	        ;;
+  powerpc) cpu=ppc	        ;;
+  *)			        ;;
+esac
+if test -n "$cpu" && test -d "$srcdir/lightning/$cpu"; then
+  $1
+  lightning_frag=`cd $srcdir && pwd`/lightning/$cpu/Makefile.frag
+  test -f $lightning_frag || lightning_frag=/dev/null
+
+  asm_src=lightning/$cpu/asm.h
+  test -f $srcdir/lightning/$cpu/asm$suffix.h && asm_src=lightning/$cpu/asm$suffix.h
+  AC_CONFIG_LINKS(lightning/asm.h:$asm_src, [], [asm_src=$asm_src])
+
+  fp_src=lightning/$cpu/fp.h
+  test -f $srcdir/lightning/$cpu/fp$suffix.h && fp_src=lightning/$cpu/fp$suffix.h
+  AC_CONFIG_LINKS(lightning/fp.h:$fp_src, [], [fp_src=$fp_src])
+
+  core_src=lightning/$cpu/core.h
+  test -f $srcdir/lightning/$cpu/core$suffix.h && core_src=lightning/$cpu/core$suffix.h
+  AC_CONFIG_LINKS(lightning/core.h:$core_src, [], [core_src=$core_src])
+
+  funcs_src=lightning/$cpu/funcs.h
+  test -f $srcdir/lightning/$cpu/funcs$suffix.h && funcs_src=lightning/$cpu/funcs$suffix.h
+  AC_CONFIG_LINKS(lightning/funcs.h:$funcs_src, [], [funcs_src=$funcs_src])
+else
+  $2
+  lightning_frag=/dev/null
+fi
+AC_SUBST_FILE(lightning_frag)
+
+])
+
 AC_DEFUN([LIGHTNING_CONFIGURE_IF_NOT_FOUND], [
 AC_REQUIRE([AC_PROG_LN_S])dnl
 AC_REQUIRE([AC_CANONICAL_HOST])dnl
@@ -12,46 +52,13 @@ lightning=
 if test "$ac_cv_header_lightning_h" = yes; then
   lightning=yes
 else
-  case "$host_cpu" in
-	i?86)	 cpu_subdir=i386					;;
-	sparc*)	 cpu_subdir=sparc					;;
-	powerpc) cpu_subdir=ppc						;;
-	*)	 ;;
-  esac
-  test -n "$cpu_subdir" && lightning=yes
+  LIGHTNING_CONFIGURE_LINKS(lightning=yes, lightning=no)
 fi
 
-ifdef([AC_HELP_STRING], [
-  dnl autoconf 2.50 style
-  if test -n "$cpu_subdir"; then
-    AC_CONFIG_LINKS(lightning/asm.h:lightning/$cpu_subdir/asm.h
-		    lightning/core.h:lightning/$cpu_subdir/core.h
-		    lightning/fp.h:lightning/$cpu_subdir/fp.h
-		    lightning/funcs.h:lightning/$cpu_subdir/funcs.h, , [
-      cpu_subdir=$cpu_subdir
-    ])
-  fi
-], [
-  dnl autoconf 2.13 style
-  AC_OUTPUT_COMMANDS([
-    if test -n "$cpu_subdir"; then
-      for i in asm fp core funcs; do
-        echo linking $srcdir/lightning/$cpu_subdir/$i.h to lightning/$i.h 
-        (cd lightning && $LN_S -f $srcdir/$cpu_subdir/$i.h $i.h)
-      done
-    fi
-  ], [
-    LN_S='$LN_S'
-    cpu_subdir=$cpu_subdir
-  ])
-])
-
-if test -n "$lightning"; then
+AS_IF([test "$lightning" = yes], [
   AC_DEFINE(HAVE_LIGHTNING, 1, [Define if GNU lightning can be used])
-  lightning=
-  ifelse([$1], , :, [$1])
-else
-  ifelse([$2], , :, [$2])
-fi
+  $1
+], [$2])
+unset lightning
 
 ])dnl

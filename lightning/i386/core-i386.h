@@ -16,23 +16,23 @@
  * under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation; either version 2.1, or (at your option)
  * any later version.
- * 
- * GNU lightning is distributed in the hope that it will be useful, but 
+ *
+ * GNU lightning is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
  * or  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
  * License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with GNU lightning; see the file COPYING.LESSER; if not, write to the
- * Free Software Foundation, 51 Franklin Street, Fifth Floor, Boston,
- * MA 02110-1301, USA.
+ * Free Software Foundation, 59 Temple Place - Suite 330, Boston,
+ * MA 02111-1307, USA.
  *
  ***********************************************************************/
 
 
 
-#ifndef __lightning_core_h
-#define __lightning_core_h
+#ifndef __lightning_core_i386_h
+#define __lightning_core_i386_h
 
 #define JIT_FP			_EBP
 #define JIT_SP			_ESP
@@ -43,10 +43,6 @@
 #define JIT_R(i)		(_EAX + (i))
 #define JIT_V(i)		((i) == 0 ? _EBX : _ESI + (i) - 1)
 
-struct jit_local_state {
-  int	framesize;
-  int	argssize;
-};
 
 /* 3-parameter operation */
 #define jit_opr_(d, s1, s2, op1d, op2d)					\
@@ -56,7 +52,7 @@ struct jit_local_state {
 
 /* 3-parameter operation, with immediate */
 #define jit_op_(d, s1, op2d)				\
-	((s1 == d) ? op2d : (MOVLrr(s1, d), op2d))	\
+	((s1 == d) ? op2d : (MOVLrr(s1, d), op2d))
 
 /* 3-parameter operation, optimizable */
 #define jit_opo_(d, s1, s2, op1d, op2d, op12d)		\
@@ -110,10 +106,15 @@ struct jit_local_state {
 	        : jit_replace(_EBX, rs, _EAX, MOVBrm(_AL, dd, db, di, ds)))
 
 /* Reduce arguments of XOR/OR/TEST */
+#ifdef JIT_X86_64
+# define JIT_CAN_16 0
+#else
+# define JIT_CAN_16 1
+#endif
 #define jit_reduce_(op)	op
 #define jit_reduce(op, is, rs)							\
 	(_u8P(is) && jit_check8(rs) ? jit_reduce_(op##Bir(is, jit_reg8(rs))) :	\
-	(_u16P(is) ? jit_reduce_(op##Wir(is, jit_reg16(rs))) :			\
+	(_u16P(is) && JIT_CAN_16 ? jit_reduce_(op##Wir(is, jit_reg16(rs))) :			\
 	jit_reduce_(op##Lir(is, rs)) ))
 
 /* Helper macros for MUL/DIV/IDIV */
@@ -207,6 +208,7 @@ struct jit_local_state {
 #define jit_subxi_i(d, rs, is)	jit_op_ ((d), (rs),       SBBLir((is), (d)) 		       )
 #define jit_xorr_i(d, s1, s2)	jit_opr_((d), (s1), (s2), XORLrr((s1), (d)), XORLrr((s2), (d)) )
 
+
 /* These can sometimes use byte or word versions! */
 #define jit_ori_i(d, rs, is)	jit_op_ ((d), (rs),        jit_reduce(OR, (is), (d))	       )
 #define jit_xori_i(d, rs, is)	jit_op_ ((d), (rs),        jit_reduce(XOR, (is), (d))	       )
@@ -260,39 +262,21 @@ struct jit_local_state {
 /* Stack */
 #define jit_pushr_i(rs)		PUSHLr(rs)
 #define jit_popr_i(rs)		POPLr(rs)
-#define jit_prolog(n)		(_jitl.framesize = 8, PUSHLr(_EBP), MOVLrr(_ESP, _EBP), PUSHLr(_EBX), PUSHLr(_ESI), PUSHLr(_EDI))
 
-/* The += allows for stack pollution */
-
-#define jit_prepare_i(ni)	(_jitl.argssize += (ni))
 #define jit_prepare_f(nf)	(_jitl.argssize += (nf))
 #define jit_prepare_d(nd)	(_jitl.argssize += 2 * (nd))
-#define jit_pusharg_i(rs)	PUSHLr(rs)
-#define jit_finish(sub)		(jit_calli((sub)), ADDLir(4 * _jitl.argssize, JIT_SP), _jitl.argssize = 0)
-#define jit_finishr(reg)	(jit_callr((reg)), ADDLir(4 * _jitl.argssize, JIT_SP), _jitl.argssize = 0)
-#define jit_retval_i(rd)	jit_movr_i ((rd), _EAX)
-
-#define	jit_arg_c()		((_jitl.framesize += sizeof(int)) - sizeof(int))
-#define	jit_arg_uc()		((_jitl.framesize += sizeof(int)) - sizeof(int))
-#define	jit_arg_s()		((_jitl.framesize += sizeof(int)) - sizeof(int))
-#define	jit_arg_us()		((_jitl.framesize += sizeof(int)) - sizeof(int))
-#define	jit_arg_i()		((_jitl.framesize += sizeof(int)) - sizeof(int))
-#define	jit_arg_ui()		((_jitl.framesize += sizeof(int)) - sizeof(int))
-#define	jit_arg_l()		((_jitl.framesize += sizeof(long)) - sizeof(long))
-#define	jit_arg_ul()		((_jitl.framesize += sizeof(long)) - sizeof(long))
-#define	jit_arg_p()		((_jitl.framesize += sizeof(long)) - sizeof(long))
+#define jit_retval_i(rd)	((void)jit_movr_i ((rd), _EAX))
 
 #define	jit_arg_f()		((_jitl.framesize += sizeof(float)) - sizeof(float))
 #define	jit_arg_d()		((_jitl.framesize += sizeof(double)) - sizeof(double))
 
 /* Unary */
 #define jit_negr_i(d, rs)	jit_opi_((d), (rs), NEGLr(d), (XORLrr((d), (d)), SUBLrr((rs), (d))) )
-#define jit_negr_l(d, rs)	jit_opi_((d), (rs), NEGLr(d), (XORLrr((d), (d)), SUBLrr((rs), (d))) )
 
-#define jit_movr_i(d, rs)	((rs) == (d) ? 0 : MOVLrr((rs), (d)))
+#define jit_movr_i(d, rs)	((void)((rs) == (d) ? 0 : MOVLrr((rs), (d))))
 #define jit_movi_i(d, is)	((is) ? MOVLir((is), (d)) : XORLrr ((d), (d)) )
-#define jit_movi_p(d, is)	(MOVLir((is), (d)), _jit.x.pc)
-#define jit_patch_movi(pa,pv)   (*_PSL((pa) - 4) = _jit_SL((pv)))
+#define jit_movi_p(d, is)       (jit_movi_l(d, ((long)(is))), _jit.x.pc)
+#define jit_patch_movi(pa,pv)   (*_PSL((pa) - sizeof(long)) = _jit_SL((pv)))
 
 #define jit_ntoh_ui(d, rs)	jit_op_((d), (rs), BSWAPLr(d))
 #define jit_ntoh_us(d, rs)	jit_op_((d), (rs), RORWir(8, d))
@@ -360,8 +344,6 @@ struct jit_local_state {
 #define jit_calli(label)	(CALLm( ((unsigned long) (label)),	0, 0, 0), _jit.x.pc)
 #define jit_callr(reg)		(CALLsr(reg))
 #define jit_jmpr(reg)		JMPsr(reg)
-#define jit_patch_at(jump_pc,v)	(*_PSL((jump_pc) - 4) = _jit_SL((v) - (jump_pc)))
-#define jit_ret()		(POPLr(_EDI), POPLr(_ESI), POPLr(_EBX), POPLr(_EBP), RET_())
 
 /* Memory */
 #define jit_ldi_c(d, is)		MOVSBLmr((is), 0,    0,    0, (d))
@@ -404,10 +386,12 @@ struct jit_local_state {
 #define jit_stxr_i(d1, d2, rs)		MOVLrm((rs), 0,    (d1), (d2), 1)
 #define jit_stxi_i(id, rd, rs)		MOVLrm((rs), (id), (rd), 0,    0)
 
+
 /* Extra */
 #define jit_nop()			NOP_()
 
 #define _jit_alignment(pc, n)		(((pc ^ _MASK(4)) + 1) & _MASK(n))
 #define jit_align(n) 			NOPi(_jit_alignment(_jit_UL(_jit.x.pc), (n)))
 
-#endif /* __lightning_core_h */
+#endif /* __lightning_core_i386_h */
+
