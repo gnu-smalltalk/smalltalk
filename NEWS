@@ -25,13 +25,16 @@ o   Fixed bug in File>>#touch, which did not work really.  There are also
 o   Fixed bug in SortedCollection.  After #removeAtIndex:, adds would leave
     the collection unordered.
 
+o   Fixed many more bugs.
+
 o   Introduced a method to efficiently convert a WriteStream into a ReadStream.
     It is called #readStream and makes WriteStream more polymorphic with String.
 
-o   Introduced another class shape, #character, that can be used for String.
+o   Introduced two more class shapes, #character and #utf32, that can be used
+    for String and UnicodeString.
 
 o   More reliable detection of at-end-of-file condition for pipes, TTYs,
-    and so on (especially on Mac OS X).
+    and so on (especially on Mac OS X), and of sockets closed by the peer.
 
 o   Moved gdk_draw_ functions to GdkDrawable.
 

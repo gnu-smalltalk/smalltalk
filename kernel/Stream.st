@@ -300,10 +300,17 @@ tab
 ! !
 
 
-!Stream methodsFor: 'providing consistent protocols'!
+!Stream methodsFor: 'polymorphism'!
 
 close
     "Do nothing. This is provided for consistency with file streams"
+!
+
+pastEnd
+    "The end of the stream has been reached.  Signal a Notification."
+
+    SystemExceptions.EndOfStream signalOn: self.
+    ^nil
 !
 
 flush

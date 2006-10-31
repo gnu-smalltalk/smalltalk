@@ -245,13 +245,6 @@ collection
     ^collection
 !
 
-pastEnd
-    "The end of the stream has been reached.  Signal a Notification"
-
-    SystemExceptions.EndOfStream signalOn: self.
-    ^nil
-!
-
 status: aString
     "When working with a stream on strings, this method can be useful!
      Format of the output:

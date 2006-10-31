@@ -1,5 +1,10 @@
 2006-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Stream.st: Put pastEnd here...
+	* kernel/PosStream.st: ... from here.
+
+2006-10-31  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/AnsiExcept.st: Support raising WrongClass without setting
 	validClasses first.
 

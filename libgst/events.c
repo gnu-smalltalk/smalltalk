@@ -190,9 +190,6 @@ file_polling_handler (int sig)
 	}
       while (n == -1 && errno == EINTR);
 
-      if (n == 0)
-	return;
-
       num_used_pollfds = 0;
       for (node = head, pprev = &head; node; node = *pprev)
 	{

@@ -1,3 +1,7 @@
+2006-05-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tcp/Sockets.st: Check if peer is dead in #bufferContents.
+
 2005-05-09  Paolo Bonzini  <bonzini@gnu.org>
 
         * tcp/Sockets.st: Do not fail on #flush or #fill if the peer is

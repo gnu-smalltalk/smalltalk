@@ -1,5 +1,10 @@
 2006-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/events.c: Look for events (especially POLLHUP) even
+	if poll returns 0.
+
+2006-10-31  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/prims.def: Make CObject primitives more resilient to
 	bad contents of the CType.
 
