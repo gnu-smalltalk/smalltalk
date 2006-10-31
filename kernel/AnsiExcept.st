@@ -1072,6 +1072,8 @@ description
 
 messageText
     "Answer an exception's message text."
+    self validClasses isNil
+	ifTrue: [ ^'Invalid argument ', self value printString ].
     ^'Invalid argument %1: must be %2'
 	bindWith: self value with: self validClassesString!
 

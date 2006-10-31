@@ -74,6 +74,10 @@ CP value: CA.
 ^(CP value + 1) at: 0!
 ^(CP value + 1) - CA!
 
+
+(CPtrCType elementType: #int) new value!
+
+
 !Object methodsFor: 'C call-outs'!
 
 testCallin

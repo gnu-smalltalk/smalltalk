@@ -1,3 +1,8 @@
+2006-10-31  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Make CObject primitives more resilient to
+	bad contents of the CType.
+
 2006-10-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.c: Extract parse_variable_primary_1

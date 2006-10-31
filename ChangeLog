@@ -1,3 +1,8 @@
+2006-10-31  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/AnsiExcept.st: Support raising WrongClass without setting
+	validClasses first.
+
 2006-10-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CharArray.st: Add missing period in #isNumeric.

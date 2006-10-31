@@ -3849,7 +3849,7 @@ primitive VMpr_CObject_allocType [succeed,fail]
 
   oop1 = POP_OOP ();
   oop2 = POP_OOP ();
-  if (IS_INT (oop2))
+  if (IS_INT (oop2) && is_a_kind_of (OOP_CLASS (oop1), _gst_c_type_class))
     {
       intptr_t arg2;
       PTR ptr;
@@ -4336,7 +4336,8 @@ primitive VMpr_CObject_at :
   oop3 = POP_OOP ();
   oop2 = POP_OOP ();
   oop1 = POP_OOP ();
-  if (IS_INT (oop2))
+  if (IS_INT (oop2)
+      && (IS_INT (oop3) || is_a_kind_of (OOP_CLASS (oop3), _gst_c_type_class)))
     {
       char *addr;
       intptr_t arg2;
