@@ -144,3 +144,5 @@ Smalltalk removeKey: #Ok!
 ^[ [ ^#block printNl ] ifCurtailed: [ ^#inner printNl ] ] ifCurtailed: [ ^#outer printNl ]!
 
 
+"used to go in an infinite loop"
+[ self halt ] on: 1 do: [ :ex | 'blah' printNl ]!

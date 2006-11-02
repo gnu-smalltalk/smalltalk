@@ -118,6 +118,11 @@ newArray2
 
 "-----------------"
 
+"used to trigger a failure in the verifier"
+^{{}} printString!
+
+"-----------------"
+
 "This test used to fail because #removeAtIndex: was not implemented
  in SortedCollection."
 

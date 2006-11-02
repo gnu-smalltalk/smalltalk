@@ -1,3 +1,8 @@
+2006-11-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/BlkClosure.st: Do not fail if #on:do: has something else
+	than an exception passed to it.
+
 2006-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Stream.st: Put pastEnd here...

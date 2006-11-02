@@ -1715,6 +1715,7 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 	    SEND_IMMEDIATE {
 	      if (n == NEW_COLON_SPECIAL
 		  && IS_INT (last_used_literal)
+		  && last_used_literal != FROM_INT (0)
 		  && sp[-2] == OOP_CLASS (_gst_array_class))
 		{
 		  partially_constructed_array *a;

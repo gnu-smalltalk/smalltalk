@@ -63,22 +63,26 @@ exceptionHandlerSearchBlock
         | best bestGoodness goodness activeHandlers nested |
         bestGoodness := -1.
         activeHandlers := context at: context numArgs + 1.
-	nested := false.
+        context at: context numArgs + 1 put: -1.
+	nested := activeHandlers = -1.
 
-        1 to: context numArgs - 1 by: 2 do: [ :i |
-            goodness := (context at: i) goodness: signal exception.
-            goodness > -1 ifTrue: [
-                (activeHandlers bitAt: i) = 1 ifTrue: [
-                    "Sorry, this handler is already active..."
-                    nested := true.
-                    goodness := -1.
-                ]
-            ].
-            goodness > bestGoodness ifTrue: [
-                best := i.
-                bestGoodness := goodness.
-            ]
-        ].
+	nested
+	    ifFalse: [
+	        1 to: context numArgs - 1 by: 2 do: [ :i |
+	            goodness := (context at: i) goodness: signal exception.
+	            goodness > -1 ifTrue: [
+	                (activeHandlers bitAt: i) = 1 ifTrue: [
+	                    "Sorry, this handler is already active..."
+	                    nested := true.
+	                    goodness := -1.
+	                ]
+	            ].
+	            goodness > bestGoodness ifTrue: [
+	                best := i.
+	                bestGoodness := goodness.
+	            ]
+	        ]
+	    ].
 
         "Now instantiate the best handler we found"
         best isNil
@@ -96,6 +100,7 @@ exceptionHandlerSearchBlock
 		#found
             ]
 	    ifTrue: [
+	        context at: context numArgs + 1 put: activeHandlers.
 		nested ifTrue: [ #skip ] ifFalse: [ nil ]
 	    ]
     ]

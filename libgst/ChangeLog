@@ -1,3 +1,7 @@
+2006-11-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/opt.c: Fix verification of {{}}.
+
 2006-10-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/events.c: Look for events (especially POLLHUP) even

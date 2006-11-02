@@ -156,3 +156,7 @@ Execution begins...
 #inner
 #outer
 returned value is #outer
+
+Execution begins...
+ error: did not understand #goodness:
+returned value is nil
