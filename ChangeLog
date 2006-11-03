@@ -1,5 +1,9 @@
 2006-11-03  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/LargeInt.st: Fix method comments.
+
+2006-11-03  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/BlkClosure.st: Mark #on:do: contexts as unwinding
 	* kernel/ProcSched.st: Remove debug code.
 	* kernel/Process.st: Fix parameter names in #on:at:suspend:.  Add

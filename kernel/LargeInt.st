@@ -219,7 +219,7 @@ resultFrom: byteArray
 !LargeInteger methodsFor: 'testing'!
 
 = aNumber
-    "Answer whether the receiver and aNumber identify the same number"
+    "Answer whether the receiver and aNumber identify the same number."
 
     <primitive: VMpr_LargeInteger_eq>
     (aNumber isKindOf: Number) ifFalse: [ ^false ].
@@ -236,7 +236,7 @@ resultFrom: byteArray
 !
 
 ~= aNumber
-    "Answer whether the receiver and aNumber identify the same number"
+    "Answer whether the receiver and aNumber identify different numbers."
 
     <primitive: VMpr_LargeInteger_ne>
     (aNumber isKindOf: Number) ifFalse: [ ^true ].
@@ -329,7 +329,7 @@ resultFrom: byteArray
 !
 
 - aNumber
-    "Sum the receiver and aNumber, answer the result"
+    "Subtract aNumber from the receiver, answer the result"
     self subclassResponsibility
 !
 
@@ -721,7 +721,8 @@ setBytes: aByteArray
 !
 
 - aNumber
-    "Sum the receiver and aNumber, answer the result"
+    "Subtract aNumber from the receiver, answer the result"
+
     "All we have to do is convert the two numbers to two positive
      numbers and make LargePositiveInteger do the calculation.
      Use #largeNegated to save some coercions."
