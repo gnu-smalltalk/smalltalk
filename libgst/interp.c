@@ -484,7 +484,7 @@ static mst_Boolean unwind_method (void);
    or an unwind method.  In this case the non-unwind contexts between
    the unwind method and the returnContextOOP must be removed from the
    chain.  */
-static void unwind_to (OOP returnContextOOP);
+static mst_Boolean unwind_to (OOP returnContextOOP);
 
 /* Arrange things so that all the non-unwinding contexts up to
    returnContextOOP aren't executed.  For block contexts this can
@@ -493,7 +493,7 @@ static void unwind_to (OOP returnContextOOP);
    from them!  For this reason, method contexts are flagged as
    disabled and unwind_context takes care of skipping them when
    doing a local return.  */
-static void disable_non_unwind_contexts (OOP returnContextOOP);
+static mst_Boolean disable_non_unwind_contexts (OOP returnContextOOP);
 
 /* Called to handle signals that are not passed to the Smalltalk
    program, such as interrupts or segmentation violation.  In the
@@ -1120,12 +1120,11 @@ unwind_method (void)
       return (false);
     }
 
-  unwind_to (newContext->parentContext);
-  return (true);
+  return unwind_to (newContext->parentContext);
 }
 
 
-void
+mst_Boolean
 unwind_to (OOP returnContextOOP)
 {
   OOP oldContextOOP, newContextOOP;
@@ -1148,15 +1147,16 @@ unwind_to (OOP returnContextOOP)
       /* Check if we got to an unwinding context (#ensure:).  */
       if UNCOMMON (CONTEXT_FLAGS (newContext) & MCF_IS_UNWIND_CONTEXT)
         {
+	  mst_Boolean result;
 	  _gst_this_context_oop = oldContextOOP;
 
 	  /* _gst_this_context_oop is the context above the
 	     one we return to.   We only unwind up to the #ensure:
 	     context.  */
-	  disable_non_unwind_contexts (returnContextOOP);
+	  result = disable_non_unwind_contexts (returnContextOOP);
 
 	  unwind_context ();
-	  return;
+	  return result;
 	}
 
       /* This context cannot be deallocated in a LIFO way.  We must
@@ -1191,9 +1191,10 @@ unwind_to (OOP returnContextOOP)
   _gst_self = newContext->receiver;
 
   SET_THIS_METHOD (newContext->method, GET_CONTEXT_IP (newContext));
+  return (true);
 }
 
-void
+mst_Boolean
 disable_non_unwind_contexts (OOP returnContextOOP)
 {
   OOP oldContextOOP, newContextOOP, *chain;
@@ -1217,6 +1218,12 @@ disable_non_unwind_contexts (OOP returnContextOOP)
 	   its parent context field to nil makes us able to garbage
 	   collect more context objects.  */
         oldContext->parentContext = _gst_nil_oop;
+
+      if (IS_NIL (newContextOOP))
+	{
+	  *chain = newContextOOP;
+	  return (false);
+	}
 
       if (newContextOOP == returnContextOOP)
 	{
@@ -1255,6 +1262,7 @@ disable_non_unwind_contexts (OOP returnContextOOP)
     }
 
   *chain = newContext->parentContext;
+  return (true);
 }
 
 

@@ -1,3 +1,10 @@
+2006-11-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp.c: Check if we hit the bottom of the stack in
+	disable_non_unwind_contexts, and percolate a return value of true
+	through unwind_to up to unwind_method.  Otherwise return false from
+	both disable_non_unwind_contexts and unwind_to.
+
 2006-11-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/opt.c: Fix verification of {{}}.

@@ -146,3 +146,9 @@ Smalltalk removeKey: #Ok!
 
 "used to go in an infinite loop"
 [ self halt ] on: 1 do: [ :ex | 'blah' printNl ]!
+
+"Test error handling within a process."
+[^'test'] fork!
+
+"Test error handling within a process."
+[self error: 'test'] fork!

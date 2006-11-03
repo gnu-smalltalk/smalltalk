@@ -58,6 +58,7 @@ fromClosure: aBlockClosure parent: parentContext
 	| ctx |
 	ctx := thisContext parentContext copy.
 	ctx parentContext: parentContext.
+	"This value is returned by #fromClosure:parent:!"
 	^ctx
     ].
 
@@ -105,7 +106,7 @@ caller
 isDisabled
     "Answers false, because contexts that are skipped when doing a return
      are always MethodContexts.  BlockContexts are removed from the chain
-     whenever a non-local return is done, because MethodContexts need to
+     whenever a non-local return is done, while MethodContexts need to
      stay there in case there is a non-local return from the #ensure:
      block."
     ^false

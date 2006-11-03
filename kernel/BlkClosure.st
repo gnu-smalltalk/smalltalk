@@ -198,7 +198,7 @@ on: anException do: aBlock
     <exceptionHandlerSearch: BlockClosure exceptionHandlerSearchBlock
 	reset: BlockClosure exceptionHandlerResetBlock>
     active := 0.
-    ^self value
+    ^self valueAndResumeOnUnwind
 !
 
 on: e1 do: b1 on: e2 do: b2
@@ -210,7 +210,7 @@ on: e1 do: b1 on: e2 do: b2
     <exceptionHandlerSearch: BlockClosure exceptionHandlerSearchBlock
 	reset: BlockClosure exceptionHandlerResetBlock>
     active := 0.
-    ^self value
+    ^self valueAndResumeOnUnwind
 !
 
 on: e1 do: b1 on: e2 do: b2 on: e3 do: b3
@@ -223,7 +223,7 @@ on: e1 do: b1 on: e2 do: b2 on: e3 do: b3
     <exceptionHandlerSearch: BlockClosure exceptionHandlerSearchBlock
 	reset: BlockClosure exceptionHandlerResetBlock>
     active := 0.
-    ^self value
+    ^self valueAndResumeOnUnwind
 !
 
 on: e1 do: b1 on: e2 do: b2 on: e3 do: b3 on: e4 do: b4
@@ -236,7 +236,7 @@ on: e1 do: b1 on: e2 do: b2 on: e3 do: b3 on: e4 do: b4
     <exceptionHandlerSearch: BlockClosure exceptionHandlerSearchBlock
 	reset: BlockClosure exceptionHandlerResetBlock>
     active := 0.
-    ^self value
+    ^self valueAndResumeOnUnwind
 !
 
 on: e1 do: b1 on: e2 do: b2 on: e3 do: b3 on: e4 do: b4 on: e5 do: b5
@@ -249,7 +249,7 @@ on: e1 do: b1 on: e2 do: b2 on: e3 do: b3 on: e4 do: b4 on: e5 do: b5
     <exceptionHandlerSearch: BlockClosure exceptionHandlerSearchBlock
 	reset: BlockClosure exceptionHandlerResetBlock>
     active := 0.
-    ^self value
+    ^self valueAndResumeOnUnwind
 !
 
 ifError: aBlock

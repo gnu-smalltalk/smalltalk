@@ -1,3 +1,13 @@
+2006-11-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/BlkClosure.st: Mark #on:do: contexts as unwinding
+	* kernel/ProcSched.st: Remove debug code.
+	* kernel/Process.st: Fix parameter names in #on:at:suspend:.  Add
+	#context and use it in #makeUntrusted:.  Wrap process not only
+	in an #on:do:, but also in an #ensure: block.
+
+	* tests/exceptions.st: Test exception raising within a process.
+
 2006-11-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/BlkClosure.st: Do not fail if #on:do: has something else

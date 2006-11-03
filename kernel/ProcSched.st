@@ -80,7 +80,6 @@ processesAt: aPriority
 
 terminateActive
     "Terminate the active process"
-    Smalltalk backtrace.
     self activeProcess terminate
 !
 

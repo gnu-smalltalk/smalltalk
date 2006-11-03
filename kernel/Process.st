@@ -47,24 +47,27 @@ can suspend themselves and resume themselves however they wish.' !
 
 !Process class methodsFor: 'private'!
 
-on: aBlockContext at: aPriority suspend: aBoolean
-    "Private - Create a process running aBlockContext at the given
+on: aBlockClosure at: aPriority suspend: aBoolean
+    "Private - Create a process running aBlockClosure at the given
      priority.  The process is suspended immediately after
      initialization if aBoolean is true"
-    ^self new onBlock: aBlockContext at: aPriority suspend: aBoolean
+    ^self new onBlock: aBlockClosure at: aPriority suspend: aBoolean
 ! !
 
 
 
 !Process methodsFor: 'basic'!
 
+context
+    "Return the execution context of the receiver."
+    ^self == Processor activeProcess
+	ifTrue: [ thisContext parentContext ]
+	ifFalse: [ suspendedContext ]!
+
 makeUntrusted: aBoolean
     "Set whether the receiver is trusted or not."
     | ctx |
-    ctx := self == Processor activeProcess
-	ifTrue: [ thisContext ]
-	ifFalse: [ suspendedContext ].
-
+    ctx := self context.
     [ ctx isNil ] whileFalse: [
 	ctx makeUntrusted: aBoolean.
 	ctx := ctx parentContext
@@ -307,13 +310,18 @@ onBlock: aBlockClosure at: aPriority suspend: aBoolean
     activePriority := Processor activePriority.
     closure := [
 	[
-	    self setPriorityFrom: activePriority to: aPriority suspend: aBoolean.
-	    aBlockClosure value ]
+	    [
+		self setPriorityFrom: activePriority to: aPriority suspend: aBoolean.
+	        aBlockClosure value
+	    ]
+	        on: SystemExceptions.ProcessBeingTerminated
 
-	    on: SystemExceptions.ProcessBeingTerminated
-	    do: [ :sig | sig return ].
+	        "If we terminate in the handler, the 'ensure' blocks are not
+	         evaluated.  Instead, if the handler returns, the unwinding
+	         is done properly."
+	        do: [ :sig | sig return ].
 
-	self primTerminate
+	] ensure: [ self primTerminate ] .
     ].
 
     "Start the Process immediately so that we get into the
