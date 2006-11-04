@@ -1,5 +1,9 @@
 2006-11-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CObject.st: Use #numberOfElements rather than #numElements.
+
+2006-11-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Builtins.st: Fix primitive number for ByteArray
 	class>>#fromCData:size:.
 

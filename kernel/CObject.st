@@ -926,7 +926,7 @@ elementType
 
 sizeof
     "Answer the receiver's size"
-    ^self type numElements * self elementType sizeof
+    ^self type numberOfElements * self elementType sizeof
 !
 
 alignof
