@@ -1,3 +1,8 @@
+2006-11-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Builtins.st: Fix primitive number for ByteArray
+	class>>#fromCData:size:.
+
 2006-11-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/LargeInt.st: Fix method comments.

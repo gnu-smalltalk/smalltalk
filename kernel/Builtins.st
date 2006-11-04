@@ -1703,7 +1703,7 @@ size
 fromCData: aCObject size: anInteger
     "Answer a ByteArray containing anInteger bytes starting at the location pointed
      to by aCObject"
-    <primitive: VMpr_String_fromCData>
+    <primitive: VMpr_ByteArray_fromCData_size>
     ^SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger
 ! !
 
