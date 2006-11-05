@@ -70,6 +70,9 @@ o   The class above which super-send bytecodes start searching is now embedded
     'here' in Smalltalk/X (not implemented) or 'self.Foo b' to execute
     the Foo>>#b method (also not implemented).
 
+o   The header files compile cleanly with a C++ compiler.  For the occasion,
+    the preferred name of the old `mst_Object' has changed to `gst_object'.
+
 o   Various speedups.
 
 Unicode support:

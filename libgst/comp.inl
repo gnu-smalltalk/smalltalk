@@ -80,7 +80,7 @@ static inline OOP get_method_info (OOP oop);
 OOP
 get_method_info (OOP oop)
 {
-  mst_Object obj;
+  gst_object obj;
   obj = OOP_TO_OBJ (oop);
   if UNCOMMON (obj->objClass == _gst_compiled_block_class)
     {

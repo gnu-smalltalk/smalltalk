@@ -198,7 +198,7 @@ static void oldspace_nomemory (heap_data *h, size_t sz);
 
 /* Answer the number of fields to be scanned in the object starting
    at OBJ, with the given FLAGS on its OOP.  */
-static int scanned_fields_in (mst_Object obj, int flags) ATTRIBUTE_PURE;
+static int scanned_fields_in (gst_object obj, int flags) ATTRIBUTE_PURE;
 
 /* The mark phase of oldspace GC.  */
 static inline void mark_oops (void);
@@ -346,7 +346,7 @@ void _gst_update_object_memory_oop (OOP oop)
     numScavenges = _gst_mem.numScavenges;
     data = (gst_object_memory) OOP_TO_OBJ (oop);
     data->bytesPerOOP = FROM_INT (sizeof (PTR));
-    data->bytesPerOTE = FROM_INT (sizeof (struct OOP) +
+    data->bytesPerOTE = FROM_INT (sizeof (struct oop_s) +
 				  sizeof (gst_object_header));
 
     data->edenSize = FROM_INT (_gst_mem.eden.totalSize);
@@ -403,7 +403,7 @@ _gst_init_oop_table (size_t size)
 
   oop_heap = NULL;
   for (i = MAX_OOP_TABLE_SIZE; i && !oop_heap; i >>= 1)
-    oop_heap = _gst_heap_create (i * sizeof (struct OOP));
+    oop_heap = _gst_heap_create (i * sizeof (struct oop_s));
 
   if (!oop_heap)
     nomemory (true);
@@ -411,14 +411,14 @@ _gst_init_oop_table (size_t size)
   alloc_oop_table (size);
 
   _gst_nil_oop->flags = F_READONLY | F_OLD | F_REACHABLE;
-  _gst_nil_oop->object = (mst_Object) & _gst_nil_object;
+  _gst_nil_oop->object = (gst_object) & _gst_nil_object;
   _gst_nil_object.objSize =
     FROM_INT (ROUNDED_WORDS (sizeof (struct gst_undefined_object)));
 
   _gst_true_oop->flags = F_READONLY | F_OLD | F_REACHABLE;
-  _gst_true_oop->object = (mst_Object) & _gst_boolean_objects[0];
+  _gst_true_oop->object = (gst_object) & _gst_boolean_objects[0];
   _gst_false_oop->flags = F_READONLY | F_OLD | F_REACHABLE;
-  _gst_false_oop->object = (mst_Object) & _gst_boolean_objects[1];
+  _gst_false_oop->object = (gst_object) & _gst_boolean_objects[1];
   _gst_boolean_objects[0].objSize =
     FROM_INT (ROUNDED_WORDS (sizeof (struct gst_boolean)));
   _gst_boolean_objects[1].objSize =
@@ -432,7 +432,7 @@ _gst_init_oop_table (size_t size)
 	FROM_INT (ROUNDED_WORDS (sizeof (struct gst_character)));
       _gst_char_object_table[i].charVal = FROM_INT (i);
       _gst_mem.ot[i + CHAR_OBJECT_BASE].object =
-	(mst_Object) & _gst_char_object_table[i];
+	(gst_object) & _gst_char_object_table[i];
       _gst_mem.ot[i + CHAR_OBJECT_BASE].flags =
 	F_READONLY | F_OLD | F_REACHABLE;
     }
@@ -446,9 +446,9 @@ alloc_oop_table (size_t size)
   OOP oop;
 
   _gst_mem.ot_size = size;
-  bytes = (size - FIRST_OOP_INDEX) * sizeof (struct OOP);
+  bytes = (size - FIRST_OOP_INDEX) * sizeof (struct oop_s);
   _gst_mem.ot_base =
-    (struct OOP *) _gst_heap_sbrk (oop_heap, bytes);
+    (struct oop_s *) _gst_heap_sbrk (oop_heap, bytes);
   if (!_gst_mem.ot_base)
     nomemory (true);
 
@@ -479,7 +479,7 @@ _gst_realloc_oop_table (size_t newSize)
   size_t bytes;
   OOP oop;
 
-  bytes = (newSize - _gst_mem.ot_size) * sizeof (struct OOP);
+  bytes = (newSize - _gst_mem.ot_size) * sizeof (struct oop_s);
   if (bytes < 0)
     return (true);
 
@@ -616,7 +616,7 @@ void
 _gst_swap_objects (OOP oop1,
 		   OOP oop2)
 {
-  struct OOP tempOOP;
+  struct oop_s tempOOP;
   if (oop2->flags & F_WEAK)
     _gst_make_oop_non_weak (oop2);
 
@@ -664,13 +664,13 @@ _gst_swap_objects (OOP oop1,
 void
 _gst_make_oop_fixed (OOP oop)
 {
-  mst_Object newObj;
+  gst_object newObj;
   int size;
   if (oop->flags & F_FIXED)
     return;
 
   size = SIZE_TO_BYTES (TO_INT(oop->object->objSize));
-  newObj = (mst_Object) _gst_mem_alloc (_gst_mem.fixed, size);
+  newObj = (gst_object) _gst_mem_alloc (_gst_mem.fixed, size);
   if (!newObj)
     abort ();
 
@@ -688,14 +688,14 @@ _gst_make_oop_fixed (OOP oop)
 void
 _gst_tenure_oop (OOP oop)
 {
-  mst_Object newObj;
+  gst_object newObj;
   if (oop->flags & F_OLD)
     return;
 
   if (!(oop->flags & F_FIXED))
     {
       int size = SIZE_TO_BYTES (TO_INT(oop->object->objSize));
-      newObj = (mst_Object) _gst_mem_alloc (_gst_mem.old, size);
+      newObj = (gst_object) _gst_mem_alloc (_gst_mem.old, size);
       if (!newObj)
         abort ();
 
@@ -711,12 +711,12 @@ _gst_tenure_oop (OOP oop)
 }
 
 
-mst_Object
+gst_object
 _gst_alloc_obj (size_t size,
 		OOP *p_oop)
 {
   OOP *newAllocPtr;
-  mst_Object p_instance;
+  gst_object p_instance;
 
   size = ROUNDED_BYTES (size);
 
@@ -733,7 +733,7 @@ _gst_alloc_obj (size_t size,
       newAllocPtr = _gst_mem.eden.allocPtr + size;
     }
 
-  p_instance = (mst_Object) _gst_mem.eden.allocPtr;
+  p_instance = (gst_object) _gst_mem.eden.allocPtr;
   _gst_mem.eden.allocPtr = newAllocPtr;
   *p_oop = alloc_oop (p_instance, _gst_mem.active_flag);
   p_instance->objSize = FROM_INT (BYTES_TO_SIZE (size));
@@ -741,28 +741,28 @@ _gst_alloc_obj (size_t size,
   return p_instance;
 }
 
-mst_Object
+gst_object
 _gst_alloc_old_obj (size_t size,
 		    OOP *p_oop)
 {
   OOP *newAllocPtr;
-  mst_Object p_instance;
+  gst_object p_instance;
 
   size = ROUNDED_BYTES (size);
   newAllocPtr = _gst_mem.eden.allocPtr + BYTES_TO_SIZE (size);
 
   /* If the object is big enough, we put it directly in oldspace.  */
-  p_instance = (mst_Object) _gst_mem_alloc (_gst_mem.old, size);
+  p_instance = (gst_object) _gst_mem_alloc (_gst_mem.old, size);
   if COMMON (p_instance)
     goto ok;
 
   _gst_global_gc (size);
-  p_instance = (mst_Object) _gst_mem_alloc (_gst_mem.old, size);
+  p_instance = (gst_object) _gst_mem_alloc (_gst_mem.old, size);
   if COMMON (p_instance)
     goto ok;
 
   _gst_compact (0);
-  p_instance = (mst_Object) _gst_mem_alloc (_gst_mem.old, size);
+  p_instance = (gst_object) _gst_mem_alloc (_gst_mem.old, size);
   if UNCOMMON (!p_instance)
     {
       /* !!! do something more reasonable in the future */
@@ -776,10 +776,10 @@ ok:
   return p_instance;
 }
 
-mst_Object _gst_alloc_words (size_t size)
+gst_object _gst_alloc_words (size_t size)
 {
   OOP *newAllocPtr;
-  mst_Object p_instance;
+  gst_object p_instance;
 
   /* We don't want to have allocPtr pointing to the wrong thing during
      GC, so we use a local var to hold its new value */
@@ -794,7 +794,7 @@ mst_Object _gst_alloc_words (size_t size)
   if UNCOMMON (size >= _gst_mem.big_object_threshold)
     abort ();
 
-  p_instance = (mst_Object) _gst_mem.eden.allocPtr;
+  p_instance = (gst_object) _gst_mem.eden.allocPtr;
   _gst_mem.eden.allocPtr = newAllocPtr;
   p_instance->objSize = FROM_INT (size);
   return p_instance;
@@ -975,7 +975,7 @@ _gst_compact (size_t new_heap_limit)
       PREFETCH_LOOP (oop, PREF_READ | PREF_NTA);
       if ((oop->flags & (F_OLD | F_FIXED)) == F_OLD)
         {
-          mst_Object new;
+          gst_object new;
           size_t size = SIZE_TO_BYTES (TO_INT (oop->object->objSize));
           new = _gst_mem_alloc (new_heap, size);
           memcpy (new, oop->object, size);
@@ -1360,7 +1360,7 @@ _gst_sweep_oop (OOP oop)
 void
 mourn_objects (void)
 {
-  mst_Object array;
+  gst_object array;
   long size;
   gst_processor_scheduler processor;
 
@@ -1517,7 +1517,7 @@ void
 add_grey_object (OOP oop)
 {
   grey_area_node *entry;
-  mst_Object obj = OOP_TO_OBJ (oop);
+  gst_object obj = OOP_TO_OBJ (oop);
   int numFields = scanned_fields_in (obj, oop->flags);
   OOP *base = &(obj->objClass);
 
@@ -1734,7 +1734,7 @@ scan_grey_objects()
 {
   grey_area_node *node, *next;
   OOP oop;
-  mst_Object obj;
+  gst_object obj;
 
   for (next = _gst_mem.grey_areas.head; (node = next); )
     {
@@ -1778,7 +1778,7 @@ scan_grey_objects()
 }
 
 int
-scanned_fields_in (mst_Object object,
+scanned_fields_in (gst_object object,
 		  int flags)
 {
   OOP objClass = object->objClass;
@@ -1872,7 +1872,7 @@ _gst_copy_an_oop (OOP oop)
   int i, n;
   do
     {
-      mst_Object obj;
+      gst_object obj;
       OOP *pData;
 
       obj = OOP_TO_OBJ (oop);
@@ -1919,7 +1919,7 @@ _gst_copy_an_oop (OOP oop)
 #endif
 
       queue_put (&_gst_mem.tenuring_queue, &oop, 1);
-      obj = oop->object = (mst_Object)
+      obj = oop->object = (gst_object)
 	queue_put (_gst_mem.active_half, pData, TO_INT (obj->objSize));
 
       oop->flags &= ~(F_SPACES | F_POOLED);
@@ -1978,7 +1978,7 @@ mark_ephemeron_oops (void)
   for (pOOP = base, i = size; i--; pOOP++)
     {
       OOP oop = *pOOP;
-      mst_Object obj = OOP_TO_OBJ(oop);
+      gst_object obj = OOP_TO_OBJ(oop);
       OOP key = obj->data[0];
 
       if (key->flags & F_REACHABLE)
@@ -1990,7 +1990,7 @@ mark_ephemeron_oops (void)
   for (pOOP = base, i = size; i--; pOOP++)
     {
       OOP oop = *pOOP;
-      mst_Object obj = OOP_TO_OBJ(oop);
+      gst_object obj = OOP_TO_OBJ(oop);
       OOP key = obj->data[0];
       int num = NUM_OOPS(obj);
       int j;
@@ -2039,7 +2039,7 @@ _gst_mark_an_oop_internal (OOP oop,
       if (!oop)
 	{			/* in the loop! */
 #if !defined (OPTIMIZE)
-	  mst_Object obj = (mst_Object) (curOOP - 1);	/* for debugging */
+	  gst_object obj = (gst_object) (curOOP - 1);	/* for debugging */
 #endif
 	iterationLoop:
 	  /* in a loop, do next iteration */
@@ -2083,7 +2083,7 @@ _gst_mark_an_oop_internal (OOP oop,
       else
 	{			/* just starting with this oop */
 	  OOP objClass;
-	  mst_Object object;
+	  gst_object object;
 	  uintptr_t size;
 
 #if !defined (OPTIMIZE)

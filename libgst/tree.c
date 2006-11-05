@@ -742,7 +742,7 @@ print_attribute_list_node (tree_node node,
   OOP selectorOOP = message->selector;
   gst_string selector = (gst_string) OOP_TO_OBJ (selectorOOP);
   OOP argumentsOOP = message->args;
-  mst_Object arguments = OOP_TO_OBJ (argumentsOOP);
+  gst_object arguments = OOP_TO_OBJ (argumentsOOP);
 
   const char *sel = selector->chars;
   char *name = alloca (oop_num_fields (selectorOOP) + 1);

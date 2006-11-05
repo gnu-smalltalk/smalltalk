@@ -1,5 +1,29 @@
 2006-11-03  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/gst.h: Compile on C++.  Rename mst_Object to gst_object.
+	* libgst/gstpub.h: Likewise.
+
+	* libgst/comp.c: Rename mst_Object to gst_object.
+	* libgst/interp.c: Likewise.
+	* libgst/lex.c: Likewise.
+	* libgst/oop.c: Likewise.
+	* libgst/oop.h: Likewise.
+	* libgst/print.c: Likewise.
+	* libgst/print.h: Likewise.
+	* libgst/dict.c: Likewise.
+	* libgst/save.c: Likewise.
+	* libgst/security.c: Likewise.
+	* libgst/sym.c: Likewise.
+	* libgst/dict.h: Likewise.
+	* libgst/tree.c: Likewise.
+	* libgst/xlat.c: Likewise.
+	* libgst/comp.inl: Likewise.
+	* libgst/dict.inl: Likewise.
+	* libgst/oop.inl: Likewise.
+	* libgst/prims.def: Likewise.
+
+2006-11-03  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/interp.c: Check if we hit the bottom of the stack in
 	disable_non_unwind_contexts, and percolate a return value of true
 	through unwind_to up to unwind_method.  Otherwise return false from
@@ -4256,7 +4280,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  <bonzini@gnu.org>
 	* lib/oop.inl: Call reallocOOPTable instead of exiting when
 	ran out of OOP table slots.
 	* lib/save.c: FixupObject, restoreObject, restoreInstanceVars accept
-	an mst_Object instead of an OOP; more coherent with their names and
+	an gst_object instead of an OOP; more coherent with their names and
 	a bit more efficient too.  Also moved updating of CFunctionDescriptors
 	from restoreInstanceVars to fixupOOPInstanceVars (it is not needed
 	when saving, only when loading, and was the only part of the code
@@ -5737,7 +5761,7 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib/mstcint.c: Fixed cFuncInfo to grow dynamically.
 	* lib/mst.h: Boolean replaced with mst_Boolean, objectClass =>
-	mst_objectClass, Object => mst_Object.  This thanks
+	mst_objectClass, Object => gst_object.  This thanks
 	to the foresightful guys at the X consortium.
 	Thanks guys for wantonly chewing up name space.
 	* lib/mst.h: Removed the old sysVersionMajor etc definitions --
@@ -5750,10 +5774,10 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  <bonzini@gnu.org>
 	* lib/mstcomp.h: Boolean switched to mst_Boolean.
 	* lib/mstdict.c: Replaced objectClass with mst_objectClass to avoid
 	conflicts with X (grrr!).  Boolean replaced with
-	mst_Boolean.  Object replaced with mst_Object.
+	mst_Boolean.  Object replaced with gst_object.
 	* lib/mstdict.h: Replaced objectClass with mst_objectClass to avoid
 	conflicts with X.  Boolean => mst_Boolean. Object =>
-	mst_Object.
+	gst_object.
 	* lib/mstinterp.c: Replaced objectClass with mst_objectClass.  Boolean =>
 	mst_Boolean.
 	* lib/mstinterp.h: Boolean => mst_Boolean.
@@ -5762,8 +5786,8 @@ Wed Apr 26 14:42.52 2000  Paolo Bonzini  <bonzini@gnu.org>
 	* lib/mstlib.c: Boolean => mst_Boolean.
 	* lib/mstlib.h: Boolean renamed to mst_Boolean.
 	* lib/mstoop.c: Boolean => mst_Boolean.
-	* lib/mstoop.h: Boolean => mst_Boolean.  Object => mst_Object.
-	* lib/mstsave.c: Boolean => mst_Boolean.  Object => mst_Object.
+	* lib/mstoop.h: Boolean => mst_Boolean.  Object => gst_object.
+	* lib/mstsave.c: Boolean => mst_Boolean.  Object => gst_object.
 	* lib/mstsave.h: Boolean => mst_Boolean.
 	* lib/mstsym.c: Boolean => mst_Boolean.
 	* lib/msttree.h: Boolean => mst_Boolean.

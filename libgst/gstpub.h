@@ -147,7 +147,7 @@ typedef struct VMProxy
   mst_Boolean (*respondsTo) __PROTO ((OOP oop, OOP selector));
   size_t (*OOPSize) __PROTO ((OOP oop));
   OOP (*OOPAt) __PROTO ((OOP oop, size_t index));
-  OOP (*OOPAtPut) __PROTO ((OOP oop, size_t index, OOP new));
+  OOP (*OOPAtPut) __PROTO ((OOP oop, size_t index, OOP newOOP));
 
   /* Some system classes.  */
   OOP objectClass, arrayClass, stringClass, characterClass, smallIntegerClass,
@@ -170,8 +170,8 @@ typedef struct VMProxy
 #define INDEXED_WORD(obj, n)   ( ((long *) ((obj) + 1))		    [(n)-1] )
 #define INDEXED_BYTE(obj, n)   ( ((char *) ((obj) + 1))		    [(n)-1] )
 #define INDEXED_OOP(obj, n)    ( ((OOP  *) ((obj) + 1))		    [(n)-1] )
-#define ARRAY_OOP_AT(obj, n)   ( ((OOP  *) ((mst_Object) obj)->data) [(n)-1] )
-#define STRING_OOP_AT(obj, n)  ( ((char *) ((mst_Object) obj)->data) [(n)-1] )
+#define ARRAY_OOP_AT(obj, n)   ( ((OOP  *) ((gst_object) obj)->data) [(n)-1] )
+#define STRING_OOP_AT(obj, n)  ( ((char *) ((gst_object) obj)->data) [(n)-1] )
 
 /* Compatibility section */
 #define indexedWord(obj, n)   INDEXED_WORD(obj, n)

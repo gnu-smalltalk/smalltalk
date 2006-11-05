@@ -60,7 +60,7 @@ void _gst_display_oop_short (OOP oop)
 
 /* Show information about the contents of the OBJ object.
    Mainly provided for debugging.  */
-void _gst_display_object (mst_Object obj)
+void _gst_display_object (gst_object obj)
   ATTRIBUTE_HIDDEN;
 
 /* Initialize the snprintfv library with hooks to print GNU Smalltalk

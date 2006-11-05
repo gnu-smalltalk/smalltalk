@@ -519,7 +519,7 @@ extern OOP _gst_identity_dictionary_at_put (OOP identityDictionaryOOP,
    dictionary instance that DICTIONARYOOP is pointing to with a new,
    larger dictionary, and returns this new dictionary (the object
    pointer, not the OOP).  */
-extern mst_Object _gst_grow_dictionary (OOP dictionaryOOP) 
+extern gst_object _gst_grow_dictionary (OOP dictionaryOOP) 
   ATTRIBUTE_HIDDEN;
 
 /* Called when an IdentityDictionary becomes full, this routine

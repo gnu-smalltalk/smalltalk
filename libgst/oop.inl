@@ -106,14 +106,14 @@ static inline OOP alloc_oop (PTR obj, intptr_t flags);
 
 /* Set the indirect object pointer OOP to point to OBJ.  */
 #define SET_OOP_OBJECT(oop, obj) do {				\
-  (oop)->object = (mst_Object) (obj);				\
+  (oop)->object = (gst_object) (obj);				\
 } while(0)
 
 /* Answer whether ADDR is part of the OOP table.  */
 #define IS_OOP_ADDR(addr)					\
   ((OOP)(addr) >= _gst_mem.ot_base 	 			\
     && (OOP)(addr) <= _gst_mem.last_allocated_oop		\
-    && (((intptr_t)addr & (sizeof (struct OOP) - 1)) == 0))
+    && (((intptr_t)addr & (sizeof (struct oop_s) - 1)) == 0))
 
 /* Answer whether ADDR is part of newspace.  */
 #define IS_EDEN_ADDR(addr)					\
@@ -147,9 +147,9 @@ static inline OOP
 alloc_oop (PTR objData, intptr_t flags)
 {
   REGISTER (1, OOP oop);
-  mst_Object obj;
+  gst_object obj;
 
-  obj = (mst_Object) objData;
+  obj = (gst_object) objData;
 
   if UNCOMMON (_gst_mem.last_allocated_oop ==
 		_gst_mem.last_swept_oop)

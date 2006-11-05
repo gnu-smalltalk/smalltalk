@@ -747,7 +747,7 @@ scan_number (int c,
 	    /* Make a LargeInteger constant and create an object out of
 	       it.  */
 	    byte_object bo = scan_large_integer (isNegative, base);
-	    mst_Object result = instantiate_with (bo->class, bo->size, &numOOP);
+	    gst_object result = instantiate_with (bo->class, bo->size, &numOOP);
             memcpy (result->data, bo->body, bo->size);
 	  }
         else

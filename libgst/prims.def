@@ -2445,7 +2445,7 @@ primitive VMpr_Object_allOwners [succeed]
   OOP oop1;
   OOP oop2, lastOOP;
   OOP result;
-  mst_Object object;
+  gst_object object;
   _gst_primitives_executed++;
 
   oop1 = STACKTOP ();
@@ -2823,7 +2823,7 @@ primitive VMpr_Object_changeClassTo [succeed,fail]
   oop1 = POP_OOP ();
   if (is_a_kind_of (OOP_CLASS (oop1), _gst_behavior_class))
     {
-      mst_Object obj;
+      gst_object obj;
       obj = OOP_TO_OBJ (STACKTOP ());
       obj->objClass = oop1;
       PRIM_SUCCEEDED;
@@ -5662,7 +5662,7 @@ primitive VMpr_CFuncDescriptor_call [succeed,fail]
 {
   volatile OOP result = NULL;		/* initialize to please GCC */
   volatile gst_method_context context;
-  mst_Object resultObj;
+  gst_object resultObj;
   OOP contextOOP, resultOOP, cFuncOOP;
   interp_jmp_buf localJmpBuf;
 

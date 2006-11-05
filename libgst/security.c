@@ -66,7 +66,7 @@ check_against_permission (OOP permissionOOP,
 			  OOP actionOOP)
 {
   gst_permission perm = (gst_permission) OOP_TO_OBJ (permissionOOP);
-  mst_Object actionArray = OOP_TO_OBJ (perm->actions);
+  gst_object actionArray = OOP_TO_OBJ (perm->actions);
   if (perm->name != nameOOP)
     return (false);
 
@@ -241,7 +241,7 @@ mst_Boolean _gst_check_permission (OOP contextOOP,
       for (i = 0; i < num_attributes; i++)
 	{
 	  gst_message attr = (gst_message) OOP_TO_OBJ (info->attributes[i]);
-	  mst_Object attr_args;
+	  gst_object attr_args;
 	  OOP permissionOOP;
 
 	  if (attr->selector != _gst_permission_symbol)

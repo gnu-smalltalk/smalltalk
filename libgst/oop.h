@@ -44,7 +44,7 @@
    True, False, and UndefinedObject (nil) oops, which are
    built-ins.  */
 #define INITIAL_OOP_TABLE_SIZE	(1024 * 128 + BUILTIN_OBJECT_BASE)
-#define MAX_OOP_TABLE_SIZE	(sizeof(struct OOP) << 20)
+#define MAX_OOP_TABLE_SIZE	(sizeof(struct oop_s) << 20)
 
 /* The number of free OOPs under which we trigger GCs.  0 is not
    enough because _gst_scavenge might still need some oops in
@@ -171,7 +171,7 @@ struct memory_space
      Some of the bits indicate the difference between the allocated length
      (stored in the object itself), and the real length, because variable
      byte objects may not be an even multiple of sizeof(PTR).  */
-  struct OOP *ot, *ot_base;
+  struct oop_s *ot, *ot_base;
 
   /* The number of OOPs in the free list and in the full OOP
      table.  num_free_oops is only correct after a GC!  */
@@ -370,19 +370,19 @@ extern void _gst_inc_grow_registry (void)
 
    The pointer to the object data is returned, the OOP is
    stored in P_OOP.  */
-extern mst_Object _gst_alloc_obj (size_t size,
+extern gst_object _gst_alloc_obj (size_t size,
 				  OOP *p_oop) 
   ATTRIBUTE_HIDDEN;
 
 /* The same, but for an oldspace object */
-extern mst_Object _gst_alloc_old_obj (size_t size,
+extern gst_object _gst_alloc_old_obj (size_t size,
 				      OOP *p_oop) 
   ATTRIBUTE_HIDDEN;
 
 /* Allocate and return space for an object of SIZE words, without
    creating an OOP.  This is a special operation that is only needed
    at bootstrap time, so it does not care about garbage collection.  */
-extern mst_Object _gst_alloc_words (size_t size) 
+extern gst_object _gst_alloc_words (size_t size) 
   ATTRIBUTE_HIDDEN;
 
 /* Grows the allocated memory to SPACESIZE bytes, if it's not there

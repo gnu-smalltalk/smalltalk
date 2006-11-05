@@ -2132,7 +2132,7 @@ make_constant_oop (tree_node constExpr)
   OOP resultOOP, elementOOP;
   inc_ptr incPtr;
   byte_object bo;
-  mst_Object result;
+  gst_object result;
 
   if (constExpr == NULL)
     return (_gst_nil_oop);	/* special case empty array literals */
@@ -2311,7 +2311,7 @@ _gst_make_attribute (tree_node attribute_keywords)
 {
   tree_node keyword;
   OOP selectorOOP, argsArrayOOP, messageOOP;
-  mst_Object argsArray;
+  gst_object argsArray;
   int i, numArgs;
   inc_ptr incPtr;
 
@@ -2426,7 +2426,7 @@ process_attribute (OOP messageOOP)
   gst_message message = (gst_message) OOP_TO_OBJ (messageOOP);
   OOP selectorOOP = message->selector;
   OOP argumentsOOP = message->args;
-  mst_Object arguments = OOP_TO_OBJ (argumentsOOP);
+  gst_object arguments = OOP_TO_OBJ (argumentsOOP);
 
   if (selectorOOP == _gst_primitive_symbol)
     {
@@ -2529,7 +2529,7 @@ OOP
 get_literals_array (void)
 {
   OOP methodLiteralsOOP;
-  mst_Object methodLiterals;
+  gst_object methodLiterals;
 
   assert (literal_vec_curr > literal_vec);
 
@@ -2725,7 +2725,7 @@ method_new (method_header header,
   int numByteCodes;
   gst_compiled_method method;
   OOP methodOOP, methodDesc;
-  mst_Object lit;
+  gst_object lit;
   int i;
 
   if (bytecodes != NULL)

@@ -49,7 +49,7 @@ static inline mst_Boolean is_a_kind_of (OOP testedOOP,
    of the Object pointed to by OOP.  Returns whether the INDEX is
    correct and the VALUE has the appropriate class and/or range.  */
 static inline mst_Boolean index_oop_put_spec (OOP oop,
-				              mst_Object object,
+				              gst_object object,
 				              size_t index,
 					      OOP value,
 				              intptr_t instanceSpec);
@@ -89,7 +89,7 @@ static inline void nil_fill (OOP * oopPtr,
    object data is returned, the OOP is stored in P_OOP.  The OOP is
    adjusted to reflect any variance in size (such as a string that's
    shorter than a word boundary).  */
-static inline mst_Object new_instance_with (OOP class_oop,
+static inline gst_object new_instance_with (OOP class_oop,
 					    size_t numIndexFields,
 					    OOP *p_oop);
 
@@ -98,7 +98,7 @@ static inline mst_Object new_instance_with (OOP class_oop,
    instance is returned.  Its fields are NOT INITIALIZED.  CLASS_OOP
    must represent a class with no indexable fields. An OOP will be
    allocated and stored in P_OOP.  */
-static inline mst_Object new_instance (OOP class_oop,
+static inline gst_object new_instance (OOP class_oop,
 				       OOP *p_oop);
 
 /* Returns a new, initialized instance of CLASS_OOP with
@@ -108,7 +108,7 @@ static inline mst_Object new_instance (OOP class_oop,
    the OOP is stored in P_OOP.  The OOP is adjusted to reflect any
    variance in size (such as a string that's shorter than a word
    boundary.  */
-static inline mst_Object instantiate_with (OOP class_oop,
+static inline gst_object instantiate_with (OOP class_oop,
 					   size_t numIndexFields,
 					   OOP *p_oop);
 
@@ -117,7 +117,7 @@ static inline mst_Object instantiate_with (OOP class_oop,
    variables of the new instance are initialized to _gst_nil_oop,
    since fixed-field-only objects can only have pointers. The pointer
    to the object data is returned, the OOP is stored in P_OOP.  */
-static inline mst_Object instantiate (OOP class_oop,
+static inline gst_object instantiate (OOP class_oop,
 				      OOP *p_oop);
 
 /* Return the Character object for the Unicode value C.  */
@@ -157,7 +157,7 @@ static inline OOP index_oop (OOP oop,
    if this is the checking fails.  OBJECT and INSTANCESPEC are cached
    out of OOP and its class.  */
 static inline OOP index_oop_spec (OOP oop,
-		                  mst_Object object,
+		                  gst_object object,
 		                  size_t index,
 		                  intptr_t instanceSpec);
 
@@ -278,12 +278,12 @@ static inline int64_t to_c_int_64 (OOP oop);
 /* Answer the void * extracted from a CObject, COBJ (*not* an OOP,
    but an object pointer).  */
 #define COBJECT_VALUE_OBJ(cObj) \
-  ( ((PTR *) cObj) [TO_INT(((mst_Object)cObj)->objSize) - 1])
+  ( ((PTR *) cObj) [TO_INT(((gst_object)cObj)->objSize) - 1])
 
 /* Sets to VALUE the void * pointed to by the CObject, COBJ (*not* an
    OOP, but an object pointer).  */
 #define SET_COBJECT_VALUE_OBJ(cObj, value) \
-  ( ((PTR *) cObj) [TO_INT(((mst_Object)cObj)->objSize) - 1] = (PTR)(value))
+  ( ((PTR *) cObj) [TO_INT(((gst_object)cObj)->objSize) - 1] = (PTR)(value))
 
 /* Sets to VALUE the void * pointed to by the CObject, COBJOOP.  */
 #define COBJECT_VALUE(cObjOOP) \
@@ -456,7 +456,7 @@ static inline double
 floatd_oop_value (floatOOP)
      OOP floatOOP;
 {
-  mst_Object obj;
+  gst_object obj;
   double d;
 
   /* we may not be aligned properly...fetch things out the hard way */
@@ -478,7 +478,7 @@ floatd_new (double f)
 
   floatObject->value = f;
 #else
-  mst_Object obj;
+  gst_object obj;
 
   obj = new_instance_with (_gst_floatd_class, sizeof (double), &floatOOP);
 
@@ -500,7 +500,7 @@ static inline long double
 floatq_oop_value (floatOOP)
      OOP floatOOP;
 {
-  mst_Object obj;
+  gst_object obj;
   long double d;
 
   /* we may not be aligned properly...fetch things out the hard way */
@@ -522,7 +522,7 @@ floatq_new (long double f)
 
   floatObject->value = f;
 #else
-  mst_Object obj;
+  gst_object obj;
 
   obj = new_instance_with (_gst_floatq_class, sizeof (long double), &floatOOP);
 
@@ -599,14 +599,14 @@ nil_fill (OOP * oopPtr,
 #undef UNROLL_ADV
 }
 
-mst_Object
+gst_object
 new_instance_with (OOP class_oop,
 		   size_t numIndexFields,
 		   OOP *p_oop)
 {
   size_t numBytes, alignedBytes;
   intptr_t instanceSpec;
-  mst_Object p_instance;
+  gst_object p_instance;
 
   instanceSpec = CLASS_INSTANCE_SPEC (class_oop);
   numBytes = sizeof (gst_object_header)
@@ -624,13 +624,13 @@ new_instance_with (OOP class_oop,
 }
 
 
-mst_Object
+gst_object
 new_instance (OOP class_oop,
 	      OOP *p_oop)
 {
   size_t numBytes;
   intptr_t instanceSpec;
-  mst_Object p_instance;
+  gst_object p_instance;
 
   instanceSpec = CLASS_INSTANCE_SPEC (class_oop);
   numBytes = sizeof (gst_object_header) + 
@@ -644,14 +644,14 @@ new_instance (OOP class_oop,
 }
 
 
-mst_Object
+gst_object
 instantiate_with (OOP class_oop,
 		  size_t numIndexFields,
 		  OOP *p_oop)
 {
   size_t numBytes, indexedBytes, alignedBytes;
   intptr_t instanceSpec;
-  mst_Object p_instance;
+  gst_object p_instance;
 
   instanceSpec = CLASS_INSTANCE_SPEC (class_oop);
   indexedBytes = numIndexFields << _gst_log2_sizes[instanceSpec & ISP_SHAPE];
@@ -686,13 +686,13 @@ instantiate_with (OOP class_oop,
   return p_instance;
 }
 
-mst_Object
+gst_object
 instantiate (OOP class_oop,
 	     OOP *p_oop)
 {
   size_t numBytes;
   intptr_t instanceSpec;
-  mst_Object p_instance;
+  gst_object p_instance;
 
   instanceSpec = CLASS_INSTANCE_SPEC (class_oop);
   numBytes = sizeof (gst_object_header) + 
@@ -737,7 +737,7 @@ OOP
 dictionary_association_at (OOP dictionaryOOP,
 			   OOP keyOOP)
 {
-  mst_Object dictionary;
+  gst_object dictionary;
   size_t index, count, numFields, numFixedFields;
   OOP associationOOP;
   gst_association association;
@@ -824,7 +824,7 @@ variable_binding_new (OOP key,
 int
 oop_num_fields (OOP oop)
 {
-  mst_Object object;
+  gst_object object;
   intptr_t instanceSpec;
   size_t words, dataBytes, fixed;
 
@@ -846,7 +846,7 @@ mst_Boolean
 is_owner (OOP scannedOOP,
 	  OOP targetOOP)
 {
-  mst_Object object;
+  gst_object object;
   OOP *scanPtr;
   int n;
 
@@ -886,14 +886,14 @@ OOP
 index_oop (OOP oop,
 	   size_t index)
 {
-  mst_Object object = OOP_TO_OBJ (oop);
+  gst_object object = OOP_TO_OBJ (oop);
   intptr_t instanceSpec = GET_INSTANCE_SPEC (object);
   return index_oop_spec (oop, object, index, instanceSpec);
 }
 
 OOP
 index_oop_spec (OOP oop,
-		mst_Object object,
+		gst_object object,
 	        size_t index,
 		intptr_t instanceSpec)
 {
@@ -1018,14 +1018,14 @@ index_oop_put (OOP oop,
 	       size_t index,
 	       OOP value)
 {
-  mst_Object object = OOP_TO_OBJ (oop);
+  gst_object object = OOP_TO_OBJ (oop);
   intptr_t instanceSpec = GET_INSTANCE_SPEC (object);
   return index_oop_put_spec (oop, object, index, value, instanceSpec);
 }
 
 mst_Boolean
 index_oop_put_spec (OOP oop,
-		    mst_Object object,
+		    gst_object object,
 		    size_t index,
 		    OOP value,
 		    intptr_t instanceSpec)
@@ -1184,7 +1184,7 @@ OOP
 inst_var_at (OOP oop,
 	     int index)
 {
-  mst_Object object;
+  gst_object object;
 
   object = OOP_TO_OBJ (oop);
   return (object->data[index - 1]);
@@ -1195,7 +1195,7 @@ inst_var_at_put (OOP oop,
 		 int index,
 		 OOP value)
 {
-  mst_Object object;
+  gst_object object;
 
   object = OOP_TO_OBJ (oop);
   object->data[index - 1] = value;

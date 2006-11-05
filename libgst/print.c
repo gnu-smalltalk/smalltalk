@@ -355,7 +355,7 @@ _gst_display_oop (OOP oop)
 }
 
 void
-_gst_display_object (mst_Object obj)
+_gst_display_object (gst_object obj)
 {
   if (IS_OOP_ADDR (obj))
     {

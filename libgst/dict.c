@@ -701,7 +701,7 @@ void
 init_proto_oops()
 {
   gst_namespace smalltalkDictionary;
-  mst_Object symbolTable, processorScheduler;
+  gst_object symbolTable, processorScheduler;
   int numWords;
 
   /* We can do this now that the classes are defined */
@@ -834,7 +834,7 @@ create_metaclass (OOP class_oop,
 {
   gst_class class;
   gst_metaclass metaclass;
-  mst_Object subClasses;
+  gst_object subClasses;
   OOP superClassOOP;
 
   superClassOOP = SUPERCLASS (class_oop);
@@ -948,7 +948,7 @@ void
 init_smalltalk_dictionary (void)
 {
   OOP featuresArrayOOP;
-  mst_Object featuresArray;
+  gst_object featuresArray;
   char fullVersionString[200];
   int i, numFeatures;
 
@@ -1334,7 +1334,7 @@ _gst_valid_class_method_dictionary (OOP class_oop)
   if (IS_NIL (class->methodDictionary))
     {
       OOP identDict;
-      mst_Object obj;
+      gst_object obj;
       identDict = identity_dictionary_new (32);
       obj = OOP_TO_OBJ (identDict);
       obj->objClass = _gst_method_dictionary_class;
@@ -1457,11 +1457,11 @@ find_key_or_nil (OOP dictionaryOOP,
 {
   size_t count, numFields, numFixedFields;
   intptr_t index;
-  mst_Object dictionary;
+  gst_object dictionary;
   OOP associationOOP;
   gst_association association;
 
-  dictionary = (mst_Object) OOP_TO_OBJ (dictionaryOOP);
+  dictionary = (gst_object) OOP_TO_OBJ (dictionaryOOP);
   numFixedFields = OOP_FIXED_FIELDS (dictionaryOOP);
   numFields = NUM_WORDS (dictionary) - numFixedFields;
   index = scramble (OOP_INDEX (keyOOP));
@@ -1489,10 +1489,10 @@ find_key_or_nil (OOP dictionaryOOP,
   abort ();
 }
 
-mst_Object
+gst_object
 _gst_grow_dictionary (OOP oldDictionaryOOP)
 {
-  mst_Object oldDictionary, dictionary;
+  gst_object oldDictionary, dictionary;
   size_t oldNumFields, numFields, i, index, numFixedFields;
   OOP associationOOP;
   gst_association association;
@@ -1763,7 +1763,7 @@ _gst_dictionary_add (OOP dictionaryOOP,
 {
   intptr_t index;
   gst_association association;
-  mst_Object dictionary;
+  gst_object dictionary;
   gst_dictionary dict;
   OOP value;
   inc_ptr incPtr;		/* I'm not sure clients are protecting
@@ -1804,7 +1804,7 @@ _gst_dictionary_add (OOP dictionaryOOP,
 OOP
 _gst_object_copy (OOP oop)
 {
-  mst_Object old, new;
+  gst_object old, new;
   OOP newOOP;
   size_t numFields;
 

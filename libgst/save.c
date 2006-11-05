@@ -141,12 +141,12 @@ static void save_object (int imageFd,
 
 /* This function converts NUMFIXED absolute addresses at OBJ->data,
    which are instance variables of the object, into relative ones.  */
-static inline void fixup_object (mst_Object obj,
+static inline void fixup_object (gst_object obj,
 			  int numPointers);
 
 /* This function converts NUMFIXED relative addresses at OBJ->data,
    which are instance variables of the object, into absolute ones.  */
-static inline void restore_object (mst_Object object,
+static inline void restore_object (gst_object object,
 			    int numPointers);
 
 /* This function inverts the endianness of SIZE long-words, starting at
@@ -156,7 +156,7 @@ static inline void fixup_byte_order (PTR buf,
 
 /* This function converts NUMFIXED relative addresses, starting at
    OBJ->data, back to absolute form.  */
-static inline void restore_pointer_slots (mst_Object obj,
+static inline void restore_pointer_slots (gst_object obj,
 				          int numPointers);
 
 /* This function loads an OOP table made of OLDSLOTSUSED slots from
@@ -196,7 +196,7 @@ static inline void restore_oop_pointer_slots (OOP oop);
 /* This function prepares the OOP table to be written to the image
    file.  This contains the object sizes instead of the pointers,
    since addresses will be recalculated upon load.  */
-static struct OOP *make_oop_table_to_be_saved (void);
+static struct oop_s *make_oop_table_to_be_saved (void);
 
 /* This function walks the OOP table and saves the data
    onto the file whose descriptor is IMAGEFD.  */
@@ -229,7 +229,7 @@ static int num_used_oops = 0;
   ( (OOP)((intptr_t)(obj) + (intptr_t)_gst_mem.ot) )
 
 
-struct OOP *myOOPTable = NULL;
+struct oop_s *myOOPTable = NULL;
 
 mst_Boolean
 _gst_save_to_file (const char *fileName)
@@ -257,7 +257,7 @@ _gst_save_to_file (const char *fileName)
 
   /* save up to the last oop slot in use */
   buffer_write (imageFd, myOOPTable,
-		sizeof (struct OOP) * num_used_oops);
+		sizeof (struct oop_s) * num_used_oops);
 
 #ifdef SNAPSHOT_TRACE
   printf ("After saving oop table: %lld\n",
@@ -281,11 +281,11 @@ _gst_save_to_file (const char *fileName)
 }
 
 
-struct OOP *
+struct oop_s *
 make_oop_table_to_be_saved (void)
 {
   OOP oop;
-  struct OOP *myOOPTable;
+  struct oop_s *myOOPTable;
   int i;
 
   num_used_oops = 0;
@@ -303,7 +303,7 @@ make_oop_table_to_be_saved (void)
 	  _gst_mem.ot_size - _gst_mem.num_free_oops);
 #endif /* SNAPSHOT_TRACE */
 
-  myOOPTable = xmalloc (sizeof (struct OOP) * num_used_oops);
+  myOOPTable = xmalloc (sizeof (struct oop_s) * num_used_oops);
 
   for (i = 0, oop = _gst_mem.ot; i < num_used_oops; oop++, i++)
     {
@@ -321,7 +321,7 @@ make_oop_table_to_be_saved (void)
 	  else
 	    myOOPTable[i].flags |= F_COUNT;
 
-	  myOOPTable[i].object = (mst_Object) TO_INT (oop->object->objSize);
+	  myOOPTable[i].object = (gst_object) TO_INT (oop->object->objSize);
 	}
       else
 	myOOPTable[i].flags = F_FREE;
@@ -344,7 +344,7 @@ void
 save_object (int imageFd,
 	     OOP oop)
 {
-  mst_Object object;
+  gst_object object;
   int numPointers, numBytes;
 
 #ifdef SNAPSHOT_TRACE
@@ -489,10 +489,10 @@ load_oop_table (int imageFd)
   OOP oop;
 
   /* load in the valid OOP slots from previous dump */
-  buffer_read (imageFd, _gst_mem.ot, sizeof (struct OOP) * num_used_oops);
+  buffer_read (imageFd, _gst_mem.ot, sizeof (struct oop_s) * num_used_oops);
   if UNCOMMON (wrong_endianness)
     fixup_byte_order (_gst_mem.ot,
-		      sizeof (struct OOP) * num_used_oops / sizeof (PTR));
+		      sizeof (struct oop_s) * num_used_oops / sizeof (PTR));
 
   /* mark the remaining ones as available */
   PREFETCH_START (&_gst_mem.ot[num_used_oops], PREF_WRITE | PREF_NTA);
@@ -510,7 +510,7 @@ void
 load_normal_oops (int imageFd)
 {
   OOP oop;
-  mst_Object object;
+  gst_object object;
 
   /* Now walk the oop table.  Start fixing the byte order.  */
 
@@ -547,7 +547,7 @@ load_normal_oops (int imageFd)
 	_gst_mem.numFixedOOPs++;
 
       size = (size_t) oop->object;
-      object = (mst_Object) _gst_mem_alloc (
+      object = (gst_object) _gst_mem_alloc (
 	(oop->flags & F_FIXED) ? _gst_mem.fixed : _gst_mem.old,
         size * sizeof (PTR));
 
@@ -602,7 +602,7 @@ load_normal_oops (int imageFd)
    loading and saving */
 
 void
-fixup_object (mst_Object obj,
+fixup_object (gst_object obj,
 	      int numPointers)
 {
   OOP instOOP, class_oop, *i;
@@ -619,7 +619,7 @@ fixup_object (mst_Object obj,
 }
 
 void
-restore_object (mst_Object object,
+restore_object (gst_object object,
 		     int numPointers)
 {
   object->objClass = OOP_ABSOLUTE (object->objClass);
@@ -627,7 +627,7 @@ restore_object (mst_Object object,
 }
 
 void
-restore_pointer_slots (mst_Object obj,
+restore_pointer_slots (gst_object obj,
 		       int numPointers)
 {
   OOP instOOP, *i;
@@ -658,7 +658,7 @@ void
 restore_oop_pointer_slots (OOP oop)
 {
   int numPointers;
-  mst_Object object;
+  gst_object object;
 
   object = OOP_TO_OBJ (oop);
   if UNCOMMON ((oop->flags & F_COUNT) == F_COUNT)

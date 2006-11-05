@@ -671,7 +671,7 @@ static gst_context_part *chunk = chunks - 1;
    and as long as no context switches happen since the time the
    process was created.  FREE_LIFO_CONTEXT points to just after the
    top of the stack.  */
-static struct OOP lifo_contexts[MAX_LIFO_DEPTH] CACHELINE_ALIGNED;
+static struct oop_s lifo_contexts[MAX_LIFO_DEPTH] CACHELINE_ALIGNED;
 static OOP free_lifo_context = lifo_contexts;
 
 /* Include `plug-in' modules for the appropriate interpreter.
@@ -887,7 +887,7 @@ dealloc_stack_context (gst_context_part context)
 {
 #ifndef OPTIMIZE
   if (free_lifo_context == lifo_contexts
-      || (OOP_TO_OBJ (free_lifo_context - 1) != (mst_Object) context))
+      || (OOP_TO_OBJ (free_lifo_context - 1) != (gst_object) context))
     {
       _gst_errorf ("Deallocating a non-LIFO context!!!");
       abort ();
@@ -979,7 +979,7 @@ _gst_find_method (OOP receiverClass,
 OOP
 create_args_array (int numArgs)
 {
-  mst_Object argsArray;
+  gst_object argsArray;
   OOP argsArrayOOP;
   int i;
 
@@ -1949,7 +1949,7 @@ _gst_init_process_system (void)
   processor = (gst_processor_scheduler) OOP_TO_OBJ (_gst_processor_oop);
   if (IS_NIL (processor->processLists))
     {
-      mst_Object processLists;
+      gst_object processLists;
 
       processLists = instantiate_with (_gst_array_class, NUM_PRIORITIES,
 				       &processor->processLists);

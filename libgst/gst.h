@@ -91,15 +91,15 @@ typedef enum {
 #endif
 
 /* An indirect pointer to object data.  */
-typedef struct OOP *OOP;
+typedef struct oop_s *OOP;
 
 /* A direct pointer to the object data.  */
-typedef struct mst_Object *mst_Object;
+typedef struct object_s *gst_object, *mst_Object;
 
 /* The contents of an indirect pointer to object data.  */
-struct OOP
+struct oop_s
 {
-  mst_Object object;
+  gst_object object;
   unsigned long flags;		/* FIXME, use uintptr_t */
 };
 
@@ -121,7 +121,7 @@ gst_object_header;
 #define OBJ_HEADER_SIZE_WORDS	(sizeof(gst_object_header) / sizeof(PTR))
 
 /* A bare-knuckles accessor for real objects */
-struct mst_Object
+struct object_s
 {
   OBJ_HEADER;
   OOP data[1];			/* variable length, may not be objects, 

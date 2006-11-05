@@ -3640,7 +3640,7 @@ The macros are@footnote{IS_NIL and IS_CLASS have been removed because
   are now private to @file{libgst.a}.  You should use the @code{nilOOP}
   field of the interpreter proxy, or @code{getObjectClass}.}:
 
-@defmac mst_Object OOP_TO_OBJ (OOP)
+@defmac gst_object OOP_TO_OBJ (OOP)
 Dereference a pointer to an OOP into a pointer to the actual object data
 (@pxref{Object representation}).  The result of @code{OOP_TO_OBJ} is not
 valid anymore if a garbage-collection happens; for this reason, you
@@ -3658,7 +3658,7 @@ Return the OOP for the class of the given object.  For example,
 @defmac mst_Boolean IS_INT (OOP)
 Return a Boolean indicating whether or not the OOP is an Integer object;
 the value of SmallInteger objects is encoded directly in the OOP, not
-separately in a @code{mst_Object} structure.  It is not safe to use
+separately in a @code{gst_object} structure.  It is not safe to use
 @code{OOP_TO_OBJ} and @code{OOP_CLASS} if @code{isInt} returns false.
 @end defmac
 
@@ -3668,17 +3668,17 @@ Return a Boolean indicating whether or not the OOP is a `real' object
 @code{OOP_CLASS} only if @code{IS_OOP} returns true.
 @end defmac
 
-@defmac mst_Boolean ARRAY_OOP_AT (mst_Object, int)
+@defmac mst_Boolean ARRAY_OOP_AT (gst_object, int)
 Access the character given in the second parameter of the given Array
 object.  Note that this is necessary because of the way
-@code{mst_Object} is defined, which prevents @code{indexedOOP} from
+@code{gst_object} is defined, which prevents @code{indexedOOP} from
 working.
 @end defmac
 
-@defmac mst_Boolean STRING_OOP_AT (mst_Object, int)
+@defmac mst_Boolean STRING_OOP_AT (gst_object, int)
 Access the character given in the second parameter of the given String
 or ByteArray object.  Note that this is necessary because of the way
-@code{mst_Object} is defined, which prevents @code{indexedByte} from
+@code{gst_object} is defined, which prevents @code{indexedByte} from
 working.
 @end defmac
 

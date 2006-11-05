@@ -260,7 +260,7 @@ iconvWrapper (iconv_t handle, OOP readBufferOOP, int readPos,
   size_t outbytesleft;
   int save_errno;
 
-  mst_Object bytesLeft, readBuffer, writeBuffer;
+  gst_object bytesLeft, readBuffer, writeBuffer;
 
   readBuffer = OOP_TO_OBJ (readBufferOOP);
   inbuf = &STRING_OOP_AT (readBuffer, readPos);

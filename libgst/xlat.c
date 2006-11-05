@@ -470,7 +470,7 @@ generate_bad_return_code (void)
   jit_movi_p (JIT_V0, _gst_small_integer_class);
   jmp = jit_bmsi_l (jit_forward (), JIT_R1, 1);
   jit_ldxi_p (JIT_V0, JIT_R1, jit_ptr_field (OOP, object));
-  jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (mst_Object, objClass));
+  jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (gst_object, objClass));
   jit_patch (jmp);
 
   jit_prepare (4);
@@ -540,7 +540,7 @@ generate_do_send_code (void)
   jit_movi_p (JIT_V0, _gst_small_integer_class);
   jmp = jit_bmsi_l (jit_forward (), JIT_R1, 1);
   jit_ldxi_p (JIT_V0, JIT_R1, jit_ptr_field (OOP, object));
-  jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (mst_Object, objClass));
+  jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (gst_object, objClass));
   jit_patch (jmp);
 
   jit_prepare (4);
@@ -1069,7 +1069,7 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
 /* Common pieces of code for generating & caching addresses */
 
 #define TEMP_OFS(tree)	   (sizeof (PTR) * (((intptr_t) ((tree)->data)) & 255))
-#define REC_VAR_OFS(tree)  jit_ptr_field(mst_Object, data[(intptr_t) ((tree)->data)])
+#define REC_VAR_OFS(tree)  jit_ptr_field(gst_object, data[(intptr_t) ((tree)->data)])
 #define STACK_OFS(tree)	   (jit_ptr_field(gst_block_context, contextStack) + \
 				TEMP_OFS (tree))
 
@@ -1878,7 +1878,7 @@ gen_fetch_class (code_tree *tree)
   else if (NOT_INTEGER (tree->child))
     {
       jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (OOP, object));
-      jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (mst_Object, objClass));
+      jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (gst_object, objClass));
     }
   else
     {
@@ -1886,7 +1886,7 @@ gen_fetch_class (code_tree *tree)
       jit_movi_p (JIT_R0, _gst_small_integer_class);
       jmp = jit_bmsi_ul (jit_forward (), JIT_V0, 1);
       jit_ldxi_p (JIT_R0, JIT_V0, jit_ptr_field (OOP, object));
-      jit_ldxi_p (JIT_R0, JIT_R0, jit_ptr_field (mst_Object, objClass));
+      jit_ldxi_p (JIT_R0, JIT_R0, jit_ptr_field (gst_object, objClass));
       jit_patch (jmp);
       jit_movr_p (JIT_V0, JIT_R0);
     }
@@ -1925,7 +1925,7 @@ gen_unary_special (code_tree *tree)
       jit_ldr_p (JIT_R2, JIT_V0);
 
       /* Check if it belongs to the wrong class...  */
-      jit_ldxi_p (JIT_R0, JIT_R2, jit_ptr_field (mst_Object, objClass));
+      jit_ldxi_p (JIT_R0, JIT_R2, jit_ptr_field (gst_object, objClass));
       jit_subi_p (JIT_R0, JIT_R0, _gst_large_positive_integer_class);
       ok2 = jit_beqi_p (jit_forward (), JIT_R0, NULL);
       bad1 = jit_bnei_p (jit_forward (), JIT_R0,
@@ -1942,7 +1942,7 @@ gen_unary_special (code_tree *tree)
       else
 	{
            /* We can check the size field directly.  */
-          jit_ldxi_p (JIT_R0, JIT_R2, jit_ptr_field (mst_Object, objSize));
+          jit_ldxi_p (JIT_R0, JIT_R2, jit_ptr_field (gst_object, objSize));
           ok3 = jit_blei_p (jit_forward (), JIT_R0, 
 			    FROM_INT (OBJ_HEADER_SIZE_WORDS + sz / SIZEOF_OOP));
 	}
@@ -2045,7 +2045,7 @@ gen_pop_into_array (code_tree *tree)
       jit_ldxi_p (JIT_R0, JIT_V0, jit_ptr_field (OOP, object));
     }
 
-  jit_stxi_p (jit_ptr_field (mst_Object, data[index]), JIT_R0, JIT_V1);
+  jit_stxi_p (jit_ptr_field (gst_object, data[index]), JIT_R0, JIT_V1);
 }
 
 
@@ -2500,7 +2500,7 @@ emit_basic_size_in_r0 (OOP classOOP, mst_Boolean tagged, int objectReg)
       objectReg = JIT_R2;
     }
 
-  jit_ldxi_l (JIT_R0, objectReg, jit_ptr_field (mst_Object, objSize));
+  jit_ldxi_l (JIT_R0, objectReg, jit_ptr_field (gst_object, objSize));
 
   if (shape != ISP_POINTER)
     jit_ldxi_p (JIT_V1, JIT_V0, jit_ptr_field (OOP, flags));
@@ -2869,7 +2869,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
         jit_movi_p (JIT_R0, _gst_small_integer_class);
         jmp = jit_bmsi_ul (jit_forward (), JIT_V0, 1);
         jit_ldxi_p (JIT_R0, JIT_V0, jit_ptr_field (OOP, object));
-        jit_ldxi_p (JIT_R0, JIT_R0, jit_ptr_field (mst_Object, objClass));
+        jit_ldxi_p (JIT_R0, JIT_R0, jit_ptr_field (gst_object, objClass));
         jit_patch (jmp);
 
         /* Store the result and the new stack pointer */
@@ -3092,7 +3092,7 @@ emit_method_prolog (OOP methodOOP,
     {
       jit_bmsi_ul (do_send_code, JIT_V0, 1);
       jit_ldxi_p (JIT_R2, JIT_V0, jit_ptr_field (OOP, object));
-      jit_ldxi_p (JIT_R1, JIT_R2, jit_ptr_field (mst_Object, objClass));
+      jit_ldxi_p (JIT_R1, JIT_R2, jit_ptr_field (gst_object, objClass));
       jit_bnei_p (do_send_code, JIT_R1, receiverClass);
     }
 
@@ -3110,7 +3110,7 @@ emit_method_prolog (OOP methodOOP,
 
     case MTH_RETURN_INSTVAR:
       {
-	int ofs = jit_ptr_field (mst_Object, data[header.primitiveIndex]);
+	int ofs = jit_ptr_field (gst_object, data[header.primitiveIndex]);
 	jit_ldxi_p (JIT_V1, JIT_V1, jit_field (inline_cache, native_ip));
 	jit_ldxi_p (JIT_R2, JIT_R2, ofs);	/* Remember? R2 is _gst_self->object */
 	jit_str_p (JIT_V2, JIT_R2);	/* Make it the stack top */
@@ -3212,7 +3212,7 @@ emit_block_prolog (OOP blockOOP,
   jit_ldxi_p (JIT_R1, JIT_V2, sizeof (PTR) * -header.numArgs);
   jit_bmsi_ul (do_send_code, JIT_R1, 1);
   jit_ldxi_p (JIT_R1, JIT_R1, jit_ptr_field (OOP, object));
-  jit_ldxi_p (JIT_R0, JIT_R1, jit_ptr_field (mst_Object, objClass));
+  jit_ldxi_p (JIT_R0, JIT_R1, jit_ptr_field (gst_object, objClass));
   jit_ldxi_p (JIT_R2, JIT_R1, jit_ptr_field (gst_block_closure, block));
   jit_bnei_p (do_send_code, JIT_R0, _gst_block_closure_class);
   jit_bnei_p (do_send_code, JIT_R2, current->methodOOP);
@@ -3232,7 +3232,7 @@ emit_block_prolog (OOP blockOOP,
 	  jit_bmsi_ul (do_send_code, JIT_V0, 1);
 	  jit_ldxi_p (JIT_R0, JIT_V0, jit_ptr_field (OOP, object));
 	  jit_ldxi_p (JIT_R0, JIT_R0,
-		      jit_ptr_field (mst_Object, objClass));
+		      jit_ptr_field (gst_object, objClass));
 	  jit_bnei_p (do_send_code, JIT_R0, receiverClass);
 	}
     }

@@ -827,7 +827,7 @@ _gst_make_instance_variable_array (OOP superclassOOP,
   int index, numInstanceVars, superInstanceVars;
   const char *p;
   inc_ptr incPtr;
-  mst_Object array;
+  gst_object array;
 
   if (variableString == NULL)
     variableString = "";
@@ -921,7 +921,7 @@ OOP
 _gst_make_pool_array (const char * poolNames)
 {
   OOP poolsOOP, name;
-  mst_Object pools;
+  gst_object pools;
   int numPools, i;
   const char *p, *e;
   inc_ptr incPtr;
