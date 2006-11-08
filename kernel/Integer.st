@@ -303,7 +303,36 @@ estimatedLog
 !
 
 floorLog: radix
-    "return (self log: radix) floor. Optimized to answer an integer."
+    "Answer (self log: radix) floor. Optimized to answer an integer."
+
+    | me answer |
+
+    self < self zero ifTrue: [
+       ^self arithmeticError: 'cannot extract logarithm of a negative number'
+    ].
+
+    radix <= radix unity ifTrue: [
+	(radix <= radix zero)
+	    ifTrue: [ ^self arithmeticError: 'base of a logarithm cannot be negative' ].
+	(radix = radix unity)
+	    ifTrue: [ ^self arithmeticError: 'base of a logarithm cannot be 1' ].
+	^(self ceilingLog: radix reciprocal) negated
+    ].
+    radix isInteger ifFalse: [
+	^(radix coerce: self) floorLog: radix
+    ].
+
+    me := self.
+    answer := 0.
+    [   me >= radix ] whileTrue: [
+	me := me // radix.
+	answer := answer + 1
+    ].
+    ^answer
+!
+
+ceilingLog: radix
+    "Answer (self log: radix) ceiling. Optimized to answer an integer."
 
     | me answer |
 
@@ -319,12 +348,12 @@ floorLog: radix
 	^(self floorLog: radix reciprocal) negated
     ].
     radix isInteger ifFalse: [
-	^(self coerce: radix) floorLog: radix
+	^(radix coerce: self) ceilingLog: radix
     ].
 
     me := self.
-    answer := 0.
-    [   me >= radix ] whileTrue: [
+    answer := 1.
+    [   me > radix ] whileTrue: [
 	me := me // radix.
 	answer := answer + 1
     ].

@@ -39,7 +39,7 @@ Execution begins...
 'A dist: B = '136.014705087354
 'C dotProduct: D = '20000
 'C grid: D = '150@250
-'C normal = '-0.83205029433784@0.55470019622523
+'C normal = '-0.832050294337844@0.554700196225229
 'C truncatedGrid: D = '150@200
 '175@300 transpose = '300@175
 returned value is Point new "<0>"

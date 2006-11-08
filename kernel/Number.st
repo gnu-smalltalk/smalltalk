@@ -638,8 +638,40 @@ log: aNumber
 floorLog: radix
     "Answer (self log: radix) floor. Optimized to answer an integer."
 
-    | me answer |
+    | me that answer |
 
+    self < self zero ifTrue: [
+       ^self arithmeticError: 'cannot extract logarithm of a negative number'
+    ].
+    radix <= radix unity ifTrue: [
+	(radix <= radix zero) ifTrue: [ ^self arithmeticError: 'bad radix' ].
+	(radix = radix unity) ifTrue: [ ^self arithmeticError: 'bad radix' ].
+	^(self ceilingLog: radix reciprocal) negated
+    ].
+
+    answer := -1.
+    self < self unity
+	ifTrue: [
+	    me := self.
+	    [   me := me * radix. me < me unity ] whileTrue: [
+		answer := answer - 1
+	    ]
+	]
+	ifFalse: [
+	    that := 1.
+	    [   that <= self ] whileTrue: [
+		that := that * radix.
+		answer := answer + 1
+	    ]
+	].
+
+   ^answer
+!
+
+ceilingLog: radix
+    "Answer (self log: radix) ceiling. Optimized to answer an integer."
+
+    | me that answer |
     self < self zero ifTrue: [
        ^self arithmeticError: 'cannot extract logarithm of a negative number'
     ].
@@ -649,20 +681,20 @@ floorLog: radix
 	^(self floorLog: radix reciprocal) negated
     ].
 
-    me := self.
+    answer := 0.
     self < self unity
 	ifTrue: [
-	    answer := -1.
-	    [   me := me * radix. me < me unity ] whileTrue: [
+	    me := self.
+	    [ me := me * radix. me <= me unity ] whileTrue: [
 		answer := answer - 1
-	    ]
+	    ].
 	]
 	ifFalse: [
-	    answer := 0.
-	    [   me > radix ] whileTrue: [
-		me := me / radix.
-		answer := answer + 1
-	    ]
+	    that := 1.
+	    [ that < self ] whileTrue: [
+		that := that * radix.
+		answer := answer + 1.
+	    ].
 	].
 
    ^answer

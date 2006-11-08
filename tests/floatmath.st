@@ -157,3 +157,25 @@ ObjectMemory globalGarbageCollect.
    ((a negated + b) = (b - a)).
    ((a + b negated) = (a - b)) } printNl ]!
 
+
+
+
+"Fun with printing"
+  
+!Float methodsFor: 'testing'!
+
+test
+    (((Behavior evaluate: self printString) = self) -> self) printNl. 
+! !
+
+1e16 test!
+1.2345e16 test!
+10.0 test!
+(20 - 2.2325251) test!
+0.12345 test!
+0.12345d-8 test!
+0.12345e-8 test!
+0.83205029433784 test!
+0.832050294337844 test!
+0.55470019622523 test!
+0.554700196225229 test!

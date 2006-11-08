@@ -331,8 +331,6 @@ withSignOf: aNumber
 
 
 
-!Number methodsFor: 'truncation and round off'!
-
 !Float methodsFor: 'printing'!
 
 printOn: aStream
@@ -370,8 +368,11 @@ printOn: aStream special: whatToPrintArray
     "Private - Print a decimal representation of the receiver on aStream,
      printing one of the three elements of whatToPrintArray if it is
      infinity, negative infinity, or a NaN"
-    | num str exp digits decimalDigits |
+    | me exponential small num den gcd
+      intFactor precision int rounding digits digitStream exponent
+      dotPrinted |
 
+    "First, take care of the easy cases."
     self isNaN ifTrue: [
 	^aStream nextPutAll:
 	    ((whatToPrintArray at: 3) bindWith: self class) ].
@@ -382,64 +383,77 @@ printOn: aStream special: whatToPrintArray
 	^aStream nextPutAll:
 	    ((whatToPrintArray at: 2) bindWith: self class) ].
 
+    "We deal only with positive values."
+    me := self abs.
     self negative ifTrue: [ aStream nextPut: $- ].
     self = self zero ifTrue: [ aStream nextPutAll: '0.0'. ^self ].
 
-    num := self abs.
+    "Figure out some quantities and the way we'll print the number."
+    exponential := me exponent abs > me class precision.
+    small := me < me unity.
+    exponent := (me floorLog: 10) + 1.
 
-    decimalDigits := self ten raisedToInteger: self class decimalDigits - 1.
+    "Compute a rational form of the number we will print..."
+    (exponential and: [ small not ])
+        ifTrue: [ num := me asInteger. den := 1 ]
+	ifFalse: [
+	    num := (me timesTwoPower: me class precision - me exponent) asInteger.
+	    den := 2 raisedToInteger: me class precision - me exponent.
 
-    num exponent abs > self class precision ifTrue: [
-	"Print in scientific notation"
-	exp := 0.
-	num < self unity
-	    ifTrue: [
-		[ num := num * self ten. exp := exp - 1. num < self unity ] whileTrue
-	    ]
-	    ifFalse: [
-		[ num := num / self ten. exp := exp + 1. num < self ten ] whileFalse
- 	    ].
+            "(The mantissa if printing a small number in exponential notation)."
+            exponential ifTrue: [ num := num * (10 raisedTo: -1 - exponent) ].
 
-	"Produce the digits, up to a maximum of 14 = -1 + log10 (2^52)."
-	num := (num * decimalDigits) asInteger.
-	num = decimalDigits
-	    ifTrue: [ num := num // 10. exp := exp + 1 ].
+	    gcd := num gcd: den.
+	    num := num // gcd.
+	    den := den // gcd ].
 
-	str := num printString.
-	str := str copyFrom: 1 to: (2 max: (str findLast: [ :each | each ~= $0 ])).
+    "To round correctly, make sure den is even."
+    (den bitAnd: 1) = 1 ifTrue: [ num := num * 2. den := den * 2 ].
 
-	str keysAndValuesDo: [ :n :ch |
-	    aStream nextPut: ch.
-	    n = 1 ifTrue: [ aStream nextPut: $. ].
-	].
-	aStream nextPut: self exponentLetter; print: exp.
-	^self
-    ].
+    "Get the first `me class decimalDigits' base-10 digits of num // den,
+     appropriately rounded"
+    intFactor := 10 raisedToInteger: (den ceilingLog: 10).
+    rounding := (10 raisedToInteger: (num ceilingLog: 10)
+    	     	    		     - me class decimalDigits) + 1.
 
-    "Print a not-so-big number"
-    num >= self unity ifTrue: [
-	str := num truncated printString.
-	aStream nextPutAll: str; nextPut: $. .
+    int := ((num * intFactor) + ((den // 2) * rounding)) // den.
+    digits := int printString.
+    digits size > me class decimalDigits
+        ifTrue: [ digits := digits copyFrom: 1 to: me class decimalDigits ].
 
-	digits := self class decimalDigits - str size.
-	digits = 0 ifTrue: [ ^self ].
-	num := num fractionPart *
-	    (10 raisedToInteger: digits).
+    "Print the non-significant zeros."
+    dotPrinted := false.
+    (small and: [ exponential not ]) ifTrue: [
+        (me floorLog: 10) negated timesRepeat: [
+            aStream nextPut: $0.
+	    dotPrinted ifFalse: [ dotPrinted := true. aStream nextPut: $. ].
+            int := int // 10.
+	    exponent := exponent + 1 ] ].
 
-	str := num truncated printString.
-	digits := digits - str size.
-	str := str copyFrom: 1 to: (1 max: (str findLast: [ :each | each ~= $0 ])).
-	aStream next: digits put: $0; nextPutAll: str.
-	^self
-    ].
+    "Make a stream with the significant digits."
+    precision := digits findLast: [ :ch | ch ~= $0 ].
+    digitStream := ReadStream on: digits from: 1 to: precision.
 
-    "Print a not-so-small number"
-    str := (num * decimalDigits) rounded printString.
-    aStream nextPutAll: '0.'.
+    "Print the integer part (only one digit if using exponential notation)."
+    [
+        digitStream atEnd
+            ifTrue: [ aStream nextPut: $0 ]
+            ifFalse: [ aStream nextPut: digitStream next ].
 
-    digits := self class decimalDigits - 1 - str size.
-    str := str copyFrom: 1 to: (1 max: (str findLast: [ :each | each ~= $0 ])).
-    aStream next: digits put: $0; nextPutAll: str.
+	exponent := exponent - 1.
+        exponent > 0 and: [ exponential not ] ] whileTrue.
+
+    "Print the fractional part."
+    digitStream atEnd
+    	ifTrue: [
+            dotPrinted ifFalse: [ aStream nextPutAll: '.0' ] ]
+    	ifFalse: [
+            dotPrinted ifFalse: [ aStream nextPut: $. ].
+	    digitStream do: [ :each | aStream nextPut: each ] ].
+
+    "Finally, print the exponent if necessary."
+    exponential ifTrue: [
+        aStream nextPut: me exponentLetter; print: exponent ].
 ! !
 
 

@@ -199,3 +199,50 @@ Execution begins...
 (-0.0 0.0 true true true )
 (0.0 -0.0 true true true )
 returned value is Array new: 2 "<0>"
+
+Execution begins...
+returned value is Float
+
+Execution begins...
+true->1.0e16
+returned value is 1.00000e+16
+
+Execution begins...
+true->1.2345e16
+returned value is 1.23450e+16
+
+Execution begins...
+true->10.0
+returned value is 10.0000
+
+Execution begins...
+true->17.7674749
+returned value is 17.7675
+
+Execution begins...
+true->0.12345
+returned value is 0.123450
+
+Execution begins...
+true->0.0000000012345
+returned value is 1.23450d-09
+
+Execution begins...
+true->1.2345e-9
+returned value is 1.23450e-09
+
+Execution begins...
+true->0.83205029433784
+returned value is 0.832050
+
+Execution begins...
+true->0.832050294337844
+returned value is 0.832050
+
+Execution begins...
+true->0.55470019622523
+returned value is 0.554700
+
+Execution begins...
+true->0.554700196225229
+returned value is 0.554700

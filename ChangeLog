@@ -1,3 +1,13 @@
+2006-11-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Float.st: Rewrite printing to round correctly and never
+	divide a floating-point number.
+	* kernel/Number.st: Fix problems in #floorLog:, add #ceilingLog:.
+	Never divide.
+	* kernel/Integer.st: Likewise.
+	* tests/floatmath.st: Test rounding when printing.
+	* tests/geometry.st: Fix test vector to test the correct rounding.
+
 2006-11-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CObject.st: Use #numberOfElements rather than #numElements.
