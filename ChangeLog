@@ -1,3 +1,8 @@
+2006-11-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Float.st: Fix typo.
+	* kernel/ScaledDec.st: Compute GCD here for #asFraction.
+
 2006-11-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Rewrite printing to round correctly and never

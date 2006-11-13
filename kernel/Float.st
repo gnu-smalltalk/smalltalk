@@ -86,7 +86,7 @@ radix
 denormalized
     "Answer whether instances of the receiver can be in denormalized
      form."
-    ^self smallestDenormalized > 0
+    ^self fminDenormalized > 0
 !
 
 fminDenormalized

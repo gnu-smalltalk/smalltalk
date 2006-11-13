@@ -108,9 +108,11 @@ asFloatQ
 
 asFraction
     "Answer the receiver, converted to a Fraction"
-    | denom |
+    | num denom |
     denom := 10 raisedToInteger: scale.
-    ^(fraction numerator * denom / fraction denominator) truncated / denom!
+    num := fraction numerator * denom quo: fraction denominator.
+    gcd := num gcd: denom.
+    ^Fraction numerator: num / gcd denominator: denom / gcd!
 
 coerce: aNumber
     "Answer aNumber, converted to a ScaledDecimal with the same scale
