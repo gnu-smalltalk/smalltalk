@@ -119,11 +119,11 @@ printOn: aStream
 
 !CFunctionDescriptor methodsFor: 'calling'!
 
-asyncCallFrom: aContext
+asyncCall
     "Perform the call-out for the function represented by the receiver.
      The arguments (and the receiver if one of the arguments has type
-     #self or #selfSmalltalk) are taken from the base of the stack of
-     aContext.  Asynchronous call-outs don't return a value, but if the
+     #self or #selfSmalltalk) are taken from the parent context.
+     Asynchronous call-outs don't return a value, but if the
      function calls back into Smalltalk the process that started the
      call-out is not suspended."
     <primitive: VMpr_CFuncDescriptor_asyncCall>
@@ -133,7 +133,7 @@ asyncCallFrom: aContext
 	    SystemExceptions.CInterfaceError signal: 'Invalid C call-out ', self name
 	]
 	ifTrue: [
-	    self asyncCallNoRetryFrom: aContext
+	    self asyncCallNoRetryFrom: thisContext parentContext
         ]
 !
 
@@ -149,12 +149,11 @@ asyncCallNoRetryFrom: aContext
     self primitiveFailed
 !
 
-callFrom: aContext into: aValueHolder
+callInto: aValueHolder
     "Perform the call-out for the function represented by the receiver.  The
      arguments (and the receiver if one of the arguments has type
-     #self or #selfSmalltalk) are taken from the base of the stack of
-     aContext, and the result is stored into aValueHolder.  aValueHolder
-     is also returned."
+     #self or #selfSmalltalk) are taken from the parent context, and the
+     the result is stored into aValueHolder.  aValueHolder is also returned."
     <primitive: VMpr_CFuncDescriptor_call>
 
     ^self isValid
@@ -162,7 +161,7 @@ callFrom: aContext into: aValueHolder
 	    SystemExceptions.CInterfaceError signal: 'Invalid C call-out ', self name
 	]
 	ifTrue: [
-	    self callNoRetryFrom: aContext into: aValueHolder
+	    self callNoRetryFrom: thisContext parentContext into: aValueHolder
         ]
 !
 

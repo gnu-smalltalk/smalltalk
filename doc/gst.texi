@@ -2595,7 +2595,7 @@ A C double, converted to an instance of FloatD
 A C long double, converted to an instance of FloatQ
 
 @item void        
-No returned value
+No returned value (@code{self} returned from Smalltalk)
 
 @item wchar
 Single C wide character (@code{wchar_t}) value

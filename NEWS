@@ -2,6 +2,9 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 2.2 TO 2.3
 
+o   C call-outs returning #void now return self rather than nil.
+    Performance of code heavily using C call-outs has improved.
+
 o   Due to incompatibilities between various OSes, you are advised to test
     end-of-stream conditions *before* rather than after reading a character
     from stdin.  In 2.2, either way would work, but serious bugs were

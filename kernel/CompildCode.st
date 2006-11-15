@@ -50,7 +50,7 @@ specialSelectors
     ^#(#+ #- #< #> #<= #>= #= #~= #* #/ #\\ #bitXor: #bitShift: #// #bitAnd:
      #bitOr: #at: #at:put: #size #class #isNil #notNil #value #value: #==
      #javaAsInt #javaAsLong nil nil nil nil nil
-     #new: #thisContext #callFrom:into: #narrow #nextPutAll: #yourself #,
+     #new: #thisContext #callInto: #narrow #nextPutAll: #yourself #,
      #on: #subclassResponsibility #add: #nl #printString #contents #name
      #isEmpty #properties #container #error: #first #tclEval: #collect:
      #tclResult #key #asTkString #abs #basicNew #negated #not #close
@@ -90,7 +90,7 @@ specialSelectors
 specialSelectorsNumArgs
     ^#[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0 0 0 0 0 1 1 0 0
        255 255 255 255 255
-       1 0 2 0 1 0 1 1 0 1 0 0 0 0 0 0 0 1 0 1 1 0 0 0 0 0 0 0 0 1 2 0
+       1 0 1 0 1 0 1 1 0 1 0 0 0 0 0 0 0 1 0 1 1 0 0 0 0 0 0 0 0 1 2 0
        1 0 2 1 0 0 3 1 0 1 0 0 1 0 0 0 0 4 0 0 0 0 1 0 2 0 0 0 0 0 0 2
        1 1 0 0 2 1 0 1 1 1 1 1 1 0 1 0 0 0 1 0 0 2 1 0 1 1 0 0 2 0 2 2
        0 0 0 0 1 0 1 1 0 0 0 0 0 1 0 0 0 2 1 1 0 0 0 1 1 0 1 0 0 0 0 1

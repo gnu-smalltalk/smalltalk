@@ -180,6 +180,11 @@ initializeAsRootClass
     self registerHandler: [ :method :ann |
         method
             rewriteAsCCall: (ann arguments at: 1)
+            for: self ]
+        forPragma: #cCall:.
+    self registerHandler: [ :method :ann |
+        method
+            rewriteAsCCall: (ann arguments at: 1)
             returning: (ann arguments at: 2)
             args: (ann arguments at: 3) ]
         forPragma: #cCall:returning:args:.

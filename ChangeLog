@@ -1,3 +1,15 @@
+2006-11-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CFuncs.st: Rename #asyncCallFrom: and #callFrom:into: into
+	#asyncCall: and #callInto:.
+	* kernel/Class.st: Provide <cCall: 'function'> pragmas.
+	* kernel/CompildCode.st: Change special selector #callFrom:into:
+	into #callInto:.
+	* kernel/CompildMeth.st: Do not materialize context in the call-outs.
+	Add support for the <cCall: 'function'> pragma.
+
+	* kernel/ScaledDec.st: Fix bug in previous check-in.
+
 2006-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Fix typo.

@@ -65,7 +65,7 @@ javaAsInt;				NULL, 0,	JAVA_AS_INT_SPECIAL
 javaAsLong;				NULL, 0,	JAVA_AS_LONG_SPECIAL
 new:;               			NULL, 1,        NEW_COLON_SPECIAL
 thisContext;        			NULL, 0,        THIS_CONTEXT_SPECIAL
-callFrom:into:;     			NULL, 2,       34
+callInto:;	     			NULL, 1,       34
 narrow;             			NULL, 0,       35
 nextPutAll:;        			NULL, 1,       36
 yourself;           			NULL, 0,       37

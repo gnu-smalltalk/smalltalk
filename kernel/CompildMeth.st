@@ -497,6 +497,17 @@ isValidCCall
         and: [ self numTemps == 0
         and: [ self flags == 5 ]]]]!
 
+rewriteAsCCall: func for: aClass
+    | args |
+    args := aClass isMetaclass
+	ifFalse: [
+	     (Array new: self numArgs + 1 withAll: #smalltalk)
+		at: 1 put: #selfSmalltalk;
+		yourself ]
+	ifTrue: [
+	     (Array new: self numArgs withAll: #smalltalk) ].
+    ^self rewriteAsCCall: func returning: #smalltalk args: args!
+
 rewriteAsCCall: func returning: returnType args: argsArray
     | descr literals bytecodes newMethod |
     self isValidCCall
@@ -508,18 +519,20 @@ rewriteAsCCall: func returning: returnType args: argsArray
 	for: func
 	returning: returnType
 	withArgs: argsArray.
-    literals := { descr. #{ContextPart}. #{ValueHolder}. }.
 
-    "^(descr callFrom: ContextPart thisContext into: ValueHolder now)
-	       value
-
-     or if the return type is not a symbol,
-
-     ^(descr callFrom: ContextPart thisContext into: ValueHolder now)
-	       value narrow"
-    bytecodes := returnType isSymbol
-	ifTrue: [ #[ 136 1 141 1 30 33 95 2 30 34 22 0 51 0 ] ]
-	ifFalse: [ #[ 136 1 141 1 30 33 95 2 30 34 22 0 30 35 51 0 ] ].
+    "One of these:
+	descr callInto: nil. ^self
+	^(descr callInto: ValueHolder now) value
+	^(descr callInto: ValueHolder now) value narrow"
+    returnType == #void
+	ifTrue: [
+	    literals := { descr. }.
+	    bytecodes := #[ 136 1 45 0 30 34 67 0 ] ]
+	ifFalse: [
+	    literals := { descr. #{ValueHolder}. }.
+	    bytecodes := returnType isSymbol
+		ifTrue: [ #[ 136 1 95 1 30 34 22 0 51 0 ] ]
+		ifFalse: [ #[ 136 1 95 1 30 34 22 0 30 35 51 0 ] ] ].
 
     newMethod := CompiledMethod
 	literals: literals
@@ -544,10 +557,11 @@ rewriteAsAsyncCCall: func args: argsArray
 	for: func
 	returning: #void
 	withArgs: argsArray.
-    literals := { descr. #{ContextPart}. #asyncCallFrom: }.
 
-    "descr asyncCallFrom: ContextPart thisContext. ^self"
-    bytecodes := #[ 136 1 141 13 30 33 64 2 67 0 ].
+    "descr asyncCall. ^self"
+    literals := { descr. #asyncCall }.
+    bytecodes := #[ 136 1 64 1 67 0 ].
+
     newMethod := CompiledMethod
 	literals: literals
 	numArgs: self numArgs

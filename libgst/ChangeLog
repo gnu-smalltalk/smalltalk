@@ -1,3 +1,10 @@
+2006-11-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/builtins.gperf: Rename #callFrom:into: into #callInto:.
+	* libgst/builtins.inl: Regenerate.
+	* libgst/prims.def: Support not passing the context to C call-out
+	primitives, and a "nil" paramter to #callInto:.
+	
 2006-11-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst.h: Compile on C++.  Rename mst_Object to gst_object.

@@ -5638,7 +5638,7 @@ primitive VMpr_CFuncDescriptor_asyncCall [succeed,fail]
 
   _gst_primitives_executed++;
 
-  contextOOP = POP_OOP ();
+  contextOOP = numArgs == 1 ? POP_OOP () : _gst_this_context_oop;
   cFuncOOP = STACKTOP ();
 
   context = (gst_method_context) OOP_TO_OBJ (contextOOP);
@@ -5654,7 +5654,8 @@ primitive VMpr_CFuncDescriptor_asyncCall [succeed,fail]
       PRIM_SUCCEEDED;
     }
 
-  UNPOP (1);
+  if (numArgs == 1)
+    UNPOP (1);
   PRIM_FAILED;
 }
 
@@ -5669,7 +5670,7 @@ primitive VMpr_CFuncDescriptor_call [succeed,fail]
   _gst_primitives_executed++;
 
   resultOOP = POP_OOP ();
-  contextOOP = POP_OOP ();
+  contextOOP = numArgs == 2 ? POP_OOP () : _gst_this_context_oop;
   cFuncOOP = POP_OOP ();
 
   context = (gst_method_context) OOP_TO_OBJ (contextOOP);
@@ -5685,8 +5686,11 @@ primitive VMpr_CFuncDescriptor_call [succeed,fail]
 
   if (result)
     {
-      resultObj = OOP_TO_OBJ (resultOOP);
-      resultObj->data[0] = result;
+      if (!IS_NIL (resultOOP))
+	{
+          resultObj = OOP_TO_OBJ (resultOOP);
+          resultObj->data[0] = result;
+	}
       SET_EXCEPT_FLAG (true);
       PRIM_SUCCEEDED;
     }
@@ -5694,7 +5698,8 @@ primitive VMpr_CFuncDescriptor_call [succeed,fail]
   /* Undo changes to the stack made above */
   POP_N_OOPS (1);
   PUSH_OOP (cFuncOOP);
-  PUSH_OOP (contextOOP);
+  if (numArgs == 2)
+    PUSH_OOP (contextOOP);
   PUSH_OOP (resultOOP);
   PRIM_FAILED;
 }
