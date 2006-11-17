@@ -78,6 +78,7 @@ o   The header files compile cleanly with a C++ compiler.  For the occasion,
 
 o   Various speedups.
 
+
 Unicode support:
 
 o   Characters above 127 are no longer used to represent extended ASCII
@@ -111,6 +112,11 @@ o   New syntax $<13> to express characters using their Unicode code point.
 
 o   Part of the I18N module was separated into the Iconv module, which
     provides support for printing Unicode characters and strings correctly.
+
+
+Goodies:
+
+o   NCurses bindings, contributed by Brad Watson.
 
 -----------------------------------------------------------------------------
 

@@ -210,6 +210,7 @@ dnl ------------------------- OTHER LIBRARIES -------------------
 
 AM_LANGINFO_CODESET
 AM_ICONV
+AC_CHECK_LIB(ncurses, initscr)
 GST_HAVE_GMP
 GST_HAVE_TCLTK
 GST_HAVE_READLINE
@@ -221,6 +222,7 @@ MODULES_GTK=""
 MODULES_TCP=""
 MODULES_I18N=""
 BLOX_IMPLEMENTATION=BloxTK
+NCURSES_DISABLED="disabled-"
 I18N_DISABLED="disabled-"
 GTK_DISABLED="disabled-"
 
@@ -232,6 +234,7 @@ AC_SUBST(MODULES_TK)
 AC_SUBST(BLOX_IMPLEMENTATION)
 AC_SUBST(GTK_DISABLED)
 AC_SUBST(I18N_DISABLED)
+AC_SUBST(NCURSES_DISABLED)
 
 AC_CHECK_HEADER(gdbm.h, MODULES_EXAMPLE="$MODULES_EXAMPLE gdbm.la")
 
@@ -257,6 +260,7 @@ test "$enable_gtk" != no && MODULES_GTK="gst-gtk.la" GTK_DISABLED=""
 test "$enable_gtk" = blox && BLOX_IMPLEMENTATION=BloxGTK
 test "$gst_cv_tcltk_libs" != "not found" && MODULES_TK="blox-tk.la"
 test "$gst_cv_inet_sockets" != "no" && MODULES_TCP="tcp.la"
+test "$ac_cv_lib_ncurses_initscr" = yes && NCURSES_DISABLED=""
 test "$ac_cv_func_nl_langinfo" = yes && \
   test "$am_cv_func_iconv" = yes && MODULES_I18N="i18n.la" I18N_DISABLED=""
 

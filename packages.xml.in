@@ -277,6 +277,15 @@
   <file>gdbm-c.st</file>
 </package>
 
+<@NCURSES_DISABLED@package>
+  <name>NCurses</name>
+  <filein>ncurses.st</filein>
+  <library>libncurses</library>
+  <directory>examples</directory>
+
+  <file>ncurses.st</file>
+</package>
+
 <package>
   <name>MD5</name>
   <filein>md5.st</filein>

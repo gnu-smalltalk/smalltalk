@@ -1,3 +1,7 @@
+2006-11-15  Brad Watson  <whitebearded1@yahoo.com>
+
+	* examples/ncurses.st: New.
+
 2006-11-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CFuncs.st: Rename #asyncCallFrom: and #callFrom:into: into

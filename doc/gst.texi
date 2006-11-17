@@ -146,8 +146,8 @@ Features:
 Packages
 * Blox::                   @gst{}'s user interface building blocks.
 * Smalltalk-in-Smalltalk:: Beyond Smalltalk's standard reflective abilities.
-* Database::               Access databases from Smalltalk programs
-* Locales::                Intenationalize and localize Smalltalk programs
+* Database::               Access databases from Smalltalk programs.
+* Locales::                Internationalize and localize Smalltalk programs
 * SUnit:                   SUnit.
 * Network support::        An interface to TCP/IP and UDP and support for
                            popular network protocols.
