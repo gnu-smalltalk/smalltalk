@@ -1,3 +1,9 @@
+2006-11-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Fetch receiver from _gst_self when passing
+	_gst_this_context_oop to the C call-out primitives.  Suspend current
+	process before quitting.
+
 2006-11-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/builtins.gperf: Rename #callFrom:into: into #callInto:.

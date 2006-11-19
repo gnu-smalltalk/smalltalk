@@ -80,7 +80,7 @@ true
 'abcabc'
 'this is a test'
 result = 7.700000
-returned value is nil
+returned value is true
 
 Execution begins...
 The string is this is a test

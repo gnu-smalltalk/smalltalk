@@ -3071,6 +3071,7 @@ primitive VMpr_ObjectMemory_quit [fail]
   oop1 = STACKTOP ();
   if (IS_INT (oop1))
     {
+      suspend_process (get_scheduled_process ());
       _gst_msg_sendf (NULL, "%v %o changed: %S",
 		      _gst_object_memory_class, "aboutToQuit");
       arg1 = TO_INT (oop1);
@@ -5633,20 +5634,28 @@ primitive VMpr_CFuncDescriptor_asyncCall [succeed,fail]
 {
   volatile OOP result = NULL;
   volatile gst_method_context context;
-  OOP contextOOP, cFuncOOP;
+  OOP contextOOP, cFuncOOP, receiverOOP;
   interp_jmp_buf localJmpBuf;
 
   _gst_primitives_executed++;
 
-  contextOOP = numArgs == 1 ? POP_OOP () : _gst_this_context_oop;
+  if (numArgs == 1)
+    {
+      contextOOP = POP_OOP ();
+      context = (gst_method_context) OOP_TO_OBJ (contextOOP);
+      receiverOOP = context->receiver;
+    }
+  else
+    {
+      contextOOP = _gst_this_context_oop;
+      context = (gst_method_context) OOP_TO_OBJ (contextOOP);
+      receiverOOP = _gst_self;
+    }
+
   cFuncOOP = STACKTOP ();
-
-  context = (gst_method_context) OOP_TO_OBJ (contextOOP);
-
   PROTECT_FROM_INTERRUPT_WITH (&localJmpBuf)
-    result = _gst_invoke_croutine (cFuncOOP,
-                                 context->receiver,
-                                 context->contextStack);
+    result = _gst_invoke_croutine (cFuncOOP, receiverOOP,
+                                   context->contextStack);
 
   if (result)
     {
@@ -5664,24 +5673,33 @@ primitive VMpr_CFuncDescriptor_call [succeed,fail]
   volatile OOP result = NULL;		/* initialize to please GCC */
   volatile gst_method_context context;
   gst_object resultObj;
-  OOP contextOOP, resultOOP, cFuncOOP;
+  OOP receiverOOP, contextOOP, resultOOP, cFuncOOP;
   interp_jmp_buf localJmpBuf;
 
   _gst_primitives_executed++;
 
   resultOOP = POP_OOP ();
-  contextOOP = numArgs == 2 ? POP_OOP () : _gst_this_context_oop;
-  cFuncOOP = POP_OOP ();
+  if (numArgs == 2)
+    {
+      contextOOP = POP_OOP ();
+      context = (gst_method_context) OOP_TO_OBJ (contextOOP);
+      receiverOOP = context->receiver;
+    }
+  else
+    {
+      contextOOP = _gst_this_context_oop;
+      context = (gst_method_context) OOP_TO_OBJ (contextOOP);
+      receiverOOP = _gst_self;
+    }
 
-  context = (gst_method_context) OOP_TO_OBJ (contextOOP);
+  cFuncOOP = POP_OOP ();
 
   /* Make the result reachable, and also push it before the
      active process can change.  */
   PUSH_OOP (resultOOP);
 
   PROTECT_CURRENT_PROCESS_WITH (&localJmpBuf)
-    result = _gst_invoke_croutine (cFuncOOP,
-				   context->receiver,
+    result = _gst_invoke_croutine (cFuncOOP, receiverOOP,
 				   context->contextStack);
 
   if (result)
