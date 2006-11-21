@@ -563,7 +563,6 @@ _gst_init_cfuncs (void)
   /* regex routines */
   _gst_define_cfunc ("reh_search", _gst_re_search);
   _gst_define_cfunc ("reh_match", _gst_re_match);
-  _gst_define_cfunc ("reh_free_registers", _gst_re_free_registers);
   _gst_define_cfunc ("reh_make_cacheable", _gst_re_make_cacheable);
 
   /* Non standard routines */

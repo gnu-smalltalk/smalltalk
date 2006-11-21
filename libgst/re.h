@@ -54,13 +54,8 @@
 OOP _gst_re_make_cacheable (OOP patternOOP)
   ATTRIBUTE_HIDDEN;
 
-struct pre_registers *_gst_re_search (OOP srcOOP, OOP patternOOP,
-				      int from, int to)
+OOP _gst_re_search (OOP srcOOP, OOP patternOOP, int from, int to)
   ATTRIBUTE_HIDDEN;
 
-int _gst_re_match (OOP srcOOP, OOP patternOOP,
-		   int from, int to)
-  ATTRIBUTE_HIDDEN;
-
-void _gst_re_free_registers(struct pre_registers *regs)
+int _gst_re_match (OOP srcOOP, OOP patternOOP, int from, int to)
   ATTRIBUTE_HIDDEN;

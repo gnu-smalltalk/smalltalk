@@ -496,9 +496,25 @@ OOP
 _gst_class_name_to_oop (const char *name)
 {
   OOP result, key;
+  char *s, *p, *prev_p;
 
-  key = _gst_symbol_to_oop (name);	/* this inits Smalltalk */
-  result = dictionary_at (_gst_smalltalk_dictionary, key);
+  if (!name || !*name)
+    return NULL;
+
+  s = strdup (name);
+  if (!_gst_smalltalk_initialized)
+    gst_init_smalltalk ();
+
+  result = _gst_smalltalk_dictionary;
+  for (p = s; (prev_p = strsep (&p, ".")) != NULL; )
+    {
+      key = _gst_intern_string (prev_p);
+      result = dictionary_at (result, key);
+      if (IS_NIL (result))
+	return NULL;
+    }
+
+  free (s);
   return (result);
 }
 
@@ -958,7 +974,7 @@ _gst_oop_at_put (OOP oop, size_t index, OOP new)
 
   old = index_oop (oop, index + 1);
   assert (old);
-  index_oop_put (oop, index, new);
+  index_oop_put (oop, index + 1, new);
   return old;
 }
 

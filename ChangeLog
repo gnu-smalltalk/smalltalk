@@ -1,5 +1,9 @@
 2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Regex.st: Move creation of MatchingRegexResults object to C.
+
+2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
         * examples/gdbm.c: Add GPL exception.
         * examples/md5.c: Add GPL exception.
 

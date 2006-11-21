@@ -1,5 +1,13 @@
 2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/re.c: Add make_re_results.  Remove _gst_re_free_registers.
+	* libgst/re.h: Remove _gst_re_free_registers.
+	* libgst/cint.c: Remove _gst_re_free_registers.
+	* libgst/callin.c (_gst_class_name_to_oop): Support namespaces.
+	(_gst_oop_at_put): Fix off-by-one bug.
+
+2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
         * libgst/alloc.c: Add GPL exception.
         * libgst/alloc.h: Add GPL exception.
         * libgst/byte.c: Add GPL exception.

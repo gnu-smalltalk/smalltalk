@@ -92,7 +92,7 @@ static void markRegexAsMRU (int i);
 static RegexCacheEntry cache[REGEX_CACHE_SIZE];
 
 /* Smalltalk globals */
-static OOP regexClass;
+static OOP regexClassOOP, resultsClassOOP;
 
 /* Allocate a buffer to be passed to the regular expression matcher */
 struct pre_pattern_buffer *
@@ -117,7 +117,7 @@ compileRegex (OOP patternOOP, struct pre_pattern_buffer *regex)
   const char *ress;
 
   pattern = &STRING_OOP_AT (OOP_TO_OBJ (patternOOP), 1);
-  patternLength = gst_interpreter_proxy.basicSize (patternOOP);
+  patternLength = _gst_basic_size (patternOOP);
 
   /* compile pattern */
   ress = pre_compile_pattern (pattern, patternLength, regex);
@@ -139,25 +139,28 @@ markRegexAsMRU (int i)
 }
 
 /* If patternOOP is not a Regex, answer REGEX_NOT_CACHED.  Else look
- * it up in the cache and move it to its top (so that it is marked as
- * most recently used).  Answer REGEX_CACHE_HIT if it is found, or
- * REGEX_CACHE_MISS if it is not.
- * pRegex will point to the compiled regex if there is a cache hit, else
- * lookupRegex will only initialize it, and it will be the caller's
- * responsibility to compile the regex into the buffer that is returned.
- * If the patternOOP is not a Regex (i.e. REGEX_NOT_CACHED returned), the
- * caller will also have to free the buffer pointed to by pRegex.
- */
+   it up in the cache and move it to its top (so that it is marked as
+   most recently used).  Answer REGEX_CACHE_HIT if it is found, or
+   REGEX_CACHE_MISS if it is not.
+
+   pRegex will point to the compiled regex if there is a cache hit, else
+   lookupRegex will only initialize it, and it will be the caller's
+   responsibility to compile the regex into the buffer that is returned.
+   If the patternOOP is not a Regex (i.e. REGEX_NOT_CACHED returned), the
+   caller will also have to free the buffer pointed to by pRegex.  */
 RegexCaching
 lookupRegex (OOP patternOOP, struct pre_pattern_buffer **pRegex)
 {
   int i;
   RegexCaching result;
 
-  if (!regexClass)
-    regexClass = _gst_class_name_to_oop ("Regex");
+  if (!regexClassOOP)
+    {
+      regexClassOOP = _gst_class_name_to_oop ("Regex");
+      resultsClassOOP = _gst_class_name_to_oop ("Kernel.MatchingRegexResults");
+    }
 
-  if (OOP_CLASS (patternOOP) != regexClass)
+  if (OOP_CLASS (patternOOP) != regexClassOOP)
     {
       *pRegex = allocateNewRegex ();
       return REGEX_NOT_CACHED;
@@ -179,9 +182,9 @@ lookupRegex (OOP patternOOP, struct pre_pattern_buffer **pRegex)
 
       /* Register the objects we're caching with the virtual machine */
       if (cache[i].patternOOP)
-	gst_interpreter_proxy.unregisterOOP (cache[i].patternOOP);
+	_gst_unregister_oop (cache[i].patternOOP);
 
-      gst_interpreter_proxy.registerOOP (patternOOP);
+      _gst_register_oop (patternOOP);
       cache[i].patternOOP = patternOOP;
     }
 
@@ -195,11 +198,10 @@ lookupRegex (OOP patternOOP, struct pre_pattern_buffer **pRegex)
 }
 
 /* Create a Regex object.  We look for one that points to the same string
- * in the cache (so that we can optimize a loop that repeatedly calls
- * asRegex; if none is found, we create one ex-novo.
- * Note that Regex and String objects have the same layout; only, Regexes
- * are read-only so that we can support this kind of "interning" them.
- */
+   in the cache (so that we can optimize a loop that repeatedly calls
+   asRegex; if none is found, we create one ex-novo.
+   Note that Regex and String objects have the same layout; only, Regexes
+   are read-only so that we can support this kind of "interning" them.  */
 OOP
 _gst_re_make_cacheable (OOP patternOOP)
 {
@@ -210,14 +212,17 @@ _gst_re_make_cacheable (OOP patternOOP)
   int patternLength;
   int i;
 
-  if (!regexClass)
-    regexClass = _gst_class_name_to_oop ("Regex");
+  if (!regexClassOOP)
+    {
+      regexClassOOP = _gst_class_name_to_oop ("Regex");
+      resultsClassOOP = _gst_class_name_to_oop ("Kernel.MatchingRegexResults");
+    }
 
-  if (OOP_CLASS (patternOOP) == regexClass)
+  if (OOP_CLASS (patternOOP) == regexClassOOP)
     return patternOOP;
 
   /* Search in the cache */
-  patternLength = gst_interpreter_proxy.basicSize (patternOOP);
+  patternLength = _gst_basic_size (patternOOP);
   pattern = &STRING_OOP_AT (OOP_TO_OBJ (patternOOP), 1);
 
   for (i = 0; i < REGEX_CACHE_SIZE; i++)
@@ -227,7 +232,7 @@ _gst_re_make_cacheable (OOP patternOOP)
 
       regexOOP = cache[i].patternOOP;
       regex = &STRING_OOP_AT (OOP_TO_OBJ (regexOOP), 1);
-      if (gst_interpreter_proxy.basicSize (regexOOP) == patternLength &&
+      if (_gst_basic_size (regexOOP) == patternLength &&
 	  memcmp (regex, pattern, patternLength) == 0)
 	{
 	  markRegexAsMRU (i);
@@ -236,7 +241,7 @@ _gst_re_make_cacheable (OOP patternOOP)
     }
 
   /* No way, must allocate a new Regex object */
-  regexOOP = gst_interpreter_proxy.objectAlloc (regexClass, patternLength);
+  regexOOP = _gst_object_alloc (regexClassOOP, patternLength);
   regex = &STRING_OOP_AT (OOP_TO_OBJ (regexOOP), 1);
   memcpy (regex, pattern, patternLength);
 
@@ -250,8 +255,69 @@ _gst_re_make_cacheable (OOP patternOOP)
     return regexOOP;
 }
 
+
+typedef struct _gst_interval
+{
+  OBJ_HEADER;
+  OOP fromOOP;
+  OOP toOOP;
+  OOP stepOOP;
+} *gst_interval;
+
+typedef struct _gst_registers
+{
+  OBJ_HEADER;
+  OOP subjectOOP;
+  OOP fromOOP;
+  OOP toOOP;
+  OOP registersOOP;
+  OOP matchOOP;
+  OOP cacheOOP;
+} *gst_registers;
+
+static OOP
+make_re_results (OOP srcOOP, struct pre_registers *regs)
+{
+  OOP resultsOOP;
+  gst_registers results;
+
+  int i;
+  if (!regs->beg || regs->beg[0] == -1)
+    return _gst_nil_oop;
+
+  resultsOOP = _gst_object_alloc (resultsClassOOP, 0);
+  results = (gst_registers) OOP_TO_OBJ (resultsOOP);
+  results->subjectOOP = srcOOP;
+  results->fromOOP = FROM_INT (regs->beg[0] + 1);
+  results->toOOP = FROM_INT (regs->end[0]);
+  if (regs->num_regs > 1)
+    results->registersOOP = _gst_object_alloc (_gst_array_class, regs->num_regs - 1);
+
+  for (i = 1; i < regs->num_regs; i++)
+    {
+      OOP intervalOOP;
+      if (regs->beg[i] == -1)
+	intervalOOP = _gst_nil_oop;
+      else
+	{
+	  intervalOOP = _gst_object_alloc (_gst_interval_class, 0);
+          gst_interval interval = (gst_interval) OOP_TO_OBJ (intervalOOP);
+          interval->fromOOP = FROM_INT (regs->beg[i] + 1);
+          interval->toOOP = FROM_INT (regs->end[i]);
+          interval->stepOOP = FROM_INT (1);
+	}
+
+      /* We need to reload results as it may be invalidated by GC.  */
+      results = (gst_registers) OOP_TO_OBJ (resultsOOP);
+      _gst_oop_at_put (results->registersOOP, i - 1, intervalOOP);
+    }
+
+  return resultsOOP;
+}
+
 /* Search helper function */
-struct pre_registers *
+
+OOP
 _gst_re_search (OOP srcOOP, OOP patternOOP, int from, int to)
 {
   int res = 0;
@@ -259,6 +325,7 @@ _gst_re_search (OOP srcOOP, OOP patternOOP, int from, int to)
   struct pre_pattern_buffer *regex;
   struct pre_registers *regs;
   RegexCaching caching;
+  OOP resultOOP;
 
   caching = lookupRegex (patternOOP, &regex);
   if (caching != REGEX_CACHE_HIT && compileRegex (patternOOP, regex) != NULL)
@@ -272,17 +339,15 @@ _gst_re_search (OOP srcOOP, OOP patternOOP, int from, int to)
   if (caching == REGEX_NOT_CACHED)
     pre_free_pattern (regex);
 
-  return regs;
+  resultOOP = make_re_results (srcOOP, regs);
+  pre_free_registers(regs);
+  free(regs);
+  return resultOOP;
 }
 
-void 
-_gst_re_free_registers(struct pre_registers *regs)
-{
-	pre_free_registers(regs);
-	free(regs);
-}
 
 /* Match helper function */
+
 int
 _gst_re_match (OOP srcOOP, OOP patternOOP, int from, int to)
 {

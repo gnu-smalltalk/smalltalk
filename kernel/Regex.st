@@ -68,16 +68,6 @@ caller.'!
 
 Namespace current: Kernel!
 
-CStruct subclass: #CRegexRegisters
-        declaration: #( (#allocated #int)
-			(#numRegs #int)
-			(#beg (#ptr #int))
-			(#end (#ptr #int)) )
-        classVariableNames: ''
-        poolDictionaries: ''
-        category: 'Collections-Text'
-!
-
 RegexResults subclass: #MatchingRegexResults
         instanceVariableNames: 'subject from to registers match cache'
         classVariableNames: ''
@@ -204,7 +194,7 @@ ifNotMatched: zeroArgBlock ifMatched: oneArgBlock
     ^zeroArgBlock value
 ! !
 
-!RegexResults methodsFor: 'accessing'!
+!Kernel.FailedMatchRegexResults methodsFor: 'accessing'!
 
 size
     self shouldNotImplement!
@@ -304,6 +294,7 @@ matchInterval
 at: anIndex
     | reg text |
     anIndex = 0 ifTrue: [ ^self match ].
+    cache isNil ifTrue: [ cache := Array new: registers size ].
     (cache at: anIndex) isNil
 	ifTrue: [
 	    reg := registers at: anIndex.
@@ -317,49 +308,6 @@ intervalAt: anIndex
     ^anIndex = 0
 	ifTrue: [ from to: to ]
 	ifFalse: [ registers at: anIndex ]! !
-
-!Kernel.MatchingRegexResults methodsFor: 'private'!
-
-initialize: regs subject: aString
-    from := regs matchBeg.
-    to := regs matchEnd.
-    registers := (1 to: regs numRegs value - 1) collect: [ :i |
-	| beg end |
-	beg := (regs begAt: i).
-	end := (regs endAt: i).
-	end < 0 ifTrue: [ nil ] ifFalse: [ beg to: end ] ].
-    cache := Array new: registers size.
-    subject := aString! !
-
-    
-
-!Kernel.CRegexRegisters methodsFor: 'C call-outs'!
-
-begAt: i
-    ^(self beg value + i) value + 1!
-
-matchBeg
-    | begValue matchBeg |
-    begValue := self beg value.
-    begValue isNil ifTrue: [ ^-1 ].
-    matchBeg := begValue value.
-    matchBeg = -1 ifTrue: [ ^-1 ].
-    ^begValue value + 1!
-
-endAt: i
-    ^(self end value + i) value!
-
-matchEnd
-    | endValue matchEnd |
-    endValue := self end value.
-    endValue isNil ifTrue: [ ^-1 ].
-    matchEnd := endValue value.
-    matchEnd = -1 ifTrue: [ ^-1 ].
-    ^endValue value!
-
-free
-    <cCall: 'reh_free_registers' returning: #void
-	args: #(#self)>! !
 
 
 !Regex class methodsFor: 'instance creation'!
@@ -439,7 +387,7 @@ lengthOfRegexMatch: pattern from: from to: to
 	args: #(#selfSmalltalk #smalltalk #int #int)>!
 
 searchRegexInternal: pattern from: from to: to
-    <cCall: 'reh_search' returning: Kernel.CRegexRegisters type
+    <cCall: 'reh_search' returning: #smalltalk
 	args: #(#selfSmalltalk #smalltalk #int #int)>! !
 
 !String methodsFor: 'regex'!
@@ -452,11 +400,9 @@ asRegex
 ~ pattern
     "Answer whether the receiver matched against the Regex or String
     object pattern."
-    | ok regs |
+    | regs |
     regs := self searchRegexInternal: pattern from: 1 to: self size.
-    ok := regs matchBeg > -1.
-    regs free.
-    ^ok
+    ^regs notNil
 !
 
 =~ pattern
@@ -464,15 +410,9 @@ asRegex
      the Regex or String object pattern."
     | regs |
     regs := self searchRegexInternal: pattern from: 1 to: self size.
-    ^regs matchBeg = -1
-	ifTrue: [
-	    regs free.
-	    Kernel.FailedMatchRegexResults notMatched
-	]
-	ifFalse: [
-	    [ Kernel.MatchingRegexResults new initialize: regs subject: self ]
-		ensure: [ regs free ]
-	]
+    ^regs isNil
+	ifTrue: [ Kernel.FailedMatchRegexResults notMatched ]
+	ifFalse: [ regs ]
 !
 
 searchRegex: pattern
@@ -480,15 +420,9 @@ searchRegex: pattern
      against the Regex or String object pattern."
     | regs |
     regs := self searchRegexInternal: pattern from: 1 to: self size.
-    ^regs matchBeg = -1
-	ifTrue: [
-	    regs free.
-	    Kernel.FailedMatchRegexResults notMatched
-	]
-	ifFalse: [
-	    [ Kernel.MatchingRegexResults new initialize: regs subject: self ]
-		ensure: [ regs free ]
-	]
+    ^regs isNil
+	ifTrue: [ Kernel.FailedMatchRegexResults notMatched ]
+	ifFalse: [ regs ]
 !
 
 searchRegex: pattern startingAt: anIndex
@@ -497,15 +431,9 @@ searchRegex: pattern startingAt: anIndex
      at index anIndex."
     | regs |
     regs := self searchRegexInternal: pattern from: anIndex to: self size.
-    ^regs matchBeg = -1
-	ifTrue: [
-	    regs free.
-	    Kernel.FailedMatchRegexResults notMatched
-	]
-	ifFalse: [
-	    [ Kernel.MatchingRegexResults new initialize: regs subject: self ]
-		ensure: [ regs free ]
-	]
+    ^regs isNil
+	ifTrue: [ Kernel.FailedMatchRegexResults notMatched ]
+	ifFalse: [ regs ]
 !
 
 searchRegex: pattern from: from to: to
@@ -514,99 +442,69 @@ searchRegex: pattern from: from to: to
      to the specified range of indices."
     | regs |
     regs := self searchRegexInternal: pattern from: from to: to.
-    ^regs matchBeg = -1
-	ifTrue: [
-	    regs free.
-	    Kernel.FailedMatchRegexResults notMatched
-	]
-	ifFalse: [
-	    [ Kernel.MatchingRegexResults new initialize: regs subject: self ]
-		ensure: [ regs free ]
-	]
+    ^regs isNil
+	ifTrue: [ Kernel.FailedMatchRegexResults notMatched ]
+	ifFalse: [ regs ]
 !
 
 indexOfRegex: regexString ifAbsent: excBlock
     "If an occurrence of the regex is present in the receiver, return
      the Interval corresponding to the leftmost-longest match.  Otherwise,
      evaluate excBlock and return the result."
-    | regs beg end |
+    | regs |
     regs := self searchRegexInternal: regexString from: 1 to: self size.
-    beg := regs matchBeg.
-    end := regs matchEnd.
-    regs free.
-    ^beg >= 1
-	ifTrue: [ beg to: end ]
-	ifFalse: [ excBlock value ]
+    ^regs isNil
+	ifFalse: [ regs interval ]
+	ifTrue: [ excBlock value ]
 !
 
 indexOfRegex: regexString startingAt: index ifAbsent: excBlock
     "If an occurrence of the regex is present in the receiver, return
      the Interval corresponding to the leftmost-longest match starting after
      the given index.  Otherwise, evaluate excBlock and return the result."
-    | regs beg end |
+    | regs |
     regs := self searchRegexInternal: regexString from: index to: self size.
-    beg := regs matchBeg.
-    end := regs matchEnd.
-    regs free.
-    ^beg >= 1
-	ifTrue: [ beg to: end ]
-	ifFalse: [ excBlock value ]
+    ^regs isNil
+	ifFalse: [ regs interval ]
+	ifTrue: [ excBlock value ]
 !
 
 indexOfRegex: regexString from: from to: to ifAbsent: excBlock
     "If an occurrence of the regex is present in the receiver, return the
      Interval corresponding to the leftmost-longest match occurring within
      the given indices.  Otherwise, evaluate excBlock and return the result."
-    | regs beg end |
+    | regs |
     regs := self searchRegexInternal: regexString from: from to: to.
-    beg := regs matchBeg.
-    end := regs matchEnd.
-    regs free.
-    ^beg >= 1
-	ifTrue: [ beg to: end ]
-	ifFalse: [ excBlock value ]
+    ^regs isNil
+	ifFalse: [ regs interval ]
+	ifTrue: [ excBlock value ]
 !
 
 indexOfRegex: regexString
     "If an occurrence of the regex is present in the receiver, return the
      Interval corresponding to the leftmost-longest match.  Otherwise return
      nil."
-    | regs beg end |
+    | regs |
     regs := self searchRegexInternal: regexString from: 1 to: self size.
-    beg := regs matchBeg.
-    end := regs matchEnd.
-    regs free.
-    ^beg >= 1
-	ifTrue: [ beg to: end ]
-	ifFalse: [ nil ]
+    ^regs isNil ifFalse: [ regs interval ]
 !
 
 indexOfRegex: regexString startingAt: index
     "If an occurrence of the regex is present in the receiver, return the
      Interval corresponding to the leftmost-longest match starting after
      the given index.  Otherwise return nil."
-    | regs beg end |
+    | regs |
     regs := self searchRegexInternal: regexString from: index to: self size.
-    beg := regs matchBeg.
-    end := regs matchEnd.
-    regs free.
-    ^beg >= 1
-	ifTrue: [ beg to: end ]
-	ifFalse: [ nil ]
+    ^regs isNil ifFalse: [ regs interval ]
 !
 
 indexOfRegex: regexString from: from to: to
     "If an occurrence of the regex is present in the receiver, return the
      Interval corresponding to the leftmost-longest match occurring within
      the given range of indices.  Otherwise return nil."
-    | regs beg end |
+    | regs |
     regs := self searchRegexInternal: regexString from: from to: to.
-    beg := regs matchBeg.
-    end := regs matchEnd.
-    regs free.
-    ^beg >= 1
-	ifTrue: [ beg to: end ]
-	ifFalse: [ nil ]
+    ^regs isNil ifFalse: [ regs interval ]
 !
 
 matchRegex: pattern
@@ -627,18 +525,15 @@ occurrencesOfRegex: pattern from: from to: to
     "Return a count of how many times pattern repeats in the receiver within
      the given range of index."
 
-    | res idx regex beg end regs |
+    | res idx regex regs |
     regex := pattern asRegex.
     res := 0.
     idx := from.
     [
         regs := self searchRegexInternal: regex from: idx to: to.
-        beg := regs matchBeg.
-        end := regs matchEnd.
-        regs free.
-        beg >= 1
+        regs notNil
     ] whileTrue: [
-	idx := end max: beg + 1.
+	idx := regs to max: regs from + 1.
 	res := res + 1.
     ].
 
@@ -728,20 +623,15 @@ onOccurrencesOfRegex: pattern from: from to: to do: aBlock
      given range of indices.  For each match, pass the RegexResults object 
      to aBlock."
 
-    | idx regex beg end regs results |
+    | idx regex regs |
     regex := pattern asRegex.
     idx := from.
     [
         regs := self searchRegexInternal: regex from: idx to: to.
-        beg := regs matchBeg.
-        end := regs matchEnd.
-        beg >= 1
+        regs notNil
     ] whileTrue: [
-	results := Kernel.MatchingRegexResults new
-	    initialize: regs subject: self.
-	regs free.
-	aBlock value: results.
-	idx := end + 1 max: beg + 1.
+	aBlock value: regs.
+	idx := regs to + 1 max: regs from + 1.
     ].
     regs free.
 !
@@ -757,21 +647,18 @@ tokenize: pattern from: from to: to
     "Split the receiver at every occurrence of pattern (considering only
      the indices between from and to).  All parts that do not match pattern
      are separated and stored into an Array of Strings that is returned."
-    | res idx regex beg end regs tokStart |
+    | res idx regex regs tokStart |
     regex := pattern asRegex.
     res := WriteStream on: (Array new: 10).
     idx := from.
     tokStart := 1.
     [
         regs := self searchRegexInternal: regex from: idx to: to.
-        beg := regs matchBeg.
-        end := regs matchEnd.
-        regs free.
-        beg >= 1
+        regs notNil
     ] whileTrue: [
-	res nextPut: (self copyFrom: tokStart to: beg - 1).
-	tokStart := end + 1.
-	idx := beg + 1 max: end + 1.
+	res nextPut: (self copyFrom: tokStart to: regs from - 1).
+	tokStart := regs to + 1.
+	idx := regs to + 1 max: regs from + 1.
     ].
 
     res nextPut: (self copyFrom: tokStart to: to).
