@@ -1,3 +1,8 @@
+2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox-tk/BloxTK.c: Add GPL exception.
+	* blox-tk/rgbtab.h: Add GPL exception.
+
 2006-09-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* blox-tk/BloxBasic.st: Fix previous checkin... half a year later.

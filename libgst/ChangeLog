@@ -1,3 +1,84 @@
+2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
+        * libgst/alloc.c: Add GPL exception.
+        * libgst/alloc.h: Add GPL exception.
+        * libgst/byte.c: Add GPL exception.
+        * libgst/byte.def: Add GPL exception.
+        * libgst/byte.h: Add GPL exception.
+        * libgst/callin.c: Add GPL exception.
+        * libgst/callin.h: Add GPL exception.
+        * libgst/cint.c: Add GPL exception.
+        * libgst/cint.h: Add GPL exception.
+        * libgst/comp.c: Add GPL exception.
+        * libgst/comp.h: Add GPL exception.
+        * libgst/comp.inl: Add GPL exception.
+        * libgst/dict.c: Add GPL exception.
+        * libgst/dict.h: Add GPL exception.
+        * libgst/dict.inl: Add GPL exception.
+        * libgst/events.c: Add GPL exception.
+        * libgst/events.h: Add GPL exception.
+        * libgst/genbc-decl.y: Add GPL exception.
+        * libgst/genbc-impl.y: Add GPL exception.
+        * libgst/genbc-scan.c: Add GPL exception.
+        * libgst/genbc-scan.l: Add GPL exception.
+        * libgst/genbc.c: Add GPL exception.
+        * libgst/genbc.h: Add GPL exception.
+        * libgst/genpr-parse.y: Add GPL exception.
+        * libgst/genpr-scan.c: Add GPL exception.
+        * libgst/genpr-scan.l: Add GPL exception.
+        * libgst/genprims.h: Add GPL exception.
+        * libgst/genvm-parse.y: Add GPL exception.
+        * libgst/genvm-scan.c: Add GPL exception.
+        * libgst/genvm-scan.l: Add GPL exception.
+        * libgst/genvm.h: Add GPL exception.
+        * libgst/gst-parse.c: Add GPL exception.
+        * libgst/gst-parse.h: Add GPL exception.
+        * libgst/gst.h: Add GPL exception.
+        * libgst/gstpriv.h: Add GPL exception.
+        * libgst/gstpub.h: Add GPL exception.
+        * libgst/heap.c: Add GPL exception.
+        * libgst/heap.h: Add GPL exception.
+        * libgst/input.c: Add GPL exception.
+        * libgst/input.h: Add GPL exception.
+        * libgst/interp-bc.inl: Add GPL exception.
+        * libgst/interp-jit.inl: Add GPL exception.
+        * libgst/interp.c: Add GPL exception.
+        * libgst/interp.h: Add GPL exception.
+        * libgst/interp.inl: Add GPL exception.
+        * libgst/jitpriv.h: Add GPL exception.
+        * libgst/lex.c: Add GPL exception.
+        * libgst/lex.h: Add GPL exception.
+        * libgst/lib.c: Add GPL exception.
+        * libgst/lib.h: Add GPL exception.
+        * libgst/md-config.h: Add GPL exception.
+        * libgst/memzero.h: Add GPL exception.
+        * libgst/oop.c: Add GPL exception.
+        * libgst/oop.h: Add GPL exception.
+        * libgst/oop.inl: Add GPL exception.
+        * libgst/opt.c: Add GPL exception.
+        * libgst/opt.h: Add GPL exception.
+        * libgst/prims.def: Add GPL exception.
+        * libgst/print.c: Add GPL exception.
+        * libgst/print.h: Add GPL exception.
+        * libgst/re.c: Add GPL exception.
+        * libgst/re.h: Add GPL exception.
+        * libgst/save.c: Add GPL exception.
+        * libgst/save.h: Add GPL exception.
+        * libgst/security.c: Add GPL exception.
+        * libgst/security.h: Add GPL exception.
+        * libgst/str.c: Add GPL exception.
+        * libgst/str.h: Add GPL exception.
+        * libgst/sym.c: Add GPL exception.
+        * libgst/sym.h: Add GPL exception.
+        * libgst/sysdep.c: Add GPL exception.
+        * libgst/sysdep.h: Add GPL exception.
+        * libgst/tree.c: Add GPL exception.
+        * libgst/tree.h: Add GPL exception.
+        * libgst/vm.def: Add GPL exception.
+        * libgst/xlat.c: Add GPL exception.
+        * libgst/xlat.h: Add GPL exception.
+        * main.c: Add GPL exception.
+
 2006-11-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Fetch receiver from _gst_self when passing
@@ -160,7 +241,6 @@
 
 2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
-	* lib-src/poll.c: Import from gnulib.
 	* libgst/dict.c: Add 'peek' variable to FileDescriptor.
 	* libgst/dict.h: Add 'peek' variable to struct gst_file_stream.
 	* libgst/input.c: Leave poll_and_read upon POLLHUP.

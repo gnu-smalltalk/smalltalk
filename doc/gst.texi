@@ -123,7 +123,7 @@ programming language.
 @detailmenu
 --- The detailed node listing ---
 
-Invocation:
+Using GNU Smalltalk:
 * Invocation::          What you can specify on the command line.
 * Operation::           A step-by-step description of the
                         startup process and a short description of
@@ -131,6 +131,10 @@ Invocation:
 * Syntax::              A description of the input file syntax
 * Test suite::          How to run the test suite system.
 * Legal concerns::      Licensing of GNU Smalltalk
+
+Legal concerns:
+* GPL::                 Complying with the GNU GPL.
+* LGPL::                Complying with the GNU LGPL.
 
 Features:
 * Memory access::      The direct memory accessing classes and methods.
@@ -613,15 +617,57 @@ and the development environment (compiler and browser) come under the
 @gnu{} General Public License, while the system class libraries come
 under the Lesser General Public License.
 
-The GPL licensing of the virtual machine means that all derivatives of
-the virtual machine must be put under the same license.  In other
-words, it is strictly forbidden to put programs that include the @gst{}
-virtual machine under a proprietary license.
+@menu
+* GPL::        Complying with the GNU GPL.
+* LGPL::       Complying with the GNU LGPL.
+@end menu
 
-This however does not extend to Smalltalk programs, since these are
-merely input data for the virtual machine.  In general, these must
-respect the terms of the Lesser General Public License@footnote{Of
-  course, they may be more constrained by usage of GPL class libraries.}.
+@node GPL
+@subsection Complying with the @gnu{} @acronym{GPL}
+
+The @acronym{GPL} licensing of the virtual machine means that all
+derivatives of the virtual machine must be put under the same license.
+In other words, it is strictly forbidden to put programs that include the
+@gst{} virtual machine under a license that is incompatible with the GPL.
+This also includes any bindings to external libraries.  For example,
+the bindings to Gtk+ are released under the @acronym{GPL}.
+
+In principle, the @acronym{GPL} would not extend to Smalltalk programs,
+since these are merely input data for the virtual machine.  On the
+other hand, using bindings that are under the @acronym{GPL} via dynamic
+linking would constitute combining two parts (the Smalltalk program and
+the bindings) into one program.  Therefore, we added a special exception
+to the @acronym{GPL} in order to avoid gray areas that could adversely
+hit both the project and its users:
+
+@quotation
+In addition, as a special exception, the Free Software Foundation
+give you permission to combine @gst{} with free software
+programs or libraries that are released under the @gnu{} @acronym{LGPL} and with
+independent programs running under the @gst{} virtual machine.
+
+You may copy and distribute such a system following the terms of the
+@gnu{} @acronym{GPL} for @gst{} and the licenses of the other code
+concerned, provided that you include the source code of that other
+code when and as the @gnu{} @acronym{GPL} requires distribution of source code.
+
+Note that people who make modified versions of @gst{} are not
+obligated to grant this special exception for their modified
+versions; it is their choice whether to do so.  The @gnu{} General
+Public License gives permission to release a modified version without
+this exception; this exception also makes it possible to release a
+modified version which carries forward this exception.
+@end quotation
+
+
+@node LGPL
+@subsection Complying with the @gnu{} @acronym{LGPL}
+
+Smalltalk programs that run under @gst{} are linked with the system
+classes in @gst{} class library.  Therefore, they must respect the terms
+of the Lesser General Public License@footnote{Of course, they may
+  be more constrained by usage of @acronym{GPL} class libraries.}.
+
 The interpretation of this license for architectures different from
 that of the C language is often difficult; the accepted one for
 Smalltalk is as follows.  The image file can be considered as an
@@ -638,18 +684,22 @@ Subsection 6a of the Lesser General Public License, which is
 reported here:
 
 @quotation
-    a) Accompany the work with the complete corresponding
-    machine-readable source code for the Library including whatever
-    changes were used in the work (which must be distributed under
-    Sections 1 and 2 above); and, if the work is an executable linked
-    with the Library, with the complete machine-readable "work that
-    uses the Library", as object code and/or source code, so that the
-    user can modify the Library and then relink to produce a modified
-    executable containing the modified Library.  (It is understood
-    that the user who changes the contents of definitions files in the
-    Library will not necessarily be able to recompile the application
-    to use the modified definitions.)
+a) Accompany the work with the complete corresponding
+machine-readable source code for the Library including whatever
+changes were used in the work (which must be distributed under
+Sections 1 and 2 above); and, if the work is an executable linked
+with the Library, with the complete machine-readable "work that
+uses the Library", as object code and/or source code, so that the
+user can modify the Library and then relink to produce a modified
+executable containing the modified Library.  (It is understood
+that the user who changes the contents of definitions files in the
+Library will not necessarily be able to recompile the application
+to use the modified definitions.)
 @end quotation
+
+In the future, alternative mechanisms similar to shared libraries may
+be provided, so that it is possible to comply with the @gnu{} @acronym{LGPL}
+in other ways.
 
 
 

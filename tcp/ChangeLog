@@ -1,3 +1,7 @@
+2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
+        * tcp/tcp.c: Add GPL exception.
+
 2006-05-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tcp/Sockets.st: Check if peer is dead in #bufferContents.

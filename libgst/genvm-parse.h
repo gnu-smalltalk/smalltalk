@@ -64,7 +64,7 @@
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 105 "genvm-parse.y"
+#line 127 "genvm-parse.y"
 {
   struct operation_list *oplist;
   struct operation_info *op;

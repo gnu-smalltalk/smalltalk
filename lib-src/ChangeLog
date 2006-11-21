@@ -1,3 +1,25 @@
+2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
+        * lib-src/ceill.c: Add GPL exception.
+        * lib-src/expl.c: Add GPL exception.
+        * lib-src/floorl.c: Add GPL exception.
+        * lib-src/frexpl.c: Add GPL exception.
+        * lib-src/getdtablesize.c: Add GPL exception.
+        * lib-src/getpagesize.c: Add GPL exception.
+        * lib-src/ldexpl.c: Add GPL exception.
+        * lib-src/mathl.h: Add GPL exception.
+        * lib-src/poll_.h: Add GPL exception.
+        * lib-src/signalx.c: Add GPL exception.
+        * lib-src/signalx.h: Add GPL exception.
+        * lib-src/socketx.h: Add GPL exception.
+        * lib-src/sqrtl.c: Add GPL exception.
+        * lib-src/strdup.c: Add GPL exception.
+        * lib-src/strerror.c: Add GPL exception.
+        * lib-src/strspell.c: Add GPL exception.
+        * lib-src/strspell.h: Add GPL exception.
+        * lib-src/strtoul.c: Add GPL exception.
+        * lib-src/trigl.h: Add GPL exception.
+
 2006-10-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/ltdl.c: Open both .dylib and .so on Mac OS.
@@ -13,6 +35,10 @@
 2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/regex.c, lib-src/regex.h: Move from examples.
+
+2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c: Import from gnulib.
 
 2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
 

@@ -2,6 +2,15 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 2.2 TO 2.3
 
+IMPORTANT: GNU Smalltalk now adds an explicit exception to the GNU GPL
+license, allowing the programs running under the virtual machine to use
+a GPL-incompatible license.  This exception is used both by the
+virtual machine and by the library bindings included in GNU Smalltalk.
+This clears gray areas when a Smalltalk program is using functions
+in the external library bindings via dynamic linking and the foreign
+function call interface (C call-outs).
+
+
 o   C call-outs returning #void now return self rather than nil.
     Performance of code heavily using C call-outs has improved.
 

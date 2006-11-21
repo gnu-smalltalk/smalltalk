@@ -90,7 +90,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 31 "genvm-parse.y"
+#line 53 "genvm-parse.y"
 
 #include "avltrees.h"
 #include "genvm.h"
@@ -182,7 +182,7 @@ int from, to;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 105 "genvm-parse.y"
+#line 127 "genvm-parse.y"
 {
   struct operation_list *oplist;
   struct operation_info *op;
@@ -504,11 +504,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   133,   133,   134,   135,   137,   141,   140,   146,   147,
-     150,   151,   152,   155,   156,   157,   160,   168,   178,   184,
-     190,   189,   199,   199,   202,   205,   208,   212,   214,   219,
-     219,   224,   226,   229,   228,   234,   237,   242,   244,   241,
-     262,   265,   268,   271,   273
+       0,   155,   155,   156,   157,   159,   163,   162,   168,   169,
+     172,   173,   174,   177,   178,   179,   182,   190,   200,   206,
+     212,   211,   221,   221,   224,   227,   230,   234,   236,   241,
+     241,   246,   248,   251,   250,   256,   259,   264,   266,   263,
+     284,   287,   290,   293,   295
 };
 #endif
 
@@ -1452,22 +1452,22 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 136 "genvm-parse.y"
+#line 158 "genvm-parse.y"
     { free ((yyvsp[(2) - (2)].text)); }
     break;
 
   case 6:
-#line 141 "genvm-parse.y"
+#line 163 "genvm-parse.y"
     { curr_table = define_table ((yyvsp[(2) - (2)].text)); }
     break;
 
   case 7:
-#line 143 "genvm-parse.y"
+#line 165 "genvm-parse.y"
     { emit_table (curr_table); free_table (curr_table); }
     break;
 
   case 16:
-#line 161 "genvm-parse.y"
+#line 183 "genvm-parse.y"
     { from = to = (yyvsp[(1) - (2)].num);
 	    if (from < 0 || from > 255)
 	      {
@@ -1478,7 +1478,7 @@ yyreduce:
     break;
 
   case 17:
-#line 169 "genvm-parse.y"
+#line 191 "genvm-parse.y"
     { from = (yyvsp[(1) - (4)].num), to = (yyvsp[(3) - (4)].num);
 	    if (from < 0 || to < 0 || from > 255 || to > 255)
 	      {
@@ -1489,26 +1489,26 @@ yyreduce:
     break;
 
   case 18:
-#line 179 "genvm-parse.y"
+#line 201 "genvm-parse.y"
     { set_table (curr_table, from, to, (yyvsp[(2) - (2)].text));
 	    free ((yyvsp[(2) - (2)].text));
 	  }
     break;
 
   case 19:
-#line 185 "genvm-parse.y"
+#line 207 "genvm-parse.y"
     { set_table (curr_table, from, to, (yyvsp[(2) - (2)].text));
 	    free ((yyvsp[(2) - (2)].text));
 	  }
     break;
 
   case 20:
-#line 190 "genvm-parse.y"
+#line 212 "genvm-parse.y"
     { filprintf (out_fil, "%s:\n", (yyvsp[(2) - (2)].text)); }
     break;
 
   case 21:
-#line 192 "genvm-parse.y"
+#line 214 "genvm-parse.y"
     { emit_operation_list ((yyvsp[(5) - (6)].oplist));
 	    free_operation_list ((yyvsp[(5) - (6)].oplist));
 	    filprintf (out_fil, "  NEXT_BC;\n");
@@ -1517,94 +1517,94 @@ yyreduce:
     break;
 
   case 22:
-#line 199 "genvm-parse.y"
+#line 221 "genvm-parse.y"
     { c_args_on_paren = 1; }
     break;
 
   case 23:
-#line 200 "genvm-parse.y"
+#line 222 "genvm-parse.y"
     { (yyval.oplist) = append_to_operation_list ((yyvsp[(1) - (7)].oplist), (yyvsp[(2) - (7)].text), (yyvsp[(5) - (7)].id)); }
     break;
 
   case 24:
-#line 202 "genvm-parse.y"
+#line 224 "genvm-parse.y"
     { (yyval.oplist) = NULL; }
     break;
 
   case 25:
-#line 206 "genvm-parse.y"
+#line 228 "genvm-parse.y"
     { (yyval.id) = (yyvsp[(1) - (1)].id); }
     break;
 
   case 26:
-#line 208 "genvm-parse.y"
+#line 230 "genvm-parse.y"
     { (yyval.id) = NULL; }
     break;
 
   case 27:
-#line 213 "genvm-parse.y"
+#line 235 "genvm-parse.y"
     { (yyval.id) = append_to_id_list ((yyvsp[(1) - (3)].id), (yyvsp[(3) - (3)].text)); free ((yyvsp[(3) - (3)].text)); }
     break;
 
   case 28:
-#line 215 "genvm-parse.y"
+#line 237 "genvm-parse.y"
     { (yyval.id) = append_to_id_list (NULL, (yyvsp[(1) - (1)].text)); free ((yyvsp[(1) - (1)].text)); }
     break;
 
   case 29:
-#line 219 "genvm-parse.y"
+#line 241 "genvm-parse.y"
     { curr_fil = filnew (NULL, 0); }
     break;
 
   case 30:
-#line 221 "genvm-parse.y"
+#line 243 "genvm-parse.y"
     { (yyval.text) = fildelete (curr_fil); }
     break;
 
   case 31:
-#line 225 "genvm-parse.y"
+#line 247 "genvm-parse.y"
     { filcat (curr_fil, (yyvsp[(2) - (2)].text)); }
     break;
 
   case 32:
-#line 227 "genvm-parse.y"
+#line 249 "genvm-parse.y"
     { filcat (curr_fil, (yyvsp[(1) - (1)].text)); }
     break;
 
   case 33:
-#line 229 "genvm-parse.y"
+#line 251 "genvm-parse.y"
     { filcat (curr_fil, "("); }
     break;
 
   case 34:
-#line 231 "genvm-parse.y"
+#line 253 "genvm-parse.y"
     { filcat (curr_fil, ")"); }
     break;
 
   case 35:
-#line 235 "genvm-parse.y"
+#line 257 "genvm-parse.y"
     { (yyval.text) = (yyvsp[(1) - (1)].text); }
     break;
 
   case 36:
-#line 237 "genvm-parse.y"
+#line 259 "genvm-parse.y"
     { asprintf (&(yyval.text), "label%d", ++counter); }
     break;
 
   case 37:
-#line 242 "genvm-parse.y"
+#line 264 "genvm-parse.y"
     { curr_op = define_operation ((yyvsp[(2) - (2)].text)); c_code_on_brace = true; }
     break;
 
   case 38:
-#line 244 "genvm-parse.y"
+#line 266 "genvm-parse.y"
     { curr_fil = filnew (NULL, 0);
 	    filprintf (curr_fil, "#line %d \"vm.def\"\n      ", yylineno + 1);
 	  }
     break;
 
   case 39:
-#line 248 "genvm-parse.y"
+#line 270 "genvm-parse.y"
     { filprintf (curr_fil, "\n#line __oline__ \"vm.inl\"");
 	    if (curr_op)
 	      {
@@ -1620,22 +1620,22 @@ yyreduce:
     break;
 
   case 40:
-#line 263 "genvm-parse.y"
+#line 285 "genvm-parse.y"
     { (yyval.id) = append_to_id_list ((yyvsp[(1) - (2)].id), (yyvsp[(2) - (2)].text)); free ((yyvsp[(2) - (2)].text)); }
     break;
 
   case 41:
-#line 265 "genvm-parse.y"
+#line 287 "genvm-parse.y"
     { (yyval.id) = NULL; }
     break;
 
   case 42:
-#line 269 "genvm-parse.y"
+#line 291 "genvm-parse.y"
     { set_curr_op_stack ((yyvsp[(2) - (5)].id), (yyvsp[(4) - (5)].id)); }
     break;
 
   case 43:
-#line 272 "genvm-parse.y"
+#line 294 "genvm-parse.y"
     { filcat (curr_fil, (yyvsp[(2) - (2)].text)); }
     break;
 
@@ -1855,7 +1855,7 @@ yyreturn:
 }
 
 
-#line 276 "genvm-parse.y"
+#line 298 "genvm-parse.y"
 
 
 void yyprint (FILE *fp, int tok, YYSTYPE *val)
