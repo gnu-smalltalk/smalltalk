@@ -201,9 +201,10 @@ call_argtype_function (struct printf_info *const pinfo, int **argtypes, spec_ent
       pinfo->type = spec->type;
 
       if (pinfo->argc > argindex)
-        n = spec->arg(pinfo, pinfo->argc - argindex, *argtypes + argindex);
+        n = spec->arg(pinfo, (size_t) (pinfo->argc - argindex),
+		      *argtypes + argindex);
       else
-        n = spec->arg(pinfo, 0, NULL);
+        n = spec->arg(pinfo, (size_t) 0, NULL);
 
       if (n < 0)
 	return n;
@@ -221,7 +222,7 @@ call_argtype_function (struct printf_info *const pinfo, int **argtypes, spec_ent
           pinfo->spec = *pinfo->format;
           pinfo->extra = spec->user;
           pinfo->type = spec->type;
-          n = spec->arg(pinfo, n, *argtypes + argindex);
+          n = spec->arg(pinfo, (size_t)n, *argtypes + argindex);
 	}
     }
 
@@ -397,7 +398,8 @@ parse_printf_format (const char *format, int n, int *argtypes)
 		      info.spec = *info.format;
 		      info.extra = spec->user;
 		      info.type = spec->type;
-		      status = (*spec->arg) (&info, n - argindex, argtypes + argindex);
+		      status = (*spec->arg) (&info, (size_t) (n - argindex),
+					     argtypes + argindex);
 		    }
 		  else
 		    {
@@ -499,7 +501,7 @@ do_printfv (STREAM *stream, const char *format, union printf_arg const args[])
 		  info.extra = spec->user;
 		  info.type = spec->type;
 
-		  status = spec->arg ? (*spec->arg) (&info, 0, NULL) : 1;
+		  status = spec->arg ? (*spec->arg) (&info, (size_t)0, NULL) : 1;
 
 		  if (status < 0)
 		    goto error;
@@ -965,7 +967,8 @@ snv_fdputc (int ch, STREAM *stream)
 {
   static char buf[1] = { 0 };
   buf[0] = (char) ch;
-  return write (SNV_POINTER_TO_INT (stream_details (stream)), buf, 1) ? ch : -1;
+  return write ((int) SNV_POINTER_TO_INT (stream_details (stream)), buf, 1)
+	 ? ch : -1;
 }
 
 /**
