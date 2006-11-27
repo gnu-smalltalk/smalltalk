@@ -1,3 +1,7 @@
+2006-11-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/xlat.c: Use _p variants appropriately.
+
 2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/re.c: Add make_re_results.  Remove _gst_re_free_registers.

@@ -627,8 +627,8 @@ under the Lesser General Public License.
 
 The @acronym{GPL} licensing of the virtual machine means that all
 derivatives of the virtual machine must be put under the same license.
-In other words, it is strictly forbidden to put programs that include the
-@gst{} virtual machine under a license that is incompatible with the GPL.
+In other words, it is strictly forbidden to distribute programs that include the
+@gst{} virtual machine under a license that is not the GPL.
 This also includes any bindings to external libraries.  For example,
 the bindings to Gtk+ are released under the @acronym{GPL}.
 

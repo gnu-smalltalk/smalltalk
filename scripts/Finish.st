@@ -46,6 +46,9 @@ ok ifFalse: [ ObjectMemory quit: 1 ]!
 old := Smalltalk arguments first.
 new := Smalltalk arguments at: 2.
 old = new ifFalse: [ FileSegment relocateFrom: old to: new ].
+ImageFileName := 'gst.im'.
+ImageFilePath := new.
+KernelFileLocalPath := new, '/kernel'. 
 KernelFilePath := new, '/kernel'!
 
 ObjectMemory snapshot!

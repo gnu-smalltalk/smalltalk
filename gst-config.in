@@ -2,7 +2,6 @@
 
 : ${prefix:=@prefix@}
 : ${exec_prefix:=@exec_prefix@}
-gst_libs='@LDPATH@ @LIBS@'
 exec_prefix_set=no
 
 usage()
@@ -68,6 +67,9 @@ while test $# -gt 0; do
   esac
   shift
 done
+
+: ${pkglibdir:="@libdir@/@PACKAGE@"}
+gst_libs="${pkglibdir} @LIBS@"
 
 if test "$echo_prefix" = "yes"; then
 	echo $prefix

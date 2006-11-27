@@ -1558,7 +1558,7 @@ gen_binary_int (code_tree *tree)
 	      if (overflow)
 		{
 		  addr = lbl_get (overflow);
-		  addr = jit_beqi_l (addr, reg0, FROM_INT (MIN_ST_INT));
+		  addr = jit_beqi_p (addr, reg0, FROM_INT (MIN_ST_INT));
 		  lbl_use (overflow, addr);
 		}
 	      jit_rsbi_l (JIT_V0, reg0, 2);
@@ -1672,7 +1672,7 @@ gen_binary_int (code_tree *tree)
 	      if (overflow)
 		{
 		  addr = lbl_get (overflow);
-		  addr = jit_beqi_l (addr, reg0, FROM_INT (MIN_ST_INT));
+		  addr = jit_beqi_p (addr, reg0, FROM_INT (MIN_ST_INT));
 		  lbl_use (overflow, addr);
 		}
 	      jit_rsbi_l (JIT_V0, reg0, 2);
