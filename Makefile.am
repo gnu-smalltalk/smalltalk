@@ -53,11 +53,11 @@ pkgconfigdir = $(libdir)/pkgconfig
 nodist_pkgconfig_DATA = gnu-smalltalk.pc
 
 pkglib_DATA = libc.la
-dist_pkgdata_DATA = scripts/Load.st scripts/Reload.st scripts/Test.st
 noinst_DATA = gst.im
 dist_noinst_DATA += smalltalk-mode.el.in gst-mode.el.in .gdbinit \
 	kernel/stamp-classes blox-tk/stamp-classes tcp/stamp-classes \
-	i18n/stamp-classes scripts/Finish.st scripts/GenLibDoc.st \
+	i18n/stamp-classes scripts/Load.st scripts/Reload.st \
+	scripts/Test.st scripts/Finish.st scripts/GenLibDoc.st \
 	scripts/GenBaseDoc.st gsticon.ico
 
 if WITH_EMACS
