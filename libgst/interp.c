@@ -2270,8 +2270,6 @@ void
 _gst_mark_processor_registers (void)
 {
   mark_semaphore_oops ();
-
-  /* Get everything into the main OOP table first.  */
   if (_gst_this_context_oop)
     MAYBE_MARK_OOP (_gst_this_context_oop);
 

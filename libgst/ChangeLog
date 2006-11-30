@@ -1,3 +1,9 @@
+2006-11-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp.c: Remove misleading comment.
+	* libgst/xlat.c: Export SP in gen_dirty_block around the function call,
+	as it may cause a GC. 
+
 2006-11-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Use _p variants appropriately.

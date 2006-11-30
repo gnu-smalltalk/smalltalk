@@ -1168,6 +1168,13 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
   }									\
 } while(0)
 
+/* Remember that the stack top is cached in V0, and import V2 (the
+ * stack pointer) from the sp variable.  */
+#define KEEP_V0_IMPORT_SP do {						\
+  jit_ldi_p(JIT_V2, &sp);						\
+  sp_delta = 0;								\
+} while(0)
+
 /* Remember that the stack top is *not* cached in V0, and import V2 (the
  * stack pointer) from the sp variable.  */
 #define IMPORT_SP do {							\
@@ -1875,14 +1882,14 @@ gen_dirty_block (code_tree *tree)
 {
   GET_UNARY_ARG;
 
+  KEEP_V0_EXPORT_SP;
   jit_prepare (1);
   jit_pusharg_p (JIT_V0);
   jit_finish (_gst_make_block_closure);
   jit_retval (JIT_V0);
 
-  rec_var_cached = false;
-  stack_cached = -1;
-  self_cached = false;
+  KEEP_V0_IMPORT_SP;
+  CACHE_NOTHING;
 }
 
 #if 0
