@@ -210,7 +210,7 @@ dnl ------------------------- OTHER LIBRARIES -------------------
 
 AM_LANGINFO_CODESET
 AM_ICONV
-AC_CHECK_LIB(ncurses, initscr)
+GST_HAVE_LIB(ncurses, initscr)
 GST_HAVE_GMP
 GST_HAVE_TCLTK
 GST_HAVE_READLINE
