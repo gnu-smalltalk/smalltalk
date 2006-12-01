@@ -1,3 +1,7 @@
+2006-12-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/re.c: Remove ISO C99-ism.
+
 2006-11-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Remove misleading comment.

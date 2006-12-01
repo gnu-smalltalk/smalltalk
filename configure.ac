@@ -92,6 +92,19 @@ dnl ------------------------------ C COMPILER / OS ------------
 AC_SYS_LARGEFILE
 AC_C_INLINE
 AC_C_RESTRICT
+
+dnl Test for broken solaris include file.  Should be moved to gnulib maybe?
+AC_MSG_CHECKING([for broken sys/avl.h])
+AC_PREPROC_IFELSE([#include <sys/avl.h>
+  #ifndef _AVL_H
+  would be useless anyway :-(
+  #endif], [
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(_AVL_H, 1,
+    [Define to 1 if, like Solaris, your system has a sys/avl.h header that
+pollutes the name space.])], [
+  AC_MSG_RESULT(no)])
+
 GST_C_HIDDEN_VISIBILITY
 GST_C_WARN_LONG_DOUBLE
 GST_C_GOTO_VOID_P
@@ -191,7 +204,7 @@ AC_CHECK_LIB(m, atan)
 GST_REPLACE_POLL
 AC_REPLACE_FUNCS(putenv strdup strerror strsignal mkstemp getpagesize \
 	getdtablesize strstr ftruncate floorl ceill sqrtl frexpl ldexpl asinl \
-	acosl atanl logl expl tanl sinl cosl)
+	acosl atanl logl expl tanl sinl cosl strsep strpbrk)
 AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname sbrk usleep lstat \
 	grantpt popen getrusage gettimeofday getcwd fork strchr	\
 	sigsetmask alarm select mprotect madvise nl_langinfo waitpid \

@@ -300,8 +300,9 @@ make_re_results (OOP srcOOP, struct pre_registers *regs)
 	intervalOOP = _gst_nil_oop;
       else
 	{
+          gst_interval interval;
 	  intervalOOP = _gst_object_alloc (_gst_interval_class, 0);
-          gst_interval interval = (gst_interval) OOP_TO_OBJ (intervalOOP);
+          interval = (gst_interval) OOP_TO_OBJ (intervalOOP);
           interval->fromOOP = FROM_INT (regs->beg[i] + 1);
           interval->toOOP = FROM_INT (regs->end[i]);
           interval->stepOOP = FROM_INT (1);
