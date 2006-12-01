@@ -560,7 +560,7 @@ rewriteAsAsyncCCall: func args: argsArray
 
     "descr asyncCall. ^self"
     literals := { descr. #asyncCall }.
-    bytecodes := #[ 136 1 64 1 67 0 ].
+    bytecodes := #[ 136 1 66 1 67 0 ].
 
     newMethod := CompiledMethod
 	literals: literals

@@ -78,6 +78,16 @@ CP value: CA.
 (CPtrCType elementType: #int) new value!
 
 
+!SmallInteger methodsFor: 'C call-outs'!
+
+testAsync
+    "Asynchronous vs. synchronous actually matters only when the function
+     calls back to Smalltalk.  But otherwise, we have no coverage of how
+     the asyncCCall pragma is compiled."
+    <asyncCCall: 'marli' args: #(#self)>! !
+
+3 testAsync!
+
 !Object methodsFor: 'C call-outs'!
 
 testCallin
