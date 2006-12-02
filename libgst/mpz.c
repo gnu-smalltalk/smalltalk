@@ -673,7 +673,7 @@ mp_limb_t
 _gst_mpz_fdiv_qr_si (gst_mpz *quot,
 		     const gst_mpz *dividend, intptr_t divisor)
 {
-  int rem = _gst_mpz_tdiv_qr_si (quot, dividend, divisor);
+  mp_limb_t rem = _gst_mpz_tdiv_qr_si (quot, dividend, divisor);
 
   /* When the dividend and the divisor has same sign, or if the
      division is exact, this function gives same result as

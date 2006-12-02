@@ -1,3 +1,7 @@
+2006-12-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/mpz.c: Make 64-bit clean.
+
 2006-12-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/re.c: Remove ISO C99-ism.
