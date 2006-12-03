@@ -400,14 +400,14 @@ truncateTo: aNumber
 rounded
     "Returns the integer nearest the receiver"
     ^self negative
-	ifTrue: [ (self - 0.5) ceiling ]
-	ifFalse: [ (self + 0.5) floor ]
+	ifTrue: [ (self - (self unity / 2)) ceiling ]
+	ifFalse: [ (self + (self unity / 2)) floor ]
 !
 
 roundTo: aNumber
     "Answer the receiver, truncated to the nearest multiple
      of aNumber"
-    ^(self + (aNumber / 2) / aNumber) integerPart * aNumber
+    ^(self / aNumber) rounded * aNumber
 ! !
 
 
