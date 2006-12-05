@@ -1,3 +1,11 @@
+2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 2.3 released.
+
+2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Reject character literals above 128.
+
 2006-12-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/mpz.c: Make 64-bit clean.

@@ -14,11 +14,6 @@ function call interface (C call-outs).
 o   C call-outs returning #void now return self rather than nil.
     Performance of code heavily using C call-outs has improved.
 
-o   Due to incompatibilities between various OSes, you are advised to test
-    end-of-stream conditions *before* rather than after reading a character
-    from stdin.  In 2.2, either way would work, but serious bugs were
-    found on Mac OS X unless stdin was redirected from a file.
-
 o   FileStreams can now use pwrite for more efficient operation on files
     opened for read/write, and will do many less gratuitous lseek
     operations.  pread will also be used by FileStream>>#copyFrom:to:.
@@ -47,6 +42,10 @@ o   Introduced two more class shapes, #character and #utf32, that can be used
 
 o   More reliable detection of at-end-of-file condition for pipes, TTYs,
     and so on (especially on Mac OS X), and of sockets closed by the peer.
+    Due to incompatibilities between various OSes, you are advised to test
+    end-of-stream conditions *before* rather than after reading a character
+    from stdin.  In 2.2, either way would work, but serious bugs were
+    found on Mac OS X unless stdin was redirected from a file.
 
 o   Moved gdk_draw_ functions to GdkDrawable.
 
@@ -79,8 +78,8 @@ o   The backtraces now omit again the internal methods in the exception
 
 o   The class above which super-send bytecodes start searching is now embedded
     in the bytecode stream.  This provides the infrastructure to implement
-    'here' in Smalltalk/X (not implemented) or 'self.Foo b' to execute
-    the Foo>>#b method (also not implemented).
+    'here' as in Smalltalk/X or 'self.Foo b' to execute the Foo>>#b method
+    (these possible extensions have not been implemented).
 
 o   The header files compile cleanly with a C++ compiler.  For the occasion,
     the preferred name of the old `mst_Object' has changed to `gst_object'.
@@ -100,13 +99,17 @@ o   Characters above 127 are no longer used to represent extended ASCII
     *cannot* be shown on a stream with #nextPut: (use #display: instead)
     nor compared with #== (use #= instead).
 
-    Character constants like $+ or $A are guaranteed to create normal
-    "Character" objects, for which you can safely use #nextPut:.
+    Character literals like $+ or $A are guaranteed to create normal
+    "Character" objects, for which you can safely use #nextPut:.  Right
+    now, these are valid only for characters between 0 and 127.  To create
+    Character literals for unicode characters, use the new syntax to
+    express characters using their Unicode code point.  This may be
+    extended in the future to support Unicode character literals.
 
-    There is no way to represent extended ASCII characters: with the Iconv
-    and I18N modules, you can use something like
+    A ``safe'' way to obtain the character whose encoding is between
+    128 and 255 is this (which requires the Iconv module to be loaded):
     
-        (String with: (Character value: 128)) asUnicodeString first
+        ##('<your character>' asUnicodeString first)
 
     (This snippet has no shortcut by design because, in general, converting
     a Character to a UnicodeCharacter is not a well-defined operation).
@@ -116,14 +119,14 @@ o   New UnicodeCharacter and UnicodeString classes.  These new classes
     manual for more information.
 
 o   New syntax $<13> to express characters using their Unicode code point.
-    Note that this syntax will create instances of the new UnicodeCharacter
+    As anticipated, this syntax will create instances of the new UnicodeCharacter
     class when the number is > 127.
 
 o   Part of the I18N module was separated into the Iconv module, which
     provides support for printing Unicode characters and strings correctly.
 
 
-Goodies:
+Other goodies:
 
 o   NCurses bindings, contributed by Brad Watson.
 

@@ -432,6 +432,12 @@ char_literal (int c,
     }
   else
     {
+      if (ic > 127)
+        {
+          _gst_errorf
+	    ("Invalid character literal, only character codes from 0 to 127 are valid");
+          _gst_had_error = true;
+        }
       lvalp->ival = ic;
       return (CHAR_LITERAL);
     }
