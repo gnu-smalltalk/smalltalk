@@ -172,7 +172,7 @@ dist-hook: gst-package
 # Build an image after installing the data; install-data runs after
 # install-exec, so the gst executable is already in bindir.
 install-data-hook: gst-package
-	rm -f $(pkgdatadir)/packages.xml
+	rm -f $(DESTDIR)$(pkgdatadir)/packages.xml
 	./gst-package --srcdir="$(srcdir)" --no-load --destdir="$(DESTDIR)" packages.xml
 	srcdir=`cd $(srcdir) && pwd`; \
 	cd $(DESTDIR)$(pkgdatadir); \

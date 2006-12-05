@@ -394,7 +394,7 @@ truncated
 truncateTo: aNumber
     "Answer the receiver, truncated towards zero to a multiple
      of aNumber"
-    ^(self / aNumber) integerPart * aNumber
+    ^(self coerce: (self quo: aNumber)) * aNumber
 !
 
 rounded
@@ -407,7 +407,7 @@ rounded
 roundTo: aNumber
     "Answer the receiver, truncated to the nearest multiple
      of aNumber"
-    ^(self / aNumber) rounded * aNumber
+    ^(self coerce: (self / aNumber) rounded) * aNumber
 ! !
 
 
