@@ -1,3 +1,7 @@
+2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Number.st: Fix coercion in previous checkin.
+
 2006-12-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Number.st: Don't use Floats in #rounded and use

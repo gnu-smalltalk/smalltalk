@@ -1,3 +1,12 @@
+2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+        * compiler/STCompiler.st: Pass current environment in evaluate:parser:,
+        add #compile:asMethodOf:classified:parser:environment: and don't inline
+        its functionality elsewhere.
+        * compiler/STParser.st: Parse leading _ as assignment.
+        * compiler/StartCompiler.st: Pass current environment when compiling
+        doits.
+
 2006-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/STCompiler.st: Rethink previous change.

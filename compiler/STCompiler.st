@@ -115,9 +115,9 @@ evaluate: aSequenceNode parser: aParser
 	source: nil;
 	yourself.
 
-    cm := self new
-	class: UndefinedObject parser: aParser;
-	visitNode: methodNode.
+    cm := self
+	compile: methodNode asMethodOf: UndefinedObject classified: nil
+	parser: aParser environment: Namespace current.
 
     ^nil perform: cm
 ! !
@@ -125,27 +125,34 @@ evaluate: aSequenceNode parser: aParser
 !STCompiler class methodsFor: 'compilation'!
 
 compile: methodNode for: aBehavior classified: aString parser: aParser
-    | cm |
-    cm := self new
-	class: aBehavior parser: aParser;
-	visitNode: methodNode.
-
-    cm methodCategory: aString.
-
     ^aBehavior
 	addSelector: methodNode selector
-	withMethod: cm
+	withMethod: (self
+			compile: methodNode
+			asMethodOf: aBehavior
+			classified: aString
+			parser: aParser)
 !
 
 compile: methodNode asMethodOf: aBehavior classified: aString parser: aParser
-    | cm |
-    cm := self new
-	class: aBehavior parser: aParser;
-	visitNode: methodNode.
+    ^self
+	compile: methodNode
+	asMethodOf: aBehavior
+	classified: aString
+	parser: aParser
+	environment: nil!
 
-    cm methodCategory: aString.
+compile: methodNode asMethodOf: aBehavior classified: aString parser: aParser
+    environment: aNamespace
 
-    ^cm
+    | compiler |
+    compiler := self new.
+    compiler class: aBehavior parser: aParser.
+    aNamespace isNil ifFalse: [ compiler addPool: aNamespace ].
+
+    ^(compiler visitNode: methodNode)
+	methodCategory: aString;
+	yourself
 ! !
 
 !STCompiler methodsFor: 'private'!
@@ -166,6 +173,10 @@ class: aBehavior parser: aParser
 
 addLiteral: literal
     ^symTable addLiteral: literal
+!
+
+addPool: aNamespace
+    ^symTable addPool: aNamespace
 !
 
 bytecodesFor: aBlockNode
@@ -708,7 +719,7 @@ compileSendToSuper: aNode
     aNode arguments do: [ :each | each acceptVisitor: self ].
     self pushLiteral: destClass superclass.
     VMSpecialSelectors at: aNode selector ifPresent: [ :idx |
-	self compileByte: SendSuperImmediate arg: idx.
+	self compileByte: SendImmediateSuper arg: idx.
 	^aNode
     ].
 

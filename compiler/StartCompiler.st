@@ -116,7 +116,8 @@ evaluate: node
 	compile: node
 	asMethodOf: evalFor class
 	classified: nil
-	parser: self.
+	parser: self
+	environment: Namespace current.
 
     [ lastResult := evalFor perform: method ] valueWithUnwind.
     ^curClass notNil

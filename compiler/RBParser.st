@@ -937,6 +937,7 @@ scanByteArray
 
 scanIdentifierOrKeyword
     | tokenType token |
+    currentCharacter == $_ ifTrue: [ ^self scanAssignment ].
     self scanName.
     token := self scanNamespaceName.
 
@@ -1102,14 +1103,16 @@ scanQualifier
 	start: tokenStart
 	stop: self previousStepPosition!
 
+scanAssignment
+    self step.
+    ^RBAssignmentToken start: tokenStart!
+
 scanSpecialCharacter
     | character |
     currentCharacter == $: ifTrue: 
 	    [self step.
 	    ^currentCharacter == $=
-		ifTrue: 
-		    [self step.
-		    RBAssignmentToken start: tokenStart]
+		ifTrue: [self scanAssignment]
 		ifFalse: [RBSpecialCharacterToken value: $: start: tokenStart]].
     character := currentCharacter.
     self step.
