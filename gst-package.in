@@ -38,6 +38,34 @@
 : ${datarootdir:=@datarootdir@}
 : ${AWK:=gawk}
 : ${GST_LOAD:=${exec_prefix}/bin/gst-load}
+: ${INSTALL=@INSTALL@}
+
+case "$INSTALL" in
+  */install-sh | *"/install-sh -c" | \
+  */install.sh | *"/install.sh -c" | \
+  install-sh | "install-sh -c" | \
+  install.sh | "install.sh -c")
+    display_install=install
+    INSTALL=func_install
+    ;;
+  *)
+    display_install="$INSTALL"
+    ;;
+esac
+
+# Simplistic replacement for the install package, used when
+# configure chose the install-sh script
+func_install ()
+{
+  while [ $# -gt 4 ]; do
+    shift
+  done
+  set -e
+  rm -f "$4"
+  cp "$3" "$4"
+  chmod $2 "$4"
+  set +e
+}
 
 IMAGE_PATH=${SMALLTALK_IMAGE:-@datadir@/@PACKAGE@}
 (cd $IMAGE_PATH 2> /dev/null && IMAGE_PATH=`pwd`)
@@ -295,11 +323,11 @@ if $install; then
 	}
 
         if test -x "$file"; then
-	  echo "@INSTALL@ -m 755 $file $dest"
-          $dry_run || (rm -f "$dest" && cp "$file" "$dest" && chmod 755 "$dest")
+	  echo "$display_install -m 755 $file $dest"
+          $dry_run || $INSTALL -m 755 "$file" "$dest"
 	else
-	  echo "@INSTALL@ -m 644 $file $dest"
-          $dry_run || (rm -f "$dest" && cp "$file" "$dest" && chmod 644 "$dest")
+	  echo "$display_install -m 644 $file $dest"
+          $dry_run || $INSTALL -m 644 "$file" "$dest"
 	fi
       done
     fi
