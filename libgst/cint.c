@@ -686,7 +686,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   for (si = i = 0; i < fixedArgs; i++)
     {
       cType = TO_INT (desc->argTypes[i]);
-      if (cType >= CDATA_SELF)
+      if (cType == CDATA_SELF || cType == CDATA_SELF_OOP)
 	push_smalltalk_obj (receiver,
 			    cType == CDATA_SELF ? CDATA_UNKNOWN : CDATA_OOP);
       else if (cType != CDATA_VOID)
