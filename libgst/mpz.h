@@ -119,6 +119,10 @@ void _gst_mpz_mul_2exp (gst_mpz *, const gst_mpz *, unsigned)
 void _gst_mpz_div_2exp (gst_mpz *, const gst_mpz *, unsigned) 
   ATTRIBUTE_HIDDEN;
 
+/* Divide with no remainder.  */
+void _gst_mpz_divexact (gst_mpz *, const gst_mpz *, const gst_mpz *) 
+  ATTRIBUTE_HIDDEN;
+
 /* Allocate space for an integer if necessary, and assign an integer
    from another one.  */
 void _gst_mpz_set (gst_mpz *, const gst_mpz *) 

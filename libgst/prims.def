@@ -825,6 +825,53 @@ primitive VMpr_LargeInteger_modulo [uses_gmp]
 }
 
 
+primitive VMpr_LargeInteger_divExact [uses_gmp]
+{
+#ifdef HAVE_GMP
+  gst_mpz a = { 0, 0, NULL };
+  gst_mpz b = { 0, 0, NULL };
+  gst_mpz q = { 0, 0, NULL };
+  OOP oop1, oop2, oop3;
+
+  _gst_primitives_executed++;
+  oop2 = POP_OOP ();
+  oop1 = POP_OOP ();
+  if COMMON (IS_INT (oop1)
+      || SUPERCLASS (OOP_CLASS (oop1)) == _gst_large_integer_class
+      || OOP_CLASS (oop1) == _gst_large_zero_integer_class)
+    _gst_mpz_from_oop (&a, oop1);
+  else
+    {
+      UNPOP (2);
+      PRIM_FAILED;
+    }
+
+  if COMMON (IS_INT (oop2) && oop2 != FROM_INT (0))
+    _gst_mpz_tdiv_qr_si (&q, &a, TO_INT(oop2));
+  else if (IS_OOP (oop2)
+	   && SUPERCLASS (OOP_CLASS (oop2)) == _gst_large_integer_class)
+    {
+      _gst_mpz_from_oop (&b, oop2);
+      _gst_mpz_divexact (&q, &a, &b);
+      _gst_mpz_clear (&b);
+    }
+  else
+    {
+      _gst_mpz_clear (&a);
+      UNPOP (2);
+      PRIM_FAILED;
+    }
+
+  oop3 = _gst_oop_from_mpz (&q);
+  _gst_mpz_clear (&a);
+  _gst_mpz_clear (&q);
+  PUSH_OOP (oop3);
+  PRIM_SUCCEEDED;
+#else
+  PRIM_FAILED;
+#endif
+}
+
 primitive VMpr_LargeInteger_quo [uses_gmp]
 {
 #ifdef HAVE_GMP

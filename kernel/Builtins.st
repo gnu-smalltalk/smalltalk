@@ -136,6 +136,15 @@
     ^self retry: #// coercing: arg
 !
 
+divExact: arg
+    "Dividing receiver by arg assuming that the remainder is zero, and answer
+     the result"
+    "Use quo:, no speed to gain fom SmallIntegers."
+    <primitive: VMpr_SmallInteger_quo>
+    arg = 0 ifTrue: [ ^self zeroDivide ].
+    ^self retry: #divExact: coercing: arg
+!
+
 quo: arg
     "Dividing receiver by arg (with truncation towards zero) and answer
      the result"

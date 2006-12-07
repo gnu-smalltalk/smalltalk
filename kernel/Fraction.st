@@ -99,8 +99,8 @@ numerator
 	gcd := (numerator gcd: aNumber denominator) * 
 	       (denominator gcd: aNumber numerator).
 
-	num := num quo: gcd.
-	den := den quo: gcd
+	num := num divExact: gcd.
+	den := den divExact: gcd
     ].
 
     den = 1 ifTrue: [ ^num ].
@@ -120,15 +120,14 @@ numerator
 		       (aNumber numerator * denominator) 
 	    denominator: denominator * aNumber denominator ].
 
-    num := (numerator * (aNumber denominator quo: gcd)) +
-	   (aNumber numerator * (denominator quo: gcd)).
-    den := denominator * aNumber denominator quo: gcd.
+    num := (numerator * (aNumber denominator divExact: gcd)) +
+	   (aNumber numerator * (denominator divExact: gcd)).
+    den := denominator * aNumber denominator divExact: gcd.
 
     "Compute a GCD on smaller operands"
-    gcd := gcd gcd: num.
-
-    num := num quo: gcd.
-    den := den quo: gcd.
+    gcd := num gcd: den.
+    num := num divExact: gcd.
+    den := den divExact: gcd.
     den = 1 ifTrue: [ ^num ].
     ^Fraction numerator: num denominator: den
 !
@@ -147,15 +146,14 @@ numerator
 		       (aNumber numerator * denominator) 
 	    denominator: denominator * aNumber denominator ].
 
-    num := (numerator * (aNumber denominator quo: gcd)) -
-	   (aNumber numerator * (denominator quo: gcd)).
-    den := denominator * aNumber denominator quo: gcd.
+    num := (numerator * (aNumber denominator divExact: gcd)) -
+	   (aNumber numerator * (denominator divExact: gcd)).
+    den := denominator * aNumber denominator divExact: gcd.
 
     "Compute a GCD on smaller operands"
-    gcd := gcd gcd: num.
-
-    num := num quo: gcd.
-    den := den quo: gcd.
+    gcd := num gcd: den.
+    num := num divExact: gcd.
+    den := den divExact: gcd.
     den = 1 ifTrue: [ ^num ].
     ^Fraction numerator: num denominator: den
 !
@@ -172,8 +170,8 @@ numerator
     gcd := (numerator gcd: aNumber numerator) * 
 	(denominator gcd: aNumber denominator).
 
-    num := num quo: gcd.
-    den := den quo: gcd.
+    num := num divExact: gcd.
+    den := den divExact: gcd.
     den = 1 ifTrue: [ ^num ].
     ^Fraction numerator: num denominator: den
 !
@@ -425,9 +423,9 @@ reduce
 
     gcd := numerator gcd: denominator.
     gcd = 1 ifTrue: [^self].
-    denominator = gcd ifTrue: [^numerator quo: gcd].
-    numerator := numerator quo: gcd.
-    denominator := denominator quo: gcd.
+    denominator = gcd ifTrue: [^numerator divExact: gcd].
+    numerator := numerator divExact: gcd.
+    denominator := denominator divExact: gcd.
     ^self
 !
 

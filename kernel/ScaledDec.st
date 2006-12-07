@@ -112,7 +112,9 @@ asFraction
     denom := 10 raisedToInteger: scale.
     num := fraction numerator * denom quo: fraction denominator.
     gcd := num gcd: denom.
-    ^Fraction numerator: num / gcd denominator: denom / gcd!
+    ^Fraction
+	numerator: (num divExact: gcd)
+	denominator: (denom divExact: gcd)!
 
 coerce: aNumber
     "Answer aNumber, converted to a ScaledDecimal with the same scale

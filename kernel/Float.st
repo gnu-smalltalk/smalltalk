@@ -245,13 +245,13 @@ asFraction
 	    ((self coerce: n0) / (self coerce: d0) - abs) abs < eps ]
     ]   whileFalse.
 
-    self abs < 1
+    self exponent < 0
 	ifTrue: [ d0 := d0 * (2 raisedToInteger: self exponent negated) ]
 	ifFalse: [ n0 := n0 * (2 raisedToInteger: self exponent) ].
 
     gcd := n0 gcd: d0.
-    n0 := n0 quo: gcd.
-    d0 := d0 quo: gcd.
+    n0 := n0 divExact: gcd.
+    d0 := d0 divExact: gcd.
 
     ^Fraction
 	numerator: (self < 0 ifTrue: [ n0 negated ] ifFalse: [ n0 ])
@@ -404,8 +404,8 @@ printOn: aStream special: whatToPrintArray
             exponential ifTrue: [ num := num * (10 raisedTo: -1 - exponent) ].
 
 	    gcd := num gcd: den.
-	    num := num // gcd.
-	    den := den // gcd ].
+	    num := num divExact: gcd.
+	    den := den divExact: gcd ].
 
     "To round correctly, make sure den is even."
     (den bitAnd: 1) = 1 ifTrue: [ num := num * 2. den := den * 2 ].

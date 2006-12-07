@@ -191,8 +191,8 @@ binomial: anInteger
 		    "We're finishing, empty the stack and then simplify the
 		     remaining common factors."
 		    gcd := stepNum gcd: stepDen.
-		    stepNum := stepNum // gcd.
-		    stepDen := stepDen // gcd.
+		    stepNum := stepNum divExact: gcd.
+		    stepDen := stepDen divExact: gcd.
 
 		    num size timesRepeat: [
 			stepNum := stepNum * num removeLast.
@@ -204,8 +204,8 @@ binomial: anInteger
 		n := n - 1. k := k - 1 ].
 
 	    (gcd := stepNum gcd: stepDen) > 1 and: [
-	        stepNum := stepNum // gcd.
-		stepDen := stepDen // gcd.
+	        stepNum := stepNum divExact: gcd.
+		stepDen := stepDen divExact: gcd.
  	    
 		"The numerators and denominators have been simplified, try
 	         to add some more factors."
@@ -232,8 +232,9 @@ binomial: anInteger
             stepDen := stepDen * den removeLast.
             mask := mask bitShift: -1.
         ].
-        num addLast: stepNum.
-        den addLast: stepDen.
+	gcd := stepNum gcd: stepDen.
+        num addLast: (stepNum divExact: gcd).
+        den addLast: (stepDen divExact: gcd).
         step := step + 1.
     ] repeat
 !
@@ -378,7 +379,7 @@ gcd: anInteger
 
 lcm: anInteger
     "Return the least common multiple between the receiver and anInteger"
-    ^((self // (self gcd: anInteger)) * anInteger) abs
+    ^((self divExact: (self gcd: anInteger)) * anInteger) abs
 !
 
 even

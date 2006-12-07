@@ -359,12 +359,14 @@ resultFrom: byteArray
 	[ ^self retryDivisionCoercing: aNumber ].
 
     gcd := self gcd: aNumber.
-    gcd = self ifTrue: [ ^Fraction numerator: 1 denominator: (aNumber quo: self) ].
-    gcd = aNumber ifTrue: [ ^self quo: aNumber ].
+    gcd = self ifTrue: [
+	^Fraction numerator: 1 denominator: (aNumber divExact: gcd) ].
+    gcd = aNumber ifTrue: [
+	^self divExact: gcd ].
     
     ^Fraction
-	numerator: (self quo: gcd)
-	denominator: (aNumber quo: gcd)
+	numerator: (self divExact: gcd)
+	denominator: (aNumber divExact: gcd)
 !
 
 // aNumber
@@ -408,6 +410,27 @@ quo: aNumber
     self sign = 0 ifTrue: [ ^self ].
     aNumber generality = self generality ifFalse:
 	[ ^self retry: #quo: coercing: aNumber ].
+
+    result := self abs
+	divide: aNumber abs
+	using: [ :quo :rem :remNotZero | self species resultFrom: quo ].
+
+    ^self sign = aNumber sign
+	ifTrue: [ result ]
+	ifFalse: [ result negated ]
+!
+
+divExact: aNumber
+    "Dividing receiver by arg assuming that the remainder is zero, and answer
+     the result"
+    | result |
+    <primitive: VMpr_LargeInteger_divExact>
+
+    "Same as quo:, not worthwhile to implement it in Smalltalk."
+    aNumber sign = 0 ifTrue: [ ^self zeroDivide ].
+    self sign = 0 ifTrue: [ ^self ].
+    aNumber generality = self generality ifFalse:
+	[ ^self retry: #divExact: coercing: aNumber ].
 
     result := self abs
 	divide: aNumber abs
