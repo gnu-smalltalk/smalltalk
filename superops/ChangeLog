@@ -1,3 +1,7 @@
+2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 2.3 released.
+
 2003-09-13  Paolo Bonzini <bonzini@gnu.org>
 
 	* observer-list.cc: new file

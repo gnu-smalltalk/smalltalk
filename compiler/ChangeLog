@@ -1,5 +1,9 @@
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	*** Version 2.3 released.
+
+2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
+
         * compiler/STCompiler.st: Pass current environment in evaluate:parser:,
         add #compile:asMethodOf:classified:parser:environment: and don't inline
         its functionality elsewhere.

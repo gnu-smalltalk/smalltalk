@@ -127,6 +127,10 @@
 
 	* examples/Prolog.st: Enjoy the wonders of polymorphism.
 
+2006-10-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/String.st: FIx storeOn:.
+
 2006-10-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CharArray.st: Make #numberOfCharacters notYetImplemented

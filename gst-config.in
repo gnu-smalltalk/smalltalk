@@ -69,7 +69,7 @@ while test $# -gt 0; do
 done
 
 : ${pkglibdir:="@libdir@/@PACKAGE@"}
-gst_libs="${pkglibdir} @LIBS@"
+gst_libs="-L${pkglibdir} @LIBS@"
 
 if test "$echo_prefix" = "yes"; then
 	echo $prefix
