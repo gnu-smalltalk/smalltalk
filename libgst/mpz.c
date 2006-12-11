@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1991, 2002 Free Software Foundation, Inc.
+ * Copyright 1991, 2002, 2006 Free Software Foundation, Inc.
  *
  * This file is derived from an absurdly old version of the GNU MP Library.
  *
@@ -130,47 +130,6 @@ gst_mpz_sub_ui (gst_mpz *dif, const gst_mpz *min, mp_limb_t sub)
   dif->size = difsize;
 }
 
-#define COUNT_LEADING_ZEROS(count, x) \
-  do {									\
-    mp_limb_t __xr = (x);						\
-    unsigned int __a;							\
-									\
-    if (SIZEOF_MP_LIMB_T <= 32)						\
-      {									\
-	__a = __xr < (1<<16)						\
-	  ? (__xr < (1<<8) ? 0 : 8)					\
-	  : (__xr < (1<<24) ?  16 : 24);				\
-      }									\
-    else								\
-      {									\
-	for (__a = SIZEOF_MP_LIMB_T - 8; __a > 0; __a -= 8)		\
-	  if (((__xr >> __a) & 0xff) != 0)				\
-	    break;							\
-      }									\
-									\
-    (count) = 8*SIZEOF_MP_LIMB_T - (clz_tab[__xr >> __a] + __a);	\
-  } while (0)
-
-#define COUNT_TRAILING_ZEROS(count, x) \
-  do {									\
-    mp_limb_t __ctz_x = (x);						\
-    unsigned int __ctz_c;						\
-    COUNT_LEADING_ZEROS (__ctz_c, __ctz_x & -__ctz_x);			\
-    (count) = 8 * SIZEOF_MP_LIMB_T - 1 - __ctz_c;			\
-  } while (0)
-
-static const unsigned char clz_tab[] =
-{
-  0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
-  6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-  7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-  8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
-  8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
-  8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
-  8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
-};
-
 void
 _gst_mpz_clear (gst_mpz *m)
 {
@@ -264,9 +223,6 @@ _gst_mpz_cmp (const gst_mpz *u, const gst_mpz *v)
   mp_size_t usize = u->size;
   mp_size_t vsize = v->size;
   mp_size_t size;
-  mp_size_t i;
-  mp_limb_t a, b;
-  mp_srcptr up, vp;
 
   if (usize != vsize)
     return usize - vsize;
@@ -275,28 +231,10 @@ _gst_mpz_cmp (const gst_mpz *u, const gst_mpz *v)
     return 0;
 
   size = ABS (usize);
-
-  up = u->d;
-  vp = v->d;
-
-  i = size - 1;
-  do
-    {
-      a = up[i];
-      b = vp[i];
-      i--;
-      if (i < 0)
-	break;
-    }
-  while (a == b);
-
-  if (a == b)
-    return 0;
-
-  if ((a < b) == (usize < 0))
-    return 1;
+  if (usize < 0)
+    return mpn_cmp (v->d, u->d, size);
   else
-    return -1;
+    return mpn_cmp (u->d, v->d, size);
 }
 
 void
@@ -497,10 +435,21 @@ _gst_mpz_tdiv_qr_si (gst_mpz *quot, const gst_mpz *num, intptr_t den)
   rem = mpn_divrem_1 (qp, 0L, np, nsize, ABS(den));
 
   nsize -=  qp[nsize - 1] == 0;
-
   quot->size = sign_quotient >= 0 ? nsize : -nsize;
   alloca (0);
   return sign_remainder >= 0 ? rem : -rem;
+}
+
+static inline void
+gst_mpz_copy_abs (gst_mpz *d, const gst_mpz *s)
+{
+  d->size = ABS (s->size);
+  if (d != s)
+    {
+      if (d->alloc < d->size)
+	gst_mpz_realloc (d, d->size);
+      MPN_COPY (d->d, s->d, d->size);
+    }
 }
 
 void
@@ -515,27 +464,17 @@ _gst_mpz_gcd (gst_mpz *g, const gst_mpz *u, const gst_mpz *v)
   mp_size_t vsize = ABS (v->size);
   mp_size_t gsize;
 
-  /* GCD(0, V) == V.  */
-  if (usize == 0)
+  /* GCD(0, V) == GCD (U, 1) == V.  */
+  if (usize == 0 || (vsize == 1 && vp[0] == 1))
     {
-      g->size = vsize;
-      if (g == v)
-	return;
-      if (g->alloc < vsize)
-	gst_mpz_realloc (g, vsize);
-      MPN_COPY (g->d, vp, vsize);
+      gst_mpz_copy_abs (g, v);
       return;
     }
 
-  /* GCD(U, 0) == U.  */
-  if (vsize == 0)
+  /* GCD(U, 0) == GCD (1, V) == U.  */
+  if (vsize == 0 || (usize == 1 && up[0] == 1))
     {
-      g->size = usize;
-      if (g == u)
-	return;
-      if (g->alloc < usize)
-	gst_mpz_realloc (g, usize);
-      MPN_COPY (g->d, up, usize);
+      gst_mpz_copy_abs (g, u);
       return;
     }
 
@@ -556,11 +495,13 @@ _gst_mpz_gcd (gst_mpz *g, const gst_mpz *u, const gst_mpz *v)
     }
 
   /*  Eliminate low zero bits from U and V and move to temporary storage.  */
-  while (*up == 0)
-    up++;
-  u_zero_limbs = up - u->d;
+  u_zero_bits = mpn_scan1 (up, 0);
+  u_zero_limbs = u_zero_bits / BITS_PER_MP_LIMB;
+  u_zero_bits &= BITS_PER_MP_LIMB - 1;
+  up += u_zero_limbs;
   usize -= u_zero_limbs;
-  COUNT_TRAILING_ZEROS (u_zero_bits, *up);
+
+  /* Operands could be destroyed for big-endian case, but let's be tidy.  */
   tp = up;
   up = (mp_ptr) alloca (usize * SIZEOF_MP_LIMB_T);
   if (u_zero_bits != 0)
@@ -571,11 +512,13 @@ _gst_mpz_gcd (gst_mpz *g, const gst_mpz *u, const gst_mpz *v)
   else
     MPN_COPY (up, tp, usize);
 
-  while (*vp == 0)
-    vp++;
-  v_zero_limbs = vp - v->d;
+  v_zero_bits = mpn_scan1 (vp, 0);
+  v_zero_limbs = v_zero_bits / BITS_PER_MP_LIMB;
+  v_zero_bits &= BITS_PER_MP_LIMB - 1;
+  vp += v_zero_limbs;
   vsize -= v_zero_limbs;
-  COUNT_TRAILING_ZEROS (v_zero_bits, *vp);
+
+  /* Operands could be destroyed for big-endian case, but let's be tidy.  */
   tp = vp;
   vp = (mp_ptr) alloca (vsize * SIZEOF_MP_LIMB_T);
   if (v_zero_bits != 0)
