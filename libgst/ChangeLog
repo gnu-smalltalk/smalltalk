@@ -1,3 +1,11 @@
+2006-12-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/oop.c: Proceed recursively if marking the ephemerons'
+	slots finds more ephemerons.  Add more debugging functions.
+	Rename GC_DEBUGGING and MMAN_DEBUGGING to GC_DEBUG_OUTPUT and
+	MMAN_DEBUG_OUTPUT.  Preprocessor symbol GC_DEBUGGING now enables
+	sanity checks.
+
 2006-12-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/mpz.c: Use more GMP functions, fixes segv on 64-bit hosts.

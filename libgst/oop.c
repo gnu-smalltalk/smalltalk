@@ -65,6 +65,9 @@
 /* The number of OOPs that are swept on each incremental GC step.  */
 #define INCREMENTAL_SWEEP_STEP	  100
 
+/* Define this flag to turn on debugging dumps for garbage collection */
+/* #define GC_DEBUG_OUTPUT */
+
 /* Define this flag to turn on debugging code for OOP table management */
 /* #define GC_DEBUGGING */
 
@@ -77,14 +80,18 @@
 /* #define NO_SIGSEGV_HANDLING */
 
 /* Define this flag to turn on debugging code for oldspace management */
-/* #define MMAN_DEBUGGING */
+/* #define MMAN_DEBUG_OUTPUT */
 
 #if !defined HAVE_SIGSEGV_RECOVERY || !(HAVE_SIGSEGV_RECOVERY-0)
 #define NO_SIGSEGV_HANDLING
 #endif
 
-#if defined(GC_DEBUGGING)
-#undef OPTIMIZE
+#if defined(GC_DEBUG_OUTPUT)
+#define GC_DEBUGGING
+#endif
+
+#if !defined(OPTIMIZE)
+#define GC_DEBUGGING
 #endif
 
 
@@ -541,6 +548,55 @@ _gst_dump_oop_table()
           _gst_display_oop_short (oop);
       }
 }
+
+void
+_gst_dump_owners (OOP oop)
+{
+  OOP oop2, lastOOP;
+
+  for (oop2 = _gst_mem.ot_base, lastOOP = &_gst_mem.ot[_gst_mem.ot_size];
+       oop2 < lastOOP; oop2++)
+    if UNCOMMON (IS_OOP_VALID (oop2) && is_owner(oop2, oop))
+      _gst_display_oop (oop2);
+}
+
+void
+_gst_check_oop_table ()
+{
+  OOP oop, lastOOP;
+
+  for (oop = _gst_mem.ot_base, lastOOP = &_gst_mem.ot[_gst_mem.ot_size];
+       oop < lastOOP; oop++)
+    {
+      gst_object object;
+      OOP *scanPtr;
+      int n;
+
+      if (!IS_OOP_VALID_GC (oop))
+	continue;
+
+      object = OOP_TO_OBJ (oop);
+      scanPtr = &object->objClass;
+      if (oop->flags & F_CONTEXT)
+        {
+          gst_method_context ctx;
+          intptr_t methodSP;
+          ctx = (gst_method_context) object;
+          methodSP = TO_INT (ctx->spOffset);
+          n = ctx->contextStack + methodSP + 1 - object->data;
+        }
+      else
+        n = NUM_OOPS (object) + 1;
+
+      while (n--)
+        {
+	  OOP pointedOOP = *scanPtr++;
+	  if (IS_OOP (pointedOOP)
+	      && (!IS_OOP_ADDR (pointedOOP) || !IS_OOP_VALID_GC (pointedOOP)))
+            abort ();
+	}
+    }
+}
 
 
 void
@@ -833,7 +889,7 @@ reset_survivor_space (surv_space *space)
 void
 oldspace_after_allocating (heap_data *h, heap_block *blk, size_t sz)
 {
-#ifdef MMAN_DEBUGGING
+#ifdef MMAN_DEBUG_OUTPUT
   printf ("Allocating oldspace page at %p (%d)\n", blk, sz);
 #endif
 
@@ -846,7 +902,7 @@ oldspace_before_freeing (heap_data *h, heap_block *blk, size_t sz)
 {
   grey_area_node *node, *last, **next;
 
-#ifdef MMAN_DEBUGGING
+#ifdef MMAN_DEBUG_OUTPUT
   printf ("Freeing oldspace page at %p (%d)\n", blk, sz);
 #endif
   
@@ -855,7 +911,7 @@ oldspace_before_freeing (heap_data *h, heap_block *blk, size_t sz)
     if (node->base >= (OOP *)blk
 	&& node->base + node->n <= (OOP *)( ((char *)blk) + sz))
       {
-#ifdef MMAN_DEBUGGING
+#ifdef MMAN_DEBUG_OUTPUT
 	printf ("  Remembered table entry removed %p..%p\n",
 		node->base, node->base+node->n);
 #endif
@@ -902,7 +958,7 @@ int oldspace_sigsegv_handler (void* fault_address, int serious)
   if (_gst_mem_protect (page, getpagesize(), PROT_READ | PROT_WRITE) == -1 &&
       (errno == ENOMEM || errno == EFAULT || errno == EACCES || errno == EINVAL))
     {
-#if defined (MMAN_DEBUGGING)
+#if defined (MMAN_DEBUG_OUTPUT)
       printf ("Plain old segmentation violation -- address = %p\n", page);
 #endif
       reentering = 0;
@@ -913,7 +969,7 @@ int oldspace_sigsegv_handler (void* fault_address, int serious)
   (void) *(volatile char *) fault_address;
   reentering = 0;
 
-#if defined (MMAN_DEBUGGING)
+#if defined (MMAN_DEBUG_OUTPUT)
   printf ("Unprotected %p (SIGSEGV at %p)\n", page, fault_address);
 #endif
 
@@ -1063,6 +1119,9 @@ _gst_global_gc (int next_allocation)
   _gst_mem.live_flags |= F_REACHABLE;
   check_weak_refs ();
   _gst_restore_object_pointers ();
+#if defined (GC_DEBUGGING)
+  _gst_check_oop_table ();
+#endif
   reset_incremental_gc (_gst_mem.ot);
 
   update_stats (&stats.timeOfLastGlobalGC,
@@ -1207,7 +1266,7 @@ _gst_finish_incremental_gc ()
 {
   OOP oop, firstOOP;
 
-#if defined (GC_DEBUGGING)
+#if defined (GC_DEBUG_OUTPUT)
   printf ("Completing sweep (%p...%p), validity flags %x\n", _gst_mem.last_swept_oop,
           _gst_mem.highest_swept_oop, _gst_mem.live_flags);
 #endif
@@ -1329,7 +1388,7 @@ reset_incremental_gc (OOP firstOOP)
     _gst_realloc_oop_table (_gst_mem.ot_size
       * (100 + _gst_mem.space_grow_rate) / 100);
 
-#if defined (GC_DEBUGGING)
+#if defined (GC_DEBUG_OUTPUT)
   printf ("Found unallocated at OOP %p, last allocated OOP %p\n"
           "Highest OOP swept top to bottom %p, lowest swept bottom to top %p\n",
 	  _gst_mem.first_allocated_oop, _gst_mem.last_allocated_oop,
@@ -1348,12 +1407,10 @@ _gst_sweep_oop (OOP oop)
 
 #ifdef ENABLE_JIT_TRANSLATION
   if (oop->flags & F_XLAT)
-    /* Unreachable, always free the native code.  Note
-       it is *not* optional to free the code in this case -- and
-       I'm not talking about memory leaks: a different
-       method could use the same OOP as this one and the
-       old method one would be executed instead of the new
-       one! */
+    /* Unreachable, always free the native code.  It is *not* optional
+       to free the code in this case -- and I'm not talking about memory
+       leaks: a different method could use the same OOP as this one and
+       the old method would be executed instead of the new one! */
     _gst_release_native_code (oop);
 #endif
 
@@ -1434,7 +1491,7 @@ queue_put (surv_space *q, OOP *src, int n)
       result = q->allocPtr;
       newAlloc = q->allocPtr + n;
 
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
       printf ("Top %p alloc %p tenure %p\n", q->topPtr, q->allocPtr, q->tenurePtr);
 #endif
 
@@ -1442,7 +1499,7 @@ queue_put (surv_space *q, OOP *src, int n)
         /* We tenure old objects as we copy more objects into
            the circular survivor space.  */
         {
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
 	  printf ("Tenure: current max %p, needed %p\n", q->tenurePtr, newAlloc);
 #endif
 	  tenure_one_object();
@@ -1451,7 +1508,7 @@ queue_put (surv_space *q, OOP *src, int n)
 
       if UNCOMMON (newAlloc > q->maxPtr)
         {
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
           printf ("Wrap: survivor space ends at %p, needed %p\n", q->maxPtr, newAlloc);
 #endif
           q->topPtr = q->allocPtr;
@@ -1483,14 +1540,14 @@ tenure_one_object ()
   OOP oop;
 
   oop = *_gst_mem.tenuring_queue.tenurePtr;
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
   printf ("      ");
   _gst_display_oop (oop);
 #endif
 
   if (_gst_mem.scan.current == oop)
     {
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
       printf ("Tenured OOP %p was being scanned\n", oop);
 #endif
 
@@ -1500,7 +1557,7 @@ tenure_one_object ()
 
   else if (_gst_mem.scan.queue_at == _gst_mem.tenuring_queue.tenurePtr)
     {
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
       printf ("Tenured OOP %p had not been scanned yet\n", oop);
 #endif
 
@@ -1669,7 +1726,7 @@ scan_grey_pages ()
   OOP *pOOP, oop;
   int i, n;
 
-#if defined (MMAN_DEBUGGING)
+#if defined (MMAN_DEBUG_OUTPUT)
   printf ("Pages on the grey list: ");
   for (n = 0, node = _gst_mem.grey_pages.head; node; node = node->next, n++)
     {
@@ -1687,7 +1744,7 @@ scan_grey_pages ()
 
   for (last = NULL, next = &_gst_mem.grey_pages.head; (node = *next); )
     {
-#if defined(GC_DEBUGGING) || defined(MMAN_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT) || defined(MMAN_DEBUG_OUTPUT)
       printf ("Scanning grey page %p...%p\n", node->base, node->base + node->n);
 #endif
 
@@ -1714,7 +1771,7 @@ scan_grey_pages ()
 	{
           /* The entry was temporary, or we found no new-space
              pointers in it.  Delete it and make the page read-only.  */
-#if defined (MMAN_DEBUGGING)
+#if defined (MMAN_DEBUG_OUTPUT)
 	  printf ("Protecting %p\n", node->base);
 #endif
 	  _gst_mem.rememberedTableEntries--;
@@ -1734,7 +1791,7 @@ scan_grey_pages ()
 
   _gst_mem.grey_pages.tail = last;
 
-#if defined (MMAN_DEBUGGING)
+#if defined (MMAN_DEBUG_OUTPUT)
   printf ("Pages left on the grey list: ");
   for (n = 0, node = _gst_mem.grey_pages.head; node; node = node->next, n++)
     {
@@ -1767,7 +1824,7 @@ scan_grey_objects()
 	/* Objects might have moved, so update node->base.  */
 	node->base = (OOP *) &obj->data[1];
 
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
       printf ("Scanning grey range %p...%p (%p)\n", node->base, node->base + node->n, oop);
 #endif
 
@@ -1835,7 +1892,7 @@ scanned_fields_in (gst_object object,
 void
 cheney_scan (void)
 {
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
   printf ("Starting Cheney scan\n");
 #endif
 
@@ -1856,7 +1913,9 @@ cheney_scan (void)
 #if defined(GC_DEBUGGING)
       if (!IS_OOP_ADDR (oop))
 	abort();
+#endif
 
+#if defined(GC_DEBUG_OUTPUT)
       printf (">Scan ");
       _gst_display_oop (oop);
 #endif
@@ -1875,7 +1934,7 @@ cheney_scan (void)
 	MAYBE_COPY_OOP (_gst_mem.scan.at[i+1]);
     }
 
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
   printf ("Ending Cheney scan\n");
 #endif
 }
@@ -1900,12 +1959,12 @@ _gst_copy_an_oop (OOP oop)
       obj = OOP_TO_OBJ (oop);
       pData = (OOP *) obj;
 
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
       printf (">Copy ");
       _gst_display_oop (oop);
 #endif
 
-#if !defined (OPTIMIZE)
+#if defined (GC_DEBUGGING)
       if UNCOMMON (!IS_INT (obj->objSize))
 	{
 	  printf ("Size not an integer in OOP %p (%p)\n", oop, obj);
@@ -1930,7 +1989,7 @@ _gst_copy_an_oop (OOP oop)
 	  abort ();
 	}
 
-#if !defined (OPTIMIZE)
+#if defined (GC_DEBUGGING)
       if UNCOMMON ((oop->flags & F_OLD) ||
 	  IS_SURVIVOR_ADDR(obj, _gst_mem.active_half == &_gst_mem.surv[1]))
         {
@@ -1985,7 +2044,7 @@ mark_oops (void)
 void
 mark_ephemeron_oops (void)
 {
-  OOP *pOOP, *base;
+  OOP *pOOP, *pDeadOOP, *base;
   int i, size;
 
   /* Make a local copy of the buffer */
@@ -2009,9 +2068,9 @@ mark_ephemeron_oops (void)
       key->flags |= F_REACHABLE;
     }
 
-  for (pOOP = base, i = size; i--; pOOP++)
+  for (pOOP = pDeadOOP = base, i = size; i--; )
     {
-      OOP oop = *pOOP;
+      OOP oop = *pOOP++;
       gst_object obj = OOP_TO_OBJ(oop);
       OOP key = obj->data[0];
       int num = NUM_OOPS(obj);
@@ -2024,10 +2083,10 @@ mark_ephemeron_oops (void)
       for (j = 1; j < num; j++)
         MAYBE_MARK_OOP (obj->data[j]);
 
-      /* Remember that above we cleared F_EPHEMERON is the key
+      /* Remember that above we cleared F_EPHEMERON if the key
          is alive.  */
       if (!IS_OOP_MARKED (key) && (oop->flags & F_EPHEMERON))
-        _gst_add_buf_pointer (oop);
+        *pDeadOOP++ = oop;
 
       /* Ok, now mark the key.  */
       MAYBE_MARK_OOP (key);
@@ -2035,6 +2094,12 @@ mark_ephemeron_oops (void)
       /* Restore the flag in case it was cleared.  */
       oop->flags |= F_EPHEMERON;
     }
+
+  /* If more ephemerons were reachable from the object, go on...  */
+  if (_gst_buffer_size ())
+    mark_ephemeron_oops ();
+
+  _gst_add_buf_data (base, (char *) pDeadOOP - (char *) base);
 }
 
 #define TAIL_MARK_OOP(newOOP) BEGIN_MACRO { \
@@ -2060,7 +2125,7 @@ _gst_mark_an_oop_internal (OOP oop,
     {
       if (!oop)
 	{			/* in the loop! */
-#if !defined (OPTIMIZE)
+#if defined (GC_DEBUGGING)
 	  gst_object obj = (gst_object) (curOOP - 1);	/* for debugging */
 #endif
 	iterationLoop:
@@ -2070,7 +2135,7 @@ _gst_mark_an_oop_internal (OOP oop,
 	  curOOP++;
 	  if (IS_OOP (oop))
 	    {
-#if !defined (OPTIMIZE)
+#if defined (GC_DEBUGGING)
 	      if UNCOMMON (!IS_OOP_ADDR (oop))
 		{
 		  printf
@@ -2108,7 +2173,7 @@ _gst_mark_an_oop_internal (OOP oop,
 	  gst_object object;
 	  uintptr_t size;
 
-#if !defined (OPTIMIZE)
+#if defined (GC_DEBUGGING)
 	  if UNCOMMON (IS_OOP_FREE (oop))
 	    {
 	      printf ("Error! Free OOP %p is being marked!\n", oop);
@@ -2117,7 +2182,7 @@ _gst_mark_an_oop_internal (OOP oop,
 	    }
 #endif
 
-#if defined(GC_DEBUGGING)
+#if defined(GC_DEBUG_OUTPUT)
 	  printf (">Mark ");
 	  _gst_display_oop (oop);
 #endif

@@ -2,7 +2,18 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 2.3 TO 2.3.1
 
+o   configure does not lock up when the system emacs is XEmacs and does not
+    include both the comint package and the package's source code.
+
+o   Fixed a garbage collection bug that typically occurred when installing
+    GNU Smalltalk, or when launching the installed image.
+
 o   gst-package honors the INSTALL command found by configure.
+
+o   gst-config does not "forget" to prefix the library directories with -L.
+
+o   Segmentation violations on large integer operations (on 64-bit hosts)
+    were fixed.
 
 -----------------------------------------------------------------------------
 
@@ -145,7 +156,7 @@ Scripting improvements:
 o   A sharp-bang sequence at the beginning of a file is parsed as a
     one-line comment.
 
-o   Provides an "-f" option (long option "--file" to be used in a #! line,
+o   Provides an "-f" option (long option "--file") to be used in a #! line,
     as in "#! /usr/bin/env gst -f", which has the same effect of -Q,
     processing the file indicated by the option's argument, and passing
     the rest of the command line to GNU Smalltalk.  In other words, the
