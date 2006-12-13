@@ -164,6 +164,7 @@ dist_noinst_DATA += \
 dist-hook: gst-package
 	$(SED) -e "s/@\(I18N_DISABLED\)@/disabled-/" \
 	  -e "s/@\(GTK_DISABLED\)@/disabled-/" \
+	  -e "s/@\(NCURSES_DISABLED\)@/disabled-/" \
 	  -e "s/@\(VERSION\)@/@VERSION@/" \
 	  $(srcdir)/packages.xml.in > $(distdir)/packages.xml
 	SMALLTALK_IMAGE=$(distdir) \
