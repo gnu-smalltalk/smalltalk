@@ -284,7 +284,7 @@
   <directory>examples</directory>
 
   <file>ncurses.st</file>
-</package>
+</@NCURSES_DISABLED@package>
 
 <package>
   <name>MD5</name>

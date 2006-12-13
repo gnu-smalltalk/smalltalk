@@ -6,6 +6,6 @@ includedir = @includedir@
 Name: gnu-smalltalk
 Description: GNU Smalltalk
 Version: @VERSION@
-Libs: -L${libdir} -lgst
+Libs: -L${libdir} -L${libdir}/@PACKAGE@ -lgst @LIBS@
 Cflags: -I${includedir}
 
