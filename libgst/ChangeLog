@@ -1,3 +1,7 @@
+2006-12-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	*** Version 2.3.1 released.
+
 2006-12-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Proceed recursively if marking the ephemerons'
