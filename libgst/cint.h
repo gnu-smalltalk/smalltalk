@@ -63,6 +63,22 @@ extern int _gst_errno
 /* Element type for the name-to-C-function mapping table.  */
 typedef void (*p_void_func) ();
 
+typedef struct gst_cfunc_descriptor
+{
+  OBJ_HEADER;
+  OOP cFunction;                /* gst_cobject whose C value is func
+                                   addr */ 
+  OOP cFunctionName;            /* Name of C function in mapping table */
+  OOP returnType;               /* Smalltalk return type */
+  OOP numFixedArgs;             /* number of real arguments passed from
+                                   smalltalk (excluding "self" parameters
+                                   which are synthetically added when 
+                                   calling the C function).  */
+  OOP argTypes[1];              /* variable length, really numFixedArgs
+                                   long */
+}
+ *gst_cfunc_descriptor;
+
 /* Invokes a C routine.  Arguments passed from Smalltalk are stored starting
    from ARGS, and the object to which the message that called-out was
    sent is RECEIVER.  CFUNCOOP is the C function descriptor used
@@ -85,16 +101,6 @@ extern void _gst_define_cfunc (const char *funcName, PTR funcAddr)
 /* Adds to the mapping table the standard C functions supported by
    GNU Smalltalk.  */
 extern void _gst_init_cfuncs (void) 
-  ATTRIBUTE_HIDDEN;
-
-/* This routine is called during image loading to restore a C function
-   descriptor pointer.  This is because between the time that the image
-   was made and now, the executable image may have changed, so any
-   reference to the C function address may be invalid.  We therefore just
-   perform the function lookup again and use that value.  CFUNCDESCOOP
-   is the C function descriptor object to be adjusted, which contains
-   the name of the function to be looked up.  */
-extern void _gst_restore_cfunc_descriptor (OOP cFuncDescOOP) 
   ATTRIBUTE_HIDDEN;
 
 /* Makes a C based descriptor for a callout method.  Returns a

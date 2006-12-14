@@ -2901,11 +2901,3 @@ file_segment_new (void)
   INC_RESTORE_POINTER (incPtr);
   return (fileSegmentOOP);
 }
-
-void _gst_restore_primitive_number (OOP methodOOP, int *map)
-{
-  gst_compiled_method method;
-
-  method = (gst_compiled_method) OOP_TO_OBJ (methodOOP);
-  method->header.primitiveIndex = map[method->header.primitiveIndex];
-}

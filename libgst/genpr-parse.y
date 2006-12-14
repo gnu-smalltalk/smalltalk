@@ -315,10 +315,10 @@ gen_prim_id (const char *name, int id, const char *attrs)
   prim_no++;
 
   filprintf (def_fil,
-	     "  _gst_primitive_table[%d].name = \"%s\";\n"
-	     "  _gst_primitive_table[%d].attributes = %s;\n"
-	     "  _gst_primitive_table[%d].id = %d;\n"
-	     "  _gst_primitive_table[%d].func = %s;\n",
+	     "  _gst_default_primitive_table[%d].name = \"%s\";\n"
+	     "  _gst_default_primitive_table[%d].attributes = %s;\n"
+	     "  _gst_default_primitive_table[%d].id = %d;\n"
+	     "  _gst_default_primitive_table[%d].func = %s;\n",
 	     prim_no, name,
 	     prim_no, attrs,
 	     prim_no, id,
@@ -381,12 +381,12 @@ output()
 	  "  int i;\n"
 	  "%s"
 	  "\n"
-	  "  for (i = %d; i < 1023; i++)\n"
+	  "  for (i = %d; i < NUM_PRIMITIVES; i++)\n"
 	  "    {\n"
-	  "      _gst_primitive_table[i].name = NULL;\n"
-	  "      _gst_primitive_table[i].attributes = PRIM_FAIL;\n"
-	  "      _gst_primitive_table[i].id = i;\n"
-	  "      _gst_primitive_table[i].func = VMpr_HOLE;\n"
+	  "      _gst_default_primitive_table[i].name = NULL;\n"
+	  "      _gst_default_primitive_table[i].attributes = PRIM_FAIL;\n"
+	  "      _gst_default_primitive_table[i].id = i;\n"
+	  "      _gst_default_primitive_table[i].func = VMpr_HOLE;\n"
 	  "    }\n"
 	  "}\n"
 	  "\n", proto, stmt, def, prim_no + 1);

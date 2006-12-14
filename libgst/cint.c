@@ -97,22 +97,6 @@ typedef enum
 }
 cdata_type;
 
-typedef struct gst_cfunc_descriptor
-{
-  OBJ_HEADER;
-  OOP cFunction;		/* gst_cobject whose C value is func
-				   addr */
-  OOP cFunctionName;		/* Name of C function in mapping table */
-  OOP returnType;		/* Smalltalk return type */
-  OOP numFixedArgs;		/* number of real arguments passed from
-				   smalltalk (excluding "self" parameters
-  				   which are synthetically added when
-				   calling the C function).  */
-  OOP argTypes[1];		/* variable length, really numFixedArgs 
-				   long */
-}
- *gst_cfunc_descriptor;
-
 typedef struct symbol_type_map
 {
   OOP *symbol;
@@ -644,6 +628,9 @@ _gst_invoke_croutine (OOP cFuncOOP,
   incPtr = INC_SAVE_POINTER ();
 
   desc = (gst_cfunc_descriptor) OOP_TO_OBJ (cFuncOOP);
+  if (IS_NIL (desc->cFunction))
+    return (NULL);
+
   c_func_cur = (cfunc_info *) COBJECT_VALUE (desc->cFunction);
   if (!c_func_cur)
     return (NULL);
@@ -1244,18 +1231,4 @@ _gst_set_errno(int errnum)
 #else
   _gst_errno = errnum;
 #endif
-}
-
-void
-_gst_restore_cfunc_descriptor (OOP cFuncDescOOP)
-{
-  gst_cfunc_descriptor desc;
-  cfunc_info *cfi;
-  char *funcName;
-
-  desc = (gst_cfunc_descriptor) OOP_TO_OBJ (cFuncDescOOP);
-  funcName = (char *) _gst_to_cstring (desc->cFunctionName);
-  cfi = lookup_function (funcName);
-  xfree (funcName);
-  SET_COBJECT_VALUE (desc->cFunction, cfi);
 }

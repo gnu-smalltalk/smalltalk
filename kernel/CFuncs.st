@@ -94,12 +94,11 @@ isValid
     "Answer whether the function represented by the receiver is actually
     a registered one"
     | newAddress |
-    cFunction address = 0 ifFalse: [ ^true ].
+    (cFunction notNil and: [ cFunction address ~= 0 ]) ifTrue: [ ^true ].
 
     newAddress := CFunctionDescriptor addressOf: self name.
+    self address: newAddress.
     ^newAddress address ~= 0
-	ifTrue: [ self address: newAddress ];
-	yourself
 ! !
 
 

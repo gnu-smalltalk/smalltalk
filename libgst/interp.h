@@ -542,10 +542,21 @@ prim_table_entry;
 #define PRIM_RETURN_SMALL_INTEGER	0x0100	/* 31 or 63 bits */
 #define PRIM_RETURN_SMALL_SMALLINTEGER	0x0300	/* 30 or 62 bits */
 
+/* The table of functions that implement the primitives.  */
+extern prim_table_entry _gst_primitive_table[NUM_PRIMITIVES];
+extern prim_table_entry _gst_default_primitive_table[NUM_PRIMITIVES];
+ 
 /* This can be used to obtain information on a particular primitive
    operations in the GNU Smalltalk system.  */
 extern prim_table_entry * _gst_get_primitive_attributes (int primitive)
   ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
+
+/* Dually, this maps the primitive number that will be used for running
+   the image, to the entry which was returned by _gst_get_primitive_attributes.
+   If PTE is NULL, the primitive will be invalid.  */
+extern void _gst_set_primitive_attributes (int primitive,
+					   prim_table_entry *pte)
   ATTRIBUTE_HIDDEN;
 
 /* Initialize the table of primitives.  */

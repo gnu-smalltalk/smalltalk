@@ -104,9 +104,9 @@ typedef struct method_header
 {
 #ifdef WORDS_BIGENDIAN
 #if SIZEOF_OOP == 8
-  unsigned dummy:32;		/* unused */
+  unsigned :32;		/* unused */
 #endif
-  unsigned:1;			/* sign - must be 0 */
+  unsigned :1;			/* sign - must be 0 */
   unsigned headerFlag:MTH_FLAG_BITS;	/* prim _gst_self, etc.  */
   unsigned primitiveIndex:MTH_PRIM_BITS;	/* index of primitve,
 						   or 0 */
@@ -122,9 +122,9 @@ typedef struct method_header
   unsigned primitiveIndex:MTH_PRIM_BITS;	/* index of primitve,
 						   or 0 */
   unsigned headerFlag:MTH_FLAG_BITS;	/* prim _gst_self, etc.  */
-  unsigned:1;			/* sign - must be 0 */
+  unsigned :1;			/* sign - must be 0 */
 #if SIZEOF_OOP == 8
-  unsigned dummy:32;		/* unused */
+  unsigned :32;		/* unused */
 #endif
 #endif				/* WORDS_BIGENDIAN */
 }
@@ -174,29 +174,29 @@ typedef struct block_header
 {
 #ifdef WORDS_BIGENDIAN
 #if SIZEOF_OOP == 8
-  unsigned dummy:32;		/* unused */
+  unsigned :32;		/* unused */
 #endif
-  unsigned:1;			/* sign - must be 0 */
+  unsigned :1;			/* sign - must be 0 */
   unsigned numArgs:BLK_ARGS_BITS;	/* number of arguments we have */
   unsigned numTemps:BLK_TEMPS_BITS;	/* number of _gst_temporaries
 					   we have */
   unsigned depth:BLK_DEPTH_BITS;	/* number of stack slots needed 
 					 */
-  unsigned unused:BLK_UNUSED_BITS;
+  unsigned :BLK_UNUSED_BITS;
   unsigned clean:BLK_CLEAN_BITS;	/* behavior of block */
   unsigned intMark:1;		/* flag this as an Int */
 #else
   unsigned intMark:1;		/* flag this as an Int */
   unsigned clean:BLK_CLEAN_BITS;	/* behavior of block */
-  unsigned unused:BLK_UNUSED_BITS;
+  unsigned :BLK_UNUSED_BITS;
   unsigned depth:BLK_DEPTH_BITS;	/* number of stack slots needed 
 					 */
   unsigned numTemps:BLK_TEMPS_BITS;	/* number of _gst_temporaries
 					   we have */
   unsigned numArgs:BLK_ARGS_BITS;	/* number of arguments we have */
-  unsigned:1;			/* sign - must be 0 */
+  unsigned :1;			/* sign - must be 0 */
 #if SIZEOF_OOP == 8
-  unsigned dummy:32;		/* unused */
+  unsigned :32;		/* unused */
 #endif
 #endif
 }
@@ -373,17 +373,6 @@ extern int _gst_add_forced_object (OOP oop)
 /* Transform the ATTRIBUTE_KEYWORDS node (a TREE_ATTRIBUTE_LIST)
    into a Message object, and return it.  */
 extern OOP _gst_make_attribute (tree_node attribute_keywords) 
-  ATTRIBUTE_HIDDEN;
-
-/* This routine is called during image loading to restore the
-   primitive number in a CompiledMethod.  This is because we achieve
-   better binary compatibility if we keep the primitives name
-   invariant, rather than the primitive index, across image loads.
-   This allows us to keep the primitive list in prims.inl in a logical
-   order rather than having to add at the end of the list.  MAP
-   associates primitive numbers in the saved image (obtained by the
-   saved VMPrimitives dictionary) to primitive numbers in this VM.  */
-extern void _gst_restore_primitive_number (OOP methodOOP, int *map) 
   ATTRIBUTE_HIDDEN;
 
 /* Process the attributes in ARRAYOOP, return the primitive number

@@ -223,7 +223,7 @@ static void init_smalltalk_dictionary (void);
 
 /* This fills MAP so that it associates primitive numbers in the saved
    image to primitive numbers in this VM.  */
-static void prepare_primitive_numbers_map (int *map);
+static void prepare_primitive_numbers_table (void);
 
 /* Add a global named GLOBALNAME and give it the value GLOBALVALUE.
    Return GLOBALVALUE.  */
@@ -768,6 +768,9 @@ init_proto_oops()
 void
 _gst_init_dictionary (void)
 {
+  memcpy (_gst_primitive_table, _gst_default_primitive_table,
+          sizeof (_gst_primitive_table));
+
   /* The order of this must match the indices defined in oop.h!! */
   _gst_smalltalk_dictionary = alloc_oop (NULL, _gst_mem.active_flag);
   _gst_processor_oop = alloc_oop (NULL, _gst_mem.active_flag);
@@ -1228,8 +1231,6 @@ mst_Boolean
 _gst_init_dictionary_on_image_load (size_t numOOPs)
 {
   const class_definition *ci;
-  OOP oop;
-  int primitive_numbers_map[NUM_PRIMITIVES];
 
   _gst_smalltalk_dictionary = OOP_AT (SMALLTALK_OOP_INDEX);
   _gst_processor_oop = OOP_AT (PROCESSOR_OOP_INDEX);
@@ -1261,43 +1262,28 @@ _gst_init_dictionary_on_image_load (size_t numOOPs)
   _gst_init_builtin_objects_classes ();
   _gst_init_symbols ();
 
-  /* Important: this is called *before* init_primitives_dictionary
-     fills the VMPrimitives dictionary and *after* _gst_init_symbols
+  /* Important: this is called *after* _gst_init_symbols
      fills in _gst_vm_primitives_symbol! */
-  prepare_primitive_numbers_map (primitive_numbers_map);
-
-  init_primitives_dictionary ();
+  prepare_primitive_numbers_table ();
   init_runtime_objects ();
-
-  for (oop = _gst_mem.ot_base; oop < &_gst_mem.ot[numOOPs]; oop++)
-    {
-      if (!IS_OOP_VALID_GC (oop))
-	continue;
-
-      if UNCOMMON (OOP_CLASS (oop) == _gst_c_func_descriptor_class)
-	_gst_restore_cfunc_descriptor (oop); /* in cint.c */
-      else if UNCOMMON (OOP_CLASS (oop) == _gst_compiled_method_class)
-	_gst_restore_primitive_number (oop, primitive_numbers_map);
-      else if UNCOMMON (OOP_CLASS (oop) == _gst_callin_process_class)
-	_gst_terminate_process (oop);
-    }
-
   return (true);
 }
 
 void
-prepare_primitive_numbers_map (int *map)
+prepare_primitive_numbers_table ()
 {
   int i;
   OOP primitivesDictionaryOOP;
   gst_dictionary primitivesDictionary;
 
-  memzero (map, NUM_PRIMITIVES * sizeof (int));
   primitivesDictionaryOOP = dictionary_at (_gst_smalltalk_dictionary, 
 					   _gst_vm_primitives_symbol);
 
   primitivesDictionary =
     (gst_dictionary) OOP_TO_OBJ (primitivesDictionaryOOP);
+
+  for (i = 0; i < NUM_PRIMITIVES; i++)
+    _gst_set_primitive_attributes (i, NULL);
 
   for (i = 0; i < NUM_PRIMITIVES; i++)
     {
@@ -1311,15 +1297,14 @@ prepare_primitive_numbers_map (int *map)
       symbolOOP = _gst_intern_string (pte->name);
       valueOOP = dictionary_at (primitivesDictionaryOOP, symbolOOP);
 
-      if IS_NIL (valueOOP)
+      if (IS_NIL (valueOOP))
         {
           _gst_errorf ("bad primitive name");
           continue;
         }
 
       old_index = TO_INT (valueOOP);
-      map[old_index] = i;
-      /* printf ("Old primitive %d is now %d\n", old_index, i); */
+      _gst_set_primitive_attributes (old_index, pte);
     }
 }
 

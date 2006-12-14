@@ -161,15 +161,16 @@ static void buffer_fill (int imageFd);
 static void save_object (int imageFd,
 			 OOP oop);
 
-/* This function converts NUMFIXED absolute addresses at OBJ->data,
-   which are instance variables of the object, into relative ones.  */
-static inline void fixup_object (gst_object obj,
-			  int numPointers);
+/* This function copies NUMBYTES from SRC to DEST, converting the first
+   NUMPOINTERS absolute addresses into relative ones (these are the
+   instance variables of the object).  */
+static inline void fixup_object (gst_object dest, gst_object src,
+				 int numPointers, int numBytes);
 
-/* This function converts NUMFIXED relative addresses at OBJ->data,
+/* This function converts NUMPOINTERS relative addresses at OBJECT,
    which are instance variables of the object, into absolute ones.  */
 static inline void restore_object (gst_object object,
-			    int numPointers);
+				   int numPointers);
 
 /* This function inverts the endianness of SIZE long-words, starting at
    BUF.  */
@@ -366,7 +367,7 @@ void
 save_object (int imageFd,
 	     OOP oop)
 {
-  gst_object object;
+  gst_object object, saveObject;
   int numPointers, numBytes;
 
 #ifdef SNAPSHOT_TRACE
@@ -380,10 +381,20 @@ save_object (int imageFd,
   if (IS_OOP_FREE (oop))
     abort ();
 
-  fixup_object (object, numPointers);
   numBytes = sizeof (OOP) * TO_INT (object->objSize);
-  buffer_write (imageFd, object, numBytes);
-  restore_object (object, numPointers);
+  if (numBytes < 262144)
+    {
+      saveObject = alloca (numBytes);
+      fixup_object (saveObject, object, numPointers, numBytes);
+      buffer_write (imageFd, saveObject, numBytes);
+    }
+  else
+    {
+      saveObject = malloc (numBytes);
+      fixup_object (saveObject, object, numPointers, numBytes);
+      buffer_write (imageFd, saveObject, numBytes);
+      free (saveObject);
+    }
 }
 
 void
@@ -624,20 +635,79 @@ load_normal_oops (int imageFd)
    loading and saving */
 
 void
-fixup_object (gst_object obj,
-	      int numPointers)
+fixup_object (gst_object dest, gst_object src,
+	      int numPointers, int numBytes)
 {
-  OOP instOOP, class_oop, *i;
+  OOP class_oop;
+  int i;
 
-  class_oop = obj->objClass;
-  obj->objClass = OOP_RELATIVE (class_oop);
+  class_oop = src->objClass;
+  dest->objSize = src->objSize;
+  dest->objClass = OOP_RELATIVE (class_oop);
 
-  for (i = obj->data; numPointers; i++, numPointers--)
+  for (i = 0; i < numPointers; i++)
+    if (IS_INT (src->data[i]))
+      dest->data[i] = src->data[i];
+    else
+      dest->data[i] = OOP_RELATIVE (src->data[i]);
+
+  memcpy (&dest->data[i], &src->data[i], numBytes - sizeof (OOP) * numPointers);
+
+  /* Do the heavy work on the objects now rather than at load time, in order
+     to make the loading faster.  In general, we should do this as little as
+     possible, because it's pretty hard: the three cases below for Process,
+     Semaphore and CallinProcess for example are just there to terminate all
+     CallinProcess objects.  */
+  if (class_oop == _gst_callin_process_class)
     {
-      instOOP = *i;
-      if (IS_OOP (instOOP))
-	*i = OOP_RELATIVE (instOOP);
+      gst_process process = (gst_process) dest;
+      process->suspendedContext = OOP_RELATIVE (_gst_nil_oop);
+      process->nextLink = OOP_RELATIVE (_gst_nil_oop);
+      process->myList = OOP_RELATIVE (_gst_nil_oop);
     }
+
+  else if (class_oop == _gst_process_class)
+    {
+      /* Find the new next link.  */
+      gst_process destProcess = (gst_process) dest;
+      gst_process next = (gst_process) src;
+      while (OOP_CLASS (next->nextLink) == _gst_callin_process_class)
+	next = (gst_process) OOP_TO_OBJ (next->nextLink);
+
+      destProcess->nextLink = OOP_RELATIVE (next->nextLink);
+    }
+
+  else if (class_oop == _gst_semaphore_class)
+    {
+      /* Find the new first and last link.  */
+      gst_semaphore destSem = (gst_semaphore) dest;
+      gst_semaphore srcSem = (gst_semaphore) src;
+      OOP firstOOP = _gst_nil_oop, lastOOP = _gst_nil_oop;
+      OOP linkOOP = srcSem->firstLink;
+      while (!IS_NIL (linkOOP))
+	{
+	  gst_process process = (gst_process) OOP_TO_OBJ (linkOOP);
+	  if (process->objClass != _gst_callin_process_class)
+	    {
+	      if (IS_NIL (firstOOP))
+		firstOOP = linkOOP;
+	      lastOOP = linkOOP;
+	    }
+	  linkOOP = process->nextLink;
+	}
+
+      destSem->firstLink = OOP_RELATIVE (firstOOP);
+      destSem->lastLink = OOP_RELATIVE (lastOOP);
+    }
+
+  /* The other case is to reset CFunctionDescriptor objects, so that we'll
+     relink the external functions when we reload the image.  */
+  else if (class_oop == _gst_c_func_descriptor_class)
+    {
+      gst_cfunc_descriptor desc = (gst_cfunc_descriptor) dest;
+      desc->cFunction = OOP_RELATIVE (_gst_nil_oop);
+    }
+
 }
 
 void

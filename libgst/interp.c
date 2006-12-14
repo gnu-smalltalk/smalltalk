@@ -152,7 +152,8 @@ mst_Boolean _gst_make_core_file = false;
 mst_Boolean _gst_non_interactive = true;
 
 /* The table of functions that implement the primitives.  */
-static prim_table_entry _gst_primitive_table[NUM_PRIMITIVES];
+prim_table_entry _gst_primitive_table[NUM_PRIMITIVES];
+prim_table_entry _gst_default_primitive_table[NUM_PRIMITIVES];
 
 /* Some performance counters from the interpreter: these
    count the number of special returns.  */
@@ -2620,7 +2621,16 @@ execute_primitive_operation (int primitive, volatile int numArgs)
 prim_table_entry *
 _gst_get_primitive_attributes (int primitive)
 {
-  return &_gst_primitive_table[primitive];
+  return &_gst_default_primitive_table[primitive];
+}
+
+void
+_gst_set_primitive_attributes (int primitive, prim_table_entry *pte)
+{
+  if (pte)
+    _gst_primitive_table[primitive] = *pte;
+  else
+    _gst_primitive_table[primitive] = _gst_default_primitive_table[0];
 }
 
 void

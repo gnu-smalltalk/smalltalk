@@ -1,5 +1,29 @@
 2006-12-14  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/cint.c: Move gst_cfunc_descriptor to cint.h.  Accept a nil
+	cFunction inside a descriptor (now happens upon image load),
+	remove _gst_restore_cfunc_descriptor.
+	* libgst/cint.h: Adjust for cint.c changes.
+	* libgst/comp.c: Remove _gst_restore_primitive_number.
+	* libgst/comp.h: Remove _gst_restore_primitive_number.
+	* libgst/dict.c: Initialize primitive table from default in
+	_gst_init_dictionary, and from the image in prepare_primitives_table	
+	(which replaces prepare_primitive_numbers_map).  Don't reset
+	the VMPrimitives dictionary upon image load, and don't walk the
+	OOP table.
+	* libgst/genpr-parse.y: Initialize _gst_default_primitive_table
+	instead of _gst_primitive_table.
+	* libgst/interp.c: Use _gst_default_primitive_table in
+	_gst_get_primitive_attributes, add _gst_set_primitive_attributes.
+	Make the primitive tables public.
+	* libgst/interp.h: Adjust for the above.
+	* libgst/save.c: Allocate temporary storage for the object that
+	are about to be saved.  Massage the CallinProcess, Process,
+	Semaphore and CFunctionDescriptor instances in that temporary
+	storage rather than at load time.
+
+2006-12-14  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/input.c: Initialize completions only when a readline stream
 	is pushed.
 
