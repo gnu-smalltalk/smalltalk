@@ -331,6 +331,9 @@ _gst_push_stdin_string (void)
 #ifdef HAVE_READLINE
     }
 
+  if (count == 0)
+    _gst_add_all_symbol_completions ();
+
   newStream = push_new_stream (STREAM_READLINE);
 
   newStream->st_str.strBase = NULL;	/* force readline() but no free() */
@@ -1168,9 +1171,6 @@ _gst_initialize_readline (void)
 
   /* Set up to use read to read from stdin */
   rl_getc_function = readline_getc;
-
-  if (count == 0)
-    _gst_add_all_symbol_completions ();
 }
 
 #endif /* HAVE_READLINE */
