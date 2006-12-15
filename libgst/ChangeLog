@@ -1,5 +1,10 @@
 2006-12-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/alloc.c: Remove assertions if !OPTIMIZE.  Increase default
+	allocation granularity.
+
+2006-12-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/save.c: Store object table base in the image, adjust based
 	on the delta upon loading.  Inline functions that are not used
 	anymore upon saving due to the previous change.  Reset nativeIP

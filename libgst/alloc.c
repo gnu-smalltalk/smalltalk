@@ -175,8 +175,9 @@ init_heap (heap_data *h, size_t heap_allocation_size, size_t heap_limit)
   for (i = 0; freelist_size[i] > 0; i++)
     h->freelist[i] = NULL;
 
-  h->heap_allocation_size = heap_allocation_size ? pagesize :
-    ROUNDUPPAGESIZE (heap_allocation_size);
+  h->heap_allocation_size = (heap_allocation_size
+			     ? ROUNDUPPAGESIZE (heap_allocation_size)
+			     : MMAP_THRESHOLD);
   h->heap_limit = heap_limit;
   h->mmap_count = 0;
   h->heap_total = 0;
@@ -223,25 +224,26 @@ rerun:
 	      goto nospace;
 	    }
 
+#ifndef OPTIMIZE
           if (((intptr_t) blk) & (pagesize - 1))
 	    abort ();
+#endif
 
 	  blk->vSmall.nfree = *mptr;
 	  *mptr = blk;
 	}
 
-      if (!blk->vSmall.free)
-	abort ();
-
-      if (!blk->vSmall.avail)
-	abort ();
-
       /* Unlink free one and return it */
       mem = blk->vSmall.free;
+
+#ifndef OPTIMIZE
+      if (!blk->vSmall.free || !blk->vSmall.avail)
+	abort ();
 
       if (((intptr_t) mem <= (intptr_t) blk) ||
 	  ((intptr_t) mem >= (intptr_t) blk + pagesize))
 	abort ();
+#endif
 
       blk->vSmall.free = mem->next;
 
@@ -264,8 +266,10 @@ rerun:
       mem = (heap_freeobj *) blk->vLarge.data;
     }
 
+#ifndef OPTIMIZE
   if (OBJECT_SIZE (mem) < sz)
     abort ();
+#endif
 
   if (h->after_allocating)
     h->after_allocating (h, blk, sz);
@@ -375,8 +379,10 @@ _gst_mem_free (heap_data *h, PTR mem)
          it to freelist.  */
       if (++info->vSmall.avail == 1)
 	{
+#ifndef OPTIMIZE
 	  if ( ((intptr_t) info) & (pagesize - 1))
 	    abort ();
+#endif
 
 	  info->vSmall.nfree = h->freelist[lnr];
 	  h->freelist[lnr] = info;
@@ -385,17 +391,20 @@ _gst_mem_free (heap_data *h, PTR mem)
       obj->next = info->vSmall.free;
       info->vSmall.free = obj;
 
+#ifndef OPTIMIZE
       if ((intptr_t) obj < (intptr_t) info ||
 	  (intptr_t) obj >= (intptr_t) info + pagesize ||
 	  (intptr_t) obj == (intptr_t) (obj->next))
 	abort ();
 
+      if (info->vSmall.avail > info->vSmall.nr)
+	abort ();
+#endif
+
       /* If we free all sub-blocks, free the block */
-      if (info->vSmall.avail >= info->vSmall.nr)
+      if (info->vSmall.avail == info->vSmall.nr)
 	{
 	  heap_block **finfo = &h->freelist[lnr];
-          if (info->vSmall.avail > info->vSmall.nr)
-	    abort ();
 
 	  for (;;)
 	    {
@@ -407,8 +416,10 @@ _gst_mem_free (heap_data *h, PTR mem)
 		  break;
 		}
 	      finfo = &(*finfo)->vSmall.nfree;
+#ifndef OPTIMIZE
 	      if (!*finfo)
 		abort ();
+#endif
 	    }
 	}
     }
@@ -488,8 +499,10 @@ heap_primitive_alloc (heap_data *h, size_t sz)
       && h->heap_total + sz > h->heap_limit)
     return (NULL);
 
+#ifndef OPTIMIZE
   if (sz & (pagesize - 1))
     abort ();
+#endif
 
   if (sz > MMAP_THRESHOLD)
     {
@@ -516,8 +529,13 @@ heap_primitive_alloc (heap_data *h, size_t sz)
   for (pptr = &heap_prim_freelist; (ptr = *pptr); pptr = &(ptr->vFree.next))
     {
       h->probes++;
+#ifndef OPTIMIZE
       if (((intptr_t) ptr) & (pagesize - 1))
 	abort ();
+
+      if (ptr->size & (pagesize - 1))
+	abort ();
+#endif
 
       /* First fit */
       if (sz <= ptr->size)
@@ -548,9 +566,6 @@ heap_primitive_alloc (heap_data *h, size_t sz)
 
 	  return (ptr);
 	}
-
-      if (ptr->size & (pagesize - 1))
-	abort ();
     }
 
   /* Nothing found on free list */
@@ -562,8 +577,10 @@ heap_primitive_alloc (heap_data *h, size_t sz)
 static void
 heap_primitive_free (heap_data *h, heap_block *mem)
 {
+#ifndef OPTIMIZE
   if (mem->size & (pagesize - 1))
     abort ();
+#endif
 
   if (h->before_prim_freeing)
     h->before_prim_freeing (h, mem, mem->size);
@@ -584,8 +601,13 @@ heap_add_to_free_list (heap_data *h, heap_block *mem)
   heap_block *lptr;
   heap_block *nptr;
 
+#ifndef OPTIMIZE
   if (((intptr_t) mem) & (pagesize - 1))
     abort ();
+
+  if (mem->size & (pagesize - 1))
+    abort ();
+#endif
 
   if (mem < heap_prim_freelist || heap_prim_freelist == 0)
     {
@@ -608,8 +630,10 @@ heap_add_to_free_list (heap_data *h, heap_block *mem)
   lptr = heap_prim_freelist;
   while (lptr->vFree.next != 0)
     {
+#ifndef OPTIMIZE
       if (lptr->size & (pagesize - 1))
 	abort ();
+#endif
 
       nptr = lptr->vFree.next;
       if (mem > lptr && mem < nptr)
@@ -664,8 +688,10 @@ static void
 heap_system_alloc (heap_data *h, size_t sz)
 {
   heap_block * mem;
+#ifndef OPTIMIZE
   if (sz & (pagesize - 1))
     abort ();
+#endif
 
   mem = (heap_block *) morecore (sz);
   mem->mmap_block = 0;
