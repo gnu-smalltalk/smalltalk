@@ -110,6 +110,7 @@ typedef struct save_file_header
   size_t big_object_threshold;
   size_t grow_threshold_percent;
   size_t space_grow_rate;
+  intptr_t ot_base;
 }
 save_file_header;
 
@@ -164,23 +165,13 @@ static void save_object (int imageFd,
 /* This function copies NUMBYTES from SRC to DEST, converting the first
    NUMPOINTERS absolute addresses into relative ones (these are the
    instance variables of the object).  */
-static inline void fixup_object (gst_object dest, gst_object src,
-				 int numPointers, int numBytes);
-
-/* This function converts NUMPOINTERS relative addresses at OBJECT,
-   which are instance variables of the object, into absolute ones.  */
-static inline void restore_object (gst_object object,
-				   int numPointers);
+static inline void fixup_object (OOP oop, gst_object dest, gst_object src,
+				 int numBytes);
 
 /* This function inverts the endianness of SIZE long-words, starting at
    BUF.  */
 static inline void fixup_byte_order (PTR buf,
 			      size_t size);
-
-/* This function converts NUMFIXED relative addresses, starting at
-   OBJ->data, back to absolute form.  */
-static inline void restore_pointer_slots (gst_object obj,
-				          int numPointers);
 
 /* This function loads an OOP table made of OLDSLOTSUSED slots from
    the image file stored in the file whose descriptor is IMAGEFD.
@@ -241,15 +232,13 @@ static mst_Boolean wrong_endianness;
    system.  */
 static int num_used_oops = 0;
 
-/* Convert to a relative offset from start of OOP table.  The offset
-   is 0 mod pointer-size, so it still looks like a pointer to the
-   IS_INT test.  */
-#define OOP_RELATIVE(obj) \
-  ( (OOP)((intptr_t)(obj) - (intptr_t)_gst_mem.ot) )
+/* Delta from the object table address used in the saved image, and
+   the one we allocate now.  */
+static intptr_t ot_delta;
 
 /* Convert from relative offset to actual oop table address.  */
 #define OOP_ABSOLUTE(obj) \
-  ( (OOP)((intptr_t)(obj) + (intptr_t)_gst_mem.ot) )
+  ( (OOP)((intptr_t)(obj) + ot_delta) )
 
 
 struct oop_s *myOOPTable = NULL;
@@ -368,7 +357,7 @@ save_object (int imageFd,
 	     OOP oop)
 {
   gst_object object, saveObject;
-  int numPointers, numBytes;
+  int numBytes;
 
 #ifdef SNAPSHOT_TRACE
   printf (">Save ");
@@ -376,7 +365,6 @@ save_object (int imageFd,
 #endif
 
   object = OOP_TO_OBJ (oop);
-  numPointers = NUM_OOPS (object);
 
   if (IS_OOP_FREE (oop))
     abort ();
@@ -385,13 +373,13 @@ save_object (int imageFd,
   if (numBytes < 262144)
     {
       saveObject = alloca (numBytes);
-      fixup_object (saveObject, object, numPointers, numBytes);
+      fixup_object (oop, saveObject, object, numBytes);
       buffer_write (imageFd, saveObject, numBytes);
     }
   else
     {
       saveObject = malloc (numBytes);
-      fixup_object (saveObject, object, numPointers, numBytes);
+      fixup_object (oop, saveObject, object, numBytes);
       buffer_write (imageFd, saveObject, numBytes);
       free (saveObject);
     }
@@ -415,6 +403,7 @@ save_file_version (int imageFd)
   header.big_object_threshold = _gst_mem.big_object_threshold;
   header.grow_threshold_percent = _gst_mem.grow_threshold_percent;
   header.space_grow_rate = _gst_mem.space_grow_rate;
+  header.ot_base = (intptr_t) _gst_mem.ot_base;
   buffer_write (imageFd, &header, sizeof (save_file_header));
 }
 
@@ -466,6 +455,7 @@ load_snapshot (int imageFd)
       header.grow_threshold_percent = BYTE_INVERT (header.grow_threshold_percent);
       header.space_grow_rate = BYTE_INVERT (header.space_grow_rate);
       header.version = BYTE_INVERT (header.version);
+      header.ot_base = BYTE_INVERT (header.ot_base);
     }
 
   /* check for version mismatch; if so this image file is invalid */
@@ -483,6 +473,7 @@ load_snapshot (int imageFd)
   _gst_init_oop_table (MAX (header.oopTableSize * 2,
 		       INITIAL_OOP_TABLE_SIZE));
 
+  ot_delta = (intptr_t) (_gst_mem.ot_base) - header.ot_base;
   num_used_oops = header.oopTableSize;
   load_oop_table (imageFd);
 
@@ -496,7 +487,8 @@ load_snapshot (int imageFd)
   printf ("After loading objects: %lld\n", file_pos + buf_pos);
 #endif /* SNAPSHOT_TRACE */
 
-  restore_all_pointer_slots ();
+  if (ot_delta)
+    restore_all_pointer_slots ();
 
   if (_gst_init_dictionary_on_image_load (num_used_oops))
     {
@@ -588,8 +580,6 @@ load_normal_oops (int imageFd)
       if (!IS_INT (object->objSize) || TO_INT (object->objSize) != size)
 	abort ();
 
-      object->objClass = OOP_ABSOLUTE (object->objClass);
-
       /* Remove flags that are invalid after an image has been loaded.  */
       oop->flags &= ~F_RUNTIME;
 
@@ -604,15 +594,6 @@ load_normal_oops (int imageFd)
 
       if (oop->flags & F_WEAK)
 	_gst_make_oop_weak (oop);
-
-      if (oop->flags & F_CONTEXT)
-	{
-	  /* this is another quirk; this is not the best place to do
-	     it. We have to reset the nativeIPs so that we can find
-	     restarted processes and recompile their methods.  */
-	  gst_method_context context = (gst_method_context) object;
-	  context->native_ip = DUMMY_NATIVE_IP;
-	}
     }
 
   /* NUM_OOPS requires access to the instance spec in the class
@@ -625,8 +606,10 @@ load_normal_oops (int imageFd)
          oop++)
       if (oop->flags & F_BYTE)
 	{
+	  OOP classOOP;
 	  object = OOP_TO_OBJ (oop);
-	  fixup_byte_order (object->data, NUM_OOPS (object));
+          classOOP = OOP_ABSOLUTE (object->objClass);
+	  fixup_byte_order (object->data, CLASS_FIXED_FIELDS (classOOP));
 	}
 }
 
@@ -635,35 +618,34 @@ load_normal_oops (int imageFd)
    loading and saving */
 
 void
-fixup_object (gst_object dest, gst_object src,
-	      int numPointers, int numBytes)
+fixup_object (OOP oop, gst_object dest, gst_object src, int numBytes)
 {
   OOP class_oop;
-  int i;
-
-  class_oop = src->objClass;
-  dest->objSize = src->objSize;
-  dest->objClass = OOP_RELATIVE (class_oop);
-
-  for (i = 0; i < numPointers; i++)
-    if (IS_INT (src->data[i]))
-      dest->data[i] = src->data[i];
-    else
-      dest->data[i] = OOP_RELATIVE (src->data[i]);
-
-  memcpy (&dest->data[i], &src->data[i], numBytes - sizeof (OOP) * numPointers);
+  memcpy (dest, src, numBytes);
 
   /* Do the heavy work on the objects now rather than at load time, in order
      to make the loading faster.  In general, we should do this as little as
      possible, because it's pretty hard: the three cases below for Process,
      Semaphore and CallinProcess for example are just there to terminate all
      CallinProcess objects.  */
-  if (class_oop == _gst_callin_process_class)
+
+  class_oop = src->objClass;
+
+  if (oop->flags & F_CONTEXT)
+    {
+      /* this is another quirk; this is not the best place to do
+         it. We have to reset the nativeIPs so that we can find
+         restarted processes and recompile their methods.  */
+      gst_method_context context = (gst_method_context) dest;
+      context->native_ip = DUMMY_NATIVE_IP;
+    }
+
+  else if (class_oop == _gst_callin_process_class)
     {
       gst_process process = (gst_process) dest;
-      process->suspendedContext = OOP_RELATIVE (_gst_nil_oop);
-      process->nextLink = OOP_RELATIVE (_gst_nil_oop);
-      process->myList = OOP_RELATIVE (_gst_nil_oop);
+      process->suspendedContext = _gst_nil_oop;
+      process->nextLink = _gst_nil_oop;
+      process->myList = _gst_nil_oop;
     }
 
   else if (class_oop == _gst_process_class)
@@ -674,7 +656,7 @@ fixup_object (gst_object dest, gst_object src,
       while (OOP_CLASS (next->nextLink) == _gst_callin_process_class)
 	next = (gst_process) OOP_TO_OBJ (next->nextLink);
 
-      destProcess->nextLink = OOP_RELATIVE (next->nextLink);
+      destProcess->nextLink = next->nextLink;
     }
 
   else if (class_oop == _gst_semaphore_class)
@@ -682,22 +664,21 @@ fixup_object (gst_object dest, gst_object src,
       /* Find the new first and last link.  */
       gst_semaphore destSem = (gst_semaphore) dest;
       gst_semaphore srcSem = (gst_semaphore) src;
-      OOP firstOOP = _gst_nil_oop, lastOOP = _gst_nil_oop;
       OOP linkOOP = srcSem->firstLink;
+
+      destSem->firstLink = _gst_nil_oop;
+      destSem->lastLink = _gst_nil_oop;
       while (!IS_NIL (linkOOP))
 	{
 	  gst_process process = (gst_process) OOP_TO_OBJ (linkOOP);
 	  if (process->objClass != _gst_callin_process_class)
 	    {
-	      if (IS_NIL (firstOOP))
-		firstOOP = linkOOP;
-	      lastOOP = linkOOP;
+	      if (IS_NIL (destSem->firstLink))
+		destSem->firstLink = linkOOP;
+	      destSem->lastLink = linkOOP;
 	    }
 	  linkOOP = process->nextLink;
 	}
-
-      destSem->firstLink = OOP_RELATIVE (firstOOP);
-      destSem->lastLink = OOP_RELATIVE (lastOOP);
     }
 
   /* The other case is to reset CFunctionDescriptor objects, so that we'll
@@ -705,34 +686,9 @@ fixup_object (gst_object dest, gst_object src,
   else if (class_oop == _gst_c_func_descriptor_class)
     {
       gst_cfunc_descriptor desc = (gst_cfunc_descriptor) dest;
-      desc->cFunction = OOP_RELATIVE (_gst_nil_oop);
+      desc->cFunction = _gst_nil_oop;
     }
 
-}
-
-void
-restore_object (gst_object object,
-		     int numPointers)
-{
-  object->objClass = OOP_ABSOLUTE (object->objClass);
-  restore_pointer_slots (object, numPointers);
-}
-
-void
-restore_pointer_slots (gst_object obj,
-		       int numPointers)
-{
-  OOP instOOP, *i;
-
-  i = obj->data;
-  while (numPointers--)
-    {
-      instOOP = *i;
-      if (IS_OOP (instOOP))
-	*i = OOP_ABSOLUTE (instOOP);
-
-      i++;
-    }
 }
 
 void
@@ -751,14 +707,19 @@ restore_oop_pointer_slots (OOP oop)
 {
   int numPointers;
   gst_object object;
+  OOP *i;
 
   object = OOP_TO_OBJ (oop);
+  object->objClass = OOP_ABSOLUTE (object->objClass);
+
   if UNCOMMON ((oop->flags & F_COUNT) == F_COUNT)
     numPointers = NUM_OOPS (object);
   else
     numPointers = oop->flags >> F_COUNT_SHIFT;
 
-  restore_pointer_slots (object, numPointers);
+  for (i = object->data; numPointers--; i++)
+    if (IS_OOP (*i))
+      *i = OOP_ABSOLUTE (*i);
 }
 
 void
