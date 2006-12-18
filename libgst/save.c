@@ -110,6 +110,7 @@ typedef struct save_file_header
   size_t big_object_threshold;
   size_t grow_threshold_percent;
   size_t space_grow_rate;
+  size_t num_free_oops;
   intptr_t ot_base;
 }
 save_file_header;
@@ -134,20 +135,28 @@ static off_t file_pos;
 static mst_Boolean use_mmap;
 
 
+/* This function establishes a buffer of size NUMBYTES for writes.  */
+static void buffer_write_init (int imageFd,
+			       int numBytes);
+
+/* This function flushes and frees the buffer used for writes.  */
+static void buffer_write_flush (int imageFd);
+
 /* This function buffers writes to the image file whose descriptor is
-   IMAGEFD.  It should be called with DATA == NULL and N > 0 to
-   establish the buffer size, with DATA == NULL and N == 0 to flush
-   the data and free the buffer, and the same as write(2) to do the
-   actual I/O.  */
+   IMAGEFD.  */
 static void buffer_write (int imageFd,
 			  PTR data,
 			  int numBytes);
 
+/* This function establishes a buffer of size NUMBYTES for reads.  */
+static void buffer_read_init (int imageFd,
+			      int numBytes);
+
+/* This function frees the buffer used for reads.  */
+static void buffer_read_free (int imageFd);
+
 /* This function buffers reads from the image file whose descriptor
-   is IMAGEFD.  It should be called with DATA == NULL and N > 0 to
-   establish the buffer size, with DATA == NULL and N == 0 to flush
-   the data and free the buffer, and the same as write(2) to do the
-   actual I/O.  Memory-mapped I/O is used is possible.  */
+   is IMAGEFD.  Memory-mapped I/O is used is possible.  */
 static void buffer_read (int imageFd,
 			 PTR data,
 			 int numBytes);
@@ -189,9 +198,10 @@ static void load_oop_table (int imageFd);
    Object data is loaded from the IMAGEFD file descriptor.  */
 static void load_normal_oops (int imageFd);
 
-/* This function stores the header of the image file into the file
+/* This function stores the header, HEADERP, of the image file into the file
    whose descriptor is IMAGEFD.  */
-static void save_file_version (int imageFd);
+static void save_file_version (int imageFd,
+			       struct save_file_header *headerp);
 
 /* This function loads into HEADERP the header of the image file
    without checking its validity.
@@ -210,7 +220,7 @@ static inline void restore_oop_pointer_slots (OOP oop);
 /* This function prepares the OOP table to be written to the image
    file.  This contains the object sizes instead of the pointers,
    since addresses will be recalculated upon load.  */
-static struct oop_s *make_oop_table_to_be_saved (void);
+static struct oop_s *make_oop_table_to_be_saved (struct save_file_header *hdr);
 
 /* This function walks the OOP table and saves the data
    onto the file whose descriptor is IMAGEFD.  */
@@ -247,6 +257,7 @@ mst_Boolean
 _gst_save_to_file (const char *fileName)
 {
   int imageFd;
+  save_file_header header;
 
   imageFd = _gst_open_file (fileName, "w");
   if (imageFd < 0)
@@ -257,10 +268,11 @@ _gst_save_to_file (const char *fileName)
   _gst_global_gc (0);
   _gst_finish_incremental_gc ();
 
-  myOOPTable = make_oop_table_to_be_saved ();
+  memzero (&header, sizeof (header));
+  myOOPTable = make_oop_table_to_be_saved (&header);
 
-  buffer_write (imageFd, NULL, WRITE_BUFFER_SIZE);
-  save_file_version (imageFd);
+  buffer_write_init (imageFd, WRITE_BUFFER_SIZE);
+  save_file_version (imageFd, &header);
 
 #ifdef SNAPSHOT_TRACE
   printf ("After saving header: %lld\n",
@@ -284,7 +296,7 @@ _gst_save_to_file (const char *fileName)
 	  lseek (imageFd, 0, SEEK_CUR));
 #endif /* SNAPSHOT_TRACE */
 
-  buffer_write (imageFd, NULL, 0);
+  buffer_write_flush (imageFd);
   close (imageFd);
 
   _gst_invoke_hook ("finishedSnapshot");
@@ -294,7 +306,7 @@ _gst_save_to_file (const char *fileName)
 
 
 struct oop_s *
-make_oop_table_to_be_saved (void)
+make_oop_table_to_be_saved (struct save_file_header *header)
 {
   OOP oop;
   struct oop_s *myOOPTable;
@@ -336,8 +348,12 @@ make_oop_table_to_be_saved (void)
 	  myOOPTable[i].object = (gst_object) TO_INT (oop->object->objSize);
 	}
       else
-	myOOPTable[i].flags = F_FREE;
+	{
+	  myOOPTable[i].flags = F_FREE;
+	  header->num_free_oops++;
+	}
     }
+
   return (myOOPTable);
 }
 
@@ -386,25 +402,22 @@ save_object (int imageFd,
 }
 
 void
-save_file_version (int imageFd)
+save_file_version (int imageFd, struct save_file_header *headerp)
 {
-  save_file_header header;
+  memcpy (headerp->dummy, EXECUTE, strlen (EXECUTE));
+  memcpy (headerp->signature, SIGNATURE, strlen (SIGNATURE));
+  headerp->flags = FLAGS_WRITTEN;
+  headerp->version = VERSION_REQUIRED;
+  headerp->oopTableSize = num_used_oops;
+  headerp->edenSpaceSize = _gst_mem.eden.totalSize;
+  headerp->survSpaceSize = _gst_mem.surv[0].totalSize;
+  headerp->oldSpaceSize = _gst_mem.old->heap_limit;
 
-  memzero (&header, sizeof (header));
-  memcpy (header.dummy, EXECUTE, strlen (EXECUTE));
-  memcpy (header.signature, SIGNATURE, strlen (SIGNATURE));
-  header.flags = FLAGS_WRITTEN;
-  header.version = VERSION_REQUIRED;
-  header.oopTableSize = num_used_oops;
-  header.edenSpaceSize = _gst_mem.eden.totalSize;
-  header.survSpaceSize = _gst_mem.surv[0].totalSize;
-  header.oldSpaceSize = _gst_mem.old->heap_limit;
-
-  header.big_object_threshold = _gst_mem.big_object_threshold;
-  header.grow_threshold_percent = _gst_mem.grow_threshold_percent;
-  header.space_grow_rate = _gst_mem.space_grow_rate;
-  header.ot_base = (intptr_t) _gst_mem.ot_base;
-  buffer_write (imageFd, &header, sizeof (save_file_header));
+  headerp->big_object_threshold = _gst_mem.big_object_threshold;
+  headerp->grow_threshold_percent = _gst_mem.grow_threshold_percent;
+  headerp->space_grow_rate = _gst_mem.space_grow_rate;
+  headerp->ot_base = (intptr_t) _gst_mem.ot_base;
+  buffer_write (imageFd, headerp, sizeof (save_file_header));
 }
 
 
@@ -424,7 +437,7 @@ _gst_load_from_file (const char *fileName)
   imageFd = _gst_open_file (fileName, "r");
   loaded = (imageFd >= 0) && load_snapshot (imageFd);
 
-  buffer_read (imageFd, NULL, 0);
+  buffer_read_free (imageFd);
 
   close (imageFd);
   return (loaded);
@@ -435,7 +448,7 @@ load_snapshot (int imageFd)
 {
   save_file_header header;
 
-  buffer_read (imageFd, NULL, READ_BUFFER_SIZE);
+  buffer_read_init (imageFd, READ_BUFFER_SIZE);
   load_file_version (imageFd, &header);
   if (strcmp (header.signature, SIGNATURE))
     return (false);
@@ -455,6 +468,7 @@ load_snapshot (int imageFd)
       header.grow_threshold_percent = BYTE_INVERT (header.grow_threshold_percent);
       header.space_grow_rate = BYTE_INVERT (header.space_grow_rate);
       header.version = BYTE_INVERT (header.version);
+      header.num_free_oops = BYTE_INVERT (header.num_free_oops);
       header.ot_base = BYTE_INVERT (header.ot_base);
     }
 
@@ -470,11 +484,13 @@ load_snapshot (int imageFd)
 		 header.oldSpaceSize, header.big_object_threshold,
 		 header.grow_threshold_percent, header.space_grow_rate);
 
-  _gst_init_oop_table (header.ot_base,
+  _gst_init_oop_table ((PTR) header.ot_base,
 		       MAX (header.oopTableSize * 2, INITIAL_OOP_TABLE_SIZE));
 
   ot_delta = (intptr_t) (_gst_mem.ot_base) - header.ot_base;
   num_used_oops = header.oopTableSize;
+  _gst_mem.num_free_oops = header.num_free_oops;
+
   load_oop_table (imageFd);
 
 #ifdef SNAPSHOT_TRACE
@@ -512,6 +528,7 @@ void
 load_oop_table (int imageFd)
 {
   OOP oop;
+  int i;
 
   /* load in the valid OOP slots from previous dump */
   buffer_read (imageFd, _gst_mem.ot, sizeof (struct oop_s) * num_used_oops);
@@ -521,12 +538,12 @@ load_oop_table (int imageFd)
 
   /* mark the remaining ones as available */
   PREFETCH_START (&_gst_mem.ot[num_used_oops], PREF_WRITE | PREF_NTA);
-  for (oop = &_gst_mem.ot[num_used_oops];
-       oop < &_gst_mem.ot[_gst_mem.ot_size]; oop++)
+
+  for (oop = &_gst_mem.ot[num_used_oops],
+       i = _gst_mem.ot_size - num_used_oops; i--; oop++)
     {
       PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
       oop->flags = F_FREE;
-      oop++;
     }
 }
 
@@ -536,24 +553,22 @@ load_normal_oops (int imageFd)
 {
   OOP oop;
   gst_object object;
+  int i;
 
   /* Now walk the oop table.  Start fixing the byte order.  */
 
-  _gst_mem.num_free_oops = _gst_mem.ot_size - num_used_oops;
   _gst_mem.last_allocated_oop = &_gst_mem.ot[num_used_oops - 1];
   PREFETCH_START (_gst_mem.ot, PREF_WRITE | PREF_NTA);
-  for (oop = _gst_mem.ot; oop < &_gst_mem.ot[num_used_oops];
-       oop++)
+  for (oop = _gst_mem.ot, i = num_used_oops; i--; oop++)
     {
       size_t size;
+      intptr_t flags;
 
       PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
-      if (oop->flags & F_FREE)
-	{
-	  _gst_mem.num_free_oops++;
-	  oop->flags = F_FREE;	/* just free */
-	  continue;
-	}
+      flags = oop->flags;
+
+      if (flags & F_FREE)
+	continue;
 
       /* FIXME: a small amount of garbage is saved that is produced
          by mourning the ephemerons right before GC.  We should probably
@@ -564,35 +579,34 @@ load_normal_oops (int imageFd)
 	 to create new-space objects.  The solution is not however as neat
 	 as possible.  */
 
-      oop->flags &= ~(F_SPACES | F_POOLED);
-      oop->flags |= F_OLD;
+      flags &= ~(F_SPACES | F_POOLED | F_RUNTIME);
+      flags |= F_OLD;
 
       _gst_mem.numOldOOPs++;
-      if (oop->flags & F_FIXED)
-	_gst_mem.numFixedOOPs++;
+      size = sizeof (PTR) * (size_t) oop->object;
+      if (flags & F_FIXED)
+	{
+	  _gst_mem.numFixedOOPs++;
+          object = (gst_object) _gst_mem_alloc (_gst_mem.fixed, size);
+	}
+      else
+        object = (gst_object) _gst_mem_alloc (_gst_mem.old, size);
 
-      size = (size_t) oop->object;
-      object = (gst_object) _gst_mem_alloc (
-	(oop->flags & F_FIXED) ? _gst_mem.fixed : _gst_mem.old,
-        size * sizeof (PTR));
+      buffer_read (imageFd, object, size);
+      if UNCOMMON (wrong_endianness)
+	fixup_byte_order (object, 
+			  (oop->flags & F_BYTE)
+			  ? OBJ_HEADER_SIZE_WORDS
+			  : size / sizeof (PTR));
 
-      buffer_read (imageFd, object, sizeof (PTR) * size);
-      if (!IS_INT (object->objSize) || TO_INT (object->objSize) != size)
+      if (object->objSize != FROM_INT ((size_t) oop->object))
 	abort ();
 
       /* Remove flags that are invalid after an image has been loaded.  */
-      oop->flags &= ~F_RUNTIME;
-
       oop->object = object;
-      if UNCOMMON (wrong_endianness)
-	{
-	  OOP size = (OOP) BYTE_INVERT ((intptr_t) oop->object->objSize);
-	  fixup_byte_order (object, 
-			    (oop->flags & F_BYTE)
-			      ? OBJ_HEADER_SIZE_WORDS : TO_INT (size));
-	}
+      oop->flags = flags;
 
-      if (oop->flags & F_WEAK)
+      if (flags & F_WEAK)
 	_gst_make_oop_weak (oop);
     }
 
@@ -602,8 +616,7 @@ load_normal_oops (int imageFd)
      do another pass here and fix the byte objects using the now
      correct class objects.  */
   if UNCOMMON (wrong_endianness)
-    for (oop = _gst_mem.ot; oop < &_gst_mem.ot[num_used_oops];
-         oop++)
+    for (oop = _gst_mem.ot, i = num_used_oops; i--; oop++)
       if (oop->flags & F_BYTE)
 	{
 	  OOP classOOP;
@@ -731,29 +744,27 @@ fixup_byte_order (PTR buf,
     *p = BYTE_INVERT (*p);
 }
 
+void
+buffer_write_init (int imageFd, int numBytes)
+{
+  buf = xmalloc (numBytes);
+  buf_size = numBytes;
+  buf_pos = 0;
+}
+
+void
+buffer_write_flush (int imageFd)
+{
+  _gst_full_write (imageFd, buf, buf_pos);
+  xfree (buf);
+  buf_pos = 0;
+}
 
 void
 buffer_write (int imageFd,
 	      PTR data,
 	      int numBytes)
 {
-  if UNCOMMON (!data)
-    {
-      if (numBytes)
-	{
-	  buf = xmalloc (numBytes);
-	  buf_size = numBytes;
-	}
-      else
-	{
-	  _gst_full_write (imageFd, buf, buf_pos);
-	  xfree (buf);
-	}
-
-      buf_pos = 0;
-      return;
-    }
-
   if UNCOMMON (buf_pos + numBytes > buf_size)
     {
       _gst_full_write (imageFd, buf, buf_pos);
@@ -810,42 +821,45 @@ buffer_fill (int imageFd)
 }
 
 void
+buffer_read_init (int imageFd, int numBytes)
+{
+  if (numBytes)
+    {
+      struct stat st;
+      fstat (imageFd, &st);
+      file_size = st.st_size;
+      file_pos = 0;
+      buf_size = numBytes;
+      use_mmap = true;
+      buf = NULL;
+      buffer_fill (imageFd);
+    }
+}
+
+void
+buffer_read_free (int imageFd)
+{
+  if (use_mmap)
+    _gst_osmem_free (buf, buf_size);
+  else
+    xfree (buf);
+}
+
+void
 buffer_read (int imageFd,
 	     PTR pdata,
 	     int numBytes)
 {
   char *data = (char *) pdata;
 
-  if UNCOMMON (!data)
-    {
-      if (numBytes)
-	{
-	  struct stat st;
-	  fstat (imageFd, &st);
-	  file_size = st.st_size;
-	  file_pos = 0;
-	  buf_size = numBytes;
-	  use_mmap = true;
-	  buf = NULL;
-	  buffer_fill (imageFd);
-	}
-      else
-	{
-	  if (use_mmap)
-	    _gst_osmem_free (buf, buf_size);
-	  else
-	    xfree (buf);
-	}
-
-      return;
-    }
-
-  /* Avoid triggering a SIGBUS.  */
+#if 0
+  /* Avoid triggering a SIGBUS.  Unnecessary, and wastes time.  */
   if UNCOMMON (numBytes > file_size - file_pos)
     {
       memzero (data + file_size - file_pos, numBytes - (file_size - file_pos));
       numBytes = file_size - file_pos;
     }
+#endif
 
   if UNCOMMON (numBytes > buf_size - buf_pos)
     {
