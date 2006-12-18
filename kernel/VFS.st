@@ -237,7 +237,8 @@ update: aspect
 	self allSubclassesDo: [ :each | each release ].
     ].
     aspect == #aboutToQuit ifTrue: [
-	self allSubinstancesDo: [ :each | each release ]
+	self broadcast: #release.
+	self release.
     ].
 !
 
@@ -265,6 +266,18 @@ vfsFor: fileName name: fsName subPath: subPath
 	vfsFor: fileName name: fsName subPath: subPath!
 
 
+!VFSHandler methodsFor: 'releasing'!
+
+addToBeFinalized
+    "Something that has to be finalized will also be released before quitting."
+    VFSHandler addDependent: self.
+    super addToBeFinalized!
+
+finalize
+    "Upon finalization, we remove the file that was temporarily holding the file
+     contents"
+    self release! !
+
 !VFSHandler methodsFor: 'accessing'!
 
 name
@@ -274,16 +287,14 @@ name
 
 name: aName
     "Private - Initialize the receiver's instance variables"
-    name := aName!
+    name := aName
+!
 
 realFileName
     "Answer the real file name which holds the file contents,
      or an empty string if it does not apply."
     ^name
-! !
-
-
-!VFSHandler methodsFor: 'accessing'!
+!
 
 size
     "Answer the size of the file identified by the receiver"
@@ -652,11 +663,6 @@ name: virtualFileName realFileName: temporaryFileName
     self name: virtualFileName.
     realFileName := temporaryFileName!
 
-finalize
-    "Upon finalization, we remove the file that was temporarily holding the file
-     contents"
-    self release!
-
 realFileName
     "Answer the real file name which holds the file contents,
      or nil if it does not apply."
@@ -668,10 +674,11 @@ release
 
     "Remove the file that was temporarily holding the file contents"
     realFileName isNil ifTrue: [ ^self ].
-    self remove.
-    realFileName := nil! !
+    self primUnlink: realFileName.
+    realFileName := nil.
+    super release! !
 
-!ArchiveFileHandler class methodsFor: 'registering'!
+!ArchiveFileHandler methodsFor: 'querying'!
 
 isDirectory
     "Answer true.  The archive can always be considered as a directory."
@@ -707,7 +714,9 @@ at: aName
     ].
 
     ^handlers at: aName ifAbsentPut: [
-	self newMemberHandlerFor: aName ]!
+	ArchiveMemberHandler new
+	    name: aName;
+	    parent: self ]!
 
 do: aBlock
     "Evaluate aBlock once for each file in the directory represented by the
@@ -715,28 +724,17 @@ do: aBlock
 
     self subclassResponsibility!
 
-finalize
-    "Upon finalization, we remove the file that was temporarily holding the file
-     contents"
-    self release!
-
 release
     "Release the resources used by the receiver that don't survive when
      reloading a snapshot."
 
     handlers isNil ifTrue: [ ^self ].
     handlers do: [ :each | each release ].
-    handlers := nil! !
+    handlers := nil.
+    super release! !
 
 
 !ArchiveFileHandler methodsFor: 'ArchiveMemberHandler protocol'!
-
-newMemberHandlerFor: aName
-    "Answer a new ArchiveMemberHandler for a file named aName
-     residing inside the archive represented by the receiver."
-    ^ArchiveMemberHandler new
-	name: aName;
-	parent: self!
 
 extractMember: anArchiveMemberHandler
     "Extract the contents of anArchiveMemberHandler into a file
@@ -801,14 +799,15 @@ fileSystemsIn: path
 
 release
     "Avoid that paths stay in the image file"
-    FileTypes := nil!
+    FileTypes := nil.
+    super release!
 
 vfsFor: file name: fsName subPath: subPath
     "Create a temporary file and use it to construct the contents of the given
      file, under the virtual filesystem fsName."
     subPath isNil ifFalse: [
 	^(self vfsFor: file name: fsName subPath: nil)
-	    newMemberHandlerFor: subPath
+	    at: subPath
     ].
 
     ^ActivePaths at: (fsName -> file) ifAbsentPut: [
@@ -1031,9 +1030,8 @@ release
     "Release the resources used by the receiver that don't survive when
      reloading a snapshot."
 
-    super release.
-    extractedFiles := nil
-! !
+    extractedFiles := nil.
+    super release! !
 
 
 !ArchiveMemberHandler methodsFor: 'initializing'!
@@ -1154,7 +1152,8 @@ release
     "Remove the file that was temporarily holding the file contents"
     realFileName isNil ifTrue: [ ^self ].
     self primUnlink: realFileName.
-    realFileName := nil! !
+    realFileName := nil.
+    super release! !
 
 !ArchiveMemberHandler methodsFor: 'file operations'!
 

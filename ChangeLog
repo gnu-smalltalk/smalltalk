@@ -1,5 +1,10 @@
 2006-12-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/VFS.st: Use dependency to invoke #release instead of
+	#allSubinstancesDo:
+
+2006-12-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FileDescr.st: Fix #nextPutByte:.
 	* kernel/FileStream.st: Remove it and #nextPutByteArray:.
 
