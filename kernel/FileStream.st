@@ -278,16 +278,6 @@ nextPut: aCharacter
     writeEnd := ptr - 1.
 !
 
-nextPutByte: anInteger
-    "Store the byte, anInteger, on the file"
-    self nextPut: anInteger asCharacter
-!
-
-nextPutByteArray: aByteArray
-    "Store aByteArray on the file"
-    ^self nextPutAll: aByteArray asString
-!
-
 bufferStart
     "Private - Answer the offset from the start of the file corresponding
      to the beginning of the read buffer."

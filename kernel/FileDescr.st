@@ -319,7 +319,7 @@ nextPut: aCharacter
 
 nextPutByte: anInteger
     "Store the byte, anInteger, on the file"
-    self nextPut: anInteger asCharacter
+    self nextPut: (Character value: anInteger)
 !
 
 nextPutByteArray: aByteArray
