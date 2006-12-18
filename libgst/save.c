@@ -530,21 +530,12 @@ load_oop_table (int imageFd)
   OOP oop;
   int i;
 
-  /* load in the valid OOP slots from previous dump */
+  /* Load in the valid OOP slots from previous dump.  The others are already
+     initialized to F_FREE.  */
   buffer_read (imageFd, _gst_mem.ot, sizeof (struct oop_s) * num_used_oops);
   if UNCOMMON (wrong_endianness)
     fixup_byte_order (_gst_mem.ot,
 		      sizeof (struct oop_s) * num_used_oops / sizeof (PTR));
-
-  /* mark the remaining ones as available */
-  PREFETCH_START (&_gst_mem.ot[num_used_oops], PREF_WRITE | PREF_NTA);
-
-  for (oop = &_gst_mem.ot[num_used_oops],
-       i = _gst_mem.ot_size - num_used_oops; i--; oop++)
-    {
-      PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
-      oop->flags = F_FREE;
-    }
 }
 
 
