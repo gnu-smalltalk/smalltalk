@@ -55,7 +55,8 @@
 
 typedef char *heap;
 
-/* Initialize access to a heap managed region.
+/* Initialize access to a heap managed region of the given SIZE, trying
+   to put it at the specified address.
 
    On success, returns a "heap descriptor" which is used in subsequent
    calls to other heap package functions.  It is explicitly "char *"
@@ -63,7 +64,7 @@ typedef char *heap;
    implementation details.
 
    On failure returns NULL.  */
-extern heap _gst_heap_create (int size) 
+extern heap _gst_heap_create (PTR address, int size) 
   ATTRIBUTE_HIDDEN;
 
 /* Terminate access to a heap managed region by unmapping all memory pages

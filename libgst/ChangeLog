@@ -1,3 +1,18 @@
+2006-12-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/alloc.c: Adjust calls to _gst_heap_create.
+	* libgst/lib.c: Likewise.
+	* libgst/oop.c: Likewise.
+	* libgst/save.c: Likewise.
+
+	* libgst/heap.c: Add address parameter to _gst_heap_create.
+	* libgst/heap.h: Likewise for declaration.
+	* libgst/oop.h: Likewise for _gst_init_oop_table declaration.
+	* libgst/sysdep.c: Add address parameter to _gst_osmem_reserve and
+	to the implementations of the function.  Support MAP_AUTORESRV
+	as a synonym of MAP_NORESERVE.
+	* libgst/sysdep.h: Likewise for declaration.
+
 2006-12-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/alloc.c: Remove assertions if !OPTIMIZE.  Increase default

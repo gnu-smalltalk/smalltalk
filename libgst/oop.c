@@ -426,13 +426,13 @@ void _gst_update_object_memory_oop (OOP oop)
 }
 
 void
-_gst_init_oop_table (size_t size)
+_gst_init_oop_table (PTR address, size_t size)
 {
   int i;
 
   oop_heap = NULL;
   for (i = MAX_OOP_TABLE_SIZE; i && !oop_heap; i >>= 1)
-    oop_heap = _gst_heap_create (i * sizeof (struct oop_s));
+    oop_heap = _gst_heap_create (address, i * sizeof (struct oop_s));
 
   if (!oop_heap)
     nomemory (true);

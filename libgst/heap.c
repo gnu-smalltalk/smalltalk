@@ -100,7 +100,7 @@ extern int getpagesize ();
 
 
 heap
-_gst_heap_create (int size)
+_gst_heap_create (PTR address, int size)
 {
   struct heap mtemp;
   struct heap *hdp;
@@ -112,6 +112,9 @@ _gst_heap_create (int size)
       pageround = pagesize - 1;
     }
 
+  if (address)
+    address -= HEAP_DELTA;
+
   /* We start off with the heap descriptor allocated on the stack,
      until we build it up enough to call heap_sbrk_internal() to
      allocate the first page of the region and copy it there.  Ensure
@@ -121,7 +124,7 @@ _gst_heap_create (int size)
   hdp = &mtemp;
   memzero ((char *) hdp, sizeof (mtemp));
   hdp->areasize = size;
-  hdp->base = _gst_osmem_reserve (size);
+  hdp->base = _gst_osmem_reserve (address, size);
 
   if (!hdp->base)
     return NULL;

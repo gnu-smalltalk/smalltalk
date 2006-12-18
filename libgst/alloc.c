@@ -714,7 +714,7 @@ morecore (size_t size)
 #ifdef NO_MALLOC_OVERRIDE
   if (current_heap == NULL)
     {
-      just_allocated_heap = _gst_heap_create (MMAP_AREA_SIZE);
+      just_allocated_heap = _gst_heap_create (NULL, MMAP_AREA_SIZE);
       if (!just_allocated_heap)
 	return (NULL);
       current_heap = just_allocated_heap;
@@ -746,7 +746,7 @@ morecore (size_t size)
       if (just_allocated_heap)
 	return (NULL);
 
-      just_allocated_heap = _gst_heap_create (MMAP_AREA_SIZE);
+      just_allocated_heap = _gst_heap_create (NULL, MMAP_AREA_SIZE);
       if (!just_allocated_heap)
 	return (NULL);
 

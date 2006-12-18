@@ -323,12 +323,12 @@ extern void _gst_init_mem (size_t eden, size_t survivor, size_t old,
            	           int space_grow_rate) 
   ATTRIBUTE_HIDDEN;
 
-/* Initialize an OOP table of SIZE bytes.  Initially, all the OOPs are
-   free list so that's just how we initialize them.  We do
-   as much initialization as we can, but we're called before classses
-   are defined, so things that have definite classes must wait until
-   the classes are defined.  */
-extern void _gst_init_oop_table (size_t size) 
+/* Initialize an OOP table of SIZE bytes, trying at the given address if
+   possible.  Initially, all the OOPs are on the free list so that's
+   just how we initialize them.  We do as much initialization as we can,
+   but we're called before classses are defined, so things that have
+   definite classes must wait until the classes are defined.  */
+extern void _gst_init_oop_table (PTR address, size_t size) 
   ATTRIBUTE_HIDDEN;
 
 /* Dump the entire contents of the OOP table.  Mainly for debugging

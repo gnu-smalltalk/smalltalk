@@ -243,7 +243,8 @@ extern void _gst_osmem_free (PTR ptr, size_t size)
   ATTRIBUTE_HIDDEN;
 
 /* Reserve SIZE bytes of the address space without allocating them.  */
-extern PTR _gst_osmem_reserve (size_t size)
+extern PTR _gst_osmem_reserve (PTR base,
+			       size_t size)
   ATTRIBUTE_HIDDEN;
 
 /* Release SIZE bytes of the address space starting from BASE.  */

@@ -470,8 +470,8 @@ load_snapshot (int imageFd)
 		 header.oldSpaceSize, header.big_object_threshold,
 		 header.grow_threshold_percent, header.space_grow_rate);
 
-  _gst_init_oop_table (MAX (header.oopTableSize * 2,
-		       INITIAL_OOP_TABLE_SIZE));
+  _gst_init_oop_table (header.ot_base,
+		       MAX (header.oopTableSize * 2, INITIAL_OOP_TABLE_SIZE));
 
   ot_delta = (intptr_t) (_gst_mem.ot_base) - header.ot_base;
   num_used_oops = header.oopTableSize;

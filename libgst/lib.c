@@ -528,7 +528,7 @@ gst_init_smalltalk (void)
 	  return 1;
 	}
 
-      _gst_init_oop_table (INITIAL_OOP_TABLE_SIZE);
+      _gst_init_oop_table (NULL, INITIAL_OOP_TABLE_SIZE);
       _gst_init_mem_default ();
       _gst_init_dictionary ();
       _gst_init_interpreter ();

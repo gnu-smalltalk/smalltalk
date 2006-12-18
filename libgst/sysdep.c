@@ -1429,14 +1429,14 @@ _gst_debug (void)
 
 typedef struct heap_implementation {
   mst_Boolean (*check) ();
-  PTR (*reserve) (size_t);
+  PTR (*reserve) (PTR, size_t);
   void (*release) (PTR, size_t);
   PTR (*commit) (PTR, size_t);
   void (*decommit) (PTR, size_t);
 } heap_implementation;
 
 #ifdef WIN32
-static PTR win32_reserve (size_t);
+static PTR win32_reserve (PTR, size_t);
 static void win32_release (PTR, size_t);
 static PTR win32_commit (PTR, size_t);
 static void win32_decommit (PTR, size_t);
@@ -1446,12 +1446,15 @@ struct heap_implementation heap_impl_tab[] = {
 };
 #else /* !WIN32 */
 
+# if defined MAP_AUTORESRV && !defined MAP_NORESERVE
+#  define MAP_NORESERVE MAP_AUTORESRV
+# endif
 # ifdef MAP_NORESERVE
-static PTR noreserve_reserve (size_t);
+static PTR noreserve_reserve (PTR, size_t);
 static void noreserve_decommit (PTR, size_t);
 #endif
 static mst_Boolean anon_mmap_check (void);
-static PTR anon_mmap_reserve (size_t);
+static PTR anon_mmap_reserve (PTR, size_t);
 static void anon_mmap_release (PTR, size_t);
 static PTR anon_mmap_commit (PTR, size_t);
 
@@ -1481,7 +1484,7 @@ static int dev_zero = -1;
 static heap_implementation *impl;
 
 PTR
-_gst_osmem_reserve (size_t size)
+_gst_osmem_reserve (PTR address, size_t size)
 {
   if (!impl)
     {
@@ -1489,7 +1492,7 @@ _gst_osmem_reserve (size_t size)
          The check is done at run-time because it is cheap.  */
       for (impl = heap_impl_tab; impl->reserve; impl++)
         if (!impl->check || impl->check ())
-	  return impl->reserve (size);
+	  return impl->reserve (address, size);
 
       /* Not found, check again the next time just in case and return
          ENOMEM.  */
@@ -1498,7 +1501,7 @@ _gst_osmem_reserve (size_t size)
       return (NULL);
     }
   else
-    return impl->reserve (size);
+    return impl->reserve (address, size);
 }
 
 void
@@ -1563,10 +1566,10 @@ _gst_osmem_free (PTR ptr, size_t size)
 #ifdef WIN32
 
 PTR
-win32_reserve (size_t size)
+win32_reserve (PTR address, size_t size)
 {
   PTR base;
-  base = VirtualAlloc(NULL, size, MEM_RESERVE, PAGE_NOACCESS);
+  base = VirtualAlloc(address, size, MEM_RESERVE, PAGE_NOACCESS);
   if (!base)
     errno = ENOMEM;
 
@@ -1603,9 +1606,9 @@ win32_decommit (PTR base, size_t size)
    is available.  */
 
 PTR
-noreserve_reserve (size_t size)
+noreserve_reserve (PTR address, size_t size)
 {
-  PTR result = anon_mmap (NULL, size, PROT_NONE,
+  PTR result = anon_mmap (address, size, PROT_NONE,
 			  MAP_PRIVATE | MAP_NORESERVE);
 
   return result == MAP_FAILED ? NULL : result;
@@ -1626,11 +1629,11 @@ noreserve_decommit (PTR base, size_t size)
 static char *baseaddr;
 
 PTR
-anon_mmap_reserve (size_t size)
+anon_mmap_reserve (PTR address, size_t size)
 {
   PTR base;
 
-  /* We must check for overflows in baseaddr!  */
+  /* We must check for overflows in baseaddr!  Note that we ignore address.  */
   if (((uintptr_t) baseaddr) + size < (uintptr_t) baseaddr)
     {
       errno = ENOMEM;
