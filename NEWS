@@ -1,5 +1,17 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 2.3.1 TO 2.4
+
+o   Startup time and quit time were improved widely (the time for running
+    a simple "Hello, World" program is about one fifth of 2.3.x).
+
+o   The image is loaded using copy-on-write memory mapped files.  This means
+    that as long as a loaded object is not touched, the operating system
+    will map it to the same physical memory, for different copies of
+    the GNU Smalltalk virtual machine that loaded the same image.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 2.3 TO 2.3.1
 
 o   configure does not lock up when the system emacs is XEmacs and does not

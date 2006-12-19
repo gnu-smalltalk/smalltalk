@@ -113,7 +113,7 @@ _gst_heap_create (PTR address, int size)
     }
 
   if (address)
-    address -= HEAP_DELTA;
+    address = (char *) address - HEAP_DELTA;
 
   /* We start off with the heap descriptor allocated on the stack,
      until we build it up enough to call heap_sbrk_internal() to

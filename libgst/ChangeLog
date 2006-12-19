@@ -1,3 +1,16 @@
+2006-12-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/heap.c: Remove arithmetic on void *.
+
+	* libgst/sym.c: Remove unused symbols.
+	* libgst/sym.h: Remove unused symbols.
+	* libgst/vm.def: Use _gst_must_be_boolean_symbol.
+	* libgst/vm.inl: Regenerate.
+
+2006-12-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/save.c: Don't uselessly mark unused OOPs as free.
+
 2006-12-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/save.c: Miscellaneous speed-ups, including caching the

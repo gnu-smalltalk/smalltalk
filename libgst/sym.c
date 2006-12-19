@@ -98,8 +98,6 @@ OOP _gst_and_symbol = NULL;
 OOP _gst_as_scaled_decimal_scale_symbol = NULL;
 OOP _gst_at_put_symbol = NULL;
 OOP _gst_at_symbol = NULL;
-OOP _gst_at_end_symbol = NULL;
-OOP _gst_at_sign_symbol = NULL;
 OOP _gst_bad_return_error_symbol = NULL;
 OOP _gst_bit_and_symbol = NULL;
 OOP _gst_bit_or_symbol = NULL;
@@ -113,7 +111,6 @@ OOP _gst_c_object_symbol = NULL;
 OOP _gst_char_symbol = NULL;
 OOP _gst_class_symbol = NULL;
 OOP _gst_divide_symbol = NULL;
-OOP _gst_do_symbol = NULL;
 OOP _gst_does_not_understand_symbol = NULL;
 OOP _gst_double_symbol = NULL;
 OOP _gst_equal_symbol = NULL;
@@ -137,13 +134,9 @@ OOP _gst_long_symbol = NULL;
 OOP _gst_minus_symbol = NULL;
 OOP _gst_must_be_boolean_symbol = NULL;
 OOP _gst_new_colon_symbol = NULL;
-OOP _gst_new_symbol = NULL;
-OOP _gst_next_put_symbol = NULL;
-OOP _gst_next_symbol = NULL;
 OOP _gst_nil_symbol = NULL;
 OOP _gst_not_equal_symbol = NULL;
 OOP _gst_not_nil_symbol = NULL;
-OOP _gst_not_same_object_symbol = NULL;
 OOP _gst_or_symbol = NULL;
 OOP _gst_perform_symbol = NULL;
 OOP _gst_perform_with_symbol = NULL;
@@ -179,10 +172,7 @@ OOP _gst_ulong_symbol = NULL;
 OOP _gst_undeclared_symbol = NULL;
 OOP _gst_unknown_symbol = NULL;
 OOP _gst_value_colon_symbol = NULL;
-OOP _gst_value_value_symbol = NULL;
-OOP _gst_value_value_value_symbol = NULL;
 OOP _gst_value_symbol = NULL;
-OOP _gst_value_with_arguments_symbol = NULL;
 OOP _gst_value_with_rec_with_args_symbol = NULL;
 OOP _gst_variadic_smalltalk_symbol = NULL;
 OOP _gst_variadic_symbol = NULL;
@@ -195,7 +185,6 @@ OOP _gst_while_false_colon_symbol = NULL;
 OOP _gst_while_false_symbol = NULL;
 OOP _gst_while_true_colon_symbol = NULL;
 OOP _gst_while_true_symbol = NULL;
-OOP _gst_yourself_symbol = NULL;
 OOP _gst_current_namespace = NULL;
 
 /* The list of selectors for the send immediate bytecode.  */
@@ -281,8 +270,6 @@ static const symbol_info sym_info[] = {
   {&_gst_as_scaled_decimal_scale_symbol, "asScaledDecimal:scale:"},
   {&_gst_at_put_symbol, "at:put:"},
   {&_gst_at_symbol, "at:"},
-  {&_gst_at_end_symbol, "atEnd"},
-  {&_gst_at_sign_symbol, "@"},
   {&_gst_bad_return_error_symbol, "badReturnError"},
   {&_gst_bit_and_symbol, "bitAnd:"},
   {&_gst_bit_or_symbol, "bitOr:"},
@@ -296,7 +283,6 @@ static const symbol_info sym_info[] = {
   {&_gst_c_object_symbol, "cObject"},
   {&_gst_c_object_ptr_symbol, "cObjectPtr"},
   {&_gst_divide_symbol, "/"},
-  {&_gst_do_symbol, "do:"},
   {&_gst_does_not_understand_symbol, "doesNotUnderstand:"},
   {&_gst_float_symbol, "float"},
   {&_gst_double_symbol, "double"},
@@ -322,13 +308,9 @@ static const symbol_info sym_info[] = {
   {&_gst_minus_symbol, "-"},
   {&_gst_must_be_boolean_symbol, "mustBeBoolean"},
   {&_gst_new_colon_symbol, "new:"},
-  {&_gst_new_symbol, "new"},
-  {&_gst_next_put_symbol, "nextPut:"},
-  {&_gst_next_symbol, "next"},
   {&_gst_nil_symbol, "nil"},
   {&_gst_not_equal_symbol, "~="},
   {&_gst_not_nil_symbol, "notNil"},
-  {&_gst_not_same_object_symbol, "~~"},
   {&_gst_or_symbol, "or:"},
   {&_gst_perform_symbol, "perform:"},
   {&_gst_perform_with_symbol, "perform:with:"},
@@ -360,13 +342,9 @@ static const symbol_info sym_info[] = {
   {&_gst_undeclared_symbol, "Undeclared"},
   {&_gst_unknown_symbol, "unknown"},
   {&_gst_value_colon_symbol, "value:"},
-  {&_gst_value_value_symbol, "value:value:"},
-  {&_gst_value_value_value_symbol,
-   "value:value:value:"},
   {&_gst_value_with_rec_with_args_symbol,
    "valueWithReceiver:withArguments:"},
   {&_gst_value_symbol, "value"},
-  {&_gst_value_with_arguments_symbol, "valueWithArguments:"},
   {&_gst_variadic_symbol, "variadic"},
   {&_gst_variadic_smalltalk_symbol, "variadicSmalltalk"},
   {&_gst_vm_primitives_symbol, "VMPrimitives"},
@@ -378,7 +356,6 @@ static const symbol_info sym_info[] = {
   {&_gst_while_false_symbol, "whileFalse"},
   {&_gst_while_true_colon_symbol, "whileTrue:"},
   {&_gst_while_true_symbol, "whileTrue"},
-  {&_gst_yourself_symbol, "yourself"},
   {NULL, NULL},
 };
 

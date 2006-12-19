@@ -756,7 +756,7 @@ operation POP_JUMP_FALSE n ( tos -- ) {
       ip += n;
       PREPARE_STACK ();
       EXPORT_REGS();
-      SEND_MESSAGE(_gst_intern_string("mustBeBoolean"), 0);
+      SEND_MESSAGE(_gst_must_be_boolean_symbol, 0);
       IMPORT_REGS();
       FETCH (dispatch_vec);
     }
@@ -775,7 +775,7 @@ operation POP_JUMP_TRUE n ( tos -- ) {
       ip += n;
       PREPARE_STACK ();
       EXPORT_REGS();
-      SEND_MESSAGE(_gst_intern_string("mustBeBoolean"), 0);
+      SEND_MESSAGE(_gst_must_be_boolean_symbol, 0);
       IMPORT_REGS();
       FETCH (dispatch_vec);
     }
