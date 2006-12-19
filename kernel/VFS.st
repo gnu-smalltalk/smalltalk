@@ -228,10 +228,7 @@ update: aspect
      filesystems specified by the subclasses upon image load."
 
     (aspect == #returnFromSnapshot or: [ aspect == #finishedSnapshot ]) ifTrue: [
-	Registry := LookupTable new.
-	self allSubclassesDo: [ :each |
-	    each fileSystems do: [ :fs | self register: fs forClass: each ]
-	]
+	Registry := nil.
     ].
     (aspect == #aboutToQuit or: [ aspect == #aboutToSnapshot ]) ifTrue: [
 	self allSubclassesDo: [ :each | each release ].
@@ -262,6 +259,10 @@ vfsFor: fileName name: fsName subPath: subPath
     "Create an instance of a subclass of the receiver, implementing the virtual
      file `subPath' inside the `fileName' archive.  fsName is the virtual
      filesystem name and is used to determine the subclass to be instantiated."
+    Registry isNil ifTrue: [
+	Registry := LookupTable new.
+	self allSubclassesDo: [ :each |
+	    each fileSystems do: [ :fs | self register: fs forClass: each ] ] ].
     ^(Registry at: fsName) 
 	vfsFor: fileName name: fsName subPath: subPath!
 
