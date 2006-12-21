@@ -98,23 +98,21 @@ static mst_Boolean is_base_digit (int c,
 				  int base);
 
 /* Parse the fractional part of a Float constant.  Store it in
-   NUMPTR.  Read numbers in base-BASE, the first one being C. 
-   Answer the scale (number of digits in numPtr).  If LARGEINTEGER
-   is not NULL, the digits are stored in the buffer maintained
-   by str.c, and LARGEINTEGER is set to true if numPtr does
-   not have sufficient precision.  */
+   NUMPTR.  Read numbers in base-BASE, the first one being C.  Answer the
+   scale (number of digits in numPtr).  If LARGEINTEGER is not NULL,
+   the digits are stored in an obstack, and LARGEINTEGER is set to true
+   if numPtr does not have sufficient precision.  */
 static int scan_fraction (int c,
 			   int base,
 			   long double *numPtr,
 			   mst_Boolean *largeInteger);
 
 /* Parse a numeric constant and return it.  Read numbers in
-   base-BASE, the first one being C.  If a - was parsed,
-   NEGATIVE must be true so that the sign of the result is
-   changed accordingly.  If LARGEINTEGER is not NULL, the
-   digits are stored in the buffer maintained by str.c,
-   and LARGEINTEGER is set to true if the return value does
-   not have sufficient precision.  */
+   base-BASE, the first one being C.  If a - was parsed, NEGATIVE
+   must be true so that the sign of the result is changed accordingly.
+   If LARGEINTEGER is not NULL, the digits are stored in an obstack,
+   and LARGEINTEGER is set to true if the return value does not have
+   sufficient precision.  */
 static long double scan_digits (int c,
 			    mst_Boolean negative,
 			    int base,
@@ -506,15 +504,15 @@ scan_symbol (int c,
       return '#';
     }
 
-  _gst_reset_buffer ();
-  _gst_add_str_buf_char (ic);
+  obstack_1grow (_gst_compilation_obstack, ic);
 
   while (((ic = _gst_next_char ()) != EOF)
          && (CHAR_TAB (ic)->char_class & SYMBOL_CHAR))
-    _gst_add_str_buf_char (ic);
+    obstack_1grow (_gst_compilation_obstack, ic);
 
   _gst_unread_char (ic);
-  lvalp->sval = _gst_obstack_cur_str_buf (_gst_compilation_obstack);
+  obstack_1grow (_gst_compilation_obstack, '\0');
+  lvalp->sval = obstack_finish (_gst_compilation_obstack);
   return SYMBOL_LITERAL;
 }
 
@@ -574,8 +572,6 @@ string_literal (int c,
 {
   int ic;
 
-  _gst_reset_buffer ();
-
   for (;;)
     {
       ic = _gst_next_char ();
@@ -595,9 +591,10 @@ string_literal (int c,
 	      break;
 	    }
 	}
-      _gst_add_str_buf_char (ic);
+      obstack_1grow (_gst_compilation_obstack, ic);
     }
-  lvalp->sval = _gst_obstack_cur_str_buf (_gst_compilation_obstack);
+  obstack_1grow (_gst_compilation_obstack, '\0');
+  lvalp->sval = obstack_finish (_gst_compilation_obstack);
   return (STRING_LITERAL);
 }
 
@@ -607,14 +604,13 @@ scan_ident (int c,
 {
   int ic, identType;
 
-  _gst_reset_buffer ();
-  _gst_add_str_buf_char (c);
+  obstack_1grow (_gst_compilation_obstack, c);
 
   identType = IDENTIFIER;
 
   while (((ic = _gst_next_char ()) != EOF)
 	 && (CHAR_TAB (ic)->char_class & ID_CHAR))
-    _gst_add_str_buf_char (ic);
+    obstack_1grow (_gst_compilation_obstack, ic);
 
   /* Read a dot as '::' if followed by a letter.  */
   if (ic == '.')
@@ -638,7 +634,7 @@ scan_ident (int c,
 	_gst_unread_char (':');
       else
 	{
-          _gst_add_str_buf_char (':');
+          obstack_1grow (_gst_compilation_obstack, ':');
           identType = KEYWORD;
 	}
     }
@@ -646,7 +642,8 @@ scan_ident (int c,
   else
     _gst_unread_char (ic);
 
-  lvalp->sval = _gst_obstack_cur_str_buf (_gst_compilation_obstack);
+  obstack_1grow (_gst_compilation_obstack, '\0');
+  lvalp->sval = obstack_finish (_gst_compilation_obstack);
   return (identType);
 }
 
@@ -850,6 +847,8 @@ scan_number (int c,
 
   if (float_type)
     {
+      obstack_blank_fast (_gst_compilation_obstack,
+			  -obstack_object_size (_gst_compilation_obstack));
       lvalp->fval = num;
       return (float_type);
     }
@@ -858,6 +857,7 @@ scan_number (int c,
       lvalp->boval = scan_large_integer (isNegative, base);
       return (LARGE_INTEGER_LITERAL);
     }
+  else
     {
       lvalp->ival = (intptr_t) num;
       return (INTEGER_LITERAL);
@@ -873,9 +873,6 @@ scan_digits (int c,
   long double result;
   mst_Boolean oneDigit = false;
 
-  if (largeInteger)
-    _gst_reset_buffer ();
-
   while (c == '_')
     c = _gst_next_char ();
 
@@ -886,7 +883,7 @@ scan_digits (int c,
       result += digit_to_int (c, base);
       if (largeInteger)
 	{
-	  _gst_add_str_buf_char (digit_to_int (c, base));
+	  obstack_1grow (_gst_compilation_obstack, digit_to_int (c, base));
 	  if (result > -MIN_ST_INT
 	      || (!negative && result > MAX_ST_INT))
 	    *largeInteger = true;
@@ -930,7 +927,7 @@ scan_fraction (int c,
 
       if (largeInteger)
         {
-          _gst_add_str_buf_char (digit_to_int (c, base));
+          obstack_1grow (_gst_compilation_obstack, digit_to_int (c, base));
           if (num > MAX_ST_INT)
             *largeInteger = true;
         }
@@ -1006,13 +1003,14 @@ scan_large_integer (mst_Boolean negative,
   gst_uchar *digits, *result;
   byte_object bo;
 
-  size = _gst_buffer_size ();
+  /* Copy the contents of the currently grown obstack on the stack.  */
+  size = obstack_object_size (_gst_compilation_obstack);
   digits = (gst_uchar *) alloca (size);
-  _gst_copy_buffer (digits);
+  memcpy (digits, obstack_base (_gst_compilation_obstack), size);
 
-  bo =
-    (byte_object) obstack_alloc (_gst_compilation_obstack,
-				 sizeof (struct byte_object) + size);
+  /* And reuse the area on the obstack for a struct byte_object.  */
+  obstack_blank (_gst_compilation_obstack, sizeof (struct byte_object));
+  bo = (byte_object) obstack_finish (_gst_compilation_obstack);
 
   bo->class =
     negative ? _gst_large_negative_integer_class :

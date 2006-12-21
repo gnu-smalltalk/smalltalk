@@ -67,46 +67,6 @@ static size_t cur_len = 0;
 /* This variable holds the current size of the buffer.  */
 static size_t max_buf_len = 0;
 
-char *
-_gst_cur_str_buf (void)
-{
-  char *result;
-
-  result = (char *) xmalloc (cur_len + 1);
-  result[cur_len] = '\0';
-  return (_gst_copy_buffer (result));
-}
-
-char *
-_gst_obstack_cur_str_buf (struct obstack *h)
-{
-  char *result;
-
-  result = (char *) obstack_alloc (h, cur_len + 1);
-  result[cur_len] = '\0';
-  return (_gst_copy_buffer (result));
-}
-
-void
-_gst_add_str_buf_char (char c)
-{
-  if (cur_len >= max_buf_len)
-    {
-      if (max_buf_len)
-	{
-	  max_buf_len += (max_buf_len / 2);
-	  buf_base = (char *) xrealloc (buf_base, max_buf_len);
-	}
-      else
-	{
-	  max_buf_len = STRING_BASE_SIZE;
-	  buf_base = (char *) xmalloc (max_buf_len);
-	}
-    }
-
-  buf_base[cur_len++] = c;
-}
-
 void
 _gst_add_buf_pointer (PTR ptr)
 {
