@@ -56,18 +56,6 @@
 #ifndef GST_STR_H
 #define GST_STR_H
 
-/* Returns the currently accumulated string, as a C string, and resets
-   the pointer to start with a new string.  The string returned is
-   unique.  */
-extern char *_gst_cur_str_buf (void)
-  ATTRIBUTE_HIDDEN;
-
-/* Returns the currently accumulated string, as a C string, and resets
-   the pointer to start with a new string.  The string returned is
-   unique and is allocated in the obstack H.  */
-extern char *_gst_obstack_cur_str_buf (struct obstack *h)
-  ATTRIBUTE_HIDDEN;
-
 /* Returns the currently accumulated buffer, and resets the pointer
    to start with a new string.  Instead of allocating fresh memory for
    the data, it is moved to the location pointed by WHERE. WHERE is
@@ -77,11 +65,6 @@ extern PTR _gst_copy_buffer (PTR where)
 
 /* Answer the current size of the buffer.  */
 extern size_t _gst_buffer_size (void)
-  ATTRIBUTE_HIDDEN;
-
-/* Adds a character C to the string being accumulated.  The character
-   can be any valid ASCII character.  */
-extern void _gst_add_str_buf_char (char c)
   ATTRIBUTE_HIDDEN;
 
 /* Resets the pointer to start with a new string.  */
