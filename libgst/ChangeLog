@@ -1,3 +1,8 @@
+2006-12-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Previous change not 64-bit clean,
+	obstack_chunk_size returns unsigned rather than int or size_t.
+
 2006-12-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Build strings on obstack instead of the
