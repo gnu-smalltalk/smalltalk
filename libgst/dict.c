@@ -1223,7 +1223,7 @@ create_class (const class_definition *ci)
 
 
 mst_Boolean
-_gst_init_dictionary_on_image_load (size_t numOOPs)
+_gst_init_dictionary_on_image_load (mst_Boolean prim_table_matches)
 {
   const class_definition *ci;
 
@@ -1259,7 +1259,12 @@ _gst_init_dictionary_on_image_load (size_t numOOPs)
 
   /* Important: this is called *after* _gst_init_symbols
      fills in _gst_vm_primitives_symbol! */
-  prepare_primitive_numbers_table ();
+  if (prim_table_matches)
+    memcpy (_gst_primitive_table, _gst_default_primitive_table,
+            sizeof (_gst_primitive_table));
+  else
+    prepare_primitive_numbers_table ();
+
   init_runtime_objects ();
   return (true);
 }

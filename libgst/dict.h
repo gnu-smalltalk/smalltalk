@@ -603,10 +603,10 @@ extern void _gst_set_oop_bytes (OOP byteArrayOOP,
 extern void _gst_free_cobject (OOP cObjOOP) 
   ATTRIBUTE_HIDDEN;
 
-/* Loads the contents of the global variable from the Smalltalk
-   dictionary after NUMOOPS objects have been loaded from an
-   image.  */
-extern mst_Boolean _gst_init_dictionary_on_image_load (size_t numOOPs) 
+/* Loads the contents of the global variables from the Smalltalk dictionary
+   after an image has been restored.  PRIM_TABLE_MATCHES if true if the
+   table of primitives is already set up correctly.  */
+extern mst_Boolean _gst_init_dictionary_on_image_load (mst_Boolean prim_table_matches) 
   ATTRIBUTE_HIDDEN;
 
 /* Transforms a primitive name into a primitive index, looking up

@@ -51,6 +51,7 @@
 
 %{
 #include "genprims.h"
+#include "md5.h"
 
 /* This program finds declarations of the form:
 
@@ -356,11 +357,15 @@ void
 output()
 {
   char *proto, *stmt, *def;
+  unsigned int md5[16 / sizeof (int)];
+
   gen_proto ("VMpr_HOLE");
 
   proto = fildelete (proto_fil);
   stmt = fildelete (stmt_fil);
   def = fildelete (def_fil);
+
+  md5_buffer (def, strlen (def), md5);
 
   printf ("%s\n"
 	  "%s\n"
@@ -374,6 +379,8 @@ output()
 	  "  UNPOP (numArgs);\n"
 	  "  PRIM_FAILED;\n"
 	  "}\n"
+	  "\n"
+	  "int _gst_primitives_md5[4] = { 0x%x, 0x%x, 0x%x, 0x%x };\n"
 	  "\n"
 	  "void\n"
 	  "_gst_init_primitives()\n"
@@ -389,7 +396,10 @@ output()
 	  "      _gst_default_primitive_table[i].func = VMpr_HOLE;\n"
 	  "    }\n"
 	  "}\n"
-	  "\n", proto, stmt, def, prim_no + 1);
+	  "\n",
+	  proto, stmt,
+	  md5[0], md5[1], md5[2], md5[3],
+	  def, prim_no + 1);
 
   free (proto);
   free (stmt);

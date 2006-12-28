@@ -1,5 +1,18 @@
 2006-12-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/dict.c: Change _gst_init_dictionary_on_image_load to be
+	whether the primitive table's checksum is ok.  If it is, just copy
+	the default primitive table just like in _gst_init_dictionary.
+	* libgst/dict.h: Adjust for above change.
+	* libgst/genpr-parse.y: Compute MD5 of DEF_FIL as checksum and
+	print it.
+	* libgst/interp.h: Declare _gst_primitives_md5.
+	* libgst/save.c: Save its contents, and compare it to pass the new flag
+	to _gst_init_dictionary_on_image_load.  Move checks from load_snapshot
+	to load_file_version.
+
+2006-12-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/gstpriv.h: Remove F_FREE.
 	* libgst/oop.c: Remove loops setting flags to F_FREE.  Set flags to 0
 	instead of F_FREE elsewhere.

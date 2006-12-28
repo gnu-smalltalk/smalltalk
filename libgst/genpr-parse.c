@@ -89,6 +89,7 @@
 #line 52 "genpr-parse.y"
 
 #include "genprims.h"
+#include "md5.h"
 
 /* This program finds declarations of the form:
 
@@ -169,14 +170,14 @@ static string_list *current_ids;
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 117 "genpr-parse.y"
+#line 118 "genpr-parse.y"
 {
   Filament *fil;
   char *text;
   int id;
 }
 /* Line 193 of yacc.c.  */
-#line 180 "../../libgst/genpr-parse.c"
+#line 181 "../../libgst/genpr-parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -189,7 +190,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 193 "../../libgst/genpr-parse.c"
+#line 194 "../../libgst/genpr-parse.c"
 
 #ifdef short
 # undef short
@@ -479,9 +480,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   140,   140,   139,   148,   154,   153,   166,   171,   177,
-     182,   188,   196,   201,   210,   213,   220,   219,   232,   236,
-     241,   240
+       0,   141,   141,   140,   149,   155,   154,   167,   172,   178,
+     183,   189,   197,   202,   211,   214,   221,   220,   233,   237,
+     242,   241
 };
 #endif
 
@@ -1402,27 +1403,27 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 140 "genpr-parse.y"
+#line 141 "genpr-parse.y"
     {
 	    filprintf (stmt_fil, "#line %d \"prims.def\"\n{", yylineno);
 	  }
     break;
 
   case 3:
-#line 144 "genpr-parse.y"
+#line 145 "genpr-parse.y"
     {
 	    free_data ();
 	  }
     break;
 
   case 4:
-#line 148 "genpr-parse.y"
+#line 149 "genpr-parse.y"
     {
 	  }
     break;
 
   case 5:
-#line 154 "genpr-parse.y"
+#line 155 "genpr-parse.y"
     {
 	    current_id = 0;
 	    current_func_name = strdup ((yyvsp[(2) - (2)].text));
@@ -1432,13 +1433,13 @@ yyreduce:
     break;
 
   case 6:
-#line 161 "genpr-parse.y"
+#line 162 "genpr-parse.y"
     {
 	  }
     break;
 
   case 7:
-#line 167 "genpr-parse.y"
+#line 168 "genpr-parse.y"
     {
 	    gen_prim_id (current_func_name, (yyvsp[(1) - (2)].id), (yyvsp[(2) - (2)].text));
 	    free ((yyvsp[(2) - (2)].text));
@@ -1446,27 +1447,27 @@ yyreduce:
     break;
 
   case 8:
-#line 172 "genpr-parse.y"
+#line 173 "genpr-parse.y"
     {
 	  }
     break;
 
   case 9:
-#line 178 "genpr-parse.y"
+#line 179 "genpr-parse.y"
     {
 	    (yyval.id) = strtoul ((yyvsp[(2) - (2)].text), NULL, 10);
 	  }
     break;
 
   case 10:
-#line 182 "genpr-parse.y"
+#line 183 "genpr-parse.y"
     {
 	    (yyval.id) = current_id--;
 	  }
     break;
 
   case 11:
-#line 189 "genpr-parse.y"
+#line 190 "genpr-parse.y"
     {
 	    (yyval.text) = fildelete ((yyvsp[(2) - (3)].fil));
 	    strupr ((yyval.text));
@@ -1474,7 +1475,7 @@ yyreduce:
     break;
 
   case 12:
-#line 197 "genpr-parse.y"
+#line 198 "genpr-parse.y"
     {
 	    (yyval.fil) = filnew ("PRIM_", 5);
 	    filcat ((yyval.fil), (yyvsp[(1) - (1)].text));
@@ -1482,7 +1483,7 @@ yyreduce:
     break;
 
   case 13:
-#line 202 "genpr-parse.y"
+#line 203 "genpr-parse.y"
     {
 	    (yyval.fil) = (yyvsp[(1) - (3)].fil);
 	    filcat ((yyval.fil), " | PRIM_");
@@ -1491,26 +1492,26 @@ yyreduce:
     break;
 
   case 14:
-#line 211 "genpr-parse.y"
+#line 212 "genpr-parse.y"
     {
 	  }
     break;
 
   case 15:
-#line 214 "genpr-parse.y"
+#line 215 "genpr-parse.y"
     {
 	  }
     break;
 
   case 16:
-#line 220 "genpr-parse.y"
+#line 221 "genpr-parse.y"
     {
 	    (yyval.text) = strdup((yyvsp[(2) - (2)].text));
 	  }
     break;
 
   case 17:
-#line 224 "genpr-parse.y"
+#line 225 "genpr-parse.y"
     {
 	    gen_prim_id ((yyvsp[(3) - (5)].text), (yyvsp[(4) - (5)].id), (yyvsp[(5) - (5)].text));
 	    free ((yyvsp[(3) - (5)].text));
@@ -1519,14 +1520,14 @@ yyreduce:
     break;
 
   case 18:
-#line 233 "genpr-parse.y"
+#line 234 "genpr-parse.y"
     {
 	    filprintf (stmt_fil, "%d", (yyvsp[(2) - (2)].id));
 	  }
     break;
 
   case 20:
-#line 241 "genpr-parse.y"
+#line 242 "genpr-parse.y"
     {
 	    (yyval.id) = lookup_prim_id ((yyvsp[(3) - (3)].text));
 	    if ((yyval.id) == NOT_FOUND)
@@ -1535,7 +1536,7 @@ yyreduce:
     break;
 
   case 21:
-#line 247 "genpr-parse.y"
+#line 248 "genpr-parse.y"
     {
 	    (yyval.id) = (yyvsp[(4) - (5)].id);
 	    literal_fil = stmt_fil;
@@ -1544,7 +1545,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1548 "../../libgst/genpr-parse.c"
+#line 1549 "../../libgst/genpr-parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1758,7 +1759,7 @@ yyreturn:
 }
 
 
-#line 253 "genpr-parse.y"
+#line 254 "genpr-parse.y"
 
 
 void
@@ -1865,11 +1866,15 @@ void
 output()
 {
   char *proto, *stmt, *def;
+  unsigned int md5[16 / sizeof (int)];
+
   gen_proto ("VMpr_HOLE");
 
   proto = fildelete (proto_fil);
   stmt = fildelete (stmt_fil);
   def = fildelete (def_fil);
+
+  md5_buffer (def, strlen (def), md5);
 
   printf ("%s\n"
 	  "%s\n"
@@ -1883,6 +1888,8 @@ output()
 	  "  UNPOP (numArgs);\n"
 	  "  PRIM_FAILED;\n"
 	  "}\n"
+	  "\n"
+	  "int _gst_primitives_md5[4] = { 0x%x, 0x%x, 0x%x, 0x%x };\n"
 	  "\n"
 	  "void\n"
 	  "_gst_init_primitives()\n"
@@ -1898,7 +1905,10 @@ output()
 	  "      _gst_default_primitive_table[i].func = VMpr_HOLE;\n"
 	  "    }\n"
 	  "}\n"
-	  "\n", proto, stmt, def, prim_no + 1);
+	  "\n",
+	  proto, stmt,
+	  md5[0], md5[1], md5[2], md5[3],
+	  def, prim_no + 1);
 
   free (proto);
   free (stmt);

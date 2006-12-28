@@ -542,6 +542,11 @@ prim_table_entry;
 #define PRIM_RETURN_SMALL_INTEGER	0x0100	/* 31 or 63 bits */
 #define PRIM_RETURN_SMALL_SMALLINTEGER	0x0300	/* 30 or 62 bits */
 
+/* The checksum of the table of primitive numbers.  Right now it is an MD5,
+   computed from part of the C source code of prims.inl.  We compare it when
+   loading an image, to avoid having to reload the primitive table.  */
+extern int _gst_primitives_md5[4];
+
 /* The table of functions that implement the primitives.  */
 extern prim_table_entry _gst_primitive_table[NUM_PRIMITIVES];
 extern prim_table_entry _gst_default_primitive_table[NUM_PRIMITIVES];

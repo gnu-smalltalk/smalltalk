@@ -112,6 +112,7 @@ typedef struct save_file_header
   size_t space_grow_rate;
   size_t num_free_oops;
   intptr_t ot_base;
+  int prim_table_md5[4]; /* checksum for the primitive table */
 }
 save_file_header;
 
@@ -212,8 +213,8 @@ static void save_file_version (int imageFd,
 /* This function loads into HEADERP the header of the image file
    without checking its validity.
    This data is loaded from the IMAGEFD file descriptor.  */
-static void load_file_version (int imageFd,
-			       save_file_header * headerp);
+static mst_Boolean load_file_version (int imageFd,
+				      save_file_header * headerp);
 
 /* This function walks the OOP table and converts all the relative
    addresses for the instance variables to absolute ones.  */
@@ -423,6 +424,8 @@ save_file_version (int imageFd, struct save_file_header *headerp)
   headerp->grow_threshold_percent = _gst_mem.grow_threshold_percent;
   headerp->space_grow_rate = _gst_mem.space_grow_rate;
   headerp->ot_base = (intptr_t) _gst_mem.ot_base;
+  memcpy (&headerp->prim_table_md5, _gst_primitives_md5, sizeof (_gst_primitives_md5));
+
   buffer_write (imageFd, headerp, sizeof (save_file_header));
 }
 
@@ -451,34 +454,11 @@ mst_Boolean
 load_snapshot (int imageFd)
 {
   save_file_header header;
+  int prim_table_matches;
 
   buffer_read_init (imageFd, READ_BUFFER_SIZE);
-  load_file_version (imageFd, &header);
-  if (strcmp (header.signature, SIGNATURE))
-    return (false);
-
-  /* different sizeof(PTR) not supported */
-  if (FLAG_CHANGED (header.flags, SLOT_SIZE_FLAG))
-    return (false);
-
-  if UNCOMMON ((wrong_endianness =
-         FLAG_CHANGED (header.flags, ENDIANNESS_FLAG)))
-    {
-      header.oopTableSize = BYTE_INVERT (header.oopTableSize);
-      header.edenSpaceSize = BYTE_INVERT (header.edenSpaceSize);
-      header.survSpaceSize = BYTE_INVERT (header.survSpaceSize);
-      header.oldSpaceSize = BYTE_INVERT (header.oldSpaceSize);
-      header.big_object_threshold = BYTE_INVERT (header.big_object_threshold);
-      header.grow_threshold_percent = BYTE_INVERT (header.grow_threshold_percent);
-      header.space_grow_rate = BYTE_INVERT (header.space_grow_rate);
-      header.version = BYTE_INVERT (header.version);
-      header.num_free_oops = BYTE_INVERT (header.num_free_oops);
-      header.ot_base = BYTE_INVERT (header.ot_base);
-    }
-
-  /* check for version mismatch; if so this image file is invalid */
-  if (header.version > VERSION_REQUIRED)
-    return (false);
+  if (!load_file_version (imageFd, &header))
+    return false;
 
 #ifdef SNAPSHOT_TRACE
   printf ("After loading header: %lld\n", file_pos + buf_pos);
@@ -510,7 +490,9 @@ load_snapshot (int imageFd)
   if (ot_delta)
     restore_all_pointer_slots ();
 
-  if (_gst_init_dictionary_on_image_load (num_used_oops))
+  prim_table_matches = !memcmp (header.prim_table_md5, _gst_primitives_md5,
+				sizeof (_gst_primitives_md5));
+  if (_gst_init_dictionary_on_image_load (prim_table_matches))
     {
 #ifdef SNAPSHOT_TRACE
       _gst_dump_oop_table ();
@@ -521,19 +503,47 @@ load_snapshot (int imageFd)
   return (false);
 }
 
-void
+mst_Boolean
 load_file_version (int imageFd,
 		   save_file_header * headerp)
 {
   buffer_read (imageFd, headerp, sizeof (save_file_header));
+  if (strcmp (headerp->signature, SIGNATURE))
+    return (false);
+
+  /* different sizeof(PTR) not supported */
+  if (FLAG_CHANGED (headerp->flags, SLOT_SIZE_FLAG))
+    return (false);
+
+  if UNCOMMON ((wrong_endianness =
+         FLAG_CHANGED (headerp->flags, ENDIANNESS_FLAG)))
+    {
+      headerp->oopTableSize = BYTE_INVERT (headerp->oopTableSize);
+      headerp->edenSpaceSize = BYTE_INVERT (headerp->edenSpaceSize);
+      headerp->survSpaceSize = BYTE_INVERT (headerp->survSpaceSize);
+      headerp->oldSpaceSize = BYTE_INVERT (headerp->oldSpaceSize);
+      headerp->big_object_threshold = BYTE_INVERT (headerp->big_object_threshold);
+      headerp->grow_threshold_percent = BYTE_INVERT (headerp->grow_threshold_percent);
+      headerp->space_grow_rate = BYTE_INVERT (headerp->space_grow_rate);
+      headerp->version = BYTE_INVERT (headerp->version);
+      headerp->num_free_oops = BYTE_INVERT (headerp->num_free_oops);
+      headerp->ot_base = BYTE_INVERT (headerp->ot_base);
+      headerp->prim_table_md5[0] = BYTE_INVERT (headerp->prim_table_md5[0]);
+      headerp->prim_table_md5[1] = BYTE_INVERT (headerp->prim_table_md5[1]);
+      headerp->prim_table_md5[2] = BYTE_INVERT (headerp->prim_table_md5[2]);
+      headerp->prim_table_md5[3] = BYTE_INVERT (headerp->prim_table_md5[3]);
+    }
+
+  /* check for version mismatch; if so this image file is invalid */
+  if (headerp->version > VERSION_REQUIRED)
+    return (false);
+
+  return (true);
 }
 
 void
 load_oop_table (int imageFd)
 {
-  OOP oop;
-  int i;
-
   /* Load in the valid OOP slots from previous dump.  The others are already
      initialized to free (0).  */
   buffer_read (imageFd, _gst_mem.ot, sizeof (struct oop_s) * num_used_oops);
