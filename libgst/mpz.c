@@ -1542,7 +1542,7 @@ _gst_mpz_divexact (gst_mpz *quot, const gst_mpz *num, const gst_mpz *den)
     }
 
   /* Avoid quadratic behaviour, but do it conservatively.  */
-  if (qsize > 1500)
+  if (nsize - dsize > 1500)
     {
       gst_mpz r;
       _gst_mpz_tdiv_qr (quot, &r, num, den);
@@ -1559,33 +1559,27 @@ _gst_mpz_divexact (gst_mpz *quot, const gst_mpz *num, const gst_mpz *den)
   np += d_zero_limbs;
   nsize -= d_zero_limbs;
 
+  /* Allocate where we place the result.  It must be nsize limbs big
+     because it also acts as a temporary area.  */
+  if (quot->alloc < nsize)
+    gst_mpz_realloc (quot, nsize);
+  qp = quot->d;
+
   if (d_zero_bits != 0)
     {
-      /* Allocate where we place the result.  It must be nsize limbs big
-         because it also acts as a temporary area.  */
-      if (quot->alloc < nsize)
-	gst_mpz_realloc (quot, nsize);
-      qp = quot->d;
-
       tp = (mp_ptr) alloca (dsize * SIZEOF_MP_LIMB_T);
       mpn_rshift (tp, dp, dsize, d_zero_bits);
       mpn_rshift (qp, np, nsize, d_zero_bits);
 
       dsize -= tp[dsize - 1] == 0;
       nsize -= qp[nsize - 1] == 0;
-      qsize = nsize - dsize + 1;
-      mpn_bdivmod (qp, qp, nsize, tp, dsize, qsize * GMP_NUMB_BITS);
+      dp = tp;
     }
   else
-    {
-      qsize = nsize - dsize + 1;
-      if (quot->alloc < qsize)
-	gst_mpz_realloc (quot, qsize);
-      qp = quot->d;
-      mpn_bdivmod (qp, np, nsize, dp, dsize, qsize * GMP_NUMB_BITS);
-    }
+    MPN_COPY(qp, np, nsize);
 
-  /*  We just have to set the size.  */
+  qsize = nsize - dsize + 1;
+  mpn_bdivmod (qp, qp, nsize, dp, dsize, qsize * GMP_NUMB_BITS);
   quot->size = (num->size ^ den->size) >= 0 ? qsize : -qsize;
 }
 
