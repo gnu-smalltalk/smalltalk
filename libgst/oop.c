@@ -747,18 +747,22 @@ _gst_make_oop_fixed (OOP oop)
   if (oop->flags & F_FIXED)
     return;
 
-  size = SIZE_TO_BYTES (TO_INT(oop->object->objSize));
-  newObj = (gst_object) _gst_mem_alloc (_gst_mem.fixed, size);
-  if (!newObj)
-    abort ();
+  if ((oop->flags & F_LOADED) == 0)
+    {
+      size = SIZE_TO_BYTES (TO_INT(oop->object->objSize));
+      newObj = (gst_object) _gst_mem_alloc (_gst_mem.fixed, size);
+      if (!newObj)
+        abort ();
 
-  memcpy (newObj, oop->object, size);
-  if (oop->flags & F_OLD)
-    _gst_mem_free (_gst_mem.old, oop->object);
-  else
-    _gst_mem.numOldOOPs++;
+      memcpy (newObj, oop->object, size);
+      if ((oop->flags & F_OLD) == 0)
+	_gst_mem.numOldOOPs++;
+      else
+        _gst_mem_free (_gst_mem.old, oop->object);
 
-  oop->object = newObj;
+      oop->object = newObj;
+    }
+
   oop->flags &= ~(F_SPACES | F_POOLED);
   oop->flags |= F_OLD | F_FIXED;
 }
@@ -778,7 +782,6 @@ _gst_tenure_oop (OOP oop)
         abort ();
 
       memcpy (newObj, oop->object, size);
-
       _gst_mem.numOldOOPs++;
 
       oop->object = newObj;
@@ -1051,7 +1054,7 @@ _gst_compact (size_t new_heap_limit)
        oop < &_gst_mem.ot[_gst_mem.ot_size]; oop++)
     {
       PREFETCH_LOOP (oop, PREF_READ | PREF_NTA);
-      if ((oop->flags & (F_OLD | F_FIXED)) == F_OLD)
+      if ((oop->flags & (F_OLD | F_FIXED | F_LOADED)) == F_OLD)
         {
           gst_object new;
           size_t size = SIZE_TO_BYTES (TO_INT (oop->object->objSize));
@@ -1423,14 +1426,16 @@ _gst_sweep_oop (OOP oop)
       _gst_mem.numOldOOPs--;
       stats.reclaimedOldSpaceBytesSinceLastGlobalGC +=
 	SIZE_TO_BYTES (TO_INT (OOP_TO_OBJ (oop)->objSize));
-      _gst_mem_free (_gst_mem.fixed, oop->object);
+      if ((oop->flags & F_LOADED) == 0)
+        _gst_mem_free (_gst_mem.fixed, oop->object);
     }
   else if UNCOMMON (oop->flags & F_OLD)
     {
       _gst_mem.numOldOOPs--;
       stats.reclaimedOldSpaceBytesSinceLastGlobalGC +=
 	SIZE_TO_BYTES (TO_INT (OOP_TO_OBJ (oop)->objSize));
-      _gst_mem_free (_gst_mem.old, oop->object);
+      if ((oop->flags & F_LOADED) == 0)
+        _gst_mem_free (_gst_mem.old, oop->object);
     }
 
   oop->flags = F_FREE;

@@ -329,9 +329,10 @@ _gst_display_oop_short (OOP oop)
             oop->flags & F_WEAK ? "Weak" :
             oop->flags & F_EPHEMERON ? "Ephemeron" : "",
 
-            oop->flags & _gst_mem.active_flag ? "To-space" :
             oop->flags & F_FIXED ? "Fixed" :
-            oop->flags & F_OLD ? "Old" : "From-space",
+            oop->flags & F_LOADED ? "Permanent" :
+            oop->flags & F_OLD ? "Old" :
+            oop->flags & _gst_mem.active_flag ? "To-space" : "From-space",
 
 	    IS_EDEN_ADDR (oop->object) ? "Eden" :
 	    IS_SURVIVOR_ADDR (oop->object, 0) ? "Surv (Even)" :
@@ -359,9 +360,10 @@ _gst_display_oop (OOP oop)
             oop->flags & F_WEAK ? "Weak" :
             oop->flags & F_EPHEMERON ? "Ephemeron" : "",
 
-            oop->flags & _gst_mem.active_flag ? "To-space" :
             oop->flags & F_FIXED ? "Fixed" :
-            oop->flags & F_OLD ? "Old" : "From-space",
+            oop->flags & F_LOADED ? "Permanent" :
+            oop->flags & F_OLD ? "Old" :
+            oop->flags & _gst_mem.active_flag ? "To-space" : "From-space",
 
 	    IS_EDEN_ADDR (oop->object) ? "Eden" :
 	    IS_SURVIVOR_ADDR (oop->object, 0) ? "Surv (Even)" :

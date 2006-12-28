@@ -132,7 +132,7 @@ static off_t file_size;
 static off_t file_pos;
 
 /* Whether we are using mmap to read the file.  */
-static mst_Boolean use_mmap;
+static mst_Boolean buf_used_mmap;
 
 
 /* This function establishes a buffer of size NUMBYTES for writes.  */
@@ -154,6 +154,12 @@ static void buffer_read_init (int imageFd,
 
 /* This function frees the buffer used for reads.  */
 static void buffer_read_free (int imageFd);
+
+/* This function, which only works if memory-mapped I/O is used, advances
+   the buffer pointer by NUMBYTES and returns the pointer to the previous
+   value of the buffer pointer.  */
+static inline PTR buffer_advance (int imageFd,
+				  int numBytes);
 
 /* This function buffers reads from the image file whose descriptor
    is IMAGEFD.  Memory-mapped I/O is used is possible.  */
@@ -333,9 +339,9 @@ make_oop_table_to_be_saved (struct save_file_header *header)
     {
       if (IS_OOP_VALID_GC (oop))
 	{
-	  int numPointers;
-          myOOPTable[i].flags = oop->flags;
-	  numPointers = NUM_OOPS (oop->object);
+	  int numPointers = NUM_OOPS (oop->object);
+
+          myOOPTable[i].flags = (oop->flags & ~F_RUNTIME) | F_OLD;
 
 	  /* Cache the number of indexed instance variables.  We prefer
 	     to do more work upon saving (done once) than upon loading
@@ -436,8 +442,6 @@ _gst_load_from_file (const char *fileName)
 
   imageFd = _gst_open_file (fileName, "r");
   loaded = (imageFd >= 0) && load_snapshot (imageFd);
-
-  buffer_read_free (imageFd);
 
   close (imageFd);
   return (loaded);
@@ -545,8 +549,11 @@ load_normal_oops (int imageFd)
   OOP oop;
   gst_object object;
   int i;
+  mst_Boolean use_copy_on_write
+    = buf_used_mmap && ~wrong_endianness && ot_delta == 0;
 
-  /* Now walk the oop table.  Start fixing the byte order.  */
+  /* Now walk the oop table.  Load the data (or get the addresses from the
+     mmap-ed area) and fix the byte order.  */
 
   _gst_mem.last_allocated_oop = &_gst_mem.ot[num_used_oops - 1];
   PREFETCH_START (_gst_mem.ot, PREF_WRITE | PREF_NTA);
@@ -570,32 +577,40 @@ load_normal_oops (int imageFd)
 	 to create new-space objects.  The solution is not however as neat
 	 as possible.  */
 
-      flags &= ~(F_SPACES | F_POOLED | F_RUNTIME);
-      flags |= F_OLD;
-
       _gst_mem.numOldOOPs++;
       size = sizeof (PTR) * (size_t) oop->object;
-      if (flags & F_FIXED)
+      if (use_copy_on_write)
 	{
-	  _gst_mem.numFixedOOPs++;
-          object = (gst_object) _gst_mem_alloc (_gst_mem.fixed, size);
+	  oop->flags |= F_LOADED;
+	  object = buffer_advance (imageFd, size);
 	}
+
       else
-        object = (gst_object) _gst_mem_alloc (_gst_mem.old, size);
+	{
+	  if (flags & F_FIXED)
+	    {
+	      _gst_mem.numFixedOOPs++;
+              object = (gst_object) _gst_mem_alloc (_gst_mem.fixed, size);
+	    }
+          else
+            object = (gst_object) _gst_mem_alloc (_gst_mem.old, size);
 
-      buffer_read (imageFd, object, size);
-      if UNCOMMON (wrong_endianness)
-	fixup_byte_order (object, 
-			  (oop->flags & F_BYTE)
-			  ? OBJ_HEADER_SIZE_WORDS
-			  : size / sizeof (PTR));
+          buffer_read (imageFd, object, size);
+          if UNCOMMON (wrong_endianness)
+	    fixup_byte_order (object, 
+			      (oop->flags & F_BYTE)
+			      ? OBJ_HEADER_SIZE_WORDS
+			      : size / sizeof (PTR));
 
-      if (object->objSize != FROM_INT ((size_t) oop->object))
-	abort ();
+	  /* Would be nice, but causes us to touch every page and lose most
+	     of the startup-time benefits of copy-on-write.  So we only
+	     do it in the slow case, anyway.  */
+	  if (object->objSize != FROM_INT ((size_t) oop->object))
+	    abort ();
+        }
 
       /* Remove flags that are invalid after an image has been loaded.  */
       oop->object = object;
-      oop->flags = flags;
 
       if (flags & F_WEAK)
 	_gst_make_oop_weak (oop);
@@ -615,6 +630,9 @@ load_normal_oops (int imageFd)
           classOOP = OOP_ABSOLUTE (object->objClass);
 	  fixup_byte_order (object->data, CLASS_FIXED_FIELDS (classOOP));
 	}
+
+  if (!use_copy_on_write)
+    buffer_read_free (imageFd);
 }
 
 
@@ -775,65 +793,51 @@ void
 buffer_fill (int imageFd)
 {
   buf_pos = 0;
-  if (use_mmap)
-    {
-#ifndef WIN32
-      if (buf)
-	_gst_osmem_free (buf, buf_size);
-
-      buf = mmap (NULL, buf_size, PROT_READ, MAP_SHARED, imageFd, file_pos);
-
-      if (buf != (PTR) -1)
-	{
-#ifdef HAVE_MADVISE
-#ifdef MADV_WILLNEED
-	  madvise (buf, buf_size, MADV_WILLNEED);
-#endif
-
-	  /* Ahem... this madvise causes a kernel OOPS on my machine!  */
-#if 0
-#ifdef MADV_SEQUENTIAL
-	  madvise (buf, buf_size, MADV_SEQUENTIAL);
-#endif
-#endif
-
-#endif /* HAVE_MADVISE */
-	  return;
-	}
-#endif /* !WIN32 */
-
-      /* First non-mmaped input operation.  Allocate the buffer.  */
-      buf = xmalloc (buf_size);
-      use_mmap = false;
-    }
-
-  /* Cannot mmap the file, use read(2).  */
   read (imageFd, buf, buf_size);
 }
 
 void
 buffer_read_init (int imageFd, int numBytes)
 {
-  if (numBytes)
+  struct stat st;
+  fstat (imageFd, &st);
+  file_size = st.st_size;
+  file_pos = 0;
+
+#ifndef WIN32
+  buf = mmap (NULL, file_size, PROT_READ, MAP_PRIVATE, imageFd, 0);
+
+  if (buf != (PTR) -1)
     {
-      struct stat st;
-      fstat (imageFd, &st);
-      file_size = st.st_size;
-      file_pos = 0;
-      buf_size = numBytes;
-      use_mmap = true;
-      buf = NULL;
-      buffer_fill (imageFd);
+      buf_size = file_size;
+      buf_used_mmap = true;
+      return;
     }
+#endif /* !WIN32 */
+
+  /* Non-mmaped input.  */
+  buf_used_mmap = false;
+  buf_size = numBytes;
+  buf = xmalloc (buf_size);
+  buffer_fill (imageFd);
 }
 
 void
 buffer_read_free (int imageFd)
 {
-  if (use_mmap)
+  if (buf_used_mmap)
     _gst_osmem_free (buf, buf_size);
   else
     xfree (buf);
+}
+
+PTR
+buffer_advance (int imageFd,
+	        int numBytes)
+{
+  PTR current_pos = buf + buf_pos;
+  buf_pos += numBytes;
+  return current_pos;
 }
 
 void
@@ -842,15 +846,6 @@ buffer_read (int imageFd,
 	     int numBytes)
 {
   char *data = (char *) pdata;
-
-#if 0
-  /* Avoid triggering a SIGBUS.  Unnecessary, and wastes time.  */
-  if UNCOMMON (numBytes > file_size - file_pos)
-    {
-      memzero (data + file_size - file_pos, numBytes - (file_size - file_pos));
-      numBytes = file_size - file_pos;
-    }
-#endif
 
   if UNCOMMON (numBytes > buf_size - buf_pos)
     {

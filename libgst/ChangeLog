@@ -1,3 +1,17 @@
+2006-12-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gstpriv.h: Reserve three less bits to runtime flags, add
+	F_LOADED.
+	* libgst/oop.c: The address of loaded objects never changes, and
+	they're always old.  Never compact loaded objects.  Never free them too.
+	* libgst/print.c: Print loaded OOPs correctly.
+	* libgst/save.c: Define and use buffer_advance.  Try reusing the
+	mmap-ed area in load_normal_oops; free buffer in load_normal_oops
+	only if copy-on-write is not used.  Mmap all the file in a
+	single step, and using MAP_PRIVATE, and only do the "read" method
+	in buffer_fill.  Rename use_mmap to buf_used_mmap.  Save objects with
+	the old bit set and without the F_RUNTIME flags.
+
 2006-12-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/mpz.c: Fix a bug in _gst_mpz_divexact, causing memory

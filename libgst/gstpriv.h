@@ -256,7 +256,7 @@ enum {
 
   /* The grouping of all the flags which are not valid across image
      saves and loads.  */
-  F_RUNTIME = 0xFFF000U,
+  F_RUNTIME = 0xFF8000U,
 
   /* Set if the OOP is currently unused.  */
   F_FREE = 0x10U,
@@ -285,6 +285,10 @@ enum {
   /* Set for untrusted classes, instances of untrusted classes,
      and contexts whose receiver is untrusted.  */
   F_UNTRUSTED = 0x800U,
+
+  /* Set for objects that were loaded from the image.  We never
+     garbage collect their contents, only the OOPs.  */
+  F_LOADED = 0x1000U,
 
   /* Set to the number of bytes unused in an object with byte-sized
      instance variables.  Note that this field and the following one
