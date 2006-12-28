@@ -94,65 +94,41 @@ typedef struct symbol_info
 symbol_info;
 
 
+/* These variables hold various symbols needed mostly by the compiler
+   and the C interface.  It is important that these symbols are *not*
+   included in the builtin selectors list (builtins.gperf) because
+   of the way we create symbols in _gst_init_symbols_pass1.  */
+
 OOP _gst_and_symbol = NULL;
 OOP _gst_as_scaled_decimal_scale_symbol = NULL;
-OOP _gst_at_put_symbol = NULL;
-OOP _gst_at_symbol = NULL;
 OOP _gst_bad_return_error_symbol = NULL;
-OOP _gst_bit_and_symbol = NULL;
-OOP _gst_bit_or_symbol = NULL;
-OOP _gst_bit_shift_symbol = NULL;
-OOP _gst_bit_xor_symbol = NULL;
 OOP _gst_boolean_symbol = NULL;
 OOP _gst_byte_array_out_symbol = NULL;
 OOP _gst_byte_array_symbol = NULL;
 OOP _gst_c_object_ptr_symbol = NULL;
 OOP _gst_c_object_symbol = NULL;
 OOP _gst_char_symbol = NULL;
-OOP _gst_class_symbol = NULL;
-OOP _gst_divide_symbol = NULL;
 OOP _gst_does_not_understand_symbol = NULL;
 OOP _gst_double_symbol = NULL;
-OOP _gst_equal_symbol = NULL;
 OOP _gst_false_symbol = NULL;
 OOP _gst_float_symbol = NULL;
-OOP _gst_greater_equal_symbol = NULL;
-OOP _gst_greater_than_symbol = NULL;
 OOP _gst_if_false_if_true_symbol = NULL;
 OOP _gst_if_false_symbol = NULL;
 OOP _gst_if_true_if_false_symbol = NULL;
 OOP _gst_if_true_symbol = NULL;
 OOP _gst_int_symbol = NULL;
-OOP _gst_integer_divide_symbol = NULL;
-OOP _gst_is_nil_symbol = NULL;
-OOP _gst_java_as_int_symbol = NULL;
-OOP _gst_java_as_long_symbol = NULL;
-OOP _gst_less_equal_symbol = NULL;
-OOP _gst_less_than_symbol = NULL;
 OOP _gst_long_double_symbol = NULL;
 OOP _gst_long_symbol = NULL;
-OOP _gst_minus_symbol = NULL;
 OOP _gst_must_be_boolean_symbol = NULL;
-OOP _gst_new_colon_symbol = NULL;
 OOP _gst_nil_symbol = NULL;
-OOP _gst_not_equal_symbol = NULL;
-OOP _gst_not_nil_symbol = NULL;
 OOP _gst_or_symbol = NULL;
-OOP _gst_perform_symbol = NULL;
-OOP _gst_perform_with_symbol = NULL;
-OOP _gst_perform_with_with_symbol = NULL;
-OOP _gst_perform_with_with_with_symbol = NULL;
-OOP _gst_perform_with_arguments_symbol = NULL;
 OOP _gst_permission_symbol = NULL;
-OOP _gst_plus_symbol = NULL;
 OOP _gst_primitive_symbol = NULL;
-OOP _gst_remainder_symbol = NULL;
 OOP _gst_repeat_symbol = NULL;
-OOP _gst_same_object_symbol = NULL;
 OOP _gst_self_smalltalk_symbol = NULL;
 OOP _gst_self_symbol = NULL;
-OOP _gst_size_symbol = NULL;
 OOP _gst_smalltalk_symbol = NULL;
+OOP _gst_smalltalk_namespace_symbol = NULL;
 OOP _gst_start_execution_symbol = NULL;
 OOP _gst_string_out_symbol = NULL;
 OOP _gst_string_symbol = NULL;
@@ -161,9 +137,7 @@ OOP _gst_symbol_symbol = NULL;
 OOP _gst_symbol_out_symbol = NULL;
 OOP _gst_symbol_table = NULL;
 OOP _gst_terminate_symbol = NULL;
-OOP _gst_this_context_symbol = NULL;
 OOP _gst_times_repeat_symbol = NULL;
-OOP _gst_times_symbol = NULL;
 OOP _gst_to_by_do_symbol = NULL;
 OOP _gst_to_do_symbol = NULL;
 OOP _gst_true_symbol = NULL;
@@ -171,8 +145,6 @@ OOP _gst_uint_symbol = NULL;
 OOP _gst_ulong_symbol = NULL;
 OOP _gst_undeclared_symbol = NULL;
 OOP _gst_unknown_symbol = NULL;
-OOP _gst_value_colon_symbol = NULL;
-OOP _gst_value_symbol = NULL;
 OOP _gst_value_with_rec_with_args_symbol = NULL;
 OOP _gst_variadic_smalltalk_symbol = NULL;
 OOP _gst_variadic_symbol = NULL;
@@ -188,7 +160,7 @@ OOP _gst_while_true_symbol = NULL;
 OOP _gst_current_namespace = NULL;
 
 /* The list of selectors for the send immediate bytecode.  */
-struct builtin_selector *_gst_builtin_selectors[256] = {};
+struct builtin_selector _gst_builtin_selectors[256] = {};
 
 /* True if undeclared globals can be considered forward references.  */
 int _gst_use_undeclared = 0;
@@ -199,6 +171,15 @@ int _gst_use_undeclared = 0;
 static mst_Boolean is_same_string (const char *str,
 				   OOP oop,
 				   int len);
+
+/* Allocate memory for a symbol of length LEN and whose contents are STR.
+   This function does not fill in the object's class because it is called
+   upon image loading, when the classes have not been initialized yet.  */
+static OOP alloc_symbol_oop (const char *str, int len);
+
+/* Link SYMBOLOOP into the symbol table (using the given hash table index),
+   and fill the class slot of the symbol.  */
+static OOP alloc_symlink (OOP symbolOOP, uintptr_t index);
 
 /* Answer whether C is considered a white space character in Smalltalk
    programs.  */
@@ -239,6 +220,14 @@ static OOP scan_name (const char ** pp);
 static OOP intern_counted_string (const char *str,
 				  int len);
 
+/* This is a hack.  It is the same as _gst_intern_string except that,
+   if the given symbol is pointed to by PTESTOOP, we increment
+   PTESTOOP and return the old value.  This works and speeds up image
+   loading, because we are careful to create the same symbols in
+   _gst_init_symbols_passN and _gst_restore_symbols.  */
+static inline OOP
+intern_string_fast (const char *str, OOP *pTestOOP)
+
 /* This looks for SYMBOL among the instance variables that the current
    class declares, and returns the index of the variable if one is
    found.  */
@@ -268,64 +257,35 @@ static scope cur_scope = NULL;
 static const symbol_info sym_info[] = {
   {&_gst_and_symbol, "and:"},
   {&_gst_as_scaled_decimal_scale_symbol, "asScaledDecimal:scale:"},
-  {&_gst_at_put_symbol, "at:put:"},
-  {&_gst_at_symbol, "at:"},
   {&_gst_bad_return_error_symbol, "badReturnError"},
-  {&_gst_bit_and_symbol, "bitAnd:"},
-  {&_gst_bit_or_symbol, "bitOr:"},
-  {&_gst_bit_xor_symbol, "bitXor:"},
-  {&_gst_bit_shift_symbol, "bitShift:"},
   {&_gst_byte_array_symbol, "byteArray"},
   {&_gst_byte_array_out_symbol, "byteArrayOut"},
   {&_gst_boolean_symbol, "boolean"},
   {&_gst_char_symbol, "char"},
-  {&_gst_class_symbol, "class"},
   {&_gst_c_object_symbol, "cObject"},
   {&_gst_c_object_ptr_symbol, "cObjectPtr"},
-  {&_gst_divide_symbol, "/"},
   {&_gst_does_not_understand_symbol, "doesNotUnderstand:"},
   {&_gst_float_symbol, "float"},
   {&_gst_double_symbol, "double"},
-  {&_gst_equal_symbol, "="},
   {&_gst_false_symbol, "false"},
-  {&_gst_greater_equal_symbol, ">="},
-  {&_gst_greater_than_symbol, ">"},
   {&_gst_if_false_if_true_symbol, "ifFalse:ifTrue:"},
   {&_gst_if_false_symbol, "ifFalse:"},
   {&_gst_if_true_if_false_symbol, "ifTrue:ifFalse:"},
   {&_gst_if_true_symbol, "ifTrue:"},
-  {&_gst_integer_divide_symbol, "//"},
   {&_gst_int_symbol, "int"},
   {&_gst_uint_symbol, "uInt"},
-  {&_gst_is_nil_symbol, "isNil"},
-  {&_gst_java_as_int_symbol, "javaAsInt"},
-  {&_gst_java_as_long_symbol, "javaAsLong"},
-  {&_gst_less_equal_symbol, "<="},
-  {&_gst_less_than_symbol, "<"},
   {&_gst_long_double_symbol, "longDouble"},
   {&_gst_long_symbol, "long"},
   {&_gst_ulong_symbol, "uLong"},
-  {&_gst_minus_symbol, "-"},
   {&_gst_must_be_boolean_symbol, "mustBeBoolean"},
-  {&_gst_new_colon_symbol, "new:"},
   {&_gst_nil_symbol, "nil"},
-  {&_gst_not_equal_symbol, "~="},
-  {&_gst_not_nil_symbol, "notNil"},
   {&_gst_or_symbol, "or:"},
-  {&_gst_perform_symbol, "perform:"},
-  {&_gst_perform_with_symbol, "perform:with:"},
-  {&_gst_perform_with_with_symbol, "perform:with:with:"},
-  {&_gst_perform_with_with_with_symbol, "perform:with:with:with:"},
-  {&_gst_perform_with_arguments_symbol, "perform:withArguments:"},
-  {&_gst_plus_symbol, "+"},
   {&_gst_primitive_symbol, "primitive:"},
-  {&_gst_remainder_symbol, "\\\\"},
   {&_gst_repeat_symbol, "repeat"},
-  {&_gst_same_object_symbol, "=="},
   {&_gst_self_symbol, "self"},
   {&_gst_self_smalltalk_symbol, "selfSmalltalk"},
-  {&_gst_size_symbol, "size"},
   {&_gst_smalltalk_symbol, "smalltalk"},
+  {&_gst_smalltalk_namespace_symbol, "Smalltalk"},
   {&_gst_start_execution_symbol, "startExecution:"},
   {&_gst_string_out_symbol, "stringOut"},
   {&_gst_string_symbol, "string"},
@@ -333,18 +293,13 @@ static const symbol_info sym_info[] = {
   {&_gst_symbol_symbol, "symbol"},
   {&_gst_symbol_out_symbol, "symbolOut"},
   {&_gst_terminate_symbol, "__terminate"},
-  {&_gst_this_context_symbol, "thisContext"},
-  {&_gst_times_symbol, "*"},
   {&_gst_times_repeat_symbol, "timesRepeat:"},
   {&_gst_to_by_do_symbol, "to:by:do:"},
   {&_gst_to_do_symbol, "to:do:"},
   {&_gst_true_symbol, "true"},
   {&_gst_undeclared_symbol, "Undeclared"},
   {&_gst_unknown_symbol, "unknown"},
-  {&_gst_value_colon_symbol, "value:"},
-  {&_gst_value_with_rec_with_args_symbol,
-   "valueWithReceiver:withArguments:"},
-  {&_gst_value_symbol, "value"},
+  {&_gst_value_with_rec_with_args_symbol, "valueWithReceiver:withArguments:"},
   {&_gst_variadic_symbol, "variadic"},
   {&_gst_variadic_smalltalk_symbol, "variadicSmalltalk"},
   {&_gst_vm_primitives_symbol, "VMPrimitives"},
@@ -659,7 +614,7 @@ _gst_find_variable (symbol_entry * se,
       fill_symbol_entry (se, SCOPE_SPECIAL, true, symbol, NIL_INDEX, 0);
       return (true);
     }
-  else if (symbol == _gst_this_context_symbol)
+  else if (symbol == _gst_builtin_selectors[THIS_CONTEXT_SPECIAL].symbol)
     {
       fill_symbol_entry (se, SCOPE_SPECIAL, true, symbol,
 			 THIS_CONTEXT_INDEX, 0);
@@ -1070,19 +1025,41 @@ _gst_intern_string (const char *str)
   return (intern_counted_string (str, len));
 }
 
+static uintptr_t
+hash_symbol (const char *str, int len)
+{
+  uintptr_t index = scramble (_gst_hash_string (str, len));
+  return (index & (SYMBOL_TABLE_SIZE - 1)) + 1;
+}
+
+static OOP
+alloc_symlink (OOP symbolOOP, uintptr_t index)
+{
+  gst_symbol symbol;
+  sym_link link;
+  OOP linkOOP;
+
+  symbol = (gst_symbol) OOP_TO_OBJ (symbolOOP);
+  symbol->objClass = _gst_symbol_class;
+
+  link = (sym_link) new_instance (_gst_sym_link_class, &linkOOP);
+  link->nextLink = ARRAY_AT (_gst_symbol_table, index);
+  link->symbol = symbolOOP;
+  ARRAY_AT_PUT (_gst_symbol_table, index, linkOOP);
+
+  return (symbolOOP);
+}
+
 static OOP
 intern_counted_string (const char *str,
 		       int len)
 {
   uintptr_t index;
-  sym_link link;
-  gst_symbol symbol;
   OOP symbolOOP, linkOOP;
+  sym_link link;
   inc_ptr incPtr;
 
-  index = scramble (_gst_hash_string (str, len));
-  index = (index & (SYMBOL_TABLE_SIZE - 1)) + 1;
-
+  index = hash_symbol (str, len);
   for (linkOOP = ARRAY_AT (_gst_symbol_table, index); !IS_NIL (linkOOP);
        linkOOP = link->nextLink)
     {
@@ -1097,22 +1074,31 @@ intern_counted_string (const char *str,
 #endif
 
   incPtr = INC_SAVE_POINTER ();
-  symbol = (gst_symbol) new_instance_with (_gst_symbol_class, 
-					   len, &symbolOOP);
-
-  memcpy (symbol->symString, str, len);
-  symbolOOP->flags |= F_READONLY;
+  symbolOOP = alloc_symbol_oop (str, len);
   INC_ADD_OOP (symbolOOP);
 
-  link = (sym_link) new_instance (_gst_sym_link_class, &linkOOP);
-  link->nextLink = ARRAY_AT (_gst_symbol_table, index);
-  link->symbol = symbolOOP;
-  ARRAY_AT_PUT (_gst_symbol_table, index, linkOOP);
-
+  alloc_symlink (symbolOOP, index);
   INC_RESTORE_POINTER (incPtr);
+
   return (symbolOOP);
 }
 
+static OOP
+alloc_symbol_oop (const char *str, int len)
+{
+  int numBytes, alignedBytes;
+  gst_symbol symbol;
+  OOP symbolOOP;
+
+  numBytes = sizeof(gst_object_header) + len;
+  alignedBytes = ROUNDED_BYTES (numBytes);
+  symbol = (gst_symbol) _gst_alloc_obj (alignedBytes, &symbolOOP);
+  INIT_UNALIGNED_OBJECT (symbolOOP, alignedBytes - numBytes);
+
+  memcpy (symbol->symString, str, len);
+  symbolOOP->flags |= F_READONLY;
+  return symbolOOP;
+}
 
 static mst_Boolean
 is_same_string (const char *str,
@@ -1236,25 +1222,22 @@ _gst_selector_num_args (OOP symbolOOP)
     return (1);
 
   for (numArgs = 0; len;)
-    {
-      if (bytes[--len] == ':')
-	{
-	  numArgs++;
-	}
-    }
+    if (bytes[--len] == ':')
+      numArgs++;
+
   return (numArgs);
 }
 
 #include "builtins.inl"
 
 void
-_gst_init_symbols (void)
+_gst_init_symbols_pass1 (void)
 {
   const symbol_info *si;
   struct builtin_selector *bs;
 
   for (si = sym_info; si->symbolVar; si++)
-    *si->symbolVar = _gst_intern_string (si->value);
+    *si->symbolVar = alloc_symbol_oop (si->value, strlen (si->value));
 
   /* Complete gperf's generated table with each symbol's OOP,
      and prepare a kind of reverse mapping from the 256 bytecodes
@@ -1266,7 +1249,70 @@ _gst_init_symbols (void)
     if (bs->offset != -1)
       {
 	const char *name = bs->offset + _gst_builtin_selectors_names;
-	bs->symbol = _gst_intern_string (name);
-        _gst_builtin_selectors[bs->bytecode] = bs;
+	bs->symbol = alloc_symbol_oop (name, strlen (name));
+        _gst_builtin_selectors[bs->bytecode] = *bs;
+      }
+}
+
+void
+_gst_init_symbols_pass2 (void)
+{
+  const symbol_info *si;
+  struct builtin_selector *bs;
+
+  for (si = sym_info; si->symbolVar; si++)
+    alloc_symlink (*si->symbolVar, hash_symbol (si->value, strlen (si->value)));
+
+  /* Complete gperf's generated table with each symbol's OOP,
+     and prepare a kind of reverse mapping from the 256 bytecodes
+     to the hash table entries.  */
+  for (bs = _gst_builtin_selectors_hash;
+       bs - _gst_builtin_selectors_hash <
+	 sizeof (_gst_builtin_selectors_hash) / sizeof (_gst_builtin_selectors_hash[0]);
+       bs++)
+    if (bs->offset != -1)
+      {
+	const char *name = bs->offset + _gst_builtin_selectors_names;
+	alloc_symlink (bs->symbol, hash_symbol (name, strlen (name)));
+      }
+}
+
+static inline OOP
+intern_string_fast (const char *str, OOP *pTestOOP)
+{
+  int len = strlen (str);
+  OOP testOOP = *pTestOOP;
+
+  if (is_same_string (str, testOOP, len))
+    {
+      (*pTestOOP)++;
+      return testOOP;
+    }
+  else
+    return intern_counted_string (str, len);
+}
+
+void
+_gst_restore_symbols (void)
+{
+  const symbol_info *si;
+  struct builtin_selector *bs;
+  OOP currentOOP = _gst_symbol_table + 1;
+
+  for (si = sym_info; si->symbolVar; si++)
+    *si->symbolVar = intern_string_fast (si->value, &currentOOP);
+
+  /* Complete gperf's generated table with each symbol's OOP,
+     and prepare a kind of reverse mapping from the 256 bytecodes
+     to the hash table entries.  */
+  for (bs = _gst_builtin_selectors_hash;
+       bs - _gst_builtin_selectors_hash <
+	 sizeof (_gst_builtin_selectors_hash) / sizeof (_gst_builtin_selectors_hash[0]);
+       bs++)
+    if (bs->offset != -1)
+      {
+	const char *name = bs->offset + _gst_builtin_selectors_names;
+	bs->symbol = intern_string_fast (name, &currentOOP);
+        _gst_builtin_selectors[bs->bytecode] = *bs;
       }
 }

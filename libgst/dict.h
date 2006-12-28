@@ -466,13 +466,6 @@ extern OOP _gst_message_new_args (OOP selectorOOP,
 				  OOP argsArray) 
   ATTRIBUTE_HIDDEN;
 
-/* Create a new DirectedMessage object for the given RECEIVER,
-   SELECTOR (a Symbol) and Array of arguments.  */
-extern OOP _gst_directed_message_new_args (OOP receiverOOP,
-					   OOP selectorOOP,
-					   OOP argsArray) 
-  ATTRIBUTE_HIDDEN;
-
 /* Returns the name of CLASS_OOP (a Smalltalk Class) */
 extern OOP _gst_get_class_symbol (OOP class_oop)
   ATTRIBUTE_PURE 

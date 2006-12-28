@@ -165,13 +165,13 @@ INVALID (opcode, arg);
   dispatch SEND_ARITH (10);
 }
 
-/* BIT_XOR_COLON_SPECIAL(*) */
+/* BIT_XOR_SPECIAL(*) */
 11 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_ARITH (11);
 }
 
-/* BIT_SHIFT_COLON_SPECIAL(*) */
+/* BIT_SHIFT_SPECIAL(*) */
 12 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_ARITH (12);
@@ -183,25 +183,25 @@ INVALID (opcode, arg);
   dispatch SEND_ARITH (13);
 }
 
-/* BIT_AND_COLON_SPECIAL(*) */
+/* BIT_AND_SPECIAL(*) */
 14 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_ARITH (14);
 }
 
-/* BIT_OR_COLON_SPECIAL(*) */
+/* BIT_OR_SPECIAL(*) */
 15 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_ARITH (15);
 }
 
-/* AT_COLON_SPECIAL(*) */
+/* AT_SPECIAL(*) */
 16 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_SPECIAL (0);
 }
 
-/* AT_COLON_PUT_COLON_SPECIAL(*) */
+/* AT_PUT_SPECIAL(*) */
 17 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_SPECIAL (1);
@@ -701,7 +701,7 @@ INVALID (opcode, arg);
 }
 
 /* PUSH_INTEGER(*)
-   AT_COLON_SPECIAL(0) */
+   AT_SPECIAL(0) */
 91 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_INTEGER (arg | arg_lsb);
@@ -726,7 +726,7 @@ INVALID (opcode, arg);
 }
 
 /* PUSH_TEMPORARY_VARIABLE(*)
-   AT_COLON_SPECIAL(0) */
+   AT_SPECIAL(0) */
 94 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
@@ -1030,7 +1030,7 @@ INVALID (opcode, arg);
 }
 
 /* PUSH_TEMPORARY_VARIABLE(*)
-   AT_COLON_PUT_COLON_SPECIAL(0) */
+   AT_PUT_SPECIAL(0) */
 130 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
@@ -1373,7 +1373,7 @@ INVALID (opcode, arg);
 }
 
 /* PUSH_INTEGER(*)
-   BIT_AND_COLON_SPECIAL(0) */
+   BIT_AND_SPECIAL(0) */
 169 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_INTEGER (arg | arg_lsb);
@@ -1423,7 +1423,7 @@ INVALID (opcode, arg);
 }
 
 /* PUSH_LIT_CONSTANT(*)
-   AT_COLON_PUT_COLON_SPECIAL(0) */
+   AT_PUT_SPECIAL(0) */
 175 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
@@ -1915,7 +1915,7 @@ INVALID (opcode, arg);
 
 /* PUSH_LIT_CONSTANT(*)
    PUSH_TEMPORARY_VARIABLE(0)
-   AT_COLON_PUT_COLON_SPECIAL(0) */
+   AT_PUT_SPECIAL(0) */
 230 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
@@ -1924,7 +1924,7 @@ INVALID (opcode, arg);
 }
 
 /* PUSH_INTEGER(*)
-   AT_COLON_PUT_COLON_SPECIAL(0) */
+   AT_PUT_SPECIAL(0) */
 231 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_INTEGER (arg | arg_lsb);

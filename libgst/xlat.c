@@ -102,14 +102,6 @@ typedef struct label
 }
 label;
 
-/* And these one simplifies the handling of special selectors */
-typedef struct special_selector
-{
-  OOP *selectorOOP;
-  int numArgs;
-  int operation;
-}
-special_selector;
 
 /* This structure represents an n-tree. Children of a node are
    connected by a linked list. It is probably the most important for
@@ -401,34 +393,34 @@ static const emit_func emit_operation_funcs[96] = {
   gen_invalid, gen_invalid, gen_invalid, gen_invalid
 };
 
-static const special_selector special_send_bytecodes[32] = {
-  {&_gst_plus_symbol, 1, TREE_SEND | TREE_BINARY_INT},
-  {&_gst_minus_symbol, 1, TREE_SEND | TREE_BINARY_INT},
-  {&_gst_less_than_symbol, 1, TREE_SEND | TREE_BINARY_BOOL},
-  {&_gst_greater_than_symbol, 1, TREE_SEND | TREE_BINARY_BOOL},
-  {&_gst_less_equal_symbol, 1, TREE_SEND | TREE_BINARY_BOOL},
-  {&_gst_greater_equal_symbol, 1, TREE_SEND | TREE_BINARY_BOOL},
-  {&_gst_equal_symbol, 1, TREE_SEND | TREE_BINARY_BOOL},
-  {&_gst_not_equal_symbol, 1, TREE_SEND | TREE_BINARY_BOOL},
-  {&_gst_times_symbol, 1, TREE_SEND | TREE_BINARY_INT},
-  {&_gst_divide_symbol, 1, TREE_SEND | TREE_NORMAL},
-  {&_gst_remainder_symbol, 1, TREE_SEND | TREE_NORMAL	/* TREE_BINARY_INT */ },
-  {&_gst_bit_xor_symbol, 1, TREE_SEND | TREE_BINARY_INT},
-  {&_gst_bit_shift_symbol, 1, TREE_SEND | TREE_NORMAL	/* TREE_BINARY_INT */ },
-  {&_gst_integer_divide_symbol, 1, TREE_SEND | TREE_BINARY_INT},
-  {&_gst_bit_and_symbol, 1, TREE_SEND | TREE_BINARY_INT},
-  {&_gst_bit_or_symbol, 1, TREE_SEND | TREE_BINARY_INT},
-  {&_gst_at_symbol, 1, TREE_SEND | TREE_NORMAL},
-  {&_gst_at_put_symbol, 2, TREE_SEND | TREE_NORMAL},
-  {&_gst_size_symbol, 0, TREE_SEND | TREE_NORMAL},
-  {&_gst_class_symbol, 0, TREE_SEND | TREE_NORMAL},
-  {&_gst_is_nil_symbol, 0, TREE_SEND | TREE_UNARY_BOOL},
-  {&_gst_not_nil_symbol, 0, TREE_SEND | TREE_UNARY_BOOL},
-  {&_gst_value_symbol, 0, TREE_SEND | TREE_NORMAL},
-  {&_gst_value_colon_symbol, 1, TREE_SEND | TREE_NORMAL},
-  {&_gst_same_object_symbol, 1, TREE_SEND | TREE_BINARY_BOOL},
-  {&_gst_java_as_int_symbol, 0, TREE_SEND | TREE_UNARY_SPECIAL},
-  {&_gst_java_as_long_symbol, 0, TREE_SEND | TREE_UNARY_SPECIAL},
+static const int special_send_bytecodes[32] = {
+  TREE_SEND | TREE_BINARY_INT,		/* PLUS_SPECIAL */
+  TREE_SEND | TREE_BINARY_INT,		/* MINUS_SPECIAL */
+  TREE_SEND | TREE_BINARY_BOOL,		/* LESS_THAN_SPECIAL */
+  TREE_SEND | TREE_BINARY_BOOL,		/* GREATER_THAN_SPECIAL */
+  TREE_SEND | TREE_BINARY_BOOL,		/* LESS_EQUAL_SPECIAL */
+  TREE_SEND | TREE_BINARY_BOOL,		/* GREATER_EQUAL_SPECIAL */
+  TREE_SEND | TREE_BINARY_BOOL,		/* EQUAL_SPECIAL */
+  TREE_SEND | TREE_BINARY_BOOL,		/* NOT_EQUAL_SPECIAL */
+  TREE_SEND | TREE_BINARY_INT,		/* TIMES_SPECIAL */
+  TREE_SEND | TREE_NORMAL,		/* DIVIDE_SPECIAL */
+  TREE_SEND | TREE_NORMAL,		/* REMAINDER_SPECIAL */
+  TREE_SEND | TREE_BINARY_INT,		/* BIT_XOR_SPECIAL */
+  TREE_SEND | TREE_NORMAL,		/* BIT_SHIFT_SPECIAL */
+  TREE_SEND | TREE_BINARY_INT,		/* INTEGER_DIVIDE_SPECIAL */
+  TREE_SEND | TREE_BINARY_INT,		/* BIT_AND_SPECIAL */
+  TREE_SEND | TREE_BINARY_INT,		/* BIT_OR_SPECIAL */
+  TREE_SEND | TREE_NORMAL,		/* AT_SPECIAL */
+  TREE_SEND | TREE_NORMAL,		/* AT_PUT_SPECIAL */
+  TREE_SEND | TREE_NORMAL,		/* SIZE_SPECIAL */
+  TREE_SEND | TREE_NORMAL,		/* CLASS_SPECIAL */
+  TREE_SEND | TREE_UNARY_BOOL,		/* IS_NIL_SPECIAL */
+  TREE_SEND | TREE_UNARY_BOOL,		/* NOT_NIL_SPECIAL */
+  TREE_SEND | TREE_NORMAL,		/* VALUE_SPECIAL */
+  TREE_SEND | TREE_NORMAL,		/* VALUE_COLON_SPECIAL */
+  TREE_SEND | TREE_BINARY_BOOL,		/* SAME_OBJECT_SPECIAL */
+  TREE_SEND | TREE_UNARY_SPECIAL,	/* JAVA_AS_INT_SPECIAL */
+  TREE_SEND | TREE_UNARY_SPECIAL,	/* JAVA_AS_LONG_SPECIAL */
 };
 
 
@@ -1779,21 +1771,21 @@ gen_binary_int (code_tree *tree)
 
 
     case REMAINDER_SPECIAL:
-    case BIT_SHIFT_COLON_SPECIAL:
+    case BIT_SHIFT_SPECIAL:
       /* not yet */
       addr = lbl_get (overflow);
       addr = jit_jmpi (addr);
       lbl_use (overflow, addr);
       break;
 
-    case BIT_AND_COLON_SPECIAL:
+    case BIT_AND_SPECIAL:
       IMM_OR_REG (and, JIT_V0);
       break;
-    case BIT_OR_COLON_SPECIAL:
+    case BIT_OR_SPECIAL:
       IMM_OR_REG (or, JIT_V0);
       break;
 
-    case BIT_XOR_COLON_SPECIAL:
+    case BIT_XOR_SPECIAL:
       /* For XOR, the tag bits of the two operands cancel (unlike
 	 AND and OR), so we cannot simply use the IMM_OR_REG macro.  */
       if (reg1 != JIT_NOREG)
@@ -3070,9 +3062,10 @@ emit_user_defined_method_call (OOP methodOOP, int numArgs,
   push_tree_node_oop (bp, NULL, TREE_PUSH | TREE_LIT_CONST, methodOOP);
   push_tree_node (bp, NULL, TREE_PUSH | TREE_SELF, NULL);
 
+  /* TODO: use instantiate_oop_with instead.  */
   push_tree_node_oop (bp, NULL, TREE_PUSH | TREE_LIT_VAR, arrayAssociation);
   push_tree_node_oop (bp, NULL, TREE_PUSH | TREE_LIT_CONST, FROM_INT (numArgs));
-  push_send_node (bp, _gst_new_colon_symbol, 1, false,
+  push_send_node (bp, _gst_intern_string ("new:"), 1, false,
 		  TREE_SEND | TREE_NORMAL, NEW_COLON_SPECIAL);
 
   for (i = 0; i < numArgs; i++)
@@ -3433,17 +3426,17 @@ decode_bytecode (gst_uchar *bp)
     }
 
     SEND_ARITH {
-      const special_selector *info = &special_send_bytecodes[n];
-      push_send_node (IP0, *info->selectorOOP, info->numArgs, false,
-                      info->operation, n);
+      int op = special_send_bytecodes[n];
+      const struct builtin_selector *bs = &_gst_builtin_selectors[n];
+      push_send_node (IP0, bs->symbol, bs->numArgs, false, op, n);
     }
     SEND_SPECIAL {
-      const special_selector *info = &special_send_bytecodes[n + 16];
-      push_send_node (IP0, *info->selectorOOP, info->numArgs, false,
-                      info->operation, n + 16);
+      int op = special_send_bytecodes[n + 16];
+      const struct builtin_selector *bs = &_gst_builtin_selectors[n + 16];
+      push_send_node (IP0, bs->symbol, bs->numArgs, false, op, n + 16);
     }
     SEND_IMMEDIATE {
-      const struct builtin_selector *bs = _gst_builtin_selectors[n];
+      const struct builtin_selector *bs = &_gst_builtin_selectors[n];
       push_send_node (IP0, bs->symbol, bs->numArgs, super,
                       TREE_SEND | TREE_NORMAL, n);
     }

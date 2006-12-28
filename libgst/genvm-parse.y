@@ -91,7 +91,7 @@ typedef struct table_info {
 #define YYPRINT(fp, tok, val) yyprint (fp, tok, &val)
 
 static int filprintf (Filament *fil, const char *format, ...);
-static void yyprint (FILE *fp, int tok, YYSTYPE *val);
+static void yyprint (FILE *fp, int tok, const YYSTYPE *val);
 static void yyerror (const char *s);
 static operation_info *define_operation (const char *name);
 static void set_curr_op_stack (id_list *in, id_list *out);
@@ -297,7 +297,7 @@ c_code: c_code EXPR
 
 %%
 
-void yyprint (FILE *fp, int tok, YYSTYPE *val)
+void yyprint (FILE *fp, int tok, const YYSTYPE *val)
 {
   switch (tok)
     {

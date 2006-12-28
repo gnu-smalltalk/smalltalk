@@ -1187,7 +1187,7 @@ static struct builtin_selector _gst_builtin_selectors_hash[] =
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str650,               			NULL, 1,        NEW_COLON_SPECIAL},
     {-1,NULL,-1,-1}, {-1,NULL,-1,-1}, {-1,NULL,-1,-1},
 #line 55 "../../libgst/builtins.gperf"
-    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str654,                			NULL, 1,        AT_COLON_SPECIAL},
+    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str654,                			NULL, 1,        AT_SPECIAL},
 #line 265 "../../libgst/builtins.gperf"
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str655,      			NULL, 0,       231},
     {-1,NULL,-1,-1}, {-1,NULL,-1,-1}, {-1,NULL,-1,-1},
@@ -1196,7 +1196,7 @@ static struct builtin_selector _gst_builtin_selectors_hash[] =
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str660,           			NULL, 0,       129},
     {-1,NULL,-1,-1}, {-1,NULL,-1,-1},
 #line 51 "../../libgst/builtins.gperf"
-    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str663,          			NULL, 1,        BIT_SHIFT_COLON_SPECIAL},
+    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str663,          			NULL, 1,        BIT_SHIFT_SPECIAL},
     {-1,NULL,-1,-1},
 #line 94 "../../libgst/builtins.gperf"
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str665,              			NULL, 0,       60},
@@ -1259,7 +1259,7 @@ static struct builtin_selector _gst_builtin_selectors_hash[] =
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str697,           			NULL, 0,       197},
     {-1,NULL,-1,-1}, {-1,NULL,-1,-1},
 #line 50 "../../libgst/builtins.gperf"
-    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str700,            			NULL, 1,        BIT_XOR_COLON_SPECIAL},
+    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str700,            			NULL, 1,        BIT_XOR_SPECIAL},
 #line 68 "../../libgst/builtins.gperf"
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str701,	     			NULL, 1,       34},
     {-1,NULL,-1,-1},
@@ -1355,7 +1355,7 @@ static struct builtin_selector _gst_builtin_selectors_hash[] =
 #line 85 "../../libgst/builtins.gperf"
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str768,           			NULL, 1,       51},
 #line 53 "../../libgst/builtins.gperf"
-    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str769,            			NULL, 1,        BIT_AND_COLON_SPECIAL},
+    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str769,            			NULL, 1,        BIT_AND_SPECIAL},
     {-1,NULL,-1,-1}, {-1,NULL,-1,-1}, {-1,NULL,-1,-1},
 #line 274 "../../libgst/builtins.gperf"
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str773,      			NULL, 2,       240},
@@ -1416,7 +1416,7 @@ static struct builtin_selector _gst_builtin_selectors_hash[] =
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str816,           			NULL, 0,       57},
     {-1,NULL,-1,-1}, {-1,NULL,-1,-1},
 #line 54 "../../libgst/builtins.gperf"
-    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str819,             			NULL, 1,        BIT_OR_COLON_SPECIAL},
+    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str819,             			NULL, 1,        BIT_OR_SPECIAL},
     {-1,NULL,-1,-1},
 #line 287 "../../libgst/builtins.gperf"
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str821,            			NULL, 1,       253},
@@ -1451,7 +1451,7 @@ static struct builtin_selector _gst_builtin_selectors_hash[] =
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str852,        			NULL, 1,       255},
     {-1,NULL,-1,-1},
 #line 56 "../../libgst/builtins.gperf"
-    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str854,            			NULL, 2,        AT_COLON_PUT_COLON_SPECIAL},
+    {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str854,            			NULL, 2,        AT_PUT_SPECIAL},
     {-1,NULL,-1,-1},
 #line 78 "../../libgst/builtins.gperf"
     {(int)(long)&((struct _gst_builtin_selectors_names_t *)0)->_gst_builtin_selectors_names_str856,           			NULL, 0,       44},

@@ -232,7 +232,7 @@ operation PLUS_SPECIAL ( op1 op2 -- op ) {
   INTERP_BASIC_OP (op, op1, op2, iarg1 += iarg2, farg1 + farg2);
   PREPARE_STACK ();
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_plus_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[PLUS_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -241,7 +241,7 @@ operation MINUS_SPECIAL ( op1 op2 -- op ) {
   INTERP_BASIC_OP (op, op1, op2, iarg1 -= iarg2, farg1 - farg2);
   PREPARE_STACK ();
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_minus_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[MINUS_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -250,7 +250,7 @@ operation LESS_THAN_SPECIAL ( op1 op2 -- op ) {
   PREPARE_STACK ();
   INTERP_BASIC_BOOL (op, op1, op2, <);
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_less_than_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[LESS_THAN_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -259,7 +259,7 @@ operation GREATER_THAN_SPECIAL ( op1 op2 -- op ) {
   PREPARE_STACK ();
   INTERP_BASIC_BOOL (op, op1, op2, >);
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_greater_than_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[GREATER_THAN_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -268,7 +268,7 @@ operation LESS_EQUAL_SPECIAL ( op1 op2 -- op ) {
   PREPARE_STACK ();
   INTERP_BASIC_BOOL (op, op1, op2, <=);
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_less_equal_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[LESS_EQUAL_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -277,7 +277,7 @@ operation GREATER_EQUAL_SPECIAL ( op1 op2 -- op ) {
   PREPARE_STACK ();
   INTERP_BASIC_BOOL (op, op1, op2, >=);
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_greater_equal_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[GREATER_EQUAL_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -286,7 +286,7 @@ operation EQUAL_SPECIAL ( op1 op2 -- op ) {
   PREPARE_STACK ();
   INTERP_BASIC_BOOL (op, op1, op2, ==);
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_equal_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[EQUAL_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -295,7 +295,7 @@ operation NOT_EQUAL_SPECIAL ( op1 op2 -- op ) {
   PREPARE_STACK ();
   INTERP_BASIC_BOOL (op, op1, op2, !=);
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_not_equal_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[NOT_EQUAL_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -304,7 +304,7 @@ operation TIMES_SPECIAL ( op1 op2 -- op ) {
   INTERP_BASIC_OP (op, op1, op2, iarg1 = mul_with_check (iarg1, iarg2), farg1 * farg2);
   PREPARE_STACK ();
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_times_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[TIMES_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -328,7 +328,7 @@ operation DIVIDE_SPECIAL ( op1 op2 -- op ) {
 	}
     }
 
-  SEND_MESSAGE (_gst_divide_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[DIVIDE_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -343,12 +343,12 @@ operation REMAINDER_SPECIAL ( op1 op2 -- op ) {
       NEXT_BC;
     }
 
-  SEND_MESSAGE (_gst_remainder_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[REMAINDER_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
 
-operation BIT_XOR_COLON_SPECIAL ( op1 op2 -- op ) {
+operation BIT_XOR_SPECIAL ( op1 op2 -- op ) {
   if COMMON (ARE_INTS (op1, op2))
     {
       op = FROM_INT (TO_INT (op1) ^ TO_INT (op2));
@@ -357,12 +357,12 @@ operation BIT_XOR_COLON_SPECIAL ( op1 op2 -- op ) {
 
   PREPARE_STACK ();
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_bit_xor_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[BIT_XOR_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
 
-operation BIT_SHIFT_COLON_SPECIAL ( op1 op2 -- op ) {
+operation BIT_SHIFT_SPECIAL ( op1 op2 -- op ) {
   if COMMON (IS_INT (op2) && IS_INT (op1))
     {
       intptr_t iarg1, iarg2;
@@ -390,7 +390,7 @@ operation BIT_SHIFT_COLON_SPECIAL ( op1 op2 -- op ) {
 
   PREPARE_STACK ();
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_bit_shift_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[BIT_SHIFT_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -405,12 +405,12 @@ operation INTEGER_DIVIDE_SPECIAL ( op1 op2 -- op1 op2 ) {
       NEXT_BC;
     }
 
-  SEND_MESSAGE (_gst_integer_divide_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[INTEGER_DIVIDE_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
 
-operation BIT_AND_COLON_SPECIAL ( op1 op2 -- op ) {
+operation BIT_AND_SPECIAL ( op1 op2 -- op ) {
   if COMMON (ARE_INTS (op1, op2))
     {
       op = FROM_INT (TO_INT (op1) & TO_INT (op2));
@@ -419,12 +419,12 @@ operation BIT_AND_COLON_SPECIAL ( op1 op2 -- op ) {
 
   PREPARE_STACK ();
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_bit_and_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[BIT_AND_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
 
-operation BIT_OR_COLON_SPECIAL ( op1 op2 -- op ) {
+operation BIT_OR_SPECIAL ( op1 op2 -- op ) {
   if COMMON (ARE_INTS (op1, op2))
     {
       op = FROM_INT (TO_INT (op1) | TO_INT (op2));
@@ -433,18 +433,18 @@ operation BIT_OR_COLON_SPECIAL ( op1 op2 -- op ) {
 
   PREPARE_STACK ();
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_bit_or_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[BIT_OR_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
 
-operation AT_COLON_SPECIAL ( rec idx -- val ) {
+operation AT_SPECIAL ( rec idx -- val ) {
   OOP classOOP;
   PREPARE_STACK ();
   EXPORT_REGS ();
   if UNCOMMON (IS_INT (rec))
     {
-      SEND_MESSAGE (_gst_at_symbol, 1);
+      SEND_MESSAGE (_gst_builtin_selectors[AT_SPECIAL].symbol, 1);
       IMPORT_REGS ();
       FETCH (dispatch_vec);
     }
@@ -460,7 +460,7 @@ operation AT_COLON_SPECIAL ( rec idx -- val ) {
      send the message, and modify the cache if the send is resolved to
      a primitive.  */
   last_primitive = 0;
-  SEND_MESSAGE (_gst_at_symbol, 1);
+  SEND_MESSAGE (_gst_builtin_selectors[AT_SPECIAL].symbol, 1);
   IMPORT_REGS ();
   if (_gst_primitive_table[last_primitive].id == 60)
     {
@@ -471,13 +471,13 @@ operation AT_COLON_SPECIAL ( rec idx -- val ) {
   FETCH (dispatch_vec);
 }
 
-operation AT_COLON_PUT_COLON_SPECIAL ( rec idx val -- res ) {
+operation AT_PUT_SPECIAL ( rec idx val -- res ) {
   OOP classOOP;
   PREPARE_STACK ();
   EXPORT_REGS ();
   if UNCOMMON (IS_INT (rec))
     {
-      SEND_MESSAGE (_gst_at_put_symbol, 2);
+      SEND_MESSAGE (_gst_builtin_selectors[AT_PUT_SPECIAL].symbol, 2);
       IMPORT_REGS ();
       FETCH (dispatch_vec);
     }
@@ -493,7 +493,7 @@ operation AT_COLON_PUT_COLON_SPECIAL ( rec idx val -- res ) {
      send the message, and modify the cache if the send is resolved to
      a primitive.  */
   last_primitive = 0;
-  SEND_MESSAGE (_gst_at_put_symbol, 2);
+  SEND_MESSAGE (_gst_builtin_selectors[AT_PUT_SPECIAL].symbol, 2);
   IMPORT_REGS ();
   if (_gst_primitive_table[last_primitive].id == 61)
     {
@@ -510,7 +510,7 @@ operation SIZE_SPECIAL ( rec -- val ) {
   EXPORT_REGS ();
   if UNCOMMON (IS_INT (rec))
     {
-      SEND_MESSAGE (_gst_size_symbol, 0);
+      SEND_MESSAGE (_gst_builtin_selectors[SIZE_SPECIAL].symbol, 0);
       IMPORT_REGS ();
       FETCH (dispatch_vec);
     }
@@ -526,7 +526,7 @@ operation SIZE_SPECIAL ( rec -- val ) {
      send the message, and modify the cache if the send is resolved to
      a primitive.  */
   last_primitive = 0;
-  SEND_MESSAGE (_gst_size_symbol, 0);
+  SEND_MESSAGE (_gst_builtin_selectors[SIZE_SPECIAL].symbol, 0);
   IMPORT_REGS ();
   if COMMON (last_primitive)
     {
@@ -543,7 +543,7 @@ operation CLASS_SPECIAL ( rec -- val ) {
   EXPORT_REGS ();
   if UNCOMMON (IS_INT (rec))
     {
-      SEND_MESSAGE (_gst_class_symbol, 0);
+      SEND_MESSAGE (_gst_builtin_selectors[CLASS_SPECIAL].symbol, 0);
       IMPORT_REGS ();
       FETCH (dispatch_vec);
     }
@@ -559,7 +559,7 @@ operation CLASS_SPECIAL ( rec -- val ) {
      send the message, and modify the cache if the send is resolved to
      a primitive.  */
   last_primitive = 0;
-  SEND_MESSAGE (_gst_class_symbol, 0);
+  SEND_MESSAGE (_gst_builtin_selectors[CLASS_SPECIAL].symbol, 0);
   IMPORT_REGS ();
   if COMMON (last_primitive)
     {
@@ -586,7 +586,7 @@ operation VALUE_SPECIAL ( rec -- rec ) {
   if (UNCOMMON (IS_INT (rec))
       || UNCOMMON (OOP_CLASS (rec) != _gst_block_closure_class)
       || UNCOMMON (send_block_value (0)))
-    SEND_MESSAGE (_gst_value_symbol, 0);
+    SEND_MESSAGE (_gst_builtin_selectors[VALUE_SPECIAL].symbol, 0);
 
   IMPORT_REGS ();
   FETCH (dispatch_vec);
@@ -598,7 +598,7 @@ operation VALUE_COLON_SPECIAL ( rec blk_arg -- rec blk_arg ) {
   if (UNCOMMON (IS_INT (rec))
       || UNCOMMON (OOP_CLASS (rec) != _gst_block_closure_class)
       || UNCOMMON (send_block_value (1)))
-    SEND_MESSAGE (_gst_value_colon_symbol, 1);
+    SEND_MESSAGE (_gst_builtin_selectors[VALUE_COLON_SPECIAL].symbol, 1);
 
   IMPORT_REGS ();
   FETCH (dispatch_vec);
@@ -618,7 +618,7 @@ operation JAVA_AS_INT_SPECIAL ( rec -- val ) {
 
   PREPARE_STACK ();
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_java_as_int_symbol, 0);
+  SEND_MESSAGE (_gst_builtin_selectors[JAVA_AS_INT_SPECIAL].symbol, 0);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -632,7 +632,7 @@ operation JAVA_AS_LONG_SPECIAL ( rec -- val ) {
 
   PREPARE_STACK ();
   EXPORT_REGS ();
-  SEND_MESSAGE (_gst_java_as_long_symbol, 0);
+  SEND_MESSAGE (_gst_builtin_selectors[JAVA_AS_LONG_SPECIAL].symbol, 0);
   IMPORT_REGS ();
   FETCH (dispatch_vec);
 }
@@ -657,7 +657,7 @@ operation SEND_SUPER sel n ( -- ) {
 }
 
 operation SEND_IMMEDIATE n ( -- ) {
-  const struct builtin_selector *bs = _gst_builtin_selectors[n];
+  const struct builtin_selector *bs = &_gst_builtin_selectors[n];
   PREPARE_STACK ();
   EXPORT_REGS ();
   SEND_MESSAGE (bs->symbol, bs->numArgs);
@@ -667,7 +667,7 @@ operation SEND_IMMEDIATE n ( -- ) {
 
 operation SEND_SUPER_IMMEDIATE n ( -- ) {
   OOP classOOP;
-  const struct builtin_selector *bs = _gst_builtin_selectors[n];
+  const struct builtin_selector *bs = &_gst_builtin_selectors[n];
   PREPARE_STACK ();
   classOOP = POP_OOP ();
 
@@ -945,12 +945,12 @@ table normal_byte_codes {
 
   11 = bytecode bc11 {
     PREFETCH ();
-    BIT_XOR_COLON_SPECIAL ();
+    BIT_XOR_SPECIAL ();
   }
 
   12 = bytecode bc12 {
     PREFETCH ();
-    BIT_SHIFT_COLON_SPECIAL ();
+    BIT_SHIFT_SPECIAL ();
   }
 
   13 = bytecode bc13 {
@@ -960,22 +960,22 @@ table normal_byte_codes {
 
   14 = bytecode bc14 {
     PREFETCH ();
-    BIT_AND_COLON_SPECIAL ();
+    BIT_AND_SPECIAL ();
   }
 
   15 = bytecode bc15 {
     PREFETCH ();
-    BIT_OR_COLON_SPECIAL ();
+    BIT_OR_SPECIAL ();
   }
 
   16 = bytecode bc16 {
     PREFETCH ();
-    AT_COLON_SPECIAL ();
+    AT_SPECIAL ();
   }
 
   17 = bytecode bc17 {
     PREFETCH ();
-    AT_COLON_PUT_COLON_SPECIAL ();
+    AT_PUT_SPECIAL ();
   }
 
   18 = bytecode bc18 {
@@ -1369,7 +1369,7 @@ table normal_byte_codes {
   91 = bytecode bc91 {
     PREFETCH ();
     PUSH_INTEGER (arg);
-    AT_COLON_SPECIAL ();
+    AT_SPECIAL ();
   }
 
   92 = bytecode bc92 {
@@ -1387,7 +1387,7 @@ table normal_byte_codes {
   94 = bytecode bc94 {
     PREFETCH ();
     PUSH_TEMPORARY_VARIABLE (arg);
-    AT_COLON_SPECIAL ();
+    AT_SPECIAL ();
   }
 
   95 = bytecode bc95 {
@@ -1609,7 +1609,7 @@ table normal_byte_codes {
   130 = bytecode bc130 {
     PREFETCH ();
     PUSH_TEMPORARY_VARIABLE (arg);
-    AT_COLON_PUT_COLON_SPECIAL ();
+    AT_PUT_SPECIAL ();
   }
 
   131 = bytecode bc131 {
@@ -1857,7 +1857,7 @@ table normal_byte_codes {
   169 = bytecode bc169 {
     PREFETCH ();
     PUSH_INTEGER (arg);
-    BIT_AND_COLON_SPECIAL ();
+    BIT_AND_SPECIAL ();
   }
 
   170 = bytecode bc170 {
@@ -1894,7 +1894,7 @@ table normal_byte_codes {
   175 = bytecode bc175 {
     PREFETCH ();
     PUSH_LIT_CONSTANT (arg);
-    AT_COLON_PUT_COLON_SPECIAL ();
+    AT_PUT_SPECIAL ();
   }
 
   176 = bytecode bc176 {
@@ -2244,13 +2244,13 @@ table normal_byte_codes {
     PREFETCH ();
     PUSH_LIT_CONSTANT (arg);
     PUSH_TEMPORARY_VARIABLE (0);
-    AT_COLON_PUT_COLON_SPECIAL ();
+    AT_PUT_SPECIAL ();
   }
 
   231 = bytecode bc231 {
     PREFETCH ();
     PUSH_INTEGER (arg);
-    AT_COLON_PUT_COLON_SPECIAL ();
+    AT_PUT_SPECIAL ();
   }
 
   232 = bytecode bc232 {

@@ -1,5 +1,41 @@
 2006-12-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/builtins.gperf: Remove _COLON from the enum for special
+	bytecodes.
+	* libgst/byte.def: Likewise.
+	* libgst/vm.def: Likewise.
+	* libgst/xlat.c: Likewise.
+
+	* libgst/comp.c: Remove the possibility to inline #perform:.
+
+	* libgst/byte.c: Turn _gst_builtin_selectors into an array of
+	structs (instead of pointers).
+	* libgst/opt.c: Likewise.
+	* libgst/sym.c: Likewise.
+	* libgst/vm.def: Use _gst_builtin_selectors instead of symbols
+	defined in sym.c (not slower with the change above).
+	* libgst/xlat.c: Only store the opcode in special_send_bytecodes and
+	use _gst_builtin_selectors for the other pieces of information.
+
+	* libgst/dict.c: Don't reload the _gst_*_class variables unless
+	necessary.  Pass the class to identity_dictionary_new and adjust the
+	sole caller, _gst_valid_class_method_dictionary.  Split the
+	creation of symbols in two parts (creating symbols, and populating
+	the symbol table with SymLink objects); call _gst_restore_symbols
+	when loading the image.  Remove _gst_directed_message_new_args.
+	* libgst/interp.c: Remove commented out code to start call-ins through
+	Process>>#startExecution:.
+	* libgst/sym.c: Remove symbols for the special selectors.  New
+	functions alloc_symbol_oop and alloc_symlink to support two-phase
+	creation of symbols in the image.  Add _gst_smalltalk_namespace_symbol.
+	New functions intern_string_fast and _gst_restore_symbols to support
+	fast reloading of symbols when loading the image.
+	* libgst/sym.h: Adjust for changes to sym.c.
+
+	* libgst/genvm-parse.y: Add const qualifier to yyprint.
+
+2006-12-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/mpz.c: Fix warnings in _gst_mpz_divexact.
 
 2006-12-28  Paolo Bonzini  <bonzini@gnu.org>

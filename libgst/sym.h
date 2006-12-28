@@ -90,63 +90,34 @@ extern int _gst_use_undeclared
 
 extern OOP _gst_and_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_as_scaled_decimal_scale_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_at_put_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_at_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_bad_return_error_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_bit_and_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_bit_or_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_bit_shift_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_bit_xor_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_boolean_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_byte_array_out_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_byte_array_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_c_object_ptr_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_c_object_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_char_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_class_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_divide_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_does_not_understand_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_double_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_equal_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_false_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_float_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_greater_equal_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_greater_than_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_if_false_if_true_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_if_false_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_if_true_if_false_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_if_true_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_int_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_integer_divide_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_is_nil_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_java_as_int_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_java_as_long_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_less_equal_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_less_than_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_long_double_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_long_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_minus_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_must_be_boolean_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_new_colon_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_nil_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_not_equal_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_not_nil_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_or_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_perform_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_perform_with_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_perform_with_with_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_perform_with_with_with_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_perform_with_arguments_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_permission_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_plus_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_primitive_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_remainder_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_repeat_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_same_object_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_self_smalltalk_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_self_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_size_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_smalltalk_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_smalltalk_namespace_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_start_execution_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_string_out_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_string_symbol ATTRIBUTE_HIDDEN;
@@ -156,7 +127,6 @@ extern OOP _gst_symbol_out_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_terminate_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_this_context_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_times_repeat_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_times_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_to_by_do_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_to_do_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_true_symbol ATTRIBUTE_HIDDEN;
@@ -164,8 +134,6 @@ extern OOP _gst_uint_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_ulong_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_undeclared_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_unknown_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_value_colon_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_value_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_value_with_rec_with_args_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_variadic_smalltalk_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_variadic_symbol ATTRIBUTE_HIDDEN;
@@ -351,9 +319,21 @@ extern void _gst_print_symbols (void)
   ATTRIBUTE_HIDDEN;
 
 /* This routine initializes the variables containing the Symbols
-   known to the VM.  */
-extern void _gst_init_symbols (void)
+   known to the VM.  This one creates the symbol OOPs, which have to
+   be consecutive in order to speed up the load.  */
+extern void _gst_init_symbols_pass1 (void)
   ATTRIBUTE_HIDDEN;
+
+/* This one creates the SymLink OOPs for the Symbols previously
+   created.  */
+extern void _gst_init_symbols_pass2 (void)
+  ATTRIBUTE_HIDDEN;
+
+/* This routine reloads the variables containing the Symbols
+   known to the VM.  It is invocated upon image load.  */
+extern void _gst_restore_symbols (void)
+  ATTRIBUTE_HIDDEN;
+
 
 extern void _gst_check_symbol_chain (void)
   ATTRIBUTE_HIDDEN;
@@ -370,7 +350,7 @@ struct builtin_selector {
   int bytecode;
 };
 
-extern struct builtin_selector *_gst_builtin_selectors[256]
+extern struct builtin_selector _gst_builtin_selectors[256]
   ATTRIBUTE_HIDDEN;
 
 extern struct builtin_selector *_gst_lookup_builtin_selector (const char *str,

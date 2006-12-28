@@ -2128,25 +2128,6 @@ _gst_nvmsg_send (OOP receiver,
   currentProcessOOP = get_active_process ();
   change_process_context (processOOP);
 
-#if 0
-  if (_gst_kernel_initialized)
-    {
-      gst_array argsArray;
-      OOP argsArrayOOP;
-      argsArray = new_instance_with (_gst_array_class, numArgs, &argsArrayOOP);
-      for (i = 0; i < sendArgs; i++)
-        argsArray->data[i] = args[i];
-
-      INC_ADD_OOP (argsArrayOOP);
-      dirMessageOOP = _gst_directed_message_new_args (receiver, sendSelector, argsArrayOOP);
-
-      receiver = _gst_process_class;
-      sendSelector = _gst_start_execution_symbol;
-      sendArgs = 1;
-      args = &dirMessageOOP;
-    }
-#endif
-
   PUSH_OOP (receiver);
   for (i = 0; i < sendArgs; i++)
     PUSH_OOP (args[i]);

@@ -936,15 +936,15 @@ _gst_compute_stack_positions (gst_uchar * bp,
 	    }
 
 	    SEND_ARITH {
-	      balance -= _gst_builtin_selectors[n]->numArgs;
+	      balance -= _gst_builtin_selectors[n].numArgs;
 	    }
 
 	    SEND_IMMEDIATE {
-	      balance -= super + _gst_builtin_selectors[n]->numArgs;
+	      balance -= super + _gst_builtin_selectors[n].numArgs;
 	    }
 
             SEND_SPECIAL {
-	      balance -= _gst_builtin_selectors[n + 16]->numArgs;
+	      balance -= _gst_builtin_selectors[n + 16].numArgs;
 	    }
 
             INVALID {
@@ -1392,10 +1392,10 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 	    }
 
 	    SEND_ARITH {
-	      if (!_gst_builtin_selectors[n])
+	      if (!_gst_builtin_selectors[n].symbol)
 		return ("invalid immediate send");
 
-	      balance -= _gst_builtin_selectors[n]->numArgs;
+	      balance -= _gst_builtin_selectors[n].numArgs;
 
 	      /* Sends touch the new stack top, so they require an extra slot.  */
 	      if (curr_sp + balance < 1)
@@ -1403,10 +1403,10 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 	    }
 
             SEND_SPECIAL {
-	      if (!_gst_builtin_selectors[n + 16])
+	      if (!_gst_builtin_selectors[n + 16].symbol)
 		return ("invalid immediate send");
 
-	      balance -= _gst_builtin_selectors[n + 16]->numArgs;
+	      balance -= _gst_builtin_selectors[n + 16].numArgs;
 
 	      /* Sends touch the new stack top, so they require an extra slot.  */
 	      if (curr_sp + balance < 1)
@@ -1414,10 +1414,10 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 	    }
 
             SEND_IMMEDIATE {
-	      if (!_gst_builtin_selectors[n])
+	      if (!_gst_builtin_selectors[n].symbol)
 		return ("invalid immediate send");
 
-	      balance -= super + _gst_builtin_selectors[n]->numArgs;
+	      balance -= super + _gst_builtin_selectors[n].numArgs;
 
 	      /* Sends touch the new stack top, so they require an extra slot.  */
 	      if (curr_sp + balance < 1)
@@ -1726,11 +1726,11 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 	    }
 
 	    SEND_ARITH {
-	      sp -= _gst_builtin_selectors[n]->numArgs;
+	      sp -= _gst_builtin_selectors[n].numArgs;
 	      sp[-1] = FROM_INT (VARYING);
 	    }
 	    SEND_SPECIAL {
-	      sp -= _gst_builtin_selectors[n + 16]->numArgs;
+	      sp -= _gst_builtin_selectors[n + 16].numArgs;
 	      sp[-1] = FROM_INT (VARYING);
 	    }
 
@@ -1769,7 +1769,7 @@ _gst_verify_method (OOP methodOOP, int *num_outer_temps, int depth)
 		    return (_gst_debug (), "Invalid send to super");
 
 		  last_used_literal = NULL;
-	          sp -= super + _gst_builtin_selectors[n]->numArgs;
+	          sp -= super + _gst_builtin_selectors[n].numArgs;
 	          if (super && sp[-1] != FROM_INT (SELF))
 		    return ("Invalid send to super");
 

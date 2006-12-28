@@ -69,15 +69,6 @@
    output for correctness.  */
 /* #define VERIFY_COMPILED_METHODS */
 
-/* Define this to inline #perform: with a constant selector.  It is
-   disabled because it removes some error checking.  For example, it
-   allows one to compile "self perform: #yourself with: 1", after
-   which the compiler thinks that the stack is balanced, when in
-   fact it is not (because #yourself is a SEND_IMMEDIATE selector);
-   or even worse, "self perform: #this:that: with: 1", where the stack
-   upon entry to #this:that: is confused beyond any recognition.  */
-/* #define INLINE_PERFORM */
-
 #define LITERAL_VEC_CHUNK_SIZE		32
 
 
@@ -184,13 +175,6 @@ static mst_Boolean compile_if_statement (OOP selector,
 static mst_Boolean compile_to_by_do (tree_node to,
 				     tree_node by,
 				     tree_node block);
-
-/* Special case compilation of #perform: and friends with a constant
-   selector (in case of #perform:withArguments:, the arguments must be
-   a constant array or an array constructor).  This is done especially
-   for the Java translator, but is always good, so why not?  */
-static mst_Boolean compile_perform (OOP selectorOOP,
-				    tree_node expr);
 
 /* Special case compilation of a #and: or #or: boolean operation; very
    similar to compile_if_statement.  EXPR is a node for the entire
@@ -1407,15 +1391,6 @@ compile_keyword_expr (tree_node expr)
 			    expr->v_expr.expression->v_list.next->v_list.next->v_list.value))
 	return;
     }
-  else if (selector == _gst_perform_symbol
-	   || selector == _gst_perform_with_symbol
-	   || selector == _gst_perform_with_with_symbol
-	   || selector == _gst_perform_with_with_with_symbol
-	   || selector == _gst_perform_with_arguments_symbol)
-    {
-      if (compile_perform (selector, expr))
-	return;
-    }
 
   numArgs = list_length (expr->v_expr.expression);
 
@@ -1423,46 +1398,6 @@ compile_keyword_expr (tree_node expr)
   compile_send (expr, selector, numArgs);
 }
 
-mst_Boolean
-compile_perform (OOP selectorOOP,
-		 tree_node expr)
-{
-#ifdef INLINE_PERFORM
-  tree_node selector = expr->v_expr.expression->v_list.value;
-  tree_node args = expr->v_expr.expression->v_list.next;
-  int i;
-
-  /* We inline only if the selector is a symbol... */
-  if (selector->nodeType != TREE_CONST_EXPR
-      || selector->v_const.constType != CONST_OOP
-      || OOP_CLASS (selector->v_const.val.oopVal) != _gst_symbol_class)
-    return false;
-
-  /* ... and in case of perform:withArguments:, if the list of arguments
-     is a constant array or an array constructor.  */
-  if (selectorOOP == _gst_perform_with_arguments_symbol)
-    {
-      if (args->nodeType != TREE_ARRAY_CONSTRUCTOR
-          || !(args->nodeType == TREE_CONST_EXPR
-	       && args->v_const.constType == CONST_ARRAY))
-	return false;
-
-      /* dive into the list of members of the array. */
-      args = args->v_const.val.aVal;
-    }
-      
-  /* compile the values now */
-  for (i = 0; args; i++, args = args->v_list.next)
-    compile_statement (args->v_list.value);
-
-  /* and send the selector */
-  compile_send (expr, selector->v_const.val.oopVal, i);
-
-  return true;
-#else
-  return false;
-#endif
-}
 
 void
 compile_send (tree_node expr,

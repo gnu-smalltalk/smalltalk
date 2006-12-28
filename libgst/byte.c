@@ -369,12 +369,12 @@ _gst_print_bytecode_name (gst_uchar * bp,
 
     SEND_ARITH {
       printf ("%s\tsend arithmetic message %O\n", prefix,
-	      _gst_builtin_selectors[n]->symbol);
+	      _gst_builtin_selectors[n].symbol);
       prefix = pref;
     }
     SEND_SPECIAL {
       printf ("%s\tsend special message %O\n", prefix,
-	      _gst_builtin_selectors[n + 16]->symbol);
+	      _gst_builtin_selectors[n + 16].symbol);
       prefix = pref;
     }
 
@@ -385,7 +385,7 @@ _gst_print_bytecode_name (gst_uchar * bp,
 
     SEND_IMMEDIATE {
       printf ("%s\tsend special message %O%s\n", prefix,
-	      _gst_builtin_selectors[n]->symbol,
+	      _gst_builtin_selectors[n].symbol,
 	      super ? " to super" : "");
       prefix = pref;
     }
