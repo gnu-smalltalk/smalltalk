@@ -220,7 +220,7 @@ struct memory_space
   /* The OOP flag corresponding to the active survivor space */
   int active_flag;
 
-  /* The OOP flag corresponding to the inactive survivor space, plus F_FREE */
+  /* The OOP flag corresponding to the inactive survivor space.  */
   int live_flags;
 
   /* These hold onto the object incubator's state */

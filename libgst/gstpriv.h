@@ -258,37 +258,34 @@ enum {
      saves and loads.  */
   F_RUNTIME = 0xFF8000U,
 
-  /* Set if the OOP is currently unused.  */
-  F_FREE = 0x10U,
-
   /* Set if the references to the instance variables of the object
      are weak.  */
-  F_WEAK = 0x20U,
+  F_WEAK = 0x10U,
 
   /* Set if the object is read-only.  */
-  F_READONLY = 0x40U,
+  F_READONLY = 0x20U,
 
   /* Set if the object is a context and hence its instance variables
      are only valid up to the stack pointer.  */
-  F_CONTEXT = 0x80U,
+  F_CONTEXT = 0x40U,
 
   /* Answer whether we want to mark the key based on references found
      outside the object.  */
-  F_EPHEMERON = 0x100U,
+  F_EPHEMERON = 0x80U,
 
   /* Set for objects that live in oldspace.  */
-  F_OLD = 0x200U,
+  F_OLD = 0x100U,
 
   /* Set together with F_OLD for objects that live in fixedspace.  */
-  F_FIXED = 0x400U,
+  F_FIXED = 0x200U,
 
   /* Set for untrusted classes, instances of untrusted classes,
      and contexts whose receiver is untrusted.  */
-  F_UNTRUSTED = 0x800U,
+  F_UNTRUSTED = 0x400U,
 
   /* Set for objects that were loaded from the image.  We never
      garbage collect their contents, only the OOPs.  */
-  F_LOADED = 0x1000U,
+  F_LOADED = 0x800U,
 
   /* Set to the number of bytes unused in an object with byte-sized
      instance variables.  Note that this field and the following one

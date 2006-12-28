@@ -355,7 +355,7 @@ make_oop_table_to_be_saved (struct save_file_header *header)
 	}
       else
 	{
-	  myOOPTable[i].flags = F_FREE;
+	  myOOPTable[i].flags = 0;
 	  header->num_free_oops++;
 	}
     }
@@ -535,7 +535,7 @@ load_oop_table (int imageFd)
   int i;
 
   /* Load in the valid OOP slots from previous dump.  The others are already
-     initialized to F_FREE.  */
+     initialized to free (0).  */
   buffer_read (imageFd, _gst_mem.ot, sizeof (struct oop_s) * num_used_oops);
   if UNCOMMON (wrong_endianness)
     fixup_byte_order (_gst_mem.ot,
@@ -564,8 +564,7 @@ load_normal_oops (int imageFd)
 
       PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
       flags = oop->flags;
-
-      if (flags & F_FREE)
+      if (IS_OOP_FREE (oop))
 	continue;
 
       /* FIXME: a small amount of garbage is saved that is produced
@@ -598,7 +597,7 @@ load_normal_oops (int imageFd)
           buffer_read (imageFd, object, size);
           if UNCOMMON (wrong_endianness)
 	    fixup_byte_order (object, 
-			      (oop->flags & F_BYTE)
+			      (flags & F_BYTE)
 			      ? OBJ_HEADER_SIZE_WORDS
 			      : size / sizeof (PTR));
 
@@ -609,9 +608,7 @@ load_normal_oops (int imageFd)
 	    abort ();
         }
 
-      /* Remove flags that are invalid after an image has been loaded.  */
       oop->object = object;
-
       if (flags & F_WEAK)
 	_gst_make_oop_weak (oop);
     }

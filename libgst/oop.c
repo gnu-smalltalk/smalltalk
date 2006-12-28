@@ -487,16 +487,6 @@ alloc_oop_table (size_t size)
   _gst_false_oop = &_gst_mem.ot[FALSE_OOP_INDEX];
 
   _gst_mem.num_free_oops = size;
-
-  /* mark the OOPs as available */
-  PREFETCH_START (_gst_mem.ot, PREF_WRITE | PREF_NTA);
-  for (oop = _gst_mem.ot;
-       oop < &_gst_mem.ot[_gst_mem.ot_size]; oop++)
-    {
-      PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
-      oop->flags = F_FREE;
-    }
-
   _gst_mem.first_allocated_oop = _gst_mem.ot;
   _gst_mem.last_allocated_oop = _gst_mem.last_swept_oop = _gst_mem.ot - 1;
   _gst_mem.highest_swept_oop = _gst_mem.ot;
@@ -518,15 +508,6 @@ _gst_realloc_oop_table (size_t newSize)
          we do with the object data.  */
       nomemory (false);
       return (false);
-    }
-
-  /* mark the new OOPs as available */
-  PREFETCH_START (&_gst_mem.ot[_gst_mem.ot_size], PREF_WRITE | PREF_NTA);
-  for (oop = &_gst_mem.ot[_gst_mem.ot_size];
-       oop < &_gst_mem.ot[newSize]; oop++)
-    {
-      PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
-      oop->flags = F_FREE;
     }
 
   _gst_mem.num_free_oops += newSize - _gst_mem.ot_size;
@@ -1438,7 +1419,7 @@ _gst_sweep_oop (OOP oop)
         _gst_mem_free (_gst_mem.old, oop->object);
     }
 
-  oop->flags = F_FREE;
+  oop->flags = 0;
 }
 
 void
@@ -1981,20 +1962,13 @@ _gst_copy_an_oop (OOP oop)
 	  printf ("Invalid size for OOP %p (%p)\n", oop, obj);
 	  abort ();
 	}
-#endif
 
-      if UNCOMMON (oop->flags & F_FREE)
+      if UNCOMMON (oop->flags == 0)
 	{
 	  printf ("Free OOP %p was referenced\n", oop);
-	  /* If we're lucky, we can print some information on it...
-	     if we're not, we segfault: not that bad given that
-	     we'll abort pretty soon! */
-	  oop->flags &= ~F_FREE;
-	  _gst_display_oop (oop);
 	  abort ();
 	}
 
-#if defined (GC_DEBUGGING)
       if UNCOMMON ((oop->flags & F_OLD) ||
 	  IS_SURVIVOR_ADDR(obj, _gst_mem.active_half == &_gst_mem.surv[1]))
         {

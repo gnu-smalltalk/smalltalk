@@ -320,7 +320,7 @@ _gst_classify_addr (void *addr)
 void
 _gst_display_oop_short (OOP oop)
 {
-  if (oop->flags & F_FREE)
+  if (IS_OOP_FREE (oop))
     printf ("%-10p   Free\n", oop);
   else
     {
@@ -351,7 +351,7 @@ _gst_display_oop (OOP oop)
       return;
     }
 
-  if (oop->flags & F_FREE)
+  if (IS_OOP_FREE (oop))
     printf ("%-10p   Free\n", oop);
   else
     {

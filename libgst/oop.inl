@@ -106,7 +106,7 @@ static inline OOP alloc_oop (PTR obj, intptr_t flags);
   ((oop)->flags & F_REACHABLE)
 
 #define IS_OOP_FREE(oop) \
-  ((oop)->flags & F_FREE)
+  ((oop)->flags == 0)
 
 /* Checks to see if INDEX (a long index into the OOP table, 1 based
    due to being called from Smalltalk via a primitive) represents a

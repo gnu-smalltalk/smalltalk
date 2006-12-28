@@ -226,7 +226,7 @@ static OOP intern_counted_string (const char *str,
    loading, because we are careful to create the same symbols in
    _gst_init_symbols_passN and _gst_restore_symbols.  */
 static inline OOP
-intern_string_fast (const char *str, OOP *pTestOOP)
+intern_string_fast (const char *str, OOP *pTestOOP);
 
 /* This looks for SYMBOL among the instance variables that the current
    class declares, and returns the index of the variable if one is
