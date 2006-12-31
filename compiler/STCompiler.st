@@ -55,7 +55,7 @@ compile: methodDefNode for: aBehavior classified: aString parser: aParser
 ! !
 
 STFakeCompiler subclass: #STCompiler
-       instanceVariableNames: 'node destClass symTable parser bytecodes depth maxDepth isInsideBlock dupReceiver'
+       instanceVariableNames: 'node destClass symTable parser bytecodes depth maxDepth isInsideBlock '
        classVariableNames: 'OneNode TrueNode FalseNode NilNode SuperVariable SelfVariable ThisContextVariable DoitToken'
        poolDictionaries: ''
        category: 'System-Compiler'
@@ -162,7 +162,6 @@ class: aBehavior parser: aParser
     symTable := STSymbolTable new.
     parser := aParser.
     bytecodes := WriteStream on: (ByteArray new: 240).
-    dupReceiver := false.
     isInsideBlock := 0.
 
     symTable declareEnvironment: aBehavior.
@@ -560,18 +559,18 @@ acceptCascadeNode: aNode
 	^aNode
     ].
 
-    dupReceiver := true.
-    first acceptVisitor: self.
+    first receiver acceptVisitor: self.
+    self depthIncr; compileByte: DupStackTop.
+    self compileMessage: first.
 
     messages
 	from: 2 to: messages size - 1
 	do: [ :each |
 	    self compileByte: PopStackTop; compileByte: DupStackTop.
-	    each acceptVisitor: self ].
+	    self compileMessage: each ].
 
-    self compileByte: PopStackTop.
-    self depthDecr: 1.
-    (messages at: messages size) acceptVisitor: self.
+    self depthDecr: 1; compileByte: PopStackTop.
+    self compileMessage: messages last.
 ! !
 
 "--------------------------------------------------------------------"
@@ -619,29 +618,26 @@ acceptAssignmentNode: aNode
 acceptMessageNode: aNode
     "RBMessageNode contains a message send. Its instance variable are
      a receiver, selector, and arguments."
-    | dup specialSelector args litIndex |
+    | specialSelector |
 
-    dup := dupReceiver. dupReceiver := false.
- 
     aNode receiver = SuperVariable ifTrue: [
 	self compileSendToSuper: aNode.
 	^true
     ].
 
-    (VMSpecialMethods includesKey: aNode selector) ifTrue: [
-	specialSelector := VMSpecialMethods at: aNode selector.
-	(specialSelector isNil and: [aNode receiver isBlock and: [ dup not ]])
-	    ifTrue: [
-		(self compileWhileLoop: aNode) ifTrue: [^false]
-	    ]
-	].
+    specialSelector := VMSpecialMethods at: aNode selector ifAbsent: [ nil ].
+    specialSelector isNil ifFalse: [
+	(self perform: specialSelector with: aNode) ifTrue: [ ^false ] ].
 
     aNode receiver acceptVisitor: self.
-    dup ifTrue: [ self depthIncr; compileByte: DupStackTop ].
-    specialSelector isNil ifFalse: [
-	(self perform: specialSelector with: aNode) ifTrue: [^false]
-    ].
+    self compileMessage: aNode
+!
 
+compileMessage: aNode
+    "RBMessageNode contains a message send. Its instance variable are
+     a receiver, selector, and arguments.  The receiver has already
+     been compiled."
+    | args litIndex |
     aNode arguments do: [ :each | each acceptVisitor: self ].
 
     VMSpecialSelectors at: aNode selector ifPresent: [ :idx |
@@ -662,6 +658,7 @@ compileWhileLoop: aNode
 
     | whileBytecodes argBytecodes jumpOffsets |
 
+    aNode receiver isBlock ifFalse: [ ^false ].
     (aNode receiver arguments isEmpty and: [
 	aNode receiver body temporaries isEmpty ]) ifFalse: [ ^false ].
 
@@ -731,6 +728,7 @@ compileSendToSuper: aNode
 
 compileTimesRepeat: aNode
     | block |
+    aNode receiver acceptVisitor: self.
     block := aNode arguments first.
     (block arguments isEmpty and: [
 	block body temporaries isEmpty ]) ifFalse: [ ^false ].
@@ -740,6 +738,7 @@ compileTimesRepeat: aNode
 
 compileLoop: aNode
     | stop step block |
+    aNode receiver acceptVisitor: self.
     aNode arguments do: [ :each |
 	stop := step.			"to:"
 	step := block.			"by:"
@@ -757,6 +756,7 @@ compileLoop: aNode
 
 compileBoolean: aNode
     | bc1 ret1 bc2 selector |
+    aNode receiver acceptVisitor: self.
     aNode arguments do: [ :each |
         (each arguments isEmpty and: [
 	    each body temporaries isEmpty ]) ifFalse: [ ^false ].

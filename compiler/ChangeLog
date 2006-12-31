@@ -1,3 +1,13 @@
+2006-12-31  Paolo Bonzini  <bonzini@gnu.org>
+
+        * compiler/STCompLit.st: Don't use "nil" slots from VMSpecialMethods.
+        * compiler/STCompiler.st: Remove dupReceiver.  Adjust for above change.
+        Compile receiver in compileTimesRepeat: and compileLoop:, test for
+        receiver being a block in compileWhileLoop:.  Extract part of
+        acceptMessageNode: to compileMessage:.  Compile receiver in
+        acceptCascadeNode: and call compileMessage: to avoid compiling the
+        receiver of a cascaded message repeatedly (reported by Stephen Compall).
+
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.3 released.

@@ -88,10 +88,10 @@ VMOtherConstants at: #VMSpecialIdentifiers put: ((LookupTable new: 8)
     yourself).
     
 VMOtherConstants at: #VMSpecialMethods put: ((IdentityDictionary new: 32)
-    at: #whileTrue		put: nil		 ;
-    at: #whileFalse		put: nil		 ;
-    at: #whileTrue:		put: nil		 ;
-    at: #whileFalse:		put: nil		 ;
+    at: #whileTrue		put: #compileWhileLoop:  ;
+    at: #whileFalse		put: #compileWhileLoop:  ;
+    at: #whileTrue:		put: #compileWhileLoop:  ;
+    at: #whileFalse:		put: #compileWhileLoop:  ;
     at: #timesRepeat:		put: #compileTimesRepeat:;
     at: #to:do:			put: #compileLoop:	 ;
     at: #to:by:do:		put: #compileLoop:	 ;
