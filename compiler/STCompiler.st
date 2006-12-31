@@ -468,7 +468,7 @@ acceptArrayConstructorNode: aNode
 	each acceptVisitor: self.
 	self
 	    depthDecr: 1;
-	    compileByte: PopStoreIntoArray arg: index.
+	    compileByte: PopStoreIntoArray arg: index - 1.
     ]
 ! !
 

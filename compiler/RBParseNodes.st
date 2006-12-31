@@ -51,7 +51,7 @@ acceptAssignmentNode: anAssignmentNode
     self visitNode: anAssignmentNode variable.
     self visitNode: anAssignmentNode value!
 
-acceptArrayNode: anArrayNode 
+acceptArrayConstructorNode: anArrayNode 
     self visitNode: anArrayNode body!
 
 acceptBlockNode: aBlockNode 
@@ -2259,7 +2259,7 @@ removeDeadCode
 !RBArrayConstructorNode methodsFor: 'visitor'!
 
 acceptVisitor: aProgramNodeVisitor 
-    ^aProgramNodeVisitor acceptArrayNode: self! !
+    ^aProgramNodeVisitor acceptArrayConstructorNode: self! !
 
 
 

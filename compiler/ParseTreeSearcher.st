@@ -763,7 +763,7 @@ acceptAssignmentNode: anAssignmentNode
     anAssignmentNode variable: (self visitNode: anAssignmentNode variable).
     anAssignmentNode value: (self visitNode: anAssignmentNode value)!
 
-acceptArrayNode: anArrayNode 
+acceptArrayConstructorNode: anArrayNode 
     anArrayNode body: (self visitNode: anArrayNode body)!
 
 acceptBlockNode: aBlockNode 

@@ -157,18 +157,19 @@ addPool: poolDictionary
 
 declareEnvironment: aBehavior
 
-    | i readOnly |
+    | i canAlwaysStore inSandbox |
     environment := aBehavior.
+    inSandbox := thisContext isUntrusted.
 
     i := -1.
-    readOnly := aBehavior isUntrusted not and: [ thisContext isUntrusted ].
-    aBehavior withAllSuperclassesDo: [ :class |
-	readOnly := readOnly and: [ class isUntrusted not ].
+    canAlwaysStore := aBehavior isUntrusted.
+    aBehavior withAllSuperclasses reverseDo: [ :class |
+	canAlwaysStore := canAlwaysStore and: [ class isUntrusted ].
 	class instVarNames do: [ :iv |
 	    instVars at: iv asSymbol put: (STVariable
 	        id: (i := i + 1)
 	        scope: 0
-	        canStore: readOnly not).
+	        canStore: (canAlwaysStore or: [ inSandbox not ])).
 	].
     ].
     self declareGlobals
@@ -294,13 +295,7 @@ bindingOf: namesArray for: stCompiler
 		i < namesArray size ifTrue: [ self invalidScopeResolution: stCompiler ].
 
 		"Last item, add to Undeclared"
-		self class insideFilein ifFalse: [ ^nil ].
-		(each at: 1) isUppercase ifFalse: [ ^nil ].
-
-		symbol := each asSymbol.
-		^Undeclared associationAt: symbol ifAbsent: [
-		    Undeclared add: symbol -> nil
-		].
+		^self lookupUndeclared: each asSymbol
 	    ].
     ].
     ^assoc
@@ -313,6 +308,13 @@ lookupPoolsFor: symbol
 	assoc isNil ifFalse: [ ^assoc ].
     ].
     ^nil
+!
+
+lookupBindingOf: symbol
+    | assoc |
+    assoc := self lookupPoolsFor: symbol.
+    assoc isNil ifTrue: [^self lookupUndeclared: symbol].
+    ^assoc
 !
 
 lookupName: aName for: stCompiler
@@ -332,7 +334,7 @@ lookupName: aName for: stCompiler
     ].
 
     assoc := index = 0
-	ifTrue: [ self lookupPoolsFor: symbol ]
+	ifTrue: [ self lookupBindingOf: symbol ]
 	ifFalse: [ self bindingOf: (aName substrings: $.) for: stCompiler ].
 
     assoc isNil ifFalse: [ ^self addLiteral: assoc ].
@@ -357,6 +359,18 @@ init
     scopes := OrderedCollection new: 5.
     pools := IdentitySet new: 7.
     tempCount := 0.
+!
+
+lookupUndeclared: symbol
+    "Answer an Association for variable symbol that will be bound
+     later, if undeclared variables are allowed and the symbol is a
+     syntactic candidate; otherwise answer nil."
+    self class insideFilein ifFalse: [ ^nil ].
+    (symbol at: 1) isUppercase ifFalse: [ ^nil ].
+
+    ^Undeclared associationAt: symbol ifAbsent: [
+	Undeclared add: symbol -> nil
+    ]
 ! !
 
 STSymbolTable initialize!
