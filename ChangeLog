@@ -1,3 +1,9 @@
+2006-12-31  Paolo Bonzini  <bonzini@gnu.org>
+	    Stephen Compall  <s11@member.fsf.org>
+
+	* kernel/FileDescr.st: Fix #copyFrom:to:.
+	* kernel/PosStream.st: Make the same method 0-based.
+
 2006-12-19  Paolo Bonzini  <bonzini@gnu.org>
 
         * kernel/VFS.st: Initialize file system registry lazily.

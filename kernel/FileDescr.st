@@ -377,15 +377,15 @@ contents
 
 copyFrom: from to: to
     "Answer the contents of the file between the two given positions"
-    | offset fromPos toPos savePos |
+    | savePos |
     from > to ifTrue: [
         from = to + 1 ifTrue: [ ^self species new ].
-        ^SystemExceptions.ArgumentOutOfRange signalOn: from mustBeBetween: 1 and: to + 1
+        ^SystemExceptions.ArgumentOutOfRange signalOn: from mustBeBetween: 0 and: to + 1
     ].
     savePos := self fileOp: 5.
     ^[
-        self position: fromPos.
-        self next: toPos - fromPos + 1
+        self position: from.
+        self next: to - from + 1
     ] ensure: [
         self position: savePos
     ]

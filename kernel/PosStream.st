@@ -106,10 +106,12 @@ peekFor: anObject
 !
 
 copyFrom: start to: end
-    "Answer the collection on which the receiver is streaming, from
-     the start-th item to the end-th"
+    "Answer the data on which the receiver is streaming, from
+     the start-th item to the end-th.  Note that this method is 0-based,
+     unlike the one in Collection, because a Stream's #position method
+     returns 0-based values."
 
-    ^collection copyFrom: start to: end
+    ^collection copyFrom: start + 1 to: end + 1
 !
 
 contents
