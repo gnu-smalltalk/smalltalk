@@ -1,3 +1,7 @@
+2007-01-02  Mike Anderson  <gnu-smalltalk@gingerbread.plus.com>
+
+	* kernel/Builtins.st: Fix Character>>#asciiValue: pasto.
+
 2006-12-31  Paolo Bonzini  <bonzini@gnu.org>
 	    Stephen Compall  <s11@member.fsf.org>
 

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006
+| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006,2007
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -1933,7 +1933,7 @@ asciiValue: anInteger
     anInteger isInteger
 	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ].
 
-    ^(self between: 0 and: 127)
+    ^(anInteger between: 0 and: 127)
 	ifTrue: [ self value: anInteger ]
 	ifFalse: [ SystemExceptions.ArgumentOutOfRange signalOn: anInteger mustBeBetween: 0 and: 127 ]
 !
