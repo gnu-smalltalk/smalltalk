@@ -97,6 +97,9 @@ scanner: aScanner
 addCommentsTo: aNode
     aNode comments: scanner getComments!
 
+currentToken
+    ^currentToken!
+
 nextToken
     ^nextToken isNil
 	ifTrue: [nextToken := scanner next]
@@ -151,6 +154,14 @@ parseBinaryMessage
     
     [ currentToken isBinary]
 	    whileTrue: [node := self parseBinaryMessageWith: node].
+    ^node!
+
+parseBinaryMessageNoGreater
+    | node |
+    node := self parseUnaryMessage.
+
+    [ currentToken isBinary and: [currentToken value ~~ #>] ]
+            whileTrue: [node := self parseBinaryMessageWith: node].
     ^node!
 
 parseBinaryMessageWith: aNode 

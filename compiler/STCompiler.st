@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002, 2003, 2006 Free Software Foundation, Inc.
+| Copyright 1999,2000,2001,2002,2003,2006,2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -419,7 +419,7 @@ acceptSequenceNode: node
 !STCompiler methodsFor: 'visiting RBMethodNodes'!
 
 acceptMethodNode: node
-    | statements method |
+    | statements method attributes |
     node body addSelfReturn.
 
     depth := maxDepth := 0.
@@ -429,11 +429,12 @@ acceptMethodNode: node
     self undeclareArgumentsAndTemporaries: node.
     symTable finish.
 
+    attributes := self compileMethodAttributes: node primitiveSources.
     method := CompiledMethod
 	literals: symTable literals
 	numArgs: node arguments size
 	numTemps: node body temporaries size
-	attributes: #()
+	attributes: attributes
 	bytecodes: bytecodes contents
 	depth: maxDepth + node body temporaries size + node arguments size.
 
@@ -441,6 +442,12 @@ acceptMethodNode: node
 	setSourceCode: node source;
 	methodClass: symTable environment;
 	selector: node selector.
+
+    method attributesDo: [ :ann || handler error |
+	handler := symTable environment pragmaHandlerFor: ann selector.
+	handler notNil ifTrue: [
+	    error := handler value: method value: ann.
+	    error notNil ifTrue: [ self compileError: error ] ] ].
 
     ^method
 ! !
@@ -933,5 +940,45 @@ compileStoreTemporary: number scopes: outerScopes
 	compileByte: StoreTemporaryVariable
 	arg: number
 ! !
+
+"--------------------------------------------------------------------"
+
+!STCompiler methodsFor: 'compiling method attributes'!
+
+compileMethodAttributes: attributes
+    ^attributes asArray collect: [ :each |
+	self compileAttribute: (RBScanner on: each readStream) ]!
+
+scanTokenFrom: scanner
+    scanner atEnd
+	ifTrue: [^self compileError: 'method attributes must end with ''>'''].
+    ^scanner next!
+
+compileAttribute: scanner
+    | currentToken selectorBuilder selector arguments parser node |
+    currentToken := self scanTokenFrom: scanner.
+    (currentToken isBinary and: [currentToken value == #<])
+	ifFalse: [^self compileError:
+		      'method attributes must begin with ''<'''].
+
+    selectorBuilder := WriteStream on: String new.
+    arguments := WriteStream on: Array new.
+    currentToken := self scanTokenFrom: scanner.
+    [ currentToken isBinary and: [currentToken value == #>] ] whileFalse: [
+	currentToken isKeyword
+	    ifFalse: [^self compileError: 'keyword expected in method attribute'].
+	selectorBuilder nextPutAll: currentToken value.
+
+        parser := RBParser new.
+        parser errorBlock: parser errorBlock.
+        parser scanner: scanner.
+        node := parser parseBinaryMessageNoGreater.
+	node := RBSequenceNode statements: {node}.
+	arguments nextPut: (self class evaluate: node parser: parser).
+	currentToken := parser currentToken.
+    ].
+
+    selector := selectorBuilder contents asSymbol.
+    ^Message selector: selector arguments: arguments contents! !
 
 STCompiler initialize!

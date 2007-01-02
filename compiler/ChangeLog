@@ -1,3 +1,12 @@
+2007-01-02  Paolo Bonzini  <bonzini@gnu.org>
+	    Stephen Compall  <s11@member.fsf.org>
+
+	* compiler/RBParseNodes.st: Fix for stream-based compilation, where
+	a method's start offset is >1.
+	* compiler/RBParser.st: Add #currentToken accessor, and
+	the #parseBinaryMessageNoGreater hack.
+	* compiler/STCompiler.st: Compile method attributes.
+
 2007-01-02  Stephen Compall  <s11@member.fsf.org>
 
 	* compiler/STSymTable.st: Warn for shadowing variable, fix

@@ -1,3 +1,9 @@
+2007-01-02  Paolo Bonzini  <bonzini@gnu.org>
+	    Stephen Compall  <s11@member.fsf.org>
+
+	* kernel/FileSegment.st: Add #copyFrom:to:.
+	* kernel/Class.st: Fix bugs in pragma handlers.
+
 2007-01-02  Mike Anderson  <gnu-smalltalk@gingerbread.plus.com>
 
 	* kernel/Builtins.st: Fix Character>>#asciiValue: pasto.

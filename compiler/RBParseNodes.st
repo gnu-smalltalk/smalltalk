@@ -953,8 +953,11 @@ children
     ^self arguments copyWith: self body!
 
 primitiveSources
+    | offset |
+    offset := self start - 1.
     ^self tags 
-	collect: [:each | self source copyFrom: each first to: each last]!
+	collect: [:each | self source copyFrom: each first - offset
+				      to: each last - offset]!
 
 isBinary
     ^(self isUnary or: [self isKeyword]) not!
@@ -991,10 +994,13 @@ source: anObject
     source := anObject!
 
 start
+    (selectorParts notNil and: [ selectorParts first start notNil ])
+	ifTrue: [ ^selectorParts first start ].
+    body start isNil ifFalse: [ ^body start ].
     ^1!
 
 stop
-    ^source size!
+    ^self start + source size - 1!
 
 tags
     ^tags isNil ifTrue: [#()] ifFalse: [tags]!
