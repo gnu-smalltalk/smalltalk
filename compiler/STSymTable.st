@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1995, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1995,1999,2000,2001,2002,2006,2007 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -118,7 +118,7 @@ scope
 
 
 Object subclass: #STSymbolTable
-       instanceVariableNames: 'variables tempCount litTable pools instVars environment scopes'
+       instanceVariableNames: 'variables tempCount litTable pools instVars environment scopes scopeVariables'
        classVariableNames: 'UseUndeclared'
        poolDictionaries: ''
        category: 'System-Compiler'
@@ -157,18 +157,19 @@ addPool: poolDictionary
 
 declareEnvironment: aBehavior
 
-    | i readOnly |
+    | i canAlwaysStore inSandbox |
     environment := aBehavior.
+    inSandbox := thisContext isUntrusted.
 
     i := -1.
-    readOnly := aBehavior isUntrusted not and: [ thisContext isUntrusted ].
-    aBehavior withAllSuperclassesDo: [ :class |
-	readOnly := readOnly and: [ class isUntrusted not ].
+    canAlwaysStore := aBehavior isUntrusted.
+    aBehavior withAllSuperclasses reverseDo: [ :class |
+	canAlwaysStore := canAlwaysStore and: [ class isUntrusted ].
 	class instVarNames do: [ :iv |
 	    instVars at: iv asSymbol put: (STVariable
 	        id: (i := i + 1)
 	        scope: 0
-	        canStore: readOnly not).
+	        canStore: (canAlwaysStore or: [ inSandbox not ])).
 	].
     ].
     self declareGlobals
@@ -202,18 +203,21 @@ declareGlobals
 !
 
 declareTemporary: tempName canStore: canStore for: stCompiler
-    | ok symbol |
+    | symbol |
     symbol := tempName asSymbol.
-    ok := variables includesKey: symbol.
+    (variables includesKey: symbol)
+	ifTrue: [(variables at: symbol) scope < scopes size
+		     ifTrue: [stCompiler compileWarning:
+				  ('variable ''%1'' shadows another'
+					 bindWith: tempName)]
+		     ifFalse: [^stCompiler compileError:
+				   'duplicate variable name ', tempName]].
     variables at: symbol put: (STVariable
 	id: tempCount
 	scope: scopes size
 	canStore: canStore
     ).
 
-    ok ifFalse: [
-	stCompiler compileWarning: 'duplicate variable name ', tempName
-    ].
     tempCount := tempCount + 1.
     ^tempCount - 1
 !
@@ -221,12 +225,15 @@ declareTemporary: tempName canStore: canStore for: stCompiler
 scopeEnter
     scopes add: tempCount.
     tempCount := 0.
+    scopeVariables add: variables.
+    variables := variables copy.
 !
 
 scopeLeave
     "Answer whether we are in a `clean' scope (no return from method, no
      references to variable in an outer scope)."
     tempCount := scopes removeLast.
+    variables := scopeVariables removeLast.
 !
 
 undeclareTemporary: tempName
@@ -294,13 +301,7 @@ bindingOf: namesArray for: stCompiler
 		i < namesArray size ifTrue: [ self invalidScopeResolution: stCompiler ].
 
 		"Last item, add to Undeclared"
-		self class insideFilein ifFalse: [ ^nil ].
-		(each at: 1) isUppercase ifFalse: [ ^nil ].
-
-		symbol := each asSymbol.
-		^Undeclared associationAt: symbol ifAbsent: [
-		    Undeclared add: symbol -> nil
-		].
+		^self lookupUndeclared: each asSymbol
 	    ].
     ].
     ^assoc
@@ -313,6 +314,13 @@ lookupPoolsFor: symbol
 	assoc isNil ifFalse: [ ^assoc ].
     ].
     ^nil
+!
+
+lookupBindingOf: symbol
+    | assoc |
+    assoc := self lookupPoolsFor: symbol.
+    assoc isNil ifTrue: [^self lookupUndeclared: symbol].
+    ^assoc
 !
 
 lookupName: aName for: stCompiler
@@ -332,7 +340,7 @@ lookupName: aName for: stCompiler
     ].
 
     assoc := index = 0
-	ifTrue: [ self lookupPoolsFor: symbol ]
+	ifTrue: [ self lookupBindingOf: symbol ]
 	ifFalse: [ self bindingOf: (aName substrings: $.) for: stCompiler ].
 
     assoc isNil ifFalse: [ ^self addLiteral: assoc ].
@@ -354,9 +362,22 @@ init
     variables := Dictionary new: 5.
     litTable := STLiteralsTable new: 13.
     instVars := Dictionary new: 7.
+    scopeVariables := OrderedCollection new: 5.
     scopes := OrderedCollection new: 5.
     pools := IdentitySet new: 7.
     tempCount := 0.
+!
+
+lookupUndeclared: symbol
+    "Answer an Association for variable symbol that will be bound
+     later, if undeclared variables are allowed and the symbol is a
+     syntactic candidate; otherwise answer nil."
+    self class insideFilein ifFalse: [ ^nil ].
+    (symbol at: 1) isUppercase ifFalse: [ ^nil ].
+
+    ^Undeclared associationAt: symbol ifAbsent: [
+	Undeclared add: symbol -> nil
+    ]
 ! !
 
 STSymbolTable initialize!

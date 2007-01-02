@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2006
+| Copyright 1988,92,94,95,99,2000,2001,2002,2006,2007
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -69,6 +69,25 @@ on: aFile startingAt: startPos for: sizeInteger
 
 
 !FileSegment methodsFor: 'basic'!
+
+copyFrom: from to: to
+    "Answer a String containing the given subsegment of the file.  As for
+     streams, from and to are 0-based."
+    (to between: 0 and: size - 1) ifFalse: [
+        ^SystemExceptions.ArgumentOutOfRange
+	    signalOn: to
+	    mustBeBetween: 0
+	    and: size - 1 ].
+    (from between: 0 and: to) ifFalse: [
+        from = to + 1 ifTrue: [ ^self species new ].
+        ^SystemExceptions.ArgumentOutOfRange
+	    signalOn: from
+	    mustBeBetween: 0
+	    and: to + 1 ].
+
+    ^self withFileDo: [ :fileStream | 
+	fileStream copyFrom: startPos + from to: startPos + to ]
+!
 
 asString
     "Answer a String containing the required segment of the file"
@@ -138,6 +157,10 @@ hash
 
 
 !FileSegment methodsFor: 'private'!
+
+species
+    ^String
+!
 
 getFile
     ^file

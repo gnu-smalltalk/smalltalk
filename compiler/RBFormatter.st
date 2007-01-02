@@ -319,7 +319,7 @@ acceptAssignmentNode: anAssignmentNode
 	    codeStream nextPutAll: ' := '.
 	    self visitNode: anAssignmentNode value]!
 
-acceptArrayNode: anArrayNode 
+acceptArrayConstructorNode: anArrayNode 
     | seqNode multiline formattedBody formatter |
     seqNode := anArrayNode body.
     formatter := (self copy) lineStart: 0;

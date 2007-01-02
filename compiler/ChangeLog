@@ -1,3 +1,39 @@
+2007-01-02  Paolo Bonzini  <bonzini@gnu.org>
+	    Stephen Compall  <s11@member.fsf.org>
+
+	* compiler/RBParseNodes.st: Fix for stream-based compilation, where
+	a method's start offset is >1.
+	* compiler/RBParser.st: Add #currentToken accessor, and
+	the #parseBinaryMessageNoGreater hack.
+	* compiler/STCompiler.st: Compile method attributes.
+
+2007-01-02  Stephen Compall  <s11@member.fsf.org>
+
+	* compiler/STSymTable.st: Warn for shadowing variable, fix
+	"duplicate variable name" warning and turn it into an error.
+
+2006-12-31  Paolo Bonzini  <bonzini@gnu.org>
+	    Stephen Compall  <s11@member.fsf.org>
+
+	* compiler/STSymTable.st: Handle undeclared variables without a
+	path.  Fix order of instance variables.
+	* compiler/STCompiler.st: Fix off-by-one error in compiling
+	RBArrayConstructorNodes.
+	* compiler/ParseTreeSearcher.st: Rename acceptArrayNode: to
+	acceptArrayConstructorNode:.
+	* compiler/RBFormatter.st: Likewise.
+	* compiler/RBParseNodes.st: Likewise.
+
+2006-12-31  Paolo Bonzini  <bonzini@gnu.org>
+
+        * compiler/STCompLit.st: Don't use "nil" slots from VMSpecialMethods.
+        * compiler/STCompiler.st: Remove dupReceiver.  Adjust for above change.
+        Compile receiver in compileTimesRepeat: and compileLoop:, test for
+        receiver being a block in compileWhileLoop:.  Extract part of
+        acceptMessageNode: to compileMessage:.  Compile receiver in
+        acceptCascadeNode: and call compileMessage: to avoid compiling the
+        receiver of a cascaded message repeatedly (reported by Stephen Compall).
+
 2006-12-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.3.1 released.

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002, 2003, 2006 Free Software Foundation, Inc.
+| Copyright 1999,2000,2001,2002,2003,2006,2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -55,7 +55,7 @@ compile: methodDefNode for: aBehavior classified: aString parser: aParser
 ! !
 
 STFakeCompiler subclass: #STCompiler
-       instanceVariableNames: 'node destClass symTable parser bytecodes depth maxDepth isInsideBlock dupReceiver'
+       instanceVariableNames: 'node destClass symTable parser bytecodes depth maxDepth isInsideBlock '
        classVariableNames: 'OneNode TrueNode FalseNode NilNode SuperVariable SelfVariable ThisContextVariable DoitToken'
        poolDictionaries: ''
        category: 'System-Compiler'
@@ -162,7 +162,6 @@ class: aBehavior parser: aParser
     symTable := STSymbolTable new.
     parser := aParser.
     bytecodes := WriteStream on: (ByteArray new: 240).
-    dupReceiver := false.
     isInsideBlock := 0.
 
     symTable declareEnvironment: aBehavior.
@@ -420,7 +419,7 @@ acceptSequenceNode: node
 !STCompiler methodsFor: 'visiting RBMethodNodes'!
 
 acceptMethodNode: node
-    | statements method |
+    | statements method attributes |
     node body addSelfReturn.
 
     depth := maxDepth := 0.
@@ -430,11 +429,12 @@ acceptMethodNode: node
     self undeclareArgumentsAndTemporaries: node.
     symTable finish.
 
+    attributes := self compileMethodAttributes: node primitiveSources.
     method := CompiledMethod
 	literals: symTable literals
 	numArgs: node arguments size
 	numTemps: node body temporaries size
-	attributes: #()
+	attributes: attributes
 	bytecodes: bytecodes contents
 	depth: maxDepth + node body temporaries size + node arguments size.
 
@@ -442,6 +442,12 @@ acceptMethodNode: node
 	setSourceCode: node source;
 	methodClass: symTable environment;
 	selector: node selector.
+
+    method attributesDo: [ :ann || handler error |
+	handler := symTable environment pragmaHandlerFor: ann selector.
+	handler notNil ifTrue: [
+	    error := handler value: method value: ann.
+	    error notNil ifTrue: [ self compileError: error ] ] ].
 
     ^method
 ! !
@@ -469,7 +475,7 @@ acceptArrayConstructorNode: aNode
 	each acceptVisitor: self.
 	self
 	    depthDecr: 1;
-	    compileByte: PopStoreIntoArray arg: index.
+	    compileByte: PopStoreIntoArray arg: index - 1.
     ]
 ! !
 
@@ -560,18 +566,18 @@ acceptCascadeNode: aNode
 	^aNode
     ].
 
-    dupReceiver := true.
-    first acceptVisitor: self.
+    first receiver acceptVisitor: self.
+    self depthIncr; compileByte: DupStackTop.
+    self compileMessage: first.
 
     messages
 	from: 2 to: messages size - 1
 	do: [ :each |
 	    self compileByte: PopStackTop; compileByte: DupStackTop.
-	    each acceptVisitor: self ].
+	    self compileMessage: each ].
 
-    self compileByte: PopStackTop.
-    self depthDecr: 1.
-    (messages at: messages size) acceptVisitor: self.
+    self depthDecr: 1; compileByte: PopStackTop.
+    self compileMessage: messages last.
 ! !
 
 "--------------------------------------------------------------------"
@@ -619,29 +625,26 @@ acceptAssignmentNode: aNode
 acceptMessageNode: aNode
     "RBMessageNode contains a message send. Its instance variable are
      a receiver, selector, and arguments."
-    | dup specialSelector args litIndex |
+    | specialSelector |
 
-    dup := dupReceiver. dupReceiver := false.
- 
     aNode receiver = SuperVariable ifTrue: [
 	self compileSendToSuper: aNode.
 	^true
     ].
 
-    (VMSpecialMethods includesKey: aNode selector) ifTrue: [
-	specialSelector := VMSpecialMethods at: aNode selector.
-	(specialSelector isNil and: [aNode receiver isBlock and: [ dup not ]])
-	    ifTrue: [
-		(self compileWhileLoop: aNode) ifTrue: [^false]
-	    ]
-	].
+    specialSelector := VMSpecialMethods at: aNode selector ifAbsent: [ nil ].
+    specialSelector isNil ifFalse: [
+	(self perform: specialSelector with: aNode) ifTrue: [ ^false ] ].
 
     aNode receiver acceptVisitor: self.
-    dup ifTrue: [ self depthIncr; compileByte: DupStackTop ].
-    specialSelector isNil ifFalse: [
-	(self perform: specialSelector with: aNode) ifTrue: [^false]
-    ].
+    self compileMessage: aNode
+!
 
+compileMessage: aNode
+    "RBMessageNode contains a message send. Its instance variable are
+     a receiver, selector, and arguments.  The receiver has already
+     been compiled."
+    | args litIndex |
     aNode arguments do: [ :each | each acceptVisitor: self ].
 
     VMSpecialSelectors at: aNode selector ifPresent: [ :idx |
@@ -662,6 +665,7 @@ compileWhileLoop: aNode
 
     | whileBytecodes argBytecodes jumpOffsets |
 
+    aNode receiver isBlock ifFalse: [ ^false ].
     (aNode receiver arguments isEmpty and: [
 	aNode receiver body temporaries isEmpty ]) ifFalse: [ ^false ].
 
@@ -731,6 +735,7 @@ compileSendToSuper: aNode
 
 compileTimesRepeat: aNode
     | block |
+    aNode receiver acceptVisitor: self.
     block := aNode arguments first.
     (block arguments isEmpty and: [
 	block body temporaries isEmpty ]) ifFalse: [ ^false ].
@@ -740,6 +745,7 @@ compileTimesRepeat: aNode
 
 compileLoop: aNode
     | stop step block |
+    aNode receiver acceptVisitor: self.
     aNode arguments do: [ :each |
 	stop := step.			"to:"
 	step := block.			"by:"
@@ -757,6 +763,7 @@ compileLoop: aNode
 
 compileBoolean: aNode
     | bc1 ret1 bc2 selector |
+    aNode receiver acceptVisitor: self.
     aNode arguments do: [ :each |
         (each arguments isEmpty and: [
 	    each body temporaries isEmpty ]) ifFalse: [ ^false ].
@@ -933,5 +940,45 @@ compileStoreTemporary: number scopes: outerScopes
 	compileByte: StoreTemporaryVariable
 	arg: number
 ! !
+
+"--------------------------------------------------------------------"
+
+!STCompiler methodsFor: 'compiling method attributes'!
+
+compileMethodAttributes: attributes
+    ^attributes asArray collect: [ :each |
+	self compileAttribute: (RBScanner on: each readStream) ]!
+
+scanTokenFrom: scanner
+    scanner atEnd
+	ifTrue: [^self compileError: 'method attributes must end with ''>'''].
+    ^scanner next!
+
+compileAttribute: scanner
+    | currentToken selectorBuilder selector arguments parser node |
+    currentToken := self scanTokenFrom: scanner.
+    (currentToken isBinary and: [currentToken value == #<])
+	ifFalse: [^self compileError:
+		      'method attributes must begin with ''<'''].
+
+    selectorBuilder := WriteStream on: String new.
+    arguments := WriteStream on: Array new.
+    currentToken := self scanTokenFrom: scanner.
+    [ currentToken isBinary and: [currentToken value == #>] ] whileFalse: [
+	currentToken isKeyword
+	    ifFalse: [^self compileError: 'keyword expected in method attribute'].
+	selectorBuilder nextPutAll: currentToken value.
+
+        parser := RBParser new.
+        parser errorBlock: parser errorBlock.
+        parser scanner: scanner.
+        node := parser parseBinaryMessageNoGreater.
+	node := RBSequenceNode statements: {node}.
+	arguments nextPut: (self class evaluate: node parser: parser).
+	currentToken := parser currentToken.
+    ].
+
+    selector := selectorBuilder contents asSymbol.
+    ^Message selector: selector arguments: arguments contents! !
 
 STCompiler initialize!

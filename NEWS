@@ -5,6 +5,9 @@ NEWS FROM 2.3 TO 2.3.1
 o   configure does not lock up when the system emacs is XEmacs and does not
     include both the comint package and the package's source code.
 
+o   #copyFrom:to: is uniformly 0-based for all Streams (unlike in Collections),
+    because a Stream has 0-based #position and #position: methods.
+
 o   Fixed a garbage collection bug that typically occurred when installing
     GNU Smalltalk, or when launching the installed image.
 
