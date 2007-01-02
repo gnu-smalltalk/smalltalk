@@ -118,7 +118,7 @@ scope
 
 
 Object subclass: #STSymbolTable
-       instanceVariableNames: 'variables tempCount litTable pools instVars environment scopes'
+       instanceVariableNames: 'variables tempCount litTable pools instVars environment scopes scopeVariables'
        classVariableNames: 'UseUndeclared'
        poolDictionaries: ''
        category: 'System-Compiler'
@@ -203,18 +203,21 @@ declareGlobals
 !
 
 declareTemporary: tempName canStore: canStore for: stCompiler
-    | ok symbol |
+    | symbol |
     symbol := tempName asSymbol.
-    ok := variables includesKey: symbol.
+    (variables includesKey: symbol)
+	ifTrue: [(variables at: symbol) scope < scopes size
+		     ifTrue: [stCompiler compileWarning:
+				  ('variable ''%1'' shadows another'
+					 bindWith: tempName)]
+		     ifFalse: [^stCompiler compileError:
+				   'duplicate variable name ', tempName]].
     variables at: symbol put: (STVariable
 	id: tempCount
 	scope: scopes size
 	canStore: canStore
     ).
 
-    ok ifFalse: [
-	stCompiler compileWarning: 'duplicate variable name ', tempName
-    ].
     tempCount := tempCount + 1.
     ^tempCount - 1
 !
@@ -222,12 +225,15 @@ declareTemporary: tempName canStore: canStore for: stCompiler
 scopeEnter
     scopes add: tempCount.
     tempCount := 0.
+    scopeVariables add: variables.
+    variables := variables copy.
 !
 
 scopeLeave
     "Answer whether we are in a `clean' scope (no return from method, no
      references to variable in an outer scope)."
     tempCount := scopes removeLast.
+    variables := scopeVariables removeLast.
 !
 
 undeclareTemporary: tempName
@@ -356,6 +362,7 @@ init
     variables := Dictionary new: 5.
     litTable := STLiteralsTable new: 13.
     instVars := Dictionary new: 7.
+    scopeVariables := OrderedCollection new: 5.
     scopes := OrderedCollection new: 5.
     pools := IdentitySet new: 7.
     tempCount := 0.
