@@ -1,3 +1,7 @@
+2007-01-03  Paolo Bonzini  <bonzini@gnu.org>
+
+        * net/ContentHandler.st: Add png extension.
+
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.3 released.
