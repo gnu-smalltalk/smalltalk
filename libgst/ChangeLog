@@ -1,3 +1,7 @@
+2007-01-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/events.c: Avoid infinite loop.
+
 2006-12-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Previous change not 64-bit clean,

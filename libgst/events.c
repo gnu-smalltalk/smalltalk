@@ -196,15 +196,14 @@ RETSIGTYPE
 file_polling_handler (int sig)
 {
   polling_queue *node, **pprev;
-  int n;
+  int n, more;
 
   _gst_set_signal_handler (sig, file_polling_handler);
+  if (num_used_pollfds == 0)
+    return;
 
-  for (;;)
+  do
     {
-      if (num_used_pollfds == 0)
-	return;
-
       do
 	{
 	  errno = 0;
@@ -213,6 +212,7 @@ file_polling_handler (int sig)
       while (n == -1 && errno == EINTR);
 
       num_used_pollfds = 0;
+      more = false;
       for (node = head, pprev = &head; node; node = *pprev)
 	{
 	  struct pollfd *poll = &pollfds[node->poll];
@@ -220,6 +220,7 @@ file_polling_handler (int sig)
 	  if (poll->revents &
 	      (poll->events | POLLERR | POLLHUP | POLLNVAL))
 	    {
+	      more = true;
 	      poll->events = 0;
 	      _gst_async_signal_and_unregister (node->semaphoreOOP);
 
@@ -241,6 +242,7 @@ file_polling_handler (int sig)
 	    }
 	}
     }
+  while (more && num_used_pollfds);
 }
 
 int

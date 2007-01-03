@@ -159,6 +159,7 @@ defaultFileExtensionMap
 	('mpg' 'video/mpeg')
 	('nws' 'message/rfc822')
 	('p7c' 'application/pkcs7-mime')
+	('png' 'image/png')
 	('pdf' 'application/pdf')
 	('pot' 'application/vnd.ms-powerpoint')
 	('ppa' 'application/vnd.ms-powerpoint')
