@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2005
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005,2007
 | Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
@@ -206,13 +206,11 @@ allFilesMatching: aPattern do: aBlock
 
     self do: [ :name || f | 
 	f := self at: name.
+	(aPattern match: name) ifTrue: [ aBlock value: f ].
 	f isDirectory 
 	    ifTrue: [
 		((#('.' '..') includes: name) or: [ f isSymbolicLink ])
-		    ifFalse: [ f allFilesMatching: aPattern do: aBlock ] ]
-	    ifFalse: [
-		(aPattern match: name)
-		    ifTrue: [ aBlock value: f ] ] ]
+		    ifFalse: [ f allFilesMatching: aPattern do: aBlock ] ] ]
 !
 
 contents
