@@ -1,3 +1,9 @@
+2007-01-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/ParseTreeSearcher.st: Port RBSmallDictionary to GNU
+	Smalltalk.  #copy and causing the dictionary to grow failed.
+	Reported by Stephen Compall.
+
 2007-01-02  Paolo Bonzini  <bonzini@gnu.org>
 	    Stephen Compall  <s11@member.fsf.org>
 
