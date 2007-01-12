@@ -1,3 +1,9 @@
+2007-01-11  Paolo Bonzini  <bonzini@gnu.org>
+	    Stephen Compall  <s11@member.fsf.org>
+
+	* compiler/ParseTreeSearcher.st: Refactor in order to not modify
+	the parse trees when nothing changes.
+
 2007-01-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/ParseTreeSearcher.st: Port RBSmallDictionary to GNU
