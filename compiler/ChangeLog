@@ -1,4 +1,8 @@
 2007-01-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/ParseTreeSearcher.st: Refine the previous refactoring.
+
+2007-01-11  Paolo Bonzini  <bonzini@gnu.org>
 	    Stephen Compall  <s11@member.fsf.org>
 
 	* compiler/ParseTreeSearcher.st: Refactor in order to not modify

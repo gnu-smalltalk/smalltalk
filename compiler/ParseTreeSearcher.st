@@ -773,7 +773,7 @@ visitNode: aNode
     ^self visitNode: aNode searches: searches onMatch: [:newNode |]!
 
 visitNodes: aNodeList
-    ^self visitNodes: aNodeList searches: searches onMatch: [:newNodes |]!
+    ^self visitNodes: aNodeList onMatch: [:newNodes |]!
 
 visitNodes: aNodeList onMatch: aBlock
     ^self visitNodes: aNodeList searches: searches onMatch: aBlock!
@@ -782,7 +782,7 @@ visitArgument: aNode
     ^self visitNode: aNode searches: argumentSearches onMatch: [:newNode |]!
 
 visitArguments: aNodeList
-    ^self visitNodes: aNodeList searches: argumentSearches onMatch: [:newNodes |]!
+    ^self visitArguments: aNodeList onMatch: [:newNodes |]!
 
 visitArguments: aNodeList onMatch: aBlock
     ^self visitNodes: aNodeList searches: argumentSearches onMatch: aBlock!
