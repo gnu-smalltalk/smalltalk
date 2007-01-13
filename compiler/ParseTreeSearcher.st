@@ -772,6 +772,9 @@ lookForMoreMatchesInContext: oldContext
 visitNode: aNode
     ^self visitNode: aNode searches: searches onMatch: [:newNode |]!
 
+visitNode: aNode onMatch: aBlock
+    ^self visitNode: aNode searches: searches onMatch: aBlock!
+
 visitNodes: aNodeList
     ^self visitNodes: aNodeList onMatch: [:newNodes |]!
 
@@ -813,15 +816,20 @@ visitNodes: aNodeList searches: theseSearches onMatch: aBlock
 !ParseTreeRewriter methodsFor: 'visitor-double dispatching'!
 
 acceptAssignmentNode: anAssignmentNode 
-    anAssignmentNode variable: (self visitNode: anAssignmentNode variable).
-    anAssignmentNode value: (self visitNode: anAssignmentNode value)!
+    self visitNode: anAssignmentNode variable
+	 onMatch: [:newField | anAssignmentNode variable: newField].
+    self visitNode: anAssignmentNode value
+	 onMatch: [:newField | anAssignmentNode value: newField]!
 
 acceptArrayConstructorNode: anArrayNode 
-    anArrayNode body: (self visitNode: anArrayNode body)!
+    self visitNode: anArrayNode body
+	 onMatch: [:newField | anArrayNode body: newField]!
 
 acceptBlockNode: aBlockNode 
-    aBlockNode arguments: (self visitArguments: aBlockNode arguments).
-    aBlockNode body: (self visitNode: aBlockNode body)!
+    self visitArguments: aBlockNode arguments
+	 onMatch: [:newField | aBlockNode arguments: newField].
+    self visitNode: aBlockNode body
+	 onMatch: [:newField | aBlockNode body: newField]!
 
 searchCascadeNodeMessage: aMessageNode messagesTo: newMessages
     "Helper for acceptCascadeNode: -- descend to aMessageNode, but no
@@ -854,31 +862,39 @@ acceptCascadeNode: aCascadeNode
      no replacements were made."
     notFound size == aCascadeNode messages size 
 	ifTrue: 
-	    [| receiver |
-	    receiver := self visitNode: aCascadeNode messages first receiver.
-	    newMessages do: [:each | each receiver: receiver]].
+	    [self visitNode: aCascadeNode messages first receiver
+		  onMatch: [:receiver |
+		      newMessages do: [:each | each receiver: receiver]]].
     notFound 
-	do: [:each | each arguments: (each arguments collect: [:arg | self visitNode: arg])].
+	do: [:each | self visitNodes: each arguments
+			  onMatch: [:newArgs | each arguments: newArgs]].
     aCascadeNode messages: newMessages!
 
 acceptMessageNode: aMessageNode 
-    aMessageNode receiver: (self visitNode: aMessageNode receiver).
-    aMessageNode 
-	arguments: (aMessageNode arguments collect: [:each | self visitNode: each])!
+    self visitNode: aMessageNode receiver
+	 onMatch: [:newField | aMessageNode receiver: newField].
+    self visitNodes: aMessageNode arguments
+	 onMatch: [:newField | aMessageNode arguments: newField]!
 
 acceptMethodNode: aMethodNode 
-    aMethodNode arguments: (self visitArguments: aMethodNode arguments).
-    aMethodNode body: (self visitNode: aMethodNode body)!
+    self visitArguments: aMethodNode arguments
+	 onMatch: [:newField | aMethodNode arguments: newField].
+    self visitNode: aMethodNode body
+	 onMatch: [:newField | aMethodNode body: newField]!
 
 acceptOptimizedNode: anOptimizedNode 
-    anOptimizedNode body: (self visitNode: anOptimizedNode body)!
+    self visitNode: anOptimizedNode body
+	 onMatch: [:newField | anOptimizedNode body: newField]!
 
 acceptReturnNode: aReturnNode 
-    aReturnNode value: (self visitNode: aReturnNode value)!
+    self visitNode: aReturnNode value
+	 onMatch: [:newField | aReturnNode value: newField]!
 
 acceptSequenceNode: aSequenceNode 
-    aSequenceNode temporaries: (self visitArguments: aSequenceNode temporaries).
-    aSequenceNode statements: (aSequenceNode statements collect: [:each | self visitNode: each])! !
+    self visitArguments: aSequenceNode temporaries
+	 onMatch: [:newField | aSequenceNode temporaries: newField].
+    self visitNodes: aSequenceNode statements
+	 onMatch: [:newField | aSequenceNode statements: newField]! !
 
 ParseTreeRewriter class
     instanceVariableNames: ''!

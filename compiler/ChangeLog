@@ -1,3 +1,9 @@
+2007-01-12  Stephen Compall  <scompall@nocandysw.com>
+
+	* compiler/ParseTreeSearcher.st: Use the visit*:onMatch: variants
+	of visit*: in accept*Node: methods of ParseTreeRewriter.  Add
+	visitNode:onMatch:.
+
 2007-01-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/ParseTreeSearcher.st: Refine the previous refactoring.
