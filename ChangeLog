@@ -1,3 +1,8 @@
+2007-01-14  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/HashedColl.st: Add copyEmpty, using primSize instead of
+	basicSize.  Fixes size-doubling for LookupTable.
+
 2007-01-09  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/Directory.st: Pass Directory entries to
