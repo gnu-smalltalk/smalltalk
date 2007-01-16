@@ -1,3 +1,7 @@
+2007-01-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Fix error checking in previous check in.
+
 2007-01-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: When changing an object's class, allow the
