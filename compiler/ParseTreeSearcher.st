@@ -277,6 +277,17 @@ LookupTable variableSubclass: #RBSmallDictionary
 
 !RBSmallDictionary methodsFor: 'private'!
 
+whileGrowingAt: key put: value
+    tally := tally + 1.
+    self primAt: self size put: key.
+    self valueAt: self size put: value!
+
+incrementTally
+    tally := tally + 1.
+    ^tally > self primSize
+	ifTrue: [ self grow ];
+	yourself!
+
 findIndex: anObject
     "Tries to see if anObject exists as an indexed variable. As soon as nil
     or anObject is found, the index of that slot is answered"
@@ -288,6 +299,7 @@ findIndex: anObject
         (element isNil or: [ element = anObject ])
             ifTrue: [ ^i ]
     ].
+    tally = self primSize ifTrue: [ self grow ].
     ^self size + 1! !
 
 RBSmallDictionary class
@@ -299,7 +311,7 @@ new
     ^self new: 2!
 
 new: anInteger
-    ^(self basicNew: anInteger) initialize: anInteger! !
+    ^(self primNew: anInteger) initialize: anInteger! !
 
 
 RBProgramNodeVisitor subclass: #ParseTreeSearcher

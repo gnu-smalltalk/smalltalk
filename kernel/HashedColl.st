@@ -278,6 +278,11 @@ addWhileGrowing: value
     ^value
 !
 
+copyEmpty
+    "Answer an empty copy of the receiver"
+    ^self copyEmpty: self primSize
+!
+
 copyAllFrom: aHashedCollection
     | value |
     1 to: aHashedCollection primSize do: [ :index |
