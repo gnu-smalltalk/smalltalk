@@ -1,3 +1,9 @@
+2007-01-22  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/Fraction.st: Print denominator for storeOn: as
+	denominator, not numerator as denominator.
+	Reported by J Pfersich.
+
 2007-01-14  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/HashedColl.st: Add copyEmpty, using primSize instead of

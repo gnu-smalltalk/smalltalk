@@ -375,7 +375,7 @@ storeOn: aStream
     aStream nextPutAll: '(Fraction numerator: ';
 	store: numerator;
 	nextPutAll: ' denominator: ';
-	store: numerator ;
+	store: denominator;
 	nextPut: $)
 ! !
 
