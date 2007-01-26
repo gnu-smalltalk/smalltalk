@@ -28,6 +28,14 @@ all-am:
 	  $(LN_S) -f $(srcdir)/$$i `basename $$i`; \
 	done
 
+clean-local:
+	@set frob $(LIGHTNING_TARGET_FILES); shift; \
+	for i; \
+	do \
+	  echo $(RM) `basename $$i`; \
+	  $(RM) `basename $$i`; \
+	done
+
 dist-hook:
 	cp -p $(srcdir)/lightning.h $(distdir)
 endif

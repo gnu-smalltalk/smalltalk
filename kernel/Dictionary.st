@@ -287,7 +287,7 @@ removeKey: key ifAbsent: aBlock
 
 associationsDo: aBlock
     "Pass each association in the dictionary to aBlock"
-    super do: [ :assoc | aBlock value: assoc ]
+    super do: aBlock
 !
 
 keysDo: aBlock
