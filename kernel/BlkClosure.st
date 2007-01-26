@@ -155,12 +155,12 @@ isImmediate
 
 !BlockClosure methodsFor: 'overriding'!
 
-shallowCopy
+copy
     ^self			"We only have one instance"
 !
 
 deepCopy
-    ^self			"it's about as deep as we need to get"
+    ^self shallowCopy		"it's about as deep as we need to get"
 ! !
 
 
