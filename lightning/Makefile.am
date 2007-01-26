@@ -32,8 +32,8 @@ clean-local:
 	@set frob $(LIGHTNING_TARGET_FILES); shift; \
 	for i; \
 	do \
-	  echo $(RM) `basename $$i`; \
-	  $(RM) `basename $$i`; \
+	  echo rm -f `basename $$i`; \
+	  rm -f `basename $$i`; \
 	done
 
 dist-hook:
