@@ -1,3 +1,8 @@
+2007-01-23  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/Dictionary.st: Use aBlock directly in associationsDo:.
+	* kernel/AbstNamespc.st: Likewise with subspacesDo:.
+
 2007-01-22  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/Fraction.st: Print denominator for storeOn: as

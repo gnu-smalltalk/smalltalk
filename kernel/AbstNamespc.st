@@ -409,7 +409,7 @@ subspaces
 
 subspacesDo: aBlock
     "Invokes aBlock for all direct subspaces."
-    self subspaces do: [ :subclass | aBlock value: subclass ]
+    self subspaces do: aBlock
 !
 
 withAllSubspaces
