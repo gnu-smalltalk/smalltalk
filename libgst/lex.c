@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2004,2005,2006
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2004,2005,2006,2007
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -688,6 +688,9 @@ scan_number (int c,
       ic = _gst_next_char ();
       if (ic == 'r')
 	{
+          char *p = obstack_finish (_gst_compilation_obstack);
+          obstack_free (_gst_compilation_obstack, p);
+
 	  base = (int) num;
 	  if (base > 36 || largeInteger)
 	    {

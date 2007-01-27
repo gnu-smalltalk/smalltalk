@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright (C) 1988, 1989, 1999  Free Software Foundation.
+| Copyright (C) 1988, 1989, 1999, 2007  Free Software Foundation.
 | Written by Steve Byrne
 |
 | This file is part of GNU Smalltalk.
@@ -97,6 +97,9 @@
 ^(34567 * 34567) <= (45678 * 45678)!
 ^(34567 * 34567) >  (45678 * 45678)!
 ^(34567 * 34567) >= (45678 * 45678)!
+
+"parsing in bases other than 10"
+16rFFFFFFFF = 4294967295!
 
 | f n f1 |
 	n _ 10.
