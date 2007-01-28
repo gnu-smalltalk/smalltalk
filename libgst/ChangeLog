@@ -1,3 +1,7 @@
+2007-01-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/mpz.c: Fix right shift bug.
+
 2007-01-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Clear obstack after parsing radix.
