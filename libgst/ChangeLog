@@ -1,5 +1,10 @@
 2007-01-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/prims.def: Use truncl and lrint to implement
+	conversion from float to integer.
+
+2007-01-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/mpz.c: Fix right shift bug.
 
 2007-01-27  Paolo Bonzini  <bonzini@gnu.org>

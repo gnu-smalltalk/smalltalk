@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright (C) 1988, 1989, 1999, 2006  Free Software Foundation.
+| Copyright (C) 1988, 1989, 1999, 2006, 2007  Free Software Foundation.
 | Written by Steve Byrne
 |
 | This file is part of GNU Smalltalk.
@@ -168,7 +168,9 @@ test
     (((Behavior evaluate: self printString) = self) -> self) printNl. 
 ! !
 
+1d16 test!
 1e16 test!
+1.2345d16 test!
 1.2345e16 test!
 10.0 test!
 (20 - 2.2325251) test!
@@ -179,3 +181,55 @@ test
 0.832050294337844 test!
 0.55470019622523 test!
 0.554700196225229 test!
+
+
+"Fun with rounding"
+
+!Float class methodsFor: 'testing'!
+
+assert: aBoolean
+    aBoolean ifFalse: [ self halt ] ifTrue: [ aBoolean printNl ]!
+
+test
+    | p |
+    p := 1 bitShift: self precision - 1.
+    self assert: (self coerce: p+0+(1/4)) asExactFraction = (p+0).
+    self assert: (self coerce: p+0+(1/2)) asExactFraction = (p+0).
+    self assert: (self coerce: p+0+(3/4)) asExactFraction = (p+1).
+    self assert: (self coerce: p+1+(1/4)) asExactFraction = (p+1).
+    self assert: (self coerce: p+1+(1/2)) asExactFraction = (p+2).
+    self assert: (self coerce: p+1+(3/4)) asExactFraction = (p+2).
+    
+    self assert: ((self emin - self precision - 1 to: self emax - 1) allSatisfy: [:i |
+        p := (self coerce: 1) timesTwoPower: i.
+	(self coerce: p asExactFraction) = p]).
+    
+    self assert: ((1 to: 1 + self precision - self emin) allSatisfy: [:i |
+        p := (self coerce: 1) timesTwoPower: i negated.
+	(self coerce: (1 bitShift: i) reciprocal negated) = p negated]).
+    
+    "check for negative zero"
+    p := 1 bitShift: 1 + self precision - self emin.
+    self assert: (self coerce: p reciprocal) positive.
+    self assert: (self coerce: p reciprocal negated) negative.
+    
+    "check for infinity"
+    p := 1 bitShift: self emax + 1.
+    self assert: (self coerce: p) = self infinity.
+    self assert: (self coerce: p negated) = self negativeInfinity.
+    
+    p := 1 bitShift: 1 + self precision - self emin.
+    self assert: (self coerce: p / 3) = self infinity.
+    self assert: (self coerce: p / -3) = self negativeInfinity.
+    
+    "check for non infinity/nan"
+    p := 1 bitShift: self emax + 1.
+    self assert: (self coerce: p / 3) isFinite.
+    self assert: (self coerce: p / -3) isFinite.
+    
+    p := 1 bitShift: 1 + self precision - self emin.
+    self assert: (self coerce: 3 / p) isFinite.
+    self assert: (self coerce: -3 / p) isFinite! !
+
+FloatD test!
+FloatE test!

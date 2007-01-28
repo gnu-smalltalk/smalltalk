@@ -194,27 +194,30 @@ truncated
         ifFalse: [ float := self negated ].
 
     exponent := float exponent.
-    bytes := ByteArray new: exponent // 8 + 2.
-    float := float timesTwoPower: (exponent bitClear: 7) negated.
+    bytes := LargePositiveInteger new: (self class precision + 7) // 8 + 1.
+    float := float timesTwoPower: float class precision - exponent - 8.
 
-    bytes size - 1 to: 1 by: -1 do: [ :i |
-         bytes at: i put: float truncated.
-         float := float fractionPart timesTwoPower: 8
+    1 to: bytes size do: [ :i |
+         bytes digitAt: i put: (float fractionPart timesTwoPower: 8) truncated.
+         float := float integerPart timesTwoPower: -8.
     ].
 
-    ^positive
-        ifTrue: [ (LargeInteger from: bytes) ]
-        ifFalse: [ (LargeInteger from: bytes) negated ]
+    bytes := bytes bitShift: (exponent - float class precision).
+    positive ifFalse: [ bytes := bytes negated ].
+    ^bytes
 !
 
 asExactFraction
     "Convert the receiver into a fraction with optimal approximation,
      but with usually huge terms."
 
+    | shift mantissa |
     self checkCoercion.
-
-    ^(self timesTwoPower: self exponent + self class precision) truncated /
-     (1    bitShift:      self exponent + self class precision)
+    shift := self exponent negated + self class precision.
+    mantissa := (self timesTwoPower: shift) truncated.
+    ^shift negative
+        ifTrue: [mantissa * (1 bitShift: shift negated)]
+        ifFalse: [mantissa / (1 bitShift: shift)]
 !
 
 asFraction

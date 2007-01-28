@@ -1,3 +1,16 @@
+2007-01-28  Paolo Bonzini  <bonzini@gnu.org>
+            Nicolas Cellier  <ncellier@ifrance.com>
+
+        * kernel/Float.st: Rewrite #truncated and #asExactFraction.
+        * kernel/Fraction.st: Use #asFloatD in #hash.  Rewrite #asFloat:.
+        * kernel/LargeInt.st: Rewrite #asFloat:.  Add #trailingZeros.
+        * kernel/SmallInt.st: Add #trailingZeros.
+        * kernel/Integer.st: Add #trailingZeros.
+        * kernel/MappedColl.st: Use map size as collection size.
+
+	* tests/floatmath.st: Add accuracy tests.
+	* tests/floatmath.ok: Adjust.
+
 2007-01-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/intmath.st: Add one regression test.

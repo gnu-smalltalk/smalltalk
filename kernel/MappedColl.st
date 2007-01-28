@@ -89,7 +89,7 @@ at: key put: value
 
 size
     "Answer the receiver's size"
-    ^domain size
+    ^map size
 !
 
 add: anObject

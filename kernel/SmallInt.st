@@ -94,6 +94,24 @@ generality
 
 !SmallInteger methodsFor: 'bit arithmetic'!
 
+trailingZeros
+    "Return the index of the trailing zero bits in the receiver"
+
+    | n bit |
+    self = 0 ifTrue: [ ^0 ].
+
+    n := self.
+    bit := 0.
+
+    (n bitAnd: 16r3FFFFFFF) = 0 ifTrue: [
+	bit := bit + 30. n := n bitShift: -30 ].
+
+    (n bitAnd: 16rFFFF) = 0 ifTrue: [ bit := bit + 16. n := n bitShift: -16 ].
+    (n bitAnd: 16rFF) = 0 ifTrue: [ bit := bit + 8. n := n bitShift: -8 ].
+    (n bitAnd: 16rF) = 0 ifTrue: [ bit := bit + 4. n := n bitShift: -4 ].
+    (n bitAnd: 16r3) = 0 ifTrue: [ bit := bit + 2. n := n bitShift: -2 ].
+    ^bit + (1 - (n bitAnd: 16r1))!
+
 highBit
     "Return the index of the highest order 1 bit of the receiver"
 

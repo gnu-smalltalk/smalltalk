@@ -139,12 +139,18 @@ clearBit: index
 !
 
 noMask: anInteger
-    "True if no 1 bits in anInteger are 1 in the receiver"
+    "Answer true if no 1 bits in anInteger are 1 in the receiver."
     ^(self bitAnd: anInteger) = 0
 !
 
+trailingZeros
+    "Return the index of the lowest order 1 bit of the receiver,
+     minus 1."
+    self subclassResponsibility
+!
+
 highBit
-    "Return the index of the highest order 1 bit of the receiver"
+    "Return the index of the highest order 1 bit of the receiver."
     self subclassResponsibility
 !
 

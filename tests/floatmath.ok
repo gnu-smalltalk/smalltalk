@@ -204,8 +204,16 @@ Execution begins...
 returned value is Float
 
 Execution begins...
+true->10000000000000000.0
+returned value is 1.00000d+16
+
+Execution begins...
 true->1.0e16
 returned value is 1.00000e+16
+
+Execution begins...
+true->12345000000000000.0
+returned value is 1.23450d+16
 
 Execution begins...
 true->1.2345e16
@@ -246,3 +254,48 @@ returned value is 0.554700
 Execution begins...
 true->0.554700196225229
 returned value is 0.554700
+
+Execution begins...
+returned value is Float class
+
+Execution begins...
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+returned value is FloatD
+
+Execution begins...
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+true
+returned value is FloatE

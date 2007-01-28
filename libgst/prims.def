@@ -1531,14 +1531,9 @@ primitive VMpr_FloatD_truncated [succeed,fail]
   if COMMON (RECEIVER_IS_CLASS (oop1, _gst_floatd_class))
     {
       double oopValue = FLOATD_OOP_VALUE (oop1);
-      if COMMON (oopValue >= 0.0 && oopValue <= MAX_ST_INT)
+      if COMMON (oopValue >= MIN_ST_INT && oopValue <= MAX_ST_INT)
 	{
-	  PUSH_INT ((intptr_t) (oopValue + 0.000000000000005));
-	  PRIM_SUCCEEDED;
-	}
-      else if COMMON (oopValue < 0.0 && oopValue >= MIN_ST_INT)
-	{
-	  PUSH_INT ((intptr_t) (oopValue - 0.000000000000005));
+	  PUSH_INT (lrint (trunc (oopValue)));
 	  PRIM_SUCCEEDED;
 	}
     }
@@ -1732,14 +1727,9 @@ primitive VMpr_FloatE_truncated [succeed,fail]
   if COMMON (RECEIVER_IS_CLASS (oop1, _gst_floate_class))
     {
       double oopValue = FLOATE_OOP_VALUE (oop1);
-      if COMMON (oopValue >= 0.0 && oopValue <= MAX_ST_INT)
+      if COMMON (oopValue >= MIN_ST_INT && oopValue <= MAX_ST_INT)
 	{
-	  PUSH_INT ((intptr_t) (oopValue + 0.000000000000005));
-	  PRIM_SUCCEEDED;
-	}
-      else if COMMON (oopValue < 0.0 && oopValue >= MIN_ST_INT)
-	{
-	  PUSH_INT ((intptr_t) (oopValue - 0.000000000000005));
+	  PUSH_INT (lrintf (truncf (oopValue)));
 	  PRIM_SUCCEEDED;
 	}
     }
@@ -1933,14 +1923,9 @@ primitive VMpr_FloatQ_truncated [succeed,fail]
   if COMMON (RECEIVER_IS_CLASS (oop1, _gst_floatq_class))
     {
       long double oopValue = FLOATQ_OOP_VALUE (oop1);
-      if COMMON (oopValue >= 0.0 && oopValue <= MAX_ST_INT)
+      if COMMON (oopValue >= MIN_ST_INT && oopValue <= MAX_ST_INT)
 	{
-	  PUSH_INT ((intptr_t) (oopValue + 0.000000000000005));
-	  PRIM_SUCCEEDED;
-	}
-      else if COMMON (oopValue < 0.0 && oopValue >= MIN_ST_INT)
-	{
-	  PUSH_INT ((intptr_t) (oopValue - 0.000000000000005));
+	  PUSH_INT (lrintl (truncl (oopValue)));
 	  PRIM_SUCCEEDED;
 	}
     }
