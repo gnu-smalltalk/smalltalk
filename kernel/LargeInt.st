@@ -494,7 +494,7 @@ negated
 !LargeInteger methodsFor: 'bit operations'!
 
 lowBit
-    "Answer the number of trailing zero bits in the receiver"
+    "Return the index of the lowest order 1 bit of the receiver."
 
     | each |
     1 to: self size do: [ :index |

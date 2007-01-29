@@ -95,7 +95,7 @@ generality
 !SmallInteger methodsFor: 'bit arithmetic'!
 
 lowBit
-    "Return the index of the trailing zero bits in the receiver"
+    "Return the index of the lowest order 1 bit of the receiver."
 
     | n bit |
     self = 0 ifTrue: [ ^0 ].
