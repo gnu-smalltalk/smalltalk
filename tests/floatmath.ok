@@ -220,6 +220,10 @@ true->1.2345e16
 returned value is 1.23450e+16
 
 Execution begins...
+true->1.25
+returned value is 1.25000
+
+Execution begins...
 true->10.0
 returned value is 10.0000
 

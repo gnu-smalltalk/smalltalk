@@ -172,6 +172,7 @@ test
 1e16 test!
 1.2345d16 test!
 1.2345e16 test!
+1.25 test!
 10.0 test!
 (20 - 2.2325251) test!
 0.12345 test!

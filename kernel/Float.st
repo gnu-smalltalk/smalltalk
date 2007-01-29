@@ -132,6 +132,41 @@ negated
 integerPart
     "Return the receiver's integer part"
     ^self - self fractionPart
+!
+
+raisedToInteger: anInteger
+    "Return self raised to the anInteger-th power"
+
+    | exp adjustExp val mant |
+
+    "Some special cases first"
+    anInteger isInteger ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: Integer ].
+    anInteger = 0 ifTrue: [ ^self unity ].
+    anInteger = 1 ifTrue: [ ^self ].
+
+    "Avoid overflow when the result is denormal and we would have an
+     unrepresentable intermediate result for its reciprocal."
+    adjustExp := self exponent.
+    exp := anInteger abs.
+    (anInteger > 0 or: [ (adjustExp + 1) * exp < self class emax ])
+	ifTrue: [
+	    mant := self.
+	    adjustExp := 0 ]
+	ifFalse: [
+	    mant := self timesTwoPower: 0 - adjustExp.
+	    adjustExp := adjustExp * anInteger ].
+
+    "Fire the big loop."
+    val := mant
+        raisedToInteger: exp
+        withCache: ((Array new: (255 min: exp))
+                        at: 1 put: mant;
+                        yourself).
+
+(mant->exp->val->adjustExp) printNl.
+    anInteger < 0 ifTrue: [ val := val reciprocal ].
+    adjustExp = 0 ifFalse: [ val := val timesTwoPower: adjustExp ].
+    ^val
 ! !
 
 
@@ -371,7 +406,7 @@ printOn: aStream special: whatToPrintArray
     "Private - Print a decimal representation of the receiver on aStream,
      printing one of the three elements of whatToPrintArray if it is
      infinity, negative infinity, or a NaN"
-    | me exponential small num den gcd
+    | me exponential small num numLog den denLog gcd
       intFactor precision int rounding digits digitStream exponent
       dotPrinted |
 
@@ -415,11 +450,17 @@ printOn: aStream special: whatToPrintArray
 
     "Get the first `me class decimalDigits' base-10 digits of num // den,
      appropriately rounded"
-    intFactor := 10 raisedToInteger: (den ceilingLog: 10).
-    rounding := (10 raisedToInteger: (num ceilingLog: 10)
-    	     	    		     - me class decimalDigits) + 1.
+    numLog := num ceilingLog: 10.
+    denLog := den ceilingLog: 10.
+    numLog > me class decimalDigits
+	ifTrue: [
+	    intFactor := 10 raisedToInteger: denLog.
+	    rounding := 10 raisedToInteger: numLog - me class decimalDigits ]
+	ifFalse: [
+	    intFactor := 10 raisedToInteger: me class decimalDigits - denLog.
+	    rounding := 0 ].
 
-    int := ((num * intFactor) + ((den // 2) * rounding)) // den.
+    int := ((num * intFactor) + ((den // 2) * (rounding + 1))) // den.
     digits := int printString.
     digits size > me class decimalDigits
         ifTrue: [ digits := digits copyFrom: 1 to: me class decimalDigits ].

@@ -1,3 +1,15 @@
+2007-01-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/LargeInt.st: Rename #trailingZeros to #lowBit.
+	* kernel/SmallInt.st: Rename #trailingZeros to #lowBit.
+	* kernel/Integer.st: Rename #trailingZeros to #lowBit.
+
+	* kernel/Float.st: Fix bug in printing exact floating-point numbers.
+	Support gradual underflow in #raisedToInteger:.
+
+        * tests/floatmath.st: Add accuracy tests.
+        * tests/floatmath.ok: Adjust.
+
 2007-01-28  Paolo Bonzini  <bonzini@gnu.org>
             Nicolas Cellier  <ncellier@ifrance.com>
 

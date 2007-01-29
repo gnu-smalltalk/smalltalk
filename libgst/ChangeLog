@@ -1,3 +1,7 @@
+2007-01-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Rename ipowl to mul_powl, support gradual underflow.
+
 2007-01-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Use truncl and lrint to implement

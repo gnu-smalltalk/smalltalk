@@ -143,9 +143,8 @@ noMask: anInteger
     ^(self bitAnd: anInteger) = 0
 !
 
-trailingZeros
-    "Return the index of the lowest order 1 bit of the receiver,
-     minus 1."
+lowBit
+    "Return the index of the lowest order 1 bit of the receiver."
     self subclassResponsibility
 !
 

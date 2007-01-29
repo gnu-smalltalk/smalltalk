@@ -493,15 +493,15 @@ negated
 
 !LargeInteger methodsFor: 'bit operations'!
 
-trailingZeros
+lowBit
     "Answer the number of trailing zero bits in the receiver"
 
     | each |
     1 to: self size do: [ :index |
         (each := self digitAt: index) = 0
-            ifFalse: [ ^index * 8 - 8 + (TrailingZeros at: each) ].
+            ifFalse: [ ^index * 8 - 7 + (TrailingZeros at: each) ].
     ].
-    ^self highBit - 1
+    ^self highBit
 !
 
 bitAnd: aNumber
@@ -1000,7 +1000,7 @@ asFloat: characterization
 
     "Apply IEEE 754 round to nearest even default rounding mode"
     carry := self bitAt: nTruncatedBits.
-    (carry = 1 and: [mantissa odd or: [self trailingZeros >= nTruncatedBits]]) 
+    (carry = 1 and: [mantissa odd or: [self lowBit > nTruncatedBits]])
         ifTrue: [mantissa := mantissa + 1].
     ^(characterization coerce: mantissa) timesTwoPower: exponent!
 
