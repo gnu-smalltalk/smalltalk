@@ -132,6 +132,41 @@ negated
 integerPart
     "Return the receiver's integer part"
     ^self - self fractionPart
+!
+
+raisedToInteger: anInteger
+    "Return self raised to the anInteger-th power"
+
+    | exp adjustExp val mant |
+
+    "Some special cases first"
+    anInteger isInteger ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: Integer ].
+    anInteger = 0 ifTrue: [ ^self unity ].
+    anInteger = 1 ifTrue: [ ^self ].
+
+    "Avoid overflow when the result is denormal and we would have an
+     unrepresentable intermediate result for its reciprocal."
+    adjustExp := self exponent.
+    exp := anInteger abs.
+    (anInteger > 0 or: [ (adjustExp + 1) * exp < self class emax ])
+	ifTrue: [
+	    mant := self.
+	    adjustExp := 0 ]
+	ifFalse: [
+	    mant := self timesTwoPower: 0 - adjustExp.
+	    adjustExp := adjustExp * anInteger ].
+
+    "Fire the big loop."
+    val := mant
+        raisedToInteger: exp
+        withCache: ((Array new: (255 min: exp))
+                        at: 1 put: mant;
+                        yourself).
+
+(mant->exp->val->adjustExp) printNl.
+    anInteger < 0 ifTrue: [ val := val reciprocal ].
+    adjustExp = 0 ifFalse: [ val := val timesTwoPower: adjustExp ].
+    ^val
 ! !
 
 
@@ -194,27 +229,30 @@ truncated
         ifFalse: [ float := self negated ].
 
     exponent := float exponent.
-    bytes := ByteArray new: exponent // 8 + 2.
-    float := float timesTwoPower: (exponent bitClear: 7) negated.
+    bytes := LargePositiveInteger new: (self class precision + 7) // 8 + 1.
+    float := float timesTwoPower: float class precision - exponent - 8.
 
-    bytes size - 1 to: 1 by: -1 do: [ :i |
-         bytes at: i put: float truncated.
-         float := float fractionPart timesTwoPower: 8
+    1 to: bytes size do: [ :i |
+         bytes digitAt: i put: (float fractionPart timesTwoPower: 8) truncated.
+         float := float integerPart timesTwoPower: -8.
     ].
 
-    ^positive
-        ifTrue: [ (LargeInteger from: bytes) ]
-        ifFalse: [ (LargeInteger from: bytes) negated ]
+    bytes := bytes bitShift: (exponent - float class precision).
+    positive ifFalse: [ bytes := bytes negated ].
+    ^bytes
 !
 
 asExactFraction
     "Convert the receiver into a fraction with optimal approximation,
      but with usually huge terms."
 
+    | shift mantissa |
     self checkCoercion.
-
-    ^(self timesTwoPower: self exponent + self class precision) truncated /
-     (1    bitShift:      self exponent + self class precision)
+    shift := self exponent negated + self class precision.
+    mantissa := (self timesTwoPower: shift) truncated.
+    ^shift negative
+        ifTrue: [mantissa * (1 bitShift: shift negated)]
+        ifFalse: [mantissa / (1 bitShift: shift)]
 !
 
 asFraction
@@ -245,7 +283,7 @@ asFraction
 	    ((self coerce: n0) / (self coerce: d0) - abs) abs < eps ]
     ]   whileFalse.
 
-    self abs < 1
+    self exponent < 0
 	ifTrue: [ d0 := d0 * (2 raisedToInteger: self exponent negated) ]
 	ifFalse: [ n0 := n0 * (2 raisedToInteger: self exponent) ].
 
@@ -368,7 +406,7 @@ printOn: aStream special: whatToPrintArray
     "Private - Print a decimal representation of the receiver on aStream,
      printing one of the three elements of whatToPrintArray if it is
      infinity, negative infinity, or a NaN"
-    | me exponential small num den gcd
+    | me exponential small num numLog den denLog gcd
       intFactor precision int rounding digits digitStream exponent
       dotPrinted |
 
@@ -412,11 +450,15 @@ printOn: aStream special: whatToPrintArray
 
     "Get the first `me class decimalDigits' base-10 digits of num // den,
      appropriately rounded"
-    intFactor := 10 raisedToInteger: (den ceilingLog: 10).
-    rounding := (10 raisedToInteger: (num ceilingLog: 10)
-    	     	    		     - me class decimalDigits) + 1.
+    numLog := num ceilingLog: 10.
+    denLog := den ceilingLog: 10. 
+    denLog < me class decimalDigits ifTrue: [
+        denLog := denLog max: den highBit ].
 
-    int := ((num * intFactor) + ((den // 2) * rounding)) // den.
+    intFactor := 10 raisedToInteger: denLog.
+    rounding := 10 raisedToInteger: numLog - me class decimalDigits.
+    int := ((num * intFactor) + ((den // 2) * (rounding + 1))) // den.
+
     digits := int printString.
     digits size > me class decimalDigits
         ifTrue: [ digits := digits copyFrom: 1 to: me class decimalDigits ].

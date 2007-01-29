@@ -1,3 +1,22 @@
+2007-01-29  Paolo Bonzini  <bonzini@gnu.org>
+            Nicolas Cellier  <ncellier@ifrance.com>
+
+        * kernel/Float.st: Rewrite #truncated and #asExactFraction.
+	Fix bug in printing exact floating-point numbers.
+	Support gradual underflow in #raisedToInteger:.
+
+        * kernel/Fraction.st: Use #asFloatD in #hash.  Rewrite #asFloat:.
+        * kernel/LargeInt.st: Rewrite #asFloat:.  Add #lowBit.
+        * kernel/SmallInt.st: Add #lowBit.
+        * kernel/Integer.st: Add #lowBit.
+        * kernel/MappedColl.st: Use map size as collection size.
+
+        * tests/floatmath.st: Add accuracy tests.
+        * tests/floatmath.ok: Adjust.
+
+        * tests/intmath.st: Add one regression test.
+        * tests/intmath.ok: Adjust.
+
 2007-01-23  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/Dictionary.st: Use aBlock directly in associationsDo:.

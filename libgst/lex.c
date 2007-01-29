@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2004,2005,2006
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2004,2005,2006,2007
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -167,9 +167,10 @@ static int scan_symbol (int c,
 static int digit_to_int (int c,
 			 int base);
 
-/* Raise BASE to the N-th power.  */
-static inline long double ipowl (long double base,
-			         int n);
+/* Raise BASE to the N-th power and multiply MANT by the result.  */
+static inline long double mul_powl (long double mant,
+				    long double base,
+			            int n);
 
 #ifdef LEXDEBUG
 static void print_token (int token,
@@ -649,22 +650,33 @@ scan_ident (int c,
 
 
 long double
-ipowl (long double base, 
-       int n)
+mul_powl (long double mant, 
+	  long double base,
+	  int n)
 {
-  int k = 1;
   long double result = 1.0;
-  while (n)
+  int n_abs = n < 0 ? -n : n;
+  int exp;
+  int k = 1;
+
+  /* Restrict base to the range from 1.0 to 2.0.  */
+  base = frexpl (base, &exp);
+  base *= 2;
+  exp--;
+
+  while (n_abs)
     {
-      if (n & k)
+      if (n_abs & k)
         {
           result *= base;
-          n ^= k;
+          n_abs ^= k;
         }
       base *= base;
       k <<= 1;
     }
-  return result;
+
+  mant = (n < 0) ? mant / result : mant * result;
+  return ldexpl (mant, exp * n);
 }
 
 int
@@ -688,6 +700,9 @@ scan_number (int c,
       ic = _gst_next_char ();
       if (ic == 'r')
 	{
+          char *p = obstack_finish (_gst_compilation_obstack);
+          obstack_free (_gst_compilation_obstack, p);
+
 	  base = (int) num;
 	  if (base > 36 || largeInteger)
 	    {
@@ -833,10 +848,8 @@ scan_number (int c,
   else
     _gst_unread_char (ic);
 
-  if (exponent > 0)
-    num *= ipowl ((long double) base, exponent);
-  else
-    num /= ipowl ((long double) base, -exponent);
+  if (exponent != 0)
+    num = mul_powl (num, (long double) base, exponent);
 
   if (isNegative)
     num = -num;

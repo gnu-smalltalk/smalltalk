@@ -290,7 +290,7 @@ truncated
 hash
     "Answer an hash value for the receiver"
     denominator = 1 ifTrue: [ ^numerator hash ].
-    ^(numerator asFloatD / denominator asFloatD) hash
+    ^self asFloatD hash
 ! !
 
 
@@ -387,33 +387,59 @@ storeOn: aStream
 
 asFloat: characterization
     "Answer the receiver converted to a Float"
-    | n d shift sign |
-    n := numerator.
-    d := denominator.
-    sign := n sign * d sign.
+    "Answer the receiver converted to a Float"
 
-    "Avoid answering NaNs and infinite values.
-     1e1800 asFloat / (1e1799 + 1) asFloat = NaN, but
-     (1e1800 / (1e1799 + 1)) asFloat must be 10."
+    | n d sign hn hd hq nBits q q1 r exponent floatExponent | 
+    sign := numerator sign * denominator sign.
+    n := numerator abs.
+    d := denominator abs.
+    hn := n highBit.
+    hd := d highBit.
 
-    shift := (characterization emax - numerator highBit).
-    shift := shift min: (characterization emax - denominator highBit).
-    shift < 0 ifTrue: [
-	"Lose some more precision, but we MUST avoid infinites and NaNs!"
-	shift := shift - 10. n := n bitShift: shift. d := d bitShift: shift ].
+    "If both numerator and denominator are represented exactly in floating
+     point number, then fastest thing to do is to use hardwired float division"
+    nBits := characterization precision + 1.
+    (hn < nBits and: [hd < nBits]) 
+        ifTrue: [^(characterization coerce: numerator) / (characterization coerce: denominator)].
 
-    d = 0 ifTrue: [
-	^sign > 0
-	    ifTrue: [ characterization infinity ]
-	    ifFalse: [ characterization negativeInfinity ] ].
-    n = 0 ifTrue: [
-	^sign > 0
-	    ifTrue: [ characterization coerce: 0 ]
-	    ifFalse: [ characterization negativeInfinity reciprocal ] ].
+    "Try and obtain a mantissa with characterization precision + 1 bits by integer division.
+     Additional bit is a helper for rounding mode.
+     First guess is rough, we might get one more bit or one less"
+    exponent := hn - hd - nBits.
+    exponent > 0 
+        ifTrue: [d := d bitShift: exponent]
+        ifFalse: [n := n bitShift: exponent negated].
+    q := n quo: d.
+    r := n - (q * d).
+    hq := q highBit.
 
-    ^(characterization coerce: n)
-	 / (characterization coerce: d)
-!
+    "check for gradual underflow, in which case we should use less bits"
+    floatExponent := exponent + hq.
+    floatExponent >= (characterization emin - 1) ifFalse: [nBits := nBits + floatExponent - characterization emin+1].
+
+    "Use exactly nBits"
+    hq > nBits 
+        ifTrue: 
+            [exponent := exponent + hq - nBits.
+            r := (q bitAnd: (1 bitShift: hq - nBits) - 1) * d + r.
+            q := q bitShift: nBits - hq].
+    hq < nBits 
+        ifTrue: 
+            [exponent := exponent + hq - nBits.
+            q1 := (r bitShift: nBits - hq) quo: d.
+            q := (q bitShift: nBits - hq) bitAnd: q1.
+            r := (r bitShift: nBits - hq) - (q1 * d)].
+
+    "check if we should round upward.
+    The case of exact half (q bitAnd: 1) = 1 & (r = 0)
+    will be handled by Integer>>asFloat:"
+    ((q bitAnd: 1) = 0 or: [r = 0]) ifFalse: [q := q + 1].
+
+    "build the Float"
+    ^(sign > 0
+        ifTrue: [characterization coerce: q]
+        ifFalse: [(characterization coerce: q) negated]) 
+            timesTwoPower: exponent!
 
 reduce
     "Reduce the fraction."

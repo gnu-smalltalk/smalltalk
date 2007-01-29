@@ -1,3 +1,13 @@
+2007-01-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Use truncl and lrint to implement
+	conversion from float to integer.
+
+	* libgst/mpz.c: Fix right shift bug.
+
+	* libgst/lex.c: Clear obstack after parsing radix.  Rename ipowl
+	to mul_powl, support gradual underflow.
+
 2007-01-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/events.c: Avoid infinite loop.

@@ -11,6 +11,9 @@ o   #copyFrom:to: is uniformly 0-based for all Streams (unlike in Collections),
 o   Fixed a garbage collection bug that typically occurred when installing
     GNU Smalltalk, or when launching the installed image.
 
+o   Fixed many floating point rounding bugs in LargeIntegers and Fractions,
+    thanks to Nicolas Cellier.
+
 o   gst-package honors the INSTALL command found by configure.
 
 o   gst-config does not "forget" to prefix the library directories with -L.

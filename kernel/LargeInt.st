@@ -470,6 +470,17 @@ negated
 
 !LargeInteger methodsFor: 'bit operations'!
 
+lowBit
+    "Return the index of the lowest order 1 bit of the receiver."
+
+    | each |
+    1 to: self size do: [ :index |
+        (each := self digitAt: index) = 0
+            ifFalse: [ ^index * 8 - 7 + (TrailingZeros at: each) ].
+    ].
+    ^self highBit
+!
+
 bitAnd: aNumber
     "Answer the receiver ANDed with aNumber"
     | newBytes |
@@ -954,17 +965,32 @@ sign
 asFloat: characterization
     "Answer the receiver converted to a Float"
 
-    | adjust result byte |
+    | nTruncatedBits mantissa exponent mask trailingBits inexact carry | 
+
+    "Check for number bigger than maximum mantissa"
+    nTruncatedBits := self highBit - characterization precision.
+    nTruncatedBits <= 0 
+        ifTrue: [^self fastAsFloat: characterization ].
+
+    mantissa := self bitShift: nTruncatedBits negated.
+    exponent := nTruncatedBits.
+
+    "Apply IEEE 754 round to nearest even default rounding mode"
+    carry := self bitAt: nTruncatedBits.
+    (carry = 1 and: [mantissa odd or: [self lowBit > nTruncatedBits]])
+        ifTrue: [mantissa := mantissa + 1].
+    ^(characterization coerce: mantissa) timesTwoPower: exponent!
+
+fastAsFloat: characterization
+    "Conversion can be exact, construct Float by successive mul add operations"
+    | result byte |
     byte := characterization coerce: 256.
-    adjust := byte raisedToInteger: self size - 1.
-    result := 0.
+    result := characterization coerce: 0.
 
     self size to: 1 by: -1 do: [ :index |
-	result := (self at: index) * adjust + result.
-	adjust := adjust / byte.
+	result := result * byte + (self at: index).
     ].
-    ^result
-!
+    ^result!
 
 mostSignificantByte
     "Private - Answer the value of the most significant byte"

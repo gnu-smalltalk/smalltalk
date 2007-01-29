@@ -322,8 +322,7 @@ _gst_mpz_div_2exp (gst_mpz *w, const gst_mpz *u, unsigned cnt)
       else
 	MPN_COPY (w->d, u->d + limb_cnt, abs_usize - limb_cnt);
 
-      if (!w->d[0])
-	wsize--;
+      wsize -= w->d[wsize - 1] == 0;
     }
 
   w->size = (usize >= 0) ? wsize : -wsize;

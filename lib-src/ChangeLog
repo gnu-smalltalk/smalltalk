@@ -1,3 +1,7 @@
+2007-01-28  Paolo Bonzini  <bonzini@gnu.org>
+
+        * lib-src/truncl.c: New.
+
 2007-01-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/poll.c: Import from gnulib.
