@@ -1,5 +1,9 @@
 2007-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Float.st: Really fix bug in printing floating point numbers.
+
+2007-01-29  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/LargeInt.st: Rename #trailingZeros to #lowBit.
 	* kernel/SmallInt.st: Rename #trailingZeros to #lowBit.
 	* kernel/Integer.st: Rename #trailingZeros to #lowBit.

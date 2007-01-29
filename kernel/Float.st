@@ -451,16 +451,14 @@ printOn: aStream special: whatToPrintArray
     "Get the first `me class decimalDigits' base-10 digits of num // den,
      appropriately rounded"
     numLog := num ceilingLog: 10.
-    denLog := den ceilingLog: 10.
-    numLog > me class decimalDigits
-	ifTrue: [
-	    intFactor := 10 raisedToInteger: denLog.
-	    rounding := 10 raisedToInteger: numLog - me class decimalDigits ]
-	ifFalse: [
-	    intFactor := 10 raisedToInteger: me class decimalDigits - denLog.
-	    rounding := 0 ].
+    denLog := den ceilingLog: 10. 
+    denLog < me class decimalDigits ifTrue: [
+        denLog := denLog max: den highBit ].
 
+    intFactor := 10 raisedToInteger: denLog.
+    rounding := 10 raisedToInteger: numLog - me class decimalDigits.
     int := ((num * intFactor) + ((den // 2) * (rounding + 1))) // den.
+
     digits := int printString.
     digits size > me class decimalDigits
         ifTrue: [ digits := digits copyFrom: 1 to: me class decimalDigits ].
