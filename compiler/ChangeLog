@@ -1,3 +1,8 @@
+2007-01-31  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/STCompiler.st: Avoid that #compileAttribute: shadows
+	an instance variable with a temporary.
+
 2007-01-12  Stephen Compall  <scompall@nocandysw.com>
 
 	* compiler/ParseTreeSearcher.st: Use the visit*:onMatch: variants
