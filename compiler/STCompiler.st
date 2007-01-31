@@ -955,7 +955,7 @@ scanTokenFrom: scanner
     ^scanner next!
 
 compileAttribute: scanner
-    | currentToken selectorBuilder selector arguments parser node |
+    | currentToken selectorBuilder selector arguments argParser node |
     currentToken := self scanTokenFrom: scanner.
     (currentToken isBinary and: [currentToken value == #<])
 	ifFalse: [^self compileError:
@@ -969,13 +969,13 @@ compileAttribute: scanner
 	    ifFalse: [^self compileError: 'keyword expected in method attribute'].
 	selectorBuilder nextPutAll: currentToken value.
 
-        parser := RBParser new.
-        parser errorBlock: parser errorBlock.
-        parser scanner: scanner.
-        node := parser parseBinaryMessageNoGreater.
+        argParser := RBParser new.
+        argParser errorBlock: parser errorBlock.
+        argParser scanner: scanner.
+        node := argParser parseBinaryMessageNoGreater.
 	node := RBSequenceNode statements: {node}.
-	arguments nextPut: (self class evaluate: node parser: parser).
-	currentToken := parser currentToken.
+	arguments nextPut: (self class evaluate: node parser: argParser).
+	currentToken := argParser currentToken.
     ].
 
     selector := selectorBuilder contents asSymbol.
