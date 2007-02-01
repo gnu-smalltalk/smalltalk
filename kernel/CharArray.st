@@ -434,21 +434,28 @@ asByteArray
 asInteger
     "Parse an Integer number from the receiver until the input character
      is invalid and answer the result at this point"
-    | result i sign ch |
+    | result i sign ch value |
     self isEmpty ifTrue: [ ^0 ].
 
     ch := self at: 1.
-    ch = $-
-	ifTrue: [
-	    sign := -1. result := 0 ]
+    result := ch codePoint - ##($0 codePoint).
+    (result < 0 or: [ result > 9 ])
+        ifTrue: [
+	    result := 0.
+	    ch = $-
+	    	ifTrue: [
+	            2 to: self size do: [ :i |
+	    	        ch := self at: i.
+	                value := ch codePoint - ##($0 codePoint).
+	                (value < 0 or: [ value > 9 ]) ifTrue: [ ^result ].
+	    	        result := result * 10 - value ] ] ]
 	ifFalse: [
-	    ch isDigit ifFalse: [ ^0 ].
-	    sign := 1. result := ch digitValue ].
+	    2 to: self size do: [ :i |
+	    	ch := self at: i.
+	        value := ch codePoint - ##($0 codePoint).
+	        (value < 0 or: [ value > 9 ]) ifTrue: [ ^result ].
+	    	result := result * 10 + value ] ].
 
-    2 to: self size do: [ :i |
-	ch := self at: i.
-	ch isDigit ifFalse: [ ^result ].
-	result := result * 10 + (ch digitValue * sign) ].
     ^result
 !
 

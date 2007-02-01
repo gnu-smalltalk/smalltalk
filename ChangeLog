@@ -1,3 +1,7 @@
+2007-02-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CharArray.st: Speed up #asInteger by 2x.
+
 2007-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Really fix bug in printing floating point numbers.
