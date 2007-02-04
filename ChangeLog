@@ -1,3 +1,7 @@
+2007-02-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Float.st: Remove debugging statement.
+
 2007-02-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CharArray.st: Speed up #asInteger by 2x.
