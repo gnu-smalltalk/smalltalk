@@ -163,7 +163,6 @@ raisedToInteger: anInteger
                         at: 1 put: mant;
                         yourself).
 
-(mant->exp->val->adjustExp) printNl.
     anInteger < 0 ifTrue: [ val := val reciprocal ].
     adjustExp = 0 ifFalse: [ val := val timesTwoPower: adjustExp ].
     ^val
