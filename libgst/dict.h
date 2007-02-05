@@ -386,6 +386,13 @@ extern OOP _gst_undefined_object_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_unicode_character_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_unicode_string_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_variable_binding_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_weak_array_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_weak_set_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_weak_key_dictionary_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_weak_value_lookup_table_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_weak_identity_set_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_weak_key_identity_dictionary_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_weak_value_identity_dictionary_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_write_stream_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_processor_oop ATTRIBUTE_HIDDEN;
 

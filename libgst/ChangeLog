@@ -1,3 +1,9 @@
+2007-02-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.c: Add variables and declarations for weak objects.
+	* libgst/dict.h: Add variables for weak objects.
+	* libgst/lib.c: Load WeakObjects.st as part of the kernel classes.
+
 2007-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Rename ipowl to mul_powl, support gradual underflow.

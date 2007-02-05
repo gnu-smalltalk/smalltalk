@@ -69,11 +69,10 @@ finalizableObjects
     ^FinalizableObjects!
 
 initialize
-    "Initialize the Dependencies dictionary to be an IdentityDictionary.  In a later
-     phase of the bootstrap process this is changed to be a WeakKeyIdentityDictionary."
+    "Initialize the Dependencies dictionary to be a WeakKeyIdentityDictionary."
 
     self == Object ifFalse: [ ^self ].
-    self dependencies: IdentityDictionary new.
+    self dependencies: WeakKeyIdentityDictionary new.
     ObjectMemory addDependent: self
 ! !
 

@@ -375,11 +375,11 @@ static const char standard_files[] = {
   "FileDescr.st\0"
   "SymLink.st\0"
   "Security.st\0"
+  "WeakObjects.st\0"
   "ObjMemory.st\0"
 
   /* More core classes */
   "Transcript.st\0"
-  "WeakObjects.st\0"
   "RecursionLock.st\0"
   "Point.st\0"
   "Rectangle.st\0"

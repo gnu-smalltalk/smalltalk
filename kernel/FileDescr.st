@@ -33,7 +33,7 @@
 
 ByteStream subclass: #FileDescriptor
 		instanceVariableNames: 'file name isPipe atEnd peek'
-		classVariableNames: ''
+		classVariableNames: 'AllOpenFiles'
 		poolDictionaries: ''
 		category: 'Streams-Files'
 !
@@ -183,8 +183,7 @@ popen: commandName dir: direction
      Else answer a new FileStream.
      The pipe will not be automatically closed upon GC, even if the object
      is not referenced anymore, because when you close a pipe you have to wait
-     for the associated process to terminate. To enforce automatic closing of
-     the pipe, send it #addToBeFinalized.
+     for the associated process to terminate.
      direction is returned by #read or #write ('r' or 'w') and is interpreted
      from the point of view of Smalltalk: reading means Smalltalk reads the
      standard output of the command, writing means Smalltalk writes the standard input of the command. The other channel
@@ -203,8 +202,7 @@ popen: commandName dir: direction ifFail: aBlock
      file cannot be opened. Else answer a new FileStream.
      The pipe will not be automatically closed upon GC, even if the object
      is not referenced anymore, because when you close a pipe you have to wait
-     for the associated process to terminate. To enforce automatic closing of
-     the pipe, send it #addToBeFinalized.
+     for the associated process to terminate.
      direction is interpreted from the point of view of Smalltalk: reading
      means that Smalltalk reads the standard output of the command, writing
      means that Smalltalk writes the standard input of the command"
@@ -232,7 +230,8 @@ write
 
 initialize
     "Initialize the receiver's class variables"
-    ObjectMemory addDependent: self
+    ObjectMemory addDependent: self.
+    AllOpenFiles := WeakIdentitySet with: stdin with: stdout with: stderr
 !
 
 update: aspect
@@ -241,9 +240,7 @@ update: aspect
 	stdin flush. stdout flush. stderr flush
     ].
     aspect == #aboutToQuit ifTrue: [
-        self allSubinstancesDo: [ :each |
-	    each isOpen ifTrue: [ each close ]
-	]
+        AllOpenFiles asArray do: [ :each | each close ]
     ]
 ! !
 
@@ -278,6 +275,7 @@ close
 finalize
     "Close the file if it is still open by the time the object becomes
     garbage."
+    AllOpenFiles remove: self ifAbsent: [].
     file isNil ifFalse: [ self close ].
 !
 
@@ -602,6 +600,14 @@ basicNextPutByte: anInteger
 
 
 !FileDescriptor methodsFor: 'initialize-release'!
+
+addToBeFinalized
+    AllOpenFiles add: self.
+    super addToBeFinalized!
+
+removeToBeFinalized
+    AllOpenFiles remove: self ifAbsent: [].
+    super removeToBeFinalized!
 
 initialize
     "Initialize the receiver's instance variables"

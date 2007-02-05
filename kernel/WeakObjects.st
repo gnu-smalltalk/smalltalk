@@ -569,10 +569,3 @@ findIndex: anObject
     ] repeat
 ! !
 
-| wkid |
-wkid := WeakKeyIdentityDictionary new.
-Object dependencies associationsDo: [ :assoc |
-    wkid add: assoc
-].
-Object dependencies: wkid!
-

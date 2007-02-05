@@ -1,3 +1,15 @@
+2007-02-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FileDescr.st: Use #remove:ifAbsent:.
+
+2007-02-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FileDescr.st: Remove #allSubinstancesDo: on quit, instead
+	register open files in a WeakIdentitySet.
+	* kernel/Object.st: Store dependencies in a WeakKeyIdentityDictionary.
+	* kernel/WeakObjects.st: Don't transform dependencies into a
+	WeakKeyIdentityDictionary here.
+
 2007-02-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Remove debugging statement.

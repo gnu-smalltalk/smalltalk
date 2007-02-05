@@ -169,6 +169,13 @@ OOP _gst_undefined_object_class = NULL;
 OOP _gst_unicode_character_class = NULL;
 OOP _gst_unicode_string_class = NULL;
 OOP _gst_variable_binding_class = NULL;
+OOP _gst_weak_array_class = NULL;
+OOP _gst_weak_set_class = NULL;
+OOP _gst_weak_key_dictionary_class = NULL;
+OOP _gst_weak_value_lookup_table_class = NULL;
+OOP _gst_weak_identity_set_class = NULL;
+OOP _gst_weak_key_identity_dictionary_class = NULL;
+OOP _gst_weak_value_identity_dictionary_class = NULL;
 OOP _gst_write_stream_class = NULL;
 OOP _gst_processor_oop = NULL;
 
@@ -444,6 +451,10 @@ static const class_definition class_info[] = {
    ISP_POINTER, true, 0,
    "Array", NULL, NULL, NULL },
 
+  {&_gst_weak_array_class, &_gst_array_class,
+   ISP_FIXED, false, 2,
+   "WeakArray", "values nilValues", NULL, NULL },
+
   {&_gst_character_array_class, &_gst_arrayed_collection_class,
    ISP_ULONG, false, 0,
    "CharacterArray", NULL, NULL, NULL },
@@ -509,17 +520,41 @@ static const class_definition class_info[] = {
    ISP_POINTER, false, 0,
    "Set", NULL, NULL, NULL },
 
+  {&_gst_weak_set_class, &_gst_set_class,
+   ISP_POINTER, false, 0,
+   "WeakSet", NULL, NULL, NULL },
+
   {&_gst_identity_set_class, &_gst_set_class,
    ISP_POINTER, false, 0,
    "IdentitySet", NULL, NULL, NULL },
+
+  {&_gst_weak_identity_set_class, &_gst_weak_set_class,
+   ISP_POINTER, false, 0,
+   "WeakIdentitySet", NULL, NULL, NULL },
 
   {&_gst_dictionary_class, &_gst_hashed_collection_class,
    ISP_POINTER, true, 0,
    "Dictionary", NULL, NULL, NULL },
 
+  {&_gst_weak_key_dictionary_class, &_gst_dictionary_class,
+   ISP_POINTER, false, 1,
+   "WeakKeyDictionary", "keys", NULL, NULL },
+
+  {&_gst_weak_key_identity_dictionary_class, &_gst_weak_key_dictionary_class,
+   ISP_POINTER, false, 0,
+   "WeakKeyIdentityDictionary", NULL, NULL, NULL },
+
   {&_gst_lookup_table_class, &_gst_dictionary_class,
    ISP_POINTER, false, 0,
    "LookupTable", NULL, NULL, NULL },
+
+  {&_gst_weak_value_lookup_table_class, &_gst_lookup_table_class,
+   ISP_POINTER, false, 1,
+   "WeakValueLookupTable", "values", NULL, NULL },
+
+  {&_gst_weak_value_identity_dictionary_class, &_gst_weak_value_lookup_table_class,
+   ISP_POINTER, false, 0,
+   "WeakValueIdentityDictionary", NULL, NULL, NULL },
 
   {&_gst_identity_dictionary_class, &_gst_lookup_table_class,
    ISP_POINTER, false, 0,
@@ -581,7 +616,7 @@ static const class_definition class_info[] = {
 
   {&_gst_file_descriptor_class, &_gst_byte_stream_class,
    ISP_FIXED, true, 5,
-   "FileDescriptor", "file name isPipe atEnd peek", NULL, NULL },
+   "FileDescriptor", "file name isPipe atEnd peek", "AllOpenFiles", NULL },
 
   {&_gst_file_stream_class, &_gst_file_descriptor_class,
    ISP_FIXED, true, 2,
