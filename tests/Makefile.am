@@ -109,17 +109,15 @@ EXTRA_DIST = run-test
 $(ansi_tests):
 
 regress:
-	SMALLTALK_KERNEL="$(top_srcdir)/kernel/"; \
-	export SMALLTALK_KERNEL; \
+	cd $(srcdir) || exit 1; \
 	for test in $(low_level_tests) $(benchmark_tests); do \
 	  result=`echo $$test | $(SED) 's/st$$/ok/'`; \
-	  $(top_builddir)/gst -I $(top_builddir)/gst.im \
-		-r $$test 2>&1 | tee $$result; \
+	  @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
+	    -r $$test 2>&1 | tee $$result; \
 	done
 
 gst.im: ../kernel/stamp-classes AnsiLoad.st Ansi.st AnsiDB.st
-	cp ../gst.im .
-	builddir=`pwd` && \
+	cp $(top_builddir)/gst.im .
 	cd $(srcdir) && \
-	$$builddir/../gst -QSI $$builddir/gst.im AnsiLoad.st
+	  @abs_top_builddir@/gst -SI @abs_top_builddir@/tests/gst.im AnsiLoad.st
 

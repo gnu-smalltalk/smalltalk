@@ -816,9 +816,6 @@ _gst_init_dictionary (void)
 
   create_classes_pass2 (class_info, sizeof (class_info) / sizeof (class_info[0]));
 
-  add_smalltalk ("KernelFilePath",
-		 _gst_string_new (_gst_kernel_file_path));
-
   init_runtime_objects ();
   _gst_tenure_all_survivors ();
 }
@@ -1024,6 +1021,7 @@ init_smalltalk_dictionary (void)
 
   add_smalltalk ("Smalltalk", _gst_smalltalk_dictionary);
   add_smalltalk ("Version", _gst_string_new (fullVersionString));
+  add_smalltalk ("KernelFilePath", _gst_string_new (_gst_kernel_file_path));
   add_smalltalk ("CObjectType", _gst_c_object_type_ctype);
   add_smalltalk ("KernelInitialized", _gst_false_oop);
   add_smalltalk ("SymbolTable", _gst_symbol_table);
@@ -1061,10 +1059,8 @@ add_smalltalk (const char *globalName,
 void
 init_runtime_objects (void)
 {
-  add_smalltalk ("KernelFileSystemPath", _gst_string_new (KERNEL_PATH));
+  add_smalltalk ("UserFileBasePath", _gst_string_new (_gst_user_file_base_path));
   add_smalltalk ("ModulePath", _gst_string_new (MODULE_PATH));
-  add_smalltalk ("KernelFileLocalPath",
-		 _gst_string_new (_gst_kernel_file_path));
   add_smalltalk ("ImageFilePath",
 		 _gst_string_new (_gst_image_file_path));
   add_smalltalk ("ImageFileName",

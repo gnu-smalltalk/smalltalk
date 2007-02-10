@@ -139,6 +139,11 @@ version
 
 !SystemDictionary methodsFor: 'testing'!
 
+imageLocal
+    "Answer whether the kernel directory is a subdirectory of the image
+     directory (non-local image) or not."
+    ^(File pathFor: Directory kernel) ~= Directory image!
+
 isSmalltalk
     ^true
 ! !

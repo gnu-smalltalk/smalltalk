@@ -1,3 +1,21 @@
+2007-02-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.c: Remove KernelFileLocalPath.  Don't touch
+	KernelFilePath on reload.  Export KernelFileUserPath.
+	* libgst/lib.c: Add --image-directory and --kernel-directory.
+	Add a struct loaded_file used to store files given on
+	the command line.  Find path of user init/user pre/site
+	pre files in init_paths, delete load_user_init_file and
+	load_user_pre_image_file.  Call init_paths after parse_args.
+	Rewrite find_kernel_file, place kernel override files
+	in ~/.st too (if one needs per-image overrides they can
+	use --kernel-directory).  Remove some variables that are
+	now unused.  Simplify ok_to_load_binary as the new semantics
+	remove the need for some checks.  Export the path to ~/.st in
+	_gst_user_file_base_path.
+	* libgst/lib.h: Export _gst_user_file_base_path.
+	* libgst/sysdep.c: Canonicalize path in _gst_get_full_file_name.
+
 2007-02-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Add variables and declarations for weak objects.

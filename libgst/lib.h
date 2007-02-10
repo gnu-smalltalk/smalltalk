@@ -62,6 +62,10 @@ extern const char *_gst_kernel_file_path
 extern const char *_gst_image_file_path 
   ATTRIBUTE_HIDDEN;
 
+/* The ".st" directory, in the current directory or in the user's
+   home directory.  */
+extern const char *_gst_user_file_base_path;
+
 /* This is the name of the binary image to load.  If it is not NULL after the
    command line is parsed, the checking of the dates of the kernel source files
    against the image file date is overridden.  If it is NULL, it is set to

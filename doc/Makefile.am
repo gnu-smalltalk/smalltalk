@@ -41,42 +41,26 @@ PUBLISHED_NAMESPACES = Smalltalk SystemExceptions NetClients VFS
 
 $(srcdir)/blox.texi: $(top_srcdir)/blox-tk/stamp-classes
 	rm -f $(srcdir)/blox.texi
-	builddir=`pwd`; gst=$$builddir/../gst; gst_im=$$builddir/../gst.im; \
-	cd $(srcdir) && \
-	  $$gst -I $$gst_im -f ../scripts/GenLibDoc.st \
-	    BLOX BloxTK blox.texi Blox.st
+	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
+	    -f ../scripts/GenLibDoc.st BLOX BloxTK blox.texi Blox.st
 	test -f $(srcdir)/blox.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/tcp.texi: $(top_srcdir)/tcp/stamp-classes
 	rm -f $(srcdir)/tcp.texi
-	builddir=`pwd`; gst=$$builddir/../gst; gst_im=$$builddir/../gst.im; \
-	cd $(srcdir) && \
-	  $$gst -I $$gst_im -f ../scripts/GenLibDoc.st \
-	    TCP TCP tcp.texi TCP.st
+	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
+	    -f ../scripts/GenLibDoc.st TCP TCP tcp.texi TCP.st
 	test -f $(srcdir)/tcp.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/i18n.texi: $(top_srcdir)/i18n/stamp-classes
 	rm -f $(srcdir)/i18n.texi
-	builddir=`pwd`; gst=$$builddir/../gst; gst_im=$$builddir/../gst.im; \
-	cd $(srcdir) && \
-	  $$gst -I $$gst_im -f ../scripts/GenLibDoc.st \
-	    I18N I18N i18n.texi Load.st Collation.st
+	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
+	    -f ../scripts/GenLibDoc.st I18N I18N i18n.texi Load.st Collation.st
 	test -f $(srcdir)/i18n.texi && touch $(srcdir)/gst-libs.texi 
-
-$(srcdir)/regex.texi: $(top_srcdir)/examples/regex.st
-	rm -f $(srcdir)/regex.texi
-	builddir=`pwd`; gst=$$builddir/../gst; gst_im=$$builddir/../gst.im; \
-	cd $(srcdir) && \
-	  $$gst -I $$gst_im -f ../scripts/GenLibDoc.st \
-	    Regex Regex regex.texi
-	test -f $(srcdir)/regex.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/classes.texi: $(top_srcdir)/kernel/stamp-classes
 	rm -f $(srcdir)/classes.texi
-	builddir=`pwd`; gst=$$builddir/../gst; gst_im=$$builddir/../gst.im; \
-	cd $(srcdir) && \
-	  $$gst -I $$gst_im -f ../scripts/GenBaseDoc.st \
-	  $(PUBLISHED_NAMESPACES)
+	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
+	    -f ../scripts/GenBaseDoc.st $(PUBLISHED_NAMESPACES)
 	test -f $(srcdir)/classes.texi && touch $(srcdir)/gst-base.texi
 
 # In TeX output, having colons in index entries looks pretty, but

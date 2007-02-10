@@ -67,8 +67,11 @@ func_install ()
   set +e
 }
 
-IMAGE_PATH=${SMALLTALK_IMAGE:-@datadir@/@PACKAGE@}
-(cd $IMAGE_PATH 2> /dev/null && IMAGE_PATH=`pwd`)
+if test -n "$SMALLTALK_IMAGE" && test -d "$SMALLTALK_IMAGE"; then
+  IMAGE_PATH=$SMALLTALK_IMAGE
+else
+  IMAGE_PATH="@datadir@/@PACKAGE@"
+fi
 
 request_help=false
 request_version=false
@@ -107,6 +110,20 @@ while [ -n "$1" ]; do
 	--di | --dis | \
 	--dist)		 load=false; dist=:	  	   ;;
 
+        --i | --im | --ima | --imag | --image | --image- | \
+        --image-d | --image-di | --image-dir | --image-dire | \
+	--image-direc | --image-direct | --image-directo | \
+	--image-director | --image-directory)  
+			 shift; IMAGE_PATH="$1"
+			 test -d "$1" || echo Invalid image directory ;;
+
+        --i=* | --im=* | --ima=* | --imag=* | --image=* | --image-=* | \
+        --image-d=* | --image-di=* | --image-dir=* | --image-dire=* | \
+	--image-direc=* | --image-direct=* | --image-directo=* | \
+	--image-director=* | --image-directory=*)  
+			 IMAGE_PATH="`echo $1 | sed s/.*=//`"
+			 test -d "$1" || echo Invalid image directory ;;
+
 	--l=* | --li=* | --lis=* | --list=* | --list-=* | \
 	--list-f=* | --list-fi=* | --list-fil=* | --list-file=* | \
 	--list-files=*)	 list_files="$list_files `echo $1 | sed s/.*=//`"
@@ -122,9 +139,11 @@ while [ -n "$1" ]; do
 	--s=* | --sr=* | --src=* | --srcd=* | --srcdi=* | \
 	--srcdir=*)	 srcdir="`echo $1 | sed s/.*=//`"  ;;
 
+	--distd | --distdi | --distdir | \
 	--de | --des | --dest | --destd | --destdi | \
 	--destdir)	 shift; DESTDIR="$1"		   ;;
 
+	--distd=* | --distdi=* | --distdir=* | \
 	--de=* | --des=* | --dest=* | --destd=* | --destdi=* | \
 	--destdir=*)	 DESTDIR="`echo $1 | sed s/.*=//`" ;;
 
@@ -138,23 +157,26 @@ while [ -n "$1" ]; do
   shift
 done
 
+(cd $IMAGE_PATH 2> /dev/null && IMAGE_PATH=`pwd`)
+
 # Do --help and --version.
 
 if [ -z "$files" ] || $request_help || $options_error; then
   cat <<EOF
 Syntax: gst-package [OPTION]... FILES...
 
-    -n, --dry-run         print commands rather than running them
-	--no-load         don't load the Smalltalk files in the image
-        --no-install      don't copy the files
-        --uninstall       remove the packages mentioned in the FILES
-        --dist            create symbolic links of non-built files
-        --list-files PKG  just output the list of files in the package
-	--srcdir DIR      look for non-built files in directory DIR
-	--destdir DIR	  prefix the destination directory with DIR
+    -n, --dry-run               print commands rather than running them
+	--no-load               don't load the Smalltalk files in the image
+        --no-install            don't copy the files
+        --uninstall             remove the packages mentioned in the FILES
+        --dist                  create symbolic links of non-built files
+        --list-files PKG        just output the list of files in the package
+	--srcdir DIR            look for non-built files in directory DIR
+	--destdir DIR	        prefix the destination directory with DIR
+        --image-directory DIR   set the image directory to DIR
 
-	--help            display this message and exit
-	--version         print version information and exit
+	--help                  display this message and exit
+	--version               print version information and exit
 
 Except in uninstall and list files mode, gst-package requires write
 access to the \`packages.xml' file in the GNU Smalltalk image directory,
@@ -223,7 +245,7 @@ fi
 if $dist; then
   :
 else
-  base="$DESTDIR$IMAGE_PATH/packages.xml"
+  base="$DESTDIR/packages.xml"
   if test -f $base; then
     merged_files="$base"
     for file in $files; do
@@ -238,7 +260,7 @@ else
     sed -e '$i\
 </packages>' -e '/<.packages>/,/<packages>/d' $merged_files > packages.tmp
 
-    mv packages.tmp $DESTDIR$IMAGE_PATH/packages.xml
+    mv packages.tmp $DESTDIR/packages.xml
   }
 fi
 
@@ -287,7 +309,7 @@ if $install; then
 	   dest=$DESTDIR$file
 	   orig_file=$file ;;
 	  *)
-	   dest="$DESTDIR$IMAGE_PATH/$dir/$file"
+	   dest="$DESTDIR/$dir/$file"
 	   file=$dir/$file
 	   orig_file=$file
 	   test -f "$file" || file=$wd/$file ;;

@@ -127,9 +127,8 @@ gsticon.o: gsticon.ico
 	echo ProgramIcon ICON `cygpath -w gsticon.ico` | windres -o gsticon.o
 
 gst.im: $(bin_PROGRAMS) $(srcdir)/kernel/stamp-classes
-	SMALLTALK_KERNEL="`cd $(srcdir)/kernel; pwd`" \
-	SMALLTALK_IMAGE="`pwd`" \
-	  ./gst -iQ /dev/null
+	./gst --no-user-files --kernel-dir="@abs_top_srcdir@/kernel" \
+	  --image-dir="@abs_top_builddir@" -iQ /dev/null
 
 all-local:
 
@@ -167,21 +166,21 @@ dist-hook: gst-package
 	  -e "s/@\(NCURSES_DISABLED\)@/disabled-/" \
 	  -e "s/@\(VERSION\)@/@VERSION@/" \
 	  $(srcdir)/packages.xml.in > $(distdir)/packages.xml
-	SMALLTALK_IMAGE=$(distdir) \
-	  ./gst-package --srcdir="$(srcdir)" --dist $(distdir)/packages.xml
+	./gst-package --distdir=$(distdir) --srcdir="$(srcdir)" \
+	  --dist $(distdir)/packages.xml
 
 # Build an image after installing the data; install-data runs after
 # install-exec, so the gst executable is already in bindir.
 install-data-hook: gst-package
 	rm -f $(DESTDIR)$(pkgdatadir)/packages.xml
-	./gst-package --srcdir="$(srcdir)" --no-load --destdir="$(DESTDIR)" packages.xml
+	./gst-package --srcdir="$(srcdir)" --no-load --destdir="$(DESTDIR)" \
+	  packages.xml
 	srcdir=`cd $(srcdir) && pwd`; \
 	cd $(DESTDIR)$(pkgdatadir); \
 	rm -f gst.im; \
-	SMALLTALK_KERNEL="`pwd`/kernel" \
-	SMALLTALK_IMAGE="`pwd`" \
-	  $(DESTDIR)$(bindir)/gst -f $$srcdir/scripts/Finish.st \
-	    "$(DESTDIR)$(pkgdatadir)" "$(pkgdatadir)" $(MODULES)
+	  $(DESTDIR)$(bindir)/gst --no-user-files -i \
+	    --kernel-dir=kernel --image-dir=. \
+	    -f $$srcdir/scripts/Finish.st "$(pkgdatadir)" $(MODULES)
 
 uninstall-local:: gst-package
 	./gst-package --uninstall --destdir="$(DESTDIR)" packages.xml

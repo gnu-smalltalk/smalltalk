@@ -1,41 +1,24 @@
-* 2.2
+* 2.4
 
-** use intptr_t instead of long for SmallIntegers.  In general,
-use stdint.h/inttypes.h way more widely (with an automatically
-generated one, perusing Autoconf). (done)
+** implement SmallScript file-in?
 
-** use libffi to fix bugs in C call-outs (done)
+** use VFS to (re)implement packages?
 
-** remove logging and -s (done)
+** faster startup (done)
 
-** new bytecode set! (done)
+** restructure init/pre/kernel files (done)
 
-** shared library (done)
-
-** fix bitrot in JITter (done)
-
-** some kind of sandboxing (partly done)
-
-** Java support (partly done)
-
-** fix debugging of JITted code (boring)
-
-** deprecate SMALLTALK_IMAGE and SMALLTALK_KERNEL in favor of
-two new options, --image-directory and --kernel-directory
-(harder than it looks)
 
 * sometime
+
+** some kind of sandboxing (partly done)
 
 ** add check in/check out to the browser so that .st files remain
 in sync.  Maybe with CVS support (see Smalltalk/X).
 
 ** cute BlockClosure implementations
 
-** implement SmallScript file-in?
-
 ** port more software (Ref. Browser?)
-
-** use VFS to (re)implement packages?
 
 
 ----------------------------------------------------------------------

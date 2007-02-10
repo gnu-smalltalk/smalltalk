@@ -217,19 +217,18 @@ baseDirs: baseDirs
      directories 2 and 3 are searched.  For a packages.xml directory in
      the local image directory, instead, only directory 3 is searched."
 
-    | found |
     files := self findBaseDirs: baseDirs for: self files.
     fileIns := self findBaseDirs: baseDirs for: self fileIns.
     builtFiles := self findBaseDirs: baseDirs for: self builtFiles.
 
-    found := nil.
+    files isNil | fileIns isNil | builtFiles isNil ifTrue: [ ^false ].
+
     baseDirs
 	do: [ :dir || name |
             name := Directory append: self directory to: dir.
-            (Directory exists: name) ifTrue: [ found := name ] ].
-    directory := found.
+            (Directory exists: name) ifTrue: [ directory := name. ^true ] ].
 
-    ^files notNil & fileIns notNil & builtFiles notNil & directory notNil
+    ^false
 !
 
 findBaseDirs: baseDirs for: aCollection
@@ -384,15 +383,15 @@ flush
 
 refreshDependencies
     "Reload the `packages.xml' file in the image and kernel directories.
-     The three possible places are 1) the system kernel directory's parent
-     directory, 2) the local kernel directory's parent directory, 3) the
+     The three possible places are 1) the kernel directory's parent
+     directory, 2) the `.st' subdirectory of the user's home directory, 3) the
      local image directory (in order of decreasing priority).
 
-     For a packages.xml found in the system kernel directory's parent
+     For a packages.xml found in the kernel directory's parent
      directory, all three directories are searched.  For a packages.xml
-     found in the local kernel directory's parent directory, only
-     directories 2 and 3 are searched.  For a packages.xml directory in
-     the local image directory, instead, only directory 3 is searched."
+     found in the `.st' subdirectory, only directories 2 and 3 are
+     searched.  For a packages.xml directory in the local image directory,
+     finally, only directory 3 is searched."
     | state |
     LoadDate isNil ifFalse: [
 	self stillValid ifTrue: [ ^self ]
@@ -401,16 +400,14 @@ refreshDependencies
     LoadDate := Date dateAndTimeNow.
     Packages := LookupTable new.
     self
-	processPackageFile: self systemPackageFileName
-	baseDirectories: {
-	    Directory systemKernel, '/..'. Directory kernel, '/..'.
-	    Directory image }.
-    self
 	processPackageFile: self packageFileName
-	baseDirectories: { Directory kernel, '/..'. Directory image }.
+	baseDirectories: { Directory userBase.  Directory kernel, '/..' }.
+    self
+	processPackageFile: self userPackageFileName
+	baseDirectories: { Directory userBase }.
     self
 	processPackageFile: self localPackageFileName
-	baseDirectories: { Directory image }.
+	baseDirectories: #().
 ! !
 
 
@@ -507,12 +504,12 @@ isLoadable: feature
 
 !PackageLoader class methodsFor: 'private - packages file'!
 
-systemPackageFileName
-    ^Directory systemKernel, '/../packages.xml'
-!
-
 packageFileName
     ^Directory kernel, '/../packages.xml'
+!
+
+userPackageFileName
+    ^Directory userBase, '/packages.xml'
 !
 
 localPackageFileName
@@ -545,11 +542,16 @@ rebuildPackageFile
     ] ensure: [ file close ]
 !
 
-processPackageFile: fileName baseDirectories: baseDirs
+processPackageFile: fileName baseDirectories: anArray
     "Private - Process the XML source in the packages file, creating
      Package objects along the way."
 
-    | cdata file stack ch tag package |
+    | cdata file stack ch tag package baseDirs |
+    baseDirs := Smalltalk imageLocal
+	ifTrue: [ { Directory image }, anArray ]
+	ifFalse: [ anArray ].
+    baseDirs isEmpty ifTrue: [ ^self ].
+
     file := [ FileStream open: fileName mode: FileStream read ]
 	on: Error
 	do: [ :ex | ex return: nil ].
@@ -603,7 +605,7 @@ processPackageFile: fileName baseDirectories: baseDirs
 !
 
 stillValid
-    ^{ self packageFileName. self localPackageFileName. self systemPackageFileName } 
+    ^{ self packageFileName. self userPackageFileName. self localPackageFileName } 
 	allSatisfy: [ :name || file |
 	    file := File name: name.
 	    file exists not or: [ file lastModifyTime < LoadDate ]

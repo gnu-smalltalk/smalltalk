@@ -773,17 +773,19 @@ updateMember: anArchiveMemberHandler
 
 fileSystems
     "Answer the virtual file systems that can be processed by this subclass.
-     These are given by the names of the executable files in the vfs
+     These are given by the names of the executable files in the `vfs'
      subdirectory of the image directory, of the parent of the kernel
-     directory and of the parent of the system kernel directory."
+     directory and (if the image is not the global installed image)
+     of the `.st' directory in the home directory."
     ActivePaths := WeakValueLookupTable new. 
     FileTypes := LookupTable new. 
     [ self fileSystemsIn: Directory kernel, '/../vfs' ]
 	on: Error do: [ :ex | ex return ].
-    [ self fileSystemsIn: Directory image, '/vfs' ]
+    [ self fileSystemsIn: Directory userBase, '/vfs' ]
 	on: Error do: [ :ex | ex return ].
-    [ self fileSystemsIn: Directory systemKernel, '/../vfs' ]
-	on: Error do: [ :ex | ex return ].
+    Smalltalk imageLocal ifTrue: [
+        [ self fileSystemsIn: Directory image, '/vfs' ]
+	    on: Error do: [ :ex | ex return ] ].
 	
     ^FileTypes keys asSet!
 

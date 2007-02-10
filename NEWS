@@ -2,17 +2,35 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 2.3.2 TO 2.4
 
-o   Startup time and quit time were improved widely (the time for running
-    a simple "Hello, World" program is about one fifth of 2.3.x).
+o   A different startup sequence is used which improves the possibility to
+    customize GNU Smalltalk, both site-wide and per-user.  The details are
+    in the manual, the main changes are these: the `.stinit' and `.stpre'
+    files are now named `.st/init.st' and `.st/pre.st'; files requested
+    with the `-K' command-line option are sought for in the `.st' directory
+    too (in the home directory); kernel files may be overridden by placing
+    them in `.st/kernel'; a site-wide customization file can be placed
+    in `/usr/local/share/smalltalk/site-pre.st'.
+
+    The kernel path is stored in the image and not changed when the image
+    is loaded.  In addition, `Directory systemKernel' and `Directory
+    localKernel' are not used anymore, and just return the same as
+    `Directory kernel'.
+
+    Finally, Smalltalk programs have access to the aforementioned `.st'
+    directory as `Directory userKernel' (name subject to change).  A
+    `packages.xml' file can be put there.
 
 o   Directory entries are passed to #allFilesMatching:do:'s block argument
     if they match aPattern.  As before, the function descends in all the
     directories, even those that do not match aPattern.
 
-o   The image is loaded using copy-on-write memory mapped files.  This means
-    that as long as a loaded object is not touched, the operating system
-    will map it to the same physical memory, for different copies of
-    the GNU Smalltalk virtual machine that loaded the same image.
+o   Image load uses copy-on-write memory mapped files.  This means that, as
+    long as a loaded object is not touched, the operating system will map
+    it to the same physical memory, for different copies of the GNU Smalltalk
+    virtual machine that loaded the same image.
+
+o   Startup time and quit time were improved widely (the time for running
+    a simple "Hello, World" program is about one fifth of 2.3.x).
 
 -----------------------------------------------------------------------------
 

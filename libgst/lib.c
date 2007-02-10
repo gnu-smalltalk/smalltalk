@@ -65,13 +65,15 @@
 /* #define DEBUG_GETOPT */
 
 #ifdef MSDOS
-#define INIT_FILE_NAME		"_stinit"
-#define PRE_IMAGE_FILE_NAME	"_stpre"
+#define LOCAL_BASE_DIR_NAME		"_st"
 #else
-#define INIT_FILE_NAME		".stinit"
-#define PRE_IMAGE_FILE_NAME	".stpre"
+#define LOCAL_BASE_DIR_NAME		".st"
 #endif
 
+#define USER_INIT_FILE_NAME		"init.st"
+#define USER_PRE_IMAGE_FILE_NAME	"pre.st"
+#define LOCAL_KERNEL_DIR_NAME		"kernel"
+#define SITE_PRE_IMAGE_FILE_NAME	"site-pre.st"
 
 
 
@@ -127,8 +129,12 @@ static const char copyright_and_legal_stuff_text[] =
   "\nUsing default kernel path: %s" "\nUsing default image path: %s"
   "\n";
 
+#define OPT_KERNEL_DIR 2
+#define OPT_IMAGE_DIR 3
+#define OPT_NO_USER 4
+
 static const struct option long_options[] = {
-  {"smalltalk", 0, 0, 'a'},
+  {"smalltalk-args", 0, 0, 'a'},
   {"core-dump", 0, 0, 'c'},
   {"declaration-trace-user", 0, 0, 'd'},
   {"declaration-trace-all", 0, 0, 'D'},
@@ -137,6 +143,9 @@ static const struct option long_options[] = {
   {"execution-trace-all", 0, 0, 'E'},
 #endif
   {"file", 0, 0, 'f'},
+  {"kernel-directory", 1, 0, OPT_KERNEL_DIR},
+  {"image-directory", 1, 0, OPT_IMAGE_DIR},
+  {"no-user-files", 0, 0, OPT_NO_USER},
   {"no-gc-message", 0, 0, 'g'},
   {"help", 0, 0, 'H'},
   {"rebuild-image", 0, 0, 'i'},
@@ -152,6 +161,20 @@ static const struct option long_options[] = {
   {"verbose", 0, 0, 'V'},
   {NULL, 0, 0, 0}
 };
+
+struct loaded_file {
+  mst_Boolean kernel_path;
+  const char *file_name;
+};
+
+enum user_dir {
+  NO_USER_DIR,
+  KERNEL_USER_DIR,
+  BASE_USER_DIR
+};
+
+static struct loaded_file *loaded_files;
+int n_loaded_files;
 
 
 /* When true, this flag suppresses the printing of execution-related
@@ -164,6 +187,13 @@ int _gst_verbosity = 2;
    environment variables) for the kernel files and the image.  */
 const char *_gst_kernel_file_path = NULL;
 const char *_gst_image_file_path = NULL;
+
+/* The ".st" directory, in the current directory or in the user's
+   home directory.  */
+const char *_gst_user_file_base_path;
+
+/* Whether to look for user files.  */
+static mst_Boolean no_user_files;
 
 /* This is the name of the binary image to load.  If it is not NULL after the
    command line is parsed, the checking of the dates of the kernel source files
@@ -217,27 +247,19 @@ static void process_stdin ();
    kernel file is found.  */
 static mst_Boolean ok_to_load_binary (void);
 
-/* Attempts to find a viable kernel Smalltalk file (.st file).  First
-   tries the current directory to allow for overriding installed kernel
-   files.  If that isn't found, the full path name of the installed kernel
-   file is stored in fullFileName.  Note that the directory part of the
-   kernel file name in this second case can be overridden by defining the
-   SMALLTALK_KERNEL environment variable to be the directory that should
-   serve as the kernel directory instead of the installed one.
-
+/* Attempts to find a viable Smalltalk file for user-level customization.
    FILENAME is a simple file name, sans directory; the file name to use 
-   for the particular kernel file is returned in the FULLFILENAME variable
-   in this variable (which must be a string large enough for any file name).
-   If there is a file in the current directory with name FILENAME, that is
-   returned; otherwise the kernel path is prepended to FILENAME (separated
-   by a slash, of course) and that is stored in the string pointed to by
-   FULLFILENAME.
+   for the particular file is returned, or NULL if it is not found.  */
+static char *find_user_file (const char *fileName);
 
-   Returns true if the kernel file is found in the local directory,
-   and false if the file was found using the default path.
- */
-static mst_Boolean find_kernel_file (const char *fileName,
-				     char *fullFileName);
+/* Attempts to find a viable kernel Smalltalk file (.st file).
+   FILENAME is a simple file name, sans directory; the file name to use 
+   for the particular kernel file is returned.
+   If there is a file in the .stkernel directory with name FILENAME, that is
+   returned; otherwise the kernel path is prepended to FILENAME (separated
+   by a slash, of course) and that is stored in the string that is returned.  */
+static char *find_kernel_file (const char *fileName, const char *systemPrefix,
+			       enum user_dir userDir);
 
 /* Loads the kernel Smalltalk files.  It uses a vector of file names,
    and loads each file individually.  To provide for greater
@@ -258,24 +280,16 @@ static void init_paths (void);
 static int parse_args (int argc,
 		       const char **argv);
 
-/* These functions load the per-user customization files, respectively
-   .stinit (loaded at every startup) and .stpre (loaded before a local
+/* Path names for the per-user customization files, respectively
+   init.st (loaded at every startup) and pre.st (loaded before a local
    image is saved.  */
-static void load_user_init_file (void);
-static void load_user_pre_image_file (void);
+static const char *user_init_file;
+static const char *user_pre_image_file;
+static const char *site_pre_image_file;
 
 /* Set by command line flag.  When true, Smalltalk saves a snapshot after
    loading the files on the command line, before exiting.  */
 static mst_Boolean snapshot_after_load = false;
-
-/* Whether SMALLTALK_IMAGE is set (only if it is set, .stpre is loaded) */
-static mst_Boolean is_local_image;
-
-/* Usually the same as _gst_image_file_path.  */
-static char *default_image_path;
-
-/* The default_image_path followed by /gst.im */
-static char *default_image_name;
 
 /* If true, skip date checking of kernel files vs. binary image; pretend
    that binary image does not exist.  */
@@ -443,20 +457,19 @@ gst_init_smalltalk (void)
   mst_Boolean loadBinary, abortOnFailure;
   mst_Boolean traceUserDeclarations, traceUserExecution;
   int result;
-  char *p;
 
   /* Even though we're nowhere near through initialization, we set this
      to make sure we don't invoke a callin function which would recursively
      invoke us.  */
   _gst_smalltalk_initialized = true;
 
-  init_paths ();
   _gst_init_snprintfv ();
 
   result = parse_args (smalltalk_argc, smalltalk_argv);
   if (result)
     return result;
 
+  init_paths ();
   _gst_init_sysdep ();
   _gst_init_signals ();
   _gst_init_cfuncs ();
@@ -479,37 +492,27 @@ gst_init_smalltalk (void)
     loadBinary = abortOnFailure = true;
   else
     {
-      _gst_binary_image_name = default_image_name;
+      char *default_image_file_name;
+      asprintf (&default_image_file_name, "%s/gst.im", _gst_image_file_path);
+
+      _gst_binary_image_name = default_image_file_name;
       loadBinary = !ignore_image && ok_to_load_binary();
       abortOnFailure = false;
 
       /* If we must create a new non-local image, but the directory is
          not writeable, we must resort to the current directory.  In
-         practice this is what is used when working in the build directory.  */
+         practice this is what happens when a "normal user" puts stuff in
+	 his ".st" directory or does "gst -i".  */
 
       if (!loadBinary
-          && !is_local_image
           && !_gst_file_is_writeable (_gst_image_file_path))
         {
-          is_local_image = true;
-          xfree (default_image_path);
-          _gst_image_file_path = default_image_path = _gst_get_cur_dir_name ();
+          _gst_image_file_path = _gst_get_cur_dir_name ();
           _gst_binary_image_name = "gst.im";
           loadBinary = !ignore_image && ok_to_load_binary();
+	  xfree (default_image_file_name);
         }
     }
-
-  /* Compute the actual path of the image file */
-  _gst_image_file_path = p =
-    _gst_get_full_file_name (_gst_binary_image_name);
-  
-  p += strlen (_gst_image_file_path);
-#if defined(MSDOS) || defined(WIN32) || defined(__OS2__)
-  while (*--p != '/' && *p != '\\');
-#else
-  while (*--p != '/');
-#endif
-  *p = 0;
 
   if (loadBinary && _gst_load_from_file (_gst_binary_image_name))
     {
@@ -538,12 +541,6 @@ gst_init_smalltalk (void)
       _gst_install_initial_methods ();
 
       result = load_standard_files ();
-      if (!result)
-	{
-          if (is_local_image)
-	    load_user_pre_image_file ();
-	}
-
       _gst_regression_testing = willRegressTest;
       if (result)
 	return result;
@@ -554,7 +551,8 @@ gst_init_smalltalk (void)
 
   _gst_kernel_initialized = true;
   _gst_invoke_hook ("returnFromSnapshot");
-  load_user_init_file ();
+  if (user_init_file)
+    process_file (user_init_file);
 
   _gst_declare_tracing = traceUserDeclarations;
   _gst_execution_tracing = traceUserExecution;
@@ -569,27 +567,39 @@ gst_init_smalltalk (void)
 void
 gst_top_level_loop (void)
 {
-  int filesProcessed;
-
-  for (filesProcessed = 0; *++smalltalk_argv;)
+  struct loaded_file *file;
+  for (file = loaded_files; file < &loaded_files[n_loaded_files]; file++)
     {
-      if (smalltalk_argv[0][0] == '-')
-        /* - by itself indicates standard input */
+      char *f;
+      if (file->kernel_path)
+	{
+	  f = find_kernel_file (file->file_name, "../", BASE_USER_DIR);
+	  if (!f)
+	    {
+	      _gst_errorf ("Couldn't open kernel file %s", file->file_name);
+	      continue;
+	    }
+	}
+      else
+	f = xstrdup (file->file_name);
+
+      /* - by itself indicates standard input */
+      if (!strcmp (f, "-"))
         process_stdin ();
       else
 	{
-	  _gst_use_undeclared++;
-	  if (!process_file (smalltalk_argv[0]))
-	    _gst_errorf ("Couldn't open file %s", smalltalk_argv[0]);
-
-	  _gst_use_undeclared--;
+	  if (!process_file (f))
+	    _gst_errorf ("Couldn't open file %s", f);
 	}
-      filesProcessed++;
+
+      xfree (f);
     }
 
-  if (filesProcessed == 0)
+  if (n_loaded_files == 0)
     process_stdin ();
 
+  xfree (loaded_files);
+  n_loaded_files = 0;
   if (snapshot_after_load)
     _gst_save_to_file (_gst_binary_image_name);
 
@@ -602,43 +612,92 @@ void
 init_paths (void)
 {
   char *currentDirectory = _gst_get_cur_dir_name ();
-  const char *kernel_path, *image_path;
 
-  kernel_path = (char *) getenv ("SMALLTALK_KERNEL");
-  image_path = (char *) getenv ("SMALLTALK_IMAGE");
-  is_local_image = true;
+  const char *home = getenv ("HOME");
 
-  if (!kernel_path
-      || !_gst_file_is_readable (kernel_path))
+  /* By default, apply this kludge fpr OSes such as Windows and MS-DOS
+     which have no concept of home directories.  */
+  if (home == NULL)
+    home = xstrdup (currentDirectory);
+
+  asprintf ((char **) &_gst_user_file_base_path, "%s/%s", home, LOCAL_BASE_DIR_NAME);
+
+  if (_gst_binary_image_name)
     {
-      char *kernel_file_path;
-      asprintf (&kernel_file_path, "%s/kernel",
-	        currentDirectory);
+      /* Compute the actual path of the image file */
+      const char *p = _gst_binary_image_name + strlen (_gst_binary_image_name);
+      for (;;)
+	if (*--p == '/'
+#if defined(MSDOS) || defined(WIN32) || defined(__OS2__)
+	    || *p == '\\'
+#endif
+	   )
+	  {
+	    char *dirname;
+	    int n = p > _gst_binary_image_name ? p - _gst_binary_image_name : 1;
+	    dirname = xmalloc (n + 1);
+	    strncpy (dirname, _gst_binary_image_name, n);
+	    _gst_image_file_path = dirname;
+	    break;
+	  }
 
-      _gst_kernel_file_path = kernel_file_path;
+	else if (p == _gst_binary_image_name)
+	  {
+	    _gst_image_file_path = ".";
+	    break;
+	  }
     }
+
+  /* These might go away in the next release.  */
+  if (!_gst_kernel_file_path)
+    {
+      _gst_kernel_file_path = getenv ("SMALLTALK_KERNEL");
+      if (_gst_kernel_file_path)
+	_gst_warningf ("SMALLTALK_KERNEL variable deprecated, "
+		       "use --kernel-directory instead");
+      if (!_gst_file_is_readable (_gst_kernel_file_path))
+	_gst_kernel_file_path = NULL;
+    }
+
+  if (!_gst_image_file_path)
+    {
+      _gst_image_file_path = getenv ("SMALLTALK_IMAGE");
+      if (_gst_image_file_path)
+	_gst_warningf ("SMALLTALK_IMAGE variable deprecated, "
+		       "use --image-directory instead");
+      if (!_gst_file_is_readable (_gst_image_file_path))
+	_gst_image_file_path = NULL;
+    }
+
+  if (_gst_image_file_path)
+    _gst_image_file_path = _gst_get_full_file_name (_gst_image_file_path);
+  else if (_gst_file_is_readable (IMAGE_PATH))
+    _gst_image_file_path = IMAGE_PATH;
   else
-    _gst_kernel_file_path = xstrdup (kernel_path);
+    _gst_image_file_path = xstrdup (currentDirectory);
 
-  if (!image_path
-      || !_gst_file_is_readable (image_path))
+  if (_gst_kernel_file_path)
+    _gst_kernel_file_path = _gst_get_full_file_name (_gst_kernel_file_path);
+  else if (_gst_file_is_readable (KERNEL_PATH))
+    _gst_kernel_file_path = KERNEL_PATH;
+  else
     {
-      image_path = IMAGE_PATH;
-
-      if (_gst_file_is_readable (image_path))
-	/* Found in the standard image path.  Apply this kludge so
-	   that OSes such as Windows and MS-DOS which have no concept 
-	   of home directories always load the .stpre file.  */
-	is_local_image = (((char *) getenv ("HOME")) == NULL);
-      else
-	image_path = currentDirectory;
+      char *default_kernel_file_path;
+      asprintf (&default_kernel_file_path, "%s/kernel", _gst_image_file_path);
+      _gst_kernel_file_path = default_kernel_file_path;
     }
 
-  asprintf (&default_image_name, "%s/gst.im",
-	    image_path);
-
-  _gst_image_file_path = default_image_path = xstrdup (image_path);
   xfree (currentDirectory);
+
+  site_pre_image_file = find_kernel_file (SITE_PRE_IMAGE_FILE_NAME, "../",
+					  NO_USER_DIR);
+
+  user_pre_image_file = find_user_file (USER_PRE_IMAGE_FILE_NAME);
+
+  if (!_gst_regression_testing)
+    user_init_file = find_user_file (USER_INIT_FILE_NAME);
+  else
+    user_init_file = NULL;
 }
 
 mst_Boolean
@@ -646,7 +705,6 @@ ok_to_load_binary (void)
 {
   time_t imageFileTime;
   const char *fileName;
-  char fullFileName[MAXPATHLEN], *home, preImageFileName[MAXPATHLEN];
 
   imageFileTime = _gst_get_file_modify_time (_gst_binary_image_name);
 
@@ -655,28 +713,20 @@ ok_to_load_binary (void)
 
   for (fileName = standard_files; *fileName; fileName += strlen (fileName) + 1)
     {
-      if (find_kernel_file (fileName, fullFileName)
-	  && !is_local_image)
-	{
-	  /* file lives locally but the image doesn't -- bad semantics.
-	     Note that if SOME of the files are local and the image file
-	     is local, it is good.  */
-	  return (false);
-	}
-      if (imageFileTime < _gst_get_file_modify_time (fullFileName))
-	return (false);
+      char *fullFileName = find_kernel_file (fileName, "", KERNEL_USER_DIR);
+      mst_Boolean ok = (imageFileTime > _gst_get_file_modify_time (fullFileName));
+      xfree (fullFileName);
+      if (!ok)
+        return (false);
     }
 
-  if (is_local_image)
-    {
-      if ((home = (char *) getenv ("HOME")) != NULL)
-	sprintf (preImageFileName, "%s/%s", home, PRE_IMAGE_FILE_NAME);
-      else
-	strcpy (preImageFileName, PRE_IMAGE_FILE_NAME);
+  if (site_pre_image_file
+      && imageFileTime <= _gst_get_file_modify_time (site_pre_image_file))
+    return (false);
 
-      if (imageFileTime < _gst_get_file_modify_time (preImageFileName))
-	return (false);
-    }
+  if (user_pre_image_file
+      && imageFileTime <= _gst_get_file_modify_time (user_pre_image_file))
+    return (false);
 
   return (true);
 }
@@ -685,81 +735,89 @@ int
 load_standard_files (void)
 {
   const char *fileName;
-  char fullFileName[MAXPATHLEN];
 
-  _gst_use_undeclared++;
   for (fileName = standard_files; *fileName; fileName += strlen (fileName) + 1)
     {
-      find_kernel_file (fileName, fullFileName);
-      if (!process_file (fullFileName))
+      char *fullFileName = find_kernel_file (fileName, "", KERNEL_USER_DIR);
+      if (!fullFileName)
 	{
 	  _gst_errorf ("can't find system file '%s'", fullFileName);
-	  _gst_errorf
-	    ("image bootstrap failed, set SMALLTALK_KERNEL to the directory name");
+	  _gst_errorf ("image bootstrap failed, use option --kernel-directory");
 	  return 1;
 	}
+      else
+	{
+	  mst_Boolean ok = process_file (fullFileName);
+	  xfree (fullFileName);
+	  if (!ok)
+	    return 1;
+	}
     }
-  _gst_use_undeclared--;
+
+  if (site_pre_image_file)
+    process_file (site_pre_image_file);
+
+  if (user_pre_image_file)
+    process_file (user_pre_image_file);
+
   return 0;
 }
 
 
-mst_Boolean
-find_kernel_file (const char *fileName,
-		  char *fullFileName)
+char *
+find_kernel_file (const char *fileName, const char *systemPrefix,
+		  enum user_dir userDir)
 {
-  if (_gst_file_is_readable (fileName))
+  char *fullFileName, *localFileName;
+
+  asprintf (&fullFileName, "%s/%s%s", _gst_kernel_file_path, systemPrefix,
+	    fileName);
+
+  if (!no_user_files && userDir != NO_USER_DIR)
     {
-      strcpy (fullFileName, fileName);
-      return (true);
+      asprintf (&localFileName, "%s/%s%s",
+		_gst_user_file_base_path,
+		userDir == BASE_USER_DIR ? "" : LOCAL_KERNEL_DIR_NAME "/",
+		fileName);
+
+      if (_gst_file_is_readable (localFileName)
+          /* If the system file is newer, use the system file instead.  */
+          && (!_gst_file_is_readable (fullFileName) ||
+	      _gst_get_file_modify_time (localFileName) >=
+	      _gst_get_file_modify_time (fullFileName)))
+	{
+	  xfree (fullFileName);
+	  return localFileName;
+	}
+      else
+	xfree (localFileName);
     }
 
-  sprintf (fullFileName, "%s/%s", _gst_kernel_file_path,
-	   fileName);
   if (_gst_file_is_readable (fullFileName))
+    return fullFileName;
+
+  xfree (fullFileName);
+  return NULL;
+}
+
+
+char *
+find_user_file (const char *fileName)
+{
+  char *fullFileName;
+  if (no_user_files)
+    return NULL;
+
+  asprintf (&fullFileName, "%s/%s", _gst_user_file_base_path, fileName);
+  if (!_gst_file_is_readable (fullFileName))
     {
-      char systemFileName[256];
-      sprintf (systemFileName, KERNEL_PATH "/%s", fileName);
-      /* If this file and the system file are the same, consider the
-         file as a system file instead.  */
-      return (!_gst_file_is_readable (systemFileName) ||
-	      _gst_get_file_modify_time (fullFileName) !=
-	      _gst_get_file_modify_time (systemFileName));
+      xfree (fullFileName);
+      return NULL;
     }
-
-  sprintf (fullFileName, KERNEL_PATH "/%s", fileName);
-  return (false);
-}
-
-
-void
-load_user_pre_image_file (void)
-{
-  char fileName[MAXPATHLEN], *home;
-
-  if ((home = (char *) getenv ("HOME")) != NULL)
-    sprintf (fileName, "%s/%s", home, PRE_IMAGE_FILE_NAME);
   else
-    strcpy (fileName, PRE_IMAGE_FILE_NAME);
-
-  process_file (fileName);
+    return fullFileName;
 }
 
-void
-load_user_init_file (void)
-{
-  char fileName[MAXPATHLEN], *home;
-
-  if (_gst_regression_testing)
-    return;
-
-  if ((home = (char *) getenv ("HOME")) != NULL)
-    sprintf (fileName, "%s/%s", home, INIT_FILE_NAME);
-  else
-    strcpy (fileName, INIT_FILE_NAME);
-
-  process_file (fileName);
-}
 
 void
 process_stdin ()
@@ -789,9 +847,11 @@ process_file (const char *fileName)
   if (_gst_verbosity > 2)
     printf ("Processing %s\n", fileName);
 
+  _gst_use_undeclared++;
   _gst_push_unix_file (fd, fileName);
   _gst_parse_stream (false);
   _gst_pop_stream (true);
+  _gst_use_undeclared--;
   return (true);
 }
 
@@ -800,7 +860,6 @@ int
 parse_args (int argc,
 	    const char **argv)
 {
-  const char **av = argv;
   int ch, prev_optind = 1, minus_a_optind = -1;
 
 #ifndef ENABLE_DYNAMIC_TRANSLATION
@@ -808,6 +867,9 @@ parse_args (int argc,
 #else
 # define OPTIONS "-acdDf:ghiI:K:lL:pQqrSvV"
 #endif
+
+  loaded_files =
+    (struct loaded_file *) xmalloc (sizeof (struct loaded_file) * argc);
 
   /* get rid of getopt's own error reporting for invalid options */
   opterr = 1;
@@ -867,7 +929,8 @@ parse_args (int argc,
 	case 'f':
 	  /* Same as -Q, passing a file, and -a.  */
 	  _gst_verbosity = 0;
-	  *++av = optarg;
+	  loaded_files[n_loaded_files].kernel_path = false;
+	  loaded_files[n_loaded_files++].file_name = optarg;
 
 	case 'a':
 	  /* "Officially", the C command line ends here.  The Smalltalk 
@@ -889,12 +952,31 @@ parse_args (int argc,
 	  break;
 
 	case 'K':
-	  {
-	    char *file;
-	    asprintf (&file, "%s/%s", _gst_image_file_path, optarg);
-	    *++av = file;
-	    break;
-	  }
+	  loaded_files[n_loaded_files].kernel_path = true;
+	  loaded_files[n_loaded_files++].file_name = optarg;
+	  break;
+
+	case OPT_KERNEL_DIR:
+	  _gst_kernel_file_path = optarg;
+          if (!_gst_file_is_readable (_gst_kernel_file_path))
+	    {
+	      _gst_errorf ("kernel path %s not readable", _gst_kernel_file_path);
+	      return 1;
+	    }
+	  break;
+
+	case OPT_IMAGE_DIR:
+	  _gst_image_file_path = optarg;
+          if (!_gst_file_is_readable (_gst_image_file_path))
+	    {
+	      _gst_errorf ("image path %s not readable", _gst_image_file_path);
+	      return 1;
+	    }
+	  break;
+
+	case OPT_NO_USER:
+	  no_user_files = true;
+	  break;
 
 	case 'v':
 	  printf (copyright_and_legal_stuff_text, VERSION, KERNEL_PATH,
@@ -902,7 +984,8 @@ parse_args (int argc,
 	  return -1;
 
 	case '\1':
-	  *++av = optarg;
+	  loaded_files[n_loaded_files].kernel_path = false;
+	  loaded_files[n_loaded_files++].file_name = optarg;
 	  break;
 
 	default:
@@ -927,7 +1010,8 @@ parse_args (int argc,
 	     is nothing after -a, or if we finished processing the argument
 	     which included -a, leave.  */
 	  _gst_smalltalk_passed_argc = argc - optind;
-	  _gst_smalltalk_passed_argv = xmalloc (sizeof (char *) * _gst_smalltalk_passed_argc);
+	  _gst_smalltalk_passed_argv =
+	    xmalloc (sizeof (char *) * _gst_smalltalk_passed_argc);
 	  memcpy (_gst_smalltalk_passed_argv, argv + optind,
 		  sizeof (char *) * _gst_smalltalk_passed_argc);
 	  break;
@@ -936,6 +1020,5 @@ parse_args (int argc,
       prev_optind = optind;
     }
 
-  *++av = NULL;
   return 0;
 }

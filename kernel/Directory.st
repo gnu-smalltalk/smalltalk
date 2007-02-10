@@ -70,14 +70,21 @@ module
 !
 
 systemKernel
-    "Answer the path to the GNU Smalltalk kernel's Smalltalk source files"
-    ^KernelFileSystemPath
+    "Answer the path to the GNU Smalltalk kernel's Smalltalk source files.
+     Same as `Directory kernel' since GNU Smalltalk 2.4."
+    ^self kernel
 !
 
 localKernel
-    "Answer the path in which a local version of the GNU Smalltalk kernel's
-     Smalltalk source files were found"
-    ^KernelFileLocalPath
+    "Answer the path to the GNU Smalltalk kernel's Smalltalk source files.
+     Same as `Directory kernel' since GNU Smalltalk 2.4."
+    ^self kernel
+!
+
+userBase
+    "Answer the base path under which file for user customization of GNU
+     Smalltalk are stored."
+    ^UserFileBasePath
 !
 
 temporary

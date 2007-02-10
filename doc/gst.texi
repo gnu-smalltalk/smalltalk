@@ -114,11 +114,6 @@ programming language.
 * Emacs::               @gst{} and Emacs.
 * C and Smalltalk::     @gst{}'s C/Smalltalk interoperability features.
 * Tutorial::            An introduction to Smalltalk and OOP.
-* Future::              Tasks for @gst{}'s subsequent releases.
-                        Volunteers to help out in performing some of these
-                        tasks would be greatly appreciated.
-                        Please see this node to find out what you can do
-                        to help make @gst{} a truly winning system.
 
 @detailmenu
 --- The detailed node listing ---
@@ -131,6 +126,11 @@ Using GNU Smalltalk:
 * Syntax::              A description of the input file syntax
 * Test suite::          How to run the test suite system.
 * Legal concerns::      Licensing of GNU Smalltalk
+
+Operation:
+* Command-line processing::        Picking an image path and a kernel path.
+* Loading or creating an image::   Loading an image or creating a new one.
+* Starting the system::            After the image is created or restored.
 
 Legal concerns:
 * GPL::                 Complying with the GNU GPL.
@@ -302,7 +302,7 @@ names, but their effect is as if they were all specified first.  The
 various flags are interpreted as follows:
 
 @table @option
-@item -a --smalltalk
+@item -a --smalltalk-args
 Used to make arguments available to Smalltalk code.  The C option parser
 discards everything after the parameter including @option{-a}, while
 Smalltalk code can get it sending the @code{arguments} message to the
@@ -357,10 +357,33 @@ This option and the following one is disabled when the dynamic
 translator (@pxref{Dynamic translator}) is enabled.
 @end ignore
 
-@item -E --kernel-declaration-trace
+@item -E --kernel-execution-trace
 Like the -e flag, but includes all byte codes executed, whether they
 occur during the loading of the kernel method definition files, or
 during the loading and execution of user files.
+
+@item --image-directory
+@itemx --kernel-directory
+Specify, respectively, the directory in which the image file @file{gst.im}
+will be looked for and saved, and the directory from which the kernel
+source files will be loaded.  These are used mostly while compiling
+@gst{} itself.
+
+@item --no-user-files
+Specify that, if an image is created, @gst{} shall not load any file
+from the @file{.st} subdirectory of the user's home directory@footnote{The
+  directory would be called @file{_st/kernel} under MS-DOS.  Under OSes that
+  don't use home directories, it would be looked for in the current directory.}.
+This is used mostly while compiling @gst{} itself, to avoid that the
+installed image be built from files overridden by the user.
+
+@item -K --kernel-file
+Specify a file to be loaded from the kernel directory.  These are
+files that are usually distributed and installed together with GNU
+Smalltalk, or that are placed under the @file{.st/kernel}
+  subdirectory of the user's home directory@footnote{The directory is
+  called @file{_st/kernel} under MS-DOS.  Under OSes that don't use home
+  directories, it is looked for in the current directory.}.
 
 @item -f --file
 This special flag is designed to prepare Smalltalk programs that can
@@ -410,9 +433,10 @@ stamp out of date with respect to the Smalltalk version.  After the
 kernel definitions have been loaded, a new image file will be saved.
 
 @item -I @var{file} --image-file @var{file}
-Use the image file named @var{file} as the image file to load.
-Completely bypasses checking the file dates on the kernel files and
-standard image file.
+Use the image file named @var{file} as the image file to load.  This
+option completely bypasses the standard image file and checking the file
+dates on the kernel files.  In addition, it sets the image directory
+to the path of @var{file}.
 
 @item -l --log-changes
 Produce a log of the compiled Smalltalk code to st-changes.st, in the
@@ -452,54 +476,106 @@ executed).
 @node Operation
 @section Startup sequence
 
+@strong{Caveat}: @emph{The startup sequence is pretty complicated.  If you
+are not interested in its customization, you can skip the first two
+sections below.  These two sections also don't apply when the command-line
+option @option{-I} is used.}
+
+@menu
+* Command-line processing::        Picking an image path and a kernel path.
+* Loading or creating an image::   Loading an image or creating a new one.
+* Starting the system::            After the image is created or restored.
+@end menu
+
+@node Command-line processing
+@subsection Picking an image path and a kernel path
+
 When @gst{} is invoked, the first thing it does is choosing two paths,
-respectively the ``image path'' and the ``kernel path''.  the image path
-is set to the value of the @env{SMALLTALK_IMAGE} environment variable
-(if it is defined); if @env{SMALLTALK_IMAGE} is not defined, Smalltalk
-will try the path compiled in the binary (usually, under Unix systems,
-@file{/usr/local/share/gnu-smalltalk} or a similar data file path) and
-then the current directory.
+respectively the ``image path'' and the ``kernel path''.  The image path
+is set by considering these paths in succession:
+@itemize
+@item the argument to the @option{--image-directory} option if it is
+  given;
+@item the value of the @env{SMALLTALK_IMAGE} environment variable
+  if it is defined and readable; this step will disappear in a future
+  release;
+@item the path compiled in the binary (usually, under Unix systems,
+  @file{/usr/local/share/smalltalk} or a similar data file path)
+  if it exists and it is readable;
+@item the current directory.  The current directory is also used if
+  the image has to be rebuilt but you cannot write to a directory
+  chosen according to the previous criteria.
+@end itemize
 
-The ``kernel path'' directory in which to look for each of the kernel
-method definition files.  There are only two possibilities in this case:
-the directory pointed to by @env{SMALLTALK_KERNEL} if it is defined,
-and a subdirectory named @file{kernel} in the current directory.
-However, kernel files are not required to be in this directory:
-Smalltalk also knows about a system default location for kernel files,
-which is compiled in the binary (usually, under Unix systems,
-@file{/usr/local/share/gnu-smalltalk/kernel} or a similar data file
-path), and which is used for kernel files not found in the directory
-chosen as above.
+The ``kernel path'' is the directory in which to look for each of the kernel
+method definition files.  The possibilities in this case are:
+@itemize
+@item the argument to the @option{--kernel-directory} option if it is given;
+@item the value of the @env{SMALLTALK_KERNEL} environment variable
+  if it is defined and readable; this step will disappear in a future
+  release;
+@item the path compiled in the binary (usually, under Unix systems,
+  @file{/usr/local/share/smalltalk/kernel} or a similar data file path)
+  if it exists and it is readable;
+@item a subdirectory named @file{kernel} of the image path.
+@end itemize
 
-Then, if the @option{-i} flag is not used, Smalltalk tries to find a saved
-binary image file in the image path.  If this is found, it is checked to
-be compatible with the current version of Smalltalk and with the current
-system; Smalltalk is able to load an image created on a system with the
-same @code{sizeof(long)} but different endianness (for example, a 68k
+After these are chosen, GNU Smalltalk can try to load an image (from the
+image path), or create a new one (bootstrapping it from the files in
+the kernel path).
+
+@node Loading or creating an image
+@subsection Loading an image or creating a new one
+
+Unless the @option{-i} flag is used, GNU Smalltalk first tries to load the
+@file{gst.im} file in the image path.  If this is found, GNU Smalltalk
+compares the write dates of all of the kernel method definition files
+against the write date of the binary image file, to avoid loading a stale
+image.  If this check passes, the image is also checked to
+be compatible with the current version of the virtual machine and with the
+current system; GNU Smalltalk is able to load an image created on a system with
+the same pointer size but different endianness (for example, a PowerPC
 image on an x86), but not an image created on a system with different
-@code{sizeof(long)} like an Alpha image on an x86.  Finally, if the
-images are compatible, it compares the write dates of all of the kernel
-method definition files against the write date of the binary image file.
+pointer sizes like an x86-64 image on an x86.  If the
+image is not stale and compatible, it is loaded---thus terminating the
+startup here.
 
 If the image is not found, is incompatible, or older than any of the
-kernel files, a new image has to be created.  The set of files that make
-up the kernel is loaded, one at a time.  The list can be found in
-@file{libgst/lib.c}, in the @code{standardFiles} variable.  If the image
-lies in the current directory, or if at least a kernel file was found
-outside of the system default path, a user-dependant
-@file{.stpre}@footnote{ The file is called @file{_stpre} under MS-DOS
-and @file{.gstpre} on the Atari ST.  Under OSes that don't use home
-directories it is looked for in the current directory.}
+kernel files, a new image has to be created.  The image path may
+now be changed to the current directory if the previous choice
+is not writeable.
+
+The set of files that make up the kernel is loaded,
+one at a time.  The list can be found in @file{libgst/lib.c}, in the
+@code{standard_files} variable.  The user can override
+kernel files by placing their own copies under the @file{.st/kernel}
+subdirectory of the user's home directory@footnote{The directory is
+  called @file{_st/kernel} under MS-DOS.  Under OSes that don't use home
+  directories, it is looked for in the current directory.}.
+
+Before saving the image, GNU Smalltalk will load two files that
+allow easy customization, as well as installation of bug fixes.  The
+first file is @file{site-pre.st}, which should be placed in the parent
+directory of the kernel directory.  Since the kernel directory is rarely
+changed from its default, a @file{site-pre.st} file under
+@file{/usr/local/share/smalltalk} provides a point for site-wide 
+customization.  The second file is a user-dependent @file{.st/pre.st}
+file from the user's home directory.@footnote{The file is looked up as
+  @file{_st/pre.st} under MS-DOS and again, under OSes that don't use
+  home directories it is looked for as @file{pre.st} in the current
+  directory.}.
+
+@node Starting the system
+@subsection After the image is created or restored
 
 At this point, independent of whether the binary image file was loaded
-or created, the @code{initialize} event is sent to the dependants of the
-special class @code{ObjectMemory} (@pxref{Memory access}).  After the
-initialization blocks have been executed, the user initialization file
-@file{.stinit} is loaded if found in the user's home
-directory@footnote{The same considerations made above hold here too.
-The file is called @file{_stinit} under MS-DOS and @file{.gstinit} on
-the Atari ST, and is looked for in the current directory under OSes that
-don't use home directories.}.
+or created, the @code{returnFromSnapshot} event is sent to the dependents of
+the special class @code{ObjectMemory} (@pxref{Memory access}).  After these
+finish executing their initialization code, the user file @file{.st/init.st} is
+loaded if found in the user's home directory@footnote{The same considerations
+  made above hold here too.  The file is called @file{_st/init.st} under MS-DOS,
+  and is looked for in the current directory under OSes that don't use home
+  directories.}.
 
 Finally, if there were any files specified on the command line, they are
 loaded, otherwise standard input is read and executed until an EOF is
@@ -516,9 +592,9 @@ the command prompt: you can use @kbd{C-c} to do this.
 
 The language that @gst{} accepts is based on the @dfn{file out} syntax
 as shown in the @dfn{Green Book}, also known as @cite{Smalltalk-80: Bits
-of History, Words of Advice} by Glenn Krasner.  The entire grammar of
-@gst{} is described in the @file{libgst/gst.y} file, but a brief description
-may be in order:
+of History, Words of Advice} by Glenn Krasner.  The grammar of
+@gst{} is not different from the grammar of other Smalltalk environments,
+but a brief description may be in order:
 @example
 <statements> !
 @end example
@@ -602,11 +678,7 @@ make check
 @end example
 
 You should see the names of the test suite files as they are processed,
-but that's it.  Any other output indicates some problem.  The only
-system that I know of which currently fails the test suite is the NeXT,
-and this is apparently due to their non-standard C runtime libraries.
-
-The test suite is by no means exhaustive.  @xref{Future}.
+but that's it.  Any other output indicates some problem.
 
 
 @node Legal concerns
@@ -768,7 +840,7 @@ that enable one to tune the virtual machine's usage of memory; many
 methods that in the past were instance methods of Smalltalk or class
 methods of Memory are now class methods of ObjectMemory.  In addition,
 and that's what the rest of this section is about, the virtual machines
-signals events to its dependants exactly through this class.
+signals events to its dependents exactly through this class.
 
 The events that can be received are
 @table @dfn
@@ -1489,11 +1561,11 @@ to define all the functions in the C run-time library.  Note
 that this is a potential security problem (especially if your program is
 SUID root under Unix), so you might want to disable dynamic loading when
 using @gst{} as an extension language.  To disable dynamic loading,
-configure @gst{} passing the @option{--without-dld} switch.
+configure @gst{} passing the @option{--disable-dld} switch.
 
 Note that a @code{DLD} class will be present even if dynamic loading is
 disabled (either because your system is not supported, or by the
-@option{--without-dld} configure switch) but any attempt to perform
+@option{--disable-dld} configure switch) but any attempt to perform
 dynamic linking will result in an error.
 
 @node Packages
@@ -1501,16 +1573,27 @@ dynamic linking will result in an error.
 
 Thanks to Andreas Klimas' insight, @gst{} now includes a
 powerful packaging system which allows one to file in components
-(@dfn{goodies} in Smalltalk's very folkloristic terminology)
-without caring of whether they need other goodies to be loaded.
+(often called @dfn{goodies} in Smalltalk's very folkloristic
+terminology) without caring of whether they need other goodies to be
+loaded first.
 
 The packaging system is implemented by a Smalltalk class,
 @code{PackageLoader}, which looks for information about packages in
-the XML file named (guess what) @file{packages.xml}, in the current image
-directory. There are two ways to load something using the packaging
-system. The first way is to use the PackageLoader's
-@code{fileInPackage:} and @code{fileInPackages:} methods.
-For example:
+the XML file named (guess what) @file{packages.xml}, in one of three
+places:
+@itemize
+@item the kernel directory's parent directory; this is where
+  an installed @file{packages.xml} resides, in a system-wide data
+  directory such as @file{/usr/local/share/smalltalk};
+@item in the file @file{.st/packages.xml}, hosting per-user packages;
+@item finally, there can be a @file{packages.xml} in the same directory
+  as the current image.
+@end itemize
+
+There are two ways to load something using the packaging system. The
+first way is to use the PackageLoader's @code{fileInPackage:} and
+@code{fileInPackages:} methods.  For example:
+
 @example
     PackageLoader fileInPackages: #('Blox' 'Browser').
     PackageLoader fileInPackage: 'Compiler'.
@@ -4161,52 +4244,6 @@ objects were registered from the same function.
 @node Tutorial
 @chapter Tutorial
 @include tutorial.texi
-
-@node Future
-@chapter Future directions for @gst{}
-
-Presented below is the set of tasks that I feel need to be performed to
-make @gst{} a more fully functional, viable system.  They are presented
-in no particular order; other tasks are listed in the @file{TODO} file,
-in the main distribution directory.
-
-I would @emph{very much} welcome any volunteers who would like to help
-with the implementation of one or more of these tasks.  Please write at
-@mailto{help-smalltalk@@gnu.org} if you are interested in adding your
-efforts to the @gst{} project.
-
-Tasks:
-@itemize @bullet
-@item
-Port software to @gst{}.  The class library has proven to be quite
-robust; it should be easy to port packages (especially free ones!) to
-@gst{} if the source dialect is reasonably @sc{ansi}-compliant.  One
-area which might give problems is namespaces, which is not standardized,
-and possibly exception handling for which most dialects have been
-cooking their own syntax for years.
-
-@item
-Port to other computers/operating systems.  The code thus far has shown
-itself to be relatively portable to various machines and Unix
-derivatives.  The architecture must support 32 or 64 bit pointers the
-same size as a long integers; in addition, the operating system had
-better be advanced enough to support asynchronous file polling and
-explicit allocation of virtual memory address ranges.
-
-@item
-Modify the Delay class primitive so that it does not fork a new process
-each time it is called when @code{setitimer} or a similar function call
-is not available; this involves using a pipe.  I want to do it somewhen,
-but if you do it before me, please tell me.
-
-@item
-Port Blox to @sc{gtk+}.
-
-@item
-More ideas are sketched in the @file{TODO} file, in the main distribution
-directory.
-@end itemize
-
 
 @iftex
 @contents
