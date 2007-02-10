@@ -1,3 +1,9 @@
+2007-02-10  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/AbstNamespc.st: Make removeSubspace: public, change its
+	argument to be a symbol rather than a namespace, and don't make it
+	a subspace of Smalltalk.
+
 2007-02-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Directory.st: Add #kernel and #userKernel, deprecate

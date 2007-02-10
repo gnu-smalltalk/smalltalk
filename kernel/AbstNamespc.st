@@ -321,6 +321,17 @@ inheritsFrom: aNamespace
       space notNil ] whileTrue
 !
 
+removeSubspace: aSymbol
+    "Remove my subspace named aSymbol from the hierarchy."
+    | spaceName |
+    spaceName := aSymbol asGlobalKey. "as with primNew:name:"
+    self subspaces remove: (self hereAt: spaceName)
+		   ifAbsent: [SystemExceptions.InvalidValue
+				  signalOn: aSymbol
+				  reason: 'aSymbol must name a subspace'].
+    ^self removeKey: spaceName
+!
+
 selectSubspaces: aBlock
     "Return a Set of subspaces of the receiver satisfying aBlock."
     | aSet |
@@ -489,11 +500,6 @@ setSuperspace: newSuperspace
 
 setSubspaces: newSubspaces
     subspaces := newSubspaces
-!
-
-removeSubspace: aNamespace
-    self subspaces remove: aNamespace.
-    aNamespace setSuperspace: nil
 ! !
 
 
