@@ -1,6 +1,6 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 2.3.2 TO 2.4
+NEWS FROM 2.3.3 TO 2.4
 
 o   A different startup sequence is used which improves the possibility to
     customize GNU Smalltalk, both site-wide and per-user.  The details are
@@ -34,6 +34,17 @@ o   Image load uses copy-on-write memory mapped files.  This means that, as
 
 o   Startup time and quit time were improved widely (the time for running
     a simple "Hello, World" program is about one fifth of 2.3.x).
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.3.2 TO 2.3.3
+
+o   Introduced the --with-imagedir configure option to specify the directory
+    used for the image.
+
+o   The manual was not properly generated in version 2.3.2.
+
+o   Removed text relocations from the virtual machine's shared library.
 
 -----------------------------------------------------------------------------
 
