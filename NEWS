@@ -1,5 +1,16 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 2.3.2 TO 2.3.3
+
+o   Introduced the --with-imagedir configure option to specify the directory
+    used for the image.
+
+o   The manual was not properly generated in version 2.3.2.
+
+o   Removed text relocations from the virtual machine's shared library.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 2.3.1 TO 2.3.2
 
 o   #copyFrom:to: is uniformly 0-based for all Streams (unlike in Collections),

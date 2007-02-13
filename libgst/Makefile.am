@@ -1,11 +1,13 @@
 LIBTOOL += --tag=LIBGST
 
+imagedir = $(localstatedir)/lib/$(PACKAGE)
+
 LEX_OUTPUT_ROOT = lex.yy
 ## CFLAGS=-O0 -g
 AM_LFLAGS = -Cfe -o$(LEX_OUTPUT_ROOT).c
 AM_YFLAGS = -vy
 AM_CPPFLAGS = -DKERNEL_PATH=\"$(pkgdatadir)/kernel\" \
-  -DIMAGE_PATH=\"$(pkgdatadir)\" -DMODULE_PATH=\"$(pkglibdir)\" \
+  -DIMAGE_PATH=\"$(imagedir)\" -DMODULE_PATH=\"$(pkglibdir)\" \
   -I$(top_srcdir)/lib-src -I$(top_srcdir)/libffi/include \
   -I$(top_builddir)/libffi/include $(INCLIGHTNING) \
   @INCSNPRINTFV@ $(INCSIGSEGV) -I$(top_builddir)/lib-src

@@ -167,21 +167,23 @@ dist-hook: gst-package
 	  -e "s/@\(NCURSES_DISABLED\)@/disabled-/" \
 	  -e "s/@\(VERSION\)@/@VERSION@/" \
 	  $(srcdir)/packages.xml.in > $(distdir)/packages.xml
-	SMALLTALK_IMAGE=$(distdir) \
-	  ./gst-package --srcdir="$(srcdir)" --dist $(distdir)/packages.xml
+	./gst-package --distdir="$(distdir)" --srcdir="$(srcdir)" \
+	  --dist $(distdir)/packages.xml
 
 # Build an image after installing the data; install-data runs after
 # install-exec, so the gst executable is already in bindir.
 install-data-hook: gst-package
 	rm -f $(DESTDIR)$(pkgdatadir)/packages.xml
-	./gst-package --srcdir="$(srcdir)" --no-load --destdir="$(DESTDIR)" packages.xml
+	./gst-package --srcdir="$(srcdir)" --no-load --destdir="$(DESTDIR)" \
+	  --target-dir="$(pkgdatadir)" packages.xml
+	$(mkdir_p) $(DESTDIR)$(imagedir)
+	rm -f $(DESTDIR)$(imagedir)/gst.im
 	srcdir=`cd $(srcdir) && pwd`; \
-	cd $(DESTDIR)$(pkgdatadir); \
-	rm -f gst.im; \
-	SMALLTALK_KERNEL="`pwd`/kernel" \
-	SMALLTALK_IMAGE="`pwd`" \
+	cd $(DESTDIR)$(imagedir) && \
+	SMALLTALK_KERNEL=$(pkgdatadir)/kernel \
+	SMALLTALK_IMAGE=$(imagedir) \
 	  $(DESTDIR)$(bindir)/gst -f $$srcdir/scripts/Finish.st \
-	    "$(DESTDIR)$(pkgdatadir)" "$(pkgdatadir)" $(MODULES)
+	    "$(pkgdatadir)" "$(imagedir)" $(MODULES)
 
 uninstall-local:: gst-package
 	./gst-package --uninstall --destdir="$(DESTDIR)" packages.xml

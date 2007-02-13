@@ -67,8 +67,50 @@ func_install ()
   set +e
 }
 
-IMAGE_PATH=${SMALLTALK_IMAGE:-@datadir@/@PACKAGE@}
-(cd $IMAGE_PATH 2> /dev/null && IMAGE_PATH=`pwd`)
+# mkdir -p emulation based on the mkinstalldirs script.
+mkdir_p ()
+{
+  for file
+  do
+    case $file in
+      /*) pathcomp=/ ;;
+      *)  pathcomp= ;;
+    esac
+    oIFS=$IFS
+    IFS=/
+    set fnord $file
+    shift
+    IFS=$oIFS
+
+    errstatus=0
+    for d
+    do
+      test "x$d" = x && continue
+      pathcomp=$pathcomp$d
+      case $pathcomp in
+        -*) pathcomp=./$pathcomp ;;
+      esac
+
+      if test ! -d "$pathcomp"; then
+        mkdir "$pathcomp" || lasterr=$?
+        test -d "$pathcomp" || errstatus=$lasterr
+      fi
+      pathcomp=$pathcomp/
+    done
+  done
+  return "$errstatus"
+}
+
+error () {
+  echo "$0": "$@" >&2
+  exit 1
+}
+
+if test -n "$SMALLTALK_IMAGE" && test -d "$SMALLTALK_IMAGE"; then
+  install_dir=$SMALLTALK_IMAGE
+else
+  install_dir="@datadir@/@PACKAGE@"
+fi
 
 request_help=false
 request_version=false
@@ -107,6 +149,21 @@ while [ -n "$1" ]; do
 	--di | --dis | \
 	--dist)		 load=false; dist=:	  	   ;;
 
+        -t | --t | --ta | --tar | --targ | --targe | --target | --target- | \
+        --target-d | --target-di | --target-dir | --target-dire | \
+	--target-direc | --target-direct | --target-directo | \
+	--target-director | --target-directory)  
+			 shift; install_dir="$1" ;;
+
+        --t=* | --ta=* | --tar=* | --targ=* | --targe=* | --target=* | \
+	--target-=* | --target-d=* | --target-di=* | --target-dir=* | \
+	--target-dire=* | --target-direc=* | --target-direct=* | \
+	--target-directo=* | --target-director=* | --target-directory=*)  
+			 install_dir="`echo $1 | sed s/^[^=]*=//`" ;;
+
+        -t*)
+			 install_dir="`echo $1 | sed s/^-t//`" ;;
+
 	--l=* | --li=* | --lis=* | --list=* | --list-=* | \
 	--list-f=* | --list-fi=* | --list-fil=* | --list-file=* | \
 	--list-files=*)	 list_files="$list_files `echo $1 | sed s/.*=//`"
@@ -122,9 +179,11 @@ while [ -n "$1" ]; do
 	--s=* | --sr=* | --src=* | --srcd=* | --srcdi=* | \
 	--srcdir=*)	 srcdir="`echo $1 | sed s/.*=//`"  ;;
 
+	--distd | --distdi | --distdir | \
 	--de | --des | --dest | --destd | --destdi | \
 	--destdir)	 shift; DESTDIR="$1"		   ;;
 
+	--distd=* | --distdi=* | --distdir=* | \
 	--de=* | --des=* | --dest=* | --destd=* | --destdi=* | \
 	--destdir=*)	 DESTDIR="`echo $1 | sed s/.*=//`" ;;
 
@@ -138,29 +197,55 @@ while [ -n "$1" ]; do
   shift
 done
 
+if $dist; then
+  install_dir=
+  if test -z "$DESTDIR"; then
+    error Using --dist without specifying --distdir 
+  else
+    mkdir_p "$DESTDIR"
+  fi
+else
+  case $install_dir in
+    /*)
+      mkdir_p "$DESTDIR$install_dir"
+      ;;
+    *)
+      if test -z "$DESTDIR"; then
+        mkdir_p "$install_dir"
+        (cd "$install_dir" 2> /dev/null && install_dir=`pwd`)
+      else
+        error Target directory must be absolute when DESTDIR is used
+      fi
+      ;;
+  esac
+fi
+
+
 # Do --help and --version.
 
 if [ -z "$files" ] || $request_help || $options_error; then
   cat <<EOF
 Syntax: gst-package [OPTION]... FILES...
 
-    -n, --dry-run         print commands rather than running them
-	--no-load         don't load the Smalltalk files in the image
-        --no-install      don't copy the files
-        --uninstall       remove the packages mentioned in the FILES
-        --dist            create symbolic links of non-built files
-        --list-files PKG  just output the list of files in the package
-	--srcdir DIR      look for non-built files in directory DIR
-	--destdir DIR	  prefix the destination directory with DIR
+    -n, --dry-run               print commands rather than running them
+	--no-load               don't load the Smalltalk files in the image
+        --no-install            don't copy the files
+        --uninstall             remove the packages mentioned in the FILES
+        --dist                  create symbolic links of non-built files
+        --list-files PKG        just output the list of files in the package
+	--srcdir DIR            look for non-built files in directory DIR
+	--distdir DIR	        for --dist, place files in directory DIR
+	--destdir DIR	        prefix the destination directory with DIR
+        --target-directory DIR  install the files in DIR (unused for --dist)
 
-	--help            display this message and exit
-	--version         print version information and exit
+	--help                  display this message and exit
+	--version               print version information and exit
 
 Except in uninstall and list files mode, gst-package requires write
 access to the \`packages.xml' file in the GNU Smalltalk image directory,
 and merges the XML package files on the command line with that file.
 
-The image path is $IMAGE_PATH.
+The default target directory is $install_dir.
 
 EOF
   # Unless --help was passed, return an error.
@@ -207,7 +292,7 @@ if $uninstall; then
 	-e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files | while read file; do
       case $file in
         /*) dest=$DESTDIR$file ;;
-	*) dest="$DESTDIR$IMAGE_PATH/$dir/$file" ;;
+	*) dest="$DESTDIR$install_dir/$dir/$file" ;;
       esac
 
       echo "rm -f $dest"
@@ -223,7 +308,7 @@ fi
 if $dist; then
   :
 else
-  base="$DESTDIR$IMAGE_PATH/packages.xml"
+  base="$DESTDIR$install_dir/packages.xml"
   if test -f $base; then
     merged_files="$base"
     for file in $files; do
@@ -238,7 +323,7 @@ else
     sed -e '$i\
 </packages>' -e '/<.packages>/,/<packages>/d' $merged_files > packages.tmp
 
-    mv packages.tmp $DESTDIR$IMAGE_PATH/packages.xml
+    mv packages.tmp $DESTDIR$install_dir/packages.xml
   }
 fi
 
@@ -253,29 +338,10 @@ if $install; then
     for subdir in . $dirs; do
       case $subdir in
         /*) dest=$DESTDIR$subdir ;;
-	*) dest=$DESTDIR$IMAGE_PATH/$dir/$subdir ;;
+	*) dest=$DESTDIR$install_dir/$dir/$subdir ;;
       esac
 
-      # The following part emulates the mkinstalldirs script
-      set fnord `echo "$dest" | sed -e 's/^\///' -e 's/\// /g'`
-      shift
-  
-      case $dest in
-	/*) pathcomp= ;;
-	*) pathcomp=. ;;
-      esac
-      for d
-      do
-        pathcomp="$pathcomp/$d"
-        case "$pathcomp" in
-          -* ) pathcomp=./$pathcomp ;;
-        esac
-
-        if test ! -d "$pathcomp"; then
-	  echo mkdir "$pathcomp"
-	  mkdir "$pathcomp"
-        fi
-      done
+      mkdir_p "$dest"
     done
 
     if $dist; then
@@ -287,7 +353,7 @@ if $install; then
 	   dest=$DESTDIR$file
 	   orig_file=$file ;;
 	  *)
-	   dest="$DESTDIR$IMAGE_PATH/$dir/$file"
+	   dest="$DESTDIR/$dir/$file"
 	   file=$dir/$file
 	   orig_file=$file
 	   test -f "$file" || file=$wd/$file ;;
@@ -311,7 +377,7 @@ if $install; then
 	    dest="$DESTDIR$file"
 	    orig_file=$file ;;
 	  *)
-	    dest="$DESTDIR$IMAGE_PATH/$dir/$file"
+	    dest="$DESTDIR$install_dir/$dir/$file"
 	    file=$dir/$file
 	    orig_file=$file
 	    test -f "$file" || file=$srcdir/$file ;;

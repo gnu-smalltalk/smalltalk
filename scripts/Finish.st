@@ -28,7 +28,7 @@
 |
  ======================================================================"
 
-"Invoked as Finish.st DESTDIR/PKGDATADIR PKGDATADIR [MODULES]..."
+"Invoked as Finish.st PKGDATADIR IMAGEDIR [MODULES]..."
 
 | ok |
 ok := false.
@@ -41,14 +41,17 @@ ok ifFalse: [ ObjectMemory quit: 1 ]!
 
 "Symbol rebuildTable."
 
-"Remove DESTDIR from the paths stored in the image"
-| old new |
-old := Smalltalk arguments first.
-new := Smalltalk arguments at: 2.
-old = new ifFalse: [ FileSegment relocateFrom: old to: new ].
+"Remove DESTDIR and references to the build directory, from the paths
+ stored in the image"
+| newImagePath newKernelBasePath |
+newKernelBasePath := Smalltalk arguments at: 1.
+newImagePath := Smalltalk arguments at: 2.
+KernelFilePath = newKernelBasePath
+    ifFalse: [ FileSegment relocateFrom: KernelFilePath to: newKernelBasePath ].
+
 ImageFileName := 'gst.im'.
-ImageFilePath := new.
-KernelFileLocalPath := new, '/kernel'. 
-KernelFilePath := new, '/kernel'!
+ImageFilePath := newImagePath.
+KernelFileLocalPath := newKernelBasePath, '/kernel'.
+KernelFilePath := newKernelBasePath, '/kernel'!
 
 ObjectMemory snapshot!
