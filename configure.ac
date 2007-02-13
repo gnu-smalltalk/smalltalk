@@ -84,6 +84,15 @@ if test $enable_generational_gc != no; then
 fi
 AM_CONDITIONAL(HAVE_SIGSEGV, test "$enable_generational_gc" != no)
 
+AC_ARG_WITH(imagedir,
+[  --with-imagedir=PATH   path where to place the system image
+			  (default: /usr/local/var/lib/smalltalk)],
+[imagedir="$withval"],
+[imagedir=`echo "$libdir" | sed \
+		-e 's,${exec_prefix},${localstatedir},' \
+		-e "s,${exec_prefix},\${localstatedir}," `/$PACKAGE ])
+AC_SUBST(imagedir)
+
 dnl 
 dnl ------------------------------ C COMPILER / OS ------------
 

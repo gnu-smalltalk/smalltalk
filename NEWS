@@ -20,6 +20,9 @@ o   A different startup sequence is used which improves the possibility to
     directory as `Directory userKernel' (name subject to change).  A
     `packages.xml' file can be put there.
 
+o   The image is now installed in /usr/local/var/lib/smalltalk (which in
+    most distributions will map to /var/lib/smalltalk).
+
 o   Directory entries are passed to #allFilesMatching:do:'s block argument
     if they match aPattern.  As before, the function descends in all the
     directories, even those that do not match aPattern.

@@ -500,7 +500,7 @@ is set by considering these paths in succession:
   if it is defined and readable; this step will disappear in a future
   release;
 @item the path compiled in the binary (usually, under Unix systems,
-  @file{/usr/local/share/smalltalk} or a similar data file path)
+  @file{/usr/local/var/lib/smalltalk} or a similar path under @file{/var})
   if it exists and it is readable;
 @item the current directory.  The current directory is also used if
   the image has to be rebuilt but you cannot write to a directory

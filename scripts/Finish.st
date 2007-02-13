@@ -28,7 +28,7 @@
 |
  ======================================================================"
 
-"Invoked as Finish.st PKGDATADIR [MODULES]..."
+"Invoked as Finish.st PKGDATADIR IMAGEDIR [MODULES]..."
 
 | ok |
 ok := false.
@@ -43,13 +43,15 @@ ok ifFalse: [ ObjectMemory quit: 1 ]!
 
 "Remove DESTDIR and references to the build directory, from the paths
  stored in the image"
-| new |
-new := Smalltalk arguments first.
-ImageFilePath = new ifFalse: [ FileSegment relocateFrom: ImageFilePath to: new ].
+| newImagePath newKernelBasePath |
+newKernelBasePath := Smalltalk arguments at: 1.
+newImagePath := Smalltalk arguments at: 2.
+KernelFilePath = newKernelBasePath
+    ifFalse: [ FileSegment relocateFrom: KernelFilePath to: newKernelBasePath ].
+
 ImageFileName := 'gst.im'.
-ImageLocal := false.
-ImageFilePath := new.
-KernelFilePath := new, '/kernel'.
+ImageFilePath := newImagePath.
+KernelFilePath := newKernelBasePath, '/kernel'.
 UserFileBasePath := nil!
 
 ObjectMemory snapshot!

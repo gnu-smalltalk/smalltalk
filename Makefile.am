@@ -166,7 +166,7 @@ dist-hook: gst-package
 	  -e "s/@\(NCURSES_DISABLED\)@/disabled-/" \
 	  -e "s/@\(VERSION\)@/@VERSION@/" \
 	  $(srcdir)/packages.xml.in > $(distdir)/packages.xml
-	./gst-package --distdir=$(distdir) --srcdir="$(srcdir)" \
+	./gst-package --distdir="$(distdir)" --srcdir="$(srcdir)" \
 	  --dist $(distdir)/packages.xml
 
 # Build an image after installing the data; install-data runs after
@@ -174,13 +174,15 @@ dist-hook: gst-package
 install-data-hook: gst-package
 	rm -f $(DESTDIR)$(pkgdatadir)/packages.xml
 	./gst-package --srcdir="$(srcdir)" --no-load --destdir="$(DESTDIR)" \
-	  packages.xml
-	srcdir=`cd $(srcdir) && pwd`; \
-	cd $(DESTDIR)$(pkgdatadir); \
-	rm -f gst.im; \
+	  --target-dir="$(pkgdatadir)" packages.xml
+	$(mkdir_p) $(DESTDIR)$(imagedir)
+	rm -f $(DESTDIR)$(imagedir)/gst.im
+	cd $(DESTDIR)$(imagedir) && \
 	  $(DESTDIR)$(bindir)/gst --no-user-files -i \
-	    --kernel-dir=kernel --image-dir=. \
-	    -f $$srcdir/scripts/Finish.st "$(pkgdatadir)" $(MODULES)
+	    --kernel-dir="$(DESTDIR)$(pkgdatadir)/kernel" \
+	    --image-dir="$(DESTDIR)$(imagedir)" \
+	    -f @abs_top_srcdir@/scripts/Finish.st \
+	    "$(pkgdatadir)" "$(imagedir)" $(MODULES)
 
 uninstall-local:: gst-package
 	./gst-package --uninstall --destdir="$(DESTDIR)" packages.xml
