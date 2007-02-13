@@ -8,6 +8,8 @@
 
 ** restructure init/pre/kernel files (done)
 
+** upgrade XML parser for package files
+*** support arch-dependent files that are installed in the image path
 
 * sometime
 

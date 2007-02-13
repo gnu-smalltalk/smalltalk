@@ -198,6 +198,7 @@ while [ -n "$1" ]; do
 done
 
 if $dist; then
+  install_dir=
   if test -z "$DESTDIR"; then
     error Using --dist without specifying --distdir 
   else
