@@ -180,8 +180,8 @@ install-data-hook: gst-package
 	rm -f $(DESTDIR)$(imagedir)/gst.im
 	srcdir=`cd $(srcdir) && pwd`; \
 	cd $(DESTDIR)$(imagedir) && \
-	SMALLTALK_KERNEL=$(pkgdatadir)/kernel \
-	SMALLTALK_IMAGE=$(imagedir) \
+	SMALLTALK_KERNEL=$(DESTDIR)$(pkgdatadir)/kernel \
+	SMALLTALK_IMAGE=$(DESTDIR)$(imagedir) \
 	  $(DESTDIR)$(bindir)/gst -f $$srcdir/scripts/Finish.st \
 	    "$(pkgdatadir)" "$(imagedir)" $(MODULES)
 
