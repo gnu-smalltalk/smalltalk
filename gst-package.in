@@ -197,30 +197,6 @@ while [ -n "$1" ]; do
   shift
 done
 
-if $dist; then
-  install_dir=
-  if test -z "$DESTDIR"; then
-    error Using --dist without specifying --distdir 
-  else
-    mkdir_p "$DESTDIR"
-  fi
-else
-  case $install_dir in
-    /*)
-      mkdir_p "$DESTDIR$install_dir"
-      ;;
-    *)
-      if test -z "$DESTDIR"; then
-        mkdir_p "$install_dir"
-        (cd "$install_dir" 2> /dev/null && install_dir=`pwd`)
-      else
-        error Target directory must be absolute when DESTDIR is used
-      fi
-      ;;
-  esac
-fi
-
-
 # Do --help and --version.
 
 if [ -z "$files" ] || $request_help || $options_error; then
@@ -276,6 +252,32 @@ if [ -n "$list_files" ]; then
   done
   exit 0
 fi
+
+# Create the installation directory.
+
+if $dist; then
+  install_dir=
+  if test -z "$DESTDIR"; then
+    error Using --dist without specifying --distdir 
+  else
+    mkdir_p "$DESTDIR"
+  fi
+else
+  case $install_dir in
+    /*)
+      mkdir_p "$DESTDIR$install_dir"
+      ;;
+    *)
+      if test -z "$DESTDIR"; then
+        mkdir_p "$install_dir"
+        (cd "$install_dir" 2> /dev/null && install_dir=`pwd`)
+      else
+        error Target directory must be absolute when DESTDIR is used
+      fi
+      ;;
+  esac
+fi
+
 
 # Extract the name of the packages to be (un)installed.
 
@@ -356,7 +358,7 @@ if $install; then
 	   dest="$DESTDIR/$dir/$file"
 	   file=$dir/$file
 	   orig_file=$file
-	   test -f "$file" || file=$wd/$file ;;
+	   if test -f $file; then file=`pwd`/$file; else file=$wd/$file; fi ;;
         esac
 
 	test -f "$file" || {

@@ -1,7 +1,5 @@
 LIBTOOL += --tag=LIBGST
 
-imagedir = $(localstatedir)/lib/$(PACKAGE)
-
 LEX_OUTPUT_ROOT = lex.yy
 ## CFLAGS=-O0 -g
 AM_LFLAGS = -Cfe -o$(LEX_OUTPUT_ROOT).c
