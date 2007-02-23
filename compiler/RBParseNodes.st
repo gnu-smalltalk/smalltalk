@@ -953,11 +953,13 @@ children
     ^self arguments copyWith: self body!
 
 primitiveSources
-    | offset |
+    | sourceString offset |
+    self tags isEmpty ifTrue: [^#()].
+    sourceString := self source asString.
     offset := self start - 1.
     ^self tags 
-	collect: [:each | self source copyFrom: each first - offset
-				      to: each last - offset]!
+	collect: [:each | sourceString copyFrom: each first - offset
+				       to: each last - offset]!
 
 isBinary
     ^(self isUnary or: [self isKeyword]) not!
