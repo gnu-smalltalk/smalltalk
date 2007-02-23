@@ -335,13 +335,15 @@ extern OOP _gst_compile_method (tree_node method,
    LITERALS is a Smalltalk Array containing the literals, or nil if we
    retrieve it from the array internal to comp.c */
 extern OOP _gst_make_new_method (int primitiveIndex,
-			int numArgs,
-			int numTemps,
-			int maximumStackDepth,
-			OOP literals,
-			bc_vector bytecodes,
-			OOP class,
-			OOP selector) 
+				 int numArgs,
+				 int numTemps,
+				 int maximumStackDepth,
+				 OOP literals,
+				 bc_vector bytecodes,
+				 OOP class,
+				 OOP selector,
+				 int64_t startPos,
+				 int64_t endPos) 
   ATTRIBUTE_HIDDEN;
 
 /* This function looks for the UndefinedObject>>#__terminate method

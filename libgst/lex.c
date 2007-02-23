@@ -348,8 +348,7 @@ _gst_yylex (PTR lvalp, YYLTYPE *llocp)
       ct = CHAR_TAB (ic);
       if ((ct->char_class & WHITE_SPACE) == 0)
 	{
-	  _gst_get_location (&llocp->first_column, &llocp->first_line);
-
+	  *llocp = _gst_get_location ();
 	  assert (ct->lexFunc || ct->retToken);
 	  if (ct->lexFunc)
 	    {
@@ -473,9 +472,8 @@ scan_symbol (int c,
   /* Look for a shebang (#! /).  */
   if (ic == '!')
     {
-      int line, column;
-      _gst_get_location (&column, &line);
-      if (line == 1 && column == 2)
+      YYLTYPE loc = _gst_get_location ();
+      if (loc.first_line == 1 && loc.first_column == 2)
         {
           while (((ic = _gst_next_char ()) != EOF)
                  && ic != '\r' && ic != '\n')

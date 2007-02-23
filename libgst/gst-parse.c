@@ -335,7 +335,6 @@ parse_doit (gst_parser *p)
   _gst_had_error = false;
 
   /* Do not lex until after _gst_free_tree, or we lose a token!  */
-  _gst_clear_method_start_pos ();
   if (p->token != EOF)
     lex (p);
 }
@@ -369,11 +368,13 @@ parse_method (gst_parser *p)
   tree_node temps = parse_temporaries (p, false);
   tree_node attrs = parse_attributes (p);
   tree_node stmts = parse_statements (p, true);
-  tree_node method = _gst_make_method (&pat->location, pat, temps, attrs, stmts);
+  YYLTYPE current_pos = _gst_get_location ();
+  tree_node method = _gst_make_method (&pat->location, &current_pos,
+				       pat, temps, attrs, stmts);
+
   if (!_gst_had_error && !_gst_skip_compilation)
     _gst_compile_method (method, false, true);
 
-  _gst_clear_method_start_pos ();
   _gst_free_tree ();
   _gst_had_error = false;
 }

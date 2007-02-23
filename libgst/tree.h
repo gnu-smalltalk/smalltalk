@@ -169,13 +169,16 @@ const_node;
    with a nil receiver, holding the selector for the method and
    a list_node (of type TREE_VAR_DECL_LIST) for the arguments.  The
    method's temporaries and statements are also held in list_nodes
-   (respectively, of course, TEMPORARIES and STATEMENTS).  */
+   (respectively, of course, TEMPORARIES and STATEMENTS).  The final
+   field is the ending position of the method in the current stream,
+   or -1 if the stream is not file-based.  */
 typedef struct method_node
 {
   tree_node selectorExpr;
   tree_node temporaries;
   tree_node attributes;
   tree_node statements;
+  int64_t endPos;
 }
 method_node;
 
@@ -220,7 +223,8 @@ struct tree_node
    struct method_node).  TEMPORARIES can possibly be NULL.  If the
    method has any attributes associated with it, then they are in
    ATTRIBUTES.  */
-extern tree_node _gst_make_method (YYLTYPE *location,
+extern tree_node _gst_make_method (YYLTYPE *startLocation,
+                                   YYLTYPE *endLocation,
 				   tree_node selectorExpr,
 				   tree_node temporaries,
 				   tree_node attributes,

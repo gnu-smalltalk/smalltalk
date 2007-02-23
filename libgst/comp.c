@@ -246,14 +246,18 @@ static OOP method_new (method_header header,
 		       OOP literals,
 		       bc_vector bytecodes,
 		       OOP class,
-		       OOP selector);
+		       OOP selector,
+		       int64_t startPos,
+                       int64_t endPos);
 
 /* Returns an instance of MethodInfo.  This instance is used in the
    reconstruction of the source code for the method, and holds the
    category that the method belongs to.  */
 static OOP method_info_new (OOP class,
 			    OOP selector,
-			    method_attributes *attrs);
+			    method_attributes *attrs,
+			    int64_t startPos,
+			    int64_t endPos);
 
 /* Returns a FileSegment instance for the currently open compilation
    stream.  FileSegment instances are used record information useful
@@ -262,8 +266,12 @@ static OOP method_info_new (OOP class,
    the instance variables are different; for a string, the entire
    contents of the string is preserved as the source code for the
    method; for a disk file loaded from within the kernel source
-   directory, the file name, byte offset and length are preserved.  */
-static OOP file_segment_new (void);
+   directory, the file name, byte offset and length are preserved.  
+   The two parameters are used in the latter case and they represent
+   respectively the first byte of the method and the first byte after
+   the method.  Otherwise they should be -1.  */
+static OOP file_segment_new (int64_t startPos,
+			     int64_t endPos);
 
 /* This creates a CompiledBlock for the given BYTECODES.  The bytecodes
    are passed through the peephole optimizer and stored, the header is
@@ -492,7 +500,7 @@ _gst_install_initial_methods (void)
   termination_method = _gst_make_new_method (0, 0, 0, 0, _gst_nil_oop,
 					     _gst_get_bytecodes (),
 					     _gst_this_class,
-					     _gst_terminate_symbol);
+					     _gst_terminate_symbol, -1, -1);
 
   install_method (termination_method);
 
@@ -612,6 +620,7 @@ _gst_execute_statements (tree_node temporaries,
   OOP methodOOP;
   OOP oldClass, oldCategory;
   inc_ptr incPtr;
+  YYLTYPE loc;
 
   quiet = quiet || _gst_verbosity <= 1 || _gst_emacs_process
 	  || !_gst_get_cur_stream_prompt ();
@@ -625,10 +634,10 @@ _gst_execute_statements (tree_node temporaries,
 
   _gst_set_compilation_class (_gst_undefined_object_class);
   _gst_set_compilation_category (_gst_nil_oop);
+  loc = _gst_get_location ();
 
   messagePattern = _gst_make_unary_expr (&statements->location,
-					 NULL,
-					 "executeStatements");
+					 NULL, "executeStatements");
 
   _gst_display_compilation_trace ("Compiling doit code", false);
 
@@ -638,7 +647,7 @@ _gst_execute_statements (tree_node temporaries,
 			 _gst_current_namespace);
   methodOOP =
     _gst_compile_method (_gst_make_method
-			 (&statements->location, messagePattern,
+			 (&statements->location, &loc, messagePattern,
 			  temporaries, NULL, statements),
 			 true, false);
 
@@ -893,7 +902,9 @@ _gst_compile_method (tree_node method,
 					_gst_get_arg_count (),
 					_gst_get_temp_count (),
 					stack_depth, _gst_nil_oop, bytecodes,
-					_gst_this_class, selector);
+					_gst_this_class, selector,
+					method->location.file_offset,
+					method->v_method.endPos);
       INC_ADD_OOP (methodOOP);
 
       if (install)
@@ -2586,7 +2597,9 @@ _gst_make_new_method (int primitiveIndex,
 		      OOP literals,
 		      bc_vector bytecodes,
 		      OOP class,
-		      OOP selector)
+		      OOP selector,
+		      int64_t startPos,
+		      int64_t endPos)
 {
   method_header header;
   int newFlags;
@@ -2667,7 +2680,8 @@ _gst_make_new_method (int primitiveIndex,
   header.numTemps = numTemps;
   header.intMark = 1;
 
-  method = method_new (header, literals, bytecodes, class, selector);
+  method = method_new (header, literals, bytecodes, class, selector,
+		       startPos, endPos);
   INC_RESTORE_POINTER (incPtr);
   return (method);
 }
@@ -2677,7 +2691,9 @@ method_new (method_header header,
 	    OOP literals,
 	    bc_vector bytecodes,
 	    OOP class,
-	    OOP selector)
+	    OOP selector,
+	    int64_t method_start_pos,
+	    int64_t method_end_pos)
 {
   int numByteCodes;
   gst_compiled_method method;
@@ -2690,7 +2706,8 @@ method_new (method_header header,
   else
     numByteCodes = 0;
 
-  methodDesc = method_info_new (class, selector, method_attrs);
+  methodDesc = method_info_new (class, selector, method_attrs,
+				method_start_pos, method_end_pos);
   INC_ADD_OOP (methodDesc);
   method_attrs = NULL;
 
@@ -2775,7 +2792,9 @@ _gst_block_new (int numArgs,
 OOP
 method_info_new (OOP class,
 		 OOP selector,
-		 method_attributes *attrs)
+		 method_attributes *attrs,
+		 int64_t method_start_pos,
+	         int64_t method_end_pos)
 {
   method_attributes *next;
   gst_method_info methodInfo;
@@ -2783,7 +2802,7 @@ method_info_new (OOP class,
   inc_ptr incPtr;
 
   incPtr = INC_SAVE_POINTER ();
-  sourceCode = file_segment_new ();
+  sourceCode = file_segment_new (method_start_pos, method_end_pos);
   INC_ADD_OOP (sourceCode);
 
   methodInfo =
@@ -2810,11 +2829,10 @@ method_info_new (OOP class,
 }
 
 OOP
-file_segment_new (void)
+file_segment_new (int64_t startPos, int64_t endPos)
 {
   OOP fileName, fileSegmentOOP;
   gst_file_segment fileSegment;
-  int64_t startPos = _gst_get_method_start_pos ();
   inc_ptr incPtr;
 
   if (startPos == -1)
@@ -2829,8 +2847,7 @@ file_segment_new (void)
 
   fileSegment->fileName = fileName;
   fileSegment->startPos = from_c_int_64 (startPos);
-  fileSegment->length =
-    from_c_int_64 (_gst_get_cur_file_pos () - startPos - 1);
+  fileSegment->length = from_c_int_64 (endPos - startPos - 1);
 
   assert (to_c_int_64 (fileSegment->length) >= 0);
   INC_RESTORE_POINTER (incPtr);

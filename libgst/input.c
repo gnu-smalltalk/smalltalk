@@ -96,16 +96,12 @@ typedef struct input_stream
 
   int line;
   int column;
-  const char *fileName;
-  int fileOffset;
-
-  /* The starting-position state.  If this is <0, as soon as another
-     token is lexed, the flag is reinitialized to the starting position
-     of the next token.  */
-  off_t method_start_pos;
+  mst_Boolean prompt;
 
   OOP fileNameOOP;		/* the full path name for file */
-  mst_Boolean prompt;
+  const char *fileName;
+  off_t fileOffset;
+
   union
   {
     unix_file_stream u_st_file;
@@ -262,6 +258,7 @@ _gst_push_unix_file (int fd,
   newStream->st_file.end = newStream->st_file.buf;
   newStream->fileName = fileName;
   newStream->prompt = isatty (fd);
+  newStream->fileOffset = lseek (fd, 0, SEEK_CUR);
 }
 
 void
@@ -282,10 +279,7 @@ _gst_push_stream_oop (OOP oop)
       _gst_register_oop (newStream->fileNameOOP);
     }
   else
-    {
-      newStream->fileName = "a Smalltalk Stream";
-      in_stream->fileOffset = -1;
-    }
+    newStream->fileName = "a Smalltalk Stream";
 
   newStream->prompt = false;
   _gst_register_oop (oop);
@@ -353,14 +347,12 @@ push_new_stream (stream_type type)
   newStream->pushedBackCount = 0;
   newStream->line = 1;
   newStream->column = 0;
-  newStream->fileOffset = 0;
+  newStream->fileOffset = -1;
   newStream->type = type;
   newStream->fileName = NULL;
   newStream->fileNameOOP = _gst_nil_oop;
   newStream->prevStream = in_stream;
   in_stream = newStream;
-
-  _gst_clear_method_start_pos ();
   return (newStream);
 }
 
@@ -372,7 +364,6 @@ _gst_set_stream_info (int line,
 {
   in_stream->line = line;
   in_stream->column = 0;
-  _gst_clear_method_start_pos ();
   if (fileName)
     {
       in_stream->fileName = fileName;
@@ -381,18 +372,6 @@ _gst_set_stream_info (int line,
   in_stream->fileOffset = fileOffset;
 }
  
-off_t
-_gst_get_method_start_pos (void)
-{
-  return (in_stream ? in_stream->method_start_pos : -1);
-}
- 
-void
-_gst_clear_method_start_pos (void)
-{
-  in_stream->method_start_pos = -1;
-}
-
 int
 my_getc (input_stream stream)
 {
@@ -451,6 +430,7 @@ my_getc (input_stream stream)
 	  if (n < 0)
 	    n = 0;
 
+	  stream->fileOffset += stream->st_file.ptr - stream->st_file.buf;
 	  stream->st_file.end = stream->st_file.buf + n;
 	  stream->st_file.ptr = stream->st_file.buf;
 	}
@@ -555,8 +535,7 @@ _gst_get_cur_string (void)
     case STREAM_OOP:
       result = _gst_string_new (in_stream->st_oop.buf);
 
-      /* Copy back to the beginning of the buffer to save memory.
-         TODO: might want to do so at the first overflow instead.  */
+      /* Copy back to the beginning of the buffer to save memory.  */
       size = in_stream->st_oop.end - in_stream->st_oop.ptr + 1;
       memmove (in_stream->st_oop.buf, in_stream->st_oop.ptr, size);
       in_stream->fileOffset += in_stream->st_oop.ptr - in_stream->st_oop.buf;
@@ -696,21 +675,21 @@ _gst_yyerror (const char *s)
   _gst_errorf ("%s", s);
 }
 
-void
-_gst_get_location (int *x, int *y)
+YYLTYPE
+_gst_get_location (void)
 {
-  *x = in_stream->column;
-  *y = in_stream->line;
+  YYLTYPE loc;
+  loc.first_line = in_stream->column;
+  loc.first_column = in_stream->line;
 
-  if (in_stream->method_start_pos < 0)
-    {
-      int last_char_pos = _gst_get_cur_file_pos ();
+  if (!in_stream || in_stream->fileOffset == -1)
+    loc.file_offset = -1;
+  else
+    /* Subtract 1 to mark the position of the last character we read.  */
+    loc.file_offset = (in_stream->st_file.ptr - in_stream->st_file.buf
+		       + in_stream->fileOffset - 1);
 
-      /* Subtract 1 to mark the position of the last character we read.  */
-      if (last_char_pos != -1)
-	last_char_pos--;
-      in_stream->method_start_pos = last_char_pos;
-    }
+  return loc;
 }
 
 void
@@ -756,33 +735,6 @@ line_stamp (int line)
 	}
     }
 }
-
-
-off_t
-_gst_get_cur_file_pos (void)
-{
-  if (!in_stream)
-    return (-1);
-
-  switch (in_stream->type)
-    {
-    case STREAM_FILE:
-      return (lseek (in_stream->st_file.fd, 0, SEEK_CUR)
-	      + in_stream->st_file.ptr - in_stream->st_file.end
-	      + in_stream->fileOffset);
-
-    case STREAM_OOP:
-      if (in_stream->fileOffset != -1)
-	return (in_stream->st_file.ptr - in_stream->st_file.buf
-		+ in_stream->fileOffset);
-      else
-	return (-1);
-
-    default:
-      return (-1);
-    }
-}
-
 
 
 int

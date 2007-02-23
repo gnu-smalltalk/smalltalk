@@ -1,3 +1,30 @@
+2007-02-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/oop.c: Remove two unused variables.
+
+	* libgst/comp.c: Add start/end position parameters to method_new,
+	method_info_new, file_segment_new, _gst_make_new_method.  Adjust
+	callers.  Get ending location of the method in _gst_execute_statements.
+	* libgst/comp.h: Adjust prototype of _gst_make_new_method.
+	* libgst/gst-parse.c: Don't call _gst_clear_method_start_pos.
+	Get ending location of the method in parse_method.
+	* libgst/gst-parse.h: Add file_offset field to YYLTYPE.
+	* libgst/input.c: Initialize fileOffset to -1 for a new stream,
+	and with lseek for a new file stream.  Update it when reading
+	from a file into the buffer.  Use it to avoid lseeking during the
+	parsing, so that _gst_get_location can quickly compute the file offset
+	and store it into the YYLTYPE.  Make _gst_get_location return the
+        YYLTYPE.  Remove _gst_get_cur_file_pos, _gst_get_method_start_pos and
+        _gst_clear_method_start_pos, and the field they used in struct stream.
+        * libgst/input.h: Remove _gst_get_cur_file_pos,
+	_gst_get_method_start_pos and _gst_clear_method_start_pos, update the
+	prototype of _gst_get_location and make it pure.
+	* libgst/lex.c: Adjust calls to _gst_get_location.
+	* libgst/prims.def: Adjust call to _gst_make_new_method.
+	* libgst/tree.c: Accept ending location in _gst_make_method.
+	* libgst/tree.h: Add new field to struct method_node and prototype of
+	_gst_make_method.
+
 2007-02-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Remove KernelFileLocalPath.  Don't touch

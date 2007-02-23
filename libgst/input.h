@@ -78,20 +78,10 @@ extern void _gst_push_unix_file (int fd,
 				 const char *fileName) 
   ATTRIBUTE_HIDDEN;
 
-/* Return the position in the stream where the method had started.  */
-extern off_t _gst_get_method_start_pos (void)
-  ATTRIBUTE_PURE
-  ATTRIBUTE_HIDDEN; 
- 
-/* Clear the starting-position state.  As soon as another token is
-   lexed, the flag is reinitialized to the starting position of the
-   next token.  */
-extern void _gst_clear_method_start_pos (void) 
-  ATTRIBUTE_HIDDEN;
- 
 /* Return the current line and column into Y and X, respectively.  
    Also sets the method_start_pos pointer.  */
-extern void _gst_get_location (int *x, int *y) 
+extern YYLTYPE _gst_get_location (void) 
+  ATTRIBUTE_PURE
   ATTRIBUTE_HIDDEN;
 
 /* Pass the OOP to the parser; it must respond to #nextHunk.  */
@@ -189,12 +179,6 @@ extern stream_type _gst_get_cur_stream_type (void)
 /* Return the name of the topmost stream in the stack if it is of type
    STREAM_FILE; nil otherwise.  */
 extern OOP _gst_get_cur_file_name (void)
-  ATTRIBUTE_PURE 
-  ATTRIBUTE_HIDDEN;
-
-/* Return the file position in the topmost stream in the stack if it
-   is of type STREAM_FILE; -1 otherwise.  */
-extern off_t _gst_get_cur_file_pos (void)
   ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
 

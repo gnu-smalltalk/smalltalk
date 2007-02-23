@@ -472,7 +472,6 @@ void
 alloc_oop_table (size_t size)
 {
   size_t bytes;
-  OOP oop;
 
   _gst_mem.ot_size = size;
   bytes = (size - FIRST_OOP_INDEX) * sizeof (struct oop_s);
@@ -496,7 +495,6 @@ mst_Boolean
 _gst_realloc_oop_table (size_t newSize)
 {
   size_t bytes;
-  OOP oop;
 
   bytes = (newSize - _gst_mem.ot_size) * sizeof (struct oop_s);
   if (bytes < 0)

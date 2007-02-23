@@ -2235,7 +2235,8 @@ primitive VMpr_CompiledMethod_create [succeed,fail]
   POP_N_OOPS(6);
 
   method = _gst_make_new_method (primitive, methodArgs, methodTemps, depth,
-			         literals, bytecodes, _gst_nil_oop, _gst_nil_oop);
+			         literals, bytecodes, _gst_nil_oop,
+				 _gst_nil_oop, -1, -1);
 
   OOP_CLASS(method) = STACKTOP ();
 

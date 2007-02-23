@@ -97,6 +97,7 @@ typedef struct YYLTYPE
 {
   int first_line;
   int first_column;
+  int64_t file_offset;
 } YYLTYPE;
 
 enum parser_state {
