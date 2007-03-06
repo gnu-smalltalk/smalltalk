@@ -58,6 +58,12 @@ valueWithArguments: v
 
 !Continuation class methodsFor: 'instance creation'!
 
+current
+    ^self fromContext: thisContext sender!
+
+currentDo: aBlock
+    ^aBlock value: (self fromContext: thisContext sender)!
+
 fromContext: aStack
     ^self new stack: aStack copyStack! !
 
@@ -99,6 +105,6 @@ copyStack
 	ifTrue:[^self copy]
 	ifFalse: [^self copy parentContext: self parentContext copyStack]! !
 
-(Continuation factorialExample: 4) printNl!
-(Undeclared.RetryCC value: 10) printNl!
-Undeclared removeKey: #RetryCC!
+"(Continuation factorialExample: 4) printNl!"
+"(Undeclared.RetryCC value: 10) printNl!"
+"Undeclared removeKey: #RetryCC!"
