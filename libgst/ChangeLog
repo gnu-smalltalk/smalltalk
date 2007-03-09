@@ -1,3 +1,8 @@
+2007-03-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Create FileSegment and MethodInfo object in
+	_gst_make_new_method, pass the MethodInfo down to method_new.
+
 2007-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Remove two unused variables.

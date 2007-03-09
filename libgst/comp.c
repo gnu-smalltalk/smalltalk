@@ -246,9 +246,7 @@ static OOP method_new (method_header header,
 		       OOP literals,
 		       bc_vector bytecodes,
 		       OOP class,
-		       OOP selector,
-		       int64_t startPos,
-                       int64_t endPos);
+		       OOP methodDesc);
 
 /* Returns an instance of MethodInfo.  This instance is used in the
    reconstruction of the source code for the method, and holds the
@@ -256,8 +254,7 @@ static OOP method_new (method_header header,
 static OOP method_info_new (OOP class,
 			    OOP selector,
 			    method_attributes *attrs,
-			    int64_t startPos,
-			    int64_t endPos);
+			    OOP sourceCode);
 
 /* Returns a FileSegment instance for the currently open compilation
    stream.  FileSegment instances are used record information useful
@@ -2603,7 +2600,7 @@ _gst_make_new_method (int primitiveIndex,
 {
   method_header header;
   int newFlags;
-  OOP method;
+  OOP method, methodDesc, sourceCode;
   inc_ptr incPtr;
 
   maximumStackDepth += numArgs + numTemps;
@@ -2680,8 +2677,18 @@ _gst_make_new_method (int primitiveIndex,
   header.numTemps = numTemps;
   header.intMark = 1;
 
-  method = method_new (header, literals, bytecodes, class, selector,
-		       startPos, endPos);
+  if (IS_NIL (class))
+    methodDesc = _gst_nil_oop;
+  else
+    {
+      sourceCode = file_segment_new (startPos, endPos);
+      INC_ADD_OOP (sourceCode);
+      methodDesc = method_info_new (class, selector, method_attrs,
+				    sourceCode);
+      INC_ADD_OOP (methodDesc);
+    }
+
+  method = method_new (header, literals, bytecodes, class, methodDesc);
   INC_RESTORE_POINTER (incPtr);
   return (method);
 }
@@ -2691,13 +2698,11 @@ method_new (method_header header,
 	    OOP literals,
 	    bc_vector bytecodes,
 	    OOP class,
-	    OOP selector,
-	    int64_t method_start_pos,
-	    int64_t method_end_pos)
+	    OOP methodDesc)
 {
   int numByteCodes;
   gst_compiled_method method;
-  OOP methodOOP, methodDesc;
+  OOP methodOOP;
   gst_object lit;
   int i;
 
@@ -2706,9 +2711,6 @@ method_new (method_header header,
   else
     numByteCodes = 0;
 
-  methodDesc = method_info_new (class, selector, method_attrs,
-				method_start_pos, method_end_pos);
-  INC_ADD_OOP (methodDesc);
   method_attrs = NULL;
 
   method = (gst_compiled_method) instantiate_with (_gst_compiled_method_class,
@@ -2793,17 +2795,11 @@ OOP
 method_info_new (OOP class,
 		 OOP selector,
 		 method_attributes *attrs,
-		 int64_t method_start_pos,
-	         int64_t method_end_pos)
+		 OOP sourceCode)
 {
   method_attributes *next;
   gst_method_info methodInfo;
-  OOP sourceCode, methodInfoOOP;
-  inc_ptr incPtr;
-
-  incPtr = INC_SAVE_POINTER ();
-  sourceCode = file_segment_new (method_start_pos, method_end_pos);
-  INC_ADD_OOP (sourceCode);
+  OOP methodInfoOOP;
 
   methodInfo =
     (gst_method_info) new_instance_with (_gst_method_info_class,
@@ -2824,7 +2820,6 @@ method_info_new (OOP class,
       attrs = next;
     }
 			     
-  INC_RESTORE_POINTER (incPtr);
   return (methodInfoOOP);
 }
 
