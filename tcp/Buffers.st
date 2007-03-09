@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2003, 2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -111,7 +111,7 @@ bufferContents
     "Answer the data that is in the buffer, and empty it."
     | contents |
     self basicAtEnd ifTrue: [ ^self species new: 0 ].
-    contents := self copyFrom: ptr to: endPtr.
+    contents := self collection copyFrom: ptr to: endPtr.
     endPtr := ptr - 1. "Empty the buffer"
     ^contents
 !
