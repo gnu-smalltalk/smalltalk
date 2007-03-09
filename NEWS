@@ -1,6 +1,6 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 2.3.3 TO 2.4
+NEWS FROM 2.3.4 TO 2.4
 
 o   A different startup sequence is used which improves the possibility to
     customize GNU Smalltalk, both site-wide and per-user.  The details are
@@ -34,6 +34,15 @@ o   Image load uses copy-on-write memory mapped files.  This means that, as
 
 o   Startup time and quit time were improved widely (the time for running
     a simple "Hello, World" program is about one fifth of 2.3.x).
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 2.3.3 TO 2.3.4
+
+o   Fixed paths in the image when "make DESTDIR" was used.
+
+o   Fixed bug in socket #nextHunk implementation, which lost the first
+    or second byte in the input buffer.
 
 -----------------------------------------------------------------------------
 
