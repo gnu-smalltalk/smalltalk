@@ -43,11 +43,12 @@ ok ifFalse: [ ObjectMemory quit: 1 ]!
 
 "Remove DESTDIR and references to the build directory, from the paths
  stored in the image"
-| newImagePath newKernelBasePath |
+| newImagePath oldKernelBasePath newKernelBasePath |
+oldKernelBasePath := File pathFor: KernelFilePath.
 newKernelBasePath := Smalltalk arguments at: 1.
 newImagePath := Smalltalk arguments at: 2.
-KernelFilePath = newKernelBasePath
-    ifFalse: [ FileSegment relocateFrom: KernelFilePath to: newKernelBasePath ].
+oldKernelBasePath = newKernelBasePath ifFalse: [
+    FileSegment relocateFrom: oldKernelBasePath to: newKernelBasePath ].
 
 ImageFileName := 'gst.im'.
 ImageFilePath := newImagePath.
