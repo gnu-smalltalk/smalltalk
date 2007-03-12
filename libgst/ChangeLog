@@ -1,3 +1,7 @@
+2007-03-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Hardcode a doit's start/end position to -1.
+
 2007-03-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Create FileSegment and MethodInfo object in
