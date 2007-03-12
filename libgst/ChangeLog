@@ -1,6 +1,8 @@
 2007-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
-	* libgst/comp.c: Hardcode a doit's start/end position to -1.
+	* libgst/comp.c: Fix off-by-one error.  
+	* libgst/input.c: Fix line/column assignment.  Don't provide
+	method source for readline stream.
 
 2007-03-08  Paolo Bonzini  <bonzini@gnu.org>
 

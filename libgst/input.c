@@ -527,9 +527,6 @@ _gst_get_cur_string (void)
   switch (in_stream->type)
     {
     case STREAM_STRING:
-#ifdef HAVE_READLINE
-    case STREAM_READLINE:
-#endif /* HAVE_READLINE */
       return (_gst_string_new (in_stream->st_str.strBase));
 
     case STREAM_OOP:
@@ -679,8 +676,8 @@ YYLTYPE
 _gst_get_location (void)
 {
   YYLTYPE loc;
-  loc.first_line = in_stream->column;
-  loc.first_column = in_stream->line;
+  loc.first_line = in_stream->line;
+  loc.first_column = in_stream->column;
 
   if (!in_stream || in_stream->fileOffset == -1)
     loc.file_offset = -1;

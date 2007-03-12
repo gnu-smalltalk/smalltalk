@@ -2842,7 +2842,7 @@ file_segment_new (int64_t startPos, int64_t endPos)
 
   fileSegment->fileName = fileName;
   fileSegment->startPos = from_c_int_64 (startPos);
-  fileSegment->length = from_c_int_64 (endPos - startPos - 1);
+  fileSegment->length = from_c_int_64 (endPos - startPos);
 
   assert (to_c_int_64 (fileSegment->length) >= 0);
   INC_RESTORE_POINTER (incPtr);
