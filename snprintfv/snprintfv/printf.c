@@ -650,15 +650,9 @@ stream_printfv (STREAM *stream, const char *format, snv_constpointer const *ap)
           if ((tp & PA_TYPE_MASK) == PA_TYPE_MASK)
             {
               if (index + 1 == info.argc)
-                {
-                  info.argc--;
-                }
+                info.argc--;
               else
-                {
-                  info.error = EINVAL;
-                  index = info.argc;
-                }
-              break;
+                continue;
             }
 
           switch (tp & ~PA_FLAG_UNSIGNED)

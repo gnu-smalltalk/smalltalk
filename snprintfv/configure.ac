@@ -37,7 +37,6 @@ AC_ARG_ENABLE(subdir,
 [enable_subdir=no])
 
 AM_INIT_AUTOMAKE
-AM_MAINTAINER_MODE
 
 SNV_CURRENT=3;	AC_SUBST(SNV_CURRENT)
 SNV_REVISION=0; AC_SUBST(SNV_REVISION)
@@ -163,11 +162,9 @@ AC_TYPE_SIZE_T
 # ----------------------------------------------------------------------
 # Checks for floating-point features
 # ----------------------------------------------------------------------
-if test x$enable_convenience_float_printing = xyes; then
-  AC_C_LONG_DOUBLE
-  AC_CHECK_LIB(m, log)
-  AC_CHECK_FUNCS(copysign copysignl isinf isinfl isnan isnanl modfl)
-fi
+AC_C_LONG_DOUBLE
+AC_CHECK_LIB(m, log)
+AC_CHECK_FUNCS(copysign copysignl isinf isinfl isnan isnanl modfl)
 
 # ----------------------------------------------------------------------
 # Add code to config.status to create an installable host dependent
