@@ -886,7 +886,7 @@ under their names.  The sub-environment includes its super-environment
 under the symbol @code{#Super}.  Most environments inherit from
 Smalltalk, the standard root environment, but they are not required to
 do so; this is similar to how most classes derive from Object, yet one
-can derive a class directly from nil.  Since they all inherit from
+can derive a class directly from @code{nil}.  Since they all inherit from
 Smalltalk all global variables defined in it, it is not necessary to
 define a special global variable pointing to root in each environment.
 
@@ -3168,12 +3168,13 @@ is a @code{void *} if supported, or otherwise a @code{char *}.
 @end deftypefun
 
 @deftypefun long OOPToC (OOP)
-This functions assumes that the passed OOP is a String, a ByteArray, a
-CObject, or a built-in object (nil, true, false, character, integer).
-If the OOP is nil, it answers 0; else the mapping for each object is
-exactly the same as for the above functions.  Note that, even though the
-function is declared as returning a @code{long}, you might need to cast
-it to either a @code{char *} or @code{PTR}.
+This functions assumes that the passed OOP is a String, a ByteArray,
+a CObject, or a built-in object (@code{nil}, @code{true}, @code{false},
+character, integer).  If the OOP is @code{nil}, it answers 0; else the
+mapping for each object is exactly the same as for the above functions.
+Note that, even though the function is declared as returning a
+@code{long}, you might need to cast it to either a @code{char *}
+or @code{PTR}.
 @end deftypefun
 
 While special care is needed to use the functions above (you will
@@ -3359,7 +3360,7 @@ wrong.  Example (same as @code{1 + 2}):
         intToOOP(1),
         symbolToOOP("+"),
         intToOOP(2),
-        nil);
+        NULL);
 @end example
 @end deftypefun
 
@@ -3379,7 +3380,7 @@ to a Symbol object.  Example:
         intToOOP(1),
         "+",
         intToOOP(2),
-        nil);
+        NULL);
 @end example
 @end deftypefun
 
@@ -3391,7 +3392,7 @@ functions.  Example:
 @example
     OOP arguments[2], shouldBeThreeOOP;
     arguments[0] = intToOOP(2);
-    arguments[1] = nil;
+    arguments[1] = NULL;
     /* @dots{} some more code here @dots{} */
 
     shouldBeThreeOOP = vmProxy->vmsgSend(
@@ -3451,8 +3452,8 @@ look at some examples.
     vmProxy->msgSendf(&aBoolean, "%b %o includes: %s", aCollection, "abc")
 
     /* 'This is a test' printNl -- in two different ways */
-    vmProxy->msgSendf(nil, "%v %s printNl", "This is a test");
-    vmProxy->msgSendf(nil, "%s %s printNl", "This is a test");
+    vmProxy->msgSendf(NULL, "%v %s printNl", "This is a test");
+    vmProxy->msgSendf(NULL, "%s %s printNl", "This is a test");
 
     /* 'This is a test', ' ok?' */
     char *str;
@@ -3464,7 +3465,7 @@ As you can see, the parameters to msgSendf are, in order:
 @itemize @bullet
 @item
 A pointer to the variable which will contain the record. If this pointer
-is nil, it is discarded.
+is @code{NULL}, it is discarded.
 
 @item
 A description of the method's interface in this format (the object
@@ -3530,13 +3531,13 @@ Specifier   if nil    C data type      expected result
    ?         0      char *, PTR        See oopToC
    o       nilOOP        OOP           any (result is not converted)
    w        '\0'       wchar_t         nil or a Character
-   W        NULL      wchar_t *        nil, a UnicodeString
+   W        NULL      wchar_t *        nil or a UnicodeString
    v                      /            any (result is discarded)
 @end example
 
-Note that, if resultPtr is nil, the @dfn{result_type} is always treated
-as @samp{%v}.  If an error occurs, the value in the `result if nil'
-column is returned.
+Note that, if resultPtr is @code{NULL}, the @dfn{result_type} is always
+treated as @samp{%v}.  If an error occurs, the value in the `result if
+nil' column is returned.
 
 @node Other C functions
 @section Other functions available to modules
@@ -4001,7 +4002,7 @@ Smalltalk code in a basic image.  To avoid this check, pass a @option{-I}
 flag:
 
 @example
-char myArgv[][] = @{ "-I", "myprog.im", nil @};
+char myArgv[][] = @{ "-I", "myprog.im", NULL @};
 int myArgc;
 /* @dots{} */
 myArgc = sizeof(myArgv) / sizeof (char *) - 1;

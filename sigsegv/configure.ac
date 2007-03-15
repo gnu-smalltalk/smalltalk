@@ -125,7 +125,7 @@ case "$host" in
     # List of signals that are sent when an invalid virtual memory address
     # is accessed, or when the stack overflows.
     case "$host_os" in
-      sunos4* | freebsd* | openbsd* | netbsd*)
+      sunos4* | freebsd* | openbsd* | netbsd* | kfreebsd*)
         CFG_SIGNALS=signals-bsd.h ;;
       hpux*)
         CFG_SIGNALS=signals-hpux.h ;;
@@ -306,7 +306,7 @@ case "$host" in
     fi
     if test "$CFG_FAULT" = fault-none.h && test "$sv_cv_fault_bsd" = yes; then
       case "$host_os" in
-        freebsd*)
+        freebsd*|kfreebsd*)
           case "$host_cpu" in
             i?86 | x86_64)
               CFG_FAULT=fault-freebsd-i386.h
