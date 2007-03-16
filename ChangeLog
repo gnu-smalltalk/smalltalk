@@ -1,3 +1,7 @@
+2007-03-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Regex.st: Fix calls to #interval.
+
 2007-03-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Finish.st: Fix DESTDIR installation.

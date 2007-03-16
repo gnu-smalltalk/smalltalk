@@ -454,7 +454,7 @@ indexOfRegex: regexString ifAbsent: excBlock
     | regs |
     regs := self searchRegexInternal: regexString from: 1 to: self size.
     ^regs isNil
-	ifFalse: [ regs interval ]
+	ifFalse: [ regs matchInterval ]
 	ifTrue: [ excBlock value ]
 !
 
@@ -465,7 +465,7 @@ indexOfRegex: regexString startingAt: index ifAbsent: excBlock
     | regs |
     regs := self searchRegexInternal: regexString from: index to: self size.
     ^regs isNil
-	ifFalse: [ regs interval ]
+	ifFalse: [ regs matchInterval ]
 	ifTrue: [ excBlock value ]
 !
 
@@ -476,7 +476,7 @@ indexOfRegex: regexString from: from to: to ifAbsent: excBlock
     | regs |
     regs := self searchRegexInternal: regexString from: from to: to.
     ^regs isNil
-	ifFalse: [ regs interval ]
+	ifFalse: [ regs matchInterval ]
 	ifTrue: [ excBlock value ]
 !
 
@@ -486,7 +486,7 @@ indexOfRegex: regexString
      nil."
     | regs |
     regs := self searchRegexInternal: regexString from: 1 to: self size.
-    ^regs isNil ifFalse: [ regs interval ]
+    ^regs isNil ifFalse: [ regs matchInterval ]
 !
 
 indexOfRegex: regexString startingAt: index
@@ -495,7 +495,7 @@ indexOfRegex: regexString startingAt: index
      the given index.  Otherwise return nil."
     | regs |
     regs := self searchRegexInternal: regexString from: index to: self size.
-    ^regs isNil ifFalse: [ regs interval ]
+    ^regs isNil ifFalse: [ regs matchInterval ]
 !
 
 indexOfRegex: regexString from: from to: to
@@ -504,7 +504,7 @@ indexOfRegex: regexString from: from to: to
      the given range of indices.  Otherwise return nil."
     | regs |
     regs := self searchRegexInternal: regexString from: from to: to.
-    ^regs isNil ifFalse: [ regs interval ]
+    ^regs isNil ifFalse: [ regs matchInterval ]
 !
 
 matchRegex: pattern
