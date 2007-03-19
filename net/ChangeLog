@@ -1,3 +1,10 @@
+2007-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* net/MIME.st: Remove unused class variable.
+	* net/URIResolver.st: Convert class variables to class-instance.
+	* net/Base.st: Convert class variables to class-instance.
+	* net/http/WikiServer.st: Don't use #perform: unless necessary.
+
 2007-01-03  Paolo Bonzini  <bonzini@gnu.org>
 
         * net/ContentHandler.st: Add png extension.

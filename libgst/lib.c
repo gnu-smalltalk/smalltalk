@@ -370,7 +370,6 @@ static const char standard_files[] = {
   "RWStream.st\0"
   "ByteStream.st\0"
   "TokenStream.st\0"
-  "Random.st\0"
   "UndefObject.st\0"
   "ProcSched.st\0"
   "Delay.st\0"
@@ -393,6 +392,7 @@ static const char standard_files[] = {
   "ObjMemory.st\0"
 
   /* More core classes */
+  "Random.st\0"
   "Transcript.st\0"
   "RecursionLock.st\0"
   "Point.st\0"

@@ -1,3 +1,9 @@
+2007-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lib.c: Load Random.st after system is initialized.
+	* libgst/dict.c: Remove Random class and _gst_random_class.
+	* libgst/dict.h: Remove _gst_random_class.
+
 2007-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Fix off-by-one error.  

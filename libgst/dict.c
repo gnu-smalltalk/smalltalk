@@ -145,7 +145,6 @@ OOP _gst_permission_class = NULL;
 OOP _gst_positionable_stream_class = NULL;
 OOP _gst_process_class = NULL;
 OOP _gst_processor_scheduler_class = NULL;
-OOP _gst_random_class = NULL;
 OOP _gst_read_stream_class = NULL;
 OOP _gst_read_write_stream_class = NULL;
 OOP _gst_root_namespace_class = NULL;
@@ -622,10 +621,6 @@ static const class_definition class_info[] = {
    ISP_FIXED, true, 2,
    "FileStream", "writePtr writeEnd", "Verbose Record Includes", NULL },
 
-  {&_gst_random_class, &_gst_stream_class,
-   ISP_FIXED, false, 1,
-   "Random", "seed", "Source", NULL },
-
   {&_gst_undefined_object_class, &_gst_object_class,
    ISP_FIXED, true, 0,
    "UndefinedObject", NULL, NULL, NULL },
@@ -683,7 +678,7 @@ static const class_definition class_info[] = {
   {&_gst_context_part_class, &_gst_object_class,
    ISP_POINTER, true, 6,
    "ContextPart", "parent nativeIP ip sp receiver method ",
-   "UnwindPoints", NULL },
+   NULL, NULL },
 
   {&_gst_method_context_class, &_gst_context_part_class,
    ISP_POINTER, true, 1,

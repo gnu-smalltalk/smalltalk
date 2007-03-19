@@ -34,7 +34,7 @@
 
 Object variableSubclass: #ContextPart
        instanceVariableNames: 'parent nativeIP ip sp receiver method '
-       classVariableNames: 'UnwindPoints'
+       classVariableNames: ''
        poolDictionaries: ''
        category: 'Language-Implementation'
 !

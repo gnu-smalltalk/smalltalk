@@ -1,3 +1,20 @@
+2007-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/Application.st: Delete.
+	* examples/Debugger.st: Delete.
+	* examples/RandomInt.st: Delete.
+	* examples/DeltaBlue.st: Convert class variables to class-instance.
+	* kernel/Regex.st: Likewise.
+	* kernel/DLD.st: Likewise.
+	* kernel/ObjDumper.st: Likewise.
+	* kernel/PkgLoader.st: Likewise.
+	* kernel/Random.st: Likewise.
+	* kernel/ValueAdapt.st: Likewise.
+	* kernel/VFS.st: Likewise.
+
+	* examples/RegExp.st: Remove useless debugging code.
+	* kernel/ContextPart.st: Remove unused class variable.
+
 2007-03-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Regex.st: Fix calls to #interval.

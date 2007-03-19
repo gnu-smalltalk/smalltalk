@@ -573,11 +573,9 @@
   <name>Examples</name>
   <directory>examples</directory>
   <file>Continuations.st</file>
-  <file>Debugger.st</file>
   <file>LazyCollection.st</file>
   <file>Man.st</file>
   <file>Tetris.st</file>
-  <file>Application.st</file>
   <file>Generator.st</file>
   <file>Gen2.st</file>
   <file>Lisp.st</file>
@@ -592,7 +590,6 @@
   <file>GenClasses.st</file>
   <file>Dinner.st</file>
   <file>Prolog.st</file>
-  <file>RandomInt.st</file>
   <file>EditStream.st</file>
   <file>PrtHier.st</file>
   <file>Case.st</file>

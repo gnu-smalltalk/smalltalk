@@ -965,7 +965,7 @@ respondTo: aRequest in: aWiki
 !WikiPageHTML class methodsFor: 'initialize'!
 
 initialize
-    ParseTable := Array new: 256 withAll: #addCurrentChar.
+    ParseTable := Array new: 256.
     ParseTable at: 1 + Character cr asciiValue put: #processCr.
     ParseTable at: 1 + Character nl asciiValue put: #processNl.
     ParseTable at: 1 + $[	    asciiValue put: #processLeftBracket.
@@ -1048,10 +1048,14 @@ closeTableRow
     contentStream position: pos!
 
 processNextChar
+    | selector |
     lastChar := currentChar.
     currentChar := contentStream next.
     
-    ^self perform: (ParseTable at: (currentChar asciiValue + 1))!
+    selector := ParseTable at: (currentChar value + 1).
+    ^selector isNil
+	ifTrue: [ self addCurrentChar ]
+	ifFalse: [ self perform: selector ]!
 
 processDot
     self atLineStart ifFalse: [ ^self addCurrentChar].

@@ -46,10 +46,13 @@ XML.'!
 
 Object subclass: #PackageLoader
 	instanceVariableNames: ''
-	classVariableNames: 'Packages LoadDate IgnoreCallouts'
+	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Language-Packaging'
 !
+
+PackageLoader class
+	instanceVariableNames: 'packages loadDate ignoreCallouts'!
 
 PackageLoader comment: 
 'I am not part of a standard Smalltalk system. I provide methods for
@@ -310,7 +313,7 @@ fileIn
 packageAt: package
     "Answer a Package object for the given package"
     self refreshDependencies.
-    ^Packages at: package asString
+    ^packages at: package asString
 !
 
 directoryFor: package
@@ -368,17 +371,18 @@ prerequisitesFor: package
 
 ignoreCallouts
     "Answer whether unavailable C callouts must generate errors or not."
-    ^IgnoreCallouts
+    ignoreCallouts isNil ifTrue: [ ignoreCallouts := false ].
+    ^ignoreCallouts
 !
 
 ignoreCallouts: aBoolean
     "Set whether unavailable C callouts must generate errors or not."
-    IgnoreCallouts := aBoolean
+    ignoreCallouts := aBoolean
 !
 
 flush
     "Set to reload the `packages.xml' file the next time it is needed."
-    LoadDate := nil
+    loadDate := nil
 !
 
 refreshDependencies
@@ -393,12 +397,12 @@ refreshDependencies
      searched.  For a packages.xml directory in the local image directory,
      finally, only directory 3 is searched."
     | state |
-    LoadDate isNil ifFalse: [
+    loadDate isNil ifFalse: [
 	self stillValid ifTrue: [ ^self ]
     ].
 
-    LoadDate := Date dateAndTimeNow.
-    Packages := LookupTable new.
+    loadDate := Date dateAndTimeNow.
+    packages := LookupTable new.
     self
 	processPackageFile: self packageFileName
 	baseDirectories: { Directory userBase.  Directory kernel, '/..' }.
@@ -498,7 +502,7 @@ hasCallout: feature
 isLoadable: feature
     "Private - Answer whether the packages file includes an entry for `feature'"
     self refreshDependencies.
-    ^Packages includesKey: feature asString
+    ^packages includesKey: feature asString
 ! !
 
 
@@ -520,7 +524,7 @@ printXmlOn: aStream
     "Print the XML source code for the information that the PackageLoader
      holds on aStream."
     aStream nextPutAll: '<packages>'.
-    Packages keys asSortedCollection do: [ :each |
+    packages keys asSortedCollection do: [ :each |
 	(self packageAt: each) printOn: aStream.
     ].
     aStream nextPutAll: '</packages>'
@@ -586,7 +590,7 @@ processPackageFile: fileName baseDirectories: anArray
 	    tag = 'library' ifTrue: [ package libraries add: cdata ] ifFalse: [
 	    tag = 'package' ifTrue: [
 		(package baseDirs: baseDirs)
-		    ifTrue: [ Packages at: package name put: package ]] ifFalse: [
+		    ifTrue: [ packages at: package name put: package ]] ifFalse: [
 	    tag = 'built-file' ifTrue: [ package builtFiles add: cdata ] ifFalse: [
 	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]]].
 	    cdata := nil.
@@ -608,8 +612,7 @@ stillValid
     ^{ self packageFileName. self userPackageFileName. self localPackageFileName } 
 	allSatisfy: [ :name || file |
 	    file := File name: name.
-	    file exists not or: [ file lastModifyTime < LoadDate ]
+	    file exists not or: [ file lastModifyTime < loadDate ]
 	]
 ! !
 
-PackageLoader ignoreCallouts: false!

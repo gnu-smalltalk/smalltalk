@@ -57,9 +57,12 @@ nil!
 
 Object subclass:  #UserProfileSettings
 	instanceVariableNames: 'settings '
-	classVariableNames: 'Default '
+	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'NetClients-URIResolver'!
+
+UserProfileSettings class
+	instanceVariableNames: 'default'!
 
 UserProfileSettings comment: 
 nil!
@@ -1420,14 +1423,12 @@ guessedContentType
 !UserProfileSettings class methodsFor: 'accessing'!
 
 default
-    ^Default! !
+    ^default isNil
+	ifTrue: [ default := self new ]
+	ifFalse: [ default ]!
 
-!UserProfileSettings class methodsFor: 'class initialization'!
-
-initialize
-    "UserProfileSettings initialize"
-
-    Default := self new! !
+default: aSettingsObject
+    default := aSettingsObject! !
 
 !UserProfileSettings class methodsFor: 'instance creation'!
 

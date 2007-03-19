@@ -57,9 +57,12 @@ Instance Variables:
 
 Object subclass:  #NetEnvironment
 	instanceVariableNames: 'debugStream debugCategories debugClasses trace logFileName '
-	classVariableNames: 'Environment '
+	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'NetClients-Framework'!
+
+NetEnvironment class
+	instanceVariableNames: 'uniqueInstance'!
 
 NetEnvironment comment: 
 nil!
@@ -226,9 +229,9 @@ username: aString
 
 default
 
-	^ Environment isNil
-		ifTrue: [ Environment := self new ]
-		ifFalse: [ Environment ].! !
+	^uniqueInstance isNil
+		ifTrue: [ uniqueInstance := self new ]
+		ifFalse: [ uniqueInstance ].! !
 
 !NetEnvironment methodsFor: 'accessing'!
 

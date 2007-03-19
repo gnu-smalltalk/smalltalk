@@ -141,7 +141,7 @@ java_lang_Runtime_insertSystemProperties_java_util_Properties: arg1
     put value: 'java.vm.specification.name'    value: 'Java(tm) Virtual Machine Specification'.
     put value: 'java.vm.specification.vendor'  value: 'Sun Microsystems Inc.'.
 
-    put value: 'java.class.path'    value: JavaClassReader classPath.
+    put value: 'java.class.path'    value: JavaClassFileReader classPath.
     put value: 'java.home'          value: Directory image.
     put value: 'os.name'            value: os.
     put value: 'os.arch'            value: cpu.

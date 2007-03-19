@@ -1,3 +1,7 @@
+2007-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+        * gtk/GtkDecl.st: Convert class variables to class-instance.
+
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.3 released.

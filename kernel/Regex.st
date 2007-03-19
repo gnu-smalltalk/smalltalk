@@ -77,10 +77,13 @@ RegexResults subclass: #MatchingRegexResults
 
 RegexResults subclass: #FailedMatchRegexResults
         instanceVariableNames: ''
-        classVariableNames: 'NotMatched'
+        classVariableNames: ''
         poolDictionaries: ''
         category: 'Collections-Text'
 !
+
+FailedMatchRegexResults class
+	instanceVariableNames: 'uniqueInstance'!
 
 Namespace current: Smalltalk!
 
@@ -172,12 +175,10 @@ intervalAt: anIndex
 
 !Kernel.FailedMatchRegexResults class methodsFor: 'private'!
 
-initialize
-    NotMatched := self new
-!
-
-notMatched
-    ^NotMatched
+uniqueInstance
+    ^uniqueInstance isNil
+	ifTrue: [ uniqueInstance := self new ]
+	ifFalse: [ uniqueInstance ]
 ! !
 
 !Kernel.FailedMatchRegexResults methodsFor: 'testing'!
@@ -411,7 +412,7 @@ asRegex
     | regs |
     regs := self searchRegexInternal: pattern from: 1 to: self size.
     ^regs isNil
-	ifTrue: [ Kernel.FailedMatchRegexResults notMatched ]
+	ifTrue: [ Kernel.FailedMatchRegexResults uniqueInstance ]
 	ifFalse: [ regs ]
 !
 
@@ -421,7 +422,7 @@ searchRegex: pattern
     | regs |
     regs := self searchRegexInternal: pattern from: 1 to: self size.
     ^regs isNil
-	ifTrue: [ Kernel.FailedMatchRegexResults notMatched ]
+	ifTrue: [ Kernel.FailedMatchRegexResults uniqueInstance ]
 	ifFalse: [ regs ]
 !
 
@@ -432,7 +433,7 @@ searchRegex: pattern startingAt: anIndex
     | regs |
     regs := self searchRegexInternal: pattern from: anIndex to: self size.
     ^regs isNil
-	ifTrue: [ Kernel.FailedMatchRegexResults notMatched ]
+	ifTrue: [ Kernel.FailedMatchRegexResults uniqueInstance ]
 	ifFalse: [ regs ]
 !
 
@@ -443,7 +444,7 @@ searchRegex: pattern from: from to: to
     | regs |
     regs := self searchRegexInternal: pattern from: from to: to.
     ^regs isNil
-	ifTrue: [ Kernel.FailedMatchRegexResults notMatched ]
+	ifTrue: [ Kernel.FailedMatchRegexResults uniqueInstance ]
 	ifFalse: [ regs ]
 !
 

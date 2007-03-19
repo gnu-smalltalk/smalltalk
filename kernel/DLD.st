@@ -144,10 +144,13 @@ do: aBlock
 
 Object subclass: #DLD
        instanceVariableNames: ''
-       classVariableNames: 'LibraryList LibraryStream ModuleList'
+       classVariableNames: ''
        poolDictionaries: ''
        category: 'Language-C interface'
 !
+
+DLD class
+	instanceVariableNames: 'libraryList libraryStream moduleList'!
 
 DLD comment: '...and Gandalf said:
 ``Many folk like to know beforehand what is to be set on the
@@ -214,7 +217,7 @@ primDefineExternFunc: aFuncName
      whether the linkage was successful. It should not be overridden."
     
     | couldNotLink |
-    LibraryStream do: [ :lib || funcAddr |
+    libraryStream do: [ :lib || funcAddr |
 	lib value notNil
 	    ifTrue: [
 	        funcAddr := self library: lib value getFunc: aFuncName.
@@ -230,9 +233,9 @@ primDefineExternFunc: aFuncName
 
 initialize
     "Private - Initialize the receiver's class variables"
-    LibraryList := OrderedCollection new.
-    LibraryStream := RoundRobinStream on: LibraryList readStream.
-    ModuleList := OrderedCollection new.
+    libraryList := OrderedCollection new.
+    libraryStream := RoundRobinStream on: libraryList readStream.
+    moduleList := OrderedCollection new.
     ObjectMemory addDependent: DLD
 !
 
@@ -241,11 +244,11 @@ update: aspect
      all the externally defined functions"
     | notLoaded |
     aspect == #returnFromSnapshot ifFalse: [ ^self ].
-    LibraryList do: [ :lib | lib value: (self linkFile: lib key) ].
+    libraryList do: [ :lib | lib value: (self linkFile: lib key) ].
 
     notLoaded := WriteStream on: Array new.
 
-    ModuleList do: [ :each |
+    moduleList do: [ :each |
 	(self linkFile: each) isNil ifTrue: [ notLoaded nextPut: each ]
     ].
 
@@ -257,20 +260,20 @@ update: aspect
 
 libraryList
     "Answer a copy of the search path of libraries to be used by DLD"
-    ^LibraryList copy
+    ^libraryList copy
 !
 
 moduleList
     "Answer a copy of the modules reloaded when the image is started"
-    ^ModuleList copy
+    ^moduleList copy
 !
 
 addLibrary: library
     "Add library to the search path of libraries to be used by DLD."
-    (LibraryList anySatisfy: [ :anAssociation | anAssociation key = library ])
+    (libraryList anySatisfy: [ :anAssociation | anAssociation key = library ])
 	ifFalse: [
-	    LibraryList add: library -> (self linkFile: library).
-	    LibraryStream := RoundRobinStream on: LibraryList readStream ].
+	    libraryList add: library -> (self linkFile: library).
+	    libraryStream := RoundRobinStream on: libraryList readStream ].
 !
 
 addModule: library
@@ -279,12 +282,12 @@ addModule: library
      but the library will not be put in the search path used whenever
      a C function is requested but not registered."
 
-    (ModuleList includes: library) ifFalse: [
+    (moduleList includes: library) ifFalse: [
         (self linkFile: library) isNil
            ifTrue: [
 		SystemExceptions.CInterfaceError
 		    signal: 'requested module ', library, ' was not found' ]
-           ifFalse: [ ModuleList add: library ]
+           ifFalse: [ moduleList add: library ]
     ]
 ! !
 

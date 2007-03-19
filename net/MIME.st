@@ -78,7 +78,7 @@ Instance Variables:
 
 MessageElement subclass:  #HeaderField
 	instanceVariableNames: 'name source '
-	classVariableNames: 'Registry '
+	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'NetClients-MIME'!
 
@@ -102,10 +102,6 @@ This reads field''s name, find an appropriate field class for this name, creates
 Instance Variables:
     name    <String>  comment
     source    <String>  comment
-
-
-Class Variables:
-    Registry    <IdentityDictionary key: String value: HeaderField class>  comment
 '!
 
 SimpleScanner subclass:  #MimeEncodedWordCoDec
@@ -1218,14 +1214,6 @@ printOn: stream
     self printCanonicalValueOn: stream.
     comment notNil ifTrue: [self printCommentOn: stream]! !
 
-
-!HeaderField class methodsFor: 'class initialization'!
-
-initialize
-    self resetRegistry.!
-
-resetRegistry
-    Registry := IdentityDictionary new: 5.! !
 
 !HeaderField class methodsFor: 'instance creation'!
 
@@ -2934,7 +2922,6 @@ printValueOn: aStream
     ]! !
 
 SimpleScanner initialize!
-HeaderField initialize!
 RFC822Scanner initialize!
 
 Namespace current: Smalltalk!

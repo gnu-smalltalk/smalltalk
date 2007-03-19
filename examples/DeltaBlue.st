@@ -29,9 +29,12 @@
 
 Object subclass: #Planner
 	instanceVariableNames: 'currentMark '
-	classVariableNames: 'CurrentPlanner '
+	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'DB-DeltaBlue'!
+
+Planner class
+	instanceVariableNames: 'currentPlanner '!
 
 Planner comment:
 'This benchmark is an implementation of the DeltaBlue Constraint Solver
@@ -701,17 +704,11 @@ removePropagateFrom: out
 	^unsatisfied! !
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-Planner class
-	instanceVariableNames: 'currentMark '!
-
 
 !Planner class methodsFor: 'instance creation'!
 
 new
-	| planner |
-	planner := super new initialize.
-	CurrentPlanner := planner.
-	^planner! !
+	^currentPlanner := super new initialize! !
 
 !Planner class methodsFor: 'benchmarks'!
 
@@ -790,7 +787,7 @@ standardBenchmark
 !Planner class methodsFor: 'accessing'!
 
 current
-	^CurrentPlanner! !
+	^currentPlanner! !
 
 
 !Plan methodsFor: 'execution'!
@@ -854,13 +851,8 @@ initializeWith: symVal
 	"Record my symbolic value and reset my arithmetic value."
 
 	symbolicValue := symVal.
-	self resetValue.!
-
-resetValue
-	"Lookup my symbolic value in the StrengthTable and reset my internal
-	 value."
-
 	arithmeticValue := StrengthTable at: symbolicValue.! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 Strength class
@@ -890,10 +882,6 @@ initialize
 			StrengthConstants
 				at: strengthSymbol
 				put: ((super new) initializeWith: strengthSymbol)].
-
-	"Fix arithmetic values stored in all instances."
-	Strength allInstancesDo:
-		[: strength | strength resetValue].
 
 	AbsoluteStrongest := Strength of: #absoluteStrongest.
 	AbsoluteWeakest := Strength of: #absoluteWeakest.

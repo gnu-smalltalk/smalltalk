@@ -67,9 +67,12 @@ Object subclass: #Atk
 
 Object subclass: #GLib
 	instanceVariableNames: ''
-	classVariableNames: 'GtkTypes'
+	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Gtk'!
+
+GLib class
+	instanceVariableNames: 'gtkTypes'!
 
 Object subclass: #GQuark
 	instanceVariableNames: ''
@@ -98,13 +101,13 @@ CObject variableWordSubclass: #GdkEvent
 !GLib class methodsFor: 'registering GObject types'!
 
 registerAllTypes
-    GtkTypes isNil ifTrue: [ GtkTypes := OrderedCollection new ].
-    GtkTypes do: [ :each | self register: each forType: each getType ]
+    gtkTypes isNil ifTrue: [ gtkTypes := OrderedCollection new ].
+    gtkTypes do: [ :each | self register: each forType: each getType ]
 !
 
 registerType: aClass
-    GtkTypes isNil ifTrue: [ GtkTypes := OrderedCollection new ].
-    GtkTypes addLast: aClass
+    gtkTypes isNil ifTrue: [ gtkTypes := OrderedCollection new ].
+    gtkTypes addLast: aClass
 !
 
 update: anObject

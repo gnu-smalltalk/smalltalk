@@ -47,9 +47,12 @@ methods called back by the translated bytecodes.
 
 Object subclass: #JavaMonitor
 	instanceVariableNames: 'semaphore process count waitSemaphores '
-	classVariableNames: 'Monitors Mutex LastMonitor LastObject'
+	classVariableNames: ''
 	poolDictionaries: ''
 	category: ''!
+
+JavaMonitor class
+	instanceVariableNames: 'monitors mutex lastMonitor lastObject'!
 
 ArrayedCollection variable: #int8 subclass: #JavaByteArray
 	instanceVariableNames: ''
@@ -165,8 +168,8 @@ be kept entirely with class variables, so that it can be accessed globally.'!
 !JavaMonitor class methodsFor: 'initialization'!
 
 initialize
-    Mutex := Semaphore forMutualExclusion.
-    Monitors := WeakKeyIdentityDictionary new!
+    mutex := Semaphore forMutualExclusion.
+    monitors := WeakKeyIdentityDictionary new!
 
 !JavaMonitor class methodsFor: 'private'!
 
@@ -185,39 +188,39 @@ monitorFor: anObject
      between the time the monitor is entered and the time the monitor is
      exited."
 
-    LastObject == anObject ifTrue: [ ^LastMonitor ].
+    lastObject == anObject ifTrue: [ ^lastMonitor ].
 
-    LastObject := anObject.
-    LastMonitor := Monitors at: anObject ifAbsent: [ nil ].
-    ^LastMonitor isNil
-	ifFalse: [ LastMonitor ]
-	ifTrue: [ Monitors at: anObject put: (LastMonitor := self new)]! !
+    lastObject := anObject.
+    lastMonitor := monitors at: anObject ifAbsent: [ nil ].
+    ^lastMonitor isNil
+	ifFalse: [ lastMonitor ]
+	ifTrue: [ monitors at: anObject put: (lastMonitor := self new)]! !
 
 !JavaMonitor class methodsFor: 'locking'!
 
 enter: anObject
     "Of course, we wait on the monitor *after* relinquishing the mutex."
     | monitor |
-    Mutex wait.
+    mutex wait.
     monitor := self monitorFor: anObject.
-    Mutex signal.
+    mutex signal.
     monitor wait!
 
 exit: anObject
     "Note that we signal the monitor *before* relinquishing the mutex."
-    Mutex wait.
+    mutex wait.
     (self monitorFor: anObject) signal.
-    Mutex signal!
+    mutex signal!
 
 notifyAll: anObject
-    Mutex wait.
+    mutex wait.
     (self monitorFor: anObject) notifyAll.
-    Mutex signal!
+    mutex signal!
 
 notify: anObject
-    Mutex wait.
+    mutex wait.
     (self monitorFor: anObject) notify.
-    Mutex signal!
+    mutex signal!
 
 waitOn: anObject timeout: msec
     | monitor count process waitSemaphores sema |
@@ -225,12 +228,12 @@ waitOn: anObject timeout: msec
     sema := Semaphore new.
 
     "Grab the monitor, unlock it and register the semaphore we'll wait on."
-    Mutex wait.
+    mutex wait.
     monitor := (self monitorFor: anObject).
     count := monitor unlock.
     waitSemaphores := monitor waitSemaphores.
     waitSemaphores addLast: sema.
-    Mutex signal.
+    mutex signal.
 
     "If there's a timeout, start a process to exit the wait anticipatedly."
     msec > 0 ifTrue: [
@@ -243,10 +246,10 @@ waitOn: anObject timeout: msec
      monitor afterwards (see also #exit:, which waits after getting the
      monitor and relinquishing the mutex)."
     process notNil ifTrue: [
-        Mutex wait.
+        mutex wait.
         waitSemaphores remove: sema ifAbsent: [].
         process terminate.
-        Mutex signal ].
+        mutex signal ].
 
     monitor lock: count!
 
@@ -1066,11 +1069,11 @@ load: class
 bootstrap
     | classPath |
     Bootstrapped := false.
-    JavaClassReader classDirectories isNil
+    JavaClassFileReader classDirectories isNil
 	ifTrue: [
 	    classPath := Smalltalk getenv: 'CLASSPATH'.
 	    classPath isNil ifTrue: [ self error: 'CLASSPATH not set' ].
-	    JavaClassReader classPath: classPath ].
+	    JavaClassFileReader classPath: classPath ].
 
     Transcript show: 'Installing native methods...'; nl.
     self installNativeMethods.

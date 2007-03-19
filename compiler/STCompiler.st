@@ -56,7 +56,7 @@ compile: methodDefNode for: aBehavior classified: aString parser: aParser
 
 STFakeCompiler subclass: #STCompiler
        instanceVariableNames: 'node destClass symTable parser bytecodes depth maxDepth isInsideBlock '
-       classVariableNames: 'OneNode TrueNode FalseNode NilNode SuperVariable SelfVariable ThisContextVariable DoitToken'
+       classVariableNames: 'OneNode TrueNode FalseNode NilNode SuperVariable SelfVariable ThisContextVariable'
        poolDictionaries: ''
        category: 'System-Compiler'
 ! 

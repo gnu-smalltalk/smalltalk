@@ -69,9 +69,12 @@ NullProxy subclass: #VersionableObjectProxy
 
 AlternativeObjectProxy subclass: #SingletonProxy
     instanceVariableNames: ''
-    classVariableNames: 'Singletons'
+    classVariableNames: ''
     poolDictionaries: ''
     category: 'Streams-Files'!
+
+SingletonProxy class
+    instanceVariableNames: 'singletons'!
 
 ObjectDumper comment: 'I''m not part of a normal Smalltalk system, but most
 Smalltalks provide a similar feature: that is, support for storing objects
@@ -945,6 +948,14 @@ dumpTo: anObjectDumper
 ! !
 
 
+!SingletonProxy class methodsFor: 'private'!
+
+singletons
+    ^singletons isNil
+	ifTrue: [ singletons := IdentityDictionary new ]
+	ifFalse: [ singletons ]
+! !
+
 !SingletonProxy class methodsFor: 'accessing'!
 
 acceptUsageForClass: aClass
@@ -953,8 +964,7 @@ acceptUsageForClass: aClass
     | singleton |
     singleton := aClass someInstance.
     singleton nextInstance isNil ifFalse: [ ^false ].
-    Singletons isNil ifTrue: [ Singletons := IdentityDictionary new ].
-    Singletons at: aClass put: singleton.
+    self singletons at: aClass put: singleton.
     ^true
 ! !
 
@@ -966,7 +976,7 @@ on: anObject
      stores the class and restores the object by looking into
      a dictionary of class -> singleton objects."
 
-    (Singletons includesKey: anObject class)
+    (self singletons includesKey: anObject class)
 	ifTrue: [ ^super on: anObject class ].
 
     self error: 'class not registered within SingletonProxy'
@@ -980,7 +990,7 @@ object
      #reconstructOriginalObject message, and the resulting
      object is sent the #postLoad message."
 
-    ^Singletons at: super object ifAbsent: [
+    ^self singletons at: super object ifAbsent: [
 	self error: 'class not registered within SingletonProxy' ]
 ! !
 

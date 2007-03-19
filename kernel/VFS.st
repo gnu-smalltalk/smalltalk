@@ -58,10 +58,13 @@ up being on disk when they are opened for the first time.'!
 
 RealFileHandler subclass: #DecodedFileHandler
        instanceVariableNames: 'realFileName'
-       classVariableNames: 'FileTypes'
+       classVariableNames: ''
        poolDictionaries: ''
        category: 'Streams-Files'
 ! 
+
+DecodedFileHandler class
+	instanceVariableNames: 'fileTypes'!
 
 DecodedFileHandler comment: 'DecodedFileHandler handles
 virtual filesystems that take a file that is on-disk, run a
@@ -74,6 +77,9 @@ RealFileHandler subclass: #ArchiveFileHandler
        category: 'Streams-Files'
 ! 
 
+ArchiveFileHandler class
+	instanceVariableNames: 'activePaths'!
+
 ArchiveFileHandler comment: 'ArchiveFileHandler handles
 virtual filesystems that have a directory structure of
 their own.  The directories and files in the archive are
@@ -84,10 +90,13 @@ on them, to extract them to a real file, and so on.'!
 
 ArchiveFileHandler subclass: #ExternalArchiveFileHandler
        instanceVariableNames: 'command topLevelFiles allFiles extractedFiles'
-       classVariableNames: 'ActivePaths FileTypes'
+       classVariableNames: ''
        poolDictionaries: ''
        category: 'Streams-Files'
 ! 
+
+ExternalArchiveFileHandler class
+	instanceVariableNames: 'fileTypes'!
 
 ExternalArchiveFileHandler comment: 'ExternalArchiveFileHandler
 allows for easy implementation of archive files (for example,
@@ -614,10 +623,16 @@ do: aBlock
 
 !DecodedFileHandler class methodsFor: 'registering'!
 
-initialize
-    "Initialize the default virtual filesystems and the associated
+fileTypes
+    "Return the valid virtual filesystems and the associated
      filter commands."
-    FileTypes := LookupTable new
+    fileTypes isNil ifTrue: [ fileTypes := self defaultFileTypes ].
+    ^fileTypes!
+
+defaultFileTypes
+    "Return the default virtual filesystems and the associated
+     filter commands."
+    ^LookupTable new
 	at: 'Z' put: 'compress -cf < %1 > %2';
 	at: 'uZ' put: 'zcat -f < %1 > %2';
 	at: 'gz' put: 'gzip -cf < %1 > %2';
@@ -639,7 +654,7 @@ fileSystems
      gzipped tar archive out of a directory), #nop (do nothing, used for
      testing) and #strings (use the `strings' utility to extract printable
      strings from a file)."
-    ^FileTypes keys!
+    ^self fileTypes keys!
 
 vfsFor: file name: fsName subPath: subPath
     "Create a temporary file and use it to construct the contents of the given
@@ -649,7 +664,7 @@ vfsFor: file name: fsName subPath: subPath
     subPath isNil
 	ifFalse: [ SystemExceptions.FileError signal: 'not a tree-shaped filesystem' ].
 
-    command := FileTypes at: fsName.
+    command := self fileTypes at: fsName.
     temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
     Smalltalk system: (command bindWith: file with: temp name).
     ^self new name: file realFileName: temp name! !
@@ -678,6 +693,35 @@ release
     self primUnlink: realFileName.
     realFileName := nil.
     super release! !
+
+
+!ArchiveFileHandler class methodsFor: 'private'!
+
+activePaths
+    "Answer a dictionary that stores the currently opened archive file
+     members, to avoid extracting members multiple times.  Might be
+     worthwhile to push it to the superclass."
+    activePaths isNil ifTrue: [ activePaths := WeakValueLookupTable new ]. 
+    ^activePaths!
+
+vfsFor: file name: fsName
+    "Create a temporary file and use it to construct the contents of the given
+     file, under the virtual filesystem fsName."
+    self subclassResponsibility!
+
+vfsFor: file name: fsName subPath: subPath
+    "Create a temporary file and use it to construct the contents of the given
+     file, under the virtual filesystem fsName."
+    subPath isNil
+	ifFalse: [ ^(self vfsFor: file name: fsName subPath: nil) at: subPath ].
+
+    ^self activePaths at: (fsName -> file) ifAbsentPut: [
+	self vfsFor: file name: fsName ]!
+
+release
+    activePaths := nil.
+    super release! !
+
 
 !ArchiveFileHandler methodsFor: 'querying'!
 
@@ -777,8 +821,7 @@ fileSystems
      subdirectory of the image directory, of the parent of the kernel
      directory and (if the image is not the global installed image)
      of the `.st' directory in the home directory."
-    ActivePaths := WeakValueLookupTable new. 
-    FileTypes := LookupTable new. 
+    fileTypes := LookupTable new. 
     [ self fileSystemsIn: Directory kernel, '/../vfs' ]
 	on: Error do: [ :ex | ex return ].
     [ self fileSystemsIn: Directory userBase, '/vfs' ]
@@ -787,7 +830,7 @@ fileSystems
         [ self fileSystemsIn: Directory image, '/vfs' ]
 	    on: Error do: [ :ex | ex return ] ].
 	
-    ^FileTypes keys asSet!
+    ^fileTypes keys asSet!
 
 fileSystemsIn: path
     "Registers the executable files in the given directory to be used
@@ -797,30 +840,20 @@ fileSystemsIn: path
     dir exists ifFalse: [ ^self ].
     dir do: [ :each |
 	(File isExecutable: path, '/', each)
-	    ifTrue: [ FileTypes at: each put: path, '/', each ]
+	    ifTrue: [ fileTypes at: each put: path, '/', each ]
     ]!
 
 release
     "Avoid that paths stay in the image file"
-    FileTypes := nil.
+    fileTypes := nil.
     super release!
 
-vfsFor: file name: fsName subPath: subPath
+vfsFor: file name: fsName
     "Create a temporary file and use it to construct the contents of the given
      file, under the virtual filesystem fsName."
-    subPath isNil ifFalse: [
-	^(self vfsFor: file name: fsName subPath: nil)
-	    at: subPath
-    ].
-
-    ^ActivePaths at: (fsName -> file) ifAbsentPut: [
-	| command temp |
-        command := FileTypes at: fsName.
-	self new
-	    name: file;
-	    command: command
-    ]! !
-
+    ^self new
+	name: file;
+	command: (fileTypes at: fsName)! !
 
 !ExternalArchiveFileHandler methodsFor: 'members'!
 

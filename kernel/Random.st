@@ -34,10 +34,13 @@
 
 Stream subclass: #Random
        instanceVariableNames: 'seed'
-       classVariableNames: 'Source'
+       classVariableNames: ''
        poolDictionaries: ''
        category: 'Streams'
 !
+
+Random class
+       instanceVariableNames: 'source'!
 
 Random comment: "Here's a random comment :-)"
 'My instances are generator streams that produce random numbers, which are 
@@ -61,16 +64,21 @@ new
 
 !Random class methodsFor: 'shortcuts'!
 
+source
+    "Return a standard source of random numbers."
+    ^source isNil
+	ifTrue: [ source := self new ]
+	ifFalse: [ source ]
+!
+
 next
     "Return a random number between 0 and 1 (excluded)"
-    Source isNil ifTrue: [ Source := self new ].
-    ^Source next
+    ^self source next
 !
 
 between: low and: high
     "Return a random integer between the given extrema"
-    Source isNil ifTrue: [ Source := self new ].
-    ^Source between: low and: high
+    ^self source between: low and: high
 ! !
 
 

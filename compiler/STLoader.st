@@ -46,7 +46,7 @@ file-in.'!
 STInterpreter subclass: #STClassLoader
        instanceVariableNames: 'loadedClasses proxies currentClass
 			       currentCategory currentNamespace'
-       classVariableNames: 'EvaluationMethods'
+       classVariableNames: ''
        poolDictionaries: 'STClassLoaderObjects'
        category: 'System-Compiler'
 !

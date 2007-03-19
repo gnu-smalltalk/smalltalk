@@ -31,7 +31,7 @@
 
 Object subclass: #STLiteralsTable
        instanceVariableNames: 'map array'
-       classVariableNames: 'UseUndeclared'
+       classVariableNames: ''
        poolDictionaries: ''
        category: 'System-Compiler'
 ! 

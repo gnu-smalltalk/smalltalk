@@ -82,6 +82,9 @@ ValueAdaptor subclass: #NullValueHolder
        category: 'Language-Data types'
 !
 
+NullValueHolder class
+	instanceVariableNames: 'uniqueInstance'!
+
 NullValueHolder comment: 
 'I pretend to store my value in a variable, but I don''t actually.
 You can use the only instance of my class (returned by `ValueHolder null'')
@@ -94,6 +97,13 @@ new
     "Not used -- use `ValueHolder null' instead"
     ^self shouldNotImplement
 !
+
+uniqueInstance
+    "Answer the sole instance of NullValueHolder"
+    ^uniqueInstance isNil
+	ifTrue: [ uniqueInstance := self basicNew ]
+	ifFalse: [ uniqueInstance ]
+! !
 
 !NullValueHolder methodsFor: 'accessing'!
 
@@ -109,7 +119,7 @@ value
 
 ValueAdaptor subclass: #ValueHolder
        instanceVariableNames: 'value'
-       classVariableNames: 'Null'
+       classVariableNames: ''
        poolDictionaries: ''
        category: 'Language-Data types'
 !
@@ -148,8 +158,7 @@ new
 
 null
     "Answer the sole instance of NullValueHolder"
-    Null isNil ifTrue: [ Null := NullValueHolder basicNew ].
-    ^Null
+    ^NullValueHolder uniqueInstance
 !
 
 with: anObject

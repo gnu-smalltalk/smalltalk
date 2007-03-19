@@ -30,19 +30,9 @@
 
 Object subclass: #RegularExpression
     instanceVariableNames: 'selectors params noDollar string'
-    classVariableNames: 'Debug'
+    classVariableNames: ''
     poolDictionaries: ''
     category: 'Examples-Useful'!
-
-!RegularExpression class methodsFor: 'debugging'!
-
-debug
-    ^Debug
-!
-
-debug: aBoolean
-    Debug := aBoolean
-! !
 
 !RegularExpression class methodsFor: 'instance creation'!
 
@@ -432,12 +422,10 @@ matchAtom: index
 
     | result |
 
-    Debug ifTrue: [
-	index print. $  print.
-	(selectors at: index) print. $  print.
-	(params at: index) print. $  print.
-	string peek print. $  printNl.
-    ].
+    "index print. $  print.
+     (selectors at: index) print. $  print.
+     (params at: index) print. $  print.
+     string peek print. $  printNl."
 
     ^self perform: (selectors at: index) with: (params at: index) with: index
 ! !

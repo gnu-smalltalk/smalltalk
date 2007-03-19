@@ -266,7 +266,7 @@ Instance Variables:
 
 JavaReader subclass: #JavaClassFileReader
     instanceVariableNames: ''
-    classVariableNames: ''
+    classVariableNames: 'ClassDirectories'
     poolDictionaries: ''
     category: 'Java-Class files'!
 
@@ -284,7 +284,7 @@ Subclasses must implement the following messages:
 
 JavaClassFileReader subclass: #JavaClassReader
     instanceVariableNames: 'tag '
-    classVariableNames: 'ClassDirectories'
+    classVariableNames: ''
     poolDictionaries: ''
     category: 'Java-Class files'!
 
@@ -880,6 +880,36 @@ readFrom: aJavaAttributeReader name: attributeName length: attributeLength
     ^self new fileName: aJavaAttributeReader nextConstant
 ! !
 
+!JavaClassFileReader class methodsFor: 'class path'!
+
+classDirectories
+    ^ClassDirectories
+!
+
+classDirectories: aCollection
+    ClassDirectories := aCollection
+!
+
+classPath
+    ^self classDirectories fold: [ :a :b | a, ':', b ]
+!
+
+classPath: pathList
+    self classDirectories: (pathList subStrings: $:)
+!
+
+findClassFile: aClass 
+    | path |
+    path := (aClass copyReplacing: $. withObject: $/) , '.class'.
+    self classDirectories isNil
+	ifTrue: [ self error: 'CLASSPATH not set' ].
+    self classDirectories do: [:dir || file |
+        file := File name: (Directory append: path to: dir).
+        file exists ifTrue: [ ^file ]].
+
+    ^nil
+! !
+
 !JavaClassFileReader methodsFor: 'stream accessing'!
 
 nextType
@@ -1160,36 +1190,6 @@ nameString: nameString typeString: typeString
         type: (self typeFromString: typeString)
 ! !
 
-!JavaClassReader class methodsFor: 'class path'!
-
-classDirectories
-    ^ClassDirectories
-!
-
-classDirectories: aCollection
-    ClassDirectories := aCollection
-!
-
-classPath
-    ^self classDirectories fold: [ :a :b | a, ':', b ]
-!
-
-classPath: pathList
-    self classDirectories: (pathList subStrings: $:)
-!
-
-findClassFile: aClass 
-    | path |
-    path := (aClass copyReplacing: $. withObject: $/) , '.class'.
-    self classDirectories isNil
-	ifTrue: [ self error: 'CLASSPATH not set' ].
-    self classDirectories do: [:dir || file |
-        file := File name: (Directory append: path to: dir).
-        file exists ifTrue: [ ^file ]].
-
-    ^nil
-! !
-
 !JavaAttributeReader methodsFor: 'reading'!
 
 rawBytes
@@ -1360,7 +1360,7 @@ addAttribute: aJavaAttribute
 
 loadClass: aString
     | file stream |
-    file := JavaClassReader findClassFile: aString.
+    file := JavaClassFileReader findClassFile: aString.
     file isNil ifTrue: [ self error: 'class not found: ', aString ].
     "Transcript show: 'Loading '; show: aString; nl."
     stream := file readStream.

@@ -362,7 +362,6 @@ extern OOP _gst_permission_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_positionable_stream_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_process_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_processor_scheduler_class ATTRIBUTE_HIDDEN;
-extern OOP _gst_random_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_read_stream_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_read_write_stream_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_root_namespace_class ATTRIBUTE_HIDDEN;
