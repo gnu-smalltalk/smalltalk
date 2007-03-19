@@ -862,7 +862,7 @@ Alphabetic list of classes:'.
 	fileName := (each nameIn: Namespace current).
 
 	('writing documentation into ', fileName, '.htm') displayNl.
-	self publish: each onFile: fileName, '.htm'
+	self publish: each onFile: fileName, '.htm'.
 	aFileStream
 	    nextPutAll: ('<A HREF="%1.htm">%1</A>' bindWith: fileName);
 	    nl.
@@ -979,7 +979,7 @@ Filed out from %1 on %2	 %3 -->
 	nextPutAllText: self classCategory; nl;
 	nextPutAll: '<BR>Superclass: ';
 	nextPutAllText: self superclassName;
-	nextPutAllText: '</B><DD>'; nl;
+	nextPutAll: '</B><DD>'; nl;
 	nextPutAllText: self classComment;
 	nl; nextPutAll: '</DL><P><A NAME="top"><H2>Method category index</H2></A>';
 	nl

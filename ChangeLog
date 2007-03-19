@@ -1,3 +1,7 @@
+2007-03-19  Janis Rucis  <parasti@gmail.com>
+
+	* examples/Publish.st: Fix two typos.
+
 2007-03-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Regex.st: Fix calls to #interval.
