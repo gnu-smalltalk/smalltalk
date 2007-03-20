@@ -342,6 +342,7 @@ extern OOP _gst_make_new_method (int primitiveIndex,
 				 bc_vector bytecodes,
 				 OOP class,
 				 OOP selector,
+				 OOP defaultCategoryOOP,
 				 int64_t startPos,
 				 int64_t endPos) 
   ATTRIBUTE_HIDDEN;

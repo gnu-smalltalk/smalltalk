@@ -1,5 +1,9 @@
 2007-03-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* tests/compiler.st: Test <category: ...> pragma.
+
+2007-03-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ObjDumper: Fix typo.
 
 2007-03-19  Paolo Bonzini  <bonzini@gnu.org>

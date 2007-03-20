@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1992,94,95,99,2000,2001,2002,2003 Free Software Foundation, Inc.
+| Copyright 1992,94,95,99,2000,2001,2002,2003,2007 Free Software Foundation, Inc.
 | Written by Brad Diller and Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -515,14 +515,16 @@ compileAll: listView
     curClass compileAll.
     curClass class compileAll.
     curClass compileAllSubclasses.
-    curClass class compileAllSubclasses!
+    curClass class compileAllSubclasses.
+    self changeState: #methodCategories!
 
 compileClass: listView 
     "Recompile selected class and its Metaclass"
 
     curClass isNil ifTrue: [^listView beep].
     curClass compileAll.
-    curClass class compileAll!
+    curClass class compileAll.
+    self changeState: #methodCategories!
 
 inspectClass: listView 
     "Bring up an inspector on a Class"
@@ -897,21 +899,25 @@ compileMethod: aString for: aView
 		    ^nil].
 
     "Retrieve selector"
-    selector := aClass selectorAt: compiledMethod.
-    selector ~= curSelector ifFalse: [^compiledMethod].
+    (compiledMethod selector = curSelector and: 
+        [ compiledMethod methodCategory = curCategory ])
+	    ifTrue: [^compiledMethod].
 
-    "Need to do additional housekeeping to keep RAM version of
+    "Need to do additional housekeeping to keep internal version of
      method dictionary, sortedMethodsByCategoryDict, in synch with the class's 
-     method dictionary. Remove duplicates stored in the RAM version of method
-     dictionary"
-    curSelector := selector.
+     method dictionary. Remove duplicates stored in the internal version of
+     method dictionary"
+    curSelector := compiledMethod selector.
+    curCategory := compiledMethod methodCategory.
     sortedMethodsByCategoryDict 
 	do: [:methods | methods remove: curSelector ifAbsent: []].
 
-    "Now add selector to RAM copy"
+    "Now add selector to internal copy"
     (sortedMethodsByCategoryDict at: curCategory
 	ifAbsentPut: [SortedCollection new]) add: curSelector.
+
     self changeState: #methods.
+    self changeState: #methodCategories.
     Primitive updateViews.
     ^compiledMethod!
 

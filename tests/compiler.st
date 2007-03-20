@@ -91,6 +91,9 @@ phoneNumber
 
 '(111) 111-1111' phoneNumber!
 
+(Object compile: 'foo <category: ''bar''> ^5') methodCategory!
+
+
 "Various errors in the recursive-descent parser"
 !BugTest class methodsFor: 'bugs'!
 

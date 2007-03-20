@@ -96,6 +96,7 @@ extern OOP _gst_byte_array_out_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_byte_array_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_c_object_ptr_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_c_object_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_category_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_char_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_does_not_understand_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_double_symbol ATTRIBUTE_HIDDEN;

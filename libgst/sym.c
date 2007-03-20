@@ -107,6 +107,7 @@ OOP _gst_byte_array_out_symbol = NULL;
 OOP _gst_byte_array_symbol = NULL;
 OOP _gst_c_object_ptr_symbol = NULL;
 OOP _gst_c_object_symbol = NULL;
+OOP _gst_category_symbol = NULL;
 OOP _gst_char_symbol = NULL;
 OOP _gst_does_not_understand_symbol = NULL;
 OOP _gst_double_symbol = NULL;
@@ -261,9 +262,10 @@ static const symbol_info sym_info[] = {
   {&_gst_byte_array_symbol, "byteArray"},
   {&_gst_byte_array_out_symbol, "byteArrayOut"},
   {&_gst_boolean_symbol, "boolean"},
-  {&_gst_char_symbol, "char"},
   {&_gst_c_object_symbol, "cObject"},
   {&_gst_c_object_ptr_symbol, "cObjectPtr"},
+  {&_gst_category_symbol, "category:"},
+  {&_gst_char_symbol, "char"},
   {&_gst_does_not_understand_symbol, "doesNotUnderstand:"},
   {&_gst_float_symbol, "float"},
   {&_gst_double_symbol, "double"},

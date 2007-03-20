@@ -98,6 +98,7 @@ mst_Boolean _gst_untrusted_methods = false;
    be placed into.  */
 OOP _gst_this_class = NULL;
 OOP _gst_this_category = NULL;
+static OOP this_method_category;
 
 /* This holds the gst_compiled_method oop for the most recently
    compiled method.  It is only really valid after a compile: has been
@@ -230,8 +231,8 @@ static OOP make_constant_oop (tree_node constExpr);
    no literals for the current method, _gst_nil_oop is returned.  */
 static OOP get_literals_array (void);
 
-/* Process the attributes in ATTRIBUTELIST, return the primitive number
-   (so far, this is the only attribute we honor).  */
+/* Process the attributes in ATTRIBUTELIST, return the primitive number.
+   Also record a <category: ...> attribute in this_method_category.  */
 static int process_attributes_tree (tree_node attributeList);
 
 /* Process the attribute in MESSAGEOOP, return the primitive number
@@ -254,7 +255,8 @@ static OOP method_new (method_header header,
 static OOP method_info_new (OOP class,
 			    OOP selector,
 			    method_attributes *attrs,
-			    OOP sourceCode);
+			    OOP sourceCode,
+			    OOP categoryOOP);
 
 /* Returns a FileSegment instance for the currently open compilation
    stream.  FileSegment instances are used record information useful
@@ -497,7 +499,8 @@ _gst_install_initial_methods (void)
   termination_method = _gst_make_new_method (0, 0, 0, 0, _gst_nil_oop,
 					     _gst_get_bytecodes (),
 					     _gst_this_class,
-					     _gst_terminate_symbol, -1, -1);
+					     _gst_terminate_symbol,
+					     _gst_this_category, -1, -1);
 
   install_method (termination_method);
 
@@ -800,6 +803,7 @@ _gst_compile_method (tree_node method,
 
   dup_message_receiver = false;
   literal_vec_curr = literal_vec;
+  this_method_category = _gst_this_category;
   _gst_unregister_oop (_gst_latest_compiled_method);
   _gst_latest_compiled_method = _gst_nil_oop;
   _gst_line_number (-1, true);
@@ -900,6 +904,7 @@ _gst_compile_method (tree_node method,
 					_gst_get_temp_count (),
 					stack_depth, _gst_nil_oop, bytecodes,
 					_gst_this_class, selector,
+					_gst_this_category,
 					method->location.file_offset,
 					method->v_method.endPos);
       INC_ADD_OOP (methodOOP);
@@ -2412,6 +2417,11 @@ process_attribute (OOP messageOOP)
 	  return (-1);
 	}
     }
+  else if (selectorOOP == _gst_category_symbol)
+    {
+      this_method_category = arguments->data[0];
+      return (0);
+    }
   else
     {
       method_attributes *new_attr = (method_attributes *)
@@ -2595,12 +2605,13 @@ _gst_make_new_method (int primitiveIndex,
 		      bc_vector bytecodes,
 		      OOP class,
 		      OOP selector,
+		      OOP defaultCategoryOOP,
 		      int64_t startPos,
 		      int64_t endPos)
 {
   method_header header;
   int newFlags;
-  OOP method, methodDesc, sourceCode;
+  OOP method, methodDesc, sourceCode, category;
   inc_ptr incPtr;
 
   maximumStackDepth += numArgs + numTemps;
@@ -2677,16 +2688,25 @@ _gst_make_new_method (int primitiveIndex,
   header.numTemps = numTemps;
   header.intMark = 1;
 
+  if (this_method_category)
+    {
+      category = this_method_category;
+      this_method_category = NULL;
+    }
+  else
+    category = defaultCategoryOOP;
+
   if (IS_NIL (class))
-    methodDesc = _gst_nil_oop;
+    sourceCode = _gst_nil_oop;
   else
     {
       sourceCode = file_segment_new (startPos, endPos);
       INC_ADD_OOP (sourceCode);
-      methodDesc = method_info_new (class, selector, method_attrs,
-				    sourceCode);
-      INC_ADD_OOP (methodDesc);
     }
+
+  methodDesc = method_info_new (class, selector, method_attrs,
+				sourceCode, category);
+  INC_ADD_OOP (methodDesc);
 
   method = method_new (header, literals, bytecodes, class, methodDesc);
   INC_RESTORE_POINTER (incPtr);
@@ -2795,7 +2815,8 @@ OOP
 method_info_new (OOP class,
 		 OOP selector,
 		 method_attributes *attrs,
-		 OOP sourceCode)
+		 OOP sourceCode,
+		 OOP categoryOOP)
 {
   method_attributes *next;
   gst_method_info methodInfo;
@@ -2807,7 +2828,7 @@ method_info_new (OOP class,
 					 &methodInfoOOP);
 
   methodInfo->sourceCode = sourceCode;
-  methodInfo->category = _gst_this_category;
+  methodInfo->category = categoryOOP;
   methodInfo->class = class;
   methodInfo->selector = selector;
 

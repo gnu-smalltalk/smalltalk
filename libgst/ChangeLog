@@ -1,3 +1,14 @@
+2007-03-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Look for <category: ...> attribute, write result
+	in this_method_category, pick it in _gst_make_new_method.  Add a
+	default category argument to _gst_make_new_method.  Always create
+	a MethodInfo object in _gst_make_new_method.
+	* libgst/comp.h: Adjust _gst_make_new_method prototype.
+	* libgst/prims.def: Adjust _gst_make_new_method prototype.
+	* libgst/sym.c: Add _gst_category_symbol.
+	* libgst/sym.h: Add _gst_category_symbol.
+
 2007-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Load Random.st after system is initialized.
