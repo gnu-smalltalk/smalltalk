@@ -58,7 +58,8 @@ fromString: aCharacterArray
 !
 
 lineDelimiter
-    "Answer a CharacterArray which one can use as a line delimiter."
+    "Answer a CharacterArray which one can use as a line delimiter.
+     This is meant to be used on subclasses of CharacterArray."
     ^self with: Character nl
 ! !
 

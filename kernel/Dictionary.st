@@ -77,6 +77,13 @@ add: newObject
     ^newObject
 !
 
+addAll: aCollection
+    "Adds all the elements of 'aCollection' to the receiver, answer
+     aCollection"
+    aCollection keysAndValuesDo: [ :key :value | self at: key put: value ].
+    ^aCollection
+!
+
 at: key put: value
     "Store value as associated to the given key"
     | index assoc |
