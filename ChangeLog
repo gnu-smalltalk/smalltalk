@@ -1,3 +1,7 @@
+2007-03-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ObjDumper: Fix typo.
+
 2007-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Application.st: Delete.

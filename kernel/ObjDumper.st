@@ -990,7 +990,7 @@ object
      #reconstructOriginalObject message, and the resulting
      object is sent the #postLoad message."
 
-    ^self singletons at: super object ifAbsent: [
+    ^self class singletons at: super object ifAbsent: [
 	self error: 'class not registered within SingletonProxy' ]
 ! !
 

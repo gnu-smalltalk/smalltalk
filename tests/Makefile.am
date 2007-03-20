@@ -110,7 +110,7 @@ $(ansi_tests):
 
 regress:
 	cd $(srcdir) || exit 1; \
-	for test in $(low_level_tests) $(benchmark_tests); do \
+	for test in $(filter $(low_level_tests) $(benchmark_tests), $(TESTS)); do \
 	  result=`echo $$test | $(SED) 's/st$$/ok/'`; \
 	  @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
 	    -r $$test 2>&1 | tee $$result; \
