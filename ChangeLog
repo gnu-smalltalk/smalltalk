@@ -1,5 +1,11 @@
 2007-03-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CharArray.st: Point out that #lineDelimiter is not usable
+	on this class.
+	* kernel/Dictionary.st: Fix #addAll:, suggested by Janis Rucis.
+
+2007-03-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* tests/compiler.st: Test <category: ...> pragma.
 
 2007-03-20  Paolo Bonzini  <bonzini@gnu.org>
