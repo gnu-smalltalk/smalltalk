@@ -42,10 +42,13 @@ o   A pragma like "<category: 'bar'>" can be used to set the category
 
 NEWS FROM 2.3.3 TO 2.3.4
 
-o   Fixed paths in the image when "make DESTDIR" was used.
-
 o   Fixed bug in socket #nextHunk implementation, which lost the first
     or second byte in the input buffer.
+
+o   Fixed paths in the image when "make DESTDIR" was used.
+
+o   Fixed implementation of Dictionary>>#addAll:, and fixed Integer>>#binomial:
+    when the argument is 0 or self.
 
 o   Fixed various minor bugs and imprecisions in the documentation.
 
