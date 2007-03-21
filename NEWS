@@ -7,6 +7,10 @@ o   Fixed paths in the image when "make DESTDIR" was used.
 o   Fixed bug in socket #nextHunk implementation, which lost the first
     or second byte in the input buffer.
 
+o   Fixed various minor bugs and imprecisions in the documentation.
+
+o   Some libffi files (for IA64 and PA) were missing from the distribution.
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 2.3.2 TO 2.3.3
