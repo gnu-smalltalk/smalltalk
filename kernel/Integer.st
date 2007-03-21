@@ -176,6 +176,9 @@ binomial: anInteger
     (self < 0 or: [ anInteger < 0 or: [ anInteger > self ]]) ifTrue: [
         ^self arithmeticError: 'binomial coefficient with invalid arguments' ].
 
+    "The easy one."
+    anInteger = 0 ifTrue: [ ^1 ].
+
     "The number of SmallInteger factors we computed so far"
     step := 1.
 
