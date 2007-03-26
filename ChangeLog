@@ -1,3 +1,11 @@
+2007-03-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Float.st: Add exclamation mark.
+
+2007-03-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/HashedColl.st: Add #withAll:.
+
 2007-03-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Integer.st: Fix infinite loop in #binomial: when anInteger

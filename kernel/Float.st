@@ -293,7 +293,7 @@ asFraction
     ^Fraction
 	numerator: (self < 0 ifTrue: [ n0 negated ] ifFalse: [ n0 ])
 	denominator: d0
-!
+! !
 
 
 !Float methodsFor: 'transcendental operations'!
