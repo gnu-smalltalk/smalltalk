@@ -63,6 +63,14 @@ new: anInteger
     ].
 
     ^(self primNew: realSize) initialize: realSize
+!
+
+withAll: aCollection
+    "Answer a collection whose elements are all those in aCollection"
+    ^(self new: aCollection size * 2)
+	addAll: aCollection;
+	yourself
+
 ! !
 
 
