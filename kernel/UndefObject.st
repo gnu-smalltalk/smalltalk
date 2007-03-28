@@ -259,8 +259,8 @@ variable: shape subclass: classNameString
     classVariableNames: stringOfClassVarNames
     poolDictionaries: stringOfPoolNames
     category: categoryNameString
-    "Define a variable pointer subclass of the receiver with the given
-     name, instance variables, class variables, pool dictionaries and
+    "Define a variable subclass of the receiver with the given name,
+     shape, instance variables, class variables, pool dictionaries and
      category. If the class is already defined, if necessary, recompile
      everything needed.  The shape can be one of #byte #int8 #character
      #short #ushort #int #uint #int64 #uint64 #utf32 #float #double or
@@ -281,6 +281,19 @@ variable: shape subclass: classNameString
 	  poolDictionaries: stringOfPoolNames
 	    category: categoryNameString
 !
+
+subclass: classNameString
+    "Define a subclass of the receiver with the given name.  If the class
+     is already defined, don't modify its instance or class variables
+     but still, if necessary, recompile everything needed."
+
+    | meta |
+    KernelInitialized ifFalse: [ ^(Smalltalk at: classNameString) ].
+    meta := self metaclassFor: classNameString.
+    ^meta name: classNameString
+          environment: Namespace current
+          subclassOf: self
+          shape: nil!
 
 variableSubclass: classNameString
     instanceVariableNames: stringInstVarNames

@@ -1172,6 +1172,15 @@ description
     "Answer a textual description of the exception."
     ^'file system error'! !
 
+!SystemExceptions.MutationError class methodsFor: 'instance creation'!
+
+new
+    "Create an instance of the receiver, which you will be able to
+     signal later."
+
+    ^self basicNew
+	initialize: nil! !
+
 !SystemExceptions.MutationError methodsFor: 'accessing'!
 
 description

@@ -401,3 +401,49 @@ asMetaclass
     "Answer the metaclass associated to the receiver"
     ^self asClass class
 ! !
+
+
+!ClassDescription methodsFor: 'parsing class declarations'!
+
+instanceVariableNames: instVarNames
+
+    "Set the instance variables for the receiver to be those
+     in instVarNames"
+
+    | variableArray variableString oldInstVarNames |
+    variableArray := self parseInstanceVariableString: instVarNames.
+    variableArray := self subclassInstVarNames, variableArray.
+    oldInstVarNames := self allInstVarNames.
+
+    "If instance variables change, update  instance variables and
+     instance spec of the class and all its subclasses "
+
+    variableArray = oldInstVarNames ifTrue: [ ^self ].
+
+    self
+        updateInstanceVars: variableArray
+        shape: self shape.
+
+    "If no variable has been removed, no need to recompile"
+    (oldInstVarNames allSatisfy: [ :each | variableArray includes: each ])
+        ifTrue: [ ^self ].
+
+    Transcript nextPutAll: 'Recompiling classes...'; nl.
+    self compileAll.
+    self compileAllSubclasses
+!
+
+parseInstanceVariableString: variableString
+    | variableArray |
+    variableArray := self parseVariableString: variableString.
+    variableArray := variableArray collect: [ :each | each asSymbol ]
+!
+
+parseVariableString: aString
+    | stream tokens |
+    stream := TokenStream on: aString.
+    tokens := stream contents.
+    tokens do: [ :token | self validateIdentifier: token ].
+    ^tokens
+! !
+

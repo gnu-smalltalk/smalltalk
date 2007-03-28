@@ -155,32 +155,37 @@ pragmaHandlerFor: aSymbol
 
 !Metaclass methodsFor: 'basic'!
 
-instanceVariableNames: classInstVarNames
+name: className
+    environment: aNamespace
+    subclassOf: superclass
 
-    "Set the class-instance variables for the receiver to be those
-     in classInstVarNames"
+    "Private - create a full featured class and install it, or change the
+     superclass or shape of an existing one; instance variable names,
+     class variable names and pool dictionaries are left untouched."
 
-    | variableArray variableString |
-    variableString := self superclass instanceVariableString,
-	classInstVarNames.
-    variableArray := self parseInstanceVariableString: variableString.
+    | aClass |
 
-    "If instance variables change, update  instance variables and
-     instance spec of the class and all its subclasses "
+    "Look for an existing metaclass"
+    aClass := aNamespace hereAt: className ifAbsent: [ nil ].
+    aClass isNil ifTrue: [
+	^self newMeta: className
+	    environment: aNamespace
+	    subclassOf: superclass
+	    instanceVariableArray: superclass allInstVarNames
+	    shape: nil
+	    classPool: BindingDictionary new
+	    poolDictionaries: #()
+	    category: nil
+    ].
 
-    variableArray = self allInstVarNames ifTrue: [ ^self ].
-
-    self
-	updateInstanceVars: variableArray 
-	shape: nil.
-
-    "If no variable has been removed, no need to recompile"
-    (self allInstVarNames allSatisfy: [ :each | variableArray includes: each ])
-	ifTrue: [ ^self ].
-	
-    Transcript nextPutAll: 'Recompiling classes...'; nl.
-    self compileAll.
-    self compileAllSubclasses
+    ^self name: className
+	environment: aNamespace
+	subclassOf: superclass
+	instanceVariableArray: superclass allInstVarNames, aClass instVarNames
+	shape: aClass shape
+	classPool: aClass classPool
+	poolDictionaries: aClass sharedPoolDictionaries
+	category: aClass category
 !
 
 name: newName

@@ -101,3 +101,39 @@ A addInstVarName: #var2.
 B removeInstVarName: #var2.
 B instance var2 printNl.
 B instance printNl!
+
+
+"Now, test using #subclass: to create classes."
+
+Association subclass: #C!
+C instSize = C allInstVarNames size!
+(C allInstVarNames -> C sharedPools) printNl!
+
+Object subclass: #C instanceVariableNames: 'a' classVariableNames: '' poolDictionaries: 'SystemExceptions' category: 'foo'!
+C instSize = C allInstVarNames size!
+(C allInstVarNames -> C sharedPools) printNl!
+
+Array subclass: #C!
+C instSize = C allInstVarNames size!
+(C allInstVarNames -> C sharedPools) printNl!
+
+Association subclass: #C!
+C instSize = C allInstVarNames size!
+(C allInstVarNames -> C sharedPools) printNl!
+
+Object subclass: #C instanceVariableNames: '' classVariableNames: 'Foo' poolDictionaries: 'SystemExceptions' category: 'foo'!
+C instSize = C allInstVarNames size!
+(C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl!
+
+Association subclass: #C!
+(C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl!
+
+Object variableSubclass: #C instanceVariableNames: '' classVariableNames: 'Foo' poolDictionaries: 'SystemExceptions' category: 'foo'!
+C instSize = C allInstVarNames size!
+(C shape -> C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl!
+
+Association subclass: #C!
+(C shape -> C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl!
+
+C class compile: 'foo ^MutationError'!
+^C foo == SystemExceptions.MutationError!

@@ -323,6 +323,35 @@ extend
         withArguments: {self name asSymbol. ''. ''. ''. 'Extensions'}
 !
 
+shape: shape
+    "Give the provided shape to the receiver's instances.
+     The shape can be nil, or one of #byte #int8 #character #short
+     #ushort #int #uint #int64 #uint64 #utf32 #float #double or #pointer."
+
+    self shape == shape ifTrue: [ ^false ].
+    shape isNil
+	ifTrue: [ ^self updateInstanceVars: self allInstVarNames shape: nil ].
+
+    self isVariable
+	ifTrue: [
+            SystemExceptions.MutationError
+                signal: 'Cannot change shape of variable class' ].
+
+    "Changing from fixed to variable.  No need to mutate the instances."
+    self setInstanceSpec: shape instVars: self allInstVarNames size!
+
+subclass: classNameString
+    "Define a subclass of the receiver with the given name.  If the class
+     is already defined, don't modify its instance or class variables
+     but still, if necessary, recompile everything needed."
+
+    | meta |
+    KernelInitialized ifFalse: [ ^(Smalltalk at: classNameString) ].
+    meta := self metaclassFor: classNameString.
+    ^meta name: classNameString
+	  environment: Namespace current
+	  subclassOf: self!
+
 subclass: classNameString
     instanceVariableNames: stringInstVarNames
     classVariableNames: stringOfClassVarNames
@@ -377,8 +406,8 @@ variable: shape subclass: classNameString
     classVariableNames: stringOfClassVarNames
     poolDictionaries: stringOfPoolNames
     category: categoryNameString
-    "Define a variable pointer subclass of the receiver with the given
-     name, instance variables, class variables, pool dictionaries and
+    "Define a variable subclass of the receiver with the given name,
+     shape, instance variables, class variables, pool dictionaries and
      category. If the class is already defined, if necessary, recompile
      everything needed.  The shape can be one of #byte #int8 #character
      #short #ushort #int #uint #int64 #uint64 #utf32 #float #double or

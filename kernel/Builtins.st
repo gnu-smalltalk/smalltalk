@@ -2628,11 +2628,15 @@ the system, and the C definition of the classes diminishes in importance."
 !Class methodsFor: 'builtins'!
 
 subclass: classNameString
+    ^(Smalltalk at: classNameString)
+!
+
+subclass: classNameString
   instanceVariableNames: stringInstVarNames
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
   category: categoryNameString
-    (Smalltalk at: classNameString) category: categoryNameString
+    ^(Smalltalk at: classNameString) category: categoryNameString
 !
 
 variable: shape subclass: classNameString
@@ -2640,7 +2644,7 @@ variable: shape subclass: classNameString
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
   category: categoryNameString
-    (Smalltalk at: classNameString) category: categoryNameString
+    ^(Smalltalk at: classNameString) category: categoryNameString
 !
 
 variableSubclass: classNameString
@@ -2648,7 +2652,7 @@ variableSubclass: classNameString
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
   category: categoryNameString
-    (Smalltalk at: classNameString) category: categoryNameString
+    ^(Smalltalk at: classNameString) category: categoryNameString
 !
 
 variableWordSubclass: classNameString
@@ -2656,7 +2660,7 @@ variableWordSubclass: classNameString
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
   category: categoryNameString
-    (Smalltalk at: classNameString) category: categoryNameString
+    ^(Smalltalk at: classNameString) category: categoryNameString
 !
 
 variableByteSubclass: classNameString
@@ -2664,7 +2668,7 @@ variableByteSubclass: classNameString
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
   category: categoryNameString
-    (Smalltalk at: classNameString) category: categoryNameString
+    ^(Smalltalk at: classNameString) category: categoryNameString
 ! !
 
 
@@ -2672,11 +2676,15 @@ variableByteSubclass: classNameString
 !UndefinedObject methodsFor: 'builtins'!
 
 subclass: classNameString
+    ^(Smalltalk at: classNameString)
+!
+
+subclass: classNameString
   instanceVariableNames: stringInstVarNames
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
   category: categoryNameString
-    (Smalltalk at: classNameString) category: categoryNameString
+    ^(Smalltalk at: classNameString) category: categoryNameString
 !
 
 variable: shape subclass: classNameString
@@ -2684,7 +2692,7 @@ variable: shape subclass: classNameString
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
   category: categoryNameString
-    (Smalltalk at: classNameString) category: categoryNameString
+    ^(Smalltalk at: classNameString) category: categoryNameString
 !
 
 variableSubclass: classNameString
@@ -2692,7 +2700,7 @@ variableSubclass: classNameString
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
   category: categoryNameString
-    (Smalltalk at: classNameString) category: categoryNameString
+    ^(Smalltalk at: classNameString) category: categoryNameString
 !
 
 variableWordSubclass: classNameString
@@ -2700,7 +2708,7 @@ variableWordSubclass: classNameString
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
   category: categoryNameString
-    (Smalltalk at: classNameString) category: categoryNameString
+    ^(Smalltalk at: classNameString) category: categoryNameString
 !
 
 variableByteSubclass: classNameString
@@ -2708,7 +2716,7 @@ variableByteSubclass: classNameString
   classVariableNames: stringOfClassVarNames
   poolDictionaries: stringOfPoolNames
   category: categoryNameString
-    (Smalltalk at: classNameString) category: categoryNameString
+    ^(Smalltalk at: classNameString) category: categoryNameString
 ! !
 
 

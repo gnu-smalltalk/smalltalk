@@ -1,3 +1,16 @@
+2007-03-28  Palo Bonzini  <bonzini@gnu.org>
+
+	* kernel/AnsiExcept.st: Force MutationError's creator to be nil.
+	* kernel/Builtins.st: Add #subclass:, always return class from
+	class creation stubs.
+	* kernel/Class.st: Add #shape: and #subclass:.
+	* kernel/ClassDescription.st: Add #instanceVariableNames:.
+	* kernel/Metaclass.st: Remove #instanceVariableNames:, add
+	#name:environment:subclassOf: (used by Class>>#subclass:).
+	* kernel/UndefObject.st: Add #subclass:.
+
+	* tests/mutate.st: Add tests for #subclass:.
+
 2007-03-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Add exclamation mark.
