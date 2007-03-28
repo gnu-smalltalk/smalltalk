@@ -24,3 +24,7 @@ compiler.st:110: parse error, expected keyword
 
 Execution begins...
 returned value is 'No crashes'
+compiler.st:117: parse error, expected '!'
+
+Execution begins...
+returned value is 2

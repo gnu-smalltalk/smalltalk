@@ -111,3 +111,10 @@ c
     ^'foo'! !
 
 ^BugTest c!
+
+"The lexer crashed on this because it returned a SYMBOL_LITERAL with
+ -123 in the ival.  This gives a parse error..."
+^#-123!
+
+"... this does not."
+^#(#-123) size!

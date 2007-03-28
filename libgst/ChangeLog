@@ -1,3 +1,7 @@
+2007-03-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Fix parsing of #-123.
+
 2007-03-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Look for <category: ...> attribute, write result
