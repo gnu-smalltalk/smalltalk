@@ -55,6 +55,57 @@
 #define GST_GSTPRIV_H
 
 #include "config.h"
+
+#include <sys/types.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include <obstack.h>
+#include <fcntl.h>
+#include <stdarg.h>
+#include <math.h>
+#include <float.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <limits.h>
+#include <poll.h>
+#include <ctype.h>
+#include <wchar.h>
+#include <dirent.h>
+#include <sys/time.h>
+#include <time.h>
+
+#ifdef HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif
+
+#ifdef HAVE_EXECINFO_H
+#include <execinfo.h>
+#endif
+
+#ifdef HAVE_SYS_FILE_H
+#include <sys/file.h>
+#endif
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
+
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
 #include "gst.h"
 
 /* Convenience macros to test the versions of GCC.  Note - they won't
@@ -540,18 +591,23 @@ extern OOP _gst_nil_oop
    because they are likely to be optimized.  */
 
 #if SIZEOF_OOP == 4
-# if defined(WORDS_BIGENDIAN) || !defined (HAVE_INET_SOCKETS)
+# if !defined(WORDS_BIGENDIAN) && defined (HAVE_INET_SOCKETS)
+#  define BYTE_INVERT(x) htonl((x))
+# elif defined _OS_OSBYTEORDERPPC_H
+#  define BYTE_INVERT(x) OSReadSwapInt32(&(x), 0)
+# else
 #  define BYTE_INVERT(x) \
         ((uintptr_t)((((uintptr_t)(x) & 0x000000ffU) << 24) | \
                      (((uintptr_t)(x) & 0x0000ff00U) <<  8) | \
                      (((uintptr_t)(x) & 0x00ff0000U) >>  8) | \
                      (((uintptr_t)(x) & 0xff000000U) >> 24)))
-# else
-#  define BYTE_INVERT(x) htonl((x))
 # endif
 
 #else /* SIZEOF_OOP == 8 */
-# define BYTE_INVERT(x) \
+# if defined _OS_OSBYTEORDERPPC_H
+#  define BYTE_INVERT(x) OSReadSwapInt64(&(x), 0)
+# else
+#  define BYTE_INVERT(x) \
         ((uintptr_t)((((uintptr_t)(x) & 0x00000000000000ffU) << 56) | \
                      (((uintptr_t)(x) & 0x000000000000ff00U) << 40) | \
                      (((uintptr_t)(x) & 0x0000000000ff0000U) << 24) | \
@@ -560,6 +616,7 @@ extern OOP _gst_nil_oop
                      (((uintptr_t)(x) & 0x0000ff0000000000U) >> 24) | \
                      (((uintptr_t)(x) & 0x00ff000000000000U) >> 40) | \
                      (((uintptr_t)(x) & 0xff00000000000000U) >> 56)))
+# endif
 #endif /* SIZEOF_OOP == 8 */
 
 /* The standard min/max macros...  */
@@ -572,56 +629,6 @@ extern OOP _gst_nil_oop
 #endif
 #ifndef MIN
 #define MIN(x, y) 		( ((x) > (y)) ? (y) : (x) )
-#endif
-
-#include <sys/types.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-#include <obstack.h>
-#include <fcntl.h>
-#include <stdarg.h>
-#include <math.h>
-#include <float.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <limits.h>
-#include <poll.h>
-#include <ctype.h>
-#include <wchar.h>
-#include <dirent.h>
-#include <sys/time.h>
-#include <time.h>
-
-#ifdef HAVE_SYS_RESOURCE_H
-#include <sys/resource.h>
-#endif
-
-#ifdef HAVE_EXECINFO_H
-#include <execinfo.h>
-#endif
-
-#ifdef HAVE_SYS_FILE_H
-#include <sys/file.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#ifdef HAVE_SYS_MMAN_H
-#include <sys/mman.h>
-#endif
-
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
-
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
 #endif
 
 #include "ansidecl.h"

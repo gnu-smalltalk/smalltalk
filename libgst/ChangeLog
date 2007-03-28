@@ -1,5 +1,10 @@
 2007-03-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/gstpriv.h: Support MacOS X/PPC macros to use lwbrx.
+	* libgst/save.c: Fix primitive table checksum for 64-biy systems.
+
+2007-03-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/lex.c: Fix parsing of #-123.
 
 2007-03-20  Paolo Bonzini  <bonzini@gnu.org>

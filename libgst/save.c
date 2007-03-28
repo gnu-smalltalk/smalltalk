@@ -112,7 +112,7 @@ typedef struct save_file_header
   size_t space_grow_rate;
   size_t num_free_oops;
   intptr_t ot_base;
-  int prim_table_md5[4]; /* checksum for the primitive table */
+  intptr_t prim_table_md5[16 / sizeof (intptr_t)]; /* checksum for the primitive table */
 }
 save_file_header;
 
@@ -530,8 +530,10 @@ load_file_version (int imageFd,
       headerp->ot_base = BYTE_INVERT (headerp->ot_base);
       headerp->prim_table_md5[0] = BYTE_INVERT (headerp->prim_table_md5[0]);
       headerp->prim_table_md5[1] = BYTE_INVERT (headerp->prim_table_md5[1]);
+#if SIZEOF_OOP == 4
       headerp->prim_table_md5[2] = BYTE_INVERT (headerp->prim_table_md5[2]);
       headerp->prim_table_md5[3] = BYTE_INVERT (headerp->prim_table_md5[3]);
+#endif
     }
 
   /* check for version mismatch; if so this image file is invalid */
