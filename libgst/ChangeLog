@@ -1,3 +1,7 @@
+2007-03-28  Paolo Bonzini  <bonzini@gnu.org>
+
+        * libgst/lex.c: Fix parsing of #-123.
+
 2007-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Use truncl and lrint to implement

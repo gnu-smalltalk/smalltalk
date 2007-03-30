@@ -55,7 +55,7 @@ new
      to create dictionaries.  Unfortunately, this #new method only creates
      dictionaries, so subclasses when trying to use this method, lose big.
      This fixes the problem."
-    ^self new: 31
+    ^self new: 24
 ! !
 
 

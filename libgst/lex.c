@@ -140,7 +140,14 @@ static int char_literal (int c,
 
 /* Parse a binary operator.  C is the first symbol in the selector */
 static int scan_bin_op (int c,
-			 YYSTYPE * lvalp);
+			YYSTYPE * lvalp);
+
+/* Actual work for scan_bin_op is done here.  MAYBE_NUMBER is false if
+   we cannot parse a negative number in this context.  */ 
+static int scan_bin_op_1 (int c,
+			  YYSTYPE * lvalp,
+			  mst_Boolean maybe_number);
+
 
 /* Parse a string literal.  C is '\'' */
 static int string_literal (int c,
@@ -487,7 +494,7 @@ scan_symbol (int c,
   /* We can read a binary operator and return a SYMBOL_LITERAL,... */
   if (CHAR_TAB (ic)->char_class & BIN_OP_CHAR)
     {
-      scan_bin_op (ic, lvalp);
+      scan_bin_op_1 (ic, lvalp, false);
       return SYMBOL_LITERAL;
     }
 
@@ -519,8 +526,9 @@ scan_symbol (int c,
 
 
 int
-scan_bin_op (int c,
-	      YYSTYPE *lvalp)
+scan_bin_op_1 (int c,
+	       YYSTYPE *lvalp,
+	       mst_Boolean maybe_number)
 {
   char buf[3];
   int ic;
@@ -551,7 +559,7 @@ scan_bin_op (int c,
 
       /* We come here also for a negative number, which we handle
          specially.  */
-      if (c == '-' && is_digit (ic))
+      if (maybe_number && c == '-' && is_digit (ic))
 	return (scan_number ('-', lvalp));
 
       buf[1] = 0;
@@ -565,6 +573,13 @@ scan_bin_op (int c,
 
   else
     return (BINOP);
+}
+
+int
+scan_bin_op (int c,
+	     YYSTYPE *lvalp)
+{
+  return scan_bin_op_1 (c, lvalp, true);
 }
 
 int
