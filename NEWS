@@ -20,6 +20,12 @@ o   A different startup sequence is used which improves the possibility to
     directory as `Directory userKernel' (name subject to change).  A
     `packages.xml' file can be put there.
 
+o   Added #from: to Collection, which constructs an instance of the class
+    based on a conveniently specified Array.  This allows one to construct
+    Dictionaries or LookupTables using
+
+	Dictionary from: { 1->2. 3->4 }
+
 o   Directory entries are passed to #allFilesMatching:do:'s block argument
     if they match aPattern.  As before, the function descends in all the
     directories, even those that do not match aPattern.

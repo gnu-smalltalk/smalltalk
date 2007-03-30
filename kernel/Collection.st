@@ -51,6 +51,14 @@ of objects.' !
 
 !Collection class methodsFor: 'instance creation'!
 
+from: anArray
+    "Convert anArray to an instance of the receiver.  anArray is
+     structured such that the instance can be conveniently and fully
+     specified using brace-syntax, possibly by imposing some
+     additional structure on anArray."
+    ^self withAll: anArray
+!
+
 withAll: aCollection
     "Answer a collection whose elements are all those in aCollection"
     ^self new addAll: aCollection; yourself

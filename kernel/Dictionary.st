@@ -49,13 +49,23 @@ equality of indices.' !
 
 !Dictionary class methodsFor: 'instance creation'!
 
+from: anArray
+    "Answer a new dictionary created from the keys and values of
+     Associations in anArray, such as {1 -> 2. 3 -> 4}.  anArray
+     should be specified using brace-syntax."
+    | inst |
+    inst := self new: anArray size.
+    anArray do: [:assoc | inst at: assoc key put: assoc value].
+    ^inst
+!
+
 new
     "Create a new dictionary with a default size"
     "Builtins defines a #new method, so that during bootstrap there is a way
      to create dictionaries.  Unfortunately, this #new method only creates
      dictionaries, so subclasses when trying to use this method, lose big.
      This fixes the problem."
-    ^self new: 31
+    ^self new: 24
 ! !
 
 

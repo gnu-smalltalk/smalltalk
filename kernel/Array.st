@@ -46,6 +46,14 @@ object creation behavior messages such as #with:, as well as iteration
 and general access behavior from SequenceableCollection.' !
 
 
+!Array class methodsFor: 'instance creation'!
+
+from: anArray
+    "Answer anArray, which is expected to be an array specified with a
+     brace-syntax expression per my inherited protocol."
+    ^anArray
+! !
+
 !Array methodsFor: 'printing'!
 
 printOn: aStream

@@ -51,13 +51,13 @@ primNew: realSize
 
 new
     "Answer a new instance of the receiver with a default size"
-    ^self new: 8
+    ^self new: 0
 !
 
 new: anInteger
-    "Answer a new instance of the receiver with the given size"
+    "Answer a new instance of the receiver with the given capacity"
     | realSize |
-    realSize := 8 max: anInteger.
+    realSize := 8 max: (anInteger * 4 + 2) // 3.
     (realSize bitAnd: (realSize - 1)) = 0 ifFalse: [
 	realSize := 1 bitShift: realSize highBit
     ].

@@ -1,3 +1,16 @@
+2007-03-29  Stephen Compall  <s11@member.fsf.org>
+
+	* kernel/Collection.st: Add and describe class from: protocol.
+	* kernel/Array.st: Specialize from:.
+	* kernel/Dictionary: Same.
+
+2007-03-29  Stephen Compall  <s11@member.fsf.org>
+
+	* kernel/Dictionary.st: Use a smaller default size in new.
+
+	* kernel/HashedColl.st: Treat new:'s argument as a requested
+	capacity.
+
 2007-03-28  Palo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiExcept.st: Force MutationError's creator to be nil.
