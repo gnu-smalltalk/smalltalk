@@ -241,8 +241,9 @@ extern OOP _gst_last_returned_value
   ATTRIBUTE_HIDDEN;
 
 /* This flag controls whether byte codes are printed after
-   compilation.  */
-extern mst_Boolean _gst_declare_tracing 
+   compilation.  If > 1, it applies also to code not invoked by
+   the user.  */
+extern int _gst_declare_tracing 
   ATTRIBUTE_HIDDEN;
 
 /* If true, the compilation of a set of methods will be skipped

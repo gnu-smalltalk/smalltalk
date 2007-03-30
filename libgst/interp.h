@@ -253,8 +253,9 @@ extern unsigned long _gst_sample_counter
 
 /* If this is true, for each byte code that is executed, we print on
    stdout the byte index within the current gst_compiled_method and a
-   decoded interpretation of the byte code.  */
-extern mst_Boolean _gst_execution_tracing 
+   decoded interpretation of the byte code.  If > 1, it applies also
+   to code not invoked by the user.  */
+extern int _gst_execution_tracing 
   ATTRIBUTE_HIDDEN;
 
 /* When this is true, and an interrupt occurs (such as SIGSEGV),

@@ -12,22 +12,16 @@ Short flags can appear either as \fB\-xyz\fR or as \fB\-x\fR \fB\-y\fR \fB\-z\fR
 mandatory for a long option, it is also mandatory for a short one. The
 currently defined set of flags is:
 .TP
-\fB\-a\fR \fB\-\-smalltalk\fR
+\fB\-a\fR \fB\-\-smalltalk\-args\fR
 Pass the remaining arguments to Smalltalk
 .TP
 \fB\-c\fR \fB\-\-core\-dump\fR
 Dump core on fatal signal
 .TP
-\fB\-d\fR \fB\-\-declaration\-trace\-user\fR
-Trace compilation of files on the command line
-.TP
-\fB\-D\fR \fB\-\-declaration\-trace\-all\fR
+\fB\-D\fR \fB\-\-declaration\-trace\fR
 Trace compilation of all loaded files
 .TP
-\fB\-e\fR \fB\-\-execution\-trace\-user\fR
-Trace execution of files on the command line
-.TP
-\fB\-E\fR \fB\-\-execution\-trace\-all\fR
+\fB\-E\fR \fB\-\-execution\-trace\fR
 Trace execution of all loaded files
 .TP
 \fB\-g\fR \fB\-\-no\-gc\-message\fR
@@ -39,21 +33,15 @@ Print this message and exit
 \fB\-i\fR \fB\-\-rebuild\-image\fR
 Ignore the image file; rebuild it from scratch
 .TP
-\fB\-I\fR \fB\-\-image\-file\fR file
-Instead of `gst.im', use `file' as the image
+\fB\-I\fR \fB\-\-image\-file\fR FILE
+Instead of `gst.im', use FILE as the image
 file, and ignore the kernel files' timestamps
 .TP
-\fB\-K\fR \fB\-\-kernel\-file\fR file
-Make file's path relative to the image path.
-.TP
-\fB\-p\fR \fB\-\-emacs\-mode\fR
-Execute as a `process' (from within Emacs)
+\fB\-K\fR \fB\-\-kernel\-file\fR FILE
+Make FILE's path relative to the image path.
 .TP
 \fB\-q\fR \fB\-\-quiet\fR \fB\-\-silent\fR
 Do not print execution information
-.TP
-\fB\-Q\fR \fB\-\-no\-messages\fR
-Run Smalltalk with \fB\-q\fR \fB\-g\fR and no startup banner
 .TP
 \fB\-r\fR \fB\-\-regression\-test\fR
 Run in regression test mode, i.e. make
@@ -67,6 +55,15 @@ Print the Smalltalk version number and exit
 .TP
 \fB\-V\fR \fB\-\-verbose\fR
 Print names of loaded files and execution stats
+.TP
+\fB\-\-kernel\-dir\fR DIR
+Look for kernel files in directory DIR.
+.TP
+\fB\-\-image\-dir\fR DIR
+Look for the image in directory DIR.
+.TP
+\fB\-\-emacs\-mode\fR
+Execute as a `process' (from within Emacs)
 .TP
 -
 Read input from standard input explicitly

@@ -86,27 +86,27 @@ static const char help_text[] =
   "\nShort flags can appear either as -xyz or as -x -y -z.  If an option is"
   "\nmandatory for a long option, it is also mandatory for a short one. The"
   "\ncurrently defined set of flags is:"
-  "\n   -a --smalltalk\t\t Pass the remaining arguments to Smalltalk"
-  "\n   -c --core-dump\t\t Dump core on fatal signal"
-  "\n   -d --declaration-trace-user\t Trace compilation of files on the command line"
-  "\n   -D --declaration-trace-all\t Trace compilation of all loaded files"
+  "\n   -a --smalltalk-args\t\t Pass the remaining arguments to Smalltalk."
+  "\n   -c --core-dump\t\t Dump core on fatal signal."
+  "\n   -D --declaration-trace\t Trace compilation of all loaded files."
 #ifndef ENABLE_JIT_TRANSLATION
-  "\n   -e --execution-trace-user\t Trace execution of files on the command line"
-  "\n   -E --execution-trace-all\t Trace execution of all loaded files"
+  "\n   -E --execution-trace\t\t Trace execution of all loaded files."
 #endif
-  "\n   -g --no-gc-message\t\t Do not print garbage collection messages"
-  "\n   -H --help\t\t\t Print this message and exit"
-  "\n   -i --rebuild-image\t\t Ignore the image file; rebuild it from scratch"
-  "\n   -I --image-file file\t\t Instead of `gst.im', use `file' as the image\n\t\t\t\t file, and ignore the kernel files' timestamps\n"
-  "\n   -K --kernel-file file\t Make file's path relative to the image path."
-  "\n   -p --emacs-mode\t\t Execute as a `process' (from within Emacs)"
-  "\n   -q --quiet --silent\t\t Do not print execution information"
-  "\n   -Q --no-messages\t\t Run Smalltalk with -q -g and no startup banner"
-  "\n   -r --regression-test\t\t Run in regression test mode, i.e. make\n\t\t\t\t printed messages constant\n"
-  "\n   -S --snapshot\t\t Save a snapshot just before exiting"
-  "\n   -v --version\t\t\t Print the Smalltalk version number and exit"
-  "\n   -V --verbose\t\t\t Print names of loaded files and execution stats"
-  "\n   -\t\t\t\t Read input from standard input explicitly"
+  "\n   -g --no-gc-message\t\t Do not print garbage collection messages."
+  "\n   -H --help\t\t\t Print this message and exit."
+  "\n   -i --rebuild-image\t\t Ignore the image file; rebuild it from scratch."
+  "\n   -I --image-file FILE\t\t Instead of `gst.im', use FILE as the image\n\t\t\t\t file, and ignore the kernel files' timestamps.\n"
+  "\n   -K --kernel-file FILE\t Make FILE's path relative to the image path."
+  "\n   -q --quiet --silent\t\t Do not print execution information."
+  "\n   -r --regression-test\t\t Run in regression test mode, i.e. make\n\t\t\t\t printed messages constant.\n"
+  "\n   -S --snapshot\t\t Save a snapshot just before exiting."
+  "\n   -v --version\t\t\t Print the Smalltalk version number and exit."
+  "\n   -V --verbose\t\t\t Print names of loaded files and execution stats."
+  "\n      --emacs-mode\t\t Execute as a `process' (from within Emacs)"
+  "\n      --image-dir DIR\t\t Look for the image in directory DIR."
+  "\n      --kernel-dir DIR\t\t Look for kernel files in directory DIR."
+  "\n      --no-user-files\t\t Don't read user customization files.\n"
+  "\n   -\t\t\t\t Read input from standard input explicitly."
   "\n"
   "\nFiles are loaded one after the other.  After the last one is loaded,"
   "\nSmalltalk will exit.  If no files are specified, Smalltalk reads from"
@@ -132,15 +132,14 @@ static const char copyright_and_legal_stuff_text[] =
 #define OPT_KERNEL_DIR 2
 #define OPT_IMAGE_DIR 3
 #define OPT_NO_USER 4
+#define OPT_EMACS_MODE 5
 
 static const struct option long_options[] = {
   {"smalltalk-args", 0, 0, 'a'},
   {"core-dump", 0, 0, 'c'},
-  {"declaration-trace-user", 0, 0, 'd'},
-  {"declaration-trace-all", 0, 0, 'D'},
+  {"declaration-trace", 0, 0, 'D'},
 #ifndef ENABLE_JIT_TRANSLATION
-  {"execution-trace-user", 0, 0, 'e'},
-  {"execution-trace-all", 0, 0, 'E'},
+  {"execution-trace", 0, 0, 'E'},
 #endif
   {"file", 0, 0, 'f'},
   {"kernel-directory", 1, 0, OPT_KERNEL_DIR},
@@ -151,9 +150,9 @@ static const struct option long_options[] = {
   {"rebuild-image", 0, 0, 'i'},
   {"image-file", 1, 0, 'I'},
   {"kernel-file", 1, 0, 'K'},
-  {"emacs-mode", 0, 0, 'p'},
+  {"emacs-mode", 0, 0, OPT_EMACS_MODE},
   {"quiet", 0, 0, 'q'},
-  {"no-messages", 0, 0, 'Q'},
+  {"no-messages", 0, 0, 'q'},
   {"silent", 0, 0, 'q'},
   {"regression-test", 0, 0, 'r'},
   {"snapshot", 0, 0, 'S'},
@@ -210,14 +209,6 @@ mst_Boolean _gst_smalltalk_initialized = false;
    includes call-ins before and after _gst_execute_statements) before
    the system is ready to do them.  */
 mst_Boolean _gst_kernel_initialized = false;
-
-/* If true, even both kernel and user method definitions are shown as
-   they are compiled.  */
-mst_Boolean _gst_trace_kernel_declarations = false;
-
-/* If true, execution tracing is performed when loading kernel method
-   definitions.  */
-mst_Boolean _gst_trace_kernel_execution = false;
 
 /* This is TRUE if we are doing regression testing, and causes
    whatever sources of variance to be suppressed (such as printing out
@@ -477,16 +468,18 @@ gst_init_smalltalk (void)
 
   if (_gst_regression_testing)
     {
-      _gst_trace_kernel_declarations = _gst_declare_tracing = false;
-      _gst_trace_kernel_execution = _gst_execution_tracing = false;
+      _gst_declare_tracing = 0;
+      _gst_execution_tracing = 0;
       _gst_verbosity = 2;
       setvbuf (stdout, NULL, _IOLBF, 1024);
     }
 
   traceUserDeclarations = _gst_declare_tracing;
   traceUserExecution = _gst_execution_tracing;
-  _gst_declare_tracing = _gst_trace_kernel_declarations;
-  _gst_execution_tracing = _gst_trace_kernel_execution;
+  if (_gst_declare_tracing == 1)
+    _gst_declare_tracing--;
+  if (_gst_execution_tracing == 1)
+    _gst_execution_tracing--;
 
   if (_gst_binary_image_name)
     loadBinary = abortOnFailure = true;
@@ -822,7 +815,7 @@ find_user_file (const char *fileName)
 void
 process_stdin ()
 {
-  if (_gst_verbosity > 0)
+  if (_gst_verbosity == 3 || isatty (0))
     {
       printf ("GNU Smalltalk ready\n\n");
       fflush (stdout);
@@ -844,7 +837,7 @@ process_file (const char *fileName)
   if (fd == -1)
     return (false);
 
-  if (_gst_verbosity > 2)
+  if (_gst_verbosity == 3)
     printf ("Processing %s\n", fileName);
 
   _gst_use_undeclared++;
@@ -863,9 +856,9 @@ parse_args (int argc,
   int ch, prev_optind = 1, minus_a_optind = -1;
 
 #ifndef ENABLE_DYNAMIC_TRANSLATION
-# define OPTIONS "-acdDeEf:ghiI:K:lL:pQqrSvV"
+# define OPTIONS "-acDEf:ghiI:K:lL:QqrSvV"
 #else
-# define OPTIONS "-acdDf:ghiI:K:lL:pQqrSvV"
+# define OPTIONS "-acDf:ghiI:K:lL:QqrSvV"
 #endif
 
   loaded_files =
@@ -890,15 +883,11 @@ parse_args (int argc,
 	  _gst_make_core_file = true;
 	  break;
 	case 'D':
-	  _gst_trace_kernel_declarations = true;	/* fall thru */
-	case 'd':
-	  _gst_declare_tracing = true;
+	  _gst_declare_tracing++;
 	  break;
 #ifndef ENABLE_JIT_TRANSLATION
 	case 'E':
-	  _gst_trace_kernel_execution = true;		/* fall thru */
-	case 'e':
-	  _gst_execution_tracing = true;
+	  _gst_execution_tracing++;
 	  break;
 #endif
 	case 'g':
@@ -907,14 +896,12 @@ parse_args (int argc,
 	case 'i':
 	  ignore_image = true;
 	  break;
-	case 'p':
+	case OPT_EMACS_MODE:
 	  _gst_emacs_process = true;
 	  break;
-	case 'Q':
-	  _gst_verbosity = 0;
-	  break;
 	case 'q':
-	  _gst_verbosity = (_gst_verbosity > 1) ? 1 : _gst_verbosity;
+	case 'Q':
+	  _gst_verbosity = 1;
 	  break;
 	case 'r':
 	  _gst_regression_testing = true;
@@ -927,8 +914,8 @@ parse_args (int argc,
 	  break;
 
 	case 'f':
-	  /* Same as -Q, passing a file, and -a.  */
-	  _gst_verbosity = 0;
+	  /* Same as -q, passing a file, and -a.  */
+	  _gst_verbosity = 1;
 	  loaded_files[n_loaded_files].kernel_path = false;
 	  loaded_files[n_loaded_files++].file_name = optarg;
 

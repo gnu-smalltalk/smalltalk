@@ -1,3 +1,20 @@
+2007-03-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Change _gst_declare_tracing to int, use value of 2
+	for tracing variables intead _gst_trace_kernel_*.
+	* libgst/comp.h: Likewise.
+	* libgst/interp.c: Likewise.  Adapt bool_addr_index to return int *.
+	* libgst/interp.h: Likewise.
+	* libgst/prims.def: Support passing/returning an int in trace flag
+	get/set primitives.
+	* libgst/lib.c: Remove -d, -e options, and map old -[de] to new
+	-[DE], allowing the user to specify them multiple times.  Keep only
+	long version of -p, make option -Q synonym of -q (it was in the
+	documentation).  Kill _gst_trace_kernel_*.  Only valid verbosity
+	values are now 1/2/3.
+	* libgst/oop.h: Change _gst_gc_message to int.
+	* libgst/oop.c: Likewise, adapting to changes to the verbosity values.
+	
 2007-03-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gstpriv.h: Support MacOS X/PPC macros to use lwbrx.

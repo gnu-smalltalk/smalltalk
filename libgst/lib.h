@@ -110,16 +110,6 @@ extern const char **_gst_smalltalk_passed_argv
 extern mst_Boolean _gst_kernel_initialized 
   ATTRIBUTE_HIDDEN;
 
-/* If true, even both kernel and user method definitions are shown as
-   they are compiled.  */
-extern mst_Boolean _gst_trace_kernel_declarations 
-  ATTRIBUTE_HIDDEN;
-
-/* If true, execution tracing is performed when loading kernel method
-   definitions.  */
-extern mst_Boolean _gst_trace_kernel_execution 
-  ATTRIBUTE_HIDDEN;
-
 /* Set by cmd line flag.  If true, Smalltalk is more verbose about
    what it's doing.  */
 extern mst_Boolean _gst_verbose 

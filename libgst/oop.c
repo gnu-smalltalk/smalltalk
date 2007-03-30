@@ -103,7 +103,7 @@ OOP _gst_true_oop = NULL;
 OOP _gst_false_oop = NULL;
 
 /* This is true to show a message whenever a GC happens.  */
-mst_Boolean _gst_gc_message = true;
+int _gst_gc_message = true;
 
 /* This is != 0 in the middle of a GC.  */
 int _gst_gc_running = 0;
@@ -1075,7 +1075,7 @@ _gst_global_gc (int next_allocation)
     
   if (!_gst_gc_running++
       && _gst_gc_message
-      && _gst_verbosity > 0
+      && _gst_verbosity >= 2
       && !_gst_regression_testing)
     {
       /* print the first part of this message before we finish
@@ -1145,7 +1145,7 @@ _gst_global_gc (int next_allocation)
 
   if (!--_gst_gc_running
       && _gst_gc_message
-      && _gst_verbosity > 0
+      && _gst_verbosity >= 2
       && !_gst_regression_testing)
     {
       fprintf (stderr, "%s\"\n", s);

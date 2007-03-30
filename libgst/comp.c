@@ -107,7 +107,7 @@ OOP _gst_latest_compiled_method = NULL;
 
 /* This flag controls whether byte codes are printed after
    compilation.  */
-mst_Boolean _gst_declare_tracing = false;
+int _gst_declare_tracing = 0;
 
 /* If true, the compilation of a set of methods will be skipped
    completely; only syntax will be checked.  Set by primitive, cleared
@@ -538,7 +538,8 @@ _gst_invoke_hook (const char *hook)
 {
   int save_execution;
   save_execution = _gst_execution_tracing;
-  _gst_execution_tracing = _gst_trace_kernel_execution;
+  if (_gst_execution_tracing == 1)
+    _gst_execution_tracing = 0;
   _gst_msg_sendf (NULL, "%v %o changed: %S", 
 		  _gst_object_memory_class, hook);
   _gst_execution_tracing = save_execution;

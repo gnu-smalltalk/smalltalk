@@ -140,7 +140,7 @@ interp_jmp_buf;
 /* If this is true, for each byte code that is executed, we print on
    stdout the byte index within the current gst_compiled_method and a
    decoded interpretation of the byte code.  */
-mst_Boolean _gst_execution_tracing = false;
+int _gst_execution_tracing = 0;
 
 /* When this is true, and an interrupt occurs (such as SIGABRT),
    Smalltalk will terminate itself by making a core dump (normally it
@@ -277,7 +277,7 @@ static interp_jmp_buf *reentrancy_jmp_buf = NULL;
 
 /* when this flag is on and execution tracing is in effect, the top of
    the stack is printed as well as the byte code */
-static mst_Boolean verbose_exec_tracing = false;
+static int verbose_exec_tracing = false;
 
 /* This is the bridge to the primitive operations in the GNU Smalltalk
    system.  This function invokes the proper primitive_func with the
@@ -474,7 +474,7 @@ static void unwind_context (void);
 /* Used to help minimize the number of primitives used to control the
    various debugging flags, this routine maps the variable's INDEX to the
    address of a boolean debug flag, which it returns.  */
-static inline mst_Boolean *bool_addr_index (int index) ATTRIBUTE_PURE;
+static inline int *bool_addr_index (int index) ATTRIBUTE_PURE;
 
 /* Check whether it is true that sending SENDSELECTOR to RECEIVER
    accepts NUMARGS arguments.  Note that the RECEIVER is only used to
@@ -2027,7 +2027,7 @@ create_callin_process (OOP contextOOP)
   return (initialProcessOOP);
 }
 
-mst_Boolean *
+int *
 bool_addr_index (int index)
 {
   switch (index)
@@ -2444,7 +2444,7 @@ interrupt_handler (int sig)
 #ifdef HAVE_EXECINFO_H
       /* Don't print a backtrace, for example, if exiting during a
 	 compilation.  */
-      if ((_gst_verbosity > 2 && (ip || _gst_gc_running))
+      if ((_gst_verbosity == 3 && (ip || _gst_gc_running))
 	  || is_serious_error || sig == SIGUSR1)
 	{
           PTR array[11];

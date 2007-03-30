@@ -257,7 +257,7 @@ struct memory_space
 };
 
 /* This is true to show a message whenever a GC happens.  */
-extern mst_Boolean _gst_gc_message 
+extern int _gst_gc_message 
   ATTRIBUTE_HIDDEN;
 
 /* This is true in the middle of a GC.  */

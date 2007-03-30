@@ -337,30 +337,21 @@ When this flag is set and a fatal signal occurs, a core dump is produced
 after an error message is printed.  Normally, the backtrace is produced
 and the system terminates without dumping core.
 
-@item -d --user-declaration-trace
+@item -d --declaration-trace
 Declaration tracing prints the class name, the method name, and the byte
-codes that the compiler is generating as it compiles methods.  Only for
-files that are named explicitly on the command line; kernel files that
-are loaded automatically as part of rebuilding the image file do not
-have their declarations traced.
-
-@item -D --kernel-declaration-trace
-Like the -d flag, but also includes declarations processed for the
-kernel files.
+codes that the compiler is generating as it compiles methods.  Only applies
+to files that are named explicitly on the command line, unless the flag is
+given multiple times on the command line.
 
 @item -e --user-execution-trace
 Prints the byte codes being executed as the interpreter operates.  Only
-works for those executions that occur after the kernel files have been
-loaded and the image file dumped.
+works for statements explicitly issued by the user (either interactively
+or from files given on the command line), unless the flag is given
+multiple times on the command line.
 @ignore
-This option and the following one is disabled when the dynamic
+This option is disabled when the dynamic
 translator (@pxref{Dynamic translator}) is enabled.
 @end ignore
-
-@item -E --kernel-execution-trace
-Like the -e flag, but includes all byte codes executed, whether they
-occur during the loading of the kernel method definition files, or
-during the loading and execution of user files.
 
 @item --image-directory
 @itemx --kernel-directory
@@ -392,7 +383,7 @@ equivalent:
 
 @example
 gst -f @var{file} @file{args...}
-gst -Q @var{file} -a @file{args...}
+gst -q @var{file} -a @file{args...}
 @end example
 
 This is meant to be used in the so called ``sharp-bang'' sequence at the
@@ -448,10 +439,6 @@ Produce a log of the compiled Smalltalk code to the file named
 
 @item -q --quiet --silent
 Suppress the printing of returned values while @gst{} runs.
-
-@item -Q --no-messages
-Suppress the printing of execution information and any other informative
-message while @gst{} runs.
 
 @item -r --regression-test
 Controls printing of certain informative I/O; this is used by the
