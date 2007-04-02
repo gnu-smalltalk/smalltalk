@@ -444,24 +444,6 @@ initMetaclass: superclass
     instanceSpec := superclass instanceSpec
 !
 
-parseInstanceVariableString: variableString
-    | variableArray |
-    variableArray := self parseVariableString: variableString.
-
-    1 to: variableArray size do:
-	[ :i | variableArray at: i put: (variableArray at: i) asSymbol ].
-
-    ^variableArray
-!
-
-parseVariableString: aString
-    | stream tokens |
-    stream := TokenStream on: aString.
-    tokens := stream contents.
-    tokens do: [ :token | self validateIdentifier: token ].
-    ^tokens
-!
-
 parsePools: aString in: aNamespace
     | stream tokens |
     stream := TokenStream on: aString.

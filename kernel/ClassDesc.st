@@ -436,7 +436,7 @@ instanceVariableNames: instVarNames
 parseInstanceVariableString: variableString
     | variableArray |
     variableArray := self parseVariableString: variableString.
-    variableArray := variableArray collect: [ :each | each asSymbol ]
+    ^variableArray collect: [ :each | each asSymbol ]
 !
 
 parseVariableString: aString
