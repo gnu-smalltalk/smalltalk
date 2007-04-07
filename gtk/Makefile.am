@@ -77,20 +77,20 @@ Libs.st: Makefile
 	done
 
 Structs.st: structs sizeof$(EXEEXT) cpp order
-	xargs ./cpp < order | ./structs > Structs.st
-	./sizeof >> Structs.st
+	LANG=C; export LANG; xargs ./cpp < order | ./structs > Structs.st
+	LANG=C ./sizeof >> Structs.st
 
 Enums.st: enums$(EXEEXT)
-	./enums > Enums.st
+	LANG=C ./enums > Enums.st
 
 Funcs.st: funcs cpp order
-	xargs ./cpp < order | ./funcs > Funcs.st
+	LANG=C; export LANG; xargs ./cpp < order | ./funcs > Funcs.st
 
 sizeof.c: mk_sizeof cpp order
-	xargs ./cpp < order | ./mk_sizeof > sizeof.c
+	LANG=C; export LANG; xargs ./cpp < order | ./mk_sizeof > sizeof.c
 
 enums.c: mk_enums cpp order
-	xargs ./cpp < order | ./mk_enums > enums.c
+	LANG=C; export LANG; xargs ./cpp < order | ./mk_enums > enums.c
 
 order: order.st Makefile $(LOCAL_FILES)
 	PKG_CONFIG='$(PKG_CONFIG)' ../gst \
