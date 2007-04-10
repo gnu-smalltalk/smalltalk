@@ -188,14 +188,14 @@ declareGlobals
     ].
 
     behavior withAllSuperclassesDo: [ :class |
-	self addPool: behavior environment.
+	self addPool: class environment.
 	class classPool isEmpty ifFalse: [
 	    pools add: class classPool
 	]
     ].
 
     behavior withAllSuperclassesDo: [ :class || dicts |
-	dicts := behavior sharedPoolDictionaries.
+	dicts := class sharedPoolDictionaries.
 	dicts isNil ifFalse: [
 	    dicts do: [ :sp | self addPool: sp ]
 	]

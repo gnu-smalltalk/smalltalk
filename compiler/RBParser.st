@@ -323,6 +323,7 @@ parseMethodDefinitionList
 	   and: [ currentToken value == $! ] ] ] whileFalse: [
 
 	start := currentToken start - 1.
+        tags := nil.
         node := self parseMethod.
 
         "One -1 accounts for base-1 vs. base-0 (as above), the

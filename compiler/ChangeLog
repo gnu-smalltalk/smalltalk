@@ -1,3 +1,11 @@
+2007-04-08  Stephen Compall  <scompall@nocandysw.com>
+
+	* compiler/STSymTable.st: Add superclass environments and shared
+	pools to global variable search.
+
+	* compiler/RBParser.st: Reset `tags' instance variable before each
+	method parse in a method definition list.
+
 2007-01-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/STCompiler.st: Avoid that #compileAttribute: shadows
