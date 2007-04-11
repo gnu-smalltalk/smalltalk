@@ -1860,7 +1860,7 @@ strategic calls to @code{printNl} will no doubt help, you can look at an
 object without having to write all the code yourself.  The
 @code{inspect} message works on any object, and dumps out the
 values of each instance variable within the object.@footnote{When using
-the Blox GUI, it actually pops up a so-called dfni{Inspector window}.}
+the Blox GUI, it actually pops up a so-called @dfn{Inspector window}.}
 
 Thus:
 @example

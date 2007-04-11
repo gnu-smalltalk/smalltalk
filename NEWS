@@ -1,6 +1,9 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 2.3.4 TO 2.4
+NEWS FROM 2.3.4 TO 2.95a
+
+o   A completely new syntax for defining classes is now present.  This will
+    be detailed in a future version of this file.
 
 o   A different startup sequence is used which improves the possibility to
     customize GNU Smalltalk, both site-wide and per-user.  The details are
