@@ -70,7 +70,7 @@ An initial exercise is to make Smalltalk say ``hello'' to
 you.  Type in the following line (@code{printNl} is a upper case
 N and a lower case L):
 @example
-   'Hello, world' printNl !
+   'Hello, world' printNl
 @end example
 The system then prints back 'Hello, world' to you.  It prints it
 twice, the first time because you asked to print and the second
@@ -133,7 +133,7 @@ object to print out, we ask the object itself to do the printing.
 
 A similar piece of code prints numbers:
 @example
-  1234 printNl !
+  1234 printNl
 @end example
 
 Notice how we used the same message, but have sent it to a
@@ -154,16 +154,26 @@ be printed out the same way---with @code{printNl}.
 White space is ignored, except as it separates words.
 This example could also have looked like:
 @example
-              1234
-   printNl         !
+              1234 printNl
 @end example
+
+However, GNU Smalltalk tries to execute each line by itself if
+possible.  If you wanted to write the code on two lines, you
+might have written something like:
+@example
+(1234
+    printNl)
+@end example
+
+From now on, we'll omit @code{printNl} since GNU Smalltalk
+does the service of printing the answer for us.
 
 An integer can be sent a number of messages in addition
 to just printing itself.  An important set of messages for
 integers are the ones which do math:
 
 @example
-   (9 + 7) printNl !
+   9 + 7
 @end example
 
 Answers (correctly!) the value 16.  The way that it does
@@ -191,24 +201,21 @@ chapter, make sure you try math involving @code{*} (multiplication),
 examples should get you started:
 
 @example
-   (8 * (4 / 2)) printNl !
-   (8 - (4 + 1)) printNl !
-   (5 + 4) printNl !
-   (2/3 + 7) printNl !
-   (2 + 3 * 4) printNl !
-   (2 + (3 * 4)) printNl !
+   8 * (4 / 2)
+   8 - (4 + 1)
+   5 + 4)
+   2/3 + 7
+   2 + 3 * 4
+   2 + (3 * 4)
 @end example
 
 @node Some classes, The hierarchy, Getting started, Tutorial
 @section Using some of the Smalltalk classes
 
 This chapter has examples which need a place to hold
-the objects they create.  The following line creates such a
-place; for now, treat it as magic.  At the end of the chapter
-we will revisit it with an explanation.  Type in:
-@example
-   Smalltalk at: #x put: 0 !
-@end example
+the objects they create.  Such place is created automatically
+as necessary; when you want to discard all the objects you
+stored, write an exclamation mark at the end of the statement.
 
 Now let's create some new objects.
 
@@ -216,7 +223,6 @@ Now let's create some new objects.
 * Arrays::                   An array in Smalltalk
 * Sets::                     A set in Smalltalk
 * Dictionaries::             Getting more sophisticated, eh?
-* Smalltalk dictionary::     A very important dictionary, really
 * Closing thoughts::         There always ought to be some closing thoughts
 @end menu
 
@@ -234,7 +240,7 @@ first.  To create an array with room for 20 elements, do@footnote{
     starting with a capital letter or ending with a colon can
     be completed.}:
 @example
-   x := Array new: 20 !
+   x := Array new: 20
 @end example
 
 The @code{Array new: 20} creates the array; the @code{x :=} part
@@ -247,7 +253,7 @@ instead, you send a message to the object, and it will modify itself.
 
 For instance:
 @example
-   (x at: 1) printNl !
+   x at: 1
 @end example
 @noindent
 which prints:
@@ -259,12 +265,12 @@ The slots of an array are initially set to ``nothing'' (which
 Smalltalk calls @code{nil}).  Let's set the first slot to the
 number 99:
 @example
-   x at: 1 put: 99 !
+   x at: 1 put: 99
 @end example
 @noindent
 and now make sure the 99 is actually there:
 @example
-   (x at: 1) printNl !
+   x at: 1
 @end example
 @noindent
 which then prints out:
@@ -311,7 +317,7 @@ Finally, note that the object stored
 in an array is just like any other object, so we can do
 things like:
 @example
-   ((x at: 1) + 1) printNl !
+   (x at: 1) + 1
 @end example
 @noindent
 which (assuming you've been typing in the examples) will
@@ -328,12 +334,12 @@ detected, and the memory reclaimed.  This is known as @i{garbage collection}
 and it is generally done when Smalltalk finds that it is
 running low on memory.  So, to get our new object, simply do:
 @example
-   x := Set new !
+   x := Set new
 @end example
 @noindent
 which creates an empty set.  To view its contents, do:
 @example
-   x printNl !
+   x
 @end example
 
 The kind of object is printed out (i.e., @code{Set}), and then the
@@ -344,61 +350,81 @@ see:
 @end example
 
 Now let's toss some stuff into it.  We'll add the numbers 5
-and 7, plus the string 'foo'.  We could type:
+and 7, plus the string 'foo'.  This is also the first example
+where we're using more than one statement, and thus a good place to present
+the statement separator---the @code{.} period:
 
 @example
-   x add: 5 !
-   x add: 7 !
-   x add: 'foo' !
+   x add: 5. x add: 7. x add: 'foo'
 @end example
 
-But let's save a little typing by using a Smalltalk shorthand:
+Like Pascal, and unlike C, statements are separated rather than
+terminated.  Thus you need only use a @code{.} when you have finished
+one statement and are starting another.  This is why our last statement,
+@code{^r}, does not have a @code{.} following.  Once again like Pascal,
+however, Smalltalk won't complain if your enter a spurious
+statement separator after @i{the last} statement.
+
+However, we can save a little typing by using a Smalltalk shorthand:
 
 @example
-   x add: 5; add: 7; add: 'foo' !
+   x add: 5; add: 7; add: 'foo'
 @end example
 
-This line does exactly what the previous example's three
-lines did.  The trick is that the semicolon operator causes
+This line does exactly what the previous one did.
+The trick is that the semicolon operator causes
 the message to be sent to the same object as the last message
 sent.  So saying @code{; add: 7} is the same as saying
 @code{x add: 7}, because @code{x} was the last thing a message was sent
-to.  This may not seem like such a big savings, but compare
+to.
+
+his may not seem like such a big savings, but compare
 the ease when your variable is named @code{aVeryLongVariableName}
 instead of just @code{x}!  We'll revisit some other occasions
 where @code{;} saves you trouble, but for now let's continue with
 our set.  Type either version of the example, and make sure
 that we've added 5, 7, and ``foo'':
 @example
-   x printNl !
+   x
 @end example
 @noindent
 
 we'll see that it now contains our data:
 @example
-   Set (5 'foo' 7)
+   Set ('foo' 5 7)
 @end example
 
 What if we add something twice?  No problem---it just stays in
 the set.  So a set is like a big checklist---either it's in
 there, or it isn't.  To wit:
 @example
-   x add:5; add: 5; add: 5; add: 5 !
-   x printNl !
+   x add:5; add: 5; add: 5; add: 5; yourself
 @end example
 
 We've added @i{5} several times, but when we printed our set
 back out, we just see:
 @example
-   Set (5 'foo' 7)
+   Set ('foo' 5 7)
+@end example
+
+@code{yourself} is commonly sent at the end of the cascade,
+if what you are interested in is the object itself---in this
+case, we were not interested in the return value of @code{add: 5},
+which happens to be @code{5} simply.  There's nothing magic in
+@code{yourself}; it is a unary message like @code{printNl},
+which does nothing but returning the object itself.  So you
+can do this too:
+
+@example
+   x yourself
 @end example
 
 What you put into a set with @code{add:}, you can take out
 with @code{remove:}.  Try:
 
 @example
-   x remove: 5 !
-   x printNl !
+   x remove: 5
+   x printNl
 @end example
 
 The set now prints as:
@@ -411,8 +437,8 @@ The ``5'' is indeed gone from the set.
 We'll finish up with one more of the many things you
 can do with a set---checking for membership.  Try:
 @example
-   (x includes: 7) printNl !
-   (x includes: 5) printNl !
+   x includes: 7
+   x includes: 5
 @end example
 
 From which we see that x does indeed contain 7, but not 5.
@@ -425,7 +451,7 @@ false---nothing else.  So they're very useful for answers to
 yes or no questions, like the ones we just posed.  Let's
 take a look at just one more kind of data structure:
 
-@node Dictionaries, Smalltalk dictionary, Sets, Some classes
+@node Dictionaries, Closing thoughts, Sets, Some classes
 @subsection Dictionaries
 
 A dictionary is a special kind of collection.  With a
@@ -436,11 +462,11 @@ one piece of information to another.  Their only downside is
 that they are somewhat less efficient than simple arrays.
 Try the following:
 @example
-   x := Dictionary new.
-   x at: 'One' put: 1 !
-   x at: 'Two' put: 2 !
-   x at: 1 put: 'One' !
-   x at: 2 put: 'Two' !
+   y := Dictionary new
+   y at: 'One' put: 1
+   y at: 'Two' put: 2
+   y at: 1 put: 'One'
+   y at: 2 put: 'Two'
 @end example
 
 This fills our dictionary in with some data.  The data is
@@ -453,8 +479,8 @@ want as either---the dictionary doesn't care.
 
 Now we can map each key to a value:
 @example
-   (x at: 1) printNl !
-   (x at: 'Two') printNl !
+   y at: 1
+   y at: 'Two'
 @end example
 
 which prints respectively:
@@ -465,7 +491,7 @@ which prints respectively:
 
 We can also ask a dictionary to print itself:
 @example
-   x printNl !
+   y
 @end example
 @noindent
 
@@ -476,66 +502,18 @@ which prints:
 @noindent
 
 where the first member of each pair is the key, and the second
-the value.
-
-@node Smalltalk dictionary, Closing thoughts, Dictionaries, Some classes
-@subsection Smalltalk dictionary
-
-If you'll remember from the beginning of the chapter,
-we started out by saying:
-@example
-   Smalltalk at: #x put: 0 !
-@end example
-
-This code should look familiar---the @code{at:put:} message is how
-we've been storing information in our own arrays and
-dictionaries.  In a Smalltalk environment the name @code{Smalltalk}
-has been preset to point to a dictionary @footnote{Actually,
-a SystemDictionary, which is just a Dictionary with some
-extra methods to run things when Smalltalk first starts and
-to do nice things with a Smalltalk environment} which both you and
-Smalltalk can use.  To see how this sharing works, we'll
-first try to use a variable which Smalltalk doesn't know
-about:
-@example
-   y := 0 !
-@end example
-
-Smalltalk complains because @code{y} is an unknown variable.
-Using our knowledge of dictionaries, and taking advantage of
-our access to Smalltalk's dictionary, we can add it ourselves:
+the value.  It is now time to take a final look at the objects
+we have created, and send them to oblivion:
 
 @example
-   Smalltalk at: #y put: 0 !
+   y
+   x!
 @end example
 
-The only mystery left is why we're using @code{#y} instead of our
-usual quoted string.  This is one of those simple questions
-whose answer runs surprisingly deep.  The quick answer is
-that @code{#y} and @code{'y'} are pretty much the same, except
-that the former will always be the same object each time you use
-it, whereas the latter can be a new string each time you do so.
-@footnote{For more detail, @xref{Two flavors of equality}.}
+The exclamation mark deleted GNU Smalltalk's knowledge of both
+variables.  Asking for them again will return just @code{nil}.
 
-Now that we've added @code{y} to Smalltalk's dictionary, we
-try again:
-@example
-   y := 1 !
-@end example
-It works!  Because you've added an entry for @code{y}, Smalltalk
-is now perfectly happy to let you use this new variable.
-If you have some spare time, you can print out the
-entire Smalltalk dictionary with:
-@example
-   Smalltalk inspect !
-@end example
-
-As you might suspect, this will print out quite a large list
-of names!  If you get tired of watching Smalltalk grind it
-out, use your interrupt key (control-C, usually) to bring
-Smalltalk back to interactive mode.
-
-@node Closing thoughts, , Smalltalk dictionary, Some classes
+@node Closing thoughts, , Dictionaries, Some classes
 @subsection Closing thoughts
 
 You've seen how Smalltalk provides you with some very
@@ -731,7 +709,7 @@ previous examples.  To save the current state of @gst{},
 type:
 
 @example
-   ObjectMemory snapshot: 'myimage.im' !
+   ObjectMemory snapshot: 'myimage.im'
 @end example
 @noindent
 
@@ -766,26 +744,19 @@ The way we create our first ``custom'' class is by sending the
 following message:
 
 @example
-   Object subclass: #Account
-       instanceVariableNames: 'balance'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: nil !
+   Object subclass: #Account.
+   Account instanceVariableNames: 'balance'.
 @end example
 
-Quite a mouthful, isn't it?  Most people end up customizing
-their editor to pop this up at a push of a button.  But
-conceptually, it isn't really that bad.  The Smalltalk variable
+Quite a mouthful, isn't it?  GNU Smalltalk provides a
+simpler way to write this, but for now let's stick with this.
+Conceptually, it isn't really that bad.  The Smalltalk variable
 @i{Object} is bound to the grand-daddy of all classes on the
 system.  What we're doing here is telling the @i{Object} class
 that we want to add to it a subclass known as @i{Account}.
-The other parts of the message can be ignored, but
-@code{instanceVariableNames: 'balance'} tells it that each object
-in this subclass will have a hidden variable named
-@code{balance}.  @footnote{In case you're having a hard time making out
-the font, the @i{''} after @code{classVariableNames:} and
-@code{poolDictionaries:} are a pair of single quotes---an
-empty string.}
+Then, @code{instanceVariableNames: 'balance'} tells the new
+class that each of its objects (@dfn{instances}) will have a
+hidden variable named @code{balance}.
 
 @node Documenting the class, Defining methods, A new class, Creating classes
 @subsection Documenting the class
@@ -794,21 +765,46 @@ The next step is to associate a description with the
 class.  You do this by sending a message to the new class:
 @example
    Account comment:
-   'I represent a place to deposit and withdraw money' !
+   'I represent a place to deposit and withdraw money'
 @end example
 
 A description is associated with every Smalltalk class, and
 it's considered good form to add a description to each new
 class you define.  To get the description for a given class:
 @example
-   (Account comment) printNl !
+   Account comment
 @end example
 
 And your string is printed back to you.  Try this with class
 Integer, too:
 @example
-   (Integer comment) printNl !
+   Integer comment
 @end example
+
+However, there is another way to define classes.  This still
+translates to sending objects, but looks more like a traditional
+programming language or scripting language:
+
+@example
+Object subclass: Account [
+    | balance |
+    <comment:
+        'I represent a place to deposit and withdraw money'>
+]
+@end example
+
+This has created a class.  If we want to access it again, for
+example to modify the comment, we can do so like this:
+
+@example
+Account extend [
+    <comment:
+        'I represent a place to withdraw money that has been deposited'>
+]
+@end example
+
+This instructs Smalltalk to pick an existing class, rather than
+trying to subclass it.
 
 @node Defining methods, Instance methods, Documenting the class, Creating classes
 @subsection Defining a method for the class
@@ -818,18 +814,17 @@ work for us---we have to define some messages which the class
 can process first.  We'll start at the beginning by defining
 methods for instance creation:
 @example
-  !Account class methodsFor: 'instance creation'!
-
-   new
-       | r |
-
-       r := super new.
-       r init.
-       ^r
-   ! !
+    Account class extend [
+       new [
+           | r |
+           <category: 'instance creation'>
+           r := super new.
+           r init.
+           ^r
+      ]
+   ]
 @end example
 
-Again, programming your editor to do this is recommended.
 The important points about this are:
 
 @itemize @bullet
@@ -838,36 +833,29 @@ The important points about this are:
 to be sent to the Account class itself.
 
 @item
-@code{methodsFor: 'instance creation'}
-is more documentation support; it says that all of the methods
-defined will be to support creating objects of type
+@code{<category: 'instance creation'>}
+is more documentation support; it says that the methods
+we are defining supports creating objects of type
 Account.
 
 @item
-The text starting with @code{new} and ending with @code{! !} 
+The text starting with @code{new [} and ending with @code{]} 
 defined what action to take for the message @code{new}.
 When you enter this definition, @gst{} will simply
 give you another prompt, but your method has been compiled in
 and is ready for use.  @gst{} is pretty quiet on successful
 method definitions---but you'll get plenty of error
 messages if there's a problem!
-@end itemize
 
-This is also the first example where we've had to use
-more than one statement, and thus a good place to present
-the statement separator---the @code{.} period.  Like Pascal, and unlike C,
-statements are separated rather than terminated.  Thus you
-need only use a @code{.} when you have finished one statement
-and are starting another.  This is why our last statement,
-@code{^r}, does not have a @code{.} following.  Once again like
-Pascal, however, Smalltalk won't complain if your enter a spurious
-statement separator after @i{the last} statement.
+If you're familiar with other Smalltalks, note that the body
+of the method is always in brackets.
+@end itemize
 
 The best way to describe how this method works is to
 step through it.  Imagine we sent a message to the new class
 Account with the command line:
 @example
-   Account new !
+   Account new
 @end example
 
 @code{Account} receives the message @code{new} and looks up
@@ -875,7 +863,10 @@ how to process this message.  It finds our new definition, and
 starts running it.  The first line, @code{| r |}, creates a local
 variable named @code{r} which can be used as a placeholder for
 the objects we create.  @code{r} will go away as soon as the message
-is done being processed.
+is done being processed; note the parallel with @code{balance}, who
+goes away as soon as the object is not used anymore.  And note that
+here you have to declare local variables explicitly, unlike what
+you did in previous examples.
 
 The first real step is to actually create the object.
 The line @code{r := super new} does this using a fancy trick.
@@ -931,16 +922,18 @@ We need to define the @code{init} method for our Account
 objects, so that our @code{new} method defined above will work.
 Here's the Smalltalk code:
 @example
-   !Account methodsFor: 'instance initialization'!
-   init
-       balance := 0
-   ! !
+Account extend [
+    init [
+        <category: 'initialization'>
+        balance := 0
+    ]
+]
 @end example
 
 It looks quite a bit like the previous method definition,
 except that the first one said
-@code{Account class methodsFor:@dots{}}, and ours says
-@code{Account methodsFor:@dots{}}.
+@code{Account class extend}, and ours says
+@code{Account extend}.
 
 The difference is that the first one defined a method for
 messages sent directly to @code{Account}, but the second one is
@@ -968,19 +961,14 @@ even have a void data type.}
 
 Let's create an instance of class Account:
 @example
-   Smalltalk at: #a put: (Account new) !
+   a := Account new
 @end example
 
 Can you guess what this does?  The @code{Smalltalk at: #a put: <something>}
 creates a Smalltalk variable.  And the @code{Account new} creates a new
 Account, and returns it.  So this line creates a Smalltalk
 variable named @code{a}, and attaches it to a new Account---all in
-one line.  Let's take a look at the Account object we just created:
-@example
-   a printNl !
-@end example
-
-It prints:
+one line.  It also prints the Account object we just created:
 @example
    an Account
 @end example
@@ -991,17 +979,19 @@ the default system @code{printNl} method---which tells what the
 object is, but not what it contains.  So clearly we must add
 such a method:
 @example
-   !Account methodsFor: 'printing'!
-   printOn: stream
-       super printOn: stream.
-       stream nextPutAll: ' with balance: '.
-       balance printOn: stream
-   ! !
+    Account extend [
+        printOn: stream [
+            <category: 'printing'>
+            super printOn: stream.
+            stream nextPutAll: ' with balance: '.
+            balance printOn: stream
+        ]
+    ]
 @end example
 
 Now give it a try again:
 @example
-   a printNl !
+   a
 @end example
 
 @noindent
@@ -1038,23 +1028,24 @@ Our final methods will let us deposit and spend money.
 They're very simple:
 
 @example
-   !Account methodsFor: 'moving money'!
-   spend: amount
-       balance := balance - amount
-   !
-   deposit: amount
-       balance := balance + amount
-   ! !
+   Account extend [
+       spend: amount [
+           <category: 'moving money'>
+           balance := balance - amount
+       ]
+       deposit: amount [
+           <category: 'moving money'>
+           balance := balance + amount
+       ]
+   ]
 @end example
 
 With these methods you can now deposit and spend amounts of
 money.  Try these operations:
 @example
-   a deposit: 125!
-   a deposit: 20!
-   a printNl!
-   a spend: 10!
-   a printNl!
+   a deposit: 125
+   a deposit: 20
+   a spend: 10
 @end example
 
 @node Next coming, , Moving money around, Creating classes
@@ -1091,16 +1082,14 @@ We create the Savings class as a subclass of Account.
 It holds money, just like an Account, but has an additional
 property that we will model: it is paid interest based on
 its balance.  We create the class Savings as a subclass of
-Account:
+Account.
 @example
-   Account subclass: #Savings
-       instanceVariableNames: 'interest'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: nil !
+   Account subclass: Savings [
+       | interest |
 @end example
 
-The instance variable @code{interest} will accumulate interest
+This is already telling something:
+the instance variable @code{interest} will accumulate interest
 paid.  Thus, in addition to the @code{spend:} and
 @code{deposit:} messages which we inherit from our parent,
 Account, we will need to define a method to add in interest
@@ -1108,12 +1097,15 @@ deposits, and a way to clear the interest variable (which
 we would do yearly, after we have paid taxes).  We first define
 a method for allocating a new account---we need to make sure that the
 interest field starts at 0.
+
+We can do so within the @code{Account subclass: Savings} scope,
+which we have not closed above.
 @example
-   !Savings methodsFor: 'initialization'!
-   init
+   init [
+       <category: 'initialization'>
        interest := 0.
-       ^ super init
-   ! !
+       ^super init
+   ]
 @end example
 
 Recall that the parent took care of the @code{new} message, and
@@ -1127,19 +1119,24 @@ initialization.
 
 With our new @code{Savings} account created, we can define
 two methods for dealing specially with such an account:
+
 @example
-   !Savings methodsFor: 'interest'!
-   interest: amount
+   interest: amount [
        interest := interest + amount.
        self deposit: amount
-   !
-   clearInterest
+   ]
+   clearInterest [
        | oldinterest |
-
        oldinterest := interest.
        interest := 0.
        ^oldinterest
-   ! !
+   ]
+@end example
+
+We are now finished, and close the class scope:
+
+@example
+]
 @end example
 
 The first method says that we add the @code{amount} to our
@@ -1203,11 +1200,8 @@ How many checks we have left in our checkbook
 
 We will define this as another subclass of Account:
 @example
-  Account subclass: #Checking
-       instanceVariableNames: 'checknum checksleft'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: nil !
+Account subclass: Checking [
+    | checknum checksleft |
 @end example
 
 We have two instance variables, but we really only need to
@@ -1217,11 +1211,11 @@ Account will send us the @code{init} message.  We don't need our
 own class-specific @code{new} function, since our parent's will
 provide everything we need.
 @example
-   !Checking methodsFor: 'Initialization'!
-   init
+    init [
+       <category: 'initialization'>
        checksleft := 0.
        ^super init
-   ! !
+   ]
 @end example
 
 As in Savings, we inherit most of abilities from our superclass,
@@ -1237,21 +1231,22 @@ We will finish this chapter by adding a method for
 spending money through our checkbook.  The mechanics of taking
 a message and updating variables should be familiar:
 @example
-   !Checking methodsFor: 'spending'!
-   newChecks: number count: checkcount
+   newChecks: number count: checkcount [
+       <category: 'spending'>
        checknum := number.
        checksleft := checkcount
-   !
+   ]
 
-   writeCheck: amount
+   writeCheck: amount [
+       <category: 'spending'>
        | num |
-
        num := checknum.
        checknum := checknum + 1.
        checksleft := checksleft - 1.
        self spend: amount.
        ^ num
-   ! !
+   ]
+]
 @end example
 
 @code{newChecks:} fills our checkbook with checks.  We record
@@ -1268,14 +1263,11 @@ spending.
 
 You can try the following examples:
 @example
-   Smalltalk at: #c put: (Checking new) !
-   c printNl !
-   c deposit: 250 !
-   c printNl !
-   c newChecks: 100 count: 50 !
-   c printNl !
-   (c writeCheck: 32) printNl !
-   c printNl !
+   c := Checking new
+   c deposit: 250
+   c newChecks: 100 count: 50
+   c writeCheck: 32
+   c
 @end example
 
 For amusement, you might want to add a printOn: message to
@@ -1315,8 +1307,8 @@ the Checking class; if you have entered the methods from the
 previous chapters, the old definition will be overridden by
 this new one.
 @example
-   !Checking methodsFor: 'spending'!
-   writeCheck: amount
+Checking extend [
+    writeCheck: amount
        | num |
 
        (checksleft < 1)
@@ -1326,7 +1318,8 @@ this new one.
        checksleft := checksleft - 1.
        self spend: amount
        ^ num
-   ! !
+   ]
+]
 @end example
 
 The two new lines are:
@@ -1337,7 +1330,7 @@ The two new lines are:
 
 At first glance, this appears to be a completely new structure.
 But, look again!  The only new construct is the square
-brackets.
+brackets, which appear within a method and not only surround it.
 
 The first line is a simple boolean expression.  @code{checksleft}
 is our integer, as initialized by our Checking class.
@@ -1381,10 +1374,10 @@ You should take a little time to play with this method
 of representing conditionals.  You can run your checkbook,
 but can also invoke the conditional functions directly:
 @example
-   true ifTrue: [ 'Hello, world!' printNl ] !
-   false ifTrue: [ 'Hello, world!' printNl ] !
-   true ifFalse: [ 'Hello, world!' printNl ] !
-   false ifFalse: [ 'Hello, world!' printNl ] !
+   true ifTrue: [ 'Hello, world!' printNl ]
+   false ifTrue: [ 'Hello, world!' printNl ]
+   true ifFalse: [ 'Hello, world!' printNl ]
+   false ifFalse: [ 'Hello, world!' printNl ]
 @end example
 
 @node Iteration, , Conditions, Code blocks (I)
@@ -1416,15 +1409,13 @@ ignore what's currently there, and define our latest Checking
 class.
 
 @example
-   Account subclass: #Checking
-       instanceVariableNames: 'checknum checksleft history'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: nil !
+Checking extend [
+    | checknum checksleft history |
 @end example
 
 This is the same syntax as the last time we defined a
-checking account, except that we have three instance variables:
+checking account, except that we start with @code{extend}
+(since the class is already there) and have three instance variables:
 the @code{checknum} and @code{checksleft} which have always been
 there, and our new @code{history} variable; since we have removed no
 instance variables, the old method will be recompiled without
@@ -1436,12 +1427,12 @@ With our new Checking instance variable, we are all set
 to start recording our checking history.  Our first change
 will be in the handling of the @code{init} message:
 @example
-   !Checking methodsFor: 'initialization'!
-   init
-       checksleft := 0.
-       history := Dictionary new.
-       ^ super init
-   ! !
+       init [
+           <category: 'initialization'>
+           checksleft := 0.
+           history := Dictionary new.
+           ^ super init
+       ]
 @end example
 
 This provides us with a Dictionary, and hooks it to our new
@@ -1452,8 +1443,8 @@ The method is a little more involved, as we've added some
 more sanity checks to the writing of checks.
 
 @example
-   !Checking methodsFor: 'spending'!
-   writeCheck: amount
+   writeCheck: amount [
+       <category: 'spending'>
        | num |
 
        "Sanity check that we have checks left in our checkbook"
@@ -1473,7 +1464,7 @@ more sanity checks to the writing of checks.
        checksleft := checksleft - 1.
        self spend: amount.
        ^ num
-   ! !
+   ]
 @end example
 
 We have added three things to our latest version of
@@ -1501,7 +1492,7 @@ best would probably be to create a new, custom
 object which contained this information, and then
 store this object under the check number key in
 the dictionary.  It would also be valid (though
-probably over-kill) to store a dictionary as the
+probably overkill) to store a dictionary as the
 value---and then store as many pieces of information
 as you'd like under each slot!} With this, we now have a working Checking
 class, with reasonable sanity checks and per-check information.
@@ -1511,21 +1502,20 @@ get access to all this information.  We will start with some
 simple print-out functions.
 
 @example
-   !Checking methodsFor: 'printing'!
-   printOn: stream
+   printOn: stream [
        super printOn: stream.
        ', checks left: ' printOn: stream.
        checksleft printOn: stream.
        ', checks written: ' printOn: stream.
        (history size) printOn: stream.
-   !
-   check: num
+   ]
+   check: num [
        | c |
        c := history
            at: num
            ifAbsent: [ ^self error: 'No such check #' ].
        ^c
-   ! !
+   ]
 @end example
 
 There should be very few surprises here.  We format and
@@ -1554,43 +1544,36 @@ object in the dictionary honors our @code{printNl}/@code{printOn:} messages
 sages.
 
 @example
-   !Checking methodsFor: 'printing'!
-   printChecks
-       history associationsDo: [ :assoc |
-           (assoc key) print.
-           ' - ' print.
-           (assoc value) printNl.
-       ]
-   ! !
+    printChecks [
+        history keysAndValuesDo: [ :key :value |
+            key print.
+            ' - ' print.
+            value printNl.
+        ]
+    ]
+]
 @end example
 
 We still see a code block object being passed to the
-dictionary, but @code{:assoc |} is something new.  A code
+dictionary, but @code{:key :value |} is something new.  A code
 block can optionally receive arguments.  In this case, the
-argument is the key/value pair, known in Smalltalk as an
-@i{Association}.  This is the way that a dictionary object
-stores its key/value pairs internally.  In fact, when you
-sent an at:put: message to a dictionary object, the first thing it
-does is pack them into a new object from the Association class.
+two arguments represent a key/value pair.
 If you only wanted the value portion, you could call
 history with a @code{do:} message instead; if you only wanted the
 key portion, you could call history with a @code{keysDo:} message instead.
 
-Our code merely uses the @code{key} and @code{value} messages to
-ask the association for the two values.  We then invoke our
-printing interface upon them.  We don't want a newline until the
-end, so the @code{print} message is used instead.  It is pretty
-much the same as @code{printNl}, since both
-implicitly use @code{Transcript}, except it doesn't add a newline.
+We then invoke our printing interface upon them.  We don't want a
+newline until the end, so the @code{print} message is used instead.
+It is pretty much the same as @code{printNl}, since both implicitly use
+@code{Transcript}, except it doesn't add a newline.
 
-It is important that you be clear on the relationship
-between an Association and the argument to a code block.  In
-this example, we passed a @code{associationsDo:} message to a
-dictionary.  A dictionary invokes the passed code block with an
-Association when processing an associationsDo: message.  But
-code blocks can receive any type of argument: the type is
-determined by the code which invokes the code block; Dictionary's
-@code{associationDo:} method, in this case.  In the next chapter
+It is important that you be clear that in principle there is
+no relationship between the code block and the dictionary you
+passed it to.  The dictionary just invokes the passed code block
+with a key/value pair when processing a keysAndValuesDo: message.  But
+the same two-parameter code block can be passed to any message that
+wishes to evaluate it (and passes the exact number of parameters to
+it).  In the next chapter
 we'll see more on how code blocks are used; we'll also look at how
 you can invoke code blocks in your own code.
 
@@ -1599,16 +1582,13 @@ you can invoke code blocks in your own code.
 
 In the last chapter, we looked at how code blocks could
 be used to build conditional expressions, and how you could
-iterate across all entries in a collection.@footnote{
-The @code{do:} message is understood by most types
-of Smalltalk collections.  It works for the
-Dictionary class, as well as sets, arrays, strings,
-intervals, linked lists, bags, and streams.  The
-@code{associationsDo:} message works only with dictionaries.
-The difference is that @code{do:} passes only the
-value portion, while @code{associationsDo:} passes the
-entire key/value pair in an Association object.} We built our
-own code blocks, and handed them off for use by system
+iterate across all entries in a collection.@footnote{The
+  @code{do:} message is understood by most types
+  of Smalltalk collections.  It works for the
+  Dictionary class, as well as sets, arrays, strings,
+  intervals, linked lists, bags, and streams.  The
+  @code{keysDo:} message, for example, works only with dictionaries.}
+We built our own code blocks, and handed them off for use by system
 objects.  But there is nothing magic about invoking code
 blocks; your own code will often need to do so.  This chapter
 will shows some examples of loop construction in
@@ -1627,18 +1607,25 @@ for yourself.
 Integer loops are constructed by telling a number to
 drive the loop.  Try this example to count from 1 to 20:
 @example
-   1 to: 20 do: [:x | x printNl ] !
+   1 to: 20 do: [:x | x printNl ]
 @end example
 
 There's also a way to count up by more than one:
 @example
-   1 to: 20 by: 2 do: [:x | x printNl ] !
+   1 to: 20 by: 2 do: [:x | x printNl ]
 @end example
 
 Finally, counting down is done with a negative step:
 @example
-   20 to: 1 by: -1 do: [:x | x printNl ] !
+   20 to: 1 by: -1 do: [:x | x printNl ]
 @end example
+
+Note that the @code{x} variable is local to the block.
+@example
+   x
+@end example
+@noindent
+just prints @code{nil}.
 
 @node Intervals, Invoking code blocks, Integer loops, Code blocks (II)
 @subsection Intervals
@@ -1647,18 +1634,16 @@ a standalone object.  This allows you to represent a range
 of numbers as a single object, which can be passed around
 the system.
 @example
-   Smalltalk at: #i put: (Interval from: 5 to: 10) !
-   i printNl !
-   i do: [:x | x printNl] !
+   i := Interval from: 5 to: 10
+   i do: [:x | x printNl]
 @end example
 
 As with the integer loops, the Interval class can also
 represent steps greater than 1.  It is done much like it was
 for our numeric loop above:
 @example
-   i := (Interval from: 5 to: 10 by: 2) !
-   i printNl !
-   i do: [:x| x printNl] !
+   i := (Interval from: 5 to: 10 by: 2)
+   i do: [:x| x printNl]
 @end example
 
 @node Invoking code blocks, , Intervals, Code blocks (II)
@@ -1673,13 +1658,13 @@ ment; they can use our existing check: message to get the
 amount.
 
 @example
-   !Checking methodsFor: 'scanning'!
-   checksOver: amount do: aBlock
-       history associationsDo: [:assoc|
-           ((assoc value) > amount)
-                  ifTrue: [aBlock value: (assoc key)]
-       ]
-   ! !
+   Checking extend [
+       checksOver: amount do: aBlock
+           history keysAndValuesDo: [:key :value |
+               (value > amount)
+                      ifTrue: [aBlock value: key]
+           ]
+   ]
 @end example
 
 The structure of this loop is much like our printChecks message
@@ -1688,12 +1673,12 @@ entry, and only invoke the supplied block if the check's
 value is greater than the specified amount.  The line:
 
 @example
-   ifTrue: [aBlock value: (assoc key)]
+   ifTrue: [aBlock value: key]
 @end example
 
 @noindent
 invokes the user-supplied block, passing as an argument the
-association's key, which is the check number.  The @code{value:}
+key, which is the check number.  The @code{value:}
 message, when received by a code block, causes the code
 block to execute.  Code blocks take @code{value}, @code{value:},
 @code{value:value:}, and @code{value:value:value:} messages, so you
@@ -1714,15 +1699,15 @@ Let's quickly set up a new checking account with $250
 checks.  Then we'll see if our new method does the job
 correctly:
 @example
-   Smalltalk at: #mycheck put: (Checking new) !
-   mycheck deposit: 250 !
-   mycheck newChecks: 100 count: 40 !
-   mycheck writeCheck: 10 !
-   mycheck writeCheck: 52 !
-   mycheck writeCheck: 15 !
-   mycheck checksOver: 1 do: [:x | x printNl] !
-   mycheck checksOver: 17 do: [:x | x printNl] !
-   mycheck checksOver: 200 do: [:x | x printNl] !
+   mycheck := Checking new.
+   mycheck deposit: 250
+   mycheck newChecks: 100 count: 40 
+   mycheck writeCheck: 10 
+   mycheck writeCheck: 52 
+   mycheck writeCheck: 15 
+   mycheck checksOver: 1 do: [:x | x printNl] 
+   mycheck checksOver: 17 do: [:x | x printNl] 
+   mycheck checksOver: 200 do: [:x | x printNl] 
 @end example
 
 We will finish this chapter with an alternative way of
@@ -1733,34 +1718,17 @@ then invoke the new resulting collection against the user's
 code block.
 
 @example
-   !Checking methodsFor: 'scanning'!
-   checksOver: amount do: aBlock
-       | chosen |
-       chosen := history select: [:amt| amt > amount].
-       chosen associationsDo: aBlock
-   ! !
+   Checking extend [
+       checksOver: amount do: aBlock [
+           | chosen |
+           chosen := history select: [:amt| amt > amount].
+           chosen keysDo: aBlock
+       ]
+   ]
 @end example
 
-Unlike our previous definition  of
-@code{checksOver:do:}, this one passes the user's code block the
-association, not just a check number.  How could this code
-be rewritten to remedy this, while still using select:?
-
-Yet, this new behavior can be useful.  You can use the same set
-of tests that we ran above.  Notice that our code block:
-@example
-   [:x| x printNl]
-@end example
-now prints out an Association.  This has a very nice
-effect: with our old method, we were told which check numbers
-were above a given amount; with this new method, we
-get the check number and amount in the form of an Association.
-When we print an association, since the key is the
-check number and the value is the check amount, we get a
-list of checks over the amount in the format:
-@example
-   CheckNum -> CheckVal
-@end example
+Note that @code{extend} will also overwrite methods.  Try
+the same tests as above, they should yield the same result!
 
 @node Debugging, More subclassing, Code blocks (II), Tutorial
 @section When Things Go Bad
@@ -1789,7 +1757,7 @@ your code using very powerful techniques.
 
 First, let's take a look at a typical error.  Type:
 @example
-   7 plus: 1 !
+   7 plus: 1
 @end example
 
 This will print out:
@@ -1822,8 +1790,8 @@ error which happens deeper within an object.
 
 Type the following lines:
 @example
-   Smalltalk at: #x put: (Dictionary new) !
-   x at: 1 !
+   x := Dictionary new
+   x at: 1
 @end example
 
 The error you receive will look like:
@@ -1874,7 +1842,7 @@ guess something of the code for Dictionary's implementation:
        ^self at: key ifAbsent: [^self error: 'key not found']
 @end example
 
-Actually, @code{findIndex:ifAbsent:} lies in class @i{HashedCollection},
+Actually, @code{findIndex:ifAbsent:} lies in class @code{HashedCollection},
 as that @code{Dictionary(HashedCollection)} in the backtrace says.
 
 It would be nice if each entry on the stack backtrace included
@@ -1892,12 +1860,12 @@ strategic calls to @code{printNl} will no doubt help, you can look at an
 object without having to write all the code yourself.  The
 @code{inspect} message works on any object, and dumps out the
 values of each instance variable within the object.@footnote{When using
-the Blox GUI, it actually pops up a so-called @i{Inspector window}.}
+the Blox GUI, it actually pops up a so-called dfni{Inspector window}.}
 
 Thus:
 @example
-   Smalltalk at: #x put: (Interval from: 1 to: 5) !
-   x inspect !
+   x := Interval from: 1 to: 5.
+   x inspect
 @end example
 
 displays:
@@ -2153,39 +2121,37 @@ implementation, but that might break some code in the image, so it
 is not practical.  Why not add a subclass?
 
 @example
-   Array variableSubclass: #NiledArray
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: nil !
+   Array subclass: NiledArray [
+       "We could even write <shape: Array shape> here!"
+       <shape: #pointer>
 
-   !NiledArray methodsFor: 'bounds checking'!
-   boundsCheck: index
-       ^(index < 1) | (index > (self basicSize))
-   ! !
+       boundsCheck: index [
+           ^(index < 1) | (index > (self basicSize))
+       ]
 
-   !NiledArray methodsFor: 'basic'!
-   at: index
-       ^(self boundsCheck: index)
-           ifTrue: [ nil ]
-           ifFalse: [ super at: index ]
+       at: index [
+           ^(self boundsCheck: index)
+               ifTrue: [ nil ]
+               ifFalse: [ super at: index ]
+       ]
 
-   !
-   at: index put: val
-       ^(self boundsCheck: index)
-           ifTrue: [ val ]
-           ifFalse: [ super at: index put: val ]
-   ! !
+       at: index put: val [
+           ^(self boundsCheck: index)
+               ifTrue: [ val ]
+               ifFalse: [ super at: index put: val ]
+       ]
+   ]
 @end example
 
 Much of the machinery of adding a class should be
-familiar.  Instead of our usual @code{subclass:} message, we use a
-@code{variableSubclass:} message.  This reflects the underlying
+familiar.  We see another declaration like @code{comment:},
+that is @code{shape:} message.  This sets up @code{NiledArray}
+to have the same underlying
 structure of an @code{Array} object; we'll delay discussing this
 until the chapter on the nuts and bolts of arrays.  In any
 case, we inherit all of the actual knowledge of how to create
 arrays, reference them, and so forth.  All that we do is
-intercept at: and at:put: messages, call our common
+intercept @code{at:} and @code{at:put:} messages, call our common
 function to validate the array index, and do something special
 if the index is not valid.  The way that we coded
 the bounds check bears a little examination.
@@ -2286,93 +2252,91 @@ class.  The class as presented suffers some limitations,
 which we'll cover later in the chapter.
 
 @example
-   Number subclass: #Complex
-       instanceVariableNames: 'realpart imagpart'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: nil !
-   !Complex class methodsFor: 'creating'!
-   new
-       ^self error: 'use real:imaginary:'
-   !
-   new: ignore
-       ^self new
-   !
-   real: r imaginary: i
-       ^(super new) setReal: r setImag: i
-   ! !
+   Number subclass: Complex [
+       | realpart imagpart |
 
-   !Complex methodsFor: 'creating--private'!
-   setReal: r setImag: i
-       realpart := r.
-       imagpart := i.
-       ^self
-   ! !
+       "This is a quick way to define class-side methods."
+       Complex class >> new [
+           <category: 'instance creation'>
+           ^self error: 'use real:imaginary:'
+       ]
+       Complex class >> new: ignore [
+           <category: 'instance creation'>
+           ^self new
+       ]
+       Complex class >> real: r imaginary: i [
+           <category: 'instance creation'>
+           ^(super new) setReal: r setImag: i
+       ]
 
-   !Complex methodsFor: 'basic'!
-   real
-       ^realpart
-   !
-   imaginary
-       ^imagpart
-   ! !
+       setReal: r setImag: i [
+           <category: 'basic'>
+           realpart := r.
+           imagpart := i.
+           ^self
+       ]
 
-   !Complex methodsFor: 'math'!
-   + val
-       ^Complex real: (realpart + val real)
-           imaginary: (imagpart + val imaginary)
-   !
-   - val
-       ^Complex real: (realpart - val real)
-           imaginary: (imagpart - val imaginary)
-   !
-   * val
-       ^Complex real: (realpart * val real) - (imagpart * val imaginary)
-           imaginary: (imagpart * val real) + (realpart * val imaginary)
-   !
-   / val
-       | d r i |
-       d := (val real * val real) + (val imaginary * val imaginary).
-       r := ((realpart * val real) + (imagpart * val imaginary)).
-       i := ((imagpart * val real) - (realpart * val imaginary)).
-       ^Complex real: r / d imaginary: i / d
-   ! !
+       real [
+           <category: 'basic'>
+           ^realpart
+       ]
+       imaginary [
+           <category: 'basic'>
+           ^imagpart
+       ]
 
-   !Complex methodsFor: 'comparison'!
+       + val [
+           <category: 'math'>
+           ^Complex real: (realpart + val real)
+               imaginary: (imagpart + val imaginary)
+       ]
+       - val [
+           <category: 'math'>
+           ^Complex real: (realpart - val real)
+               imaginary: (imagpart - val imaginary)
+       ]
+       * val [
+           <category: 'math'>
+           ^Complex real: (realpart * val real) - (imagpart * val imaginary)
+               imaginary: (imagpart * val real) + (realpart * val imaginary)
+       ]
+       / val [
+           <category: 'math'>
+           | d r i |
+           d := (val real * val real) + (val imaginary * val imaginary).
+           r := ((realpart * val real) + (imagpart * val imaginary)).
+           i := ((imagpart * val real) - (realpart * val imaginary)).
+           ^Complex real: r / d imaginary: i / d
+       ]
 
-   = val
-       ^(realpart = val real) & (imagpart = val imaginary)
-   !
-   > val
-       ^self shouldNotImplement
-   !
-   >= val
-       ^self shouldNotImplement
-   !
-   < val
-       ^self shouldNotImplement
-   !
-   <= val
-       ^self shouldNotImplement
-   ! !
+       = val [
+           <category: 'comparison'>
+           ^(realpart = val real) & (imagpart = val imaginary)
+       ]
 
-   !Complex methodsFor: 'printing'!
-   printOn: aStream
-       aStream nextPut: $(.
-       realpart printOn: aStream.
-       aStream nextPut: $,.
-       imagpart printOn: aStream.
-       aStream nextPut: $)
-   ! !
+       "All other comparison methods are based on <"
+       < val [
+           <category: 'comparison'>
+           ^self shouldNotImplement
+       ]
+
+       printOn: aStream [
+           <category: 'printing'>
+           realpart printOn: aStream.
+           aStream nextPut: $+.
+           imagpart printOn: aStream.
+           aStream nextPut: $i
+       ]
+   ]
 @end example
 
 There should be surprisingly little which is actually
 new in this example.  The printing method uses both @code{printOn:}
 as well as @code{nextPut:} to do its printing.  While we haven't
-covered it, it's pretty clear that @code{$(} generates the ASCII
-character @code{(} as an object@footnote{A GNU Smalltalk extension
+covered it, it's pretty clear that @code{$+} generates the ASCII
+character @code{+} as an object@footnote{A GNU Smalltalk extension
   allows you to type characters by ASCII code too, as in
-  @code{$<40>}.}, and @code{nextPut:} puts its argument
+  @code{$<43>}.}, and @code{nextPut:} puts its argument
 as the next thing on the stream.
 
 The math operations all generate a new object, calculating
@@ -2396,9 +2360,9 @@ to try it, all the existing methods for an Array continue to
 work without further effort-you might find it interesting to
 ponder why the following still works:
 @example
-   Smalltalk at: #a put: (NiledArray new: 10) !
-   a at: 5 put: 1234 !
-   a do: [:i| i printNl ] !
+   a := NiledArray new: 10
+   a at: 5 put: 1234
+   a do: [:i| i printNl ]
 @end example
 
 The strength of inheritance is that you focus on the incremental
@@ -2470,15 +2434,15 @@ send the current object a @code{printOn:} message whose argument is
 found in the @code{stdout} global).  You can invoke the standard output stream
 directly:
 @example
-   'Hello, world' printOn: stdout !
-   stdout inspect !
+   'Hello, world' printOn: stdout
+   stdout inspect
 @end example
 
 @noindent
 or you can do the same for the Transcript, which is yet another stream:
 @example
-   'Hello, world' printOn: stdout !
-   Transcript inspect !
+   'Hello, world' printOn: stdout
+   Transcript inspect
 @end example
 
 @noindent
@@ -2495,21 +2459,21 @@ can provide an anonymous buffer of data, but it can also
 provide a stream-like interpretation to an existing array of
 data.  Consider this example:
 @example
-   Smalltalk at: #a put: (Array new: 10) !
-   a at: 4 put: 1234 !
-   a at: 9 put: 5678 !
-   Smalltalk at: #s put: (ReadWriteStream on: a) !
-   s inspect !
-   s position: 1 !
-   s inspect !
-   s nextPut: 11; nextPut: 22 !
-   (a at: 1) printNl !
-   a do: [:x| x printNl] !
-   s position: 2 !
-   s do: [:x| x printNl] !
-   s position: 5 !
-   s do: [:x| x printNl] !
-   s inspect !
+   a := Array new: 10
+   a at: 4 put: 1234
+   a at: 9 put: 5678
+   s := ReadWriteStream on: a.
+   s inspect
+   s position: 1
+   s inspect
+   s nextPut: 11; nextPut: 22
+   (a at: 1) printNl
+   a do: [:x| x printNl]
+   s position: 2
+   s do: [:x| x printNl]
+   s position: 5
+   s do: [:x| x printNl]
+   s inspect
 @end example
 
 The key is the @code{on:} message; it tells a stream class to
@@ -2535,16 +2499,16 @@ if you want to write several strings, and don't want to add up their
 lengths yourself:
 
 @example
-   Smalltalk at: #s put: (ReadWriteStream on: (String new)) !
-   s inspect !
-   s nextPutAll: 'Hello, '!
-   s inspect !
-   s nextPutAll: 'world'!
-   s inspect !
-   s position: 1 !
-   s inspect !
-   s do: [:c | stdout nextPut: c ] !
-   (s contents) printNl !
+   s := ReadWriteStream on: String new
+   s inspect
+   s nextPutAll: 'Hello, '
+   s inspect
+   s nextPutAll: 'world'
+   s inspect
+   s position: 1
+   s inspect
+   s do: [:c | stdout nextPut: c ]
+   s contents
 @end example
 
 In this case, we have used a String as the collection
@@ -2572,10 +2536,10 @@ want to write an object to the stream several times, you
 can use @code{next:put:}, like this:
 
 @example
-   Smalltalk at: #s put: (ReadWriteStream on: (Array new: 0)) !
-   s next: 4 put: 'Hi!' !
-   s position: 1 !
-   s do: [:x | x printNl] !
+   s := ReadWriteStream on: (Array new: 0)
+   s next: 4 put: 'Hi!'
+   s position: 1
+   s do: [:x | x printNl]
 @end example
 
 @node Files, Dynamic Strings, Your own stream, Streams
@@ -2585,19 +2549,17 @@ Streams can also operate on files.  If you wanted to
 dump the file @file{/etc/passwd} to your terminal, you could
 create a stream on the file, and then stream over its contents:
 @example
-   Smalltalk at: #f put: (FileStream
-       open: '/etc/passwd'
-       mode: FileStream read) !
-   f do: [ :c | Transcript nextPut: c ] !
-   f position: 30 !
-   25 timesRepeat: [ Transcript nextPut: (f next) ] !
-   f close !
+   f := FileStream open: '/etc/passwd' mode: FileStream read
+   f linesDo: [ :c | Transcript nextPutAll: c; nl ]
+   f position: 30
+   25 timesRepeat: [ Transcript nextPut: (f next) ]
+   f close
 @end example
 
 and, of course, you can load Smalltalk source code into your
 image:
 @example
-   FileStream fileIn: '/users/myself/src/source.st' !
+   FileStream fileIn: '/Users/myself/src/source.st'
 @end example
 
 @node Dynamic Strings, , Files, Streams
@@ -2612,12 +2574,12 @@ Smalltalk source code---it shows a general method for making
 an object print itself onto a string.
 
 @example
-   printString
+   printString [
        | stream |
        stream := WriteStream on: (String new).
        self printOn: stream.
        ^stream contents
-   !
+   ]
 @end example
 
 This method, residing in Object, is inherited by every
@@ -2693,30 +2655,23 @@ from ByteArray.  To see why, we must delve down yet another
 level, and arrive at the basic methods for creating a
 class.
 
-For most example classes, we've used the message:
-@example
-       subclass:
-       instanceVariableNames:
-       classVariableNames:
-       poolDictionaries:
-       category:
-@end example
-
-But when we implemented our CheckedArray example, we used
-@code{variableSubclass:} instead of just @code{subclass:}.  The
-choice of these two kinds of class creation (and two more we'll show
+When we implemented our NiledArray example, we used
+@code{<shape: #pointer>}.  This special kind
+of class creation (and the other uses of @code{shape:} we'll show
 shortly) defines the fundamental structure of Smalltalk
 objects created within a given class.  Let's consider the
 differences in the next sub-sections.
 
-@b{subclass:}.  This kind of class creation specifies the simplest
+@table @asis
+@item Nothing
+The default kind of class creation specifies the simplest
 Smalltalk object.  The object consists only of the storage
 needed to hold the instance variables.  In C, this would be
 a simple structure with zero or more scalar fields.@footnote{C
 requires one or more; zero is allowed in Smalltalk}.
 
-@b{variableSubclass:}.  All the other types of class are a superset of
-a @code{subclass:}.  Storage is still allocated for any instance
+@item @code{#pointer}
+Storage is still allocated for any instance
 variables, but the objects of the class must be created with a
 @code{new:} message.
 The number passed as an argument to @code{new:} causes the new
@@ -2725,29 +2680,36 @@ also have that many slots of unnamed (indexed) storage allocated.
 The analog in C would be to have a dynamically allocated structure
 with some scalar fields, followed at its end by a array of pointers.
 
-@b{variableByteSubclass:}.  This is a special case of @code{variableSubclass:};
-the storage age allocated as specified by new: is an array of bytes.
+@item @code{#byte}
+The storage allocated as specified by new: is an array of bytes.
 The analog in C would be a dynamically allocated structure with
 scalar fields@footnote{This is not always true for other Smalltalk
 implementations, who don't allow instance variables in variableByteSubclasses
 and variableWordSubclasses.}, followed by a array of @code{char}.
 
-@b{variableWordSubclass:}.  Once again, this is a special case of
-@code{variableSubclass:}; the storage
-age allocated as specified by new: is an array of C signed longs,
+@item @code{#word}
+The storage allocated as specified by new: is an array of C unsigned longs,
 which are represented in Smalltalk by Integer objects.  The analog in
 C would be a dynamically allocated structure with scalar fields, followed
 by an array of @code{long}.  This kind of subclass is only used in a few
 places in Smalltalk.
 
-@b{Accessing These New Arrays.} You already know how to access instance
+@item @code{#character}
+The storage allocated as specified by new: is an array of characters.
+The analog in C would be a dynamically allocated structure with
+scalar fields, followed by a array of @code{char}.
+
+There are many more shapes for more specialized usage.
+@end table
+
+How to access this new arrays?  You already know how to access instance
 variables---by name.  But there doesn't seem to be a name for this new
 storage.  The way an object accesses it is to send itself
 array-type messages like @code{at:}, @code{at:put:}, and so forth.
 
 The problem is when an object wants to add a new level
 of interpretation to the at: and at:put: messages.  Consider
-a Dictionary---it is a @code{variableSubclass:} type of object,
+a Dictionary---it is a pointer-holding object
 but its @code{at:} message is in terms of a key, not an integer
 index of its storage.  Since it has redefined the @code{at:} message, how
 does it access its fundamental storage?
@@ -2757,50 +2719,47 @@ The answer is that Smalltalk has defined @code{basicAt:} and
 the @code{at:} and @code{at:put:} messages have been defined to provide
 a different abstraction.
 
-@b{An Example.}  This can get pretty confusing in the abstract, so let's
+This can get pretty confusing in the abstract, so let's
 do an example to show how it's pretty simple in practice.
 Smalltalk arrays tend to start at 1; let's define an array
 type whose permissible range is arbitrary.
 
 @example
-   ArrayedCollection variableSubclass: 'RangedArray'
-       instanceVariableNames: 'base'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: nil !
-   RangedArray comment: 'I am an Array whose base is arbitrary' !
-   !RangedArray class methodsFor: 'creation'!
-   new
-       ^self error: 'Use new:base:'
-   !
-   new: size
-       ^self new: size base: 1
-   !
-   new: size base: b
-       ^(super new: size) init: b
-   ! !
-   !RangedArray methodsFor: 'init'!
-   init: b
-       base := (b - 1).   "- 1 because basicAt: works with a 1 base"
-       ^self
-   ! !
-   !RangedArray methodsFor: 'basic'!
-   rangeCheck: i
-       ((i <= base) | (i > (base + (self basicSize)))) ifTrue: [
-           'Bad index value: ' printOn: stderr.
-           i printOn: stderr.
-           (Character nl) printOn: stderr.
-           ^self error: 'illegal index'
+   ArrayedCollection subclass: RangedArray [
+       | offset |
+       <comment: 'I am an Array whose base is arbitrary'>
+       RangedArray class >> new: size [
+           <category: 'instance creation'>
+           ^self new: size base: 1
        ]
-   !
-   at: i
-       self rangeCheck: i.
-       ^self basicAt: (i-base)
-   !
-   at: i put: v
-       self rangeCheck: i.
-       ^self basicAt: (i-base) put: v
-   ! !
+       RangedArray class >> new: size base: b [
+           <category: 'instance creation'>
+           ^(super new: size) init: b
+       ]
+
+       init: b [
+           <category: 'init'>
+           offset := (b - 1).   "- 1 because basicAt: works with a 1 base"
+           ^self
+      ]
+      rangeCheck: i [
+           <category: 'basic'>
+           (i <= offset) | (i > (offset + self basicSize)) ifTrue: [
+               'Bad index value: ' printOn: stderr.
+               i printOn: stderr.
+               Character nl printOn: stderr.
+               ^self error: 'illegal index'
+           ]
+       ]
+       at: [
+           self rangeCheck: i.
+           ^self basicAt: i - offset
+       ]
+       at: i put: v [
+           self rangeCheck: i.
+           ^self basicAt: i- offset put: v
+       ]
+   ]
 @end example
 
 The code has two parts; an initialization, which simply
@@ -2810,16 +2769,16 @@ underlying storage receives its 1-based index instead.
 We've included a range check; its
 utility will demonstrate itself in a moment:
 @example
-   Smalltalk at: #a put: (RangedArray new: 10 base: 5) !
-   a at: 5 put: 0 !
-   a at: 4 put: 1 !
+   a := RangedArray new: 10 base: 5.
+   a at: 5 put: 0
+   a at: 4 put: 1
 @end example
 
 Since 4 is below our base of 5, a range check error occurs.
 But this check can catch more than just our own misbehavior!
 
 @example
-   a do: [:x| x printNl] !
+   a do: [:x| x printNl]
 @end example
 
 Our do: message handling is broken!  The stack backtrace
@@ -2840,14 +2799,17 @@ this version of our range checking code also dumps the
 index.  We see that do: has assumed that all arrays start at
 1.
 
+The immediate fix is obvious; we implement our own do:
+
 @example
-   The immediate fix is obvious; we implement our own do:
-   !RangedArray methodsFor: 'basic'!
-   do: aBlock
-       1 to: (self basicSize) do: [:x|
-           aBlock value: (self basicAt: x)
+   RangedArray extend [
+       do: aBlock [
+           <category: 'basic'>
+           1 to: (self basicSize) do: [:x|
+               aBlock value: (self basicAt: x)
+           ]
        ]
-   ! !
+   ]
 @end example
 
 But the issues start to run deep.  If our parent class
@@ -2868,16 +2830,15 @@ entirely opaque to another.  But what sort of privacy should
 there be between a higher class and its subclasses?  How
 many assumption can a subclass make about its superclass,
 and how many can the superclass make before it begins
-infringing on the sovereignty of its subclasses?  Alas, there are
-rarely easy answers.
+infringing on the sovereignty of its subclasses?
 
-@b{Basic Allocation.}  In this chapter, we've seen the fundamental
-mechanisms used to allocate and index storage.  When the storage need
-not be accessed with peak efficiency, you can use the existing
-array classes.  When every access counts, having the
+Alas, there are rarely easy answers, and this is just an example.
+For this particular problem, there is an easy solution.  When the
+storage need not be accessed with peak efficiency, you can use the
+existing array classes.  When every access counts, having the
 storage be an integral part of your own object allows for
-the quickest access.  When you move into this area of object
-development, inheritance and polymorphism become trickier;
+the quickest access---but remember that when you move into this
+area, inheritance and polymorphism become trickier, as
 each level must coordinate its use of the underlying array
 with other levels.
 
@@ -2919,14 +2880,14 @@ itself.  To do this, you need to have a guarantee that all
 strings with the same contents are the same object.  The
 String class, created like:
 @example
-   y := 'Hello' !
+   y := 'Hello'
 @end example
 
 does not satisfy this.  Each time you execute this line, you
 may well get a new object.  But a very similar class, Symbol,
 will always return the same object:
 @example
-   y := #Hello !
+   y := #Hello
 @end example
 
 In general, you can use strings for almost all your tasks.
@@ -2942,19 +2903,16 @@ checks for equality.  If you ever need to ask the question
 ``is this the same object?'', you use the @code{==} operator
 instead of @code{=}:
 @example
-   Smalltalk at: #x put: 0 !
-   Smalltalk at: #y put: 0 !
-   x := 'Hello' !
-   y := 'Hello' !
-   (x = y) printNl !
-   (x == y) printNl !
-   y := 'Hel', 'lo' !
-   (x = y) printNl !
-   (x == y) printNl !
-   x := #Hello !
-   y := #Hello !
-   (x = y) printNl !
-   (x == y) printNl !
+   x := y := 'Hello'
+   (x = y) printNl
+   (x == y) printNl
+   y := 'Hel', 'lo'
+   (x = y) printNl
+   (x == y) printNl
+   x := #Hello
+   y := #Hello
+   (x = y) printNl
+   (x == y) printNl
 @end example
 
 Using C terms, @code{=} compares contents like @code{strcmp()}.
@@ -3086,13 +3044,12 @@ should not metaclasses have one?
 Evaluate the following:
 
 @display
-    st> @t{| meta |}
     st> @t{meta := Set class}
-    st> 0 to: 4 do: [ :i |
-    st>     i timesRepeat: [ Transcript space ].
-    st>     meta printNl.
-    st>     meta := meta class.
-    st> ]!
+    st> @t{0 to: 4 do: [ :i |}
+    st> @t{    i timesRepeat: [ Transcript space ]}
+    st> @t{    meta printNl}
+    st> @t{    meta := meta class}
+    st> @t{]}
     Set class
      Metaclass
       Metaclass class
@@ -3396,7 +3353,7 @@ a more complex message.  cascade does not apply to primary
 constructions, as they are too simple to require the construct.
 Since all primary construct are unary, you can just add more unary messages:
 @example
-   1234 printNl printNl printNl !
+   1234 printNl printNl printNl
 @end example
 
 @item @t{msgexpr: unaryexpr | binexpr | keyexpr}
@@ -3478,13 +3435,13 @@ specified at their front, and a trailing scientific notation.
 We have seen examples of character, string, and symbol constants.
 Array constants are simple enough; they would look like:
 @example
-   Smalltalk at: #a put: #(1 2 'Hi' $x #Hello 4 16r3F) !
+   a := #(1 2 'Hi' $x #Hello 4 16r3F)
 @end example
 
 There are also ByteArray constants, whose elements are constrained
 to be integers between 0 and 255; they would look like:
 @example
-   Smalltalk at: #a put: #[1 2 34 16r8F 26r3H 253] !
+   a := #[1 2 34 16r8F 26r3H 253]
 @end example
 
 Finally, there are three types of floating-point constants with

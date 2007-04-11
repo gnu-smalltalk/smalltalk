@@ -580,33 +580,56 @@ the command prompt: you can use @kbd{C-c} to do this.
 The language that @gst{} accepts is based on the @dfn{file out} syntax
 as shown in the @dfn{Green Book}, also known as @cite{Smalltalk-80: Bits
 of History, Words of Advice} by Glenn Krasner.  The grammar of
-@gst{} is not different from the grammar of other Smalltalk environments,
-but a brief description may be in order:
-@example
-<statements> !
-@end example
-@noindent
-executes the given statements immediately.  For example,
+@gst{} is slightly different from the grammar of other Smalltalk environments
+in order to simplify interaction with the system in a command-line environment.
+
+Statements are executed one by one; multiple statements are separated by a
+period.  At end-of-line, if a valid statement is complete, a period is
+implicit.  For example,
 
 @example
-16rFFFF printNl !
+8r300. 16rFFFF
 @end example
 @noindent
-prints out the decimal value of hex @code{FFFF}, followed by a newline.
+prints out the decimal value of octal @code{300} and hex @code{FFFF},
+each followed by a newline.
+
+Multiple statements share the same local variables, which are automatically
+declared.  To delete the local variables, terminate a statement with
+@code{!} rather than @code{.}  Here,
 
 @example
-Smalltalk quitPrimitive !
+a := 42. a!
+a
+@end example
+@noindent
+the first @code{a} is printed as @code{42}, but the second is uninitialized
+and thus printed as @code{nil}.
+
+In order to evaluate multiple statements in a single block, wrap them into
+an @dfn{eval block} as follows:
+@example
+Eval [
+    a := 42.  a printString
+]
+@end example
+@noindent
+This won't print the intermediate result (the integer 42), only the final
+result (the string @code{'42'}).
+
+@example
+ObjectMemory quit
 @end example
 @noindent
 exits from the system.  You can also type a @kbd{C-d} to exit from
 Smalltalk if it's reading statements from standard input.
 
 @display
-@t{!} @var{class-expression} @t{methodsFor:} @var{category-name} @t{!}
-@var{method-definition-1} @t{!}
-@var{method-definition-2} @t{!}
+@var{class-expression} @t{extend} @t{[}
+@var{message-pattern-1} @t{[} @var{statements} @t{]}
+@var{message-pattern-2} @t{[} @var{statements} @t{]}
 @dots{}
-@var{method-definition-n} @t{! !}
+@t{]}
 @end display
 
 This syntax is used to define new methods in a given class.  The
@@ -614,33 +637,32 @@ This syntax is used to define new methods in a given class.  The
 object, which is typically just the name of a class, although it can be
 the name of a class followed by the word @code{class}, which causes the
 method definitions that follow to apply to the named class itself,
-rather than to its instances.  Two consecutive bangs terminate the set
-of method definitions.  @var{category-name} should be a string object
-that describes what category to file the methods in.
+rather than to its instances.  Unlike other Smalltalks, method
+statements are inside brackets.
 
 @example
-!Float methodsFor: 'pi calculations'!
-
-radiusToArea
-    ^self squared * Float pi !
-
-radiusToCircumference
-    ^self * 2 * Float pi ! !
+Number extend [
+    radiusToArea [
+        ^self squared * Float pi
+    ]
+    radiusToCircumference [
+        ^self * 2 * Float pi
+    ]
+]
 @end example
 
-It also bears mentioning that there are two assignment operators:
-@code{_} and @code{:=}.  Both are usable interchangeably, provided that
-they are surrounded by spaces.  The @gst{} kernel code uses the
-@code{:=} form exclusively, but @code{_} is supported a) for
-compatibility with previous versions of @gst{} b) because this is the
-correct mapping between the assignment operator mentioned in the Blue
-Book and the current ASCII definition.  In the ancient days (like the
-middle 70's), the ASCII underscore character was also printed as a
-back-arrow, and many terminals would display it that way, thus its
-current usage.  Anyway, using @code{_} may lead to portability problems.
-
 The return operator, which is represented in the Blue Book as an
-up-arrow, is mapped to the ASCII caret symbol @code{^}.
+up-arrow, is mapped to the ASCII caret symbol @code{^}@footnote{It
+  also bears mentioning that there are two assignment operators:
+  @code{_} and @code{:=}.  Both are usable interchangeably, provided that
+  they are surrounded by spaces.  The @gst{} kernel code uses the
+  @code{:=} form exclusively, but @code{_} is supported a) for
+  compatibility with previous versions of @gst{} b) because this is the
+  correct mapping between the assignment operator mentioned in the Blue
+  Book and the current ASCII definition.  In the ancient days (like the
+  middle 70's), the ASCII underscore character was also printed as a
+  back-arrow, and many terminals would display it that way, thus its
+  current usage.  Anyway, using @code{_} may lead to portability problems.}.
 
 A complete treatment of the Smalltalk syntax and of the class library
 can be found in the included tutorial and class reference (@pxref{Top, ,
@@ -3844,17 +3866,15 @@ can be done in a single way which is also easy and very practical; just
 evaluate the standard Smalltalk code that does that:
 
 @example
-    Object subclass: #SQLAction
-           instanceVariableNames: 'database request'
-           classVariableNames: ''
-           poolDictionaries: ''
-           category: 'SQL-C interface'
+    Object subclass: SQLAction [
+         | database request |
+         <category: 'SQL-C interface'>
+    ]
 
-    SQLAction subclass: #SQLRequest
-           instanceVariableNames: 'returnedRows'
-           classVariableNames: ''
-           poolDictionaries: ''
-           category: 'SQL-C interface'
+    SQLAction subclass: SQLRequest [
+         | returnedRows |
+         <category: 'SQL-C interface'>
+    ]
 @end example
 
 To define the C @code{struct} for a class derived from Object, @gst{}'s

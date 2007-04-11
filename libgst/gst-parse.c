@@ -457,7 +457,7 @@ parse_doit (gst_parser *p)
 	    lex (p);
 	}
     }
-  else
+  else if (statement)
     {
       _gst_execute_statements (NULL, statement, UNDECLARED_TEMPORARIES, false);
       _gst_free_tree ();
@@ -1524,12 +1524,7 @@ parse_compile_time_constant (gst_parser *p)
   lex_skip_mandatory (p, ')');
 
   if (statements && !_gst_had_error)
-    {
-      OOP oldDictionary = _gst_push_temporaries_dictionary ();
-      result = _gst_execute_statements (temps, statements, UNDECLARED_CURRENT,
-					true);
-      _gst_pop_temporaries_dictionary (oldDictionary);
-    }
+    result = _gst_execute_statements (temps, statements, UNDECLARED_NONE, true);
 
   return _gst_make_oop_constant (&location, result ? result : _gst_nil_oop); 
 }

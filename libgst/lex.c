@@ -390,7 +390,8 @@ _gst_yylex (PTR lvalp, YYLTYPE *llocp)
 
 	  if (result)
 	    {
-	      last_token = result;
+	      if (_gst_get_cur_stream_prompt ())
+		last_token = result;
 	      return (result);
 	    }
 	}
@@ -440,7 +441,8 @@ int
 scan_open_paren (int c,
 	         YYSTYPE * lvalp)
 {
-  parenthesis_depth++;
+  if (_gst_get_cur_stream_prompt ())
+    parenthesis_depth++;
   return c;
 }
 
@@ -448,7 +450,8 @@ int
 scan_close_paren (int c,
 	          YYSTYPE * lvalp)
 {
-  parenthesis_depth--;
+  if (_gst_get_cur_stream_prompt ())
+    parenthesis_depth--;
   return c;
 }
 
