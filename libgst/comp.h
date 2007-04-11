@@ -264,6 +264,10 @@ extern mst_Boolean _gst_had_error
 extern mst_Boolean _gst_untrusted_methods 
   ATTRIBUTE_HIDDEN;
 
+/* Given a tree_node of type TREE_KEYWORD_LIST, pick out and concatenate
+   the keywords, turn them into a symbol OOP and return that symbol.  */
+extern OOP _gst_compute_keyword_selector (tree_node selectorExpr);
+
 /* Called to compile and execute an "immediate expression"; i.e. a Smalltalk
    statement that is not part of a method definition and where temporaries are
    declared automatically.  The parse trees are in TEMPS and STATEMENTS.

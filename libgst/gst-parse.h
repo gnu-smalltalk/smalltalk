@@ -106,10 +106,16 @@ enum parser_state {
   PARSE_DOIT
 };
 
-typedef struct gst_parser {
+typedef struct gst_lookahead {
   int token;
   YYSTYPE val;
   YYLTYPE loc;
+} gst_lookahead;
+
+typedef struct gst_parser {
+  gst_lookahead la [4];
+  int la_size;
+  int la_first;
   enum parser_state state;
   jmp_buf recover;
 } gst_parser;
@@ -123,6 +129,9 @@ extern gst_parser *_gst_current_parser
 extern void _gst_parse_method (void) 
   ATTRIBUTE_HIDDEN;
 extern void _gst_parse_chunks (void) 
+  ATTRIBUTE_HIDDEN;
+
+extern void _gst_print_tokens (gst_parser *p)
   ATTRIBUTE_HIDDEN;
 
 #endif

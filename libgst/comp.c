@@ -215,10 +215,6 @@ static mst_Boolean compile_statements (tree_node statementList,
    them into a symbol OOP and returns that symbol.  */
 static OOP compute_selector (tree_node selectorExpr);
 
-/* Given a tree_node of type TREE_KEYWORD_LIST, pick out and concatenate
-   the keywords, turn them into a symbol OOP and return that symbol.  */
-static OOP compute_keyword_selector (tree_node selectorExpr);
-
 /* Given CONSTEXPR, a section of the syntax tree that represents a
    Smalltalk constant, this routine creates and returns an OOP to be
    stored as a method literal in the method that's currently being
@@ -2252,11 +2248,11 @@ compute_selector (tree_node selectorExpr)
       || selectorExpr->nodeType == TREE_BINARY_EXPR)
     return (selectorExpr->v_expr.selector);
   else
-    return (compute_keyword_selector (selectorExpr->v_expr.expression));
+    return (_gst_compute_keyword_selector (selectorExpr->v_expr.expression));
 }
 
 OOP
-compute_keyword_selector (tree_node keywordList)
+_gst_compute_keyword_selector (tree_node keywordList)
 {
   tree_node keyword;
   int len;
@@ -2296,7 +2292,7 @@ _gst_make_attribute (tree_node attribute_keywords)
   if (_gst_had_error)
     return _gst_nil_oop;
 
-  selectorOOP = compute_keyword_selector (attribute_keywords);
+  selectorOOP = _gst_compute_keyword_selector (attribute_keywords);
   numArgs = list_length (attribute_keywords);
   argsArray = new_instance_with (_gst_array_class, numArgs, &argsArrayOOP);
   INC_ADD_OOP (argsArrayOOP);

@@ -64,7 +64,7 @@ typedef enum expr_kinds {
   EXPR_CASCADED = EXPR_GREATER | EXPR_BINOP | EXPR_KEYWORD,
   EXPR_ANY = 31
 } expr_kinds;
-
+
 
 /* Used to communicate with the #methodsFor: primitive.  */
 gst_parser *_gst_current_parser;
@@ -73,14 +73,16 @@ static inline mst_Boolean is_unlikely_selector (const char *);
 
 /* Lexer interface.  */
 
+static inline void lex_init (gst_parser *p);
+static inline void lex_lookahead (gst_parser *p, int n);
+static inline void lex_consume (gst_parser *p, int n);
 static inline void lex (gst_parser *p);
-static inline void lex_must_be (gst_parser *p,
-				int req_token);
-static inline void lex_skip_mandatory (gst_parser *p,
-				       int req_token);
-static inline mst_Boolean lex_skip_if (gst_parser *p,
-				       int req_token,
-				       mst_Boolean fail_at_eof);
+static inline int token (gst_parser *p, int n);
+static inline YYSTYPE *val (gst_parser *p, int n);
+static inline YYLTYPE *loc (gst_parser *p, int n);
+static inline void lex_must_be (gst_parser *p, int req_token);
+static inline void lex_skip_mandatory (gst_parser *p, int req_token);
+static inline mst_Boolean lex_skip_if (gst_parser *p, int req_token, mst_Boolean fail_at_eof);
 
 /* Error recovery.  */
 
@@ -94,16 +96,37 @@ static int filprintf (Filament *fil,
 
 /* Grammar productions.  */
 
+static void parse_chunks (gst_parser *p);
 static void parse_doit (gst_parser *p);
+static mst_Boolean parse_scoped_definition (gst_parser *p, 
+					    tree_node first_stmt);
+
+
+static void parse_eval_definition (gst_parser *p);
+
+static mst_Boolean parse_namespace_definition (gst_parser *p,
+					       tree_node first_stmt);
+static mst_Boolean parse_class_definition (gst_parser *p,
+					   OOP classOOP);
+static OOP parse_namespace (tree_node name);
+static OOP parse_class (tree_node list);
+static void parse_scoped_method (gst_parser *p,
+				 OOP classOOP);
+static void parse_instance_variables (gst_parser *p,
+				      OOP classOOP);
+
 static void parse_method_list (gst_parser *p);
-static void parse_method (gst_parser *p);
+static void parse_method (gst_parser *p,
+			  int at_end);
 static tree_node parse_message_pattern (gst_parser *p);
 static tree_node parse_keyword_variable_list (gst_parser *p);
 static tree_node parse_variable (gst_parser *p);
 static tree_node parse_attributes (gst_parser *p);
+static tree_node parse_attribute (gst_parser *p);
 static tree_node parse_temporaries (gst_parser *p,
 				    mst_Boolean implied_pipe);
 static tree_node parse_statements (gst_parser *p,
+				   tree_node first_stmt,
 				   mst_Boolean accept_caret);
 static tree_node parse_expression (gst_parser *p,
 				   enum expr_kinds kind);
@@ -134,9 +157,10 @@ static tree_node parse_keyword_expression (gst_parser *p,
 					   enum expr_kinds kind);
 static tree_node parse_keyword_list (gst_parser *p,
 				     enum expr_kinds kind);
-
 
-static int
+
+
+static int 
 filprintf (Filament *fil, const char *format, ...)
 {
   va_list ap;
@@ -149,13 +173,74 @@ filprintf (Filament *fil, const char *format, ...)
   return result;
 }
 
+/* Lexer interface. Intialize the parser before using it. */
 
-/* Lexer interface.  Get a token out of the stream.  */
+static inline void
+lex_init (gst_parser *p)
+{
+  p->la_first = 0;
+  p->la_size = 0;
+  lex_lookahead (p, 1);
+}
+
+/* Lexer interface.  Get N tokens out of the stream.  */
+
+static inline void 
+lex_lookahead (gst_parser *p, int n)
+{
+  while (p->la_size < n)
+    {
+      int i = (p->la_first + p->la_size) % 4;
+      assert (p->la_size == 0 || token (p, p->la_size - 1) != EOF);
+      p->la[i].token = _gst_yylex (&p->la[i].val, &p->la[i].loc);
+      p->la_size++;
+    }
+}
+
+/* Lexer interface. Eat the first N lookahead tokens. */
+
+static inline void 
+lex_consume (gst_parser *p, int n)
+{
+  p->la_first = (p->la_first + n) % 4;
+  p->la_size -= n;
+}
+
+/* Lexer interface. Eat the last lookahead token and lex the next one */
 
 static inline void
 lex (gst_parser *p)
 {
-  p->token = _gst_yylex (&p->val, &p->loc);
+  lex_consume (p, 1);
+  lex_lookahead (p, 1);
+}
+
+/* Lexer interface. Return the N-th lookahead token. */
+
+static inline int 
+token (gst_parser *p, int n) 
+{
+  int i = (p->la_first + n) % 4;
+  return p->la[i].token;
+}
+
+/* Lexer interface. Return the value of the N-th lookahead token. */
+
+static inline YYSTYPE*
+val (gst_parser *p, int n)
+{
+  int i = (p->la_first + n) % 4;
+  return &p->la[i].val;
+}
+
+
+/* Lexer interface. Return the location of the N-th lookahead token. */
+
+static inline YYLTYPE*
+loc (gst_parser *p, int n)
+{
+  int i = (p->la_first + n) % 4;
+  return &p->la[i].loc;
 }
 
 /* Lexer interface.  Check that the next token is REQ_TOKEN and fail if
@@ -164,7 +249,7 @@ lex (gst_parser *p)
 static inline void
 lex_must_be (gst_parser *p, int req_token)
 {
-  if (p->token != req_token)
+  if (token (p, 0) != req_token)
     expected (p, req_token, -1);
 }
 
@@ -174,7 +259,7 @@ lex_must_be (gst_parser *p, int req_token)
 static inline void
 lex_skip_mandatory (gst_parser *p, int req_token)
 {
-  if (p->token != req_token)
+  if (token (p, 0) != req_token)
     expected (p, req_token, -1);
   else
     lex (p);
@@ -186,9 +271,9 @@ lex_skip_mandatory (gst_parser *p, int req_token)
 static inline mst_Boolean
 lex_skip_if (gst_parser *p, int req_token, mst_Boolean fail_at_eof)
 {
-  if (p->token != req_token)
+  if (token (p, 0) != req_token)
     {
-      if (p->token == EOF && fail_at_eof)
+      if (token (p, 0) == EOF && fail_at_eof)
 	expected (p, req_token, -1);
       return false;
     }
@@ -199,6 +284,21 @@ lex_skip_if (gst_parser *p, int req_token, mst_Boolean fail_at_eof)
     }
 }
 
+
+void
+_gst_print_tokens (gst_parser *p)
+{
+  int i;
+  printf ("size: %i\n", p->la_size);
+  for (i = 0; i < p->la_size; i++) {
+    if (token (p, i) == 264)
+      printf ("%i - %i - %s\n", i, token (p, i), val (p, i)->sval); 
+    else
+      printf ("%i - %i\n", i, token (p, i));
+  }
+  printf ("\n");
+}
+
 /* Top of the descent.  */
 
 void
@@ -207,9 +307,9 @@ _gst_parse_method ()
   gst_parser p, *prev_parser = _gst_current_parser;
   _gst_current_parser = &p;
   p.state = PARSE_METHOD;
-  lex (&p);
+  lex_init (&p);
   if (setjmp (p.recover) == 0)
-    parse_method (&p);
+    parse_method (&p, EOF);
   else
     _gst_had_error = false;
 
@@ -222,26 +322,41 @@ _gst_parse_chunks ()
   gst_parser p, *prev_parser = _gst_current_parser;
 
   _gst_current_parser = &p;
-  p.state = PARSE_DOIT;
-  lex (&p);
-  if (p.token == SHEBANG)
+
+  lex_init (&p);
+  if (token (&p, 0) == SHEBANG)
     lex (&p);
 
+  p.state = PARSE_DOIT;
   setjmp (p.recover);
   _gst_had_error = false;
-  while (p.token != EOF)
-    {
-      /* Pick the production here, so that subsequent methods are compiled
-	 when we come back from an error above.  */
-      if (p.state == PARSE_METHOD_LIST)
-	parse_method_list (&p);
-      else
-        parse_doit (&p);
-    }
+  while (token (&p, 0) != EOF)
+    parse_chunks (&p);
 
   _gst_current_parser = prev_parser;
 }
-
+
+static void
+parse_chunks (gst_parser *p) 
+{
+  if (lex_skip_if (p, '!', false))
+    p->state = PARSE_DOIT;
+  else
+    {
+      OOP oldTemporaries = _gst_push_temporaries_dictionary ();
+      while (token (p, 0) != EOF && token (p, 0) != ']' && token (p, 0) != '!')
+        {
+          /* Pick the production here, so that subsequent 
+	     methods are compiled when we come back from an error above.  */
+          if (p->state == PARSE_METHOD_LIST)
+	    parse_method_list (p);
+          else
+	    parse_doit (p);
+        }
+      _gst_pop_temporaries_dictionary (oldTemporaries);
+    }
+}
+
 
 /* Print an error message and attempt error recovery.  All the parameters
    after P (terminated by -1) are tokens that were expected (possibly a
@@ -263,7 +378,7 @@ expected (gst_parser *p, int token, ...)
     {
       if (token < 256)
 	{
-          filprintf (out_fil, "%s '%c'", sep, token);
+	  filprintf (out_fil, "%s '%c'", sep, token);
 	  sep = " or";
 	}
       else
@@ -285,7 +400,7 @@ expected (gst_parser *p, int token, ...)
 #undef TOKEN_DEF
 #undef TOKEN_SEP
 
-  msg = fildelete (out_fil);
+    msg = fildelete (out_fil);
   _gst_errorf ("%s", msg);
   free (msg);
   recover_error (p);
@@ -301,85 +416,540 @@ recover_error (gst_parser *p)
     for (;;)
       {
 	/* Find the final bang.  */
-        if (p->token == EOF)
-          break;
-        if (p->token == '!')
+	if (token (p, 0) == EOF)
+	  break;
+	if (token (p, 0) == '!')
 	  {
 	    _gst_free_tree ();
-            lex (p);
+	    lex (p);
 	    break;
 	  }
-        lex (p);
+	lex (p);
       }
 
   longjmp (p->recover, 1);
 }
-
 
 /* doit: temporaries statements '!' [ method_list '!' ]
-       | empty */
+   | empty */
 
 static void
 parse_doit (gst_parser *p)
 {
-  mst_Boolean first = true;
-  OOP oldTemporaries = _gst_push_temporaries_dictionary ();
-  tree_node temps, statement;
+  tree_node statement = NULL;
+  mst_Boolean caret;
 
-  do
+  if (token (p, 0) == '|')
+    parse_temporaries (p, false);
+
+  if (token (p, 0) == EOF)
+    return;
+
+  caret = lex_skip_if (p, '^', false);
+  statement = parse_expression (p, EXPR_ANY);
+  if (!caret && lex_skip_if (p, '[', false))
     {
-      temps = parse_temporaries (p, false);
-      lex_skip_if (p, '^', false);
-      statement = parse_expression (p, EXPR_ANY);
-
-      if (p->token != '.' && p->token != EOF && p->token != '!')
-        expected (p, '.', '!', -1);
-
-      /* When regression testing, don't print intermediate values.  */
-      if (statement && !_gst_had_error)
+      if (parse_scoped_definition (p, statement))
+        lex_skip_mandatory (p, ']'); 
+      else
         {
-          if (first
-	      && _gst_kernel_initialized
-	      && (_gst_regression_testing
-		  || (_gst_get_cur_stream_prompt () && _gst_verbosity >= 3)))
-            {
-              printf ("\nExecution begins...\n");
-              first = false;
-            }
-
-          _gst_execute_statements (NULL, statement, UNDECLARED_TEMPORARIES,
-			           _gst_regression_testing);
+          while (!lex_skip_if (p, ']', true))
+	    lex (p);
 	}
-
-      _gst_free_tree ();
-      _gst_had_error = false;
-
-       /* Do not lex until after _gst_free_tree, or we lose a token!  */
-       lex_skip_if (p, '.', false);
     }
-  while (p->token != '!' && p->token != EOF);
+  else
+    {
+      _gst_execute_statements (NULL, statement, UNDECLARED_TEMPORARIES, false);
+      _gst_free_tree ();
+    }
 
-  if (_gst_regression_testing && !first)
-    printf ("returned value is %O\n", _gst_last_returned_value);
+  _gst_had_error = false;
 
-  while (p->token == '!')
-    lex (p);
-
-  _gst_pop_temporaries_dictionary (oldTemporaries);
+  /* Do not lex until after _gst_free_tree, or we lose a token! */
+  lex_skip_if (p, '.', false);
+  lex_skip_if (p, '!', false);
 }
 
 
+/* scoped_definition: eval_definition
+   | class_definition 
+   | namespace_definition */
+
+static mst_Boolean
+parse_scoped_definition (gst_parser *p, tree_node first_stmt)
+{	
+  OOP classOOP = NULL;
+  tree_node receiver = first_stmt->v_expr.receiver;
+  tree_node expression = first_stmt->v_expr.expression;
+  
+#if 0
+  _gst_print_tree (first_stmt, 0);
+#endif
+	
+  if (first_stmt->nodeType == TREE_VARIABLE_NODE
+      && strcmp (first_stmt->v_list.name, "Eval") == 0)
+    {
+      parse_eval_definition (p);
+      return true;
+    }	
+  
+  if (first_stmt->nodeType == TREE_KEYWORD_EXPR
+      && receiver->nodeType == TREE_VARIABLE_NODE
+      && expression->v_list.value->nodeType == TREE_VARIABLE_NODE
+      && expression->v_list.next == NULL)
+    {
+      if (strcmp (receiver->v_list.name, "Namespace") == 0
+	  && strcmp (expression->v_list.name, "current:") == 0)
+	return parse_namespace_definition (p, first_stmt);
+      
+      if (strcmp (expression->v_list.name, "subclass:") == 0
+	  && (classOOP = parse_class (receiver)) != NULL)
+	{
+	  const char * name = expression->v_list.value->v_list.name;
+	  _gst_msg_sendf (&classOOP, "%o %o subclass: %S", classOOP, name);
+	      
+	  if (IS_NIL (classOOP))
+	    _gst_had_error = true;
+	  else
+	    return parse_class_definition (p, classOOP);  
+	}
+    }
+
+  else if (first_stmt->nodeType == TREE_UNARY_EXPR
+	   && first_stmt->v_expr.selector == _gst_intern_string ("extend"))
+    {
+      
+      if (receiver->nodeType == TREE_VARIABLE_NODE)
+	classOOP = parse_class (receiver);
+
+      else if (receiver->nodeType == TREE_UNARY_EXPR
+	       && receiver->v_expr.selector == _gst_intern_string ("class"))
+	{
+	  classOOP = parse_class (receiver->v_expr.receiver);
+	  classOOP = OOP_CLASS (classOOP);
+	}
+
+      if (classOOP != NULL)
+	return parse_class_definition (p, classOOP);
+    }
+
+  _gst_errorf ("expected Eval, Namespace or class definition"); 
+  return false;
+}
+
+static void
+parse_eval_definition (gst_parser *p)
+{
+  tree_node tmps = NULL, stmts;
+  tree_node first_stmt = NULL;
+  OOP oldDictionary = _gst_push_temporaries_dictionary ();
+
+  tmps = parse_temporaries (p, false);
+  stmts = parse_statements (p, first_stmt, true);
+  if (stmts && !_gst_had_error)
+    {
+      if (_gst_regression_testing)
+        printf ("\nExecution begins...\n");
+
+      _gst_execute_statements (tmps, stmts, UNDECLARED_TEMPORARIES,
+			       _gst_regression_testing);
+
+      if (_gst_regression_testing && !_gst_had_error)
+        printf ("returned value is %O\n", _gst_last_returned_value);
+    }
+
+  _gst_pop_temporaries_dictionary (oldDictionary);
+  _gst_free_tree ();
+  _gst_had_error = false;
+}
+
+static mst_Boolean
+parse_namespace_definition (gst_parser *p, tree_node first_stmt)
+{      
+  tree_node expr = first_stmt->v_expr.expression;
+  OOP new_namespace = parse_namespace (expr->v_list.value);
+  
+  if (new_namespace)
+    {
+      OOP old_namespace = _gst_current_namespace;
+      _gst_register_oop (old_namespace);		
+  
+      _gst_msg_sendf (NULL, "%v %o current: %o", 
+		      _gst_namespace_class, new_namespace);
+      
+      parse_eval_definition (p);	
+      
+      _gst_msg_sendf (NULL, "%v %o current: %o",
+		      _gst_namespace_class, old_namespace);
+      
+      _gst_unregister_oop (old_namespace);
+      return true;
+    } 
+
+  return false;
+}
+
+static mst_Boolean
+parse_class_definition (gst_parser *p, OOP classOOP)
+{
+  int t1, t2, t3;
+  
+  for (;;)
+    {
+      if (_gst_had_error)
+	break;
+
+      lex_lookahead (p, 1);
+      if (token (p, 0) == ']' || token (p, 0) == EOF)
+	break;
+
+      lex_lookahead (p, 3);
+#if 0
+      print_tokens (p);      
+#endif
+      
+      t1 = token (p, 0);
+      t2 = token (p, 1);
+      t3 = token (p, 2);
+
+      switch (t1) 
+	{	
+	case '>':
+	case BINOP:
+	case KEYWORD:
+#if 0
+	  printf ("parse method\n");
+#endif
+
+	  _gst_set_compilation_class (classOOP);
+	  parse_method (p, ']');
+	  _gst_reset_compilation_category ();
+	  break;
+	  
+	case '<':
+	  if (t2 == IDENTIFIER) 
+	    {
+#if 0
+	      printf ("parse method\n");
+#endif
+
+	      _gst_set_compilation_class (classOOP);
+	      parse_method (p, ']');
+	      _gst_reset_compilation_category ();
+	    }
+	  else if (t2 == KEYWORD) 
+	    {
+	      OOP selectorOOP, args[1];
+	      tree_node keyword, value;
+	      
+#if 0
+	      printf ("parse attribute\n");
+#endif
+	      lex_skip_mandatory (p, '<');
+	      keyword = parse_keyword_expression (p, NULL, EXPR_KEYWORD);
+	      if (keyword->v_expr.expression->v_list.next != NULL)
+		_gst_errorf ("expected one keyword only");
+	      else
+		{
+		  value = keyword->v_expr.expression->v_list.value;
+		  selectorOOP = _gst_compute_keyword_selector (keyword->v_expr.expression);
+		  value = _gst_make_statement_list (&value->location, value);
+		  args[0] = _gst_execute_statements (NULL, value,
+						     UNDECLARED_NONE, true);
+	      
+		  if (!args[0])
+		    _gst_had_error = true;
+
+		  if (!_gst_had_error)
+		    _gst_nvmsg_send (classOOP, selectorOOP, args, 1);
+		}
+
+	      lex_skip_mandatory (p, '>');
+	    }
+	  else
+	    _gst_errorf ("invalid class body element");
+	  break;
+	  
+	case IDENTIFIER:
+	  if (t2 == ASSIGNMENT)
+	    {
+#if 0
+	      printf ("parse class variable\n");
+#endif
+
+ 	      OOP name, class_var_dict, result;
+	      tree_node stmt;
+
+	      name = _gst_intern_string (val (p, 0)->sval);
+
+	      lex_skip_mandatory (p, IDENTIFIER);
+	      lex_skip_mandatory (p, ASSIGNMENT);
+
+	      class_var_dict = _gst_class_variable_dictionary (classOOP);
+	      
+	      stmt = parse_expression (p, EXPR_ANY);
+	      stmt = _gst_make_statement_list (&stmt->location, stmt);
+	      result = _gst_execute_statements (NULL, stmt, UNDECLARED_NONE,
+						true);
+
+	      assert (result || _gst_had_error);
+	      if (!_gst_had_error)
+		DICTIONARY_AT_PUT (class_var_dict, name, result);
+
+	      if (token (p, 0) != ']')
+		lex_skip_mandatory(p, '.');	      
+	    }
+	  else if (t2 == BINOP)
+	    {
+#if 0
+	      printf ("parse method\n");
+#endif
+	      parse_scoped_method (p, classOOP);
+	    }
+	  else if (t2 == '[')
+	    {
+#if 0
+	      printf ("parse method\n");
+#endif
+
+	      _gst_set_compilation_class (classOOP);
+	      parse_method (p, ']');
+	      _gst_reset_compilation_category ();
+	    }
+	  else if (t2 == SCOPE_SEPARATOR)
+	    {
+#if 0 
+	      printf ("parse method qualified name\n");
+#endif
+
+	      parse_scoped_method (p, classOOP);
+	    }
+	  else if (t2 == IDENTIFIER)
+	    {
+	      if (t3 == BINOP) 
+		{
+#if 0
+		  printf ("parse class method\n");
+#endif
+		  parse_scoped_method (p, classOOP);
+		}
+	      else if (t3 == '['
+		       && strcmp (val (p, 0)->sval, "Class") == 0
+		       && strcmp (val (p, 1)->sval, "protocol") == 0)
+		{
+#if 0
+		  printf ("parse class protocol\n");
+#endif
+		  if (_gst_object_is_kind_of (classOOP, _gst_metaclass_class))
+		    _gst_errorf ("already on class side, Class protocol invalid");
+		  else
+		    {
+		      lex_consume (p, 3);
+		      parse_class_definition (p, OOP_CLASS (classOOP));
+		      lex_skip_mandatory (p, ']');
+		    }
+		}
+	      else 
+		{
+		  _gst_errorf("invalid class body element");
+		  lex_consume (p, p->la_size);
+		  return false;
+		}
+	    }
+	  break;
+	  
+	case '|':
+	  if (t2  == '|') 
+	    {
+#if 0
+	      printf ("parse instance variables - ignore\n");
+#endif
+	      lex_consume (p, 2);	      
+	    }
+	  else if (t2 == IDENTIFIER) 
+	    {
+	      if (t3 == IDENTIFIER || t3 == '|') 
+		{
+#if 0
+		  printf ("parse instance variables\n");
+#endif
+		  parse_instance_variables (p, classOOP);
+		}
+	      else if (t3 == '[')
+		{
+#if 0
+		  printf ("parse method\n");
+#endif
+		  _gst_set_compilation_class (classOOP);
+		  parse_method (p, ']');
+		  _gst_reset_compilation_category ();
+		}
+	    }	  
+	  break;
+	}
+    }
+  
+  return true;
+}
+
+static void 
+parse_scoped_method (gst_parser *p, OOP classOOP)
+{
+  OOP class;
+  tree_node class_node;
+  mst_Boolean class_method = false;
+
+  class_node = parse_variable_primary (p);
+  class = parse_class (class_node);
+
+  if (token (p, 0) == IDENTIFIER)
+    {
+      if ((strcmp (val (p, 0)->sval, "class") == 0))
+	{
+	  class_method = true;
+	  lex_skip_mandatory (p, IDENTIFIER);
+	}
+      else
+	_gst_errorf("expected `class' or `>>'");
+    }
+  
+  lex_must_be (p, BINOP);
+  if (strcmp (val (p, 0)->sval, ">>") == 0)
+    lex_skip_mandatory (p, BINOP);
+  else
+    _gst_errorf ("expected `>>'");
+  
+  if (_gst_class_is_kind_of (classOOP, class))
+    {
+      if (class_method) 
+	  class = OOP_CLASS (class);
+
+      _gst_set_compilation_class (class);
+      parse_method (p, ']');
+      _gst_reset_compilation_category ();
+    }
+  else
+    _gst_errorf ("%O is not %O or one of its superclasses",
+		 ((gst_class) OOP_TO_OBJ (class))->name,
+		 ((gst_class) OOP_TO_OBJ (classOOP))->name);
+}
+
+static OOP
+parse_class (tree_node list) 
+{
+  const char* name;
+  OOP currentOOP = _gst_current_namespace;
+	
+  do
+    {
+      name = list->v_list.name;
+      currentOOP = dictionary_at (currentOOP, _gst_intern_string (name));
+	
+      if (currentOOP == _gst_nil_oop)
+	{
+	  _gst_errorf ("key %s not found", name);
+	  return NULL;
+	}
+
+      list = list->v_list.next;
+
+      if (list == NULL)
+	{
+	  if (!_gst_object_is_kind_of (currentOOP, _gst_class_class)) 
+	    {
+	      _gst_errorf ("expected class named %s, found %O", 
+			   name, OOP_INT_CLASS (currentOOP));
+	      return NULL;
+	    }
+	}
+      else
+	{
+	  if (!_gst_object_is_kind_of (currentOOP, _gst_dictionary_class))
+	    {
+	      _gst_errorf ("expected namespace named %s, found %O", 
+			   name, OOP_INT_CLASS (currentOOP));
+	      return NULL;
+	    }
+	}
+    }
+  while (list != NULL);
+		
+  return currentOOP;
+}
+
+static OOP
+parse_namespace (tree_node list) 
+{
+  OOP name, new_namespace, current_namespace;
+  const char *namespc;
+	
+  current_namespace = _gst_current_namespace;
+  while (list->v_list.next != NULL)
+    {
+      name = _gst_intern_string (list->v_list.name);	
+      current_namespace = dictionary_at (current_namespace, name);
+		
+      if (current_namespace == _gst_nil_oop)
+	{
+	  _gst_errorf ("key %s not found", list->v_list.name);
+	  return NULL;
+	}
+      
+      if (!_gst_object_is_kind_of (current_namespace, _gst_dictionary_class))
+	{
+	  _gst_errorf ("expected namespace named %s, found %O", 
+		       list->v_list.name, OOP_INT_CLASS (current_namespace));
+	  return NULL;
+	}
+
+      list = list->v_list.next;
+    }
+		
+  namespc = list->v_list.name;
+  name = _gst_intern_string (namespc);
+  new_namespace = dictionary_at (current_namespace, name);
+
+  if (new_namespace == _gst_nil_oop) 
+    _gst_msg_sendf (&current_namespace, "%o %o addSubspace: %o",
+		    current_namespace, name);
+
+  else if (_gst_object_is_kind_of (new_namespace, _gst_dictionary_class))
+    current_namespace = new_namespace;
+
+  else
+    _gst_errorf ("expected namespace named %s, found %o", namespc,
+		 OOP_INT_CLASS (new_namespace));
+
+  return current_namespace;
+}
+
 /* method_list: method_list method '!'
-	      | empty */
+   | empty */
+
+static void
+parse_instance_variables (gst_parser *p, OOP classOOP)
+{
+  char *vars;
+  Filament *fil = filnew (NULL, 0);
+  
+  lex_skip_mandatory (p, '|');
+  while (!lex_skip_if (p, '|', true))
+    {
+      lex_must_be (p, IDENTIFIER);
+      filprintf (fil, "%s ", val (p, 0)->sval);
+      lex (p);
+    }
+
+  vars = fildelete (fil);
+  _gst_msg_sendf (NULL, "%v %o instanceVariableNames: %S", classOOP, vars);
+  free (vars);
+}
 
 static void
 parse_method_list (gst_parser *p)
 {
-  while (p->token != '!')
-    {
-      parse_method (p);
-      lex_skip_mandatory (p, '!');
-    }
+  while (token (p, 0) != '!')
+    parse_method (p, '!');
 
   lex (p);
   _gst_skip_compilation = false;
@@ -391,15 +961,27 @@ parse_method_list (gst_parser *p)
 /* method: message_pattern temporaries attributes statements */
 
 static void
-parse_method (gst_parser *p)
+parse_method (gst_parser *p, int at_end)
 {
-  tree_node pat = parse_message_pattern (p);
-  tree_node temps = parse_temporaries (p, false);
-  tree_node attrs = parse_attributes (p);
-  tree_node stmts = parse_statements (p, true);
-  YYLTYPE current_pos = _gst_get_location ();
-  tree_node method = _gst_make_method (&pat->location, &current_pos,
-				       pat, temps, attrs, stmts);
+  tree_node pat, temps, attrs, stmts;
+  YYLTYPE current_pos;
+  tree_node method;
+
+  pat = parse_message_pattern (p);
+
+  if (at_end == ']')
+    lex_skip_mandatory (p, '[');
+
+  temps = parse_temporaries (p, false);
+  attrs = parse_attributes (p);
+  stmts = parse_statements (p, NULL, true);
+
+  /* Don't lex until _gst_free_tree, or we lose a token.  */
+  lex_must_be (p, at_end);
+
+  current_pos = _gst_get_location ();
+  method = _gst_make_method (&pat->location, &current_pos,
+			     pat, temps, attrs, stmts);
 
   if (!_gst_had_error && !_gst_skip_compilation)
     {
@@ -411,31 +993,33 @@ parse_method (gst_parser *p)
 
   _gst_free_tree ();
   _gst_had_error = false;
+  if (at_end != EOF)
+    lex (p);
 }
 
 
 /* message_pattern: unary_pattern
-		  | binary_pattern
-		  | keyword_pattern
+   | binary_pattern
+   | keyword_pattern
 
    unary_pattern: IDENTIFIER
    binary_pattern: binop IDENTIFIER
    keyword_pattern: keyword_pattern KEYWORD IDENTIFIER
-		  | KEYWORD IDENTIFIER
+   | KEYWORD IDENTIFIER
    binop : BINOP | '<' | '>' | '|' */
 
 static tree_node
 parse_message_pattern (gst_parser *p)
 {
-  YYLTYPE loc = p->loc;
+  YYLTYPE location = *loc (p, 0);
   tree_node pat, arg;
-  char *sval = p->val.sval;
+  char *sval = val(p, 0)->sval;
 
-  switch (p->token)
+  switch (token (p, 0))
     {
     case IDENTIFIER:
       lex (p);
-      pat = _gst_make_unary_expr (&loc, NULL, sval); 
+      pat = _gst_make_unary_expr (&location, NULL, sval); 
       break;
 
     case BINOP:
@@ -444,12 +1028,12 @@ parse_message_pattern (gst_parser *p)
     case '|':
       lex (p);
       arg = parse_variable (p);
-      pat = _gst_make_binary_expr (&loc, NULL, sval, arg);
+      pat = _gst_make_binary_expr (&location, NULL, sval, arg);
       break;
 
     case KEYWORD:
       pat = parse_keyword_variable_list (p);
-      pat = _gst_make_keyword_expr (&loc, NULL, pat);
+      pat = _gst_make_keyword_expr (&location, NULL, pat);
       break;
 
     default:
@@ -462,17 +1046,17 @@ parse_message_pattern (gst_parser *p)
 static tree_node
 parse_keyword_variable_list (gst_parser *p)
 {
-  YYLTYPE loc = p->loc;
+  YYLTYPE location = *loc (p, 0);
   tree_node pat = NULL, arg;
 
   do
     {
-      char *sval = p->val.sval;
+      char *sval = val(p, 0)->sval;
       lex (p);
       arg = parse_variable (p);
-      pat = _gst_add_node (pat, _gst_make_keyword_list (&loc, sval, arg));
+      pat = _gst_add_node (pat, _gst_make_keyword_list (&location, sval, arg));
     }
-  while (p->token == KEYWORD);
+  while (token (p, 0) == KEYWORD);
 
   return pat;
 }
@@ -486,30 +1070,26 @@ parse_variable (gst_parser *p)
   tree_node var;
 
   lex_must_be (p, IDENTIFIER);
-  var = _gst_make_variable (&p->loc, p->val.sval); 
+  var = _gst_make_variable (loc (p, 0), val(p, 0)->sval); 
   lex (p);
   return var;
 }
 
 
 /* attributes: attributes '<' attribute_keywords '>'
-	     | empty
+   | empty
 
    attribute_keywords: attribute KEYWORD binary_expr 
-	    | KEYWORD binary_expr */
+   | KEYWORD binary_expr */
 
 static tree_node
 parse_attributes (gst_parser *p)
 {
   tree_node attrs = NULL;
 
-  while (lex_skip_if (p, '<', false))
+  while (token (p, 0) == '<')
     {
-      tree_node attr;
-      lex_must_be (p, KEYWORD);
-      attr = parse_keyword_list (p, EXPR_BINOP);
-      attr = _gst_make_attribute_list (&attr->location, attr);
-      lex_skip_mandatory (p, '>');
+      tree_node attr = parse_attribute (p);
       if (attr)
 	attrs = _gst_add_node (attrs, attr);
     }
@@ -517,12 +1097,24 @@ parse_attributes (gst_parser *p)
   return attrs;
 }
 
+static tree_node
+parse_attribute (gst_parser *p)
+{
+  tree_node attr;
+  lex_skip_mandatory (p, '<');
+  lex_must_be (p, KEYWORD);
+  attr = parse_keyword_list (p, EXPR_BINOP);
+  attr = _gst_make_attribute_list (&attr->location, attr);
+  lex_skip_mandatory (p, '>');
+  return attr;
+}
+
 
 /* temporaries: '|' variables '|'
-	      | empty
+   | empty
    temp_no_pipe: variables '|'
    variables: variables variable
-	    | empty */
+   | empty */
 
 static tree_node
 parse_temporaries (gst_parser *p, mst_Boolean implied_pipe)
@@ -534,7 +1126,7 @@ parse_temporaries (gst_parser *p, mst_Boolean implied_pipe)
   while (!lex_skip_if (p, '|', true))
     {
       tree_node temp;
-      if (p->token != IDENTIFIER)
+      if (token (p, 0) != IDENTIFIER)
 	expected (p, '|', IDENTIFIER, -1);
       temp = parse_variable (p);
       temp = _gst_make_variable_list (&temp->location, temp); 
@@ -546,17 +1138,26 @@ parse_temporaries (gst_parser *p, mst_Boolean implied_pipe)
 
 
 /* statements: statements_no_ret return_statement opt_dot
-	     | statements_no_ret opt_dot
+   | statements_no_ret opt_dot
    statements_no_ret: statements_no_ret '.' statement
-		    | empty
+   | empty
    opt_dot: '.'
-          | empty */
+   | empty */
 
 static tree_node
-parse_statements (gst_parser *p, mst_Boolean accept_caret)
+parse_statements (gst_parser *p, tree_node first_stmt, mst_Boolean accept_caret)
 {
-  tree_node stmts = NULL, stmt;
+  tree_node stmts, stmt;
   mst_Boolean caret;
+
+  if (first_stmt)
+    {
+      stmts = _gst_make_statement_list (&first_stmt->location, first_stmt);
+      if (!lex_skip_if (p, '.', false))
+	return stmts;
+    }
+  else
+    stmts = NULL;
 
   do
     {
@@ -564,7 +1165,7 @@ parse_statements (gst_parser *p, mst_Boolean accept_caret)
       stmt = parse_expression (p, EXPR_ANY);
       if (caret)
 	{
-          if (stmt == NULL)
+	  if (stmt == NULL)
 	    {
 	      _gst_errorf ("expected statement after '^'");
 	      recover_error (p);
@@ -587,8 +1188,8 @@ parse_statements (gst_parser *p, mst_Boolean accept_caret)
 
 
 /* expression: primary
-	     | variable ':=' expression
-	     | message_expression cascaded_messages */
+   | variable ':=' expression
+   | message_expression cascaded_messages */
 
 static tree_node
 parse_expression (gst_parser *p, enum expr_kinds kind)
@@ -596,9 +1197,9 @@ parse_expression (gst_parser *p, enum expr_kinds kind)
   tree_node node, assigns = NULL;
   for (;;)
     {
-      if (p->token != IDENTIFIER)
+      if (token (p, 0) != IDENTIFIER)
 	{
-	  node = parse_primary (p);
+	  node = parse_primary(p);
 	  break;
 	}
       else
@@ -627,17 +1228,17 @@ parse_expression (gst_parser *p, enum expr_kinds kind)
 
 
 /* primary: variable_primary
-	  | '(' expression ')'
-	  | literal
-	  | block
-	  | array_constructor */
+   | '(' expression ')'
+   | literal
+   | block
+   | array_constructor */
 
 static tree_node
 parse_primary (gst_parser *p)
 {
   tree_node node;
 
-  switch (p->token)
+  switch (token (p, 0))
     {
     case IDENTIFIER:
       node = parse_variable_primary (p);
@@ -672,21 +1273,21 @@ parse_primary (gst_parser *p)
 
     default:
       return NULL;
-  }
+    }
 
   return node;
 }
 
 
 /* variable_primary: variable_primary SCOPE_SEPARATOR IDENTIFIER
-		   | IDENTIFIER  */
+   | IDENTIFIER  */
 
 static tree_node
 parse_variable_primary_1 (gst_parser *p, YYLTYPE *first_loc,
 			  const char *first_val)
 {
   tree_node node;
-  assert (p->token == IDENTIFIER);
+  assert (token (p, 0) == IDENTIFIER);
   node = _gst_make_variable (first_loc, first_val);
   for (;;)
     {
@@ -695,7 +1296,7 @@ parse_variable_primary_1 (gst_parser *p, YYLTYPE *first_loc,
 	break;
 
       lex_must_be (p, IDENTIFIER);
-      node = _gst_add_node (node, _gst_make_variable (&p->loc, p->val.sval));
+      node = _gst_add_node (node, _gst_make_variable (loc (p, 0), val(p, 0)->sval));
     }
 
   return node;
@@ -704,20 +1305,20 @@ parse_variable_primary_1 (gst_parser *p, YYLTYPE *first_loc,
 static tree_node
 parse_variable_primary (gst_parser *p)
 {
-  return parse_variable_primary_1 (p, &p->loc, p->val.sval);
+  return parse_variable_primary_1 (p, loc (p, 0), val(p, 0)->sval);
 }
 
 
 /* array_literal_elt: array_literal
-		    | byte_array_literal
-		    | literal
-		    | builtin_identifier
+   | byte_array_literal
+   | literal
+   | builtin_identifier
 
    literal: <any literal token>
-	  | '#' array_literal
-	  | '#' byte_array_literal
-	  | '#' binding_constant
-	  | '#' '#' compile_time_constant */
+   | '#' array_literal
+   | '#' byte_array_literal
+   | '#' binding_constant
+   | '#' '#' compile_time_constant */
 
 static tree_node
 parse_literal (gst_parser *p, mst_Boolean array)
@@ -725,7 +1326,7 @@ parse_literal (gst_parser *p, mst_Boolean array)
   tree_node node;
   int ival;
 
-  switch (p->token)
+  switch (token (p, 0))
     {
     case '(':
       assert (array);
@@ -742,47 +1343,47 @@ parse_literal (gst_parser *p, mst_Boolean array)
       return node;
 
     case STRING_LITERAL:
-      node = _gst_make_string_constant (&p->loc, p->val.sval);
+      node = _gst_make_string_constant (loc (p, 0), val(p, 0)->sval);
       break;
 
     case SYMBOL_LITERAL:
-      node = _gst_intern_ident (&p->loc, p->val.sval);
-      node = _gst_make_symbol_constant (&p->loc, node); 
+      node = _gst_intern_ident (loc (p, 0), val(p, 0)->sval);
+      node = _gst_make_symbol_constant (loc (p, 0), node); 
       break;
 
     case INTEGER_LITERAL:
-      node = _gst_make_int_constant (&p->loc, p->val.ival);
+      node = _gst_make_int_constant (loc (p, 0), val(p, 0)->ival);
       break;
 
     case LARGE_INTEGER_LITERAL:
-      node = _gst_make_byte_object_constant (&p->loc, p->val.boval);
+      node = _gst_make_byte_object_constant (loc (p, 0), val(p, 0)->boval);
       break;
 
     case FLOATD_LITERAL:
-      node = _gst_make_float_constant (&p->loc, p->val.fval, CONST_FLOATD);
+      node = _gst_make_float_constant (loc (p, 0), val(p, 0)->fval, CONST_FLOATD);
       break;
 
     case FLOATE_LITERAL:
-      node = _gst_make_float_constant (&p->loc, p->val.fval, CONST_FLOATE);
+      node = _gst_make_float_constant (loc (p, 0), val(p, 0)->fval, CONST_FLOATE);
       break;
 
     case FLOATQ_LITERAL:
-      node = _gst_make_float_constant (&p->loc, p->val.fval, CONST_FLOATQ);
+      node = _gst_make_float_constant (loc (p, 0), val(p, 0)->fval, CONST_FLOATQ);
       break;
 
     case SCALED_DECIMAL_LITERAL:
-      node = _gst_make_oop_constant (&p->loc, p->val.oval);
+      node = _gst_make_oop_constant (loc (p, 0), val(p, 0)->oval);
       break;
 
     case CHAR_LITERAL:
-      ival = p->val.ival;
+      ival = val(p, 0)->ival;
       lex (p);
 
       /* Special case $< INTEGER_LITERAL > where the integer literal
 	 is positive.  */
-      if (ival == '<' && p->token == INTEGER_LITERAL && p->val.ival >= 0)
+      if (ival == '<' && token (p, 0) == INTEGER_LITERAL && val(p, 0)->ival >= 0)
         {
-	  ival = p->val.ival;
+	  ival = val(p, 0)->ival;
           lex (p);
 	  lex_skip_mandatory (p, '>');
 
@@ -793,11 +1394,11 @@ parse_literal (gst_parser *p, mst_Boolean array)
 	    }
         }
 
-      return _gst_make_char_constant (&p->loc, ival);
+      return _gst_make_char_constant (loc (p, 0), ival);
 
     case '#':
       lex (p);
-      switch (p->token)
+      switch (token (p, 0))
         {
 	case '(':
 	case '[':
@@ -825,13 +1426,13 @@ parse_literal (gst_parser *p, mst_Boolean array)
 
 /* array_literal: '(' array_literal_elts ')'
    array_literal_elts: array_literal_elts array_literal_elt
-		     | empty  */
+   | empty  */
 
 static tree_node
 parse_array_literal (gst_parser *p)
 {
   tree_node elts = NULL;
-  assert (p->token == '(');
+  assert (token (p, 0) == '(');
   lex (p);
 
   while (!lex_skip_if (p, ')', true))
@@ -842,7 +1443,7 @@ parse_array_literal (gst_parser *p)
       elts = _gst_add_node (elts, _gst_make_array_elt (&lit->location, lit));
     }
 
-  return _gst_make_array_constant (elts ? &elts->location : &p->loc, elts);
+  return _gst_make_array_constant (elts ? &elts->location : loc (p, 0), elts);
 }
 
 
@@ -853,18 +1454,18 @@ parse_builtin_identifier (gst_parser *p)
 {
   OOP symbolOOP;
   tree_node node;
-  YYLTYPE loc = p->loc;
+  YYLTYPE location = *loc(p,0);
 
-  assert (p->token == IDENTIFIER);
-  symbolOOP = _gst_intern_string (p->val.sval);
+  assert (token (p, 0) == IDENTIFIER);
+  symbolOOP = _gst_intern_string (val(p, 0)->sval);
   if (symbolOOP == _gst_true_symbol)
-    node = _gst_make_oop_constant (&loc, _gst_true_oop);
+    node = _gst_make_oop_constant (&location, _gst_true_oop);
 
   else if (symbolOOP == _gst_false_symbol)
-    node = _gst_make_oop_constant (&loc, _gst_false_oop);
+    node = _gst_make_oop_constant (&location, _gst_false_oop);
 
   else if (symbolOOP == _gst_nil_symbol)
-    node = _gst_make_oop_constant (&loc, _gst_nil_oop);
+    node = _gst_make_oop_constant (&location, _gst_nil_oop);
 
   else
     {
@@ -879,30 +1480,30 @@ parse_builtin_identifier (gst_parser *p)
 
 /* byte_array_literal: '[' byte_array_literal_elts ']'
    byte_array_literal_elts: byte_array_literal_elts INTEGER_LITERAL
-			  | empty  */
+   | empty  */
 
 static tree_node
 parse_byte_array_literal (gst_parser *p)
 {
   tree_node elts = NULL;
-  assert (p->token == '[');
+  assert (token (p, 0) == '[');
   lex (p);
 
   while (!lex_skip_if (p, ']', true))
     {
       tree_node lit;
       lex_must_be (p, INTEGER_LITERAL);
-      if (p->val.ival < 0 || p->val.ival > 255)
+      if (val(p, 0)->ival < 0 || val(p, 0)->ival > 255)
 	{
 	  _gst_errorf ("byte constant out of range");
 	  recover_error (p);
 	}
-      lit = _gst_make_int_constant (&p->loc, p->val.ival);
+      lit = _gst_make_int_constant (loc (p, 0), val(p, 0)->ival);
       lex (p);
       elts = _gst_add_node (elts, _gst_make_array_elt (&lit->location, lit));
     }
 
-  return _gst_make_byte_array_constant (elts ? &elts->location : &p->loc, elts);
+  return _gst_make_byte_array_constant (elts ? &elts->location : loc (p, 0), elts);
 }
 
 
@@ -912,14 +1513,14 @@ static tree_node
 parse_compile_time_constant (gst_parser *p)
 {
   tree_node temps, statements;
-  YYLTYPE loc = p->loc;
+  YYLTYPE location = *loc(p,0);
   OOP result = NULL;
 
-  assert (p->token == '#');
+  assert (token (p, 0) == '#');
   lex (p);
   lex_skip_mandatory (p, '(');
   temps = parse_temporaries (p, false);
-  statements = parse_statements (p, true);
+  statements = parse_statements (p, NULL, true);
   lex_skip_mandatory (p, ')');
 
   if (statements && !_gst_had_error)
@@ -930,7 +1531,7 @@ parse_compile_time_constant (gst_parser *p)
       _gst_pop_temporaries_dictionary (oldDictionary);
     }
 
-  return _gst_make_oop_constant (&loc, result ? result : _gst_nil_oop); 
+  return _gst_make_oop_constant (&location, result ? result : _gst_nil_oop); 
 }
 
 
@@ -941,7 +1542,7 @@ parse_binding_constant (gst_parser *p)
 {
   tree_node node;
 
-  assert (p->token == '{');
+  assert (token (p, 0) == '{');
   lex (p);
   lex_must_be (p, IDENTIFIER);
   node = parse_variable_primary (p);
@@ -957,38 +1558,38 @@ static tree_node
 parse_array_constructor (gst_parser *p)
 {
   tree_node stmts;
-  YYLTYPE loc = p->loc;
+  YYLTYPE location = *loc(p,0);
 
-  assert (p->token == '{');
+  assert (token (p, 0) == '{');
   lex (p);
 
-  stmts = parse_statements (p, false);
+  stmts = parse_statements (p, NULL, false);
   lex_skip_mandatory (p, '}');
-  return _gst_make_array_constructor (&loc, stmts); 
+  return _gst_make_array_constructor (&location, stmts); 
 }
 
 
 /* block: block_vars '||' temps_no_pipe statements
-	| block_vars '|' temporaries statements
-	| temporaries statements */
+   | block_vars '|' temporaries statements
+   | temporaries statements */
 
 static tree_node
 parse_block (gst_parser *p)
 {
-  YYLTYPE loc = p->loc;
+  YYLTYPE location = *loc(p,0);
   tree_node vars, temps, stmts;
   mst_Boolean implied_pipe;
 
-  assert (p->token == '[');
+  assert (token (p, 0) == '[');
   lex (p);
 
-  if (p->token == ':')
+  if (token (p, 0) == ':')
     {
       vars = parse_block_variables (p);
       if (lex_skip_if (p, '|', true))
 	implied_pipe = false;
-      else if (p->token == BINOP
-	       && p->val.sval[0] == '|' && p->val.sval[1] == '|')
+      else if (token (p, 0) == BINOP
+	       && val(p, 0)->sval[0] == '|' && val(p, 0)->sval[1] == '|')
 	{
 	  implied_pipe = true;
 	  lex (p);
@@ -1003,21 +1604,21 @@ parse_block (gst_parser *p)
     }
 
   temps = parse_temporaries (p, implied_pipe);
-  stmts = parse_statements (p, true);
+  stmts = parse_statements (p, NULL, true);
 
   lex_skip_mandatory (p, ']');
-  return _gst_make_block (&loc, vars, temps, stmts);
+  return _gst_make_block (&location, vars, temps, stmts);
 }
 
 
 /* block_vars: ':' IDENTIFIER
-	     | block_vars ':' IDENTIFIER */
+   | block_vars ':' IDENTIFIER */
 
 static tree_node
 parse_block_variables (gst_parser *p)
 {
   tree_node vars = NULL;
-  assert (p->token == ':');
+  assert (token (p, 0) == ':');
 
   while (lex_skip_if (p, ':', false))
     vars = _gst_add_node (vars, parse_variable (p));
@@ -1027,18 +1628,18 @@ parse_block_variables (gst_parser *p)
 
 
 /* message_expression: unary_expression
-		     | binary_expression
-		     | keyword_expression
+   | binary_expression
+   | keyword_expression
 
    unary_expression: primary unary_message
-		   | unary_expression unary_message
+   | unary_expression unary_message
    unary_message: IDENTIFIER
 
    binary_expression: unary_expression binop unary_expression
-		    | binary_expression binop unary_expression
+   | binary_expression binop unary_expression
 
    keyword_expression: binary_expression KEYWORD binary_expression
-		     | keyword_expression KEYWORD binary_expression */
+   | keyword_expression KEYWORD binary_expression */
 
 static tree_node
 parse_message_expression (gst_parser *p, tree_node receiver, enum expr_kinds kind)
@@ -1047,29 +1648,29 @@ parse_message_expression (gst_parser *p, tree_node receiver, enum expr_kinds kin
   int n;
   for (n = 0; ; n++)
     {
-      switch (p->token)
-        {
-        case IDENTIFIER:
-          node = parse_unary_expression (p, node, kind & ~EXPR_CASCADE);
-          break;
-  
-        case '>':
+      switch (token (p, 0))
+	{
+	case IDENTIFIER:
+	  node = parse_unary_expression (p, node, kind & ~EXPR_CASCADE);
+	  break;
+
+	case '>':
 	  if ((kind & EXPR_GREATER) == 0)
 	    return node;
 
-        case BINOP:
-        case '<':
-        case '|':
+	case BINOP:
+	case '<':
+	case '|':
 	  if ((kind & EXPR_BINOP) == 0)
 	    return node;
-          node = parse_binary_expression (p, node, kind & ~EXPR_CASCADE);
-          break;
+	  node = parse_binary_expression (p, node, kind & ~EXPR_CASCADE);
+	  break;
 
-        case KEYWORD:
+	case KEYWORD:
 	  if ((kind & EXPR_KEYWORD) == 0)
 	    return node;
-          node = parse_keyword_expression (p, node, kind & ~EXPR_CASCADE);
-          break;
+	  node = parse_keyword_expression (p, node, kind & ~EXPR_CASCADE);
+	  break;
 
 	case ';':
 	  if (n == 0 || (kind & EXPR_CASCADE) == 0)
@@ -1077,9 +1678,9 @@ parse_message_expression (gst_parser *p, tree_node receiver, enum expr_kinds kin
 	  return _gst_make_cascaded_message (&node->location, node,
 					     parse_cascaded_messages (p));
 
-        default:
-          return node;
-        }
+	default:
+	  return node;
+	}
     }
 
   abort ();
@@ -1087,7 +1688,7 @@ parse_message_expression (gst_parser *p, tree_node receiver, enum expr_kinds kin
 
 
 /* cascaded_messages: cascaded_messages ';' message_expression
-		    | empty */
+   | empty */
 
 static tree_node
 parse_cascaded_messages (gst_parser *p)
@@ -1096,27 +1697,27 @@ parse_cascaded_messages (gst_parser *p)
   while (lex_skip_if (p, ';', false))
     {
       tree_node node;
-      switch (p->token)
+      switch (token (p, 0))
 	{
-        case IDENTIFIER:
-          node = parse_unary_expression (p, NULL, EXPR_CASCADED);
-          break;
+	case IDENTIFIER:
+	  node = parse_unary_expression (p, NULL, EXPR_CASCADED);
+	  break;
 
-        case '>':
-        case BINOP:
-        case '<':
-        case '|':
-          node = parse_binary_expression (p, NULL, EXPR_CASCADED);
-          break;
+	case '>':
+	case BINOP:
+	case '<':
+	case '|':
+	  node = parse_binary_expression (p, NULL, EXPR_CASCADED);
+	  break;
 
-        case KEYWORD:
-          node = parse_keyword_expression (p, NULL, EXPR_CASCADED);
-          break;
+	case KEYWORD:
+	  node = parse_keyword_expression (p, NULL, EXPR_CASCADED);
+	  break;
 
-        default:
+	default:
 	  /* After a semicolon, we can expect a message send.  */
-          expected (p, IDENTIFIER, BINOP, KEYWORD, -1);
-        }
+	  expected (p, IDENTIFIER, BINOP, KEYWORD, -1);
+	}
 
       node = _gst_make_message_list (&node->location, node); 
       cascade = _gst_add_node (cascade, node);
@@ -1131,15 +1732,15 @@ parse_cascaded_messages (gst_parser *p)
 static tree_node
 parse_unary_expression (gst_parser *p, tree_node receiver, enum expr_kinds kind)
 {
-  YYLTYPE loc = receiver ? receiver->location : p->loc;
+  YYLTYPE location = receiver ? receiver->location : *loc(p,0);
   char *sel;
-  assert (p->token == IDENTIFIER);
-  sel = p->val.sval;
+  assert (token (p, 0) == IDENTIFIER);
+  sel = val(p, 0)->sval;
   if (is_unlikely_selector (sel))
     _gst_warningf ("sending `%s', most likely you forgot a period", sel);
 
   lex (p);
-  return _gst_make_unary_expr (&loc, receiver, sel); 
+  return _gst_make_unary_expr (&location, receiver, sel); 
 }
 
 
@@ -1148,12 +1749,12 @@ parse_unary_expression (gst_parser *p, tree_node receiver, enum expr_kinds kind)
 static tree_node
 parse_binary_expression (gst_parser *p, tree_node receiver, enum expr_kinds kind)
 {
-  YYLTYPE loc = receiver ? receiver->location : p->loc;
+  YYLTYPE location = receiver ? receiver->location : *loc(p,0);
   char *sel;
   tree_node arg;
-  assert (p->token == BINOP || p->token == '|' || p->token == '<'
-	  || p->token == '>');
-  sel = p->val.sval;
+  assert (token (p, 0) == BINOP || token (p, 0) == '|' || token (p, 0) == '<'
+	  || token (p, 0) == '>');
+  sel = val(p, 0)->sval;
   lex (p);
   arg = parse_expression (p, kind & ~EXPR_KEYWORD & ~EXPR_BINOP);
   if (!arg)
@@ -1162,7 +1763,7 @@ parse_binary_expression (gst_parser *p, tree_node receiver, enum expr_kinds kind
       recover_error (p);
     }
 
-  return _gst_make_binary_expr (&loc, receiver, sel, arg); 
+  return _gst_make_binary_expr (&location, receiver, sel, arg); 
 }
 
 /* See above.  This function parses a keyword expression with all its
@@ -1171,21 +1772,21 @@ parse_binary_expression (gst_parser *p, tree_node receiver, enum expr_kinds kind
 static tree_node
 parse_keyword_expression (gst_parser *p, tree_node receiver, enum expr_kinds kind)
 {
-  YYLTYPE loc = receiver ? receiver->location : p->loc;
+  YYLTYPE location = receiver ? receiver->location : *loc(p,0);
   tree_node list = parse_keyword_list (p, kind);
-  return list ? _gst_make_keyword_expr (&loc, receiver, list) : NULL;
+  return list ? _gst_make_keyword_expr (&location, receiver, list) : NULL;
 }
 
 static tree_node
 parse_keyword_list (gst_parser *p, enum expr_kinds kind)
 {
   tree_node expr = NULL;
-  assert (p->token == KEYWORD);
+  assert (token (p, 0) == KEYWORD);
 
   do
     {
-      YYLTYPE loc = p->loc;
-      char *sval = p->val.sval;
+      YYLTYPE location = *loc(p,0);
+      char *sval = val(p, 0)->sval;
       tree_node arg;
       lex (p);
       arg = parse_expression (p, kind & ~EXPR_KEYWORD);
@@ -1195,15 +1796,15 @@ parse_keyword_list (gst_parser *p, enum expr_kinds kind)
 	  recover_error (p);
 	}
 
-      expr = _gst_add_node (expr, _gst_make_keyword_list (&loc, sval, arg));
+      expr = _gst_add_node (expr, _gst_make_keyword_list (&location, sval, arg));
     }
-  while (p->token == KEYWORD);
+  while (token (p, 0) == KEYWORD);
 
   return expr;
 }
 
 
-/* Based on an hash table produced by gperf version 2.7.2
+/* Based on a hash table produced by gperf version 2.7.2
    Command-line: gperf -tn -F ', false' -j1 -k1,2
    with the following input:
 
@@ -1220,7 +1821,7 @@ parse_keyword_list (gst_parser *p, enum expr_kinds kind)
 
    A few negatives have been included in the input to avoid that
    messages like #new or #size require a strcmp (their hash value is
-   in range if only the six keywords were included), and the length
+   in range if only the six keywords are included), and the length
    has not been included to make the result depend on selectors
    *starting* with two given letters.  With this hash table and this
    implementation, only selectors starting with "fa", "ni", "se",
@@ -1232,15 +1833,15 @@ parse_keyword_list (gst_parser *p, enum expr_kinds kind)
    code like this:
 
    return ((*$1 == 's' &&
-	    (strcmp ($1+1, "elf") == 0 ||
-	     strcmp ($1+1, "uper") == 0)) ||
+   (strcmp ($1+1, "elf") == 0 ||
+   strcmp ($1+1, "uper") == 0)) ||
    
-	   (*$1 == 't' &&
-	    (strcmp ($1+1, "rue") == 0 ||
-	     strcmp ($1+1, "hisContext") == 0)) ||
+   (*$1 == 't' &&
+   (strcmp ($1+1, "rue") == 0 ||
+   strcmp ($1+1, "hisContext") == 0)) ||
    
-	   (*$1 == 'f' && strcmp ($1+1, "alse") == 0) ||
-	   (*$1 == 'n' && strcmp ($1+1, "il") == 0))
+   (*$1 == 'f' && strcmp ($1+1, "alse") == 0) ||
+   (*$1 == 'n' && strcmp ($1+1, "il") == 0))
 
    ... but using gperf is more cool :-) */
 

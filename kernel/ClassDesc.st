@@ -405,6 +405,16 @@ asMetaclass
 
 !ClassDescription methodsFor: 'parsing class declarations'!
 
+addSharedPool: aDictionary
+    "Add the given shared pool to the list of the class' pool dictionaries"
+    self subclassResponsibility
+!
+
+import: aDictionary
+    "Add the given shared pool to the list of the class' pool dictionaries"
+    self addSharedPool: aDictionary
+!
+
 instanceVariableNames: instVarNames
 
     "Set the instance variables for the receiver to be those
