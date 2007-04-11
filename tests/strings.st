@@ -28,32 +28,33 @@
 |
  ======================================================================"
 
-!String methodsFor: 'testing'!
+String extend [
+    strTest [
+        | str |
+        str := self copy.
+        str at: 1 put: $Q.
+        ^str
+    ]
+]
 
-strTest
-    | str |
-    str := self copy.
-    str at: 1 put: $Q.
-    ^str
+Eval [ 'foo' ]
 
-! !
+Eval [ 'foo on you' ]
 
-^'foo'!
-
-^'foo on you'!
-
-^'foo on
+Eval [ 'foo on
 multiple line string
-you'!
+you'
+]
 
-^'test embedded quote marks, can''t I do this?'!
+Eval [ 'test embedded quote marks, can''t I do this?' ]
 
-^'FUBAR' at: 3!
+Eval [ 'FUBAR' at: 3 ]
 
-^'quem' copy at: 1 put: $Q!
+Eval [ 'quem' copy at: 1 put: $Q ]
 
-^'quem' strTest!
+Eval [ 'quem' strTest ]
 
+Eval [
 'should be false ' print.       ('###' match: 'quem') printNl.
 'should be false ' print.       ('###' match: 'bo') printNl.
 'should be true  ' print.	('* string' match: 'any string') printNl.
@@ -68,4 +69,5 @@ you'!
 'should be true  ' print.	('*#*' match: '.s') printNl.
 'should be true  ' print.	('*#*' match: 's') printNl.
 'should be false ' print.	('*.st' match: '.s') printNl.
-'should be false ' print.	('*#*' match: '') printNl!
+'should be false ' print.	('*#*' match: '') printNl
+]

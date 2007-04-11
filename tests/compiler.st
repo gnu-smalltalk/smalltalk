@@ -89,9 +89,9 @@ phoneNumber
     ^nil
 ! !
 
-'(111) 111-1111' phoneNumber!
+Eval [ '(111) 111-1111' phoneNumber ]
 
-(Object compile: 'foo <category: ''bar''> ^5') methodCategory!
+Eval [ (Object compile: 'foo <category: ''bar''> ^5') methodCategory ]
 
 
 "Various errors in the recursive-descent parser"
@@ -106,21 +106,25 @@ a
 b
     ^{}!
 
+"The lexer crashed on this because it returned a SYMBOL_LITERAL with
+ -123 in the ival.  This gives a parse error..."
+
+c
+    #-123!
+
 c
     <3 4>
     ^'foo'! !
 
-^BugTest c!
-
-"The lexer crashed on this because it returned a SYMBOL_LITERAL with
- -123 in the ival.  This gives a parse error..."
-^#-123!
-
 "... this does not."
-^#(#-123) size!
+Eval [ #(#-123) size ]
+
+Eval [ BugTest c ]
 
 
 "Compiling a method should not capture the current temporaries dictionary."
-a:=42.
-Object compile: 'gotcha "shouldn''t compile!" ^a'!
-nil gotcha! 
+Eval [
+    a:=42.
+    Object compile: 'gotcha "shouldn''t compile!" ^a'
+]
+Eval [ nil gotcha ]

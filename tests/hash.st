@@ -28,20 +28,20 @@
 |
  ======================================================================"
 
-| n c hash |
-
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 20000 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 
-hash := LookupTable new: n * 2.
-1 to: n do: [ :each |
+    hash := LookupTable new: n * 2.
+    1 to: n do: [ :each |
 	hash at: (each printString: 16) put: 1.
-].
+    ].
 
-c := 0.
-n to: 1 by: -1 do: [ :each |
+    c := 0.
+    n to: 1 by: -1 do: [ :each |
 	(hash includesKey: each printString) ifTrue: [ c := c + 1].
-].
+    ].
 
-c printNl!
+    c printNl
+]

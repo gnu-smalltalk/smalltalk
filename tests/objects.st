@@ -28,65 +28,60 @@
 |
  ======================================================================"
 
-Object subclass: #ObjectsTest
-	 instanceVariableNames: 'name survive'
-	 classVariableNames: 'Messages'
-	 poolDictionaries: ''
-	 category: nil
-!
+Object subclass: ObjectsTest [
+    | name survive |
 
-!ObjectsTest class methodsFor: 'test'!
+    Messages := nil.
 
-testCompaction
-    Messages := SortedCollection new.
-    ObjectMemory compact.
-    Messages do: [ :each | each displayNl ]
-!
+    Class protocol [
+	testCompaction [
+	    Messages := SortedCollection new.
+	    ObjectMemory compact.
+	    Messages do: [ :each | each displayNl ]
+	]
 
-testFinalize
-    | test |
-    self new name: 'a' survive: false.
-    self new name: 'b' survive: true.
-    self new name: 'c' survive: false.
-    self testCompaction.
-    self testCompaction.
-    self testCompaction.
-!
+	testFinalize [
+	    | test |
+	    self new name: 'a' survive: false.
+	    self new name: 'b' survive: true.
+	    self new name: 'c' survive: false.
+	    self testCompaction.
+	    self testCompaction.
+	    self testCompaction.
+	]
 
-testWeak
-    | a |
-    a := Array new: 1.
-    a makeWeak.
-    a at: 1 put: Object new.
-    ObjectMemory compact.
-    ^(a at: 1) isNil
-! !
+	testWeak [
+	    | a |
+	    a := Array new: 1.
+	    a makeWeak.
+	    a at: 1 put: Object new.
+	    ObjectMemory compact.
+	    ^(a at: 1) isNil
+	]
+    ]
 
-!ObjectsTest methodsFor: 'finalization'!
+    name: aString survive: aBoolean [
+        name := aString.
+        survive := aBoolean.
+        self addToBeFinalized
+    ]
 
-name: aString survive: aBoolean
-    name := aString.
-    survive := aBoolean.
-    self addToBeFinalized
-!
+    finalize [
+        survive ifTrue: [
+            Messages add: name, ' finalized, surviving'.
+            survive := false.
+            self addToBeFinalized.
+	    ^self
+        ].
+        Messages add: name, ' finalized'
+    ]
+]
 
-finalize
-    survive ifTrue: [
-        Messages add: name, ' finalized, surviving'.
-        survive := false.
-        self addToBeFinalized.
-	^self
-    ].
-    Messages add: name, ' finalized'.
-! !
-
-ObjectsTest testFinalize!
-^ObjectsTest testWeak!
+Eval [ ObjectsTest testFinalize ]
+Eval [ ObjectsTest testWeak ]
 
 
-"TODO: use Eval here, we want 'abc' to survive through the entire
- execution."
-[
+Eval [
 
     | a b |
     a := WeakArray new: 5.
@@ -105,12 +100,12 @@ ObjectsTest testFinalize!
     ((1 to: 5) collect: [ :each | a isAlive: each ]) printNl.
     ((1 to: 5) collect: [ :each | b isAlive: each ]) printNl
 
-] value!
+]
 
 
 "Test lightweight class"
 
-	| Test methodString t |
+Eval [
  	Test := Behavior new.
 	Transcript nextPutAll: 'New instance of Behavior created'; nl.
 
@@ -128,5 +123,5 @@ ObjectsTest testFinalize!
 
  	t printTestMessage.
  	t printNl.
-	Transcript nextPutAll: 'Well it seems to work fine'; nl.
-!
+	Transcript nextPutAll: 'Well it seems to work fine'; nl
+]

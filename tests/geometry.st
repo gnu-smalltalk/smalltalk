@@ -30,27 +30,29 @@
 |
  ======================================================================"
 
-!Rectangle methodsFor: 'testing'!
+Rectangle extend [
 
-myAreasOutside: a
-    | ans |
-    ans := self areasOutside: a.
-    ans := ans asSortedCollection: [ :x :y | x printString < y printString ].
-    ^ans asArray! !
+    myAreasOutside: a [
+        | ans |
+        ans := self areasOutside: a.
+        ans := ans asSortedCollection: [ :x :y | x printString < y printString ].
+        ^ans asArray
+    ]
+]
 
 "Creation methods and printing"
-| p1 p2 |
+Eval [
   p1 := Point x: 123 y: 456.
   p2 := 123@456.
   'p1 = ' print.
   p1 printNl.
   'p2 = ' print.
   p2 printNl.
-!
+]
 
 "accessing"
 
-| p |
+Eval [
   p := 123@456.
   '(p x) = ' print.
   (p x) printNl.
@@ -62,10 +64,10 @@ myAreasOutside: a
   p y: 654.
   'p = ' print.
   p printNl.
-!
+]
 
 "comparing"
-| A B C |
+Eval [
   A := 45@230.
   B := 175@270.
   C := 175@200.
@@ -81,11 +83,11 @@ myAreasOutside: a
   (A max: B) printNl.
   'A min: B = ' print.
   (A min: B) printNl.
-!
+]
 
 "arithmetic"
 
-| A B C D|
+Eval [
   A := 45@230.
   B := 175@300.
   C := 50@50.
@@ -108,11 +110,11 @@ myAreasOutside: a
   ((120.5@220.7) rounded) printNl.
   'D truncateTo: 50 = ' print.
   (D truncateTo: 50) printNl.
-!
+]
 
 "point functions"
 
-| A B C D |
+Eval [
   A := 45@230.
   B := 175@270.
   C := 160@240.
@@ -129,13 +131,13 @@ myAreasOutside: a
   (C truncatedGrid: D) printNl.
   '175@300 transpose = ' print.
   ((175@300) transpose) printNl.
-!
+]
 
 
 "RECTANGLES--------------------------"
 
 "creation and printing"
-| A |
+Eval [
     '5 lines should be the same: A = 100@100 corner: 200@200' printNl.
     A := Rectangle left: 100 right: 200 top: 100 bottom: 200.
     'A = ' print.
@@ -151,10 +153,11 @@ myAreasOutside: a
     A printNl.
     A := (100@100) extent: 100@100.
     'A = ' print.
-    A printNl!
+    A printNl
+]
 
 "accessing"
-| A |
+Eval [
     A := Rectangle origin: 100@100 extent: 150@150.
     'A = ' print.
     A printNl.
@@ -171,10 +174,11 @@ myAreasOutside: a
     'extent = ' print.
     (A extent) printNl.
     'area = ' print.
-    (A area) printNl!
+    (A area) printNl
+]
 
 "rectangle functions"
-| A B C D |
+Eval [
     A := 50@50 corner: 200@200.
     B := 120@120 corner: 260@240.
     C := 100@300 corner: 300@400.
@@ -187,23 +191,26 @@ myAreasOutside: a
     (D myAreasOutside: B) printNl.
     (C expandBy: 10) printNl.
     (C insetBy: 10@20) printNl.
-    (B merge: C) printNl!
+    (B merge: C) printNl
+]
 
 "testing"
-| A B C |
+Eval [
     A := 50@50 corner: 200@200.
     B := 120@120 corner: 260@240.
     C := 100@300 corner: 300@400.
     (A contains: B) printNl.
     (C containsPoint: 200@320) printNl.
-    (A intersects: B) printNl!
+    (A intersects: B) printNl
+]
 
 "truncation and round off and transforming"
-| A B C |
+Eval [
     A := 50@50 corner: 200@200.
     B := 120@120 corner: 260@240.
     C := 100@300 corner: 300@400.
     (A moveBy: 50@50) printNl.
     (A moveTo: 200@300) printNl.
     (A scaleBy: 2) printNl.
-    (A translateBy: -100) printNl!
+    (A translateBy: -100) printNl
+]

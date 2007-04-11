@@ -28,24 +28,25 @@
 |
  ======================================================================"
 
-| i n a b |
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 200000 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 
-a := (1 to: n) asOrderedCollection.
-b := OrderedCollection new: n.
+    a := (1 to: n) asOrderedCollection.
+    b := OrderedCollection new: n.
 
-[a isEmpty] whileFalse: [
+    [a isEmpty] whileFalse: [
 	b addLast: a removeFirst; addLast: a removeLast ].
 	
-[b isEmpty] whileFalse: [
+    [b isEmpty] whileFalse: [
 	a addFirst: b removeLast; addFirst: b removeFirst ].
 
-a size printNl.
+    a size printNl.
 
-(a copyFrom: 1 to: (10 min: a size))
+    (a copyFrom: 1 to: (10 min: a size))
     	do: [ :each | each print ]
 	separatedBy: [ Transcript space ].
 	
-Transcript nl!
+    Transcript nl
+]

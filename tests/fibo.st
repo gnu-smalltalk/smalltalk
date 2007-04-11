@@ -28,15 +28,17 @@
 |
  ======================================================================"
 
-!SmallInteger methodsFor: 'testing'!
+SmallInteger extend [
+    fib [
+	^self < 2 ifTrue: [ 1 ] ifFalse: [ (self - 2) fib + (self - 1) fib ]
+    ]
+]
 
-fib
-	^self < 2 ifTrue: [ 1 ] ifFalse: [ (self - 2) fib + (self - 1) fib ]! !
-
-| n |
-
-n := Smalltalk arguments isEmpty
+Eval [
+    | n |
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 8 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 
-n fib printNl!
+    n fib printNl
+]

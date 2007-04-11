@@ -28,60 +28,50 @@
 |
  ======================================================================"
 
-Notification subclass: #MyException
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'testing'!
+Notification subclass: MyException [
+    <category: 'testing'>
 
-MyException class instanceVariableNames: 'count'!
+    Class protocol [
+	| count |
 
-!MyException class methodsFor: 'counting'!
-
-count
-	^count!
+	count [ ^count ]
+	increment [ count := count + 1 ]
+	initialize [ count := 0 ]
+    ]
+]
 	
-increment
-	count := count + 1!
+MyException subclass: LoException [ ]
+Eval [ LoException initialize ]
 
-initialize
-	count := 0! !
+MyException subclass: HiException [ ]
+Eval [ HiException initialize ]
+
+SmallInteger extend [
+    someFunction [
+	^self hiFunction
+    ]
 	
-MyException subclass: #LoException
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'testing'!
-
-MyException subclass: #HiException
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'testing'!
-
-LoException initialize.
-HiException initialize!
-
-!SmallInteger methodsFor: 'testing'!
-
-someFunction
-	^self hiFunction!
+    hiFunction [
+	^[ self loFunction ] on: HiException do: [ :ex | ex class increment ]
+    ]
 	
-hiFunction
-	^[ self loFunction ] on: HiException do: [ :ex | ex class increment ]!
+    loFunction [
+	^[ self blowup ] on: LoException do: [ :ex | ex class increment ]
+    ]
 	
-loFunction
-	^[ self blowup ] on: LoException do: [ :ex | ex class increment ]!
-	
-blowup
+    blowup [
 	^(self odd ifTrue: [ HiException ] ifFalse: [ LoException ])
-		signal: self! !
+		signal: self
+    ]
+]
 
-| n |
-n := Smalltalk arguments isEmpty
-	ifTrue: [ 50000 ]
-	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
-
-1 to: n do: [ :each | each someFunction ].
-('Exceptions: HI=%1 / LO=%2'
-	bindWith: HiException count with: LoException count) displayNl!
+Eval [
+    | n |
+    n := Smalltalk arguments isEmpty
+	    ifTrue: [ 50000 ]
+	    ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
+    
+    1 to: n do: [ :each | each someFunction ].
+    ('Exceptions: HI=%1 / LO=%2'
+	    bindWith: HiException count with: LoException count) displayNl
+]

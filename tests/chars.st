@@ -28,64 +28,64 @@
 |
  ======================================================================"
 
-^$A!
+Eval [ $A ]
 
-^$b!
+Eval [ $b ]
 
-^$$!
+Eval [ $$ ]
 
-^$! !
+Eval [ $!  ]
 
-^$ !
+Eval [ $  ]
 
-| a b c |
-a := 0 to: 255.
-b := a collect: [ :each | each asCharacter ].
-c := b collect: [ :each | each asInteger ].
+Eval [
+    a := 0 to: 255.
+    b := a collect: [ :each | each asCharacter ].
+    c := b collect: [ :each | each asInteger ].
 
-^c = a asArray!
-
-
-
-| allChars |
-allChars := (0 to: 127) asByteArray asString.
-
-^(0 to: 127) allSatisfy: [ :index |
-    (allChars at: index + 1) == index asCharacter ]!
+    c = a asArray
+]
 
 
+Eval [
+    allChars := (0 to: 127) asByteArray asString.
 
-| which allChars |
-allChars := (0 to: 255) asByteArray asString.
+    ^(0 to: 127) allSatisfy: [ :index |
+        (allChars at: index + 1) == index asCharacter ]
+]
 
-#(#isVowel #isLetter #isUppercase #isLowercase #isAlphaNumeric
-  #isDigit #isSeparator)
-    do: [ :symbol |
-        symbol printNl.
 
-        which := allChars collect: [ :each | 
-            (each perform: symbol) ifTrue: [ $x ] ifFalse: [ $_ ]
-	].
+Eval [
+    allChars := (0 to: 255) asByteArray asString.
 
-        Transcript showCr: (which copyFrom: 1 to: 64).
-        Transcript showCr: (which copyFrom: 65 to: 128).
-        Transcript showCr: (which copyFrom: 129 to: 192).
-        Transcript showCr: (which copyFrom: 193 to: 256).
-        Transcript nl.
-    ]!
+    #(#isVowel #isLetter #isUppercase #isLowercase #isAlphaNumeric
+      #isDigit #isSeparator)
+        do: [ :symbol |
+            symbol printNl.
+    
+            which := allChars collect: [ :each | 
+                (each perform: symbol) ifTrue: [ $x ] ifFalse: [ $_ ]
+	    ].
+    
+            Transcript showCr: (which copyFrom: 1 to: 64).
+            Transcript showCr: (which copyFrom: 65 to: 128).
+            Transcript showCr: (which copyFrom: 129 to: 192).
+            Transcript showCr: (which copyFrom: 193 to: 256).
+            Transcript nl.
+        ]
+]
 
-| which printable |
-
-printable := (33 to: 126) asByteArray asString.
-
-#(#asUppercase #asLowercase)
-    do: [ :symbol |
-        symbol printNl.
-
-        which := printable collect: [ :each | (each perform: symbol) ].
-
-        Transcript showCr: (which copyFrom: 1 to: 47).
-        Transcript showCr: (which copyFrom: 48 to: 94).
-        Transcript nl.
-    ]
-!
+Eval [
+    printable := (33 to: 126) asByteArray asString.
+    
+    #(#asUppercase #asLowercase)
+        do: [ :symbol |
+            symbol printNl.
+    
+            which := printable collect: [ :each | (each perform: symbol) ].
+    
+            Transcript showCr: (which copyFrom: 1 to: 47).
+            Transcript showCr: (which copyFrom: 48 to: 94).
+            Transcript nl.
+        ]
+]

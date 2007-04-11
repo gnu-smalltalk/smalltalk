@@ -1,8 +1,5 @@
 
 Execution begins...
-returned value is Process
-
-Execution begins...
 Process('test 1' at userSchedulingPriority, suspended)
 'inside p'
 Process('test 1' at userSchedulingPriority, terminated)

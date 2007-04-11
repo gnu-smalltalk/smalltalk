@@ -28,80 +28,80 @@
 |
  ======================================================================"
 
-^3!
+Eval [ 3 ]
 
-^-3!
+Eval [ -3 ]
 
 "Base tests"
-^2r1010!
-^8r377!
-^16rFE!
+Eval [ 2r1010 ]
+Eval [ 8r377 ]
+Eval [ 16rFE ]
 
 "Arithmetic operation tests"
 
-^3 + 4!				"should return 7"
+Eval [ 3 + 4 ]				"should return 7"
 
-^3 - 4!				"should return -1"
+Eval [ 3 - 4 ]				"should return -1"
 
-^3 < 4!				"should return true"
+Eval [ 3 < 4 ]				"should return true"
 
-^17 > 18!			"should return false"
-^17 > 17!			"should return false"
+Eval [ 17 > 18 ]			"should return false"
+Eval [ 17 > 17 ]			"should return false"
 
-^23 <= 23!			"true"
-^23 <= -45!			"false"
-^18 >= 21!			"false"
-^19 >= 18!			"true"
+Eval [ 23 <= 23 ]			"true"
+Eval [ 23 <= -45 ]			"false"
+Eval [ 18 >= 21 ]			"false"
+Eval [ 19 >= 18 ]			"true"
 
-^23 = 23!			"true"
-^23 = 24!			"false"
+Eval [ 23 = 23 ]			"true"
+Eval [ 23 = 24 ]			"false"
 
-^45 ~= 89!			"true"
-^45 ~= 45!			"false"
+Eval [ 45 ~= 89 ]			"true"
+Eval [ 45 ~= 45 ]			"false"
 
-^3 * 4!				"should return 12"
+Eval [ 3 * 4 ]				"should return 12"
 
-^ 12 //  3!			"should return 4"
-^ 12 //  5!			"should return 2"
-^-12 // -3!			"should return 4"
-^-12 // -5!			"should return 2"
-^-12 //  5!			"should return -3"
-^ 12 // -5!			"should return -3"
+Eval [  12 //  3 ]			"should return 4"
+Eval [  12 //  5 ]			"should return 2"
+Eval [ -12 // -3 ]			"should return 4"
+Eval [ -12 // -5 ]			"should return 2"
+Eval [ -12 //  5 ]			"should return -3"
+Eval [  12 // -5 ]			"should return -3"
 
-^ 12 \\  3!			"should return 0"
-^ 12 \\  5!			"should return 2"
-^-12 \\ -3!			"should return 0"
-^-12 \\ -5!			"should return -2"
-^-12 \\  5!			"should return 3"
-^ 12 \\ -5!			"should return -3"
+Eval [  12 \\  3 ]			"should return 0"
+Eval [  12 \\  5 ]			"should return 2"
+Eval [ -12 \\ -3 ]			"should return 0"
+Eval [ -12 \\ -5 ]			"should return -2"
+Eval [ -12 \\  5 ]			"should return 3"
+Eval [  12 \\ -5 ]			"should return -3"
 
 
 "LargeIntegers"
-^(1000000000 raisedToInteger: 4) printString!
+Eval [ (1000000000 raisedToInteger: 4) printString ]
 
-^100 factorial / 99 factorial!	"should return 100 of course"
-^100 factorial printString!
+Eval [ 100 factorial / 99 factorial ]	"should return 100 of course"
+Eval [ 100 factorial printString ]
 
-^(40000 * 40000) =  (40000 * 40000)!
-^(40000 * 40000) <  (40000 * 40000)!
-^(40000 * 40000) <= (40000 * 40000)!
-^(40000 * 40000) >  (40000 * 40000)!
-^(40000 * 40000) >= (40000 * 40000)!
-^(40000 * 40000) =  (32000 * 32000)!
-^(40000 * 40000) <  (32000 * 32000)!
-^(40000 * 40000) <= (32000 * 32000)!
-^(40000 * 40000) >  (32000 * 32000)!
-^(40000 * 40000) >= (32000 * 32000)!
-^(34567 * 34567) =  (45678 * 45678)!
-^(34567 * 34567) <  (45678 * 45678)!
-^(34567 * 34567) <= (45678 * 45678)!
-^(34567 * 34567) >  (45678 * 45678)!
-^(34567 * 34567) >= (45678 * 45678)!
+Eval [ (40000 * 40000) =  (40000 * 40000) ]
+Eval [ (40000 * 40000) <  (40000 * 40000) ]
+Eval [ (40000 * 40000) <= (40000 * 40000) ]
+Eval [ (40000 * 40000) >  (40000 * 40000) ]
+Eval [ (40000 * 40000) >= (40000 * 40000) ]
+Eval [ (40000 * 40000) =  (32000 * 32000) ]
+Eval [ (40000 * 40000) <  (32000 * 32000) ]
+Eval [ (40000 * 40000) <= (32000 * 32000) ]
+Eval [ (40000 * 40000) >  (32000 * 32000) ]
+Eval [ (40000 * 40000) >= (32000 * 32000) ]
+Eval [ (34567 * 34567) =  (45678 * 45678) ]
+Eval [ (34567 * 34567) <  (45678 * 45678) ]
+Eval [ (34567 * 34567) <= (45678 * 45678) ]
+Eval [ (34567 * 34567) >  (45678 * 45678) ]
+Eval [ (34567 * 34567) >= (45678 * 45678) ]
 
 "parsing in bases other than 10"
-16rFFFFFFFF = 4294967295!
+Eval [ 16rFFFFFFFF = 4294967295 ]
 
-| f n f1 |
+Eval [
 	n _ 10.
 	f _ n factorial.
 	f1 _ f * (n+1).
@@ -110,14 +110,15 @@
 	n timesRepeat: [f1 _ f1 + f].
 	((f1 // f) = (n+1)) printNl.
 	^f1 negated negated = f1
-!
+]
 
     "Check normalization and conversion to/from SmallInts"
-    ^(SmallInteger largest + 1 - 1) == SmallInteger largest!
-    ^(SmallInteger largest + 3 - 6) == (SmallInteger largest - 3)!
-    ^(SmallInteger smallest - 1 + 1) == SmallInteger smallest!
-    ^(SmallInteger smallest - 3 + 6) == (SmallInteger smallest + 3)!
+Eval [     ^(SmallInteger largest + 1 - 1) == SmallInteger largest ]
+Eval [     ^(SmallInteger largest + 3 - 6) == (SmallInteger largest - 3) ]
+Eval [     ^(SmallInteger smallest - 1 + 1) == SmallInteger smallest ]
+Eval [     ^(SmallInteger smallest - 3 + 6) == (SmallInteger smallest + 3) ]
 
+Eval [
     | bits |
 
     'Shift -1 left then right and test for -1' printNl.
@@ -142,20 +143,23 @@
 
     'LargeInteger bit logic tests passed' printNl.
     ^true
-!
+]
 
 
-!Fraction class methodsFor: 'instance creation'!
+Fraction class extend [
 
-test: n
-    | sum time |
-    sum := 0.
-    1 to: n do: [ :x | sum := sum + 1 / x ].
+    test: n [
+        | sum time |
+        sum := 0.
+        1 to: n do: [ :x | sum := sum + 1 / x ].
+        ^sum
+    ]
+]
+
+Eval [
+    | sum |
+    sum := Fraction test: 20.		"Try 100 or 200..."
+    sum numerator printNl.
+    sum denominator printNl.
     ^sum
-! !
-
-| sum |
-sum := Fraction test: 20.		"Try 100 or 200..."
-sum numerator printNl.
-sum denominator printNl.
-^sum!
+]

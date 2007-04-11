@@ -1,3 +1,10 @@
+2007-04-11  Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
+
+	* libgst/comp.c: Make compute_keyword_selector public.
+	* libgst/comp.h: Likewise.
+	* libgst/gst-parse.c: Lots of cool new stuff.
+	* libgst/gst-parse.h: Provide prototype for _gst_print_tokens.
+
 2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Add undeclared parameter to

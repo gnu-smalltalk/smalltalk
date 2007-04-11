@@ -27,29 +27,17 @@
 |
  ======================================================================"
 
-!Object methodsFor: 'testing'!
+True extend [
+    Object >> should: aBlock [ aBlock value assert ]
+    assert [ 'passed' printNl ]
+]
 
-should: aBlock
-    aBlock value assert
-!
+False extend [
+    Object >> shouldnt: aBlock [ aBlock value not assert ]
+    assert [ self error: 'failed' ]
+]
 
-shouldnt: aBlock
-    aBlock value not assert
-! !
-
-!True methodsFor: 'testing'!
-
-assert
-    'passed' printNl.
-! !
-
-!False methodsFor: 'testing'!
-
-assert
-    self error: 'failed'
-! !
-
-    | set |
+Eval [
 
     set := Set new: 50.
 
@@ -75,4 +63,4 @@ assert
     set remove: 5.
     self should: [set includes: #abc].
     self shouldnt: [set includes: 5]
-!
+]

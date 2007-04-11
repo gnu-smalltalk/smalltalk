@@ -28,23 +28,23 @@
 |
  ======================================================================"
 
-^Array new: 5!
+Eval [ Array new: 5 ]
 
-^Array!
+Eval [ Array ]
 
-^Metaclass!	"should be Metaclass"
-^Metaclass class!
-^Metaclass class class!	"should be Metaclass, since the metaclass of metaclass
-			 is a metaclass"
-^Object!
-^Object class!		"should be Object class"
-^Object class class! 	"should be MetaClass"
+Eval [ Metaclass ]	"should be Metaclass"
+Eval [ Metaclass class ]
+Eval [ Metaclass class class ]	"should be Metaclass, since the metaclass of metaclass
+				 is a metaclass"
+Eval [ Object ]
+Eval [ Object class ]		"should be Object class"
+Eval [ Object class class ] 	"should be MetaClass"
 
-^nil!
-^nil class!
+Eval [ nil ]
+Eval [ nil class ]
 
-^true!
-^true class!
+Eval [ true ]
+Eval [ true class ]
 
 
 "Test creating classes at runtime
@@ -52,11 +52,13 @@
 I apologize for the apparent lack of professionalism in the choice
 of variable and method names here."
 
-Object subclass: #Rambo
+Eval [
+    Object subclass: #Rambo
 	instanceVariableNames: 'foo bar'
 	classVariableNames: 'guinea pigs'
 	poolDictionaries: ''
-	category: ''!
+	category: ''
+]
 
 !Rambo methodsFor: 'test'!
 
@@ -98,31 +100,31 @@ returnPigs
 
 
 
-Smalltalk at: #testVar put: (Rambo new)!
+Eval [ Smalltalk at: #testVar put: (Rambo new) ]
 
-^testVar foof!			"should be nil (it hasn't been initialized)"
-^testVar barf!			"should be nil (it hasn't been initialized)"
-^testVar returnGuinea!		"should be nil (it hasn't been initialized)"
-^testVar returnPigs!		"should be nil (it hasn't been initialized)"
-^Rambo new returnPigs!		"should be nil"
-^Rambo new returnGuinea!	"should be nil"
+Eval [ testVar foof ]			"should be nil (it hasn't been initialized)"
+Eval [ testVar barf ]			"should be nil (it hasn't been initialized)"
+Eval [ testVar returnGuinea ]		"should be nil (it hasn't been initialized)"
+Eval [ testVar returnPigs ]		"should be nil (it hasn't been initialized)"
+Eval [ Rambo new returnPigs ]		"should be nil"
+Eval [ Rambo new returnGuinea ]	"should be nil"
 
-^testVar ramboTest!		"should be 10"
+Eval [ testVar ramboTest ]		"should be 10"
 
-^testVar barf!			"should now be set to 7"
+Eval [ testVar barf ]			"should now be set to 7"
 
-^testVar foof!			"should new be set to 3"
+Eval [ testVar foof ]			"should new be set to 3"
 
-testVar initPigs: 'squeeky' and: 'junior'!
+Eval [ testVar initPigs: 'squeeky' and: 'junior' ]
 				"nil is returned, we just set some global
 				 variables"
 
-^testVar returnPigs!		"should return 'junior'"
-^testVar returnGuinea!		"should return 'squeeky'"
+Eval [ testVar returnPigs ]		"should return 'junior'"
+Eval [ testVar returnGuinea ]		"should return 'squeeky'"
 
 "Test that class variables really affect all instances"
-^Rambo new returnPigs!		"all instances now return 'junior'"
-^Rambo new returnGuinea!	"all instances now return 'squeeky'"
+Eval [ Rambo new returnPigs ]		"all instances now return 'junior'"
+Eval [ Rambo new returnGuinea ]	"all instances now return 'squeeky'"
 
 
 
@@ -160,47 +162,46 @@ juma
 
 ! !
 
-^Rocky new returnGuinea!	"should return 'squeeky' by inheritance"
-^Rocky new returnPigs!		"should return 'junior' by inheritance"
+Eval [ Rocky new returnGuinea ]	"should return 'squeeky' by inheritance"
+Eval [ Rocky new returnPigs ]	"should return 'junior' by inheritance"
 
-^Rocky new quem!		"should return nil (not initialized)"
-^Rocky new juma!		"should return nil (not initialized)"
+Eval [ Rocky new quem ]		"should return nil (not initialized)"
+Eval [ Rocky new juma ]		"should return nil (not initialized)"
 
 "Test overriding of methods"
-testVar := Rocky new.
-^testVar ramboTest!		"should return 15, and set some inst vars"
+Eval [ (testVar := Rocky new) ramboTest ]		"should return 15, and set some inst vars"
 
 "Set the instance variables"
 testVar quem: 'zoneball'.	
-testVar juma: #theJumaSymbol!	"should return nil"
+testVar juma: #theJumaSymbol!
 
-^testVar foof!			"should return 12"
-^testVar barf!			"should return 3"
-^testVar quem!			"should return 'zoneball'"
-^testVar juma!			"should return #theJumaSymbol"
+Eval [ testVar foof ]			"should return 12"
+Eval [ testVar barf ]			"should return 3"
+Eval [ testVar quem ]			"should return 'zoneball'"
+Eval [ testVar juma ]			"should return #theJumaSymbol"
 
 "Test setting class variables from subclass"
-^(Rocky new) initPigs: 'frisky' and: 'radar'!
+Eval [ (Rocky new) initPigs: 'frisky' and: 'radar' ]
 				"should return instance of Rocky"
 
 "+++ work in tests involving Dudley (Milkdud) and Speedy too+++"
 
 "Test subclass access to class variables"
-^Rocky new returnGuinea!	"should return 'frisky'"
-^Rocky new returnPigs!		"should return 'radar'"
+Eval [ Rocky new returnGuinea ]	"should return 'frisky'"
+Eval [ Rocky new returnPigs ]		"should return 'radar'"
 
 "Test class access to class variables that were modified from subclass"
-^Rambo new returnGuinea!	"should return 'frisky'"
-^Rambo new returnPigs!		"should return 'radar'"
+Eval [ Rambo new returnGuinea ]	"should return 'frisky'"
+Eval [ Rambo new returnPigs ]		"should return 'radar'"
 
 "Make sure that the existing instance also sees the change in class vars"
-^testVar returnPigs!		"should return 'radar'"
+Eval [ testVar returnPigs ]		"should return 'radar'"
 
 
 
 "test of class instance varialbes"
 
-Rambo class instanceVariableNames: 'fred'!
+Eval [ Rambo class instanceVariableNames: 'fred' ]
 
 !Rambo class methodsFor: 'testing'!
 
@@ -212,8 +213,8 @@ get
     ^fred
 ! !
 
-		^Rambo get!
-Rambo put: 5.	^Rambo get!
-		^Rocky get!
-Rocky put: 15.	^Rambo get!
-		^Rocky get!
+Eval [ 			Rambo get ]
+Eval [ Rambo put: 5.	Rambo get ]
+Eval [ 			Rocky get ]
+Eval [ Rocky put: 15.	Rambo get ]
+Eval [ 			Rocky get ]

@@ -28,9 +28,9 @@
 |
  ======================================================================"
 
-!SmallInteger methodsFor: 'testing'!
+SmallInteger extend [
 
-testLists
+    testLists [
 	| li1 li2 li3 |
 	li1 := (1 to: self) asOrderedCollection.
 	li2 := li1 copy.
@@ -44,12 +44,15 @@ testLists
 	li1 := li1 reverse.
 	li1 size = self ifFalse: [ self frob ].
 	li1 = li2 ifFalse: [ self frob ].
-	^li1 size! !
+	^li1 size
+    ]
+]
 
-| n result |
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 1 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 
-n timesRepeat: [ result := 10000 testLists ].
-result displayNl!
+    n timesRepeat: [ result := 10000 testLists ].
+    result displayNl
+]

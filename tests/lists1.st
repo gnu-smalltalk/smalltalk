@@ -28,40 +28,42 @@
 |
  ======================================================================"
 
-!SmallInteger methodsFor: 'testing'!
+SmallInteger extend [
+    test [
+        | a b sum |
+        b := OrderedCollection new: self.
+        a := (1 to: self) asOrderedCollection.
+        [ a isEmpty ] whileFalse: [
+    	    b addLast: a removeLast ].
 
-test
-    | a b sum |
-    b := OrderedCollection new: self.
-    a := (1 to: self) asOrderedCollection.
-    [ a isEmpty ] whileFalse: [
-    	b addLast: a removeLast ].
+        ('%1 %2' bindWith: (b at: 1) with: (b at: 2)) displayNl.
 
-    ('%1 %2' bindWith: (b at: 1) with: (b at: 2)) displayNl.
+        b := b reverse.
+        (b includes: 0) printNl.
+        (b includes: self) printNl.
 
-    b := b reverse.
-    (b includes: 0) printNl.
-    (b includes: self) printNl.
-
-    a := b select: [ :each | each < (self // 2) ].
+        a := b select: [ :each | each < (self // 2) ].
     
-    (a copyFrom: 1 to: (10 min: a size))
-    	do: [ :each | each print ]
-	separatedBy: [ Transcript space ].
+        (a copyFrom: 1 to: (10 min: a size))
+    	    do: [ :each | each print ]
+	    separatedBy: [ Transcript space ].
 
-    Transcript nl.
+        Transcript nl.
 
-    sum := a inject: 0 into: [ :old :each |
-	each < 1000 ifTrue: [ old + each ] ifFalse: [ old ] ].
+        sum := a inject: 0 into: [ :old :each |
+	    each < 1000 ifTrue: [ old + each ] ifFalse: [ old ] ].
 	
-    sum printNl.
-    a := a, b.
+        sum printNl.
+        a := a, b.
 
-    ('%1 %2' bindWith: a size with: a last) displayNl! !
+        ('%1 %2' bindWith: a size with: a last) displayNl
+    ]
+]
 
-| n result |
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 100000 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 
-n test!
+    n test
+]

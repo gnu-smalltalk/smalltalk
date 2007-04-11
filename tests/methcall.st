@@ -28,42 +28,41 @@
 |
  ======================================================================"
 
-!ValueHolder methodsFor: 'testing'!
+ValueHolder extend [
+    activate [ self value: self value not ]
+]
 
-activate
-    self value: self value not! !
+ValueHolder subclass: NthValueHolder [
+    | counter maxCounter |
 
-ValueHolder subclass: #NthValueHolder
-	instanceVariableNames: 'counter maxCounter'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: nil!
-	
-!NthValueHolder methodsFor: 'testing'!
+    maxCounter: anInteger [
+	maxCounter := anInteger
+    ]
 
-maxCounter: anInteger
-	maxCounter := anInteger!
-
-value: anObject
+    value: anObject [
 	super value: anObject.
-	counter := 0!
+	counter := 0
+    ]
 
-activate
+    activate [
 	(counter := counter + 1) >= maxCounter
-		ifTrue: [ super activate ]! !
+		ifTrue: [ super activate ]
+    ]
+]
 
-| n val toggle ntoggle |
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 100000 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 
-val := true.
-toggle := ValueHolder with: val.
-n timesRepeat: [ val := toggle activate value ].
-val displayNl.
+    val := true.
+    toggle := ValueHolder with: val.
+    n timesRepeat: [ val := toggle activate value ].
+    val displayNl.
 
-val := true.
-ntoggle := NthValueHolder with: val.
-ntoggle maxCounter: 3.
-n timesRepeat: [ val := ntoggle activate value ].
-val displayNl! !
+    val := true.
+    ntoggle := NthValueHolder with: val.
+    ntoggle maxCounter: 3.
+    n timesRepeat: [ val := ntoggle activate value ].
+    val displayNl
+]

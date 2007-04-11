@@ -29,91 +29,89 @@
  ======================================================================"
 
 
-!Date class methodsFor: 'testing'!
+Date class extend [
 
+    inspect: aDate and: anotherDate day: dd month: mm year: yyyy [
+        Transcript
+	    show: 'newDay: ';
+	    print: aDate;
+	    show: '(';
+	    print: aDate days;
+	    show: ') <--> ';
+	    print: dd;
+	    show: '-';
+	    show: (self shortNameOfMonth: mm);
+	    show: '-';
+	    print: yyyy;
+	    show: ' <--> fromDays: ';
+	    print: anotherDate;
+	    show: '(';
+	    print: anotherDate days;
+	    show: ')';
+	    nl.
+            
+        ^self error: 'bad status'.
+    ]
 
-inspect: aDate and: anotherDate day: dd month: mm year: yyyy
-    Transcript
-	show: 'newDay: ';
-	print: aDate;
-	show: '(';
-	print: aDate days;
-	show: ') <--> ';
-	print: dd;
-	show: '-';
-	show: (self shortNameOfMonth: mm);
-	show: '-';
-	print: yyyy;
-	show: ' <--> fromDays: ';
-	print: anotherDate;
-	show: '(';
-	print: anotherDate days;
-	show: ')';
-	nl.
-        
-    ^self error: 'bad status'.
-!
+    test3 [
+            | i d |
+            -100 to: 100 do: [:j |
+                    i _ (j * 24 * 3600) - 1.  "23:59:59"
+                    d _ self fromSeconds: i.
+                    i print. Transcript space. d day print. Transcript space.
+                    d month print. Transcript space. d year print.
+                    Transcript space. d days printNl.
+    
+                    i _ (j * 24 * 3600) .  "00:00:00"
+                    d _ self fromSeconds: i.
+                    i print. Transcript space. d day print. Transcript space.
+                    d month print. Transcript space. d year print.
+                    Transcript space. d days printNl.
+            ]
+    ]
 
-test3
-        | i d |
-        -100 to: 100 do: [:j |
-                i _ (j * 24 * 3600) - 1.  "23:59:59"
-                d _ self fromSeconds: i.
-                i print. Transcript space. d day print. Transcript space.
-                d month print. Transcript space. d year print.
-                Transcript space. d days printNl.
+    test [
+        | r r1 d1 k |
+        "This step tests a reasonable interval of years in a small time.
+         Note that 7 is prime with 4, 100, 400."
+        1700 to: 4500 by: 7 do: [:yyyy |
+	    (Date daysInYear: yyyy) = 366
+		    ifTrue: [ Transcript show: 'leap ' ].
+	    yyyy printNl.
+	    1 to: 12 do: [:mm |
+                k _ Date daysInMonthIndex: mm forYear: yyyy.
+                1 to: k do: [:dd |
+		    r _ Date newDay: dd monthIndex: mm year: yyyy.
+		    r1 _ Date fromDays: (r days).
+    
+		    (r month = r1 month) & (r day = r1 day) &
+		    (r year = r1 year) & (r1 days = r days) &
+		    (r1 dayOfWeek = r dayOfWeek) & (r month = mm) &
+		    (r day = dd) & (r year = yyyy) &
+		    (d1 isNil or: [ (d1 - r daysFromBaseDay) ~= 1 ]) ifFalse: [
+		        self
+			    inspect: r and: r1
+			    day: dd month: mm year: yyyy ].
+		    d1 := r daysFromBaseDay.
+	        ].
+	    ]
+        ].
+    ]
 
-                i _ (j * 24 * 3600) .  "00:00:00"
-                d _ self fromSeconds: i.
-                i print. Transcript space. d day print. Transcript space.
-                d month print. Transcript space. d year print.
-                Transcript space. d days printNl.
-        ]
-!
+    test2 [
+    
+        #(1600 1699 1700 1799 1800 1899 1900 1901 1996 1997 1998 1999 2000 2001)
+	    do: [ :y |
+	        (Date newDay: 1 month: #jan year: y) print. Transcript space.
+	        (Date newDay: 1 month: #feb year: y) print. Transcript space.
+	        (Date newDay: 28 month: #feb year: y) print. Transcript space.
+	        (Date newDay: 1 month: #mar year: y) print. Transcript space.
+	        (Date newDay: 31 month: #dec year: y) print. Transcript space.
+	        (Date newDay: 29 month: #feb year: y) printNl
+	    ]
+    ]
+]
 
-test
-    | r r1 d1 k |
-    "This step tests a reasonable interval of years in a small time.
-     Note that 7 is prime with 4, 100, 400."
-    1700 to: 4500 by: 7 do: [:yyyy |
-	(Date daysInYear: yyyy) = 366
-		ifTrue: [ Transcript show: 'leap ' ].
-	yyyy printNl.
-	1 to: 12 do: [:mm |
-            k _ Date daysInMonthIndex: mm forYear: yyyy.
-            1 to: k do: [:dd |
-		r _ Date newDay: dd monthIndex: mm year: yyyy.
-		r1 _ Date fromDays: (r days).
-
-		(r month = r1 month) & (r day = r1 day) &
-		(r year = r1 year) & (r1 days = r days) &
-		(r1 dayOfWeek = r dayOfWeek) & (r month = mm) &
-		(r day = dd) & (r year = yyyy) &
-		(d1 isNil or: [ (d1 - r daysFromBaseDay) ~= 1 ]) ifFalse: [
-		    self
-			inspect: r and: r1
-			day: dd month: mm year: yyyy ].
-		d1 := r daysFromBaseDay.
-	    ].
-	]
-    ].
-!
-
-test2
-
-    #(1600 1699 1700 1799 1800 1899 1900 1901 1996 1997 1998 1999 2000 2001)
-	do: [ :y |
-	    (Date newDay: 1 month: #jan year: y) print. Transcript space.
-	    (Date newDay: 1 month: #feb year: y) print. Transcript space.
-	    (Date newDay: 28 month: #feb year: y) print. Transcript space.
-	    (Date newDay: 1 month: #mar year: y) print. Transcript space.
-	    (Date newDay: 31 month: #dec year: y) print. Transcript space.
-	    (Date newDay: 29 month: #feb year: y) printNl
-	]
-! !
-
-
-
-Date test!
-Date test2!
-Date test3!
+Eval [ Date test ]
+Eval [ Date test2 ]
+Eval [ Date test3 ]

@@ -28,18 +28,20 @@
 |
  ======================================================================"
 
-Smalltalk at: #Last put: 42!
+Eval [ Smalltalk at: #Last put: 42 ]
 
-!Number methodsFor: 'testing'!
-
-nextRandom
+Number extend [
+    nextRandom [
 	Last := Last * 3877 + 29573 rem: 139968.
-	^self * Last asFloatD / 139968d! !
+	^self * Last asFloatD / 139968d
+   ]
+]
 
-| n |
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 1000 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 	
-n timesRepeat: [ 100d nextRandom ].
-((100d nextRandom + 0.5d-9) printString copyFrom: 1 to: 11) displayNl!
+    n timesRepeat: [ 100d nextRandom ].
+    ((100d nextRandom + 0.5d-9) printString copyFrom: 1 to: 11) displayNl
+]

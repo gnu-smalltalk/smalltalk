@@ -27,49 +27,53 @@
 |
  ======================================================================"
 
-!Object methodsFor: 'testing' !
+Object extend [
 
-testCaseData
-    | extensions |
-    extensions := OrderedCollection new.
-    extensions
-        add: '' -> '';
-        add: '.' -> '';
-        add: '/' -> '';
-        add: 'text' -> '';
-        add: 'text.' -> '.';
-        add: '.text' -> '';
-        add: 'text/' -> '';
-        add: '/text' -> '';
-        add: '/.' -> '';
-        add: './' -> '';
-        add: 'file.ext' -> '.ext';
-        add: 'file.ext.' -> '.';
-        add: '.file.ext' -> '.ext';
-        add: 'file.ext/' -> '';
-        add: '/file.ext' -> '.ext';
-        add: '/.file.ext' -> '.ext';
-        add: './file.ext' -> '.ext';
-        add: 'dir/file' -> '';
-        add: 'dir/file.' -> '.';
-        add: 'dir/.file' -> '';
-        add: 'dir/file.ext' -> '.ext';
-        add: 'dir/file.ext.' -> '.'.
+    testCaseData [
+        | extensions |
+        extensions := OrderedCollection new.
+        extensions
+            add: '' -> '';
+            add: '.' -> '';
+            add: '/' -> '';
+            add: 'text' -> '';
+            add: 'text.' -> '.';
+            add: '.text' -> '';
+            add: 'text/' -> '';
+            add: '/text' -> '';
+            add: '/.' -> '';
+            add: './' -> '';
+            add: 'file.ext' -> '.ext';
+            add: 'file.ext.' -> '.';
+            add: '.file.ext' -> '.ext';
+            add: 'file.ext/' -> '';
+            add: '/file.ext' -> '.ext';
+            add: '/.file.ext' -> '.ext';
+            add: './file.ext' -> '.ext';
+            add: 'dir/file' -> '';
+            add: 'dir/file.' -> '.';
+            add: 'dir/.file' -> '';
+            add: 'dir/file.ext' -> '.ext';
+            add: 'dir/file.ext.' -> '.'.
+    
+         ^extensions
+    ]
 
-     ^extensions!
+    testExtensionFor [
+    
+       self testCaseData do: [:each |
+	    [(File extensionFor: each key) = each value] value printNl ]
+    ]
 
-testExtensionFor
+    testStripExtensionFrom [
+    
+       "(File stripExtensionFrom: aString),
+        (File extensionFor: aString) = aString"
+    
+       self testCaseData do: [:each |
+	    [(File stripExtensionFrom: each key),
+	     (File extensionFor: each key) = each key] value printNl ]
+    ]
+]
 
-   self testCaseData do: [:each |
-	[(File extensionFor: each key) = each value] value printNl ]!
-
-testStripExtensionFrom
-
-   "(File stripExtensionFrom: aString),
-    (File extensionFor: aString) = aString"
-
-   self testCaseData do: [:each |
-	[(File stripExtensionFrom: each key),
-	 (File extensionFor: each key) = each key] value printNl ]! !
-
-Object new testExtensionFor; testStripExtensionFrom!
+Eval [ Object new testExtensionFor; testStripExtensionFrom ]

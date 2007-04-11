@@ -28,139 +28,152 @@
 |
  ======================================================================"
 
-!Process methodsFor: 'testing'!
+Process extend [
 
-executeUntilTermination
-    self isTerminated ifTrue: [ ^self ].
-    self isActive ifFalse: [ self resume ].
-    [ self isTerminated ] whileFalse: [ Processor yield ]!
+    executeUntilTermination [
+        self isTerminated ifTrue: [ ^self ].
+        self isActive ifFalse: [ self resume ].
+        [ self isTerminated ] whileFalse: [ Processor yield ]
+    ]
 
-ensureTermination
-    self terminate; executeUntilTermination
-! !
+    ensureTermination [
+        self terminate; executeUntilTermination
+    ]
+]
 
 "Test resuming/terminating a process"
-| p |
-p :=  [ 'inside p' printNl ] newProcess name: 'test 1'; yourself.
-p printNl.
-p executeUntilTermination.
-p printNl!
+Eval [
+    p :=  [ 'inside p' printNl ] newProcess name: 'test 1'; yourself.
+    p printNl.
+    p executeUntilTermination.
+    p printNl
+]
 
 "Test Process suspend/resume"
-| p |
-p := [
-    'inside p' printNl.
-    p suspend.
-    'suspension finished' printNl ] newProcess name: 'test 2'; yourself.
-p printNl.
-p resume.
-p printNl.
-p executeUntilTermination.
-p printNl!
+Eval [
+    p := [
+        'inside p' printNl.
+        p suspend.
+        'suspension finished' printNl ] newProcess name: 'test 2'; yourself.
+    p printNl.
+    p resume.
+    p printNl.
+    p executeUntilTermination.
+    p printNl
+]
 
 
 "Test processes yielding control to each other without suspending themselves"
-| p testFinished |
-p := [
-    'inside p' printNl.
-    Processor yield.
-    'yielded back to p' printNl ] newProcess name: 'test 3'; yourself.
-p printNl.
-p resume.
-p printNl.
-p executeUntilTermination.
-p printNl!
+Eval [
+    p := [
+        'inside p' printNl.
+        Processor yield.
+        'yielded back to p' printNl ] newProcess name: 'test 3'; yourself.
+    p printNl.
+    p resume.
+    p printNl.
+    p executeUntilTermination.
+    p printNl
+]
 
 "Test simple wait on a semaphore"
-| p s |
-s := Semaphore new.
-p := [
-    'inside p' printNl.
-    s wait.
-    'wait finished' printNl ] newProcess name: 'test 4'; yourself.
-p printNl.
-p resume.
-p printNl.
-s signal.
-p printNl!
+Eval [
+    s := Semaphore new.
+    p := [
+        'inside p' printNl.
+        s wait.
+        'wait finished' printNl ] newProcess name: 'test 4'; yourself.
+    p printNl.
+    p resume.
+    p printNl.
+    s signal.
+    p printNl
+]
 
 
 "Now test process interrupts"
-| s p |
-s := Semaphore new.
-([ [ false ] whileFalse: [ ] ]
-    forkAt: Processor userBackgroundPriority)
-    name: 'background';
-    queueInterrupt: [ (p := Processor activeProcess) printNl. s signal ].
+Eval [
+    s := Semaphore new.
+    ([ [ false ] whileFalse: [ ] ]
+        forkAt: Processor userBackgroundPriority)
+        name: 'background';
+        queueInterrupt: [ (p := Processor activeProcess) printNl. s signal ].
 
-s wait.
-p printNl.
-p ensureTermination.
-p printNl!
+    s wait.
+    p printNl.
+    p ensureTermination.
+    p printNl
+]
 
 
 "Now interrupt a sleeping process"
-| s p |
-s := Semaphore new.
-([ 'should go back to sleep' printNl ] newProcess)
-    priority: Processor userInterruptPriority;
-    name: 'interrupted';
-    queueInterrupt: [ (p := Processor activeProcess) printNl. s signal ].
+Eval [
+    s := Semaphore new.
+    ([ 'should go back to sleep' printNl ] newProcess)
+        priority: Processor userInterruptPriority;
+        name: 'interrupted';
+        queueInterrupt: [ (p := Processor activeProcess) printNl. s signal ].
 
-s wait.
-p printNl.
-p ensureTermination.
-p printNl!
+    s wait.
+    p printNl.
+    p ensureTermination.
+    p printNl
+]
 
 
 "Resume a process and check that it is removed from the semaphore"
-| p1 p2 s p1ok p2ok |
-s := Semaphore new.
-p1 := [ [ s wait ] ensure: [ p1ok := true ] ] fork.
-p2 := [ [ s wait ] ensure: [ p2ok := true ] ] fork.
-p2 resume.
-s signal.
-^p1ok & p2ok & s size = 0!
+Eval [
+    s := Semaphore new.
+    p1 := [ [ s wait ] ensure: [ p1ok := true ] ] fork.
+    p2 := [ [ s wait ] ensure: [ p2ok := true ] ] fork.
+    p2 resume.
+    s signal.
+    ^p1ok & p2ok & s size = 0
+]
 
-| p1 p2 s p1ok p2ok |
-s := Semaphore new.
-p1 := [ [ s wait ] ensure: [ p1ok := true ] ] fork.
-p2 := [ [ s wait ] ensure: [ p2ok := true ] ] fork.
-p1 resume.
-s signal.
-^p1ok & p2ok & s size = 0!
+Eval [
+    | p1 p2 s p1ok p2ok |
+    s := Semaphore new.
+    p1 := [ [ s wait ] ensure: [ p1ok := true ] ] fork.
+    p2 := [ [ s wait ] ensure: [ p2ok := true ] ] fork.
+    p1 resume.
+    s signal.
+    ^p1ok & p2ok & s size = 0
+]
 
 "Terminate a process and check that #ensure: blocks are evaluated"
-| p1 p2 s dummy |
-dummy := Semaphore new.
-s := Semaphore new.
-p1 := [ [ dummy wait ] ensure: [ s signal ] ] fork.
-p2 := [ [ dummy wait ] ensure: [ s signal ] ] fork.
-p1 ensureTermination.
-p2 ensureTermination.
-s wait.
-s wait.
-^s size = 0!
+Eval [
+    dummy := Semaphore new.
+    s := Semaphore new.
+    p1 := [ [ dummy wait ] ensure: [ s signal ] ] fork.
+    p2 := [ [ dummy wait ] ensure: [ s signal ] ] fork.
+    p1 ensureTermination.
+    p2 ensureTermination.
+    s wait.
+    s wait.
+    ^s size = 0
+]
 
-| p1 p2 s dummy |
-dummy := Semaphore new.
-s := Semaphore new.
+Eval [
+    dummy := Semaphore new.
+    s := Semaphore new.
 
-p1 := [
-    [
-        Processor activeProcess priority: Processor userBackgroundPriority.
-        dummy wait
-    ] ensure: [ s signal ]
-] fork.
-p2 := [
-    [
-        Processor activeProcess priority: Processor userBackgroundPriority.
-        dummy wait
-    ] ensure: [ s signal ]
-] fork.
+    p1 := [
+        [
+            Processor activeProcess priority: Processor userBackgroundPriority.
+            dummy wait
+        ] ensure: [ s signal ]
+    ] fork.
+    p2 := [
+        [
+            Processor activeProcess priority: Processor userBackgroundPriority.
+            dummy wait
+        ] ensure: [ s signal ]
+    ] fork.
 
-p1 ensureTermination.
-p2 ensureTermination.
-s wait.
-s wait.
-^s size = 0!
+    p1 ensureTermination.
+    p2 ensureTermination.
+    s wait.
+    s wait.
+    ^s size = 0
+]

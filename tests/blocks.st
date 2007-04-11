@@ -28,127 +28,128 @@
 |
  ======================================================================"
 
-[45]!		"should return nil"
+Eval [ [45] ]			"should return a block"
 
-^[45]!			"should return a block"
+Eval [ [^#quem] value ]		"should return #quem"
 
-[^#quem] value!		"should return #quem"
+Eval [ ['foo'] value ]		"should return 'foo'"
 
-^['foo'] value!		"should return 'foo'"
+Eval [ [:i | i] value: 'juma' ]	"should return 'juma'"
 
-^[:i | i] value: 'juma'!	"should return 'juma'"
+Eval [ [:i :j| j] value: 12 value: 17 ] 	"should return 17"
 
-^[:i :j| j] value: 12 value: 17! 	"should return 17"
+Object extend [
 
-!Object methodsFor: 'testing'!
+    blockTest1 [
+        [#foo]
+    ]
 
-blockTest1
-    [#foo]
-!
+    blockTest2 [
+        [^#foo]
+    ]
 
-blockTest2
-    [^#foo]
-!
+    blockTest3 [
+        ^[#bar]
+    ]
 
-blockTest3
-    ^[#bar]
-!
+    blockTest4 [
+        ^[^#bar]
+    ]
 
-blockTest4
-    ^[^#bar]
-!
+    blockTest5: arg [
+        ^[arg]
+    ]
 
-blockTest5: arg
-    ^[arg]
-!
+    blockTest6: arg [
+        ^[:i | arg at: i]
+    ]
 
-blockTest6: arg
-    ^[:i | arg at: i]
-!
+    blockTest7: arg [
+        | temp |
+        temp := (arg at: 4) + 8.
+        ^[temp]
+    ]
 
-blockTest7: arg
-    | temp |
-    temp := (arg at: 4) + 8.
-    ^[temp]
-!
-
-blockTest8: which
-    | first second |
-    first := nil blockTest7: #('one' #two 3.0 4 $5).
-    second := nil blockTest7: #("You are[,] number" 'six' #seven 8.0 9 $A).
-    which ifTrue: [ ^first value ]
-	  ifFalse: [ ^second value]
-!
+    blockTest8: which [
+        | first second |
+        first := nil blockTest7: #('one' #two 3.0 4 $5).
+        second := nil blockTest7: #("You are[,] number" 'six' #seven 8.0 9 $A).
+        which ifTrue: [ ^first value ]
+	      ifFalse: [ ^second value]
+    ]
 
 "Implements a 'closure'!!!  Smalltalk is AMAZING!!!"
-blockTest9: initialValue
-    | counter |
-    counter := initialValue.
-    ^[:incr | counter := counter + incr. 
-              counter]
-!
-
-"Implements a REAL 'closure'!!!  GNU Smalltalk is AMAZING!!!"
-blockTest10
-    | counter |
-    counter := 1.
-    "If blocks were not real closures, variable would be 1 the
-     second time the block was called and hence it would not
-     be modified.
-     Instead if blocks are closures, variable is still nil the
-     second time the block is evaluated, and is initialized to
-     two.  eh eh eh!!"
-    ^[   | variable |
-         variable isNil ifTrue: [ variable := counter ].
-         counter := counter + 1.
-         variable
+    blockTest9: initialValue [
+        | counter |
+        counter := initialValue.
+        ^[:incr | counter := counter + incr. 
+                  counter]
     ]
-!
 
-blockTest11: initialValue
-    ^[^initialValue]
+    "Implements a REAL 'closure'!!!  GNU Smalltalk is AMAZING!!!"
+    blockTest10 [
+        | counter |
+        counter := 1.
+        "If blocks were not real closures, variable would be 1 the
+         second time the block was called and hence it would not
+         be modified.
+         Instead if blocks are closures, variable is still nil the
+         second time the block is evaluated, and is initialized to
+         two."
+        ^[   | variable |
+             variable isNil ifTrue: [ variable := counter ].
+             counter := counter + 1.
+             variable
+        ]
+    ]
 
-! !
+    blockTest11: initialValue [
+        ^[^initialValue]
+    ]
+]
 
-^nil blockTest1!		"should return nil"
+Eval [ nil blockTest1 ]		"should return nil"
 
-^nil blockTest2!		"should return nil"
+Eval [ nil blockTest2 ]		"should return nil"
 
-^nil blockTest3!		"should return a BlockClosure"
-^nil blockTest3 value!		"should return #bar"
+Eval [ nil blockTest3 ]		"should return a BlockClosure"
+Eval [ nil blockTest3 value ]		"should return #bar"
 
-^nil blockTest4 value!		"should issue an error, we're returning to
+Eval [ nil blockTest4 value ]		"should issue an error, we're returning to
 				 a non-existent context"
 
-^(nil blockTest5: 'Smalltalk!') value!
+Eval [ (nil blockTest5: 'Smalltalk!') value ]
 				"should return 'Smalltalk!'"
 
-^(nil blockTest6: #('one' #two 3.0 4 $5)) value: 2!
+Eval [ (nil blockTest6: #('one' #two 3.0 4 $5)) value: 2 ]
 				"should return #two"
 
-^(nil blockTest7: #('you' #are #number 6)) value!
+Eval [ (nil blockTest7: #('you' #are #number 6)) value ]
 				"should return 14"
 
-^nil blockTest8: true!		"should return 12"
-^nil blockTest8: false!		"should return 17"
+Eval [ nil blockTest8: true ]		"should return 12"
+Eval [ nil blockTest8: false ]		"should return 17"
 
 "Create a block with the initial value of 2"
-Smalltalk at: #testBlock put: (nil blockTest9: 2)!
+Eval [ Smalltalk at: #testBlock put: (nil blockTest9: 2) ]
 
-^testBlock value: 3!		"should return 5"
-^testBlock value: 6!		"should return 11"
-^testBlock value: 2!		"should return 13"
+Eval [ testBlock value: 3 ]		"should return 5"
+Eval [ testBlock value: 6 ]		"should return 11"
+Eval [ testBlock value: 2 ]		"should return 13"
 
-Smalltalk at: #testBlock put: (nil blockTest10)!
+Eval [ Smalltalk at: #testBlock put: (nil blockTest10) ]
 
-^testBlock value!		"should return 1"
-^testBlock value!		"should return 2 (1 if blocks aren't closures)"
+Eval [ testBlock value ]		"should return 1"
+Eval [ testBlock value ]		"should return 2 (1 if blocks aren't closures)"
 
 "And this is even more amazing!!!"
-| array |
-array := (1 to: 10) collect: [ :each | [each] ].
-^array inject: 0 into: [ :sum :each | sum + each value ]!	"should get 55"
+Eval [
+    | array |
+    array := (1 to: 10) collect: [ :each | [each] ].
+    ^array inject: 0 into: [ :sum :each | sum + each value ]	"should get 55"
+]
 
-^(nil blockTest11: 3) value!	"should be invalid; we're returning to non-
-				 existent parent"
+
+Eval [ (nil blockTest11: 3) value ]	"should be invalid; we're returning to non-
+					 existent parent"
 

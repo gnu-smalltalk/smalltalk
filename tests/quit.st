@@ -28,4 +28,5 @@
 |
  ======================================================================"
 
-ObjectMemory quit: 0; quit: 1!
+Eval [ ObjectMemory quit: 0; quit: 1 ]
+Eval [ 'foo' ]

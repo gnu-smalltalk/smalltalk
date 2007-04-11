@@ -28,94 +28,74 @@
 |
  ======================================================================"
 
-Object subclass: #A_Super
-        instanceVariableNames: 'a'
-        classVariableNames: ''
-        poolDictionaries: ''
-        category: ''!
+Object subclass: A_Super [
+    | a |
+    aSuper [ ^a ]
+]
 
-A_Super subclass: #A
-        instanceVariableNames: 'a'
-        classVariableNames: ''
-        poolDictionaries: ''
-        category: ''!
+A_Super subclass: A [
+    | a |
+    <makeUntrusted: true>
 
-A makeUntrusted: true!
+    a: value [ a := value ]
 
-!A_Super methodsFor: 'checking'!
+    check [ ^thisContext isUntrusted ]
 
-aSuper
-    ^a
-! !
+    check: aBlock [ ^aBlock value ]
 
-!A methodsFor: 'checking'!
+    dirtyBlock [ ^[ a printString. thisContext isUntrusted ] ]
 
-a: value
-    a := value
-!
-
-check
-    ^thisContext isUntrusted
-!
-
-check: aBlock
-    ^aBlock value
-!
-
-dirtyBlock
-    ^[ a printString. thisContext isUntrusted ]
-!
-
-cleanBlock
-    ^[ thisContext isUntrusted ]
-! !
+    cleanBlock [ ^[ thisContext isUntrusted ] ]
+]
 
 "Check that contexts are properly made untrusted -------------------------"
 
-^A isUntrusted!
-^A new isUntrusted!
-^A new check!
-^A new check: [ thisContext isUntrusted ]!
-^A new check: [ A new check ]!
-^A new check: [ A new check: [ thisContext isUntrusted ] ]!
-^A new check: A new cleanBlock!
-^A new cleanBlock value!
-^A new check: A new dirtyBlock!
-^A new dirtyBlock value!
+Eval [ A isUntrusted ]
+Eval [ A new isUntrusted ]
+Eval [ A new check ]
+Eval [ A new check: [ thisContext isUntrusted ] ]
+Eval [ A new check: [ A new check ] ]
+Eval [ A new check: [ A new check: [ thisContext isUntrusted ] ] ]
+Eval [ A new check: A new cleanBlock ]
+Eval [ A new cleanBlock value ]
+Eval [ A new check: A new dirtyBlock ]
+Eval [ A new dirtyBlock value ]
 
 "Make the current process untrusted... -----------------------------------"
-[
+Eval [
     Processor activeProcess makeUntrusted: true.
     thisContext isUntrusted
-] value!
+]
 
 "...and check that subsequently created process are trusted."
-^thisContext isUntrusted!
+Eval [ thisContext isUntrusted ]
 
 "Make another process untrusted. -----------------------------------------"
-| s result |
-s := Semaphore new.
-[ result := thisContext isUntrusted. s signal ] newProcess
-    makeUntrusted: true;
-    resume.
+Eval [
+    | s result |
+    s := Semaphore new.
+    [ result := thisContext isUntrusted. s signal ] newProcess
+        makeUntrusted: true;
+        resume.
 
-s wait.
-^result!
+    s wait.
+    ^result
+]
 
 "Check that access restrictions are enforced -----------------------------"
 
-[
+Eval [
     Processor activeProcess makeUntrusted: true.
     Set compile: 'lovelyMethod ^tally'.
     Set compile: 'dangerousMethod tally := 0'.
     Set compile: 'lovelyMethod ^Array'.
     Set compile: 'dangerousMethod Array := 0'
-] value!
+]
 
-![
+Eval [
     Processor activeProcess makeUntrusted: true.
     Set methodsFor: 'security checking'
-] value!
+]
 
 lovelyMethod
     ^tally!
@@ -129,7 +109,7 @@ lovelyMethod
 dangerousMethod
     Array := 0! !
 
-!Set methodsFor: 'security checking'!
+Eval [ Set methodsFor: 'security checking' ]
 
 lovelyTrustedMethod
     ^tally!
@@ -143,53 +123,35 @@ lovelyTrustedMethod
 dangerousTrustedMethod
     Array := 0! !
 
-Set subclass: #UntrustedSet
-        instanceVariableNames: 'a'
-        classVariableNames: ''
-        poolDictionaries: ''
-        category: ''!
+Set subclass: UntrustedSet [
+    | a |
+    <makeUntrusted: true>
 
-UntrustedSet makeUntrusted: true!
-
-!UntrustedSet methodsFor: 'security checking'!
-
-lovelyMethod
-    ^tally!
-
-dangerousMethod
-    tally := 0!
-
-lovelyMethod
-    ^Array!
-
-dangerousMethod
-    Array := 0!
-
-lovelyMethod
-    ^a!
-
-lovelyMethod
-    a := 1! !
+    lovelyMethod [ ^tally ]
+    dangerousMethod [ tally := 0 ]
+    lovelyMethod [ ^Array ]
+    dangerousMethod [ Array := 0 ]
+    lovelyMethod [ ^a ]
+    lovelyMethod [ a := 1 ]
+]
 
 "Check that subclasses are not fragile.  This has security implications
  as this test shows..."
 
-^A new a: 5; aSuper!
+Eval [ A new a: 5; aSuper ]
 
 "Check that methods are properly made untrusted. -------------------------"
 
-^(A >> #check:) isUntrusted!
-^(Set >> #lovelyMethod) isUntrusted!
-^(Set >> #lovelyTrustedMethod) isUntrusted!
-^(Set >> #dangerousTrustedMethod) isUntrusted!
+Eval [ (A >> #check:) isUntrusted ]
+Eval [ (Set >> #lovelyMethod) isUntrusted ]
+Eval [ (Set >> #lovelyTrustedMethod) isUntrusted ]
+Eval [ (Set >> #dangerousTrustedMethod) isUntrusted ]
 
 "Check that subclasses are properly made untrusted. ----------------------"
 
-A subclass: #B
-        instanceVariableNames: 'b'
-        classVariableNames: ''
-        poolDictionaries: ''
-        category: ''!
+A subclass: B [
+    | b |
+]
 
-^B isUntrusted!
+Eval [ B isUntrusted ]
 

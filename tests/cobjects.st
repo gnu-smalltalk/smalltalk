@@ -28,84 +28,99 @@
 |
  ======================================================================"
 
-| ca buf |
-ca := (CStringType arrayType: 1) new.
-buf := (CCharType arrayType: 10) new.
-buf at: 0 put: $a.
-buf at: 1 put: $s.
-buf at: 2 put: $d.
-buf at: 3 put: 0 asCharacter.
-ca at: 0 put: buf.
-^ca at: 0!
+Eval [
+    | ca buf |
+    ca := (CStringType arrayType: 1) new.
+    buf := (CCharType arrayType: 10) new.
+    buf at: 0 put: $a.
+    buf at: 1 put: $s.
+    buf at: 2 put: $d.
+    buf at: 3 put: 0 asCharacter.
+    ca at: 0 put: buf.
+    ^ca at: 0
+]
 
-| ca |
-ca := (CStringType arrayType: 1) new.
-ca at: 0 put: (CString value: 'asd').
-^ca at: 0!
+Eval [
+    | ca |
+    ca := (CStringType arrayType: 1) new.
+    ca at: 0 put: (CString value: 'asd').
+    ^ca at: 0
+]
 
-Smalltalk at: #CA put: nil!
+Eval [ Smalltalk at: #CA put: nil ]
 
-CA := (CStringType arrayType: 2) new.
-CA at: 0 put: (CString value: 'asd').
-CA at: 1 put: (CString value: 'dsa')!
-
-^CA at: 0!
-^CA at: 1!
-^(CA addressAt: 0) class!
-^(CA addressAt: 0) value!
-^(CA addressAt: 1) value!
-^(CA + 1) class!
-^(CA + 1) at: -1!
-^(CA + 1) at: 0!
-^(CA + 1) - CA!
-
-Smalltalk at: #CP put: nil!
-
-CP := CStringType ptrType new.
-CP value: CA.
-
-^CP value at: 0!
-^CP value at: 1!
-^(CP value addressAt: 0) class!
-^(CP value addressAt: 0) value!
-^(CP value addressAt: 1) value!
-^(CP value + 1) class!
-^(CP value + 1) at: -1!
-^(CP value + 1) at: 0!
-^(CP value + 1) - CA!
+Eval [
+    CA := (CStringType arrayType: 2) new.
+    CA at: 0 put: (CString value: 'asd').
+    CA at: 1 put: (CString value: 'dsa')
+]
 
 
-(CPtrCType elementType: #int) new value!
+Eval [ CA at: 0 ]
+Eval [ CA at: 1 ]
+Eval [ (CA addressAt: 0) class ]
+Eval [ (CA addressAt: 0) value ]
+Eval [ (CA addressAt: 1) value ]
+Eval [ (CA + 1) class ]
+Eval [ (CA + 1) at: -1 ]
+Eval [ (CA + 1) at: 0 ]
+Eval [ (CA + 1) - CA ]
+
+Eval [ Smalltalk at: #CP put: nil ]
+
+Eval [
+    CP := CStringType ptrType new.
+    CP value: CA.
+    CP value at: 0
+]
+
+Eval [ CP value at: 1 ]
+Eval [ (CP value addressAt: 0) class ]
+Eval [ (CP value addressAt: 0) value ]
+Eval [ (CP value addressAt: 1) value ]
+Eval [ (CP value + 1) class ]
+Eval [ (CP value + 1) at: -1 ]
+Eval [ (CP value + 1) at: 0 ]
+Eval [ (CP value + 1) - CA ]
 
 
-!SmallInteger methodsFor: 'C call-outs'!
+Eval [ (CPtrCType elementType: #int) new value ]
 
-testAsync
-    "Asynchronous vs. synchronous actually matters only when the function
-     calls back to Smalltalk.  But otherwise, we have no coverage of how
-     the asyncCCall pragma is compiled."
-    <asyncCCall: 'marli' args: #(#self)>! !
 
-3 testAsync!
+SmallInteger extend [
+    testAsync [
+        "Asynchronous vs. synchronous actually matters only when the function
+         calls back to Smalltalk.  But otherwise, we have no coverage of how
+         the asyncCCall pragma is compiled."
+        <asyncCCall: 'marli' args: #(#self)>
+    ]
+]
 
-!Object methodsFor: 'C call-outs'!
+Eval [ 3 testAsync ]
 
-testCallin
-    <cCall: 'testCallin' returning: #void args: #(#selfSmalltalk)>!
+Object extend [
 
-testCString: cString
-    <cCall: 'testCString' returning: #void args: #(#cObject)>!
+    testCallin [
+        <cCall: 'testCallin' returning: #void args: #(#selfSmalltalk)>
+    ]
 
-testCObjectPtr: cObject
-    <cCall: 'testCObjectPtr' returning: #void args: #(#cObjectPtr)>! !
+    testCString: cString [
+        <cCall: 'testCString' returning: #void args: #(#cObject)>
+    ]
 
-true testCallin!
-nil testCString: (CString value: 'this is a test')!
+    testCObjectPtr: cObject [
+        <cCall: 'testCObjectPtr' returning: #void args: #(#cObjectPtr)>
+    ]
+]
 
-| cObject |
-cObject := CCharType new.
-nil testCObjectPtr: cObject.
-^cObject asString!
+Eval [ true testCallin ]
+Eval [ nil testCString: (CString value: 'this is a test') ]
+
+Eval [
+    cObject := CCharType new.
+    nil testCObjectPtr: cObject.
+    ^cObject asString
+]
 
 " ### need a lot more!"
 

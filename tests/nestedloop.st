@@ -28,23 +28,22 @@
 |
  ======================================================================"
 
-| n x |
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 4 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 
-x := 0.
-n timesRepeat: [
+    x := 0.
     n timesRepeat: [
-	n timesRepeat: [
+        n timesRepeat: [
 	    n timesRepeat: [
-		n timesRepeat: [
+	        n timesRepeat: [
 		    n timesRepeat: [
-			x := x + 1
+		        n timesRepeat: [ x := x + 1 ]
 		    ]
 		]
 	    ]
 	]
-    ]
-].
-x displayNl!
+    ].
+    x displayNl
+]

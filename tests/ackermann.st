@@ -28,16 +28,19 @@
 |
  ======================================================================"
 
-!Integer methodsFor: 'bench'!
+Integer extend [
+    ack: n [
+        self = 0 ifTrue: [ ^n + 1 ].
+        n = 0 ifTrue: [ ^self - 1 ack: 1 ].
+        ^self - 1 ack: (self ack: n - 1)
+    ]
+]
 
-ack: n
-    self = 0 ifTrue: [ ^n + 1 ].
-    n = 0 ifTrue: [ ^self - 1 ack: 1 ].
-    ^self - 1 ack: (self ack: n - 1)! !
-
-| n |
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 4 ]
 	ifFalse: [ Smalltalk arguments first asInteger ].
 	
-('Ack(3,%1): %2' bindWith: n with: (3 ack: n)) displayNl!
+    ('Ack(3,%1): %2' bindWith: n with: (3 ack: n)) displayNl
+
+]

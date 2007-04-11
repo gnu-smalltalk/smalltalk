@@ -28,116 +28,118 @@
 |
  ======================================================================"
 
-!Object methodsFor: 'testing'!
+Object extend [
 
-arrayConstTest1
-    | a |
-    a := #(#foo #bar 'quem').
-    ^a
-!
+    arrayConstTest1 [
+        | a |
+        a := #(#foo #bar 'quem').
+        ^a
+    ]
 
-arrayConstTest2
-    | a |
-    a := #(#foo #bar 'quem').
-    ^a class
-!
+    arrayConstTest2 [
+        | a |
+        a := #(#foo #bar 'quem').
+        ^a class
+    ]
 
-arrayConstTest3
-    | a |
-    a := #(#foo #bar 'quem').
-    ^a size
-!
+    arrayConstTest3 [
+        | a |
+        a := #(#foo #bar 'quem').
+        ^a size
+    ]
 
-arrayConstTest4
-    | a |
-    a := #(#foo (#a #sub #array) #bar 'quem' 3.4 1 $C #barn:yard:owl: #baz).
-    ^a class
-!
+    arrayConstTest4 [
+        | a |
+        a := #(#foo (#a #sub #array) #bar 'quem' 3.4 1 $C #barn:yard:owl: #baz).
+        ^a class
+    ]
 
-arrayConstSubscriptTest
-    | a |
-    a := #(#foo (#a #sub #array) #bar 'quem' 3.4 1 $C #barn:yard:owl: #baz).
-    ^a at: self
-!
+    arrayConstSubscriptTest [
+        | a |
+        a := #(#foo (#a #sub #array) #bar 'quem' 3.4 1 $C #barn:yard:owl: #baz).
+        ^a at: self
+    ]
 
-arrayTrueFalseNilTest
-    | a |
-    a := #(true #true false #false nil #nil).
-    a do: [ :each | each class printNl ]
-!
+    arrayTrueFalseNilTest [
+        | a |
+        a := #(true #true false #false nil #nil).
+        a do: [ :each | each class printNl ]
+    ]
 
-newArray1
-    | a |
-    a := Array new: 10.
-    ^a class
-!
+    newArray1 [
+        | a |
+        a := Array new: 10.
+        ^a class
+    ]
 
-newArray2
-    | a |
-    a := Array new: 10.
-    a at: self put: self.
-    ^a at: self
-! !
+    newArray2 [
+        | a |
+        a := Array new: 10.
+        a at: self put: self.
+        ^a at: self
+    ]
+]
 
-^nil arrayConstTest1!
+Eval [ nil arrayConstTest1 ]
 
-^nil arrayConstTest2!
+Eval [ nil arrayConstTest2 ]
+ 
+Eval [ nil arrayConstTest3 ]
 
-^nil arrayConstTest3!
+Eval [ nil arrayConstTest4 ]
 
-^nil arrayConstTest4!
+Eval [ 1 arrayConstSubscriptTest ]
+Eval [ 2 arrayConstSubscriptTest ]
+Eval [ 3 arrayConstSubscriptTest ]
+Eval [ 4 arrayConstSubscriptTest ]
+Eval [ 5 arrayConstSubscriptTest ]
+Eval [ 6 arrayConstSubscriptTest ]
+Eval [ 7 arrayConstSubscriptTest ]
+Eval [ 8 arrayConstSubscriptTest ]
+Eval [ 9 arrayConstSubscriptTest ]
 
-^1 arrayConstSubscriptTest!
-^2 arrayConstSubscriptTest!
-^3 arrayConstSubscriptTest!
-^4 arrayConstSubscriptTest!
-^5 arrayConstSubscriptTest!
-^6 arrayConstSubscriptTest!
-^7 arrayConstSubscriptTest!
-^8 arrayConstSubscriptTest!
-^9 arrayConstSubscriptTest!
+Eval [ nil newArray1 ]
 
-^nil newArray1!
+Eval [ 1 newArray2 ]
+Eval [ 5 newArray2 ]
+Eval [ 10 newArray2 ]
 
-^1 newArray2!
-^5 newArray2!
-^10 newArray2!
+Eval [ nil arrayTrueFalseNilTest ]
 
-^nil arrayTrueFalseNilTest!
-
-^ByteArray with: -1!
-^ByteArray with: 0!
-^ByteArray with: 255!
-^ByteArray with: 256!
-^WordArray with: (-1 bitShift: 64)!
-^WordArray with: -1!
-^WordArray with: 0!
-^WordArray with: 255!
-^WordArray with: 256!
-^WordArray with: (1 bitShift: 64)!
+Eval [ ByteArray with: -1 ]
+Eval [ ByteArray with: 0 ]
+Eval [ ByteArray with: 255 ]
+Eval [ ByteArray with: 256 ]
+Eval [ WordArray with: (-1 bitShift: 64) ]
+Eval [ WordArray with: -1 ]
+Eval [ WordArray with: 0 ]
+Eval [ WordArray with: 255 ]
+Eval [ WordArray with: 256 ]
+Eval [ WordArray with: (1 bitShift: 64) ]
 
 "-----------------"
 
 "used to trigger a failure in the verifier"
-^{{}} printString!
+Eval [ {{}} printString ]
 
 "-----------------"
 
 "This test used to fail because #removeAtIndex: was not implemented
  in SortedCollection."
 
-| n4 n5 n6 n7 n8 n9 n10 n12 sc |
-n4 := 4->2. n5 := 5->3. n6 := 6->3.
-n7 := 7->2. n8 := 8->1. n9 := 9->8.
-n10 := 10->8. n12 := 12->1.
+Eval [
+   n4 := 4->2. n5 := 5->3. n6 := 6->3.
+   n7 := 7->2. n8 := 8->1. n9 := 9->8.
+   n10 := 10->8. n12 := 12->1.
 
-sc := SortedCollection new: 10.
-sc sortBlock: [ :a :b |
-    a value < b value
-	or: [ a value = b value and: [ a key <= b key ] ] ].
+   sc := SortedCollection new: 10.
+   sc sortBlock: [ :a :b |
+       a value < b value
+	   or: [ a value = b value and: [ a key <= b key ] ] ].
 
-sc addAll: { n8. n12. n4. n7. n5. n6. n9. n10 }.
-sc remove: n10.
-sc remove: n8.
-sc add: n8.
-sc printNl!
+   sc addAll: { n8. n12. n4. n7. n5. n6. n9. n10 }.
+   sc remove: n10.
+   sc remove: n8.
+   sc add: n8.
+   sc printNl
+]

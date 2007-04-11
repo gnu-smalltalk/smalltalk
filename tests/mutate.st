@@ -28,112 +28,98 @@
 |
  ======================================================================"
 
-Object subclass: #A
-	instanceVariableNames: 'var1'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: ''!
+Object subclass: A [
+    | var1 |
+    var1 [ ^var1 ]
+    var1: a [ var1 := a ]
 
-A subclass: #B
-	instanceVariableNames: 'var2'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: ''!
+    printOn: aStream [
+        aStream
+	    nextPutAll: self class name;
+	    nextPut: $(.
 
-A class instanceVariableNames: 'instance'!
+        self class allInstVarNames keysAndValuesDo: [ :i :each |
+	    aStream
+	        nextPutAll: each;
+	        nextPut: $: ;
+	        print: (self instVarAt: i);
+	        space
+        ].
 
-!A class methodsFor: 'testing'!
+        aStream nextPut: $)
+    ]
+]
 
-instance
-    instance isNil ifTrue: [ instance := self new ].
-    ^instance! !
+A subclass: B [ |var2|
+    var2 [ ^var2 ]
+    var2: a [ var2 := a ]
+]
 
-!A methodsFor: 'testing'!
+A class extend [
+    | instance |
 
-printOn: aStream
-    aStream
-	nextPutAll: self class name;
-	nextPut: $(.
+    instance [
+        instance isNil ifTrue: [ instance := self new ].
+        ^instance
+    ]
+]
 
-    self class allInstVarNames keysAndValuesDo: [ :i :each |
-	aStream
-	    nextPutAll: each;
-	    nextPut: $: ;
-	    print: (self instVarAt: i);
-	    space
-    ].
 
-    aStream nextPut: $)! !
+Eval [
+    A instance var1: 1.
+    A instance printNl.
 
-!A methodsFor: 'testing'!
+    B instance var1: 0.
+    B instance var2: 2.
+    B instance printNl.
 
-var1
-    ^var1!
+    A addInstVarName: #var2.
+    B instance var2 printNl.
+    B instance printNl.
 
-var1: a
-    var1 := a! !
+    A removeInstVarName: #var2.
+    B instance var2 printNl.
+    B instance printNl.
 
-!B methodsFor: 'testing'!
-
-var2
-    ^var2!
-
-var2: a
-    var2 := a! !
-
-A instance var1: 1.
-A instance printNl.
-
-B instance var1: 0.
-B instance var2: 2.
-B instance printNl.
-
-A addInstVarName: #var2.
-B instance var2 printNl.
-B instance printNl.
-
-A removeInstVarName: #var2.
-B instance var2 printNl.
-B instance printNl.
-
-"Now make B's var2 point to A's"
-A addInstVarName: #var2.
-B removeInstVarName: #var2.
-B instance var2 printNl.
-B instance printNl!
+    "Now make B's var2 point to A's"
+    A addInstVarName: #var2.
+    B removeInstVarName: #var2.
+    B instance var2 printNl.
+    B instance printNl
+]
 
 
 "Now, test using #subclass: to create classes."
 
-Association subclass: #C!
-C instSize = C allInstVarNames size!
-(C allInstVarNames -> C sharedPools) printNl!
+Eval [ Association subclass: #C ]
+Eval [ C instSize = C allInstVarNames size ]
+Eval [ (C allInstVarNames -> C sharedPools) printNl ]
 
-Object subclass: #C instanceVariableNames: 'a' classVariableNames: '' poolDictionaries: 'SystemExceptions' category: 'foo'!
-C instSize = C allInstVarNames size!
-(C allInstVarNames -> C sharedPools) printNl!
+Eval [ Object subclass: #C instanceVariableNames: 'a' classVariableNames: '' poolDictionaries: 'SystemExceptions' category: 'foo' ]
+Eval [ C instSize = C allInstVarNames size ]
+Eval [ (C allInstVarNames -> C sharedPools) printNl ]
 
-Array subclass: #C!
-C instSize = C allInstVarNames size!
-(C allInstVarNames -> C sharedPools) printNl!
+Eval [ Array subclass: #C ]
+Eval [ C instSize = C allInstVarNames size ]
+Eval [ (C allInstVarNames -> C sharedPools) printNl ]
 
-Association subclass: #C!
-C instSize = C allInstVarNames size!
-(C allInstVarNames -> C sharedPools) printNl!
+Eval [ Association subclass: #C ]
+Eval [ C instSize = C allInstVarNames size ]
+Eval [ (C allInstVarNames -> C sharedPools) printNl ]
 
-Object subclass: #C instanceVariableNames: '' classVariableNames: 'Foo' poolDictionaries: 'SystemExceptions' category: 'foo'!
-C instSize = C allInstVarNames size!
-(C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl!
+Eval [ Object subclass: #C instanceVariableNames: '' classVariableNames: 'Foo' poolDictionaries: 'SystemExceptions' category: 'foo' ]
+Eval [ C instSize = C allInstVarNames size ]
+Eval [ (C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl ]
 
-Association subclass: #C!
-(C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl!
+Eval [ Association subclass: #C ]
+Eval [ (C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl ]
 
-Object variableSubclass: #C instanceVariableNames: '' classVariableNames: 'Foo' poolDictionaries: 'SystemExceptions' category: 'foo'!
-C instSize = C allInstVarNames size!
-(C shape -> C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl!
+Eval [ Object variableSubclass: #C instanceVariableNames: '' classVariableNames: 'Foo' poolDictionaries: 'SystemExceptions' category: 'foo' ]
+Eval [ C instSize = C allInstVarNames size ]
+Eval [ (C shape -> C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl ]
 
-Association subclass: #C!
-(C shape -> C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl!
+Eval [ Association subclass: #C ]
+Eval [ (C shape -> C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl ]
 
-C class compile: 'foo ^MutationError'!
-^C foo == SystemExceptions.MutationError!
+Eval [ C class compile: 'foo ^MutationError' ]
+Eval [ C foo == SystemExceptions.MutationError ]

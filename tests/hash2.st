@@ -28,23 +28,23 @@
 |
  ======================================================================"
 
-| hash1 hash2 i n |
-
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 10 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 
-hash1 := LookupTable new: 15000.
-0 to: 9999 do: [ :each |
+    hash1 := LookupTable new: 15000.
+    0 to: 9999 do: [ :each |
 	hash1 at: 'foo_', each printString put: each.
-].
+    ].
 
-hash2 := LookupTable new: 15000.
-n timesRepeat: [
-    hash1 keysAndValuesDo: [ :k :v |
-    	hash2 at: k put: (hash2 at: k ifAbsent: [0]) + v ]].
+    hash2 := LookupTable new: 15000.
+    n timesRepeat: [
+        hash1 keysAndValuesDo: [ :k :v |
+    	    hash2 at: k put: (hash2 at: k ifAbsent: [0]) + v ]].
 
-('%1 %2 %3 %4' bindWith: (hash1 at: 'foo_1')
+    ('%1 %2 %3 %4' bindWith: (hash1 at: 'foo_1')
 	with: (hash1 at: 'foo_9999')
 	with: (hash2 at: 'foo_1')
-	with: (hash2 at: 'foo_9999')) displayNl!
+	with: (hash2 at: 'foo_9999')) displayNl
+]

@@ -28,14 +28,15 @@
 |
  ======================================================================"
 
-| n x y |
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 1000 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 	
-x := (1 to: n) asArray.
-y := Array new: n withAll: 0.
-1000 timesRepeat: [
-    n to: 1 by: -1 do: [ :i | y at: i put: (y at: i) + (x at: i) ]
-].
-('%1 %2' bindWith: y first with: y last) displayNl!
+    x := (1 to: n) asArray.
+    y := Array new: n withAll: 0.
+    1000 timesRepeat: [
+        n to: 1 by: -1 do: [ :i | y at: i put: (y at: i) + (x at: i) ]
+    ].
+    ('%1 %2' bindWith: y first with: y last) displayNl
+]

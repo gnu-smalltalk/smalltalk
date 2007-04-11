@@ -28,17 +28,18 @@
 |
  ======================================================================"
 
-Smalltalk at: #Last put: 42!
+Eval [ Smalltalk at: #Last put: 42 ]
 
-!SmallInteger methodsFor: 'testing'!
-
-nextRandom: max
+SmallInteger extend [
+    nextRandom: max [
 	Last := self * 3877 + 29573 rem: 139968.
-	^max * Last asFloatD / 139968d! !
+	^max * Last asFloatD / 139968d
+    ]
+]
 
-!Array methodsFor: 'testing'!
+Array extend [
 
-heapSort
+    heapSort [
 	| j i rra l ir |
 	ir := self size.
 	l := self size // 2 + 1.
@@ -64,15 +65,18 @@ heapSort
 				ifFalse: [ j := ir + 1 ]].
 
 		self at: i put: rra
-	] repeat! !
+	] repeat
+   ]
+]
 
-| array last n |
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 1000 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 	
-array := Array new: n.
-1 to: n do: [ :i | array at: i put: (Last nextRandom: 1d) ].
+    array := Array new: n.
+    1 to: n do: [ :i | array at: i put: (Last nextRandom: 1d) ].
 
-array heapSort.
-((array last + 0.5d-10) printString copyFrom: 1 to: 12) displayNl!
+    array heapSort.
+    ((array last + 0.5d-10) printString copyFrom: 1 to: 12) displayNl
+]

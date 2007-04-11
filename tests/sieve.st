@@ -28,21 +28,21 @@
 |
  ======================================================================"
 
-| n count flags0 flags |
-
-n := Smalltalk arguments isEmpty
+Eval [
+    n := Smalltalk arguments isEmpty
 	ifTrue: [ 1 ]
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 
-flags0 := Array new: 8192 withAll: true.
+    flags0 := Array new: 8192 withAll: true.
 
-n timesRepeat: [
-    count := 0.
-    flags := flags0 copy.
-    2 to: 8192 do: [ :i |
-        (flags at: i) ifTrue: [
-	    i+i to: 8192 by: i do: [ :j | flags at: j put: false ].
-	    count := count + 1 ]].
-].
+    n timesRepeat: [
+        count := 0.
+        flags := flags0 copy.
+        2 to: 8192 do: [ :i |
+            (flags at: i) ifTrue: [
+	        i+i to: 8192 by: i do: [ :j | flags at: j put: false ].
+	        count := count + 1 ]].
+    ].
 
-('Count: %1' bindWith: count) displayNl!
+    ('Count: %1' bindWith: count) displayNl
+]

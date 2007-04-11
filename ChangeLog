@@ -1,5 +1,46 @@
 2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ClassDesc.st: Add #import:.
+
+	* tests/blocks.st: Convert to new syntax.
+	* tests/chars.st: Convert to new syntax.
+	* tests/classes.st: Convert to new syntax.
+	* tests/cobjects.st: Convert to new syntax.
+	* tests/compiler.st: Convert to new syntax.
+	* tests/dates.st: Convert to new syntax.
+	* tests/delays.st: Convert to new syntax.
+	* tests/except.st: Convert to new syntax.
+	* tests/exceptions.st: Convert to new syntax.
+	* tests/fibo.st: Convert to new syntax.
+	* tests/fileext.st: Convert to new syntax.
+	* tests/floatmath.st: Convert to new syntax.
+	* tests/geometry.st: Convert to new syntax.
+	* tests/getopt.st: Convert to new syntax.
+	* tests/hash.st: Convert to new syntax.
+	* tests/hash2.st: Convert to new syntax.
+	* tests/heapsort.st: Convert to new syntax.
+	* tests/intmath.st: Convert to new syntax.
+	* tests/lists.st: Convert to new syntax.
+	* tests/lists1.st: Convert to new syntax.
+	* tests/lists2.st: Convert to new syntax.
+	* tests/matrix.st: Convert to new syntax.
+	* tests/methcall.st: Convert to new syntax.
+	* tests/mutate.st: Convert to new syntax.
+	* tests/nestedloop.st: Convert to new syntax.
+	* tests/objdump.st: Convert to new syntax.
+	* tests/objects.st: Convert to new syntax.
+	* tests/objinst.st: Convert to new syntax.
+	* tests/processes.st: Convert to new syntax.
+	* tests/prodcons.st: Convert to new syntax.
+	* tests/random-bench.st: Convert to new syntax.
+	* tests/untrusted.st: Convert to new syntax.
+	* tests/sets.st: Convert to new syntax.
+	* tests/sieve.st: Convert to new syntax.
+	* tests/strcat.st: Convert to new syntax.
+	* tests/strings.st: Convert to new syntax.
+
+2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
+
 	* tests/compiler.st: Check that compiling a method does not
 	capture the temporaries dictionary.
 	* tests/exceptions.st: Wrap into block when evaluating multiple

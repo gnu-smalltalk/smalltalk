@@ -28,15 +28,17 @@
 |
  ======================================================================"
 
-| i j |
-i := 4.
-[
-    [   (Delay forSeconds: 1) wait.
-        i > 1 ] whileTrue: [ i := i - 1 ].
-] forkAt: Processor userInterruptPriority.
+Eval [
+    | i j |
+    i := 4.
+    [
+        [   (Delay forSeconds: 1) wait.
+            i > 1 ] whileTrue: [ i := i - 1 ].
+    ] forkAt: Processor userInterruptPriority.
 
-[
-    (j := i) printNl.
-    [ i = j ] whileTrue.
-    i > 1
-] whileTrue!
+    [
+        (j := i) printNl.
+        [ i = j ] whileTrue.
+        i > 1
+    ] whileTrue
+]

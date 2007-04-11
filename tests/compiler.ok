@@ -1,33 +1,18 @@
-
-Execution begins...
-returned value is BugTest
-
-Execution begins...
-returned value is Object
 compiler.st:40: undefined variable undefVariable referenced
-
-Execution begins...
-returned value is BugTest
-
-Execution begins...
-returned value is String
 
 Execution begins...
 returned value is Array new: 3 "<0>"
 
 Execution begins...
 returned value is 'bar'
-
-Execution begins...
-returned value is BugTest class
-compiler.st:110: parse error, expected keyword
-
-Execution begins...
-returned value is 'No crashes'
-compiler.st:117: parse error, expected '.' or '!'
+compiler.st:113: parse error, expected '!'
+compiler.st:116: parse error, expected keyword
 
 Execution begins...
 returned value is 2
+
+Execution begins...
+returned value is 'No crashes'
 
 Execution begins...
 a Smalltalk string:1: undefined variable a referenced

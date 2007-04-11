@@ -27,8 +27,11 @@
 |
  ======================================================================"
 
-Smalltalk at: #TestException put: ExAll newChild!
+Eval [
+    Smalltalk at: #TestException put: ExAll newChild
+]
 
+Eval [
     [
         Transcript cr; show: 'testResume...'.
         TestException signal.
@@ -37,9 +40,10 @@ Smalltalk at: #TestException put: ExAll newChild!
         on: TestException
         do: [:excp | excp resume ].
         
-    Transcript cr!
+    Transcript cr
+]
 
-
+Eval [
     [
         Transcript cr; show: 'testReturn...'.
         TestException signal.
@@ -50,8 +54,10 @@ Smalltalk at: #TestException put: ExAll newChild!
             Transcript show: 'passed if nothing follows on this line'.
             excp return ].
             
-    Transcript cr!
+    Transcript cr
+]
 
+Eval [
     [
         Transcript cr; show: 'testPass...'.
         [
@@ -66,92 +72,110 @@ Smalltalk at: #TestException put: ExAll newChild!
 	    Transcript show: 'passed if nothing follows on this line'.
 	    excp return].
 	    
-    Transcript cr!
+    Transcript cr
+]
 
+Eval [
     [   Transcript cr; show: 'testEnsure...'.
             self error: ' Ignore this error']
-        ensure: [Transcript show: 'passed'; cr]!
+        ensure: [Transcript show: 'passed'; cr]
+]
 
-Smalltalk at: #Ok put: 0!
+Eval [
+    Smalltalk at: #Ok put: 0
+]
 
-"TODO: turn this into an eval!!"
-[
+Eval [
     [   self error: ' Ignore this error']
         ifCurtailed: [ Ok := Ok + 1 ].
     
     Ok := Ok + 2
-] value!
+]
 
+Eval [
     Transcript cr; show: 'testIfCurtailed...'.
     Ok = 1 ifFalse: [
 	Ok >= 2 ifTrue: [ Transcript show: 'control returned'; cr ].
 	Ok even ifTrue: [ Transcript show: 'ifCurtailed not executed'; cr ].
 	^self
     ].
-    Transcript show: 'passed'; cr!
+    Transcript show: 'passed'; cr
+]
 
+Eval [
 	| r |
 	Ok := 0.
 	r := [#( 1 2 ) size] ensure: [Ok := Ok + 1].
-	^(r = 2) & (Ok = 1)!
+	^(r = 2) & (Ok = 1)
+]
 
+Eval [
 	Ok := 0. 
 	[ [#( 1 2 ) siz] ensure: [ Ok := Ok + 1 ].
 	] on: MessageNotUnderstood do: [ :mnu | mnu return ].
-	^Ok = 1!
+	^Ok = 1
+]
 
+Eval [
 	Ok := 0.
-	[#( 1 2 ) siz] ensure: [ Ok := Ok + 1 ]!
-	^Ok = 1!
+	[#( 1 2 ) siz] ensure: [ Ok := Ok + 1 ]
+]
+Eval [ ^Ok = 1 ]
 
+Eval [
 	Ok := 0.
 	[ [Error signal] ensure: [ Ok := Ok + 1 ].
 	] on: Error do: [ :error | error return ].
-	^Ok = 1!
+	^Ok = 1
+]
 
+Eval [
 	Ok := 0.
-	[Error signal] ensure: [ Ok := Ok + 1 ]!
-	^Ok = 1!
+	[Error signal] ensure: [ Ok := Ok + 1 ]
+]
+Eval [ ^Ok = 1 ]
 
+Eval [
 	| tmp |
 	Ok := 0.
 	[tmp := [Notification signal. Ok = 0] ensure: [ Ok := Ok + 1 ].
 	] on: Notification do: [ :notification | notification resume ].
-	^tmp!
+	^tmp
+]
 
-Smalltalk removeKey: #Ok!
+Eval [ Smalltalk removeKey: #Ok ]
 
 
 "Do some torture testing on #ensure: and #ifCurtailed:"
 
-^[ #block printNl ] ensure: [ #outer printNl ]!
-^[ #block printNl ] ensure: [ ^#outer printNl ]!
-^[ [ #block printNl ] ensure: [ #inner printNl ] ] ensure: [ #outer printNl ]!
-^[ [ #block printNl ] ensure: [ #inner printNl ] ] ensure: [ ^#outer printNl ]!
-^[ [ #block printNl ] ensure: [ ^#inner printNl ] ] ensure: [ #outer printNl ]!
-^[ [ #block printNl ] ensure: [ ^#inner printNl ] ] ensure: [ ^#outer printNl ]!
+Eval [ [ #block printNl ] ensure: [ #outer printNl ] ]
+Eval [ [ #block printNl ] ensure: [ ^#outer printNl ] ]
+Eval [ [ [ #block printNl ] ensure: [ #inner printNl ] ] ensure: [ #outer printNl ] ]
+Eval [ [ [ #block printNl ] ensure: [ #inner printNl ] ] ensure: [ ^#outer printNl ] ]
+Eval [ [ [ #block printNl ] ensure: [ ^#inner printNl ] ] ensure: [ #outer printNl ] ]
+Eval [ [ [ #block printNl ] ensure: [ ^#inner printNl ] ] ensure: [ ^#outer printNl ] ]
 
-^[ #block printNl ] ifCurtailed: [ #outer printNl ]!
-^[ #block printNl ] ifCurtailed: [ ^#outer printNl ]!
-^[ [ #block printNl ] ifCurtailed: [ #inner printNl ] ] ifCurtailed: [ #outer printNl ]!
-^[ [ #block printNl ] ifCurtailed: [ #inner printNl ] ] ifCurtailed: [ ^#outer printNl ]!
-^[ [ #block printNl ] ifCurtailed: [ ^#inner printNl ] ] ifCurtailed: [ #outer printNl ]!
-^[ [ #block printNl ] ifCurtailed: [ ^#inner printNl ] ] ifCurtailed: [ ^#outer printNl ]!
+Eval [ [ #block printNl ] ifCurtailed: [ #outer printNl ] ]
+Eval [ [ #block printNl ] ifCurtailed: [ ^#outer printNl ] ]
+Eval [ [ [ #block printNl ] ifCurtailed: [ #inner printNl ] ] ifCurtailed: [ #outer printNl ] ]
+Eval [ [ [ #block printNl ] ifCurtailed: [ #inner printNl ] ] ifCurtailed: [ ^#outer printNl ] ]
+Eval [ [ [ #block printNl ] ifCurtailed: [ ^#inner printNl ] ] ifCurtailed: [ #outer printNl ] ]
+Eval [ [ [ #block printNl ] ifCurtailed: [ ^#inner printNl ] ] ifCurtailed: [ ^#outer printNl ] ]
 
 
-^[ ^#block printNl ] ifCurtailed: [ #outer printNl ]!
-^[ ^#block printNl ] ifCurtailed: [ ^#outer printNl ]!
-^[ [ ^#block printNl ] ifCurtailed: [ #inner printNl ] ] ifCurtailed: [ #outer printNl ]!
-^[ [ ^#block printNl ] ifCurtailed: [ #inner printNl ] ] ifCurtailed: [ ^#outer printNl ]!
-^[ [ ^#block printNl ] ifCurtailed: [ ^#inner printNl ] ] ifCurtailed: [ #outer printNl ]!
-^[ [ ^#block printNl ] ifCurtailed: [ ^#inner printNl ] ] ifCurtailed: [ ^#outer printNl ]!
+Eval [ [ ^#block printNl ] ifCurtailed: [ #outer printNl ] ]
+Eval [ [ ^#block printNl ] ifCurtailed: [ ^#outer printNl ] ]
+Eval [ [ [ ^#block printNl ] ifCurtailed: [ #inner printNl ] ] ifCurtailed: [ #outer printNl ] ]
+Eval [ [ [ ^#block printNl ] ifCurtailed: [ #inner printNl ] ] ifCurtailed: [ ^#outer printNl ] ]
+Eval [ [ [ ^#block printNl ] ifCurtailed: [ ^#inner printNl ] ] ifCurtailed: [ #outer printNl ] ]
+Eval [ [ [ ^#block printNl ] ifCurtailed: [ ^#inner printNl ] ] ifCurtailed: [ ^#outer printNl ] ]
 
 
 "used to go in an infinite loop"
-[ self halt ] on: 1 do: [ :ex | 'blah' printNl ]!
+Eval [ [ self halt ] on: 1 do: [ :ex | 'blah' printNl ] ]
 
 "Test error handling within a process."
-[^'test'] fork!
+Eval [ [^'test'] fork ]
 
 "Test error handling within a process."
-[self error: 'test'] fork!
+Eval [ [self error: 'test'] fork ]
