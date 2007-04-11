@@ -1,3 +1,9 @@
+2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
+            Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
+
+	* libgst/dict.c: Load _gst_binding_dictionary_class on runtime.
+	* libgst/gst-parse.c: Fix setting up class variables.
+
 2007-04-11  Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
 
 	* libgst/comp.c: Make compute_keyword_selector public.

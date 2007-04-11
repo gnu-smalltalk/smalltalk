@@ -566,7 +566,7 @@ static const class_definition class_info[] = {
   /* These five MUST have the same structure as dictionary; they're
      used interchangeably within the C portion of the system */
   {&_gst_binding_dictionary_class, &_gst_dictionary_class,
-   ISP_POINTER, false, 1,
+   ISP_POINTER, true, 1,
    "BindingDictionary", "environment", NULL, NULL },
 
   {&_gst_abstract_namespace_class, &_gst_binding_dictionary_class,

@@ -28,9 +28,9 @@
 |
  ======================================================================"
 
-Eval [ Smalltalk at: #Last put: 42 ]
-
 Number extend [
+    Last := 42.
+
     nextRandom [
 	Last := Last * 3877 + 29573 rem: 139968.
 	^self * Last asFloatD / 139968d

@@ -593,7 +593,7 @@ static mst_Boolean
 parse_class_definition (gst_parser *p, OOP classOOP)
 {
   int t1, t2, t3;
-  
+
   for (;;)
     {
       if (_gst_had_error)
@@ -679,13 +679,23 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 
  	      OOP name, class_var_dict, result;
 	      tree_node stmt;
+	      OOP the_class = classOOP;
+	      if (IS_A_METACLASS (classOOP))
+		the_class = METACLASS_INSTANCE (classOOP);
 
 	      name = _gst_intern_string (val (p, 0)->sval);
 
 	      lex_skip_mandatory (p, IDENTIFIER);
 	      lex_skip_mandatory (p, ASSIGNMENT);
 
-	      class_var_dict = _gst_class_variable_dictionary (classOOP);
+	      class_var_dict = _gst_class_variable_dictionary (the_class);
+	      if (IS_NIL (class_var_dict))
+		{
+		  gst_class class;
+		  class_var_dict = _gst_binding_dictionary_new (8, the_class);
+		  class = (gst_class) OOP_TO_OBJ (the_class);
+		  class->classVariables = class_var_dict;
+		}
 	      
 	      stmt = parse_expression (p, EXPR_ANY);
 	      stmt = _gst_make_statement_list (&stmt->location, stmt);

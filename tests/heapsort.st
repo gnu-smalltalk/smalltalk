@@ -28,13 +28,13 @@
 |
  ======================================================================"
 
-Eval [ Smalltalk at: #Last put: 42 ]
+Number extend [
+    Last := 42.
 
-SmallInteger extend [
-    nextRandom: max [
-	Last := self * 3877 + 29573 rem: 139968.
-	^max * Last asFloatD / 139968d
-    ]
+    nextRandom [
+        Last := Last * 3877 + 29573 rem: 139968.
+        ^self * Last asFloatD / 139968d
+   ]
 ]
 
 Array extend [
@@ -75,7 +75,7 @@ Eval [
 	ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
 	
     array := Array new: n.
-    1 to: n do: [ :i | array at: i put: (Last nextRandom: 1d) ].
+    1 to: n do: [ :i | array at: i put: 1d nextRandom ].
 
     array heapSort.
     ((array last + 0.5d-10) printString copyFrom: 1 to: 12) displayNl
