@@ -1961,8 +1961,6 @@ semaphore_new (int signals)
   return (semaphoreOOP);
 }
 
-/* runs before every evaluation (_gst_execute_statements) and before GC turned on.
-   Note that we don't use the incubator because _gst_processor_oop is a global.  */
 void
 _gst_init_process_system (void)
 {

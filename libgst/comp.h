@@ -264,13 +264,14 @@ extern mst_Boolean _gst_had_error
 extern mst_Boolean _gst_untrusted_methods 
   ATTRIBUTE_HIDDEN;
 
-/* Called to compile and execute an "immediate expression"; i.e. a set
-   of Smalltalk statements that are not part of a method definition.
-   The parse trees are in TEMPORARIES and STATEMENTS.  Return the object
-   that was returned by the expression.  */
-extern OOP _gst_execute_statements (tree_node temporaries,
-				    tree_node statements,
-				    mst_Boolean quiet) 
+/* Called to compile and execute an "immediate expression"; i.e. a Smalltalk
+   statement that is not part of a method definition and where temporaries are
+   declared automatically.  The parse trees are in TEMPS and STATEMENTS.
+   Return the object that was returned by the expression.  */
+extern OOP _gst_execute_statements (tree_node temps,
+				    tree_node statement,
+				    enum undeclared_strategy undeclared,
+				    mst_Boolean quiet)
   ATTRIBUTE_HIDDEN;
 
 /* This function will print a message describing the method category

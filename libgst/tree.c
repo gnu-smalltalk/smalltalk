@@ -457,14 +457,10 @@ _gst_make_binding_constant (YYLTYPE *location,
 		     tree_node variables)
 {
   tree_node result;
-  OOP assocOOP = _gst_find_variable_binding (variables);
-
-  if (IS_NIL (assocOOP))
-    return (NULL);
 
   result = make_tree_node (location, TREE_CONST_EXPR);
-  result->v_const.constType = CONST_OOP;
-  result->v_const.val.oopVal = assocOOP;
+  result->v_const.constType = CONST_BINDING;
+  result->v_const.val.aVal = variables;
 
   return (result);
 }

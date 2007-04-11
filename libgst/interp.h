@@ -427,9 +427,9 @@ extern void _gst_fixup_object_pointers (void)
 extern void _gst_restore_object_pointers (void) 
   ATTRIBUTE_HIDDEN;
 
-/* This runs before every evaluation (_gst_execute_statements) and
-   before GC turned on.  It creates an initial process if no process
-   is ready to run or if no process has been created yet.  */
+/* This runs before every evaluation and before GC turned on.  It creates an
+   initial process if no process is ready to run or if no process has been
+   created yet.  */
 extern void _gst_init_process_system (void) 
   ATTRIBUTE_HIDDEN;
 

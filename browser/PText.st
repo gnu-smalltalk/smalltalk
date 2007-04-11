@@ -38,7 +38,7 @@ Primitive subclass:  #PText
 PText comment: 
 nil!
 
-STInST RBProgramNodeVisitor subclass:  #WorksheetVariableTracker
+STInST.RBProgramNodeVisitor subclass:  #WorksheetVariableTracker
 	instanceVariableNames: 'vars class '
 	classVariableNames: ''
 	poolDictionaries: ''

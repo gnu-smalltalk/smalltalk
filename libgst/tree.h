@@ -140,6 +140,7 @@ typedef enum
   CONST_FLOATQ,
   CONST_STRING,
   CONST_OOP,
+  CONST_BINDING,
   CONST_ARRAY
 }
 const_type;

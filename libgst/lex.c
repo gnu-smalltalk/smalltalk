@@ -90,6 +90,12 @@ char *_gst_first_error_str = NULL;
 char *_gst_first_error_file = NULL;
 int _gst_first_error_line = 0;
 
+/* Last returned token.  */
+static int last_token;
+
+/* Balance of parentheses.  Used to turn a newline into a period.  */
+static int parenthesis_depth;
+
 /* Answer true if IC is a valid base-10 digit.  */
 static mst_Boolean is_digit (int ic);
 
@@ -136,6 +142,26 @@ static int comment (int c,
 
 /* Parse a character literal.  C is '$' */
 static int char_literal (int c,
+			 YYSTYPE * lvalp);
+
+/* Remember the current balance of open/close parentheses, used to treat
+   newlines as periods.  */
+static int scan_open_paren (int c,
+			    YYSTYPE * lvalp);
+
+/* Remember the current balance of open/close parentheses, used to treat
+   newlines as periods.  */
+static int scan_close_paren (int c,
+			     YYSTYPE * lvalp);
+
+/* Remember the current balance of open/close parentheses, used to treat
+   newlines as periods.  */
+static int scan_reset_paren (int c,
+			     YYSTYPE * lvalp);
+
+/* If the current balance of open/close parentheses is zero, and the
+   last token was not a period or bang, treat the newline as a period.  */
+static int scan_newline (int c,
 			 YYSTYPE * lvalp);
 
 /* Parse a binary operator.  C is the first symbol in the selector */
@@ -207,7 +233,7 @@ static const lex_tab_elt char_table[128] = {
 /*   7 */ {invalid, 0, 0},
 /*   8 */ {invalid, 0, 0},
 /*   9 */ {0, 0, WHITE_SPACE},
-/*  10 */ {0, 0, WHITE_SPACE},
+/*  10 */ {scan_newline, 0, 0},
 /*  11 */ {invalid, 0, 0},
 /*  12 */ {0, 0, WHITE_SPACE},
 /*  13 */ {0, 0, WHITE_SPACE},
@@ -230,15 +256,15 @@ static const lex_tab_elt char_table[128] = {
 /*  30 */ {invalid, 0, 0},
 /*  31 */ {invalid, 0, 0},
 /*     */ {0, 0, WHITE_SPACE},
-/*   ! */ {0, '!', 0},
+/*   ! */ {scan_reset_paren, 0, 0},
 /*   " */ {comment, 0, 0},
 /*   # */ {scan_symbol, 0, 0},
 /*   $ */ {char_literal, 0, ID_CHAR | SYMBOL_CHAR},
 /*   % */ {scan_bin_op, 0, BIN_OP_CHAR},
 /*   & */ {scan_bin_op, 0, BIN_OP_CHAR},
 /*   ' */ {string_literal, 0, 0},
-/*   ( */ {0, '(', 0},
-/*   ) */ {0, ')', 0},
+/*   ( */ {scan_open_paren, 0, 0},
+/*   ) */ {scan_close_paren, 0, 0},
 /*   * */ {scan_bin_op, 0, BIN_OP_CHAR},
 /*   + */ {scan_bin_op, 0, BIN_OP_CHAR},
 /*   , */ {scan_bin_op, 0, BIN_OP_CHAR},
@@ -288,9 +314,9 @@ static const lex_tab_elt char_table[128] = {
 /*   X */ {scan_ident, 0, ID_CHAR | SYMBOL_CHAR},
 /*   Y */ {scan_ident, 0, ID_CHAR | SYMBOL_CHAR},
 /*   Z */ {scan_ident, 0, ID_CHAR | SYMBOL_CHAR},
-/*   [ */ {0, '[', 0},
+/*   [ */ {scan_open_paren, 0, 0},
 /*   \ */ {scan_bin_op, 0, BIN_OP_CHAR},
-/*   ] */ {0, ']', 0},
+/*   ] */ {scan_close_paren, 0, 0},
 /*   ^ */ {0, '^', 0},
 /*   _ */ {0, ASSIGNMENT, ID_CHAR | SYMBOL_CHAR},
 /*   ` */ {invalid, 0, 0},
@@ -320,9 +346,9 @@ static const lex_tab_elt char_table[128] = {
 /*   x */ {scan_ident, 0, ID_CHAR | SYMBOL_CHAR},
 /*   y */ {scan_ident, 0, ID_CHAR | SYMBOL_CHAR},
 /*   z */ {scan_ident, 0, ID_CHAR | SYMBOL_CHAR},
-/*   { */ {0, '{', 0},
+/*   { */ {scan_open_paren, 0, 0},
 /*   | */ {scan_bin_op, 0, BIN_OP_CHAR},
-/*   } */ {0, '}', 0},
+/*   } */ {scan_close_paren, 0, 0},
 /*   ~ */ {scan_bin_op, 0, BIN_OP_CHAR},
 /*  ^? */ {invalid, 0, 0}
 };
@@ -358,13 +384,15 @@ _gst_yylex (PTR lvalp, YYLTYPE *llocp)
 	  *llocp = _gst_get_location ();
 	  assert (ct->lexFunc || ct->retToken);
 	  if (ct->lexFunc)
+	    result = (*ct->lexFunc) (ic, (YYSTYPE *) lvalp);
+	  else
+	    result = ct->retToken;
+
+	  if (result)
 	    {
-	      result = (*ct->lexFunc) (ic, (YYSTYPE *) lvalp);
-	      if (result)
-		return (result);
+	      last_token = result;
+	      return (result);
 	    }
-	  else if (ct->retToken)
-	    return (ct->retToken);
 	}
     }
 
@@ -399,7 +427,46 @@ invalid (int c,
   return (0);			/* tell the lexer to ignore this */
 }
 
+
+int
+scan_reset_paren (int c,
+	         YYSTYPE * lvalp)
+{
+  parenthesis_depth = 0;
+  return c;
+}
 
+int
+scan_open_paren (int c,
+	         YYSTYPE * lvalp)
+{
+  parenthesis_depth++;
+  return c;
+}
+
+int
+scan_close_paren (int c,
+	          YYSTYPE * lvalp)
+{
+  parenthesis_depth--;
+  return c;
+}
+
+int
+scan_newline (int c,
+	      YYSTYPE * lvalp)
+{
+  if (_gst_get_cur_stream_prompt ()
+      && parenthesis_depth == 0
+      && last_token != '.' && last_token != '!' && last_token != KEYWORD
+      && last_token != BINOP && last_token != '|' && last_token != '<'
+      && last_token != '>' && last_token != ';')
+    return ('.');
+  else
+    return 0;
+}
+
+
 int
 comment (int c,
 	 YYSTYPE * lvalp)

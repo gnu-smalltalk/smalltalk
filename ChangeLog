@@ -1,3 +1,12 @@
+2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/compiler.st: Check that compiling a method does not
+	capture the temporaries dictionary.
+	* tests/exceptions.st: Wrap into block when evaluating multiple
+	statements together is important.
+	* tests/objects.st: Likewise.
+	* tests/untrusted.st: Likewise.
+
 2007-04-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ClassDesc.st: Fix bugs in previous checkin to this file.

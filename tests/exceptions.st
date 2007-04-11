@@ -74,10 +74,13 @@ Smalltalk at: #TestException put: ExAll newChild!
 
 Smalltalk at: #Ok put: 0!
 
+"TODO: turn this into an eval!!"
+[
     [   self error: ' Ignore this error']
         ifCurtailed: [ Ok := Ok + 1 ].
     
-    Ok := Ok + 2!
+    Ok := Ok + 2
+] value!
 
     Transcript cr; show: 'testIfCurtailed...'.
     Ok = 1 ifFalse: [

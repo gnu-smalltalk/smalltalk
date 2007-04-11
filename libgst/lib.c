@@ -831,6 +831,7 @@ process_stdin ()
 mst_Boolean
 process_file (const char *fileName)
 {
+  enum undeclared_strategy old;
   int fd;
 
   fd = _gst_open_file (fileName, "r");
@@ -840,11 +841,11 @@ process_file (const char *fileName)
   if (_gst_verbosity == 3)
     printf ("Processing %s\n", fileName);
 
-  _gst_use_undeclared++;
+  old = _gst_set_undeclared (UNDECLARED_GLOBALS);
   _gst_push_unix_file (fd, fileName);
   _gst_parse_stream (false);
   _gst_pop_stream (true);
-  _gst_use_undeclared--;
+  _gst_set_undeclared (old);
   return (true);
 }
 

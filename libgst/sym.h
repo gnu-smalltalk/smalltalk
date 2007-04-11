@@ -84,8 +84,26 @@ typedef struct symbol_entry
 }
 symbol_entry;
 
-/* True if undeclared globals can be considered forward references.  */
-extern int _gst_use_undeclared
+enum undeclared_strategy {
+  UNDECLARED_NONE,
+  UNDECLARED_GLOBALS,
+  UNDECLARED_TEMPORARIES,
+  UNDECLARED_CURRENT
+};
+
+/* Set whether undeclared globals can be considered forward references,
+   or whether they should be considered like temporary variables.  */
+extern int _gst_set_undeclared (enum undeclared_strategy value)
+  ATTRIBUTE_HIDDEN;
+
+/* Establish a new dictionary that will host local variables of the
+   evaluations; return the old one.  */
+extern OOP _gst_push_temporaries_dictionary (void)
+  ATTRIBUTE_HIDDEN;
+
+/* Switch back to a previously used dictionary to host local variables of the
+   evaluations.  */
+extern void _gst_pop_temporaries_dictionary (OOP dictionaryOOP)
   ATTRIBUTE_HIDDEN;
 
 extern OOP _gst_and_symbol ATTRIBUTE_HIDDEN;
@@ -199,8 +217,10 @@ extern OOP _gst_make_pool_array (const char * poolNames)
   ATTRIBUTE_HIDDEN;
 
 /* This resolves to an Association the variable binding constant expressed
-   by the LIST parse tree node.  */
-extern OOP _gst_find_variable_binding (tree_node list)
+   by the LIST parse tree node.  Unless DECLARE_TEMPORARY is false,
+   temporary variables may be automatically declared.  */
+extern OOP _gst_find_variable_binding (tree_node list,
+				       mst_Boolean declare_temporary)
   ATTRIBUTE_PURE
   ATTRIBUTE_HIDDEN;
 

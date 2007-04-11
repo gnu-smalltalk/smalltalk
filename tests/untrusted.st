@@ -84,8 +84,10 @@ cleanBlock
 ^A new dirtyBlock value!
 
 "Make the current process untrusted... -----------------------------------"
-Processor activeProcess makeUntrusted: true.
-^thisContext isUntrusted!
+[
+    Processor activeProcess makeUntrusted: true.
+    thisContext isUntrusted
+] value!
 
 "...and check that subsequently created process are trusted."
 ^thisContext isUntrusted!
@@ -102,14 +104,18 @@ s wait.
 
 "Check that access restrictions are enforced -----------------------------"
 
-Processor activeProcess makeUntrusted: true.
-Set compile: 'lovelyMethod ^tally'.
-Set compile: 'dangerousMethod tally := 0'.
-Set compile: 'lovelyMethod ^Array'.
-Set compile: 'dangerousMethod Array := 0'!
+[
+    Processor activeProcess makeUntrusted: true.
+    Set compile: 'lovelyMethod ^tally'.
+    Set compile: 'dangerousMethod tally := 0'.
+    Set compile: 'lovelyMethod ^Array'.
+    Set compile: 'dangerousMethod Array := 0'
+] value!
 
-!Processor activeProcess makeUntrusted: true.
-Set methodsFor: 'security checking'!
+![
+    Processor activeProcess makeUntrusted: true.
+    Set methodsFor: 'security checking'
+] value!
 
 lovelyMethod
     ^tally!

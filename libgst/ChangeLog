@@ -1,3 +1,27 @@
+2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Add undeclared parameter to
+	_gst_exeecute_statements.  Make a statement list if necessary.
+	Adjust callers.  Add CONST_BINDING case to equal_constant and
+	make_constant_oop.
+	* libgst/comp.h: Adjust prototypes.
+	* libgst/gst-parse.c: Rewrite parse_doit.  Set undeclared parsing
+	around method compilation.  Don't check errors from
+	_gst_make_binding_constant
+	* libgst/gstpriv.h: Load sym.h early.
+	* libgst/input.c: Don't return true in _gst_get_cur_stream_prompt
+	for emacs mode.
+	* libgst/interp.c: Remove bogus comment.
+	* libgst/interp.h: Reword bogus comment.
+	* libgst/lex.c: Guess if a period should be added at end of line.
+	* libgst/lib.c: Set undeclared parsing around file loading.
+	* libgst/prims.def: Fix warning.  Set undeclared parsing around filein.
+	* libgst/sym.c: Add possibility to store undeclared variablers into
+	a custom dictionary.
+	* libgst/sym.h: Add related definitions.
+	* libgst/tree.c: Create a CONST_BINDING in _gst_make_binding_constant.
+	* libgst/tree.h: Add CONST_BINDING to const_type enum.
+
 2007-03-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Change _gst_declare_tracing to int, use value of 2

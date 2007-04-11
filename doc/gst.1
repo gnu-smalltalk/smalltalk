@@ -13,60 +13,63 @@ mandatory for a long option, it is also mandatory for a short one. The
 currently defined set of flags is:
 .TP
 \fB\-a\fR \fB\-\-smalltalk\-args\fR
-Pass the remaining arguments to Smalltalk
+Pass the remaining arguments to Smalltalk.
 .TP
 \fB\-c\fR \fB\-\-core\-dump\fR
-Dump core on fatal signal
+Dump core on fatal signal.
 .TP
 \fB\-D\fR \fB\-\-declaration\-trace\fR
-Trace compilation of all loaded files
+Trace compilation of all loaded files.
 .TP
 \fB\-E\fR \fB\-\-execution\-trace\fR
-Trace execution of all loaded files
+Trace execution of all loaded files.
 .TP
 \fB\-g\fR \fB\-\-no\-gc\-message\fR
-Do not print garbage collection messages
+Do not print garbage collection messages.
 .TP
 \fB\-H\fR \fB\-\-help\fR
-Print this message and exit
+Print this message and exit.
 .TP
 \fB\-i\fR \fB\-\-rebuild\-image\fR
-Ignore the image file; rebuild it from scratch
+Ignore the image file; rebuild it from scratch.
 .TP
 \fB\-I\fR \fB\-\-image\-file\fR FILE
 Instead of `gst.im', use FILE as the image
-file, and ignore the kernel files' timestamps
+file, and ignore the kernel files' timestamps.
 .TP
 \fB\-K\fR \fB\-\-kernel\-file\fR FILE
 Make FILE's path relative to the image path.
 .TP
 \fB\-q\fR \fB\-\-quiet\fR \fB\-\-silent\fR
-Do not print execution information
+Do not print execution information.
 .TP
 \fB\-r\fR \fB\-\-regression\-test\fR
 Run in regression test mode, i.e. make
-printed messages constant
+printed messages constant.
 .TP
 \fB\-S\fR \fB\-\-snapshot\fR
-Save a snapshot just before exiting
+Save a snapshot just before exiting.
 .TP
 \fB\-v\fR \fB\-\-version\fR
-Print the Smalltalk version number and exit
+Print the Smalltalk version number and exit.
 .TP
 \fB\-V\fR \fB\-\-verbose\fR
-Print names of loaded files and execution stats
-.TP
-\fB\-\-kernel\-dir\fR DIR
-Look for kernel files in directory DIR.
-.TP
-\fB\-\-image\-dir\fR DIR
-Look for the image in directory DIR.
+Print names of loaded files and execution stats.
 .TP
 \fB\-\-emacs\-mode\fR
 Execute as a `process' (from within Emacs)
 .TP
+\fB\-\-image\-dir\fR DIR
+Look for the image in directory DIR.
+.TP
+\fB\-\-kernel\-dir\fR DIR
+Look for kernel files in directory DIR.
+.TP
+\fB\-\-no\-user\-files\fR
+Don't read user customization files.
+.TP
 -
-Read input from standard input explicitly
+Read input from standard input explicitly.
 .PP
 Files are loaded one after the other.  After the last one is loaded,
 Smalltalk will exit.  If no files are specified, Smalltalk reads from

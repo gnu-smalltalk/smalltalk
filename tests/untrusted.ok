@@ -60,8 +60,8 @@ returned value is nil
 
 Execution begins...
 returned value is Set
-untrusted.st:118: invalid assignment to instance variable tally
-untrusted.st:124: invalid assignment to global variable Array
+untrusted.st:124: invalid assignment to instance variable tally
+untrusted.st:130: invalid assignment to global variable Array
 
 Execution begins...
 returned value is Set
@@ -74,8 +74,8 @@ returned value is UntrustedSet
 
 Execution begins...
 returned value is UntrustedSet
-untrusted.st:154: invalid assignment to instance variable tally
-untrusted.st:160: invalid assignment to global variable Array
+untrusted.st:160: invalid assignment to instance variable tally
+untrusted.st:166: invalid assignment to global variable Array
 
 Execution begins...
 returned value is nil

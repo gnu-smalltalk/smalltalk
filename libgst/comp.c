@@ -608,8 +608,9 @@ _gst_display_compilation_trace (const char *string,
 
 
 OOP
-_gst_execute_statements (tree_node temporaries,
+_gst_execute_statements (tree_node temps,
 			 tree_node statements,
+			 enum undeclared_strategy undeclared,
 			 mst_Boolean quiet)
 {
   tree_node messagePattern;
@@ -620,13 +621,14 @@ _gst_execute_statements (tree_node temporaries,
 #endif
   OOP methodOOP;
   OOP oldClass, oldCategory;
+  enum undeclared_strategy oldUndeclared;
   inc_ptr incPtr;
   YYLTYPE loc;
 
-  quiet = quiet || _gst_verbosity <= 1 || _gst_emacs_process
-	  || !_gst_get_cur_stream_prompt ();
-
-  quiet = quiet && !_gst_regression_testing;
+  if (_gst_regression_testing
+      || _gst_verbosity < 2
+      || !_gst_get_cur_stream_prompt ())
+    quiet = true;
 
   oldClass = _gst_this_class;
   oldCategory = _gst_this_category;
@@ -644,16 +646,22 @@ _gst_execute_statements (tree_node temporaries,
 
   /* This is a big hack to let doits access the variables and classes
      in the current namespace.  */
+  oldUndeclared = _gst_set_undeclared (undeclared);
   SET_CLASS_ENVIRONMENT (_gst_undefined_object_class,
 			 _gst_current_namespace);
+
+  if (statements->nodeType != TREE_STATEMENT_LIST)
+    statements = _gst_make_statement_list (&statements->location, statements);
+
   methodOOP =
-    _gst_compile_method (_gst_make_method
-			 (&statements->location, &loc, messagePattern,
-			  temporaries, NULL, statements),
+    _gst_compile_method (_gst_make_method (&statements->location, &loc,
+					   messagePattern, temps, NULL,
+					   statements),
 			 true, false);
 
   SET_CLASS_ENVIRONMENT (_gst_undefined_object_class,
 			 _gst_smalltalk_dictionary);
+  _gst_set_undeclared (oldUndeclared);
 
   _gst_set_compilation_class (oldClass);
   _gst_set_compilation_category (oldCategory);
@@ -665,9 +673,6 @@ _gst_execute_statements (tree_node temporaries,
 
   incPtr = INC_SAVE_POINTER ();
   INC_ADD_OOP (methodOOP);
-
-  if (!quiet && (_gst_regression_testing || _gst_verbosity >= 3))
-    printf ("\nExecution begins...\n");
 
   _gst_bytecode_counter = _gst_primitives_executed =
     _gst_self_returns = _gst_inst_var_returns = _gst_literal_returns =
@@ -696,61 +701,48 @@ _gst_execute_statements (tree_node temporaries,
 
   INC_RESTORE_POINTER (incPtr);
 
-  if (quiet)
-    return (_gst_last_returned_value);
+  if (!quiet)
+    {
+      int save_execution;
 
-  /* Do more frequent flushing to ensure the result are well placed */
-  if (_gst_regression_testing)
-    fflush(stdout);
+      /* Do more frequent flushing to ensure the result are well placed */
+      if (_gst_verbosity >= 3)
+	{
+          printf ("returned value is ");
+          fflush(stdout);
+	}
 
-  if (_gst_regression_testing || _gst_verbosity >= 3)
-    printf ("returned value is ");
-
-  printf ("%O\n", _gst_last_returned_value);
-
-  if (_gst_regression_testing)
-    fflush(stdout);
-
-  if (_gst_verbosity < 3)
+      save_execution = _gst_execution_tracing;
+      if (_gst_execution_tracing == 1)
+        _gst_execution_tracing = 0;
+      _gst_str_msg_send (_gst_last_returned_value, "printNl", NULL);
+      _gst_execution_tracing = save_execution;
+    }
+  if (quiet || _gst_verbosity < 3)
     return (_gst_last_returned_value);
 
   deltaTime = endTime - startTime;
-  deltaTime += (deltaTime == 0);	/* it could be zero which would 
-					   core dump */
-
 #ifdef ENABLE_JIT_TRANSLATION
-#define GIVING_X_BYTECODES_PER_SEC
-#define BYTECODES_PER_SEC
-  printf ("Execution");
+  printf ("Execution took %.3f seconds", deltaTime / 1000.0);
 #else
-#define GIVING_X_BYTECODES_PER_SEC ", giving %lu bytecodes/sec"
-#define BYTECODES_PER_SEC , (unsigned long) (_gst_bytecode_counter/ (deltaTime / 1000.0))
-  printf ("%lu byte codes executed\nwhich", _gst_bytecode_counter);
+  printf ("%lu byte codes executed\nwhich took %.3f seconds",
+	  _gst_bytecode_counter, deltaTime / 1000.0);
 #endif
 
-  printf (" took %.3f seconds" GIVING_X_BYTECODES_PER_SEC "\n",
-	  deltaTime / 1000.0 BYTECODES_PER_SEC);
-#if 0 && defined(HAVE_GETRUSAGE)
+#ifdef HAVE_GETRUSAGE
   deltaTime = ((endRusage.ru_utime.tv_sec * 1000) +
 	       (endRusage.ru_utime.tv_usec / 1000)) -
     ((startRusage.ru_utime.tv_sec * 1000) +
      (startRusage.ru_utime.tv_usec / 1000));
-  deltaTime += (deltaTime == 0);	/* it could be zero which would 
-					   core dump */
-  printf ("(%.3f seconds user time" GIVING_X_BYTECODES_PER_SEC ", ",
-	  deltaTime / 1000.0 BYTECODES_PER_SEC);
+  printf (" (%.3fs user", deltaTime / 1000.0);
 
   deltaTime = ((endRusage.ru_stime.tv_sec * 1000) +
 	       (endRusage.ru_stime.tv_usec / 1000)) -
     ((startRusage.ru_stime.tv_sec * 1000) +
      (startRusage.ru_stime.tv_usec / 1000));
-  printf ("%.3f seconds system time)\n", deltaTime / 1000.0);
-
-  printf ("(%ld swaps, %ld minor page faults, %ld major page faults)\n",
-	  endRusage.ru_nswap - startRusage.ru_nswap,
-	  endRusage.ru_minflt - startRusage.ru_minflt,
-	  endRusage.ru_majflt - startRusage.ru_majflt);
+  printf ("+%.3fs sys)", deltaTime / 1000.0);
 #endif
+  printf ("\n");
 
 #ifdef ENABLE_JIT_TRANSLATION
   if (!_gst_sample_counter)
@@ -765,9 +757,8 @@ _gst_execute_statements (tree_node temporaries,
 
   printf ("%lu primitives, percent %.2f\n", _gst_primitives_executed,
 	  100.0 * _gst_primitives_executed / _gst_bytecode_counter);
-  printf
-    ("self returns %lu, inst var returns %lu, literal returns %lu\n",
-     _gst_self_returns, _gst_inst_var_returns, _gst_literal_returns);
+  printf ("self returns %lu, inst var returns %lu, literal returns %lu\n",
+          _gst_self_returns, _gst_inst_var_returns, _gst_literal_returns);
   printf ("%lu method cache lookups since last cleanup, percent %.2f\n",
 	  _gst_sample_counter,
 	  100.0 * _gst_sample_counter / _gst_bytecode_counter);
@@ -777,15 +768,12 @@ _gst_execute_statements (tree_node temporaries,
   printf ("%lu method cache hits, %lu misses", cacheHits,
 	  _gst_cache_misses);
   if (cacheHits || _gst_cache_misses)
-    printf (", %.2f percent hits\n",
-	    (100.0 * cacheHits) / _gst_sample_counter);
+    printf (", %.2f percent hits\n", (100.0 * cacheHits) / _gst_sample_counter);
   else
     printf ("\n");
 
   return (_gst_last_returned_value);
 }
-#undef GIVING_X_BYTECODES_PER_SEC
-#undef BYTECODES_PER_SEC
 
 
 
@@ -2068,6 +2056,11 @@ equal_constant (OOP oop,
 	return (true);
       break;
 
+    case CONST_BINDING:
+      if (oop == _gst_find_variable_binding (constExpr->v_const.val.aVal, false))
+	return (true);
+      break;
+
     case CONST_ARRAY:
       if (IS_OOP (oop) && OOP_CLASS (oop) == _gst_array_class)
 	{
@@ -2165,6 +2158,18 @@ make_constant_oop (tree_node constExpr)
       bo = constExpr->v_const.val.boVal;
       result = instantiate_with (bo->class, bo->size, &resultOOP);
       memcpy (result->data, bo->body, bo->size);
+      return (resultOOP);
+
+    case CONST_BINDING:
+      resultOOP = _gst_find_variable_binding (constExpr->v_const.val.aVal,
+					      false);
+      if (IS_NIL (resultOOP))
+	{
+	  _gst_errorf_at (constExpr->location.first_line,
+			  "invalid variable binding");
+          EXIT_COMPILATION ();
+	}
+
       return (resultOOP);
 
     case CONST_ARRAY:
@@ -2302,9 +2307,9 @@ _gst_make_attribute (tree_node attribute_keywords)
       tree_node value = keyword->v_list.value;
       if (value->nodeType != TREE_CONST_EXPR)
 	{
-          tree_node stmt = _gst_make_statement_list (&value->location, value);
-          OOP result = _gst_execute_statements (NULL, stmt, true);
-          value = _gst_make_oop_constant (&stmt->location, result);
+          OOP result = _gst_execute_statements (NULL, value, UNDECLARED_NONE,
+					        true);
+          value = _gst_make_oop_constant (&value->location, result);
           if (!result)
 	    {
 	      _gst_had_error = true;

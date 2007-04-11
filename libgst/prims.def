@@ -3390,7 +3390,7 @@ primitive VMpr_SystemDictionary_setTraceFlag [succeed,fail]
   oop1 = POP_OOP ();
   if (IS_INT (oop1))
     {
-      mst_Boolean *varAddr;
+      int *varAddr;
       intptr_t arg1 = TO_INT (oop1);
       varAddr = bool_addr_index (arg1);
       if (varAddr != NULL)
@@ -5100,6 +5100,7 @@ primitive VMpr_Object_makeWeak [succeed,fail]
 
 primitive VMpr_Stream_fileIn [succeed,fail]
 {
+  enum undeclared_strategy old;
   OOP streamOOP = STACKTOP ();
   _gst_primitives_executed++;
 
@@ -5120,9 +5121,9 @@ primitive VMpr_Stream_fileIn [succeed,fail]
     }
 
   _gst_push_stream_oop (streamOOP);
-  _gst_use_undeclared++;
+  old = _gst_set_undeclared (UNDECLARED_GLOBALS);
   parse_stream_with_protection (false);
-  _gst_use_undeclared--;
+  _gst_set_undeclared (old);
   _gst_pop_stream (false);	/* we didn't open it, so we don't close it */
   PRIM_SUCCEEDED;
 }

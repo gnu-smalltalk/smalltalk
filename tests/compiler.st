@@ -118,3 +118,9 @@ c
 
 "... this does not."
 ^#(#-123) size!
+
+
+"Compiling a method should not capture the current temporaries dictionary."
+a:=42.
+Object compile: 'gotcha "shouldn''t compile!" ^a'!
+nil gotcha! 

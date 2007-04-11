@@ -160,11 +160,13 @@ OOP _gst_while_true_colon_symbol = NULL;
 OOP _gst_while_true_symbol = NULL;
 OOP _gst_current_namespace = NULL;
 
+OOP temporaries_dictionary = NULL;
+
 /* The list of selectors for the send immediate bytecode.  */
 struct builtin_selector _gst_builtin_selectors[256] = {};
 
 /* True if undeclared globals can be considered forward references.  */
-int _gst_use_undeclared = 0;
+enum undeclared_strategy _gst_use_undeclared = UNDECLARED_TEMPORARIES;
 
 /* Answer whether OOP is a Smalltalk String LEN characters long and
    these characters match the first LEN characters of STR (which must
@@ -538,10 +540,36 @@ find_class_variable (OOP varName)
 }
 
 
-OOP
-_gst_find_variable_binding (tree_node list)
+int
+_gst_set_undeclared (enum undeclared_strategy new)
 {
-  OOP symbol, root, assocOOP, undeclaredDictionary;
+  enum undeclared_strategy old = _gst_use_undeclared;
+  if (new != UNDECLARED_CURRENT)
+    _gst_use_undeclared = new;
+  return old;
+}
+
+OOP
+_gst_push_temporaries_dictionary (void)
+{
+  OOP old = temporaries_dictionary;
+  temporaries_dictionary = _gst_dictionary_new (8);
+  _gst_register_oop (temporaries_dictionary);
+  return old;
+}
+
+void
+_gst_pop_temporaries_dictionary (OOP dictionaryOOP)
+{
+  _gst_unregister_oop (temporaries_dictionary);
+  temporaries_dictionary = dictionaryOOP;
+}
+
+
+OOP
+_gst_find_variable_binding (tree_node list, mst_Boolean declare_temporary)
+{
+  OOP symbol, root, assocOOP, undeclaredDictionaryOOP;
 
   symbol = _gst_intern_string (list->v_list.name);
   assocOOP = find_class_variable (symbol);
@@ -558,23 +586,27 @@ _gst_find_variable_binding (tree_node list)
       char *varName;
 
       varName = STRING_OOP_CHARS (symbol);
-      if (!isupper (*varName) || !_gst_use_undeclared)
-	return (assocOOP);
+      if (_gst_use_undeclared == UNDECLARED_TEMPORARIES
+	  && declare_temporary)
+        undeclaredDictionaryOOP = temporaries_dictionary;
 
-      undeclaredDictionary =
-	dictionary_at (_gst_smalltalk_dictionary,
-		       _gst_undeclared_symbol);
+      else if (_gst_use_undeclared == UNDECLARED_GLOBALS
+	       && isupper (*varName))
+        undeclaredDictionaryOOP = dictionary_at (_gst_smalltalk_dictionary,
+					         _gst_undeclared_symbol);
 
-      assocOOP =
-	dictionary_association_at (undeclaredDictionary, symbol);
+      else
+	undeclaredDictionaryOOP = _gst_nil_oop;
 
-      if (IS_NIL (assocOOP))
+      if (!IS_NIL (undeclaredDictionaryOOP))
 	{
-	  assocOOP =
-	    NAMESPACE_AT_PUT (undeclaredDictionary, symbol,
-			      _gst_nil_oop);
-
-	  MAKE_OOP_UNTRUSTED (assocOOP, _gst_untrusted_methods);
+          assocOOP = dictionary_association_at (undeclaredDictionaryOOP, symbol);
+          if (IS_NIL (assocOOP))
+	    {
+	      assocOOP =
+	        NAMESPACE_AT_PUT (undeclaredDictionaryOOP, symbol, _gst_nil_oop);
+	      MAKE_OOP_UNTRUSTED (assocOOP, _gst_untrusted_methods);
+	    }
 	}
     }
 
@@ -645,7 +677,7 @@ _gst_find_variable (symbol_entry * se,
       return (true);
     }
 
-  varAssoc = _gst_find_variable_binding (list);
+  varAssoc = _gst_find_variable_binding (list, true);
   if (IS_NIL (varAssoc))
     return (false);
 

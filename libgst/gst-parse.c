@@ -322,21 +322,50 @@ recover_error (gst_parser *p)
 static void
 parse_doit (gst_parser *p)
 {
-  tree_node temps = parse_temporaries (p, false);
-  tree_node statements = parse_statements (p, true);
+  mst_Boolean first = true;
+  OOP oldTemporaries = _gst_push_temporaries_dictionary ();
+  tree_node temps, statement;
 
-  if (p->token != EOF && p->token != '!')
-    expected (p, '!', -1);
+  do
+    {
+      temps = parse_temporaries (p, false);
+      lex_skip_if (p, '^', false);
+      statement = parse_expression (p, EXPR_ANY);
 
-  if (statements && !_gst_had_error)
-    _gst_execute_statements (temps, statements, false);
+      if (p->token != '.' && p->token != EOF && p->token != '!')
+        expected (p, '.', '!', -1);
 
-  _gst_free_tree ();
-  _gst_had_error = false;
+      /* When regression testing, don't print intermediate values.  */
+      if (statement && !_gst_had_error)
+        {
+          if (first
+	      && _gst_kernel_initialized
+	      && (_gst_regression_testing
+		  || (_gst_get_cur_stream_prompt () && _gst_verbosity >= 3)))
+            {
+              printf ("\nExecution begins...\n");
+              first = false;
+            }
 
-  /* Do not lex until after _gst_free_tree, or we lose a token!  */
-  if (p->token != EOF)
+          _gst_execute_statements (NULL, statement, UNDECLARED_TEMPORARIES,
+			           _gst_regression_testing);
+	}
+
+      _gst_free_tree ();
+      _gst_had_error = false;
+
+       /* Do not lex until after _gst_free_tree, or we lose a token!  */
+       lex_skip_if (p, '.', false);
+    }
+  while (p->token != '!' && p->token != EOF);
+
+  if (_gst_regression_testing && !first)
+    printf ("returned value is %O\n", _gst_last_returned_value);
+
+  while (p->token == '!')
     lex (p);
+
+  _gst_pop_temporaries_dictionary (oldTemporaries);
 }
 
 
@@ -373,7 +402,12 @@ parse_method (gst_parser *p)
 				       pat, temps, attrs, stmts);
 
   if (!_gst_had_error && !_gst_skip_compilation)
-    _gst_compile_method (method, false, true);
+    {
+      enum undeclared_strategy oldUndeclared;
+      oldUndeclared = _gst_set_undeclared (UNDECLARED_GLOBALS);
+      _gst_compile_method (method, false, true);
+      _gst_set_undeclared (oldUndeclared);
+    }
 
   _gst_free_tree ();
   _gst_had_error = false;
@@ -889,7 +923,12 @@ parse_compile_time_constant (gst_parser *p)
   lex_skip_mandatory (p, ')');
 
   if (statements && !_gst_had_error)
-    result = _gst_execute_statements (temps, statements, true);
+    {
+      OOP oldDictionary = _gst_push_temporaries_dictionary ();
+      result = _gst_execute_statements (temps, statements, UNDECLARED_CURRENT,
+					true);
+      _gst_pop_temporaries_dictionary (oldDictionary);
+    }
 
   return _gst_make_oop_constant (&loc, result ? result : _gst_nil_oop); 
 }
@@ -908,12 +947,7 @@ parse_binding_constant (gst_parser *p)
   node = parse_variable_primary (p);
   lex_skip_mandatory (p, '}');
 
-  if (!(node = _gst_make_binding_constant (&node->location, node)))
-    {
-      _gst_errorf ("invalid variable binding");
-      recover_error (p);
-    }
-  return node;
+  return _gst_make_binding_constant (&node->location, node);
 }
 
 

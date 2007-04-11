@@ -84,6 +84,10 @@ ObjectsTest testFinalize!
 ^ObjectsTest testWeak!
 
 
+"TODO: use Eval here, we want 'abc' to survive through the entire
+ execution."
+[
+
     | a b |
     a := WeakArray new: 5.
     a at: 1 put: 'abc'.
@@ -99,7 +103,9 @@ ObjectsTest testFinalize!
     ((1 to: 5) collect: [ :each | a isAlive: each ]) printNl.
     1 to: 5 do: [ :index | a clearGCFlag: index ].
     ((1 to: 5) collect: [ :each | a isAlive: each ]) printNl.
-    ((1 to: 5) collect: [ :each | b isAlive: each ]) printNl!
+    ((1 to: 5) collect: [ :each | b isAlive: each ]) printNl
+
+] value!
 
 
 "Test lightweight class"
