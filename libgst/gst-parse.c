@@ -105,6 +105,7 @@ static tree_node parse_temporaries (gst_parser *p,
 				    mst_Boolean implied_pipe);
 static tree_node parse_statements (gst_parser *p,
 				   mst_Boolean accept_caret);
+static tree_node parse_required_expression (gst_parser *p);
 static tree_node parse_expression (gst_parser *p,
 				   enum expr_kinds kind);
 static tree_node parse_primary (gst_parser *p);
@@ -526,18 +527,14 @@ parse_statements (gst_parser *p, mst_Boolean accept_caret)
   do
     {
       caret = accept_caret && lex_skip_if (p, '^', false);
-      stmt = parse_expression (p, EXPR_ANY);
       if (caret)
 	{
-          if (stmt == NULL)
-	    {
-	      _gst_errorf ("expected statement after '^'");
-	      recover_error (p);
-	    }
+          stmt = parse_required_expression (p);
 	  stmt = _gst_make_return (&stmt->location, stmt);
 	}
       else
 	{
+          stmt = parse_expression (p, EXPR_ANY);
 	  if (stmt == NULL)
 	    break;
 	}
@@ -590,6 +587,17 @@ parse_expression (gst_parser *p, enum expr_kinds kind)
     return node;
 }
 
+static tree_node
+parse_required_expression (gst_parser *p)
+{
+  tree_node stmt = parse_expression (p, EXPR_ANY);
+  if (!stmt)
+    {
+      _gst_errorf ("expected expression");
+      recover_error (p);
+    }
+  return stmt;
+}
 
 /* primary: variable_primary
 	  | '(' expression ')'
@@ -631,7 +639,7 @@ parse_primary (gst_parser *p)
 
     case '(':
       lex (p);
-      node = parse_expression (p, EXPR_ANY);
+      node = parse_required_expression (p);
       lex_skip_mandatory (p, ')');
       break;
 
