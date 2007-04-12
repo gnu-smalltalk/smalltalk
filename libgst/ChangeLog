@@ -1,6 +1,11 @@
 2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
             Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
 
+	* libgst/gst-parse.c: Improved error recovery.
+
+2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
+            Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
+
 	* libgst/gst-parse.c: Fix parsing when expressions were required
 	but not found.
 

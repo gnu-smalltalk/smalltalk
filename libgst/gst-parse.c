@@ -625,7 +625,7 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 	  _gst_set_compilation_class (classOOP);
 	  parse_method (p, ']');
 	  _gst_reset_compilation_category ();
-	  break;
+	  continue;
 	  
 	case '<':
 	  if (t2 == IDENTIFIER) 
@@ -637,6 +637,7 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 	      _gst_set_compilation_class (classOOP);
 	      parse_method (p, ']');
 	      _gst_reset_compilation_category ();
+	      continue;
 	    }
 	  else if (t2 == KEYWORD) 
 	    {
@@ -649,7 +650,10 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 	      lex_skip_mandatory (p, '<');
 	      keyword = parse_keyword_expression (p, NULL, EXPR_KEYWORD);
 	      if (keyword->v_expr.expression->v_list.next != NULL)
-		_gst_errorf ("expected one keyword only");
+		{
+		  _gst_errorf ("expected one keyword only");
+		  _gst_had_error = true;
+		}
 	      else
 		{
 		  value = keyword->v_expr.expression->v_list.value;
@@ -666,11 +670,10 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 		}
 
 	      lex_skip_mandatory (p, '>');
+	      continue;
 	    }
-	  else
-	    _gst_errorf ("invalid class body element");
 	  break;
-	  
+   
 	case IDENTIFIER:
 	  if (t2 == ASSIGNMENT)
 	    {
@@ -711,6 +714,7 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 
 	      if (token (p, 0) != ']')
 		lex_skip_mandatory(p, '.');	      
+	      continue;
 	    }
 	  else if (t2 == BINOP)
 	    {
@@ -718,6 +722,7 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 	      printf ("parse method\n");
 #endif
 	      parse_scoped_method (p, classOOP);
+	      continue;
 	    }
 	  else if (t2 == '[')
 	    {
@@ -728,6 +733,7 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 	      _gst_set_compilation_class (classOOP);
 	      parse_method (p, ']');
 	      _gst_reset_compilation_category ();
+	      continue;
 	    }
 	  else if (t2 == SCOPE_SEPARATOR)
 	    {
@@ -736,6 +742,7 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 #endif
 
 	      parse_scoped_method (p, classOOP);
+	      continue;
 	    }
 	  else if (t2 == IDENTIFIER)
 	    {
@@ -745,6 +752,7 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 		  printf ("parse class method\n");
 #endif
 		  parse_scoped_method (p, classOOP);
+		  continue;
 		}
 	      else if (t3 == '['
 		       && strcmp (val (p, 0)->sval, "Class") == 0
@@ -754,19 +762,18 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 		  printf ("parse class protocol\n");
 #endif
 		  if (_gst_object_is_kind_of (classOOP, _gst_metaclass_class))
-		    _gst_errorf ("already on class side, Class protocol invalid");
+		    {
+		      _gst_errorf ("already on class side, Class protocol invalid");
+		      _gst_had_error = true;
+		      continue;
+		    }
 		  else
 		    {
 		      lex_consume (p, 3);
 		      parse_class_definition (p, OOP_CLASS (classOOP));
 		      lex_skip_mandatory (p, ']');
 		    }
-		}
-	      else 
-		{
-		  _gst_errorf("invalid class body element");
-		  lex_consume (p, p->la_size);
-		  return false;
+		  continue;
 		}
 	    }
 	  break;
@@ -787,6 +794,7 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 		  printf ("parse instance variables\n");
 #endif
 		  parse_instance_variables (p, classOOP);
+		  continue;
 		}
 	      else if (t3 == '[')
 		{
@@ -796,13 +804,20 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 		  _gst_set_compilation_class (classOOP);
 		  parse_method (p, ']');
 		  _gst_reset_compilation_category ();
+		  continue;
 		}
-	    }	  
+	    }   
+	  break;
+   
+	default:
 	  break;
 	}
+
+      _gst_errorf ("invalid class body element");
+      _gst_had_error = true;
     }
-  
-  return true;
+
+  return !_gst_had_error;
 }
 
 static void 
