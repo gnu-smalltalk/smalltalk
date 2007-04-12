@@ -1240,14 +1240,22 @@ parse_expression (gst_parser *p, enum expr_kinds kind)
 							  node));
     }
 
-  if (!node)
-    return node;
+  if (!node && assigns)
+    {
+      _gst_errorf ("expected expression");
+      recover_error (p);
+    }
 
-  node = parse_message_expression (p, node, kind & ~EXPR_ASSIGNMENT);
+  if (node)
+    {
+      node = parse_message_expression (p, node, kind & ~EXPR_ASSIGNMENT);
+      assert (node);
+    }
+
   if (assigns)
-    return _gst_make_assign (&assigns->location, assigns, node);
-  else
-    return node;
+    node = _gst_make_assign (&assigns->location, assigns, node);
+
+  return node;
 }
 
 static tree_node
