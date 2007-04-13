@@ -476,7 +476,7 @@ _gst_interpret (OOP processOOP)
 #endif /* !LOCAL_REGS */
 
 #ifdef PIPELINING
-  gst_uchar b1, arg2, b4;	/* pre-fetch queue */
+  gst_uchar b2, arg2, b4;	/* pre-fetch queue */
   void *t2;		        /* pre-decode queue */
   BRANCH_REGISTER (t);
 #elif REG_AVAILABILITY >= 1
