@@ -534,7 +534,8 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
 	return parse_class_definition (p, classOOP);
     }
 
-  _gst_errorf ("expected Eval, Namespace or class definition"); 
+  _gst_errorf_at (first_stmt->location.first_line, 
+		  "expected Eval, Namespace or class definition"); 
   return false;
 }
 
@@ -875,7 +876,7 @@ parse_class (tree_node list)
 	
       if (currentOOP == _gst_nil_oop)
 	{
-	  _gst_errorf ("key %s not found", name);
+	  _gst_errorf_at (list->location.first_line, "key %s not found", name);
 	  return NULL;
 	}
 
@@ -885,7 +886,8 @@ parse_class (tree_node list)
 	{
 	  if (!_gst_object_is_kind_of (currentOOP, _gst_class_class)) 
 	    {
-	      _gst_errorf ("expected class named %s, found %O", 
+	      _gst_errorf_at (list->location.first_line,
+			      "expected class named %s, found %O", 
 			   name, OOP_INT_CLASS (currentOOP));
 	      return NULL;
 	    }
@@ -894,8 +896,9 @@ parse_class (tree_node list)
 	{
 	  if (!_gst_object_is_kind_of (currentOOP, _gst_dictionary_class))
 	    {
-	      _gst_errorf ("expected namespace named %s, found %O", 
-			   name, OOP_INT_CLASS (currentOOP));
+	      _gst_errorf_at  (list->location.first_line,
+			       "expected namespace named %s, found %O", 
+			       name, OOP_INT_CLASS (currentOOP));
 	      return NULL;
 	    }
 	}
@@ -919,14 +922,16 @@ parse_namespace (tree_node list)
 		
       if (current_namespace == _gst_nil_oop)
 	{
-	  _gst_errorf ("key %s not found", list->v_list.name);
+	  _gst_errorf_at (list->location.first_line, 
+			  "key %s not found", list->v_list.name);
 	  return NULL;
 	}
       
       if (!_gst_object_is_kind_of (current_namespace, _gst_dictionary_class))
 	{
-	  _gst_errorf ("expected namespace named %s, found %O", 
-		       list->v_list.name, OOP_INT_CLASS (current_namespace));
+	  _gst_errorf_at (list->location.first_line, 
+			  "expected namespace named %s, found %O", 
+			  list->v_list.name, OOP_INT_CLASS (current_namespace));
 	  return NULL;
 	}
 
@@ -945,8 +950,9 @@ parse_namespace (tree_node list)
     current_namespace = new_namespace;
 
   else
-    _gst_errorf ("expected namespace named %s, found %o", namespc,
-		 OOP_INT_CLASS (new_namespace));
+    _gst_errorf_at (list->location.first_line, 
+		    "expected namespace named %s, found %O", namespc,
+		    OOP_INT_CLASS (new_namespace));
 
   return current_namespace;
 }

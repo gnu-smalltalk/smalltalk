@@ -433,7 +433,8 @@ int
 scan_reset_paren (int c,
 	         YYSTYPE * lvalp)
 {
-  parenthesis_depth = 0;
+  if (_gst_get_cur_stream_prompt ())
+    parenthesis_depth = 0;
   return c;
 }
 
