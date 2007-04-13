@@ -166,7 +166,7 @@
    bytecode.
    GET_ARG holds a pointer to the (possibly prefetched) argument of the next
    bytecode.  */
-#if PIPELINING
+#ifdef PIPELINING
 #define FETCH(v)		goto *(t = (v)[*ip], b2 = ip[2], b4 = ip[4], \
 				       arg = ip[1], arg2 = ip[3], t2 = dispatch_vec[b2], \
 				       t)

@@ -1,4 +1,10 @@
 2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
+	    Thomas Girard  <thomas.g.girard@free.fr>
+
+	* libgst/vm.def: Fix pipelining typo.
+	* libgst/interp-bc.inl: Fix pipelining typo.
+
+2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
             Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
 
         * libgst/gst-parse.c: Fix parsing when expressions were required
