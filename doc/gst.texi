@@ -577,11 +577,27 @@ the command prompt: you can use @kbd{C-c} to do this.
 @node Syntax
 @section Syntax of @gst{}
 
-The language that @gst{} accepts is based on the @dfn{file out} syntax
-as shown in the @dfn{Green Book}, also known as @cite{Smalltalk-80: Bits
-of History, Words of Advice} by Glenn Krasner.  The grammar of
-@gst{} is slightly different from the grammar of other Smalltalk environments
-in order to simplify interaction with the system in a command-line environment.
+The language that @gst{} accepts is basically the same that other Smalltalk
+environment accept and the same syntax used in the @dfn{Blue Book}, also
+known as @cite{Smalltalk-80: The Language and Its Implementation}.
+The return operator, which is represented in the Blue Book as an
+up-arrow, is mapped to the ASCII caret symbol @code{^}; the assignment
+operator (left-arrow) is usually represented as @code{:=}@footnote{It
+  also bears mentioning that there are two assignment operators:
+  @code{_} and @code{:=}.  Both are usable interchangeably, provided that
+  they are surrounded by spaces.  The @gst{} kernel code uses the
+  @code{:=} form exclusively, but @code{_} is supported a) for
+  compatibility with previous versions of @gst{} b) because this is the
+  correct mapping between the assignment operator mentioned in the Blue
+  Book and the current ASCII definition.  In the ancient days (like the
+  middle 70's), the ASCII underscore character was also printed as a
+  back-arrow, and many terminals would display it that way, thus its
+  current usage.  Anyway, using @code{_} may lead to portability problems.}.
+
+Actually, the grammar of @gst{} is slightly different from the grammar
+of other Smalltalk environments in order to simplify interaction with
+the system in a command-line environment as well as in full-screen
+editors.
 
 Statements are executed one by one; multiple statements are separated by a
 period.  At end-of-line, if a valid statement is complete, a period is
@@ -596,15 +612,16 @@ each followed by a newline.
 
 Multiple statements share the same local variables, which are automatically
 declared.  To delete the local variables, terminate a statement with
-@code{!} rather than @code{.}  Here,
+@code{!} rather than @code{.} or newline.  Here,
 
 @example
-a := 42. a!
+a := 42
+a!
 a
 @end example
 @noindent
-the first @code{a} is printed as @code{42}, but the second is uninitialized
-and thus printed as @code{nil}.
+the first two @code{a}s are printed as @code{42}, but the third one
+is uninitialized and thus printed as @code{nil}.
 
 In order to evaluate multiple statements in a single block, wrap them into
 an @dfn{eval block} as follows:
@@ -624,21 +641,60 @@ ObjectMemory quit
 exits from the system.  You can also type a @kbd{C-d} to exit from
 Smalltalk if it's reading statements from standard input.
 
+GNU Smalltalk provides three extensions to the language that make it
+simpler to write complete programs in an editor.  However, it is also
+compatible with the @dfn{file out} syntax as shown in the @dfn{Green Book}
+(also known as @cite{Smalltalk-80: Bits of History, Words of Advice}
+by Glenn Krasner).
+
+A new class is created using this syntax:
+
 @display
-@var{class-expression} @t{extend} @t{[}
+@var{superclass-name} @t{subclass:} @var{new-class-name} @t{[}
+@t{|} @var{instance variables} @t{|}
+@var{pragmas}
 @var{message-pattern-1} @t{[} @var{statements} @t{]}
 @var{message-pattern-2} @t{[} @var{statements} @t{]}
+@dots{}
+@var{class-variable-1} @t{:=} @var{expression}@t{.}
+@var{class-variable-2} @t{:=} @var{expression}@t{.}
 @dots{}
 @t{]}
 @end display
 
-This syntax is used to define new methods in a given class.  The
-@var{class-expression} is an expression that evaluates to a class
+In short:
+@itemize @bullet
+@item Instance variables are defined with the same syntax as method temporary
+  variables.
+
+@item Unlike other Smalltalks, method statements are inside brackets.
+
+@item Class variables are defined the same as variable assignments.
+
+@item Pragmas define class comment, class category, imported
+  namespaces, and the shape of indexed instance variables.
+
+@example
+<comment: 'Class comment'>
+<category: 'Examples-Intriguing'>
+<import: SystemExceptions>
+<shape: #pointer>
+@end example
+@end itemize
+
+A similar syntax is used to define new methods in an existing class.
+
+@display
+@var{class-expression} @t{extend} @t{[}
+@dots{}
+@t{]}
+@end display
+
+The @var{class-expression} is an expression that evaluates to a class
 object, which is typically just the name of a class, although it can be
 the name of a class followed by the word @code{class}, which causes the
 method definitions that follow to apply to the named class itself,
-rather than to its instances.  Unlike other Smalltalks, method
-statements are inside brackets.
+rather than to its instances.
 
 @example
 Number extend [
@@ -650,19 +706,6 @@ Number extend [
     ]
 ]
 @end example
-
-The return operator, which is represented in the Blue Book as an
-up-arrow, is mapped to the ASCII caret symbol @code{^}@footnote{It
-  also bears mentioning that there are two assignment operators:
-  @code{_} and @code{:=}.  Both are usable interchangeably, provided that
-  they are surrounded by spaces.  The @gst{} kernel code uses the
-  @code{:=} form exclusively, but @code{_} is supported a) for
-  compatibility with previous versions of @gst{} b) because this is the
-  correct mapping between the assignment operator mentioned in the Blue
-  Book and the current ASCII definition.  In the ancient days (like the
-  middle 70's), the ASCII underscore character was also printed as a
-  back-arrow, and many terminals would display it that way, thus its
-  current usage.  Anyway, using @code{_} may lead to portability problems.}.
 
 A complete treatment of the Smalltalk syntax and of the class library
 can be found in the included tutorial and class reference (@pxref{Top, ,
