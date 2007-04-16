@@ -480,7 +480,11 @@ _gst_interpret (OOP processOOP)
   void *t2;		        /* pre-decode queue */
   BRANCH_REGISTER (t);
 #elif REG_AVAILABILITY >= 1
+#ifdef BRANCH_REGISTER
   BRANCH_REGISTER(prefetch);
+#else
+  void *prefetch;
+#endif
 #endif /* !PIPELINING */
 
 #include "vm.inl"

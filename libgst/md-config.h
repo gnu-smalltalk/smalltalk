@@ -57,7 +57,6 @@
 # define __DECL_REG1 __asm("$16")
 # define __DECL_REG2 __asm("$17")
 # define __DECL_REG3 __asm("$18")
-# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__DECL_REG1) && defined(__sparc__)
@@ -65,7 +64,6 @@
 # define __DECL_REG1 __asm("%l0")
 # define __DECL_REG2 __asm("%l1")
 # define __DECL_REG3 __asm("%l2")
-# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__DECL_REG1) && defined(__alpha__)
@@ -77,12 +75,10 @@
 #  define __DECL_REG1 __asm("r9")
 #  define __DECL_REG2 __asm("r10")
 #  define __DECL_REG3		/* __asm("r11") */
-#  define BRANCH_REGISTER(name) void *name
 # else
 #  define __DECL_REG1 __asm("$9")
 #  define __DECL_REG2 __asm("$10")
 #  define __DECL_REG3		/* __asm("$11") */
-#  define BRANCH_REGISTER(name) void *name
 # endif
 # define L1_CACHE_SHIFT 6
 #endif
@@ -96,7 +92,6 @@
 # else
 #  define __DECL_REG3 __asm("%ebx")   /* ...but prefer a callee-save reg.  */
 # endif
-# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__DECL_REG1) && defined(PPC) || defined(_POWER) || defined(_IBMR2)
@@ -104,7 +99,6 @@
 # define __DECL_REG1 __asm("26")
 # define __DECL_REG2 __asm("27")
 # define __DECL_REG3 __asm("28")
-# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__DECL_REG1) && defined(__hppa__)
@@ -112,7 +106,6 @@
 # define __DECL_REG1 __asm("%r16")
 # define __DECL_REG2 __asm("%r17")
 # define __DECL_REG3 __asm("%r18")
-# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__DECL_REG1) && defined(__mc68000__)
@@ -122,7 +115,6 @@
 # define __DECL_REG1 __asm("a5")
 # define __DECL_REG2 __asm("a4")
 # define __DECL_REG3 __asm("d7")
-# define BRANCH_REGISTER(name) void *name
 # define L1_CACHE_SHIFT 4
 #endif
 
@@ -157,7 +149,6 @@
 
 #ifndef REG_AVAILABILITY
 # define REG_AVAILABILITY 1
-# define BRANCH_REGISTER(name) void *name
 #endif
 
 #if !defined(__GNUC__) || !defined(__DECL_REG1)
