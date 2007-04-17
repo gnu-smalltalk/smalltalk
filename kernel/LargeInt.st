@@ -216,6 +216,73 @@ resultFrom: byteArray
 ! !
 
 
+!LargeInteger methodsFor: 'built-ins'!
+
+hash
+    "Answer an hash value for the receiver"
+    <primitive: VMpr_String_hash>
+    ^0
+!
+
+size
+    "Answer the number of indexed instance variable in the receiver"
+    <primitive: VMpr_Object_basicSize>
+!
+
+digitLength
+    "Answer the number of base-256 digits in the receiver"
+    <primitive: VMpr_Object_basicSize>
+!
+
+at: anIndex
+    "Answer the anIndex-th byte in the receiver's representation"
+    <primitive: VMpr_Object_basicAt>
+    ^self mostSignificantByte
+!
+
+at: anIndex put: aNumber
+    "Set the anIndex-th byte in the receiver's representation"
+    <primitive: VMpr_Object_basicAtPut>
+
+   self checkIndexableBounds: anIndex put: aNumber
+!
+
+primReplaceFrom: start to: stop with: replacementString 
+    startingAt: replaceStart    
+    "Private - Replace the characters from start to stop with new
+     characters contained in replacementString (which, actually, can be
+     any variable byte class), starting at the replaceStart location of
+     replacementString"
+    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+    ^self primitiveFailed
+!
+
+digitAt: anIndex
+    "Answer the anIndex-th base-256 digit in the receiver's representation"
+    <primitive: VMpr_Object_basicAt>
+    ^self mostSignificantByte
+!
+
+digitAt: anIndex put: aNumber
+    "Set the anIndex-th base-256 digit in the receiver's representation"
+    <primitive: VMpr_Object_basicAtPut>
+    self checkIndexableBounds: anIndex put: aNumber
+! !
+
+
+!LargeInteger methodsFor: 'disabled'!
+
+asObject
+    "This method always fails. The number of OOPs is far less than
+    the minimum number represented with a LargeInteger."
+    self primitiveFailed
+!
+
+asObjectNoFail
+    ^nil
+! !
+
+
 !LargeInteger methodsFor: 'testing'!
 
 = aNumber

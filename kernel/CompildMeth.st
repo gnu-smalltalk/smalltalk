@@ -49,6 +49,37 @@ instances.' !
 
 !CompiledMethod class methodsFor: 'instance creation'!
 
+literals: lits numArgs: numArg numTemps: numTemp
+    attributes: attrArray bytecodes: bytecodes depth: depth
+
+    "Answer a full fledged CompiledMethod. Construct the method
+     header from the parameters, and set the literals and bytecodes
+     to the provided ones.  Also, the bytecodes are optimized and
+     any embedded CompiledBlocks modified to refer to these literals
+     and to the newly created CompiledMethod."
+
+    <primitive: VMpr_CompiledMethod_create>
+    attrArray inject: false into: [ :found :each |
+	each arguments size ~= each selector numArgs
+	    ifTrue: [ SystemExceptions.VerificationError signal: 'invalid number of arguments' ].
+
+	each selector == #primitive:
+	    ifFalse: [ found ]
+	    ifTrue: [
+		found
+		    ifTrue: [ SystemExceptions.VerificationError signal: 'duplicate primitive declaration' ].
+		(each arguments first class == SmallInteger
+		    and: [ each arguments first strictlyPositive ])
+		    ifFalse: [ SystemExceptions.VerificationError signal: 'invalid primitive declaration' ].
+
+		true
+	    ].
+    ]
+! !
+
+
+!CompiledMethod class methodsFor: 'instance creation'!
+
 numArgs: args
     "Create a user-defined method (one that is sent
      #valueWithReceiver:withArguments: when it is invoked)
@@ -573,4 +604,3 @@ rewriteAsAsyncCCall: func args: argsArray
     newMethod descriptor: self descriptor.
     self become: newMethod.
     ^nil! !
-

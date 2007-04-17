@@ -3162,22 +3162,6 @@ primitive VMpr_Dictionary_at [succeed]
   PRIM_SUCCEEDED;
 }
 
-/* Dictionary at: put: */
-primitive VMpr_Dictionary_atPut [succeed]
-{
-  OOP oop1;
-  OOP oop2;
-  OOP oop3;
-  _gst_primitives_executed++;
-
-  oop3 = POP_OOP ();
-  oop2 = POP_OOP ();
-  oop1 = STACKTOP ();
-  DICTIONARY_AT_PUT (oop1, oop2, oop3);
-  SET_STACKTOP (oop3);
-  PRIM_SUCCEEDED;
-}
-
 /* This is not defined in terms of #error: in a .st file because some 
    of the required functionality may not be present when it gets
    first invoked, say during the loading of the first kernel files.

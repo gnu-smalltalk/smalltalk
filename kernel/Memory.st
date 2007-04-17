@@ -241,3 +241,19 @@ stringAt: anAddress put: aValue
 ! !
 
 
+
+!Memory class methodsFor: 'private'!
+
+type: aType at: anAddress
+    "Returns a particular type object from memory at anAddress"
+    <primitive: VMpr_Memory_at>
+    ^self primitiveFailed
+!
+
+type: aType at: anAddress put: aValue
+    "Sets the memory location anAddress to aValue"
+    <primitive: VMpr_Memory_atPut>
+    ^self primitiveFailed
+! !
+
+

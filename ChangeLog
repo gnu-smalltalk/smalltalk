@@ -1,5 +1,44 @@
 2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Builtins.st: Move most builtins...
+	* kernel/AbstNamespc.st: ...here.
+	* kernel/ArrayColl.st: ... and here,
+	* kernel/Behavior.st: ... and here,
+	* kernel/BlkClosure.st: ... and here,
+	* kernel/ByteArray.st: ... and here,
+	* kernel/CFuncs.st: ... and here,
+	* kernel/CObject.st: ... and here,
+	* kernel/CharArray.st: ... and here,
+	* kernel/Character.st: ... and here,
+	* kernel/CompildCode.st: ... and here,
+	* kernel/CompildMeth.st: ... and here,
+	* kernel/CompiledBlk.st: ... and here,
+	* kernel/ContextPart.st: ... and here,
+	* kernel/FileDescr.st: ... and here,
+	* kernel/Float.st: ... and here,
+	* kernel/FloatD.st: ... and here,
+	* kernel/FloatE.st: ... and here,
+	* kernel/FloatQ.st: ... and here,
+	* kernel/HashedColl.st: ... and here,
+	* kernel/LargeInt.st: ... and here,
+	* kernel/Memory.st: ... and here,
+	* kernel/Namespace.st: ... and here,
+	* kernel/ObjMemory.st: ... and here,
+	* kernel/Object.st: ... and here,
+	* kernel/ProcSched.st: ... and here,
+	* kernel/Process.st: ... and here,
+	* kernel/Semaphore.st: ... and here,
+	* kernel/SmallInt.st: ... and here,
+	* kernel/Stream.st: ... and here,
+	* kernel/String.st: ... and here,
+	* kernel/Symbol.st: ... and here,
+	* kernel/SysDict.st: ... and here,
+	* kernel/Time.st: ... and here,
+	* kernel/UniChar.st: ... and here,
+	* kernel/UniString.st: ... and here,
+
+2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
 	* tests/mutate.st: Finish converting to new syntax.
 
 2007-04-11  Paolo Bonzini  <bonzini@gnu.org>

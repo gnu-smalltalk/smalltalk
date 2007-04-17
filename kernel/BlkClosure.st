@@ -527,3 +527,48 @@ outerContext: containingContext
      the receiver"
     outerContext := containingContext
 ! !
+    
+
+
+!BlockClosure methodsFor: 'built ins'!
+
+value
+    "Evaluate the receiver passing no parameters"
+    <primitive: VMpr_BlockClosure_value>
+    SystemExceptions.WrongArgumentCount signal
+!
+
+value: arg1
+    "Evaluate the receiver passing arg1 as the only parameter"
+    <primitive: VMpr_BlockClosure_value>
+    SystemExceptions.WrongArgumentCount signal
+!
+
+value: arg1 value: arg2
+    "Evaluate the receiver passing arg1 and arg2 as the parameters"
+    <primitive: VMpr_BlockClosure_value>
+    SystemExceptions.WrongArgumentCount signal
+!
+
+value: arg1 value: arg2 value: arg3
+    "Evaluate the receiver passing arg1, arg2 and arg3 as the parameters"
+    <primitive: VMpr_BlockClosure_value>
+    SystemExceptions.WrongArgumentCount signal
+!
+
+valueWithArguments: argumentsArray
+    "Evaluate the receiver passing argArray's elements as the parameters"
+    <primitive: VMpr_BlockClosure_valueWithArguments>
+    argumentsArray isArray 
+	ifFalse: [ SystemExceptions.WrongClass signalOn: argumentsArray mustBe: Array ].
+
+    SystemExceptions.WrongArgumentCount signal
+! !
+
+!BlockClosure methodsFor: 'private'!
+
+valueAndResumeOnUnwind
+    "Private - For use by #ensure:"
+    <primitive: VMpr_BlockClosure_valueAndResumeOnUnwind>
+    SystemExceptions.WrongArgumentCount signal
+! !

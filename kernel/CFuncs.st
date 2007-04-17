@@ -47,6 +47,16 @@ to perform the actual call-out to C routines.' !
 
 
 
+!CFunctionDescriptor class methodsFor: 'instance creation'!
+
+for: funcNameString returning: returnTypeSymbol withArgs: argsArray
+    "Private - Answer a CFunctionDescriptor"
+
+    <primitive: VMpr_CFuncDescriptor_create>
+    ^self primitiveFailed
+! !
+
+
 !CFunctionDescriptor class methodsFor: 'testing'!
 
 addressOf: function
@@ -174,6 +184,8 @@ callNoRetryFrom: aContext into: aValueHolder
     <primitive: VMpr_CFuncDescriptor_call>
     self primitiveFailed
 ! !
+
+
 
 "A couple of simple, but useful callout functions, as examples."
 

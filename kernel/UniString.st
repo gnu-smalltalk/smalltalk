@@ -113,3 +113,11 @@ numberOfCharacters
      the same as #size for UnicodeString."
     ^self size! !
 
+
+!UnicodeString methodsFor: 'built-ins'!
+
+hash
+    "Answer an hash value for the receiver"
+    <primitive: VMpr_String_hash>
+    ^0
+! !

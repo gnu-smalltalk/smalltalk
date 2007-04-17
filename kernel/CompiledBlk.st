@@ -45,6 +45,19 @@ CompiledBlock comment:
 
 !CompiledBlock class methodsFor: 'instance creation'!
 
+numArgs: args numTemps: temps bytecodes: bytecodes depth: depth literals: literalArray
+    "Answer an (almost) full fledged CompiledBlock.  To make it complete,
+     you must either set the new object's `method' variable, or put it
+     into a BlockClosure and put the BlockClosure into a CompiledMethod's
+     literals.  The clean-ness of the block is automatically computed."
+
+    <primitive: VMpr_CompiledBlock_create>
+    self primitiveFailed
+! !
+
+
+!CompiledBlock class methodsFor: 'instance creation'!
+
 new: numBytecodes header: anInteger method: outerMethod
     "Answer a new instance of the receiver with room for the given
      number of bytecodes and the given header."

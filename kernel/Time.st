@@ -63,6 +63,57 @@ utcNow
 ! !
 
 
+
+!Time class methodsFor: 'builtins'!
+
+timezoneBias
+    "Specifies the current bias, in minutes, for local time translation for
+     the current time. The bias is the difference, in seconds, between
+     Coordinated Universal Time (UTC) and local time; a positive bias
+     indicates that the local timezone is to the east of Greenwich (e.g.
+     Europe, Asia), while a negative bias indicates that it is to the
+     west (e.g. America)"
+    <primitive: VMpr_Time_timezoneBias>
+    ^self primitiveFailed
+!
+
+timezone
+    "Answer a String associated with the current timezone (either standard
+     or daylight-saving) on this operating system. For example, the answer
+     could be `EST' to indicate Eastern Standard Time; the answer can be
+     empty and can't be assumed to be a three-character code such as `EST'."
+    <primitive: VMpr_Time_timezone>
+    ^self primitiveFailed
+!
+
+secondClock
+    "Returns the number of seconds to/since 1/1/2000. This method won't
+     last long - until Time.st restores correct Blue Book semantics"
+    <primitive: VMpr_Time_secondClock>
+    ^self primitiveFailed
+!
+
+primSecondClock
+    "Returns the number of seconds to/from 1/1/2000."
+    <primitive: VMpr_Time_secondClock>
+    ^self primitiveFailed
+!
+
+millisecondClock
+    "Returns the number of milliseconds since midnight. This method won't
+     last long - until Time.st restores correct Blue Book semantics"
+    <primitive: VMpr_Time_millisecondClock>
+   ^self primitiveFailed
+!
+
+primMillisecondClock
+    "Returns the number of milliseconds since midnight."
+    <primitive: VMpr_Time_millisecondClock>
+   ^self primitiveFailed
+! !
+
+
+
 !Time class methodsFor: 'initialization'!
 
 initialize
@@ -293,3 +344,4 @@ printOn: aStream
 setSeconds: secs
     seconds := secs \\ 86400
 ! !
+

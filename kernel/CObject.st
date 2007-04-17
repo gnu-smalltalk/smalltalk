@@ -184,6 +184,31 @@ CBoolean comment: 'I return true if a byte is not zero, false otherwise.'!
 
 !CObject class methodsFor: 'instance creation'!
 
+alloc: nBytes
+    "Allocate nBytes bytes and return an instance of the receiver"
+    <primitive: VMpr_CObject_alloc>
+    ^SystemExceptions.WrongClass signalOn: nBytes mustBe: SmallInteger
+!
+
+new: nBytes
+    "Allocate nBytes bytes and return an instance of the receiver"
+    <primitive: VMpr_CObject_alloc>
+    ^SystemExceptions.WrongClass signalOn: nBytes mustBe: SmallInteger
+!
+
+alloc: nBytes type: cTypeObject
+    "Allocate nBytes bytes and return a CObject of the given type"
+    <primitive: VMpr_CObject_allocType>
+    nBytes isInteger ifFalse: [
+	^SystemExceptions.WrongClass signalOn: nBytes mustBe: SmallInteger
+    ].
+    ^SystemExceptions.WrongClass signalOn: cTypeObject mustBe: CType
+! !
+
+
+
+!CObject class methodsFor: 'instance creation'!
+
 address: anInteger
     "Answer a new object pointing to the passed address, anInteger"
     ^(self basicNew: 1)
@@ -1101,3 +1126,87 @@ narrow
     "Return the receiver: a NULL pointer is always nil, whatever its type."
     ^self
 ! !
+
+
+!CObject methodsFor: 'C data access'!
+
+at: byteOffset type: aType
+    "Answer some data of the given type from byteOffset bytes after
+     the pointer stored in the receiver"
+    <primitive: VMpr_CObject_at>
+    byteOffset isInteger ifFalse: [
+	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
+    ].
+    ^SystemExceptions.WrongClass signalOn: aType
+!
+    
+at: byteOffset put: aValue type: aType
+    "Store aValue as data of the given type from byteOffset bytes after
+     the pointer stored in the receiver"
+    | type |
+    <primitive: VMpr_CObject_atPut>
+
+    "Attempt to store something meaningful from another CObject"
+    type := aValue cObjStoredType.
+    type isNil ifTrue: [ type := aType ].
+    ^self at: byteOffset noCObjectsPut: aValue cObjStoredValue type: type
+!
+
+free
+    "Free the receiver's pointer and set it to null. Big trouble hits
+     you if the receiver doesn't point to the base of a malloc-ed area."
+    <primitive: VMpr_CObject_free>
+    ^self primitiveFailed
+! !
+
+
+
+!CObject methodsFor: 'private'!
+
+at: byteOffset noCObjectsPut: aValue type: aType
+    "Private - Store aValue as data of the given type from byteOffset bytes
+     after the pointer stored in the receiver. This version refuses CObjects
+     for `aValue'. "
+    <primitive: VMpr_CObject_atPut>
+
+    byteOffset isInteger ifFalse: [
+	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
+    ].
+    (aType isInteger or: [ aType isKindOf: CType ]) ifFalse: [
+	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
+    ].
+    ^SystemExceptions.WrongClass signalOn: aValue
+!
+
+derefAt: byteOffset type: aType
+    <primitive: VMpr_CObject_derefAt>
+
+    byteOffset isInteger ifFalse: [
+	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
+    ].
+    ^SystemExceptions.WrongClass signalOn: aType
+!
+
+derefAt: byteOffset put: aValue type: aType
+    | type |
+    <primitive: VMpr_CObject_derefAtPut>
+
+    "Attempt to store something meaningful from another CObject"
+    type := aValue cObjStoredType.
+    type isNil ifTrue: [ type := aType ].
+    ^self derefAt: byteOffset noCObjectsPut: aValue cObjStoredValue type: type
+!
+
+derefAt: byteOffset noCObjectsPut: aValue type: aType
+    <primitive: VMpr_CObject_derefAtPut>
+
+    byteOffset isInteger ifFalse: [
+	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
+    ].
+    (aType isInteger or: [ aType isKindOf: CType ]) ifFalse: [
+	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
+    ].
+    ^SystemExceptions.WrongClass signalOn: aValue
+! !
+
+

@@ -504,3 +504,87 @@ isFloat
     ^true
 ! !
 
+!Float methodsFor: 'built ins'!
+
+exp
+    "Answer 'e' (2.718281828459...) raised to the receiver"
+    <primitive: VMpr_Float_exp>
+    self primitiveFailed
+!
+
+ln
+    "Answer the logarithm of the receiver in base 'e' (2.718281828459...)"
+    <primitive: VMpr_Float_ln>
+    self primitiveFailed
+!
+
+raisedTo: aNumber
+    "Answer the receiver raised to its aNumber power"
+    <primitive: VMpr_Float_pow>
+    aNumber isFloat ifTrue: [ self arithmeticError: 'invalid operands' ].
+    ^self raisedTo: (self coerce: aNumber)
+!
+
+sqrt
+    "Answer the square root of the receiver"
+    <primitive: VMpr_Float_sqrt>
+    self primitiveFailed
+!
+
+ceiling
+    "Answer the integer part of the receiver, truncated towards +infinity"
+    <primitive: VMpr_Float_ceil>
+    self checkCoercion.
+    ^self > 0
+	ifTrue: [ self truncated + self fractionPart sign ]
+	ifFalse: [ self truncated ]
+!
+
+primHash
+    "Private - Answer an hash value for the receiver"
+    <primitive: VMpr_String_hash>
+    ^0
+!
+
+floor
+    "Answer the integer part of the receiver, truncated towards -infinity"
+    <primitive: VMpr_Float_floor>
+    self checkCoercion.
+    ^self < 0
+	ifTrue: [ self truncated + self fractionPart sign ]
+	ifFalse: [ self truncated ]
+!
+
+sin
+    "Answer the sine of the receiver"
+    <primitive: VMpr_Float_sin>
+    self primitiveFailed
+!
+
+cos
+    "Answer the cosine of the receiver"
+    <primitive: VMpr_Float_cos>
+    self primitiveFailed
+!
+
+tan
+    "Answer the tangent of the receiver"
+    <primitive: VMpr_Float_tan>
+!
+
+arcSin
+    "Answer the arc-sine of the receiver"
+    <primitive: VMpr_Float_arcSin>
+    ^self arithmeticError: 'argument out of range'
+!
+
+arcCos
+    "Answer the arc-cosine of the receiver"
+    <primitive: VMpr_Float_arcCos>
+    ^self arithmeticError: 'argument out of range'
+!
+
+arcTan
+    "Answer the arc-tangent of the receiver"
+    <primitive: VMpr_Float_arcTan>
+! !

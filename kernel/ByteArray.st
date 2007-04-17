@@ -346,3 +346,73 @@ type: type at: index put: value size: size
 	 at: (ObjectMemory addressOf: self) + offset
 	 put: value
 ! !
+
+
+
+!ByteArray class methodsFor: 'instance creation'!
+
+fromCData: aCObject size: anInteger
+    "Answer a ByteArray containing anInteger bytes starting at the location pointed
+     to by aCObject"
+    <primitive: VMpr_ByteArray_fromCData_size>
+    ^SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger
+! !
+
+
+
+!ByteArray methodsFor: 'built ins'!
+
+byteAt: index
+    "Answer the index-th indexed instance variable of the receiver"
+    <primitive: VMpr_Object_basicAt>
+    self checkIndexableBounds: index
+!
+
+byteAt: index put: value
+    "Store the `value' byte in the index-th indexed instance variable
+     of the receiver"
+    <primitive: VMpr_Object_basicAtPut>
+
+    self checkIndexableBounds: index put: value
+!
+
+
+hash
+    "Answer an hash value for the receiver"
+    <primitive: VMpr_String_hash>
+    ^0
+!
+
+replaceFrom: start to: stop withString: aString startingAt: replaceStart
+    "Replace the characters from start to stop with the
+     ASCII codes contained in aString (which, actually, can be
+     any variable byte class), starting at the replaceStart
+     location of aString"
+    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+    ^super replaceFrom: start to: stop with: aString startingAt: replaceStart
+!
+
+replaceFrom: start to: stop with: aByteArray startingAt: replaceStart
+    "Replace the characters from start to stop with the
+     bytes contained in aByteArray (which, actually, can be
+     any variable byte class), starting at the replaceStart
+     location of aByteArray"
+    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+    ^super replaceFrom: start to: stop with: aByteArray startingAt: replaceStart
+!
+
+primReplaceFrom: start to: stop with: aByteArray startingAt: srcIndex
+    "Private - Replace the characters from start to stop with the
+     ASCII codes contained in aString (which, actually, can be
+     any variable byte class), starting at the srcIndex location of
+     aString"
+    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+    ^self primitiveFailed
+!
+
+asCData: aCType
+    "Convert the receiver to a CObject with the given type"
+    <primitive: VMpr_ByteArray_asCData>
+    ^self primitiveFailed
+! !
+

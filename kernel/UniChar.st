@@ -46,5 +46,21 @@ UnicodeCharacter objects are created when accessing UnicodeStrings,
 or with Character class>>#codePoint:.' !
 
 
-"All other methods defined as primitives, or inherited from Character."
+!UnicodeCharacter class methodsFor: 'built ins'!
 
+value: anInteger
+    "Returns the character object, possibly a Character, corresponding
+     to anInteger.  Error if anInteger is not an integer, or not in
+     0..16r10FFFF.
+
+     This is only a primitive for speed.  UnicodeCharacter's #value:
+     method is equivalent to #codePoint: (which is the same for
+     Character and UnicodeCharacter)."
+     <primitive: VMpr_UnicodeCharacter_create>
+
+    anInteger isInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ]
+	ifTrue: [ SystemExceptions.ArgumentOutOfRange signalOn: anInteger mustBeBetween: 0 and: 16r10FFFF ]
+! !
+
+

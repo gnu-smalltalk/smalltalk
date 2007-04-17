@@ -381,3 +381,31 @@ postStore
     "Called after an object is dumped.  Do nothing -- necessary because
      by default this calls #postLoad by default"
 ! !
+
+
+!HashedCollection methodsFor: 'builtins'!
+
+primAt: anIndex
+    "Private - Answer the anIndex-th item of the hash table for the receiver.
+     Using this instead of basicAt: allows for easier changes in the
+     representation"
+    <primitive: VMpr_Object_basicAt>
+    self checkIndexableBounds: anIndex
+!
+
+primAt: anIndex put: value
+    "Private - Store value in the anIndex-th item of the hash table for the
+     receiver. Using this instead of basicAt:put: allows for easier
+     changes in the representation"
+    <primitive: VMpr_Object_basicAtPut>
+
+    self checkIndexableBounds: anIndex put: value
+!
+
+primSize
+    "Private - Answer the size of the hash table for the receiver.
+     Using this instead of basicSize allows for easier changes
+     in the representation"
+    <primitive: VMpr_Object_basicSize>
+! !
+

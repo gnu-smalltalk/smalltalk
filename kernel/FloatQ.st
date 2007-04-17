@@ -56,7 +56,7 @@ coerce: aNumber
 signByte
     "Answer the byte of the receiver that contains the sign bit"
     ^##(| n k |
-	n := 0.0q * -1.
+	n := -0.0q.
 	1 to: n size do: [ :i | (n at: i) = 128 ifTrue: [ k := i ] ].
 	k)
 ! !
@@ -178,3 +178,107 @@ exponentLetter
     ^$q
 ! !
 
+!FloatQ methodsFor: 'built ins'!
+
++ arg
+    "Sum the receiver and arg and answer another Number"
+    <primitive: VMpr_FloatQ_plus>
+    ^self retrySumCoercing: arg
+!
+
+- arg
+    "Subtract arg from the receiver and answer another Number"
+    <primitive: VMpr_FloatQ_minus>
+    ^self retryDifferenceCoercing: arg
+!
+
+< arg
+    "Answer whether the receiver is less than arg"
+    <primitive: VMpr_FloatQ_lt>
+    ^self retryRelationalOp: #< coercing: arg
+!
+
+> arg
+    "Answer whether the receiver is greater than arg"
+    <primitive: VMpr_FloatQ_gt>
+    ^self retryRelationalOp: #> coercing: arg
+!
+
+<= arg
+    "Answer whether the receiver is less than or equal to arg"
+    <primitive: VMpr_FloatQ_le>
+    ^self retryRelationalOp: #<= coercing: arg
+!
+
+>= arg
+    "Answer whether the receiver is greater than or equal to arg"
+    <primitive: VMpr_FloatQ_ge>
+    ^self retryRelationalOp: #>= coercing: arg
+!
+
+= arg
+    "Answer whether the receiver is equal to arg"
+    <primitive: VMpr_FloatQ_eq>
+    ^self retryEqualityCoercing: arg
+!
+
+~= arg
+    "Answer whether the receiver is not equal to arg"
+    <primitive: VMpr_FloatQ_ne>
+    ^self retryInequalityCoercing: arg
+!
+
+* arg
+    "Multiply the receiver and arg and answer another Number"
+    <primitive: VMpr_FloatQ_times>
+    ^self retryMultiplicationCoercing: arg
+!
+
+/ arg
+    "Divide the receiver by arg and answer another FloatQ"
+    <primitive: VMpr_FloatQ_divide>
+    ^self generality = arg generality
+	ifTrue: [ self zeroDivide ]
+	ifFalse: [ self retryDivisionCoercing: arg ]
+!
+
+asFloatD
+    "Answer the receiver converted to a FloatD"
+
+    <primitive: VMpr_FloatQ_asFloatD>
+    self primitiveFailed
+!
+
+asFloatE
+    "Answer the receiver converted to a FloatE"
+
+    <primitive: VMpr_FloatQ_asFloatE>
+    self primitiveFailed
+!
+
+truncated
+    "Truncate the receiver towards zero and answer the result"
+
+    <primitive: VMpr_FloatQ_truncated>
+    ^super truncated
+!
+
+fractionPart
+    "Answer the fractional part of the receiver"
+    <primitive: VMpr_FloatQ_fractionPart>
+    self checkCoercion.
+    ^self primitiveFailed
+!
+
+exponent
+    "Answer the exponent of the receiver in mantissa*2^exponent
+     representation ( |mantissa|<=1 ) "
+    <primitive: VMpr_FloatQ_exponent>
+!
+
+timesTwoPower: arg
+    "Answer the receiver multiplied by 2^arg"
+    <primitive: VMpr_FloatQ_timesTwoPower>
+! !
+
+

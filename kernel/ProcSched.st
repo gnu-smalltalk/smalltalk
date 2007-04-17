@@ -250,3 +250,45 @@ storeOn: aStream
     "Store onto aStream a Smalltalk expression which evaluates to the receiver"
     aStream nextPutAll: 'Processor'
 ! !
+
+
+!ProcessorScheduler methodsFor: 'built ins'!
+
+disableInterrupts
+   "Disable interrupts caused by external events while the
+    current process is executing.  Note that interrupts are
+    disabled on a per-process basis, and that calling
+    #disableInterrupts twice requires calling #enableInterrupts
+    twice as well to re-enable interrupts."
+   <primitive: VMpr_Processor_disableInterrupts>
+!
+
+enableInterrupts
+   "Re-enable interrupts caused by external events while the
+    current process is executing.  By default, interrupts are
+    enabled."
+   <primitive: VMpr_Processor_enableInterrupts>
+!
+
+
+!ProcessorScheduler methodsFor: 'timed invocation'!
+
+isTimeoutProgrammed
+    "Private - Answer whether there is a pending call to
+    #signal:atMilliseconds:"
+    <primitive: VMpr_Processor_isTimeoutProgrammed>
+!
+
+signal: aSemaphore atMilliseconds: millis
+    "Private - signal 'aSemaphore' after 'millis' milliseconds have elapsed"
+    <primitive: VMpr_Processor_signalAtMilliseconds>
+    ^self primitiveFailed
+!
+
+signal: aSemaphore onInterrupt: anIntegerSignalNumber
+    "Private - signal 'aSemaphore' when the given C signal occurs"
+    <primitive: VMpr_Processor_signalOnInterrupt>
+    ^self primitiveFailed
+! !
+
+

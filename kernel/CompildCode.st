@@ -894,3 +894,37 @@ bytecodeStart
     "Answer the index where the bytecodes start - 1"
     ^0
 ! !
+
+
+!CompiledCode class methodsFor: 'cache flushing'!
+
+flushTranslatorCache
+    "Answer any kind of cache mantained by a just-in-time code translator
+     in the virtual machine (if any).  Do nothing for now."
+! !
+
+!CompiledCode methodsFor: 'translation'!
+
+discardTranslation
+    "Flush the just-in-time translated code for the receiver (if any)."
+    <primitive: VMpr_CompiledCode_discardTranslation>
+! !
+
+!CompiledCode methodsFor: 'private'!
+
+verificationResult
+    "Answer the result of verifying the bytecodes for the receiver."
+    <primitive: VMpr_CompiledCode_verificationResult>
+! !
+
+!CompiledCode methodsFor: 'security'!
+
+verify
+    "Verify the bytecodes for the receiver, and raise an exception if
+     the verification process failed."
+    | result |
+    result := self verificationResult.
+    result isNil ifFalse: [
+	SystemExceptions.VerificationError signal: result
+    ]
+! !

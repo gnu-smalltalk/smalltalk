@@ -45,8 +45,84 @@ several methods that are "system" related, such as #quitPrimitive.
 My instance also helps keep track of dependencies between objects.' !
 
 
-">>> See also builtins.st for some non-primitive but highly useful
-SystemDictionary method definitions."
+
+!SystemDictionary methodsFor: 'builtins'!
+
+basicBacktrace
+    "Prints the method invocation stack backtrace, as an aid to debugging"
+    <primitive: VMpr_SystemDictionary_backtrace>
+    self primitiveFailed
+!
+
+backtrace
+    "Prints the method invocation stack backtrace, as an aid to debugging"
+    <primitive: VMpr_SystemDictionary_backtrace>
+    self primitiveFailed
+!
+
+getTraceFlag: anIndex
+    "Private - Returns a boolean value which is one of the interpreter's
+     tracing flags"
+    <primitive: VMpr_SystemDictionary_getTraceFlag>
+    self primitiveFailed
+!
+
+setTraceFlag: anIndex to: aBoolean
+    "Private - Sets the value of one of the interpreter's tracing flags
+    (indicated by 'anIndex') to the value aBoolean."
+    <primitive: VMpr_SystemDictionary_setTraceFlag>
+    self primitiveFailed
+!
+
+byteCodeCounter
+    "Answer the number of bytecodes executed by the VM"
+    <primitive: VMpr_SystemDictionary_byteCodeCounter>
+!
+
+debug
+    "This methods provides a way to break in the VM code.  Set a breakpoint
+     in _gst_debug and call this method near the point where you think
+     the bug happens."
+    <primitive: VMpr_SystemDictionary_debug>
+!
+
+
+"==========================================================================
+ These are so useful throughout the loading of the kernel methods that I
+ make an exception here and put in real methods instead of just primitives.
+ "
+
+executionTrace
+    "Answer whether executed bytecodes are printed on stdout"
+    ^self getTraceFlag: 1
+!
+
+executionTrace: aBoolean
+    "Set whether executed bytecodes are printed on stdout"
+    ^self setTraceFlag: 1 to: aBoolean
+!
+
+declarationTrace
+    "Answer whether compiled bytecodes are printed on stdout"
+    ^self getTraceFlag: 0
+!
+
+declarationTrace: aBoolean
+    "Set whether compiled bytecodes are printed on stdout"
+    ^self setTraceFlag: 0 to: aBoolean
+!
+
+verboseTrace
+    "Answer whether execution tracing prints the object on the stack top"
+    ^self getTraceFlag: 2
+!
+
+verboseTrace: aBoolean
+    "Set whether execution tracing prints the object on the stack top"
+    ^self setTraceFlag: 2 to: aBoolean
+! !
+
+
 
 
 !SystemDictionary methodsFor: 'basic'!
@@ -148,5 +224,10 @@ isSmalltalk
     ^true
 ! !
 
-Smalltalk addSubspace: #Kernel!
+
+!SystemDictionary class methodsFor: 'initialization'!
 
+initialize
+    Smalltalk addSubspace: #Kernel.
+    Smalltalk addFeature: #Kernel.
+    KernelInitialized := true! !

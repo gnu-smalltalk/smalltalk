@@ -569,3 +569,47 @@ isCharacterArray
     ^true
 ! !
 
+
+!CharacterArray methodsFor: 'built ins'!
+
+valueAt: index
+    "Answer the ascii value of index-th character variable of the receiver"
+    | shape size |
+
+    <primitive: VMpr_CharacterArray_valueAt>
+
+    shape := self class shape.
+    (shape == #character or: [ shape == #utf32 ]) ifFalse: [ ^self subclassResponsibility ].
+    self class isFixed ifTrue: [ ^self subclassResponsibility ].
+
+    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger ].
+    ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index
+!
+ 
+valueAt: index put: value
+    "Store (Character value: value) in the index-th indexed instance variable
+     of the receiver"
+    | shape size |
+
+    <primitive: VMpr_CharacterArray_valueAtPut>
+
+    shape := self class shape.
+    (shape == #character or: [ shape == #utf32 ]) ifFalse: [ ^self subclassResponsibility ].
+    self class isFixed ifTrue: [ ^self subclassResponsibility ].
+
+    self isReadOnly ifTrue: [ ^SystemExceptions.ReadOnlyObject signal ].
+
+    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger ].
+    (index < 1) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+    (index > self basicSize) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+
+    value isInteger ifFalse: [
+            SystemExceptions.WrongClass signalOn: value mustBe: SmallInteger ].
+
+    shape == #character ifTrue: [
+        ^SystemExceptions.ArgumentOutOfRange signalOn: value mustBeBetween: 0 and: 255 ].
+
+    ^SystemExceptions.ArgumentOutOfRange signalOn: value mustBeBetween: 0 and: 16r10FFFF
+! !
+
+

@@ -146,3 +146,234 @@ highBit
 isSmallInteger
     ^true
 ! !
+
+
+!SmallInteger methodsFor: 'built ins'!
+
++ arg
+    "Sum the receiver and arg and answer another Number"
+    <primitive: VMpr_SmallInteger_plus>
+    ^self generality == arg generality
+	ifFalse: [ self retrySumCoercing: arg ]
+	ifTrue: [ (LargeInteger fromInteger: self) +
+	    (LargeInteger fromInteger: arg) ]
+!
+
+- arg
+    "Subtract arg from the receiver and answer another Number"
+    <primitive: VMpr_SmallInteger_minus>
+    ^self generality == arg generality
+	ifFalse: [ self retryDifferenceCoercing: arg ]
+	ifTrue: [ (LargeInteger fromInteger: self) -
+	    (LargeInteger fromInteger: arg) ]
+!
+
+< arg
+    "Answer whether the receiver is less than arg"
+    <primitive: VMpr_SmallInteger_lt>
+    ^self retryRelationalOp: #< coercing: arg
+!
+
+> arg
+    "Answer whether the receiver is greater than arg"
+    <primitive: VMpr_SmallInteger_gt>
+    ^self retryRelationalOp: #> coercing: arg
+!
+
+<= arg
+    "Answer whether the receiver is less than or equal to arg"
+    <primitive: VMpr_SmallInteger_le>
+    ^self retryRelationalOp: #<= coercing: arg
+!
+
+>= arg
+    "Answer whether the receiver is greater than or equal to arg"
+    <primitive: VMpr_SmallInteger_ge>
+    ^self retryRelationalOp: #>= coercing: arg
+!
+
+= arg
+    "Answer whether the receiver is equal to arg"
+    <primitive: VMpr_SmallInteger_eq>
+    ^self retryEqualityCoercing: arg
+!
+
+== arg
+    "Answer whether the receiver is the same object as arg"
+    <primitive: VMpr_SmallInteger_eq>
+    "if they aren't = by the primitive, they're not =="
+    ^false
+!
+
+~= arg
+    "Answer whether the receiver is not equal to arg"
+    <primitive: VMpr_SmallInteger_ne>
+    ^self retryInequalityCoercing: arg
+!
+
+~~ arg
+    "Answer whether the receiver is not the same object as arg"
+    <primitive: VMpr_SmallInteger_ne>
+    ^true			"see comment above for =="
+!
+
+* arg
+    "Multiply the receiver and arg and answer another Number"
+    <primitive: VMpr_SmallInteger_times>
+    ^self generality == arg generality
+	ifFalse: [ self retryMultiplicationCoercing: arg ]
+	ifTrue: [ (LargeInteger fromInteger: self) *
+	    (LargeInteger fromInteger: arg) ]
+!
+
+/ arg
+    "Divide the receiver by arg and answer another Integer or Fraction"
+    <primitive: VMpr_SmallInteger_divide>
+    " Create a Fraction when it's appropriate "
+    arg = 0 ifTrue: [ ^self zeroDivide ].
+    ^arg class == self class
+	ifTrue: [ (Fraction numerator: self denominator: arg) reduce ]
+	ifFalse: [ self retryDivisionCoercing: arg ]
+!
+
+\\ arg
+    "Calculate the remainder of dividing receiver by arg (with truncation
+     towards -infinity) and answer it"
+    <primitive: VMpr_SmallInteger_modulo>
+    arg = 0 ifTrue: [ ^self zeroDivide ].
+    ^self retry: #\\ coercing: arg
+!
+
+// arg
+    "Dividing receiver by arg (with truncation towards -infinity) and answer
+     the result"
+    <primitive: VMpr_SmallInteger_intDiv>
+    arg = 0 ifTrue: [ ^self zeroDivide ].
+    ^self retry: #// coercing: arg
+!
+
+divExact: arg
+    "Dividing receiver by arg assuming that the remainder is zero, and answer
+     the result"
+    "Use quo:, no speed to gain fom SmallIntegers."
+    <primitive: VMpr_SmallInteger_quo>
+    arg = 0 ifTrue: [ ^self zeroDivide ].
+    ^self retry: #divExact: coercing: arg
+!
+
+quo: arg
+    "Dividing receiver by arg (with truncation towards zero) and answer
+     the result"
+    <primitive: VMpr_SmallInteger_quo>
+    arg = 0 ifTrue: [ ^self zeroDivide ].
+    ^self retry: #quo: coercing: arg
+!
+
+bitAnd: arg
+    "Do a bitwise AND between the receiver and arg, answer the result"
+    <primitive: VMpr_SmallInteger_bitAnd>
+    ^arg isInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: arg mustBe: Integer ]
+	ifTrue: [ (LargeInteger fromInteger: self) bitAnd: arg ]
+!
+
+bitOr: arg
+    "Do a bitwise OR between the receiver and arg, answer the result"
+    <primitive: VMpr_SmallInteger_bitOr>
+    ^arg isInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: arg mustBe: Integer ]
+	ifTrue: [ (LargeInteger fromInteger: self) bitOr: arg ]
+!
+
+bitXor: arg
+    "Do a bitwise XOR between the receiver and arg, answer the result"
+    <primitive: VMpr_SmallInteger_bitXor>
+    ^arg isInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: arg mustBe: Integer ]
+	ifTrue: [ (LargeInteger fromInteger: self) bitXor: arg ]
+!
+
+bitShift: arg
+    "Shift the receiver by arg places to the left if arg > 0,
+     by arg places to the right if arg < 0, answer another Number"
+
+    <primitive: VMpr_SmallInteger_bitShift>
+    ^arg isSmallInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: arg mustBe: Integer ]
+	ifTrue: [ (LargeInteger fromInteger: self) bitShift: arg ]
+!
+
+asFloatD
+    "Convert the receiver to a FloatD, answer the result"
+    <primitive: VMpr_SmallInteger_asFloatD>
+    self primitiveFailed
+!
+
+asFloatE
+    "Convert the receiver to a FloatE, answer the result"
+    <primitive: VMpr_SmallInteger_asFloatE>
+    self primitiveFailed
+!
+
+asFloatQ
+    "Convert the receiver to a FloatQ, answer the result"
+    <primitive: VMpr_SmallInteger_asFloatQ>
+    self primitiveFailed
+!
+
+asObject
+    "Answer the object whose index is in the receiver, nil if there is a free
+     object, fail if index is out of bounds"
+    <primitive: VMpr_SmallInteger_asObject>
+    self primitiveFailed
+!
+
+nextValidOop
+    "Answer the index of the first non-free OOP after the receiver.  This is
+    used internally; it is placed here to avoid polluting Object."
+    <primitive: VMpr_SmallInteger_nextValidOop>
+    ^nil
+!
+
+asObjectNoFail
+    "Answer the object whose index is in the receiver, or nil if no object is
+     found at that index"
+    <primitive: VMpr_SmallInteger_asObject>
+    ^nil
+! !
+
+
+!SmallInteger methodsFor: 'builtins'!
+
+scramble
+    "Answer the receiver with its bits mixed and matched."
+    <primitive: VMpr_SmallInteger_scramble>
+    self primitiveFailed
+!
+
+at: anIndex
+    "Answer the index-th indexed instance variable of the receiver.
+     This method always fails."
+    SystemExceptions.NotIndexable signalOn: self
+!
+
+basicAt: anIndex
+    "Answer the index-th indexed instance variable of the receiver.
+     This method always fails."
+    SystemExceptions.NotIndexable signalOn: self
+!
+
+at: anIndex put: value
+    "Store value in the index-th indexed instance variable of the receiver
+     This method always fails."
+
+    SystemExceptions.NotIndexable signalOn: self
+!
+
+basicAt: anIndex put: value
+    "Store value in the index-th indexed instance variable of the receiver
+     This method always fails."
+
+    SystemExceptions.NotIndexable signalOn: self
+! !
+

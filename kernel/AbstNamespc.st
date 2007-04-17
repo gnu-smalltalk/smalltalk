@@ -44,6 +44,21 @@ AbstractNamespace comment:
 an instance of me; it is called their `environment''. ' !
 
 
+!AbstractNamespace methodsFor: 'basic & copying'!
+
+= arg
+    "Answer whether the receiver is equal to arg. The equality test is
+     by default the same as that for equal objects. = must not fail;
+     answer false if the receiver cannot be compared to arg"
+    <primitive: VMpr_Object_identity>
+!
+
+hash
+    "Answer an hash value for the receiver.  This is the same as the
+     object's #identityHash."
+    <primitive: VMpr_Object_hash>
+! !
+
 !AbstractNamespace class methodsFor: 'instance creation'!
 
 new

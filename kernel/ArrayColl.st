@@ -418,3 +418,11 @@ growTo: newSize
     ^self become: (self copyGrowTo: newSize)
 ! !
 
+
+!ArrayedCollection methodsFor: 'built ins'!
+
+size
+    "Answer the size of the receiver"
+    <primitive: VMpr_Object_basicSize>
+
+! !

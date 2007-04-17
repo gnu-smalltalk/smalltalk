@@ -684,4 +684,535 @@ mutate: instVarMap startAt: start newClass: class
     ^self become: aCopy
 ! !
 
-Smalltalk verboseTrace: true!
+
+!Object methodsFor: 'built ins'!
+
+allOwners
+    "Return an Array of Objects that point to the receiver."
+    <primitive: VMpr_Object_allOwners>
+!
+
+changeClassTo: aBehavior
+    "Mutate the class of the receiver to be aBehavior.
+     Note: Tacitly assumes that the structure is the same
+     for the original and new class!!"
+     <primitive: VMpr_Object_changeClassTo>
+!
+
+checkIndexableBounds: index 
+   "Private - Check the reason why an access to the given indexed
+    instance variable failed"
+
+    self class isFixed ifTrue: [ ^SystemExceptions.NotIndexable signalOn: self ].
+
+    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger ].
+    (index < 1) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+    (index > self basicSize) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+!
+
+checkIndexableBounds: index put: object
+   "Private - Check the reason why a store to the given indexed
+    instance variable failed"
+
+    | shape size |
+    self class isFixed ifTrue: [ ^SystemExceptions.NotIndexable signalOn: self ].
+
+    self isReadOnly ifTrue: [ ^SystemExceptions.ReadOnlyObject signal ].
+
+    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger ].
+    (index < 1) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+    (index > self basicSize) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+
+    shape := self class shape.
+    (shape == #float or: [ shape == #double ]) ifTrue: [
+	SystemExceptions.WrongClass signalOn: object mustBe: { Float. SmallInteger } ].
+
+    (object isKindOf: Character) ifFalse: [
+        (shape == #character or: [ shape == #utf32 ]) ifTrue: [
+	    SystemExceptions.WrongClass signalOn: object mustBe: Character ] ].
+
+    shape == #character ifTrue: [
+        ^SystemExceptions.ArgumentOutOfRange
+	    signalOn: object
+	    mustBeBetween: 0 asCharacter
+	    and: 255 asCharacter ].
+
+    shape == #utf32 ifTrue: [
+        ^SystemExceptions.ArgumentOutOfRange
+	    signalOn: object
+	    mustBeBetween: 0 asCharacter
+	    and: 16r10FFFF asCharacter ].
+
+    shape == #byte ifTrue: [ size := 8 ].
+    shape == #int8 ifTrue: [ size := 7 ].
+    shape == #ushort ifTrue: [ size := 16 ].
+    shape == #short ifTrue: [ size := 15 ].
+    shape == #uint ifTrue: [ size := 32 ].
+    shape == #int ifTrue: [ size := 31 ].
+    shape == #uint64 ifTrue: [ size := 64 ].
+    shape == #int64 ifTrue: [ size := 63 ].
+    size isNil ifTrue: [ ^self primtiveFailed ].
+
+    ^SystemExceptions.ArgumentOutOfRange
+        signalOn: object
+        mustBeBetween: (size odd ifTrue: [ -1 bitShift: size ] ifFalse: [ 0 ])
+        and: (1 bitShift: size) - 1
+!
+
+at: anIndex
+    "Answer the index-th indexed instance variable of the receiver"
+    <primitive: VMpr_Object_basicAt>
+    self checkIndexableBounds: anIndex
+!
+
+basicAt: anIndex
+    "Answer the index-th indexed instance variable of the receiver.
+     This method must not be overridden, override at: instead"
+    <primitive: VMpr_Object_basicAt>
+    self checkIndexableBounds: anIndex
+!
+
+at: anIndex put: value
+    "Store value in the index-th indexed instance variable of the receiver"
+    <primitive: VMpr_Object_basicAtPut>
+   self checkIndexableBounds: anIndex put: value
+!
+
+basicAt: anIndex put: value
+    "Store value in the index-th indexed instance variable of the receiver
+     This method must not be overridden, override at:put: instead"
+
+    <primitive: VMpr_Object_basicAtPut>
+    self checkIndexableBounds: anIndex put: value
+!
+
+size
+    "Answer the number of indexed instance variable in the receiver"
+    <primitive: VMpr_Object_basicSize>
+!
+
+basicSize
+    "Answer the number of indexed instance variable in the receiver"
+    <primitive: VMpr_Object_basicSize>
+!
+
+become: otherObject
+    "Change all references to the receiver into references to otherObject.
+     Depending on the implementation, references to otherObject might or
+     might not be transformed into the receiver (respectively,
+     'two-way become' and 'one-way become').
+     Implementations doing one-way become answer the receiver (so that it is
+     not lost). Most implementations doing two-way become answer otherObject,
+     but this is not assured - so do answer the receiver for consistency.
+     GNU Smalltalk does two-way become and answers otherObject, but this
+     might change in future versions: programs should not rely on the behavior
+     and results of #become: ."
+    <primitive: VMpr_Object_become>
+
+    ^SystemExceptions.ReadOnlyObject signal
+!
+
+shallowCopy
+    "Returns a shallow copy of the receiver (the instance variables are
+     not copied)"
+    | class aCopy |
+
+    "This is a primitive for speed.  An alternative implementation is
+     found below."
+    <primitive: VMpr_Object_shallowCopy>
+
+    class := self class.
+    class isVariable
+        ifTrue: [ aCopy := class basicNew: self basicSize ]
+        ifFalse: [ aCopy := class basicNew ].
+
+    " copy the instance variables (if any) "
+    1 to: class instSize + self basicSize do: [ :i |
+        aCopy instVarAt: i put: (self instVarAt: i).
+    ].
+    ^aCopy
+!
+
+makeFixed
+    "Avoid that the receiver moves in memory across garbage collections."
+
+    <primitive: VMpr_Object_makeFixed>
+
+    "We are an integer - fail"
+    SystemExceptions.InvalidValue signalOn: self reason:
+	'Instances of Integer cannot be tenured!'
+!
+
+tenure
+    "Move the object to oldspace."
+
+    <primitive: VMpr_Object_tenure>
+
+    "We are an integer - they won't notice the difference so don't
+     fail."
+!
+
+instVarAt: index
+    "Answer the index-th instance variable of the receiver.
+     This method must not be overridden."
+    <primitive: VMpr_Object_instVarAt>
+    (index < 1)
+	ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger ].
+
+    index > (self basicSize + self class instSize)
+	ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+
+    ^self basicAt: index - self class instSize
+!
+
+instVarAt: index put: value
+    "Store value in the index-th instance variable of the receiver.
+     This method must not be overridden."
+    <primitive: VMpr_Object_instVarAtPut>
+    self isReadOnly ifTrue: [ ^SystemExceptions.ReadOnlyObject signal ].
+
+    (index < 1)
+	ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: SmallInteger ].
+
+    index > (self basicSize + self class instSize)
+	ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+
+    ^self basicAt: index - self class instSize put: value
+!
+
+isReadOnly
+    "Answer whether the object's indexed instance variables can be
+     written"
+
+    <primitive: VMpr_Object_isReadOnly>
+!
+
+isUntrusted
+    "Answer whether the object is to be considered untrusted."
+
+    <primitive: VMpr_Object_isUntrusted>
+!
+
+makeReadOnly: aBoolean
+    "Set whether the object's indexed instance variables can be written"
+
+    <primitive: VMpr_Object_makeReadOnly>
+    SystemExceptions.WrongClass signalOn: aBoolean mustBe: Boolean
+!
+
+makeUntrusted: aBoolean
+    "Set whether the object is to be considered untrusted."
+
+    <primitive: VMpr_Object_makeUntrusted>
+    SystemExceptions.WrongClass signalOn: aBoolean mustBe: Boolean
+!
+
+makeWeak
+    "Make the object a 'weak' one. When an object is only referenced by weak
+     objects, it is collected and the slots in the weak objects are changed to
+     nils by the VM; the weak object is then sent the #mourn message."
+
+    <primitive: VMpr_Object_makeWeak>
+!
+
+makeEphemeron
+    "Make the object an 'ephemeron'.  An ephemeron is marked after all
+     other objects, and if no references are found to the key except from
+     the object itself, it is sent the #mourn message."
+
+    <primitive: VMpr_Object_makeEphemeron>
+    SystemExceptions.InvalidValue signalOn: self reason:
+	'ephemerons should have at least one instance variables'
+!
+
+asOop
+    "Answer the object index associated to the receiver. The object
+     index doesn't change when garbage collection is performed."
+    <primitive: VMpr_Object_hash>
+    
+    "We are an integer - fail"
+    SystemExceptions.InvalidValue signalOn: self reason:
+	'Instances of Integer have no associated OOP!'
+!
+
+identityHash
+    "Answer an hash value for the receiver. This method must not be
+     overridden"
+    <primitive: VMpr_Object_hash>
+    
+    "We are an integer - answer the receiver"
+    ^self
+!
+
+hash
+    "Answer an hash value for the receiver. This hash value is ok
+     for objects that do not redefine ==."
+
+    <primitive: VMpr_Object_hash>
+
+    "We are an integer - answer the receiver"
+    ^self
+!
+
+nextInstance
+    "Private - answer another instance of the receiver's class, or
+     nil if the entire object table has been walked"
+    <primitive: VMpr_Object_nextInstance>
+    ^nil
+!
+
+perform: selectorOrMessageOrMethod
+    "Send the unary message named selectorOrMessageOrMethod (if a Symbol)
+     to the receiver, or the message and arguments it identifies (if a Message
+     or DirectedMessage), or finally execute the method within the receiver
+     (if a CompiledMethod).  In the last case, the method need not reside on
+     the hierarchy from the receiver's class to Object -- it need not reside
+     at all in a MethodDictionary, in fact -- but doing bad things will
+     compromise stability of the Smalltalk virtual machine (and don't blame
+     anybody but yourself).
+
+     This method should not be overridden"
+    <primitive: VMpr_Object_perform>
+    selectorOrMessageOrMethod isSymbol ifTrue: [
+	(self respondsTo: selectorOrMessageOrMethod)
+	    ifTrue: [ ^SystemExceptions.WrongArgumentCount signal ]
+	    ifFalse: [ self doesNotUnderstand: (Message
+		selector: selectorOrMessageOrMethod
+		arguments: #()) ]
+    ].
+    (selectorOrMessageOrMethod isKindOf: CompiledMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
+
+    ^selectorOrMessageOrMethod sendTo: self
+!
+
+perform: selectorOrMethod with: arg1
+    "Send the message named selectorOrMethod (if a Symbol) to the receiver,
+     passing arg1 to it, or execute the method within the receiver
+     (if a CompiledMethod).  In the latter case, the method need not reside on
+     the hierarchy from the receiver's class to Object -- it need not reside
+     at all in a MethodDictionary, in fact -- but doing bad things will
+     compromise stability of the Smalltalk virtual machine (and don't blame
+     anybody but yourself).
+
+     This method should not be overridden"
+    <primitive: VMpr_Object_perform>
+    (selectorOrMethod isKindOf: CompiledMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
+    selectorOrMethod isSymbol
+	ifFalse: [ SystemExceptions.WrongClass signalOn: selectorOrMethod mustBe: Symbol ].
+
+    (self respondsTo: selectorOrMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ]
+	ifFalse: [ self doesNotUnderstand: (Message
+	    selector: selectorOrMethod
+	    arguments: {arg1}) ]
+!
+
+perform: selectorOrMethod with: arg1 with: arg2
+    "Send the message named selectorOrMethod (if a Symbol) to the receiver,
+     passing arg1 and arg2 to it, or execute the method within the receiver
+     (if a CompiledMethod).  In the latter case, the method need not reside on
+     the hierarchy from the receiver's class to Object -- it need not reside
+     at all in a MethodDictionary, in fact -- but doing bad things will
+     compromise stability of the Smalltalk virtual machine (and don't blame
+     anybody but yourself).
+
+     This method should not be overridden"
+    <primitive: VMpr_Object_perform>
+    (selectorOrMethod isKindOf: CompiledMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
+    selectorOrMethod isSymbol
+	ifFalse: [ SystemExceptions.WrongClass signalOn: selectorOrMethod mustBe: Symbol ].
+
+    (self respondsTo: selectorOrMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ]
+	ifFalse: [ self doesNotUnderstand: (Message
+	    selector: selectorOrMethod
+	    arguments: { arg1. arg2 }) ]
+!
+
+perform: selectorOrMethod with: arg1 with: arg2 with: arg3
+    "Send the message named selectorOrMethod (if a Symbol) to the receiver,
+     passing the other arguments to it, or execute the method within the
+     receiver (if a CompiledMethod).  In the latter case, the method need not
+     reside on the hierarchy from the receiver's class to Object -- it need
+     not reside at all in a MethodDictionary, in fact -- but doing bad things
+     will compromise stability of the Smalltalk virtual machine (and don't
+     blame anybody but yourself).
+
+     This method should not be overridden"
+    <primitive: VMpr_Object_perform>
+    (selectorOrMethod isKindOf: CompiledMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
+    selectorOrMethod isSymbol
+	ifFalse: [ SystemExceptions.WrongClass signalOn: selectorOrMethod mustBe: Symbol ].
+
+    (self respondsTo: selectorOrMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ]
+	ifFalse: [ self doesNotUnderstand: (Message
+	    selector: selectorOrMethod
+	    arguments: { arg1. arg2. arg3 }) ]
+!
+
+perform: selectorOrMethod with: arg1 with: arg2 with: arg3 with: arg4
+    "Send the message named selectorOrMethod (if a Symbol) to the receiver,
+     passing the other arguments to it, or execute the method within the
+     receiver (if a CompiledMethod).  In the latter case, the method need not
+     reside on the hierarchy from the receiver's class to Object -- it need
+     not reside at all in a MethodDictionary, in fact -- but doing bad things
+     will compromise stability of the Smalltalk virtual machine (and don't
+     blame anybody but yourself).
+
+     This method should not be overridden"
+    <primitive: VMpr_Object_perform>
+    (selectorOrMethod isKindOf: CompiledMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
+    selectorOrMethod isSymbol
+	ifFalse: [ SystemExceptions.WrongClass signalOn: selectorOrMethod mustBe: Symbol ].
+
+    (self respondsTo: selectorOrMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ]
+	ifFalse: [ self doesNotUnderstand: (Message
+	    selector: selectorOrMethod
+	    arguments: { arg1. arg2. arg3. arg4 }) ]
+!
+
+perform: selectorOrMethod withArguments: argumentsArray
+    "Send the message named selectorOrMethod (if a Symbol) to the receiver,
+     passing the elements of argumentsArray as parameters, or execute the
+     method within the receiver (if a CompiledMethod).  In the latter case,
+     the method need not reside on the hierarchy from the receiver's class
+     to Object -- it need not reside at all in a MethodDictionary, in
+     fact -- but doing bad things will compromise stability of the Smalltalk
+     virtual machine (and don't blame anybody but yourself).
+
+     This method should not be overridden"
+    <primitive: VMpr_Object_performWithArguments>
+    argumentsArray isArray 
+	ifFalse: [ SystemExceptions.WrongClass signalOn: argumentsArray mustBe: Array ].
+    (selectorOrMethod isKindOf: CompiledMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ].
+    selectorOrMethod isSymbol
+	ifFalse: [ SystemExceptions.WrongClass signalOn: selectorOrMethod mustBe: Symbol ].
+
+    (self respondsTo: selectorOrMethod)
+	ifTrue: [ SystemExceptions.WrongArgumentCount signal ]
+	ifFalse: [ self doesNotUnderstand: (Message
+	    selector: selectorOrMethod
+	    arguments: argumentsArray) ]
+!
+
+== arg
+    "Answer whether the receiver is the same object as arg. This is a
+     very fast test and is called 'object identity'. "
+    <primitive: VMpr_Object_identity>
+!
+
+= arg
+    "Answer whether the receiver is equal to arg. The equality test is
+     by default the same as that for identical objects. = must not fail;
+     answer false if the receiver cannot be compared to arg"
+    <primitive: VMpr_Object_identity>
+!
+
+class
+    "Answer the class to which the receiver belongs"
+    <primitive: VMpr_Object_class>
+    self primitiveFailed
+!
+
+error: message
+    "Stop the execution and/or bring up a debugger. message is an error
+     message to be shown"
+    <primitive: VMpr_Object_bootstrapError>
+!
+
+basicPrint
+    "Print a basic representation of the receiver"
+    <primitive: VMpr_Object_basicPrint>
+!
+
+"### look these messages up to be sure"
+
+halt
+    "Called to enter the debugger"
+    ^self halt: 'halt encountered'
+!
+
+halt: aString
+    "Called to enter the debugger"
+    ^self error: aString
+!
+
+mark: aSymbol
+    "Private - use this method to mark code which needs to be reworked,
+     removed, etc. You can then find all senders of #mark: to find all marked
+     methods or you can look for all senders of the symbol that you sent to
+     #mark: to find a category of marked methods."
+!
+
+primitiveFailed
+    "Called when a VM primitive fails"
+    SystemExceptions.PrimitiveFailed signal
+!
+
+shouldNotImplement
+    "Called when objects belonging to a class should not answer a
+     selector defined by a superclass"
+
+    SystemExceptions.ShouldNotImplement signal
+!
+
+subclassResponsibility
+    "Called when a method defined by a class should be overridden
+     in a subclass"
+
+    SystemExceptions.SubclassResponsibility signal
+!
+
+notYetImplemented
+    "Called when a method defined by a class is not yet implemented,
+     but is going to be"
+
+    SystemExceptions.NotYetImplemented signal
+! !
+
+
+!Object methodsFor: 'VM callbacks'!
+
+doesNotUnderstand: message
+    "Called by the system when a selector was not found. message is a
+     Message containing information on the receiver"
+    <primitive: VMpr_Object_bootstrapDNU>
+!
+
+badReturnError
+    "Called back when a block performs a bad return."
+
+    SystemExceptions.BadReturn signal
+!
+
+mustBeBoolean
+    "Called by the system when ifTrue:*, ifFalse:*, and: or or: are sent to
+     anything but a boolean"
+
+    | result |
+    result := SystemExceptions.MustBeBoolean signalOn: self.
+    result == false ifFalse: [ result := true ].
+    ^result
+!
+
+noRunnableProcess
+    "Called back when all processes are suspended"
+    SystemExceptions.NoRunnableProcess signal
+!
+
+userInterrupt
+    "Called back when the user presses Ctrl-Break"
+    SystemExceptions.UserInterrupt signal
+! !
+
+

@@ -491,3 +491,31 @@ checkSecurityFor: perm
     ^self parentContext isNil or: [
 	self parentContext checkSecurityFor: perm ]
 ! !
+
+
+!ContextPart class methodsFor: 'built ins'!
+
+thisContext
+    "Return the value of the thisContext variable.  Called internally
+     when the variable is accessed."
+
+    <primitive: VMpr_ContextPart_thisContext>
+! !
+
+!ContextPart methodsFor: 'built ins'!
+
+continue: anObject
+    "Resume execution from the receiver, faking that the context on
+     top of it in the execution chain has returned anObject.  The
+     receiver must belong to the same process as the executing context,
+     otherwise the results are not predictable.  All #ensure: (and
+     possibly #ifCurtailed:) blocks between the currently executing
+     context and the receiver are evaluated (which is not what
+     would happen if you directly bashed at the parent context of
+     thisContext)."
+
+    <primitive: VMpr_ContextPart_continue>
+    self badReturnError
+! !
+
+

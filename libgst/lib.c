@@ -296,6 +296,7 @@ static mst_Boolean ignore_image = false;
    is not an array but a list of consecutive file names.  */
 static const char standard_files[] = {
   "Builtins.st\0"
+  "SysDict.st\0"
   "Object.st\0"
   "Message.st\0"
   "DirMessage.st\0"
@@ -353,7 +354,6 @@ static const char standard_files[] = {
   "AbstNamespc.st\0"
   "RootNamespc.st\0"
   "Namespace.st\0"
-  "SysDict.st\0"
   "Stream.st\0"
   "PosStream.st\0"
   "ReadStream.st\0"

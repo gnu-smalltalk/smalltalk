@@ -247,3 +247,30 @@ storeOn: aStream
     self superspace storeOn: aStream.
     aStream nextPut: $.; nextPutAll: name
 ! !
+!Namespace class methodsFor: 'accessing'!
+
+current
+    "Answer the current namespace"
+    Current isNil ifTrue: [ Current := Smalltalk ].
+    ^Current
+!
+
+current: aNamespaceOrClass
+    "Set the current namespace to be aNamespace or, if it is a class,
+     its class pool (the Dictionary that holds class variables)."
+    "The primitive call is needed to inform the compiler"
+    | namespace |
+    <primitive: VMpr_Namespace_setCurrent>
+    namespace := aNamespaceOrClass isClass
+	ifTrue: [ aNamespaceOrClass classPool ]
+	ifFalse: [ aNamespaceOrClass ].
+
+    (namespace isKindOf: Dictionary)
+	ifTrue: [ Current := namespace ]
+	ifFalse: [
+	    SystemExceptions.WrongClass
+		signalOn: aNamespaceOrClass
+		mustBe: { Dictionary. Class } ].
+! !
+
+

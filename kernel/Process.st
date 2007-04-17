@@ -358,3 +358,29 @@ isWaiting
     ^self isReady not & self isSuspended not
 ! !
 
+
+!Process methodsFor: 'builtins'!
+
+singleStepWaitingOn: aSemaphore
+    "Execute a limited amount of code (usually a bytecode, or up to the
+     next backward jump, or up to the next message send) of the receiver,
+     which must in a ready-to-run state (neither executing nor terminating
+     nor suspended), then restart running the current process.  aSemaphore
+     is used as a means to synchronize the execution of the current process
+     and the receiver and should have no signals on it.  The current process
+     should have higher priority than the receiver."
+    <primitive: VMpr_Process_singleStepWaitingOn>
+    SystemExceptions.InvalidProcessState signalOn: self
+!
+
+resume
+    "Resume the receiver's execution"
+    <primitive: VMpr_Process_resume>
+    SystemExceptions.ProcessTerminated signalOn: self
+!
+
+yield
+    "Yield control from the receiver to other processes"
+    <primitive: VMpr_Process_yield>
+! !
+

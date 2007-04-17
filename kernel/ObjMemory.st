@@ -97,8 +97,7 @@ initialize
     Delay initialize.
     Namespace initialize.
     Processor initialize.
-    Smalltalk addFeature: #Kernel.
-    KernelInitialized := true.
+    SystemDictionary initialize.
     self changed: #returnFromSnapshot
 ! !
 
@@ -305,5 +304,188 @@ scavengesBeforeTenuring
      methods is not considered."
     ^self survSpaceSize / self tenuredBytesPerScavenge! !
 
+!ObjectMemory class methodsFor: 'builtins'!
+
+addressOfOOP: anObject
+    "Returns the address of the OOP (object table slot) for anObject.
+     The address is an Integer and will not change over time (i.e. is
+     immune from garbage collector action) except if the virtual machine
+     is stopped and restarted."
+
+    <primitive: VMpr_Memory_addressOfOOP>
+    SystemExceptions InvalidArgument
+	signalOn: anObject
+	reason: 'Cannot extract address of an immediate OOP'
+!
+
+addressOf: anObject
+    "Returns the address of the actual object that anObject
+     references.  Note that, with the exception of fixed objects
+     this address is only valid until the next garbage collection;
+     thus it's pretty risky to count on the address returned by
+     this method for very long."
+    <primitive: VMpr_Memory_addressOf>
+    SystemExceptions InvalidArgument
+	signalOn: anObject
+	reason: 'Cannot extract address of an immediate OOP'
+!
+
+scavenge
+    "Force a minor garbage collection"
+    <primitive: VMpr_ObjectMemory_scavenge>
+    ^self primitiveFailed
+!
+
+globalGarbageCollect
+    "Force a full garbage collection"
+    <primitive: VMpr_ObjectMemory_globalGarbageCollect>
+    ^self primitiveFailed
+!
+
+compact
+    "Force a full garbage collection, including compaction of oldspace"
+    <primitive: VMpr_ObjectMemory_compact>
+    ^self primitiveFailed
+!
+
+incrementalGCStep
+    "Do a step in the incremental garbage collection."
+    <primitive: VMpr_ObjectMemory_incrementalGCStep>
+    ^self primitiveFailed
+!
+
+finishIncrementalGC
+    "Do a step in the incremental garbage collection."
+    <primitive: VMpr_ObjectMemory_finishIncrementalGC>
+    ^self primitiveFailed
+!
+
+abort
+    "Quit the Smalltalk environment, dumping core."
+    <primitive: VMpr_ObjectMemory_abort>
+!
+
+quit
+    "Quit the Smalltalk environment. Whether files are closed and
+     other similar cleanup occurs depends on the platform"
+    self quit: 0
+!
+
+quit: exitStatus
+    "Quit the Smalltalk environment, passing the exitStatus integer
+     to the OS. Files are closed and other similar cleanups occur."
+    <primitive: VMpr_ObjectMemory_quit>
+    SystemExceptions.WrongClass signalOn: exitStatus mustBe: SmallInteger
+!
+
+smoothingFactor
+    "Answer the factor (between 0 and 1) used to smooth the statistics
+     provided by the virtual machine about memory handling.  0 disables
+     updating the averages, 1 disables the smoothing (the statistics
+     return the last value)."
+    <primitive: VMpr_ObjectMemory_getSmoothingFactor>
+    ^self primitiveFailed
+!
+
+smoothingFactor: rate
+    "Set the factor (between 0 and 1) used to smooth the statistics
+     provided by the virtual machine about memory handling.  0 disables
+     updating the averages, 1 disables the smoothing (the statistics
+     return the last value)."
+    <primitive: VMpr_ObjectMemory_setSmoothingFactor>
+    rate class == FloatD
+	ifTrue: [ SystemExceptions.ArgumentOutOfRange signalOn: rate mustBeBetween: 0 and: 1 ]
+	ifFalse: [ ^self spaceGrowRate: rate asFloatD ]
+!
+
+spaceGrowRate
+    "Answer the rate with which the amount of memory used by the system grows"
+    <primitive: VMpr_ObjectMemory_getSpaceGrowRate>
+    ^self primitiveFailed
+!
+
+spaceGrowRate: rate
+    "Set the rate with which the amount of memory used by the system grows"
+    <primitive: VMpr_ObjectMemory_setSpaceGrowRate>
+    rate class == FloatD
+	ifTrue: [ SystemExceptions.ArgumentOutOfRange signalOn: rate mustBeBetween: 0.01 and: 500.0 ]
+	ifFalse: [ ^self spaceGrowRate: rate asFloatD ]
+!
+
+bigObjectThreshold
+   "Answer the smallest size for objects that are allocated outside
+    the main heap in the hope of providing more locality of reference
+    between small objects."
+    <primitive: VMpr_ObjectMemory_getBigObjectThreshold>
+    ^self primitiveFailed
+!
+
+bigObjectThreshold: bytes
+   "Set the smallest size for objects that are allocated outside
+    the main heap in the hope of providing more locality of reference
+    between small objects.  bytes must be a positive SmallInteger."
+
+    <primitive: VMpr_ObjectMemory_setBigObjectThreshold>
+    bytes isSmallInteger
+	ifTrue: [ SystemExceptions.ArgumentOutOfRange
+	    signalOn: bytes mustBeBetween: 0 and: SmallInteger largest ]
+	ifFalse: [ SystemExceptions.WrongClass
+	    signalOn: bytes mustBe: SmallInteger ]
+!
+
+growThresholdPercent
+    "Answer the percentage of the amount of memory used by the system grows
+     which has to be full for the system to allocate more memory"
+    <primitive: VMpr_ObjectMemory_getGrowThresholdPercent>
+    ^self primitiveFailed
+!
+
+growThresholdPercent: growPercent
+    "Set the percentage of the amount of memory used by the system grows
+     which has to be full for the system to allocate more memory"
+    <primitive: VMpr_ObjectMemory_setGrowThresholdPercent>
+
+    growPercent class == FloatD
+	ifTrue: [ SystemExceptions.ArgumentOutOfRange signalOn: growPercent mustBeBetween: 0.01 and: 100.0 ]
+	ifFalse: [ ^self growThresholdPercent: growPercent asFloatD ]
+!
+
+
+growTo: numBytes
+    "Grow the amount of memory used by the system grows to numBytes."
+    <primitive: VMpr_ObjectMemory_growTo>
+    ^self primitiveFailed
+!
+
+snapshot: aString
+    "Save an image on the aString file"
+    <primitive: VMpr_ObjectMemory_snapshot>
+    ^aString isString
+	ifFalse: [ SystemExceptions.WrongClass signalOn: aString mustBe: String ]
+	ifTrue: [ File checkError ]
+!
+
+gcMessage
+    "Answer whether messages indicating that garbage collection is taking
+     place are printed on stdout"
+    ^Smalltalk getTraceFlag: 3
+!
+
+gcMessage: aBoolean 
+    "Set whether messages indicating that garbage collection is taking
+     place are printed on stdout"
+    ^Smalltalk setTraceFlag: 3 to: aBoolean
+! !
+
+
+!ObjectMemory methodsFor: 'builtins'!
+
+update
+    "Update the values in the object to the current state of the VM."
+    <primitive: VMpr_ObjectMemory_update>
+    self primitiveFailed
+! !
+
+
 ObjectMemory initialize!
 

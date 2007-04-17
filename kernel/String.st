@@ -174,3 +174,102 @@ byteAt: index put: value
     ^self valueAt: index put: value
 ! !
 
+
+!String class methodsFor: 'instance creation'!
+
+fromCData: aCObject
+    "Answer a String containing the bytes starting at the location pointed
+     to by aCObject, up to the first NUL character."
+    <primitive: VMpr_String_fromCData>
+    ^self primitiveFailed!
+
+fromCData: aCObject size: anInteger
+    "Answer a String containing anInteger bytes starting at the location pointed
+     to by aCObject"
+    <primitive: VMpr_String_fromCData_size>
+    ^SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger
+! !
+
+
+
+!String methodsFor: 'built ins'!
+
+hash
+    "Answer an hash value for the receiver"
+    <primitive: VMpr_String_hash>
+    ^0
+!
+
+similarityTo: aString
+    "Answer a number that denotes the similarity between aString and
+     the receiver.  0 indicates equality, negative numbers indicate
+     some difference.  Implemented as a primitive for speed."
+    <primitive: VMpr_String_similarityTo>
+    ^SystemExceptions.WrongClass signalOn: aString mustBe: String
+!
+    
+size
+    "Answer the size of the receiver"
+    <primitive: VMpr_Object_basicSize>
+    ^self primitiveFailed
+!
+
+replaceFrom: start to: stop withByteArray: byteArray startingAt: replaceStart
+    "Replace the characters from start to stop with new characters whose
+     ASCII codes are contained in byteArray, starting at the replaceStart
+     location of byteArray"
+    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+    ^super replaceFrom: start to: stop with: byteArray asString startingAt: replaceStart
+!
+
+replaceFrom: start to: stop with: aString startingAt: replaceStart
+    "Replace the characters from start to stop with new characters whose
+     ASCII codes are contained in aString, starting at the replaceStart
+     location of aString"
+    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+    ^super replaceFrom: start to: stop with: aString startingAt: replaceStart
+!
+
+primReplaceFrom: start to: stop with: replacementString 
+    startingAt: replaceStart    
+    "Private - Replace the characters from start to stop with new
+     characters contained in replacementString (which, actually, can be
+     any variable byte class, starting at the replaceStart location of
+     replacementString"
+    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+    ^self primitiveFailed
+!
+
+at: anIndex
+    "Answer the index-th indexed instance variable of the receiver"
+    <primitive: VMpr_Object_basicAt>
+    self checkIndexableBounds: anIndex
+!
+
+basicAt: anIndex
+    "Answer the index-th indexed instance variable of the receiver.
+     This method must not be overridden, override at: instead"
+    <primitive: VMpr_Object_basicAt>
+    self checkIndexableBounds: anIndex
+!
+
+at: anIndex put: value
+    "Store value in the index-th indexed instance variable of the receiver"
+    <primitive: VMpr_Object_basicAtPut>
+   self checkIndexableBounds: anIndex put: value
+!
+
+basicAt: anIndex put: value
+    "Store value in the index-th indexed instance variable of the receiver
+     This method must not be overridden, override at:put: instead"
+
+    <primitive: VMpr_Object_basicAtPut>
+    self checkIndexableBounds: anIndex put: value
+!
+
+asCData: aCType
+    "Convert the receiver to a CObject with the given type"
+    <primitive: VMpr_String_asCData>
+    ^self primitiveFailed
+! !
+

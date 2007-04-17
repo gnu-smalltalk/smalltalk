@@ -100,6 +100,42 @@ initialize
 ! !
 
 
+!Character class methodsFor: 'built ins'!
+
+codePoint: anInteger
+    "Returns the character object, possibly an UnicodeCharacter, corresponding
+     to anInteger.  Error if anInteger is not an integer, or not in 0..16r10FFFF."
+     <primitive: VMpr_UnicodeCharacter_create>
+
+    anInteger isInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ]
+	ifTrue: [ SystemExceptions.ArgumentOutOfRange signalOn: anInteger mustBeBetween: 0 and: 16r10FFFF ]
+!
+
+asciiValue: anInteger
+    "Returns the character object corresponding to anInteger.  Error if
+     anInteger is not an integer, or not in 0..127."
+
+    anInteger isInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ].
+
+    ^(anInteger between: 0 and: 127)
+	ifTrue: [ self value: anInteger ]
+	ifFalse: [ SystemExceptions.ArgumentOutOfRange signalOn: anInteger mustBeBetween: 0 and: 127 ]
+!
+
+value: anInteger
+    "Returns the character object corresponding to anInteger.  Error if
+     anInteger is not an integer, or not in 0..255."
+     <primitive: VMpr_Character_create>
+
+    anInteger isInteger
+	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ]
+	ifTrue: [ SystemExceptions.ArgumentOutOfRange signalOn: anInteger mustBeBetween: 0 and: 255 ]
+! !
+
+
+
 !Character class methodsFor: 'constants'!
 
 backspace
@@ -367,4 +403,37 @@ isCharacter
     ^true
 ! !
 
+!Character methodsFor: 'built ins'!
+
+= char
+    "Boolean return value; true if the characters are equal"
+    <primitive: VMpr_Character_equal>
+!
+
+asciiValue
+    "Returns the integer value corresponding to self.  #codePoint,
+     #asciiValue, #value, and #asInteger are synonyms."
+    ^codePoint
+!
+
+asInteger
+    "Returns the integer value corresponding to self.  #codePoint,
+     #asciiValue, #value, and #asInteger are synonyms."
+    ^codePoint
+!
+
+codePoint
+    "Returns the integer value corresponding to self.  #codePoint,
+     #asciiValue, #value, and #asInteger are synonyms."
+    ^codePoint
+!
+
+value
+    "Returns the integer value corresponding to self.  #codePoint,
+     #asciiValue, #value, and #asInteger are synonyms."
+    ^codePoint
+! !
+
+
+
 Character initialize!

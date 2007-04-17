@@ -311,3 +311,31 @@ isSymbol
     ^true
 ! !
 
+
+!Symbol class methodsFor: 'built ins'!
+
+intern: aString
+    "Private - Same as 'aString asSymbol'"
+    <primitive: VMpr_Symbol_intern>
+    SystemExceptions.WrongClass signalOn: aString mustBe: String
+! !
+
+
+
+!Symbol methodsFor: 'built ins'!
+
+= aSymbol
+    "Answer whether the receiver and aSymbol are the same object"
+    <primitive: VMpr_Object_identity>
+    ^false
+!
+
+hash
+    "Answer an hash value for the receiver. Symbols are optimized
+     for speed"
+    <primitive: VMpr_Object_hash>
+
+! !
+
+
+

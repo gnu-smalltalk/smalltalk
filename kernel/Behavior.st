@@ -1338,3 +1338,70 @@ hierarchyIndent
     "Answer the indent to be used by #printHierarchy - 4 by default"
     ^4
 ! !
+
+
+!Behavior methodsFor: 'built ins'!
+
+flushCache
+    "Invalidate the method cache kept by the virtual machine. This
+     message should not need to be called by user programs."
+    <primitive: VMpr_Behavior_flushCache>
+    ^self primitiveFailed
+!
+
+basicNewInFixedSpace: numInstanceVariables
+    "Create a new instance of a class with indexed instance variables. The
+     instance has numInstanceVariables indexed instance variables.  The
+     instance is guaranteed not to move across garbage collections.  Like
+     #basicNew:, this method should not be overridden."
+    <primitive: VMpr_Behavior_basicNewFixedColon>
+    self isFixed ifTrue: [
+	SystemExceptions.WrongMessageSent signalOn: #basicNewInFixedSpace:
+	    useInstead: #basicNewInFixedSpace
+    ].
+    numInstanceVariables isSmallInteger ifTrue: [ ^self primitiveFailed ].
+
+    ^SystemExceptions.WrongClass signalOn: numInstanceVariables mustBe: SmallInteger
+!
+
+basicNewInFixedSpace
+    "Create a new instance of a class with no indexed instance variables.
+     The instance is guaranteed not to move across garbage collections.
+     Like #basicNew, this method should not be overridden."
+    <primitive: VMpr_Behavior_basicNewFixed>
+    self isFixed ifTrue: [ ^self primitiveFailed ].
+    SystemExceptions.WrongMessageSent signalOn: #basicNewInFixedSpace
+	useInstead: #basicNewInFixedSpace:
+!
+
+someInstance
+    "Private - Answer the first instance of the receiver in the object
+     table"
+    <primitive: VMpr_Behavior_someInstance>
+    ^nil			"return nil on failure"
+!
+
+methodsFor: category ifTrue: condition
+    "Compile the following code inside the receiver, with the given
+     category, if condition is true; else ignore it"
+    <primitive: VMpr_Behavior_methodsForIfTrue>
+    ^self primitiveFailed
+!
+
+compileString: aString
+    "Compile the code in aString, with no category. Fail if the code
+     does not obey Smalltalk syntax. Answer the generated CompiledMethod
+     if it does"
+    <primitive: VMpr_Behavior_compileString>
+    ^self primitiveFailed
+!
+
+compileString: aString ifError: aBlock
+    "Compile the code in aString, with no category. Evaluate aBlock
+     (passing the file name, line number and description of the error) if
+     the code does not obey Smalltalk syntax. Answer the generated
+     CompiledMethod if it does"
+    <primitive: VMpr_Behavior_compileStringIfError>
+    ^self primitiveFailed
+! !
+

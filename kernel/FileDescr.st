@@ -751,3 +751,76 @@ write: byteArray from: position to: end
     ].
     ^cur - position
 ! !
+
+
+!FileDescriptor methodsFor: 'built ins'!
+
+fileOp: ioFuncIndex
+    "Private - Used to limit the number of primitives used by FileStreams"
+    <primitive: VMpr_FileDescriptor_fileOp>
+    file isNil ifTrue: [ SystemExceptions.FileError signal: 'file closed' ].
+    self checkError.
+    ^nil
+!
+
+fileOp: ioFuncIndex ifFail: aBlock
+    "Private - Used to limit the number of primitives used by FileStreams."
+    <primitive: VMpr_FileDescriptor_fileOp>
+    ^aBlock value
+!
+
+fileOp: ioFuncIndex with: arg1
+    "Private - Used to limit the number of primitives used by FileStreams"
+    <primitive: VMpr_FileDescriptor_fileOp>
+    file isNil ifTrue: [ SystemExceptions.FileError signal: 'file closed' ].
+    self checkError.
+    ^nil
+!
+
+fileOp: ioFuncIndex with: arg1 ifFail: aBlock
+    "Private - Used to limit the number of primitives used by FileStreams."
+    <primitive: VMpr_FileDescriptor_fileOp>
+    ^aBlock value
+!
+
+fileOp: ioFuncIndex with: arg1 with: arg2
+    "Private - Used to limit the number of primitives used by FileStreams"
+    <primitive: VMpr_FileDescriptor_fileOp>
+    file isNil ifTrue: [ SystemExceptions.FileError signal: 'file closed' ].
+    self checkError.
+    ^nil
+!
+
+fileOp: ioFuncIndex with: arg1 with: arg2 ifFail: aBlock
+    "Private - Used to limit the number of primitives used by FileStreams."
+    <primitive: VMpr_FileDescriptor_fileOp>
+    ^aBlock value
+!
+
+fileOp: ioFuncIndex with: arg1 with: arg2 with: arg3
+    "Private - Used to limit the number of primitives used by FileStreams"
+    <primitive: VMpr_FileDescriptor_fileOp>
+    file isNil ifTrue: [ SystemExceptions.FileError signal: 'file closed' ].
+    self checkError.
+    ^nil
+!
+
+fileOp: ioFuncIndex with: arg1 with: arg2 with: arg3 ifFail: aBlock
+    "Private - Used to limit the number of primitives used by FileStreams."
+    <primitive: VMpr_FileDescriptor_fileOp>
+    ^aBlock value
+!
+
+fileOp: ioFuncIndex with: arg1 with: arg2 with: arg3 with: arg4
+    "Private - Used to limit the number of primitives used by FileStreams"
+    <primitive: VMpr_FileDescriptor_fileOp>
+    file isNil ifTrue: [ SystemExceptions.FileError signal: 'file closed' ].
+    self checkError.
+    ^nil
+!
+
+fileOp: ioFuncIndex with: arg1 with: arg2 with: arg3 with: arg4 ifFail: aBlock
+    "Private - Used to limit the number of primitives used by FileStreams."
+    <primitive: VMpr_FileDescriptor_fileOp>
+    ^aBlock value
+! !
