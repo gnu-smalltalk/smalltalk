@@ -462,6 +462,7 @@ scan_newline (int c,
 {
   if (_gst_get_cur_stream_prompt ()
       && parenthesis_depth == 0
+      && last_token != 0
       && last_token != '.' && last_token != '!' && last_token != KEYWORD
       && last_token != BINOP && last_token != '|' && last_token != '<'
       && last_token != '>' && last_token != ';')
