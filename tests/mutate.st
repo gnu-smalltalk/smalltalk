@@ -121,5 +121,5 @@ Eval [ (C shape -> C classPool keys asArray -> C allInstVarNames -> C sharedPool
 Eval [ Association subclass: #C ]
 Eval [ (C shape -> C classPool keys asArray -> C allInstVarNames -> C sharedPools) printNl ]
 
-Eval [ C class compile: 'foo ^MutationError' ]
+Eval [ C class compile: 'foo [ ^MutationError ]' ]
 Eval [ C foo == SystemExceptions.MutationError ]

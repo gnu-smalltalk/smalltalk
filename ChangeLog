@@ -1,3 +1,7 @@
+2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/mutate.st: Finish converting to new syntax.
+
 2007-04-11  Paolo Bonzini  <bonzini@gnu.org>
 	    Thomas Girard  <thomas.g.girard@free.fr>
 
