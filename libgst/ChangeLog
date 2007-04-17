@@ -1,5 +1,9 @@
 2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/input.c: Fix latent bug with Smalltalk Stream parsing.
+
+2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/lex.c: Fix bug if first line entered at REPL is empty.
 
 2007-04-16  Paolo Bonzini  <bonzini@gnu.org>

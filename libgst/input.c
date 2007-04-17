@@ -533,8 +533,9 @@ _gst_get_cur_string (void)
       result = _gst_string_new (in_stream->st_oop.buf);
 
       /* Copy back to the beginning of the buffer to save memory.  */
-      size = in_stream->st_oop.end - in_stream->st_oop.ptr + 1;
-      memmove (in_stream->st_oop.buf, in_stream->st_oop.ptr, size);
+      size = in_stream->st_oop.end - in_stream->st_oop.ptr;
+      if (size)
+	memmove (in_stream->st_oop.buf, in_stream->st_oop.ptr, size);
       in_stream->fileOffset += in_stream->st_oop.ptr - in_stream->st_oop.buf;
       in_stream->st_oop.ptr = in_stream->st_oop.buf;
       in_stream->st_oop.end = in_stream->st_oop.buf + size;
