@@ -31,191 +31,194 @@
 |
  ======================================================================"
 
-!Object methodsFor: 'builtin'!
-
-class
-    "Answer the class to which the receiver belongs"
-    <primitive: VMpr_Object_class>
-    self primitiveFailed 
-! !
+
+Object extend [
+    class [
+        "Answer the class to which the receiver belongs"
+        <primitive: VMpr_Object_class>
+        <category: 'builtin'>
+        self primitiveFailed 
+    ]
+]
+        
+
+Behavior extend [
+    
+    new [
+        "Create a new instance of a class with no indexed instance variables"
+        <primitive: VMpr_Behavior_basicNew>
+        <category: 'builtin'>
+        self isFixed ifFalse: [ ^self new: 0 ].
+        ^self primitiveFailed
+    ]
+    
+    basicNew [
+        "Create a new instance of a class with no indexed instance variables;
+         this method must not be overridden."
+        <primitive: VMpr_Behavior_basicNew>
+        <category: 'builtin'>
+        self isFixed ifFalse: [ ^self basicNew: 0 ].
+        ^self primitiveFailed
+    ]
+    
+    new: numInstanceVariables [
+        "Create a new instance of a class with indexed instance variables. The
+         instance has numInstanceVariables indexed instance variables."
+        <primitive: VMpr_Behavior_basicNewColon>
+        <category: 'builtin'>
+        self isFixed ifTrue: [
+    	SystemExceptions.WrongMessageSent signalOn: #new: useInstead: #new
+        ].
+        numInstanceVariables isSmallInteger ifTrue: [ ^self primitiveFailed ].
+    
+        ^SystemExceptions.WrongClass signalOn: numInstanceVariables mustBe: SmallInteger
+    ]
+    
+    basicNew: numInstanceVariables [
+        "Create a new instance of a class with indexed instance variables. The
+         instance has numInstanceVariables indexed instance variables;
+         this method must not be overridden."
+        <primitive: VMpr_Behavior_basicNewColon>
+        <category: 'builtin'>
+        self isFixed ifTrue: [
+    	SystemExceptions.WrongMessageSent signalOn: #basicNew: useInstead: #basicNew
+        ].
+        numInstanceVariables isSmallInteger ifTrue: [ ^self primitiveFailed ].
+    
+        ^SystemExceptions.WrongClass signalOn: numInstanceVariables mustBe: SmallInteger
+    ]
+]
     
 
-!Behavior methodsFor: 'built ins'!
-
-new
-    "Create a new instance of a class with no indexed instance variables"
-    <primitive: VMpr_Behavior_basicNew>
-    self isFixed ifFalse: [ ^self new: 0 ].
-    ^self primitiveFailed
-!
-
-basicNew
-    "Create a new instance of a class with no indexed instance variables;
-     this method must not be overridden."
-    <primitive: VMpr_Behavior_basicNew>
-    self isFixed ifFalse: [ ^self basicNew: 0 ].
-    ^self primitiveFailed
-!
-
-new: numInstanceVariables
-    "Create a new instance of a class with indexed instance variables. The
-     instance has numInstanceVariables indexed instance variables."
-    <primitive: VMpr_Behavior_basicNewColon>
-    self isFixed ifTrue: [
-	SystemExceptions.WrongMessageSent signalOn: #new: useInstead: #new
-    ].
-    numInstanceVariables isSmallInteger ifTrue: [ ^self primitiveFailed ].
-
-    ^SystemExceptions.WrongClass signalOn: numInstanceVariables mustBe: SmallInteger
-!
-
-basicNew: numInstanceVariables
-    "Create a new instance of a class with indexed instance variables. The
-     instance has numInstanceVariables indexed instance variables;
-     this method must not be overridden."
-    <primitive: VMpr_Behavior_basicNewColon>
-    self isFixed ifTrue: [
-	SystemExceptions.WrongMessageSent signalOn: #basicNew: useInstead: #basicNew
-    ].
-    numInstanceVariables isSmallInteger ifTrue: [ ^self primitiveFailed ].
-
-    ^SystemExceptions.WrongClass signalOn: numInstanceVariables mustBe: SmallInteger
-! !
-
+Dictionary extend [
+    
+    Dictionary class >> new [
+        "Answer a new Dictionary. This method, actually, won't last long -
+         until LookupTbl.st is loaded"
+        <primitive: VMpr_Dictionary_new>
+        <category: 'builtin'>
+        ^self primitiveFailed
+    ]
+    
+    at: key [
+        "Answer the value associated with the given key in the receiver.
+         This method, actually, won't last long - until LookupTbl.st is loaded"
+        <primitive: VMpr_Dictionary_at>
+        <category: 'builtin'>
+        ^self primitiveFailed
+    ]
+]
+    
+    
 
-!Dictionary class methodsFor: 'built ins'!
+Class extend [
+    
+    subclass: classNameString [
+        ^(Smalltalk at: classNameString)
+    ]
+    
+    subclass: classNameString
+      instanceVariableNames: stringInstVarNames
+      classVariableNames: stringOfClassVarNames
+      poolDictionaries: stringOfPoolNames
+      category: categoryNameString [
+        ^(Smalltalk at: classNameString) category: categoryNameString
+    ]
+    
+    variable: shape subclass: classNameString
+      instanceVariableNames: stringInstVarNames
+      classVariableNames: stringOfClassVarNames
+      poolDictionaries: stringOfPoolNames
+      category: categoryNameString [
+        ^(Smalltalk at: classNameString) category: categoryNameString
+    ]
+    
+    variableSubclass: classNameString
+      instanceVariableNames: stringInstVarNames
+      classVariableNames: stringOfClassVarNames
+      poolDictionaries: stringOfPoolNames
+      category: categoryNameString [
+        ^(Smalltalk at: classNameString) category: categoryNameString
+    ]
+    
+    variableWordSubclass: classNameString
+      instanceVariableNames: stringInstVarNames
+      classVariableNames: stringOfClassVarNames
+      poolDictionaries: stringOfPoolNames
+      category: categoryNameString [
+        ^(Smalltalk at: classNameString) category: categoryNameString
+    ]
+    
+    variableByteSubclass: classNameString
+      instanceVariableNames: stringInstVarNames
+      classVariableNames: stringOfClassVarNames
+      poolDictionaries: stringOfPoolNames
+      category: categoryNameString [
+        ^(Smalltalk at: classNameString) category: categoryNameString
+    ]
+    
+    category: aString [
+        "Define a category for the receiver"
+    
+        category := aString
+    ]
+    
+    comment: aString [
+        "Define a comment for the receiver"
+    
+        comment := aString
+    ]
 
-new
-    "Answer a new Dictionary. This method, actually, won't last long -
-     until LookupTbl.st is loaded"
-    <primitive: VMpr_Dictionary_new>
-    ^self primitiveFailed
-! !
-
-
+    shape: aSymbol [
+    ]
+    
+    import: aString [
+    ]
+]
+    
 
-!Dictionary methodsFor: 'built ins'!
-
-at: key
-    "Answer the value associated with the given key in the receiver.
-     This method, actually, won't last long - until LookupTbl.st is loaded"
-    <primitive: VMpr_Dictionary_at>
-    ^self primitiveFailed
-! !
-
-
-
-!Class methodsFor: 'builtins'!
-
-subclass: classNameString
-    ^(Smalltalk at: classNameString)
-!
-
-subclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    ^(Smalltalk at: classNameString) category: categoryNameString
-!
-
-variable: shape subclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    ^(Smalltalk at: classNameString) category: categoryNameString
-!
-
-variableSubclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    ^(Smalltalk at: classNameString) category: categoryNameString
-!
-
-variableWordSubclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    ^(Smalltalk at: classNameString) category: categoryNameString
-!
-
-variableByteSubclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    ^(Smalltalk at: classNameString) category: categoryNameString
-! !
-
-
-
-!UndefinedObject methodsFor: 'builtins'!
-
-subclass: classNameString
-    ^(Smalltalk at: classNameString)
-!
-
-subclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    ^(Smalltalk at: classNameString) category: categoryNameString
-!
-
-variable: shape subclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    ^(Smalltalk at: classNameString) category: categoryNameString
-!
-
-variableSubclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    ^(Smalltalk at: classNameString) category: categoryNameString
-!
-
-variableWordSubclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    ^(Smalltalk at: classNameString) category: categoryNameString
-!
-
-variableByteSubclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    ^(Smalltalk at: classNameString) category: categoryNameString
-! !
-
-
-!Class methodsFor: 'builtins'!
-
-category: aString
-    "Define a category for the receiver"
-
-    category := aString
-!
-
-comment: aString
-    "Define a comment for the receiver"
-
-    comment := aString
-!
-
-shape: aSymbol
-!
-
-import: aString
-! !
+UndefinedObject extend [
+    subclass: classNameString [
+        ^(Smalltalk at: classNameString)
+    ]
+    
+    subclass: classNameString
+      instanceVariableNames: stringInstVarNames
+      classVariableNames: stringOfClassVarNames
+      poolDictionaries: stringOfPoolNames
+      category: categoryNameString [
+        ^(Smalltalk at: classNameString) category: categoryNameString
+    ]
+    
+    variable: shape subclass: classNameString
+      instanceVariableNames: stringInstVarNames
+      classVariableNames: stringOfClassVarNames
+      poolDictionaries: stringOfPoolNames
+      category: categoryNameString [
+        ^(Smalltalk at: classNameString) category: categoryNameString
+    ]
+    
+    variableSubclass: classNameString
+      instanceVariableNames: stringInstVarNames
+      classVariableNames: stringOfClassVarNames
+      poolDictionaries: stringOfPoolNames
+      category: categoryNameString [
+        ^(Smalltalk at: classNameString) category: categoryNameString
+    ]
+    
+    variableWordSubclass: classNameString
+      instanceVariableNames: stringInstVarNames
+      classVariableNames: stringOfClassVarNames
+      poolDictionaries: stringOfPoolNames
+      category: categoryNameString [
+        ^(Smalltalk at: classNameString) category: categoryNameString
+    ]
+    
+    variableByteSubclass: classNameString
+      instanceVariableNames: stringInstVarNames
+      classVariableNames: stringOfClassVarNames
+      poolDictionaries: stringOfPoolNames
+      category: categoryNameString [
+        ^(Smalltalk at: classNameString) category: categoryNameString
+    ]
+]

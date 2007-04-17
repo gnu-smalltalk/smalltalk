@@ -1,5 +1,9 @@
 2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Builtins.st: Convert to new syntax.
+
+2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Builtins.st: Move most builtins...
 	* kernel/AbstNamespc.st: ...here.
 	* kernel/ArrayColl.st: ... and here,
