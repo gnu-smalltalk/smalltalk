@@ -402,8 +402,15 @@ extractComment: source
     comment := ReadStream on: source.
 
     self skipWhite: comment.
-    (isCommented := comment peekFor: $") ifFalse: [
-	"Maybe they put temporaries *before* the method comment..."
+    isCommented := comment peekFor: $".
+
+    "Check for new syntax."
+    isCommented ifFalse: [
+	comment peekFor: $[.
+	isCommented := comment peekFor: $" ].
+
+    "Maybe they put temporaries *before* the method comment..."
+    isCommented ifFalse: [
 	(comment peekFor: $|) ifTrue: [
 	    comment skipTo: $| .
 	    isCommented := comment atEnd not and: [
