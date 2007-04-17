@@ -512,6 +512,11 @@ policy
 
 policy: aSecurityPolicy
     securityPolicy := aSecurityPolicy withOwner: self
+!
+
+check: aPermission
+    self securityPolicy isNil ifTrue: [ ^self isUntrusted not ].
+    ^self securityPolicy check: aPermission
 ! !
 
 
@@ -727,4 +732,3 @@ initialize
     "Perform the special initialization of root classes."
     self subclassesDo: [ :each | each instanceClass initializeAsRootClass ]
 ! !
-

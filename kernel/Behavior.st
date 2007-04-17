@@ -1059,14 +1059,6 @@ publicMethods
 ! !
 
 
-!Class methodsFor: 'security'!
-
-check: aPermission
-    self securityPolicy isNil ifTrue: [ ^self isUntrusted not ].
-    ^self securityPolicy check: aPermission
-! !
-
-
 !Behavior methodsFor: 'support for lightweight classes'!
 
 article
@@ -1404,4 +1396,3 @@ compileString: aString ifError: aBlock
     <primitive: VMpr_Behavior_compileStringIfError>
     ^self primitiveFailed
 ! !
-
