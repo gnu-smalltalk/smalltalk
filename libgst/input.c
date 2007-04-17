@@ -539,6 +539,7 @@ _gst_get_cur_string (void)
       in_stream->fileOffset += in_stream->st_oop.ptr - in_stream->st_oop.buf;
       in_stream->st_oop.ptr = in_stream->st_oop.buf;
       in_stream->st_oop.end = in_stream->st_oop.buf + size;
+      *in_stream->st_oop.end = 0;
       return (result);
 
     default:

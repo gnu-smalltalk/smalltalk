@@ -1,5 +1,9 @@
 2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/input.c: More Smalltalk Stream fixes.
+
+2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/lex.c: Load SysDict.st early in the bootstrap process.
 	* libgst/prims.def: Remove VMpr_Dictionary_atPut.
 
