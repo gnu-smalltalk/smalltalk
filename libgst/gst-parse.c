@@ -1013,7 +1013,11 @@ parse_method (gst_parser *p, int at_end)
   /* Don't lex until _gst_free_tree, or we lose a token.  */
   lex_must_be (p, at_end);
 
+  /* Still, include the ']' in the method source code.  */
   current_pos = _gst_get_location ();
+  if (at_end == ']')
+    current_pos.file_offset++;
+
   method = _gst_make_method (&pat->location, &current_pos,
 			     pat, temps, attrs, stmts);
 

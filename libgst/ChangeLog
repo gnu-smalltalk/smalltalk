@@ -1,5 +1,13 @@
 2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/comp.c: Move all FileSegment stuff to input.c
+	* libgst/input.c: Rename _gst_get_cur_string to _gst_get_source_string
+	and return FileSegments or substrings here.  Concatenate pieces of
+	readline input like in a STREAM_OOP.
+	* libgst/input.h: Adjust _gst_get_cur_string prototype.
+
+2007-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/input.c: More Smalltalk Stream fixes.
 
 2007-04-17  Paolo Bonzini  <bonzini@gnu.org>

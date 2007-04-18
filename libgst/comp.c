@@ -72,15 +72,6 @@
 #define LITERAL_VEC_CHUNK_SIZE		32
 
 
-typedef struct gst_file_segment
-{
-  OBJ_HEADER;
-  OOP fileName;
-  OOP startPos;
-  OOP length;
-}
- *gst_file_segment;
-
 typedef struct method_attributes
 {
   struct method_attributes *next;
@@ -253,20 +244,6 @@ static OOP method_info_new (OOP class,
 			    method_attributes *attrs,
 			    OOP sourceCode,
 			    OOP categoryOOP);
-
-/* Returns a FileSegment instance for the currently open compilation
-   stream.  FileSegment instances are used record information useful
-   in obtaining the source code for a method that's been compiled.
-   Depending on whether the input stream is a string or a FileStream,
-   the instance variables are different; for a string, the entire
-   contents of the string is preserved as the source code for the
-   method; for a disk file loaded from within the kernel source
-   directory, the file name, byte offset and length are preserved.  
-   The two parameters are used in the latter case and they represent
-   respectively the first byte of the method and the first byte after
-   the method.  Otherwise they should be -1.  */
-static OOP file_segment_new (int64_t startPos,
-			     int64_t endPos);
 
 /* This creates a CompiledBlock for the given BYTECODES.  The bytecodes
    are passed through the peephole optimizer and stored, the header is
@@ -2702,7 +2679,7 @@ _gst_make_new_method (int primitiveIndex,
     sourceCode = _gst_nil_oop;
   else
     {
-      sourceCode = file_segment_new (startPos, endPos);
+      sourceCode = _gst_get_source_string (startPos, endPos);
       INC_ADD_OOP (sourceCode);
     }
 
@@ -2846,28 +2823,3 @@ method_info_new (OOP class,
   return (methodInfoOOP);
 }
 
-OOP
-file_segment_new (int64_t startPos, int64_t endPos)
-{
-  OOP fileName, fileSegmentOOP;
-  gst_file_segment fileSegment;
-  inc_ptr incPtr;
-
-  if (startPos == -1)
-    return _gst_get_cur_string ();
-
-  incPtr = INC_SAVE_POINTER ();
-  fileName = _gst_get_cur_file_name ();
-  INC_ADD_OOP (fileName);
-
-  fileSegment = (gst_file_segment) new_instance (_gst_file_segment_class,
-						 &fileSegmentOOP);
-
-  fileSegment->fileName = fileName;
-  fileSegment->startPos = from_c_int_64 (startPos);
-  fileSegment->length = from_c_int_64 (endPos - startPos);
-
-  assert (to_c_int_64 (fileSegment->length) >= 0);
-  INC_RESTORE_POINTER (incPtr);
-  return (fileSegmentOOP);
-}

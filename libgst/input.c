@@ -60,6 +60,15 @@
 #define EMACS_PROCESS_MARKER	'\001'	/* ^A as marker -- random
 					   choice */
 
+typedef struct gst_file_segment
+{
+  OBJ_HEADER;
+  OOP fileName;
+  OOP startPos;
+  OOP length;
+}
+ *gst_file_segment;
+
 typedef struct string_stream
 {
   char *strBase;		/* base of asciz string */
@@ -220,6 +229,9 @@ _gst_pop_stream (mst_Boolean closeIt)
       xfree (stream->st_str.strBase);
       break;
 
+#ifdef HAVE_READLINE
+    case STREAM_READLINE:
+#endif /* HAVE_READLINE */
     case STREAM_OOP:
       xfree (stream->st_oop.buf);
       _gst_unregister_oop (stream->st_oop.oop);
@@ -230,16 +242,6 @@ _gst_pop_stream (mst_Boolean closeIt)
       if (closeIt)
         close (stream->st_file.fd);
       break;
-
-#ifdef HAVE_READLINE
-    case STREAM_READLINE:
-      if (stream->st_str.strBase)
-	{
-	  xfree (stream->st_str.strBase);
-	  stream->st_str.strBase = NULL;
-	}
-      break;
-#endif /* HAVE_READLINE */
     }
 
   xfree (stream);
@@ -329,9 +331,10 @@ _gst_push_stdin_string (void)
     _gst_add_all_symbol_completions ();
 
   newStream = push_new_stream (STREAM_READLINE);
-
-  newStream->st_str.strBase = NULL;	/* force readline() but no free() */
-  newStream->st_str.str = NULL;
+  newStream->fileOffset = 0;
+  newStream->st_oop.buf = NULL;
+  newStream->st_oop.ptr = NULL;
+  newStream->st_oop.end = NULL;
   newStream->fileName = "stdin";	/* that's where we get input from */
   newStream->prompt = true;
 #endif
@@ -372,6 +375,29 @@ _gst_set_stream_info (int line,
   in_stream->fileOffset = fileOffset;
 }
  
+void
+refill_stream (input_stream stream, char *buf, int new_line)
+{
+  size_t old_size = stream->st_oop.ptr - stream->st_oop.buf;
+  size_t size = old_size + strlen (buf);
+
+  /* Leave space for the '\0' at the end.  */
+  stream->st_oop.buf = xrealloc (stream->st_oop.buf, size + new_line + 1);
+  stream->st_oop.ptr = stream->st_oop.buf + old_size;
+  stream->st_oop.end = stream->st_oop.buf + size + new_line;
+
+  memcpy (stream->st_oop.ptr, buf, size - old_size);
+  if (new_line)
+    {
+      stream->st_oop.ptr[size - old_size] = '\n';
+      stream->st_oop.ptr[size - old_size + 1] = '\0';
+    }
+  else
+    stream->st_oop.ptr[size - old_size] = '\0';
+
+  free (buf);
+}
+
 int
 my_getc (input_stream stream)
 {
@@ -393,22 +419,11 @@ my_getc (input_stream stream)
       if (stream->st_oop.ptr == stream->st_oop.end)
 	{
 	  char *buf;
-	  int old_size;
-	  int size;
 	  _gst_msg_sendf(&buf, "%s %o nextHunk", stream->st_oop.oop);
 	  if (!buf || !*buf)
 	    return EOF;
 
-	  old_size = stream->st_oop.ptr - stream->st_oop.buf;
-	  size = old_size + strlen (buf);
-
-	  /* Leave space for the '\0' at the end.  */
-	  stream->st_oop.buf = xrealloc (stream->st_oop.buf, size + 1);
-	  stream->st_oop.ptr = stream->st_oop.buf + old_size;
-	  stream->st_oop.end = stream->st_oop.buf + size;
-
-	  memcpy (stream->st_oop.ptr, buf, size - old_size + 1);
-	  free (buf);
+	  refill_stream (stream, buf, false);
 	}
 
       return (unsigned char) *stream->st_oop.ptr++;
@@ -440,55 +455,18 @@ my_getc (input_stream stream)
 
 #ifdef HAVE_READLINE
     case STREAM_READLINE:
-      {
-	char *r_line;
-	int r_len;
+      /* Refill the buffer...  */
+      if (stream->st_oop.ptr == stream->st_oop.end)
+	{
+	  char *buf = readline ((char *) "st> ");
+	  if (!buf)
+	    return EOF;
 
-	if (stream->st_str.strBase)
-	  {
-	    ic = (unsigned char) *stream->st_str.str++;
-	    if (ic)
-	      return (ic);
+	  add_history (buf);
+	  refill_stream (stream, buf, true);
+	}
 
-	    /* If null, read a new line */
-	  }
-
-	if (stream->st_str.strBase)
-	  {
-	    xfree (stream->st_str.strBase);
-	    stream->st_str.strBase = NULL;
-	  }
-	r_line = readline ((char *) "st> ");
-	if (!r_line)
-	  {
-	    /* return value of NULL indicates EOF */
-	    return (EOF);
-	  }
-	if (*r_line)
-	  {
-	    /* add only non-empty lines.  */
-	    add_history (r_line);
-	  }
-
-	/* tack on the newline, not returned by readline() */
-	r_len = strlen (r_line);
-	r_line = xrealloc (r_line, (unsigned) (r_len + 2));
-	if (!r_line)
-	  {
-	    _gst_errorf ("Out of memory reallocating linebuffer space");
-	    stream->st_str.str = stream->st_str.strBase = NULL;
-	    ic = '\n';		/* return a newline ...  */
-	  }
-	else
-	  {
-	    r_line[r_len] = '\n';
-	    r_line[r_len + 1] = '\0';
-	    stream->st_str.str = stream->st_str.strBase = r_line;
-	    ic = (unsigned char) *stream->st_str.str++;
-	  }
-
-	break;
-      }
+      return (unsigned char) *stream->st_oop.ptr++;
 #endif /* HAVE_READLINE */
 
     default:
@@ -516,35 +494,72 @@ _gst_get_cur_stream_type (void)
 }
 
 OOP
-_gst_get_cur_string (void)
+_gst_get_source_string (off_t startPos, off_t endPos)
 {
+  char *p;
   OOP result;
   int size;
 
   if (!in_stream)
     return (_gst_nil_oop);
 
+  if (startPos != -1 && !_gst_get_cur_stream_prompt ())
+    {
+      OOP fileName;
+      gst_file_segment fileSegment;
+      inc_ptr incPtr;
+
+      incPtr = INC_SAVE_POINTER ();
+      fileName = _gst_get_cur_file_name ();
+      INC_ADD_OOP (fileName);
+
+      fileSegment = (gst_file_segment) new_instance (_gst_file_segment_class,
+                                                     &result);
+
+      fileSegment->fileName = fileName;
+      fileSegment->startPos = from_c_int_64 (startPos);
+      fileSegment->length = from_c_int_64 (endPos - startPos);
+
+      assert (to_c_int_64 (fileSegment->length) >= 0);
+      INC_RESTORE_POINTER (incPtr);
+      return (result);
+    }
+
   switch (in_stream->type)
     {
     case STREAM_STRING:
-      return (_gst_string_new (in_stream->st_str.strBase));
+      p = in_stream->st_str.strBase;
+      break;
 
+#ifdef HAVE_READLINE
+    case STREAM_READLINE:
+#endif /* HAVE_READLINE */
     case STREAM_OOP:
-      result = _gst_string_new (in_stream->st_oop.buf);
-
-      /* Copy back to the beginning of the buffer to save memory.  */
-      size = in_stream->st_oop.end - in_stream->st_oop.ptr;
-      if (size)
-	memmove (in_stream->st_oop.buf, in_stream->st_oop.ptr, size);
-      in_stream->fileOffset += in_stream->st_oop.ptr - in_stream->st_oop.buf;
-      in_stream->st_oop.ptr = in_stream->st_oop.buf;
-      in_stream->st_oop.end = in_stream->st_oop.buf + size;
-      *in_stream->st_oop.end = 0;
-      return (result);
+      p = in_stream->st_oop.buf;
+      break;
 
     default:
       return (_gst_nil_oop);
     }
+
+   if (startPos == -1) 
+    result = _gst_string_new (p);
+  else
+    result = _gst_counted_string_new (p + startPos, endPos - startPos);
+
+  if (in_stream->type != STREAM_STRING)
+    {
+      /* Copy back to the beginning of the buffer to save memory.  */
+      size = in_stream->st_oop.end - in_stream->st_oop.ptr;
+      if (size)
+	memmove (in_stream->st_oop.buf, in_stream->st_oop.ptr, size);
+      in_stream->st_oop.buf[size] = 0;
+      in_stream->fileOffset += in_stream->st_oop.ptr - in_stream->st_oop.buf;
+      in_stream->st_oop.ptr = in_stream->st_oop.buf;
+      in_stream->st_oop.end = in_stream->st_oop.buf + size;
+    }
+
+  return result;
 }
 
 OOP

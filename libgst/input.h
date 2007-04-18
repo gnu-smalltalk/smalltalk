@@ -183,9 +183,9 @@ extern OOP _gst_get_cur_file_name (void)
   ATTRIBUTE_HIDDEN;
 
 /* Returns an OOP containing the string of the topmost stream if it is
-   a STREAM_STRING, STREAM_OOP or STREAM_READLINE; nil otherwise.  */
-extern OOP _gst_get_cur_string (void)
-  ATTRIBUTE_PURE 
+   a STREAM_STRING, STREAM_OOP or STREAM_READLINE, or if it has a filename;
+   nil otherwise.  */
+extern OOP _gst_get_source_string (off_t startPos, off_t endPos)
   ATTRIBUTE_HIDDEN;
 
 #ifdef HAVE_READLINE
