@@ -557,10 +557,10 @@ _gst_get_cur_string (void)
       size = in_stream->st_oop.end - in_stream->st_oop.ptr;
       if (size)
 	memmove (in_stream->st_oop.buf, in_stream->st_oop.ptr, size);
+      in_stream->st_oop.buf[size] = 0;
       in_stream->fileOffset += in_stream->st_oop.ptr - in_stream->st_oop.buf;
       in_stream->st_oop.ptr = in_stream->st_oop.buf;
       in_stream->st_oop.end = in_stream->st_oop.buf + size;
-      *in_stream->st_oop.end = 0;
       return (result);
 
     default:

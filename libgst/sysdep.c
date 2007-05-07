@@ -1658,7 +1658,7 @@ anon_mmap_commit (PTR base, size_t size)
 		          PROT_READ | PROT_WRITE | PROT_EXEC,
 		          MAP_PRIVATE | MAP_FIXED);
 
-  return result;
+  return UNCOMMON (result == MAP_FAILED) ? NULL : result;
 }
 
 /* This is hairy and a hack.  We have to find a place for our heaps...  */
