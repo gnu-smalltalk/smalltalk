@@ -1,4 +1,4 @@
-/* Fault handler information subroutine.  MacOSX/PowerPC version.
+/* Fault handler information subroutine.  MacOSX/Darwin5/PowerPC version.
  * Taken from gcc-3.2/boehm-gc/os_dep.c.
  *
  * Copyright 1988, 1989 Hans-J. Boehm, Alan J. Demers

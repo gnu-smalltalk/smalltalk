@@ -1,5 +1,5 @@
 /* Determine the virtual memory area of a given address.
-   Copyright (C) 2002  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 2002, 2006  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -22,6 +22,15 @@
 #include <stdlib.h> /* malloc, free */
 #include <sys/procfs.h> /* PIOC*, prmap_t */
 
+#include "stackvma-simple.c"
+
+#if HAVE_MINCORE
+# define sigsegv_get_vma mincore_get_vma
+# define STATIC static
+# include "stackvma-mincore.c"
+# undef sigsegv_get_vma
+#endif
+
 int
 sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
 {
@@ -38,7 +47,7 @@ sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
   sprintf (fname,"/proc/%u", (unsigned int) getpid ());
   fd = open (fname, O_RDONLY);
   if (fd < 0)
-    return -1;
+    goto failed;
 
   if (ioctl (fd, PIOCNMAP, &nmaps) < 0)
     goto fail2;
@@ -72,6 +81,7 @@ sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
 #endif
           free (maps);
           close (fd);
+          vma->is_near_this = simple_is_near_this;
           return 0;
         }
 #if STACK_DIRECTION < 0
@@ -83,5 +93,10 @@ sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
   free (maps);
  fail2:
   close (fd);
+ failed:
+#if HAVE_MINCORE
+  return mincore_get_vma (address, vma);
+#else
   return -1;
+#endif
 }

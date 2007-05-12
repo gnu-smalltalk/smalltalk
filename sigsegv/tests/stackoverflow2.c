@@ -1,5 +1,5 @@
 /* Test that stack overflow and SIGSEGV are correctly distinguished.
-   Copyright (C) 2002-2005  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 2002-2006  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ recurse_1 (int n, volatile int *p)
 volatile int
 recurse (volatile int n)
 {
-  return *recurse_1 (n, (volatile int *) &n);
+  return *recurse_1 (n, &n);
 }
 
 int
@@ -159,7 +159,7 @@ main ()
       recurse (0);
       printf ("no endless recursion?!\n"); exit (1);
     case 2:
-      *(int *) (page + 0x678) = 42;
+      *(volatile int *) (page + 0x678) = 42;
       break;
     case 3:
       break;

@@ -1,7 +1,21 @@
+New in 2.4:
+
+* Support for GCC 4 on more platforms.
+* Added support for catching stack overflow on NetBSD.
+* Improved support for catching stack overflow on Linux, Solaris:
+  Works also when /proc is not mounted or lacks read permissions.
+
+New in 2.3:
+
+* Support for GCC 4 on some platforms contributed by Paolo Bonzini.
+* Support for MacOS X i386 contributed by Bruno Haible.
+* Improved support for Woe32 contributed by Doug Currie.
+
 New in 2.2:
 
-* Support for Mach contributed by Paolo Bonzini.
-
+* Support for new versions of MacOS X contributed by Paolo Bonzini.
+* Improved support for AIX 5, contributed by Bruno Haible.
+
 New in 2.1:
 
 * Support for MacOS X contributed by Paolo Bonzini.

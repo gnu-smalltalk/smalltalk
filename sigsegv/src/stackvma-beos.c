@@ -1,5 +1,5 @@
 /* Determine the virtual memory area of a given address.  BeOS version.
-   Copyright (C) 2002  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 2002, 2006  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
 
 #include "stackvma.h"
 #include <OS.h>
+
+#include "stackvma-simple.c"
 
 int
 sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
@@ -48,6 +50,7 @@ sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
           else
             vma->next_start = 0;
 #endif
+          vma->is_near_this = simple_is_near_this;
           return 0;
         }
 #if STACK_DIRECTION < 0

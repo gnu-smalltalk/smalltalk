@@ -67,7 +67,7 @@ recurse_1 (int n, volatile int *p)
 volatile int
 recurse (volatile int n)
 {
-  return *recurse_1 (n, (volatile int *) &n);
+  return *recurse_1 (n, &n);
 }
 
 int

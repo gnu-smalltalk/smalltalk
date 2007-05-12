@@ -14,6 +14,8 @@ o   Fixed various minor bugs and imprecisions in the documentation.
 
 o   Some libffi files (for IA64 and PA) were missing from the distribution.
 
+o   Upgraded libsigsegv, for improved Mac OS X on Intel support
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 2.3.2 TO 2.3.3

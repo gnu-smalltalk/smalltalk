@@ -1,6 +1,5 @@
-/* Detecting stack overflow.  Version for platforms which do not
-   support catching stack overflows.
-   Copyright (C) 2003  Paolo Bonzini <bonzini@gnu.org>
+/* Fault handler information.
+   Copyright (C) 2002  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,8 +15,23 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-static int
-remember_stack_top (void *some_variable_on_stack)
-{
-  return 0;
-}
+/* The included file defines:
+
+     SIGSEGV_FAULT_HANDLER_ARGLIST
+          is the argument list for the actual fault handler.
+
+     SIGSEGV_FAULT_ADDRESS
+          is a macro for fetching the fault address.
+
+   and if available (optional):
+
+     SIGSEGV_FAULT_CONTEXT
+          is a macro giving a pointer to the entire fault context (i.e.
+          the register set etc.).
+
+     SIGSEGV_FAULT_STACKPOINTER
+          is a macro for fetching the stackpointer at the moment the fault
+          occurred.
+ */
+
+#include CFG_FAULT

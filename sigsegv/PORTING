@@ -4,33 +4,46 @@ Successfully tested platforms
 __PLATFORM__________________________________SIGSEGV__STACK_OVERFLOW__VERSION___
                                            |         |           |
 alpha-dec-osf4.0d                          |   yes   |   yes     | 2.1
-alpha-dec-osf4.0f                          |   yes   |   yes     | 2.0
+alpha-dec-osf4.0f                          |   yes   |   yes     | 2.1
+alphaev56-dec-osf4.0f                      |   yes   |   yes     | 2.3
 alpha-dec-osf4.0g                          |   yes   |   yes     | 2.1
 alpha-dec-osf5.1                           |   yes   |   yes     | 2.1
+alphaev67-dec-osf5.1                       |   yes   |   yes     | 2.2
 alpha-unknown-freebsd4.8                   |   yes   |   yes     | 2.1
+alpha-portbld-freebsd5.5                   |   yes   |   yes     | 2.3
 alphaev67-unknown-linux2.4.17-gnu-glibc2.1 |   yes   |   yes     | 1.95
 alphaev6-unknown-linux2.2.19-gnu-glibc2.2  |   yes   |   yes     | 2.1
+alphaev67-unknown-linux2.2.20-gnu-glibc2.2 |   yes   |   yes     | 2.1
 alphaev67-unknown-linux2.4.4-gnu-glibc2.2  |   yes   |   yes     | 2.1
 alphaev6-unknown-linux2.4.9-gnu-glibc2.2   |   yes   |   yes     | 2.1
 alphaev67-unknown-linux2.4.9-gnu-glibc2.2  |   yes   |   yes     | 2.1
 alphaev6-unknown-linux2.4.18-gnu-glibc2.2  |   yes   |   yes     | 2.1
 alphaev67-unknown-linux2.4.18-gnu-glibc2.2 |   yes   |   yes     | 2.1
+alpha-unknown-linux2.4.19-gnu-glibc2.3     |   yes   |   yes     | 2.3
+alphaev68-unknown-linux2.6.11-gnu-glibc2.3 |   yes   |   yes     | 2.2
+alpha-unknown-openbsd3.7                   |   yes   |   yes     | 2.2
 alpha-unknown-netbsd1.6                    |   yes   |   yes     | 2.1
 armv4l-unknown-linux2.4.0-gnu-glibc2.2     |   no    |   yes     | 2.1
 armv4l-unknown-linux2.4.3-gnu-glibc2.2     |   yes   |   yes     | 2.1
 armv4l-unknown-linux2.4.9-gnu-glibc2.2     |   no    |   yes     | 2.0.1
-hppa2.0-hp-hpux10.20                       |   yes   |   yes     | 2.1
-hppa2.0w-hp-hpux11.00                      |   yes   |   yes     | 2.1
-hppa2.0w-hp-hpux11.11                      |   yes   |   yes     | 2.1
+armv5tel-unknown-linux2.4.20-gnu-glibc2.2  |   yes   |   yes     | 2.2
+hppa1.1-hp-hpux11.00                       |   yes   |   yes     | 2.1
+hppa2.0-hp-hpux10.20                       |   yes   |   yes     | 2.2
+hppa2.0w-hp-hpux11.00                      |   yes   |   yes     | 2.2
+hppa2.0w-hp-hpux11.11                      |   yes   |   yes     | 2.2
 hppa-unknown-linux2.4.19-gnu-glibc2.2      |   yes   |   yes     | 2.0.1
 hppa64-unknown-linux2.4.17-gnu-glibc2.2    |   yes   |   yes     | 2.1
 i586-pc-beos                               |   no    |   yes     | 2.1
 i686-pc-cygwin                             |   yes   |   yes     | 2.02
+i686-pc-cygwin                             |   yes   |   yes     | 2.2
+i386-apple-darwin8.6.1                     |   yes   |   yes     | 2.3
+i686-apple-darwin8.6.1                     |   yes   |   yes     | 2.3
 i586-pc-linux2.2.14-gnu-glibc2.1           |   yes   |   yes     | 2.1
 i686-pc-linux2.2.14-gnu-glibc2.1           |   yes   |   yes     | 2.0
 i686-pc-linux2.2.19-gnu-glibc2.1           |   yes   |   yes     | 1.95
 i486-pc-linux2.2.21-gnu-glibc2.1           |   yes   |   yes     | 2.0
 i586-pc-linux2.4.18-gnu-glibc2.1           |   yes   |   yes     | 2.0
+i686-pc-linux2.4.19-gnu-glibc2.1           |   yes   |   yes     | 2.2
 i686-pc-linux2.2.16-gnu-glibc2.2           |   yes   |   yes     | 2.0
 i686-pc-linux2.2.19-gnu-glibc2.2           |   yes   |   yes     | 2.0
 i686-pc-linux2.4.7-gnu-glibc2.2            |   yes   |   yes     | 2.1
@@ -47,30 +60,84 @@ i486-pc-linux2.4.20-gnu-glibc2.3           |   yes   |   yes     | 2.0
 i586-pc-linux2.4.20-gnu-glibc2.3           |   yes   |   yes     | 2.0
 i686-pc-linux2.4.20-gnu-glibc2.3           |   yes   |   yes     | 2.0
 i686-pc-linux2.4.21-gnu-glibc2.3           |   yes   |   yes     | 2.0
-i386-pc-mingw32                            |   yes   |   yes     | 2.0
+i586-pc-linux2.4.22-gnu-glibc2.3           |   yes   |   yes     | 2.0
+i386-pc-mingw32                            |   yes   |   yes     | 2.2
+i586-pc-mingw32                            |   yes   |   yes     | 2.1
 i686-pc-mingw32                            |   yes   |   yes     | 1.96
+i386-pc-solaris2.9                         |   yes   |   yes     | 2.2
+i386-pc-solaris2.10                        |   yes   |   yes     | 2.3
+i386-pc-solaris2.11                        |   yes   |   yes     | 2.2
 i686-pc-win32-msvc6                        |   yes   |   yes     | 1.96
 i386-unknown-freebsd4.0                    |   yes   |   yes     | 2.1
 i386-unknown-freebsd4.0-gnu-glibc2.3       |   yes   |   yes     | 2.1
 i386-unknown-freebsd4.6                    |   yes   |   yes     | 1.95
 i386-unknown-freebsd4.7                    |   yes   |   yes     | 2.1
 i386-unknown-freebsd4.8                    |   yes   |   yes     | 2.1
+i386-unknown-freebsd4.9                    |   yes   |   yes     | 2.2
+i386-unknown-freebsd4.10                   |   yes   |   yes     | 2.2
+i386-unknown-freebsd5.0                    |   yes   |   yes     | 2.3
+i386-portbld-freebsd6.0                    |   yes   |   yes     | 2.3
 i386-unknown-netbsdelf1.6                  |   no    |   no      | 2.1
-i386-unknown-openbsd3.2                    |   yes   |   yes     | 2.1
+i386-unknown-netbsdelf2.0.2                |   yes   |   yes     | 2.4
+i386-unknown-netbsdelf3.0                  |   yes   |   yes     | 2.4
+i386-unknown-netbsd                        |   yes   |   no      | 2.2
+i386-unknown-openbsd3.2                    |   yes   |   yes     | 2.3
+i386-unknown-openbsd3.3                    |   yes   |   yes     | 2.1
+i386-unknown-openbsd3.4                    |   yes   |   yes     | 2.2
+i386-unknown-openbsd3.6                    |   yes   |   yes     | 2.1
+ia64-portbld-freebsd7.0                    |   yes   |   no      | 2.3
 ia64-hp-hpux11.22                          |   yes   |   no      | 2.1
-ia64-unknown-linux2.4.18-gnu-glibc2.2      |   yes   |   yes     | 2.1
-mips-sgi-irix6.5                           |   yes   |   yes     | 2.1
-rs6000-ibm-aix3.2.5                        |   yes   |   no      | 2.1
+ia64-hp-hpux11.23                          |   yes   |   no      | 2.2
+ia64-unknown-linux2.4.18-gnu-glibc2.2      |   yes   |   yes     | 2.4
+ia64-unknown-linux2.6.9-gnu-glibc2.3       |   yes   |   no      | 2.3
+mips-sgi-irix6.5                           |   yes   |   yes     | 2.3
+mips-unknown-linux2.4.27-gnu-glibc2.3      |   yes   |   yes     | 2.3
+nsr-tandem-nsk                             |   no    |   no      | 2.1
+rs6000-ibm-aix3.2.5                        |   yes   |   no      | 2.2
+rs6000-ibm-aix4.2.0.0                      |   yes   |   yes     | 2.2
+rs6000-ibm-aix4.2.1.0                      |   yes   |   yes     | 2.1
+powerpc-ibm-aix4.3.2.0                     |   yes   |   yes     | 2.3
 powerpc-ibm-aix4.3.3.0                     |   yes   |   yes     | 1.95
+powerpc-ibm-aix5.1.0.0                     |   yes   |   yes     | 2.3
+powerpc-ibm-aix5.2.0.0                     |   yes   |   no      | 2.1
 powerpc-apple-darwin5.5                    |   yes   |   yes     | 2.2
 powerpc-apple-darwin6.8                    |   yes   |   yes     | 2.2
+powerpc-apple-darwin7.7.0                  |   yes   |   yes     | 2.2
+powerpc-apple-darwin7.8.0                  |   yes   |   yes     | 2.2
+powerpc-apple-darwin7.9.0                  |   yes   |   yes     | 2.3
+powerpc-apple-darwin8.1.0                  |   yes   |   yes     | 2.2
+powerpc-apple-darwin8.3.0                  |   yes   |   yes     | 2.2
+powerpc-apple-darwin8.4.0                  |   yes   |   yes     | 2.2
 powerpc-unknown-linux2.2.17-gnu-glibc2.1   |   no    |   yes     | 1.95
 powerpc-unknown-linux2.2.17-gnu-glibc2.2   |   yes   |   yes     | 2.0.1
-sparc-sun-solaris2.6                       |   yes   |   yes     | 2.0
-sparc-sun-solaris2.7                       |   yes   |   yes     | 2.1
-sparc-sun-solaris2.8                       |   yes   |   yes     | 2.1
-sparc-sun-solaris2.9                       |   yes   |   yes     | 2.1
+powerpc-unknown-linux2.4.19-gnu-glibc2.2   |   yes   |   yes     | 2.3
+powerpc-unknown-linux2.4.28-gnu-glibc2.2   |   yes   |   yes     | 2.1
+powerpc-unknown-linux2.4.26-gnu-glibc2.3   |   yes   |   yes     | 2.1
+powerpc-unknown-linux2.6.10-gnu-glibc2.3   |   yes   |   yes     | 2.2
+powerpc-unknown-netbsd2.0                  |   yes   |   no      | 2.1
+powerpc64-unknown-linux2.6.5-gnu-glibc2.3  |   yes   |   yes     | 2.4
+sparc-sun-solaris2.5.1                     |   yes   |   yes     | 2.2
+sparc-sun-solaris2.6                       |   yes   |   yes     | 2.2
+sparc-sun-solaris2.7                       |   yes   |   yes     | 2.3
+sparc-sun-solaris2.8                       |   yes   |   yes     | 2.3
+sparc-sun-solaris2.9                       |   yes   |   yes     | 2.3
+sparc-sun-solaris2.10                      |   yes   |   yes     | 2.3
+sparc-sun-solaris2.11                      |   yes   |   yes     | 2.4
 sparc64-unknown-linux2.2.18-gnu-glibc2.1   |   no    |   no      | 1.95
+sparc64-unknown-linux2.4.28-gnu-glibc2.3   |   yes   |   no      | 2.3
+sparc64-unknown-openbsd3.6                 |   no    |   no      | 2.2
+x86_64-unknown-linux2.4.21-gnu-glibc2.2    |   yes   |   yes     | 2.1
+x86_64-unknown-linux2.4.21-gnu-glibc2.3    |   yes   |   yes     | 2.1
+x86_64-unknown-linux2.6.3-gnu-glibc2.3     |   yes   |   yes     | 2.1
+x86_64-unknown-linux2.6.9-gnu-glibc2.3     |   yes   |   yes     | 2.3
+x86_64-unknown-linux2.6.16.13-gnu-glibc2.4 |   yes   |   yes     | 2.4
+amd64-portbld-freebsd5.4                   |   yes   |   yes     | 2.2
+amd64-portbld-freebsd6.0                   |   yes   |   yes     | 2.3
+amd64-portbld-freebsd7.0                   |   yes   |   yes     | 2.3
+
+
+On FreeBSD 5.2, libsigsegv works best if the /proc filesystem is mounted.
+(It is not mounted by default.)
 
 
 Porting to new platforms
@@ -93,10 +160,6 @@ them is stored in a platform dependent file; the file is chosen in configure.
   * How to determine the stack's virtual memory area.
     This is a file among stackvma-*.c.
     configure chooses and sets the variable CFG_STACKVMA.
-
-  * How to determine if a fault is actually a stack overflow (more on
-    this later).  This is a file among heur-*.h.
-    configure chooses and sets the variable CFG_HEURISTICS.
 
   * How to leave a signal handler that is executing on the alternate
     signal stack.
@@ -123,68 +186,3 @@ For each of these, the approach should be:
   - Verify that "make" and "make check" pass.
 
 For non-Unix systems, a separate handler-<os>.c is likely to be needed.
-There are already two of them, namely handler-win32.c and handler-mach.c;
-the latter is configurable with a machfault-<os>-<cpu>.h file similarly to
-the generic Unix port.
-
-If this is the case, you should add code at the top of the configure script
-which chooses it depending on the host system's triplet.  There is a case
-statement with an arm for each such file, which also enables some or all of
-the other parts of the configuration by setting the CFG_* variables.  A
-value of "detect" will try to use the existing configuration machinery to
-detect the most appropriate file.
-
-Try to make the handler-<os>.c file as generic as possible; the
-handler-unix.c and handler-mach.c are good examples of this.  If possible,
-move the platform dependencies to CFG_FAULT, and maybe try to detect them
-as part of the configuration process.  If an operating system is composed
-of more than one layer (such as Darwin's BSD and Mach layers, or Cygwin's
-Win32 and POSIX layers) pick the most appropriate one instead of relying
-on both: otherwise, the code will probably be less maintainable and more
-subject to negative interactions between the various layers.
-
-Stack-overflow detection
-========================
-
-On the average platform, including Unix and Mach, we must distinguish
-stack overflow from other segmentation violations using some kind of
-heuristics.  At least two of the following must be true:
-
-      A) CFG_FAULT points to an include file which defines
-         SIGSEGV_FAULT_ADDRESS.
-      B) CFG_FAULT points to an include file which defines
-         SIGSEGV_FAULT_STACKPOINTER.
-      C) There is a stackvma-*.c, other than stackvma-none.c, which
-         defines sigsegv_get_vma.
-
-If we have A) and B), we use the
-
-     Heuristic AB: If the fault address is near the stack pointer, it's a
-     stack overflow.  This is implemented in heur-ab.h and takes special
-     care for the IA-64's special stack handling.
-
-If we have A) and C), we use the
-
-     Heuristic AC: If the fault address is near and beyond the bottom of
-     the stack's virtual memory area, it's a stack overflow.  This is
-     implemented in heur-ac.h.
-
-If we have B) and C), we use the
-
-     Heuristic BC: If the stack pointer is near the bottom of the stack's
-     virtual memory area, it's a stack overflow.  This is implemented in
-     heur-bc.h and comes in two flavours: on OSes which let the stack's
-     VMA grow continuously, we determine the bottom by use of getrlimit();
-     on OSes which preallocate the stack's VMA with its maximum size
-     (like BeOS), we use the stack's VMA directly.
-
-Using these heuristics is quite easy.  Just set CFG_STACKVMA to a file
-name or "detect" at the top of configure.in, and make sure that the
-appropriate #defines are made in your CFG_FAULT file.  Also make sure
-that you don't set sv_cv_have_stack_overflow_recovery: then, configure
-will do the appropriate checks automatically and define
-HAVE_STACK_OVERFLOW_RECOVERY to 1 if and only if one of the heuristics
-can be adopted.
-
-On the other hand, if you do not need any heuristics (like under Win32),
-be sure to set sv_cv_have_stack_overflow_recovery to yes.

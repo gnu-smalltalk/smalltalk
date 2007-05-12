@@ -17,9 +17,18 @@ Installation instructions on Woe32 with Cygwin, compiling for mingw32:
         make install
 
 ===============================================================================
-Installation instructions on Woe32 with MS Visual C/C++ 4.0, 5.0, or 6.0:
+Installation instructions on Woe32 with MS Visual C/C++ 4.0, 5.0, 6.0, or 7.0:
 
-- Requires MS Visual C/C++ 4.0 or 5.0 or 6.0.
+- Requires MS Visual C/C++ 4.0 or 5.0 or 6.0 or 7.0.
+
+  Note that binaries created with MSVC 7.0 should not be distributed: They
+  depend on a closed-source library 'msvcr70.dll' which is not normally part
+  of a Woe32 installation. You cannot distribute 'msvcr70.dll' with the
+  binaries - this would be a violation of the GPL and of the Microsoft EULA.
+  You can distribute the binaries without including 'msvcr70.dll', but this
+  will cause problems for users that don't have this library on their system.
+  Therefore it is not recommended. This problem does not occur with MSVC 6.0
+  and earlier.
 
 - Cannot build in a separate directory.
 
