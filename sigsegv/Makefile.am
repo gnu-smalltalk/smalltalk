@@ -13,7 +13,8 @@
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
+## USA.
 
 ## Process this file with automake to produce Makefile.in.
 
@@ -71,4 +72,4 @@ install-next:
 # Rules for "make dist".
 
 $(srcdir)/config.h.msvc : config.h.in
-	$(SED) -e 's/#undef CFG_HANDLER/#define CFG_HANDLER "handler-win32.c"/' < $(srcdir)/config.h.in > $@
+	sed -e 's/#undef CFG_HANDLER/#define CFG_HANDLER "handler-win32.c"/' < $(srcdir)/config.h.in > $@

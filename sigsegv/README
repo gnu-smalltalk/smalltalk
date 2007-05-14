@@ -94,8 +94,8 @@ Installation instructions on Woe32:
 
 Copyright notice:
 
-Copyright 1998-1999, 2002-2003  Bruno Haible <bruno@clisp.org>
-Copyright 2002-2003  Paolo Bonzini <bonzini@gnu.org>
+Copyright 1998-1999, 2002-2005  Bruno Haible <bruno@clisp.org>
+Copyright 2002-2005  Paolo Bonzini <bonzini@gnu.org>
 
 This is free software distributed under the GNU General Public Licence
 described in the file COPYING. There is ABSOLUTELY NO WARRANTY, explicit or
@@ -104,8 +104,8 @@ implied, on this software.
 
 Distribution:
 
-ftp://ftp.gnu.org/pub/gnu/libsigsegv/libsigsegv-2.1.tar.gz
-http://ftp.gnu.org/gnu/libsigsegv/libsigsegv-2.1.tar.gz
+ftp://ftp.gnu.org/pub/gnu/libsigsegv/libsigsegv-2.2.tar.gz
+http://ftp.gnu.org/gnu/libsigsegv/libsigsegv-2.2.tar.gz
 
 Homepage:
 

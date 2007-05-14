@@ -1,5 +1,5 @@
-/* Fault handler information.  AIX/PowerPC version.
-   Copyright (C) 2002  Bruno Haible <bruno@clisp.org>
+/* Fault handler information.  MacOSX/Darwin7/PowerPC version.
+   Copyright (C) 2002-2004  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,6 +15,10 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#include "fault-aix.h"
+#include "fault-macosdarwin7-powerpc.c"
 
-#define SIGSEGV_FAULT_STACKPOINTER scp->sc_jmpbuf.jmp_context.gpr[1]
+#define SIGSEGV_FAULT_HANDLER_ARGLIST  int sig, siginfo_t *sip, ucontext_t *ucp
+#define SIGSEGV_FAULT_ADDRESS  (unsigned long) get_fault_addr (sip, ucp)
+#define SIGSEGV_FAULT_CONTEXT  ucp
+#define SIGSEGV_FAULT_ADDRESS_FROM_SIGINFO
+#define SIGSEGV_FAULT_STACKPOINTER  ucp->uc_mcontext->ss.r1

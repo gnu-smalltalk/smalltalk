@@ -1,5 +1,5 @@
 /* Determine the virtual memory area of a given address.  FreeBSD version.
-   Copyright (C) 2002-2003  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 2002-2003, 2006  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,6 +18,15 @@
 #include "stackvma.h"
 #include <stdio.h>
 
+#include "stackvma-simple.c"
+
+#if HAVE_MINCORE
+# define sigsegv_get_vma mincore_get_vma
+# define STATIC static
+# include "stackvma-mincore.c"
+# undef sigsegv_get_vma
+#endif
+
 int
 sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
 {
@@ -33,7 +42,7 @@ sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
   /* Open the current process' maps file.  It describes one VMA per line.  */
   fp = fopen ("/proc/curproc/map", "r");
   if (!fp)
-    return -1;
+    goto failed;
 
 #if STACK_DIRECTION < 0
   prev_end = 0;
@@ -72,8 +81,17 @@ sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
         vma->next_start = 0;
 #endif
       fclose (fp);
+      vma->is_near_this = simple_is_near_this;
       return 0;
     }
   fclose (fp);
+ failed:
+#if HAVE_MINCORE
+  /* FreeBSD 6.[01] doesn't allow to distinguish unmapped pages from
+     mapped but swapped-out pages.  See whether it's fixed.  */
+  if (!is_mapped (0))
+    /* OK, mincore() appears to work as expected.  */
+    return mincore_get_vma (address, vma);
+#endif
   return -1;
 }

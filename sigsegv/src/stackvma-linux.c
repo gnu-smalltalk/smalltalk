@@ -1,5 +1,5 @@
 /* Determine the virtual memory area of a given address.  Linux version.
-   Copyright (C) 2002  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 2002, 2006  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,6 +18,15 @@
 #include "stackvma.h"
 #include <stdio.h>
 
+#include "stackvma-simple.c"
+
+#if HAVE_MINCORE
+# define sigsegv_get_vma mincore_get_vma
+# define STATIC static
+# include "stackvma-mincore.c"
+# undef sigsegv_get_vma
+#endif
+
 int
 sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
 {
@@ -31,7 +40,7 @@ sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
   /* Open the current process' maps file.  It describes one VMA per line.  */
   fp = fopen ("/proc/self/maps", "r");
   if (!fp)
-    return -1;
+    goto failed;
 
 #if STACK_DIRECTION < 0
   prev = 0;
@@ -53,6 +62,7 @@ sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
             vma->next_start = 0;
 #endif
           fclose (fp);
+          vma->is_near_this = simple_is_near_this;
           return 0;
         }
 #if STACK_DIRECTION < 0
@@ -60,5 +70,10 @@ sigsegv_get_vma (unsigned long address, struct vma_struct *vma)
 #endif
     }
   fclose (fp);
+ failed:
+#if HAVE_MINCORE
+  return mincore_get_vma (address, vma);
+#else
   return -1;
+#endif
 }

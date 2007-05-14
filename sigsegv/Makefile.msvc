@@ -61,7 +61,7 @@ INSTALL_DATA = @INSTALL_DATA@
 
 SHELL = /bin/sh
 
-OBJECTS = handler.obj dispatcher.obj
+OBJECTS = handler.obj dispatcher.obj version.obj
 
 all : sigsegv.lib
 
@@ -76,6 +76,9 @@ handler.obj : $(srcdir)/src/handler.c $(srcdir)/src/handler-win32.c sigsegv.h co
 
 dispatcher.obj : $(srcdir)/src/dispatcher.c sigsegv.h config.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $(srcdir)/src/dispatcher.c
+
+version.obj : $(srcdir)/src/version.c sigsegv.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(srcdir)/src/version.c
 
 !if !$(DLL)
 sigsegv.lib : $(OBJECTS)

@@ -17,8 +17,41 @@
 
 #include "sigsegv.h"
 
+/* On the average Unix platform, we define
+
+   HAVE_SIGSEGV_RECOVERY
+       if there is a fault-*.h include file which defines
+       SIGSEGV_FAULT_HANDLER_ARGLIST and SIGSEGV_FAULT_ADDRESS.
+
+   HAVE_STACK_OVERFLOW_RECOVERY
+       if HAVE_SIGALTSTACK is set and
+       at least two of the following are true:
+       A) There is a fault-*.h include file which defines
+          SIGSEGV_FAULT_HANDLER_ARGLIST and SIGSEGV_FAULT_ADDRESS.
+       B) There is a fault-*.h include file which defines
+          SIGSEGV_FAULT_HANDLER_ARGLIST and SIGSEGV_FAULT_STACKPOINTER.
+       C) There is a stackvma-*.c, other than stackvma-none.c, which
+          defines sigsegv_get_vma.
+
+   Why? Obviously, to catch stack overflow, we need an alternate signal
+   stack; this requires kernel support. But we also need to distinguish
+   (with a reasonable confidence) a stack overflow from a regular SIGSEGV.
+   If we have A) and B), we use the
+     Heuristic AB: If the fault address is near the stack pointer, it's a
+     stack overflow.
+   If we have A) and C), we use the
+     Heuristic AC: If the fault address is near and beyond the bottom of
+     the stack's virtual memory area, it's a stack overflow.
+   If we have B) and C), we use the
+     Heuristic BC: If the stack pointer is near the bottom of the stack's
+     virtual memory area, it's a stack overflow.
+     This heuristic comes in two flavours: On OSes which let the stack's
+     VMA grow continuously, we determine the bottom by use of getrlimit().
+     On OSes which preallocate the stack's VMA with its maximum size
+     (like BeOS), we use the stack's VMA directly.
+ */
+
 #include <stddef.h> /* needed for NULL on SunOS4 */
-#include <stdio.h> /* perror */
 #include <stdlib.h>
 #include <signal.h>
 #if HAVE_SYS_SIGNAL_H
@@ -31,25 +64,18 @@
 #define SS_DISABLE SA_DISABLE
 #endif
 
-#if HAVE_STACK_OVERFLOW_RECOVERY
-static stackoverflow_handler_t stk_user_handler = (stackoverflow_handler_t)NULL;
-static unsigned long stk_extra_stack;
-static unsigned long stk_extra_stack_size;
-#endif /* HAVE_STACK_OVERFLOW_RECOVERY */
-
-#if HAVE_SIGSEGV_RECOVERY
-/* User's SIGSEGV handler.  */
-static sigsegv_handler_t user_handler = (sigsegv_handler_t)NULL;
-#endif /* HAVE_SIGSEGV_RECOVERY */
-
-
-/* Platform dependent:
-   Characteristics of the signal handler.  */
-#include CFG_FAULT
-
-/* Platform dependent:
-   Determining which signals should be trapped.  */
+#include "fault.h"
 #include CFG_SIGNALS
+
+#if HAVE_STACK_OVERFLOW_RECOVERY
+
+#include <stdio.h> /* perror */
+
+#if HAVE_GETRLIMIT
+# include <sys/types.h>
+# include <sys/time.h>
+# include <sys/resource.h> /* declares struct rlimit */
+#endif
 
 /* Platform dependent:
    Determine the virtual memory area of a given address.  */
@@ -59,68 +85,232 @@ static sigsegv_handler_t user_handler = (sigsegv_handler_t)NULL;
    Leaving a signal handler executing on the alternate stack.  */
 #include "leave.h"
 
-/* Platform dependent:
-   Determine if a fault is caused by a stack overflow.  */
-#include CFG_HEURISTICS
+#if HAVE_STACKVMA
 
-#ifndef SIGSEGV_FAULT_HANDLER_ARGLIST
-#define SIGSEGV_FAULT_HANDLER_ARGLIST int sig
-#endif
+/* Address of the last byte belonging to the stack vma.  */
+static unsigned long stack_top = 0;
 
-#ifndef SIGSEGV_FAULT_CONTEXT
-#define SIGSEGV_FAULT_CONTEXT NULL
-#endif
-
-/* Our SIGSEGV handler, with OS dependent argument list.  */
+/* Needs to be called once only.  */
 static void
-sigsegv_handler (SIGSEGV_FAULT_HANDLER_ARGLIST)
+remember_stack_top (void *some_variable_on_stack)
 {
-#if HAVE_SIGSEGV_RECOVERY
-  void *address = (void *) (SIGSEGV_FAULT_ADDRESS);
-#endif
+  struct vma_struct vma;
 
-#if HAVE_STACK_OVERFLOW_RECOVERY
-  /* Did the user install a stack overflow handler?  */
-  if (stk_user_handler)
-    {
+  if (sigsegv_get_vma ((unsigned long) some_variable_on_stack, &vma) >= 0)
+    stack_top = vma.end - 1;
+}
 
-#if HAVE_SIGSEGV_RECOVERY
-       /* Call user's handler.  If successful, exit.  */
-       if (user_handler && (*user_handler) (address, 0))
-         return;
-#endif /* HAVE_SIGSEGV_RECOVERY */
+#endif /* HAVE_STACKVMA */
 
-       /* Handler declined responsibility.  */
+static stackoverflow_handler_t stk_user_handler = (stackoverflow_handler_t)NULL;
+static unsigned long stk_extra_stack;
+static unsigned long stk_extra_stack_size;
 
-      if (IS_STACK_OVERFLOW)
-	{
-	  /* Call user's handler.  */
-#ifdef SIGSEGV_FAULT_STACKPOINTER
-	  unsigned long old_sp = (unsigned long) SIGSEGV_FAULT_STACKPOINTER;
-	  int emergency =
-	    (old_sp >= stk_extra_stack
-	     && old_sp <= stk_extra_stack + stk_extra_stack_size);
-#else
-	  int emergency = 0;
-#endif /* SIGSEGV_FAULT_STACKPOINTER */
-
-	  stackoverflow_context_t context = (SIGSEGV_FAULT_CONTEXT);
-	  (*stk_user_handler) (emergency, context);
-        }
-    }
 #endif /* HAVE_STACK_OVERFLOW_RECOVERY */
 
 #if HAVE_SIGSEGV_RECOVERY
-  /* Call user's handler again.  If successful, exit.  */
-  if (user_handler && (*user_handler) (address, 1))
-    return;
+
+/* User's SIGSEGV handler.  */
+static sigsegv_handler_t user_handler = (sigsegv_handler_t)NULL;
+
 #endif /* HAVE_SIGSEGV_RECOVERY */
 
-  /* All handlers declined responsibility for real.  */
+
+/* Our SIGSEGV handler, with OS dependent argument list.  */
+
+#if HAVE_SIGSEGV_RECOVERY
+
+static void
+sigsegv_handler (SIGSEGV_FAULT_HANDLER_ARGLIST)
+{
+  void *address = (void *) (SIGSEGV_FAULT_ADDRESS);
+
+#if HAVE_STACK_OVERFLOW_RECOVERY
+#if !(HAVE_STACKVMA || defined SIGSEGV_FAULT_STACKPOINTER)
+#error "Insufficient heuristics for detecting a stack overflow.  Either define CFG_STACKVMA and HAVE_STACKVMA correctly, or define SIGSEGV_FAULT_STACKPOINTER correctly, or undefine HAVE_STACK_OVERFLOW_RECOVERY!"
+#endif
+
+  /* Call user's handler.  */
+  if (user_handler && (*user_handler) (address, 0))
+    {
+      /* Handler successful.  */
+    }
+  else
+    {
+      /* Handler declined responsibility.  */
+
+      /* Did the user install a stack overflow handler?  */
+      if (stk_user_handler)
+        {
+          /* See whether it was a stack overflow. If so, longjump away.  */
+#ifdef SIGSEGV_FAULT_STACKPOINTER
+          unsigned long old_sp = (unsigned long) (SIGSEGV_FAULT_STACKPOINTER);
+#ifdef __ia64
+          unsigned long old_bsp = (unsigned long) (SIGSEGV_FAULT_BSP_POINTER);
+#endif
+#endif
+
+#if HAVE_STACKVMA
+          /* Were we able to determine the stack top?  */
+          if (stack_top)
+            {
+              /* Determine stack bounds.  */
+              struct vma_struct vma;
+
+              if (sigsegv_get_vma (stack_top, &vma) >= 0)
+                {
+                  /* Heuristic AC: If the fault_address is nearer to the stack
+                     segment's [start,end] than to the previous segment, we
+                     consider it a stack overflow.
+                     In the case of IA-64, we know that the previous segment
+                     is the up-growing bsp segment, and either of the two
+                     stacks can overflow.  */
+                  unsigned long addr = (unsigned long) address;
+
+#ifdef __ia64
+                  if (addr >= vma.prev_end && addr <= vma.end - 1)
+#else
+#if STACK_DIRECTION < 0
+                  if (addr >= vma.start
+                      ? (addr <= vma.end - 1)
+                      : vma.is_near_this (addr, &vma))
+#else
+                  if (addr <= vma.end - 1
+                      ? (addr >= vma.start)
+                      : vma.is_near_this (addr, &vma))
+#endif
+#endif
+#else
+          /* Heuristic AB: If the fault address is near the stack pointer,
+             it's a stack overflow.  */
+          unsigned long addr = (unsigned long) address;
+
+          if ((addr <= old_sp + 4096 && old_sp <= addr + 4096)
+#ifdef __ia64
+              || (addr <= old_bsp + 4096 && old_bsp <= addr + 4096)
+#endif
+             )
+            {
+                {
+#endif
+                    {
+#ifdef SIGSEGV_FAULT_STACKPOINTER
+                      int emergency =
+                        (old_sp >= stk_extra_stack
+                         && old_sp <= stk_extra_stack + stk_extra_stack_size);
+                      stackoverflow_context_t context = (SIGSEGV_FAULT_CONTEXT);
+#else
+                      int emergency = 0;
+                      stackoverflow_context_t context = (void *) 0;
+#endif
+                      /* Call user's handler.  */
+                      (*stk_user_handler) (emergency, context);
+                    }
+                }
+            }
+        }
+#endif /* HAVE_STACK_OVERFLOW_RECOVERY */
+
+      if (user_handler && (*user_handler) (address, 1))
+        {
+          /* Handler successful.  */
+        }
+      else
+        {
+          /* Handler declined responsibility for real.  */
+
+          /* Remove ourselves and dump core.  */
+          SIGSEGV_FOR_ALL_SIGNALS (sig, signal (sig, SIG_DFL);)
+        }
+
+#if HAVE_STACK_OVERFLOW_RECOVERY
+    }
+#endif /* HAVE_STACK_OVERFLOW_RECOVERY */
+}
+
+#elif HAVE_STACK_OVERFLOW_RECOVERY
+
+static void
+#ifdef SIGSEGV_FAULT_STACKPOINTER
+sigsegv_handler (SIGSEGV_FAULT_HANDLER_ARGLIST)
+#else
+sigsegv_handler (int sig)
+#endif
+{
+#if !((HAVE_GETRLIMIT && defined RLIMIT_STACK) || defined SIGSEGV_FAULT_STACKPOINTER)
+#error "Insufficient heuristics for detecting a stack overflow.  Either define SIGSEGV_FAULT_STACKPOINTER correctly, or undefine HAVE_STACK_OVERFLOW_RECOVERY!"
+#endif
+
+  /* Did the user install a handler?  */
+  if (stk_user_handler)
+    {
+      /* See whether it was a stack overflow.  If so, longjump away.  */
+#ifdef SIGSEGV_FAULT_STACKPOINTER
+      unsigned long old_sp = (unsigned long) (SIGSEGV_FAULT_STACKPOINTER);
+#endif
+
+      /* Were we able to determine the stack top?  */
+      if (stack_top)
+        {
+          /* Determine stack bounds.  */
+          struct vma_struct vma;
+
+          if (sigsegv_get_vma (stack_top, &vma) >= 0)
+            {
+#if HAVE_GETRLIMIT && defined RLIMIT_STACK
+              /* Heuristic BC: If the stack size has reached its maximal size,
+                 and old_sp is near the low end, we consider it a stack
+                 overflow.  */
+              struct rlimit rl;
+
+              if (getrlimit (RLIMIT_STACK, &rl) >= 0)
+                {
+                  unsigned long current_stack_size = vma.end - vma.start;
+                  unsigned long max_stack_size = rl.rlim_cur;
+                  if (current_stack_size <= max_stack_size + 4096
+                      && max_stack_size <= current_stack_size + 4096
+#else
+                {
+                  if (1
+#endif
+#ifdef SIGSEGV_FAULT_STACKPOINTER
+                      /* Heuristic BC: If we know old_sp, and it is neither
+                         near the low end, nor in the alternate stack, then
+                         it's probably not a stack overflow.  */
+                      && ((old_sp >= stk_extra_stack
+                           && old_sp <= stk_extra_stack + stk_extra_stack_size)
+#if STACK_DIRECTION < 0
+                          || (old_sp <= vma.start + 4096
+                              && vma.start <= old_sp + 4096))
+#else
+                          || (old_sp <= vma.end + 4096
+                              && vma.end <= old_sp + 4096))
+#endif
+#endif
+                     )
+                    {
+#ifdef SIGSEGV_FAULT_STACKPOINTER
+                      int emergency =
+                        (old_sp >= stk_extra_stack
+                         && old_sp <= stk_extra_stack + stk_extra_stack_size);
+                      stackoverflow_context_t context = (SIGSEGV_FAULT_CONTEXT);
+#else
+                      int emergency = 0;
+                      stackoverflow_context_t context = (void *) 0;
+#endif
+                      /* Call user's handler.  */
+                      (*stk_user_handler)(emergency,context);
+                    }
+                }
+            }
+        }
+    }
 
   /* Remove ourselves and dump core.  */
   SIGSEGV_FOR_ALL_SIGNALS (sig, signal (sig, SIG_DFL);)
 }
+
+#endif
 
 
 static void
@@ -223,12 +413,6 @@ install_for (int sig)
 int
 sigsegv_install_handler (sigsegv_handler_t handler)
 {
-#if HAVE_STACK_OVERFLOW_RECOVERY
-  int dummy;
-  if (remember_stack_top (&dummy) == -1)
-    return -1;
-#endif
-
 #if HAVE_SIGSEGV_RECOVERY
   user_handler = handler;
 
@@ -273,9 +457,15 @@ stackoverflow_install_handler (stackoverflow_handler_t handler,
                                void *extra_stack, unsigned long extra_stack_size)
 {
 #if HAVE_STACK_OVERFLOW_RECOVERY
-  int dummy;
-  if (remember_stack_top (&dummy) == -1)
-    return -1;
+#if HAVE_STACKVMA
+  if (!stack_top)
+    {
+      int dummy;
+      remember_stack_top (&dummy);
+      if (!stack_top)
+        return -1;
+    }
+#endif
 
   stk_user_handler = handler;
   stk_extra_stack = (unsigned long) extra_stack;

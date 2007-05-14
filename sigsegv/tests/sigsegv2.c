@@ -1,5 +1,5 @@
 /* Test the dispatcher.
-   Copyright (C) 2002-2005  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 2002-2006  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -116,13 +116,13 @@ main ()
   mprotect ((void *) area3, 0x4000, PROT_READ);
 
   /* This access should call the handler.  */
-  ((int*)area2)[230] = 22;
+  ((volatile int *)area2)[230] = 22;
   /* This access should call the handler.  */
-  ((int*)area3)[412] = 33;
+  ((volatile int *)area3)[412] = 33;
   /* This access should not give a signal.  */
-  ((int*)area2)[135] = 22;
+  ((volatile int *)area2)[135] = 22;
   /* This access should call the handler.  */
-  ((int*)area1)[612] = 11;
+  ((volatile int *)area1)[612] = 11;
 
   barrier();
 

@@ -1,5 +1,5 @@
 /* Determine the virtual memory area of a given address.  Mach version.
-   Copyright (C) 2003  Paolo Bonzini <bonzini@gnu.org>
+   Copyright (C) 2003, 2006  Paolo Bonzini <bonzini@gnu.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,6 +26,8 @@
 #ifndef NeXT
 #include <mach/machine/vm_param.h>
 #endif
+
+#include "stackvma-simple.c"
 
 int
 sigsegv_get_vma (unsigned long req_address, struct vma_struct *vma)
@@ -59,13 +61,6 @@ sigsegv_get_vma (unsigned long req_address, struct vma_struct *vma)
                          &inheritance, &shared, &object_name, &offset)
               == KERN_SUCCESS);
 #endif
-#if 0
-      printf ("this vma = %x...%x, joined vmas = %x...%x prev_vma = %x...%x\n",
-	      address, address + size,
-	      join_address, join_address + join_size,
-	      prev_address, prev_address + prev_size);
-#endif
-
       if (!more)
         {
           address = join_address + join_size;
@@ -94,6 +89,7 @@ sigsegv_get_vma (unsigned long req_address, struct vma_struct *vma)
           vma->start = join_address;
           vma->end = join_address + join_size;
           vma->prev_end = prev_address + prev_size;
+          vma->is_near_this = simple_is_near_this;
           return 0;
         }
 #else
@@ -102,6 +98,7 @@ sigsegv_get_vma (unsigned long req_address, struct vma_struct *vma)
           vma->start = prev_address;
           vma->end = prev_address + prev_size;
           vma->next_start = join_address;
+          vma->is_near_this = simple_is_near_this;
           return 0;
         }
 #endif
@@ -113,6 +110,7 @@ sigsegv_get_vma (unsigned long req_address, struct vma_struct *vma)
       vma->start = prev_address;
       vma->end = prev_address + prev_size;
       vma->next_start = ~0UL;
+      vma->is_near_this = simple_is_near_this;
       return 0;
     }
 #endif
