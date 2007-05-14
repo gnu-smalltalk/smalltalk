@@ -1,8 +1,10 @@
-* 2.4
+* 3.0
 
-** implement SmallScript file-in?
+** implement new syntax (being done)
 
-** use VFS to (re)implement packages?
+** implement a better packaging system allowing zipped source files with
+XML package descriptions to be delivered and installed.  Investigate
+basing it on the Virtual File System infrastructure.
 
 ** faster startup (done)
 
@@ -10,6 +12,7 @@
 
 ** upgrade XML parser for package files
 *** support arch-dependent files that are installed in the image path
+
 
 * sometime
 
@@ -22,6 +25,17 @@ in sync.  Maybe with CVS support (see Smalltalk/X).
 
 ** port more software (Ref. Browser?)
 
+
+----------------------------------------------------------------------
+
+
+* bindings
+
+** zlib.  use it to implement direct ZIP-file access in VFS.
+
+** IPv6.  Not hard to do.
+
+** rss.  would provide cool examples of XML.
 
 ----------------------------------------------------------------------
 
@@ -77,17 +91,10 @@ outside #new and so on).
 ** follow the implementation lines of compiler/STLoader.st to implement
 SIF file-in.
 
-** implement a better packaging system allowing zipped source files with
-XML package descriptions to be delivered and installed.  Investigate
-using fastjar from gcj, and basing it on the Virtual File System
-infrastructure.
-
 ** make the smalltalk cpp work - nothing less, nothing more ;-)
 
 ** print entities correctly in the URIResolver.  A file named abc&def
 should print abc&amp;def in the file list.
-
-** support IPv6.  Not hard to do.
 
 
 * emacs mode
