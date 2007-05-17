@@ -1,3 +1,14 @@
+2007-05-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/PosStream.st: Fix comment of #species.
+	* kernel/Stream.st: Fix #nextHunk.
+	* examples/zlib.c: New.
+	* examples/zlib.st: New.
+
+2007-05-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Fix #kindOfSubclass.
+
 2007-03-29  Stephen Compall  <s11@member.fsf.org>
 
 	* kernel/Dictionary.st: Use a smaller default size in new.

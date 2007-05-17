@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -139,7 +139,7 @@ by an STClassLoader.'!
 
 LoadedBehavior subclass: #LoadedClass
         instanceVariableNames: 'name category sharedPools classVars class
-				environment kind '
+				environment shape '
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -210,7 +210,7 @@ variableByteSubclass: s instanceVariableNames: ivn classVariableNames: cvn
 	classVariableNames: cvn
 	poolDictionaries: pd
 	category: c
-	kind: 'variableByteSubclass:'
+	shape: #byte
 	loader: loader!
  
 variableWordSubclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -223,7 +223,20 @@ variableWordSubclass: s instanceVariableNames: ivn classVariableNames: cvn
 	classVariableNames: cvn
 	poolDictionaries: pd
 	category: c
-	kind: 'variableWordSubclass:'
+	shape: #word
+	loader: loader!
+ 
+variable: shape subclass: s instanceVariableNames: ivn classVariableNames: cvn
+	poolDictionaries: pd category: c
+
+    ^LoadedClass
+	superclass: self
+	name: s
+	instanceVariableNames: ivn
+	classVariableNames: cvn
+	poolDictionaries: pd
+	category: c
+	shape: shape
 	loader: loader!
  
 variableSubclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -236,7 +249,7 @@ variableSubclass: s instanceVariableNames: ivn classVariableNames: cvn
 	classVariableNames: cvn
 	poolDictionaries: pd
 	category: c
-	kind: 'variableSubclass:'
+	shape: #pointer
 	loader: loader!
  
 subclass: s instanceVariableNames: ivn classVariableNames: cvn
@@ -249,7 +262,19 @@ subclass: s instanceVariableNames: ivn classVariableNames: cvn
 	classVariableNames: cvn
 	poolDictionaries: pd
 	category: c
-	kind: 'subclass:'
+	shape: nil
+	loader: loader!
+
+subclass: s
+
+    ^LoadedClass
+	superclass: self
+	name: s
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: ''
+	shape: nil
 	loader: loader!
 
 !PseudoBehavior methodsFor: 'method dictionary services'!
@@ -520,11 +545,27 @@ asMetaclass
     self subclassResponsibility
 !
 
+category
+    self subclassResponsibility
+!
+
+category: aString
+    self subclassResponsibility
+!
+
 comment
     self subclassResponsibility
 !
 
 comment: aString
+    self subclassResponsibility
+!
+
+shape
+    self subclassResponsibility
+!
+
+shape: aSymbol
     self subclassResponsibility
 !
 
@@ -604,6 +645,14 @@ isClass
     ^true
 !
 
+category
+    ^self asClass category
+!
+
+category: aString
+    ^self asClass category: aString
+!
+
 comment
     ^self asClass comment
 !
@@ -651,6 +700,10 @@ instVarNames
     ^instVars
 !
 
+instanceVariableNames: ivn
+    instVars := (TokenStream on: ivn) contents.
+!
+
 superclass
     ^superclass
 !
@@ -672,10 +725,6 @@ printOn: aStream
 
 isMetaclass
     ^true
-!
-
-instanceVariableNames: ivn
-    instVars := (TokenStream on: ivn) contents.
 !
 
 asClass
@@ -712,8 +761,8 @@ environment
     ^self asClass environment
 !
 
-kindOfSubclass
-    ^'subclass:'
+shape
+    ^nil
 !
 
 classVarNames
@@ -752,10 +801,10 @@ for: aClass
 !LoadedClass class methodsFor: 'creating classes'!
 
 superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
-	poolDictionaries: pd category: c kind: kind loader: loader
+	poolDictionaries: pd category: c shape: sh loader: loader
     ^self new
 	superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
-	poolDictionaries: pd category: c kind: kind loader: loader
+	poolDictionaries: pd category: c shape: sh loader: loader
 ! !
 
 !LoadedClass methodsFor: 'accessing'!
@@ -782,6 +831,21 @@ category
     ^category
 !
 
+category: aString
+    "Set the class category"
+    category := aString
+!
+
+shape
+    "Answer the class shape"
+    ^shape
+!
+
+shape: aSymbol
+    "Set the class shape"
+    shape := aSymbol
+!
+
 comment
     "Answer the class comment"
     ^comment
@@ -798,8 +862,11 @@ environment
 !
 
 kindOfSubclass
-    ^kind
-!
+    "Return a string indicating the type of class the receiver is"
+    self isVariable ifFalse: [ ^'subclass:' ].
+    self isPointers ifTrue: [ ^'variableSubclass:' ].
+    ^'variable: ', self shape storeString, 'subclass:'
+! 
 
 classVarNames
     "Answer the names of the variables in the class pool dictionary"
@@ -811,6 +878,18 @@ sharedPools
     "Return the names of the shared pools defined by the class"
 
     ^sharedPools
+!
+
+addClassVarName: aString
+    "Return the names of the shared pools defined by the class"
+
+    sharedPools := sharedPools copyWith: aString
+!
+
+import: aNamespace
+    "Return the names of the shared pools defined by the class"
+
+    sharedPools := sharedPools copyWith: (aNamespace nameIn: self environment)
 ! !
 
 !LoadedClass methodsFor: 'filing'!
@@ -903,12 +982,12 @@ fileOutOn: aFileStream
 !LoadedClass methodsFor: 'initializing'!
 
 superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
-	poolDictionaries: pd category: c kind: k loader: loader
+	poolDictionaries: pd category: c shape: sh loader: loader
     self initialize: loader.
     superclass := sup.
     name := s.
     category := c.
-    kind := k.
+    shape := sh.
     environment := loader currentNamespace.
     class := LoadedMetaclass new for: self.
     instVars := (TokenStream on: ivn) contents.

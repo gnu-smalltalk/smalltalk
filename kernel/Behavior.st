@@ -904,7 +904,7 @@ inheritsFrom: aClass
 kindOfSubclass
     "Return a string indicating the type of class the receiver is"
     self isVariable ifFalse: [ ^'subclass:' ].
-    self isPointers ifFalse: [ ^'variableSubclass:' ].
+    self isPointers ifTrue: [ ^'variableSubclass:' ].
     ^'variable: ', self shape storeString, 'subclass:'
 !
 

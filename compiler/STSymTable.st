@@ -364,7 +364,7 @@ init
     instVars := Dictionary new: 7.
     scopeVariables := OrderedCollection new: 5.
     scopes := OrderedCollection new: 5.
-    pools := IdentitySet new: 7.
+    pools := OrderedSet identityNew: 7.
     tempCount := 0.
 !
 

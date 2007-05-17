@@ -287,6 +287,15 @@
 </@NCURSES_DISABLED@package>
 
 <package>
+  <name>ZLib</name>
+  <filein>zlib.st</filein>
+  <module>zlib</module>
+  <directory>examples</directory>
+
+  <file>zlib.st</file>
+</package>
+
+<package>
   <name>MD5</name>
   <filein>md5.st</filein>
   <module>md5</module>
@@ -356,6 +365,7 @@
   <filein>RBParser.st</filein>
   <filein>ParseTreeSearcher.st</filein>
   <filein>RBFormatter.st</filein>
+  <filein>OrderedSet.st</filein>
   <filein>STCompLit.st</filein>
   <filein>STSymTable.st</filein>
   <filein>STCompiler.st</filein>
@@ -370,6 +380,7 @@
   <file>RBParseNodes.st</file>
   <file>RBParser.st</file>
   <file>RBToken.st</file>
+  <filein>OrderedSet.st</filein>
   <file>STCompLit.st</file>
   <file>STCompiler.st</file>
   <file>STDecompiler.st</file>

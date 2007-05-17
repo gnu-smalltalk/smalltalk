@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2002 Free Software Foundation, Inc.
+| Copyright 2001, 2002, 2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -69,21 +69,31 @@ toEvaluate: interpretedSelector perform: selector
 
 !STInterpreter methodsFor: 'overrides'!
 
+evaluationMethodFor: selector
+    | method class |
+    class := self class.
+    [
+        class evaluationMethods isNil ifFalse: [
+            method := class evaluationMethods at: selector ifAbsent: [ nil ].
+	    method isNil ifFalse: [ ^method ].
+	].
+	class == STInterpreter ifTrue: [ ^#unknownTo:selector:arguments: ].
+	class := class superclass
+    ] repeat
+!
+
 evaluateStatement: node
-    | receiver selector argumentNodes result |
-    receiver := node receiver.
-    selector := node selector.
-    argumentNodes := node arguments.
+    | method |
+    method := self evaluationMethodFor: node selector.
+    ^self
+	perform: method
+	with: node receiver
+	with: node selector
+	with: node arguments
+!
 
-    result := false.
-    self class evaluationMethods at: selector ifPresent: [ :method |
-	result := self
-	    perform: method
-	    with: receiver
-	    with: selector
-	    with: argumentNodes ].
-
-    ^result
+unknownTo: receiver selector: selector arguments: argumentNodes
+    ^false
 !
 
 evaluate: node
@@ -101,7 +111,13 @@ evaluate: node
 
 initialize
     self
+	toEvaluate: #subclass:
+	perform: #doSubclass:selector:arguments:;
+
 	toEvaluate: #subclass:instanceVariableNames:classVariableNames:poolDictionaries:category:
+	perform: #doSubclass:selector:arguments:;
+
+	toEvaluate: #variable:subclass:instanceVariableNames:classVariableNames:poolDictionaries:category:
 	perform: #doSubclass:selector:arguments:;
 
 	toEvaluate: #variableSubclass:instanceVariableNames:classVariableNames:poolDictionaries:category:
@@ -122,11 +138,23 @@ initialize
 	toEvaluate: #current:
 	perform: #doSetNamespace:selector:arguments:;
 
+	toEvaluate: #import:
+	perform: #doImport:selector:arguments:;
+
+	toEvaluate: #category:
+	perform: #doSend:selector:arguments:;
+
 	toEvaluate: #comment:
-	perform: #doComment:selector:arguments:;
+	perform: #doSend:selector:arguments:;
+
+	toEvaluate: #shape:
+	perform: #doSend:selector:arguments:;
+
+	toEvaluate: #addClassVarName:
+	perform: #doSend:selector:arguments:;
 
 	toEvaluate: #instanceVariableNames:
-	perform: #doClassInstVars:selector:arguments:
+	perform: #doSend:selector:arguments:
 ! !
 
 !STClassLoader class methodsFor: 'instance creation'!
@@ -193,26 +221,26 @@ doSubclass: receiver selector: selector arguments: argumentNodes
     ^false
 !
 
-doComment: receiver selector: selector arguments: argumentNodes
-    | class |
+doSend: receiver selector: selector arguments: argumentNodes
+    | isClass class |
     (argumentNodes allSatisfy: [ :each | each isLiteral ])
 	ifFalse: [ ^false ].
 
-    class := self resolveClass: receiver.
-    class comment: argumentNodes first value.
+    isClass := receiver isMessage and: [ receiver selector = #class ].
+    class := isClass
+	ifTrue: [ (self resolveClass: receiver receiver) asMetaclass ]
+	ifFalse: [ self resolveClass: receiver ].
+
+    class perform: selector with: argumentNodes first value.
     ^false
 !
 
-doClassInstVars: receiver selector: selector arguments: argumentNodes
-    | class |
-    (argumentNodes allSatisfy: [ :each | each isLiteral ])
-	ifFalse: [ ^false ].
-
-    receiver isMessage ifFalse: [ ^false ].
-    receiver selector = #class ifFalse: [ ^false ].
-
+doImport: receiver selector: selector arguments: argumentNodes
+    | class namespace |
+    receiver isMessage ifTrue: [ ^false ].
     class := self resolveClass: receiver.
-    class instanceVariableNames: argumentNodes first value.
+    namespace := self resolveNamespace: argumentNodes first.
+    class import: namespace.
     ^false
 !
 

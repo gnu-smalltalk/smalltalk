@@ -416,19 +416,23 @@ skipToAll: aCollection
 		ch := self next.
 	    ]
     ] repeat
-! !
-
-!Stream methodsFor: 'private'!
+!
 
 nextHunk
-    "Private - Used internally by the VM when we file in a stream."
+    "Answer a more-or-less arbitrary amount of data.  When used on files, this
+     does at most one I/O operation.  For other kinds of stream, the definition
+     may vary.  This method is used by the VM when loading data from a Smalltalk
+     stream, and by various kind of Stream decorators supplied with GNU
+     Smalltalk (including zlib streams)."
     | s |
     s := self species new: 1024.
     1 to: 1024 do: [ :i |
-	self atEnd ifTrue: [ ^s copyFrom: 1 to: i ].
+	self atEnd ifTrue: [ ^s copyFrom: 1 to: i - 1 ].
 	s at: i put: self next ].
     ^s
-!
+! !
+
+!Stream methodsFor: 'private'!
 
 prefixTableFor: aCollection
     "Private - Answer the prefix table for the Knuth-Morris-Pratt algorithm.
