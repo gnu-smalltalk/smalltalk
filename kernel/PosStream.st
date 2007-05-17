@@ -271,7 +271,7 @@ isExternalStream
 !
 
 species
-    "The collections returned by #upTo: etc. are the same kind as
-    those returned by the collection with methods such as #select:"
+    "Return the type of the collections returned by #upTo: etc., which are the
+    same kind as those returned by the collection with methods such as #select:."
     ^collection species
 ! !
