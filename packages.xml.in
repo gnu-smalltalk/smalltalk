@@ -288,10 +288,12 @@
 
 <package>
   <name>ZLib</name>
+  <filein>PipeStream.st</filein>
   <filein>zlib.st</filein>
   <module>zlib</module>
   <directory>examples</directory>
 
+  <file>PipeStream.st</file>
   <file>zlib.st</file>
 </package>
 
