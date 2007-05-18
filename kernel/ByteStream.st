@@ -164,6 +164,9 @@ nextPutByte: anInteger
 nextPutAll: aCollection
     "Write all the objects in aCollection to the receiver"
     | collEnd relative lastCopied |
+    aCollection isSequenceable
+	ifFalse: [ ^super nextPutAll: aCollection ].
+
     aCollection isEmpty ifTrue: [ ^self ].
 
     collEnd := ptr + aCollection size - 1.

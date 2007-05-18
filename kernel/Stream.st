@@ -196,7 +196,9 @@ next: n putAll: aCollection startingAt: start
 
 nextPutAll: aCollection
     "Write all the objects in aCollection to the receiver"
-    aCollection do: [ :element | self nextPut: element ].
+    aCollection isSequenceable
+	ifTrue: [ self next: aCollection size putAll: aCollection startingAt: 1 ]
+	ifFalse: [ aCollection do: [ :element | self nextPut: element ] ].
     ^aCollection
 !
 
@@ -213,6 +215,18 @@ next: anInteger put: anObject
 atEnd
     "Answer whether the stream has got to an end"
     self subclassResponsibility
+!
+
+readStream
+    "As a wild guess, return the receiver.  WriteStreams should override
+     this method."
+    ^self
+!
+
+isSequenceable
+    "Answer whether the receiver can be accessed by a numeric index with
+     #at:/#at:put:."
+    ^false
 !
 
 isExternalStream
