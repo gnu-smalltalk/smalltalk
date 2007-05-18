@@ -1,5 +1,10 @@
 2007-05-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PipeStream.st: New.
+	* kernel/zlib.st: Use it.
+
+2007-05-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ByteStream.st: Support #nextPutAll: of Streams into Streams.
 	* kernel/Collection.st: Add #isSequenceable.
 	* kernel/FileDescr.st: Add #next:putAll:startingAt:.  Support

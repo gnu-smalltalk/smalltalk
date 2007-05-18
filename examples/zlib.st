@@ -133,6 +133,13 @@ testError
     ^[ (InflateStream on: #[12 34 56] readStream) contents. false ]
 	on: ZlibError do: [ :ex | ex return: true ]!
 
+testWrite
+    "Test the WriteStream version of DeflateStream."
+    | dest |
+    dest := DeflateStream compressingTo: String new writeStream.
+    dest nextPutAll: self testVector.
+    ^dest contents asByteArray = self doDeflate asByteArray!
+
 testRaw
     "Test connecting a DeflateStream back-to-back with an InflateStream."
     | deflate |
@@ -196,6 +203,7 @@ runTests
     self testDirect printNl.
     self testRaw printNl.
     self testGZip printNl.
+    self testWrite printNl.
     self bufferSize: oldBufSize! !
 
 
@@ -349,6 +357,16 @@ defaultCompressionLevel: anInteger
 
 !RawDeflateStream class methodsFor: 'instance creation'!
 
+compressingTo: aStream
+    "Answer a stream that receives data via #nextPut: and compresses it onto
+     aStream."
+    ^PipeStream connectedTo: aStream via: [ :r | self on: r ]!
+
+compressingTo: aStream level: level
+    "Answer a stream that receives data via #nextPut: and compresses it onto
+     aStream with the given compression level."
+    ^PipeStream connectedTo: aStream via: [ :r | self on: r level: level ]!
+
 on: aStream
     "Answer a stream that compresses the data in aStream with the default
      compression level."
@@ -405,7 +423,6 @@ position: anInteger
 
 reset
     "Reset the stream to the beginning of the compressed data."
-     input stream or skipping compressed data."
     source reset.
     self destroyZlibObject; initializeZlibObject.
     self resetBuffer!
@@ -416,7 +433,7 @@ copyFrom: start to: end
      unlike the one in Collection, because a Stream's #position method
      returns 0-based values.  Notice that this class can only provide
      the illusion of random access, by appropriately rewinding the input
-     stream or skipping compressed data.""
+     stream or skipping compressed data."
     | pos |
     pos := self position.
     ^[ self position: start; next: end - start ]
