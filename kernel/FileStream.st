@@ -365,7 +365,20 @@ nextPutAllFlush: aCollection
 nextPutAll: aCollection
     "Put all the characters in aCollection in the file"
     | n coll written |
-    coll := aCollection asString.
+    "Just do 'coll := aCollection asString', but avoid expensive operations
+     in the common case where aCollection is already a String."
+    coll := aCollection isSequenceable
+	ifTrue: [ aCollection ]
+	ifFalse: [
+	    [ aCollection asString ]
+	        on: MessageNotUnderstood
+	        do: [ :ex |
+		    "If we are in a stream, try to facilitate buffering."
+		    [ aCollection atEnd ] whileFalse: [
+		        coll := aCollection nextHunk.
+		        self next: coll size putAll: coll startingAt: 1 ].
+		    ^self ] ].
+
     n := coll size.
     written := collection size - ptr + 1 min: n.
     self next: written bufferAll: coll startingAt: 1.

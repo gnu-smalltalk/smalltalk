@@ -105,6 +105,12 @@ inspect
 !
 
 
+isSequenceable
+    "Answer whether the receiver can be accessed by a numeric index with
+     #at:/#at:put:."
+    ^true
+!
+
 = aCollection
     "Answer whether the receiver's items match those in aCollection"
 

@@ -151,6 +151,12 @@ removeAll: aCollection ifAbsent: aBlock
 
 !Collection methodsFor: 'testing collections'!
 
+isSequenceable
+    "Answer whether the receiver can be accessed by a numeric index with
+     #at:/#at:put:."
+    ^false
+!
+
 capacity
     "Answer how many elements the receiver can hold before having to grow."
     ^self basicSize

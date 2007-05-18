@@ -519,8 +519,21 @@ isEmpty
     ^self size == 0
 !
 
+next: n putAll: aCollection startingAt: position
+    "Put the characters in the supplied range of aCollection in the file"
+    ^self write: aCollection from: position to: position + n - 1!
+
 nextPutAll: aCollection
     "Put all the characters in aCollection in the file"
+    | stream |
+    aCollection isSequenceable ifFalse: [
+	[ stream := aCollection readStream ]
+	    on: MessageNotUnderstood
+	    do: [ :ex | ex return: aCollection asString readStream ].
+
+	[ stream atEnd ] whileFalse: [ self write: stream nextHunk ].
+	^self ].
+
     self write: aCollection asString
 !
 
@@ -545,8 +558,8 @@ next: anInteger
     n = 0
 	ifTrue: [ atEnd := true ].
     ^n < anInteger
-	ifTrue: [ collection copyFrom: 1 to: n ]
-	ifFalse: [ collection ].
+	ifTrue: [ result copyFrom: 1 to: n ]
+	ifFalse: [ result ].
 ! !
 
 
