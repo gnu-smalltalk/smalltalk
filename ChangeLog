@@ -1,5 +1,12 @@
 2007-05-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Load.st: Rewrite.
+	* scripts/Test.st: Rewrite.
+	* scripts/Reload.st: Replace with...
+	* scripts/gst-reload.sh: ... this script.
+
+2007-05-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PipeStream.st: New.
 	* kernel/zlib.st: Use it.
 

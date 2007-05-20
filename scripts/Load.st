@@ -30,15 +30,59 @@
 |
  ======================================================================"
 
-| ok verbose |
-ok := false.
-verbose := FileStream verbose: true.
-[
-    PackageLoader fileInPackages: Smalltalk arguments.
-    ok := true
-] valueWithUnwind.
+Smalltalk arguments isEmpty ifTrue: [ ObjectMemory quit ]!
+
+| helpString verbose snapshot force |
+snapshot := true.
+force := false.
+verbose := FileStream verbose: false.
+
+helpString :=
+'Usage:
+    gst-load [ flag ... ] package ...
+
+Options:
+    -q --quiet            hide the output
+    -v --verbose          show loaded files
+    -f --force            reload package if already loaded
+    -n --dry-run          don''t save the image after loading
+    -h --help             show this message
+'.
+
+"Parse the command-line arguments."
+Smalltalk
+    arguments: '-h|--help -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force'
+    do: [ :opt :arg |
+
+    opt = 'help' ifTrue: [
+	helpString displayOn: stderr.
+	ObjectMemory quit: 0 ].
+
+    opt = 'quiet' ifTrue: [
+	OutputVerbosity := 0.
+	FileStream verbose: false ].
+
+    opt = 'verbose' ifTrue: [
+	OutputVerbosity := 1.
+	FileStream verbose: true ].
+
+    opt = 'force' ifTrue: [
+	force := true ].
+
+    opt = 'dry-run' ifTrue: [
+	snapshot := false ].
+
+    opt isNil ifTrue: [
+	[
+	    force ifTrue: [ Smalltalk removeFeature: arg asSymbol ].
+	    PackageLoader fileInPackage: arg ]
+	    ifCurtailed: [ ObjectMemory quit: 1 ] ] ]
+
+    ifError: [
+	helpString displayOn: stderr.
+	ObjectMemory quit: 1 ].
+
 FileStream verbose: verbose.
 
-ok ifFalse: [ ObjectMemory quit: 1 ]!
-ObjectMemory snapshot!
+snapshot ifTrue: [ ObjectMemory snapshot ]!
 

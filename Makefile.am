@@ -56,7 +56,7 @@ pkglib_DATA = libc.la
 noinst_DATA = gst.im
 dist_noinst_DATA += smalltalk-mode.el.in gst-mode.el.in .gdbinit \
 	kernel/stamp-classes blox-tk/stamp-classes tcp/stamp-classes \
-	i18n/stamp-classes scripts/Load.st scripts/Reload.st \
+	i18n/stamp-classes scripts/Load.st scripts/gst-reload.sh \
 	scripts/Test.st scripts/Finish.st scripts/GenLibDoc.st \
 	scripts/GenBaseDoc.st gsticon.ico
 
@@ -83,7 +83,7 @@ install-exec-hook:
 	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/scripts/Load.st \
 	  > $(DESTDIR)$(bindir)/gst-load
 	chmod +x $(DESTDIR)$(bindir)/gst-load
-	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/scripts/Reload.st \
+	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/scripts/gst-reload.sh \
 	  > $(DESTDIR)$(bindir)/gst-reload
 	chmod +x $(DESTDIR)$(bindir)/gst-reload
 	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/scripts/Test.st \

@@ -32,7 +32,7 @@
 
 
 Object subclass: #Package
-	instanceVariableNames: 'name features prerequisites builtFiles files fileIns directory libraries modules callouts namespace'
+	instanceVariableNames: 'name features prerequisites builtFiles files fileIns directory libraries modules callouts namespace sunitScripts'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Language-Packaging'
@@ -98,6 +98,11 @@ printOn: aStream
 	printXmlOn: aStream
 	collection: self prerequisites asSortedCollection
 	tag: 'prereq'.
+
+    self
+	printXmlOn: aStream
+	collection: self sunitScripts
+	tag: 'sunit'.
 
     self
 	printXmlOn: aStream
@@ -199,6 +204,18 @@ modules
      required to load the package."
     modules isNil ifTrue: [ modules := Set new ].
     ^modules!
+
+sunitScript
+    "Answer a String containing a SUnit script that
+     describes the package's test suite."
+    self sunitScripts isEmpty ifTrue: [ ^'' ].
+    ^self sunitScripts fold: [ :a :b | a, ' ', b ]!
+
+sunitScripts
+    "Answer a (modifiable) OrderedCollection of SUnit scripts that
+     compose the package's test suite."
+    sunitScripts isNil ifTrue: [ sunitScripts := OrderedCollection new ].
+    ^sunitScripts!
 
 callouts
     "Answer a (modifiable) Set of call-outs that are required to load
@@ -338,6 +355,12 @@ fileInsFor: package
     "Answer a Set of Strings containing the filenames of the given package's
      file-ins (relative to the directory answered by #directoryFor:)"
     ^(self packageAt: package) fileIns.
+!
+
+sunitScriptFor: package
+    "Answer a Strings containing a SUnit script that describes the package's
+     test suite."
+    ^(self packageAt: package) sunitScript.
 !
 
 calloutsFor: package
@@ -592,7 +615,8 @@ processPackageFile: fileName baseDirectories: anArray
 		(package baseDirs: baseDirs)
 		    ifTrue: [ packages at: package name put: package ]] ifFalse: [
 	    tag = 'built-file' ifTrue: [ package builtFiles add: cdata ] ifFalse: [
-	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]]].
+	    tag = 'sunit' ifTrue: [ package sunitScripts add: cdata ] ifFalse: [
+	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]]]].
 	    cdata := nil.
 	].
 	ch isAlphaNumeric ifTrue: [

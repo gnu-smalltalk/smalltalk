@@ -140,6 +140,13 @@ defaultResources
     			addAll: testCase resources;
     			yourself]!
 
+isLogging
+    ^true!
+
+logPolicy: aLogPolicy
+    self tests do: [ :each |
+	each isLogging ifTrue: [ each logPolicy: aLogPolicy ] ]!
+
 name
     ^name!
 

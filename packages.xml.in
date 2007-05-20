@@ -398,6 +398,9 @@
 
 <package>
   <name>SUnit</name>
+  <sunit>SUnitTest.*</sunit>
+  <sunit>TestSuitesScriptTest.*</sunit>
+
   <filein>SUnitPreload.st</filein>
   <filein>SUnit.st</filein>
   <filein>SUnitTests.st</filein>
