@@ -17,6 +17,7 @@ GST_REVISION(6:1:2)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
 AC_CONFIG_SRCDIR([main.c])
+AC_CONFIG_TESTDIR(tests)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
@@ -41,7 +42,7 @@ AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_LN_S
 GST_PROG_LN
-AC_PATH_PROG(INSTALL_INFO, install-info, :, $PATH:/sbin)
+AC_PATH_PROG(INSTALL_INFO, install-info, :, $PATH:/sbin:/usr/sbin)
 
 AC_ARG_WITH(emacs, 
 [  --without-emacs         disable Emacs modes for Smalltalk], ,
@@ -58,6 +59,7 @@ dnl We only want the GNU implementations
 AM_MISSING_PROG(LEX, flex, $missing_dir)
 AM_MISSING_PROG(YACC, bison, $missing_dir)
 AM_MISSING_PROG(GPERF, gperf, $missing_dir)
+AM_MISSING_PROG(AUTOM4TE, autom4te, $missing_dir)
 
 dnl 
 dnl ------------------------------ SUBDIRS --------------------

@@ -1,91 +1,10 @@
-TESTS = $(low_level_tests) $(benchmark_tests) $(ansi_tests)
-
-low_level_tests = arrays.st classes.st blocks.st \
-	sets.st processes.st exceptions.st \
-	intmath.st floatmath.st dates.st \
-	objects.st strings.st chars.st objdump.st \
-	delays.st geometry.st cobjects.st compiler.st \
-	fileext.st mutate.st untrusted.st getopt.st \
-	quit.st
-
-benchmark_tests = ackermann.st ary3.st except.st \
-	fibo.st hash.st hash2.st heapsort.st \
-	lists.st lists1.st lists2.st matrix.st \
-	methcall.st nestedloop.st objinst.st \
-	prodcons.st random-bench.st sieve.st strcat.st
-
-ansi_tests = \
-	ArrayANSITest \
-	ArrayFactoryANSITest \
-	BagANSITest \
-	BagFactoryANSITest \
-	BooleanANSITest \
-	ByteArrayANSITest \
-	ByteArrayFactoryANSITest \
-	CharacterANSITest \
-	CharacterFactoryANSITest \
-	DateAndTimeANSITest \
-	DateAndTimeFactoryANSITest \
-	DictionaryANSITest \
-	DictionaryFactoryANSITest \
-	DurationANSITest \
-	DurationFactoryANSITest \
-	DyadicValuableANSITest \
-	ErrorANSITest \
-	ErrorClassANSITest \
-	ExceptionANSITest \
-	ExceptionClassANSITest \
-	ExceptionSetANSITest \
-	FailedMessageANSITest \
-	FileStreamFactoryANSITest \
-	FloatANSITest \
-	FloatCharacterizationANSITest \
-	FractionANSITest \
-	FractionFactoryANSITest \
-	IdentityDictionaryANSITest \
-	IdentityDictionaryFactoryANSITest \
-	IntegerANSITest \
-	IntervalANSITest \
-	IntervalFactoryANSITest \
-	MessageNotUnderstoodANSITest \
-	MessageNotUnderstoodSelectorANSITest \
-	MonadicBlockANSITest \
-	NilANSITest \
-	NiladicBlockANSITest \
-	NotificationANSITest \
-	NotificationClassANSITest \
-	ObjectANSITest \
-	ObjectClassANSITest \
-	OrderedCollectionANSITest \
-	OrderedCollectionFactoryANSITest \
-	ReadFileStreamANSITest \
-	ReadStreamANSITest \
-	ReadStreamFactoryANSITest \
-	ReadWriteStreamANSITest \
-	ReadWriteStreamFactoryANSITest \
-	ScaledDecimalANSITest \
-	SelectorANSITest \
-	SetANSITest \
-	SetFactoryANSITest \
-	SortedCollectionANSITest \
-	SortedCollectionFactoryANSITest \
-	StringANSITest \
-	StringFactoryANSITest \
-	SymbolANSITest \
-	TranscriptANSITest \
-	WarningANSITest \
-	WarningClassANSITest \
-	WriteFileStreamANSITest \
-	WriteStreamANSITest \
-	WriteStreamFactoryANSITest \
-	ZeroDivideANSITest \
-	ZeroDivideFactoryANSITest
-
-TESTS_ENVIRONMENT=$(srcdir)/run-test
-
 nodist_check_DATA = gst.im
 
+AUTOTEST = $(AUTOM4TE) --language=autotest
+TESTSUITE = $(srcdir)/testsuite
+
 dist_noinst_DATA = \
+local.at testsuite.at $(TESTSUITE) package.m4 \
 ackermann.ok ackermann.st arrays.ok arrays.st ary3.ok ary3.st blocks.ok \
 blocks.st chars.ok chars.st classes.ok classes.st cobjects.ok cobjects.st \
 compiler.ok compiler.st dates.ok dates.st delays.ok delays.st except.ok \
@@ -100,13 +19,9 @@ quit.st random-bench.ok random-bench.st untrusted.ok untrusted.st sets.ok \
 sets.st sieve.ok sieve.st strcat.ok strcat.st strings.ok strings.st \
 Ansi.st AnsiDB.st AnsiInit.st AnsiLoad.st AnsiRun.st
 
-CLEANFILES = *.log *.diff gst.im
+CLEANFILES = gst.im
 
-EXTRA_DIST = run-test
-
-.PHONY: regress $(ansi_tests)
-
-$(ansi_tests):
+.PHONY: regress
 
 regress:
 	cd $(srcdir) || exit 1; \
@@ -121,3 +36,22 @@ gst.im: ../kernel/stamp-classes AnsiLoad.st Ansi.st AnsiDB.st
 	cd $(srcdir) && \
 	  @abs_top_builddir@/gst -SI @abs_top_builddir@/tests/gst.im AnsiLoad.st
 
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac
+	{                                      \
+	    echo '# Signature of the current package.'; \
+	    echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])'; \
+	    echo 'm4_define([AT_PACKAGE_TARNAME],   [@PACKAGE_TARNAME@])'; \
+	    echo 'm4_define([AT_PACKAGE_VERSION],   [@PACKAGE_VERSION@])'; \
+	    echo 'm4_define([AT_PACKAGE_STRING],    [@PACKAGE_STRING@])'; \
+	    echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
+	  } >'$(srcdir)/package.m4'
+
+check-local: atconfig $(TESTSUITE)
+	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
+
+clean-local:
+	-$(SHELL) '$(TESTSUITE)' --clean
+
+$(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(srcdir)/local.at
+	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
+	mv $@.tmp $@
