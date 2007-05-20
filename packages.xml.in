@@ -288,13 +288,17 @@
 
 <package>
   <name>ZLib</name>
+  <sunit>ZlibStreamTest.*</sunit>
+
   <filein>PipeStream.st</filein>
   <filein>zlib.st</filein>
+  <filein>zlibtests.st</filein>
   <module>zlib</module>
   <directory>examples</directory>
 
   <file>PipeStream.st</file>
   <file>zlib.st</file>
+  <file>zlibtests.st</file>
 </package>
 
 <package>

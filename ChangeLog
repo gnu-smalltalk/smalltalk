@@ -1,3 +1,8 @@
+2007-05-18  Stephen Compall  <scompall@nocandysw.com>
+
+	* examples/zlibtests.st: New file split from examples/zlib.st.
+	Convert to an SUnit test.
+
 2007-05-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Load.st: Rewrite.

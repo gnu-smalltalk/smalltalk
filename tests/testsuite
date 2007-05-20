@@ -620,7 +620,7 @@ at_times_file=$at_suite_dir/at-times
 # List of the tested programs.
 at_tested='../gst'
 # List of the all the test groups.
-at_groups_all=' banner-1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 banner-2 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 banner-3 41 banner-4 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106'
+at_groups_all=' banner-1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 banner-2 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 banner-3 41 banner-4 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 banner-5 107'
 # As many question marks as there are digits in the last test group number.
 # Used to normalize the test group numbers so that `ls' lists them in
 # numerical order.
@@ -732,6 +732,7 @@ at_help_all="1;testsuite.at:27;arrays.st;base;
 104;testsuite.at:136;WriteStreamFactoryANSITest;ANSI SUnit;
 105;testsuite.at:137;ZeroDivideANSITest;ANSI SUnit;
 106;testsuite.at:138;ZeroDivideFactoryANSITest;ANSI SUnit;
+107;testsuite.at:141;ZLib;ZLib SUnit;
 "
 
 at_prev=
@@ -4033,12 +4034,12 @@ _ATEOF
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:71: \$GST -f \$abs_top_srcdir/scripts/Test.st -p SUnit"
+echo "$at_srcdir/testsuite.at:71: cd \$abs_top_builddir && \$GST -f \$abs_top_srcdir/scripts/Test.st -p SUnit"
 echo testsuite.at:71 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_top_srcdir/scripts/Test.st -p SUnit" in
+    case "cd $abs_top_builddir && $GST -f $abs_top_srcdir/scripts/Test.st -p SUnit" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4046,12 +4047,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_top_srcdir/scripts/Test.st -p SUnit ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_top_srcdir/scripts/Test.st -p SUnit ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_top_srcdir/scripts/Test.st -p SUnit ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_top_srcdir/scripts/Test.st -p SUnit ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4108,12 +4109,12 @@ _ATEOF
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:74: \$GST -f \$abs_srcdir/AnsiRun.st ArrayANSITest"
+echo "$at_srcdir/testsuite.at:74: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ArrayANSITest"
 echo testsuite.at:74 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ArrayANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ArrayANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4121,12 +4122,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ArrayANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ArrayANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ArrayANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ArrayANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4174,12 +4175,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:75: \$GST -f \$abs_srcdir/AnsiRun.st ArrayFactoryANSITest"
+echo "$at_srcdir/testsuite.at:75: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ArrayFactoryANSITest"
 echo testsuite.at:75 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ArrayFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ArrayFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4187,12 +4188,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ArrayFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ArrayFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ArrayFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ArrayFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4240,12 +4241,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:76: \$GST -f \$abs_srcdir/AnsiRun.st BagANSITest"
+echo "$at_srcdir/testsuite.at:76: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st BagANSITest"
 echo testsuite.at:76 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st BagANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st BagANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4253,12 +4254,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st BagANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st BagANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st BagANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st BagANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4306,12 +4307,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:77: \$GST -f \$abs_srcdir/AnsiRun.st BagFactoryANSITest"
+echo "$at_srcdir/testsuite.at:77: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st BagFactoryANSITest"
 echo testsuite.at:77 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st BagFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st BagFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4319,12 +4320,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st BagFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st BagFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st BagFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st BagFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4372,12 +4373,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:78: \$GST -f \$abs_srcdir/AnsiRun.st BooleanANSITest"
+echo "$at_srcdir/testsuite.at:78: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st BooleanANSITest"
 echo testsuite.at:78 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st BooleanANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st BooleanANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4385,12 +4386,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st BooleanANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st BooleanANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st BooleanANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st BooleanANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4438,12 +4439,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:79: \$GST -f \$abs_srcdir/AnsiRun.st ByteArrayANSITest"
+echo "$at_srcdir/testsuite.at:79: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ByteArrayANSITest"
 echo testsuite.at:79 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ByteArrayANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ByteArrayANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4451,12 +4452,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ByteArrayANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ByteArrayANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ByteArrayANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ByteArrayANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4504,12 +4505,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:80: \$GST -f \$abs_srcdir/AnsiRun.st ByteArrayFactoryANSITest"
+echo "$at_srcdir/testsuite.at:80: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ByteArrayFactoryANSITest"
 echo testsuite.at:80 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ByteArrayFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ByteArrayFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4517,12 +4518,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ByteArrayFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ByteArrayFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ByteArrayFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ByteArrayFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4570,12 +4571,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:81: \$GST -f \$abs_srcdir/AnsiRun.st CharacterANSITest"
+echo "$at_srcdir/testsuite.at:81: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st CharacterANSITest"
 echo testsuite.at:81 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st CharacterANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st CharacterANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4583,12 +4584,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st CharacterANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st CharacterANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st CharacterANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st CharacterANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4636,12 +4637,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:82: \$GST -f \$abs_srcdir/AnsiRun.st CharacterFactoryANSITest"
+echo "$at_srcdir/testsuite.at:82: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st CharacterFactoryANSITest"
 echo testsuite.at:82 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st CharacterFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st CharacterFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4649,12 +4650,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st CharacterFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st CharacterFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st CharacterFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st CharacterFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4702,12 +4703,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:83: \$GST -f \$abs_srcdir/AnsiRun.st DateAndTimeANSITest"
+echo "$at_srcdir/testsuite.at:83: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st DateAndTimeANSITest"
 echo testsuite.at:83 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st DateAndTimeANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DateAndTimeANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4715,12 +4716,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st DateAndTimeANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DateAndTimeANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st DateAndTimeANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DateAndTimeANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4768,12 +4769,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:84: \$GST -f \$abs_srcdir/AnsiRun.st DateAndTimeFactoryANSITest"
+echo "$at_srcdir/testsuite.at:84: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st DateAndTimeFactoryANSITest"
 echo testsuite.at:84 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st DateAndTimeFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DateAndTimeFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4781,12 +4782,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st DateAndTimeFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DateAndTimeFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st DateAndTimeFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DateAndTimeFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4834,12 +4835,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:85: \$GST -f \$abs_srcdir/AnsiRun.st DictionaryANSITest"
+echo "$at_srcdir/testsuite.at:85: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st DictionaryANSITest"
 echo testsuite.at:85 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st DictionaryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DictionaryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4847,12 +4848,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st DictionaryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DictionaryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st DictionaryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DictionaryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4900,12 +4901,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:86: \$GST -f \$abs_srcdir/AnsiRun.st DictionaryFactoryANSITest"
+echo "$at_srcdir/testsuite.at:86: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st DictionaryFactoryANSITest"
 echo testsuite.at:86 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st DictionaryFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DictionaryFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4913,12 +4914,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st DictionaryFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DictionaryFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st DictionaryFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DictionaryFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4966,12 +4967,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:87: \$GST -f \$abs_srcdir/AnsiRun.st DurationANSITest"
+echo "$at_srcdir/testsuite.at:87: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st DurationANSITest"
 echo testsuite.at:87 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st DurationANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DurationANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4979,12 +4980,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st DurationANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DurationANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st DurationANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DurationANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5032,12 +5033,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:88: \$GST -f \$abs_srcdir/AnsiRun.st DurationFactoryANSITest"
+echo "$at_srcdir/testsuite.at:88: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st DurationFactoryANSITest"
 echo testsuite.at:88 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st DurationFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DurationFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5045,12 +5046,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st DurationFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DurationFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st DurationFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DurationFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5098,12 +5099,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:89: \$GST -f \$abs_srcdir/AnsiRun.st DyadicValuableANSITest"
+echo "$at_srcdir/testsuite.at:89: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st DyadicValuableANSITest"
 echo testsuite.at:89 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st DyadicValuableANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DyadicValuableANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5111,12 +5112,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st DyadicValuableANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DyadicValuableANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st DyadicValuableANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st DyadicValuableANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5164,12 +5165,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:90: \$GST -f \$abs_srcdir/AnsiRun.st ErrorANSITest"
+echo "$at_srcdir/testsuite.at:90: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ErrorANSITest"
 echo testsuite.at:90 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ErrorANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ErrorANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5177,12 +5178,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ErrorANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ErrorANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ErrorANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ErrorANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5230,12 +5231,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:91: \$GST -f \$abs_srcdir/AnsiRun.st ErrorClassANSITest"
+echo "$at_srcdir/testsuite.at:91: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ErrorClassANSITest"
 echo testsuite.at:91 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ErrorClassANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ErrorClassANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5243,12 +5244,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ErrorClassANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ErrorClassANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ErrorClassANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ErrorClassANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5296,12 +5297,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:92: \$GST -f \$abs_srcdir/AnsiRun.st ExceptionANSITest"
+echo "$at_srcdir/testsuite.at:92: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ExceptionANSITest"
 echo testsuite.at:92 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ExceptionANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ExceptionANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5309,12 +5310,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ExceptionANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ExceptionANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ExceptionANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ExceptionANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5362,12 +5363,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:93: \$GST -f \$abs_srcdir/AnsiRun.st ExceptionClassANSITest"
+echo "$at_srcdir/testsuite.at:93: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ExceptionClassANSITest"
 echo testsuite.at:93 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ExceptionClassANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ExceptionClassANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5375,12 +5376,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ExceptionClassANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ExceptionClassANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ExceptionClassANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ExceptionClassANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5428,12 +5429,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:94: \$GST -f \$abs_srcdir/AnsiRun.st ExceptionSetANSITest"
+echo "$at_srcdir/testsuite.at:94: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ExceptionSetANSITest"
 echo testsuite.at:94 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ExceptionSetANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ExceptionSetANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5441,12 +5442,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ExceptionSetANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ExceptionSetANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ExceptionSetANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ExceptionSetANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5494,12 +5495,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:95: \$GST -f \$abs_srcdir/AnsiRun.st FailedMessageANSITest"
+echo "$at_srcdir/testsuite.at:95: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st FailedMessageANSITest"
 echo testsuite.at:95 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st FailedMessageANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FailedMessageANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5507,12 +5508,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st FailedMessageANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FailedMessageANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st FailedMessageANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FailedMessageANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5560,12 +5561,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:96: \$GST -f \$abs_srcdir/AnsiRun.st FileStreamFactoryANSITest"
+echo "$at_srcdir/testsuite.at:96: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st FileStreamFactoryANSITest"
 echo testsuite.at:96 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st FileStreamFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FileStreamFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5573,12 +5574,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st FileStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FileStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st FileStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FileStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5626,12 +5627,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:97: \$GST -f \$abs_srcdir/AnsiRun.st FloatANSITest"
+echo "$at_srcdir/testsuite.at:97: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st FloatANSITest"
 echo testsuite.at:97 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st FloatANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FloatANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5639,12 +5640,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st FloatANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FloatANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st FloatANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FloatANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5692,12 +5693,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:98: \$GST -f \$abs_srcdir/AnsiRun.st FloatCharacterizationANSITest"
+echo "$at_srcdir/testsuite.at:98: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st FloatCharacterizationANSITest"
 echo testsuite.at:98 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st FloatCharacterizationANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FloatCharacterizationANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5705,12 +5706,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st FloatCharacterizationANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FloatCharacterizationANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st FloatCharacterizationANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FloatCharacterizationANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5758,12 +5759,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:99: \$GST -f \$abs_srcdir/AnsiRun.st FractionANSITest"
+echo "$at_srcdir/testsuite.at:99: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st FractionANSITest"
 echo testsuite.at:99 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st FractionANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FractionANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5771,12 +5772,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st FractionANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FractionANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st FractionANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FractionANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5824,12 +5825,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:100: \$GST -f \$abs_srcdir/AnsiRun.st FractionFactoryANSITest"
+echo "$at_srcdir/testsuite.at:100: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st FractionFactoryANSITest"
 echo testsuite.at:100 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st FractionFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FractionFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5837,12 +5838,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st FractionFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FractionFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st FractionFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st FractionFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5890,12 +5891,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:101: \$GST -f \$abs_srcdir/AnsiRun.st IdentityDictionaryANSITest"
+echo "$at_srcdir/testsuite.at:101: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st IdentityDictionaryANSITest"
 echo testsuite.at:101 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5903,12 +5904,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -5956,12 +5957,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:102: \$GST -f \$abs_srcdir/AnsiRun.st IdentityDictionaryFactoryANSITest"
+echo "$at_srcdir/testsuite.at:102: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st IdentityDictionaryFactoryANSITest"
 echo testsuite.at:102 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -5969,12 +5970,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IdentityDictionaryFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6022,12 +6023,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:103: \$GST -f \$abs_srcdir/AnsiRun.st IntegerANSITest"
+echo "$at_srcdir/testsuite.at:103: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st IntegerANSITest"
 echo testsuite.at:103 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st IntegerANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IntegerANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6035,12 +6036,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st IntegerANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IntegerANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st IntegerANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IntegerANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6088,12 +6089,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:104: \$GST -f \$abs_srcdir/AnsiRun.st IntervalANSITest"
+echo "$at_srcdir/testsuite.at:104: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st IntervalANSITest"
 echo testsuite.at:104 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st IntervalANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IntervalANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6101,12 +6102,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st IntervalANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IntervalANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st IntervalANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IntervalANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6154,12 +6155,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:105: \$GST -f \$abs_srcdir/AnsiRun.st IntervalFactoryANSITest"
+echo "$at_srcdir/testsuite.at:105: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st IntervalFactoryANSITest"
 echo testsuite.at:105 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st IntervalFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IntervalFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6167,12 +6168,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st IntervalFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IntervalFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st IntervalFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st IntervalFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6220,12 +6221,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:106: \$GST -f \$abs_srcdir/AnsiRun.st MessageNotUnderstoodANSITest"
+echo "$at_srcdir/testsuite.at:106: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st MessageNotUnderstoodANSITest"
 echo testsuite.at:106 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6233,12 +6234,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6286,12 +6287,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:107: \$GST -f \$abs_srcdir/AnsiRun.st MessageNotUnderstoodSelectorANSITest"
+echo "$at_srcdir/testsuite.at:107: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st MessageNotUnderstoodSelectorANSITest"
 echo testsuite.at:107 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodSelectorANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodSelectorANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6299,12 +6300,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodSelectorANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodSelectorANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodSelectorANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodSelectorANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6352,12 +6353,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:108: \$GST -f \$abs_srcdir/AnsiRun.st MonadicBlockANSITest"
+echo "$at_srcdir/testsuite.at:108: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st MonadicBlockANSITest"
 echo testsuite.at:108 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st MonadicBlockANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st MonadicBlockANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6365,12 +6366,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st MonadicBlockANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st MonadicBlockANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st MonadicBlockANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st MonadicBlockANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6418,12 +6419,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:109: \$GST -f \$abs_srcdir/AnsiRun.st NilANSITest"
+echo "$at_srcdir/testsuite.at:109: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st NilANSITest"
 echo testsuite.at:109 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st NilANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NilANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6431,12 +6432,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st NilANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NilANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st NilANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NilANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6484,12 +6485,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:110: \$GST -f \$abs_srcdir/AnsiRun.st NiladicBlockANSITest"
+echo "$at_srcdir/testsuite.at:110: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st NiladicBlockANSITest"
 echo testsuite.at:110 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st NiladicBlockANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NiladicBlockANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6497,12 +6498,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st NiladicBlockANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NiladicBlockANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st NiladicBlockANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NiladicBlockANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6550,12 +6551,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:111: \$GST -f \$abs_srcdir/AnsiRun.st NotificationANSITest"
+echo "$at_srcdir/testsuite.at:111: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st NotificationANSITest"
 echo testsuite.at:111 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st NotificationANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NotificationANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6563,12 +6564,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st NotificationANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NotificationANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st NotificationANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NotificationANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6616,12 +6617,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:112: \$GST -f \$abs_srcdir/AnsiRun.st NotificationClassANSITest"
+echo "$at_srcdir/testsuite.at:112: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st NotificationClassANSITest"
 echo testsuite.at:112 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st NotificationClassANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NotificationClassANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6629,12 +6630,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st NotificationClassANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NotificationClassANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st NotificationClassANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st NotificationClassANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6682,12 +6683,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:113: \$GST -f \$abs_srcdir/AnsiRun.st ObjectANSITest"
+echo "$at_srcdir/testsuite.at:113: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ObjectANSITest"
 echo testsuite.at:113 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ObjectANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ObjectANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6695,12 +6696,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ObjectANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ObjectANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ObjectANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ObjectANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6748,12 +6749,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:114: \$GST -f \$abs_srcdir/AnsiRun.st ObjectClassANSITest"
+echo "$at_srcdir/testsuite.at:114: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ObjectClassANSITest"
 echo testsuite.at:114 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ObjectClassANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ObjectClassANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6761,12 +6762,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ObjectClassANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ObjectClassANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ObjectClassANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ObjectClassANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6814,12 +6815,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:115: \$GST -f \$abs_srcdir/AnsiRun.st OrderedCollectionANSITest"
+echo "$at_srcdir/testsuite.at:115: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st OrderedCollectionANSITest"
 echo testsuite.at:115 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st OrderedCollectionANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st OrderedCollectionANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6827,12 +6828,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st OrderedCollectionANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st OrderedCollectionANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st OrderedCollectionANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st OrderedCollectionANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6880,12 +6881,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:116: \$GST -f \$abs_srcdir/AnsiRun.st OrderedCollectionFactoryANSITest"
+echo "$at_srcdir/testsuite.at:116: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st OrderedCollectionFactoryANSITest"
 echo testsuite.at:116 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st OrderedCollectionFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st OrderedCollectionFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6893,12 +6894,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st OrderedCollectionFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st OrderedCollectionFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st OrderedCollectionFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st OrderedCollectionFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -6946,12 +6947,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:117: \$GST -f \$abs_srcdir/AnsiRun.st ReadFileStreamANSITest"
+echo "$at_srcdir/testsuite.at:117: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ReadFileStreamANSITest"
 echo testsuite.at:117 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ReadFileStreamANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadFileStreamANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -6959,12 +6960,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ReadFileStreamANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadFileStreamANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ReadFileStreamANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadFileStreamANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7012,12 +7013,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:118: \$GST -f \$abs_srcdir/AnsiRun.st ReadStreamANSITest"
+echo "$at_srcdir/testsuite.at:118: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ReadStreamANSITest"
 echo testsuite.at:118 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ReadStreamANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadStreamANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7025,12 +7026,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ReadStreamANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadStreamANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ReadStreamANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadStreamANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7078,12 +7079,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:119: \$GST -f \$abs_srcdir/AnsiRun.st ReadStreamFactoryANSITest"
+echo "$at_srcdir/testsuite.at:119: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ReadStreamFactoryANSITest"
 echo testsuite.at:119 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ReadStreamFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadStreamFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7091,12 +7092,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ReadStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ReadStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7144,12 +7145,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:120: \$GST -f \$abs_srcdir/AnsiRun.st ReadWriteStreamANSITest"
+echo "$at_srcdir/testsuite.at:120: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ReadWriteStreamANSITest"
 echo testsuite.at:120 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7157,12 +7158,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7210,12 +7211,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:121: \$GST -f \$abs_srcdir/AnsiRun.st ReadWriteStreamFactoryANSITest"
+echo "$at_srcdir/testsuite.at:121: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ReadWriteStreamFactoryANSITest"
 echo testsuite.at:121 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7223,12 +7224,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ReadWriteStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7276,12 +7277,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:122: \$GST -f \$abs_srcdir/AnsiRun.st ScaledDecimalANSITest"
+echo "$at_srcdir/testsuite.at:122: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ScaledDecimalANSITest"
 echo testsuite.at:122 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ScaledDecimalANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ScaledDecimalANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7289,12 +7290,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ScaledDecimalANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ScaledDecimalANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ScaledDecimalANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ScaledDecimalANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7342,12 +7343,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:123: \$GST -f \$abs_srcdir/AnsiRun.st SelectorANSITest"
+echo "$at_srcdir/testsuite.at:123: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st SelectorANSITest"
 echo testsuite.at:123 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st SelectorANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SelectorANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7355,12 +7356,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st SelectorANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SelectorANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st SelectorANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SelectorANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7408,12 +7409,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:124: \$GST -f \$abs_srcdir/AnsiRun.st SetANSITest"
+echo "$at_srcdir/testsuite.at:124: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st SetANSITest"
 echo testsuite.at:124 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st SetANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SetANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7421,12 +7422,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st SetANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SetANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st SetANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SetANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7474,12 +7475,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:125: \$GST -f \$abs_srcdir/AnsiRun.st SetFactoryANSITest"
+echo "$at_srcdir/testsuite.at:125: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st SetFactoryANSITest"
 echo testsuite.at:125 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st SetFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SetFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7487,12 +7488,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st SetFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SetFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st SetFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SetFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7540,12 +7541,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:126: \$GST -f \$abs_srcdir/AnsiRun.st SortedCollectionANSITest"
+echo "$at_srcdir/testsuite.at:126: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st SortedCollectionANSITest"
 echo testsuite.at:126 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st SortedCollectionANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SortedCollectionANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7553,12 +7554,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st SortedCollectionANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SortedCollectionANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st SortedCollectionANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SortedCollectionANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7606,12 +7607,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:127: \$GST -f \$abs_srcdir/AnsiRun.st SortedCollectionFactoryANSITest"
+echo "$at_srcdir/testsuite.at:127: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st SortedCollectionFactoryANSITest"
 echo testsuite.at:127 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st SortedCollectionFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SortedCollectionFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7619,12 +7620,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st SortedCollectionFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SortedCollectionFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st SortedCollectionFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SortedCollectionFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7672,12 +7673,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:128: \$GST -f \$abs_srcdir/AnsiRun.st StringANSITest"
+echo "$at_srcdir/testsuite.at:128: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st StringANSITest"
 echo testsuite.at:128 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st StringANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st StringANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7685,12 +7686,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st StringANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st StringANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st StringANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st StringANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7738,12 +7739,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:129: \$GST -f \$abs_srcdir/AnsiRun.st StringFactoryANSITest"
+echo "$at_srcdir/testsuite.at:129: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st StringFactoryANSITest"
 echo testsuite.at:129 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st StringFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st StringFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7751,12 +7752,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st StringFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st StringFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st StringFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st StringFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7804,12 +7805,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:130: \$GST -f \$abs_srcdir/AnsiRun.st SymbolANSITest"
+echo "$at_srcdir/testsuite.at:130: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st SymbolANSITest"
 echo testsuite.at:130 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st SymbolANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SymbolANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7817,12 +7818,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st SymbolANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SymbolANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st SymbolANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st SymbolANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7870,12 +7871,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:131: \$GST -f \$abs_srcdir/AnsiRun.st TranscriptANSITest"
+echo "$at_srcdir/testsuite.at:131: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st TranscriptANSITest"
 echo testsuite.at:131 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st TranscriptANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st TranscriptANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7883,12 +7884,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st TranscriptANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st TranscriptANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st TranscriptANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st TranscriptANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -7936,12 +7937,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:132: \$GST -f \$abs_srcdir/AnsiRun.st WarningANSITest"
+echo "$at_srcdir/testsuite.at:132: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st WarningANSITest"
 echo testsuite.at:132 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st WarningANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WarningANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -7949,12 +7950,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st WarningANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WarningANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st WarningANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WarningANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8002,12 +8003,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:133: \$GST -f \$abs_srcdir/AnsiRun.st WarningClassANSITest"
+echo "$at_srcdir/testsuite.at:133: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st WarningClassANSITest"
 echo testsuite.at:133 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st WarningClassANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WarningClassANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8015,12 +8016,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st WarningClassANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WarningClassANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st WarningClassANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WarningClassANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8068,12 +8069,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:134: \$GST -f \$abs_srcdir/AnsiRun.st WriteFileStreamANSITest"
+echo "$at_srcdir/testsuite.at:134: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st WriteFileStreamANSITest"
 echo testsuite.at:134 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st WriteFileStreamANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WriteFileStreamANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8081,12 +8082,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st WriteFileStreamANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WriteFileStreamANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st WriteFileStreamANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WriteFileStreamANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8134,12 +8135,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:135: \$GST -f \$abs_srcdir/AnsiRun.st WriteStreamANSITest"
+echo "$at_srcdir/testsuite.at:135: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st WriteStreamANSITest"
 echo testsuite.at:135 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st WriteStreamANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WriteStreamANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8147,12 +8148,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st WriteStreamANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WriteStreamANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st WriteStreamANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WriteStreamANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8200,12 +8201,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:136: \$GST -f \$abs_srcdir/AnsiRun.st WriteStreamFactoryANSITest"
+echo "$at_srcdir/testsuite.at:136: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st WriteStreamFactoryANSITest"
 echo testsuite.at:136 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st WriteStreamFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WriteStreamFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8213,12 +8214,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st WriteStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WriteStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st WriteStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st WriteStreamFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8266,12 +8267,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:137: \$GST -f \$abs_srcdir/AnsiRun.st ZeroDivideANSITest"
+echo "$at_srcdir/testsuite.at:137: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ZeroDivideANSITest"
 echo testsuite.at:137 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ZeroDivideANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ZeroDivideANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8279,12 +8280,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ZeroDivideANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ZeroDivideANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ZeroDivideANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ZeroDivideANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8332,12 +8333,12 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:138: \$GST -f \$abs_srcdir/AnsiRun.st ZeroDivideFactoryANSITest"
+echo "$at_srcdir/testsuite.at:138: cd \$abs_top_builddir && \$GST -f \$abs_srcdir/AnsiRun.st ZeroDivideFactoryANSITest"
 echo testsuite.at:138 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "$GST -f $abs_srcdir/AnsiRun.st ZeroDivideFactoryANSITest" in
+    case "cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ZeroDivideFactoryANSITest" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8345,12 +8346,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; $GST -f $abs_srcdir/AnsiRun.st ZeroDivideFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ZeroDivideFactoryANSITest ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; $GST -f $abs_srcdir/AnsiRun.st ZeroDivideFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
+    ( :; cd $abs_top_builddir && $GST -f $abs_srcdir/AnsiRun.st ZeroDivideFactoryANSITest ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8361,6 +8362,92 @@ case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
    *) echo "$at_srcdir/testsuite.at:138: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+
+        $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+
+  banner-5 ) # Banner 5. testsuite.at:140
+    cat <<\_ATEOF
+
+Other packages.
+
+_ATEOF
+    ;;
+
+  107 ) # 107. testsuite.at:141: ZLib
+    at_setup_line='testsuite.at:141'
+    at_desc="ZLib"
+    $at_quiet $ECHO_N "107: ZLib                                           $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "107. testsuite.at:141: testing ..."
+      $at_traceon
+
+
+
+
+  case $AUTOTEST_PATH in
+    tests) GST="$abs_top_builddir/gst -I $abs_top_builddir/gst.im" ;;
+    *) GST="$AUTOTEST_PATH/gst " ;;
+  esac
+
+  $at_traceoff
+echo "$at_srcdir/testsuite.at:141: cd \$abs_top_builddir && \$GST -f \$abs_top_srcdir/scripts/Test.st -p ZLib
+    ret=\$?
+    case \$ret in
+      2) exit 77 ;;
+      0|1) exit \$ret ;;
+    esac"
+echo testsuite.at:141 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    echo 'Not enabling shell tracing (command contains an embedded newline)'
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; cd $abs_top_builddir && $GST -f $abs_top_srcdir/scripts/Test.st -p ZLib
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; cd $abs_top_builddir && $GST -f $abs_top_srcdir/scripts/Test.st -p ZLib
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:141: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
