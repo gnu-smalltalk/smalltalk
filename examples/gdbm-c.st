@@ -74,6 +74,7 @@ asString
 !
 
 free
+    self removeToBeFinalized.
     self dPtr value free.
     super free
 ! !
@@ -123,87 +124,5 @@ nextKey: afterDatum
 reorganize
     "int gdbm_reorganize(dbf);"
     <cCall: 'gdbm_reorganize' returning: #int args: #(#self)>
-! !
-
-!GDBM class methodsFor: 'testing'!
-
-test
-    | database key value |
-    database := self open: 'test.gdbm' blockSize: 1024 flags: 2 "write/create"
-		    mode: 8r666 fatalFunc: nil.
-
-    key := DatumStruct fromString: 'fred'.
-    value := DatumStruct fromString: 'Fred Flintstone'.
-    database at: key put: value flag: 1 "replace".
-    key free.
-    value free.
-
-    key := DatumStruct fromString: 'wilma'.
-    value := DatumStruct fromString: 'Wilma Flintstone'.
-    database at: key put: value flag: 1 "replace".
-    key free.
-    value free.
-
-    database close.
-
-    database := self open: 'test.gdbm' blockSize: 1024 flags: 0 "read"
-		    mode: 8r666 fatalFunc: nil.
-
-    value := (database at: (DatumStruct fromString: 'wilma')).
-    value asString printNl.
-    value free.
-
-    value := (database at: (DatumStruct fromString: 'barney')).
-    value asString printNl.
-    value free.
-
-    database close.
-!
-
-test2
-    | database newItem item value |
-    database := self open: 'test.gdbm' blockSize: 1024 flags: 0 "read"
-		     mode: 8r666 fatalFunc: nil.
-
-    item := database firstKey.
-    [ item dPtr value notNil ] 
-	whileTrue: [
-	    value := database at: item.
-	    Transcript nextPutAll: item asString;
-		nextPutAll: '  ';
-		nextPutAll: value asString;
-		nl.
-
-	    value free.
-
-	    newItem := database nextKey: item.
-	    item free.
-	    item := newItem ].
-
-    item free.
-    database close.
-!
-
-test3
-    | database newItem item value |
-    database := self open: 'test.gdbm' blockSize: 1024 flags: 0 "read"
-		     mode: 8r666 fatalFunc: nil.
-
-    item := database firstKey.
-    [ item dPtr value notNil ] 
-	whileTrue: [
-	    Transcript nextPutAll: item asString;
-		nextPutAll: '  '.
-
-	    newItem := database nextKey: item.
-	    Transcript
-		display: (newItem dPtr value
-		    ifNotNil: [ :ignored | newItem asString ]);
-		nl.
-	    item free.
-	    item := newItem ].
-
-    item free.
-    database close.
 ! !
 

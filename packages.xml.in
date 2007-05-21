@@ -268,13 +268,18 @@
 
 <package>
   <name>GDBM</name>
+  <sunit>GDBMTest</sunit>
+  <prereq>SUnit</prereq>
+
   <filein>gdbm-c.st</filein>
   <filein>gdbm.st</filein>
+  <filein>gdbmtests.st</filein>
   <module>gdbm</module>
   <directory>examples</directory>
 
   <file>gdbm.st</file>
   <file>gdbm-c.st</file>
+  <file>gdbmtests.st</file>
 </package>
 
 <@NCURSES_DISABLED@package>

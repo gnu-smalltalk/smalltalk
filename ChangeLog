@@ -1,5 +1,11 @@
 2007-05-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/gdbm-c.st: Fix finalization bug.  Move tests from here...
+	* examples/gdbm.st: ... and here...
+	* examples/gdbmtests.st: ... to here.
+
+2007-05-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PkgLoader.st: Add public #fileIn method to Package.
 
 2007-05-21  Paolo Bonzini  <bonzini@gnu.org>

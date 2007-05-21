@@ -81,7 +81,7 @@ close
 !
 
 finalize
-    gdbm isNil ifFalse: [ gdbm close ]
+    gdbm isNil ifFalse: [ self close ]
 ! !
 
 !Database methodsFor: 'accessing'!
@@ -223,54 +223,4 @@ after: key
     ]
 ! !
 
-
-!Database class methodsFor: 'testing'!
-
-test
-    | database key value |
-    database := self writeCreate: 'test.gdbm' blockSize: 1024
-		    mode: 8r666.
-
-    database at: 'fred' put: 'Fred Flintstone'.
-    database at: 'wilma' put: 'Wilma Flintstone'.
-    database close.
-
-    database := self read: 'test.gdbm' blockSize: 1024
-		    mode: 8r666.
-
-    (database at: 'wilma') printNl.
-    (database at: 'barney' ifAbsent: [ nil ]) printNl.
-
-    database close.
-!
-
-test2
-    | database newItem item value |
-    database := self read: 'test.gdbm' blockSize: 1024
-		     mode: 8r666.
-
-    database keysAndValuesDo: [ :item :value |
-	Transcript nextPutAll: item;
-		nextPutAll: '  ';
-		nextPutAll: value;
-		nl.
-    ].
-
-    database close.
-!
-
-test3
-    | database newItem item value |
-    database := self read: 'test.gdbm' blockSize: 1024
-		     mode: 8r666.
-
-    database keysDo: [ :item |
-	Transcript nextPutAll: item;
-		nextPutAll: '  ';
-		display: (database after: item);
-		nl.
-    ].
-
-    database close.
-! !
 
