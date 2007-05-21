@@ -97,6 +97,10 @@ testDigestOf
     self allTestCases do: [ :each |
         self assert: (MD5 digestOf: each key) = each value ]!
 
+testByteArray
+    self allTestCases do: [ :each |
+        self assert: (MD5 digestOf: each key asByteArray) = each value ]!
+
 testHexDigestOf
     self allHexTestCases do: [ :each |
         self assert: (MD5 hexDigestOf: each key) = each value ]!
