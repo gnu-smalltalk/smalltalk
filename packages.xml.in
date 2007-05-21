@@ -601,10 +601,20 @@
   <file>torture.st</file>
 </disabled-package>
 
+<package>
+  <name>Continuations</name>
+  <sunit>AmbTest</sunit>
+  <prereq>SUnit</prereq>
+
+  <filein>Continuations.st</filein>
+
+  <directory>examples</directory>
+  <file>Continuations.st</file>
+</package>
+
 <disabled-package>
   <name>Examples</name>
   <directory>examples</directory>
-  <file>Continuations.st</file>
   <file>LazyCollection.st</file>
   <file>Man.st</file>
   <file>Tetris.st</file>

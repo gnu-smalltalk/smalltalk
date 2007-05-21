@@ -1,5 +1,10 @@
 2007-05-21  Paolo Bonzini  <bonzini@gnu.org>
 
+        * examples/Continuations.st: Add the Amb class from seaside and
+	related SUnit tests.
+
+2007-05-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* examples/gdbm-c.st: Fix finalization bug.  Move tests from here...
 	* examples/gdbm.st: ... and here...
 	* examples/gdbmtests.st: ... to here.
