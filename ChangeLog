@@ -1,5 +1,9 @@
 2007-05-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PkgLoader.st: Add public #fileIn method to Package.
+
+2007-05-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* examples/md5tests.st: New.
 
 2007-05-18  Stephen Compall  <scompall@nocandysw.com>

@@ -62,6 +62,10 @@ into a Smalltalk image, correctly handling dependencies.'!
 
 !Package methodsFor: 'accessing'!
 
+fileIn
+    "File in the given package and its dependencies."
+    PackageLoader fileInPackage: self name!
+
 printXmlOn: aStream collection: aCollection tag: aString
     "Private - Print aCollection on aStream as a sequence of aString
      tags."
@@ -294,7 +298,7 @@ createNamespace
     ].
     ^ns!
 
-fileIn
+primFileIn
     "Private - File in the given package without paying attention at
      dependencies and C callout availability"
     | dir namespace |
@@ -501,7 +505,7 @@ fileInPackages: packagesList
 	extractDependenciesFor: packagesList
 	onError: [ :errorMessage | ^self error: errorMessage ].
 	
-    toBeLoaded do: [ :each | (self packageAt: each) fileIn ]
+    toBeLoaded do: [ :each | (self packageAt: each) primFileIn ]
 ! !
 
 
