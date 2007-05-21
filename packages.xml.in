@@ -288,7 +288,8 @@
 
 <package>
   <name>ZLib</name>
-  <sunit>ZlibStreamTest.*</sunit>
+  <sunit>ZlibStreamTest</sunit>
+  <prereq>SUnit</prereq>
 
   <filein>PipeStream.st</filein>
   <filein>zlib.st</filein>
@@ -303,11 +304,16 @@
 
 <package>
   <name>MD5</name>
+  <sunit>MD5Test</sunit>
+  <prereq>SUnit</prereq>
+
   <filein>md5.st</filein>
+  <filein>md5tests.st</filein>
   <module>md5</module>
   <directory>examples</directory>
 
   <file>md5.st</file>
+  <file>md5tests.st</file>
 </package>
 
 <package>
@@ -402,8 +408,8 @@
 
 <package>
   <name>SUnit</name>
-  <sunit>SUnitTest.*</sunit>
-  <sunit>TestSuitesScriptTest.*</sunit>
+  <sunit>SUnitTest</sunit>
+  <sunit>TestSuitesScriptTest</sunit>
 
   <filein>SUnitPreload.st</filein>
   <filein>SUnit.st</filein>

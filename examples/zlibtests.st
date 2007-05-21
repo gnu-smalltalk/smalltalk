@@ -9,7 +9,7 @@
 "======================================================================
 |
 | Copyright 2007 Free Software Foundation, Inc.
-| Written by Paolo Bonzini
+| Written by Paolo Bonzini and Stephen Compall
 |
 | This file is part of GNU Smalltalk.
 |
