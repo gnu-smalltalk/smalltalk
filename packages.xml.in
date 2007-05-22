@@ -379,6 +379,9 @@
 
 <package>
   <name>Parser</name>
+  <sunit>STInST.Tests.TestStandardRewrites</sunit>
+  <prereq>SUnit</prereq>
+
   <namespace>STInST</namespace>
   <filein>RBToken.st</filein>
   <filein>RBParseNodes.st</filein>
@@ -393,6 +396,8 @@
   <filein>STLoaderObjs.st</filein>
   <filein>STLoader.st</filein>
 
+  <filein>RewriteTests.st</filein>
+
   <directory>compiler</directory>
 
   <file>ParseTreeSearcher.st</file>
@@ -400,13 +405,14 @@
   <file>RBParseNodes.st</file>
   <file>RBParser.st</file>
   <file>RBToken.st</file>
-  <filein>OrderedSet.st</filein>
+  <file>OrderedSet.st</file>
   <file>STCompLit.st</file>
   <file>STCompiler.st</file>
   <file>STDecompiler.st</file>
   <file>STLoader.st</file>
   <file>STLoaderObjs.st</file>
   <file>STSymTable.st</file>
+  <file>RewriteTests.st</file>
 </package>
 
 <package>

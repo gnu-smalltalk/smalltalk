@@ -1,3 +1,9 @@
+2007-05-22  Stephen Compall  <scompall@nocandysw.com>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/RewriteTests.st: New.
+	* compiler/ParseTreeSearcher.st: Fix two bugs.
+
 2007-05-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/STLoader.st: Update for class shapes, add new methods.

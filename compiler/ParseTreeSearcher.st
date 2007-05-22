@@ -762,7 +762,7 @@ lookForMoreMatchesInContext: oldContext
 	(key isString not and: [key recurseInto]) ifTrue: [
 	    "Of course, the following statement does nothing without the `deepCopy'
 	     which fixes the bug."
-	    newValue := oldContext at: key put: value "deepCopy <<<".
+	    newValue := oldContext at: key put: value deepCopy "<<<".
 	    self visitNodes: newValue
 	         onMatch: [:newValue |
 		     oldContext at: key put: newValue]]]! !
@@ -845,7 +845,7 @@ searchCascadeNodeMessage: aMessageNode messagesTo: newMessages
 	ifFalse: [newMessages add:
 		      (newNode isMessage ifTrue: [newNode]
 					 ifFalse: [Warning signal: 'Cannot replace message node inside of cascaded node with non-message node'.
-					           "answer := nil. <<<"
+					           answer := nil. "<<<"
 						   aMessageNode])].
     ^answer!
 

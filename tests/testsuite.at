@@ -69,6 +69,7 @@ AT_DIFF_TEST([strcat.st])
 
 AT_BANNER([Basic packages.])
 AT_PACKAGE_TEST([SUnit])
+AT_PACKAGE_TEST([Parser])
 
 AT_BANNER([ANSI compliancy tests.])
 AT_ANSI_TEST([ArrayANSITest])
