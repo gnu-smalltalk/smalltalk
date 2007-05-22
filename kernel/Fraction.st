@@ -92,6 +92,8 @@ numerator
     (aNumber generality = self generality)
 	ifFalse: [^self retryMultiplicationCoercing: aNumber].
 
+    aNumber numerator = 0 ifTrue: [ ^aNumber ].
+    self numerator = 0 ifTrue: [ ^self ].
     num := numerator * aNumber numerator.
     den := denominator * aNumber denominator.
 
@@ -167,6 +169,8 @@ numerator
     (aNumber generality = self generality)
 	ifFalse: [^self retryDivisionCoercing: aNumber].
 
+    aNumber numerator = 0 ifTrue: [ ^self zeroDivide ].
+    self numerator = 0 ifTrue: [ ^self ].
     num := numerator * aNumber denominator.
     den := denominator * aNumber numerator.
     gcd := (numerator gcd: aNumber numerator) * 

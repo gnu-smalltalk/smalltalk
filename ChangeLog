@@ -1,3 +1,7 @@
+2007-05-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Fraction.st: Fix multiplication/division by zero.
+
 2007-05-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PipeStream.st: New.
