@@ -667,7 +667,7 @@ at_help_all="1;testsuite.at:27;arrays.st;base;
 39;testsuite.at:67;sieve.st;base;
 40;testsuite.at:68;strcat.st;base;
 41;testsuite.at:71;SUnit;SUnit;
-42;testsuite.at:72;Parser;SUnit SUnit;
+42;testsuite.at:72;Parser;Parser SUnit;
 43;testsuite.at:75;ArrayANSITest;ANSI SUnit;
 44;testsuite.at:76;ArrayFactoryANSITest;ANSI SUnit;
 45;testsuite.at:77;BagANSITest;ANSI SUnit;
@@ -733,10 +733,10 @@ at_help_all="1;testsuite.at:27;arrays.st;base;
 105;testsuite.at:137;WriteStreamFactoryANSITest;ANSI SUnit;
 106;testsuite.at:138;ZeroDivideANSITest;ANSI SUnit;
 107;testsuite.at:139;ZeroDivideFactoryANSITest;ANSI SUnit;
-108;testsuite.at:142;Continuations;SUnit SUnit;
-109;testsuite.at:143;DhbNumericalMethods;SUnit SUnit;
+108;testsuite.at:142;Continuations;Continuations SUnit;
+109;testsuite.at:143;DhbNumericalMethods;DhbNumericalMethods SUnit;
 110;testsuite.at:144;GDBM;GDBM SUnit;
-111;testsuite.at:145;MD5;SUnit SUnit;
+111;testsuite.at:145;MD5;MD5 SUnit;
 112;testsuite.at:146;ZLib;ZLib SUnit;
 "
 

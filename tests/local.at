@@ -43,7 +43,7 @@ dnl AT_PACKAGE_TEST([PACKAGE], [XFAILS])
 dnl ------------------------------------
 m4_define([AT_PACKAGE_TEST], [
   AT_SETUP([$1])
-  AT_KEYWORDS([m4_if([$1], [SUnit], [], [SUnit ])SUnit])
+  AT_KEYWORDS([m4_if([$1], [SUnit], [], [$1 ])SUnit])
   $2
   AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st -p $1], [], [], [ignore])
   AT_CLEANUP
