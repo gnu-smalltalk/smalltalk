@@ -701,7 +701,7 @@ instVarNames
 !
 
 instanceVariableNames: ivn
-    instVars := (TokenStream on: ivn) contents.
+    instVars := ivn subStrings.
 !
 
 superclass
@@ -990,9 +990,9 @@ superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
     shape := sh.
     environment := loader currentNamespace.
     class := LoadedMetaclass new for: self.
-    instVars := (TokenStream on: ivn) contents.
-    classVars := (TokenStream on: cvn) contents.
-    sharedPools := (TokenStream on: pd) contents.
+    instVars := ivn subStrings.
+    classVars := cvn subStrings.
+    sharedPools := pd subStrings.
     superclass addSubclass: self.
     environment at: name put: self.
 ! !

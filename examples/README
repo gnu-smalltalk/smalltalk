@@ -99,6 +99,8 @@ William Lount	which fields are more important and which must be sorted in
 Tokenizer.st	An abstract base class for lexical analyzers.
 by me/sbb
 
+TokenStream.st  Formerly a part of the class hierarchy.  Now replaced with
+by sbb          CharacterArray>>#subStrings.
 
 The `modules' directory contains some of the simplest packages that one could
 write for GNU Smalltalk, but nevertheless useful and interesting...  currently

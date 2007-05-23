@@ -1,3 +1,10 @@
+2007-05-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Class.st: Don't use TokenStream.
+	* kernel/Metaclass.st: Don't use TokenStream.
+	* kernel/TokenStream.st: Move it...
+	* examples/TokenStream.st: ... here.
+
 2007-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Fraction.st: Fix multiplication/division by zero.

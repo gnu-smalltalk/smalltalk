@@ -162,7 +162,6 @@ OOP _gst_sym_link_class = NULL;
 OOP _gst_symbol_class = NULL;
 OOP _gst_system_dictionary_class = NULL;
 OOP _gst_time_class = NULL;
-OOP _gst_token_stream_class = NULL;
 OOP _gst_true_class = NULL;
 OOP _gst_undefined_object_class = NULL;
 OOP _gst_unicode_character_class = NULL;
@@ -588,10 +587,6 @@ static const class_definition class_info[] = {
   {&_gst_stream_class, &_gst_object_class,
    ISP_FIXED, false, 0,
    "Stream", NULL, NULL, NULL },
-
-  {&_gst_token_stream_class, &_gst_stream_class,
-   ISP_FIXED, false, 1,
-   "TokenStream", "charStream", NULL, NULL },
 
   {&_gst_positionable_stream_class, &_gst_stream_class,
    ISP_FIXED, false, 4,

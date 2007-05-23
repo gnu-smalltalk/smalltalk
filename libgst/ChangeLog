@@ -1,3 +1,9 @@
+2007-05-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lib.c: Remove TokenStream.st.  Fix pasto.
+	* libgst/dict.c: Remove TokenStream and _gst_token_stream_class.
+	* libgst/dict.h: Remove _gst_token_stream_class.
+
 2007-05-07  Stephen Compall  <s11@member.fsf.org>
 
 	* libgst/sysdep.c: Fix return value of anon_mmap_commit.

@@ -445,9 +445,8 @@ initMetaclass: superclass
 !
 
 parsePools: aString in: aNamespace
-    | stream tokens |
-    stream := TokenStream on: aString.
-    tokens := stream contents.
+    | tokens |
+    tokens := aString subStrings asArray.
     ^tokens collect: [ :poolName |
 	(poolName substrings: $.) inject: aNamespace into: [ :namespace :key |
 	    self validateIdentifier: key.

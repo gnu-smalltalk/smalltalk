@@ -450,9 +450,8 @@ parseInstanceVariableString: variableString
 !
 
 parseVariableString: aString
-    | stream tokens |
-    stream := TokenStream on: aString.
-    tokens := stream contents.
+    | tokens |
+    tokens := aString subStrings asArray.
     tokens do: [ :token | self validateIdentifier: token ].
     ^tokens
 ! !

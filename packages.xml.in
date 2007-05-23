@@ -624,6 +624,7 @@
 <disabled-package>
   <name>Examples</name>
   <directory>examples</directory>
+  <file>TokenStream.st</file>
   <file>LazyCollection.st</file>
   <file>Man.st</file>
   <file>Tetris.st</file>
@@ -719,7 +720,6 @@
   <file>FileStream.st</file>
   <file>Security.st</file>
   <file>OrderColl.st</file>
-  <file>TokenStream.st</file>
   <file>CFuncs.st</file>
   <file>Float.st</file>
   <file>PkgLoader.st</file>

@@ -360,7 +360,6 @@ static const char standard_files[] = {
   "WriteStream.st\0"
   "RWStream.st\0"
   "ByteStream.st\0"
-  "TokenStream.st\0"
   "UndefObject.st\0"
   "ProcSched.st\0"
   "Delay.st\0"
@@ -734,7 +733,7 @@ load_standard_files (void)
       char *fullFileName = find_kernel_file (fileName, "", KERNEL_USER_DIR);
       if (!fullFileName)
 	{
-	  _gst_errorf ("can't find system file '%s'", fullFileName);
+	  _gst_errorf ("can't find system file '%s'", fileName);
 	  _gst_errorf ("image bootstrap failed, use option --kernel-directory");
 	  return 1;
 	}

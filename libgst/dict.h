@@ -379,7 +379,6 @@ extern OOP _gst_sym_link_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_symbol_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_system_dictionary_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_time_class ATTRIBUTE_HIDDEN;
-extern OOP _gst_token_stream_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_true_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_undefined_object_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_unicode_character_class ATTRIBUTE_HIDDEN;

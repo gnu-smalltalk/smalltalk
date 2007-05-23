@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001
+| Copyright 1988,92,94,95,99,2000,2001,2007
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -40,8 +40,7 @@ Stream subclass: #TokenStream
 !
 
 TokenStream comment:
-'I am not a typical part of the Smalltalk kernel class hierarchy.
-I operate on a stream of characters and return distinct whitespace-delimited
+'I operate on a stream of characters and return distinct whitespace-delimited
 groups of characters; I am used to parse the parameters of class-creation
 methods.
 
