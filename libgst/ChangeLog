@@ -1,3 +1,7 @@
+2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.c: Don't trust {FLT,DBL,LDBL}_DIG.
+
 2007-05-07  Stephen Compall  <s11@member.fsf.org>
 
 	* libgst/sysdep.c: Fix return value of anon_mmap_commit.

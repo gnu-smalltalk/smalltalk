@@ -1099,7 +1099,7 @@ init_c_symbols ()
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CDoubleNaN"),
 		    floatd_new ((double) NAN));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CDoubleDigits"),
-		    FROM_INT (DBL_DIG));
+		    FROM_INT (ceil (DBL_MANT_DIG * 0.301029995663981)));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CDoubleBinaryDigits"),
 		    FROM_INT (DBL_MANT_DIG));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CDoubleMinExp"),
@@ -1120,7 +1120,7 @@ init_c_symbols ()
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CFloatMax"),
 		    floate_new (FLT_MAX));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CFloatDigits"),
-		    FROM_INT (FLT_DIG));
+		    FROM_INT (ceil (FLT_MANT_DIG * 0.301029995663981)));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CFloatBinaryDigits"),
 		    FROM_INT (FLT_MANT_DIG));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CFloatMinExp"),
@@ -1141,7 +1141,7 @@ init_c_symbols ()
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CLongDoubleMax"),
 		    floatq_new (LDBL_MAX));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CLongDoubleDigits"),
-		    FROM_INT (LDBL_DIG));
+		    FROM_INT (ceil (LDBL_MANT_DIG * 0.301029995663981)));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CLongDoubleBinaryDigits"),
 		    FROM_INT (LDBL_MANT_DIG));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CLongDoubleMinExp"),
