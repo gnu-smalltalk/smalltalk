@@ -171,26 +171,31 @@ Eval [
 
 "Fun with printing"
   
-Float extend [
-    test [
-        (((Behavior evaluate: self printString) = self) -> self) printNl
+Float class extend [
+    test: bytes [
+	| b f |
+	b := Memory bigEndian ifTrue: [ bytes reverse ] ifFalse: [ bytes ].
+	f := self new: b size.
+	1 to: f size do: [ :i | f at: i put: (b at: i) ].
+        (true->f) printNl.
+	^f
     ]
 ]
 
-Eval [ 1d16 test ]
-Eval [ 1e16 test ]
-Eval [ 1.2345d16 test ]
-Eval [ 1.2345e16 test ]
-Eval [ 1.25 test ]
-Eval [ 10.0 test ]
-Eval [ (20 - 2.2325251) test ]
-Eval [ 0.12345 test ]
-Eval [ 0.12345d-8 test ]
-Eval [ 0.12345e-8 test ]
-Eval [ 0.83205029433784 test ]
-Eval [ 0.832050294337844 test ]
-Eval [ 0.55470019622523 test ]
-Eval [ 0.554700196225229 test ]
+Eval [ FloatD test: #[0 128 224 55 121 195 65 67] ]
+Eval [ FloatE test: #[202 27 14 90] ]
+Eval [ FloatD test: #[0 72 224 37 219 237 69 67] ]
+Eval [ FloatE test: #[217 110 47 90] ]
+Eval [ FloatD test: #[0 0 0 0 0 0 244 63] ]
+Eval [ FloatD test: #[0 0 0 0 0 0 36 64] ]
+Eval [ FloatD test: #[57 0 44 60 121 196 49 64] ]
+Eval [ FloatD test: #[123 242 176 80 107 154 191 63] ]
+Eval [ FloatD test: #[78 250 91 111 99 53 21 62] ]
+Eval [ FloatE test: #[27 171 169 48] ]
+Eval [ FloatD test: #[191 220 89 240 39 160 234 63] ]
+Eval [ FloatD test: #[227 220 89 240 39 160 234 63] ]
+Eval [ FloatD test: #[157 232 59 160 26 192 225 63] ]
+Eval [ FloatD test: #[148 232 59 160 26 192 225 63] ]
 
 
 "Fun with rounding"

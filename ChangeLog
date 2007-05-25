@@ -1,5 +1,9 @@
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
+	* tests/floatmath.st: Test printing on hexadecimal patterns.
+
+2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	* examples/gdbmtests.st: Remove created files.
 
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
