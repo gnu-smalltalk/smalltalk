@@ -323,23 +323,6 @@ extend
         withArguments: {self name asSymbol. ''. ''. ''. 'Extensions'}
 !
 
-shape: shape
-    "Give the provided shape to the receiver's instances.
-     The shape can be nil, or one of #byte #int8 #character #short
-     #ushort #int #uint #int64 #uint64 #utf32 #float #double or #pointer."
-
-    self shape == shape ifTrue: [ ^false ].
-    shape isNil
-	ifTrue: [ ^self updateInstanceVars: self allInstVarNames shape: nil ].
-
-    self isVariable
-	ifTrue: [
-            SystemExceptions.MutationError
-                signal: 'Cannot change shape of variable class' ].
-
-    "Changing from fixed to variable.  No need to mutate the instances."
-    self setInstanceSpec: shape instVars: self allInstVarNames size!
-
 subclass: classNameString
     "Define a subclass of the receiver with the given name.  If the class
      is already defined, don't modify its instance or class variables
@@ -450,7 +433,7 @@ variableWordSubclass: classNameString
 	    environment: Namespace current
 	    subclassOf: self
 	    instanceVariableNames: stringInstVarNames
-	    shape: (CSymbols.CLongSize = 4 ifTrue: [ #uint ] ifFalse: [ #uint64 ])
+	    shape: #word
 	    classVariableNames: stringOfClassVarNames
 	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString

@@ -1,5 +1,18 @@
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/gdbmtests.st: Remove created files.
+
+2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Add #shape:.  Support #word shape.
+	* kernel/Builtins.st: Add #shape: and instanceVariableNames: for
+	Behavior.
+	* kernel/Class.st: Remove #shape:.  Use #word shape.
+	* kernel/Metaclass.st: Support #word shape.
+	* kernel/UndefObject.st: Use #word shape.
+
+2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Collection.st: Don't use #basicSize in #copyWith:.
 	* kernel/Dictionary.st: Replace #primSize with #capacity.
 	* kernel/HashedColl.st: Replace #primSize with #capacity.

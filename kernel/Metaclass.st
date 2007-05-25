@@ -239,7 +239,10 @@ name: className
     "Private - create a full featured class and install it, or change an
      existing one"
 
-    | aClass needToRecompileMetaclasses needToRecompileClasses |
+    | aClass realShape needToRecompileMetaclasses needToRecompileClasses |
+    realShape := shape == #word
+        ifTrue: [ CSymbols.CLongSize = 4 ifTrue: [ #uint ] ifFalse: [ #uint64 ] ]
+        ifFalse: [ shape ].
 
     "Look for an existing metaclass"
     aClass := aNamespace hereAt: className ifAbsent: [ nil ].
@@ -248,14 +251,14 @@ name: className
 	    environment: aNamespace
 	    subclassOf: superclass
 	    instanceVariableArray: variableArray
-	    shape: shape
+	    shape: realShape
 	    classPool: classVarDict
 	    poolDictionaries: sharedPoolNames
 	    category: categoryName
     ].
 
-    (aClass isVariable & shape notNil) ifTrue: [
-	aClass shape == shape ifFalse: [
+    (aClass isVariable & realShape notNil) ifTrue: [
+	aClass shape == realShape ifFalse: [
 	    SystemExceptions.MutationError
 		signal: 'Cannot change shape of variable class' ]
     ].
@@ -287,13 +290,13 @@ name: className
 
     (needToRecompileClasses := variableArray ~= aClass allInstVarNames
 	| needToRecompileMetaclasses) 
-	| (aClass shape ~~ shape)
+	| (aClass shape ~~ realShape)
 	    ifTrue: [
 	        aClass instanceCount > 0
 		    ifTrue: [ ObjectMemory globalGarbageCollect ].
 		aClass
 		    updateInstanceVars: variableArray 
-		    shape: shape
+		    shape: realShape
 	    ].
 
     aClass sharedPoolDictionaries isNil 

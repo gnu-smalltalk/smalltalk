@@ -169,13 +169,17 @@ Class extend [
         comment := aString
     ]
 
-    shape: aSymbol [
-    ]
-    
     import: aString [
     ]
 ]
     
+Behavior extend [
+    instanceVariableNames: ivn [
+    ]
+    
+    shape: aSymbol [
+    ]
+]
 
 UndefinedObject extend [
     subclass: classNameString [

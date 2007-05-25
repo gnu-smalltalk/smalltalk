@@ -341,7 +341,7 @@ variableWordSubclass: classNameString
 	    environment: Namespace current
 	    subclassOf: self
 	    instanceVariableNames: stringInstVarNames
-	    shape: (CSymbols.CLongSize = 4 ifTrue: [ #uint ] ifFalse: [ #uint64 ])
+	    shape: #word
 	    classVariableNames: stringOfClassVarNames
 	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString

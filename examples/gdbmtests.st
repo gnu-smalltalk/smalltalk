@@ -43,6 +43,10 @@ setUp
     self cInterfaceSetup.
     self stInterfaceSetup!
 
+tearDown
+    (File exists: 'test-c.gdbm') ifTrue: [ File remove: 'test-c.gdbm' ].
+    (File exists: 'test-st.gdbm') ifTrue: [ File remove: 'test-st.gdbm' ]!
+
 cInterfaceSetup
     | database key value |
     (File exists: 'test-c.gdbm') ifTrue: [ File remove: 'test-c.gdbm' ].

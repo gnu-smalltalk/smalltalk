@@ -913,6 +913,28 @@ shapes
        #double #utf32 nil nil nil #pointer)
 !
 
+shape: shape
+    "Give the provided shape to the receiver's instances.
+     The shape can be nil, or one of #byte #int8 #character #short
+     #ushort #int #uint #int64 #uint64 #utf32 #float #double or #pointer."
+
+    | realShape |
+    realShape := shape == #word
+	ifTrue: [ CSymbols.CLongSize = 4 ifTrue: [ #uint ] ifFalse: [ #uint64 ] ]
+	ifFalse: [ shape ].
+
+    self shape == realShape ifTrue: [ ^false ].
+    realShape isNil
+	ifTrue: [ ^self updateInstanceVars: self allInstVarNames shape: nil ].
+
+    self isVariable
+	ifTrue: [
+            SystemExceptions.MutationError
+                signal: 'Cannot change shape of variable class' ].
+
+    "Changing from fixed to variable.  No need to mutate the instances."
+    self setInstanceSpec: realShape instVars: self allInstVarNames size!
+
 shape
     self isVariable ifFalse: [ ^nil ].
     ^self shapes at: (instanceSpec bitAnd: 15) + 1
