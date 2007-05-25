@@ -163,7 +163,10 @@ name: className
      superclass or shape of an existing one; instance variable names,
      class variable names and pool dictionaries are left untouched."
 
-    | aClass |
+    | aClass variableArray |
+    variableArray := superclass notNil
+        ifTrue: [ superclass allInstVarNames ]
+        ifFalse: [ #() ].
 
     "Look for an existing metaclass"
     aClass := aNamespace hereAt: className ifAbsent: [ nil ].
@@ -171,17 +174,19 @@ name: className
 	^self newMeta: className
 	    environment: aNamespace
 	    subclassOf: superclass
-	    instanceVariableArray: superclass allInstVarNames
+	    instanceVariableArray: variableArray
 	    shape: nil
 	    classPool: BindingDictionary new
 	    poolDictionaries: #()
 	    category: nil
     ].
 
+    variableArray := variableArray, aClass instVarNames.
+
     ^self name: className
 	environment: aNamespace
 	subclassOf: superclass
-	instanceVariableArray: superclass allInstVarNames, aClass instVarNames
+	instanceVariableArray: variableArray
 	shape: aClass shape
 	classPool: aClass classPool
 	poolDictionaries: aClass sharedPoolDictionaries

@@ -1,3 +1,9 @@
+2007-05-25  Daniele Sciascia  <sciasciad@lu.unisi.ch>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/UndefObject.st: Fix bug in #subclass:
+	* kernel/Metaclass.st: Fix bug in sending #subclass: to nil
+
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/floatmath.st: Test printing on hexadecimal patterns.

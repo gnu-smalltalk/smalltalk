@@ -292,8 +292,7 @@ subclass: classNameString
     meta := self metaclassFor: classNameString.
     ^meta name: classNameString
           environment: Namespace current
-          subclassOf: self
-          shape: nil!
+          subclassOf: self!
 
 variableSubclass: classNameString
     instanceVariableNames: stringInstVarNames
