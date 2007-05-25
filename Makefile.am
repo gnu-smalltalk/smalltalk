@@ -188,7 +188,7 @@ install-data-hook: gst-package
 uninstall-local:: gst-package
 	./gst-package --uninstall --destdir="$(DESTDIR)" packages.xml
 	-rm -f $(DESTDIR)$(pkgdatadir)/packages.xml
-	-rm -f $(DESTDIR)$(pkgdatadir)/gst.im
+	-rm -f $(DESTDIR)$(imagedir)/gst.im
 
 installcheck-local:
 	if test -n "$(DESTDIR)"; then :; else \
