@@ -445,8 +445,7 @@ copyReplacing: targetObject withObject: newObject
 copyWith: newElement
     "Answer a copy of the receiver to which newElement is added"
 
-    ^(self copyEmpty: self basicSize + 1)
-       addAll: self;
+    ^self copy
        add: newElement;
        yourself
 !

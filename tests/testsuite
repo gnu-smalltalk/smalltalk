@@ -1795,7 +1795,7 @@ $at_traceon
     at_setup_line='testsuite.at:34'
     at_desc="floatmath.st"
     $at_quiet $ECHO_N "  8: floatmath.st                                   $ECHO_C"
-    at_xfail=yes
+    at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
       echo "8. testsuite.at:34: testing ..."

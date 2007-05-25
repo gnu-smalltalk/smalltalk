@@ -1,5 +1,12 @@
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Collection.st: Don't use #basicSize in #copyWith:.
+	* kernel/Dictionary.st: Replace #primSize with #capacity.
+	* kernel/HashedColl.st: Replace #primSize with #capacity.
+	* kernel/LookupTable.st: Replace #primSize with #capacity.
+
+2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Test.st: Fix error output.
 
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
