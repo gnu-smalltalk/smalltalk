@@ -1431,8 +1431,8 @@ _gst_shared_pool_dictionary (OOP class_oop)
 
 
 OOP
-_gst_find_shared_pool_variable (OOP poolOOP,
-				OOP symbol)
+_gst_namespace_association_at (OOP poolOOP,
+			       OOP symbol)
 {
   OOP assocOOP;
   gst_namespace pool;
@@ -1456,6 +1456,17 @@ _gst_find_shared_pool_variable (OOP poolOOP,
       pool = (gst_namespace) OOP_TO_OBJ (poolOOP);
       poolOOP = pool->superspace;
     }
+}
+
+OOP
+_gst_namespace_at (OOP poolOOP,
+		   OOP symbol)
+{
+  OOP assocOOP = _gst_namespace_association_at (poolOOP, symbol);
+  if (IS_NIL (assocOOP))
+    return assocOOP;
+  else
+    return ASSOCIATION_VALUE (assocOOP);
 }
 
 

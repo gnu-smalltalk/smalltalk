@@ -1,3 +1,17 @@
+2007-05-25  Daniele Sciascia  <sciascid@lu.unisi.ch>
+
+	* compiler/RBFormatter.st: fix various bugs.  Reformat method comments.
+	Support varying the overall indentation.
+	* compiler/RBParseNodes.st: store category in RBMethodNode.
+	* compiler/RBParser.st: support storing a method category.  Rewrite
+	parseDoits to deal with comments correctly (almost).
+	* compiler/RBToken.st: fix bug in handling of #{...}.
+	* compiler/STLoader.st: Replace #unknownTo:selector:arguments:
+	with #unknown:.  Store a proxy for the nil superclass.  Add various
+	methods used by the converter.
+	* compiler/STLoaderObjs.st: Add ProxyNilClass.  Store selector in
+	LoadedMethod.  Add various #copyEmpty: methods.
+
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/ParseTreeSearcher.st: Add #capacity to RBSmallDictionary.

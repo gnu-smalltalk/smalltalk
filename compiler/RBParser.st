@@ -17,7 +17,7 @@
 
 
 Object subclass: #RBParser
-    instanceVariableNames: 'scanner currentToken nextToken errorBlock tags source '
+    instanceVariableNames: 'scanner currentToken nextToken errorBlock tags source methodCategory'
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Refactory-Parser'!
@@ -25,6 +25,12 @@ Object subclass: #RBParser
 
 
 !RBParser methodsFor: 'accessing'!
+
+methodCategory
+    ^methodCategory !
+    
+methodCategory: aCategory
+    methodCategory := aCategory !
 
 errorBlock: aBlock 
     errorBlock := aBlock.
@@ -255,14 +261,34 @@ parseDoits
     " Parses the stuff to be executed until a
         ! <class expression> methodsFor: <category string> ! "
 
-    | node |
+    | node method start stop comments asd |
 
     [
-	self atEnd ifTrue: [ ^false ].
+		self atEnd ifTrue: [ ^false ].
+		comments := scanner getComments.
+		start := comments isNil
+	    	ifTrue: [ asd := true. currentToken start - 2 ]
+	    	ifFalse: [ asd := false. comments first first - 2 ].
+		
+		tags := nil.
         node := self parseStatements: false.
+        comments notNil
+            ifTrue: [ node comments isNil ifTrue: [ node comments: #() ].
+                	  node comments: comments, node comments ].
+
+        "One -1 accounts for base-1 vs. base-0 (as above), the
+         other drops the bang because we have a one-token lookahead."
+		stop := currentToken start - 2.
+
+        method := RBMethodNode selectorParts: #() arguments: #().
+        method source: (scanner stream segmentFrom: start to: stop).
+        node parent: method.
+
         self step.           "gobble doit terminating bang"
-	node statements size > 0 and: [ self evaluate: node ]
+		node statements size > 0 and: [ self evaluate: node ]
+		
     ]   whileFalse.
+
     ^true
 !
 
@@ -311,6 +337,7 @@ parseMethod
     self addCommentsTo: methodNode.
     methodNode body: (self parseStatements: true).
     methodNode tags: tags.
+    methodNode category: methodCategory.
     ^methodNode!
 
 parseMethodDefinitionList
@@ -552,13 +579,20 @@ parseExpression: aString onError: aBlock
     ^(node statements size == 1 and: [node temporaries isEmpty])
 	ifTrue: [node statements first]
 	ifFalse: [node]!
-
+    
 parseMethod: aString 
-    ^self parseMethod: aString onError: nil!
+    ^self parseMethod: aString category: nil onError: nil!
+    
+parseMethod: aString category: aCategory
+    ^self parseMethod: aString category: aCategory onError: nil!
 
 parseMethod: aString onError: aBlock 
+    ^self parseMethod: aString category: nil onError: aBlock!
+    
+parseMethod: aString category: aCategory onError: aBlock 
     | parser |
     parser := self new.
+    parser methodCategory: aCategory.
     parser errorBlock: aBlock.
     parser initializeParserWith: aString type: #on:errorBlock:.
     ^parser parseMethod: aString!

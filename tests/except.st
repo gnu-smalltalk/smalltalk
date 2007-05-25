@@ -31,7 +31,7 @@
 Notification subclass: MyException [
     <category: 'testing'>
 
-    Class protocol [
+    MyException class [
 	| count |
 
 	count [ ^count ]

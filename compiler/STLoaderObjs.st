@@ -127,6 +127,15 @@ STClassLoader as a superclass while parsing source code.  Proxying
 preexisting classes is necessary to correctly augment their subclasses
 with the new classes, and to handle extension methods.'!
 
+ProxyClass subclass: #ProxyNilClass
+        instanceVariableNames: ''
+        classVariableNames: ''
+        poolDictionaries: ''
+        category: 'System-Compiler'!
+
+ProxyClass comment:
+'This class represent a proxy for the nil fake superclass.'!
+
 PseudoBehavior subclass: #LoadedBehavior
         instanceVariableNames: 'instVars superclass methods comment '
         classVariableNames: ''
@@ -159,7 +168,7 @@ LoadedBehavior comment:
 by an STClassLoader.'!
 
 Object subclass: #LoadedMethod
-        instanceVariableNames: 'source category'
+        instanceVariableNames: 'source category selector'
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -689,7 +698,13 @@ doesNotUnderstand: aMessage
 setProxy: aClass for: aSTClassLoader
     self initialize: aSTClassLoader.
     proxy := aClass.
-    self setSubclasses: aClass subclasses copy.
+    self setSubclasses: OrderedCollection new.
+! !
+
+!ProxyNilClass methodsFor: 'accessing'!
+
+nameIn: aNamespace
+    ^'nil'
 ! !
 
 !LoadedBehavior methodsFor: 'accessing'!
@@ -999,8 +1014,11 @@ superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
 
 !LoadedMethod class methodsFor: 'instance creation'!
 
-category: category source: source
-    ^self new category: category source: source
+category: category source: source selector: selector
+    ^self new
+	    category: category
+	    source: source
+	    selector: selector
 !
 
 !LoadedMethod methodsFor: 'accessing'!
@@ -1011,6 +1029,10 @@ methodCategory
 
 methodSourceCode
     ^source
+!
+
+selector
+    ^selector
 !
 
 methodSourceString
@@ -1024,9 +1046,10 @@ discardTranslation
 
 !LoadedMethod methodsFor: 'initializing'!
 
-category: c source: s
+category: c source: s selector: sel
     category := c.
     source := s.
+    selector := sel.
 ! !
 
 !PseudoNamespace methodsFor: 'abstract'!
@@ -1062,11 +1085,16 @@ storeOn: aStream
 copyEmpty: newSize
     ^(super copyEmpty: newSize)
 	setLoader: loader;
+	setSubspaces: subspaces;
 	yourself
 !
 
 setLoader: aSTClassLoader
     loader := aSTClassLoader
+!
+
+setSubspaces: aSet
+    subspaces := aSet
 ! !
 
 !PseudoNamespace methodsFor: 'accessing'!
@@ -1097,6 +1125,13 @@ name: aSymbol in: aDictionary for: aSTClassLoader
 	setLoader: aSTClassLoader;
 	environment: aDictionary;
 	yourself)
+! !
+
+!LoadedNamespace methodsFor: 'initializing'!
+copyEmpty: newSize
+    ^(super copyEmpty: newSize)
+        name: name;
+    	yourself
 ! !
  
 !LoadedNamespace methodsFor: 'accessing'!

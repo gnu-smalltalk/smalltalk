@@ -33,7 +33,7 @@ Object subclass: ObjectsTest [
 
     Messages := nil.
 
-    Class protocol [
+    ObjectsTest class [
 	testCompaction [
 	    Messages := SortedCollection new.
 	    ObjectMemory compact.

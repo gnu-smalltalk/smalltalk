@@ -1,3 +1,16 @@
+2007-05-25  Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
+
+	* libgst/dict.c: Turn _gst_find_shared_pool_variable into
+	_gst_namespace_association_at, add _gst_namespace_at.
+	* libgst/dict.h: Declare it.
+	* libgst/gst-parse.c: Support attributes both before and after
+	temporaries.  Improve error recovery.  Set the correct namespace
+	when extending a class.  Fix error locations.  Support class
+	definition in a namespace definition.  Replace "Class protocol" with
+	"Foo class".  Support subclassing nil.  Lookup classes in the
+	superspaces too.
+	* libgst/sym.c: Use _gst_namespace_association_at.
+
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Don't trust {FLT,DBL,LDBL}_DIG.

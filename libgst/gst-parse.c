@@ -97,7 +97,8 @@ static int filprintf (Filament *fil,
 /* Grammar productions.  */
 
 static void parse_chunks (gst_parser *p);
-static void parse_doit (gst_parser *p);
+static void parse_doit (gst_parser *p,
+			mst_Boolean accept_bang);
 static mst_Boolean parse_scoped_definition (gst_parser *p, 
 					    tree_node first_stmt);
 
@@ -121,7 +122,8 @@ static void parse_method (gst_parser *p,
 static tree_node parse_message_pattern (gst_parser *p);
 static tree_node parse_keyword_variable_list (gst_parser *p);
 static tree_node parse_variable (gst_parser *p);
-static tree_node parse_attributes (gst_parser *p);
+static tree_node parse_attributes (gst_parser *p,
+				  tree_node prev_attrs);
 static tree_node parse_attribute (gst_parser *p);
 static tree_node parse_temporaries (gst_parser *p,
 				    mst_Boolean implied_pipe);
@@ -352,7 +354,7 @@ parse_chunks (gst_parser *p)
           if (p->state == PARSE_METHOD_LIST)
 	    parse_method_list (p);
           else
-	    parse_doit (p);
+	    parse_doit (p, true);
         }
       _gst_pop_temporaries_dictionary (oldTemporaries);
     }
@@ -435,7 +437,7 @@ recover_error (gst_parser *p)
    | empty */
 
 static void
-parse_doit (gst_parser *p)
+parse_doit (gst_parser *p, mst_Boolean accept_bang)
 {
   tree_node statement = NULL;
   mst_Boolean caret;
@@ -443,7 +445,7 @@ parse_doit (gst_parser *p)
   if (token (p, 0) == '|')
     parse_temporaries (p, false);
 
-  if (token (p, 0) == EOF)
+  if (token (p, 0) == EOF && accept_bang)
     return;
 
   caret = lex_skip_if (p, '^', false);
@@ -468,7 +470,8 @@ parse_doit (gst_parser *p)
 
   /* Do not lex until after _gst_free_tree, or we lose a token! */
   lex_skip_if (p, '.', false);
-  lex_skip_if (p, '!', false);
+  if (accept_bang)
+    lex_skip_if (p, '!', false);
 }
 
 
@@ -519,19 +522,40 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
   else if (first_stmt->nodeType == TREE_UNARY_EXPR
 	   && first_stmt->v_expr.selector == _gst_intern_string ("extend"))
     {
-      
-      if (receiver->nodeType == TREE_VARIABLE_NODE)
-	classOOP = parse_class (receiver);
+      OOP namespace_old = _gst_current_namespace;
+      OOP classOrMetaclassOOP = NULL;
+      mst_Boolean ret_value;
 
+      _gst_register_oop (namespace_old);
+      if (receiver->nodeType == TREE_VARIABLE_NODE)
+ 	{
+ 	  classOOP = parse_class (receiver);
+	  classOrMetaclassOOP = classOOP;
+ 	}
       else if (receiver->nodeType == TREE_UNARY_EXPR
 	       && receiver->v_expr.selector == _gst_intern_string ("class"))
-	{
-	  classOOP = parse_class (receiver->v_expr.receiver);
-	  classOOP = OOP_CLASS (classOOP);
-	}
+ 	{
+ 	  classOOP = parse_class (receiver->v_expr.receiver);
+	  classOrMetaclassOOP = OOP_CLASS (classOOP);
+ 	}	   
+      if (classOrMetaclassOOP != NULL) 
+ 	{ 
+ 	  OOP namespace_new = ((gst_class) OOP_TO_OBJ (classOOP))->environment; 
+	  
+	  /* When creating the image, current namespace is not available. */
+	  if (namespace_new != namespace_old)
+	    _gst_msg_sendf (NULL, "%v %o current: %o",
+			    _gst_namespace_class, namespace_new);
+	  
+ 	  ret_value = parse_class_definition (p, classOrMetaclassOOP);
 
-      if (classOOP != NULL)
-	return parse_class_definition (p, classOOP);
+	  if (namespace_new != namespace_old)
+	    _gst_msg_sendf (NULL, "%v %o current: %o",
+			    _gst_namespace_class, namespace_old);
+	  
+ 	  _gst_unregister_oop (namespace_old);
+ 	  return ret_value;
+ 	}
     }
 
   _gst_errorf_at (first_stmt->location.first_line, 
@@ -579,8 +603,9 @@ parse_namespace_definition (gst_parser *p, tree_node first_stmt)
       _gst_msg_sendf (NULL, "%v %o current: %o", 
 		      _gst_namespace_class, new_namespace);
       
-      parse_eval_definition (p);	
-      
+      while (token (p, 0) != ']' && token (p, 0) != EOF)
+        parse_doit (p, false);	
+
       _gst_msg_sendf (NULL, "%v %o current: %o",
 		      _gst_namespace_class, old_namespace);
       
@@ -755,16 +780,22 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 		  parse_scoped_method (p, classOOP);
 		  continue;
 		}
-	      else if (t3 == '['
-		       && strcmp (val (p, 0)->sval, "Class") == 0
-		       && strcmp (val (p, 1)->sval, "protocol") == 0)
+	      else if (t3 == '[' && strcmp (val (p, 1)->sval, "class") == 0)
 		{
 #if 0
 		  printf ("parse class protocol\n");
 #endif
 		  if (_gst_object_is_kind_of (classOOP, _gst_metaclass_class))
 		    {
-		      _gst_errorf ("already on class side, Class protocol invalid");
+		      _gst_errorf ("already on class side");
+		      _gst_had_error = true;
+		      continue;
+		    }
+		  else if (((gst_class) OOP_TO_OBJ (classOOP))->name
+			   != _gst_intern_string (val (p, 0)->sval))
+		    {
+		      _gst_errorf ("`%s class' invalid within %O",
+				   val (p, 0)->sval, classOOP);
 		      _gst_had_error = true;
 		      continue;
 		    }
@@ -785,7 +816,8 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 #if 0
 	      printf ("parse instance variables - ignore\n");
 #endif
-	      lex_consume (p, 2);	      
+	      lex_consume (p, 2);
+	      continue;
 	    }
 	  else if (t2 == IDENTIFIER) 
 	    {
@@ -868,11 +900,14 @@ parse_class (tree_node list)
 {
   const char* name;
   OOP currentOOP = _gst_current_namespace;
-	
+
+  if (strcmp (list->v_list.name, "nil") == 0)
+      return _gst_nil_oop;
+  
   do
     {
       name = list->v_list.name;
-      currentOOP = dictionary_at (currentOOP, _gst_intern_string (name));
+      currentOOP = _gst_namespace_at (currentOOP, _gst_intern_string (name));
 	
       if (currentOOP == _gst_nil_oop)
 	{
@@ -918,7 +953,7 @@ parse_namespace (tree_node list)
   while (list->v_list.next != NULL)
     {
       name = _gst_intern_string (list->v_list.name);	
-      current_namespace = dictionary_at (current_namespace, name);
+      current_namespace = _gst_namespace_at (current_namespace, name);
 		
       if (current_namespace == _gst_nil_oop)
 	{
@@ -997,7 +1032,7 @@ parse_method_list (gst_parser *p)
 static void
 parse_method (gst_parser *p, int at_end)
 {
-  tree_node pat, temps, attrs, stmts;
+  tree_node pat, temps, stmts, attrs = NULL;
   YYLTYPE current_pos;
   tree_node method;
 
@@ -1006,8 +1041,14 @@ parse_method (gst_parser *p, int at_end)
   if (at_end == ']')
     lex_skip_mandatory (p, '[');
 
+  if (token (p, 0) == '<')
+    attrs = parse_attributes (p, NULL);
+
   temps = parse_temporaries (p, false);
-  attrs = parse_attributes (p);
+
+  if (token (p, 0) == '<')
+    attrs = parse_attributes (p, attrs);
+
   stmts = parse_statements (p, NULL, true);
 
   /* Don't lex until _gst_free_tree, or we lose a token.  */
@@ -1121,18 +1162,16 @@ parse_variable (gst_parser *p)
    | KEYWORD binary_expr */
 
 static tree_node
-parse_attributes (gst_parser *p)
+parse_attributes (gst_parser *p, tree_node prev_attrs)
 {
-  tree_node attrs = NULL;
-
   while (token (p, 0) == '<')
     {
       tree_node attr = parse_attribute (p);
       if (attr)
-	attrs = _gst_add_node (attrs, attr);
+	prev_attrs = _gst_add_node (prev_attrs, attr);
     }
 
-  return attrs;
+  return prev_attrs;
 }
 
 static tree_node

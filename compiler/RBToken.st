@@ -241,7 +241,7 @@ compiler: aCompiler
     compiler := aCompiler!
 
 isCompileTimeBound
-    ^false!
+    ^true!
 
 realValue
     association notNil ifTrue: [ ^association ].

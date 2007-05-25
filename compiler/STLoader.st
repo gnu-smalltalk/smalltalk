@@ -44,7 +44,7 @@ STInterpreter comment:
 file-in.'!
 
 STInterpreter subclass: #STClassLoader
-       instanceVariableNames: 'loadedClasses proxies currentClass
+       instanceVariableNames: 'loadedClasses proxies proxyNilClass currentClass
 			       currentCategory currentNamespace'
        classVariableNames: ''
        poolDictionaries: 'STClassLoaderObjects'
@@ -77,7 +77,7 @@ evaluationMethodFor: selector
             method := class evaluationMethods at: selector ifAbsent: [ nil ].
 	    method isNil ifFalse: [ ^method ].
 	].
-	class == STInterpreter ifTrue: [ ^#unknownTo:selector:arguments: ].
+	class == STInterpreter ifTrue: [ ^nil ].
 	class := class superclass
     ] repeat
 !
@@ -85,15 +85,13 @@ evaluationMethodFor: selector
 evaluateStatement: node
     | method |
     method := self evaluationMethodFor: node selector.
-    ^self
-	perform: method
-	with: node receiver
-	with: node selector
-	with: node arguments
-!
-
-unknownTo: receiver selector: selector arguments: argumentNodes
-    ^false
+    (method isNil)
+        ifTrue: [ ^self unknown: node ]
+        ifFalse: [ ^self
+	                perform: method
+	                with: node receiver
+	                with: node selector
+	                with: node arguments ]
 !
 
 evaluate: node
@@ -103,8 +101,12 @@ evaluate: node
 	    "We *do not* want short-circuit evaluation here!!"
             each isMessage
 	        ifTrue: [ old | (self evaluateStatement: each) ]
-	        ifFalse: [ old ]
+	        ifFalse: [ self unknown: each ]
         ]
+!
+
+unknown: node
+    ^false
 ! !
 
 !STClassLoader class methodsFor: 'accessing'!
@@ -171,6 +173,10 @@ currentNamespace
 currentNamespace: ns
     currentNamespace := ns!
 
+proxyNilClass
+    proxyNilClass isNil ifTrue: [ proxyNilClass := ProxyNilClass on: nil for: self ].
+    ^proxyNilClass!
+    
 proxyForNamespace: anObject
     ^proxies at: anObject ifAbsentPut: [
 	ProxyNamespace on: anObject for: self ]!
@@ -181,10 +187,14 @@ proxyForClass: anObject
 
 !STClassLoader methodsFor: 'initializing'!
 
+defaultNamespace
+    ^Namespace current
+!
+
 initialize
-    loadedClasses := OrderedCollection new.
+    loadedClasses := OrderedSet new.
     proxies := IdentityDictionary new.
-    currentNamespace := self proxyForNamespace: Namespace current.
+    currentNamespace := self proxyForNamespace: self defaultNamespace.
 ! !
 
 !STClassLoader methodsFor: 'overrides'!
@@ -198,26 +208,38 @@ endMethodList
     currentClass := nil
 !
 
+defineMethod: node 
+    ^currentClass methodDictionary
+        at: (node selector asSymbol)
+        put: (LoadedMethod
+                category: currentCategory
+                source: (node source)
+                selector: (node selector asSymbol))
+!
+
 compile: node
-    currentClass methodDictionary
-	at: node selector asSymbol
-	put: (LoadedMethod
-	    category: currentCategory
-	    source: node source)
+    self defineMethod: node.
 ! !
 
 !STClassLoader methodsFor: 'evaluating statements'!
 
-doSubclass: receiver selector: selector arguments: argumentNodes
+defineSubclass: receiver selector: selector arguments: argumentNodes
     | class arguments newClass |
-    (argumentNodes allSatisfy: [ :each | each isLiteral ])
-	ifFalse: [ ^false ].
-
+    
     class := self resolveClass: receiver.
     arguments := argumentNodes collect: [ :each | each value ].
     newClass := class perform: selector withArguments: arguments asArray.
     loadedClasses add: newClass.
     proxies at: newClass put: newClass.
+    ^newClass
+!
+
+doSubclass: receiver selector: selector arguments: argumentNodes
+   
+    (argumentNodes allSatisfy: [ :each | each isLiteral ])
+	ifFalse: [ ^false ].
+    
+    self defineSubclass: receiver selector: selector arguments: argumentNodes.
     ^false
 !
 
@@ -278,7 +300,10 @@ resolveClass: node
     | object |
     (node isMessage and: [ node selector = #class ])
 	ifTrue: [ ^(self resolveClass: node receiver) asMetaclass ].
-
+    node isLiteral ifTrue: [
+        "Dictionary cannot have nil as a key, use the entire RBLiteralNode."
+        ^self proxyNilClass ].
+        
     object := self resolveName: node.
     object isClass ifFalse: [ ^object ].
 

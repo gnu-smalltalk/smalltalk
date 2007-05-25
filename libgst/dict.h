@@ -423,9 +423,16 @@ extern OOP _gst_class_variable_dictionary (OOP class_oop)
   ATTRIBUTE_HIDDEN;
 
 /* This finds the key SYMBOL into the dictionary POOLOOP and, if any,
-   in all of its super-namespaces.  */
-extern OOP _gst_find_shared_pool_variable (OOP poolOOP,
-					   OOP symbol)
+   in all of its super-namespaces.  Returns the association.  */
+extern OOP _gst_namespace_association_at (OOP poolOOP,
+					  OOP symbol)
+  ATTRIBUTE_PURE 
+  ATTRIBUTE_HIDDEN;
+
+/* This finds the key SYMBOL into the dictionary POOLOOP and, if any,
+   in all of its super-namespaces.  Returns the value.  */
+extern OOP _gst_namespace_at (OOP poolOOP,
+			      OOP symbol)
   ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
 

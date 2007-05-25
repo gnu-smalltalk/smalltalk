@@ -515,7 +515,7 @@ find_class_variable (OOP varName)
     {
       class = (gst_class) OOP_TO_OBJ (class_oop);
       assocOOP =
-	_gst_find_shared_pool_variable (class->environment, varName);
+	_gst_namespace_association_at (class->environment, varName);
       if (!IS_NIL (assocOOP))
 	return (assocOOP);
     }
@@ -530,7 +530,7 @@ find_class_variable (OOP varName)
 	{
 	  poolDictionaryOOP = ARRAY_AT (class->sharedPools, i + 1);
 	  assocOOP =
-	    _gst_find_shared_pool_variable (poolDictionaryOOP, varName);
+	    _gst_namespace_association_at (poolDictionaryOOP, varName);
 	  if (!IS_NIL (assocOOP))
 	    return (assocOOP);
 	}
@@ -578,7 +578,7 @@ _gst_find_variable_binding (tree_node list, mst_Boolean declare_temporary)
     {
       root = ASSOCIATION_VALUE (assocOOP);
       symbol = _gst_intern_string (list->v_list.name);
-      assocOOP = _gst_find_shared_pool_variable (root, symbol);
+      assocOOP = _gst_namespace_association_at (root, symbol);
     }
 
   if (IS_NIL (assocOOP) && !(list->v_list.next))

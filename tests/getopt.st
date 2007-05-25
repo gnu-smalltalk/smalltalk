@@ -31,7 +31,7 @@
  ======================================================================"
 
 Getopt extend [
-    Class protocol [
+    Getopt class [
         test: args with: pattern [
             args do: [ :each |
                 self

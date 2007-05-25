@@ -17,7 +17,7 @@
 
 
 RBProgramNodeVisitor subclass: #RBFormatter
-    instanceVariableNames: 'codeStream lineStart firstLineLength tabs '
+    instanceVariableNames: 'codeStream lineStart firstLineLength tabs initialIndent '
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Refactory-Parser'!
@@ -34,6 +34,13 @@ firstLineLength
 format: aNode 
     self visitNode: aNode.
     ^codeStream contents!
+
+initialIndent
+    initialIndent isNil ifTrue: [ initialIndent := 0 ].
+    ^initialIndent!
+
+initialIndent: anInteger
+    initialIndent := anInteger!
 
 isMultiLine
     ^firstLineLength notNil!
@@ -129,21 +136,41 @@ selectorsToStartOnNewLine
 
 !RBFormatter methodsFor: 'private-formatting'!
 
-formatLiteral: aValue 
-    | isArray |
-    (isArray := aValue class == Array) | (aValue class == ByteArray) ifTrue: 
-	    [codeStream nextPutAll: (isArray ifTrue: ['#('] ifFalse: ['#[']).
-	    aValue
-		do: [:each | self formatLiteral: each]
-		separatedBy: [codeStream nextPut: $ ].
-	    codeStream nextPut: (isArray ifTrue: [$)] ifFalse: [$]]).
+formatLiteral: token 
+    | isArray aValue |
+    
+    aValue := token value.
+
+    token isCompileTimeBound ifTrue: 
+	    [codeStream nextPutAll: '#{';
+		nextPutAll: aValue;
+		nextPut: $}.
 	    ^self].
+	aValue class == Array ifTrue: 
+		    [codeStream nextPutAll: '#('.
+		    aValue
+				do: [:each | self formatLiteral: each]
+				separatedBy: [codeStream nextPut: $ ].
+		    codeStream nextPut: $).
+		    ^self].
+	aValue class == ByteArray ifTrue: 
+		    [codeStream nextPutAll: '#['.
+		    aValue
+				do: [:each | codeStream store: each]
+				separatedBy: [codeStream nextPut: $ ].
+			codeStream nextPut: $].
+			^self].
     aValue isSymbol ifTrue: 
 	    [self formatSymbol: aValue.
 	    ^self].
     aValue class == Character ifTrue: 
 	    [codeStream nextPut: $$;
 		nextPut: aValue.
+	    ^self].
+    aValue class == String ifTrue: 
+	    [codeStream nextPut: $';
+		nextPutAll: (aValue copyReplaceAll: '''' with: '''''');
+		nextPut: $'.
 	    ^self].
     aValue storeOn: codeStream!
 
@@ -194,6 +221,19 @@ formatMessageSelector: selectorParts withArguments: formattedArgs multiline: mul
 			nextPutAll: (formattedArgs at: i).
 		    (multiLine and: [i < formattedArgs size]) ifTrue: [self indent]]]!
 
+formatComment: aString
+    | stream |
+    stream := ReadStream on: aString
+	from: (aString findFirst: [ :each | each = $" ]) + 1
+	to: (aString findLast: [ :each | each = $" ]) - 1.
+    stream atEnd ifTrue: [ ^self ].
+    codeStream nextPut: $".
+    stream linesDo: [ :each |
+	codeStream nextPutAll: each trimSeparators.
+	stream atEnd ifFalse: [
+	    self indent. codeStream space ] ].
+    codeStream nextPut: $"!
+
 formatMethodCommentFor: aNode indentBefore: aBoolean 
     | source |
     source := aNode source.
@@ -201,8 +241,8 @@ formatMethodCommentFor: aNode indentBefore: aBoolean
     aNode comments do: 
 	    [:each | 
 	    aBoolean ifTrue: [self indent].
-	    codeStream nextPutAll: (aNode source copyFrom: each first to: each last);
-		nl.
+	    self formatComment: (aNode source copyFrom: each first to: each last).
+	    codeStream nl.
 	    aBoolean ifFalse: [self indent]]!
 
 formatMethodPatternFor: aMethodNode 
@@ -210,7 +250,8 @@ formatMethodPatternFor: aMethodNode
     selectorParts := aMethodNode selectorParts.
     arguments := aMethodNode arguments.
     arguments isEmpty
-	ifTrue: [codeStream nextPutAll: selectorParts first value]
+	ifTrue: [codeStream nextPutAll: selectorParts first value;
+	                    nextPut: $ ]
 	ifFalse: 
 	    [selectorParts with: arguments
 		do: 
@@ -230,7 +271,7 @@ formatStatementCommentFor: aNode
 	    crs := self newLinesFor: source startingAt: each first.
 	    (crs - 1 max: 0) timesRepeat: [codeStream nl].
 	    crs == 0 ifTrue: [codeStream tab] ifFalse: [self indent].
-	    codeStream nextPutAll: (source copyFrom: each first to: each last)]!
+	    self formatComment: (source copyFrom: each first to: each last)]!
 
 formatStatementsFor: aSequenceNode 
     | statements |
@@ -367,12 +408,7 @@ acceptCascadeNode: aCascadeNode
 		separatedBy: [codeStream nextPut: $;]]!
 
 acceptLiteralNode: aLiteralNode 
-    aLiteralNode isCompileTimeBound ifTrue: 
-	    [codeStream nextPutAll: '#{';
-		nextPutAll: aLiteralNode value;
-		nextPut: $}.
-	    ^self].
-    ^self formatLiteral: aLiteralNode value!
+    ^self formatLiteral: aLiteralNode token!
 
 acceptMessageNode: aMessageNode 
     | newFormatter code |
@@ -387,11 +423,24 @@ acceptMessageNode: aMessageNode
 
 acceptMethodNode: aMethodNode 
     self formatMethodPatternFor: aMethodNode.
-    self indentWhile: 
+    codeStream nextPut: $[.
+
+    self indent: self initialIndent while: [
+        self indentWhile: 
 	    [self formatMethodCommentFor: aMethodNode indentBefore: true.
+
+            (aMethodNode category isNil)
+                 ifFalse: [
+		    self indent.
+		    codeStream nextPutAll: '<category: ';
+                                  print: (aMethodNode category);
+                                  nextPut: $> ] .
+       
 	    self indent.
-	    aMethodNode body statements isEmpty 
-		ifFalse: [self visitNode: aMethodNode body]]!
+	    self visitNode: aMethodNode body ].
+		
+	self indent.
+	codeStream nextPut: $] ]!
 
 acceptOptimizedNode: anOptimizedNode 
     codeStream nextPutAll: '##('.
@@ -404,8 +453,10 @@ acceptReturnNode: aReturnNode
 
 acceptSequenceNode: aSequenceNode 
     | parent |
-    self formatMethodCommentFor: aSequenceNode indentBefore: false.
-    self formatTemporariesFor: aSequenceNode.
+    aSequenceNode statements isEmpty ifFalse: [
+        self formatMethodCommentFor: aSequenceNode indentBefore: false.
+        self formatTemporariesFor: aSequenceNode.
+    ].
     parent := aSequenceNode parent.
     (parent notNil and: [parent isMethod]) ifTrue: [self formatTagFor: parent].
     self formatStatementsFor: aSequenceNode!

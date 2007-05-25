@@ -900,7 +900,7 @@ RBStatementNode class
 
 
 RBProgramNode subclass: #RBMethodNode
-    instanceVariableNames: 'selector selectorParts body source arguments tags '
+    instanceVariableNames: 'selector selectorParts body source arguments tags category'
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Refactory-Parser'!
@@ -1015,7 +1015,13 @@ tags
     ^tags isNil ifTrue: [#()] ifFalse: [tags]!
 
 tags: aCollectionOfIntervals 
-    tags := aCollectionOfIntervals! !
+    tags := aCollectionOfIntervals! 
+    
+category
+    ^category!
+
+category: aCategory
+    category := aCategory! !
 
 !RBMethodNode methodsFor: 'comparing'!
 
