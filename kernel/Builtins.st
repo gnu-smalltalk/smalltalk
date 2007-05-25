@@ -173,10 +173,12 @@ Class extend [
     ]
 ]
     
-Behavior extend [
+ClassDescription extend [
     instanceVariableNames: ivn [
     ]
+]
     
+Behavior extend [
     shape: aSymbol [
     ]
 ]

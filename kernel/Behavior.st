@@ -1218,7 +1218,10 @@ updateInstanceVars: variableArray
     | instVarMap startOfInstanceVars endOfInstanceVars newInstanceVars 
        oldInstVars oldClass instances |
 
-    startOfInstanceVars := self superclass instSize + 1.
+    startOfInstanceVars := self superclass isNil
+	ifTrue: [ 1 ]
+	ifFalse: [ self superclass instSize + 1 ].
+
     endOfInstanceVars := self instSize.
     newInstanceVars := variableArray
 	copyFrom: startOfInstanceVars 

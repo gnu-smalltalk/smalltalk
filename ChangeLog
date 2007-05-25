@@ -1,3 +1,12 @@
+2007-05-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Support nil superclass more thoroughly.
+	* kernel/Builtins.st: Move #instanceVariableNames: to
+	ClassDescription.
+	* kernel/Float.st: Print exponent for 1.0e/1.0q.  The zillionth
+	printing bug.
+	* kernel/ScaledDec.st: Remove initial space.
+
 2007-05-25  Daniele Sciascia  <sciascid@lu.unisi.ch>
 
 	* scripts/Convert.st: New.

@@ -383,10 +383,19 @@ printOn: aStream
 
 storeOn: aStream
     "Print a representation of the receiver on aStream"
-    self
-	printOn: aStream
-	special: #('%1 infinity' '%1 negativeInfinity' '%1 nan')
-! !
+    | printString |
+    (self isInfinite or: [ self isNaN ])
+	ifTrue: [
+	     ^self
+	          printOn: aStream
+	          special: #('%1 infinity' '%1 negativeInfinity' '%1 nan') ].
+    printString := self printString.
+    aStream nextPutAll: printString.
+
+    "For FloatE/FloatQ, force printing the exponent at the end."
+    self exponentLetter == $d ifTrue: [ ^self ].
+    (printString includes: self exponentLetter)
+	ifFalse: [ aStream nextPut: self exponentLetter ]! !
 
 
 
@@ -441,11 +450,12 @@ printOn: aStream special: whatToPrintArray
 	prevWeight := weight.
 	weight := weight / 10 ].
 
-    "Smallest number such that me + eps ~= eps"
-    eps := 2 raisedToInteger: me exponent - me class precision + 1.
-    "For large numbers, don't let round-to-even bite us."
-    eps isInteger ifTrue: [ eps := eps / 2 ].
-    (num - prevWeight quo: eps) = 0 ifTrue: [ digits := digits + 1 ].
+    num = 0 ifFalse: [
+        "Smallest number such that me + eps ~= eps"
+        eps := 2 raisedToInteger: me exponent - me class precision + 1.
+        "For large numbers, don't let round-to-even bite us."
+        eps isInteger ifTrue: [ eps := eps / 2 ].
+        (num - prevWeight quo: eps) = 0 ifTrue: [ digits := digits + 1 ] ].
 
     digits := digits printString.
 
