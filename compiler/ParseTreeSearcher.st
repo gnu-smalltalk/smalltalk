@@ -277,6 +277,9 @@ LookupTable variableSubclass: #RBSmallDictionary
 
 !RBSmallDictionary methodsFor: 'private'!
 
+capacity
+    ^super primSize!
+
 whileGrowingAt: key put: value
     tally := tally + 1.
     self primAt: self size put: key.
