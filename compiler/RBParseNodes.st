@@ -258,7 +258,7 @@ deepCopy
      of copied nodes.  We do already copy for our instance variables
      through #postCopy, so we redirect #deepCopy to be a normal #copy."
 
-    ^self copy
+    ^self copy!
 
 collect: aBlock 
     "Hacked to fit collection protocols"
