@@ -106,17 +106,8 @@ Object subclass: FileOutExporter [
     fileOutSelectors: selectors classSelectors: classSelectors [
         self fileOutHeader.
         self fileOutDeclaration: [
-            
-            outStream space: 4.
-            
-            classSelectors do: [ :each | self fileOutSource: each class: true ]
-                           separatedBy: [ outStream nl; nl; space: 4 ].
-             
-            (classSelectors isEmpty)
-                ifFalse: [ outStream nl; nl; space: 4 ].
-            
-            selectors do: [ :each | self fileOutSource: each class: false ]
-                      separatedBy: [ outStream nl; nl; space: 4 ]
+            classSelectors do: [ :each | self fileOutSource: each class: true ].
+            selectors do: [ :each | self fileOutSource: each class: false ].
         ]
     ]
 

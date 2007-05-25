@@ -1,3 +1,7 @@
+2007-05-25  Paolo Bonzini  <bonzini@gnu.org>
+
+        * compiler/Exporter.st: Fix output spacing.
+
 2007-05-25  Daniele Sciascia  <sciascid@lu.unisi.ch>
 
 	* compiler/Exporter.st: New.
