@@ -1,3 +1,7 @@
+2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Float.st: Use rational arithmetic to print Floats.
+
 2007-05-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Class.st: Don't use TokenStream.
