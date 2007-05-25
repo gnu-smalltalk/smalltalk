@@ -113,14 +113,14 @@ quiet ifFalse: [
 
     result printNl.
     result errorCount > 0 ifTrue: [
-        aStream nextPutAll: 'Errors:'; nl.
+        stdout nextPutAll: 'Errors:'; nl.
         (result errors asSortedCollection: [ :a :b | a printString <= b printString ])
-            do: [ :each | aStream nextPutAll: '    '; print: each; nl ] ].
+            do: [ :each | stdout nextPutAll: '    '; print: each; nl ] ].
 
     result failureCount > 0 ifTrue: [
-        aStream nextPutAll: 'Failures:'; nl.
+        stdout nextPutAll: 'Failures:'; nl.
         (result failures asSortedCollection: [ :a :b | a printString <= b printString ])
-            do: [ :each | aStream nextPutAll: '    '; print: each; nl ] ] ].
+            do: [ :each | stdout nextPutAll: '    '; print: each; nl ] ] ].
 
 result runCount = result passedCount
     ifFalse: [ ObjectMemory quit: 1 ]!
