@@ -116,7 +116,7 @@ deepCopy
     "Returns a deep copy of the receiver (the instance variables are
      copies of the receiver's instance variables)"
     | key newDict |
-    newDict := self copyEmpty: self primSize.
+    newDict := self copyEmpty: self capacity.
     1 to: self primSize do: [ :index |
 	key := self primAt: index.
 	key isNil

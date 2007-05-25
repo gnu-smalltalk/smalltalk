@@ -122,7 +122,7 @@ remove: oldObject ifAbsent: anExceptionBlock
 shallowCopy
     "Returns a shallow copy of the receiver (the instance variables are
      not copied)"
-    ^(self copyEmpty: self primSize)
+    ^(self copyEmpty: self capacity)
         copyAllFrom: self;
         yourself
 !
@@ -131,7 +131,7 @@ deepCopy
     "Returns a deep copy of the receiver (the instance variables are
      copies of the receiver's instance variables)"
     | newHashedCollection |
-    newHashedCollection := self copyEmpty: self primSize.
+    newHashedCollection := self copyEmpty: self capacity.
     self do: [ :each | newHashedCollection addWhileGrowing: each copy ].
     ^newHashedCollection
 ! !
@@ -264,7 +264,7 @@ incrementTally
     "Answer whether the collection's size varied"
     | grown |
     (grown := tally >= (self primSize * 3 // 4))
-        ifTrue: [ self growBy: self primSize ].
+        ifTrue: [ self growBy: self capacity ].
 
     tally := tally + 1.
     ^grown
@@ -288,7 +288,7 @@ addWhileGrowing: value
 
 copyEmpty
     "Answer an empty copy of the receiver"
-    ^self copyEmpty: self primSize
+    ^self copyEmpty: self capacity
 !
 
 copyAllFrom: aHashedCollection
@@ -355,7 +355,7 @@ findIndexOrNil: anObject
 !
 
 grow
-    ^self growBy: self primSize
+    ^self growBy: self capacity
 !
 
 growBy: delta
@@ -363,7 +363,7 @@ growBy: delta
 
     | newSize newHashedCollection |
     newSize := self primSize + delta.
-    newHashedCollection := self copyEmpty: self primSize + delta.
+    newHashedCollection := self copyEmpty: self capacity + delta.
     newHashedCollection copyAllFrom: self.
     ^self become: newHashedCollection
 ! !

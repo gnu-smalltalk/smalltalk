@@ -2,6 +2,10 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 2.3.3 TO 2.3.4
 
+o   Behavior>>#evaluate: and MethodDictionary>>#removeAt:ifAbsent: would
+    cause the method dictionary's size to double.  This caused sometimes
+    spurious failures in floatmath.st.
+
 o   Fixed bug in socket #nextHunk implementation, which lost the first
     or second byte in the input buffer.
 

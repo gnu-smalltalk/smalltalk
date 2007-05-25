@@ -317,7 +317,7 @@ collect: aBlock
     "Answer a new dictionary where the keys are the same and the values are
      obtained by passing each value to aBlock and collecting the return values"
     | aDictionary |
-    aDictionary := self copyEmpty: self primSize.
+    aDictionary := self copyEmpty: self capacity.
     self keysAndValuesDo: [ :key :value |
 	aDictionary at: key put: (aBlock value: value) ].
     ^aDictionary
@@ -327,7 +327,7 @@ select: aBlock
     "Answer a new dictionary containing the key/value pairs for which aBlock
      returns true. aBlock only receives the value part of the pairs."
     | newDict |
-    newDict := self copyEmpty: self primSize.
+    newDict := self copyEmpty: self capacity.
     self associationsDo:
     	[ :assoc | (aBlock value: assoc value)
 		     ifTrue: [ newDict add: assoc ] ].
@@ -338,7 +338,7 @@ reject: aBlock
     "Answer a new dictionary containing the key/value pairs for which aBlock
      returns false. aBlock only receives the value part of the pairs."
     | newDict |
-    newDict := self copyEmpty: self primSize.
+    newDict := self copyEmpty: self capacity.
     self associationsDo:
     	[ :assoc | (aBlock value: assoc value)
 		     ifFalse: [ newDict add: assoc ] ].
