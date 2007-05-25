@@ -20,6 +20,7 @@ sets.st sieve.ok sieve.st strcat.ok strcat.st strings.ok strings.st \
 Ansi.st AnsiDB.st AnsiInit.st AnsiLoad.st AnsiRun.st
 
 CLEANFILES = gst.im
+DISTCLEANFILES = atconfig
 
 .PHONY: regress
 
