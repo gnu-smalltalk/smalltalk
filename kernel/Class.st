@@ -578,87 +578,15 @@ isClass
 !Class methodsFor: 'filing'!
 
 fileOutDeclarationOn: aFileStream
-    "File out class definition to aFileStream"
-    | aSet printFormattedSet superclassName |
-    self isMetaclass ifTrue: [ ^self].
-
-    printFormattedSet := [ 
-	aFileStream nextPutAll: ''''. 
-	(aSet isEmpty) not ifTrue: [
-	    aSet do: [ :element |
-		aFileStream nextPutAll: element; space ]. 
-	    aFileStream nextPutAll: ''''.
-	].
-    ].
-
-    superclassName := self superclass isNil
-	ifTrue: [ 'nil' ]
-	ifFalse: [ self superclass nameIn: self environment ].
-
-    aFileStream
-	nextPutAll: superclassName; space;
-	nextPutAll: self kindOfSubclass; space;
-	store: name asSymbol.
-
-    aFileStream nl; tab; nextPutAll: 'instanceVariableNames: '.
-	((aSet := self instVarNames ) isEmpty)
-	    ifTrue:[aFileStream nextPutAll: '''''']
-	    ifFalse: printFormattedSet.
-
-    aFileStream nl; tab; nextPutAll: 'classVariableNames: '.
-	(aSet := self classVarNames) isEmpty
-	    ifTrue:[aFileStream nextPutAll: '''''']
-	    ifFalse: printFormattedSet.
-
-    aFileStream nl; tab; nextPutAll: 'poolDictionaries: '.
-	(aSet := self sharedPools) isEmpty
-	    ifTrue:[aFileStream nextPutAll: '''''']
-	    ifFalse: printFormattedSet.
-
-    aFileStream nl; tab; nextPutAll: 'category: ';
-	store: category;
-	nextPut: $!;
-	nl; nl;
-	print: self;
-	nextPutAll: ' comment: ';
-	nl;
-	store: self comment;
-	nextPut: $!;
-	nl; nl.
-
-    ((aSet := self class instVarNames) isEmpty)
-	ifTrue:[ ^self ].
-
-    aFileStream print: self class; nextPutAll: ' instanceVariableNames: '.
-    printFormattedSet value.
-    aFileStream nextPut: $!; nl; nl.
+    "File out class definition to aFileStream.  Requires package Parser."
+    self notYetImplemented
 !
 
 fileOutOn: aFileStream
     "File out complete class description:  class definition, class and
-     instance methods"
+     instance methods.  Requires package Parser."
 
-    self fileOutHeaderOn: aFileStream. 
-    self fileOutDeclarationOn: aFileStream.
-    self fileOutMethodsOn: aFileStream.
-    self fileOutInitializeOn: aFileStream!
-
-fileOutInitializeOn: aFileStream
-    (self class includesSelector: #initialize) ifTrue: [
-	aFileStream nl; print: self; nextPutAll: ' initialize!'.
-    ]!
-
-fileOutMethodsOn: aFileStream
-    "File out instance methods of the receiver."
-
-    self class collectCategories do:
-	[ :category | self class fileOutCategory: category toStream: aFileStream ].
-
-    self collectCategories do:
-	[ :category | self fileOutCategory: category toStream: aFileStream ].
-
-    aFileStream nl
-! !
+    self notYetImplemented! !
 
 
 !Class methodsFor: 'saving and loading'!

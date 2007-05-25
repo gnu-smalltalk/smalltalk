@@ -1,5 +1,13 @@
-2007-05-25  Daniele Sciascia  <sciasciad@lu.unisi.ch>
-	    Paolo Bonzini  <bonzini@gnu.org>
+2007-05-25  Daniele Sciascia  <sciascid@lu.unisi.ch>
+
+	* scripts/Convert.st: New.
+
+2007-05-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Class.st: Require Parser to file out.
+	* kernel/ClassDesc.st: Require Parser to file out.
+
+2007-05-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/UndefObject.st: Fix bug in #subclass:
 	* kernel/Metaclass.st: Fix bug in sending #subclass: to nil

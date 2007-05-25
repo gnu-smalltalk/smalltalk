@@ -271,13 +271,14 @@ sharedVariableString
 
 fileOutOn: aFileStream
     "File out complete class description:  class definition, class and
-     instance methods"
+     instance methods.  Requires package Parser."
 
     self subclassResponsibility
 !
 
 fileOut: fileName
-    "Open the given file and to file out a complete class description to it"
+    "Open the given file and to file out a complete class description to it.
+     Requires package Parser."
 
     | aFileStream  |
     aFileStream := FileStream open: fileName mode: FileStream write.
@@ -290,83 +291,33 @@ fileOut: fileName
 
 fileOutCategory: categoryName to: fileName
     "File out all the methods belonging to the method category, categoryName,
-     to the fileName file"
+     to the fileName file.  Requires package Parser."
 
     | aFileStream |
     aFileStream := FileStream open: fileName mode: FileStream write.
-
     Transcript nextPutAll: 'Filing out a category to: '; nextPutAll: fileName.
-
     self fileOutCategory: categoryName toStream: aFileStream.
     aFileStream close
 !
-	
-fileOutCategory: category toStream: aFileStream
-    "File out all the methods belonging to the method category, categoryName,
-     to aFileStream"
 
-    | methods |
-    self selectors isNil ifTrue: [ ^self ].
-
-    methods := self selectors select: [ :selector |
-	(self compiledMethodAt: selector) methodCategory = category
-    ].
-
-    methods isEmpty ifTrue: [ ^self ].
-
-    aFileStream
-	nextPut: $!;
-	print: self;
-	nextPutAll: ' methodsFor: ';
-	store: category;
-	nextPut: $!.
-
-    methods asSortedCollection do: [ :selector |
-	aFileStream
-	    nextPutAll: '
-
-';
-	    "nextPutAll: (STInST.RBFormatter new
-		format: (STInST.RBParser parseMethod: (self sourceCodeAt: selector)));"
-	    nextPutAll: (self sourceCodeAt: selector);
-	    nextPut: $!
-    ].
-    aFileStream nextPutAll: ' !
-
-'
+fileOutCategory: categoryName toStream: aFileStream
+    "File out the given selector to a FileStream.  Requires package Parser."
+    self notYetImplemented
 !
-
-fileOutHeaderOn: aFileStream
-    "Write date and time stamp to aFileStream"
-    | now |
-    aFileStream nextPutAll: '"Filed out from ';
-	nextPutAll: Smalltalk version;
-	nextPutAll: ' on '.
-    now := Date dateAndTimeNow.
-    aFileStream print: now asDate;
-	nextPutAll:  '  ';
-	print: now asTime;
-	nextPutAll: '"!
-
-'!
-
+	
 fileOutSelector: selector to: fileName
-    "File out the given selector to fileName"
+    "File out the given selector to fileName.  Requires package Parser."
 
     | aFileStream |
     aFileStream := FileStream open: fileName mode: FileStream write.
-
     Transcript nextPutAll: 'Filing out a selector to: '; nextPutAll: fileName.
-    self fileOutHeaderOn: aFileStream.
-    aFileStream nextPutAll: '!';
-	print: self;
-	nextPutAll: ' methodsFor: ';
-	store: (self compiledMethodAt: selector) methodCategory;
-	nextPut: $!;
-	nl;
-	nextPutAll: (self sourceCodeAt: selector) ;
-	nextPutAll: '! !';
-	close
+    self fileOutSelector: selector toStream: aFileStream.
+    aFileStream close
+!
+
+fileOutSelector: selector toStream: aFileStream
+    "File out the given selector to a FileStream.  Requires package Parser."
+    self notYetImplemented
 ! !
 
 

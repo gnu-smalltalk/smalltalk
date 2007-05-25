@@ -58,7 +58,7 @@ dist_noinst_DATA += smalltalk-mode.el.in gst-mode.el.in .gdbinit \
 	kernel/stamp-classes blox-tk/stamp-classes tcp/stamp-classes \
 	i18n/stamp-classes scripts/Load.st scripts/gst-reload.sh \
 	scripts/Test.st scripts/Finish.st scripts/GenLibDoc.st \
-	scripts/GenBaseDoc.st gsticon.ico
+	scripts/GenBaseDoc.st scripts/Convert.st gsticon.ico
 
 if WITH_EMACS
 nodist_lisp_LISP = smalltalk-mode.el

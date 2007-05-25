@@ -445,105 +445,7 @@ nameIn: aNamespace
 	  self printString ]
 ! !
 
-!PseudoBehavior methodsFor: 'filing'!
-
-fileOutOn: aFileStream
-    "File out complete class description:  class definition, class and
-     instance methods"
-
-    self subclassResponsibility
-!
-
-fileOut: fileName
-    "Open the given file and to file out a complete class description to it"
-
-    | aFileStream  |
-    aFileStream := FileStream open: fileName mode: FileStream write.
-
-    Transcript nextPutAll: 'Filing out class to: '; nextPutAll: fileName.
-    
-    self fileOutOn: aFileStream. 
-    aFileStream close.
-!
-
-fileOutCategory: categoryName to: fileName
-    "File out all the methods belonging to the method category, categoryName,
-     to the fileName file"
-
-    | aFileStream |
-    aFileStream := FileStream open: fileName mode: FileStream write.
-
-    Transcript nextPutAll: 'Filing out a category to: '; nextPutAll: fileName.
-
-    self fileOutCategory: categoryName toStream: aFileStream.
-    aFileStream close
-!
-	
-fileOutCategory: category toStream: aFileStream
-    "File out all the methods belonging to the method category, categoryName,
-     to aFileStream"
-
-    | methods |
-    self selectors isNil ifTrue: [ ^self ].
-
-    aFileStream
-	nextPut: $!;
-	print: self;
-	nextPutAll: ' methodsFor: ';
-	store: category;
-	nextPut: $!.
-
-    methods := self selectors select: [ :selector |
-	(self compiledMethodAt: selector) methodCategory = category
-    ].
-
-    methods asSortedCollection do: [ :selector |
-	aFileStream
-	    nextPutAll: '
-
-';	    nextPutAll: (self sourceCodeAt: selector);
-	    nextPut: $!
-    ].
-    aFileStream nextPutAll: ' !
-
-'
-!
-
-fileOutSelector: selector to: fileName
-    "File out the given selector to fileName"
-
-    | aFileStream |
-    aFileStream := FileStream open: fileName mode: FileStream write.
-
-    Transcript nextPutAll: 'Filing out a selector to: '; nextPutAll: fileName.
-    self fileOutHeaderOn: aFileStream.
-    aFileStream nextPutAll: '!';
-	print: self;
-	nextPutAll: ' methodsFor: ';
-	store: (self compiledMethodAt: selector) methodCategory;
-	nextPut: $!;
-	nl;
-	nextPutAll: (self sourceCodeAt: selector) ;
-	nextPutAll: '! !';
-	close
-! !
-
 
-!PseudoBehavior methodsFor: 'private'!
-
-collectCategories
-    "Answer all the method categories, sorted by name"
-
-    | categories |
-    self methodDictionary isNil ifTrue: [ ^#() ].
-
-    categories := Set new.
-    self methodDictionary do:
-	[ :method | categories add: (method methodCategory) ].
-
-    ^categories asSortedCollection
-! !
-
 !PseudoBehavior methodsFor: 'abstract'!
 
 asClass
@@ -794,15 +696,6 @@ sharedPools
 
 
 
-!LoadedMetaclass methodsFor: 'filing'!
-
-fileOutOn: aFileStream
-    "File out complete class description:  class definition, class and
-     instance methods"
-
-    instanceClass fileOutOn: aFileStream
-! !
-
 !LoadedMetaclass methodsFor: 'initializing'!
 
 for: aClass
@@ -907,93 +800,7 @@ import: aNamespace
     sharedPools := sharedPools copyWith: (aNamespace nameIn: self environment)
 ! !
 
-!LoadedClass methodsFor: 'filing'!
-
-fileOutHeaderOn: aFileStream
-    "Write date and time stamp to aFileStream"
-    | now |
-    aFileStream nextPutAll: '"Filed out from ';
-	nextPutAll: Smalltalk version;
-	nextPutAll: ' on '.
-    now := Date dateAndTimeNow.
-    aFileStream print: now asDate;
-	nextPutAll:  '  ';
-	print: now asTime;
-	nextPutAll: '"!
-
-'!
-
-fileOutDeclarationOn: aFileStream
-    "File out class definition to aFileStream"
-    | aSet printFormattedSet |
-    self isMetaclass ifTrue: [ ^self].
-
-    printFormattedSet := [ 
-	aFileStream nextPut: $'. 
-	(aSet isEmpty) not ifTrue: [
-	    aSet do: [ :element |
-		aFileStream nextPutAll: element; space ]. 
-	    aFileStream nextPut: $'.
-	].
-    ].
-
-    aFileStream print: self superclass; space;
-	nextPutAll: self kindOfSubclass; space;
-	store: name asSymbol.
-
-    aFileStream nl; tab; nextPutAll: 'instanceVariableNames: '.
-	((aSet := self instVarNames ) isEmpty)
-	    ifTrue:[aFileStream nextPutAll: '''''']
-	    ifFalse: printFormattedSet.
-
-    aFileStream nl; tab; nextPutAll: 'classVariableNames: '.
-	(aSet := self classVarNames) isEmpty
-	    ifTrue:[aFileStream nextPutAll: '''''']
-	    ifFalse: printFormattedSet.
-
-    aFileStream nl; tab; nextPutAll: 'poolDictionaries: '.
-	(aSet := self sharedPools) isEmpty
-	    ifTrue:[aFileStream nextPutAll: '''''']
-	    ifFalse: printFormattedSet.
-
-    aFileStream nl; tab; nextPutAll: 'category: ';
-	store: category;
-	nextPut: $!;
-	nl; nl;
-	print: self;
-	nextPutAll: ' comment: ';
-	nl;
-	store: self comment;
-	nextPut: $!;
-	nl; nl.
-
-    ((aSet := self asMetaclass instVarNames) isEmpty)
-	ifTrue:[ ^self ].
-
-    aFileStream print: self asMetaclass; nextPutAll: ' instanceVariableNames: '.
-    printFormattedSet value.
-    aFileStream nextPut: $!; nl; nl.
-!
-
-fileOutOn: aFileStream
-    "File out complete class description:  class definition, class and
-     instance methods"
-
-    self fileOutHeaderOn: aFileStream. 
-    self fileOutDeclarationOn: aFileStream.
-
-    self asMetaclass collectCategories do:
-	[ :category | self asMetaclass fileOutCategory: category toStream: aFileStream ].
-
-    self collectCategories do:
-	[ :category | self fileOutCategory: category toStream: aFileStream ].
-
-    (self asMetaclass includesSelector: #initialize) ifTrue: [
-	aFileStream nl; print: self; nextPutAll: ' initialize!'.
-    ].
-    aFileStream nl
-! !
-
+
 !LoadedClass methodsFor: 'initializing'!
 
 superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn

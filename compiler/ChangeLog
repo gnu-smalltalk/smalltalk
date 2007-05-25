@@ -1,5 +1,10 @@
 2007-05-25  Daniele Sciascia  <sciascid@lu.unisi.ch>
 
+	* compiler/Exporter.st: New.
+	* compiler/STLoaderObjs.st: Eliminate file-out code.
+
+2007-05-25  Daniele Sciascia  <sciascid@lu.unisi.ch>
+
 	* compiler/RBFormatter.st: fix various bugs.  Reformat method comments.
 	Support varying the overall indentation.
 	* compiler/RBParseNodes.st: store category in RBMethodNode.

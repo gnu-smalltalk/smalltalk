@@ -395,6 +395,7 @@
   <filein>STDecompiler.st</filein>
   <filein>STLoaderObjs.st</filein>
   <filein>STLoader.st</filein>
+  <filein>Exporter.st</filein>
 
   <filein>RewriteTests.st</filein>
 
@@ -413,6 +414,7 @@
   <file>STLoaderObjs.st</file>
   <file>STSymTable.st</file>
   <file>RewriteTests.st</file>
+  <file>Exporter.st</file>
 </package>
 
 <package>
