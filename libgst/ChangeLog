@@ -1,3 +1,10 @@
+2007-05-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Pass radix when converting ScaledDecimals like 2r1.1s.
+	* libgst/sym.c: Change #asScaledDecimal:scale: to
+	#asScaledDecimal:radix:scale:.
+	* libgst/sym.h: Likewise.
+
 2007-05-25  Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
 
 	* libgst/dict.c: Turn _gst_find_shared_pool_variable into

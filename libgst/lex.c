@@ -886,8 +886,9 @@ scan_number (int c,
 		(num * (10 raisedToInteger: exponent)
 		   asScaledDecimal: floatExponent) */
 	lvalp->oval =
-	  _gst_msg_send (numOOP, _gst_as_scaled_decimal_scale_symbol,
+	  _gst_msg_send (numOOP, _gst_as_scaled_decimal_radix_scale_symbol,
 			 FROM_INT (exponent),
+			 FROM_INT (base),
 			 FROM_INT ((int) floatExponent), 
 			 NULL);
 

@@ -100,7 +100,7 @@ symbol_info;
    of the way we create symbols in _gst_init_symbols_pass1.  */
 
 OOP _gst_and_symbol = NULL;
-OOP _gst_as_scaled_decimal_scale_symbol = NULL;
+OOP _gst_as_scaled_decimal_radix_scale_symbol = NULL;
 OOP _gst_bad_return_error_symbol = NULL;
 OOP _gst_boolean_symbol = NULL;
 OOP _gst_byte_array_out_symbol = NULL;
@@ -259,7 +259,7 @@ static scope cur_scope = NULL;
    and is used to restore the global variables upon image load.  */
 static const symbol_info sym_info[] = {
   {&_gst_and_symbol, "and:"},
-  {&_gst_as_scaled_decimal_scale_symbol, "asScaledDecimal:scale:"},
+  {&_gst_as_scaled_decimal_radix_scale_symbol, "asScaledDecimal:radix:scale:"},
   {&_gst_bad_return_error_symbol, "badReturnError"},
   {&_gst_byte_array_symbol, "byteArray"},
   {&_gst_byte_array_out_symbol, "byteArrayOut"},

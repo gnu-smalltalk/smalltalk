@@ -107,7 +107,7 @@ extern void _gst_pop_temporaries_dictionary (OOP dictionaryOOP)
   ATTRIBUTE_HIDDEN;
 
 extern OOP _gst_and_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_as_scaled_decimal_scale_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_as_scaled_decimal_radix_scale_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_bad_return_error_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_boolean_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_byte_array_out_symbol ATTRIBUTE_HIDDEN;

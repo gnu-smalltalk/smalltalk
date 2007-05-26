@@ -144,12 +144,12 @@ asScaledDecimal: n
 	scale: n
 !
 
-asScaledDecimal: denDigits scale: n
-    "Answer the receiver, divided by 10^denDigits and converted to
+asScaledDecimal: denDigits radix: base scale: n
+    "Answer the receiver, divided by base^denDigits and converted to
      a ScaledDecimal object."
     ^ScaledDecimal
 	newFromNumber: (self asFraction *
-	  (10 raisedToInteger: denDigits))
+	  (base raisedToInteger: denDigits))
 	scale: n
 !
 
