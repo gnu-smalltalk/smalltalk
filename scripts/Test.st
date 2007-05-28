@@ -32,9 +32,15 @@
 
 Smalltalk arguments isEmpty ifTrue: [ ObjectMemory quit ]!
 
+FileStream verbose: false.
+OutputVerbosity := 0.
+PackageLoader fileInPackage: #SUnit.
+OutputVerbosity := 1!
+
 | helpString verbose script suite result quiet |
 quiet := false.
 verbose := false.
+
 FileStream verbose: true.
 script := ''.
 
@@ -93,7 +99,6 @@ Smalltalk
 script isEmpty ifTrue: [ ^self ].
 
 FileStream verbose: false.
-PackageLoader fileInPackage: #SUnit.
 suite := TestSuitesScripter run: script.
 
 "Set log policy to write to stdout."

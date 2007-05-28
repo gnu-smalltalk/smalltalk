@@ -111,6 +111,7 @@ programming language.
 * Overview::            What @gst{} is.
 * Using GNU Smalltalk:: Running @gst{}.
 * Features::            A description of @gst{}'s special features.
+* Packages::            An easy way to install Smalltalk code into an image.
 * Emacs::               @gst{} and Emacs.
 * C and Smalltalk::     @gst{}'s C/Smalltalk interoperability features.
 * Tutorial::            An introduction to Smalltalk and OOP.
@@ -145,7 +146,6 @@ Features:
 * Security::           Sandboxing and access control.
 * Special objects::    Methods to assign particular properties to objects.
 * Dynamic loading::    Picking external libraries and modules at run-time.
-* Packages::           An easy way to install Smalltalk code into an image.
 
 Packages
 * Blox::                   @gst{}'s user interface building blocks.
@@ -728,7 +728,6 @@ methods in SystemDictionary (the Smalltalk dictionary's class).
 * Security::           Sandboxing and access control.
 * Special objects::    Methods to assign particular properties to objects.
 * Dynamic loading::    Picking external libraries and modules at run-time.
-* Packages::           An easy way to install Smalltalk code into an image.
 
 @end menu
 
@@ -1497,12 +1496,12 @@ disabled (either because your system is not supported, or by the
 dynamic linking will result in an error.
 
 @node Packages
-@section Packages
+@chapter Packages
 
-Thanks to Andreas Klimas' insight, @gst{} now includes a
-powerful packaging system which allows one to file in components
-(@dfn{goodies} in Smalltalk's very folkloristic terminology)
-without caring of whether they need other goodies to be loaded.
+@gst{} includes a packaging system which allows one to file in components
+(often called @dfn{goodies} in Smalltalk's very folkloristic
+terminology) without caring of whether they need other goodies to be
+loaded first.
 
 The packaging system is implemented by a Smalltalk class,
 @code{PackageLoader}, which looks for information about packages in
@@ -1533,10 +1532,31 @@ and GST will automatically file in:
 @bulletize Compiler (Blox is skipped because it has already been loaded)
 @end itemize
 
-Then it will save the Smalltalk image, and finally exit!
+Then it will save the Smalltalk image, and finally exit.
+
+@file{gst-load} supports several options:
+
+@table @option
+@item -q
+@itemx --quiet
+Hide the script's output.
+
+@item -v
+@itemx --verbose
+Show which files are loaded, one by one.
+
+@item -f
+@itemx --force
+If a package given on the command-line is already present, reload it.
+This does not apply to automatically selected prerequisites.
+
+@item -n
+@item --dry-run
+Do not save the image after loading.
+@end table
 
 To provide support for this system, you have to give away with your GST
-goodies a small file (say you call it @file{mypkg}) which looks like
+goodies a small file (say you call it @file{mypkg.xml}) which looks like
 this:
 @example
 <packages>
@@ -1590,8 +1610,13 @@ package registers the GTK+ library in this way, so that the
 bindings can use them.
 
 @item callout
-Refuse to load the package if the function whose name is within
-the tags is not available to be called from Smalltalk code.
+Instructs to load the package only if the C function whose name is
+within the tag is available to be called from Smalltalk code.
+
+@item sunit
+Specifies a testing script that @code{gst-sunit} (@pxref{SUnit}) will
+run in order to test the package.  If this is specified, the package
+should list @code{SUnit} among the prerequisites.
 @end table
 
 To install your package, you only have to do
@@ -1599,10 +1624,12 @@ To install your package, you only have to do
     gst-package mypkg.xml
 @end example
 
-which is a small shell script which will merge the file with
-@file{packages.xml}, install the files specified in the @code{file} tags
+@command{gst-package} is a small shell script which will merge the file
+with @file{packages.xml}, install the files specified in the @code{file} tags
 and load the packages.  The @gst{} makefile also use @file{gst-package}
-to install packages and to prepare the distribution tarballs.
+to install packages and to prepare the distribution tarballs.@footnote{The
+  operation of gst-package is subject to change in future releases, while
+  keeping backwards compatibility.}
 
 The rest of this chapter discusses the packages provided with @gst{}.
 
@@ -1618,7 +1645,7 @@ The rest of this chapter discusses the packages provided with @gst{}.
 @end menu
 
 @node Blox
-@subsection Blox
+@section Blox
 
 Blox is a GUI building block tool kit.  It is an abstraction on top of
 the a platform's native GUI toolkit that is common across all platforms.
@@ -1690,7 +1717,7 @@ Startup sequence}) or to run it automatically through ObjectMemory
 
 
 @node Smalltalk-in-Smalltalk
-@subsection The Smalltalk-in-Smalltalk library
+@section The Smalltalk-in-Smalltalk library
 
 
 The Smalltalk-in-Smalltalk library is a set of classes for looking at
@@ -1699,6 +1726,7 @@ be created for real, analyzing and performing changes to the image,
 finding smelly code and automatically doing repetitive changes.
 This package incredibly enhances the reflective capabilities of Smalltalk.
 
+@ignore
 Being quite big (20000 source code lines) this package is split into
 three different packages: @code{Parser} loads the parser only,
 @code{STInST} loads various other tools (which compose the
@@ -1708,6 +1736,7 @@ will be the foundation for @gst{}'s next generation browser),
     The tests can take @strong{hours} to complete!}
 (@pxref{SUnit}).  Porting of the @code{STInST} package will be
 completed in @gst{} 2.2.
+@end ignore
 
 A fundamental part of the system is the recursive-descent parser which
 creates parse nodes in the form of instances of subclasses of
@@ -1734,9 +1763,11 @@ with the browser, and by the compiler.
 
 @item
 The parser is able to perform complex tree searches and rewrites,
-through the ParseTreeSearcher and ParseTreeRewriter classes.  This
-mechanism is exploited by most of the tools loaded by the @code{STInST}
-package.
+through the ParseTreeSearcher and ParseTreeRewriter classes.
+@ignore
+This mechanism is exploited by most of the tools loaded by the
+@code{STInST} package.
+@end ignore
 @end itemize
 
 In addition, two applications were created on top of this library
@@ -1754,7 +1785,7 @@ like usual classes which can be fed to @gst{}'s @code{ClassPublisher}
 (found in @file{examples/Publish.st}.
 
 @node Database
-@subsection Database connectivity
+@section Database connectivity
 
 @gst{} includes support for connecting to databases.  Currently this
 support is limited to retrieving result sets from @acronym{SQL} selection
@@ -1849,7 +1880,7 @@ Jdm.MySQL.JdmMysqlTestSuite new run printNl
 @end example
 
 @node Locales
-@subsection Internationalization and localization support
+@section Internationalization and localization support
 
 Different countries and cultures have varying conventions for how to
 communicate.  These conventions range from very simple ones, such as the
@@ -2040,7 +2071,7 @@ In addition, the representation of translated strings is the standard
 @sc{mo} file format adopted by the @gnu{} @code{gettext} library.
 
 @node SUnit
-@subsection The SUnit testing package
+@section The SUnit testing package
 
 @code{SUnit} is a framework to write and perform test cases in Smalltalk,
 originarily written by the father of Extreme Programming@footnote{Extreme
@@ -2057,7 +2088,7 @@ What follows is a description of the philosophy of @code{SUnit} and
 a description of its usage, excerpted from Kent Beck's paper in which
 he describes @code{SUnit}.
 
-@subsubsection Where should you start?
+@subsection Where should you start?
 
 Testing is one of those impossible tasks. You'd like to be absolutely
 complete, so you can be sure the software will work.  On the other hand,
@@ -2084,7 +2115,7 @@ To design a test fixture you have to
 @bulletize{Override setUp to initialize the variables}
 @end itemize
 
-@subsubsection How do you represent a single unit of testing?
+@subsection How do you represent a single unit of testing?
 
 You can predict the results of sending a message to a fixture. You need
 to represent such a predictable situation somehow.  The simplest way to
@@ -2104,7 +2135,7 @@ tests to others to run. @emph{Represent a predictable reaction of a
 fixture as a method.}  Add a method to TestCase subclass, and stimulate
 the fixture in the method.
 
-@subsubsection How do you test for expected results?
+@subsection How do you test for expected results?
 
 If you're testing interactively, you check for expected results
 directly, by printing and inspecting your objects.  Since tests are in
@@ -2141,7 +2172,7 @@ In the example, after stimulating the fixture by adding an object to an
 empty Set, we want to check and make sure it's in there:
 
 @example
-SetTestCasee>>#testAdd
+SetTestCase>>#testAdd
     empty add: 5.
     self should: [empty includes: 5]
 @end example
@@ -2162,7 +2193,7 @@ method. Send @code{run} to the resulting object:
 If it runs to completion, the test worked. If you get a walkback,
 something went wrong.
 
-@subsubsection How do you collect and run many different test cases?
+@subsection How do you collect and run many different test cases?
 
 As soon as you have two test cases running, you'll want to run them both
 one after the other without having to execute two do it's. You could
@@ -2193,8 +2224,40 @@ All of these objects are suitable for being stored in the image and
 retrieved.  You can easily store a suite, then bring it in and run it,
 comparing results with previous runs.
 
+@gst{} includes a Smalltalk script to simplify running SUnit test suites.
+It is called @command{gst-sunit}.  The command-line to @command{gst-sunit}
+specifies the packages, files and classes to test:
+
+@table @option
+@item -q
+@itemx --quiet
+Hide the program's output.  The results are still communicated with the
+program's exit code.
+
+@item -v
+@itemx --verbose
+Be more verbose, in particular this will cause @command{gst-sunit} to write
+which test is currently being executed.
+
+@item -f @var{FILE}
+@itemx --file=@var{FILE}
+Load @var{FILE} before running the required test cases.
+
+@item -p @var{PACKAGE}
+@item --package=@var{PACKAGE}
+Load @var{PACKAGE} and its dependencies, and add @var{PACKAGE}'s tests to
+the set of test cases to run.
+
+@item @var{CLASS}
+@itemx @var{CLASS}*
+Add @var{CLASS} to the set of test cases to run.  An asterisk after the class
+name adds all the classes in @var{CLASS}'s hierarchy.  In particular,
+each selector whose name starts with @code{test} constitutes a separate
+test case.
+@end table
+
 @node Network support
-@subsection TCP, WebServer, NetClients
+@section TCP, WebServer, NetClients
 
 @gst{} includes an almost complete abstraction of the @sc{tcp}, @sc{udp}
 and @sc{ip} protocols.  Although based on the standard @sc{bsd} sockets,
@@ -2245,7 +2308,7 @@ other Smalltalk dialects and ported to @gst{}.  Future version of
 @gst{} will include documentation for these as well.
 
 @node XML
-@subsection An XML parser and object model for @gst{}
+@section An XML parser and object model for @gst{}
 
 The @sc{xml} parser library for Smalltalk, loaded as package XML
 includes a validating @sc{xml} parser and Document Object Model.
@@ -2254,7 +2317,7 @@ and a @sc{xsl} interpreter based on it is bundled with @gst{} as
 well (see packages XPath and @sc{xsl}).
 
 @node Other packages
-@subsection Other packages
+@section Other packages
 
 Various other ``minor'' packages are provided, typically as examples of
 writing modules for @gst{} (@pxref{External modules, , Linking your
