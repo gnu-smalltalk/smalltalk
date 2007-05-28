@@ -6,9 +6,7 @@ o   Behavior>>#evaluate: and MethodDictionary>>#removeAt:ifAbsent: would
     cause the method dictionary's size to double.  This caused sometimes
     spurious failures in floatmath.st.
 
-o   Behavior>>#evaluate: and MethodDictionary>>#removeAt:ifAbsent: would
-    cause the method dictionary's size to double.  This caused sometimes
-    spurious failures in floatmath.st.
+o   Fixed bug in LargeInteger division on systems not equipped with GMP.
 
 o   Fixed bug in socket #nextHunk implementation, which lost the first
     or second byte in the input buffer.
@@ -19,6 +17,14 @@ o   Fixed implementation of Dictionary>>#addAll:, and fixed Integer>>#binomial:
     when the argument is 0 or self.
 
 o   Fixed various minor bugs and imprecisions in the documentation.
+
+o   Improvements to the ancillary scripts gst-load and gst-sunit.  In
+    particular, a package can describe the classes that constitute its
+    testsuite, and gst-sunit allows to quickly run the testsuite for a
+    package.
+
+o   Improvements to the test suite.  Several of the modules included with
+    GNU Smalltalk are tested.  The testsuite is now written using Autotest.
 
 o   Some libffi files (for IA64 and PA) were missing from the distribution.
 
