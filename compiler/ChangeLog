@@ -1,3 +1,13 @@
+2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/ParseTreeSearcher.st: Sync with development version.
+	* compiler/RewriteTests.st: New.
+
+2007-05-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/RBParseNodes.st: Add #deepCopy.  Our #copy is as deep
+	as it needs to be.
+
 2007-05-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/STLoader.st: Update for class shapes, add new methods.

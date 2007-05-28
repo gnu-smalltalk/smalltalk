@@ -1,9 +1,58 @@
+2007-05-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/LargeInt.st: Fix division when GMP is absent.
+
+2007-05-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Number.st: Change #asScaledDecimal:scale: to
+	#asScaledDecimal:radix:scale:.
+
+2007-05-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Support nil superclass more thoroughly.
+	* kernel/Builtins.st: Move #instanceVariableNames: to
+	ClassDescription.
+	* kernel/Float.st: Print exponent for 1.0e/1.0q.  The zillionth
+	printing bug.
+	* kernel/ScaledDec.st: Remove initial space.
+
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
+        * tests/floatmath.st: Test printing on hexadecimal patterns.
+
+2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/gdbmtests.st: Remove created files.
+
+2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
+            Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/Collection.st: Don't use #basicSize in #copyWith:.
 	* kernel/Dictionary.st: Replace #primSize with #capacity.
 	* kernel/HashedColl.st: Replace #primSize with #capacity.
 	* kernel/LookupTable.st: Replace #primSize with #capacity.
+
+	* numerics/NumericsAdds.st: Make all tests pass.
+	* numerics/NumericsTests.st: Update usage of SUnit logging API.
+
+        * examples/Continuations.st: Add the Amb class from seaside and
+	related SUnit tests.
+
+	* examples/gdbm-c.st: Fix finalization bug.  Move tests from here...
+	* examples/gdbm.st: ... and here...
+	* examples/gdbmtests.st: ... to here.
+
+	* kernel/PkgLoader.st: Add public #fileIn method to Package.
+
+	* examples/md5tests.st: New.
+
+	* examples/zlibtests.st: New file split from examples/zlib.st.
+	Convert to an SUnit test.
+
+	* scripts/Load.st: Rewrite.
+	* scripts/Test.st: Rewrite.
+	* scripts/Reload.st: Replace with...
+	* scripts/gst-reload.sh: ... this script.
 
 2007-05-22  Paolo Bonzini  <bonzini@gnu.org>
 

@@ -1,6 +1,6 @@
 examplemodulesdir = $(pkgdatadir)/examples/modules
 
-dist_examplemodules_DATA = gdbm.st gdbm-c.st md5.st zlib.st
+dist_examplemodules_DATA = gdbm.st gdbm-c.st md5.st zlib.st zlibtests.st
 
 EXTRA_LTLIBRARIES = gdbm.la zlib.la
 pkglib_LTLIBRARIES = @MODULES_EXAMPLE@ md5.la

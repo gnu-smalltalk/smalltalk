@@ -95,7 +95,7 @@ symbol_info;
 
 
 OOP _gst_and_symbol = NULL;
-OOP _gst_as_scaled_decimal_scale_symbol = NULL;
+OOP _gst_as_scaled_decimal_radix_scale_symbol = NULL;
 OOP _gst_at_put_symbol = NULL;
 OOP _gst_at_symbol = NULL;
 OOP _gst_at_end_symbol = NULL;
@@ -278,7 +278,7 @@ static scope cur_scope = NULL;
    and is used to restore the global variables upon image load.  */
 static const symbol_info sym_info[] = {
   {&_gst_and_symbol, "and:"},
-  {&_gst_as_scaled_decimal_scale_symbol, "asScaledDecimal:scale:"},
+  {&_gst_as_scaled_decimal_radix_scale_symbol, "asScaledDecimal:radix:scale:"},
   {&_gst_at_put_symbol, "at:put:"},
   {&_gst_at_symbol, "at:"},
   {&_gst_at_end_symbol, "atEnd"},

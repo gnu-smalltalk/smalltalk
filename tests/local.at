@@ -1,0 +1,76 @@
+dnl Local Autotest macros for GNU Smalltalk.
+dnl
+dnl Copyright (C) 2007 Free Software Foundation, Inc.
+dnl
+dnl This program is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation; either version 2, or (at your option)
+dnl any later version.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program; if not, write to the Free Software
+dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+dnl 02111-1307, USA.
+
+dnl AT_CHECK_GST([COMMAND-LINE], [IMAGE], [DIR], [STDOUT], [STDERR])
+dnl ----------------------------------------------------------------
+m4_define([AT_CHECK_GST], [
+  case $AUTOTEST_PATH in
+    tests) GST="$abs_top_builddir/gst -I m4_ifval([$2], [$2], [$abs_top_builddir/gst.im])" ;;
+    *) GST="$AUTOTEST_PATH/gst m4_ifval([$2], [-I $2])" ;;
+  esac
+
+  AT_CHECK([cd m4_ifval([$3], [$3], [$abs_top_builddir]) && $GST $1], 0, [$4], [$5])
+])
+
+dnl AT_DIFF_TEST([FILE], [XFAILS])
+dnl ------------------------------
+m4_define([AT_DIFF_TEST], [
+  AT_SETUP([$1])
+  AT_KEYWORDS([base])
+  $2
+  cat $abs_srcdir/m4_bpatsubst([$1], [\.st$], [.ok]) > expout
+  AT_CHECK_GST([-r $1 2>&1], [], [$abs_srcdir], [expout])
+  AT_CLEANUP
+])
+
+dnl AT_PACKAGE_TEST([PACKAGE], [XFAILS])
+dnl ------------------------------------
+m4_define([AT_PACKAGE_TEST], [
+  AT_SETUP([$1])
+  AT_KEYWORDS([m4_if([$1], [SUnit], [], [SUnit ])SUnit])
+  $2
+  AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st -p $1], [], [], [ignore])
+  AT_CLEANUP
+])
+
+dnl AT_OPTIONAL_PACKAGE_TEST([PACKAGE], [XFAILS])
+dnl ---------------------------------------------
+dnl Returns exit code 77 (skip) if the package cannot be loaded.
+m4_define([AT_OPTIONAL_PACKAGE_TEST], [
+  AT_SETUP([$1])
+  AT_KEYWORDS([$1 SUnit])
+  $2
+  AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st -p $1
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac], [], [], [ignore])
+  AT_CLEANUP
+])
+
+dnl AT_ANSI_TEST([PACKAGE], [XFAILS])
+dnl ---------------------------------
+m4_define([AT_ANSI_TEST], [
+  AT_SETUP([$1])
+  AT_KEYWORDS([ANSI SUnit])
+  $2
+  AT_CHECK_GST([-f $abs_srcdir/AnsiRun.st $1], [$abs_builddir/gst.im], [], [ignore])
+  AT_CLEANUP
+])

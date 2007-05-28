@@ -434,5 +434,3 @@ testResourcesCollection
     collection := self resources.
     self assert: collection size = 1! !
 
-(SUnitTest -> SUnitTest buildSuite run) printNl!
-

@@ -201,4 +201,3 @@ testTwoCommentsScript
     self assert: suite tests size = 1
 ! !
 
-(TestSuitesScriptTest->TestSuitesScriptTest buildSuite run) printNl!

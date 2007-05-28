@@ -383,10 +383,19 @@ printOn: aStream
 
 storeOn: aStream
     "Print a representation of the receiver on aStream"
-    self
-	printOn: aStream
-	special: #('%1 infinity' '%1 negativeInfinity' '%1 nan')
-! !
+    | printString |
+    (self isInfinite or: [ self isNaN ])
+	ifTrue: [
+	     ^self
+	          printOn: aStream
+	          special: #('%1 infinity' '%1 negativeInfinity' '%1 nan') ].
+    printString := self printString.
+    aStream nextPutAll: printString.
+
+    "For FloatE/FloatQ, force printing the exponent at the end."
+    self exponentLetter == $d ifTrue: [ ^self ].
+    (printString includes: self exponentLetter)
+	ifFalse: [ aStream nextPut: self exponentLetter ]! !
 
 
 
@@ -405,8 +414,8 @@ printOn: aStream special: whatToPrintArray
     "Private - Print a decimal representation of the receiver on aStream,
      printing one of the three elements of whatToPrintArray if it is
      infinity, negative infinity, or a NaN"
-    | me exponential small num numLog den denLog gcd
-      intFactor precision int rounding digits digitStream exponent
+    | me exponential small num weight prevWeight digit eps
+      precision digits digitStream exponent
       dotPrinted |
 
     "First, take care of the easy cases."
@@ -430,45 +439,32 @@ printOn: aStream special: whatToPrintArray
     small := me < me unity.
     exponent := (me floorLog: 10) + 1.
 
-    "Compute a rational form of the number we will print..."
-    (exponential and: [ small not ])
-        ifTrue: [ num := me asInteger. den := 1 ]
-	ifFalse: [
-	    num := (me timesTwoPower: me class precision - me exponent) asInteger.
-	    den := 2 raisedToInteger: me class precision - me exponent.
+    "Compute the digits one by one."
+    num := me asExactFraction.
+    digits := 0.
+    weight := 10 raisedToInteger: exponent - 1.
+    me class decimalDigits timesRepeat: [
+	digit := num // weight.
+	digits := digits * 10 + digit.
+	num := num - (digit * weight).
+	prevWeight := weight.
+	weight := weight / 10 ].
 
-            "(The mantissa if printing a small number in exponential notation)."
-            exponential ifTrue: [ num := num * (10 raisedTo: -1 - exponent) ].
+    num = 0 ifFalse: [
+        "Smallest number such that me + eps ~= eps"
+        eps := 2 raisedToInteger: me exponent - me class precision + 1.
+        "For large numbers, don't let round-to-even bite us."
+        eps isInteger ifTrue: [ eps := eps / 2 ].
+        (num - prevWeight quo: eps) = 0 ifTrue: [ digits := digits + 1 ] ].
 
-	    gcd := num gcd: den.
-	    num := num // gcd.
-	    den := den // gcd ].
-
-    "To round correctly, make sure den is even."
-    (den bitAnd: 1) = 1 ifTrue: [ num := num * 2. den := den * 2 ].
-
-    "Get the first `me class decimalDigits' base-10 digits of num // den,
-     appropriately rounded"
-    numLog := num ceilingLog: 10.
-    denLog := den ceilingLog: 10. 
-    denLog < me class decimalDigits ifTrue: [
-        denLog := denLog max: den highBit ].
-
-    intFactor := 10 raisedToInteger: denLog.
-    rounding := 10 raisedToInteger: numLog - me class decimalDigits.
-    int := ((num * intFactor) + ((den // 2) * (rounding + 1))) // den.
-
-    digits := int printString.
-    digits size > me class decimalDigits
-        ifTrue: [ digits := digits copyFrom: 1 to: me class decimalDigits ].
+    digits := digits printString.
 
     "Print the non-significant zeros."
     dotPrinted := false.
     (small and: [ exponential not ]) ifTrue: [
-        (me floorLog: 10) negated timesRepeat: [
+        1 - exponent timesRepeat: [
             aStream nextPut: $0.
 	    dotPrinted ifFalse: [ dotPrinted := true. aStream nextPut: $. ].
-            int := int // 10.
 	    exponent := exponent + 1 ] ].
 
     "Make a stream with the significant digits."

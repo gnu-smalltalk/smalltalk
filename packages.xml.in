@@ -239,7 +239,10 @@
 <package>
   <name>DhbNumericalMethods</name>
   <namespace>Dhb</namespace>
+
+  <tests>Dhb.DhbTestCase*</tests>
   <prereq>SUnit</prereq>
+
   <filein>Basic.st</filein>
   <filein>Statistics.st</filein>
   <filein>RNG.st</filein>
@@ -268,13 +271,18 @@
 
 <package>
   <name>GDBM</name>
+  <sunit>GDBMTest</sunit>
+  <prereq>SUnit</prereq>
+
   <filein>gdbm-c.st</filein>
   <filein>gdbm.st</filein>
+  <filein>gdbmtests.st</filein>
   <module>gdbm</module>
   <directory>examples</directory>
 
   <file>gdbm.st</file>
   <file>gdbm-c.st</file>
+  <file>gdbmtests.st</file>
 </package>
 
 <@NCURSES_DISABLED@package>
@@ -288,22 +296,32 @@
 
 <package>
   <name>ZLib</name>
+  <sunit>ZlibStreamTest</sunit>
+  <prereq>SUnit</prereq>
+
   <filein>PipeStream.st</filein>
   <filein>zlib.st</filein>
+  <filein>zlibtests.st</filein>
   <module>zlib</module>
   <directory>examples</directory>
 
   <file>PipeStream.st</file>
   <file>zlib.st</file>
+  <file>zlibtests.st</file>
 </package>
 
 <package>
   <name>MD5</name>
+  <sunit>MD5Test</sunit>
+  <prereq>SUnit</prereq>
+
   <filein>md5.st</filein>
+  <filein>md5tests.st</filein>
   <module>md5</module>
   <directory>examples</directory>
 
   <file>md5.st</file>
+  <file>md5tests.st</file>
 </package>
 
 <package>
@@ -361,6 +379,9 @@
 
 <package>
   <name>Parser</name>
+  <sunit>STInST.Tests.TestStandardRewrites</sunit>
+  <prereq>SUnit</prereq>
+
   <namespace>STInST</namespace>
   <filein>RBToken.st</filein>
   <filein>RBParseNodes.st</filein>
@@ -375,6 +396,8 @@
   <filein>STLoaderObjs.st</filein>
   <filein>STLoader.st</filein>
 
+  <filein>RewriteTests.st</filein>
+
   <directory>compiler</directory>
 
   <file>ParseTreeSearcher.st</file>
@@ -382,13 +405,14 @@
   <file>RBParseNodes.st</file>
   <file>RBParser.st</file>
   <file>RBToken.st</file>
-  <filein>OrderedSet.st</filein>
+  <file>OrderedSet.st</file>
   <file>STCompLit.st</file>
   <file>STCompiler.st</file>
   <file>STDecompiler.st</file>
   <file>STLoader.st</file>
   <file>STLoaderObjs.st</file>
   <file>STSymTable.st</file>
+  <file>RewriteTests.st</file>
 </package>
 
 <package>
@@ -398,6 +422,9 @@
 
 <package>
   <name>SUnit</name>
+  <sunit>SUnitTest</sunit>
+  <sunit>TestSuitesScriptTest</sunit>
+
   <filein>SUnitPreload.st</filein>
   <filein>SUnit.st</filein>
   <filein>SUnitTests.st</filein>
@@ -583,10 +610,20 @@
   <file>torture.st</file>
 </disabled-package>
 
+<package>
+  <name>Continuations</name>
+  <sunit>AmbTest</sunit>
+  <prereq>SUnit</prereq>
+
+  <filein>Continuations.st</filein>
+
+  <directory>examples</directory>
+  <file>Continuations.st</file>
+</package>
+
 <disabled-package>
   <name>Examples</name>
   <directory>examples</directory>
-  <file>Continuations.st</file>
   <file>Debugger.st</file>
   <file>LazyCollection.st</file>
   <file>Man.st</file>

@@ -32,7 +32,7 @@
 
 
 Object subclass: #Package
-	instanceVariableNames: 'name features prerequisites builtFiles files fileIns directory libraries modules callouts namespace'
+	instanceVariableNames: 'name features prerequisites builtFiles files fileIns directory libraries modules callouts namespace sunitScripts'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Language-Packaging'
@@ -58,6 +58,10 @@ into a Smalltalk image, correctly handling dependencies.'!
 
 
 !Package methodsFor: 'accessing'!
+
+fileIn
+    "File in the given package and its dependencies."
+    PackageLoader fileInPackage: self name!
 
 printXmlOn: aStream collection: aCollection tag: aString
     "Private - Print aCollection on aStream as a sequence of aString
@@ -95,6 +99,11 @@ printOn: aStream
 	printXmlOn: aStream
 	collection: self prerequisites asSortedCollection
 	tag: 'prereq'.
+
+    self
+	printXmlOn: aStream
+	collection: self sunitScripts
+	tag: 'sunit'.
 
     self
 	printXmlOn: aStream
@@ -197,6 +206,18 @@ modules
     modules isNil ifTrue: [ modules := Set new ].
     ^modules!
 
+sunitScript
+    "Answer a String containing a SUnit script that
+     describes the package's test suite."
+    self sunitScripts isEmpty ifTrue: [ ^'' ].
+    ^self sunitScripts fold: [ :a :b | a, ' ', b ]!
+
+sunitScripts
+    "Answer a (modifiable) OrderedCollection of SUnit scripts that
+     compose the package's test suite."
+    sunitScripts isNil ifTrue: [ sunitScripts := OrderedCollection new ].
+    ^sunitScripts!
+
 callouts
     "Answer a (modifiable) Set of call-outs that are required to load
      the package.  Their presence is checked after the libraries and
@@ -275,7 +296,7 @@ createNamespace
     ].
     ^ns!
 
-fileIn
+primFileIn
     "Private - File in the given package without paying attention at
      dependencies and C callout availability"
     | dir namespace |
@@ -336,6 +357,12 @@ fileInsFor: package
     "Answer a Set of Strings containing the filenames of the given package's
      file-ins (relative to the directory answered by #directoryFor:)"
     ^(self packageAt: package) fileIns.
+!
+
+sunitScriptFor: package
+    "Answer a Strings containing a SUnit script that describes the package's
+     test suite."
+    ^(self packageAt: package) sunitScript.
 !
 
 calloutsFor: package
@@ -477,7 +504,7 @@ fileInPackages: packagesList
 	extractDependenciesFor: packagesList
 	onError: [ :errorMessage | ^self error: errorMessage ].
 	
-    toBeLoaded do: [ :each | (self packageAt: each) fileIn ]
+    toBeLoaded do: [ :each | (self packageAt: each) primFileIn ]
 ! !
 
 
@@ -586,7 +613,8 @@ processPackageFile: fileName baseDirectories: baseDirs
 		(package baseDirs: baseDirs)
 		    ifTrue: [ Packages at: package name put: package ]] ifFalse: [
 	    tag = 'built-file' ifTrue: [ package builtFiles add: cdata ] ifFalse: [
-	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]]].
+	    tag = 'sunit' ifTrue: [ package sunitScripts add: cdata ] ifFalse: [
+	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]]]].
 	    cdata := nil.
 	].
 	ch isAlphaNumeric ifTrue: [

@@ -23,7 +23,7 @@ TestCase subclass:#DhbTestCase
 
 !DhbTestCase methodsFor: 'logging'!
 
-logPolicy
+defaultLogPolicyClass
     ^TestVerboseLog
 ! !
 

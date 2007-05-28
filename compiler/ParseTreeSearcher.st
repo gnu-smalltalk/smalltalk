@@ -277,6 +277,12 @@ LookupTable variableSubclass: #RBSmallDictionary
 
 !RBSmallDictionary methodsFor: 'private'!
 
+capacity
+    ^super primSize!
+
+capacity
+    ^super primSize!
+
 whileGrowingAt: key put: value
     tally := tally + 1.
     self primAt: self size put: key.
@@ -758,79 +764,143 @@ foundMatch
     answer := true!
 
 lookForMoreMatchesInContext: oldContext 
-    oldContext keysAndValuesDo: 
-	    [:key :value | 
-	    (key isString not and: [key recurseInto]) 
-		ifTrue: 
-		    [oldContext at: key put: (value collect: [:each | self visitNode: each])]]! !
+    oldContext keysAndValuesDo: [:key :value || newValue |
+	(key isString not and: [key recurseInto]) ifTrue: [
+	    "Of course, the following statement does nothing without the `deepCopy'
+	     which fixes the bug."
+	    newValue := oldContext at: key put: value deepCopy "<<<".
+	    self visitNodes: newValue
+	         onMatch: [:newValue |
+		     oldContext at: key put: newValue]]]! !
 
 !ParseTreeRewriter methodsFor: 'visiting'!
 
-visitArguments: aNodeCollection 
-    ^aNodeCollection collect: [:each | self visitArgument: each]! !
+visitNode: aNode
+    ^self visitNode: aNode searches: searches onMatch: [:newNode |]!
+
+visitNode: aNode onMatch: aBlock
+    ^self visitNode: aNode searches: searches onMatch: aBlock!
+
+visitNodes: aNodeList
+    ^self visitNodes: aNodeList onMatch: [:newNodes |]!
+
+visitNodes: aNodeList onMatch: aBlock
+    ^self visitNodes: aNodeList searches: searches onMatch: aBlock!
+
+visitArgument: aNode
+    ^self visitNode: aNode searches: argumentSearches onMatch: [:newNode |]!
+
+visitArguments: aNodeList
+    ^self visitArguments: aNodeList onMatch: [:newNodes |]!
+
+visitArguments: aNodeList onMatch: aBlock
+    ^self visitNodes: aNodeList searches: argumentSearches onMatch: aBlock!
+
+visitNode: aNode searches: theseSearches onMatch: aBlock
+    "Visit aNode, sending visitNode:'s answer to aBlock if
+     performSearches:on: finds a match."
+    | newNode |
+    newNode := self performSearches: theseSearches on: aNode.
+    ^newNode isNil ifTrue: [aNode acceptVisitor: self.  aNode]
+		   ifFalse: [aBlock value: newNode.  newNode]!
+
+visitNodes: aNodeList searches: theseSearches onMatch: aBlock
+    "Answer aNodeList but with each element replaced by the result of
+     visitNode:onMatch: with said element (and a block of my own).  If
+     any matches occur, I'll call aBlock afterwards with the
+     replacement of aNodeList before answering it."
+    | replacementList rlHasMatch |
+    rlHasMatch := false.
+    replacementList := aNodeList collect: [:eltNode |
+	self visitNode: eltNode
+	     searches: theseSearches
+	     onMatch: [:newElt | rlHasMatch := true]].
+    ^rlHasMatch
+	ifTrue: [aBlock value: replacementList.  replacementList]
+	ifFalse: [aNodeList]! !
 
 !ParseTreeRewriter methodsFor: 'visitor-double dispatching'!
 
 acceptAssignmentNode: anAssignmentNode 
-    anAssignmentNode variable: (self visitNode: anAssignmentNode variable).
-    anAssignmentNode value: (self visitNode: anAssignmentNode value)!
+    self visitNode: anAssignmentNode variable
+	 onMatch: [:newField | anAssignmentNode variable: newField].
+    self visitNode: anAssignmentNode value
+	 onMatch: [:newField | anAssignmentNode value: newField]!
 
 acceptArrayConstructorNode: anArrayNode 
-    anArrayNode body: (self visitNode: anArrayNode body)!
+    self visitNode: anArrayNode body
+	 onMatch: [:newField | anArrayNode body: newField]!
 
 acceptBlockNode: aBlockNode 
-    aBlockNode arguments: (self visitArguments: aBlockNode arguments).
-    aBlockNode body: (self visitNode: aBlockNode body)!
+    self visitArguments: aBlockNode arguments
+	 onMatch: [:newField | aBlockNode arguments: newField].
+    self visitNode: aBlockNode body
+	 onMatch: [:newField | aBlockNode body: newField]!
+
+searchCascadeNodeMessage: aMessageNode messagesTo: newMessages
+    "Helper for acceptCascadeNode: -- descend to aMessageNode, but no
+     further.  Add the resulting message or cascade of messages from
+     the tree rule's foundMatchFor: to newMessages and answer said
+     result if a match is found.  Add aMessageNode to newMessages and
+     answer nil otherwise."
+    | answer newNode |
+    answer := self performSearches: searches on: aMessageNode.
+    newNode := answer ifNil: [aMessageNode].
+    newNode isCascade
+	ifTrue: [newMessages addAll: newNode messages]
+	ifFalse: [newMessages add:
+		      (newNode isMessage ifTrue: [newNode]
+					 ifFalse: [Warning signal: 'Cannot replace message node inside of cascaded node with non-message node'.
+					           answer := nil. "<<<"
+						   aMessageNode])].
+    ^answer!
 
 acceptCascadeNode: aCascadeNode 
     | newMessages notFound |
     newMessages := OrderedCollection new: aCascadeNode messages size.
     notFound := OrderedCollection new: aCascadeNode messages size.
-    aCascadeNode messages do: 
-	    [:each | 
-	    | newNode |
-	    newNode := self performSearches: searches on: each.
-	    newNode isNil 
-		ifTrue: 
-		    [newNode := each.
-		    notFound add: newNode].
-	    newNode isMessage 
-		ifTrue: [newMessages add: newNode]
-		ifFalse: 
-		    [newNode isCascade 
-			ifTrue: [newMessages addAll: newNode messages]
-			ifFalse: 
-			    [Transcript
-				show: 'Cannot replace message node inside of cascaded node with non-message node.';
-				cr.
-			    newMessages add: each]]].
+    aCascadeNode messages do: [:each | 
+	(self searchCascadeNodeMessage: each
+	      messagesTo: newMessages)
+	    isNil ifTrue: [notFound add: each]].
+
+    "Rewrite the receiver once and distribute it among the messages if
+     no replacements were made."
     notFound size == aCascadeNode messages size 
 	ifTrue: 
-	    [| receiver |
-	    receiver := self visitNode: aCascadeNode messages first receiver.
-	    newMessages do: [:each | each receiver: receiver]].
+	    [self visitNode: aCascadeNode messages first receiver
+		  onMatch: [:receiver |
+		      newMessages do: [:each | each receiver: receiver]]].
     notFound 
-	do: [:each | each arguments: (each arguments collect: [:arg | self visitNode: arg])].
+	do: [:each | self visitNodes: each arguments
+			  onMatch: [:newArgs | each arguments: newArgs]].
     aCascadeNode messages: newMessages!
 
 acceptMessageNode: aMessageNode 
-    aMessageNode receiver: (self visitNode: aMessageNode receiver).
-    aMessageNode 
-	arguments: (aMessageNode arguments collect: [:each | self visitNode: each])!
+    self visitNode: aMessageNode receiver
+	 onMatch: [:newField | aMessageNode receiver: newField].
+    self visitNodes: aMessageNode arguments
+	 onMatch: [:newField | aMessageNode arguments: newField]!
 
 acceptMethodNode: aMethodNode 
-    aMethodNode arguments: (self visitArguments: aMethodNode arguments).
-    aMethodNode body: (self visitNode: aMethodNode body)!
+    self visitArguments: aMethodNode arguments
+	 onMatch: [:newField | aMethodNode arguments: newField].
+    self visitNode: aMethodNode body
+	 onMatch: [:newField | aMethodNode body: newField]!
 
 acceptOptimizedNode: anOptimizedNode 
-    anOptimizedNode body: (self visitNode: anOptimizedNode body)!
+    self visitNode: anOptimizedNode body
+	 onMatch: [:newField | anOptimizedNode body: newField]!
 
 acceptReturnNode: aReturnNode 
-    aReturnNode value: (self visitNode: aReturnNode value)!
+    self visitNode: aReturnNode value
+	 onMatch: [:newField | aReturnNode value: newField]!
 
 acceptSequenceNode: aSequenceNode 
-    aSequenceNode temporaries: (self visitArguments: aSequenceNode temporaries).
-    aSequenceNode statements: (aSequenceNode statements collect: [:each | self visitNode: each])! !
+    self visitArguments: aSequenceNode temporaries
+	 onMatch: [:newField | aSequenceNode temporaries: newField].
+    self visitNodes: aSequenceNode statements
+	 onMatch: [:newField | aSequenceNode statements: newField]! !
 
 ParseTreeRewriter class
     instanceVariableNames: ''!

@@ -162,26 +162,31 @@ ObjectMemory globalGarbageCollect.
 
 "Fun with printing"
   
-!Float methodsFor: 'testing'!
+!Float class methodsFor: 'testing'!
 
-test
-    (((Behavior evaluate: self printString) = self) -> self) printNl. 
+test: bytes
+    | b f |
+    b := Memory bigEndian ifTrue: [ bytes reverse ] ifFalse: [ bytes ].
+    f := self new: b size.
+    1 to: f size do: [ :i | f at: i put: (b at: i) ].
+    (true->f) printNl.
+    ^f
 ! !
 
-1d16 test!
-1e16 test!
-1.2345d16 test!
-1.2345e16 test!
-1.25 test!
-10.0 test!
-(20 - 2.2325251) test!
-0.12345 test!
-0.12345d-8 test!
-0.12345e-8 test!
-0.83205029433784 test!
-0.832050294337844 test!
-0.55470019622523 test!
-0.554700196225229 test!
+FloatD test: #[0 128 224 55 121 195 65 67] !
+FloatE test: #[202 27 14 90] !
+FloatD test: #[0 72 224 37 219 237 69 67] !
+FloatE test: #[217 110 47 90] !
+FloatD test: #[0 0 0 0 0 0 244 63] !
+FloatD test: #[0 0 0 0 0 0 36 64] !
+FloatD test: #[57 0 44 60 121 196 49 64] !
+FloatD test: #[123 242 176 80 107 154 191 63] !
+FloatD test: #[78 250 91 111 99 53 21 62] !
+FloatE test: #[27 171 169 48] !
+FloatD test: #[191 220 89 240 39 160 234 63] !
+FloatD test: #[227 220 89 240 39 160 234 63] !
+FloatD test: #[157 232 59 160 26 192 225 63] !
+FloatD test: #[148 232 59 160 26 192 225 63] !
 
 
 "Fun with rounding"

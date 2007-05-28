@@ -6,14 +6,13 @@
 /* The name of the file implementing the handler functionality. */
 #define CFG_HANDLER "handler-win32.c"
 
-/* The name of the include file describing the stack overflow detection
-   heuristics. */
-#undef CFG_HEURISTICS
-
 /* The name of the file implementing sigsegv_reset_onstack_flag. */
 #undef CFG_LEAVE
 
-/* The name of the include file describing which signals should be trapped. */
+/* The name of the include file describing the Mach fault handler. */
+#undef CFG_MACHFAULT
+
+/* The name of the include file describing the fault signals. */
 #undef CFG_SIGNALS
 
 /* The name of the file determining the stack virtual memory area. */
@@ -34,6 +33,9 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define to 1 if you have the `mincore' function. */
+#undef HAVE_MINCORE
+
 /* Define if <sys/mman.h> defines MAP_ANON and mmaping with MAP_ANON works. */
 #undef HAVE_MMAP_ANON
 
@@ -52,6 +54,9 @@
 
 /* Define to 1 if you have the `sigaltstack' function. */
 #undef HAVE_SIGALTSTACK
+
+/* Define if CFG_STACKVMA is set to a nontrivial source file. */
+#undef HAVE_STACKVMA
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H

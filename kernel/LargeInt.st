@@ -1308,7 +1308,7 @@ primDivide: rhs
     n := v size.
     sub := ByteArray new: n.
     m := u size - n.
-    q := ByteArray new: m + 1.
+    q := ByteArray new: m + 2.
 
     "1. Normalize the divisor
      Knuth's algorithm is based on an initial guess for the quotient. The

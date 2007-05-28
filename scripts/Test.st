@@ -10,7 +10,7 @@
 
 "======================================================================
 |
-| Copyright 2003 Free Software Foundation, Inc.
+| Copyright 2003, 2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -30,27 +30,97 @@
 |
  ======================================================================"
 
-(Smalltalk includesKey: #TestSuitesScripter)
-    ifFalse: [
-	Transcript show: 'SUnit not loaded.'; nl.
-	ObjectMemory quit: 1 ]!
+Smalltalk arguments isEmpty ifTrue: [ ObjectMemory quit ]!
 
-| suite script result |
-Smalltalk arguments isEmpty ifTrue: [ ^self ].
-script := Smalltalk arguments fold: [ :a :b | a, ' ', b ].
+| helpString verbose script suite result quiet |
+quiet := false.
+verbose := false.
+FileStream verbose: true.
+script := ''.
+
+helpString :=
+'Usage:
+    gst-sunit [ flag ... ] class.tests ...
+
+Options:
+    -q --quiet            hide the output
+    -v --verbose          show passed tests
+    -f --file=FILE        load file before running subsequent tests
+    -p --package=PACKAGE  load package and run its tests
+    -h --help             show this message
+'.
+
+"Parse the command-line arguments."
+Smalltalk
+    arguments: '-h|--help -q|--quiet -v|-V|--verbose -f|--file: -p|--package:'
+    do: [ :opt :arg |
+
+    opt = 'help' ifTrue: [
+	helpString displayOn: stderr.
+	ObjectMemory quit: 0 ].
+
+    opt = 'verbose' ifTrue: [
+        OutputVerbosity := 1.
+	quiet := false.
+	verbose := true.
+	FileStream verbose: true ].
+
+    opt = 'quiet' ifTrue: [
+        OutputVerbosity := 0.
+	quiet := true.
+	verbose := false.
+	FileStream verbose: false ].
+
+    opt = 'package' ifTrue: [
+	[
+	    | pkg |
+	    pkg := PackageLoader packageAt: arg.
+	    pkg fileIn.
+	    script := script, ' ', pkg sunitScript ]
+	    ifCurtailed: [ ObjectMemory quit: 2 ] ].
+
+    opt = 'file' ifTrue: [
+	[ FileStream fileIn: arg ]
+	    ifCurtailed: [ ObjectMemory quit: 2 ] ].
+
+    opt isNil ifTrue: [
+	script := script, ' ', arg ] ]
+
+    ifError: [
+	helpString displayOn: stderr.
+	ObjectMemory quit: 1 ].
+
+script isEmpty ifTrue: [ ^self ].
+
+FileStream verbose: false.
+PackageLoader fileInPackage: #SUnit.
 suite := TestSuitesScripter run: script.
+
+"Set log policy to write to stdout."
+quiet
+    ifTrue: [ suite logPolicy: TestLogPolicy null ].
+verbose
+    ifTrue: [ suite logPolicy: (TestVerboseLog on: stdout) ].
+(quiet or: [ verbose ])
+    ifFalse: [ suite logPolicy: (TestCondensedLog on: stdout) ].
+
 result := suite run.
-result printNl.
 
-result errorCount > 0 ifTrue: [
-    Transcript show: 'Errors:'; nl.
-    (result errors asSortedCollection: [ :a :b | a printString <= b printString ])
-	do: [ :each | Transcript show: '    '; print: each; nl ] ].
+"Print result depending on verboseness."
+quiet ifFalse: [
+    result runCount < result passedCount
+        ifTrue: [ stdout nl ].
 
-result failureCount > 0 ifTrue: [
-    Transcript show: 'Failures:'; nl.
-    (result failures asSortedCollection: [ :a :b | a printString <= b printString ])
-	do: [ :each | Transcript show: '    '; print: each; nl ] ].
+    result printNl.
+    result errorCount > 0 ifTrue: [
+        stdout nextPutAll: 'Errors:'; nl.
+        (result errors asSortedCollection: [ :a :b | a printString <= b printString ])
+            do: [ :each | stdout nextPutAll: '    '; print: each; nl ] ].
 
-result runCount = result passedCount ifFalse: [
-    ObjectMemory quit: 1 ]!
+    result failureCount > 0 ifTrue: [
+        stdout nextPutAll: 'Failures:'; nl.
+        (result failures asSortedCollection: [ :a :b | a printString <= b printString ])
+            do: [ :each | stdout nextPutAll: '    '; print: each; nl ] ] ].
+
+result runCount = result passedCount
+    ifFalse: [ ObjectMemory quit: 1 ]!

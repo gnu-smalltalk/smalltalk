@@ -89,7 +89,7 @@ extern int _gst_use_undeclared
   ATTRIBUTE_HIDDEN;
 
 extern OOP _gst_and_symbol ATTRIBUTE_HIDDEN;
-extern OOP _gst_as_scaled_decimal_scale_symbol ATTRIBUTE_HIDDEN;
+extern OOP _gst_as_scaled_decimal_radix_scale_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_at_put_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_at_symbol ATTRIBUTE_HIDDEN;
 extern OOP _gst_at_end_symbol ATTRIBUTE_HIDDEN;

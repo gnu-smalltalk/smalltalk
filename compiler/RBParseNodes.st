@@ -253,6 +253,13 @@ nodesDo: aBlock
 
 !RBProgramNode methodsFor: 'enumeration'!
 
+deepCopy
+    "Hacked to fit collection protocols.  We use #deepCopy to obtain a list
+     of copied nodes.  We do already copy for our instance variables
+     through #postCopy, so we redirect #deepCopy to be a normal #copy."
+
+    ^self copy!
+
 collect: aBlock 
     "Hacked to fit collection protocols"
 
