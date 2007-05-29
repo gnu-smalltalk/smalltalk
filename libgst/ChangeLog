@@ -1,3 +1,10 @@
+2007-05-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gst-parse.c: Revert meaning of the last parameter
+	to parse_doit.	Skip over the final '!' in parse_chunks,
+	don't do so in parse_doit and parse_method_list.  Exit
+	parse_namespace_definition upon finding a '!'.
+
 2007-05-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Pass radix when converting ScaledDecimals like 2r1.1s.

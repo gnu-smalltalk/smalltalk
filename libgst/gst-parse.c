@@ -98,7 +98,7 @@ static int filprintf (Filament *fil,
 
 static void parse_chunks (gst_parser *p);
 static void parse_doit (gst_parser *p,
-			mst_Boolean accept_bang);
+			mst_Boolean fail_at_eof);
 static mst_Boolean parse_scoped_definition (gst_parser *p, 
 					    tree_node first_stmt);
 
@@ -354,8 +354,10 @@ parse_chunks (gst_parser *p)
           if (p->state == PARSE_METHOD_LIST)
 	    parse_method_list (p);
           else
-	    parse_doit (p, true);
+	    parse_doit (p, false);
         }
+
+      lex_skip_if (p, '!', false);
       _gst_pop_temporaries_dictionary (oldTemporaries);
     }
 }
@@ -437,7 +439,7 @@ recover_error (gst_parser *p)
    | empty */
 
 static void
-parse_doit (gst_parser *p, mst_Boolean accept_bang)
+parse_doit (gst_parser *p, mst_Boolean fail_at_eof)
 {
   tree_node statement = NULL;
   mst_Boolean caret;
@@ -445,7 +447,7 @@ parse_doit (gst_parser *p, mst_Boolean accept_bang)
   if (token (p, 0) == '|')
     parse_temporaries (p, false);
 
-  if (token (p, 0) == EOF && accept_bang)
+  if (token (p, 0) == EOF && !fail_at_eof)
     return;
 
   caret = lex_skip_if (p, '^', false);
@@ -470,8 +472,6 @@ parse_doit (gst_parser *p, mst_Boolean accept_bang)
 
   /* Do not lex until after _gst_free_tree, or we lose a token! */
   lex_skip_if (p, '.', false);
-  if (accept_bang)
-    lex_skip_if (p, '!', false);
 }
 
 
@@ -603,8 +603,8 @@ parse_namespace_definition (gst_parser *p, tree_node first_stmt)
       _gst_msg_sendf (NULL, "%v %o current: %o", 
 		      _gst_namespace_class, new_namespace);
       
-      while (token (p, 0) != ']' && token (p, 0) != EOF)
-        parse_doit (p, false);	
+      while (token (p, 0) != ']' && token (p, 0) != EOF && token (p, 0) != '!')
+        parse_doit (p, true);	
 
       _gst_msg_sendf (NULL, "%v %o current: %o",
 		      _gst_namespace_class, old_namespace);
@@ -1020,7 +1020,6 @@ parse_method_list (gst_parser *p)
   while (token (p, 0) != '!')
     parse_method (p, '!');
 
-  lex (p);
   _gst_skip_compilation = false;
   _gst_reset_compilation_category ();
   p->state = PARSE_DOIT;
