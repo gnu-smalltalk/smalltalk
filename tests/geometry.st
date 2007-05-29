@@ -116,17 +116,18 @@ Eval [
 
 Eval [
   A := 45@230.
-  B := 175@270.
+  B := 141@270.
   C := 160@240.
   D := 50@50.
+  E := 3@4.
   'A dist: B = ' print.
   (A dist: B) printNl.
   'C dotProduct: D = ' print.
   (C dotProduct: D) printNl.
   'C grid: D = ' print.
   (C grid: D) printNl.
-  'C normal = ' print.
-  (C normal) printNl.
+  'E normal * 5 = ' print.
+  (E normal * 5) rounded printNl.
   'C truncatedGrid: D = ' print.
   (C truncatedGrid: D) printNl.
   '175@300 transpose = ' print.
