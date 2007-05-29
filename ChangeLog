@@ -1,3 +1,7 @@
+2007-05-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/geometry.st: Improve numerical stability.
+
 2007-05-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/LargeInt.st: Fix division when GMP is absent.

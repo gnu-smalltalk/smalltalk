@@ -36,10 +36,10 @@ Execution begins...
 returned value is Point new "<0>"
 
 Execution begins...
-'A dist: B = '136.0147050873544
+'A dist: B = '104.0
 'C dotProduct: D = '20000
 'C grid: D = '150@250
-'C normal = '-0.8320502943378438@0.5547001962252292
+'E normal * 5 = '-4@3
 'C truncatedGrid: D = '150@200
 '175@300 transpose = '300@175
 returned value is Point new "<0>"
