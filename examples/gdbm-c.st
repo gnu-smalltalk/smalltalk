@@ -40,7 +40,7 @@ CObject variableWordSubclass: #GDBM
 CStruct subclass: #DatumStruct
 	declaration: #(		"typedef struct {	"
 	    (#dPtr (#ptr #char))"	char *dptr;	"
-	    (#dSize #long)	"	int   dsize;	"
+	    (#dSize #int)	"	int   dsize;	"
 	)			"      } datum;		"
 	classVariableNames: ''
 	poolDictionaries: ''

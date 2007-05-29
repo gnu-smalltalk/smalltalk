@@ -49,6 +49,14 @@ o   A pragma like "<category: 'bar'>" can be used to set the category
 
 -----------------------------------------------------------------------------
 
+NEWS FROM 2.3.4 TO 2.3.5
+
+o   Fixed a floating-point accuracy problem in the test suite.
+
+o   Fixed a 64-bit cleanliness problem in the GDBM bindings.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 2.3.3 TO 2.3.4
 
 o   Fixed bug in LargeInteger division on systems not equipped with GMP.
