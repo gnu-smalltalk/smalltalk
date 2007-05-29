@@ -1,5 +1,13 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 2.3.4 TO 2.3.5
+
+o   Fixed a floating-point accuracy problem in the test suite.
+
+o   Fixed a 64-bit cleanliness problem in the GDBM bindings.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 2.3.3 TO 2.3.4
 
 o   Behavior>>#evaluate: and MethodDictionary>>#removeAt:ifAbsent: would

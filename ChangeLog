@@ -1,5 +1,9 @@
 2007-05-29  Paolo Bonzini  <bonzini@gnu.org>
 
+	* example/gdbm-c.st: Fix 64-bit cleanliness.
+
+2007-05-29  Paolo Bonzini  <bonzini@gnu.org>
+
 	* tests/geometry.st: Improve numerical stability.
 
 2007-05-28  Paolo Bonzini  <bonzini@gnu.org>
