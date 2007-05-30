@@ -1,6 +1,11 @@
+2007-05-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/Generator.st: Use same example as Gen2.st.
+	* examples/Gen2.st: Provide same API as Generator.st.
+
 2007-05-29  Paolo Bonzini  <bonzini@gnu.org>
 
-	* example/gdbm-c.st: Fix 64-bit cleanliness.
+	* examples/gdbm-c.st: Fix 64-bit cleanliness.
 
 2007-05-29  Paolo Bonzini  <bonzini@gnu.org>
 

@@ -43,7 +43,7 @@ return values.  The return values are computed one at a time, as
 needed, and hence need not even be finite.
 
 A generator methods starts by creating a Generator object with
-"Generator new" and saving it into an instance variable.  As soon as
+"Generator new" and saving it into a temporary variable.  As soon as
 this is executed, even though it is not apparent, the method exits
 returning the newly created Generator.  As soon as a message like
 #next, #peek, #atEnd or #peekFor: is sent to the generator, execution
@@ -52,6 +52,13 @@ generator''s #yield: method is called: then the argument of #yield:
 will be the Generator''s next element.  If the generator method goes
 on to the end without calling #yield:, the Generator will produce no
 more elements and #atEnd will return true.
+
+Alternatively, a generator block can be converted to a Generator with
+"Generator on: [...]".  The Generator itself is passed to the block
+and, again, the block starts its execution when a message like
+#next, #peek, #atEnd or #peekFor: is sent to the generator.  Again,
+the block''s execution is temporarily suspended when the
+generator''s #yield: method is called.
 
 Returning a value from the generator method makes no sense at least
 after "Generator new" is invoked.  Before, you can use it to return a
@@ -100,6 +107,12 @@ new
      and the argument."
     ^super new
 	context: thisContext parentContext
+!
+
+on: aBlock
+    | gen |
+    gen := self new.
+    aBlock value: gen.
 ! !
 
 !Generator methodsFor: 'stream protocol'!
@@ -205,22 +218,30 @@ generatorForGeneratorExample
     gen := Generator new.
     'Entering gen' displayNl.
     1 to: self do: [ :each |
-	('Yielding ', each printString) displayNl.
+	('Yielding ', each printString, '... ') display.
 	gen yield: each.
 	'Resuming gen' displayNl
     ]!
 
-generatorExample
-    | gen n |
-    gen := self generatorForGeneratorExample.
-    ('Got ', gen printString) displayNl.
+generatorBlockExample
+    ^Generator on: [ :gen |
+        'Entering gen' displayNl.
+        1 to: self do: [ :each |
+	    ('Yielding ', each printString, '... ') display.
+	    gen yield: each.
+	    'Resuming gen' displayNl
+        ] ]!
+
+generatorExample: gen
+    | n |
+    ('Running on ', gen printString) displayNl.
     [
-	'Calling next' displayNl.
+	'Calling next... ' display.
 	n := gen next.
 	n notNil
     ] whileTrue: [
 	('Got ', n printString) displayNl
-    ]!
-! !
+    ]! !
 
-10 generatorExample!
+10 generatorExample: 10 generatorForGeneratorExample!
+10 generatorExample: 10 generatorBlockExample!

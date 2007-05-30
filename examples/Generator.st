@@ -41,7 +41,7 @@ of many return values.  The return values are computed one at a time,
 as needed, and hence need not even be finite.
 
 A generator block is converted to a Generator with "Generator
-for: [...]".  The Generator itself is passed to the block,
+on: [...]".  The Generator itself is passed to the block,
 and as soon as a message like #next, #peek, #atEnd or #peekFor: is
 sent to the generator, execution of the block starts/resumes and
 goes on until the generator''s #yield: method is called: then the
@@ -167,23 +167,20 @@ generatorForGeneratorExample
     ^Generator on: [ :gen |
         'Entering gen' displayNl.
         1 to: self do: [ :each |
-	    ('Yielding ', each printString) displayNl.
+	    ('Yielding ', each printString, '... ') display.
 	    gen yield: each.
 	    'Resuming gen' displayNl
-        ]
-    ]!
+        ] ]!
 
-generatorExample
-    | gen n |
-    gen := self generatorForGeneratorExample.
-    ('Got ', gen printString) displayNl.
+generatorExample: gen
+    | n |
+    ('Running on ', gen printString) displayNl.
     [
-	'Calling next' displayNl.
+	'Calling next... ' display.
 	n := gen next.
 	n notNil
     ] whileTrue: [
 	('Got ', n printString) displayNl
-    ]!
-! !
+    ]! !
 
-10 generatorExample!
+10 generatorExample: 10 generatorForGeneratorExample!
