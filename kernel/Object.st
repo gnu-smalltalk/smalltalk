@@ -585,14 +585,6 @@ reconstructOriginalObject
 
 !Object methodsFor: 'debugging'!
 
-breakpoint: context return: return
-    "Called back by the system. Must return the value passed through the
-     second parameter"
-
-    context method removeBreakpointAt: context ip.
-    ^return
-!
-
 inspect
     "Print all the instance variables of the receiver on the Transcript"
     | instVars output object |
