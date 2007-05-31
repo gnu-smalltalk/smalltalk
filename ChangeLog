@@ -1,5 +1,9 @@
 2007-05-31  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/Continuations.st: Add more funny stuff.
+
+2007-05-31  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/BindingDict.st: Check for capacity in #copyEmpty:,
 	add #copyEmptyForCollect:
 	* kernel/Collection.st: Add #copyEmptyForCollect:.
