@@ -279,6 +279,12 @@ basicRemoveAtIndex: anIndex
     ^answer
 !
 
+copyEmptyForCollect: size
+    "Answer an empty copy of the receiver, with the class answered by the
+     collect: method."
+    ^OrderedCollection new: size
+!
+
 copyEmptyForCollect
     "Answer an empty copy of the receiver, with the class answered by the
      collect: method."

@@ -57,7 +57,7 @@ copy
 copyEmpty: newSize
     "Answer an empty copy of the receiver whose size is newSize"
     | realSize |
-    realSize := 8 max: newSize.
+    realSize := 8 max: (newSize * 4 + 2) // 3.
     (realSize bitAnd: (realSize - 1)) = 0 ifFalse: [
         realSize := 1 bitShift: realSize highBit
     ].
@@ -71,7 +71,13 @@ copyEmpty: newSize
 copyEmptyForCollect
     "Answer an empty copy of the receiver which is filled in to
      compute the result of #collect:"
-    ^self species new: self primSize
+    ^self species new: self capacity
+!
+
+copyEmptyForCollect: size
+    "Answer an empty copy of the receiver which is filled in to
+     compute the result of #collect:"
+    ^self species new: size
 !
 
 shallowCopy
