@@ -1,5 +1,15 @@
 2007-05-31  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/Generator.st: Fix bug.
+	* examples/Gen2.st: Fix bug.
+	* examples/Gen3.st: Another variation on Generators, this time
+	continuation based (as funny as the context-based one, as fast as
+	the process-based one).
+	* examples/StreamFilter.st: Add cute Sieve of Erathostenes example.
+	* examples/Continuations.st: Add more tests, add #escape/#escapeDo:.
+
+2007-05-31  Paolo Bonzini  <bonzini@gnu.org>
+
 	* examples/Continuations.st: Add more funny stuff.
 
 2007-05-31  Paolo Bonzini  <bonzini@gnu.org>

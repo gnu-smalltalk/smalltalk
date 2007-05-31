@@ -149,7 +149,7 @@ peekFor: anObject
      again."
     self atEnd ifTrue: [ ^nil ].
     ^next = anObject
-        ifTrue: [ next := nil. true ]
+        ifTrue: [ next := nil. atEnd := nil. true ]
         ifFalse: [ false ]
 ! !
 
@@ -244,4 +244,8 @@ generatorExample: gen
     ]! !
 
 10 generatorExample: 10 generatorForGeneratorExample!
-10 generatorExample: 10 generatorBlockExample!
+Eval [
+    Smalltalk byteCodeCounter printNl.
+    10 generatorExample: 10 generatorBlockExample.
+    Smalltalk byteCodeCounter printNl
+]

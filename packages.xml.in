@@ -614,7 +614,7 @@
 
 <package>
   <name>Continuations</name>
-  <sunit>AmbTest</sunit>
+  <sunit>ContinuationTest AmbTest</sunit>
   <prereq>SUnit</prereq>
 
   <filein>Continuations.st</filein>
