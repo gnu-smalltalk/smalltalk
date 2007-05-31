@@ -1,5 +1,9 @@
 2007-05-31  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Object.st: Remove stale method.
+
+2007-05-31  Paolo Bonzini  <bonzini@gnu.org>
+
 	* examples/Generator.st: Fix bug.
 	* examples/Gen2.st: Fix bug.
 	* examples/Gen3.st: Another variation on Generators, this time
