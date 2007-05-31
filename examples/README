@@ -111,27 +111,24 @@ Tokenizer.st	An abstract base class for lexical analyzers.
 by me/sbb
 
 
-The `modules' directory contains some of the simplest packages that one could
-write for GNU Smalltalk, but nevertheless useful and interesting...  currently
-they are:
-- a wrapper for GDBM, the GNU Database Manager
-- a Perl5 regular expression matcher based on GNU regex
-- an MD5 class for computing MD5 checksums.
+Generator.st	Python/Ruby-like generators, using processes.
+Gen2.st		Same, using contexts.
+Gen3.st		Same, hiding context manipulation with continuation objects.
+by me
 
-The `blox' directory contains:
+The directory also contains some bindings for external libraries; currently
+these are GDBM, ZLib and MD5 bindings.
+
+The directory also contains two examples of using Blox:
 
 Man.st		Man page viewer widget (example of using BExtended).  To test
-by me		it evaluate "ManViewer openOn: 'path' "
-		Will somebody write a Smalltalk xman?!? (that means you...)
-		Send it to me if you do!
+by me		it evaluate "ManViewer openOn: 'path' ".
 
-Tetris.st	A Tetris game written using BLOX.  A few notes:
-by me		1) you should have a precise version of Delays to use it
-		   (Win32 or an OS with setitimer, like BSD and Linux).  Simple
-		   `alarm' (which has only 1 second precision) is not enough.
-		2) Cursor keys move the piece, Up rotates it, Return drops it.
+Tetris.st	A Tetris game written using BLOX.  To start it, use
+by me		"Tetris play".  Cursor keys move the piece, Up rotates it,
+		Return drops it.
 
-		To start it, use "Tetris play"
+		
 
 More examples can be found in the blox/BloxExtend.st and blox/test.st file
 

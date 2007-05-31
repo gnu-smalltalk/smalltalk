@@ -75,11 +75,10 @@ nil subclass: #CollectionProxy
        category: 'Examples-Collections'!
 
 CollectionProxy subclass: #ArrayedCollectionProxy
-       instanceVariableNames: ''
+       instanceVariableNames: 'stream'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Examples-Collections'!
-
 
 CollectionProxy subclass: #DictionaryProxy
        instanceVariableNames: ''
@@ -113,8 +112,14 @@ sizeFrom: aCollection
 !CollectionFilter methodsFor: 'querying classes'!
 
 copyEmpty: collection
-    ^collection copyEmpty!
+    ^prev isNil
+	ifTrue: [ collection copyEmpty ]
+	ifFalse: [ prev copyEmpty: collection ]!
 
+copyEmpty: collection size: size
+    ^prev isNil
+	ifTrue: [ collection copyEmpty: size ]
+	ifFalse: [ prev copyEmpty: collection size: size ]!
 
 !CollectionFilter methodsFor: 'initializing'!
 
@@ -166,6 +171,8 @@ sizeFrom: aCollection
 copyEmpty: collection
     ^collection copyEmptyForCollect!
 
+copyEmpty: collection size: size
+    ^collection copyEmptyForCollect: size! !
 
 
 !CollectionProxy class methodsFor: 'instance creation'!
@@ -338,15 +345,31 @@ initializeCollection: aCollection filter: aCollectionFilter
 
 !ArrayedCollectionProxy methodsFor: 'proxying'!
 
+readStream
+    | stream marker size |
+    stream isNil ifTrue: [
+	marker := Object new.
+	stream := WriteStream on: (filter copyEmpty: collection).
+	collection do: [ :each || newObject |
+	    newObject := filter map: each ifRemovedReturn: marker.
+	    newObject == marker
+	        ifFalse: [ stream nextPut: newObject ] ] ].
+
+    ^stream readStream!
+
 asCollection
-    | builtStream marker |
-    builtStream := WriteStream on: (filter copyEmpty: collection).
+    | builtCollection marker n size |
+    (stream notNil or: [ (size := filter sizeFrom: collection) isNil ])
+	ifTrue: [ ^self become: self readStream contents ].
+
     marker := Object new.
+    builtCollection := filter copyEmpty: collection size: size.
+    n := 0.
     collection do: [ :each || newObject |
 	newObject := filter map: each ifRemovedReturn: marker.
 	newObject == marker
-	    ifFalse: [ builtStream nextPut: newObject ] ].
-    ^self become: builtStream contents! !
+	    ifFalse: [ builtCollection at: (n := n + 1) put: newObject ] ].
+    ^self become: builtCollection! !
 
 
 !DictionaryProxy methodsFor: 'proxying'!

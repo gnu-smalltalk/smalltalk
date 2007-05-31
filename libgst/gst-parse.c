@@ -941,9 +941,10 @@ parse_array_constructor (gst_parser *p)
 }
 
 
-/* block: block_vars '||' temps_no_pipe statements
-	| block_vars '|' temporaries statements
-	| temporaries statements */
+/* block: '[' block_vars '||' temps_no_pipe statements ']'
+	| '[' block_vars '|' temporaries statements ']'
+        | '[' block_vars ']'
+	| '[' temporaries statements ']' */
 
 static tree_node
 parse_block (gst_parser *p)
@@ -958,7 +959,9 @@ parse_block (gst_parser *p)
   if (p->token == ':')
     {
       vars = parse_block_variables (p);
-      if (lex_skip_if (p, '|', true))
+      if (p->token == ']')
+	implied_pipe = false;
+      else if (lex_skip_if (p, '|', true))
 	implied_pipe = false;
       else if (p->token == BINOP
 	       && p->val.sval[0] == '|' && p->val.sval[1] == '|')
@@ -967,7 +970,7 @@ parse_block (gst_parser *p)
 	  lex (p);
 	}
       else
-	expected (p, ':', '|', -1);
+	expected (p, ':', '|', ']', -1);
     }
   else
     {

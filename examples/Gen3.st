@@ -28,8 +28,10 @@
 |
  ======================================================================"
 
+PackageLoader fileInPackage: #Continuations!
+
 Stream subclass: #Generator
-	  instanceVariableNames: 'next producer consumer process atEnd'
+	  instanceVariableNames: 'next genCC consCC atEnd'
 	  classVariableNames: ''
 	  poolDictionaries: ''
 	  category: 'Streams-Generators'
@@ -106,9 +108,9 @@ next
      decides that nothing else can be generated."
     | result |
     self atEnd ifTrue: [ ^nil ].
-    atEnd := nil.
     result := next.
     next := nil.
+    atEnd := nil.
     ^result
 !
 
@@ -134,32 +136,37 @@ peekFor: anObject
 !Generator methodsFor: 'private - continuations'!
 
 forkOn: aBlock
-    producer := Semaphore new.
-    consumer := Semaphore new.
-    process := [
-	producer wait.
-	aBlock value: self.
-	consumer signal
-    ] fork!
+    "When initializing, we just store the current continuation and exit;
+     the ^self is where the control flow is actually split.  When #next is
+     called first, the code after the continuation is executed, which
+     executes the generator block and finally resumes execution of the
+     consumer when the block leaves."
+    Continuation escapeDo: [ :cc |
+	genCC := cc.
+	atEnd := nil.
+	^self ].
+    atEnd := true.
+    aBlock value: self.
+    consCC oneShotValue!
 
 yield: anObject
-    "Save the object returned by the block in the next
-     instance variable, then restart the consumer thread
-     and put our own to wait."
-
-    next := anObject.
-    atEnd := false.
-    consumer signal.
-    producer wait!
+    "When entering from the generator the code in the block is executed and
+     control flow goes back to the consumer.  When entering from the consumer,
+     the code after the continuation is executed, which resumes execution of
+     the generator block."
+    Continuation escapeDo: [ :cc |
+	genCC := cc.
+	atEnd := false.
+	next := anObject.
+	consCC oneShotValue ].
+    atEnd := true!
 
 generateNext
-    "Restart the producer thread and put our own to wait."
+    "Restart the generator continuation."
 
-    atEnd := true.
-    process priority = Processor activePriority
-        ifFalse: [ process priority: Processor activePriority ].
-    producer signal.
-    consumer wait! !
+    Continuation escapeDo: [ :cc |
+	consCC := cc.
+	genCC oneShotValue ]!
 
 !Integer methodsFor: 'examples of generators'!
 

@@ -463,6 +463,12 @@ copyEmpty: newSize
     ^self species new: newSize
 !
 
+copyEmptyForCollect: size
+    "Answer an empty copy of the receiver, with the class answered by the
+     collect: method."
+    ^self copyEmpty: size
+!
+
 copyEmptyForCollect
     "Answer an empty copy of the receiver, with the class answered by the
      collect: method."

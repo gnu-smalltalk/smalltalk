@@ -334,6 +334,14 @@ inject: value into: aBlock
 !
 
 select: aBlock
+    "Example: Sieve of Erathostenes.
+     GNU Smalltalk does not detect that i escapes, so we need to avoid
+     optimizations of #to:do:.
+
+	s := (2 to: 100) readStream.
+	(2 to: 10) do: [ :i |
+	    s := s reject: [ :n | n > i and: [ n \\ i = 0 ] ] ].
+	s contents printNl"
     ^FilteringStream on: self select: aBlock
 !
 
