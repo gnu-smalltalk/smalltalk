@@ -1,5 +1,3 @@
-#! @bindir@/gst -f
-
 "======================================================================
 |
 |   Smalltalk SUnit runner (utility script)
@@ -47,12 +45,14 @@ Options:
     -v --verbose          show passed tests
     -f --file=FILE        load file before running subsequent tests
     -p --package=PACKAGE  load package and run its tests
+    -I --image-file=FILE  run tests on the specified image file
     -h --help             show this message
 '.
 
 "Parse the command-line arguments."
 Smalltalk
-    arguments: '-h|--help -q|--quiet -v|-V|--verbose -f|--file: -p|--package:'
+    arguments: '-h|--help -q|--quiet -v|-V|--verbose -f|--file: -p|--package:
+		-I|--image-file'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [

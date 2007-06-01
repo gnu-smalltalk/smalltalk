@@ -792,4 +792,13 @@
   <file>../vfs/utar</file>
 </disabled-package>
 
+<disabled-package>
+  <name>AuxScripts</name>
+  <directory>scripts</directory>
+
+  <file>Test.st</file>
+  <file>Load.st</file>
+  <file>Getopt.st</file>
+</disabled-package>
+
 </packages>

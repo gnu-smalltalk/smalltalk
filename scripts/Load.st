@@ -1,5 +1,3 @@
-#! @bindir@/gst -f
-
 "======================================================================
 |
 |   Smalltalk package loader (utility script)
@@ -46,12 +44,15 @@ Options:
     -v --verbose          show loaded files
     -f --force            reload package if already loaded
     -n --dry-run          don''t save the image after loading
+    -t --test             run SUnit tests if available
+    -I --image-file=FILE  load into the specified image
     -h --help             show this message
 '.
 
 "Parse the command-line arguments."
 Smalltalk
-    arguments: '-h|--help -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force'
+    arguments: '-h|--help -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force
+		-t|--test -I|--image-file:'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [

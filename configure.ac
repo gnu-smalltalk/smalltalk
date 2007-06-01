@@ -362,6 +362,9 @@ dnl Scripts & data files
 AC_CONFIG_FILES(gnu-smalltalk.pc)
 AC_CONFIG_FILES(gst-config, chmod +x gst-config)
 AC_CONFIG_FILES(gst-package, chmod +x gst-package)
+AC_CONFIG_FILES(gst-load, chmod +x gst-load)
+AC_CONFIG_FILES(gst-reload, chmod +x gst-reload)
+AC_CONFIG_FILES(gst-sunit, chmod +x gst-sunit)
 AC_CONFIG_FILES(packages.xml)
 AC_CONFIG_FILES(libc.la)
 
