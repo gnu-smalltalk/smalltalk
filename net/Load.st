@@ -28,8 +28,6 @@
 |
  ======================================================================"
 
-FileStream fileIn: '../examples/StreamFilter.st'!
-
 Smalltalk addSubspace: #NetClients!
 NetClients addSubspace: #FTP!
 NetClients addSubspace: #HTTP!

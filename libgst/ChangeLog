@@ -1,3 +1,7 @@
+2007-06-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lib.c: Load StreamOps.st.
+
 2007-05-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.c: Support [:arg1 :arg2] syntax for blocks.

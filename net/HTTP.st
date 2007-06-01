@@ -205,9 +205,7 @@ readResponseInto: aStream
     readStream := connectionStream stream.
     response preReadBytes isEmpty ifFalse: [
     	self reporter readByte: response preReadBytes size.
-	readStream := ConcatenatedStream 
-			  with: response preReadBytes readStream 
-			  with: readStream ].
+	readStream := response preReadBytes readStream, readStream ].
 
     totalByte notNil 
 	ifTrue: [

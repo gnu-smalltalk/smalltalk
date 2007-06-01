@@ -649,7 +649,6 @@
   <file>Case.st</file>
   <file>Publish.st</file>
   <file>RegExp.st</file>
-  <file>StreamFilter.st</file>
   <file>PushBack.st</file>
   <file>SortCriter.st</file>
   <file>shell</file>
@@ -777,6 +776,7 @@
   <file>RecursionLock.st</file>
   <file>Getopt.st</file>
   <file>Regex.st</file>
+  <file>StreamOps.st</file>
 
   <file>../vfs/</file>
   <file>../vfs/README</file>
