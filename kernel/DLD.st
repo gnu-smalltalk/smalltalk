@@ -32,6 +32,8 @@
  ======================================================================"
 
 
+Namespace current: Kernel!
+
 Stream subclass: #RoundRobinStream
        instanceVariableNames: 'stream first last'
        classVariableNames: ''
@@ -141,6 +143,7 @@ do: aBlock
     last := nil.
 ! !
 
+Namespace current: Smalltalk!
 
 Object subclass: #DLD
        instanceVariableNames: ''
@@ -234,7 +237,7 @@ primDefineExternFunc: aFuncName
 initialize
     "Private - Initialize the receiver's class variables"
     libraryList := OrderedCollection new.
-    libraryStream := RoundRobinStream on: libraryList readStream.
+    libraryStream := Kernel.RoundRobinStream on: libraryList readStream.
     moduleList := OrderedCollection new.
     ObjectMemory addDependent: DLD
 !
@@ -273,7 +276,7 @@ addLibrary: library
     (libraryList anySatisfy: [ :anAssociation | anAssociation key = library ])
 	ifFalse: [
 	    libraryList add: library -> (self linkFile: library).
-	    libraryStream := RoundRobinStream on: libraryList readStream ].
+	    libraryStream := Kernel.RoundRobinStream on: libraryList readStream ].
 !
 
 addModule: library

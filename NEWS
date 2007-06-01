@@ -60,6 +60,10 @@ o   Fixed a 64-bit cleanliness problem in the GDBM bindings.
 o   Support for writing a block with arguments and no statements
     as [ :a :b ] in addition to [ :a :b | ].
 
+o   The StreamFilter.st example, which provided lookahead, filtering,
+    concatenation and other kinds of manipulation for Streams, has been
+    promoted into the default image.
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 2.3.3 TO 2.3.4

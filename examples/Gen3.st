@@ -107,7 +107,7 @@ next
     "Evaluate the generator until it generates the next value or
      decides that nothing else can be generated."
     | result |
-    self atEnd ifTrue: [ ^nil ].
+    self atEnd ifTrue: [ ^self pastEnd ].
     result := next.
     next := nil.
     atEnd := nil.
@@ -127,7 +127,7 @@ peekFor: anObject
      decides that nothing else can be generated, and if it is not equal
      to anObject, save the value so that #peek or #next will return it
      again."
-    self atEnd ifTrue: [ ^nil ].
+    self atEnd ifTrue: [ self pastEnd. ^false ].
     ^next = anObject
         ifTrue: [ next := nil. atEnd := nil. true ]
         ifFalse: [ false ]

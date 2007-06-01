@@ -1,5 +1,17 @@
 2007-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/GenLibDoc.st: Don't load examples/StreamFilter.st.
+	* examples/StreamFilter.st: Move...
+	* kernel/StreamOps.st: ... here.  Clean up, add PeekableStream.  Move
+	the Stream subclasses into the Kernel namespace.
+	* examples/Generator.st: Fix #peekFor: to return false at end of stream.
+	* examples/Gen2.st: Fix #peekFor: to return false at end of stream.
+	* examples/Gen3.st: Fix #peekFor: to return false at end of stream.
+
+	* kernel/DLD.st: Move RoundRobinStream into the Kernel namespace.
+
+2007-06-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Getopt.st: New.
 	* scripts/Load.st: Add (and ignore) --test and --image-file.
 	* scripts/Test.st: Add (and ignore) --image-file.

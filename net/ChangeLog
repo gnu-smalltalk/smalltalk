@@ -1,3 +1,7 @@
+2007-06-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* net/HTTP.st: Use #, on streams directly.
+
 2007-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/MIME.st: Remove unused class variable.

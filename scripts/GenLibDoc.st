@@ -30,8 +30,7 @@
 
 "Load the prerequisites"
 PackageLoader fileInPackage: 'Parser'.
-FileStream fileIn: '../examples/Publish.st'.
-FileStream fileIn: '../examples/StreamFilter.st'!
+FileStream fileIn: '../examples/Publish.st'!
 
 | namespace package outTexinfo rejected files dir source classes |
 namespace := (Smalltalk arguments at: 1) asSymbol.
@@ -45,11 +44,10 @@ files := PackageLoader filesFor: package.
 files := files select: [ :each | '*.st' match: each ].
 files := files reject: [ :each | rejected includes: each ].
 files := files collect: [ :each | Directory append: each to: dir ].
+files := files collect: [ :each | FileStream open: each mode: FileStream read ].
 
 "Load the source code"
-source := files
-    inject: ConcatenatedStream new
-    into: [ :str :each | str, (FileStream open: each mode: FileStream read) ].
+source := files fold: [ :old :each | old, each ].
 
 "Go!"
 Smalltalk addSubspace: namespace.
