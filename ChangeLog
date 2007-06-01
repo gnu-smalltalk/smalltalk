@@ -10,6 +10,12 @@
 
 	* kernel/DLD.st: Move RoundRobinStream into the Kernel namespace.
 
+2007-06-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Getopt.st: New.
+	* scripts/Load.st: Add (and ignore) --test and --image-file.
+	* scripts/Test.st: Add (and ignore) --image-file.
+
 2007-05-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Object.st: Remove stale method.

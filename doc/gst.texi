@@ -1551,8 +1551,7 @@ For example:
 The second way is to use the @file{gst-load} script which is installed
 together with the virtual machine.  For example, you can do:
 
-@t{@ @ @ @ gst-load Browser Blox Compiler}@footnote{
-When using an alternate image path, use the @env{SMALLTALK_IMAGE} variable.}
+@t{@ @ @ @ gst-load Browser Blox Compiler}
 
 @noindent
 and GST will automatically file in:
@@ -1570,6 +1569,10 @@ Then it will save the Smalltalk image, and finally exit.
 @file{gst-load} supports several options:
 
 @table @option
+@item -I
+@itemx --image-file
+Load the packages inside the given image.
+
 @item -q
 @itemx --quiet
 Hide the script's output.
@@ -1582,6 +1585,12 @@ Show which files are loaded, one by one.
 @itemx --force
 If a package given on the command-line is already present, reload it.
 This does not apply to automatically selected prerequisites.
+
+@item -t
+@itemx --test
+Run the package testsuite before installing, and exit with a failure
+if the tests fail.  Currently, the testsuites are placed in the image
+together with the package, but this may change in future versions.
 
 @item -n
 @item --dry-run
@@ -2262,6 +2271,10 @@ It is called @command{gst-sunit}.  The command-line to @command{gst-sunit}
 specifies the packages, files and classes to test:
 
 @table @option
+@item -I
+@itemx --image-file
+Run tests inside the given image.
+
 @item -q
 @itemx --quiet
 Hide the program's output.  The results are still communicated with the

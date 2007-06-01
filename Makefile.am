@@ -56,8 +56,7 @@ pkglib_DATA = libc.la
 noinst_DATA = gst.im
 dist_noinst_DATA += smalltalk-mode.el.in gst-mode.el.in .gdbinit \
 	kernel/stamp-classes blox-tk/stamp-classes tcp/stamp-classes \
-	i18n/stamp-classes scripts/Load.st scripts/gst-reload.sh \
-	scripts/Test.st scripts/Finish.st scripts/GenLibDoc.st \
+	i18n/stamp-classes scripts/Finish.st scripts/GenLibDoc.st \
 	scripts/GenBaseDoc.st gsticon.ico
 
 if WITH_EMACS
@@ -67,7 +66,7 @@ nodist_lisp_LISP += gst-mode.el
 endif
 endif
 
-bin_SCRIPTS = gst-package gst-config
+bin_SCRIPTS = gst-package gst-config gst-load gst-reload gst-sunit
 DISTCLEANFILES = termbold termnorm smalltalk-mode.el gst-mode.el
 CLEANFILES = gst.im $(lisp_LISP)
 
@@ -78,22 +77,6 @@ smalltalk-mode.el: smalltalk-mode.el.in
 gst-mode.el: gst-mode.el.in
 	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/gst-mode.el.in \
 	  > gst-mode.el
-
-install-exec-hook:
-	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/scripts/Load.st \
-	  > $(DESTDIR)$(bindir)/gst-load
-	chmod +x $(DESTDIR)$(bindir)/gst-load
-	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/scripts/gst-reload.sh \
-	  > $(DESTDIR)$(bindir)/gst-reload
-	chmod +x $(DESTDIR)$(bindir)/gst-reload
-	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/scripts/Test.st \
-	  > $(DESTDIR)$(bindir)/gst-sunit
-	chmod +x $(DESTDIR)$(bindir)/gst-sunit
-
-uninstall-local::
-	-rm -f $(DESTDIR)$(bindir)/gst-load
-	-rm -f $(DESTDIR)$(bindir)/gst-reload
-	-rm -f $(DESTDIR)$(bindir)/gst-sunit
 
 ###########################################################
 #

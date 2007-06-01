@@ -1,0 +1,73 @@
+#! /bin/sh
+
+#######################################################################
+#
+#   Smalltalk package loader (utility script)
+#
+#
+#######################################################################
+
+
+#######################################################################
+#
+# Copyright 2007 Free Software Foundation, Inc.
+# Written by Paolo Bonzini.
+#
+# This file is part of GNU Smalltalk.
+#
+# GNU Smalltalk is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later version.
+# 
+# GNU Smalltalk is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+# 
+# You should have received a copy of the GNU General Public License along with
+# GNU Smalltalk; see the file COPYING.  If not, write to the Free Software
+# Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  
+#
+########################################################################
+
+OPTIONS='-h|--help -q|--quiet -v|-V|--verbose -f|--file: -p|--package: -I|--image-file'
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+: ${GST=@bindir@/gst}
+
+gst () {
+  script=$1
+  shift
+  if test x${image_file:+set} = xset; then
+    "$GST" $GSTARGS -I "$image_file" -qK "$script" -a "$@"
+  else
+    "$GST" $GSTARGS -qK "$script" -a "$@"
+  fi
+}
+
+show_help () {
+  "$GST" $GSTARGS -qK scripts/Test.st -a $1
+  exit $?
+}
+
+getopt () {
+  "$GST" $GSTARGS -qK scripts/Getopt.st -a "$OPTIONS" "$@"
+}
+
+getopt "$@" | {
+  test=false
+  packages=
+  while read opt arg; do
+    case $opt in
+      ERROR) show_help --bad ;;
+      --help) show_help --help ;;
+      --image-file)
+	test x${image_file:+set} = xset && show_help --bad
+	image_file=$arg ;;
+    esac
+  done
+
+  gst scripts/Test.st "$@"
+  exit $?
+}
