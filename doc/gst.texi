@@ -799,105 +799,115 @@ Smalltalk}, by Augustin Mrazik.]}
 
 @subsection Introduction
 
-The standard Smalltalk-80 programming environment supports symbolic
-identification of objects in one global namespace---in the
-@code{Smalltalk} system dictionary. This means that each global variable
-in the system has its unique name which is used for symbolic
-identification of the particular object in the source code (e.g. in
-expressions or methods).  Most important global variables are classes
-defining the behavior of objects.
+The Smalltalk-80 programming environment, upon which @gst{} is
+historically based, supports symbolic identification of objects in one
+global namespace---in the @code{Smalltalk} system dictionary. This means
+that each global variable in the system has its unique name which is
+used for symbolic identification of the particular object in the source
+code (e.g.@: in expressions or methods).  The most important of these
+global variables are classes defining the behavior of objects.
 
-In a development dealing with modelling of real systems, polymorphic
-symbolic identification is often needed.  This means that it should be
-possible to use the same name for different classes or other global
-variables.  Let us mention class Module as an example which would mean
-totaly different things for a programmer, for a computer technician and
-for a civil engineer or an architect.
+In development dealing with modelling of real systems, @dfn{polymorphic
+symbolic identification} is often needed.  By this, we mean that it
+should be possible to use the same name for different classes or other
+global variables.  Selection of the proper variable binding should be
+context-specific.  By way of illustration, let us consider class
+@code{Statement} as an example which would mean totally different things
+in different domains:
 
-This issue becomes inevitable if we start to work in a Smalltalk
-environment supporting persistence.  Polymorphism of classes becomes
-necessary in the moment we start to think about storing classes in the
-database since after restoring them into the running Smalltalk image a
-mismatch with the current symbolic identification of the present classes
-could occur.  For example you might have the class Module already in
-your image with the meaning of a program module (e.g. in a CASE system)
-and you might attempt to load the class Module representing a part of
-the computer hardware from the database for hardware configuration
-system.  The last class could get bound to the #Module symbol in the
-Smalltalk system dictionary and the other class could remain in the
-system as unbound class with full functionality, however, it could not
-be accessed anymore at the symbolical level in the source code.
+@table @asis
+@item @gst{} or other programming language
+An expression in the top level of a code body, possibly with special
+syntax available such as assignment or branching.
 
-Objects which have to be identified in the source code of methods or
-message sends by their names are included in Smalltalk which is a sole
-instance of SystemDictionary.  Such objects may be identified simply by
-stating their name as primary in a Smalltalk statement.  The code is
-compiled in the Smalitalk environment and if such a primary is found it
-is bound to the corresponding object as receiver of the rest of the
-message send.  In this way Smalltalk as instance of SystemDictionary
-represents the sole symbolic name space in the Smalltalk system.  In the
-following text the symbolic name space will be called simply environment
-to make the text more clear.
+@item Bank
+A customer's trace report of recent transactions.
+
+@item AI, logical derivation
+An assertion of a truth within a logical system.
+@end table
+
+This issue becomes inevitable if we start to work persistently, using
+@code{ObjectMemory snapshot} to save after each session for later
+resumption.  For example, you might have the class @code{Statement}
+already in your image with the ``Bank'' meaning above (e.g.@: in the
+live bank support systems we all run in our images) and you might decide
+to start developing @acronym{YAC} [Yet Another C].  Upon starting to
+write parse nodes for the compiler, you would find that
+@code{#Statement} is boundk in the banking package.  You could replace
+it with your parse node class, and the bank's @code{Statement} could
+remain in the system as an unbound class with full functionality;
+however, it could not be accessed anymore at the symbolic level in the
+source code.  Whether this would be a problem or not would depend on
+whether any of the bank's code refers to the class @code{Statement}, and
+when these references occur.
+
+Objects which have to be identified in source code by their names are
+included in @code{Smalltalk}, the sole instance of
+@code{SystemDictionary}.  Such objects may be identified simply by
+writing their names as you would any variable names.  The code is
+compiled in the default environment, and if the variable is found in
+@code{Smalltalk}, without being shadowed by a class pool or local
+variables, its value is retrieved and used as the value of the
+expression.  In this way @code{Smalltalk} represents the sole symbolic
+namespace.  In the following text the symbolic namespace, as a concept,
+will be called simply @dfn{environment} to make the text more clear.
 
 @subsection Concepts
 
 To support polymorphic symbolical identification several environments
-will be needed.  The same name may be located concurrently in several
-environments and point to diverse objects.
+will be needed.  The same name may exist concurrently in several
+environments as a key, pointing to diverse objects in each.
 
-However, symbolic navigation between these environments is needed.
-Before approaching the problem of the syntax to be implemented and of
-its very implementation, we have to point out which structural relations
-are going to be established between environments.
+Symbolic navigation between these environments is needed.  Before
+approaching the problem of the syntax and semantics to be implemented,
+we have to decide on structural relations to be established between
+environments.
 
-Since the environment has first to be symbolically identified to gain
-access to its global variables, it has to be a global variable in
-another environment. Obviously, @code{Smalltalk} will be the first
-environment from which the navigation begins. From @code{Smalltalk} some
-of the existing environments may be seen. From these environments other
-sub-environments may be seen, etc. This means that environments
-represent nodes in a graph where symbolic identifications from one
-environment to another one represent branches.
+Since the environment must first be symbolically identified to direct
+access to its global variables, it must first itself be a global
+variable in another environment.  @code{Smalltalk} is a great choice for
+the root environment, from which selection of other environments and
+their variables begins. From @code{Smalltalk} some of the existing
+sub-environments may be seen; from these other sub-environments may be
+seen, etc.  This means that environments represent nodes in a graph
+where symbolic selections from one environment to another one represent
+branches.
 
-However, the symbolic identification should be unambiguous although it
-will be polymorphic. This is why we should avoid cycles in the
-environment graph. Cycles in the graph could cause also other problems
-in the implementation, e.g. unability to use recursive algorithms. This
-is why in general the environments build a directed acyclic
-graph@footnote{An inheritance tree in the current @gst{} implementation
-of namespaces; a class can fake multiple inheritance by specifying a
-namespace (environment, if you prefer) as one of its pool
-dictionaries.}.
+The symbolic identification should be unambiguous, although it will be
+polymorphic. This is why we should avoid cycles in the environment
+graph. Cycles in the graph could cause also other problems in the
+implementation, e.g.@: inability to use trivially recursive algorithms.
+Thus, in general, the environments must build a directed acyclic graph;
+@gst{} currently limits this to an n-ary tree, with the extra feature
+that environments can be used as pool dictionaries.
 
-Let us call the partial ordering relation which occurs between the two
-environments to be inheritance. Sub-environments inherits from their
-super-environments.
+Let us call the partial ordering relation which occurs between
+environments @dfn{inheritance}.  Sub-environments inherit from their
+super-environments.  The feature of inheritance in the meaning of
+object-orientation is associated with this relation: all associations of
+the super-environment are valid also in its sub-environments, unless they
+are locally redefined in the sub-environment.
 
-Not only that ``inheritance'' is the standard term for the partial
-ordering relation in the lattice theory but the feature of inheritance
-in the meaning of object-orientation is associated with this
-relation. This means that all associations of the super-environment are
-valid also in its sub-environments unless they are locally redefined in
-the sub-environment.
-
-A super-environment includes all its sub-enviroments as associations
-under their names.  The sub-environment includes its super-environment
-under the symbol @code{#Super}.  Most environments inherit from
-Smalltalk, the standard root environment, but they are not required to
-do so; this is similar to how most classes derive from Object, yet one
-can derive a class directly from @code{nil}.  Since they all inherit from
-Smalltalk all global variables defined in it, it is not necessary to
-define a special global variable pointing to root in each environment.
+A super-environment includes all its sub-enviroments as
+@code{Association}s under their names.  The sub-environment includes its
+super-environment under the symbol @code{#Super}.  Most environments
+inherit from @code{Smalltalk}, the standard root environment, but they
+are not required to do so; this is similar to how most classes derive
+from @code{Object}, yet one can derive a class directly from @code{nil}.
+Since they all inherit @code{Smalltalk}'s global variables, it is not
+necessary to define @code{Smalltalk} as pointing to @code{Smalltalk}'s
+@code{Smalltalk} in each environment.
 
 The inheritance links to the super-environments are used in the lookup
 for a potentially inherited global variable.  This includes lookups by a
-compiler searching for a variable and lookups via methods such as
-@code{#at:} and @code{#includesKey:}.
+compiler searching for a variable binding and lookups via methods such
+as @code{#at:} and @code{#includesKey:}.
 
 @subsection Syntax
 
-Global objects of an environment (local or inherited) may be referenced by
-their symbol used in the source code, e.g.
+Global objects of an environment, be they local or inherited, may be
+referenced by their symbol variable names used in the source code, e.g.
 @example
             John goHome
 @end example
@@ -906,15 +916,16 @@ their symbol used in the source code, e.g.
 if the @code{#John -> aMan} association exists in the particular environment or
 one of its super-environments, all along the way to the root environment.
 
-If an object has to be referenced from another environment (i.e. which
-is not on the inheritance link) it has to be referenced either
-relatively to the position of the current environment (using the Super
-symbol), or absolutely (using the ``full pathname'' of the object,
-navigating from Smalltalk through the tree of sub-environments).
+If an object must be referenced from another environment (i.e.@: which
+is not one of its sub-environments) it has to be referenced either
+@emph{relatively} to the position of the current environment, using the
+@code{Super} symbol, or @emph{absolutely}, using the ``full pathname''
+of the object, navigating from the tree root (usually @code{Smalltalk})
+through the tree of sub-environments.
 
-For the identification of global objects in another environment a
-``pathname'' of symbols is used. The symbols are separated by blanks,
-i.e. the ``look'' to be implemented is that of
+For the identification of global objects in another environment, we use
+a ``pathname'' of symbols.  The symbols are separated by blanks; the
+``look'' to appear is that of
 @example
 Smalltalk Tasks MyTask
 @end example
@@ -925,43 +936,56 @@ and of
 Super Super Peter.
 @end example
 
+@noindent
 Its similarity to a sequence of message sends is not casual, and
-suggests the following syntax for write access:@footnote{Absent from the
-original paper.}
+suggests the following syntax for write access:
 @example
 Smalltalk Tasks MyTask: anotherTask
 @end example
 
-This resembles the way accessors are used for other objects.  As it is
-custom in Smalltalk, however, we are reminded by uppercase letters that
+This resembles the way accessors are used for other objects.  As is
+custom in Smalltalk, however, we are reminded by capitalization that
 we are accessing global objects.
 
-For compatibility and efficiency (compile-time name resolving is faster
-than run-time resolving), two special syntaxes have been implemented.
-Standard dot notation can be used to read the value of a global
-(like in @code{Tasks.MyTask} or @code{Tasks::MyTask}), and another
-syntax returns the Association object for a particular global: so
-the last example above can be written also like
+So a variable with an environment path may be resolved to a binding when
+code is compiled, rather than at runtime through a sequence of message
+sends like the above, two special syntaxes have been implemented.
+Standard dot notation can be used to read the value of a global (like in
+@code{Tasks.MyTask} or @code{Tasks::MyTask}), unless you try really hard
+to dissociate variable references between compile time and run time.
+
+Another syntax returns the @dfn{variable binding}, the
+@code{Association} for a particular global.  The last example above is
+equivalently:
 @example
 #@{Smalltalk.Tasks.MyTask@} value: anotherTask
 @end example
 
-The latter kind of literal (called a @dfn{variable binding}) is also
-valid inside literal arrays.
+The latter syntax, a @dfn{variable binding}, is also valid inside
+literal arrays.
 
 @subsection Implementation
 
-A superclass of @code{SystemDictionary} called @code{RootNamespace} has to be
-defined and many of the features of Smalltalk-80 SystemDictionaries will
-be hosted by that class. @code{Namespace} and @code{RootNamespace} will in
-turn become subclasses of @code{AbstractNamespace}.
+A superclass of @code{SystemDictionary} called @code{RootNamespace} is
+defined, and many of the features of the Smalltalk-80
+@code{SystemDictionary} will be hosted by that class.  @code{Namespace}
+and @code{RootNamespace} will in turn become subclasses of
+@code{AbstractNamespace}.
 
 To handle inheritance, the following methods have to be defined or redefined in
 Namespace (@emph{not} in RootNamespace):
 
 @table @asis
 @item Accessors like @code{#at:ifAbsent:} and @code{#includesKey:}
-Inheritance has to be implemented.
+Inheritance must be implemented.  When @code{Namespace}, trying to read
+a variable, finds an association in its own dictionary or a
+super-environment dictionary, it uses that; for @code{Dictionary}'s
+writes and when a new association must be created, @code{Namespace}
+creates it in its own dictionary.  There are special methods like
+@code{#set:to:} for cases in which you want to modify a binding in a
+super-environment if that is the relevant variable's binding.
+
+@c this needs more clarity for #at:put: #set:to: disambig
 
 @item Enumerators like @code{#do:} and @code{#keys}
 This should return @strong{all} the objects in the namespace, including
@@ -969,56 +993,63 @@ those which are inherited.
 @end table
 
 For programs to be able to process correctly the ``pathnames'' and the
-accessors, this feature must be implemented directly in
+accessors, this feature should be implemented directly in
 @code{AbstractNamespace}; it is easily handled through the standard
 @code{doesNotUnderstand:} message for trapping message sends that the
-virtual machine could not resolve.  @code{AbstractNamespace} will also
-implement a new set of methods that allow one to navigate through the
-namespace hierarchy; these parallel those found in @code{Behavior} for
-the class hierarchy.
+virtual machine could not resolve.  In @gst{}, this is in fact how it is
+done, though the method is part of class @code{BindingDictionary}
+instead.  @code{AbstractNamespace} will also implement a new set of
+methods that allow one to navigate through the namespace hierarchy;
+these parallel those found in @code{Behavior} for the class hierarchy.
 
 The most important task of the @code{Namespace} class is to provide
 organization for the most important global objects in the Smalltalk
 system---for the classes.  This importance becomes even more crucial in
-the structured environments which is first of all a framework for class
-polymorphism.
+a structure of multiple environments intended to change the semantics of
+code compiled for those classes.
 
-In Smalltalk the classes have the instance variable @code{name} which holds the
-name of the class. Each defined class is included in Smalltalk under this name.
-In a framework with several environments the class should know the environment
-in which it has been created and compiled.  This is a new variable of Class
-which has to be defined and properly set in relevant methods. In the mother
-environment the class should be included under its name.
+In Smalltalk the classes have the instance variable @code{name} which
+holds the name of the class. Each @dfn{defined class} is included in
+@code{Smalltalk}, or another environment, under this name.  In a
+framework with several environments the class should know the
+environment in which it has been created and compiled.  This is a new
+property of @code{Class} which must be defined and properly used in
+relevant methods.  In the mother environment the class shall be included
+under its name.
 
-Of course, any class (just like any other object) may be included concurrently
-in several environments, even under different symbols in the same or in
-diverse environments.  We can consider this 'alias names' of the particular
-class or global variable.  However, classes may be referenced under the other
-names or in other environments as their mother environment e.g. for the
-purpose of intance creation or messages to he class (class methods), but
-they cannot be compiled in other environment. If a class compiles its methods
-it always compiles them in its mother environment even if this compilation is
-requested from another environment.  If the syntax is not correct in the mother
-environment, a compilation error simply occurs.
+Any class, as with any other object, may be included concurrently in
+several environments, even under different symbols in the same or in
+diverse environments.  We can consider these ``alias names'' of the
+particular class or other value.  A class may be referenced under the
+other names or in other environments than its mother environment, e.g.@:
+for the purpose of instance creation or messages to the class, but it
+should not compile code in these environments, even if this compilation
+is requested from another environment.  If the syntax is not correct in
+the mother environment, a compilation error occurs.  This follows from
+the existence of class ``mother environments'', as a class is
+responsible for compiling its own methods.
 
-An important issue is also the name of the class answered by the class for the
-purpose of its identification in diverse tools (e.g. in a browser). This has
-to be change to reflect the environment in which it is shown, i.e. the
-method @samp{nameIn: environment} has to be implemented and used on
-proper places.
+An important issue is also the name of the class answered by the class
+for the purpose of its identification in diverse tools (e.g.@: in a
+browser). This must be changed to reflect the environment in which it is
+shown, i.e.@: the method @samp{nameIn: environment} must be implemented
+and used in proper places.
 
-These methods are not all which have to redefined in the Smalltalk system to
-achieve full functionality of structured environments.  In particular, changes
-have to be made to the behavior classes, to the user interface, to the
-compiler, to a few classes supporting persistance.  An interesting point that
-could not be noticed is that the environment is easier to use if evaluations
-(@dfn{doits}) are parsed as if UndefinedObject's mother environment was
-@emph{the current namespace}.
+Other changes must be made to the Smalltalk system to achieve the full
+functionality of structured environments.  In particular, changes have
+to be made to the behavior classes, the user interface, the compiler,
+and a few classes supporting persistance.  One small detail of note is
+that evaluation in the @acronym{REPL} or @samp{Workspace}, implemented
+by compiling methods on @code{UndefinedObject}, make more sense if
+@code{UndefinedObject}'s environment is the ``current environment'' as
+reachable by @code{Namespace current}, even though its mother
+environment by any other sensibility is @code{Smalltalk}.
 
 @subsection Using namespaces
 
-Using namespaces if often merely a matter of rewriting the loading script this
-way:
+Using namespaces is often merely a matter of adding a @samp{namespace}
+option to the @gst{} @acronym{XML} package description used by
+@code{PackageLoader}, or rewriting the loading script this way:
 @example
     Smalltalk addSubspace: #NewNS!
     Namespace current: NewNS!
@@ -1026,11 +1057,11 @@ way:
     Namespace current: Smalltalk!
 @end example
 
-Also remember that pool dictionaries are actually ``pool namespaces'', in the
-sense that including a namespace in the pool dictionaries list will
-automatically include its superspaces too. Declaring a namespace as a 
-pool dictionaries is similar in this way to C++'s @code{using namespace}
-declaration.
+Also remember that pool dictionaries are actually ``pool namespaces'',
+in the sense that including a namespace in a pool dictionaries list will
+automatically include its superspaces too. Declaring a namespace as a
+pool dictionary for a class is similar in this way to C++'s @code{using
+namespace} declaration within the class proper's definition.
 
 Finally, be careful when working with fundamental system classes.  Although you
 can use code like
@@ -1044,25 +1075,27 @@ can use code like
 @noindent
 or the equivalent syntax @code{Set extend}, this approach won't work
 when applied to core classes.  For example, you might be successful with
-a @code{Set} or @code{WriteStream} object, but subclassing SmallInteger this
-way can bite you in strange ways: integer literals will still belong to the
-Smalltalk dictionary's version of the class (this holds for Arrays, Strings,
-etc.  too), primitive operations will still answer standard Smalltalk
-@code{SmallIntegers}, and so on.  Or, @code{variableWordSubclasses} will
-recognize 32-bit @code{Smalltalk LargeInteger} objects, but not LargeIntegers
-belonging to your own namespace.
+a @code{Set} or @code{WriteStream} object, but subclassing
+@code{SmallInteger} this way can bite you in strange ways: integer
+literals will still belong to the @code{Smalltalk} dictionary's version
+of the class (this holds for @code{Array}s, @code{String}s, etc.@: too),
+primitive operations will still answer standard Smalltalk
+@code{SmallIntegers}, and so on.  Similarly,
+@code{variableWordSubclasses} will recognize 32-bit @code{Smalltalk
+LargeInteger} objects, but not @code{LargeInteger}s belonging to your
+own namespace.
 
-Unfortunately this problem is not easy to solve since Smalltalk has to cache
-the OOPs of determinate class objects for speed---it would not be feasible
-to lookup the environment to which sender of a message belongs every time
-the @code{+} message was sent to an Integer.
+Unfortunately, this problem is not easy to solve since Smalltalk has to
+cache the @acronym{OOP}s of determinate class objects for speed---it
+would not be feasible to lookup the environment to which sender of a
+message belongs every time the @code{+} message was sent to an Integer.
 
 So, @gst{} namespaces cannot yet solve 100% of the problem of clashes
 between extensions to a class---for that you'll still have to rely on
 prefixes to method names.  But they @emph{do} solve the problem of clashes
 between class names, or between class names and pool dictionary names, so you
-might want to give them a try.  An example of using namespaces is given by the
-@file{examples/Publish.st} file in the @gst{} source code directory.
+might want to give them a try.  An example of using namespaces is given by
+@file{examples/Publish.st} in the @gst{} source code directory.
 
 
 @node Disk file-IO
