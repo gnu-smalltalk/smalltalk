@@ -76,7 +76,7 @@ AC_CONFIG_SUBDIRS(snprintfv)
 AC_ARG_ENABLE(generational-gc,
 [  --disable-generational-gc disable generational garbage collection], ,
 [case $host in
-        *-*-cygwin* | *-*-mingw* | ia64-*-* | x86_64-*-* ) enable_generational_gc=no ;;
+        *-*-cygwin* | *-*-mingw* | ia64-*-* ) enable_generational_gc=no ;;
         *) enable_generational_gc=yes ;;
 esac])
 if test $enable_generational_gc != no; then
