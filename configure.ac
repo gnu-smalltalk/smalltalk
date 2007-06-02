@@ -7,7 +7,7 @@ dnl with this software.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.60)
-AC_INIT([GNU Smalltalk], 2.3.4, help-smalltalk@gnu.org, smalltalk)
+AC_INIT([GNU Smalltalk], 2.3.5, help-smalltalk@gnu.org, smalltalk)
 MAINTAINER="bonzini@gnu.org"
 
 dnl CURRENT:REVISION:AGE means this is the REVISION-th version of
@@ -76,7 +76,7 @@ AC_CONFIG_SUBDIRS(snprintfv)
 AC_ARG_ENABLE(generational-gc,
 [  --disable-generational-gc disable generational garbage collection], ,
 [case $host in
-        *-*-cygwin* | *-*-mingw* | ia64-*-* | x86_64-*-* ) enable_generational_gc=no ;;
+        *-*-cygwin* | *-*-mingw* | ia64-*-* ) enable_generational_gc=no ;;
         *) enable_generational_gc=yes ;;
 esac])
 if test $enable_generational_gc != no; then

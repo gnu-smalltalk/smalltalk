@@ -8,6 +8,8 @@ o   Fixed a floating-point accuracy problem in the test suite.
 
 o   Fixed a 64-bit cleanliness problem in the GDBM bindings.
 
+o   Generational GC enabled on x86_64.
+
 o   Support for writing a block with arguments and no statements
     as [ :a :b ] in addition to [ :a :b | ].
 
