@@ -371,7 +371,18 @@ deepCopy
      e.g. the method and the instance variables that have
      been pushed is almost surely not the right thing."
     ^self shallowCopy
-! !
+    "Answer a copy of the entire stack, but don't copy any
+     of the other instance variables of the context."
+    ^self copyStack!
+
+copyStack
+    "Answer a copy of the entire stack."
+    | ret ctx |
+    ret := ctx := self copy.
+    [ ctx parentContext isNil ] whileFalse: [
+        ctx parentContext: (ctx := ctx parentContext copy) ].
+
+    ^ret! !
 
 
 !ContextPart methodsFor: 'enumerating'!
