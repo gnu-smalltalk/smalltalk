@@ -174,21 +174,24 @@ yield: anObject
 
 generatorForGeneratorExample
     ^Generator on: [ :gen |
+        'Entering gen' displayNl.
         1 to: self do: [ :each |
+            ('Yielding ', each printString, '... ') display.
 	    gen yield: each.
+            'Resuming gen' displayNl
         ] ]!
 
 generatorExample: gen
     | n |
+    ('Running on ', gen printString) displayNl.
     [
+        'Calling next... ' display.
 	n := gen next.
 	n notNil
     ] whileTrue: [
+        ('Got ', n printString) displayNl
     ]! !
 
-Eval [
-    Smalltalk byteCodeCounter printNl.
-    (Time millisecondsToRun: [ 
-        100000 generatorExample: 100000 generatorForGeneratorExample ]) printNl.
-    Smalltalk byteCodeCounter printNl
-]
+Smalltalk byteCodeCounter printNl.
+10 generatorExample: 10 generatorForGeneratorExample.
+Smalltalk byteCodeCounter printNl!
