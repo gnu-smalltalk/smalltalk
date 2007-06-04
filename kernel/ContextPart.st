@@ -367,10 +367,6 @@ mark
 !ContextPart methodsFor: 'copying'!
 
 deepCopy
-    "Answer a shallow copy of the receiver -- duplicating
-     e.g. the method and the instance variables that have
-     been pushed is almost surely not the right thing."
-    ^self shallowCopy
     "Answer a copy of the entire stack, but don't copy any
      of the other instance variables of the context."
     ^self copyStack!
