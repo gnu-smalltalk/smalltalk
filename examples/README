@@ -111,9 +111,9 @@ Tokenizer.st	An abstract base class for lexical analyzers.
 by me/sbb
 
 
-Generator.st	Python/Ruby-like generators, using processes.
-Gen2.st		Same, using contexts.
-Gen3.st		Same, hiding context manipulation with continuation objects.
+Generator.st	Python/Ruby-like generators, using continuations.
+Gen2.st		Same, using contexts (slower).
+Gen3.st		Same, using processes (in the middle).
 by me
 
 The directory also contains some bindings for external libraries; currently

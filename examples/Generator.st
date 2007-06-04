@@ -28,8 +28,10 @@
 |
  ======================================================================"
 
+PackageLoader fileInPackage: #Continuations!
+
 Stream subclass: #Generator
-	  instanceVariableNames: 'next producer consumer process atEnd'
+	  instanceVariableNames: 'next genCC consCC atEnd'
 	  classVariableNames: ''
 	  poolDictionaries: ''
 	  category: 'Streams-Generators'
@@ -97,7 +99,7 @@ on: aBlock
 
 atEnd
     "Answer whether more data can be generated."
-    atEnd isNil ifTrue: [ self generateNext ].
+    atEnd isNil ifTrue: [ genCC := genCC callCC ].
     ^atEnd
 !
 
@@ -106,9 +108,9 @@ next
      decides that nothing else can be generated."
     | result |
     self atEnd ifTrue: [ ^self pastEnd ].
-    atEnd := nil.
     result := next.
     next := nil.
+    atEnd := nil.
     ^result
 !
 
@@ -134,57 +136,59 @@ peekFor: anObject
 !Generator methodsFor: 'private - continuations'!
 
 forkOn: aBlock
-    producer := Semaphore new.
-    consumer := Semaphore new.
-    process := [
-	producer wait.
-	aBlock value: self.
-	consumer signal
-    ] fork!
+    "When initializing, we just store the current continuation and exit;
+     the ^self is where the control flow is actually split.  When #next is
+     called first, the code after the continuation is executed, which
+     executes the generator block and finally resumes execution of the
+     consumer when the block leaves."
 
-yield: anObject
-    "Save the object returned by the block in the next
-     instance variable, then restart the consumer thread
-     and put our own to wait."
-
-    next := anObject.
-    atEnd := false.
-    consumer signal.
-    producer wait!
-
-generateNext
-    "Restart the producer thread and put our own to wait."
+    "This is the only time we create a continuation with a block; after
+     this, we just replace a continuation with another through
+     Continuation>>#callCC."
+    consCC := Continuation escapeDo: [ :cc |
+	genCC := cc.
+	atEnd := nil.
+	^self ].
 
     atEnd := true.
-    process priority = Processor activePriority
-        ifFalse: [ process priority: Processor activePriority ].
-    producer signal.
-    consumer wait! !
+    genCC := nil.
+    aBlock value: self.
+    consCC oneShotValue!
+
+yield: anObject
+    "When entering from the generator the code in the block is executed and
+     control flow goes back to the consumer.  When entering from the consumer,
+     the code after the continuation is executed, which resumes execution of
+     the generator block."
+    atEnd := false.
+    next := anObject.
+    consCC := consCC callCC.
+
+    "Make sure that an exception (or any other event that causes #yield: not
+     to be invoked again) terminates the generator.  Also, generators should
+     not reenter."
+    genCC := nil.
+    atEnd := true! !
 
 !Integer methodsFor: 'examples of generators'!
 
 generatorForGeneratorExample
     ^Generator on: [ :gen |
-        'Entering gen' displayNl.
         1 to: self do: [ :each |
-	    ('Yielding ', each printString, '... ') display.
 	    gen yield: each.
-	    'Resuming gen' displayNl
         ] ]!
 
 generatorExample: gen
     | n |
-    ('Running on ', gen printString) displayNl.
     [
-	'Calling next... ' display.
 	n := gen next.
 	n notNil
     ] whileTrue: [
-	('Got ', n printString) displayNl
     ]! !
 
 Eval [
     Smalltalk byteCodeCounter printNl.
-    10 generatorExample: 10 generatorForGeneratorExample.
+    (Time millisecondsToRun: [ 
+        100000 generatorExample: 100000 generatorForGeneratorExample ]) printNl.
     Smalltalk byteCodeCounter printNl
 ]
