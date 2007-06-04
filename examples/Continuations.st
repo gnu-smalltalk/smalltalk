@@ -55,6 +55,12 @@ oneShotValue: v
     thisContext parentContext: stack.
     ^v!
 
+callCC
+    | cont |
+    cont := Continuation new stack: thisContext parentContext.
+    thisContext parentContext: stack.
+    ^cont!
+
 value
     thisContext parentContext: stack copyStack.
     ^nil!

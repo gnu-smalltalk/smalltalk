@@ -1,6 +1,9 @@
 2007-06-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Continuations.st: Adopt definitive API.
+	* examples/Gen3.st: Use Continuation>>#callCC, much faster.  Rename to
+	Generator.st.
+	* examples/Generator.st: Rename to Gen3.st.
 	* kernel/ContextPart.st: Move the continuations example's #copyStack
 	method here, as #deepCopy.
 
