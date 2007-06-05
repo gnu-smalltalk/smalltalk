@@ -167,6 +167,9 @@
   
   "Level 2 Smalltalk font-locking keywords")
 
+(defvar smalltalk-last-category ""
+  "Category of last method")
+
 ;; ---[ Interactive functions ]---------------------------------------
 
 (defun smalltalk-mode ()
@@ -219,11 +222,7 @@
 		 smalltalk-indent-amount))
     (indent-to-column col)))
 
-(defun smalltalk-begin-of-defun ()
-  "Skips to the beginning of the current method.  If already at
-the beginning of a method, skips to the beginning of the previous
-one."
-  (interactive)
+(defun smalltalk-bang-begin-of-defun ()
   (let ((parse-sexp-ignore-comments t) here delim start)
     (setq here (point))
     (while (and (search-backward "!" nil 'to-end)
@@ -244,6 +243,48 @@ one."
 	  (if (= (preceding-char) ?!)
 	      (backward-char 1))
 	  (smalltalk-begin-of-defun)))))  ;and go to the next one
+
+(defun smalltalk-scope-begin-of-defun ()
+  (let (here prev (start (smalltalk-current-scope-point)))
+    (if (and start (/= (point) start))
+	(progn
+    (backward-char 1)
+    (skip-chars-backward " \t")
+    (if (bolp)
+	(backward-char 1)
+      (end-of-line))
+    (setq here (point))
+	       (goto-char start)
+	       (skip-chars-forward "^[")
+	       (forward-char 1)
+	       (condition-case nil
+		   (while (< (point) here)
+		     (if (looking-at "[ \t]*\\[") (setq prev (point)))
+		     (forward-sexp 1))
+		 (error t))
+	       (if prev
+		   (progn (goto-char prev)
+			  (beginning-of-line)
+			  (skip-chars-forward " \t"))
+		 (goto-char start))))))
+
+(defun smalltalk-begin-of-defun ()
+  "Skips to the beginning of the current method.  If already at
+the beginning of a method, skips to the beginning of the previous
+one."
+  (interactive)
+  (if (smalltalk-in-bang-syntax)
+      (smalltalk-bang-begin-of-defun)
+    (smalltalk-scope-begin-of-defun)))
+
+(defun smalltalk-begin-of-scope ()
+  "Skips to the beginning of the current method.  If already at
+the beginning of a method, skips to the beginning of the previous
+one."
+  (interactive)
+  (let ((start (smalltalk-current-scope-point)))
+    (if start (goto-char start))))
+
 
 (defun smalltalk-forward-sexp (n)
   (interactive "p")
@@ -275,14 +316,14 @@ one."
   (interactive)
   (smalltalk-indent-line))
 
-(defun smalltalk-newline-and-indent (levels)
+(defun smalltalk-newline-and-indent ()
   "Called basically to do newline and indent.  Sees if the current line is a
 new statement, in which case the indentation is the same as the previous
 statement (if there is one), or is determined by context; or, if the current
 line is not the start of a new statement, in which case the start of the
 previous line is used, except if that is the start of a new line in which case
 it indents by smalltalk-indent-amount."
-  (interactive "p")
+  (interactive)
   (newline)
   (smalltalk-indent-line))
 
@@ -302,7 +343,7 @@ expressions."
 	  (save-excursion
       	    (skip-chars-backward "A-z0-9_")
 	    (if (and (looking-at smalltalk-name-regexp)
-		     (not (smalltalk-at-method-begin)))
+		     (not (smalltalk-at-begin-of-defun)))
 		(setq needs-indent (smalltalk-white-to-bolp))))
 	  (and needs-indent
 	       (smalltalk-indent-for-colon))))
@@ -315,34 +356,118 @@ expressions."
 
 (defun smalltalk-bang ()
   (interactive)
-  (insert "!")
+  (cond ((or (smalltalk-in-string) (smalltalk-in-comment)) (insert "!"))
+        (t (if (smalltalk-in-bang-syntax)
+               (progn (insert "!")
+	         (save-excursion
+	           (beginning-of-line)
+	           (if (looking-at "^[ \t]+!")
+		       (delete-horizontal-space)))))
+          (smalltalk-end-of-defun))))
+
+(defun smalltalk-end-of-defun ()
+  (interactive)
+  (if (smalltalk-in-bang-syntax)
+      (progn (search-forward "!")
+	     (forward-char 1)
+	     (if (looking-at "[ \t\n]+!")
+		 (progn (search-forward 1)
+			(forward-char 1))))
+    (progn (end-of-line)
+	   (smalltalk-begin-of-defun)
+	   (skip-chars-forward "^[")
+	   (forward-sexp 1)
+	   (skip-chars-forward " \t\n"))))
+
+(defun smalltalk-last-category-name ()
+  smalltalk-last-category)
+
+(defun smalltalk-insert-indented-line (string)
+  (insert (format "%s\n" string))
   (save-excursion
+    (backward-char 1)
+    (smalltalk-indent-line)))
+ 
+(defun smalltalk-maybe-insert-spacing-line (n)
+  (if (not (save-excursion
+	     (previous-line n)
+	     (looking-at "^[ \t]*$")))
+      (insert "\n")))
+
+(defun smalltalk-insert-method-body (selector-name category-name)
+  (let (insert-at-top)
     (beginning-of-line)
-    (if (looking-at "^[ \t]+!")
-	(delete-horizontal-space))))
+    (smalltalk-forward-whitespace)
+    (beginning-of-line)
+    (setq insert-at-top (smalltalk-at-begin-of-defun))
+    (if (not insert-at-top)
+	(progn (smalltalk-end-of-defun)
+	       (beginning-of-line)))
+    (smalltalk-maybe-insert-spacing-line 1)
+    (smalltalk-insert-indented-line (format "%s [" selector-name))
+    (save-excursion
+      (insert "\n")
+      (if (not (equal category-name ""))
+	  (smalltalk-insert-indented-line (format "<category: '%s'>" category-name)))
+      (smalltalk-insert-indented-line "]")
+      (smalltalk-maybe-insert-spacing-line 0))
+    (smalltalk-indent-line)
+    (end-of-line)))
 
-(defun smalltalk-instance-template (class-name category-name)
-  (interactive
-   (list (read-string "Class: " (smalltalk-backward-find-class-name))
-	 (read-string "Category: ")))
-  (insert (format "!%s methodsFor: '%s'!\n\n" class-name category-name))
-  (save-excursion
-    (insert "\n! !\n")))
+(defun smalltalk-instance-template-fn (class-name selector-name category-name)
+  (setq smalltalk-last-category category-name)
+  (smalltalk-exit-class-scope)
+  (smalltalk-insert-method-body
+   (if (equal class-name (smalltalk-current-class-name))
+       selector-name
+     (format "%s >> %s" class-name selector-name))
+   category-name))
 
-(defun smalltalk-private-template (class-name)
-  (interactive
-   (list (read-string "Class: " (smalltalk-backward-find-class-name))))
-  (insert (format "!%s methodsFor: 'private'!\n\n" class-name))
-  (save-excursion
-    (insert "\n! !\n")))
+(defun smalltalk-class-template-fn (class-name selector-name category-name)
+  (setq smalltalk-last-category category-name)
+  (if (and (equal selector-name "")
+	   (equal class-name (smalltalk-current-class-name)))
+      (progn (smalltalk-insert-method-body (format "    %s class" class-name) "")
+	     (setq smalltalk-last-category "instance creation"))
+    (smalltalk-insert-method-body
+     (if (and (smalltalk-in-class-scope)
+	      (equal class-name (smalltalk-current-class-name)))
+	 selector-name
+       (format "%s class >> %s" class-name selector-name))
+     category-name)))
 
-(defun smalltalk-class-template (class-name category-name)
-  (interactive
-   (list (read-string "Class: " (smalltalk-backward-find-class-name))
-	 (read-string "Category: " "instance creation")))
-  (insert (format "!%s class methodsFor: '%s'!\n\n" class-name category-name))
-  (save-excursion
-    (insert "\n! !\n")))
+(defun smalltalk-private-template-fn (class-name selector-name)
+  (if (smalltalk-in-class-scope)
+      (smalltalk-class-template-fn class-name selector-name "private")
+    (smalltalk-instance-template-fn class-name selector-name "private")))
+
+(defun smalltalk-maybe-read-class (with-class)
+   (if (= with-class 1)
+       (smalltalk-current-class-name)
+     (read-string "Class: " (smalltalk-current-class-name))))
+
+(defun smalltalk-instance-template (with-class)
+  (interactive "p")
+  (smalltalk-instance-template-fn
+   (smalltalk-maybe-read-class with-class)
+   (read-string "Selector: ")
+   (read-string "Category: " (smalltalk-last-category-name))))
+
+(defun smalltalk-class-template (with-class)
+  (interactive "p")
+  (let* ((class-name (smalltalk-maybe-read-class with-class))
+	 (selector-name (read-string "Selector: "))
+	 (category-name (if (equal selector-name "") ""
+			  (read-string "Category: "
+				       (smalltalk-last-category-name)))))
+  (smalltalk-class-template-fn class-name selector-name category-name)))
+   
+
+(defun smalltalk-private-template (with-class)
+  (interactive "p")
+  (smalltalk-private-template-fn
+   (smalltalk-maybe-read-class with-class)
+   (read-string "Selector: ")))
 
 ;; ---[ Non-interactive functions ]-----------------------------------
 
@@ -358,37 +483,58 @@ expressions."
 	   comment-column))))	; except leave at least one space.
 
 (defun smalltalk-indent-line ()
-  (let (indent-amount is-keyword)
-    (save-excursion
-      (beginning-of-line)
-      (if (smalltalk-in-comment)
-	  ;; We are in the middle of a multi-line comment
-	  (progn
-	    (search-backward "\"")
-	    (setq indent-amount (1+ (current-column))))
-	(progn
-	  (smalltalk-forward-whitespace)
-	  (if (looking-at "[A-z][A-z0-9_]*:")
-	      (setq is-keyword t)
-	    (setq indent-amount (calculate-smalltalk-indent))))))
-    (if is-keyword
-	(smalltalk-indent-for-colon)
-      (smalltalk-indent-to-column indent-amount))))
+  (smalltalk-indent-to-column 
+   (save-excursion
+     (beginning-of-line)
+     (skip-chars-forward " \t")
+     (if (and (not (smalltalk-in-comment))
+	      (looking-at "[A-z][A-z0-9_]*:")
+	      (not (smalltalk-at-begin-of-defun)))
+	 (smalltalk-indent-for-colon)
+       (smalltalk-calculate-indent)))))
  
-(defun calculate-smalltalk-indent ()
-  (let (needs-indent indent-amount done c state orig start-of-line
-		     (parse-sexp-ignore-comments t))
+(defun smalltalk-toplevel-indent (for-scope)
+  (let (orig)
+    (condition-case nil
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (end-of-line)
+	    (setq orig (line-number-at-pos))
+	    (if for-scope (smalltalk-begin-of-scope) (smalltalk-begin-of-defun))
+	    (smalltalk-forward-whitespace)
+	    (if (= orig (line-number-at-pos))
+		(smalltalk-current-column)
+	      (+ smalltalk-indent-amount (smalltalk-current-column)))))
+      (error 0))))
+     
+(defun smalltalk-statement-indent ()
+  (let (needs-indent indent-amount done c state orig start-of-line close
+		     (parse-sexp-ignore-comments nil))
     (save-excursion
       (save-restriction
 	(widen)
+	(beginning-of-line)
+	(setq close (looking-at "[ \t]*\]"))
 	(narrow-to-region (point-min) (point)) ;only care about what's before
 	(setq state (parse-partial-sexp (point-min) (point)))
-	(cond ((equal (nth 3 state) ?\") ;in a comment
+	(cond ((nth 4 state) ;in a comment
 	       (save-excursion
 		 (smalltalk-backward-comment)
-		 (setq indent-amount (1+ (current-column)))))
+		 (setq indent-amount 
+		       (+ (current-column) (if (= (current-column) 0) 0 1)))))
 	      ((equal (nth 3 state) ?')	;in a string
 	       (setq indent-amount 0))
+	      (close ;just before a closing bracket
+	       (save-excursion
+		 (condition-case nil
+		     (progn (widen)
+			    (smalltalk-forward-whitespace)
+			    (forward-char)
+			    (backward-sexp 1)
+			    (beginning-of-line)
+			    (smalltalk-forward-whitespace)
+			    (setq indent-amount (current-column))))))
 	      (t
 	       (save-excursion
 		 (smalltalk-backward-whitespace)
@@ -412,7 +558,7 @@ expressions."
 			     (setq indent-amount (smalltalk-current-column)))
 
 		       ;; we're top level
-		       (setq indent-amount smalltalk-indent-amount)))
+		       (setq indent-amount (smalltalk-toplevel-indent nil))))
 		    ((= (preceding-char) ?.) ;at end of statement
 		     (smalltalk-find-statement-begin)
 		     (setq indent-amount (smalltalk-current-column)))
@@ -422,41 +568,24 @@ expressions."
 		     (setq indent-amount (+ (smalltalk-current-column)
 					    smalltalk-indent-amount)))
 		    ((= (preceding-char) ?>) ;maybe <primitive: xxx>
-		     (setq orig (point))
-		     (backward-char 1)
-		     (smalltalk-backward-whitespace)
-		     (skip-chars-backward "0-9")
-		     (smalltalk-backward-whitespace)
-		     (if (= (preceding-char) ?:)
-			 (progn
-			   (backward-char 1)
-			   (skip-chars-backward "a-zA-Z_")
-			   (if (looking-at "primitive:")
-			       (progn
-				 (smalltalk-backward-whitespace)
-				 (if (= (preceding-char) ?<)
-				     (setq indent-amount (1- (smalltalk-current-column))))))))
-		     (if (null indent-amount)
-			 (progn
-			   (goto-char orig)
-			   (smalltalk-find-statement-begin)
-			   (setq indent-amount (+ (smalltalk-current-column)
-						  smalltalk-indent-amount)))))
-		    (t			;must be a statement continuation
 		     (save-excursion
 		       (beginning-of-line)
-		       (setq start-of-line (point)))
-		     (smalltalk-find-statement-begin)
-		     (setq indent-amount (+ (smalltalk-current-column)
-					    smalltalk-indent-amount))))))
-	indent-amount))))
+		       (if (looking-at "[ \t]*<[ \t]*[a-zA-Z]+:")
+			   (setq indent-amount (smalltalk-toplevel-indent nil))))))))
+	(or indent-amount
+	    (save-excursion
+	      (condition-case nil
+		  (smalltalk-find-statement-begin)
+		  (error (beginning-of-line)))
+	      (+ (smalltalk-current-column)
+		 smalltalk-indent-amount)))))))
 
+(defun smalltalk-calculate-indent ()
+    (cond
+     ((smalltalk-at-begin-of-scope) (smalltalk-toplevel-indent t))
+     ((smalltalk-at-begin-of-defun) (smalltalk-toplevel-indent t))
+     (t (smalltalk-statement-indent))))
 
-(defun smalltalk-previous-nonblank-line ()
-  (forward-line -1)
-  (while (and (not (bobp))
-	      (looking-at "^[ \t]*$"))
-    (forward-line -1)))
 
 (defun smalltalk-in-string ()
   "Returns non-nil delimiter as a string if the current location is
@@ -502,11 +631,12 @@ or non-white space, non-comment character"
 
 (defun smalltalk-current-indent ()
   "Returns the indentation of the given line, regardless of narrowed buffer."
-  (save-restriction
-    (widen)
-    (beginning-of-line)
-    (skip-chars-forward smalltalk-whitespace)
-    (current-column)))
+  (save-excursion
+    (save-restriction
+      (widen)
+      (beginning-of-line)
+      (skip-chars-forward " \t")
+      (current-column))))
 
 (defun smalltalk-find-statement-begin ()
   "Leaves the point at the first non-blank, non-comment character of a new
@@ -599,19 +729,38 @@ following on the same line."
   "Narrows the region to between point and the closest previous open paren.
 Actually, skips over any block parameters, and skips over the whitespace
 following on the same line."
-  (let* ((state (parse-partial-sexp (point-min) (point)))
+  (let*	((parse-sexp-ignore-comments t)
+	 (state (parse-partial-sexp (point-min) (point)))
 	 (start (smalltalk-match-paren state)))
     (if (null start) () (narrow-to-region start (point)))
     state))
 
-(defun smalltalk-at-method-begin ()
+(defun smalltalk-at-begin-of-scope ()
+  "Returns T if at the beginning of a class or namespace definition, otherwise nil"
+  (save-excursion 
+    (end-of-line)
+    (if (smalltalk-in-bang-syntax)
+	(let ((parse-sexp-ignore-comments t))
+	  (and (bolp)
+	       (progn (smalltalk-backward-whitespace)
+		      (= (preceding-char) ?!))))
+      (= (line-number-at-pos)
+	 (progn (smalltalk-begin-of-scope)
+		(line-number-at-pos))))))
+
+(defun smalltalk-at-begin-of-defun ()
   "Returns T if at the beginning of a method definition, otherwise nil"
-  (let ((parse-sexp-ignore-comments t))
-    (if (bolp)
-	(save-excursion
-	  (smalltalk-backward-whitespace)
-	  (= (preceding-char) ?!)
-	  ))))
+  (save-excursion
+    (end-of-line)
+    (if (smalltalk-in-bang-syntax)
+	(let ((parse-sexp-ignore-comments t))
+	  (and (bolp)
+	       (progn (smalltalk-backward-whitespace)
+		      (= (preceding-char) ?!))))
+      (= (line-number-at-pos)
+	 (progn (smalltalk-begin-of-defun)
+		(line-number-at-pos))))))
+
 
 (defun smalltalk-indent-for-colon ()
   (let (indent-amount c start-line state done default-amount
@@ -620,15 +769,15 @@ following on the same line."
     (save-excursion
       (save-restriction
 	(widen)
+	(end-of-line)
 	(smalltalk-narrow-to-method)
-	(beginning-of-line)
 	(setq state (smalltalk-parse-sexp-and-narrow-to-paren))
 	(narrow-to-region (point-min) (point))
 	(setq start-line (point))
 	(smalltalk-backward-whitespace)
 	(cond
 	 ((bobp)
-	  (setq indent-amount (smalltalk-current-column)))
+	  (setq indent-amount (smalltalk-toplevel-indent t)))
 	 ((eq (setq c (preceding-char)) ?\;)	; cascade before, treat as stmt continuation
 	  (smalltalk-find-statement-begin)
 	  (setq indent-amount (+ (smalltalk-current-column)
@@ -660,14 +809,14 @@ following on the same line."
 			 (setq indent-amount (smalltalk-current-column))))))
 	    (and (null indent-amount)
 		 (setq indent-amount default-amount))))))
-    (if indent-amount
-	(smalltalk-indent-to-column indent-amount))))
+    (or indent-amount (smalltalk-current-indent))))
 
 (defun smalltalk-indent-to-column (col)
-  (save-excursion
-    (beginning-of-line)
-    (delete-horizontal-space)
-    (indent-to col))
+  (if (/= col (smalltalk-current-indent))
+      (save-excursion
+	(beginning-of-line)
+	(delete-horizontal-space)
+	(indent-to col)))
   (if (bolp)
       ;;delete horiz space may have moved us to bol instead of staying where
       ;; we were.  this fixes it up.
@@ -715,7 +864,11 @@ method selector and temporaries."
 	      (skip-chars-forward (concat "^" smalltalk-whitespace))
 	      (smalltalk-forward-whitespace)
 	      (skip-chars-forward smalltalk-name-chars)))) ;skip over operand
+      (if (not (smalltalk-in-bang-syntax))
+	  (progn (skip-chars-forward "^[")
+		 (forward-char)))
       (smalltalk-forward-whitespace)
+
       ;;sbb  6-Sep-93 14:58:54 attempted fix(skip-chars-forward smalltalk-whitespace)
       (if (= (following-char) ?|)	;scan for temporaries
 	  (progn
@@ -778,59 +931,112 @@ Whitespace is defined as spaces, tabs, and comments."
     (backward-char 1)
     (search-backward "\"")))
 
-(defun smalltalk-collect-selector ()
-  "Point is stationed inside or at the beginning of the selector in question.
-This function computes the Smalltalk selector (unary, binary, or keyword) and
-returns it as a string.  Point is not changed."
-  (save-excursion
-    (let (start selector done ch
-		(parse-sexp-ignore-comments t))
-      (skip-chars-backward (concat "^" "\"" smalltalk-whitespace))
-      (setq start (point))
-      (if (looking-at smalltalk-name-regexp)
-	  (progn			;maybe unary, maybe keyword
-	    (skip-chars-forward smalltalk-name-chars)
-	    (if (= (following-char) ?:)	;keyword?
-		(progn
-		  (forward-char 1)
-		  (setq selector (buffer-substring start (point)))
-		  (setq start (point))
-		  (while (not done)
-		    (smalltalk-forward-whitespace)
-		    (setq ch (following-char))
-		    (cond ((memq ch '(?\; ?. ?\] ?\) ?} ?! ))
-			   (setq done t))
-			  ((= ch ?:)
-			   (forward-char 1)
-			   (setq selector
-				 (concat selector
-					 (buffer-substring start (point)))))
-			  (t
-			   (setq start (point))
-			   (smalltalk-forward-sexp 1)))))
-	      (setq selector (buffer-substring start (point)))))
-	(skip-chars-forward (concat "^" ?\" smalltalk-whitespace))
-	(setq selector (buffer-substring start (point))))
-      selector)))
-
-(defun smalltalk-backward-find-class-name ()
-  (let (first-hit-point first-hit second-hit-point second-hit)
+(defun smalltalk-current-class ()
+  (let ((here (point))
+	curr-hit-point curr-hit new-hit-point new-hit)
     (save-excursion
-      (if (setq first-hit-point
+      (if (setq curr-hit-point
 		(search-backward-regexp "^![ \t]*\\(\\w+\\)[ \t]+" nil t))
-	  (setq first-hit (buffer-substring (match-beginning 1) (match-end 1)))))
+	  (setq curr-hit (buffer-substring
+			  (match-beginning 1)
+			  (match-end 1)))))
+
     (save-excursion
-      (if (setq second-hit-point
+      (if (setq new-hit-point
 		(search-backward-regexp
-		 "^\\w+[ \t]+\\(variable\\|variableWord\\|variableByte\\)?subclass:[ \t]+#\\(\\w+\\)" nil t))
-	  (setq second-hit (buffer-substring
-			    (match-beginning 2)
-			    (match-end 2)))))
-    (if first-hit-point
-	(if (and second-hit-point (> second-hit-point first-hit-point))
-	    second-hit
-	  first-hit)
-      (or second-hit ""))))
+		 "^[ \t]*\\(\\w+\\)[ \t]+class[ \t]+\\[" nil t))
+	  (setq new-hit (buffer-substring
+			 (match-beginning 1)
+			 (match-end 1)))))
+    (if (and new-hit-point
+	     (or (not curr-hit-point) (> new-hit-point curr-hit-point))
+	     (smalltalk-in-class-scope-of here new-hit-point))
+	  (progn (setq curr-hit-point new-hit-point)
+		 (setq curr-hit new-hit)))
+
+    (save-excursion
+      (if (setq new-hit-point
+		(search-backward-regexp
+		 "^[ \t]*\\(\\w+\\)[ \t]+extend[ \t]+\\[" nil t))
+	  (setq new-hit (buffer-substring
+			 (match-beginning 1)
+			 (match-end 1)))))
+    (if (and new-hit-point
+	     (or (not curr-hit-point) (> new-hit-point curr-hit-point)))
+	  (progn (setq curr-hit-point new-hit-point)
+		 (setq curr-hit new-hit)))
+
+    (save-excursion
+      (if (setq new-hit-point
+		(search-backward-regexp
+		 "^[ \t]*\\w+[ \t]+\\(variable\\|variableWord\\|variableByte\\)?subclass:[ \t]+#?\\(\\w+\\)" nil t))
+	  (setq new-hit (buffer-substring
+			 (match-beginning 2)
+			 (match-end 2)))))
+    (if (and new-hit-point
+	     (or (not curr-hit-point) (> new-hit-point curr-hit-point)))
+	(progn (setq curr-hit-point new-hit-point)
+	       (setq curr-hit new-hit)))
+    (cons curr-hit curr-hit-point)))
+
+(defun smalltalk-current-scope-point ()
+  (let ((curr-hit-point (smalltalk-current-class-point))
+	new-hit-point)
+    (save-excursion
+      (setq new-hit-point
+		(search-backward-regexp "^[ \t]*Eval[ \t]+\\[" nil t)))
+    (if (and new-hit-point
+	     (or (not curr-hit-point) (> new-hit-point curr-hit-point)))
+	(setq curr-hit-point new-hit-point))
+    
+    (save-excursion
+      (setq new-hit-point
+	    (search-backward-regexp "^[ \t]*Namespace[ \t]+current:[ \t]+[A-Za-z0-9_.]+[ \t]+\\[" nil t)))
+    (if (and new-hit-point
+	     (or (not curr-hit-point) (> new-hit-point curr-hit-point)))
+	(setq curr-hit-point new-hit-point))
+
+    curr-hit-point))
+
+(defun smalltalk-current-class-point ()
+    (cdr (smalltalk-current-class)))
+
+(defun smalltalk-current-class-name ()
+    (car (smalltalk-current-class)))
+
+(defun smalltalk-in-bang-syntax ()
+  (let ((curr-hit-point (smalltalk-current-class-point)))
+    (and curr-hit-point
+	 (save-excursion
+	   (goto-char curr-hit-point)
+	   (beginning-of-line)
+	   (looking-at "!")))))
+
+(defun smalltalk-in-class-scope-of (orig curr-hit-point)
+  (save-excursion
+    (goto-char curr-hit-point)
+    (skip-chars-forward " \t")
+    (skip-chars-forward smalltalk-name-chars)
+    (skip-chars-forward " \t")
+    (and (= (following-char) ?c)
+	 ;; check if the class scope ends after the point
+	 (condition-case nil
+	     (progn (skip-chars-forward "^[")
+		    (forward-sexp 1)
+		    (> (point) orig))
+	   (error t)))))
+
+(defun smalltalk-in-class-scope ()
+  (let ((curr-hit-point (smalltalk-current-class-point)))
+    (and curr-hit-point
+	 (smalltalk-in-class-scope-of (point) curr-hit-point))))
+
+(defun smalltalk-exit-class-scope ()
+  (interactive)
+  (if (smalltalk-in-class-scope)
+      (progn (smalltalk-begin-of-scope)
+	     (skip-chars-forward "^[")
+	     (smalltalk-end-of-defun))))
 
 
 (provide 'smalltalk-mode)
