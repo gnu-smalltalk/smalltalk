@@ -165,7 +165,12 @@ poll (pfd, nfd, timeout)
 	       0-byte recv, and use ioctl(2) to detect POLLHUP.  */
 	    r = recv (pfd[i].fd, NULL, 0, MSG_PEEK);
 	    if (r == 0 || errno == ENOTSOCK)
-	      ioctl(pfd[i].fd, FIONREAD, &r);
+	      {
+		ioctl(pfd[i].fd, FIONREAD, &r);
+		if (r == 0 && isatty (pfd[i].fd))
+		  r++;
+		errno = 0;
+	      }
 #else
 	    char data[64];
 	    r = recv (pfd[i].fd, data, sizeof (data), MSG_PEEK);

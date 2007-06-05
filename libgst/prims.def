@@ -5220,7 +5220,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
     fd = mkstemp ((char *) fileName2);
 
     xfree (fileName);
-    if (fd >= 0)
+    if (fd < 0)
       {
         xfree (fileName2);
 	UNPOP (numArgs);
@@ -5487,6 +5487,16 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 
 	PRIM_SUCCEEDED;
       }
+      break;
+
+    case PRIM_SHUTDOWN_WRITE:
+      shutdown (fd, 1);
+      if (errno == ENOTSOCK && isatty (fd))
+	{
+	  char buf[1];
+	  write (fd, buf, 0);
+	  errno == 0;
+	}
       break;
     }
 

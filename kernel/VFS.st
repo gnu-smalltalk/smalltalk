@@ -933,10 +933,8 @@ refresh
     pipe := FileStream
 	popen: command, ' list ', self name
 	dir: FileStream read.
-    [
-	line := pipe nextLine readStream.
-	line atEnd
-    ] whileFalse: [
+    pipe linesDo: [ :l || line |
+	line := l readStream.
 	isDir := line next = $d.
 	line skipTo: Character space.   	"Attributes"
 	line skipSeparators.

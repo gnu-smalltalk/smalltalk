@@ -1,3 +1,7 @@
+2007-06-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c: Yet another MacOS workaround.
+
 2007-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/lrintl.c: New.

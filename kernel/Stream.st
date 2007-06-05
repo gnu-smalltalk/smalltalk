@@ -242,15 +242,18 @@ isExternalStream
 linesDo: aBlock
     "Evaluate aBlock once for every line in the receiver (assuming the
      receiver is streaming on Characters)."
-    [self atEnd] whileFalse:
-	[aBlock value: self nextLine].
+    [
+	[self atEnd] whileFalse:
+    	    [aBlock value: self nextLine ]
+    ] on: EndOfStream do: [ :ex | ex return ]
 !
 
 do: aBlock
     "Evaluate aBlock once for every object in the receiver"
-    [self atEnd] whileFalse:
-    	[aBlock value: self next ]
-
+    [
+	[self atEnd] whileFalse:
+    	    [aBlock value: self next ]
+    ] on: EndOfStream do: [ :ex | ex return ]
 ! !
 
 

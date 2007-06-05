@@ -263,6 +263,17 @@ invalidate
     file := nil
 !
 
+shutdown
+    "Close the transmission side of a full-duplex connection.  This is useful
+     on read-write pipes."
+    file isNil ifTrue: [ ^self ].
+
+    self flush.
+    self fileOp: 19.
+    self checkError.
+    access := 1
+!
+
 close
     "Close the file"
     file isNil ifTrue: [ ^self ].

@@ -1,3 +1,15 @@
+2007-06-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FileDescr.st: Add #shutdown.
+	* kernel/Stream.st: Wrap #linesDo: and #do: in an exception handler.
+	* kernel/VFS.st: Use #linesDo:.
+
+2007-06-04  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/AbstNamespc.st: Make removeSubspace: public, change its
+	argument to be a symbol rather than a namespace, and don't make it
+	a subspace of Smalltalk.
+
 2007-06-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Continuations.st: Adopt definitive API.
