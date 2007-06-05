@@ -171,9 +171,3 @@ uninstall-local:: gst-package
 	./gst-package --uninstall --destdir="$(DESTDIR)" packages.xml
 	-rm -f $(DESTDIR)$(pkgdatadir)/packages.xml
 	-rm -f $(DESTDIR)$(imagedir)/gst.im
-
-installcheck-local:
-	if test -n "$(DESTDIR)"; then :; else \
-	  echo '[ PackageLoader fileInPackages: #(#MD5 #Regex) ] \
-	    ifCurtailed: [ ObjectMemory quit: 1 ]!' | $(bindir)/gst -q; \
-	fi

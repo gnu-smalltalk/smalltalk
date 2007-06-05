@@ -21,7 +21,7 @@ m4_include([package.m4])
 m4_include([local.at])
 
 AT_INIT
-AT_TESTED(../gst)
+AT_TESTED(gst)
 
 AT_BANNER([Regression tests.])
 AT_DIFF_TEST([arrays.st])

@@ -19,7 +19,7 @@ quit.st random-bench.ok random-bench.st untrusted.ok untrusted.st sets.ok \
 sets.st sieve.ok sieve.st strcat.ok strcat.st strings.ok strings.st \
 Ansi.st AnsiDB.st AnsiInit.st AnsiLoad.st AnsiRun.st
 
-CLEANFILES = gst.im
+CLEANFILES = gst.im gst
 DISTCLEANFILES = atconfig
 
 .PHONY: regress
@@ -47,11 +47,19 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	    echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
 	  } >'$(srcdir)/package.m4'
 
-check-local: atconfig $(TESTSUITE)
+check-local: gst atconfig $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
 
 clean-local:
 	-$(SHELL) '$(TESTSUITE)' --clean
+
+gst: ../gst
+	$(LN_S) ../gst .
+
+installcheck-local: atconfig $(TESTSUITE)
+	if test -z "$(DESTDIR)"; then \
+	  $(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS) AUTOTEST_PATH=$(bindir); \
+	fi
 
 $(TESTSUITE): $(srcdir)/testsuite.at $(srcdir)/package.m4 $(srcdir)/local.at
 	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $@.at
