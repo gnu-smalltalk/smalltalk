@@ -1,3 +1,9 @@
+2007-06-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FileDescr.st: Add #shutdown.
+	* kernel/Stream.st: Wrap #linesDo: and #do: in an exception handler.
+	* kernel/VFS.st: Use #linesDo:.
+
 2007-06-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Continuations.st: Adopt definitive API.

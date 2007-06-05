@@ -1,3 +1,9 @@
+2007-06-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp.h: Add PRIM_SHUTDOWN_WRITE.
+	* libgst/interp.c: Implement it.  Fix bug in PRIM_MK_TEMP.
+	* libgst/sysdep.c: Use pipes/sockets instead of pty's.
+
 2007-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Load StreamOps.st.
