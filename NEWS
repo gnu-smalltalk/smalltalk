@@ -29,6 +29,14 @@ o   Added #from: to Collection, which constructs an instance of the class
 
 	Dictionary from: { 1->2. 3->4 }
 
+    Another methods meant to be used with the { ... } syntax is #join.
+    For example
+
+        { 'hello'. a. '!' }
+
+    returns a string and is the same as using #, repeatedly, but is more
+    efficient.
+
 o   Continuations and generators have moved to the base image.  More complex
     examples of continuations still reside in the Continuations package.
 

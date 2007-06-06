@@ -1,3 +1,9 @@
+2007-06-06  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/Collection.st: Add #join: class method.
+	* kernel/ArrayColl.st: Specialize.
+	* kernel/SeqCollect.st: Add #join method.
+
 2007-06-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Continuation.st: Moved Continuation class from examples,
