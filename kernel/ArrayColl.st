@@ -117,6 +117,19 @@ with: element1 with: element2 with: element3 with: element4 with: element5
 	at: 4 put: element4;
 	at: 5 put: element5;
 	yourself
+!
+
+join: aCollection
+    "Where aCollection is a collection of SequenceableCollections,
+     answer a new instance with all the elements therein, in order."
+    | newInst |
+    newInst := self new: (aCollection inject: 0 into:
+			      [:size :each | size + each size]).
+    aCollection inject: 1 into: [:start :subColl | | nextStart |
+	newInst replaceFrom: start to: (nextStart := start + subColl size) - 1
+		with: subColl.
+	nextStart].
+    ^newInst
 ! !
 
 

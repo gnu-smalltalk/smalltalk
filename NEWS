@@ -29,6 +29,9 @@ o   Added #from: to Collection, which constructs an instance of the class
 
 	Dictionary from: { 1->2. 3->4 }
 
+o   Continuations and generators have moved to the base image.  More complex
+    examples of continuations still reside in the Continuations package.
+
 o   Directory entries are passed to #allFilesMatching:do:'s block argument
     if they match aPattern.  As before, the function descends in all the
     directories, even those that do not match aPattern.

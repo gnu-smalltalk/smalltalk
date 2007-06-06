@@ -2555,6 +2555,31 @@ primitive VMpr_ContextPart_continue [checks_receiver,reload_ip]
     }
 }
 
+/* Continuation resume:nextContinuation: */
+primitive VMpr_Continuation_resume [fail,reload_ip]
+{
+  OOP oop1, oop2, oop3;
+
+  _gst_primitives_executed++;
+  oop3 = POP_OOP ();
+  oop2 = POP_OOP ();
+  oop1 = STACKTOP ();
+  if COMMON (RECEIVER_IS_A_KIND_OF (OOP_CLASS (oop1), _gst_continuation_class))
+    {
+      gst_continuation cc = (gst_continuation) OOP_TO_OBJ (oop1);
+      if (COMMON (!IS_NIL (cc->stack)))
+	{
+	  resume_suspended_context (cc->stack);
+	  cc->stack = oop3;
+	  SET_STACKTOP (oop2);
+	  PRIM_SUCCEEDED_RELOAD_IP;
+	}
+    }
+
+  UNPOP (2);
+  PRIM_FAILED;
+}
+
 /* BlockClosure value
    BlockClosure value:
    BlockClosure value:value:

@@ -15,66 +15,6 @@
 
 PackageLoader fileInPackage: #SUnit!
 
-Object subclass: #Continuation
-    instanceVariableNames: 'stack '
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Language-Implementation'!
-
-
-!Continuation class methodsFor: 'instance creation'!
-
-escapeDo: aBlock
-    aBlock value: (self new stack: thisContext parentContext).
-    SystemExceptions.BadReturn signal.
-    Processor activeProcess terminate!
-
-current
-    ^self new stack: thisContext parentContext copyStack!
-
-currentDo: aBlock
-    ^aBlock value: (self new stack: thisContext parentContext copyStack)! !
-
-!Continuation methodsFor: 'private'!
-
-stack
-    ^stack!
-
-stack: s
-    stack := s! !
-
-!Continuation methodsFor: 'invocation'!
-
-oneShotValue
-    thisContext parentContext: stack.
-    ^nil!
-
-oneShotValue: v
-    "escape to the original continuation with v as the result, discarding the stack on the way"
-
-    thisContext parentContext: stack.
-    ^v!
-
-callCC
-    | cont |
-    cont := Continuation new stack: thisContext parentContext.
-    thisContext parentContext: stack.
-    ^cont!
-
-value
-    thisContext parentContext: stack copyStack.
-    ^nil!
-
-value: v
-    "return to the original continuation, copying the stack to allow another activation"
-    thisContext parentContext: stack copyStack.
-    ^v!
-
-valueWithArguments: v
-    "with one argument, just invoke the usual value mechanism"
-    v size == 1 ifFalse: [^self error: 'continuations can only be resumed with one argument'].
-    ^self value: (v at: 1)! !
-
 
 !BlockClosure methodsFor: 'continuations'!
 

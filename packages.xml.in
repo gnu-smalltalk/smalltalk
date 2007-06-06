@@ -689,6 +689,8 @@
   <file>Metaclass.st</file>
   <file>SmallInt.st</file>
   <file>BlkClosure.st</file>
+  <file>Continuation.st</file>
+  <file>Generator.st</file>
   <file>Dictionary.st</file>
   <file>MethodDict.st</file>
   <file>SortCollect.st</file>

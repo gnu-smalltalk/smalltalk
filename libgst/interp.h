@@ -181,6 +181,13 @@ typedef struct gst_block_context
 }
  *gst_block_context;
 
+typedef struct gst_continuation
+{
+  OBJ_HEADER;
+  OOP stack;
+}
+ *gst_continuation;
+
 /* The structure of various objects related to the process system.  */
 typedef struct gst_semaphore
 {

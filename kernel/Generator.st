@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   Python-like Generators
+|   Generator Method Definitions
 |
 |
  ======================================================================"
@@ -8,27 +8,27 @@
 
 "======================================================================
 |
-| Copyright 2003 Free Software Foundation, Inc.
+| Copyright 2003, 2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
-| This file is part of GNU Smalltalk.
+| This file is part of the GNU Smalltalk class library.
 |
-| GNU Smalltalk is free software; you can redistribute it and/or modify it
-| under the terms of the GNU General Public License as published by the Free
-| Software Foundation; either version 2, or (at your option) any later version.
-| 
-| GNU Smalltalk is distributed in the hope that it will be useful, but WITHOUT
-| ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-| FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-| details.
-| 
-| You should have received a copy of the GNU General Public License along with
-| GNU Smalltalk; see the file COPYING.  If not, write to the Free Software
-| Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  
+| The GNU Smalltalk class library is free software; you can redistribute it
+| and/or modify it under the terms of the GNU Lesser General Public License
+| as published by the Free Software Foundation; either version 2.1, or (at
+| your option) any later version.
+|
+| The GNU Smalltalk class library is distributed in the hope that it will be
+| useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
+| General Public License for more details.
+|
+| You should have received a copy of the GNU Lesser General Public License
+| along with the GNU Smalltalk class library; see the file COPYING.LIB.
+| If not, write to the Free Software Foundation, 59 Temple Place - Suite
+| 330, Boston, MA 02110-1301, USA.
 |
  ======================================================================"
-
-PackageLoader fileInPackage: #Continuations!
 
 Stream subclass: #Generator
 	  instanceVariableNames: 'next genCC consCC atEnd'
@@ -75,21 +75,10 @@ Smalltalk do.'!
 !Generator class methodsFor: 'instance creation'!
 
 on: aBlock
-    "Return a generator, and also suspend the execution of the
-     sender by returning the new generator to the method that
-     invoked the sender.  More easily seen by looking at an
-     example:
-
-     Integer>>evenNumbersUpTo: n
-         ^Generator on: [ :gen |
-             self to: n do: [ :each |
-                 each even ifTrue: [ gen yield: each ]
-             ]
-	]
-
-     Although there is no return statement in the method, evaluating
-     it returns a Generator for the even numbers between the receiver
-     and the argument."
+    "Return a generator and pass it to aBlock.  When #next is sent
+     to the generator, the block will start execution, and will be
+     suspended again as soon as #yield: is sent from the block to
+     the generator."
     ^self new
 	forkOn: aBlock;	
 	yourself
@@ -131,29 +120,7 @@ peekFor: anObject
     ^next = anObject
         ifTrue: [ next := nil. atEnd := nil. true ]
         ifFalse: [ false ]
-! !
-
-!Generator methodsFor: 'private - continuations'!
-
-forkOn: aBlock
-    "When initializing, we just store the current continuation and exit;
-     the ^self is where the control flow is actually split.  When #next is
-     called first, the code after the continuation is executed, which
-     executes the generator block and finally resumes execution of the
-     consumer when the block leaves."
-
-    "This is the only time we create a continuation with a block; after
-     this, we just replace a continuation with another through
-     Continuation>>#callCC."
-    consCC := Continuation escapeDo: [ :cc |
-	genCC := cc.
-	atEnd := nil.
-	^self ].
-
-    atEnd := true.
-    genCC := nil.
-    aBlock value: self.
-    consCC oneShotValue!
+!
 
 yield: anObject
     "When entering from the generator the code in the block is executed and
@@ -170,30 +137,24 @@ yield: anObject
     genCC := nil.
     atEnd := true! !
 
-!Integer methodsFor: 'examples of generators'!
+!Generator methodsFor: 'private - continuations'!
 
-generatorForGeneratorExample
-    ^Generator on: [ :gen |
-        'Entering gen' displayNl.
-        1 to: self do: [ :each |
-            ('Yielding ', each printString, '... ') display.
-	    gen yield: each.
-            'Resuming gen' displayNl
-        ] ]!
+forkOn: aBlock
+    "When initializing, we just store the current continuation and exit;
+     the ^self is where the control flow is actually split.  When #next is
+     called first, the code after the continuation is executed, which
+     executes the generator block and finally resumes execution of the
+     consumer when the block leaves.
 
-generatorExample: gen
-    | n |
-    ('Running on ', gen printString) displayNl.
-    [
-        'Calling next... ' display.
-	n := gen next.
-	n notNil
-    ] whileTrue: [
-        ('Got ', n printString) displayNl
-    ]! !
+     This is the only time we create a continuation with a block; after
+     this, we just replace a continuation with another through
+     Continuation>>#callCC."
+    consCC := Continuation escapeDo: [ :cc |
+	genCC := cc.
+	atEnd := nil.
+	^self ].
 
-Eval [
-    Smalltalk byteCodeCounter printNl.
-    10 generatorExample: 10 generatorForGeneratorExample.
-    Smalltalk byteCodeCounter printNl
-]
+    atEnd := true.
+    genCC := nil.
+    aBlock value: self.
+    consCC oneShotValue! !

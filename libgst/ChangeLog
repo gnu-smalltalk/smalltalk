@@ -1,5 +1,15 @@
 2007-06-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/dict.c: Add Continuation class.
+	* libgst/dict.h: Add Continuation class.
+	* libgst/interp.c: Add resume_suspended_context, extracted from
+	change_process_context.
+	* libgst/interp.h: Add Continuation class definition.
+	* libgst/prims.def: Add a primitive for continuations.
+	* libgst/lib.c: Add Continuation.st and Generator.st.
+
+2007-06-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/input.c: Be quiet, but still automatically add periods, when
 	in Emacs mode.
 	* libgst/comp.c: Likewise.

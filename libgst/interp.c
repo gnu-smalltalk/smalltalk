@@ -351,10 +351,13 @@ static void sleep_process (OOP processOOP);
    processes for PROCESSOOP's priority.  Return PROCESSOOP.  */
 static OOP activate_process (OOP processOOP);
 
+/* Restore the virtual machine's state from the ContextPart OOP.  */
+static void resume_suspended_context (OOP oop);
+
 /* Save the virtual machine's state into the suspended Process and
    ContextPart objects, and load them from NEWPROCESS and from
    NEWPROCESS's suspendedContext.  The Processor (the only instance
-   of ProcessorScheduler is also updated accordingly.  */
+   of ProcessorScheduler) is also updated accordingly.  */
 static void change_process_context (OOP newProcess);
 
 /* Mark the semaphores attached to the process system (asynchronous
@@ -1321,7 +1324,6 @@ _gst_make_block_closure (OOP blockOOP)
 void
 change_process_context (OOP newProcess)
 {
-  gst_method_context thisContext;
   OOP processOOP;
   gst_process process;
   gst_processor_scheduler processor;
@@ -1352,7 +1354,7 @@ change_process_context (OOP newProcess)
       disable_preemption = !IS_NIL (process->interrupts) &&
 		           TO_INT (process->interrupts) < 0;
 
-      _gst_this_context_oop = process->suspendedContext;
+      resume_suspended_context (process->suspendedContext);
 
       /* Interrupt-enabling cannot be controlled globally from Smalltalk,
          but only on a per-Process basis.  You might think that this leaves
@@ -1377,8 +1379,15 @@ change_process_context (OOP newProcess)
             _gst_enable_interrupts();
 	}
     }
+}
 
-  thisContext = (gst_method_context) OOP_TO_OBJ (_gst_this_context_oop);
+void
+resume_suspended_context (OOP oop)
+{
+  gst_method_context thisContext;
+
+  _gst_this_context_oop = oop;
+  thisContext = (gst_method_context) OOP_TO_OBJ (oop);
   SET_THIS_METHOD (thisContext->method, GET_CONTEXT_IP (thisContext));
   sp = thisContext->contextStack + TO_INT (thisContext->spOffset);
 
@@ -1388,6 +1397,7 @@ change_process_context (OOP newProcess)
 
   _gst_temporaries = thisContext->contextStack;
   _gst_self = thisContext->receiver;
+  free_lifo_context = lifo_contexts;
 }
 
 

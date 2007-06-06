@@ -543,6 +543,31 @@ copyReplaceFrom: start to: stop with: replacementCollection
 
 
 
+!SequenceableCollection methodsFor: 'concatenating'!
+
+flatten: aSpecies
+    "Answer a new collection of aSpecies, which should respond to
+     #join:, with all the elements of all my elements, which should be
+     collections, in order."
+    ^aSpecies join: self
+!
+
+flatten
+    "Answer a new collection like my first element, with all the
+     elements (in order) of all my elements, which should be
+     collections.
+
+     I use my first element instead of myself as a prototype because
+     my elements are more likely to share the desired properties than
+     I am, such as in:
+
+     #('hello, ' 'world') flatten => 'hello, world'"
+    ^self isEmpty ifTrue: [#()]
+		  ifFalse: [self flatten: self first species]
+! !
+
+
+
 !SequenceableCollection methodsFor: 'enumerating'!
 
 readStream

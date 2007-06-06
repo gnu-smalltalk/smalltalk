@@ -318,6 +318,7 @@ extern OOP _gst_compiled_block_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_compiled_code_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_compiled_method_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_context_part_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_continuation_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_date_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_delay_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_dictionary_class ATTRIBUTE_HIDDEN;

@@ -101,6 +101,7 @@ OOP _gst_compiled_block_class = NULL;
 OOP _gst_compiled_code_class = NULL;
 OOP _gst_compiled_method_class = NULL;
 OOP _gst_context_part_class = NULL;
+OOP _gst_continuation_class = NULL;
 OOP _gst_date_class = NULL;
 OOP _gst_delay_class = NULL;
 OOP _gst_dictionary_class = NULL;
@@ -682,6 +683,10 @@ static const class_definition class_info[] = {
   {&_gst_block_context_class, &_gst_context_part_class,
    ISP_POINTER, true, 1,
    "BlockContext", "outerContext ", NULL, NULL },
+
+  {&_gst_continuation_class, &_gst_object_class,
+   ISP_FIXED, true, 1,
+   "Continuation", "stack ", NULL, NULL },
 
   {&_gst_block_closure_class, &_gst_object_class,
    ISP_FIXED, true, 3,
