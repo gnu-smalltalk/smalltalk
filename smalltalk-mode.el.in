@@ -126,14 +126,11 @@
 
     ;; -----
 
-    (define-key keymap "\C-cc"     'smalltalk-compile)
     (define-key keymap "\C-cd"     'smalltalk-doit)
-    (define-key keymap "\C-ce"     'smalltalk-eval-region)
-    (define-key keymap "\C-cf"     'smalltalk-filein)
+    (define-key keymap "\C-cf"     'smalltalk-filein-buffer)
     (define-key keymap "\C-cm"     'gst)
     (define-key keymap "\C-cp"     'smalltalk-print)
     (define-key keymap "\C-cq"     'smalltalk-quit)
-    (define-key keymap "\C-cr"     'smalltalk-reeval-region)
     (define-key keymap "\C-cs"     'smalltalk-snapshot)
     
     keymap)  

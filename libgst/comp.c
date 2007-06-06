@@ -599,6 +599,7 @@ _gst_execute_statements (tree_node temps,
   YYLTYPE loc;
 
   if (_gst_regression_testing
+      || _gst_emacs_process
       || _gst_verbosity < 2
       || !_gst_get_cur_stream_prompt ())
     quiet = true;

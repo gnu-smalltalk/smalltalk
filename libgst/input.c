@@ -480,7 +480,7 @@ my_getc (input_stream stream)
 mst_Boolean
 _gst_get_cur_stream_prompt (void)
 {
-  return !_gst_emacs_process && in_stream && in_stream->prompt;
+  return in_stream && in_stream->prompt;
 }
 
 stream_type
