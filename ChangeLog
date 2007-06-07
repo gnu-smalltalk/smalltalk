@@ -1,3 +1,11 @@
+2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
+
+        * kernel/ArrayColl.st: Add #atAll:.
+        * kernel/Dictionary.st: Add #atAll:.
+        * kernel/SeqCollect.st: Add #atAll:.
+        * kernel/MappedColl.st: Add #atAll:, remove #domain/#map accessors,
+        rewrite #select:/#collect:/#reject:.
+
 2007-06-06  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/Collection.st: Add #join: class method.

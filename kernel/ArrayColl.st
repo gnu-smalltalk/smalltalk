@@ -156,6 +156,17 @@ add: value
 	yourself
 !
 
+atAll: keyCollection
+    "Answer a collection of the same kind returned by #collect:, that
+     only includes the values at the given indices. Fail if any of
+     the values in keyCollection is out of bounds for the receiver."
+    | result i |
+    result := self copyEmptyForCollect: keyCollection size.
+    i := 0.
+    keyCollection do: [ :key | result at: (i := i + 1) put: (self at: key) ].
+    ^result
+!
+
 copyFrom: start to: stop
     "Answer a new collection containing all the items in the receiver from the
      start-th and to the stop-th"

@@ -109,6 +109,14 @@ at: key put: value
     ^value
 !
 
+atAll: keyCollection
+    "Answer a Dictionary that only includes the given keys. Fail if any of
+     them is not found"
+    | result |
+    result := self class new: keyCollection size.
+    keyCollection do: [ :key | result at: key put: (self at: key) ].
+    ^result!
+
 at: key
     "Answer the value associated to the given key. Fail if the key
      is not found"

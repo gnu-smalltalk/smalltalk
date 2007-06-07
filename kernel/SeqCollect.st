@@ -151,6 +151,15 @@ at: anIndex ifAbsent: aBlock
     ^self at: anIndex
 !
 
+atAll: keyCollection
+    "Answer a collection of the same kind returned by #collect:, that
+     only includes the values at the given indices. Fail if any of
+     the values in keyCollection is out of bounds for the receiver."
+    | result |
+    result := self copyEmptyForCollect: keyCollection size.
+    keyCollection do: [ :key | result add: (self at: key) ].
+    ^result!
+
 atAll: aCollection put: anObject
     "Put anObject at every index contained in aCollection"
     aCollection do: [ :index | self at: index put: anObject ]
