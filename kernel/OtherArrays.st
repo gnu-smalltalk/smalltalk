@@ -35,11 +35,15 @@ ArrayedCollection variableWordSubclass: #WordArray
 	poolDictionaries: ''
 	category: 'Collections-Sequenceable'!
 
+Namespace current: Kernel!
+
 Magnitude subclass: #LargeArraySubpart
 	instanceVariableNames: 'first last index'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Collections-Sequenceable'!
+
+Namespace current: Smalltalk!
 
 ArrayedCollection subclass: #LargeArrayedCollection
 	instanceVariableNames: 'storage indices position size'
@@ -68,7 +72,7 @@ LargeArrayedCollection subclass: #LargeWordArray
 WordArray comment: '
 I am similar to a plain array, but my items are 32-bit integers.'.
 
-LargeArraySubpart comment: '
+Kernel.LargeArraySubpart comment: '
 This class is an auxiliary class used to store information
 about a LargeArrayedCollection''s contents.  LargeArrayedCollections
 store their items non-contiguously in a separate storage object, and
@@ -92,7 +96,7 @@ LargeWordArray comment: '
 I am similar to a plain WordArray, but I''m specially designed to save
 memory when lots of items are zero.'!
 
-!LargeArraySubpart class methodsFor: 'instance creation'!
+!Kernel.LargeArraySubpart class methodsFor: 'instance creation'!
 
 first: first last: last index: index
     "Answer a LargeArraySubpart which answers first, last, and index
@@ -100,7 +104,7 @@ first: first last: last index: index
     ^self new first: first last: last index: index
 ! !
 
-!LargeArraySubpart methodsFor: 'comparing'!
+!Kernel.LargeArraySubpart methodsFor: 'comparing'!
 
 < anObject
     "Answer whether the receiver points to a part of the array that
@@ -131,7 +135,7 @@ hash
     ^self first hash
 ! !
 
-!LargeArraySubpart methodsFor: 'accessing'!
+!Kernel.LargeArraySubpart methodsFor: 'accessing'!
 
 first: firstIndex last: lastIndex index: storagePosition
     "Set up the receiver so that it answers first, last, and index
@@ -165,7 +169,7 @@ lastIndex
     ^index + last - first
 ! !
 
-!LargeArraySubpart methodsFor: 'modifying'!
+!Kernel.LargeArraySubpart methodsFor: 'modifying'!
 
 cutAt: position
     "Answer a new LargeArraySubpart whose lastIndex is position - 1,
@@ -174,7 +178,7 @@ cutAt: position
 
     | newPart newFirst |
     newFirst := first + (position - index).
-    newPart := LargeArraySubpart first: first last: newFirst - 1 index: index.
+    newPart := self class first: first last: newFirst - 1 index: index.
     first := newFirst.
     index := position.
     ^newPart
@@ -235,7 +239,7 @@ at: anIndex put: anObject
     subpart := self atPutSubpart: anIndex.
     subpart isNil ifTrue: [
 	self addToStorage: anObject.
-	indices add: (LargeArraySubpart
+	indices add: (Kernel.LargeArraySubpart
 	    first: anIndex
 	    last: anIndex
 	    index: position - 1).
@@ -257,7 +261,7 @@ at: anIndex put: anObject
 	]
 	ifFalse: [
 	    "Create a new subpart."
-	    indices add: (LargeArraySubpart
+	    indices add: (Kernel.LargeArraySubpart
 		first: anIndex
 		last: anIndex
 		index: position - 1)

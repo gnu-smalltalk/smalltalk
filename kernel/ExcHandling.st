@@ -41,11 +41,7 @@ Smalltalk at: #ExError put: nil.
 Smalltalk at: #ExDoesNotUnderstand put: nil.
 Smalltalk at: #ExUserBreak put: nil.
 
-Object subclass: #Signal
-    instanceVariableNames: 'exception arguments tag messageText resumeBlock onDoBlock handlerBlock context isNested previousState'
-    classVariableNames: 'NoTag'
-    poolDictionaries: ''
-    category: 'Language-Exceptions'.
+Namespace current: Kernel!
 
 Object subclass: #TrappableEvent
     instanceVariableNames: ''
@@ -59,21 +55,27 @@ TrappableEvent subclass: #CoreException
     poolDictionaries: ''
     category: 'Language-Exceptions'.
 
-TrappableEvent subclass: #ExceptionSet
+Namespace current: Smalltalk!
+
+Kernel.TrappableEvent subclass: #ExceptionSet
     instanceVariableNames: 'collection'
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Language-Exceptions'!
 
-"The classes were created. Add their comments."
+Object subclass: #Signal
+    instanceVariableNames: 'exception arguments tag messageText resumeBlock onDoBlock handlerBlock context isNested previousState'
+    classVariableNames: 'NoTag'
+    poolDictionaries: ''
+    category: 'Language-Exceptions'.
 
-TrappableEvent comment: '
+Kernel.TrappableEvent comment: '
 I am an abstract class for arguments passed to #on:do:... methods in
 BlockClosure. I define a bunch of methods that apply to CoreExceptions
 and ExceptionSets: they allow you to create ExceptionSets
 and examine all the exceptions to be trapped.'.
 
-CoreException comment: '
+Kernel.CoreException comment: '
 My instances describe a single event that can be trapped using #on:do:...,
 contain whether such execution can be resumed after such an event, a
 description of what happened, and a block that is used as an handler by
@@ -100,7 +102,7 @@ execution, leave the #on:do:... snippet, and pass the exception to an handler
 with a lower priority.'!
 
 
-!TrappableEvent methodsFor: 'instance creation'!
+!Kernel.TrappableEvent methodsFor: 'instance creation'!
 
 , aTrappableEvent
     "Answer an ExceptionSet containing all the exceptions in the
@@ -113,7 +115,7 @@ with a lower priority.'!
 ! !
 
 
-!TrappableEvent methodsFor: 'enumerating'!
+!Kernel.TrappableEvent methodsFor: 'enumerating'!
 
 allExceptionsDo: aBlock
     "Execute aBlock, passing it an Exception for every exception in the
@@ -136,7 +138,7 @@ handles: exception
 ! !
 
 
-!CoreException methodsFor: 'basic'!
+!Kernel.CoreException methodsFor: 'basic'!
 
 postCopy
     "Modify the receiver so that the description is deep copied"
@@ -145,7 +147,7 @@ postCopy
 ! !
 
 
-!CoreException methodsFor: 'accessing'!
+!Kernel.CoreException methodsFor: 'accessing'!
 
 defaultHandler
     "Answer the default handler for the receiver"
@@ -198,7 +200,7 @@ signalClass: aClass
 ! !
 
 
-!CoreException methodsFor: 'instance creation'!
+!Kernel.CoreException methodsFor: 'instance creation'!
 
 newChild
     "Answer a child exception of the receiver. Its properties are set to those
@@ -215,7 +217,7 @@ newChild
 ! !
 
 
-!CoreException methodsFor: 'exception handling'!
+!Kernel.CoreException methodsFor: 'exception handling'!
 
 signal
     "Raise the exception described by the receiver, passing no parameters"
@@ -272,7 +274,7 @@ signalWithArguments: args
 ! !
 
 
-!CoreException methodsFor: 'enumerating'!
+!Kernel.CoreException methodsFor: 'enumerating'!
 
 allExceptionsDo: aBlock
     "Private - Evaluate aBlock for every exception in the receiver. As it contains just one
@@ -311,7 +313,7 @@ handles: exceptionOrSignal
 ! !
 
 
-!CoreException methodsFor: 'private'!
+!Kernel.CoreException methodsFor: 'private'!
 
 depth
     "Private - Answer the depth of the receiver in the exception hierarchy"
@@ -375,7 +377,7 @@ actualDefaultHandler
 ! !
 
 
-!CoreException methodsFor: 'private - accessing'!
+!Kernel.CoreException methodsFor: 'private - accessing'!
 
 parent: anException
     "Private - Set the parent of the receiver to anException"
@@ -383,7 +385,7 @@ parent: anException
 ! !
 
 
-!CoreException class methodsFor: 'instance creation'!
+!Kernel.CoreException class methodsFor: 'instance creation'!
 
 new
     "Create a new exception whose parent is ExAll"
@@ -392,7 +394,7 @@ new
 ! !
 
 
-!CoreException class methodsFor: 'private'!
+!Kernel.CoreException class methodsFor: 'private'!
 
 resetAllHandlers
     "Private, class - Reset the handlers for all the exceptions; that is, the
@@ -593,7 +595,7 @@ resignalAs: replacementException
      (this might or not be correct -- if it isn't you can use an idiom such
      as `sig retryUsing: [ replacementException signal ])"
 
-    CoreException resetAllHandlers.
+    Kernel.CoreException resetAllHandlers.
     replacementException return: (replacementException exception
 	activateOuterHandlerFor: replacementException)
 !
@@ -605,7 +607,7 @@ retry
     onDoBlock isNil ifTrue: [
 	self primError: 'No exception handler effective - #retry failed'
     ].
-    CoreException resetAllHandlers.
+    Kernel.CoreException resetAllHandlers.
     self return: onDoBlock value
 !
 
@@ -613,7 +615,7 @@ retryUsing: aBlock
     "Execute aBlock reinstating all handlers, and return its result from
      the #signal method."
 
-    CoreException resetAllHandlers.
+    Kernel.CoreException resetAllHandlers.
     self return: aBlock value
 !
 
@@ -623,7 +625,7 @@ return
     context isNil ifTrue: [
 	self primError: 'No exception handler effective - #return failed'
     ].
-    CoreException resetAllHandlers.
+    Kernel.CoreException resetAllHandlers.
     context parentContext continue: nil.
 !
 
@@ -633,7 +635,7 @@ return: anObject
     context isNil ifTrue: [
 	self primError: 'No exception handler effective - #return: failed'
     ].
-    CoreException resetAllHandlers.
+    Kernel.CoreException resetAllHandlers.
     context parentContext continue: anObject.
 ! !
 

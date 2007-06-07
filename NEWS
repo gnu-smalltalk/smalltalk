@@ -49,6 +49,10 @@ o   Image load uses copy-on-write memory mapped files.  This means that, as
     it to the same physical memory, for different copies of the GNU Smalltalk
     virtual machine that loaded the same image.
 
+o   Several classes not meant to be accessed by the user have been moved to
+    an internal Kernel namespace.  This also removes them from the automatically
+    generated documentation.
+
 o   Startup time and quit time were improved widely (the time for running
     a simple "Hello, World" program is about one fifth of 2.3.x).
 

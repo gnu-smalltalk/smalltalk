@@ -1,5 +1,13 @@
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiExcept.st: Move TrappableEvent and CoreException to
+	the Kernel namespace.
+	* kernel/ExcHandling.st: Likewise.
+	* kernel/Autoload.st: Likewise for AutoloadClass.
+	* kernel/OtherArrays.st: Likewise for LargeArraySubpart.
+
+2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/AnsiExcept.st: Remove two archaeological mysteries.
 
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>

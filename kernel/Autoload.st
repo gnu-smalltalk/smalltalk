@@ -31,6 +31,8 @@
 |
  ======================================================================"
 
+Namespace current: Kernel!
+
 nil subclass: #AutoloadClass
        instanceVariableNames: 'superClass subClasses methodDictionary
                                instanceSpec instanceVariables
@@ -45,6 +47,8 @@ AutoloadClass comment:
 Having a proxy for the metaclass as well allows one to send messages to
 the metaclass (such as #methodsFor: to extend it with class-side methods)
 and have the class autoloaded.' !
+
+Namespace current: Smalltalk!
 
 nil subclass: #Autoload
        instanceVariableNames: ''
@@ -61,7 +65,7 @@ the class itself (such as to create an instance) or to its metaclass (such
 as #methodsFor: to extend it with class-side methods).' !
 
 
-!AutoloadClass methodsFor: 'accessing'!
+!Kernel.AutoloadClass methodsFor: 'accessing'!
 
 name
     "Answer the name of the class to be autoloaded"
@@ -143,13 +147,13 @@ class: nameSymbol in: aNamespace from: fileNameString
     "Turn the metaclass into an instance of AutoloadClass.  To do
      this we create a `prototype' in the form of an array and then..."
 
-    newClass := Array new: AutoloadClass allInstVarNames size.
+    newClass := Array new: Kernel.AutoloadClass allInstVarNames size.
     1 to: behavior class instSize do: [ :i |
 	newClass at: i put: (behavior instVarAt: i).
     ].
     
     "... change its class magically."
-    newClass changeClassTo: AutoloadClass.
+    newClass changeClassTo: Kernel.AutoloadClass.
 
     "We can now initialize it."
     newClass

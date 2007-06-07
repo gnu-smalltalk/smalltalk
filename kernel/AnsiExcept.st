@@ -509,7 +509,7 @@ initialize
      asking the core exception.  For backwards compatibility, however, we
      must give a state to these (in case someone uses `on: ExAll do: ...')."
 
-    (ExAll := CoreException basicNew)
+    (ExAll := Kernel.CoreException basicNew)
 	defaultHandler: [ :sig | self primError: sig messageText ];
 	depth: 0;
 	signalClass: Signal;
