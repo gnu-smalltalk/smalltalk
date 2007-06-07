@@ -554,15 +554,6 @@ coreException
 	defaultHandler: [ :sig | sig defaultAction ];
 	signalClass: self;
 	yourself
-!
-
-whenSignalledIn: onDoBlock do: handlerBlock exitBlock: exitBlock
-    "Private - Create an ExceptionHandler from the arguments and register it"
-
-    self coreException
-	whenSignalledIn: onDoBlock
-	do: handlerBlock
-	exitBlock: exitBlock
 ! !
 
 
@@ -606,10 +597,6 @@ hash
 
 !Exception methodsFor: 'private'!
 
-asAnsiException
-    ^self
-!
-	        
 initialize: anObject
     "Initialize the receiver's instance variables."
     

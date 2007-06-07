@@ -1,5 +1,9 @@
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiExcept.st: Remove two archaeological mysteries.
+
+2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/StreamOps.st: Add ConcatenatedStream>>#copyFrom:to:.
         * scripts/Convert.st: Handle comments properly, using #formatAll:
         and handling toplevel comments independently.

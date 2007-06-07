@@ -2272,7 +2272,7 @@ _gst_make_attribute (tree_node attribute_keywords)
 
   selectorOOP = _gst_compute_keyword_selector (attribute_keywords);
   numArgs = list_length (attribute_keywords);
-  argsArray = new_instance_with (_gst_array_class, numArgs, &argsArrayOOP);
+  argsArray = instantiate_with (_gst_array_class, numArgs, &argsArrayOOP);
   INC_ADD_OOP (argsArrayOOP);
 
   for (i = 0, keyword = attribute_keywords; keyword != NULL;
