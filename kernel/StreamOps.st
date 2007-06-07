@@ -150,6 +150,17 @@ position: anInteger
     curPos := anInteger - startPos
 !
 
+copyFrom: start to: end
+    "needed to do the documentation"
+    | adjust stream |
+    self atEnd.
+    end + 1 = start ifTrue: [ ^'' ].
+    end <= startPos
+	ifTrue: [ stream := last. adjust := lastStart ]
+	ifFalse: [ stream := streams first. adjust := startPos ].
+    ^stream copyFrom: (start - adjust max: 0) to: end - adjust
+!
+
 segmentFrom: start to: end
     "needed to do the documentation"
     | adjust stream |

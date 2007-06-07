@@ -1,5 +1,11 @@
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/StreamOps.st: Add ConcatenatedStream>>#copyFrom:to:.
+        * scripts/Convert.st: Handle comments properly, using #formatAll:
+        and handling toplevel comments independently.
+
+2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
+
         * kernel/ArrayColl.st: Add #atAll:.
         * kernel/Dictionary.st: Add #atAll:.
         * kernel/SeqCollect.st: Add #atAll:.

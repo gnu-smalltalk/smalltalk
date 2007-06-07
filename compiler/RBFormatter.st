@@ -31,6 +31,10 @@ firstLineLength
 	ifTrue: [codeStream position]
 	ifFalse: [firstLineLength]!
 
+formatAll: anArray
+    self formatStatements: anArray.
+    ^codeStream contents!
+
 format: aNode 
     self visitNode: aNode.
     ^codeStream contents!
@@ -274,8 +278,9 @@ formatStatementCommentFor: aNode
 	    self formatComment: (source copyFrom: each first to: each last)]!
 
 formatStatementsFor: aSequenceNode 
-    | statements |
-    statements := aSequenceNode statements.
+    self formatStatements: aSequenceNode statements!
+
+formatStatements: statements
     statements isEmpty ifTrue: [^self].
     1 to: statements size - 1
 	do: 

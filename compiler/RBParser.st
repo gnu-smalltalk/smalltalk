@@ -261,29 +261,33 @@ parseDoits
     " Parses the stuff to be executed until a
         ! <class expression> methodsFor: <category string> ! "
 
-    | node method start stop comments asd |
+    | node method start stop comments source |
 
     [
-		self atEnd ifTrue: [ ^false ].
-		comments := scanner getComments.
-		start := comments isNil
-	    	ifTrue: [ asd := true. currentToken start - 2 ]
-	    	ifFalse: [ asd := false. comments first first - 2 ].
-		
-		tags := nil.
-        node := self parseStatements: false.
-        comments notNil
-            ifTrue: [ node comments isNil ifTrue: [ node comments: #() ].
-                	  node comments: comments, node comments ].
+	self atEnd ifTrue: [ ^false ].
+	comments := scanner getComments.
+	start := comments isNil
+	    	ifTrue: [ currentToken start - 1 ]
+	    	ifFalse: [ comments first first - 2 ].
+	
+	tags := nil.
+	node := self parseStatements: false.
+	node comments isNil
+	    ifTrue: [ node comments: comments ]
+	    ifFalse: [
+		comments isNil ifFalse: [ node comments: node comments, comments ] ].
 
         "One -1 accounts for base-1 vs. base-0 (as above), the
          other drops the bang because we have a one-token lookahead."
-		stop := currentToken start - 2.
+	stop := currentToken start - 2.
 
         method := RBMethodNode selectorParts: #() arguments: #().
-        method source: (scanner stream segmentFrom: start to: stop).
+        source := scanner stream copyFrom: start to: stop.
+	source := MappedCollection collection: source map: (1 - start to: stop).
+        method source: source.
         node parent: method.
 
+        scanner stripSeparators.           "gobble doit terminating bang"
         self step.           "gobble doit terminating bang"
 		node statements size > 0 and: [ self evaluate: node ]
 		
@@ -358,9 +362,11 @@ parseMethodDefinitionList
 	stop := currentToken start - 2.
         node source: (scanner stream segmentFrom: start to: stop).
 
+        scanner stripSeparators.
         self step.           "gobble method terminating bang"
         self compile: node
     ].
+    scanner stripSeparators.
     self step.
     self endMethodList
 !
@@ -705,12 +711,13 @@ ignoreComments
     saveComments := false!
 
 next
-    | token |
+    | token ch |
     buffer reset.
     tokenStart := stream position.
+    ch := currentCharacter.
     characterType == #eof ifTrue: [^RBToken start: tokenStart + 1].    "The EOF token should occur after the end of input"
     token := self scanToken.
-    self stripSeparators.
+    ch == $! ifFalse: [ self stripSeparators ].
     ^token!
 
 nextPut: anObject 

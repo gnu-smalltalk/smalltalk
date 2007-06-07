@@ -38,6 +38,22 @@ Object subclass: EmittedEntity [
     ]
 ]
 
+EmittedEntity subclass: EmittedComments [
+    | comments |
+    EmittedComments class >> comments: aCollection source: aString [
+	^self new comments: (aCollection collect: [ :c |
+	    aString copyFrom: c first to: c last ])
+    ]
+
+    emitTo: outStream [
+	comments do: [ :c | outStream nextPutAll: c; nl; nl ]
+    ]
+
+    comments: anArray [
+	comments := anArray
+   ]
+]
+
 EmittedEntity subclass: EmittedClass [
     | class methodsToEmit classMethodsToEmit isComplete |
     
@@ -97,14 +113,14 @@ EmittedEntity subclass: EmittedEval [
     ] 
     
     emitTo: aStream [
-        aStream nextPutAll: 'Eval ['; nl; space: 4.
-        statements do: [ :each | self emitStatement: each To: aStream ]
-                   separatedBy: [ aStream nextPut: $.; nl; space: 4 ].
+	| formatter |
+        aStream nextPutAll: 'Eval ['.
+	formatter := STInST.RBFormatter new.
+	formatter indent: 1 while: [
+	    formatter indent.
+            aStream nextPutAll: (formatter formatAll: statements).
+	].
         aStream nl; nextPut: $]; nl; nl.
-    ]
-    
-    emitStatement: aStatement To: aStream [
-	aStream nextPutAll: (STInST.RBFormatter new format: aStatement)
     ]
 ]
 
@@ -149,12 +165,8 @@ STInST.STClassLoader subclass: SyntaxConverter [
         <category: 'overrides'>
 
 	"FIXME: there's a bug in RBParser.st"
-	stuffToEmit isEmpty ifTrue: [
-	     node comments do: 
-	          [ :c | outStream
-			     nextPutAll: 
-			         (node source copyFrom: c first to: c last);
-			     nl; nl ] ].
+	node comments isEmpty ifFalse: [
+	    stuffToEmit add: (EmittedComments comments: node comments source: node source) ].
 
         ^super evaluate: node
     ]
@@ -170,15 +182,18 @@ STInST.STClassLoader subclass: SyntaxConverter [
             ifFalse: [ self addMethod: method toExtensionClass: currentClass ]
     ]
     
+    lastIsEval [
+        <category: 'collecting entities'>
+
+        ^stuffToEmit notEmpty and: [ stuffToEmit last isKindOf: EmittedEval ]
+    ]
+
     unknown: node [
         <category: 'collecting entities'>
         
         | eval statement |
 
-        (stuffToEmit size > 0)
-            ifTrue: [ (stuffToEmit last isKindOf: EmittedEval)
-                        ifFalse: [ stuffToEmit add: (EmittedEval new) ] ]
-            ifFalse: [ stuffToEmit add: (EmittedEval new) ].
+	self lastIsEval ifFalse: [ stuffToEmit add: (EmittedEval new) ].
             
         eval := stuffToEmit last.
         eval addStatement: node.
