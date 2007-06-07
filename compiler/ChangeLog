@@ -1,4 +1,8 @@
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
+	
+	* compiler/RBParser.st: Really fix doit parsing.
+
+2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
         * compiler/RBFormatter.st: Add #formatAll:.
         * compiler/RBParser.st: Fixes to doit parsing.

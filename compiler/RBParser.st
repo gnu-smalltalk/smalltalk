@@ -268,7 +268,7 @@ parseDoits
 	comments := scanner getComments.
 	start := comments isNil
 	    	ifTrue: [ currentToken start - 1 ]
-	    	ifFalse: [ comments first first - 2 ].
+	    	ifFalse: [ comments first first - 1 ].
 	
 	tags := nil.
 	node := self parseStatements: false.
