@@ -117,6 +117,19 @@ with: element1 with: element2 with: element3 with: element4 with: element5
 	at: 4 put: element4;
 	at: 5 put: element5;
 	yourself
+!
+
+join: aCollection
+    "Where aCollection is a collection of SequenceableCollections,
+     answer a new instance with all the elements therein, in order."
+    | newInst start |
+    newInst := self new: (aCollection inject: 0 into:
+			      [:size :each | size + each size]).
+    start := 1.
+    aCollection do: [:subColl |
+	newInst replaceFrom: start to: (start := start + subColl size) - 1
+		with: subColl].
+    ^newInst
 ! !
 
 
@@ -141,6 +154,17 @@ add: value
 	       with: aSequenceableCollection
 	       startingAt: 1;
 	yourself
+!
+
+atAll: keyCollection
+    "Answer a collection of the same kind returned by #collect:, that
+     only includes the values at the given indices. Fail if any of
+     the values in keyCollection is out of bounds for the receiver."
+    | result i |
+    result := self copyEmptyForCollect: keyCollection size.
+    i := 0.
+    keyCollection do: [ :key | result at: (i := i + 1) put: (self at: key) ].
+    ^result
 !
 
 copyFrom: start to: stop

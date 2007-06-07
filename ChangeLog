@@ -1,3 +1,19 @@
+2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/AnsiExcept.st: Remove two archaeological mysteries.
+
+        * kernel/ArrayColl.st: Add #atAll:.
+        * kernel/Dictionary.st: Add #atAll:.
+        * kernel/SeqCollect.st: Add #atAll:.
+        * kernel/MappedColl.st: Add #atAll:, remove #domain/#map accessors,
+        rewrite #select:/#collect:/#reject:.
+
+2007-06-07  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/Collection.st: Add #join: class method.
+	* kernel/ArrayColl.st: Specialize.
+	* kernel/SeqCollect.st: Add #join method.
+
 2007-06-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Add #shutdown.

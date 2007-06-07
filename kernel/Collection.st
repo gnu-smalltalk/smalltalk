@@ -85,6 +85,17 @@ with: firstObject with: secondObject with: thirdObject with: fourthObject with: 
      they were passed"
     ^self new add: firstObject; add: secondObject; add: thirdObject;
     	add: fourthObject; add: fifthObject; yourself
+!
+
+join: aCollection
+    "Answer a collection formed by treating each element in
+     aCollection as a `withAll:' argument collection to be added to a
+     new instance."
+    | newInst |
+    newInst := self new: (aCollection inject: 0 into:
+			      [:size :each | size + each size]).
+    aCollection do: [:each | newInst addAll: each].
+    ^newInst
 ! !
 
 

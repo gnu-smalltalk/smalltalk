@@ -82,6 +82,16 @@ at: key
     ^domain at: (map at: key)
 !
 
+atAll: keyCollection
+    "Answer a new MappedCollection that only includes the given keys. The new
+     MappedCollection might use keyCollection or consecutive integers for the
+     keys, depending on the map's type. Fail if any of them is not found in
+     the map."
+    ^self class
+	collection: domain
+	map: (map atAll: keyCollection)
+!
+
 at: key put: value
     "Store value at the given key"
     ^domain at: (map at: key) put: value
@@ -104,14 +114,13 @@ contents
     ^aBag
 !
 
+copyFrom: a to: b
+    ^domain atAll: (map atAll: (a to: b))
+!
+
 do: aBlock
     "Evaluate aBlock for each object"
     map do: [ :value | aBlock value: (domain at: value) ]
-!
-
-domain
-    "Answer the domain"
-    ^domain
 !
 
 keys
@@ -119,39 +128,44 @@ keys
     ^map keys
 !
 
-map
-    "Answer the map"
-    ^map
+keysAndValuesDo: aBlock
+    "Evaluate aBlock passing two arguments, one being a key that can be used to
+     access this collection, and the other one being the value."
+    map do: [ :key | aBlock value: key value: (self at: key) ]
+!
+
+keysDo: aBlock
+    "Evaluate aBlock on the keys that can be used to access this collection."
+    map do: aBlock
 !
 
 collect: aBlock
-    "Answer a MappedCollection with a copy of the receiver's map
-     and a domain obtained by passing each object through aBlock"
-    | newDomain |
-    newDomain := domain collect: aBlock.
-    ^self species collection: newDomain map: map copy.
+    "Answer a Collection with the same keys as the map, where accessing
+     a key yields the value obtained by passing through aBlock the value
+     accessible from the key in the receiver.  The result need not be
+     another MappedCollection"
+
+    "This is tricky.  Optimize the operation in order to perform the
+     minimal number of evaluation of aBlock"
+    ^domain size > map size
+	ifTrue: [ map collect: [ :key | aBlock value: (self at: key) ] ]
+	ifFalse: [ self class collection: (domain collect: aBlock) map: map copy ]
 !
 
 reject: aBlock
     "Answer the objects in the domain for which aBlock returns false"
 
-    | aStream map |
-    aStream := WriteStream on: (domain copyEmpty: self size).
-    self do: [ :value | (aBlock value: value) ifFalse:
-    	    	[ aStream nextPut: value ] ].
-
-    ^aStream contents
+    | newMap |
+    newMap := newMap reject: [ :key | aBlock value: (self at: key) ].
+    ^self class collection: domain map: newMap
 !
 
 select: aBlock
     "Answer the objects in the domain for which aBlock returns true"
 
-    | aStream |
-    aStream := WriteStream on: (domain copyEmpty: self size).
-    self do: [ :value | (aBlock value: value) ifFalse:
-    	    	[ aStream nextPut: value ] ].
-
-    ^aStream contents
+    | newMap |
+    newMap := newMap select: [ :key | aBlock value: (self at: key) ].
+    ^self class collection: domain map: newMap
 ! !
 
 

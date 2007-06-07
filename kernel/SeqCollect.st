@@ -151,6 +151,15 @@ at: anIndex ifAbsent: aBlock
     ^self at: anIndex
 !
 
+atAll: keyCollection
+    "Answer a collection of the same kind returned by #collect:, that
+     only includes the values at the given indices. Fail if any of
+     the values in keyCollection is out of bounds for the receiver."
+    | result |
+    result := self copyEmptyForCollect: keyCollection size.
+    keyCollection do: [ :key | result add: (self at: key) ].
+    ^result!
+
 atAll: aCollection put: anObject
     "Put anObject at every index contained in aCollection"
     aCollection do: [ :index | self at: index put: anObject ]
@@ -539,6 +548,24 @@ copyReplaceFrom: start to: stop with: replacementCollection
     ].
 
     ^result
+! !
+
+
+
+!SequenceableCollection methodsFor: 'concatenating'!
+
+join
+    "Answer a new collection like my first element, with all the
+     elements (in order) of all my elements, which should be
+     collections.
+
+     I use my first element instead of myself as a prototype because
+     my elements are more likely to share the desired properties than
+     I am, such as in:
+
+     #('hello, ' 'world') flatten => 'hello, world'"
+    ^self isEmpty ifTrue: [#()]
+		  ifFalse: [self first species join: self]
 ! !
 
 

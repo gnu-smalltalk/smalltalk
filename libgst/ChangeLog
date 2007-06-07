@@ -1,3 +1,8 @@
+2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Initialize an attribute's arguments array before
+	filling it, a GC may trigger while it is being created.
+
 2007-06-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.h: Add PRIM_SHUTDOWN_WRITE.
