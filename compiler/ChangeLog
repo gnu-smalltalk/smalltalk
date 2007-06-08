@@ -1,3 +1,12 @@
+2007-06-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/Exporter.st: emit superclass name relative to namespace
+	of the current class.
+	* compiler/STLoader.st: track defaultNamespace as a proxy which is
+	set up at the *beginning* of the processing.
+	* compiler/STLoaderObjs.st: redefine PseudoBehavior>>#nameIn: as it is
+	done for PseudoNamespace.
+
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
 	
 	* compiler/RBParser.st: Really fix doit parsing.

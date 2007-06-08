@@ -1,3 +1,7 @@
+2007-06-08  Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
+
+	* scripts/Convert.st: Track current Namespace for Evals.
+
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiExcept.st: Move TrappableEvent and CoreException to

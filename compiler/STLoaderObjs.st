@@ -439,10 +439,11 @@ allSharedPools
 
 nameIn: aNamespace
     "Answer the class name when the class is referenced from aNamespace"
-    ^self environment = aNamespace
-	ifTrue: [ self printString ]
-	ifFalse: [ (self environment nameIn: aNamespace), '.',
-	  self printString ]
+    | proxy reference |
+    proxy := loader proxyForNamespace: aNamespace.
+    reference := proxy at: self name asSymbol ifAbsent: [ nil ].
+    self = reference ifTrue: [ ^self name ].
+    ^(self environment nameIn: aNamespace), '.', self printString
 ! !
 
 

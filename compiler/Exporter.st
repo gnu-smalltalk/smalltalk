@@ -87,8 +87,8 @@ Object subclass: FileOutExporter [
     ]
 
     defaultNamespace [
-	    defaultNamespace isNil 
-	        ifTrue: [ defaultNamespace := Namespace current ].
+	defaultNamespace isNil 
+	    ifTrue: [ defaultNamespace := Namespace current ].
         ^defaultNamespace
     ]
 
@@ -145,7 +145,7 @@ Object subclass: FileOutExporter [
                   
 	    self fileOutClassBody: aBlock.
 
-        outStream nextPut: $]; nl.
+        outStream nextPut: $]; nl; nl.
     ]
     
     fileOutClassBody: aBlock [
@@ -173,7 +173,7 @@ Object subclass: FileOutExporter [
         
         superclassName := outClass superclass isNil
             ifTrue: [ 'nil' ]
-            ifFalse: [ outClass superclass nameIn: self defaultNamespace ].
+            ifFalse: [ outClass superclass nameIn: outClass environment ].
         
         outStream
             nextPutAll: superclassName; space;

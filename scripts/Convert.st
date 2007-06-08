@@ -95,7 +95,7 @@ EmittedEntity subclass: EmittedClass [
 ]
 
 EmittedEntity subclass: EmittedEval [
-    | statements comments |
+    | statements comments namespace |
     
     <comment: 'This class is responsible for emitting a set of 
     statements that should be inside an Eval declaration.'>
@@ -105,16 +105,30 @@ EmittedEntity subclass: EmittedEval [
     ]
     
     initialize [
-        statements := STInST.OrderedSet new
+        statements := STInST.OrderedCollection new
     ]
     
+    namespace [ 
+	^namespace
+    ]
+
+    namespace: aNamespace [ 
+	namespace := aNamespace
+    ]
+
     addStatement: aStatement [
         statements add: aStatement
     ] 
     
     emitTo: aStream [
 	| formatter |
-        aStream nextPutAll: 'Eval ['.
+	statements isEmpty ifTrue: [ ^self ].
+	namespace isNil
+            ifTrue: [ aStream nextPutAll: 'Eval' ]
+            ifFalse: [ aStream nextPutAll: 'Namespace current: ';
+			store: namespace ].
+
+	aStream nextPutAll: ' ['.
 	formatter := STInST.RBFormatter new.
 	formatter indent: 1 while: [
 	    formatter indent.
@@ -182,22 +196,28 @@ STInST.STClassLoader subclass: SyntaxConverter [
             ifFalse: [ self addMethod: method toExtensionClass: currentClass ]
     ]
     
-    lastIsEval [
+    lastEval [
         <category: 'collecting entities'>
 
-        ^stuffToEmit notEmpty and: [ stuffToEmit last isKindOf: EmittedEval ]
+	| lastIsEval evalNamespace |
+
+        evalNamespace := currentNamespace = self defaultNamespace
+	    ifTrue: [ nil ]
+	    ifFalse: [ currentNamespace ].
+
+        lastIsEval := stuffToEmit notEmpty
+	    and: [ (stuffToEmit last isKindOf: EmittedEval)
+	    and: [ stuffToEmit last namespace = evalNamespace ]].
+
+	^lastIsEval
+	    ifTrue: [ stuffToEmit last ]
+	    ifFalse: [ stuffToEmit add: (EmittedEval new namespace: evalNamespace) ]
     ]
 
     unknown: node [
         <category: 'collecting entities'>
         
-        | eval statement |
-
-	self lastIsEval ifFalse: [ stuffToEmit add: (EmittedEval new) ].
-            
-        eval := stuffToEmit last.
-        eval addStatement: node.
-     
+	self lastEval addStatement: node.
         ^false
     ]
     
@@ -246,7 +266,7 @@ STInST.STClassLoader subclass: SyntaxConverter [
 
 
 Eval [ 
-    
+
     args := Smalltalk arguments.
     
     inFile := FileStream open: (args at: 1) mode: FileStream read.

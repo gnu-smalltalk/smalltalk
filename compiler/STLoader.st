@@ -45,7 +45,7 @@ file-in.'!
 
 STInterpreter subclass: #STClassLoader
        instanceVariableNames: 'loadedClasses proxies proxyNilClass currentClass
-			       currentCategory currentNamespace'
+			       currentCategory currentNamespace defaultNamespace'
        classVariableNames: ''
        poolDictionaries: 'STClassLoaderObjects'
        category: 'System-Compiler'
@@ -188,13 +188,18 @@ proxyForClass: anObject
 !STClassLoader methodsFor: 'initializing'!
 
 defaultNamespace
+    ^defaultNamespace
+!
+
+initialNamespace
     ^Namespace current
 !
 
 initialize
     loadedClasses := OrderedSet new.
     proxies := IdentityDictionary new.
-    currentNamespace := self proxyForNamespace: self defaultNamespace.
+    defaultNamespace := self proxyForNamespace: self initialNamespace.
+    currentNamespace := defaultNamespace.
 ! !
 
 !STClassLoader methodsFor: 'overrides'!
