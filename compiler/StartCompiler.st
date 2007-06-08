@@ -29,17 +29,17 @@
  ======================================================================"
 
 
-RBParser subclass: #STFileInParser
+STParsingDriver subclass: #STEvaluationDriver
        instanceVariableNames: 'curCategory curClass curCompilerClass evalFor lastResult method'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'System-Compiler'
 !
 
-STFileInParser comment:
-'I am a STParser that compiles code that you file in.'!
+STEvaluationDriver comment:
+'I am an STParsingDriver that compiles code that you file in.'!
 
-!STFileInParser class methodsFor: 'accessing'!
+!STEvaluationDriver class methodsFor: 'accessing'!
 
 methodsFor: aString compiler: compilerClass class: aClass
     | ctx |
@@ -75,19 +75,14 @@ methodsFor: aString compiler: compilerClass class: aClass
 	yourself
 ! !
 
-!STFileInParser methodsFor: 'accessing'!
+!STEvaluationDriver methodsFor: 'accessing'!
 
 evalFor: anObject
     evalFor := anObject
 !
 
-lastResult
-    ^lastResult
-!
-
 result
-    "This is what #parseSmalltalk answers"
-    ^method
+    ^lastResult
 !
 
 methodsFor: aString compiler: compilerClass class: aClass
@@ -96,7 +91,7 @@ methodsFor: aString compiler: compilerClass class: aClass
     curCompilerClass := compilerClass
 ! !
 
-!STFileInParser methodsFor: 'overrides'!
+!STEvaluationDriver methodsFor: 'overrides'!
 
 compile: node
     method := curCompilerClass
@@ -136,14 +131,21 @@ compilerClass
     ^STInST.STCompiler
 !
 
+evaluatorClass
+    "This method is present for symmetry with #parserClass.  It
+     specifies the class that will be used to drive evaluation
+     of Smalltalk source code."
+    ^STInST.STFileInParser
+!
+
 parserClass
     "This method specifies which class will be used by an
-     STFileInParser to parse method definition chunk.  An instance of
+     STEvaluationDriver to parse method definition chunk.  An instance of
      the class will be created and sent #parseMethodDefinitionList,
      or the same will be done with the currently active parser
      (the one that parsed the doit that sent #methodsFor:) if
      this method answers nil."
-    ^STInST.STFileInParser
+    ^STInST.RBParser
 ! !
 
 
@@ -155,60 +157,61 @@ parserClass
 fileIn
     [
 	STInST.STSymbolTable nowInsideFileIn.
-	STInST.STFileInParser parseSmalltalkStream: self ]
+	STInST.STEvaluationDriver new
+	    parseSmalltalkStream: self
+	    with: STInST.STFileInParser ]
+
 	    ensure: [ STInST.STSymbolTable nowOutsideFileIn ]
 ! !
 
 !Smalltalk.Behavior methodsFor: 'compiling'!
 
 evalString: aString to: anObject
-    ^STInST.STFileInParser new
-	errorBlock: nil;
-	initializeParserWith: aString type: #on:errorBlock:;
-	evalFor: anObject;
-	parseSmalltalk;
-	lastResult
+    ^STInST.STEvaluationDriver new
+	parseSmalltalk: aString with: self evaluatorClass
 !
 
 evalString: aString to: anObject ifError: aBlock
-    ^STInST.STFileInParser new
+    ^STInST.STEvaluationDriver new
+	parseSmalltalk: aString
+	with: self evaluatorClass
 	errorBlock: [ :l :m |
 	    ^aBlock value: 'a Smalltalk String' value: l value: m.
-	];
-	initializeParserWith: aString type: #on:errorBlock:;
-	evalFor: anObject;
-	parseSmalltalk;
-	lastResult
+	]
 !
 
 compileString: aString
-    | codeWithHeader |
-    codeWithHeader := WriteStream on: (String new: aString size + 50).
-    codeWithHeader
-	nextPut: $!;
-	print: self;
-	nextPutAll: ' methodsFor: nil!';
-	nextPutAll: aString;
-	nextPutAll: '! !'.
+    | parser source |
+    source := aString isString
+	ifTrue: [ aString ]
+	ifFalse: [ source := aString contents ].
+    parser := self parserClass new.
+    parser initializeParserWith: source type: #on:errorBlock:.
 
-    ^STInST.STFileInParser parseSmalltalkStream: codeWithHeader readStream
+    ^self compilerClass
+	compile: (parser parseMethod: source)
+	for: self
+	classified: nil
+	parser: parser
 !
 
 compileString: aString ifError: aBlock
-    | codeWithHeader |
-    codeWithHeader := WriteStream on: (String new: aString size + 50).
-    codeWithHeader
-	nextPut: $!;
-	print: self;
-	nextPutAll: ' methodsFor: nil!';
-	nextPutAll: aString;
-	nextPutAll: '! !'.
+    | parser source |
+    source := aString isString
+	ifTrue: [ aString ]
+	ifFalse: [ source := aString contents ].
 
-    ^STInST.STFileInParser
-	parseSmalltalkStream: codeWithHeader readStream
-	onError: [ :f :l :m |
-	    ^aBlock value: 'a Smalltalk ', aString class printString value: l - 1 value: m.
-	]
+    parser := self parserClass new.
+    parser errorBlock: [ :m :l |
+		    ^aBlock value: 'a Smalltalk ', aString class printString
+			value: l - 1 value: m ].
+    parser initializeParserWith: source type: #on:errorBlock:.
+
+    ^self compilerClass
+	compile: (parser parseMethod: source)
+	for: self
+	classified: nil
+	parser: parser
 !
 
 basicMethodsFor: category ifTrue: condition
@@ -223,7 +226,7 @@ methodsFor: aString
 !
 
 methodsFor: aString ifTrue: realCompile
-    self parserClass
+    self evaluatorClass
 	methodsFor: aString
 	compiler: (realCompile
 	    ifTrue: [ self compilerClass ]

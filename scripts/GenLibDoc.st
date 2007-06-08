@@ -52,6 +52,8 @@ source := files fold: [ :old :each | old, each ].
 "Go!"
 Smalltalk addSubspace: namespace.
 Namespace current: (Smalltalk at: namespace).
-classes := STInST.STClassLoader parseSmalltalkStream: source.
+classes := STInST.STClassLoader new
+	parseSmalltalkStream: source
+	with: STInST.STFileInParser.
 Namespace current: Smalltalk.
 ClassPublisher.Texinfo publishAll: classes onFile: outTexinfo!

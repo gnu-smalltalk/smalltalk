@@ -28,7 +28,7 @@
 |
  ======================================================================"
 
-RBParser subclass: #STInterpreter
+STParsingDriver subclass: #STInterpreter
        instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''

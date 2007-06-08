@@ -54,12 +54,6 @@ parseExpression
     self atEnd ifFalse: [self parserError: 'Unknown input at end'].
     ^node!
 
-parseSmalltalk
-    [ self parseDoits ]
-        whileTrue: [ self parseMethodDefinitionList ].
-
-    ^self result!
-
 parseMethod: aString 
     | node |
     node := self parseMethod.
@@ -257,45 +251,6 @@ parseCascadeMessage
 				    temp]])].
     ^RBCascadeNode messages: messages semicolons: semicolons!
 
-parseDoits
-    " Parses the stuff to be executed until a
-        ! <class expression> methodsFor: <category string> ! "
-
-    | node method start stop comments source |
-
-    [
-	self atEnd ifTrue: [ ^false ].
-	comments := scanner getComments.
-	start := comments isNil
-	    	ifTrue: [ currentToken start - 1 ]
-	    	ifFalse: [ comments first first - 1 ].
-	
-	tags := nil.
-	node := self parseStatements: false.
-	node comments isNil
-	    ifTrue: [ node comments: comments ]
-	    ifFalse: [
-		comments isNil ifFalse: [ node comments: node comments, comments ] ].
-
-        "One -1 accounts for base-1 vs. base-0 (as above), the
-         other drops the bang because we have a one-token lookahead."
-	stop := currentToken start - 2.
-
-        method := RBMethodNode selectorParts: #() arguments: #().
-        source := scanner stream copyFrom: start to: stop.
-	source := MappedCollection collection: source map: (1 - start to: stop).
-        method source: source.
-        node parent: method.
-
-        scanner stripSeparators.           "gobble doit terminating bang"
-        self step.           "gobble doit terminating bang"
-		node statements size > 0 and: [ self evaluate: node ]
-		
-    ]   whileFalse.
-
-    ^true
-!
-
 parseKeywordMessage
     ^self parseKeywordMessageWith: self parseBinaryMessage!
 
@@ -343,33 +298,6 @@ parseMethod
     methodNode tags: tags.
     methodNode category: methodCategory.
     ^methodNode!
-
-parseMethodDefinitionList
-    "Called after first !, expecting a set of bang terminated
-     method definitions, followed by a bang"
-
-    | node start stop |
-
-    [   scanner atEnd or: [ currentToken isSpecial
-	   and: [ currentToken value == $! ] ] ] whileFalse: [
-
-	start := currentToken start - 1.
-        tags := nil.
-        node := self parseMethod.
-
-        "One -1 accounts for base-1 vs. base-0 (as above), the
-         other drops the bang because we have a one-token lookahead."
-	stop := currentToken start - 2.
-        node source: (scanner stream segmentFrom: start to: stop).
-
-        scanner stripSeparators.
-        self step.           "gobble method terminating bang"
-        self compile: node
-    ].
-    scanner stripSeparators.
-    self step.
-    self endMethodList
-!
 
 parseOptimizedExpression
     | position node |
@@ -544,23 +472,6 @@ parseVariableNode
     self step.
     ^node! !
 
-!RBParser methodsFor: 'overridable - parsing file-ins'!
-
-compile: node
-    "do nothing by default"
-!
-
-endMethodList
-    "do nothing by default"
-!
-
-evaluate: node
-    "This should be overridden because its result affects the parsing
-     process: true means 'start parsing methods', false means 'keep
-     evaluating'. By default, always answer false."
-    ^false
-! !
-
 !RBParser methodsFor: 'testing'!
 
 atEnd
@@ -626,40 +537,6 @@ parseRewriteMethod: aString onError: aBlock
     parser initializeParserWith: aString type: #rewriteOn:errorBlock:.
     ^parser parseMethod: aString!
 
-parseSmalltalk: aString 
-    ^self parseSmalltalk: aString onError: nil!
-
-parseSmalltalk: aString onError: aBlock 
-    | parser |
-    parser := self new.
-    parser errorBlock: aBlock.
-    parser initializeParserWith: aString type: #on:errorBlock:.
-    parser parseSmalltalk.
-    ^parser result!
-
-parseSmalltalkStream: aStream 
-    ^self parseSmalltalkStream: aStream onError: nil!
-
-parseSmalltalkStream: aStream onError: aBlock 
-    | parser |
-    parser := self new.
-    parser errorBlock: aBlock.
-    parser initializeParserWithStream: aStream type: #on:errorBlock:.
-    parser parseSmalltalk.
-    ^parser result!
-
-parseSmalltalkFileIn: aFilename
-    ^self parseSmalltalkFileIn: aFilename onError: nil!
-
-parseSmalltalkFileIn: aFilename onError: aBlock 
-    | parser file |
-    file := FileStream open: aFilename mode: FileStream read.
-    parser := self new.
-    parser errorBlock: aBlock.
-    parser initializeParserWithStream: file type: #on:errorBlock:.
-    parser parseSmalltalk.
-    ^parser result!
-
 !RBParser class methodsFor: 'parsing'!
 
 parseMethodPattern: aString 
@@ -711,13 +588,12 @@ ignoreComments
     saveComments := false!
 
 next
-    | token ch |
+    | token |
     buffer reset.
     tokenStart := stream position.
-    ch := currentCharacter.
     characterType == #eof ifTrue: [^RBToken start: tokenStart + 1].    "The EOF token should occur after the end of input"
     token := self scanToken.
-    ch == $! ifFalse: [ self stripSeparators ].
+    self stripSeparators.
     ^token!
 
 nextPut: anObject 
@@ -1318,29 +1194,3 @@ isVariable: aString
     ^scanner atEnd! !
 
 RBScanner initialize!
-
-
-!PositionableStream methodsFor: 'compiling'!
-
-name
-    "Answer a string that represents what the receiver is streaming on"
-    ^'(%1 %2)' bindWith: self species article with: self species name
-!
-
-segmentFrom: startPos to: endPos
-    "Answer an object that, when sent #asString, will yield the result
-     of sending `copyFrom: startPos to: endPos' to the receiver"
-    ^self copyFrom: startPos to: endPos
-! !
-
-!FileStream methodsFor: 'compiling'!
-
-segmentFrom: startPos to: endPos
-    "Answer an object that, when sent #asString, will yield the result
-     of sending `copyFrom: startPos to: endPos' to the receiver"
-    ^FileSegment
-	on: self name
-	startingAt: startPos
-	for: endPos - startPos + 1.
-! !
-

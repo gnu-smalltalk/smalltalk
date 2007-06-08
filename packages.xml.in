@@ -389,6 +389,7 @@
   <filein>ParseTreeSearcher.st</filein>
   <filein>RBFormatter.st</filein>
   <filein>OrderedSet.st</filein>
+  <filein>STFileParser.st</filein>
   <filein>STCompLit.st</filein>
   <filein>STSymTable.st</filein>
   <filein>STCompiler.st</filein>

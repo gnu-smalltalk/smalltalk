@@ -103,6 +103,10 @@ suspend
     self yield
 !
 
+finalize
+    ^self terminate
+!
+
 terminate
     "Terminate the receiver after having evaluated all the #ensure: and
      #ifCurtailed: blocks that are active in it.  This is done by signalling
@@ -120,6 +124,7 @@ terminate
 primTerminate
     "Terminate the receiver - This is nothing more than prohibiting to
      resume the process, then suspending it."
+    self removeToBeFinalized. 
     suspendedContext := nil.
     self suspend
 ! !
@@ -329,7 +334,7 @@ onBlock: aBlockClosure at: aPriority suspend: aBoolean
      terminate the process with #terminate."
     suspendedContext := closure asContext: nil.
     priority := Processor unpreemptedPriority.
-    self resume
+    self addToBeFinalized; resume
 !
 
 isActive

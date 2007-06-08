@@ -1,3 +1,12 @@
+2007-06-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Process.st: Terminate GCed processes.
+
+2007-06-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Convert.st: Adjust for new STParsingDriver hierarchy.
+	* scripts/GenLibDoc.st: Likewise.
+
 2007-06-08  Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
 
 	* scripts/Convert.st: Track current Namespace for Evals.

@@ -1,5 +1,13 @@
 2007-06-08  Paolo Bonzini  <bonzini@gnu.org>
 
+	* compiler/RBParser.st: Move file-in related stuff...
+	* compiler/STFileParser.st: ... here.  Add STParsingDriver hierarchy.
+	* compiler/STLoader.st: Make STInterpreter an STParsingDriver.
+	* compiler/StartCompiler.st: Rename STFileInParser to STEvaluationDriver
+	and make it a subclass of STParsingDriver.
+
+2007-06-08  Paolo Bonzini  <bonzini@gnu.org>
+
 	* compiler/Exporter.st: emit superclass name relative to namespace
 	of the current class.
 	* compiler/STLoader.st: track defaultNamespace as a proxy which is

@@ -140,7 +140,7 @@ EmittedEntity subclass: EmittedEval [
 
 
 STInST.STClassLoader subclass: SyntaxConverter [
-    | stuffToEmit classesToEmit inStream outStream |
+    | stuffToEmit classesToEmit outStream |
     
     <comment: 'A class loader that creates a set of "EmittedEntity"
     based on the contents of the given file being loaded.
@@ -151,34 +151,31 @@ STInST.STClassLoader subclass: SyntaxConverter [
     
     SyntaxConverter class >> convertStream: in to: out [
         <catogory: 'instance creation'>
-        ^super new initializeWithInStream: in withOutStream: out.
+        ^self convertStream: in with: STInST.STFileInParser to: out
     ]
     
-    initializeWithInStream: in withOutStream: out [
+    SyntaxConverter class >> convertStream: in with: aParserClass to: out [
+        <catogory: 'instance creation'>
+        ^self new
+	    outStream: out;
+	    parseSmalltalkStream: in with: aParserClass;
+	    doEmitStuff.        
+    ]
+    
+    initialize [
         <category: 'initialization'>
-        super initializeParserWithStream: in type: #on:errorBlock:.
+	super initialize.
         stuffToEmit := OrderedSet new.
         classesToEmit := Dictionary new.
-        inStream := in.
-        outStream := out.
-        
-        self parseSmalltalk
     ]
-    
-    parseSmalltalk [
-        <category: 'overrides'>
-        
-        | ret |
-        
-        ret := super parseSmalltalk.
-        self doEmitStuff.        
-        ^ret
+
+    outStream: out [
+        outStream := out.
     ]
     
     evaluate: node [
         <category: 'overrides'>
 
-	"FIXME: there's a bug in RBParser.st"
 	node comments isEmpty ifFalse: [
 	    stuffToEmit add: (EmittedComments comments: node comments source: node source) ].
 
