@@ -104,6 +104,7 @@ suspend
 !
 
 finalize
+    "Terminate processes that are GCed while waiting on a dead semaphore."
     ^self terminate
 !
 
