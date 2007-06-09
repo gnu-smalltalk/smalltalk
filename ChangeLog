@@ -1,3 +1,9 @@
+2007-06-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/MappedColl.st: Add back #domain and #map.
+
+	* scripts/Convert.st: Add example method to convert from Squeak.
+
 2007-06-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Process.st: Terminate GCed processes.

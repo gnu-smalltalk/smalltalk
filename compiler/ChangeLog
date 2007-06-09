@@ -1,3 +1,16 @@
+2007-06-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/Exporter.st: Use #parseNodeAt: to access the method
+	parse tree.  Define it for Behavior and #methodParseNode for
+	CompiledMethod.
+	* compiler/STFileParser.st: Use MappedCollection trick for method
+	source too.  Look at the token type to distinguish '!' from other
+	tokens.
+	* compiler/STLoaderObjs.st: Store an RBMethodNode in LoadedMethod
+	objects.
+	* compiler/STLoaer.st: Adjust for above change to LoadedMethod.
+	* compiler/SqueakParser.st: New.
+	
 2007-06-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/RBParser.st: Move file-in related stuff...

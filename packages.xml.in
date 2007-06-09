@@ -396,6 +396,7 @@
   <filein>STDecompiler.st</filein>
   <filein>STLoaderObjs.st</filein>
   <filein>STLoader.st</filein>
+  <filein>SqueakParser.st</filein>
   <filein>Exporter.st</filein>
 
   <filein>RewriteTests.st</filein>

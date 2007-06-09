@@ -168,7 +168,7 @@ LoadedBehavior comment:
 by an STClassLoader.'!
 
 Object subclass: #LoadedMethod
-        instanceVariableNames: 'source category selector'
+        instanceVariableNames: 'node'
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -314,8 +314,13 @@ includesSelector: selector
     ^self methodDictionary includesKey: selector
 !
 
+parseNodeAt: selector
+    "Answer the parse tree (if available) for the given selector"
+    ^(self compiledMethodAt: selector) methodParseNode
+!
+
 sourceCodeAt: selector
-    "Answer source code (if available) for the given compiledMethod"
+    "Answer source code (if available) for the given selector"
     | source |
     source := (self compiledMethodAt: selector) methodSourceCode.
     source isNil ifTrue: [ '" *** SOURCE CODE NOT AVAILABLE *** "' copy ].
@@ -822,42 +827,45 @@ superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
 
 !LoadedMethod class methodsFor: 'instance creation'!
 
-category: category source: source selector: selector
+node: aRBMethodNode
     ^self new
-	    category: category
-	    source: source
-	    selector: selector
+	    node: aRBMethodNode
 !
 
 !LoadedMethod methodsFor: 'accessing'!
 
+node
+    ^node
+!
+
+node: aRBMethodNode
+    node := aRBMethodNode
+!
+
+methodParseNode
+    ^self node
+!
+
 methodCategory
-    ^category
+    ^node category
 !
 
 methodSourceCode
-    ^source
+    ^node source
 !
 
 selector
-    ^selector
+    ^node selector asSymbol
 !
 
 methodSourceString
-    ^source asString
+    "FIXME: this relies on the source code being a MappedCollection."
+    ^node source domain asString
 ! !
 
 !LoadedMethod methodsFor: 'empty stubs'!
 
 discardTranslation
-! !
-
-!LoadedMethod methodsFor: 'initializing'!
-
-category: c source: s selector: sel
-    category := c.
-    source := s.
-    selector := sel.
 ! !
 
 !PseudoNamespace methodsFor: 'abstract'!

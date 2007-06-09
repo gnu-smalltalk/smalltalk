@@ -149,6 +149,11 @@ STInST.STClassLoader subclass: SyntaxConverter [
     entities that have been constructed.'>
     
     
+    SyntaxConverter class >> convertSqueakStream: in to: out [
+        <catogory: 'instance creation'>
+        ^self convertStream: in with: STInST.SqueakFileInParser to: out
+    ]
+    
     SyntaxConverter class >> convertStream: in to: out [
         <catogory: 'instance creation'>
         ^self convertStream: in with: STInST.STFileInParser to: out

@@ -299,11 +299,22 @@ FileOutExporter subclass: FormattingExporter [
                     
 	source := STInST.RBFormatter new
 		      initialIndent: 1;
-                      format: (STInST.RBParser 
-                                  parseMethod: (class sourceCodeAt: selector)
-                                  category: (class compiledMethodAt: selector)
-						methodCategory).
+                      format: (class parseNodeAt: selector).
         outStream nextPutAll: source; nl.
+    ]
+]
+
+Behavior extend [
+    parseNodeAt: selector [
+        ^(self compiledMethodAt: selector) methodParseNode
+    ]
+]
+
+CompiledMethod extend [
+    methodParseNode [
+	^STInST.RBParser 
+            parseMethod: self methodSourceString
+            category: self methodCategory
     ]
 ]
 

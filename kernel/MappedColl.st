@@ -97,6 +97,16 @@ at: key put: value
     ^domain at: (map at: key) put: value
 !
 
+domain
+    "Answer the receiver's domain"
+    ^domain
+!
+
+map
+    "Answer the receiver's map"
+    ^map
+!
+
 size
     "Answer the receiver's size"
     ^map size

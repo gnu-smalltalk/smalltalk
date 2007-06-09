@@ -214,12 +214,10 @@ endMethodList
 !
 
 defineMethod: node 
+    node category: currentCategory.
     ^currentClass methodDictionary
         at: (node selector asSymbol)
-        put: (LoadedMethod
-                category: currentCategory
-                source: (node source)
-                selector: (node selector asSymbol))
+        put: (LoadedMethod node: node)
 !
 
 compile: node

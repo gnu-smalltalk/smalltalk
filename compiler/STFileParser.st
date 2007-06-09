@@ -159,7 +159,7 @@ parseMethodDefinitionList
     "Called after first !, expecting a set of bang terminated
      method definitions, followed by a bang"
 
-    | node start stop |
+    | node source start stop |
 
     [   scanner atEnd or: [ currentToken isSpecial
 	   and: [ currentToken value == $! ] ] ] whileFalse: [
@@ -171,7 +171,9 @@ parseMethodDefinitionList
         "One -1 accounts for base-1 vs. base-0 (as above), the
          other drops the bang because we have a one-token lookahead."
 	stop := currentToken start - 2.
-        node source: (scanner stream segmentFrom: start to: stop).
+        source := scanner stream copyFrom: start to: stop.
+	source := MappedCollection collection: source map: (1 - start to: stop).
+        node source: source.
 
         scanner stripSeparators.
         self step.           "gobble method terminating bang"
@@ -258,13 +260,13 @@ RBScanner subclass: #STFileScanner
 !STFileScanner methodsFor: 'accessing'!
 
 next
-    | token ch |
+    | token |
     buffer reset.
     tokenStart := stream position.
-    ch := currentCharacter.
     characterType == #eof ifTrue: [^RBToken start: tokenStart + 1].    "The EOF token should occur after the end of input"
     token := self scanToken.
-    ch == $! ifFalse: [ self stripSeparators ].
+    (token isSpecial and: [ token value == $! ])
+	 ifFalse: [ self stripSeparators ].
     ^token!
 
 
