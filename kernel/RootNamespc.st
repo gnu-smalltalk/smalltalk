@@ -51,7 +51,7 @@ new: spaceName
     a key that references it."
     ^Smalltalk
         at: spaceName asGlobalKey
-        put: ((super new: 31) setSuperspace: nil)
+        put: ((super new: 24) setSuperspace: nil)
 ! !
 
 

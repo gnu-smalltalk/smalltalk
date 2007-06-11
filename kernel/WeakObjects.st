@@ -264,6 +264,11 @@ add: anObject
     ^anObject
 !
 
+includes: anObject
+    "Answer whether I contain anObject."
+    ^super includes: (HomedAssociation key: anObject value: nil environment: self)
+!
+
 remove: anObject ifAbsent: aBlock
     "Remove oldObject to the set. If it is found, answer oldObject.
      Otherwise, evaluate aBlock and return its value."
@@ -470,6 +475,14 @@ rehash
 ! !
 
 
+!WeakIdentitySet methodsFor: 'accessing'!
+
+identityIncludes: anObject
+    "Answer whether I include anObject exactly.  As I am an
+     identity-set, this is the same as #includes:."
+    ^self includes: anObject
+! !
+
 !WeakIdentitySet methodsFor: 'private methods'!
 
 hashFor: anObject

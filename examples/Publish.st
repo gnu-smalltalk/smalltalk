@@ -295,6 +295,19 @@ skipToWhite: start on: string
     ^pos
 !
 
+skipWhiteExceptNewlines: stream
+    "Skip up to next non-separator or newline.  Answer whether stream
+     is not at end afterwards."
+    [| char |
+     stream atEnd ifTrue: [^false].
+     char := stream next.
+     char isSeparator and:
+	 [(##({Character nl. Character cr} asString)
+	       includes: char) not]] whileTrue.
+    stream skip: -1.
+    ^true
+!
+
 skipWhite: start on: string
     "Answer the position of the first white character in string, starting
      the scan at position start"
@@ -390,7 +403,7 @@ reformatComment: source
     [ input atEnd ] whileFalse: [
 	comment nextPutAll: (input upTo: Character nl).
 	comment nl.
-	self skipWhite: input
+	self skipWhiteExceptNewlines: input
     ].
     ^comment contents
 !

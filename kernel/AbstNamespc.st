@@ -74,7 +74,7 @@ primNew: parent name: spaceName
 
     ^parent
         at: spaceName asGlobalKey
-        put: ((super new: 32)
+        put: ((super new: 24)
 		setSuperspace: parent;
 		name: spaceName asSymbol;
 		yourself)
@@ -257,7 +257,8 @@ values
 !AbstractNamespace methodsFor: 'namespace hierarchy'!
 
 addSubspace: aSymbol
-    "Add aNamespace to the set of the receiver's subspaces"
+    "Create a namespace named aSymbol, add it to the receiver's
+     subspaces, and answer it."
     ^Namespace primNew: self name: aSymbol
 !
 
