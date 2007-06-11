@@ -151,6 +151,38 @@ fullNameFor: aString
     ^path inject: '/' into: [ :old :each |
 	Directory append: each to: old
     ]
+!
+
+pathFrom: srcName to: destName
+    ^self
+	computePathFrom: (File fullNameFor: srcName)
+	to: (File fullNameFor: destName)
+! !
+
+
+!File class methodsFor: 'private'!
+
+computePathFrom: srcName to: destName
+    | src dest srcComponent destComponent path |
+    src := srcName subStrings: Directory pathSeparator.
+    dest := destName subStrings: Directory pathSeparator.
+
+    src := src asOrderedCollection.
+    src removeLast.
+
+    dest := dest asOrderedCollection.
+    dest isEmpty ifTrue: [ dest addLast: '' ].
+
+    [ src isEmpty or: [
+	dest size = 1 or: [
+	src first ~= dest first ] ] ] whileFalse: [
+
+	src removeFirst.
+	dest removeFirst ].
+
+    path := src collect: [ :each | '..' ].
+    path addAllLast: dest.
+    ^path fold: [ :a :b | a, '/', b ]
 ! !
 
 
@@ -176,6 +208,17 @@ checkError: errno
 touch: fileName
     "Update the timestamp of the file with the given path name."
     (File name: fileName) touch
+!
+
+symlink: srcName as: destName
+    "Create a symlink for the srcName file with the given path name"
+    (File name: srcName) symlinkAs: destName
+!
+
+symlink: destName from: srcName
+    "Create a symlink named destName file from the given path (relative to
+     destName)"
+    (VFS.VFSHandler for: destName) symlinkFrom: srcName
 !
 
 remove: fileName
@@ -443,6 +486,30 @@ readStream
 writeStream
     "Open a write-only FileStream on the receiver"
     ^self open: FileStream write
+!
+
+symlinkAs: destName
+    "Create destName as a symbolic link of the receiver.  The appropriate
+     relative path is computed automatically."
+    | dest relPath |
+    dest := VFS.VFSHandler for: destName.
+    relPath := File
+	computePathFrom: dest realFileName
+	to: vfsHandler realFileName.
+    dest symlinkFrom: relPath
+!
+
+pathTo: destName
+    "Compute the relative path from the receiver to destName."
+    ^File
+	computePathFrom: vfsHandler realFileName
+	to: (File fullNameFor: destName)
+!
+
+symlinkFrom: srcName
+    "Create the receiver as a symbolic link from srcName (relative to the
+     path of the receiver)."
+    vfsHandler symlinkFrom: srcName
 !
 
 remove

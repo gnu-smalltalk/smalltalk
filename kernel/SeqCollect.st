@@ -563,7 +563,7 @@ join
      my elements are more likely to share the desired properties than
      I am, such as in:
 
-     #('hello, ' 'world') flatten => 'hello, world'"
+     #('hello, ' 'world') join => 'hello, world'"
     ^self isEmpty ifTrue: [#()]
 		  ifFalse: [self first species join: self]
 ! !

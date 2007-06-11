@@ -1,3 +1,30 @@
+2007-06-10  Stephen Compall  <scompall@nocandysw.com>
+
+	* examples/Publish.st: Add Basic>>#skipWhiteExceptNewlines:, and
+	use it in Basic>>#reformatComment:, thereby preserving multiple
+	newlines as they appear in comments.
+
+	* kernel/AbstNamespc.st: Reduce default size.
+	* kernel/RootNamespc.st: Same.
+
+2007-06-10  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/AbstNamespc.st: Document that #addSubspace: answers the
+	new namespace, also referring to the argument.
+
+	* kernel/SeqCollect.st: Fix doc example for #join usage.
+
+2007-06-10  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/WeakObjects.st: Add #includes: to WeakSet, as the
+	inherited method doesn't work with this class.  Add
+	#identityIncludes: to WeakIdentitySet.
+
+2007-06-11  Paolo Bonzini  <bonzini@gnu.org>
+
+        * kernel/File.st: Add #pathFrom:to: and symlink creation.
+        * kernel/VFS.st: Add symlink creation.
+
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiExcept.st: Remove two archaeological mysteries.

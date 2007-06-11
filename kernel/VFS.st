@@ -145,6 +145,9 @@ primIsWriteable: name
 primIsExecutable: name
     <cCall: 'fileIsExecutable' returning: #boolean args: #(#string)>!
 
+primSymlink: srcName as: destName
+    <cCall: 'symlink' returning: #void args: #(#string #string)>!
+
 primUnlink: fileName
     <cCall: 'unlink' returning: #void args: #(#string)>!
 
@@ -392,6 +395,11 @@ remove
     self subclassResponsibility
 !
 
+symlinkFrom: srcName
+    "Create the receiver as a symlink from the relative path srcName"
+    self subclassResponsibility
+!
+
 renameTo: newFileName
     "Rename the file with the given path name oldFileName to newFileName"
     self subclassResponsibility
@@ -543,8 +551,14 @@ remove
     File checkError
 !
 
+symlinkFrom: srcName
+    "Create the receiver as a symlink from path destName"
+    self primSymlink: srcName as: self realFileName.
+    File checkError
+!
+
 renameTo: newFileName
-    "Rename the file with the given path name oldFileName to newFileName"
+    "Rename the file with the given path name to newFileName"
     self primRename: self realFileName to: newFileName.
     File checkError
 ! !
@@ -650,7 +664,7 @@ name: virtualFileName realFileName: temporaryFileName
      virtualFileName file into temporaryFileName."
     self addToBeFinalized.
     self name: virtualFileName.
-    realFileName := temporaryFileName!
+    realFileName := File fullNamFor: temporaryFileName!
 
 finalize
     "Upon finalization, we remove the file that was temporarily holding the file
@@ -854,7 +868,7 @@ extractMember: anArchiveMemberHandler
 	        with: anArchiveMemberHandler name
 	        with: temp name).
 
-        temp name
+        File fullNameFor: temp name
     ]!
 
 fillMember: anArchiveMemberHandler
