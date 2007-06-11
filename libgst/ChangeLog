@@ -1,3 +1,7 @@
+2007-06-11  Paolo Bonzini  <bonzini@gnu.org>
+
+        * libgst/cint.c: Add symlink function.
+
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Initialize an attribute's arguments array before

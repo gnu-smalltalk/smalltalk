@@ -531,6 +531,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("rewinddir", rewinddir);
   _gst_define_cfunc ("extractDirentName", extract_dirent_name);
 
+  _gst_define_cfunc ("symlink", symlink);
   _gst_define_cfunc ("unlink", unlink);
   _gst_define_cfunc ("rename", rename);
   _gst_define_cfunc ("rmdir", rmdir);
