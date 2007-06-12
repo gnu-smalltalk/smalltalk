@@ -103,8 +103,8 @@ add: newObject
 !HashedCollection methodsFor: 'removing'!
 
 remove: oldObject ifAbsent: anExceptionBlock
-    "Remove oldObject to the set. If it is found, answer oldObject.
-     Otherwise, evaluate anExceptionBlock and return its value."
+    "Remove oldObject from the set. If it is found, answer oldObject.
+     Otherwise, evaluate anExceptionBlock and answer its value."
 
     | index |
     index := self findIndexOrNil: oldObject.

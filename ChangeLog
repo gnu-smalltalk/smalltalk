@@ -1,3 +1,11 @@
+2007-06-11  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/WeakObjects.st: Reimplement some private and public
+	methods from HashedCollection for WeakSet, removing unneeded
+	HomedAssociations.
+
+	* kernel/HashedColl.st: Tweak #remove:ifAbsent:'s comment.
+
 2007-06-10  Stephen Compall  <scompall@nocandysw.com>
 
 	* examples/Publish.st: Add Basic>>#skipWhiteExceptNewlines:, and
@@ -423,7 +431,7 @@
 
 	* kernel/Collection.st: Add and describe class from: protocol.
 	* kernel/Array.st: Specialize from:.
-	* kernel/Dictionary: Same.
+	* kernel/Dictionary.st: Same.
 
 2007-03-29  Stephen Compall  <s11@member.fsf.org>
 

@@ -258,26 +258,13 @@ species
 add: anObject
     "Add newObject to the set, if and only if the set doesn't already contain
      an occurrence of it. Don't fail if a duplicate is found. Answer anObject"
-    super add: ((HomedAssociation key: anObject value: nil environment: self)
-	makeEphemeron;
-	yourself).
-    ^anObject
-!
+    | index |
+    index := self findIndex: anObject ifAbsent: [ :index |
+	self incrementTally
+	    ifTrue: [ self findIndex: anObject ]
+	    ifFalse: [ index ]].
 
-includes: anObject
-    "Answer whether I contain anObject."
-    ^super includes: (HomedAssociation key: anObject value: nil environment: self)
-!
-
-remove: anObject ifAbsent: aBlock
-    "Remove oldObject to the set. If it is found, answer oldObject.
-     Otherwise, evaluate aBlock and return its value."
-    | obj |
-    obj := super
-	remove: (HomedAssociation key: anObject value: nil environment: self)
-	ifAbsent: [ nil ].
-
-    obj isNil ifTrue: [ ^aBlock value ].
+    self primAt: index put: (self newAssociation: anObject).
     ^anObject
 !
 
@@ -292,6 +279,44 @@ do: aBlock
 
 
 
+!WeakSet methodsFor: 'loading'!
+
+postLoad
+    "Called after loading an object; must restore it to the state before
+     `preStore' was called.  Make it weak again"
+    1 to: self primSize do: [ :i |
+        (self primAt: i) notNil
+           ifTrue: [ (self primAt: i) makeEphemeron ].
+    ]
+! !
+
+
+!WeakSet methodsFor: 'copying'!
+
+newAssociation: key
+    ^(HomedAssociation key: key value: nil environment: self)
+	makeEphemeron;
+	yourself!
+
+shallowCopy
+    "Returns a shallow copy of the receiver (the instance variables are
+     not copied)"
+    | copy |
+    copy := self copyEmpty: self capacity.
+    self do: [:each | copy addWhileGrowing: (copy newAssociation: each) ].
+    ^copy
+!
+
+deepCopy
+    "Returns a deep copy of the receiver (the instance variables are
+     copies of the receiver's instance variables)"
+    | copy |
+    copy := self copyEmpty: self capacity.
+    self do: [ :each | copy addWhileGrowing: (copy newAssociation: each copy) ].
+    ^copy
+! !
+
+
 !WeakSet methodsFor: 'private'!
 
 mourn: anObject
@@ -301,9 +326,34 @@ mourn: anObject
     super mourn: anObject key
 !
 
-hashFor: anObject
-    "Return an hash value for the item, anObject"
-    ^anObject key hash
+rehashObjectsAfter: index
+    "Private - Rehashes all the objects in the collection after index to
+    see if any of them hash to index.  If so, that object is copied to
+    index, and the process repeats with that object's index, until a nil
+    is encountered."
+    | i j size assoc |
+    i := index.
+    size := self primSize.
+    [   i = size ifTrue: [ i := 1 ] ifFalse: [ i := i + 1 ].
+	assoc := self primAt: i.
+	assoc notNil
+    ]   whileTrue: [
+	j := self findIndex: assoc key.
+	(self primAt: j) isNil ifTrue: [
+	    self primAt: j put: assoc.
+	    self primAt: i put: nil
+	]
+    ]
+!
+
+addWhileGrowing: association
+    "Private - Add the newObject association to the receiver. Don't check for
+     the set to be full - we want SPEED!."
+    self
+	primAt: (self findIndex: association key)
+	put: association.
+    tally := tally + 1.
+    ^association
 !
 
 findIndex: anObject
@@ -314,12 +364,12 @@ findIndex: anObject
     self beConsistent.
 
     "Sorry for the lack of readability, but I want speed... :-)"
-    index := (anObject key hash scramble
+    index := (anObject hash scramble
                 bitAnd: (size := self primSize) - 1) + 1.
 
     [
         ((element := self primAt: index) isNil
-            or: [ element key = anObject key ])
+            or: [ element key = anObject ])
                 ifTrue: [ ^index ].
 
         index == size
@@ -363,6 +413,18 @@ at: key put: value
     assoc makeEphemeron.
     self add: assoc.
     ^value
+! !
+
+
+!WeakKeyDictionary class methodsFor: 'hacks'!
+
+postLoad
+    "Called after loading an object; must restore it to the state before
+     `preStore' was called.  Make it weak again"
+    1 to: self primSize do: [ :i |
+        (self primAt: i) notNil
+           ifTrue: [ (self primAt: i) makeEphemeron ].
+    ]
 ! !
 
 
@@ -487,7 +549,7 @@ identityIncludes: anObject
 
 hashFor: anObject
     "Return an hash value for the item, anObject"
-    ^anObject key identityHash
+    ^anObject identityHash
 !
 
 findIndex: anObject
@@ -498,12 +560,12 @@ findIndex: anObject
     self beConsistent.
 
     "Sorry for the lack of readability, but I want speed... :-)"
-    index := (anObject key identityHash scramble
+    index := (anObject identityHash scramble
                 bitAnd: (size := self primSize) - 1) + 1.
 
     [
         ((element := self primAt: index) isNil
-            or: [ element key == anObject key ])
+            or: [ element key == anObject ])
                 ifTrue: [ ^index ].
 
         index == size
@@ -522,7 +584,7 @@ keysClass
 
 hashFor: anObject
     "Return an hash value for the item, anObject"
-    ^anObject key identityHash
+    ^anObject identityHash
 !
 
 findIndex: anObject
