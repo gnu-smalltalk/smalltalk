@@ -482,36 +482,6 @@ rehash
 
 !Dictionary methodsFor: 'private methods'!
 
-rehashObjectsAfter: index
-    "Private - Rehashes all the objects in the collection after index to
-    see if any of them hash to index.  If so, that object is copied to
-    index, and the process repeats with that object's index, until a nil
-    is encountered."
-    | i j size assoc |
-    i := index.
-    size := self primSize.
-    [   i = size ifTrue: [ i := 1 ] ifFalse: [ i := i + 1 ].
-	assoc := self primAt: i.
-	assoc notNil
-    ]   whileTrue: [
-	j := self findIndex: assoc key.
-	(self primAt: j) isNil ifTrue: [
-	    self primAt: j put: assoc.
-	    self primAt: i put: nil
-	]
-    ]
-!
-
-addWhileGrowing: association
-    "Private - Add the newObject association to the receiver. Don't check for
-     the set to be full - we want SPEED!."
-    self
-	primAt: (self findIndex: association key)
-	put: association.
-    tally := tally + 1.
-    ^association
-!
-
 keysClass
     "Private - Answer the class answered by #keys"
     ^Set
@@ -522,6 +492,13 @@ hashFor: anObject
     ^anObject key hash
 !
 
+findElementIndex: anObject
+    "anObject is the content of an indexed variable. See what slot it should
+     be inserted in."
+
+    ^self findIndex: anObject key
+!
+    
 findIndex: anObject
     "Tries to see if anObject exists as an indexed variable. As soon as nil
     or anObject is found, the index of that slot is answered"

@@ -293,11 +293,6 @@ postLoad
 
 !WeakSet methodsFor: 'copying'!
 
-newAssociation: key
-    ^(HomedAssociation key: key value: nil environment: self)
-	makeEphemeron;
-	yourself!
-
 shallowCopy
     "Returns a shallow copy of the receiver (the instance variables are
      not copied)"
@@ -319,6 +314,11 @@ deepCopy
 
 !WeakSet methodsFor: 'private'!
 
+newAssociation: key
+    ^(HomedAssociation key: key value: nil environment: self)
+	makeEphemeron;
+	yourself!
+
 mourn: anObject
     "Private - anObject has been found to have a weak key, remove it."
 
@@ -326,36 +326,13 @@ mourn: anObject
     super mourn: anObject key
 !
 
-rehashObjectsAfter: index
-    "Private - Rehashes all the objects in the collection after index to
-    see if any of them hash to index.  If so, that object is copied to
-    index, and the process repeats with that object's index, until a nil
-    is encountered."
-    | i j size assoc |
-    i := index.
-    size := self primSize.
-    [   i = size ifTrue: [ i := 1 ] ifFalse: [ i := i + 1 ].
-	assoc := self primAt: i.
-	assoc notNil
-    ]   whileTrue: [
-	j := self findIndex: assoc key.
-	(self primAt: j) isNil ifTrue: [
-	    self primAt: j put: assoc.
-	    self primAt: i put: nil
-	]
-    ]
-!
+findElementIndex: anObject
+    "anObject is the content of an indexed variable. See what slot it should
+     be inserted in."
 
-addWhileGrowing: association
-    "Private - Add the newObject association to the receiver. Don't check for
-     the set to be full - we want SPEED!."
-    self
-	primAt: (self findIndex: association key)
-	put: association.
-    tally := tally + 1.
-    ^association
+    ^self findIndex: anObject key
 !
-
+    
 findIndex: anObject
     "Tries to see if anObject exists as an indexed variable. As soon as nil
     or anObject is found, the index of that slot is answered"
@@ -364,7 +341,7 @@ findIndex: anObject
     self beConsistent.
 
     "Sorry for the lack of readability, but I want speed... :-)"
-    index := (anObject hash scramble
+    index := (anObject identityHash scramble
                 bitAnd: (size := self primSize) - 1) + 1.
 
     [
@@ -546,11 +523,6 @@ identityIncludes: anObject
 ! !
 
 !WeakIdentitySet methodsFor: 'private methods'!
-
-hashFor: anObject
-    "Return an hash value for the item, anObject"
-    ^anObject identityHash
-!
 
 findIndex: anObject
     "Tries to see if anObject exists as an indexed variable. As soon as nil

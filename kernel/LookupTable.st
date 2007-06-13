@@ -279,7 +279,7 @@ rehashObjectsAfter: index
 	key := self primAt: i.
 	key notNil
     ]   whileTrue: [
-	j := self findIndex: key.
+	j := self findElementIndex: key.
 	(self primAt: j) isNil ifTrue: [
 	    self primAt: j put: key.
 	    self valueAt: j put: (self valueAt: i).
@@ -341,6 +341,13 @@ hashFor: anObject
     ^anObject hash
 !
 
+findElementIndex: anObject
+    "anObject is the content of an indexed variable. See what slot it should
+     be inserted in."
+
+    ^self findIndex: anObject
+!
+    
 findIndex: anObject
     "Tries to see if anObject exists as an indexed variable. As soon as nil
     or anObject is found, the index of that slot is answered"

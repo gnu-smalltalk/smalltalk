@@ -1,3 +1,11 @@
+2007-06-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Dictionary.st: Add #findElementIndex:, remove subsumed methods.
+	* kernel/HashedColl.st: Add #findElementIndex:, use it.
+	* kernel/LookupTable.st: Add #findElementIndex:.
+	* kernel/WeakObjects.st: Add #findElementIndex:, remove subsumed
+	methods.
+
 2007-06-11  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/WeakObjects.st: Reimplement some private and public

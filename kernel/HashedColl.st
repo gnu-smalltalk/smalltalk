@@ -280,7 +280,7 @@ addWhileGrowing: value
     "Private - Add the newObject association to the receiver. Don't check for
      the set to be full - we want SPEED!."
     self
-	primAt: (self findIndex: value)
+	primAt: (self findElementIndex: value)
 	put: value.
     tally := tally + 1.
     ^value
@@ -312,7 +312,7 @@ rehashObjectsAfter: index
 	element := self primAt: i.
 	element notNil
     ]   whileTrue: [
-	j := self findIndex: element.
+	j := self findElementIndex: element.
 	(self primAt: j) isNil ifTrue: [
 	    self primAt: j put: element.
 	    self primAt: i put: nil
@@ -325,6 +325,13 @@ hashFor: anObject
     self subclassResponsibility
 !
 
+findElementIndex: anObject
+    "anObject is the content of an indexed variable. See what slot it should
+     be inserted in."
+
+    ^self findIndex: anObject
+!
+    
 findIndex: anObject
     "Tries to see if anObject exists as an indexed variable. As soon as nil
     or anObject is found, the index of that slot is answered"
