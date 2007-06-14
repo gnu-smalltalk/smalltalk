@@ -1806,6 +1806,8 @@ win32_reserve (PTR address, size_t size)
 {
   PTR base;
   base = VirtualAlloc(address, size, MEM_RESERVE, PAGE_NOACCESS);
+  if (!base && address)
+    base = VirtualAlloc(NULL, size, MEM_RESERVE, PAGE_NOACCESS);
   if (!base)
     errno = ENOMEM;
 
