@@ -739,6 +739,21 @@ _gst_get_cur_dir_name (void)
 }
 
 
+int
+_gst_set_file_access_times (const char *name, long new_atime, long new_mtime)
+{
+  struct timeval times[2];
+  int result;
+  times[0].tv_sec = new_atime + 86400 * 10957;
+  times[1].tv_sec = new_mtime + 86400 * 10957;
+  times[0].tv_usec = times[1].tv_usec = 0;
+  result = utimes (name, times);
+  if (!result)
+    errno = 0;
+  return (result);
+}
+
+
 char *
 _gst_get_full_file_name (const char *name)
 {

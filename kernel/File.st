@@ -132,9 +132,18 @@ fullNameFor: aString
     "Answer the full path to a file called `aString', resolving the `.' and
      `..' directory entries, and answer the result.  `/..' is the same as '/'."
 
-    | path substrings |
+    | path substrings result isAbsolute isWindows |
+
+    isAbsolute := (aString at: 1) isPathSeparator.
+    isWindows := Directory pathSeparator == $\.
+    "Windows paths starting X:/ are absolute"
+    (isWindows and: [
+        aString size >= 3 and: [ 
+	(aString at: 2) = $: and: [
+	(aString at: 3) isPathSeparator ]]]) ifTrue: [ isAbsolute := true ].
+
     path := OrderedCollection new.
-    (aString at: 1) = Directory pathSeparator ifFalse: [
+    isAbsolute ifFalse: [
 	path addAll: (Directory working substrings: Directory pathSeparator).
     ].
     substrings := aString substrings: Directory pathSeparator.
@@ -148,9 +157,18 @@ fullNameFor: aString
 	]
     ].
 
-    ^path inject: '/' into: [ :old :each |
-	Directory append: each to: old
-    ]
+    result := path inject: Directory pathSeparatorString into: [ :old :each |
+ 	Directory append: each to: old
+    ].
+
+    "Remove initial / from /C:/"
+    ^(isWindows and: [
+	result size >= 4 and: [ 
+	(result at: 1) isPathSeparator and: [
+	(result at: 3) = $: and: [
+	(result at: 4) isPathSeparator ]]]])
+	    ifTrue: [ result copyFrom: 2 ]
+	    ifFalse: [ result ]
 !
 
 pathFrom: srcName to: destName

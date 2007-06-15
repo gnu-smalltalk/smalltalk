@@ -1,3 +1,11 @@
+2007-06-15  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Character.st: Add #isPathSeparator.
+	* kernel/Directory.st: Use it; add special cases for Win32 systems.
+	* kernel/File.st: Use it; add special cases for Win32 systems.
+	* kernel/FileDescr.st: Look for :// instead of :/ to distinguish URIs.
+
 2007-06-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Dictionary.st: Add #findElementIndex:, remove subsumed methods.

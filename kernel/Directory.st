@@ -113,26 +113,33 @@ append: fileName to: directory
     "Answer the name of a file named `fileName' which resides in a directory
      named `directory'."
     directory isEmpty ifTrue: [ ^fileName ].
-    (fileName at: 1) = self pathSeparator
-	ifTrue: [ ^fileName ].
-    (self pathSeparator = $\ and: [ fileName size >= 2 and: [
-	(fileName at: 2) = $: ]]) ifTrue: [ ^fileName ].
-    ^(directory at: directory size) = self pathSeparator
+    self pathSeparator == $\
+	ifFalse: [
+	    (fileName at: 1) isPathSeparator ifTrue: [ ^fileName ] ]
+	ifTrue: [
+	    (fileName at: 1) isPathSeparator ifTrue: [
+		^(directory size >= 2 and: [ (directory at: 2) = $: ])
+		    ifTrue: [ '%1:%2' bindWith: directory first with: fileName ]
+		    ifFalse: [ fileName ] ].
+            (fileName size >= 2 and: [ (fileName at: 2) = $: ])
+		ifTrue: [ ^fileName ] ].
+
+    ^(directory at: directory size) isPathSeparator
 	ifTrue: [ directory, fileName ]
 	ifFalse: [ '%1%2%3'
 	    bindWith: directory
-	    with: self pathSeparatorString
+	    with: self pathSeparator
 	    with: fileName ]
 !
 
 pathSeparator
     "Answer (as a Character) the character used to separate directory names"
-    ^$/
+    ^CSymbols.PathSeparator
 !
 
 pathSeparatorString
     "Answer (in a String) the character used to separate directory names"
-    ^'/'
+    ^String with: self pathSeparator
 ! !
 
 

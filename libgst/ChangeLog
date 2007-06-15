@@ -1,3 +1,11 @@
+2007-06-15  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Remove my_utime.
+	* libgst/sysdep.c: Move it here as _gst_set_file_access_times.
+	* libgst/sysdep.h: Declare it.
+	* libgst/dict.c: Add CSymbols.PathSeparator.
+
 2007-06-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.c: Try VirtualAlloc with NULL address if a fixed

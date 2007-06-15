@@ -103,7 +103,7 @@ open: fileName mode: fileMode
      finished with it anyway, using #close. To keep a file open even when
      no references exist anymore, send it #removeToBeFinalized"
 
-    ((fileName indexOfSubCollection: ':/') > 0 and: [
+    ((fileName indexOfSubCollection: '://') > 0 and: [
         fileMode = FileStream read ]) ifTrue: [
            ^NetClients.URIResolver openStreamOn: fileName ].
 

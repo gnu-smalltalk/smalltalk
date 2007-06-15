@@ -294,6 +294,12 @@ isPunctuation
     ^(Table at: 1 + codePoint ifAbsent: [ 0 ]) = 4
 !
 
+isPathSeparator
+    "Returns true if self is a path separator ($/ or $\ under Windows,
+     $/ only under Unix systems including Mac OS X).
+    ^self == $/ or: [ self == Directory pathSeparator ]
+!
+
 isVowel
     "Returns true if self is a, e, i, o, or u; case insensitive"
     | char |

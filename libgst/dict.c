@@ -1112,6 +1112,14 @@ init_c_symbols ()
 #define NAN (0.0 / 0.0)
 #endif
 
+#if defined WIN32 && !defined __CYGWIN__
+  NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("PathSeparator"),
+		    CHAR_OOP_AT ('\\'));
+#else
+  NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("PathSeparator"),
+		    CHAR_OOP_AT ('/'));
+#endif
+
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CDoubleMin"),
 		    floatd_new (DBL_MIN));
   NAMESPACE_AT_PUT (cSymbolsOOP, _gst_intern_string ("CDoubleMax"),
