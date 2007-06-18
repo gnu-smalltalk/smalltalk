@@ -217,7 +217,7 @@ AC_REPLACE_FUNCS(putenv strdup strerror strsignal mkstemp getpagesize \
 	getdtablesize strstr ftruncate floorl ceill sqrtl frexpl ldexpl asinl \
 	acosl atanl logl expl tanl sinl cosl truncl lrintl strsep strpbrk)
 AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname sbrk usleep lstat \
-	grantpt popen getrusage gettimeofday fork strchr utimes readlink \
+	grantpt popen getrusage gettimeofday fork strchr utimes utime readlink \
 	sigsetmask alarm select mprotect madvise nl_langinfo waitpid \
 	setsid spawnl nanosleep pread pwrite)
 
