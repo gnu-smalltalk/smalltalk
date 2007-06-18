@@ -58,6 +58,10 @@
 
 #include "gstpriv.h"
 
+#ifdef HAVE_UTIME_H
+# include <utime.h>
+#endif
+
 #ifdef HAVE_SYS_TIMES_H
 # include <sys/times.h>
 #endif
@@ -742,12 +746,23 @@ _gst_get_cur_dir_name (void)
 int
 _gst_set_file_access_times (const char *name, long new_atime, long new_mtime)
 {
-  struct timeval times[2];
   int result;
+#if defined HAVE_UTIMES
+  struct timeval times[2];
   times[0].tv_sec = new_atime + 86400 * 10957;
   times[1].tv_sec = new_mtime + 86400 * 10957;
   times[0].tv_usec = times[1].tv_usec = 0;
   result = utimes (name, times);
+#elif defined HAVE_UTIME
+  struct utimbuf utb;
+  utb.actime = new_atime + 86400 * 10957;
+  utb.modtime = new_mtime + 86400 * 10957;
+  result = utime (name, &utb);
+#else
+#warning neither utime nor utimes are available.
+  errno = ENOSYS;
+  result = -1;
+#endif
   if (!result)
     errno = 0;
   return (result);

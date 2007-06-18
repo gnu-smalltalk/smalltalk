@@ -76,4 +76,7 @@ Object extend [
     ]
 ]
 
-Eval [ Object new testExtensionFor; testStripExtensionFrom ]
+Eval [
+    CSymbols.PathSeparator := $/.
+    Object new testExtensionFor; testStripExtensionFrom
+]

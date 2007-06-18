@@ -1,3 +1,7 @@
+2007-06-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/fileext.st: Run tests using Unix file separator.
+
 2007-06-15  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
 	    Paolo Bonzini  <bonzini@gnu.org>
 

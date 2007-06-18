@@ -296,7 +296,7 @@ isPunctuation
 
 isPathSeparator
     "Returns true if self is a path separator ($/ or $\ under Windows,
-     $/ only under Unix systems including Mac OS X).
+     $/ only under Unix systems including Mac OS X)."
     ^self == $/ or: [ self == Directory pathSeparator ]
 !
 

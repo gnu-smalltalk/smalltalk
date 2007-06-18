@@ -188,7 +188,7 @@ AC_DEFINE(_GNU_SOURCE, 1, [We want the definition of every available function])
 AC_HEADER_ASSERT
 AC_CHECK_HEADERS_ONCE(stdint.h inttypes.h unistd.h poll.h sys/ioctl.h \
 	sys/resource.h sys/utsname.h stropts.h sys/param.h stddef.h limits.h \
-	sys/timeb.h termios.h sys/mman.h sys/file.h execinfo.h \
+	sys/timeb.h termios.h sys/mman.h sys/file.h execinfo.h utime.h \
 	sys/wait.h fcntl.h, [], [], [AC_INCLUDES_DEFAULT])
 
 AC_TYPE_INT8_T
