@@ -1,3 +1,9 @@
+2007-06-19  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/File.st: Support mixed \ and / in a Windows path.
+	Support a file named "C:" in the middle of a Windows path (?).
+
 2007-06-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/fileext.st: Run tests using Unix file separator.

@@ -793,13 +793,24 @@ _gst_get_full_file_name (const char *name)
     return NULL;
   rpath_limit = rpath + path_max;
 
+#if defined WIN32 && !defined __CYGWIN__
+  {
+    DWORD retval = GetFullPathNameA (name, path_max, rpath, NULL);
+    if (retval > path_max)
+      {
+	rpath = realloc (rpath, retval);
+        retval = GetFullPathNameA (name, retval, rpath, NULL);
+      }
+    if (retval == 0
+	|| stat (rpath, &st) == -1)
+      goto error;
+  }
+#else
   if (name[0] != '/')
     {
       if (!getcwd (rpath, path_max))
-	{
-	  rpath[0] = '\0';
-	  goto error;
-	}
+	goto error;
+
       dest = strchr (rpath, '\0');
     }
   else
@@ -912,6 +923,7 @@ _gst_get_full_file_name (const char *name)
   if (dest > rpath + 1 && dest[-1] == '/')
     --dest;
   *dest = '\0';
+#endif
   return rpath;
 
 error:

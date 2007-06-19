@@ -132,7 +132,7 @@ fullNameFor: aString
     "Answer the full path to a file called `aString', resolving the `.' and
      `..' directory entries, and answer the result.  `/..' is the same as '/'."
 
-    | path substrings result isAbsolute isWindows |
+    | path canonical result isAbsolute isWindows |
 
     isAbsolute := (aString at: 1) isPathSeparator.
     isWindows := Directory pathSeparator == $\.
@@ -146,10 +146,14 @@ fullNameFor: aString
     isAbsolute ifFalse: [
 	path addAll: (Directory working substrings: Directory pathSeparator).
     ].
-    substrings := aString substrings: Directory pathSeparator.
-    substrings := ReadStream on: substrings.
 
-    substrings do: [ :each |
+    "A Windows path may contain both / and \ separators. Clean it up
+     to allow easy parsing"
+    canonical := Directory pathSeparator = $/
+	ifTrue: [ aString ]
+	ifFalse: [ aString copyReplacing: $/ with: Directory pathSeparator ].
+
+    (canonical substrings: Directory pathSeparator) do: [ :each |
 	each = '.' ifFalse: [
 	    each = '..'
 		ifTrue: [ path isEmpty ifFalse: [ path removeLast ] ]
@@ -158,8 +162,7 @@ fullNameFor: aString
     ].
 
     result := path inject: Directory pathSeparatorString into: [ :old :each |
- 	Directory append: each to: old
-    ].
+	 old, Directory pathSeparatorString, each ].
 
     "Remove initial / from /C:/"
     ^(isWindows and: [
