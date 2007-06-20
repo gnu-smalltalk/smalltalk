@@ -79,6 +79,36 @@ evaluate: node
     ^driver evaluate: node
 ! !
 
+!STFileParser methodsFor: 'utility'!
+
+parseStatements
+    ^self parseDoit: [ self parseStatements: false ]!
+
+parseDoit: aBlock
+    | node method start stop comments source |
+    comments := scanner getComments.
+    start := comments isNil
+	    	ifTrue: [ currentToken start - 1 ]
+	    	ifFalse: [ comments first first - 1 ].
+	
+    tags := nil.
+    node := aBlock value.
+    node comments isNil
+	ifTrue: [ node comments: comments ]
+	ifFalse: [
+	    comments isNil ifFalse: [ node comments: node comments, comments ] ].
+
+    "One -1 accounts for base-1 vs. base-0 (as above), the
+     other drops the bang because we have a one-token lookahead."
+    stop := currentToken start - 2.
+
+    method := RBMethodNode selectorParts: #() arguments: #().
+    source := scanner stream copyFrom: start to: stop.
+    source := MappedCollection collection: source map: (1 - start to: stop).
+    method source: source.
+    node parent: method.
+    ^node! !
+
 !STFileParser class methodsFor: 'accessing'!
 
 parseSmalltalk: aString with: aDriver
@@ -120,38 +150,14 @@ parseDoits
     " Parses the stuff to be executed until a
         ! <class expression> methodsFor: <category string> ! "
 
-    | node method start stop comments source |
-
+    | node |
     [
 	self atEnd ifTrue: [ ^false ].
-	comments := scanner getComments.
-	start := comments isNil
-	    	ifTrue: [ currentToken start - 1 ]
-	    	ifFalse: [ comments first first - 1 ].
-	
-	tags := nil.
-	node := self parseStatements: false.
-	node comments isNil
-	    ifTrue: [ node comments: comments ]
-	    ifFalse: [
-		comments isNil ifFalse: [ node comments: node comments, comments ] ].
-
-        "One -1 accounts for base-1 vs. base-0 (as above), the
-         other drops the bang because we have a one-token lookahead."
-	stop := currentToken start - 2.
-
-        method := RBMethodNode selectorParts: #() arguments: #().
-        source := scanner stream copyFrom: start to: stop.
-	source := MappedCollection collection: source map: (1 - start to: stop).
-        method source: source.
-        node parent: method.
-
+	node := self parseStatements.
         scanner stripSeparators.           "gobble doit terminating bang"
         self step.           "gobble doit terminating bang"
 	node statements size > 0 and: [ self evaluate: node ]
-		
-    ]   whileFalse.
-
+    ] whileFalse.
     ^true
 !
 
@@ -160,8 +166,7 @@ parseMethodDefinitionList
      method definitions, followed by a bang"
 
     | node source start stop |
-
-    [   scanner atEnd or: [ currentToken isSpecial
+    [ scanner atEnd or: [ currentToken isSpecial
 	   and: [ currentToken value == $! ] ] ] whileFalse: [
 
 	start := currentToken start - 1.

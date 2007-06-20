@@ -1,3 +1,8 @@
+2007-06-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/STFileParser.st: Refactor part of #parseDoits into the
+	superclass.
+
 2007-06-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/Exporter.st: Use #parseNodeAt: to access the method
