@@ -252,10 +252,10 @@ do: aBlock separatedBy: separatorBlock
     | first |
     first := true.
     self do: [ :each |
-	aBlock value: each.
 	first
 	    ifTrue: [ first := false ]
-	    ifFalse: [ separatorBlock value ]
+	    ifFalse: [ separatorBlock value ].
+	aBlock value: each.
     ]
 !
 
