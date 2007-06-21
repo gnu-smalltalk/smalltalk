@@ -66,6 +66,23 @@ o   The image is now installed in /usr/local/var/lib/smalltalk (which in
 o   A pragma like "<category: 'bar'>" can be used to set the category
     of a method.
 
+Packages improvements:
+
+o   Packages can specify a "testing-only" subpackage that is loaded when
+    running tests (e.g. with "gst-load --test" or "gst-sunit --package"),
+    but not when loading the package normally.  This is done with a <test>
+    tag nested into <package>.
+
+o   Initial support for ZIPped package files.  These should be named ".star"
+    (SmallTalk ARchive) and include at the top a package.xml file (whose
+    format is the same as the <package> tag of packages.xml).  The name
+    of ".star" file should be the same as the name of the package if the
+    package.xml file has a <name> tag.
+
+    Currently, in order to load ".star" files, unzip should be installed
+    on the machine.
+
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 2.3.4 TO 2.3.5

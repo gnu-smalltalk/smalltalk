@@ -52,7 +52,7 @@ Options:
 "Parse the command-line arguments."
 Smalltalk
     arguments: '-h|--help -q|--quiet -v|-V|--verbose -f|--file: -p|--package:
-		-I|--image-file'
+		-I|--image-file:'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
@@ -93,10 +93,14 @@ Smalltalk
 	helpString displayOn: stderr.
 	ObjectMemory quit: 1 ].
 
-script isEmpty ifTrue: [ ^self ].
+script isEmpty ifTrue: [ ObjectMemory quit ].
 
 FileStream verbose: false.
-PackageLoader fileInPackage: #SUnit.
+(PackageLoader packageAt: #SUnit) loaded
+    ifFalse: [
+	stderr nextPutAll: 'gst-sunit: you should load SUnit first.'; nl.
+	ObjectMemory quit: 1 ].
+
 suite := TestSuitesScripter run: script.
 
 "Set log policy to write to stdout."

@@ -1,5 +1,10 @@
 2007-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PkgLoader.st: Set namespace for test package.
+	* scripts/Test.st: Check if SUnit is loaded.
+
+2007-06-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PkgLoader.st: Support test packages.
 	* scripts/Test.st: Load the test package if available.
 

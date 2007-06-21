@@ -692,6 +692,8 @@ test: aPackage
     aPackage prerequisites add: 'SUnit'; add: self name.
     aPackage directory isNil ifTrue: [
         aPackage directory: self directory ].
+    aPackage namespace isNil ifTrue: [
+        aPackage namespace: self namespace ].
     test := aPackage!
 
 namespace
