@@ -753,7 +753,7 @@ baseDirectories: baseDirectories
 
     files isNil | fileIns isNil | builtFiles isNil ifTrue: [ ^false ].
 
-    self directory printNl isNil ifFalse: [
+    self directory isNil ifFalse: [
         baseDirectories
 	    do: [ :dir || name |
                 name := Directory append: self directory to: dir.
