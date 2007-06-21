@@ -8,7 +8,8 @@
 
 "======================================================================
 |
-| Copyright 1999,2000,2001,2002,2003,2004,2005 Free Software Foundation, Inc.
+| Copyright 1999,2000,2001,2002,2003,2004,2005,2007
+| Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -291,6 +292,7 @@ baseDirectories: anArray
 !
 
 at: aString ifAbsent: aBlock
+    packages isNil ifTrue: [ ^aBlock value ].
     ^packages at: aString asString ifAbsent: aBlock
 !
 
@@ -867,7 +869,7 @@ primFileIn
 !
 
 parse: file tag: openingTag
-    | stack cdata ch tag |
+    | stack cdata ch tag testPackage |
     stack := OrderedCollection new.
     stack addLast: openingTag.
     [
@@ -905,7 +907,7 @@ parse: file tag: openingTag
 	    ch isAlphaNumeric ifTrue: [
 	        tag := file upTo: $>.
 		tag = 'test'
-		    ifTrue: [ self test: (Package new parse: file tag: tag) ]
+		    ifTrue: [ testPackage := Package new parse: file tag: tag ]
 	            ifFalse: [ stack addLast: tag ].
 
 		cdata trimSeparators isEmpty ifFalse: [
@@ -913,8 +915,11 @@ parse: file tag: openingTag
 
 	        cdata := nil
 	    ].
-        ]
+        ].
     ] ensure: [
+	"Do this now, so that our <namespace> and <directory> are honored."
+	testPackage isNil ifFalse: [ self test: testPackage ].
+
         stack isEmpty ifFalse: [
 	    self error: 'error in packages file: unmatched start tags',
 		stack asArray printString ]

@@ -178,10 +178,12 @@ proxyNilClass
     ^proxyNilClass!
     
 proxyForNamespace: anObject
+    anObject isNamespace ifFalse: [ ^anObject ].
     ^proxies at: anObject ifAbsentPut: [
 	ProxyNamespace on: anObject for: self ]!
 
 proxyForClass: anObject
+    anObject isClass ifFalse: [ ^anObject ].
     ^proxies at: anObject ifAbsentPut: [
 	ProxyClass on: anObject for: self ]! !
 
@@ -308,16 +310,12 @@ resolveClass: node
         ^self proxyNilClass ].
         
     object := self resolveName: node.
-    object isClass ifFalse: [ ^object ].
-
     ^self proxyForClass: object
 !
 
 resolveNamespace: node
     | object |
     object := self resolveName: node.
-    object isNamespace ifFalse: [ ^object ].
-
     ^self proxyForNamespace: object
 !
 
