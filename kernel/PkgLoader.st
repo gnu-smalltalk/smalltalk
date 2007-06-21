@@ -80,6 +80,18 @@ PackageInfo comment:
 information on a Smalltalk package, and can output my description in
 XML.'!
 
+PackageInfo subclass: #StarPackage
+	instanceVariableNames: 'fileName loadedPackage '
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Language-Packaging'
+!
+
+PackageInfo comment:
+'I am not part of a standard Smalltalk system. I store internally the
+information on a Smalltalk package, and can output my description in
+XML.'!
+
 Namespace current: Smalltalk!
 
 Kernel.PackageInfo subclass: #Package
@@ -272,7 +284,7 @@ at: aString ifAbsent: aBlock
 !
 
 keys
-    ^packages keys
+    ^packages isNil ifTrue: [ #() ] ifFalse: [ packages keys ]
 !
 
 includesKey: aString
@@ -305,6 +317,13 @@ refresh
     packages := LookupTable new.
     [ self parse: file baseDirectories: allDirs ]
         ensure: [ file close ].
+
+    (Directory name: (File pathFor: fileName))
+	namesMatching: '*.star'
+	do: [ :starName |
+	    | package |
+	    package := Kernel.StarPackage fileName: starName.
+	    packages at: package name put: package ]
 !
 
 parse: file baseDirectories: baseDirs
@@ -346,6 +365,17 @@ parse: file baseDirectories: baseDirs
 fileIn
     "File in the given package and its dependencies."
     PackageLoader fileInPackage: self name!
+
+printXmlOn: aStream collection: aCollection tag: aString
+    "Private - Print aCollection on aStream as a sequence of aString
+     tags."
+    aCollection do: [ :each |
+        aStream
+            nextPutAll: '  <'; nextPutAll: aString; nextPut: $>;
+            nextPutAll: each;
+            nextPutAll: '</'; nextPutAll: aString; nextPut: $>;
+            nl
+    ]!
 
 printOn: aStream
     "Print a representation of the receiver on aStream (it happens
@@ -397,10 +427,12 @@ printOn: aStream
 	collection: self modules asSortedCollection
 	tag: 'module'.
 
-    self
-	printXmlOn: aStream
-	collection: { self directory }
-	tag: 'directory'.
+    self directory isNil
+	ifFalse: [
+	    self
+		printXmlOn: aStream
+		collection: { self directory }
+		tag: 'directory' ].
 
     self files size + self builtFiles size > 1 ifTrue: [ aStream nl ].
     self
@@ -486,6 +518,100 @@ callouts
 directory
     "Answer the base directory from which to load the package."
     self subclassResponsibility!
+! !
+
+
+!Kernel.StarPackage class methodsFor: 'accessing'!
+
+fileName: fileName
+    ^self new
+	fileName: fileName;
+	name: (File stripPathFrom: (File stripExtensionFrom: fileName));
+	yourself
+! !
+
+!Kernel.StarPackage methodsFor: 'accessing'!
+
+namespace
+    "Answer the namespace in which the package is loaded."
+    ^self loadedPackage namespace!
+
+features
+    "Answer a (modifiable) Set of features provided by the package."
+    ^self loadedPackage features!
+
+prerequisites
+    "Answer a (modifiable) Set of prerequisites."
+    ^self loadedPackage prerequisites!
+
+builtFiles
+    "Answer a (modifiable) OrderedCollection of files that are part of
+     the package but are not distributed."
+    ^self loadedPackage builtFiles!
+
+files
+    "Answer a (modifiable) OrderedCollection of files that are part of
+     the package."
+    ^self loadedPackage files!
+
+fileIns
+    "Answer a (modifiable) OrderedCollections of files that are to be
+     filed-in to load the package.  This is usually a subset of
+     `files' and `builtFiles'."
+    ^self loadedPackage fileIns!
+
+libraries
+    "Answer a (modifiable) Set of shared library names
+     that are required to load the package."
+    ^self loadedPackage libraries!
+
+modules
+    "Answer a (modifiable) Set of modules that are
+     required to load the package."
+    ^self loadedPackage modules!
+
+sunitScripts
+    "Answer a (modifiable) OrderedCollection of SUnit scripts that
+     compose the package's test suite."
+    ^self loadedPackage sunitScripts!
+
+callouts
+    "Answer a (modifiable) Set of call-outs that are required to load
+     the package.  Their presence is checked after the libraries and
+     modules are loaded so that you can do a kind of versioning."
+    ^self loadedPackage callouts!
+
+directory
+    ^fileName, '#uzip'!
+
+fileName
+    ^fileName!
+
+fileName: aString
+    fileName := aString!
+
+primFileIn
+    self loadedPackage primFileIn!
+
+loadedPackage
+    | file package |
+    loadedPackage isNil ifFalse: [ ^loadedPackage ].
+
+    file := FileStream open: fileName, '#uzip/package.xml' mode: FileStream read.
+    [ package := Package parse: file ]
+	ensure: [ file close ].
+    package isNil ifTrue: [
+	^self error: 'invalid disabled-package tag inside a star file' ].
+
+    package baseDirectories: { self directory }.
+    package name isNil
+	ifTrue: [ package name: self name ]
+	ifFalse: [
+	    package name = self name
+		ifFalse: [ self error: 'invalid package name in package.xml' ] ].
+
+    loadedPackage := package.
+    ^loadedPackage
 ! !
 
 
@@ -627,10 +753,12 @@ baseDirectories: baseDirectories
 
     files isNil | fileIns isNil | builtFiles isNil ifTrue: [ ^false ].
 
-    baseDirectories
-	do: [ :dir || name |
-            name := Directory append: self directory to: dir.
-            (Directory exists: name) ifTrue: [ directory := name. ^true ] ].
+    self directory printNl isNil ifFalse: [
+        baseDirectories
+	    do: [ :dir || name |
+                name := Directory append: self directory to: dir.
+                name := Directory append: self directory to: dir.
+                (Directory exists: name) ifTrue: [ directory := name. ^true ] ] ].
 
     ^false
 !
@@ -650,9 +778,11 @@ findBaseDirs: baseDirectories forFile: fileName
      exists.  Return nil if no directory is found that contains the file."
     | name |
     baseDirectories do: [ :dir |
-       name := Directory append: self directory to: dir.
-       name := Directory append: fileName to: name.
-       (File exists: name) ifTrue: [ ^name ] ].
+	name := dir.
+	self directory isNil ifFalse: [
+            name := Directory append: self directory to: dir ].
+        name := Directory append: fileName to: name.
+        (File exists: name) ifTrue: [ ^name ] ].
     ^nil
 !
 
@@ -690,23 +820,26 @@ primFileIn
 	    nl
     ].
 
-    dir := Directory working.
-    namespace := Namespace current.
-    Namespace current: self createNamespace.
-    Directory working: self directory.
-    self libraries do: [ :each | DLD addLibrary: each ].
-    self modules do: [ :each | DLD addModule: each ].
+    [
+        dir := Directory working.
+        namespace := Namespace current.
+        Namespace current: self createNamespace.
+        self directory isNil ifFalse: [ Directory working: self directory ].
+        self libraries do: [ :each | DLD addLibrary: each ].
+        self modules do: [ :each | DLD addModule: each ].
 
-    PackageLoader ignoreCallouts ifFalse: [
-        self callouts do: [ :func |
-            (CFunctionDescriptor isFunction: func)
-	         ifFalse: [ ^self error: 'C callout not available: ', func ]]].
+        PackageLoader ignoreCallouts ifFalse: [
+            self callouts do: [ :func |
+                (CFunctionDescriptor isFunction: func)
+	             ifFalse: [ ^self error: 'C callout not available: ', func ]]].
 
-    self fileIns do: [ :each | FileStream fileIn: each ].
-    Directory working: dir.
-    Namespace current: namespace.
-    Smalltalk addFeature: self name.
-    self features do: [ :each | Smalltalk addFeature: each ].
+        self fileIns do: [ :each | FileStream fileIn: each ].
+        Smalltalk addFeature: self name.
+        self features do: [ :each | Smalltalk addFeature: each ].
+    ] ensure: [
+        Directory working: dir.
+        Namespace current: namespace.
+    ]
 ! !
 
 

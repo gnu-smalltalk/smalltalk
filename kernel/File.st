@@ -161,7 +161,7 @@ fullNameFor: aString
 	]
     ].
 
-    result := path inject: Directory pathSeparatorString into: [ :old :each |
+    result := path inject: '' into: [ :old :each |
 	 old, Directory pathSeparatorString, each ].
 
     "Remove initial / from /C:/"

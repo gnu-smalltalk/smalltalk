@@ -1,5 +1,10 @@
 2007-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/File.st: Concatenate starting from an empty string.
+	* kernel/PkgLoader.st: Implement beginning of STAR format.
+
+2007-06-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PkgLoader.st: Extract parsing of a single package in XML
 	format.
 
