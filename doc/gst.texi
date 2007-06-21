@@ -1790,9 +1790,16 @@ Instructs to load the package only if the C function whose name is
 within the tag is available to be called from Smalltalk code.
 
 @item sunit
-Specifies a testing script that @code{gst-sunit} (@pxref{SUnit}) will
+Specifies a testing script that @file{gst-sunit} (@pxref{SUnit}) will
 run in order to test the package.  If this is specified, the package
 should list @code{SUnit} among the prerequisites.
+
+@item test
+Specifies a subpackage that is only loaded by @file{gst-sunit} in order
+to test the package.  The subpackage may include arbitrary tags except
+@code{name}.  The @code{Sunit} package is implicitly made a prerequisite
+of the testing subpackage, and the default value of @code{directory} is
+the one given for the outer package.
 @end table
 
 To install your package, you only have to do

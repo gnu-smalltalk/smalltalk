@@ -240,9 +240,6 @@
   <name>DhbNumericalMethods</name>
   <namespace>Dhb</namespace>
 
-  <tests>Dhb.DhbTestCase*</tests>
-  <prereq>SUnit</prereq>
-
   <filein>Basic.st</filein>
   <filein>Statistics.st</filein>
   <filein>RNG.st</filein>
@@ -252,9 +249,13 @@
   <filein>Optimization.st</filein>
   <filein>Distributions.st</filein>
   <filein>Integration.st</filein>
-  <filein>NumericsTests.st</filein>
   <filein>NumericsAdds.st</filein>
   <directory>numerics</directory>
+
+  <test>
+    <sunit>Dhb.DhbTestCase*</sunit>
+    <filein>NumericsTests.st</filein>
+  </test>
 
   <file>NumericsTests.st</file>
   <file>Approximation.st</file>
@@ -271,14 +272,15 @@
 
 <package>
   <name>GDBM</name>
-  <sunit>GDBMTest</sunit>
-  <prereq>SUnit</prereq>
-
   <filein>gdbm-c.st</filein>
   <filein>gdbm.st</filein>
-  <filein>gdbmtests.st</filein>
   <module>gdbm</module>
   <directory>examples</directory>
+
+  <test>
+    <sunit>GDBMTest</sunit>
+    <filein>gdbmtests.st</filein>
+  </test>
 
   <file>gdbm.st</file>
   <file>gdbm-c.st</file>
@@ -296,14 +298,15 @@
 
 <package>
   <name>ZLib</name>
-  <sunit>ZlibStreamTest</sunit>
-  <prereq>SUnit</prereq>
-
   <filein>PipeStream.st</filein>
   <filein>zlib.st</filein>
-  <filein>zlibtests.st</filein>
   <module>zlib</module>
   <directory>examples</directory>
+
+  <test>
+   <sunit>ZlibStreamTest</sunit>
+   <filein>zlibtests.st</filein>
+  </test>
 
   <file>PipeStream.st</file>
   <file>zlib.st</file>
@@ -312,13 +315,14 @@
 
 <package>
   <name>MD5</name>
-  <sunit>MD5Test</sunit>
-  <prereq>SUnit</prereq>
-
   <filein>md5.st</filein>
-  <filein>md5tests.st</filein>
   <module>md5</module>
   <directory>examples</directory>
+
+  <test>
+   <sunit>MD5Test</sunit>
+   <filein>md5tests.st</filein>
+  </test>
 
   <file>md5.st</file>
   <file>md5tests.st</file>
@@ -379,8 +383,6 @@
 
 <package>
   <name>Parser</name>
-  <sunit>STInST.Tests.TestStandardRewrites</sunit>
-  <prereq>SUnit</prereq>
 
   <namespace>STInST</namespace>
   <filein>RBToken.st</filein>
@@ -399,7 +401,10 @@
   <filein>SqueakParser.st</filein>
   <filein>Exporter.st</filein>
 
-  <filein>RewriteTests.st</filein>
+  <test>
+   <sunit>STInST.Tests.TestStandardRewrites</sunit>
+   <filein>RewriteTests.st</filein>
+  </test>
 
   <directory>compiler</directory>
 
@@ -426,19 +431,24 @@
 
 <package>
   <name>SUnit</name>
-  <sunit>SUnitTest</sunit>
-  <sunit>TestSuitesScriptTest</sunit>
 
   <filein>SUnitPreload.st</filein>
   <filein>SUnit.st</filein>
-  <filein>SUnitTests.st</filein>
   <filein>SUnitScript.st</filein>
   <directory>sunit</directory>
+
+  <test>
+    <sunit>SUnitTest</sunit>
+    <sunit>TestSuitesScriptTest</sunit>
+    <filein>SUnitTests.st</filein>
+    <filein>SUnitScriptTests.st</filein>
+  </test>
 
   <file>SUnit.st</file>
   <file>SUnitPreload.st</file>
   <file>SUnitTests.st</file>
   <file>SUnitScript.st</file>
+  <file>SUnitScriptTests.st</file>
 </package>
 
 <package>

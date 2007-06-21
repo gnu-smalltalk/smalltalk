@@ -95,7 +95,7 @@ XML.'!
 Namespace current: Smalltalk!
 
 Kernel.PackageInfo subclass: #Package
-	instanceVariableNames: 'features prerequisites builtFiles files fileIns directory libraries modules callouts namespace sunitScripts'
+	instanceVariableNames: 'features prerequisites builtFiles files fileIns directory libraries modules callouts namespace sunitScripts test'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Language-Packaging'
@@ -128,7 +128,12 @@ printOn: aStream
     "Print the XML source code for the information that the PackageLoader
      holds on aStream."
     aStream nextPutAll: '<packages>'; nl.
-    self do: [ :each | each printOn: aStream ].
+    self
+	do: [ :each |
+	    aStream space: 2.
+	    each printOn: aStream tag: 'package' indent: 2.
+	    aStream nl ]
+	separatedBy: [ aStream nl ].
     aStream nextPutAll: '</packages>'
 ! !
 
@@ -144,6 +149,12 @@ at: aString ifAbsent: aBlock
 
 do: aBlock
     self keys do: [ :each | aBlock value: (self at: each) ]
+!
+
+do: aBlock separatedBy: sepBlock
+    self keys
+	do: [ :each | aBlock value: (self at: each) ]
+	separatedBy: sepBlock
 !
 
 keys
@@ -364,9 +375,15 @@ parse: file baseDirectories: baseDirs
 
 fileIn
     "File in the given package and its dependencies."
-    PackageLoader fileInPackage: self name!
+    self name isNil
+	ifTrue: [
+	    "Other packages cannot be dependent on this one."
+	    PackageLoader fileInPackages: self prerequisites.
+	    self primFileIn ]
+	ifFalse: [
+	    PackageLoader fileInPackage: self name ]!
 
-printXmlOn: aStream collection: aCollection tag: aString
+printXmlOn: aStream collection: aCollection tag: aString indent: indent
     "Private - Print aCollection on aStream as a sequence of aString
      tags."
     aCollection do: [ :each |
@@ -374,78 +391,101 @@ printXmlOn: aStream collection: aCollection tag: aString
             nextPutAll: '  <'; nextPutAll: aString; nextPut: $>;
             nextPutAll: each;
             nextPutAll: '</'; nextPutAll: aString; nextPut: $>;
-            nl
+            nl; space: indent
     ]!
 
 printOn: aStream
+    self printOn: aStream tag: 'package' indent: 0
+!
+
+printOn: aStream tag: tag indent: indent
     "Print a representation of the receiver on aStream (it happens
      to be XML."
 
-    aStream nextPutAll: '<package>
-  <name>'; nextPutAll: self name; nextPutAll: '</name>'; nl.
+    aStream
+	nextPut: $<;
+	nextPutAll: tag;
+	nextPut: $>;
+	nl; space: indent.
+
+    self name isNil ifFalse: [
+	aStream
+	    nextPutAll: '  <name>';
+	    nextPutAll: self name;
+	    nextPutAll: '</name>';
+	    nl; space: indent.
+    ].
 
     self namespace isNil ifFalse: [
 	aStream
 	    nextPutAll: '  <namespace>';
 	    nextPutAll: self namespace;
 	    nextPutAll: '</namespace>';
-	    nl.
+	    nl; space: indent.
     ].
+
+    self test isNil ifFalse: [
+	aStream space: 2.
+	self test printOn: aStream tag: 'test' indent: indent + 2.
+	aStream nl; space: indent ].
 
     self
 	printXmlOn: aStream
 	collection: self features asSortedCollection
-	tag: 'provides'.
-
+	tag: 'provides'
+	indent: indent.
     self
 	printXmlOn: aStream
 	collection: self prerequisites asSortedCollection
-	tag: 'prereq'.
-
+	tag: 'prereq'
+	indent: indent.
     self
 	printXmlOn: aStream
 	collection: self sunitScripts
-	tag: 'sunit'.
-
+	tag: 'sunit'
+	indent: indent.
     self
 	printXmlOn: aStream
 	collection: self callouts asSortedCollection
-	tag: 'callout'.
-
+	tag: 'callout'
+	indent: indent.
     self
 	printXmlOn: aStream
 	collection: self fileIns
-	tag: 'filein'.
-
+	tag: 'filein'
+	indent: indent.
     self
 	printXmlOn: aStream
 	collection: self libraries asSortedCollection
-	tag: 'library'.
-
+	tag: 'library'
+	indent: indent.
     self
 	printXmlOn: aStream
 	collection: self modules asSortedCollection
-	tag: 'module'.
-
+	tag: 'module'
+	indent: indent.
     self directory isNil
 	ifFalse: [
-	    self
-		printXmlOn: aStream
-		collection: { self directory }
-		tag: 'directory' ].
+	    aStream
+	        nextPutAll: '  <directory>';
+	        nextPutAll: self directory;
+	        nextPutAll: '</directory>';
+	        nl; space: indent ].
 
-    self files size + self builtFiles size > 1 ifTrue: [ aStream nl ].
+    self files size + self builtFiles size > 1
+	ifTrue: [ aStream nl; space: indent  ].
+
     self
 	printXmlOn: aStream
 	collection: self files
-	tag: 'file'.
-
+	tag: 'file'
+	indent: indent.
     self
 	printXmlOn: aStream
 	collection: self builtFiles
-	tag: 'built-file'.
-
-    aStream nextPutAll: '</package>'; nl!
+	tag: 'built-file'
+	indent: indent.
+    aStream nextPutAll: '</'; nextPutAll: tag; nextPut: $>!
 
 name
     "Answer the name of the package."
@@ -618,59 +658,41 @@ loadedPackage
 !Package class methodsFor: 'instance creation'!
 
 parse: file
-    | stack cdata ch tag package |
-    stack := OrderedCollection new.
+    | ch tag |
     [
-	[ cdata := cdata isNil
-	    ifTrue: [ file upTo: $< ]
-	    ifFalse: [ cdata, (file upTo: $<) ].
+	(file upTo: $<) trimSeparators isEmpty ifFalse: [
+	    self error: 'unexpected cdata' ].
+	file atEnd ifTrue: [
+	    self error: 'expected start tag' ].
 
-	    file atEnd ] whileFalse: [
-	    ch := file peek.
-	    ch == $! ifTrue: [ file skipTo: $> ].
-	    ch == $/ ifTrue: [
-	        tag := stack removeLast.
-	        file next.
-	        (file upTo: $>) = tag ifFalse: [
-		    ^self error: 'error in packages file: unmatched end tag ', tag
-	        ].
+	ch := file peek.
+	ch == $! ifTrue: [ file skipTo: $> ].
+	ch == $/ ifTrue: [ self error: 'unexpected end tag ' ].
 
-	        "I tried to put these from the most common to the least common"
-
-	        tag = 'file' ifTrue: [ package files add: cdata ] ifFalse: [
-	        tag = 'filein' ifTrue: [ package fileIns add: cdata ] ifFalse: [
-	        tag = 'prereq' ifTrue: [ package prerequisites add: cdata ] ifFalse: [
-	        tag = 'provides' ifTrue: [ package features add: cdata ] ifFalse: [
-	        tag = 'module' ifTrue: [ package modules add: cdata ] ifFalse: [
-	        tag = 'directory' ifTrue: [ package directory: cdata ] ifFalse: [
-	        tag = 'name' ifTrue: [ package name: cdata ] ifFalse: [
-	        tag = 'namespace' ifTrue: [ package namespace: cdata ] ifFalse: [
-	        tag = 'library' ifTrue: [ package libraries add: cdata ] ifFalse: [
-	        tag = 'package' ifTrue: [ ^package ] ifFalse: [
-	        tag = 'disabled-package' ifTrue: [ ^nil ] ifFalse: [
-	        tag = 'built-file' ifTrue: [ package builtFiles add: cdata ] ifFalse: [
-	        tag = 'sunit' ifTrue: [ package sunitScripts add: cdata ] ifFalse: [
-	        tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]]]]].
-	        cdata := nil.
-	    ].
-	    ch isAlphaNumeric ifTrue: [
-	        tag := file upTo: $>.
-	        tag = 'package' ifTrue: [ package := Package new ].
-	        tag = 'disabled-package' ifTrue: [ package := Package new ].
-		(stack isEmpty and: [ package isNil ])
-		    ifTrue: [ self error: 'expected package tag' ].
-	        stack addLast: tag.
-	        cdata := nil
-	    ].
+	ch isAlphaNumeric ifTrue: [
+	    tag := file upTo: $>.
+	    tag = 'package' ifTrue: [ ^Package new parse: file tag: tag ].
+	    tag = 'disabled-package' ifTrue: [ Package new parse: file tag: tag. ^nil ].
         ]
-    ] ensure: [
-        stack isEmpty ifFalse: [
-	    self error: 'error in packages file: unmatched start tags',
-		stack asArray printString ]
-    ]
+    ] repeat
 ! !
 
 !Package methodsFor: 'accessing'!
+
+test
+    "Answer the test sub-package."
+    ^test!
+
+test: aPackage
+    "Set the test sub-package to be aPackage."
+    aPackage test isNil ifFalse: [
+	self error: 'test packages must not be nested' ].
+    aPackage name isNil ifFalse: [
+	self error: 'test package must not have names' ].
+    aPackage prerequisites add: 'SUnit'; add: self name.
+    aPackage directory isNil ifTrue: [
+        aPackage directory: self directory ].
+    test := aPackage!
 
 namespace
     "Answer the namespace in which the package is loaded."
@@ -751,6 +773,9 @@ baseDirectories: baseDirectories
     fileIns := self findBaseDirs: baseDirectories for: self fileIns.
     builtFiles := self findBaseDirs: baseDirectories for: self builtFiles.
 
+    (self test notNil and: [ (self test baseDirectories: baseDirectories) not ])
+	ifTrue: [ ^false ].
+
     files isNil | fileIns isNil | builtFiles isNil ifTrue: [ ^false ].
 
     self directory isNil ifFalse: [
@@ -808,18 +833,15 @@ createNamespace
     ].
     ^ns!
 
+loaded
+    ^self name notNil and: [ Smalltalk hasFeatures: self name ]!
+
 primFileIn
     "Private - File in the given package without paying attention at
      dependencies and C callout availability"
     | dir namespace |
 
-    (Smalltalk hasFeatures: self name) ifTrue: [ ^self ].
-    OutputVerbosity > 0 ifTrue: [
-        Transcript
-	    nextPutAll: 'Loading package ', self name;
-	    nl
-    ].
-
+    self loaded ifTrue: [ ^self ].
     [
         dir := Directory working.
         namespace := Namespace current.
@@ -834,11 +856,66 @@ primFileIn
 	             ifFalse: [ ^self error: 'C callout not available: ', func ]]].
 
         self fileIns do: [ :each | FileStream fileIn: each ].
-        Smalltalk addFeature: self name.
+        self name isNil ifFalse: [ Smalltalk addFeature: self name ].
         self features do: [ :each | Smalltalk addFeature: each ].
     ] ensure: [
         Directory working: dir.
         Namespace current: namespace.
+    ]
+!
+
+parse: file tag: openingTag
+    | stack cdata ch tag |
+    stack := OrderedCollection new.
+    stack addLast: openingTag.
+    [
+	[ cdata := cdata isNil
+	    ifTrue: [ file upTo: $< ]
+	    ifFalse: [ cdata, (file upTo: $<) ].
+
+	    file atEnd ] whileFalse: [
+	    ch := file peek.
+	    ch == $! ifTrue: [ file skipTo: $> ].
+	    ch == $/ ifTrue: [
+	        tag := stack removeLast.
+	        file next.
+	        (file upTo: $>) = tag ifFalse: [
+		    ^self error: 'error in packages file: unmatched end tag ', tag
+	        ].
+
+	        "I tried to put these from the most common to the least common"
+	        tag = 'file' ifTrue: [ self files add: cdata ] ifFalse: [
+	        tag = 'filein' ifTrue: [ self fileIns add: cdata ] ifFalse: [
+	        tag = 'prereq' ifTrue: [ self prerequisites add: cdata ] ifFalse: [
+	        tag = 'provides' ifTrue: [ self features add: cdata ] ifFalse: [
+	        tag = 'module' ifTrue: [ self modules add: cdata ] ifFalse: [
+	        tag = 'directory' ifTrue: [ self directory: cdata ] ifFalse: [
+	        tag = 'name' ifTrue: [ self name: cdata ] ifFalse: [
+	        tag = 'namespace' ifTrue: [ self namespace: cdata ] ifFalse: [
+	        tag = 'library' ifTrue: [ self libraries add: cdata ] ifFalse: [
+	        tag = 'built-file' ifTrue: [ self builtFiles add: cdata ] ifFalse: [
+	        tag = 'sunit' ifTrue: [ self sunitScripts add: cdata ] ifFalse: [
+	        tag = 'callout' ifTrue: [ self callouts add: cdata ] ifFalse: [
+	        tag = openingTag ifTrue: [ ^self ] ifFalse: [
+		    self error: 'invalid tag ', tag ]]]]]]]]]]]]].
+	        cdata := nil.
+	    ].
+	    ch isAlphaNumeric ifTrue: [
+	        tag := file upTo: $>.
+		tag = 'test'
+		    ifTrue: [ self test: (Package new parse: file tag: tag) ]
+	            ifFalse: [ stack addLast: tag ].
+
+		cdata trimSeparators isEmpty ifFalse: [
+		    ^self error: 'unexpected character data' ].
+
+	        cdata := nil
+	    ].
+        ]
+    ] ensure: [
+        stack isEmpty ifFalse: [
+	    self error: 'error in packages file: unmatched start tags',
+		stack asArray printString ]
     ]
 ! !
 
@@ -973,7 +1050,10 @@ fileInPackages: packagesList
 	extractDependenciesFor: packagesList
 	ifMissing: [ :name | ^self error: 'package not available: ', name ].
 	
-    toBeLoaded do: [ :each | (self packageAt: each) primFileIn ]
+    toBeLoaded do: [ :each |
+        OutputVerbosity > 0 ifTrue: [
+            Transcript nextPutAll: 'Loading package ', each; nl ].
+	(self packageAt: each) primFileIn ]
 ! !
 
 

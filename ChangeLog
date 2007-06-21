@@ -1,4 +1,9 @@
-2007-06-22  Paolo Bonzini  <bonzini@gnu.org>
+2007-06-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/PkgLoader.st: Support test packages.
+	* scripts/Test.st: Load the test package if available.
+
+2007-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Collection.st: Fix #do:separatedBy:.
 

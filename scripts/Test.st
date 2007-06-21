@@ -75,8 +75,11 @@ Smalltalk
 	[
 	    | pkg |
 	    pkg := PackageLoader packageAt: arg.
-	    pkg fileIn.
-	    script := script, ' ', pkg sunitScript ]
+	    script := script, ' ', pkg sunitScript.
+	    pkg test notNil ifTrue: [
+		pkg := pkg test.
+	        script := script, ' ', pkg sunitScript ].
+	    pkg fileIn ]
 	    ifCurtailed: [ ObjectMemory quit: 2 ] ].
 
     opt = 'file' ifTrue: [
