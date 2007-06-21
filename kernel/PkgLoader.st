@@ -574,6 +574,10 @@ fileName: fileName
 
 !Kernel.StarPackage methodsFor: 'accessing'!
 
+test
+    "Answer the test subpackage for this package."
+    ^self loadedPackage test!
+
 namespace
     "Answer the namespace in which the package is loaded."
     ^self loadedPackage namespace!

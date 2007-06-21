@@ -1,5 +1,9 @@
 2007-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PkgLoader.st: Add #test to StarPackage.
+
+2007-06-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PkgLoader.st: Set test package after loading the rest.
 	* compiler/STLoader.st: A proxy of a proxy is the proxy itself.
 
