@@ -1,4 +1,9 @@
-2007-06-19  Paolo Bonzini  <bonzini@gnu.org>
+2007-06-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/PkgLoader.st: Extract parsing of a single package in XML
+	format.
+
+2007-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Implement composite pattern.
 

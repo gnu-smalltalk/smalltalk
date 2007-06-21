@@ -30,18 +30,6 @@
 |
  ======================================================================"
 
-Object subclass: #Package
-	instanceVariableNames: 'name features prerequisites builtFiles files fileIns directory libraries modules callouts namespace sunitScripts'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-Packaging'
-!
-
-Package comment:
-'I am not part of a standard Smalltalk system. I store internally the
-information on a Smalltalk package, and can output my description in
-XML.'!
-
 Namespace current: Kernel!
 
 Object subclass: #PackageGroup
@@ -80,7 +68,31 @@ PackageDirectory comment:
 information on a Smalltalk package, and can output my description in
 XML.'!
 
+Object subclass: #PackageInfo
+	instanceVariableNames: 'name '
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Language-Packaging'
+!
+
+PackageInfo comment:
+'I am not part of a standard Smalltalk system. I store internally the
+information on a Smalltalk package, and can output my description in
+XML.'!
+
 Namespace current: Smalltalk!
+
+Kernel.PackageInfo subclass: #Package
+	instanceVariableNames: 'features prerequisites builtFiles files fileIns directory libraries modules callouts namespace sunitScripts'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Language-Packaging'
+!
+
+Package comment:
+'I am not part of a standard Smalltalk system. I store internally the
+information on a Smalltalk package, and can output my description in
+XML.'!
 
 Object subclass: #PackageLoader
 	instanceVariableNames: ''
@@ -286,77 +298,54 @@ refresh
 	ifFalse: [ baseDirectories ].
     allDirs isEmpty ifTrue: [ ^self ].
 
-    packages := LookupTable new.
     file := [ FileStream open: fileName mode: FileStream read ]
 	on: Error
 	do: [ :ex | ^self ].
 
-    stack := OrderedCollection new.
+    packages := LookupTable new.
+    [ self parse: file baseDirectories: allDirs ]
+        ensure: [ file close ].
+!
+
+parse: file baseDirectories: baseDirs
+    | open ch cdata tag package |
+    open := false.
     [ cdata := cdata isNil
 	ifTrue: [ file upTo: $< ]
 	ifFalse: [ cdata, (file upTo: $<) ].
-
 	file atEnd ] whileFalse: [
+
+	cdata trimSeparators isEmpty ifFalse: [
+	    ^self error: 'unexpected character data' ].
+
 	ch := file peek.
 	ch == $! ifTrue: [ file skipTo: $> ].
 	ch == $/ ifTrue: [
-	    tag := stack removeLast.
 	    file next.
-	    (file upTo: $>) = tag ifFalse: [
-		file close.
-		^self error: 'error in packages file: unmatched end tag ', tag
-	    ].
+	    ^(tag := file upTo: $>) = 'packages'
+		ifTrue: [ packages ]
+		ifFalse: [ ^self error: 'unmatched end tag ', tag ] ].
 
-	    "I tried to put these from the most common to the least common"
-
-	    tag = 'file' ifTrue: [ package files add: cdata ] ifFalse: [
-	    tag = 'filein' ifTrue: [ package fileIns add: cdata ] ifFalse: [
-	    tag = 'prereq' ifTrue: [ package prerequisites add: cdata ] ifFalse: [
-	    tag = 'provides' ifTrue: [ package features add: cdata ] ifFalse: [
-	    tag = 'module' ifTrue: [ package modules add: cdata ] ifFalse: [
-	    tag = 'directory' ifTrue: [ package directory: cdata ] ifFalse: [
-	    tag = 'name' ifTrue: [ package name: cdata ] ifFalse: [
-	    tag = 'namespace' ifTrue: [ package namespace: cdata ] ifFalse: [
-	    tag = 'library' ifTrue: [ package libraries add: cdata ] ifFalse: [
-	    tag = 'package' ifTrue: [
-		(package baseDirectories: allDirs)
-		    ifTrue: [ packages at: package name put: package ]] ifFalse: [
-	    tag = 'built-file' ifTrue: [ package builtFiles add: cdata ] ifFalse: [
-	    tag = 'sunit' ifTrue: [ package sunitScripts add: cdata ] ifFalse: [
-	    tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]]]].
-	    cdata := nil.
-	].
 	ch isAlphaNumeric ifTrue: [
-	    stack addLast: (tag := file upTo: $>).
-	    tag = 'package' ifTrue: [ package := Package new ].
-	    tag = 'disabled-package' ifTrue: [ package := Package new ].
-	    cdata := nil
-	].
-    ].
-    file close.
-    stack isEmpty ifFalse: [
-	self error: 'error in packages file: unmatched start tags', stack asArray printString
-    ].
+	    open
+		ifFalse: [
+		    tag := file upTo: $>.
+		    tag = 'packages' ifFalse: [ ^self error: 'expected packages tag' ].
+		    open := true ]
+		ifTrue: [
+		    file skip: -1.
+		    package := Package parse: file.
+		    (package notNil and: [ package baseDirectories: baseDirs ])
+			ifTrue: [ packages at: package name put: package ] ] ] ]
 ! !
 
 
 
-!Package methodsFor: 'accessing'!
+!Kernel.PackageInfo methodsFor: 'accessing'!
 
 fileIn
     "File in the given package and its dependencies."
     PackageLoader fileInPackage: self name!
-
-printXmlOn: aStream collection: aCollection tag: aString
-    "Private - Print aCollection on aStream as a sequence of aString
-     tags."
-    aCollection do: [ :each |
-	aStream
-	    nextPutAll: '  <'; nextPutAll: aString; nextPut: $>;
-	    nextPutAll: each;
-	    nextPutAll: '</'; nextPutAll: aString; nextPut: $>;
-	    nl
-    ]!
 
 printOn: aStream
     "Print a representation of the receiver on aStream (it happens
@@ -413,8 +402,7 @@ printOn: aStream
 	collection: { self directory }
 	tag: 'directory'.
 
-    files := self files copy addAll: self builtFiles; yourself.
-    files size > 1 ifTrue: [ aStream nl ].
+    self files size + self builtFiles size > 1 ifTrue: [ aStream nl ].
     self
 	printXmlOn: aStream
 	collection: self files
@@ -434,6 +422,129 @@ name
 name: aString
     "Set to aString the name of the package."
     name := aString!
+
+namespace
+    "Answer the namespace in which the package is loaded."
+    self subclassResponsibility!
+
+features
+    "Answer a (modifiable) Set of features provided by the package."
+    self subclassResponsibility!
+
+prerequisites
+    "Answer a (modifiable) Set of prerequisites."
+    self subclassResponsibility!
+
+builtFiles
+    "Answer a (modifiable) OrderedCollection of files that are part of
+     the package but are not distributed."
+    self subclassResponsibility!
+
+files
+    "Answer a (modifiable) OrderedCollection of files that are part of
+     the package."
+    self subclassResponsibility!
+
+allFiles
+    "Answer an OrderedCollection of all the files, both built and
+     distributed, that are part of the package."
+    ^self files, self builtFiles!
+
+fileIns
+    "Answer a (modifiable) OrderedCollections of files that are to be
+     filed-in to load the package.  This is usually a subset of
+     `files' and `builtFiles'."
+    self subclassResponsibility!
+
+libraries
+    "Answer a (modifiable) Set of shared library names
+     that are required to load the package."
+    self subclassResponsibility!
+
+modules
+    "Answer a (modifiable) Set of modules that are
+     required to load the package."
+    self subclassResponsibility!
+
+sunitScript
+    "Answer a String containing a SUnit script that
+     describes the package's test suite."
+    self sunitScripts isEmpty ifTrue: [ ^'' ].
+    ^self sunitScripts fold: [ :a :b | a, ' ', b ]!
+
+sunitScripts
+    "Answer a (modifiable) OrderedCollection of SUnit scripts that
+     compose the package's test suite."
+    self subclassResponsibility!
+
+callouts
+    "Answer a (modifiable) Set of call-outs that are required to load
+     the package.  Their presence is checked after the libraries and
+     modules are loaded so that you can do a kind of versioning."
+    self subclassResponsibility!
+
+directory
+    "Answer the base directory from which to load the package."
+    self subclassResponsibility!
+! !
+
+
+!Package class methodsFor: 'instance creation'!
+
+parse: file
+    | stack cdata ch tag package |
+    stack := OrderedCollection new.
+    [
+	[ cdata := cdata isNil
+	    ifTrue: [ file upTo: $< ]
+	    ifFalse: [ cdata, (file upTo: $<) ].
+
+	    file atEnd ] whileFalse: [
+	    ch := file peek.
+	    ch == $! ifTrue: [ file skipTo: $> ].
+	    ch == $/ ifTrue: [
+	        tag := stack removeLast.
+	        file next.
+	        (file upTo: $>) = tag ifFalse: [
+		    ^self error: 'error in packages file: unmatched end tag ', tag
+	        ].
+
+	        "I tried to put these from the most common to the least common"
+
+	        tag = 'file' ifTrue: [ package files add: cdata ] ifFalse: [
+	        tag = 'filein' ifTrue: [ package fileIns add: cdata ] ifFalse: [
+	        tag = 'prereq' ifTrue: [ package prerequisites add: cdata ] ifFalse: [
+	        tag = 'provides' ifTrue: [ package features add: cdata ] ifFalse: [
+	        tag = 'module' ifTrue: [ package modules add: cdata ] ifFalse: [
+	        tag = 'directory' ifTrue: [ package directory: cdata ] ifFalse: [
+	        tag = 'name' ifTrue: [ package name: cdata ] ifFalse: [
+	        tag = 'namespace' ifTrue: [ package namespace: cdata ] ifFalse: [
+	        tag = 'library' ifTrue: [ package libraries add: cdata ] ifFalse: [
+	        tag = 'package' ifTrue: [ ^package ] ifFalse: [
+	        tag = 'disabled-package' ifTrue: [ ^nil ] ifFalse: [
+	        tag = 'built-file' ifTrue: [ package builtFiles add: cdata ] ifFalse: [
+	        tag = 'sunit' ifTrue: [ package sunitScripts add: cdata ] ifFalse: [
+	        tag = 'callout' ifTrue: [ package callouts add: cdata ]]]]]]]]]]]]]].
+	        cdata := nil.
+	    ].
+	    ch isAlphaNumeric ifTrue: [
+	        tag := file upTo: $>.
+	        tag = 'package' ifTrue: [ package := Package new ].
+	        tag = 'disabled-package' ifTrue: [ package := Package new ].
+		(stack isEmpty and: [ package isNil ])
+		    ifTrue: [ self error: 'expected package tag' ].
+	        stack addLast: tag.
+	        cdata := nil
+	    ].
+        ]
+    ] ensure: [
+        stack isEmpty ifFalse: [
+	    self error: 'error in packages file: unmatched start tags',
+		stack asArray printString ]
+    ]
+! !
+
+!Package methodsFor: 'accessing'!
 
 namespace
     "Answer the namespace in which the package is loaded."
@@ -465,11 +576,6 @@ files
     files isNil ifTrue: [ files := OrderedCollection new ].
     ^files!
 
-allFiles
-    "Answer an OrderedCollection of all the files, both built and
-     distributed, that are part of the package."
-    ^self files, self builtFiles!
-
 fileIns
     "Answer a (modifiable) OrderedCollections of files that are to be
      filed-in to load the package.  This is usually a subset of
@@ -488,12 +594,6 @@ modules
      required to load the package."
     modules isNil ifTrue: [ modules := Set new ].
     ^modules!
-
-sunitScript
-    "Answer a String containing a SUnit script that
-     describes the package's test suite."
-    self sunitScripts isEmpty ifTrue: [ ^'' ].
-    ^self sunitScripts fold: [ :a :b | a, ' ', b ]!
 
 sunitScripts
     "Answer a (modifiable) OrderedCollection of SUnit scripts that
@@ -609,6 +709,7 @@ primFileIn
     self features do: [ :each | Smalltalk addFeature: each ].
 ! !
 
+
 !PackageLoader class methodsFor: 'accessing'!
 
 packageAt: package
