@@ -113,6 +113,7 @@ append: fileName to: directory
     "Answer the name of a file named `fileName' which resides in a directory
      named `directory'."
     directory isEmpty ifTrue: [ ^fileName ].
+    fileName isEmpty ifTrue: [ ^directory ].
     self pathSeparator == $\
 	ifFalse: [
 	    (fileName at: 1) isPathSeparator ifTrue: [ ^fileName ] ]
@@ -160,9 +161,12 @@ allFilesMatching: aPattern do: aBlock
 !
 
 create: dirName
-    "Create a directory named dirName."
-    ^(VFS.VFSHandler for: (File pathFor: dirName ifNone: [ Directory working ]))
-	createDir: (File stripPathFrom: dirName)
+    "Create a directory named dirName and answer it."
+    | parent handler |
+    parent := File pathFor: dirName ifNone: [ Directory working ].
+    handler := VFS.VFSHandler for: parent.
+    handler createDir: (File stripPathFrom: dirName).
+    ^Directory name: dirName
 ! !
 
 

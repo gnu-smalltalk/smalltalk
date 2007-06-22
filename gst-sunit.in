@@ -40,19 +40,19 @@ gst () {
   script=$1
   shift
   if test x${image_file:+set} = xset; then
-    "$GST" $GSTARGS -I "$image_file" -qK "$script" -a "$@"
+    eval \"\$GST\" "$GSTARGS" -I \"\$image_file\" -qK \"\$script\" -a \"\$@\"
   else
-    "$GST" $GSTARGS -qK "$script" -a "$@"
+    eval \"\$GST\" "$GSTARGS" -qK \"\$script\" -a \"\$@\"
   fi
-}
+} 
 
 show_help () {
-  "$GST" $GSTARGS -qK scripts/Test.st -a $1
+  eval \"\$GST\" "$GSTARGS" -qK scripts/Test.st -a \$1
   exit $?
 }
 
 getopt () {
-  "$GST" $GSTARGS -qK scripts/Getopt.st -a "$OPTIONS" "$@"
+  eval \"\$GST\" "$GSTARGS" -qK scripts/Getopt.st -a \"\$OPTIONS\" \"\$@\"
 }
 
 getopt "$@" | {
