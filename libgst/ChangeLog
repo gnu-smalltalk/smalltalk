@@ -1,3 +1,20 @@
+2007-06-19  Paolo Bonzini  <bonzini@gnu.org>
+
+        * libgst/sysdep.c: Look for backslashes in Windows paths.
+
+2007-06-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sysdep.c: Use utime if utimes missing.
+	* tests/fileext.st: Run tests using Unix file separator.
+
+2007-06-15  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Remove my_utime.
+	* libgst/sysdep.c: Move it here as _gst_set_file_access_times.
+	* libgst/sysdep.h: Declare it.
+	* libgst/dict.c: Add CSymbols.PathSeparator.
+
 2007-06-11  Paolo Bonzini  <bonzini@gnu.org>
 
         * libgst/cint.c: Add symlink function.

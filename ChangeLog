@@ -1,3 +1,21 @@
+2007-06-19  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+            Paolo Bonzini  <bonzini@gnu.org>
+
+        * kernel/File.st: Support mixed \ and / in a Windows path.
+        Support a file named "C:" in the middle of a Windows path (?).
+
+2007-06-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/fileext.st: Run tests using Unix file separator.
+
+2007-06-15  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Character.st: Add #isPathSeparator.
+	* kernel/Directory.st: Use it; add special cases for Win32 systems.
+	* kernel/File.st: Use it; add special cases for Win32 systems.
+	* kernel/FileDescr.st: Look for :// instead of :/ to distinguish URIs.
+
 2007-06-10  Stephen Compall  <scompall@nocandysw.com>
 
 	* examples/Publish.st: Add Basic>>#skipWhiteExceptNewlines:, and

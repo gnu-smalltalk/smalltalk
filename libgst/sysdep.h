@@ -138,6 +138,12 @@ extern time_t _gst_get_time (void)
 extern time_t _gst_get_file_modify_time (const char *fileName)
   ATTRIBUTE_HIDDEN;
 
+/* Sets the time when FILENAME was last modified.  The times are in
+   seconds, relative to 1 Jan 2000.  */
+extern int _gst_set_file_access_times (const char *name, long new_atime,
+				       long new_mtime)
+  ATTRIBUTE_HIDDEN;
+
 /* Converts the given time (expressed in seconds since midnight Jan 1,
    1970, and in Universal Coordinated Time) into a local time.  */
 extern time_t _gst_adjust_time_zone (time_t t)

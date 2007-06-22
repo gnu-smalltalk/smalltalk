@@ -107,7 +107,7 @@ DISTCLEANFILES += config.h
 
 # These two lines add a beatiful icon to the Win32 executable
 gsticon.o: gsticon.ico
-	echo ProgramIcon ICON `cygpath -w gsticon.ico` | windres -o gsticon.o
+	echo ProgramIcon ICON `$(CYGPATH_W) gsticon.ico` | windres -o gsticon.o
 
 gst.im: $(bin_PROGRAMS) $(srcdir)/kernel/stamp-classes
 	SMALLTALK_KERNEL="`cd $(srcdir)/kernel; pwd`" \

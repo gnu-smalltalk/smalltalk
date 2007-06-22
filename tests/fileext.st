@@ -72,4 +72,5 @@ testStripExtensionFrom
 	[(File stripExtensionFrom: each key),
 	 (File extensionFor: each key) = each key] value printNl ]! !
 
+CSymbols.PathSeparator := $/.
 Object new testExtensionFor; testStripExtensionFrom!

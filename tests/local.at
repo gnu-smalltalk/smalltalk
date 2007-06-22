@@ -25,7 +25,7 @@ m4_define([AT_CHECK_GST], [
     *) GST="$AUTOTEST_PATH/gst m4_ifval([$2], [-I $2])" ;;
   esac
 
-  AT_CHECK([cd m4_ifval([$3], [$3], [$abs_top_builddir]) && $GST $1], 0, [$4], [$5])
+  AT_CHECK([cd m4_ifval([$3], [$3], [$abs_top_builddir]) && $GST $1 | tr -d '\r'], 0, [$4], [$5])
 ])
 
 dnl AT_DIFF_TEST([FILE], [XFAILS])
