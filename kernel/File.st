@@ -161,6 +161,7 @@ fullNameFor: aString
 	]
     ].
 
+    path isEmpty ifTrue: [ ^Directory pathSeparatorString ].
     result := path inject: '' into: [ :old :each |
 	 old, Directory pathSeparatorString, each ].
 
@@ -300,6 +301,30 @@ isAccessible: fileName
 image
     "Answer the full path to the image being used."
     ^ImageFileName
+! !
+
+
+!File methodsFor: 'printing'!
+
+printOn: aStream
+    "Print a representation of the receiver on aStream."
+    aStream
+	nextPut: $<;
+	print: self class;
+	space;
+	display: self;
+	nextPut: $>
+!
+
+displayOn: aStream
+    "Print a representation of the receiver on aStream."
+    | name string |
+    name := self name.
+    string := (name anySatisfy: [ :each | '"$\<>'' `' includes: each ])
+	ifTrue: [ { ''''. name copyReplaceAll: '''' with: '''\'''''. '''' } join ]
+	ifFalse: [ name ].
+
+    aStream nextPutAll: string
 ! !
 
 
@@ -499,9 +524,21 @@ openDescriptor: mode ifFail: aBlock
     ^vfsHandler openDescriptor: mode ifFail: aBlock
 !
 
+withReadStreamDo: aBlock
+    | stream |
+    stream := self readStream.
+    [ aBlock value: stream ] ensure: [ stream close ]
+!
+
 readStream
     "Open a read-only FileStream on the receiver"
     ^self open: FileStream read
+!
+
+withWriteStreamDo: aBlock
+    | stream |
+    stream := self writeStream.
+    [ aBlock value: stream ] ensure: [ stream close ]
 !
 
 writeStream
@@ -518,6 +555,13 @@ symlinkAs: destName
 	computePathFrom: dest realFileName
 	to: vfsHandler realFileName.
     dest symlinkFrom: relPath
+!
+
+pathFrom: dirName
+    "Compute the relative path from the directory dirName to the receiver"
+    ^File
+	computePathFrom: (File fullNameFor: dirName), '/somefile'
+	to: vfsHandler realFileName
 !
 
 pathTo: destName

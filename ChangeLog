@@ -1,3 +1,10 @@
+2007-06-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/File.st: Fix fullNameFor: returning root, add
+	printing methods and #with{Read,Write}StreamDo:.
+	* kernel/Directory.st: Support appending empty filename,
+	return newly created directory in #create:.
+
 2007-06-19  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
             Paolo Bonzini  <bonzini@gnu.org>
 
