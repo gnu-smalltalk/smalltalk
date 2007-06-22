@@ -39,7 +39,7 @@ $(srcdir)/gst.1: $(top_srcdir)/libgst/lib.c $(top_srcdir)/configure.ac
 
 PUBLISHED_NAMESPACES = Smalltalk SystemExceptions NetClients VFS
 
-$(srcdir)/blox.texi: $(top_srcdir)/blox-tk/stamp-classes
+$(srcdir)/blox.texi: $(top_srcdir)/blox/stamp-classes
 	rm -f $(srcdir)/blox.texi
 	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
 	    -f ../scripts/GenLibDoc.st BLOX BloxTK blox.texi Blox.st

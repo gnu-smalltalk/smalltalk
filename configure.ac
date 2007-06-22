@@ -369,30 +369,14 @@ AC_CONFIG_FILES(packages.xml)
 AC_CONFIG_FILES(libc.la)
 
 dnl Master Makefile
-AC_CONFIG_FILES(Makefile, [
-  echo 'Makefile: packages.xml' >> Makefile
-  for i in blox-tk:BloxTK tcp:TCP i18n:I18N kernel:Kernel; do
-    package=`echo $i | sed s/.*://`
-    dir=`echo $i | sed s/:.*//`
-
-    echo
-    echo "all-local: \$(top_srcdir)/$dir/stamp-classes"
-    echo "\$(top_srcdir)/$dir/stamp-classes: \\"
-
-    ./gst-package --list-files $package packages.xml | \
-      sed -n 's,.*\.st$,& \\,p'
-
-    echo
-    echo "	echo timestamp > \$(top_srcdir)/$dir/stamp-classes"
-  done >> Makefile
-])
+AC_CONFIG_FILES(Makefile)
 
 dnl VM makefiles
 AC_CONFIG_FILES(doc/Makefile lib-src/Makefile libgst/Makefile)
 AC_CONFIG_FILES(opcode/Makefile lightning/Makefile tests/Makefile)
 
 dnl Modules makefiles
-AC_CONFIG_FILES(blox-tk/Makefile examples/Makefile)
+AC_CONFIG_FILES(blox/tk/Makefile examples/Makefile)
 AC_CONFIG_FILES(i18n/Makefile tcp/Makefile)
 AC_CONFIG_FILES(gtk/Makefile)
 

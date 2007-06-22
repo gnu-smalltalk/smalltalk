@@ -33,6 +33,20 @@
 
 Namespace current: Kernel!
 
+Notification subclass: #PackageSkip
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Language-Packaging'
+!
+
+Exception subclass: #PackageNotAvailable
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Language-Packaging'
+!
+
 Object subclass: #PackageGroup
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -96,7 +110,7 @@ XML.'!
 Namespace current: Smalltalk!
 
 Kernel.PackageInfo subclass: #Package
-	instanceVariableNames: 'features prerequisites builtFiles files fileIns directory libraries modules callouts namespace sunitScripts test'
+	instanceVariableNames: 'features prerequisites builtFiles files fileIns relativeDirectory baseDirectories libraries modules callouts namespace sunitScripts test'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Language-Packaging'
@@ -106,6 +120,22 @@ Package comment:
 'I am not part of a standard Smalltalk system. I store internally the
 information on a Smalltalk package, and can output my description in
 XML.'!
+
+Namespace current: Kernel!
+
+Package subclass: #DisabledPackage
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Language-Packaging'
+!
+
+DisabledPackage comment:
+'I am not part of a standard Smalltalk system. I store internally the
+information on a Smalltalk package, and can output my description in
+XML.'!
+
+Namespace current: Smalltalk!
 
 Object subclass: #PackageLoader
 	instanceVariableNames: ''
@@ -132,7 +162,7 @@ printOn: aStream
     self
 	do: [ :each |
 	    aStream space: 2.
-	    each printOn: aStream tag: 'package' indent: 2.
+	    each printOn: aStream indent: 2.
 	    aStream nl ]
 	separatedBy: [ aStream nl ].
     aStream nextPutAll: '</packages>'
@@ -220,6 +250,12 @@ extractDependenciesFor: packagesList ifMissing: aBlock
 
 new
     ^super new initialize
+! !
+
+!Kernel.PackageDirectories methodsFor: 'copying'!
+
+postCopy
+    dirs := dirs copy
 ! !
 
 !Kernel.PackageDirectories methodsFor: 'accessing'!
@@ -317,21 +353,38 @@ refresh
     "Private - Process the XML source in the packages file, creating
      Package objects along the way."
 
-    | cdata file stack ch tag package allDirs |
+    packages := LookupTable new.
+    self refreshPackageList.
+    self refreshStarList
+!
+
+refreshPackageList
+    | file allDirs |
     allDirs := Smalltalk imageLocal
 	ifTrue: [ { Directory image }, baseDirectories ]
 	ifFalse: [ baseDirectories ].
+
     allDirs isEmpty ifTrue: [ ^self ].
 
     file := [ FileStream open: fileName mode: FileStream read ]
 	on: Error
 	do: [ :ex | ^self ].
 
-    packages := LookupTable new.
-    [ self parse: file baseDirectories: allDirs ]
+    [
+        [ self parse: file baseDirectories: allDirs ]
+	    on: PackageNotAvailable
+	    do: [ :ex | ex resignalAs: PackageSkip new ] ]
         ensure: [ file close ].
 
-    (Directory name: (File pathFor: fileName))
+    packages := packages reject: [ :each | each isDisabled ]
+!
+
+refreshStarList
+    | dir |
+    dir := Directory name: (File pathFor: fileName).
+    dir exists ifFalse: [ ^self].
+
+    dir
 	namesMatching: '*.star'
 	do: [ :starName |
 	    | package |
@@ -362,13 +415,25 @@ parse: file baseDirectories: baseDirs
 	    open
 		ifFalse: [
 		    tag := file upTo: $>.
-		    tag = 'packages' ifFalse: [ ^self error: 'expected packages tag' ].
+		    tag = 'packages' ifFalse: [
+			^self error: 'expected packages tag' ].
+	            tag = 'package' ifTrue: [
+			package := Package new parse: file tag: 'package' ].
 		    open := true ]
 		ifTrue: [
 		    file skip: -1.
-		    package := Package parse: file.
-		    (package notNil and: [ package baseDirectories: baseDirs ])
-			ifTrue: [ packages at: package name put: package ] ] ] ]
+		    package := Package parse: file ].
+
+	    package notNil ifTrue: [
+	        package name isNil ifTrue: [
+	            ^self error: 'missing package name in ', fileName ].
+
+		[
+		    package baseDirectories: baseDirs.
+		    packages at: package name put: package ]
+			on: PackageSkip
+			do: [ :ex | ex return ] ].
+	    package := nil ] ]
 ! !
 
 
@@ -397,7 +462,11 @@ printXmlOn: aStream collection: aCollection tag: aString indent: indent
     ]!
 
 printOn: aStream
-    self printOn: aStream tag: 'package' indent: 0
+    self printOn: aStream indent: 0
+!
+
+printOn: aStream indent: indent
+    self printOn: aStream tag: 'package' indent: indent
 !
 
 printOn: aStream tag: tag indent: indent
@@ -466,11 +535,11 @@ printOn: aStream tag: tag indent: indent
 	collection: self modules asSortedCollection
 	tag: 'module'
 	indent: indent.
-    self directory isNil
+    self relativeDirectory isNil
 	ifFalse: [
 	    aStream
 	        nextPutAll: '  <directory>';
-	        nextPutAll: self directory;
+	        nextPutAll: self relativeDirectory;
 	        nextPutAll: '</directory>';
 	        nl; space: indent ].
 
@@ -557,6 +626,11 @@ callouts
      modules are loaded so that you can do a kind of versioning."
     self subclassResponsibility!
 
+relativeDirectory
+    "Answer the directory from which to load the package, relative to the package
+     file."
+    self subclassResponsibility!
+
 directory
     "Answer the base directory from which to load the package."
     self subclassResponsibility!
@@ -627,6 +701,9 @@ callouts
      modules are loaded so that you can do a kind of versioning."
     ^self loadedPackage callouts!
 
+relativeDirectory
+    ^'.'!
+
 directory
     ^fileName, '#uzip'!
 
@@ -649,6 +726,7 @@ loadedPackage
     package isNil ifTrue: [
 	^self error: 'invalid disabled-package tag inside a star file' ].
 
+    package relativeDirectory: self relativeDirectory.
     package baseDirectories: { self directory }.
     package name isNil
 	ifTrue: [ package name: self name ]
@@ -677,13 +755,19 @@ parse: file
 
 	ch isAlphaNumeric ifTrue: [
 	    tag := file upTo: $>.
-	    tag = 'package' ifTrue: [ ^Package new parse: file tag: tag ].
-	    tag = 'disabled-package' ifTrue: [ Package new parse: file tag: tag. ^nil ].
+	    tag = 'package'
+		ifTrue: [ ^Package new parse: file tag: tag ].
+	    tag = 'disabled-package'
+		ifTrue: [ ^DisabledPackage new parse: file tag: tag ].
         ]
     ] repeat
 ! !
 
 !Package methodsFor: 'accessing'!
+
+isDisabled
+    ^false
+!
 
 test
     "Answer the test sub-package."
@@ -691,15 +775,19 @@ test
 
 test: aPackage
     "Set the test sub-package to be aPackage."
-    aPackage test isNil ifFalse: [
-	self error: 'test packages must not be nested' ].
-    aPackage name isNil ifFalse: [
-	self error: 'test package must not have names' ].
+    aPackage test isNil
+	ifFalse: [ self error: 'test packages must not be nested' ].
+    aPackage name isNil
+	ifFalse: [ self error: 'test package must not have names' ].
+
     aPackage prerequisites add: 'SUnit'; add: self name.
-    aPackage directory isNil ifTrue: [
-        aPackage directory: self directory ].
-    aPackage namespace isNil ifTrue: [
-        aPackage namespace: self namespace ].
+    aPackage namespace isNil
+	ifTrue: [ aPackage namespace: self namespace ].
+    aPackage relativeDirectory isNil
+	ifTrue: [ aPackage relativeDirectory: self relativeDirectory ].
+
+    self baseDirectories isNil ifFalse: [
+        aPackage baseDirectories: self baseDirectories ].
     test := aPackage!
 
 namespace
@@ -764,12 +852,17 @@ callouts
     callouts isNil ifTrue: [ callouts := Set new ].
     ^callouts!
 
-baseDirectories: baseDirectories
-    "Resolve the names in the package according to the base directories
-     in baseDirectories, which depend on where the packages.xml is found:
-     the three possible places are 1) the system kernel directory's parent
-     directory, 2) the local kernel directory's parent directory, 3) the
-     local image directory (in order of decreasing priority).
+baseDirectories
+    ^baseDirectories
+!
+
+baseDirectories: aCollection
+    "Check if it's possible to resolve the names in the package according to
+     the base directories in baseDirectories, which depend on where
+     the packages.xml is found: the three possible places are 1) the
+     system kernel directory's parent directory, 2) the local kernel
+     directory's parent directory, 3) the local image directory (in
+     order of decreasing priority).
 
      For a packages.xml found in the system kernel directory's parent
      directory, all three directories are searched.  For a packages.xml
@@ -777,56 +870,62 @@ baseDirectories: baseDirectories
      directories 2 and 3 are searched.  For a packages.xml directory in
      the local image directory, instead, only directory 3 is searched."
 
-    files := self findBaseDirs: baseDirectories for: self files.
-    fileIns := self findBaseDirs: baseDirectories for: self fileIns.
-    builtFiles := self findBaseDirs: baseDirectories for: self builtFiles.
+    baseDirectories := aCollection.
+    self findPathsFor: self files.
+    "self findPathsFor: self fileIns."
+    "self findPathsFor: self builtFiles."
+    self directory.
 
-    (self test notNil and: [ (self test baseDirectories: baseDirectories) not ])
-	ifTrue: [ ^false ].
-
-    files isNil | fileIns isNil | builtFiles isNil ifTrue: [ ^false ].
-
-    self directory isNil ifFalse: [
-        baseDirectories
-	    do: [ :dir || name |
-                name := Directory append: self directory to: dir.
-                name := Directory append: self directory to: dir.
-                (Directory exists: name) ifTrue: [ directory := name. ^true ] ] ].
-
-    ^false
+    self test notNil ifTrue: [ self test baseDirectories: aCollection ].
 !
 
-findBaseDirs: baseDirectories for: aCollection
+findPathsFor: aCollection
     "Resolve the names in aCollection according to the base directories
      in baseDirectories, and return the collection with the full filenames, or
      nil if no directory was found for one or more file in aCollection."
     ^aCollection collect: [ :fileName || name |
-        name := self findBaseDirs: baseDirectories forFile: fileName.
-        name isNil ifTrue: [ ^nil ] ifFalse: [ name ]]
+        name := self findPathFor: fileName ]
 !
 
-findBaseDirs: baseDirectories forFile: fileName
+findPathFor: fileName
     "Try appending 'self directory' and fileName to each of the directory
      in baseDirectories, and return the path to the first tried filename that
      exists.  Return nil if no directory is found that contains the file."
     | name |
     baseDirectories do: [ :dir |
 	name := dir.
-	self directory isNil ifFalse: [
-            name := Directory append: self directory to: dir ].
+	self relativeDirectory isNil ifFalse: [
+            name := Directory append: self relativeDirectory to: dir ].
         name := Directory append: fileName to: name.
         (File exists: name) ifTrue: [ ^name ] ].
-    ^nil
+
+    "TODO: should put the name and baseDirectories into the exception."
+    "name printNl.  baseDirectories printNl."
+    PackageNotAvailable signal: self
 !
 
 
 directory
     "Answer the base directory from which to load the package."
-    ^directory!
 
-directory: dir
-    "Set the base directory from which to load the package to dir."
-    directory := dir!
+    self relativeDirectory isNil ifTrue: [ ^nil ].
+
+    self baseDirectories
+	do: [ :dir || name |
+            name := Directory append: self relativeDirectory to: dir.
+            (Directory exists: name) ifTrue: [ ^name ] ].
+
+    PackageNotAvailable signal: self!
+
+relativeDirectory
+    "Answer the directory, relative to the packages file, from which to load
+     the package."
+    ^relativeDirectory!
+
+relativeDirectory: dir
+    "Set the directory, relative to the packages file, from which to load
+     the package, to dir."
+    relativeDirectory := dir!
 
 createNamespace
     "Private - Create the path of namespaces indicated by our
@@ -847,12 +946,14 @@ loaded
 primFileIn
     "Private - File in the given package without paying attention at
      dependencies and C callout availability"
-    | dir namespace |
 
+    | dir namespace |
     self loaded ifTrue: [ ^self ].
+
+    dir := Directory working.
+    namespace := Namespace current.
     [
-        dir := Directory working.
-        namespace := Namespace current.
+        | loadedFiles |
         Namespace current: self createNamespace.
         self directory isNil ifFalse: [ Directory working: self directory ].
         self libraries do: [ :each | DLD addLibrary: each ].
@@ -863,7 +964,8 @@ primFileIn
                 (CFunctionDescriptor isFunction: func)
 	             ifFalse: [ ^self error: 'C callout not available: ', func ]]].
 
-        self fileIns do: [ :each | FileStream fileIn: each ].
+        loadedFiles := self findPathsFor: self fileIns.
+	loadedFiles do: [ :each | FileStream fileIn: each ].
         self name isNil ifFalse: [ Smalltalk addFeature: self name ].
         self features do: [ :each | Smalltalk addFeature: each ].
     ] ensure: [
@@ -897,7 +999,7 @@ parse: file tag: openingTag
 	        tag = 'prereq' ifTrue: [ self prerequisites add: cdata ] ifFalse: [
 	        tag = 'provides' ifTrue: [ self features add: cdata ] ifFalse: [
 	        tag = 'module' ifTrue: [ self modules add: cdata ] ifFalse: [
-	        tag = 'directory' ifTrue: [ self directory: cdata ] ifFalse: [
+	        tag = 'directory' ifTrue: [ self relativeDirectory: cdata ] ifFalse: [
 	        tag = 'name' ifTrue: [ self name: cdata ] ifFalse: [
 	        tag = 'namespace' ifTrue: [ self namespace: cdata ] ifFalse: [
 	        tag = 'library' ifTrue: [ self libraries add: cdata ] ifFalse: [
@@ -928,6 +1030,16 @@ parse: file tag: openingTag
 	    self error: 'error in packages file: unmatched start tags',
 		stack asArray printString ]
     ]
+! !
+
+!Kernel.DisabledPackage methodsFor: 'accessing'!
+
+printOn: aStream indent: indent
+    self printOn: aStream tag: 'disabled-package' indent: indent
+!
+
+isDisabled
+    ^true
 ! !
 
 

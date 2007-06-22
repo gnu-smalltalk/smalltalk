@@ -1,4 +1,5 @@
 #! /bin/sh
+
 #######################################################################
 #
 #   Smalltalk package installer
@@ -9,47 +10,49 @@
 
 #######################################################################
 #
-# Copyright 1999,2000,2001,2002
-# Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2001, 2002, 2006, 2007 Free Software Foundation, Inc.
 # Written by Paolo Bonzini.
 #
-# This file is part of GNU Smalltalk
+# This file is part of GNU Smalltalk.
 #
-# GNU Smalltalk is free software; you can redistribute it
-# and/or modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2, or (at
-# your option) any later version.
+# GNU Smalltalk is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; either version 2, or (at your option) any later version.
 # 
-# The GNU Smalltalk is distributed in the hope that it will be
-# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
+# GNU Smalltalk is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
 # 
-# You should have received a copy of the GNU General Public License
-# along with the GNU Smalltalk; see the file COPYING.
-# If not, write to the Free Software Foundation, 59 Temple Place - Suite
-# 330, Boston, MA 02110-1301, USA.  
+# You should have received a copy of the GNU General Public License along with
+# GNU Smalltalk; see the file COPYING.  If not, write to the Free Software
+# Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  
 #
-#######################################################################"
+########################################################################
 
+OPTIONS='-h|--help --version --no-load --no-install --uninstall --dist
+	-t|--target-directory: --list-files: --list-packages
+	--srcdir: --distdir|--destdir:
+	-n|--dry-run -I|--image-file:'
 
-: ${prefix:=@prefix@}
-: ${exec_prefix:=@exec_prefix@}
-: ${datarootdir:=@datarootdir@}
-: ${AWK:=gawk}
-: ${GST_LOAD:=${exec_prefix}/bin/gst-load}
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+: ${GST=@bindir@/gst}
+
 : ${INSTALL=@INSTALL@}
+: ${LN_S=@LN_S@}
+ mkdir_p='mkdir -p'
 
 case "$INSTALL" in
   */install-sh | *"/install-sh -c" | \
   */install.sh | *"/install.sh -c" | \
   install-sh | "install-sh -c" | \
   install.sh | "install.sh -c")
-    display_install=install
+    display_INSTALL=install
     INSTALL=func_install
     ;;
   *)
-    display_install="$INSTALL"
+    display_INSTALL="$INSTALL"
     ;;
 esac
 
@@ -101,310 +104,77 @@ mkdir_p ()
   return "$errstatus"
 }
 
-error () {
-  echo "$0": "$@" >&2
-  exit 1
+show_command () {
+  save_INSTALL=$INSTALL
+  INSTALL=$display_INSTALL
+  mkdir_p='mkdir -p'
+  eval echo "$cmd"
+  INSTALL=$save_INSTALL
+  mkdir_p='mkdir_p'
 }
 
-if test -n "$SMALLTALK_IMAGE" && test -d "$SMALLTALK_IMAGE"; then
-  install_dir=$SMALLTALK_IMAGE
-else
-  install_dir="@datadir@/@PACKAGE@"
-fi
+# The same shell functions used in gst-load and gst-sunit.
 
-request_help=false
-request_version=false
-options_error=false
-load=:
-install=:
-dist=false
-list_files=
-uninstall=false
-dry_run=false
-DESTDIR=
-srcdir=.
-files=
-
-# Command line parsing.
-
-while [ -n "$1" ]; do
-  case $1 in
-	--v | --ve | --ver | --vers | --versi | --versio | \
-	--version)	 request_version=:		   ;;
-
-	--h | --he | --hel | \
-	--help)		 request_help=:			   ;;
-
-	--no-l | --no-lo | --no-loa | \
-	--no-load)	 load=false			   ;;
-
-	--no-i | --no-in | --no-ins | --no-inst | \
-	--no-insta | --no-instal | \
-	--no-install)	 install=false			   ;;
-
-	--u | --un | --uni | --unin | --unins | --uninst | \
-	--uninsta | --uninstal | \
-	--uninstall)     load=false; uninstall=:           ;;
-
-	--di | --dis | \
-	--dist)		 load=false; dist=:	  	   ;;
-
-        -t | --t | --ta | --tar | --targ | --targe | --target | --target- | \
-        --target-d | --target-di | --target-dir | --target-dire | \
-	--target-direc | --target-direct | --target-directo | \
-	--target-director | --target-directory)  
-			 shift; install_dir="$1" ;;
-
-        --t=* | --ta=* | --tar=* | --targ=* | --targe=* | --target=* | \
-	--target-=* | --target-d=* | --target-di=* | --target-dir=* | \
-	--target-dire=* | --target-direc=* | --target-direct=* | \
-	--target-directo=* | --target-director=* | --target-directory=*)  
-			 install_dir="`echo $1 | sed s/^[^=]*=//`" ;;
-
-        -t*)
-			 install_dir="`echo $1 | sed s/^-t//`" ;;
-
-	--l=* | --li=* | --lis=* | --list=* | --list-=* | \
-	--list-f=* | --list-fi=* | --list-fil=* | --list-file=* | \
-	--list-files=*)	 list_files="$list_files `echo $1 | sed s/.*=//`"
-							   ;;
-
-	--l | --li | --lis | --list | --list- | \
-	--list-f | --list-fi | --list-fil | --list-file | \
-	--list-files)	 shift; list_files="$list_files $1" ;;
-
-	--s | --sr | --src | --srcd | --srcdi | \
-	--srcdir)	 shift; srcdir="$1"		   ;;
-
-	--s=* | --sr=* | --src=* | --srcd=* | --srcdi=* | \
-	--srcdir=*)	 srcdir="`echo $1 | sed s/.*=//`"  ;;
-
-	--distd | --distdi | --distdir | \
-	--de | --des | --dest | --destd | --destdi | \
-	--destdir)	 shift; DESTDIR="$1"		   ;;
-
-	--distd=* | --distdi=* | --distdir=* | \
-	--de=* | --des=* | --dest=* | --destd=* | --destdi=* | \
-	--destdir=*)	 DESTDIR="`echo $1 | sed s/.*=//`" ;;
-
-	-n | --dr | --dry | --dry- | --dry-r | --dry-ru | \
-  	--dry-run)	 dry_run=:			   ;;
-
-	-*)		 options_error=:		   ;;
-
-  	*)		 files="$files $1"		   ;;
-  esac
+gst () {
+  script=$1
   shift
-done
-
-# Do --help and --version.
-
-if [ -z "$files" ] || $request_help || $options_error; then
-  cat <<EOF
-Syntax: gst-package [OPTION]... FILES...
-
-    -n, --dry-run               print commands rather than running them
-	--no-load               don't load the Smalltalk files in the image
-        --no-install            don't copy the files
-        --uninstall             remove the packages mentioned in the FILES
-        --dist                  create symbolic links of non-built files
-        --list-files PKG        just output the list of files in the package
-	--srcdir DIR            look for non-built files in directory DIR
-	--distdir DIR	        for --dist, place files in directory DIR
-	--destdir DIR	        prefix the destination directory with DIR
-        --target-directory DIR  install the files in DIR (unused for --dist)
-
-	--help                  display this message and exit
-	--version               print version information and exit
-
-Except in uninstall and list files mode, gst-package requires write
-access to the \`packages.xml' file in the GNU Smalltalk image directory,
-and merges the XML package files on the command line with that file.
-
-The default target directory is $install_dir.
-
-EOF
-  # Unless --help was passed, return an error.
-  $request_help && exit 0
-  exit 1
-fi
-
-if $request_version; then
-  echo GNU Smalltalk package installer, version @VERSION@
-  exit 0
-fi
-
-# Process --list-files now, then exit.
-
-if [ -n "$list_files" ]; then
-  for pkg in $list_files; do
-    dir="`sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
-	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files | sed 1q`"
-
-    sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
-	-e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' \
-	-e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files | while read file; do
-      case $file in
-        /*) echo "$file" ;;
-	*) echo "$dir/$file" ;;
-      esac
-    done
-  done
-  exit 0
-fi
-
-# Create the installation directory.
-
-if $dist; then
-  install_dir=
-  if test -z "$DESTDIR"; then
-    error Using --dist without specifying --distdir 
+  if test x${image_file:+set} = xset; then
+    eval \"\$GST\" "$GSTARGS" -I \"\$image_file\" -qK \"\$script\" -a \"\$@\"
   else
-    mkdir_p "$DESTDIR"
+    eval \"\$GST\" "$GSTARGS" -qK \"\$script\" -a \"\$@\"
   fi
-else
-  case $install_dir in
-    /*)
-      mkdir_p "$DESTDIR$install_dir"
-      ;;
-    *)
-      if test -z "$DESTDIR"; then
-        mkdir_p "$install_dir"
-        (cd "$install_dir" 2> /dev/null && install_dir=`pwd`)
-      else
-        error Target directory must be absolute when DESTDIR is used
-      fi
-      ;;
-  esac
-fi
+} 
 
+show_help () {
+  eval \"\$GST\" "$GSTARGS" -qK scripts/Package.st -a \$1
+  exit $?
+}
 
-# Extract the name of the packages to be (un)installed.
+getopt () {
+  eval \"\$GST\" "$GSTARGS" -qK scripts/Getopt.st -a \"\$OPTIONS\" \"\$@\"
+}
 
-pkgs=`sed -e '/<name>/!d' \
-          -e 's,.*<name>\([^<]*\)<.name>,\1 ,' $files `
-
-if $uninstall; then
-  for pkg in $pkgs; do
-    dir="`sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
-	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files | sed 1q`"
-
-    sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
-	-e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' \
-	-e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files | while read file; do
-      case $file in
-        /*) dest=$DESTDIR$file ;;
-	*) dest="$DESTDIR$install_dir/$dir/$file" ;;
-      esac
-
-      echo "rm -f $dest"
-      $dry_run || rm -f "$dest"
-    done
+getopt "$@" | {
+  load_dry_run=
+  load_test=
+  list=false
+  run_cmd=eval
+  files=
+  srcdir=
+  while read opt arg; do
+    case $opt in
+      ERROR) show_help --bad ;;
+      --help) show_help --help ;;
+      --dist | --uninstall | --no-load) load_dry_run=-n ;;
+      --test) load_test=--test ;;
+      --dry-run) run_cmd=: ;;
+      --list-files) list=: ;;
+      --list-packages) list=: ;;
+      --srcdir) srcdir=$arg ;;
+      --image-file)
+	test x${image_file:+set} = xset && show_help --bad
+	image_file=$arg ;;
+      --) files="$files '$arg'" ;;
+    esac
   done
-  exit 0
-fi
 
-# If we are installing, add packages.xml to the list
-# and merge the supplied packages files with it
+  set -e
 
-if $dist; then
-  :
-else
-  base="$DESTDIR$install_dir/packages.xml"
-  if test -f $base; then
-    merged_files="$base"
-    for file in $files; do
-      test $file -ef $base || merged_files="$merged_files $file"
-    done
+  if $list; then
+    gst scripts/Package.st "$@"
   else
-    merged_files="$files"
-  fi
-
-  echo "Merging $files into $base..."
-  $dry_run || {
-    sed -e '$i\
-</packages>' -e '/<.packages>/,/<packages>/d' $merged_files > packages.tmp
-
-    mv packages.tmp $DESTDIR$install_dir/packages.xml
-  }
-fi
-
-if $install; then
-  for pkg in $pkgs; do
-    dir="`sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
-	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files | sed 1q`"
-    dirs="`sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
-	      -e 's,.*<built-file>\([^<]*\)/<.built-file>,\1,p' \
-	      -e 's,.*<file>\([^<]*\)/<.file>,\1,p' $files `"
-
-    for subdir in . $dirs; do
-      case $subdir in
-        /*) dest=$DESTDIR$subdir ;;
-	*) dest=$DESTDIR$install_dir/$dir/$subdir ;;
-      esac
-
-      mkdir_p "$dest"
+    gst scripts/Package.st "$@" | while read cmd; do
+      show_command "$cmd"
+      $run_cmd "$cmd"
     done
 
-    if $dist; then
-      wd=`cd $srcdir && pwd`
-      sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
-	  -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files | while read file; do
-        case $file in
-          /*)
-	   dest=$DESTDIR$file
-	   orig_file=$file ;;
-	  *)
-	   dest="$DESTDIR/$dir/$file"
-	   file=$dir/$file
-	   orig_file=$file
-	   if test -f $file; then file=`pwd`/$file; else file=$wd/$file; fi ;;
-        esac
-
-	test -f "$file" || {
-	  echo gst-package: "$orig_file" not found
-	  exit 1
-	}
-
-        echo "@LN_S@ -f $file $dest"
-        $dry_run || @LN_S@ -f "$file" "$dest"
-      done
-
-    else
-      sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
-	  -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' \
-	  -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files | while read file; do
-        case "$file" in
-          /*)
-	    dest="$DESTDIR$file"
-	    orig_file=$file ;;
-	  *)
-	    dest="$DESTDIR$install_dir/$dir/$file"
-	    file=$dir/$file
-	    orig_file=$file
-	    test -f "$file" || file=$srcdir/$file ;;
-        esac
-
-	test -f "$file" || {
-	  echo gst-package: "$orig_file" not found
-	  exit 1
-	}
-
-        if test -x "$file"; then
-	  echo "$display_install -m 755 $file $dest"
-          $dry_run || $INSTALL -m 755 "$file" "$dest"
-	else
-	  echo "$display_install -m 644 $file $dest"
-          $dry_run || $INSTALL -m 644 "$file" "$dest"
-	fi
-      done
+    if test "$run_cmd" = eval && test "$load_test,$load_dry_run" != ,-n; then
+      packages=`eval gst scripts/Package.st \
+		${srcdir:+"--srcdir=$srcdir"} \
+		--list-packages "$files" `
+      "@bindir@/gst-load" \
+		${image_file:+"--image-file=$image_file"} \
+		$load_dry_run $load_test $packages
     fi
-  done
-fi
-
-if $load && [ -n "$pkgs" ]; then
-  echo ${GST_LOAD} $pkgs
-  $dry_run || ${GST_LOAD} $pkgs
-fi
-
-exit 0
+  fi
+}

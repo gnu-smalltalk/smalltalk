@@ -1,0 +1,3 @@
+../tcp/stamp-classes:: \
+../tcp/Buffers.st ../tcp/Datagram.st ../tcp/SocketAddress.st ../tcp/AbstractSocketImpl.st ../tcp/IPSocketImpl.st ../tcp/Sockets.st ../tcp/Tests.st ../tcp/cfuncs.st ../tcp/init.st ../tcp/ChangeLog 
+	touch ../tcp/stamp-classes

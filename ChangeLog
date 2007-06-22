@@ -1,5 +1,11 @@
 2007-06-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PkgLoader.st: Store info in objects as it is in packages.xml,
+	resolving filenames at load time.  Add DisabledPackage.
+	* scripts/Package.st: New.
+
+2007-06-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/File.st: Fix fullNameFor: returning root, add
 	printing methods and #with{Read,Write}StreamDo:.
 	* kernel/Directory.st: Support appending empty filename,
