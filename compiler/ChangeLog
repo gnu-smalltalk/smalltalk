@@ -1,3 +1,14 @@
+2007-06-23  Stephen Compall  <scompall@nocandysw.com>
+
+	* compiler/RBParseNodes.st (RBMethodNode>>#primitiveSources):
+	Handle MappedCollections as source instead of FileSegments.
+	* compiler/StartCompiler.st (STParserScanner): New class.  Use it
+	to allow other parsers to rescan tokens from some parser.
+	(STEvaluationDriver>>#methodsFor:parsingWith:compiler:class:): Add
+	parsingWith: argument and handle separation of evaluate:/compile:
+	driver and parser.
+	(Behavior>>#methodsFor:ifTrue:): Send to the driver, not the parser.
+
 2007-06-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/STFileParser.st: Refactor part of #parseDoits into the

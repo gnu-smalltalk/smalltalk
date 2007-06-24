@@ -29,6 +29,30 @@
  ======================================================================"
 
 
+Object subclass: #STParserScanner
+       instanceVariableNames: 'parser scanner unusedTokens'
+       classVariableNames: ''
+       poolDictionaries: ''
+       category: 'System-Compiler'
+!
+
+STParserScanner comment:
+'I provide RBScanner''s important protocols for use in another Parser
+by extracting tokens from a scanner owned by a particular parser.  In
+other words, by giving me to another parser, you can subcontract
+parsing from one parser to the other.
+
+My main purpose is to account for lookahead tokens, so they are not
+hidden from other objects trying to work with a RBParser''s scanner.
+
+    parser
+	The parser I come from.
+    scanner
+	Said parser''s real scanner.
+    unusedTokens
+	See #unusedTokens:.'
+!
+
 STParsingDriver subclass: #STEvaluationDriver
        instanceVariableNames: 'curCategory curClass curCompilerClass evalFor lastResult method'
        classVariableNames: ''
@@ -38,11 +62,104 @@ STParsingDriver subclass: #STEvaluationDriver
 
 STEvaluationDriver comment:
 'I am an STParsingDriver that compiles code that you file in.'!
+
+!STParserScanner class methodsFor: 'instance creation'!
 
+overscanFrom: aParser scanning: aScanner
+    "Answer a new instances that treats aParser's implicit scanner
+     token sequence as my own."
+    ^self new parser: aParser scanner: aScanner; yourself
+! !
+
+!STParserScanner methodsFor: 'accessing'!
+
+atEnd
+    ^unusedTokens isEmpty
+	ifTrue: [scanner atEnd]
+	ifFalse: [unusedTokens first isMemberOf: RBToken]
+!
+
+next
+    ^unusedTokens isEmpty
+	ifTrue: [scanner next]
+	ifFalse: [unusedTokens removeFirst]
+!
+
+getComments
+    ^scanner getComments
+!
+
+stream
+    ^scanner stream
+!
+
+stripSeparators
+    "I don't know why RBParser sends this, but here it is."
+    ^scanner stripSeparators
+!
+
+unusedTokens: tokens
+    "Make `tokens' a list that should be reread by any parser that
+     takes control of the effective token stream."
+    unusedTokens addAllFirst: tokens.
+! !
+
+!STParserScanner methodsFor: 'private'!
+
+unusedTokens
+    "Information used by a parser to (re)set its internal state."
+    ^unusedTokens
+!
+
+parser: aParser scanner: aScanner
+    parser := aParser.
+    scanner := aScanner.
+    unusedTokens := OrderedCollection new: 2.
+! !
+
+!RBParser methodsFor: 'accessing'!
+
+unusedTokens
+    "Answer the tokens I have read from the scanner but not
+     processed."
+    ^{currentToken. nextToken} copyWithout: nil
+!
+
+releaseScannerTo: aBlock
+    "Invoke aBlock with my effective scanner, during which that
+     scanner can be owned by a different parser.  After aBlock exits,
+     I assume that I own the scanner's token stream again.  Answer
+     aBlock's result.
+
+     If you read tokens from the scanner, but don't use them, you must
+     push them back on with #unusedTokens:."
+    | delegateScanner |
+    delegateScanner := STParserScanner overscanFrom: self scanning: scanner.
+    delegateScanner unusedTokens: self unusedTokens.
+    ^[aBlock value: delegateScanner]
+	ensure: [| unused |
+		 unused := delegateScanner unusedTokens.
+		 currentToken := unused at: 1 ifAbsent: [nil].
+		 nextToken := unused at: 2 ifAbsent: [nil].
+		 unused size > 2 ifTrue:
+		     [SystemExceptions.InvalidValue
+			  signalOn: unused
+			  reason: 'too many enqueued tokens']]
+! !
+
 !STEvaluationDriver class methodsFor: 'accessing'!
 
-methodsFor: aString compiler: compilerClass class: aClass
-    | ctx |
+methodsFor: aString parsingWith: parser compiler: compilerClass class: aClass
+    "Search the current context stack for another evaluation driver,
+     copy its error block and scanner to a new instance of `parser',
+     and compile the method definition list following the #methodsFor:
+     invocation implied by this message that was just read by that
+     other evaluation driver/parser.  Answer the new instance of
+     myself.
+
+     If the outer driver's parser is the same, just reuse that
+     driver/parser combo instead."
+    | ctx driver |
     ctx := thisContext.
     [ ctx selector == #evaluate: ] whileFalse: [
 	ctx := ctx parentContext.
@@ -54,25 +171,26 @@ methodsFor: aString compiler: compilerClass class: aClass
         ]
     ].
 
-    self == ctx receiver class ifTrue: [
-	^ctx receiver
-	    methodsFor: aString
-	    compiler: compilerClass
-	    class: aClass
-    ].
+    "Optimization where #evaluatorClass is left alone: If the outer
+     parser has the same class as the parser I will create, change the
+     outer driver to #compile: for my arguments."
+    (parser isNil or: [ctx receiver parser isMemberOf: parser])
+	ifTrue: [^ctx receiver methodsFor: aString
+			       compiler: compilerClass
+			       class: aClass; yourself].
 
-    "Create a new parser and invoke it.  It will eat the text from 
-     the current parser, which will be automagically fooled..."
-    ^self new
-	errorBlock: ctx receiver errorBlock;
-	scanner: ctx receiver scanner;
-
-	methodsFor: aString
-	compiler: compilerClass
-	class: aClass;
-
-	parseMethodDefinitionList;
-	yourself
+    driver := self new.
+    driver methodsFor: aString
+	   compiler: compilerClass
+	   class: aClass.
+    ctx receiver parser releaseScannerTo: [:scanner | | parseProc |
+	(parseProc := parser new)
+	    errorBlock: ctx receiver errorBlock;
+	    scanner: scanner;
+	    driver: driver;
+	    parseMethodDefinitionList.
+	scanner unusedTokens: parseProc unusedTokens].
+    ^driver
 ! !
 
 !STEvaluationDriver methodsFor: 'accessing'!
@@ -132,19 +250,21 @@ compilerClass
 !
 
 evaluatorClass
-    "This method is present for symmetry with #parserClass.  It
-     specifies the class that will be used to drive evaluation
-     of Smalltalk source code."
+    "Answer the class to be used by an STEvaluationDriver to parse
+     method definition chunks for this class, and by my own evaluating
+     methods to parse expressions.
+
+     In the former case, an instance of the class will be created and
+     sent #parseMethodDefinitionList, or the same will be done with
+     the currently active parser (the one that parsed the doit that
+     sent #methodsFor:, which cannot be so easily changed in the
+     current framework) if this method answers nil."
     ^STInST.STFileInParser
 !
 
 parserClass
-    "This method specifies which class will be used by an
-     STEvaluationDriver to parse method definition chunk.  An instance of
-     the class will be created and sent #parseMethodDefinitionList,
-     or the same will be done with the currently active parser
-     (the one that parsed the doit that sent #methodsFor:) if
-     this method answers nil."
+    "Answer the class to be used by my method-compiling methods to
+     parse methods for delivery to my #compilerClass."
     ^STInST.RBParser
 ! !
 
@@ -226,8 +346,9 @@ methodsFor: aString
 !
 
 methodsFor: aString ifTrue: realCompile
-    self evaluatorClass
+    ^STInST.STEvaluationDriver
 	methodsFor: aString
+	parsingWith: self evaluatorClass
 	compiler: (realCompile
 	    ifTrue: [ self compilerClass ]
 	    ifFalse: [ STInST.STFakeCompiler ])
