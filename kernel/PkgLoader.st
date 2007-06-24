@@ -137,6 +137,25 @@ XML.'!
 
 Namespace current: Smalltalk!
 
+Namespace current: Kernel!
+
+Smalltalk.Package subclass: #TestPackage
+		  instanceVariableNames: 'owner'
+		  classVariableNames: ''
+		  poolDictionaries: ''
+		  category: 'Language-Packaging'
+!
+
+TestPackage comment:
+'I am not part of a standard Smalltalk system.  I am an unnamed
+subpackage of a regular package, representing an SUnit test suite for
+that package.
+
+    owner
+	The Package I provide tests for; initialized by the owner.'!
+
+Namespace current: Smalltalk!
+
 Object subclass: #PackageLoader
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -781,13 +800,7 @@ test: aPackage
 	ifFalse: [ self error: 'test package must not have names' ].
 
     aPackage prerequisites add: 'SUnit'; add: self name.
-    aPackage namespace isNil
-	ifTrue: [ aPackage namespace: self namespace ].
-    aPackage relativeDirectory isNil
-	ifTrue: [ aPackage relativeDirectory: self relativeDirectory ].
-
-    self baseDirectories isNil ifFalse: [
-        aPackage baseDirectories: self baseDirectories ].
+    aPackage owner: self.
     test := aPackage!
 
 namespace
@@ -1013,7 +1026,7 @@ parse: file tag: openingTag
 	    ch isAlphaNumeric ifTrue: [
 	        tag := file upTo: $>.
 		tag = 'test'
-		    ifTrue: [ testPackage := Package new parse: file tag: tag ]
+		    ifTrue: [ self test: (TestPackage new parse: file tag: tag) ]
 	            ifFalse: [ stack addLast: tag ].
 
 		cdata trimSeparators isEmpty ifFalse: [
@@ -1023,9 +1036,6 @@ parse: file tag: openingTag
 	    ].
         ].
     ] ensure: [
-	"Do this now, so that our <namespace> and <directory> are honored."
-	testPackage isNil ifFalse: [ self test: testPackage ].
-
         stack isEmpty ifFalse: [
 	    self error: 'error in packages file: unmatched start tags',
 		stack asArray printString ]
@@ -1040,6 +1050,29 @@ printOn: aStream indent: indent
 
 isDisabled
     ^true
+! !
+
+
+!Kernel.TestPackage methodsFor: 'accessing'!
+
+owner: aPackage
+    "Set the Package I test."
+    owner := aPackage.
+!
+
+relativeDirectory
+    "Answer the base directory from which to load the package."
+    ^super relativeDirectory ifNil: [owner relativeDirectory]
+!
+
+namespace
+    "Answer the namespace in which the package is loaded."
+    ^super namespace ifNil: [owner namespace]
+!
+
+baseDirectories
+    "Answer the namespace in which the package is loaded."
+    ^super baseDirectories ifNil: [owner baseDirectories]
 ! !
 
 

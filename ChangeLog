@@ -1,3 +1,9 @@
+2007-06-23  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/PkgLoader.st: Add class TestPackage, reifying its
+	relationship with its owner package, and use it for all <test/>
+	tags.
+
 2007-06-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Store info in objects as it is in packages.xml,
