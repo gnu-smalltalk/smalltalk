@@ -33,6 +33,7 @@
 OPTIONS='-h|--help -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force -t|--test -I|--image-file:'
 prefix=@prefix@
 exec_prefix=@exec_prefix@
+
 : ${GST=@bindir@/gst}
 
 gst () {
@@ -56,27 +57,15 @@ getopt () {
 
 getopt "$@" | {
   test=false
-  packages=
-  verbosity=
   while read opt arg; do
     case $opt in
       ERROR) show_help --bad ;;
       --help) show_help --help ;;
-      --quiet) verbosity="$verbosity $opt" ;;
-      --verbose) verbosity="$verbosity $opt" ;;
-      --test) test=: ;;
       --image-file)
 	test x${image_file:+set} = xset && show_help --bad
 	image_file=$arg ;;
-      --) packages="$packages -p$arg" ;;
     esac
   done
-
-  if $test; then
-    gst scripts/Test.st $verbosity $packages
-    result=$?
-    test $result -gt 0 && exit 1
-  fi
 
   gst scripts/Load.st "$@"
   exit $?

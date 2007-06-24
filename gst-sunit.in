@@ -44,7 +44,7 @@ gst () {
   else
     eval \"\$GST\" "$GSTARGS" -qK \"\$script\" -a \"\$@\"
   fi
-} 
+}
 
 show_help () {
   eval \"\$GST\" "$GSTARGS" -qK scripts/Test.st -a \$1
@@ -57,7 +57,6 @@ getopt () {
 
 getopt "$@" | {
   test=false
-  packages=
   while read opt arg; do
     case $opt in
       ERROR) show_help --bad ;;

@@ -198,7 +198,7 @@ static mst_Boolean no_user_files;
    command line is parsed, the checking of the dates of the kernel source files
    against the image file date is overridden.  If it is NULL, it is set to
    default_image_name.  */
-const char *_gst_binary_image_name = NULL;
+char *_gst_binary_image_name = NULL;
 
 /* This is used by the callin functions to auto-initialize Smalltalk.
    When it's not true, initialization needs to be performed.  It's set
@@ -503,7 +503,7 @@ gst_init_smalltalk (void)
           && !_gst_file_is_writeable (_gst_image_file_path))
         {
           _gst_image_file_path = _gst_get_cur_dir_name ();
-          _gst_binary_image_name = "gst.im";
+          asprintf (&_gst_binary_image_name, "%s/gst.im", _gst_image_file_path);
           loadBinary = !ignore_image && ok_to_load_binary();
 	  xfree (default_image_file_name);
         }
@@ -664,23 +664,28 @@ init_paths (void)
 	_gst_image_file_path = NULL;
     }
 
-  if (_gst_image_file_path)
-    _gst_image_file_path = _gst_get_full_file_name (_gst_image_file_path);
-  else if (_gst_file_is_readable (IMAGE_PATH))
-    _gst_image_file_path = IMAGE_PATH;
-  else
-    _gst_image_file_path = xstrdup (currentDirectory);
-
-  if (_gst_kernel_file_path)
-    _gst_kernel_file_path = _gst_get_full_file_name (_gst_kernel_file_path);
-  else if (_gst_file_is_readable (KERNEL_PATH))
-    _gst_kernel_file_path = KERNEL_PATH;
-  else
+  if (!_gst_image_file_path)
     {
-      char *default_kernel_file_path;
-      asprintf (&default_kernel_file_path, "%s/kernel", _gst_image_file_path);
-      _gst_kernel_file_path = default_kernel_file_path;
+      if (_gst_file_is_readable (IMAGE_PATH))
+        _gst_image_file_path = IMAGE_PATH;
+      else
+        _gst_image_file_path = xstrdup (currentDirectory);
     }
+
+  if (!_gst_kernel_file_path)
+    {
+      if (_gst_file_is_readable (KERNEL_PATH))
+        _gst_kernel_file_path = KERNEL_PATH;
+      else
+	{
+          char *kernel_file_path;
+	  asprintf (&kernel_file_path, "%s/kernel", _gst_image_file_path);
+	  _gst_kernel_file_path = kernel_file_path;
+	}
+    }
+
+  _gst_image_file_path = _gst_get_full_file_name (_gst_image_file_path);
+  _gst_kernel_file_path = _gst_get_full_file_name (_gst_kernel_file_path);
 
   xfree (currentDirectory);
 

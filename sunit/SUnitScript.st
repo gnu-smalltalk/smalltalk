@@ -15,6 +15,39 @@ Object subclass: #TestSuitesScripter
 
 !TestSuitesScripter class methodsFor: 'Init / Release'!
 
+run: script quiet: quiet verbose: verbose
+    | suite result |
+    suite := TestSuitesScripter run: script.
+
+    "Set log policy to write to stdout."
+    quiet
+        ifTrue: [ suite logPolicy: TestLogPolicy null ].
+    verbose
+        ifTrue: [ suite logPolicy: (TestVerboseLog on: stdout) ].
+    (quiet or: [ verbose ])
+        ifFalse: [ suite logPolicy: (TestCondensedLog on: stdout) ].
+
+    result := suite run.
+
+    "Print result depending on verboseness."
+    quiet ifFalse: [
+        result runCount < result passedCount
+            ifTrue: [ stdout nl ].
+
+        result printNl.
+        result errorCount > 0 ifTrue: [
+            stdout nextPutAll: 'Errors:'; nl.
+            (result errors asSortedCollection: [ :a :b | a printString <= b printString ])
+                do: [ :each | stdout nextPutAll: '    '; print: each; nl ] ].
+
+        result failureCount > 0 ifTrue: [
+            stdout nextPutAll: 'Failures:'; nl.
+            (result failures asSortedCollection: [ :a :b | a printString <= b printString ])
+                do: [ :each | stdout nextPutAll: '    '; print: each; nl ] ] ].
+
+    ^result
+!
+
 run: aString
     ^(self script: aString) value!
 

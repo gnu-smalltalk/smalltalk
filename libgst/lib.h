@@ -70,7 +70,7 @@ extern const char *_gst_user_file_base_path;
    command line is parsed, the checking of the dates of the kernel source files
    against the image file date is overridden.  If it is NULL, it is set to
    default_image_name.  */
-extern const char *_gst_binary_image_name 
+extern char *_gst_binary_image_name 
   ATTRIBUTE_HIDDEN;
 
 /* This is used by the callin functions to auto-initialize Smalltalk.

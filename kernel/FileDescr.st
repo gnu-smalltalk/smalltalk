@@ -585,11 +585,6 @@ atEnd
 	self peek.
 	atEnd isNil ifTrue: [ ^false ] ].
     ^atEnd
-!
-
-isExternalStream
-    "Answer whether the receiver streams on a file or socket."
-    ^true
 ! !
 
 
@@ -646,6 +641,12 @@ initialize
 newBuffer
     "Private - Answer a String to be used as the receiver's buffer"
     ^String new: 1
+!
+
+readStream
+    ^(access bitAnd: 1) = 0
+	ifTrue: [ self class open: self name mode: FileStream read ]
+	ifFalse: [ self ]
 ! !
 
 

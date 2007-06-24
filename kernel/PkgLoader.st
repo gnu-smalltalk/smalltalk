@@ -229,10 +229,11 @@ extractDependenciesFor: packagesList ifMissing: aBlock
      prerequisites which are not available."
 
     | toBeLoaded featuresFound dependencies allPrereq allFeatures |
-    toBeLoaded := packagesList asOrderedCollection.
-    toBeLoaded := toBeLoaded collect: [ :each | each asString ].
     featuresFound := Set withAll: Smalltalk.Features.
     featuresFound := featuresFound collect: [ :each | each asString ].
+    toBeLoaded := packagesList asOrderedCollection.
+    toBeLoaded := toBeLoaded collect: [ :each | each asString ].
+    toBeLoaded removeAll: featuresFound ifAbsent: [ :doesNotMatter | ].
     dependencies := packagesList collect: [ :each | each asString ].
     [
 	allPrereq := Set new.

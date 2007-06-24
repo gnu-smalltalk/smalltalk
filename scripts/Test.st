@@ -33,7 +33,7 @@ Smalltalk arguments isEmpty ifTrue: [ ObjectMemory quit ]!
 | helpString verbose script suite result quiet |
 quiet := false.
 verbose := false.
-FileStream verbose: true.
+FileStream verbose: false.
 script := ''.
 
 helpString :=
@@ -101,33 +101,7 @@ FileStream verbose: false.
 	stderr nextPutAll: 'gst-sunit: you should load SUnit first.'; nl.
 	ObjectMemory quit: 1 ].
 
-suite := TestSuitesScripter run: script.
-
-"Set log policy to write to stdout."
-quiet
-    ifTrue: [ suite logPolicy: TestLogPolicy null ].
-verbose
-    ifTrue: [ suite logPolicy: (TestVerboseLog on: stdout) ].
-(quiet or: [ verbose ])
-    ifFalse: [ suite logPolicy: (TestCondensedLog on: stdout) ].
-
-result := suite run.
-
-"Print result depending on verboseness."
-quiet ifFalse: [
-    result runCount < result passedCount
-        ifTrue: [ stdout nl ].
-
-    result printNl.
-    result errorCount > 0 ifTrue: [
-        stdout nextPutAll: 'Errors:'; nl.
-        (result errors asSortedCollection: [ :a :b | a printString <= b printString ])
-            do: [ :each | stdout nextPutAll: '    '; print: each; nl ] ].
-
-    result failureCount > 0 ifTrue: [
-        stdout nextPutAll: 'Failures:'; nl.
-        (result failures asSortedCollection: [ :a :b | a printString <= b printString ])
-            do: [ :each | stdout nextPutAll: '    '; print: each; nl ] ] ].
+result := TestSuitesScripter run: script quiet: quiet verbose: verbose.
 
 result runCount = result passedCount
     ifFalse: [ ObjectMemory quit: 1 ]!

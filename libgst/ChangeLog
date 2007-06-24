@@ -1,3 +1,9 @@
+2007-06-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lib.c: Put full path names into kernel/image paths and into
+	the image file name.
+	* libgst/lib.h: Adjust constness.
+
 2007-06-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.c: Use GetFullPathName under Windows.
