@@ -30,7 +30,7 @@
 #
 ########################################################################
 
-OPTIONS='-h|--help --version --no-load --no-install --uninstall --dist
+OPTIONS='-h|--help --version --load --no-load --no-install --uninstall --dist
 	-t|--target-directory: --list-files: --list-packages
 	--srcdir: --distdir|--destdir:
 	-n|--dry-run -I|--image-file:'
@@ -135,7 +135,7 @@ getopt () {
 }
 
 getopt "$@" | {
-  load_dry_run=
+  load_dry_run=-n
   load_test=
   list=false
   run_cmd=eval
@@ -145,7 +145,7 @@ getopt "$@" | {
     case $opt in
       ERROR) show_help --bad ;;
       --help) show_help --help ;;
-      --dist | --uninstall | --no-load) load_dry_run=-n ;;
+      --load) load_dry_run= ;;
       --test) load_test=--test ;;
       --dry-run) run_cmd=: ;;
       --list-files) list=: ;;
@@ -172,9 +172,7 @@ getopt "$@" | {
       packages=`eval gst scripts/Package.st \
 		${srcdir:+"--srcdir=$srcdir"} \
 		--list-packages "$files" `
-      "@bindir@/gst-load" \
-		${image_file:+"--image-file=$image_file"} \
-		$load_dry_run $load_test $packages
+      gst scripts/Load.st $load_dry_run $load_test $packages
     fi
   fi
 }

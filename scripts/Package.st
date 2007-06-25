@@ -29,6 +29,24 @@
  ======================================================================"
 
 
+Package extend [
+    isStarPackageBody [
+	^'*.star#uzip' match: self baseDirectories first
+    ]
+
+    starFileName [
+	| dir |
+	self isStarPackageBody ifFalse: [ self halt ].
+	dir := self baseDirectories first.
+	^dir copyFrom: 1 to: dir size - 5 ]
+
+    runCommand: aCommand [
+	self isStarPackageBody
+	    ifTrue: [ aCommand runOnStar: self ]
+	    ifFalse: [ aCommand runOnPackage: self ]
+    ]
+]
+
 Kernel.PackageDirectory subclass: PackageFile [
     refreshStarList []
 
@@ -49,9 +67,15 @@ Kernel.PackageDirectories subclass: PackageFiles [
 
     addFile: fileName [
 	| packageFile |
-	packageFile := PackageFile
-	    on: fileName
-	    baseDirectories: (self baseDirsFor: fileName).
+	packageFile := ('*.star' match: fileName)
+	    ifFalse: [
+		PackageFile
+		    on: fileName
+		    baseDirectories: (self baseDirsFor: fileName) ]
+	    ifTrue: [
+		PackageFile
+		    on: fileName, '#uzip/package.xml'
+		    baseDirectories: fileName, '#uzip' ].
 
 	packageFile refresh.
 	self add: packageFile.
@@ -80,7 +104,7 @@ File extend [
     emitSymlink: dest [
 	self isDirectory ifTrue: [ ^(Directory name: dest) emitMkdir ].
 
-	('cp -pf %1 %2'
+	('$LN_S -f %1 %2'
 		bindWith: self
 		with: (File name: dest)) displayNl
     ]
@@ -101,12 +125,149 @@ Directory extend [
     ]
 ]
 
-| installDir mode listFiles destdir files packageFiles helpString |
+Object subclass: Command [
+    | packages installDir |
 
-mode := #install.
+    validateDestDir: destdir installDir: instDir [ 
+	instDir isNil ifTrue: [ ^self ].
+	((Directory name: instDir) name ~= instDir
+	    and: [ destdir notEmpty ]) ifTrue: [
+		self error: '--destdir used with relative target directory' ]
+    ]
+
+    destDir: destdir installDir: instDir [
+	self validateDestDir: destdir installDir: installDir.
+	instDir isNil
+	    ifTrue: [ installDir := destdir, self defaultInstallDir ]
+	    ifFalse: [ installDir := destdir, instDir ]
+    ]
+
+    defaultInstallDir [ ^Directory image ]
+    installDir [ ^installDir ]
+
+    packages [
+	packages isNil ifTrue: [ packages := PackageFiles new ].
+	^packages 
+    ]
+
+    srcdir: aString [ self packages srcdir: aString ]
+    addAllFiles: aCollection [ self packages addAllFiles: aCollection ]
+
+    run [ self packages do: [ :pkg | pkg runCommand: self ] ]
+    runOnStar: self [ self runOnPackage: self ]
+    runOnPackage: self [ ]
+
+    listFiles: listFiles [
+        listFiles do: [ :each || package |
+	    package := self packages at: each.
+	    package allFiles do: [ :file |
+		(package findPathFor: file) displayNl ] ]
+    ]
+]
+
+Command subclass: PkgDist [
+    validateDestDir: destdir installDir: installDir [ 
+	destdir isEmpty ifTrue: [
+	    self error: 'using --dist without specifying --distdir' ].
+    ]
+
+    defaultInstallDir [ ^'' ]
+    runOnPackage: aPackage [
+	| dirs files baseDir |
+	files := aPackage files.
+        dirs := files collect: [ :file |
+	    Directory append: (File pathFor: file) to: aPackage relativeDirectory ].
+
+        dirs asSet asSortedCollection do: [ :dir || destName |
+	    destName := Directory append: dir to: self installDir.
+	    (Directory name: destName) emitMkdir ].
+
+	baseDir := Directory append: aPackage relativeDirectory to: self installDir.
+        files do: [ :file || srcFile destName |
+	    srcFile := File name: (aPackage findPathFor: file).
+	    destName := Directory append: file to: baseDir.
+	    srcFile emitSymlink: destName ]
+    ]
+]
+
+Command subclass: PkgInstall [
+    run [
+        | destFile mergeResult |
+        "Create the installation directory.  Then, if we are installing, add
+         packages.xml to the list and merge the supplied packages files with it.
+         This is temporary, as installation will create .star packages later on."
+        (Directory name: self installDir) emitMkdir.
+
+        "This is also temporary.  To merge the packages.xml file, we need to
+         really create the file.  This screws up --dry-run but, again, it's
+         temporary.  For distribution it is not necessary, because the distdir
+	 should have already been created."
+        ((Directory name: self installDir) name subStrings: $/)
+	    inject: (Directory name: '/')
+	    into: [ :old :each || dir |
+	        dir := old directoryAt: each.
+	        dir exists ifFalse: [ dir := Directory create: dir name ].
+	        dir ].
+
+	"Do merge the package files.  So far we did this in install mode only,
+	 but it actually makes more sense to do it in distribution mode."
+        destFile := File name: self installDir, '/packages.xml'.
+	mergeResult := packages copy.
+        destFile exists ifTrue: [
+	    "In this case, we can pass problematic packages through."
+	    [ mergeResult addFile: destFile name ]
+		on: Kernel.PackageNotAvailable
+		do: [ :ex | ex resume ] ].
+
+        destFile withWriteStreamDo: [ :s | mergeResult printOn: s ].
+	super run
+    ]
+
+    runOnPackage: aPackage [
+	"Right now this is almost a copy of PkgDist>>#runOnPackage:, but
+	 this will change when this will create a .star file."
+	| dirs files baseDir |
+	files := aPackage allFiles.
+        dirs := files collect: [ :file |
+	    Directory append: (File pathFor: file) to: aPackage relativeDirectory ].
+
+        dirs asSet asSortedCollection do: [ :dir || destName |
+	    destName := Directory append: dir to: self installDir.
+	    (Directory name: destName) emitMkdir ].
+
+	baseDir := Directory append: aPackage relativeDirectory to: self installDir.
+        files do: [ :file || srcFile destName |
+	    srcFile := File name: (aPackage findPathFor: file).
+	    destName := Directory append: file to: baseDir.
+	    srcFile emitInstall: destName ]
+    ]
+]
+
+Command subclass: PkgUninstall [
+    runOnPackage: aPackage [
+	| baseDir |
+	baseDir := Directory append: aPackage relativeDirectory to: self installDir.
+	aPackage allFiles do: [ :file || destName |
+	    destName := (Directory append: file to: baseDir).
+	    (File name: destName) emitRemove ]
+    ]
+]
+
+Command subclass: PkgList [
+    validateDestDir: destdir installDir: installDir [ ]
+]
+
+PkgList subclass: PkgPackageList [
+    runOnPackage: aPackage [ aPackage name displayNl ]
+]
+
+| srcdir installDir mode listFiles destdir packageFiles helpString |
+
+mode := PkgInstall.
 listFiles := OrderedCollection new.
-installDir := Directory image.
+installDir := nil.
 destdir := ''.
+srcdir := nil.
 packageFiles := OrderedCollection new.
 packages := PackageFiles new.
 
@@ -116,7 +277,7 @@ helpString :=
 
     -n, --dry-run               print commands rather than running them
 	--test                  run unit tests after merging
-	--no-load               don''t load the Smalltalk files in the image
+	--load                  also load the Smalltalk files in the image
         --uninstall             remove the packages mentioned in the FILES
         --dist                  create symbolic links of non-built files
         --list-files PKG        just output the list of files in the package
@@ -137,9 +298,11 @@ The default target directory is $install_dir.'.
 
 [
     Smalltalk
-        "--no-load, --image-file, --dry-run are processed by gst-package."
-        arguments: '-h|--help --no-load --uninstall --dist
-            -t|--target-directory: --list-files: --list-packages
+        "--load, --image-file, --dry-run are processed by gst-package.
+	 --no-load present for backwards compatibility, it is now the default.
+	 --no-install is also present for backwards compatibility."
+        arguments: '-h|--help --no-load --load --no-install --uninstall
+            --dist -t|--target-directory: --list-files: --list-packages
             --srcdir: --distdir|--destdir: -n|--dry-run -I|--image-file:'
 
         do: [ :opt :arg |
@@ -147,102 +310,28 @@ The default target directory is $install_dir.'.
                 helpString displayOn: stderr.
                 ObjectMemory quit: 0 ].
 
-            opt = 'uninstall' ifTrue: [ mode := #uninstall ].
-            opt = 'dist' ifTrue: [ mode := #dist ].
+            opt = 'uninstall' ifTrue: [ mode := PkgUninstall ].
+            opt = 'dist' ifTrue: [ mode := PkgDist ].
+            opt = 'list-packages' ifTrue: [ mode := PkgPackageList ].
+
             opt = 'target-directory' ifTrue: [ installDir := arg ].
-            opt = 'list-files' ifTrue: [ listFiles add: arg ].
-            opt = 'list-packages' ifTrue: [ mode := #list ].
-            opt = 'srcdir' ifTrue: [ packages srcdir: arg ].
+            opt = 'no-install' ifTrue: [ mode := Command ].
+            opt = 'list-files' ifTrue: [ mode := PkgList. listFiles add: arg ].
+            opt = 'srcdir' ifTrue: [ srcdir := arg ].
             opt = 'destdir' ifTrue: [ destdir := arg ].
 
             opt isNil ifTrue: [ packageFiles add: arg ] ].
 
     "Validate the installation and source directory."
-    mode = #dist
-        ifTrue: [
-	    destdir isEmpty ifTrue: [
-	        self error: 'using --dist without specifying --distdir' ].
-	    installDir := '' ]
-        ifFalse: [
-	    ((Directory name: installDir) name ~= installDir
-	        and: [ destdir notEmpty ]) ifTrue: [
-		    self error: '--destdir used with relative target directory' ] ].
-
-    packages addAllFiles: packageFiles.
-
-    "Process --uninstall, --list-packages, --list-files now, then exit."
-    mode = #uninstall ifTrue: [
-        packages do: [ :each || baseDir |
-	    baseDir := Directory append: each relativeDirectory to: installDir.
-	    each allFiles do: [ :file || destName |
-	        destName := destdir, (Directory append: file to: baseDir).
-	        (File name: destName) emitRemove ] ].
-
-        ObjectMemory quit ].
-
-    mode = #list ifTrue: [
-        packages do: [ :each | each name displayNl ].
-        ObjectMemory quit ].
-
-    listFiles isEmpty ifFalse: [
-        listFiles do: [ :each || package |
-	    package := packages at: each.
-	    package allFiles do: [ :file |
-		(package findPathFor: file) displayNl ] ].
-        ObjectMemory quit ].
-
-
-    "Create the installation directory.  Then, if we are installing, add
-     packages.xml to the list and merge the supplied packages files with it.
-     This is temporary, as installation will create .star packages later on."
-
-    installDir := destdir, installDir.
-    (Directory name: installDir) emitMkdir.
-
-    "This is also temporary.  To merge the packages.xml file, we need to
-     really create the file.  This screws up --dry-run but, again, it's
-     temporary."
-    ((Directory name: installDir) name subStrings: $/)
-	inject: (Directory name: '/')
-	into: [ :old :each || dir |
-	    dir := old directoryAt: each.
-	    dir exists ifFalse: [ dir := Directory create: dir name ].
-	    dir ].
-
-    mode = #dist ifFalse: [
-        | destFile mergeResult |
-        destFile := File name: installDir, '/packages.xml'.
-	mergeResult := packages copy.
-        destFile exists ifTrue: [
-	    "In this case, we can pass problematic packages through."
-	    [ mergeResult addFile: destFile name ]
-		on: Kernel.PackageNotAvailable
-		do: [ :ex | ex resume ] ].
-
-        destFile withWriteStreamDo: [ :s | mergeResult printOn: s ] ].
-
-    packages do: [ :each || dirs files baseDir |
-	files := mode = #dist
-	    ifTrue: [ each files ]
-	    ifFalse: [ each allFiles ].
-
-        dirs := files collect: [ :file |
-	    Directory append: (File pathFor: file) to: each relativeDirectory ].
-
-        dirs asSet asSortedCollection do: [ :dir |
-	    destName := Directory append: dir to: installDir.
-	    (Directory name: destName) emitMkdir ].
-
-	baseDir := Directory append: each relativeDirectory to: installDir.
-        files do: [ :file || srcFile destName |
-	    srcFile := File name: (each findPathFor: file).
-	    destName := Directory append: file to: baseDir.
-
-            mode = #dist
-	        ifTrue: [ srcFile emitSymlink: destName ]
-	        ifFalse: [ srcFile emitInstall: destName ] ] ]
+    mode new
+        destDir: destdir installDir: installDir;
+	srcdir: srcdir;
+	addAllFiles: packageFiles;
+	run;
+	listFiles: listFiles
 ]
     on: Error
     do: [ :ex |
-	('gst-package: ', ex messageText) displayOn: stderr.
+	('gst-package: ', ex messageText, '
+') displayOn: stderr.
 	"ex pass." ObjectMemory quit: 1 ].

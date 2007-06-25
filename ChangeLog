@@ -1,3 +1,7 @@
+2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/PkgLoader.st: Refactor using Command pattern.
+
 2007-06-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Add #readStream.
