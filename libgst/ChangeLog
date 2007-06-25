@@ -1,3 +1,7 @@
+2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Don't lose on integer literals followed by identifiers.
+
 2007-06-19  Paolo Bonzini  <bonzini@gnu.org>
 
         * libgst/sysdep.c: Look for backslashes in Windows paths.

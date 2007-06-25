@@ -435,13 +435,18 @@ enumerate: aBlock
 predicates
     ^predicates!
 
-usedVarNames
+xpathUsedVarNames
     | list |
     list := OrderedCollection new.
     self enumerate: [:exp |
     	(exp isKindOf: XPathVariable)
     		ifTrue: [list add: exp name]].
     ^list! !
+
+!Object methodsFor: 'xpath'!
+
+xpathUsedVarNames
+    ^OrderedCollection new! !
 
 !XPathExpression methodsFor: 'matching'!
 
@@ -2020,6 +2025,9 @@ unionExpr
 atEndOfExpression
     ^tokenType == #endOfExpression!
 
+init: streamOrString notifying: nothing failBlock: bah
+    self source: streamOrString!
+
 source: streamOrString
     buffer := String new writeStream.
     stack := OrderedCollection new.
@@ -2041,6 +2049,9 @@ pastEnd
 result
     stack size = 1 ifFalse: [self error: 'Parsing logic error, incorrect number of values on the stack'].
     ^stack first!
+
+initScanner
+    "Present for compatibility with the parser in VW."!
 
 xmlNode: aNode
     xmlNode := aNode! !
