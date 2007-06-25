@@ -958,6 +958,8 @@ scan_number (int c,
     }
   else
     {
+      char *p = obstack_finish (_gst_compilation_obstack);
+      obstack_free (_gst_compilation_obstack, p);
       lvalp->ival = (intptr_t) num;
       return (INTEGER_LITERAL);
     }

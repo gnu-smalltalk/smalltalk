@@ -490,7 +490,7 @@ normalizeVariables
     [sorted size = lastSize] whileFalse:
     	[lastSize := sorted size.
     	unsorted copy do: [:var |
-    		list := var expression usedVarNames.
+    		list := var expression xpathUsedVarNames.
     		list := list reject: [:nm | sorted includes: nm].
     		list isEmpty
     			ifTrue:
@@ -1135,9 +1135,9 @@ test2
     | test doc default result |
     default := self examplesDirectory.
     test := self new.
-    test readFileNamed: (default construct: 'activityinfo.xsl').
+    test readFileNamed: (default nameAt: 'activityinfo.xsl').
     doc := XMLParser
-    		processDocumentInFilename: (default construct: 'activityinfo.xml')
+    		processDocumentInFilename: (default nameAt: 'activityinfo.xml')
     		beforeScanDo: [:parser | parser validate: false].
     result := test process: doc.
     self store: result on: 'activityinfo.html'!
@@ -1148,9 +1148,9 @@ test2a
     | test doc default result |
     default := self examplesDirectory.
     test := self new.
-    test readFileNamed: (default construct: 'activityinfo2.xsl').
+    test readFileNamed: (default nameAt: 'activityinfo2.xsl').
     doc := XMLParser
-    		processDocumentInFilename: (default construct: 'activityinfo.xml')
+    		processDocumentInFilename: (default nameAt: 'activityinfo.xml')
     		beforeScanDo: [:parser | parser validate: false].
     result := test process: doc.
     self store: result on: 'activityinfo2.html'.!
@@ -1161,9 +1161,9 @@ test2b
     | test doc default result |
     default := self examplesDirectory.
     test := self new.
-    test readFileNamed: (default construct: 'activityinfo3.xsl').
+    test readFileNamed: (default nameAt: 'activityinfo3.xsl').
     doc := XMLParser
-    		processDocumentInFilename: (default construct: 'activityinfo.xml')
+    		processDocumentInFilename: (default nameAt: 'activityinfo.xml')
     		beforeScanDo: [:parser | parser validate: false].
     result := test process: doc.
     self store: result on: 'activityinfo3.html'.!
@@ -1174,9 +1174,9 @@ test3
     | test doc default result |
     default := self examplesDirectory.
     test := self new.
-    test readFileNamed: (default construct: 'listgen.xsl').
+    test readFileNamed: (default nameAt: 'listgen.xsl').
     doc := XMLParser
-    		processDocumentInFilename: (default construct: 'listgen.xml')
+    		processDocumentInFilename: (default nameAt: 'listgen.xml')
     		beforeScanDo: [:parser | parser validate: false].
     result := test process: doc.
     self store: result on: 'listgen.html'.!
@@ -1502,7 +1502,9 @@ processAttributeValue: aString for: aNodeContext
     						expr := p result.
     						elm := expr xpathValueIn: aNodeContext.
     						output nextPutAll: elm xpathAsString.
-    						p pastEnd ifFalse: [source skip: -1]]]
+
+    						"Not needed with our XPath parser!"
+						"p pastEnd ifFalse: [source skip: -1]" ]]
     			ifFalse: [ch = $}
     				ifTrue:
     					[source next = $} ifFalse: [self error: 'Expected doubled }'].

@@ -1,3 +1,7 @@
+2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Don't lose on integer literals followed by identifiers.
+
 2007-06-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Put full path names into kernel/image paths and into
