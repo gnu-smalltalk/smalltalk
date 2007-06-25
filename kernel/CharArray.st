@@ -305,14 +305,14 @@ subStrings: aCharacter
 
 bindWith: s1
     "Answer the receiver with every %1 replaced by the displayString of s1"
-    ^self bindWithArguments: { s1 }
+    ^self % { s1 }
 !
 
 bindWith: s1 with: s2
     "Answer the receiver with every %1 or %2 replaced by s1 or s2,
      respectively.  s1 and s2 are `displayed' (i.e. their
      displayString is used) upon replacement."
-    ^self bindWithArguments: { s1. s2 }
+    ^self % { s1. s2 }
 !
 
 bindWith: s1 with: s2 with: s3
@@ -320,7 +320,7 @@ bindWith: s1 with: s2 with: s3
      respectively.  s1, s2 and s3 are `displayed' (i.e. their
      displayString is used) upon replacement."
 
-    ^self bindWithArguments: { s1. s2. s3 }
+    ^self % { s1. s2. s3 }
 !
 
 bindWith: s1 with: s2 with: s3 with: s4
@@ -328,10 +328,20 @@ bindWith: s1 with: s2 with: s3 with: s4
      or s4, respectively.  s1, s2, s3 and s4 are `displayed' (i.e. their
      displayString is used) upon replacement."
 
-    ^self bindWithArguments: { s1. s2. s3. s4 }
+    ^self % { s1. s2. s3. s4 }
 !
 
 bindWithArguments: anArray
+    "Answer the receiver with every %n (1<=n<=9) replaced by the n-th element
+     of anArray.  The replaced elements are `displayed' (i.e. their
+     displayString is used).  In addition, the special pattern
+     %<trueString|falseString>n is replaced with one of the two
+     strings depending on the n-th element of anArray being true or false."
+
+    ^self % anArray
+!
+
+% anArray
     "Answer the receiver with every %n (1<=n<=9) replaced by the n-th element
      of anArray.  The replaced elements are `displayed' (i.e. their
      displayString is used).  In addition, the special pattern

@@ -1,3 +1,7 @@
+2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CharArray.st: Add #%.
+
 2007-06-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/File.st: Fix fullNameFor: returning root, add
