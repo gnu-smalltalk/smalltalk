@@ -85,6 +85,14 @@ o   Initial support for ZIPped package files.  These should be named ".star"
 
 -----------------------------------------------------------------------------
 
+NEWS FROM 2.3.5 TO 2.3.6
+
+o   Added #% as a shortcut for CharacterArray>>#bindWithArguments:.
+
+o   Fixes to File and Directory for Windows
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 2.3.4 TO 2.3.5
 
 o   Added more examples of continuations.
