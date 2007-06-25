@@ -83,9 +83,7 @@ example2Host: host
     "self example2Host: 'localhost'."
 
     | user message client |
-    user := '%1@%2'
-	bindWith: (Smalltalk getenv: 'USER')
-	with: IPAddress localHostName.
+    user := '%1@%2' % { Smalltalk getenv: 'USER'. IPAddress localHostName }.
 
     message := MIME.MimeEntity readFrom:
 ('From: ', user, '
@@ -106,9 +104,7 @@ exampleHost: host
     "self exampleHost: 'localhost'."
 
     | user message client |
-    user := '%1@%2'
-	bindWith: (Smalltalk getenv: 'USER')
-	with: IPAddress localHostName.
+    user := '%1@%2' % { Smalltalk getenv: 'USER'. IPAddress localHostName }.
     message := MIME.MimeEntity readFrom:
 ('From: ', user, '
 To: ', user, '

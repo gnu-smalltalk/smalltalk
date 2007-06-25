@@ -384,9 +384,7 @@ id
 languageDirectory: rootDirectory
     "Answer the directory where data files for the current language reside,
      given the root directory of the locale data."
-    ^'%1/%2'
-	bindWith: rootDirectory
-	with: self language!
+    ^'%1/%2' % { rootDirectory. self language }!
 
 languageDirectory
     "Answer the directory where data files for the current language reside."
@@ -396,10 +394,7 @@ territoryDirectory: rootDirectory
     "Answer the directory where data files for the current language,
      specific to the territory, reside, given the root directory of the
      locale data."
-    ^'%1/%2_%3'
-	bindWith: rootDirectory
-	with: self language
-	with: self territory!
+    ^'%1/%2_%3' % { rootDirectory. self language. self territory }!
 
 territoryDirectory
     "Answer the directory where data files for the current language,

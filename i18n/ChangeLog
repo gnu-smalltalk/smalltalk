@@ -1,3 +1,7 @@
+2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* i18n/Locale.st: Use #%.
+
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.3 released.

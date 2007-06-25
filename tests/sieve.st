@@ -44,5 +44,5 @@ Eval [
 	        count := count + 1 ]].
     ].
 
-    ('Count: %1' bindWith: count) displayNl
+    ('Count: %1' % { count }) displayNl
 ]

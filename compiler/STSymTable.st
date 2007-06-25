@@ -209,7 +209,7 @@ declareTemporary: tempName canStore: canStore for: stCompiler
 	ifTrue: [(variables at: symbol) scope < scopes size
 		     ifTrue: [stCompiler compileWarning:
 				  ('variable ''%1'' shadows another'
-					 bindWith: tempName)]
+					 % { tempName })]
 		     ifFalse: [^stCompiler compileError:
 				   'duplicate variable name ', tempName]].
     variables at: symbol put: (STVariable

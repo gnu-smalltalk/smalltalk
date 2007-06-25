@@ -3756,7 +3756,7 @@ makeDirtyBlock
 !
 
 popIntoArray: anIndex
-    stream tab; nextPutAll: ('pop and store into array element[%1]' bindWith: anIndex); nl
+    stream tab; nextPutAll: ('pop and store into array element[%1]' % { anIndex }); nl
 !
 
 popJumpIfFalseTo: destination
@@ -3796,7 +3796,7 @@ pushGlobal: anObject
 !
 
 pushInstVar: anIndex
-    stream tab; nextPutAll: ('push Instance Variable[%1]' bindWith: anIndex); nl
+    stream tab; nextPutAll: ('push Instance Variable[%1]' % { anIndex }); nl
 !
 
 pushLiteral: anObject
@@ -3805,7 +3805,7 @@ pushLiteral: anObject
     (printString isNil or: [ printString size > 40 ]) ifTrue: [
         printString := anObject isClass
 	    ifTrue: [ anObject name displayString ]
-	    ifFalse: [ '%1 %2' bindWith: anObject class article with: anObject class name displayString ]].
+	    ifFalse: [ '%1 %2' % { anObject class article. anObject class name } ]].
 
     stream tab; nextPutAll: 'push '; nextPutAll: printString; nl
 !
@@ -3815,11 +3815,11 @@ pushSelf
 !
 
 pushTemporary: anIndex
-    stream tab; nextPutAll: ('push Temporary[%1]' bindWith: anIndex); nl
+    stream tab; nextPutAll: ('push Temporary[%1]' % { anIndex }); nl
 !
 
 pushTemporary: anIndex outer: scopes
-    stream tab; nextPutAll: ('push Temporary[%1] from outer context #%2' bindWith: anIndex with: scopes); nl
+    stream tab; nextPutAll: ('push Temporary[%1] from outer context #%2' % { anIndex. scopes }); nl
 !
 
 returnFromContext
@@ -3831,7 +3831,7 @@ returnFromMethod
 !
 
 send: aSymbol numArgs: anInteger
-    stream tab; nextPutAll: ('send %2 args message %1' bindWith: aSymbol storeString with: anInteger); nl
+    stream tab; nextPutAll: ('send %2 args message %1' % { aSymbol storeString. anInteger }); nl
 !
 
 storeGlobal: anObject
@@ -3839,19 +3839,19 @@ storeGlobal: anObject
 !
 
 storeInstVar: anIndex
-    stream tab; nextPutAll: ('store into Instance Variable[%1]' bindWith: anIndex); nl
+    stream tab; nextPutAll: ('store into Instance Variable[%1]' % { anIndex }); nl
 !
 
 storeTemporary: anIndex
-    stream tab; nextPutAll: ('store into Temporary[%1]' bindWith: anIndex); nl
+    stream tab; nextPutAll: ('store into Temporary[%1]' % { anIndex }); nl
 !
 
 storeTemporary: anIndex outer: scopes
-    stream tab; nextPutAll: ('store into Temporary[%1] from outer context #%2' bindWith: anIndex with: scopes); nl
+    stream tab; nextPutAll: ('store into Temporary[%1] from outer context #%2' % { anIndex. scopes }); nl
 !
 
 superSend: aSymbol numArgs: anInteger
-    stream tab; nextPutAll: ('send %2 args message %1 to super' bindWith: aSymbol with: anInteger); nl
+    stream tab; nextPutAll: ('send %2 args message %1 to super' % { aSymbol. anInteger }); nl
 ! !
 
 !TargetInstructionPrinter methodsFor: 'decoding bytecodes'!

@@ -77,7 +77,9 @@ Eval [
     m1 := Array newMatrix: size columns: size.
     m2 := Array newMatrix: size columns: size.
     n timesRepeat: [ mm := m1 mmult: m2 ].
-    ('%1 %2 %3 %4' bindWith: (mm atXY: 1@1)
-        with: (mm atXY: 3@4) with: (mm atXY: 4@3)
-        with: (mm atXY: 5@5)) displayNl
+    ('%1 %2 %3 %4' % {
+	mm atXY: 1@1.
+        mm atXY: 3@4.
+	mm atXY: 4@3.
+        mm atXY: 5@5 }) displayNl
 ]

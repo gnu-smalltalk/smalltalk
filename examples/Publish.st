@@ -884,7 +884,7 @@ Alphabetic list of classes:'.
 	('writing documentation into ', fileName, '.htm') displayNl.
 	self publish: each onFile: fileName, '.htm'.
 	aFileStream
-	    nextPutAll: ('<A HREF="%1.htm">%1</A>' bindWith: fileName);
+	    nextPutAll: ('<A HREF="%1.htm">%1</A>' % { fileName });
 	    nl.
     ].
 
@@ -989,10 +989,7 @@ Filed out from %1 on %2	 %3 -->
     <TITLE>%4</TITLE>
 </HEAD>
 <BODY>
-' bindWith: Smalltalk version
-  with: (now at: 1) printString
-  with: (now at: 2) printString
-  with: self className).
+' % { Smalltalk version. now at: 1. now at: 2. self className }).
 
     self
 	nextPutAll: '<DL><DT><B>Category: ';
@@ -1364,7 +1361,7 @@ emitHeader: now
 @section %1
 @clindex %1
 
-' bindWith: self className).
+' % { self className }).
 
     self
 	nextPutAll: '@table @b'; nl;

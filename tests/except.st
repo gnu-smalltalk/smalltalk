@@ -72,6 +72,6 @@ Eval [
 	    ifFalse: [ 1 max: Smalltalk arguments first asInteger ].
     
     1 to: n do: [ :each | each someFunction ].
-    ('Exceptions: HI=%1 / LO=%2'
-	    bindWith: HiException count with: LoException count) displayNl
+    ('Exceptions: HI=%1 / LO=%2' % { HiException count. LoException count })
+	displayNl
 ]

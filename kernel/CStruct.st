@@ -210,8 +210,7 @@ computeTypeString: type block: aBlock
 
     type isSymbol ifFalse: [
 	typeString := '#{%1} value type'
-	    bindWith: ((type value nameIn: Namespace current)
-	    copyReplaceAll: $  with: $.).
+	    % { type value nameIn: Namespace current }.
 
 	^aBlock value: type value value: typeString.
     ].

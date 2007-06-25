@@ -41,7 +41,7 @@ nil!
 !ClassBrowser methodsFor: 'initializing'!
 
 createTopView
-    ^BrowserShell new: ('Class Browser on %1' bindWith: startingClass)!
+    ^BrowserShell new: ('Class Browser on %1' % { startingClass })!
 
 openOn: aClass 
     "Create and open a class hierarchy browser on startingClass"

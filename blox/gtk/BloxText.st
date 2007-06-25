@@ -851,7 +851,7 @@ tag: name bind: event to: aSymbol of: anObject parameters: params
 	to: aSymbol
 	of: anObject
 	parameters: params
-	prefix: ('%1 tag bind %2' bindWith: self connected with: name)
+	prefix: ('%1 tag bind %2' % { self connected. name })
 ! !
 
 

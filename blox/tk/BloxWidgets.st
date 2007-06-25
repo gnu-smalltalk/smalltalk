@@ -879,8 +879,8 @@ label: value
 !BButton methodsFor: 'private'!
 
 create
-    self create: ('-highlightthickness 0 -takefocus 1 -command {callback %1 invokeCallback} -font {', self class defaultFont, '}'
-	bindWith: self asOop printString)
+    self create: ('-highlightthickness 0 -takefocus 1 -command {callback %1 invokeCallback} -font {%2}'
+	% { self asOop. self class defaultFont })
 !
 
 setInitialSize
@@ -3687,8 +3687,7 @@ initialize: parentWidget
     label := ''.
     exists := false.
     primitive := '%1.w%2'
-	bindWith: self parent container
-	with: (self asOop printString: 36).
+	% { self parent container. self asOop printString: 36 }.
 !
 
 newMenuItemFor: pair notifying: receiver

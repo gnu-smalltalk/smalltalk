@@ -1,5 +1,11 @@
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* xml/XML.st: Use #%.
+	* xml/XPath.st: Use #%.
+	* xml/XSL.st: Use #%.
+
+2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* xml/XPath.st: Change #usedVarNames to #xpathUsedVarNames, add
 	a few methods for VW compatibility.
 	* xml/XSL.st: Adapt to these changes and to the non-bogusness of our

@@ -807,10 +807,8 @@ destroyed
 
 from: aPoint to: endPoint
     ^'%1.%2 %3.%4'
-	bindWith: aPoint y printString
-	with: (aPoint x - 1) printString
-	with: endPoint y printString
-	with: (endPoint x - 1) printString
+	% { aPoint y printString.  (aPoint x - 1) printString.
+	    endPoint y printString.  (endPoint x - 1) printString }
 !
 
 parseResult
@@ -835,7 +833,7 @@ tag: name bind: event to: aSymbol of: anObject parameters: params
 	to: aSymbol
 	of: anObject
 	parameters: params
-	prefix: ('%1 tag bind %2' bindWith: self connected with: name)
+	prefix: ('%1 tag bind %2' % { self connected. name })
 !
 
 widgetType

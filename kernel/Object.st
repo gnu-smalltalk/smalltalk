@@ -598,8 +598,8 @@ inspect
     	output := [ object printString ]
 		      on: Error
 		      do: [ :ex | ex return: ('%1 %2'
-				      bindWith: object class article
-				      with: object class name asString) ].
+				      % { object class article.
+				          object class name asString }) ].
 
         i <= instVars size
 	    ifTrue: [

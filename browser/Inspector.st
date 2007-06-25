@@ -131,10 +131,10 @@ initFieldListsMenu
 open
     | pane |
     topView := BrowserShell new: ('Inspecting %1%2'
-	bindWith: (fieldList value isClass
+	% { fieldList value isClass
 			ifFalse: [ fieldList value class article, ' ' ]
-			ifTrue: [ '' ])
-	with: (fieldList value class nameIn: Namespace current)).
+			ifTrue: [ '' ].
+	    fieldList value class nameIn: Namespace current }).
     topView data: self.
     topView blox 
 	x: 20
@@ -322,7 +322,7 @@ currentFieldValue
 currentFieldString
     ^[ self currentFieldValue printString ] on: Error do: [ :ex |
 	ex return: ('[%1 exception raised while printing item]'
-			bindWith: ex class) ]!
+			% { ex class }) ]!
 
 fieldsSortBlock
     "nil = use OrderedCollection, else a block to be used as fields'

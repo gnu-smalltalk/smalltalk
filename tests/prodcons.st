@@ -41,5 +41,5 @@ Eval [
     
     join wait.
     join wait.
-    ('%1 %2' bindWith: produced with: consumed) displayNl
+    ('%1 %2' % { produced. consumed }) displayNl
 ]

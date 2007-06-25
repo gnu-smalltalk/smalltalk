@@ -98,30 +98,25 @@ Kernel.PackageDirectories subclass: PackageFiles [
 
 File extend [
     emitRemove [
-	('rm -f %1' bindWith: self) displayNl
+	('rm -f %1' % { self }) displayNl
     ]
 
     emitSymlink: dest [
 	self isDirectory ifTrue: [ ^(Directory name: dest) emitMkdir ].
-
-	('$LN_S -f %1 %2'
-		bindWith: self
-		with: (File name: dest)) displayNl
+	('$LN_S -f %1 %2' % { self. File name: dest }) displayNl
     ]
 
     emitInstall: dest [
 	| mode |
 	mode := self isExecutable ifTrue: [ 8r755 ] ifFalse: [ 8r644 ].
 	('$INSTALL -m %1 %2 %3'
-		bindWith: (mode printString: 8)
-		with: self
-		with: (File name: dest)) displayNl
+	    % { mode printString: 8. self. File name: dest }) displayNl
     ]
 ]
 
 Directory extend [
     emitMkdir [
-	('$mkdir_p %1' bindWith: self) displayNl
+	('$mkdir_p %1' % { self }) displayNl
     ]
 ]
 

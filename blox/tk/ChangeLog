@@ -1,3 +1,9 @@
+2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* blox/tk/BloxBasic.st: Use #%.
+	* blox/tk/BloxText.st: Use #%.
+	* blox/tk/BloxWidgets.st: Use #%.
+
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.3 released.

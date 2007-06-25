@@ -40,5 +40,5 @@ Getopt
 	o := opt ifNil: [ '' ].
 	pat := o isString ifTrue: [ '--%1 %2' ] ifFalse: [ '-%1 %2' ].
 	a := arg ifNil: [ '' ].
-	(pat bindWith: o with: a) displayNl ]
+	(pat % { o. a }) displayNl ]
     ifError: [ 'ERROR' displayNl ]

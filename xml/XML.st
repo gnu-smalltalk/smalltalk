@@ -1739,7 +1739,7 @@ definition: aPattern
     definition := aPattern!
 
 description
-    ^'an <%1> element' bindWith: tag!
+    ^'an <%1> element' % { tag }!
 
 elementNamed: elementName
     | list |
@@ -2076,8 +2076,7 @@ completeValidationAgainst: aParser
     ndata isNil
     	ifFalse: [aParser dtd notationAt: ndata ifAbsent:
     			[aParser invalid: ('Unparsed entity "%1" uses an undeclared notation "%2"'
-    					bindWith: name
-    					with: ndata)]]! !
+    					% { name. ndata })]]! !
 
 !SAXDriver methodsFor: 'other'!
 
@@ -2692,7 +2691,7 @@ normalizeFor: aParser
     			ifFalse: [aParser malformed: 'Incomplete translation'].
     		(self duplicatesNeedTested and: [t hasDuplicatesInFollowSet])
     			ifTrue: [aParser warn: ('Nondeterministic content model %1'
-    							bindWith: self printString)].
+    							% { self })].
     		done add: t.
     		t followSet do: [:t1 |
     			(done includes: t1) ifFalse: [list add: t1]]].
@@ -2854,7 +2853,7 @@ named: aName
 !NamePattern methodsFor: 'accessing'!
 
 description
-    ^'<%1>' bindWith: name!
+    ^'<%1>' % { name }!
 
 name
     ^name! !
@@ -3041,7 +3040,7 @@ next
     large values of ch. If primitive failure code can not be trusted to do
     this, then the bounds check would have to be added back."
     (ch isNil or: [(CharacterClasses at: ch asInteger + 1) > 0])
-    	ifFalse: [parser errorHandler fatalError: (BadCharacterSignal new messageText:('A character with Unicode value %1 is not legal' bindWith: ch asInteger))].
+    	ifFalse: [parser errorHandler fatalError: (BadCharacterSignal new messageText:('A character with Unicode value %1 is not legal' % { ch asInteger }))].
     ^ch!
 
 skip: n
@@ -3517,8 +3516,7 @@ hasExpanded: anEntity
     [s == nil] whileFalse:
     	[s entity == anEntity
     		ifTrue: [self malformed: ('The %1 entity "%2" invokes itself recursively'
-    					bindWith: anEntity entityType
-    					with: anEntity name)].
+    					% { anEntity entityType. anEntity name })].
     	s := s nextLink].
     ^false!
 
@@ -3918,7 +3916,7 @@ PERef: refType
     		exp := self dtd parameterEntityAt: nm.
     		exp == nil
     			ifTrue: [self warn: ('The parameter entity "%1" has not been defined'
-    						bindWith: nm)].
+    						% { nm })].
     		exp == nil
     			ifTrue: [self isValidating
     				ifTrue:
@@ -4060,7 +4058,7 @@ charEntity: data startedIn: str1
     large values of ch. If primitive failure code can not be trusted to do
     this, then the bounds check would have to be added back."
     (CharacterClasses at: n + 1) = 0
-    	ifTrue: [sax fatalError: (BadCharacterSignal new messageText:('A character with Unicode value %1 is not legal' bindWith: n))].
+    	ifTrue: [sax fatalError: (BadCharacterSignal new messageText:('A character with Unicode value %1 is not legal' % { n }))].
     data nextPut: (Character value: n).
     self getNextChar!
 
@@ -4071,7 +4069,7 @@ closeTag: tag
     self skipSpace.
     self mustFind: '>'.
     nm = tag
-    	ifFalse: [self malformed: ('The close tag for %1 was not found' bindWith: tag asString)].
+    	ifFalse: [self malformed: ('The close tag for %1 was not found' % { tag asString })].
     sax endElement: nm namespace localName: nm type qName: nm asString.
     elementStack last definesNamespaces
     	ifTrue: [elementStack last namespaces
@@ -4176,7 +4174,7 @@ elementContent: tag openedIn: str
     braceCount := 0.
     buffer reset.
     [hereChar == nil
-    	ifTrue: [self malformed: ('The end tag for <%1> was expected' bindWith: tag)].
+    	ifTrue: [self malformed: ('The end tag for <%1> was expected' % { tag })].
     hereChar == $<
     	ifTrue:
     		[braceCount := 0.
@@ -4239,7 +4237,7 @@ generalEntityInText: str canBeExternal: external
     exp == nil
     	ifTrue:
     		[msg := 'The general entity "%1" has not been defined'
-    						bindWith: nm.
+    						% { nm }.
     		self isValidating
     			ifTrue: [self invalid: msg]
     			ifFalse: [self warn: msg].
@@ -4270,7 +4268,7 @@ popTag
     self isValidating
     	ifTrue:
     		[elementStack last canTerminate
-    			ifFalse: [self invalid: ('One of %1 was expected, but none was found' bindWith: elementStack last followSetDescription)]].
+    			ifFalse: [self invalid: ('One of %1 was expected, but none was found' % { elementStack last followSetDescription })]].
     elementStack removeLast.!
 
 pushNewTag: nm
@@ -4287,13 +4285,13 @@ pushNewTag: nm
     				types == nil
     					ifTrue: [self invalid:
     						('"%1" is not permitted at this point in the "%2" node'
-    							bindWith: nm asString
-    							with: elm tag asString)].
+    							% { nm asString.
+    							elm tag asString })].
     				elm types: types].
     		elementStack addLast: (ElementContext new tag: nm).
     		p := self dtd elementFor: nm from: self.
     		p == nil
-    			ifTrue: [self invalid: ('Using a tag (%1) without declaring it is not permitted' bindWith: nm asString)].
+    			ifTrue: [self invalid: ('Using a tag (%1) without declaring it is not permitted' % { nm asString })].
     		elementStack last type: p]
     	ifFalse:
     		[elementStack addLast: (ElementContext new tag: nm)]!
@@ -4357,7 +4355,7 @@ attType
     					'ENTITY' 'ENTITIES'
     					'NMTOKEN' 'NMTOKENS').
     		(all includes: nm)
-    			ifFalse: [self malformed: ('One of %1 was expected, but none was found' bindWith: all storeString)].
+    			ifFalse: [self malformed: ('One of %1 was expected, but none was found' % { all })].
     		type := #(#{NOTATION_AT} #{CDATA_AT} #{ID_AT}
     					#{IDREF_AT} #{IDREFS_AT}
     					#{ENTITY_AT} #{ENTITIES_AT}
@@ -4586,7 +4584,7 @@ checkReservedAttributes: nm type: type value: value
     			ifFalse: [self malformed: 'xml:space must have a value of "preserve" or "default"']].!
 
 illegalLanguageCode: value
-    self malformed: ('Illegal value (%1) for xml:lang' bindWith: value)!
+    self malformed: ('Illegal value (%1) for xml:lang' % { value })!
 
 isValidName: aTag
     aTag size = 0 ifTrue: [^false].
@@ -4615,7 +4613,7 @@ processAttributes: nm
     		attributes addLast: (self attributeFor: nm).
     		(attributes collect: [:i | i tag asString]) asSet size = attributes size
     			ifFalse: [self malformed: ('The attribute "%1" was used twice in this element''s tag'
-    							bindWith: attributes last tag asString)]].
+    							% { attributes last tag asString })]].
     self isValidating
     	ifTrue: [attributes := self validateAttributes: attributes for: nm].
     attributes := self resolveNamespaces: attributes.
@@ -4642,7 +4640,7 @@ validateAttributes: attributes for: tag
     attributeList do: [:i |
     	(attr includesKey: i key asString)
     		ifFalse: [self invalid: ('the attribute %1 was not defined in the DTD'
-    							bindWith: i key)]].
+    							% { i key })]].
     attr do: [:adef | | a |
     	a := attributeList detect: [:at | at key isLike: adef name] ifNone: [].
     	a == nil
@@ -4654,8 +4652,8 @@ validateAttributes: attributes for: tag
     						(Attribute name: adef name value: adef default)]
     			ifFalse: [adef isRequired
     				ifTrue: [self invalid: ('"%1" elements are required to have a "%2" attribute'
-    								bindWith: tag asString
-    								with: adef name asString)]]]
+    								% { tag asString.
+    								adef name asString })]]]
     		ifFalse: [adef validateValueOf: a for: self]].
     ^attributeList size = 0
     	ifTrue: [nil]
@@ -4665,12 +4663,12 @@ validateAttributes: attributes for: tag
 
 checkUnresolvedIDREFs
     (self isValidating and: [unresolvedIDREFs isEmpty not])
-    	ifTrue: [self invalid: ('The IDREFs %1 have not been resolved to IDs' bindWith: unresolvedIDREFs asSortedCollection asArray)]!
+    	ifTrue: [self invalid: ('The IDREFs %1 have not been resolved to IDs' % { unresolvedIDREFs asSortedCollection asArray })]!
 
 registerID: attribute
     latestID := attribute value.
     (definedIDs includes: latestID)
-    	ifTrue: [self invalid: ('The id "%1" was used more than once' bindWith: latestID)].
+    	ifTrue: [self invalid: ('The id "%1" was used more than once' % { latestID })].
     definedIDs add: latestID.
     unresolvedIDREFs remove: latestID ifAbsent: []!
 
@@ -4797,7 +4795,7 @@ documentNode
     ^self document!
 
 expected: string
-    self malformed: ('%1 expected, but not found' bindWith: string)!
+    self malformed: ('%1 expected, but not found' % { string })!
 
 expectedWhitespace
     self malformed: 'White space expected but not found'!
@@ -4863,12 +4861,12 @@ validateEncoding: encName
     c := encName first.
     (c asInteger < 128 and: [c isLetter])
     	ifFalse: [self malformed: ('The first letter of the encoding ("%1") must be an ASCII alphabetic letter'
-    					bindWith: encName)].
+    					% { encName })].
     2 to: encName size do: [:i |
     	c := encName at: i.
     	(c asInteger < 128 and: [c isLetter or: [c isDigit or: ['._-' includes: c]]])
     		ifFalse: [self malformed: ('A letter in the encoding name ("%1") must be ''.'', ''_'', ''-'', or an ASCII letter or digit'
-    					bindWith: encName)]]!
+    					% { encName })]]!
 
 warn: aMessage
     sax warning: (WarningSignal new messageText: aMessage)!
@@ -4979,7 +4977,7 @@ findNamespace: ns
     	nsURI = nil ifFalse: [^nsURI]].
     ^ns = ''
     	ifTrue: ['']
-    	ifFalse: [self invalid: ('The namespace qualifier %1 has not been bound to a namespace URI' bindWith: ns)]!
+    	ifFalse: [self invalid: ('The namespace qualifier %1 has not been bound to a namespace URI' % { ns })]!
 
 resolveNamespaces: attributes
     | newAttributes showDecls t1 t2 k |
@@ -5008,8 +5006,8 @@ resolveNamespaces: attributes
     					(t1 type = t2 type and: [t1 namespace = t2 namespace])
     						ifTrue:
     							[self malformed: ('The attributes "%1" and "%2" have the same namespace and type'
-    									bindWith: t1 asString
-    									with: t2 asString).
+    									% { t1 asString.
+    									t2 asString }).
     							k := newAttributes size].
     					k := k + 1]]].
     elementStack last tag: (self correctTag: elementStack last tag).
@@ -5641,9 +5639,9 @@ validateValueOf: anAttribute for: aParser
     type validateValueOf: anAttribute for: aParser.
     (self isFixed not or: [anAttribute value = self default])
     	ifFalse: [aParser invalid: ('The attribute "%1" was declared FIXED, but the value used in the document ("%2") did not match the default ("%3")'
-    					bindWith: anAttribute tag asString
-    					with: anAttribute value
-    					with: self default)].! !
+    					% { anAttribute tag asString.
+    					    anAttribute value.
+    					    self default })].! !
 
 !AttributeDef methodsFor: 'private'!
 
@@ -5905,22 +5903,22 @@ attributeFor: key subKey: k2 from: anErrorReporter
     | val |
     (val := attributeDefs at: key asString ifAbsent: []) == nil
     	ifTrue: [anErrorReporter invalid: ('The attribute "%1 %2" has not been defined'
-    						bindWith: key asString
-    						with: k2 asString)].
+    						% { key asString.
+    						    k2 asString })].
     ^val at: k2 asString
     	ifAbsent: [anErrorReporter invalid: ('The attribute "%1 %2" has not been defined'
-    						bindWith: key asString
-    						with: k2 asString)]!
+    						% { key asString.
+    						    k2 asString })]!
 
 attributeFor: key subKey: k2 put: value from: anErrorReporter
     | dict |
     dict := attributeDefs at: key asString ifAbsentPut: [Dictionary new].
     (dict includesKey: k2 asString)
     	ifTrue: [^anErrorReporter warn: ('The attribute "%1 %2" has been defined more than once'
-    				bindWith: key asString
-    				with: k2 asString)].
+    				% { key asString.
+    				    k2 asString })].
     (value type isID and: [dict contains: [:attr | attr type isID]])
-    	ifTrue: [^anErrorReporter invalid: ('The element %1 has two attributes typed as ID' bindWith: key asString)].
+    	ifTrue: [^anErrorReporter invalid: ('The element %1 has two attributes typed as ID' % { key asString })].
     dict at: k2 asString put: value!
 
 attributesFor: key
@@ -5943,7 +5941,7 @@ elementFor: key from: anErrorReporter
     | val |
     (val := elementDefs at: key asString ifAbsent: []) == nil
     	ifTrue: [anErrorReporter warn: ('The element "%1" has not been defined'
-    						bindWith: key asString)].
+    						% { key asString })].
     ^val!
 
 elementFor: key put: value from: anErrorReporter
@@ -5951,7 +5949,7 @@ elementFor: key put: value from: anErrorReporter
     	ifTrue:
     		[| msg |
     		msg := ('The element "%1" has been defined more than once'
-    					bindWith: key asString).
+    					% { key asString }).
     		anErrorReporter isValidating
     			ifTrue: [anErrorReporter invalid: msg]
     			ifFalse: [anErrorReporter warn: msg]].
@@ -5977,7 +5975,7 @@ generalEntityAt: key
 generalEntityAt: key put: value from: anErrorReporter
     (generalEntities includesKey: key)
     	ifTrue: [^anErrorReporter warn: ('The general entity "%1" has been defined more than once'
-    					bindWith: key)].
+    					% { key })].
     generalEntities at: key put: value!
 
 notationAt: name from: anErrorReporter
@@ -5997,7 +5995,7 @@ parameterEntityAt: key
 parameterEntityAt: key put: value from: anErrorReporter
     (parameterEntities includesKey: key)
     	ifTrue: [^anErrorReporter warn: ('The parameter entity "%1" has been defined more than once'
-    					bindWith: key)].
+    					% { key })].
     parameterEntities at: key put: value! !
 
 !DocumentType methodsFor: 'private'!
@@ -6133,8 +6131,7 @@ completeValidationAgainst: aParser from: anAttributeDef
     typeNames do: [:nm |
     	aParser dtd notationAt: nm ifAbsent:
     		[aParser invalid: ('Undeclared Notation "%1" used by attribute type "%2"'
-    						bindWith: nm
-    						with: anAttributeDef tag asString)]]!
+    						% { nm. anAttributeDef tag asString })]]!
 
 validateValueOf: anAttribute for: aParser
     | v |
@@ -6142,9 +6139,8 @@ validateValueOf: anAttribute for: aParser
     v := anAttribute value.
     (typeNames includes: v)
     	ifFalse: [aParser invalid: ('A NOTATION attribute (%1="%2") should have had a value from %3.'
-    				bindWith: anAttribute tag asString
-    				with: v
-    				with: typeNames asArray)].! !
+    				% { anAttribute tag asString
+    				    v. typeNames asArray })].! !
 
 !NOTATION_AT class methodsFor: 'instance creation'!
 
@@ -6161,8 +6157,7 @@ validateValueOf: anAttribute for: aParser
     	ifTrue: [aParser invalid: 'white space must not occur in NMTOKEN attributes'].
     (aParser isValidNmToken: v)
     	ifFalse: [aParser invalid: ('An NMTOKEN attribute (%1="%2") does not match the required syntax of an NmToken.'
-    				bindWith: anAttribute tag asString
-    				with: v)]! !
+    				% { anAttribute tag asString. v })]! !
 
 !IDREF_AT methodsFor: 'validating'!
 
@@ -6174,8 +6169,7 @@ validateValueOf: anAttribute for: aParser
     	ifTrue: [aParser invalid: 'white space must not occur in IDREF attributes'].
     (aParser isValidName: v)
     	ifFalse: [aParser invalid: ('An IDREF attribute (%1="%2") does not match the required syntax of a Name.'
-    				bindWith: anAttribute tag asString
-    				with: v)].
+    				% { anAttribute tag asString. v })].
     aParser rememberIDREF: v! !
 
 !NMTOKENS_AT methodsFor: 'validating'!
@@ -6187,8 +6181,7 @@ validateValueOf: anAttribute for: aParser
     (all := self stringAsTokens: v) do: [:nm |
     	(aParser isValidNmToken: nm)
     		ifFalse: [aParser invalid: ('An NMTOKENS attribute (%1="%2") does not match the required syntax of a list of NmTokens.'
-    				bindWith: anAttribute tag asString
-    				with: v)]].
+    				% { anAttribute tag asString. v })]].
     all size = 0 ifTrue: [aParser invalid: 'Attribute has empty list of NMTOKENS'].! !
 
 !ENTITY_AT methodsFor: 'validating'!
@@ -6208,17 +6201,14 @@ validateValueOf: anAttribute for: aParser
     	ifTrue: [aParser invalid: 'white space must not occur in ENTITY attributes'].
     (aParser isValidName: v)
     	ifFalse: [aParser invalid: ('An ENTITY attribute (%1="%2") does not match the required syntax of a Name.'
-    				bindWith: anAttribute tag asString
-    				with: v)].
+    				% { anAttribute tag asString. v })].
     ent := aParser dtd generalEntityAt: v.
     ent == nil
     	ifTrue: [aParser invalid: ('Undeclared unparsed entity "%1" used by attribute type "%2"'
-    					bindWith: v
-    					with: anAttribute tag asString)]
+    					% { v. anAttribute tag asString })]
     	ifFalse: [ent isParsed
     		ifTrue: [aParser invalid: ('The entity "%1" used by attribute type "%2" is a parsed entity and should be unparsed'
-    						bindWith: v
-    						with: anAttribute tag asString)]
+    						% { v. anAttribute tag asString })]
     		ifFalse: []]! !
 
 !CDATA_AT methodsFor: 'validating'!
@@ -6240,8 +6230,7 @@ validateValueOf: anAttribute for: aParser
     	ifTrue: [aParser invalid: 'white space must not occur in ID attributes'].
     (aParser isValidName: v)
     	ifFalse: [aParser invalid: ('An ID attribute (%1="%2") does not match the required syntax of a Name.'
-    				bindWith: anAttribute tag asString
-    				with: v)].
+    				% { anAttribute tag asString. v })].
     aParser registerID: anAttribute! !
 
 !ID_AT methodsFor: 'testing'!
@@ -6265,9 +6254,8 @@ validateValueOf: anAttribute for: aParser
     v := anAttribute value.
     (values includes: v)
     	ifFalse: [aParser invalid: ('An attribute (%1="%2") should have had a value from %3.'
-    				bindWith: anAttribute tag asString
-    				with: v
-    				with: values asArray)]! !
+    				% { anAttribute tag asString. v
+    				    values asArray })]! !
 
 !Enumeration_AT class methodsFor: 'instance creation'!
 
@@ -6283,8 +6271,7 @@ validateValueOf: anAttribute for: aParser
     (all := self stringAsTokens: v) do: [:nm |
     	(aParser isValidName: nm)
     		ifFalse: [aParser invalid: ('An IDREFS attribute (%1="%2") does not match the required syntax of a list of Names.'
-    				bindWith: anAttribute tag asString
-    				with: v)].
+    				% { anAttribute tag asString. v })].
     	aParser rememberIDREF: nm].
     all size = 0 ifTrue: [aParser invalid: 'Attribute has empty list of IDREFS'].! !
 
@@ -6304,17 +6291,14 @@ validateValueOf: anAttribute for: aParser
     (all := self stringAsTokens: v) do: [:nm |
     	(aParser isValidName: nm)
     		ifFalse: [aParser invalid: ('An ENTITIES attribute (%1="%2") does not match the required syntax of a list of Names.'
-    				bindWith: anAttribute tag asString
-    				with: v)].
+    				% { anAttribute tag asString. v })].
     	ent := aParser dtd generalEntityAt: nm.
     	ent == nil
     		ifTrue: [aParser invalid: ('Undeclared unparsed entity "%1" used by attribute type "%2"'
-    					bindWith: nm
-    					with: anAttribute tag asString)]
+    					% { nm. anAttribute tag asString })]
     		ifFalse: [ent isParsed
     			ifTrue: [aParser invalid: ('The entity "%1" used by attribute type "%2" is a parsed entity and should be unparsed'
-    						bindWith: nm
-    						with: anAttribute tag asString)]
+    						% { nm. anAttribute tag asString })]
     			ifFalse: []]].
     all size = 0 ifTrue: [aParser invalid: 'Attribute has empty list of ENTITIES'].! !
 
@@ -6396,7 +6380,7 @@ defineDefaultNamespace: attribute
 
 defineNamespace: attribute from: aParser
     (#('xmlns' 'xml') includes: attribute tag type)
-    	ifTrue: [self error: ('It is illegal to redefine the qualifier "%1".' bindWith: attribute tag type)].
+    	ifTrue: [self error: ('It is illegal to redefine the qualifier "%1".' % { attribute tag type })].
     attribute value isEmpty ifTrue: [aParser invalid: 'It is not permitted to have an empty URI as a namespace name'].
     self namespaces at: attribute tag type put: attribute value!
 

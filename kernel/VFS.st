@@ -680,7 +680,7 @@ vfsFor: file name: fsName subPath: subPath
 
     command := self fileTypes at: fsName.
     temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
-    Smalltalk system: (command bindWith: file with: temp name).
+    Smalltalk system: (command % { file. temp name }).
     ^self new name: file realFileName: temp name! !
 
 
@@ -874,10 +874,7 @@ vfsFor: file name: fsName
 createDir: dirName
     "Create a subdirectory of the receiver, naming it dirName."
 
-    Smalltalk system: command,
-	(' mkdir %1 %2'
-	    bindWith: self name
-	    with: dirName)!
+    Smalltalk system: ('%1 mkdir %2 %3' % { command. self name. dirName })!
 
 do: aBlock
     "Evaluate aBlock once for each file in the directory represented by the
@@ -897,11 +894,8 @@ extractMember: anArchiveMemberHandler
     ^extractedFiles at: anArchiveMemberHandler ifAbsentPut: [
 	| temp |
         temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
-        Smalltalk system: command,
-	    (' copyout %1 %2 %3'
-	        bindWith: self name
-	        with: anArchiveMemberHandler name
-	        with: temp name).
+        Smalltalk system: ('%1 copyout %2 %3 %4'
+	    % { command. self name. anArchiveMemberHandler name. temp name }).
 
         File fullNameFor: temp name
     ]!
@@ -948,26 +942,17 @@ removeMember: anArchiveMemberHandler
 	ifTrue: [ 'rmdir' ]
 	ifFalse: [ 'rm' ].
 
-    Smalltalk system: command,
-	(' %1 %2 %3'
-	    bindWith: subcmd
-	    with: self name
-	    with: anArchiveMemberHandler name)!
+    Smalltalk system: ('%1 %2 %3 %4'
+	% { command. subcmd. self name. anArchiveMemberHandler name. })!
 
 updateMember: anArchiveMemberHandler
     "Update the member represented by anArchiveMemberHandler by
      copying the file into which it was extracted back to the
      archive."
 
-    | temp |
-    temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
-    Smalltalk system: command,
-	(' copyin %1 %2 %3'
-	    bindWith: self name
-	    with: anArchiveMemberHandler name
-	    with: anArchiveMemberHandler realFileName).
-
-    ^temp name!
+    Smalltalk system: ('%1 copyin %2 %3 %4'
+	% { command. self name. anArchiveMemberHandler name.
+	    anArchiveMemberHandler realFileName })!
 
 refresh
     "Extract the directory listing from the archive"

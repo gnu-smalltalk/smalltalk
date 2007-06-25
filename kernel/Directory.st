@@ -120,17 +120,14 @@ append: fileName to: directory
 	ifTrue: [
 	    (fileName at: 1) isPathSeparator ifTrue: [
 		^(directory size >= 2 and: [ (directory at: 2) = $: ])
-		    ifTrue: [ '%1:%2' bindWith: directory first with: fileName ]
+		    ifTrue: [ '%1:%2' % { directory first. fileName } ]
 		    ifFalse: [ fileName ] ].
             (fileName size >= 2 and: [ (fileName at: 2) = $: ])
 		ifTrue: [ ^fileName ] ].
 
     ^(directory at: directory size) isPathSeparator
 	ifTrue: [ directory, fileName ]
-	ifFalse: [ '%1%2%3'
-	    bindWith: directory
-	    with: self pathSeparator
-	    with: fileName ]
+	ifFalse: [ directory, self pathSeparatorString, fileName ]
 !
 
 pathSeparator

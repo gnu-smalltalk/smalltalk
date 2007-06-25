@@ -1138,7 +1138,7 @@ authorizer: aString
     authorizer := aString!
 
 challengeFor: aServlet
-    ^'Basic realm="%1"' bindWith: aServlet name!
+    ^'Basic realm="%1"' % { aServlet name }!
 
 authorize: aRequest in: aServlet ifAuthorized: aBlock
     ^(self authorize: aRequest)

@@ -103,9 +103,7 @@ printOn: aStream
     aStream
         nextPutAll: self class name;
         nextPutAll: ('(%1: %<free|held>2, %3 %<available signals|waiting processes>2)'
-	    bindWith: self name printString
-	    with: self signals > 0
-	    with: self signals abs)! !
+	    % { self name printString. self signals > 0. self signals abs })! !
 
 
 !Semaphore methodsFor: 'private'!

@@ -877,8 +877,7 @@ description
 
 messageText
     "Answer an exception's message text."
-    ^'%1: %2 element(s) missing' bindWith: self basicMessageText
-	with: self remainingCount!
+    ^'%1: %2 element(s) missing' % { self basicMessageText. self remainingCount }!
 
 remainingCount
     "Answer the number of items that were to be read."
@@ -913,7 +912,7 @@ description
 
 messageText
     "Answer an exception's message text."
-    ^'Invalid value %1: %2' bindWith: self value with: self basicMessageText!
+    ^'Invalid value %1: %2' % { self value. self basicMessageText }!
 
 value
     "Answer the object that was found to be invalid."
@@ -927,9 +926,7 @@ value: anObject
 
 messageText
     "Answer an exception's message text."
-    ^'Invalid argument %1: %2'
-	bindWith: self value
-	with: self basicMessageText! !
+    ^'Invalid argument %1: %2' % { self value. self basicMessageText }! !
 
 !SystemExceptions.AlreadyDefined methodsFor: 'accessing'!
 
@@ -994,8 +991,7 @@ description
 
 messageText
     "Answer an exception's message text."
-    ^'Invalid index %1: %2'
-	bindWith: self value with: self basicMessageText!
+    ^'Invalid index %1: %2' % { self value. self basicMessageText }!
 
 collection
     "Answer the collection that triggered the error"
@@ -1062,7 +1058,7 @@ messageText
     self validClasses isNil
 	ifTrue: [ ^'Invalid argument ', self value printString ].
     ^'Invalid argument %1: must be %2'
-	bindWith: self value with: self validClassesString!
+	% { self value. self validClassesString }!
 
 validClasses
     "Answer the list of classes whose instances would have been valid."
@@ -1255,9 +1251,8 @@ signalOn: selector useInstead: aSymbol
 
 messageText
     "Answer an exception's message text."
-    ^'%1, use %2 instead'
-	bindWith: self basicMessageText
-	with: self suggestedSelector storeString!
+    ^'%1, use %2 instead' %
+	{ self basicMessageText. self suggestedSelector storeString }!
 
 selector
     "Answer which selector was sent."

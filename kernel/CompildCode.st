@@ -394,8 +394,8 @@ inspect
     	output := [ object printString ]
 		      on: Error
 		      do: [ :ex | ex return: ('%1 %2'
-				      bindWith: object class article
-				      with: object class name asString) ].
+				      % { object class article.
+				       object class name asString }) ].
     	Transcript
     	    nextPutAll: '  ';
     	    nextPutAll: (instVars at: i);
@@ -727,31 +727,31 @@ invalidOpcode: aStream
     aStream tab; nextPutAll: 'invalid opcode'; nl!
 
 pushInstVar: anIndex with: aStream
-    aStream tab; nextPutAll: ('push Instance Variable[%1]' bindWith: anIndex); nl!
+    aStream tab; nextPutAll: ('push Instance Variable[%1]' % { anIndex }); nl!
 
 storeInstVar: anIndex with: aStream
-    aStream tab; nextPutAll: ('store into Instance Variable[%1]' bindWith: anIndex); nl!
+    aStream tab; nextPutAll: ('store into Instance Variable[%1]' % { anIndex }); nl!
 
 popIntoArray: anIndex with: aStream
-    aStream tab; nextPutAll: ('pop and store into array element[%1]' bindWith: anIndex); nl!
+    aStream tab; nextPutAll: ('pop and store into array element[%1]' % { anIndex }); nl!
 
 pushTemporary: anIndex outer: scopes with: aStream
-    aStream tab; nextPutAll: ('push Temporary[%1] from outer context #%2' bindWith: anIndex with: scopes); nl!
+    aStream tab; nextPutAll: ('push Temporary[%1] from outer context #%2' % { anIndex. scopes }); nl!
 
 storeTemporary: anIndex outer: scopes with: aStream
-    aStream tab; nextPutAll: ('store into Temporary[%1] from outer context #%2' bindWith: anIndex with: scopes); nl!
+    aStream tab; nextPutAll: ('store into Temporary[%1] from outer context #%2' % { anIndex. scopes }); nl!
 
 pushTemporary: anIndex with: aStream
-    aStream tab; nextPutAll: ('push Temporary[%1]' bindWith: anIndex); nl!
+    aStream tab; nextPutAll: ('push Temporary[%1]' % { anIndex }); nl!
 
 storeTemporary: anIndex with: aStream
-    aStream tab; nextPutAll: ('store into Temporary[%1]' bindWith: anIndex); nl!
+    aStream tab; nextPutAll: ('store into Temporary[%1]' % { anIndex }); nl!
 
 pushLiteral: anObject with: aStream
     | printString |
     printString := anObject printString.
     (anObject isClass not and: [ printString size > 30 ])
-	ifTrue: [ printString := '%1 %2' bindWith: anObject class article with: anObject class name asString ].
+	ifTrue: [ printString := '%1 %2' % { anObject class article. anObject class name asString } ].
 
     aStream tab; nextPutAll: 'push '; nextPutAll: printString; nl!
 
@@ -795,10 +795,10 @@ jumpTo: destination with: aStream
     aStream tab; nextPutAll: 'jump to '; print: destination; nl!
 
 superSend: aSymbol numArgs: anInteger with: aStream
-    aStream tab; nextPutAll: ('send %2 args message %1 to super' bindWith: aSymbol with: anInteger); nl!
+    aStream tab; nextPutAll: ('send %2 args message %1 to super' % { aSymbol. anInteger }); nl!
 
 send: aSymbol numArgs: anInteger with: aStream
-    aStream tab; nextPutAll: ('send %2 args message %1' bindWith: aSymbol with: anInteger); nl!
+    aStream tab; nextPutAll: ('send %2 args message %1' % { aSymbol. anInteger }); nl!
 
 bytecodeIndex: byte with: aStream
     "Private - Print the bytecode index for byte"

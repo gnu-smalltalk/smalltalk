@@ -388,7 +388,7 @@ xpathCompareEquality: aData using: aBlock
     	ifTrue: [^nodes contains: [:nd1 |
     			aData unsortedNodes contains: [:nd2 |
     				aBlock value: nd1 xpathStringData value: nd2 xpathStringData]]].
-    self error: ('Can''t compare a %1 with a node set' bindWith: aData class printString)!
+    self error: ('Can''t compare a %1 with a node set' % { aData class })!
 
 xpathCompareOrder: aData using: aBlock
     ^aData xpathIsNodeSet
@@ -442,6 +442,11 @@ xpathUsedVarNames
     	(exp isKindOf: XPathVariable)
     		ifTrue: [list add: exp name]].
     ^list! !
+
+!Object methodsFor: 'xpath'!
+
+xpathUsedVarNames
+    ^OrderedCollection new! !
 
 !Object methodsFor: 'xpath'!
 
@@ -850,7 +855,7 @@ baseValueIn: aNodeContext
     | var |
     var := aNodeContext variables
     	at: self name
-    	ifAbsent: [self error: ('No binding found for the variable $%1' bindWith: self name)].
+    	ifAbsent: [self error: ('No binding found for the variable $%1' % { self name })].
     ^var! !
 
 !XPathVariable methodsFor: 'accessing'!
@@ -1372,7 +1377,7 @@ initializeNumeric
 !XPathBinaryExpression class methodsFor: 'instance creation'!
 
 operator: op with: arg1 with: arg2
-    ^(operators at: op ifAbsent: [self error: ('Not implemented yet %1' bindWith: op)]) copy
+    ^(operators at: op ifAbsent: [self error: ('Not implemented yet %1' % { op })]) copy
 	operator: op with: arg1 with: arg2! !
 
 !XPathSortingVector methodsFor: 'sorting'!
@@ -1611,7 +1616,7 @@ axis: axisName test: test
     | stepClass step |
     stepClass := self class nodeTypes
     			at: axisName
-    			ifAbsent: [self error: ('%1 is not an axis' bindWith: axisName)].
+    			ifAbsent: [self error: ('%1 is not an axis' % { axisName })].
     step := stepClass new.
     step axisName: axisName.		"Some classes represent multiple axes, and must be told which"
     step baseTest: test.
@@ -2028,6 +2033,9 @@ atEndOfExpression
 init: streamOrString notifying: nothing failBlock: bah
     self source: streamOrString!
 
+init: streamOrString notifying: nothing failBlock: bah
+    self source: streamOrString!
+
 source: streamOrString
     buffer := String new writeStream.
     stack := OrderedCollection new.
@@ -2053,6 +2061,9 @@ result
 initScanner
     "Present for compatibility with the parser in VW."!
 
+initScanner
+    "Present for compatibility with the parser in VW."!
+
 xmlNode: aNode
     xmlNode := aNode! !
 
@@ -2060,7 +2071,7 @@ xmlNode: aNode
 
 functionNamed: fName
     functions == nil ifTrue: [functions := XPathFunction baseFunctions].
-    ^(functions at: fName ifAbsent: [self error: ('Not implemented yet %1()' bindWith: fName)]) copy!
+    ^(functions at: fName ifAbsent: [self error: ('Not implemented yet %1()' % { fName })]) copy!
 
 namespaceAt: aQualifier
     | elm ns |
@@ -2072,7 +2083,7 @@ namespaceAt: aQualifier
     		elm := elm parent].
     aQualifier = 'xml' ifTrue: [^XML_URI].
     self error: ('No namespace binding found for namespace qualifier "%1".'
-    		bindWith: aQualifier)!
+    		% { aQualifier })!
 
 peekFor: trialValue 
     "Test to see if tokenType matches aType and token equals trialValue. If so, 
@@ -2498,7 +2509,7 @@ xpathCompareEquality: aData using: aBlock
     aData xpathIsNodeSet
     	ifTrue: [^aData unsortedNodes contains: [:nd2 |
     				aBlock value: self value: nd2 xpathStringData xpathAsBoolean]].
-    self error: ('Can''t compare a %1 with a boolean' bindWith: aData class printString)!
+    self error: ('Can''t compare a %1 with a boolean' % { aData class })!
 
 xpathCompareOrder: aData using: aBlock
     | v |
@@ -2564,7 +2575,7 @@ xpathCompareEquality: aData using: aBlock
     aData xpathIsNodeSet
     	ifTrue: [^aData unsortedNodes contains: [:nd2 |
     				aBlock value: self value: nd2 xpathStringData xpathAsNumber]].
-    self error: ('Can''t compare a %1 with a number' bindWith: aData class printString)!
+    self error: ('Can''t compare a %1 with a number' % { aData class })!
 
 xpathCompareOrder: aData using: aBlock
     | v |
@@ -2631,7 +2642,7 @@ xpathCompareEquality: aData using: aBlock
     aData xpathIsNodeSet
     	ifTrue: [^aData unsortedNodes contains: [:nd2 |
     				aBlock value: self value: nd2 xpathStringData]].
-    self error: ('Can''t compare a %1 with a string' bindWith: aData class printString)!
+    self error: ('Can''t compare a %1 with a string' % { aData class })!
 
 xpathCompareOrder: aData using: aBlock
     | v |

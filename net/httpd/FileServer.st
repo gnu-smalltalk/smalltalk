@@ -678,9 +678,7 @@ contentLength
 !MultiRangeResponse methodsFor: 'caching'!
 
 getBoundary
-    ^'------%1-!-GST-!-%2'
-	bindWith: Time secondClock printString
-	with: Time millisecondClock printString!
+    ^'------%1-!-GST-!-%2' % { Time secondClock. Time millisecondClock }!
     
 mimeType
     "Cache the MIME type as computed by the FileResponse implementation"

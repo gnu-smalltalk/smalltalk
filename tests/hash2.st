@@ -43,8 +43,9 @@ Eval [
         hash1 keysAndValuesDo: [ :k :v |
     	    hash2 at: k put: (hash2 at: k ifAbsent: [0]) + v ]].
 
-    ('%1 %2 %3 %4' bindWith: (hash1 at: 'foo_1')
-	with: (hash1 at: 'foo_9999')
-	with: (hash2 at: 'foo_1')
-	with: (hash2 at: 'foo_9999')) displayNl
+    ('%1 %2 %3 %4' % {
+	hash1 at: 'foo_1'.
+	hash1 at: 'foo_9999'.
+	hash2 at: 'foo_1'.
+	hash2 at: 'foo_9999' }) displayNl
 ]

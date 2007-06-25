@@ -41,6 +41,6 @@ Eval [
 	ifTrue: [ 4 ]
 	ifFalse: [ Smalltalk arguments first asInteger ].
 	
-    ('Ack(3,%1): %2' bindWith: n with: (3 ack: n)) displayNl
+    ('Ack(3,%1): %2' % { n. (3 ack: n) }) displayNl
 
 ]

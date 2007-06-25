@@ -419,7 +419,7 @@ addNamedTemplate: aRule
     all := namedTemplates at: aRule name
     		ifAbsentPut: [OrderedCollection new].
     (all contains: [:c | c importance = currentImportance value])
-    	ifTrue: [self error: ('There are two named templates named %1 with the same importance' bindWith: aRule name)].
+    	ifTrue: [self error: ('There are two named templates named %1 with the same importance' % { aRule name })].
     all add: aRule!
 
 addRule: aRule
@@ -438,13 +438,13 @@ addVariable: aVariable
     all := variables at: aVariable name
     		ifAbsentPut: [OrderedCollection new].
     (all contains: [:c | c importance = currentImportance value])
-    	ifTrue: [self error: ('There are two variables named %1 with the same importance' bindWith: aVariable name)].
+    	ifTrue: [self error: ('There are two variables named %1 with the same importance' % { aVariable name })].
     all add: aVariable!
 
 attributesForSet: setName
     | list map |
     list := attributeSets at: setName
-    	ifAbsent: [self error: ('No attribute set named "%1".' bindWith: setName asString)].
+    	ifAbsent: [self error: ('No attribute set named "%1".' % { setName asString })].
     map := Dictionary new.
     list do: [:as |
     	(as allAttributesFrom: self) do: [:attr |
@@ -454,8 +454,8 @@ attributesForSet: setName
     map do: [:singleList |
     	(singleList size > 1 and: [(singleList at: 1) key = (singleList at: 2) key])
     		ifTrue: [self error: ('Attribute set "%1" includes more than one definition of the attribute "%2".'
-    					bindWith: setName asString
-    					with: singleList first name asString)].
+    					% { setName asString.
+    					    singleList first name asString })].
     	list add: singleList first value].
     ^list!
 
@@ -535,7 +535,7 @@ readString: aString
 resolveAttributesForSet: setName
     | list |
     list := attributeSets at: setName
-    	ifAbsent: [self error: ('No attribute set named "%1".' bindWith: setName asString)].!
+    	ifAbsent: [self error: ('No attribute set named "%1".' % { setName asString })].!
 
 setOutput: anOutputCommand
     output := anOutputCommand!
@@ -1291,11 +1291,11 @@ checkURISyntax: aString
     type := aString copyFrom: n + 1 to: aString size.
     ch := type at: 1.
     (ch = $_ or: [ch isLetter])
-    	ifFalse: [self error: ('Type name syntax error in "%1".' bindWith: type)].
+    	ifFalse: [self error: ('Type name syntax error in "%1".' % { type })].
     2 to: type size do: [:i |
     	ch := type at: i.
     	(ch isLetter or: [ch isDigit or: ['.-_' includes: ch]])
-    		ifFalse: [self error: ('Type name syntax error in "%1".' bindWith: type)]]!
+    		ifFalse: [self error: ('Type name syntax error in "%1".' % { type })]]!
 
 collate: node1 to: node2 within: aNodeContext
     | list sign |
@@ -1309,8 +1309,7 @@ collate: node1 to: node2 within: aNodeContext
 readAttribute: attName
     ^self readAttribute: attName
     	default: [self error: ('%1 needs to have an attribute named %2'
-    				bindWith: self tag asString
-    				with: attName)]!
+    				% { self tag asString. attName })]!
 
 readAttribute: attName default: def
     | att |
@@ -1325,18 +1324,17 @@ readInteger: attName default: def
     ^att == nil
     	ifTrue: [def value]
     	ifFalse:
-    		[att isEmpty ifTrue: [self error: ('The %1 attribute is empty' bindWith: attName)].
+    		[att isEmpty ifTrue: [self error: ('The %1 attribute is empty' % { attName })].
     		att := att readStream.
     		val := Number readFrom: att.
     		val = 0 ifTrue: [self error: 'Bad number format, ', (att instVarAt: 1)].
-    		att atEnd ifFalse: [self error: ('The %1 attribute is not a legal integer value' bindWith: attName)].
+    		att atEnd ifFalse: [self error: ('The %1 attribute is not a legal integer value' % { attName })].
     		val]!
 
 readMatchPattern: attName
     ^self readMatchPattern: attName
     	default: [self error: ('%1 needs to have an attribute named %2'
-    				bindWith: self tag asString
-    				with: attName)]!
+    				% { self tag asString. attName })]!
 
 readMatchPattern: attName default: def
     | att |
@@ -1350,8 +1348,7 @@ readMatchPattern: attName default: def
 readSelectPattern: attName
     ^self readSelectPattern: attName
     	default: [self error: ('%1 needs to have an attribute named %2'
-    				bindWith: self tag asString
-    				with: attName)]!
+    				% { self tag asString. attName })]!
 
 readSelectPattern: attName default: def
     | att d |
@@ -1372,8 +1369,7 @@ readTag: attName
     att := self valueOfAttribute: attName ifAbsent: [nil].
     ^att == nil
     	ifTrue: [self error: ('%1 needs to have an attribute named %2'
-    				bindWith: self tag asString
-    				with: attName)]
+    				% { self tag asString. attName })]
     	ifFalse: [att]!
 
 readTagList: attName default: defaultBlock
@@ -1437,7 +1433,7 @@ generatesAttributes
 
 isStylesheetEntry
     Transcript nl; tab; show: ('Stylesheet contains a top-level element that is not permitted (%1)'
-    		bindWith: self tag).
+    		% { self tag }).
     Transcript nl; tab; show: 'It has been ignored'.
     ^false!
 
@@ -1523,7 +1519,7 @@ resolveComputedTag: nm
     		qualifier := self findQualifierAtNamespace: 'quote:', ns.
     		qualifier == nil
     			ifTrue: [qualifier := self findQualifierAtNamespace: ns].
-    		qualifier == nil ifTrue: [self error: ('The namespace %1 has not been bound to a qualifier in this stylesheet, and automatic creation of qualifiers has not been implemented.' bindWith: ns)].
+    		qualifier == nil ifTrue: [self error: ('The namespace %1 has not been bound to a qualifier in this stylesheet, and automatic creation of qualifiers has not been implemented.' % { ns })].
     		NodeTag new qualifier: qualifier ns: ns type: type]
     	ifFalse:
     		[self checkQNameSyntax: nm.
@@ -1542,7 +1538,7 @@ resolveTag: aTagString
     				ifTrue: [self error: 'A qualified name cannot begin or end with a colon.'].
     			qual := aTagString copyFrom: 1 to: c - 1.
     			ns := self findNamespaceAt: qual.
-    			ns == nil ifTrue: [self error: ('The namespace qualifier %1 has not been bound to a namespace in this stylesheet' bindWith: qual)].
+    			ns == nil ifTrue: [self error: ('The namespace qualifier %1 has not been bound to a namespace in this stylesheet' % { qual })].
     			"Use a # in the match to make sure there's at least one more character"
     			('quote:#*' match: ns)
     				ifTrue: [ns := ns copyFrom: 'quote:' size + 1 to: ns size].
@@ -1988,7 +1984,7 @@ sequenceSrc
 format: number by: aFormat
     | n s |
     aFormat size = 1
-    	ifFalse: [self error: ('Unrecognized number format = "%1"' bindWith: aFormat)].
+    	ifFalse: [self error: ('Unrecognized number format = "%1"' % { aFormat })].
     aFormat = 'a'
     	ifTrue:
     		[n := self radix: number base: 26.
@@ -2352,7 +2348,7 @@ topLevelAddToRuleDB: aDB
 
     self tag namespace = XSL_URI
     	ifTrue: [self error: ('"%1" not recognized as an XSL command'
-    		bindWith: self tag asString)].
+    		% { self tag asString })].
     aDB addRule: self! !
 
 !VariableDefinition methodsFor: 'loading'!

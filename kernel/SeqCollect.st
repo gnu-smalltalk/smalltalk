@@ -77,8 +77,8 @@ inspect
     	output := [ object printString ]
 		      on: Error
 		      do: [ :ex | ex return: ('%1 %2'
-				      bindWith: object class article
-				      with: object class name asString) ].
+				      % { object class article.
+				          object class name asString }) ].
 
 	Transcript nextPutAll: '  ';
 	    nextPutAll: (instVars at: i);
@@ -92,8 +92,8 @@ inspect
     	output := [ obj printString ]
 		      on: Error
 		      do: [ :ex | ex return: ('%1 %2'
-				      bindWith: obj class article
-				      with: obj class name asString) ].
+				      % { obj class article.
+				          obj class name asString }) ].
 	Transcript 
 	    nextPutAll: '    [';
 	    print: i;

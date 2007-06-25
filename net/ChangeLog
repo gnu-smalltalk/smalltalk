@@ -1,3 +1,10 @@
+2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* net/SMTP.st: Use #%.
+	* net/httpd/FileServer.st: Use #%.
+	* net/httpd/WebServer.st: Use #%.
+	* net/httpd/WikiServer.st: Use #%.
+
 2007-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/HTTP.st: Use #, on streams directly.

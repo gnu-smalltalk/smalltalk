@@ -38,5 +38,5 @@ Eval [
     1000 timesRepeat: [
         n to: 1 by: -1 do: [ :i | y at: i put: (y at: i) + (x at: i) ]
     ].
-    ('%1 %2' bindWith: y first with: y last) displayNl
+    ('%1 %2' % { y first. y last }) displayNl
 ]

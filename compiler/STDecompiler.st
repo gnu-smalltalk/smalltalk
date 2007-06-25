@@ -880,8 +880,8 @@ source
      primitive names in the decompiled code."
 
     ^context method primitive > 0
-	ifTrue: [ '<primitive: %1>' bindWith:
-	    (VMPrimitives keyAtValue: context method primitive) asString ]
+	ifTrue: [ '<primitive: %1>'
+		      % { VMPrimitives keyAtValue: context method primitive } ]
 	ifFalse: [ '' ]!
 
 tags: source

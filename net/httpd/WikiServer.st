@@ -1276,10 +1276,9 @@ sendBody
 emitMatchList
     self findMatches.
     referringPages isEmpty ifTrue: [ ^self emitNoMatches ].
-    self heading: [self << ((referringPages size = 1
-		ifTrue: ['There is 1 reference to the phrase:']
-		ifFalse: ['There are %1 references to the phrase:'])
-		bindWith: referringPages size printString)].
+    self heading: [
+	self << ('There %<is|are>2 %1 reference%<|s>2 to the phrase:'
+		% { referringPages size. referringPages size = 1 })].
     self << '<I>  ...'; << self searchString; << '...</I>'; lineBreak.
     self << '<UL>'; nl.
     referringPages do: [:each | self listItem: [self linkToPage: each]].

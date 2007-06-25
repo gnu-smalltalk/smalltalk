@@ -575,10 +575,10 @@ getKeyPressEventNames: key
     ^(keySym size = 1 and: [ keySym first isLetter ])
 	ifTrue: [
 	    "Use both the lowercase and uppercase variants"
-	    { '<%1KeyPress-%2>' bindWith: mod with: keySym asLowercase.
-	      '<%1KeyPress-%2>' bindWith: mod with: keySym asUppercase } ]
+	    { '<%1KeyPress-%2>' % { mod. keySym asLowercase } .
+	      '<%1KeyPress-%2>' % { mod. keySym asUppercase } } ]
 	ifFalse: [
-	    { '<%1KeyPress-%2>' bindWith: mod with: keySym } ]!
+	    { '<%1KeyPress-%2>' % { mod. keySym } } ]!
 
 translateModifier: mod platform: platform
     | name |

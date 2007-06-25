@@ -149,7 +149,7 @@ points: p coords: coords
 dropdownTest
     ^[ :win || cb name size label |
         cb := [
-            [ label font: ('{%1} %2' bindWith: name text with: size text) ]
+            [ label font: ('{%1} %2' % { name text. size text }) ]
                 on: ExAll
                 do: [ :sig | sig return ]
         ].

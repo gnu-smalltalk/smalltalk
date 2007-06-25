@@ -101,7 +101,7 @@ createGetMethod: what default: value
     ^self compile: ('%1
     "Answer the receiver''s %1. Its default value is %2"
     %1 isNil ifTrue: [ %1 := %2 ].
-    ^%1' bindWith: what with: value)
+    ^%1' % { what. value })
 !
 
 createGetMethod: what
@@ -109,7 +109,7 @@ createGetMethod: what
 
     ^self compile: ('%1
     "Answer the receiver''s %1"
-    ^%1' bindWith: what)
+    ^%1' % { what })
 !
 
 createSetMethod: what
@@ -120,7 +120,7 @@ createSetMethod: what
     
     ^self compile: ('%1: %2
     "Set the receiver''s %1 to %2"
-    %1 := %2' bindWith: what with: parameter)
+    %1 := %2' % { what. parameter })
 !
 
 defineAsyncCFunc: cFuncNameString
@@ -134,9 +134,7 @@ defineAsyncCFunc: cFuncNameString
     code := (
 '%1
     <asyncCCall: ''%2'' args: #%3>')
-	bindWith: selectorAndArgs
-	with: cFuncNameString
-	with: argsArray printString.
+	% { selectorAndArgs. cFuncNameString. argsArray printString }.
 
     ^self compile: code ifError: [ :file :line :error | code error: error ].
 !
@@ -153,10 +151,8 @@ defineCFunc: cFuncNameString
     code := (
 '%1
     <cCall: ''%2'' returning: %3 args: #%4>')
-	bindWith: selectorAndArgs
-	with: cFuncNameString
-	with: returnTypeSymbol storeString
-	with: argsArray printString.
+	% { selectorAndArgs. cFuncNameString. returnTypeSymbol storeString.
+	    argsArray printString }.
 
     ^self compile: code ifError: [ :file :line :error | code error: error ].
 !
@@ -1123,7 +1119,7 @@ name
     "Answer the class name; this prints to the name of the superclass
      enclosed in braces.  This class name is used, for example, to print
      the receiver."
-    ^'{%1}' bindWith: self asClass printString
+    ^'{%1}' % { self asClass }
 ! !
 
 

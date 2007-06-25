@@ -1,5 +1,28 @@
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiExcept.st: Use #%.
+	* kernel/Behavior.st: Likewise.
+	* kernel/CStruct.st: Likewise.
+	* kernel/Collection.st: Likewise.
+	* kernel/CompildCode.st: Likewise.
+	* kernel/Directory.st: Likewise.
+	* kernel/Float.st: Likewise.
+	* kernel/Object.st: Likewise.
+	* kernel/Semaphore.st: Likewise.
+	* kernel/SeqCollect.st: Likewise.
+	* kernel/VFS.st: Likewise.
+	* tests/AnsiRun.st: Likewise.
+	* tests/ackermann.st: Likewise.
+	* tests/ary3.st: Likewise.
+	* tests/except.st: Likewise.
+	* tests/hash2.st: Likewise.
+	* tests/lists1.st: Likewise.
+	* tests/matrix.st: Likewise.
+	* tests/prodcons.st: Likewise.
+	* tests/sieve.st: Likewise.
+
+2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/CharArray.st: Add #%.
 
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>

@@ -35,7 +35,7 @@ Transcript message: stdout -> #nextPutAllFlush:!
 
 Smalltalk arguments do: [ :each || results |
     results := (Smalltalk at: each asSymbol) suite run.
-    Transcript showCr: ('%1: %2' bindWith: each with: results printString).
+    Transcript showCr: ('%1: %2' % { each. results }).
     results failureCount > 0 ifTrue: [ results failures printNl ].
     results errorCount > 0 ifTrue: [ results errors printNl ].
     results correctCount < results runCount ifTrue: [ ObjectMemory quit: 1 ]

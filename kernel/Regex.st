@@ -558,7 +558,7 @@ copyFrom: from to: to replacingRegex: pattern with: str
     "Returns the substring of the receiver between from and to.  
      If pattern has a match in that part of the string, the match
      is replaced with str after substituting %n sequences with the 
-     captured subexpressions of the match (as in #bindWithArguments:)."
+     captured subexpressions of the match (as in #%)."
     | regs beg end repl res |
     regs := self searchRegex: pattern from: from to: to.
 
@@ -566,7 +566,7 @@ copyFrom: from to: to replacingRegex: pattern with: str
 	ifTrue: [
 	    beg := regs from.
 	    end := regs to.
-	    repl := str bindWithArguments: regs.
+	    repl := str % regs.
 	    res := self species new: (to - from) - (end - beg) + repl size.
 	    res replaceFrom: 1 to: beg - from with: self startingAt: from.
 	    res replaceFrom: beg - from + 1 to: beg - from + repl size with: repl.
@@ -579,7 +579,7 @@ copyFrom: from to: to replacingRegex: pattern with: str
 copyReplacingRegex: pattern with: str
     "Returns the receiver after replacing the first match of pattern (if
      any) with str.  %n sequences present in str are substituted with the 
-     captured subexpressions of the match (as in #bindWithArguments:)."
+     captured subexpressions of the match (as in #%)."
 
     ^self copyFrom: 1 to: self size replacingRegex: pattern with: str
 !
@@ -588,7 +588,7 @@ copyFrom: from to: to replacingAllRegex: pattern with: str
     "Returns the substring of the receiver between from and to.  
      Any match of pattern in that part of the string is replaced with
      str after substituting %n sequences with the captured subexpressions
-     of the match (as in #bindWithArguments:)."
+     of the match (as in #%)."
 
     | res idx regex beg end regs |
     regex := pattern asRegex.
@@ -601,7 +601,7 @@ copyFrom: from to: to replacingAllRegex: pattern with: str
 	beg := regs from.
 	end := regs to.
 	res next: beg - idx putAll: self startingAt: idx.
-	res nextPutAll: (str bindWithArguments: regs).
+	res nextPutAll: (str % regs).
 	idx := end + 1.
 	beg > end ifTrue: [ res nextPut: (self at: idx). idx := idx + 1 ].
 	idx > self size ifTrue: [ ^res contents ].
@@ -614,7 +614,7 @@ copyFrom: from to: to replacingAllRegex: pattern with: str
 copyReplacingAllRegex: pattern with: str
     "Returns the receiver after replacing all the matches of pattern (if
      any) with str.  %n sequences present in str are substituted with the 
-     captured subexpressions of the match (as in #bindWithArguments:)."
+     captured subexpressions of the match (as in #%)."
 
     ^self copyFrom: 1 to: self size replacingAllRegex: pattern with: str
 !

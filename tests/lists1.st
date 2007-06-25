@@ -36,7 +36,7 @@ SmallInteger extend [
         [ a isEmpty ] whileFalse: [
     	    b addLast: a removeLast ].
 
-        ('%1 %2' bindWith: (b at: 1) with: (b at: 2)) displayNl.
+        ('%1 %2' % { b at: 1. b at: 2 }) displayNl.
 
         b := b reverse.
         (b includes: 0) printNl.
@@ -56,7 +56,7 @@ SmallInteger extend [
         sum printNl.
         a := a, b.
 
-        ('%1 %2' bindWith: a size with: a last) displayNl
+        ('%1 %2' % { a size. a last }) displayNl
     ]
 ]
 

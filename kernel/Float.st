@@ -420,14 +420,11 @@ printOn: aStream special: whatToPrintArray
 
     "First, take care of the easy cases."
     self isNaN ifTrue: [
-	^aStream nextPutAll:
-	    ((whatToPrintArray at: 3) bindWith: self class) ].
+	^aStream nextPutAll: ((whatToPrintArray at: 3) % { self class }) ].
     self = self class infinity ifTrue: [
-	^aStream nextPutAll:
-	    ((whatToPrintArray at: 1) bindWith: self class) ].
+	^aStream nextPutAll: ((whatToPrintArray at: 1) % { self class }) ].
     self = self class negativeInfinity ifTrue: [
-	^aStream nextPutAll:
-	    ((whatToPrintArray at: 2) bindWith: self class) ].
+	^aStream nextPutAll: ((whatToPrintArray at: 2) % { self class }) ].
 
     "We deal only with positive values."
     me := self abs.

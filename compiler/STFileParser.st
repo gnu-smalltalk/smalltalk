@@ -280,7 +280,7 @@ next
 
 name
     "Answer a string that represents what the receiver is streaming on"
-    ^'(%1 %2)' bindWith: self species article with: self species name
+    ^'(%1 %2)' % { self species article. self species name }
 !
 
 segmentFrom: startPos to: endPos

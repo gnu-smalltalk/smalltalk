@@ -419,8 +419,7 @@ printHierarchyOf: dict hierarchy: desc startAt: root on: stream indent: indent
 	    [:each | 
 	    | template |
 	    template := (dict at: each) ifTrue: ['%1%2'] ifFalse: ['%1(%2)'].
-	    string := template bindWith: indent
-			with: (each nameIn: self currentNamespace).
+	    string := template % { indent. each nameIn: self currentNamespace }.
 	    shownClasses at: string put: each.
 	    stream nextPut: string.
 	    self 
