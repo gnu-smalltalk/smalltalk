@@ -98,31 +98,30 @@ Kernel.PackageDirectories subclass: PackageFiles [
 
 File extend [
     emitRemove [
-	('rm -f %1' % { self }) displayNl
+	('cmd rm -f %1' % { self }) displayNl
     ]
 
     emitSymlink: dest [
 	self isDirectory ifTrue: [ ^(Directory name: dest) emitMkdir ].
-	('$LN_S -f %1 %2' % { self. File name: dest }) displayNl
+	('cmd \$LN_S -f %1 %2' % { self. File name: dest }) displayNl
     ]
 
     emitInstall: dest [
 	| mode |
 	mode := self isExecutable ifTrue: [ 8r755 ] ifFalse: [ 8r644 ].
-	('$INSTALL -m %1 %2 %3'
+	('cmd \$INSTALL -m %1 %2 %3'
 	    % { mode printString: 8. self. File name: dest }) displayNl
     ]
 ]
 
 Directory extend [
     emitMkdir [
-	('$mkdir_p %1' % { self }) displayNl
+	('cmd \$mkdir_p %1' % { self }) displayNl
     ]
 ]
 
 Object subclass: Command [
     | packages installDir |
-
     validateDestDir: destdir installDir: instDir [ 
 	instDir isNil ifTrue: [ ^self ].
 	((Directory name: instDir) name ~= instDir
@@ -160,7 +159,87 @@ Object subclass: Command [
     ]
 ]
 
-Command subclass: PkgDist [
+Command subclass: ShellCommand [
+    run [
+	stdout nextPutAll:
+'case "$INSTALL" in
+  */install-sh | *"/install-sh -c" | \
+  */install.sh | *"/install.sh -c" | \
+  install-sh | "install-sh -c" | \
+  install.sh | "install.sh -c")
+    display_INSTALL=install
+    INSTALL=func_install
+    ;;
+  *)
+    display_INSTALL="$INSTALL"
+    ;;
+esac
+
+# Simplistic replacement for the install package, used when
+# configure chose the install-sh script
+func_install ()
+{
+  while [ $# -gt 4 ]; do
+    shift
+  done
+  set -e
+  rm -f "$4"
+  cp "$3" "$4"
+  chmod $2 "$4"
+  set +e
+}
+
+# mkdir -p emulation based on the mkinstalldirs script.
+mkdir_p ()
+{
+  for file
+  do
+    case $file in
+      /*) pathcomp=/ ;;
+      *)  pathcomp= ;;
+    esac
+    oIFS=$IFS
+    IFS=/
+    set fnord $file
+    shift
+    IFS=$oIFS
+
+    errstatus=0
+    for d
+    do
+      test "x$d" = x && continue
+      pathcomp=$pathcomp$d
+      case $pathcomp in
+        -*) pathcomp=./$pathcomp ;;
+      esac
+
+      if test ! -d "$pathcomp"; then
+        mkdir "$pathcomp" || lasterr=$?
+        test -d "$pathcomp" || errstatus=$lasterr
+      fi
+      pathcomp=$pathcomp/
+    done
+  done
+  return "$errstatus"
+}
+
+cmd () {
+  save_INSTALL=$INSTALL
+  INSTALL=$display_INSTALL
+  mkdir_p="mkdir -p"
+  eval echo "$@"
+  INSTALL=$save_INSTALL
+  mkdir_p=mkdir_p
+  $run_cmd "$@"
+}
+
+set -e
+'.
+        super run
+    ]
+]
+
+ShellCommand subclass: PkgDist [
     validateDestDir: destdir installDir: installDir [ 
 	destdir isEmpty ifTrue: [
 	    self error: 'using --dist without specifying --distdir' ].
@@ -185,9 +264,11 @@ Command subclass: PkgDist [
     ]
 ]
 
-Command subclass: PkgInstall [
-    run [
+ShellCommand subclass: PkgInstall [
+    prolog [
         | destFile mergeResult |
+	super prolog.
+
         "Create the installation directory.  Then, if we are installing, add
          packages.xml to the list and merge the supplied packages files with it.
          This is temporary, as installation will create .star packages later on."
@@ -215,7 +296,6 @@ Command subclass: PkgInstall [
 		do: [ :ex | ex resume ] ].
 
         destFile withWriteStreamDo: [ :s | mergeResult printOn: s ].
-	super run
     ]
 
     runOnPackage: aPackage [
@@ -238,7 +318,7 @@ Command subclass: PkgInstall [
     ]
 ]
 
-Command subclass: PkgUninstall [
+ShellCommand subclass: PkgUninstall [
     runOnPackage: aPackage [
 	| baseDir |
 	baseDir := Directory append: aPackage relativeDirectory to: self installDir.

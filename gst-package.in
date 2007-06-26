@@ -39,80 +39,6 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 : ${GST=@bindir@/gst}
 
-: ${INSTALL=@INSTALL@}
-: ${LN_S=@LN_S@}
- mkdir_p='mkdir -p'
-
-case "$INSTALL" in
-  */install-sh | *"/install-sh -c" | \
-  */install.sh | *"/install.sh -c" | \
-  install-sh | "install-sh -c" | \
-  install.sh | "install.sh -c")
-    display_INSTALL=install
-    INSTALL=func_install
-    ;;
-  *)
-    display_INSTALL="$INSTALL"
-    ;;
-esac
-
-# Simplistic replacement for the install package, used when
-# configure chose the install-sh script
-func_install ()
-{
-  while [ $# -gt 4 ]; do
-    shift
-  done
-  set -e
-  rm -f "$4"
-  cp "$3" "$4"
-  chmod $2 "$4"
-  set +e
-}
-
-# mkdir -p emulation based on the mkinstalldirs script.
-mkdir_p ()
-{
-  for file
-  do
-    case $file in
-      /*) pathcomp=/ ;;
-      *)  pathcomp= ;;
-    esac
-    oIFS=$IFS
-    IFS=/
-    set fnord $file
-    shift
-    IFS=$oIFS
-
-    errstatus=0
-    for d
-    do
-      test "x$d" = x && continue
-      pathcomp=$pathcomp$d
-      case $pathcomp in
-        -*) pathcomp=./$pathcomp ;;
-      esac
-
-      if test ! -d "$pathcomp"; then
-        mkdir "$pathcomp" || lasterr=$?
-        test -d "$pathcomp" || errstatus=$lasterr
-      fi
-      pathcomp=$pathcomp/
-    done
-  done
-  return "$errstatus"
-}
-
-show_command () {
-  save_INSTALL=$INSTALL
-  INSTALL=$display_INSTALL
-  mkdir_p='mkdir -p'
-  eval echo "$cmd"
-  INSTALL=$save_INSTALL
-  mkdir_p='mkdir_p'
-}
-
 # The same shell functions used in gst-load and gst-sunit.
 
 gst () {
@@ -163,10 +89,12 @@ getopt "$@" | {
   if $list; then
     gst scripts/Package.st "$@"
   else
-    gst scripts/Package.st "$@" | while read cmd; do
-      show_command "$cmd"
-      $run_cmd "$cmd"
-    done
+    {
+      echo ': ${INSTALL=@INSTALL@}'
+      echo ': ${LN_S=@LN_S@}'
+      echo run_cmd=$run_cmd
+      gst scripts/Package.st "$@"
+    } | sh && \
 
     if test "$run_cmd" = eval && test "$load_test,$load_dry_run" != ,-n; then
       packages=`eval gst scripts/Package.st \

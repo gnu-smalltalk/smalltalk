@@ -1,3 +1,7 @@
+2007-06-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Package.st: Emit shell function prolog here.
+
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiExcept.st: Use #%.
