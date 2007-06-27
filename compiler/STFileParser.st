@@ -75,8 +75,8 @@ endMethodList
 evaluate: node
     "This should be overridden because its result affects the parsing
      process: true means 'start parsing methods', false means 'keep
-     evaluating'. By default, always answer false."
-    ^driver evaluate: node
+     evaluating'."
+    ^node statements size > 0 and: [ driver evaluate: node ]
 ! !
 
 !STFileParser methodsFor: 'utility'!
@@ -156,34 +156,37 @@ parseDoits
 	node := self parseStatements.
         scanner stripSeparators.           "gobble doit terminating bang"
         self step.           "gobble doit terminating bang"
-	node statements size > 0 and: [ self evaluate: node ]
+	self evaluate: node
     ] whileFalse.
     ^true
 !
+
+parseMethodFromFile
+    | node source start stop |
+    start := currentToken start - 1.
+    tags := nil.
+    node := self parseMethod.
+
+    "One -1 accounts for base-1 vs. base-0 (as above), the
+     other drops the bang because we have a one-token lookahead."
+    stop := currentToken start - 2.
+    source := scanner stream copyFrom: start to: stop.
+    source := MappedCollection collection: source map: (1 - start to: stop).
+    node source: source.
+
+    scanner stripSeparators.
+    self step.           "gobble method terminating bang"
+    ^node!
 
 parseMethodDefinitionList
     "Called after first !, expecting a set of bang terminated
      method definitions, followed by a bang"
 
-    | node source start stop |
     [ scanner atEnd or: [ currentToken isSpecial
 	   and: [ currentToken value == $! ] ] ] whileFalse: [
 
-	start := currentToken start - 1.
-        tags := nil.
-        node := self parseMethod.
+	self compile: self parseMethodFromFile ].
 
-        "One -1 accounts for base-1 vs. base-0 (as above), the
-         other drops the bang because we have a one-token lookahead."
-	stop := currentToken start - 2.
-        source := scanner stream copyFrom: start to: stop.
-	source := MappedCollection collection: source map: (1 - start to: stop).
-        node source: source.
-
-        scanner stripSeparators.
-        self step.           "gobble method terminating bang"
-        self compile: node
-    ].
     scanner stripSeparators.
     self step.
     self endMethodList

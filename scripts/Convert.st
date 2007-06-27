@@ -140,7 +140,7 @@ EmittedEntity subclass: EmittedEval [
 
 
 STInST.STClassLoader subclass: SyntaxConverter [
-    | stuffToEmit classesToEmit outStream |
+    | stuffToEmit classesToEmit createdNamespaces outStream |
     
     <comment: 'A class loader that creates a set of "EmittedEntity"
     based on the contents of the given file being loaded.
@@ -152,6 +152,11 @@ STInST.STClassLoader subclass: SyntaxConverter [
     SyntaxConverter class >> convertSqueakStream: in to: out [
         <catogory: 'instance creation'>
         ^self convertStream: in with: STInST.SqueakFileInParser to: out
+    ]
+    
+    SyntaxConverter class >> convertSIFStream: in to: out [
+        <catogory: 'instance creation'>
+        ^self convertStream: in with: STInST.SIFFileInParser to: out
     ]
     
     SyntaxConverter class >> convertStream: in to: out [
@@ -172,6 +177,7 @@ STInST.STClassLoader subclass: SyntaxConverter [
 	super initialize.
         stuffToEmit := OrderedSet new.
         classesToEmit := Dictionary new.
+        createdNamespaces := OrderedSet new.
     ]
 
     outStream: out [
@@ -216,9 +222,21 @@ STInST.STClassLoader subclass: SyntaxConverter [
 	    ifFalse: [ stuffToEmit add: (EmittedEval new namespace: evalNamespace) ]
     ]
 
+    createNamespaces [
+	createdNamespaces do: [ :each || stmt |
+	    stmt := RBMessageNode
+                receiver: (RBVariableNode named: (each superspace nameIn: self currentNamespace))
+                selector: #addSubspace:
+                arguments: { RBLiteralNode value: each name asSymbol }.
+	    self lastEval addStatement: stmt
+	].
+	createdNamespaces := OrderedSet new
+    ]
+
     unknown: node [
         <category: 'collecting entities'>
         
+	self createNamespaces.
 	self lastEval addStatement: node.
         ^false
     ]
@@ -228,6 +246,9 @@ STInST.STClassLoader subclass: SyntaxConverter [
         
         | class emittedClass |
         
+	createdNamespaces remove: self currentNamespace ifAbsent: [ ].
+	self createNamespaces.
+
         class := super defineSubclass: receiver 
                        selector: selector 
                        arguments: argumentNodes.        
@@ -240,12 +261,20 @@ STInST.STClassLoader subclass: SyntaxConverter [
         ^false
     ]
     
+    doAddNamespace: receiver selector: selector arguments: argumentNodes [
+	| ns |
+	super doAddNamespace: receiver selector: selector arguments: argumentNodes.
+
+        ns := (self resolveNamespace: receiver) at: argumentNodes first value.
+	createdNamespaces add: ns
+    ]
+
     doEmitStuff [
         <category: 'emitting'>
 
-        stuffToEmit do: [ :each | each emitTo: outStream ].
-        stuffToEmit := OrderedSet new.
-        classesToEmit := Dictionary new
+        stuffToEmit
+	    do: [ :each | each emitTo: outStream ]
+	    separatedBy: [ outStream nl; nextPut: 12 asCharacter; nl ].
     ]
     
     addMethod: aMethod toLoadedClass: aClass [

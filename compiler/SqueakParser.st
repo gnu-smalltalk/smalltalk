@@ -42,10 +42,10 @@ evaluate: node
      This avoids that the STParsingDriver need to know about other
      dialects."
     | stmt |
-    node statements size == 1 ifFalse: [ ^driver evaluate: node ].
+    node statements size == 1 ifFalse: [ ^super evaluate: node ].
 
     stmt := node statements first.
-    stmt isMessage ifFalse: [ ^driver evaluate: node ].
+    stmt isMessage ifFalse: [ ^super evaluate: node ].
     stmt selector == #addCategory: ifTrue: [ ^false ].
     stmt selector == #commentStamp:prior: ifTrue: [
 	stmt arguments: { scanner nextRawChunk }.
@@ -58,7 +58,7 @@ evaluate: node
 	stmt arguments: { stmt arguments first }.
 	stmt selector: #methodsFor: ].
 
-    ^driver evaluate: node
+    ^super evaluate: node
 ! !
 
 !SqueakFileInParser methodsFor: 'private-parsing'!

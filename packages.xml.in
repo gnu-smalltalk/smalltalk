@@ -399,6 +399,7 @@
   <filein>STLoaderObjs.st</filein>
   <filein>STLoader.st</filein>
   <filein>SqueakParser.st</filein>
+  <filein>SIFParser.st</filein>
   <filein>Exporter.st</filein>
 
   <test>
@@ -421,6 +422,8 @@
   <file>STLoaderObjs.st</file>
   <file>STSymTable.st</file>
   <file>RewriteTests.st</file>
+  <file>SqueakParser.st</file>
+  <file>SIFParser.st</file>
   <file>Exporter.st</file>
 </package>
 

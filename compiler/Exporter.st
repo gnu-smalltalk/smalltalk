@@ -138,8 +138,7 @@ Object subclass: FileOutExporter [
         outClass environment = self defaultNamespace
 	        ifTrue: [ ^self fileOutClassBody: aBlock ].
         
-        outStream nextPut: 12 asCharacter; nl;
-                  nextPutAll: 'Namespace current: ';
+        outStream nextPutAll: 'Namespace current: ';
                   store: outClass environment;
                   nextPutAll: ' ['; nl; nl.
                   
@@ -216,10 +215,10 @@ Object subclass: FileOutExporter [
         "class instance varriables"            
         outClass asMetaclass instVarNames isEmpty
             ifFalse: [ outStream nl; space: 4; nextPutAll: outClass name;
-                       nextPutAll: ' class ['; nl; space: 4.
+                       nextPutAll: ' class ['; nl; tab.
                        outStream nextPut: $|; space.
                        self printFormattedSet: outClass asMetaclass instVarNames.
-                       outStream space; nextPut: $|; nl; space: 4.
+                       outStream space; nextPut: $|; nl; tab.
                        outStream nl; space: 4; nextPut: $]; nl ].
          
         "class variables"

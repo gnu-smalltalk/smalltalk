@@ -1,3 +1,8 @@
+2007-06-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Convert.st: Emit Namespace creation when needed.
+	Emit form feeds here.
+
 2007-06-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Package.st: Emit shell function prolog here.

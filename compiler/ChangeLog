@@ -1,3 +1,12 @@
+2007-06-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* compiler/SIFParser.st: New.
+	* compiler/SqueakParser.st: Use super.
+	* compiler/STFileParser.st: Split part of #parseMethodDefinitionList
+	into a separate method.
+	* compiler/Exporter.st: Fix indentation of class-instance variables.
+	Don't emit form feed character.
+
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/STFileParser.st: Use #%.
