@@ -1,3 +1,7 @@
+2007-06-27  Paolo Bonzini  <bonzini@gnu.org>
+
+        * kernel/Collection.st: Fix #do:separatedBy:.
+
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CharArray.st: Add #%.
