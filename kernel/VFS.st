@@ -281,11 +281,6 @@ vfsFor: fileName name: fsName subPath: subPath
 
 !VFSHandler methodsFor: 'releasing'!
 
-addToBeFinalized
-    "Something that has to be finalized will also be released before quitting."
-    VFSHandler addDependent: self.
-    super addToBeFinalized!
-
 finalize
     "Upon finalization, we remove the file that was temporarily holding the file
      contents"
@@ -504,11 +499,19 @@ lastModifyTime
     ^self getDateAndTime: self stat stMtime value
 !
 
+finalize
+    "Free the statistics for the receiver"
+    | statVar |
+    statVar := stat.
+    stat := nil.
+    statVar free
+!
+
 refresh
     "Refresh the statistics for the receiver"
     stat isNil ifTrue: [
         stat := CStatStruct new.
-        stat addToBeFinalized
+        self addToBeFinalized
     ].
     self lstatOn: self realFileName into: stat.
     File checkError.
@@ -526,8 +529,14 @@ exists
     "Answer whether a file with the name contained in the receiver does exist."
     stat isNil ifTrue: [
         stat := CStatStruct new.
-        stat addToBeFinalized.
+        self addToBeFinalized.
     ].
+    self lstatOn: self realFileName into: stat.
+    File errno == 0 ifFalse: [ ^false ].
+
+    isSymbolicLink := (stat stMode value bitAnd: 8r170000) = 8r120000. "S_IFLNK"
+    isSymbolicLink ifFalse: [ ^true ].
+
     self statOn: self realFileName into: stat.
     ^File errno == 0
 !
@@ -689,6 +698,7 @@ vfsFor: file name: fsName subPath: subPath
 name: virtualFileName realFileName: temporaryFileName
     "Private - Initialize a new object storing the contents of the
      virtualFileName file into temporaryFileName."
+    VFSHandler addDependent: self.
     self addToBeFinalized.
     self name: virtualFileName.
     realFileName := File fullNamFor: temporaryFileName!
@@ -769,6 +779,7 @@ at: aName
 
     handlers isNil ifTrue: [
 	handlers := LookupTable new.
+	VFSHandler addDependent: self.
 	self addToBeFinalized
     ].
 

@@ -1,3 +1,11 @@
+2007-06-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFS.st: Free stat into the RealFileHandler's finalizer.
+	Move responsibility of registering an object with VFS's ObjectMemory
+	handler to the object, rather than doing this in #addToBeFinalized.
+	Fixes race where stat was finalized before an object that was later
+	resurrected. 
+
 2007-06-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Convert.st: Emit Namespace creation when needed.
