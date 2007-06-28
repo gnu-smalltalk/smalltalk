@@ -1,4 +1,4 @@
-nodist_check_DATA = gst.im
+nodist_check_DATA = gst.im gst
 
 AUTOTEST = $(AUTOM4TE) --language=autotest
 TESTSUITE = $(srcdir)/testsuite
@@ -32,6 +32,9 @@ regress:
 	  $(top_builddir)/gst -I $(top_builddir)/gst.im \
 		-r $$test 2>&1 | tee $$result; \
 	done
+
+gst: ../gst
+	rm -f gst; $(LN_S) ../gst .
 
 gst.im: ../kernel/stamp-classes AnsiLoad.st Ansi.st AnsiDB.st
 	cp ../gst.im .

@@ -21,11 +21,11 @@ dnl AT_CHECK_GST([COMMAND-LINE], [IMAGE], [DIR], [STDOUT], [STDERR])
 dnl ----------------------------------------------------------------
 m4_define([AT_CHECK_GST], [
   case $AUTOTEST_PATH in
-    tests) GST="$abs_top_builddir/gst -I m4_ifval([$2], [$2], [$abs_top_builddir/gst.im])" ;;
-    *) GST="$AUTOTEST_PATH/gst m4_ifval([$2], [-I $2])" ;;
+    tests) image_path="-I m4_ifval([$2], [$2], [$abs_top_builddir/gst.im])" ;;
+    *) image_path="m4_ifval([$2], [-I $2])" ;;
   esac
 
-  AT_CHECK([cd m4_ifval([$3], [$3], [$abs_top_builddir]) && $GST $1 | tr -d '\r'], 0, [$4], [$5])
+  AT_CHECK([{ (cd m4_ifval([$3], [$3], [$abs_top_builddir]) && gst $image_path $1); echo exit $? > retcode; } | tr -d '\r'; . retcode], 0, [$4], [$5])
 ])
 
 dnl AT_DIFF_TEST([FILE], [XFAILS])
@@ -43,7 +43,7 @@ dnl AT_PACKAGE_TEST([PACKAGE], [XFAILS])
 dnl ------------------------------------
 m4_define([AT_PACKAGE_TEST], [
   AT_SETUP([$1])
-  AT_KEYWORDS([m4_if([$1], [SUnit], [], [SUnit ])SUnit])
+  AT_KEYWORDS([m4_if([$1], [SUnit], [], [$1 ])SUnit])
   $2
   AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st -p $1], [], [], [ignore])
   AT_CLEANUP
