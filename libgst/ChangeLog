@@ -1,3 +1,7 @@
+2007-06-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lib.c: Ensure null termination of _gst_image_file_path.
+
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Don't lose on integer literals followed by identifiers.

@@ -631,7 +631,8 @@ init_paths (void)
 	    char *dirname;
 	    int n = p > _gst_binary_image_name ? p - _gst_binary_image_name : 1;
 	    dirname = xmalloc (n + 1);
-	    strncpy (dirname, _gst_binary_image_name, n);
+	    memcpy (dirname, _gst_binary_image_name, n);
+	    dirname[n] = 0;
 	    _gst_image_file_path = dirname;
 	    break;
 	  }
