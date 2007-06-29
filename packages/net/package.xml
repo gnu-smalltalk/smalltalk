@@ -1,0 +1,20 @@
+<package>
+  <name>NetClients</name>
+  <prereq>TCP</prereq>
+  <prereq>SUnit</prereq>
+  <filein>Load.st</filein>
+
+  <file>Base.st</file>
+  <file>HTTP.st</file>
+  <file>Load.st</file>
+  <file>NetServer.st</file>
+  <file>MIME.st</file>
+  <file>ContentHandler.st</file>
+  <file>FTP.st</file>
+  <file>IMAP.st</file>
+  <file>NNTP.st</file>
+  <file>POP.st</file>
+  <file>SMTP.st</file>
+  <file>URIResolver.st</file>
+  <file>ChangeLog</file>
+</package>

@@ -1,0 +1,7 @@
+<package>
+  <name>NCurses</name>
+  <filein>ncurses.st</filein>
+  <library>libncurses</library>
+
+  <file>ncurses.st</file>
+</package>

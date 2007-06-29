@@ -1,0 +1,14 @@
+<package>
+  <name>Glorp</name>
+  <prereq>MySQL</prereq>
+  <prereq>SUnit</prereq>
+  <filein>GlorpPort.st</filein>
+  <filein>Glorp.st</filein>
+  <filein>GlorpMySQL.st</filein>
+  <filein>GlorpTest.st</filein>
+
+  <file>GlorpPort.st</file>
+  <file>Glorp.st</file>
+  <file>GlorpMySQL.st</file>
+  <file>GlorpTest.st</file>
+</package>

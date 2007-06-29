@@ -43,6 +43,10 @@ AC_PROG_AWK
 AC_PROG_LN_S
 GST_PROG_LN
 AC_PATH_PROG(INSTALL_INFO, install-info, :, $PATH:/sbin:/usr/sbin)
+AC_PATH_PROG(ZIP, zip, no, $PATH)
+if test "$ZIP" = no; then
+  AC_MSG_ERROR([Please install InfoZIP to use GNU Smalltalk.])
+fi
 
 AC_ARG_WITH(emacs, 
 [  --without-emacs         disable Emacs modes for Smalltalk], ,
@@ -218,7 +222,7 @@ AC_REPLACE_FUNCS(putenv strdup strerror strsignal mkstemp getpagesize \
 	acosl atanl logl expl tanl sinl cosl truncl lrintl strsep strpbrk)
 AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname sbrk usleep lstat \
 	grantpt popen getrusage gettimeofday fork strchr utimes utime readlink \
-	sigsetmask alarm select mprotect madvise nl_langinfo waitpid \
+	sigsetmask alarm select mprotect madvise waitpid \
 	setsid spawnl nanosleep pread pwrite)
 
 GST_FUNC_STRTOUL
@@ -232,62 +236,84 @@ dnl ------------------------- OTHER LIBRARIES -------------------
 
 { echo; echo "${term_bold}Auxiliary libraries:${term_norm}"; } >& AS_MESSAGE_FD
 
-AM_LANGINFO_CODESET
-AM_ICONV
-GST_HAVE_LIB(ncurses, initscr)
 GST_HAVE_GMP
-GST_HAVE_TCLTK
 GST_HAVE_READLINE
-GST_INET_SOCKETS
 
-MODULES_EXAMPLE=""
-MODULES_TK=""
-MODULES_GTK=""
-MODULES_TCP=""
-MODULES_I18N=""
-BLOX_IMPLEMENTATION=BloxTK
-NCURSES_DISABLED="disabled-"
-I18N_DISABLED="disabled-"
-GTK_DISABLED="disabled-"
-
-AC_SUBST(MODULES_EXAMPLE)
-AC_SUBST(MODULES_TCP)
-AC_SUBST(MODULES_GTK)
-AC_SUBST(MODULES_I18N)
-AC_SUBST(MODULES_TK)
-AC_SUBST(BLOX_IMPLEMENTATION)
-AC_SUBST(GTK_DISABLED)
-AC_SUBST(I18N_DISABLED)
-AC_SUBST(NCURSES_DISABLED)
-
-AC_CHECK_HEADER(gdbm.h, MODULES_EXAMPLE="$MODULES_EXAMPLE gdbm.la")
-AC_CHECK_HEADER(zlib.h, MODULES_EXAMPLE="$MODULES_EXAMPLE zlib.la")
-
-AC_ARG_ENABLE(gtk,
-[  --enable-gtk={yes,no,blox}
+GST_PACKAGE_PREFIX([packages])
+GST_PACKAGE([BloxGTK], [blox/gtk])
+GST_PACKAGE([BloxTK], [blox/tk],
+   [GST_HAVE_TCLTK],
+   [gst_cv_tcltk_libs],
+   [Makefile], [blox-tk.la])
+GST_PACKAGE([Blox], [blox/tests], , , [package.xml])
+GST_PACKAGE([Browser], [browser])
+GST_PACKAGE([Continuations], [continuations])
+GST_PACKAGE([DB], [db])
+GST_PACKAGE([GDBM], [gdbm],
+   [AC_CHECK_HEADER([gdbm.h])],
+   [ac_cv_header_gdbm_h],
+   [Makefile], [gdbm.la])
+GST_PACKAGE([Glorp], [glorp])
+GST_PACKAGE([GTK], [gtk], [
+  AC_ARG_ENABLE(gtk,
+  [  --enable-gtk={yes,no,blox}
                           enable GTK+ bindings.  Blox/GTK is experimental.], ,
-enable_gtk=yes)
+  enable_gtk=yes)
 
-if test "$enable_gtk" != no; then
-  maybe_enable_gtk=$enable_gtk
-  enable_gtk=no
-  AM_PATH_GLIB_2_0(2.0.0, [
-    AM_PATH_GTK_2_0(2.0.0, [
-      PKG_CHECK_MODULES(ATK, atk >= 1.0.0, [
-        PKG_CHECK_MODULES(PANGO, pango >= 1.0.0, [enable_gtk=$maybe_enable_gtk])
+  if test "$enable_gtk" != no; then
+    maybe_enable_gtk=$enable_gtk
+    enable_gtk=no
+    AM_PATH_GLIB_2_0(2.0.0, [
+      AM_PATH_GTK_2_0(2.0.0, [
+        PKG_CHECK_MODULES(ATK, atk >= 1.0.0, [
+          PKG_CHECK_MODULES(PANGO, pango >= 1.0.0, [enable_gtk=$maybe_enable_gtk])
+        ])
       ])
-    ])
-  ], [], gobject)
+    ], [], gobject)
+  fi],
+  [enable_gtk],
+  [Makefile], [gst-gtk.la])
+GST_PACKAGE([WebServer], [httpd])
+GST_PACKAGE([I18N], [i18n],
+  [AC_CHECK_FUNCS_ONCE([nl_langinfo])
+  AM_LANGINFO_CODESET
+  AM_ICONV],
+  [ac_cv_func_nl_langinfo am_cv_func_iconv],
+  [Makefile], [i18n.la])
+GST_PACKAGE([Iconv], [iconv],
+  [AM_ICONV],
+  [am_cv_func_iconv],
+  [Makefile], [iconv.la])
+GST_PACKAGE([Java], [java])
+GST_PACKAGE([MD5], [md5], [], [], [Makefile], [md5.la])
+GST_PACKAGE([MySQL], [mysql])
+GST_PACKAGE([NCurses],
+  [ncurses],
+  [GST_HAVE_LIB(ncurses, initscr)],
+  [ac_cv_lib_ncurses_initscr])
+GST_PACKAGE([NetClients], [net])
+GST_PACKAGE([DhbNumericalMethods], [numerics])
+GST_PACKAGE([Compiler], [stinst/compiler])
+GST_PACKAGE([Parser], [stinst/parser])
+GST_PACKAGE([SUnit], [sunit])
+GST_PACKAGE([TCP], [tcp],
+  [GST_INET_SOCKETS],
+  [gst_cv_inet_sockets],
+  [Makefile], [tcp.la])
+GST_PACKAGE([XML], [xml])
+GST_PACKAGE([XPath], [xpath])
+GST_PACKAGE([XSL], [xsl])
+GST_PACKAGE([ZLib],
+  [zlib],
+  [AC_CHECK_HEADER([zlib.h])],
+  [ac_cv_header_zlib_h],
+  [Makefile], [zlib.la])
+
+if test "$enable_gtk" = blox; then
+  BLOX_IMPLEMENTATION=BloxGTK
+else
+  BLOX_IMPLEMENTATION=BloxTK
 fi
- 
-AM_CONDITIONAL(HAVE_GTK, test "$enable_gtk" != no)
-test "$enable_gtk" != no && MODULES_GTK="gst-gtk.la" GTK_DISABLED=""
-test "$enable_gtk" = blox && BLOX_IMPLEMENTATION=BloxGTK
-test "$gst_cv_tcltk_libs" != "not found" && MODULES_TK="blox-tk.la"
-test "$gst_cv_inet_sockets" != "no" && MODULES_TCP="tcp.la"
-test "$ac_cv_lib_ncurses_initscr" = yes && NCURSES_DISABLED=""
-test "$ac_cv_func_nl_langinfo" = yes && \
-  test "$am_cv_func_iconv" = yes && MODULES_I18N="i18n.la" I18N_DISABLED=""
 
 AC_ARG_ENABLE(jit, 
 [  --enable-jit            enable dynamic translation to machine code], ,
@@ -365,7 +391,8 @@ AC_CONFIG_FILES(gst-package, chmod +x gst-package)
 AC_CONFIG_FILES(gst-load, chmod +x gst-load)
 AC_CONFIG_FILES(gst-reload, chmod +x gst-reload)
 AC_CONFIG_FILES(gst-sunit, chmod +x gst-sunit)
-AC_CONFIG_FILES(packages.xml)
+AC_CONFIG_FILES(gst-blox, chmod +x gst-blox)
+AC_CONFIG_FILES(tests/gst, chmod +x tests/gst)
 AC_CONFIG_FILES(libc.la)
 
 dnl Master Makefile
@@ -374,21 +401,5 @@ AC_CONFIG_FILES(Makefile)
 dnl VM makefiles
 AC_CONFIG_FILES(doc/Makefile lib-src/Makefile libgst/Makefile)
 AC_CONFIG_FILES(opcode/Makefile lightning/Makefile tests/Makefile)
-
-dnl Modules makefiles
-AC_CONFIG_FILES(blox/tk/Makefile examples/Makefile)
-AC_CONFIG_FILES(i18n/Makefile tcp/Makefile)
-AC_CONFIG_FILES(gtk/Makefile)
-
-dnl Support VPATH builds off a CVS repository.  When building from
-dnl the tarball, a suitable packages.xml file is put in the root source
-dnl directory by `make dist'.
-AC_CONFIG_COMMANDS($srcdir/packages.xml, [
-  if test -f $srcdir/packages.xml; then
-    :
-  else
-    $as_ln_s `pwd`/packages.xml $srcdir/packages.xml
-  fi
-])
 
 AC_OUTPUT

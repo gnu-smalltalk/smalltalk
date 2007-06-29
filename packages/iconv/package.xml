@@ -1,0 +1,10 @@
+<package>
+  <name>Iconv</name>
+  <namespace>I18N</namespace>
+
+  <filein>Sets.st</filein>
+
+  <module>iconv</module>
+
+  <file>Sets.st</file>
+</package>

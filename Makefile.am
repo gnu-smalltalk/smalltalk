@@ -22,20 +22,20 @@ ACLOCAL_AMFLAGS = -I build-aux
 PACKAGE=smalltalk
 
 DIST_SUBDIRS = lib-src snprintfv lightning sigsegv libffi opcode libgst \
-	i18n tcp examples blox/tk . gtk tests doc
+	. $(ALL_PACKAGES) tests doc
 
 SUBDIRS = lib-src lightning $(subdirs)
 if ENABLE_DISASSEMBLER
 SUBDIRS += opcode
 endif
-SUBDIRS += libgst i18n tcp examples blox/tk . doc gtk tests
+SUBDIRS += libgst . $(BUILT_PACKAGES) doc tests
 
 # Running gst inside the build directory...
 
 GST_ARGUMENTS = --no-user-files --kernel-dir="@abs_top_srcdir@/kernel" \
           --image-dir="@abs_top_builddir@"
 GST = ./gst $(GST_ARGUMENTS)
-GST_PACKAGE = GST=./gst GSTARGS='$(GST_ARGUMENTS)' ./gst-package --srcdir="$(srcdir)" -I gst.im 
+GST_PACKAGE = GST=./gst GSTARGS='$(GST_ARGUMENTS)' ./gst-package -I gst.im 
 
 
 ###########################################################
@@ -72,8 +72,8 @@ nodist_lisp_LISP += gst-mode.el
 endif
 endif
 
-bin_SCRIPTS = gst-package gst-config gst-load gst-reload gst-sunit
-DISTCLEANFILES = termbold termnorm smalltalk-mode.el gst-mode.el
+bin_SCRIPTS = gst-package gst-config gst-load gst-reload gst-sunit gst-blox
+DISTCLEANFILES = termbold termnorm smalltalk-mode.el gst-mode.el pkgrules.tmp
 CLEANFILES = gst.im $(lisp_LISP)
 
 smalltalk-mode.el: smalltalk-mode.el.in
@@ -117,48 +117,6 @@ gsticon.o: gsticon.ico
 gst.im: $(bin_PROGRAMS) $(srcdir)/kernel/stamp-classes
 	$(GST) -iQ /dev/null
 
-all-local:
-
-
-###########################################################
-#
-#        Stamp classes for various packages
-#
-#	 Used for building the image and the documentation
-#
-###########################################################
-
-CLASS_STAMP = $(srcdir)/blox/stamp-classes $(srcdir)/tcp/stamp-classes $ \
-	$(srcdir)/i18n/stamp-classes $(srcdir)/kernel/stamp-classes
-
-blox_PACKAGE=BloxTK
-tcp_PACKAGE=TCP
-i18n_PACKAGE=I18N
-kernel_PACKAGE=Kernel
-
--include $(srcdir)/blox/stamp-classes
--include $(srcdir)/kernel/stamp-classes
--include $(srcdir)/i18n/stamp-classes
--include $(srcdir)/tcp/stamp-classes
-
-all-local: $(CLASS_STAMP)
-
-# The slow rule for building the stamp-classes files uses gst-package, and
-# depends on packages.xml in order to run# when the list of files in the
-# package might have changed.  The fast rule just touches the file.  We
-# could actually do without double-colon rules by using another stamp file
-# which depends on packages.xml and rebuilds all the stamp-classes files.
-
-$(CLASS_STAMP):: packages.xml.in
-
-$(srcdir)/%/stamp-classes: packages.xml.in
-	dir=$*; package=$($*_PACKAGE); \
-	(echo '$@:: \'; \
-	  $(GST_PACKAGE) --list-files $$package packages.xml | \
-	    tr -d \\r | tr \\n ' '; \
-	echo; \
-	echo '	touch $@') > $@
-
 
 ###########################################################
 #
@@ -183,33 +141,47 @@ dist_noinst_DATA += \
 #
 #        Rules for installing and distributing
 #
+#	 More rules are created by the GST_PACKAGE macros,
+#	 including the stamp files used for building the
+#	 documentation.  Here we mimic those rules for the
+#	 kernel, whose file list lives in packages.xml
+#
 ###########################################################
 
-# We need to provide a basic packages.xml file when a vpath build is in use
-# so that the packages are found in subdirectories of the srcdir
-# The \( ... \) below protect against substitution in config.status
-dist-hook: gst-package
-	$(SED) -e "s/@\(I18N_DISABLED\)@/disabled-/" \
-	  -e "s/@\(GTK_DISABLED\)@/disabled-/" \
-	  -e "s/@\(NCURSES_DISABLED\)@/disabled-/" \
-	  -e "s/@\(VERSION\)@/@VERSION@/" \
-	  $(srcdir)/packages.xml.in > $(distdir)/packages.xml
-	$(GST_PACKAGE) --dist --distdir="$(distdir)" packages.xml
-	@for i in $(CLASS_STAMP); do \
-	  dir=`dirname $$i`; dir=`basename $$dir`; \
-	  echo cp -p $$i $(distdir)/$$dir/stamp-classes; \
-	  cp -p $$i $(distdir)/$$dir/stamp-classes; \
-	done
+-include $(srcdir)/kernel/stamp-classes
+all-local: $(srcdir)/kernel/stamp-classes
+
+# The slow rule for building the stamp-classes files uses gst-package, and
+# depends on packages.xml in order to run when the list of files in the
+# package might have changed.  The fast rule just touches the file.  We
+# could actually do without double-colon rules by using another stamp file
+# which depends on packages.xml and rebuilds all the stamp-classes files.
+
+$(srcdir)/kernel/stamp-classes:: $(srcdir)/packages.xml
+	(echo '$$(srcdir)/kernel/stamp-classes:: \'; \
+	  $(GST_PACKAGE) --list-files Kernel --vpath --srcdir="$(srcdir)" $(srcdir)/packages.xml | \
+	    tr -d \\r | tr \\n ' '; \
+	echo; \
+	echo '	touch $$(srcdir)/kernel/stamp-classes') \
+	  > $(srcdir)/kernel/stamp-classes
+
+all-local:
+clean-local::
+
+dist-hook::
+	$(GST_PACKAGE) --dist \
+	  --distdir="$(distdir)" --srcdir="$(srcdir)" \
+	  $(srcdir)/packages.xml
+	cp -p $(srcdir)/kernel/stamp-classes $(distdir)/kernel/stamp-classes
 
 # Build an image after installing the data; install-data runs after
 # install-exec, so the gst executable is already in bindir.
-install-data-hook: gst-package
-	rm -f $(DESTDIR)$(pkgdatadir)/packages.xml
-	$(GST_PACKAGE) \
-	  --no-load --destdir="$(DESTDIR)" --target-dir="$(pkgdatadir)" \
-	  packages.xml
+# To install the kernel files, we use gst-package in --dist mode.
+install-data-hook::
+	$(GST_PACKAGE) --dist --copy --all-files \
+	  --destdir="$(DESTDIR)" --target-dir="$(pkgdatadir)" \
+	  --srcdir="$(srcdir)" $(srcdir)/packages.xml
 	$(mkdir_p) $(DESTDIR)$(imagedir)
-	rm -f $(DESTDIR)$(imagedir)/gst.im
 	cd $(DESTDIR)$(imagedir) && \
 	  $(DESTDIR)$(bindir)/gst --no-user-files -i \
 	    --kernel-dir="$(DESTDIR)$(pkgdatadir)/kernel" \
@@ -220,6 +192,7 @@ install-data-hook: gst-package
 uninstall-local:: gst-package
 	$(GST_PACKAGE) \
 	  --uninstall --destdir="$(DESTDIR)" --target-dir="$(pkgdatadir)" \
-	  packages.xml
-	-rm -f $(DESTDIR)$(pkgdatadir)/packages.xml
+	  --srcdir=$(srcdir) $(DESTDIR)$(pkgdatadir)/packages.xml
 	-rm -f $(DESTDIR)$(imagedir)/gst.im
+
+@PACKAGE_RULES@

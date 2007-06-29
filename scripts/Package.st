@@ -30,6 +30,10 @@
 
 
 Package extend [
+    srcdir [
+	^self baseDirectories last
+    ]
+
     isStarPackageBody [
 	^'*.star#uzip' match: self baseDirectories first
     ]
@@ -47,13 +51,23 @@ Package extend [
     ]
 ]
 
+Kernel.PackageDirectory subclass: StarPackageFile [
+    refreshStarList: dir [
+	| package |
+	package := Kernel.StarPackage fileName: self fileName.
+        packages at: package name put: package loadedPackage
+    ]
+
+    refreshPackageList []
+]
+
 Kernel.PackageDirectory subclass: PackageFile [
-    refreshStarList []
+    refreshStarList: dir []
 
     refreshPackageList [
         | file |
 	file := FileStream open: fileName mode: FileStream read.
-	[ self parse: file baseDirectories: baseDirectories ]
+	[ self parse: file ]
 	    ensure: [ file close ].
     ]
 ]
@@ -71,20 +85,37 @@ Kernel.PackageDirectories subclass: PackageFiles [
 	    ifFalse: [
 		PackageFile
 		    on: fileName
-		    baseDirectories: (self baseDirsFor: fileName) ]
+		    baseDirectories: [ self baseDirsFor: fileName ] ]
 	    ifTrue: [
-		PackageFile
-		    on: fileName, '#uzip/package.xml'
-		    baseDirectories: fileName, '#uzip' ].
+		StarPackageFile
+		    on: fileName
+		    baseDirectories: [ fileName, '#uzip' ] ].
 
 	packageFile refresh.
 	self add: packageFile.
     ]
 
     baseDirsFor: fileName [
-	^self srcdir isNil
-	    ifTrue: [ { (File name: fileName) path } ]
-	    ifFalse: [ { (File name: fileName) path. srcdir } ]
+	| file srcdirPath builddirPrefix |
+	file := File name: fileName.
+	self srcdir isNil ifTrue: [ ^{ file path } ].
+
+	"See if the file is in srcdir or builddir.  In any case, we want to
+	 look for files first in the builddir, and secondarily in srcdir."
+	srcdirPath := file pathFrom: srcdir.
+	builddirPrefix := (Directory name: Directory working) pathFrom: srcdir.
+	^(srcdirPath startsWith: builddirPrefix, Directory pathSeparatorString)
+	    ifFalse: [
+		"file is in srcdir."
+		{ File pathFor: srcdirPath. file path } ]
+	    ifTrue: [ {
+		"file is in builddir."
+		file path.
+		Directory append: (File pathFor: fileName) to: self srcdir } ]
+    ]
+
+    filesDo: aBlock [
+	(dirs collect: [ :each | each fileName ]) asSet do: aBlock
     ]
 
     srcdir [
@@ -97,31 +128,36 @@ Kernel.PackageDirectories subclass: PackageFiles [
 ]
 
 File extend [
+    emitZipDir: dir [
+	self emitRemove.
+	('cmd %1 \$ZIP -qr %2 .' % { dir. self }) displayNl
+    ]
+
     emitRemove [
-	('cmd rm -f %1' % { self }) displayNl
+	('cmd . rm -f %1' % { self }) displayNl
     ]
 
     emitSymlink: dest [
-	self isDirectory ifTrue: [ ^(Directory name: dest) emitMkdir ].
-	('cmd \$LN_S -f %1 %2' % { self. File name: dest }) displayNl
+	('cmd . \$LN_S -f %1 %2' % { self. dest }) displayNl
     ]
 
     emitInstall: dest [
 	| mode |
 	mode := self isExecutable ifTrue: [ 8r755 ] ifFalse: [ 8r644 ].
-	('cmd \$INSTALL -m %1 %2 %3'
+	('cmd . \$INSTALL -m %1 %2 %3'
 	    % { mode printString: 8. self. File name: dest }) displayNl
     ]
 ]
 
 Directory extend [
     emitMkdir [
-	('cmd \$mkdir_p %1' % { self }) displayNl
+	('cmd . \$mkdir_p %1' % { self }) displayNl
     ]
 ]
 
 Object subclass: Command [
-    | packages installDir |
+    | packages installDir dryRun copy allFiles |
+
     validateDestDir: destdir installDir: instDir [ 
 	instDir isNil ifTrue: [ ^self ].
 	((Directory name: instDir) name ~= instDir
@@ -130,7 +166,7 @@ Object subclass: Command [
     ]
 
     destDir: destdir installDir: instDir [
-	self validateDestDir: destdir installDir: installDir.
+	self validateDestDir: destdir installDir: instDir.
 	instDir isNil
 	    ifTrue: [ installDir := destdir, self defaultInstallDir ]
 	    ifFalse: [ installDir := destdir, instDir ]
@@ -139,28 +175,64 @@ Object subclass: Command [
     defaultInstallDir [ ^Directory image ]
     installDir [ ^installDir ]
 
+    dryRun [ ^dryRun ]
+    dryRun: aBoolean [ dryRun := aBoolean ]
+    copy [ ^copy ]
+    copy: aBoolean [ copy := aBoolean ]
+    allFiles [ ^allFiles ]
+    allFiles: aBoolean [ allFiles := aBoolean ]
+
     packages [
 	packages isNil ifTrue: [ packages := PackageFiles new ].
 	^packages 
     ]
 
-    srcdir: aString [ self packages srcdir: aString ]
+    srcdir [
+	^self packages srcdir ifNil: [ '.' ]
+    ]
+    srcdir: aString [
+	(aString = '.' or: [ (File fullNameFor: aString) = Directory working ])
+	    ifTrue: [ self packages srcdir: nil ]
+	    ifFalse: [ self packages srcdir: aString ]
+    ]
+
     addAllFiles: aCollection [ self packages addAllFiles: aCollection ]
 
+    prolog [ ]
     run [ self packages do: [ :pkg | pkg runCommand: self ] ]
-    runOnStar: self [ self runOnPackage: self ]
-    runOnPackage: self [ ]
+    runOnStar: aStarPackage [ self runOnPackage: aStarPackage ]
+    runOnPackage: aPackage [ ]
 
-    listFiles: listFiles [
+    listFiles: listFiles vpath: aBoolean [
+	| base vpathBase |
+	base := Directory name: self installDir.
+	vpathBase := Directory name: self srcdir.
+
         listFiles do: [ :each || package |
 	    package := self packages at: each.
 	    package allFiles do: [ :file |
-		(package findPathFor: file) displayNl ] ]
+		| path relativePath |
+		path := package findPathFor: file.
+		relativePath := base pathTo: path.
+		(aBoolean and: [ (relativePath indexOfSubCollection: '../') > 0 ])
+		    ifTrue: [ relativePath := vpathBase pathTo: path ].
+
+		relativePath displayNl ] ]
     ]
 ]
 
 Command subclass: ShellCommand [
-    run [
+    emitVariable: aString default: command [
+	('%1="%2"' % { aString. (Smalltalk getenv: aString) ifNil: [ command ] })
+	    displayNl.
+    ]
+
+    prolog [
+	('run_cmd=%<:|eval>1' % { dryRun }) displayNl.
+	self emitVariable: 'INSTALL' default: 'install-sh'.
+	self emitVariable: 'LN_S' default: 'ln -s'.
+	self emitVariable: 'ZIP' default: 'zip'.
+
 	stdout nextPutAll:
 'case "$INSTALL" in
   */install-sh | *"/install-sh -c" | \
@@ -224,108 +296,165 @@ mkdir_p ()
 }
 
 cmd () {
+  (dir="$1"
+  shift
   save_INSTALL=$INSTALL
   INSTALL=$display_INSTALL
   mkdir_p="mkdir -p"
-  eval echo "$@"
+  case "$dir" in
+    .) eval echo "$@" ;;
+    *) eval echo cd $dir \\\&\\\& "$@" ;;
+  esac
   INSTALL=$save_INSTALL
   mkdir_p=mkdir_p
-  $run_cmd "$@"
+  eval cd "$dir"
+  $run_cmd "$@")
+}
+
+mkdtemp () {
+  # Create a temporary directory $tmp in $TMPDIR (default /tmp).
+  # Use mktemp if possible; otherwise fall back on mkdir,
+  # with $RANDOM to make collisions less likely.
+  : ${TMPDIR=/tmp}
+
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    if test $i = 1 && test "$run_cmd" != :; then
+      tmp=`(umask 077 && mktemp -d "$TMPDIR/gstar-XXXXXX") 2>/dev/null`
+    else
+      tmp=$TMPDIR/foo$$-$RANDOM
+      test "$run_cmd" != : && break
+      mkdir -m700 "$tmp" 2>/dev/null
+    fi
+    result=$?
+    test -n "$tmp" && test -d "$tmp" && break
+    test $i = 10 && exit $?
+  done
+  trap "rm -rf \"\$tmp\"" 0 1 2 3 15
+  echo "mkdir -m700 \"$tmp\""
 }
 
 set -e
 '.
-        super run
     ]
 ]
 
 ShellCommand subclass: PkgDist [
-    validateDestDir: destdir installDir: installDir [ 
-	destdir isEmpty ifTrue: [
+    validateDestDir: destdir installDir: instDir [ 
+	(destdir isEmpty and: [ instDir isNil ]) ifTrue: [
 	    self error: 'using --dist without specifying --distdir' ].
     ]
 
     defaultInstallDir [ ^'' ]
+    run [
+	super run.
+
+	"Distribute package files, unless they are automatically generated
+	 from autoconf."
+	packages filesDo: [ :each |
+	    | destName autoconfName srcdir |
+	    destName := File stripPathFrom: each.
+	    srcdir := Directory append: (File pathFor: each) to: self srcdir.
+	    autoconfName := destName, '.in'.
+	    ((Directory name: srcdir) includes: autoconfName)
+		ifFalse: [
+		    self distribute: (File name: each)
+			as: destName
+			in: nil ] ]
+    ]
+
+    distribute: srcFile as: file in: dir [
+	| destName baseDir |
+	baseDir := self installDir.
+	dir isNil ifFalse: [
+	    baseDir := Directory append: dir to: baseDir ].
+	destName := Directory append: file to: baseDir.
+	copy
+	    ifTrue: [ srcFile emitInstall: destName ]
+	    ifFalse: [ srcFile emitSymlink: destName ]
+    ]
+
     runOnPackage: aPackage [
 	| dirs files baseDir |
-	files := aPackage files.
-        dirs := files collect: [ :file |
-	    Directory append: (File pathFor: file) to: aPackage relativeDirectory ].
+	files := allFiles
+	    ifTrue: [ aPackage allFiles ]
+	    ifFalse: [ aPackage allDistFiles ].
 
-        dirs asSet asSortedCollection do: [ :dir || destName |
+        dirs := files collect: [ :file | File pathFor: file ].
+	dirs := dirs asSet asOrderedCollection.
+
+	aPackage relativeDirectory isNil ifFalse: [
+	    dirs := dirs collect: [ :dir |
+		Directory append: dir to: aPackage relativeDirectory ] ].
+
+        dirs do: [ :dir || destName |
 	    destName := Directory append: dir to: self installDir.
 	    (Directory name: destName) emitMkdir ].
 
-	baseDir := Directory append: aPackage relativeDirectory to: self installDir.
         files do: [ :file || srcFile destName |
 	    srcFile := File name: (aPackage findPathFor: file).
-	    destName := Directory append: file to: baseDir.
-	    srcFile emitSymlink: destName ]
+	    self distribute: srcFile as: file in: aPackage relativeDirectory ]
+    ]
+    runOnStar: aPackage [
+	self error: 'cannot distribute sources from .star file'
     ]
 ]
 
 ShellCommand subclass: PkgInstall [
-    prolog [
-        | destFile mergeResult |
-	super prolog.
-
-        "Create the installation directory.  Then, if we are installing, add
-         packages.xml to the list and merge the supplied packages files with it.
-         This is temporary, as installation will create .star packages later on."
+    run [
+        "Create the installation directory."
         (Directory name: self installDir) emitMkdir.
-
-        "This is also temporary.  To merge the packages.xml file, we need to
-         really create the file.  This screws up --dry-run but, again, it's
-         temporary.  For distribution it is not necessary, because the distdir
-	 should have already been created."
-        ((Directory name: self installDir) name subStrings: $/)
-	    inject: (Directory name: '/')
-	    into: [ :old :each || dir |
-	        dir := old directoryAt: each.
-	        dir exists ifFalse: [ dir := Directory create: dir name ].
-	        dir ].
-
-	"Do merge the package files.  So far we did this in install mode only,
-	 but it actually makes more sense to do it in distribution mode."
-        destFile := File name: self installDir, '/packages.xml'.
-	mergeResult := packages copy.
-        destFile exists ifTrue: [
-	    "In this case, we can pass problematic packages through."
-	    [ mergeResult addFile: destFile name ]
-		on: Kernel.PackageNotAvailable
-		do: [ :ex | ex resume ] ].
-
-        destFile withWriteStreamDo: [ :s | mergeResult printOn: s ].
+	super run.
     ]
 
     runOnPackage: aPackage [
-	"Right now this is almost a copy of PkgDist>>#runOnPackage:, but
-	 this will change when this will create a .star file."
-	| dirs files baseDir |
-	files := aPackage allFiles.
-        dirs := files collect: [ :file |
-	    Directory append: (File pathFor: file) to: aPackage relativeDirectory ].
+	| pkg destFile dirs files baseDir |
+        'mkdtemp' displayNl.
+	baseDir := '\"\$tmp\"/%1' % { aPackage name }.
+	pkg := aPackage copy.
+	pkg relativeDirectory: nil.
 
-        dirs asSet asSortedCollection do: [ :dir || destName |
-	    destName := Directory append: dir to: self installDir.
-	    (Directory name: destName) emitMkdir ].
+	('cmd . \$mkdir_p ', baseDir) displayNl.
+	('$run_cmd cat \> %1/package.xml << ''__<EOF>__''
+%2
+__<EOF>__' % { baseDir. pkg }) displayNl.
 
-	baseDir := Directory append: aPackage relativeDirectory to: self installDir.
+	files := pkg allFiles.
+        dirs := files collect: [ :file | File pathFor: file ].
+	dirs asSet asSortedCollection do: [ :dir |
+	    ('cmd . \$mkdir_p %1/%2' % { baseDir. dir }) displayNl ].
+
         files do: [ :file || srcFile destName |
 	    srcFile := File name: (aPackage findPathFor: file).
-	    destName := Directory append: file to: baseDir.
-	    srcFile emitInstall: destName ]
+	    ('cmd . \$LN_S -f %1 %2/%3' % { srcFile. baseDir. file }) displayNl ].
+
+	destFile := Directory append: aPackage name, '.star' to: self installDir.
+	(File name: destFile) emitZipDir: baseDir.
+    ]
+
+    runOnStar: aPackage [
+	| destFile |
+	destFile := Directory append: aPackage name, '.star' to: self installDir.
+	(File name: aPackage starFileName) emitInstall: destFile.
     ]
 ]
 
 ShellCommand subclass: PkgUninstall [
+    run [
+        super run.
+        packages filesDo: [ :each | (File name: each) emitRemove ]
+    ]
+
     runOnPackage: aPackage [
 	| baseDir |
-	baseDir := Directory append: aPackage relativeDirectory to: self installDir.
+	baseDir := self installDir.
+	aPackage relativeDirectory isNil
+	    ifFalse: [ baseDir := Directory append: aPackage relativeDirectory to: baseDir ].
 	aPackage allFiles do: [ :file || destName |
 	    destName := (Directory append: file to: baseDir).
 	    (File name: destName) emitRemove ]
     ]
+
+    runOnStar: aPackage [ ]
 ]
 
 Command subclass: PkgList [
@@ -336,7 +465,7 @@ PkgList subclass: PkgPackageList [
     runOnPackage: aPackage [ aPackage name displayNl ]
 ]
 
-| srcdir installDir mode listFiles destdir packageFiles helpString |
+| srcdir installDir mode listFiles destdir packageFiles helpString dryRun vpath |
 
 mode := PkgInstall.
 listFiles := OrderedCollection new.
@@ -345,6 +474,10 @@ destdir := ''.
 srcdir := nil.
 packageFiles := OrderedCollection new.
 packages := PackageFiles new.
+vpath := false.
+dryRun := false.
+allFiles := false.
+copy := false.
 
 helpString := 
 'Usage:
@@ -354,7 +487,7 @@ helpString :=
 	--test                  run unit tests after merging
 	--load                  also load the Smalltalk files in the image
         --uninstall             remove the packages mentioned in the FILES
-        --dist                  create symbolic links of non-built files
+        --dist                  copy files instead of creating STAR files.
         --list-files PKG        just output the list of files in the package
         --list-packages         just output the list of packages in the files
 	--srcdir DIR            look for non-built files in directory DIR
@@ -365,6 +498,13 @@ helpString :=
 	--help                  display this message and exit
 	--version               print version information and exit
 
+--list-files suboptions:
+	--vpath			Omit path to srcdir for files that are there
+
+--dist suboptions:
+        --all-files             Process all files, not just non-built ones
+        --copy                  Do not create symbolic links
+
 Except in uninstall and list files mode, gst-package requires write
 access to the GNU Smalltalk image directory, and merges the XML package
 files on the command line with that file.
@@ -373,12 +513,13 @@ The default target directory is $install_dir.'.
 
 [
     Smalltalk
-        "--load, --image-file, --dry-run are processed by gst-package.
+        "--load and --image-file are processed by gst-package.
 	 --no-load present for backwards compatibility, it is now the default.
 	 --no-install is also present for backwards compatibility."
         arguments: '-h|--help --no-load --load --no-install --uninstall
             --dist -t|--target-directory: --list-files: --list-packages
-            --srcdir: --distdir|--destdir: -n|--dry-run -I|--image-file:'
+            --srcdir: --distdir|--destdir: -n|--dry-run --all-files
+	    --vpath --copy -I|--image-file:'
 
         do: [ :opt :arg |
             opt = 'help' ifTrue: [
@@ -394,16 +535,27 @@ The default target directory is $install_dir.'.
             opt = 'list-files' ifTrue: [ mode := PkgList. listFiles add: arg ].
             opt = 'srcdir' ifTrue: [ srcdir := arg ].
             opt = 'destdir' ifTrue: [ destdir := arg ].
+            opt = 'dry-run' ifTrue: [ dryRun := true ].
+            opt = 'all-files' ifTrue: [ allFiles := true ].
+            opt = 'copy' ifTrue: [ copy := true ].
+            opt = 'vpath' ifTrue: [ vpath := true ].
 
-            opt isNil ifTrue: [ packageFiles add: arg ] ].
+            opt isNil ifTrue: [ packageFiles add: arg ] ]
+        ifError: [
+            helpString displayOn: stderr.
+            ObjectMemory quit: 1 ].
 
     "Validate the installation and source directory."
     mode new
         destDir: destdir installDir: installDir;
 	srcdir: srcdir;
 	addAllFiles: packageFiles;
+	dryRun: dryRun;
+	allFiles: allFiles;
+	copy: copy;
+	prolog;
 	run;
-	listFiles: listFiles
+	listFiles: listFiles vpath: vpath
 ]
     on: Error
     do: [ :ex |

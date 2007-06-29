@@ -1,0 +1,5 @@
+#! /bin/sh
+abs_top_builddir=@abs_top_builddir@
+: ${LIBTOOL=$abs_top_builddir/libtool}
+
+exec $LIBTOOL --mode=execute @PACKAGE_DLOPEN_FLAGS@ $abs_top_builddir/gst ${1+"$@"}

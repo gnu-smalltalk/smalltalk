@@ -1,0 +1,32 @@
+<package>
+  <name>DhbNumericalMethods</name>
+  <namespace>Dhb</namespace>
+
+  <filein>Basic.st</filein>
+  <filein>Statistics.st</filein>
+  <filein>RNG.st</filein>
+  <filein>Approximation.st</filein>
+  <filein>Matrixes.st</filein>
+  <filein>Functions.st</filein>
+  <filein>Optimization.st</filein>
+  <filein>Distributions.st</filein>
+  <filein>Integration.st</filein>
+  <filein>NumericsAdds.st</filein>
+
+  <test>
+    <sunit>Dhb.DhbTestCase*</sunit>
+    <filein>NumericsTests.st</filein>
+  </test>
+
+  <file>NumericsTests.st</file>
+  <file>Approximation.st</file>
+  <file>Basic.st</file>
+  <file>Distributions.st</file>
+  <file>Functions.st</file>
+  <file>Integration.st</file>
+  <file>Matrixes.st</file>
+  <file>Optimization.st</file>
+  <file>RNG.st</file>
+  <file>Statistics.st</file>
+  <file>NumericsAdds.st</file>
+</package>

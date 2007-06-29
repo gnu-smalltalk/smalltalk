@@ -19,7 +19,7 @@ quit.st random-bench.ok random-bench.st untrusted.ok untrusted.st sets.ok \
 sets.st sieve.ok sieve.st strcat.ok strcat.st strings.ok strings.st \
 Ansi.st AnsiDB.st AnsiInit.st AnsiLoad.st AnsiRun.st
 
-CLEANFILES = gst.im gst
+CLEANFILES = gst.im
 DISTCLEANFILES = atconfig
 
 .PHONY: regress
@@ -28,14 +28,12 @@ regress:
 	cd $(srcdir) || exit 1; \
 	for test in $(filter $(low_level_tests) $(benchmark_tests), $(TESTS)); do \
 	  result=`echo $$test | $(SED) 's/st$$/ok/'`; \
-	  @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
-	    -r $$test 2>&1 | tee $$result; \
+	  ./gst -I @abs_top_builddir@/gst.im -r $$test 2>&1 | tee $$result; \
 	done
 
 gst.im: ../kernel/stamp-classes AnsiLoad.st Ansi.st AnsiDB.st
-	cp $(top_builddir)/gst.im .
-	cd $(srcdir) && \
-	  @abs_top_builddir@/gst -SI @abs_top_builddir@/tests/gst.im AnsiLoad.st
+	echo "PackageLoader fileInPackage: #SUnit. ObjectMemory snapshot: 'gst.im'" | ./gst -I ../gst.im -
+	cd $(srcdir) && @abs_builddir@/gst -SI @abs_top_builddir@/tests/gst.im AnsiLoad.st
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	{                                      \
@@ -52,9 +50,6 @@ check-local: gst atconfig $(TESTSUITE)
 
 clean-local:
 	-$(SHELL) '$(TESTSUITE)' --clean
-
-gst: ../gst
-	$(LN_S) ../gst .
 
 installcheck-local: atconfig $(TESTSUITE)
 	if test -z "$(DESTDIR)"; then \

@@ -1,0 +1,57 @@
+<package>
+  <name>Browser</name>
+  <namespace>BLOX.BLOXBrowser</namespace>
+  <prereq>Blox</prereq>
+  <prereq>Parser</prereq>
+  <filein>Load.st</filein>
+  <filein>GuiData.st</filein>
+  <filein>View.st</filein>
+  <filein>Manager.st</filein>
+  <filein>RadioForm.st</filein>
+  <filein>Menu.st</filein>
+  <filein>ModalDialog.st</filein>
+  <filein>PList.st</filein>
+  <filein>PText.st</filein>
+  <filein>PCode.st</filein>
+  <filein>ButtonForm.st</filein>
+  <filein>BrowShell.st</filein>
+  <filein>BrowserMain.st</filein>
+  <filein>ClassHierBrow.st</filein>
+  <filein>ClassBrow.st</filein>
+  <filein>NamespBrow.st</filein>
+  <filein>MethSetBrow.st</filein>
+  <filein>Inspector.st</filein>
+  <filein>DictInspect.st</filein>
+  <filein>MethInspect.st</filein>
+  <filein>StrcInspect.st</filein>
+  <filein>DebugSupport.st</filein>
+  <filein>Debugger.st</filein>
+  <filein>Notifier.st</filein>
+
+
+  <file>BrowShell.st</file>
+  <file>Inspector.st</file>
+  <file>Notifier.st</file>
+  <file>View.st</file>
+  <file>BrowserMain.st</file>
+  <file>Load.st</file>
+  <file>PCode.st</file>
+  <file>bear.gif</file>
+  <file>ClassBrow.st</file>
+  <file>Manager.st</file>
+  <file>PList.st</file>
+  <file>ButtonForm.st</file>
+  <file>ClassHierBrow.st</file>
+  <file>Menu.st</file>
+  <file>PText.st</file>
+  <file>DebugSupport.st</file>
+  <file>Debugger.st</file>
+  <file>MethInspect.st</file>
+  <file>RadioForm.st</file>
+  <file>NamespBrow.st</file>
+  <file>DictInspect.st</file>
+  <file>MethSetBrow.st</file>
+  <file>GuiData.st</file>
+  <file>ModalDialog.st</file>
+  <file>StrcInspect.st</file>
+</package>

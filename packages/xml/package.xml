@@ -1,0 +1,7 @@
+<package>
+  <name>XML</name>
+  <filein>XML.st</filein>
+
+  <file>XML.st</file>
+  <file>ChangeLog</file>
+</package>

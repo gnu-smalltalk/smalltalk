@@ -1,0 +1,14 @@
+<package>
+  <name>MySQL</name>
+  <namespace>Jdm.MySQL</namespace>
+  <prereq>DB</prereq>
+  <prereq>TCP</prereq>
+  <prereq>SUnit</prereq>
+  <filein>MySQL.st</filein>
+  <filein>MySQLTests.st</filein>
+
+  <file>MySQL.st</file>
+  <file>MySQLTests.st</file>
+  <file>mysql-test.st</file>
+  <file>README</file>
+</package>

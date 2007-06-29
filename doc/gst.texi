@@ -1888,16 +1888,12 @@ to the inspector, namespace support and a complete debugger).
 To start the browser you can simply type:
 
 @example
-    gst -qK browser/Run.st
+    gst-blox
 @end example
 
 This will load any requested packages, then, if all goes well, a
 worksheet window with a menu named @dfn{Smalltalk} will appear in the
-top-left corner of the screen. You might want to file-in
-@file{browser/Run.st} from your @file{.stinit} file (@pxref{Operation, ,
-Startup sequence}) or to run it automatically through ObjectMemory
-(@pxref{Memory access}).
-
+top-left corner of the screen.
 
 @node Smalltalk-in-Smalltalk
 @section The Smalltalk-in-Smalltalk library

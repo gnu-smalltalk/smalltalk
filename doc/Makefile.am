@@ -39,19 +39,19 @@ $(srcdir)/gst.1: $(top_srcdir)/libgst/lib.c $(top_srcdir)/configure.ac
 
 PUBLISHED_NAMESPACES = Smalltalk SystemExceptions NetClients VFS
 
-$(srcdir)/blox.texi: $(top_srcdir)/blox/stamp-classes
+$(srcdir)/blox.texi: $(top_srcdir)/packages/blox/tk/stamp-classes
 	rm -f $(srcdir)/blox.texi
 	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
 	    -f ../scripts/GenLibDoc.st BLOX BloxTK blox.texi Blox.st
 	test -f $(srcdir)/blox.texi && touch $(srcdir)/gst-libs.texi 
 
-$(srcdir)/tcp.texi: $(top_srcdir)/tcp/stamp-classes
+$(srcdir)/tcp.texi: $(top_srcdir)/packages/tcp/stamp-classes
 	rm -f $(srcdir)/tcp.texi
 	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
 	    -f ../scripts/GenLibDoc.st TCP TCP tcp.texi TCP.st
 	test -f $(srcdir)/tcp.texi && touch $(srcdir)/gst-libs.texi 
 
-$(srcdir)/i18n.texi: $(top_srcdir)/i18n/stamp-classes
+$(srcdir)/i18n.texi: $(top_srcdir)/packages/i18n/stamp-classes
 	rm -f $(srcdir)/i18n.texi
 	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
 	    -f ../scripts/GenLibDoc.st I18N I18N i18n.texi Load.st Collation.st

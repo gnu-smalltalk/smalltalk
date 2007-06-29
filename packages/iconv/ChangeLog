@@ -1,0 +1,5 @@
+2007-06-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* iconv/iconv.c: Created from i18n package.
+
+

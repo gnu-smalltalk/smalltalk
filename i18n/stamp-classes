@@ -1,3 +1,0 @@
-../i18n/stamp-classes:: \
-../i18n/Locale.st ../i18n/Expression.st ../i18n/GetText.st ../i18n/Numbers.st ../i18n/Times.st ../i18n/Collation.st ../i18n/ChangeLog 
-	touch ../i18n/stamp-classes

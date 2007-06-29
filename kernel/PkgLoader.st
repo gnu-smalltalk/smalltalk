@@ -72,7 +72,7 @@ information on a Smalltalk package, and can output my description in
 XML.'!
 
 PackageGroup subclass: #PackageDirectory
-	instanceVariableNames: 'packages fileName baseDirectories'
+	instanceVariableNames: 'packages fileName baseDirectories baseDirCache'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Language-Packaging'
@@ -265,6 +265,14 @@ extractDependenciesFor: packagesList ifMissing: aBlock
     ^toBeLoaded
 !
 
+refresh
+    self refresh: ##(Date newDay: 1 month: #jan year: 1900)
+!
+
+refresh: aLoadDate
+    self subclassResponsibility
+! !
+
 
 !Kernel.PackageDirectories class methodsFor: 'instance creation'!
 
@@ -302,12 +310,8 @@ includesKey: aString
     ^dirs anySatisfy: [ :each | each includesKey: aString ]
 !
 
-shouldReload: loadDate
-    ^dirs anySatisfy: [ :each | each shouldReload: loadDate ]
-!
-
-refresh
-    dirs do: [ :each | each refresh ]
+refresh: aLoadDate
+    dirs do: [ :each | each refresh: aLoadDate ]
 ! !
 
 !Kernel.PackageDirectories methodsFor: 'initializing'!
@@ -323,10 +327,10 @@ new
     self shouldNotImplement
 !
 
-on: aString baseDirectories: anArray
+on: aString baseDirectories: aBlock
     ^super new
 	fileName: aString;
-	baseDirectories: anArray
+	baseDirectories: aBlock
 ! !
 
 !Kernel.PackageDirectory methodsFor: 'accessing'!
@@ -339,12 +343,8 @@ fileName: aString
     fileName := aString
 !
 
-baseDirectories
-    ^baseDirectories
-!
-
-baseDirectories: anArray
-    baseDirectories := anArray
+baseDirectories: aBlock
+    baseDirectories := aBlock
 !
 
 at: aString ifAbsent: aBlock
@@ -362,36 +362,36 @@ includesKey: aString
 
 !Kernel.PackageDirectory methodsFor: 'refreshing'!
 
-shouldReload: loadDate
-    | file |
-    file := File name: fileName.
-    file exists ifFalse: [ packages := LookupTable new. ^false ].
-    ^file lastModifyTime > loadDate
-!
-
-refresh
+refresh: loadDate
     "Private - Process the XML source in the packages file, creating
      Package objects along the way."
 
-    packages := LookupTable new.
-    self refreshPackageList.
-    self refreshStarList
+    | dir file allDirs |
+    file := File name: fileName.
+    dir := Directory name: file path.
+
+    allDirs := Smalltalk imageLocal
+	ifTrue: [ { Directory image }, baseDirectories value ]
+	ifFalse: [ baseDirectories value ].
+    
+    ((file exists and: [ file lastModifyTime > loadDate ])
+        or: [ (dir exists and: [ dir lastModifyTime > loadDate ])
+        or: [ allDirs ~= baseDirCache ]]) ifTrue: [
+	    packages := LookupTable new.
+	    baseDirCache := allDirs.
+	    self refreshPackageList.
+	    self refreshStarList: dir ].
 !
 
 refreshPackageList
-    | file allDirs |
-    allDirs := Smalltalk imageLocal
-	ifTrue: [ { Directory image }, baseDirectories ]
-	ifFalse: [ baseDirectories ].
-
-    allDirs isEmpty ifTrue: [ ^self ].
-
+    | file |
+    baseDirCache isEmpty ifTrue: [ ^self ].
     file := [ FileStream open: fileName mode: FileStream read ]
 	on: Error
 	do: [ :ex | ^self ].
 
     [
-        [ self parse: file baseDirectories: allDirs ]
+        [ self parse: file ]
 	    on: PackageNotAvailable
 	    do: [ :ex | ex resignalAs: PackageSkip new ] ]
         ensure: [ file close ].
@@ -399,11 +399,8 @@ refreshPackageList
     packages := packages reject: [ :each | each isDisabled ]
 !
 
-refreshStarList
-    | dir |
-    dir := Directory name: (File pathFor: fileName).
-    dir exists ifFalse: [ ^self].
-
+refreshStarList: dir
+    dir exists ifFalse: [ ^self ].
     dir
 	namesMatching: '*.star'
 	do: [ :starName |
@@ -412,7 +409,7 @@ refreshStarList
 	    packages at: package name put: package ]
 !
 
-parse: file baseDirectories: baseDirs
+parse: file
     | open ch cdata tag package |
     open := false.
     [ cdata := cdata isNil
@@ -427,19 +424,19 @@ parse: file baseDirectories: baseDirs
 	ch == $! ifTrue: [ file skipTo: $> ].
 	ch == $/ ifTrue: [
 	    file next.
-	    ^(tag := file upTo: $>) = 'packages'
-		ifTrue: [ packages ]
-		ifFalse: [ ^self error: 'unmatched end tag ', tag ] ].
+	    (tag := file upTo: $>) = 'packages' ifTrue: [ ^self ].
+	    ^self error: 'unmatched end tag ', tag ].
 
 	ch isAlphaNumeric ifTrue: [
 	    open
 		ifFalse: [
 		    tag := file upTo: $>.
-		    tag = 'packages' ifFalse: [
-			^self error: 'expected packages tag' ].
-	            tag = 'package' ifTrue: [
-			package := Package new parse: file tag: 'package' ].
-		    open := true ]
+	            tag = 'package'
+			ifTrue: [ package := Package new parse: file tag: 'package' ]
+			ifFalse: [
+			    tag = 'packages' ifFalse: [
+				^self error: 'expected packages tag' ].
+			    open := true ] ]
 		ifTrue: [
 		    file skip: -1.
 		    package := Package parse: file ].
@@ -449,13 +446,14 @@ parse: file baseDirectories: baseDirs
 	            ^self error: 'missing package name in ', fileName ].
 
 		[
-		    package baseDirectories: baseDirs.
+		    package baseDirectories: baseDirCache.
 		    packages at: package name put: package ]
 			on: PackageSkip
-			do: [ :ex | ex return ] ].
+			do: [ :ex | ex return ].
+		open ifFalse: [ ^self ] ].
+
 	    package := nil ] ]
 ! !
-
 
 
 !Kernel.PackageInfo methodsFor: 'accessing'!
@@ -611,7 +609,20 @@ files
 allFiles
     "Answer an OrderedCollection of all the files, both built and
      distributed, that are part of the package."
-    ^self files, self builtFiles!
+    | result |
+    result := self files, self builtFiles.
+    self test isNil ifFalse: [
+	result := result, (self test allFiles: self test relativeDirectory) ].
+    ^result!
+
+allDistFiles
+    "Answer an OrderedCollection of all the files, both built and
+     distributed, that are part of the package."
+    | result |
+    result := self files.
+    self test isNil ifFalse: [
+	result := result, (self test allDistFiles: self test relativeDirectory) ].
+    ^result!
 
 fileIns
     "Answer a (modifiable) OrderedCollections of files that are to be
@@ -654,7 +665,20 @@ relativeDirectory
 directory
     "Answer the base directory from which to load the package."
     self subclassResponsibility!
+
+loaded
+    ^self name notNil and: [ Smalltalk hasFeatures: self name ]
 ! !
+
+!Kernel.PackageInfo methodsFor: 'private - subpackages'!
+
+allFiles: prefix
+    prefix isNil ifTrue: [ ^self allFiles ].
+    ^self allFiles collect: [ :each | Directory append: each to: prefix ]!
+
+allDistFiles: prefix
+    prefix isNil ifTrue: [ ^self allDistFiles ].
+    ^self allDistFiles collect: [ :each | Directory append: each to: prefix ]! !
 
 
 !Kernel.StarPackage class methodsFor: 'accessing'!
@@ -722,7 +746,7 @@ callouts
     ^self loadedPackage callouts!
 
 relativeDirectory
-    ^'.'!
+    ^nil!
 
 directory
     ^fileName, '#uzip'!
@@ -954,9 +978,6 @@ createNamespace
     ].
     ^ns!
 
-loaded
-    ^self name notNil and: [ Smalltalk hasFeatures: self name ]!
-
 primFileIn
     "Private - File in the given package without paying attention at
      dependencies and C callout availability"
@@ -1061,11 +1082,6 @@ owner: aPackage
     owner := aPackage.
 !
 
-relativeDirectory
-    "Answer the base directory from which to load the package."
-    ^super relativeDirectory ifNil: [owner relativeDirectory]
-!
-
 namespace
     "Answer the namespace in which the package is loaded."
     ^super namespace ifNil: [owner namespace]
@@ -1073,7 +1089,9 @@ namespace
 
 baseDirectories
     "Answer the namespace in which the package is loaded."
-    ^super baseDirectories ifNil: [owner baseDirectories]
+    ^super baseDirectories ifNil: [
+	owner baseDirectories collect: [ :each |
+	    Directory append: owner relativeDirectory to: each ] ]
 ! !
 
 
@@ -1157,8 +1175,8 @@ ignoreCallouts: aBoolean
 
 flush
     "Set to reload the `packages.xml' file the next time it is needed."
-    loadDate := nil.
-    root := nil
+    root := nil.
+    loadDate := ##(Date newDay: 1 month: #jan year: 1900)
 !
 
 refresh
@@ -1173,22 +1191,21 @@ refresh
      searched.  For a packages.xml directory in the local image directory,
      finally, only directory 3 is searched."
     | state |
-    loadDate isNil ifFalse: [
-	(root shouldReload: loadDate) ifFalse: [ ^self ]
-    ].
-
-    loadDate := Date dateAndTimeNow.
-    root := Kernel.PackageDirectories new.
-    root add: (Kernel.PackageDirectory
+    root isNil ifTrue: [
+	self flush.
+        root := Kernel.PackageDirectories new.
+        root add: (Kernel.PackageDirectory
 		  on: self packageFileName 
-		  baseDirectories: { Directory userBase.  Directory kernel, '/..' }).
-    root add: (Kernel.PackageDirectory
+		  baseDirectories: [ { Directory userBase. Directory kernel, '/..' } ]).
+        root add: (Kernel.PackageDirectory
 		  on: self userPackageFileName 
-		  baseDirectories: { Directory userBase.  }).
-    root add: (Kernel.PackageDirectory
+		  baseDirectories: [ { Directory userBase. } ]).
+        root add: (Kernel.PackageDirectory
 		  on: self localPackageFileName 
-		  baseDirectories: #()).
-    root refresh
+		  baseDirectories: [ #() ]) ].
+
+    root refresh: loadDate.
+    loadDate := Date dateAndTimeNow.
 ! !
 
 
@@ -1264,4 +1281,3 @@ rebuildPackageFile
         root printOn: file
     ] ensure: [ file close ]
 ! !
-

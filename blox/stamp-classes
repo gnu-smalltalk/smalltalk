@@ -1,3 +1,0 @@
-../blox/stamp-classes:: \
-../blox/tk/Blox.st ../blox/tk/BloxBasic.st ../blox/tk/BloxWidgets.st ../blox/tk/BloxText.st ../blox/tk/BloxCanvas.st ../blox/tk/BloxExtend.st ../blox/tk/colors.txt 
-	touch ../blox/stamp-classes

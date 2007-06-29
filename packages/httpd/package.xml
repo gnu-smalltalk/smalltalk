@@ -1,0 +1,30 @@
+<package>
+  <name>WebServer</name>
+  <namespace>NetClients.WikiWorks</namespace>
+  <prereq>NetClients</prereq>
+  <filein>WebServer.st</filein>
+  <filein>FileServer.st</filein>
+  <filein>WikiServer.st</filein>
+  <filein>STT.st</filein>
+  <filein>Haiku.st</filein>
+
+
+  <file>FileServer.st</file>
+  <file>Haiku.st</file>
+  <file>STT.st</file>
+  <file>WebServer.st</file>
+  <file>WikiServer.st</file>
+  <file>edit.jpg</file>
+  <file>example1.stt</file>
+  <file>example2.stt</file>
+  <file>find.jpg</file>
+  <file>head.jpg</file>
+  <file>help.jpg</file>
+  <file>history.jpg</file>
+  <file>next.jpg</file>
+  <file>prev.jpg</file>
+  <file>recent.jpg</file>
+  <file>rename.jpg</file>
+  <file>test.st</file>
+  <file>top.jpg</file>
+</package>

@@ -1,0 +1,20 @@
+<package>
+  <name>SUnit</name>
+
+  <filein>SUnitPreload.st</filein>
+  <filein>SUnit.st</filein>
+  <filein>SUnitScript.st</filein>
+
+  <test>
+    <sunit>SUnitTest</sunit>
+    <sunit>TestSuitesScriptTest</sunit>
+    <filein>SUnitTests.st</filein>
+    <filein>SUnitScriptTests.st</filein>
+  </test>
+
+  <file>SUnit.st</file>
+  <file>SUnitPreload.st</file>
+  <file>SUnitTests.st</file>
+  <file>SUnitScript.st</file>
+  <file>SUnitScriptTests.st</file>
+</package>

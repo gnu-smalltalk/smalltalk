@@ -1,5 +1,18 @@
 2007-06-29  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PkgLoader.st: Turn baseDirectories into a block.  Replace
+	#shouldReload: with #refresh:.  Support <package> as root tag for
+	PackageDirectory>>#parse:.  Include test package files in #allFiles
+	and #allDistFiles.  Move #loaded up to PackageInfo.  Prepend
+	the owner relativeDirectory to the test package's in #baseDirectories.
+	Add PackageLoader class>>#flush:.
+	* scripts/Finish.st: Flush PackageLoader.
+	* scripts/Package.st: Revamping, including full .star support,
+	--copy and --all-files options to --dist, proper handling of srcdir
+	paths, --vpath option to --list-files.
+
+2007-06-29  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/File.st: Move #pathTo:...
 	* kernel/Directory.st: ... here, and mimic what File>>#pathFrom: does.
 

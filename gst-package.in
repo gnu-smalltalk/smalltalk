@@ -32,7 +32,7 @@
 
 OPTIONS='-h|--help --version --load --no-load --no-install --uninstall --dist
 	-t|--target-directory: --list-files: --list-packages
-	--srcdir: --distdir|--destdir:
+	--srcdir: --distdir|--destdir: --copy --all-files --vpath
 	-n|--dry-run -I|--image-file:'
 
 prefix=@prefix@
@@ -89,12 +89,7 @@ getopt "$@" | {
   if $list; then
     gst scripts/Package.st "$@"
   else
-    {
-      echo ': ${INSTALL=@INSTALL@}'
-      echo ': ${LN_S=@LN_S@}'
-      echo run_cmd=$run_cmd
-      gst scripts/Package.st "$@"
-    } | sh && \
+    INSTALL='@INSTALL@' LN_S='@LN_S@' ZIP='@ZIP@' gst scripts/Package.st "$@" | sh
 
     if test "$run_cmd" = eval && test "$load_test,$load_dry_run" != ,-n; then
       packages=`eval gst scripts/Package.st \

@@ -1,0 +1,15 @@
+<package>
+  <name>GDBM</name>
+  <filein>gdbm-c.st</filein>
+  <filein>gdbm.st</filein>
+  <module>gdbm</module>
+
+  <test>
+    <sunit>GDBMTest</sunit>
+    <filein>gdbmtests.st</filein>
+  </test>
+
+  <file>gdbm.st</file>
+  <file>gdbm-c.st</file>
+  <file>gdbmtests.st</file>
+</package>

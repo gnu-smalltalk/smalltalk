@@ -1,0 +1,6 @@
+<package>
+  <name>XPath</name>
+  <prereq>XML</prereq>
+  <filein>XPath.st</filein>
+  <file>XPath.st</file>
+</package>

@@ -1,0 +1,26 @@
+<package>
+  <name>TCP</name>
+  <namespace>TCP</namespace>
+  <filein>Buffers.st</filein>
+  <filein>Datagram.st</filein>
+  <filein>SocketAddress.st</filein>
+  <filein>AbstractSocketImpl.st</filein>
+  <filein>IPSocketImpl.st</filein>
+  <filein>Sockets.st</filein>
+  <filein>Tests.st</filein>
+  <filein>cfuncs.st</filein>
+  <filein>init.st</filein>
+
+  <module>tcp</module>
+
+  <file>Buffers.st</file>
+  <file>Datagram.st</file>
+  <file>SocketAddress.st</file>
+  <file>AbstractSocketImpl.st</file>
+  <file>IPSocketImpl.st</file>
+  <file>Sockets.st</file>
+  <file>Tests.st</file>
+  <file>cfuncs.st</file>
+  <file>init.st</file>
+  <file>ChangeLog</file>
+</package>

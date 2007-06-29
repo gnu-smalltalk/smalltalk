@@ -55,4 +55,5 @@ ImageFilePath := newImagePath.
 KernelFilePath := newKernelBasePath, '/kernel'.
 UserFileBasePath := nil!
 
+PackageLoader flush!
 ObjectMemory snapshot!

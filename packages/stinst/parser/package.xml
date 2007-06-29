@@ -1,0 +1,46 @@
+<package>
+  <name>Parser</name>
+
+  <namespace>STInST</namespace>
+  <filein>RBToken.st</filein>
+  <filein>RBParseNodes.st</filein>
+  <filein>RBParser.st</filein>
+  <filein>ParseTreeSearcher.st</filein>
+  <filein>RBFormatter.st</filein>
+  <filein>OrderedSet.st</filein>
+  <filein>STFileParser.st</filein>
+  <filein>STCompLit.st</filein>
+  <filein>STSymTable.st</filein>
+  <filein>STCompiler.st</filein>
+  <filein>STDecompiler.st</filein>
+  <filein>STLoaderObjs.st</filein>
+  <filein>STLoader.st</filein>
+  <filein>SqueakParser.st</filein>
+  <filein>SIFParser.st</filein>
+  <filein>Exporter.st</filein>
+
+  <test>
+   <sunit>STInST.Tests.TestStandardRewrites</sunit>
+   <filein>RewriteTests.st</filein>
+  </test>
+
+
+  <file>ParseTreeSearcher.st</file>
+  <file>RBFormatter.st</file>
+  <file>RBParseNodes.st</file>
+  <file>RBParser.st</file>
+  <file>RBToken.st</file>
+  <file>OrderedSet.st</file>
+  <file>STCompLit.st</file>
+  <file>STCompiler.st</file>
+  <file>STDecompiler.st</file>
+  <file>STLoader.st</file>
+  <file>STLoaderObjs.st</file>
+  <file>STSymTable.st</file>
+  <file>RewriteTests.st</file>
+  <file>SqueakParser.st</file>
+  <file>SIFParser.st</file>
+  <file>Exporter.st</file>
+  <file>STFileParser.st</file>
+  <file>ChangeLog</file>
+</package>
