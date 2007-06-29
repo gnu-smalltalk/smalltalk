@@ -564,13 +564,6 @@ pathFrom: dirName
 	to: vfsHandler realFileName
 !
 
-pathTo: destName
-    "Compute the relative path from the receiver to destName."
-    ^File
-	computePathFrom: vfsHandler realFileName
-	to: (File fullNameFor: destName)
-!
-
 symlinkFrom: srcName
     "Create the receiver as a symbolic link from srcName (relative to the
      path of the receiver)."

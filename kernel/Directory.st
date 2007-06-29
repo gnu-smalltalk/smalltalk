@@ -165,6 +165,13 @@ create: dirName
 
 !Directory methodsFor: 'accessing'!
 
+pathTo: destName
+    "Compute the relative path from the receiver to destName."
+    ^File
+        computePathFrom: vfsHandler realFileName, '/somefile'
+        to: (File fullNameFor: destName)
+!
+
 fileAt: aName
     "Answer a File object for a file named `aName' residing in the
      directory represented by the receiver."
