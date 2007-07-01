@@ -1,3 +1,8 @@
+2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Remove bogus check on file in of FileDescriptor
+	objects.
+
 2007-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lib.c: Ensure null termination of _gst_image_file_path.
