@@ -507,7 +507,7 @@ encoding: aStringOrStream as: toEncoding
     encoderTo := Iconv.
     EncodersRegistry do: [ :each |
 	((each at: 1) includes: to)
-	    ifTrue: [ encoderTo := each at: 2 ]
+	    ifTrue: [ encoderTo := each at: 3 ]
     ].
 
     pipe := aStringOrStream.

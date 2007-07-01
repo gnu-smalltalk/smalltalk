@@ -1,3 +1,8 @@
+2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* iconv/iconvtests.st: New.
+	* iconv/Sets.st: Fix buglet.
+
 2007-06-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* iconv/iconv.c: Created from i18n package.

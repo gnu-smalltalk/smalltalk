@@ -2,9 +2,15 @@
   <name>Iconv</name>
   <namespace>I18N</namespace>
 
+  <test>
+    <sunit>I18N.IconvTest</sunit>
+    <filein>iconvtests.st</filein>
+  </test>
+
   <filein>Sets.st</filein>
 
   <module>iconv</module>
 
   <file>Sets.st</file>
+  <file>iconvtests.st</file>
 </package>
