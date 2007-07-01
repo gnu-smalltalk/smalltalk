@@ -332,7 +332,7 @@ displayOn: aStream
 
 name
     "Answer the name of the file identified by the receiver"
-    ^vfsHandler name
+    ^vfsHandler fullName
 !
 
 size

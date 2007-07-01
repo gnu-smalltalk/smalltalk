@@ -596,6 +596,10 @@ checkIfPipe
 	    'cannot do that to a pipe or socket.' ]
 !
 
+setName: aString
+    name := aString.
+!
+
 setFD: fd
     access := 3.
     file := fd.

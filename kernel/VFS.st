@@ -71,7 +71,7 @@ virtual filesystems that take a file that is on-disk, run a
 command on it, and then read from the result.'!
 
 RealFileHandler subclass: #ArchiveFileHandler
-       instanceVariableNames: 'handlers'
+       instanceVariableNames: 'handlers fsName'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Streams-Files'
@@ -89,7 +89,7 @@ will still ask the archive to get directory information
 on them, to extract them to a real file, and so on.'!
 
 ArchiveFileHandler subclass: #ExternalArchiveFileHandler
-       instanceVariableNames: 'command topLevelFiles allFiles extractedFiles'
+       instanceVariableNames: 'topLevelFiles allFiles extractedFiles'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Streams-Files'
@@ -287,6 +287,12 @@ finalize
     self release! !
 
 !VFSHandler methodsFor: 'accessing'!
+
+fullName
+    "Answer the name of the file identified by the receiver as answered by
+     File>>#name."
+    ^self name
+!
 
 name
     "Answer the name of the file identified by the receiver"
@@ -690,18 +696,18 @@ vfsFor: file name: fsName subPath: subPath
     command := self fileTypes at: fsName.
     temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
     Smalltalk system: (command % { file. temp name }).
-    ^self new name: file realFileName: temp name! !
+    ^self new name: file fsName: fsName realFileName: temp name! !
 
 
 !DecodedFileHandler methodsFor: 'files'!
 
-name: virtualFileName realFileName: temporaryFileName
+name: virtualFileName fsName: aString realFileName: temporaryFileName
     "Private - Initialize a new object storing the contents of the
      virtualFileName file into temporaryFileName."
     VFSHandler addDependent: self.
     self addToBeFinalized.
-    self name: virtualFileName.
-    realFileName := File fullNamFor: temporaryFileName!
+    self name: virtualFileName, '#', aString.
+    realFileName := File fullNameFor: temporaryFileName!
 
 realFileName
     "Answer the real file name which holds the file contents,
@@ -719,19 +725,13 @@ release
     super release! !
 
 
-!ArchiveFileHandler class methodsFor: 'private'!
-
-activePaths
-    "Answer a dictionary that stores the currently opened archive file
-     members, to avoid extracting members multiple times.  Might be
-     worthwhile to push it to the superclass."
-    activePaths isNil ifTrue: [ activePaths := WeakValueLookupTable new ]. 
-    ^activePaths!
+!ArchiveFileHandler class methodsFor: 'instance creation'!
 
 vfsFor: file name: fsName
-    "Create a temporary file and use it to construct the contents of the given
+    "Create an instance of this class representing the contents of the given
      file, under the virtual filesystem fsName."
-    self subclassResponsibility!
+    ^self new
+	name: file fsName: fsName!
 
 vfsFor: file name: fsName subPath: subPath
     "Create a temporary file and use it to construct the contents of the given
@@ -740,7 +740,24 @@ vfsFor: file name: fsName subPath: subPath
 	ifFalse: [ ^(self vfsFor: file name: fsName subPath: nil) at: subPath ].
 
     ^self activePaths at: (fsName -> file) ifAbsentPut: [
-	self vfsFor: file name: fsName ]!
+	self vfsFor: file name: fsName ]! !
+
+!ArchiveFileHandler methodsFor: 'accessing'!
+
+name
+    ^super name, '#', self fsName!
+
+fsName
+    ^fsName! !
+
+!ArchiveFileHandler class methodsFor: 'private'!
+
+activePaths
+    "Answer a dictionary that stores the currently opened archive file
+     members, to avoid extracting members multiple times.  Might be
+     worthwhile to push it to the superclass."
+    activePaths isNil ifTrue: [ activePaths := WeakValueLookupTable new ]. 
+    ^activePaths!
 
 release
     activePaths := nil.
@@ -837,6 +854,11 @@ updateMember: anArchiveMemberHandler
 
     self subclassResponsibility! !
 
+!ArchiveFileHandler methodsFor: 'private'!
+
+name: containerFileName fsName: aString
+    super name: containerFileName.
+    fsName := aString! !
 
 !ExternalArchiveFileHandler class methodsFor: 'registering'!
 
@@ -868,24 +890,20 @@ fileSystemsIn: path
 	    ifTrue: [ fileTypes at: each put: path, '/', each ]
     ]!
 
+fileTypes
+    ^fileTypes!
+
 release
     "Avoid that paths stay in the image file"
     fileTypes := nil.
-    super release!
-
-vfsFor: file name: fsName
-    "Create a temporary file and use it to construct the contents of the given
-     file, under the virtual filesystem fsName."
-    ^self new
-	name: file;
-	command: (fileTypes at: fsName)! !
+    super release! !
 
 !ExternalArchiveFileHandler methodsFor: 'members'!
 
 createDir: dirName
     "Create a subdirectory of the receiver, naming it dirName."
 
-    Smalltalk system: ('%1 mkdir %2 %3' % { command. self name. dirName })!
+    Smalltalk system: ('%1 mkdir %2 %3' % { self command. self realFileName. dirName })!
 
 do: aBlock
     "Evaluate aBlock once for each file in the directory represented by the
@@ -906,7 +924,7 @@ extractMember: anArchiveMemberHandler
 	| temp |
         temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
         Smalltalk system: ('%1 copyout %2 %3 %4'
-	    % { command. self name. anArchiveMemberHandler name. temp name }).
+	    % { self command. self realFileName. anArchiveMemberHandler name. temp name }).
 
         File fullNameFor: temp name
     ]!
@@ -954,7 +972,7 @@ removeMember: anArchiveMemberHandler
 	ifFalse: [ 'rm' ].
 
     Smalltalk system: ('%1 %2 %3 %4'
-	% { command. subcmd. self name. anArchiveMemberHandler name. })!
+	% { self command. subcmd. self realFileName. anArchiveMemberHandler name. })!
 
 updateMember: anArchiveMemberHandler
     "Update the member represented by anArchiveMemberHandler by
@@ -962,8 +980,12 @@ updateMember: anArchiveMemberHandler
      archive."
 
     Smalltalk system: ('%1 copyin %2 %3 %4'
-	% { command. self name. anArchiveMemberHandler name.
+	% { self command. self realFileName. anArchiveMemberHandler name.
 	    anArchiveMemberHandler realFileName })!
+
+command
+    ^self class fileTypes at: fsName
+!
 
 refresh
     "Extract the directory listing from the archive"
@@ -976,7 +998,7 @@ refresh
     allFiles := LookupTable new.
     directoryTree := LookupTable new.
     pipe := FileStream
-	popen: command, ' list ', self name
+	popen: self command, ' list ', self realFileName
 	dir: FileStream read.
     pipe linesDo: [ :l || line |
 	line := l readStream.
@@ -1032,9 +1054,6 @@ refresh
 
 
 !ExternalArchiveFileHandler methodsFor: 'private'!
-
-command: cmd
-    command := cmd!
 
 findDirectory: path into: tree
     "Look up into tree (which is a tree of Dictionaries) the directory
@@ -1095,6 +1114,20 @@ size: bytes stCtime: ctime stMtime: mtime stAtime: atime isDirectory: isDir
     isDirectory := isDir! !
 
 !ArchiveMemberHandler methodsFor: 'accessing'!
+
+realFileName
+    "Answer the real file name which holds the file contents,
+     or nil if it does not apply."
+
+    realFileName isNil ifFalse: [ ^realFileName ].
+    self exists ifFalse: [ ^nil ].
+    realFileName := (self parent extractMember: self).
+    ^realFileName!
+
+fullName
+    "Answer the name of the file identified by the receiver as answered by
+     File>>#name."
+    ^Directory append: self name to: self parent name!
 
 parent
     "Answer the archive of which the receiver is a member."
@@ -1180,15 +1213,6 @@ isAccessible
 
 !ArchiveMemberHandler methodsFor: 'finalization'!
 
-realFileName
-    "Answer the real file name which holds the file contents,
-     or nil if it does not apply."
-
-    realFileName isNil ifFalse: [ ^realFileName ].
-    self exists ifFalse: [ ^nil ].
-    realFileName := (self parent extractMember: self).
-    ^realFileName!
-
 release
     "Release the resources used by the receiver that don't survive when
      reloading a snapshot."
@@ -1216,6 +1240,7 @@ open: class mode: mode ifFail: aBlock
     mode == FileStream read ifFalse: [
 	fileStream addDependent: self ].
 
+    fileStream setName: self name.
     ^fileStream
 !
 

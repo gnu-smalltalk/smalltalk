@@ -1,5 +1,14 @@
 2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/File.st: Use VFSHandler>>#fullName.
+	* kernel/FileDescr.st: Add #setName:.
+	* kernel/VFS.st: Add fsName field to ArchiveFileHandler, replacing
+	command in ExternalArchiveFileHandler and making #vfsFor:name:
+	concrete in ArchiveFileHandler.  Add #fullName, implement it
+	in ArchiveMemberHandler.  Use #setName: when opening files.
+
+2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Regex.st: add #replaceRegex:with: and #replacingAllRegex:with:.
 
 2007-06-29  Paolo Bonzini  <bonzini@gnu.org>
