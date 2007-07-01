@@ -1,3 +1,7 @@
+2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Regex.st: add #replaceRegex:with: and #replacingAllRegex:with:.
+
 2007-06-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Turn baseDirectories into a block.  Replace

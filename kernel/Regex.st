@@ -554,16 +554,62 @@ occurrencesOfRegex: pattern
     ^self occurrencesOfRegex: pattern from: 1 to: self size.
 !
 
+replacingRegex: pattern with: str
+    "Returns the receiver if the pattern has no match in it.  If it has
+     a match, it is replaced with str after substituting %n sequences
+     with the captured subexpressions of the match (as in #%)."
+    | regs beg end repl res |
+    regs := self searchRegexInternal: pattern from: 1 to: self size.
+    regs isNil ifTrue: [ ^self ].
+
+    beg := regs from.
+    end := regs to.
+    repl := str % regs.
+    ^(res := self species new: self size - (end - beg + 1) + repl size)
+	replaceFrom: 1 to: beg - 1 with: self startingAt: 1;
+	replaceFrom: beg to: beg + repl size - 1 with: repl startingAt: 1;
+	replaceFrom: beg + repl size to: res size with: self startingAt: end + 1
+!
+
+replacingAllRegex: pattern with: str
+    "Returns the receiver if the pattern has no match in it.  Otherwise,
+     any match of pattern in that part of the string is replaced with
+     str after substituting %n sequences with the captured subexpressions
+     of the match (as in #%)."
+
+    | res idx regex beg end regs |
+    regex := pattern asRegex.
+    regs := self searchRegexInternal: regex from: 1 to: self size.
+    regs isNil ifTrue: [ ^self ].
+
+    res := WriteStream on: (String new: self size).
+    idx := 1.
+    [
+	beg := regs from.
+	end := regs to.
+	res next: beg - idx putAll: self startingAt: idx.
+	res nextPutAll: (str % regs).
+	idx := end + 1.
+	beg > end ifTrue: [ res nextPut: (self at: idx). idx := idx + 1 ].
+	idx > self size ifTrue: [ ^res contents ].
+        regs := self searchRegexInternal: regex from: idx to: self size.
+	regs isNil
+    ] whileFalse.
+
+    res next: self size - idx + 1 putAll: self startingAt: idx.
+    ^res contents
+!
+
 copyFrom: from to: to replacingRegex: pattern with: str
     "Returns the substring of the receiver between from and to.  
      If pattern has a match in that part of the string, the match
      is replaced with str after substituting %n sequences with the 
      captured subexpressions of the match (as in #%)."
     | regs beg end repl res |
-    regs := self searchRegex: pattern from: from to: to.
+    regs := self searchRegexInternal: pattern from: from to: to.
 
-    regs matched
-	ifTrue: [
+    regs isNil
+	ifFalse: [
 	    beg := regs from.
 	    end := regs to.
 	    repl := str % regs.
@@ -571,7 +617,7 @@ copyFrom: from to: to replacingRegex: pattern with: str
 	    res replaceFrom: 1 to: beg - from with: self startingAt: from.
 	    res replaceFrom: beg - from + 1 to: beg - from + repl size with: repl.
 	    res replaceFrom: beg - from + repl size + 1 to: res size with: self startingAt: end - from + 2 ]
-	ifFalse: [ res := self copyFrom: from to: to ].
+	ifTrue: [ res := self copyFrom: from to: to ].
 
     ^res
 !
@@ -595,9 +641,9 @@ copyFrom: from to: to replacingAllRegex: pattern with: str
     res := WriteStream on: (String new: to - from + 1).
     idx := from.
     [
-        regs := self searchRegex: regex from: idx to: to.
-	regs matched
-    ] whileTrue: [
+        regs := self searchRegexInternal: regex from: idx to: to.
+	regs isNil
+    ] whileFalse: [
 	beg := regs from.
 	end := regs to.
 	res next: beg - idx putAll: self startingAt: idx.
