@@ -314,6 +314,7 @@ if test "$enable_gtk" = blox; then
 else
   BLOX_IMPLEMENTATION=BloxTK
 fi
+AC_SUBST(BLOX_IMPLEMENTATION)
 
 AC_ARG_ENABLE(jit, 
 [  --enable-jit            enable dynamic translation to machine code], ,
