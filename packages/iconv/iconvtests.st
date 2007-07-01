@@ -113,4 +113,32 @@ testByteArrayAsUnicodeStringColon
     str := #[239 191 190].
     self assert: (str asUnicodeString: 'UTF-8') first = $<16rFFFE>.
     str := #[208 184].
-    self assert: (str asUnicodeString: 'UTF-8') first = $<16r438>! !
+    self assert: (str asUnicodeString: 'UTF-8') first = $<16r438>!
+
+testFromUTF7
+    self assert: ('+-' asUnicodeString: 'UTF-7') first = $+.
+    self assert: ('+BBg-' asUnicodeString: 'UTF-7') first = $<16r418>.
+    self assert: ('+BBgEOA-' asUnicodeString: 'UTF-7') second = $<16r438>.
+    self assert: ('+BBgEOAQZ-' asUnicodeString: 'UTF-7') third = $<16r419>.
+    self assert: ('+2//f/w-' asUnicodeString: 'UTF-7') first = $<16r10FFFF>.
+    self assert: ('+2//f/w-' asUnicodeString: 'UTF-7') size = 1.
+    self assert: ('+BDjb/9//-' asUnicodeString: 'UTF-7') last = $<16r10FFFF>.
+    self assert: ('+BDjb/9//-' asUnicodeString: 'UTF-7') size = 2.
+    self assert: ('+BDgEGNv/3/8-' asUnicodeString: 'UTF-7') last = $<16r10FFFF>.
+    self assert: ('+BDgEGNv/3/8-' asUnicodeString: 'UTF-7') size = 3!
+
+testToUTF7
+    | str |
+    self assert: ((UnicodeString with: $+) asString: 'UTF-7') asString = '+-'.
+    str := UnicodeString with: $<16r418>.
+    self assert: (str asString: 'UTF-7') encoding = 'UTF-7'.
+    self assert: (str asString: 'UTF-7') asString = '+BBg-'.
+    str := str copyWith: $<16r438>.
+    self assert: (str asString: 'UTF-7') asString = '+BBgEOA-'.
+    str := str copyWith: $<16r419>.
+    self assert: (str asString: 'UTF-7') asString = '+BBgEOAQZ-'.
+    str := UnicodeString with: $<16r10FFFF>.
+    self assert: (str asString: 'UTF-7') asString = '+2//f/w-'.
+!
+
+ !

@@ -387,6 +387,11 @@ atEndOfInput
     ^origin atEnd
 !
 
+peekInput
+    "Return the next character in the origin without advancing it."
+    ^origin peek
+!
+
 nextInput
     "Return the next character in the origin.  This method is for
      private use by encoders, calling it outside may corrupt the
@@ -990,9 +995,8 @@ next
 	"Convert to a surrogate pair"
 	ch := ch - 16r10000.
 	left := 32.
-	value := (((ch bitAnd: 16rFFF) + 16rD800) bitShift: 16) +
+	value := (((ch bitAnd: 16r3FF) + 16rD800) bitShift: 16) +
 		 ((ch bitShift: -10) + 16rDC00).
-
 	^$+
     ].
 
@@ -1154,7 +1158,7 @@ getNext
 	ch == 45 "minus" ifTrue: [ ^$+ ].
 
 	"Else switch into base64 mode"
-	shift := 32.
+	shift := 16.
 	wch := 0.
     ].
 
@@ -1164,7 +1168,7 @@ getNext
 	    "Terminate base64 encoding.
 	     If accumulated data is nonzero, the input is invalid.
 	     Also, partial UTF-16 characters are invalid."
-	    (shift <= 26 or: [ wch > 0 ]) ifTrue: [
+	    (shift <= 10 or: [ wch > 0 ]) ifTrue: [
 		shift := 0.
 		InvalidSequenceError signal ].
 
@@ -1175,43 +1179,34 @@ getNext
 	    ^self getNext
 	].
 
-    "Concatenate the base64 integer value to the accumulator"
-    shift > 6 ifTrue: [
-	shift := shift - 6.
-	wch := wch + (value bitShift: shift).
-	shift > 16 ifTrue: [ ^self getNext ].
+    shift <= 6 ifTrue: [
+        wc1 := wch + (value bitShift: shift - 6).
+        wch := ((value bitShift: shift) bitAnd: 16r3F) bitShift: 10.
+        shift := shift + 10.
 
-	(shift between: 11 and: 16) ifTrue: [
-	    "Completed an UTF-16 character.  When we see a High
-	     Surrogate, we must wait for the following Low Surrogate."
-	    wc1 := wch bitShift: -16.
-
-	    (wc1 between: 16rD800 and: 16rDBFF) ifFalse: [
-		wch := (wch bitAnd: 65535) bitShift: 16.
-		shift := shift + 16.
-		^Character codePoint: wc1
-	    ].
-	].
-
-	(shift between: 5 and: 10) ifTrue: [
+	(wc1 between: 16rDC00 and: 16rDFFF) ifTrue: [
+	    InvalidSequenceError signal ].
+	wc1 >= 16r4000000 ifTrue: [
 	    "After an High Surrogate, verify that the next character
 	     is indeed a Low Surrogate"
-	    wc1 := wch bitAnd: 65535.
-	    (wc1 between: 16rDC00 and: 16rDFFF) ifFalse: [
-		shift := 0.
-		InvalidSequenceError signal ]
-	].
-    ].
+	    (wc1 between: 16r400DC00 and: 16r7FFDFFF) ifTrue: [
+	        wc1 := ((wc1 bitAnd: 16r3FF0000) bitShift: -6)
+		       + (wc1 bitAnd: 16r3FF) + 16r10000.
+	        ^Character codePoint: wc1 ].
+	    InvalidSequenceError signal ].
+	(wc1 between: 16rD800 and: 16rDBFF) ifFalse: [
+	    ^Character codePoint: wc1 ].
+	shift = 0 ifTrue: [
+	    InvalidSequenceError signal ].
 
-    "Completed an UTF-16 surrogate pair"
+        "Read a High Surrogate."
+	wch := wch + (wc1 - 16rD400 bitShift: 16).
+	^self getNext ].
 
-    "35FDC00 = -0xD800 << 10 - 0xDC00 + 0x10000"
-    wc1 := wch bitShift: -16.
-    wch := (wch bitAnd: 65535) + (value bitShift: shift - 6).
-    wc1 := (wc1 bitShift: 10) + wch - 16r35FDC00.
-
-    wch := ((value bitShift: shift) bitAnd: 16r3F) bitShift: 26.
-    ^Character codePoint: wc1
+    "Concatenate the base64 integer value to the accumulator"
+    shift := shift - 6.
+    wch := wch + (value bitShift: shift).
+    ^self getNext!
 ! !
 
 
