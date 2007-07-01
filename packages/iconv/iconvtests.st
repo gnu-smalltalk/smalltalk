@@ -1,0 +1,116 @@
+"======================================================================
+|
+|   Iconv module unit tests
+|
+|
+ ======================================================================"
+
+
+"======================================================================
+|
+| Copyright 2007 Free Software Foundation, Inc.
+| Written by Paolo Bonzini and Stephen Compall
+|
+| This file is part of GNU Smalltalk.
+|
+| GNU Smalltalk is free software; you can redistribute it and/or modify it
+| under the terms of the GNU General Public License as published by the Free
+| Software Foundation; either version 2, or (at your option) any later version.
+|
+| GNU Smalltalk is distributed in the hope that it will be useful, but WITHOUT
+| ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+| FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+| details.
+|
+| You should have received a copy of the GNU General Public License along with
+| GNU Smalltalk; see the file COPYING.  If not, write to the Free Software
+| Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+|
+ ======================================================================"
+
+TestCase subclass: #IconvTest
+         instanceVariableNames: ''
+         classVariableNames: ''
+         poolDictionaries: ''
+         category: 'Examples-Useful'!
+
+!IconvTest methodsFor: 'test'!
+
+testStringNumberOfCharacters
+    self assert: ($<16r438> asString: 'UTF-8') numberOfCharacters = 1.
+    self assert: ($<16rFFFE> asString: 'UTF-8') numberOfCharacters = 1.
+    self assert: ((UnicodeString new: 10) atAllPut: $<16r438>) asString
+		 numberOfCharacters = 10!
+
+testUnicodeStringNumberOfCharacters
+    self assert: $<16r438> asUnicodeString numberOfCharacters = 1.
+    self assert: $<16rFFFE> asUnicodeString numberOfCharacters = 1.
+    self assert: ((UnicodeString new: 10) atAllPut: $<16r438>)
+		 numberOfCharacters = 10!
+
+testUnicodeCharAsStringColon
+    self assert: ($<16r438> asString: 'UTF-8') = #[208 184] asString.
+    self assert: ($<16rFFFE> asString: 'UTF-8') = #[239 191 190] asString.
+    self assert: ($<16r438> asString: 'KOI8-R') first value = 201.
+    self assert: ($<16r438> asString: 'KOI8-R') first class = Character.
+    self deny: ($<16r438> asString: 'KOI8-R') first = $<201>!
+
+testEncodedStringSize
+    | str |
+    str := EncodedString
+		fromString: (String with: (Character value: 233))
+		encoding: 'KOI8-R'.
+    self assert: str size = 1.
+    str := EncodedString
+		fromString: #[16rD8 0 16rDC 0] asString
+		encoding: 'UTF-16BE'.
+    self assert: str size = 4!
+
+testEncodedStringNumberOfCharacters
+    | str |
+    str := EncodedString
+		fromString: (String with: (Character value: 233))
+		encoding: 'KOI8-R'.
+    self assert: str numberOfCharacters = 1.
+    str := EncodedString
+		fromString: #[16rD8 0 16rDC 0] asString
+		encoding: 'UTF-16BE'.
+    self assert: str numberOfCharacters = 1!
+
+testEncodedStringAsUnicodeString
+    | str |
+    str := EncodedString
+		fromString: (String with: (Character value: 233))
+		encoding: 'KOI8-R'.
+    self assert: str asUnicodeString first = $<16r418>!
+
+testCharAsStringColon
+    | ch |
+    ch := Character value: 233.
+    self assert: (ch asString: 'KOI8-R') encoding = 'KOI8-R'.
+    self deny: (ch asString: 'KOI8-R') = (ch asString: 'ISO-8859-1')!
+
+testCharAsUnicodeStringColon
+    | ch |
+    ch := Character value: 233.
+    self assert: (ch asUnicodeString: 'KOI8-R') first = $<16r418>!
+
+testStringAsUnicodeStringColon
+    | str |
+    str := (Character value: 233) asString.
+    self assert: (str asUnicodeString: 'KOI8-R') first = $<16r418>.
+    self assert: (str asUnicodeString: 'ISO-8859-1') first = $<233>.
+    str := #[239 191 190] asString.
+    self assert: (str asUnicodeString: 'UTF-8') first = $<16rFFFE>.
+    str := #[208 184] asString.
+    self assert: (str asUnicodeString: 'UTF-8') first = $<16r438>!
+
+testByteArrayAsUnicodeStringColon
+    | str |
+    str := #[233].
+    self assert: (str asUnicodeString: 'KOI8-R') first = $<16r418>.
+    self assert: (str asUnicodeString: 'ISO-8859-1') first = $<233>.
+    str := #[239 191 190].
+    self assert: (str asUnicodeString: 'UTF-8') first = $<16rFFFE>.
+    str := #[208 184].
+    self assert: (str asUnicodeString: 'UTF-8') first = $<16r438>! !
