@@ -202,7 +202,7 @@
   <directory>i18n</directory>
 
   <file>Sets.st</file>
-  <filein>iconvtests.st</filein>
+  <file>iconvtests.st</file>
 </@I18N_DISABLED@package>
 
 <@I18N_DISABLED@package>
