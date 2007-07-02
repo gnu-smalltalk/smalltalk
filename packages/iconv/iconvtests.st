@@ -140,6 +140,7 @@ testFromUTF7
     self shouldnt: [ '#' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
     self should: [ '\' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
     self should: [ '~' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
+    self should: [ '+BBgA' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
     self should: [ '+BBg\' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError!
 
 testToUTF7
@@ -148,6 +149,9 @@ testToUTF7
     str := UnicodeString with: $<16r418>.
     self assert: (str asString: 'UTF-7') encoding = 'UTF-7'.
     self assert: (str asString: 'UTF-7') asString = '+BBg-'.
+    self assert: ((str copyWith: $.) asString: 'UTF-7') asString = '+BBg.'.
+    self assert: ((str copyWith: $-) asString: 'UTF-7') asString = '+BBg--'.
+    self assert: ((str copyWith: $A) asString: 'UTF-7') asString = '+BBg-A'.
     str := str copyWith: $<16r438>.
     self assert: (str asString: 'UTF-7') asString = '+BBgEOA-'.
     str := str copyWith: $<16r419>.
