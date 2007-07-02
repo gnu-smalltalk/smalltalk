@@ -1,5 +1,11 @@
 2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
+        * iconv/Sets.st: Optimize leaving Base64.  Reject partial characters
+        at end of input.
+        * iconv/iconvtests.st: Test for this.
+
+2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
+
         * iconv/iconvtests.st: More UTF-7 tests.
         * iconv/Sets.st: UTF-7 fixes and some small optimization.
 

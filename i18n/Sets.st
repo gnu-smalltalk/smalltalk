@@ -950,6 +950,14 @@ initialize
 
 !ToUTF7 methodsFor: 'private'!
 
+isBase64: anInteger
+    | d |
+    ^anInteger < 128 and: [
+	d := Base64Characters at: (anInteger // 8) + 1.
+	((d bitShift: (0 - (anInteger \\ 8))) bitAnd: 1) == 1
+    ]
+!
+
 isDirect: anInteger
     | d |
     ^anInteger < 128 and: [
@@ -989,7 +997,7 @@ next
 	ch < 65536
 	    ifTrue: [ left := 16. value := ch. ^$+ ].
 
-	ch > 16r110000
+	ch >= 16r110000
 	     ifTrue: [ InvalidSequenceError signal ].
 
 	"Convert to a surrogate pair"
@@ -1001,29 +1009,23 @@ next
     ].
 
     left < 0 ifTrue: [
-	"left = -2 ---> output the lookahead character and go to 0
-	 left = -1 ---> if there's a lookahead output - and go to -2,
-			if at end of input output - and stop,
-			else reactivate base64"
+	"if at end of input output -.  otherwise:
+	 left = -2 ---> output the lookahead character and go to 0
+	 left = -1 ---> if there's a lookahead output it; if -, go to -2
+			without advancing in the input.; otherwise go to 0"
 
-	left = -2 ifTrue: [
-	    left := 0.
-	    ch := lookahead asCharacter.
-	    lookahead := nil.
-	    ^ch
-	].
-	lookahead isNil ifFalse: [
-	    left := -2.
-	    ^$-
-	].
-
-	left := 0.
-	self atEndOfInput ifTrue: [ ^$- ].
-    ].
+	lookahead isNil
+	    ifTrue: [
+		left := 0.
+		self atEndOfInput ifTrue: [ ^$- ] ]
+	    ifFalse: [
+	        ch := lookahead.
+	        ^(left = -1 and: [ self isBase64: ch ])
+		    ifTrue: [ left := -2. $- ]
+		    ifFalse: [ lookahead := nil. left := 0. ch asCharacter ]]].
 
     left < 6 ifTrue: [
 	"Pump another character into the Base64 encoder"
-        "TODO:  should deactivate base64 encoding"
 
 	(self atEndOfInput or: [
 	    self isDirect: (ch := self nextInput codePoint) ])
@@ -1032,16 +1034,14 @@ next
 		value := value bitShift: 6 - (left \\ 6).
 		left := left + 6 - (left \\ 6).
 
-		lookahead := ch.
-	    ]
+		lookahead := ch ]
 	    ifFalse: [
 		ch < 65536
 		    ifTrue: [
 		        left := left + 16.
-		        value := (value bitShift: 16) + ch
-		    ]
+		        value := (value bitShift: 16) + ch ]
 		    ifFalse: [
-			ch > 16r110000
+			ch >= 16r110000
 			    ifTrue: [ InvalidSequenceError signal ].
 
 			"Convert to a surrogate pair"
@@ -1049,16 +1049,14 @@ next
 			left := left + 32.
 			value := (value bitShift: 32) + 
 			     (((ch bitAnd: 16rFFF) + 16rD800) bitShift: 16) +
-			     ((ch bitShift: -10) + 16rDC00).
-		    ]
-	    ]
-    ].
+			     ((ch bitShift: -10) + 16rDC00) ] ] ].
 
     "Take 6 bits out of the Base-64 encoded stream"
     left := left - 6.
     ch := value bitShift: 0 - left.
     value := value bitXor: (ch bitShift: left).
 
+    "Exit base64 if at end of input or next char is direct."
     left = 0 ifTrue: [ left := -1 ].
     ^self toBase64Char: ch
 ! !
@@ -1113,10 +1111,7 @@ next
     | ch |
     lookahead isNil ifTrue: [ SystemExceptions.EndOfStream signal: self. ^nil ].
     ch := lookahead.
-    [
-        self atEndOfInput ifTrue: [ lookahead := nil. ^ch ].
-	(lookahead := self getNext) isNil
-    ] whileTrue.
+    self getNext.
     ^ch
 !
 
@@ -1127,15 +1122,23 @@ flush
      up to six characters before it can provide a full UTF-32 character)."
     shift := -6.
     wch := 0.
-    [
-        self atEndOfInput ifTrue: [ lookahead := nil. ^self ].
-	(lookahead := self getNext) isNil
-    ] whileTrue.
+    self getNext.
 ! !
 
 !FromUTF7 methodsFor: 'private - converting'!
 
 getNext
+    [
+        self atEndOfInput ifTrue: [
+	    (shift = -6 or: [ shift = 10 ]) ifFalse: [
+		shift := -6. wch := 0.
+		InvalidSequenceError signal ].
+	    lookahead := nil.
+	    ^self ].
+	(lookahead := self readNext) isNil
+    ] whileTrue!
+
+readNext
     "The decoder will always decode a character ahead, because when we
      are to read only a minus, we might already be at the end of the
      stream! Here is a simple example: +AFs- which decodes to [
