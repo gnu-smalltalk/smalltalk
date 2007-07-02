@@ -1,3 +1,8 @@
+2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* iconv/iconvtests.st: More UTF-7 tests.
+	* iconv/Sets.st: UTF-7 fixes and some small optimization.
+
 2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* iconv/iconvtests.st: Add UTF-7 tests.

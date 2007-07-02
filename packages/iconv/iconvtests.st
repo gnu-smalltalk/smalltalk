@@ -116,16 +116,31 @@ testByteArrayAsUnicodeStringColon
     self assert: (str asUnicodeString: 'UTF-8') first = $<16r438>!
 
 testFromUTF7
+    | str |
     self assert: ('+-' asUnicodeString: 'UTF-7') first = $+.
     self assert: ('+BBg-' asUnicodeString: 'UTF-7') first = $<16r418>.
     self assert: ('+BBgEOA-' asUnicodeString: 'UTF-7') second = $<16r438>.
     self assert: ('+BBgEOAQZ-' asUnicodeString: 'UTF-7') third = $<16r419>.
-    self assert: ('+2//f/w-' asUnicodeString: 'UTF-7') first = $<16r10FFFF>.
     self assert: ('+2//f/w-' asUnicodeString: 'UTF-7') size = 1.
-    self assert: ('+BDjb/9//-' asUnicodeString: 'UTF-7') last = $<16r10FFFF>.
+    self assert: ('+2//f/w-' asUnicodeString: 'UTF-7') first = $<16r10FFFF>.
     self assert: ('+BDjb/9//-' asUnicodeString: 'UTF-7') size = 2.
+    self assert: ('+BDjb/9//-' asUnicodeString: 'UTF-7') last = $<16r10FFFF>.
+    self assert: ('+BDgEGNv/3/8-' asUnicodeString: 'UTF-7') size = 3.
     self assert: ('+BDgEGNv/3/8-' asUnicodeString: 'UTF-7') last = $<16r10FFFF>.
-    self assert: ('+BDgEGNv/3/8-' asUnicodeString: 'UTF-7') size = 3!
+
+    "Test exiting Base64 mode with a non-Base64 character."
+    str := 'A+ImIDkQ.' asUnicodeString: 'UTF-7'.
+    self assert: str size = 4.
+    self assert: str first = $A.
+    self assert: str second = $<16r2262>.
+    self assert: str third = $<16r391>.
+    self assert: str last = $. .
+
+    "Test handling of optional direct characters."
+    self shouldnt: [ '#' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
+    self should: [ '\' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
+    self should: [ '~' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
+    self should: [ '+BBg\' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError!
 
 testToUTF7
     | str |
