@@ -1111,13 +1111,38 @@ atEnd
 next
     "Answer the next character that the receiver can produce."
     | ch |
+    lookahead isNil ifTrue: [ SystemExceptions.EndOfStream signal: self. ^nil ].
+    ch := lookahead.
+    [
+        self atEndOfInput ifTrue: [ lookahead := nil. ^ch ].
+	(lookahead := self getNext) isNil
+    ] whileTrue.
+    ^ch
+!
+
+flush
+    "Flush any remaining state left in the encoder by the last character
+     (this is because UTF-7 encodes 6 bits at a time, so it takes three
+     characters before it can provide a single 16-bit character and
+     up to six characters before it can provide a full UTF-32 character)."
+    shift := -6.
+    wch := 0.
+    [
+        self atEndOfInput ifTrue: [ lookahead := nil. ^self ].
+	(lookahead := self getNext) isNil
+    ] whileTrue.
+! !
+
+!FromUTF7 methodsFor: 'private - converting'!
+
+getNext
     "The decoder will always decode a character ahead, because when we
      are to read only a minus, we might already be at the end of the
      stream! Here is a simple example: +AFs- which decodes to [
-	 We read + and switch to base-64 --> shift = 32
-	 We read A and put it into the accumulator --> shift = 26
-	 We read F and put it into the accumulator --> shift = 20
-	 We read s and put it into the accumulator --> shift = 14
+	 We read + and switch to base-64 --> shift = 10
+	 We read A and put it into the accumulator --> shift = 4
+	 We read F and put it into the accumulator --> shift = -2 *next is last*
+	 We read s and put it into the accumulator --> shift = 8
 
      We then decode the [ and return it.  Now we are not
      #atEndOfInput yet, but there are no more characters to
@@ -1129,28 +1154,9 @@ next
      our choice's overhead is proportional to the number of output
      characters, which is always less in UTF-7."
 
-    lookahead isNil ifTrue: [ SystemExceptions.EndOfStream signal: self. ^nil ].
-    ch := lookahead.
-    lookahead := self getNext.
-    ^ch
-!
-
-flush
-    "Flush any remaining state left in the encoder by the last character
-     (this is because UTF-7 encodes 6 bits at a time, so it takes three
-     characters before it can provide a single 16-bit character and
-     up to six characters before it can provide a full UTF-32 character)."
-    shift := 0.
-    lookahead := self getNext.
-! !
-
-!FromUTF7 methodsFor: 'private - converting'!
-
-getNext
     | ch value wc1 |
-    self atEndOfInput ifTrue: [ ^nil ].
     ch := self nextInput value.
-    shift = 0 ifTrue: [
+    shift = -6 ifTrue: [
         (self isDirect: ch) ifTrue: [ ^Character codePoint: ch ].
 	ch == 43 "plus" ifFalse: [ InvalidSequenceError signal ].
 
@@ -1158,8 +1164,7 @@ getNext
 	ch == 45 "minus" ifTrue: [ ^$+ ].
 
 	"Else switch into base64 mode"
-	shift := 16.
-	wch := 0.
+	shift := 10.
     ].
 
     ((ch between: 43 and: 122) and: [
@@ -1168,46 +1173,45 @@ getNext
 	    "Terminate base64 encoding.
 	     If accumulated data is nonzero, the input is invalid.
 	     Also, partial UTF-16 characters are invalid."
-	    (shift <= 10 or: [ wch > 0 ]) ifTrue: [
-		shift := 0.
+	    (shift <= 4 or: [ wch > 0 ]) ifTrue: [
+		shift := -6. wch := 0.
 		InvalidSequenceError signal ].
 
-	    shift := 0.
-	    ch = 45 "minus" ifFalse: [ ^$- ].
+	    shift := -6.
 
-	    "Discard the -"
-	    ^self getNext
+	    "Discard a -"
+	    ch = 45 "minus" ifTrue: [ ^nil ].
+            (self isDirect: ch) ifFalse: [ InvalidSequenceError signal ].
+	    ^Character codePoint: ch
 	].
 
-    shift <= 6 ifTrue: [
-        wc1 := wch + (value bitShift: shift - 6).
-        wch := ((value bitShift: shift) bitAnd: 16r3F) bitShift: 10.
-        shift := shift + 10.
+    shift > 0 ifTrue: [
+        "Concatenate the base64 integer value to the accumulator"
+        wch := wch + (value bitShift: shift).
+        shift := shift - 6.
+        ^nil ].
 
-	(wc1 between: 16rDC00 and: 16rDFFF) ifTrue: [
-	    InvalidSequenceError signal ].
-	wc1 >= 16r4000000 ifTrue: [
-	    "After an High Surrogate, verify that the next character
-	     is indeed a Low Surrogate"
-	    (wc1 between: 16r400DC00 and: 16r7FFDFFF) ifTrue: [
-	        wc1 := ((wc1 bitAnd: 16r3FF0000) bitShift: -6)
-		       + (wc1 bitAnd: 16r3FF) + 16r10000.
-	        ^Character codePoint: wc1 ].
-	    InvalidSequenceError signal ].
-	(wc1 between: 16rD800 and: 16rDBFF) ifFalse: [
-	    ^Character codePoint: wc1 ].
-	shift = 0 ifTrue: [
-	    InvalidSequenceError signal ].
+    wc1 := wch + (value bitShift: shift).
+    wch := (value bitShift: shift + 16) bitAnd: 16rFC00.
+    shift := shift + 10.
 
-        "Read a High Surrogate."
-	wch := wch + (wc1 - 16rD400 bitShift: 16).
-	^self getNext ].
+    wc1 < 16rD800 ifTrue: [
+        ^Character codePoint: wc1 ].
+    wc1 < 16rDC00 ifTrue: [
+        "Read a High Surrogate. D7C0 = D800 - (16r10000 bitShift: -6)"
+	wch := wch + (wc1 - 16rD7C0 bitShift: 16).
+	^nil ].
+    wc1 < 16rE000 ifTrue: [
+        ^InvalidSequenceError signal ].
+    wc1 <= 16rFFFF ifTrue: [
+        ^Character codePoint: wc1 ].
 
-    "Concatenate the base64 integer value to the accumulator"
-    shift := shift - 6.
-    wch := wch + (value bitShift: shift).
-    ^self getNext!
-! !
+    "After an High Surrogate, verify that the next character
+     is indeed a Low Surrogate"
+    ((wc1 bitAnd: 65535) between: 16rDC00 and: 16rDFFF) ifFalse: [
+        ^InvalidSequenceError signal ].
+    wc1 := ((wc1 bitAnd: 16r7FF0000) bitShift: -6) + (wc1 bitAnd: 16r3FF).
+    ^Character codePoint: wc1! !
 
 
 
