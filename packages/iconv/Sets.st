@@ -94,19 +94,19 @@ Stream subclass: #Encoder
 
 Encoder comment:
 'This class is the superclass of streams that take an origin
-and encode it to another character set.  Most of the subclasses
-are for internal use, the one you really want to use is probably
-EncodedStream.'!
+and encode it to another character set.  The subclasses are
+are for internal use unless you are writing support for your own
+encodings.'!
 
-Encoder subclass: #EncodedStream
+Stream subclass: #EncodedStream
        instanceVariableNames: ''
        classVariableNames: 'EncodersRegistry'
        poolDictionaries: 'Encoders'
        category: 'i18n-Character sets'!
 
 EncodedStream comment:
-'This class is a factory for subclasses of Encoder.  The Encoder
-is in practice a pipe, so the purpose of this class is simply to
+'This class is a factory for subclasses of Encoder.  Encoders
+act as parts of a pipe, hence this class provides methods that
 construct an appropriate pipe.'!
 
 Namespace current: Smalltalk.I18N.Encoders!

@@ -1,5 +1,9 @@
 2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
+	* iconv/Sets.st: Make EncodedStream a subclass of Stream.
+
+2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
+
 	* iconv/Sets.st: Optimize leaving Base64.  Reject partial characters
 	at end of input.
 	* iconv/iconvtests.st: Test for this.
