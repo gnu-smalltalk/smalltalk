@@ -194,12 +194,15 @@
   <name>Iconv</name>
   <namespace>I18N</namespace>
 
+  <sunit>I18N.IconvTest</sunit>
   <filein>Sets.st</filein>
+  <filein>iconvtests.st</filein>
 
   <module>i18n</module>
   <directory>i18n</directory>
 
   <file>Sets.st</file>
+  <filein>iconvtests.st</filein>
 </@I18N_DISABLED@package>
 
 <@I18N_DISABLED@package>

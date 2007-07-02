@@ -5052,19 +5052,6 @@ primitive VMpr_Stream_fileIn [succeed,fail]
   if (!RECEIVER_IS_OOP (streamOOP))
     PRIM_FAILED;
 
-  if (is_a_kind_of (OOP_CLASS (streamOOP), _gst_file_descriptor_class))
-    {
-      gst_file_stream fileStream = (gst_file_stream) OOP_TO_OBJ (streamOOP);
-      char *fileName = _gst_to_cstring (fileStream->name);
-      if (!_gst_file_is_readable (fileName))
-	{
-	  xfree (fileName);
-	  PRIM_FAILED;
-	}
-      else
-	xfree (fileName);
-    }
-
   _gst_push_stream_oop (streamOOP);
   _gst_use_undeclared++;
   parse_stream_with_protection (false);

@@ -1,3 +1,13 @@
+2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* iconv/iconvtests.st: Add UTF-7 tests.
+	* iconv/Sets.st: Rewrite FromUTF7.
+
+2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* iconv/iconvtests.st: New.
+	* iconv/Sets.st: Fix buglet.
+
 2006-12-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.3.1 released.

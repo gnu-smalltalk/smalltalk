@@ -1,3 +1,8 @@
+2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Remove bogus check on file in of FileDescriptor
+	objects.
+
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Don't lose on integer literals followed by identifiers.
