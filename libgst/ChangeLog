@@ -1,3 +1,7 @@
+2007-07-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.c: Export LibexecPath.
+
 2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Remove bogus check on file in of FileDescriptor

@@ -104,6 +104,11 @@ o   The image is now installed in /usr/local/var/lib/smalltalk (which in
 o   A pragma like "<category: 'bar'>" can be used to set the category
     of a method.
 
+o   Since they are not portable outside Unix systems, the `archive' virtual
+    filesystems (deb, lslR, mailfs, patchfs, uar, urar, uzoo, ulha, ucpio, utar)
+    are now available only if the VFSAddOns package is loaded.  Without the
+    package, only #uzip is available and it will only support extracting from
+    ZIP files.
 
 -----------------------------------------------------------------------------
 

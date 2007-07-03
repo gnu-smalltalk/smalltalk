@@ -300,6 +300,7 @@ GST_PACKAGE([TCP], [tcp],
   [GST_INET_SOCKETS],
   [gst_cv_inet_sockets],
   [Makefile], [tcp.la])
+GST_PACKAGE([VFSAddOns], [vfs])
 GST_PACKAGE([XML], [xml])
 GST_PACKAGE([XPath], [xpath])
 GST_PACKAGE([XSL], [xsl])

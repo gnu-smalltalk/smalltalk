@@ -218,19 +218,6 @@
   <file>Getopt.st</file>
   <file>Regex.st</file>
   <file>StreamOps.st</file>
-
-  <file>../vfs/README</file>
-  <file>../vfs/deb</file>
-  <file>../vfs/lslR</file>
-  <file>../vfs/mailfs</file>
-  <file>../vfs/patchfs</file>
-  <file>../vfs/uar</file>
-  <file>../vfs/urar</file>
-  <file>../vfs/uzip</file>
-  <file>../vfs/uzoo</file>
-  <file>../vfs/ulha</file>
-  <file>../vfs/ucpio</file>
-  <file>../vfs/utar</file>
 </disabled-package>
 
 <disabled-package>

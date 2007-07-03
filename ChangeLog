@@ -1,3 +1,11 @@
+2007-07-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFS.st: Move most of the code in ExternalArchiveFileHandler
+	up to ArchiveFileHandler, modify ExternalArchiveFileHandler to be
+	ZipFileHandler and adjusting it for the new ArchiveFileHandler protocol,
+	add priorities to each class.
+	* kernel/Directory.st: Add #libexec.
+
 2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/File.st: Use VFSHandler>>#fullName.

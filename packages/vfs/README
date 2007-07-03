@@ -4,13 +4,12 @@
 Starting with version 1.96.5, GNU Smalltalk includes the Midnight
 Commander's virtual filesystem layer.  One of the virtual filesystems,
 implemented by the ExternalArchiveFileHandler class, makes it possible
-to create new virtual filesystems for GNU Smalltalk very easily (this
-was not implemented until 2.0c, however).
+to create new virtual filesystems for GNU Smalltalk very easily.
 
 This is achieved simply by creating a shell script/program to handle
-requests.  (Note: $(sharedir) should be substituted for actual
+requests.  (Note: $(libexecdir) should be substituted for actual
 sharedir path stored when configured or compiled, like
-/usr/local/share/smalltalk or /usr/share/smalltalk).
+/usr/local/libexec or /usr/libexec).
 
 The script must be called with the vfs suffix you give to your
 filesystem. For example, if you have .zip file, and would like to see
@@ -24,8 +23,8 @@ U. Note that sometime in future filesystem like zip may exist: It will
 take whole tree and create .zip file from it. So /usr#zip will be
 zipfile containing whole /usr tree.
 
-You then have to create a program (with executable permissions) prefix
-in $(sharedir)/extfs (in our example $(sharedir)/extfs/uzip).
+You then have to create a program (with executable permissions) prefix in
+$(libexecdir)/smalltalk/vfs (in our example $(libexecdir)/smalltalk/vfs/uzip).
 
 * Commands that should be implemented by your shell script
 ----------------------------------------------------------
@@ -33,7 +32,7 @@ in $(sharedir)/extfs (in our example $(sharedir)/extfs/uzip).
 Return zero from your script upon completion of the command, otherwise
 nonzero for failure or in case of an unsupported command.
 
-$libdir/extfs/prefix command [arguments]
+$(libexecdir)/smalltalk/vfs/prefix command [arguments]
 
 * Command: list archivename
 
@@ -99,8 +98,7 @@ This should create a new directory called dirname inside archivename.
 
 * Command: rmdir archivename dirname
 
-This should remove an existing directory dirname. If the directory is
-not empty, mc will recursively delete it (possibly prompting).
+This should remove an existing directory dirname.
 
 ---------------------------------------------------------
 
@@ -113,5 +111,5 @@ similar to yours.
 
 In constructing these routines, errors will be made.  Since this
 routine is an executable shell script it can be run from the command
-line independently of mc, and its output will show on the console or
+line independently of gst, and its output will show on the console or
 can be redirected to a file.

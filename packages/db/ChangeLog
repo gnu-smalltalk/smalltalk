@@ -4,30 +4,30 @@
 
 2003-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
-	* db/GlorpTestModels.st: put in a separate
+	* GlorpTestModels.st: put in a separate
 	namespace.  Override #allClassBindings instead
 	of #allClassNames.
-	* db/GlorpCore.st: implement #allClassBindings relying
+	* GlorpCore.st: implement #allClassBindings relying
 	on #allClassNames and vice versa, so that any one of the
 	two can be overridden (the former is namespace-clean).
-	* db/GlorpPorting.st: add #smalltalkAssociationAt:.
+	* GlorpPorting.st: add #smalltalkAssociationAt:.
 
 2003-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
-	* db/GlorpCore.st: new file
-	* db/GlorpDBTests.st: new file
-	* db/GlorpDatabase.st: new file
-	* db/GlorpExpressions.st: new file
-	* db/GlorpExtensions.st: new file, modified to support GNU Smalltalk.
-	* db/GlorpMappings.st: new file
-	* db/GlorpMisc.st: new file
-	* db/GlorpMySQL.st: new file
-	* db/GlorpPorting.st: new file, modified to support GNU Smalltalk.
-	* db/GlorpQueries.st: new file
-	* db/GlorpTestModels.st: new file
-	* db/GlorpTests.st: new file
-	* db/GlorpUnitOfWork.st: new file
-	* db/MySQL.st: support more queries
+	* GlorpCore.st: new file
+	* GlorpDBTests.st: new file
+	* GlorpDatabase.st: new file
+	* GlorpExpressions.st: new file
+	* GlorpExtensions.st: new file, modified to support GNU Smalltalk.
+	* GlorpMappings.st: new file
+	* GlorpMisc.st: new file
+	* GlorpMySQL.st: new file
+	* GlorpPorting.st: new file, modified to support GNU Smalltalk.
+	* GlorpQueries.st: new file
+	* GlorpTestModels.st: new file
+	* GlorpTests.st: new file
+	* GlorpUnitOfWork.st: new file
+	* MySQL.st: support more queries
 
 2003-05-09  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -49,9 +49,9 @@
 
 	*** Version 2.0b (development) released
 
-	* db/DB.st: new file
-	* db/MySQL.st: new file
-	* db/MySQLTests.st: new file
-	* db/mysql-test.st: new file
+	* DB.st: new file
+	* MySQL.st: new file
+	* MySQLTests.st: new file
+	* mysql-test.st: new file
 
 

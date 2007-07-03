@@ -1,8 +1,8 @@
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox/tk/BloxBasic.st: Use #%.
-	* blox/tk/BloxText.st: Use #%.
-	* blox/tk/BloxWidgets.st: Use #%.
+	* BloxBasic.st: Use #%.
+	* BloxText.st: Use #%.
+	* BloxWidgets.st: Use #%.
 
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -10,38 +10,38 @@
 
 2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxTK.c: Add GPL exception.
-	* blox-tk/rgbtab.h: Add GPL exception.
+	* BloxTK.c: Add GPL exception.
+	* rgbtab.h: Add GPL exception.
 
 2006-09-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxBasic.st: Fix previous checkin... half a year later.
+	* BloxBasic.st: Fix previous checkin... half a year later.
 
 2006-03-17  Paolo Bonzini  <bonzini@gnu.org>
 	    Jiro Yamamoto <jyamamoto@katch.ne.jp>
 
-	* blox-tk/BloxBasic.st: Support specifying different default fonts
+	* BloxBasic.st: Support specifying different default fonts
 	on different platforms.
-	* blox-tk/BloxWidgets.st: Likewise.
-	* blox-tk/BloxText.st: Likewise.
+	* BloxWidgets.st: Likewise.
+	* BloxText.st: Likewise.
 
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxBasic.st: Switch to new C-call descriptions.
+	* BloxBasic.st: Switch to new C-call descriptions.
 
 2004-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
-        * blox-tk/BloxWidgets.st, blox-tk/BloxText.st: set
+        * BloxWidgets.st, blox-tk/BloxText.st: set
 	default font to Helvetica 10.
 	
 2004-01-03  Paolo Bonzini  <bonzini@gnu.org>
 
-        * blox-tk/BloxCanvas.st, blox-tk/BloxText.st: fixed
+        * BloxCanvas.st, blox-tk/BloxText.st: fixed
         erroneous use of ValueHolder class>>#value:.
 
 2003-06-04  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxCanvas.st: fixed bug in BEmbeddedImage>>
+	* BloxCanvas.st: fixed bug in BEmbeddedImage>>
 	#data:.  Thanks to Mike Anderson.
 
 2003-05-09  Paolo Bonzini  <bonzini@gnu.org>
@@ -58,45 +58,45 @@
 
 2003-03-23  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxWidgets.st: adjust the wraplength of the label
+	* BloxWidgets.st: adjust the wraplength of the label
 	in a BDialog as it changes size.
 
 2003-03-14  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxBasic.st: fix clipboard management
+	* BloxBasic.st: fix clipboard management
 
 2003-02-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxBasic.st: fix geometry management
+	* BloxBasic.st: fix geometry management
 	under Windows when parent window is unmapped
 
 2003-01-19  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxWidgets.st: remove two Tcl calls that
+	* BloxWidgets.st: remove two Tcl calls that
 	took 2 seconds each!
 
 2002-12-29  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxBasic.st: bind events to both the
+	* BloxBasic.st: bind events to both the
 	lowercase and the uppercase version of alphabetic
 	keysyms.
 
 2002-12-20  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxWidgets.st: trigger callbacks in
+	* BloxWidgets.st: trigger callbacks in
 	a list box when keys are pressed.
 
 2002-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxBasic.st: use asynchronous call-out
+	* BloxBasic.st: use asynchronous call-out
 	for bloxIdle.
 
 2002-11-19  Paolo Bonzini  <bonzini@gnu.org>
 
-	* blox-tk/BloxBasic.st: rewritten event loop
+	* BloxBasic.st: rewritten event loop
 
 2002-10-22  Mike Castle  <dalgoda@ix.netcom.com>
 
-        * blox/tk/BloxTK.c: add some consts for Tcl 8.4.0
+        * BloxTK.c: add some consts for Tcl 8.4.0
 
 Older entries in browser/ChangeLog.

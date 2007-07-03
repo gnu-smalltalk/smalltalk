@@ -1,30 +1,30 @@
 2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* iconv/Sets.st: Make EncodedStream a subclass of Stream.
+	* Sets.st: Make EncodedStream a subclass of Stream.
 
 2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* iconv/Sets.st: Optimize leaving Base64.  Reject partial characters
+	* Sets.st: Optimize leaving Base64.  Reject partial characters
 	at end of input.
-	* iconv/iconvtests.st: Test for this.
+	* iconvtests.st: Test for this.
 
 2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* iconv/iconvtests.st: More UTF-7 tests.
-	* iconv/Sets.st: UTF-7 fixes and some small optimization.
+	* iconvtests.st: More UTF-7 tests.
+	* Sets.st: UTF-7 fixes and some small optimization.
 
 2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* iconv/iconvtests.st: Add UTF-7 tests.
-	* iconv/Sets.st: Rewrite FromUTF7.
+	* iconvtests.st: Add UTF-7 tests.
+	* Sets.st: Rewrite FromUTF7.
 
 2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* iconv/iconvtests.st: New.
-	* iconv/Sets.st: Fix buglet.
+	* iconvtests.st: New.
+	* Sets.st: Fix buglet.
 
 2007-06-29  Paolo Bonzini  <bonzini@gnu.org>
 
-	* iconv/iconv.c: Created from i18n package.
+	* iconv.c: Created from i18n package.
 
 

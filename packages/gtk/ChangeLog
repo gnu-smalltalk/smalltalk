@@ -1,6 +1,6 @@
 2007-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
-        * gtk/GtkDecl.st: Convert class variables to class-instance.
+        * GtkDecl.st: Convert class variables to class-instance.
 
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -8,78 +8,78 @@
 
 2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
-        * gtk/gst-gtk.c: Add GPL exception.
-        * gtk/gst-gtk.h: Add GPL exception.
-        * gtk/placer.c: Add GPL exception.
-        * gtk/placer.h: Add GPL exception.
-        * gtk/testplacer.c: Add GPL exception.
+        * gst-gtk.c: Add GPL exception.
+        * gst-gtk.h: Add GPL exception.
+        * placer.c: Add GPL exception.
+        * placer.h: Add GPL exception.
+        * testplacer.c: Add GPL exception.
 
 2006-10-05  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/funcs.awk: Fix for newer GTK+.
-	* gtk/structs.awk: Likewise.
+	* funcs.awk: Fix for newer GTK+.
+	* structs.awk: Likewise.
 
 2006-09-29  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/funcs.awk: Fix for newer GTK+.
+	* funcs.awk: Fix for newer GTK+.
 
 2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/funcs.awk: Fix more non-portable code.
+	* funcs.awk: Fix more non-portable code.
 
 2006-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/cpp.awk: Fix non-portable code.
-	* gtk/funcs.awk: Fix some non-portable code.
+	* cpp.awk: Fix non-portable code.
+	* funcs.awk: Fix some non-portable code.
 
 2006-09-04  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/order.st: Use Getopt, add -P flag instead of hardcoding prefixes.
+	* order.st: Use Getopt, add -P flag instead of hardcoding prefixes.
 
 2006-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/funcs.awk: support wchar_t.
+	* funcs.awk: support wchar_t.
 
 2006-04-26  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/funcs.awk: Fix placement of gdk_draw_* functions.
+	* funcs.awk: Fix placement of gdk_draw_* functions.
 
 2006-03-27  Robert Collins  <robertc@robertcollins.net>
 
-	* gtk/cpp.awk: Do not include #ifndef GDK_PIXBUF_ENABLE_BACKEND stuff.
+	* cpp.awk: Do not include #ifndef GDK_PIXBUF_ENABLE_BACKEND stuff.
 
 2005-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/gst-gtk.c: Support 2 extra arguments to the signal function,
+	* gst-gtk.c: Support 2 extra arguments to the signal function,
 	i.e. the widget and the user data.
 
 2005-10-10  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/funcs.awk: Do not include error_quark functions, they are
+	* funcs.awk: Do not include error_quark functions, they are
 	related to a GLib module and not to a class.  Do not include
 	get_type functions if the type is not mapped to a Smalltalk class.
 
 2005-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/funcs.awk: GTK+ 2.6 has functions with internal visibility.
-	* gtk/structs.awk: GTK+ 2.6 widgets use a couple more GLib data types.
+	* funcs.awk: GTK+ 2.6 has functions with internal visibility.
+	* structs.awk: GTK+ 2.6 widgets use a couple more GLib data types.
 
 2005-09-23  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/mk_sizeof.awk: GTK+ 2.6 update.
-	* gtk/mk_enums.awk: GTK+ 2.6 update.
+	* mk_sizeof.awk: GTK+ 2.6 update.
+	* mk_enums.awk: GTK+ 2.6 update.
 
 2005-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/gst-gtk.c: Fix warnings.
+	* gst-gtk.c: Fix warnings.
 
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/MoreFuncs.st: Switch to new C-call descriptions.
-	* gtk/funcs.awk: Switch to new C-call descriptions.
+	* MoreFuncs.st: Switch to new C-call descriptions.
+	* funcs.awk: Switch to new C-call descriptions.
 
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* gtk/GtkDecl.st: Remove file-ins, now done through packages.xml.
-	* gtk/GtkImpl.st: Add code that was after file-ins in GtkDecl.st
+	* GtkDecl.st: Remove file-ins, now done through packages.xml.
+	* GtkImpl.st: Add code that was after file-ins in GtkDecl.st
 

@@ -1056,6 +1056,7 @@ init_runtime_objects (void)
 {
   add_smalltalk ("UserFileBasePath", _gst_string_new (_gst_user_file_base_path));
   add_smalltalk ("ModulePath", _gst_string_new (MODULE_PATH));
+  add_smalltalk ("LibexecPath", _gst_string_new (LIBEXEC_PATH));
   add_smalltalk ("ImageFilePath",
 		 _gst_string_new (_gst_image_file_path));
   add_smalltalk ("ImageFileName",

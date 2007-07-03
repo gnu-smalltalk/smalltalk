@@ -1,6 +1,6 @@
 2007-03-08  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/Buffers.st: Adjust for changes to Stream>>#copyFrom:.
+	* Buffers.st: Adjust for changes to Stream>>#copyFrom:.
 
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -8,43 +8,43 @@
 
 2006-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
-        * tcp/tcp.c: Add GPL exception.
+        * tcp.c: Add GPL exception.
 
 2006-05-09  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/Sockets.st: Check if peer is dead in #bufferContents.
+	* Sockets.st: Check if peer is dead in #bufferContents.
 
 2005-05-09  Paolo Bonzini  <bonzini@gnu.org>
 
-        * tcp/Sockets.st: Do not fail on #flush or #fill if the peer is
+        * Sockets.st: Do not fail on #flush or #fill if the peer is
 	not alive anymore.
 
 2005-08-23  Mike Anderson  <msasjf@yahoo.co.uk>
 
-        * tcp/Sockets.st: Fix thinkos.
+        * Sockets.st: Fix thinkos.
 
 2005-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/cfuncs.st: Switch to new C-call descriptions.
+	* cfuncs.st: Switch to new C-call descriptions.
 
 2004-12-20  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c (O_NONBLOCK): Add here from sysdep.h.
+	* tcp.c (O_NONBLOCK): Add here from sysdep.h.
 
 2004-11-26  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/SocketAddress.st: fix typo in #newRawSocket.
+	* SocketAddress.st: fix typo in #newRawSocket.
 
 2003-11-03  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/Buffers.st: force a buffer fill before triggering
+	* Buffers.st: force a buffer fill before triggering
 	an EndOfStream notification.
 
 2003-05-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.1.2 released.
 
-	* tcp/Sockets.st: define AbstractSocket>>#isExternalStream.
+	* Sockets.st: define AbstractSocket>>#isExternalStream.
 
 2003-04-17  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -56,20 +56,20 @@
 
 2003-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/AbstractSocketImpl.st: fix bug in datagram sockets'
+	* AbstractSocketImpl.st: fix bug in datagram sockets'
 	#nextPut:.  Thanks to the guy who reported it and whose
 	address I've lost.
 
 2003-03-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/AbstractSocketImpl.st: add VMpr_FileDescriptor_socketOp
+	* AbstractSocketImpl.st: add VMpr_FileDescriptor_socketOp
 	primitives.
 
 2002-12-24  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c: add function to export SO_ERROR
-	* tcp/cfuncs.st: declare it
-	* tcp/AbstractSocketImpl.st: check for SO_ERROR after
+	* tcp.c: add function to export SO_ERROR
+	* cfuncs.st: declare it
+	* AbstractSocketImpl.st: check for SO_ERROR after
 	waiting on a process; fix glitches in the handling of socket
 	options.
 
@@ -81,25 +81,25 @@
 
 	*** Version 2.0.5 (stable) released
 
-	* tcp/Buffers.st: moved from examples/ since the browser
+	* Buffers.st: moved from examples/ since the browser
 	is not using it anymore.
-	* tcp/Sockets.st: allow a nil remote address for
+	* Sockets.st: allow a nil remote address for
 	UDP sockets.
 
 2002-08-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.0b (development) released
 
-	* tcp/IPSocketImpl.st: adapt to recent changes in
+	* IPSocketImpl.st: adapt to recent changes in
 	CObject.
-	* tcp/init.st: don't initialize URL (removed)
+	* init.st: don't initialize URL (removed)
 
 2002-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Versions 2.0a (development) and 2.0.4 (stable) released
 
-	* tcp/ContentHandler.st: removed
-	* tcp/URL.st: removed
+	* ContentHandler.st: removed
+	* URL.st: removed
 
 2002-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -111,7 +111,7 @@
 	
 2002-07-06  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/Sockets.st: add #waitForConnection to ServerSocket
+	* Sockets.st: add #waitForConnection to ServerSocket
 
 2002-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -123,29 +123,29 @@
 	
 2002-06-03  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c: fix UDP
-	* tcp/Sockets.st: fix UDP
-	* tcp/AbstractSocketImpl.st: fix UDP
-	* tcp/Tests.st: added UDP loopback test
+	* tcp.c: fix UDP
+	* Sockets.st: fix UDP
+	* AbstractSocketImpl.st: fix UDP
+	* Tests.st: added UDP loopback test
 
 2002-06-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c: return address family in myGetHostByName,
+	* tcp.c: return address family in myGetHostByName,
 	accept it in myGetHostByAddr (as a primitive support for IPv6)
-	* tcp/SocketAddress.st: use the new calling conventions;
+	* SocketAddress.st: use the new calling conventions;
 	Cache is now a class variable, not a class instance variable.
 	Removed IPAddress class from this file
-	* tcp/cfuncs.st: declare the new calling conventions; declare
+	* cfuncs.st: declare the new calling conventions; declare
 	IPAddress class>>#addressFamily
-	* tcp/Socket.st: demand the choice of the implementation
+	* Socket.st: demand the choice of the implementation
 	class to the address class
-	* tcp/IPSocketImpl.st: moved IPAddress here
+	* IPSocketImpl.st: moved IPAddress here
 
 2002-05-28  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/ContentHandler.st: marked as obsolete and
+	* ContentHandler.st: marked as obsolete and
 	deemed that it will disappear in 2.1
-	* tcp/URL.st: likewise
+	* URL.st: likewise
 
 2002-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -153,7 +153,7 @@
 	
 2002-05-10  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c: copy a final zero address in gethostbyname
+	* tcp.c: copy a final zero address in gethostbyname
 
 2002-04-14  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -173,7 +173,7 @@
 
 2002-01-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/TCP.st: load into the TCP namespace
+	* TCP.st: load into the TCP namespace
 
 2001-11-20  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -181,42 +181,42 @@
 
 2001-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/ContentHandler.st: prefixed # to symbols in arrays
-	* tcp/SocketAddress.st: prefixed # to symbols in arrays
-	* tcp/cfuncs.st: prefixed # to symbols in arrays
+	* ContentHandler.st: prefixed # to symbols in arrays
+	* SocketAddress.st: prefixed # to symbols in arrays
+	* cfuncs.st: prefixed # to symbols in arrays
 
 2001-10-27  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/Tests.st: use the ServerSocket's local address
+	* Tests.st: use the ServerSocket's local address
 	for the client Socket.  Set ServerSocket's soReuseAddr
 	option.
 
 2001-10-26  Paolo Bonzini  <bonzini@amoia3.elet.polimi.it>
 
-	* tcp/SocketAddress.st: removed "class" in occurrences of
+	* SocketAddress.st: removed "class" in occurrences of
 	"self class at: ... cache:"
 
 2001-04-20  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c: set errno to 0 instead of EINPROGRESS
+	* tcp.c: set errno to 0 instead of EINPROGRESS
 	after a connect.
 
 2001-04-20  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c: force the socket in non-blocking mode
+	* tcp.c: force the socket in non-blocking mode
 	during connect.
 
 2001-04-16  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/AbstractSocketImpl.st: subclass from FileDescriptor
-	* tcp/cfuncs.st: don't declare oobAvailable
-	* tcp/init.st: don't file in UnixStream
-	* tcp/tcp.c: removed UnixStream primitives
+	* AbstractSocketImpl.st: subclass from FileDescriptor
+	* cfuncs.st: don't declare oobAvailable
+	* init.st: don't file in UnixStream
+	* tcp.c: removed UnixStream primitives
 
 2001-04-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/init.st: use ObjectMemory instead of init blocks.
-	* tcp/SocketAddress.st: use ObjectMemory instead of init blocks.
+	* init.st: use ObjectMemory instead of init blocks.
+	* SocketAddress.st: use ObjectMemory instead of init blocks.
 
 2001-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -224,38 +224,38 @@
 
 2001-02-02   Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c: use new VMProxy
-	* tcp/cfuncs.h: removed
+	* tcp.c: use new VMProxy
+	* cfuncs.h: removed
 
 2000-01-30  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/AbstractSocketImpl.st: merged with SocketImpl.st,
+	* AbstractSocketImpl.st: merged with SocketImpl.st,
 	DatagramSocketImpl.st, MulticastSocketImpl.st; support
 	multiple address families.
-	* tcp/IPSocketImpl.st: created from TCPSocketImpl.st,
+	* IPSocketImpl.st: created from TCPSocketImpl.st,
 	UDPSocketImpl.st, OOBSocketImpl.st, ICMPSocketImpl.st
-	* tcp/SocketAddress.st: created from IPAddress.st
-	* tcp/Sockets.st: created from AbstractSocket.st,
+	* SocketAddress.st: created from IPAddress.st
+	* Sockets.st: created from AbstractSocket.st,
 	Socket.st, DatagramSocket.st, MulticastSocket.st,
 	ServerSocket.st
 
 2000-01-30  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/cfuncs.st: declared oobAvailable, sockStream, msgOOB and msgPeek
-	* tcp/tcp.c: declared oobAvailable, sockStream, msgOOB and msgPeek
-	* tcp/TCP.st: load OOBSocketImpl.st and RawSocketImpl.st
-	* tcp/SocketImpl.st: added #outOfBandImplementation and
+	* cfuncs.st: declared oobAvailable, sockStream, msgOOB and msgPeek
+	* tcp.c: declared oobAvailable, sockStream, msgOOB and msgPeek
+	* TCP.st: load OOBSocketImpl.st and RawSocketImpl.st
+	* SocketImpl.st: added #outOfBandImplementation and
 	#outOfBandInitialize:, moved many methods from TCPSocketImpl.st
-	* tcp/MulticastSocketImpl.st: new file
-	* tcp/OOBSocketImpl.st: new file
-	* tcp/ICMPSocketImpl.st: new file
-	* tcp/TCPSocketImpl.st: added #outOfBandImplementationClass,
+	* MulticastSocketImpl.st: new file
+	* OOBSocketImpl.st: new file
+	* ICMPSocketImpl.st: new file
+	* TCPSocketImpl.st: added #outOfBandImplementationClass,
 	moved many methods to SocketImpl
-	* tcp/UDPSocketImpl.st: moved many methods to DatagramSocketImpl
-	* tcp/Datagram.st: added #data:, removed #sockAddr
-	* tcp/DatagramSocket.st: allow to specify a default receiver
+	* UDPSocketImpl.st: moved many methods to DatagramSocketImpl
+	* Datagram.st: added #data:, removed #sockAddr
+	* DatagramSocket.st: allow to specify a default receiver
 	and a buffer size, added #raw
-	* tcp/DatagramSocketImpl.st: use #send:to:port: in #nextPut:,
+	* DatagramSocketImpl.st: use #send:to:port: in #nextPut:,
 	moved many methods from UDPSocketImpl.st
 
 2000-06-17  Paolo Bonzini  <bonzini@gnu.org>
@@ -264,7 +264,7 @@
 
 2000-05-08  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/cfuncs.st: in some function definitions, changed
+	* cfuncs.st: in some function definitions, changed
 	the byteArray type specifier to byteArrayOut.  This fixes
 	bugs with accessing the local and remote addresses of
 	sockets, and with receiving datagrams.
@@ -275,10 +275,10 @@
 
 2000-04-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/Datagram.st: added methods to use different ObjectDumpers
-	* tcp/DatagramSocket.st: #peek: and #receive: now answer the
+	* Datagram.st: added methods to use different ObjectDumpers
+	* DatagramSocket.st: #peek: and #receive: now answer the
 	Datagram.
-	* tcp/*: commented the source code.
+	* *: commented the source code.
 
 2000-04-12  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -286,7 +286,7 @@
 
 2000-04-08  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c: properly ignore SIGPIPE
+	* tcp.c: properly ignore SIGPIPE
 
 2000-03-23  Paolo Bonzini  <bonzini@gnu.org>
  
@@ -298,15 +298,15 @@
 
 2000-02-27  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/URL.st: implemented #= and hashing as per RFC 2068
+	* URL.st: implemented #= and hashing as per RFC 2068
 
 2000-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/SocketImpl.st: added #hasBeenConnectedTo: to
+	* SocketImpl.st: added #hasBeenConnectedTo: to
 	fix problem with the #remoteAddress of sockets created
 	with #accept:
-	* tcp/TCPSocketImpl.st: fixed #accept:
-	* tcp/tcp.c: fixed getHostByAddr when host is unknown to
+	* TCPSocketImpl.st: fixed #accept:
+	* tcp.c: fixed getHostByAddr when host is unknown to
 	the DNS server.
 
 2000-02-22  Paolo Bonzini  <bonzini@gnu.org>
@@ -315,7 +315,7 @@
 
 2000-02-21  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/Socket.st: can adjust read/write buffer sizes after the
+	* Socket.st: can adjust read/write buffer sizes after the
 	Socket object has been created.
 
 2000-02-15  Paolo Bonzini  <bonzini@gnu.org>
@@ -328,45 +328,45 @@
 
 2000-01-31  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/TCPSocketImpl.st: fixed `message not understood' in #accept:
-	* tcp/Socket.st: added the #producerConsumerTest
+	* TCPSocketImpl.st: fixed `message not understood' in #accept:
+	* Socket.st: added the #producerConsumerTest
 
 2000-01-30  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/IPAddress.st: fixed \\ instead of // in port:
-	* tcp/Socket.st: fixed buffer filling to reveal dead connections,
+	* IPAddress.st: fixed \\ instead of // in port:
+	* Socket.st: fixed buffer filling to reveal dead connections,
 	added a couple of test methods.
-	* tcp/UnixStream.st: moved #canRead and #canWrite here from
+	* UnixStream.st: moved #canRead and #canWrite here from
 	TCPSocketImpl and UDPSocketImpl.
-	* tcp/TCPSocketImpl.st: removed #canRead/#canWrite
-	* tcp/UDPSocketImpl.st: removed #canRead/#canWrite
-	* tcp/AbstractSocketImpl.st: removed #canRead/#canWrite
+	* TCPSocketImpl.st: removed #canRead/#canWrite
+	* UDPSocketImpl.st: removed #canRead/#canWrite
+	* AbstractSocketImpl.st: removed #canRead/#canWrite
 
 2000-01-28  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/cfuncs.st: #anyLocalAddress had second arg declared
+	* cfuncs.st: #anyLocalAddress had second arg declared
 	as byteArray (should have been byteArrayOut).
-	* tcp/tcp.c: fixed getAnyLocalAddress (missing cast to long)
-        * tcp/UDPSocketImpl.st: copied changes to TCPSocketImpl.st
+	* tcp.c: fixed getAnyLocalAddress (missing cast to long)
+        * UDPSocketImpl.st: copied changes to TCPSocketImpl.st
         here
 
 2000-01-11  Nicolas Burrus  <Nicolas.Burrus@epita.fr>
 
-        * tcp/TCPSocketImpl.st: changed 'socket' to 'create' in
+        * TCPSocketImpl.st: changed 'socket' to 'create' in
         method create
-        * tcp/TCPSocketImpl.st: in methods canWrite and canRead
+        * TCPSocketImpl.st: in methods canWrite and canRead
         changed 'forReading' to 'reading'
-        * tcp/TCPSocketImpl.st: in getPeerName "intAt:" makes an
+        * TCPSocketImpl.st: in getPeerName "intAt:" makes an
         error, replaced with "at:"
-        * tcp/cfuncs.st: changed "Smalltalk" to "Namespace current"
+        * cfuncs.st: changed "Smalltalk" to "Namespace current"
 
 2000-01-10  Nicolas Burrus  <Nicolas.Burrus@epita.fr>
 
-        * tcp/IPAdress.st: fixed bug in #allByName (`host := aString 
+        * IPAdress.st: fixed bug in #allByName (`host := aString 
         asLowerCase' was after the conditional)
-        * tcp/Socket.st: #initialize now initializes Read/WriteBufferSize
+        * Socket.st: #initialize now initializes Read/WriteBufferSize
         and defaultImplementationClass too.
-        * tcp/TCPSocketImpl.st: 'pfInit' changed to 'pfInet'
+        * TCPSocketImpl.st: 'pfInit' changed to 'pfInet'
 
 1999-12-28  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -382,29 +382,29 @@
 
 1999-10-22  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/IPAddress.st: method to return the IP address class
+	* IPAddress.st: method to return the IP address class
 	was named #class which broke everything (now it is
 	#addressClass).
 
 1999-10-17  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/TCP.st: removed declaration of forward references
+	* TCP.st: removed declaration of forward references
 	to nil now that Undeclared is available.
 
 1999-10-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/ReadBuffer.st: moved to examples/Buffers.st
-	* tcp/WriteBuffer.st: moved to examples/Buffers.st
-	* tcp/TCP.st: now loads examples/Buffers.st
+	* ReadBuffer.st: moved to examples/Buffers.st
+	* WriteBuffer.st: moved to examples/Buffers.st
+	* TCP.st: now loads examples/Buffers.st
 
-	* tcp/AbstractSocket.st: added time-outs
-	* tcp/Socket.st: added time-outs
-	* tcp/DatagramSocket.st: added time-outs
+	* AbstractSocket.st: added time-outs
+	* Socket.st: added time-outs
+	* DatagramSocket.st: added time-outs
 
-	* tcp/TCPSocketImpl.st: added #canRead/#canWrite
-	* tcp/UDPSocketImpl.st: added #canRead/#canWrite
-	* tcp/cfuncs.st: added support for #canRead/#canWrite
-	* tcp/tcp.c: added support for #canRead/#canWrite
+	* TCPSocketImpl.st: added #canRead/#canWrite
+	* UDPSocketImpl.st: added #canRead/#canWrite
+	* cfuncs.st: added support for #canRead/#canWrite
+	* tcp.c: added support for #canRead/#canWrite
 
 1999-10-09  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -412,8 +412,8 @@
 
 1999-09-29  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/ReadBuffer.st: added #bufferContents and #isFull
-	* tcp/Socket.st: removed PositionableStream methods since they
+	* ReadBuffer.st: added #bufferContents and #isFull
+	* Socket.st: removed PositionableStream methods since they
 	are in Stream now.
 
 1999-09-25  Paolo Bonzini  <bonzini@gnu.org>
@@ -422,11 +422,11 @@
 
 1999-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/AbstractSocket.st: moved buffering to Socket.st, changed
+	* AbstractSocket.st: moved buffering to Socket.st, changed
 	superclass to Stream
-	* tcp/IPAddress.st: support for "a.b.c", "a.b", "a" addresses in
+	* IPAddress.st: support for "a.b.c", "a.b", "a" addresses in
 	#fromString:
-	* tcp/Socket.st: moved buffering from AbstractSocket.st, added
+	* Socket.st: moved buffering from AbstractSocket.st, added
 	various PositionableStream methods
 
 1999-08-29  Paolo Bonzini  <bonzini@gnu.org>
@@ -435,17 +435,17 @@
 
 1999-08-27  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/ContentHandler.st: incorporated part of URLConnection.st;
+	* ContentHandler.st: incorporated part of URLConnection.st;
 	test for TIFF files includes the version number (not really
 	orthodox but makes the test more precise).
-	* tcp/HTTPConnection.st: removed.
-	* tcp/URLConnection.st: moved class methods to ContentHandler,
+	* HTTPConnection.st: removed.
+	* URLConnection.st: moved class methods to ContentHandler,
 	removed instance methods.
-	* tcp/TCP.st: changed in the list of files to be loaded.
+	* TCP.st: changed in the list of files to be loaded.
 
 1999-07-26  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c: added `select' hacks from 1.1.5's tcp.c
+	* tcp.c: added `select' hacks from 1.1.5's tcp.c
 
 1999-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -453,13 +453,13 @@
 
 1999-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
-        * tcp/ContentHandler.st: changed category to Sockets-RFC.
-        * tcp/HTTPConnection.st: changed category to Sockets-RFC. Added
+        * ContentHandler.st: changed category to Sockets-RFC.
+        * HTTPConnection.st: changed category to Sockets-RFC. Added
         pattern-based choice of whether to use or not a proxy.
-        * tcp/URLConnection.st: changed category to Sockets-RFC.
-        * tcp/URL.st: changed category to Sockets-RFC.
-        * tcp/tcp.c: added fullWrite.
-        * tcp/tcp.c: the `write' callout now uses the fullWrite wrapper.
+        * URLConnection.st: changed category to Sockets-RFC.
+        * URL.st: changed category to Sockets-RFC.
+        * tcp.c: added fullWrite.
+        * tcp.c: the `write' callout now uses the fullWrite wrapper.
 
 1999-06-17  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -467,8 +467,8 @@
 
 1999-05-10  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/URL.st: added #file accessor, which I had forgotten
-	* tcp/URLConnection.st: added a default file extension map.
+	* URL.st: added #file accessor, which I had forgotten
+	* URLConnection.st: added a default file extension map.
 
 1999-04-27  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -476,7 +476,7 @@
 
 1999-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/tcp.c: added usage of the new HAVE_GETHOSTNAME symbol
+	* tcp.c: added usage of the new HAVE_GETHOSTNAME symbol
 	in gstconf.h
 
 1999-04-10  Paolo Bonzini  <bonzini@gnu.org>
@@ -489,40 +489,40 @@
 
 1999-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/URLConnection.st: created.
-	* tcp/HTTPConnection.st: created.
-	* tcp/Init.st: Created.
+	* URLConnection.st: created.
+	* HTTPConnection.st: created.
+	* Init.st: Created.
 
 1999-01-17  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/URL.st: created.
+	* URL.st: created.
 
 1999-01-16  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/AbstractSocketImpl.st: created.
-	* tcp/DatagramSocketImpl.st: created.
-	* tcp/SocketImpl.st: created.
-	* tcp/tcp.c: Happy birthday tcp.c!! Changed to support
+	* AbstractSocketImpl.st: created.
+	* DatagramSocketImpl.st: created.
+	* SocketImpl.st: created.
+	* tcp.c: Happy birthday tcp.c!! Changed to support
 	new socket implementation.
-	* tcp/TCPSocketImpl.st: created.
-	* tcp/UDPSocketImpl.st: created.
+	* TCPSocketImpl.st: created.
+	* UDPSocketImpl.st: created.
 
 1999-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/AbstractSocket.st: Created
-	* tcp/BufferedStream.st: Created
-	* tcp/ContentHandler.st: Created
-	* tcp/Datagram.st: Created.
-	* tcp/DatagramSocket.st: Created
-	* tcp/IPAddress.st: Created from tcp/hosts.st.
-	* tcp/MulticastSocket.st: Created
-	* tcp/ServerSocket.st: Created
-	* tcp/Socket.st: Created
-	* tcp/TCP.st: Created.
+	* AbstractSocket.st: Created
+	* BufferedStream.st: Created
+	* ContentHandler.st: Created
+	* Datagram.st: Created.
+	* DatagramSocket.st: Created
+	* IPAddress.st: Created from tcp/hosts.st.
+	* MulticastSocket.st: Created
+	* ServerSocket.st: Created
+	* Socket.st: Created
+	* TCP.st: Created.
 
 1998-10-18  Paolo Bonzini  <bonzini@gnu.org>
 
-	* tcp/UnixStream.st: Changed tell to a particular case of lseek
+	* UnixStream.st: Changed tell to a particular case of lseek
 
 1998-09-02  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -534,7 +534,7 @@
 
 1995-01-16  Steve Byrne  <sbb@gnu.org>
 
-	* tcp/tcp.c: Created.
+	* tcp.c: Created.
 
 1994-09-15  Steve Byrne  <sbb@gnu.org>
 
@@ -542,11 +542,11 @@
 
 1992-02-23  Steve Byrne  <sbb@gnu.org>
 
-	* tcp/UnixStream.st: Also added readShort and friends.
-	* tcp/UnixStream.st: Added direction constants
+	* UnixStream.st: Also added readShort and friends.
+	* UnixStream.st: Added direction constants
 
 1990-11-17  Steve Byrne  <sbb@gnu.org>
 
-	* tcp/UnixStream.st: added read:numBytes:
-	* tcp/UnixStream.st: Added skip: method.
-	* tcp/UnixStream.st: Installed as a built-in class.
+	* UnixStream.st: added read:numBytes:
+	* UnixStream.st: Added skip: method.
+	* UnixStream.st: Installed as a built-in class.

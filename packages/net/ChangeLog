@@ -1,24 +1,24 @@
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/SMTP.st: Use #%.
-	* net/httpd/FileServer.st: Use #%.
-	* net/httpd/WebServer.st: Use #%.
-	* net/httpd/WikiServer.st: Use #%.
+	* SMTP.st: Use #%.
+	* httpd/FileServer.st: Use #%.
+	* httpd/WebServer.st: Use #%.
+	* httpd/WikiServer.st: Use #%.
 
 2007-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/HTTP.st: Use #, on streams directly.
+	* HTTP.st: Use #, on streams directly.
 
 2007-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/MIME.st: Remove unused class variable.
-	* net/URIResolver.st: Convert class variables to class-instance.
-	* net/Base.st: Convert class variables to class-instance.
-	* net/http/WikiServer.st: Don't use #perform: unless necessary.
+	* MIME.st: Remove unused class variable.
+	* URIResolver.st: Convert class variables to class-instance.
+	* Base.st: Convert class variables to class-instance.
+	* http/WikiServer.st: Don't use #perform: unless necessary.
 
 2007-01-03  Paolo Bonzini  <bonzini@gnu.org>
 
-        * net/ContentHandler.st: Add png extension.
+        * ContentHandler.st: Add png extension.
 
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -27,24 +27,24 @@
 2006-10-05  Mike Anderson  <msasjf@yahoo.co.uk>
 	    Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/NetServer: Fix #at:, add #isPeerAlive and use it.
-	* net/ContentHandler.st: Add svg.
-	* net/WebServer.st: Add #named:, parse If-Modified-Since times,
+	* NetServer: Fix #at:, add #isPeerAlive and use it.
+	* ContentHandler.st: Add svg.
+	* WebServer.st: Add #named:, parse If-Modified-Since times,
 	Parse Content-Length for POST requests.  Add #hasPostData,
 	#postDataAt:ifPresent:.  Use #subStrings:, fix printing of
 	100 status codes.  Support query data without a value.
 
 2005-09-05  Mike Anderson  <msasjf@yahoo.co.uk>
 
-	* net/HTTP.st: Fix bugs and support chunked encoding.
+	* HTTP.st: Fix bugs and support chunked encoding.
 
 2005-04-07  Brett Cundal <bcundal@cundal.net>
 
-	* net/NetServer.st: Fix typo in printOn:
+	* NetServer.st: Fix typo in printOn:
  
 2003-08-26  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/NetServer.st: give a name to each NetThread process.
+	* NetServer.st: give a name to each NetThread process.
 
 2003-05-09  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -60,16 +60,16 @@
 
 2003-03-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/FTP.st: bring things back in good shape.
-	* net/Base.st: likewise.
-	* net/NNTP.st: do something to fix its most blatant
+	* FTP.st: bring things back in good shape.
+	* Base.st: likewise.
+	* NNTP.st: do something to fix its most blatant
 	brokenness.
 
 2002-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
         *** Versions 2.0c (development) and 2.0.6 (stable) released
 
-	* net/URIResolver.st: added WebEntity>>#stream and used it
+	* URIResolver.st: added WebEntity>>#stream and used it
 
 2002-08-14  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -79,9 +79,9 @@
 
 	*** Version 2.0b (development) released
 
-	* net/httpd/FileServer.st: accept POST requests
-	* net/httpd/Load.st: load STT.st
-	* net/httpd/STT.st: new file
+	* httpd/FileServer.st: accept POST requests
+	* httpd/Load.st: load STT.st
+	* httpd/STT.st: new file
 
 2002-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -93,11 +93,11 @@
 
 2002-07-16  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/httpd/WebServer.st: support virtual hosting
+	* httpd/WebServer.st: support virtual hosting
 
 2002-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/URL.st: now part of the base image
+	* URL.st: now part of the base image
 
 2002-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -105,8 +105,8 @@
 	
 2002-07-06  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/httpd/Load.st: adapt to namespaces
-	* net/NetServer.st: use the new #waitForConnection method
+	* httpd/Load.st: adapt to namespaces
+	* NetServer.st: use the new #waitForConnection method
 	on ServerSocket.
 	
 2002-06-28  Paolo Bonzini  <bonzini@gnu.org>
@@ -119,78 +119,78 @@
 	
 2002-06-21  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/HTTP.st: done some refactory and added HTTP/1.1 support
-	* net/POP.st: souped up POP3 support
-	* net/ContentHandler.st: merged from TCP
-	* net/URIResolver.st: use ContentHandler to guess MIME types
-	* net/URL.st: merged some functionality from TCP's old URL.st
+	* HTTP.st: done some refactory and added HTTP/1.1 support
+	* POP.st: souped up POP3 support
+	* ContentHandler.st: merged from TCP
+	* URIResolver.st: use ContentHandler to guess MIME types
+	* URL.st: merged some functionality from TCP's old URL.st
 
 2002-06-20  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/Base.st: changed NetClient to NetProtocolInterpreter,
+	* Base.st: changed NetClient to NetProtocolInterpreter,
 	moved NetClient here
-	* net/IMAP.st: from IMAPClient
-	* net/URIResolver.st: adapt to new class hierarchy
-	* net/FTP.st: split FTPClient into two classes à la IMAP
-	* net/SMTP.st: likewise
-	* net/POP.st: likewise
-	* net/HTTP.st: likewise
+	* IMAP.st: from IMAPClient
+	* URIResolver.st: adapt to new class hierarchy
+	* FTP.st: split FTPClient into two classes à la IMAP
+	* SMTP.st: likewise
+	* POP.st: likewise
+	* HTTP.st: likewise
 
-	* net/Base.st: moved reporter and user here
-	* net/IMAP.st: from here
-	* net/FTP.st: here
-	* net/HTTP.st: and here
-	* net/URIResolver.st: added some state, and saved some
+	* Base.st: moved reporter and user here
+	* IMAP.st: from here
+	* FTP.st: here
+	* HTTP.st: and here
+	* URIResolver.st: added some state, and saved some
 	100-character-long source code lines doing this
 
 2002-06-19  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/URL.st: support URLs with both the fragment and the query
+	* URL.st: support URLs with both the fragment and the query
 	parts, and store the user and password parts
-	* net/URIResolver.st: fixed some bugs in the FTP and file
+	* URIResolver.st: fixed some bugs in the FTP and file
 	implementation.  Lowercased tag names, replace color entities (a
 	legacy of SmallWalker) with style attributes.
 
-	* net/HTTP.st: removed HTTPProfileSettings
-	* net/URIResolver.st: moved here
+	* HTTP.st: removed HTTPProfileSettings
+	* URIResolver.st: moved here
 
-	* net/URIResolver.st: WebEntity now delays loading the body from
+	* URIResolver.st: WebEntity now delays loading the body from
 	disk until it is requested; URIResolver loads it and removes the
 	temporary file, if any.
 
 2002-06-15  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/IMAP.st: fixed continuation responses -- passes the
+	* IMAP.st: fixed continuation responses -- passes the
 	IMAPProtocolInterprerTest but I doubt that something so complicated
 	works first time on a real IMAP server...
 
 2002-06-14  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/MIME.st: drop the blank line after the headers; more fixes
+	* MIME.st: drop the blank line after the headers; more fixes
 	for IMAP
-	* net/IMAP.st: some fixes, passes IMAPScannerTest and IMAPResponseTest
-	* net/HTTP.st: basic functionality is in
+	* IMAP.st: some fixes, passes IMAPScannerTest and IMAPResponseTest
+	* HTTP.st: basic functionality is in
 
 2002-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/URIResolver.st: override appropriately the code
+	* URIResolver.st: override appropriately the code
 	installed by URL.st
 	
 2002-05-28  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/MIME.st: basic functionality is in
-	* net/Base.st: code cleanup
-	* net/FTP.st: code cleanup
-	* net/HTTP.st: code cleanup
-	* net/IMAP.st: code cleanup
-	* net/Load.st: code cleanup
-	* net/MIME.st: code cleanup
-	* net/NNTP.st: code cleanup
-	* net/NetServer.st: code cleanup
-	* net/POP.st: code cleanup
-	* net/SMTP.st: code cleanup
-	* net/URIResolver.st: code cleanup
-	* net/URL.st: code cleanup
+	* MIME.st: basic functionality is in
+	* Base.st: code cleanup
+	* FTP.st: code cleanup
+	* HTTP.st: code cleanup
+	* IMAP.st: code cleanup
+	* Load.st: code cleanup
+	* MIME.st: code cleanup
+	* NNTP.st: code cleanup
+	* NetServer.st: code cleanup
+	* POP.st: code cleanup
+	* SMTP.st: code cleanup
+	* URIResolver.st: code cleanup
+	* URL.st: code cleanup
 
 2002-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -202,18 +202,18 @@
 	
 2002-03-14  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/MIME.st: added accessors for common headers.
-	* net/SMTP.st: more fixes.  Must look up what method must be used
+	* MIME.st: added accessors for common headers.
+	* SMTP.st: more fixes.  Must look up what method must be used
 	to print headers, the rest is fine.
 
 2002-03-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.4 released
 	
-	* net/FTP.st: some porting fixes make it work reasonably
-	* net/POP.st: some porting fixes make it work reasonably, if it
+	* FTP.st: some porting fixes make it work reasonably
+	* POP.st: some porting fixes make it work reasonably, if it
 	were not for MIME-handling bugs
-	* net/MIME.st: some fixes make it work worse than earlier,
+	* MIME.st: some fixes make it work worse than earlier,
 	but we're on the way :-)
 
 2002-01-29  Paolo Bonzini  <bonzini@gnu.org>
@@ -226,8 +226,8 @@
 	
 2002-01-02  Paolo Bonzini  <bonzini@amoia3.elet.polimi.it>
 
-	* net/Base.st: include TCP in NetworkClient's pool dictionary
-	* net/NetServer.st: include TCP in NetworkServer's pool dictionary
+	* Base.st: include TCP in NetworkClient's pool dictionary
+	* NetServer.st: include TCP in NetworkServer's pool dictionary
 	
 2001-11-20  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -235,58 +235,58 @@
 	
 2001-11-13  Paolo Bonzini  <bonzini@amoia3.elet.polimi.it>
 
-	* net/httpd/WebServer.st: prefixed # to symbols in arrays
+	* httpd/WebServer.st: prefixed # to symbols in arrays
 
-	* net/Base.st: implemented PrependDotStream and RemoveDotStream
-	* net/RFC822.st: implemented #readFromClient: and the #print...
+	* Base.st: implemented PrependDotStream and RemoveDotStream
+	* RFC822.st: implemented #readFromClient: and the #print...
 	methods
 
 2001-10-31  Paolo Bonzini  <bonzini@amoia3.elet.polimi.it>
 
-	* net/MIME.st: new name of net/RFC822.st, implemented SimpleScanner
+	* MIME.st: new name of net/RFC822.st, implemented SimpleScanner
 	to use lookahead instead of #skip:'ing on the source.
 
 2001-10-26  Paolo Bonzini  <bonzini@amoia3.elet.polimi.it>
 
-	* net/URL.st: extracted from XML and NetKit.st
-	* net/FTP.st: moved into separate namespace
-	* net/SMTP.st: created from Mail.st, moved into separate namespace
-	* net/POP.st: created from Mail.st, moved into separate namespace
-	* net/NNTP.st: moved into separate namespace
-	* net/URIResolver.st: from Agent.st, moved into separate namespace
-	* net/HTTP.st: moved into separate namespace
-	* net/Base.st: created from NetKit.st, moved into separate namespace
-	* net/RFC822.st: moved into separate namespace
+	* URL.st: extracted from XML and NetKit.st
+	* FTP.st: moved into separate namespace
+	* SMTP.st: created from Mail.st, moved into separate namespace
+	* POP.st: created from Mail.st, moved into separate namespace
+	* NNTP.st: moved into separate namespace
+	* URIResolver.st: from Agent.st, moved into separate namespace
+	* HTTP.st: moved into separate namespace
+	* Base.st: created from NetKit.st, moved into separate namespace
+	* RFC822.st: moved into separate namespace
 
 2001-04-11  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/FTP.st: adapted to ANSI exception handling
-	* net/Mail.st: likewise
-	* net/NNTP.st: likewise
-	* net/Agent.st: likewise
-	* net/HTTP.st: likewise
-	* net/NetKit.st: likewise
-	* net/RFC822.st: likewise
+	* FTP.st: adapted to ANSI exception handling
+	* Mail.st: likewise
+	* NNTP.st: likewise
+	* Agent.st: likewise
+	* HTTP.st: likewise
+	* NetKit.st: likewise
+	* RFC822.st: likewise
 
 2001-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
-	* net/httpd/FileServer.st: moved from web
-	* net/httpd/WikiServer.st: moved from web
-	* net/httpd/WebServer.st: moved from web
-	* net/httpd/test.st: moved from web, use namespaces
-	* net/httpd/Load.st: moved from web, use namespaces
-	* net/NetServer.st: moved from web
+	* httpd/FileServer.st: moved from web
+	* httpd/WikiServer.st: moved from web
+	* httpd/WebServer.st: moved from web
+	* httpd/test.st: moved from web, use namespaces
+	* httpd/Load.st: moved from web, use namespaces
+	* NetServer.st: moved from web
 	
-	* net/FTP.st: created from Kazuki Yasumatsu's NetworkClients
-	* net/Mail.st: created from Kazuki Yasumatsu's NetworkClients
-	* net/NNTP.st: created from Kazuki Yasumatsu's NetworkClients
-	* net/IMAP.st: created from Leslie Tyrrell's IMAP client framework,
+	* FTP.st: created from Kazuki Yasumatsu's NetworkClients
+	* Mail.st: created from Kazuki Yasumatsu's NetworkClients
+	* NNTP.st: created from Kazuki Yasumatsu's NetworkClients
+	* IMAP.st: created from Leslie Tyrrell's IMAP client framework,
 	merged with NetworkClients
-	* net/Agent.st: created from Kazuki Yasumatsu's NetworkClients
-	* net/HTTP.st: created from Kazuki Yasumatsu's NetworkClients
-	* net/Load.st: new file
-	* net/NetKit.st: created from Kazuki Yasumatsu's NetworkClients
-	* net/RFC822.st: created from Cincom's Internet Connectivity Toolkit
+	* Agent.st: created from Kazuki Yasumatsu's NetworkClients
+	* HTTP.st: created from Kazuki Yasumatsu's NetworkClients
+	* Load.st: new file
+	* NetKit.st: created from Kazuki Yasumatsu's NetworkClients
+	* RFC822.st: created from Cincom's Internet Connectivity Toolkit
 
 2001-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -294,11 +294,11 @@
 
 2001-01-30  Paolo Bonzini  <bonzini@gnu.org>
 
-	* web/FileServer.st: treat . and .. specially; don't list
+	* FileServer.st: treat . and .. specially; don't list
 	files for which the users has no read access.
-	* web/NetServer.st: new file
-	* web/WebServer.st: use NetServer.st's services
-	* web/Load.st: load NetServer.st
+	* NetServer.st: new file
+	* WebServer.st: use NetServer.st's services
+	* Load.st: load NetServer.st
 
 2001-01-30   Paolo Bonzini  <bonzini@gnu.org>
 
@@ -306,22 +306,22 @@
 	
 2000-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
-	* web/WebServer.st: #error -> #errorCode and #error: -> #errorCode:
+	* WebServer.st: #error -> #errorCode and #error: -> #errorCode:
 	in ErrorResponse.  Plus, support the If-Modified-Since request
 	directly in WebResponse.
-	* web/FileServer.st: call the superclass implementation of
+	* FileServer.st: call the superclass implementation of
 	#sendStandardHeaders.
 
 
 2000-07-10  Paolo Bonzini  <bonzini@gnu.org>
 
-	* web/WebServer.st: in #extractPostData: don't process data
+	* WebServer.st: in #extractPostData: don't process data
 	if the client specified an empty Content-Type.  Terminate 100
 	(Continue) responses with a *double* line-feed.
 
 2000-07-04  Paolo Bonzini  <bonzini@gnu.org>
  
-	* web/*.st: use the new DateTime and Duration classes
+	* *.st: use the new DateTime and Duration classes
 
 2000-06-17  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -329,12 +329,12 @@
 
 2000-04-08  Paolo Bonzini  <bonzini@gnu.org>
 
-        * web/FileServer.st: implemented "Range:" (RangeResponse,
+        * FileServer.st: implemented "Range:" (RangeResponse,
         MultiRangeResponse, RangeSpecification hierarchy)
 
 2000-04-01  Paolo Bonzini  <bonzini@gnu.org>
 
-        * web/WikiServer.st: check for `.html' extension in the page URLs.
+        * WikiServer.st: check for `.html' extension in the page URLs.
 
 2000-03-23  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -346,7 +346,7 @@
 
 2000-03-02  Paolo Bonzini  <bonzini@gnu.org>
 
-        * web/Haiku.st: created
-        * web/Load.st: load Haiku.st too
+        * Haiku.st: created
+        * Load.st: load Haiku.st too
 
 

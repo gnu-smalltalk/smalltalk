@@ -69,6 +69,11 @@ module
     ^ModulePath
 !
 
+libexec
+    "Answer the path to GNU Smalltalk's auxiliary executables"
+    ^LibexecPath
+!
+
 systemKernel
     "Answer the path to the GNU Smalltalk kernel's Smalltalk source files.
      Same as `Directory kernel' since GNU Smalltalk 2.4."

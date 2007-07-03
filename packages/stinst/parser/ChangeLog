@@ -1,21 +1,21 @@
 2007-06-27  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/SIFParser.st: New.
-	* compiler/SqueakParser.st: Use super.
-	* compiler/STFileParser.st: Split part of #parseMethodDefinitionList
+	* SIFParser.st: New.
+	* SqueakParser.st: Use super.
+	* STFileParser.st: Split part of #parseMethodDefinitionList
 	into a separate method.
-	* compiler/Exporter.st: Fix indentation of class-instance variables.
+	* Exporter.st: Fix indentation of class-instance variables.
 	Don't emit form feed character.
 
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STFileParser.st: Use #%.
+	* STFileParser.st: Use #%.
 
 2007-06-23  Stephen Compall  <scompall@nocandysw.com>
 
-	* compiler/RBParseNodes.st (RBMethodNode>>#primitiveSources):
+	* RBParseNodes.st (RBMethodNode>>#primitiveSources):
 	Handle MappedCollections as source instead of FileSegments.
-	* compiler/StartCompiler.st (STParserScanner): New class.  Use it
+	* StartCompiler.st (STParserScanner): New class.  Use it
 	to allow other parsers to rescan tokens from some parser.
 	(STEvaluationDriver>>#methodsFor:parsingWith:compiler:class:): Add
 	parsingWith: argument and handle separation of evaluate:/compile:
@@ -24,182 +24,182 @@
 
 2007-06-20  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STFileParser.st: Refactor part of #parseDoits into the
+	* STFileParser.st: Refactor part of #parseDoits into the
 	superclass.
 
 2007-06-09  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/Exporter.st: Use #parseNodeAt: to access the method
+	* Exporter.st: Use #parseNodeAt: to access the method
 	parse tree.  Define it for Behavior and #methodParseNode for
 	CompiledMethod.
-	* compiler/STFileParser.st: Use MappedCollection trick for method
+	* STFileParser.st: Use MappedCollection trick for method
 	source too.  Look at the token type to distinguish '!' from other
 	tokens.
-	* compiler/STLoaderObjs.st: Store an RBMethodNode in LoadedMethod
+	* STLoaderObjs.st: Store an RBMethodNode in LoadedMethod
 	objects.
-	* compiler/STLoaer.st: Adjust for above change to LoadedMethod.
-	* compiler/SqueakParser.st: New.
+	* STLoaer.st: Adjust for above change to LoadedMethod.
+	* SqueakParser.st: New.
 	
 2007-06-08  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/RBParser.st: Move file-in related stuff...
-	* compiler/STFileParser.st: ... here.  Add STParsingDriver hierarchy.
-	* compiler/STLoader.st: Make STInterpreter an STParsingDriver.
-	* compiler/StartCompiler.st: Rename STFileInParser to STEvaluationDriver
+	* RBParser.st: Move file-in related stuff...
+	* STFileParser.st: ... here.  Add STParsingDriver hierarchy.
+	* STLoader.st: Make STInterpreter an STParsingDriver.
+	* StartCompiler.st: Rename STFileInParser to STEvaluationDriver
 	and make it a subclass of STParsingDriver.
 
 2007-06-08  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/Exporter.st: emit superclass name relative to namespace
+	* Exporter.st: emit superclass name relative to namespace
 	of the current class.
-	* compiler/STLoader.st: track defaultNamespace as a proxy which is
+	* STLoader.st: track defaultNamespace as a proxy which is
 	set up at the *beginning* of the processing.
-	* compiler/STLoaderObjs.st: redefine PseudoBehavior>>#nameIn: as it is
+	* STLoaderObjs.st: redefine PseudoBehavior>>#nameIn: as it is
 	done for PseudoNamespace.
 
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
 	
-	* compiler/RBParser.st: Really fix doit parsing.
+	* RBParser.st: Really fix doit parsing.
 
 2007-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
-        * compiler/RBFormatter.st: Add #formatAll:.
-        * compiler/RBParser.st: Fixes to doit parsing.
+        * RBFormatter.st: Add #formatAll:.
+        * RBParser.st: Fixes to doit parsing.
 
 2007-05-25  Paolo Bonzini  <bonzini@gnu.org>
 
-        * compiler/Exporter.st: Fix output spacing.
+        * Exporter.st: Fix output spacing.
 
 2007-05-25  Daniele Sciascia  <sciascid@lu.unisi.ch>
 
-	* compiler/Exporter.st: New.
-	* compiler/STLoaderObjs.st: Eliminate file-out code.
+	* Exporter.st: New.
+	* STLoaderObjs.st: Eliminate file-out code.
 
 2007-05-25  Daniele Sciascia  <sciascid@lu.unisi.ch>
 
-	* compiler/RBFormatter.st: fix various bugs.  Reformat method comments.
+	* RBFormatter.st: fix various bugs.  Reformat method comments.
 	Support varying the overall indentation.
-	* compiler/RBParseNodes.st: store category in RBMethodNode.
-	* compiler/RBParser.st: support storing a method category.  Rewrite
+	* RBParseNodes.st: store category in RBMethodNode.
+	* RBParser.st: support storing a method category.  Rewrite
 	parseDoits to deal with comments correctly (almost).
-	* compiler/RBToken.st: fix bug in handling of #{...}.
-	* compiler/STLoader.st: Replace #unknownTo:selector:arguments:
+	* RBToken.st: fix bug in handling of #{...}.
+	* STLoader.st: Replace #unknownTo:selector:arguments:
 	with #unknown:.  Store a proxy for the nil superclass.  Add various
 	methods used by the converter.
-	* compiler/STLoaderObjs.st: Add ProxyNilClass.  Store selector in
+	* STLoaderObjs.st: Add ProxyNilClass.  Store selector in
 	LoadedMethod.  Add various #copyEmpty: methods.
 
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/ParseTreeSearcher.st: Add #capacity to RBSmallDictionary.
+	* ParseTreeSearcher.st: Add #capacity to RBSmallDictionary.
 
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/RBParseNodes.st: Wasn't thinking straight when I made
+	* RBParseNodes.st: Wasn't thinking straight when I made
 	the last change.
 
 2007-05-23  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STLoaderObjs.st: Don't use TokenStream.
+	* STLoaderObjs.st: Don't use TokenStream.
 
 2007-05-23  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/RBParseNodes.st: Add #deepCopy.  Our #copy is as deep
+	* RBParseNodes.st: Add #deepCopy.  Our #copy is as deep
 	as it needs to be.
 
 2007-05-22  Stephen Compall  <scompall@nocandysw.com>
 	    Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/RewriteTests.st: New.
-	* compiler/ParseTreeSearcher.st: Fix two bugs.
+	* RewriteTests.st: New.
+	* ParseTreeSearcher.st: Fix two bugs.
 
 2007-05-14  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STLoader.st: Update for class shapes, add new methods.
-	* compiler/STLoaderObjs.st: Update for class shapes, add new methods.
+	* STLoader.st: Update for class shapes, add new methods.
+	* STLoaderObjs.st: Update for class shapes, add new methods.
 
 2007-04-16  Stephen Compall  <scompall@nocandysw.com>
 	    Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/OrderedSet.st: Added (by Stephen Compall).
-	* compiler/STSymTable.st: Use it.
+	* OrderedSet.st: Added (by Stephen Compall).
+	* STSymTable.st: Use it.
 
 2007-04-08  Stephen Compall  <scompall@nocandysw.com>
 
-	* compiler/STSymTable.st: Add superclass environments and shared
+	* STSymTable.st: Add superclass environments and shared
 	pools to global variable search.
 
-	* compiler/RBParser.st: Reset `tags' instance variable before each
+	* RBParser.st: Reset `tags' instance variable before each
 	method parse in a method definition list.
 
 2007-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: Remove unused class variable.
-	* compiler/STLoader.st: Likewise.
-	* compiler/STSymTable.st: Likewise.
+	* STCompiler.st: Remove unused class variable.
+	* STLoader.st: Likewise.
+	* STSymTable.st: Likewise.
 
 2007-02-18  Stephen Compall  <scompall@nocandysw.com>
 
-	* compiler/RBParseNodes.st: Fix off-by-one in
+	* RBParseNodes.st: Fix off-by-one in
 	RBMethodNode>>#primitiveSources when source is a FileSegment.
 
 2007-01-31  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: Avoid that #compileAttribute: shadows
+	* STCompiler.st: Avoid that #compileAttribute: shadows
 	an instance variable with a temporary.
 
 2007-01-12  Stephen Compall  <scompall@nocandysw.com>
 
-	* compiler/ParseTreeSearcher.st: Use the visit*:onMatch: variants
+	* ParseTreeSearcher.st: Use the visit*:onMatch: variants
 	of visit*: in accept*Node: methods of ParseTreeRewriter.  Add
 	visitNode:onMatch:.
 
 2007-01-11  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/ParseTreeSearcher.st: Refine the previous refactoring.
+	* ParseTreeSearcher.st: Refine the previous refactoring.
 
 2007-01-11  Paolo Bonzini  <bonzini@gnu.org>
 	    Stephen Compall  <s11@member.fsf.org>
 
-	* compiler/ParseTreeSearcher.st: Refactor in order to not modify
+	* ParseTreeSearcher.st: Refactor in order to not modify
 	the parse trees when nothing changes.
 
 2007-01-10  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/ParseTreeSearcher.st: Port RBSmallDictionary to GNU
+	* ParseTreeSearcher.st: Port RBSmallDictionary to GNU
 	Smalltalk.  #copy and causing the dictionary to grow failed.
 	Reported by Stephen Compall.
 
 2007-01-02  Paolo Bonzini  <bonzini@gnu.org>
 	    Stephen Compall  <s11@member.fsf.org>
 
-	* compiler/RBParseNodes.st: Fix for stream-based compilation, where
+	* RBParseNodes.st: Fix for stream-based compilation, where
 	a method's start offset is >1.
-	* compiler/RBParser.st: Add #currentToken accessor, and
+	* RBParser.st: Add #currentToken accessor, and
 	the #parseBinaryMessageNoGreater hack.
-	* compiler/STCompiler.st: Compile method attributes.
+	* STCompiler.st: Compile method attributes.
 
 2007-01-02  Stephen Compall  <s11@member.fsf.org>
 
-	* compiler/STSymTable.st: Warn for shadowing variable, fix
+	* STSymTable.st: Warn for shadowing variable, fix
 	"duplicate variable name" warning and turn it into an error.
 
 2006-12-31  Paolo Bonzini  <bonzini@gnu.org>
 	    Stephen Compall  <s11@member.fsf.org>
 
-	* compiler/STSymTable.st: Handle undeclared variables without a
+	* STSymTable.st: Handle undeclared variables without a
 	path.  Fix order of instance variables.
-	* compiler/STCompiler.st: Fix off-by-one error in compiling
+	* STCompiler.st: Fix off-by-one error in compiling
 	RBArrayConstructorNodes.
-	* compiler/ParseTreeSearcher.st: Rename acceptArrayNode: to
+	* ParseTreeSearcher.st: Rename acceptArrayNode: to
 	acceptArrayConstructorNode:.
-	* compiler/RBFormatter.st: Likewise.
-	* compiler/RBParseNodes.st: Likewise.
+	* RBFormatter.st: Likewise.
+	* RBParseNodes.st: Likewise.
 
 2006-12-31  Paolo Bonzini  <bonzini@gnu.org>
 
-        * compiler/STCompLit.st: Don't use "nil" slots from VMSpecialMethods.
-        * compiler/STCompiler.st: Remove dupReceiver.  Adjust for above change.
+        * STCompLit.st: Don't use "nil" slots from VMSpecialMethods.
+        * STCompiler.st: Remove dupReceiver.  Adjust for above change.
         Compile receiver in compileTimesRepeat: and compileLoop:, test for
         receiver being a block in compileWhileLoop:.  Extract part of
         acceptMessageNode: to compileMessage:.  Compile receiver in
@@ -212,22 +212,22 @@
 
 2006-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
-        * compiler/STCompiler.st: Pass current environment in evaluate:parser:,
+        * STCompiler.st: Pass current environment in evaluate:parser:,
         add #compile:asMethodOf:classified:parser:environment: and don't inline
         its functionality elsewhere.
-        * compiler/STParser.st: Parse leading _ as assignment.
-        * compiler/StartCompiler.st: Pass current environment when compiling
+        * STParser.st: Parse leading _ as assignment.
+        * StartCompiler.st: Pass current environment when compiling
         doits.
 
 2006-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: Rethink previous change.
+	* STCompiler.st: Rethink previous change.
 
 2006-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: Adapt for new super send.
-	* compiler/StartCompiler.st: Support streams in #compile:
-	* compiler/STDecompiler: Don't use dead method nextByteCodeIndex:,
+	* STCompiler.st: Adapt for new super send.
+	* StartCompiler.st: Support streams in #compile:
+	* STDecompiler: Don't use dead method nextByteCodeIndex:,
 	add new hook #lineNo:with:, rewrite #merge:, support #timesRepeat:
 	decompilation, fix case where return bytecodes leave the previous
 	sdtatement on the stack.  Last but not least, adapt for new
@@ -235,37 +235,37 @@
 
 2006-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/StartCompiler.st: define #fileIn in Stream.
+	* StartCompiler.st: define #fileIn in Stream.
 
 2006-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/RBParser.st: support $<123> syntax.
+	* RBParser.st: support $<123> syntax.
 
 2006-07-10  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STLoaderObjs.st: new class OverlayDictionary
+	* STLoaderObjs.st: new class OverlayDictionary
 	allows to add extensions and redefinitions to base classes.
 
 2003-09-24  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: adapt to new bytecode set.
+	* STCompiler.st: adapt to new bytecode set.
 	Fix bugs and refactor the code along the way.
 
 2003-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STDecompiler.st: remove unused callbacks for
+	* STDecompiler.st: remove unused callbacks for
 	disassembling bytecodes.
 
 2003-06-22  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STSymTable.st: use STVariables to store instance
+	* STSymTable.st: use STVariables to store instance
 	variables.
-	* compiler/STCompiler.st: check whether storing is allowed
+	* STCompiler.st: check whether storing is allowed
 	for every variable.
 
 2003-06-05  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: compile blocks by pushing
+	* STCompiler.st: compile blocks by pushing
 	the CompiledBlock directly.
 
 2003-05-09  Paolo Bonzini  <bonzini@gnu.org>
@@ -282,43 +282,43 @@
 
 2003-01-04  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/RBParser.st: provide default implementation
+	* RBParser.st: provide default implementation
 	for #evaluate:
 
 2002-11-15  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: compile RBOptimizedNodes
+	* STCompiler.st: compile RBOptimizedNodes
 
 2002-10-08  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STLoaderObjs.st: adapt to recent changes
+	* STLoaderObjs.st: adapt to recent changes
 	in the layout of Namespace.
 
 2002-09-21  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STDecompiler.st: new file
+	* STDecompiler.st: new file
 
 2002-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
         *** Versions 2.0c (development) and 2.0.6 (stable) released
 
-	* compiler/STSymTable.st: added namespace syntax support.
-	* compiler/STCompiler.st: pass `self' along to the
+	* STSymTable.st: added namespace syntax support.
+	* STCompiler.st: pass `self' along to the
 	symbol table.
-	* compiler/test.st: test namespace syntax
+	* test.st: test namespace syntax
 
 2002-09-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/RBParser.st: added namespace syntax support.
-	* compiler/STLoader.st: support namespace syntax.
+	* RBParser.st: added namespace syntax support.
+	* STLoader.st: support namespace syntax.
 
 2002-09-06  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/RBTests.st: new file
+	* RBTests.st: new file
 
 2002-08-19  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STLoader.st: separate into a superclass,
+	* STLoader.st: separate into a superclass,
 	STInterpreter, and a subclass (the old STClassLoader)
 
 2002-08-14  Paolo Bonzini  <bonzini@gnu.org>
@@ -339,27 +339,27 @@
 
 2002-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: rewritten as a RBProgramNodeVisitor
-	* compiler/STLoader.st: modified to use RBProgramNodes
-	* compiler/RBFormatter.st: added hacks to print #{...}
-	* compiler/RBToken.st: added hacks to resolve #{...} at
+	* STCompiler.st: rewritten as a RBProgramNodeVisitor
+	* STLoader.st: modified to use RBProgramNodes
+	* RBFormatter.st: added hacks to print #{...}
+	* RBToken.st: added hacks to resolve #{...} at
 	compile-time
-	* compiler/RBParseNodes.st: added hacks to resolve #{...} at
+	* RBParseNodes.st: added hacks to resolve #{...} at
 	compile-time
 
 2002-07-14  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/RBParser.st: ported
-	* compiler/RBParseNodes.st: ported
-	* compiler/RBFormatter.st: ported
-	* compiler/ParseTreeSearcher.st: ported
-	* compiler/RBToken.st: ported
-	* compiler/STParser.st: part deleted, part moved to StartCompiler.st
-	* compiler/STParseNodes.st: deleted
-	* compiler/STTok.st: deleted
-	* compiler/STToken.st: deleted
-	* compiler/STFormatter.st: deleted
-	* compiler/STVisitor.st: deleted
+	* RBParser.st: ported
+	* RBParseNodes.st: ported
+	* RBFormatter.st: ported
+	* ParseTreeSearcher.st: ported
+	* RBToken.st: ported
+	* STParser.st: part deleted, part moved to StartCompiler.st
+	* STParseNodes.st: deleted
+	* STTok.st: deleted
+	* STToken.st: deleted
+	* STFormatter.st: deleted
+	* STVisitor.st: deleted
 
 2002-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -367,7 +367,7 @@
 	
 2002-07-03  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STTok.st: parse scaled decimal literals correctly.
+	* STTok.st: parse scaled decimal literals correctly.
 
 2002-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -399,40 +399,40 @@
 	
 2002-01-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/Load.st: put everything in the STInST namespace
-	* compiler/StartCompiler.st: use the STInST namespace
+	* Load.st: put everything in the STInST namespace
+	* StartCompiler.st: use the STInST namespace
 
 2001-12-11  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STLoaderObjs.st: implement #= and #hash for ProxyClass
+	* STLoaderObjs.st: implement #= and #hash for ProxyClass
 	and ProxyNamespace.
-        * compiler/STParser.st: compile correctly { a. b. } (with
+        * STParser.st: compile correctly { a. b. } (with
 	a dot before the closed brace).
 
 2001-12-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: compute FileSegments correctly
+	* STParser.st: compute FileSegments correctly
 	(include the first token in the selector and don't include
 	the bang)
 
 2001-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: parse arrays according to the ANSI
+	* STParser.st: parse arrays according to the ANSI
 	standard.
-	* compiler/STLoader.st: new file
-	* compiler/STLoaderObjs.st: new file
+	* STLoader.st: new file
+	* STLoaderObjs.st: new file
 
 2001-11-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 1.96.1 released
 
-        * compiler/test.st: moved from unsupported/misc/Compiler.st
+        * test.st: moved from unsupported/misc/Compiler.st
 
 2001-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
-        * compiler/STFormatter.st: prefixed # to symbols in arrays
-        * compiler/STTok.st: prefixed # to symbols in arrays
-        * compiler/STToken.st: prefixed # to symbols in arrays
+        * STFormatter.st: prefixed # to symbols in arrays
+        * STTok.st: prefixed # to symbols in arrays
+        * STToken.st: prefixed # to symbols in arrays
 
 2001-02-23  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -440,29 +440,29 @@
 
 2001-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: use the ability of #perform: &
+	* STParser.st: use the ability of #perform: &
 	friends to receive a CompiledMethod as their first parameter.
-	* compiler/STCompiler.st: added #compiled:asMethodOf:classified:parser:
+	* STCompiler.st: added #compiled:asMethodOf:classified:parser:
 	which does not install the new CompiledMethod in the Behavior
 	specified in the second parameter.
 
-	* compiler/STCompiler.st: fixed a few compilation bugs
+	* STCompiler.st: fixed a few compilation bugs
 	(cascades, #whileTrue:, outer temporaries).
-	* compiler/STCompLit.st: StoreVariable and PopStoreVariable
+	* STCompLit.st: StoreVariable and PopStoreVariable
 	were inverted.
 
-	* compiler/StartCompiler.st: support pluggable parser &
+	* StartCompiler.st: support pluggable parser &
 	compiler classes
-	* compiler/STParser.st: support pluggable parser &
+	* STParser.st: support pluggable parser &
 	compiler classes
 
 2001-01-31   Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: compile STBindingNodes.
-	* compiler/STParseNodes.st: defined STBindingNode.
-	* compiler/STParser.st: generate STBindingNode.
-	* compiler/STVisitor.st: defined #variableBinding: visiting method.
-	* compiler/STFormatter.st: defined #variableBinding: visiting method.
+	* STCompiler.st: compile STBindingNodes.
+	* STParseNodes.st: defined STBindingNode.
+	* STParser.st: generate STBindingNode.
+	* STVisitor.st: defined #variableBinding: visiting method.
+	* STFormatter.st: defined #variableBinding: visiting method.
 	
 2001-01-30   Paolo Bonzini  <bonzini@gnu.org>
 
@@ -470,25 +470,25 @@
 	
 2000-11-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STToken.st: added STOpenBraceTok and STCloseBraceTok.
-	* compiler/STTok.st: recognize STOpenBraceTok and STCloseBraceTok.
-	* compiler/STParser.st: generate STArrayNodes.
-	* compiler/STParseNodes.st: defined STArrayNode.
-	* compiler/STCompiler.st: compile STArrayNodes.
-	* compiler/STVisitor.st: defined #braceArray: visiting method.
-	* compiler/STFormatter.st: defined #braceArray: visiting method.
+	* STToken.st: added STOpenBraceTok and STCloseBraceTok.
+	* STTok.st: recognize STOpenBraceTok and STCloseBraceTok.
+	* STParser.st: generate STArrayNodes.
+	* STParseNodes.st: defined STArrayNode.
+	* STCompiler.st: compile STArrayNodes.
+	* STVisitor.st: defined #braceArray: visiting method.
+	* STFormatter.st: defined #braceArray: visiting method.
 
 2000-08-08  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParseNodes.st: refactored STBlockNode and STMethodBodyNode
+	* STParseNodes.st: refactored STBlockNode and STMethodBodyNode
 	to have a common superclass, STCompoundNode.
 	Implemented STCompundNode.
-	* compiler/STCompiler.st: modified compilation of conditionals to
+	* STCompiler.st: modified compilation of conditionals to
 	please the JIT compiler (see libgst/ChangeLog).
 
 2000-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STTok.st: parse scaled decimal correctly
+	* STTok.st: parse scaled decimal correctly
 
 2000-06-17  Paolo Bonzini  <bonzini@gnu.org>
 
@@ -496,192 +496,192 @@
 
 2000-04-12  Paolo Bonzini (bonzini@gnu.org)
 
-	* compiler/STVisitor.st: added support for comments
+	* STVisitor.st: added support for comments
 
 2000-04-10  Paolo Bonzini (bonzini@gnu.org)
 
-	* compiler/STFormatter.st: created
-	* compiler/STVisitor.st: added STVisitingParser
+	* STFormatter.st: created
+	* STVisitor.st: added STVisitingParser
 
 1999-12-31  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STFileInParser.st: split between STParser.st and
+	* STFileInParser.st: split between STParser.st and
 	StartCompiler.st (so that the class itself is loaded together with
 	the Parser package, even though it is not activated).
-	* compiler/STSymTable.st: use an IdentitySet for storing pool
+	* STSymTable.st: use an IdentitySet for storing pool
 	dictionaries.
 
 1999-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: new way of compiling blocks.
+	* STCompiler.st: new way of compiling blocks.
 
 1999-12-21  Paolo Bonzini  <bonzini@gnu@org>
 
-	* compiler/STParser.st: added STPluggableParser, derivated from
+	* STParser.st: added STPluggableParser, derivated from
 	the syntax highlighter.
 
 1999-12-05  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STTok.st: parse stuff like 1.0d53 and 1.0q212 correctly
+	* STTok.st: parse stuff like 1.0d53 and 1.0q212 correctly
 	even though FloatD/FloatE/FloatQ is not supported yet.
 
 1999-11-11  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: added another delegation method for warnings.
-	* compiler/STParser.st: added warnings (nothing is done with them yet,
+	* STCompiler.st: added another delegation method for warnings.
+	* STParser.st: added warnings (nothing is done with them yet,
 	but the methods are there).
-	* compiler/STSymTable.st: duplicate var names produce a warning.
+	* STSymTable.st: duplicate var names produce a warning.
 
 1999-10-30  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: save the last STParseNode that was generated
-	* compiler/STParseNode.st: added the `comments' variable
+	* STParser.st: save the last STParseNode that was generated
+	* STParseNode.st: added the `comments' variable
 
 1999-10-22  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STSymTable.st: fixed bug with undeclared variables (error
+	* STSymTable.st: fixed bug with undeclared variables (error
 	when the undeclared variable's name had not been interned as a symbol)
-	* compiler/STVisitor.st: created
-	* compiler/Load.st: load STVisitor.st
+	* STVisitor.st: created
+	* Load.st: load STVisitor.st
 
 1999-10-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: added ability to read comment tokens and
+	* STParser.st: added ability to read comment tokens and
 	removed methods that test for particular kinds of tokens
 	(#isBinaryOperator: and #isSymbolId:)
-	* compiler/STTok.st: now passes comment tokens to STParser
-	* compiler/STToken.st: reworked token hierarchy to add polymorphic
+	* STTok.st: now passes comment tokens to STParser
+	* STToken.st: reworked token hierarchy to add polymorphic
 	methods that replace STParser's old #isBinaryOperator: and
 	#isSymbolId:. Hope to get not only elegance, but also a bit of
 	speed.
 
 1999-10-11  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STSymTable.st: added code to handle `Undeclared'.
-	* compiler/STFileInParser.st: tell STSymbolTable to recognize
+	* STSymTable.st: added code to handle `Undeclared'.
+	* STFileInParser.st: tell STSymbolTable to recognize
 	`Undeclared' inside file-ins.
 
 1999-09-11  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STSymTable.st: implementation of namespaces
+	* STSymTable.st: implementation of namespaces
 
 1999-09-02  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: added support for [ :a :b || temp1 temp2 | ].
+	* STParser.st: added support for [ :a :b || temp1 temp2 | ].
 
 1999-05-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompLit.st: First changes to support loop optimization
-	* compiler/STCompiler.st: First changes to support loop optimization
-	* compiler/STParseNodes.st: First changes to support loop optimization
+	* STCompLit.st: First changes to support loop optimization
+	* STCompiler.st: First changes to support loop optimization
+	* STParseNodes.st: First changes to support loop optimization
 
 1999-04-22  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: modified to support recent changes in the
+	* STCompiler.st: modified to support recent changes in the
 	bytecode set.
-	* compiler/STCompLit.st: same as above.
+	* STCompLit.st: same as above.
 
 1999-03-03  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: added stack depth tracing.
+	* STCompiler.st: added stack depth tracing.
 
 1999-02-16  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompLit.st: added support for > 64 literals
+	* STCompLit.st: added support for > 64 literals
 	(BigLiteral)
-	* compiler/STCompiler.st: added support for > 64 literals
+	* STCompiler.st: added support for > 64 literals
 	(compileBigLiteral:)
 
 1999-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: Selectors stay Strings. The compiler
+	* STParser.st: Selectors stay Strings. The compiler
 	turns them to Symbols.
 
 1999-02-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STSymTable.st: changed to use new #isSymbolString:
+	* STSymTable.st: changed to use new #isSymbolString:
 	method for Symbol
 
 1999-02-09  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: Removed usage of Tokenizer's recording
+	* STParser.st: Removed usage of Tokenizer's recording
 	capability, since Tokenizer no more has that capability...
 
 1999-02-03  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/Load.st: created.
-	* compiler/STParser.st: Fixed bug in parsing binary message
+	* Load.st: created.
+	* STParser.st: Fixed bug in parsing binary message
 	declarations.
-	* compiler/STCompiler.st: fixed #compileString: to work with
+	* STCompiler.st: fixed #compileString: to work with
 	metaclasses.
 
 1999-02-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STFileInParser.st: created.
+	* STFileInParser.st: created.
 
 1999-01-26  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STVariable.st: created to detect storing in an argument
-	* compiler/STCompiler.st: in sync with the C compiler, storing into
+	* STVariable.st: created to detect storing in an argument
+	* STCompiler.st: in sync with the C compiler, storing into
 	an argument is now detected as an error.  Thanks to Andreas Klimas
 	for signaling this to me!!
 
 1998-11-24  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STSymTable.st: perfected treating of class pools (now
+	* STSymTable.st: perfected treating of class pools (now
 	they're exactly the same as a shared pool dictionary)
 
 1998-11-23  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: added STDoitCompiler
+	* STCompiler.st: added STDoitCompiler
 
 1998-11-06  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STToken.st: Added code that supports new methods to
+	* STToken.st: Added code that supports new methods to
 	find out the class of a token.
-	* compiler/STParser.st: Switched most uses to isMemberOf: to
+	* STParser.st: Switched most uses to isMemberOf: to
 	special and faster methods.  Split into STParser and STFileInParser
 	to support other cases when parsing is necessary
 
 1998-10-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: Added byte array constants
-	* compiler/STTok.st: Fixed number parsing, changed parseError: to
+	* STParser.st: Added byte array constants
+	* STTok.st: Fixed number parsing, changed parseError: to
 	error:
 
 1998-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: Fixed bugs which jumped out while testing the
+	* STParser.st: Fixed bugs which jumped out while testing the
 	compiler (e.g. parseArrayLit returned OrderedCollections)
-	* compiler/STTok.st: Now subclass of Tokenizer; renamed to STTok
+	* STTok.st: Now subclass of Tokenizer; renamed to STTok
 
 1998-09-05  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STCompiler.st: moved compilation policy to subclasses
+	* STCompiler.st: moved compilation policy to subclasses
 	of STParseNode.  Now compile (which is called compile:) returns a
 	CompiledMethod.  Added STFakeCompiler.
-	* compiler/STCompLit.st: merged VMStorageLocations and VMSpecialIndices
+	* STCompLit.st: merged VMStorageLocations and VMSpecialIndices
 	into VMOtherConstants, added VMSpecialMethods
-	* compiler/STParseNodes.st: switched to a single node (STConstNode)
+	* STParseNodes.st: switched to a single node (STConstNode)
 	for constants, cleaned up unused classes, renamed Selector to
 	SelectorNode.  Added support for storing source code.
 
 1998-09-03  Paolo Bonzini  <bonzini@gnu.org>
 
-	* compiler/STParser.st: Switched to a single node for constants
+	* STParser.st: Switched to a single node for constants
 	(STConstNode), two separate nodes for identifiers (STIdentifierNode
 	and STSpecialIdentifierNode), changed pools quite a bit, prefixed
 	ST to everything.
-	* compiler/STSymTable.st: modified heavily to support new code in
+	* STSymTable.st: modified heavily to support new code in
 	STCompiler
 
 1995-09-04  Steve Byrne  <sbb@gnu.org>
 
-	* compiler/STParseNodes.st: Switched to being externally accessible
+	* STParseNodes.st: Switched to being externally accessible
 	instead of supporting internal access only.
 
 1995-09-03  Steve Byrne  <sbb@gnu.org>
 
-	* compiler/STCompLit.st: created.
-	* compiler/STCompiler.st: created.
-	* compiler/STSymTable.st: created.
+	* STCompLit.st: created.
+	* STCompiler.st: created.
+	* STSymTable.st: created.

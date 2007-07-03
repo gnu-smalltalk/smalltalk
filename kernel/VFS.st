@@ -71,7 +71,7 @@ virtual filesystems that take a file that is on-disk, run a
 command on it, and then read from the result.'!
 
 RealFileHandler subclass: #ArchiveFileHandler
-       instanceVariableNames: 'handlers fsName'
+       instanceVariableNames: 'handlers fsName topLevelFiles allFiles extractedFiles'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Streams-Files'
@@ -88,21 +88,15 @@ resides entirely in ArchiveFileHandler because the members
 will still ask the archive to get directory information
 on them, to extract them to a real file, and so on.'!
 
-ArchiveFileHandler subclass: #ExternalArchiveFileHandler
-       instanceVariableNames: 'topLevelFiles allFiles extractedFiles'
+ArchiveFileHandler subclass: #ZipFileHandler
+       instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Streams-Files'
 ! 
 
-ExternalArchiveFileHandler class
-	instanceVariableNames: 'fileTypes'!
-
-ExternalArchiveFileHandler comment: 'ExternalArchiveFileHandler
-allows for easy implementation of archive files (for example,
-transparent unzipping and untarring) with a single shell script.
-It implements a protocol that that is compatible with the Midnight
-Commander and with GNOME VFS.'!
+ZipFileHandler comment: 'ZipFileHandler transparently extracts
+files from a ZIP archive.'!
 
 VFSHandler subclass: #ArchiveMemberHandler
        instanceVariableNames: 'parent size stCtime stMtime stAtime isDirectory realFileName'
@@ -251,6 +245,11 @@ update: aspect
     ].
 !
 
+priority
+    "Answer the priority for this class (higher number = higher priority) in
+     case multiple classes implement the same file system.  The default is 0."
+    ^0!
+
 fileSystems
     "Answer the virtual file systems that can be processed by this subclass.
      The default is to answer an empty array, but subclasses can override
@@ -263,18 +262,26 @@ register: fileSystem forClass: vfsHandlerClass
     "Register the given file system to be handled by an instance of
      vfsHandlerClass.  This is automatically called if the class overrides
      #fileSystems."
-    Registry at: fileSystem put: vfsHandlerClass! !
+    ((Registry includesKey: fileSystem) not
+	or: [ (Registry at: fileSystem) priority < vfsHandlerClass priority ])
+	    ifTrue: [ Registry at: fileSystem put: vfsHandlerClass ]! !
 
 !VFSHandler class methodsFor: 'private'!
+
+register
+    Registry isNil ifTrue: [ VFSHandler registerAll ].
+    self fileSystems do: [ :fs | VFSHandler register: fs forClass: self ]!
+
+registerAll
+    "Register all file systems under the VFSHandler hierarchy."
+    Registry isNil ifTrue: [ Registry := LookupTable new ].
+    self allSubclassesDo: [ :each | each register ]!
 
 vfsFor: fileName name: fsName subPath: subPath
     "Create an instance of a subclass of the receiver, implementing the virtual
      file `subPath' inside the `fileName' archive.  fsName is the virtual
      filesystem name and is used to determine the subclass to be instantiated."
-    Registry isNil ifTrue: [
-	Registry := LookupTable new.
-	self allSubclassesDo: [ :each |
-	    each fileSystems do: [ :fs | self register: fs forClass: each ] ] ].
+    Registry isNil ifTrue: [ self registerAll ].
     ^(Registry at: fsName) 
 	vfsFor: fileName name: fsName subPath: subPath!
 
@@ -652,6 +659,11 @@ do: aBlock
 
 !DecodedFileHandler class methodsFor: 'registering'!
 
+priority
+    "Answer the priority for this class (higher number = higher priority) in
+     case multiple classes implement the same file system."
+    ^-10!
+
 fileTypes
     "Return the valid virtual filesystems and the associated
      filter commands."
@@ -808,8 +820,7 @@ at: aName
 do: aBlock
     "Evaluate aBlock once for each file in the directory represented by the
     receiver, passing its name."
-
-    self subclassResponsibility!
+    topLevelFiles do: aBlock!
 
 release
     "Release the resources used by the receiver that don't survive when
@@ -818,100 +829,11 @@ release
     handlers isNil ifTrue: [ ^self ].
     handlers do: [ :each | each release ].
     handlers := nil.
+    extractedFiles := nil.
     super release! !
 
 
 !ArchiveFileHandler methodsFor: 'ArchiveMemberHandler protocol'!
-
-extractMember: anArchiveMemberHandler
-    "Extract the contents of anArchiveMemberHandler into a file
-     that resides on disk, and answer the name of the file."
-    self subclassResponsibility!
-
-fillMember: anArchiveMemberHandler
-    "Extract the information on anArchiveMemberHandler.  Answer
-     false if it actually does not exist in the archive; otherwise,
-     answer true after having told anArchiveMemberHandler about them
-     by sending #size:stCtime:stMtime:stAtime:isDirectory: to it."
-
-    self subclassResponsibility!
-
-member: anArchiveMemberHandler do: aBlock
-    "Evaluate aBlock once for each file in the directory represented by
-    anArchiveMemberHandler, passing its name."
-
-    self subclassResponsibility!
-
-removeMember: anArchiveMemberHandler
-    "Remove the member represented by anArchiveMemberHandler."
-
-    self subclassResponsibility!
-
-updateMember: anArchiveMemberHandler
-    "Update the member represented by anArchiveMemberHandler by
-     copying the file into which it was extracted back to the
-     archive."
-
-    self subclassResponsibility! !
-
-!ArchiveFileHandler methodsFor: 'private'!
-
-name: containerFileName fsName: aString
-    super name: containerFileName.
-    fsName := aString! !
-
-!ExternalArchiveFileHandler class methodsFor: 'registering'!
-
-fileSystems
-    "Answer the virtual file systems that can be processed by this subclass.
-     These are given by the names of the executable files in the `vfs'
-     subdirectory of the image directory, of the parent of the kernel
-     directory and (if the image is not the global installed image)
-     of the `.st' directory in the home directory."
-    fileTypes := LookupTable new. 
-    [ self fileSystemsIn: Directory kernel, '/../vfs' ]
-	on: Error do: [ :ex | ex return ].
-    [ self fileSystemsIn: Directory userBase, '/vfs' ]
-	on: Error do: [ :ex | ex return ].
-    Smalltalk imageLocal ifTrue: [
-        [ self fileSystemsIn: Directory image, '/vfs' ]
-	    on: Error do: [ :ex | ex return ] ].
-	
-    ^fileTypes keys asSet!
-
-fileSystemsIn: path
-    "Registers the executable files in the given directory to be used
-     to resolve a virtual file system."
-    | dir |
-    dir := RealFileHandler for: path.
-    dir exists ifFalse: [ ^self ].
-    dir do: [ :each |
-	(File isExecutable: path, '/', each)
-	    ifTrue: [ fileTypes at: each put: path, '/', each ]
-    ]!
-
-fileTypes
-    ^fileTypes!
-
-release
-    "Avoid that paths stay in the image file"
-    fileTypes := nil.
-    super release! !
-
-!ExternalArchiveFileHandler methodsFor: 'members'!
-
-createDir: dirName
-    "Create a subdirectory of the receiver, naming it dirName."
-
-    Smalltalk system: ('%1 mkdir %2 %3' % { self command. self realFileName. dirName })!
-
-do: aBlock
-    "Evaluate aBlock once for each file in the directory represented by the
-    receiver, passing its name."
-    topLevelFiles do: aBlock!
-
-
-!ExternalArchiveFileHandler methodsFor: 'ArchiveMemberHandler protocol'!
 
 extractMember: anArchiveMemberHandler
     "Extract the contents of anArchiveMemberHandler into a file
@@ -921,13 +843,15 @@ extractMember: anArchiveMemberHandler
 	extractedFiles := IdentityDictionary new ].
 
     ^extractedFiles at: anArchiveMemberHandler ifAbsentPut: [
-	| temp |
+        | temp |
         temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
-        Smalltalk system: ('%1 copyout %2 %3 %4'
-	    % { self command. self realFileName. anArchiveMemberHandler name. temp name }).
+	self extractMember: anArchiveMemberHandler into: temp.
+        File fullNameFor: temp name ]!
 
-        File fullNameFor: temp name
-    ]!
+extractMember: anArchiveMemberHandler into: file
+    "Extract the contents of anArchiveMemberHandler into a file
+     that resides on disk, and answer the name of the file."
+    self subclassResponsibility!
 
 fillMember: anArchiveMemberHandler
     "Extract the information on anArchiveMemberHandler.  Answer
@@ -963,30 +887,6 @@ member: anArchiveMemberHandler do: aBlock
 
     (data at: 3) do: aBlock!
 
-removeMember: anArchiveMemberHandler
-    "Remove the member represented by anArchiveMemberHandler."
-
-    | subcmd |
-    subcmd := anArchiveMemberHandler isDirectory
-	ifTrue: [ 'rmdir' ]
-	ifFalse: [ 'rm' ].
-
-    Smalltalk system: ('%1 %2 %3 %4'
-	% { self command. subcmd. self realFileName. anArchiveMemberHandler name. })!
-
-updateMember: anArchiveMemberHandler
-    "Update the member represented by anArchiveMemberHandler by
-     copying the file into which it was extracted back to the
-     archive."
-
-    Smalltalk system: ('%1 copyin %2 %3 %4'
-	% { self command. self realFileName. anArchiveMemberHandler name.
-	    anArchiveMemberHandler realFileName })!
-
-command
-    ^self class fileTypes at: fsName
-!
-
 refresh
     "Extract the directory listing from the archive"
 
@@ -997,28 +897,13 @@ refresh
     current := currentPath := nil.
     allFiles := LookupTable new.
     directoryTree := LookupTable new.
-    pipe := FileStream
-	popen: self command, ' list ', self realFileName
-	dir: FileStream read.
-    pipe linesDo: [ :l || line |
-	line := l readStream.
-	isDir := line next = $d.
-	line skipTo: Character space.   	"Attributes"
-	line skipSeparators.
-	line skipTo: Character space.   	"Number of links"
-	line skipSeparators.
-	line skipTo: Character space.   	"Owner"
-	line skipSeparators.
-	line skipTo: Character space.   	"Group"
-	line skipSeparators.
-	size := Number readFrom: line.		"File size"
-	line skipSeparators.
-	date := DateTime readFrom: line.	"Date"
-	line skipSeparators.
-	path := line upToAll: ' -> '.		"Path"
+    self files do: [ :data || path size date |
+	path := data at: 1.
+	size := data at: 2.
+	date := data at: 3.
+	isDir := data at: 4.
 
-	path last = $/
-	    ifTrue: [ path := path copyFrom: 1 to: path size - 1 ].
+	path last = $/ ifTrue: [ path := path copyFrom: 1 to: path size - 1 ].
 
 	"Look up the tree for the directory in which the file resides.
          We keep a simple 1-element cache."
@@ -1037,8 +922,7 @@ refresh
 	    ifTrue: [ current at: name put: LookupTable new ]
 	    ifFalse: [ current at: name put: nil ].
 
-	allFiles at: path put: { size. date. directory }.
-    ].
+	allFiles at: path put: { size. date. directory } ].
 
     "Leave the LookupTables to be garbage collected, we are now interested
      in the file names only."
@@ -1047,13 +931,21 @@ refresh
 	(data at: 3) isNil ifFalse: [
 	    data at: 3 put: (data at: 3) keys asArray
 	]
-    ].
+    ]!
 
-    pipe close
-! !
+removeMember: anArchiveMemberHandler
+    "Remove the member represented by anArchiveMemberHandler."
 
-
-!ExternalArchiveFileHandler methodsFor: 'private'!
+    self subclassResponsibility!
+
+updateMember: anArchiveMemberHandler
+    "Update the member represented by anArchiveMemberHandler by
+     copying the file into which it was extracted back to the
+     archive."
+
+    self subclassResponsibility! !
+
+!ArchiveFileHandler methodsFor: 'private'!
 
 findDirectory: path into: tree
     "Look up into tree (which is a tree of Dictionaries) the directory
@@ -1084,17 +976,70 @@ findDirectory: path into: tree
 	    last := i + 1
 	]
     ].
-    ^current! !
+    ^current!
+
+name: containerFileName fsName: aString
+    super name: containerFileName.
+    fsName := aString! !
 
 
-!ExternalArchiveFileHandler methodsFor: 'releasing'!
+!ZipFileHandler class methodsFor: 'registering'!
 
-release
-    "Release the resources used by the receiver that don't survive when
-     reloading a snapshot."
+priority
+    "Answer the priority for this class (higher number = higher priority) in
+     case multiple classes implement the same file system."
+    ^-10!
 
-    extractedFiles := nil.
-    super release! !
+fileSystems
+    "Answer the virtual file systems that can be processed by this subclass."
+    ^#('uzip')! !
+
+!ZipFileHandler methodsFor: 'members'!
+
+createDir: dirName
+    "Create a subdirectory of the receiver, naming it dirName."
+
+    self notYetImplemented!
+
+extractMember: anArchiveMemberHandler into: temp
+    "Extract the contents of anArchiveMemberHandler into a file
+     that resides on disk, and answer the name of the file."
+    Smalltalk system: ('unzip -p %1 %2 > %3'
+	% { self realFileName. anArchiveMemberHandler name. temp name })!
+
+removeMember: anArchiveMemberHandler
+    "Remove the member represented by anArchiveMemberHandler."
+
+    Smalltalk system: ('zip -d %1 %2'
+	% { self realFileName. anArchiveMemberHandler name. })!
+
+updateMember: anArchiveMemberHandler
+    "Update the member represented by anArchiveMemberHandler by
+     copying the file into which it was extracted back to the
+     archive."
+
+    self notYetImplemented!
+
+files
+    "Extract the directory listing from the archive"
+
+    ^Generator on: [ :gen || pipe |
+	pipe := FileStream
+	    popen: 'unzip -Z ', self realFileName
+	    dir: FileStream read.
+
+        pipe linesDo: [ :l || result isDir size path date |
+	    "Extract first character, fourth field, seventh+eighth field, rest of line."
+	    result := l searchRegex:
+		'^(.)\S+\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\S+\s+(\S+\s+\S+)\s(.*?)(?: -> |$)'.
+	    result matched ifTrue: [
+	        isDir := (result at: 1) = $d.
+	        size := (result at: 2) asInteger.
+	        date := DateTime readFrom: (result at: 3) readStream.
+	        path := result at: 4.
+	        gen yield: { path. size. date. isDir } ] ].
+
+	pipe close ]! !
 
 
 !ArchiveMemberHandler methodsFor: 'initializing'!
