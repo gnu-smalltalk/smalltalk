@@ -531,7 +531,7 @@ refresh
     isSymbolicLink := (stat stMode value bitAnd: 8r170000) = 8r120000. "S_IFLNK"
     isSymbolicLink ifTrue: [
 	self statOn: self realFileName into: stat.
-	File checkError ]
+	File errno ]
 ! !
 
 
@@ -548,10 +548,8 @@ exists
     File errno == 0 ifFalse: [ ^false ].
 
     isSymbolicLink := (stat stMode value bitAnd: 8r170000) = 8r120000. "S_IFLNK"
-    isSymbolicLink ifFalse: [ ^true ].
-
-    self statOn: self realFileName into: stat.
-    ^File errno == 0
+    isSymbolicLink ifTrue: [ self statOn: self realFileName into: stat ].
+    ^true
 !
 
 isReadable

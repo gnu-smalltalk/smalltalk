@@ -195,14 +195,18 @@ computePathFrom: srcName to: destName
     dest := dest asOrderedCollection.
     dest isEmpty ifTrue: [ dest addLast: '' ].
 
-    [ src isEmpty or: [
-	dest size = 1 or: [
-	src first ~= dest first ] ] ] whileFalse: [
+    path := (src notEmpty and: [ src first ~= dest first ])
+	ifTrue: [ OrderedCollection with: '' ]
+	ifFalse: [
+	    [ src isEmpty or: [
+		dest size = 1 or: [
+		src first ~= dest first ] ] ] whileFalse: [
 
-	src removeFirst.
-	dest removeFirst ].
+		src removeFirst.
+		dest removeFirst ].
 
-    path := src collect: [ :each | '..' ].
+	    src collect: [ :each | '..' ] ].
+
     path addAllLast: dest.
     ^path fold: [ :a :b | a, '/', b ]
 ! !
