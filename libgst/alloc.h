@@ -54,6 +54,11 @@
 
 #define NUM_FREELISTS 47
 
+/* Oh my God, how broken things sometimes are!  */ 
+#if defined small
+# undef small
+#endif
+
 typedef struct heap_freeobj
 {
   struct heap_freeobj *next;

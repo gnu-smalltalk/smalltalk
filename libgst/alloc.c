@@ -97,11 +97,6 @@
 
 static void init_heap (heap_data *h, size_t heap_allocation_size, size_t heap_limit);
 
-/* Oh my God, how broken things sometimes are!  */
-#if defined small
-# undef small
-#endif
-
 #define vSmall var.small
 #define vLarge var.large
 #define vFree  var.free

@@ -3079,6 +3079,8 @@ primitive VMpr_ObjectMemory_quit [fail]
   if (IS_INT (oop1))
     {
       suspend_process (get_scheduled_process ());
+      fflush (stdout);
+      fflush (stderr);
       _gst_msg_sendf (NULL, "%v %o changed: %S",
 		      _gst_object_memory_class, "aboutToQuit");
       arg1 = TO_INT (oop1);
