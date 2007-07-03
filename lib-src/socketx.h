@@ -53,13 +53,56 @@
 #ifndef GST_SOCKETX_H
 #define GST_SOCKETX_H
 
+#include "config.h"
+
 #ifdef HAVE_INET_SOCKETS
 
 #ifdef __MSVCRT__
+#include <windows.h>
 #include <winsock2.h>
+#include <io.h>
+
 #define is_socket_error(err)      (WSAGetLastError() == WSA##err)
 #define clear_socket_error()      WSASetLastError(0)
+
+#define ESHUTDOWN WSAESHUTDOWN
+#define ENOTCONN WSAENOTCONN
+#define ECONNRESET WSAECONNRESET
+#define ECONNABORTED WSAECONNABORTED
+#define ENETRESET WSAENETRESET
+
+typedef int nfds_t;
+
+/* re-define FD_ISSET to avoid a WSA call while we are not using 
+ * network sockets */
+#undef FD_ISSET
+#define FD_ISSET(fd, set) win_fd_isset(fd, set)
+
+static inline int
+win_fd_isset (int fd, fd_set * set)
+{
+  int i;
+  if (set == NULL)
+    return 0;
+
+  for (i = 0; i < set->fd_count; i++)
+    if (set->fd_array[i] == fd)
+      return 1;
+
+  return 0;
+}
+
+int win_select(int n, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *ptv);
+int win_recv(int fd, void* buffer, int n, int flags);
+
+#undef select
+#define select win_select
+
+#undef recv
+#define recv win_recv
+
 #else /* !__MSVCRT__ */
+
 #include <errno.h>
 #include <sys/select.h>
 #include <sys/socket.h>

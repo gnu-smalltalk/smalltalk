@@ -1,3 +1,10 @@
+2007-07-03  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/socketx.h: Add declarations for new functions in socketx.c.
+	* lib-src/socketx.c: New.
+	* lib-src/poll.c: Include socketx.h.
+
 2007-06-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/poll.c: Yet another MacOS workaround.

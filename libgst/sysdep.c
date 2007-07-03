@@ -1527,7 +1527,7 @@ _gst_recv (int fd,
 
   for (;;)
     {
-      result = recv (fd, buffer, size, flags);
+      result = recvfrom (fd, buffer, size, flags, NULL, NULL);
       if (errno == EFAULT)
         abort ();
 

@@ -1,3 +1,11 @@
+2007-07-03  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/alloc.c: Remove #undef small.
+	* libgst/alloc.h: Move it here.
+	* libgst/prims.def: Flush stdio files before quitting.
+	* libgst/sysdep.c: Implement _gst_recv with recvfrom.
+
 2007-07-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Export LibexecPath.

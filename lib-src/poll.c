@@ -25,8 +25,7 @@
 #include "poll.h"
 #include <errno.h>
 #include <limits.h>
-#include <sys/socket.h>
-#include <sys/select.h>
+#include "socketx.h"
 #include <unistd.h>
 
 #ifdef HAVE_SYS_IOCTL_H
