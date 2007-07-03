@@ -1,3 +1,9 @@
+2007-07-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/File.st: Create absolute symlink if first component of path
+	differs.
+	* kernel/VFS.st: Don't fail if a symlink's destination does not exist.
+
 2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Regex.st: add #replaceRegex:with: and #replacingAllRegex:with:.
