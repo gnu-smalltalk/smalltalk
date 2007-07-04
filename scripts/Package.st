@@ -129,34 +129,91 @@ Kernel.PackageDirectories subclass: PackageFiles [
 
 File extend [
     emitZipDir: dir [
+	| saveDir |
 	self emitRemove.
-	('cmd %1 \$ZIP -qr %2 .' % { dir. self }) displayNl
+	('cd %1 && %2 -qr %3 .' % { dir. Command zip. self }) displayNl.
+        saveDir := Directory working.
+	Command
+	    execute: [
+	        Directory working: dir name.
+		Smalltalk system: '%1 -qr %2 .' % { Command zip. self }
+	    ]
+	    ensure: [ Directory working: saveDir ]
     ]
 
     emitRemove [
-	('cmd . rm -f %1' % { self }) displayNl
+	('rm -f %1' % { self }) displayNl.
+	Command execute: [
+	    self exists ifTrue: [ self remove ] ].
     ]
 
     emitSymlink: dest [
-	('cmd . \$LN_S -f %1 %2' % { self. dest }) displayNl
+	| destFile |
+	('%1 -f %2 %3' % { Command symLink. self. dest }) displayNl.
+	Command execute: [
+	    destFile := File name: dest.
+	    destFile exists ifTrue: [ destFile remove ].
+	    self symlinkAs: dest ].
     ]
 
     emitInstall: dest [
-	| mode |
+	| destFile srcStream destStream mode |
 	mode := self isExecutable ifTrue: [ 8r755 ] ifFalse: [ 8r644 ].
-	('cmd . \$INSTALL -m %1 %2 %3'
-	    % { mode printString: 8. self. File name: dest }) displayNl
+	destFile := File name: dest.
+	('%1 -m %2 %3 %4' % {
+	    Command install. self. mode printString: 8. destFile })
+		displayNl.
+	Command
+	    execute: [
+	        destFile exists ifTrue: [ destFile remove ].
+	        srcStream := self readStream.
+		destStream := destFile writeStream.
+	        destStream nextPutAll: srcStream.
+	    ]
+	    ensure: [
+		destStream isNil ifFalse: [ destStream close ].
+		srcStream isNil ifFalse: [ srcStream close ].
+		destFile mode: mode
+	    ].
     ]
 ]
 
 Directory extend [
     emitMkdir [
-	('cmd . \$mkdir_p %1' % { self }) displayNl
+	| doThat |
+	self exists ifTrue: [ ^self ].
+	Command execute: [ (Directory name: self path) emitMkdir ].
+	('mkdir %1' % { self }) displayNl.
+	Command execute: [ Directory create: self name ].
     ]
 ]
 
 Object subclass: Command [
-    | packages installDir dryRun copy allFiles |
+    | packages installDir copy allFiles |
+
+    DryRun := false.
+    Command class >> execute: aBlock [
+	DryRun ifFalse: [ aBlock value ]
+    ]
+    Command class >> execute: aBlock ensure: ensureBlock [
+	DryRun ifFalse: [ aBlock ensure: ensureBlock ]
+    ]
+    Command class >> dryRun [
+	^DryRun
+    ]
+    Command class >> dryRun: aBoolean [
+	DryRun := aBoolean
+    ]
+
+    Command class >> zip [
+	^(Smalltalk getenv: 'XZIP') ifNil: [ 'zip' ]
+    ]
+    Command class >> install [
+	^(Smalltalk getenv: 'INSTALL') ifNil: [ 'install' ]
+    ]
+    Command class >> symLink [
+	^(Smalltalk getenv: 'LN_S') ifNil: [ 'ln -s' ]
+    ]
 
     validateDestDir: destdir installDir: instDir [ 
 	instDir isNil ifTrue: [ ^self ].
@@ -167,16 +224,14 @@ Object subclass: Command [
 
     destDir: destdir installDir: instDir [
 	self validateDestDir: destdir installDir: instDir.
-	instDir isNil
-	    ifTrue: [ installDir := destdir, self defaultInstallDir ]
-	    ifFalse: [ installDir := destdir, instDir ]
+	installDir :=
+	    Directory name:
+	        destdir, (instDir ifNil: [ self defaultInstallDir ])
     ]
 
     defaultInstallDir [ ^Directory image ]
     installDir [ ^installDir ]
 
-    dryRun [ ^dryRun ]
-    dryRun: aBoolean [ dryRun := aBoolean ]
     copy [ ^copy ]
     copy: aBoolean [ copy := aBoolean ]
     allFiles [ ^allFiles ]
@@ -205,7 +260,7 @@ Object subclass: Command [
 
     listFiles: listFiles vpath: aBoolean [
 	| base vpathBase |
-	base := Directory name: self installDir.
+	base := self installDir.
 	vpathBase := Directory name: self srcdir.
 
         listFiles do: [ :each || package |
@@ -221,124 +276,7 @@ Object subclass: Command [
     ]
 ]
 
-Command subclass: ShellCommand [
-    emitVariable: aString default: command [
-	('%1="%2"' % { aString. (Smalltalk getenv: aString) ifNil: [ command ] })
-	    displayNl.
-    ]
-
-    prolog [
-	('run_cmd=%<:|eval>1' % { dryRun }) displayNl.
-	self emitVariable: 'INSTALL' default: 'install-sh'.
-	self emitVariable: 'LN_S' default: 'ln -s'.
-	self emitVariable: 'ZIP' default: 'zip'.
-
-	stdout nextPutAll:
-'case "$INSTALL" in
-  */install-sh | *"/install-sh -c" | \
-  */install.sh | *"/install.sh -c" | \
-  install-sh | "install-sh -c" | \
-  install.sh | "install.sh -c")
-    display_INSTALL=install
-    INSTALL=func_install
-    ;;
-  *)
-    display_INSTALL="$INSTALL"
-    ;;
-esac
-
-# Simplistic replacement for the install package, used when
-# configure chose the install-sh script
-func_install ()
-{
-  while [ $# -gt 4 ]; do
-    shift
-  done
-  set -e
-  rm -f "$4"
-  cp "$3" "$4"
-  chmod $2 "$4"
-  set +e
-}
-
-# mkdir -p emulation based on the mkinstalldirs script.
-mkdir_p ()
-{
-  for file
-  do
-    case $file in
-      /*) pathcomp=/ ;;
-      *)  pathcomp= ;;
-    esac
-    oIFS=$IFS
-    IFS=/
-    set fnord $file
-    shift
-    IFS=$oIFS
-
-    errstatus=0
-    for d
-    do
-      test "x$d" = x && continue
-      pathcomp=$pathcomp$d
-      case $pathcomp in
-        -*) pathcomp=./$pathcomp ;;
-      esac
-
-      if test ! -d "$pathcomp"; then
-        mkdir "$pathcomp" || lasterr=$?
-        test -d "$pathcomp" || errstatus=$lasterr
-      fi
-      pathcomp=$pathcomp/
-    done
-  done
-  return "$errstatus"
-}
-
-cmd () {
-  (dir="$1"
-  shift
-  save_INSTALL=$INSTALL
-  INSTALL=$display_INSTALL
-  mkdir_p="mkdir -p"
-  case "$dir" in
-    .) eval echo "$@" ;;
-    *) eval echo cd $dir \\\&\\\& "$@" ;;
-  esac
-  INSTALL=$save_INSTALL
-  mkdir_p=mkdir_p
-  eval cd "$dir"
-  $run_cmd "$@")
-}
-
-mkdtemp () {
-  # Create a temporary directory $tmp in $TMPDIR (default /tmp).
-  # Use mktemp if possible; otherwise fall back on mkdir,
-  # with $RANDOM to make collisions less likely.
-  : ${TMPDIR=/tmp}
-
-  for i in 1 2 3 4 5 6 7 8 9 10; do
-    if test $i = 1 && test "$run_cmd" != :; then
-      tmp=`(umask 077 && mktemp -d "$TMPDIR/gstar-XXXXXX") 2>/dev/null`
-    else
-      tmp=$TMPDIR/foo$$-$RANDOM
-      test "$run_cmd" != : && break
-      mkdir -m700 "$tmp" 2>/dev/null
-    fi
-    result=$?
-    test -n "$tmp" && test -d "$tmp" && break
-    test $i = 10 && exit $?
-  done
-  trap "rm -rf \"\$tmp\"" 0 1 2 3 15
-  echo "mkdir -m700 \"$tmp\""
-}
-
-set -e
-'.
-    ]
-]
-
-ShellCommand subclass: PkgDist [
+Command subclass: PkgDist [
     validateDestDir: destdir installDir: instDir [ 
 	(destdir isEmpty and: [ instDir isNil ]) ifTrue: [
 	    self error: 'using --dist without specifying --distdir' ].
@@ -365,9 +303,8 @@ ShellCommand subclass: PkgDist [
     distribute: srcFile as: file in: dir [
 	| destName baseDir |
 	baseDir := self installDir.
-	dir isNil ifFalse: [
-	    baseDir := Directory append: dir to: baseDir ].
-	destName := Directory append: file to: baseDir.
+	dir isNil ifFalse: [ baseDir := baseDir directoryAt: dir ].
+	destName := baseDir nameAt: file.
 	copy
 	    ifTrue: [ srcFile emitInstall: destName ]
 	    ifFalse: [ srcFile emitSymlink: destName ]
@@ -387,8 +324,7 @@ ShellCommand subclass: PkgDist [
 		Directory append: dir to: aPackage relativeDirectory ] ].
 
         dirs do: [ :dir || destName |
-	    destName := Directory append: dir to: self installDir.
-	    (Directory name: destName) emitMkdir ].
+	    (self installDir directoryAt: dir) emitMkdir ].
 
         files do: [ :file || srcFile destName |
 	    srcFile := File name: (aPackage findPathFor: file).
@@ -399,46 +335,65 @@ ShellCommand subclass: PkgDist [
     ]
 ]
 
-ShellCommand subclass: PkgInstall [
+Command subclass: PkgInstall [
+    | tmpDir |
+
     run [
         "Create the installation directory."
-        (Directory name: self installDir) emitMkdir.
-	super run.
+        self installDir emitMkdir.
+	[ super run ] ensure: [
+	    tmpDir isNil ifFalse: [ tmpDir remove ] ]
+    ]
+
+    tmpDir [
+	tmpDir isNil ifTrue: [
+            tmpDir := Directory createTemporary: Directory temporary, '/gstar-'.
+            ('mkdir %1' % { tmpDir }) displayNl ].
+	^tmpDir
     ]
 
     runOnPackage: aPackage [
 	| pkg destFile dirs files baseDir |
-        'mkdtemp' displayNl.
-	baseDir := '\"\$tmp\"/%1' % { aPackage name }.
+	baseDir := self tmpDir directoryAt: aPackage name.
 	pkg := aPackage copy.
 	pkg relativeDirectory: nil.
 
-	('cmd . \$mkdir_p ', baseDir) displayNl.
-	('$run_cmd cat \> %1/package.xml << ''__<EOF>__''
-%2
-__<EOF>__' % { baseDir. pkg }) displayNl.
+	baseDir emitMkdir.
+	Command
+	    execute: [
+	        (baseDir fileAt: 'package.xml') withWriteStreamDo: [ :s |
+	            pkg printOn: s ].
 
-	files := pkg allFiles.
-        dirs := files collect: [ :file | File pathFor: file ].
-	dirs asSet asSortedCollection do: [ :dir |
-	    ('cmd . \$mkdir_p %1/%2' % { baseDir. dir }) displayNl ].
+	        files := pkg allFiles.
+                dirs := files collect: [ :file | File pathFor: file ].
+	        dirs asSet asSortedCollection do: [ :dir |
+	            (baseDir directoryAt: dir) emitMkdir ].
 
-        files do: [ :file || srcFile destName |
-	    srcFile := File name: (aPackage findPathFor: file).
-	    ('cmd . \$LN_S -f %1 %2/%3' % { srcFile. baseDir. file }) displayNl ].
+                files do: [ :file || srcFile |
+	            srcFile := File name: (aPackage findPathFor: file).
+	            srcFile emitSymlink: (baseDir nameAt: file) ].
 
-	destFile := Directory append: aPackage name, '.star' to: self installDir.
-	(File name: destFile) emitZipDir: baseDir.
+	        (self installDir fileAt: aPackage name, '.star')
+		    emitZipDir: baseDir
+	    ]
+	    ensure: [
+	        "Clean up our mess."
+	        (baseDir fileAt: 'package.xml') remove.
+                files do: [ :file |
+	            (baseDir fileAt: file) remove ].
+	        dirs asSet asSortedCollection do: [ :dir |
+	            (baseDir directoryAt: dir) remove ]
+	    ].
     ]
 
     runOnStar: aPackage [
 	| destFile |
-	destFile := Directory append: aPackage name, '.star' to: self installDir.
+	destFile := self installDir nameAt: aPackage name, '.star'.
 	(File name: aPackage starFileName) emitInstall: destFile.
     ]
 ]
 
-ShellCommand subclass: PkgUninstall [
+Command subclass: PkgUninstall [
     run [
         super run.
         packages filesDo: [ :each | (File name: each) emitRemove ]
@@ -447,11 +402,11 @@ ShellCommand subclass: PkgUninstall [
     runOnPackage: aPackage [
 	| baseDir |
 	baseDir := self installDir.
-	aPackage relativeDirectory isNil
-	    ifFalse: [ baseDir := Directory append: aPackage relativeDirectory to: baseDir ].
-	aPackage allFiles do: [ :file || destName |
-	    destName := (Directory append: file to: baseDir).
-	    (File name: destName) emitRemove ]
+	aPackage relativeDirectory isNil ifFalse: [
+	    baseDir := baseDir directoryAt: aPackage relativeDirectory ].
+
+	aPackage allFiles do: [ :file |
+	    (baseDir fileAt: file) emitRemove ]
     ]
 
     runOnStar: aPackage [ ]
@@ -465,7 +420,7 @@ PkgList subclass: PkgPackageList [
     runOnPackage: aPackage [ aPackage name displayNl ]
 ]
 
-| srcdir installDir mode listFiles destdir packageFiles helpString dryRun vpath |
+| srcdir installDir mode listFiles destdir packageFiles helpString vpath |
 
 mode := PkgInstall.
 listFiles := OrderedCollection new.
@@ -475,7 +430,6 @@ srcdir := nil.
 packageFiles := OrderedCollection new.
 packages := PackageFiles new.
 vpath := false.
-dryRun := false.
 allFiles := false.
 copy := false.
 
@@ -535,7 +489,7 @@ The default target directory is $install_dir.'.
             opt = 'list-files' ifTrue: [ mode := PkgList. listFiles add: arg ].
             opt = 'srcdir' ifTrue: [ srcdir := arg ].
             opt = 'destdir' ifTrue: [ destdir := arg ].
-            opt = 'dry-run' ifTrue: [ dryRun := true ].
+            opt = 'dry-run' ifTrue: [ Command dryRun: true ].
             opt = 'all-files' ifTrue: [ allFiles := true ].
             opt = 'copy' ifTrue: [ copy := true ].
             opt = 'vpath' ifTrue: [ vpath := true ].
@@ -550,7 +504,6 @@ The default target directory is $install_dir.'.
         destDir: destdir installDir: installDir;
 	srcdir: srcdir;
 	addAllFiles: packageFiles;
-	dryRun: dryRun;
 	allFiles: allFiles;
 	copy: copy;
 	prolog;

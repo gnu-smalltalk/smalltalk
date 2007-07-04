@@ -63,7 +63,6 @@ getopt () {
 getopt "$@" | {
   load_dry_run=-n
   load_test=
-  list=false
   run_cmd=eval
   files=
   srcdir=
@@ -74,8 +73,8 @@ getopt "$@" | {
       --load) load_dry_run= ;;
       --test) load_test=--test ;;
       --dry-run) run_cmd=: ;;
-      --list-files) list=: ;;
-      --list-packages) list=: ;;
+      --list-files) run_cmd=: ;;
+      --list-packages) run_cmd=: ;;
       --srcdir) srcdir=$arg ;;
       --image-file)
 	test x${image_file:+set} = xset && show_help --bad
@@ -86,16 +85,12 @@ getopt "$@" | {
 
   set -e
 
-  if $list; then
-    gst scripts/Package.st "$@"
-  else
-    INSTALL='@INSTALL@' LN_S='@LN_S@' ZIP='@ZIP@' gst scripts/Package.st "$@" | sh
+  INSTALL='@INSTALL@' LN_S='@LN_S@' XZIP='@ZIP@' gst scripts/Package.st "$@"
 
-    if test "$run_cmd" = eval && test "$load_test,$load_dry_run" != ,-n; then
-      packages=`eval gst scripts/Package.st \
-		${srcdir:+"--srcdir=$srcdir"} \
+  if test "$run_cmd" = eval && test "$load_test,$load_dry_run" != ,-n; then
+    packages=`eval gst scripts/Package.st \
+		${srcdir:+"--srcdir=$srcdir"}
 		--list-packages "$files" `
-      gst scripts/Load.st $load_dry_run $load_test $packages
-    fi
+    gst scripts/Load.st $load_dry_run $load_test $packages
   fi
 }
