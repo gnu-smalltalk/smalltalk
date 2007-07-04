@@ -189,7 +189,7 @@ Directory extend [
 ]
 
 Object subclass: Command [
-    | packages installDir copy allFiles |
+    | packages installDir options |
 
     DryRun := false.
     Command class >> execute: aBlock [
@@ -215,6 +215,15 @@ Object subclass: Command [
 	^(Smalltalk getenv: 'LN_S') ifNil: [ 'ln -s' ]
     ]
 
+    options: aSet [
+	options := aSet.
+	aSet do: [ :each |
+	    (self validOptions includes: each) ifFalse: [
+		self error: ('option %1 invalid for this mode' % {each}) ] ]
+    ]
+    validOptions [ ^#() ]
+    isOption: aString [ ^options includes: aString ]
+
     validateDestDir: destdir installDir: instDir [ 
 	instDir isNil ifTrue: [ ^self ].
 	((Directory name: instDir) name ~= instDir
@@ -231,11 +240,6 @@ Object subclass: Command [
 
     defaultInstallDir [ ^Directory image ]
     installDir [ ^installDir ]
-
-    copy [ ^copy ]
-    copy: aBoolean [ copy := aBoolean ]
-    allFiles [ ^allFiles ]
-    allFiles: aBoolean [ allFiles := aBoolean ]
 
     packages [
 	packages isNil ifTrue: [ packages := PackageFiles new ].
@@ -258,8 +262,9 @@ Object subclass: Command [
     runOnStar: aStarPackage [ self runOnPackage: aStarPackage ]
     runOnPackage: aPackage [ ]
 
-    listFiles: listFiles vpath: aBoolean [
-	| base vpathBase |
+    listFiles: listFiles [
+	| base vpathBase vpath |
+	vpath := self isOption: 'vpath'.
 	base := self installDir.
 	vpathBase := Directory name: self srcdir.
 
@@ -269,7 +274,7 @@ Object subclass: Command [
 		| path relativePath |
 		path := package findPathFor: file.
 		relativePath := base pathTo: path.
-		(aBoolean and: [ (relativePath indexOfSubCollection: '../') > 0 ])
+		(vpath and: [ (relativePath indexOfSubCollection: '../') > 0 ])
 		    ifTrue: [ relativePath := vpathBase pathTo: path ].
 
 		relativePath displayNl ] ]
@@ -300,19 +305,21 @@ Command subclass: PkgDist [
 			in: nil ] ]
     ]
 
+    validOptions [ ^#('all-files' 'copy') ]
+
     distribute: srcFile as: file in: dir [
 	| destName baseDir |
 	baseDir := self installDir.
 	dir isNil ifFalse: [ baseDir := baseDir directoryAt: dir ].
 	destName := baseDir nameAt: file.
-	copy
+	(self isOption: 'copy')
 	    ifTrue: [ srcFile emitInstall: destName ]
 	    ifFalse: [ srcFile emitSymlink: destName ]
     ]
 
     runOnPackage: aPackage [
 	| dirs files baseDir |
-	files := allFiles
+	files := (self isOption: 'all-files')
 	    ifTrue: [ aPackage allFiles ]
 	    ifFalse: [ aPackage allDistFiles ].
 
@@ -337,12 +344,31 @@ Command subclass: PkgDist [
 
 Command subclass: PkgInstall [
     | tmpDir |
+    validOptions [ ^#('load' 'test') ]
 
     run [
         "Create the installation directory."
+	| script result |
         self installDir emitMkdir.
 	[ super run ] ensure: [
-	    tmpDir isNil ifFalse: [ tmpDir remove ] ]
+	    tmpDir isNil ifFalse: [ tmpDir remove ] ].
+
+	(self isOption: 'test') ifFalse: [ ^self ].
+	script := ''.
+	self packages do: [ :each || pkg |
+	    pkg := each.
+            script := script, ' ', pkg sunitScript.
+            pkg test notNil ifTrue: [
+                pkg := pkg test.
+                script := script, ' ', pkg sunitScript ].
+            pkg fileIn ].
+
+	(PackageLoader packageAt: #SUnit) loaded ifFalse: [ ^self ].
+	script isEmpty ifTrue: [ ^self ].
+
+	result := TestSuitesScripter run: script quiet: false verbose: false.
+	result runCount = result passedCount
+	    ifFalse: [ ObjectMemory quit: 1 ]
     ]
 
     tmpDir [
@@ -393,28 +419,6 @@ Command subclass: PkgInstall [
     ]
 ]
 
-PkgInstall subclass: PkgInstallTest [
-    run [
-	| script result |
-	super run.
-	script := ''.
-	self packages do: [ :each || pkg |
-	    pkg := each.
-            script := script, ' ', pkg sunitScript.
-            pkg test notNil ifTrue: [
-                pkg := pkg test.
-                script := script, ' ', pkg sunitScript ].
-            pkg fileIn ].
-
-	(PackageLoader packageAt: #SUnit) loaded ifFalse: [ ^self ].
-	script isEmpty ifTrue: [ ^self ].
-
-	result := TestSuitesScripter run: script quiet: false verbose: false.
-	result runCount = result passedCount
-	    ifFalse: [ ObjectMemory quit: 1 ]
-    ]
-]
-
 Command subclass: PkgUninstall [
     run [
         super run.
@@ -435,6 +439,7 @@ Command subclass: PkgUninstall [
 ]
 
 Command subclass: PkgList [
+    validOptions [ ^#('list-files' 'vpath') ]
     validateDestDir: destdir installDir: installDir [ ]
 ]
 
@@ -442,26 +447,22 @@ PkgList subclass: PkgPackageList [
     runOnPackage: aPackage [ aPackage name displayNl ]
 ]
 
-| srcdir installDir mode listFiles destdir packageFiles helpString vpath |
+| srcdir installDir mode listFiles destdir packageFiles helpString options |
 
-mode := PkgInstall.
+mode := nil.
 listFiles := OrderedCollection new.
 installDir := nil.
 destdir := ''.
-srcdir := nil.
+srcdir := '.'.
+options := Set new.
 packageFiles := OrderedCollection new.
 packages := PackageFiles new.
-vpath := false.
-allFiles := false.
-copy := false.
 
 helpString := 
 'Usage:
     gst-package [OPTION]... FILES...
 
     -n, --dry-run               print commands rather than running them
-	--test                  run unit tests after merging
-	--load                  also load the Smalltalk files in the image
         --uninstall             remove the packages mentioned in the FILES
         --dist                  copy files instead of creating STAR files.
         --list-files PKG        just output the list of files in the package
@@ -474,6 +475,10 @@ helpString :=
 	--help                  display this message and exit
 	--version               print version information and exit
 
+--install suboptions:
+	--test                  run unit tests after merging
+	--load                  also load the Smalltalk files in the image
+
 --list-files suboptions:
 	--vpath			Omit path to srcdir for files that are there
 
@@ -485,7 +490,8 @@ Except in uninstall and list files mode, gst-package requires write
 access to the GNU Smalltalk image directory, and merges the XML package
 files on the command line with that file.
 
-The default target directory is $install_dir.'.
+The default target directory is ', Directory image, '
+'.
 
 [
     Smalltalk
@@ -502,36 +508,50 @@ The default target directory is $install_dir.'.
                 helpString displayOn: stderr.
                 ObjectMemory quit: 0 ].
 
-            opt = 'uninstall' ifTrue: [ mode := PkgUninstall ].
-            opt = 'dist' ifTrue: [ mode := PkgDist ].
-            opt = 'list-packages' ifTrue: [ mode := PkgPackageList ].
+            opt = 'uninstall' ifTrue: [
+		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
+		mode := PkgUninstall ].
+            opt = 'dist' ifTrue: [
+		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
+		mode := PkgDist ].
+            opt = 'list-packages' ifTrue: [
+		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
+		mode := PkgPackageList ].
+            opt = 'no-install' ifTrue: [
+		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
+		mode := PkgList ].
+            opt = 'list-files' ifTrue: [
+		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
+		listFiles add: arg.
+		mode := PkgList ].
 
             opt = 'target-directory' ifTrue: [ installDir := arg ].
-            opt = 'no-install' ifTrue: [ mode := Command ].
-            opt = 'list-files' ifTrue: [ mode := PkgList. listFiles add: arg ].
+
             opt = 'srcdir' ifTrue: [ srcdir := arg ].
             opt = 'destdir' ifTrue: [ destdir := arg ].
             opt = 'dry-run' ifTrue: [ Command dryRun: true ].
-            opt = 'test' ifTrue: [ mode := PkgInstallTest ].
-            opt = 'all-files' ifTrue: [ allFiles := true ].
-            opt = 'copy' ifTrue: [ copy := true ].
-            opt = 'vpath' ifTrue: [ vpath := true ].
+            opt = 'test' ifTrue: [ options add: opt ].
+            opt = 'load' ifTrue: [ options add: opt ].
+            opt = 'all-files' ifTrue: [ options add: opt ].
+            opt = 'copy' ifTrue: [ options add: opt ].
+            opt = 'vpath' ifTrue: [ options add: opt ].
 
             opt isNil ifTrue: [ packageFiles add: arg ] ]
         ifError: [
             helpString displayOn: stderr.
             ObjectMemory quit: 1 ].
 
+    mode isNil ifTrue: [ mode := PkgInstall ].
+
     "Validate the installation and source directory."
     mode new
         destDir: destdir installDir: installDir;
 	srcdir: srcdir;
 	addAllFiles: packageFiles;
-	allFiles: allFiles;
-	copy: copy;
+	options: options;
 	prolog;
 	run;
-	listFiles: listFiles vpath: vpath
+	listFiles: listFiles
 ]
     on: Error
     do: [ :ex |

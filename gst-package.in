@@ -39,8 +39,6 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 : ${GST=@bindir@/gst}
 
-# The same shell functions used in gst-load and gst-sunit.
-
 gst () {
   script=$1
   shift
@@ -62,7 +60,6 @@ getopt () {
 
 getopt "$@" | {
   load=false
-  install=:
   files=
   srcdir=
   while read opt arg; do
@@ -70,7 +67,6 @@ getopt "$@" | {
       ERROR) show_help --bad ;;
       --help) show_help --help ;;
       --load) load=: ;;
-      --dry-run | --list-*) install=false ;;
       --srcdir) srcdir=$arg ;;
       --image-file)
 	test x${image_file:+set} = xset && show_help --bad
@@ -83,7 +79,7 @@ getopt "$@" | {
 
   INSTALL='@INSTALL@' LN_S='@LN_S@' XZIP='@ZIP@' gst scripts/Package.st "$@"
 
-  if $install && $load; then
+  if $load; then
     packages=`eval gst scripts/Package.st \
 		${srcdir:+"--srcdir=$srcdir"}
 		--list-packages "$files" `

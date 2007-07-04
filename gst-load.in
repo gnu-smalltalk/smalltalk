@@ -56,7 +56,6 @@ getopt () {
 }
 
 getopt "$@" | {
-  test=false
   while read opt arg; do
     case $opt in
       ERROR) show_help --bad ;;
