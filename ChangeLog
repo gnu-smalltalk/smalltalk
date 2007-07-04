@@ -1,5 +1,9 @@
 2007-07-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Package.st: Handle testing within the script.
+
+2007-07-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Package.st: Execute commands within the script.
 
 2007-07-04  Paolo Bonzini  <bonzini@gnu.org>

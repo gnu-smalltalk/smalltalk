@@ -393,6 +393,28 @@ Command subclass: PkgInstall [
     ]
 ]
 
+PkgInstall subclass: PkgInstallTest [
+    run [
+	| script result |
+	super run.
+	script := ''.
+	self packages do: [ :each || pkg |
+	    pkg := each.
+            script := script, ' ', pkg sunitScript.
+            pkg test notNil ifTrue: [
+                pkg := pkg test.
+                script := script, ' ', pkg sunitScript ].
+            pkg fileIn ].
+
+	(PackageLoader packageAt: #SUnit) loaded ifFalse: [ ^self ].
+	script isEmpty ifTrue: [ ^self ].
+
+	result := TestSuitesScripter run: script quiet: false verbose: false.
+	result runCount = result passedCount
+	    ifFalse: [ ObjectMemory quit: 1 ]
+    ]
+]
+
 Command subclass: PkgUninstall [
     run [
         super run.
@@ -470,7 +492,7 @@ The default target directory is $install_dir.'.
         "--load and --image-file are processed by gst-package.
 	 --no-load present for backwards compatibility, it is now the default.
 	 --no-install is also present for backwards compatibility."
-        arguments: '-h|--help --no-load --load --no-install --uninstall
+        arguments: '-h|--help --no-load --test --load --no-install --uninstall
             --dist -t|--target-directory: --list-files: --list-packages
             --srcdir: --distdir|--destdir: -n|--dry-run --all-files
 	    --vpath --copy -I|--image-file:'
@@ -490,6 +512,7 @@ The default target directory is $install_dir.'.
             opt = 'srcdir' ifTrue: [ srcdir := arg ].
             opt = 'destdir' ifTrue: [ destdir := arg ].
             opt = 'dry-run' ifTrue: [ Command dryRun: true ].
+            opt = 'test' ifTrue: [ mode := PkgInstallTest ].
             opt = 'all-files' ifTrue: [ allFiles := true ].
             opt = 'copy' ifTrue: [ copy := true ].
             opt = 'vpath' ifTrue: [ vpath := true ].

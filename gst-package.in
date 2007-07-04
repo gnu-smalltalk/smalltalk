@@ -31,7 +31,7 @@
 ########################################################################
 
 OPTIONS='-h|--help --version --load --no-load --no-install --uninstall --dist
-	-t|--target-directory: --list-files: --list-packages
+	--test -t|--target-directory: --list-files: --list-packages
 	--srcdir: --distdir|--destdir: --copy --all-files --vpath
 	-n|--dry-run -I|--image-file:'
 
@@ -61,20 +61,16 @@ getopt () {
 }
 
 getopt "$@" | {
-  load_dry_run=-n
-  load_test=
-  run_cmd=eval
+  load=false
+  install=:
   files=
   srcdir=
   while read opt arg; do
     case $opt in
       ERROR) show_help --bad ;;
       --help) show_help --help ;;
-      --load) load_dry_run= ;;
-      --test) load_test=--test ;;
-      --dry-run) run_cmd=: ;;
-      --list-files) run_cmd=: ;;
-      --list-packages) run_cmd=: ;;
+      --load) load=: ;;
+      --dry-run | --list-*) install=false ;;
       --srcdir) srcdir=$arg ;;
       --image-file)
 	test x${image_file:+set} = xset && show_help --bad
@@ -87,10 +83,10 @@ getopt "$@" | {
 
   INSTALL='@INSTALL@' LN_S='@LN_S@' XZIP='@ZIP@' gst scripts/Package.st "$@"
 
-  if test "$run_cmd" = eval && test "$load_test,$load_dry_run" != ,-n; then
+  if $install && $load; then
     packages=`eval gst scripts/Package.st \
 		${srcdir:+"--srcdir=$srcdir"}
 		--list-packages "$files" `
-    gst scripts/Load.st $load_dry_run $load_test $packages
+    gst scripts/Load.st $load_dry_run $packages
   fi
 }
