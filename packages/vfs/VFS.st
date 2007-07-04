@@ -97,6 +97,11 @@ createDir: dirName
 
 !ExternalArchiveFileHandler methodsFor: 'ArchiveMemberHandler protocol'!
 
+member: anArchiveMemberHandler mode: bits
+    "Set the permission bits for the file in anArchiveMemberHandler."
+
+    self notYetImplemented!
+
 extractMember: anArchiveMemberHandler into: file
     "Extract the contents of anArchiveMemberHandler into a file
      that resides on disk, and answer the name of the file."
@@ -136,11 +141,14 @@ files
 	    popen: self command, ' list ', self realFileName
 	    dir: FileStream read.
 
-        pipe linesDo: [ :l || line isDir size path date |
+        pipe linesDo: [ :l || line mode size path date |
 	    line := l readStream.
-	    isDir := line next = $d.
+	    mode := line next: 10.
+	    line peek isSeparator ifFalse: [ line skipTo: Character space ].
+	    line skipSeparators.
+
 	    "Attributes, number of links, owner, group"
-	    4 timesRepeat: [
+	    3 timesRepeat: [
 		line skipTo: Character space.
 	        line skipSeparators ].
 
@@ -150,7 +158,7 @@ files
 	    line skipSeparators.
 	    path := line upToAll: ' -> '.		"Path"
 
-            gen yield: { path. size. date. isDir } ].
+            gen yield: { path. size. date. mode } ].
 
         pipe close ]! !
 

@@ -339,9 +339,20 @@ name
     ^vfsHandler fullName
 !
 
+mode
+    "Answer the permission bits for the file identified by the receiver"
+    ^vfsHandler mode
+!
+
 size
     "Answer the size of the file identified by the receiver"
     ^vfsHandler size
+!
+
+mode: anInteger
+    "Set the permission bits for the file identified by the receiver to be
+     anInteger."
+    vfsHandler mode: anInteger
 !
 
 lastAccessTime: aDateTime

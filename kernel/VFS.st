@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2002, 2005 Free Software Foundation, Inc.
+| Copyright 2002, 2005, 2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -99,7 +99,7 @@ ZipFileHandler comment: 'ZipFileHandler transparently extracts
 files from a ZIP archive.'!
 
 VFSHandler subclass: #ArchiveMemberHandler
-       instanceVariableNames: 'parent size stCtime stMtime stAtime isDirectory realFileName'
+       instanceVariableNames: 'parent mode size stCtime stMtime stAtime realFileName'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Streams-Files'
@@ -138,6 +138,9 @@ openDir: dirName
 
 closeDir: dirObject
     <cCall: 'closedir' returning: #int args: #(#cObject)>!
+
+primChmod: name mode: mode
+    <cCall: 'chmod' returning: #int args: #(#string #int)>!
 
 primIsReadable: name
     <cCall: 'fileIsReadable' returning: #boolean args: #(#string)>!
@@ -472,6 +475,17 @@ name: aName
 size
     "Answer the size of the file identified by the receiver"
     ^self stat stSize value
+!
+
+mode
+    "Answer the octal permissions for the file."
+    ^self stat stMode value bitAnd: 8r7777
+!
+
+mode: mode
+    "Set the octal permissions for the file to be `mode'."
+    self primChmod: (self name) mode: (mode bitAnd: 8r7777).
+    File checkError
 !
 
 isDirectory
@@ -867,7 +881,7 @@ fillMember: anArchiveMemberHandler
 	stCtime: self lastModifyTime
 	stMtime: (data at: 2)
 	stAtime: self lastAccessTime
-	isDirectory: (data at: 3) notNil.
+	mode: (data at: 3).
 
     ^true!
 
@@ -880,26 +894,30 @@ member: anArchiveMemberHandler do: aBlock
     data := allFiles at: anArchiveMemberHandler name ifAbsent: [ nil ].
     data isNil
 	ifTrue: [ ^SystemExceptions.FileError signal: 'File not found' ].
-    (data at: 3) isNil
+    (data at: 4) isNil
 	ifTrue: [ ^SystemExceptions.FileError signal: 'Not a directory' ].
 
-    (data at: 3) do: aBlock!
+    (data at: 4) do: aBlock!
 
 refresh
     "Extract the directory listing from the archive"
 
-    | pipe line isDir size date path parentPath name
-      current currentPath directoryTree directory |
+    | pipe line parentPath name current currentPath directoryTree directory |
     super refresh.
 
     current := currentPath := nil.
     allFiles := LookupTable new.
     directoryTree := LookupTable new.
-    self files do: [ :data || path size date |
+    self files do: [ :data || path size date mode |
 	path := data at: 1.
 	size := data at: 2.
 	date := data at: 3.
-	isDir := data at: 4.
+	mode := data at: 4.
+
+	mode isCharacter ifTrue: [ mode := (mode == $d) ].
+	mode == true ifTrue: [ mode := 8r040755 ].
+	mode == false ifTrue: [ mode := 8r644 ].
+	mode isString ifTrue: [ mode := self convertModeString: mode ].
 
 	path last = $/ ifTrue: [ path := path copyFrom: 1 to: path size - 1 ].
 
@@ -916,20 +934,25 @@ refresh
 	"Create an item in the tree for directories, and
 	 add an association to the allFiles SortedCollection"
 
-	directory := isDir
+	directory := (mode bitAnd: 8r170000) = 8r40000
 	    ifTrue: [ current at: name put: LookupTable new ]
 	    ifFalse: [ current at: name put: nil ].
 
-	allFiles at: path put: { size. date. directory } ].
+	allFiles at: path put: { size. date. mode. directory } ].
 
     "Leave the LookupTables to be garbage collected, we are now interested
      in the file names only."
     topLevelFiles := directoryTree keys asArray.
     allFiles do: [ :data |
-	(data at: 3) isNil ifFalse: [
-	    data at: 3 put: (data at: 3) keys asArray
+	(data at: 4) isNil ifFalse: [
+	    data at: 4 put: (data at: 4) keys asArray
 	]
     ]!
+
+member: anArchiveMemberHandler mode: bits
+    "Set the permission bits for the file in anArchiveMemberHandler."
+
+    self subclassResponsibility!
 
 removeMember: anArchiveMemberHandler
     "Remove the member represented by anArchiveMemberHandler."
@@ -944,6 +967,20 @@ updateMember: anArchiveMemberHandler
     self subclassResponsibility! !
 
 !ArchiveFileHandler methodsFor: 'private'!
+
+convertModeString: modeString
+    "Convert the mode from a string to an octal number."
+    | mode |
+    mode := 0.
+    (modeString at: 1) = $l ifTrue: [ mode := 8r120000 ].
+    (modeString at: 1) = $d ifTrue: [ mode := 8r040000 ].
+    (modeString at: 4) asLowercase = $s ifTrue: [ mode := mode + 8r04000 ].
+    (modeString at: 7) asLowercase = $s ifTrue: [ mode := mode + 8r02000 ].
+    (modeString at: 10) asLowercase = $t ifTrue: [ mode := mode + 8r01000 ].
+    modeString from: 2 to: 10 keysAndValuesDo: [ :i :ch |
+	ch isLowercase ifTrue: [ mode := mode setBit: 11 - i ] ].
+    ^mode
+!
 
 findDirectory: path into: tree
     "Look up into tree (which is a tree of Dictionaries) the directory
@@ -999,6 +1036,11 @@ createDir: dirName
 
     self notYetImplemented!
 
+member: anArchiveMemberHandler mode: bits
+    "Set the permission bits for the file in anArchiveMemberHandler."
+
+    self notYetImplemented!
+
 extractMember: anArchiveMemberHandler into: temp
     "Extract the contents of anArchiveMemberHandler into a file
      that resides on disk, and answer the name of the file."
@@ -1026,16 +1068,16 @@ files
 	    popen: 'unzip -Z ', self realFileName
 	    dir: FileStream read.
 
-        pipe linesDo: [ :l || result isDir size path date |
+        pipe linesDo: [ :l || result mode size path date |
 	    "Extract first character, fourth field, seventh+eighth field, rest of line."
 	    result := l searchRegex:
-		'^(.)\S+\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\S+\s+(\S+\s+\S+)\s(.*?)(?: -> |$)'.
+		'^(.{10})\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\S+\s+(\S+\s+\S+)\s(.*?)(?: -> |$)'.
 	    result matched ifTrue: [
-	        isDir := (result at: 1) = $d.
+	        mode := result at: 1.
 	        size := (result at: 2) asInteger.
 	        date := DateTime readFrom: (result at: 3) readStream.
 	        path := result at: 4.
-	        gen yield: { path. size. date. isDir } ] ].
+	        gen yield: { path. size. date. mode } ] ].
 
 	pipe close ]! !
 
@@ -1047,14 +1089,14 @@ parent: anArchiveFileHandler
 
     parent := anArchiveFileHandler!
 
-size: bytes stCtime: ctime stMtime: mtime stAtime: atime isDirectory: isDir
+size: bytes stCtime: ctime stMtime: mtime stAtime: atime mode: modeBits
     "Called back by the receiver's parent when the ArchiveMemberHandler
      asks for file information."
     size := bytes.
     stCtime := ctime.
     stMtime := mtime.
     stAtime := atime.
-    isDirectory := isDir! !
+    mode := modeBits! !
 
 !ArchiveMemberHandler methodsFor: 'accessing'!
 
@@ -1127,11 +1169,23 @@ exists
     "Answer whether a file with the name contained in the receiver does exist."
     ^self parent fillMember: self!
 
+mode
+    "Answer the octal permissions for the file."
+    size isNil ifTrue: [ self refresh ].
+    ^mode bitAnd: 8r7777
+!
+
+mode: mode
+    "Set the octal permissions for the file to be `mode'."
+    self parent member: self mode: (mode bitAnd: 8r7777).
+!
+
 isDirectory
     "Answer whether a file with the name contained in the receiver does exist
     and identifies a directory."
     size isNil ifTrue: [ self refresh ].
-    ^isDirectory!
+    ^(mode bitAnd: 8r170000) = 8r040000
+!
 
 isReadable
     "Answer whether a file with the name contained in the receiver does exist

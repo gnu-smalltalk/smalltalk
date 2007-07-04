@@ -508,6 +508,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("stat", my_stat);
   _gst_define_cfunc ("lstat", my_lstat);
   _gst_define_cfunc ("utime", _gst_set_file_access_times);
+  _gst_define_cfunc ("chmod", chmod);
 
   _gst_define_cfunc ("opendir", my_opendir);
   _gst_define_cfunc ("closedir", closedir);
@@ -521,6 +522,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("rmdir", rmdir);
   _gst_define_cfunc ("chdir", my_chdir);
   _gst_define_cfunc ("mkdir", mkdir);
+  _gst_define_cfunc ("mkdtemp", mkdtemp);
   _gst_define_cfunc ("getCurDirName", _gst_get_cur_dir_name);
 
   _gst_define_cfunc ("fileIsReadable", _gst_file_is_readable);

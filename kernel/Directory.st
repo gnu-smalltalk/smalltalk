@@ -48,6 +48,9 @@ virtual one).'!
 
 !Directory class methodsFor: 'C call-outs'!
 
+primCreateTemporary: dirName
+    <cCall: 'mkdtemp' returning: #void args: #(#stringOut)>!
+
 primWorking: dirName
     <cCall: 'chdir' returning: #void args: #(#string)>! !
 
@@ -155,6 +158,15 @@ working: dirName
     "Change the current working directory to dirName."
     self primWorking: dirName.
     self checkError
+!
+
+createTemporary: prefix
+    "Create an empty directory whose name starts with prefix and answer it."
+    | name |
+    name := prefix, 'XXXXXX'.
+    self primCreateTemporary: name.
+    self checkError.
+    ^Directory name: name
 !
 
 allFilesMatching: aPattern do: aBlock
