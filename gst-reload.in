@@ -1,6 +1,0 @@
-#! /bin/sh
-
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-
-@bindir@/gst-load --force ${1+"$@"}

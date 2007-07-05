@@ -51,13 +51,14 @@ Options:
     -n --dry-run          don''t save the image after loading
     -t --test             run SUnit tests if available
     -I --image-file=FILE  load into the specified image
+       --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message
 '.
 
 "Parse the command-line arguments."
 Smalltalk
     arguments: '-h|--help -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force
-		-t|--test -I|--image-file:'
+		-t|--test -I|--image-file: --kernel-directory:'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [

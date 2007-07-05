@@ -302,6 +302,11 @@ isAccessible: fileName
 
 !File class methodsFor: 'reading system defaults'!
 
+executable
+    "Answer the full path to the executable being run."
+    ^ExecutableFileName
+!
+
 image
     "Answer the full path to the image being used."
     ^ImageFileName
@@ -324,9 +329,12 @@ displayOn: aStream
     "Print a representation of the receiver on aStream."
     | name string |
     name := self name.
-    string := (name anySatisfy: [ :each | '"$\<>'' `' includes: each ])
-	ifTrue: [ { ''''. name copyReplaceAll: '''' with: '''\'''''. '''' } join ]
-	ifFalse: [ name ].
+    (name anySatisfy: [ :each | '"(){}[]$\<>#'' `' includes: each ])
+	ifFalse: [ aStream nextPutAll: name. ^self ].
+
+    string := Directory pathSeparator = $/
+	ifTrue: [ '''%1''' % { name copyReplaceAll: '''' with: '''\''''' } ]
+	ifFalse: [ { '"'. name. '"' } join ].
 
     aStream nextPutAll: string
 ! !
@@ -469,6 +477,11 @@ stripExtension
 stripPath
     "Answer the file name and extension (if any) of the receiver"
     ^File stripPathFrom: self name
+!
+
+directory
+    "Answer the Directory object for the receiver's path"
+    ^Directory name: (File pathFor: self name)
 !
 
 path

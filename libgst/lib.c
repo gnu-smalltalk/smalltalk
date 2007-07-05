@@ -191,6 +191,9 @@ const char *_gst_image_file_path = NULL;
    home directory.  */
 const char *_gst_user_file_base_path;
 
+/* The path to the executable, derived from argv[0].  */
+const char *_gst_executable_path;
+
 /* Whether to look for user files.  */
 static mst_Boolean no_user_files;
 
@@ -441,6 +444,7 @@ gst_smalltalk_args (int argc,
 {
   smalltalk_argc = argc;
   smalltalk_argv = argv;
+  _gst_executable_path = _gst_find_executable (argv[0]);
 }
 
 

@@ -46,13 +46,14 @@ Options:
     -f --file=FILE        load file before running subsequent tests
     -p --package=PACKAGE  load package and run its tests
     -I --image-file=FILE  run tests on the specified image file
+       --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message
 '.
 
 "Parse the command-line arguments."
 Smalltalk
     arguments: '-h|--help -q|--quiet -v|-V|--verbose -f|--file: -p|--package:
-		-I|--image-file:'
+		-I|--image-file: --kernel-directory:'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [

@@ -95,6 +95,12 @@
 # include <windows.h>
 #endif
 
+/* Get declaration of _NSGetExecutablePath on MacOS X 10.2 or newer.  */
+#if HAVE_MACH_O_DYLD_H
+# define ENUM_DYLD_BOOL
+# include <mach-o/dyld.h>
+#endif
+
 #if defined MAP_ANONYMOUS && !defined MAP_ANON
 # define MAP_ANON MAP_ANONYMOUS
 #endif
@@ -966,6 +972,158 @@ mst_Boolean
 _gst_file_is_executable (const char *fileName)
 {
   return (access (fileName, X_OK) == 0);
+}
+
+#ifdef __linux__
+/* File descriptor of the executable, used for double checking.  */
+static int executable_fd = -1;
+#endif
+
+/* Tests whether a given pathname may belong to the executable.  */
+static mst_Boolean
+maybe_executable (const char *filename)
+{
+  if (!_gst_file_is_executable (filename))
+    return false;
+
+#ifdef __linux__
+  if (executable_fd >= 0)
+    {
+      /* If we already have an executable_fd, check that filename points to
+	 the same inode.  */
+      struct stat statexe, statfile;
+
+      if (fstat (executable_fd, &statexe) < 0
+	  || stat (filename, &statfile) < 0
+	  && !(statfile.st_dev
+	       && statfile.st_dev == statexe.st_dev
+	       && statfile.st_ino == statexe.st_ino))
+	return false;
+
+      close (executable_fd);
+      executable_fd = -1;
+    }
+#endif
+
+  return true;
+}
+
+/* Determine the full pathname of the current executable, freshly allocated.
+   Return NULL if unknown.  Guaranteed to work on Linux and Win32, Mac OS X.
+   Likely to work on the other Unixes (maybe except BeOS), under most
+   conditions.  */
+char *
+_gst_find_executable (const char *argv0)
+{
+#if defined WIN32
+  char location[MAX_PATH];
+  int length = GetModuleFileName (NULL, location, sizeof (location));
+  if (length <= 0)
+    return NULL;
+
+#if defined __CYGWIN__
+  {
+    /* On Cygwin, we need to convert paths coming from Win32 system calls
+       to the Unix-like slashified notation.  */
+    static char location_as_posix_path[2 * MAX_PATH];
+
+    /* There's no error return defined for cygwin_conv_to_posix_path.
+       See cygwin-api/func-cygwin-conv-to-posix-path.html.
+       Does it overflow the buffer of expected size MAX_PATH or does it
+       truncate the path?  I don't know.  Let's catch both.  */
+    cygwin_conv_to_posix_path (location, location_as_posix_path);
+    location_as_posix_path[MAX_PATH - 1] = '\0';
+    if (strlen (location_as_posix_path) >= MAX_PATH - 1)
+      /* A sign of buffer overflow or path truncation.  */
+      return NULL;
+
+    return _gst_get_full_file_name (location_as_posix_path);
+  }
+#else
+  return xstrdup (location);
+#endif
+
+#else /* Unix && !Cygwin */
+#ifdef PATH_MAX
+  int path_max = PATH_MAX;
+#else
+  int path_max = pathconf (name, _PC_PATH_MAX);
+  if (path_max <= 0)
+    path_max = 1024;
+#endif
+
+#if HAVE_MACH_O_DYLD_H && HAVE__NSGETEXECUTABLEPATH
+  char *location = alloca (path_max);
+  uint32_t length = path_max;
+  if (_NSGetExecutablePath (location, &length) == 0 && location[0] == '/')
+    return _gst_get_full_file_name (location);
+
+#elif defined __linux__
+  /* The executable is accessible as /proc/<pid>/exe.  In newer Linux
+     versions, also as /proc/self/exe.  Linux >= 2.1 provides a symlink
+     to the true pathname; older Linux versions give only device and ino,
+     enclosed in brackets, which we cannot use here.  */
+  {
+    char buf[6 + 10 + 5];
+    char *location = alloca (path_max);
+
+    sprintf (buf, "/proc/%d/exe", getpid ());
+    location = xreadlink (buf);
+    n = readlink (buf, location, path_max);
+    if (n > 0 && location[0] != '[')
+      return location;
+    if (executable_fd < 0)
+      executable_fd = open (buf, O_RDONLY, 0);
+  }
+#endif
+
+  if (*argv0 == '-')
+    argv0++;
+
+  /* Guess the executable's full path.  We assume the executable has been
+     called via execlp() or execvp() with properly set up argv[0].
+     exec searches paths without slashes in the directory list given
+     by $PATH.  */
+  if (!strchr (argv0, '/'))
+    {
+      const char *p_next = getenv ("PATH");
+      const char *p;
+
+      while ((p = p_next) != NULL)
+	{
+	  char *concat_name;
+
+	  p_next = strchr (p, ':');
+	  /* An empty PATH element designates the current directory.  */
+	  if (p_next == p + 1)
+	    concat_name = xstrdup (argv0);
+	  else if (!p_next)
+	    asprintf (&concat_name, "%s/%s", p, argv0);
+	  else
+	    asprintf (&concat_name, "%.*s/%s", p_next++ - p, p, argv0);
+
+	  if (maybe_executable (concat_name))
+	    {
+	      char *full_path = _gst_get_full_file_name (concat_name);
+	      free (concat_name);
+	      return full_path;
+	    }
+
+	  free (concat_name);
+	}
+      /* Not found in the PATH, assume the current directory.  */
+    }
+
+  if (maybe_executable (argv0))
+    return _gst_get_full_file_name (argv0);
+
+  /* No way to find the executable.  */
+#ifdef __linux__
+  close (executable_fd);
+  executable_fd = -1;
+#endif
+  return NULL;
+#endif
 }
 
 

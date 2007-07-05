@@ -186,6 +186,10 @@ extern mst_Boolean _gst_file_is_writeable (const char *fileName)
 extern mst_Boolean _gst_file_is_executable (const char *fileName)
   ATTRIBUTE_HIDDEN;
 
+/* Return a path to the executable given argv[0].  */
+extern char *_gst_find_executable (const char *argv0)
+  ATTRIBUTE_HIDDEN;
+
 /* Answer true if the file descriptor FD is associated to a pipe
    (it cannot be seeked through).  */
 extern mst_Boolean _gst_is_pipe (int fd)

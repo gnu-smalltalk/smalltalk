@@ -66,6 +66,9 @@ extern const char *_gst_image_file_path
    home directory.  */
 extern const char *_gst_user_file_base_path;
 
+/* The path to the executable.  */
+extern const char *_gst_executable_path;
+
 /* This is the name of the binary image to load.  If it is not NULL after the
    command line is parsed, the checking of the dates of the kernel source files
    against the image file date is overridden.  If it is NULL, it is set to

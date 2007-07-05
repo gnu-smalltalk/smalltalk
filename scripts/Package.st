@@ -182,7 +182,7 @@ Directory extend [
     emitMkdir [
 	| doThat |
 	self exists ifTrue: [ ^self ].
-	Command execute: [ (Directory name: self path) emitMkdir ].
+	Command execute: [ self directory emitMkdir ].
 	('mkdir %1' % { self }) displayNl.
 	Command execute: [ Directory create: self name ].
     ]
@@ -348,12 +348,19 @@ Command subclass: PkgInstall [
 
     run [
         "Create the installation directory."
-	| script result |
         self installDir emitMkdir.
 	[ super run ] ensure: [
 	    tmpDir isNil ifFalse: [ tmpDir remove ] ].
 
-	(self isOption: 'test') ifFalse: [ ^self ].
+	(Command dryRun not and: [ self isOption: 'load' ])
+	    ifTrue: [ ^self loadPackages ].
+
+	(self isOption: 'test') ifTrue: [ self runTests ]
+    ]
+
+    runTests [
+	"Run SUnit tests, used unless --load is given too."
+	| script result |
 	script := ''.
 	self packages do: [ :each || pkg |
 	    pkg := each.
@@ -369,6 +376,30 @@ Command subclass: PkgInstall [
 	result := TestSuitesScripter run: script quiet: false verbose: false.
 	result runCount = result passedCount
 	    ifFalse: [ ObjectMemory quit: 1 ]
+    ]
+
+    loadPackages [
+	"Call gst-load, needed because we added our code to the image."
+	| gstPackage execDir gstLoad pat packageList |
+	gstPackage := File name: File executable.
+	gstPackage stripPath = 'gst-tool'
+	    ifTrue: [
+		gstLoad := gstPackage.
+		pat := '%1 gst-load -I %2 --kernel-directory %3 %4 %5' ]
+	    ifFalse: [
+		gstLoad := gstPackage directory fileAt: 'gst-load'.
+		pat := '%1 -I %2 --kernel-directory %3 %4 %5' ].
+
+	packageList := ''.
+	self packages
+	    do: [ :each | packageList := packageList, ' ', each name ].
+
+	Smalltalk system: (pat % {
+	    gstLoad.
+	    File name: File image.
+	    Directory name: Directory kernel.
+	    (self isOption: 'test') ifTrue: [ '--test' ] ifFalse: [ '' ].
+	    packageList })
     ]
 
     tmpDir [
@@ -462,18 +493,23 @@ helpString :=
 'Usage:
     gst-package [OPTION]... FILES...
 
-    -n, --dry-run               print commands rather than running them
+Operation modes:
+        --install               make or install STAR packages (default)
         --uninstall             remove the packages mentioned in the FILES
         --dist                  copy files instead of creating STAR files.
         --list-files PKG        just output the list of files in the package
         --list-packages         just output the list of packages in the files
+	--help                  display this message and exit
+	--version               print version information and exit
+
+Common suboptions:
+    -n, --dry-run               print commands without running them
 	--srcdir DIR            look for non-built files in directory DIR
 	--distdir DIR	        for --dist, place files in directory DIR
 	--destdir DIR	        prefix the destination directory with DIR
         --target-directory DIR  install the files in DIR (unused for --dist)
-
-	--help                  display this message and exit
-	--version               print version information and exit
+    -I, --image-file=FILE       load into the specified image
+        --kernel-dir=PATH       use the specified kernel directory
 
 --install suboptions:
 	--test                  run unit tests after merging
@@ -495,13 +531,13 @@ The default target directory is ', Directory image, '
 
 [
     Smalltalk
-        "--load and --image-file are processed by gst-package.
+        "--kenrel-directory and --image-file are processed by gst-tool.
 	 --no-load present for backwards compatibility, it is now the default.
 	 --no-install is also present for backwards compatibility."
         arguments: '-h|--help --no-load --test --load --no-install --uninstall
             --dist -t|--target-directory: --list-files: --list-packages
             --srcdir: --distdir|--destdir: -n|--dry-run --all-files
-	    --vpath --copy -I|--image-file:'
+	    --vpath --copy -I|--image-file: --kernel-directory:'
 
         do: [ :opt :arg |
             opt = 'help' ifTrue: [

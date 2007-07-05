@@ -32,10 +32,10 @@ SUBDIRS += libgst . $(BUILT_PACKAGES) doc tests
 
 # Running gst inside the build directory...
 
-GST_ARGUMENTS = --no-user-files --kernel-dir="@abs_top_srcdir@/kernel" \
-          --image-dir="@abs_top_builddir@"
-GST = ./gst $(GST_ARGUMENTS)
-GST_PACKAGE = GST=./gst GSTARGS='$(GST_ARGUMENTS)' ./gst-package -I gst.im 
+GST = ./gst --no-user-files --kernel-dir="@abs_top_srcdir@/kernel" \
+	--image-dir="@abs_top_builddir@"
+GST_PACKAGE = ./gst-tool gst-package \
+	-I gst.im --kernel-dir="@abs_top_srcdir@/kernel"
 
 
 ###########################################################
@@ -72,7 +72,7 @@ nodist_lisp_LISP += gst-mode.el
 endif
 endif
 
-bin_SCRIPTS = gst-package gst-config gst-load gst-reload gst-sunit gst-blox
+bin_SCRIPTS = gst-config
 DISTCLEANFILES = termbold termnorm smalltalk-mode.el gst-mode.el pkgrules.tmp
 CLEANFILES = gst.im $(lisp_LISP)
 
@@ -90,12 +90,16 @@ gst-mode.el: gst-mode.el.in
 #
 ###########################################################
 
+AM_CPPFLAGS = -I$(top_srcdir)/libgst		\
+	-DCMD_ZIP="\"$(ZIP)\""			\
+	-DCMD_INSTALL="\"$(INSTALL)\""		\
+	-DCMD_LN_S="\"$(LN_S)\""
+
 bin_PROGRAMS = gst
 
 gst_SOURCES = main.c
 gst_LDADD = libgst/libgst.la @ICON@
 gst_DEPENDENCIES = libgst/libgst.la @ICON@
-AM_CPPFLAGS = -I$(top_srcdir)/libgst
 
 if ENABLE_DISASSEMBLER
 gst_LDADD += opcode/libdisass.la
@@ -106,6 +110,29 @@ endif
 # By default, we do not build the installed VM as a shared library: it is
 # a bit slower, and on x86 we also exchange the PIC register for the frame
 gst_LDFLAGS = -export-dynamic -static
+
+# The single gst-tool executable is installed with multiple names, hence
+# we use noinst here.
+noinst_PROGRAMS = gst-tool
+gst_tool_SOURCES = gst-tool.c
+gst_tool_LDADD = libgst/libgst.la
+gst_tool_DEPENDENCIES = libgst/libgst.la
+gst_tool_LDFLAGS = -export-dynamic
+
+GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package
+
+uninstall-local::
+	@for i in gst-load $(GST_EXTRA_TOOLS); do \
+	  echo rm -f "$(DESTDIR)$(bindir)/$$i"; \
+	  rm -f "$(DESTDIR)$(bindir)/$$i"; \
+	done
+
+install-exec-hook::
+	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL) gst-tool "$(DESTDIR)$(bindir)/gst-load"
+	@for i in $(GST_EXTRA_TOOLS); do \
+	  echo $(LN) -f "$(DESTDIR)$(bindir)/gst-load" "$(DESTDIR)$(bindir)/$$i"; \
+	  $(LN) -f "$(DESTDIR)$(bindir)/gst-load" "$(DESTDIR)$(bindir)/$$i"; \
+	done
 
 nodist_noinst_HEADERS = config.h
 DISTCLEANFILES += config.h
@@ -189,7 +216,7 @@ install-data-hook::
 	    -f @abs_top_srcdir@/scripts/Finish.st \
 	    "$(pkgdatadir)" "$(imagedir)" $(MODULES)
 
-uninstall-local:: gst-package
+uninstall-local:: gst-tool
 	$(GST_PACKAGE) \
 	  --uninstall --destdir="$(DESTDIR)" --target-dir="$(pkgdatadir)" \
 	  --srcdir=$(srcdir) $(DESTDIR)$(pkgdatadir)/packages.xml

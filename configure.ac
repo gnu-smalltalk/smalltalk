@@ -217,13 +217,14 @@ AC_FUNC_OBSTACK
 
 AC_CHECK_LIB(m, atan)
 GST_REPLACE_POLL
+gt_FUNC_SETENV
 AC_REPLACE_FUNCS(putenv strdup strerror strsignal mkstemp getpagesize \
 	getdtablesize strstr ftruncate floorl ceill sqrtl frexpl ldexpl asinl \
 	acosl atanl logl expl tanl sinl cosl truncl lrintl strsep strpbrk)
 AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname sbrk usleep lstat \
 	grantpt popen getrusage gettimeofday fork strchr utimes utime readlink \
 	sigsetmask alarm select mprotect madvise waitpid \
-	setsid spawnl nanosleep pread pwrite)
+	setsid spawnl nanosleep pread pwrite _NSGetExecutablePath)
 
 GST_FUNC_STRTOUL
 GST_FUNC_LOCALTIME
@@ -389,11 +390,6 @@ AC_SUBST(LTLIBOBJS)
 dnl Scripts & data files
 AC_CONFIG_FILES(gnu-smalltalk.pc)
 AC_CONFIG_FILES(gst-config, chmod +x gst-config)
-AC_CONFIG_FILES(gst-package, chmod +x gst-package)
-AC_CONFIG_FILES(gst-load, chmod +x gst-load)
-AC_CONFIG_FILES(gst-reload, chmod +x gst-reload)
-AC_CONFIG_FILES(gst-sunit, chmod +x gst-sunit)
-AC_CONFIG_FILES(gst-blox, chmod +x gst-blox)
 AC_CONFIG_FILES(tests/gst, chmod +x tests/gst)
 AC_CONFIG_FILES(libc.la)
 

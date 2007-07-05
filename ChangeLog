@@ -1,5 +1,15 @@
 2007-07-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Load.st: Add --kernel-directory.
+	* scripts/Test.st: Add --kernel-directory.
+	* scripts/Package.st: Add --kernel-directory, --load, --test.
+	* scripts/Browser.st: Move gst-blox.in here, remove shebang.
+
+	* kernel/File.st: Add #executable and #directory.  Quote with "
+	on Windows.
+
+2007-07-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/File.st: Fix typo.
 
 2007-07-04  Paolo Bonzini  <bonzini@gnu.org>

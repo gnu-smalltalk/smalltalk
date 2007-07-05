@@ -1,3 +1,11 @@
+2007-07-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lib.c: Add _gst_executable_path.
+	* libgst/lib.h: Set it in gst_smalltalk_args.
+	* libgst/dict.c: Set CSymbols.ExecutableFileName.
+	* libgst/sysdep.c: Add _gst_find_executable.
+	* libgst/sysdep.h: Declare _gst_find_executable.
+
 2007-07-04  Paolo Bonzini  <bonzini@gnu.org>
 
         * libgst/cint.c: Add binding for mkdtemp and chmod.

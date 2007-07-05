@@ -96,13 +96,13 @@ o   Processes that are garbage collected before they terminate execution (e.g.
 o   Startup time and quit time were improved widely (the time for running
     a simple "Hello, World" program is about one fifth of 2.3.x).
 
+o   The "<category: 'bar'>" pragma can be used to set the category
+    of a method.
+
 o   The graphical browser can now be started just by typing "gst-blox".
 
 o   The image is now installed in /usr/local/var/lib/smalltalk (which in
     most distributions will map to /var/lib/smalltalk).
-
-o   A pragma like "<category: 'bar'>" can be used to set the category
-    of a method.
 
 o   Since they are not portable outside Unix systems, the `archive' virtual
     filesystems (deb, lslR, mailfs, patchfs, uar, urar, uzoo, ulha, ucpio, utar)
@@ -160,6 +160,8 @@ o   Improvements to the ancillary scripts gst-load and gst-sunit.  In
 
 o   Improvements to the test suite.  Several of the modules included with
     GNU Smalltalk are tested.  The testsuite is now written using Autotest.
+
+o   Installed binaries do not require the Bourne shell anymore.
 
 o   Some libffi files (for IA64 and PA) were missing from the distribution.
 
