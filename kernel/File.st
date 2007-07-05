@@ -151,7 +151,7 @@ fullNameFor: aString
      to allow easy parsing"
     canonical := Directory pathSeparator = $/
 	ifTrue: [ aString ]
-	ifFalse: [ aString copyReplacing: $/ with: Directory pathSeparator ].
+	ifFalse: [ aString copyReplacing: $/ withObject: Directory pathSeparator ].
 
     (canonical substrings: Directory pathSeparator) do: [ :each |
 	each = '.' ifFalse: [
