@@ -995,7 +995,7 @@ maybe_executable (const char *filename)
 
       if (fstat (executable_fd, &statexe) < 0
 	  || stat (filename, &statfile) < 0
-	  && !(statfile.st_dev
+	  || !(statfile.st_dev
 	       && statfile.st_dev == statexe.st_dev
 	       && statfile.st_ino == statexe.st_ino))
 	return false;
@@ -1066,9 +1066,9 @@ _gst_find_executable (const char *argv0)
   {
     char buf[6 + 10 + 5];
     char *location = alloca (path_max);
+    ssize_t n;
 
     sprintf (buf, "/proc/%d/exe", getpid ());
-    location = xreadlink (buf);
     n = readlink (buf, location, path_max);
     if (n > 0 && location[0] != '[')
       return location;

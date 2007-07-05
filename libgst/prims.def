@@ -5548,7 +5548,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	{
 	  char buf[1];
 	  write (fd, buf, 0);
-	  errno == 0;
+	  errno = 0;
 	}
       break;
     }

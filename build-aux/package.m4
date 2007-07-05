@@ -23,6 +23,7 @@ m4_define([_GST_RULES_PREPARE],
 
 m4_define([_GST_PKG_ENABLE], [
   cat >> pkgrules.tmp << \EOF
+-include $(srcdir)/_GST_PKG_STAMP
 all-local: $1.star
 EOF
   m4_if([$3], [], [], 
@@ -73,7 +74,6 @@ dist-hook:: _GST_PKG_XML
 dist-hook:: $(srcdir)/_GST_PKG_STAMP
 	cp -p $< _GST_PKG_DISTDIR/stamp-classes
 
--include $(srcdir)/_GST_PKG_STAMP
 $(srcdir)/_GST_PKG_STAMP:: _GST_PKG_XML_IN
 	(echo '$1_FILES = \'; \
 	  $(GST_[]PACKAGE) --srcdir=$(srcdir) --vpath --list-files $1 $< | \

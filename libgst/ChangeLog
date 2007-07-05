@@ -1,5 +1,10 @@
 2007-07-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/prims.def: Fix "==" vs. "=" typo.
+	* libgst/sysdep.c: Fix previous change for Linux.
+
+2007-07-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/lib.c: Add _gst_executable_path.
 	* libgst/lib.h: Set it in gst_smalltalk_args.
 	* libgst/dict.c: Set CSymbols.ExecutableFileName.

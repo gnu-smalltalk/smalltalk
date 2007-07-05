@@ -361,7 +361,8 @@ main(int argc, const char **argv)
   else
     program_name = argv[0];
 
-  if (!strcmp (program_name, "gst-tool"))
+  if (!strcmp (program_name, "gst-tool")
+      || !strcmp (program_name, "lt-gst-tool"))
     {
       argv++, argc--;
       program_name = argv[0];
