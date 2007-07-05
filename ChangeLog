@@ -1,3 +1,7 @@
+2007-07-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/File.st: Fix typo.
+
 2007-07-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/File.st: Create absolute symlink if first component of path
