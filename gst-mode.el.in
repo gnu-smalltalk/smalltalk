@@ -191,6 +191,7 @@ gst-mode-hook is called after comint-mode-hook."
   (require 'comint)
   (comint-mode)
   (setq comint-prompt-regexp smalltalk-prompt-pattern)
+  (setq comint-use-prompt-regexp t) 
   (use-local-map gst-mode-map)
   (make-local-variable 'mode-status)
   (make-local-variable 'smalltalk-command-string)
