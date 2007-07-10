@@ -63,9 +63,9 @@
 #include <stdio.h>
 
 const char *program_name;
-const char **smalltalk_argv;
-int smalltalk_argc;
-int error;
+const char *kernel_dir;
+const char *image_file;
+int flags = GST_NO_TTY;
 
 struct tool {
   const char *name;
@@ -129,15 +129,9 @@ struct option *long_opts;
 void
 option_error (const char *s, ...)
 {
-  static int first;
   va_list ap;
-  if (!first)
-    return;
-
-  error = 1;
-  first = 1;
   va_start (ap, s);
-
+  fprintf (stderr, "%s: ", program_name);
   vfprintf (stderr, s, ap);
   fprintf (stderr, "\n");
   va_end (ap);
@@ -224,22 +218,16 @@ parse_option (int short_opt, const char *long_opt, const char *arg)
   if (short_opt == 'I'
       || (long_opt && !strcmp (long_opt, "image-file")))
     {
-      static int found_option;
-      if (found_option)
+      if (image_file)
 	option_error ("duplicate --image-file option");
-      found_option = true;
-      smalltalk_argv[smalltalk_argc++] = "-I";
-      smalltalk_argv[smalltalk_argc++] = arg;
+      image_file = arg;
     }
 
   if (long_opt && !strcmp (long_opt, "kernel-directory"))
     {
-      static int found_option;
-      if (found_option)
+      if (kernel_dir)
 	option_error ("duplicate --kernel-directory option");
-      found_option = true;
-      smalltalk_argv[smalltalk_argc++] = "--kernel-directory";
-      smalltalk_argv[smalltalk_argc++] = arg;
+      kernel_dir = arg;
     }
 }
 
@@ -352,6 +340,8 @@ parse_options (const char **argv)
 int
 main(int argc, const char **argv)
 {
+  int smalltalk_argc;
+  const char **smalltalk_argv;
   int i;
   int result;
 
@@ -361,16 +351,14 @@ main(int argc, const char **argv)
   else
     program_name = argv[0];
 
+  /* Check if used in the build tree.  */
   if (!strcmp (program_name, "gst-tool")
       || !strcmp (program_name, "lt-gst-tool"))
     {
       argv++, argc--;
       program_name = argv[0];
+      flags |= GST_IGNORE_USER_FILES;
     }
-
-  smalltalk_argv = alloca (sizeof (const char *) * (argc + 9));
-  smalltalk_argc = 1;
-  smalltalk_argv[0] = argv[0];
 
   for (i = 0; ; i++)
     if (!tools[i].name)
@@ -381,15 +369,18 @@ main(int argc, const char **argv)
   setup_options (tools[i].options);
   parse_options (&argv[1]);
 
-  smalltalk_argv[smalltalk_argc++] = "--no-user-files";
-  smalltalk_argv[smalltalk_argc++] = "-qK";
-  smalltalk_argv[smalltalk_argc++] = tools[i].script;
-  smalltalk_argv[smalltalk_argc++] = "-a";
   if (tools[i].force_opt)
-    smalltalk_argv[smalltalk_argc++] = tools[i].force_opt;
-
-  memcpy (&smalltalk_argv[smalltalk_argc], &argv[1], argc * sizeof (char *));
-  smalltalk_argc += argc - 1;
+    {
+      smalltalk_argv = alloca (sizeof (const char *) * (argc + 1));
+      smalltalk_argc = argc;
+      smalltalk_argv[0] = tools[i].force_opt;
+      memcpy (&smalltalk_argv[1], &argv[1], argc * sizeof (char *));
+    }
+  else
+    {
+      smalltalk_argv = argv + 1;
+      smalltalk_argc = argc - 1;
+    }
 
 #ifdef CMD_LN_S
   setenv ("LN_S", CMD_LN_S, 0);
@@ -401,11 +392,12 @@ main(int argc, const char **argv)
   setenv ("XZIP", CMD_ZIP, 0);
 #endif
 
-  gst_smalltalk_args(smalltalk_argc, smalltalk_argv);
-  result = gst_init_smalltalk();
+  gst_set_var (GST_VERBOSITY, 1);
+  gst_smalltalk_args (smalltalk_argc, smalltalk_argv);
+  result = gst_initialize (kernel_dir, image_file, flags);
   if (result != 0)
     exit (result < 0 ? 1 : result);
     
-  gst_top_level_loop();
-  exit (error ? 1 : 0);
+  gst_process_file (tools[i].script, GST_DIR_KERNEL_SYSTEM);
+  exit (0);
 }

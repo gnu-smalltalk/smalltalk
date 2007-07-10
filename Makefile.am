@@ -32,10 +32,9 @@ SUBDIRS += libgst . $(BUILT_PACKAGES) doc tests
 
 # Running gst inside the build directory...
 
-GST = ./gst --no-user-files --kernel-dir="@abs_top_srcdir@/kernel" \
-	--image-dir="@abs_top_builddir@"
-GST_PACKAGE = ./gst-tool gst-package \
-	-I gst.im --kernel-dir="@abs_top_srcdir@/kernel"
+GST_OPTS = --kernel-dir="@abs_top_srcdir@/kernel" -I "@abs_top_builddir@/gst.im"
+GST = ./gst --no-user-files $(GST_OPTS)
+GST_PACKAGE = ./gst-tool gst-package $(GST_OPTS)
 
 
 ###########################################################
@@ -93,7 +92,9 @@ gst-mode.el: gst-mode.el.in
 AM_CPPFLAGS = -I$(top_srcdir)/libgst		\
 	-DCMD_ZIP="\"$(ZIP)\""			\
 	-DCMD_INSTALL="\"$(INSTALL)\""		\
-	-DCMD_LN_S="\"$(LN_S)\""
+	-DCMD_LN_S="\"$(LN_S)\""		\
+	-DKERNEL_PATH=\"$(pkgdatadir)/kernel\"	\
+	-DIMAGE_PATH=\"$(imagedir)\"
 
 bin_PROGRAMS = gst
 
@@ -117,7 +118,7 @@ noinst_PROGRAMS = gst-tool
 gst_tool_SOURCES = gst-tool.c
 gst_tool_LDADD = libgst/libgst.la
 gst_tool_DEPENDENCIES = libgst/libgst.la
-gst_tool_LDFLAGS = -export-dynamic
+gst_tool_LDFLAGS = -export-dynamic -static
 
 GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package
 
@@ -212,7 +213,7 @@ install-data-hook::
 	cd $(DESTDIR)$(imagedir) && \
 	  $(DESTDIR)$(bindir)/gst --no-user-files -i \
 	    --kernel-dir="$(DESTDIR)$(pkgdatadir)/kernel" \
-	    --image-dir="$(DESTDIR)$(imagedir)" \
+	    -I"$(DESTDIR)$(imagedir)/gst.im" \
 	    -f @abs_top_srcdir@/scripts/Finish.st \
 	    "$(pkgdatadir)" "$(imagedir)" $(MODULES)
 

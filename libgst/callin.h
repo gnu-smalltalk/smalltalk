@@ -58,6 +58,18 @@
 
 
 /* Sends SELECTOR (which should be a Symbol, otherwise _gst_nil_oop is
+   returned) to RECEIVER.  The message arguments pointed to by AP
+   should also be OOPs (otherwise, an access violation exception is
+   pretty likely) and are passed in a NULL-terminated list after the
+   selector.  The value returned from the method is passed back as an
+   OOP to the C program as the result of the function, or _gst_nil_oop
+   if the number of arguments is wrong.  */
+extern OOP _gst_va_msg_send (OOP receiver,
+			     OOP selector,
+			     va_list ap) 
+  ATTRIBUTE_HIDDEN;
+
+/* Sends SELECTOR (which should be a Symbol, otherwise _gst_nil_oop is
    returned) to RECEIVER.  The message arguments should also be OOPs
    (otherwise, an access violation exception is pretty likely) and are
    passed in a NULL-terminated list after the selector.  The value
@@ -87,6 +99,11 @@ extern OOP _gst_vmsg_send (OOP receiver,
    OOP to the C program as the result of the function, or _gst_nil_oop
    if the number of arguments is wrong.  */
 extern OOP _gst_str_msg_send (OOP receiver, const char * sel, ...) 
+  ATTRIBUTE_HIDDEN;
+
+/* See manual; basically it takes care of the conversion from C to
+   Smalltalk data types.  */
+extern void _gst_va_msg_sendf (PTR resultPtr, const char * fmt, va_list ap)
   ATTRIBUTE_HIDDEN;
 
 /* See manual; basically it takes care of the conversion from C to
@@ -205,7 +222,7 @@ extern wchar_t *_gst_oop_to_wstring (OOP oop)
   ATTRIBUTE_HIDDEN;
 extern char *_gst_oop_to_byte_array (OOP oop) 
   ATTRIBUTE_HIDDEN;
-extern PTR _gst_oop_to_cobject (OOP oop) 
+extern PTR _gst_oop_to_c_object (OOP oop) 
   ATTRIBUTE_HIDDEN;
 extern long double _gst_oop_to_long_double (OOP oop) 
   ATTRIBUTE_HIDDEN;
@@ -244,10 +261,6 @@ extern void _gst_copy_registered_oops (void)
 
 /* Initializes the registry of OOPs which some C code is holding.  */
 extern void _gst_init_oopregistry (void) 
-  ATTRIBUTE_HIDDEN;
-
-/* Initializes the VMProxy.  */
-extern void _gst_init_vmproxy (void) 
   ATTRIBUTE_HIDDEN;
 
 #endif /* GST_CALLIN_H */

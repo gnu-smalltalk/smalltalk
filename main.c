@@ -56,27 +56,353 @@
 #endif
 
 #include "gstpub.h"
+#include "getopt.h"
 
-#if STDC_HEADERS
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
+#include <sys/stat.h>
 
 #ifdef ENABLE_DISASSEMBLER
 #define TRUE_FALSE_ALREADY_DEFINED
 #include "dis-asm.h"
 #endif
 
+static const char help_text[] =
+  "GNU Smalltalk usage:"
+  "\n"
+  "\n    gst [ flag ... ] [ file ... ]"
+  "\n    gst [ flag ... ] { -f | --file } file [ args ... ]"
+  "\n"
+  "\nShort flags can appear either as -xyz or as -x -y -z.  If an option is"
+  "\nmandatory for a long option, it is also mandatory for a short one. The"
+  "\ncurrently defined set of flags is:"
+  "\n   -a --smalltalk-args\t\t Pass the remaining arguments to Smalltalk."
+  "\n   -c --core-dump\t\t Dump core on fatal signal."
+  "\n   -D --declaration-trace\t Trace compilation of all loaded files."
+  "\n   -E --execution-trace\t\t Trace execution of all loaded files."
+  "\n   -g --no-gc-message\t\t Do not print garbage collection messages."
+  "\n   -H --help\t\t\t Print this message and exit."
+  "\n   -i --rebuild-image\t\t Ignore the image file; rebuild it from scratch."
+  "\n      --maybe-rebuild-image\t Rebuild the image file from scratch if\n\t\t\t\t any kernel file is newer."
+  "\n   -I --image FILE\t\t Instead of `gst.im', use FILE as the image\n\t\t\t\t file, and ignore the kernel files' timestamps.\n"
+  "\n   -K --kernel-file FILE\t Make FILE's path relative to the image path."
+  "\n   -q --quiet --silent\t\t Do not print execution information."
+  "\n   -r --regression-test\t\t Run in regression test mode, i.e. make\n\t\t\t\t printed messages constant."
+  "\n   -S --snapshot\t\t Save a snapshot just before exiting."
+  "\n   -v --version\t\t\t Print the Smalltalk version number and exit."
+  "\n   -V --verbose\t\t\t Show names of loaded files and execution stats."
+  "\n      --emacs-mode\t\t Execute as a `process' (from within Emacs)"
+  "\n      --kernel-dir DIR\t\t Look for kernel files in directory DIR."
+  "\n      --no-user-files\t\t Don't read user customization files.\n"
+  "\n   -\t\t\t\t Read input from standard input explicitly."
+  "\n"
+  "\nFiles are loaded one after the other.  After the last one is loaded,"
+  "\nSmalltalk will exit.  If no files are specified, Smalltalk reads from"
+  "\nthe terminal, with prompts."
+  "\n"
+  "\nIn the second form, the file after -f is the last loaded file; any"
+  "\nparameter after that file is passed to the Smalltalk program."
+  "\n" "\nReport bugs to help-smalltalk@gnu.org\n";
+
+static const char copyright_and_legal_stuff_text[] =
+  "GNU Smalltalk version %s"
+  "\nCopyright 2006 Free Software Foundation, Inc."
+  "\nWritten by Steve Byrne (sbb@gnu.org) and Paolo Bonzini (bonzini@gnu.org)"
+  "\n"
+  "\nGNU Smalltalk comes with NO WARRANTY, to the extent permitted by law."
+  "\nYou may redistribute copies of GNU Smalltalk under the terms of the"
+  "\nGNU General Public License.  For more information, see the file named"
+  "\nCOPYING."
+  "\n"
+  "\nUsing default kernel path: %s" "\nUsing default image path: %s"
+  "\n";
+
+#define OPT_KERNEL_DIR 2
+#define OPT_NO_USER 3
+#define OPT_EMACS_MODE 4
+#define OPT_MAYBE_REBUILD 5
+
+#define OPTIONS "-acDEf:ghiI:K:lL:QqrSvV"
+
+static const struct option long_options[] = {
+  {"smalltalk-args", 0, 0, 'a'},
+  {"core-dump", 0, 0, 'c'},
+  {"declaration-trace", 0, 0, 'D'},
+  {"execution-trace", 0, 0, 'E'},
+  {"file", 0, 0, 'f'},
+  {"kernel-directory", 1, 0, OPT_KERNEL_DIR},
+  {"no-user-files", 0, 0, OPT_NO_USER},
+  {"no-gc-message", 0, 0, 'g'},
+  {"help", 0, 0, 'h'},
+  {"maybe-rebuild-image", 0, 0, OPT_MAYBE_REBUILD},
+  {"rebuild-image", 0, 0, 'i'},
+  {"image-file", 1, 0, 'I'},
+  {"kernel-file", 1, 0, 'K'},
+  {"emacs-mode", 0, 0, OPT_EMACS_MODE},
+  {"quiet", 0, 0, 'q'},
+  {"no-messages", 0, 0, 'q'},
+  {"silent", 0, 0, 'q'},
+  {"regression-test", 0, 0, 'r'},
+  {"snapshot", 0, 0, 'S'},
+  {"version", 0, 0, 'v'},
+  {"verbose", 0, 0, 'V'},
+  {NULL, 0, 0, 0}
+};
+
+struct loaded_file {
+  mst_Boolean kernel_path;
+  const char *file_name;
+};
+
+static struct loaded_file *loaded_files;
+int n_loaded_files;
+
+
+/* These contain the default path that was picked (after looking at the
+   environment variables) for the kernel files and the image.  */
+char *kernel_dir = NULL;
+
+/* Mapped to the corresponding GST variable, with additional care to
+   handle more than 1 occurrence of the option.  */
+int declare_tracing;
+int execution_tracing;
+
+/* Flags to be passed to gst_initialize.  Set mostly from command-line
+   variables.  */
+int flags;
+
+/* We implement -S ourselves.  This flag is set to 1 if -S is passed.  */
+mst_Boolean snapshot_after_load;
+
+/* This is the name of the binary image to load.  If it is not NULL after the
+   command line is parsed, the checking of the dates of the kernel source files
+   against the image file date is overridden.  If it is NULL, it is set to
+   default_image_name.  */
+const char *image_file = NULL;
+
+/* Prompt; modified if --emacs-process is given to add a ^A in front of it.  */
+const char *stdin_prompt = "st> ";
+
+
+#define EMACS_PROCESS_MARKER    "\001"
+
+void
+parse_args (int argc,
+	    const char **argv)
+{
+  int ch, prev_optind = 1, minus_a_optind = -1;
+
+  /* get rid of getopt's own error reporting for invalid options */
+  opterr = 1;
+
+  while ((ch = getopt_long (argc, (char **) argv, OPTIONS,
+			    long_options, NULL)) != -1)
+    {
+
+#if DEBUG_GETOPT
+      printf ("%c \"%s\"  %d  %d  %d\n", ch, optarg ? optarg : "",
+	      optind, prev_optind, minus_a_optind);
+#endif
+
+      switch (ch)
+	{
+	case 'c':
+	  gst_set_var (GST_MAKE_CORE_FILE, true);
+	  break;
+	case 'D':
+	  declare_tracing++;
+	  break;
+	case 'E':
+	  execution_tracing++;
+	  break;
+	case 'g':
+	  gst_set_var (GST_GC_MESSAGE, false);
+	  break;
+	case OPT_MAYBE_REBUILD:
+	  flags |= GST_MAYBE_REBUILD_IMAGE;
+	  break;
+	case 'i':
+	  flags |= GST_REBUILD_IMAGE;
+	  break;
+	case OPT_EMACS_MODE:
+	  stdin_prompt = EMACS_PROCESS_MARKER "st> ";
+	  gst_set_var (GST_VERBOSITY, 1);
+	  break;
+	case 'q':
+	case 'Q':
+	  gst_set_var (GST_VERBOSITY, 1);
+	  break;
+	case 'r':
+	  gst_set_var (GST_REGRESSION_TESTING, true);
+	  break;
+	case 'S':
+	  snapshot_after_load = true;
+	  break;
+	case 'V':
+	  gst_set_var (GST_VERBOSITY, 3);
+	  break;
+
+	case 'f':
+	  /* Same as -q, passing a file, and -a.  */
+	  gst_set_var (GST_VERBOSITY, 1);
+	  loaded_files[n_loaded_files].kernel_path = false;
+	  loaded_files[n_loaded_files++].file_name = optarg;
+
+	case 'a':
+	  /* "Officially", the C command line ends here.  The Smalltalk 
+	     command line, instead, starts right after the parameter
+	     containing -a. -a is handled specially by the code that
+	     tests the minus_a_optind variable, so that ./gst -aI 
+	     xxx yyy for example interprets xxx as the image to be
+	     loaded.  */
+	  minus_a_optind = optind;
+	  break;
+
+	case 'I':
+	  if (image_file)
+	    {
+	      fprintf (stderr, "gst: Only one -I option should be given\n");
+	      exit (1);
+	    }
+	  image_file = optarg;
+	  break;
+
+	case 'K':
+	  loaded_files[n_loaded_files].kernel_path = true;
+	  loaded_files[n_loaded_files++].file_name = optarg;
+	  break;
+
+	case OPT_KERNEL_DIR:
+	  if (kernel_dir)
+	    {
+	      fprintf (stderr, "gst: Only one --kernel-directory option should"
+			       " be given\n");
+	      exit (1);
+	    }
+	  kernel_dir = optarg;
+	  break;
+
+	case OPT_NO_USER:
+	  flags |= GST_IGNORE_USER_FILES;
+	  break;
+
+	case 'v':
+	  printf (copyright_and_legal_stuff_text, VERSION, KERNEL_PATH,
+		  IMAGE_PATH);
+	  exit (0);
+
+	case '\1':
+	  loaded_files[n_loaded_files].kernel_path = false;
+	  loaded_files[n_loaded_files++].file_name = optarg;
+	  break;
+
+	default:
+	  /* Fall through and show help message */
+
+	case 'h':
+	  printf (help_text);
+	  exit (ch == 'h' ? 1 : 0);
+	}
+
+      if (minus_a_optind > -1
+	  && (ch == '\1'
+	      || ch == 'f'
+	      || optind > prev_optind
+	      || optind > minus_a_optind))
+	{
+	  /* If the first argument was not an option, undo and leave.  */
+	  if (ch == '\1')
+	    optind--;
+
+	  /* If the first argument after -a was not an option, or if there
+	     is nothing after -a, or if we finished processing the argument
+	     which included -a, leave.  */
+	  gst_smalltalk_args (argc - optind, argv + optind);
+	  break;
+	}
+
+      prev_optind = optind;
+    }
+}
+
 int
 main(int argc, const char **argv)
 {
   int result;
-  gst_smalltalk_args(argc, argv);
-  result = gst_init_smalltalk();
-  if (result == 0)
-    gst_top_level_loop();
+  struct loaded_file *file;
 
-  exit(result <= 0 ? 0 : result);
+  loaded_files =
+    (struct loaded_file *) alloca (sizeof (struct loaded_file) * argc);
+
+  parse_args (argc, argv);
+
+  /* These might go away in the next release.  */
+  if (!kernel_dir)
+    {
+      kernel_dir = getenv ("SMALLTALK_KERNEL");
+      if (kernel_dir)
+	{
+          flags |= GST_IGNORE_BAD_KERNEL_PATH;
+          fprintf (stderr, "gst: SMALLTALK_KERNEL variable deprecated, "
+		           "use --kernel-directory instead\n");
+	}
+    }
+
+  if (!image_file)
+    {
+      const char *image_dir = getenv ("SMALLTALK_IMAGE");
+      flags |= GST_MAYBE_REBUILD_IMAGE;
+      if (image_dir)
+        {
+	  char *p;
+	  asprintf (&p, "%s/gst.im", image_dir);
+	  image_file = p;
+          flags |= GST_IGNORE_BAD_IMAGE_PATH;
+          fprintf (stderr, "SMALLTALK_IMAGE variable deprecated, "
+		           "use -I instead\n");
+        }
+    }
+
+  gst_set_var (GST_DECLARE_TRACING, declare_tracing > 1);
+  gst_set_var (GST_EXECUTION_TRACING, execution_tracing > 1);
+  result = gst_initialize (kernel_dir, image_file, flags);
+  if (result)
+    exit (result);
+
+  gst_set_var (GST_DECLARE_TRACING, declare_tracing > 0);
+  gst_set_var (GST_EXECUTION_TRACING, execution_tracing > 0);
+
+  for (file = loaded_files; file < &loaded_files[n_loaded_files]; file++)
+    {
+      /* - by itself indicates standard input */
+      if (!file->kernel_path && !strcmp (file->file_name, "-"))
+        gst_process_stdin (stdin_prompt);
+
+      else
+	{
+	  if (!gst_process_file (file->file_name,
+				 file->kernel_path ? GST_DIR_BASE : GST_DIR_ABS))
+	    {
+	      if (file->kernel_path)
+		fprintf (stderr, "gst: Couldn't open kernel file %s\n", file->file_name);
+	      else
+		fprintf (stderr, "gst: Couldn't open file %s\n", file->file_name);
+	    }
+	}
+    }
+
+  if (n_loaded_files == 0)
+    gst_process_stdin (stdin_prompt);
+
+  if (snapshot_after_load)
+    gst_msg_sendf (NULL, "%O snapshot: %O", 
+		   gst_class_name_to_oop ("ObjectMemory"),
+                   gst_str_msg_send (gst_class_name_to_oop ("File"),
+				     "image", NULL));
+
+  gst_invoke_hook (GST_ABOUT_TO_QUIT);
+  exit (0);
 }
 
 #ifdef ENABLE_DISASSEMBLER

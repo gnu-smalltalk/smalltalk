@@ -506,15 +506,54 @@ _gst_get_termination_method (void)
   return (termination_method);
 }
 
+static void
+invoke_hook_smalltalk (enum gst_vm_hook hook)
+{
+  const char *hook_name;
+  if (!_gst_kernel_initialized)
+    return;
+
+  switch (hook) {
+  case GST_BEFORE_EVAL:
+    hook_name = "beforeEvaluation";
+    break;
+
+  case GST_AFTER_EVAL:
+    hook_name = "afterEvaluation";
+    break;
+
+  case GST_RETURN_FROM_SNAPSHOT:
+    hook_name = "returnFromSnapshot";
+    break;
+
+  case GST_ABOUT_TO_QUIT:
+    hook_name = "aboutToQuit";
+    break;
+
+  case GST_ABOUT_TO_SNAPSHOT:
+    hook_name = "aboutToSnapshot";
+    break;
+
+  case GST_FINISHED_SNAPSHOT:
+    hook_name = "finishedSnapshot";
+    break;
+
+  default:
+    return;
+  }
+
+  _gst_msg_sendf (NULL, "%v %o changed: %S", 
+		  _gst_object_memory_class, hook_name);
+}
+
 void
-_gst_invoke_hook (const char *hook)
+_gst_invoke_hook (enum gst_vm_hook hook)
 {
   int save_execution;
   save_execution = _gst_execution_tracing;
   if (_gst_execution_tracing == 1)
     _gst_execution_tracing = 0;
-  _gst_msg_sendf (NULL, "%v %o changed: %S", 
-		  _gst_object_memory_class, hook);
+  invoke_hook_smalltalk (hook);
   _gst_execution_tracing = save_execution;
 }
 
@@ -599,7 +638,6 @@ _gst_execute_statements (tree_node temps,
   YYLTYPE loc;
 
   if (_gst_regression_testing
-      || _gst_emacs_process
       || _gst_verbosity < 2
       || !_gst_get_cur_stream_prompt ())
     quiet = true;
@@ -657,8 +695,7 @@ _gst_execute_statements (tree_node temps,
   getrusage (RUSAGE_SELF, &startRusage);
 #endif
 
-  if (_gst_kernel_initialized)
-    _gst_invoke_hook ("beforeEvaluation");
+  _gst_invoke_hook (GST_BEFORE_EVAL);
 
   /* send a message to NIL, which will find this synthetic method
      definition in Object and execute it */
@@ -670,8 +707,7 @@ _gst_execute_statements (tree_node temps,
   getrusage (RUSAGE_SELF, &endRusage);
 #endif
 
-  if (_gst_kernel_initialized)
-    _gst_invoke_hook ("afterEvaluation");
+  _gst_invoke_hook (GST_AFTER_EVAL);
 
   INC_RESTORE_POINTER (incPtr);
 

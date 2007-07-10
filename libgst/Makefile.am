@@ -42,13 +42,13 @@ libgst_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined \
 	-export-symbols-regex "^gst_.*"
 
 libgst_la_SOURCES = \
-       interp.c    lib.c         gst-parse.c    lex.c        \
+       gstpub.c    files.c       gst-parse.c    lex.c        \
        str.c       tree.c        byte.c         comp.c       \
        sym.c       dict.c        oop.c  	opt.c        \
        save.c      cint.c    	 heap.c	        input.c      \
        sysdep.c    callin.c      xlat.c         events.c     \
        mpz.c       print.c	 alloc.c	security.c   \
-       re.c
+       re.c	   interp.c    
 
 # definitions for genprims
 
@@ -81,7 +81,7 @@ dist_noinst_DATA = valgrind.supp prims.def byte.def vm.def builtins.gperf
 STAMP_FILES = prims.stamp match.stamp vm.stamp
 
 noinst_HEADERS = \
-	gstpriv.h lib.h lex.h str.h re.h \
+	gstpriv.h files.h lex.h str.h re.h \
 	tree.h byte.h interp.h comp.h memzero.h \
 	sym.h dict.h oop.h save.h cint.h xlat.h \
 	sysdep.h callin.h gstpub.h opt.h mpz.h \

@@ -318,7 +318,7 @@ extern void _gst_reset_compilation_category ()
 
 /* This function will send a message to ObjectMemory (a system
    class) asking it to broadcast the event named HOOK.  */
-extern void _gst_invoke_hook (const char *hook) 
+extern void _gst_invoke_hook (enum gst_vm_hook hook) 
   ATTRIBUTE_HIDDEN;
 
 /* Prepares the compiler for execution, initializing some variables.  */

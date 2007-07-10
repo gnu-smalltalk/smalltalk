@@ -207,9 +207,6 @@ static OOP classify_type_symbol (OOP symbolOOP,
 static int get_errno (void);
 
 /* Encapsulate binary incompatibilities between various C libraries.  */
-static int my_utime (const char *name,
-		     long new_atime,
-		     long new_mtime);
 static int my_stat (const char *name,
 		    gst_stat * out);
 static int my_lstat (const char *name,
@@ -439,7 +436,7 @@ get_argc (void)
 const char *
 get_argv (int n)
 {
-  return (n <= _gst_smalltalk_passed_argc
+  return (n >= 1 && n <= _gst_smalltalk_passed_argc
 	  ? _gst_smalltalk_passed_argv[n - 1]
 	  : NULL);
 }
@@ -449,14 +446,14 @@ dld_open (const char *filename)
 {
 #ifdef ENABLE_DLD
   lt_dlhandle handle;
-  void (*initModule) ();
+  void (*initModule) (struct VMProxy *);
 
   handle = lt_dlopenext (filename);
   if (handle)
     {
       initModule = lt_dlsym (handle, "gst_initModule");
       if (initModule)
-	initModule (&gst_interpreter_proxy);
+	initModule (_gst_get_vmproxy ());
     }
 
   return (handle);

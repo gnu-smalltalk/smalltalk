@@ -73,13 +73,7 @@ extern const char *_gst_executable_path;
    command line is parsed, the checking of the dates of the kernel source files
    against the image file date is overridden.  If it is NULL, it is set to
    default_image_name.  */
-extern char *_gst_binary_image_name 
-  ATTRIBUTE_HIDDEN;
-
-/* This is used by the callin functions to auto-initialize Smalltalk.
-   When it's not true, initialization needs to be performed.  It's set
-   to true by gst_init_smalltalk().  */
-extern mst_Boolean _gst_smalltalk_initialized 
+extern const char *_gst_binary_image_name 
   ATTRIBUTE_HIDDEN;
 
 /* This is TRUE if we are doing regression testing, and causes
@@ -116,6 +110,43 @@ extern mst_Boolean _gst_kernel_initialized
 /* Set by cmd line flag.  If true, Smalltalk is more verbose about
    what it's doing.  */
 extern mst_Boolean _gst_verbose 
+  ATTRIBUTE_HIDDEN;
+
+/* This is true if the image initialization has already been
+   started.  */
+extern mst_Boolean _gst_smalltalk_initialized
+  ATTRIBUTE_HIDDEN;
+
+/* This sets the arguments to be passed to the Smalltalk library,
+   which are the same that are available by the `gst' executable.  */
+extern void _gst_smalltalk_args (int argc,
+				 const char **argv)
+  ATTRIBUTE_HIDDEN;
+
+/* Set the fundamental paths for the Smalltalk VM and initialize
+   it.  */
+extern int _gst_initialize (const char *kernel_dir,
+			    const char *image_file,
+			    int flags)
+  ATTRIBUTE_HIDDEN;
+
+/* This processes files passed to gst_smalltalk_args and, if none
+   was passed, stdin is looked for input.  */
+extern void _gst_top_level_loop (void)
+  ATTRIBUTE_HIDDEN;
+
+/* Returns a copy of the VMProxy.  In gstpub.c.  */
+extern struct VMProxy *_gst_get_vmproxy (void) 
+  ATTRIBUTE_HIDDEN;
+
+/* Attempts to find a viable kernel Smalltalk file (.st file).
+   FILENAME is a simple file name, sans directory; the file name to use 
+   for the particular kernel file is returned.
+   If there is a file in the .stkernel directory with name FILENAME, that is
+   returned; otherwise the kernel path is prepended to FILENAME (separated
+   by a slash, of course) and that is stored in the string that is returned.  */
+extern char *_gst_find_file (const char *fileName,
+			     enum gst_file_dir dir)
   ATTRIBUTE_HIDDEN;
 
 #endif /* GST_LIB_H */

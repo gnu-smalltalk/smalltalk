@@ -72,104 +72,108 @@ extern "C"
 
 #include "gst.h"
 
-#ifndef __PROTO
-# ifndef __STDC__
-#  define __PROTO(args) ()
-# else
-#  define __PROTO(args) args
-# endif
-#endif
 
 typedef struct VMProxy
 {
   OOP nilOOP, trueOOP, falseOOP;
 
-  OOP (*msgSend) __PROTO ((OOP receiver,
-			   OOP selector, 
-			   ...));
-  OOP (*vmsgSend) __PROTO ((OOP receiver,
-			    OOP selector,
-			    OOP * args));
-  OOP (*nvmsgSend) __PROTO ((OOP receiver,
-			     OOP selector,
-			     OOP * args,
-			     int nargs));
+  OOP (*msgSend) (OOP receiver,
+		  OOP selector, 
+		  ...);
+  OOP (*vmsgSend) (OOP receiver,
+		   OOP selector,
+		   OOP * args);
+  OOP (*nvmsgSend) (OOP receiver,
+		    OOP selector,
+		    OOP * args,
+		    int nargs);
     
-  OOP (*strMsgSend) __PROTO ((OOP receiver,
-			      const char * selector,
-			      ...));
-  void (*msgSendf) __PROTO ((PTR resultPtr,
-			     const char *fmt,
-			     ...));
-  OOP (*evalExpr) __PROTO ((const char *str));
-  void (*evalCode) __PROTO ((const char *str));
+  OOP (*strMsgSend) (OOP receiver,
+		     const char * selector,
+		     ...);
+  void (*msgSendf) (PTR resultPtr,
+		    const char *fmt,
+		    ...);
+  OOP (*evalExpr) (const char *str);
+  void (*evalCode) (const char *str);
 
-  OOP (*objectAlloc) __PROTO ((OOP classOOP,
-			       int size));
-  int (*basicSize) __PROTO ((OOP oop));
+  OOP (*objectAlloc) (OOP classOOP,
+		      int size);
+  int (*basicSize) (OOP oop);
   
   /* Actually funcAddr is a function pointer, but we don't know the
      returned type so we must declare it as PTR */
-  void (*defineCFunc) __PROTO ((const char *funcName,
-				PTR funcAddr));
-  OOP (*registerOOP) __PROTO ((OOP oop));
-  void (*unregisterOOP) __PROTO ((OOP oop));
+  void (*defineCFunc) (const char *funcName,
+		       PTR funcAddr);
+  OOP (*registerOOP) (OOP oop);
+  void (*unregisterOOP) (OOP oop);
 
   /* Convert C datatypes to Smalltalk types */
   
-  OOP (*idToOOP) __PROTO ((long i));
-  OOP (*intToOOP) __PROTO ((long i));
-  OOP (*floatToOOP) __PROTO ((double f));
-  OOP (*boolToOOP) __PROTO ((int b));
-  OOP (*charToOOP) __PROTO ((char c));
-  OOP (*classNameToOOP) __PROTO ((const char *name));
-  OOP (*stringToOOP) __PROTO ((const char *str));
-  OOP (*byteArrayToOOP) __PROTO ((const char *str,
-				  int n));
-  OOP (*symbolToOOP) __PROTO ((const char *str));
-  OOP (*cObjectToOOP) __PROTO ((PTR co));
-  OOP (*typeNameToOOP) __PROTO ((const char *name));
-  void (*setCObject) __PROTO ((OOP oop, PTR co));
+  OOP (*idToOOP) (long i);
+  OOP (*intToOOP) (long i);
+  OOP (*floatToOOP) (double f);
+  OOP (*boolToOOP) (int b);
+  OOP (*charToOOP) (char c);
+  OOP (*classNameToOOP) (const char *name);
+  OOP (*stringToOOP) (const char *str);
+  OOP (*byteArrayToOOP) (const char *str,
+			 int n);
+  OOP (*symbolToOOP) (const char *str);
+  OOP (*cObjectToOOP) (PTR co);
+  OOP (*typeNameToOOP) (const char *name);
+  void (*setCObject) (OOP oop, PTR co);
 
   /* Convert Smalltalk datatypes to C data types */
 
-  long (*OOPToC) __PROTO ((OOP oop));	/* sometimes answers a PTR */
-  long (*OOPToId) __PROTO ((OOP oop));
-  long (*OOPToInt) __PROTO ((OOP oop));
-  double (*OOPToFloat) __PROTO ((OOP oop));
-  int (*OOPToBool) __PROTO ((OOP oop));
-  char (*OOPToChar) __PROTO ((OOP oop));
-  char *(*OOPToString) __PROTO ((OOP oop));
-  char *(*OOPToByteArray) __PROTO ((OOP oop));
-  PTR (*OOPToCObject) __PROTO ((OOP oop));
+  long (*OOPToC) (OOP oop);	/* sometimes answers a PTR */
+  long (*OOPToId) (OOP oop);
+  long (*OOPToInt) (OOP oop);
+  double (*OOPToFloat) (OOP oop);
+  int (*OOPToBool) (OOP oop);
+  char (*OOPToChar) (OOP oop);
+  char *(*OOPToString) (OOP oop);
+  char *(*OOPToByteArray) (OOP oop);
+  PTR (*OOPToCObject) (OOP oop);
 
   /* Smalltalk process support */
-  void (*asyncSignal) __PROTO ((OOP semaphoreOOP));
-  void (*syncWait) __PROTO ((OOP semaphoreOOP));
-  void (*asyncSignalAndUnregister) __PROTO ((OOP semaphoreOOP));
+  void (*asyncSignal) (OOP semaphoreOOP);
+  void (*syncWait) (OOP semaphoreOOP);
+  void (*asyncSignalAndUnregister) (OOP semaphoreOOP);
 
   /* Array-of-OOP registry support.  Move these above
      when we break binary compatibility.  */
-  void (*registerOOPArray) __PROTO ((OOP **first, OOP **last));
-  void (*unregisterOOPArray) __PROTO ((OOP **first));
+  void (*registerOOPArray) (OOP **first, OOP **last);
+  void (*unregisterOOPArray) (OOP **first);
 
   /* More conversions.  */
-  long double (*OOPToLongDouble) __PROTO ((OOP oop));
-  OOP (*longDoubleToOOP) __PROTO ((long double f));
+  long double (*OOPToLongDouble) (OOP oop);
+  OOP (*longDoubleToOOP) (long double f);
 
   /* More functions, added in 2.2.  */
-  OOP (*getObjectClass) __PROTO ((OOP oop));
-  OOP (*getSuperclass) __PROTO ((OOP oop));
-  mst_Boolean (*classIsKindOf) __PROTO ((OOP oop, OOP candidate));
-  mst_Boolean (*objectIsKindOf) __PROTO ((OOP oop, OOP candidate));
-  OOP (*perform) __PROTO ((OOP oop, OOP selector));
-  OOP (*performWith) __PROTO ((OOP oop, OOP selector, OOP arg));
-  mst_Boolean (*classImplementsSelector) __PROTO ((OOP classOOP, OOP selector));
-  mst_Boolean (*classCanUnderstand) __PROTO ((OOP classOOP, OOP selector));
-  mst_Boolean (*respondsTo) __PROTO ((OOP oop, OOP selector));
-  size_t (*OOPSize) __PROTO ((OOP oop));
-  OOP (*OOPAt) __PROTO ((OOP oop, size_t index));
-  OOP (*OOPAtPut) __PROTO ((OOP oop, size_t index, OOP newOOP));
+  OOP (*getObjectClass) (OOP oop);
+  OOP (*getSuperclass) (OOP oop);
+  mst_Boolean (*classIsKindOf) (OOP oop,
+				OOP candidate);
+  mst_Boolean (*objectIsKindOf) (OOP oop,
+				 OOP candidate);
+  OOP (*perform) (OOP oop,
+		  OOP selector);
+  OOP (*performWith) (OOP oop,
+		      OOP selector,
+		      OOP arg);
+  mst_Boolean (*classImplementsSelector) (OOP classOOP,
+					  OOP selector);
+  mst_Boolean (*classCanUnderstand) (OOP classOOP,
+				     OOP selector);
+  mst_Boolean (*respondsTo) (OOP oop,
+			     OOP selector);
+  size_t (*OOPSize) (OOP oop);
+  OOP (*OOPAt) (OOP oop,
+		size_t index);
+  OOP (*OOPAtPut) (OOP oop,
+		   size_t index,
+		   OOP newOOP);
 
   /* Some system classes.  */
   OOP objectClass, arrayClass, stringClass, characterClass, smallIntegerClass,
@@ -183,17 +187,18 @@ typedef struct VMProxy
   OOP processorOOP;
 
   /* More functions, added in 2.3.  */
-  OOP (*wcharToOOP) __PROTO ((wchar_t wc));
-  OOP (*wstringToOOP) __PROTO ((const wchar_t *str));
-  wchar_t (*OOPToWChar) __PROTO ((OOP oop));
-  wchar_t *(*OOPToWString) __PROTO ((OOP oop));
-} VMProxy;
+  OOP (*wcharToOOP) (wchar_t wc);
+  OOP (*wstringToOOP) (const wchar_t *str);
+  wchar_t (*OOPToWChar) (OOP oop);
+  wchar_t *(*OOPToWString) (OOP oop);
 
-#define INDEXED_WORD(obj, n)   ( ((long *) ((obj) + 1))		    [(n)-1] )
-#define INDEXED_BYTE(obj, n)   ( ((char *) ((obj) + 1))		    [(n)-1] )
-#define INDEXED_OOP(obj, n)    ( ((OOP  *) ((obj) + 1))		    [(n)-1] )
-#define ARRAY_OOP_AT(obj, n)   ( ((OOP  *) ((gst_object) obj)->data) [(n)-1] )
-#define STRING_OOP_AT(obj, n)  ( ((char *) ((gst_object) obj)->data) [(n)-1] )
+  /* 3.0+ functions.  */
+  void (*processStdin) (const char *);
+  mst_Boolean (*processFile) (const char *fileName, enum gst_file_dir dir);
+  int (*getVar) (enum gst_var_index index);
+  int (*setVar) (enum gst_var_index index, int value);
+  void (*invokeHook) (enum gst_vm_hook);
+} VMProxy;
 
 /* Compatibility section */
 #define indexedWord(obj, n)   INDEXED_WORD(obj, n)
@@ -210,21 +215,76 @@ typedef struct VMProxy
    are not meant to be called by a module, which is brought up by
    GNU Smalltalk when the VM is already up and running.  */
 
-/* This loads the image and prepares the Smalltalk environment.
-   Return -1 if the Smalltalk main loop should not be run but
-   without returning an erroneous exit code, 0 if it should be
-   run, and >0 if there was an error (such as the inability
-   to bootstrap).  */
-extern int gst_init_smalltalk __PROTO ((void));
+/* These are the library counterparts of the functions in files.h.  */
+extern void gst_smalltalk_args (int argc, const char **argv);
+extern int gst_initialize (const char *kernel_dir,
+			   const char *image_file,
+			   int flags);
 
-/* This sets the arguments to be passed to the Smalltalk library,
-   which are the same that are available by the `gst' executable.  */
-extern void gst_smalltalk_args __PROTO ((int argc,
-					 const char **argv));
+/* Functions in input.h.  */
+extern void gst_process_stdin (const char *prompt);
+extern mst_Boolean gst_process_file (const char *fileName, enum gst_file_dir dir);
 
-/* This processes files passed to gst_smalltalk_args and, if none
-   was passed, stdin is looked for input.  */
-extern void gst_top_level_loop __PROTO ((void));
+/* Functions in interp.h.  */
+extern int gst_get_var (int index);
+extern int gst_set_var (int index, int value);
+
+/* Functions in comp.h.  */
+extern void gst_invoke_hook (enum gst_vm_hook);
+
+/* These are the library counterparts of the functions in
+   gst_vm_proxy.  */
+extern OOP gst_msg_send (OOP receiver, OOP selector, ...);
+extern OOP gst_vmsg_send (OOP receiver, OOP selector, OOP * args);
+extern OOP gst_nvmsg_send (OOP receiver, OOP selector, OOP * args, int nargs);
+extern OOP gst_str_msg_send (OOP receiver, const char * selector, ...);
+extern void gst_msg_sendf (PTR result_ptr, const char *fmt, ...);
+extern OOP gst_eval_expr (const char *str);
+extern void gst_eval_code (const char *str);
+extern OOP gst_object_alloc (OOP class_oop, int size);
+extern int gst_basic_size (OOP oop);
+extern void gst_define_cfunc (const char *func_name, PTR func_addr);
+extern OOP gst_register_oop (OOP oop);
+extern void gst_unregister_oop (OOP oop);
+extern OOP gst_id_to_oop (long i);
+extern OOP gst_int_to_oop (long i);
+extern OOP gst_float_to_oop (double f);
+extern OOP gst_bool_to_oop (int b);
+extern OOP gst_char_to_oop (char c);
+extern OOP gst_class_name_to_oop (const char *name);
+extern OOP gst_string_to_oop (const char *str);
+extern OOP gst_byte_array_to_oop (const char *str, int n);
+extern OOP gst_symbol_to_oop (const char *str);
+extern OOP gst_c_object_to_oop (PTR co);
+extern OOP gst_type_name_to_oop (const char *name);
+extern void gst_set_c_o_bject (OOP oop, PTR co);
+extern long gst_oop_to_c (OOP oop);	/* sometimes answers a PTR */
+extern long gst_oop_to_id (OOP oop);
+extern long gst_oop_to_int (OOP oop);
+extern double gst_oop_to_float (OOP oop);
+extern int gst_oop_to_bool (OOP oop);
+extern char gst_oop_to_char (OOP oop);
+extern char *gst_oop_to_string (OOP oop);
+extern char *gst_oop_to_byte_array (OOP oop);
+extern PTR gst_oop_to_c_object (OOP oop);
+extern void gst_async_signal (OOP semaphore_oop);
+extern void gst_sync_wait (OOP semaphore_oop);
+extern void gst_async_signal_and_unregister (OOP semaphore_oop);
+extern void gst_register_oop_array (OOP **first, OOP **last);
+extern void gst_unregister_oop_array (OOP **first);
+extern long double gst_oop_to_long_double (OOP oop);
+extern OOP gst_long_double_to_oop (long double f);
+extern OOP gst_get_object_class (OOP oop);
+extern OOP gst_get_superclass (OOP oop);
+extern mst_Boolean gst_class_is_kind_of (OOP oop, OOP candidate);
+extern mst_Boolean gst_object_is_kind_of (OOP oop, OOP candidate);
+extern OOP gst_perform_with (OOP oop, OOP selector, OOP arg);
+extern mst_Boolean gst_class_implements_selector (OOP class_oop, OOP selector);
+extern mst_Boolean gst_class_can_understand (OOP class_oop, OOP selector);
+extern mst_Boolean gst_responds_to (OOP oop, OOP selector);
+extern size_t gst_oop_size (OOP oop);
+extern OOP gst_oop_at (OOP oop, size_t index);
+extern OOP gst_oop_at_put (OOP oop, size_t index, OOP new_oop); 
 
 /* This is exclusively for programs who link with libgst.a; plugins
    should not use this VMProxy but rather the one they receive in
@@ -234,7 +294,5 @@ extern VMProxy gst_interpreter_proxy;
 #ifdef __cplusplus
 }
 #endif
-
-#undef __PROTO
 
 #endif /* GST_GSTPUB_H */

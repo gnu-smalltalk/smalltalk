@@ -176,4 +176,46 @@ struct object_s
 #define IS_OOP(oop) \
   (! IS_INT(oop) )
 
+/* enum types used by the public APIs.  */
+enum gst_file_dir {
+  GST_DIR_ABS,
+  GST_DIR_KERNEL_SYSTEM,
+  GST_DIR_KERNEL,
+  GST_DIR_BASE
+};
+
+enum gst_var_index {
+  GST_DECLARE_TRACING,
+  GST_EXECUTION_TRACING,
+  GST_EXECUTION_TRACING_VERBOSE,
+  GST_GC_MESSAGE,
+  GST_VERBOSITY,
+  GST_MAKE_CORE_FILE,
+  GST_REGRESSION_TESTING
+};
+
+enum gst_init_flags {
+  GST_REBUILD_IMAGE = 1,
+  GST_MAYBE_REBUILD_IMAGE = 2,
+  GST_IGNORE_USER_FILES = 4,
+  GST_IGNORE_BAD_IMAGE_PATH = 8,
+  GST_IGNORE_BAD_KERNEL_PATH = 16,
+  GST_NO_TTY = 32,
+};
+
+enum gst_vm_hook {
+  GST_BEFORE_EVAL,
+  GST_AFTER_EVAL,
+  GST_RETURN_FROM_SNAPSHOT,
+  GST_ABOUT_TO_QUIT,
+  GST_ABOUT_TO_SNAPSHOT,
+  GST_FINISHED_SNAPSHOT
+};
+
+#define INDEXED_WORD(obj, n)   ( ((long *) ((obj) + 1))		    [(n)-1] )
+#define INDEXED_BYTE(obj, n)   ( ((char *) ((obj) + 1))		    [(n)-1] )
+#define INDEXED_OOP(obj, n)    ( ((OOP  *) ((obj) + 1))		    [(n)-1] )
+#define ARRAY_OOP_AT(obj, n)   ( ((OOP  *) ((gst_object) obj)->data) [(n)-1] )
+#define STRING_OOP_AT(obj, n)  ( ((char *) ((gst_object) obj)->data) [(n)-1] )
+
 #endif /* GST_GST_H */

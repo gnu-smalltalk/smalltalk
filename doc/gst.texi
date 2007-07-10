@@ -353,11 +353,10 @@ This option is disabled when the dynamic
 translator (@pxref{Dynamic translator}) is enabled.
 @end ignore
 
-@item --image-directory
-@itemx --kernel-directory
+@item --kernel-directory
 Specify, respectively, the directory in which the image file @file{gst.im}
 will be looked for and saved, and the directory from which the kernel
-source files will be loaded.  These are used mostly while compiling
+source files will be loaded.  This is used mostly while compiling
 @gst{} itself.
 
 @item --no-user-files
@@ -423,11 +422,18 @@ kernel files newer than the image file, or the image file's version
 stamp out of date with respect to the Smalltalk version.  After the
 kernel definitions have been loaded, a new image file will be saved.
 
+@item --maybe-rebuild-image
+Check for kernel files newer than the image file, or the image file's
+version stamp out of date with respect to the Smalltalk version.
+If these checks find the image is out of date, the kernel definitions
+will be loaded and a new image file will be saved.  This behavior
+is the default when @option{-I} is not given, but must be specified
+explicitly.
+
 @item -I @var{file} --image-file @var{file}
 Use the image file named @var{file} as the image file to load.  This
 option completely bypasses the standard image file and checking the file
-dates on the kernel files.  In addition, it sets the image directory
-to the path of @var{file}.
+dates on the kernel files.
 
 @item -l --log-changes
 Produce a log of the compiled Smalltalk code to st-changes.st, in the
@@ -3677,6 +3683,24 @@ is the receiver, the second is the selector, the third is the sole
 argument.
 @end deftypefun
 
+@deftypefun OOP invokeHook (int)
+Calls into Smalltalk to process a @code{ObjectMemory} hook given by
+the parameter.  In practice, @code{changed:} is sent to @code{ObjectMemory}
+with a symbol derived from the parameter.  The parameter can be one of:
+@itemize
+@item @code{GST_BEFORE_EVAL}
+@item @code{GST_AFTER_EVAL}
+@item @code{GST_ABOUT_TO_QUIT}
+@item @code{GST_RETURN_FROM_SNAPSHOT}
+@item @code{GST_ABOUT_TO_SNAPSHOT}
+@item @code{GST_FINISHED_SNAPSHOT}
+@end itemize
+
+All cases where the last three should be used should be covered in
+@gst{}'s source code.  The first three, however, can actually be useful
+in user code.
+@end deftypefun
+
 The two functions that directly accept Smalltalk code are named
 @code{evalCode} and @code{evalExpr}, and they're basically the same.
 They both accept a single parameter, a pointer to the code to be
@@ -4211,7 +4235,7 @@ interest.
 
 How to initialize @gst{} is most briefly and easily explained by looking
 at @gst{}'s own source code.  For this reason, here is a snippet
-from @file{main.c}.
+from @file{gst-tool.c}.
 
 @example
 
@@ -4220,13 +4244,13 @@ int main(argc, argv)
 int     argc;
 char    **argv;
 @{
-  int result;
-  gst_smalltalk_args(argc, argv);
-  result = gst_init_smalltalk();
-  if (result < 0)
-    result = 0;
-  else if (result == 0)
-    gst_top_level_loop();
+  gst_set_var (GST_VERBOSITY, 1);
+  gst_smalltalk_args (smalltalk_argc, smalltalk_argv);
+  result = gst_initialize (kernel_dir, image_file, GST_NO_TTY);
+  if (result != 0)
+    exit (result < 0 ? 1 : result);
+
+  gst_process_file (tools[i].script, GST_DIR_KERNEL_SYSTEM);
 
   exit(result);
 @}
@@ -4235,30 +4259,45 @@ char    **argv;
 
 Your initialization code will be almost the same as that in @gst{}'s
 @code{main()}, with the exception of the call to
-@code{gst_top_level_loop}.  All you'll have to do is to pass some
-arguments to the @gst{} library via @code{gst_smalltalk_args}, and then
-call @code{gst_init_smalltalk}.
+@code{gst_process_file}.  All you'll have to do is to pass some
+arguments to the @gst{} library via @code{gst_smalltalk_args}, possibly
+modify some defaults using @code{gst_get_var} and @code{gst_set_var},
+and then call @code{gst_initialize}.
 
-Note that @code{gst_init_smalltalk} will likely take some time (from a
-second to 30-40 seconds), because it has to check if the image file must
-be be rebuilt and, if so, it reloads and recompiles the 37000 lines of
-Smalltalk code in a basic image.  To avoid this check, pass a @option{-I}
-flag:
+Variable indices that can be passed to  @code{gst_get_var} and
+@code{gst_set_var} include:
 
-@example
-char myArgv[][] = @{ "-I", "myprog.im", NULL @};
-int myArgc;
-/* @dots{} */
-myArgc = sizeof(myArgv) / sizeof (char *) - 1;
-smalltalkArgs(myArgc, myArgv);
-@end example
+@table @code
+@item GST_DECLARE_TRACING
+@item GST_EXECUTION_TRACING
+@item GST_EXECUTION_TRACING_VERBOSE
+@item GST_GC_MESSAGE
+@item GST_VERBOSITY
+@item GST_MAKE_CORE_FILE
+@item GST_REGRESSION_TESTING
+@end table
 
-The result of @code{gst_init_smalltalk} is as follows: @code{0} means
-``go on'', @code{-1} means ``don't run the top-level loop, but exit with
-a zero error code'', while anything else is an error code to be passed
-to @code{exit}.  In practice, @code{-1} is answered when you pass the
-@code{--help} or @code{--version} options: if you don't pass them,
-you can safely ignore it.
+While the flags that can be passed as the last parameter to
+@code{gst_initialize} are any combination of these:
+
+@table @code
+@item GST_REBUILD_IMAGE,
+@item GST_MAYBE_REBUILD_IMAGE,
+@item GST_IGNORE_USER_FILES,
+@item GST_IGNORE_BAD_IMAGE_NAME,
+@item GST_IGNORE_BAD_IMAGE_PATH,
+@item GST_IGNORE_BAD_KERNEL_PATH,
+@item GST_NO_TTY
+@end table
+
+Note that @code{gst_initialize} will likely take some time (from a
+tenth of a second to 3-4 seconds), because it has to check if the image
+file must be be rebuilt and, if so, it reloads and recompiles the 37000
+lines of Smalltalk code in a basic image.  To avoid this check, pass a
+valid image file as the third argument to @code{gst_initialize}:
+
+The result of @code{gst_init_smalltalk} is @code{0} for success,
+while anything else is an error code.
 
 If you're using @gst{} as an extension library, you might also want to
 disable the two @code{ObjectMemory} class methods, @code{quit} and
@@ -4277,9 +4316,9 @@ your program in a less traumatic way, or redefining these two methods to
 exit through a call out to a C routine in your program.
 
 Also, note that it is not a problem if you develop the class libraries
-for your programs within @gst{}'s environment @b{without}
-@code{defineCFunc}-ing your own C call-outs, since @gst{} recalculates
-the addresses of the C call-outs every time it is started.
+for your programs within @gst{}'s environment (which will not call
+@code{defineCFunc} for your own C call-outs), since the addresses of
+the C call-outs are looked up again when an image is restored.
 
 
 

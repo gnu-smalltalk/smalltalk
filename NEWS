@@ -36,6 +36,10 @@ o   GNU Smalltalk now needs InfoZIP to be installed on the machine where
     In the future, the dependency on InfoZIP will be limited to compiling
     GNU Smalltalk, or may be removed altogether.
 
+o   The ABI for external usage has changed.  libgst.a does not know anymore
+    how to parse options, but exports functions to achieve the same effect
+    as options.
+
 
 Packages improvements:
 

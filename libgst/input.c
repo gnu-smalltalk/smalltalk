@@ -57,9 +57,6 @@
 # include <readline/history.h>
 #endif
 
-#define EMACS_PROCESS_MARKER	'\001'	/* ^A as marker -- random
-					   choice */
-
 typedef struct gst_file_segment
 {
   OBJ_HEADER;
@@ -105,7 +102,7 @@ typedef struct input_stream
 
   int line;
   int column;
-  mst_Boolean prompt;
+  const char *prompt;
 
   OOP fileNameOOP;		/* the full path name for file */
   const char *fileName;
@@ -147,10 +144,8 @@ static int poll_and_read (int fd, char *buf, int n);
 static int change_str = -1;
 
 
-/* If true, the normal execution information is supressed, and the
-   prompt is emitted with a special marker character ahead of it to
-   let the process filter know that the execution has completed.  */
-mst_Boolean _gst_emacs_process = false;
+/* If true, readline is disabled.  */
+mst_Boolean _gst_no_tty = false;
 
 /* >= 1 if completions are enabled, < 1 if they are not.  Available
    for completeness even if Readline is not used.  */
@@ -259,7 +254,6 @@ _gst_push_unix_file (int fd,
   newStream->st_file.ptr = newStream->st_file.buf;
   newStream->st_file.end = newStream->st_file.buf;
   newStream->fileName = fileName;
-  newStream->prompt = isatty (fd);
   newStream->fileOffset = lseek (fd, 0, SEEK_CUR);
 }
 
@@ -283,7 +277,6 @@ _gst_push_stream_oop (OOP oop)
   else
     newStream->fileName = "a Smalltalk Stream";
 
-  newStream->prompt = false;
   _gst_register_oop (oop);
 }
 
@@ -297,7 +290,6 @@ _gst_push_smalltalk_string (OOP stringOOP)
   newStream->st_str.strBase = (char *) _gst_to_cstring (stringOOP);
   newStream->st_str.str = newStream->st_str.strBase;
   newStream->fileName = "a Smalltalk string";
-  newStream->prompt = false;
 }
 
 void
@@ -310,7 +302,6 @@ _gst_push_cstring (const char *string)
   newStream->st_str.strBase = xstrdup (string);
   newStream->st_str.str = newStream->st_str.strBase;
   newStream->fileName = "a C string";
-  newStream->prompt = false;
 }
 
 void
@@ -319,7 +310,7 @@ _gst_push_stdin_string (void)
 #ifdef HAVE_READLINE
   input_stream newStream;
 
-  if (_gst_emacs_process || !isatty (0))
+  if (_gst_no_tty)
     {
 #endif
       _gst_push_unix_file (0, "stdin");
@@ -336,7 +327,6 @@ _gst_push_stdin_string (void)
   newStream->st_oop.ptr = NULL;
   newStream->st_oop.end = NULL;
   newStream->fileName = "stdin";	/* that's where we get input from */
-  newStream->prompt = true;
 #endif
 }
 
@@ -353,6 +343,7 @@ push_new_stream (stream_type type)
   newStream->fileOffset = -1;
   newStream->type = type;
   newStream->fileName = NULL;
+  newStream->prompt = NULL;
   newStream->fileNameOOP = _gst_nil_oop;
   newStream->prevStream = in_stream;
   in_stream = newStream;
@@ -431,10 +422,7 @@ my_getc (input_stream stream)
     case STREAM_FILE:
       if (in_stream->column == 0 && in_stream->prompt)
 	{
-	  if (_gst_emacs_process)
-	    printf ("%c", EMACS_PROCESS_MARKER);
-
-	  printf ("st> ");
+	  printf ("%s", in_stream->prompt);
 	  fflush(stdout);
 	}
 
@@ -458,7 +446,9 @@ my_getc (input_stream stream)
       /* Refill the buffer...  */
       if (stream->st_oop.ptr == stream->st_oop.end)
 	{
-	  char *buf = readline ((char *) "st> ");
+	  char *buf = readline (in_stream->prompt
+				? (char *) in_stream->prompt
+				: (char *) "");
 	  if (!buf)
 	    return EOF;
 
@@ -834,6 +824,53 @@ poll_and_read (int fd, char *buf, int n)
   else
     return -1;
 }
+
+void
+_gst_process_stdin (const char *prompt)
+{
+  if (_gst_verbosity == 3 || isatty (0))
+    {
+      printf ("GNU Smalltalk ready\n\n");
+      fflush (stdout);
+    }
+
+  _gst_non_interactive = false;
+  _gst_push_stdin_string ();
+  if (isatty (0))
+    in_stream->prompt = prompt;
+  _gst_parse_stream (false);
+  _gst_pop_stream (true);
+  _gst_non_interactive = true;
+}
+
+mst_Boolean
+_gst_process_file (const char *fileName, enum gst_file_dir dir)
+{
+  enum undeclared_strategy old;
+  int fd;
+  char *f;
+
+  f = _gst_find_file (fileName, dir);
+  if (!f)
+    return false;
+
+  fd = _gst_open_file (f, "r");
+  if (fd != -1)
+    {
+      if (_gst_verbosity == 3)
+	printf ("Processing %s\n", f);
+
+      old = _gst_set_undeclared (UNDECLARED_GLOBALS);
+      _gst_push_unix_file (fd, f);
+      _gst_parse_stream (false);
+      _gst_pop_stream (true);
+      _gst_set_undeclared (old);
+    }
+
+  xfree (f);
+  return (true);
+}
+
 
 #ifdef HAVE_READLINE
 /* Find apostrophes and double them */

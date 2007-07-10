@@ -27,7 +27,7 @@ MOSTLYCLEANFILES = gst-libs.me gst-libs.mes gst-base.me gst-base.mes \
 ##
 ####################################################
 
-$(srcdir)/gst.1: $(top_srcdir)/libgst/lib.c $(top_srcdir)/configure.ac
+$(srcdir)/gst.1: $(top_srcdir)/main.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) --info-page gst \
 	  --name "the GNU Smalltalk virtual machine" $(top_builddir)/gst >$@
 

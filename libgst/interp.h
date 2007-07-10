@@ -577,4 +577,17 @@ extern void _gst_set_primitive_attributes (int primitive,
 extern void _gst_init_primitives () 
   ATTRIBUTE_HIDDEN;
 
+/* Get the value of internal variable whose number is INDEX; the
+   list of valid variables is in gstpub.h.  Return -1 if the index
+   is invalid.  */
+extern int _gst_get_var (enum gst_var_index index)
+  ATTRIBUTE_HIDDEN;
+
+/* Set the value of internal variable whose number is INDEX; the
+   list of valid variables is in gstpub.h.  Return -1 if the index
+   is invalid or the value is negative, otherwise return the previous
+   value.  */
+extern int _gst_set_var (enum gst_var_index index, int value)
+  ATTRIBUTE_HIDDEN;
+
 #endif /* GST_INTERP_H */

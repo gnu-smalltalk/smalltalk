@@ -270,7 +270,7 @@ _gst_save_to_file (const char *fileName)
   if (imageFd < 0)
     return (false);
 
-  _gst_invoke_hook ("aboutToSnapshot");
+  _gst_invoke_hook (GST_ABOUT_TO_SNAPSHOT);
 
   _gst_global_gc (0);
   _gst_finish_incremental_gc ();
@@ -306,7 +306,7 @@ _gst_save_to_file (const char *fileName)
   buffer_write_flush (imageFd);
   close (imageFd);
 
-  _gst_invoke_hook ("finishedSnapshot");
+  _gst_invoke_hook (GST_FINISHED_SNAPSHOT);
 
   return (true);
 }

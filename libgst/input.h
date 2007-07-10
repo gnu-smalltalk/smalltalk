@@ -66,10 +66,8 @@ typedef enum
 }
 stream_type;
 
-/* If true, the normal execution information is supressed, and the
-   prompt is emitted with a special marker character ahead of it to
-   let the process filter know that the execution has completed.  */
-extern mst_Boolean _gst_emacs_process 
+/* If true, readline is suppressed.  */
+extern mst_Boolean _gst_no_tty 
   ATTRIBUTE_HIDDEN;
 
 /* Pass file descriptor FD, printed as file name FILENAME, to the
@@ -212,6 +210,16 @@ extern void _gst_enable_completion (void)
 extern void _gst_disable_completion (void) 
   ATTRIBUTE_HIDDEN;
 
+/* Parse the Smalltalk source code read from stdin, showing the
+   PROMPT that is passed.  */
+extern void _gst_process_stdin (const char *prompt)
+  ATTRIBUTE_HIDDEN;
+
+/* Parse the Smalltalk source code read from file FILE found within
+   the search path DIR.  */
+extern mst_Boolean _gst_process_file (const char *fileName,
+				      enum gst_file_dir dir)
+  ATTRIBUTE_HIDDEN;
 
 #endif /* GST_INPUT_H */
 

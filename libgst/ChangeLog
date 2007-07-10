@@ -1,3 +1,37 @@
+2007-07-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lib.c: Rename...
+	* libgst/files.c: ... to this.
+
+	* libgst/files.c: Change "gst_" functions to "_gst_".
+	* libgst/callin.c: Move gst_interpreter_proxy and _gst_init_vmproxy...
+	* libgst/gstpub.c: ... here (new file).  Add "gst_*" functions.
+	* libgst/callin.h: Rename *cobject functions to *c_object.
+
+	* libgst/interp.c: Change bool_addr_index to _gst_{get,set}_var.
+	* libgst/prims.def: Switch to new interface.
+	
+	* libgst/files.c: Rename find_kernel_file to _gst_find_file, drop
+	second parameter.
+	* libgst/input.c: Add _gst_process_stdin, _gst_process_file.
+	* libgst/gstpub.c: Add public and VMProxy counterparts.
+
+	* libgst/comp.c: Turn _gst_invoke_hook parameter into an enum.
+	* libgst/files.c: Turn _gst_invoke_hook parameter into an enum.
+	* libgst/save.c: Turn _gst_invoke_hook parameter into an enum.
+	* libgst/gstpub.c: Add public and VMProxy counterparts.
+	
+	* libgst/input.c: Add _gst_no_tty and turn "prompt" field into char *.
+	* libgst/files.c: Remove --emacs-process and -S handling.
+	
+	* libgst/files.c: Create _gst_initialize out of init_paths and
+	_gst_init_smalltalk, remove SMALLTALK_KERNEL and SMALLTALK_IMAGE
+	handling out of init_paths, remove option handling, always derive
+	image path from image file.
+	* libgst/callin.c: Change _gst_init_smalltalk calls to _gst_initialize.
+	
+	* libgst/gst.h: Add enums for above changes.
+	
 2007-07-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Fix "==" vs. "=" typo.

@@ -474,11 +474,6 @@ static inline void prepare_context (gst_context_part context,
    status (ip, sp, _gst_this_method, _gst_self, ...).  */
 static void unwind_context (void);
 
-/* Used to help minimize the number of primitives used to control the
-   various debugging flags, this routine maps the variable's INDEX to the
-   address of a boolean debug flag, which it returns.  */
-static inline int *bool_addr_index (int index) ATTRIBUTE_PURE;
-
 /* Check whether it is true that sending SENDSELECTOR to RECEIVER
    accepts NUMARGS arguments.  Note that the RECEIVER is only used to
    do a quick check in the method cache before examining the selector
@@ -2035,25 +2030,59 @@ create_callin_process (OOP contextOOP)
   return (initialProcessOOP);
 }
 
-int *
-bool_addr_index (int index)
+int
+_gst_get_var (enum gst_var_index index)
 {
   switch (index)
     {
-    case 0:
-      return (&_gst_declare_tracing);
-    case 1:
-      return (&_gst_execution_tracing);
-    case 2:
-      return (&verbose_exec_tracing);
-    case 3:
-      return (&_gst_gc_message);
+    case GST_DECLARE_TRACING:
+      return (_gst_declare_tracing);
+    case GST_EXECUTION_TRACING:
+      return (_gst_execution_tracing);
+    case GST_EXECUTION_TRACING_VERBOSE:
+      return (verbose_exec_tracing);
+    case GST_GC_MESSAGE:
+      return (_gst_gc_message);
+    case GST_VERBOSITY:
+      return (_gst_verbosity);
+    case GST_MAKE_CORE_FILE:
+      return (_gst_make_core_file);
+    case GST_REGRESSION_TESTING:
+      return (_gst_regression_testing);
     default:
-      return (NULL);		/* index out of range, signal the error 
-				 */
+      return (-1);
     }
 }
 
+int
+_gst_set_var (enum gst_var_index index, int value)
+{
+  int old = _gst_get_var (index);
+  if (value < 0)
+    return -1;
+
+  switch (index)
+    {
+    case GST_DECLARE_TRACING:
+      _gst_declare_tracing = value;
+    case GST_EXECUTION_TRACING:
+      _gst_execution_tracing = value;
+    case GST_EXECUTION_TRACING_VERBOSE:
+      verbose_exec_tracing = value;
+    case GST_GC_MESSAGE:
+      _gst_gc_message = value;
+    case GST_VERBOSITY:
+      _gst_verbosity = value;
+    case GST_MAKE_CORE_FILE:
+      _gst_make_core_file = value;
+    case GST_REGRESSION_TESTING:
+      _gst_regression_testing = true;
+    default:
+      return (-1);
+    }
+
+  return old;
+}
 
 
 void

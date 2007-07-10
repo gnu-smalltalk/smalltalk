@@ -86,66 +86,17 @@ oop_array_registry;
 static oop_registry *oop_registry_root;
 static oop_array_registry *oop_array_registry_root;
 
-VMProxy gst_interpreter_proxy = {
-  NULL, NULL, NULL,
-
-  _gst_msg_send, _gst_vmsg_send, _gst_nvmsg_send, _gst_str_msg_send,
-  _gst_msg_sendf,
-  _gst_eval_expr, _gst_eval_code,
-
-  _gst_object_alloc, _gst_basic_size,
-
-  _gst_define_cfunc, _gst_register_oop, _gst_unregister_oop,
-
-/* Convert C datatypes to Smalltalk types */
-
-  _gst_id_to_oop, _gst_int_to_oop, _gst_float_to_oop, _gst_bool_to_oop,
-  _gst_char_to_oop, _gst_class_name_to_oop,
-  _gst_string_to_oop, _gst_byte_array_to_oop, _gst_symbol_to_oop,
-  _gst_c_object_to_oop, _gst_type_name_to_oop, _gst_set_c_object,
-
-/* Convert Smalltalk datatypes to C data types */
-
-  _gst_oop_to_c, _gst_oop_to_id, _gst_oop_to_int, _gst_oop_to_float,
-  _gst_oop_to_bool, _gst_oop_to_char,
-  _gst_oop_to_string, _gst_oop_to_byte_array, _gst_oop_to_cobject,
-
-/* Smalltalk process support */
-  _gst_async_signal, _gst_sync_wait, _gst_async_signal_and_unregister,
-
-  _gst_register_oop_array, _gst_unregister_oop_array,
-
-/* Convert Smalltalk datatypes to C data types (2) */
-  _gst_oop_to_long_double, _gst_long_double_to_oop,
-
-  _gst_get_object_class, _gst_get_superclass,
-  _gst_class_is_kind_of, _gst_object_is_kind_of,
-  _gst_perform, _gst_perform_with, _gst_class_implements_selector,
-  _gst_class_can_understand, _gst_responds_to,
-  _gst_oop_size, _gst_oop_at, _gst_oop_at_put,
-
-  /* System objects.  */
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-
-  /* New in 2.3.  */
-  _gst_wchar_to_oop, _gst_wstring_to_oop,
-  _gst_oop_to_wchar, _gst_oop_to_wstring,
-};
-
 OOP
-_gst_msg_send (OOP receiver,
-	       OOP selector,
-	       ...)
+_gst_va_msg_send (OOP receiver,
+		  OOP selector,
+		  va_list ap)
 {
-  va_list ap, save;
+  va_list save;
   OOP *args, anArg;
   int numArgs;
 
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
-
-  va_start (ap, selector);
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
 #ifdef __va_copy
   __va_copy (save, ap);
@@ -168,6 +119,17 @@ _gst_msg_send (OOP receiver,
 }
 
 OOP
+_gst_msg_send (OOP receiver,
+	       OOP selector,
+	       ...)
+{
+  va_list ap;
+
+  va_start (ap, selector);
+  return _gst_va_msg_send (receiver, selector, ap);
+}
+
+OOP
 _gst_vmsg_send (OOP receiver,
 		OOP selector,
 		OOP * args)
@@ -175,7 +137,7 @@ _gst_vmsg_send (OOP receiver,
   int numArgs;
 
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   for (numArgs = 0; args[numArgs]; numArgs++);
 
@@ -190,54 +152,26 @@ _gst_str_msg_send (OOP receiver,
 		   const char *sel,
 		   ...)
 {
-  va_list ap, save;
-  OOP *args, anArg;
-  int numArgs;
-  OOP selector;
-
-  if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
-
+  va_list ap; 
+  OOP selector = _gst_symbol_to_oop (sel);
   va_start (ap, sel);
-  selector = _gst_intern_string (sel);
-
-#ifdef __va_copy
-  __va_copy (save, ap);
-#else
-  save = ap;
-#endif
-
-  for (numArgs = 0; (anArg = va_arg (ap, OOP)) != NULL; numArgs++);
-
-  if (numArgs != _gst_selector_num_args (selector))
-    return (_gst_nil_oop);
-  else
-    {
-      args = (OOP *) alloca (sizeof (OOP) * numArgs);
-      for (numArgs = 0; (anArg = va_arg (save, OOP)) != NULL; numArgs++)
-	args[numArgs] = anArg;
-
-      return _gst_nvmsg_send (receiver, selector, args, numArgs);
-    }
+  return _gst_va_msg_send (receiver, selector, ap);
 }
 
 /* Use like printf */
 void
-_gst_msg_sendf (PTR resultPtr, 
-		const char *fmt, 
-		...)
+_gst_va_msg_sendf (PTR resultPtr, 
+		   const char *fmt, 
+		   va_list ap)
 {
-  va_list ap;
   OOP selector, *args, result;
   int i, numArgs;
   const char *fp;
   char *s, selectorBuf[256];
   inc_ptr incPtr;
 
-  va_start (ap, fmt);
-
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   incPtr = INC_SAVE_POINTER ();
 
@@ -423,6 +357,17 @@ _gst_msg_sendf (PTR resultPtr,
   INC_RESTORE_POINTER (incPtr);
 }
 
+
+void
+_gst_msg_sendf (PTR resultPtr, 
+		const char *fmt, 
+		...)
+{
+  va_list ap;
+  va_start (ap, fmt);
+  _gst_va_msg_sendf (resultPtr, fmt, ap);
+}
+
 OOP
 _gst_type_name_to_oop (const char *name)
 {
@@ -440,7 +385,7 @@ void
 _gst_eval_code (const char *str)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   _gst_push_cstring (str);
   _gst_parse_stream (false);
@@ -454,7 +399,7 @@ _gst_eval_expr (const char *str)
   OOP result;
 
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   _gst_push_cstring (str);
   _gst_parse_stream (false);
@@ -503,7 +448,7 @@ _gst_class_name_to_oop (const char *name)
 
   s = strdup (name);
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   result = _gst_smalltalk_dictionary;
   for (p = s; (prev_p = strsep (&p, ".")) != NULL; )
@@ -523,7 +468,7 @@ OOP
 _gst_int_to_oop (long int i)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return (FROM_INT (i));
 }
@@ -532,7 +477,7 @@ OOP
 _gst_id_to_oop (long int i)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return (OOP_AT (i));
 }
@@ -553,7 +498,7 @@ OOP
 _gst_bool_to_oop (int b)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (b)
     return (_gst_true_oop);
@@ -566,7 +511,7 @@ OOP
 _gst_char_to_oop (char c)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return (CHAR_OOP_AT (c));
 }
@@ -575,7 +520,7 @@ OOP
 _gst_wchar_to_oop (wchar_t wc)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return (char_new (wc));
 }
@@ -587,7 +532,7 @@ OOP
 _gst_string_to_oop (const char *str)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (str == NULL)
     return (_gst_nil_oop);
@@ -599,7 +544,7 @@ OOP
 _gst_wstring_to_oop (const wchar_t *str)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (str == NULL)
     return (_gst_nil_oop);
@@ -612,7 +557,7 @@ _gst_byte_array_to_oop (const char *str,
 			int n)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (str == NULL)
     return (_gst_nil_oop);
@@ -624,7 +569,7 @@ OOP
 _gst_symbol_to_oop (const char *str)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (str == NULL)
     return (_gst_nil_oop);
@@ -638,7 +583,7 @@ OOP
 _gst_c_object_to_oop (PTR co)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (co == NULL)
     return (_gst_nil_oop);
@@ -650,7 +595,7 @@ void
 _gst_set_c_object (OOP oop, PTR co)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   SET_COBJECT_VALUE(oop, co);
 }
@@ -668,7 +613,7 @@ long
 _gst_oop_to_c (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (IS_INT (oop))
     return (TO_INT (oop));
@@ -695,7 +640,7 @@ long
 _gst_oop_to_int (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return (TO_INT (oop));
 }
@@ -704,7 +649,7 @@ long
 _gst_oop_to_id (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return (OOP_INDEX (oop));
 }
@@ -713,7 +658,7 @@ double
 _gst_oop_to_float (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (IS_CLASS (oop, _gst_floatd_class))
     return (FLOATD_OOP_VALUE (oop));
@@ -729,7 +674,7 @@ long double
 _gst_oop_to_long_double (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (IS_CLASS (oop, _gst_floatd_class))
     return (FLOATD_OOP_VALUE (oop));
@@ -745,7 +690,7 @@ int
 _gst_oop_to_bool (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return (oop == _gst_true_oop);
 }
@@ -754,7 +699,7 @@ char
 _gst_oop_to_char (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return (CHAR_OOP_VALUE (oop));
 }
@@ -763,7 +708,7 @@ wchar_t
 _gst_oop_to_wchar (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return (CHAR_OOP_VALUE (oop));
 }
@@ -772,7 +717,7 @@ char *
 _gst_oop_to_string (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (IS_NIL (oop))
     return (NULL);
@@ -784,7 +729,7 @@ wchar_t *
 _gst_oop_to_wstring (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (IS_NIL (oop))
     return (NULL);
@@ -796,7 +741,7 @@ char *
 _gst_oop_to_byte_array (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (IS_NIL (oop))
     return (NULL);
@@ -805,10 +750,10 @@ _gst_oop_to_byte_array (OOP oop)
 }
 
 PTR
-_gst_oop_to_cobject (OOP oop)
+_gst_oop_to_c_object (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (IS_NIL (oop))
     return (NULL);
@@ -820,7 +765,7 @@ OOP
 _gst_get_object_class (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return OOP_INT_CLASS (oop);
 }
@@ -829,7 +774,7 @@ OOP
 _gst_get_superclass (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   /* Quick tests for "class-ness".  */
   assert (IS_OOP (oop));
@@ -843,7 +788,7 @@ mst_Boolean
 _gst_class_is_kind_of (OOP candidate, OOP superclass)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   /* Quick tests for "class-ness".  */
   assert (IS_OOP (candidate) && IS_OOP (superclass));
@@ -865,7 +810,7 @@ _gst_object_is_kind_of (OOP candidate, OOP superclass)
 {
   OOP its_class;
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   if (IS_INT (candidate))
     {
@@ -892,7 +837,7 @@ OOP
 _gst_perform (OOP receiver, OOP selector)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return _gst_nvmsg_send (receiver, selector, NULL, 0);
 }
@@ -901,7 +846,7 @@ OOP
 _gst_perform_with (OOP receiver, OOP selector, OOP arg)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return _gst_nvmsg_send (receiver, selector, &arg, 1);
 }
@@ -910,7 +855,7 @@ mst_Boolean
 _gst_class_implements_selector (OOP classOOP, OOP selector)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   assert (IS_OOP (classOOP));
   assert (OOP_CLASS (classOOP) == _gst_behavior_class
@@ -924,7 +869,7 @@ _gst_class_can_understand (OOP classOOP, OOP selector)
 {
   method_cache_entry dummy;
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   /* Quick test for "class-ness".  */
   assert (IS_OOP (classOOP));
@@ -939,7 +884,7 @@ _gst_responds_to (OOP oop, OOP selector)
 {
   method_cache_entry dummy;
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return _gst_find_method (OOP_INT_CLASS (oop), selector, &dummy);
 }
@@ -948,7 +893,7 @@ size_t
 _gst_oop_size (OOP oop)
 {
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   return NUM_INDEXABLE_FIELDS (oop);
 }
@@ -958,7 +903,7 @@ _gst_oop_at (OOP oop, size_t index)
 {
   OOP result;
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   result = index_oop (oop, index + 1);
   assert (result);
@@ -970,7 +915,7 @@ _gst_oop_at_put (OOP oop, size_t index, OOP new)
 {
   OOP old;
   if (!_gst_smalltalk_initialized)
-    gst_init_smalltalk ();
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
 
   old = index_oop (oop, index + 1);
   assert (old);
@@ -1157,39 +1102,4 @@ _gst_mark_registered_oops (void)
       OOP *last = *(k->last);
       MARK_OOP_RANGE (first, last);
     }
-}
-
-void
-_gst_init_vmproxy (void)
-{
-  gst_interpreter_proxy.nilOOP = _gst_nil_oop;
-  gst_interpreter_proxy.trueOOP = _gst_true_oop;
-  gst_interpreter_proxy.falseOOP = _gst_false_oop;
-
-  gst_interpreter_proxy.objectClass = _gst_object_class;
-  gst_interpreter_proxy.arrayClass = _gst_array_class;
-  gst_interpreter_proxy.stringClass = _gst_string_class;
-  gst_interpreter_proxy.characterClass = _gst_char_class;
-  gst_interpreter_proxy.smallIntegerClass = _gst_small_integer_class;
-  gst_interpreter_proxy.floatDClass = _gst_floatd_class;
-  gst_interpreter_proxy.floatEClass = _gst_floate_class;
-  gst_interpreter_proxy.byteArrayClass = _gst_byte_array_class;
-  gst_interpreter_proxy.objectMemoryClass = _gst_object_memory_class;
-  gst_interpreter_proxy.classClass = _gst_class_class;
-  gst_interpreter_proxy.behaviorClass = _gst_behavior_class;
-  gst_interpreter_proxy.blockClosureClass = _gst_block_closure_class;
-  gst_interpreter_proxy.contextPartClass = _gst_context_part_class;
-  gst_interpreter_proxy.blockContextClass = _gst_block_context_class;
-  gst_interpreter_proxy.methodContextClass = _gst_method_context_class;
-  gst_interpreter_proxy.compiledMethodClass = _gst_compiled_method_class;
-  gst_interpreter_proxy.compiledBlockClass = _gst_compiled_block_class;
-  gst_interpreter_proxy.fileDescriptorClass = _gst_file_descriptor_class;
-  gst_interpreter_proxy.fileStreamClass = _gst_file_stream_class;
-  gst_interpreter_proxy.processClass = _gst_process_class;
-  gst_interpreter_proxy.semaphoreClass = _gst_semaphore_class;
-  gst_interpreter_proxy.cObjectClass = _gst_c_object_class;
-
-  /* And system objects.  */
-  gst_interpreter_proxy.processorOOP = _gst_processor_oop;
-
 }

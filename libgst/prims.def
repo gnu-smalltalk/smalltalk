@@ -3374,13 +3374,13 @@ primitive VMpr_SystemDictionary_getTraceFlag [succeed,fail]
   if (IS_INT (oop2))
     {
       intptr_t arg2;
-      int *varAddr;
+      int value;
       arg2 = TO_INT (oop2);
-      varAddr = bool_addr_index (arg2);
-      if (varAddr != NULL)
+      value = _gst_get_var (arg2);
+      if (value != -1)
 	{
-	  oop1 = (*varAddr > 1 ? FROM_INT (oop2 ) :
-		  (*varAddr ? _gst_true_oop : _gst_false_oop));
+	  oop1 = (value > 1 ? FROM_INT (oop2 ) :
+		  (value ? _gst_true_oop : _gst_false_oop));
 	  PUSH_OOP (oop1);
 	  PRIM_SUCCEEDED;
 	}
@@ -3401,12 +3401,13 @@ primitive VMpr_SystemDictionary_setTraceFlag [succeed,fail]
   oop1 = POP_OOP ();
   if (IS_INT (oop1))
     {
-      int *varAddr;
       intptr_t arg1 = TO_INT (oop1);
-      varAddr = bool_addr_index (arg1);
-      if (varAddr != NULL)
+      intptr_t old_value = _gst_set_var (arg1,
+					 IS_INT (oop2)
+					 ? TO_INT (oop2)
+					 : oop2 == _gst_true_oop);
+      if (old_value != -1)
 	{
-	  *varAddr = IS_INT (oop2) ? TO_INT (oop2) : (oop2 == _gst_true_oop);
 	  SET_EXCEPT_FLAG (true);
 	  PRIM_SUCCEEDED;
 	}
