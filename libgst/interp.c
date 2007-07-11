@@ -2065,18 +2065,25 @@ _gst_set_var (enum gst_var_index index, int value)
     {
     case GST_DECLARE_TRACING:
       _gst_declare_tracing = value;
+      break;
     case GST_EXECUTION_TRACING:
       _gst_execution_tracing = value;
+      break;
     case GST_EXECUTION_TRACING_VERBOSE:
       verbose_exec_tracing = value;
+      break;
     case GST_GC_MESSAGE:
       _gst_gc_message = value;
+      break;
     case GST_VERBOSITY:
       _gst_verbosity = value;
+      break;
     case GST_MAKE_CORE_FILE:
       _gst_make_core_file = value;
+      break;
     case GST_REGRESSION_TESTING:
       _gst_regression_testing = true;
+      break;
     default:
       return (-1);
     }
