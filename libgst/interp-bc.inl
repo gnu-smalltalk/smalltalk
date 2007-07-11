@@ -506,6 +506,7 @@ _gst_interpret (OOP processOOP)
   IMPORT_REGS ();
 
 monitor_byte_codes:
+  SET_EXCEPT_FLAG (false);
   if (!disable_preemption)
     {
       _gst_disable_interrupts ();	/* block out everything! */
@@ -571,12 +572,12 @@ monitor_byte_codes:
 
       printf ("%5td:", (ptrdiff_t) (ip - method_base));
       _gst_print_bytecode_name (ip, ip - method_base, _gst_literals, "");
+      SET_EXCEPT_FLAG (true);
     }
 
   if UNCOMMON (time_to_preempt)
     set_preemption_timer ();
 
-  SET_EXCEPT_FLAG (_gst_execution_tracing);
   FETCH (normal_byte_codes);
 
   /* Some more routines we need... */

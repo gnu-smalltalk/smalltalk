@@ -1,3 +1,7 @@
+2007-07-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Debugger.st: Highlight line 1 for nil context.
+
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* ClassBrow.st: Use #%.

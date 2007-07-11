@@ -1,3 +1,8 @@
+2007-07-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/MiniDebugger.st: Fix bitrot.
+	* kernel/CompildCode.st: Fix generation of source code line map.
+
 2007-07-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Load.st: Add --kernel-directory.

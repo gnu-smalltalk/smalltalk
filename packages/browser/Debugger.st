@@ -297,6 +297,7 @@ currentLine
 
 lineFor: context
     | lineMap |
+    context isNil ifTrue: [ ^1 ].
     lineMap := methodLineMapCache at: context method
 	ifAbsentPut: [ context method sourceCodeMap ].
     ^lineMap at: context ip + 1 ifAbsent: [ 1 ]!
