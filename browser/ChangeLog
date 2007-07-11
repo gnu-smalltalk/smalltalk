@@ -1,3 +1,7 @@
+2007-07-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Debugger.st: Highlight line 1 for nil context.
+
 2006-12-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	*** Version 2.3.1 released.

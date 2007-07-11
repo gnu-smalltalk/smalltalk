@@ -331,6 +331,7 @@ continue
 !MiniDebugger methodsFor: 'source code'!
 
 currentMethodSource
+    activeContext isNil ifTrue: [ ^#() ].
     ^methodSourceCodeCache at: activeContext method ifAbsentPut: [
 	self linesOf: activeContext method methodSourceString
     ]
@@ -338,6 +339,7 @@ currentMethodSource
 
 currentLine
     | lineMap |
+    activeContext isNil ifTrue: [ ^self ].
     lineMap := methodLineMapCache at: activeContext method ifAbsentPut: [
 	activeContext method sourceCodeMap
     ].
@@ -345,23 +347,15 @@ currentLine
 !
 
 linesOf: aString
-    | oc start |
-    aString isNil ifTrue: [ ^#() ].
-    oc := OrderedCollection new.
-    start := 0.
-    aString keysAndValuesDo: [ :index :each |
-	each == Character nl
-	    ifTrue: [
-		oc add: (aString copyFrom: start to: index - 1).
-		start := index + 1
-	    ]
-    ].
-    oc add: (aString copyFrom: start).
-    ^oc
+    aString isNil ifTrue: [ ^nil ].
+    ^aString readStream lines contents
 !
 
 printCurrentMethod
-    self currentMethodSource keysAndValuesDo: [ :line :code |
+    | source |
+    source := self currentMethodSource.
+    source isNil ifTrue: [ ^self ].
+    source keysAndValuesDo: [ :line :code |
 	self rightJustify: line.
 	stdout
 	    space;
@@ -371,14 +365,16 @@ printCurrentMethod
 !
 
 printCurrentLine
-    | line |
+    | line source |
+    source := self currentMethodSource.
+    source isNil ifTrue: [ ^self ].
     line := self currentLine.
     line = 0 ifTrue: [ ^self ].
 
     self rightJustify: line.
     stdout
 	space;
-	nextPutAll: (self currentMethodSource at: line ifAbsent: [ '' ]);
+	nextPutAll: (source at: line ifAbsent: [ '' ]);
 	nl
 ! !
 
@@ -402,8 +398,10 @@ doStepCommand
 	(command == $c) ifTrue: [ self continue ].
     ].
 
-    activeContext == context ifFalse: [ activeContext printNl ].
-    self printCurrentLine.
+    activeContext isNil ifFalse: [
+	activeContext == context ifFalse: [ activeContext printNl ].
+	self printCurrentLine ].
+
     ^true
 !
 
@@ -519,8 +517,8 @@ initializeFor: aProcess
     [ activeContext isInternalExceptionHandlingContext ]
 	whileTrue: [ self finish ].
 
-    process suspendedContext backtraceOn: stdout.
-    ObjectMemory globalGarbageCollect.
+    self backtraceOf: process.
+    self printCurrentLine.
 !
 
 backtraceOf: aProcess

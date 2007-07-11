@@ -474,7 +474,7 @@ sourceCodeMap
     map := ByteArray new: self size.
     line := 1.
     self allByteCodeIndicesDo: [ :each :byte :operand |
-        (self class bytecodeInfoTable at: byte * 4 + 4) > 128 ifTrue: [
+        (self class bytecodeInfoTable at: byte * 4 + 4) >= 128 ifTrue: [
 	    line := operand.
             operand > 255 ifTrue: [ map := map asArray ]
         ].

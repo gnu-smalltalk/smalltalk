@@ -1,3 +1,8 @@
+2007-07-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp-bc.inl: Reset _gst_except_flag to false at beginning
+	of monitor_byte_codes.
+
 2007-07-03  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
 	    Paolo Bonzini  <bonzini@gnu.org>
 
