@@ -1,5 +1,10 @@
 2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Collection.st: Add a few messages from Squeak.
+	* kernel/SeqCollect.st: Add a few messages from Squeak.
+
+2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
+
 	* tests/compiler.st: Add new testcase.
 
 2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
