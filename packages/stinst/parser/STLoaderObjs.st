@@ -32,7 +32,7 @@ STInST addSubspace: #STClassLoaderObjects!
 Namespace current: STClassLoaderObjects!
 
 Object subclass: #PseudoBehavior
-        instanceVariableNames: 'subclasses loader'
+        instanceVariableNames: 'subclasses methods loader'
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -115,8 +115,30 @@ secondary: aDictionary
 ! !
 
 
+PseudoBehavior subclass: #UndefinedClass
+        instanceVariableNames: 'name class'
+        classVariableNames: ''
+        poolDictionaries: ''
+        category: 'System-Compiler'!
+
+UndefinedClass comment:
+'This class represent a proxy for a class that is found by an
+STClassLoader while parsing source code, but is not
+the system.  It is possible to handle subclasses and extension methods
+of such classes.'!
+
+PseudoBehavior subclass: #UndefinedMetaclass
+        instanceVariableNames: 'instanceClass'
+        classVariableNames: ''
+        poolDictionaries: ''
+        category: 'System-Compiler'!
+
+UndefinedMetaclass comment:
+'This class represent a proxy for the metaclass of a class that is found
+by an STClassLoader while parsing source code, but is not the system.'!
+
 PseudoBehavior subclass: #ProxyClass
-        instanceVariableNames: 'proxy methods'
+        instanceVariableNames: 'proxy otherSide'
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -137,7 +159,7 @@ ProxyClass comment:
 'This class represent a proxy for the nil fake superclass.'!
 
 PseudoBehavior subclass: #LoadedBehavior
-        instanceVariableNames: 'instVars superclass methods comment '
+        instanceVariableNames: 'instVars superclass comment '
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -153,7 +175,7 @@ LoadedBehavior subclass: #LoadedClass
         poolDictionaries: ''
         category: 'System-Compiler'!
 
-LoadedBehavior comment:
+LoadedClass comment:
 'This class represent a proxy for a class whose source code is parsed
 by an STClassLoader.'!
 
@@ -163,7 +185,7 @@ LoadedBehavior subclass: #LoadedMetaclass
         poolDictionaries: ''
         category: 'System-Compiler'!
 
-LoadedBehavior comment:
+LoadedMetaclass comment:
 'This class represent a proxy for a metaclass whose source code is parsed
 by an STClassLoader.'!
 
@@ -206,6 +228,12 @@ PseudoNamespace variableSubclass: #ProxyNamespace
 ProxyNamespace comment:
 'This class represent a proxy for a preexisting namespace that is
 referenced by the source code that an STClassLoader is parsing.'!
+
+!PseudoBehavior class methodsFor: 'creating'!
+
+for: aSTClassLoader
+    ^self new initialize: aSTClassLoader
+! !
 
 !PseudoBehavior methodsFor: 'creating classes'!
 
@@ -337,28 +365,25 @@ sourceCodeAt: selector
 !PseudoBehavior methodsFor: 'navigating hierarchy'!
 
 subclasses
+    subclasses isNil
+        ifTrue: [ subclasses := OrderedCollection new ]
     ^subclasses
 !
 
 addSubclass: aClass
     "Add aClass asone of the receiver's subclasses."
-    subclasses isNil
-        ifTrue: [ subclasses := Array new: 0 ]
-        ifFalse: [ "remove old class if any"
-                  subclasses := subclasses copyWithout: aClass ].
-    subclasses := subclasses copyWith: aClass
+    self subclasses remove: aClass ifAbsent: [].
+    self subclasses add: aClass
 !
 
 removeSubclass: aClass
     "Remove aClass from the list of the receiver's subclasses"
-    subclasses := subclasses copyWithout: aClass
+    self subclasses remove: aClass ifAbsent: [].
 !
 
 allSubclassesDo: aBlock
     "Invokes aBlock for all subclasses, both direct and indirect."
-    subclasses isNil ifTrue: [ ^self ].
-
-    subclasses do: [ :class |
+    self subclasses do: [ :class |
         aBlock value: class.
         class allSubclassesDo: aBlock
     ].
@@ -411,8 +436,7 @@ selectSuperclasses: aBlock
 
 subclassesDo: aBlock
     "Invokes aBlock for all direct subclasses."
-    subclasses isNil ifTrue: [ ^self ].
-    subclasses do: aBlock
+    self subclasses do: aBlock
 ! !
 
 !PseudoBehavior methodsFor: 'accessing'!
@@ -450,6 +474,13 @@ nameIn: aNamespace
     self = reference ifTrue: [ ^self name ].
     ^(self environment nameIn: aNamespace), '.', self printString
 ! !
+
+
+!PseudoBehavior methodsFor: 'testing'!
+
+isDefined
+    ^true
+!
 
 
 !PseudoBehavior methodsFor: 'abstract'!
@@ -503,7 +534,12 @@ superclass
 !
 
 methodDictionary
-    self subclassResponsibility
+    methods isNil ifTrue: [ methods := LookupTable new ].
+    ^methods
+!
+
+methodDictionary: aDictionary
+    methods := aDictionary
 ! !
 
 !PseudoBehavior methodsFor: 'printing'!
@@ -523,90 +559,83 @@ storeOn: aStream
 !PseudoBehavior methodsFor: 'initializing'!
 
 initialize: aSTClassLoader
-    self setSubclasses: OrderedCollection new.
     loader := aSTClassLoader
-!
-
-setSubclasses: classes
-    subclasses := classes
 ! !
 
 !ProxyClass class methodsFor: 'creating classes'!
 
 on: aClass for: aSTClassLoader
-    ^self new setProxy: aClass for: aSTClassLoader
+    ^(self for: aSTClassLoader) setProxy: aClass
 ! !
 
 !ProxyClass methodsFor: 'delegation'!
 
 = anObject
-    ^self asClass == anObject 
+    ^proxy == anObject 
 	or: [ anObject class == self class
-		 and: [ self asClass == anObject asClass ]
-	]
+		 and: [ proxy == anObject proxy ] ]
 !
 
 hash
     ^proxy hash
 !
 
+proxy
+   ^proxy
+!
+
 asClass
-    ^proxy
+    proxy isClass ifTrue: [ ^self ].
+    otherSide isNil
+	ifTrue: [ otherSide := ProxyClass on: proxy instanceClass for: self loader ].
+    ^otherSide
 !
 
 asMetaclass
-    ^self asClass asMetaclass
+    proxy isMetaclass ifTrue: [ ^self ].
+    otherSide isNil
+	ifTrue: [ otherSide := ProxyClass on: proxy class for: self loader ].
+    ^otherSide
 !
 
 isClass
-    ^true
+    ^proxy isClass
+!
+
+isMetaclass
+    ^proxy isClass
 !
 
 category
-    ^self asClass category
-!
-
-category: aString
-    ^self asClass category: aString
+    ^proxy category
 !
 
 comment
-    ^self asClass comment
-!
-
-comment: aString
-    ^self asClass comment: aString
+    ^proxy comment
 !
 
 environment
-    ^self asClass environment
+    ^proxy environment
 !
 
 kindOfSubclass
-    ^self asClass kindOfSubclass
+    ^proxy kindOfSubclass
 !
 
 superclass
-    ^self asClass superclass
-!
-
-methodDictionary
-    methods isNil ifTrue: [
-         methods := OverlayDictionary on: self asClass methodDictionary ].
-    ^methods
+    ^proxy superclass
 !
 
 doesNotUnderstand: aMessage
-    ^self asClass perform: aMessage
+    ^proxy perform: aMessage
 ! !
 
 
 !ProxyClass methodsFor: 'initializing'!
 
-setProxy: aClass for: aSTClassLoader
-    self initialize: aSTClassLoader.
+setProxy: aClass
     proxy := aClass.
-    self setSubclasses: OrderedCollection new.
+    self methodDictionary: (OverlayDictionary on: proxy methodDictionary)
 ! !
 
 !ProxyNilClass methodsFor: 'accessing'!
@@ -614,6 +643,101 @@ setProxy: aClass for: aSTClassLoader
 nameIn: aNamespace
     ^'nil'
 ! !
+
+!UndefinedClass class methodsFor: 'creating'!
+
+name: aSymbol for: aLoader
+    ^(self for: aLoader) setName: aSymbol
+! !
+
+!UndefinedClass methodsFor: 'testing'!
+
+isDefined
+    ^false
+! !
+
+!UndefinedClass methodsFor: 'accessing'!
+
+asMetaclass
+    ^class!
+
+asClass
+    ^self!
+
+name
+    ^name!
+
+nameIn: aNamespace
+    ^name asString!
+
+setName: aSymbol
+    name := aSymbol.
+    class := UndefinedMetaclass for: self.
+! !
+
+!UndefinedClass methodsFor: 'printing'!
+
+printOn: aStream
+    aStream nextPutAll: self name!
+! !
+
+!UndefinedMetaclass class methodsFor: 'creating'!
+
+for: aClass
+    ^(super for: aClass loader)
+	initializeFor: aClass! !
+
+!UndefinedMetaclass methodsFor: 'printing'!
+
+printOn: aStream
+    aStream
+	nextPutAll: self asClass name;
+	nextPutAll: ' class'!
+! !
+
+!UndefinedMetaclass methodsFor: 'initializing'!
+
+initializeFor: aClass
+    super initialize: aClass loader.
+    instanceClass := aClass! !
+
+!UndefinedMetaclass methodsFor: 'accessing'!
+
+isMetaclass
+    ^true
+!
+
+asClass
+    ^instanceClass
+!
+
+asMetaclass
+    ^self
+!
+
+shape
+    ^nil
+! !
+
+!UndefinedMetaclass methodsFor: 'testing'!
+
+isDefined
+    ^false
+! !
+
+!UndefinedMetaclass methodsFor: 'delegation'!
+
+name
+    ^self asClass name
+! !
+
+
+
+!LoadedMetaclass class methodsFor: 'creating'!
+
+for: aClass
+    ^(super for: aClass loader)
+	initializeFor: aClass! !
 
 !LoadedBehavior methodsFor: 'accessing'!
 
@@ -629,11 +753,6 @@ instanceVariableNames: ivn
 
 superclass
     ^superclass
-!
-
-methodDictionary
-    methods isNil ifTrue: [ methods := LookupTable new ].
-    ^methods
 ! !
 
 !LoadedMetaclass methodsFor: 'printing'!
@@ -702,9 +821,15 @@ sharedPools
 
 
 
-!LoadedMetaclass methodsFor: 'initializing'!
+!LoadedMetaclass class methodsFor: 'creating'!
 
 for: aClass
+    ^(super for: aClass loader)
+	initializeFor: aClass! !
+
+!LoadedMetaclass methodsFor: 'initializing'!
+
+initializeFor: aClass
     super initialize: aClass loader.
     instanceClass := aClass.
     instVars := Array new.
@@ -716,9 +841,9 @@ for: aClass
 
 superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
 	poolDictionaries: pd category: c shape: sh loader: loader
-    ^self new
+    ^(self for: loader)
 	superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
-	poolDictionaries: pd category: c shape: sh loader: loader
+	poolDictionaries: pd category: c shape: sh
 ! !
 
 !LoadedClass methodsFor: 'accessing'!
@@ -810,14 +935,13 @@ import: aNamespace
 !LoadedClass methodsFor: 'initializing'!
 
 superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
-	poolDictionaries: pd category: c shape: sh loader: loader
-    self initialize: loader.
+	poolDictionaries: pd category: c shape: sh
     superclass := sup.
     name := s.
     category := c.
     shape := sh.
     environment := loader currentNamespace.
-    class := LoadedMetaclass new for: self.
+    class := LoadedMetaclass for: self.
     instVars := ivn subStrings.
     classVars := cvn subStrings.
     sharedPools := pd subStrings.

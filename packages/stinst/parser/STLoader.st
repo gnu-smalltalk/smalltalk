@@ -323,6 +323,12 @@ resolveName: node
     | current selectors |
     node isVariable
 	ifTrue: [
+	    (node name includes: $.) ifFalse: [
+		^self currentNamespace at: node name asSymbol ifAbsent: [
+		    defaultNamespace
+			at: node name asSymbol
+			put: (UndefinedClass name: node name asSymbol for: self) ]].
+
 	    ^(node name substrings: $.)
 		inject: self currentNamespace
 		into: [ :current :each | current at: each asSymbol ]

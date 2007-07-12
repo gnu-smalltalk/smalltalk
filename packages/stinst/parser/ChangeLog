@@ -1,5 +1,16 @@
 2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Exporter.st: Do not call #environment when not filing out the
+	complete class.  Indentation fixes.
+	* STLoader.st: Create an UndefinedClass object if there is no
+	namespace and the class is not found in the current namespace.
+	* STLoaderObjs.st: Move methods variable up to PseudoBehavior.
+	Make metaclass of ProxyClass a ProxyClass itself.  Add
+	UndefinedClass and UndefinedMetaclass.  Turn subclasses of
+	PseudoBehavior into an OrderedCollection.
+
+2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
+
 	* SqueakParser.st: Fix parsing of comments.
 
 2007-06-27  Paolo Bonzini  <bonzini@gnu.org>

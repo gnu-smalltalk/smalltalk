@@ -1,5 +1,9 @@
 2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Convert.st: Give error or warning on undefined classes.
+
+2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Collection.st: Add a few messages from Squeak.
 	* kernel/SeqCollect.st: Add a few messages from Squeak.
 

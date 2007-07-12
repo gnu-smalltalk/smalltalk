@@ -135,22 +135,21 @@ Object subclass: FileOutExporter [
     ]
     
     fileOutDeclaration: aBlock [
-        outClass environment = self defaultNamespace
-	        ifTrue: [ ^self fileOutClassBody: aBlock ].
+        (completeFileOut and: [ outClass environment ~= self defaultNamespace ])
+	    ifFalse: [ ^self fileOutClassBody: aBlock ].
         
         outStream nextPutAll: 'Namespace current: ';
                   store: outClass environment;
                   nextPutAll: ' ['; nl; nl.
                   
-	    self fileOutClassBody: aBlock.
-
+	self fileOutClassBody: aBlock.
         outStream nextPut: $]; nl; nl.
     ]
     
     fileOutClassBody: aBlock [
-	    completeFileOut
-	        ifTrue: [ self fileOutClassDeclaration: aBlock ]
-	        ifFalse: [ self fileOutClassExtension: aBlock ].
+	completeFileOut
+	    ifTrue: [ self fileOutClassDeclaration: aBlock ]
+	    ifFalse: [ self fileOutClassExtension: aBlock ].
     ]
     
     fileOutClassExtension: aBlock [

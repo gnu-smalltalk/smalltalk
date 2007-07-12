@@ -61,14 +61,20 @@ EmittedEntity subclass: EmittedClass [
     by using a FormattingExporter.'>
     
     EmittedClass class >> forClass: aClass [        
-        ^super new initializeWithClass: aClass extension: true
+	aClass isDefined ifFalse: [ aClass printNl. self halt ].
+        ^super new initializeWithClass: aClass complete: true
     ]
     
     EmittedClass class >> forExtension: aClass [
-        ^super new initializeWithClass: aClass extension: false
+	aClass isDefined ifFalse: [
+	    stderr
+		nextPutAll: 'warning: extensions for undefined class ';
+		print: aClass;
+		nl ].
+        ^super new initializeWithClass: aClass complete: false
     ]
     
-    initializeWithClass: aClass extension: aBoolean [
+    initializeWithClass: aClass complete: aBoolean [
         class := aClass.
         methodsToEmit := STInST.OrderedSet new.
 	classMethodsToEmit := STInST.OrderedSet new.
@@ -266,7 +272,8 @@ STInST.STClassLoader subclass: SyntaxConverter [
 	super doAddNamespace: receiver selector: selector arguments: argumentNodes.
 
         ns := (self resolveNamespace: receiver) at: argumentNodes first value.
-	createdNamespaces add: ns
+	createdNamespaces add: ns.
+	^false
     ]
 
     doEmitStuff [
