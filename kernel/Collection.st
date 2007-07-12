@@ -124,6 +124,11 @@ empty
     ^self become: self copyEmpty
 !
 
+removeAllSuchThat: aBlock
+    "Remove from the receiver all objects for which aBlock returns true."
+
+    self removeAll: (self select: aBlock) ifAbsent: [ :each | ]!
+
 remove: oldObject ifAbsent: anExceptionBlock
     "Remove oldObject from the receiver. If absent, evaluate anExceptionBlock
      and answer the result, else answer oldObject."

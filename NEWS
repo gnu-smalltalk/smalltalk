@@ -4,8 +4,13 @@ NEWS FROM 2.3.5 TO 2.3.6
 
 o   Added #% as a shortcut for CharacterArray>>#bindWithArguments:.
 
+o   Added #allButFirst, #allButFirst:, #allButLast, #allButLast:,
+    #removeAllSuchThat: to Collection.
+
 o   A race condition was fixed where a file handler was resurrected and
     another object inside it had already been finalized.
+
+o   Fixed bug with growing of the Undeclared dictionary.
 
 o   Fixes to File and Directory for Windows
 

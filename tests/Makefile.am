@@ -27,7 +27,7 @@ DISTCLEANFILES = atconfig
 regress:
 	SMALLTALK_KERNEL="$(top_srcdir)/kernel/"; \
 	export SMALLTALK_KERNEL; \
-	for test in $(low_level_tests) $(benchmark_tests); do \
+	for test in $(TESTS); do \
 	  result=`echo $$test | $(SED) 's/st$$/ok/'`; \
 	  $(top_builddir)/gst -I $(top_builddir)/gst.im \
 		-r $$test 2>&1 | tee $$result; \

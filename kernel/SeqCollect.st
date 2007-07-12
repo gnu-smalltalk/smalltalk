@@ -192,6 +192,26 @@ before: oldObject
     ^self at: i - 1
 !
 
+allButFirst
+    "Answer a copy of the receiver without the first object."
+    ^self copyFrom: 2
+!
+
+allButFirst: n
+    "Answer a copy of the receiver without the first n objects."
+    ^self copyFrom: n + 1
+!
+
+allButLast
+    "Answer a copy of the receiver without the last object."
+    ^self copyFrom: self size - 1
+!
+
+allButLast: n
+    "Answer a copy of the receiver without the last n objects."
+    ^self copyFrom: self size - n
+!
+
 first
     "Answer the first item in the receiver"
     ^self at: 1

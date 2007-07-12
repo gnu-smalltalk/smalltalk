@@ -1,3 +1,7 @@
+2007-07-12  Paolo Bonzini  <bonzinI@gnu.org>
+
+	* libgst/dict.c: Fix pasto in _gst_grow_dictionary.
+
 2007-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-bc.inl: Reset _gst_except_flag to false at beginning
