@@ -427,7 +427,7 @@ peekFor: aCharacter
     | copy |
     copy := self copy.
     copy == self ifTrue: [ ^self shouldNotImplement ].
-    self become: (PeekableStream on: copy).
+    self become: (Kernel.PeekableStream on: copy).
     ^self peekFor: aCharacter
 !
 

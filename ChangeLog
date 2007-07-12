@@ -1,3 +1,7 @@
+2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/StreamOps.st: Fix access to PeekableStream.
+
 2007-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/MiniDebugger.st: Fix bitrot.
