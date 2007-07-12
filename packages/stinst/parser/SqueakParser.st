@@ -48,7 +48,7 @@ evaluate: node
     stmt isMessage ifFalse: [ ^super evaluate: node ].
     stmt selector == #addCategory: ifTrue: [ ^false ].
     stmt selector == #commentStamp:prior: ifTrue: [
-	stmt arguments: { scanner nextRawChunk }.
+	stmt arguments: { RBLiteralNode new literalToken: scanner nextRawChunk }.
 	stmt selector: #comment: ].
 
     stmt selector == #methodsFor:stamp: ifTrue: [

@@ -1,3 +1,7 @@
+2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* SqueakParser.st: Fix parsing of comments.
+
 2007-06-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* SIFParser.st: New.
