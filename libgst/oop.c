@@ -998,7 +998,7 @@ void
 _gst_compact (size_t new_heap_limit)
 {
   OOP oop;
-  grey_area_node *node, *next;
+  grey_area_node *node, **next, *last;
   heap_data *new_heap = init_old_space (
     new_heap_limit ? new_heap_limit : _gst_mem.old->heap_limit);
 
@@ -1016,15 +1016,26 @@ _gst_compact (size_t new_heap_limit)
       update_stats (&stats.timeOfLastCompaction, NULL, NULL);
     }
 
-  /* Discard all the grey pages.  */
-  for (node = _gst_mem.grey_pages.head; node; node = next)
-    {
-      next = node->next;
-      xfree (node);
-    }
-  _gst_mem.grey_pages.head = _gst_mem.grey_pages.tail = NULL;
-  _gst_mem.rememberedTableEntries = 0;
+  /* Leave only pages from the loaded image in the grey table.  */
+  for (last = NULL, next = &_gst_mem.grey_pages.head; (node = *next); )
+    if (node->base >= (OOP *)_gst_mem.loaded_base
+        && node->base < _gst_mem.loaded_end)
+      {
+#ifdef MMAN_DEBUG_OUTPUT
+        printf ("  Remembered table entry left for loaded image: %p..%p\n",
+                node->base, node->base+node->n);
+#endif
+        last = node;
+        next = &(node->next);
+      }
+    else
+      {
+        _gst_mem.rememberedTableEntries--;
+        *next = node->next;
+        xfree (node);
+      }
 
+  _gst_mem.grey_pages.tail = last;
   _gst_fixup_object_pointers ();
 
   /* Now do the copying loop which will compact oldspace.  */
@@ -1704,6 +1715,43 @@ copy_oops (void)
 }
 
 void
+_gst_print_grey_list (mst_Boolean check_pointers)
+{
+  grey_area_node *node;
+  OOP *pOOP, oop;
+  int i, n;
+
+  for (n = 0, node = _gst_mem.grey_pages.head; node; node = node->next, n++)
+    {
+      int new_pointers = 0;
+      if (check_pointers)
+        for (new_pointers = 0, pOOP = node->base, i = node->n; i--; pOOP++)
+          {
+            PREFETCH_LOOP (pOOP, PREF_READ | PREF_NTA);
+            oop = *pOOP;
+
+            /* Not all addresses are known to contain valid OOPs! */
+	    if (!IS_OOP_ADDR (oop))
+	      continue;
+
+            if (!IS_OOP_NEW (oop))
+	      continue;
+
+	    new_pointers++;
+	  }
+
+      printf ("%11p%c ", node->base, new_pointers == 0 ? ' ' : '*');
+      if ((n & 3) == 3)
+	putchar ('\n');
+    }
+
+  if (_gst_mem.grey_pages.tail)
+    printf ("  (tail = %12p)", _gst_mem.grey_pages.tail->base);
+
+  printf ("\n");
+}
+
+void
 scan_grey_pages ()
 {
   grey_area_node *node, **next, *last;
@@ -1711,19 +1759,8 @@ scan_grey_pages ()
   int i, n;
 
 #if defined (MMAN_DEBUG_OUTPUT)
-  printf ("Pages on the grey list: ");
-  for (n = 0, node = _gst_mem.grey_pages.head; node; node = node->next, n++)
-    {
-      if (n & 3)
-        printf ("%12p ", node->base);
-      else
-        printf ("\n%12p ", node->base);
-    }
-
-  if (_gst_mem.grey_pages.tail)
-    printf ("  (tail = %12p)", _gst_mem.grey_pages.tail->base);
-
-  printf ("\n");
+  printf ("Pages on the grey list:\n");
+  _gst_print_grey_list (true);
 #endif
 
   for (last = NULL, next = &_gst_mem.grey_pages.head; (node = *next); )
@@ -1776,19 +1813,8 @@ scan_grey_pages ()
   _gst_mem.grey_pages.tail = last;
 
 #if defined (MMAN_DEBUG_OUTPUT)
-  printf ("Pages left on the grey list: ");
-  for (n = 0, node = _gst_mem.grey_pages.head; node; node = node->next, n++)
-    {
-      if (n & 3)
-        printf ("%12p ", node->base);
-      else
-        printf ("\n%12p ", node->base);
-    }
-
-  if (_gst_mem.grey_pages.tail)
-    printf ("  (tail = %12p)", _gst_mem.grey_pages.tail->base);
-
-  printf ("\n");
+  printf ("Pages left on the grey list:\n");
+  _gst_print_grey_list (false);
 #endif
 }
 

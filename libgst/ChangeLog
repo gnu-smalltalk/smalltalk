@@ -1,5 +1,13 @@
 2007-07-12  Paolo Bonzini  <bonzinI@gnu.org>
 
+	* libgst/oop.c: When compacting, do not discard grey pages from
+	the loaded space.  Add _gst_print_grey_list.
+	* libgst/oop.h: Add fields to delimit loaded space to
+	struct memory_space.
+	* libgst/save.c: Fill them in.
+
+2007-07-12  Paolo Bonzini  <bonzinI@gnu.org>
+
 	* libgst/dict.c: Fix pasto in _gst_grow_dictionary.
 
 2007-07-11  Paolo Bonzini  <bonzini@gnu.org>

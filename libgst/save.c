@@ -149,9 +149,10 @@ static void buffer_write (int imageFd,
 			  PTR data,
 			  int numBytes);
 
-/* This function establishes a buffer of size NUMBYTES for reads.  */
-static void buffer_read_init (int imageFd,
-			      int numBytes);
+/* This function establishes a buffer of size NUMBYTES for reads.  The
+   base of the buffer is returned if mmap was used.  */
+static char *buffer_read_init (int imageFd,
+			       int numBytes);
 
 /* This function frees the buffer used for reads.  */
 static void buffer_read_free (int imageFd);
@@ -191,19 +192,19 @@ static inline void fixup_byte_order (PTR buf,
 
 /* This function loads an OOP table made of OLDSLOTSUSED slots from
    the image file stored in the file whose descriptor is IMAGEFD.
-   The fixup gets handled by load_normal_oops */
+   The fixup gets handled by load_normal_oops.  */
 static void load_oop_table (int imageFd);
 
 /* This function loads OBJECTDATASIZE bytes of object data belonging
    to standard (i.e. non built-in OOPs) and fixes the endianness of
-   the objects, as well as converting to absolute the address of
-   their class.  Endianness conversion is done in two steps: first
+   the objects.  Endianness conversion is done in two steps: first
    the non-byte objects (identified by not having the F_BYTE flag),
    including the class objects which are necessary to fix the byte
    objects, then all the byte-objects which also have instance
    variables). 
-   Object data is loaded from the IMAGEFD file descriptor.  */
-static void load_normal_oops (int imageFd);
+   Object data is loaded from the IMAGEFD file descriptor.  If
+   copy-on-write is used, return the end address of the loaded data.  */
+static char *load_normal_oops (int imageFd);
 
 /* This function stores the header, HEADERP, of the image file into the file
    whose descriptor is IMAGEFD.  */
@@ -455,8 +456,9 @@ load_snapshot (int imageFd)
 {
   save_file_header header;
   int prim_table_matches;
+  char *base, *end;
 
-  buffer_read_init (imageFd, READ_BUFFER_SIZE);
+  base = buffer_read_init (imageFd, READ_BUFFER_SIZE);
   if (!load_file_version (imageFd, &header))
     return false;
 
@@ -481,7 +483,12 @@ load_snapshot (int imageFd)
   printf ("After loading OOP table: %lld\n", file_pos + buf_pos);
 #endif /* SNAPSHOT_TRACE */
 
-  load_normal_oops (imageFd);
+  end = load_normal_oops (imageFd);
+  if (end)
+    {
+      _gst_mem.loaded_base = (OOP *) base;
+      _gst_mem.loaded_end = (OOP *) end;
+    }
 
 #ifdef SNAPSHOT_TRACE
   printf ("After loading objects: %lld\n", file_pos + buf_pos);
@@ -555,12 +562,14 @@ load_oop_table (int imageFd)
 }
 
 
-void
+char *
 load_normal_oops (int imageFd)
 {
   OOP oop;
-  gst_object object;
   int i;
+
+  gst_object object = NULL;
+  size_t size = 0;
   mst_Boolean use_copy_on_write
     = buf_used_mmap && ~wrong_endianness && ot_delta == 0;
 
@@ -571,7 +580,6 @@ load_normal_oops (int imageFd)
   PREFETCH_START (_gst_mem.ot, PREF_WRITE | PREF_NTA);
   for (oop = _gst_mem.ot, i = num_used_oops; i--; oop++)
     {
-      size_t size;
       intptr_t flags;
 
       PREFETCH_LOOP (oop, PREF_WRITE | PREF_NTA);
@@ -641,7 +649,12 @@ load_normal_oops (int imageFd)
 	}
 
   if (!use_copy_on_write)
-    buffer_read_free (imageFd);
+    {
+      buffer_read_free (imageFd);
+      return NULL;
+    }
+  else
+    return ((char *)object) + size;
 }
 
 
@@ -805,7 +818,7 @@ buffer_fill (int imageFd)
   read (imageFd, buf, buf_size);
 }
 
-void
+char *
 buffer_read_init (int imageFd, int numBytes)
 {
   struct stat st;
@@ -820,7 +833,7 @@ buffer_read_init (int imageFd, int numBytes)
     {
       buf_size = file_size;
       buf_used_mmap = true;
-      return;
+      return buf;
     }
 #endif /* !WIN32 */
 
@@ -829,6 +842,7 @@ buffer_read_init (int imageFd, int numBytes)
   buf_size = numBytes;
   buf = xmalloc (buf_size);
   buffer_fill (imageFd);
+  return NULL;
 }
 
 void

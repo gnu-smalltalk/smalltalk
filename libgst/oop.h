@@ -217,6 +217,9 @@ struct memory_space
   /* The active survivor space */
   struct surv_space *active_half;
 
+  /* The beginning and end of the area mmap-ed directly from the image.  */
+  OOP *loaded_base, *loaded_end;
+
   /* The OOP flag corresponding to the active survivor space */
   int active_flag;
 
