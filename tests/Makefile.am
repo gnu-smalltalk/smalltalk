@@ -26,9 +26,9 @@ DISTCLEANFILES = atconfig
 
 regress:
 	cd $(srcdir) || exit 1; \
-	for test in $(filter $(low_level_tests) $(benchmark_tests), $(TESTS)); do \
+	for test in $(TESTS); do \
 	  result=`echo $$test | $(SED) 's/st$$/ok/'`; \
-	  ./gst -I @abs_top_builddir@/gst.im -r $$test 2>&1 | tee $$result; \
+	  @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im -r $$test 2>&1 | tee $$result; \
 	done
 
 gst.im: ../kernel/stamp-classes AnsiLoad.st Ansi.st AnsiDB.st

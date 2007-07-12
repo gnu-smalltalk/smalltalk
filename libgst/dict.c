@@ -1558,9 +1558,9 @@ _gst_grow_dictionary (OOP oldDictionaryOOP)
      object, the new dictionary itself */
 
   dictionary = instantiate_with (OOP_CLASS (oldDictionaryOOP), 
-						  numFields, &dictionaryOOP);
+				 numFields, &dictionaryOOP);
   memcpy (dictionary->data, oldDictionary->data, sizeof (PTR) * numFixedFields);
-  oldDictionary = OOP_TO_OBJ (dictionaryOOP);
+  oldDictionary = OOP_TO_OBJ (oldDictionaryOOP);
 
   /* rehash all associations from old dictionary into new one */
   for (i = 0; i < oldNumFields; i++)

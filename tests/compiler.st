@@ -93,6 +93,11 @@ Eval [ '(111) 111-1111' phoneNumber ]
 
 Eval [ (Object compile: 'foo <category: ''bar''> ^5') methodCategory ]
 
+Eval [
+    a := Undeclared keys size.
+    1 to: 100 do: [ :i | Object compile: 'a%1 ^A%1' % {i} ].
+    Undeclared keys size - a
+]
 
 "Various errors in the recursive-descent parser"
 !BugTest class methodsFor: 'bugs'!

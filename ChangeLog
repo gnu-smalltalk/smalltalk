@@ -1,5 +1,9 @@
 2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
 
+	* tests/compiler.st: Add new testcase.
+
+2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/StreamOps.st: Fix access to PeekableStream.
 
 2007-07-11  Paolo Bonzini  <bonzini@gnu.org>
