@@ -425,7 +425,7 @@ Options:
 
 		filter := arg
 		    asFilterOn: filter
-		    through: [ :class | class category ] ].
+		    through: [ :class | class category ifNil: [ '' ] ] ].
 
 	    opt = 'format' ifTrue: [
 		parser := formats at: arg ifAbsent: [
@@ -480,6 +480,10 @@ Options:
 ') displayOn: stderr.
 	    outFile = stdout ifFalse: [
 	        outFile close.
-		(File name: outFile name) remove ].
-	    ex pass. ObjectMemory quit: 1 ].
+
+		"TODO: don't do this on non-regular files.  It will make
+		 /dev/null disappear if you run gst-convert as root (which
+		 you shouldn't)."
+		[ (File name: outFile name) remove ] on: Error do: [ :ex | ] ].
+	    "ex pass." ObjectMemory quit: 1 ].
 ]
