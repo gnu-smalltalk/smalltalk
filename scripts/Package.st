@@ -537,12 +537,16 @@ The default target directory is ', Directory image, '
         arguments: '-h|--help --no-load --test --load --no-install --uninstall
             --dist -t|--target-directory: --list-files: --list-packages
             --srcdir: --distdir|--destdir: -n|--dry-run --all-files
-	    --vpath --copy -I|--image-file: --kernel-directory:'
+	    --vpath --copy -I|--image-file: --kernel-directory: --version'
 
         do: [ :opt :arg |
-            opt = 'help' ifTrue: [
-                helpString displayOn: stderr.
-                ObjectMemory quit: 0 ].
+	    opt = 'help' ifTrue: [
+		helpString displayOn: stdout.
+		ObjectMemory quit: 0 ].
+
+	    opt = 'version' ifTrue: [
+		('gst-package - %1' % {Smalltalk version}) displayNl.
+		ObjectMemory quit: 0 ].
 
             opt = 'uninstall' ifTrue: [
 		mode isNil ifFalse: [ self error: 'multiple modes specified' ].

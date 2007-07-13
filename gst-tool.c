@@ -77,13 +77,13 @@ struct tool {
 struct tool tools[] = {
   {
     "gst-load", "scripts/Load.st",
-    "-h|--help -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
+    "-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
 	-t|--test -I|--image-file: --kernel-directory:",
     NULL
   },
   {
     "gst-reload", "scripts/Load.st",
-    "-h|--help -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
+    "-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
 	-t|--test -I|--image-file: --kernel-directory:",
     "--force"
   },
@@ -97,7 +97,7 @@ struct tool tools[] = {
   },
   {
     "gst-sunit", "scripts/Test.st",
-    "-h|--help -q|--quiet -v|-V|--verbose -f|--file: -p|--package: \
+    "-h|--help --version -q|--quiet -v|-V|--verbose -f|--file: -p|--package: \
 	-I|--image-file: --kernel-directory:",
     NULL
   },

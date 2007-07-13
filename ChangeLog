@@ -1,3 +1,9 @@
+2007-07-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Load.st: Add --version.
+	* scripts/Package.st: Add --version.
+	* scripts/Test.st: Add --version.
+
 2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Convert.st: Give error or warning on undefined classes.

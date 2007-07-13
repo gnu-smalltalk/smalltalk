@@ -47,18 +47,24 @@ Options:
     -p --package=PACKAGE  load package and run its tests
     -I --image-file=FILE  run tests on the specified image file
        --kernel-dir=PATH  use the specified kernel directory
-    -h --help             show this message
+    -h --help             show this message and exit
+    -v --version          print version information and exit
 '.
 
 "Parse the command-line arguments."
 Smalltalk
     arguments: '-h|--help -q|--quiet -v|-V|--verbose -f|--file: -p|--package:
-		-I|--image-file: --kernel-directory:'
+		-I|--image-file: --kernel-directory: --version'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
-	helpString displayOn: stderr.
+	helpString displayOn: stdout.
 	ObjectMemory quit: 0 ].
+
+    opt = 'version' ifTrue: [
+	('gst-sunit - %1' % {Smalltalk version}) displayNl.
+	ObjectMemory quit: 0 ].
+
 
     opt = 'verbose' ifTrue: [
         OutputVerbosity := 1.

@@ -8,8 +8,8 @@ HTML_IMAGES = images/backon.png images/back.png images/blankon.png \
 	images/prevon.png images/prev.png images/tocon.png \
 	images/toc.png images/upon.png images/up.png
 
-dist_man_MANS = gst.1
-HELP2MAN = $(top_srcdir)/build-aux/help2man
+dist_man_MANS = gst.1 gst-load.1 gst-package.1 gst-sunit.1
+HELP2MAN = $(top_srcdir)/build-aux/help2man -p gst
 
 info_TEXINFOS = gst.texi gst-base.texi gst-libs.texi
 gst_TEXINFOS = tutorial.texi vers-gst.texi
@@ -27,8 +27,26 @@ MOSTLYCLEANFILES = gst-libs.me gst-libs.mes gst-base.me gst-base.mes \
 ##
 ####################################################
 
+$(srcdir)/gst-package.1: $(top_srcdir)/scripts/Package.st $(top_srcdir)/configure.ac
+	$(HELP2MAN) \
+	  --name "create and install GNU Smalltalk .star package files" \
+	  "$(top_builddir)/gst-tool gst-package -I $(top_builddir)/gst.im \
+	     --kernel-directory $(top_srcdir)/kernel" >$@
+
+$(srcdir)/gst-load.1: $(top_srcdir)/scripts/Load.st $(top_srcdir)/configure.ac
+	$(HELP2MAN) \
+	  --name "test and load packages into a GNU Smalltalk image" \
+	  "$(top_builddir)/gst-tool gst-load -I $(top_builddir)/gst.im \
+	     --kernel-directory $(top_srcdir)/kernel" >$@
+
+$(srcdir)/gst-sunit.1: $(top_srcdir)/scripts/Test.st $(top_srcdir)/configure.ac
+	$(HELP2MAN) \
+	  --name "unit testing tool for GNU Smalltalk" \
+	  "$(top_builddir)/gst-tool gst-load -I $(top_builddir)/gst.im \
+	     --kernel-directory $(top_srcdir)/kernel" >$@
+
 $(srcdir)/gst.1: $(top_srcdir)/main.c $(top_srcdir)/configure.ac
-	$(HELP2MAN) --info-page gst \
+	$(HELP2MAN) \
 	  --name "the GNU Smalltalk virtual machine" $(top_builddir)/gst >$@
 
 ####################################################

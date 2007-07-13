@@ -53,16 +53,21 @@ Options:
     -I --image-file=FILE  load into the specified image
        --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message
+       --version          print version information and exit
 '.
 
 "Parse the command-line arguments."
 Smalltalk
-    arguments: '-h|--help -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force
-		-t|--test -I|--image-file: --kernel-directory:'
+    arguments: '-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run
+		-f|--force -t|--test -I|--image-file: --kernel-directory:'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
-	helpString displayOn: stderr.
+	helpString displayOn: stdout.
+	ObjectMemory quit: 0 ].
+
+    opt = 'version' ifTrue: [
+	('gst-load - %1' % {Smalltalk version}) displayNl.
 	ObjectMemory quit: 0 ].
 
     opt = 'quiet' ifTrue: [
