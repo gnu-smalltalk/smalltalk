@@ -33,7 +33,7 @@
 PackageLoader fileInPackage: #Parser.
 
 Object subclass: EmittedEntity [  
-    emitTo: aStream [
+    emitTo: aStream filteredBy: aBlock [
         self subclassResponsibility
     ]
 ]
@@ -45,7 +45,7 @@ EmittedEntity subclass: EmittedComments [
 	    aString copyFrom: c first to: c last ])
     ]
 
-    emitTo: outStream [
+    emitTo: outStream filteredBy: aBlock [
 	comments do: [ :c | outStream nextPutAll: c; nl; nl ]
     ]
 
@@ -61,16 +61,17 @@ EmittedEntity subclass: EmittedClass [
     by using a FormattingExporter.'>
     
     EmittedClass class >> forClass: aClass [        
-	aClass isDefined ifFalse: [ aClass printNl. self halt ].
+	(aClass superclass notNil and: [
+	    aClass superclass isDefined not ]) ifTrue: [
+	        Warning signal:
+		    ('superclass %1 is undefined' % {aClass superclass}) ].
         ^super new initializeWithClass: aClass complete: true
     ]
     
     EmittedClass class >> forExtension: aClass [
 	aClass isDefined ifFalse: [
-	    stderr
-		nextPutAll: 'warning: extensions for undefined class ';
-		print: aClass;
-		nl ].
+	    Warning signal:
+		('extensions for undefined class %1' % {aClass}) ].
         ^super new initializeWithClass: aClass complete: false
     ]
     
@@ -93,7 +94,13 @@ EmittedEntity subclass: EmittedClass [
 	classMethodsToEmit add: aMethod selector asSymbol.
     ]
 	
-    emitTo: aStream [ 
+    emitTo: aStream filteredBy: aBlock [ 
+	(aBlock value: class)
+	    ifFalse: [
+	        Notification signal: ('Skipping %1' % {class}).
+		^self ].
+
+        Notification signal: ('Converting %1...' % {class}).
         (STInST.FormattingExporter on: class to: aStream)
             completeFileOut: isComplete;
             fileOutSelectors: methodsToEmit classSelectors: classMethodsToEmit.
@@ -126,7 +133,7 @@ EmittedEntity subclass: EmittedEval [
         statements add: aStatement
     ] 
     
-    emitTo: aStream [
+    emitTo: aStream filteredBy: aBlock [
 	| formatter |
 	statements isEmpty ifTrue: [ ^self ].
 	namespace isNil
@@ -146,7 +153,7 @@ EmittedEntity subclass: EmittedEval [
 
 
 STInST.STClassLoader subclass: SyntaxConverter [
-    | stuffToEmit classesToEmit createdNamespaces outStream |
+    | stuffToEmit classesToEmit createdNamespaces filter outStream |
     
     <comment: 'A class loader that creates a set of "EmittedEntity"
     based on the contents of the given file being loaded.
@@ -172,21 +179,33 @@ STInST.STClassLoader subclass: SyntaxConverter [
     
     SyntaxConverter class >> convertStream: in with: aParserClass to: out [
         <catogory: 'instance creation'>
-        ^self new
-	    outStream: out;
-	    parseSmalltalkStream: in with: aParserClass;
-	    doEmitStuff.        
+        ^self new convertStream: in with: aParserClass to: out
     ]
-    
+
     initialize [
         <category: 'initialization'>
 	super initialize.
+	filter := [ :class | [true] ].
         stuffToEmit := OrderedSet new.
         classesToEmit := Dictionary new.
         createdNamespaces := OrderedSet new.
     ]
 
+    convertStream: in with: aParserClass to: out [
+        <catogory: 'operation'>
+        self
+	    outStream: out;
+	    parseSmalltalkStream: in with: aParserClass;
+	    doEmitStuff.        
+    ]
+
+    filter: aBlock [
+        <category: 'accessing'>
+        filter := aBlock.
+    ]
+    
     outStream: out [
+        <category: 'accessing'>
         outStream := out.
     ]
     
@@ -280,7 +299,7 @@ STInST.STClassLoader subclass: SyntaxConverter [
         <category: 'emitting'>
 
         stuffToEmit
-	    do: [ :each | each emitTo: outStream ]
+	    do: [ :each | each emitTo: outStream filteredBy: filter ]
 	    separatedBy: [ outStream nl; nextPut: 12 asCharacter; nl ].
     ]
     
@@ -303,14 +322,164 @@ STInST.STClassLoader subclass: SyntaxConverter [
 ]
 
 
-Eval [ 
+String extend [
+   asFilterOn: aBlock through: valueBlock [
+	| regex |
+	self first = $+ ifTrue: [
+	    regex := self allButFirst asRegex.
+	    ^[ :obj | (aBlock value: obj)
+			 or: [ (valueBlock value: obj) ~ regex ] ] ].
 
-    args := Smalltalk arguments.
+	self first = $- ifTrue: [
+	    regex := self allButFirst asRegex.
+	    ^[ :obj | (aBlock value: obj)
+			 and: [ ((valueBlock value: obj) ~ regex) not ] ] ].
+
+	regex := self asRegex.
+	^[ :obj | (aBlock value: obj) and: [ (valueBlock value: obj) ~ regex ] ]
+    ]
+]
+
+
+Eval [ 
+    | helpString inFile outFile quiet verbose converter filter parser
+	args formats |
+    args := OrderedCollection new.
+    parser := STInST.STFileInParser.
+    quiet := false.
+    verbose := false.
+    outFile := nil.
+    filter := [ :class | true ].
+    converter := SyntaxConverter new.
+    formats := Dictionary from: {
+	'gst' -> STInST.STFileInParser.
+	'squeak' -> STInST.SqueakFileInParser.
+	'sif' -> STInST.SIFFileInParser
+    }.
     
-    inFile := FileStream open: (args at: 1) mode: FileStream read.
-    outFile := FileStream open: (args at: 2) mode: FileStream write.
-    
-    SyntaxConverter convertStream: inFile to: outFile.
-    inFile close.
-    outFile close
+    helpString :=
+'Usage:
+    gst-package [OPTION]... [INFILE [OUTFILE]]
+    gst-package [OPTION]... -o|--output OUTFILE INFILES
+
+Options:
+    -q, --quiet               don''t show any message
+    -v, --verbose             print extra information while processing
+    -f, --format=FORMAT       convert from given input format (supported
+                              formats are %1)
+    -C, --class=REGEX         convert only classes matching REGEX
+    -C, --class=+REGEX        in addition, convert classes matching REGEX
+    -C, --class=-REGEX        do not convert classes matching REGEX
+    -c, --category=REGEX      convert only classes whose category matches REGEX
+    -c, --category=+REGEX     in addition, convert those whose category
+                              matches REGEX
+    -c, --category=-REGEX     do not convert classes whose category
+                              matches REGEX
+
+    -o, --output OUTFILE      concatenate multiple input files into a single
+                              converted output file
+        --help                display this message and exit
+        --version             print version information and exit
+'.
+
+    Smalltalk
+        arguments: '-h|--help --version -q|--quiet -v|-V|--verbose
+		    -C|--class: -c|--category: -f|--format: -o|--output:
+		    -I|--image-file: --kernel-directory:'
+        do: [ :opt :arg |
+	    opt = 'help' ifTrue: [
+	        helpString displayOn: stdout.
+	        ObjectMemory quit: 0 ].
+
+	    opt = 'version' ifTrue: [
+	        ('gst-convert - %1' % {Smalltalk version}) displayNl.
+	        ObjectMemory quit: 0 ].
+
+	    opt = 'quiet' ifTrue: [
+		quiet := false.
+		verbose := true ].
+
+	    opt = 'verbose' ifTrue: [
+		quiet := false.
+		verbose := true ].
+
+	    opt = 'output' ifTrue: [
+		outFile isNil ifFalse: [
+		    helpString displayOn: stderr.
+		    ObjectMemory quit: 1 ].
+		outFile := arg ]. 
+
+	    opt = 'class' ifTrue: [
+		[ 'a' ~ arg ] on: Error do: [ :ex |
+		    helpString displayOn: stderr.
+		    ObjectMemory quit: 1 ].
+
+		filter := arg
+		    asFilterOn: filter
+		    through: [ :class | class nameIn: Smalltalk ] ].
+
+	    opt = 'category' ifTrue: [
+		[ 'a' ~ arg ] on: Error do: [ :ex |
+		    helpString displayOn: stderr.
+		    ObjectMemory quit: 1 ].
+
+		filter := arg
+		    asFilterOn: filter
+		    through: [ :class | class category ] ].
+
+	    opt = 'format' ifTrue: [
+		parser := formats at: arg ifAbsent: [
+		    helpString displayOn: stderr.
+		    ObjectMemory quit: 1 ] ].
+
+	    opt isNil ifTrue: [
+		args addLast: arg ].
+        ]
+
+        ifError: [
+            helpString displayOn: stderr.
+            ObjectMemory quit: 1 ].
+
+    [
+        outFile isNil
+	    ifTrue: [
+	        args size > 2 ifTrue: [
+	            helpString displayOn: stderr.
+	            ObjectMemory quit: 1 ].
+
+	        inFile := (args size = 0 or: [ args first = '-' ])
+		    ifTrue: [ stdin ]
+		    ifFalse: [ FileStream open: args first mode: FileStream read ].
+	        outFile := (args size <= 1 or: [ args last = '-' ])
+		    ifTrue: [ stdout ]
+		    ifFalse: [ FileStream open: args last mode: FileStream write ] ]
+	    ifFalse: [
+		args := args collect: [ :f |
+		    f = '-'
+			ifTrue: [ stdin ]
+			ifFalse: [ FileStream open: f mode: FileStream read ] ].
+		inFile := args fold: [ :a :b | a, b ].
+
+	        outFile := outFile = '-'
+		    ifTrue: [ stdout ]
+		    ifFalse: [ FileStream open: outFile mode: FileStream write ] ].
+
+	converter filter: filter.
+	converter convertStream: inFile with: parser to: outFile.
+	inFile close.
+	outFile close
+    ]
+	on: Notification do: [ :ex |
+	    verbose ifTrue: [ ('gst-convert: ', ex messageText, '
+') displayOn: stderr ] ]
+	on: Warning do: [ :ex |
+	    quiet ifFalse: [ ('gst-convert: warning: ', ex messageText, '
+') displayOn: stderr ] ]
+	on: Error do: [ :ex |
+	    ('gst-convert: error: ', ex messageText, '
+') displayOn: stderr.
+	    outFile = stdout ifFalse: [
+	        outFile close.
+		(File name: outFile name) remove ].
+	    ex pass. ObjectMemory quit: 1 ].
 ]

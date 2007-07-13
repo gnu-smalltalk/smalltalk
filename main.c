@@ -245,7 +245,7 @@ parse_args (int argc,
 
 	case 'f':
 	  /* Same as -q, passing a file, and -a.  */
-	  gst_set_var (GST_VERBOSITY, 1);
+	  gst_set_var (GST_VERBOSITY, 0);
 	  loaded_files[n_loaded_files].kernel_path = false;
 	  loaded_files[n_loaded_files++].file_name = optarg;
 

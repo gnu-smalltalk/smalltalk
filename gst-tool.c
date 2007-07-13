@@ -76,6 +76,13 @@ struct tool {
 
 struct tool tools[] = {
   {
+    "gst-convert", "scripts/Convert.st",
+    "-h|--help --version -q|--quiet -v|-V|--verbose -C|--class: \
+        -c|--category: -f|--format: -o|--output: -I|--image-file: \
+        --kernel-directory:",
+    NULL
+  },
+  {
     "gst-load", "scripts/Load.st",
     "-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
 	-t|--test -I|--image-file: --kernel-directory:",
@@ -317,7 +324,7 @@ parse_options (const char **argv)
   int at_end = 0;
   while (*argv)
     {
-      if (at_end || argv[0][0] != '-')
+      if (at_end || argv[0][0] != '-' || argv[0][1] == '\0')
 	{
 	  parse_option (0, NULL, argv[0]);
 	  argv++;
@@ -392,7 +399,7 @@ main(int argc, const char **argv)
   setenv ("XZIP", CMD_ZIP, 0);
 #endif
 
-  gst_set_var (GST_VERBOSITY, 1);
+  gst_set_var (GST_VERBOSITY, 0);
   gst_smalltalk_args (smalltalk_argc, smalltalk_argv);
   result = gst_initialize (kernel_dir, image_file, flags);
   if (result != 0)

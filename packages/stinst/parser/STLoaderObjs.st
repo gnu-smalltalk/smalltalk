@@ -366,7 +366,7 @@ sourceCodeAt: selector
 
 subclasses
     subclasses isNil
-        ifTrue: [ subclasses := OrderedCollection new ]
+        ifTrue: [ subclasses := OrderedCollection new ].
     ^subclasses
 !
 

@@ -1,3 +1,7 @@
+2007-07-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STLoaderObjs.st: Fix PseudoBehavior>>#subclasses.
+
 2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Exporter.st: Do not call #environment when not filing out the
