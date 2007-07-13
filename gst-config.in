@@ -49,6 +49,9 @@ while test $# -gt 0; do
     --exec-prefix)
       echo_exec_prefix=yes
       ;;
+    --help)
+      usage 0
+      ;;
     --version)
       echo @VERSION@
       ;;

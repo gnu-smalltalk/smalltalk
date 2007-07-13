@@ -8,7 +8,7 @@ HTML_IMAGES = images/backon.png images/back.png images/blankon.png \
 	images/prevon.png images/prev.png images/tocon.png \
 	images/toc.png images/upon.png images/up.png
 
-dist_man_MANS = gst.1 gst-load.1 gst-package.1 gst-sunit.1
+dist_man_MANS = gst.1 gst-load.1 gst-package.1 gst-sunit.1 gst-config.1
 HELP2MAN = $(top_srcdir)/build-aux/help2man -p gst
 
 info_TEXINFOS = gst.texi gst-base.texi gst-libs.texi
@@ -48,6 +48,17 @@ $(srcdir)/gst-sunit.1: $(top_srcdir)/scripts/Test.st $(top_srcdir)/configure.ac
 $(srcdir)/gst.1: $(top_srcdir)/main.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "the GNU Smalltalk virtual machine" $(top_builddir)/gst >$@
+
+$(srcdir)/gst-config.1: $(top_builddir)/gst-config
+	$(HELP2MAN) \
+	  --name "configuration for libgst" $(top_builddir)/gst-config >$@
+
+uninstall-local:
+	rm -f $(DESTDIR)$(man1dir)/gst-reload.1
+
+install-data-local: install-man
+	rm -f $(DESTDIR)$(man1dir)/gst-reload.1
+	$(LN_S) $(DESTDIR)$(man1dir)/gst-load.1 $(DESTDIR)$(man1dir)/gst-reload.1
 
 ####################################################
 ##
