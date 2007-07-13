@@ -359,8 +359,8 @@ Eval [
     
     helpString :=
 'Usage:
-    gst-package [OPTION]... [INFILE [OUTFILE]]
-    gst-package [OPTION]... -o|--output OUTFILE INFILES
+    gst-convert [OPTION]... [INFILE [OUTFILE]]
+    gst-convert [OPTION]... -o|--output OUTFILE INFILES
 
 Options:
     -q, --quiet               don''t show any message
@@ -380,7 +380,7 @@ Options:
                               converted output file
         --help                display this message and exit
         --version             print version information and exit
-'.
+' % {formats keys asSortedCollection fold: [ :a :b | a, ', ', b ]}.
 
     Smalltalk
         arguments: '-h|--help --version -q|--quiet -v|-V|--verbose
