@@ -181,7 +181,7 @@ parseOneArgument
     arg := args next.
     arg = '--' ifTrue: [ ^self parseRemainingArguments ].
 
-    (arg isEmpty or: [ arg first ~= $- ])
+    arg ~ '^(-?$|[^-])'
 	ifTrue: [ ^actionBlock value: nil value: arg ].
 
     argStream := arg readStream.
