@@ -8,7 +8,7 @@ HTML_IMAGES = images/backon.png images/back.png images/blankon.png \
 	images/prevon.png images/prev.png images/tocon.png \
 	images/toc.png images/upon.png images/up.png
 
-dist_man_MANS = gst.1 gst-load.1 gst-package.1 gst-sunit.1 gst-config.1
+dist_man_MANS = gst.1 gst-load.1 gst-package.1 gst-sunit.1 gst-config.1 gst-convert.1
 HELP2MAN = $(top_srcdir)/build-aux/help2man -p gst
 
 info_TEXINFOS = gst.texi gst-base.texi gst-libs.texi
@@ -31,6 +31,12 @@ $(srcdir)/gst-package.1: $(top_srcdir)/scripts/Package.st $(top_srcdir)/configur
 	$(HELP2MAN) \
 	  --name "create and install GNU Smalltalk .star package files" \
 	  "$(top_builddir)/gst-tool gst-package -I $(top_builddir)/gst.im \
+	     --kernel-directory $(top_srcdir)/kernel" >$@
+
+$(srcdir)/gst-convert.1: $(top_srcdir)/scripts/Load.st $(top_srcdir)/configure.ac
+	$(HELP2MAN) \
+	  --name "Smalltalk syntax converter and beautifier" \
+	  "$(top_builddir)/gst-tool gst-convert -I $(top_builddir)/gst.im \
 	     --kernel-directory $(top_srcdir)/kernel" >$@
 
 $(srcdir)/gst-load.1: $(top_srcdir)/scripts/Load.st $(top_srcdir)/configure.ac
