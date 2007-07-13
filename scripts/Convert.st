@@ -153,7 +153,7 @@ EmittedEntity subclass: EmittedEval [
 
 
 STInST.STClassLoader subclass: SyntaxConverter [
-    | stuffToEmit classesToEmit createdNamespaces filter outStream |
+    | stuffToEmit classesToEmit createdNamespaces filter outStream rewriter |
     
     <comment: 'A class loader that creates a set of "EmittedEntity"
     based on the contents of the given file being loaded.
@@ -217,21 +217,43 @@ STInST.STClassLoader subclass: SyntaxConverter [
         outStream := out.
     ]
     
+    rewrite: node [
+	^rewriter isNil
+	    ifTrue: [ node ]
+	    ifFalse: [ rewriter executeTree: node; tree ].
+    ]
+
     evaluate: node [
         <category: 'overrides'>
 
+	| rewritten |
+	rewritten := self rewrite: node.
 	node comments isEmpty ifFalse: [
 	    stuffToEmit add: (EmittedComments comments: node comments source: node source) ].
 
         ^super evaluate: node
     ]
     
+    addRule: searchString [
+	| tree rule |
+	tree := RBParser parseRewriteExpression: searchString.
+	tree isMessage ifFalse: [ self error: 'expected ->' ].
+	tree selector = #-> ifFalse: [ self error: 'expected ->' ].
+	rule := RBStringReplaceRule
+	    searchForTree: tree receiver
+	    replaceWith: tree arguments first.
+
+	rewriter isNil ifTrue: [ rewriter := ParseTreeRewriter new ].
+	rewriter addRule: rule
+    ]
+
     compile: node [
         <category: 'collecting entities'>
         
-        | method |
+        | rewritten method |
 
-        method := self defineMethod: node.                
+	rewritten := self rewrite: node.
+        method := self defineMethod: rewritten.                
         (classesToEmit includesKey: currentClass asClass)
             ifTrue: [ self addMethod: method toLoadedClass: currentClass ]
             ifFalse: [ self addMethod: method toExtensionClass: currentClass ]
@@ -384,6 +406,7 @@ Options:
                               matches REGEX
     -c, --category=-REGEX     do not convert classes whose category
                               matches REGEX
+    -r, --rule=''CODE->REPL''   look for CODE and replace it with REPL
 
     -o, --output OUTFILE      concatenate multiple input files into a single
                               converted output file
@@ -392,7 +415,7 @@ Options:
 ' % {formats keys asSortedCollection fold: [ :a :b | a, ', ', b ]}.
 
     Smalltalk
-        arguments: '-h|--help --version -q|--quiet -v|-V|--verbose
+        arguments: '-h|--help --version -q|--quiet -v|-V|--verbose -r|--rule:
 		    -C|--class: -c|--category: -f|--format: -o|--output:
 		    -I|--image-file: --kernel-directory:'
         do: [ :opt :arg |
@@ -417,6 +440,9 @@ Options:
 		    helpString displayOn: stderr.
 		    ObjectMemory quit: 1 ].
 		outFile := arg ]. 
+
+	    opt = 'rule' ifTrue: [
+		converter addRule: arg ].
 
 	    opt = 'class' ifTrue: [
 		[ 'a' ~ arg ] on: Error do: [ :ex |

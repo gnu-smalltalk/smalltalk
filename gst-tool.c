@@ -77,7 +77,7 @@ struct tool {
 struct tool tools[] = {
   {
     "gst-convert", "scripts/Convert.st",
-    "-h|--help --version -q|--quiet -v|-V|--verbose -C|--class: \
+    "-h|--help --version -q|--quiet -v|-V|--verbose -C|--class: -r|--rule: \
         -c|--category: -f|--format: -o|--output: -I|--image-file: \
         --kernel-directory:",
     NULL
