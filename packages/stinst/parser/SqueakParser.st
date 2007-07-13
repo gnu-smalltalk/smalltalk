@@ -80,6 +80,11 @@ STFileScanner subclass: #SqueakFileInScanner
 
 !SqueakFileInScanner methodsFor: 'accessing'!
 
+on: aStream
+    super on: aStream.
+    classificationTable := classificationTable copy.
+    classificationTable at: $! value put: #binary!
+
 scanLiteralString
     "In theory, this should also be applied to method comments, but the
      representation of comments in RBParseNode makes it more complicated;
@@ -90,24 +95,23 @@ scanLiteralString
     val value: (val value copyReplacing: 13 asCharacter withObject: 10 asCharacter).
     ^val!
 
-scanSpecialCharacter
+scanLiteralCharacter
+    "Also treat ! specially here."
+    | val |
+    val := super scanLiteralCharacter.
+    val value = $! ifTrue: [ self step ].
+    ^val!
+
+scanBinary: aClass
     "Treat ! specially, it is a binary operator in Squeak (if properly escaped).
      This actually fails on tokens like +!! which is the binary operator +!,
-     but this are never used in practice."
+     but this are never used in practice.  It works for #!! however."
 
-    | val |
     currentCharacter == $!
-	ifFalse: [^super scanSpecialCharacter].
+	ifFalse: [^super scanBinary: aClass].
     self step == $!
 	ifFalse: [^RBSpecialCharacterToken value: $! start: tokenStart].
-
-    buffer nextPut: $!.
-    (characterType == #binary and: [currentCharacter ~~ $-]) ifTrue:
-            [buffer nextPut: currentCharacter.
-            self step].
-    val := buffer contents.
-    val := val asSymbol.
-    ^RBBinarySelectorToken value: val start: tokenStart!
+    ^super scanBinary: aClass!
 
 nextRawChunk
     "Return a raw chunk, converting all double exclamation marks to single.

@@ -1,5 +1,11 @@
 2007-07-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* STFileParser.st: Don't call #step before evaluating.
+	* SqueakParser.st: Refine ! parsing.
+	* STLoaderObjs.st: Add more methods required by converter.
+
+2007-07-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* STLoaderObjs.st: Fix PseudoBehavior>>#subclasses.
 
 2007-07-12  Paolo Bonzini  <bonzini@gnu.org>

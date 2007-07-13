@@ -155,9 +155,10 @@ parseDoits
 	self atEnd ifTrue: [ ^false ].
 	node := self parseStatements.
         scanner stripSeparators.           "gobble doit terminating bang"
-        self step.           "gobble doit terminating bang"
 	self evaluate: node
-    ] whileFalse.
+    ] whileFalse: [
+        self step		            "gobble doit terminating bang"
+    ].
     ^true
 !
 
@@ -181,6 +182,8 @@ parseMethodFromFile
 parseMethodDefinitionList
     "Called after first !, expecting a set of bang terminated
      method definitions, followed by a bang"
+
+    self step.				"gobble doit terminating bang"
 
     [ scanner atEnd or: [ currentToken isSpecial
 	   and: [ currentToken value == $! ] ] ] whileFalse: [

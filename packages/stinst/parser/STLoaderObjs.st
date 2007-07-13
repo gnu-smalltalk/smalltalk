@@ -494,11 +494,7 @@ asMetaclass
 !
 
 category
-    self subclassResponsibility
-!
-
-category: aString
-    self subclassResponsibility
+    ^nil
 !
 
 comment
@@ -582,6 +578,10 @@ hash
 
 proxy
    ^proxy
+!
+
+printOn: aStream
+    proxy printOn: aStream
 !
 
 asClass

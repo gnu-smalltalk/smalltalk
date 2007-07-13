@@ -213,6 +213,11 @@ contractTo: smallSize
 	with: '...'
 !
 
+lines
+    "Answer an Array of Strings each representing one line in the receiver."
+    ^self readStream lines contents
+!
+
 substrings
     "Answer an OrderedCollection of substrings of the receiver. A new substring
      start at the start of the receiver, or after every sequence of white space

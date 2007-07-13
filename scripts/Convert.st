@@ -191,6 +191,14 @@ STInST.STClassLoader subclass: SyntaxConverter [
         createdNamespaces := OrderedSet new.
     ]
 
+    convertStream: in with: aParserClass to: out onError: aBlock [
+        <catogory: 'operation'>
+        self
+	    outStream: out;
+	    parseSmalltalkStream: in with: aParserClass onError: aBlock;
+	    doEmitStuff.        
+    ]
+
     convertStream: in with: aParserClass to: out [
         <catogory: 'operation'>
         self
@@ -278,6 +286,7 @@ STInST.STClassLoader subclass: SyntaxConverter [
                        selector: selector 
                        arguments: argumentNodes.        
                             
+        Notification signal: ('Parsing %1' % {class}).
         emittedClass := EmittedClass forClass: class.
     
         classesToEmit at: class put: emittedClass.
@@ -465,19 +474,23 @@ Options:
 		    ifFalse: [ FileStream open: outFile mode: FileStream write ] ].
 
 	converter filter: filter.
-	converter convertStream: inFile with: parser to: outFile.
+	converter
+	    convertStream: inFile
+	    with: parser
+	    to: outFile
+	    onError: [ :m :pos | self error: ('line %1: %2' % {
+		(inFile copyFrom: 1 to: pos) readStream lines contents size.
+		m}) ].
+
 	inFile close.
 	outFile close
     ]
 	on: Notification do: [ :ex |
-	    verbose ifTrue: [ ('gst-convert: ', ex messageText, '
-') displayOn: stderr ] ]
+	    verbose ifTrue: [ stderr nextPutAll: 'gst-convert: ', ex messageText; nl; flush ] ]
 	on: Warning do: [ :ex |
-	    quiet ifFalse: [ ('gst-convert: warning: ', ex messageText, '
-') displayOn: stderr ] ]
+	    quiet ifFalse: [ stderr nextPutAll: 'gst-convert: warning: ', ex messageText; nl; flush ] ]
 	on: Error do: [ :ex |
-	    ('gst-convert: error: ', ex messageText, '
-') displayOn: stderr.
+	    stderr nextPutAll: 'gst-convert: error: ', ex messageText; nl; flush.
 	    outFile = stdout ifFalse: [
 	        outFile close.
 
@@ -485,5 +498,5 @@ Options:
 		 /dev/null disappear if you run gst-convert as root (which
 		 you shouldn't)."
 		[ (File name: outFile name) remove ] on: Error do: [ :ex | ] ].
-	    "ex pass." ObjectMemory quit: 1 ].
+	    ex pass. ObjectMemory quit: 1 ].
 ]
