@@ -832,6 +832,9 @@ returns it as a string.  Point is not changed."
 	  first-hit)
       (or second-hit ""))))
 
+;; ---[ Emacs configuration ]-----------------------------------------
+
+(push '("\\.st\\'" . smalltalk-mode) auto-mode-alist)
 
 (provide 'smalltalk-mode)
 (autoload 'gst "@lispdir@/gst-mode.elc" "" t)
