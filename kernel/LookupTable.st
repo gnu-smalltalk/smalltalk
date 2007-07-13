@@ -39,10 +39,11 @@ Dictionary variableSubclass: #LookupTable
 !
 
 LookupTable comment:
-'I am similar to Dictionary, except that my representation is
-different (more efficient, but not useful to store a variable
-binding). I use the object equality comparison message #=
-to determine equivalence of indices.' !
+'I am a more efficient variant of Dictionary that cannot be used as a
+pool dictionary of variables, as I don''t use Associations to store
+key-value pairs.  I also cannot have nil as a key; if you need to be
+able to store nil as a key, use Dictionary instead.  I use the object
+equality comparison message #= to determine equivalence of indices.' !
 
 
 !LookupTable class methodsFor: 'instance creation'!

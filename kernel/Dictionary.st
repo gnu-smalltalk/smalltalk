@@ -43,7 +43,12 @@ Dictionary comment:
 'I implement a dictionary, which is an object that is indexed by
 unique objects (typcially instances of Symbol), and associates another
 object with that index.  I use the equality operator = to determine
-equality of indices.' !
+equality of indices.
+
+In almost all places where you would use a plain Dictionary, a
+LookupTable would be more efficient; see LookupTable''s comment before
+you use it.  I do have a couple of special features that are useful in
+certain special cases.' !
 
 
 

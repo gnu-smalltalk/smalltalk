@@ -1,3 +1,10 @@
+2007-07-13  Stephen Compall <scompall@nocandysw.com>
+
+	* kernel/Dictionary.st: Explain that LookupTable is usually a
+	better choice.
+	* kernel/LookupTable.st: Expand the explanation of differences
+	with Dictionary.
+
 2007-07-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Load.st: Add --version.

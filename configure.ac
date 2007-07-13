@@ -241,12 +241,10 @@ GST_HAVE_GMP
 GST_HAVE_READLINE
 
 GST_PACKAGE_PREFIX([packages])
-GST_PACKAGE([BloxGTK], [blox/gtk])
 GST_PACKAGE([BloxTK], [blox/tk],
    [GST_HAVE_TCLTK],
    [gst_cv_tcltk_libs],
    [Makefile], [blox-tk.la])
-GST_PACKAGE([Blox], [blox/tests], , , [package.xml])
 GST_PACKAGE([Browser], [browser])
 GST_PACKAGE([Continuations], [continuations])
 GST_PACKAGE([DB], [db])
@@ -274,6 +272,14 @@ GST_PACKAGE([GTK], [gtk], [
   fi],
   [enable_gtk],
   [Makefile], [gst-gtk.la])
+GST_PACKAGE([BloxGTK], [blox/gtk],, [enable_gtk])
+GST_PACKAGE([Blox], [blox/tests],
+	    [enable_blox=no
+	     case x"$enable_gtk" in
+		 xno|xnot\ found) ;; *) enable_blox=yes ;; esac
+	     case x"$gst_cv_tcltk_includes" in
+		 xno|xnot\ found) ;; *) enable_blox=yes ;; esac], 
+	    [enable_blox], [package.xml])
 GST_PACKAGE([WebServer], [httpd])
 GST_PACKAGE([I18N], [i18n],
   [AC_CHECK_FUNCS_ONCE([nl_langinfo])
