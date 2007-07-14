@@ -277,7 +277,7 @@ GST_PACKAGE([Blox], [blox/tests],
 	    [enable_blox=no
 	     case x"$enable_gtk" in
 		 xno|xnot\ found) ;; *) enable_blox=yes ;; esac
-	     case x"$gst_cv_tcltk_includes" in
+	     case x"$gst_cv_tcltk_libs" in
 		 xno|xnot\ found) ;; *) enable_blox=yes ;; esac], 
 	    [enable_blox], [package.xml])
 GST_PACKAGE([WebServer], [httpd])
