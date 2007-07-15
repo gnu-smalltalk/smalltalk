@@ -30,8 +30,8 @@
 "
 
 GuiData subclass:  #Notifier
-	instanceVariableNames: 'callstackList process stacktrace
-				currentSelection errMessage topView '
+	instanceVariableNames: 'callstackList debugger stacktrace
+				currentSelection errMessage topView listView '
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Graphics-Browser'!
@@ -51,40 +51,36 @@ debuggingPriority
 
 !Notifier class methodsFor: 'instance creation'!
 
-openOn: process message: message
+openOn: aProcess message: message
+    self new init: message debugger: (Smalltalk.Debugger on: aProcess)!
+
+open
+    self open: ('Notifier on %1' % { Processor activeProcess })!
+
+open: message
     | handleErrorsWithGui |
-    handleErrorsWithGui := BLOX BLOXBrowser BrowserMain handleErrorsWithGui.
-    BLOX BLOXBrowser BrowserMain handleErrorsWithGui: false.
-    [
+    handleErrorsWithGui := BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui.
+    BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui: false.
+    [ :debugger |
         Processor activeProcess name: 'Notifier/Debugger'.
-        [ process isSuspended ] whileFalse: [ Processor yield ].
-
-        self new
-            init: message
-	    process: process.
-
-        BLOX BLOXBrowser BrowserMain handleErrorsWithGui: handleErrorsWithGui.
-    ] fork.
-
-    process suspend.
+	self new init: message debugger: debugger.
+        BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui: handleErrorsWithGui.
+    ] forkDebugger
 ! !
 
 !Notifier methodsFor: 'accessing'!
 
 currentContext
-    currentSelection isNil ifTrue: [^nil].
+    currentSelection isNil ifTrue: [currentSelection := 1].
     ^callstackList at: currentSelection! !
 
 !Notifier methodsFor: 'callback'!
 
-contexts
-    ^callstackList elements!
-
-nameList
-    ^callstackList labels!
-
 process
-    ^process!
+    ^debugger process!
+
+debugger
+    ^debugger!
 
 contextSelectedFrom: assoc 
     currentSelection := assoc key!
@@ -102,11 +98,11 @@ close: aView
     tv := aView rootView blox.
     aView rootView close ifTrue: [tv destroy]!
 
-init: aString process: aProcess
+init: aString debugger: aDebugger
     | context lastContext contexts |
     errMessage := aString.
-    process := aProcess.
-    context := process suspendedContext.
+    debugger := aDebugger.
+    context := debugger suspendedContext.
     lastContext := context environment.
     stacktrace := OrderedCollection new.
     contexts := OrderedCollection new.
@@ -129,10 +125,12 @@ init: aString process: aProcess
 
     self createWindow.
     callstackList contents: stacktrace elements: contexts.
-    topView display!
+    topView display.
+    listView update.
+    listView select: 1!
 
 createWindow
-    | topLevel listView |
+    | topLevel |
     topView := (BrowserShell new: errMessage) data: self.
     topLevel := topView blox.
     topLevel

@@ -58,6 +58,11 @@ on: aBlockClosure at: aPriority suspend: aBoolean
 
 !Process methodsFor: 'basic'!
 
+debugger
+    "Return the object in charge of debugging the receiver.  This always returns
+     nil unless the DebugTools package is loaded."
+    ^self context debugger!
+
 context
     "Return the execution context of the receiver."
     ^self == Processor activeProcess

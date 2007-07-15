@@ -139,6 +139,19 @@ backtraceOn: aStream
 
 !ContextPart methodsFor: 'debugging'!
 
+currentLine
+    "Answer the 1-based number of the line that is pointed to by the receiver's
+     instruction pointer.  It is always 1 unless the DebugTools package is
+     loaded."
+    ^1
+!
+
+debugger
+    "Answer the debugger that is attached to the given context.  It
+     is always nil unless the DebugTools package is loaded."
+    ^nil
+!
+
 debuggerClass
     "Answer which debugger should be used to debug the current
      context chain.  The class with the highest debugging
@@ -147,15 +160,15 @@ debuggerClass
     ctx := self.
     last := self class lastUnwindPoint.
     [
-	currentClass := ctx receiver class debuggerClass.
-	currentClass isNil ifTrue: [ ^nil ].
-	(debuggerClass isNil
-	    or: [ currentClass debuggingPriority > debuggerClass debuggingPriority ])
-		ifTrue: [ debuggerClass := currentClass ].
+        currentClass := ctx receiver class debuggerClass.
+        currentClass isNil ifTrue: [ ^nil ].
+        (debuggerClass isNil
+            or: [ currentClass debuggingPriority > debuggerClass debuggingPriority ])
+                ifTrue: [ debuggerClass := currentClass ].
 
-	ctx == last | ctx isNil
+        ctx == last | ctx isNil
     ] whileFalse: [
-	ctx := ctx parentContext
+        ctx := ctx parentContext
     ].
     ^debuggerClass
 !

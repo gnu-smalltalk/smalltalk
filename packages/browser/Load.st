@@ -36,4 +36,4 @@ Class allSubclassesDo: [ :each |
 ]!
 
 (BLOX.BLOXBrowser includesKey: #BrowserMain)
-    ifTrue: [ BLOX BLOXBrowser BrowserMain close ]!
+    ifTrue: [ BLOX.BLOXBrowser.BrowserMain close ]!

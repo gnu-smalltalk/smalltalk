@@ -1,5 +1,15 @@
 2007-07-16  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/MiniDebugger.st: Use DebugTools.
+	* kernel/ContextPart.st: Add stub methods for #currentLine and
+	#debugger.
+	* kernel/ExcHandling.st: Use #stopInferior: if the process is
+	already being debugged.
+	* kernel/ProcSched.st: Add #activeDebugger.
+	* kernel/Process.st: Add #debugger.
+
+2007-07-16  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/VFS.st: Set a FileStream's name to the full path.
 
 2007-07-13  Paolo Bonzini  <bonzini@gnu.org>

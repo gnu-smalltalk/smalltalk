@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   Minimal inspector and debugger
+|   Minimal inspector and debugger using DebugTools
 |
 |
  ======================================================================"
@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2002, 2006 Free Software Foundation, Inc.
+| Copyright 2002, 2006, 2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -28,6 +28,7 @@
 |
  ======================================================================"
 
+PackageLoader fileInPackage: #DebugTools!
 
 Object subclass: #MiniTool
 	instanceVariableNames: 'commandArg command'
@@ -44,8 +45,7 @@ MiniTool subclass: #MiniInspector
 !
 
 MiniTool subclass: #MiniDebugger
-	instanceVariableNames: 'process activeContext depth stepSemaphore
-				methodSourceCodeCache methodLineMapCache'
+	instanceVariableNames: 'debugger activeContext depth methodSourceCodeCache'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'System-Debugging-Support'
@@ -244,18 +244,63 @@ debuggingPriority
 
 !MiniDebugger class methodsFor: 'instance creation'!
 
-openOn: process message: aString
-    [
-	Processor activeProcess name: 'MiniDebugger'.
-	[ process isSuspended ] whileFalse: [ Processor yield ].
-	aString printNl.
-        self new initializeFor: process; commandLoop
-    ] fork.
-    process suspend.
+open: aString
+    [ :debugger || continuation arg |
+	Processor activeProcess name: 'Debugger'.
+	arg := Continuation currentDo: [ :cc |
+            continuation := cc.
+            aString ].
+	arg printNl.
+	[ self new debugger: debugger; commandLoop ]
+	    on: SystemExceptions.DebuggerReentered
+	    do: [ :ex | continuation value: ex messageText ]
+    ] forkDebugger
 ! !
 
-
-!MiniDebugger methodsFor: 'stepping commands'!
+!MiniDebugger methodsFor: 'commands'!
+
+debugger: aDebugger
+    debugger := aDebugger.
+!
+
+commandLoop
+
+    "Show meaningful source code to the user."
+    [ debugger suspendedContext isInternalExceptionHandlingContext ]
+	whileTrue: [ debugger slowFinish ].
+
+    depth := 0.
+    activeContext := debugger suspendedContext.
+    debugger suspendedContext backtrace.
+    self printCurrentLine.
+    [
+	self getCommand.
+	debugger isActive
+    ] whileTrue.
+    Processor activeProcess suspend
+!
+
+
+!MiniDebugger methodsFor: 'commands'!
+
+step
+    debugger step.
+    self resetContext!
+
+next
+    debugger next.
+    self resetContext!
+
+finish
+    debugger finish: activeContext.
+    self resetContext!
+
+continue
+    debugger continue!
+
+resetContext
+    activeContext := debugger suspendedContext.
+    depth := 0!
 
 up
     activeContext parentContext isNil ifTrue: [ ^self ].
@@ -266,90 +311,11 @@ up
 down
     depth > 0 ifFalse: [ ^self ].
     depth := depth - 1.
-    activeContext := process suspendedContext.
+    activeContext := debugger suspendedContext.
     depth timesRepeat: [ activeContext := activeContext parentContext ]
-!
-
-stepBytecode
-    process singleStepWaitingOn: stepSemaphore.
-    process suspend.
-!
-
-step
-    | context line |
-    context := process suspendedContext.
-    line := self currentLine.
-    [
-	self stepBytecode.
-	activeContext := process suspendedContext.
-	activeContext == context and: [ line = self currentLine ]
-    ] whileTrue.
-    depth := 0.
-!
-
-next
-    | context |
-    context := process suspendedContext.
-    [
-        self step.
-        activeContext notNil and: [ activeContext parentContext == context ]
-    ] whileTrue: [
-        self finish: activeContext
-    ]
-!
-
-finish: aContext
-    | context |
-    [
-	context := process suspendedContext.
-	[
-	    self stepBytecode.
-	    process suspendedContext == context
-	] whileTrue.
-
-	activeContext := process suspendedContext.
-	activeContext notNil "no context? exit"
-	    and: [ activeContext parentContext == context "a send? go on"
-	    or: [ (self depthOf: aContext) notNil ]] "aContext still in the chain? go on"
-    ] whileTrue
-!
-
-finish
-    self finish: activeContext
-!
-
-continue
-    | proc |
-    proc := Processor activeProcess.
-    [ proc terminate. process resume ] forkAt: Processor unpreemptedPriority.
-
-    "Suspend just in case we get here."
-    proc suspend
 ! !
 
-
-!MiniDebugger methodsFor: 'source code'!
-
-currentMethodSource
-    activeContext isNil ifTrue: [ ^#() ].
-    ^methodSourceCodeCache at: activeContext method ifAbsentPut: [
-	self linesOf: activeContext method methodSourceString
-    ]
-!
-
-currentLine
-    | lineMap |
-    activeContext isNil ifTrue: [ ^self ].
-    lineMap := methodLineMapCache at: activeContext method ifAbsentPut: [
-	activeContext method sourceCodeMap
-    ].
-    ^lineMap at: activeContext ip + 1 ifAbsent: [ activeContext inspect. 1 ]
-!
-
-linesOf: aString
-    aString isNil ifTrue: [ ^nil ].
-    ^aString readStream lines contents
-!
+!MiniDebugger methodsFor: 'printing'!
 
 printCurrentMethod
     | source |
@@ -366,9 +332,10 @@ printCurrentMethod
 
 printCurrentLine
     | line source |
+    activeContext isNil ifTrue: [ ^self ].
     source := self currentMethodSource.
     source isNil ifTrue: [ ^self ].
-    line := self currentLine.
+    line := Debugger currentLineIn: activeContext.
     line = 0 ifTrue: [ ^self ].
 
     self rightJustify: line.
@@ -409,7 +376,11 @@ doProcessCommand
     | id proc |
     ('TSKb' includes: command) ifFalse: [ ^false ].
 
-    proc := process.
+    (commandArg isEmpty and: [ command == $b ]) ifTrue: [
+	activeContext backtrace.
+	^true ].
+
+    proc := debugger process.
     commandArg notEmpty ifTrue: [
 	id := Number readFrom: commandArg onError: nil.
 
@@ -421,12 +392,12 @@ doProcessCommand
     proc suspendedContext isNil
 	ifTrue: [ 'process was terminated' displayNl. ^true ].
 
-    (command == $b) ifTrue: [ self backtraceOf: proc ].
+    (command == $b) ifTrue: [ proc context backtrace ].
     (command == $S) ifTrue: [ proc suspend ].
     (command == $K) ifTrue: [ proc primTerminate ].
     (command == $T) ifTrue: [
 	proc terminate.
-	proc == process ifTrue: [ self continue ]
+	proc == debugger process ifTrue: [ self continue ]
     ].
     ^true
 !
@@ -453,14 +424,6 @@ doCommand
     (command == $X) ifTrue: [ ObjectMemory abort ].
     (command == $x) ifTrue: [ ObjectMemory quit ].
     ^true
-!
-
-commandLoop
-    [
-	self getCommand.
-	process isTerminated
-    ] whileFalse.
-    Processor activeProcess suspend
 !
 
 eofCommand
@@ -503,43 +466,14 @@ Other commands:
     x ..... exit Smalltalk'
 ! !
 
-
 !MiniDebugger methodsFor: 'private'!
 
-initializeFor: aProcess
-    process := aProcess.
-    stepSemaphore := Semaphore new.
-    methodSourceCodeCache := IdentityDictionary new.
-    methodLineMapCache := IdentityDictionary new.
-    activeContext := process suspendedContext.
-    depth := 0.
-
-    [ activeContext isInternalExceptionHandlingContext ]
-	whileTrue: [ self finish ].
-
-    self backtraceOf: process.
-    self printCurrentLine.
-!
-
-backtraceOf: aProcess
-    | context |
-    context := aProcess == process
-	ifTrue: [ activeContext ]
-	ifFalse: [ aProcess suspendedContext ].
-
-    context backtrace
-!
-
-depthOf: aContext
-    | context depth |
-    context := activeContext.
-    depth := 0.
-    [ context == aContext ] whileFalse: [
-	context := context parentContext.
-	context isNil ifTrue: [ ^nil ].
-	depth := depth + 1.
-    ].
-    ^depth
+currentMethodSource
+    activeContext isNil ifTrue: [ ^#() ].
+    methodSourceCodeCache isNil ifTrue: [
+	methodSourceCodeCache := WeakKeyIdentityDictionary new ].
+    ^methodSourceCodeCache at: activeContext method ifAbsentPut: [
+	activeContext method methodSourceString lines ]
 !
 
 rightJustify: n
@@ -551,12 +485,23 @@ rightJustify: n
 !
 
 showProcesses
-    self rightJustify: process asOop. '>' display. process printNl.
+    self rightJustify: debugger process asOop.
+    '>' display.
+    debugger process printNl.
+
     Process allSubinstancesDo: [ :each |
-	each == process
-	    ifFalse: [ self rightJustify: each asOop. ' ' display. each printNl ]
-    ]
+	each == debugger process ifFalse: [
+	    self rightJustify: each asOop.
+	    ' ' display.
+	    each printNl ] ]
 ! !
+
+!UndefinedObject methodsFor: 'polymorphism'!
+
+lines
+    ^nil
+! !
+
 
 
 !Behavior methodsFor: 'debugging'!

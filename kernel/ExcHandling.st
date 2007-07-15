@@ -720,15 +720,16 @@ primError: message
     "This might start the debugger... Note that we use #basicPrint
      'cause #printOn: might invoke an error."
 
-    | debuggerClass context |
+    | debugger debuggerClass context |
     Transcript initialize.    
     stdout flush.
+
+    debugger := Processor activeDebugger.
+    debugger isNil ifFalse: [ ^debugger stopInferior: message ].
+
     debuggerClass := thisContext debuggerClass.
     debuggerClass isNil ifFalse: [
-	^debuggerClass
-	    openOn: Processor activeProcess
-	    message: self class printString, ' error: ', message
-    ].
+	^debuggerClass open: self class printString, ' error: ', message ].
 
     "Default behavior - print backtrace"
     RegressionTesting ifFalse: [ self basicPrint ].

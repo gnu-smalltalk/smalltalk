@@ -81,6 +81,10 @@ o   Added #from: to Collection, which constructs an instance of the class
     returns a string and is the same as using #, repeatedly, but is more
     efficient.
 
+o   A new package DebugTools provides a generic Debugger class that can
+    be used to control an inferior Smalltalk process.  It is used by the
+    textual MiniDebugger.
+
 o   Continuations and generators have moved to the base image.  More complex
     examples of continuations still reside in the Continuations package.
 

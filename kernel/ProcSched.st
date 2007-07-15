@@ -58,6 +58,11 @@ activeProcess
     ^activeProcess
 !
 
+activeDebugger
+    "Answer the active process' debugger"
+    ^self activeProcess debugger
+!
+
 activePriority
     "Answer the active process' priority"
     ^self activeProcess priority

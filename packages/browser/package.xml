@@ -1,8 +1,11 @@
 <package>
   <name>Browser</name>
   <namespace>BLOX.BLOXBrowser</namespace>
+
   <prereq>Blox</prereq>
   <prereq>Parser</prereq>
+  <prereq>DebugTools</prereq>
+
   <filein>Load.st</filein>
   <filein>GuiData.st</filein>
   <filein>View.st</filein>

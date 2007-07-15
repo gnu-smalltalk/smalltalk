@@ -30,10 +30,9 @@
 "
 
 GuiData subclass:  #Debugger
-	instanceVariableNames: 'stacktrace contexts process stepSemaphore
+	instanceVariableNames: 'stacktrace contexts debugger 
 			        activeContext receiverInspector stackInspector
-				listView theClass theMethod textView topView
-				methodLineMapCache'
+				listView theClass theMethod textView topView'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Graphics-Browser'!
@@ -75,12 +74,10 @@ new: notifier
 !Debugger methodsFor: 'initialize/release'!
 
 init: notifier 
-    process := notifier process.
-    stepSemaphore := Semaphore new.
-    methodLineMapCache := IdentityDictionary new.
+    debugger := notifier debugger.
 
-    [ process suspendedContext isInternalExceptionHandlingContext ]
-        whileTrue: [ self finish ].
+    [ debugger suspendedContext isInternalExceptionHandlingContext ]
+        whileTrue: [ debugger slowFinish ].
 
     self createWindowFrom: notifier.
 !
@@ -191,7 +188,7 @@ contextSelectedFrom: assoc
 
 highlight: context
     | line |
-    line := self lineFor: context.
+    line := context currentLine.
     textView blox
 	gotoLine: line end: false;
 	selectFrom: 1 @ line to: 1 @ (line + 1)!
@@ -219,39 +216,51 @@ debugSelectors
        #() #('Terminate' #terminateButtonCallback))
 !
 
+updateAfter: aBlock
+    "If there's an exception, replace this window with another
+     notifier."
+    aBlock
+	on: SystemExceptions.DebuggerReentered
+	do: [ :ex |
+	    topView close.
+	    Notifier openOn: debugger process.
+	    ^self ].
+
+    self updateContextList!
+
 stepButtonCallback
-    self step; updateContextList
+    self updateAfter: [ debugger step ]
 !
 
 nextButtonCallback
-    self next; updateContextList
+    self updateAfter: [ debugger next ]
 !
 
 finishButtonCallback
-    self finish; updateContextList
+    self updateAfter: [ debugger finish: activeContext ]
 !
 
 continueButtonCallback
     topView close.
-    self continue.
+    debugger continue.
 !
 
 killButtonCallback
     topView close.
-    process primTerminate
+    debugger process primTerminate
 !
 
 terminateButtonCallback
     topView close.
-    process terminate.
-    self continue
+    debugger process terminate.
+    debugger continue
 ! !
 
 !Debugger methodsFor: 'list pane'!
 
 updateContextList
     | context lastContext |
-    context := process suspendedContext.
+    context := debugger suspendedContext.
     lastContext := context environment.
     stacktrace := OrderedCollection new.
     contexts := OrderedCollection new.
@@ -265,7 +274,7 @@ updateContextList
     ].
 
     self changeState: #stacktrace.
-    self currentContext: process suspendedContext!
+    self currentContext: debugger suspendedContext!
 
 currentContext: context
     activeContext := context.
@@ -277,93 +286,6 @@ currentContext: context
     Primitive updateViews.
 
     self highlight: context! !
-
-!Debugger methodsFor: 'debugging operations'!
-
-depthOf: aContext
-    | context depth |
-    context := activeContext.
-    depth := 0.
-    [ context == aContext ] whileFalse: [
-        context := context parentContext.
-        context isNil ifTrue: [ ^nil ].
-        depth := depth + 1.
-    ].
-    ^depth
-!
-
-currentLine
-    ^self lineFor: process suspendedContext!
-
-lineFor: context
-    | lineMap |
-    context isNil ifTrue: [ ^1 ].
-    lineMap := methodLineMapCache at: context method
-	ifAbsentPut: [ context method sourceCodeMap ].
-    ^lineMap at: context ip + 1 ifAbsent: [ 1 ]!
-
-stepBytecode
-    "Execute a bytecode of the debugged process"
-    process singleStepWaitingOn: stepSemaphore.
-    process suspend.
-!
-
-step
-    "Execute a line of the debugged process, going inside a message
-     that is sent."
-    | context line |
-    context := process suspendedContext.
-    line := self currentLine.
-    [
-        self stepBytecode.
-        activeContext := process suspendedContext.
-        activeContext == context and: [ line = self currentLine ]
-    ] whileTrue.
-!
-
-next
-    "Execute a line of the debugged process, stepping over a message
-     that is sent."
-    | context |
-    context := process suspendedContext.
-    [
-        self step.
-        activeContext notNil and: [ activeContext parentContext == context ]
-    ] whileTrue: [
-        self finish: activeContext
-    ]
-!
-
-finish: aContext
-    "Execute the debugged process until it returns from aContext"
-    | context |
-    [
-        context := process suspendedContext.
-        [
-            self stepBytecode.
-            process suspendedContext == context
-        ] whileTrue.
-
-        activeContext := process suspendedContext.
-        activeContext notNil "no context? exit"
-            and: [ activeContext parentContext == context "a send? go on"
-            or: [ (self depthOf: aContext) notNil ]] "aContext still in the chain? go on"
-    ] whileTrue
-!
-
-finish
-    "Execute the debugged process until it returns from the active context"
-    self finish: activeContext
-!
-
-continue
-    | proc |
-    proc := Processor activeProcess.
-    [ proc terminate. process resume ] forkAt: Processor unpreemptedPriority.
-
-    "Suspend just in case we get here."
-    proc suspend
-! !
 
 !PrimitiveInspectorFieldList methodsFor: 'primitives'!
 

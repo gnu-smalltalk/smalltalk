@@ -1,3 +1,9 @@
+2007-07-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Debugger.st: Use DebugTools.
+	* Notifier.st: Use DebugTools.
+	* Load.st: Delimit namespaces with periods.
+
 2007-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Debugger.st: Highlight line 1 for nil context.
