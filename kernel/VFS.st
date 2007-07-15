@@ -1237,7 +1237,7 @@ open: class mode: mode ifFail: aBlock
     mode == FileStream read ifFalse: [
 	fileStream addDependent: self ].
 
-    fileStream setName: self name.
+    fileStream setName: self fullName.
     ^fileStream
 !
 
