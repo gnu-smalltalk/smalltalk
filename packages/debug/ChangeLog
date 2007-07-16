@@ -1,3 +1,7 @@
+2007-01-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* debugtests.st: Remove useless fileInPackage:.
+
 2007-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* DebugTools.st: New.

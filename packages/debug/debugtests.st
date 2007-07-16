@@ -28,8 +28,6 @@
 |
  ======================================================================"
 
-PackageLoader fileInPackage: #SUnit!
-
 TestCase subclass: #DebuggerTest
          instanceVariableNames: ''
          classVariableNames: ''
