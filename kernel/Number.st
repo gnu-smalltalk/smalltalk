@@ -345,9 +345,7 @@ retryDivisionCoercing: aNumber
     exception if aNumber is zero"
 
     aNumber = 0 ifTrue: [ self zeroDivide ].
-    ^self negative == aNumber negative
-	ifTrue: [ self rem: aNumber ]
-	ifFalse: [ (self rem: aNumber) + aNumber ]
+    ^self - ((self // aNumber) * aNumber)
 !
 
 quo: aNumber
@@ -586,12 +584,12 @@ arcTan: x
 	^self generality < x generality
 	    ifTrue: [
 		x generality < 0.0e generality
-		    ifTrue: [ FloatD pi * self sign / -2 ]
-		    ifFalse: [ x class pi * self sign / -2 ]]
+		    ifTrue: [ FloatD pi * self sign / 2 ]
+		    ifFalse: [ x class pi * self sign / 2 ]]
 	    ifFalse: [
 		self generality < 0.0e generality
-		    ifTrue: [ FloatD pi * self sign / -2 ]
-		    ifFalse: [ self class pi * self sign / -2 ]]].
+		    ifTrue: [ FloatD pi * self sign / 2 ]
+		    ifFalse: [ self class pi * self sign / 2 ]]].
 
     result := (self / x) arcTan.
     ^x < 0
@@ -601,6 +599,33 @@ arcTan: x
 		ifFalse: [ result + result class pi ]
 		ifTrue: [ result - result class pi ] ]
 !
+
+cosh
+    "Answer the hyperbolic cosine of the receiver."
+    ^(self exp + self negated exp) / 2!
+
+sinh
+    "Answer the hyperbolic sine of the receiver."
+    ^(self exp - self negated exp) / 2!
+
+tanh
+    "Answer the hyperbolic tangent of the receiver."
+    | ep en |
+    ep := self exp.
+    en := self negated exp.
+    ^(ep - en) / (ep + en)!
+
+arcCosh
+    "Answer the hyperbolic arc-cosine of the receiver."
+    ^(self + (self squared - 1) sqrt) ln!
+
+arcSinh
+    "Answer the hyperbolic arc-sine of the receiver."
+    ^(self + (self squared + 1) sqrt) ln!
+
+arcTanh
+    "Answer the hyperbolic arc-tangent of the receiver."
+    ^((1 + self) / (1 - self)) ln / 2!
 
 sqrt
     "Answer the square root of the receiver"

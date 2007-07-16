@@ -246,6 +246,7 @@ GST_PACKAGE([BloxTK], [blox/tk],
    [gst_cv_tcltk_libs],
    [Makefile], [blox-tk.la])
 GST_PACKAGE([Browser], [browser])
+GST_PACKAGE([Complex], [complex])
 GST_PACKAGE([Continuations], [continuations])
 GST_PACKAGE([DebugTools], [debug])
 GST_PACKAGE([DB], [db])

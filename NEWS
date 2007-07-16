@@ -85,6 +85,8 @@ o   A new package DebugTools provides a generic Debugger class that can
     be used to control an inferior Smalltalk process.  It is used by the
     textual MiniDebugger.
 
+o   Complex numbers support added (package Complex).
+
 o   Continuations and generators have moved to the base image.  More complex
     examples of continuations still reside in the Continuations package.
 
