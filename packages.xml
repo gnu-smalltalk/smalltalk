@@ -233,6 +233,7 @@
   <file>Load.st</file>
   <file>Package.st</file>
   <file>Browser.st</file>
+  <file>Convert.st</file>
 </disabled-package>
 
 </packages>

@@ -62,7 +62,7 @@ pkglib_DATA = libc.la
 noinst_DATA = gst.im
 dist_noinst_DATA += smalltalk-mode.el.in gst-mode.el.in .gdbinit \
 	scripts/Finish.st scripts/GenLibDoc.st \
-	scripts/GenBaseDoc.st scripts/Convert.st gsticon.ico
+	scripts/GenBaseDoc.st gsticon.ico
 
 if WITH_EMACS
 nodist_lisp_LISP = smalltalk-mode.el
