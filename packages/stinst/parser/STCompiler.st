@@ -124,6 +124,12 @@ evaluate: aSequenceNode parser: aParser
 
 !STCompiler class methodsFor: 'compilation'!
 
+canCompile: code
+    "Answer whether I know how to compile the given code directly, on
+     behalf of a Behavior."
+    ^(code isKindOf: RBProgramNode) and: [code isMethod]
+!
+
 compile: methodNode for: aBehavior classified: aString parser: aParser
     ^aBehavior
 	addSelector: methodNode selector
@@ -735,7 +741,7 @@ compileSendToSuper: aNode
 
 compileTimesRepeat: aNode
     | block |
-    aNode receiver acceptVisitor: self.
+    "aNode receiver acceptVisitor: self."
     block := aNode arguments first.
     (block arguments isEmpty and: [
 	block body temporaries isEmpty ]) ifFalse: [ ^false ].
@@ -745,7 +751,7 @@ compileTimesRepeat: aNode
 
 compileLoop: aNode
     | stop step block |
-    aNode receiver acceptVisitor: self.
+    "aNode receiver acceptVisitor: self."
     aNode arguments do: [ :each |
 	stop := step.			"to:"
 	step := block.			"by:"
@@ -763,7 +769,6 @@ compileLoop: aNode
 
 compileBoolean: aNode
     | bc1 ret1 bc2 selector |
-    aNode receiver acceptVisitor: self.
     aNode arguments do: [ :each |
         (each arguments isEmpty and: [
 	    each body temporaries isEmpty ]) ifFalse: [ ^false ].
@@ -776,6 +781,7 @@ compileBoolean: aNode
 		bc2 := self bytecodesFor: each ].
     ].
 
+    aNode receiver acceptVisitor: self.
     selector := aNode selector.
     bc2 isNil ifTrue: [
 	"Transform everything into #ifTrue:ifFalse: or #ifFalse:ifTrue:"
@@ -804,7 +810,7 @@ compileBoolean: aNode
     selector == #ifFalse:ifTrue: ifTrue: [
 	^self compileIfFalse: bc1 returns: ret1 ifTrue: bc2
     ].
-    ^false "What happened?!?"
+    ^self error: 'bad boolean message selector'
 !
 
 compileBoolean: aNode longBranch: bc1 returns: ret1 shortBranch: bc2

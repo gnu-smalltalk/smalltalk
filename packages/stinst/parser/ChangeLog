@@ -1,3 +1,10 @@
+2007-07-17  Stephen Compall  <scompall@nocandysw.com>
+
+	* STCompiler.st: Add #canCompile: to STCompiler class.
+	(#compileBoolean:) Don't put receiver's bytecodes if refusing to
+	optimize the given message send.
+	(#compileTimesRepeat:, #compileLoop:): Likewise.
+
 2007-07-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STFileParser.st: Don't call #step before evaluating.

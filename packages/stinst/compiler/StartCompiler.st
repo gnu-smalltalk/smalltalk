@@ -300,7 +300,42 @@ evalString: aString to: anObject ifError: aBlock
 	]
 !
 
+compile: code
+    "Compile code as method source, which may be a stream, a parse
+     node, or anything that responds to #asString.  If there are
+     parsing errors, answer nil.  Else, answer a CompiledMethod, the
+     result of compilation."
+    ^self compile: code ifError: [:f :l :m | nil]
+!
+
+compile: code ifError: block
+    "Compile code as method source, which may be a stream, a parse
+     node, or anything that responds to #asString.  If there are
+     parsing errors, invoke exception block, 'block' passing file
+     name, line number and error.  Answer a CompiledMethod, the result
+     of compilation."
+    (self compilerClass canCompile: code)
+	ifTrue: [| dummyParser |
+		 dummyParser := self parserClass new.
+		 dummyParser errorBlock: [:m :l |
+		     ^block value: 'a Smalltalk %1' % {code class}
+			    value: l - 1 value: m].
+		 ^self compilerClass
+		     compile: code for: self
+		     classified: nil parser: dummyParser].
+    (code isKindOf: WriteStream)
+    	ifTrue: [ ^self compileString: code readStream ifError: block ].
+    (code isKindOf: Stream)
+    	ifTrue: [ ^self compileString: code ifError: block ].
+
+    ^self compileString: code asString ifError: block
+!
+
 compileString: aString
+    "Compile aString, which should be a string or stream, as a method
+     for my instances, installing it in my method dictionary.  Signal
+     an error if parsing or compilation fail, otherwise answer the
+     resulting CompiledMethod."
     | parser source |
     source := aString isString
 	ifTrue: [ aString ]

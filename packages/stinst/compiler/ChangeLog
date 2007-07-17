@@ -1,0 +1,6 @@
+2007-07-17  Stephen Compall  <scompall@nocandysw.com>
+
+	* packages/stinst/compiler/StartCompiler.st: Allow method nodes to
+	be given directly to Behavior's compile methods, by checking
+	whether the compilerClass can directly compile the given `code'
+	object.

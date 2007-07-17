@@ -1,3 +1,9 @@
+2007-07-17  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/Behavior.st: Use #compileString:ifError: instead of
+	#compileString: in #compile:ifError:.  Remove vacuous "code class
+	== String" case in compile methods.
+
 2007-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Number.st: Add hyperbolic functions.

@@ -216,7 +216,7 @@ compile: code
      Else, return a CompiledMethod result of compilation"
     (code isKindOf: WriteStream)
     	ifTrue: [ ^self compileString: code readStream ].
-    ((code isKindOf: Stream) or: [ code class == String ])
+    (code isKindOf: Stream)
     	ifTrue: [ ^self compileString: code ].
 
     ^self compileString: code asString
@@ -224,14 +224,14 @@ compile: code
 
 compile: code ifError: block
     "Compile method source.  If there are parsing errors, invoke
-     exception block, 'block' passing file name, line number and error.
-     description. Return a CompiledMethod result of compilation"
+     exception block, 'block' passing file name, line number and
+     error.  Return a CompiledMethod result of compilation"
     (code isKindOf: WriteStream)
-    	ifTrue: [ ^self compileString: code readStream ].
-    ((code isKindOf: Stream) or: [ code class == String ])
-    	ifTrue: [ ^self compileString: code ].
+    	ifTrue: [ ^self compileString: code readStream ifError: block ].
+    (code isKindOf: Stream)
+    	ifTrue: [ ^self compileString: code ifError: block ].
 
-    ^self compileString: code asString
+    ^self compileString: code asString ifError: block
 !
 
 compile: code notifying: requestor
