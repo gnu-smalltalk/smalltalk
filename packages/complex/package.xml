@@ -3,5 +3,11 @@
 
   <filein>Complex.st</filein>
 
+  <test>
+   <sunit>ComplexTest</sunit>
+   <filein>complextests.st</filein>
+  </test>
+
   <file>Complex.st</file>
+  <file>complextests.st</file>
 </package>

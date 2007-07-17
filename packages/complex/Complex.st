@@ -80,7 +80,7 @@ real: re imaginary: im
 
     ^re generality < im generality
 	ifTrue: [ ^self basicNew setReal: (im coerce: re) imaginary: im ]
-	ifFalse: [ ^self basicNew setReal: (re coerce: im) imaginary: im ]! !
+	ifFalse: [ ^self basicNew setReal: re imaginary: (re coerce: im) ]! !
 
 !Complex methodsFor: 'math'!
 
@@ -146,6 +146,15 @@ exp
 	realResult: expRe * self imaginary cos
 	imaginary: expRe * self imaginary sin!
 
+sqrt
+    "Return the square root of the receiver.  Can be improved!"
+    | abs |
+    self imaginary < 0 ifTrue: [ ^self conjugate sqrt conjugate ].
+    abs := self abs.
+    ^Complex
+	realResult: ((abs + self real) / 2) sqrt
+	imaginary: ((abs - self real) / 2) sqrt!
+
 sin
     "Return the sine of the receiver."
     | sinhIm |
@@ -178,33 +187,21 @@ cosh
 	realResult: (sinhRe squared + 1) sqrt * self imaginary cos
 	imaginary: sinhRe * self imaginary sin!
 
-arcCos
-    "Return the arc-cosine of the receiver."
-    | z |
-    z := (Complex real: self imaginary: ((1 - self squared) sqrt)) ln.
-    ^Complex real: 0 imaginary: z negated!
-
-arcSin
-    "Return the arc-sine of the receiver."
-    | z |
-    z := (Complex real: ((1 - self squared) sqrt) imaginary: self) ln.
-    ^Complex real: 0 imaginary: z negated!
+arg
+    "Return the argument of the receiver."
+    ^self imaginary arcTan: self real!
 
 arcTan
     "Return the arc-tangent of the receiver."
     | z |
-    z := ((Complex i + self) / (Complex i - self)) ln.
+    z := ((Complex i + self) / (Complex i - self) asFloat) ln.
     ^Complex real: 0 imaginary: z / 2!
 
 arcTan: aNumber
     "Return the arc-tangent of aNumber divided by the receiver."
     | z |
-    z := ((aNumber i + self) / (aNumber i - self)) ln.
+    z := ((aNumber i + self) / (aNumber i - self) asFloat) ln.
     ^Complex real: 0 imaginary: z / 2!
-
-arg
-    "Return the argument of the receiver."
-    ^self imaginary arcTan: self real!
 
 ln
     "Return the natural logarithm of the receiver."
@@ -216,7 +213,7 @@ log
     "Return the base-10 logarithm of the receiver."
     | ln |
     ln := self ln.
-    ^ln / ln class ln10! 
+    ^ln / ln real class ln10! 
 
 tanh
     "Return the hyperbolic tangent of the receiver."
@@ -232,13 +229,13 @@ tan
     ^self abs < aNumber abs!
 
 <= aNumber
-    ^self abs < aNumber abs!
+    ^self abs <= aNumber abs!
 
 >= aNumber
-    ^self abs < aNumber abs!
+    ^self abs >= aNumber abs!
 
 > aNumber
-    ^self abs < aNumber abs!
+    ^self abs > aNumber abs!
 
 = aNumber
     aNumber isNumber ifFalse: [ ^false ].
@@ -422,17 +419,17 @@ primSqrt
     self primitiveFailed
 !
 
-!Float methodsFor: 'accessing'!
+!Float methodsFor: 'transcendental functions'!
 
 arg
     "Return the argument of the receiver."
-    ^self >= 0 ifTrue: [ self zero ] ifFalse: [ self pi ]
+    ^self >= 0 ifTrue: [ self zero ] ifFalse: [ self class pi ]
 !
 
 ln
     "Answer the natural logarithm of the receiver"
     self >= 0 ifTrue: [ ^self primLn ].
-    ^Complex real: self negated primLn imaginary: self pi
+    ^Complex real: self negated primLn imaginary: self class pi
 !
 
 sqrt
@@ -440,5 +437,23 @@ sqrt
     self >= 0 ifTrue: [ ^self primSqrt ].
     ^Complex real: 0 imaginary: self negated primSqrt
 ! !
+
+!Number methodsFor: 'transcendental functions'!
+
+arcCos
+    "Return the arc-cosine of the receiver."
+    | z |
+    z := (Complex real: self imaginary: ((1 - self squared) sqrt)) ln.
+    ^Complex real: 0 imaginary: z negated!
+
+arcSin
+    "Return the arc-sine of the receiver."
+    | z |
+    z := (Complex real: ((1 - self squared) sqrt) imaginary: self) ln.
+    ^Complex real: 0 imaginary: z negated! !
+
+Float methodDictionary
+    removeKey: #arcSin;
+    removeKey: #arcCos!
 
 Complex initialize!
