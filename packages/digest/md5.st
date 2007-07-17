@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   MD5 module declarations
+|   MD5 class declarations
 |
 |
  ======================================================================"
@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2005 Free Software Foundation, Inc.
+| Copyright 2001, 2005, 2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini
 |
 | This file is part of the GNU Smalltalk class library.
@@ -30,11 +30,17 @@
 |
  ======================================================================"
 
-Object subclass: #MD5
-       instanceVariableNames: 'state'
+MessageDigest subclass: #MD5
+       instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Examples-Modules'!
+
+!MD5 class methodsFor: 'C call-outs'!
+
+new
+    ^self basicNew initialize
+! !
 
 !MD5 methodsFor: 'C call-outs'!
 
@@ -50,40 +56,16 @@ finalize: state in: digest
     <cCall: 'MD5Final' returning: #void args: #(#byteArray #byteArrayOut)>
 ! !
 
-!MD5 class methodsFor: 'instance creation'!
-
-new
-    ^self basicNew initialize
-!
-
-new: initialString
-    ^self basicNew initialize; nextPutAll: initialString; yourself
-! !
-
-!MD5 class methodsFor: 'checksumming'!
-
-digestOf: aStringOrStream
-    ^(self new: aStringOrStream) digest
-!
-
-hexDigestOf: aStringOrStream
-    ^(self new: aStringOrStream) hexDigest
-!
-
 !MD5 methodsFor: 'initialization'!
 
 initialize
-    state := self newState
+    self state: self newState
 ! !
 
 !MD5 methodsFor: 'checksumming'!
 
-copy
-    ^self deepCopy
-!
-
 nextPut: char
-    self combine: (String with: char) size: 1 into: state
+    self combine: (String with: char) size: 1 into: self state
 !
 
 nextPutAll: aStringOrStream
@@ -93,7 +75,7 @@ nextPutAll: aStringOrStream
 	    self
 		combine: aStringOrStream
 		size: aStringOrStream size
-		into: state
+		into: self state
 	]
 	ifFalse: [
 	    buffer := aStringOrStream species new: 1024.
@@ -102,46 +84,17 @@ nextPutAll: aStringOrStream
 		n := n + 1.
 		buffer at: n put: each.
 		n = 1024 ifTrue: [
-		    self combine: buffer size: n into: state.
+		    self combine: buffer size: n into: self state.
 		    n := 0
 		]
 	    ].
-	    self combine: buffer size: n into: state.
+	    self combine: buffer size: n into: self state.
 	]
 !
 
-partialDigest
-    ^self digestFor: state copy
-!
-
 digest
-    ^self digestFor: state
-!
-
-partialHexDigest
-    ^self hexDigestFor: state copy
-!
-
-hexDigest
-    ^self hexDigestFor: state
-! !
-
-!MD5 methodsFor: 'private'!
-
-digestFor: aState
     | answer |
     answer := ByteArray new: 16.
-    self finalize: aState in: answer.
+    self finalize: self state in: answer.
     ^answer
-!
-
-hexDigestFor: aState
-    | digest answer |
-    digest := self digestFor: aState.
-    answer := String new: 32.
-    digest keysAndValuesDo: [ :i :each |
-	answer at: i + i - 1 put: (Character digitValue: each // 16).
-	answer at: i + i put: (Character digitValue: each \\ 16)
-    ].
-    ^answer asLowercase
 ! !

@@ -294,7 +294,7 @@ GST_PACKAGE([Iconv], [iconv],
   [am_cv_func_iconv],
   [Makefile], [iconv.la])
 GST_PACKAGE([Java], [java])
-GST_PACKAGE([MD5], [md5], [], [], [Makefile], [md5.la])
+GST_PACKAGE([Digest], [digest], [], [], [Makefile], [digest.la])
 GST_PACKAGE([MySQL], [mysql])
 GST_PACKAGE([NCurses],
   [ncurses],

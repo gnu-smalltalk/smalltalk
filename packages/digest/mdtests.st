@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   MD5 tests declarations
+|   Message digest tests declarations
 |
 |
  ======================================================================"
@@ -28,54 +28,59 @@
 |
  ======================================================================"
 
-TestCase subclass: #MD5Test
+TestCase subclass: #MessageDigestTest
        instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Examples-Modules'!
 
-!MD5Test methodsFor: 'test vectors'!
+!MessageDigestTest methodsFor: 'test vectors'!
 
 nullDigest
-    ^#[16rD4 16r1D 16r8C 16rD9 16r8F 16r00 16rB2 16r04
-       16rE9 16r80 16r09 16r98 16rEC 16rF8 16r42 16r7E]!
+    ^self hexToByteArray: self hexNullDigest!
 
 hexNullDigest
-    ^'d41d8cd98f00b204e9800998ecf8427e'!
+    self subclassResponsibility!
 
 abcDigest
-    ^#[16r90 16r01 16r50 16r98 16r3C 16rD2 16r4F 16rB0
-       16rD6 16r96 16r3F 16r7D 16r28 16rE1 16r7F 16r72]!
+    ^self hexToByteArray: self hexAbcDigest!
 
 hexAbcDigest
-    ^'900150983cd24fb0d6963f7d28e17f72'!
+    self subclassResponsibility!
 
 abcdefDigest
-    ^#[16rE8 16r0B 16r50 16r17 16r09 16r89 16r50 16rFC
-       16r58 16rAA 16rD8 16r3C 16r8C 16r14 16r97 16r8E]!
+    ^self hexToByteArray: self hexAbcdefDigest!
 
 hexAbcdefDigest
-    ^'e80b5017098950fc58aad83c8c14978e'!
+    self subclassResponsibility!
 
 size64
     ^(2 to: 37) inject: '' into: [ :a :b | a, b printString ]!
 
 size64Digest
-    ^#[16r16 16r5B 16r2B 16r14 16rEC 16rCD 16rE0 16r3D
-       16rE4 16r74 16r2A 16r2F 16r93 16r90 16rE1 16rA1]!
+    ^self hexToByteArray: self hexSize64Digest!
 
 hexSize64Digest
-    ^'165b2b14eccde03de4742a2f9390e1a1'!
+    self subclassResponsibility!
 
 size128
     ^(2 to: 69) inject: '' into: [ :a :b | a, b printString ]!
 
 size128Digest
-    ^#[16r59 16rBD 16rA0 16r9A 16r8B 16r3E 16r1D 16r18
-       16r62 16r37 16rED 16r0F 16rED 16r34 16rD8 16r7A]!
+    ^self hexToByteArray: self hexSize128Digest!
 
 hexSize128Digest
-    ^'59bda09a8b3e1d186237ed0fed34d87a'!
+    self subclassResponsibility!
+
+hexToByteArray: hex
+    | ba |
+    ba := ByteArray new: hex size / 2.
+    1 to: hex size by: 2 do: [ :i |
+	ba
+	    at: i // 2 + 1
+	    put: (hex at: i) asUppercase digitValue * 16
+		 + (hex at: i + 1) asUppercase digitValue ].
+    ^ba!
 
 allTestCases
     ^{ '' -> self nullDigest.
@@ -91,37 +96,37 @@ allHexTestCases
        self size64 -> self hexSize64Digest.
        self size128 -> self hexSize128Digest }!
 
-!MD5Test methodsFor: 'testing'!
+!MessageDigestTest methodsFor: 'testing'!
 
 testDigestOf
     self allTestCases do: [ :each |
-        self assert: (MD5 digestOf: each key) = each value ]!
+        self assert: (self digestClass digestOf: each key) = each value ]!
 
 testByteArray
     self allTestCases do: [ :each |
-        self assert: (MD5 digestOf: each key asByteArray) = each value ]!
+        self assert: (self digestClass digestOf: each key asByteArray) = each value ]!
 
 testHexDigestOf
     self allHexTestCases do: [ :each |
-        self assert: (MD5 hexDigestOf: each key) = each value ]!
+        self assert: (self digestClass hexDigestOf: each key) = each value ]!
 
 testNextPut
     self allTestCases do: [ :each |
         | md5 |
-        md5 := MD5 new.
+        md5 := self digestClass new.
         each key do: [ :ch | md5 nextPut: ch ].
         self assert: md5 digest = each value ]!
 
 testNextPutAll
     self allTestCases do: [ :each |
         | md5 |
-        md5 := MD5 new.
+        md5 := self digestClass new.
         md5 nextPutAll: each key readStream.
         self assert: md5 digest = each value ]!
 
 testPartial
     | md5 |
-    md5 := MD5 new.
+    md5 := self digestClass new.
     md5 nextPutAll: 'abc'.
     self assert: md5 partialDigest = self abcDigest.
     md5 nextPutAll: 'def'.
@@ -130,9 +135,61 @@ testPartial
 
 testPartialHex
     | md5 |
-    md5 := MD5 new.
+    md5 := self digestClass new.
     md5 nextPutAll: 'abc'.
     self assert: md5 partialHexDigest = self hexAbcDigest.
     md5 nextPutAll: 'def'.
     self assert: md5 partialHexDigest = self hexAbcdefDigest.
     self assert: md5 hexDigest = self hexAbcdefDigest! !
+
+MessageDigestTest subclass: #MD5Test
+       instanceVariableNames: ''
+       classVariableNames: ''
+       poolDictionaries: ''
+       category: 'Examples-Modules'!
+
+!MD5Test methodsFor: 'test vectors'!
+
+hexNullDigest
+    ^'d41d8cd98f00b204e9800998ecf8427e'!
+
+hexAbcDigest
+    ^'900150983cd24fb0d6963f7d28e17f72'!
+
+hexAbcdefDigest
+    ^'e80b5017098950fc58aad83c8c14978e'!
+
+hexSize64Digest
+    ^'165b2b14eccde03de4742a2f9390e1a1'!
+
+hexSize128Digest
+    ^'59bda09a8b3e1d186237ed0fed34d87a'!
+
+digestClass
+    ^MD5! !
+
+MessageDigestTest subclass: #SHA1Test
+       instanceVariableNames: ''
+       classVariableNames: ''
+       poolDictionaries: ''
+       category: 'Examples-Modules'!
+
+!SHA1Test methodsFor: 'test vectors'!
+
+hexNullDigest
+    ^'da39a3ee5e6b4b0d3255bfef95601890afd80709'!
+
+hexAbcDigest
+    ^'a9993e364706816aba3e25717850c26c9cd0d89d'!
+
+hexAbcdefDigest
+    ^'1f8ac10f23c5b5bc1167bda84b833e5c057a77d2'!
+
+hexSize64Digest
+    ^'6a90ea3e17064652ed5406d3e10eb9ac2ee9a21e'!
+
+hexSize128Digest
+    ^'e02f6ccdd12ebf0958e18aea9fed8fbe818a223c'!
+
+digestClass
+    ^SHA1! !

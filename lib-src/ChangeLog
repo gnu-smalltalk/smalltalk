@@ -1,3 +1,8 @@
+2007-07-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/sha1.c: New.
+	* lib-src/sha1.h: New.
+
 2007-07-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/setenv.c: New.

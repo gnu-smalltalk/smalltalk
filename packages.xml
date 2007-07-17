@@ -1,5 +1,10 @@
 <packages>
 <package>
+  <name>MD5</name>
+  <prereq>Digest</prereq>
+</package>
+
+<package>
   <name>Regex</name>
 </package>
 

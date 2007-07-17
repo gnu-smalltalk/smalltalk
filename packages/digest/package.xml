@@ -1,0 +1,17 @@
+<package>
+  <name>Digest</name>
+  <filein>digest.st</filein>
+  <filein>md5.st</filein>
+  <filein>sha1.st</filein>
+  <module>digest</module>
+
+  <test>
+   <sunit>MD5Test SHA1Test</sunit>
+   <filein>mdtests.st</filein>
+  </test>
+
+  <file>digest.st</file>
+  <file>md5.st</file>
+  <file>sha1.st</file>
+  <file>mdtests.st</file>
+</package>

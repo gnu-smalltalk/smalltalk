@@ -736,9 +736,9 @@ at_help_all="1;testsuite.at:27;arrays.st;base;
 108;testsuite.at:142;Continuations;Continuations SUnit;
 109;testsuite.at:143;DebugTools;DebugTools SUnit;
 110;testsuite.at:144;DhbNumericalMethods;DhbNumericalMethods SUnit;
-111;testsuite.at:145;GDBM;GDBM SUnit;
-112;testsuite.at:146;Iconv;Iconv SUnit;
-113;testsuite.at:147;MD5;MD5 SUnit;
+111;testsuite.at:145;Digest;Digest SUnit;
+112;testsuite.at:146;GDBM;GDBM SUnit;
+113;testsuite.at:147;Iconv;Iconv SUnit;
 114;testsuite.at:148;ZLib;ZLib SUnit;
 "
 
@@ -8660,10 +8660,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  111 ) # 111. testsuite.at:145: GDBM
+  111 ) # 111. testsuite.at:145: Digest
     at_setup_line='testsuite.at:145'
-    at_desc="GDBM"
-    $at_quiet $ECHO_N "111: GDBM                                           $ECHO_C"
+    at_desc="Digest"
+    $at_quiet $ECHO_N "111: Digest                                         $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -8679,36 +8679,25 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:145: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st -p GDBM
-    ret=\$?
-    case \$ret in
-      2) exit 77 ;;
-      0|1) exit \$ret ;;
-    esac); echo exit \$? > retcode; } | tr -d '\\r'; . retcode"
+echo "$at_srcdir/testsuite.at:145: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st -p Digest); echo exit \$? > retcode; } | tr -d '\\r'; . retcode"
 echo testsuite.at:145 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    echo 'Not enabling shell tracing (command contains an embedded newline)'
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p Digest); echo exit $? > retcode; } | tr -d '\\r'; . retcode" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p GDBM
-    ret=$?
-    case $ret in
-      2) exit 77 ;;
-      0|1) exit $ret ;;
-    esac); echo exit $? > retcode; } | tr -d '\r'; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p Digest); echo exit $? > retcode; } | tr -d '\r'; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p GDBM
-    ret=$?
-    case $ret in
-      2) exit 77 ;;
-      0|1) exit $ret ;;
-    esac); echo exit $? > retcode; } | tr -d '\r'; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p Digest); echo exit $? > retcode; } | tr -d '\r'; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8737,10 +8726,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  112 ) # 112. testsuite.at:146: Iconv
+  112 ) # 112. testsuite.at:146: GDBM
     at_setup_line='testsuite.at:146'
-    at_desc="Iconv"
-    $at_quiet $ECHO_N "112: Iconv                                          $ECHO_C"
+    at_desc="GDBM"
+    $at_quiet $ECHO_N "112: GDBM                                           $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -8756,7 +8745,7 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:146: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st -p Iconv
+echo "$at_srcdir/testsuite.at:146: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st -p GDBM
     ret=\$?
     case \$ret in
       2) exit 77 ;;
@@ -8770,7 +8759,7 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p Iconv
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p GDBM
     ret=$?
     case $ret in
       2) exit 77 ;;
@@ -8780,7 +8769,7 @@ if test -n "$at_trace_this"; then
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p Iconv
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p GDBM
     ret=$?
     case $ret in
       2) exit 77 ;;
@@ -8814,10 +8803,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  113 ) # 113. testsuite.at:147: MD5
+  113 ) # 113. testsuite.at:147: Iconv
     at_setup_line='testsuite.at:147'
-    at_desc="MD5"
-    $at_quiet $ECHO_N "113: MD5                                            $ECHO_C"
+    at_desc="Iconv"
+    $at_quiet $ECHO_N "113: Iconv                                          $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -8833,25 +8822,36 @@ $at_traceon
   esac
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:147: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st -p MD5); echo exit \$? > retcode; } | tr -d '\\r'; . retcode"
+echo "$at_srcdir/testsuite.at:147: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st -p Iconv
+    ret=\$?
+    case \$ret in
+      2) exit 77 ;;
+      0|1) exit \$ret ;;
+    esac); echo exit \$? > retcode; } | tr -d '\\r'; . retcode"
 echo testsuite.at:147 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p MD5); echo exit $? > retcode; } | tr -d '\\r'; . retcode" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
+    echo 'Not enabling shell tracing (command contains an embedded newline)'
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p MD5); echo exit $? > retcode; } | tr -d '\r'; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p Iconv
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac); echo exit $? > retcode; } | tr -d '\r'; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p MD5); echo exit $? > retcode; } | tr -d '\r'; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st -p Iconv
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac); echo exit $? > retcode; } | tr -d '\r'; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 

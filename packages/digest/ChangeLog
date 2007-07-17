@@ -1,0 +1,10 @@
+2007-07-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* packages/digest/package.xml: Add new files, rename module.
+	* packages/digest/digest.st: New.
+	* packages/digest/md5.st: Adjust for new MessageDigest superclass.
+	* packages/digest/sha1.st: New.
+	* packages/digest/md5.c: Rename to...
+	* packages/digest/digest.c: ... this.  Add SHA1 wrappers.
+	* packages/digest/md5tests.st: Rename to...
+	* packages/digest/mdtests.st: ... this.  Add SHA1 tests.

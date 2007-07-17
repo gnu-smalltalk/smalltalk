@@ -99,6 +99,8 @@ o   Image load uses copy-on-write memory mapped files.  This means that, as
     it to the same physical memory, for different copies of the GNU Smalltalk
     virtual machine that loaded the same image.
 
+o   MD5 packages renamed to Digest, SHA1 support added.
+
 o   Processes that are garbage collected before they terminate execution (e.g.
     because they are waiting on a semaphore that is also garbage collected)
     are appropriately terminated.

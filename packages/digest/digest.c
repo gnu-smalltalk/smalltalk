@@ -1,13 +1,13 @@
 /***********************************************************************
  *
- *	MD5 interface definitions for GNU Smalltalk 
+ *	Digest module definitions for GNU Smalltalk 
  *
  *
  ***********************************************************************/
 
 /***********************************************************************
  *
- * Copyright 2002, 2006 Free Software Foundation, Inc.
+ * Copyright 2005, 2007 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -57,17 +57,26 @@
 #endif
 
 #include "md5.h"
+#include "sha1.h"
 
 #include "gstpub.h"
 
 static VMProxy *vmProxy;
-static OOP MD5AllocOOP (void);
+static OOP SHA1AllocOOP (void);
 
 OOP
 MD5AllocOOP (void)
 {
   struct md5_ctx ctx;
   md5_init_ctx (&ctx);
+  return vmProxy->byteArrayToOOP ((char *) &ctx, sizeof (ctx));
+}
+
+OOP
+SHA1AllocOOP (void)
+{
+  struct sha1_ctx ctx;
+  sha1_init_ctx (&ctx);
   return vmProxy->byteArrayToOOP ((char *) &ctx, sizeof (ctx));
 }
 
@@ -78,4 +87,8 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("MD5AllocOOP", MD5AllocOOP);
   vmProxy->defineCFunc ("MD5Update", md5_process_bytes);
   vmProxy->defineCFunc ("MD5Final", md5_finish_ctx);
+
+  vmProxy->defineCFunc ("SHA1AllocOOP", SHA1AllocOOP);
+  vmProxy->defineCFunc ("SHA1Update", sha1_process_bytes);
+  vmProxy->defineCFunc ("SHA1Final", sha1_finish_ctx);
 }
