@@ -188,9 +188,13 @@ create: dirName
 
 pathTo: destName
     "Compute the relative path from the receiver to destName."
+    | destFullName |
+    destFullName := File fullNameFor: destName.
+    vfsHandler realFileName = destFullName ifTrue: [ ^'.' ].
+
     ^File
         computePathFrom: vfsHandler realFileName, '/somefile'
-        to: (File fullNameFor: destName)
+        to: destFullName
 !
 
 fileAt: aName

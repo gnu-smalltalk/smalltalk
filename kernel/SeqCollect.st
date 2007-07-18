@@ -204,12 +204,12 @@ allButFirst: n
 
 allButLast
     "Answer a copy of the receiver without the last object."
-    ^self copyFrom: self size - 1
+    ^self copyFrom: 1 to: self size - 1
 !
 
 allButLast: n
     "Answer a copy of the receiver without the last n objects."
-    ^self copyFrom: self size - n
+    ^self copyFrom: 1 to: self size - n
 !
 
 first

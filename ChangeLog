@@ -1,3 +1,8 @@
+2007-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Directory.st: Return '.' from #pathTo: if appropriate.
+	* kernel/SeqCollect.st: Fix #allButLast and #allButLast:.
+
 2007-07-18  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/Behavior.st: Rename #compileString: to #primCompile: and
