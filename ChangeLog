@@ -1,3 +1,8 @@
+2007-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Directory.st: Return '.' from #pathTo: if appropriate.
+	* kernel/SeqCollect.st: Fix #allButLast and #allButLast:.
+
 2007-07-13  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/Dictionary.st: Explain that LookupTable is usually a
