@@ -5,512 +5,394 @@
 "6/1/95"
 
 "copyright 1995, Richard E. Hawkins"
+
 "all rights reserved"
 
 
-
-
-Object subclass: #Agent
-       instanceVariableNames: 'cash doneForDay inventory id '
-       classVariableNames: 'lastID hour date nHours World nCostToShop'
-       poolDictionaries: ''
-       category: nil !
-
-Agent comment: 'I am the root agent class for AL models!'!
-
-!Agent class methodsFor: 'instance creation'!
-
-    classInit: modelSpecs
-
-	"how boring"
-	!    
-
-new
-
-    |r|
-
-    r := super new.
-    r init.
-
-    ^r
-
-	!
-
-newID
-    "this returns a new, unique, id number"
-
-    lastID := lastID + 1.
-
-    ^lastID	
-
-
-	! !
-
-
-!Agent  methodsFor: 'instance initialization'!
-
-init
+
+Object subclass: Agent [
+    | cash doneForDay inventory id |
     
+    <category: nil>
+    <comment: 'I am the root agent class for AL models!'>
 
-    id := (Agent newID ).
-    cash := 0.
-    inventory := 0    
-	"   'Whee!  ive been inited' printNl"
+    lastID := nil.
+    hour := nil.
+    date := nil.
+    nHours := nil.
+    World := nil.
+    nCostToShop := nil.
 
-	! !
+    Agent class >> classInit: modelSpecs [
+	"how boring"
 
+	<category: 'instance creation'>
+	
+    ]
 
-!Agent  methodsFor: 'methods for variable acces'!
+    Agent class >> new [
+	<category: 'instance creation'>
+	| r |
+	r := super new.
+	r init.
+	^r
+    ]
 
-tellID
-    ^id
-	!
+    Agent class >> newID [
+	"this returns a new, unique, id number"
 
-tellInv
-    ^inventory
-	!
+	<category: 'instance creation'>
+	lastID := lastID + 1.
+	^lastID
+    ]
 
-tellCash
-    ^cash
+    init [
+	<category: 'instance initialization'>
+	id := Agent newID.
+	cash := 0.
+	inventory := 0
+	"'Whee!  ive been inited' printNl"
+    ]
 
-	!
+    tellID [
+	<category: 'methods for variable acces'>
+	^id
+    ]
 
-    setCash: newCash
-	cash := newCash.
-	!
+    tellInv [
+	<category: 'methods for variable acces'>
+	^inventory
+    ]
 
-perish
-    inventory := 0
-	!
+    tellCash [
+	<category: 'methods for variable acces'>
+	^cash
+    ]
 
-    addCash: howMuch
+    setCash: newCash [
+	<category: 'methods for variable acces'>
+	cash := newCash
+    ]
+
+    perish [
+	<category: 'methods for variable acces'>
+	inventory := 0
+    ]
+
+    addCash: howMuch [
+	<category: 'methods for variable acces'>
 	cash := cash + howMuch
-	    !
+    ]
 
-newDay
-    self perish .
-    doneForDay = false
-
-
-
-
-	! !
+    newDay [
+	<category: 'methods for variable acces'>
+	self perish.
+	doneForDay = false
+    ]
+]
 
 
-
+
 "the person will be the dominant agent type"
 
 
-
-
-Agent  subclass: #Person
-       instanceVariableNames: ''
-       classVariableNames: 'lastID nDailyCash initYet '
-       poolDictionaries:''
-       category: nil !
-
-
-
-
-Person  comment: 'I am a person, and I live in Hawkinsville.'!
-
-!Person   class methodsFor: 'instance creation'!
-
-
-
-new
-
-    |r|
-
-    (initYet = nil) 
-	ifTrue: 
-	    [    nDailyCash := 20000.
-		 initYet := true].
-    r := super new.
-    r init.
-    ^r
-	
-
-	! !
-
-!Person methodsFor: 'instance initialization'!
-
-init
+
+Agent subclass: Person [
     
-    
+    <category: nil>
+    <comment: 'I am a person, and I live in Hawkinsville.'>
 
-    ^ super init
-	! !
+    lastID := nil.
+    nDailyCash := nil.
+    initYet := nil.
+
+    Person class >> new [
+	<category: 'instance creation'>
+	| r |
+	initYet = nil 
+	    ifTrue: 
+		[nDailyCash := 20000.
+		initYet := true].
+	r := super new.
+	r init.
+	^r
+    ]
+
+    init [
+	<category: 'instance initialization'>
+	^super init
+    ]
+]
 
 
-
-
-
-
-
+
 "!Person methodsFor: 'methods for daily initialization'!"
-
 
 "nothing here, really"
 
-
 "! !"
-
 
 " *** end of class Person *** "
 
 
-Person  subclass: #Merchant
-	instanceVariableNames: 'myPrices myTransactions mySales myLostTransactions myLostSales gHrTolerance gHrCh0 gHrCh1 gHrCh2'
-	classVariableNames: 'nDailyInventory  lastID hChanges dChanges'
-	poolDictionaries: ''
-	category: nil !
+
+Person subclass: Merchant [
+    | myPrices myTransactions mySales myLostTransactions myLostSales gHrTolerance gHrCh0 gHrCh1 gHrCh2 |
+    
+    <category: nil>
+    <comment: 'I am a Merchant, and I live in Hawkinsville.'>
 
+    nDailyInventory := nil.
+    lastID := nil.
+    hChanges := nil.
+    dChanges := nil.
 
-Merchant comment: 'I am a Merchant, and I live in Hawkinsville.'!
+    Merchant class >> classInit: modelSpecs [
+	<category: 'instance creation'>
+	lastID := 0.
+	nDailyInventory := modelSpecs tellDailyInventory
+    ]
 
-!Merchant class methodsFor: 'instance creation'!
+    Merchant class >> new [
+	<category: 'instance creation'>
+	| r |
+	r := super new.
+	r init.
+	^r
+    ]
 
-    classInit: modelSpecs
-	lastID :=0.
-	nDailyInventory := (modelSpecs tellDailyInventory) 
-	    !
-
-new
-
-    |r|
-
-    r := super new.
-    r init.
-    ^r
-	
-
-	! !
-
-
-
-!Merchant methodsFor: 'instance initialization'!
-
-    init: modelSpecs
-
+    init: modelSpecs [
+	<category: 'instance initialization'>
 	super init.
 
 	"an array to keep track of prices by hour"
-	myPrices := (Array new: 5)   "nHours"
-	    ! !
+	myPrices := Array new: 5	"nHours"
+    ]
 
+    newDay [
+	<category: 'methods for daily initialization'>
+	| temp |
+	super NewDay.	"get general agent newday stuff"
+	inventory = nDailyInventory.
 
+	"put the adjusted closing price into a temporary spot"
+	temp := myPrices at: nHours + 1.
 
+	"flush the data"
+	[:array | array atAllPut: 0] myPrices myTransactions mySales 
+	    myLostTransactions myLostSale
+    ]
 
-!Merchant methodsFor: 'methods for daily initialization'!
+    tellPrice [
+	<category: 'methods for general behavior'>
+	^myPrices at: hour
+    ]
 
-
-newDay
-    
-    | temp | 
-    super NewDay. "get general agent newday stuff"
-    
-    inventory = nDailyInventory.
-    
-    "put the adjusted closing price into a temporary spot"
-    temp :=  myPrices at: (nHours+1).
-    
-    "flush the data "
-
-    [:array | array atAllPut: 0 ] 
-
-	myPrices myTransactions mySales myLostTransactions myLostSale
-
-
-	! !
-
-
-
-
-
-"!Merchant methodsFor: 'methods for variable access2'!"
-!Merchant methodsFor: 'methods for general behavior'!
-
-
-
-tellPrice
-
-    ^myPrices at: hour
-
-!
- 
-endHour
-
-    self setPrice.
+    endHour [
+	<category: 'methods for general behavior'>
+	self setPrice.
 	super endHour
-!
+    ]
 
-endOfDay
+    endOfDay [
+	"end of day merchant behavior"
 
-    "end of day merchant behavior"
+	"compile the days information"
 
-"compile the days information"
+	"this will compile the data for each log"
 
-"this will compile the data for each log"
-"additionally, it will compile to the master log, whose"
-"identity is known to the class"
-    [:dayLog | dayLog sumUp ] 
-	myPrices myTransactions mySales myLostTransactions myLostSale.
+	"additionally, it will compile to the master log, whose"
 
+	"identity is known to the class"
+
+	<category: 'methods for general behavior'>
+	[:dayLog | dayLog sumUp] myPrices myTransactions mySales 
+	    myLostTransactions myLostSale.
 	self setPrice.
 	super endOfDay
-!
+    ]
 
-setPrice
-    (hour = 'endOfDay')
-	ifTrue: [self setPriceDay]
-	ifFalse: [self setPriceHour].
+    setPrice [
+	<category: 'methods for general behavior'>
+	hour = 'endOfDay' ifTrue: [self setPriceDay] ifFalse: [self setPriceHour]
+    ]
 
-!
+    setPriceHour [
+	<category: 'methods for general behavior'>
+	| dev change |
+	dev := self myDev d
+    ]
 
-setPriceHour
+    gHrTolerance [
+	<category: 'methods for general behavior'>
+	gHrCh0 gHrCh1 gHrCh2
+    ]
 
-|dev aDev sDev change|
+    myDev [
+	"write this!!! ***"
 
-    dev := (self myDev).
-    aDev := (dev abs).
-    (dev = 0)
-	ifTrue: [sDev := 0]
-	ifFalse: [sDev := dev/aDev].
-    (aDev > gHrTolerance) ifTrue:
-	["stuff is selling at the wrong speed; change price"
-	 change := sDev * (gHrCh0 + gHrCh1*aDev + gHrCh2*aDev*aDev).
-	 hChanges inc.	 ]
-			 ifFalse: [change := 0].
-    myPrices setNextHour: change.
-!
-
-gHrTolerance gHrCh0 gHrCh1 gHrCh2     
-
-!
-
-setPriceHour
-|dev change|
-
-dev := (self myDev)
-
-d
-
-!
-myDev
-"write this!!! ***"
+	<category: 'methods for general behavior'>
+	
+    ]
+]
 
 
-
-	! !
-
-
-
-
-
-
-
-
-
-
-
+
 " *** end of class Merchant *** "
-
-
-
-
-
 
 "The world is of course populated with Consumers"
 
 
-Person  subclass: #Consumer
-	instanceVariableNames: 'trysLeft'
-	classVariableNames: 'nDailyCash  lastID sinboy nTotMerchants yestPrice'
-	poolDictionaries: ''
-	category: nil !
+
+Person subclass: Consumer [
+    | trysLeft |
+    
+    <category: nil>
+    <comment: 'I am a Consumer, and I live in Hawkinsville.'>
 
+    nDailyCash := nil.
+    lastID := nil.
+    sinboy := nil.
+    nTotMerchants := nil.
+    yestPrice := nil.
 
+    Consumer class >> classInit: modelSpecs [
+	<category: 'instance creation'>
+	lastID := 0.
+	nDailyCash := modelSpecs tellDailyCash
+    ]
 
+    Consumer class >> new [
+	<category: 'instance creation'>
+	| r |
+	r := super new.
+	r init.
+	^r
+    ]
 
+    init [
+	<category: 'instance initialization'>
+	^super init
+    ]
 
-Consumer  comment: 'I am a Consumer, and I live in Hawkinsville.'!
-
-!Consumer class methodsFor: 'instance creation'!
-
-    classInit: modelSpecs
-	lastID :=0.
-	nDailyCash := (modelSpecs tellDailyCash) 
-	    !
-new
-
-    |r|
-
-    r := super new.
-    r init.
-    ^r
+    at: key put: value [
+	<category: 'general behavior'>
 	
+    ]
 
-	! !
+    buyStuff: howMany at: price from: myMerch [
+	"make sure he can afford it"
 
-!Consumer methodsFor: 'instance initialization'!
+	<category: 'general behavior'>
+	| iGot quant |
+	cash < (price * howMany) 
+	    ifTrue: [quant := cash / price]
+	    ifFalse: [quant := howMany copy].
+	iGot := myMerch sell: quant.
+	inventory := inventory + iGot.
+	cash := cash - (myMerch getPaid: iGot * price).
+	^iGot
+    ]
 
-init
-    
-    
-
-    ^ super init
-	! !
-
-
-!Consumer methodsFor: 'general behavior'!
-    "seller howMuch price"
-smile
-
-!
-at: key  put: value
-    | index assoc |
-    "index := self findKeyIndex: key."
-    
-     
-     
-!
-
-
-
-buyStuff:  howMany at: price from: myMerch
-
-    "make sure he can afford it"
-    |iGot  quant|
-
-    
-
-    (cash < (price * howMany) )
-	ifTrue: [ quant  := (cash / price) ]
-	ifFalse: [ quant := howMany copy].
-
-    iGot := ( myMerch sell: quant).
-    
-    inventory := inventory + iGot.
-    
-    cash := cash - (myMerch getPaid: (iGot * price)).
-    ^ iGot
-
-		    
-		    
-	!
-
-
-newDay
-    
-    super newDay.
-    cash := nDailyCash.
-    "give us this day. . ."
-    World rShopSchedule: (self) 
+    newDay [
+	<category: 'general behavior'>
+	super newDay.
+	cash := nDailyCash.
+	"give us this day. . ."
+	World rShopSchedule: self
 	"schedule me to shop at a random time"
+    ]
 
-	!
+    shop [
+	"it is definitely time to shop"
 
+	"note that the c++ version called him daily and he checked to see if"
 
+	"it was time to shop"
 
-shop
+	"and for that matter, this section could be probably halved in lenght;"
 
-    "it is definitely time to shop"
-    "note that the c++ version called him daily and he checked to see if"
-    "  it was time to shop"
-    "and for that matter, this section could be probably halved in lenght;"
-    " this is essentially the c++ code"
+	"this is essentially the c++ code"
 
+	<category: 'general behavior'>
+	| myMerch price demand yestPrDemand |
+	myMerch := World randMerch.
+	price := myMerch tellPrice.
+	demand := (self myDemand: myMerch price) - inventory.
+	demand < 0 ifTrue: [demand := 0].
 
-    | myMerch price demand yestPrDemand |    
+	"is it worth buying here?"
+	yestPrDemand = self demand: yestPrice.
+	price > ((yestPrice + nCostToShop) / yestPrDemand) & (hour < nHours) 
+	    & (trysLeft > 0) & (demand > 0) 
+	    ifTrue: 
+		["this guy is too expensive, try next hour"
 
-    myMerch := ( World randMerch ).
-    
-    price :=  (myMerch tellPrice ).
-    demand := (self myDemand: myMerch price) - inventory.
-    (demand < 0) ifTrue: [demand := 0].
-    
-    "is it worth buying here?"
-    yestPrDemand = self demand: yestPrice.
+		self abortShop]
+	    ifFalse: 
+		[self 
+		    buyStuff: demand
+		    at: price
+		    from: myMerch].
+	inventory < demand ifTrue: [doneForDay := true]
+    ]
 
-    ( (price > (yestPrice + nCostToShop/yestPrDemand)) &
-	  (hour < nHours) & (trysLeft > 0) & (demand > 0) )
-	ifTrue: "this guy is too expensive, try next hour"
-	    [ self abortShop ]
-	ifFalse: [self buyStuff:  demand at: price from: myMerch ].
-
-    (inventory < demand)
-	ifTrue: [doneForDay := true]
-
-
-
-	!
-
-    myDemand:  price
+    myDemand: price [
 	"the consumer's demand at the given price"
+
 	"perhaps this can inherit a code segment from modelSpecs"
-	
+
+	<category: 'general behavior'>
 	| dem |
+	date < 10 
+	    ifTrue: [dem := 200 - price]
+	    ifFalse: [dem := (200 - price + 25) * sinboy].
+	^dem
+    ]
 
-    (date < 10)
-	ifTrue: [dem := 200 - price]
-	ifFalse: [dem := 200 - price + 25 * sinboy].
-
-    ^ dem
-	!
-
-
-
-abortShop
-    cash := cash - nCostToShop.
-    trysLeft := trysLeft - 1.
-    World shopReSchedule: self.
-    ^ True
-	
-
-! !
+    abortShop [
+	<category: 'general behavior'>
+	cash := cash - nCostToShop.
+	trysLeft := trysLeft - 1.
+	World shopReSchedule: self.
+	^True
+    ]
+]
 
 
+
 "the DayLog class is to keep track of & total hourly transactions"
 
-Array  subclass: #DayLog
 
-	instanceVariableNames: 'carryOver total'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: nil !
+
+Array subclass: DayLog [
+    | carryOver total |
+    
+    <category: nil>
+    <comment: 'DayLogs are extended arrays with also  endOfDay & total elements'>
 
+    DayLog class >> new [
+	<category: 'instance creation'>
+	| r |
+	r := super new.
+	r init.
+	^r
+    ]
 
+    init [
+	<category: 'instance initialization'>
+	^super init
+    ]
 
-DayLog  comment: 'DayLogs are extended arrays with also  endOfDay & total elements'
+    endOfDay [
+	"[:array | array atAllPut: 0 ]
+	 
+	 myPrices myTransactions mySales myLostTransactions myLostSale"
 
-!DayLog class methodsFor: 'instance creation'!
+	"sum the elements into Total"
 
-
-new
-
-    |r|
-
-    r := super new.
-    r init.
-    ^r
+	<category: 'general behavior'>
 	
+    ]
+]
 
-	! !
-
-!DayLog methodsFor: 'instance initialization'!
-
-init
-    ^ super init
-	! !
-
-!DayLog methodsFor: 'general behavior'!
-
-endOfDay
-
- "   [:array | array atAllPut: 0 ] 
-
-	myPrices myTransactions mySales myLostTransactions myLostSale
-"
-"sum the elements into Total"
-! !

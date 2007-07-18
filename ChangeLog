@@ -1,3 +1,21 @@
+2007-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
+        * tests/classes.st: Test bad instance variable names.
+        * tests/strings.st: Add nice example from unsupported/Extensn.st.
+
+	* unsupported/Extensn.st: Delete.
+	* unsupported/IfError.st: Delete.
+	* unsupported/ParseErr.st: Delete.
+	* unsupported/Process1.st: Delete.
+	* unsupported/Process2.st: Rename to Process.st.
+	* unsupported/a.st: Delete.
+	* unsupported/ba.st: Delete.
+	* unsupported/bug.st: Delete.
+	* unsupported/bug2.st: Delete.
+	* unsupported/bug4.st: Delete.
+	* unsupported/er2.st: Delete.
+	* unsupported/self.st: Delete.
+
 2007-07-17  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/Behavior.st: Use #compileString:ifError: instead of

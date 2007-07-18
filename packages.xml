@@ -39,32 +39,19 @@
 <disabled-package>
   <name>OtherExamples</name>
   <directory>unsupported</directory>
-  <file>BigExpr.st</file>
-  <file>CInt.st</file>
   <file>CPP-test.st</file>
   <file>CParseT1.st</file>
   <file>CParseT2.st</file>
   <file>CParseT3.st</file>
   <file>CString.st</file>
   <file>DLD.st</file>
-  <file>Extensn.st</file>
-  <file>IfError.st</file>
   <file>Interr.st</file>
-  <file>ParseErr.st</file>
-  <file>Process1.st</file>
-  <file>Process2.st</file>
+  <file>Process.st</file>
   <file>Profile.st</file>
   <file>Sorting.st</file>
-  <file>a.st</file>
-  <file>ba.st</file>
-  <file>bug.st</file>
-  <file>bug2.st</file>
-  <file>bug4.st</file>
   <file>echo.st</file>
-  <file>er2.st</file>
   <file>market.st</file>
   <file>resolve.st</file>
-  <file>self.st</file>
   <file>t.st</file>
   <file>torture.st</file>
 </disabled-package>

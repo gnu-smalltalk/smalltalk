@@ -218,3 +218,7 @@ Eval [ Rambo put: 5.	Rambo get ]
 Eval [ 			Rocky get ]
 Eval [ Rocky put: 15.	Rambo get ]
 Eval [ 			Rocky get ]
+
+"Test out parsing bad instance variable names"
+Eval [ Rambo instanceVariableNames: 'd99ogABCRblammo 9whammo loser! dogbert++' ]
+Eval [ Rambo instanceVariableNames: 'dog!,blammo whammo? loser! dogbert++' ]

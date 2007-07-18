@@ -71,3 +71,27 @@ Eval [
 'should be false ' print.	('*.st' match: '.s') printNl.
 'should be false ' print.	('*#*' match: '') printNl
 ]
+
+String extend [
+    formatAs: format [
+	| input |
+        input := self readStream.
+	^format collect: [ :ch |
+	    ch = $#
+		ifTrue: [
+		    input atEnd
+			ifTrue: [ Character space ]
+			ifFalse: [ input next ] ]
+		ifFalse: [ ch ] ]
+    ]
+]
+
+Eval [ '8101234567' formatAs: '(###)###-####' ]
+Eval [ '5431234567' formatAs: '###-###-####' ]
+Eval [ '496449294' formatAs: '###-##-####' ]
+Eval [ '12345' formatAs: '$###.##' ]
+Eval [ 'SR2859591' formatAs: 'Publication number ####-####-#' ]
+Eval [ '388350028456431097' formatAs: 'Card Number #### ###### #### Expires ##/##' ]
+Eval [ '543' formatAs: '###-###-####' ]
+Eval [ '' formatAs: '###-###-####' ]
+Eval [ '1234' formatAs: '' ]

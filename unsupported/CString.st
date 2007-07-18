@@ -2,22 +2,19 @@
 
 Object
 	defineCFunc: 'testCString'
-	withSelectorArgs: 'testString: aString'
+	withSelectorArgs: 'testString'
 	returning: #void
-	args: #(#cObject)
+	args: #(#self)
 !
 
 | type object cs |
-    type := CType baseType: CArray 
-		 subType: CStringType
-		 numElements: 8.
+    type := CStringType arrayType: 8.
     "type inspect."
     
     object := type new.
     "object inspect."
     cs := CString value: 'foo'.
-    nil testString: cs.
+    cs testString.
     object at: 1 put: cs.
-    
-    (object at: 1) inspect.
+    (object at: 1) printNl.
 ! 

@@ -45,7 +45,7 @@ SystemDictionary defineCFunc: 'fcntl'
 | sem |
        sem := Semaphore new.
        Processor signal: sem onInterrupt: 23.
-       [ [ sem wait.
+       [ [ sem wait. stdin next printNl.
 	 'running' printNl. Processor yield. true ] whileTrue ] fork.
        [ Processor yield. true ] whileTrue.
        'back from yielding' printNl.

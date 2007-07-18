@@ -145,3 +145,11 @@ returned value is 5
 
 Execution begins...
 returned value is 15
+
+Execution begins...
+ error: Invalid value 9whammo: invalid Smalltalk identifier
+returned value is nil
+
+Execution begins...
+ error: Invalid value dog!,blammo: invalid Smalltalk identifier
+returned value is nil
