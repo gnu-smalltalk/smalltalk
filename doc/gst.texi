@@ -1838,17 +1838,33 @@ of the testing subpackage, and the default value of @code{directory} and
 
 To install your package, you only have to do
 @example
-    gst-package mypkg.xml
+    gst-package path/to/package.xml
 @end example
 
-@command{gst-package} is a small shell script which will merge the file
-with @file{packages.xml}, install the files specified in the @code{file} tags
-and load the packages.  The @gst{} makefile also use @file{gst-package}
-to install packages and to prepare the distribution tarballs.@footnote{The
-  operation of gst-package is subject to change in future releases, while
-  keeping backwards compatibility.}
+@command{gst-package} is a Smalltalk script which will create a
+@file{.star} archive in the current image directory, with the files
+specified in the @code{file} tags (you can use the option
+@option{--target-directory} to create the @file{.star} file
+elsewhere).
 
-The rest of this chapter discusses the packages provided with @gst{}.
+Alternatively, @code{gst-package} can be used to create a skeleton
+GNU style source tree.  This include a @file{configure.ac} that will
+find the installation path of GNU Smalltalk, and a @file{Makefile.am}
+to support all the standard Makefile targets (including @command{make
+install} and @command{make dist}).  To do so, go in the directory that
+is to become the top of the source tree and type.
+
+@example
+    gst-package --prepare path1/package.xml path2/package.xml
+@end example
+
+In this case the generated configure script and Makefile will use
+some of the more advanced features of @command{gst-package} (to be
+documented).  The @gst{} makefile similarly uses
+@command{gst-package} to install packages and to prepare the distribution
+tarballs.
+
+The rest of this chapter discusses some of the packages provided with @gst{}.
 
 @menu
 * Blox, BloxTK, and Browser:             Blox.

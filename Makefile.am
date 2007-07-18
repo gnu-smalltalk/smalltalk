@@ -20,6 +20,7 @@ AUTOMAKE_OPTIONS = gnu 1.8
 ACLOCAL_AMFLAGS = -I build-aux
 
 PACKAGE=smalltalk
+gstdatadir=$(pkgdatadir)
 
 DIST_SUBDIRS = lib-src snprintfv lightning sigsegv libffi opcode libgst \
 	. $(ALL_PACKAGES) tests doc
@@ -44,7 +45,7 @@ GST_PACKAGE = ./gst-tool gst-package $(GST_OPTS)
 ###########################################################
 
 aclocaldir = $(datadir)/aclocal
-dist_aclocal_DATA = build-aux/gst.m4
+dist_aclocal_DATA = build-aux/gst.m4 build-aux/gst-package.m4
 dist_noinst_DATA = Doxyfile
 dist_noinst_SCRIPTS = build-aux/texi2dvi build-aux/texi2html \
 	build-aux/help2man build-aux/config.rpath 

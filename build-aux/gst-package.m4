@@ -1,7 +1,7 @@
 dnl I'd like this to be edited in -*- Autoconf -*- mode...
 dnl
 
-dnl GST_PACKAGE(NAME, DIR, [TESTS], [VARS-TO-TEST], [CONFIG-FILES], [LIBS])
+dnl GST_PACKAGE_ENABLE(NAME, DIR, [TESTS], [VARS-TO-TEST], [CONFIG-FILES], [LIBS])
 dnl ------------------------------------------------------------------------
 dnl Arrange for installation of package NAME in directory DIR (prefixed
 dnl by whatever was set up with GST_PACKAGE_PREFIX.
@@ -26,7 +26,7 @@ m4_define([_GST_PKG_ENABLE], [
 dnl If this is unconditionally included, the rule for $1.star will be
 dnl invoked on install
 install-data-hook:: $1.star
-	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=$(pkgdatadir) --destdir=$(DESTDIR) $1.star
+	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=$(gstdatadir) --destdir=$(DESTDIR) $1.star
 
 -include $(srcdir)/_GST_PKG_STAMP
 all-local: $1.star
@@ -46,7 +46,7 @@ _GST_COND])
 
 m4_define([_GST_PKG_PREFIX], [])
 
-AC_DEFUN([GST_PACKAGE], [
+AC_DEFUN([GST_PACKAGE_ENABLE], [
   $3
   AC_MSG_CHECKING([whether to install $1])
   _GST_RULES_PREPARE
@@ -68,7 +68,7 @@ clean-local::
 	-rm -f $1.star
 
 uninstall-local::
-	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=$(pkgdatadir) --destdir=$(DESTDIR) --uninstall $(DESTDIR)$(pkgdatadir)/$1.star
+	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=$(gstdatadir) --destdir=$(DESTDIR) --uninstall $(DESTDIR)$(gstdatadir)/$1.star
 
 dist-hook:: _GST_PKG_XML
 	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=_GST_PKG_DISTDIR --dist $<

@@ -241,21 +241,21 @@ GST_HAVE_GMP
 GST_HAVE_READLINE
 
 GST_PACKAGE_PREFIX([packages])
-GST_PACKAGE([BloxTK], [blox/tk],
+GST_PACKAGE_ENABLE([BloxTK], [blox/tk],
    [GST_HAVE_TCLTK],
    [gst_cv_tcltk_libs],
    [Makefile], [blox-tk.la])
-GST_PACKAGE([Browser], [browser])
-GST_PACKAGE([Complex], [complex])
-GST_PACKAGE([Continuations], [continuations])
-GST_PACKAGE([DebugTools], [debug])
-GST_PACKAGE([DB], [db])
-GST_PACKAGE([GDBM], [gdbm],
+GST_PACKAGE_ENABLE([Browser], [browser])
+GST_PACKAGE_ENABLE([Complex], [complex])
+GST_PACKAGE_ENABLE([Continuations], [continuations])
+GST_PACKAGE_ENABLE([DebugTools], [debug])
+GST_PACKAGE_ENABLE([DB], [db])
+GST_PACKAGE_ENABLE([GDBM], [gdbm],
    [AC_CHECK_HEADER([gdbm.h])],
    [ac_cv_header_gdbm_h],
    [Makefile], [gdbm.la])
-GST_PACKAGE([Glorp], [glorp])
-GST_PACKAGE([GTK], [gtk], [
+GST_PACKAGE_ENABLE([Glorp], [glorp])
+GST_PACKAGE_ENABLE([GTK], [gtk], [
   AC_ARG_ENABLE(gtk,
   [  --enable-gtk={yes,no,blox}
                           enable GTK+ bindings.  Blox/GTK is experimental.], ,
@@ -274,46 +274,46 @@ GST_PACKAGE([GTK], [gtk], [
   fi],
   [enable_gtk],
   [Makefile], [gst-gtk.la])
-GST_PACKAGE([BloxGTK], [blox/gtk],, [enable_gtk])
-GST_PACKAGE([Blox], [blox/tests],
+GST_PACKAGE_ENABLE([BloxGTK], [blox/gtk],, [enable_gtk])
+GST_PACKAGE_ENABLE([Blox], [blox/tests],
 	    [enable_blox=no
 	     case x"$enable_gtk" in
 		 xno|xnot\ found) ;; *) enable_blox=yes ;; esac
 	     case x"$gst_cv_tcltk_libs" in
 		 xno|xnot\ found) ;; *) enable_blox=yes ;; esac], 
 	    [enable_blox], [package.xml])
-GST_PACKAGE([WebServer], [httpd])
-GST_PACKAGE([I18N], [i18n],
+GST_PACKAGE_ENABLE([WebServer], [httpd])
+GST_PACKAGE_ENABLE([I18N], [i18n],
   [AC_CHECK_FUNCS_ONCE([nl_langinfo])
   AM_LANGINFO_CODESET
   AM_ICONV],
   [ac_cv_func_nl_langinfo am_cv_func_iconv],
   [Makefile], [i18n.la])
-GST_PACKAGE([Iconv], [iconv],
+GST_PACKAGE_ENABLE([Iconv], [iconv],
   [AM_ICONV],
   [am_cv_func_iconv],
   [Makefile], [iconv.la])
-GST_PACKAGE([Java], [java])
-GST_PACKAGE([Digest], [digest], [], [], [Makefile], [digest.la])
-GST_PACKAGE([MySQL], [mysql])
-GST_PACKAGE([NCurses],
+GST_PACKAGE_ENABLE([Java], [java])
+GST_PACKAGE_ENABLE([Digest], [digest], [], [], [Makefile], [digest.la])
+GST_PACKAGE_ENABLE([MySQL], [mysql])
+GST_PACKAGE_ENABLE([NCurses],
   [ncurses],
   [GST_HAVE_LIB(ncurses, initscr)],
   [ac_cv_lib_ncurses_initscr])
-GST_PACKAGE([NetClients], [net])
-GST_PACKAGE([DhbNumericalMethods], [numerics])
-GST_PACKAGE([Compiler], [stinst/compiler])
-GST_PACKAGE([Parser], [stinst/parser])
-GST_PACKAGE([SUnit], [sunit])
-GST_PACKAGE([TCP], [tcp],
+GST_PACKAGE_ENABLE([NetClients], [net])
+GST_PACKAGE_ENABLE([DhbNumericalMethods], [numerics])
+GST_PACKAGE_ENABLE([Compiler], [stinst/compiler])
+GST_PACKAGE_ENABLE([Parser], [stinst/parser])
+GST_PACKAGE_ENABLE([SUnit], [sunit])
+GST_PACKAGE_ENABLE([TCP], [tcp],
   [GST_INET_SOCKETS],
   [gst_cv_inet_sockets],
   [Makefile], [tcp.la])
-GST_PACKAGE([VFSAddOns], [vfs], [], [], [Makefile])
-GST_PACKAGE([XML], [xml])
-GST_PACKAGE([XPath], [xpath])
-GST_PACKAGE([XSL], [xsl])
-GST_PACKAGE([ZLib],
+GST_PACKAGE_ENABLE([VFSAddOns], [vfs], [], [], [Makefile])
+GST_PACKAGE_ENABLE([XML], [xml])
+GST_PACKAGE_ENABLE([XPath], [xpath])
+GST_PACKAGE_ENABLE([XSL], [xsl])
+GST_PACKAGE_ENABLE([ZLib],
   [zlib],
   [AC_CHECK_HEADER([zlib.h])],
   [ac_cv_header_zlib_h],

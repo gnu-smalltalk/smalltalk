@@ -8,23 +8,29 @@ AC_DEFUN([AM_PATH_GST],[
 dnl Various autoconf user options
 
 AC_ARG_WITH(gst,
-[  --with-gst=PFX   ]dnl
-[Prefix where GNU Smalltalk is installed],
+AS_HELP_STRING([--with-gst=PFX], [Prefix where GNU Smalltalk is installed]),
 gst_prefix="$withval", gst_prefix="")
 
     if test x$gst_prefix != x; then
-        GST_CONFIG="$gst_prefix/bin/gst-config"
+        : ${GST="$gst_prefix/bin/gst"}
+        : ${GST_CONFIG="$gst_prefix/bin/gst-config"}
+        : ${GST_PACKAGE="$gst_prefix/bin/gst-package"}
     fi
 
     have_gst="no";
      
-    AC_PATH_PROG(GST_CONFIG, gst-config, no)
+    AC_PATH_PROG([GST], [gst], no)
+    AC_PATH_PROG([GST_CONFIG], [gst-config], no)
+    AC_PATH_PROG([GST_PACKAGE], [gst-package], no)
+
     min_gst_version=ifelse([$1],,0.0.0,$1)
     AC_MSG_CHECKING(for GNU Smalltalk version >= $min_gst_version)
     if test "x$GST_CONFIG" != xno; then
         GST_CFLAGS=`$GST_CONFIG --cflags`
         GST_LIBS=`$GST_CONFIG --libs $extra_libs`
         GST_PREFIX=`$GST_CONFIG --prefix`
+        gstlibdir=`$GST_CONFIG --libdir`
+        gstdatadir=`$GST_CONFIG --datadir`
 
         gst_config_major_version=`$GST_CONFIG --version | \
             sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
@@ -66,10 +72,14 @@ gst_prefix="$withval", gst_prefix="")
 
 	GST_CFLAGS=""
 	GST_LIBS=""
+	gstlibdir=${libdir}/smalltalk
+	gstdatadir=${datadir}/smalltalk
 	ifelse([$3], , :, [$3])
     fi
 
     AC_SUBST(GST_CFLAGS)
     AC_SUBST(GST_LIBS)
     AC_SUBST(GST_PREFIX)
+    AC_SUBST(gstlibdir)
+    AC_SUBST(gstdatadir)
 ])    

@@ -97,7 +97,7 @@ struct tool tools[] = {
   {
     "gst-package", "scripts/Package.st",
     "-h|--help --version --load --no-load --no-install --uninstall --dist \
-        --test -t|--target-directory: --list-files: --list-packages \
+        --prepare --test -t|--target-directory: --list-files: --list-packages \
         --srcdir: --distdir|--destdir: --copy --all-files --vpath \
         -n|--dry-run -I|--image-file: --kernel-directory:",
     NULL

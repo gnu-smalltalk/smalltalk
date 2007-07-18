@@ -79,7 +79,7 @@ Kernel.PackageDirectories subclass: PackageFiles [
 	aCollection do: [ :each | self addFile: each ]
     ]
 
-    addFile: fileName [
+    parse: fileName [
 	| packageFile |
 	packageFile := ('*.star' match: fileName)
 	    ifFalse: [
@@ -92,7 +92,11 @@ Kernel.PackageDirectories subclass: PackageFiles [
 		    baseDirectories: [ fileName, '#uzip' ] ].
 
 	packageFile refresh.
-	self add: packageFile.
+	^packageFile
+    ]
+
+    addFile: fileName [
+	self add: (self parse: fileName).
     ]
 
     baseDirsFor: fileName [
@@ -478,6 +482,161 @@ PkgList subclass: PkgPackageList [
     runOnPackage: aPackage [ aPackage name displayNl ]
 ]
 
+Command subclass: PkgPrepare [
+    | srcFile |
+    validateDestDir: destdir installDir: installDir [
+	destdir = ''
+	    ifFalse: [ self error: '--destdir not needed with --prepare' ].
+	installDir isNil
+	    ifFalse: [ self error: '--target-directory not needed with --prepare' ]
+    ]
+
+    addAllFiles: aCollection [
+	| f |
+	aCollection isEmpty ifTrue: [
+	    (File exists: self srcdir, '/package.xml')
+		ifTrue: [ srcFile := 'package.xml' ].
+	    (File exists: self srcdir, '/package.xml.in')
+		ifTrue: [ srcFile := 'package.xml.in' ].
+	    ^super addAllFiles: { srcFile } ].
+
+	srcFile isNil ifTrue: [
+	    f := Directory append: aCollection first to: self srcdir.
+            (File exists: f)
+	        ifTrue: [ srcFile := (Directory name: self srcdir) pathTo: f ].
+
+	    f := Directory append: aCollection first, '.in' to: self srcdir.
+            (File exists: f)
+	        ifTrue: [ srcFile := (Directory name: self srcdir) pathTo: f ]
+	].
+
+	super addAllFiles: aCollection.
+    ]
+
+    run [
+        | base configureAC makefileAM gstIN |
+	base := Directory name: self srcdir.
+	configureAC := base at: 'configure.ac'.
+	makefileAM := base at: 'Makefile.am'.
+	gstIN := base at: 'gst.in'.
+
+	configureAC exists ifFalse: [
+	    configureAC withWriteStreamDo: [ :ws | self writeConfigure: ws ] ].
+	gstIN exists ifFalse: [
+	    gstIN withWriteStreamDo: [ :ws | self writeGstIn: ws ] ].
+	makefileAM exists ifFalse: [
+	    makefileAM withWriteStreamDo: [ :ws | self writeMakefile: ws ] ]
+    ]
+
+    writeGstIn: ws [
+	ws nextPutAll:
+'#! /bin/sh
+abs_top_builddir=@abs_top_builddir@
+: ${LIBTOOL=$abs_top_builddir/libtool}
+
+exec $LIBTOOL --mode=execute @PACKAGE_DLOPEN_FLAGS@ @GST@ ${1+"$@"}
+'
+    ]
+
+    writeConfigure: ws [
+	| numPackages pkgName tarName |
+	numPackages := 0.
+	self packages do: [ :each |
+	    pkgName := each name.
+	    numPackages := numPackages + 1 ].
+
+	numPackages = 1 ifFalse: [ pkgName := 'XYZ' ].
+
+        tarName := 'gst-',
+	    (pkgName asLowercase copyReplacingAllRegex: '[-_ ]+' with: '-').
+
+	ws nextPutAll: ('AC_PREREQ(2.59)
+AC_INIT([GNU Smalltalk package %1], [0.0], , %2)
+AC_CONFIG_SRCDIR([%3])
+
+AM_INIT_AUTOMAKE
+
+AM_PATH_GST([2.95b], , [AC_MSG_ERROR([GNU Smalltalk not found])])
+' % { pkgName. tarName. srcFile }).
+
+	packages filesDo: [ :each |
+	    self writeConfigureEntry: each to: ws ].
+
+	ws nextPutAll: '
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([gst], [chmod +x gst])
+AC_OUTPUT
+'
+    ]
+
+    writeConfigureEntry: each to: ws [
+	| pkgName buildPath srcPath pkgSrcDir relPkgSrcDir generated |
+	buildPath := (Directory name: Directory working) pathTo: each.
+	srcPath := (Directory name: self srcdir) pathTo: each.
+
+	pkgSrcDir := srcPath size < buildPath size
+	    ifTrue: [ File pathFor: srcPath ifNone: [ self srcdir ] ]
+	    ifFalse: [ Directory append: (File pathFor: buildPath) to: self srcdir ].
+
+	relPkgSrcDir := (Directory name: self srcdir) pathTo: pkgSrcDir.
+
+	('*.in' match: each)
+	    ifTrue: [
+		srcPath := srcPath allButLast: 3.
+		buildPath := buildPath allButLast: 3.
+		generated := true ]
+	    ifFalse: [
+		generated := (File name: srcPath, '.in') exists ].
+
+	(File name: each) withReadStreamDo: [ :rs |
+	    | pkg |
+	    [ pkg := Package parse: rs ]
+	        on: Kernel.PackageNotAvailable
+	        do: [ :ex | ex resume ].
+	    pkgName := pkg name ].
+
+	ws nextPutAll: ('GST_PACKAGE_ENABLE([%1], [%2]' % {
+	    pkgName. relPkgSrcDir }).
+
+	generated ifTrue: [
+	    ws nextPutAll: (', , , [%1]' % {
+		(Directory name: relPkgSrcDir) pathTo: srcPath }) ].
+
+	ws nextPutAll: ')'; nl.
+    ]
+
+    writeMakefile: ws [
+	ws nextPutAll:
+'AUTOMAKE_OPTIONS = foreign
+AM_CPPFLAGS = $(GST_CFLAGS)
+
+## Example:
+##
+## gst_module_ldflags = -rpath $(gstlibdir) -module \
+##        -no-undefined -export-symbols-regex gst_initModule
+##
+## noinst_HEADERS = md5.h sha1.h
+## gstlib_LTLIBRARIES = digest.la
+## digest_la_SOURCES = digest.c md5.c sha1.c
+## digest_la_LDFLAGS = $(gst_module_ldflags)
+
+
+### -------------------------------------- ###
+### Rules completed by GST_PACKAGE_ENABLE. ###
+### -------------------------------------- ###
+
+DISTCLEANFILES = pkgrules.tmp
+all-local:
+clean-local::
+install-data-hook::
+dist-hook::
+uninstall-local::
+
+@PACKAGE_RULES@
+'
+    ]
+]
+
 | srcdir installDir mode listFiles destdir packageFiles helpString options |
 
 mode := nil.
@@ -536,7 +695,7 @@ The default target directory is ', Directory image, '
 	 --no-install is also present for backwards compatibility."
         arguments: '-h|--help --no-load --test --load --no-install --uninstall
             --dist -t|--target-directory: --list-files: --list-packages
-            --srcdir: --distdir|--destdir: -n|--dry-run --all-files
+            --prepare --srcdir: --distdir|--destdir: -n|--dry-run --all-files
 	    --vpath --copy -I|--image-file: --kernel-directory: --version'
 
         do: [ :opt :arg |
@@ -560,6 +719,9 @@ The default target directory is ', Directory image, '
             opt = 'no-install' ifTrue: [
 		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
 		mode := PkgList ].
+            opt = 'prepare' ifTrue: [
+		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
+		mode := PkgPrepare ].
             opt = 'list-files' ifTrue: [
 		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
 		listFiles add: arg.

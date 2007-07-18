@@ -1,5 +1,9 @@
 2007-07-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Package.st: add --prepare option.
+
+2007-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Directory.st: Return '.' from #pathTo: if appropriate.
 	* kernel/SeqCollect.st: Fix #allButLast and #allButLast:.
 
