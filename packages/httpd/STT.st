@@ -120,7 +120,7 @@ asSmalltalkCodeOn: anObject
 
     stream := String new writeStream.
     self writeSmalltalkCodeOn: stream.
-    method := anObject class compile: stream contents.
+    method := anObject class compile: stream.
     self cache: method.
     anObject class removeSelector: method selector.
     ^method
