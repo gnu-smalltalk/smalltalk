@@ -2554,10 +2554,31 @@ well (see packages XPath and @sc{xsl}).
 
 Various other ``minor'' packages are provided, typically as examples of
 writing modules for @gst{} (@pxref{External modules, , Linking your
-libraries to the virtual machine}).  These are Regex, providing Perl5 
-regular expressions, @sc{gdbm}, which is an interface to the @gnu{}
-database manager, and @sc{md5}, which provides a simple class to 
-quickly compute cryptographically strong hash values.
+libraries to the virtual machine}).  These include:
+
+@table @i
+@item Complex
+which adds transparent operations with complex numbers
+
+@item @sc{gdbm}
+which is an interface to the @gnu{} database manager
+
+@item Digest
+which provides two easy to use classes to quickly compute
+cryptographically strong hash values using the MD5 and SHA1
+algorithms.
+
+@item NCurses
+which provides bindings to @i{ncurses}
+
+@item Continuations
+which provides more examples and tests for continuations (an
+advanced feature to support complex control flow).
+
+@item DebugTools
+which provides a way to attach to another Smalltalk process
+and execute it a bytecode or a method at a time.
+@end table
 
 @node Emacs
 @chapter Smalltalk interface for @gnu{} Emacs

@@ -1,0 +1,8 @@
+2007-07-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* complextests.st: New.
+	* Complex.st: Fix bugs.
+
+2007-07-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Complex.st: New.
