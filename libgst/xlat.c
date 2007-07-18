@@ -3223,7 +3223,7 @@ emit_block_prolog (OOP blockOOP,
   /* If they don't, check if we came here because somebody called
      send_block_value.  In this case, the number of arguments is surely 
      valid and the inline cache's numArgs is bogus. This handles
-     #valueWithArguments:, #compileString:ifError: and other primitives 
+     #valueWithArguments:, #primCompile:ifError: and other primitives 
      in which send_block_value is used.  */
   jit_ldi_p (JIT_R2, &native_ip);
   jit_bnei_p (do_send_code, JIT_R2, current->nativeCode);

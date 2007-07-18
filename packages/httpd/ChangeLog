@@ -1,0 +1,3 @@
+2007-07-18  Stephen Compall  <scompall@nocandysw.com>
+
+        * packages/httpd/STT.st: Use #compile:.

@@ -340,7 +340,7 @@ name: className
     "Please note that I need to recompile the classes in this sequence;
     otherwise, the same error is propagated to each selector which is compiled
     after an error is detected even though there are no further compilation 
-    errors. Apparently, there is a bug in the primitive compileString.  This
+    errors. Apparently, there is a bug in the primitive #primCompile:.  This
     can be cleaned up later"
 	 
     (needToRecompileClasses | needToRecompileMetaclasses)

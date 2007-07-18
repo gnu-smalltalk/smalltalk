@@ -4941,9 +4941,9 @@ primitive VMpr_Object_makeReadOnly [succeed,fail]
   PRIM_FAILED;
 }
 
-/* Behavior compileString: aString */
+/* Behavior primCompile: aString */
 
-primitive VMpr_Behavior_compileString [succeed]
+primitive VMpr_Behavior_primCompile [succeed]
 {
   OOP oop1;
   OOP oop2;
@@ -4964,8 +4964,8 @@ primitive VMpr_Behavior_compileString [succeed]
   PRIM_SUCCEEDED;
 }
 
-/* Behavior compileString: aString ifError: aBlock */
-primitive VMpr_Behavior_compileStringIfError [fail,succeed,reload_ip]
+/* Behavior primCompile: aString ifError: aBlock */
+primitive VMpr_Behavior_primCompileIfError [fail,succeed,reload_ip]
 {
   OOP oop1;
   OOP oop2;

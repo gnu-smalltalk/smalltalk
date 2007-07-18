@@ -1,3 +1,15 @@
+2007-07-18  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/Behavior.st: Rename #compileString: to #primCompile: and
+	document; similarly with #compileString:ifError:.  In evaluation
+	methods, remove vacuous "code isMemberOf: String" cases in
+	evaluation methods, remove some inlining, and fix the WriteStream
+	cases.
+	(#compile:, #compile:ifError:): Use #primCompile:.
+	(#evalString:to:, #evalString:to:ifError:): Use #compile: and
+	#compile:ifError:.
+	* kernel/Metaclass.st: Mention #primCompile:.
+
 2007-07-18  Paolo Bonzini  <bonzini@gnu.org>
 
         * tests/classes.st: Test bad instance variable names.

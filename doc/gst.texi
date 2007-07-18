@@ -67,7 +67,7 @@ This file documents @sc{gnu} Smalltalk Version @value{VERSION}.
 It was last updated on @value{UPDATED}.
 
 Copyright @copyright{} 1988, 1989, 1991, 1992, 1994, 1995, 1999,
-2000, 2001, 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
+2000, 2001, 2002, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 
 This document is released under the terms of the @sc{gnu} Free
 Documentation License as published by the Free Software Foundation;
@@ -100,7 +100,7 @@ with its equivalent in the printed manual, constitutes the Title Page.
 
 @ifnottex
 This document describes installing and operating the @gst{}
-programming language.
+programming environment.
 
 @insertcopying
 
@@ -262,32 +262,39 @@ The @gst{} virtual machine may be invoked via the following command:
 gst [ flags @dots{} ] [ file @dots{} ]
 @end example
 
-When you first invoke @gst{}, it will attempt to see if any of the
-kernel method definition files are newer than the last saved binary
-image in the current directory (if there is one).  If there is a newer
-kernel method definition file, or if the binary image file (called
-@file{gst.im}) does not exist, a new binary image will be built by
-loading in all the kernel method definition files, performing a full
-garbage collection in order to compact the space in use, and then saving
-the resulting data in a position independent format.  Your first
-invocation should look something like this:
+When you invoke @gst{}, it will ensure that the binary image file
+(called @file{gst.im}) is up to date; if not, it will build a new one as
+described in @ref{Loading or creating an image,, Loading an image or
+creating a new one}.  Your first invocation should look something like
+this:
 
 @display
-"Scavenging@dots{} done, used space = 51%"
-@gst{} Ready
+"Global garbage collection... done"
+@gst{} ready
 
 st>
 @end display
 
-If you specify @var{file}, that file will be read and executed and
-Smalltalk will exit when end of file is reached.  If you specify more
-than one file, each will be read and processed in turn.  If you don't
-specify @var{file}, standard input is read, and if the standard input is
-a terminal, a prompt is issued.  You may specify @option{-} for the name
-of a file to invoke an explicit read from standard input; furthermore,
-specifying @option{--} stops the interpretation of options so that every
-argument that follows is considered a file name even if it begins with a
-minus.
+If you specify one or more @var{file}s, they will be read and executed
+in order, and Smalltalk will exit when end of file is reached.  If you
+don't specify @var{file}, @gst{} reads standard input, issuing a
+@samp{st>} prompt if the standard input is a terminal.  You may specify
+@option{-} for the name of a file to invoke an explicit read from
+standard input.
+
+@cindex saving
+@cindex quitting
+@cindex exiting
+@findex quit
+@findex snapshot
+To exit while at the @samp{st>} prompt, use @kbd{Ctrl-d}, or type
+@kbd{ObjectMemory quit} followed by @key{RET}.  Use @kbd{ObjectMemory
+snapshot} first to save a new image that you can reload later, if you
+wish.
+
+As is standard for @acronym{GNU}-style options, specifying @option{--}
+stops the interpretation of options so that every argument that follows
+is considered a file name even if it begins with a @samp{-}.
 
 You can specify both short and long flags; for example, @option{--version}
 is exactly the same as @option{-v}, but is easier to remember.  Short
@@ -302,11 +309,12 @@ names, but their effect is as if they were all specified first.  The
 various flags are interpreted as follows:
 
 @table @option
-@item -a --smalltalk-args
-Used to make arguments available to Smalltalk code.  The C option parser
-discards everything after the parameter including @option{-a}, while
-Smalltalk code can get it sending the @code{arguments} message to the
-@code{Smalltalk} object.
+@item -a
+@itemx --smalltalk-args
+@findex arguments
+Treat all options afterward as arguments to be given to Smalltalk code
+retrievable with @code{Smalltalk arguments}, ignoring them as arguments
+to @gst{} itself.
 
 Examples:
 @multitable {@option{--verbose -aq -c}} {Options seen by @sc{gnu} Smalltalk} {@code{Smalltalk arguments}}
@@ -330,21 +338,21 @@ Examples:
   @tab @code{#('-c')}
 @end multitable
 
-That should be clear.
+@item -c
+@itemx --core-dump
+When a fatal signal occurs, produce a core dump before terminating.
+Without this option, only a backtrace is provided.
 
-@item -c --core-dump
-When this flag is set and a fatal signal occurs, a core dump is produced
-after an error message is printed.  Normally, the backtrace is produced
-and the system terminates without dumping core.
+@item -d
+@itemx --declaration-trace
+Print the class name, the method name, and the byte codes that the
+compiler generates as it compiles methods.  Only applies to files that
+are named explicitly on the command line, unless the flag is given
+multiple times on the command line.
 
-@item -d --declaration-trace
-Declaration tracing prints the class name, the method name, and the byte
-codes that the compiler is generating as it compiles methods.  Only applies
-to files that are named explicitly on the command line, unless the flag is
-given multiple times on the command line.
-
-@item -e --user-execution-trace
-Prints the byte codes being executed as the interpreter operates.  Only
+@item -e
+@itemx --user-execution-trace
+Print the byte codes being executed as the interpreter operates.  Only
 works for statements explicitly issued by the user (either interactively
 or from files given on the command line), unless the flag is given
 multiple times on the command line.
@@ -353,32 +361,29 @@ This option is disabled when the dynamic
 translator (@pxref{Dynamic translator}) is enabled.
 @end ignore
 
-@item --kernel-directory
-Specify, respectively, the directory in which the image file @file{gst.im}
-will be looked for and saved, and the directory from which the kernel
-source files will be loaded.  This is used mostly while compiling
-@gst{} itself.
+@item --kernel-dir
+Specify the directory from which the kernel source files will be loaded.
+This is used mostly while compiling @gst{} itself.  Smalltalk code can
+retrieve this information with @code{Directory kernel}.
 
 @item --no-user-files
-Specify that, if an image is created, @gst{} shall not load any file
-from the @file{.st} subdirectory of the user's home directory@footnote{The
-  directory would be called @file{_st/kernel} under MS-DOS.  Under OSes that
-  don't use home directories, it would be looked for in the current directory.}.
-This is used mostly while compiling @gst{} itself, to avoid that the
-installed image be built from files overridden by the user.
+Don't load any files from @file{~/.st/} (@pxref{Loading or creating an
+image,, Loading an image or creating a new one}).@footnote{The directory
+would be called @file{_st/} under MS-DOS.  Under OSes that don't use
+home directories, it would be looked for in the current directory.}
+This is used mostly while compiling @gst{} itself, to ensure that the
+installed image is built only from files in the source tree.
 
-@item -K --kernel-file
-Specify a file to be loaded from the kernel directory.  These are
-files that are usually distributed and installed together with GNU
-Smalltalk, or that are placed under the @file{.st/kernel}
-  subdirectory of the user's home directory@footnote{The directory is
-  called @file{_st/kernel} under MS-DOS.  Under OSes that don't use home
-  directories, it is looked for in the current directory.}.
+@item -K @var{file}
+@itemx --kernel-file @var{file}
+Load @var{file} in the usual way, but look for it relative to the kernel
+directory's parent directory, which is usually
+@file{/usr/local/share/smalltalk/}.  See @option{--kernel-dir} above.
 
-@item -f --file
-This special flag is designed to prepare Smalltalk programs that can
-be invoked from the Unix shell.  The following two command lines are
-equivalent:
+@cindex shell scripts
+@item -f
+@itemx --file
+The following two command lines are equivalent:
 
 @example
 gst -f @var{file} @file{args...}
@@ -394,12 +399,11 @@ beginning of a file, as in
 @r{@i{@dots{} Smalltalk source code @dots{}}}
 @end example
 
-The first line is specially parsed by @gst{} as a comment, and the
-@option{-f} option ensures that the arguments are passed properly to
-the script.  Another possibility, one that does not require hard-coding
-the path to the interpreter, is as follows@footnote{The words in
-the shell command @command{exec} are all quoted, so GNU Smalltalk parses
-them as five separate comments.}:
+@gst{} treats the first line as a comment, and the @option{-f} option
+ensures that the arguments are passed properly to the script.  Use this
+instead to avoid hard-coding the path to @command{gst}:@footnote{The
+words in the shell command @command{exec} are all quoted, so GNU
+Smalltalk parses them as five separate comments.}
 
 @example
 #! /bin/sh
@@ -408,71 +412,82 @@ them as five separate comments.}:
 @r{@i{@dots{} Smalltalk source code @dots{}}}
 @end example
 
-@item -g --no-gc-messages
-Suppress garbage collection messages. 
+@item -g
+@itemx --no-gc-messages
+Suppress garbage collection messages.
 
-@item -h --help
-Prints out a brief summary of the command line syntax of @gst{},
-including the definitions of all of the option flags, and then exits.
+@item -h
+@itemx --help
+Print out a brief summary of the command line syntax of @gst{},
+including the definitions of all of the option flags, and then exit.
 
-@item -i --rebuild-image
-Ignore the saved image file; always load from the kernel method
-definition files.  Setting this flag bypasses the normal checks for
-kernel files newer than the image file, or the image file's version
-stamp out of date with respect to the Smalltalk version.  After the
-kernel definitions have been loaded, a new image file will be saved.
+@item -i
+@itemx --rebuild-image
+Always build and save a new image file; see @ref{Loading or creating an
+image,, Loading an image or creating a new one}.
 
 @item --maybe-rebuild-image
-Check for kernel files newer than the image file, or the image file's
-version stamp out of date with respect to the Smalltalk version.
-If these checks find the image is out of date, the kernel definitions
-will be loaded and a new image file will be saved.  This behavior
-is the default when @option{-I} is not given, but must be specified
-explicitly.
+Perform the image checks and rebuild as described in @ref{Loading or
+creating an image,, Loading an image or creating a new one}.  This is
+the default when @option{-I} is not given.
 
-@item -I @var{file} --image-file @var{file}
-Use the image file named @var{file} as the image file to load.  This
-option completely bypasses the standard image file and checking the file
-dates on the kernel files.
+@cindex image path
+@item -I @var{file}
+@itemx --image-file @var{file}
+Use the image file named @var{file} as the image file to load instead of
+the default location, and set @var{file}'s directory part as the image
+path.  This option completely bypasses checking the file dates on the
+kernel files; use @option{--maybe-rebuild-image} to restore the usual
+behavior, writing the newly built image to @var{file} if needed.
 
-@item -l --log-changes
-Produce a log of the compiled Smalltalk code to st-changes.st, in the
-current working directory.
+@item -l
+@itemx --log-changes
+Log compiled Smalltalk code to st-changes.st, in the current working
+directory.
 
-@item -L @var{file} --log-file @var{file}
-Produce a log of the compiled Smalltalk code to the file named
-@var{file}.
+@item -L @var{file}
+@itemx --log-file @var{file}
+Log compiled Smalltalk code to the file named @var{file}.
 
-@item -q --quiet --silent
-Suppress the printing of returned values while @gst{} runs.
+@item -q
+@itemx --quiet
+@itemx --silent
+Suppress the printing of answered values from top-level expressions
+while @gst{} runs.
 
-@item -r --regression-test
-Controls printing of certain informative I/O; this is used by the
-regression testing system and is probably not of interest to the general
-user.
+@item -r
+@itemx --regression-test
+This is used by the regression testing system and is probably not of
+interest to the general user.  It controls printing of certain
+information.
 
-@item -S --snapshot
-Save a snapshot after loading files from the command line.  Of course
-the snapshot is not saved if you include - (stdin) on the command line
-and exit by typing Ctrl-C.
+@item -S
+@itemx --snapshot
+Save the image after loading files from the command line.  Of course
+this ``snapshot'' is not saved if you include - (stdin) on the command
+line and exit by typing @kbd{Ctrl-c}.
 
-@item -v --version
-Prints out the Smalltalk version number, then exits.
+@item -v
+@itemx --version
+Print out the @gst{} version number, then exit.
 
-@item -V --verbose
-Enables verbose mode.  When verbose mode is on, various diagnostic
-messages are printed (the name of each file as it's loaded, plus
-messages about the beginning of execution or how many byte codes were
-executed).
+@item -V
+@itemx --verbose
+Print various diagnostic messages while executing (the name of each file
+as it's loaded, plus messages about the beginning of execution or how
+many byte codes were executed).
 @end table
 
 @node Operation
 @section Startup sequence
 
-@strong{Caveat}: @emph{The startup sequence is pretty complicated.  If you
-are not interested in its customization, you can skip the first two
-sections below.  These two sections also don't apply when the command-line
-option @option{-I} is used.}
+@strong{Caveat}: @emph{The startup sequence is pretty complicated.  If
+you are not interested in its customization, you can skip the first two
+sections below.  These two sections also don't apply when using the
+command-line option @option{-I}, unless also using
+@option{--maybe-rebuild-image}.}
+
+You can abort @gst{} at any time during this procedure with @kbd{Ctrl-c}.
 
 @menu
 * Command-line processing::        Picking an image path and a kernel path.
@@ -483,11 +498,12 @@ option @option{-I} is used.}
 @node Command-line processing
 @subsection Picking an image path and a kernel path
 
-When @gst{} is invoked, the first thing it does is choosing two paths,
-respectively the ``image path'' and the ``kernel path''.  The image path
-is set by considering these paths in succession:
+@cindex image path
+When @gst{} is invoked, it first chooses two paths, the ``image path''
+and the ``kernel path''.  The image path is set by considering these
+paths in succession:
 @itemize
-@item the argument to the @option{--image-directory} option if it is
+@item the directory part of the @option{--image-file} option if it is
   given;
 @item the value of the @env{SMALLTALK_IMAGE} environment variable
   if it is defined and readable; this step will disappear in a future
@@ -500,10 +516,11 @@ is set by considering these paths in succession:
   chosen according to the previous criteria.
 @end itemize
 
-The ``kernel path'' is the directory in which to look for each of the kernel
-method definition files.  The possibilities in this case are:
+@cindex kernel path
+The ``kernel path'' is the directory in which to look for Smalltalk code
+compiled into the base image.  The possibilities in this case are:
 @itemize
-@item the argument to the @option{--kernel-directory} option if it is given;
+@item the argument to the @option{--kernel-dir} option if it is given;
 @item the value of the @env{SMALLTALK_KERNEL} environment variable
   if it is defined and readable; this step will disappear in a future
   release;
@@ -513,71 +530,82 @@ method definition files.  The possibilities in this case are:
 @item a subdirectory named @file{kernel} of the image path.
 @end itemize
 
-After these are chosen, GNU Smalltalk can try to load an image (from the
-image path), or create a new one (bootstrapping it from the files in
-the kernel path).
-
 @node Loading or creating an image
 @subsection Loading an image or creating a new one
 
-Unless the @option{-i} flag is used, GNU Smalltalk first tries to load the
-@file{gst.im} file in the image path.  If this is found, GNU Smalltalk
-compares the write dates of all of the kernel method definition files
-against the write date of the binary image file, to avoid loading a stale
-image.  If this check passes, the image is also checked to
-be compatible with the current version of the virtual machine and with the
-current system; GNU Smalltalk is able to load an image created on a system with
-the same pointer size but different endianness (for example, a PowerPC
-image on an x86), but not an image created on a system with different
-pointer sizes like an x86-64 image on an x86.  If the
-image is not stale and compatible, it is loaded---thus terminating the
-startup here.
+@cindex compatible images
+@cindex images, loading
+@gst{} can load images created on any system with the same pointer size
+as its host system by approximately the same version of @gst{}, even if
+they have different endianness.  For example, images created on 32-bit
+PowerPC can be loaded with a 32-bit x86 @command{gst} @acronym{VM},
+provided that the @gst{} versions are similar enough.  Such images are
+called @dfn{compatible images}.  It cannot load images created on
+systems with different pointer sizes; for example, our x86 @command{gst}
+cannot load an image created on x86-64.
 
-If the image is not found, is incompatible, or older than any of the
-kernel files, a new image has to be created.  The image path may
-now be changed to the current directory if the previous choice
-is not writeable.
+Unless the @option{-i} flag is used, @gst{} first tries to load the file
+named by @option{--image-file}, defaulting to @file{gst.im} in the image
+path.  If this is found, @gst{} ensures the image is ``not stale'',
+meaning its write date is newer than the write dates of all of the
+kernel method definition files.  It also ensures that the image is
+``compatible'', as described above.  If both tests pass, @gst{} loads
+the image and continues with @ref{Starting the system,, After the image
+is created or restored}.
 
-The set of files that make up the kernel is loaded,
-one at a time.  The list can be found in @file{libgst/lib.c}, in the
-@code{standard_files} variable.  The user can override
-kernel files by placing their own copies under the @file{.st/kernel}
-subdirectory of the user's home directory@footnote{The directory is
-  called @file{_st/kernel} under MS-DOS.  Under OSes that don't use home
-  directories, it is looked for in the current directory.}.
+If that fails, a new image has to be created.  The image path may now be
+changed to the current directory if the previous choice is not
+writeable.
 
-Before saving the image, GNU Smalltalk will load two files that
-allow easy customization, as well as installation of bug fixes.  The
-first file is @file{site-pre.st}, which should be placed in the parent
-directory of the kernel directory.  Since the kernel directory is rarely
-changed from its default, a @file{site-pre.st} file under
-@file{/usr/local/share/smalltalk} provides a point for site-wide 
-customization.  The second file is a user-dependent @file{.st/pre.st}
-file from the user's home directory.@footnote{The file is looked up as
-  @file{_st/pre.st} under MS-DOS and again, under OSes that don't use
-  home directories it is looked for as @file{pre.st} in the current
-  directory.}.
+@cindex kernel, loading
+To build an image, @gst{} loads the set of files that make up the
+kernel, one at a time.  The list can be found in @file{libgst/lib.c}, in
+the @code{standard_files} variable.  You can override kernel files by
+placing your own copies in @file{~/.st/kernel/}.@footnote{The directory
+is called @file{_st/kernel} under MS-DOS.  Under OSes that don't use
+home directories, it is looked for in the current directory.}  For
+example, if you create a file @file{~/.st/kernel/Builtins.st}, it will
+be loaded instead of the @file{Builtins.st} in the kernel path.
+
+@cindex @file{pre.st}
+@cindex @file{site-pre.st}
+To aid with image customization and local bug fixes, @gst{} loads two
+more files (if present) before saving the image.  The first is
+@file{site-pre.st}, found in the parent directory of the kernel
+directory.  Unless users at a site change the kernel directory when
+running @command{gst}, @file{/usr/local/share/smalltalk/site-pre.st}
+provides a convenient place for site-wide customization.  The second is
+@file{~/.st/pre.st}, which can be different for each user's home
+directory.@footnote{The file is looked up as @file{_st/pre.st} under
+MS-DOS and again, under OSes that don't use home directories it is
+looked for as @file{pre.st} in the current directory.}.
+
+Before the next steps, @gst{} takes a snapshot of the new memory image,
+saving it over the old image file if it can, or in the current directory
+otherwise.
 
 @node Starting the system
 @subsection After the image is created or restored
 
-At this point, independent of whether the binary image file was loaded
-or created, the @code{returnFromSnapshot} event is sent to the dependents of
-the special class @code{ObjectMemory} (@pxref{Memory access}).  After these
-finish executing their initialization code, the user file @file{.st/init.st} is
-loaded if found in the user's home directory@footnote{The same considerations
-  made above hold here too.  The file is called @file{_st/init.st} under MS-DOS,
-  and is looked for in the current directory under OSes that don't use home
-  directories.}.
+@c so it's not a "function"... it's an operation
+@findex returnFromSnapshot
+@cindex @file{init.st}
+Next, @gst{} sends the @code{returnFromSnapshot} event to the dependents
+of the special class @code{ObjectMemory} (@pxref{Memory access}).
+Afterwards, it loads @file{~/.st/init.st} if available.@footnote{The
+same considerations made above hold here too.  The file is called
+@file{_st/init.st} under MS-DOS, and is looked for in the current
+directory under OSes that don't use home directories.}
 
-Finally, if there were any files specified on the command line, they are
-loaded, otherwise standard input is read and executed until an EOF is
-detected.  You are then able to operate @gst{} by typing in expressions
-to the @samp{st>} prompt, and/or reading in files that contain Smalltalk
-code.
+@cindex startup, customizing
+@cindex customizing startup
+You can remember the difference between @file{pre.st} and @file{init.st}
+by remembering that @file{pre.st} is the @emph{pre}-snapshot file and
+@file{init.st} is the post-image-load @emph{init}ialization file.
 
-At some time, you may wish to abort what @gst{} is doing and return to
-the command prompt: you can use @kbd{C-c} to do this.
+Finally, @gst{} loads files listed on the command line, or prompts for
+input at the terminal, as described in @ref{Invocation,, Command line
+arguments}.
 
 
 @node Syntax

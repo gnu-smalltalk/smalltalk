@@ -1,3 +1,9 @@
+2007-07-17  Stephen Compall  <scompall@nocandysw.com>
+
+	* libgst/prims.def: Rename compileString primitives to
+	primCompile.
+	* libgst/xlat.c: Mention #primCompile:.
+
 2007-07-12  Paolo Bonzini  <bonzinI@gnu.org>
 
 	* libgst/oop.c: When compacting, do not discard grey pages from

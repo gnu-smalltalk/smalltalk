@@ -215,11 +215,11 @@ compile: code
     "Compile method source.  If there are parsing errors, answer nil.
      Else, return a CompiledMethod result of compilation"
     (code isKindOf: WriteStream)
-    	ifTrue: [ ^self compileString: code readStream ].
+    	ifTrue: [ ^self primCompile: code readStream ].
     (code isKindOf: Stream)
-    	ifTrue: [ ^self compileString: code ].
+    	ifTrue: [ ^self primCompile: code ].
 
-    ^self compileString: code asString
+    ^self primCompile: code asString
 !
 
 compile: code ifError: block
@@ -227,11 +227,11 @@ compile: code ifError: block
      exception block, 'block' passing file name, line number and
      error.  Return a CompiledMethod result of compilation"
     (code isKindOf: WriteStream)
-    	ifTrue: [ ^self compileString: code readStream ifError: block ].
+    	ifTrue: [ ^self primCompile: code readStream ifError: block ].
     (code isKindOf: Stream)
-    	ifTrue: [ ^self compileString: code ifError: block ].
+    	ifTrue: [ ^self primCompile: code ifError: block ].
 
-    ^self compileString: code asString ifError: block
+    ^self primCompile: code asString ifError: block
 !
 
 compile: code notifying: requestor
@@ -378,7 +378,7 @@ evalString: aString to: anObject
     [
 	next := self extractEvalChunk: s.
 	method := anObject class
-	    compileString: 'Doit ^ [
+	    compile: 'Doit ^ [
 ', next, ' ] value ' ifError: [ :fname :line :error | nil ]. 
 
 	method isNil | (next allSatisfy: [ :each | each = Character space ])
@@ -393,14 +393,14 @@ evalString: aString to: anObject
 evalString: aString to: anObject ifError: aBlock
     "Answer the stack top at the end of the evaluation of the code in
      aString. If aString cannot be parsed, evaluate aBlock (see
-     compileString:ifError:). The code is executed as part of anObject"
+     compile:ifError:). The code is executed as part of anObject"
     | s result next method |
 
     s := ReadStream on: aString.
     [
 	next := self extractEvalChunk: s.
 	method := anObject class
-	    compileString: 'Doit ^ [
+	    compile: 'Doit ^ [
 ', next, ' ] value '
 	    ifError: [:fname :lineNo :errorString | 
 		aBlock value: fname value: lineNo - 1 value: errorString.
@@ -419,26 +419,14 @@ evalString: aString to: anObject ifError: aBlock
 evaluate: code
     "Evaluate Smalltalk expression in 'code' and return result."
 
-    (code isKindOf: WriteStream)
-    	ifTrue: [ ^self compileString: code readStream ].
-    (code isKindOf: Stream)
-	ifTrue: [ ^self evalString: code contents to: nil ].
-    (code isMemberOf: String)
-	ifFalse: [ ^self evalString: code asString to: nil ].
-    ^self evalString: code to: nil
+    ^self evaluate: code to: nil
 !
 
 
 evaluate: code ifError: block
     "Evaluate 'code'.  If a parsing error is detected, invoke 'block'"
 
-    (code isKindOf: WriteStream)
-    	ifTrue: [ ^self compileString: code readStream ].
-    (code isKindOf: Stream)
-	ifTrue: [ ^self evalString: code contentsto: nil ifError: block ].
-    (code isMemberOf: String)
-	ifFalse: [ ^self evalString: code asString to: nil ifError: block ].
-    ^self evalString: code to: nil ifError: block.
+    ^self evaluate: code to: nil ifError: block
 !
 
 evaluate: code to: anObject ifError: block
@@ -446,24 +434,16 @@ evaluate: code to: anObject ifError: block
     method is used to support Inspector expression evaluation.  If a parsing error 
     is encountered, invoke error block, 'block'" 
 
-    (code isKindOf: WriteStream)
-    	ifTrue: [ ^self compileString: code readStream ].
-   (code isKindOf: Stream)
+    (code isKindOf: Stream)
 	ifTrue: [ ^self evalString: code contents to: anObject ifError: block ].
-    (code isMemberOf: String)
-	ifFalse: [ ^self evalString: code asString to: anObject ifError: block ].
     ^self evalString: code to: anObject ifError: block.
 !
 
 evaluate: code to: anObject 
     "Evaluate Smalltalk expression as part of anObject's method definition"
 
-    (code isKindOf: WriteStream)
-    	ifTrue: [ ^self compileString: code readStream ].
     (code isKindOf: Stream)
 	ifTrue: [ ^self evalString: code contents to: anObject ].
-    (code isMemberOf: String)
-	ifFalse: [ ^self evalString: code asString to: anObject ].
     ^self evalString: code to: anObject.
 !
 
@@ -1401,19 +1381,24 @@ methodsFor: category ifTrue: condition
     ^self primitiveFailed
 !
 
-compileString: aString
-    "Compile the code in aString, with no category. Fail if the code
-     does not obey Smalltalk syntax. Answer the generated CompiledMethod
-     if it does"
-    <primitive: VMpr_Behavior_compileString>
+primCompile: code
+    "Compile the code, a string or readable stream, with no
+     category. Fail if the code does not obey Smalltalk syntax. Answer
+     the generated CompiledMethod if it does.
+
+     Do not send this in user code; use #compile: or related methods
+     instead."
+    <primitive: VMpr_Behavior_primCompile>
     ^self primitiveFailed
 !
 
-compileString: aString ifError: aBlock
-    "Compile the code in aString, with no category. Evaluate aBlock
-     (passing the file name, line number and description of the error) if
-     the code does not obey Smalltalk syntax. Answer the generated
-     CompiledMethod if it does"
-    <primitive: VMpr_Behavior_compileStringIfError>
+primCompile: code ifError: aBlock
+    "As with #primCompile:, but evaluate aBlock (passing the file
+     name, line number and description of the error) if the code does
+     not obey Smalltalk syntax.
+
+     Do not send this in user code; use #compile:ifError: or related
+     methods instead."
+    <primitive: VMpr_Behavior_primCompileIfError>
     ^self primitiveFailed
 ! !

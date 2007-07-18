@@ -324,14 +324,14 @@ compile: code ifError: block
 		     compile: code for: self
 		     classified: nil parser: dummyParser].
     (code isKindOf: WriteStream)
-    	ifTrue: [ ^self compileString: code readStream ifError: block ].
+    	ifTrue: [ ^self primCompile: code readStream ifError: block ].
     (code isKindOf: Stream)
-    	ifTrue: [ ^self compileString: code ifError: block ].
+    	ifTrue: [ ^self primCompile: code ifError: block ].
 
-    ^self compileString: code asString ifError: block
+    ^self primCompile: code asString ifError: block
 !
 
-compileString: aString
+primCompile: aString
     "Compile aString, which should be a string or stream, as a method
      for my instances, installing it in my method dictionary.  Signal
      an error if parsing or compilation fail, otherwise answer the
@@ -350,7 +350,7 @@ compileString: aString
 	parser: parser
 !
 
-compileString: aString ifError: aBlock
+primCompile: aString ifError: aBlock
     | parser source |
     source := aString isString
 	ifTrue: [ aString ]
