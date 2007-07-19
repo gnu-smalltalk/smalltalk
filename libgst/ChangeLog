@@ -1,10 +1,18 @@
+2007-07-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/input.h: Turn second parameter of _gst_set_stream_info to OOP.
+	* libgst/input.c: Likewise.
+	* libgst/prims.def: Remove fileIn primitive.  Remove check on
+	file validity from fileInLine primitive.  Adjust call to
+	_gst_set_stream_info.
+
 2007-07-17  Stephen Compall  <scompall@nocandysw.com>
 
 	* libgst/prims.def: Rename compileString primitives to
 	primCompile.
 	* libgst/xlat.c: Mention #primCompile:.
 
-2007-07-12  Paolo Bonzini  <bonzinI@gnu.org>
+2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: When compacting, do not discard grey pages from
 	the loaded space.  Add _gst_print_grey_list.
@@ -12,7 +20,7 @@
 	struct memory_space.
 	* libgst/save.c: Fill them in.
 
-2007-07-12  Paolo Bonzini  <bonzinI@gnu.org>
+2007-07-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Fix pasto in _gst_grow_dictionary.
 

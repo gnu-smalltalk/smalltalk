@@ -1,3 +1,8 @@
+2007-07-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Stream.st: Add #name, implement #fileIn in Smalltalk.
+	* kernel/StreamOps.st: Add #name.
+
 2007-07-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Package.st: add --prepare option.

@@ -189,6 +189,11 @@ position
      streams support random access to the stream data."
     ^delta + ptr!
 
+name
+    "Return the name of the underlying stream."
+    ^source name
+!
+
 species
     "Return the type of the collections returned by #upTo: etc."
     ^source species! !

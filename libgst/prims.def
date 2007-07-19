@@ -5108,25 +5108,6 @@ primitive VMpr_Object_makeWeak [succeed,fail]
   PRIM_SUCCEEDED;
 }
 
-/* Stream fileIn */
-
-primitive VMpr_Stream_fileIn [succeed,fail]
-{
-  enum undeclared_strategy old;
-  OOP streamOOP = STACKTOP ();
-  _gst_primitives_executed++;
-
-  if (!RECEIVER_IS_OOP (streamOOP))
-    PRIM_FAILED;
-
-  _gst_push_stream_oop (streamOOP);
-  old = _gst_set_undeclared (UNDECLARED_GLOBALS);
-  parse_stream_with_protection (false);
-  _gst_set_undeclared (old);
-  _gst_pop_stream (false);	/* we didn't open it, so we don't close it */
-  PRIM_SUCCEEDED;
-}
-
 /* Stream fileInLine: lineNum fileName: aString at: charPosInt */
 
 primitive VMpr_Stream_fileInLine [succeed,fail]
@@ -5135,49 +5116,26 @@ primitive VMpr_Stream_fileInLine [succeed,fail]
   OOP oop2 = POP_OOP ();
   OOP oop1 = POP_OOP ();
   OOP streamOOP = STACKTOP ();
-  char *realFileName;
+  enum undeclared_strategy old;
   
   if (!RECEIVER_IS_OOP (streamOOP))
     PRIM_FAILED;
-
-  if (is_a_kind_of (OOP_CLASS (streamOOP), _gst_file_descriptor_class))
-    {
-      gst_file_stream fileStream = (gst_file_stream) OOP_TO_OBJ (streamOOP);
-      char *fileName = _gst_to_cstring (fileStream->name);
-      if (!_gst_file_is_readable (fileName))
-	{
-	  xfree (fileName);
-	  PRIM_FAILED;
-	}
-      else
-	xfree (fileName);
-    }
 
   if (IS_INT (oop1)
       && (IS_NIL (oop2)
 	  || (IS_CLASS (oop2, _gst_string_class) && IS_INT (oop3))))
     {
-      intptr_t arg2;
-      intptr_t arg4;
-      arg2 = TO_INT (oop1);
-      if (!IS_NIL (oop2))
-	{
-	  realFileName = _gst_to_cstring (oop2);
-	  arg4 = TO_INT (oop3);
-	}
-      else
-	{
-	  realFileName = NULL;
-	  arg4 = 0;
-	}
+      intptr_t arg1;
+      intptr_t arg3;
+      arg1 = TO_INT (oop1);
+      arg3 = TO_INT (oop3);
 
       _gst_push_stream_oop (streamOOP);
-      _gst_set_stream_info (arg2, realFileName, arg4);
+      _gst_set_stream_info (arg1, oop2, arg3);
+      old = _gst_set_undeclared (UNDECLARED_GLOBALS);
       parse_stream_with_protection (false);
+      _gst_set_undeclared (old);
       _gst_pop_stream (false);
-
-      if (realFileName)
-	xfree (realFileName);
     }
 
   PRIM_SUCCEEDED;

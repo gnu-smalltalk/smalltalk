@@ -49,6 +49,13 @@ provide for writing collections sequentially.' !
 
 !Stream methodsFor: 'accessing-reading'!
 
+name
+    "Return nil by default; not all streams have a name."
+    ^nil
+! !
+
+!Stream methodsFor: 'accessing-reading'!
+
 next
     "Return the next object in the receiver"
     self subclassResponsibility
@@ -492,12 +499,16 @@ fileIn
      in the namespace, so that the old references will automagically point
      to the new value."
 
-    <primitive: VMpr_Stream_fileIn>
-    self primitiveFailed!
+    | pos |
+    pos := [ self position ]
+	on: MessageNotUnderstood
+	do: [ :ex | ex return: 0 ].
+
+    ^self fileInLine: 1 fileName: self name at: pos!
 
 fileInLine: lineNum fileName: aString at: charPosInt
-    "Private - Much like a preprocessor #line directive; it is used
-     by the Emacs Smalltalk mode."
+    "Private - Much like a preprocessor #line directive; it is used internally
+     by #fileIn, and explicitly by the Emacs Smalltalk mode."
 
     <primitive: VMpr_Stream_fileInLine>
     self primitiveFailed

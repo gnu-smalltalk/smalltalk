@@ -267,15 +267,7 @@ _gst_push_stream_oop (OOP oop)
   newStream->st_oop.buf = NULL;
   newStream->st_oop.ptr = NULL;
   newStream->st_oop.end = NULL;
-  if (is_a_kind_of (OOP_CLASS (oop), _gst_file_descriptor_class))
-    {
-      gst_file_stream fileStream = (gst_file_stream) OOP_TO_OBJ (oop);
-      newStream->fileNameOOP = fileStream->name;
-      in_stream->fileOffset = lseek (TO_INT (fileStream->file), 0, SEEK_CUR);
-      _gst_register_oop (newStream->fileNameOOP);
-    }
-  else
-    newStream->fileName = "a Smalltalk Stream";
+  newStream->fileName = "a Smalltalk Stream";
 
   _gst_register_oop (oop);
 }
@@ -353,16 +345,18 @@ push_new_stream (stream_type type)
 
 void
 _gst_set_stream_info (int line,
-		      const char *fileName,
+		      OOP fileNameOOP,
 		      int fileOffset)
 {
   in_stream->line = line;
   in_stream->column = 0;
-  if (fileName)
+  if (!IS_NIL (fileNameOOP))
     {
-      in_stream->fileName = fileName;
-      in_stream->fileNameOOP = _gst_nil_oop;
+      in_stream->fileName = _gst_to_cstring (fileNameOOP);
+      _gst_register_oop (in_stream->fileNameOOP);
     }
+
+  in_stream->fileNameOOP = fileNameOOP;
   in_stream->fileOffset = fileOffset;
 }
  
@@ -708,11 +702,8 @@ line_stamp (int line)
 	{
 	  if (in_stream->fileName)
 	    fprintf (stderr, "%s:", in_stream->fileName);
-	  else if (in_stream->fileNameOOP != _gst_nil_oop)
-	    {
-	      char *s = _gst_to_cstring (in_stream->fileNameOOP);
-	      fprintf (stderr, "%s:", s);
-	    }
+	  else if (!IS_NIL (in_stream->fileNameOOP))
+	    fprintf (stderr, "%#O:", in_stream->fileNameOOP);
 
 	  fprintf (stderr, "%d: ", line);
 	}

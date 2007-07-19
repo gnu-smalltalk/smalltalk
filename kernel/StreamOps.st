@@ -238,6 +238,10 @@ peekFor: aCharacter
 
 !FilteringStream methodsFor: 'basic'!
 
+name
+    ^stream name
+!
+
 species
     ^stream species
 ! !
@@ -303,6 +307,10 @@ position: anInteger
 
 !CollectingStream methodsFor: 'basic'!
 
+name
+    ^stream name
+!
+
 species
     ^stream species
 ! !
@@ -314,6 +322,10 @@ on: aStream
 ! !
 
 !PeekableStream methodsFor: 'basic'!
+
+name
+    ^stream name
+!
 
 next
     | char |
@@ -372,6 +384,10 @@ on: aStream
 ! !
 
 !LineStream methodsFor: 'basic'!
+
+name
+    ^stream name
+!
 
 next
     ^charStream nextLine

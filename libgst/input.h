@@ -115,7 +115,7 @@ extern void _gst_pop_stream (mst_Boolean closeIt)
    a subsection of a real file via a temporary file what the real
    source of the text is.  */
 extern void _gst_set_stream_info (int line,
-				  const char *fileName,
+				  OOP fileNameOOP,
 				  int fileOffset) 
   ATTRIBUTE_HIDDEN;
 
