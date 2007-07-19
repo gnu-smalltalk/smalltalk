@@ -1,5 +1,9 @@
 2007-07-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* examples/Publish.st: Fix new syntax support.
+
+2007-07-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/CharArray.st: Add #linesDo:.
 	* examples/Publish.st: Remove #linesDo:.
 

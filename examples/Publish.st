@@ -399,6 +399,7 @@ extractComment: source
     "Check for new syntax."
     isCommented ifFalse: [
 	comment peekFor: $[.
+	self skipWhite: comment.
 	isCommented := comment peekFor: $" ].
 
     "Maybe they put temporaries *before* the method comment..."
