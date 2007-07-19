@@ -1,5 +1,10 @@
 2007-07-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CharArray.st: Add #linesDo:.
+	* examples/Publish.st: Remove #linesDo:.
+
+2007-07-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Stream.st: Add #name, implement #fileIn in Smalltalk.
 	* kernel/StreamOps.st: Add #name.
 

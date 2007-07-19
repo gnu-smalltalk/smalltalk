@@ -32,27 +32,6 @@ Smalltalk addSubspace: #ClassPublisher!
 
 Namespace current: ClassPublisher!
 
-!String methodsFor: 'useful functionality'!
-
-linesDo: aBlock
-    "Send 'aBlock' a substring of the receiver for each newline delimited
-     line in the receiver"
-    | start substr |
-    start := 1.
-    1 to: self size do:
-	[ :i | (self at: i) == Character nl
-		   ifTrue: [ substr := self copyFrom: start to: i - 1.
-			     aBlock value: substr.
-			     start := i + 1. ]
-	      ].
-    "start - 1 <= self size   this includes the blank line at the end"
-    start <= self size
-	ifTrue: [ aBlock value: (self copyFrom: start to: self size) ]
-! !
-
-
-"----------------------------------------------------------------------"
-
 Object subclass: #Basic
     instanceVariableNames: 'class destination referenceNamespace'
     classVariableNames: ''

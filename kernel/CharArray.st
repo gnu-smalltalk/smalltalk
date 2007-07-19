@@ -213,6 +213,12 @@ contractTo: smallSize
 	with: '...'
 !
 
+linesDo: aBlock
+    "Evaluate aBlock once for every newline delimited line in the receiver,
+     passing the line to the block."
+    self readStream linesDo: aBlock
+!
+
 lines
     "Answer an Array of Strings each representing one line in the receiver."
     ^self readStream lines contents
