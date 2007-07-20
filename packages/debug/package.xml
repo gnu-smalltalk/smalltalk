@@ -2,7 +2,7 @@
   <name>DebugTools</name>
 
   <test>
-    <sunit>DebugTest</sunit>
+    <sunit>DebuggerTest</sunit>
     <filein>debugtests.st</filein>
   </test>
 

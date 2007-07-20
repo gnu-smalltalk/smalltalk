@@ -55,7 +55,7 @@ $(srcdir)/gst.1: $(top_srcdir)/main.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "the GNU Smalltalk virtual machine" $(top_builddir)/gst >$@
 
-$(srcdir)/gst-config.1: $(top_builddir)/gst-config
+$(srcdir)/gst-config.1: $(top_srcdir)/gst-config.in
 	$(HELP2MAN) \
 	  --name "configuration for libgst" $(top_builddir)/gst-config >$@
 

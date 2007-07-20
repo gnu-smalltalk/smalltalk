@@ -1,3 +1,8 @@
+2007-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Package.st: prepare will only be in 2.95c.  Honor
+	--dry-run there too.
+
 2007-07-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/StreamOps.st: Oops.

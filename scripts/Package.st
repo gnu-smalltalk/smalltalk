@@ -521,11 +521,17 @@ Command subclass: PkgPrepare [
 	gstIN := base at: 'gst.in'.
 
 	configureAC exists ifFalse: [
-	    configureAC withWriteStreamDo: [ :ws | self writeConfigure: ws ] ].
+	    'creating configure.ac' displayNl.
+	    Command dryRun ifFalse: [
+	        configureAC withWriteStreamDo: [ :ws | self writeConfigure: ws ] ] ].
 	gstIN exists ifFalse: [
-	    gstIN withWriteStreamDo: [ :ws | self writeGstIn: ws ] ].
+	    'creating gst.in' displayNl.
+	    Command dryRun ifFalse: [
+	        gstIN withWriteStreamDo: [ :ws | self writeGstIn: ws ] ] ].
 	makefileAM exists ifFalse: [
-	    makefileAM withWriteStreamDo: [ :ws | self writeMakefile: ws ] ]
+	    'creating Makefile.am' displayNl.
+	    Command dryRun ifFalse: [
+	        makefileAM withWriteStreamDo: [ :ws | self writeMakefile: ws ] ] ]
     ]
 
     writeGstIn: ws [
@@ -556,7 +562,7 @@ AC_CONFIG_SRCDIR([%3])
 
 AM_INIT_AUTOMAKE
 
-AM_PATH_GST([2.95b], , [AC_MSG_ERROR([GNU Smalltalk not found])])
+AM_PATH_GST([2.95c], , [AC_MSG_ERROR([GNU Smalltalk not found])])
 ' % { pkgName. tarName. srcFile }).
 
 	packages filesDo: [ :each |
@@ -656,6 +662,7 @@ Operation modes:
         --install               make or install STAR packages (default)
         --uninstall             remove the packages mentioned in the FILES
         --dist                  copy files instead of creating STAR files.
+        --prepare               create configure.ac or Makefile.am
         --list-files PKG        just output the list of files in the package
         --list-packages         just output the list of packages in the files
 	--help                  display this message and exit

@@ -1,6 +1,6 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 2.3.5 TO 2.95b
+NEWS FROM 2.3.5 TO 2.95c
 
 Important changes:
 
@@ -25,14 +25,15 @@ o   A different startup sequence is used which improves the possibility to
 
     Finally, Smalltalk programs have access to the aforementioned `.st'
     directory as `Directory userKernel' (name subject to change).  A
-    `packages.xml' file can be put there.
+    `packages.xml' file, as well as `.star' files (see later) can be put
+    there.
 
 o   Several classes not meant to be accessed by the user have been moved to
     an internal Kernel namespace.  This also removes them from the automatically
     generated documentation.
 
 o   GNU Smalltalk now needs InfoZIP to be installed on the machine where
-    it is running, in order to use the new compressed package facility.
+    it is running, in order to use the new single-file package facility.
     In the future, the dependency on InfoZIP will be limited to compiling
     GNU Smalltalk, or may be removed altogether.
 
@@ -54,8 +55,7 @@ o   All packages in the distribution are now installed in the new ".star"
     package.xml file has a <name> tag.
 
 o   In install mode, gst-package automatically creates a ".star" file.
-
-o   gst-package also accepts ".star" files on the command line; in this case,
+    gst-package also accepts ".star" files on the command line; in this case,
     install mode will simply copy the file instead of rebuilding it from
     scratch.
 
@@ -83,7 +83,7 @@ o   Added #from: to Collection, which constructs an instance of the class
 
 o   A new package DebugTools provides a generic Debugger class that can
     be used to control an inferior Smalltalk process.  It is used by the
-    textual MiniDebugger.
+    textual MiniDebugger as well as the debugger that is part of the GUI.
 
 o   Complex numbers support added (package Complex).
 

@@ -23,10 +23,11 @@ m4_define([_GST_RULES_PREPARE],
 
 m4_define([_GST_PKG_ENABLE], [
   cat >> pkgrules.tmp << \EOF
-dnl If this is unconditionally included, the rule for $1.star will be
-dnl invoked on install
 install-data-hook:: $1.star
 	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=$(gstdatadir) --destdir=$(DESTDIR) $1.star
+
+uninstall-local::
+	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=$(gstdatadir) --destdir=$(DESTDIR) --uninstall $(DESTDIR)$(gstdatadir)/$1.star
 
 -include $(srcdir)/_GST_PKG_STAMP
 all-local: $1.star
@@ -66,9 +67,6 @@ $1.star: _GST_PKG_XML $(srcdir)/_GST_PKG_STAMP
 
 clean-local::
 	-rm -f $1.star
-
-uninstall-local::
-	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=$(gstdatadir) --destdir=$(DESTDIR) --uninstall $(DESTDIR)$(gstdatadir)/$1.star
 
 dist-hook:: _GST_PKG_XML
 	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=_GST_PKG_DISTDIR --dist $<
