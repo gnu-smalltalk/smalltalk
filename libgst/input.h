@@ -210,6 +210,9 @@ extern void _gst_enable_completion (void)
 extern void _gst_disable_completion (void) 
   ATTRIBUTE_HIDDEN;
 
+#endif /* HAVE_READLINE */
+
+
 /* Parse the Smalltalk source code read from stdin, showing the
    PROMPT that is passed.  */
 extern void _gst_process_stdin (const char *prompt)
@@ -220,8 +223,6 @@ extern void _gst_process_stdin (const char *prompt)
 extern mst_Boolean _gst_process_file (const char *fileName,
 				      enum gst_file_dir dir)
   ATTRIBUTE_HIDDEN;
-
-#endif /* GST_INPUT_H */
 
 
 #endif

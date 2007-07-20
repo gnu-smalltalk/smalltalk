@@ -1,3 +1,8 @@
+2007-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/input.h: Fix prototype declaration when readline is not
+	available.
+
 2007-07-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.h: Turn second parameter of _gst_set_stream_info to OOP.
