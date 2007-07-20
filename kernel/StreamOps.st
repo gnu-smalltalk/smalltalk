@@ -386,7 +386,7 @@ on: aStream
 !LineStream methodsFor: 'basic'!
 
 name
-    ^stream name
+    ^charStream name
 !
 
 next
