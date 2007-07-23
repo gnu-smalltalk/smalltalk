@@ -78,6 +78,12 @@ position: anInteger
     self basicPosition: anInteger
 !
 
+size
+    "Unlike WriteStreams, ReadWriteStreams answer the full length of the
+     collection."
+    ^endPtr
+!
+
 skip: anInteger
     "Unlike WriteStreams, ReadWriteStreams don't truncate the stream"
     self basicPosition: ((self position + anInteger max: 0) min: endPtr).

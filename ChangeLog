@@ -1,5 +1,10 @@
 2007-07-23  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PosStream.st: Use #size in #position: or #basicPosition:.
+	* kernel/RWStream.st: Use PositionableStream definition of #size.
+
+2007-07-23  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/VFS.st: Avoid referring to realFileName, refactoring
 	hierarchy to use a parent VFSHandler instead.  Allow creating
 	a special ArchiveMemberHandler in ArchiveFileMember>>#files.

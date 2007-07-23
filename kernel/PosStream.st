@@ -189,16 +189,16 @@ position
 
 position: anInteger
     "Move the stream pointer to the anInteger-th object"
-    (anInteger between: 0 and: endPtr)
+    (anInteger between: 0 and: self size)
 	ifTrue: [ ptr := anInteger + 1 ]
-	ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: ptr ]
+	ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger ]
 !
 
 basicPosition: anInteger
     "Move the stream pointer to the anInteger-th object"
-    (anInteger between: 0 and: endPtr)
+    (anInteger between: 0 and: self size)
 	ifTrue: [ ptr := anInteger + 1 ]
-	ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: ptr ]
+	ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger ]
 !
 
 reset
@@ -209,7 +209,7 @@ reset
 
 setToEnd
     "Move the current position to the end of the stream."
-    ptr := endPtr + 1
+    self position: self size
 !
 
 size
