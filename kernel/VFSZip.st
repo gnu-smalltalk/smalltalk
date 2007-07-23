@@ -183,6 +183,7 @@ offset: anInteger
 
 open: class mode: mode ifFail: aBlock
     | file |
+    mode = FileStream read ifFalse: [ ^self notYetImplemented ].
     file := self parent open: class mode: mode ifFail: [ ^aBlock value ].
     file skip: self offset + 26.
     file skip: file nextUshort + file nextUshort.

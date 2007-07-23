@@ -1,5 +1,9 @@
 2007-07-23  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/VFSZip.st: Refuse to open for writing.
+
+2007-07-23  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/MthContext.st: Make flags accessors foolproof.
 	* kernel/VFS.st: Don't redirect from %1 for DecodedFileHandler.
 
