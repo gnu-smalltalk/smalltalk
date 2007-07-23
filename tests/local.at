@@ -25,7 +25,7 @@ m4_define([AT_CHECK_GST], [
     *) image_path="m4_ifval([$2], [-I $2])" ;;
   esac
 
-  AT_CHECK([{ (cd m4_ifval([$3], [$3], [$abs_top_builddir]) && gst $image_path $1); echo exit $? > retcode; } | tr -d '\r'; . retcode], 0, [$4], [$5])
+  AT_CHECK([{ (cd m4_ifval([$3], [$3], [$abs_top_builddir]) && gst $image_path $1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode], 0, [$4], [$5])
 ])
 
 dnl AT_DIFF_TEST([FILE], [XFAILS])
@@ -45,7 +45,7 @@ m4_define([AT_PACKAGE_TEST], [
   AT_SETUP([$1])
   AT_KEYWORDS([m4_if([$1], [SUnit], [], [$1 ])SUnit])
   $2
-  AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st -p $1], [], [], [ignore])
+  AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st --verbose -p $1], [], [], [ignore])
   AT_CLEANUP
 ])
 
@@ -56,7 +56,7 @@ m4_define([AT_OPTIONAL_PACKAGE_TEST], [
   AT_SETUP([$1])
   AT_KEYWORDS([$1 SUnit])
   $2
-  AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st -p $1
+  AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st --verbose -p $1
     ret=$?
     case $ret in
       2) exit 77 ;;

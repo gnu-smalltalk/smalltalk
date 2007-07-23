@@ -274,6 +274,7 @@ static const char standard_files[] = {
   "File.st\0"
   "Directory.st\0"
   "VFS.st\0"
+  "VFSZip.st\0"
   "URL.st\0"
   "FileStream.st\0"
 

@@ -99,16 +99,6 @@ resides entirely in ArchiveFileHandler because the members
 will still ask the archive to get directory information
 on them, to extract them to a real file, and so on.'!
 
-ArchiveFileHandler subclass: #ZipFileHandler
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Streams-Files'
-! 
-
-ZipFileHandler comment: 'ZipFileHandler transparently extracts
-files from a ZIP archive.'!
-
 VFSHandler subclass: #ArchiveMemberHandler
        instanceVariableNames: 'parent name mode size stCtime stMtime stAtime'
        classVariableNames: ''
@@ -1369,106 +1359,9 @@ realFileName
     realFileName := (self parent extractMember: self).
     ^realFileName! !
 
-!ZipFileHandler class methodsFor: 'registering'!
-
-priority
-    "Answer the priority for this class (higher number = higher priority) in
-     case multiple classes implement the same file system."
-    ^-10!
-
-fileSystems
-    "Answer the virtual file systems that can be processed by this subclass."
-    ^#('uzip')! !
 
-!ZipFileHandler methodsFor: 'members'!
-
-createDir: dirName
-    "Create a subdirectory of the receiver, naming it dirName."
-
-    self notYetImplemented!
-
-member: anArchiveMemberHandler mode: bits
-    "Set the permission bits for the file in anArchiveMemberHandler."
-
-    self notYetImplemented!
-
-extractMember: anArchiveMemberHandler into: temp
-    "Extract the contents of anArchiveMemberHandler into a file
-     that resides on disk, and answer the name of the file."
-    Smalltalk system: ('unzip -p %1 %2 > %3'
-	% { self realFileName. anArchiveMemberHandler name. temp name })!
-
-removeMember: anArchiveMemberHandler
-    "Remove the member represented by anArchiveMemberHandler."
-
-    Smalltalk system: ('zip -d %1 %2'
-	% { self realFileName. anArchiveMemberHandler name. })!
-
-updateMember: anArchiveMemberHandler
-    "Update the member represented by anArchiveMemberHandler by
-     copying the file into which it was extracted back to the
-     archive."
-
-    self notYetImplemented!
-
-centralDirectoryOf: f
-    | r beginCD size comLen buf ofsCD |
-    size := f size.
-    r := 21.
-
-    "Great idea, that of putting a variable-length item at the end.  Luckily,
-     we can make a sanity check of the data and find the correct spot of the
-     central directory's final record."
-    size - 22 to: size - 65535 - 22 by: -257 do: [ :pos |
-        buf := (f copyFrom: pos to: pos + r) asByteArray.
-        beginCD := buf indexOfSubCollection: #[16r50 16r4B 5 6] ifAbsent: [ 0 ].
-        beginCD = 0 ifFalse: [
-            comLen := (buf at: beginCD + 21) * 256 + (buf at: beginCD + 20).
-            (pos + beginCD + 21 + comLen) = size ifTrue: [
-                ofsCD := ((buf at: beginCD + 19) * 16777216)
-                     + ((buf at: beginCD + 18) * 65536)
-                     + ((buf at: beginCD + 17) * 256)
-                     + (buf at: beginCD + 16).
-
-                ^(f copyFrom: ofsCD to: pos + beginCD - 2) asByteArray ] ].
-
-        r := 278 ].
-
-    self error: 'invalid data in ZIP file'
-!
-
-files
-    "Extract the directory listing from the archive"
-
-    ^Generator on: [ :gen |
-	| f cd mode path date method dataSize fileSize fnsize extra comment attr ofs |
-	f := self open: FileStream read ifFail: [
-	    self error: 'cannot open file for input' ].
-        cd := ByteStream on: (self centralDirectoryOf: f).
-	f close.
-
-        date := DateTime now.
-        [ cd atEnd ] whileFalse: [
-	    cd skip: 10.
-	    method := cd nextUshort.
-	    cd skip: 8.
-	    dataSize := cd nextUlong.
-	    fileSize := cd nextUlong.
-	    fnsize := cd nextUshort.
-	    extra := cd nextUshort.
-	    comment := cd nextUshort.
-	    cd skip: 4.
-	    attr := cd nextUlong.
-	    ofs := cd nextUlong.
-	    path := cd next: fnsize.
-	    cd skip: extra + comment.
-
-	    mode := (attr bitAnd: 16) = 16.
-	    gen yield: { path. fileSize. date. mode } ] ]! !
-
-
-
-RealFileHandler initialize!
-DecodedFileHandler initialize!
-VFSHandler initialize!
 Namespace current: Smalltalk!
+
+VFS.RealFileHandler initialize!
+VFS.DecodedFileHandler initialize!
+VFS.VFSHandler initialize!

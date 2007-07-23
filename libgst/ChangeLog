@@ -1,5 +1,9 @@
 2007-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/files.c: Load VFSZip.st.
+
+2007-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/input.h: Fix prototype declaration when readline is not
 	available.
 

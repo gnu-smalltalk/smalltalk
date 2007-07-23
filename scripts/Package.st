@@ -135,12 +135,12 @@ File extend [
     emitZipDir: dir [
 	| saveDir |
 	self emitRemove.
-	('cd %1 && %2 -qr %3 .' % { dir. Command zip. self }) displayNl.
+	('cd %1 && %2 -n .st:.xml -qr %3 .' % { dir. Command zip. self }) displayNl.
         saveDir := Directory working.
 	Command
 	    execute: [
 	        Directory working: dir name.
-		Smalltalk system: '%1 -qr %2 .' % { Command zip. self }
+		Smalltalk system: '%1 -n .st:.xml -qr %2 .' % { Command zip. self }
 	    ]
 	    ensure: [ Directory working: saveDir ]
     ]
