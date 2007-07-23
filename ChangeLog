@@ -1,5 +1,10 @@
 2007-07-23  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/MthContext.st: Make flags accessors foolproof.
+	* kernel/VFS.st: Don't redirect from %1 for DecodedFileHandler.
+
+2007-07-23  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PosStream.st: Use #size in #position: or #basicPosition:.
 	* kernel/RWStream.st: Use PositionableStream definition of #size.
 

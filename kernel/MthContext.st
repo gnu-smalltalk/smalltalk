@@ -101,6 +101,7 @@ isDisabled
      chain whenever a non-local return is done, but MethodContexts need to
      stay there in case there is a non-local return from the #ensure:
      block."
+    flags isInteger ifFalse: [ ^false ].
     ^flags == 1
 !
 
@@ -109,6 +110,7 @@ isUnwind
      non-local return (a return from the enclosing method of a block, or
      a call to the #continue: method of ContextPart).  Such contexts are
      created only by #ensure:."
+    flags isInteger ifFalse: [ ^false ].
     ^(flags bitAnd: 2) == 2
 !
 
@@ -118,6 +120,7 @@ isEnvironment
      ``termination'' method.  Such a context can be used as a marker for
      the current execution environment.  Answer whether the receiver is
      that kind of context."
+    flags isInteger ifFalse: [ ^false ].
     ^(flags bitAnd: 4) == 4
 !
 

@@ -632,12 +632,12 @@ initialize
     "Initialize the default virtual filesystems and the associated
      filter commands."
     FileTypes := LookupTable new
-	at: 'Z' put: 'compress -cf < %1 > %2';
-	at: 'uZ' put: 'zcat -f < %1 > %2';
-	at: 'gz' put: 'gzip -cf < %1 > %2';
-	at: 'ugz' put: 'gzip -cdf < %1 > %2';
-	at: 'bz2' put: 'bzip2 < %1 > %2';
-	at: 'ubz2' put: 'bzip2 -d < %1 > %2';
+	at: 'Z' put: 'compress -cf %1 > %2';
+	at: 'uZ' put: 'zcat -f %1 > %2';
+	at: 'gz' put: 'gzip -cf %1 > %2';
+	at: 'ugz' put: 'gzip -cdf %1 > %2';
+	at: 'bz2' put: 'bzip2 -c %1 > %2';
+	at: 'ubz2' put: 'bzip2 -cd %1 > %2';
 	at: 'tar' put: 'tar chof %2 %1';
 	at: 'tgz' put: 'tar chof - %1 | gzip -cf > %2';
 	at: 'nop' put: 'cat %1 > %2';
