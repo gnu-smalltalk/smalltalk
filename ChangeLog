@@ -1,3 +1,10 @@
+2007-07-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFS.st: Avoid referring to realFileName, refactoring
+	hierarchy to use a parent VFSHandler instead.  Allow creating
+	a special ArchiveMemberHandler in ArchiveFileMember>>#files.
+	Read the ZIP file directory directly from the file.
+
 2007-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Package.st: prepare will only be in 2.95c.  Honor

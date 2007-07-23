@@ -34,7 +34,7 @@ Smalltalk addSubspace: #VFS!
 Namespace current: VFS!
 
 Object subclass: #VFSHandler
-       instanceVariableNames: 'name'
+       instanceVariableNames: ''
        classVariableNames: 'Registry'
        poolDictionaries: ''
        category: 'Streams-Files'
@@ -46,7 +46,7 @@ delegate to the appropriate handler, which is in charge of
 actually accessing or ``molding'''' the filesystem.'!
 
 VFSHandler subclass: #RealFileHandler
-       instanceVariableNames: 'stat isSymbolicLink'
+       instanceVariableNames: 'name stat isSymbolicLink'
        classVariableNames: 'Epoch'
        poolDictionaries: ''
        category: 'Streams-Files'
@@ -56,7 +56,21 @@ RealFileHandler comment: 'RealFileHandler is an handler for
 files that are on disk, as well as for virtual files that end
 up being on disk when they are opened for the first time.'!
 
-RealFileHandler subclass: #DecodedFileHandler
+VFSHandler subclass: #FileHandlerWrapper
+       instanceVariableNames: 'parent fsName'
+       classVariableNames: ''
+       poolDictionaries: ''
+       category: 'Streams-Files'
+! 
+
+FileHandlerWrapper comment: 'FileHandlerWrapper is an
+abstract class for virtual filesystems that are built on top
+of another handler.'!
+
+FileHandlerWrapper class
+	instanceVariableNames: 'activePaths'!
+
+FileHandlerWrapper subclass: #DecodedFileHandler
        instanceVariableNames: 'realFileName'
        classVariableNames: ''
        poolDictionaries: ''
@@ -66,19 +80,16 @@ RealFileHandler subclass: #DecodedFileHandler
 DecodedFileHandler class
 	instanceVariableNames: 'fileTypes'!
 
-DecodedFileHandler comment: 'DecodedFileHandler handles
+FileHandlerWrapper comment: 'DecodedFileHandler handles
 virtual filesystems that take a file that is on-disk, run a
 command on it, and then read from the result.'!
 
-RealFileHandler subclass: #ArchiveFileHandler
-       instanceVariableNames: 'handlers fsName topLevelFiles allFiles extractedFiles'
+FileHandlerWrapper subclass: #ArchiveFileHandler
+       instanceVariableNames: 'tmpFileHandlers topLevelFiles allFiles extractedFiles'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Streams-Files'
 ! 
-
-ArchiveFileHandler class
-	instanceVariableNames: 'activePaths'!
 
 ArchiveFileHandler comment: 'ArchiveFileHandler handles
 virtual filesystems that have a directory structure of
@@ -99,7 +110,7 @@ ZipFileHandler comment: 'ZipFileHandler transparently extracts
 files from a ZIP archive.'!
 
 VFSHandler subclass: #ArchiveMemberHandler
-       instanceVariableNames: 'parent mode size stCtime stMtime stAtime realFileName'
+       instanceVariableNames: 'parent name mode size stCtime stMtime stAtime'
        classVariableNames: ''
        poolDictionaries: ''
        category: 'Streams-Files'
@@ -107,6 +118,17 @@ VFSHandler subclass: #ArchiveMemberHandler
 
 ArchiveMemberHandler comment: 'ArchiveMemberHandler is the handler
 class for members of archive files (instances of ArchiveFileHandler).'!
+
+ArchiveMemberHandler subclass: #TmpFileArchiveMemberHandler
+       instanceVariableNames: 'realFileName'
+       classVariableNames: ''
+       poolDictionaries: ''
+       category: 'Streams-Files'
+! 
+
+ArchiveMemberHandler comment: 'TmpFileArchiveMemberHandler is a handler
+class for members of archive files that creates temporary files when
+extracting files from an archive.'!
 
 CStruct
     subclass: #CStatStruct
@@ -124,7 +146,6 @@ CStruct
 
 
 
-"opendir and closedir needed to test for directories"
 !VFSHandler methodsFor: 'C call-outs'!
 
 lstatOn: fileName into: statStruct
@@ -194,6 +215,7 @@ for: fileName
     file := fileName.
     pos1 := file indexOf: $#.
     pos1 = 0 ifTrue: [ ^RealFileHandler new name: file ].
+    result := RealFileHandler new name: (file copyFrom: 1 to: pos1 - 1).
     [
 	"Extract the file name and path, and resolve the first virtual
          file path (for example abc#uzip/def in abc#uzip/def#ugz)"
@@ -210,17 +232,17 @@ for: fileName
 	pos2 > file size
     ] whileFalse: [
 	result := self
-	    vfsFor: (file copyFrom: 1 to: pos1 - 1)
+	    vfsFor: result
 	    name: fsName
 	    subPath: (file copyFrom: pos1 + fsName size + 2 to: pos2 - 1).
 
-	file := result realFileName, (file copyFrom: pos2 to: file size).
-	pos1 := file indexOf: $#
+	file := file copyFrom: pos2.
+	pos1 := 1.
     ].
 
     "Resolve the last virtual file path"    
     ^self
-	vfsFor: (file copyFrom: 1 to: pos1 - 1)
+	vfsFor: result
 	name: fsName
 	subPath: subPath
 ! !
@@ -280,13 +302,20 @@ registerAll
     Registry isNil ifTrue: [ Registry := LookupTable new ].
     self allSubclassesDo: [ :each | each register ]!
 
-vfsFor: fileName name: fsName subPath: subPath
+vfsFor: parent name: fsName subPath: subPath
     "Create an instance of a subclass of the receiver, implementing the virtual
      file `subPath' inside the `fileName' archive.  fsName is the virtual
      filesystem name and is used to determine the subclass to be instantiated."
+
+    | handler handlerClass |
     Registry isNil ifTrue: [ self registerAll ].
-    ^(Registry at: fsName) 
-	vfsFor: fileName name: fsName subPath: subPath!
+
+    handlerClass := Registry at: fsName.
+    handler := handlerClass vfsFor: parent name: fsName.
+
+    ^subPath isNil
+	ifTrue: [ handler ]
+	ifFalse: [ handler at: subPath ]! !
 
 
 !VFSHandler methodsFor: 'releasing'!
@@ -306,18 +335,13 @@ fullName
 
 name
     "Answer the name of the file identified by the receiver"
-    ^name
-!
-
-name: aName
-    "Private - Initialize the receiver's instance variables"
-    name := aName
+    self subclassResponsibility
 !
 
 realFileName
     "Answer the real file name which holds the file contents,
-     or an empty string if it does not apply."
-    ^name
+     or nil if it does not apply."
+    self subclassResponsibility
 !
 
 size
@@ -466,6 +490,16 @@ initialize
 
 
 !RealFileHandler methodsFor: 'accessing'!
+
+name
+    "Answer the name of the file identified by the receiver"
+    ^name
+!
+
+realFileName
+    "Answer the real file name for the file identified by the receiver"
+    ^name
+!
 
 name: aName
     "Private - Initialize the receiver's instance variables"
@@ -669,6 +703,107 @@ do: aBlock
 ! !
 
 
+!FileHandlerWrapper class methodsFor: 'instance creation'!
+
+vfsFor: parent name: fsName
+    "Create an instance of this class representing the contents of the given
+     file, under the virtual filesystem fsName."
+    ^self activePaths at: (fsName -> parent name) ifAbsentPut: [
+	self new parent: parent fsName: fsName ]! !
+
+!FileHandlerWrapper class methodsFor: 'private'!
+
+activePaths
+    "Answer a dictionary that stores the currently opened archive file
+     members, to avoid extracting members multiple times.  Might be
+     worthwhile to push it to the superclass."
+    activePaths isNil ifTrue: [ activePaths := WeakValueLookupTable new ]. 
+    ^activePaths!
+
+release
+    activePaths := nil.
+    super release! !
+
+!FileHandlerWrapper methodsFor: 'private'!
+
+fsName
+    ^fsName!
+
+!FileHandlerWrapper methodsFor: 'accessing'!
+
+name
+    ^self parent name, '#', self fsName!
+
+parent
+    ^parent!
+
+realFileName
+    ^self parent realFileName!
+
+!FileHandlerWrapper methodsFor: 'delegation'!
+
+size
+    "Answer the size of the file identified by the receiver"
+    ^self parent size
+!
+
+lastAccessTime
+    "Answer the last access time of the file identified by the receiver"
+    ^self parent lastAccessTime
+!
+
+lastChangeTime
+    "Answer the last change time of the file identified by the receiver
+    (the `last change time' has to do with permissions, ownership and the
+    like). On some operating systems, this could actually be the
+    file creation time."
+    ^self parent lastChangeTime
+!
+
+creationTime
+    "Answer the creation time of the file identified by the receiver.
+    On some operating systems, this could actually be the last change time
+    (the `last change time' has to do with permissions, ownership and the
+    like)."
+    ^self parent creationTime
+!
+
+lastModifyTime
+    "Answer the last modify time of the file identified by the receiver
+    (the `last modify time' has to do with the actual file contents)."
+    ^self parent lastModifyTime
+!
+
+isReadable
+    "Answer whether a file with the name contained in the receiver does exist
+     and is readable"
+    ^self parent isReadable!
+
+isWriteable
+    "Answer whether a file with the name contained in the receiver does exist
+     and is writeable"
+    ^self parent isWritable!
+
+isExecutable
+    "Answer whether a file with the name contained in the receiver does exist
+     and is executable"
+    ^self parent isExecutable!
+
+open: class mode: mode ifFail: aBlock
+    "Open the receiver in the given mode (as answered by FileStream's
+    class constant methods)"
+    ^self parent open: class mode: mode ifFail: aBlock!
+
+remove
+    "Remove the file with the given path name"
+    self parent remove! !
+
+!FileHandlerWrapper methodsFor: 'private'!
+
+parent: containerFileHandler fsName: aString
+    parent := containerFileHandler.
+    fsName := aString! !
+
 !DecodedFileHandler class methodsFor: 'registering'!
 
 priority
@@ -707,31 +842,46 @@ fileSystems
      gzipped tar archive out of a directory), #nop (do nothing, used for
      testing) and #strings (use the `strings' utility to extract printable
      strings from a file)."
-    ^self fileTypes keys!
-
-vfsFor: file name: fsName subPath: subPath
-    "Create a temporary file and use it to construct the contents of the given
-     file, under the virtual filesystem fsName. subPath must be nil because
-     this class supports single-file virtual filesystems only."
-    | temp command |
-    subPath isNil
-	ifFalse: [ SystemExceptions.FileError signal: 'not a tree-shaped filesystem' ].
-
-    command := self fileTypes at: fsName.
-    temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
-    Smalltalk system: (command % { file. temp name }).
-    ^self new name: file fsName: fsName realFileName: temp name! !
-
+    ^self fileTypes keys! !
 
 !DecodedFileHandler methodsFor: 'files'!
 
-name: virtualFileName fsName: aString realFileName: temporaryFileName
+at: aName
+    SystemExceptions.FileError signal: 'not a tree-shaped filesystem'!
+
+parent: containerFileHandler fsName: aString
     "Private - Initialize a new object storing the contents of the
      virtualFileName file into temporaryFileName."
+    | temp command pipe file |
+    super parent: containerFileHandler fsName: aString.
+
+    command := self class fileTypes at: fsName.
+    temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
+
+    "Go through a pipe if the file is completely virtual."
+    self parent realFileName isNil
+	ifTrue: [
+	    pipe := FileStream popen: (command % { '-'. temp name }) dir: FileStream write.
+	    file := parent open: FileStream read ifFail: [
+		self error: 'cannot open input file' ].
+	    pipe nextPutAll: file.
+	    file close.
+	    pipe close ]
+	ifFalse: [
+	    Smalltalk system: (command % { parent realFileName. temp name }) ].
+
+    realFileName := temp name.
+    temp close.
+
     VFSHandler addDependent: self.
-    self addToBeFinalized.
-    self name: virtualFileName, '#', aString.
-    realFileName := File fullNameFor: temporaryFileName!
+    self addToBeFinalized!
+
+open: class mode: mode ifFail: aBlock
+    "Open the receiver in the given mode (as answered by FileStream's
+    class constant methods)"
+
+    ^class fopen: self realFileName mode: mode ifFail: aBlock
+!
 
 realFileName
     "Answer the real file name which holds the file contents,
@@ -749,45 +899,6 @@ release
     super release! !
 
 
-!ArchiveFileHandler class methodsFor: 'instance creation'!
-
-vfsFor: file name: fsName
-    "Create an instance of this class representing the contents of the given
-     file, under the virtual filesystem fsName."
-    ^self new
-	name: file fsName: fsName!
-
-vfsFor: file name: fsName subPath: subPath
-    "Create a temporary file and use it to construct the contents of the given
-     file, under the virtual filesystem fsName."
-    subPath isNil
-	ifFalse: [ ^(self vfsFor: file name: fsName subPath: nil) at: subPath ].
-
-    ^self activePaths at: (fsName -> file) ifAbsentPut: [
-	self vfsFor: file name: fsName ]! !
-
-!ArchiveFileHandler methodsFor: 'accessing'!
-
-name
-    ^super name, '#', self fsName!
-
-fsName
-    ^fsName! !
-
-!ArchiveFileHandler class methodsFor: 'private'!
-
-activePaths
-    "Answer a dictionary that stores the currently opened archive file
-     members, to avoid extracting members multiple times.  Might be
-     worthwhile to push it to the superclass."
-    activePaths isNil ifTrue: [ activePaths := WeakValueLookupTable new ]. 
-    ^activePaths!
-
-release
-    activePaths := nil.
-    super release! !
-
-
 !ArchiveFileHandler methodsFor: 'querying'!
 
 isDirectory
@@ -800,32 +911,29 @@ isAccessible
     ^true! !
 
 
-!ArchiveFileHandler methodsFor: 'file operations'!
-
-remove
-    "Remove the file with the given path name"
-    self primUnlink: self realFileName! !
-
-
 !ArchiveFileHandler methodsFor: 'directory operations'!
-
-createDir: dirName
-    "Create a subdirectory of the receiver, naming it dirName."
-    self subclassResponsibility
-!
 
 at: aName
     "Answer a VFSHandler for a file named `aName' residing in the directory
      represented by the receiver."
 
-    handlers isNil ifTrue: [
-	handlers := LookupTable new.
+    | handler data |
+    allFiles isNil ifTrue: [ self refresh ].
+    data := allFiles
+	at: aName
+	ifAbsent: [ nil ].
+
+    handler := data at: 5 ifAbsent: [ nil ].
+    handler isNil ifFalse: [ ^handler ].
+
+    tmpFileHandlers isNil ifTrue: [
+	tmpFileHandlers := LookupTable new.
 	VFSHandler addDependent: self.
 	self addToBeFinalized
     ].
 
-    ^handlers at: aName ifAbsentPut: [
-	ArchiveMemberHandler new
+    ^tmpFileHandlers at: aName ifAbsentPut: [
+	TmpFileArchiveMemberHandler new
 	    name: aName;
 	    parent: self ]!
 
@@ -838,32 +946,13 @@ release
     "Release the resources used by the receiver that don't survive when
      reloading a snapshot."
 
-    handlers isNil ifTrue: [ ^self ].
-    handlers do: [ :each | each release ].
-    handlers := nil.
-    extractedFiles := nil.
+    tmpFileHandlers isNil ifTrue: [ ^self ].
+    tmpFileHandlers do: [ :each | each release ].
+    tmpFileHandlers := nil.
     super release! !
 
 
 !ArchiveFileHandler methodsFor: 'ArchiveMemberHandler protocol'!
-
-extractMember: anArchiveMemberHandler
-    "Extract the contents of anArchiveMemberHandler into a file
-     that resides on disk, and answer the name of the file."
-
-    extractedFiles isNil ifTrue: [
-	extractedFiles := IdentityDictionary new ].
-
-    ^extractedFiles at: anArchiveMemberHandler ifAbsentPut: [
-        | temp |
-        temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
-	self extractMember: anArchiveMemberHandler into: temp.
-        File fullNameFor: temp name ]!
-
-extractMember: anArchiveMemberHandler into: file
-    "Extract the contents of anArchiveMemberHandler into a file
-     that resides on disk, and answer the name of the file."
-    self subclassResponsibility!
 
 fillMember: anArchiveMemberHandler
     "Extract the information on anArchiveMemberHandler.  Answer
@@ -876,13 +965,7 @@ fillMember: anArchiveMemberHandler
     data := allFiles at: anArchiveMemberHandler name ifAbsent: [ nil ].
     data isNil ifTrue: [ ^false ].
 
-    anArchiveMemberHandler
-	size: (data at: 1)
-	stCtime: self lastModifyTime
-	stMtime: (data at: 2)
-	stAtime: self lastAccessTime
-	mode: (data at: 3).
-
+    anArchiveMemberHandler fillFrom: data.
     ^true!
 
 member: anArchiveMemberHandler do: aBlock
@@ -894,10 +977,10 @@ member: anArchiveMemberHandler do: aBlock
     data := allFiles at: anArchiveMemberHandler name ifAbsent: [ nil ].
     data isNil
 	ifTrue: [ ^SystemExceptions.FileError signal: 'File not found' ].
-    (data at: 4) isNil
+    (data at: 1) isNil
 	ifTrue: [ ^SystemExceptions.FileError signal: 'Not a directory' ].
 
-    (data at: 4) do: aBlock!
+    (data at: 1) do: aBlock!
 
 refresh
     "Extract the directory listing from the archive"
@@ -908,17 +991,11 @@ refresh
     current := currentPath := nil.
     allFiles := LookupTable new.
     directoryTree := LookupTable new.
-    self files do: [ :data || path size date mode |
+    self files do: [ :data || path size date mode member |
+	mode := self convertMode: (data at: 4).
+	data at: 4 put: mode.
+
 	path := data at: 1.
-	size := data at: 2.
-	date := data at: 3.
-	mode := data at: 4.
-
-	mode isCharacter ifTrue: [ mode := (mode == $d) ].
-	mode == true ifTrue: [ mode := 8r040755 ].
-	mode == false ifTrue: [ mode := 8r644 ].
-	mode isString ifTrue: [ mode := self convertModeString: mode ].
-
 	path last = $/ ifTrue: [ path := path copyFrom: 1 to: path size - 1 ].
 
 	"Look up the tree for the directory in which the file resides.
@@ -928,8 +1005,7 @@ refresh
 	name := File stripPathFrom: path.
 	parentPath = currentPath ifFalse: [
 	    currentPath := parentPath.
-	    current := self findDirectory: path into: directoryTree
-	].
+	    current := self findDirectory: path into: directoryTree ].
 
 	"Create an item in the tree for directories, and
 	 add an association to the allFiles SortedCollection"
@@ -938,16 +1014,18 @@ refresh
 	    ifTrue: [ current at: name put: LookupTable new ]
 	    ifFalse: [ current at: name put: nil ].
 
-	allFiles at: path put: { size. date. mode. directory } ].
+	data at: 1 put: directory.
+	allFiles at: path put: data.
+
+	member := data at: 5 ifAbsent: [ nil ].
+	member notNil ifTrue: [ member fillFrom: data ] ].
 
     "Leave the LookupTables to be garbage collected, we are now interested
      in the file names only."
     topLevelFiles := directoryTree keys asArray.
     allFiles do: [ :data |
-	(data at: 4) isNil ifFalse: [
-	    data at: 4 put: (data at: 4) keys asArray
-	]
-    ]!
+	(data at: 1) isNil ifFalse: [
+	    data at: 1 put: (data at: 1) keys asArray ] ]!
 
 member: anArchiveMemberHandler mode: bits
     "Set the permission bits for the file in anArchiveMemberHandler."
@@ -966,7 +1044,42 @@ updateMember: anArchiveMemberHandler
 
     self subclassResponsibility! !
 
+
+!ArchiveFileHandler methodsFor: 'TmpFileArchiveMemberHandler protocol'!
+
+extractMember: anArchiveMemberHandler
+    "Extract the contents of anArchiveMemberHandler into a file
+     that resides on disk, and answer the name of the file."
+
+    extractedFiles isNil ifTrue: [
+	extractedFiles := IdentityDictionary new ].
+
+    ^extractedFiles at: anArchiveMemberHandler ifAbsentPut: [
+	| temp |
+	temp := FileStream openTemporaryFile: Directory temporary, '/vfs'.
+	self extractMember: anArchiveMemberHandler into: temp.
+	File fullNameFor: temp name ]!
+
+extractMember: anArchiveMemberHandler into: file
+    "Extract the contents of anArchiveMemberHandler into a file
+     that resides on disk, and answer the name of the file."
+    self subclassResponsibility! !
+
+
 !ArchiveFileHandler methodsFor: 'private'!
+
+release
+    extractedFiles do: [ :each | self primUnlink: each ].
+    extractedFiles := nil
+!
+
+convertMode: mode
+    "Convert the mode from a string, character or boolean to an octal number."
+    mode isNumber ifTrue: [ ^mode ].
+    mode isString ifTrue: [ ^self convertModeString: mode ].
+    mode isCharacter ifTrue: [ ^self convertMode: (mode == $d) ].
+    ^mode ifTrue: [ 8r040755 ] ifFalse: [ 8r644 ].
+!
 
 convertModeString: modeString
     "Convert the mode from a string to an octal number."
@@ -1011,75 +1124,7 @@ findDirectory: path into: tree
 	    last := i + 1
 	]
     ].
-    ^current!
-
-name: containerFileName fsName: aString
-    super name: containerFileName.
-    fsName := aString! !
-
-
-!ZipFileHandler class methodsFor: 'registering'!
-
-priority
-    "Answer the priority for this class (higher number = higher priority) in
-     case multiple classes implement the same file system."
-    ^-10!
-
-fileSystems
-    "Answer the virtual file systems that can be processed by this subclass."
-    ^#('uzip')! !
-
-!ZipFileHandler methodsFor: 'members'!
-
-createDir: dirName
-    "Create a subdirectory of the receiver, naming it dirName."
-
-    self notYetImplemented!
-
-member: anArchiveMemberHandler mode: bits
-    "Set the permission bits for the file in anArchiveMemberHandler."
-
-    self notYetImplemented!
-
-extractMember: anArchiveMemberHandler into: temp
-    "Extract the contents of anArchiveMemberHandler into a file
-     that resides on disk, and answer the name of the file."
-    Smalltalk system: ('unzip -p %1 %2 > %3'
-	% { self realFileName. anArchiveMemberHandler name. temp name })!
-
-removeMember: anArchiveMemberHandler
-    "Remove the member represented by anArchiveMemberHandler."
-
-    Smalltalk system: ('zip -d %1 %2'
-	% { self realFileName. anArchiveMemberHandler name. })!
-
-updateMember: anArchiveMemberHandler
-    "Update the member represented by anArchiveMemberHandler by
-     copying the file into which it was extracted back to the
-     archive."
-
-    self notYetImplemented!
-
-files
-    "Extract the directory listing from the archive"
-
-    ^Generator on: [ :gen || pipe |
-	pipe := FileStream
-	    popen: 'unzip -Z ', self realFileName
-	    dir: FileStream read.
-
-        pipe linesDo: [ :l || result mode size path date |
-	    "Extract first character, fourth field, seventh+eighth field, rest of line."
-	    result := l searchRegex:
-		'^(.{10})\s+\S+\s+\S+\s+(\d+)\s+\S+\s+\S+\s+(\S+\s+\S+)\s(.*?)(?: -> |$)'.
-	    result matched ifTrue: [
-	        mode := result at: 1.
-	        size := (result at: 2) asInteger.
-	        date := DateTime readFrom: (result at: 3) readStream.
-	        path := result at: 4.
-	        gen yield: { path. size. date. mode } ] ].
-
-	pipe close ]! !
+    ^current! !
 
 
 !ArchiveMemberHandler methodsFor: 'initializing'!
@@ -1089,9 +1134,24 @@ parent: anArchiveFileHandler
 
     parent := anArchiveFileHandler!
 
-size: bytes stCtime: ctime stMtime: mtime stAtime: atime mode: modeBits
+fillFrom: data
     "Called back by the receiver's parent when the ArchiveMemberHandler
      asks for file information."
+    self
+	size: (data at: 2)
+	stMtime: (data at: 3)
+	mode: (data at: 4)!
+
+size: bytes stMtime: mtime mode: modeBits
+    "Set the file information for the receiver."
+    size := bytes.
+    stCtime := self parent lastModifyTime.
+    stMtime := mtime.
+    stAtime := self parent lastAccessTime.
+    mode := modeBits!
+
+size: bytes stCtime: ctime stMtime: mtime stAtime: atime mode: modeBits
+    "Set the file information for the receiver."
     size := bytes.
     stCtime := ctime.
     stMtime := mtime.
@@ -1101,18 +1161,22 @@ size: bytes stCtime: ctime stMtime: mtime stAtime: atime mode: modeBits
 !ArchiveMemberHandler methodsFor: 'accessing'!
 
 realFileName
-    "Answer the real file name which holds the file contents,
-     or nil if it does not apply."
-
-    realFileName isNil ifFalse: [ ^realFileName ].
-    self exists ifFalse: [ ^nil ].
-    realFileName := (self parent extractMember: self).
-    ^realFileName!
+    ^nil!
 
 fullName
     "Answer the name of the file identified by the receiver as answered by
      File>>#name."
     ^Directory append: self name to: self parent name!
+
+name
+    "Answer the receiver's file name."
+    ^name
+!
+
+name: aName
+    "Set the receiver's file name to aName."
+    name := aName
+!
 
 parent
     "Answer the archive of which the receiver is a member."
@@ -1162,6 +1226,7 @@ refresh
 ! !
 
 
+
 
 !ArchiveMemberHandler methodsFor: 'testing'!
 
@@ -1208,37 +1273,13 @@ isAccessible
     ^true! !
 
 
-!ArchiveMemberHandler methodsFor: 'finalization'!
-
-release
-    "Release the resources used by the receiver that don't survive when
-     reloading a snapshot."
-
-    "Remove the file that was temporarily holding the file contents"
-    realFileName isNil ifTrue: [ ^self ].
-    self primUnlink: realFileName.
-    realFileName := nil.
-    super release! !
-
 !ArchiveMemberHandler methodsFor: 'file operations'!
 
 open: class mode: mode ifFail: aBlock
     "Open the receiver in the given mode (as answered by FileStream's
     class constant methods)"
 
-    | fileStream |
-    self realFileName isNil ifTrue: [ ^aBlock value ].
-
-    fileStream := class
-	fopen: self realFileName
-	mode: mode
-	ifFail: [ ^aBlock value ].
-
-    mode == FileStream read ifFalse: [
-	fileStream addDependent: self ].
-
-    fileStream setName: self fullName.
-    ^fileStream
+    self subclassResponsibility
 !
 
 update: aspect
@@ -1284,6 +1325,148 @@ do: aBlock
     receiver, passing its name."
     self parent member: self do: aBlock
 ! !
+
+
+!TmpFileArchiveMemberHandler methodsFor: 'finalization'!
+
+release
+    "Release the resources used by the receiver that don't survive when
+     reloading a snapshot."
+
+    "Remove the file that was temporarily holding the file contents"
+    realFileName isNil ifTrue: [ ^self ].
+    self primUnlink: realFileName.
+    realFileName := nil.
+    super release! !
+
+!TmpFileArchiveMemberHandler methodsFor: 'directory operations'!
+
+open: class mode: mode ifFail: aBlock
+    "Open the receiver in the given mode (as answered by FileStream's
+    class constant methods)"
+
+    | fileStream |
+    self realFileName isNil ifTrue: [ ^aBlock value ].
+
+    fileStream := class
+	fopen: self realFileName
+	mode: mode
+	ifFail: [ ^aBlock value ].
+
+    mode == FileStream read ifFalse: [
+	fileStream addDependent: self ].
+
+    fileStream setName: self fullName.
+    ^fileStream
+!
+
+realFileName
+    "Answer the real file name which holds the file contents,
+     or nil if it does not apply."
+
+    realFileName isNil ifFalse: [ ^realFileName ].
+    self exists ifFalse: [ ^nil ].
+    realFileName := (self parent extractMember: self).
+    ^realFileName! !
+
+!ZipFileHandler class methodsFor: 'registering'!
+
+priority
+    "Answer the priority for this class (higher number = higher priority) in
+     case multiple classes implement the same file system."
+    ^-10!
+
+fileSystems
+    "Answer the virtual file systems that can be processed by this subclass."
+    ^#('uzip')! !
+
+!ZipFileHandler methodsFor: 'members'!
+
+createDir: dirName
+    "Create a subdirectory of the receiver, naming it dirName."
+
+    self notYetImplemented!
+
+member: anArchiveMemberHandler mode: bits
+    "Set the permission bits for the file in anArchiveMemberHandler."
+
+    self notYetImplemented!
+
+extractMember: anArchiveMemberHandler into: temp
+    "Extract the contents of anArchiveMemberHandler into a file
+     that resides on disk, and answer the name of the file."
+    Smalltalk system: ('unzip -p %1 %2 > %3'
+	% { self realFileName. anArchiveMemberHandler name. temp name })!
+
+removeMember: anArchiveMemberHandler
+    "Remove the member represented by anArchiveMemberHandler."
+
+    Smalltalk system: ('zip -d %1 %2'
+	% { self realFileName. anArchiveMemberHandler name. })!
+
+updateMember: anArchiveMemberHandler
+    "Update the member represented by anArchiveMemberHandler by
+     copying the file into which it was extracted back to the
+     archive."
+
+    self notYetImplemented!
+
+centralDirectoryOf: f
+    | r beginCD size comLen buf ofsCD |
+    size := f size.
+    r := 21.
+
+    "Great idea, that of putting a variable-length item at the end.  Luckily,
+     we can make a sanity check of the data and find the correct spot of the
+     central directory's final record."
+    size - 22 to: size - 65535 - 22 by: -257 do: [ :pos |
+        buf := (f copyFrom: pos to: pos + r) asByteArray.
+        beginCD := buf indexOfSubCollection: #[16r50 16r4B 5 6] ifAbsent: [ 0 ].
+        beginCD = 0 ifFalse: [
+            comLen := (buf at: beginCD + 21) * 256 + (buf at: beginCD + 20).
+            (pos + beginCD + 21 + comLen) = size ifTrue: [
+                ofsCD := ((buf at: beginCD + 19) * 16777216)
+                     + ((buf at: beginCD + 18) * 65536)
+                     + ((buf at: beginCD + 17) * 256)
+                     + (buf at: beginCD + 16).
+
+                ^(f copyFrom: ofsCD to: pos + beginCD - 2) asByteArray ] ].
+
+        r := 278 ].
+
+    self error: 'invalid data in ZIP file'
+!
+
+files
+    "Extract the directory listing from the archive"
+
+    ^Generator on: [ :gen |
+	| f cd mode path date method dataSize fileSize fnsize extra comment attr ofs |
+	f := self open: FileStream read ifFail: [
+	    self error: 'cannot open file for input' ].
+        cd := ByteStream on: (self centralDirectoryOf: f).
+	f close.
+
+        date := DateTime now.
+        [ cd atEnd ] whileFalse: [
+	    cd skip: 10.
+	    method := cd nextUshort.
+	    cd skip: 8.
+	    dataSize := cd nextUlong.
+	    fileSize := cd nextUlong.
+	    fnsize := cd nextUshort.
+	    extra := cd nextUshort.
+	    comment := cd nextUshort.
+	    cd skip: 4.
+	    attr := cd nextUlong.
+	    ofs := cd nextUlong.
+	    path := cd next: fnsize.
+	    cd skip: extra + comment.
+
+	    mode := (attr bitAnd: 16) = 16.
+	    gen yield: { path. fileSize. date. mode } ] ]! !
+
+
 
 RealFileHandler initialize!
 DecodedFileHandler initialize!
