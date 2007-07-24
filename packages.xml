@@ -139,6 +139,7 @@
   <file>Namespace.st</file>
   <file>SymLink.st</file>
   <file>VFS.st</file>
+  <file>VFSZip.st</file>
   <file>Builtins.st</file>
   <file>False.st</file>
   <file>Number.st</file>

@@ -406,5 +406,6 @@ main(int argc, const char **argv)
     exit (result < 0 ? 1 : result);
     
   gst_process_file (tools[i].script, GST_DIR_KERNEL_SYSTEM);
+  gst_invoke_hook (GST_ABOUT_TO_QUIT);
   exit (0);
 }

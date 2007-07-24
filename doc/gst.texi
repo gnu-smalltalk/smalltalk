@@ -4299,27 +4299,24 @@ language for your future marvellous software projects, you might be
 interest.
 
 How to initialize @gst{} is most briefly and easily explained by looking
-at @gst{}'s own source code.  For this reason, here is a snippet
-from @file{gst-tool.c}.
+at @gst{}'s own source code.  For this reason, here is a
+simplified snippet from @file{gst-tool.c}.
 
 @example
-
-/* From main.c */
 int main(argc, argv)
 int     argc;
 char    **argv;
 @{
   gst_set_var (GST_VERBOSITY, 1);
-  gst_smalltalk_args (smalltalk_argc, smalltalk_argv);
-  result = gst_initialize (kernel_dir, image_file, GST_NO_TTY);
+  gst_smalltalk_args (argc, argv);
+  result = gst_initialize ("@var{kernel-dir}", "@var{image-file}", GST_NO_TTY);
   if (result != 0)
     exit (result < 0 ? 1 : result);
 
-  gst_process_file (tools[i].script, GST_DIR_KERNEL_SYSTEM);
-
-  exit(result);
+  gst_process_file ("@var{source-file}", GST_DIR_KERNEL_SYSTEM);
+  gst_invoke_hook (GST_ABOUT_TO_QUIT);
+  exit (0);
 @}
-
 @end example
 
 Your initialization code will be almost the same as that in @gst{}'s
