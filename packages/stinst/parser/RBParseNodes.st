@@ -879,6 +879,8 @@ temporaries: variableNodes statements: statementNodes
 !Behavior methodsFor: 'RefactoringBrowser'!
 
 parseTreeFor: aSymbol 
+    "Answer the parse tree for the given selector, or nil if there was an
+     error.  Requires the Parser package to be loaded."
     ^RBParser parseMethod: (self sourceCodeAt: aSymbol)
 	onError: [:aString :pos | ^nil]! !
 

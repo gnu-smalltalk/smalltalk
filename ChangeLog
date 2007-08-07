@@ -1,3 +1,21 @@
+2007-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Add a (notYetImplemented) parseTreeFor: method.
+	* kernel/PkgLoader.st: Move #fullPathsOf: (new name of #findPathsFor:)
+	and #createNamespace up to PackageInfo, implement #fullPathOf: (new name
+	of #findPathFor:) in StarPackage.
+
+	* kernel/Namespace.st: Return a string in #nameIn:.
+	* kernel/RootNamespc.st: Return a string in #nameIn:.
+
+	* kernel/SeqCollect.st: Add #first: and #last:.
+	* kernel/VFSZip.st: Add #copyFrom:to: to LimitedStream.
+
+	* scripts/GenDoc.st: New.
+	* scripts/Package.st: Fix for renaming of #findPathFor:.
+	* scripts/GenBaseDoc.st: Removed.
+	* scripts/GenLibDoc.st: Removed.
+
 2007-07-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFSZip.st: Refuse to open for writing.

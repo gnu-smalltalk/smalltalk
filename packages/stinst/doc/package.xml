@@ -1,0 +1,9 @@
+<package>
+  <name>ClassPublisher</name>
+  <namespace>STInST</namespace>
+  <prereq>Parser</prereq>
+  <filein>Publish.st</filein>
+
+  <file>Publish.st</file>
+</package>
+

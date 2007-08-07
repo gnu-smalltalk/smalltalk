@@ -471,7 +471,7 @@ nameIn: aNamespace
     | proxy reference |
     proxy := loader proxyForNamespace: aNamespace.
     reference := proxy at: self name asSymbol ifAbsent: [ nil ].
-    self = reference ifTrue: [ ^self name ].
+    self = reference ifTrue: [ ^self name asString ].
     ^(self environment nameIn: aNamespace), '.', self printString
 ! !
 
@@ -1006,7 +1006,7 @@ nameIn: aNamespace
     | reference proxy |
     proxy := loader proxyForNamespace: aNamespace.
     reference := proxy at: self name asSymbol ifAbsent: [ nil ].
-    self = reference ifTrue: [ ^self name ].
+    self = reference ifTrue: [ ^self name asString ].
     ^(self superspace nameIn: aNamespace ), '.', self name
 !
 

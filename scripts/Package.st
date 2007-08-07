@@ -276,7 +276,7 @@ Object subclass: Command [
 	    package := self packages at: each.
 	    package allFiles do: [ :file |
 		| path relativePath |
-		path := package findPathFor: file.
+		path := package fullPathOf: file.
 		relativePath := base pathTo: path.
 		(vpath and: [ (relativePath indexOfSubCollection: '../') > 0 ])
 		    ifTrue: [ relativePath := vpathBase pathTo: path ].
@@ -338,7 +338,7 @@ Command subclass: PkgDist [
 	    (self installDir directoryAt: dir) emitMkdir ].
 
         files do: [ :file || srcFile destName |
-	    srcFile := File name: (aPackage findPathFor: file).
+	    srcFile := File name: (aPackage fullPathOf: file).
 	    self distribute: srcFile as: file in: aPackage relativeDirectory ]
     ]
     runOnStar: aPackage [
@@ -431,7 +431,7 @@ Command subclass: PkgInstall [
 	            (baseDir directoryAt: dir) emitMkdir ].
 
                 files do: [ :file || srcFile |
-	            srcFile := File name: (aPackage findPathFor: file).
+	            srcFile := File name: (aPackage fullPathOf: file).
 	            srcFile emitSymlink: (baseDir nameAt: file) ].
 
 	        (self installDir fileAt: aPackage name, '.star')

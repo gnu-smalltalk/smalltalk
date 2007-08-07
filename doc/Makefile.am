@@ -8,7 +8,9 @@ HTML_IMAGES = images/backon.png images/back.png images/blankon.png \
 	images/prevon.png images/prev.png images/tocon.png \
 	images/toc.png images/upon.png images/up.png
 
-dist_man_MANS = gst.1 gst-load.1 gst-package.1 gst-sunit.1 gst-config.1 gst-convert.1
+dist_man_MANS = gst.1 gst-load.1 gst-package.1 gst-sunit.1 gst-config.1 \
+	gst-convert.1 gst-doc.1
+
 HELP2MAN = $(top_srcdir)/build-aux/help2man -p gst
 
 info_TEXINFOS = gst.texi gst-base.texi gst-libs.texi
@@ -21,6 +23,9 @@ MOSTLYCLEANFILES = gst-libs.me gst-libs.mes gst-base.me gst-base.mes \
 	gst-libs.cl gst-libs.cls gst-base.cl gst-base.cls \
 	gst-libs.sl gst-libs.sls gst-base.sl gst-base.sls
 
+GST_TOOL_ARGS = -I $(top_builddir)/gst.im --kernel-dir $(top_srcdir)/kernel
+GST_DOC = $(top_builddir)/gst-tool gst-doc $(GST_TOOL_ARGS)
+
 ####################################################
 ##
 ##  Rule to build the man page
@@ -30,26 +35,27 @@ MOSTLYCLEANFILES = gst-libs.me gst-libs.mes gst-base.me gst-base.mes \
 $(srcdir)/gst-package.1: $(top_srcdir)/scripts/Package.st $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "create and install GNU Smalltalk .star package files" \
-	  "$(top_builddir)/gst-tool gst-package -I $(top_builddir)/gst.im \
-	     --kernel-directory $(top_srcdir)/kernel" >$@
+	  "$(top_builddir)/gst-tool gst-package $(GST_TOOL_ARGS)" >$@
 
 $(srcdir)/gst-convert.1: $(top_srcdir)/scripts/Load.st $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "Smalltalk syntax converter and beautifier" \
-	  "$(top_builddir)/gst-tool gst-convert -I $(top_builddir)/gst.im \
-	     --kernel-directory $(top_srcdir)/kernel" >$@
+	  "$(top_builddir)/gst-tool gst-convert $(GST_TOOL_ARGS)" >$@
 
 $(srcdir)/gst-load.1: $(top_srcdir)/scripts/Load.st $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "test and load packages into a GNU Smalltalk image" \
-	  "$(top_builddir)/gst-tool gst-load -I $(top_builddir)/gst.im \
-	     --kernel-directory $(top_srcdir)/kernel" >$@
+	  "$(top_builddir)/gst-tool gst-load $(GST_TOOL_ARGS)" >$@
 
 $(srcdir)/gst-sunit.1: $(top_srcdir)/scripts/Test.st $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "unit testing tool for GNU Smalltalk" \
-	  "$(top_builddir)/gst-tool gst-load -I $(top_builddir)/gst.im \
-	     --kernel-directory $(top_srcdir)/kernel" >$@
+	  "$(top_builddir)/gst-tool gst-sunit $(GST_TOOL_ARGS)" >$@
+
+$(srcdir)/gst-doc.1: $(top_srcdir)/scripts/GenDoc.st $(top_srcdir)/configure.ac
+	$(HELP2MAN) \
+	  --name "GNU Smalltalk documentation generator" \
+	  "$(top_builddir)/gst-tool gst-doc $(GST_TOOL_ARGS)" >$@
 
 $(srcdir)/gst.1: $(top_srcdir)/main.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
@@ -72,30 +78,26 @@ install-data-local: install-man
 ##
 ####################################################
 
-PUBLISHED_NAMESPACES = Smalltalk SystemExceptions NetClients VFS
+PUBLISHED_CLASSES = Smalltalk.* SystemExceptions.* NetClients.* VFS.*
 
 $(srcdir)/blox.texi: $(top_srcdir)/packages/blox/tk/stamp-classes
-	rm -f $(srcdir)/blox.texi
-	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
-	    -f ../scripts/GenLibDoc.st BLOX BloxTK blox.texi Blox.st
+	$(GST_DOC) -p BloxTK -o $(srcdir)/blox.texi BLOX.* || \
+	  rm -f $(srcdir)/blox.texi
 	test -f $(srcdir)/blox.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/tcp.texi: $(top_srcdir)/packages/tcp/stamp-classes
-	rm -f $(srcdir)/tcp.texi
-	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
-	    -f ../scripts/GenLibDoc.st TCP TCP tcp.texi TCP.st
+	$(GST_DOC) -p TCP -o $(srcdir)/tcp.texi TCP.* || \
+	  rm -f $(srcdir)/tcp.texi
 	test -f $(srcdir)/tcp.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/i18n.texi: $(top_srcdir)/packages/i18n/stamp-classes
-	rm -f $(srcdir)/i18n.texi
-	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
-	    -f ../scripts/GenLibDoc.st I18N I18N i18n.texi Load.st Collation.st
+	$(GST_DOC) -p I18N -o $(srcdir)/i18n.texi I18N.* || \
+	  rm -f $(srcdir)/i18n.texi
 	test -f $(srcdir)/i18n.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/classes.texi: $(top_srcdir)/kernel/stamp-classes
-	rm -f $(srcdir)/classes.texi
-	cd $(srcdir) && @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im \
-	    -f ../scripts/GenBaseDoc.st $(PUBLISHED_NAMESPACES)
+	$(GST_DOC) -o $(srcdir)/classes.texi $(PUBLISHED_CLASSES) || \
+	  rm -f $(srcdir)/classes.texi
 	test -f $(srcdir)/classes.texi && touch $(srcdir)/gst-base.texi
 
 # In TeX output, having colons in index entries looks pretty, but

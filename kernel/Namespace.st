@@ -220,7 +220,7 @@ nameIn: aNamespace
 
     | reference |
     reference := aNamespace at: self name asGlobalKey ifAbsent: [ nil ].
-    reference == self ifTrue: [ ^self name ].
+    reference == self ifTrue: [ ^self name asString ].
     ^(self superspace nameIn: aNamespace), '.', self name
 !
 

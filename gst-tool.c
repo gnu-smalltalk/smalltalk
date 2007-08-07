@@ -113,6 +113,12 @@ struct tool tools[] = {
     "-I|--image-file: --kernel-directory:",
     NULL
   },
+  {
+    "gst-doc", "scripts/GenDoc.st",
+    "-h|--help --version -p|--package: -f|--file: -I|--image-file: \
+        -o|--output: --kernel-directory:",
+    NULL
+  },
   { NULL, NULL, NULL, NULL }
 };
 

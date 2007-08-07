@@ -204,6 +204,13 @@ on: aStream from: start to: end
 atEnd
     ^stream position >= limit or: [ stream atEnd ]!
 
+copyFrom: start to: end
+    (start between: 0 and: limit - offset)
+        ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: start ].
+    (end between: 0 and: limit - offset)
+        ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: end ].
+    ^stream copyFrom: offset + start to: offset + end!
+
 isPositionable
     ^true!
 

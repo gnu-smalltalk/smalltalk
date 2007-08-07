@@ -116,7 +116,7 @@ nameIn: aNamespace
     | reference |
     reference := aNamespace at: self name asGlobalKey ifAbsent: [ nil ].
     ^reference == self
-	ifTrue: [ self name ]
+	ifTrue: [ self name asString ]
 	ifFalse: [ 'Smalltalk.', self name ]
 !
 

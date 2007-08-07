@@ -232,6 +232,16 @@ fourth
     ^self at: 4
 !
 
+first: n
+    "Answer the first n items in the receiver"
+    ^self copyFrom: 1 to: n
+!
+
+last: n
+    "Answer the last n items in the receiver"
+    ^self copyFrom: self size - n + 1
+!
+
 last
     "Answer the last item in the receiver"
     ^self at: self size

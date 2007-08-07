@@ -28,17 +28,13 @@
 |
  ======================================================================"
 
-Smalltalk addSubspace: #ClassPublisher!
-
-Namespace current: ClassPublisher!
-
-Object subclass: #Basic
+Object subclass: #ClassPublisher
     instanceVariableNames: 'class destination referenceNamespace'
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Examples-File out'!
 
-!Basic class methodsFor: 'publishing'!
+!ClassPublisher class methodsFor: 'publishing'!
 
 basicPublish: aClass on: aFileStream
     "Publish aClass, in the format supported by the receiver, on aFileStream"
@@ -67,7 +63,7 @@ publish: aClass onFile: fileNameString
     ] ensure: [ file close ]
 ! !
 
-!Basic methodsFor: 'publishing'!
+!ClassPublisher methodsFor: 'publishing'!
 
 fileOut: aClass on: aFileStream
     "File out the given class on aFileStream."
@@ -95,7 +91,7 @@ fileOutMethods
 	[ :category | self emitCategory: category ].
 ! !
 
-!Basic methodsFor: 'to be subclassed'!
+!ClassPublisher methodsFor: 'to be subclassed'!
 
 emitCategory: category
     "Emit valid output for the given category."
@@ -131,7 +127,7 @@ printEscaped: ch
     self nextPut: ch
 ! !
 
-!Basic methodsFor: 'accessing/delegating'!
+!ClassPublisher methodsFor: 'accessing/delegating'!
 
 currentClass
     "Answer the class which we are working on"
@@ -240,7 +236,7 @@ methodDictionary
     ^self currentClass methodDictionary
 ! !
 
-!Basic methodsFor: 'useful parsing'!
+!ClassPublisher methodsFor: 'useful parsing'!
 
 selectorAndBody: methodString
     "Answer a two-element Array containing the selector and the
@@ -457,14 +453,14 @@ guessComment: source
 
 "----------------------------------------------------------------------"
 
-Basic subclass: #Documentation
+ClassPublisher subclass: #DocPublisher
     instanceVariableNames: 'categories'
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Examples-File out'!
 !
 
-!Documentation class methodsFor: 'printing trees'!
+!DocPublisher class methodsFor: 'printing trees'!
 
 printHierarchyOf: classes on: aFileStream
     "Typeset on aFileStream a full hierarchy tree, starting from the classes
@@ -564,7 +560,7 @@ makeDescendentsDictionary: dict thenPrintOn: aFileStream
 ! !
 
 
-!Documentation methodsFor: 'abstract'!
+!DocPublisher methodsFor: 'abstract'!
 
 emitMethod: source
 !
@@ -596,7 +592,7 @@ namespaceFor: aClass
     ^Namespace current
 ! !
 
-!Documentation methodsFor: 'accessing'!
+!DocPublisher methodsFor: 'accessing'!
 
 categoriesSize
     ^categories size
@@ -612,7 +608,7 @@ categoryAt: n ifBadIndex: aString
     ^(categories at: n) key
 ! !
 
-!Documentation methodsFor: 'subclassed'!
+!DocPublisher methodsFor: 'subclassed'!
 
 emitCategory: category
     "I emit a link to the anchor where the category will be, and store
@@ -660,13 +656,13 @@ emitFooter
 "----------------------------------------------------------------------"
 
 
-Basic subclass: #Postscript
+ClassPublisher subclass: #PSFileOutPublisher
     instanceVariableNames: ''
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Examples-File out'!
 
-!Postscript methodsFor: 'subclassed'!
+!PSFileOutPublisher methodsFor: 'subclassed'!
 
 emitCategory: category
     "I write Postscript for legal Smalltalk load syntax definitions of all of my methods
@@ -745,7 +741,7 @@ emitHeader: now
 	nextPutAll: '() show newline newline'; nl; nl
 ! !
 
-!Postscript methodsFor: 'PostScript'!
+!PSFileOutPublisher methodsFor: 'PostScript'!
 
 header
 ^'%!
@@ -810,14 +806,14 @@ indent ypos moveto
 ! !
 
 
-Documentation subclass: #HTML
+DocPublisher subclass: #HTMLDocPublisher
     instanceVariableNames: ''
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Examples-File out'!
 !
 
-!HTML class methodsFor: 'multiple classes'!
+!HTMLDocPublisher class methodsFor: 'multiple classes'!
 
 publishNamespaces: aCollection
     | subclasses |
@@ -840,12 +836,12 @@ publishAll: classArray withIndexOn: aFileStream
     aFileStream nextPutAll:
 
 '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN"> <!--
-Automatically yours from GNU Smalltalk''s HTML ClassPublisher! -->
+Automatically yours from GNU Smalltalk''s HTMLDocPublisher! -->
 
 <HTML>
 <HEAD>
     <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
-    <META NAME="GENERATOR" CONTENT="GNU Smalltalk HTML ClassPublisher">
+    <META NAME="GENERATOR" CONTENT="GNU Smalltalk HTMLDocPublisher">
     <TITLE>Smalltalk class reference</TITLE>
 </HEAD>
 <BODY>
@@ -880,7 +876,7 @@ publishAll: classArray withIndexOnFile: aFileName
 ! !
 
 
-!HTML class methodsFor: 'writing the class tree'!
+!HTMLDocPublisher class methodsFor: 'writing the class tree'!
 
 printTreeClass: class shouldLink: aBoolean on: aFileStream indent: indent
     | fileName |
@@ -900,7 +896,7 @@ printTreeClass: class shouldLink: aBoolean on: aFileStream indent: indent
     aFileStream nl.
 ! !
 
-!HTML methodsFor: 'emitting comments'!
+!HTMLDocPublisher methodsFor: 'emitting comments'!
 
 emitMethod: source
     "I emit valid HTML for a comment contained in source - which is a method's
@@ -918,7 +914,7 @@ emitMethod: source
 	nl; nl
 ! !
 
-!HTML methodsFor: 'subclassed'!
+!HTMLDocPublisher methodsFor: 'subclassed'!
 
 emitLink: category kind: kind
     self nextPutAll: '<A HREF="#';
@@ -959,13 +955,13 @@ emitHeader: now
     self nextPutAll: (
 
 '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN"> <!--
-Automatically yours from GNU Smalltalk''s HTML ClassPublisher!
+Automatically yours from GNU Smalltalk''s HTMLDocPublisher!
 Filed out from %1 on %2	 %3 -->
 
 <HTML>
 <HEAD>
     <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
-    <META NAME="GENERATOR" CONTENT="GNU Smalltalk HTML ClassPublisher">
+    <META NAME="GENERATOR" CONTENT="GNU Smalltalk HTMLDocPublisher">
     <TITLE>%4</TITLE>
 </HEAD>
 <BODY>
@@ -1000,18 +996,18 @@ printEscaped: ch
 "----------------------------------------------------------------------"
 
 
-Documentation subclass: #Texinfo
+DocPublisher subclass: #TexinfoDocPublisher
     instanceVariableNames: ''
     classVariableNames: ''
     poolDictionaries: ''
     category: 'Examples-File out'!
 !
 
-Texinfo class
+TexinfoDocPublisher class
     instanceVariableNames: 'current'!
 
 
-!Texinfo class methodsFor: 'multiple classes'!
+!TexinfoDocPublisher class methodsFor: 'multiple classes'!
 
 nextClass
     | result |
@@ -1072,7 +1068,7 @@ publish: aClass on: aFileStream
 ! !
 
 
-!Texinfo class methodsFor: 'texinfo source'!
+!TexinfoDocPublisher class methodsFor: 'texinfo source'!
 
 header
 
@@ -1178,7 +1174,7 @@ afterTree
 footer
 ^''! !
 
-!Texinfo class methodsFor: 'creating the class tree'!
+!TexinfoDocPublisher class methodsFor: 'creating the class tree'!
 
 printTreeClass: class shouldLink: aBoolean on: aFileStream indent: indent
 
@@ -1197,7 +1193,7 @@ printTreeClass: class shouldLink: aBoolean on: aFileStream indent: indent
 	nl.
 ! !
 
-!Texinfo class methodsFor: 'creating GST''s manual'!
+!TexinfoDocPublisher class methodsFor: 'creating GST''s manual'!
 
 publishNamespaces: aCollection
     | subclasses |
@@ -1213,7 +1209,7 @@ publishNamespaces: aCollection
 	onFile: 'classes.texi'
 ! !
 
-!Texinfo methodsFor: 'emitting comments'!
+!TexinfoDocPublisher methodsFor: 'emitting comments'!
 
 emitMethodSelector: aSymbol
     "I emit a Texinfo indexing command for the selector in aSymbol."
@@ -1242,7 +1238,7 @@ emitCrossReferences: comment
 	]
 !
 
-!Texinfo methodsFor: 'subclassed'!
+!TexinfoDocPublisher methodsFor: 'subclassed'!
 
 emitSelectorAndMethod: association
     "I emit valid Texinfo markup for a comment contained in source - which is
@@ -1371,5 +1367,3 @@ printEscaped: ch
     ch = $# ifTrue: [ self nextPut: $- ].
     self nextPut: ch
 ! !
-
-Namespace current: Smalltalk!

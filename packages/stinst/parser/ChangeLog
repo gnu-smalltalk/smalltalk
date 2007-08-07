@@ -1,3 +1,9 @@
+2007-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STLoader.st: Accept a non-proxy namespace in #currentNamespace:.
+	Add #loadedClasses.
+	* STLoaderObjs.st: Ensure #nameIn: returns a string.
+
 2007-07-18  Stephen Compall  <scompall@nocandysw.com>
 
 	* STCompiler.st: Rename #compileString: et al to #primCompile:,

@@ -34,11 +34,14 @@ o   Several classes not meant to be accessed by the user have been moved to
 
 o   GNU Smalltalk now needs InfoZIP to be installed on the machine where
     it is compiled, in order to use the new single-file package facility.
-    In the future, the dependency on InfoZIP may be removed altogether.
+    In the future, this dependency may be removed.
 
 o   The ABI for external usage has changed.  libgst.a does not know anymore
     how to parse options, but exports functions to achieve the same effect
     as options.
+
+o   The tool for automatic documentation generator, that has been used by
+    the GNU Smalltalk distribution for a long time, is now installed as gst-doc.
 
 
 Packages improvements:

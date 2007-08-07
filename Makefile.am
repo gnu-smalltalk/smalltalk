@@ -62,8 +62,7 @@ nodist_pkgconfig_DATA = gnu-smalltalk.pc
 pkglib_DATA = libc.la
 noinst_DATA = gst.im
 dist_noinst_DATA += smalltalk-mode.el.in gst-mode.el.in .gdbinit \
-	scripts/Finish.st scripts/GenLibDoc.st \
-	scripts/GenBaseDoc.st gsticon.ico
+	scripts/Finish.st gsticon.ico
 
 if WITH_EMACS
 nodist_lisp_LISP = smalltalk-mode.el
@@ -121,7 +120,7 @@ gst_tool_LDADD = libgst/libgst.la
 gst_tool_DEPENDENCIES = libgst/libgst.la
 gst_tool_LDFLAGS = -export-dynamic -static
 
-GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package gst-convert
+GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package gst-convert gst-doc
 
 uninstall-local::
 	@for i in gst-load $(GST_EXTRA_TOOLS); do \

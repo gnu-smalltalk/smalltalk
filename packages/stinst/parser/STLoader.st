@@ -171,7 +171,7 @@ currentNamespace
     ^currentNamespace!
 
 currentNamespace: ns
-    currentNamespace := ns!
+    currentNamespace := self proxyForNamespace: ns!
 
 proxyNilClass
     proxyNilClass isNil ifTrue: [ proxyNilClass := ProxyNilClass on: nil for: self ].
@@ -206,9 +206,13 @@ initialize
 
 !STClassLoader methodsFor: 'overrides'!
 
+loadedClasses
+    ^loadedClasses
+!
+
 result
     "This is what #parseSmalltalk answers"
-    ^loadedClasses
+    ^self loadedClasses
 !
 
 endMethodList

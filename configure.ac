@@ -304,6 +304,7 @@ GST_PACKAGE_ENABLE([NetClients], [net])
 GST_PACKAGE_ENABLE([DhbNumericalMethods], [numerics])
 GST_PACKAGE_ENABLE([Compiler], [stinst/compiler])
 GST_PACKAGE_ENABLE([Parser], [stinst/parser])
+GST_PACKAGE_ENABLE([ClassPublisher], [stinst/doc])
 GST_PACKAGE_ENABLE([SUnit], [sunit])
 GST_PACKAGE_ENABLE([TCP], [tcp],
   [GST_INET_SOCKETS],

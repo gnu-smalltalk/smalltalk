@@ -79,7 +79,6 @@
   <file>EditStream.st</file>
   <file>PrtHier.st</file>
   <file>Case.st</file>
-  <file>Publish.st</file>
   <file>RegExp.st</file>
   <file>PushBack.st</file>
   <file>SortCriter.st</file>
@@ -221,6 +220,7 @@
   <file>Load.st</file>
   <file>Package.st</file>
   <file>Browser.st</file>
+  <file>GenDoc.st</file>
   <file>Convert.st</file>
 </disabled-package>
 

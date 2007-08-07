@@ -458,6 +458,19 @@ parse: file
 
 !Kernel.PackageInfo methodsFor: 'accessing'!
 
+createNamespace
+    "Create the path of namespaces indicated by our namespace field in
+     dot notation, and answer the final namespace"
+    | ns |
+    ns := Smalltalk.
+    self namespace isNil ifTrue: [ ^ns ].
+    (self namespace subStrings: $.) do: [ :each || key |
+	key := each asSymbol.
+	(ns includesKey: key) ifFalse: [ ns addSubspace: key ].
+	ns := ns at: key
+    ].
+    ^ns!
+
 fileIn
     "File in the given package and its dependencies."
     self name isNil
@@ -467,6 +480,19 @@ fileIn
 	    self primFileIn ]
 	ifFalse: [
 	    PackageLoader fileInPackage: self name ]!
+
+fullPathsOf: aCollection
+    "Resolve the names in aCollection according to the base directories
+     in baseDirectories, and return the collection with the full filenames.
+     Raise a PackageNotAvailable exception if no directory was found for one
+     or more files in aCollection."
+    ^aCollection collect: [ :fileName || name |
+        name := self fullPathOf: fileName ]
+!
+
+fullPathOf: fileName
+    self subclassResponsibility
+!
 
 printXmlOn: aStream collection: aCollection tag: aString indent: indent
     "Private - Print aCollection on aStream as a sequence of aString
@@ -692,6 +718,13 @@ fileName: fileName
 
 !Kernel.StarPackage methodsFor: 'accessing'!
 
+fullPathOf: fileName
+    "Try appending 'self directory' and fileName to each of the directory
+     in baseDirectories, and return the path to the first tried filename that
+     exists.  Raise a PackageNotAvailable exception if no directory is
+     found that contains the file."
+    ^self loadedPackage fullPathOf: fileName!
+
 test
     "Answer the test subpackage for this package."
     ^self loadedPackage test!
@@ -909,26 +942,19 @@ baseDirectories: aCollection
      the local image directory, instead, only directory 3 is searched."
 
     baseDirectories := aCollection.
-    self findPathsFor: self files.
-    "self findPathsFor: self fileIns."
-    "self findPathsFor: self builtFiles."
+    self fullPathsOf: self files.
+    "self fullPathsOf: self fileIns."
+    "self fullPathsOf: self builtFiles."
     self directory.
 
     self test notNil ifTrue: [ self test baseDirectories: aCollection ].
 !
 
-findPathsFor: aCollection
-    "Resolve the names in aCollection according to the base directories
-     in baseDirectories, and return the collection with the full filenames, or
-     nil if no directory was found for one or more file in aCollection."
-    ^aCollection collect: [ :fileName || name |
-        name := self findPathFor: fileName ]
-!
-
-findPathFor: fileName
+fullPathOf: fileName
     "Try appending 'self directory' and fileName to each of the directory
      in baseDirectories, and return the path to the first tried filename that
-     exists.  Return nil if no directory is found that contains the file."
+     exists.  Raise a PackageNotAvailable exception if no directory is
+     found that contains the file."
     | name |
     baseDirectories do: [ :dir |
 	name := dir.
@@ -965,19 +991,6 @@ relativeDirectory: dir
      the package, to dir."
     relativeDirectory := dir!
 
-createNamespace
-    "Private - Create the path of namespaces indicated by our
-     namespace field in dot notation, and answer the final namespace"
-    | ns |
-    ns := Smalltalk.
-    self namespace isNil ifTrue: [ ^ns ].
-    (self namespace subStrings: $.) do: [ :each || key |
-	key := each asSymbol.
-	(ns includesKey: key) ifFalse: [ ns addSubspace: key ].
-	ns := ns at: key
-    ].
-    ^ns!
-
 primFileIn
     "Private - File in the given package without paying attention at
      dependencies and C callout availability"
@@ -999,7 +1012,7 @@ primFileIn
                 (CFunctionDescriptor isFunction: func)
 	             ifFalse: [ ^self error: 'C callout not available: ', func ]]].
 
-        loadedFiles := self findPathsFor: self fileIns.
+        loadedFiles := self fullPathsOf: self fileIns.
 	loadedFiles do: [ :each | FileStream fileIn: each ].
         self name isNil ifFalse: [ Smalltalk addFeature: self name ].
         self features do: [ :each | Smalltalk addFeature: each ].

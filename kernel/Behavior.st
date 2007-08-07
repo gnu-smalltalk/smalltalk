@@ -528,15 +528,21 @@ compiledMethodAt: selector
 !
 
 selectorAt: method
-    "Return selector for the given compiledMethod"
+    "Return selector for the given CompiledMethod"
     self methodDictionary isNil ifTrue: [
 	SystemExceptions.NotFound signalOn: method what: 'method' ].
     ^self methodDictionary keyAtValue: method ifAbsent: [
         SystemExceptions.NotFound signalOn: method what: 'method' ].
 !
 
+parseTreeFor: selector
+    "Answer the parse tree for the given selector, or nil if there was an
+     error.  Requires the Parser package to be loaded."
+    self notYetImplemented
+!
+
 sourceCodeAt: selector
-    "Answer source code (if available) for the given compiledMethod"
+    "Answer source code (if available) for the given selector."
     | source |
     source := (self compiledMethodAt: selector) methodSourceCode.
     source isNil ifTrue: [ ^'" *** SOURCE CODE NOT AVAILABLE *** "' copy ].
