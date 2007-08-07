@@ -936,9 +936,14 @@ release
     "Release the resources used by the receiver that don't survive when
      reloading a snapshot."
 
-    tmpFileHandlers isNil ifTrue: [ ^self ].
-    tmpFileHandlers do: [ :each | each release ].
-    tmpFileHandlers := nil.
+    tmpFileHandlers isNil ifFalse: [
+        tmpFileHandlers do: [ :each | each release ].
+	tmpFileHandlers := nil ].
+
+    extractedFiles isNil ifFalse: [
+	extractedFiles do: [ :each | self primUnlink: each ].
+        extractedFiles := nil ].
+
     super release! !
 
 
@@ -1057,11 +1062,6 @@ extractMember: anArchiveMemberHandler into: file
 
 
 !ArchiveFileHandler methodsFor: 'private'!
-
-release
-    extractedFiles do: [ :each | self primUnlink: each ].
-    extractedFiles := nil
-!
 
 convertMode: mode
     "Convert the mode from a string, character or boolean to an octal number."

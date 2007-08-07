@@ -1,3 +1,7 @@
+2007-08-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFS.st: Eliminate wrong redefinition of #release.
+
 2007-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Add a (notYetImplemented) parseTreeFor: method.
