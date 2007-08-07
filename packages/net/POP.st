@@ -32,6 +32,7 @@
  ======================================================================"
 
 
+NetClients addSubspace: #POP!
 Namespace current: NetClients.POP!
 
 NetResponse subclass:  #POPResponse
@@ -313,4 +314,4 @@ defaultResponseClass
     ^POPResponse! !
 
 
-Namespace current: Smalltalk!
+Namespace current: NetClients!

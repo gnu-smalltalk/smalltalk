@@ -32,8 +32,6 @@
  ======================================================================"
 
 
-Namespace current: NetClients!
-
 Object subclass:  #URIResolver
 	instanceVariableNames: 'url reporter noCache client entity '
 	classVariableNames: ''

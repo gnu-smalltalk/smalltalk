@@ -32,6 +32,7 @@
  ======================================================================"
 
 
+NetClients addSubspace: #SMTP!
 Namespace current: NetClients.SMTP!
 
 NetClient subclass:  #SMTPClient
@@ -284,4 +285,4 @@ smtpVerify: aString
     self checkResponse! !
 
 
-Namespace current: Smalltalk!
+Namespace current: NetClients!

@@ -31,6 +31,7 @@
 
 
 
+NetClients addSubspace: #IMAP!
 Namespace current: NetClients.IMAP!
 
 Object subclass:  #IMAPCommand
@@ -3483,4 +3484,4 @@ canParse: cmdName
 IMAPCommand initialize!
 IMAPScanner initialize!
 
-Namespace current: Smalltalk!
+Namespace current: NetClients!

@@ -31,6 +31,7 @@
 
 
 
+NetClients addSubspace: #MIME!
 Namespace current: NetClients.MIME!
 
 Object subclass:  #MessageElement
@@ -2924,4 +2925,4 @@ printValueOn: aStream
 SimpleScanner initialize!
 RFC822Scanner initialize!
 
-Namespace current: Smalltalk!
+Namespace current: NetClients!

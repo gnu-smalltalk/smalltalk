@@ -32,6 +32,7 @@
  ======================================================================"
 
 
+NetClients addSubspace: #FTP!
 Namespace current: NetClients.FTP!
 
 Object subclass:  #FTPServerEntity
@@ -510,4 +511,4 @@ fileNotFoundError: errorString
     ^FTPFileNotFoundError signal: errorString! !
 
 
-Namespace current: Smalltalk!
+Namespace current: NetClients!

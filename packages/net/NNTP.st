@@ -32,6 +32,7 @@
  ======================================================================"
 
 
+NetClients addSubspace: #NNTP!
 Namespace current: NetClients.NNTP!
 
 NetClient subclass:  #NNTPClient
@@ -482,4 +483,4 @@ nextPutAll: aString
     			ifFalse: [self reconnect. ex restart]]! !
 
 
-Namespace current: Smalltalk!
+Namespace current: NetClients!

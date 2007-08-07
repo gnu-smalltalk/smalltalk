@@ -1,3 +1,17 @@
+2007-08-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Load.st: Delete.
+	* IMAP.st: Create namespace here.
+	* MIME.st: Create namespace here.
+	* NNTP.st: Create namespace here.
+	* POP.st: Create namespace here.
+	* SMTP.st: Create namespace here.
+	* FTP.st: Create namespace here.
+	* HTTP.st: Create namespace here.
+	* NetServer.st: Remove namespace switching.
+	* URIResolver.st: Remove namespace switching.
+	* Base.st: Remove namespace switching.
+
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* SMTP.st: Use #%.

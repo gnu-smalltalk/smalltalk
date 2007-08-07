@@ -30,7 +30,6 @@
 |
  ======================================================================"
 
-Namespace current: NetClients!
 
 Object subclass:  #NetThread
 	instanceVariableNames: 'process socket priority '
@@ -258,5 +257,3 @@ stop
     super stop.
 ! !
 
-
-Namespace current: Smalltalk!

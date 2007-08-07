@@ -36,7 +36,6 @@
 
 
 
-Namespace current: NetClients!
 NetClients at: #LineEndCR put: #cr!
 NetClients at: #LineEndLF put: #nl!
 NetClients at: #LineEndCRLF put: #crnl!
@@ -1080,7 +1079,3 @@ species
 stream
     ^stream! !
 
-
-
-
-Namespace current: Smalltalk!

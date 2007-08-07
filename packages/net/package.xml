@@ -2,19 +2,31 @@
   <name>NetClients</name>
   <prereq>TCP</prereq>
   <prereq>SUnit</prereq>
-  <filein>Load.st</filein>
 
+  <filein>MIME.st</filein>
+  <filein>Base.st</filein>
+  <filein>ContentHandler.st</filein>
+  <filein>IMAP.st</filein>
+  <filein>POP.st</filein>
+  <filein>SMTP.st</filein>
+  <filein>NNTP.st</filein>
+  <filein>FTP.st</filein>
+  <filein>HTTP.st</filein>
+  <filein>URIResolver.st</filein>
+  <filein>NetServer.st</filein>
+
+  <namespace>NetClients</namespace>
+
+  <file>ChangeLog</file>
   <file>Base.st</file>
-  <file>HTTP.st</file>
-  <file>Load.st</file>
-  <file>NetServer.st</file>
-  <file>MIME.st</file>
   <file>ContentHandler.st</file>
   <file>FTP.st</file>
+  <file>HTTP.st</file>
   <file>IMAP.st</file>
+  <file>MIME.st</file>
   <file>NNTP.st</file>
+  <file>NetServer.st</file>
   <file>POP.st</file>
   <file>SMTP.st</file>
   <file>URIResolver.st</file>
-  <file>ChangeLog</file>
 </package>

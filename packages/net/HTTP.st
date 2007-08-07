@@ -32,6 +32,7 @@
  ======================================================================"
 
 
+NetClients addSubspace: #HTTP!
 Namespace current: NetClients.HTTP!
 
 NetClient subclass:  #HTTPClient
@@ -409,4 +410,4 @@ parseStatusLine: aClient
     statusMessage := stream upToEnd! !
 
 
-Namespace current: Smalltalk!
+Namespace current: NetClients!
