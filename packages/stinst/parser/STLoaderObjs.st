@@ -603,7 +603,7 @@ isClass
 !
 
 isMetaclass
-    ^proxy isClass
+    ^proxy isMetaclass
 !
 
 category
@@ -703,6 +703,10 @@ initializeFor: aClass
 
 !UndefinedMetaclass methodsFor: 'accessing'!
 
+isClass
+    ^false
+!
+
 isMetaclass
     ^true
 !
@@ -764,6 +768,10 @@ printOn: aStream
 ! !
 
 !LoadedMetaclass methodsFor: 'accessing'!
+
+isClass
+    ^false
+!
 
 isMetaclass
     ^true
@@ -850,6 +858,10 @@ superclass: sup name: s instanceVariableNames: ivn classVariableNames: cvn
 
 isClass
     ^true
+!
+
+isMetaclass
+    ^false
 !
 
 asClass
