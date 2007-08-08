@@ -76,7 +76,7 @@ evaluate: node
     "This should be overridden because its result affects the parsing
      process: true means 'start parsing methods', false means 'keep
      evaluating'."
-    ^node statements size > 0 and: [ driver evaluate: node ]
+    ^node notNil and: [ node statements size > 0 and: [ driver evaluate: node ]]
 ! !
 
 !STFileParser methodsFor: 'utility'!
@@ -154,10 +154,11 @@ parseDoits
     [
 	self atEnd ifTrue: [ ^false ].
 	node := self parseStatements.
-        scanner stripSeparators.           "gobble doit terminating bang"
+        scanner stripSeparators.
 	self evaluate: node
     ] whileFalse: [
-        self step		            "gobble doit terminating bang"
+        (currentToken isSpecial and: [currentToken value == $!])
+	    ifTrue: [ self step	]
     ].
     ^true
 !
@@ -258,6 +259,12 @@ evaluate: node
      process: true means 'start parsing methods', false means 'keep
      evaluating'. By default, always answer false."
     ^false
+!
+
+currentNamespace
+    ^Namespace current
+!
+
 ! !
 
 RBScanner subclass: #STFileScanner

@@ -532,10 +532,21 @@ superclass
 methodDictionary
     methods isNil ifTrue: [ methods := LookupTable new ].
     ^methods
-!
+! 
 
 methodDictionary: aDictionary
     methods := aDictionary
+!
+
+collectCategories
+    | categories |
+    self methodDictionary isNil ifTrue: [ ^#() ].
+
+    categories := Set new.
+    self methodDictionary do:
+	[ :method | categories add: (method methodCategory) ].
+
+    ^categories asSortedCollection 
 ! !
 
 !PseudoBehavior methodsFor: 'printing'!

@@ -383,7 +383,8 @@ Eval [
     filter := [ :class | true ].
     converter := SyntaxConverter new.
     formats := Dictionary from: {
-	'gst' -> STInST.STFileInParser.
+	'gst2' -> STInST.STFileInParser.
+	'gst' -> STInST.GSTFileInParser.
 	'squeak' -> STInST.SqueakFileInParser.
 	'sif' -> STInST.SIFFileInParser
     }.

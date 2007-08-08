@@ -292,6 +292,10 @@ parseMessagePattern
 parseMethod
     | methodNode |
     methodNode := self parseMessagePattern.
+    ^self parseMethodInto: methodNode!
+
+parseMethodInto: methodNode
+    tags := nil.
     self parseResourceTag.
     self addCommentsTo: methodNode.
     methodNode body: (self parseStatements: true).

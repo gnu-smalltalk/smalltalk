@@ -1,3 +1,12 @@
+2007-08-08  Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
+
+	* RBParser.st: Add #parseMethodInto:.
+	* STFileParser.st: Support "self evaluate: nil".  Only skip "!"
+	after evaluating.  Add #currentNamespace.
+	* STLoader.st: Handle #addClassVarName:value:.
+	* STLoaderObjs.st: Add #collectCategories.
+	* GSTParser.st: New.
+
 2007-08-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STLoaderObjs.st: Override #isMetaclass together with #isClass.

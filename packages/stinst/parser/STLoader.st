@@ -154,6 +154,9 @@ initialize
 
 	toEvaluate: #addClassVarName:
 	perform: #doSend:selector:arguments:;
+	
+	toEvaluate: #addClassVarName:value:
+	perform: #doAddClassVarName:selector:arguments:;
 
 	toEvaluate: #instanceVariableNames:
 	perform: #doSend:selector:arguments:
@@ -263,6 +266,15 @@ doSend: receiver selector: selector arguments: argumentNodes
 	ifFalse: [ self resolveClass: receiver ].
 
     class perform: selector with: argumentNodes first value.
+    ^false
+!
+
+doAddClassVarName: receiver selector: selector arguments: argumentNodes
+    | class classVarName value |
+    class := self resolveClass: receiver.
+    classVarName := argumentNodes first value asString.
+    value := argumentNodes last.
+    class addClassVarName: classVarName value: value.
     ^false
 !
 

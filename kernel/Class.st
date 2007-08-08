@@ -96,14 +96,21 @@ superclass: aClass
 !Class methodsFor: 'accessing instances and variables'!
 
 addClassVarName: aString
-    "Add a class variable with the given name to the class pool dictionary"
+    "Add a class variable with the given name to the class pool dictionary."
     | sym |
     sym := aString asClassPoolKey.
-
     (self classPool includesKey: sym)
-        ifTrue: [ SystemExceptions.AlreadyDefined signalOn: aString ].
+        ifFalse: [ self classPool at: sym put: nil ].
 
-    self classPool at: sym put: nil
+    ^self classPool associationAt: sym
+!
+
+addClassVarName: aString value: valueBlock
+    "Add a class variable with the given name to the class pool dictionary,
+     and evaluate valueBlock as its initializer."
+    ^(self addClassVarName: aString)
+        value: valueBlock value;
+	yourself
 !
 
 bindingFor: aString

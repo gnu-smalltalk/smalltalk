@@ -1,4 +1,10 @@
 2007-08-08  Paolo Bonzini  <bonzini@gnu.org>
+	    Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
+
+	* kernel/Class.st: Add #addClassVarName:value:.
+	* scripts/Convert.st: Add GSTParser support.
+
+2007-08-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/WriteStream.st: Reimplement #moveToEnd.
 
