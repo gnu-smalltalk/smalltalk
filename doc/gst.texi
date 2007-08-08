@@ -886,7 +886,7 @@ methods in SystemDictionary (the Smalltalk dictionary's class).
 * Security::           Sandboxing and access control.
 * Special objects::    Methods to assign particular properties to objects.
 * Dynamic loading::    Picking external libraries and modules at run-time.
-
+* Documentation::      Automatic documentation generation.
 @end menu
 
 
@@ -1685,6 +1685,54 @@ Note that a @code{DLD} class will be present even if dynamic loading is
 disabled (either because your system is not supported, or by the
 @option{--disable-dld} configure switch) but any attempt to perform
 dynamic linking will result in an error.
+
+@node Documentation
+@section Automatic documentation generator
+
+@gst{} includes an automatic documentation generator invoked via the
+@command{gst-doc} command.  The code is actually part of the
+@code{ClassPublisher} package, and @command{gst-doc} takes care
+of reading the code to be documented and firing a @code{ClassPublisher}.
+
+Currently, @command{gst-doc} can only generate output in Texinfo
+format, though this will change in future releases.
+
+@command{gst-doc} can document code that is already in the image, or
+it can load external files and packages.  Note that the latter approach
+will not work for files and packages that programmatically create code
+or file in other files/packages.
+
+@command{gst-doc} is invoked as follows:
+
+@example
+gst-doc [ @var{flag} ... ] @var{class} ...
+@end example
+
+The following options are supported:
+
+@table @option
+@item -p @var{package}
+@itemx --package=@var{package}
+Produce documentation for the classes inside the @var{package} package.
+
+@item -f @var{file}
+@itemx --file=@var{file}
+Produce documentation for the classes inside the @var{file} file.
+
+@item -I
+@itemx --image-file
+Produce documentation for the code that is already in the given image.
+
+@item -o
+@itemx --output=@var{file}
+Emit documentation in the named file.
+@end table
+
+@var{class} is either a class name, or a namespace name followed by
+@code{.*}.  Documentation will be written for classes that are specified
+in the command line.  @var{class} can be omitted if a @option{-f} or
+@option{-p} option is given.  In this case, documentation will be
+written for all the classes in the package.
 
 @node Packages
 @chapter Packages

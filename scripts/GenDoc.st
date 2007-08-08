@@ -44,78 +44,91 @@ Options:
     -p --package=PKG      look for classes in the given package
     -f --file=FILE        look for classes in the given file
     -I --image-file=FILE  look for classes in the given image
-    -o --output=OUT       look for classes in the given image
+    -o --output=FILE      emit documentation in the given file (default=stdout)
        --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message
        --version          print version information and exit
 '.
 
-loader := STInST.STClassLoader new.
-Namespace current: Smalltalk.
+[
+    loader := STInST.STClassLoader new.
+    Namespace current: Smalltalk.
 
-"Parse the command-line arguments."
-Smalltalk
-    arguments: '-h|--help --version -p|--package: -f|--file: -I|--image-file:
-                -o|--output: --kernel-directory:'
-    do: [ :opt :arg |
+    "Parse the command-line arguments."
+    Smalltalk
+        arguments: '-h|--help --version -p|--package: -f|--file:
+                    -I|--image-file: -o|--output: --kernel-directory:'
+        do: [ :opt :arg |
 
-    opt = 'help' ifTrue: [
-        helpString displayOn: stdout.
-        ObjectMemory quit: 0 ].
+        opt = 'help' ifTrue: [
+            helpString displayOn: stdout.
+            ObjectMemory quit: 0 ].
 
-    opt = 'version' ifTrue: [
-        ('gst-doc - %1' % {Smalltalk version}) displayNl.
-        ObjectMemory quit: 0 ].
+        opt = 'version' ifTrue: [
+            ('gst-doc - %1' % {Smalltalk version}) displayNl.
+            ObjectMemory quit: 0 ].
 
-    opt = 'output' ifTrue: [
-	outFile isNil ifFalse: [
-	    self error: '--output specified multiple times' ].
-	outFile := arg ].
+        opt = 'output' ifTrue: [
+	    outFile isNil ifFalse: [
+	        self error: '--output specified multiple times' ].
+	    outFile := arg ].
 
-    opt = 'package' ifTrue: [
-	package := PackageLoader packageAt: arg.
-	loader currentNamespace: package createNamespace.
-        files := package fullPathsOf: package fileIns.
-	files do: [ :each || file |
-	    file := FileStream open: each mode: FileStream read.
+        opt = 'package' ifTrue: [
+	    package := PackageLoader packageAt: arg.
+	    loader currentNamespace: package createNamespace.
+            files := package fullPathsOf: package fileIns.
+	    files do: [ :each || file |
+	        file := FileStream open: each mode: FileStream read.
+	        loader
+	            parseSmalltalkStream: file
+	            with: STInST.STFileInParser ].
+
+	    loader currentNamespace: Smalltalk ].
+
+        opt = 'file' ifTrue: [
+	    file := FileStream open: arg mode: FileStream read.
 	    loader
 	        parseSmalltalkStream: file
 	        with: STInST.STFileInParser ].
 
-	loader currentNamespace: Smalltalk ].
+        opt isNil ifTrue: [ classPatterns add: arg ] ]
 
-    opt = 'file' ifTrue: [
-	file := FileStream open: arg mode: FileStream read.
-	loader
-	    parseSmalltalkStream: file
-	    with: STInST.STFileInParser ].
+        ifError: [
+            helpString displayOn: stderr.
+            ObjectMemory quit: 1 ].
 
-    opt isNil ifTrue: [ classPatterns add: arg ] ]
+    classPatterns isEmpty
+        ifTrue: [
+            classes := loader loadedClasses.
+            classes isEmpty
+	        ifTrue: [ self error: 'specify -p, -f, or a class name' ] ]
+        ifFalse: [
+	    allClasses :=
+	        loader loadedClasses,
+	        (Class allSubclasses collect: [ :each | each instanceClass ]).
 
-    ifError: [
-        helpString displayOn: stderr.
-        ObjectMemory quit: 1 ].
+	    classes := IdentitySet new.
+	    classPatterns do: [ :pat || ns |
+	        (pat last: 2) = '.*'
+		    ifTrue: [
+		        ns := pat allButLast: 2.
+	                classes addAll:
+			    (allClasses select: [ :each |
+			        (each environment nameIn: Smalltalk) = ns ]) ]
+		    ifFalse: [
+	                classes addAll:
+			    (allClasses select: [ :each |
+			        (each nameIn: Smalltalk) = pat ]) ] ] ].
 
-allClasses :=
-    loader loadedClasses,
-    (Class allSubclasses collect: [ :each | each instanceClass ]).
-
-classes := IdentitySet new.
-classPatterns do: [ :pat || namespace |
-    (pat last: 2) = '.*'
-	ifTrue: [
-	    namespace := pat allButLast: 2.
-            classes addAll:
-		(allClasses select: [ :each |
-		    (each environment nameIn: Smalltalk) = namespace ]) ]
-	ifFalse: [
-            classes addAll:
-		(allClasses select: [ :each |
-		    (each nameIn: Smalltalk) = pat ]) ] ].
-
-outFile isNil
-    ifTrue: [
-	Transcript message: stderr -> #nextPutAllFlush:.
-	publisher publishAll: classes on: stdout ]
-    ifFalse: [
-	publisher publishAll: classes onFile: outFile ]!
+    outFile isNil
+        ifTrue: [
+	    Transcript message: stderr -> #nextPutAllFlush:.
+	    publisher publishAll: classes on: stdout ]
+        ifFalse: [
+	    publisher publishAll: classes onFile: outFile ]
+]
+    on: Error
+    do: [ :ex |
+        ('gst-doc: ', ex messageText, '
+') displayOn: stderr.
+        "ex pass." ObjectMemory quit: 1 ]!
