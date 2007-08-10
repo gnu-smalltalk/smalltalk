@@ -1,3 +1,7 @@
+2007-08-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Number.st: Fix #= vs. #~= blunder.
+
 2007-08-08  Paolo Bonzini  <bonzini@gnu.org>
 	    Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
 

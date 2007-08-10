@@ -241,7 +241,7 @@ retryInequalityCoercing: aNumber
     aNumGen := aNumber generality.
     aNumGen isNil ifTrue: [ ^true ].
 
-    selfGen > aNumGen ifTrue: [ ^false == (self = (self coerce: aNumber)) ].
+    selfGen > aNumGen ifTrue: [ ^false == (self ~= (self coerce: aNumber)) ].
     selfGen < aNumGen ifTrue: [ ^false == ((aNumber coerce: self) ~= aNumber) ].
 
     self retryError
