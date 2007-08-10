@@ -882,7 +882,7 @@ scanNumberValue
     currentCharacter == $q ifTrue: [ num := num asFloatQ ] ifFalse: [
 	^exponent isNil
 	    ifTrue: [ num ]
-	    ifFalse: [ num asFloatE * (base raisedToInteger: exponent) ]
+	    ifFalse: [ num asFloat * (base raisedToInteger: exponent) ]
     ]]].
 
     ch := currentCharacter.

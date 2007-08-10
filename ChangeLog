@@ -1,3 +1,7 @@
+2007-08-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Number.st: Fix #= vs. #~= blunder.
+
 2007-07-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/MthContext.st: Make flags accessors foolproof.

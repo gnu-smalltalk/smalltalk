@@ -36,7 +36,7 @@ LocaleData subclass: #LcCollate
     poolDictionaries: ''
     category: 'i18n-Collation'!
 
-Locale comment: 
+LcCollate comment: 
 'This object is a factory of CollationKey objects; they are obtained by
 sending either #? or #collationKeyFor:, with a String as the only argument.
 

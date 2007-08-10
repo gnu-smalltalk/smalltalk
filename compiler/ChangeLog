@@ -1,3 +1,7 @@
+2007-08-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* RBParser.st: Convert to FloatD if there is no exponent.
+
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* compiler/ParseTreeSearcher.st: Sync with development version.
