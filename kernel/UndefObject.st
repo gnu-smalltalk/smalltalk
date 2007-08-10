@@ -224,7 +224,10 @@ variableLongSubclass: classNameString classInstanceVariableNames: stringClassIns
 ! !
 
 
-!UndefinedObject methodsFor: 'class creation'!
+!UndefinedObject methodsFor: 'class polymorphism'!
+
+methodDictionary
+    ^nil!
 
 removeSubclass: aClass
 	"Ignored -- necessary to support disjoint class hierarchies"!

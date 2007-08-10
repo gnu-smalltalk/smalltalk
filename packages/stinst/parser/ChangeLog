@@ -1,3 +1,13 @@
+2007-08-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STFileParser.st: Change #parseDoit: to #parseDoit, change
+	#parseStatements to include only the block it had inside, localize
+	MappedCollection hack in a single place.
+	* SIFParser.st: Change #parseStatements to #parseDoit.
+	* GSTParser.st: Override #evaluate: to include comments.  Don't
+	create MappedCollection here.  Split part of #parseStatements into
+	a #parseDoit override.
+
 2007-08-08  Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
 
 	* RBParser.st: Add #parseMethodInto:.

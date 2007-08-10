@@ -71,6 +71,13 @@ errorBlock
 	ifTrue: [[:message :position | ]]
 	ifFalse: [errorBlock]!
 
+errorFile
+    ^scanner stream name!
+	
+errorLine
+    ^(scanner stream copyFrom: 1 to: self errorPosition)
+	readStream lines contents size!
+
 errorPosition
     ^currentToken start!
 
@@ -83,7 +90,7 @@ parserError: aString
     "Evaluate the block. If it returns raise an error"
 
     self errorBlock value: aString value: self errorPosition.
-    self error: aString! !
+    self error: ('%1:%2: %3' % { self errorFile. self errorLine. aString })! !
 
 !RBParser methodsFor: 'initialize-release'!
 
@@ -402,7 +409,7 @@ parseStatementList: tagBoolean into: sequenceNode
     [self atEnd 
 	or: [currentToken isSpecial and: ['!])}' includes: currentToken value]]] 
 	    whileFalse: 
-		[return ifTrue: [self parserError: 'End of statement list encounted'].
+		[return ifTrue: [self parserError: 'End of statement list encountered'].
 		(currentToken isSpecial and: [currentToken value == $^]) 
 		    ifTrue: 
 			[returnPosition := currentToken start.

@@ -183,7 +183,7 @@ evaluateGlobalInitializer: stmt
     "Convert `Foo initializer' syntax to GNU Smalltalk file-out syntax."
     | node |
     stmt receiver name = 'Global' ifTrue: [
-	node := self parseStatements.
+	node := self parseDoit.
         scanner stripSeparators.
         self step.
 	^super evaluate: node ].
@@ -197,7 +197,7 @@ evaluateInitializerFor: key in: receiver
     position := currentToken start.
     node := RBOptimizedNode
                 left: position
-                body: self parseStatements
+                body: self parseDoit
                 right: currentToken start.
 
     scanner stripSeparators.

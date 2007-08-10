@@ -2,7 +2,7 @@
 	    Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
 
 	* kernel/Class.st: Add #addClassVarName:value:.
-	* scripts/Convert.st: Add GSTParser support.
+	* scripts/Convert.st: Add GSTParser support.  Remove error block.
 
 2007-08-08  Paolo Bonzini  <bonzini@gnu.org>
 

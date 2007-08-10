@@ -504,10 +504,7 @@ Options:
 	converter
 	    convertStream: inFile
 	    with: parser
-	    to: outFile
-	    onError: [ :m :pos | self error: ('line %1: %2' % {
-		(inFile copyFrom: 1 to: pos) readStream lines contents size.
-		m}) ].
+	    to: outFile.
 
 	inFile close.
 	outFile close
@@ -525,5 +522,5 @@ Options:
 		 /dev/null disappear if you run gst-convert as root (which
 		 you shouldn't)."
 		[ (File name: outFile name) remove ] on: Error do: [ :ex | ] ].
-	    ex pass. ObjectMemory quit: 1 ].
+	    "ex pass." ObjectMemory quit: 1 ].
 ]

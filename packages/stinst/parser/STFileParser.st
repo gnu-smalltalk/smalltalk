@@ -82,17 +82,20 @@ evaluate: node
 !STFileParser methodsFor: 'utility'!
 
 parseStatements
-    ^self parseDoit: [ self parseStatements: false ]!
+    (currentToken isSpecial and: [currentToken value == $!])
+        ifTrue: [ ^RBSequenceNode statements: #() ].
 
-parseDoit: aBlock
-    | node method start stop comments source |
+    ^self parseStatements: false!
+
+parseDoit
+    | node start stop comments |
     comments := scanner getComments.
     start := comments isNil
 	    	ifTrue: [ currentToken start - 1 ]
 	    	ifFalse: [ comments first first - 1 ].
 	
     tags := nil.
-    node := aBlock value.
+    node := self parseStatements.
     node comments isNil
 	ifTrue: [ node comments: comments ]
 	ifFalse: [
@@ -102,11 +105,19 @@ parseDoit: aBlock
      other drops the bang because we have a one-token lookahead."
     stop := currentToken start - 2.
 
-    method := RBMethodNode selectorParts: #() arguments: #().
+    ^self addSourceFrom: start to: stop to: node!
+
+addSourceFrom: start to: stop to: node
+    | method source |
+    node isMethod
+	ifTrue: [
+	    method := node ]
+	ifFalse: [
+	    method := RBMethodNode selectorParts: #() arguments: #().
+	    node parent: method ].
     source := scanner stream copyFrom: start to: stop.
     source := MappedCollection collection: source map: (1 - start to: stop).
     method source: source.
-    node parent: method.
     ^node! !
 
 !STFileParser class methodsFor: 'accessing'!
@@ -153,7 +164,7 @@ parseDoits
     | node |
     [
 	self atEnd ifTrue: [ ^false ].
-	node := self parseStatements.
+	node := self parseDoit.
         scanner stripSeparators.
 	self evaluate: node
     ] whileFalse: [
@@ -168,13 +179,12 @@ parseMethodFromFile
     start := currentToken start - 1.
     tags := nil.
     node := self parseMethod.
+    node comments: (node comments select: [ :each | each last >= start ]).
 
     "One -1 accounts for base-1 vs. base-0 (as above), the
      other drops the bang because we have a one-token lookahead."
     stop := currentToken start - 2.
-    source := scanner stream copyFrom: start to: stop.
-    source := MappedCollection collection: source map: (1 - start to: stop).
-    node source: source.
+    node := self addSourceFrom: start to: stop to: node.
 
     scanner stripSeparators.
     self step.           "gobble method terminating bang"

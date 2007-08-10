@@ -502,7 +502,6 @@ comment
 !
 
 comment: aString
-    self subclassResponsibility
 !
 
 shape
@@ -510,7 +509,6 @@ shape
 !
 
 shape: aSymbol
-    self subclassResponsibility
 !
 
 environment
@@ -518,7 +516,10 @@ environment
 !
 
 kindOfSubclass
-    self subclassResponsibility
+    "Return a string indicating the type of class the receiver is"
+    self shape isNil ifTrue: [ ^'subclass:' ].
+    self shape == #pointer ifTrue: [ ^'variableSubclass:' ].
+    ^'variable: ', self shape storeString, 'subclass:'
 !
 
 sharedPools
@@ -627,10 +628,6 @@ comment
 
 environment
     ^proxy environment
-!
-
-kindOfSubclass
-    ^proxy kindOfSubclass
 !
 
 superclass
@@ -923,13 +920,6 @@ environment
     ^environment
 !
 
-kindOfSubclass
-    "Return a string indicating the type of class the receiver is"
-    self isVariable ifFalse: [ ^'subclass:' ].
-    self isPointers ifTrue: [ ^'variableSubclass:' ].
-    ^'variable: ', self shape storeString, 'subclass:'
-! 
-
 classVarNames
     "Answer the names of the variables in the class pool dictionary"
 
@@ -943,6 +933,12 @@ sharedPools
 !
 
 addClassVarName: aString
+    "Return the names of the shared pools defined by the class"
+
+    sharedPools := sharedPools copyWith: aString
+!
+
+addClassVarName: aString value: aBlock
     "Return the names of the shared pools defined by the class"
 
     sharedPools := sharedPools copyWith: aString

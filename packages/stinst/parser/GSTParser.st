@@ -31,33 +31,41 @@
  ======================================================================"
 
 STInST.STFileInParser subclass: GSTFileInParser [
-    | class |
+    | class currentDeclaration |
 
     parseStatements [
         | returnPosition statements node |
+	"Skip temporaries."
+        (currentToken isBinary and: [currentToken value == #|]) 
+	    ifTrue: [ self step. self parseArgs. self step ].
+        (currentToken isBinary and: [currentToken value == #||]) 
+	    ifTrue: [ self step ].
 
         (currentToken isSpecial and: [currentToken value == $!]) 
-	   ifTrue: [ ^RBSequenceNode statements: #() ].
+	    ifTrue: [ ^RBSequenceNode statements: #() ].
 
-        statements := OrderedCollection new.
-
-        (currentToken isSpecial and: [currentToken value == $^]) 
+        node := (currentToken isSpecial and: [currentToken value == $^]) 
             ifTrue: [returnPosition := currentToken start.  
                      self step.
-                     node := RBReturnNode return: returnPosition value: self parseAssignment.
-                     self addCommentsTo: node.
-                     statements add: node]
-            ifFalse: [node := self parseAssignment.
-                      self addCommentsTo: node.
-                      statements add: node].
+                     RBReturnNode return: returnPosition value: self parseAssignment]
+            ifFalse: [self parseAssignment].
 
-        (currentToken isSpecial and: [self skipToken: $[])
-            ifTrue: [self parseDeclaration: node. ^nil].
+        self addCommentsTo: node.
+        ^RBSequenceNode statements: { node }
+    ]
 
-        ^RBSequenceNode statements: statements
+    parseDoit [
+	| node |
+	node := super parseDoit.
+        (currentToken isSpecial and: [ self skipToken: $[ ])
+            ifTrue: [self parseDeclaration: node statements first. ^nil].
+
+        currentToken isSpecial ifTrue: [ self skipToken: $. ].
+	^node
     ]
 
     parseDeclaration: node [
+	currentDeclaration := node parent.
         node isMessage ifTrue: [
             (node selectorParts first value = 'subclass:')
                 ifTrue: [self parseClass: node. ^self].
@@ -127,6 +135,9 @@ STInST.STFileInParser subclass: GSTFileInParser [
     
     parseClassBodyElement [
         | node classNode |
+
+	"drop comments"
+        scanner getComments.
         
         "look for class tag"
         (currentToken value = #< and: [self nextToken isKeyword])
@@ -248,23 +259,20 @@ STInST.STFileInParser subclass: GSTFileInParser [
     
     parseMethodSourceOn: classNode [
         | patternNode |
-        
+	"Drop comments before the message pattern"
         patternNode := self parseMessagePattern.
         self skipExpectedToken: $[.
         self parseMethodSource: patternNode on: classNode.
     ]
     
     parseMethodSource: patternNode on: classNode [
-        "TODO: parse category tag inside methods"
-        | methodNode source start stop |
+        | methodNode start stop |
         
         start := patternNode selectorParts first start - 1.
         methodNode := self parseMethodInto: patternNode.
         stop := currentToken start - 1.
         self skipExpectedToken: $].
-        source := scanner stream copyFrom: start to: stop.
-        source := MappedCollection collection: source map: (1 - start to: stop).
-        methodNode source: source.
+        methodNode := self addSourceFrom: start to: stop to: methodNode.
         
         self evaluateMessageOn: classNode
              selector: #methodsFor:
@@ -300,18 +308,39 @@ STInST.STFileInParser subclass: GSTFileInParser [
     ]
     
     evaluateStatement: node [
-        ^self evaluate: (self makeSequenceNode: node).
+	^self evaluate: (self makeSequenceNode: node)
     ]
     
-    makeSequenceNode: stmt [
+    evaluate: seq [
+	| emptySeq |
+	(currentDeclaration notNil and: [ currentDeclaration comments notEmpty ])
+	    ifTrue: [
+		seq parent isNil
+		    ifTrue: [
+			seq comments: currentDeclaration comments.
+			seq parent: currentDeclaration parent ]
+		    ifFalse: [
+			emptySeq := self makeSequenceNode.
+			emptySeq comments: currentDeclaration comments.
+			emptySeq parent: currentDeclaration parent.
+			super evaluate: emptySeq ] ].
+	currentDeclaration := nil.
+        ^super evaluate: seq
+    ]
+
+    makeSequenceNode [
         | seq |
 	seq := RBSequenceNode
             leftBar: nil
             temporaries: #()
             rightBar: nil.
-        seq statements: { stmt }.
         seq periods: #().
+        seq statements: #().
 	^seq
+    ]
+    
+    makeSequenceNode: stmt [
+        ^self makeSequenceNode statements: { stmt }.
     ]
     
     makeClassOf: node [
