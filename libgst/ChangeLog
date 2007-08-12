@@ -1,3 +1,8 @@
+2007-08-12  Paolo Bonzini  <bonzinI@gnu.org>
+
+	* libgst/comp.c: Make literals read-only in make_oop_constant.
+	* libgst/dict.inl: Make Float* and Character literals read-only.
+
 2007-07-12  Paolo Bonzini  <bonzinI@gnu.org>
 
 	* libgst/dict.c: Fix pasto in _gst_grow_dictionary.

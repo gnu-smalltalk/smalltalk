@@ -463,6 +463,7 @@ floate_new (double f)
     (_gst_floate_class, sizeof (float), &floatOOP);
 
   floatObject->value = f;
+  MAKE_OOP_READONLY (floatOOP, true);
   return (floatOOP);
 }
 
@@ -507,6 +508,7 @@ floatd_new (double f)
   memcpy (&obj->data, &f, sizeof (double));
 #endif
 
+  MAKE_OOP_READONLY (floatOOP, true);
   return (floatOOP);
 }
 
@@ -551,6 +553,7 @@ floatq_new (long double f)
   memcpy (&obj->data, &f, sizeof (long double));
 #endif
 
+  MAKE_OOP_READONLY (floatOOP, true);
   return (floatOOP);
 }
 
@@ -567,6 +570,7 @@ char_new (int codePoint)
   charObject = (gst_char) new_instance (_gst_unicode_character_class, &charOOP);
 
   charObject->codePoint = FROM_INT (codePoint);
+  MAKE_OOP_READONLY (charOOP, true);
   return (charOOP);
 }
 

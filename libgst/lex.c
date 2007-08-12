@@ -824,6 +824,7 @@ scan_number (int c,
 
 	/* incubator is set up by _gst_compile_method */
 	INC_ADD_OOP (lvalp->oval);
+	MAKE_OOP_READONLY (lvalp->oval, true);
 	return (SCALED_DECIMAL_LITERAL);
       }
     while (0);

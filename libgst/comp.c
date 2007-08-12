@@ -1105,8 +1105,6 @@ compile_constant (tree_node constExpr)
 	      return;
 	    }
         }
-      else
-        MAKE_OOP_READONLY (constantOOP, true);
 
       index = add_literal (constantOOP);
     }
@@ -2182,9 +2180,8 @@ make_constant_oop (tree_node constExpr)
 	  elementOOP = make_constant_oop (arrayElt->v_list.value);
 	  result = OOP_TO_OBJ (resultOOP);
 	  result->data[i] = elementOOP;
-	  if (IS_OOP (elementOOP))
-	    MAKE_OOP_READONLY (elementOOP, true);
 	}
+      MAKE_OOP_READONLY (resultOOP, true);
       INC_RESTORE_POINTER (incPtr);
       return (resultOOP);
     }
@@ -2207,7 +2204,9 @@ make_constant_oop (tree_node constExpr)
       return (floatq_new (constExpr->v_const.val.fVal));
 
     case CONST_STRING:
-      return (_gst_string_new (constExpr->v_const.val.sVal));
+      resultOOP = _gst_string_new (constExpr->v_const.val.sVal);
+      MAKE_OOP_READONLY (resultOOP, true);
+      return (resultOOP);
 
     case CONST_OOP:
       return (constExpr->v_const.val.oopVal);
@@ -2216,6 +2215,7 @@ make_constant_oop (tree_node constExpr)
       bo = constExpr->v_const.val.boVal;
       result = instantiate_with (bo->class, bo->size, &resultOOP);
       memcpy (result->data, bo->body, bo->size);
+      MAKE_OOP_READONLY (resultOOP, true);
       return (resultOOP);
 
     case CONST_ARRAY:
@@ -2232,10 +2232,9 @@ make_constant_oop (tree_node constExpr)
 	  elementOOP = make_constant_oop (arrayElt->v_list.value);
 	  result = OOP_TO_OBJ (resultOOP);
 	  result->data[i] = elementOOP;
-	  if (IS_OOP (elementOOP))
-	    MAKE_OOP_READONLY (elementOOP, true);
 	}
 
+      MAKE_OOP_READONLY (resultOOP, true);
       INC_RESTORE_POINTER (incPtr);
       return (resultOOP);
     }
