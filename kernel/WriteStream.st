@@ -140,7 +140,7 @@ initCollection: aCollection
 
 moveToEnd
     endPtr := collection size.
-    self setToEnd
+    ptr := endPtr + 1
 !
 
 growCollection
