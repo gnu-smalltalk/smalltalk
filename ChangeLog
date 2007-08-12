@@ -1,3 +1,7 @@
+2007-08-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/WriteStream.st: Fix ANSI testcases.
+
 2007-08-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Number.st: Fix #= vs. #~= blunder.
