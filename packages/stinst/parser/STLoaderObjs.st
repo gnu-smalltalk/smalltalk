@@ -170,7 +170,7 @@ by an STClassLoader.'!
 
 LoadedBehavior subclass: #LoadedClass
         instanceVariableNames: 'name category sharedPools classVars class
-				environment shape '
+				environment shape declaration '
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -301,6 +301,16 @@ subclass: s instanceVariableNames: ivn classVariableNames: cvn
 	category: c
 	shape: nil
 	loader: loader!
+
+subclass: s declaration: cstructDecl classVariableNames: cvn
+	poolDictionaries: pd category: c
+
+    ^(self
+	subclass: s
+	instanceVariableNames: ''
+	classVariableNames: cvn
+	poolDictionaries: pd
+	category: c) declaration: cstructDecl; yourself!
 
 subclass: s
 
@@ -592,6 +602,10 @@ proxy
    ^proxy
 !
 
+classPragmas
+    ^proxy classPragmas
+!
+
 printOn: aStream
     proxy printOn: aStream
 !
@@ -647,6 +661,10 @@ setProxy: aClass
 ! !
 
 !ProxyNilClass methodsFor: 'accessing'!
+
+classPragmas
+    ^#(#comment #category)
+!
 
 nameIn: aNamespace
     ^'nil'
@@ -893,6 +911,20 @@ category
 category: aString
     "Set the class category"
     category := aString
+!
+
+classPragmas
+    ^superclass classPragmas
+!
+
+declaration
+    "Answer the class declaration for CStruct subclasses"
+    ^declaration
+!
+
+declaration: aString
+    "Set the class declaration (for CStruct subclasses)"
+    declaration := aString
 !
 
 shape

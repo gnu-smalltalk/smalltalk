@@ -451,6 +451,16 @@ asFraction
 
 !Integer methodsFor: 'printing'!
 
+isLiteralObject
+    "Answer whether the receiver is expressible as a Smalltalk literal."
+    ^true
+!
+
+storeLiteralOn: aStream
+    "Store on aStream some Smalltalk code which compiles to the receiver"
+    self storeOn: aStream
+!
+
 printOn: aStream base: b
     "Print on aStream the base b representation of the receiver"
     aStream nextPutAll: (self printString: b)

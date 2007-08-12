@@ -381,6 +381,16 @@ printOn: aStream
 
 !Float methodsFor: 'storing'!
 
+isLiteralObject
+    "Answer whether the receiver is expressible as a Smalltalk literal."
+    ^true
+!
+
+storeLiteralOn: aStream
+    "Store on aStream some Smalltalk code which compiles to the receiver"
+    self storeOn: aStream
+!
+
 storeOn: aStream
     "Print a representation of the receiver on aStream"
     | printString |

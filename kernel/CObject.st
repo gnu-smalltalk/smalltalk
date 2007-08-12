@@ -172,15 +172,20 @@ to a character.  I provide the protocol for both data types.  My #value
 method returns a Smalltalk String, as you would expect for a scalar datatype.
 '!
 
-CByte comment: 'You''re a marine.
-You adapt -- you improvise -- you overcome
-
-    	    	    	- Gunnery Sgt. Thomas Highway
-    	    	    	  Heartbreak Ridge'!
+CByte comment: 'You know what a byte is, don''t you?!?'!
 
 CBoolean comment: 'I return true if a byte is not zero, false otherwise.'!
 
 
+
+!CObject class methodsFor: 'subclassing'!
+
+subclass: aSymbol
+    "Create a subclass with the given name."
+    ^(super subclass: aSymbol)
+	shape: #word;
+	yourself
+! !
 
 !CObject class methodsFor: 'instance creation'!
 

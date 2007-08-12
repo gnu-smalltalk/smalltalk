@@ -39,6 +39,8 @@ CObject variableWordSubclass: #CCompound
       category: 'Language-C interface'
 !
 
+CCompound class instanceVariableNames: 'declaration'!
+
 CCompound variableWordSubclass: #CStruct
       instanceVariableNames: ''
       classVariableNames: ''
@@ -112,6 +114,11 @@ alignof
     ^1
 !
 
+classPragmas
+    "Return the pragmas that are written in the file-out of this class."
+    ^super classPragmas copyWith: #declaration
+!
+
 newStruct: structName declaration: array
     "The old way to create a CStruct.  Superseded by #subclass:declaration:..."
     ^self
@@ -137,20 +144,29 @@ subclass: structName declaration: array
 		       poolDictionaries: pd
 		       category: category.
 
-    newClass compileDeclaration: array.
+    newClass declaration: array.
     ^newClass
 !
 
-compileDeclaration: array
+declaration
+    "Return the description of the fields in the receiver class."
+    ^declaration
+!
+
+declaration: array
     self subclassResponsibility
 !
 
-compileDeclaration: array inject: startOffset into: aBlock
+declaration: array inject: startOffset into: aBlock
     "Compile methods that implement the declaration in array.  To
      compute the offset after each field, the value of the
      old offset plus the new field's size is passed to aBlock,
      together with the new field's alignment requirements."
     | offset maxAlignment inspStr |
+    (declaration notNil and: [ declaration ~= array ])
+	ifTrue: [ self error: 'cannot redefine CStruct/CUnion' ].
+
+    declaration := array.
     offset := startOffset.
     maxAlignment := self superclass alignof.
     inspStr := WriteStream on: (String new: 8).
@@ -309,20 +325,20 @@ inspect
 
 !CStruct class methodsFor: 'subclass creation'!
 
-compileDeclaration: array
+declaration: array
     "Compile methods that implement the declaration in array."
     self
-	compileDeclaration: array
+	declaration: array
 	inject: self superclass sizeof
 	into: [ :oldOffset :alignment | oldOffset alignTo: alignment ]
 ! !
 
 !CUnion class methodsFor: 'subclass creation'!
 
-compileDeclaration: array
+declaration: array
     "Compile methods that implement the declaration in array."
     self
-	compileDeclaration: array
+	declaration: array
 	inject: 0
 	into: [ :oldOffset :alignment | 0 ]
 ! !

@@ -63,6 +63,33 @@ printOn: aStream
 	[ :elt | elt printOn: aStream.
 		 aStream space ].
     aStream nextPut: $)
+!
+
+isLiteralObject
+    "Answer whether the receiver is expressible as a Smalltalk literal."
+    ^self isReadOnly not
+!
+
+storeLiteralOn: aStream
+    "Store a Smalltalk literal compiling to the receiver on aStream"
+    aStream nextPut: $#.
+    aStream nextPut: $(.
+    self do: [ :elt | elt storeLiteralOn: aStream. aStream space ].
+    aStream nextPut: $).
+!
+
+storeOn: aStream
+    "Store Smalltalk code compiling to the receiver on aStream"
+    aStream nextPut: $#.
+    aStream nextPut: $(.
+    self do: [ :elt |
+	elt isLiteralObject
+	    ifTrue: [ elt storeLiteralOn: aStream ]
+	    ifFalse: [ aStream nextPutAll: '##('; store: elt; nextPut: $) ].
+	aStream space ].
+
+    aStream nextPut: $).
+    self isReadOnly ifFalse: [ aStream nextPutAll: ' copy' ]
 ! !
 
 

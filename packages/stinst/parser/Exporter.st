@@ -201,15 +201,14 @@ Object subclass: FileOutExporter [
             outStream nextPutAll: '>' ].
 
 	    "category and comment"  	
-        outStream nl; space: 4;
-		  nextPutAll: '<category: ';
-            	  print: outClass category;
-		  nextPut: $>;
-		  nl; space: 4;
-           	  nextPutAll: '<comment: ';
-		  print: outClass comment;
-		  nextPut: $>;
-                  nl.
+	outStream nl.
+	outClass classPragmas do: [ :selector |
+            outStream space: 4;
+		  nextPut: $<;
+		  nextPutAll: selector;
+		  nextPutAll: ': '.
+	    (outClass perform: selector) storeLiteralOn: outStream.
+	    outStream  nextPut: $>; nl ].
 	    
         "class instance varriables"            
         outClass asMetaclass instVarNames isEmpty

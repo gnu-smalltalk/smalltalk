@@ -3305,44 +3305,40 @@ struct audio_info @{
 
 And here is a Smalltalk equivalent decision:
 @example
-CStruct subclass: #AudioPrinfo
-        declaration: #( (#sampleRate #uLong)
-                        (#channels #uLong)
-                        (#precision #uLong)
-                        (#encoding #uLong)
-                        (#gain #uLong)
-                        (#port #uLong)
-                        (#xxx (#array #uLong 4))
-                        (#samples #uLong)
-                        (#eof #uLong)
-                        (#pause #uChar)
-                        (#error #uChar)
-                        (#waiting #uChar)
-                        (#ccc (#array #uChar 3))
-                        (#open #uChar)
-                        (#active #uChar))
-        classVariableNames: ''
-        poolDictionaries: ''
-        category: 'C interface-Audio'
-!
+CStruct subclass: AudioPrinfo [
+    <declaration: #( (#sampleRate #uLong)
+                     (#channels #uLong)
+                     (#precision #uLong)
+                     (#encoding #uLong)
+                     (#gain #uLong)
+                     (#port #uLong)
+                     (#xxx (#array #uLong 4))
+                     (#samples #uLong)
+                     (#eof #uLong)
+                     (#pause #uChar)
+                     (#error #uChar)
+                     (#waiting #uChar)
+                     (#ccc (#array #uChar 3))
+                     (#open #uChar)
+                     (#active #uChar))>
 
-CStruct subclass: #AudioInfo
-        declaration: #( (#play #@{AudioPrinfo@} )
-                        (#record #@{AudioPrinfo@} )
-                        (#monitorGain #uLong)
-                        (#yyy (#array #uLong 4)))
-        classVariableNames: ''
-        poolDictionaries: ''
-        category: 'C interface-Audio'
-!
+    <category: 'C interface-Audio'>
+]
+
+CStruct subclass: AudioInfo [
+    <declaration: #( (#play #@{AudioPrinfo@} )
+                     (#record #@{AudioPrinfo@} )
+                     (#monitorGain #uLong)
+                     (#yyy (#array #uLong 4)))>
+
+    <category: 'C interface-Audio'>
+]
 @end example
 
 This creates two new subclasses of @code{CStruct} called
 @code{AudioPrinfo} and @code{AudioInfo}, with the given fields.  The
 syntax is the same as for creating standard subclasses, with the
-@code{instanceVariableNames} replaced by @code{declaration}@footnote{The
-old @code{#newStruct:declaration:} method for creating CStructs is
-deprecated because it does not allow one to set the category.}.  You can
+additional metadata @code{declaration:}.  You can
 make C functions return @code{CObject}s that are instances of these
 classes by passing @code{AudioPrinfo type} as the parameter to the
 @code{returning:} keyword.

@@ -267,6 +267,12 @@ displayOn: aStream
     self printOn: aStream
 !
 
+storeLiteralOn: aStream
+    "Print Smalltalk code on aStream that compiles
+     to the same symbol as the receiver."
+    self storeOn: aStream
+!
+
 storeOn: aStream
     "Print Smalltalk code on aStream that compiles
      to the same symbol as the receiver."

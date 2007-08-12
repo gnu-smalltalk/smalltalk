@@ -65,6 +65,28 @@ asUnicodeString
 
 
 
+!ByteArray methodsFor: 'storing'!
+
+isLiteralObject
+    "Answer whether the receiver is expressible as a Smalltalk literal."
+    ^self isReadOnly not
+!
+
+storeLiteralOn: aStream
+    "Put a Smalltalk literal evaluating to the receiver on aStream."
+    aStream nextPut: $#.
+    aStream nextPut: $[.
+    self do: [ :elt | elt printOn: aStream; space ].
+    
+    aStream nextPut: $]
+!
+
+storeOn: aStream
+    "Put Smalltalk code evaluating to the receiver on aStream."
+    self storeLiteralOn: aStream.
+    self isReadOnly ifFalse: [ aStream nextPutAll: ' copy' ]   
+! !
+
 !ByteArray methodsFor: 'more advanced accessing'!
 
 "Note that the types could be given symbolic names and installed in a 

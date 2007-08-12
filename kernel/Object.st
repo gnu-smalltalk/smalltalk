@@ -504,6 +504,13 @@ storeString
     ^stream contents
 !
 
+storeLiteralOn: aStream
+    "Put a Smalltalk literal compiling to the receiver on aStream"
+    aStream nextPutAll: '##('.
+    self storeOn: aStream.
+    aStream nextPut: $).
+!
+
 storeOn: aStream
     "Put Smalltalk code compiling to the receiver on aStream"
     | class hasSemi |

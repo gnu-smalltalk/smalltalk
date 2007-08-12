@@ -182,6 +182,11 @@ sharedPools
     ^s
 !
 
+classPragmas
+    "Return the pragmas that are written in the file-out of this class."
+    ^#(#category #comment)
+!
+
 initializeAsRootClass
     "Perform special initialization reserved to root classes."
     self registerHandler: [ :method :ann |

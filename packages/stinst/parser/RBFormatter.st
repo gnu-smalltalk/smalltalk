@@ -171,12 +171,7 @@ formatLiteral: token
 	    [codeStream nextPut: $$;
 		nextPut: aValue.
 	    ^self].
-    aValue class == String ifTrue: 
-	    [codeStream nextPut: $';
-		nextPutAll: (aValue copyReplaceAll: '''' with: '''''');
-		nextPut: $'.
-	    ^self].
-    aValue storeOn: codeStream!
+    aValue storeLiteralOn: codeStream!
 
 formatMessage: aMessageNode cascade: cascadeBoolean 
     | selectorParts arguments multiLine formattedArgs indentFirst firstArgLength length |

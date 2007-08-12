@@ -74,11 +74,19 @@ deepCopy
 
 !Boolean methodsFor: 'storing'!
 
+isLiteralObject
+    "Answer whether the receiver is expressible as a Smalltalk literal."
+    ^true
+!
+
+storeLiteralOn: aStream
+    "Store on aStream some Smalltalk code which compiles to the receiver"
+    self storeOn: aStream
+!
+
 storeOn: aStream
     "Store on aStream some Smalltalk code which compiles to the receiver"
-
     self printOn: aStream		"representation is the same"
-
 ! !
 
 

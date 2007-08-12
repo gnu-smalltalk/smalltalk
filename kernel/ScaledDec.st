@@ -263,6 +263,16 @@ printOn: aStream
 
 !ScaledDecimal methodsFor: 'storing'!
 
+isLiteralObject
+    "Answer whether the receiver is expressible as a Smalltalk literal."
+    ^true
+!
+
+storeLiteralOn: aStream
+    "Store on aStream some Smalltalk code which compiles to the receiver"
+    self storeOn: aStream
+!
+
 storeOn: aStream 
     "Print Smalltalk code that compiles to the receiver on aStream."
     self printOn: aStream! !

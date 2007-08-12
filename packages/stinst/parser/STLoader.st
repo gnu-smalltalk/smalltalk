@@ -131,6 +131,9 @@ initialize
 	toEvaluate: #variableByteSubclass:instanceVariableNames:classVariableNames:poolDictionaries:category:
 	perform: #doSubclass:selector:arguments:;
 
+	toEvaluate: #subclass:declaration:classVariableNames:poolDictionaries:category:
+	perform: #doSubclass:selector:arguments:;
+
 	toEvaluate: #methodsFor:
 	perform: #doMethodsFor:selector:arguments:;
 

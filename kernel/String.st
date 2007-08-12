@@ -81,14 +81,6 @@ or assumed to be the system default.'!
 ! !
 
 
-!String methodsFor: 'storing'!
-
-storeOn: aStream
-    "Print Smalltalk code compiling to the receiver on aStream"
-    self printOn: aStream
-! !
-
-
 !String methodsFor: 'converting'!
 
 encoding
@@ -140,13 +132,23 @@ displayOn: aStream
     aStream nextPutAll: self
 !
 
-storeOn: aStream
-    "Store Smalltalk code compiling to the receiver on aStream"
+isLiteralObject
+    "Answer whether the receiver is expressible as a Smalltalk literal."
+    ^self isReadOnly not
+!
+
+storeLiteralOn: aStream
+    "Store a Smalltalk literal compiling to the receiver on aStream"
     aStream nextPut: $'.
     self do:
     	[ :char | char == $' ifTrue: [ aStream nextPut: char ].
 	    	  aStream nextPut: char ].
     aStream nextPut: $'.
+!
+
+storeOn: aStream
+    "Store Smalltalk code compiling to the receiver on aStream"
+    self storeLiteralOn: aStream.
     self isReadOnly
 	ifFalse: [ aStream nextPutAll: ' copy' ]
 !

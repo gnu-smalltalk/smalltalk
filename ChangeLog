@@ -1,3 +1,22 @@
+2007-08-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Array.st: Add #storeLiteralOn:.
+	* kernel/Boolean.st: Add #storeLiteralOn:.
+	* kernel/ByteArray.st: Add #storeLiteralOn:.
+	* kernel/Character.st: Add #storeLiteralOn:.
+	* kernel/Float.st: Add #storeLiteralOn:.
+	* kernel/Integer.st: Add #storeLiteralOn:.
+	* kernel/Object.st: Add #storeLiteralOn:.
+	* kernel/ScaledDec.st: Add #storeLiteralOn:.
+	* kernel/String.st: Add #storeLiteralOn:.
+	* kernel/Symbol.st: Add #storeLiteralOn:.
+	* kernel/UndefObject.st: Add #storeLiteralOn:.
+	* kernel/VarBinding.st: Add #storeLiteralOn:.
+
+	* kernel/Class.st: Add #classPragmas.
+	* kernel/CObject.st: Set shape on subclasses.
+	* kernel/CStruct.st: Add #classPragmas, #declaration, #declaration:.
+
 2007-08-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Number.st: Fix #= vs. #~= blunder.

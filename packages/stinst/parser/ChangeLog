@@ -1,3 +1,10 @@
+2007-08-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Exporter.st: Use #classPragmas to emit class metadata.
+	* RBFormatter.st: Use #storeLiteralOn:.
+	* STLoader.st: Support the CStruct creation method.
+	* STLoaderObjs.st: Likewise, and add #classPragmas.
+
 2007-08-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* RBParser.st: Convert to FloatD if there is no exponent.

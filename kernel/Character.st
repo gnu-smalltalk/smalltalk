@@ -367,6 +367,11 @@ displayOn: aStream
 	    self printCodePointOn: aStream.
 	    aStream nextPut: $> ]!
 
+storeLiteralOn: aStream
+    "Store on aStream some Smalltalk code which compiles to the receiver"
+    self storeOn: aStream
+!
+
 printOn: aStream
     "Print a representation of the receiver on aStream"
     self storeOn: aStream! !
@@ -374,6 +379,11 @@ printOn: aStream
 
 
 !Character methodsFor: 'storing'!
+
+isLiteralObject
+    "Answer whether the receiver is expressible as a Smalltalk literal."
+    ^true
+!
 
 storeOn: aStream
     "Store Smalltalk code compiling to the receiver on aStream"
