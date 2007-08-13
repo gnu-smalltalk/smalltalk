@@ -358,7 +358,7 @@ function returned( var )
   else {
     res = ptr_type[res]
     if (res == "")
-      res = var " type"
+      res = "#{" var "}"
   }
 
   return res

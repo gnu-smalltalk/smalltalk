@@ -540,15 +540,19 @@ rewriteAsCCall: func for: aClass
     ^self rewriteAsCCall: func returning: #smalltalk args: args!
 
 rewriteAsCCall: func returning: returnType args: argsArray
-    | descr literals bytecodes newMethod |
+    | descr literals bytecodes newMethod returnCType |
     self isValidCCall
 	ifFalse: [ ^'C call-out not empty' ].
     (CFunctionDescriptor isFunction: func)
 	ifFalse: [ ^'C function not defined '].
 
+    returnCType := (returnType isSymbol or: [ returnType isKindOf: CType ])
+	ifTrue: [ returnType ]
+	ifFalse: [ CType from: returnType ].
+
     descr := CFunctionDescriptor
 	for: func
-	returning: returnType
+	returning: returnCType
 	withArgs: argsArray.
 
     "One of these:
@@ -561,9 +565,9 @@ rewriteAsCCall: func returning: returnType args: argsArray
 	    bytecodes := #[ 136 1 45 0 30 34 67 0 ] ]
 	ifFalse: [
 	    literals := { descr. #{ValueHolder}. }.
-	    bytecodes := returnType isSymbol
-		ifTrue: [ #[ 136 1 95 1 30 34 22 0 51 0 ] ]
-		ifFalse: [ #[ 136 1 95 1 30 34 22 0 30 35 51 0 ] ] ].
+	    bytecodes := (returnCType isKindOf: CType)
+		ifTrue: [ #[ 136 1 95 1 30 34 22 0 30 35 51 0 ] ]
+		ifFalse: [ #[ 136 1 95 1 30 34 22 0 51 0 ] ] ].
 
     newMethod := CompiledMethod
 	literals: literals

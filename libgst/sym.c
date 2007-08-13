@@ -128,6 +128,7 @@ OOP _gst_primitive_symbol = NULL;
 OOP _gst_repeat_symbol = NULL;
 OOP _gst_self_smalltalk_symbol = NULL;
 OOP _gst_self_symbol = NULL;
+OOP _gst_short_symbol = NULL;
 OOP _gst_smalltalk_symbol = NULL;
 OOP _gst_smalltalk_namespace_symbol = NULL;
 OOP _gst_start_execution_symbol = NULL;
@@ -142,8 +143,10 @@ OOP _gst_times_repeat_symbol = NULL;
 OOP _gst_to_by_do_symbol = NULL;
 OOP _gst_to_do_symbol = NULL;
 OOP _gst_true_symbol = NULL;
+OOP _gst_uchar_symbol = NULL;
 OOP _gst_uint_symbol = NULL;
 OOP _gst_ulong_symbol = NULL;
+OOP _gst_ushort_symbol = NULL;
 OOP _gst_undeclared_symbol = NULL;
 OOP _gst_unknown_symbol = NULL;
 OOP _gst_value_with_rec_with_args_symbol = NULL;
@@ -268,6 +271,7 @@ static const symbol_info sym_info[] = {
   {&_gst_c_object_ptr_symbol, "cObjectPtr"},
   {&_gst_category_symbol, "category:"},
   {&_gst_char_symbol, "char"},
+  {&_gst_uchar_symbol, "uChar"},
   {&_gst_does_not_understand_symbol, "doesNotUnderstand:"},
   {&_gst_float_symbol, "float"},
   {&_gst_double_symbol, "double"},
@@ -288,6 +292,8 @@ static const symbol_info sym_info[] = {
   {&_gst_repeat_symbol, "repeat"},
   {&_gst_self_symbol, "self"},
   {&_gst_self_smalltalk_symbol, "selfSmalltalk"},
+  {&_gst_short_symbol, "short"},
+  {&_gst_ushort_symbol, "uShort"},
   {&_gst_smalltalk_symbol, "smalltalk"},
   {&_gst_smalltalk_namespace_symbol, "Smalltalk"},
   {&_gst_start_execution_symbol, "startExecution:"},

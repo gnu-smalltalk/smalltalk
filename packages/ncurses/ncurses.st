@@ -484,14 +484,14 @@ derwin: anInt1 forColumns: anInt2 atY: anInt3 atX: anInt4
      call."
 
     "WINDOW *derwin (WINDOW *, int, int, int, int);" 
-    <cCall: 'derwin' returning: NCWindow type 
+    <cCall: 'derwin' returning: #{NCWindow}
 	args: #(#self #int #int #int #int )>!
 dupwin
     "I return a duplicate of my window. See the man(3) dupwin entry
      for a description of my c function call."
 
     "WINDOW *dupwin (WINDOW *);" 
-    <cCall: 'dupwin' returning: NCWindow type
+    <cCall: 'dupwin' returning: #{NCWindow}
 	args: #(#self )>!
 
 getbkgd
@@ -926,7 +926,7 @@ subpad: anInt1 ncols: anInt2 beginY: anInt3 beginX: anInt4
     c function call."
 
     "WINDOW *subpad (WINDOW *, int, int, int, int);"
-    <cCall: 'subpad' returning: NCWindow type 
+    <cCall: 'subpad' returning: #{NCWindow}
 	args: #(#self #int #int #int #int )>!
 
 subwin: anInt1 ncols: anInt2 beginY: anInt3 beginX: anInt4
@@ -935,7 +935,7 @@ subwin: anInt1 ncols: anInt2 beginY: anInt3 beginX: anInt4
     function call."
 
     "WINDOW *subwin (WINDOW *, int, int, int, int);"
-    <cCall: 'subwin' returning: NCWindow type 
+    <cCall: 'subwin' returning: #{NCWindow}
 	args: #(#self #int #int #int #int )>!
 
 syncok: aBoolean
@@ -2388,7 +2388,7 @@ newpad: anInt1 ncols: anInt2
      man(3) newpad entry for a description of my c function call."
 
     "WINDOW *newpad (int, int);"
-    <cCall: 'newpad' returning: NCWindow type
+    <cCall: 'newpad' returning: #{NCWindow}
 	args: #(#int #int )>!
 
 newwin: anInt1 cols: anInt2 beginY: anInt3 beginX: anInt4
@@ -2398,7 +2398,7 @@ newwin: anInt1 cols: anInt2 beginY: anInt3 beginX: anInt4
      description of my c function call."
 
     "WINDOW *newwin (int, int, int, int);"
-    <cCall: 'newwin' returning: NCWindow type
+    <cCall: 'newwin' returning: #{NCWindow}
 	args: #(#int #int #int #int )>!
 
 nl
@@ -2473,7 +2473,7 @@ pairNumber: anInt
 
 primInitScr
     "WINDOW *initscr (void);"
-    <cCall: 'initscr' returning: NCWindow type 
+    <cCall: 'initscr' returning: #{NCWindow}
 	args: #( )>!
 
 printw: aString 

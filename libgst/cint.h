@@ -56,6 +56,49 @@
 #ifndef GST_CINT_H
 #define GST_CINT_H
 
+typedef enum
+{				/* types for C parameters */
+  CDATA_CHAR,
+  CDATA_UCHAR,
+  CDATA_SHORT,
+  CDATA_USHORT,
+  CDATA_LONG,
+  CDATA_ULONG,
+  CDATA_FLOAT,
+  CDATA_DOUBLE,
+  CDATA_STRING,
+  CDATA_OOP,			/* no conversion to-from C (OOP) */
+  CDATA_INT,
+  CDATA_UINT,
+  CDATA_LONG_DOUBLE,
+
+  CDATA_UNKNOWN,		/* when there is no type a priori */
+  CDATA_STRING_OUT,		/* for things that modify string params */
+  CDATA_SYMBOL,
+  CDATA_BYTEARRAY,
+  CDATA_BYTEARRAY_OUT,
+  CDATA_BOOLEAN,
+  CDATA_VOID,			/* valid only as a return type */
+  CDATA_VARIADIC,		/* for parameters, this param is an
+				   array to be interpreted as
+				   arguments.  Note that only simple
+				   conversions are performed in this
+				   case.  */
+  CDATA_VARIADIC_OOP,		/* for parameters, this param is an
+				   array whose elements are OOPs to be
+				   passed.  */
+  CDATA_COBJECT,		/* a C object is being passed */
+  CDATA_COBJECT_PTR,		/* a C object pointer is being passed */
+  CDATA_SELF,			/* pass self as the corresponding
+				   argument */
+  CDATA_SELF_OOP,		/* pass self as an OOP */
+  CDATA_WCHAR,
+  CDATA_WSTRING,
+  CDATA_WSTRING_OUT,
+  CDATA_SYMBOL_OUT
+}
+cdata_type;
+
 /* Value of errno which is checked by the Smalltalk base classes.  */
 extern int _gst_errno 
   ATTRIBUTE_HIDDEN;

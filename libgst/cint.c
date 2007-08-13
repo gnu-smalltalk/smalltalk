@@ -58,45 +58,6 @@
 #include "../libffi/include/ffi.h"
 #include <ltdl.h>
 
-typedef enum
-{				/* types for C parameters */
-  CDATA_UNKNOWN,		/* when there is no type a priori */
-  CDATA_CHAR,
-  CDATA_STRING,
-  CDATA_STRING_OUT,		/* for things that modify string params */
-  CDATA_SYMBOL,
-  CDATA_BYTEARRAY,
-  CDATA_BYTEARRAY_OUT,
-  CDATA_BOOLEAN,
-  CDATA_INT,
-  CDATA_UINT,
-  CDATA_LONG,
-  CDATA_ULONG,
-  CDATA_FLOAT,
-  CDATA_DOUBLE,
-  CDATA_LONG_DOUBLE,
-  CDATA_VOID,			/* valid only as a return type */
-  CDATA_VARIADIC,		/* for parameters, this param is an
-				   array to be interpreted as
-				   arguments.  Note that only simple
-				   conversions are performed in this
-				   case.  */
-  CDATA_VARIADIC_OOP,		/* for parameters, this param is an
-				   array whose elements are OOPs to be
-				   passed.  */
-  CDATA_COBJECT,		/* a C object is being passed */
-  CDATA_COBJECT_PTR,		/* a C object pointer is being passed */
-  CDATA_OOP,			/* no conversion to-from C (OOP) */
-  CDATA_SELF,			/* pass self as the corresponding
-				   argument */
-  CDATA_SELF_OOP,		/* pass self as an OOP */
-  CDATA_WCHAR,
-  CDATA_WSTRING,
-  CDATA_WSTRING_OUT,
-  CDATA_SYMBOL_OUT
-}
-cdata_type;
-
 typedef struct symbol_type_map
 {
   OOP *symbol;
@@ -228,38 +189,46 @@ static cfunc_info *c_func_cur = NULL;
 
 /* printable names for corresponding C types */
 static const char *c_type_name[] = {
-  "void?",			/* CDATA_UNKNOWN */
   "char",			/* CDATA_CHAR */
+  "unsigned char",		/* CDATA_UCHAR */
+  "short",			/* CDATA_SHORT */
+  "unsigned short",		/* CDATA_USHORT */
+  "long",			/* CDATA_LONG */
+  "unsigned long",		/* CDATA_ULONG */
+  "float",			/* CDATA_FLOAT */
+  "double",			/* CDATA_DOUBLE */
   "char *",			/* CDATA_STRING */
+  "OOP",			/* CDATA_OOP */
+  "int",			/* CDATA_INT */
+  "unsigned int",		/* CDATA_UINT */
+  "long double",		/* CDATA_LONG_DOUBLE */
+
+  "void?",			/* CDATA_UNKNOWN */
   "char *",			/* CDATA_STRING_OUT */
   "char *",			/* CDATA_SYMBOL */
   "char *",			/* CDATA_BYTEARRAY */
   "char *",			/* CDATA_BYTEARRAY_OUT */
   "int",			/* CDATA_BOOLEAN */
-  "int",			/* CDATA_INT */
-  "unsigned int",		/* CDATA_UINT */
-  "long",			/* CDATA_LONG */
-  "unsigned long",		/* CDATA_ULONG */
-  "float",			/* CDATA_FLOAT */
-  "double",			/* CDATA_DOUBLE */
-  "long double",		/* CDATA_LONG_DOUBLE */
   "void?",			/* CDATA_VOID */
   "...",			/* CDATA_VARIADIC */
   "...",			/* CDATA_VARIADIC_OOP */
   "void *",			/* CDATA_COBJECT -- this is misleading */
   "void **",			/* CDATA_COBJECT_PTR */
-  "OOP",			/* CDATA_OOP */
   "void?",			/* CDATA_SELF */
   "OOP",			/* CDATA_SELF_OOP */
   "wchar_t",			/* CDATA_WCHAR */
   "wchar_t *",			/* CDATA_WSTRING */
   "wchar_t *",			/* CDATA_WSTRING_OUT */
+  "char *",			/* CDATA_SYMBOL_OUT */
 };
 
 /* A map between symbols and the cdata_type enum.  */
 static const symbol_type_map type_map[] = {
   {&_gst_unknown_symbol, CDATA_UNKNOWN},
   {&_gst_char_symbol, CDATA_CHAR},
+  {&_gst_uchar_symbol, CDATA_UCHAR},
+  {&_gst_short_symbol, CDATA_SHORT},
+  {&_gst_ushort_symbol, CDATA_USHORT},
   {&_gst_string_symbol, CDATA_STRING},
   {&_gst_string_out_symbol, CDATA_STRING_OUT},
   {&_gst_symbol_symbol, CDATA_SYMBOL},
@@ -754,11 +723,16 @@ get_ffi_type (OOP returnTypeOOP)
 
     case CDATA_VOID:
     case CDATA_INT:
-    case CDATA_UINT:
     case CDATA_CHAR:
+    case CDATA_SHORT:
     case CDATA_WCHAR:
     case CDATA_BOOLEAN:
       return &ffi_type_sint;
+
+    case CDATA_UINT:
+    case CDATA_UCHAR:
+    case CDATA_USHORT:
+      return &ffi_type_uint;
 
    case CDATA_FLOAT:
      return &ffi_type_float;
@@ -860,8 +834,27 @@ push_smalltalk_obj (OOP oop,
 
         case CDATA_INT:
 	case CDATA_UINT:
-	case CDATA_CHAR:
 	  cp->u.intVal = TO_C_INT (oop);
+	  SET_TYPE (&ffi_type_sint);
+	  return;
+
+	case CDATA_CHAR:
+	  cp->u.intVal = (char) TO_C_INT (oop);
+	  SET_TYPE (&ffi_type_sint);
+	  return;
+
+	case CDATA_UCHAR:
+	  cp->u.intVal = (unsigned char) TO_C_INT (oop);
+	  SET_TYPE (&ffi_type_sint);
+	  return;
+
+	case CDATA_SHORT:
+	  cp->u.intVal = (short) TO_C_INT (oop);
+	  SET_TYPE (&ffi_type_sint);
+	  return;
+
+	case CDATA_USHORT:
+	  cp->u.intVal = (unsigned short) TO_C_INT (oop);
 	  SET_TYPE (&ffi_type_sint);
 	  return;
 
@@ -894,6 +887,9 @@ push_smalltalk_obj (OOP oop,
         case CDATA_INT:
 	case CDATA_UINT:
 	case CDATA_CHAR:
+	case CDATA_UCHAR:
+	case CDATA_SHORT:
+	case CDATA_USHORT:
 	case CDATA_BOOLEAN:
 	  cp->u.intVal = (oop == _gst_true_oop);
 	  SET_TYPE (&ffi_type_sint);
@@ -902,7 +898,7 @@ push_smalltalk_obj (OOP oop,
     }
 
   else if ((class == _gst_char_class
-	    && (cType == CDATA_CHAR || cType == CDATA_WCHAR))
+	    && (cType == CDATA_CHAR || cType == CDATA_UCHAR || cType == CDATA_WCHAR))
            || (class == _gst_unicode_character_class && cType == CDATA_WCHAR))
     {
       cp->u.intVal = CHAR_OOP_VALUE (oop);
@@ -1020,6 +1016,7 @@ c_to_smalltalk (cparam *result, OOP returnTypeOOP)
       break;
 
     case CDATA_CHAR:
+    case CDATA_UCHAR:
       resultOOP = CHAR_OOP_AT ((gst_uchar) result->u.intVal);
       break;
 
@@ -1032,11 +1029,19 @@ c_to_smalltalk (cparam *result, OOP returnTypeOOP)
       break;
 
     case CDATA_INT:
-      resultOOP = FROM_C_INT ((long) result->u.intVal);
+      resultOOP = FROM_C_INT ((int) result->u.intVal);
       break;
 
     case CDATA_UINT:
-      resultOOP = FROM_C_INT ((long) result->u.intVal);
+      resultOOP = FROM_C_UINT ((unsigned int) result->u.intVal);
+      break;
+
+    case CDATA_SHORT:
+      resultOOP = FROM_INT ((short) result->u.intVal);
+      break;
+
+    case CDATA_USHORT:
+      resultOOP = FROM_INT ((unsigned short) result->u.intVal);
       break;
 
     case CDATA_LONG:

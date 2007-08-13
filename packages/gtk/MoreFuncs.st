@@ -79,11 +79,11 @@ propertiesAt: name put: anObject
 !GtkWidget methodsFor: 'C call-outs'!
 
 getAllocation
-    <cCall: 'gstGtkWidgetGetAllocation' returning: GtkAllocation type
+    <cCall: 'gstGtkWidgetGetAllocation' returning: #{GtkAllocation}
 	args: #(#self )>!
 
 getWindow
-    <cCall: 'gstGtkGetWindow' returning: GdkWindow type args: #(#self )>!
+    <cCall: 'gstGtkGetWindow' returning: #{GdkWindow} args: #(#self )>!
 
 getState
     <cCall: 'gstGtkGetState' returning: #int args: #(#self )>!
@@ -133,10 +133,10 @@ setOop: iter column: aColumn value: aValue
 !GtkDialog methodsFor: 'C call-outs'!
 
 getVBox
-    <cCall: 'gstGtkDialogGetVBox' returning: GtkWidget type args: #(#self )>!
+    <cCall: 'gstGtkDialogGetVBox' returning: #{GtkWidget} args: #(#self )>!
 
 getActionArea
-    <cCall: 'gstGtkDialogGetActionArea' returning: GtkWidget type
+    <cCall: 'gstGtkDialogGetActionArea' returning: #{GtkWidget}
 	args: #(#self )>! !
 
 !GtkScrolledWindow methodsFor: 'C call-outs'!

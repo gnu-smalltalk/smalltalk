@@ -1,5 +1,16 @@
 2007-08-13  Paolo Bonzini  <bonzinI@gnu.org>
 
+	* libgst/cint.c: Remove enum cdata_type, moved to cint.h.  Reorder
+	c_type_name and type_map accordingly.  Add CDATA_UCHAR, CDATA_SHORT,
+	and CDATA_USHORT.  Convert from/to them appropriately in
+	push_smalltalk_obj, get_ffi_type.
+	* libgst/cint.h: Add enum cdata_type.
+	* libgst/prims.def: Use enum cdata_type values.
+	* libgst/sym.c: Add symbols for #short, #uShort, #uChar.
+	* libgst/sym.h: Add symbols for #short, #uShort, #uChar.
+
+2007-08-13  Paolo Bonzini  <bonzinI@gnu.org>
+
 	* libgst/interp.c: Fix GC bug in _gst_prepare_execution_environment.
 
 2007-08-13  Paolo Bonzini  <bonzinI@gnu.org>

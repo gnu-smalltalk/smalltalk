@@ -3436,45 +3436,45 @@ primitive VMpr_Memory_at [succeed,fail]
       arg2 = TO_C_LONG (oop3);
       switch (arg1)
 	{
-	case 0:		/* char */
-	case 1:		/* unsigned char */
+	case CDATA_CHAR:		/* char */
+	case CDATA_UCHAR:		/* unsigned char */
 	  PUSH_OOP (CHAR_OOP_AT (*(unsigned char *) arg2));
 	  PRIM_SUCCEEDED;
-	case 2:		/* short */
+	case CDATA_SHORT:		/* short */
 	  PUSH_INT (*(short *) arg2);
 	  PRIM_SUCCEEDED;
-	case 3:		/* unsigned short */
+	case CDATA_USHORT:		/* unsigned short */
 	  PUSH_INT (*(unsigned short *) arg2);
 	  PRIM_SUCCEEDED;
-	case 4:		/* long */
+	case CDATA_LONG:		/* long */
 	  PUSH_OOP (FROM_C_LONG (*(long *) arg2));
 	  PRIM_SUCCEEDED;
-	case 5:		/* unsigned long */
+	case CDATA_ULONG:		/* unsigned long */
 	  PUSH_OOP (FROM_C_ULONG (*(unsigned long *) arg2));
 	  PRIM_SUCCEEDED;
-	case 6:		/* float */
+	case CDATA_FLOAT:		/* float */
 	  PUSH_OOP (floate_new (*(float *) arg2));
 	  PRIM_SUCCEEDED;
-	case 7:		/* double */
+	case CDATA_DOUBLE:		/* double */
 	  PUSH_OOP (floatd_new (*(double *) arg2));
 	  PRIM_SUCCEEDED;
-	case 8:		/* string */
+	case CDATA_STRING:		/* string */
 	  if (*(char **) arg2)
 	    PUSH_OOP (_gst_string_new (*(char **) arg2));
 	  else
 	    PUSH_OOP (_gst_nil_oop);
 
 	  PRIM_SUCCEEDED;
-	case 9:		/* OOP */
+	case CDATA_OOP:		/* OOP */
 	  PUSH_OOP (*(OOP *) arg2);
 	  PRIM_SUCCEEDED;
-	case 10:		/* int */
+	case CDATA_INT:		/* int */
 	  PUSH_OOP (FROM_C_INT (*(int *) arg2));
 	  PRIM_SUCCEEDED;
-	case 11:		/* unsigned int */
+	case CDATA_UINT:		/* unsigned int */
 	  PUSH_OOP (FROM_C_UINT (*(unsigned int *) arg2));
 	  PRIM_SUCCEEDED;
-	case 12:		/* long double */
+	case CDATA_LONG_DOUBLE:		/* long double */
 	  PUSH_OOP (floatq_new (*(long double *) arg2));
 	  PRIM_SUCCEEDED;
 	}
@@ -3503,8 +3503,8 @@ primitive VMpr_Memory_atPut [succeed,fail]
       arg2 = TO_C_LONG (oop3);
       switch (arg1)
 	{
-	case 0:		/* char */
-	case 1:		/* unsigned char */
+	case CDATA_CHAR:		/* char */
+	case CDATA_UCHAR:		/* unsigned char */
 	  /* may want to use Character instead? */
 	  if (IS_CLASS (oop3, _gst_char_class)
 	      || (IS_CLASS (oop3, _gst_unicode_character_class)
@@ -3519,23 +3519,23 @@ primitive VMpr_Memory_atPut [succeed,fail]
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
-	case 2:		/* short */
-	case 3:		/* unsigned short */
+	case CDATA_SHORT:		/* short */
+	case CDATA_USHORT:		/* unsigned short */
 	  if (IS_INT (oop4))
 	    {
 	      *(short *) arg2 = (short) TO_INT (oop4);
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
-	case 4:		/* long */
-	case 5:		/* unsigned long */
+	case CDATA_LONG:		/* long */
+	case CDATA_ULONG:		/* unsigned long */
 	  if (IS_C_LONG (oop4))
 	    {
 	      *(long *) arg2 = TO_C_LONG (oop4);
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
-	case 6:		/* float */
+	case CDATA_FLOAT:		/* float */
 	  if (IS_CLASS (oop4, _gst_floatd_class))
 	    {
 	      *(float *) arg2 = (float) FLOATD_OOP_VALUE (oop4);
@@ -3552,7 +3552,7 @@ primitive VMpr_Memory_atPut [succeed,fail]
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
-	case 7:		/* double */
+	case CDATA_DOUBLE:		/* double */
 	  if (IS_CLASS (oop4, _gst_floatd_class))
 	    {
 	      *(double *) arg2 = FLOATD_OOP_VALUE (oop4);
@@ -3569,7 +3569,7 @@ primitive VMpr_Memory_atPut [succeed,fail]
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
-	case 8:		/* string */
+	case CDATA_STRING:		/* string */
 	  if (IS_CLASS (oop4, _gst_string_class)
 	      || IS_CLASS (oop4, _gst_symbol_class))
 	    {
@@ -3579,18 +3579,18 @@ primitive VMpr_Memory_atPut [succeed,fail]
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
-	case 9:		/* OOP */
+	case CDATA_OOP:		/* OOP */
 	  *(OOP *) arg2 = oop4;
 	  PRIM_SUCCEEDED;
-	case 10:		/* int */
-	case 11:		/* unsigned int */
+	case CDATA_INT:		/* int */
+	case CDATA_UINT:		/* unsigned int */
 	  if (IS_C_INT (oop4))
 	    {
 	      *(int *) arg2 = TO_C_INT (oop4);
 	      PRIM_SUCCEEDED;
 	    }
 	  break;
-	case 12:		/* long double */
+	case CDATA_LONG_DOUBLE:		/* long double */
 	  if (IS_CLASS (oop4, _gst_floatd_class))
 	    {
 	      *(long double *) arg2 = (long double) FLOATD_OOP_VALUE (oop4);
@@ -4420,36 +4420,36 @@ primitive VMpr_CObject_at :
 
 	  switch (arg3)
 	    {
-	    case 0:
-	    case 1:
+	    case CDATA_CHAR:
+	    case CDATA_UCHAR:
 	      PUSH_OOP (CHAR_OOP_AT (*(gst_uchar *) addr));
 	      PRIM_SUCCEEDED;
 
-	    case 2:
+	    case CDATA_SHORT:
 	      PUSH_INT (*(short *) addr);
 	      PRIM_SUCCEEDED;
 
-	    case 3:
+	    case CDATA_USHORT:
 	      PUSH_INT (*(unsigned short *) addr);
 	      PRIM_SUCCEEDED;
 
-	    case 4:
+	    case CDATA_LONG:
 	      PUSH_OOP (FROM_C_LONG (*(long *) addr));
 	      PRIM_SUCCEEDED;
 
-	    case 5:
+	    case CDATA_ULONG:
 	      PUSH_OOP (FROM_C_ULONG (*(unsigned long *) addr));
 	      PRIM_SUCCEEDED;
 
-	    case 6:
+	    case CDATA_FLOAT:
 	      PUSH_OOP (floate_new (*(float *) addr));
 	      PRIM_SUCCEEDED;
 
-	    case 7:
+	    case CDATA_DOUBLE:
 	      PUSH_OOP (floatd_new (*(double *) addr));
 	      PRIM_SUCCEEDED;
 
-	    case 8:
+	    case CDATA_STRING:
 	      {
 		char **strAddr;
 		strAddr = (char **) addr;
@@ -4464,19 +4464,19 @@ primitive VMpr_CObject_at :
 		    PRIM_SUCCEEDED;
 		  }
 	      }
-	    case 9:
+	    case CDATA_OOP:
 	      PUSH_OOP (*(OOP *) addr);
 	      PRIM_SUCCEEDED;
 
-	    case 10:
+	    case CDATA_INT:
 	      PUSH_OOP (FROM_C_INT (*(int *) addr));
 	      PRIM_SUCCEEDED;
 
-	    case 11:
+	    case CDATA_UINT:
 	      PUSH_OOP (FROM_C_UINT (*(unsigned int *) addr));
 	      PRIM_SUCCEEDED;
 
-	    case 12:
+	    case CDATA_LONG_DOUBLE:
 	      PUSH_OOP (floatq_new (*(long double *) addr));
 	      PRIM_SUCCEEDED;
 	    }
@@ -4538,8 +4538,8 @@ primitive VMpr_CObject_atPut :
 	  arg4 = TO_INT (oop4);
 	  switch (arg4)
 	    {
-	    case 0:		/* char */
-	    case 1:		/* uchar */
+	    case CDATA_CHAR:		/* char */
+	    case CDATA_UCHAR:		/* uchar */
 	      if (IS_CLASS (oop3, _gst_char_class)
 		  || (IS_CLASS (oop3, _gst_unicode_character_class)
 		      && CHAR_OOP_VALUE (oop3) <= 127))
@@ -4554,8 +4554,8 @@ primitive VMpr_CObject_atPut :
 		}
 	      break;
 
-	    case 2:		/* short */
-	    case 3:		/* ushort */
+	    case CDATA_SHORT:		/* short */
+	    case CDATA_USHORT:		/* ushort */
 	      if (IS_INT (oop3))
 		{
 		  *(short *) addr = (short) TO_INT (oop3);
@@ -4563,8 +4563,8 @@ primitive VMpr_CObject_atPut :
 		}
 	      break;
 
-	    case 4:		/* long */
-	    case 5:		/* ulong */
+	    case CDATA_LONG:		/* long */
+	    case CDATA_ULONG:		/* ulong */
 	      if (IS_C_LONG (oop3))
 		{
 		  *(long *) addr = (long) TO_C_LONG (oop3);
@@ -4572,7 +4572,7 @@ primitive VMpr_CObject_atPut :
 		}
 	      break;
 
-	    case 6:
+	    case CDATA_FLOAT:
 	      {
 		float *floatAddr;
 		floatAddr = (float *) addr;
@@ -4599,7 +4599,7 @@ primitive VMpr_CObject_atPut :
 	      }
 	      break;
 
-	    case 7:		/* double */
+	    case CDATA_DOUBLE:		/* double */
 	      {
 		double *doubleAddr;
 		doubleAddr = (double *) addr;
@@ -4626,7 +4626,7 @@ primitive VMpr_CObject_atPut :
 	      }
 	      break;
 
-	    case 8:		/* string */
+	    case CDATA_STRING:		/* string */
 	      {			/* note that this does not allow for
 				   replacemnt in place */
 		/* to replace in place, use replaceFrom: */
@@ -4649,12 +4649,12 @@ primitive VMpr_CObject_atPut :
 		break;
 	      }
 
-	    case 9:
+	    case CDATA_OOP:
 	      *(OOP *) addr = oop3;
 	      PRIM_SUCCEEDED;
 
-	    case 10:		/* int */
-	    case 11:		/* uint */
+	    case CDATA_INT:		/* int */
+	    case CDATA_UINT:		/* uint */
 	      if (IS_C_INT (oop3))
 		{
 		  *(int *) addr = (int) TO_C_INT (oop3);
@@ -4662,7 +4662,7 @@ primitive VMpr_CObject_atPut :
 		}
 	      break;
 
-	    case 12:		/* long double */
+	    case CDATA_LONG_DOUBLE:	/* long double */
 	      {
 		long double *longDoubleAddr;
 		longDoubleAddr = (long double *) addr;

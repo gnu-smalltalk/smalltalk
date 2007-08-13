@@ -88,7 +88,7 @@ open: fileName blockSize: size flags: flags
     mode: modeInt fatalFunc: funcAddr
 
     "GDBM_FILE gdbm_open(name, block_size, flags, mode, fatal_func);"
-    <cCall: 'gdbm_open' returning: GDBM type
+    <cCall: 'gdbm_open' returning: #{GDBM}
 	args: #(#string #int #int #int #cObject)>! !
 
 !GDBM methodsFor: 'C call-outs'!
@@ -105,7 +105,7 @@ at: key put: value flag: aFlag
 
 at: key
     "datum gdbm_fetch(dbf, key);"
-    <cCall: 'gdbm_fetch' returning: DatumStruct type args: #(#self #cObject)>
+    <cCall: 'gdbm_fetch' returning: #{DatumStruct} args: #(#self #cObject)>
 !
 
 removeKey: key
@@ -115,12 +115,12 @@ removeKey: key
 
 firstKey
     "datum gdbm_firstkey(dbf);"
-    <cCall: 'gdbm_firstkey' returning: DatumStruct type args: #(#self)>
+    <cCall: 'gdbm_firstkey' returning: #{DatumStruct} args: #(#self)>
 !
 
 nextKey: afterDatum
     "datum gdbm_nextkey(dbf, key);"
-    <cCall: 'gdbm_nextkey' returning: DatumStruct type args: #(#self #cObject)>
+    <cCall: 'gdbm_nextkey' returning: #{DatumStruct} args: #(#self #cObject)>
 !
 
 reorganize

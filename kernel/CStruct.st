@@ -34,7 +34,7 @@
 
 CObject variableWordSubclass: #CCompound
       instanceVariableNames: ''
-      classVariableNames: 'TypeMap'
+      classVariableNames: ''
       poolDictionaries: ''
       category: 'Language-C interface'
 !
@@ -75,29 +75,6 @@ new
 
 
 !CCompound class methodsFor: 'subclass creation'!
-
-initialize
-    "Initialize the receiver's TypeMap"
-    TypeMap := IdentityDictionary new
-	at: #long put: #{CLongType}; 
-	at: #uLong put: #{CULongType};
-	at: #byte put: #{CByteType};
-	at: #char put: #{CCharType};
-	at: #uChar put: #{CUCharType};
-	at: #uchar put: #{CUCharType};
-	at: #short put: #{CShortType};
-	at: #uShort put: #{CUShortType};
-	at: #ushort put: #{CUShortType};
-	at: #int put: #{CIntType};
-	at: #uInt put: #{CUIntType};
-	at: #uint put: #{CUIntType};
-	at: #float put: #{CFloatType};
-	at: #double put: #{CDoubleType};
-	at: #longDouble put: #{CLongDoubleType};
-	at: #string put: #{CStringType};
-	at: #smalltalk put: #{CSmalltalkType};
-	yourself
-!
 
 sizeof
     "Answer 0, the size of an empty struct"
@@ -169,99 +146,30 @@ declaration: array inject: startOffset into: aBlock
 
     "Iterate through each member, doing alignment, size calculations,
      and creating accessor methods"
-    array do: [ :dcl || type name |
+    array do: [ :dcl || typeDecl name str type |
 	name := dcl at: 1.
-	type := dcl at: 2.
+	typeDecl := dcl at: 2.
 	self emitInspectTo: inspStr for: name.
 
-	self computeTypeString: type block: [ :typeInfo :typeString |
-	    | str |
-	    offset := aBlock value: offset value: typeInfo alignof.
-	    maxAlignment := typeInfo alignof max: maxAlignment.
+	type := CType from: typeDecl.
+	offset := aBlock value: offset value: type alignof.
+	maxAlignment := type alignof max: maxAlignment.
 
-	    str := WriteStream on: (String new: 20).
-	    str nextPutAll: name;
-		nl;
-		nextPutAll: '    ^self at: ';
-		print: offset;
-		nextPutAll: ' type: ';
-		nextPutAll: typeString.
-	    self compile: str classified: 'accessing'.
-	    offset := offset + typeInfo sizeof
-	]
+	str := WriteStream on: (String new: 20).
+	str nextPutAll: name;
+	    nl;
+	    nextPutAll: '    ^self at: ';
+	    print: offset;
+	    nextPutAll: ' type: ';
+	    store: type.
+	self compile: str classified: 'accessing'.
+	offset := offset + type sizeof
     ].
 
     self compile: inspStr contents, ')' classified: 'debugging'.
     self compileSize: offset align: maxAlignment
 !
 			
-computeAggregateType: type block: aBlock
-    "Private - Called by computeTypeString:block: for pointers/arrays.
-    Format of type:
-    	(array int 3) or
-    	(ptr FooStruct)
-    "
-    | structureType |
-    structureType := type at: 1.
-    structureType == #array 
-	ifTrue: [ ^self computeArrayType: type block: aBlock ].
-    structureType == #ptr
-	ifTrue: [ ^self computePtrType: type block: aBlock ].
-!
-
-computeTypeString: type block: aBlock
-    "Private - Pass the size, alignment, and description of CType for aBlock,
-    given the field description in `type' (the second element of each pair)."
-    | typeInfo typeString |
-    type class == Array
-	ifTrue: [ ^self computeAggregateType: type block: aBlock ].
-
-    "must be a type name, either built in or struct, either a Symbol
-     or an Association"
-
-    type isSymbol ifFalse: [
-	typeString := '#{%1} value type'
-	    % { type value nameIn: Namespace current }.
-
-	^aBlock value: type value value: typeString.
-    ].
-
-    TypeMap at: type ifPresent: [ :binding |
-	^aBlock value: binding value value: binding key
-    ].
-
-    ^aBlock
-	value: (Namespace current at: type)
-	value: type, ' type'
-!
-
-	
-computeArrayType: type block: aBlock
-    "Private - Called by computeAggregateType:block: for arrays"
-    | numElts elementType |
-    elementType := type at: 2.
-    numElts := type at: 3.
-    self computeTypeString: elementType
-	 block: [ :typeInfo :typeString | 
-	     aBlock value: (CArrayCType elementType: typeInfo
-			    numberOfElements: numElts)
-		    value: '(CArrayCType elementType: ', typeString,
-			   ' numberOfElements: ', (numElts printString), ')'
-	 ]
-!
-
-computePtrType: type block: aBlock
-    "Private - Called by computeAggregateType:block: for pointers"
-    | subType |
-    subType := type at: 2.
-    self computeTypeString: subType
-	 block: [ :typeInfo :typeString | 
-	     aBlock value: CPtr
-		    value: '(CPtrCType elementType: ', typeString, ')'
-    ]
-!
-
-
 compileSize: size align: alignment
     "Private - Compile sizeof and alignof methods"
     | sizeofMethod alignofMethod |

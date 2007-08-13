@@ -35,7 +35,7 @@
 
 Object subclass: #CType
        instanceVariableNames: 'cObjectType'
-       classVariableNames: ''
+       classVariableNames: 'TypeMap'
        poolDictionaries: ''
        category: 'Language-C interface'
 ! 
@@ -85,11 +85,79 @@ CPtrCType subclass: #CArrayCType
 
 
 
+!CType class methodsFor: 'initialization'!
+
+initialize
+    "Initialize the receiver's TypeMap"
+    Smalltalk at: #CObjectType	   put: (CType cObjectType: CObject).
+    Smalltalk at: #CCharType	   put: (CScalarCType cObjectType: CChar).
+    Smalltalk at: #CUCharType	   put: (CScalarCType cObjectType: CUChar).
+    Smalltalk at: #CShortType	   put: (CScalarCType cObjectType: CShort).
+    Smalltalk at: #CUShortType	   put: (CScalarCType cObjectType: CUShort).
+    Smalltalk at: #CLongType	   put: (CScalarCType cObjectType: CLong).
+    Smalltalk at: #CULongType	   put: (CScalarCType cObjectType: CULong).
+    Smalltalk at: #CIntType	   put: (CScalarCType cObjectType: CInt).
+    Smalltalk at: #CUIntType	   put: (CScalarCType cObjectType: CUInt).
+    Smalltalk at: #CSmalltalkType  put: (CScalarCType cObjectType: CSmalltalk).
+    Smalltalk at: #CFloatType	   put: (CScalarCType cObjectType: CFloat).
+    Smalltalk at: #CDoubleType	   put: (CScalarCType cObjectType: CDouble).
+    Smalltalk at: #CLongDoubleType put: (CScalarCType cObjectType: CLongDouble).
+    Smalltalk at: #CStringType	   put: (CStringCType cObjectType: CString).
+    Smalltalk at: #CByteType	   put: (CScalarCType cObjectType: CByte).
+    Smalltalk at: #CBooleanType	   put: (CScalarCType cObjectType: CBoolean).
+    
+    TypeMap := IdentityDictionary new
+        at: #long put: CLongType; 
+        at: #uLong put: CULongType;
+        at: #byte put: CByteType;
+        at: #char put: CCharType;
+        at: #uChar put: CUCharType;
+        at: #uchar put: CUCharType;
+        at: #short put: CShortType;
+        at: #uShort put: CUShortType;
+        at: #ushort put: CUShortType;
+        at: #int put: CIntType;
+        at: #uInt put: CUIntType;
+        at: #uint put: CUIntType;
+        at: #float put: CFloatType;
+        at: #double put: CDoubleType;
+        at: #longDouble put: CLongDoubleType;
+        at: #string put: CStringType;
+        at: #smalltalk put: CSmalltalkType;
+        yourself
+! !
+
 !CType class methodsFor: 'C instance creation'!
 
 cObjectType: aCObjectSubclassBinding
     "Create a new CType for the given subclass of CObject"
     ^self basicNew init: aCObjectSubclassBinding
+!
+
+from: type
+    "Private - Pass the size, alignment, and description of CType for aBlock,
+    given the field description in `type' (the second element of each pair)."
+    | typeInfo typeString |
+    type class == Array
+	ifTrue: [ ^self computeAggregateType: type ].
+
+    "must be a type name, either built in or struct, either a Symbol
+     or an Association"
+
+    type isSymbol ifFalse: [ ^type value type ].
+    ^TypeMap at: type ifAbsent: [ Namespace current at: type ]
+!
+
+computeAggregateType: type
+    "Private - Called by from: for pointers/arrays.
+    Format of type:
+    	(#array #int 3) or
+    	(#ptr #{FooStruct})
+    "
+    | structureType |
+    structureType := type at: 1.
+    structureType == #array ifTrue: [ ^CArrayCType from: type ].
+    structureType == #ptr ifTrue: [ ^CPtrCType from: type ].
 ! !
 
 
@@ -207,6 +275,13 @@ elementType
 
 !CPtrCType class methodsFor: 'instance creation'!
 
+from: type
+    "Private - Called by computeAggregateType: for pointers"
+    | subType typeInfo |
+    subType := type at: 2.
+    typeInfo := CType from: subType.
+    ^self elementType: typeInfo!
+
 elementType: aCType
     "Answer a new instance of CPtrCType that maps pointers to the given CType"
     ^self new init: CPtr; elementType: aCType
@@ -227,6 +302,15 @@ new: size
     ^CObject alloc: elementType sizeof * size type: self
 ! !
 
+!CPtrCType methodsFor: 'storing'!
+
+storeOn: aStream
+    aStream
+	nextPutAll: '(CPtrCType elementType: ';
+	store: self elementType;
+	nextPut: $)
+! !
+
 !CPtrCType methodsFor: 'private'!
 
 elementType: aCType
@@ -237,6 +321,16 @@ elementType: aCType
 
 
 !CArrayCType class methodsFor: 'instance creation'!
+
+from: type
+    "Private - Called by CType>>from: for arrays"
+    | numElts elementType typeInfo |
+    elementType := type at: 2.
+    numElts := type at: 3.
+    typeInfo := CType from: elementType.
+    ^self
+	elementType: typeInfo
+	numberOfElements: numElts!
 
 elementType: aCType
     self shouldNotImplement
@@ -253,6 +347,17 @@ elementType: aCType numberOfElements: anInteger
         numberOfElements: anInteger
 ! !
 
+
+!CArrayCType methodsFor: 'storing'!
+
+storeOn: aStream
+    aStream
+	nextPutAll: '(CArrayCType elementType: ';
+	store: self elementType;
+	nextPutAll: ' numberOfElements: ';
+	store: numElements printString;
+	nextPut: $)
+! !
 
 !CArrayCType methodsFor: 'accessing'!
 
@@ -279,20 +384,4 @@ numberOfElements: anInteger
 ! !
 
 
-Smalltalk at: #CObjectType	put: (CType cObjectType: CObject).
-Smalltalk at: #CCharType	put: (CScalarCType cObjectType: CChar).
-Smalltalk at: #CUCharType	put: (CScalarCType cObjectType: CUChar).
-Smalltalk at: #CShortType	put: (CScalarCType cObjectType: CShort).
-Smalltalk at: #CUShortType	put: (CScalarCType cObjectType: CUShort).
-Smalltalk at: #CLongType	put: (CScalarCType cObjectType: CLong).
-Smalltalk at: #CULongType	put: (CScalarCType cObjectType: CULong).
-Smalltalk at: #CIntType		put: (CScalarCType cObjectType: CInt).
-Smalltalk at: #CUIntType	put: (CScalarCType cObjectType: CUInt).
-Smalltalk at: #CSmalltalkType	put: (CScalarCType cObjectType: CSmalltalk).
-Smalltalk at: #CFloatType	put: (CScalarCType cObjectType: CFloat).
-Smalltalk at: #CDoubleType	put: (CScalarCType cObjectType: CDouble).
-Smalltalk at: #CLongDoubleType	put: (CScalarCType cObjectType: CLongDouble).
-Smalltalk at: #CStringType	put: (CStringCType cObjectType: CString).
-Smalltalk at: #CByteType	put: (CScalarCType cObjectType: CByte).
-Smalltalk at: #CBooleanType	put: (CScalarCType cObjectType: CBoolean).
-!
+CType initialize!

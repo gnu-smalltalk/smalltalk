@@ -1,5 +1,15 @@
 2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CStruct.st: Remove TypeMap, #computeType:block: and
+	its callees.  Use CType>>#from: to make a CType from an array
+	or VariableBinding, and #storeOn: instead of the former second
+	argument of the block.
+	* kernel/CType.st: Add TypeMap and CType>>#from:.  Override
+	#storeOn: in CArray and CPtr.
+	* kernel/CompildMeth.st: Use CType>>#from:.
+	
+2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/CObject.st: Make #alloc:/#new: not a primitive.  Add a
 	defaultType class-instance variable and make the class-side #type
 	default to it; the instance-side #type defaults to the class-side #type.

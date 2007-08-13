@@ -36,12 +36,28 @@ o   GNU Smalltalk now needs InfoZIP to be installed on the machine where
     it is compiled, in order to use the new single-file package facility.
     In the future, this dependency may be removed.
 
+o   The tool for automatic documentation generator, that has been used by
+    the GNU Smalltalk distribution for a long time, is now installed as gst-doc.
+
+
+Backwards-incompatible changes:
+
+o   If you want to return a specific CObject class from a C call-out,
+    it is suggested that you stop using "returning: ClassName type", as in
+
+       <cCall: 'dupwin' returning: NCWindow type args: #(#self )>!
+
+    and instead use
+
+       <cCall: 'dupwin' returning: #{NCWindow} args: #(#self )>!
+                                   ^^^^^^^^^^^
+
+    The source code conversion tool might silently produce an incorrect
+    output if you use the former syntax.
+
 o   The ABI for external usage has changed.  libgst.a does not know anymore
     how to parse options, but exports functions to achieve the same effect
     as options.
-
-o   The tool for automatic documentation generator, that has been used by
-    the GNU Smalltalk distribution for a long time, is now installed as gst-doc.
 
 
 Packages improvements:
@@ -123,6 +139,15 @@ o   Since they are not portable outside Unix systems, the `archive' virtual
     are now available only if the VFSAddOns package is loaded.  Without the
     package, only #uzip is available and it will only support extracting from
     ZIP files.
+
+o   When declaring a C function, the #returning: argument now supports
+    specifying CPtr and CArray types, the same way it is done in CStruct
+    and CUnion declarations.  For example, since you can specify an "int *"
+    as "#{CInt}", an "int **" (pointer to pointer to Integer, i.e. pointer
+    to CInt) would be written "#(#ptr #{CInt})".
+
+    Conversion from Array to CType is generally available using the
+    CType class>>#from: method.
 
 -----------------------------------------------------------------------------
 
