@@ -328,31 +328,23 @@ resolveClass: node
         "Dictionary cannot have nil as a key, use the entire RBLiteralNode."
         ^self proxyNilClass ].
         
-    object := self resolveName: node.
+    object := self
+	resolveName: node
+	isNamespace: [ :index :size | index < size ].
     ^self proxyForClass: object
 !
 
 resolveNamespace: node
     | object |
-    object := self resolveName: node.
+    object := self
+	resolveName: node
+	isNamespace: [ :index :size | true ].
+
     ^self proxyForNamespace: object
 !
 
-resolveName: node
+resolveName: node isNamespace: aBlock
     | current selectors |
-    node isVariable
-	ifTrue: [
-	    (node name includes: $.) ifFalse: [
-		^self currentNamespace at: node name asSymbol ifAbsent: [
-		    defaultNamespace
-			at: node name asSymbol
-			put: (UndefinedClass name: node name asSymbol for: self) ]].
-
-	    ^(node name substrings: $.)
-		inject: self currentNamespace
-		into: [ :current :each | current at: each asSymbol ]
-	].
-
     current := node.
     selectors := OrderedCollection new.
     [ current isMessage ] whileTrue: [
@@ -361,9 +353,15 @@ resolveName: node
     ].
     selectors addAllFirst: (current name substrings: $.).
 
-    ^selectors
-	inject: self currentNamespace
-	into: [ :current :each | current at: each asSymbol ]
-! !
+    current := self currentNamespace.
+    selectors keysAndValuesDo: [ :index :each || name |
+	name := each asSymbol.
+	current := current
+	       at: name
+	       ifAbsentPut: [
+	           (aBlock value: index value: selectors size)
+		       ifTrue: [ current addSubspace: name ]
+		       ifFalse: [ UndefinedClass name: name in: current for: self ]]].
+    ^current! !
 
 STClassLoader initialize!

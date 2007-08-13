@@ -1,5 +1,11 @@
 2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* STLoader.st: Create undefined namespaces.
+	* STLoaderObjs.st: Support creating undefined classes in arbitrary
+	namespaces.
+
+2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* STLoaderObjs.st: Add one more #classPragmas implementation.
 
 2007-08-12  Paolo Bonzini  <bonzini@gnu.org>

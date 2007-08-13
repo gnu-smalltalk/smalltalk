@@ -116,7 +116,7 @@ secondary: aDictionary
 
 
 PseudoBehavior subclass: #UndefinedClass
-        instanceVariableNames: 'name class'
+        instanceVariableNames: 'name class environment'
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -676,8 +676,10 @@ nameIn: aNamespace
 
 !UndefinedClass class methodsFor: 'creating'!
 
-name: aSymbol for: aLoader
-    ^(self for: aLoader) setName: aSymbol
+name: aSymbol in: aNamespace for: aLoader
+    ^(self for: aLoader)
+	environment: aNamespace;
+	name: aSymbol
 ! !
 
 !UndefinedClass methodsFor: 'testing'!
@@ -699,14 +701,24 @@ classPragmas
 !
 
 name
-    ^name!
+    ^name
+!
 
-nameIn: aNamespace
-    ^name asString!
+name: aSymbol
+    name := aSymbol
+!
 
-setName: aSymbol
-    name := aSymbol.
-    class := UndefinedMetaclass for: self.
+initializeFor: aSTLoader
+    super initializeFor: aSTLoader.
+    class := UndefinedMetaclass for: self
+!
+
+environment
+    ^environment
+!
+
+environment: aNamespace
+    environment := aNamespace.
 ! !
 
 !UndefinedClass methodsFor: 'printing'!
