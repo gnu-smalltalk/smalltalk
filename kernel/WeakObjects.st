@@ -360,8 +360,7 @@ findIndex: anObject
 !WeakKeyDictionary methodsFor: 'accessing'!
 
 add: anAssociation
-    "Store value as associated to the given key. If any, recycle Associations
-     temporarily stored by the compiler inside the `Undeclared' dictionary."
+    "Store value as associated to the given key."
     | assoc |
     assoc := anAssociation.
 
@@ -378,8 +377,7 @@ add: anAssociation
 !
 
 at: key put: value
-    "Store value as associated to the given key. If any, recycle Associations
-     temporarily stored by the compiler inside the `Undeclared' dictionary."
+    "Store value as associated to the given key."
     | assoc |
 
     assoc := HomedAssociation

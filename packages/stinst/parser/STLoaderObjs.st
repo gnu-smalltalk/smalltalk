@@ -495,6 +495,10 @@ isDefined
 
 !PseudoBehavior methodsFor: 'abstract'!
 
+classPragmas
+    self subclassResponsibility
+!
+
 asClass
     self subclassResponsibility
 !
@@ -689,6 +693,10 @@ asMetaclass
 
 asClass
     ^self!
+
+classPragmas
+    ^#(#comment #category)
+!
 
 name
     ^name!

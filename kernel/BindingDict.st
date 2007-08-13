@@ -179,26 +179,29 @@ printOn: aStream in: aNamespace
 at: key put: value
     "Store value as associated to the given key. If any, recycle Associations
      temporarily stored by the compiler inside the `Undeclared' dictionary."
-    | index assoc |
+    | index assoc newAssoc |
     index := self findIndex: key.
     assoc := self primAt: index.
+    assoc isNil ifFalse: [ assoc value: value. ^value ].
+
+    newAssoc := VariableBinding
+	key: key
+	value: value
+	environment: self.
+
+    self incrementTally ifTrue: [
+        index := self findIndex: key ].
+
+    assoc := Undeclared
+	associationAt: key
+	ifAbsent: [ nil ].
     assoc isNil
-	ifTrue: [
-	    self incrementTally ifTrue: [
-	        index := self findIndex: key ].
+	ifTrue: [ assoc := newAssoc ]
+	ifFalse: [
+	    Undeclared remove: assoc ifAbsent: [ ].
+	    assoc become: newAssoc ].
 
-	    assoc := Undeclared
-		associationAt: key
-		ifAbsent: [
-		    VariableBinding
-			key: key
-			value: value
-			environment: self ].
-
-	    assoc := self primAt: index put: assoc.
-	].
-
-    assoc value: value.
+    self primAt: index put: assoc.
     ^value
 ! !
 
@@ -238,11 +241,6 @@ primAt: index put: anObject
     | assoc |
     assoc := anObject.
     assoc isNil ifFalse: [
-	assoc environment == Undeclared ifTrue: [
-	    Undeclared remove: assoc ifAbsent: [ ].
-            assoc environment: self.
-	].
-
 	"Need static typing to avoid crashes..."
 	((assoc isKindOf: VariableBinding) and: [
 	    assoc environment == self]) ifFalse: [
