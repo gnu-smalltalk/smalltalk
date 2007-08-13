@@ -78,11 +78,6 @@ contents
     "Returns a collection of the same type that the stream accesses, up to
     and including the final element."
     ^collection copyFrom: 1 to: ptr - 1
-!
-
-size
-    "Answer how many objects are there in the underlying collection."
-    ^endPtr
 ! !
 
 
