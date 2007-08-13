@@ -302,6 +302,30 @@ log
     ^self ln / self class ln10
 !
 
+ceilingLog: radix
+    "Answer (self log: radix) ceiling."
+
+    self < self zero ifTrue: [
+       ^self arithmeticError: 'cannot extract logarithm of a negative number'
+    ].
+    radix <= radix unity ifTrue: [
+        (radix <= radix zero) ifTrue: [ ^self arithmeticError: 'bad radix' ].
+        (radix = radix unity) ifTrue: [ ^self arithmeticError: 'bad radix' ] ].
+    ^(self log: radix) ceiling
+!
+
+floorLog: radix
+    "Answer (self log: radix) floor."
+
+    self < self zero ifTrue: [
+       ^self arithmeticError: 'cannot extract logarithm of a negative number'
+    ].
+    radix <= radix unity ifTrue: [
+        (radix <= radix zero) ifTrue: [ ^self arithmeticError: 'bad radix' ].
+        (radix = radix unity) ifTrue: [ ^self arithmeticError: 'bad radix' ] ].
+    ^(self log: radix) floor
+!
+
 estimatedLog
     "Answer an estimate of (self abs floorLog: 10)"
     ^(self exponent + 1) asFloatD / FloatD log10Base2
