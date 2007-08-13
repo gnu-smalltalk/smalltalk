@@ -1,3 +1,17 @@
+2007-08-13  Paolo Bonzini  <bonzinI@gnu.org>
+
+	* libgst/callin.c: Use _gst_c_object_new instead of
+	_gst_c_object_new_typed.
+	* libgst/cint.c: Likewise.
+	* libgst/dict.inl: Likewise.
+	* libgst/dict.c: Remove _gst_c_object_type_ctype and _gst_c_type_new.
+	Add a new parameter to _gst_c_object_new_typed and call it
+	_gst_c_object_new; dereference the binding of the TYPEOOP.
+	Remove _gst_alloc_cobject.
+	* libgst/prims.def: Remove VMpr_CObject_alloc.  Check receiver
+	type for VMpr_CObject_allocType.  Use _gst_c_object_new instead of
+	_gst_c_object_new_typed.
+
 2007-08-12  Paolo Bonzini  <bonzinI@gnu.org>
 
         * libgst/comp.c: Make literals read-only in make_oop_constant.

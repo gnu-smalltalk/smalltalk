@@ -260,7 +260,7 @@ _gst_va_msg_sendf (PTR resultPtr,
 	    INC_ADD_OOP (ctype);
 
 	    args[++i] =
-	      _gst_c_object_new_typed (va_arg (ap, PTR), ctype);
+	      _gst_c_object_new (va_arg (ap, PTR), ctype, _gst_nil_oop);
 
 	    INC_ADD_OOP (args[i]);
           }
@@ -272,7 +272,7 @@ _gst_va_msg_sendf (PTR resultPtr,
     	    OOP ctype;
     	    ctype = va_arg (ap, OOP);
     	    args[++i] =
-    	      _gst_c_object_new_typed (va_arg (ap, PTR), ctype);
+    	      _gst_c_object_new (va_arg (ap, PTR), ctype, _gst_nil_oop);
 
 	    INC_ADD_OOP (args[i]);
           }

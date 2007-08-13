@@ -71,11 +71,6 @@ new
     "Allocate a new instance of the receiver. To free the memory after
      GC, remember to call #addToBeFinalized."
     ^self alloc: self sizeof
-!
-
-type
-    "Answer a CType for the receiver"
-    ^CType cObjectType: self
 ! !
 
 

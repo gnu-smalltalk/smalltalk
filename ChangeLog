@@ -1,5 +1,17 @@
 2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CObject.st: Make #alloc:/#new: not a primitive.  Add a
+	defaultType class-instance variable and make the class-side #type
+	default to it; the instance-side #type defaults to the class-side #type.
+	Always return aValue from #at:put:.  Remove the instance-side
+	#scalarIndex and rename the class-side method to cObjStoredType.
+	Add missing CString class>>#cObjStoredType.
+	* kernel/CStruct.st: Remove #type override.
+	* kernel/CType.st: Adapt so that the binding is stored in the class
+	variable.  Use the #cObjectType accessor consistently.
+
+2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/BindingDict.st: Use a different association than the
 	one in Undeclared, using #become: on it.
 	* kernel/WeakObjects.st: Fix wrong method comments.

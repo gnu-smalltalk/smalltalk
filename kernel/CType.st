@@ -87,9 +87,9 @@ CPtrCType subclass: #CArrayCType
 
 !CType class methodsFor: 'C instance creation'!
 
-cObjectType: aCObjectSubclass
+cObjectType: aCObjectSubclassBinding
     "Create a new CType for the given subclass of CObject"
-    ^self basicNew init: aCObjectSubclass
+    ^self basicNew init: aCObjectSubclassBinding
 ! !
 
 
@@ -104,7 +104,7 @@ new
 address: cObjOrInt
     "Create a new CObject with the type (class) identified by the receiver,
     pointing to the given address (identified by an Integer or CObject)."
-    ^(cObjectType basicNew: 1)
+    ^(self cObjectType basicNew: 1)
 	type: self;
 	address: (cObjOrInt isInteger
 	    ifTrue: [ cObjOrInt ]
@@ -139,12 +139,12 @@ cObjectType
 
 sizeof
     "Answer the size of the receiver's instances"
-    ^cObjectType sizeof
+    ^self cObjectType sizeof
 !
 
 alignof
     "Answer the size of the receiver's instances"
-    ^cObjectType alignof
+    ^self cObjectType alignof
 !
 
 valueType
@@ -181,7 +181,7 @@ init: aCObjectClass
 storeOn: aStream
     "Store Smalltalk code that compiles to the receiver"
     aStream
-	print: cObjectType;
+	print: self cObjectType;
 	nextPutAll: 'Type'
 ! !
 
@@ -191,7 +191,7 @@ valueType
     "valueType is used as a means to communicate to the interpreter the 
     underlying type of the data.  For scalars, it is supplied by the
     CObject subclass."
-    ^cObjectType scalarIndex
+    ^self cObjectType cObjStoredType
 ! !
 
 
@@ -279,6 +279,7 @@ numberOfElements: anInteger
 ! !
 
 
+Smalltalk at: #CObjectType	put: (CType cObjectType: CObject).
 Smalltalk at: #CCharType	put: (CScalarCType cObjectType: CChar).
 Smalltalk at: #CUCharType	put: (CScalarCType cObjectType: CUChar).
 Smalltalk at: #CShortType	put: (CScalarCType cObjectType: CShort).

@@ -1069,9 +1069,9 @@ c_to_smalltalk (cparam *result, OOP returnTypeOOP)
       else if (returnType == CDATA_COBJECT)
 	{
 	  if (IS_INT (returnTypeOOP))
-	    resultOOP = COBJECT_NEW (result->u.ptrVal);
-	  else
-	    resultOOP = _gst_c_object_new_typed (result->u.ptrVal, returnTypeOOP);
+	    returnTypeOOP = _gst_nil_oop;
+	  resultOOP = _gst_c_object_new (result->u.ptrVal, returnTypeOOP,
+					 _gst_c_object_class);
 	}
       else if (returnType == CDATA_STRING || returnType == CDATA_STRING_OUT)
 	{

@@ -36,6 +36,8 @@ Object variableWordSubclass: #CObject
 	    poolDictionaries: 'CSymbols'
 	    category: 'Language-C interface'!
 
+CObject class instanceVariableNames: 'defaultType'!
+
 CObject variableWordSubclass: #CScalar
 	instanceVariableNames: ''
 	classVariableNames: ''
@@ -191,14 +193,12 @@ subclass: aSymbol
 
 alloc: nBytes
     "Allocate nBytes bytes and return an instance of the receiver"
-    <primitive: VMpr_CObject_alloc>
-    ^SystemExceptions.WrongClass signalOn: nBytes mustBe: SmallInteger
+    ^self alloc: nBytes type: nil
 !
 
 new: nBytes
     "Allocate nBytes bytes and return an instance of the receiver"
-    <primitive: VMpr_CObject_alloc>
-    ^SystemExceptions.WrongClass signalOn: nBytes mustBe: SmallInteger
+    ^self alloc: nBytes type: nil
 !
 
 alloc: nBytes type: cTypeObject
@@ -217,8 +217,7 @@ alloc: nBytes type: cTypeObject
 address: anInteger
     "Answer a new object pointing to the passed address, anInteger"
     ^(self basicNew: 1)
-	address: anInteger;
-	type: self scalarIndex
+	address: anInteger
 !
 
 new
@@ -229,14 +228,10 @@ new
 
 !CObject class methodsFor: 'conversion'!
 
-scalarIndex
-    "Nothing special in the default case - answer a CType for the receiver"
-    ^CType cObjectType: self
-!
-
 type
     "Nothing special in the default case - answer a CType for the receiver"
-    ^CType cObjectType: self
+    defaultType isNil ifTrue: [ defaultType := CType cObjectType: self ].
+    ^defaultType
 ! !
 
 
@@ -294,9 +289,10 @@ at: anIndex put: aValue
     dereferencedType := self dereferencedType.
     offset := anIndex * dereferencedType sizeof.
     valueType := dereferencedType valueType.
-    ^valueType isInteger
+    valueType isInteger
         ifTrue: [ self at: offset put: aValue type: valueType ]
-        ifFalse: [ (self at: offset type: dereferencedType) value: aValue ]
+        ifFalse: [ (self at: offset type: dereferencedType) value: aValue ].
+    ^aValue
 !
 
 incr
@@ -366,14 +362,10 @@ narrow
      to specify the return type."
 !
 
-scalarIndex
-    "Nothing special in the default case - answer the receiver's CType"
-    ^type
-!
-
 type
     "Answer a CType for the receiver"
-    ^type
+    type isNil ifTrue: [ type := self class type ].
+    ^type 
 ! !
 
 
@@ -404,6 +396,14 @@ type: aCType
 ! !
 
 
+!CObject class methodsFor: 'private'!
+
+cObjStoredType
+    "Private - Provide a conversion from a CObject to a Smalltalk object
+     to be stored by #at:put:"
+    ^nil
+! !
+
 !CObject methodsFor: 'private'!
 
 adjPtrBy: byteOffset
@@ -440,9 +440,17 @@ value: anObject
 !
 
 type
-    "Answer a CType for the receiver - for example, CByteType if
+    "Answer a CType for the receiver---for example, CByteType if
      the receiver is CByte."
     ^self environment at: (self name, 'Type') asGlobalKey
+! !
+
+!CScalar class methodsFor: 'private'!
+
+cObjStoredType
+    "Private - Provide a conversion from a CObject to a Smalltalk object
+     to be stored by #at:put:"
+    self subclassResponsibility
 ! !
 
 
@@ -451,19 +459,19 @@ type
 cObjStoredType
     "Private - Provide a conversion from a CObject to a Smalltalk object
      to be stored by #at:put:"
-    ^self scalarIndex
+    self subclassResponsibility
 !
 
 value
     "Answer the value the receiver is pointing to. The exact returned
      value depends on the receiver's class"
-    ^self at: 0 type: self scalarIndex
+    ^self at: 0 type: self cObjStoredType
 !
 
 value: aValue
     "Set the receiver to point to the value, aValue. The exact meaning
      of aValue depends on the receiver's class"
-    self at: 0 put: aValue type: self scalarIndex
+    self at: 0 put: aValue type: self cObjStoredType
 ! !
 
 
@@ -480,7 +488,7 @@ alignof
     ^CPtrSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^9
 ! !
@@ -498,7 +506,7 @@ alignof
     ^CPtrSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^9
 ! !
@@ -517,7 +525,7 @@ alignof
     ^CLongSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^4
 ! !
@@ -535,7 +543,7 @@ alignof
     ^CLongSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^4
 ! !
@@ -554,7 +562,7 @@ alignof
     ^CLongSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^5
 ! !
@@ -571,7 +579,7 @@ alignof
     ^CLongSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^5
 ! !
@@ -589,7 +597,7 @@ alignof
     ^CIntSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^10
 ! !
@@ -607,7 +615,7 @@ alignof
     ^CIntSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^10
 ! !
@@ -626,7 +634,7 @@ alignof
     ^CIntSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^11
 ! !
@@ -645,7 +653,7 @@ alignof
     ^CIntSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^11
 ! !
@@ -665,7 +673,7 @@ alignof
     ^CShortSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^2
 ! !
@@ -684,7 +692,7 @@ alignof
     ^CShortSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^2
 ! !
@@ -703,7 +711,7 @@ alignof
     ^CShortSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^3
 ! !
@@ -721,7 +729,7 @@ alignof
     ^CShortSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^3
 ! !
@@ -741,7 +749,7 @@ alignof
     ^1
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^0
 ! !
@@ -774,7 +782,7 @@ alignof
     ^1
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^0
 ! !
@@ -795,7 +803,7 @@ alignof
     ^1
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^1
 ! !
@@ -812,7 +820,7 @@ alignof
     ^1
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^1
 ! !
@@ -832,7 +840,7 @@ alignof
     ^CFloatSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^6
 ! !
@@ -849,7 +857,7 @@ alignof
     ^CFloatSize
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^6
 ! !
@@ -869,7 +877,7 @@ alignof
     ^CDoubleAlignment
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^7
 ! !
@@ -886,7 +894,7 @@ alignof
     ^CDoubleAlignment
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^7
 ! !
@@ -904,7 +912,7 @@ alignof
     ^CLongDoubleAlignment
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's instances scalar type"
     ^12
 ! !
@@ -921,7 +929,7 @@ alignof
     ^CLongDoubleAlignment
 !
 
-scalarIndex
+cObjStoredType
     "Private - Answer an index referring to the receiver's scalar type"
     ^12
 ! !
@@ -976,7 +984,7 @@ cObjStoredType
 
     "If they want to store the receiver with #at:put:, they store the
      address (of the first character) without dereferencing the pointer."
-    ^CLong scalarIndex
+    ^CLong cObjStoredType
 !
 
 cObjStoredValue
@@ -1014,9 +1022,9 @@ value: anObject
      or 64-bit address.  If it is a CObject, its address is
      stored."
     anObject isInteger
-        ifTrue: [ ^self at: 0 put: anObject type: CLong scalarIndex ].
+        ifTrue: [ ^self at: 0 put: anObject type: CLong cObjStoredType ].
 
-    self at: 0 put: anObject address type: CLong scalarIndex
+    self at: 0 put: anObject address type: CLong cObjStoredType
 ! !
 
 
@@ -1038,11 +1046,19 @@ value: anObject
 !
 
 type
-    "Answer a CType for the receiver - for example, CByteType if
+    "Answer a CType for the receiver---for example, CByteType if
      the receiver is CByte."
     ^CStringType
 ! !
 
+
+!CString class methodsFor: 'accessing'!
+
+cObjStoredType
+    "Private - Provide a conversion from a CObject to a Smalltalk object
+     to be stored by #at:put:"
+    ^8
+! !
 
 !CString methodsFor: 'accessing'!
 
@@ -1069,38 +1085,33 @@ value: aValue
 
 !CByte class methodsFor: 'conversion'!
 
-scalarIndex
+cObjStoredType
     "Nothing special in the default case - answer a CType for the receiver"
-    ^CType cObjectType: self
+    ^self type
 !
 
 type
-    "Nothing special in the default case - answer a CType for the receiver"
-    ^CType cObjectType: self
+    "Answer a CType for the receiver"
+    ^CByteType
 ! !
 
 
 !CByte methodsFor: 'accessing'!
 
-scalarIndex
+cObjStoredType
     "Nothing special in the default case - answer the receiver's CType"
-    ^type
-!
-
-type
-    "Answer a CType for the receiver"
-    ^type
+    ^self type
 !
 
 value
     "Answer the value the receiver is pointing to. The returned value
      is a SmallInteger"
-    ^(self at: 0 type: super scalarIndex) value
+    ^(self at: 0 type: super cObjStoredType) value
 !
 
 value: aValue
     "Set the receiver to point to the value, aValue (a SmallInteger)."
-    self at: 0 put: aValue asCharacter type: super scalarIndex
+    self at: 0 put: aValue asCharacter type: super cObjStoredType
 ! !
 
 

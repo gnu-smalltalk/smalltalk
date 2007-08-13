@@ -295,7 +295,7 @@ static inline int64_t to_c_int_64 (OOP oop);
 
 /* Answer a new CObject pointing to COBJPTR.  */
 #define COBJECT_NEW(cObjPtr) \
-  (_gst_c_object_new_typed(cObjPtr, _gst_c_object_type_ctype))
+  (_gst_c_object_new(cObjPtr, _gst_nil_oop, _gst_c_object_class))
 
 /* Answer the void * extracted from a CObject, COBJ (*not* an OOP,
    but an object pointer).  */

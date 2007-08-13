@@ -89,7 +89,6 @@ OOP _gst_byte_array_class = NULL;
 OOP _gst_byte_stream_class = NULL;
 OOP _gst_c_func_descriptor_class = NULL;
 OOP _gst_c_object_class = NULL;
-OOP _gst_c_object_type_ctype = NULL;
 OOP _gst_c_type_class = NULL;
 OOP _gst_callin_process_class = NULL;
 OOP _gst_char_class = NULL;
@@ -1002,8 +1001,6 @@ init_smalltalk_dictionary (void)
   int i, numFeatures;
 
   _gst_current_namespace = _gst_smalltalk_dictionary;
-  _gst_c_object_type_ctype = _gst_c_type_new (_gst_c_object_class);
-
   for (numFeatures = 0; feature_strings[numFeatures]; numFeatures++);
 
   featuresArray = new_instance_with (_gst_array_class, numFeatures,
@@ -1017,7 +1014,6 @@ init_smalltalk_dictionary (void)
   add_smalltalk ("Smalltalk", _gst_smalltalk_dictionary);
   add_smalltalk ("Version", _gst_string_new (fullVersionString));
   add_smalltalk ("KernelFilePath", _gst_string_new (_gst_kernel_file_path));
-  add_smalltalk ("CObjectType", _gst_c_object_type_ctype);
   add_smalltalk ("KernelInitialized", _gst_false_oop);
   add_smalltalk ("SymbolTable", _gst_symbol_table);
   add_smalltalk ("Processor", _gst_processor_oop);
@@ -1284,9 +1280,6 @@ _gst_init_dictionary_on_image_load (mst_Boolean prim_table_matches)
   _gst_current_namespace =
     dictionary_at (_gst_class_variable_dictionary (_gst_namespace_class),
 		   _gst_intern_string ("Current"));
-
-  _gst_c_object_type_ctype = dictionary_at (_gst_smalltalk_dictionary,
-					    _gst_intern_string ("CObjectType"));
 
   _gst_init_builtin_objects_classes ();
 
@@ -2064,43 +2057,30 @@ _gst_message_new_args (OOP selectorOOP,
 }
 
 OOP
-_gst_c_object_new_typed (PTR cObjPtr,
-			 OOP typeOOP)
+_gst_c_object_new (PTR cObjPtr,
+		   OOP typeOOP,
+		   OOP defaultClassOOP)
 {
   gst_cobject cObject;
   gst_ctype cType;
   OOP cObjectOOP;
+  OOP classOOP;
 
-  cType = (gst_ctype) OOP_TO_OBJ (typeOOP);
-  cObject = (gst_cobject) new_instance_with (cType->cObjectType, 1, 
-		     			     &cObjectOOP);
-
+  if (!IS_NIL (typeOOP))
+    {
+      cType = (gst_ctype) OOP_TO_OBJ (typeOOP);
+      classOOP = cType->cObjectType;
+    }
+  else
+    classOOP = defaultClassOOP;
+    
+  cObject = (gst_cobject) new_instance_with (classOOP, 1, &cObjectOOP);
   cObject->type = typeOOP;
   SET_COBJECT_VALUE_OBJ (cObject, cObjPtr);
 
   return (cObjectOOP);
 }
 
-OOP
-_gst_alloc_cobject (OOP class_oop,
-		    size_t size)
-{
-  PTR space;
-  OOP typeOOP, cobjOOP;
-  inc_ptr incPtr;
-
-  space = (PTR) xmalloc ((int) size);
-
-  incPtr = INC_SAVE_POINTER ();
-  typeOOP = _gst_c_type_new (class_oop);
-  INC_ADD_OOP (typeOOP);
-
-  cobjOOP = _gst_c_object_new_typed (space, typeOOP);
-
-  INC_RESTORE_POINTER (incPtr);
-
-  return cobjOOP;
-}
 
 void
 _gst_free_cobject (OOP cObjOOP)
@@ -2112,17 +2092,6 @@ _gst_free_cobject (OOP cObjOOP)
 
   /* at least make it not point to falsely valid storage */
   SET_COBJECT_VALUE_OBJ (cObject, NULL);
-}
-
-OOP
-_gst_c_type_new (OOP cObjectSubclassOOP)
-{
-  gst_ctype cType;
-  OOP cTypeOOP;
-
-  cType = (gst_ctype) new_instance (_gst_c_type_class, &cTypeOOP);
-  cType->cObjectType = cObjectSubclassOOP;
-  return (cTypeOOP);
 }
 
 void

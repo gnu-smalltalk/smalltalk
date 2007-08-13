@@ -504,21 +504,12 @@ extern OOP _gst_shared_pool_dictionary (OOP class_oop)
   ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
 
-/* Creates a new CObject pointing to cObjPtr, extracting the name of
-   the class to be instantiated from the CType, TYPEOOP.  */
-extern OOP _gst_c_object_new_typed (PTR cObjPtr,
-				    OOP typeOOP) 
-  ATTRIBUTE_HIDDEN;
-
-/* Allocates a new CObject by malloc-ing SIZE bytes; CLASS_OOP is the
-   class to be instantiated.  */
-extern OOP _gst_alloc_cobject (OOP class_oop,
-			       size_t size) 
-  ATTRIBUTE_HIDDEN;
-
-/* Creates a new CType that when passed to _gst_c_object_new_typed
-   creates an instance of COBJECTSUBCLASSOOP.  */
-extern OOP _gst_c_type_new (OOP cObjectSubclassOOP) 
+/* Creates a new CObject pointing to cObjPtr, extracting the class
+   to be instantiated from the CType, TYPEOOP, or using the provided
+   class if TYPEOOP is nil.  */
+extern OOP _gst_c_object_new (PTR cObjPtr,
+			      OOP typeOOP,
+			      OOP defaultClassOOP) 
   ATTRIBUTE_HIDDEN;
 
 /* Creates a new String with LEN indexed instance variables.  */
