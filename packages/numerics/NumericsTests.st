@@ -425,7 +425,7 @@ testBeta
 testBetaLog
     "Code example 2.15"
     | value |
-    value := ( 2.5d gamma * 5.5d gamma / 8 gamma) ln.
+    value := 2.5d logGamma + 5.5d logGamma - 8 logGamma.
     self should: [ ((2.5d logBeta: 5.5d)  - value) abs < 1.0d-13].
 !
 
