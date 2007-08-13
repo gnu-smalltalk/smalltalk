@@ -90,8 +90,8 @@ $(srcdir)/tcp.texi: $(top_srcdir)/packages/tcp/stamp-classes
 	  rm -f $(srcdir)/tcp.texi
 	test -f $(srcdir)/tcp.texi && touch $(srcdir)/gst-libs.texi 
 
-$(srcdir)/i18n.texi: $(top_srcdir)/packages/i18n/stamp-classes
-	$(GST_DOC) -p I18N -o $(srcdir)/i18n.texi I18N.* || \
+$(srcdir)/i18n.texi: $(top_srcdir)/packages/iconv/stamp-classes $(top_srcdir)/packages/i18n/stamp-classes
+	$(GST_DOC) -p Iconv -p I18N -o $(srcdir)/i18n.texi I18N.* || \
 	  rm -f $(srcdir)/i18n.texi
 	test -f $(srcdir)/i18n.texi && touch $(srcdir)/gst-libs.texi 
 
