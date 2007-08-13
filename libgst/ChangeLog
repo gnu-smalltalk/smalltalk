@@ -1,5 +1,9 @@
 2007-08-13  Paolo Bonzini  <bonzinI@gnu.org>
 
+	* libgst/interp.c: Fix GC bug in _gst_prepare_execution_environment.
+
+2007-08-13  Paolo Bonzini  <bonzinI@gnu.org>
+
 	* libgst/callin.c: Use _gst_c_object_new instead of
 	_gst_c_object_new_typed.
 	* libgst/cint.c: Likewise.

@@ -2118,7 +2118,8 @@ OOP
 _gst_prepare_execution_environment (void)
 {
   gst_method_context dummyContext;
-  OOP dummyContextOOP;
+  OOP dummyContextOOP, processOOP;
+  inc_ptr inc = INC_SAVE_POINTER ();
 
   empty_context_stack ();
   dummyContext = alloc_stack_context (4);
@@ -2141,7 +2142,12 @@ _gst_prepare_execution_environment (void)
   dummyContextOOP = alloc_oop (dummyContext,
 			       _gst_mem.active_flag | F_POOLED | F_CONTEXT);
 
-  return (create_callin_process (dummyContextOOP));
+
+  INC_ADD_OOP (dummyContextOOP);
+  processOOP = create_callin_process (dummyContextOOP);
+
+  INC_RESTORE_POINTER (inc);
+  return (processOOP);
 }
 
 OOP
