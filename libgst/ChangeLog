@@ -1,3 +1,7 @@
+2007-08-13  Paolo Bonzini  <bonzinI@gnu.org>
+
+	* libgst/interp.c: Fix GC bug in _gst_prepare_execution_environment.
+
 2007-08-12  Paolo Bonzini  <bonzinI@gnu.org>
 
 	* libgst/comp.c: Make literals read-only in make_oop_constant.
