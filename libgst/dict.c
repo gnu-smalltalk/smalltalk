@@ -2069,7 +2069,7 @@ _gst_c_object_new (PTR cObjPtr,
   if (!IS_NIL (typeOOP))
     {
       cType = (gst_ctype) OOP_TO_OBJ (typeOOP);
-      classOOP = cType->cObjectType;
+      classOOP = ASSOCIATION_VALUE (cType->cObjectType);
     }
   else
     classOOP = defaultClassOOP;

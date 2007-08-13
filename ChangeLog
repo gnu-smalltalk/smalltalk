@@ -1,5 +1,9 @@
 2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CType.st: Store a VariableBinding inside a CType.
+
+2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/CStruct.st: Remove TypeMap, #computeType:block: and
 	its callees.  Use CType>>#from: to make a CType from an array
 	or VariableBinding, and #storeOn: instead of the former second

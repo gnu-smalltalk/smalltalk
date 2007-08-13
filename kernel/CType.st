@@ -129,9 +129,14 @@ initialize
 
 !CType class methodsFor: 'C instance creation'!
 
-cObjectType: aCObjectSubclassBinding
+cObjectBinding: aCObjectSubclassBinding
     "Create a new CType for the given subclass of CObject"
     ^self basicNew init: aCObjectSubclassBinding
+!
+
+cObjectType: aCObjectSubclass
+    "Create a new CType for the given subclass of CObject"
+    ^self cObjectBinding: aCObjectSubclass binding
 !
 
 from: type
@@ -144,7 +149,7 @@ from: type
     "must be a type name, either built in or struct, either a Symbol
      or an Association"
 
-    type isSymbol ifFalse: [ ^type value type ].
+    type isSymbol ifFalse: [ ^self cObjectBinding: type ].
     ^TypeMap at: type ifAbsent: [ Namespace current at: type ]
 !
 
@@ -202,7 +207,7 @@ ptrType
 cObjectType
     "Answer the CObject subclass whose instance is created when new is sent
      to the receiver"
-    ^cObjectType
+    ^cObjectType value
 ! 
 
 sizeof
@@ -284,7 +289,7 @@ from: type
 
 elementType: aCType
     "Answer a new instance of CPtrCType that maps pointers to the given CType"
-    ^self new init: CPtr; elementType: aCType
+    ^(self cObjectType: CPtr) elementType: aCType; yourself
 ! !
 
 
@@ -341,10 +346,10 @@ elementType: aCType numberOfElements: anInteger
     are of the given CType, and whose size is exactly anInteger elements
     (of course, anInteger only matters for allocation, not for access, since
     no out-of-bounds protection is provided for C objects)."
-    ^self new
-        init: CArray;
+    ^(self cObjectType: CArray)
         elementType: aCType;
-        numberOfElements: anInteger
+        numberOfElements: anInteger;
+	yourself
 ! !
 
 
