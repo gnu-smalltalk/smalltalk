@@ -73,20 +73,10 @@ with: aCollection
 
 !ReadWriteStream methodsFor: 'positioning'!
 
-position: anInteger
-    "Unlike WriteStreams, ReadWriteStreams don't truncate the stream"
-    self basicPosition: anInteger
-!
-
-size
-    "Unlike WriteStreams, ReadWriteStreams answer the full length of the
-     collection."
-    ^endPtr
-!
-
-skip: anInteger
-    "Unlike WriteStreams, ReadWriteStreams don't truncate the stream"
-    self basicPosition: ((self position + anInteger max: 0) min: endPtr).
+contents
+    "Unlike WriteStreams, ReadWriteStreams return the whole contents of the
+     underlying collection."
+    ^collection copyFrom: 1 to: endPtr
 ! !
 
 

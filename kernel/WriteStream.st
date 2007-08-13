@@ -74,9 +74,10 @@ with: aCollection from: firstIndex to: lastIndex
 
 !WriteStream methodsFor: 'accessing'!
 
-size
-    "Answer how many objects have been written"
-    ^ptr - 1
+contents
+    "Returns a collection of the same type that the stream accesses, up to
+    and including the final element."
+    ^collection copyFrom: 1 to: ptr - 1
 ! !
 
 
