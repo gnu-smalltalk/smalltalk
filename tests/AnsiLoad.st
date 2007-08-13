@@ -93,3 +93,5 @@ loaded ifFalse: [
     FileStream fileIn: 'AnsiDB.st'.
     FileStream fileIn: 'AnsiInit.st'.
 ]!
+
+ObjectMemory snapshot!

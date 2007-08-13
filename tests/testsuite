@@ -1344,6 +1344,7 @@ _ATEOF
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r arrays.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:27: { (cd \$abs_srcdir && gst \$image_path -r arrays.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:27 >"$at_check_line_file"
@@ -1411,6 +1412,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r classes.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:28: { (cd \$abs_srcdir && gst \$image_path -r classes.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:28 >"$at_check_line_file"
@@ -1478,6 +1480,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r blocks.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:29: { (cd \$abs_srcdir && gst \$image_path -r blocks.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:29 >"$at_check_line_file"
@@ -1545,6 +1548,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r sets.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:30: { (cd \$abs_srcdir && gst \$image_path -r sets.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:30 >"$at_check_line_file"
@@ -1612,6 +1616,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r processes.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:31: { (cd \$abs_srcdir && gst \$image_path -r processes.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:31 >"$at_check_line_file"
@@ -1679,6 +1684,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r exceptions.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:32: { (cd \$abs_srcdir && gst \$image_path -r exceptions.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:32 >"$at_check_line_file"
@@ -1746,6 +1752,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r intmath.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:33: { (cd \$abs_srcdir && gst \$image_path -r intmath.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:33 >"$at_check_line_file"
@@ -1813,6 +1820,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r floatmath.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:34: { (cd \$abs_srcdir && gst \$image_path -r floatmath.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:34 >"$at_check_line_file"
@@ -1880,6 +1888,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r dates.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:35: { (cd \$abs_srcdir && gst \$image_path -r dates.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:35 >"$at_check_line_file"
@@ -1947,6 +1956,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r objects.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:36: { (cd \$abs_srcdir && gst \$image_path -r objects.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:36 >"$at_check_line_file"
@@ -2014,6 +2024,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r strings.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:37: { (cd \$abs_srcdir && gst \$image_path -r strings.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:37 >"$at_check_line_file"
@@ -2081,6 +2092,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r chars.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:38: { (cd \$abs_srcdir && gst \$image_path -r chars.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:38 >"$at_check_line_file"
@@ -2148,6 +2160,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r objdump.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:39: { (cd \$abs_srcdir && gst \$image_path -r objdump.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:39 >"$at_check_line_file"
@@ -2215,6 +2228,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r delays.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:40: { (cd \$abs_srcdir && gst \$image_path -r delays.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:40 >"$at_check_line_file"
@@ -2282,6 +2296,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r geometry.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:41: { (cd \$abs_srcdir && gst \$image_path -r geometry.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:41 >"$at_check_line_file"
@@ -2349,6 +2364,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r cobjects.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:42: { (cd \$abs_srcdir && gst \$image_path -r cobjects.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:42 >"$at_check_line_file"
@@ -2416,6 +2432,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r compiler.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:43: { (cd \$abs_srcdir && gst \$image_path -r compiler.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:43 >"$at_check_line_file"
@@ -2483,6 +2500,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r fileext.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:44: { (cd \$abs_srcdir && gst \$image_path -r fileext.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:44 >"$at_check_line_file"
@@ -2550,6 +2568,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r mutate.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:45: { (cd \$abs_srcdir && gst \$image_path -r mutate.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:45 >"$at_check_line_file"
@@ -2617,6 +2636,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r untrusted.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:46: { (cd \$abs_srcdir && gst \$image_path -r untrusted.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:46 >"$at_check_line_file"
@@ -2684,6 +2704,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r getopt.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:47: { (cd \$abs_srcdir && gst \$image_path -r getopt.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:47 >"$at_check_line_file"
@@ -2751,6 +2772,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r quit.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:48: { (cd \$abs_srcdir && gst \$image_path -r quit.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:48 >"$at_check_line_file"
@@ -2827,6 +2849,7 @@ _ATEOF
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r ackermann.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:51: { (cd \$abs_srcdir && gst \$image_path -r ackermann.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:51 >"$at_check_line_file"
@@ -2894,6 +2917,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r ary3.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:52: { (cd \$abs_srcdir && gst \$image_path -r ary3.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:52 >"$at_check_line_file"
@@ -2961,6 +2985,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r except.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:53: { (cd \$abs_srcdir && gst \$image_path -r except.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:53 >"$at_check_line_file"
@@ -3028,6 +3053,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r fibo.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:54: { (cd \$abs_srcdir && gst \$image_path -r fibo.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:54 >"$at_check_line_file"
@@ -3095,6 +3121,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r hash.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:55: { (cd \$abs_srcdir && gst \$image_path -r hash.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:55 >"$at_check_line_file"
@@ -3162,6 +3189,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r hash2.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:56: { (cd \$abs_srcdir && gst \$image_path -r hash2.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:56 >"$at_check_line_file"
@@ -3229,6 +3257,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r heapsort.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:57: { (cd \$abs_srcdir && gst \$image_path -r heapsort.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:57 >"$at_check_line_file"
@@ -3296,6 +3325,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r lists.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:58: { (cd \$abs_srcdir && gst \$image_path -r lists.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:58 >"$at_check_line_file"
@@ -3363,6 +3393,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r lists1.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:59: { (cd \$abs_srcdir && gst \$image_path -r lists1.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:59 >"$at_check_line_file"
@@ -3430,6 +3461,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r lists2.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:60: { (cd \$abs_srcdir && gst \$image_path -r lists2.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:60 >"$at_check_line_file"
@@ -3497,6 +3529,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r matrix.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:61: { (cd \$abs_srcdir && gst \$image_path -r matrix.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:61 >"$at_check_line_file"
@@ -3564,6 +3597,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r methcall.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:62: { (cd \$abs_srcdir && gst \$image_path -r methcall.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:62 >"$at_check_line_file"
@@ -3631,6 +3665,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r nestedloop.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:63: { (cd \$abs_srcdir && gst \$image_path -r nestedloop.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:63 >"$at_check_line_file"
@@ -3698,6 +3733,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r objinst.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:64: { (cd \$abs_srcdir && gst \$image_path -r objinst.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:64 >"$at_check_line_file"
@@ -3765,6 +3801,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r prodcons.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:65: { (cd \$abs_srcdir && gst \$image_path -r prodcons.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:65 >"$at_check_line_file"
@@ -3832,6 +3869,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r random-bench.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:66: { (cd \$abs_srcdir && gst \$image_path -r random-bench.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:66 >"$at_check_line_file"
@@ -3899,6 +3937,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r sieve.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:67: { (cd \$abs_srcdir && gst \$image_path -r sieve.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:67 >"$at_check_line_file"
@@ -3966,6 +4005,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_srcdir && gst $image_path -r strcat.st 2>&1); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:68: { (cd \$abs_srcdir && gst \$image_path -r strcat.st 2>&1); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:68 >"$at_check_line_file"
@@ -4041,6 +4081,7 @@ _ATEOF
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p SUnit); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:71: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p SUnit); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:71 >"$at_check_line_file"
@@ -4107,6 +4148,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Parser); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:72: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p Parser); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:72 >"$at_check_line_file"
@@ -4182,6 +4224,7 @@ _ATEOF
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ArrayANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:75: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ArrayANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:75 >"$at_check_line_file"
@@ -4248,6 +4291,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ArrayFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:76: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ArrayFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:76 >"$at_check_line_file"
@@ -4314,6 +4358,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st BagANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:77: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st BagANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:77 >"$at_check_line_file"
@@ -4380,6 +4425,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st BagFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:78: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st BagFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:78 >"$at_check_line_file"
@@ -4446,6 +4492,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st BooleanANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:79: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st BooleanANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:79 >"$at_check_line_file"
@@ -4512,6 +4559,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ByteArrayANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:80: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ByteArrayANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:80 >"$at_check_line_file"
@@ -4578,6 +4626,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ByteArrayFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:81: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ByteArrayFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:81 >"$at_check_line_file"
@@ -4644,6 +4693,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st CharacterANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:82: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st CharacterANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:82 >"$at_check_line_file"
@@ -4710,6 +4760,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st CharacterFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:83: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st CharacterFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:83 >"$at_check_line_file"
@@ -4776,6 +4827,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st DateAndTimeANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:84: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st DateAndTimeANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:84 >"$at_check_line_file"
@@ -4842,6 +4894,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st DateAndTimeFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:85: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st DateAndTimeFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:85 >"$at_check_line_file"
@@ -4908,6 +4961,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st DictionaryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:86: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st DictionaryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:86 >"$at_check_line_file"
@@ -4974,6 +5028,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st DictionaryFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:87: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st DictionaryFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:87 >"$at_check_line_file"
@@ -5040,6 +5095,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st DurationANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:88: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st DurationANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:88 >"$at_check_line_file"
@@ -5106,6 +5162,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st DurationFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:89: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st DurationFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:89 >"$at_check_line_file"
@@ -5172,6 +5229,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st DyadicValuableANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:90: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st DyadicValuableANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:90 >"$at_check_line_file"
@@ -5238,6 +5296,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ErrorANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:91: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ErrorANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:91 >"$at_check_line_file"
@@ -5304,6 +5363,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ErrorClassANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:92: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ErrorClassANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:92 >"$at_check_line_file"
@@ -5370,6 +5430,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ExceptionANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:93: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ExceptionANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:93 >"$at_check_line_file"
@@ -5436,6 +5497,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ExceptionClassANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:94: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ExceptionClassANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:94 >"$at_check_line_file"
@@ -5502,6 +5564,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ExceptionSetANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:95: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ExceptionSetANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:95 >"$at_check_line_file"
@@ -5568,6 +5631,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st FailedMessageANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:96: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st FailedMessageANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:96 >"$at_check_line_file"
@@ -5634,6 +5698,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st FileStreamFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:97: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st FileStreamFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:97 >"$at_check_line_file"
@@ -5700,6 +5765,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st FloatANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:98: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st FloatANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:98 >"$at_check_line_file"
@@ -5766,6 +5832,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st FloatCharacterizationANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:99: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st FloatCharacterizationANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:99 >"$at_check_line_file"
@@ -5832,6 +5899,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st FractionANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:100: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st FractionANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:100 >"$at_check_line_file"
@@ -5898,6 +5966,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st FractionFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:101: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st FractionFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:101 >"$at_check_line_file"
@@ -5964,6 +6033,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st IdentityDictionaryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:102: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st IdentityDictionaryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:102 >"$at_check_line_file"
@@ -6030,6 +6100,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st IdentityDictionaryFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:103: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st IdentityDictionaryFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:103 >"$at_check_line_file"
@@ -6096,6 +6167,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st IntegerANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:104: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st IntegerANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:104 >"$at_check_line_file"
@@ -6162,6 +6234,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st IntervalANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:105: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st IntervalANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:105 >"$at_check_line_file"
@@ -6228,6 +6301,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st IntervalFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:106: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st IntervalFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:106 >"$at_check_line_file"
@@ -6294,6 +6368,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:107: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st MessageNotUnderstoodANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:107 >"$at_check_line_file"
@@ -6360,6 +6435,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st MessageNotUnderstoodSelectorANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:108: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st MessageNotUnderstoodSelectorANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:108 >"$at_check_line_file"
@@ -6426,6 +6502,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st MonadicBlockANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:109: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st MonadicBlockANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:109 >"$at_check_line_file"
@@ -6492,6 +6569,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st NilANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:110: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st NilANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:110 >"$at_check_line_file"
@@ -6558,6 +6636,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st NiladicBlockANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:111: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st NiladicBlockANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:111 >"$at_check_line_file"
@@ -6624,6 +6703,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st NotificationANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:112: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st NotificationANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:112 >"$at_check_line_file"
@@ -6690,6 +6770,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st NotificationClassANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:113: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st NotificationClassANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:113 >"$at_check_line_file"
@@ -6756,6 +6837,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ObjectANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:114: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ObjectANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:114 >"$at_check_line_file"
@@ -6822,6 +6904,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ObjectClassANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:115: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ObjectClassANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:115 >"$at_check_line_file"
@@ -6888,6 +6971,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st OrderedCollectionANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:116: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st OrderedCollectionANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:116 >"$at_check_line_file"
@@ -6954,6 +7038,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st OrderedCollectionFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:117: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st OrderedCollectionFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:117 >"$at_check_line_file"
@@ -7020,6 +7105,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ReadFileStreamANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:118: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ReadFileStreamANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:118 >"$at_check_line_file"
@@ -7086,6 +7172,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ReadStreamANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:119: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ReadStreamANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:119 >"$at_check_line_file"
@@ -7152,6 +7239,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ReadStreamFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:120: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ReadStreamFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:120 >"$at_check_line_file"
@@ -7218,6 +7306,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ReadWriteStreamANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:121: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ReadWriteStreamANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:121 >"$at_check_line_file"
@@ -7284,6 +7373,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ReadWriteStreamFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:122: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ReadWriteStreamFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:122 >"$at_check_line_file"
@@ -7350,6 +7440,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ScaledDecimalANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:123: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ScaledDecimalANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:123 >"$at_check_line_file"
@@ -7416,6 +7507,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st SelectorANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:124: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st SelectorANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:124 >"$at_check_line_file"
@@ -7482,6 +7574,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st SetANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:125: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st SetANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:125 >"$at_check_line_file"
@@ -7548,6 +7641,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st SetFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:126: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st SetFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:126 >"$at_check_line_file"
@@ -7614,6 +7708,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st SortedCollectionANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:127: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st SortedCollectionANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:127 >"$at_check_line_file"
@@ -7680,6 +7775,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st SortedCollectionFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:128: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st SortedCollectionFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:128 >"$at_check_line_file"
@@ -7746,6 +7842,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st StringANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:129: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st StringANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:129 >"$at_check_line_file"
@@ -7812,6 +7909,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st StringFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:130: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st StringFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:130 >"$at_check_line_file"
@@ -7878,6 +7976,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st SymbolANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:131: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st SymbolANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:131 >"$at_check_line_file"
@@ -7944,6 +8043,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st TranscriptANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:132: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st TranscriptANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:132 >"$at_check_line_file"
@@ -8010,6 +8110,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st WarningANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:133: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st WarningANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:133 >"$at_check_line_file"
@@ -8076,6 +8177,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st WarningClassANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:134: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st WarningClassANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:134 >"$at_check_line_file"
@@ -8142,6 +8244,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st WriteFileStreamANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:135: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st WriteFileStreamANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:135 >"$at_check_line_file"
@@ -8208,6 +8311,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st WriteStreamANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:136: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st WriteStreamANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:136 >"$at_check_line_file"
@@ -8274,6 +8378,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st WriteStreamFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:137: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st WriteStreamFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:137 >"$at_check_line_file"
@@ -8340,6 +8445,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ZeroDivideANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:138: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ZeroDivideANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:138 >"$at_check_line_file"
@@ -8406,6 +8512,7 @@ $at_traceon
     *) image_path="-I $abs_builddir/gst.im" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_srcdir/AnsiRun.st ZeroDivideFactoryANSITest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:139: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_srcdir/AnsiRun.st ZeroDivideFactoryANSITest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:139 >"$at_check_line_file"
@@ -8481,6 +8588,7 @@ _ATEOF
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Complex); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:142: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p Complex); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:142 >"$at_check_line_file"
@@ -8547,6 +8655,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Continuations); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:143: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p Continuations); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:143 >"$at_check_line_file"
@@ -8613,6 +8722,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p DebugTools); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:144: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p DebugTools); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:144 >"$at_check_line_file"
@@ -8679,6 +8789,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:145: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p DhbNumericalMethods); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:145 >"$at_check_line_file"
@@ -8745,6 +8856,7 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Digest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:146: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p Digest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:146 >"$at_check_line_file"
@@ -8811,6 +8923,12 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p GDBM
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:147: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p GDBM
     ret=\$?
@@ -8888,6 +9006,12 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Iconv
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:148: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p Iconv
     ret=\$?
@@ -8965,6 +9089,12 @@ $at_traceon
     *) image_path="" ;;
   esac
 
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p ZLib
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
 echo "$at_srcdir/testsuite.at:149: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p ZLib
     ret=\$?

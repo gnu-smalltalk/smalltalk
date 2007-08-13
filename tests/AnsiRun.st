@@ -28,10 +28,7 @@
 |
  ======================================================================"
 
-Transcript message: stderr -> #nextPutAllFlush:!
-FileStream fileIn: 'AnsiLoad.st' ifMissing: #FloatANSITest!
-Transcript message: stdout -> #nextPutAllFlush:!
-
+FloatANSITest isClass ifFalse: [ ObjectMemory quit: 1 ]!
 
 Smalltalk arguments do: [ :each || results |
     results := (Smalltalk at: each asSymbol) suite run.
