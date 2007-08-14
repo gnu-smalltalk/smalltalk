@@ -73,14 +73,14 @@ Object subclass: #JdmMysqlCommand
 
 
 Jdm.JdmConnection subclass: #JdmConnection
-	instanceVariableNames: 'socket readStream writeStream hashesByProtocol responsePacket clientCapabilities '
+	instanceVariableNames: 'socket readStream writeStream hashesByProtocol responsePacket '
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Mysql-Driver'!
 
 
 Jdm.JdmServerInfo subclass: #JdmServerInfo
-	instanceVariableNames: 'protocol serverThread hashSeed options '
+	instanceVariableNames: 'protocol serverThread charset status hashSeed options '
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Mysql-Driver'!
@@ -113,7 +113,7 @@ Object subclass: #JdmTimestampWriter
 	category: 'Mysql-Driver'!
 
 Jdm.JdmColumn subclass: #JdmColumn
-	instanceVariableNames: ''
+	instanceVariableNames: 'charset'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Mysql-Driver'!
@@ -159,7 +159,7 @@ nextPutAllNullTerminated: aCollection2
 
 nextPutCommand: aCommand 
 	self
-		nextPut: aCommand command asCharacter;
+		nextPut: (Character value: aCommand command);
 		nextPutAllNullTerminated: aCommand message!
 
 outputPacket
@@ -300,9 +300,6 @@ initialize
 
 initializeConnection
     | messageText |
-    hashesByProtocol := self class dictionaryClass: Dictionary
-				   from: self class protocolHashes.
-
     socket := TCP.Socket remote: connectionSpec host port: connectionSpec port.
     "socket := [ TCP Socket remote: connectionSpec host port: connectionSpec port ]
 	on: Error
@@ -313,7 +310,7 @@ initializeConnection
     readStream := socket.
     writeStream := socket.
     serverInfo := JdmServerInfo on: self.
-    clientCapabilities := serverInfo protocol = 10 ifTrue: [1] ifFalse: [0]!
+!
 
 initializeDatabase
     (self requestPacket writeStream)
@@ -322,45 +319,52 @@ initializeDatabase
 	flush.
     self responsePacket checkStatusOnError: #setDatabase!
 
-initializeUser
-    | replyStream password |
-    password := connectionSpec password isEmpty 
-	ifTrue: ['']
-	ifFalse: 
-	    [self 
-		 hash: connectionSpec password
-		 seed: self serverInfo hashSeed
-		 for: self serverInfo protocol].
-    
-    replyStream := self replyPacket writeStream.
+oldProtocolHashes
+    connectionSpec password isEmpty ifTrue: [ ^'' ].
+    ^{ self hash2: connectionSpec password seed: self serverInfo hashSeed }!
 
-    replyStream 
-	nextPutAll: (self class integerAsByteArray: (self clientCapabilities) length: 2) asByteString;
-	nextPutAll: (self class integerAsByteArray: 65536 length: 3) asByteString;
-	nextPutAllNullTerminated: connectionSpec user;
-	nextPutAllNullTerminated: password.
-    replyStream flush.
+newProtocolHashes
+    connectionSpec password isEmpty ifTrue: [ ^String new: 1 ].
+    ^{ self hashSHA1: connectionSpec password seed: self serverInfo hashSeed.
+       self hash2: connectionSpec password seed: self serverInfo hashSeed }!
+
+initializeUser
+    | replyStream hashes userSent longPassword |
+    replyStream := self replyPacket writeStream.
+    serverInfo hashSeed size = 8
+	ifTrue: [
+	    hashes := self oldProtocolHashes.
+	    replyStream
+	        nextPutAll: (self class integerAsByteArray: 1 length: 2) asByteString;
+	        nextPutAll: (self class integerAsByteArray: 65536 length: 3) asByteString;
+	        nextPutAllNullTerminated: connectionSpec user;
+		nextPutAllNullTerminated: hashes first;
+		flush ]
+	ifFalse: [
+	    hashes := self newProtocolHashes.
+	    replyStream
+	        nextPutAll: (self class integerAsByteArray: 41477 length: 4) asByteString;
+	        nextPutAll: (self class integerAsByteArray: 65536 length: 4) asByteString;
+	        nextPut: 8 asCharacter;
+	        next: 23 put: 0 asCharacter;
+	        nextPutAllNullTerminated: connectionSpec user;
+		nextPut: hashes first size asCharacter;
+		nextPutAll: hashes first;
+        	flush.
    
-    self responsePacket checkStatusOnError: #authenticate! !
+	    (self responsePacket isStatus: 254 onError: #authenticate) ifTrue: [
+		replyStream := self replyPacket writeStream.
+		replyStream nextPutAll: hashes second; flush ] ]! !
 
 !JdmConnection methodsFor: 'hashing'!
 
-getHashFor: aProtocol 
-	^hashesByProtocol at: aProtocol ifAbsent: [nil]!
-
-hash: aString seed: aSeed for: aProtocol 
-	| aHashMethod |
-	aHashMethod := self getHashFor: aProtocol.
-	aHashMethod isNil ifTrue: [^aString].
+hash: aString seed: aSeed for: hashMethod 
 	^self class 
-		perform: aHashMethod
+		perform: hashMethod
 		with: aString
 		with: aSeed! !
 
 !JdmConnection methodsFor: 'accessing'!
-
-clientCapabilities
-	^clientCapabilities!
 
 replyPacket
 	^(JdmOutputPacket on: writeStream) 
@@ -378,42 +382,44 @@ JdmConnection class
 	instanceVariableNames: ''!
 
 
-!JdmConnection class methodsFor: 'constants'!
+!JdmConnection methodsFor: 'hashing'!
 
-protocolHashes
-	^#(9 #hash1:seed:
-          10 #hash2:seed:)! !
+hashSHA1: aString seed: aSeed 
+	"This algorithm is for MySQL 4.1+."
 
-!JdmConnection class methodsFor: 'hashing'!
+	| hashedString hashedStringSeeded result |
+	"Compute hash1 = SHA1(password), then hash2 = SHA1(hash1). The server
+	 already knows this, as that is what is held in its password table
+	 (preceded with a *)."
 
-hash1: aString seed: aSeed 
-	"This algorithm is for protocol 9."
+	hashedString := SHA1 digestOf: aString.
+	hashedStringSeeded := SHA1 digestOf: hashedString.
 
-	| hashedString maxValue array num1 num2 |
-	hashedString := String new: aSeed size.
-	array := self randomInit1: aString seed: aSeed.
-	maxValue := array at: 1.
-	num1 := array at: 2.
-	num2 := array at: 3.
-	1 to: hashedString size
-		do: 
-			[:index | 
-			| num3 |
-			num1 := (num1 * 3 + num2) \\ maxValue.
-			num2 := (num1 + num2 + 33) \\ maxValue.
-			num3 := (num1 / maxValue * 31) truncated + 64.
-			hashedString at: index put: num3 asCharacter].
-	^hashedString!
+	"Append hash2 to the salt sent by the server and hash that."
+	hashedStringSeeded := SHA1 digestOf: aSeed, hashedStringSeeded.
 
-hash2: aString seed: aSeed 
-	"This algorithm is for clientProtocol 10."
+	"Finally, XOR the result with SHA1(password).  The server takes this,
+	 computes SHA1(salt.`SHA1 stored in DB`), uses the latter result to
+	 undo the XOR, computes again SHA1, and compares that with the SHA1
+	 stored in the DB."
 
-	| hashedString maxValue result num1 num2 num3 |
+	result := String new: 20.
+	1 to: 20 do: [ :i |
+	    result at: i put: (Character value:
+		((hashedString at: i) bitXor: (hashedStringSeeded at: i))) ].
+	^result!
+
+hash2: aString seed: longSeed 
+	"This algorithm is for MySQL 3.22+."
+
+	| hashedString maxValue result num1 num2 num3 aSeed |
+	"Reserve a final byte for NULL termination"
+	aSeed := longSeed copyFrom: 1 to: 8.
 	hashedString := String new: aSeed size.
 	result := self randomInit2: aString seed: aSeed.
-	maxValue := result at: 1.
-	num1 := result at: 2.
-	num2 := result at: 3.
+	maxValue := 16r3FFFFFFF.
+	num1 := result at: 1.
+	num2 := result at: 2.
 	1 to: hashedString size
 		do: 
 			[:index | 
@@ -424,11 +430,10 @@ hash2: aString seed: aSeed
 	num1 := (num1 * 3 + num2) \\ maxValue.
 	num2 := (num1 + num2 + 33) \\ maxValue.
 	num3 := (num1 / maxValue * 31) truncated.
-	hashedString inject: 1
-		into: 
-			[:index :character | 
-			hashedString at: index put: (character asInteger bitXor: num3) asCharacter.
-			index + 1].
+	hashedString keysAndValuesDo: [:index :character | 
+		hashedString
+			at: index
+			put: (character asInteger bitXor: num3) asCharacter].
 	^hashedString!
 
 hash: aString 
@@ -450,24 +455,13 @@ hash: aString
 					num3 := num3 + charValue]].
 	^Array with: (num1 bitAnd: 2147483647) with: (num2 bitAnd: 2147483647)!
 
-randomInit1: aString seed: aSeed 
-	| result array1 array2 |
-	result := Array new: 3.
-	array1 := self hash: aString.
-	array2 := self hash: aSeed.
-	result at: 1 put: 16r01FFFFFF.
-	result at: 2 put: ((array1 at: 1) bitXor: (array2 at: 1)) \\ (result at: 1).
-	result at: 3 put: (result at: 2) // 2.
-	^result!
-
 randomInit2: aString seed: aSeed 
 	| result array1 array2 |
-	result := Array new: 3.
+	result := Array new: 2.
 	array1 := self hash: aString.
 	array2 := self hash: aSeed.
-	result at: 1 put: 16r3FFFFFFF.
-	result at: 2 put: ((array1 at: 1) bitXor: (array2 at: 1)) \\ (result at: 1).
-	result at: 3 put: ((array1 at: 2) bitXor: (array2 at: 2)) \\ (result at: 1).
+	result at: 1 put: ((array1 at: 1) bitXor: (array2 at: 1)) \\ 16r3FFFFFFF.
+	result at: 2 put: ((array1 at: 2) bitXor: (array2 at: 2)) \\ 16r3FFFFFFF.
 	^result! !
 
 !JdmConnection class methodsFor: 'misc'!
@@ -505,7 +499,7 @@ byteArrayAsByteString: ba
     size := ba size.
     s := String new: size.
     1 to: size do: [:index |
-	s at: index put: ((ba at: index) asCharacter).
+	s at: index put: (Character value: (ba at: index)).
 	].
     ^s! !
 
@@ -572,6 +566,9 @@ initialize
 	readStream := JdmReadStream on: buffer.! !
 
 !JdmInputPacket methodsFor: 'reading'!
+
+isStatus: anInteger onError: aSymbol
+	^(self readStatusOnError: aSymbol) = anInteger!
 
 checkForStatus: anInteger onError: aSymbol
 	(self readStatusOnError: aSymbol) = anInteger ifFalse: [self handleError: aSymbol]!
@@ -647,8 +644,7 @@ flush
 	s := JdmConnection byteArrayAsByteString: ba.
 	aString replaceFrom: 1 to: self class sizeSize with: s startingAt: 1.
 
-	aString at: self class sizeSize + 1 put: self packetNumber asCharacter.
-	
+	aString at: self class sizeSize + 1 put: (Character value: self packetNumber).
 	(self stream) nextPutAll: aString; flush
 ! !
 
@@ -761,6 +757,18 @@ initialize
 
 !JdmServerInfo methodsFor: 'accessing'!
 
+charset
+	^charset!
+
+charset: anObject
+	charset := anObject!
+
+status
+	^status!
+
+status: anObject
+	status := anObject!
+
 hashSeed
 	^hashSeed!
 
@@ -794,10 +802,25 @@ readFrom: aResponsePacket
 		readServerVersionFrom: aResponsePacket;
 		readServerThreadFrom: aResponsePacket;
 		readHashSeedFrom: aResponsePacket;
-		readOptionsFrom: aResponsePacket!
+		readOptionsFrom: aResponsePacket.
+	aResponsePacket readStream atEnd ifFalse: [
+		self
+			readCharsetFrom: aResponsePacket;
+			readStatusFrom: aResponsePacket;
+			readMoreSeedFrom: aResponsePacket ]!
+
+readStatusFrom: aResponsePacket
+	status := (aResponsePacket readStream next: 2) asByteArray asInteger.
+	aResponsePacket readStream next: 13!
+
+readCharsetFrom: aResponsePacket
+	charset := aResponsePacket readStream next value!
 
 readHashSeedFrom: aResponsePacket
 	hashSeed := aResponsePacket readStream readNullTerminatedString!
+
+readMoreSeedFrom: aResponsePacket
+	hashSeed := hashSeed, aResponsePacket readStream readNullTerminatedString!
 
 readOptionsFrom: aResponsePacket 
 	options := (aResponsePacket readStream next: 2) asByteArray asInteger!
@@ -809,7 +832,9 @@ readServerThreadFrom: aResponsePacket
 	serverThread := (aResponsePacket readStream next: 4) asByteArray asInteger!
 
 readServerVersionFrom: aResponsePacket 
-	serverVersion := JdmServerVersion readFrom: aResponsePacket readStream! !
+	serverVersion := JdmServerVersion
+	    readFrom: aResponsePacket readStream readNullTerminatedString readStream.
+! !
 
 !JdmServerInfo methodsFor: 'validation'!
 
@@ -848,7 +873,7 @@ readFrom: aStream
 	release := Integer readFrom: aStream.
 	aStream next.
 	version := Integer readFrom: aStream.
-	aStream readNullTerminatedString! !
+! !
 
 !JdmServerVersion class methodsFor: 'instance creation'!
 
@@ -929,12 +954,17 @@ readMysqlTimeFrom: aStream
 	^Time fromSeconds: 60 * (60 * hour + minute) + second!
 
 readMysqlTimestampFrom: aStream 
-	| year month day hour minute second |
+	| year month day hour minute second separators |
 	year := self readIntegerFrom: aStream next: 4.
+	separators := aStream peekFor: $-.
 	month := self readIntegerFrom: aStream next: 2.
+	separators ifTrue: [ aStream next ].
 	day := self readIntegerFrom: aStream next: 2.
+	separators ifTrue: [ aStream next ].
 	hour := self readIntegerFrom: aStream next: 2.
+	separators ifTrue: [ aStream next ].
 	minute := self readIntegerFrom: aStream next: 2.
+	separators ifTrue: [ aStream next ].
 	second := self readIntegerFrom: aStream next: 2.
 	^JdmDateTime
 		fromDate: (Date newDay: day monthIndex: month year: year)
@@ -982,37 +1012,62 @@ print: anInteger on: aStream next: n
 
 !JdmColumn methodsFor: 'reading'!
 
+charset
+	^charset
+! !
+
+!JdmColumn methodsFor: 'reading'!
+
 readDecimalPlaces: aReadStream
 	decimalPlaces := aReadStream next asInteger!
 
 readFlags: aReadStream 
-	"Currently the size of both the flags field and decimalPlaces field is specified as a sum of the two.
-        I am guessing that the size of the flags is more likely to change than that of the decimalPlaces.
-        Right now I assume that the flags are all bytes but the last and that the last is the decimalPlaces"
-
-	flags := (aReadStream next: aReadStream next asInteger - 1) asByteArray 
-				asInteger!
+	flags := (aReadStream next: 2) asByteArray asInteger!
 
 readFrom: aReadStream 
-	self
-		readTable: aReadStream;
-		readName: aReadStream;
-		readSize: aReadStream;
-		readType: aReadStream;
-		readFlags: aReadStream;
-		readDecimalPlaces: aReadStream!
+	| length fields |
+	"can be catalogue, db, table, org table, field (and org field follows)
+	 or table, field, length, type, flags+decimal"
+	fields := (1 to: 5) collect: [ :i |
+		aReadStream next: aReadStream next asInteger ].
+	aReadStream atEnd ifFalse: [
+		table := fields at: 3.
+		name := fields at: 5.
+		"org field"
+		aReadStream next: aReadStream next asInteger.
+		length := aReadStream next asInteger - 10.
+		self
+			readCharset: aReadStream;
+			readSize: aReadStream;
+			readType: aReadStream;
+			readFlags: aReadStream;
+			readDecimalPlaces: aReadStream.
+		aReadStream next: length.
+		^self ].
+
+	"MySQL 3.x format."
+	table := fields at: 1.
+	name := fields at: 2.
+	size := (fields at: 3) asByteArray asInteger.
+	type := (fields at: 4) first asInteger.
+	self readFlags: (fields at: 5) readStream.
+	decimalPlaces := (fields at: 5) last asInteger!
+
+
+readCharset: aReadStream
+	charset := (aReadStream next: 2) asByteArray asInteger!
 
 readName: aReadStream
 	name := (aReadStream next: aReadStream next asInteger)!
 
 readSize: aReadStream
-	size := (aReadStream next: aReadStream next asInteger) asByteArray asInteger!
+	size := (aReadStream next: 4) asByteArray asInteger!
 
 readTable: aReadStream
 	table := (aReadStream next: aReadStream next asInteger)!
 
 readType: aReadStream
-	type := (aReadStream next: aReadStream next asInteger) asByteArray asInteger! !
+	type := aReadStream next asInteger! !
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 JdmColumn class
@@ -1030,8 +1085,11 @@ datetimeType
 dateType
 	^10!
 
+oldDecimalType
+	^246!
+
 decimalType
-	^0!
+	^246!
 
 doubleType
 	^5!
@@ -1135,23 +1193,20 @@ readFrom: aReadStream
 checkForEndOrNull: aReadStream 
 	"This is a bit unclean...the value 254 has been overloaded in the protocol.  When it is the only
         value in the stream, it indicates there are no more rows.  It also indicates that the following
-        4 bytes contain the size of the field value.  The problem is that there is another condition that
+        8 bytes contain the size of the field value.  The problem is that there is another condition that
         produces a single value on the stream...a row with one column whose value is NULL."
 
 	| endOrNull |
-	aReadStream size = 1 ifFalse: [^false].
-	endOrNull := aReadStream next asInteger.
-	endOrNull = 254 
-		ifTrue: 
-			[isEmpty := true.
-			^true].
-	endOrNull = 251 
-		ifTrue: 
-			[^true].
-	"Unexpected Value"
-	JdmErrorTable throwException: #invalidQuery
-		message: 'Unexpected value ' , endOrNull printString.
-	^true!
+	aReadStream size = 1 ifTrue: [
+		endOrNull := aReadStream next asInteger.
+		isEmpty := endOrNull = 254.
+		^true ].
+	(aReadStream size < 9 and: [ aReadStream peekFor: (Character value: 254) ])
+		ifTrue: [
+			aReadStream next: aReadStream size - 1.
+			isEmpty := true.
+			^true ].
+	^false !
 
 readFrom: aReadStream 
 	(self checkForEndOrNull: aReadStream) ifTrue: [^self].
@@ -1170,7 +1225,9 @@ readSizeFrom: aReadStream
 	aSize := aReadStream next asInteger.
 	aSize < 251 ifTrue: [^aSize].
 	aSize = 251 ifTrue: [^-1].
-	^(aReadStream next: (aSize bitAnd: 3) + 2) asByteArray asInteger! !
+	aSize = 252 ifTrue: [^(aReadStream next: 2) asByteArray asInteger].
+	aSize = 253 ifTrue: [^(aReadStream next: 3) asByteArray asInteger].
+	aSize = 254 ifTrue: [^(aReadStream next: 8) asByteArray asInteger]! !
 
 !JdmRow methodsFor: 'initialize-release'!
 
@@ -1369,6 +1426,7 @@ buildTypeMap
 		at: JdmColumn longlongType put: #toInteger:column:;
 		at: JdmColumn floatType put: #toFloat:column:;
 		at: JdmColumn doubleType put: #toDouble:column:;
+		at: JdmColumn oldDecimalType put: #toDouble:column:;
 		at: JdmColumn decimalType put: #toDouble:column:;
 		at: JdmColumn dateType put: #toDate:column:;
 		at: JdmColumn datetimeType put: #toDateTime:column:;
@@ -1413,7 +1471,7 @@ asByteString
     | stream | 
     stream := WriteStream on: String new.
     1 to: self size do: [ :x |
-	stream nextPut: (self basicAt: x) asCharacter].
+	stream nextPut: (Character value: (self basicAt: x))].
     ^stream contents
 ! !
 

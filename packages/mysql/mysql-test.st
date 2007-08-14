@@ -5,11 +5,12 @@
 |
  ======================================================================"
 
-| value resultSet statement spec connection |
+PackageLoader fileInPackage: #MySQL!
 
+| value resultSet statement spec connection |
 spec :=    (Jdm.JdmConnectionSpec new initialize
-        user: 'root'; password: '';
-        host: 'philo';
+        user: 'root'; password: 'root';
+        host: 'localhost';
         database: 'mysql';
         port: 3306).
 

@@ -4,8 +4,13 @@
   <prereq>DB</prereq>
   <prereq>TCP</prereq>
   <prereq>SUnit</prereq>
+  <prereq>Digest</prereq>
   <filein>MySQL.st</filein>
-  <filein>MySQLTests.st</filein>
+
+  <test>
+    <sunit>Jdm.MySQL.JdmMysqlTestSuite</sunit>
+    <filein>MySQLTests.st</filein>
+  </test>
 
   <file>MySQL.st</file>
   <file>MySQLTests.st</file>

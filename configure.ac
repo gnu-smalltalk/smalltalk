@@ -295,7 +295,15 @@ GST_PACKAGE_ENABLE([Iconv], [iconv],
   [Makefile], [iconv.la])
 GST_PACKAGE_ENABLE([Java], [java])
 GST_PACKAGE_ENABLE([Digest], [digest], [], [], [Makefile], [digest.la])
+
 GST_PACKAGE_ENABLE([MySQL], [mysql])
+AC_MSG_CHECKING([whether to run MySQL tests])
+AC_ARG_ENABLE(mysql-tests,
+[  --enable-mysql-tests   test MySQL bindings, require user "root" with
+                          password "root", plus database "test"], ,
+[enable_mysql_tests=no])
+AC_SUBST(enable_mysql_tests)
+
 GST_PACKAGE_ENABLE([NCurses],
   [ncurses],
   [GST_HAVE_LIB(ncurses, initscr)],
@@ -400,6 +408,7 @@ dnl Scripts & data files
 AC_CONFIG_FILES(gnu-smalltalk.pc)
 AC_CONFIG_FILES(gst-config, chmod +x gst-config)
 AC_CONFIG_FILES(tests/gst, chmod +x tests/gst)
+AC_CONFIG_FILES(tests/atlocal)
 AC_CONFIG_FILES(libc.la)
 
 dnl Master Makefile

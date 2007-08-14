@@ -4,7 +4,7 @@ AUTOTEST = $(AUTOM4TE) --language=autotest
 TESTSUITE = $(srcdir)/testsuite
 
 dist_noinst_DATA = \
-local.at testsuite.at $(TESTSUITE) package.m4 \
+atlocal.in local.at testsuite.at $(TESTSUITE) package.m4 \
 ackermann.ok ackermann.st arrays.ok arrays.st ary3.ok ary3.st blocks.ok \
 blocks.st chars.ok chars.st classes.ok classes.st cobjects.ok cobjects.st \
 compiler.ok compiler.st dates.ok dates.st delays.ok delays.st except.ok \
@@ -45,13 +45,13 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	    echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
 	  } >'$(srcdir)/package.m4'
 
-check-local: gst atconfig $(TESTSUITE)
+check-local: gst atlocal atconfig $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
 
 clean-local:
 	-$(SHELL) '$(TESTSUITE)' --clean
 
-installcheck-local: atconfig $(TESTSUITE)
+installcheck-local: atlocal atconfig $(TESTSUITE)
 	if test -z "$(DESTDIR)"; then \
 	  $(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS) AUTOTEST_PATH=$(bindir); \
 	fi

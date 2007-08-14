@@ -29,9 +29,6 @@
 |
  ======================================================================"
 
-Jdm addSubspace: #MySQL!
-Namespace current: Jdm.MySQL!
-
 TestCase subclass: #JdmMysqlBaseTestCase
 	instanceVariableNames: 'connection testSupport testProgress '
 	classVariableNames: ''
@@ -127,17 +124,25 @@ createTable
 	Transcript show: 'Creating table: ', testSupport class tableName, '...'.
 	result := connection createStatement 
 				executeQuery: testSupport createTable.
-	Transcript show: ' Done'.
+	Transcript show: ' Done'; nl.
 	self should: [result type = #update and: [result value = 0]]! !
 
 !JdmMysqlDropTableTestCase methodsFor: 'tests'!
+
+dropTableIfExists
+	| result |
+	Transcript show: 'Dropping table: ', testSupport class tableName, '...'.
+	result := connection createStatement 
+				executeQuery: 'drop table if exists ' , testSupport class tableName.
+	Transcript show: ' Done'; nl.
+	self should: [result type = #update and: [result value = 0]]!
 
 dropTable
 	| result |
 	Transcript show: 'Dropping table: ', testSupport class tableName, '...'.
 	result := connection createStatement 
 				executeQuery: 'drop table ' , testSupport class tableName.
-	Transcript show: ' Done'.
+	Transcript show: ' Done'; nl.
 	self should: [result type = #update and: [result value = 0]]! !
 
 !JdmMysqlDeleteTestCase methodsFor: 'tests'!
@@ -148,8 +153,9 @@ deleteRows
 		show: 'Deleting ' , testSupport class numRowsToInsert printString , ' rows...'.
 	result := connection createStatement 
 				executeQuery: 'delete from ' , testSupport class tableName.
-	Transcript show: ' Done'.
-	self should: [result type = #update and: [result value = 0]]! !
+	Transcript show: ' Done'; nl.
+	"Value is either 0 or numRowsToInsert, depending on the version"
+	self should: [result type = #update]! !
 
 !JdmMysqlInsertTestCase methodsFor: 'tests'!
 
@@ -169,7 +175,7 @@ insertRows
 	ok := true.
 	testSupport class numRowsToInsert timesRepeat: [
 		result := self insertRow.
-		ok := ok and: [result type = #update and: [result value = 1]].
+		ok := ok and: [result type = #update "and: [result value = 1]"].
 	].
 	self should: [ ok ]! !
 
@@ -246,7 +252,7 @@ writeFieldDefinitionFor: aType on: aWriteStream
 connectionSpec
 	^JdmConnectionSpec new
 		initialize;
-		user: 'utente'; password: '';
+		user: 'root'; password: 'root';
 		host: 'localhost'; database: 'test';
 		port: 3306; yourself!
 
@@ -498,7 +504,7 @@ resetMysqlTestSupport
 !JdmMysqlTestSupport class methodsFor: 'constants'!
 
 numRowsToInsert
-	^500!
+	^40!
 
 tableName
 	^'JdmMysqlTestTable'! !
@@ -587,7 +593,7 @@ checkSteps
 	totalSteps = numSteps 
 		ifTrue: 
 			[Transcript
-				show: ' Done']! !
+				show: ' Done'; nl]! !
 
 !JdmTestProgress methodsFor: 'accessing'!
 
@@ -636,6 +642,7 @@ defaultResolution
 initialize
 "	super initialize."
 	self name: 'JdmMysql-Test'.
+	self addTest: (JdmMysqlDropTableTestCase selector: #dropTableIfExists).
 	self addTest: (JdmMysqlCreateTableTestCase selector: #createTable).
 	self addTest: (JdmMysqlInsertTestCase selector: #insertRows).
 	self addTest: (JdmMysqlSelectTestCase selector: #selectRows).
@@ -645,7 +652,7 @@ initialize
 
 !JdmMysqlTestSuite class methodsFor: 'instance creation'!
 
-new
+suite
 	^super new initialize! !
 
 !JdmMysqlTestSupport methodsFor: 'private'!
@@ -941,11 +948,8 @@ resetMysqlTestSupport
 !JdmMysqlTestSupport class methodsFor: 'constants'!
 
 numRowsToInsert
-	^500!
+	^40!
 
 tableName
 	^'JdmMysqlTestTable'! !
-
-Namespace current: Smalltalk!
-
 
