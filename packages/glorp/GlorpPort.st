@@ -115,11 +115,6 @@ glorpPrintSQLOn: stream
         next: (self second < 10 ifTrue: [ 1 ] ifFalse: [ 0 ]) put: $0;
         print: self second;
         nextPut: $'! !
-!Smalltalk.OrderedCollection methodsFor: 'testing'!
-
-writeStream
-    "For our purposes, these aren't collections, but rather a simple database type"
-    ^Glorp.AddingWriteStream on: self.! !
 
 !Smalltalk.Collection methodsFor: 'streams'!
 

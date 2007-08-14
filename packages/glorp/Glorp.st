@@ -7302,7 +7302,7 @@ new
 !DatabaseAccessor class methodsFor: 'accessing'!
 
 loggingEnabled
-    LoggingEnabled isNil ifTrue: [LoggingEnabled := true].
+    LoggingEnabled isNil ifTrue: [LoggingEnabled := false].
     ^LoggingEnabled!
 
 loggingEnabled: aBoolean 

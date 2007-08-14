@@ -441,6 +441,14 @@ growTo: newSize
     "Private - Make the receiver grow to a size of newSize"
     ^self become: (self copyGrowTo: newSize)
 ! !
+
+
+!ArrayedCollection methodsFor: 'streams'!
+
+writeStream
+    "Answer a WriteStream streaming on the receiver"
+    ^WriteStream on: self
+! !
 
 
 !ArrayedCollection methodsFor: 'built ins'!

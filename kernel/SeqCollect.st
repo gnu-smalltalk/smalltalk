@@ -612,11 +612,6 @@ readWriteStream
     ^ReadWriteStream on: self
 ! 
 
-writeStream
-    "Answer a WriteStream streaming on the receiver"
-    ^WriteStream on: self
-! 
-
 anyOne
     "Answer an unspecified element of the collection."
 
