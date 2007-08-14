@@ -1,5 +1,4 @@
 Smalltalk addSubspace: #GlorpTestNamespace!
-Namespace current: Glorp!
 
 TestCase subclass: #GlorpTestCase
     instanceVariableNames: ''
@@ -2224,8 +2223,8 @@ defaultMysqlLogin
 
     ^(Login new)
     	database: MySQLPlatform new;
-    	username: '';
-    	password: '';
+    	username: 'root';
+    	password: 'root';
     	connectString: 'test'.! !
 
 !GlorpDatabaseLoginResource class methodsFor: 'LICENSE'!
@@ -7014,10 +7013,12 @@ helpTestValue: anObject
     self helpTestValue: anObject
 	compareModelWith: [:read :original | 
 	    read notNil and: [
-	        (original class isKindOf: Float)
+	        (original isKindOf: Float)
 	            or: [ original class == Dialect doublePrecisionFloatClass
 		    or: [ read test = original ]]]]
-	compareWith: [:read :original | read = original].!
+	compareWith: [:read :original |
+	        (original isKindOf: Float)
+		    or: [ read = original ] ].!
 
 helpTestValue: anObject compareWith: aBlock
     self
@@ -8003,6 +8004,9 @@ testBeginTransactionWithRollback
 testCreateTable
     | selectResult |
     [[self accessor beginTransaction.
+    self accessor
+    	dropTableNamed: 'GLORP_TEST_CREATE'
+    	ifAbsent: [:ex | ex return: nil].
     self accessor
     	executeSQLString: 'CREATE TABLE GLORP_TEST_CREATE (ID varchar(4))'] 
     	ensure: [self accessor commitTransaction].
@@ -10726,5 +10730,3 @@ resources
 
 unfinished
     "indicates an unfinished test"! !
-
-Namespace current: Smalltalk!

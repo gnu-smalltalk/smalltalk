@@ -1,8 +1,6 @@
 'From VisualWorks®, Pre-Release 7 of June 3, 2002 on August 23, 2002 at 9:50:56 pm'!
 "Package GlorpDatabase(0.2.11,aknight)="!
 
-Namespace current: Glorp!
-
 DatabasePlatform subclass: #MySQLPlatform
     instanceVariableNames: ''
     classVariableNames: 'NewTableType'
@@ -141,6 +139,10 @@ dropConstraint: aConstraint
 dropTableNamed: aString
     self executeSQLString: 'DROP TABLE IF EXISTS ' , aString!
 
+dropTableNamed: aString ifAbsent: aBlock 
+    self doCommand: [self executeSQLString: 'DROP TABLE ' , aString]
+        ifError: aBlock!
+
 executeSQLString: aString 
     | statement result resultSet rows row numColumns |
     statement := connection createStatement.
@@ -256,8 +258,8 @@ printTimestamp: aTimestamp for: aType
 
 convertBooleanToDBBoolean: aBoolean for: aType
     aBoolean isNil ifTrue: [^nil].
-    aBoolean isInteger ifTrue: [ ^aBoolean ].
-    ^aBoolean ifTrue: [1] ifFalse: [0]!
+    aBoolean isInteger ifTrue: [ ^aBoolean ~= 0].
+    ^aBoolean!
 
 convertDBBooleanToBoolean: aBoolean for: aType
     aBoolean isInteger ifFalse: [^aBoolean].

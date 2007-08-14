@@ -2,10 +2,17 @@
   <name>Glorp</name>
   <prereq>MySQL</prereq>
   <prereq>SUnit</prereq>
+
+  <namespace>Glorp</namespace>
+
   <filein>GlorpPort.st</filein>
   <filein>Glorp.st</filein>
   <filein>GlorpMySQL.st</filein>
-  <filein>GlorpTest.st</filein>
+
+  <test>
+    <sunit>Glorp.GlorpTestCase*</sunit>
+    <filein>GlorpTest.st</filein>
+  </test>
 
   <file>GlorpPort.st</file>
   <file>Glorp.st</file>

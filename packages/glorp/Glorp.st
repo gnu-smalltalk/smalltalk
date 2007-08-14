@@ -1,5 +1,3 @@
-Namespace current: Smalltalk!
-
 Smalltalk.Object subclass: #GlorpHelper
     instanceVariableNames: ''
     classVariableNames: ''
@@ -19,10 +17,6 @@ Instance Variables:
     target	<Collection>	The thing we''re streaming onto.
 
 '!
-
-
-Smalltalk addSubspace: #Glorp!
-Namespace current: Glorp!
 
 Smalltalk.Object subclass: #CachePolicy
     instanceVariableNames: 'expiryAction numberOfElements '
@@ -11353,11 +11347,6 @@ atIndex: anInteger
     "For compatibility with Dolphin and VA data base rows."
     ^self at: anInteger.! !
 
-!Smalltalk.Collection methodsFor: 'streams'!
-
-writeStream
-    ^AddingWriteStream on: self.! !
-
 !Smalltalk.Time methodsFor: 'printing'!
 
 glorpPadToTwoDigits: anInteger
@@ -11426,7 +11415,7 @@ needsWork: aString
 todo
     "marker"! !
 
-!Smalltalk.GlorpHelper methodsFor: 'glorp'!
+!GlorpHelper class methodsFor: 'glorp'!
 
 glorpBaseExpressionClass
     "This is to work around Dolphin's obnoxious insistence on absolute prerequisite enforcement. We have to define extension methods on blocks for asGlorpExpression. These need to create a messageArchiver. Those have to be in the dialect-specific prereq, but since that gets loaded before anything else it can't reference Glorp classes. So have it send a message instead"
@@ -11476,14 +11465,14 @@ glorpIsCollection
 
 glorpPrintSQLOn: aStream 
     aStream nextPut: $(.
-    GlorpHelper  do: [:each | each glorpPrintSQLOn: aStream]
+    Glorp.GlorpHelper  do: [:each | each glorpPrintSQLOn: aStream]
     	for: self
     	separatedBy: [aStream nextPutAll: ', '].
     aStream nextPut: $)!
 
 glorpPrintSQLOn: aStream for: aType
     aStream nextPut: $(.
-    GlorpHelper 
+    Glorp.GlorpHelper 
     	do: [:each | aType print: each on: aStream]
     	for: self
     	separatedBy: [aStream nextPutAll: ', '].
@@ -11500,5 +11489,3 @@ glorpRegisterCollectionInternalsIn: anObjectTransaction
     			ifFalse: [anObjectTransaction register: (self instVarAt: index)]]! !
 
 Glorp.FunctionExpression initialize!
-
-Namespace current: Smalltalk!

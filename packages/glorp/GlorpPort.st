@@ -1,6 +1,3 @@
-Smalltalk addSubspace: #Glorp!
-Namespace current: Glorp!
-
 nil subclass: #ProtoObject
     instanceVariableNames: ''
     classVariableNames: ''
@@ -64,16 +61,16 @@ isBlock
 !BlockClosure methodsFor: 'glorp'!
 
 asGlorpExpression
-    ^self asGlorpExpressionOn: GlorpHelper glorpBaseExpressionClass new.!
+    ^self asGlorpExpressionOn: Glorp.GlorpHelper glorpBaseExpressionClass new.!
 
 asGlorpExpressionForDescriptor: aDescriptor
     | base |
-    base := GlorpHelper glorpBaseExpressionClass new.
+    base := Glorp.GlorpHelper glorpBaseExpressionClass new.
     base descriptor: aDescriptor.
     ^self asGlorpExpressionOn: base.!
 
 asGlorpExpressionOn: anExpression 
-    ^(self value: GlorpHelper glorpMessageArchiverClass new) asGlorpExpressionOn: anExpression!
+    ^(self value: Glorp.GlorpHelper glorpMessageArchiverClass new) asGlorpExpressionOn: anExpression!
 
 isBlock
     ^true! !
@@ -118,3 +115,14 @@ glorpPrintSQLOn: stream
         next: (self second < 10 ifTrue: [ 1 ] ifFalse: [ 0 ]) put: $0;
         print: self second;
         nextPut: $'! !
+!Smalltalk.OrderedCollection methodsFor: 'testing'!
+
+writeStream
+    "For our purposes, these aren't collections, but rather a simple database type"
+    ^Glorp.AddingWriteStream on: self.! !
+
+!Smalltalk.Collection methodsFor: 'streams'!
+
+writeStream
+    ^Glorp.AddingWriteStream on: self.! !
+

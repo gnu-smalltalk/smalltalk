@@ -829,6 +829,10 @@ scopeHas: name ifTrue: aBlock
 
 !Behavior methodsFor: 'testing the form of the instances'!
 
+isBits
+    ^self shape notNil and: [ self isPointers not ]
+!
+
 isPointers
     "Answer whether the instance variables of the receiver's instances
      are objects"

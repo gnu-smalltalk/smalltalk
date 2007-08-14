@@ -868,10 +868,8 @@ on: aConnection
 !JdmServerVersion methodsFor: 'reading'!
 
 readFrom: aStream
-	fileFormat := Integer readFrom: aStream.
-	aStream next.
-	release := Integer readFrom: aStream.
-	aStream next.
+	fileFormat := aStream upTo: $..
+	release := aStream upTo: $..
 	version := Integer readFrom: aStream.
 ! !
 
@@ -1076,17 +1074,23 @@ JdmColumn class
 
 !JdmColumn class methodsFor: 'constants-types'!
 
+bitType
+	^16!
+
 blobType
 	^252!
 
 datetimeType
 	^12!
 
+newDateType
+	^14!
+
 dateType
 	^10!
 
 oldDecimalType
-	^246!
+	^0!
 
 decimalType
 	^246!
@@ -1141,6 +1145,9 @@ tinyBlobType
 
 tinyType
 	^1!
+
+varCharType
+	^15!
 
 varStringType
 	^253!
@@ -1266,6 +1273,11 @@ withNumColumns: anInteger
 
 !JdmFieldConverter methodsFor: 'converting-smalltalk'!
 
+writeBoolean: aBoolean on: aStream
+	aBoolean
+		ifTrue: [ aStream nextPutAll: 'True' ]
+		ifFalse: [ aStream nextPutAll: 'False' ]!
+
 writeDate: aDate on: aStream
 	JdmTimestampWriter printMysqlDate: aDate on: aStream!
 
@@ -1351,6 +1363,10 @@ convertToMysql: aValue on: aStream
 
 !JdmFieldConverter methodsFor: 'converting'!
 
+toBoolean: aString column: aColumn
+	aString isNil ifTrue: [ ^nil ].
+	^aString first value = 1!
+
 toByteArray: aString column: aColumn
  	^aColumn isBinary
  		ifTrue: [aString isNil
@@ -1409,6 +1425,7 @@ toTimestamp: aString column: aColumn
 buildConversionMap
 	converterSelectors := IdentityDictionary new.
 	converterSelectors
+		at: #Boolean put: #writeBoolean:on:;
 		at: #FloatD put: #writeDouble:on:;
 		at: #FloatE put: #writeFloat:on:;
 		at: #Time put: #writeQuotedTime:on:;
@@ -1419,6 +1436,7 @@ buildConversionMap
 buildTypeMap
 	types := Dictionary new.
 	types
+		at: JdmColumn bitType put: #toBoolean:column:;
 		at: JdmColumn tinyType put: #toInteger:column:;
 		at: JdmColumn shortType put: #toInteger:column:;
 		at: JdmColumn longType put: #toInteger:column:;
@@ -1428,6 +1446,7 @@ buildTypeMap
 		at: JdmColumn doubleType put: #toDouble:column:;
 		at: JdmColumn oldDecimalType put: #toDouble:column:;
 		at: JdmColumn decimalType put: #toDouble:column:;
+		at: JdmColumn newDateType put: #toDate:column:;
 		at: JdmColumn dateType put: #toDate:column:;
 		at: JdmColumn datetimeType put: #toDateTime:column:;
 		at: JdmColumn timeType put: #toTime:column:;
@@ -1438,6 +1457,7 @@ buildTypeMap
 		at: JdmColumn mediumBlobType put: #toByteArray:column:;
 		at: JdmColumn longBlobType put: #toByteArray:column:;
 		at: JdmColumn blobType put: #toByteArray:column:;
+		at: JdmColumn varCharType put: #toString:column:;
 		at: JdmColumn varStringType put: #toString:column:;
 		at: JdmColumn stringType put: #toString:column:! !
 
