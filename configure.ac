@@ -299,8 +299,8 @@ GST_PACKAGE_ENABLE([Digest], [digest], [], [], [Makefile], [digest.la])
 GST_PACKAGE_ENABLE([MySQL], [mysql])
 AC_MSG_CHECKING([whether to run MySQL tests])
 AC_ARG_ENABLE(mysql-tests,
-[  --enable-mysql-tests   test MySQL bindings, require user "root" with
-                          password "root", plus database "test"], ,
+[  --enable-mysql-tests=USER:PWD:DATABASE
+                          test MySQL bindings [default=root:root:test]], ,
 [enable_mysql_tests=no])
 AC_SUBST(enable_mysql_tests)
 

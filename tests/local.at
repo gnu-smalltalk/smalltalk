@@ -40,26 +40,26 @@ m4_define([AT_DIFF_TEST], [
   AT_CLEANUP
 ])
 
-dnl AT_PACKAGE_TEST([PACKAGE], [XFAILS], [CLASSES], [CONDITION])
-dnl ------------------------------------------------------------
+dnl AT_PACKAGE_TEST([PACKAGE], [XFAILS], [VARS], [CONDITION])
+dnl ---------------------------------------------------------
 m4_define([AT_PACKAGE_TEST], [
   AT_SETUP([$1])
   AT_KEYWORDS([m4_if([$1], [SUnit], [], [$1 ])SUnit])
   $2
   m4_ifval([$4], [AT_CHECK([$4 || exit 77])])
-  AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st --verbose -p $1 $3], [], [], [ignore])
+  AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st --verbose $3 -p $1], [], [], [ignore])
   AT_CLEANUP
 ])
 
-dnl AT_OPTIONAL_PACKAGE_TEST([PACKAGE], [XFAILS], [CLASSES], [CONDITION])
-dnl ---------------------------------------------------------------------
+dnl AT_OPTIONAL_PACKAGE_TEST([PACKAGE], [XFAILS], [VARS], [CONDITION])
+dnl ------------------------------------------------------------------
 dnl Returns exit code 77 (skip) if the package cannot be loaded.
 m4_define([AT_OPTIONAL_PACKAGE_TEST], [
   AT_SETUP([$1])
   AT_KEYWORDS([$1 SUnit])
   $2
   m4_ifval([$4], [AT_CHECK([$4 || exit 77])])
-  AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st --verbose -p $1 $3
+  AT_CHECK_GST([-f $abs_top_srcdir/scripts/Test.st --verbose $3 -p $1
     ret=$?
     case $ret in
       2) exit 77 ;;

@@ -250,11 +250,22 @@ writeFieldDefinitionFor: aType on: aWriteStream
 !JdmMysqlTestSupport methodsFor: 'accessing'!
 
 connectionSpec
+	| user password db isUser |
+	user := TestSuitesScripter variableAt: 'mysqluser' ifAbsent: [ nil ].
+	isUser := user notNil.
+	isUser ifFalse: [ user := 'root' ].
+	password := TestSuitesScripter variableAt: 'mysqlpassword' ifAbsent: [
+	    isUser ifTrue: [ nil ] ifFalse: [ 'root' ] ].
+	db := TestSuitesScripter variableAt: 'mysqldb' ifAbsent: [ 'test' ].
+
 	^JdmConnectionSpec new
 		initialize;
-		user: 'root'; password: 'root';
-		host: 'localhost'; database: 'test';
-		port: 3306; yourself!
+		user: user;
+		password: password;
+		host: 'localhost';
+		database: db;
+		port: 3306;
+		yourself!
 
 createTable
 	^self createTableNamed: self class tableName!

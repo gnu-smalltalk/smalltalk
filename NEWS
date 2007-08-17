@@ -127,8 +127,17 @@ o   Processes that are garbage collected before they terminate execution (e.g.
     because they are waiting on a semaphore that is also garbage collected)
     are appropriately terminated.
 
+o   Since they are not portable outside Unix systems, the `archive' virtual
+    filesystems (deb, lslR, mailfs, patchfs, uar, urar, uzoo, ulha, ucpio, utar)
+    are now available only if the VFSAddOns package is loaded.  Without the
+    package, only #uzip is available and it will only support extracting from
+    ZIP files.
+
 o   Startup time and quit time were improved widely (the time for running
     a simple "Hello, World" program is about one fifth of 2.3.x).
+
+o   SUnit scripts can declare variables (using a "variable=value" syntax)
+    that can be accessed from within a testsuite.  
 
 o   The "<category: 'bar'>" pragma can be used to set the category
     of a method.
@@ -138,11 +147,10 @@ o   The graphical browser can now be started just by typing "gst-blox".
 o   The image is now installed in /usr/local/var/lib/smalltalk (which in
     most distributions will map to /var/lib/smalltalk).
 
-o   Since they are not portable outside Unix systems, the `archive' virtual
-    filesystems (deb, lslR, mailfs, patchfs, uar, urar, uzoo, ulha, ucpio, utar)
-    are now available only if the VFSAddOns package is loaded.  Without the
-    package, only #uzip is available and it will only support extracting from
-    ZIP files.
+o   The MySQL driver was updated to support MySQL 4.x authentication.
+    Tests can be run by configuring with --enable-mysql-tests=USER:PASSWORD:DB
+    (the given user, password and database should already exists when
+    `make check' is run; the default is "root:root:test").
 
 o   When declaring a C function, the #returning: argument now supports
     specifying CPtr and CArray types, the same way it is done in CStruct

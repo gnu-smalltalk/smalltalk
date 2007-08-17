@@ -2501,6 +2501,8 @@ All of these objects are suitable for being stored in the image and
 retrieved.  You can easily store a suite, then bring it in and run it,
 comparing results with previous runs.
 
+@subsection Running testsuites from the command line
+
 @gst{} includes a Smalltalk script to simplify running SUnit test suites.
 It is called @command{gst-sunit}.  The command-line to @command{gst-sunit}
 specifies the packages, files and classes to test:
@@ -2535,6 +2537,20 @@ Add @var{CLASS} to the set of test cases to run.  An asterisk after the class
 name adds all the classes in @var{CLASS}'s hierarchy.  In particular,
 each selector whose name starts with @code{test} constitutes a separate
 test case.
+
+@item @var{VAR}=@var{VALUE}
+Associate variable @var{VAR} with a value.  Variables allow customization
+of the testing environment.  For example, the username with which to access
+a database can be specified with variables.  From within a test, variables
+are accessible with code like this:
+
+@example
+    TestSuitesScripter variableAt: 'mysqluser' ifAbsent: [ 'root' ]
+@end example
+
+Note that a @code{#variableAt:} variant does @emph{not} exist, because
+the testsuite should pick default values in case the variables are
+not specified by the user.
 @end table
 
 @node Network support

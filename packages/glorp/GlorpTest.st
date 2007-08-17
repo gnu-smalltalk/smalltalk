@@ -2221,11 +2221,19 @@ defaultMysqlLogin
     "To set the default database login to MySQL, execute the following statement."
     "DefaultLogin := self defaultMysqlLogin."
 
+    | user password db isUser |
+    user := TestSuitesScripter variableAt: 'mysqluser' ifAbsent: [ nil ].
+    isUser := user notNil.
+    isUser ifFalse: [ user := 'root' ].
+    password := TestSuitesScripter variableAt: 'mysqlpassword' ifAbsent: [
+	isUser ifTrue: [ nil ] ifFalse: [ 'root' ] ].
+    db := TestSuitesScripter variableAt: 'mysqldb' ifAbsent: [ 'test' ].
+
     ^(Login new)
     	database: MySQLPlatform new;
-    	username: 'root';
-    	password: 'root';
-    	connectString: 'test'.! !
+	username: user;
+	password: password;
+	connectString: db! !
 
 !GlorpDatabaseLoginResource class methodsFor: 'LICENSE'!
 

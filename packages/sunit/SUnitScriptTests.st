@@ -43,9 +43,15 @@ TestCase subclass: #TestSuitesScriptTest
 
 !TestSuitesScriptTest methodsFor: 'Testing'!
 
+suiteFor: aScript
+    ^(TestSuitesScripter script: aScript) value!
+
+compile: aScript
+    ^(TestSuitesScripter script: aScript) value; yourself!
+
 testCompoundScript
     | allTestCaseClasses superCase subCase |
-    allTestCaseClasses := (TestSuitesScripter run: 'TestSuitesHierarchyScriptTest TestSuitesCompoundScriptTest') tests. 
+    allTestCaseClasses := (self suiteFor: 'TestSuitesHierarchyScriptTest TestSuitesCompoundScriptTest') tests. 
     self assert: allTestCaseClasses size = 2.
     superCase := (allTestCaseClasses at: 1) tests first.
     self assert: superCase class sunitName sunitAsSymbol = #TestSuitesHierarchyScriptTest.
@@ -55,31 +61,31 @@ testCompoundScript
 
 testEmbeddedNameCommentScript
     | suite |
-    suite := TestSuitesScripter run: ' "This comment contains the name of a SUnitTest Case"  TestSuitesScriptTest'.
+    suite := self suiteFor: ' "This comment contains the name of a SUnitTest Case"  TestSuitesScriptTest'.
     self assert: suite tests size = 1
 !
 
 testEmptyCommentScript
     | suite |
-    suite := TestSuitesScripter run: ' " " TestSuitesScriptTest'.
+    suite := self suiteFor: ' " " TestSuitesScriptTest'.
     self assert: suite tests size = 1
 !
 
 testEmptyHierarchyScript
     | suite |
-    suite := TestSuitesScripter run: '*'.
+    suite := self suiteFor: '*'.
     self assert: suite tests isEmpty
 !
 
 testEmptyScript
     | suite |
-    suite := TestSuitesScripter run: ''.
+    suite := self suiteFor: ''.
     self assert: suite tests isEmpty
 !
 
 testHierarchyScript
     | allTestCaseClasses superCase subCase suite |
-    suite := TestSuitesScripter run: 'TestSuitesHierarchyScriptTest*'.
+    suite := self suiteFor: 'TestSuitesHierarchyScriptTest*'.
     allTestCaseClasses := suite tests. 
     self assert: allTestCaseClasses size = 1.
     superCase := (allTestCaseClasses first tests at: 1) tests first.
@@ -90,13 +96,13 @@ testHierarchyScript
 
 testOpenCommentScript
     | suite |
-    suite := TestSuitesScripter run: ' "SUnitTest'.
+    suite := self suiteFor: ' "SUnitTest'.
     self assert: suite tests isEmpty
 !
 
 testSimpleScript
     | allTestCaseClasses case suite |
-    suite := TestSuitesScripter run: 'TestSuitesHierarchyScriptTest'.
+    suite := self suiteFor: 'TestSuitesHierarchyScriptTest'.
     allTestCaseClasses := suite tests.
     self assert: allTestCaseClasses size = 1.
     case := (allTestCaseClasses at: 1) tests at: 1.
@@ -105,13 +111,42 @@ testSimpleScript
 
 testSingleWordCommentScript
     | suite |
-    suite := TestSuitesScripter run: ' "SUnitTest" TestSuitesScriptTest'.
+    suite := self suiteFor: ' "SUnitTest" TestSuitesScriptTest'.
     self assert: suite tests size = 1
 !
 
 testTwoCommentsScript
     | suite |
-    suite := TestSuitesScripter run: ' " SUnitTest "  " SUnitTest " TestSuitesScriptTest'.
+    suite := self suiteFor: ' " SUnitTest "  " SUnitTest " TestSuitesScriptTest'.
+    self assert: suite tests size = 1.
+    suite := self suiteFor: ' " SUnitTest "" SUnitTest " TestSuitesScriptTest'.
     self assert: suite tests size = 1
+!
+
+testStringVariableScript
+    | scripter |
+    scripter := self compile: 'var1=''value'' var2=''''''quoted "not SUnitTest and not a comment"
+'''''' TestSuitesScriptTest'.
+    self assert: (scripter variableAt: 'var1' ifAbsent: [ 42 ]) = 'value'.
+    self assert: (scripter variableAt: 'var2' ifAbsent: [ 42 ]) = '''quoted "not SUnitTest and not a comment"
+'''.
+    self assert: (scripter variableAt: 'var3' ifAbsent: [ 42 ]) = 42.
+    self assert: scripter value tests size = 1
+!
+
+testVariableScript
+    | scripter |
+    scripter := self compile: ' var1=value TestSuitesScriptTest'.
+    self assert: (scripter variableAt: 'var1' ifAbsent: [ 42 ]) = 'value'.
+    self assert: (scripter variableAt: 'var2' ifAbsent: [ 42 ]) = 42.
+    self assert: scripter value tests size = 1
+!
+
+testEmptyVariableScript
+    | scripter |
+    scripter := self compile: ' var1= TestSuitesScriptTest'.
+    self assert: (scripter variableAt: 'var1' ifAbsent: [ 42 ]) = ''.
+    self assert: (scripter variableAt: 'var2' ifAbsent: [ 42 ]) = 42.
+    self assert: scripter value tests size = 1
 ! !
 

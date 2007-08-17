@@ -4083,14 +4083,14 @@ _ATEOF
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p SUnit ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p SUnit); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:71: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p SUnit ); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:71: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p SUnit); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:71 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p SUnit ); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p SUnit); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4098,12 +4098,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p SUnit ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p SUnit); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p SUnit ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p SUnit); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -4151,14 +4151,14 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Parser ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Parser); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:72: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p Parser ); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:72: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Parser); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:72 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Parser ); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Parser); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -4166,12 +4166,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Parser ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Parser); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Parser ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Parser); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8592,14 +8592,14 @@ _ATEOF
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Complex ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Complex); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:142: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p Complex ); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:142: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Complex); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:142 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Complex ); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Complex); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8607,12 +8607,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Complex ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Complex); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Complex ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Complex); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8660,14 +8660,14 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Continuations ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Continuations); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:143: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p Continuations ); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:143: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Continuations); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:143 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Continuations ); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Continuations); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8675,12 +8675,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Continuations ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Continuations); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Continuations ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Continuations); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8728,14 +8728,14 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p DebugTools ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:144: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p DebugTools ); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:144: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:144 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p DebugTools ); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8743,12 +8743,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p DebugTools ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p DebugTools ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8796,14 +8796,14 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p DhbNumericalMethods ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:145: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p DhbNumericalMethods ); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:145: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:145 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p DhbNumericalMethods ); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8811,12 +8811,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p DhbNumericalMethods ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p DhbNumericalMethods ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8864,14 +8864,14 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Digest ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:146: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p Digest ); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:146: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:146 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Digest ); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8879,12 +8879,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Digest ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Digest ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8932,14 +8932,14 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p GDBM
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p GDBM
     ret=$?
     case $ret in
       2) exit 77 ;;
       0|1) exit $ret ;;
     esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:147: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p GDBM
+echo "$at_srcdir/testsuite.at:147: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p GDBM
     ret=\$?
     case \$ret in
       2) exit 77 ;;
@@ -8953,7 +8953,7 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p GDBM
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p GDBM
     ret=$?
     case $ret in
       2) exit 77 ;;
@@ -8963,7 +8963,7 @@ if test -n "$at_trace_this"; then
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p GDBM
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p GDBM
     ret=$?
     case $ret in
       2) exit 77 ;;
@@ -9016,14 +9016,14 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Iconv
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Iconv
     ret=$?
     case $ret in
       2) exit 77 ;;
       0|1) exit $ret ;;
     esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:148: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p Iconv
+echo "$at_srcdir/testsuite.at:148: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Iconv
     ret=\$?
     case \$ret in
       2) exit 77 ;;
@@ -9037,7 +9037,7 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Iconv
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Iconv
     ret=$?
     case $ret in
       2) exit 77 ;;
@@ -9047,7 +9047,7 @@ if test -n "$at_trace_this"; then
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p Iconv
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Iconv
     ret=$?
     case $ret in
       2) exit 77 ;;
@@ -9094,12 +9094,12 @@ $at_traceon
 
 
   $at_traceoff
-echo "$at_srcdir/testsuite.at:149: test \"\$enable_mysql_tests\" = yes || exit 77"
+echo "$at_srcdir/testsuite.at:149: test \"\$enable_mysql_tests\" != no || exit 77"
 echo testsuite.at:149 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "test \"$enable_mysql_tests\" = yes || exit 77" in
+    case "test \"$enable_mysql_tests\" != no || exit 77" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -9107,12 +9107,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; test "$enable_mysql_tests" = yes || exit 77 ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test "$enable_mysql_tests" != no || exit 77 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; test "$enable_mysql_tests" = yes || exit 77 ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test "$enable_mysql_tests" != no || exit 77 ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -9140,14 +9140,14 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p MySQL ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p MySQL); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:149: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p MySQL ); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:149: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose \$mysqlvars -p MySQL); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:149 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p MySQL ); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p MySQL); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -9155,12 +9155,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p MySQL ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p MySQL); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p MySQL ); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p MySQL); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -9208,14 +9208,14 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p ZLib
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
     ret=$?
     case $ret in
       2) exit 77 ;;
       0|1) exit $ret ;;
     esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:150: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose -p ZLib
+echo "$at_srcdir/testsuite.at:150: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
     ret=\$?
     case \$ret in
       2) exit 77 ;;
@@ -9229,7 +9229,7 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p ZLib
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
     ret=$?
     case $ret in
       2) exit 77 ;;
@@ -9239,7 +9239,7 @@ if test -n "$at_trace_this"; then
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose -p ZLib
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
     ret=$?
     case $ret in
       2) exit 77 ;;
