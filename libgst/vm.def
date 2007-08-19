@@ -88,9 +88,6 @@
 #define STORE_METHOD_LITERAL(index, oop)    _gst_literals[index] = (oop)
 #endif
 
-#define METHOD_VARIABLE(index)		    ASSOCIATION_VALUE (METHOD_LITERAL (index))
-#define STORE_METHOD_VARIABLE(index, oop)   SET_ASSOCIATION_VALUE (METHOD_LITERAL (index), oop)
-
 #ifndef OPEN_CODE_MATH
 
 #define RAW_INT_OP(op, op1, op2, iop)
@@ -697,7 +694,19 @@ operation PUSH_OUTER_TEMP n scopes ( -- tos ) {
 }
 
 operation PUSH_LIT_VARIABLE n ( -- tos ) {
-  tos = METHOD_VARIABLE (n);
+  tos = METHOD_LITERAL (n);
+  if (UNCOMMON (IS_INT (tos))
+      || UNCOMMON (!is_a_kind_of (OOP_CLASS (tos), _gst_association_class)))
+    {
+      PREPARE_STACK ();
+      PUSH_OOP (tos);
+      EXPORT_REGS ();
+      SEND_MESSAGE (_gst_builtin_selectors[VALUE_SPECIAL].symbol, 0);
+      IMPORT_REGS ();
+      FETCH (dispatch_vec);
+    }
+  else
+    tos = ASSOCIATION_VALUE (tos);
 }
 
 operation PUSH_RECEIVER_VARIABLE n ( -- tos ) {
@@ -724,7 +733,20 @@ operation STORE_OUTER_TEMP n scopes ( tos -- tos ) {
 }
 
 operation STORE_LIT_VARIABLE n ( tos -- tos ) {
-  STORE_METHOD_VARIABLE (n, tos);
+  OOP var = METHOD_LITERAL (n), value = tos;
+  if (UNCOMMON (IS_INT (var))
+      || UNCOMMON (!is_a_kind_of (OOP_CLASS (var), _gst_association_class)))
+    {
+      PREPARE_STACK ();
+      SET_STACKTOP (var);
+      PUSH_OOP (value);
+      EXPORT_REGS ();
+      SEND_MESSAGE (_gst_builtin_selectors[VALUE_COLON_SPECIAL].symbol, 1);
+      IMPORT_REGS ();
+      FETCH (dispatch_vec);
+    }
+  else
+    SET_ASSOCIATION_VALUE (var, value);
 }
 
 operation STORE_RECEIVER_VARIABLE n ( tos -- tos ) {

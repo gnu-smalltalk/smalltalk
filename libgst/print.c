@@ -130,7 +130,7 @@ print_association_key_to_stream (STREAM *stream, OOP associationOOP)
   gst_association association;
 
   if (!IS_OOP (associationOOP)
-      || !is_a_kind_of (OOP_CLASS(associationOOP), _gst_association_class))
+      || !is_a_kind_of (OOP_CLASS(associationOOP), _gst_lookup_key_class))
     {
       stream_printf (stream, "<non-association %O in association context>",
                      associationOOP);

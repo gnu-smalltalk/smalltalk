@@ -778,26 +778,31 @@ set_top_node_extra (int extra, int jumpOffset)
   node->jumpDest = this_label[jumpOffset];
 }
 
-code_tree *
-push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int operation, int imm)
+static inline inline_cache *
+set_inline_cache (OOP selector, int numArgs, mst_Boolean super, int operation, int imm)
 {
-  code_tree *args, *node;
-  int tot_args;
-
   curr_inline_cache->numArgs = numArgs;
   curr_inline_cache->selector = selector;
   curr_inline_cache->cachedIP = super ? do_super_code : do_send_code;
   curr_inline_cache->is_super = super;
   curr_inline_cache->more = true;
   curr_inline_cache->imm = imm;
+  return curr_inline_cache++;
+}
+
+code_tree *
+push_send_node (gst_uchar *bp, OOP selector, int numArgs, mst_Boolean super, int operation, int imm)
+{
+  code_tree *args, *node;
+  int tot_args;
+  inline_cache *ic = set_inline_cache (selector, numArgs, super, operation, imm);
 
   /* Remember that we must pop an extra node for the receiver! */
   tot_args = numArgs + (super ? 2 : 1);
   for (args = NULL; tot_args--;)
     args = pop_tree_node (args);
 
-  node =
-    push_tree_node (bp, args, operation, (PTR) curr_inline_cache++);
+  node = push_tree_node (bp, args, operation, (PTR) ic);
   return (node);
 }
 
@@ -3330,8 +3335,16 @@ decode_bytecode (gst_uchar *bp)
     }
 
     PUSH_LIT_VARIABLE {
-      push_tree_node_oop (IP0, NULL, TREE_PUSH | TREE_LIT_VAR,
-                          literals[n]);
+      if (is_a_kind_of (OOP_INT_CLASS (literals[n]), _gst_association_class))
+        push_tree_node_oop (IP0, NULL, TREE_PUSH | TREE_LIT_VAR,
+                            literals[n]);
+      else
+	{
+          push_tree_node_oop (IP0, NULL, TREE_PUSH | TREE_LIT_CONST,
+                              literals[n]);
+          push_send_node (IP0, _gst_builtin_selectors[VALUE_SPECIAL].symbol,
+			  0, false, TREE_SEND, 0);
+	}
     }
 
     PUSH_SELF {
@@ -3370,9 +3383,22 @@ decode_bytecode (gst_uchar *bp)
                       (PTR) (uintptr_t) n);
     }
     STORE_LIT_VARIABLE {
-      push_tree_node_oop (IP0, pop_tree_node (NULL),
-                          TREE_STORE | TREE_LIT_VAR,
-                          literals[n]);
+      if (is_a_kind_of (OOP_INT_CLASS (literals[n]), _gst_association_class))
+        push_tree_node_oop (IP0, pop_tree_node (NULL),
+			    TREE_STORE | TREE_LIT_VAR, literals[n]);
+      else
+	{
+	  code_tree *value = pop_tree_node (NULL);
+          code_tree *var = push_tree_node_oop (IP0, NULL,
+					       TREE_PUSH | TREE_LIT_CONST,
+					       literals[n]);
+          inline_cache *ic =
+	    set_inline_cache (_gst_builtin_selectors[VALUE_COLON_SPECIAL].symbol,
+			      1, false, TREE_SEND, 0);
+
+	  var->next = value;
+	  push_tree_node (IP0, var, TREE_SEND, (PTR) ic);
+	}
     }
 
     SEND {
@@ -3556,14 +3582,19 @@ translate_method (OOP methodOOP, OOP receiverClass, int size)
   for (inlineCacheCount = 0, bp = bc; bp < end; )
     MATCH_BYTECODES (XLAT_COUNT_SENDS, bp, (
       PUSH_RECEIVER_VARIABLE, PUSH_TEMPORARY_VARIABLE,
-      PUSH_LIT_CONSTANT, PUSH_LIT_VARIABLE, PUSH_SELF,
+      PUSH_LIT_CONSTANT, PUSH_SELF,
       PUSH_SPECIAL, PUSH_INTEGER, RETURN_METHOD_STACK_TOP,
       RETURN_CONTEXT_STACK_TOP, LINE_NUMBER_BYTECODE,
       STORE_RECEIVER_VARIABLE, STORE_TEMPORARY_VARIABLE,
-      STORE_LIT_VARIABLE, POP_INTO_NEW_STACKTOP,
+      POP_INTO_NEW_STACKTOP,
       POP_STACK_TOP, DUP_STACK_TOP, PUSH_OUTER_TEMP,
       STORE_OUTER_TEMP, JUMP, POP_JUMP_TRUE, POP_JUMP_FALSE,
       MAKE_DIRTY_BLOCK, EXIT_INTERPRETER, INVALID { }
+
+      PUSH_LIT_VARIABLE, STORE_LIT_VARIABLE {
+	if (!is_a_kind_of (OOP_INT_CLASS (literals[n]), _gst_association_class))
+	  inlineCacheCount++;
+      }
 
       SEND_ARITH, SEND_SPECIAL, SEND_IMMEDIATE, SEND {
         inlineCacheCount++;

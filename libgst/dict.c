@@ -390,7 +390,7 @@ static const class_definition class_info[] = {
    "LargeNegativeInteger", NULL, NULL, NULL },
 
   {&_gst_lookup_key_class, &_gst_magnitude_class,
-   ISP_FIXED, false, 1,
+   ISP_FIXED, true, 1,
    "LookupKey", "key", NULL, NULL },
 
   {&_gst_association_class, &_gst_lookup_key_class,
