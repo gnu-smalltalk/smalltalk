@@ -82,12 +82,14 @@ resolveBinding
      add the variable to the defaultDictionary.  If already bound, reuse the
      bound that was found on the previous lookup."
 
+    | assoc |
+
     "See if a previous access has created the binding."
-    association := defaultDictionary associationAt: self key ifAbsent: [ nil ].
-    association isNil ifFalse: [ ^self ].
+    assoc := defaultDictionary associationAt: self key ifAbsent: [ nil ].
+    assoc isNil ifFalse: [ ^assoc ].
 
     "Look for the binding in the class environment."
-    class withAllSuperclassesDo: [ :env || pools assoc |
+    class withAllSuperclassesDo: [ :env || pools |
         assoc := env environment associationAt: self key ifAbsent: [ nil ].
         assoc isNil ifFalse: [ ^assoc ].
 
