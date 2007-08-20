@@ -522,12 +522,11 @@ binaryRepresentationObject
 !CompiledMethod methodsFor: 'c call-outs'!
 
 isValidCCall
-    ^true
-    "^(self bytecodeAt: 1) == 67
+    ^(self bytecodeAt: 1) == 66
         and: [ (self bytecodeAt: 2) == 0
         and: [ self numLiterals == 0
         and: [ self numTemps == 0
-        and: [ self flags == 5 ]]]]"!
+        and: [ self flags == 5 ]]]]!
 
 rewriteAsCCall: func for: aClass
     | args |
@@ -563,12 +562,12 @@ rewriteAsCCall: func returning: returnType args: argsArray
     returnType == #void
 	ifTrue: [
 	    literals := { descr. }.
-	    bytecodes := #[ 136 1 45 0 30 34 67 0 ] ]
+	    bytecodes := #[ 179 1 45 0 30 34 66 0 ] ]
 	ifFalse: [
 	    literals := { descr. #{ValueHolder}. }.
 	    bytecodes := (returnCType isKindOf: CType)
-		ifTrue: [ #[ 136 1 95 1 30 34 22 0 30 35 51 0 ] ]
-		ifFalse: [ #[ 136 1 95 1 30 34 22 0 51 0 ] ] ].
+		ifTrue: [ #[ 179 1 34 1 30 84 30 34 22 0 30 35 51 0 ] ]
+		ifFalse: [ #[ 179 1 34 1 30 84 30 34 22 0 51 0 ] ] ].
 
     newMethod := CompiledMethod
 	literals: literals
@@ -596,7 +595,7 @@ rewriteAsAsyncCCall: func args: argsArray
 
     "descr asyncCall. ^self"
     literals := { descr. #asyncCall }.
-    bytecodes := #[ 136 1 66 1 67 0 ].
+    bytecodes := #[ 179 1 65 1 66 0 ].
 
     newMethod := CompiledMethod
 	literals: literals

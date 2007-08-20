@@ -249,13 +249,13 @@ INVALID (opcode, arg);
   dispatch SEND_SPECIAL (8);
 }
 
-/* SEND_SPECIAL(9) */
+/* JAVA_AS_INT_SPECIAL(*) */
 25 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_SPECIAL (9);
 }
 
-/* SEND_SPECIAL(10) */
+/* JAVA_AS_LONG_SPECIAL(*) */
 26 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_SPECIAL (10);
@@ -491,24 +491,16 @@ INVALID (opcode, arg);
   dispatch SEND (arg | arg_lsb, 0, 1);
 }
 
-/* LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0) */
-65 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
-}
-
 /* EXT_BYTE(*)
    SEND(0) */
-66 {
+65 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND (arg | arg_lsb, 0, 0);
 }
 
 /* PUSH_SELF(0)
    RETURN_CONTEXT_STACK_TOP(*) */
-67 {
+66 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_SELF;
   dispatch RETURN_CONTEXT_STACK_TOP;
@@ -516,18 +508,26 @@ INVALID (opcode, arg);
 
 /* LINE_NUMBER_BYTECODE(*)
    PUSH_SELF(0) */
-68 {
+67 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_SELF;
 }
 
-/* PUSH_TEMPORARY_VARIABLE(0)
-   SEND_IMMEDIATE(*) */
+/* LINE_NUMBER_BYTECODE(*)
+   POP_STACK_TOP(0) */
+68 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch POP_STACK_TOP;
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_TEMPORARY_VARIABLE(0) */
 69 {
   extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_TEMPORARY_VARIABLE (0);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
 }
 
 /* PUSH_LIT_CONSTANT(*)
@@ -538,57 +538,90 @@ INVALID (opcode, arg);
   dispatch MAKE_DIRTY_BLOCK;
 }
 
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_TEMPORARY_VARIABLE(0) */
-71 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_TEMPORARY_VARIABLE (0);
-}
-
 /* EXT_BYTE(*)
    SEND(2) */
-72 {
+71 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND (arg | arg_lsb, 0, 2);
 }
 
 /* POP_STACK_TOP(0)
    DUP_STACK_TOP(*) */
-73 {
+72 {
   extract opcode (8), arg_lsb (8);
   dispatch POP_STACK_TOP;
   dispatch DUP_STACK_TOP;
 }
 
-/* LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0)
-   PUSH_SELF(0) */
-74 {
+/* PUSH_TEMPORARY_VARIABLE(0)
+   SEND_IMMEDIATE(*) */
+73 {
   extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
-  dispatch PUSH_SELF;
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
 }
 
-/* EXT_BYTE(*)
-   PUSH_OUTER_TEMP(1) */
-75 {
+/* PUSH_SELF(0)
+   EXT_BYTE(*)
+   SEND(0) */
+74 {
   extract opcode (8), arg_lsb (8);
-  dispatch PUSH_OUTER_TEMP (arg | arg_lsb, 1);
+  dispatch PUSH_SELF;
+  dispatch SEND (arg | arg_lsb, 0, 0);
 }
 
 /* PUSH_SPECIAL(*)
    RETURN_CONTEXT_STACK_TOP(0) */
-76 {
+75 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_SPECIAL (arg | arg_lsb);
   dispatch RETURN_CONTEXT_STACK_TOP;
 }
 
+/* PUSH_SELF(0)
+   SEND_IMMEDIATE(*) */
+76 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SELF;
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* EXT_BYTE(*)
+   PUSH_OUTER_TEMP(1) */
+77 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_OUTER_TEMP (arg | arg_lsb, 1);
+}
+
+/* STORE_TEMPORARY_VARIABLE(*)
+   POP_STACK_TOP(0) */
+78 {
+  extract opcode (8), arg_lsb (8);
+  dispatch STORE_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch POP_STACK_TOP;
+}
+
+/* PUSH_SELF(0)
+   PUSH_TEMPORARY_VARIABLE(*) */
+79 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SELF;
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+}
+
+/* STORE_RECEIVER_VARIABLE(*)
+   PUSH_SELF(0)
+   RETURN_CONTEXT_STACK_TOP(0) */
+80 {
+  extract opcode (8), arg_lsb (8);
+  dispatch STORE_RECEIVER_VARIABLE (arg | arg_lsb);
+  dispatch PUSH_SELF;
+  dispatch RETURN_CONTEXT_STACK_TOP;
+}
+
 /* PUSH_INTEGER(*)
    PLUS_SPECIAL(0) */
-77 {
+81 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_INTEGER (arg | arg_lsb);
   dispatch SEND_ARITH (0);
@@ -596,49 +629,39 @@ INVALID (opcode, arg);
 
 /* LINE_NUMBER_BYTECODE(*)
    PUSH_LIT_VARIABLE(0) */
-78 {
+82 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_LIT_VARIABLE (0);
 }
 
-/* PUSH_TEMPORARY_VARIABLE(1)
-   SEND_IMMEDIATE(*) */
-79 {
+/* PUSH_TEMPORARY_VARIABLE(0)
+   PUSH_TEMPORARY_VARIABLE(*) */
+83 {
   extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (1);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_SELF(0)
-   SEND_IMMEDIATE(*) */
-80 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_SELF;
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
 }
 
 /* PUSH_TEMPORARY_VARIABLE(0)
    SEND(*) */
-81 {
+84 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_TEMPORARY_VARIABLE (0);
   dispatch SEND (arg >> 8, 0, arg_lsb);
 }
 
-/* STORE_RECEIVER_VARIABLE(*)
-   PUSH_SELF(0)
-   RETURN_CONTEXT_STACK_TOP(0) */
-82 {
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_TEMPORARY_VARIABLE(1) */
+85 {
   extract opcode (8), arg_lsb (8);
-  dispatch STORE_RECEIVER_VARIABLE (arg | arg_lsb);
-  dispatch PUSH_SELF;
-  dispatch RETURN_CONTEXT_STACK_TOP;
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_TEMPORARY_VARIABLE (1);
 }
 
 /* IS_NIL_SPECIAL(0)
    POP_JUMP_FALSE(*) */
-83 {
+86 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_SPECIAL (4);
   dispatch POP_JUMP_FALSE (IP - IP0 + (arg | arg_lsb));
@@ -646,31 +669,15 @@ INVALID (opcode, arg);
 
 /* PUSH_INTEGER(*)
    EQUAL_SPECIAL(0) */
-84 {
+87 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_INTEGER (arg | arg_lsb);
   dispatch SEND_ARITH (6);
 }
 
-/* STORE_TEMPORARY_VARIABLE(*)
-   POP_STACK_TOP(0) */
-85 {
-  extract opcode (8), arg_lsb (8);
-  dispatch STORE_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
-}
-
-/* PUSH_TEMPORARY_VARIABLE(*)
-   RETURN_CONTEXT_STACK_TOP(0) */
-86 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch RETURN_CONTEXT_STACK_TOP;
-}
-
 /* EXT_BYTE(*)
    SEND(3) */
-87 {
+88 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND (arg | arg_lsb, 0, 3);
 }
@@ -678,82 +685,33 @@ INVALID (opcode, arg);
 /* PUSH_TEMPORARY_VARIABLE(0)
    EXT_BYTE(*)
    SEND(1) */
-88 {
+89 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_TEMPORARY_VARIABLE (0);
   dispatch SEND (arg | arg_lsb, 0, 1);
 }
 
-/* PUSH_TEMPORARY_VARIABLE(0)
-   PUSH_TEMPORARY_VARIABLE(*) */
-89 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (0);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-}
-
-/* PUSH_INTEGER(*)
-   MINUS_SPECIAL(0) */
-90 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND_ARITH (1);
-}
-
-/* PUSH_INTEGER(*)
-   AT_SPECIAL(0) */
-91 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND_SPECIAL (0);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_TEMPORARY_VARIABLE(1) */
-92 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_TEMPORARY_VARIABLE (1);
-}
-
-/* PUSH_SELF(0)
-   EXT_BYTE(*)
-   SEND(0) */
-93 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_SELF;
-  dispatch SEND (arg | arg_lsb, 0, 0);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(*)
-   AT_SPECIAL(0) */
-94 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch SEND_SPECIAL (0);
-}
-
-/* PUSH_LIT_VARIABLE(*)
-   SEND_IMMEDIATE(84) */
-95 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_VARIABLE (arg | arg_lsb);
-  dispatch SEND_IMMEDIATE (84, 0);
-}
-
 /* LINE_NUMBER_BYTECODE(*)
    PUSH_SELF(0)
    SEND(0) */
-96 {
+90 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_SELF;
   dispatch SEND (0, 0, 0);
 }
 
+/* PUSH_TEMPORARY_VARIABLE(*)
+   RETURN_CONTEXT_STACK_TOP(0) */
+91 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch RETURN_CONTEXT_STACK_TOP;
+}
+
 /* PUSH_LIT_CONSTANT(*)
    SEND_IMMEDIATE(36) */
-97 {
+92 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
   dispatch SEND_IMMEDIATE (36, 0);
@@ -761,228 +719,268 @@ INVALID (opcode, arg);
 
 /* SAME_OBJECT_SPECIAL(0)
    POP_JUMP_FALSE(*) */
-98 {
+93 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_SPECIAL (8);
   dispatch POP_JUMP_FALSE (IP - IP0 + (arg | arg_lsb));
 }
 
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_RECEIVER_VARIABLE(0) */
-99 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_RECEIVER_VARIABLE (0);
-}
-
-/* DUP_STACK_TOP(0)
-   POP_JUMP_FALSE(*) */
-100 {
-  extract opcode (8), arg_lsb (8);
-  dispatch DUP_STACK_TOP;
-  dispatch POP_JUMP_FALSE (IP - IP0 + (arg | arg_lsb));
-}
-
-/* PUSH_TEMPORARY_VARIABLE(*)
-   PUSH_INTEGER(1)
-   PLUS_SPECIAL(0) */
-101 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch PUSH_INTEGER (1);
-  dispatch SEND_ARITH (0);
-}
-
-/* POP_STACK_TOP(0)
-   DUP_STACK_TOP(0)
-   LINE_NUMBER_BYTECODE(*) */
-102 {
-  extract opcode (8), arg_lsb (8);
-  dispatch POP_STACK_TOP;
-  dispatch DUP_STACK_TOP;
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_TEMPORARY_VARIABLE(2) */
-103 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_TEMPORARY_VARIABLE (2);
-}
-
-/* PUSH_SELF(0)
-   SEND(*) */
-104 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_SELF;
-  dispatch SEND (arg >> 8, 0, arg_lsb);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(0)
-   EXT_BYTE(*)
-   SEND(0) */
-105 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (0);
-  dispatch SEND (arg | arg_lsb, 0, 0);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   SEND_IMMEDIATE(38) */
-106 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch SEND_IMMEDIATE (38, 0);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(*)
-   SIZE_SPECIAL(0) */
-107 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch SEND_SPECIAL (2);
-}
-
-/* EXT_BYTE(*)
-   STORE_OUTER_TEMP(1) */
-108 {
-  extract opcode (8), arg_lsb (8);
-  dispatch STORE_OUTER_TEMP (arg | arg_lsb, 1);
-}
-
-/* PUSH_INTEGER(*)
-   SEND_IMMEDIATE(32) */
-109 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND_IMMEDIATE (32, 0);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   EQUAL_SPECIAL(0) */
-110 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch SEND_ARITH (6);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0)
-   PUSH_TEMPORARY_VARIABLE(0) */
-111 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
-  dispatch PUSH_TEMPORARY_VARIABLE (0);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   MAKE_DIRTY_BLOCK(0)
-   SEND_IMMEDIATE(76) */
-112 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch MAKE_DIRTY_BLOCK;
-  dispatch SEND_IMMEDIATE (76, 0);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(2)
-   SEND_IMMEDIATE(*) */
-113 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (2);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_RECEIVER_VARIABLE(1) */
-114 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_RECEIVER_VARIABLE (1);
-}
-
 /* PUSH_LIT_CONSTANT(*)
    EXT_BYTE(1)
    SEND(1) */
-115 {
+94 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
   dispatch SEND (1, 0, 1);
 }
 
-/* PUSH_TEMPORARY_VARIABLE(*)
-   PLUS_SPECIAL(0) */
-116 {
+/* LINE_NUMBER_BYTECODE(*)
+   POP_STACK_TOP(0)
+   PUSH_SELF(0) */
+95 {
   extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch SEND_ARITH (0);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch POP_STACK_TOP;
+  dispatch PUSH_SELF;
+}
+
+/* POP_STACK_TOP(0)
+   DUP_STACK_TOP(0)
+   LINE_NUMBER_BYTECODE(*) */
+96 {
+  extract opcode (8), arg_lsb (8);
+  dispatch POP_STACK_TOP;
+  dispatch DUP_STACK_TOP;
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(0)
+   EXT_BYTE(*)
+   SEND(0) */
+97 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch SEND (arg | arg_lsb, 0, 0);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(1)
+   SEND_IMMEDIATE(*) */
+98 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (1);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   EQUAL_SPECIAL(0) */
+99 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch SEND_ARITH (6);
+}
+
+/* PUSH_INTEGER(*)
+   MINUS_SPECIAL(0) */
+100 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch SEND_ARITH (1);
+}
+
+/* DUP_STACK_TOP(0)
+   POP_JUMP_FALSE(*) */
+101 {
+  extract opcode (8), arg_lsb (8);
+  dispatch DUP_STACK_TOP;
+  dispatch POP_JUMP_FALSE (IP - IP0 + (arg | arg_lsb));
 }
 
 /* POP_STACK_TOP(0)
    LINE_NUMBER_BYTECODE(*) */
-117 {
+102 {
   extract opcode (8), arg_lsb (8);
   dispatch POP_STACK_TOP;
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
 }
 
+/* PUSH_INTEGER(*)
+   SEND_IMMEDIATE(32) */
+103 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch SEND_IMMEDIATE (32, 0);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(*)
+   SIZE_SPECIAL(0) */
+104 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND_SPECIAL (2);
+}
+
+/* PUSH_SELF(0)
+   SEND(*) */
+105 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SELF;
+  dispatch SEND (arg >> 8, 0, arg_lsb);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_TEMPORARY_VARIABLE(2) */
+106 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_TEMPORARY_VARIABLE (2);
+}
+
 /* POP_STACK_TOP(0)
    SEND_IMMEDIATE(*) */
-118 {
+107 {
   extract opcode (8), arg_lsb (8);
   dispatch POP_STACK_TOP;
   dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
 }
 
-/* PUSH_INTEGER(1)
-   STORE_TEMPORARY_VARIABLE(*) */
-119 {
+/* PUSH_TEMPORARY_VARIABLE(*)
+   PUSH_INTEGER(1)
+   PLUS_SPECIAL(0) */
+108 {
   extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
   dispatch PUSH_INTEGER (1);
-  dispatch STORE_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND_ARITH (0);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_RECEIVER_VARIABLE(0) */
+109 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_RECEIVER_VARIABLE (0);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   SEND_IMMEDIATE(38) */
+110 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch SEND_IMMEDIATE (38, 0);
+}
+
+/* PUSH_INTEGER(*)
+   AT_SPECIAL(0) */
+111 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch SEND_SPECIAL (0);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_RECEIVER_VARIABLE(1) */
+112 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_RECEIVER_VARIABLE (1);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(0)
+   PUSH_LIT_CONSTANT(*) */
+113 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+}
+
+/* DUP_STACK_TOP(0)
+   POP_JUMP_TRUE(*) */
+114 {
+  extract opcode (8), arg_lsb (8);
+  dispatch DUP_STACK_TOP;
+  dispatch POP_JUMP_TRUE (IP - IP0 + (arg | arg_lsb));
+}
+
+/* PUSH_TEMPORARY_VARIABLE(*)
+   AT_SPECIAL(0) */
+115 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND_SPECIAL (0);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(2)
+   SEND_IMMEDIATE(*) */
+116 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (2);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   SEND_IMMEDIATE(49) */
+117 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch SEND_IMMEDIATE (49, 0);
+}
+
+/* STORE_TEMPORARY_VARIABLE(1)
+   LINE_NUMBER_BYTECODE(*)
+   POP_STACK_TOP(0) */
+118 {
+  extract opcode (8), arg_lsb (8);
+  dispatch STORE_TEMPORARY_VARIABLE (1);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch POP_STACK_TOP;
 }
 
 /* PUSH_TEMPORARY_VARIABLE(1)
    EXT_BYTE(*)
    SEND(1) */
-120 {
+119 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_TEMPORARY_VARIABLE (1);
   dispatch SEND (arg | arg_lsb, 0, 1);
 }
 
-/* PUSH_TEMPORARY_VARIABLE(*)
-   VALUE_SPECIAL(0) */
+/* STORE_RECEIVER_VARIABLE(*)
+   POP_STACK_TOP(0) */
+120 {
+  extract opcode (8), arg_lsb (8);
+  dispatch STORE_RECEIVER_VARIABLE (arg | arg_lsb);
+  dispatch POP_STACK_TOP;
+}
+
+/* EXT_BYTE(*)
+   STORE_OUTER_TEMP(1) */
 121 {
   extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch SEND_SPECIAL (6);
-}
-
-/* PUSH_LIT_CONSTANT(1)
-   SEND_IMMEDIATE(*) */
-122 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (1);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(*)
-   TIMES_SPECIAL(0) */
-123 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch SEND_ARITH (8);
+  dispatch STORE_OUTER_TEMP (arg | arg_lsb, 1);
 }
 
 /* PUSH_INTEGER(*)
-   GREATER_THAN_SPECIAL(0) */
-124 {
+   SEND_IMMEDIATE(96) */
+122 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND_ARITH (3);
+  dispatch SEND_IMMEDIATE (96, 0);
+}
+
+/* POP_STACK_TOP(0)
+   PUSH_TEMPORARY_VARIABLE(*) */
+123 {
+  extract opcode (8), arg_lsb (8);
+  dispatch POP_STACK_TOP;
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+}
+
+/* PUSH_RECEIVER_VARIABLE(*)
+   RETURN_CONTEXT_STACK_TOP(0) */
+124 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
+  dispatch RETURN_CONTEXT_STACK_TOP;
 }
 
 /* LINE_NUMBER_BYTECODE(*)
@@ -995,268 +993,236 @@ INVALID (opcode, arg);
   dispatch PUSH_TEMPORARY_VARIABLE (1);
 }
 
-/* PUSH_TEMPORARY_VARIABLE(*)
-   MINUS_SPECIAL(0) */
+/* LINE_NUMBER_BYTECODE(*)
+   POP_STACK_TOP(0)
+   PUSH_TEMPORARY_VARIABLE(0) */
 126 {
   extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch SEND_ARITH (1);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_OUTER_TEMP(1) */
-127 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_OUTER_TEMP (0, 1);
-}
-
-/* DUP_STACK_TOP(0)
-   POP_JUMP_TRUE(*) */
-128 {
-  extract opcode (8), arg_lsb (8);
-  dispatch DUP_STACK_TOP;
-  dispatch POP_JUMP_TRUE (IP - IP0 + (arg | arg_lsb));
-}
-
-/* STORE_TEMPORARY_VARIABLE(1)
-   LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0) */
-129 {
-  extract opcode (8), arg_lsb (8);
-  dispatch STORE_TEMPORARY_VARIABLE (1);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch POP_STACK_TOP;
-}
-
-/* PUSH_TEMPORARY_VARIABLE(*)
-   AT_PUT_SPECIAL(0) */
-130 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch SEND_SPECIAL (1);
-}
-
-/* PUSH_LIT_CONSTANT(0)
-   SEND_IMMEDIATE(*) */
-131 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (0);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(3)
-   SEND_IMMEDIATE(*) */
-132 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (3);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* POP_STACK_TOP(0)
-   JUMP_BACK(*) */
-133 {
-  extract opcode (8), arg_lsb (8);
-  dispatch POP_STACK_TOP;
-  dispatch JUMP (IP - IP0 - (arg | arg_lsb));
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_RECEIVER_VARIABLE(2) */
-134 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_RECEIVER_VARIABLE (2);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_SELF(0)
-   PUSH_TEMPORARY_VARIABLE(0) */
-135 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_SELF;
   dispatch PUSH_TEMPORARY_VARIABLE (0);
 }
 
 /* LINE_NUMBER_BYTECODE(*)
+   PUSH_SELF(0)
    PUSH_LIT_CONSTANT(0) */
-136 {
+127 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_SELF;
   dispatch PUSH_LIT_CONSTANT (0);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   RETURN_CONTEXT_STACK_TOP(0) */
+128 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch RETURN_CONTEXT_STACK_TOP;
 }
 
 /* PUSH_SELF(0)
    SIZE_SPECIAL(*) */
-137 {
+129 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_SELF;
   dispatch SEND_SPECIAL (2);
 }
 
-/* PUSH_INTEGER(*)
-   TIMES_SPECIAL(0) */
-138 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND_ARITH (8);
-}
-
 /* IS_NIL_SPECIAL(0)
    POP_JUMP_TRUE(*) */
-139 {
+130 {
   extract opcode (8), arg_lsb (8);
   dispatch SEND_SPECIAL (4);
   dispatch POP_JUMP_TRUE (IP - IP0 + (arg | arg_lsb));
 }
 
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_RECEIVER_VARIABLE(3) */
-140 {
+/* PUSH_TEMPORARY_VARIABLE(*)
+   AT_PUT_SPECIAL(0) */
+131 {
   extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_RECEIVER_VARIABLE (3);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND_SPECIAL (1);
 }
 
 /* LINE_NUMBER_BYTECODE(*)
    PUSH_LIT_VARIABLE(1) */
-141 {
+132 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_LIT_VARIABLE (1);
 }
 
-/* STORE_RECEIVER_VARIABLE(*)
-   POP_STACK_TOP(0) */
+/* PUSH_TEMPORARY_VARIABLE(*)
+   PLUS_SPECIAL(0) */
+133 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND_ARITH (0);
+}
+
+/* POP_STACK_TOP(0)
+   JUMP_BACK(*) */
+134 {
+  extract opcode (8), arg_lsb (8);
+  dispatch POP_STACK_TOP;
+  dispatch JUMP (IP - IP0 - (arg | arg_lsb));
+}
+
+/* POP_STACK_TOP(0)
+   PUSH_LIT_VARIABLE(*) */
+135 {
+  extract opcode (8), arg_lsb (8);
+  dispatch POP_STACK_TOP;
+  dispatch PUSH_LIT_VARIABLE (arg | arg_lsb);
+}
+
+/* PUSH_INTEGER(1)
+   STORE_TEMPORARY_VARIABLE(*) */
+136 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (1);
+  dispatch STORE_TEMPORARY_VARIABLE (arg | arg_lsb);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   EXT_BYTE(2)
+   SEND(1) */
+137 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch SEND (2, 0, 1);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_TEMPORARY_VARIABLE(3) */
+138 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_TEMPORARY_VARIABLE (3);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_OUTER_TEMP(1) */
+139 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_OUTER_TEMP (0, 1);
+}
+
+/* PUSH_RECEIVER_VARIABLE(*)
+   SEND(0) */
+140 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
+  dispatch SEND (0, 0, 0);
+}
+
+/* PUSH_INTEGER(*)
+   GREATER_THAN_SPECIAL(0) */
+141 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch SEND_ARITH (3);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(*)
+   VALUE_SPECIAL(0) */
 142 {
   extract opcode (8), arg_lsb (8);
-  dispatch STORE_RECEIVER_VARIABLE (arg | arg_lsb);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND_SPECIAL (6);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(*)
+   MINUS_SPECIAL(0) */
+143 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND_ARITH (1);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   EXT_BYTE(3)
+   SEND(1) */
+144 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch SEND (3, 0, 1);
+}
+
+/* PUSH_SPECIAL(0)
+   SAME_OBJECT_SPECIAL(0)
+   POP_JUMP_FALSE(*) */
+145 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SPECIAL (0);
+  dispatch SEND_SPECIAL (8);
+  dispatch POP_JUMP_FALSE (IP - IP0 + (arg | arg_lsb));
+}
+
+/* STORE_TEMPORARY_VARIABLE(2)
+   LINE_NUMBER_BYTECODE(*)
+   POP_STACK_TOP(0) */
+146 {
+  extract opcode (8), arg_lsb (8);
+  dispatch STORE_TEMPORARY_VARIABLE (2);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch POP_STACK_TOP;
+}
+
+/* SAME_OBJECT_SPECIAL(0)
+   POP_JUMP_TRUE(*) */
+147 {
+  extract opcode (8), arg_lsb (8);
+  dispatch SEND_SPECIAL (8);
+  dispatch POP_JUMP_TRUE (IP - IP0 + (arg | arg_lsb));
+}
+
+/* PUSH_INTEGER(*)
+   TIMES_SPECIAL(0) */
+148 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch SEND_ARITH (8);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_RECEIVER_VARIABLE(2) */
+149 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_RECEIVER_VARIABLE (2);
 }
 
 /* PUSH_INTEGER(*)
    LESS_THAN_SPECIAL(0) */
-143 {
+150 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_INTEGER (arg | arg_lsb);
   dispatch SEND_ARITH (2);
 }
 
 /* PUSH_LIT_CONSTANT(*)
-   EXT_BYTE(2)
-   SEND(1) */
-144 {
+   AT_PUT_SPECIAL(0) */
+151 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch SEND (2, 0, 1);
+  dispatch SEND_SPECIAL (1);
 }
 
 /* EXT_BYTE(*)
    PUSH_OUTER_TEMP(2) */
-145 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_OUTER_TEMP (arg | arg_lsb, 2);
-}
-
-/* PUSH_RECEIVER_VARIABLE(*)
-   SIZE_SPECIAL(0) */
-146 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
-  dispatch SEND_SPECIAL (2);
-}
-
-/* POP_STACK_TOP(0)
-   PUSH_TEMPORARY_VARIABLE(*) */
-147 {
-  extract opcode (8), arg_lsb (8);
-  dispatch POP_STACK_TOP;
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(*)
-   PUSH_INTEGER(1)
-   MINUS_SPECIAL(0) */
-148 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch PUSH_INTEGER (1);
-  dispatch SEND_ARITH (1);
-}
-
-/* POP_STACK_TOP(0)
-   DUP_STACK_TOP(0)
-   PUSH_TEMPORARY_VARIABLE(*)
-   PUSH_INTEGER(1)
-   PLUS_SPECIAL(0) */
-149 {
-  extract opcode (8), arg_lsb (8);
-  dispatch POP_STACK_TOP;
-  dispatch DUP_STACK_TOP;
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch PUSH_INTEGER (1);
-  dispatch SEND_ARITH (0);
-}
-
-/* NOT_NIL_SPECIAL(0)
-   POP_JUMP_FALSE(*) */
-150 {
-  extract opcode (8), arg_lsb (8);
-  dispatch SEND_SPECIAL (5);
-  dispatch POP_JUMP_FALSE (IP - IP0 + (arg | arg_lsb));
-}
-
-/* STORE_TEMPORARY_VARIABLE(1)
-   LINE_NUMBER_BYTECODE(*) */
-151 {
-  extract opcode (8), arg_lsb (8);
-  dispatch STORE_TEMPORARY_VARIABLE (1);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0)
-   PUSH_TEMPORARY_VARIABLE(2) */
 152 {
   extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
-  dispatch PUSH_TEMPORARY_VARIABLE (2);
-}
-
-/* DUP_STACK_TOP(0)
-   LINE_NUMBER_BYTECODE(*) */
-153 {
-  extract opcode (8), arg_lsb (8);
-  dispatch DUP_STACK_TOP;
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   EXT_BYTE(1)
-   PUSH_OUTER_TEMP(1) */
-154 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_OUTER_TEMP (1, 1);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_SELF(0)
-   SEND_IMMEDIATE(84) */
-155 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_SELF;
-  dispatch SEND_IMMEDIATE (84, 0);
+  dispatch PUSH_OUTER_TEMP (arg | arg_lsb, 2);
 }
 
 /* LINE_NUMBER_BYTECODE(*)
    PUSH_SELF(0)
    PUSH_TEMPORARY_VARIABLE(0)
    SEND(1) */
-156 {
+153 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_SELF;
@@ -1264,38 +1230,68 @@ INVALID (opcode, arg);
   dispatch SEND (0, 0, 1);
 }
 
+/* PUSH_SELF(0)
+   PUSH_TEMPORARY_VARIABLE(0)
+   EXT_BYTE(*)
+   SEND(1) */
+154 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SELF;
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch SEND (arg | arg_lsb, 0, 1);
+}
+
 /* LINE_NUMBER_BYTECODE(*)
-   PUSH_TEMPORARY_VARIABLE(3) */
-157 {
+   PUSH_SELF(0)
+   SEND_IMMEDIATE(40) */
+155 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_TEMPORARY_VARIABLE (3);
+  dispatch PUSH_SELF;
+  dispatch SEND_IMMEDIATE (40, 0);
 }
 
 /* PUSH_TEMPORARY_VARIABLE(*)
-   EQUAL_SPECIAL(0) */
-158 {
+   PUSH_TEMPORARY_VARIABLE(3) */
+156 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch SEND_ARITH (6);
+  dispatch PUSH_TEMPORARY_VARIABLE (3);
+}
+
+/* STORE_TEMPORARY_VARIABLE(1)
+   LINE_NUMBER_BYTECODE(*) */
+157 {
+  extract opcode (8), arg_lsb (8);
+  dispatch STORE_TEMPORARY_VARIABLE (1);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_TEMPORARY_VARIABLE(0)
+   SEND(0) */
+158 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch SEND (0, 0, 0);
 }
 
 /* PUSH_INTEGER(*)
-   RETURN_CONTEXT_STACK_TOP(0) */
+   BIT_AND_SPECIAL(0) */
 159 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch RETURN_CONTEXT_STACK_TOP;
+  dispatch SEND_ARITH (14);
 }
 
-/* STORE_TEMPORARY_VARIABLE(2)
-   LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0) */
+/* PUSH_TEMPORARY_VARIABLE(2)
+   EXT_BYTE(*)
+   SEND(0) */
 160 {
   extract opcode (8), arg_lsb (8);
-  dispatch STORE_TEMPORARY_VARIABLE (2);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
+  dispatch PUSH_TEMPORARY_VARIABLE (2);
+  dispatch SEND (arg | arg_lsb, 0, 0);
 }
 
 /* PUSH_TEMPORARY_VARIABLE(0)
@@ -1308,509 +1304,220 @@ INVALID (opcode, arg);
   dispatch SEND (arg >> 8, 0, arg_lsb);
 }
 
-/* PUSH_RECEIVER_VARIABLE(*)
-   SEND(0) */
-162 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
-  dispatch SEND (0, 0, 0);
-}
-
-/* PUSH_SELF(0)
-   PUSH_TEMPORARY_VARIABLE(*) */
-163 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_SELF;
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-}
-
-/* STORE_TEMPORARY_VARIABLE(0)
-   LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0) */
-164 {
-  extract opcode (8), arg_lsb (8);
-  dispatch STORE_TEMPORARY_VARIABLE (0);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
-}
-
-/* STORE_TEMPORARY_VARIABLE(1)
-   LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0)
-   PUSH_SELF(0) */
-165 {
-  extract opcode (8), arg_lsb (8);
-  dispatch STORE_TEMPORARY_VARIABLE (1);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
-  dispatch PUSH_SELF;
-}
-
-/* PUSH_TEMPORARY_VARIABLE(*)
-   VALUE_COLON_SPECIAL(0) */
-166 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch SEND_SPECIAL (7);
-}
-
-/* PUSH_RECEIVER_VARIABLE(1)
-   SEND_IMMEDIATE(*) */
-167 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_RECEIVER_VARIABLE (1);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_LIT_CONSTANT(1)
-   MAKE_DIRTY_BLOCK(0)
-   SEND_IMMEDIATE(*) */
-168 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (1);
-  dispatch MAKE_DIRTY_BLOCK;
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_INTEGER(*)
-   BIT_AND_SPECIAL(0) */
-169 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND_ARITH (14);
-}
-
-/* PUSH_LIT_CONSTANT(2)
-   SEND_IMMEDIATE(*) */
-170 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (2);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(1)
-   PUSH_TEMPORARY_VARIABLE(*) */
-171 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (1);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-}
-
-/* POP_STACK_TOP(0)
-   LINE_NUMBER_BYTECODE(*)
-   SEND_IMMEDIATE(37) */
-172 {
-  extract opcode (8), arg_lsb (8);
-  dispatch POP_STACK_TOP;
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch SEND_IMMEDIATE (37, 0);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   SAME_OBJECT_SPECIAL(0) */
-173 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch SEND_SPECIAL (8);
-}
-
-/* PUSH_INTEGER(*)
-   INTEGER_DIVIDE_SPECIAL(0) */
-174 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND_ARITH (13);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   AT_PUT_SPECIAL(0) */
-175 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch SEND_SPECIAL (1);
-}
-
-/* PUSH_RECEIVER_VARIABLE(*)
-   RETURN_CONTEXT_STACK_TOP(0) */
-176 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
-  dispatch RETURN_CONTEXT_STACK_TOP;
-}
-
-/* PUSH_LIT_VARIABLE(0)
-   SEND_IMMEDIATE(*) */
-177 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_VARIABLE (0);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   MAKE_DIRTY_BLOCK(0)
-   EXT_BYTE(2)
-   SEND(1) */
-178 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch MAKE_DIRTY_BLOCK;
-  dispatch SEND (2, 0, 1);
-}
-
 /* LINE_NUMBER_BYTECODE(*)
    PUSH_SELF(0)
-   SEND_IMMEDIATE(40) */
-179 {
+   PUSH_TEMPORARY_VARIABLE(0) */
+162 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_SELF;
-  dispatch SEND_IMMEDIATE (40, 0);
-}
-
-/* STORE_TEMPORARY_VARIABLE(2)
-   LINE_NUMBER_BYTECODE(*) */
-180 {
-  extract opcode (8), arg_lsb (8);
-  dispatch STORE_TEMPORARY_VARIABLE (2);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-}
-
-/* PUSH_RECEIVER_VARIABLE(*)
-   MINUS_SPECIAL(0) */
-181 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
-  dispatch SEND_ARITH (1);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   LESS_THAN_SPECIAL(0) */
-182 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch SEND_ARITH (2);
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
 }
 
 /* LINE_NUMBER_BYTECODE(*)
-   PUSH_LIT_VARIABLE(0)
-   SEND_IMMEDIATE(84) */
-183 {
+   PUSH_RECEIVER_VARIABLE(3) */
+163 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_LIT_VARIABLE (0);
-  dispatch SEND_IMMEDIATE (84, 0);
+  dispatch PUSH_RECEIVER_VARIABLE (3);
 }
 
 /* PUSH_TEMPORARY_VARIABLE(2)
    EXT_BYTE(*)
    SEND(1) */
-184 {
+164 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_TEMPORARY_VARIABLE (2);
   dispatch SEND (arg | arg_lsb, 0, 1);
 }
 
-/* PUSH_LIT_CONSTANT(*)
-   MAKE_DIRTY_BLOCK(0)
-   EXT_BYTE(3)
-   SEND(1) */
-185 {
+/* NOT_NIL_SPECIAL(0)
+   POP_JUMP_FALSE(*) */
+165 {
   extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch MAKE_DIRTY_BLOCK;
-  dispatch SEND (3, 0, 1);
+  dispatch SEND_SPECIAL (5);
+  dispatch POP_JUMP_FALSE (IP - IP0 + (arg | arg_lsb));
 }
 
-/* POP_STACK_TOP(0)
-   PUSH_RECEIVER_VARIABLE(*) */
-186 {
-  extract opcode (8), arg_lsb (8);
-  dispatch POP_STACK_TOP;
-  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
-}
-
-/* PUSH_RECEIVER_VARIABLE(*)
-   TIMES_SPECIAL(0) */
-187 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
-  dispatch SEND_ARITH (8);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_LIT_VARIABLE(0)
-   RETURN_CONTEXT_STACK_TOP(0) */
-188 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_LIT_VARIABLE (0);
-  dispatch RETURN_CONTEXT_STACK_TOP;
-}
-
-/* STORE_TEMPORARY_VARIABLE(0)
+/* STORE_TEMPORARY_VARIABLE(2)
    LINE_NUMBER_BYTECODE(*) */
-189 {
+166 {
   extract opcode (8), arg_lsb (8);
-  dispatch STORE_TEMPORARY_VARIABLE (0);
+  dispatch STORE_TEMPORARY_VARIABLE (2);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-}
-
-/* PUSH_SELF(0)
-   EXT_BYTE(*)
-   SEND(1) */
-190 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_SELF;
-  dispatch SEND (arg | arg_lsb, 0, 1);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_SELF(0)
-   PUSH_LIT_CONSTANT(0) */
-191 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_SELF;
-  dispatch PUSH_LIT_CONSTANT (0);
-}
-
-/* PUSH_LIT_VARIABLE(2)
-   SEND_IMMEDIATE(*) */
-192 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_VARIABLE (2);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_LIT_VARIABLE(*)
-   PUSH_TEMPORARY_VARIABLE(0) */
-193 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_VARIABLE (arg | arg_lsb);
-  dispatch PUSH_TEMPORARY_VARIABLE (0);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_TEMPORARY_VARIABLE(0)
-   SEND(0) */
-194 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_TEMPORARY_VARIABLE (0);
-  dispatch SEND (0, 0, 0);
-}
-
-/* STORE_TEMPORARY_VARIABLE(0)
-   LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0)
-   PUSH_SELF(0) */
-195 {
-  extract opcode (8), arg_lsb (8);
-  dispatch STORE_TEMPORARY_VARIABLE (0);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
-  dispatch PUSH_SELF;
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_SELF(0)
-   CLASS_SPECIAL(0) */
-196 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_SELF;
-  dispatch SEND_SPECIAL (3);
-}
-
-/* PUSH_LIT_VARIABLE(1)
-   SEND_IMMEDIATE(*) */
-197 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_VARIABLE (1);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   EXT_BYTE(3)
-   SEND(1) */
-198 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch SEND (3, 0, 1);
-}
-
-/* PUSH_RECEIVER_VARIABLE(*)
-   PLUS_SPECIAL(0) */
-199 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
-  dispatch SEND_ARITH (0);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   RETURN_CONTEXT_STACK_TOP(0) */
-200 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch RETURN_CONTEXT_STACK_TOP;
-}
-
-/* EXT_BYTE(*)
-   STORE_OUTER_TEMP(1)
-   RETURN_CONTEXT_STACK_TOP(0) */
-201 {
-  extract opcode (8), arg_lsb (8);
-  dispatch STORE_OUTER_TEMP (arg | arg_lsb, 1);
-  dispatch RETURN_CONTEXT_STACK_TOP;
-}
-
-/* PUSH_SELF(0)
-   CLASS_SPECIAL(*) */
-202 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_SELF;
-  dispatch SEND_SPECIAL (3);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_RECEIVER_VARIABLE(4) */
-203 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_RECEIVER_VARIABLE (4);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_RECEIVER_VARIABLE(5) */
-204 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_RECEIVER_VARIABLE (5);
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   EXT_BYTE(2)
-   PUSH_OUTER_TEMP(1) */
-205 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_OUTER_TEMP (2, 1);
-}
-
-/* PUSH_OUTER_TEMP(1)
-   SEND_IMMEDIATE(*) */
-206 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_OUTER_TEMP (0, 1);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_RECEIVER_VARIABLE(0)
-   SEND_IMMEDIATE(*) */
-207 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_RECEIVER_VARIABLE (0);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(4)
-   SEND_IMMEDIATE(*) */
-208 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (4);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
 }
 
 /* STORE_TEMPORARY_VARIABLE(3)
    LINE_NUMBER_BYTECODE(*)
    POP_STACK_TOP(0) */
-209 {
+167 {
   extract opcode (8), arg_lsb (8);
   dispatch STORE_TEMPORARY_VARIABLE (3);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch POP_STACK_TOP;
 }
 
+/* PUSH_LIT_CONSTANT(1)
+   SEND_IMMEDIATE(*) */
+168 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (1);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(*)
+   EQUAL_SPECIAL(0) */
+169 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND_ARITH (6);
+}
+
+/* POP_STACK_TOP(0)
+   DUP_STACK_TOP(0)
+   PUSH_TEMPORARY_VARIABLE(*)
+   PUSH_INTEGER(1)
+   PLUS_SPECIAL(0) */
+170 {
+  extract opcode (8), arg_lsb (8);
+  dispatch POP_STACK_TOP;
+  dispatch DUP_STACK_TOP;
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch PUSH_INTEGER (1);
+  dispatch SEND_ARITH (0);
+}
+
+/* PUSH_SELF(0)
+   EXT_BYTE(*)
+   SEND(1) */
+171 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SELF;
+  dispatch SEND (arg | arg_lsb, 0, 1);
+}
+
+/* STORE_TEMPORARY_VARIABLE(0)
+   LINE_NUMBER_BYTECODE(*)
+   POP_STACK_TOP(0) */
+172 {
+  extract opcode (8), arg_lsb (8);
+  dispatch STORE_TEMPORARY_VARIABLE (0);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch POP_STACK_TOP;
+}
+
+/* DUP_STACK_TOP(0)
+   LINE_NUMBER_BYTECODE(*) */
+173 {
+  extract opcode (8), arg_lsb (8);
+  dispatch DUP_STACK_TOP;
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+}
+
+/* PUSH_SELF(0)
+   PUSH_LIT_CONSTANT(*)
+   SEND_IMMEDIATE(49) */
+174 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SELF;
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch SEND_IMMEDIATE (49, 0);
+}
+
+/* POP_STACK_TOP(0)
+   PUSH_RECEIVER_VARIABLE(*) */
+175 {
+  extract opcode (8), arg_lsb (8);
+  dispatch POP_STACK_TOP;
+  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
+}
+
 /* LINE_NUMBER_BYTECODE(*)
    PUSH_SELF(0)
-   SEND_IMMEDIATE(130) */
-210 {
+   SEND_IMMEDIATE(84) */
+176 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_SELF;
-  dispatch SEND_IMMEDIATE (130, 0);
+  dispatch SEND_IMMEDIATE (84, 0);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_LIT_VARIABLE(2) */
+177 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_LIT_VARIABLE (2);
 }
 
 /* PUSH_LIT_CONSTANT(*)
    MAKE_DIRTY_BLOCK(0)
-   EXT_BYTE(1)
+   EXT_BYTE(3)
    SEND(1) */
-211 {
+178 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
   dispatch MAKE_DIRTY_BLOCK;
-  dispatch SEND (1, 0, 1);
-}
-
-/* EXT_BYTE(*)
-   SEND(5) */
-212 {
-  extract opcode (8), arg_lsb (8);
-  dispatch SEND (arg | arg_lsb, 0, 5);
-}
-
-/* EXT_BYTE(*)
-   SEND(4) */
-213 {
-  extract opcode (8), arg_lsb (8);
-  dispatch SEND (arg | arg_lsb, 0, 4);
-}
-
-/* PUSH_SPECIAL(*)
-   RETURN_METHOD_STACK_TOP(0) */
-214 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_SPECIAL (arg | arg_lsb);
-  dispatch RETURN_METHOD_STACK_TOP;
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   EXT_BYTE(2)
-   SEND(2) */
-215 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch SEND (2, 0, 2);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(1)
-   SEND(*) */
-216 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (1);
-  dispatch SEND (arg >> 8, 0, arg_lsb);
-}
-
-/* PUSH_INTEGER(*)
-   DIVIDE_SPECIAL(0) */
-217 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND_ARITH (9);
+  dispatch SEND (3, 0, 1);
 }
 
 /* LINE_NUMBER_BYTECODE(*)
-   PUSH_INTEGER(1) */
-218 {
+   PUSH_LIT_CONSTANT(0) */
+179 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_INTEGER (1);
+  dispatch PUSH_LIT_CONSTANT (0);
+}
+
+/* DUP_STACK_TOP(0)
+   PUSH_LIT_CONSTANT(*)
+   SEND_IMMEDIATE(36) */
+180 {
+  extract opcode (8), arg_lsb (8);
+  dispatch DUP_STACK_TOP;
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch SEND_IMMEDIATE (36, 0);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   EXT_BYTE(1)
+   PUSH_OUTER_TEMP(1) */
+181 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_OUTER_TEMP (1, 1);
+}
+
+/* PUSH_INTEGER(*)
+   INTEGER_DIVIDE_SPECIAL(0) */
+182 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch SEND_ARITH (13);
+}
+
+/* PUSH_LIT_CONSTANT(1)
+   MAKE_DIRTY_BLOCK(0)
+   SEND_IMMEDIATE(*) */
+183 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (1);
+  dispatch MAKE_DIRTY_BLOCK;
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(3)
+   SEND_IMMEDIATE(*) */
+184 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (3);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
 }
 
 /* LINE_NUMBER_BYTECODE(*)
    PUSH_SPECIAL(0)
    RETURN_CONTEXT_STACK_TOP(0) */
-219 {
+185 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_SPECIAL (0);
@@ -1818,94 +1525,496 @@ INVALID (opcode, arg);
 }
 
 /* LINE_NUMBER_BYTECODE(*)
-   PUSH_INTEGER(0) */
-220 {
+   PUSH_RECEIVER_VARIABLE(5) */
+186 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_INTEGER (0);
+  dispatch PUSH_RECEIVER_VARIABLE (5);
 }
 
-/* PUSH_OUTER_TEMP(1)
-   EXT_BYTE(*)
+/* PUSH_LIT_CONSTANT(*)
+   MAKE_DIRTY_BLOCK(0)
+   EXT_BYTE(2)
    SEND(1) */
-221 {
+187 {
   extract opcode (8), arg_lsb (8);
-  dispatch PUSH_OUTER_TEMP (0, 1);
-  dispatch SEND (arg | arg_lsb, 0, 1);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(2)
-   PUSH_TEMPORARY_VARIABLE(*) */
-222 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (2);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-}
-
-/* PUSH_SPECIAL(0)
-   STORE_RECEIVER_VARIABLE(*) */
-223 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_SPECIAL (0);
-  dispatch STORE_RECEIVER_VARIABLE (arg | arg_lsb);
-}
-
-/* DUP_STACK_TOP(0)
-   PUSH_LIT_CONSTANT(*)
-   SEND_IMMEDIATE(36) */
-224 {
-  extract opcode (8), arg_lsb (8);
-  dispatch DUP_STACK_TOP;
   dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch SEND_IMMEDIATE (36, 0);
+  dispatch MAKE_DIRTY_BLOCK;
+  dispatch SEND (2, 0, 1);
 }
 
-/* POP_STACK_TOP(0)
-   DUP_STACK_TOP(0)
-   LINE_NUMBER_BYTECODE(*)
-   PUSH_SELF(0) */
-225 {
+/* PUSH_TEMPORARY_VARIABLE(*)
+   VALUE_COLON_SPECIAL(0) */
+188 {
   extract opcode (8), arg_lsb (8);
-  dispatch POP_STACK_TOP;
-  dispatch DUP_STACK_TOP;
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_SELF;
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND_SPECIAL (7);
 }
 
-/* SAME_OBJECT_SPECIAL(0)
-   POP_JUMP_TRUE(*) */
-226 {
+/* PUSH_INTEGER(*)
+   RETURN_CONTEXT_STACK_TOP(0) */
+189 {
   extract opcode (8), arg_lsb (8);
-  dispatch SEND_SPECIAL (8);
-  dispatch POP_JUMP_TRUE (IP - IP0 + (arg | arg_lsb));
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch RETURN_CONTEXT_STACK_TOP;
 }
 
 /* PUSH_TEMPORARY_VARIABLE(0)
    EXT_BYTE(*)
    SEND(2) */
-227 {
+190 {
   extract opcode (8), arg_lsb (8);
   dispatch PUSH_TEMPORARY_VARIABLE (0);
   dispatch SEND (arg | arg_lsb, 0, 2);
 }
 
-/* STORE_TEMPORARY_VARIABLE(2)
-   LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0)
-   PUSH_SELF(0) */
-228 {
+/* PUSH_TEMPORARY_VARIABLE(*)
+   PUSH_INTEGER(1)
+   MINUS_SPECIAL(0) */
+191 {
   extract opcode (8), arg_lsb (8);
-  dispatch STORE_TEMPORARY_VARIABLE (2);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch PUSH_INTEGER (1);
+  dispatch SEND_ARITH (1);
+}
+
+/* PUSH_SELF(0)
+   PUSH_LIT_CONSTANT(*) */
+192 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SELF;
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_RECEIVER_VARIABLE(4) */
+193 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_RECEIVER_VARIABLE (4);
+}
+
+/* PUSH_OUTER_TEMP(1)
+   SEND_IMMEDIATE(*) */
+194 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_OUTER_TEMP (0, 1);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_SELF(0)
+   EXT_BYTE(1)
+   SEND(0) */
+195 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_SELF;
+  dispatch SEND (1, 0, 0);
+}
+
+/* PUSH_OUTER_TEMP(1)
+   EXT_BYTE(*)
+   SEND(1) */
+196 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_OUTER_TEMP (0, 1);
+  dispatch SEND (arg | arg_lsb, 0, 1);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(4)
+   SEND_IMMEDIATE(*) */
+197 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (4);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* PUSH_INTEGER(*)
+   SEND_IMMEDIATE(41) */
+198 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch SEND_IMMEDIATE (41, 0);
+}
+
+/* EXT_BYTE(*)
+   SEND(4) */
+199 {
+  extract opcode (8), arg_lsb (8);
+  dispatch SEND (arg | arg_lsb, 0, 4);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(*)
+   PUSH_TEMPORARY_VARIABLE(2) */
+200 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch PUSH_TEMPORARY_VARIABLE (2);
+}
+
+/* PUSH_SELF(0)
+   CLASS_SPECIAL(*) */
+201 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SELF;
+  dispatch SEND_SPECIAL (3);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(1)
+   SEND(*) */
+202 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (1);
+  dispatch SEND (arg >> 8, 0, arg_lsb);
+}
+
+/* PUSH_SELF(0)
+   PUSH_TEMPORARY_VARIABLE(1)
+   EXT_BYTE(*)
+   SEND(1) */
+203 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SELF;
+  dispatch PUSH_TEMPORARY_VARIABLE (1);
+  dispatch SEND (arg | arg_lsb, 0, 1);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   EXT_BYTE(4)
+   SEND(1) */
+204 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch SEND (4, 0, 1);
+}
+
+/* PUSH_INTEGER(*)
+   SEND(1) */
+205 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch SEND (0, 0, 1);
+}
+
+/* PUSH_RECEIVER_VARIABLE(*)
+   SIZE_SPECIAL(0) */
+206 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
+  dispatch SEND_SPECIAL (2);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(1)
+   EXT_BYTE(*)
+   SEND(2) */
+207 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (1);
+  dispatch SEND (arg | arg_lsb, 0, 2);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(0)
+   PUSH_TEMPORARY_VARIABLE(1)
+   EXT_BYTE(*)
+   SEND(2) */
+208 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch PUSH_TEMPORARY_VARIABLE (1);
+  dispatch SEND (arg | arg_lsb, 0, 2);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(*)
+   POP_INTO_NEW_STACKTOP(0) */
+209 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch POP_INTO_NEW_STACKTOP (0);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   MAKE_DIRTY_BLOCK(0)
+   EXT_BYTE(5)
+   SEND(1) */
+210 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch MAKE_DIRTY_BLOCK;
+  dispatch SEND (5, 0, 1);
+}
+
+/* EXT_BYTE(*)
+   SEND_SUPER(1) */
+211 {
+  extract opcode (8), arg_lsb (8);
+  dispatch SEND (arg | arg_lsb, 1, 1);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   MAKE_DIRTY_BLOCK(0)
+   EXT_BYTE(4)
+   SEND(1) */
+212 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch MAKE_DIRTY_BLOCK;
+  dispatch SEND (4, 0, 1);
+}
+
+/* PUSH_RECEIVER_VARIABLE(1)
+   SEND_IMMEDIATE(*) */
+213 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_RECEIVER_VARIABLE (1);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* EXT_BYTE(*)
+   STORE_OUTER_TEMP(1)
+   RETURN_CONTEXT_STACK_TOP(0) */
+214 {
+  extract opcode (8), arg_lsb (8);
+  dispatch STORE_OUTER_TEMP (arg | arg_lsb, 1);
+  dispatch RETURN_CONTEXT_STACK_TOP;
+}
+
+/* POP_STACK_TOP(0)
+   LINE_NUMBER_BYTECODE(*)
+   SEND_IMMEDIATE(37) */
+215 {
+  extract opcode (8), arg_lsb (8);
+  dispatch POP_STACK_TOP;
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch SEND_IMMEDIATE (37, 0);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_SELF(0)
+   CLASS_SPECIAL(0) */
+216 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_SELF;
+  dispatch SEND_SPECIAL (3);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(1)
+   EXT_BYTE(*)
+   SEND(0) */
+217 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (1);
+  dispatch SEND (arg | arg_lsb, 0, 0);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_SELF(0)
+   SEND_IMMEDIATE(130) */
+218 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_SELF;
+  dispatch SEND_IMMEDIATE (130, 0);
+}
+
+/* PUSH_RECEIVER_VARIABLE(0)
+   SEND_IMMEDIATE(*) */
+219 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_RECEIVER_VARIABLE (0);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(0)
+   PUSH_LIT_VARIABLE(*) */
+220 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch PUSH_LIT_VARIABLE (arg | arg_lsb);
+}
+
+/* STORE_TEMPORARY_VARIABLE(0)
+   LINE_NUMBER_BYTECODE(*) */
+221 {
+  extract opcode (8), arg_lsb (8);
+  dispatch STORE_TEMPORARY_VARIABLE (0);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+}
+
+/* PUSH_RECEIVER_VARIABLE(2)
+   SEND_IMMEDIATE(*) */
+222 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_RECEIVER_VARIABLE (2);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_SELF(0)
+   EXT_BYTE(2)
+   SEND(0) */
+223 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_SELF;
+  dispatch SEND (2, 0, 0);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   POP_STACK_TOP(0)
+   PUSH_TEMPORARY_VARIABLE(2) */
+224 {
+  extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch POP_STACK_TOP;
+  dispatch PUSH_TEMPORARY_VARIABLE (2);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   MAKE_DIRTY_BLOCK(0)
+   EXT_BYTE(6)
+   SEND(1) */
+225 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch MAKE_DIRTY_BLOCK;
+  dispatch SEND (6, 0, 1);
+}
+
+/* PUSH_SPECIAL(*)
+   RETURN_METHOD_STACK_TOP(0) */
+226 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SPECIAL (arg | arg_lsb);
+  dispatch RETURN_METHOD_STACK_TOP;
+}
+
+/* PUSH_INTEGER(*)
+   GREATER_EQUAL_SPECIAL(0) */
+227 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch SEND_ARITH (5);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   POP_STACK_TOP(0)
+   PUSH_RECEIVER_VARIABLE(1) */
+228 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch POP_STACK_TOP;
+  dispatch PUSH_RECEIVER_VARIABLE (1);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_LIT_VARIABLE(3) */
+229 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_LIT_VARIABLE (3);
+}
+
+/* PUSH_LIT_CONSTANT(2)
+   SEND_IMMEDIATE(*) */
+230 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (2);
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* EXT_BYTE(*)
+   SEND_SUPER(0) */
+231 {
+  extract opcode (8), arg_lsb (8);
+  dispatch SEND (arg | arg_lsb, 1, 0);
+}
+
+/* PUSH_SPECIAL(0)
+   STORE_RECEIVER_VARIABLE(*) */
+232 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_SPECIAL (0);
+  dispatch STORE_RECEIVER_VARIABLE (arg | arg_lsb);
+}
+
+/* PUSH_SELF(0)
+   PUSH_TEMPORARY_VARIABLE(*)
+   SEND(1) */
+233 {
+  extract opcode (8), arg_lsb (8);
   dispatch PUSH_SELF;
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND (0, 0, 1);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   POP_STACK_TOP(0)
+   PUSH_TEMPORARY_VARIABLE(0)
+   RETURN_CONTEXT_STACK_TOP(0) */
+234 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch POP_STACK_TOP;
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch RETURN_CONTEXT_STACK_TOP;
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   SAME_OBJECT_SPECIAL(0) */
+235 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch SEND_SPECIAL (8);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   MAKE_DIRTY_BLOCK(0)
+   EXT_BYTE(1)
+   SEND(1) */
+236 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch MAKE_DIRTY_BLOCK;
+  dispatch SEND (1, 0, 1);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   POP_STACK_TOP(0)
+   PUSH_TEMPORARY_VARIABLE(3) */
+237 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch POP_STACK_TOP;
+  dispatch PUSH_TEMPORARY_VARIABLE (3);
+}
+
+/* POP_STACK_TOP(0)
+   DUP_STACK_TOP(0)
+   SEND_IMMEDIATE(*) */
+238 {
+  extract opcode (8), arg_lsb (8);
+  dispatch POP_STACK_TOP;
+  dispatch DUP_STACK_TOP;
+  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+}
+
+/* PUSH_LIT_CONSTANT(*)
+   PUSH_TEMPORARY_VARIABLE(0)
+   AT_PUT_SPECIAL(0) */
+239 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch SEND_SPECIAL (1);
 }
 
 /* DUP_STACK_TOP(0)
    PUSH_TEMPORARY_VARIABLE(*)
    PUSH_INTEGER(1)
    PLUS_SPECIAL(0) */
-229 {
+240 {
   extract opcode (8), arg_lsb (8);
   dispatch DUP_STACK_TOP;
   dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
@@ -1913,224 +2022,49 @@ INVALID (opcode, arg);
   dispatch SEND_ARITH (0);
 }
 
-/* PUSH_LIT_CONSTANT(*)
-   PUSH_TEMPORARY_VARIABLE(0)
-   AT_PUT_SPECIAL(0) */
-230 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch PUSH_TEMPORARY_VARIABLE (0);
-  dispatch SEND_SPECIAL (1);
-}
-
-/* PUSH_INTEGER(*)
-   AT_PUT_SPECIAL(0) */
-231 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND_SPECIAL (1);
-}
-
-/* POP_STACK_TOP(0)
-   LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0) */
-232 {
-  extract opcode (8), arg_lsb (8);
-  dispatch POP_STACK_TOP;
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_SELF(0)
-   EXT_BYTE(1)
-   SEND(0) */
-233 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch PUSH_SELF;
-  dispatch SEND (1, 0, 0);
-}
-
-/* PUSH_LIT_VARIABLE(3)
-   SEND_IMMEDIATE(*) */
-234 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_VARIABLE (3);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   MAKE_DIRTY_BLOCK(0)
-   EXT_BYTE(5)
-   SEND(1) */
-235 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch MAKE_DIRTY_BLOCK;
-  dispatch SEND (5, 0, 1);
-}
-
-/* PUSH_LIT_CONSTANT(*)
-   MAKE_DIRTY_BLOCK(0)
-   SEND_IMMEDIATE(52) */
-236 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
-  dispatch MAKE_DIRTY_BLOCK;
-  dispatch SEND_IMMEDIATE (52, 0);
-}
-
-/* DUP_STACK_TOP(0)
-   SEND_IMMEDIATE(*) */
-237 {
-  extract opcode (8), arg_lsb (8);
-  dispatch DUP_STACK_TOP;
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_RECEIVER_VARIABLE(*)
-   DIVIDE_SPECIAL(0) */
-238 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_RECEIVER_VARIABLE (arg | arg_lsb);
-  dispatch SEND_ARITH (9);
-}
-
-/* PUSH_LIT_VARIABLE(*)
-   PUSH_TEMPORARY_VARIABLE(1) */
-239 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_VARIABLE (arg | arg_lsb);
-  dispatch PUSH_TEMPORARY_VARIABLE (1);
-}
-
-/* POP_STACK_TOP(0)
-   DUP_STACK_TOP(0)
-   SEND_IMMEDIATE(*) */
-240 {
-  extract opcode (8), arg_lsb (8);
-  dispatch POP_STACK_TOP;
-  dispatch DUP_STACK_TOP;
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_SELF(0)
-   PUSH_TEMPORARY_VARIABLE(0)
-   SEND_IMMEDIATE(*) */
-241 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_SELF;
-  dispatch PUSH_TEMPORARY_VARIABLE (0);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
-}
-
-/* PUSH_TEMPORARY_VARIABLE(*)
-   DIVIDE_SPECIAL(0) */
-242 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
-  dispatch SEND_ARITH (9);
-}
-
-/* STORE_LIT_VARIABLE(*)
-   PUSH_SELF(0)
-   RETURN_CONTEXT_STACK_TOP(0) */
-243 {
-  extract opcode (8), arg_lsb (8);
-  dispatch STORE_LIT_VARIABLE (arg | arg_lsb);
-  dispatch PUSH_SELF;
-  dispatch RETURN_CONTEXT_STACK_TOP;
-}
-
-/* LINE_NUMBER_BYTECODE(*)
-   POP_STACK_TOP(0)
-   PUSH_TEMPORARY_VARIABLE(0)
-   RETURN_CONTEXT_STACK_TOP(0) */
-244 {
-  extract opcode (8), arg_lsb (8);
-  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
-  dispatch POP_STACK_TOP;
-  dispatch PUSH_TEMPORARY_VARIABLE (0);
-  dispatch RETURN_CONTEXT_STACK_TOP;
-}
-
-/* PUSH_TEMPORARY_VARIABLE(3)
-   EXT_BYTE(*)
-   SEND(0) */
-245 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_TEMPORARY_VARIABLE (3);
-  dispatch SEND (arg | arg_lsb, 0, 0);
-}
-
-/* PUSH_INTEGER(*)
-   SEND(1) */
-246 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND (0, 0, 1);
-}
-
-/* PUSH_INTEGER(*)
-   GREATER_EQUAL_SPECIAL(0) */
-247 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (arg | arg_lsb);
-  dispatch SEND_ARITH (5);
-}
-
-/* PUSH_SELF(0)
-   PUSH_TEMPORARY_VARIABLE(0)
-   SEND(*) */
-248 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_SELF;
-  dispatch PUSH_TEMPORARY_VARIABLE (0);
-  dispatch SEND (arg >> 8, 0, arg_lsb);
-}
-
-/* PUSH_LIT_VARIABLE(0)
-   EXT_BYTE(*)
-   SEND(0) */
-249 {
-  extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_VARIABLE (0);
-  dispatch SEND (arg | arg_lsb, 0, 0);
-}
-
 /* LINE_NUMBER_BYTECODE(*)
    PUSH_TEMPORARY_VARIABLE(4) */
-250 {
+241 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_TEMPORARY_VARIABLE (4);
 }
 
-/* LINE_NUMBER_BYTECODE(*)
-   PUSH_LIT_VARIABLE(1)
-   EXT_BYTE(2)
-   SEND(0) */
-251 {
+/* POP_STACK_TOP(0)
+   LINE_NUMBER_BYTECODE(*)
+   PUSH_LIT_VARIABLE(1) */
+242 {
   extract opcode (8), arg_lsb (8);
+  dispatch POP_STACK_TOP;
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch PUSH_LIT_VARIABLE (1);
-  dispatch SEND (2, 0, 0);
 }
 
-/* PUSH_LIT_CONSTANT(3)
-   SEND_IMMEDIATE(*) */
-252 {
+/* DUP_STACK_TOP(0)
+   PUSH_LIT_CONSTANT(*)
+   EXT_BYTE(1)
+   SEND(1) */
+243 {
   extract opcode (8), arg_lsb (8);
-  dispatch PUSH_LIT_CONSTANT (3);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+  dispatch DUP_STACK_TOP;
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+  dispatch SEND (1, 0, 1);
+}
+
+/* POP_INTO_NEW_STACKTOP(1)
+   EXT_BYTE(*)
+   SEND(1) */
+244 {
+  extract opcode (8), arg_lsb (8);
+  dispatch POP_INTO_NEW_STACKTOP (1);
+  dispatch SEND (arg | arg_lsb, 0, 1);
 }
 
 /* LINE_NUMBER_BYTECODE(*)
    POP_STACK_TOP(0)
    PUSH_TEMPORARY_VARIABLE(1)
    RETURN_CONTEXT_STACK_TOP(0) */
-253 {
+245 {
   extract opcode (8), arg_lsb (8);
   dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
   dispatch POP_STACK_TOP;
@@ -2138,19 +2072,92 @@ INVALID (opcode, arg);
   dispatch RETURN_CONTEXT_STACK_TOP;
 }
 
-/* DUP_STACK_TOP(*)
-   PUSH_TEMPORARY_VARIABLE(1) */
-254 {
+/* STORE_TEMPORARY_VARIABLE(3)
+   LINE_NUMBER_BYTECODE(*) */
+246 {
   extract opcode (8), arg_lsb (8);
-  dispatch DUP_STACK_TOP;
-  dispatch PUSH_TEMPORARY_VARIABLE (1);
+  dispatch STORE_TEMPORARY_VARIABLE (3);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
 }
 
-/* PUSH_INTEGER(0)
-   SEND_IMMEDIATE(*) */
+/* DUP_STACK_TOP(0)
+   EXT_BYTE(*)
+   SEND(0) */
+247 {
+  extract opcode (8), arg_lsb (8);
+  dispatch DUP_STACK_TOP;
+  dispatch SEND (arg | arg_lsb, 0, 0);
+}
+
+/* STORE_RECEIVER_VARIABLE(*)
+   RETURN_CONTEXT_STACK_TOP(0) */
+248 {
+  extract opcode (8), arg_lsb (8);
+  dispatch STORE_RECEIVER_VARIABLE (arg | arg_lsb);
+  dispatch RETURN_CONTEXT_STACK_TOP;
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_SELF(0)
+   EXT_BYTE(3)
+   SEND(0) */
+249 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_SELF;
+  dispatch SEND (3, 0, 0);
+}
+
+/* NOT_NIL_SPECIAL(0)
+   DUP_STACK_TOP(0)
+   POP_JUMP_FALSE(*) */
+250 {
+  extract opcode (8), arg_lsb (8);
+  dispatch SEND_SPECIAL (5);
+  dispatch DUP_STACK_TOP;
+  dispatch POP_JUMP_FALSE (IP - IP0 + (arg | arg_lsb));
+}
+
+/* DUP_STACK_TOP(0)
+   PUSH_LIT_CONSTANT(*) */
+251 {
+  extract opcode (8), arg_lsb (8);
+  dispatch DUP_STACK_TOP;
+  dispatch PUSH_LIT_CONSTANT (arg | arg_lsb);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   PUSH_TEMPORARY_VARIABLE(0)
+   RETURN_CONTEXT_STACK_TOP(0) */
+252 {
+  extract opcode (8), arg_lsb (8);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_TEMPORARY_VARIABLE (0);
+  dispatch RETURN_CONTEXT_STACK_TOP;
+}
+
+/* PUSH_INTEGER(*)
+   AT_PUT_SPECIAL(0) */
+253 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_INTEGER (arg | arg_lsb);
+  dispatch SEND_SPECIAL (1);
+}
+
+/* PUSH_TEMPORARY_VARIABLE(*)
+   CLASS_SPECIAL(0) */
+254 {
+  extract opcode (8), arg_lsb (8);
+  dispatch PUSH_TEMPORARY_VARIABLE (arg | arg_lsb);
+  dispatch SEND_SPECIAL (3);
+}
+
+/* LINE_NUMBER_BYTECODE(*)
+   EXT_BYTE(2)
+   PUSH_OUTER_TEMP(1) */
 255 {
   extract opcode (8), arg_lsb (8);
-  dispatch PUSH_INTEGER (0);
-  dispatch SEND_IMMEDIATE (arg | arg_lsb, 0);
+  dispatch LINE_NUMBER_BYTECODE (arg | arg_lsb);
+  dispatch PUSH_OUTER_TEMP (2, 1);
 }
 

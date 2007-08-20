@@ -1236,31 +1236,31 @@ table normal_byte_codes {
 
   65 = bytecode bc65 {
     PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
-  }
-
-  66 = bytecode bc66 {
-    PREFETCH ();
     SEND (arg, 0);
   }
 
-  67 = bytecode bc67 {
+  66 = bytecode bc66 {
     PREFETCH ();
     PUSH_SELF ();
     RETURN_CONTEXT_STACK_TOP ();
   }
 
-  68 = bytecode bc68 {
+  67 = bytecode bc67 {
     PREFETCH ();
     LINE_NUMBER_BYTECODE ();
     PUSH_SELF ();
   }
 
+  68 = bytecode bc68 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    POP_STACK_TOP ();
+  }
+
   69 = bytecode bc69 {
     PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
     PUSH_TEMPORARY_VARIABLE (0);
-    SEND_IMMEDIATE (arg);
   }
 
   70 = bytecode bc70 {
@@ -1271,329 +1271,328 @@ table normal_byte_codes {
 
   71 = bytecode bc71 {
     PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_TEMPORARY_VARIABLE (0);
-  }
-
-  72 = bytecode bc72 {
-    PREFETCH ();
     SEND (arg, 2);
   }
 
-  73 = bytecode bc73 {
+  72 = bytecode bc72 {
     PREFETCH ();
     POP_STACK_TOP ();
     DUP_STACK_TOP ();
   }
 
+  73 = bytecode bc73 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    SEND_IMMEDIATE (arg);
+  }
+
   74 = bytecode bc74 {
     PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
     PUSH_SELF ();
+    SEND (arg, 0);
   }
 
   75 = bytecode bc75 {
-    PREFETCH ();
-    PUSH_OUTER_TEMP (arg, 1);
-  }
-
-  76 = bytecode bc76 {
     PREFETCH ();
     PUSH_SPECIAL (arg);
     RETURN_CONTEXT_STACK_TOP ();
   }
 
-  77 = bytecode bc77 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    PLUS_SPECIAL ();
-  }
-
-  78 = bytecode bc78 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_LIT_VARIABLE (0);
-  }
-
-  79 = bytecode bc79 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (1);
-    SEND_IMMEDIATE (arg);
-  }
-
-  80 = bytecode bc80 {
+  76 = bytecode bc76 {
     PREFETCH ();
     PUSH_SELF ();
     SEND_IMMEDIATE (arg);
   }
 
-  81 = bytecode bc81 {
+  77 = bytecode bc77 {
     PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (0);
-    SEND (arg >> 8, arg & 255);
+    PUSH_OUTER_TEMP (arg, 1);
   }
 
-  82 = bytecode bc82 {
+  78 = bytecode bc78 {
+    PREFETCH ();
+    STORE_TEMPORARY_VARIABLE (arg);
+    POP_STACK_TOP ();
+  }
+
+  79 = bytecode bc79 {
+    PREFETCH ();
+    PUSH_SELF ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+  }
+
+  80 = bytecode bc80 {
     PREFETCH ();
     STORE_RECEIVER_VARIABLE (arg);
     PUSH_SELF ();
     RETURN_CONTEXT_STACK_TOP ();
   }
 
+  81 = bytecode bc81 {
+    PREFETCH ();
+    PUSH_INTEGER (arg);
+    PLUS_SPECIAL ();
+  }
+
+  82 = bytecode bc82 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_LIT_VARIABLE (0);
+  }
+
   83 = bytecode bc83 {
     PREFETCH ();
-    IS_NIL_SPECIAL ();
-    POP_JUMP_FALSE (arg);
+    PUSH_TEMPORARY_VARIABLE (0);
+    PUSH_TEMPORARY_VARIABLE (arg);
   }
 
   84 = bytecode bc84 {
     PREFETCH ();
-    PUSH_INTEGER (arg);
-    EQUAL_SPECIAL ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    SEND (arg >> 8, arg & 255);
   }
 
   85 = bytecode bc85 {
-    PREFETCH ();
-    STORE_TEMPORARY_VARIABLE (arg);
-    POP_STACK_TOP ();
-  }
-
-  86 = bytecode bc86 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    RETURN_CONTEXT_STACK_TOP ();
-  }
-
-  87 = bytecode bc87 {
-    PREFETCH ();
-    SEND (arg, 3);
-  }
-
-  88 = bytecode bc88 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (0);
-    SEND (arg, 1);
-  }
-
-  89 = bytecode bc89 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (0);
-    PUSH_TEMPORARY_VARIABLE (arg);
-  }
-
-  90 = bytecode bc90 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    MINUS_SPECIAL ();
-  }
-
-  91 = bytecode bc91 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    AT_SPECIAL ();
-  }
-
-  92 = bytecode bc92 {
     PREFETCH ();
     LINE_NUMBER_BYTECODE ();
     PUSH_TEMPORARY_VARIABLE (1);
   }
 
-  93 = bytecode bc93 {
+  86 = bytecode bc86 {
     PREFETCH ();
-    PUSH_SELF ();
-    SEND (arg, 0);
+    IS_NIL_SPECIAL ();
+    POP_JUMP_FALSE (arg);
   }
 
-  94 = bytecode bc94 {
+  87 = bytecode bc87 {
     PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    AT_SPECIAL ();
+    PUSH_INTEGER (arg);
+    EQUAL_SPECIAL ();
   }
 
-  95 = bytecode bc95 {
+  88 = bytecode bc88 {
     PREFETCH ();
-    PUSH_LIT_VARIABLE (arg);
-    SEND_IMMEDIATE (84);
+    SEND (arg, 3);
   }
 
-  96 = bytecode bc96 {
+  89 = bytecode bc89 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    SEND (arg, 1);
+  }
+
+  90 = bytecode bc90 {
     PREFETCH ();
     LINE_NUMBER_BYTECODE ();
     PUSH_SELF ();
     SEND (0, 0);
   }
 
-  97 = bytecode bc97 {
+  91 = bytecode bc91 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+    RETURN_CONTEXT_STACK_TOP ();
+  }
+
+  92 = bytecode bc92 {
     PREFETCH ();
     PUSH_LIT_CONSTANT (arg);
     SEND_IMMEDIATE (36);
   }
 
-  98 = bytecode bc98 {
+  93 = bytecode bc93 {
     PREFETCH ();
     SAME_OBJECT_SPECIAL ();
     POP_JUMP_FALSE (arg);
   }
 
-  99 = bytecode bc99 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_RECEIVER_VARIABLE (0);
-  }
-
-  100 = bytecode bc100 {
-    PREFETCH ();
-    DUP_STACK_TOP ();
-    POP_JUMP_FALSE (arg);
-  }
-
-  101 = bytecode bc101 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    PUSH_INTEGER (1);
-    PLUS_SPECIAL ();
-  }
-
-  102 = bytecode bc102 {
-    PREFETCH ();
-    POP_STACK_TOP ();
-    DUP_STACK_TOP ();
-    LINE_NUMBER_BYTECODE ();
-  }
-
-  103 = bytecode bc103 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_TEMPORARY_VARIABLE (2);
-  }
-
-  104 = bytecode bc104 {
-    PREFETCH ();
-    PUSH_SELF ();
-    SEND (arg >> 8, arg & 255);
-  }
-
-  105 = bytecode bc105 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (0);
-    SEND (arg, 0);
-  }
-
-  106 = bytecode bc106 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    SEND_IMMEDIATE (38);
-  }
-
-  107 = bytecode bc107 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    SIZE_SPECIAL ();
-  }
-
-  108 = bytecode bc108 {
-    PREFETCH ();
-    STORE_OUTER_TEMP (arg, 1);
-  }
-
-  109 = bytecode bc109 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    SEND_IMMEDIATE (32);
-  }
-
-  110 = bytecode bc110 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    EQUAL_SPECIAL ();
-  }
-
-  111 = bytecode bc111 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
-    PUSH_TEMPORARY_VARIABLE (0);
-  }
-
-  112 = bytecode bc112 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    MAKE_DIRTY_BLOCK ();
-    SEND_IMMEDIATE (76);
-  }
-
-  113 = bytecode bc113 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (2);
-    SEND_IMMEDIATE (arg);
-  }
-
-  114 = bytecode bc114 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_RECEIVER_VARIABLE (1);
-  }
-
-  115 = bytecode bc115 {
+  94 = bytecode bc94 {
     PREFETCH ();
     PUSH_LIT_CONSTANT (arg);
     SEND (1, 1);
   }
 
-  116 = bytecode bc116 {
+  95 = bytecode bc95 {
     PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    PLUS_SPECIAL ();
+    LINE_NUMBER_BYTECODE ();
+    POP_STACK_TOP ();
+    PUSH_SELF ();
   }
 
-  117 = bytecode bc117 {
+  96 = bytecode bc96 {
+    PREFETCH ();
+    POP_STACK_TOP ();
+    DUP_STACK_TOP ();
+    LINE_NUMBER_BYTECODE ();
+  }
+
+  97 = bytecode bc97 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    SEND (arg, 0);
+  }
+
+  98 = bytecode bc98 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (1);
+    SEND_IMMEDIATE (arg);
+  }
+
+  99 = bytecode bc99 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    EQUAL_SPECIAL ();
+  }
+
+  100 = bytecode bc100 {
+    PREFETCH ();
+    PUSH_INTEGER (arg);
+    MINUS_SPECIAL ();
+  }
+
+  101 = bytecode bc101 {
+    PREFETCH ();
+    DUP_STACK_TOP ();
+    POP_JUMP_FALSE (arg);
+  }
+
+  102 = bytecode bc102 {
     PREFETCH ();
     POP_STACK_TOP ();
     LINE_NUMBER_BYTECODE ();
   }
 
-  118 = bytecode bc118 {
+  103 = bytecode bc103 {
+    PREFETCH ();
+    PUSH_INTEGER (arg);
+    SEND_IMMEDIATE (32);
+  }
+
+  104 = bytecode bc104 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+    SIZE_SPECIAL ();
+  }
+
+  105 = bytecode bc105 {
+    PREFETCH ();
+    PUSH_SELF ();
+    SEND (arg >> 8, arg & 255);
+  }
+
+  106 = bytecode bc106 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_TEMPORARY_VARIABLE (2);
+  }
+
+  107 = bytecode bc107 {
     PREFETCH ();
     POP_STACK_TOP ();
     SEND_IMMEDIATE (arg);
   }
 
-  119 = bytecode bc119 {
+  108 = bytecode bc108 {
     PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
     PUSH_INTEGER (1);
-    STORE_TEMPORARY_VARIABLE (arg);
+    PLUS_SPECIAL ();
   }
 
-  120 = bytecode bc120 {
+  109 = bytecode bc109 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_RECEIVER_VARIABLE (0);
+  }
+
+  110 = bytecode bc110 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    SEND_IMMEDIATE (38);
+  }
+
+  111 = bytecode bc111 {
+    PREFETCH ();
+    PUSH_INTEGER (arg);
+    AT_SPECIAL ();
+  }
+
+  112 = bytecode bc112 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_RECEIVER_VARIABLE (1);
+  }
+
+  113 = bytecode bc113 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    PUSH_LIT_CONSTANT (arg);
+  }
+
+  114 = bytecode bc114 {
+    PREFETCH ();
+    DUP_STACK_TOP ();
+    POP_JUMP_TRUE (arg);
+  }
+
+  115 = bytecode bc115 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+    AT_SPECIAL ();
+  }
+
+  116 = bytecode bc116 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (2);
+    SEND_IMMEDIATE (arg);
+  }
+
+  117 = bytecode bc117 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    SEND_IMMEDIATE (49);
+  }
+
+  118 = bytecode bc118 {
+    PREFETCH ();
+    STORE_TEMPORARY_VARIABLE (1);
+    LINE_NUMBER_BYTECODE ();
+    POP_STACK_TOP ();
+  }
+
+  119 = bytecode bc119 {
     PREFETCH ();
     PUSH_TEMPORARY_VARIABLE (1);
     SEND (arg, 1);
   }
 
+  120 = bytecode bc120 {
+    PREFETCH ();
+    STORE_RECEIVER_VARIABLE (arg);
+    POP_STACK_TOP ();
+  }
+
   121 = bytecode bc121 {
     PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    VALUE_SPECIAL ();
+    STORE_OUTER_TEMP (arg, 1);
   }
 
   122 = bytecode bc122 {
     PREFETCH ();
-    PUSH_LIT_CONSTANT (1);
-    SEND_IMMEDIATE (arg);
+    PUSH_INTEGER (arg);
+    SEND_IMMEDIATE (96);
   }
 
   123 = bytecode bc123 {
     PREFETCH ();
+    POP_STACK_TOP ();
     PUSH_TEMPORARY_VARIABLE (arg);
-    TIMES_SPECIAL ();
   }
 
   124 = bytecode bc124 {
     PREFETCH ();
-    PUSH_INTEGER (arg);
-    GREATER_THAN_SPECIAL ();
+    PUSH_RECEIVER_VARIABLE (arg);
+    RETURN_CONTEXT_STACK_TOP ();
   }
 
   125 = bytecode bc125 {
@@ -1605,192 +1604,170 @@ table normal_byte_codes {
 
   126 = bytecode bc126 {
     PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    MINUS_SPECIAL ();
+    LINE_NUMBER_BYTECODE ();
+    POP_STACK_TOP ();
+    PUSH_TEMPORARY_VARIABLE (0);
   }
 
   127 = bytecode bc127 {
     PREFETCH ();
     LINE_NUMBER_BYTECODE ();
-    PUSH_OUTER_TEMP (0, 1);
+    PUSH_SELF ();
+    PUSH_LIT_CONSTANT (0);
   }
 
   128 = bytecode bc128 {
     PREFETCH ();
-    DUP_STACK_TOP ();
-    POP_JUMP_TRUE (arg);
+    PUSH_LIT_CONSTANT (arg);
+    RETURN_CONTEXT_STACK_TOP ();
   }
 
   129 = bytecode bc129 {
-    PREFETCH ();
-    STORE_TEMPORARY_VARIABLE (1);
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
-  }
-
-  130 = bytecode bc130 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    AT_PUT_SPECIAL ();
-  }
-
-  131 = bytecode bc131 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (0);
-    SEND_IMMEDIATE (arg);
-  }
-
-  132 = bytecode bc132 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (3);
-    SEND_IMMEDIATE (arg);
-  }
-
-  133 = bytecode bc133 {
-    PREFETCH ();
-    POP_STACK_TOP ();
-    JUMP_BACK (arg);
-  }
-
-  134 = bytecode bc134 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_RECEIVER_VARIABLE (2);
-  }
-
-  135 = bytecode bc135 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_SELF ();
-    PUSH_TEMPORARY_VARIABLE (0);
-  }
-
-  136 = bytecode bc136 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_LIT_CONSTANT (0);
-  }
-
-  137 = bytecode bc137 {
     PREFETCH ();
     PUSH_SELF ();
     SIZE_SPECIAL ();
   }
 
-  138 = bytecode bc138 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    TIMES_SPECIAL ();
-  }
-
-  139 = bytecode bc139 {
+  130 = bytecode bc130 {
     PREFETCH ();
     IS_NIL_SPECIAL ();
     POP_JUMP_TRUE (arg);
   }
 
-  140 = bytecode bc140 {
+  131 = bytecode bc131 {
     PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_RECEIVER_VARIABLE (3);
+    PUSH_TEMPORARY_VARIABLE (arg);
+    AT_PUT_SPECIAL ();
   }
 
-  141 = bytecode bc141 {
+  132 = bytecode bc132 {
     PREFETCH ();
     LINE_NUMBER_BYTECODE ();
     PUSH_LIT_VARIABLE (1);
   }
 
-  142 = bytecode bc142 {
+  133 = bytecode bc133 {
     PREFETCH ();
-    STORE_RECEIVER_VARIABLE (arg);
+    PUSH_TEMPORARY_VARIABLE (arg);
+    PLUS_SPECIAL ();
+  }
+
+  134 = bytecode bc134 {
+    PREFETCH ();
     POP_STACK_TOP ();
+    JUMP_BACK (arg);
   }
 
-  143 = bytecode bc143 {
+  135 = bytecode bc135 {
     PREFETCH ();
-    PUSH_INTEGER (arg);
-    LESS_THAN_SPECIAL ();
+    POP_STACK_TOP ();
+    PUSH_LIT_VARIABLE (arg);
   }
 
-  144 = bytecode bc144 {
+  136 = bytecode bc136 {
+    PREFETCH ();
+    PUSH_INTEGER (1);
+    STORE_TEMPORARY_VARIABLE (arg);
+  }
+
+  137 = bytecode bc137 {
     PREFETCH ();
     PUSH_LIT_CONSTANT (arg);
     SEND (2, 1);
   }
 
+  138 = bytecode bc138 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_TEMPORARY_VARIABLE (3);
+  }
+
+  139 = bytecode bc139 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_OUTER_TEMP (0, 1);
+  }
+
+  140 = bytecode bc140 {
+    PREFETCH ();
+    PUSH_RECEIVER_VARIABLE (arg);
+    SEND (0, 0);
+  }
+
+  141 = bytecode bc141 {
+    PREFETCH ();
+    PUSH_INTEGER (arg);
+    GREATER_THAN_SPECIAL ();
+  }
+
+  142 = bytecode bc142 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+    VALUE_SPECIAL ();
+  }
+
+  143 = bytecode bc143 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+    MINUS_SPECIAL ();
+  }
+
+  144 = bytecode bc144 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    SEND (3, 1);
+  }
+
   145 = bytecode bc145 {
     PREFETCH ();
-    PUSH_OUTER_TEMP (arg, 2);
+    PUSH_SPECIAL (0);
+    SAME_OBJECT_SPECIAL ();
+    POP_JUMP_FALSE (arg);
   }
 
   146 = bytecode bc146 {
     PREFETCH ();
-    PUSH_RECEIVER_VARIABLE (arg);
-    SIZE_SPECIAL ();
+    STORE_TEMPORARY_VARIABLE (2);
+    LINE_NUMBER_BYTECODE ();
+    POP_STACK_TOP ();
   }
 
   147 = bytecode bc147 {
     PREFETCH ();
-    POP_STACK_TOP ();
-    PUSH_TEMPORARY_VARIABLE (arg);
+    SAME_OBJECT_SPECIAL ();
+    POP_JUMP_TRUE (arg);
   }
 
   148 = bytecode bc148 {
     PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    PUSH_INTEGER (1);
-    MINUS_SPECIAL ();
+    PUSH_INTEGER (arg);
+    TIMES_SPECIAL ();
   }
 
   149 = bytecode bc149 {
     PREFETCH ();
-    POP_STACK_TOP ();
-    DUP_STACK_TOP ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    PUSH_INTEGER (1);
-    PLUS_SPECIAL ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_RECEIVER_VARIABLE (2);
   }
 
   150 = bytecode bc150 {
     PREFETCH ();
-    NOT_NIL_SPECIAL ();
-    POP_JUMP_FALSE (arg);
+    PUSH_INTEGER (arg);
+    LESS_THAN_SPECIAL ();
   }
 
   151 = bytecode bc151 {
     PREFETCH ();
-    STORE_TEMPORARY_VARIABLE (1);
-    LINE_NUMBER_BYTECODE ();
+    PUSH_LIT_CONSTANT (arg);
+    AT_PUT_SPECIAL ();
   }
 
   152 = bytecode bc152 {
     PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
-    PUSH_TEMPORARY_VARIABLE (2);
+    PUSH_OUTER_TEMP (arg, 2);
   }
 
   153 = bytecode bc153 {
-    PREFETCH ();
-    DUP_STACK_TOP ();
-    LINE_NUMBER_BYTECODE ();
-  }
-
-  154 = bytecode bc154 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_OUTER_TEMP (1, 1);
-  }
-
-  155 = bytecode bc155 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_SELF ();
-    SEND_IMMEDIATE (84);
-  }
-
-  156 = bytecode bc156 {
     PREFETCH ();
     LINE_NUMBER_BYTECODE ();
     PUSH_SELF ();
@@ -1798,29 +1775,49 @@ table normal_byte_codes {
     SEND (0, 1);
   }
 
-  157 = bytecode bc157 {
+  154 = bytecode bc154 {
+    PREFETCH ();
+    PUSH_SELF ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    SEND (arg, 1);
+  }
+
+  155 = bytecode bc155 {
     PREFETCH ();
     LINE_NUMBER_BYTECODE ();
+    PUSH_SELF ();
+    SEND_IMMEDIATE (40);
+  }
+
+  156 = bytecode bc156 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
     PUSH_TEMPORARY_VARIABLE (3);
+  }
+
+  157 = bytecode bc157 {
+    PREFETCH ();
+    STORE_TEMPORARY_VARIABLE (1);
+    LINE_NUMBER_BYTECODE ();
   }
 
   158 = bytecode bc158 {
     PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    EQUAL_SPECIAL ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    SEND (0, 0);
   }
 
   159 = bytecode bc159 {
     PREFETCH ();
     PUSH_INTEGER (arg);
-    RETURN_CONTEXT_STACK_TOP ();
+    BIT_AND_SPECIAL ();
   }
 
   160 = bytecode bc160 {
     PREFETCH ();
-    STORE_TEMPORARY_VARIABLE (2);
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
+    PUSH_TEMPORARY_VARIABLE (2);
+    SEND (arg, 0);
   }
 
   161 = bytecode bc161 {
@@ -1832,429 +1829,503 @@ table normal_byte_codes {
 
   162 = bytecode bc162 {
     PREFETCH ();
-    PUSH_RECEIVER_VARIABLE (arg);
-    SEND (0, 0);
+    LINE_NUMBER_BYTECODE ();
+    PUSH_SELF ();
+    PUSH_TEMPORARY_VARIABLE (0);
   }
 
   163 = bytecode bc163 {
     PREFETCH ();
-    PUSH_SELF ();
-    PUSH_TEMPORARY_VARIABLE (arg);
+    LINE_NUMBER_BYTECODE ();
+    PUSH_RECEIVER_VARIABLE (3);
   }
 
   164 = bytecode bc164 {
-    PREFETCH ();
-    STORE_TEMPORARY_VARIABLE (0);
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
-  }
-
-  165 = bytecode bc165 {
-    PREFETCH ();
-    STORE_TEMPORARY_VARIABLE (1);
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
-    PUSH_SELF ();
-  }
-
-  166 = bytecode bc166 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    VALUE_COLON_SPECIAL ();
-  }
-
-  167 = bytecode bc167 {
-    PREFETCH ();
-    PUSH_RECEIVER_VARIABLE (1);
-    SEND_IMMEDIATE (arg);
-  }
-
-  168 = bytecode bc168 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (1);
-    MAKE_DIRTY_BLOCK ();
-    SEND_IMMEDIATE (arg);
-  }
-
-  169 = bytecode bc169 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    BIT_AND_SPECIAL ();
-  }
-
-  170 = bytecode bc170 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (2);
-    SEND_IMMEDIATE (arg);
-  }
-
-  171 = bytecode bc171 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (1);
-    PUSH_TEMPORARY_VARIABLE (arg);
-  }
-
-  172 = bytecode bc172 {
-    PREFETCH ();
-    POP_STACK_TOP ();
-    LINE_NUMBER_BYTECODE ();
-    SEND_IMMEDIATE (37);
-  }
-
-  173 = bytecode bc173 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    SAME_OBJECT_SPECIAL ();
-  }
-
-  174 = bytecode bc174 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    INTEGER_DIVIDE_SPECIAL ();
-  }
-
-  175 = bytecode bc175 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    AT_PUT_SPECIAL ();
-  }
-
-  176 = bytecode bc176 {
-    PREFETCH ();
-    PUSH_RECEIVER_VARIABLE (arg);
-    RETURN_CONTEXT_STACK_TOP ();
-  }
-
-  177 = bytecode bc177 {
-    PREFETCH ();
-    PUSH_LIT_VARIABLE (0);
-    SEND_IMMEDIATE (arg);
-  }
-
-  178 = bytecode bc178 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    MAKE_DIRTY_BLOCK ();
-    SEND (2, 1);
-  }
-
-  179 = bytecode bc179 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_SELF ();
-    SEND_IMMEDIATE (40);
-  }
-
-  180 = bytecode bc180 {
-    PREFETCH ();
-    STORE_TEMPORARY_VARIABLE (2);
-    LINE_NUMBER_BYTECODE ();
-  }
-
-  181 = bytecode bc181 {
-    PREFETCH ();
-    PUSH_RECEIVER_VARIABLE (arg);
-    MINUS_SPECIAL ();
-  }
-
-  182 = bytecode bc182 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    LESS_THAN_SPECIAL ();
-  }
-
-  183 = bytecode bc183 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_LIT_VARIABLE (0);
-    SEND_IMMEDIATE (84);
-  }
-
-  184 = bytecode bc184 {
     PREFETCH ();
     PUSH_TEMPORARY_VARIABLE (2);
     SEND (arg, 1);
   }
 
-  185 = bytecode bc185 {
+  165 = bytecode bc165 {
     PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    MAKE_DIRTY_BLOCK ();
-    SEND (3, 1);
+    NOT_NIL_SPECIAL ();
+    POP_JUMP_FALSE (arg);
   }
 
-  186 = bytecode bc186 {
+  166 = bytecode bc166 {
     PREFETCH ();
-    POP_STACK_TOP ();
-    PUSH_RECEIVER_VARIABLE (arg);
-  }
-
-  187 = bytecode bc187 {
-    PREFETCH ();
-    PUSH_RECEIVER_VARIABLE (arg);
-    TIMES_SPECIAL ();
-  }
-
-  188 = bytecode bc188 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_LIT_VARIABLE (0);
-    RETURN_CONTEXT_STACK_TOP ();
-  }
-
-  189 = bytecode bc189 {
-    PREFETCH ();
-    STORE_TEMPORARY_VARIABLE (0);
+    STORE_TEMPORARY_VARIABLE (2);
     LINE_NUMBER_BYTECODE ();
   }
 
-  190 = bytecode bc190 {
-    PREFETCH ();
-    PUSH_SELF ();
-    SEND (arg, 1);
-  }
-
-  191 = bytecode bc191 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_SELF ();
-    PUSH_LIT_CONSTANT (0);
-  }
-
-  192 = bytecode bc192 {
-    PREFETCH ();
-    PUSH_LIT_VARIABLE (2);
-    SEND_IMMEDIATE (arg);
-  }
-
-  193 = bytecode bc193 {
-    PREFETCH ();
-    PUSH_LIT_VARIABLE (arg);
-    PUSH_TEMPORARY_VARIABLE (0);
-  }
-
-  194 = bytecode bc194 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_TEMPORARY_VARIABLE (0);
-    SEND (0, 0);
-  }
-
-  195 = bytecode bc195 {
-    PREFETCH ();
-    STORE_TEMPORARY_VARIABLE (0);
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
-    PUSH_SELF ();
-  }
-
-  196 = bytecode bc196 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_SELF ();
-    CLASS_SPECIAL ();
-  }
-
-  197 = bytecode bc197 {
-    PREFETCH ();
-    PUSH_LIT_VARIABLE (1);
-    SEND_IMMEDIATE (arg);
-  }
-
-  198 = bytecode bc198 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    SEND (3, 1);
-  }
-
-  199 = bytecode bc199 {
-    PREFETCH ();
-    PUSH_RECEIVER_VARIABLE (arg);
-    PLUS_SPECIAL ();
-  }
-
-  200 = bytecode bc200 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    RETURN_CONTEXT_STACK_TOP ();
-  }
-
-  201 = bytecode bc201 {
-    PREFETCH ();
-    STORE_OUTER_TEMP (arg, 1);
-    RETURN_CONTEXT_STACK_TOP ();
-  }
-
-  202 = bytecode bc202 {
-    PREFETCH ();
-    PUSH_SELF ();
-    CLASS_SPECIAL ();
-  }
-
-  203 = bytecode bc203 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_RECEIVER_VARIABLE (4);
-  }
-
-  204 = bytecode bc204 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_RECEIVER_VARIABLE (5);
-  }
-
-  205 = bytecode bc205 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_OUTER_TEMP (2, 1);
-  }
-
-  206 = bytecode bc206 {
-    PREFETCH ();
-    PUSH_OUTER_TEMP (0, 1);
-    SEND_IMMEDIATE (arg);
-  }
-
-  207 = bytecode bc207 {
-    PREFETCH ();
-    PUSH_RECEIVER_VARIABLE (0);
-    SEND_IMMEDIATE (arg);
-  }
-
-  208 = bytecode bc208 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (4);
-    SEND_IMMEDIATE (arg);
-  }
-
-  209 = bytecode bc209 {
+  167 = bytecode bc167 {
     PREFETCH ();
     STORE_TEMPORARY_VARIABLE (3);
     LINE_NUMBER_BYTECODE ();
     POP_STACK_TOP ();
   }
 
-  210 = bytecode bc210 {
+  168 = bytecode bc168 {
     PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_SELF ();
-    SEND_IMMEDIATE (130);
+    PUSH_LIT_CONSTANT (1);
+    SEND_IMMEDIATE (arg);
   }
 
-  211 = bytecode bc211 {
+  169 = bytecode bc169 {
     PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    MAKE_DIRTY_BLOCK ();
-    SEND (1, 1);
+    PUSH_TEMPORARY_VARIABLE (arg);
+    EQUAL_SPECIAL ();
   }
 
-  212 = bytecode bc212 {
+  170 = bytecode bc170 {
     PREFETCH ();
-    SEND (arg, 5);
-  }
-
-  213 = bytecode bc213 {
-    PREFETCH ();
-    SEND (arg, 4);
-  }
-
-  214 = bytecode bc214 {
-    PREFETCH ();
-    PUSH_SPECIAL (arg);
-    RETURN_METHOD_STACK_TOP ();
-  }
-
-  215 = bytecode bc215 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    SEND (2, 2);
-  }
-
-  216 = bytecode bc216 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (1);
-    SEND (arg >> 8, arg & 255);
-  }
-
-  217 = bytecode bc217 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    DIVIDE_SPECIAL ();
-  }
-
-  218 = bytecode bc218 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
+    POP_STACK_TOP ();
+    DUP_STACK_TOP ();
+    PUSH_TEMPORARY_VARIABLE (arg);
     PUSH_INTEGER (1);
+    PLUS_SPECIAL ();
   }
 
-  219 = bytecode bc219 {
+  171 = bytecode bc171 {
     PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_SPECIAL (0);
-    RETURN_CONTEXT_STACK_TOP ();
-  }
-
-  220 = bytecode bc220 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_INTEGER (0);
-  }
-
-  221 = bytecode bc221 {
-    PREFETCH ();
-    PUSH_OUTER_TEMP (0, 1);
+    PUSH_SELF ();
     SEND (arg, 1);
   }
 
-  222 = bytecode bc222 {
+  172 = bytecode bc172 {
     PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (2);
-    PUSH_TEMPORARY_VARIABLE (arg);
+    STORE_TEMPORARY_VARIABLE (0);
+    LINE_NUMBER_BYTECODE ();
+    POP_STACK_TOP ();
   }
 
-  223 = bytecode bc223 {
+  173 = bytecode bc173 {
     PREFETCH ();
-    PUSH_SPECIAL (0);
-    STORE_RECEIVER_VARIABLE (arg);
+    DUP_STACK_TOP ();
+    LINE_NUMBER_BYTECODE ();
   }
 
-  224 = bytecode bc224 {
+  174 = bytecode bc174 {
+    PREFETCH ();
+    PUSH_SELF ();
+    PUSH_LIT_CONSTANT (arg);
+    SEND_IMMEDIATE (49);
+  }
+
+  175 = bytecode bc175 {
+    PREFETCH ();
+    POP_STACK_TOP ();
+    PUSH_RECEIVER_VARIABLE (arg);
+  }
+
+  176 = bytecode bc176 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_SELF ();
+    SEND_IMMEDIATE (84);
+  }
+
+  177 = bytecode bc177 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_LIT_VARIABLE (2);
+  }
+
+  178 = bytecode bc178 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    MAKE_DIRTY_BLOCK ();
+    SEND (3, 1);
+  }
+
+  179 = bytecode bc179 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_LIT_CONSTANT (0);
+  }
+
+  180 = bytecode bc180 {
     PREFETCH ();
     DUP_STACK_TOP ();
     PUSH_LIT_CONSTANT (arg);
     SEND_IMMEDIATE (36);
   }
 
-  225 = bytecode bc225 {
+  181 = bytecode bc181 {
     PREFETCH ();
-    POP_STACK_TOP ();
-    DUP_STACK_TOP ();
     LINE_NUMBER_BYTECODE ();
-    PUSH_SELF ();
+    PUSH_OUTER_TEMP (1, 1);
   }
 
-  226 = bytecode bc226 {
+  182 = bytecode bc182 {
     PREFETCH ();
-    SAME_OBJECT_SPECIAL ();
-    POP_JUMP_TRUE (arg);
+    PUSH_INTEGER (arg);
+    INTEGER_DIVIDE_SPECIAL ();
   }
 
-  227 = bytecode bc227 {
+  183 = bytecode bc183 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (1);
+    MAKE_DIRTY_BLOCK ();
+    SEND_IMMEDIATE (arg);
+  }
+
+  184 = bytecode bc184 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (3);
+    SEND_IMMEDIATE (arg);
+  }
+
+  185 = bytecode bc185 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_SPECIAL (0);
+    RETURN_CONTEXT_STACK_TOP ();
+  }
+
+  186 = bytecode bc186 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_RECEIVER_VARIABLE (5);
+  }
+
+  187 = bytecode bc187 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    MAKE_DIRTY_BLOCK ();
+    SEND (2, 1);
+  }
+
+  188 = bytecode bc188 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+    VALUE_COLON_SPECIAL ();
+  }
+
+  189 = bytecode bc189 {
+    PREFETCH ();
+    PUSH_INTEGER (arg);
+    RETURN_CONTEXT_STACK_TOP ();
+  }
+
+  190 = bytecode bc190 {
     PREFETCH ();
     PUSH_TEMPORARY_VARIABLE (0);
     SEND (arg, 2);
   }
 
-  228 = bytecode bc228 {
+  191 = bytecode bc191 {
     PREFETCH ();
-    STORE_TEMPORARY_VARIABLE (2);
+    PUSH_TEMPORARY_VARIABLE (arg);
+    PUSH_INTEGER (1);
+    MINUS_SPECIAL ();
+  }
+
+  192 = bytecode bc192 {
+    PREFETCH ();
+    PUSH_SELF ();
+    PUSH_LIT_CONSTANT (arg);
+  }
+
+  193 = bytecode bc193 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_RECEIVER_VARIABLE (4);
+  }
+
+  194 = bytecode bc194 {
+    PREFETCH ();
+    PUSH_OUTER_TEMP (0, 1);
+    SEND_IMMEDIATE (arg);
+  }
+
+  195 = bytecode bc195 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_SELF ();
+    SEND (1, 0);
+  }
+
+  196 = bytecode bc196 {
+    PREFETCH ();
+    PUSH_OUTER_TEMP (0, 1);
+    SEND (arg, 1);
+  }
+
+  197 = bytecode bc197 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (4);
+    SEND_IMMEDIATE (arg);
+  }
+
+  198 = bytecode bc198 {
+    PREFETCH ();
+    PUSH_INTEGER (arg);
+    SEND_IMMEDIATE (41);
+  }
+
+  199 = bytecode bc199 {
+    PREFETCH ();
+    SEND (arg, 4);
+  }
+
+  200 = bytecode bc200 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+    PUSH_TEMPORARY_VARIABLE (2);
+  }
+
+  201 = bytecode bc201 {
+    PREFETCH ();
+    PUSH_SELF ();
+    CLASS_SPECIAL ();
+  }
+
+  202 = bytecode bc202 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (1);
+    SEND (arg >> 8, arg & 255);
+  }
+
+  203 = bytecode bc203 {
+    PREFETCH ();
+    PUSH_SELF ();
+    PUSH_TEMPORARY_VARIABLE (1);
+    SEND (arg, 1);
+  }
+
+  204 = bytecode bc204 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    SEND (4, 1);
+  }
+
+  205 = bytecode bc205 {
+    PREFETCH ();
+    PUSH_INTEGER (arg);
+    SEND (0, 1);
+  }
+
+  206 = bytecode bc206 {
+    PREFETCH ();
+    PUSH_RECEIVER_VARIABLE (arg);
+    SIZE_SPECIAL ();
+  }
+
+  207 = bytecode bc207 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (1);
+    SEND (arg, 2);
+  }
+
+  208 = bytecode bc208 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    PUSH_TEMPORARY_VARIABLE (1);
+    SEND (arg, 2);
+  }
+
+  209 = bytecode bc209 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+    POP_INTO_NEW_STACKTOP (0);
+  }
+
+  210 = bytecode bc210 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    MAKE_DIRTY_BLOCK ();
+    SEND (5, 1);
+  }
+
+  211 = bytecode bc211 {
+    PREFETCH ();
+    SEND_SUPER (arg, 1);
+  }
+
+  212 = bytecode bc212 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    MAKE_DIRTY_BLOCK ();
+    SEND (4, 1);
+  }
+
+  213 = bytecode bc213 {
+    PREFETCH ();
+    PUSH_RECEIVER_VARIABLE (1);
+    SEND_IMMEDIATE (arg);
+  }
+
+  214 = bytecode bc214 {
+    PREFETCH ();
+    STORE_OUTER_TEMP (arg, 1);
+    RETURN_CONTEXT_STACK_TOP ();
+  }
+
+  215 = bytecode bc215 {
+    PREFETCH ();
+    POP_STACK_TOP ();
+    LINE_NUMBER_BYTECODE ();
+    SEND_IMMEDIATE (37);
+  }
+
+  216 = bytecode bc216 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_SELF ();
+    CLASS_SPECIAL ();
+  }
+
+  217 = bytecode bc217 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (1);
+    SEND (arg, 0);
+  }
+
+  218 = bytecode bc218 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_SELF ();
+    SEND_IMMEDIATE (130);
+  }
+
+  219 = bytecode bc219 {
+    PREFETCH ();
+    PUSH_RECEIVER_VARIABLE (0);
+    SEND_IMMEDIATE (arg);
+  }
+
+  220 = bytecode bc220 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    PUSH_LIT_VARIABLE (arg);
+  }
+
+  221 = bytecode bc221 {
+    PREFETCH ();
+    STORE_TEMPORARY_VARIABLE (0);
+    LINE_NUMBER_BYTECODE ();
+  }
+
+  222 = bytecode bc222 {
+    PREFETCH ();
+    PUSH_RECEIVER_VARIABLE (2);
+    SEND_IMMEDIATE (arg);
+  }
+
+  223 = bytecode bc223 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_SELF ();
+    SEND (2, 0);
+  }
+
+  224 = bytecode bc224 {
+    PREFETCH ();
     LINE_NUMBER_BYTECODE ();
     POP_STACK_TOP ();
-    PUSH_SELF ();
+    PUSH_TEMPORARY_VARIABLE (2);
+  }
+
+  225 = bytecode bc225 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    MAKE_DIRTY_BLOCK ();
+    SEND (6, 1);
+  }
+
+  226 = bytecode bc226 {
+    PREFETCH ();
+    PUSH_SPECIAL (arg);
+    RETURN_METHOD_STACK_TOP ();
+  }
+
+  227 = bytecode bc227 {
+    PREFETCH ();
+    PUSH_INTEGER (arg);
+    GREATER_EQUAL_SPECIAL ();
+  }
+
+  228 = bytecode bc228 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    POP_STACK_TOP ();
+    PUSH_RECEIVER_VARIABLE (1);
   }
 
   229 = bytecode bc229 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_LIT_VARIABLE (3);
+  }
+
+  230 = bytecode bc230 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (2);
+    SEND_IMMEDIATE (arg);
+  }
+
+  231 = bytecode bc231 {
+    PREFETCH ();
+    SEND_SUPER (arg, 0);
+  }
+
+  232 = bytecode bc232 {
+    PREFETCH ();
+    PUSH_SPECIAL (0);
+    STORE_RECEIVER_VARIABLE (arg);
+  }
+
+  233 = bytecode bc233 {
+    PREFETCH ();
+    PUSH_SELF ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+    SEND (0, 1);
+  }
+
+  234 = bytecode bc234 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    POP_STACK_TOP ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    RETURN_CONTEXT_STACK_TOP ();
+  }
+
+  235 = bytecode bc235 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    SAME_OBJECT_SPECIAL ();
+  }
+
+  236 = bytecode bc236 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    MAKE_DIRTY_BLOCK ();
+    SEND (1, 1);
+  }
+
+  237 = bytecode bc237 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    POP_STACK_TOP ();
+    PUSH_TEMPORARY_VARIABLE (3);
+  }
+
+  238 = bytecode bc238 {
+    PREFETCH ();
+    POP_STACK_TOP ();
+    DUP_STACK_TOP ();
+    SEND_IMMEDIATE (arg);
+  }
+
+  239 = bytecode bc239 {
+    PREFETCH ();
+    PUSH_LIT_CONSTANT (arg);
+    PUSH_TEMPORARY_VARIABLE (0);
+    AT_PUT_SPECIAL ();
+  }
+
+  240 = bytecode bc240 {
     PREFETCH ();
     DUP_STACK_TOP ();
     PUSH_TEMPORARY_VARIABLE (arg);
@@ -2262,157 +2333,33 @@ table normal_byte_codes {
     PLUS_SPECIAL ();
   }
 
-  230 = bytecode bc230 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    PUSH_TEMPORARY_VARIABLE (0);
-    AT_PUT_SPECIAL ();
-  }
-
-  231 = bytecode bc231 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    AT_PUT_SPECIAL ();
-  }
-
-  232 = bytecode bc232 {
-    PREFETCH ();
-    POP_STACK_TOP ();
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
-  }
-
-  233 = bytecode bc233 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    PUSH_SELF ();
-    SEND (1, 0);
-  }
-
-  234 = bytecode bc234 {
-    PREFETCH ();
-    PUSH_LIT_VARIABLE (3);
-    SEND_IMMEDIATE (arg);
-  }
-
-  235 = bytecode bc235 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    MAKE_DIRTY_BLOCK ();
-    SEND (5, 1);
-  }
-
-  236 = bytecode bc236 {
-    PREFETCH ();
-    PUSH_LIT_CONSTANT (arg);
-    MAKE_DIRTY_BLOCK ();
-    SEND_IMMEDIATE (52);
-  }
-
-  237 = bytecode bc237 {
-    PREFETCH ();
-    DUP_STACK_TOP ();
-    SEND_IMMEDIATE (arg);
-  }
-
-  238 = bytecode bc238 {
-    PREFETCH ();
-    PUSH_RECEIVER_VARIABLE (arg);
-    DIVIDE_SPECIAL ();
-  }
-
-  239 = bytecode bc239 {
-    PREFETCH ();
-    PUSH_LIT_VARIABLE (arg);
-    PUSH_TEMPORARY_VARIABLE (1);
-  }
-
-  240 = bytecode bc240 {
-    PREFETCH ();
-    POP_STACK_TOP ();
-    DUP_STACK_TOP ();
-    SEND_IMMEDIATE (arg);
-  }
-
   241 = bytecode bc241 {
-    PREFETCH ();
-    PUSH_SELF ();
-    PUSH_TEMPORARY_VARIABLE (0);
-    SEND_IMMEDIATE (arg);
-  }
-
-  242 = bytecode bc242 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (arg);
-    DIVIDE_SPECIAL ();
-  }
-
-  243 = bytecode bc243 {
-    PREFETCH ();
-    STORE_LIT_VARIABLE (arg);
-    PUSH_SELF ();
-    RETURN_CONTEXT_STACK_TOP ();
-  }
-
-  244 = bytecode bc244 {
-    PREFETCH ();
-    LINE_NUMBER_BYTECODE ();
-    POP_STACK_TOP ();
-    PUSH_TEMPORARY_VARIABLE (0);
-    RETURN_CONTEXT_STACK_TOP ();
-  }
-
-  245 = bytecode bc245 {
-    PREFETCH ();
-    PUSH_TEMPORARY_VARIABLE (3);
-    SEND (arg, 0);
-  }
-
-  246 = bytecode bc246 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    SEND (0, 1);
-  }
-
-  247 = bytecode bc247 {
-    PREFETCH ();
-    PUSH_INTEGER (arg);
-    GREATER_EQUAL_SPECIAL ();
-  }
-
-  248 = bytecode bc248 {
-    PREFETCH ();
-    PUSH_SELF ();
-    PUSH_TEMPORARY_VARIABLE (0);
-    SEND (arg >> 8, arg & 255);
-  }
-
-  249 = bytecode bc249 {
-    PREFETCH ();
-    PUSH_LIT_VARIABLE (0);
-    SEND (arg, 0);
-  }
-
-  250 = bytecode bc250 {
     PREFETCH ();
     LINE_NUMBER_BYTECODE ();
     PUSH_TEMPORARY_VARIABLE (4);
   }
 
-  251 = bytecode bc251 {
+  242 = bytecode bc242 {
     PREFETCH ();
+    POP_STACK_TOP ();
     LINE_NUMBER_BYTECODE ();
     PUSH_LIT_VARIABLE (1);
-    SEND (2, 0);
   }
 
-  252 = bytecode bc252 {
+  243 = bytecode bc243 {
     PREFETCH ();
-    PUSH_LIT_CONSTANT (3);
-    SEND_IMMEDIATE (arg);
+    DUP_STACK_TOP ();
+    PUSH_LIT_CONSTANT (arg);
+    SEND (1, 1);
   }
 
-  253 = bytecode bc253 {
+  244 = bytecode bc244 {
+    PREFETCH ();
+    POP_INTO_NEW_STACKTOP (1);
+    SEND (arg, 1);
+  }
+
+  245 = bytecode bc245 {
     PREFETCH ();
     LINE_NUMBER_BYTECODE ();
     POP_STACK_TOP ();
@@ -2420,16 +2367,67 @@ table normal_byte_codes {
     RETURN_CONTEXT_STACK_TOP ();
   }
 
-  254 = bytecode bc254 {
+  246 = bytecode bc246 {
+    PREFETCH ();
+    STORE_TEMPORARY_VARIABLE (3);
+    LINE_NUMBER_BYTECODE ();
+  }
+
+  247 = bytecode bc247 {
     PREFETCH ();
     DUP_STACK_TOP ();
-    PUSH_TEMPORARY_VARIABLE (1);
+    SEND (arg, 0);
+  }
+
+  248 = bytecode bc248 {
+    PREFETCH ();
+    STORE_RECEIVER_VARIABLE (arg);
+    RETURN_CONTEXT_STACK_TOP ();
+  }
+
+  249 = bytecode bc249 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_SELF ();
+    SEND (3, 0);
+  }
+
+  250 = bytecode bc250 {
+    PREFETCH ();
+    NOT_NIL_SPECIAL ();
+    DUP_STACK_TOP ();
+    POP_JUMP_FALSE (arg);
+  }
+
+  251 = bytecode bc251 {
+    PREFETCH ();
+    DUP_STACK_TOP ();
+    PUSH_LIT_CONSTANT (arg);
+  }
+
+  252 = bytecode bc252 {
+    PREFETCH ();
+    LINE_NUMBER_BYTECODE ();
+    PUSH_TEMPORARY_VARIABLE (0);
+    RETURN_CONTEXT_STACK_TOP ();
+  }
+
+  253 = bytecode bc253 {
+    PREFETCH ();
+    PUSH_INTEGER (arg);
+    AT_PUT_SPECIAL ();
+  }
+
+  254 = bytecode bc254 {
+    PREFETCH ();
+    PUSH_TEMPORARY_VARIABLE (arg);
+    CLASS_SPECIAL ();
   }
 
   255 = bytecode bc255 {
     PREFETCH ();
-    PUSH_INTEGER (0);
-    SEND_IMMEDIATE (arg);
+    LINE_NUMBER_BYTECODE ();
+    PUSH_OUTER_TEMP (2, 1);
   }
 
 }

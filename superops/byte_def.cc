@@ -7,7 +7,7 @@
 
 ///////////////////////////////////////////////////////////////////////
 //
-// Copyright 2003 Free Software Foundation, Inc.
+// Copyright 2003, 2007 Free Software Foundation, Inc.
 // Written by Paolo Bonzini.
 //
 // This file is part of GNU Smalltalk.
@@ -402,10 +402,7 @@ bytecode_superoperator::bytecode_superoperator (int _num, int _bc1, int _bc2,
   fixed_arg (_arg)
 {
   if (!bc1 || !bc2)
-    {
-      std::cerr << "Image has superoperators, compile gst with NO_SUPEROPERATORS." << std::endl;
-      abort ();
-    }
+    abort ();
 }
 
 bytecode_with_fixed_arg_1::bytecode_with_fixed_arg_1 (int _num, int _bc1,
@@ -503,13 +500,13 @@ bytecode_fast_send bc7 (7, "SEND_ARITH", "NOT_EQUAL_SPECIAL(*)");
 bytecode_fast_send bc8 (8, "SEND_ARITH", "TIMES_SPECIAL(*)");
 bytecode_fast_send bc9 (9, "SEND_ARITH", "DIVIDE_SPECIAL(*)");
 bytecode_fast_send bc10 (10, "SEND_ARITH", "REMAINDER_SPECIAL(*)");
-bytecode_fast_send bc11 (11, "SEND_ARITH", "BIT_XOR_COLON_SPECIAL(*)");
-bytecode_fast_send bc12 (12, "SEND_ARITH", "BIT_SHIFT_COLON_SPECIAL(*)");
+bytecode_fast_send bc11 (11, "SEND_ARITH", "BIT_XOR_SPECIAL(*)");
+bytecode_fast_send bc12 (12, "SEND_ARITH", "BIT_SHIFT_SPECIAL(*)");
 bytecode_fast_send bc13 (13, "SEND_ARITH", "INTEGER_DIVIDE_SPECIAL(*)");
-bytecode_fast_send bc14 (14, "SEND_ARITH", "BIT_AND_COLON_SPECIAL(*)");
-bytecode_fast_send bc15 (15, "SEND_ARITH", "BIT_OR_COLON_SPECIAL(*)");
-bytecode_fast_send bc16 (16, "SEND_SPECIAL", "AT_COLON_SPECIAL(*)");
-bytecode_fast_send bc17 (17, "SEND_SPECIAL", "AT_COLON_PUT_COLON_SPECIAL(*)");
+bytecode_fast_send bc14 (14, "SEND_ARITH", "BIT_AND_SPECIAL(*)");
+bytecode_fast_send bc15 (15, "SEND_ARITH", "BIT_OR_SPECIAL(*)");
+bytecode_fast_send bc16 (16, "SEND_SPECIAL", "AT_SPECIAL(*)");
+bytecode_fast_send bc17 (17, "SEND_SPECIAL", "AT_PUT_SPECIAL(*)");
 bytecode_fast_send bc18 (18, "SEND_SPECIAL", "SIZE_SPECIAL(*)");
 bytecode_fast_send bc19 (19, "SEND_SPECIAL", "CLASS_SPECIAL(*)");
 bytecode_fast_send bc20 (20, "SEND_SPECIAL", "IS_NIL_SPECIAL(*)");

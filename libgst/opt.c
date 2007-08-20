@@ -69,7 +69,7 @@
 /* Define this to disable superoperators in the peephole bytecode
    optimizer.  Some simple optimizations will still be done, making
    the output suitable for searching superoperator candidates.  */
-#define NO_SUPEROPERATORS
+/* #define NO_SUPEROPERATORS */
 
 /* Define this to disable bytecode verification.  */
 /* #define NO_VERIFIER */

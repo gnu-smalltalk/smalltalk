@@ -1,5 +1,13 @@
 2007-08-20  Paolo Bonzini  <bonzini@gnu.org>
 
+        * libgst/superop1.inl: Regenerate.
+        * libgst/superop2.inl: Regenerate.
+        * libgst/byte.def: Regenerate.
+	* libgst/vm.def: Reenable superoperators.
+	* libgst/opt.c: Reenable superoperators.
+
+2007-08-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/comp.c: Make make_constant_oop global, adjust for new
 	return value of _gst_find_variable_binding, create
 	DeferredVariableBinding objects.  Compile store-into-

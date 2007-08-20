@@ -13,7 +13,7 @@
 
 ///////////////////////////////////////////////////////////////////////
 //
-// Copyright 2003 Free Software Foundation, Inc.
+// Copyright 2003, 2007 Free Software Foundation, Inc.
 // Written by Paolo Bonzini.
 //
 // This file is part of GNU Smalltalk.
@@ -146,6 +146,7 @@ struct sequence {
   void visit (superop_collector& sc);
   void replace_with_fixed_arg_1 (int new_bc, int bc1, int arg1, int bc2);
   void replace_with_fixed_arg_2 (int new_bc, int bc1, int bc2, int arg2);
+  bool includes_superoperators ();
 };
 
 
@@ -313,6 +314,15 @@ sequence::sequence (sequence * next_, std::istream& is) : next (next_)
       is >> bc;
       seq[i] = bc;
     }
+}
+
+bool 
+sequence::includes_superoperators ()
+{
+  for (int i = 0; i < n; i += 2)
+    if (seq[i] >= 64)
+      return true;
+  return false;
 }
 
 // Count the total length of the sequences.
@@ -503,7 +513,7 @@ main (int argc, char **argv)
     "     ({1}, breaks)"
     "         with: (breaks asArray copyWith: self numBytecodes + 1)"
     "         do: [ :begin :end |"
-    "             begin = end ifFalse: ["
+    "             end - begin > 2 ifTrue: ["
     "                 aBlock value: (self copyFrom: begin to: end - 1) ]"
     "         ]!"
 
@@ -514,6 +524,7 @@ main (int argc, char **argv)
     "         stdout nl"
     "     ]! !"
 
+    " stdout nextPutAll: 'BEGIN'; nl!"
     " CompiledMethod allInstancesDo: [ :each |"
     "     each descriptor notNil"
     "         ifTrue: [ each printAllOptimizableSequences ] ]!"
@@ -541,6 +552,8 @@ main (int argc, char **argv)
   while (nthis > 0
 	 && !(total[nread - 1] == '\n' && total[nread - 2] == '\n'));
 
+  total = strstr (total, "BEGIN\n") + 6;
+
   // Parse sequences from the buffer until we reach its end
   // (which is marked by an empty sequence).  Don't save sequences
   // whose length is 2 because they produce no superoperators.
@@ -548,18 +561,26 @@ main (int argc, char **argv)
   std::istringstream is (istr);
 
   sequence *seqs = NULL;
+  int bad_seqs = 0;
   do
     {
       seqs = new sequence (seqs, is);
       sequence *first = seqs;
-      int length = first->n;
-      if (length <= 2)
+      if (first->includes_superoperators ())
         {
+	  bad_seqs++;
           seqs = seqs->next;
 	  delete first;
 	}
     }
   while (is.tellg () > 0);
+
+  if (bad_seqs)
+    {
+      std::cout << "Discarded " << bad_seqs << " sequences.  "
+	<< (bad_seqs > 200 ? "Was gst compiled with NO_SUPEROPERATORS?" : "")
+        << std::endl;
+    }
 
   // Statistics are fun...
   int before = seqs->all_count();

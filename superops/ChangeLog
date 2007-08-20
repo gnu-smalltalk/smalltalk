@@ -1,4 +1,13 @@
-2007-08-19  Paolo Bonzini  <bonzini@gnu.org>
+2007-08-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* superops/byte_def.cc: Abort on superoperators.  Remove "COLON".
+	* superops/vm_def.cc: Abort on superoperators.  Emit ADVANCE instead
+	of PREFETCH for jumps.  Remove "COLON".
+	* superops/superops.cc: Filter out superoperators here.  Be resilient
+	to errors before the code runs.
+	* superops/table.cc: Clear memory.
+
+2007-08-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* superops/superops.cc: Split after push/store literal variable.
 

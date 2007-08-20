@@ -7,7 +7,7 @@
 
 ///////////////////////////////////////////////////////////////////////
 //
-// Copyright 2003 Free Software Foundation, Inc.
+// Copyright 2003, 2007 Free Software Foundation, Inc.
 // Written by Paolo Bonzini.
 //
 // This file is part of GNU Smalltalk.
@@ -107,8 +107,12 @@ struct bytecode_with_fixed_arg_2 : bytecode_superoperator {
 void
 bytecode::write_vm_def (std::ostream & os)
 {
-  os << "  " << num << " = bytecode bc" << num << " {" << std::endl
-    << "    PREFETCH ();" << std::endl;
+  os << "  " << num << " = bytecode bc" << num << " {" << std::endl;
+  if (num == 40 || num == 41)
+    os << "    ADVANCE ();" << std::endl;
+  else
+    os << "    PREFETCH ();" << std::endl;
+
   write_vm_def_var_arg (os);
   os << "  }" << std::endl << std::endl;
 };
@@ -220,10 +224,7 @@ bytecode_superoperator::bytecode_superoperator (int _num, int _bc1, int _bc2,
   fixed_arg (_arg)
 {
   if (!bc1 || !bc2)
-    {
-      std::cerr << "Image has superoperators, compile gst with NO_SUPEROPERATORS." << std::endl;
-      abort ();
-    }
+    abort ();
 }
 
 bytecode_with_fixed_arg_1::bytecode_with_fixed_arg_1 (int _num, int _bc1,
@@ -303,13 +304,13 @@ bytecode_noarg bc7 (7, "NOT_EQUAL_SPECIAL");
 bytecode_noarg bc8 (8, "TIMES_SPECIAL");
 bytecode_noarg bc9 (9, "DIVIDE_SPECIAL");
 bytecode_noarg bc10 (10, "REMAINDER_SPECIAL");
-bytecode_noarg bc11 (11, "BIT_XOR_COLON_SPECIAL");
-bytecode_noarg bc12 (12, "BIT_SHIFT_COLON_SPECIAL");
+bytecode_noarg bc11 (11, "BIT_XOR_SPECIAL");
+bytecode_noarg bc12 (12, "BIT_SHIFT_SPECIAL");
 bytecode_noarg bc13 (13, "INTEGER_DIVIDE_SPECIAL");
-bytecode_noarg bc14 (14, "BIT_AND_COLON_SPECIAL");
-bytecode_noarg bc15 (15, "BIT_OR_COLON_SPECIAL");
-bytecode_noarg bc16 (16, "AT_COLON_SPECIAL");
-bytecode_noarg bc17 (17, "AT_COLON_PUT_COLON_SPECIAL");
+bytecode_noarg bc14 (14, "BIT_AND_SPECIAL");
+bytecode_noarg bc15 (15, "BIT_OR_SPECIAL");
+bytecode_noarg bc16 (16, "AT_SPECIAL");
+bytecode_noarg bc17 (17, "AT_PUT_SPECIAL");
 bytecode_noarg bc18 (18, "SIZE_SPECIAL");
 bytecode_noarg bc19 (19, "CLASS_SPECIAL");
 bytecode_noarg bc20 (20, "IS_NIL_SPECIAL");

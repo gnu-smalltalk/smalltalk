@@ -1,5 +1,10 @@
 2007-08-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CompildCode.st: Regenerate bytecodeInfoTable.
+	* kernel/CompildMeth.st: Fix for new bytecode set.
+
+2007-08-20  Paolo Bonzini  <bonzini@gnu.org>
+
         * kernel/DeferBinding.st: Fix infinite recursion.
 
 2007-08-20  Paolo Bonzini  <bonzini@gnu.org>
