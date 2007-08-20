@@ -141,6 +141,7 @@ typedef enum
   CONST_STRING,
   CONST_OOP,
   CONST_BINDING,
+  CONST_DEFERRED_BINDING,
   CONST_ARRAY
 }
 const_type;
@@ -332,6 +333,12 @@ extern tree_node _gst_make_symbol_constant (YYLTYPE *location,
 /* Create a const_node storing a string, pointed to by SVAL.  */
 extern tree_node _gst_make_string_constant (YYLTYPE *location,
 				  	    const char *sval)
+  ATTRIBUTE_HIDDEN;
+
+/* Create a const_node storing a deferred variable binding, whose key
+   is the symbol KEYOOP.  */
+extern tree_node _gst_make_deferred_binding_constant (YYLTYPE *location,
+						      OOP keyOOP)
   ATTRIBUTE_HIDDEN;
 
 /* Create a const_node for an array whose elements are

@@ -164,6 +164,16 @@ typedef struct gst_class_description
 }
  *gst_class_description;
 
+typedef struct gst_deferred_variable_binding
+{
+  OBJ_HEADER;
+  OOP key;
+  OOP class;
+  OOP defaultDictionary;
+  OOP association;
+}
+ *gst_deferred_variable_binding;
+
 typedef struct gst_association
 {
   OBJ_HEADER;
@@ -320,6 +330,7 @@ extern OOP _gst_compiled_method_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_context_part_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_continuation_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_date_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_deferred_variable_binding_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_delay_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_dictionary_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_directed_message_class ATTRIBUTE_HIDDEN;

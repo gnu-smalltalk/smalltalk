@@ -269,6 +269,12 @@ extern mst_Boolean _gst_untrusted_methods
 extern OOP _gst_compute_keyword_selector (tree_node selectorExpr)
   ATTRIBUTE_HIDDEN;
 
+/* Given CONSTEXPR, a section of the syntax tree that represents a
+   Smalltalk constant, this routine creates and returns an OOP to be
+   stored as a method literal in the method that's currently being
+   compiled.  */ 
+extern OOP _gst_make_constant_oop (tree_node constExpr);
+
 /* Called to compile and execute an "immediate expression"; i.e. a Smalltalk
    statement that is not part of a method definition and where temporaries are
    declared automatically.  The parse trees are in TEMPS and STATEMENTS.

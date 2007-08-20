@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006,2007
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -572,63 +572,66 @@ _gst_pop_temporaries_dictionary (OOP dictionaryOOP)
 }
 
 
-OOP
+tree_node
 _gst_find_variable_binding (tree_node list, mst_Boolean declare_temporary)
 {
-  OOP symbol, root, assocOOP, undeclaredDictionaryOOP;
+  OOP symbol, root, assocOOP;
+  tree_node elt;
 
   symbol = _gst_intern_string (list->v_list.name);
   assocOOP = find_class_variable (symbol);
 
-  while (assocOOP != _gst_nil_oop && (list = list->v_list.next))
+  for (elt = list; assocOOP != _gst_nil_oop && (elt = elt->v_list.next); )
     {
       root = ASSOCIATION_VALUE (assocOOP);
-      symbol = _gst_intern_string (list->v_list.name);
+      symbol = _gst_intern_string (elt->v_list.name);
       assocOOP = _gst_namespace_association_at (root, symbol);
     }
 
-  if (IS_NIL (assocOOP) && !(list->v_list.next))
+  if (!IS_NIL (assocOOP))
+    return _gst_make_oop_constant (&list->location, assocOOP);
+
+  else if (_gst_use_undeclared == UNDECLARED_GLOBALS
+	   && !elt->v_list.next 
+	   && isupper (*STRING_OOP_CHARS (symbol)))
     {
-      char *varName;
-
-      varName = STRING_OOP_CHARS (symbol);
-      if (_gst_use_undeclared == UNDECLARED_TEMPORARIES
-	  && declare_temporary)
-        undeclaredDictionaryOOP = temporaries_dictionary;
-
-      else if (_gst_use_undeclared == UNDECLARED_GLOBALS
-	       && isupper (*varName))
-        undeclaredDictionaryOOP = dictionary_at (_gst_smalltalk_dictionary,
-					         _gst_undeclared_symbol);
-
-      else
-	undeclaredDictionaryOOP = _gst_nil_oop;
-
-      if (!IS_NIL (undeclaredDictionaryOOP))
-	{
-          assocOOP = dictionary_association_at (undeclaredDictionaryOOP, symbol);
-          if (IS_NIL (assocOOP))
-	    {
-	      assocOOP =
-	        NAMESPACE_AT_PUT (undeclaredDictionaryOOP, symbol, _gst_nil_oop);
-	      MAKE_OOP_UNTRUSTED (assocOOP, _gst_untrusted_methods);
-	    }
-	}
+      OOP dictOOP = dictionary_at (_gst_smalltalk_dictionary,
+				   _gst_undeclared_symbol);
+      assocOOP = _gst_namespace_association_at (dictOOP, symbol);
+      if (IS_NIL (assocOOP))
+        assocOOP = NAMESPACE_AT_PUT (dictOOP, symbol, _gst_nil_oop);
+      return _gst_make_oop_constant (&list->location, assocOOP);
     }
 
-  return (assocOOP);
+  /* For temporaries, make a deferred binding so that we can try using
+     a global variable.  Unlike namespaces, the temporaries dictionary
+     does not know anything about Undeclared.  */
+  else if (_gst_use_undeclared == UNDECLARED_TEMPORARIES
+	   && !list->v_list.next
+	   && declare_temporary)
+    return _gst_make_deferred_binding_constant (&list->location, symbol);
+
+  else
+    return NULL;
 }
 
+OOP
+_gst_get_undeclared_dictionary ()
+{
+  assert (_gst_use_undeclared == UNDECLARED_TEMPORARIES);
+  return temporaries_dictionary;
+}
 
 mst_Boolean
 _gst_find_variable (symbol_entry * se,
 		    tree_node list)
 {
-  OOP varAssoc;
+  tree_node resolved;
   int index;
   unsigned int scopeDistance;
   scope scope;
   symbol_list s;
+  OOP varAssoc;
   OOP symbol;
 
   symbol = _gst_intern_string (list->v_list.name);
@@ -683,10 +686,11 @@ _gst_find_variable (symbol_entry * se,
       return (true);
     }
 
-  varAssoc = _gst_find_variable_binding (list, true);
-  if (IS_NIL (varAssoc))
+  resolved = _gst_find_variable_binding (list, true);
+  if (!resolved)
     return (false);
 
+  varAssoc = _gst_make_constant_oop (resolved);
   index = _gst_add_forced_object (varAssoc);
 
   fill_symbol_entry (se, SCOPE_GLOBAL, 

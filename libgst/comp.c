@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006,2007
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -205,12 +205,6 @@ static mst_Boolean compile_statements (tree_node statementList,
    selector (if a TREE_UNARY_EXPR or TREE_BINARY_EXPR).  Then it turns
    them into a symbol OOP and returns that symbol.  */
 static OOP compute_selector (tree_node selectorExpr);
-
-/* Given CONSTEXPR, a section of the syntax tree that represents a
-   Smalltalk constant, this routine creates and returns an OOP to be
-   stored as a method literal in the method that's currently being
-   compiled.  */
-static OOP make_constant_oop (tree_node constExpr);
 
 /* Creates a new Array object that contains the literals for the
    method that's being compiled and returns it.  As a side effect, the
@@ -1090,7 +1084,7 @@ compile_constant (tree_node constExpr)
      bytecode, or add it to the literals.  */
   if (index == -1)
     {
-      constantOOP = make_constant_oop (constExpr);
+      constantOOP = _gst_make_constant_oop (constExpr);
       if (IS_INT (constantOOP))
         {
           intVal = TO_INT (constantOOP);
@@ -1954,7 +1948,14 @@ compile_assignments (tree_node varList)
 	_gst_compile_byte (STORE_RECEIVER_VARIABLE, variable.varIndex);
 
       else
-	_gst_compile_byte (STORE_LIT_VARIABLE, variable.varIndex);
+	{
+	  /* This can become a message send, which might not return the
+	     value.  Compile it in a way that can be easily peephole
+	     optimized. */
+	  _gst_compile_byte (STORE_LIT_VARIABLE, variable.varIndex);
+	  _gst_compile_byte (POP_STACK_TOP, 0);
+	  _gst_compile_byte (PUSH_LIT_VARIABLE, variable.varIndex);
+	}
     }
 }
 
@@ -2059,13 +2060,26 @@ equal_constant (OOP oop,
 	}
       break;
 
-    case CONST_OOP:
-      if (oop == constExpr->v_const.val.oopVal)
-	return (true);
+    case CONST_DEFERRED_BINDING:
+      if (IS_OOP (oop) && OOP_CLASS (oop) == _gst_deferred_variable_binding_class)
+	{
+	  gst_deferred_variable_binding binding =
+	    (gst_deferred_variable_binding) OOP_TO_OBJ (oop);
+	  if (binding->key == constExpr->v_const.val.oopVal)
+	    return (true);
+	}
       break;
 
     case CONST_BINDING:
-      if (oop == _gst_find_variable_binding (constExpr->v_const.val.aVal, false))
+      constExpr = _gst_find_variable_binding (constExpr->v_const.val.aVal,						      false);
+      if (!constExpr)
+	return (false);
+
+      assert (constExpr->v_const.constType != CONST_BINDING);
+      return equal_constant (oop, constExpr);
+
+    case CONST_OOP:
+      if (oop == constExpr->v_const.val.oopVal)
 	return (true);
       break;
 
@@ -2097,9 +2111,9 @@ equal_constant (OOP oop,
 }
 
 OOP
-make_constant_oop (tree_node constExpr)
+_gst_make_constant_oop (tree_node constExpr)
 {
-  tree_node arrayElt;
+  tree_node subexpr;
   int len, i;
   OOP resultOOP, elementOOP;
   inc_ptr incPtr;
@@ -2115,8 +2129,8 @@ make_constant_oop (tree_node constExpr)
 
   else if (constExpr->nodeType == TREE_ARRAY_ELT_LIST)
     {
-      for (len = 0, arrayElt = constExpr; arrayElt;
-	   len++, arrayElt = arrayElt->v_list.next);
+      for (len = 0, subexpr = constExpr; subexpr;
+	   len++, subexpr = subexpr->v_list.next);
 
       incPtr = INC_SAVE_POINTER ();
 
@@ -2126,10 +2140,10 @@ make_constant_oop (tree_node constExpr)
       instantiate_with (_gst_array_class, len, &resultOOP);
       INC_ADD_OOP (resultOOP);
 
-      for (i = 0, arrayElt = constExpr; i < len;
-	   i++, arrayElt = arrayElt->v_list.next)
+      for (i = 0, subexpr = constExpr; i < len;
+	   i++, subexpr = subexpr->v_list.next)
 	{
-	  elementOOP = make_constant_oop (arrayElt->v_list.value);
+	  elementOOP = _gst_make_constant_oop (subexpr->v_list.value);
 	  result = OOP_TO_OBJ (resultOOP);
 	  result->data[i] = elementOOP;
 	}
@@ -2160,9 +2174,6 @@ make_constant_oop (tree_node constExpr)
       MAKE_OOP_READONLY (resultOOP, true);
       return (resultOOP);
 
-    case CONST_OOP:
-      return (constExpr->v_const.val.oopVal);
-
     case CONST_BYTE_OBJECT:
       bo = constExpr->v_const.val.boVal;
       result = instantiate_with (bo->class, bo->size, &resultOOP);
@@ -2170,30 +2181,46 @@ make_constant_oop (tree_node constExpr)
       MAKE_OOP_READONLY (resultOOP, true);
       return (resultOOP);
 
+    case CONST_DEFERRED_BINDING:
+      {
+	gst_deferred_variable_binding dvb;
+        result = instantiate (_gst_deferred_variable_binding_class, &resultOOP);
+        dvb = (gst_deferred_variable_binding) result;
+	dvb->key = constExpr->v_const.val.oopVal;
+	dvb->class = _gst_this_class;
+	dvb->defaultDictionary = _gst_get_undeclared_dictionary ();
+	dvb->association = _gst_nil_oop;
+        return (resultOOP);
+      }
+
     case CONST_BINDING:
-      resultOOP = _gst_find_variable_binding (constExpr->v_const.val.aVal,
-					      false);
-      if (IS_NIL (resultOOP))
+      subexpr = _gst_find_variable_binding (constExpr->v_const.val.aVal,
+					    false);
+      if (!subexpr)
 	{
 	  _gst_errorf_at (constExpr->location.first_line,
 			  "invalid variable binding");
           EXIT_COMPILATION ();
 	}
 
-      return (resultOOP);
+      assert (subexpr->v_const.constType != CONST_BINDING);
+      return _gst_make_constant_oop (subexpr);
+
+    case CONST_OOP:
+      return (constExpr->v_const.val.oopVal);
 
     case CONST_ARRAY:
-      for (len = 0, arrayElt = constExpr->v_const.val.aVal; arrayElt;
-	   len++, arrayElt = arrayElt->v_list.next);
+      for (len = 0, subexpr = constExpr->v_const.val.aVal; subexpr;
+	   len++, subexpr = subexpr->v_list.next);
 
       incPtr = INC_SAVE_POINTER ();
       result = instantiate_with (_gst_array_class, len, &resultOOP);
       INC_ADD_OOP (resultOOP);
 
-      for (i = 0, arrayElt = constExpr->v_const.val.aVal; i < len;
-	   i++, arrayElt = arrayElt->v_list.next)
+      for (i = 0, subexpr = constExpr->v_const.val.aVal; i < len;
+	   i++, subexpr = subexpr->v_list.next)
 	{
-	  elementOOP = make_constant_oop (arrayElt->v_list.value);
+	  elementOOP = _gst_make_constant_oop (subexpr->v_list.value);
 	  result = OOP_TO_OBJ (resultOOP);
 	  result->data[i] = elementOOP;
 	}
@@ -2327,7 +2354,7 @@ _gst_make_attribute (tree_node attribute_keywords)
 	}
 
       argsArray = OOP_TO_OBJ (argsArrayOOP);
-      argsArray->data[i] = make_constant_oop (value);
+      argsArray->data[i] = _gst_make_constant_oop (value);
     }
 
   messageOOP = _gst_message_new_args (selectorOOP, argsArrayOOP);

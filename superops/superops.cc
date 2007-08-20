@@ -487,6 +487,10 @@ main (int argc, char **argv)
     "         (b >= 40 and: [ b <= 43 ])"
     "            ifTrue: [ breaks add: (self nextBytecodeIndex: i) ]."
 
+    ///////// "Split after push/store literal variable"
+    "         (b = 34 or: [ b = 38 ])"
+    "            ifTrue: [ breaks add: (self nextBytecodeIndex: i) ]."
+
     ///////// "Split after sends"
     "         (b < 32 and: [ (b + 12 bitAnd: 250) ~= 32 ])"
     "            ifTrue: [ breaks add: (self nextBytecodeIndex: i) ]"
@@ -511,7 +515,7 @@ main (int argc, char **argv)
     "     ]! !"
 
     " CompiledMethod allInstancesDo: [ :each |"
-    "     each getDescriptor notNil"
+    "     each descriptor notNil"
     "         ifTrue: [ each printAllOptimizableSequences ] ]!"
 
     " CompiledBlock allInstancesDo: [ :each |"

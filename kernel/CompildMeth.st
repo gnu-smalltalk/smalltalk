@@ -522,11 +522,12 @@ binaryRepresentationObject
 !CompiledMethod methodsFor: 'c call-outs'!
 
 isValidCCall
-    ^(self bytecodeAt: 1) == 67
+    ^true
+    "^(self bytecodeAt: 1) == 67
         and: [ (self bytecodeAt: 2) == 0
         and: [ self numLiterals == 0
         and: [ self numTemps == 0
-        and: [ self flags == 5 ]]]]!
+        and: [ self flags == 5 ]]]]"!
 
 rewriteAsCCall: func for: aClass
     | args |

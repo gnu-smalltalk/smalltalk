@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006,2007
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -170,6 +170,11 @@ static const char standard_files[] = {
   "False.st\0"
   "True.st\0"
   "Magnitude.st\0"
+  "LookupKey.st\0"
+  "DeferBinding.st\0"
+  "Association.st\0"
+  "HomedAssoc.st\0"
+  "VarBinding.st\0"
   "Integer.st\0"
   "Date.st\0"
   "Time.st\0"
@@ -183,10 +188,6 @@ static const char standard_files[] = {
   "SmallInt.st\0"
   "Character.st\0"
   "UniChar.st\0"
-  "LookupKey.st\0"
-  "Association.st\0"
-  "HomedAssoc.st\0"
-  "VarBinding.st\0"
   "Link.st\0"
   "Process.st\0"
   "CallinProcess.st\0"

@@ -341,6 +341,19 @@ _gst_make_string_constant (YYLTYPE *location,
 }
 
 tree_node
+_gst_make_deferred_binding_constant (YYLTYPE *location,
+				     OOP keyOOP)
+{
+  tree_node result;
+
+  result = make_tree_node (location, TREE_CONST_EXPR);
+  result->v_const.constType = CONST_DEFERRED_BINDING;
+  result->v_const.val.oopVal = keyOOP;
+
+  return (result);
+}
+
+tree_node
 _gst_make_oop_constant (YYLTYPE *location,
 		        OOP oval)
 {

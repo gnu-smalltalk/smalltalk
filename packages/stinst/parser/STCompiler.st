@@ -893,7 +893,9 @@ compileAssignmentFor: aNode
 	^self compileByte: StoreReceiverVariable arg: definition.
     ].
     
-    ^self compileByte: StoreLitVariable arg: definition.
+    self compileByte: StoreLitVariable arg: definition.
+    self compileByte: PopStackTop.
+    self compileByte: PushLitVariable arg: definition
 !
 
 acceptVariableNode: aNode

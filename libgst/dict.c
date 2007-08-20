@@ -102,6 +102,7 @@ OOP _gst_compiled_method_class = NULL;
 OOP _gst_context_part_class = NULL;
 OOP _gst_continuation_class = NULL;
 OOP _gst_date_class = NULL;
+OOP _gst_deferred_variable_binding_class = NULL;
 OOP _gst_delay_class = NULL;
 OOP _gst_dictionary_class = NULL;
 OOP _gst_directed_message_class = NULL;
@@ -392,6 +393,11 @@ static const class_definition class_info[] = {
   {&_gst_lookup_key_class, &_gst_magnitude_class,
    ISP_FIXED, true, 1,
    "LookupKey", "key", NULL, NULL },
+
+  {&_gst_deferred_variable_binding_class, &_gst_lookup_key_class,
+   ISP_FIXED, true, 3,
+   "DeferredVariableBinding", "class defaultDictionary association",
+   NULL, NULL },
 
   {&_gst_association_class, &_gst_lookup_key_class,
    ISP_FIXED, true, 1,

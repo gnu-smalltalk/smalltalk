@@ -69,7 +69,7 @@
 /* Define this to disable superoperators in the peephole bytecode
    optimizer.  Some simple optimizations will still be done, making
    the output suitable for searching superoperator candidates.  */
-/* #define NO_SUPEROPERATORS */
+#define NO_SUPEROPERATORS
 
 /* Define this to disable bytecode verification.  */
 /* #define NO_VERIFIER */
@@ -676,9 +676,10 @@ optimize_basic_block (gst_uchar * from,
 	  break;
 
         case PUSH_TEMPORARY_VARIABLE:
-        case PUSH_LIT_VARIABLE:
         case PUSH_RECEIVER_VARIABLE:
-	  /* Leave only the store in store/pop/push sequences.  */
+	  /* Leave only the store in store/pop/push sequences.  Don't do this
+	     for STORE_LIT_VARIABLE, as it fails if #value: is sent and,
+	     for example, self is returned.  */
 	  if (opt >= from + 4
 	      && (opt == from + 4 || opt[-6] != EXT_BYTE)
 	      && opt[-4] == bp[0] + (STORE_TEMPORARY_VARIABLE - PUSH_TEMPORARY_VARIABLE)
@@ -1130,8 +1131,8 @@ typedef struct partially_constructed_array {
 #define CHECK_LIT_VARIABLE(store, n) \
   CHECK_LITERAL (n); \
   if (IS_INT (literals[(n)]) || \
-      !is_a_kind_of (OOP_CLASS (literals[(n)]), _gst_association_class)) \
-    return ("Association expected"); \
+      !is_a_kind_of (OOP_CLASS (literals[(n)]), _gst_lookup_key_class)) \
+    return ("LookupKey expected"); \
   else if (store \
 	   && untrusted \
 	   && !IS_OOP_UNTRUSTED (literals[(n)])) \

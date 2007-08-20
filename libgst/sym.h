@@ -219,11 +219,16 @@ extern OOP _gst_make_class_variable_dictionary (const char * variableNames,
 extern OOP _gst_make_pool_array (const char * poolNames)
   ATTRIBUTE_HIDDEN;
 
-/* This resolves to an Association the variable binding constant expressed
-   by the LIST parse tree node.  Unless DECLARE_TEMPORARY is false,
-   temporary variables may be automatically declared.  */
-extern OOP _gst_find_variable_binding (tree_node list,
-				       mst_Boolean declare_temporary)
+/* This resolves the variable binding constant expressed by the LIST parse
+   tree node.  Unless DECLARE_TEMPORARY is false, temporary variables
+   may be automatically declared.  */
+extern tree_node _gst_find_variable_binding (tree_node list,
+					     mst_Boolean declare_temporary)
+  ATTRIBUTE_HIDDEN;
+
+/* This returns the dictionary in which to define an undeclared variable
+   binding.  */
+extern OOP _gst_get_undeclared_dictionary ()
   ATTRIBUTE_PURE
   ATTRIBUTE_HIDDEN;
 

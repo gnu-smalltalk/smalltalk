@@ -1,3 +1,24 @@
+2007-08-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Make make_constant_oop global, adjust for new
+	return value of _gst_find_variable_binding, create
+	DeferredVariableBinding objects.  Compile store-into-
+	variable to store+pop+push.  Adjust equal_constant to
+	support CONST_DEFERRED_BINDING and adjusting for the new return value
+	of _gst_find_variable_binding.
+	* libgst/comp.h: Declare _gst_find_variable_binding.
+	* libgst/dict.c: Add DeferredVariableBinding.
+	* libgst/dict.h: Add DeferredVariableBinding and
+	struct gst_deferred_variable_binding.
+	* libgst/files.c: Add DeferBinding.st, load LookupKey hierarchy early.
+	* libgst/opt.c: Temporarily disable superoperators.  Pass LookupKeys
+	in the verifier.
+	* libgst/sym.c: Return a tree_node from _gst_find_variable_binding,
+	adjust _gst_find_variable, add _gst_get_undeclared_dictionary.
+	* libgst/sym.h: Adjust declarations.
+	* libgst/tree.c: Add _gst_make_deferred_binding_constant.
+	* libgst/tree.h: Add _gst_make_deferred_binding_constant.
+
 2007-08-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/vm.def: Support non-Associations storing global variables.
