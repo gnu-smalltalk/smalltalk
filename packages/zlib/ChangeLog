@@ -1,0 +1,10 @@
+2007-08-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* zlib.st: Split into...
+	* ZLibStream.st: ... this new file containing the abstract class...
+	* ZLibReadStream.st: ... and this one.  Don't use PipeStream.  Pass
+	flush parameter and input buffer size to zlib.
+	* ZLibWriteStream.st: New file.
+	* PipeStream.st: Removed.
+	* zlib.c: Accept flush parameter directly, and get input buffer size
+	from Smalltalk.  Reorder the fields of ZlibStream.

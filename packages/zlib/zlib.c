@@ -65,13 +65,10 @@ static VMProxy *vmProxy;
 
 typedef struct zlib_stream {
   OBJ_HEADER;
-  OOP ptr;
-  OOP endPtr;
   OOP inBytes;
   OOP outBytes;
-  OOP delta;
-  OOP source;
   OOP zlibObject;
+  OOP stream;
 } *zlib_stream;
 
 
@@ -131,7 +128,7 @@ gst_inflateEnd (OOP oop)
    zlib buffers so that they point into the Smalltalk buffers.  */
 
 static int
-zlib_wrapper (OOP oop, int finish, int (*func) (z_stream *, int))
+zlib_wrapper (OOP oop, int flush, int inSize, int (*func) (z_stream *, int))
 {
   zlib_stream zs = (zlib_stream) OOP_TO_OBJ (oop);
   z_stream *zlib_obj = vmProxy->OOPToCObject (zs->zlibObject);
@@ -139,7 +136,6 @@ zlib_wrapper (OOP oop, int finish, int (*func) (z_stream *, int))
   OOP outBytesOOP = zs->outBytes;
   char *inBytes = &STRING_OOP_AT (OOP_TO_OBJ (inBytesOOP), 1);
   char *outBytes = &STRING_OOP_AT (OOP_TO_OBJ (outBytesOOP), 1);
-  size_t inSize = vmProxy->OOPSize (inBytesOOP);
   size_t outSize = vmProxy->OOPSize (outBytesOOP);
   int ret;
 
@@ -159,7 +155,7 @@ zlib_wrapper (OOP oop, int finish, int (*func) (z_stream *, int))
   /* Call the function we are wrapping.  */
   zlib_obj->next_out = outBytes;
   zlib_obj->avail_out = outSize;
-  ret = func (zlib_obj, finish ? Z_FINISH : Z_NO_FLUSH);
+  ret = func (zlib_obj, flush);
   if (ret == Z_BUF_ERROR)
     {
       zlib_obj->msg = NULL;
@@ -180,7 +176,7 @@ zlib_wrapper (OOP oop, int finish, int (*func) (z_stream *, int))
      output is finished.  */
   if (ret < 0)
     return -1;
-  else if (finish && inSize == 0 && outSize == zlib_obj->avail_out)
+  else if (flush == Z_FINISH && inSize == 0 && outSize == zlib_obj->avail_out)
     return -1;
   else
     return outSize - zlib_obj->avail_out;
@@ -188,17 +184,17 @@ zlib_wrapper (OOP oop, int finish, int (*func) (z_stream *, int))
 
 
 int
-gst_deflate (OOP oop, int finish)
+gst_deflate (OOP oop, int flush, int inSize)
 {
-  return zlib_wrapper (oop, finish, deflate);
+  return zlib_wrapper (oop, flush, inSize, deflate);
 }
 
 
 
 int
-gst_inflate (OOP oop, int finish)
+gst_inflate (OOP oop, int flush, int inSize)
 {
-  return zlib_wrapper (oop, finish, inflate);
+  return zlib_wrapper (oop, flush, inSize, inflate);
 }
 
 

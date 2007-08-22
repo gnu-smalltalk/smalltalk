@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   PipeStream class (part of the ZLib bindings)
+|   PipeStream class
 |
 |
  ======================================================================"
@@ -38,26 +38,26 @@ PositionableStream subclass: #PipeStream
 	category: 'Examples-Processes'!
 
 PipeStream comment:
-'Used internally by the zlib bindings, the PipeStream provides two
-pieces of functionality.  The first is to provide a dual-ended FIFO
-stream, which can be read and written by independent processes.  The
-second is to provide a WriteStream-to-ReadStream adaptor, where the
-data is written to the PipeStream (the writing side), fueled to
-an object expecting a ReadStream (possibly as a decorator), and taken
-from there into the destination stream.  The effect is to turn a
-ReadStream decorator into a WriteStream decorator.'!
+'The PipeStream provides two pieces of functionality.  The first
+is to provide a dual-ended FIFO stream, which can be read and
+written by independent processes.  The second is to provide a
+WriteStream-to-ReadStream adaptor, where the data is written to
+the PipeStream (the writing side), fueled to an object expecting a
+ReadStream (possibly as a decorator), and taken from there into the
+destination stream.  The effect is to turn a ReadStream decorator into
+a WriteStream decorator.'!
 
 !PipeStream class methodsFor: 'accessing'!
 
 bufferSize
-    "Answer the size of the output buffers that are passed to zlib.  Each
-     zlib stream uses a buffer of this size."
-    BufferSize isNil ifTrue: [ BufferSize := 512 ].
+    "Answer the size of the internal buffer.  Each PipeStream uses a
+     buffer of this size."
+    BufferSize isNil ifTrue: [ BufferSize := 1024 ].
     ^BufferSize!
 
 bufferSize: anInteger
-    "Set the size of the output buffers that are passed to zlib.  Each
-     zlib stream uses a buffer of this size."
+    "Set the size of the internal buffer. Each PipeStream uses a
+     uses a buffer of this size."
     BufferSize := anInteger!
 
 !PipeStream class methodsFor: 'instance creation'!

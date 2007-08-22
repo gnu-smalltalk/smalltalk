@@ -30,27 +30,18 @@
 |
  ======================================================================"
 
-Error subclass: #ZlibError
-	instanceVariableNames: 'stream'
+ZlibStream subclass: #ZlibReadStream
+	instanceVariableNames: 'delta ptr endPtr'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Examples-Useful'!
 
-ZlibError comment: 'This exception is raised whenever there is an error
-in a compressed stream.'!
-
-Stream subclass: #ZlibStream
-	instanceVariableNames: 'ptr endPtr inBytes outBytes delta source zlibObject'
-	classVariableNames: 'BufferSize'
-	poolDictionaries: ''
-	category: 'Examples-Useful'!
-
-ZlibStream comment: 'This abstract class implements the basic buffering that is
+ZlibReadStream comment: 'This abstract class implements the basic buffering that is
 used for communication with zlib.'!
 
-ZlibStream subclass: #RawDeflateStream
+ZlibReadStream subclass: #RawDeflateStream
 	instanceVariableNames: ''
-	classVariableNames: 'DefaultCompressionLevel'
+	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Examples-Useful'!
 
@@ -75,7 +66,7 @@ RawDeflateStream subclass: #GZipDeflateStream
 GZipDeflateStream comment: 'Instances of this class produce GZip (RFC1952)
 deflated data.'!
 
-ZlibStream subclass: #RawInflateStream
+ZlibReadStream subclass: #RawInflateStream
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
@@ -103,43 +94,7 @@ GZipInflateStream comment: 'Instances of this class reinflate GZip (RFC1952)
 deflated data.'!
 
 
-!ZlibError methodsFor: 'accessing'!
-
-stream
-    "Answer the ZlibStream that caused the error."
-    ^stream!
-
-stream: anObject
-    "Set the ZlibStream that caused the error."
-    stream := anObject! !
-
-
-!ZlibStream class methodsFor: 'accessing'!
-
-bufferSize
-    "Answer the size of the output buffers that are passed to zlib.  Each
-     zlib stream uses a buffer of this size."
-    BufferSize isNil ifTrue: [ BufferSize := 16384 ].
-    ^BufferSize!
-
-bufferSize: anInteger
-    "Set the size of the output buffers that are passed to zlib.  Each
-     zlib stream uses a buffer of this size."
-    BufferSize := anInteger!
-
-
-!ZlibStream class methodsFor: 'instance creation'!
-
-new
-    self shouldNotImplement!
-
-on: aStream
-    "Answer an instance of the receiver that decorates aStream."
-    ^self basicNew initialize: aStream!
-
-
-
-!ZlibStream methodsFor: 'streaming'!
+!ZlibReadStream methodsFor: 'streaming'!
 
 atEnd
     "Answer whether the stream has got to an end"
@@ -147,10 +102,6 @@ atEnd
     ^zlibObject isNil or: [
         self fillBuffer.
         zlibObject isNil ]!
-
-isExternalStream
-    "Answer whether the receiver streams on a file or socket."
-    ^source isExternalStream!
 
 next
     "Return the next object (character or byte) in the receiver."
@@ -187,20 +138,11 @@ peek
 position
     "Answer the current value of the stream pointer.  Note that only inflating
      streams support random access to the stream data."
-    ^delta + ptr!
-
-name
-    "Return the name of the underlying stream."
-    ^source name
-!
-
-species
-    "Return the type of the collections returned by #upTo: etc."
-    ^source species! !
+    ^delta + ptr! !
 
 
 
-!ZlibStream methodsFor: 'private'!
+!ZlibReadStream methodsFor: 'private'!
 
 resetBuffer
     delta := 0.
@@ -208,89 +150,54 @@ resetBuffer
     self fillBuffer!
 
 initialize: aStream
-    source := aStream.
+    super initialize: aStream.
     outBytes := self species new: self class bufferSize.
-    self addToBeFinalized.
     self resetBuffer!
 
 fillBuffer
     "Fill the output buffer, supplying data to zlib until it can actually
      produce something."
+    | flush |
     delta := delta + endPtr.
     ptr := 0.
     [
         inBytes isNil ifTrue: [
-	    inBytes := source atEnd
+	    inBytes := self stream atEnd
 	        ifTrue: [ #[] ]
-	        ifFalse: [ source nextHunk ] ].
+	        ifFalse: [ self stream nextHunk ] ].
 
-        endPtr := self processInput: source atEnd.
+	flush := self stream atEnd ifTrue: [ 4 ] ifFalse: [ 0 ].
+        endPtr := self processInput: flush size: inBytes size.
 	endPtr = 0 ] whileTrue.
 
     "End of data, or zlib error encountered."
-    endPtr = -1 ifTrue: [ self checkError ]!
-
-finalize
-    self destroyZlibObject! !
-
-!ZlibStream methodsFor: 'private zlib interface'!
-
-checkError
-    | error |
-    error := self getError.
-    self finalize; removeToBeFinalized.
-    error isNil ifFalse: [
-	ZlibError new messageText: error; stream: self; signal ]!
-
-getError
-    <cCall: 'gst_zlibError' returning: #string args: #(#self)>!
-
-destroyZlibObject
-    self subclassResponsibility!
-
-processInput: atEnd
-    self subclassResponsibility! !
+    endPtr = -1 ifTrue: [ self checkError ]! !
 
 
 
-!RawDeflateStream class methodsFor: 'accessing'!
-
-defaultCompressionLevel
-    "Return the default compression level used by deflating streams."
-    DefaultCompressionLevel isNil ifTrue: [ DefaultCompressionLevel := 6 ].
-    ^DefaultCompressionLevel!
-
-defaultCompressionLevel: anInteger
-    "Set the default compression level used by deflating streams.  It
-     should be a number between 1 and 9."
-    DefaultCompressionLevel := anInteger!
-
-
 !RawDeflateStream class methodsFor: 'instance creation'!
 
 compressingTo: aStream
     "Answer a stream that receives data via #nextPut: and compresses it onto
      aStream."
-    ^PipeStream connectedTo: aStream via: [ :r | self on: r ]!
+    ^RawDeflateWriteStream on: aStream!
 
 compressingTo: aStream level: level
     "Answer a stream that receives data via #nextPut: and compresses it onto
      aStream with the given compression level."
-    ^PipeStream connectedTo: aStream via: [ :r | self on: r level: level ]!
+    ^RawDeflateWriteStream on: aStream level: level!
 
 on: aStream
     "Answer a stream that compresses the data in aStream with the default
      compression level."
-    ^self basicNew
-	initializeZlibObject: self defaultCompressionLevel;
-	initialize: aStream!
+    ^(super on: aStream)
+	initializeZlibObject: self defaultCompressionLevel!
 
 on: aStream level: compressionLevel
     "Answer a stream that compresses the data in aStream with the given
      compression level."
-    ^self basicNew
-	initializeZlibObject: compressionLevel;
-	initialize: aStream!
+    ^(super on: aStream)
+	initializeZlibObject: compressionLevel!
 
 
 !RawDeflateStream methodsFor: 'private zlib interface'!
@@ -304,16 +211,40 @@ initializeZlibObject: level
 destroyZlibObject
     <cCall: 'gst_deflateEnd' returning: #void args: #(#self)>!
 
-processInput: atEnd
-    <cCall: 'gst_deflate' returning: #int args: #(#self #boolean)>! !
+processInput: atEnd size: bytes
+    <cCall: 'gst_deflate' returning: #int args: #(#self #int #int)>! !
 
 
 
+!DeflateStream class methodsFor: 'instance creation'!
+
+compressingTo: aStream
+    "Answer a stream that receives data via #nextPut: and compresses it onto
+     aStream."
+    ^DeflateWriteStream on: aStream!
+
+compressingTo: aStream level: level
+    "Answer a stream that receives data via #nextPut: and compresses it onto
+     aStream with the given compression level."
+    ^DeflateWriteStream on: aStream level: level!
+
 !DeflateStream methodsFor: 'private zlib interface'!
 
 initializeZlibObject: level
     self initializeZlibObject: level windowSize: 15! !
 
+
+!GZipDeflateStream class methodsFor: 'instance creation'!
+
+compressingTo: aStream
+    "Answer a stream that receives data via #nextPut: and compresses it onto
+     aStream."
+    ^GZipDeflateWriteStream on: aStream!
+
+compressingTo: aStream level: level
+    "Answer a stream that receives data via #nextPut: and compresses it onto
+     aStream with the given compression level."
+    ^GZipDeflateWriteStream on: aStream level: level!
 
 !GZipDeflateStream methodsFor: 'private zlib interface'!
 
@@ -334,7 +265,7 @@ position: anInteger
 
 reset
     "Reset the stream to the beginning of the compressed data."
-    source reset.
+    self stream reset.
     self destroyZlibObject; initializeZlibObject.
     self resetBuffer!
 
@@ -374,8 +305,8 @@ initializeZlibObject
 destroyZlibObject
     <cCall: 'gst_inflateEnd' returning: #void args: #(#self)>!
 
-processInput: atEnd
-    <cCall: 'gst_inflate' returning: #int args: #(#self #boolean)>! !
+processInput: atEnd size: bytes
+    <cCall: 'gst_inflate' returning: #int args: #(#self #int #int)>! !
 
 
 

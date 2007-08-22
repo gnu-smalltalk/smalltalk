@@ -74,6 +74,16 @@ testError
     self should: [ (InflateStream on: #[12 34 56] readStream) contents ]
 	 raise: ZlibError!
 
+testSyncFlush
+    "Test flushing the WriteStream version of DeflateStream."
+    | dest stream contents |
+    stream := String new writeStream.
+    dest := DeflateStream compressingTo: stream.
+    dest nextPutAll: self fooVector; syncFlush.
+    contents := stream contents.
+    self assert: (contents asByteArray last: 4) = #[0 0 255 255].
+    self assert: (InflateStream on: contents readStream) contents = self fooVector!
+
 testWrite
     "Test the WriteStream version of DeflateStream."
     | dest |

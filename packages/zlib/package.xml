@@ -1,7 +1,8 @@
 <package>
   <name>ZLib</name>
-  <filein>PipeStream.st</filein>
-  <filein>zlib.st</filein>
+  <filein>ZLibStream.st</filein>
+  <filein>ZLibReadStream.st</filein>
+  <filein>ZLibWriteStream.st</filein>
   <module>zlib</module>
 
   <test>
@@ -9,7 +10,8 @@
    <filein>zlibtests.st</filein>
   </test>
 
-  <file>PipeStream.st</file>
-  <file>zlib.st</file>
+  <file>ZLibStream.st</file>
+  <file>ZLibReadStream.st</file>
+  <file>ZLibWriteStream.st</file>
   <file>zlibtests.st</file>
 </package>

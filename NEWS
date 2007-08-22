@@ -161,6 +161,10 @@ o   When declaring a C function, the #returning: argument now supports
     Conversion from Array to CType is generally available using the
     CType class>>#from: method.
 
+o   The zlib bindings' WriteStream decorator supports partial flushing.
+    Class PipeStream is distributed independently as it is not used anymore
+    by the zlib bindings.
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 2.3.5 TO 2.3.6
