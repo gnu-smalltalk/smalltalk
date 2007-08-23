@@ -103,10 +103,10 @@ next: anInteger put: anObject
     self nextPutAll: (String new: anInteger withAll: anObject)
 !
 
-nextPutAll: aString
+next: n putAll: aString startingAt: pos
     "Write aString to the Transcript"
     semaphore critical: [
-	self primNextPutAll: aString.
+	self primNextPutAll: (aString copyFrom: pos to: pos + n - 1).
 	Processor idle
     ]
 !

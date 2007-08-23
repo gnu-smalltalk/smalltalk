@@ -351,45 +351,6 @@ copyFrom: from to: to
 
 !FileStream methodsFor: 'overriding inherited methods'!
 
-nextPutAllFlush: aCollection
-    "Put all the characters in aCollection in the file, then flush the
-     file buffers"
-    | n coll written |
-    coll := aCollection asString.
-    n := coll size.
-    written := collection size - ptr + 1 min: n.
-    self next: written bufferAll: coll startingAt: 1; flush.
-    written = n ifFalse: [ self write: coll from: written + 1 to: n ].
-!
-
-nextPutAll: aCollection
-    "Put all the characters in aCollection in the file"
-    | n coll written |
-    "Just do 'coll := aCollection asString', but avoid expensive operations
-     in the common case where aCollection is already a String."
-    coll := aCollection isSequenceable
-	ifTrue: [ aCollection ]
-	ifFalse: [
-	    [ aCollection asString ]
-	        on: MessageNotUnderstood
-	        do: [ :ex |
-		    "If we are in a stream, try to facilitate buffering."
-		    [ aCollection atEnd ] whileFalse: [
-		        coll := aCollection nextHunk.
-		        self next: coll size putAll: coll startingAt: 1 ].
-		    ^self ] ].
-
-    n := coll size.
-    written := collection size - ptr + 1 min: n.
-    self next: written bufferAll: coll startingAt: 1.
-    written = n ifTrue: [ ^self ].
-
-    self flush.
-    n - written < collection size
-        ifTrue: [ self next: n - written bufferAll: coll startingAt: written + 1 ]
-	ifFalse: [ self write: coll from: written + 1 to: n ].
-!
-
 next: n putAll: aCollection startingAt: pos
     | written |
     written := collection size - ptr + 1 min: n.

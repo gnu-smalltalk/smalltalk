@@ -147,28 +147,6 @@ nextPut: aByte
     inBytes at: ptr put: aByte.
     ptr := ptr + 1!
 
-nextPutAll: aCollection
-    "Put all the characters or bytes in aCollection in the deflation buffer."
-
-    | n coll written |
-    "Just do 'coll := aCollection asString', but avoid expensive operations
-     in the common case where aCollection is already a String."
-    ptr = inBytes size ifTrue: [ self flushBuffer ].
-
-    coll := aCollection isSequenceable
-        ifTrue: [ aCollection ]
-        ifFalse: [
-            [ aCollection asString ]
-                on: MessageNotUnderstood
-                do: [ :ex |
-                    "If we are in a stream, try to facilitate buffering."
-                    [ aCollection atEnd ] whileFalse: [
-                        coll := aCollection nextHunk.
-                        self next: coll size putAll: coll startingAt: 1 ].
-                    ^self ] ].
-
-    self next: coll size putAll: coll startingAt: 1!
-
 next: n putAll: aCollection startingAt: pos
     "Put n characters or bytes of aCollection, starting at the pos-th,
      in the deflation buffer."

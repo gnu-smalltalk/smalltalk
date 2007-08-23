@@ -201,11 +201,28 @@ next: n putAll: aCollection startingAt: start
     ^aCollection
 !
 
+nextPutAllFlush: aCollection
+    "Put all the elements of aCollection in the stream, then flush the
+     buffers if supported by the stream."
+    self nextPutAll: aCollection; flush
+!
+
 nextPutAll: aCollection
     "Write all the objects in aCollection to the receiver"
-    aCollection isSequenceable
-	ifTrue: [ self next: aCollection size putAll: aCollection startingAt: 1 ]
-	ifFalse: [ aCollection do: [ :element | self nextPut: element ] ].
+    | coll |
+    aCollection isSequenceable ifTrue: [
+	^self next: aCollection size putAll: aCollection startingAt: 1 ].
+
+    "Try to detect a Stream."
+    [ aCollection atEnd ] 
+        on: MessageNotUnderstood
+        do: [ :ex | ^self nextPutAll: (self species withAll: aCollection) ].
+
+    "If we are in a stream, try to facilitate buffering."
+    [ aCollection atEnd ] whileFalse: [
+        coll := aCollection nextHunk.
+        self next: coll size putAll: coll startingAt: 1 ].
+
     ^aCollection
 !
 

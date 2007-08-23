@@ -161,32 +161,6 @@ nextPutByte: anInteger
     ^super nextPut: (int bitAnd: 255)
 !
 
-nextPutAll: aCollection
-    "Write all the objects in aCollection to the receiver"
-    | collEnd relative lastCopied |
-    aCollection isSequenceable
-	ifFalse: [ ^super nextPutAll: aCollection ].
-
-    aCollection isEmpty ifTrue: [ ^self ].
-
-    collEnd := ptr + aCollection size - 1.
-    relative := ptr - 1.
-
-    [ 
-	lastCopied := collEnd min: collection size.
-	collection
-	    replaceFrom: ptr
-	    to: lastCopied
-	    with: aCollection
-	    startingAt: ptr - relative.
-	
-	(ptr := lastCopied + 1) > collEnd
-    ]   whileFalse: [
-	ptr > endPtr ifTrue: [ endPtr := ptr ].
-	self growCollection
-    ].
-!
-
 nextPutByteArray: aByteArray
     "Store aByteArray on the byte array"
     ^self nextPutAll: aByteArray

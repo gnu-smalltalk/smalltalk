@@ -99,6 +99,27 @@ nextPut: anObject
     ^anObject
 !
 
+next: n putAll: aCollection startingAt: pos
+    "Put n characters or bytes of aCollection, starting at the pos-th,
+     in the collection buffer."
+
+    | end written amount |
+    ptr = collection size ifTrue: [ self growCollection ].
+    written := 0.
+    [
+        end := collection size min: ptr + (n - written - 1).
+	end >= ptr ifTrue: [
+	    collection
+		replaceFrom: ptr
+		to: end
+		with: aCollection
+		startingAt: pos + written.
+            written := written + (end - ptr + 1).
+	    ptr := end + 1 ].
+        written < n
+    ] whileTrue: [ self growCollection ].
+    ptr > endPtr ifTrue: [ endPtr := ptr - 1 ]!
+
 contents
     "Returns a collection of the same type that the stream accesses, up to 
     and including the final element."

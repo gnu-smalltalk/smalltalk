@@ -1,3 +1,12 @@
+2007-08-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ByteStream.st: Remove #nextPutAll:.
+	* kernel/FileDescr.st: Remove #nextPutAll: and #nextPutAllFlush:.
+	* kernel/FileStream.st: Remove #nextPutAll: and #nextPutAllFlush:.
+	* kernel/Stream.st: Use #nextHunk in #nextPutAll:, add #nextPutAllFlush:.
+	* kernel/Transcript.st: Implement #next:putAll:startingAt:.
+	* kernel/WriteStream.st: Likewise.
+
 2007-08-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/PipeStream.st: New.
