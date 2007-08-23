@@ -1,3 +1,7 @@
+2007-08-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* zlib/ZLibReadStream.st: Delay blocking until first access.
+
 2007-08-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* zlib.st: Split into...

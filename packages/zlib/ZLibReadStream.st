@@ -145,9 +145,9 @@ position
 !ZlibReadStream methodsFor: 'private'!
 
 resetBuffer
+    ptr := 0.
     delta := 0.
-    endPtr := 0.
-    self fillBuffer!
+    endPtr := 0!
 
 initialize: aStream
     super initialize: aStream.
@@ -161,12 +161,10 @@ fillBuffer
     delta := delta + endPtr.
     ptr := 0.
     [
-        inBytes isNil ifTrue: [
-	    inBytes := self stream atEnd
-	        ifTrue: [ #[] ]
-	        ifFalse: [ self stream nextHunk ] ].
+        (inBytes isNil and: [ self stream atEnd not ])
+	    ifTrue: [ inBytes := self stream nextHunk ].
 
-	flush := self stream atEnd ifTrue: [ 4 ] ifFalse: [ 0 ].
+	flush := inBytes isNil ifTrue: [ 4 ] ifFalse: [ 0 ].
         endPtr := self processInput: flush size: inBytes size.
 	endPtr = 0 ] whileTrue.
 
