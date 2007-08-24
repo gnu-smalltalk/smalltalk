@@ -32,7 +32,7 @@
 
 
 LookupKey subclass: #DeferredVariableBinding
-	  instanceVariableNames: 'class defaultDictionary association'
+	  instanceVariableNames: 'class defaultDictionary association path'
 	  classVariableNames: ''
 	  poolDictionaries: ''
 	  category: 'Language-Data types'
@@ -47,6 +47,13 @@ in the scope of a given class are used.'!
 
 !DeferredVariableBinding class methodsFor: 'basic'!
 
+path: anArray class: aClass defaultDictionary: aDictionary
+    ^(self key: anArray first)
+        class: aClass;
+        defaultDictionary: aDictionary;
+        path: anArray allButFirst;
+	yourself!
+
 key: aSymbol class: aClass defaultDictionary: aDictionary
     ^(self key: aSymbol)
         class: aClass;
@@ -57,14 +64,21 @@ key: aSymbol class: aClass defaultDictionary: aDictionary
 
 value
     "Answer a new instance of the receiver with the given key and value"
-    association isNil ifTrue: [ association := self resolveBinding ].
+    association isNil
+	ifTrue: [ association := self resolvePathFrom: self resolveBinding ].
     ^association value
 !
 
 value: anObject
     "Answer a new instance of the receiver with the given key and value"
-    association isNil ifTrue: [ association := self resolveBinding ].
+    association isNil
+	ifTrue: [ association := self resolvePathFrom: self resolveBinding ].
     association value: anObject
+!
+
+path
+    "Answer the path followed after resolving the first key."
+    ^path
 ! !
 
 
@@ -76,6 +90,25 @@ class: aClass
 
 defaultDictionary: aDictionary
     defaultDictionary := aDictionary!
+
+path: anArray
+    path := anArray isEmpty ifTrue: [ nil ] ifFalse: [ anArray ]!
+
+resolvePathFrom: assoc
+    "Given the resolution of the first key, resolve the rest of the path.
+     The final element might be put in Undeclared, the ones in the middle
+     instead must exist."
+    | pathAssoc |
+    path isNil ifTrue: [ ^assoc ].
+    pathAssoc := assoc.
+    1 to: path size - 1 do: [ :each |
+	pathAssoc := pathAssoc value associationAt: (path at: each) ].
+    ^pathAssoc value
+	associationAt: path last
+	ifAbsent: [
+	    Undeclared
+		at: path last put: nil;
+		associationAt: path last ]!
 
 resolveBinding
     "Look for a pool dictionary of class that includes the key.  If not found,
@@ -109,10 +142,17 @@ resolveBinding
 
 !DeferredVariableBinding methodsFor: 'storing'!
 
+printOn: aStream
+    "Put on aStream some Smalltalk code compiling to the receiver"
+    aStream nextPut: ${.
+    aStream nextPutAll: self key.
+    self path isNil ifFalse: [
+	self path do: [ :each | aStream nextPut: $.; nextPutAll: each ] ].
+    aStream nextPut: $}
+!
+
 storeOn: aStream
     "Put on aStream some Smalltalk code compiling to the receiver"
     aStream nextPut: $#.
-    aStream nextPut: ${.
-    aStream nextPutAll: self key.
-    aStream nextPut: $}
+    self printOn: aStream
 ! !

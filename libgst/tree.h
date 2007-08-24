@@ -336,9 +336,9 @@ extern tree_node _gst_make_string_constant (YYLTYPE *location,
   ATTRIBUTE_HIDDEN;
 
 /* Create a const_node storing a deferred variable binding, whose key
-   is the symbol KEYOOP.  */
+   is the variable VARNODE.  */
 extern tree_node _gst_make_deferred_binding_constant (YYLTYPE *location,
-						      OOP keyOOP)
+						      tree_node varNode)
   ATTRIBUTE_HIDDEN;
 
 /* Create a const_node for an array whose elements are

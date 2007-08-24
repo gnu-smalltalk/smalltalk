@@ -395,8 +395,8 @@ static const class_definition class_info[] = {
    "LookupKey", "key", NULL, NULL },
 
   {&_gst_deferred_variable_binding_class, &_gst_lookup_key_class,
-   ISP_FIXED, true, 3,
-   "DeferredVariableBinding", "class defaultDictionary association",
+   ISP_FIXED, true, 4,
+   "DeferredVariableBinding", "class defaultDictionary association path",
    NULL, NULL },
 
   {&_gst_association_class, &_gst_lookup_key_class,

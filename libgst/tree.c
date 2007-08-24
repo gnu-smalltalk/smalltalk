@@ -342,13 +342,13 @@ _gst_make_string_constant (YYLTYPE *location,
 
 tree_node
 _gst_make_deferred_binding_constant (YYLTYPE *location,
-				     OOP keyOOP)
+				     tree_node varNode)
 {
   tree_node result;
 
   result = make_tree_node (location, TREE_CONST_EXPR);
   result->v_const.constType = CONST_DEFERRED_BINDING;
-  result->v_const.val.oopVal = keyOOP;
+  result->v_const.val.aVal = varNode;
 
   return (result);
 }
@@ -758,6 +758,16 @@ print_const_node (tree_node node,
     case CONST_ARRAY:
       printf ("array: ");
       _gst_print_tree (node->v_const.val.aVal, level + 7);
+      break;
+
+    case CONST_DEFERRED_BINDING:
+      printf ("deferred variable binding: ");
+      _gst_print_tree (node->v_const.val.aVal, level + 27);
+      break;
+
+    case CONST_BINDING:
+      printf ("variable binding: ");
+      _gst_print_tree (node->v_const.val.aVal, level + 18);
       break;
 
     default:

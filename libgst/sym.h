@@ -222,8 +222,7 @@ extern OOP _gst_make_pool_array (const char * poolNames)
 /* This resolves the variable binding constant expressed by the LIST parse
    tree node.  Unless DECLARE_TEMPORARY is false, temporary variables
    may be automatically declared.  */
-extern tree_node _gst_find_variable_binding (tree_node list,
-					     mst_Boolean declare_temporary)
+extern tree_node _gst_find_variable_binding (tree_node list)
   ATTRIBUTE_HIDDEN;
 
 /* This returns the dictionary in which to define an undeclared variable

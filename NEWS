@@ -116,6 +116,15 @@ o   Directory entries are passed to #allFilesMatching:do:'s block argument
     if they match aPattern.  As before, the function descends in all the
     directories, even those that do not match aPattern.
 
+o   Evaluated code now puts undeclared variables in a private namespace (so
+    that you do not have to declare temporaries) and defers the resolution
+    of undefined variable bindings until the time of their first access.
+
+    Unfortunately, this slows down evaluated code noticeably; you can get
+    back the performance by putting code in a method or an Eval (in the
+    latter case, you will have to declare temporaries explicitly, or the
+    code will be compiled to use the slower deferred variable binding).
+
 o   Image load uses copy-on-write memory mapped files.  This means that, as
     long as a loaded object is not touched, the operating system will map
     it to the same physical memory, for different copies of the GNU Smalltalk

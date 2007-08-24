@@ -171,6 +171,7 @@ typedef struct gst_deferred_variable_binding
   OOP class;
   OOP defaultDictionary;
   OOP association;
+  OOP path;
 }
  *gst_deferred_variable_binding;
 

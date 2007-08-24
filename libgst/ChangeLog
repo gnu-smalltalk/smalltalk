@@ -1,3 +1,19 @@
+2007-08-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Create deferred variable bindings with a path.
+	Adjust calls to _gst_find_variable_binding.
+	* libgst/dict.c: Add path variable to DeferredVariableBinding.
+	* libgst/dict.h: Add path variable to struct
+	gst_deferred_variable_binding.
+	* libgst/sym.h: Remove last parameter from
+	_gst_find_variable_binding.
+	* libgst/sym.c: Assume last parameter of _gst_find_variable_binding
+	to be true.  Adjust call to _gst_make_deferred_binding_constant.
+	* libgst/tree.h: Adjust last parameter of
+	_gst_make_deferred_binding_constant.
+	* libgst/tree.c: Turn last parameter of _gst_find_variable_binding
+	into a tree.  Support new constant types in _gst_print_tree.
+
 2007-08-20  Paolo Bonzini  <bonzini@gnu.org>
 
         * libgst/superop1.inl: Regenerate.

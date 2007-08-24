@@ -573,7 +573,7 @@ _gst_pop_temporaries_dictionary (OOP dictionaryOOP)
 
 
 tree_node
-_gst_find_variable_binding (tree_node list, mst_Boolean declare_temporary)
+_gst_find_variable_binding (tree_node list)
 {
   OOP symbol, root, assocOOP;
   tree_node elt;
@@ -606,10 +606,8 @@ _gst_find_variable_binding (tree_node list, mst_Boolean declare_temporary)
   /* For temporaries, make a deferred binding so that we can try using
      a global variable.  Unlike namespaces, the temporaries dictionary
      does not know anything about Undeclared.  */
-  else if (_gst_use_undeclared == UNDECLARED_TEMPORARIES
-	   && !list->v_list.next
-	   && declare_temporary)
-    return _gst_make_deferred_binding_constant (&list->location, symbol);
+  else if (_gst_use_undeclared == UNDECLARED_TEMPORARIES)
+    return _gst_make_deferred_binding_constant (&list->location, list);
 
   else
     return NULL;
@@ -686,7 +684,7 @@ _gst_find_variable (symbol_entry * se,
       return (true);
     }
 
-  resolved = _gst_find_variable_binding (list, true);
+  resolved = _gst_find_variable_binding (list);
   if (!resolved)
     return (false);
 

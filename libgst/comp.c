@@ -2065,13 +2065,26 @@ equal_constant (OOP oop,
 	{
 	  gst_deferred_variable_binding binding =
 	    (gst_deferred_variable_binding) OOP_TO_OBJ (oop);
-	  if (binding->key == constExpr->v_const.val.oopVal)
-	    return (true);
+	  gst_object path = OOP_TO_OBJ (binding->path);
+	  int i, size = NUM_OOPS (path);
+	  OOP *pKey;
+	  tree_node varNode = constExpr->v_const.val.aVal;
+
+	  /* Use <= because we test the key first.  */
+	  for (i = 0, pKey = &binding->key; i <= size; pKey = &path->data[i++])
+	    {
+	      if (!varNode
+		  || *pKey != _gst_intern_string (varNode->v_list.name))
+		return (false);
+
+	      varNode = varNode->v_list.next;
+	      pKey = &path->data[i];
+	    }
 	}
       break;
 
     case CONST_BINDING:
-      constExpr = _gst_find_variable_binding (constExpr->v_const.val.aVal,						      false);
+      constExpr = _gst_find_variable_binding (constExpr->v_const.val.aVal);
       if (!constExpr)
 	return (false);
 
@@ -2184,18 +2197,36 @@ _gst_make_constant_oop (tree_node constExpr)
     case CONST_DEFERRED_BINDING:
       {
 	gst_deferred_variable_binding dvb;
-        result = instantiate (_gst_deferred_variable_binding_class, &resultOOP);
-        dvb = (gst_deferred_variable_binding) result;
-	dvb->key = constExpr->v_const.val.oopVal;
+	tree_node varNode = constExpr->v_const.val.aVal;
+
+        incPtr = INC_SAVE_POINTER ();
+        dvb = (gst_deferred_variable_binding)
+	  instantiate (_gst_deferred_variable_binding_class, &resultOOP);
+        INC_ADD_OOP (resultOOP);
+
+	dvb->key = _gst_intern_string (varNode->v_list.name);
 	dvb->class = _gst_this_class;
 	dvb->defaultDictionary = _gst_get_undeclared_dictionary ();
 	dvb->association = _gst_nil_oop;
+
+	varNode = varNode->v_list.next;
+	if (varNode)
+	  {
+	    int i, size = list_length (varNode);
+	    OOP arrayOOP;
+	    gst_object array =
+	      instantiate_with (_gst_array_class, size, &arrayOOP);
+
+	    dvb->path = arrayOOP;
+	    for (i = 0; i < size; i++, varNode = varNode->v_list.next)
+	      array->data[i] = _gst_intern_string (varNode->v_list.name);
+	  }
+
         return (resultOOP);
       }
 
     case CONST_BINDING:
-      subexpr = _gst_find_variable_binding (constExpr->v_const.val.aVal,
-					    false);
+      subexpr = _gst_find_variable_binding (constExpr->v_const.val.aVal);
       if (!subexpr)
 	{
 	  _gst_errorf_at (constExpr->location.first_line,
