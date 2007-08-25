@@ -55,15 +55,16 @@ printOn: aStream
     self receiver class == self methodClass ifFalse: [
 	aStream nextPut: $(.
 	self methodClass printOn: aStream in: Namespace current.
-	aStream nextPut: $).
-    ].
+	aStream nextPut: $) ].
     aStream
 	nextPutAll: '>>';
-	print: self selector.
+	nextPutAll: self selector.
+
+    self selector = #doesNotUnderstand: ifTrue: [
+	aStream space; print: (self at: 1) selector ].
 
     self isDisabled ifTrue: [
-	aStream nextPutAll: '<disabled>'
-    ]
+	aStream nextPutAll: ' <disabled>' ]
 ! !
 
 

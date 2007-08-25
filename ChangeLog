@@ -1,5 +1,9 @@
 2007-08-24  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/MthContext.st: Print what was not understood.
+
+2007-08-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/DeferBinding.st: Add path variable and #resolvePathFrom: method.
 
 2007-08-23  Paolo Bonzini  <bonzini@gnu.org>
