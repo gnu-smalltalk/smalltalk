@@ -323,6 +323,10 @@ on: aStream
 
 !PeekableStream methodsFor: 'basic'!
 
+species
+    ^stream species
+!
+
 name
     ^stream name
 !
@@ -352,7 +356,7 @@ peek
      Returns nil when at end of stream."
     haveLookahead ifFalse: [
 	stream atEnd ifTrue: [ ^nil ].
-	haveLookahead := true. lookahead := self next ].
+	haveLookahead := true. lookahead := stream next ].
     ^lookahead
 !
 

@@ -82,6 +82,13 @@ on: aBlock
     ^self new
 	forkOn: aBlock;	
 	yourself
+!
+
+on: aCollection do: aBlock
+    "Return a generator; for each item of aCollection, evaluate aBlock
+     passing the generator and the item."
+    ^self on: [ :gen |
+	aCollection do: [ :each | aBlock value: gen value: each ] ]
 ! !
 
 !Generator methodsFor: 'stream protocol'!

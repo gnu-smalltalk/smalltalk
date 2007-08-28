@@ -1,3 +1,9 @@
+2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Generator.st: Add #on:do:.
+	* kernel/StreamOps.st: Always delegate species, fix
+	PeekableStream>>#peek.
+
 2007-08-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/MthContext.st: Print what was not understood.

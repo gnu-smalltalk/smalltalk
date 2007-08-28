@@ -177,7 +177,7 @@ highlightBlockClosure
 highlightSyntax
     | parser |
     (source = self contents) ifFalse:
-      [ 'FIXME: this is wrong, something is being dropped elsewhere with respect to content updates' printNl.
+      [ "FIXME: this is wrong, something is being dropped elsewhere with respect to content updates"
         source:=self contents
       ].
     parser := STInST.RBParser new

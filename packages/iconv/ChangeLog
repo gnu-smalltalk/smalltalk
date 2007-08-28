@@ -1,3 +1,7 @@
+2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Sets.st: Add some methods, skip BOM when converting to UnicodeString.
+
 2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Sets.st: Make EncodedStream a subclass of Stream.
