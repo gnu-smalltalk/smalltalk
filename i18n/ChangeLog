@@ -1,23 +1,27 @@
+2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* i18n/Sets.st: Add some methods, skip BOM when converting to UnicodeString.
+
 2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
-        * iconv/Sets.st: Optimize leaving Base64.  Reject partial characters
+        * i18n/Sets.st: Optimize leaving Base64.  Reject partial characters
         at end of input.
-        * iconv/iconvtests.st: Test for this.
+        * i18n/iconvtests.st: Test for this.
 
 2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
-        * iconv/iconvtests.st: More UTF-7 tests.
-        * iconv/Sets.st: UTF-7 fixes and some small optimization.
+        * i18n/iconvtests.st: More UTF-7 tests.
+        * i18n/Sets.st: UTF-7 fixes and some small optimization.
 
 2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* iconv/iconvtests.st: Add UTF-7 tests.
-	* iconv/Sets.st: Rewrite FromUTF7.
+	* i18n/iconvtests.st: Add UTF-7 tests.
+	* i18n/Sets.st: Rewrite FromUTF7.
 
 2007-07-01  Paolo Bonzini  <bonzini@gnu.org>
 
-	* iconv/iconvtests.st: New.
-	* iconv/Sets.st: Fix buglet.
+	* i18n/iconvtests.st: New.
+	* i18n/Sets.st: Fix buglet.
 
 2006-12-13  Paolo Bonzini  <bonzini@gnu.org>
 

@@ -569,6 +569,9 @@ unicodeOn: aStringOrStream encoding: fromEncoding
 
     "Compose iconv-produced bytes into UTF-32 character codes if needed."
     encoderFrom == Iconv ifTrue: [ pipe := self compose: pipe from: pivot ].
+
+    "Skip the BOM, if present."
+    pipe peekFor: $<16rFEFF>.
     ^pipe
 !
 
@@ -608,7 +611,7 @@ on: aStringOrStream from: fromEncoding to: toEncoding
 	ifTrue: [ from := aStringOrStream utf16Encoding ].
 
     (to = 'UTF-32' or: [ to = 'UCS-4' ]) ifTrue: [ to := 'UTF-32BE' ].
-    (to = 'UTF-16' or: [ to = 'UCS-2' ]) ifTrue: [ to := 'UTF-32BE' ].
+    (to = 'UTF-16' or: [ to = 'UCS-2' ]) ifTrue: [ to := 'UTF-16BE' ].
 
     pivot := 'UTF-32'.
     ((from startsWith: 'UCS-4') or: [ from startsWith: 'UTF-32' ])
@@ -1265,17 +1268,22 @@ defaultEncoding: aString
 
 !CharacterArray methodsFor: 'multibyte encodings'!
 
+asString: aString
+    "Return a String with the contents of the receiver, converted
+     into the aString locale character set."
+    ^(I18N.EncodedStream on: self from: self encoding to: aString) contents!
+
+asUnicodeString
+    "Return an UnicodeString with the contents of the receiver, interpreted
+     as the default locale character set."
+    ^(I18N.EncodedStream unicodeOn: self) contents!
+
 numberOfCharacters
     "Answer the number of Unicode characters in the receiver, interpreting it
      as the default locale character set."
     ^self asUnicodeString numberOfCharacters!
 
 !String methodsFor: 'multibyte encodings'!
-
-asUnicodeString
-    "Return an UnicodeString with the contents of the receiver, interpreted
-     as the default locale character set."
-    ^(I18N.EncodedStream unicodeOn: self) contents!
 
 numberOfCharacters: aString
     "Answer the number of Unicode characters in the receiver, interpreting it
@@ -1401,6 +1409,12 @@ printOn: aStream
 
 
 !ByteArray methodsFor: 'converting'!
+
+asString: aString
+    "Return a String with the contents of the receiver, interpreted
+     as the locale character set given by aString."
+    ^self asString asUnicodeString
+!
 
 asUnicodeString
     "Return an UnicodeString with the contents of the receiver, interpreted

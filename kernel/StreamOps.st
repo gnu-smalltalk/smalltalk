@@ -112,6 +112,10 @@ atEnd
     ^false
 !
 
+species
+    ^stream species
+!
+
 name
     self atEnd ifTrue: [ ^nil ].
     ^streams first name
@@ -329,7 +333,7 @@ peek
      Returns nil when at end of stream."
     haveLookahead ifFalse: [
 	stream atEnd ifTrue: [ ^nil ].
-	haveLookahead := true. lookahead := self next ].
+	haveLookahead := true. lookahead := stream next ].
     ^lookahead
 !
 
