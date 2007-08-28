@@ -502,6 +502,18 @@ allSelectors
     ^aSet
 !
 
+lookupSelector: aSelector
+    "Return the compiled method associated with selector, from the local
+    method dictionary or one of a superclass; return nil if not found."
+    | class method |
+    class := self.
+    [
+        method := class compiledMethodAt: aSelector ifAbsent: [ nil ].
+        method isNil ifFalse: [ ^method ].
+        class := class superclass.
+        class isNil ifTrue: [ ^nil ] ] repeat
+!
+
 compiledMethodAt: selector ifAbsent: aBlock
     "Return the compiled method associated with selector, from the local
     method dictionary.  Evaluate aBlock if not found."
@@ -745,12 +757,7 @@ includesSelector: selector
 canUnderstand: selector
     "Returns true if the instances of the receiver understand
      the given selector"
-    (self includesSelector: selector)
-    	ifTrue: [ ^true ].
-    self allSuperclassesDo:
-    	[ :superclass | (superclass includesSelector: selector)
-	    	    	    ifTrue: [ ^true ] ].
-    ^false
+    ^(self lookupSelector: selector) notNil
 !
 
 whichClassIncludesSelector: selector

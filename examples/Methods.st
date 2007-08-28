@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2006 Free Software Foundation, Inc.
+| Copyright 2006, 2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -128,17 +128,6 @@ to: anAssociation
 	yourself!
 
 
-!Behavior methodsFor: 'forwarding'!
-
-boundCompiledMethodAt: aSelector
-    | class method |
-    class := self.
-    [
-	method := class compiledMethodAt: aSelector ifAbsent: [ nil ].
-	method isNil ifFalse: [ ^method ].
-	class := class superclass.
-	class isNil ifTrue: [ ^nil ] ] repeat! !
-
 !ForwardingMethod methodsFor: 'forwarding'!
 
 destClass
@@ -155,7 +144,7 @@ destSelector: aSymbol
 
 valueWithReceiver: rec withArguments: args
     | method |
-    method := destClass boundCompiledMethodAt: destSelector.
+    method := destClass lookupSelector: destSelector.
     ^method isNil 
 	ifTrue: [
 	    rec doesNotUnderstand:
@@ -163,5 +152,154 @@ valueWithReceiver: rec withArguments: args
 	ifFalse: [
 	    rec perform: method withArguments: args ]! !
 
+CompiledMethod subclass: #MethodWrapper
+    instanceVariableNames: 'method methodClass selector'
+    classVariableNames: 'WrapperList'
+    poolDictionaries: ''
+    category: 'Examples-VM'!
+
+!MethodWrapper class methodsFor: 'testing'!
+
+readdWrappersAfter: aWrapper
+    | all index toAdd |
+    all := self wrappersFor: aWrapper basicMethod.
+    index := all identityIndexOf: aWrapper.
+    toAdd := all copyFrom: index + 1.
+    all empty.
+    toAdd do: [ :each | each install ]
+!
+
+recordWrapper: aWrapper
+    (self wrappersFor: aWrapper basicMethod) addLast: aWrapper
+!
+
+wrappersFor: aMethod
+    WrapperList isNil ifTrue: [ WrapperList := IdentityDictionary new ].
+    ^WrapperList at: aMethod ifAbsentPut: [ OrderedCollection new ]
+! !
+
+!MethodWrapper methodsFor: 'wrapping'!
+
+beforeMethod
+!
+
+afterMethod
+!
+
+valueWithReceiver: rec withArguments: args
+    self beforeMethod.
+    ^[ rec perform: method withArguments: args ]
+	ensure: [ self afterMethod ]
+! !
+
+!CompiledCode methodsFor: 'installing'!
+
+basicMethod
+    ^self
+! !
+
+!MethodWrapper methodsFor: 'installing'!
+
+basicMethod
+    ^method basicMethod
+!
+
+install
+    method := self methodClass lookupSelector: selector.
+    method isNil ifTrue: [ self error: 'cannot find method' ].
+    self methodClass methodDictionary at: selector put: self.
+    self class recordWrapper: self.
+!
+
+uninstall
+    method methodClass == self methodClass
+	ifTrue: [ self methodDictionary at: selector put: method ]
+	ifFalse: [ self methodDictionary removeKey: selector ifAbsent: [] ].
+    self class readdWrappersAfter: self.
+    method := nil.
+!
+
+isInstalled
+    ^method notNil
+!
+
+methodClass
+    ^methodClass
+!
+
+methodDictionary
+    ^methodClass methodDictionary
+!
+
+methodClass: aClass
+    methodClass := aClass
+!
+
+selector: aSymbol
+    selector := aSymbol
+! !
+
+!MethodWrapper class methodsFor: 'instance creation'!
+
+on: aSymbol in: aClass
+    ^(self numArgs: aSymbol numArgs)
+	selector: aSymbol;
+	methodClass: aClass;
+	yourself! !
+
+MethodWrapper subclass: #WrapperExample
+    instanceVariableNames: 'text'
+    classVariableNames: 'WrapperList'
+    poolDictionaries: ''
+    category: 'Examples-VM'!
+
+!WrapperExample class methodsFor: 'installing'!
+
+test
+    | a b |
+    a := WrapperExample on: #asArray in: String.
+    b := WrapperExample on: #asArray in: String.
+
+    (a isInstalled->b isInstalled) printNl.
+    (String includesSelector: #asArray) printNl.
+
+    a install: 'wrapper1'.
+    (a isInstalled->b isInstalled) printNl.
+    (String includesSelector: #asArray) printNl.
+    'abc' asArray.
+
+    b install: 'wrapper2'.
+    (a isInstalled->b isInstalled) printNl.
+    (String includesSelector: #asArray) printNl.
+    'abc' asArray.
+
+    a uninstall.
+    (a isInstalled->b isInstalled) printNl.
+    (String includesSelector: #asArray) printNl.
+    'abc' asArray.
+
+    b uninstall.
+    (a isInstalled->b isInstalled) printNl.
+    (String includesSelector: #asArray) printNl.
+    'abc' asArray.
+! !
+
+!WrapperExample methodsFor: 'installing'!
+
+install: aString
+    text := aString.
+    self install
+!
+
+beforeMethod
+    ('before ', text) printNl
+!
+
+afterMethod
+    ('after ', text) printNl
+! !
+
 InterpretedMethod test!
 ForwardingMethod test!
+WrapperExample test!
+

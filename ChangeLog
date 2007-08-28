@@ -1,5 +1,10 @@
 2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/SeqCollect.st: Properly forward #identityIndexOf: methods.
+	* examples/Methods.st: Add MethodWrapper.
+
+2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Getopt.st: Fix regex to use \A instead of ^.
 
 2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
