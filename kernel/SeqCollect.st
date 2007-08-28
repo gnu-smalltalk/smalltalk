@@ -361,20 +361,20 @@ indexOf: anElement
 identityIndexOf: anElement startingAt: anIndex
     "Answer the first index > anIndex which contains an object identical
      to anElement. Answer 0 if no item is found"
-    ^self indexOf: anElement startingAt: anIndex ifAbsent: [ ^0 ]
+    ^self identityIndexOf: anElement startingAt: anIndex ifAbsent: [ ^0 ]
 !
 
 identityIndexOf: anElement ifAbsent: exceptionBlock
     "Answer the index of the first occurrence of an object identical to
      anElement in the receiver. Invoke exceptionBlock and answer its
      result if no item is found"
-    ^self indexOf: anElement startingAt: 1 ifAbsent: exceptionBlock
+    ^self identityIndexOf: anElement startingAt: 1 ifAbsent: exceptionBlock
 !
 
 identityIndexOf: anElement
     "Answer the index of the first occurrence of an object identical to
      anElement in the receiver. Answer 0 if no item is found"
-    ^self indexOf: anElement startingAt: 1 ifAbsent: [ ^0 ]
+    ^self identityIndexOf: anElement startingAt: 1 ifAbsent: [ ^0 ]
 ! !
 
 

@@ -1,5 +1,11 @@
 2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/SeqCollect.st: Properly forward #identityIndexOf: methods.
+	* kernel/Behavior.st: Add #lookupSelector:.
+	* examples/Methods.st: Add MethodWrapper.
+
+2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Generator.st: Add #on:do:.
 	* kernel/StreamOps.st: Always delegate species, fix
 	PeekableStream>>#peek.
