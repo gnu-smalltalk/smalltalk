@@ -1,5 +1,9 @@
 2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Getopt.st: Fix regex to use \A instead of ^.
+
+2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Generator.st: Add #on:do:.
 	* kernel/StreamOps.st: Always delegate species, fix
 	PeekableStream>>#peek.
