@@ -394,6 +394,11 @@ metaclassFor: classNameString
     ^(class isNil or: [ class isClass not ])
         ifTrue: [ Metaclass subclassOf: Class ]
         ifFalse: [ class class ]
+!
+
+allSubclasses
+    "Return all the classes in the system."
+    ^Class allSubclasses collect: [ :each | each instanceClass ]
 ! !
 
 

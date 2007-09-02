@@ -619,6 +619,11 @@ retryUsing: aBlock
     self return: aBlock value
 !
 
+context
+    "Return the execution context for the #on:do: snippet"
+    ^context
+!
+
 return
     "Exit the #on:do: snippet, answering nil to its caller."
 

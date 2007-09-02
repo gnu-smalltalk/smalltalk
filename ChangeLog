@@ -1,3 +1,8 @@
+2007-09-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/UndefObject.st: Add #allSubclasses.
+	* kernel/ExcHandling.st: Add #context.
+
 2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Properly forward #identityIndexOf: methods.
