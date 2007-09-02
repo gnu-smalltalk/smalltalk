@@ -1,3 +1,8 @@
+2007-09-02  Stephen Compall <scompall@nocandysw.com>
+
+	* STCompiler.st: Jump past #true bytes after ifFalse: branch in
+	#ifFalse:ifTrue:, not #false bytes.
+
 2007-08-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STCompiler.st: User store+pop+push sequence for pushing literal
