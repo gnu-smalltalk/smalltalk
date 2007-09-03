@@ -2,7 +2,7 @@
 
 ** implement new syntax (done)
 *** option processing for scripts/Convert.st (done)
-*** implement GST syntax parser for STClassLoader
+*** implement GST syntax parser for STClassLoader (done)
 *** mega conversion of old source code and bug shaking
 
 ** faster startup (done)
@@ -20,12 +20,6 @@ XML package descriptions to be delivered and installed, basing it on the
 Virtual File System infrastructure. (done)
 *** force .star files to be uncompressed, and implement a "view" on
 FileStream that only shows a segment of the file (done).
-
-** known bugs
-*** something weird happens if you run the DebugTools tests twice, as with:
-./gst-tool gst-sunit --kernel=../kernel -Igst.im -pDebugTools DebuggerTest
-*** there are bugs in how source code loaded from stdin is stored into
-CompiledMethods.
 
 
 * sometime

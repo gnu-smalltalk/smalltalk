@@ -529,7 +529,8 @@ _gst_get_source_string (off_t startPos, off_t endPos)
    if (startPos == -1) 
     result = _gst_string_new (p);
   else
-    result = _gst_counted_string_new (p + startPos, endPos - startPos);
+    result = _gst_counted_string_new (p + (startPos - in_stream->fileOffset),
+				      endPos - startPos);
 
   if (in_stream->type != STREAM_STRING)
     {
