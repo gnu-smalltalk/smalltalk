@@ -3251,7 +3251,7 @@ CPtrs and CArrays get their underlying element type through a
 
 CPtr's also have @code{value} and @code{value:} which get or change the
 underlying value that's pointed to.  In practice, @code{value} dereferences
-the pointer.  CString is a subclass that answers a Smalltalk @coded{String} when
+the pointer.  CString is a subclass that answers a Smalltalk @code{String} when
 sent @code{value}, and automatically allocates storage to copy and
 null-terminate a Smalltalk @code{String} when sent @code{value:}.
 
