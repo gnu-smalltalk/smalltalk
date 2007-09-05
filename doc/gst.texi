@@ -63,7 +63,7 @@
 @end direntry
 
 @copying
-This file documents @sc{gnu} Smalltalk Version @value{VERSION}.
+This file documents @sc{gnu} Smalltalk version @value{VERSION}.
 It was last updated on @value{UPDATED}.
 
 Copyright @copyright{} 1988, 1989, 1991, 1992, 1994, 1995, 1999,
@@ -1082,41 +1082,24 @@ of the object, navigating from the tree root (usually @code{Smalltalk})
 through the tree of sub-environments.
 
 For the identification of global objects in another environment, we use
-a ``pathname'' of symbols.  The symbols are separated by blanks; the
+a ``pathname'' of symbols.  The symbols are separated by periods; the
 ``look'' to appear is that of
 @example
-Smalltalk Tasks MyTask
+Smalltalk.Tasks.MyTask
 @end example
 
 @noindent
 and of
 @example
-Super Super Peter.
+Super.Super.Peter.
 @end example
 
-@noindent
-Its similarity to a sequence of message sends is not casual, and
-suggests the following syntax for write access:
+As is custom in Smalltalk, we are reminded by capitalization that we
+are accessing global objects.  Another syntax returns the @dfn{variable
+binding}, the @code{Association} for a particular global.  The first
+example above is equivalently:
 @example
-Smalltalk Tasks MyTask: anotherTask
-@end example
-
-This resembles the way accessors are used for other objects.  As is
-custom in Smalltalk, however, we are reminded by capitalization that
-we are accessing global objects.
-
-So a variable with an environment path may be resolved to a binding when
-code is compiled, rather than at runtime through a sequence of message
-sends like the above, two special syntaxes have been implemented.
-Standard dot notation can be used to read the value of a global (like in
-@code{Tasks.MyTask} or @code{Tasks::MyTask}), unless you try really hard
-to dissociate variable references between compile time and run time.
-
-Another syntax returns the @dfn{variable binding}, the
-@code{Association} for a particular global.  The last example above is
-equivalently:
-@example
-#@{Smalltalk.Tasks.MyTask@} value: anotherTask
+#@{Smalltalk.Tasks.MyTask@} value
 @end example
 
 The latter syntax, a @dfn{variable binding}, is also valid inside
@@ -1127,7 +1110,7 @@ literal arrays.
 A superclass of @code{SystemDictionary} called @code{RootNamespace} is
 defined, and many of the features of the Smalltalk-80
 @code{SystemDictionary} will be hosted by that class.  @code{Namespace}
-and @code{RootNamespace} will in turn become subclasses of
+and @code{RootNamespace} are in turn subclasses of
 @code{AbstractNamespace}.
 
 To handle inheritance, the following methods have to be defined or redefined in
@@ -1148,17 +1131,12 @@ super-environment if that is the relevant variable's binding.
 @item Enumerators like @code{#do:} and @code{#keys}
 This should return @strong{all} the objects in the namespace, including
 those which are inherited.
-@end table
 
-For programs to be able to process correctly the ``pathnames'' and the
-accessors, this feature should be implemented directly in
-@code{AbstractNamespace}; it is easily handled through the standard
-@code{doesNotUnderstand:} message for trapping message sends that the
-virtual machine could not resolve.  In @gst{}, this is in fact how it is
-done, though the method is part of class @code{BindingDictionary}
-instead.  @code{AbstractNamespace} will also implement a new set of
+@item Hierarchy access
+@code{AbstractNamespace} will also implement a new set of
 methods that allow one to navigate through the namespace hierarchy;
 these parallel those found in @code{Behavior} for the class hierarchy.
+@end table
 
 The most important task of the @code{Namespace} class is to provide
 organization for the most important global objects in the Smalltalk
@@ -1207,31 +1185,39 @@ environment by any other sensibility is @code{Smalltalk}.
 
 Using namespaces is often merely a matter of adding a @samp{namespace}
 option to the @gst{} @acronym{XML} package description used by
-@code{PackageLoader}, or rewriting the loading script this way:
+@code{PackageLoader}, or wrapping your code like this:
 @example
-    Smalltalk addSubspace: #NewNS!
-    Namespace current: NewNS!
-    @dots{}
-    Namespace current: Smalltalk!
+    Namespace current: NewNS [
+        @dots{}
+    ]
 @end example
 
-Also remember that pool dictionaries are actually ``pool namespaces'',
-in the sense that including a namespace in a pool dictionaries list will
-automatically include its superspaces too. Declaring a namespace as a
-pool dictionary for a class is similar in this way to C++'s @code{using
-namespace} declaration within the class proper's definition.
+Namespaces can be imported into classes like this:
+@example
+    Stream subclass: EncodedStream [
+        <import: Encoders>
+    ]
+@end example
+
+@noindent
+Alternatively, paths to
+classes (and other objects) in the namespaces will have to be specified
+completely.  Importing a namespace into a class is similar to C++'s
+@code{using namespace} declaration within the class proper's definition.
 
 Finally, be careful when working with fundamental system classes.  Although you
 can use code like
 @example
-    Smalltalk Set variableSubclass: #Set
-        @dots{}
-        category: 'My application-Extensions'
-
+    Namespace current: NewNS [
+        Smalltalk.Set subclass: #Set [
+            <category: 'My application-Extensions'>
+            @dots{}
+        ]
+    ]
 @end example
 
 @noindent
-or the equivalent syntax @code{Set extend}, this approach won't work
+this approach won't work
 when applied to core classes.  For example, you might be successful with
 a @code{Set} or @code{WriteStream} object, but subclassing
 @code{SmallInteger} this way can bite you in strange ways: integer
@@ -1239,21 +1225,21 @@ literals will still belong to the @code{Smalltalk} dictionary's version
 of the class (this holds for @code{Array}s, @code{String}s, etc.@: too),
 primitive operations will still answer standard Smalltalk
 @code{SmallIntegers}, and so on.  Similarly,
-@code{variableWordSubclasses} will recognize 32-bit @code{Smalltalk
-LargeInteger} objects, but not @code{LargeInteger}s belonging to your
-own namespace.
+word-shaped will recognize 32-bit @code{Smalltalk.LargeInteger} objects,
+but not @code{LargeInteger}s belonging to your own namespace.
 
 Unfortunately, this problem is not easy to solve since Smalltalk has to
-cache the @acronym{OOP}s of determinate class objects for speed---it
+know the @acronym{OOP}s of determinate class objects for speed---it
 would not be feasible to lookup the environment to which sender of a
 message belongs every time the @code{+} message was sent to an Integer.
 
 So, @gst{} namespaces cannot yet solve 100% of the problem of clashes
 between extensions to a class---for that you'll still have to rely on
 prefixes to method names.  But they @emph{do} solve the problem of clashes
-between class names, or between class names and pool dictionary names, so you
-might want to give them a try.  An example of using namespaces is given by
-@file{examples/Publish.st} in the @gst{} source code directory.
+between class names, or between class names and pool dictionary names.
+
+Namespaces are unrelated from packages; loading a package does not
+import the corresponding namespace.
 
 
 @node Disk file-IO
@@ -3252,9 +3238,9 @@ the @code{value} message, and change their value when sent the
 
 @code{replaceWith:} @code{aString} replaces the string the instance
 points to with the new string.  Actually, it copies the bytes from the
-Smalltalk String instance aString into the C string object, and null
+Smalltalk @code{String} instance aString into the C string object, and null
 terminates.  Be sure that the C string has enough room!  You can also
-use a Smalltalk ByteArray as the data source.
+use a Smalltalk @code{ByteArray} as the data source.
 
 Non-scalars include instances of @code{CArray}, @code{CPtr} and
 subclasses of @code{CStruct} and @code{CUnion}.
@@ -3265,7 +3251,7 @@ CPtrs and CArrays get their underlying element type through a
 
 CPtr's also have @code{value} and @code{value:} which get or change the
 underlying value that's pointed to.  In practice, @code{value} dereferences
-the pointer.  CString is a subclass that answers a Smalltalk String when
+the pointer.  CString is a subclass that answers a Smalltalk @coded{String} when
 sent @code{value}, and automatically allocates storage to copy and
 null-terminate a Smalltalk @code{String} when sent @code{value:}.
 
@@ -3563,8 +3549,8 @@ functions all @dfn{end} with @code{ToOOP}, except
 @code{cObjectToTypedOOP}:
 
 @deftypefun OOP intToOOP (long)
-This object returns a Smalltalk Integer which contains the same value as
-the passed C @code{long}.  Note that Smalltalk Integers are always
+This object returns a Smalltalk @code{Integer} which contains the same value as
+the passed C @code{long}.  Note that Smalltalk integers are always
 signed and have a bit less of precision with respect to C longs.  On 32
 bit machines, their precision is 30 bits (if unsigned) or 31 bits (if
 signed); on 64 bit machines, their precision is 62 bits (if unsigned) or
@@ -3579,32 +3565,32 @@ since the call to @code{OOPToId}.
 @end deftypefun
 
 @deftypefun OOP floatToOOP (double)
-This object returns a Smalltalk FloatD which contains the same value as
+This object returns a Smalltalk @code{FloatD} which contains the same value as
 the passed @code{double}.  Unlike Integers, FloatDs have exactly the same
 precision as C doubles.
 @end deftypefun
 
 @deftypefun OOP longDoubleToOOP (long double)
-This object returns a Smalltalk FloatQ which contains the same value as
+This object returns a Smalltalk @code{FloatQ} which contains the same value as
 the passed @code{long double}.  Unlike Integers, FloatQs have exactly the same
 precision as C long doubles.
 @end deftypefun
 
 @deftypefun OOP boolToOOP (int)
-This object returns a Smalltalk Boolean which contains the same boolean
+This object returns a Smalltalk @code{Boolean} which contains the same boolean
 value as the passed C @code{int}.  That is, the returned OOP is the sole
 instance of either @code{False} or @code{True}, depending on where the
 parameter is zero or not.
 @end deftypefun
 
 @deftypefun OOP charToOOP (char)
-This object returns a Smalltalk Character which represents the same char
+This object returns a Smalltalk @code{Character} which represents the same char
 as the passed C @code{char}.
 @end deftypefun
 
 @deftypefun OOP charToOOP (wchar_t)
-This object returns a Smalltalk Character which represents the same char
-as the passed C @code{wchar_t}.
+This object returns a Smalltalk @code{Character} or @code{UnicodeCharacter}
+which represents the same char as the passed C @code{wchar_t}.
 @end deftypefun
 
 @deftypefun OOP classNameToOOP (char *)
