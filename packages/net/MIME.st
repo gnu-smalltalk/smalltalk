@@ -2836,7 +2836,7 @@ version
 version: string
 
     | arr |
-    arr := string tokensBasedOn: $..
+    arr := string subStrings: $..
     arr size < 2 ifTrue: [ self notify: 'Version should be specified as <major version>.<minor version>' ].
     self majorVersion: arr first.
     self minorVersion: arr last.! !
