@@ -1,3 +1,8 @@
+2007-09-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ArrayColl.st: Add #join:separatedBy:.
+	* kernel/SeqCollect.st: Add #join:separatedBy: and #join:.
+
 2007-09-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/UndefObject.st: Add #allSubclasses.

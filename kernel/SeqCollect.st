@@ -55,6 +55,21 @@ streamContents: aBlock
     stream truncate.
     aBlock value: stream.
     ^stream contents
+!
+
+join: aCollection separatedBy: sepCollection
+    "Where aCollection is a collection of SequenceableCollections,
+     answer a new instance with all the elements therein, in order,
+     each separated by an occurrence of sepCollection."
+    | newInst start |
+    newInst := self new: (aCollection
+	inject: sepCollection size * (aCollection size - 1)
+	into: [:size :each | size + each size]).
+
+    aCollection
+	do: [:subColl | newInst addAll: subColl]
+	separatedBy: [ newInst addAll: sepCollection].
+    ^newInst
 ! !
 
 
@@ -596,6 +611,21 @@ join
      #('hello, ' 'world') join => 'hello, world'"
     ^self isEmpty ifTrue: [#()]
 		  ifFalse: [self first species join: self]
+!
+
+join: sepCollection
+    "Answer a new collection like my first element, with all the
+     elements (in order) of all my elements (which should be
+     collections) separated by sepCollection.
+
+     I use my first element instead of myself as a prototype because
+     my elements are more likely to share the desired properties than
+     I am, such as in:
+
+     #('hello,' 'world') join: ' ' => 'hello, world'"
+    ^self isEmpty
+	ifTrue: [#()]
+	ifFalse: [self first species join: self separatedBy: sepCollection]
 ! !
 
 

@@ -130,6 +130,26 @@ join: aCollection
 	newInst replaceFrom: start to: (start := start + subColl size) - 1
 		with: subColl].
     ^newInst
+!
+
+join: aCollection separatedBy: sepCollection
+    "Where aCollection is a collection of SequenceableCollections,
+     answer a new instance with all the elements therein, in order,
+     each separated by an occurrence of sepCollection."
+    | newInst start |
+    newInst := self new: (aCollection
+	inject: sepCollection size * (aCollection size - 1)
+	into: [:size :each | size + each size]).
+
+    start := 1.
+    aCollection
+	do: [:subColl |
+	    newInst replaceFrom: start to: (start := start + subColl size) - 1
+		with: subColl]
+	separatedBy: [
+	    newInst replaceFrom: start to: (start := start + sepCollection size) - 1
+		with: sepCollection].
+    ^newInst
 ! !
 
 
