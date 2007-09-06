@@ -61,6 +61,7 @@ AC_DEFUN([GST_PACKAGE_ENABLE], [
 			      [_GST_PKG_XML])])dnl
 
   cat >> pkgrules.tmp << \EOF
+all-local: $(srcdir)/_GST_PKG_STAMP
 $1.star: _GST_PKG_XML $(srcdir)/_GST_PKG_STAMP
 	_GST_PKG_IF_FILE([$5], [Makefile], [cd _GST_PKG_DIR && $(MAKE)
 	])$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=. $<
