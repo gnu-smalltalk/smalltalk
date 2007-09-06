@@ -324,6 +324,10 @@ atEnd
     ^haveLookahead not and: [ stream atEnd ]
 !
 
+species
+    ^stream species
+!
+
 pastEnd
     ^stream pastEnd
 !
