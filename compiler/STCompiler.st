@@ -848,7 +848,7 @@ compileIfFalse: bcFalse returns: bcFalseReturns ifTrue: bcTrue
     self compileJump: falseSize if: true.
     self nextPutAll: bcFalse.
     bcFalseReturns ifFalse: [
-	self compileByte: Jump arg: bcFalse size.
+	self compileByte: Jump arg: bcTrue size.
     ].
     self nextPutAll: bcTrue.
     ^true

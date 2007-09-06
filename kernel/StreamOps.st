@@ -113,7 +113,7 @@ atEnd
 !
 
 species
-    ^stream species
+    ^streams first species
 !
 
 name

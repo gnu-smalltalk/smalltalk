@@ -1,6 +1,11 @@
+2007-09-02  Stephen Compall <scompall@nocandysw.com>
+
+	* compiler/STCompiler.st: Jump past #true bytes after ifFalse: branch
+	in #ifFalse:ifTrue:, not #false bytes.
+
 2007-08-10  Paolo Bonzini  <bonzini@gnu.org>
 
-	* RBParser.st: Convert to FloatD if there is no exponent.
+	* compiler/RBParser.st: Convert to FloatD if there is no exponent.
 
 2007-05-24  Paolo Bonzini  <bonzini@gnu.org>
 

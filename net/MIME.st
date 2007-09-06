@@ -708,8 +708,14 @@ upTo: anObject
     If anObject is not found answer everything."
 
     | str |
-    lookahead isNil ifFalse: [ source skip: -1 ].
+    lookahead = anObject ifTrue: [
+	self sourceTrailNextPut: lookahead.
+	lookahead := nil.
+	^'' ].
     str := source upTo: anObject.
+    lookahead isNil ifFalse: [
+	str := lookahead asString, str.
+	lookahead := nil ].
     self
 	sourceTrailNextPutAll: str;
 	sourceTrailNextPut: anObject.
@@ -717,7 +723,9 @@ upTo: anObject
 
 upToAll: pattern 
     | str |
-    lookahead isNil ifFalse: [ source skip: -1 ].
+    lookahead isNil ifFalse: [
+	source skip: -1.
+	lookahead := nil ].
     str := source upToAll: pattern.
     self
 	sourceTrailNextPutAll: str;
@@ -726,8 +734,10 @@ upToAll: pattern
 
 upToEnd
     | str |
-    lookahead isNil ifFalse: [ source skip: -1 ].
     str := source upToEnd.
+    lookahead isNil ifFalse: [
+	str := lookahead asString, str.
+	lookahead := nil ].
     self sourceTrailNextPutAll: str.
     ^str! !
 
@@ -2441,11 +2451,6 @@ decodeUUEncodedFrom: startIndex to: farEndIndex in: aString
 		    count := count - 3]]].
     ^data copyFrom: 1 to: output position! !
 
-!MimeScanner methodsFor: 'constants'!
-
-boundaryDashes
-    ^'--'! !
-
 !MimeScanner methodsFor: 'multi-character scans'!
 
 scanText
@@ -2459,13 +2464,12 @@ scanToBoundary: boundary
 " Scan for specified boundary (RFC2046, p5.1). Answer two-element array. First element is the scanned text from current position up to the beginning of the boundary. Second element is either #next or #last. #next means the boundary found is not the last one. #last means the boundary is the closing boundary for the multi-part body (that is, it looks like '--<boundary>--) "
 
     | pattern string kind |
-    pattern := (String with: Character nl), self boundaryDashes , boundary.
+    pattern := (String with: Character nl), '--' , boundary.
     string := self upToAll: pattern.
-    self next: pattern size.                    " Skip over pattern "
-    kind := (self next: 2) = self boundaryDashes
+    kind := ((self peekFor: $-) and: [ self peekFor: $- ])
 		ifTrue: [#last]
-		ifFalse:[self skip: -2. #next].
-    self upTo: Character nl.                    " Skip to the end of line "
+		ifFalse:[#next].
+    self upTo: Character nl.
     ^Array with: string with: kind.!
 
 scanToken
@@ -2847,7 +2851,7 @@ version
 version: string
 
     | arr |
-    arr := string tokensBasedOn: $..
+    arr := string subStrings: $..
     arr size < 2 ifTrue: [ self notify: 'Version should be specified as <major version>.<minor version>' ].
     self majorVersion: arr first.
     self minorVersion: arr last.! !

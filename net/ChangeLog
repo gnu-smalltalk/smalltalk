@@ -1,3 +1,15 @@
+2007-09-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* MIME.st: More fixes to previous change.
+
+2007-09-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* MIME.st: Try not to use negative #skip:.
+
+2007-09-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* MIME.st: Use #subStrings:.
+
 2007-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* net/HTTP.st: Use #, on streams directly.
