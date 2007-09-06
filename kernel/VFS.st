@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2002, 2005 Free Software Foundation, Inc.
+| Copyright 2002, 2005, 2007 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -676,7 +676,7 @@ name: virtualFileName realFileName: temporaryFileName
      virtualFileName file into temporaryFileName."
     self addToBeFinalized.
     self name: virtualFileName.
-    realFileName := File fullNamFor: temporaryFileName!
+    realFileName := File fullNameFor: temporaryFileName!
 
 finalize
     "Upon finalization, we remove the file that was temporarily holding the file

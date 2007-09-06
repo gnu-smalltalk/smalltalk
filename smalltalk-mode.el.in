@@ -1,6 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
-;;; Copyright 1988-92, 1994-95, 1999, 2000, 2003 Free Software Foundation, Inc.
+;;; Copyright 1988-92, 1994-95, 1999, 2000, 2003, 2007
+;;; Free Software Foundation, Inc.
 ;;; Written by Steve Byrne.
 ;;;
 ;;; This file is part of GNU Smalltalk.

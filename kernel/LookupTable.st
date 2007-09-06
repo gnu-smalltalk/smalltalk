@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002
+| Copyright 1999, 2000, 2001, 2002, 2007
 | Free Software Foundation, Inc.
 | Written by Steve Byrne and Paolo Bonzini.
 |

@@ -8,7 +8,8 @@
 
 "======================================================================
 |
-| Copyright 1992,94,95,99,2000,2001,2002,2003 Free Software Foundation, Inc.
+| Copyright 1992,94,95,99,2000,2001,2002,2003,2007
+| Free Software Foundation, Inc.
 | Written by Brad Diller and Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.

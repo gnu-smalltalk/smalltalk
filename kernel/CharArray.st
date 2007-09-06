@@ -8,7 +8,8 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002, 2006 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2006, 2007
+| Free Software Foundation, Inc.
 | Written by Steve Byrne and Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.

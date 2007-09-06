@@ -4,17 +4,34 @@ NEWS FROM 2.3.5 TO 2.3.6
 
 o   Added #% as a shortcut for CharacterArray>>#bindWithArguments:.
 
-o   Added #allButFirst, #allButFirst:, #allButLast, #allButLast:,
+o   Added #allButFirst, #allButFirst:, #allButLast, #allButLast:, #atAll:,
     #removeAllSuchThat: to Collection.
+
+o   Added #join to SequenceableCollection.
+
+o   Added symbolic link creation to File.
 
 o   A race condition was fixed where a file handler was resurrected and
     another object inside it had already been finalized.
+
+o   Pipes use OS pipes or socketpairs instead of a pseudo-tty.
+
+o   Fixed bitrot in the debugger.
 
 o   Fixed bug where ~= was computed incorrectly as = (e.g. 3 ~= 3.0e).
 
 o   Fixed bug with growing of the Undeclared dictionary.
 
-o   Fixes to File and Directory for Windows
+o   Fixed many minor bugs.
+
+o   Fixed GC bug that could cause crashes if two GCs happened at particularly
+    unlucky spots.
+
+o   Fixes to File and Directory for Windows.
+
+o   Fixes to MIME message parsing, UTF-7 encoding and XPath.
+
+o   VariableBinding objects were made read-only when used as literals.
 
 -----------------------------------------------------------------------------
 

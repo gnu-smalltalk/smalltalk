@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright (C) 2003  Free Software Foundation.
+| Copyright (C) 2003, 2007  Free Software Foundation.
 | Written by Paolo Bonzini, based on test vectors by Nicolas Pelletier.
 | This file is part of GNU Smalltalk.
 |
