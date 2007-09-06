@@ -62,6 +62,7 @@ join: aCollection separatedBy: sepCollection
      answer a new instance with all the elements therein, in order,
      each separated by an occurrence of sepCollection."
     | newInst start |
+    aCollection isEmpty ifTrue: [ ^self new: 0 ].
     newInst := self new: (aCollection
 	inject: sepCollection size * (aCollection size - 1)
 	into: [:size :each | size + each size]).

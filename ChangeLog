@@ -1,5 +1,10 @@
 2007-09-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ArrayColl.st: Guard #join:separatedBy: for empty separator.
+	* kernel/SeqCollect.st: Guard #join:separatedBy: for empty separator.
+
+2007-09-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ArrayColl.st: Add #join:separatedBy:.
 	* kernel/SeqCollect.st: Add #join:separatedBy: and #join:.
 
