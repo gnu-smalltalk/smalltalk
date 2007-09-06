@@ -707,9 +707,12 @@ upTo: anObject
     | str |
     lookahead = anObject ifTrue: [
 	self sourceTrailNextPut: lookahead.
+	lookahead := nil.
 	^'' ].
     str := source upTo: anObject.
-    lookahead isNil ifFalse: [ str := lookahead asString, str ].
+    lookahead isNil ifFalse: [
+	str := lookahead asString, str.
+	lookahead := nil ].
     self
 	sourceTrailNextPutAll: str;
 	sourceTrailNextPut: anObject.
@@ -717,7 +720,9 @@ upTo: anObject
 
 upToAll: pattern 
     | str |
-    lookahead isNil ifFalse: [ source skip: -1 ].
+    lookahead isNil ifFalse: [
+	source skip: -1.
+	lookahead := nil ].
     str := source upToAll: pattern.
     self
 	sourceTrailNextPutAll: str;
@@ -727,7 +732,9 @@ upToAll: pattern
 upToEnd
     | str |
     str := source upToEnd.
-    lookahead isNil ifFalse: [ str := lookahead asString, str ].
+    lookahead isNil ifFalse: [
+	str := lookahead asString, str.
+	lookahead := nil ].
     self sourceTrailNextPutAll: str.
     ^str! !
 
@@ -2448,7 +2455,7 @@ scanToBoundary: boundary
     | pattern string kind |
     pattern := (String with: Character nl), '--' , boundary.
     string := self upToAll: pattern.
-    kind := (self peekFor: $- and: [ self peekFor: $- ])
+    kind := ((self peekFor: $-) and: [ self peekFor: $- ])
 		ifTrue: [#last]
 		ifFalse:[#next].
     self upTo: Character nl.
