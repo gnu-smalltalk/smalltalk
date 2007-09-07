@@ -1,3 +1,7 @@
+2007-09-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFS.st: Use lazy initialization for Registry.
+
 2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Properly forward #identityIndexOf: methods.
