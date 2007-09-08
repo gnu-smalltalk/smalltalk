@@ -1232,6 +1232,8 @@ fileInPackage: package
 fileInPackages: packagesList
     "File in all the packages in packagesList into GNU Smalltalk."
     | toBeLoaded |
+    packagesList isEmpty ifTrue: [ ^self ].
+
     self refresh.
     toBeLoaded := root
 	extractDependenciesFor: packagesList

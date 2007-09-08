@@ -53,6 +53,7 @@ oldKernelBasePath = newKernelBasePath ifFalse: [
 ImageFileName := 'gst.im'.
 ImageFilePath := newImagePath.
 KernelFilePath := newKernelBasePath, '/kernel'.
+ExecutableFileName := nil.
 UserFileBasePath := nil!
 
 PackageLoader flush!

@@ -1,3 +1,9 @@
+2007-09-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/PkgLoader.st: Avoid refreshing the list if filing in no
+	package.
+	* scripts/Finish.st: Clear ExecutableFileName before saving.
+
 2007-09-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ArrayColl.st: Guard #join:separatedBy: for empty separator.
