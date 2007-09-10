@@ -118,6 +118,7 @@ terminate
      #ifCurtailed: blocks that are active in it.  This is done by signalling
      a ProcessBeingTerminated notification."
     [
+	self isTerminated ifTrue: [ ^self ].
         Processor activeProcess == self
 	    ifFalse: [
 		self queueInterrupt: [ SystemExceptions.ProcessBeingTerminated signal ].

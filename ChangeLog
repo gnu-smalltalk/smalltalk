@@ -1,3 +1,7 @@
+2007-09-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Process.st: Don't fail if terminating a terminated process.
+
 2007-09-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Avoid refreshing the list if filing in no
