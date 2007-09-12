@@ -132,7 +132,7 @@ testSignalWith
 			SpExceptionContext
 				for: [SpAbstractError raiseSignal: 'Hello world!!']
 				on: SpAbstractError
-				do: [:ex | SpError raiseSignal: ex]]
+				do: [:ex | SpError signalWith: ex]]
 		raise: SpError
 		description: 'SpError not raised'
 !  !

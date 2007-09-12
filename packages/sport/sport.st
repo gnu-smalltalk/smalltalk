@@ -1694,8 +1694,6 @@ Object subclass: SpWeakArray [
 
 
 Error subclass: SpAbstractError [
-    | parameter |
-    
     <category: 'Sport-Exceptions'>
     <comment: 'synchronized with 2.030'>
 
@@ -1709,6 +1707,13 @@ Error subclass: SpAbstractError [
 
 	<category: 'signalling'>
 	^self signal
+    ]
+
+    SpAbstractError class >> signalWith: anObject [
+	"Raise an an exception."
+
+	<category: 'signalling'>
+	^self new signalWith: anObject
     ]
 
     SpAbstractError class >> raiseSignal: aString [
@@ -1732,12 +1737,12 @@ Error subclass: SpAbstractError [
 
     parameter [
 	<category: 'accessing'>
-	^parameter
+	^self tag
     ]
 
     parameter: anObject [
 	<category: 'accessing'>
-	parameter := anObject
+	self tag: anObject
     ]
 
     raiseSignal [
@@ -1752,6 +1757,13 @@ Error subclass: SpAbstractError [
 
 	<category: 'signalling'>
 	^self signal: aString
+    ]
+
+    signalWith: anObject [
+	"Raise an an exception."
+
+	<category: 'signalling'>
+	^self tag: anObject; signal
     ]
 ]
 
