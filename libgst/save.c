@@ -267,7 +267,7 @@ _gst_save_to_file (const char *fileName)
   int imageFd;
   save_file_header header;
 
-  imageFd = _gst_open_file (fileName, "w");
+  imageFd = _gst_open_file (fileName, "r+");
   if (imageFd < 0)
     return (false);
 
@@ -276,6 +276,7 @@ _gst_save_to_file (const char *fileName)
   _gst_global_gc (0);
   _gst_finish_incremental_gc ();
 
+  ftruncate (imageFd, 0);
   memzero (&header, sizeof (header));
   myOOPTable = make_oop_table_to_be_saved (&header);
 

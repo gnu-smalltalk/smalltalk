@@ -1,3 +1,8 @@
+2007-09-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/save.c: Open image file with r+ and truncate it afterwards.
+	* libgst/sysdep.c: Use O_CREAT for r+.
+
 2007-09-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.c: Adjust by fileOffset when generating source string

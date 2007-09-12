@@ -1640,7 +1640,7 @@ _gst_open_file (const char *filename,
       if (*mode == '\0')
 	break;
       else if (*mode == '+')
-	access = O_RDWR;
+        create = 1, access = O_RDWR;
       else if (*mode == 'x')
 	oflags |= O_EXCL;
     }
