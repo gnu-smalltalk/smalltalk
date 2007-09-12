@@ -1,6 +1,6 @@
 <package>
   <name>Glorp</name>
-  <prereq>MySQL</prereq>
+  <prereq>DBD-MySQL</prereq>
   <prereq>SUnit</prereq>
 
   <namespace>Glorp</namespace>

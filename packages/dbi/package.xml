@@ -1,0 +1,18 @@
+<package>
+  <name>DBI</name>
+  <namespace>DBI</namespace>
+
+  <filein>ConnectionInfo.st</filein>
+  <filein>Connection.st</filein>
+  <filein>Statement.st</filein>
+  <filein>ResultSet.st</filein>
+  <filein>Row.st</filein>
+  <filein>ColumnInfo.st</filein>
+
+  <file>ConnectionInfo.st</file>
+  <file>Connection.st</file>
+  <file>Statement.st</file>
+  <file>ResultSet.st</file>
+  <file>Row.st</file>
+  <file>ColumnInfo.st</file>
+</package>

@@ -1,7 +1,0 @@
-<package>
-  <name>DB</name>
-  <namespace>Jdm</namespace>
-  <filein>DB.st</filein>
-
-  <file>DB.st</file>
-</package>

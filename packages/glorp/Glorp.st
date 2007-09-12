@@ -7286,7 +7286,7 @@ postCopy! !
 !DatabaseAccessor class methodsFor: 'instance creation'!
 
 classForThisPlatform
-    Dialect isGNU ifTrue: [^Smalltalk Glorp JdmDatabaseAccessor].
+    Dialect isGNU ifTrue: [^Smalltalk Glorp DBIDatabaseAccessor].
     Dialect isSqueak ifTrue: [^Dialect smalltalkAt: #SqueakDatabaseAccessor].
     Dialect isVisualWorks ifTrue: [^Dialect smalltalkAt: #'Glorp.VWDatabaseAccessor'].
     Dialect isVisualAge ifTrue: [^Dialect smalltalkAt: #VA55DatabaseAccessor].

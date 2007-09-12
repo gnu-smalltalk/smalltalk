@@ -31,7 +31,7 @@ DelegatingDatabaseConverter subclass: #MySQLTextConverter
     poolDictionaries: ''
     category: 'Glorp-MySQL'!
 
-DatabaseAccessor subclass: #JdmDatabaseAccessor
+DatabaseAccessor subclass: #DBIDatabaseAccessor
     instanceVariableNames: 'isInTransaction'
     classVariableNames: ''
     poolDictionaries: ''
@@ -95,26 +95,23 @@ convert: anObject toDatabaseRepresentationAs: aDatabaseType
 
 
 
-!JdmDatabaseAccessor methodsFor: 'login'!
+!DBIDatabaseAccessor methodsFor: 'login'!
 
 loginIfError: aBlock 
-    | spec |
     self logging
 	ifTrue: [self log: 'Login'].
 
-    spec := (Jdm.JdmConnectionSpec new initialize
-        user: currentLogin username;
-    	password: currentLogin password;
-        database: currentLogin connectString).
-
-    isInTransaction := false.
-    self doCommand: [connection := self connectionClass on: spec] ifError: aBlock.
+    isInTransaction := 0.
+    self doCommand: [ connection := DBI.Connection
+        connect: currentLogin connectString
+    	user: currentLogin username
+    	password: currentLogin password ] ifError: aBlock.
     self logging
 	ifTrue: [self log: 'Login finished']!
 
 connectionClassForLogin: aLogin 
-    aLogin database class == MySQLPlatform
-    	ifTrue: [^Jdm.MySQL.JdmConnection].
+    ('dbi:*' match: aLogin connectString)
+    	ifTrue: [^DBI.Connection].
     self error: 'Unknown database: ' , aLogin database name!
 
 logout
@@ -128,7 +125,7 @@ isLoggedIn
 
     ^connection notNil! !
 
-!JdmDatabaseAccessor methodsFor: 'executing'!
+!DBIDatabaseAccessor methodsFor: 'executing'!
 
 disconnect
     connection close!
@@ -137,71 +134,61 @@ dropConstraint: aConstraint
 !
 
 dropTableNamed: aString
-    self executeSQLString: 'DROP TABLE IF EXISTS ' , aString!
+    self doCommand: [self executeSQLString: 'DROP TABLE ' , aString]
+        ifError: []!
 
 dropTableNamed: aString ifAbsent: aBlock 
     self doCommand: [self executeSQLString: 'DROP TABLE ' , aString]
         ifError: aBlock!
 
 executeSQLString: aString 
-    | statement result resultSet rows row numColumns |
-    statement := connection createStatement.
-    result := statement executeQuery: aString.
-    result type = #read ifFalse: [ ^#() ].
+    | resultSet rows numColumns |
+    resultSet := connection do: aString.
+    resultSet isSelect ifFalse: [ ^#() ].
     self logging ifTrue: [ self log: aString ].
 
     "Optimize the cases of 0 returned rows."
-    resultSet := result value.
-    resultSet next ifFalse: [ ^#() ].
+    resultSet rowCount = 0 ifTrue: [ ^#() ].
 
-    numColumns := resultSet columns size.
-    rows := (Array new: 1) writeStream.
-    [row := self fetchRowFrom: resultSet numColumns: numColumns.
-     rows nextPut: row.
-     resultSet next] whileTrue.
+    numColumns := resultSet columnCount.
+    rows := Array new: resultSet rowCount.
+    1 to: rows size do: [ :i |
+        rows at: i put: (self fetchValuesFrom: resultSet next) ].
 
-    ^rows contents!
+    ^rows!
 
-fetchRowFrom: resultSet numColumns: numColumns
-    | row |
-    row := Array new: numColumns.
-        1 to: numColumns
-                do: [:i | row at: i put: (resultSet valueAt: i)].
-    ^row!
+fetchValuesFrom: row
+    | array |
+    array := Array new: row columnCount.
+    1 to: row columnCount
+            do: [:i | array at: i put: (row atIndex: i)].
+    ^array!
 
-!JdmDatabaseAccessor methodsFor: 'transactions'!
+!DBIDatabaseAccessor methodsFor: 'transactions'!
 
 commitTransaction
 
     self logging ifTrue: 
     	[self log: 'Commit Transaction'].
-    self executeSQLString: 'COMMIT'.
-    isInTransaction := false!
+    connection commitTransaction.
+    isInTransaction > 0 ifTrue: [ isInTransaction := isInTransaction - 1 ]!
 
 isInTransaction
 
-    ^isInTransaction!
+    ^isInTransaction > 0!
 
 rollbackTransaction
     self logging ifTrue: 
     	[self log: 'Rollback Transaction'].
-    self executeSQLString: 'ROLLBACK'.
-    isInTransaction := false!
+    connection rollbackTransaction.
+    isInTransaction > 0 ifTrue: [ isInTransaction := isInTransaction - 1 ]!
 
 beginTransaction
     self logging ifTrue: 
     	[self log: 'Begin Transaction'].
-    self executeSQLString: 'START TRANSACTION'.
-    isInTransaction := true! !
+    connection beginTransaction.
+    isInTransaction := isInTransaction + 1! !
 
-
-!Jdm.MySQL.JdmDateTime methodsFor: 'glorp'!
-
-asTimestamp
-    ^DateTime
-        fromDays: self date daysFromBaseDay
-        seconds: self time asSeconds
-        offset: Duration zero! !
 
 
 !MySQLPlatform class methodsFor: 'LICENSE'!

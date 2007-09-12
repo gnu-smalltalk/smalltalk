@@ -63,6 +63,9 @@ o   The #writeStream method was moved down from SequenceableCollection to
     ArrayedCollection, since it does not really work well on variable-sized
     collections such as OrderedCollections.
 
+o   The database access library has been replaced by a new DBI-like library,
+    contributed by Mike Anderson.
+
 
 Packages improvements:
 

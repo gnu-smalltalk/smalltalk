@@ -241,6 +241,7 @@ GST_HAVE_GMP
 GST_HAVE_READLINE
 
 GST_PACKAGE_PREFIX([packages])
+
 GST_PACKAGE_ENABLE([BloxTK], [blox/tk],
    [GST_HAVE_TCLTK],
    [gst_cv_tcltk_libs],
@@ -249,7 +250,20 @@ GST_PACKAGE_ENABLE([Browser], [browser])
 GST_PACKAGE_ENABLE([Complex], [complex])
 GST_PACKAGE_ENABLE([Continuations], [continuations])
 GST_PACKAGE_ENABLE([DebugTools], [debug])
-GST_PACKAGE_ENABLE([DB], [db])
+
+GST_PACKAGE_ENABLE([DBD-MySQL], [dbd-mysql])
+AC_MSG_CHECKING([whether to run MySQL tests])
+AC_ARG_ENABLE(mysql-tests,
+[  --enable-mysql-tests=USER:PWD:DATABASE
+                          test MySQL bindings [default=root:root:test]], ,
+[enable_mysql_tests=no])
+AC_SUBST(enable_mysql_tests)
+
+GST_PACKAGE_ENABLE([DBD-PostgreSQL], [dbd-postgresql],
+   [GST_HAVE_LIB(pq, PQconnectdb)],
+   [ac_cv_lib_pq_PQconnectdb])
+GST_PACKAGE_ENABLE([DBI], [dbi])
+
 GST_PACKAGE_ENABLE([GDBM], [gdbm],
    [AC_CHECK_HEADER([gdbm.h])],
    [ac_cv_header_gdbm_h],
@@ -295,14 +309,6 @@ GST_PACKAGE_ENABLE([Iconv], [iconv],
   [Makefile], [iconv.la])
 GST_PACKAGE_ENABLE([Java], [java])
 GST_PACKAGE_ENABLE([Digest], [digest], [], [], [Makefile], [digest.la])
-
-GST_PACKAGE_ENABLE([MySQL], [mysql])
-AC_MSG_CHECKING([whether to run MySQL tests])
-AC_ARG_ENABLE(mysql-tests,
-[  --enable-mysql-tests=USER:PWD:DATABASE
-                          test MySQL bindings [default=root:root:test]], ,
-[enable_mysql_tests=no])
-AC_SUBST(enable_mysql_tests)
 
 GST_PACKAGE_ENABLE([NCurses],
   [ncurses],

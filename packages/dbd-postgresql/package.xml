@@ -1,0 +1,16 @@
+<package>
+  <name>DBD-PostgreSQL</name>
+  <prereq>DBI</prereq>
+  <namespace>DBI.PostgreSQL</namespace>
+  <library>libpq</library>
+
+  <filein>Connection.st</filein>
+  <filein>ResultSet.st</filein>
+  <filein>Row.st</filein>
+  <filein>ColumnInfo.st</filein>
+
+  <file>Connection.st</file>
+  <file>ResultSet.st</file>
+  <file>Row.st</file>
+  <file>ColumnInfo.st</file>
+</package>

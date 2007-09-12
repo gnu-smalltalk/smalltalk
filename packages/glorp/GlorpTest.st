@@ -2233,7 +2233,7 @@ defaultMysqlLogin
     	database: MySQLPlatform new;
 	username: user;
 	password: password;
-	connectString: db! !
+	connectString: 'dbi:MySQL:dbname=', db! !
 
 !GlorpDatabaseLoginResource class methodsFor: 'LICENSE'!
 
