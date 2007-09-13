@@ -1,3 +1,7 @@
+2007-09-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp.inl: Fix 64-bit cleanliness error.
+
 2007-09-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/save.c: Open image file with r+ and truncate it afterwards.
