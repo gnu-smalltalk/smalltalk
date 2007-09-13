@@ -193,7 +193,12 @@ copyFrom: start to: stop
      start-th and to the stop-th"
 
     | len |
-    stop < start ifTrue: [^self copyEmpty: 0].
+    stop < start ifTrue: [
+        stop = (start - 1) ifTrue: [^self copyEmpty: 0].
+        ^SystemExceptions.ArgumentOutOfRange
+            signalOn: stop
+            mustBeBetween: start - 1 and: self size ].
+
     len := stop - start + 1.
     ^(self copyEmpty: len)
 	replaceFrom: 1 to: len with: self startingAt: start;

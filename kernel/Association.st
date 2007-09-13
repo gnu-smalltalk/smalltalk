@@ -90,9 +90,13 @@ value
 
 = anAssociation
     "Answer whether the association's key and value are the same as
-     anAssociation's, or false if anAssociation is not an Association"
-    ^self class == anAssociation class and: [
-	self key = anAssociation key and: [ self value = anAssociation value ] ]
+     anAssociation's, or false if anAssociation is not an Association.
+     As a special case, identical values are considered equal even if
+     #= returns false (as is the case for NaN floating-point values)."
+    self class == anAssociation class ifFalse: [ ^false ].
+    self key = anAssociation key ifFalse: [ ^false ].
+    self value == anAssociation value ifTrue: [ ^true ].
+    ^self value = anAssociation value
 !
 
 hash

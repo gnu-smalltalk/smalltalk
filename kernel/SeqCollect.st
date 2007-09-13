@@ -518,16 +518,19 @@ copyReplaceFrom: start to: stop withObject: anObject
 copyFrom: start
     "Answer a new collection containing all the items in the receiver from the
      start-th."
-    | sz |
-    start > (sz := self size) ifTrue: [^self copyEmpty: 0].
-    ^self copyFrom: (start max: 1) to: sz!
+    ^self copyFrom: start to: self size!
 
 copyFrom: start to: stop
     "Answer a new collection containing all the items in the receiver from the
      start-th and to the stop-th"
 
     | len coll |
-    stop < start ifTrue: [^self copyEmpty: 0].
+    stop < start ifTrue: [
+	stop = (start - 1) ifTrue: [^self copyEmpty: 0].
+        ^SystemExceptions.ArgumentOutOfRange
+            signalOn: stop
+            mustBeBetween: start - 1 and: self size ].
+
     len := stop - start + 1.
     coll := self copyEmpty: len + 10.
     self from: start to: stop do: [ :each | coll add: each ].
