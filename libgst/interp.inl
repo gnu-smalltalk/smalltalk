@@ -86,7 +86,7 @@ mul_with_check (intptr_t a, intptr_t b)
   /* This fallback method uses a division to do overflow check */
   else
     {
-      if COMMON ((a | b) < (1L << (ST_INT_SIZE / 2))
+      if COMMON (((uintptr_t) (a | b)) < (1L << (ST_INT_SIZE / 2))
 	         || b == 0
 	         || result / b == a)
         return (result);
