@@ -56,6 +56,11 @@
 #ifndef GST_OOP_H
 #define GST_OOP_H
 
+/* Define this flag to disable blacking of grey pages (that is, the
+   entire oldspace is scanned to look for reachable newspace objects).
+   This is also necessary to run valgrind on GNU Smalltalk.  */
+/* #define NO_SIGSEGV_HANDLING */
+
 #define NUM_CHAR_OBJECTS	256
 #define NUM_BUILTIN_OBJECTS	3
 #define FIRST_OOP_INDEX		(-NUM_CHAR_OBJECTS-NUM_BUILTIN_OBJECTS)

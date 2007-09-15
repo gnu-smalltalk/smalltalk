@@ -828,7 +828,11 @@ buffer_read_init (int imageFd, int numBytes)
   file_pos = 0;
 
 #ifndef WIN32
+#ifdef NO_SIGSEGV_HANDLING
+  buf = mmap (NULL, file_size, PROT_READ|PROT_WRITE, MAP_PRIVATE, imageFd, 0);
+#else
   buf = mmap (NULL, file_size, PROT_READ, MAP_PRIVATE, imageFd, 0);
+#endif
 
   if (buf != (PTR) -1)
     {

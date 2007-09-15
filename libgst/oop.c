@@ -74,11 +74,6 @@
 /* Define this flag to disable incremental garbage collection */
 /* #define NO_INCREMENTAL_GC */
 
-/* Define this flag to disable blacking of grey pages (that is, the
-   entire oldspace is scanned to look for reachable newspace objects).
-   This is also necessary to run valgrind on GNU Smalltalk.  */
-/* #define NO_SIGSEGV_HANDLING */
-
 /* Define this flag to turn on debugging code for oldspace management */
 /* #define MMAN_DEBUG_OUTPUT */
 
