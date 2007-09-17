@@ -122,6 +122,7 @@ subclass: structName declaration: array
 
 declaration
     "Return the description of the fields in the receiver class."
+    declaration isNil ifTrue: [ declaration := #() ].
     ^declaration
 !
 
@@ -135,7 +136,7 @@ declaration: array inject: startOffset into: aBlock
      old offset plus the new field's size is passed to aBlock,
      together with the new field's alignment requirements."
     | offset maxAlignment inspStr |
-    (declaration notNil and: [ declaration ~= array ])
+    (self declaration notEmpty and: [ self declaration ~= array ])
 	ifTrue: [ self error: 'cannot redefine CStruct/CUnion' ].
 
     declaration := array.

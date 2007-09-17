@@ -1,3 +1,7 @@
+2007-09-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Fix GC problem with attributes.
+
 2007-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.h: Move NO_SIGSEGV_HANDLING...

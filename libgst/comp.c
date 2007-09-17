@@ -2372,20 +2372,21 @@ _gst_make_attribute (tree_node attribute_keywords)
        i++, keyword = keyword->v_list.next)
     {
       tree_node value = keyword->v_list.value;
+      OOP result;
       if (value->nodeType != TREE_CONST_EXPR)
 	{
-          OOP result = _gst_execute_statements (NULL, value, UNDECLARED_NONE,
-					        true);
-          value = _gst_make_oop_constant (&value->location, result);
+          result = _gst_execute_statements (NULL, value, UNDECLARED_NONE, true);
           if (!result)
 	    {
 	      _gst_had_error = true;
 	      return _gst_nil_oop;
 	    }
 	}
+      else
+	result = _gst_make_constant_oop (value);
 
       argsArray = OOP_TO_OBJ (argsArrayOOP);
-      argsArray->data[i] = _gst_make_constant_oop (value);
+      argsArray->data[i] = result;
     }
 
   messageOOP = _gst_message_new_args (selectorOOP, argsArrayOOP);

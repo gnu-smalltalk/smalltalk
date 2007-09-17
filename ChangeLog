@@ -1,3 +1,10 @@
+2007-09-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CStruct.st: Use lazy initialization for declaration.  Allow
+	replacing an empty declaration.
+	* kernel/Metaclass.st: Mutate the class object if the list of class-
+	instance variables changes.
+
 2007-09-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Association.st: Treat identical values as equal.
