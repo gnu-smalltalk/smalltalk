@@ -1,3 +1,8 @@
+2007-09-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Metaclass.st: Mutate the class object if the list of class-
+	instance variables changes.
+
 2007-09-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFS.st: Use lazy initialization for Registry.

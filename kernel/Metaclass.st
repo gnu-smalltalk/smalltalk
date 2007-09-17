@@ -291,24 +291,32 @@ name: className
 		    shape: shape
 	    ].
 
+    "Now add/remove pool dictionaries.  FIXME: They may affect name binding,
+     so we should probably recompile everything if they change."
     aClass sharedPoolDictionaries isNil 
-	ifTrue: [ aClass setSharedPools: sharedPoolNames ]
+	ifTrue: [
+	    aClass setSharedPools: sharedPoolNames ]
 	ifFalse: [
 	    sharedPoolNames do: [ :dict |
-		(aClass sharedPoolDictionaries includes: dict)
-		    ifFalse: [ aClass addSharedPool: dict ]
-	    ].
+		(aClass sharedPoolDictionaries includes: dict) ifFalse: [
+		    aClass addSharedPool: dict ] ].
 
 	    aClass sharedPoolDictionaries copy do: [ :dict |
-		(sharedPoolNames includes: dict)
-		    ifFalse: [
+		(sharedPoolNames includes: dict) ifFalse: [
 			aClass removeSharedPool: dict.
-			needToRecompileMetaclasses := true
-		    ]
-	    ]
+			needToRecompileMetaclasses := true ] ]
 	].
 
     (aClass superclass ~~ superclass) ifTrue: [
+	"Mutate the class if the set of class-instance variables changes."
+	(self superclass allInstVarNames ~= superclass class allInstVarNames)
+	    ifTrue: [
+		aClass class
+		    updateInstanceVars:
+			superclass class allInstVarNames,
+			aClass class instVarNames
+		    shape: aClass class shape ].
+
 	"Fix references between classes..."
 	aClass superclass removeSubclass: aClass.
 	superclass addSubclass: aClass.
@@ -320,6 +328,7 @@ name: className
 	superclass class addSubclass: self.
 	self superclass: superclass class.
 	needToRecompileMetaclasses := true.
+
     ].
 
     aClass category: categoryName.
@@ -483,7 +492,6 @@ growClassInstance
     | newClass numInstVars |
     newClass := self new.
     numInstVars := self instSize.
-    numInstVars printNl.
     1 to: numInstVars - 1 do:
 	[ :i | newClass instVarAt: i put: 
 		   (instanceClass instVarAt: i) ].
