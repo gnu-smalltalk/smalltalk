@@ -29,7 +29,7 @@ install-data-hook:: $1.star
 uninstall-local::
 	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=$(gstdatadir) --destdir=$(DESTDIR) --uninstall $(DESTDIR)$(gstdatadir)/$1.star
 
--include $(srcdir)/_GST_PKG_STAMP
+-include $(srcdir)/_GST_PKG_MK
 all-local: $1.star
 EOF
   m4_if([$3], [], [], 
@@ -55,6 +55,7 @@ AC_DEFUN([GST_PACKAGE_ENABLE], [
   m4_define([_GST_PKG_XML], [_GST_PKG_DIR/package.xml])dnl
   m4_define([_GST_PKG_DISTDIR], [$(distdir)/_GST_PKG_DIR])dnl
   m4_define([_GST_PKG_STAMP], [_GST_PKG_DIR/stamp-classes])dnl
+  m4_define([_GST_PKG_MK], [_GST_PKG_DIR/Makefile.frag])dnl
   m4_define([_GST_PKG_XML_IN],
 	    [_GST_PKG_IF_FILE([$5], [package.xml],
 			      [$(srcdir)/_GST_PKG_DIR/package.xml.in],
@@ -72,17 +73,18 @@ clean-local::
 dist-hook:: _GST_PKG_XML
 	$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=_GST_PKG_DISTDIR --dist $<
 
-dist-hook:: $(srcdir)/_GST_PKG_STAMP
-	cp -p $< _GST_PKG_DISTDIR/stamp-classes
+dist-hook:: $(srcdir)/_GST_PKG_STAMP $(srcdir)/_GST_PKG_MK
+	cp -p $(srcdir)/_GST_PKG_STAMP _GST_PKG_DISTDIR/stamp-classes
+	cp -p $(srcdir)/_GST_PKG_MK _GST_PKG_DISTDIR/Makefile.frag
 
-$(srcdir)/_GST_PKG_STAMP:: _GST_PKG_XML_IN
+$(srcdir)/_GST_PKG_MK: _GST_PKG_XML_IN
 	(echo '$1_FILES = \'; \
 	  $(GST_[]PACKAGE) --srcdir=$(srcdir) --vpath --list-files $1 $< | \
 	    tr -d \\r | tr \\n " "; \
 	echo; \
 	echo '$$($1_FILES):'; \
-	echo '$$(srcdir)/_GST_PKG_STAMP:: $$($1_FILES)'; \
-	echo '	touch $$(srcdir)/_GST_PKG_STAMP') > $(srcdir)/_GST_PKG_STAMP
+	echo '$$(srcdir)/_GST_PKG_STAMP: $$($1_FILES)'; \
+	echo '	touch $$(srcdir)/_GST_PKG_STAMP') > $(srcdir)/_GST_PKG_MK
 EOF
 
     m4_if([$4], [],
