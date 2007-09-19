@@ -89,6 +89,19 @@ on: aCollection do: aBlock
      passing the generator and the item."
     ^self on: [ :gen |
 	aCollection do: [ :each | aBlock value: gen value: each ] ]
+!
+
+inject: aValue into: aBlock
+    "Return an infinite generator; the first item is aValue, the following
+     items are obtained by passing the previous value to aBlock."
+    ^self on: [ :gen |
+        | last |
+        last := aValue.
+        [
+            gen yield: last.
+            last := aBlock value: last
+        ] repeat
+    ]
 ! !
 
 !Generator methodsFor: 'stream protocol'!

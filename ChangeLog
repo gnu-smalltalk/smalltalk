@@ -1,5 +1,9 @@
 2007-09-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Generator.st: Added #inject:into: on the class side.
+
+2007-09-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/LargeInt.st: Avoid #|.
 
 2007-09-17  Paolo Bonzini  <bonzini@gnu.org>
