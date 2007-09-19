@@ -291,7 +291,11 @@ make_re_results (OOP srcOOP, struct pre_registers *regs)
   results->fromOOP = FROM_INT (regs->beg[0] + 1);
   results->toOOP = FROM_INT (regs->end[0]);
   if (regs->num_regs > 1)
-    results->registersOOP = _gst_object_alloc (_gst_array_class, regs->num_regs - 1);
+    {
+      OOP registersOOP = _gst_object_alloc (_gst_array_class, regs->num_regs - 1);
+      results = (gst_registers) OOP_TO_OBJ (resultsOOP);
+      results->registersOOP = registersOOP;
+    }
 
   for (i = 1; i < regs->num_regs; i++)
     {

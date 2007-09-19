@@ -1,3 +1,7 @@
+2007-09-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/LargeInt.st: Avoid #|.
+
 2007-09-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CStruct.st: Use lazy initialization for declaration.  Allow

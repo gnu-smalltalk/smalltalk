@@ -1,3 +1,7 @@
+2007-09-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/re.c: Yet another GC problem.
+
 2007-09-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Fix GC problem with attributes.

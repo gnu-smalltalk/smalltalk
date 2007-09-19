@@ -158,7 +158,7 @@ from: byteArray
 	    ifFalse: [
 		"Check if the current byte is spurious AND has the same
 		 sign as the previous"
-		((byte = 0) | (byte = 255)) and: [
+		(byte = 0 or: [ byte = 255 ]) and: [
 		    (byte bitXor: (byteArray at: lastSignificant - 1)) < 128]
 	    ]
 
