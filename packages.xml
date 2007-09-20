@@ -67,6 +67,7 @@
   <file>Lisp.st</file>
   <file>Queens.st</file>
   <file>DeltaBlue.st</file>
+  <file>JSON.st</file>
   <file>Richards.st</file>
   <file>Bench.st</file>
   <file>MiniDebugger.st</file>

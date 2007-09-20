@@ -106,12 +106,6 @@ o   Added #from: to Collection, which constructs an instance of the class
     returns a string and is the same as using #, repeatedly, but is more
     efficient.
 
-o   A new package DebugTools provides a generic Debugger class that can
-    be used to control an inferior Smalltalk process.  It is used by the
-    textual MiniDebugger as well as the debugger that is part of the GUI.
-
-o   Complex numbers support added (package Complex).
-
 o   Continuations and generators have moved to the base image.  More complex
     examples of continuations still reside in the Continuations package.
 
@@ -132,8 +126,6 @@ o   Image load uses copy-on-write memory mapped files.  This means that, as
     long as a loaded object is not touched, the operating system will map
     it to the same physical memory, for different copies of the GNU Smalltalk
     virtual machine that loaded the same image.
-
-o   MD5 packages renamed to Digest, SHA1 support added.
 
 o   Processes that are garbage collected before they terminate execution (e.g.
     because they are waiting on a semaphore that is also garbage collected)
@@ -176,6 +168,21 @@ o   When declaring a C function, the #returning: argument now supports
 o   The zlib bindings' WriteStream decorator supports partial flushing.
     Class PipeStream is distributed independently as it is not used anymore
     by the zlib bindings.
+
+
+New goodies:
+
+o   A new package DebugTools provides a generic Debugger class that can
+    be used to control an inferior Smalltalk process.  It is used by the
+    textual MiniDebugger as well as the debugger that is part of the GUI.
+
+o   Complex numbers support added (package Complex).
+
+o   JSON reader/writer contributed by Robin Redeker.
+
+o   MD5 packages renamed to Digest, SHA1 support added.
+
+o   New DBI-like library replacing the old one, contributed by Mike Anderson.
 
 -----------------------------------------------------------------------------
 

@@ -1,3 +1,7 @@
+2007-09-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/JSON.st: New, by Robin Redeker.
+
 2007-09-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Generator.st: Added #inject:into: on the class side.
