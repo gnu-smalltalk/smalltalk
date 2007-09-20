@@ -343,14 +343,14 @@ Examples:
 When a fatal signal occurs, produce a core dump before terminating.
 Without this option, only a backtrace is provided.
 
-@item -d
+@item -D
 @itemx --declaration-trace
 Print the class name, the method name, and the byte codes that the
 compiler generates as it compiles methods.  Only applies to files that
 are named explicitly on the command line, unless the flag is given
 multiple times on the command line.
 
-@item -e
+@item -E
 @itemx --execution-trace
 Print the byte codes being executed as the interpreter operates.  Only
 works for statements explicitly issued by the user (either interactively
