@@ -87,7 +87,9 @@
 # define REG_AVAILABILITY 0
 # define __DECL_REG1 __asm("%esi")
 # define __DECL_REG2 __asm("%edi")
-# if defined __PIC__ || defined __pic__
+# if defined __APPLE__
+#  define __DECL_REG3 /* bug on Apple GCC? */
+# elif defined __PIC__ || defined __pic__
 #  define __DECL_REG3 __asm("%edx")   /* Don't conflict with GOT pointer... */
 # else
 #  define __DECL_REG3 __asm("%ebx")   /* ...but prefer a callee-save reg.  */
@@ -151,7 +153,7 @@
 # define REG_AVAILABILITY 1
 #endif
 
-#if !defined(__GNUC__) || !defined(__DECL_REG1)
+#if !defined(__GNUC__) || !defined(__DECL_REG1) || !defined(__OPTIMIZE__)
 # define REGISTER(reg, decl)	register decl
 #else
 # define __DECL_REG(k)		k
