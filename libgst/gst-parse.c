@@ -900,6 +900,7 @@ parse_class (tree_node list)
 {
   const char* name;
   OOP currentOOP = _gst_current_namespace;
+  tree_node next; 
 
   if (strcmp (list->v_list.name, "nil") == 0)
       return _gst_nil_oop;
@@ -915,9 +916,8 @@ parse_class (tree_node list)
 	  return NULL;
 	}
 
-      list = list->v_list.next;
-
-      if (list == NULL)
+      next = list->v_list.next;
+      if (next == NULL)
 	{
 	  if (!_gst_object_is_kind_of (currentOOP, _gst_class_class)) 
 	    {
@@ -937,6 +937,7 @@ parse_class (tree_node list)
 	      return NULL;
 	    }
 	}
+      list = next;
     }
   while (list != NULL);
 		

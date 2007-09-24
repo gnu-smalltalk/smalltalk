@@ -1,5 +1,10 @@
 2007-09-24  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/gst-parse.c: Fix NULL dereference on Smalltalk subclass:
+	Foo [ ].
+
+2007-09-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/md-config.h: Disable register allocation tricks if not
 	optimizing, as well as third register on Apple compilers.
 
