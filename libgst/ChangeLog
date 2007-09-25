@@ -1,3 +1,7 @@
+2007-09-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/re.c: Cache any read-only string literal.
+
 2007-09-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.c: Fix NULL dereference on Smalltalk subclass:

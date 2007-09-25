@@ -154,13 +154,7 @@ lookupRegex (OOP patternOOP, struct pre_pattern_buffer **pRegex)
   int i;
   RegexCaching result;
 
-  if (!regexClassOOP)
-    {
-      regexClassOOP = _gst_class_name_to_oop ("Regex");
-      resultsClassOOP = _gst_class_name_to_oop ("Kernel.MatchingRegexResults");
-    }
-
-  if (OOP_CLASS (patternOOP) != regexClassOOP)
+  if (!IS_OOP_READONLY (patternOOP))
     {
       *pRegex = allocateNewRegex ();
       return REGEX_NOT_CACHED;
@@ -218,7 +212,7 @@ _gst_re_make_cacheable (OOP patternOOP)
       resultsClassOOP = _gst_class_name_to_oop ("Kernel.MatchingRegexResults");
     }
 
-  if (OOP_CLASS (patternOOP) == regexClassOOP)
+  if (!IS_OOP_READONLY (patternOOP))
     return patternOOP;
 
   /* Search in the cache */
@@ -284,6 +278,12 @@ make_re_results (OOP srcOOP, struct pre_registers *regs)
   int i;
   if (!regs->beg || regs->beg[0] == -1)
     return _gst_nil_oop;
+
+  if (!regexClassOOP)
+    {
+      regexClassOOP = _gst_class_name_to_oop ("Regex");
+      resultsClassOOP = _gst_class_name_to_oop ("Kernel.MatchingRegexResults");
+    }
 
   resultsOOP = _gst_object_alloc (resultsClassOOP, 0);
   results = (gst_registers) OOP_TO_OBJ (resultsOOP);
