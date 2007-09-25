@@ -410,3 +410,9 @@ ffi_closure_unix64:
 .LEFDE3:
 
 #endif /* __x86_64__ */
+
+
+#ifdef __ELF__
+.section .note.GNU-stack,"",%progbits
+#endif
+

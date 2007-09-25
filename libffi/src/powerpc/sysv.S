@@ -217,3 +217,9 @@ END(ffi_call_SYSV)
       .align 2
 .LEFDE1:
 #endif
+
+
+#ifdef __ELF__
+.section .note.GNU-stack,"",%progbits
+#endif
+
