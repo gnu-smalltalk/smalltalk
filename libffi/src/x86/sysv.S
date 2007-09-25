@@ -431,3 +431,9 @@ ffi_closure_raw_SYSV:
 #endif
 
 #endif /* ifndef __x86_64__ */
+
+
+#ifdef __ELF__
+.section .note.GNU-stack,"",%progbits
+#endif
+
