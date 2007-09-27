@@ -5480,12 +5480,14 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 
     case PRIM_SHUTDOWN_WRITE:
       shutdown (fd, 1);
+#ifdef ENOTSOCK
       if (errno == ENOTSOCK && isatty (fd))
 	{
 	  char buf[1];
 	  write (fd, buf, 0);
 	  errno == 0;
 	}
+#endif
       break;
     }
 

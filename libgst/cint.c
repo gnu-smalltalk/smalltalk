@@ -232,6 +232,7 @@ static int my_lstat (const char *name,
 		     gst_stat * out);
 static int my_putenv (const char *str);
 static int my_chdir (const char *str);
+static int my_symlink(const char* oldpath, const char* newpath);
 static DIR *my_opendir (const char *str);
 static char *extract_dirent_name (struct dirent *dir);
 
@@ -531,7 +532,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("rewinddir", rewinddir);
   _gst_define_cfunc ("extractDirentName", extract_dirent_name);
 
-  _gst_define_cfunc ("symlink", symlink);
+  _gst_define_cfunc ("symlink", my_symlink);
   _gst_define_cfunc ("unlink", unlink);
   _gst_define_cfunc ("rename", rename);
   _gst_define_cfunc ("rmdir", rmdir);
@@ -1244,3 +1245,10 @@ _gst_restore_cfunc_descriptor (OOP cFuncDescOOP)
   xfree (funcName);
   SET_COBJECT_VALUE (desc->cFunction, cfi);
 }
+
+int
+my_symlink (const char* oldpath, const char* newpath)
+{
+  return symlink (oldpath,  newpath);
+}
+ 

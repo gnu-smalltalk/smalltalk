@@ -1,3 +1,10 @@
+2007-09-27  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Wrap symlink to avoid errors in case the prototype
+	is absent.
+	* libgst/prims.def: Disable ENOTSOCK checking if constant not defined.
+
 2007-09-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Fix GC problem with attributes.
