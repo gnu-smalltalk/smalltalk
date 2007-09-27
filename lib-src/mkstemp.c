@@ -28,40 +28,48 @@
 #include <limits.h>
 #include <errno.h>
 
-/* Generate a unique temporary file name from template.  The last six characters of
-   template must be XXXXXX and these are replaced with a string that makes the
-   filename unique. */
+/* Generate a unique temporary file name from template.  The last six characters
+   of template must be XXXXXX and these are replaced with a string that makes
+   the filename unique. */
 
 int
 mkstemp (template)
      char *template;
 {
-  int i, j, n, fd;
-  char *data = template + strlen(template) - 6;
+  int i, j, n, fd, save_errno;
+  char *data = template + strlen (template) - 6;
+  save_errno = errno;
 
-  if (data < template) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  for (n = 0; n <= 5; n++)
-    if (data[n] != 'X') {
+  if (data < template)
+    {
       errno = EINVAL;
       return -1;
     }
 
-  for (i = 0; i < INT_MAX; i++) {
-    j = i ^ 827714841;             /* Base 36 DOSSUX :-) */
-    for (n = 5; n >= 0; n--) {
-      data[n] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" [j % 36];
-      j /= 36;
+  for (n = 0; n <= 5; n++)
+    if (data[n] != 'X')
+      {
+	errno = EINVAL;
+	return -1;
+      }
+
+  for (i = 0; i < INT_MAX; i++)
+    {
+      j = i ^ 827714841;	/* Base 36 DOSSUX :-) */
+      for (n = 5; n >= 0; n--)
+	{
+	  data[n] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"[j % 36];
+	  j /= 36;
+	}
+
+      fd = open (template, O_CREAT | O_EXCL | O_RDWR, 0600);
+      if (fd != -1)
+	{
+	  errno = save_errno;
+	  return fd;
+	}
     }
 
-    fd = open (template, O_CREAT|O_EXCL|O_RDWR, 0600);
-    if (fd != -1)
-      return fd;
-  }
-    
   errno = EEXIST;
   return -1;
 }

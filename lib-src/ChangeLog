@@ -1,3 +1,9 @@
+2007-09-27  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/symlink.c: New.
+	* lib-src/mkstemp.c: Save old errno upon success.
+
 2007-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/sha1.c: New.
