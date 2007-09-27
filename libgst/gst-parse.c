@@ -880,19 +880,30 @@ parse_scoped_method (gst_parser *p, OOP classOOP)
   else
     _gst_errorf ("expected `>>'");
   
-  if (_gst_class_is_kind_of (classOOP, class))
+  if (!class)
+    {
+      _gst_skip_compilation = true;
+      class = classOOP;
+    }
+
+  else if (!_gst_class_is_kind_of (classOOP, class))
+    {
+      _gst_skip_compilation = true;
+      _gst_errorf ("%#O is not %#O or one of its superclasses",
+		   ((gst_class) OOP_TO_OBJ (class))->name,
+		   ((gst_class) OOP_TO_OBJ (classOOP))->name);
+    }
+
+  else
     {
       if (class_method) 
-	  class = OOP_CLASS (class);
-
-      _gst_set_compilation_class (class);
-      parse_method (p, ']');
-      _gst_reset_compilation_category ();
+	class = OOP_CLASS (class);
     }
-  else
-    _gst_errorf ("%O is not %O or one of its superclasses",
-		 ((gst_class) OOP_TO_OBJ (class))->name,
-		 ((gst_class) OOP_TO_OBJ (classOOP))->name);
+
+  _gst_set_compilation_class (class);
+  parse_method (p, ']');
+  _gst_reset_compilation_category ();
+  _gst_skip_compilation = false;
 }
 
 static OOP

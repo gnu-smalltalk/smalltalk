@@ -1,3 +1,8 @@
+2007-09-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gst-parse.c: Strengthen error checking for wrong
+	"Class >> method [ ... ]" stanzas.
+
 2007-09-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/re.c: Cache any read-only string literal.
