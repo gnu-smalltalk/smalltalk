@@ -499,7 +499,7 @@ xpmParseHeader (XpmData * mdata)
       l = xpmNextWord (mdata, buf, BUFSIZ);
       if (!l)
 	return (TCL_ERROR);	/* File Invalid */
-      ptr = index (buf, '_');
+      ptr = strchr (buf, '_');
       if (!ptr || strncmp ("_format", ptr, l - (ptr - buf)))
 	return (TCL_ERROR);	/* File Invalid */
       /* this is definitely an XPM 1 file */
@@ -624,7 +624,7 @@ xpmParseValues (XpmData * data, unsigned int *width, unsigned int *height,
 	  l = xpmNextWord (data, buf, BUFSIZ);
 	  if (!l)
 	    return (TCL_ERROR);	/* File invalid */
-	  ptr = index (buf, '_');
+	  ptr = strchr (buf, '_');
 	  if (!ptr)
 	    return (TCL_ERROR);	/* File invalid */
 	  switch (l - (ptr - buf))

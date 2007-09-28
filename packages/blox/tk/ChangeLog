@@ -1,3 +1,7 @@
+2007-09-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* BloxTK.c: Use strchr, not index.
+
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* BloxBasic.st: Use #%.
