@@ -176,7 +176,7 @@ dist_noinst_DATA += \
 #
 ###########################################################
 
--include $(srcdir)/kernel/stamp-classes
+-include $(srcdir)/kernel/Makefile.frag
 all-local: $(srcdir)/kernel/stamp-classes
 
 # The slow rule for building the stamp-classes files uses gst-package, and
@@ -185,13 +185,13 @@ all-local: $(srcdir)/kernel/stamp-classes
 # could actually do without double-colon rules by using another stamp file
 # which depends on packages.xml and rebuilds all the stamp-classes files.
 
-$(srcdir)/kernel/stamp-classes:: $(srcdir)/packages.xml
-	(echo '$$(srcdir)/kernel/stamp-classes:: \'; \
+$(srcdir)/kernel/Makefile.frag: $(srcdir)/packages.xml
+	(echo '$$(srcdir)/kernel/stamp-classes: \'; \
 	  $(GST_PACKAGE) --list-files Kernel --vpath --srcdir="$(srcdir)" $(srcdir)/packages.xml | \
 	    tr -d \\r | tr \\n ' '; \
 	echo; \
 	echo '	touch $$(srcdir)/kernel/stamp-classes') \
-	  > $(srcdir)/kernel/stamp-classes
+	  > $(srcdir)/kernel/Makefile.frag
 
 all-local:
 clean-local::

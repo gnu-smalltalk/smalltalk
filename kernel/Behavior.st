@@ -920,7 +920,7 @@ shape: shape
     shape = #word ifTrue: [
 	realShape := CSymbols.CLongSize = 4 ifTrue: [ #uint ] ifFalse: [ #uint64 ] ].
     shape = #inherit ifTrue: [
-	realShape := self superclass shape ]
+	realShape := self superclass shape ].
 
     self shape == realShape ifTrue: [ ^false ].
     realShape isNil
