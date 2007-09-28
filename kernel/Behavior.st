@@ -908,13 +908,19 @@ shapes
 
 shape: shape
     "Give the provided shape to the receiver's instances.
-     The shape can be nil, or one of #byte #int8 #character #short
-     #ushort #int #uint #int64 #uint64 #utf32 #float #double or #pointer."
+     The shape can be nil, or one of #byte #int8 #character #short #word
+     #ushort #int #uint #int64 #uint64 #utf32 #float #double or #pointer.
+     In addition, the special value #inherit means to use the shape of the
+     superclass; note however that this is a static setting, and subclasses
+     that used #inherit are not mutated when the superclass adopts a different
+     shape."
 
     | realShape |
-    realShape := shape == #word
-	ifTrue: [ CSymbols.CLongSize = 4 ifTrue: [ #uint ] ifFalse: [ #uint64 ] ]
-	ifFalse: [ shape ].
+    realShape := shape.
+    shape = #word ifTrue: [
+	realShape := CSymbols.CLongSize = 4 ifTrue: [ #uint ] ifFalse: [ #uint64 ] ].
+    shape = #inherit ifTrue: [
+	realShape := self superclass shape ]
 
     self shape == realShape ifTrue: [ ^false ].
     realShape isNil

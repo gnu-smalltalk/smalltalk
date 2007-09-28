@@ -2122,8 +2122,10 @@ is not practical.  Why not add a subclass?
 
 @example
    Array subclass: NiledArray [
-       "We could even write <shape: Array shape> here!"
-       <shape: #pointer>
+       "We could write <shape: #pointer>, but we just use the same shape
+        as the superclass.  That's a good idea because the superclass
+        instance creation methods should work if we do not change the shape."
+       <shape: #inherit>
 
        boundsCheck: index [
            ^(index < 1) | (index > (self basicSize))
@@ -2652,19 +2654,17 @@ type of array which a String uses.
 Aha!  But when you go back to chapter 9 and look at the
 Smalltalk hierarchy, you notice that String does not inherit
 from ByteArray.  To see why, we must delve down yet another
-level, and arrive at the basic methods for creating a
-class.
+level, and arrive at the basic methods for setting up the
+structure of the instances of a class.
 
 When we implemented our NiledArray example, we used
-@code{<shape: #pointer>}.  This special kind
-of class creation (and the other uses of @code{shape:} we'll show
-shortly) defines the fundamental structure of Smalltalk
-objects created within a given class.  Let's consider the
-differences in the next sub-sections.
+@code{<shape: #inherit>}.  The shape is exactly that:
+the fundamental structure of Smalltalk objects created within a given
+class.  Let's consider the differences in the next sub-sections.
 
 @table @asis
 @item Nothing
-The default kind of class creation specifies the simplest
+The default shape specifies the simplest
 Smalltalk object.  The object consists only of the storage
 needed to hold the instance variables.  In C, this would be
 a simple structure with zero or more scalar fields.@footnote{C
@@ -2698,9 +2698,11 @@ places in Smalltalk.
 The storage allocated as specified by new: is an array of characters.
 The analog in C would be a dynamically allocated structure with
 scalar fields, followed by a array of @code{char}.
-
-There are many more shapes for more specialized usage.
 @end table
+
+There are many more shapes for more specialized usage.  All of them
+specify the same kind of ``array-like'' behavior, with different
+data types.
 
 How to access this new arrays?  You already know how to access instance
 variables---by name.  But there doesn't seem to be a name for this new
@@ -2708,7 +2710,7 @@ storage.  The way an object accesses it is to send itself
 array-type messages like @code{at:}, @code{at:put:}, and so forth.
 
 The problem is when an object wants to add a new level
-of interpretation to the at: and at:put: messages.  Consider
+of interpretation to these messages.  Consider
 a Dictionary---it is a pointer-holding object
 but its @code{at:} message is in terms of a key, not an integer
 index of its storage.  Since it has redefined the @code{at:} message, how
