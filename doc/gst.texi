@@ -440,15 +440,6 @@ path.  This option completely bypasses checking the file dates on the
 kernel files; use @option{--maybe-rebuild-image} to restore the usual
 behavior, writing the newly built image to @var{file} if needed.
 
-@item -l
-@itemx --log-changes
-Log compiled Smalltalk code to st-changes.st, in the current working
-directory.
-
-@item -L @var{file}
-@itemx --log-file @var{file}
-Log compiled Smalltalk code to the file named @var{file}.
-
 @item -q
 @itemx --quiet
 @itemx --silent
