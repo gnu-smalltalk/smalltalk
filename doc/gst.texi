@@ -414,14 +414,6 @@ Use the image file named @var{file} as the image file to load.
 Completely bypasses checking the file dates on the kernel files and
 standard image file.
 
-@item -l --log-changes
-Produce a log of the compiled Smalltalk code to st-changes.st, in the
-current working directory.
-
-@item -L @var{file} --log-file @var{file}
-Produce a log of the compiled Smalltalk code to the file named
-@var{file}.
-
 @item -q --quiet --silent
 Suppress the printing of returned values while @gst{} runs.
 
