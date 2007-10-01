@@ -1,3 +1,9 @@
+2007-10-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/RecursionLock.st: Signal waiting semaphore if a process is
+	terminated inside its critical section.
+	* kernel/Semaphore.st: Likewise.
+
 2007-09-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Behavior.st: Add #inherit shape.

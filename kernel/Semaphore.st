@@ -67,7 +67,9 @@ forMutualExclusion
 critical: aBlock
     "Wait for the receiver to be free, execute aBlock and signal the receiver
      again. Return the result of evaluating aBlock."
-    self wait.
+
+    "Look out for race conditions!"
+    [ self wait ] on: ProcessBeingTerminated do: [ :ex | self signal. ex pass ].
     ^aBlock ensure: [ self signal ]
 ! !
 

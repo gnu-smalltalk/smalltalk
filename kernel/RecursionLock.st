@@ -99,7 +99,7 @@ critical: aBlock
     self isOwnerProcess ifTrue: [ ^aBlock value ].
 
     "Look out for race conditions!"
-    self enter.
+    [ self enter ] on: ProcessBeingTerminated do: [ :ex | self exit. ex pass ].
     ^aBlock ensure: [ self exit ]
 ! !
 
