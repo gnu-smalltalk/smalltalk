@@ -259,7 +259,7 @@ evaluatorClass
      the currently active parser (the one that parsed the doit that
      sent #methodsFor:, which cannot be so easily changed in the
      current framework) if this method answers nil."
-    ^STInST.STFileInParser
+    ^STInST.GSTFileInParser
 !
 
 parserClass
@@ -279,7 +279,7 @@ fileIn
 	STInST.STSymbolTable nowInsideFileIn.
 	STInST.STEvaluationDriver new
 	    parseSmalltalkStream: self
-	    with: STInST.STFileInParser ]
+	    with: STInST.GSTFileInParser ]
 
 	    ensure: [ STInST.STSymbolTable nowOutsideFileIn ]
 ! !

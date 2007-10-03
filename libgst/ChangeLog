@@ -1,3 +1,7 @@
+2007-10-01  Stephen Compall  <scompall@nocandysw.com>
+
+	* libgst/re.c: Add init_re, registering ASCII case table.
+
 2007-09-27  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
 	    Paolo Bonzini  <bonzini@gnu.org>
 
