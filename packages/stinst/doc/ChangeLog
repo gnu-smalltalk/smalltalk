@@ -1,3 +1,7 @@
+2007-10-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Publish.st: Guess comments in new-syntax methods.
+
 2007-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Publish.st: From examples/Publish.st.  Rename classes.

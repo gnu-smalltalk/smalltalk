@@ -1,3 +1,7 @@
+2007-10-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/GenDoc.st: Use GSTFileInParser.
+
 2007-10-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/RecursionLock.st: Signal waiting semaphore if a process is

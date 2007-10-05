@@ -411,7 +411,7 @@ extractComment: source
 
     ^isCommented
 	ifTrue: [ self reformatComment: comment ]
-	ifFalse: [ self guessComment: source ]
+	ifFalse: [ self guessComment: comment contents ]
 !
 
 guessComment: source
@@ -427,26 +427,31 @@ guessComment: source
 	ifTrue: [ ^'This method''s functionality should be implemented by subclasses of ',
 	    self currentClass asClass printString ].
 
-    n := self skipWhite: 1 on: source.
-    n > source size ifTrue: [ ^'Answer the receiver.' ].
+    n := 1.
+    [
+        n := self skipWhite: n on: source.
+	(n > source size or: [ ']"' includes: (source at: n) ])
+            ifTrue: [ ^'Answer the receiver.' ].
 
-    m := self skipToWhite: n on: source.
-    start := source copyFrom: n to: m - 1.
-
-    m <= source size ifTrue: [
+        m := self skipToWhite: n on: source.
+        start := source copyFrom: n to: m - 1.
 	n := self skipWhite: m on: source.
-	n <= source size ifTrue: [
-	    (source at: n) = $" ifFalse: [
-		(source at: n) = $! ifFalse: [ ^'Not commented.' ]
-	    ]
-	]
-    ].
-    start = '^self'
-	ifTrue: [ ^'Answer the receiver.' ].
 
-    ^(start at: 1) = $^
-	ifTrue: [ 'Answer `', (start copyFrom: 2 to: start size), '''.' ]
-	ifFalse: [ 'Not commented' ]
+        (start notEmpty and: [ (start at: 1) = $^
+		and: [ n > source size
+			  or: [ ']"' includes: (source at: n) ]]]) ifTrue: [
+	    start = '^self'
+		ifTrue: [ ^'Answer the receiver.' ].
+	    ^'Answer `', (start copyFrom: 2 to: start size), '''.' ].
+
+	n <= source size ifTrue: [
+	    (source at: n) = $<
+		ifTrue: [ n := source indexOf: $> startingAt: n ]
+	        ifFalse: [
+		    (']"' includes: (source at: n))
+			ifFalse: [ ^'Not commented.' ] ].
+	    n := n + 1 ].
+    ] repeat
 ! !
 
 
@@ -1255,7 +1260,7 @@ emitSelectorAndMethod: association
         emitMethodSelector: association key;
 	emitCrossReferences: comment;
 	nextPutAll: '@item ';
-	nextPutAllText: (selAndBody at: 1);
+	nextPutAllText: ((selAndBody at: 1) copyWithout: Character nl);
 	nl;
 	nextPutAllText: comment;
 	nl; nl

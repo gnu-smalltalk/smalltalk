@@ -81,7 +81,7 @@ Options:
 	        file := FileStream open: each mode: FileStream read.
 	        loader
 	            parseSmalltalkStream: file
-	            with: STInST.STFileInParser ].
+	            with: STInST.GSTFileInParser ].
 
 	    loader currentNamespace: Smalltalk ].
 
@@ -89,7 +89,7 @@ Options:
 	    file := FileStream open: arg mode: FileStream read.
 	    loader
 	        parseSmalltalkStream: file
-	        with: STInST.STFileInParser ].
+	        with: STInST.GSTFileInParser ].
 
         opt isNil ifTrue: [ classPatterns add: arg ] ]
 
