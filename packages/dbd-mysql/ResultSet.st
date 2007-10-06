@@ -93,7 +93,7 @@ ResultSet subclass: MySQLResultSet [
 	<category: 'cursor access'>
         (anInteger between: 0 and: self size)
             ifTrue: [ index := anInteger ]
-            ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger ]
+            ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger ].
 	^index
     ]
 
