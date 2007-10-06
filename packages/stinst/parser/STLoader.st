@@ -134,6 +134,21 @@ initialize
 	toEvaluate: #subclass:declaration:classVariableNames:poolDictionaries:category:
 	perform: #doSubclass:selector:arguments:;
 
+	toEvaluate: #subclass:instanceVariableNames:classVariableNames:poolDictionaries:
+	perform: #doSubclass:selector:arguments:;
+
+	toEvaluate: #variable:subclass:instanceVariableNames:classVariableNames:poolDictionaries:
+	perform: #doSubclass:selector:arguments:;
+
+	toEvaluate: #variableSubclass:instanceVariableNames:classVariableNames:poolDictionaries:
+	perform: #doSubclass:selector:arguments:;
+
+	toEvaluate: #variableWordSubclass:instanceVariableNames:classVariableNames:poolDictionaries:
+	perform: #doSubclass:selector:arguments:;
+
+	toEvaluate: #variableByteSubclass:instanceVariableNames:classVariableNames:poolDictionaries:
+	perform: #doSubclass:selector:arguments:;
+
 	toEvaluate: #methodsFor:
 	perform: #doMethodsFor:selector:arguments:;
 

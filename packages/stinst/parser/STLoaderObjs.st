@@ -312,6 +312,71 @@ subclass: s declaration: cstructDecl classVariableNames: cvn
 	poolDictionaries: pd
 	category: c) declaration: cstructDecl; yourself!
 
+variableByteSubclass: s instanceVariableNames: ivn classVariableNames: cvn
+	poolDictionaries: pd
+
+    ^LoadedClass
+	superclass: self
+	name: s
+	instanceVariableNames: ivn
+	classVariableNames: cvn
+	poolDictionaries: pd
+	category: ''
+	shape: #byte
+	loader: loader!
+ 
+variableWordSubclass: s instanceVariableNames: ivn classVariableNames: cvn
+	poolDictionaries: pd
+
+    ^LoadedClass
+	superclass: self
+	name: s
+	instanceVariableNames: ivn
+	classVariableNames: cvn
+	poolDictionaries: pd
+	category: ''
+	shape: #word
+	loader: loader!
+ 
+variable: shape subclass: s instanceVariableNames: ivn classVariableNames: cvn
+	poolDictionaries: pd
+
+    ^LoadedClass
+	superclass: self
+	name: s
+	instanceVariableNames: ivn
+	classVariableNames: cvn
+	poolDictionaries: pd
+	category: ''
+	shape: shape
+	loader: loader!
+ 
+variableSubclass: s instanceVariableNames: ivn classVariableNames: cvn
+	poolDictionaries: pd
+
+    ^LoadedClass
+	superclass: self
+	name: s
+	instanceVariableNames: ivn
+	classVariableNames: cvn
+	poolDictionaries: pd
+	category: ''
+	shape: #pointer
+	loader: loader!
+ 
+subclass: s instanceVariableNames: ivn classVariableNames: cvn
+	poolDictionaries: pd
+
+    ^LoadedClass
+	superclass: self
+	name: s
+	instanceVariableNames: ivn
+	classVariableNames: cvn
+	poolDictionaries: pd
+	category: ''
+	shape: nil
+	loader: loader!
+
 subclass: s
 
     ^LoadedClass
@@ -708,8 +773,8 @@ name: aSymbol
     name := aSymbol
 !
 
-initializeFor: aSTLoader
-    super initializeFor: aSTLoader.
+initialize: aSTLoader
+    super initialize: aSTLoader.
     class := UndefinedMetaclass for: self
 !
 

@@ -1,3 +1,9 @@
+2007-10-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STLoader.st: Add no-category class creation methods.
+	* STLoaderObjs.st: Fix override of non-existent method in
+	UndefinedClass.  Add no-category class creation methods.
+
 2007-09-02  Stephen Compall <scompall@nocandysw.com>
 
 	* STCompiler.st: Jump past #true bytes after ifFalse: branch in
