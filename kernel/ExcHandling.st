@@ -350,21 +350,6 @@ hold on to a CoreException via a class-instance variable.'>
 	    previousState: nil
     ]
 
-    activateOuterHandlerFor: aSignal [
-	"Private - Raise the exception described by the receiver, passing a
-	 Signal modeled after aSignal, and returning the return value of the
-	 handler."
-
-	<category: 'private'>
-	| signal |
-	<exceptionHandlingInternal: true>
-	signal := (signalClass new)
-		    initException: self;
-		    copyFrom: aSignal.
-	self instantiateNextHandler: signal.
-	^signal activateHandler: true
-    ]
-
     actualDefaultHandler [
 	"Private - Answer the default handler for the receiver. It differs from
 	 #defaultHandler because if the default handler of the parent has to be
@@ -570,7 +555,8 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	<exceptionHandlingInternal: false>
-	^self exception activateOuterHandlerFor: self
+        self exception instantiateNextHandler: self.
+        ^self activateHandler: true
     ]
 
     pass [
@@ -580,7 +566,8 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	<exceptionHandlingInternal: false>
-	^self return: (self exception activateOuterHandlerFor: self)
+        self exception instantiateNextHandler: self.
+        ^self return: (self activateHandler: true)
     ]
 
     resume [
@@ -620,8 +607,8 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	Kernel.CoreException resetAllHandlers.
-	replacementException return: (replacementException exception 
-		    activateOuterHandlerFor: replacementException)
+        replacementException exception instantiateNextHandler: replacementException.
+        ^replacementException return: (replacementException activateHandler: true)
     ]
 
     retry [
@@ -715,16 +702,6 @@ with a lower priority.'>
 	<category: 'private'>
 	context isNil 
 	    ifFalse: [context at: context numArgs + 1 put: previousState]
-    ]
-
-    copyFrom: aSignal [
-	"Private - Initialize from another instance of Signal"
-
-	<category: 'private'>
-	self
-	    initArguments: aSignal arguments;
-	    messageText: aSignal messageText;
-	    tag: aSignal tag
     ]
 
     initArguments: args [

@@ -1,5 +1,17 @@
 2007-10-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiExcept.st: Add semaphore field to
+	ProcessBeingTerminated.  Remove #copyFrom:.
+	* kernel/ExcHandling.st: remove #activateOuterHandlerFor:,
+	inline it in the callers.  Remove #copyFrom:.
+	* kernel/Process.st: In #terminate, pass semaphore if waiting on one.
+	* kernel/RecursionLock.st: Remove #enter/#exit, inline them since
+	we have to use Semaphore>>#critical:.
+	* kernel/Semaphore.st: Rewrite #critical: to avoid races.
+	* tests/processes.st: Add race condition testcases.
+
+2007-10-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Dictionary.st: Implement #deepCopy and #whileGrowingAt:put:.
 	Use the latter in #collect:.
 	* kernel/LookupTable.st: Remove #deepCopy.

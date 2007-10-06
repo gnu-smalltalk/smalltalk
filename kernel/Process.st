@@ -136,11 +136,16 @@ can suspend themselves and resume themselves however they wish.'>
 	 a ProcessBeingTerminated notification."
 
 	<category: 'basic'>
-	
+	| semaphore |
+
 	[self isTerminated ifTrue: [^self].
 	Processor activeProcess == self 
 	    ifFalse: 
-		[self queueInterrupt: [SystemExceptions.ProcessBeingTerminated signal].
+		[semaphore := self isWaiting ifTrue: [myList].
+		self queueInterrupt:
+		    [SystemExceptions.ProcessBeingTerminated new
+			semaphore: semaphore;
+			signal].
 		^self]] 
 		valueWithoutPreemption.
 	SystemExceptions.ProcessBeingTerminated signal

@@ -64,12 +64,21 @@ I also provide some methods for implementing critical sections.'>
 	"Look out for race conditions!"
 
 	<category: 'mutual exclusion'>
-	[self wait] on: ProcessBeingTerminated
-	    do: 
-		[:ex | 
-		self signal.
-		ex pass].
-	^aBlock ensure: [self signal]
+	| caught |
+	^[
+	    [
+		"The VM will not preempt the process between the two statements.
+		 Note that it is *wrong* to set the variable to true before
+		 obtaining the semaphore, but the exception handler straightens
+		 that.  On the other hand, setting the variable to true after the
+		 wait would be wrong if the process was preempted and terminated
+		 after the wait (hence, with `caught' still set to false and the
+	         semaphore obtained)."
+	        caught := true.
+	        self wait ] on: ProcessBeingTerminated do: [ :ex |
+		    ex semaphore isNil ifFalse: [ caught := false ] ].
+	    aBlock value ]
+		ensure: [caught ifTrue: [self signal] ]
     ]
 
     name [

@@ -177,3 +177,34 @@ Eval [
     s wait.
     ^s size = 0
 ]
+
+Eval [
+    "A semaphore that has just left the wait in Semaphore>>critical:
+     should signal the associated semaphore before leaving."
+    | s p |
+    s := Semaphore new.
+    p := [s critical:[]] forkAt: Processor activePriority - 1.
+
+    "Wait until p entered the critical section"
+    [p isWaiting] whileFalse: [Processor yield].
+
+    "Now that p entered it, signal the semaphore. p now 'owns' the semaphore
+     but since we are running at higher priority than p it will not get to do
+     anything."
+    s signal.
+    p ensureTermination.
+    ^s signals = 1
+]
+
+Eval [
+    "A process that has entered the wait in Semaphore>>critical:,
+     but never obtains the semaphore, should leave it without
+     signaling the semaphore."
+    | s p |
+    s := Semaphore new.
+    p := [s critical:[]] fork.
+    [p isWaiting] whileFalse: [Processor yield].
+    p ensureTermination.
+    ^s signals = 0
+]
+

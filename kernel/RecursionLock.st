@@ -101,26 +101,10 @@ Object subclass: RecursionLock [
 	self isOwnerProcess ifTrue: [^aBlock value].
 
 	"Look out for race conditions!"
-	[self enter] on: ProcessBeingTerminated
-	    do: 
-		[:ex | 
-		self exit.
-		ex pass].
-	^aBlock ensure: [self exit]
-    ]
-
-    enter [
-	<category: 'private'>
-	
-	[sema wait.
-	owner := Processor activeProcess] valueWithoutPreemption
-    ]
-
-    exit [
-	<category: 'private'>
-	
-	[owner := nil.
-	sema signal] valueWithoutPreemption
+	sema critical: [
+	    [owner := Processor activeProcess.
+	    aBlock value]
+		ensure: [owner := nil]].
     ]
 
     initialize [

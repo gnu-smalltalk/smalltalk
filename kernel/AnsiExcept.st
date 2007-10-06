@@ -226,14 +226,6 @@ CoreException, so the two mechanisms are actually interchangeable.'>
 	    signal
     ]
 
-    copyFrom: aSignal [
-	"Private - Initialize from another instance of Signal"
-
-	<category: 'private - copying'>
-	(aSignal isKindOf: Exception) ifTrue: [self initialize: aSignal creator].
-	super copyFrom: aSignal
-    ]
-
     creator [
 	<category: 'private - copying'>
 	^creator
@@ -443,13 +435,29 @@ Namespace current: SystemExceptions [
 Notification subclass: ProcessBeingTerminated [
     
     <category: 'Language-Exceptions'>
-    <comment: nil>
+    <comment: 'I am raised when a process is terminated.'>
+
+    | semaphore |
 
     description [
 	"Answer a textual description of the exception."
 
 	<category: 'accessing'>
 	^'the current process is being terminated'
+    ]
+
+    semaphore [
+	"If the process was waiting on a semaphore, answer it."
+
+	<category: 'accessing'>
+	^semaphore
+    ]
+
+    semaphore: aSemaphore [
+	"If the process was waiting on a semaphore, answer it."
+
+	<category: 'accessing'>
+	semaphore := aSemaphore
     ]
 ]
 
