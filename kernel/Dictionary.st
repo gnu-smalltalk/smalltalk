@@ -342,7 +342,7 @@ collect: aBlock
     | aDictionary |
     aDictionary := self copyEmpty: self capacity.
     self keysAndValuesDo: [ :key :value |
-	aDictionary at: key put: (aBlock value: value) ].
+	aDictionary whileGrowingAt: key put: (aBlock value: value) ].
     ^aDictionary
 !
 
@@ -486,6 +486,22 @@ rehash
 
 
 !Dictionary methodsFor: 'private methods'!
+
+whileGrowingAt: key put: value
+    "Private - Add the given key/value association to the receiver. Don't check
+     for the set to be full - we want SPEED!."
+    self addWhileGrowing: key -> value
+!
+
+deepCopy
+    "Returns a deep copy of the receiver (the keys and values are
+     copies of the receiver's instance variables)"
+    | newDictionary |
+    newDictionary := self copyEmpty: self capacity.
+    self keysAndValuesDo: [ :k :v |
+	newDictionary whileGrowingAt: k put: v copy ].
+    ^newDictionary
+!
 
 keysClass
     "Private - Answer the class answered by #keys"

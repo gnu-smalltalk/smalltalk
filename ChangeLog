@@ -1,3 +1,9 @@
+2007-10-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Dictionary.st: Implement #deepCopy and #whileGrowingAt:put:.
+	Use the latter in #collect:.
+	* kernel/LookupTable.st: Remove #deepCopy.
+
 2007-10-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/GenDoc.st: Use GSTFileInParser.
