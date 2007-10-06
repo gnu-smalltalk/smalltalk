@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002
@@ -32,110 +31,107 @@
  ======================================================================"
 
 
-LookupKey subclass: #Association
-	  instanceVariableNames: 'value'
-	  classVariableNames: ''
-	  poolDictionaries: ''
-	  category: 'Language-Data types'
-!
-
-Association comment: 
-'My instances represent a mapping between two objects.  Typically, my
+
+LookupKey subclass: Association [
+    | value |
+    
+    <category: 'Language-Data types'>
+    <comment: 'My instances represent a mapping between two objects.  Typically, my
 "key" object is a symbol, but I don''t require this.  My "value" object has 
-no conventions associated with it; it can be any object at all.' !
-	      
+no conventions associated with it; it can be any object at all.'>
 
-
-!Association class methodsFor: 'basic'!
+    Association class >> key: aKey value: aValue [
+	"Answer a new association with the given key and value"
 
-key: aKey value: aValue
-    "Answer a new association with the given key and value"
-    ^self new key: aKey value: aValue
-! !
+	<category: 'basic'>
+	^self new key: aKey value: aValue
+    ]
 
+    environment [
+	"Answer nil.  This is present to achieve polymorphism with
+	 instances of VariableBinding."
 
-
-!Association methodsFor: 'accessing'!
+	<category: 'accessing'>
+	^nil
+    ]
 
-environment
-    "Answer nil.  This is present to achieve polymorphism with
-     instances of VariableBinding."
-    ^nil
-!
+    environment: aNamespace [
+	"Do nothing.  This is present to achieve polymorphism with
+	 instances of VariableBinding."
 
-environment: aNamespace
-    "Do nothing.  This is present to achieve polymorphism with
-     instances of VariableBinding."
-!
+	<category: 'accessing'>
+	
+    ]
 
-value: aValue
-    "Set the association's value to aValue"
-    value := aValue
-!
+    value: aValue [
+	"Set the association's value to aValue"
 
-key: aKey value: aValue
-    "Set the association's key to aKey, and its value to aValue"
-    key := aKey.
-    value := aValue
-!
+	<category: 'accessing'>
+	value := aValue
+    ]
 
-value
-    "Answer the association's value"
-    ^value
-! !
+    key: aKey value: aValue [
+	"Set the association's key to aKey, and its value to aValue"
 
+	<category: 'accessing'>
+	key := aKey.
+	value := aValue
+    ]
 
-
-!Association methodsFor: 'testing'!
+    value [
+	"Answer the association's value"
 
-= anAssociation
-    "Answer whether the association's key and value are the same as
-     anAssociation's, or false if anAssociation is not an Association.
-     As a special case, identical values are considered equal even if
-     #= returns false (as is the case for NaN floating-point values)."
-    self class == anAssociation class ifFalse: [ ^false ].
-    self key = anAssociation key ifFalse: [ ^false ].
-    self value == anAssociation value ifTrue: [ ^true ].
-    ^self value = anAssociation value
-!
+	<category: 'accessing'>
+	^value
+    ]
 
-hash
-    "Answer an hash value for the receiver"
-    ^key hash bitXor: value hash
-! !
+    = anAssociation [
+	"Answer whether the association's key and value are the same as
+	 anAssociation's, or false if anAssociation is not an Association.
+	 As a special case, identical values are considered equal even if
+	 #= returns false (as is the case for NaN floating-point values)."
 
+	<category: 'testing'>
+	self class == anAssociation class ifFalse: [^false].
+	self key = anAssociation key ifFalse: [^false].
+	self value == anAssociation value ifTrue: [^true].
+	^self value = anAssociation value
+    ]
 
+    hash [
+	"Answer an hash value for the receiver"
 
-
-!Association methodsFor: 'printing'!
+	<category: 'testing'>
+	^key hash bitXor: value hash
+    ]
 
-printOn: aStream
-    "Put on aStream a representation of the receiver"
-    self key printOn: aStream.
-    aStream nextPutAll: '->'.
-    self value printOn: aStream
-! !
+    printOn: aStream [
+	"Put on aStream a representation of the receiver"
 
+	<category: 'printing'>
+	self key printOn: aStream.
+	aStream nextPutAll: '->'.
+	self value printOn: aStream
+    ]
 
-
-!Association methodsFor: 'storing'!
+    storeOn: aStream [
+	"Put on aStream some Smalltalk code compiling to the receiver"
 
-storeOn: aStream
-    "Put on aStream some Smalltalk code compiling to the receiver"
-    aStream nextPut: $(.
-    aStream store: self class.
-    aStream nextPutAll: ' key: '.
-    self key storeOn: aStream.
-    aStream nextPutAll: ' value: '.
-    self value storeOn: aStream.
-    aStream nextPut: $)
-! !
+	<category: 'storing'>
+	aStream nextPut: $(.
+	aStream store: self class.
+	aStream nextPutAll: ' key: '.
+	self key storeOn: aStream.
+	aStream nextPutAll: ' value: '.
+	self value storeOn: aStream.
+	aStream nextPut: $)
+    ]
 
-
-!Association methodsFor: 'finalization'!
+    mourn [
+	"Finalize the receiver"
 
-mourn
-    "Finalize the receiver"
-    self key: nil value: nil.
-! !
+	<category: 'finalization'>
+	self key: nil value: nil
+    ]
+]
 

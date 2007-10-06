@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2005 Free Software Foundation, Inc.
@@ -30,69 +29,79 @@
 |
  ======================================================================"
 
-Object subclass: #MessageDigest
-       instanceVariableNames: 'state'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Modules'!
 
-!MessageDigest class methodsFor: 'instance creation'!
+
+Object subclass: MessageDigest [
+    | state |
+    
+    <category: 'Examples-Modules'>
+    <comment: nil>
 
-new: initialString
-    ^self new nextPutAll: initialString; yourself
-! !
+    MessageDigest class >> new: initialString [
+	<category: 'instance creation'>
+	^(self new)
+	    nextPutAll: initialString;
+	    yourself
+    ]
 
-!MessageDigest class methodsFor: 'checksumming'!
+    MessageDigest class >> digestOf: aStringOrStream [
+	<category: 'checksumming'>
+	^(self new: aStringOrStream) digest
+    ]
 
-digestOf: aStringOrStream
-    ^(self new: aStringOrStream) digest
-!
+    MessageDigest class >> hexDigestOf: aStringOrStream [
+	<category: 'checksumming'>
+	^(self new: aStringOrStream) hexDigest
+    ]
 
-hexDigestOf: aStringOrStream
-    ^(self new: aStringOrStream) hexDigest
-!
+    copy [
+	<category: 'checksumming'>
+	^self deepCopy
+    ]
 
-!MessageDigest methodsFor: 'checksumming'!
+    partialDigest [
+	<category: 'checksumming'>
+	| s digest |
+	s := state copy.
+	digest := self digest.
+	state := s.
+	^digest
+    ]
 
-copy
-    ^self deepCopy
-!
+    digest [
+	<category: 'checksumming'>
+	self subclassResponsibility
+    ]
 
-partialDigest
-    | s digest |
-    s := state copy.
-    digest := self digest.
-    state := s.
-    ^digest
-!
+    partialHexDigest [
+	<category: 'checksumming'>
+	| s digest |
+	s := state copy.
+	digest := self hexDigest.
+	state := s.
+	^digest
+    ]
 
-digest
-    self subclassResponsibility
-!
+    hexDigest [
+	<category: 'checksumming'>
+	| digest answer |
+	digest := self digest.
+	answer := String new: digest size * 2.
+	digest keysAndValuesDo: 
+		[:i :each | 
+		answer at: i + i - 1 put: (Character digitValue: each // 16).
+		answer at: i + i put: (Character digitValue: each \\ 16)].
+	^answer asLowercase
+    ]
 
-partialHexDigest
-    | s digest |
-    s := state copy.
-    digest := self hexDigest.
-    state := s.
-    ^digest
-!
+    state [
+	<category: 'private'>
+	^state
+    ]
 
-hexDigest
-    | digest answer |
-    digest := self digest.
-    answer := String new: digest size * 2.
-    digest keysAndValuesDo: [ :i :each |
-	answer at: i + i - 1 put: (Character digitValue: each // 16).
-	answer at: i + i put: (Character digitValue: each \\ 16)
-    ].
-    ^answer asLowercase
-! !
+    state: anObject [
+	<category: 'private'>
+	state := anObject
+    ]
+]
 
-!MessageDigest methodsFor: 'private'!
-
-state
-    ^state!
-
-state: anObject
-    state := anObject! !

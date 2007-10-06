@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001
@@ -32,113 +31,119 @@
  ======================================================================"
 
 
-Object subclass: #Boolean
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-Data types'
-!
-
-Boolean comment:
-'I have two instances in the Smalltalk system: true and false.  I provide
+
+Object subclass: Boolean [
+    
+    <category: 'Language-Data types'>
+    <comment: 'I have two instances in the Smalltalk system: true and false.  I provide
 methods that are conditional on boolean values, such as conditional
 execution and loops, and conditional testing, such as conditional and and
 conditional or.  I should say that I appear to provide those operations; 
-my subclasses True and False actually provide those operations.' !
+my subclasses True and False actually provide those operations.'>
 
-
-!Boolean class methodsFor: 'testing'!
+    Boolean class >> isIdentity [
+	"Answer whether x = y implies x == y for instances of the receiver"
 
-isIdentity
-    "Answer whether x = y implies x == y for instances of the receiver"
-    ^true
-!
+	<category: 'testing'>
+	^true
+    ]
 
-isImmediate
-    "Answer whether, if x is an instance of the receiver, x copy == x"
-    ^true
-! !
+    Boolean class >> isImmediate [
+	"Answer whether, if x is an instance of the receiver, x copy == x"
 
+	<category: 'testing'>
+	^true
+    ]
 
-
-!Boolean methodsFor: 'overriding'!
+    shallowCopy [
+	<category: 'overriding'>
+	^self	"We only have one instance"
+    ]
 
-shallowCopy
-    ^self			"We only have one instance"
-!
+    deepCopy [
+	<category: 'overriding'>
+	^self	"it's about as deep as we need to get"
+    ]
 
-deepCopy
-    ^self			"it's about as deep as we need to get"
-! !
+    isLiteralObject [
+	"Answer whether the receiver is expressible as a Smalltalk literal."
 
-
-!Boolean methodsFor: 'storing'!
+	<category: 'storing'>
+	^true
+    ]
 
-isLiteralObject
-    "Answer whether the receiver is expressible as a Smalltalk literal."
-    ^true
-!
+    storeLiteralOn: aStream [
+	"Store on aStream some Smalltalk code which compiles to the receiver"
 
-storeLiteralOn: aStream
-    "Store on aStream some Smalltalk code which compiles to the receiver"
-    self storeOn: aStream
-!
+	<category: 'storing'>
+	self storeOn: aStream
+    ]
 
-storeOn: aStream
-    "Store on aStream some Smalltalk code which compiles to the receiver"
-    self printOn: aStream		"representation is the same"
-! !
+    storeOn: aStream [
+	"Store on aStream some Smalltalk code which compiles to the receiver"
 
-
-!Boolean methodsFor: 'C hacks'!
+	<category: 'storing'>
+	self printOn: aStream	"representation is the same"
+    ]
 
-asCBooleanValue
-    self subclassResponsibility
-! !
+    asCBooleanValue [
+	<category: 'C hacks'>
+	self subclassResponsibility
+    ]
 
-
-!Boolean methodsFor: 'basic'!
+    ifTrue: trueBlock ifFalse: falseBlock [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-ifTrue: trueBlock ifFalse: falseBlock
-    self subclassResponsibility
-!
+    ifFalse: falseBlock ifTrue: trueBlock [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-ifFalse: falseBlock ifTrue: trueBlock
-    self subclassResponsibility
-!
+    ifTrue: trueBlock [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-ifTrue: trueBlock
-    self subclassResponsibility
-!
+    ifFalse: falseBlock [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-ifFalse: falseBlock
-    self subclassResponsibility
-!
+    not [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-not
-    self subclassResponsibility
-!
+    & aBoolean [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-& aBoolean
-    self subclassResponsibility
-!
+    | aBoolean [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-| aBoolean
-    self subclassResponsibility
-!
+    eqv: aBoolean [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-eqv: aBoolean
-    self subclassResponsibility
-!
+    xor: aBoolean [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-xor: aBoolean
-    self subclassResponsibility
-!
+    and: aBlock [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-and: aBlock
-    self subclassResponsibility
-!
+    or: aBlock [
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
+]
 
-or: aBlock
-    self subclassResponsibility
-! !

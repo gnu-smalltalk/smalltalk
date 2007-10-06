@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -30,78 +29,80 @@
 "
 
 
-Primitive subclass:  #PRadioButton
-	instanceVariableNames: 'state isPressedMsg '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
+
+Primitive subclass: PRadioButton [
+    | state isPressedMsg |
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-PRadioButton comment: 
-nil!
+    PRadioButton class >> on: data parentView: sv isPressed: isPressedSelector label: label handleUserChange: changeSelector value: onValue [
+	<category: 'instance creation'>
+	| view |
+	view := self new.
+	view parentView: sv.
+	view data: data.
+	view
+	    isPressed: isPressedSelector;
+	    state: onValue.
+	view handleUserChange: changeSelector.
+	view initBlox: label.
+	^view
+    ]
 
-!PRadioButton class methodsFor: 'instance creation'!
+    isPressed [
+	"Return current switch state."
 
-on: data parentView: sv isPressed: isPressedSelector label: label handleUserChange: changeSelector value: onValue 
-    | view |
-    view := self new.
-    view parentView: sv.
-    view data: data.
-    view
-	isPressed: isPressedSelector;
-	state: onValue.
-    view handleUserChange: changeSelector.
-    view initBlox: label.
-    ^view! !
+	<category: 'access'>
+	^(data perform: isPressedMsg) = state
+    ]
 
-!PRadioButton methodsFor: 'access'!
+    state [
+	<category: 'access'>
+	^state
+    ]
 
-isPressed
-    "Return current switch state."
+    state: value [
+	<category: 'access'>
+	state := value
+    ]
 
-    ^(data perform: isPressedMsg) = state!
+    initBlox: aLabel [
+	<category: 'initialize-delete'>
+	blox := BRadioButton new: parentView label: aLabel.
+	blox value: self isPressed.
+	blox callback: self message: 'toggle:'
+    ]
 
-state
-    ^state!
+    isPressed: isPressedSelector [
+	<category: 'initialize-delete'>
+	isPressedMsg := isPressedSelector
+    ]
 
-state: value 
-    state := value! !
+    toggle: btnState [
+	"Send the modification message to the data object"
 
-!PRadioButton methodsFor: 'initialize-delete'!
-
-initBlox: aLabel 
-    blox := BRadioButton new: parentView label: aLabel.
-    blox value: self isPressed.
-    blox callback: self message: 'toggle:'!
-
-isPressed: isPressedSelector 
-    isPressedMsg := isPressedSelector! !
-
-!PRadioButton methodsFor: 'message selectors'!
-
-toggle: btnState 
-    "Send the modification message to the data object"
-
-    self isPressed ifTrue: [^self].
-    (stateChangeMsg notNil and: [self canChangeState]) 
-	ifTrue: [data perform: stateChangeMsg with: state]! !
+	<category: 'message selectors'>
+	self isPressed ifTrue: [^self].
+	(stateChangeMsg notNil and: [self canChangeState]) 
+	    ifTrue: [data perform: stateChangeMsg with: state]
+    ]
+]
 
 
-Form subclass:  #RadioForm
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
+
+Form subclass: RadioForm [
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-RadioForm comment: 
-nil!
-
-!RadioForm class methodsFor: 'instance creation'!
-
-new: aString in: view 
-    | aView |
-    aView := self new.
-    aView parentView: view.
-    aView blox: (BRadioGroup new: view blox).
-    ^aView! !
-
+    RadioForm class >> new: aString in: view [
+	<category: 'instance creation'>
+	| aView |
+	aView := self new.
+	aView parentView: view.
+	aView blox: (BRadioGroup new: view blox).
+	^aView
+    ]
+]
 

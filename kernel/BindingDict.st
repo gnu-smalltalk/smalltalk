@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
@@ -31,247 +30,247 @@
  ======================================================================"
 
 
-Dictionary variableSubclass: #BindingDictionary
-	   instanceVariableNames: 'environment'
-	   classVariableNames: ''
-	   poolDictionaries: ''
-	   category: 'Language-Implementation'
-!
-
-BindingDictionary comment: 
-'I am a special form of dictionary that provides special ways to access my
+
+Dictionary subclass: BindingDictionary [
+    | environment |
+    
+    <shape: #pointer>
+    <category: 'Language-Implementation'>
+    <comment: 'I am a special form of dictionary that provides special ways to access my
 keys, which typically begin with an uppercase letter; also, my associations
 are actually VariableBinding instances.
 
 My keys are (expected to be) symbols, so I use == to match searched keys
 to those in the dictionary -- this is done expecting that it brings a bit
-more speed.' !
+more speed.'>
 
-
-!BindingDictionary methodsFor: 'copying'!
-
-copy
-    ^self
-!
-
-copyEmpty: newSize
-    "Answer an empty copy of the receiver whose size is newSize"
-    | realSize |
-    realSize := 8 max: (newSize * 4 + 2) // 3.
-    (realSize bitAnd: (realSize - 1)) = 0 ifFalse: [
-        realSize := 1 bitShift: realSize highBit
-    ].
-
-    ^(self class primNew: realSize)
-	initialize: realSize;
-	environment: self environment;
-	yourself
-!
-
-copyEmptyForCollect
-    "Answer an empty copy of the receiver which is filled in to
-     compute the result of #collect:"
-    ^self species new: self capacity
-!
-
-copyEmptyForCollect: size
-    "Answer an empty copy of the receiver which is filled in to
-     compute the result of #collect:"
-    ^self species new: size
-!
-
-shallowCopy
-    ^self
-!
-
-deepCopy
-    ^self
-! !
-
-
-!BindingDictionary methodsFor: 'accessing'!
-
-environment
-    "Answer the environment to which the receiver is connected.  This
-     can be the class for a dictionary that holds class variables,
-     or the super-namespace.  In general it is used to compute the
-     receiver's name."
-    ^environment!
-
-environment: anObject
-    "Set the environment to which the receiver is connected.  This
-     can be the class for a dictionary that holds class variables,
-     or the super-namespace.  In general it is used to compute the
-     receiver's name."
-    environment := anObject!
-
-name
-    "Answer the receiver's name, which by default is the same as the
-     name of the receiver's environment."
-    ^self environment name!
-
-nameIn: aNamespace
-    "Answer the receiver's name when referred to from aNamespace; by
-     default the computation is deferred to the receiver's environment."
-    ^self environment nameIn: aNamespace!
-
-define: aSymbol
-    "Define aSymbol as equal to nil inside the receiver.  Fail if such
-     a variable already exists (use #at:put: if you don't want to fail)"
-
-    super at: aSymbol ifAbsent: [
-	self at: aSymbol put: nil.
+    copy [
+	<category: 'copying'>
 	^self
-    ].
-    SystemExceptions.AlreadyDefined signalOn: aSymbol
-!
+    ]
 
-import: aSymbol from: aNamespace 
-    "Add to the receiver the symbol aSymbol, associated to the
-     same value as in aNamespace. Fail if aNamespace does not
-     contain the given key."
+    copyEmpty: newSize [
+	"Answer an empty copy of the receiver whose size is newSize"
 
-    self add: (aNamespace associationAt: aSymbol) copy
-!
+	<category: 'copying'>
+	| realSize |
+	realSize := 8 max: (newSize * 4 + 2) // 3.
+	(realSize bitAnd: realSize - 1) = 0 
+	    ifFalse: [realSize := 1 bitShift: realSize highBit].
+	^(self class primNew: realSize)
+	    initialize: realSize;
+	    environment: self environment;
+	    yourself
+    ]
 
-doesNotUnderstand: aMessage
-    "Try to map unary selectors to read accesses to the Namespace,
-    and one-argument keyword selectors to write accesses.
-    Note that: a) this works only if the selector has an
-    uppercase first letter; and b) `aNamespace Variable: value' is
-    the same as `aNamespace set: #Variable to: value', not the same as
-    `aNamespace at: #Variable put: value' --- the latter always
-    refers to the current namespace, while the former won't
-    define a new variable, instead searching in superspaces (and
-    raising an error if the variable cannot be found)."
+    copyEmptyForCollect [
+	"Answer an empty copy of the receiver which is filled in to
+	 compute the result of #collect:"
 
-    | key |
-    (aMessage selector at: 1) isUppercase
-	ifFalse: [ ^super doesNotUnderstand: aMessage ].
+	<category: 'copying'>
+	^self species new: self capacity
+    ]
 
-    aMessage arguments size = 0 ifTrue: [
+    copyEmptyForCollect: size [
+	"Answer an empty copy of the receiver which is filled in to
+	 compute the result of #collect:"
+
+	<category: 'copying'>
+	^self species new: size
+    ]
+
+    shallowCopy [
+	<category: 'copying'>
 	^self
-	    at: aMessage selector
-	    ifAbsent: [ super doesNotUnderstand: aMessage ]
-    ].
+    ]
 
-    aMessage arguments size > 1
-	ifTrue: [ ^super doesNotUnderstand: aMessage ].
+    deepCopy [
+	<category: 'copying'>
+	^self
+    ]
 
-    key := (aMessage selector copyWithout: $:) asSymbol.
-    ^self
-	set: key
-	to: aMessage argument
-	ifAbsent: [ super doesNotUnderstand: aMessage ]
-! !
+    environment [
+	"Answer the environment to which the receiver is connected.  This
+	 can be the class for a dictionary that holds class variables,
+	 or the super-namespace.  In general it is used to compute the
+	 receiver's name."
 
-
-!BindingDictionary methodsFor: 'printing'!
+	<category: 'accessing'>
+	^environment
+    ]
 
-printOn: aStream in: aNamespace
-    "Print the receiver's name when referred to from aNamespace; by
-     default the computation is deferred to the receiver's environment."
-    self environment printOn: aStream in: aNamespace! !
+    environment: anObject [
+	"Set the environment to which the receiver is connected.  This
+	 can be the class for a dictionary that holds class variables,
+	 or the super-namespace.  In general it is used to compute the
+	 receiver's name."
 
-
-!BindingDictionary methodsFor: 'forward declarations'!
+	<category: 'accessing'>
+	environment := anObject
+    ]
 
-at: key put: value
-    "Store value as associated to the given key. If any, recycle Associations
-     temporarily stored by the compiler inside the `Undeclared' dictionary."
-    | index assoc newAssoc |
-    index := self findIndex: key.
-    assoc := self primAt: index.
-    assoc isNil ifFalse: [ assoc value: value. ^value ].
+    name [
+	"Answer the receiver's name, which by default is the same as the
+	 name of the receiver's environment."
 
-    newAssoc := VariableBinding
-	key: key
-	value: value
-	environment: self.
+	<category: 'accessing'>
+	^self environment name
+    ]
 
-    self incrementTally ifTrue: [
-        index := self findIndex: key ].
+    nameIn: aNamespace [
+	"Answer the receiver's name when referred to from aNamespace; by
+	 default the computation is deferred to the receiver's environment."
 
-    assoc := Undeclared
-	associationAt: key
-	ifAbsent: [ nil ].
-    assoc isNil
-	ifTrue: [ assoc := newAssoc ]
-	ifFalse: [
-	    Undeclared remove: assoc ifAbsent: [ ].
-	    assoc become: newAssoc ].
+	<category: 'accessing'>
+	^self environment nameIn: aNamespace
+    ]
 
-    self primAt: index put: assoc.
-    ^value
-! !
+    define: aSymbol [
+	"Define aSymbol as equal to nil inside the receiver.  Fail if such
+	 a variable already exists (use #at:put: if you don't want to fail)"
 
-
-!BindingDictionary methodsFor: 'private'!
+	<category: 'accessing'>
+	super at: aSymbol
+	    ifAbsent: 
+		[self at: aSymbol put: nil.
+		^self].
+	SystemExceptions.AlreadyDefined signalOn: aSymbol
+    ]
 
-hashFor: anObject
-    "Return an hash value for the item, anObject"
-    ^anObject key identityHash
-!
+    import: aSymbol from: aNamespace [
+	"Add to the receiver the symbol aSymbol, associated to the
+	 same value as in aNamespace. Fail if aNamespace does not
+	 contain the given key."
 
-findIndex: anObject
-    "Tries to see if anObject exists as an indexed variable. As soon as nil
-    or anObject is found, the index of that slot is answered"
+	<category: 'accessing'>
+	self add: (aNamespace associationAt: aSymbol) copy
+    ]
 
-    | index size element |
-    self beConsistent.
+    doesNotUnderstand: aMessage [
+	"Try to map unary selectors to read accesses to the Namespace,
+	 and one-argument keyword selectors to write accesses.
+	 Note that: a) this works only if the selector has an
+	 uppercase first letter; and b) `aNamespace Variable: value' is
+	 the same as `aNamespace set: #Variable to: value', not the same as
+	 `aNamespace at: #Variable put: value' --- the latter always
+	 refers to the current namespace, while the former won't
+	 define a new variable, instead searching in superspaces (and
+	 raising an error if the variable cannot be found)."
 
-    "Sorry for the lack of readability, but I want speed... :-)"
-    index := (anObject identityHash scramble
-		bitAnd: (size := self primSize) - 1) + 1.
+	<category: 'accessing'>
+	| key |
+	(aMessage selector at: 1) isUppercase 
+	    ifFalse: [^super doesNotUnderstand: aMessage].
+	aMessage arguments size = 0 
+	    ifTrue: 
+		[^self at: aMessage selector ifAbsent: [super doesNotUnderstand: aMessage]].
+	aMessage arguments size > 1 ifTrue: [^super doesNotUnderstand: aMessage].
+	key := (aMessage selector copyWithout: $:) asSymbol.
+	^self 
+	    set: key
+	    to: aMessage argument
+	    ifAbsent: [super doesNotUnderstand: aMessage]
+    ]
 
-    [
-	((element := self primAt: index) isNil
-	    or: [ element key == anObject ])
-		ifTrue: [ ^index ].
+    printOn: aStream in: aNamespace [
+	"Print the receiver's name when referred to from aNamespace; by
+	 default the computation is deferred to the receiver's environment."
 
-	index == size
-	    ifTrue: [ index := 1 ]
-	    ifFalse: [ index := index + 1 ]
-    ] repeat
-!
+	<category: 'printing'>
+	self environment printOn: aStream in: aNamespace
+    ]
 
-primAt: index put: anObject
-    "Store anObject in the dictionary. If any, recycle Associations
-     temporarily stored by the compiler inside the `Undeclared' dictionary."
-    | assoc |
-    assoc := anObject.
-    assoc isNil ifFalse: [
-	"Need static typing to avoid crashes..."
-	((assoc isKindOf: VariableBinding) and: [
-	    assoc environment == self]) ifFalse: [
-	    assoc := VariableBinding
-	        key: assoc key
-	        value: assoc value
-	        environment: self.
-	].
+    at: key put: value [
+	"Store value as associated to the given key. If any, recycle Associations
+	 temporarily stored by the compiler inside the `Undeclared' dictionary."
 
-	assoc makeUntrusted: environment isUntrusted.
-    ].
+	<category: 'forward declarations'>
+	| index assoc newAssoc |
+	index := self findIndex: key.
+	assoc := self primAt: index.
+	assoc isNil 
+	    ifFalse: 
+		[assoc value: value.
+		^value].
+	newAssoc := VariableBinding 
+		    key: key
+		    value: value
+		    environment: self.
+	self incrementTally ifTrue: [index := self findIndex: key].
+	assoc := Undeclared associationAt: key ifAbsent: [nil].
+	assoc isNil 
+	    ifTrue: [assoc := newAssoc]
+	    ifFalse: 
+		[Undeclared remove: assoc ifAbsent: [].
+		assoc become: newAssoc].
+	self primAt: index put: assoc.
+	^value
+    ]
 
-    ^super primAt: index put: assoc
-!
+    hashFor: anObject [
+	"Return an hash value for the item, anObject"
 
-addWhileGrowing: anAssociation
-    | save |
-    save := anAssociation environment.
-    anAssociation environment: self.
-    super addWhileGrowing: anAssociation.
-    anAssociation environment: save.
-    ^anAssociation
-!
+	<category: 'private'>
+	^anObject key identityHash
+    ]
 
-keysClass
-    ^IdentitySet
-! !
+    findIndex: anObject [
+	"Tries to see if anObject exists as an indexed variable. As soon as nil
+	 or anObject is found, the index of that slot is answered"
 
-
-!BindingDictionary methodsFor: 'testing'!
+	<category: 'private'>
+	| index size element |
+	self beConsistent.
 
-species
-    ^IdentityDictionary
-! !
+	"Sorry for the lack of readability, but I want speed... :-)"
+	index := (anObject identityHash scramble 
+		    bitAnd: (size := self primSize) - 1) + 1.
+	
+	[((element := self primAt: index) isNil or: [element key == anObject]) 
+	    ifTrue: [^index].
+	index == size ifTrue: [index := 1] ifFalse: [index := index + 1]] 
+		repeat
+    ]
+
+    primAt: index put: anObject [
+	"Store anObject in the dictionary. If any, recycle Associations
+	 temporarily stored by the compiler inside the `Undeclared' dictionary."
+
+	<category: 'private'>
+	| assoc |
+	assoc := anObject.
+	assoc isNil 
+	    ifFalse: 
+		["Need static typing to avoid crashes..."
+
+		((assoc isKindOf: VariableBinding) and: [assoc environment == self]) 
+		    ifFalse: 
+			[assoc := VariableBinding 
+				    key: assoc key
+				    value: assoc value
+				    environment: self].
+		assoc makeUntrusted: environment isUntrusted].
+	^super primAt: index put: assoc
+    ]
+
+    addWhileGrowing: anAssociation [
+	<category: 'private'>
+	| save |
+	save := anAssociation environment.
+	anAssociation environment: self.
+	super addWhileGrowing: anAssociation.
+	anAssociation environment: save.
+	^anAssociation
+    ]
+
+    keysClass [
+	<category: 'private'>
+	^IdentitySet
+    ]
+
+    species [
+	<category: 'testing'>
+	^IdentityDictionary
+    ]
+]
+

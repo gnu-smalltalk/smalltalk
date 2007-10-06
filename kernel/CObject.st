@@ -30,137 +30,1228 @@
 |
  ======================================================================"
 
-Object variableWordSubclass: #CObject
-	    instanceVariableNames: 'type '
-	    classVariableNames: ''
-	    poolDictionaries: 'CSymbols'
-	    category: 'Language-C interface'!
 
-CObject class instanceVariableNames: 'defaultType'!
-
-CObject variableWordSubclass: #CScalar
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'!
-
-CScalar variableWordSubclass: #CSmalltalk
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CLong
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CULong
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CInt
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CUInt
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CShort
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CUShort
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CChar
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CUChar
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CFloat
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CDouble
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CScalar variableWordSubclass: #CLongDouble
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CObject variableWordSubclass: #CAggregate
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'!
-
-CAggregate variableWordSubclass: #CArray
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CAggregate variableWordSubclass: #CPtr
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CPtr variableWordSubclass: #CString
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-C interface'.
-
-CUChar variableWordSubclass: #CByte
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-C interface'!
-
-CByte variableWordSubclass: #CBoolean
-      instanceVariableNames: ''
-      classVariableNames: ''
-      poolDictionaries: ''
-      category: 'Language-C interface'!
-
-CObject comment:
-'I am not part of the standard Smalltalk kernel class hierarchy.
+
+Object subclass: CObject [
+    | type |
+    
+    <shape: #word>
+    <import: CSymbols>
+    <category: 'Language-C interface'>
+    <comment: 'I am not part of the standard Smalltalk kernel class hierarchy.
 My instances contain values that are not interpreted by the Smalltalk 
 system; they frequently hold "pointers" to data outside of the Smalltalk
 environment.  The C callout mechanism allows my instances to be transformed
-into their corresponding C values for use in external routines.'.
+into their corresponding C values for use in external routines.'>
 
-CString comment:
-'Technically, CString is really a pointer to CChar.  However, it can be
+    CObject class [
+	| defaultType |
+	
+    ]
+
+    CObject class >> subclass: aSymbol [
+	"Create a subclass with the given name."
+
+	<category: 'subclassing'>
+	^(super subclass: aSymbol)
+	    shape: #word;
+	    yourself
+    ]
+
+    CObject class >> alloc: nBytes [
+	"Allocate nBytes bytes and return an instance of the receiver"
+
+	<category: 'instance creation'>
+	^self alloc: nBytes type: nil
+    ]
+
+    CObject class >> new: nBytes [
+	"Allocate nBytes bytes and return an instance of the receiver"
+
+	<category: 'instance creation'>
+	^self alloc: nBytes type: nil
+    ]
+
+    CObject class >> alloc: nBytes type: cTypeObject [
+	"Allocate nBytes bytes and return a CObject of the given type"
+
+	<category: 'instance creation'>
+	<primitive: VMpr_CObject_allocType>
+	nBytes isInteger 
+	    ifFalse: [^SystemExceptions.WrongClass signalOn: nBytes mustBe: SmallInteger].
+	^SystemExceptions.WrongClass signalOn: cTypeObject mustBe: CType
+    ]
+
+    CObject class >> address: anInteger [
+	"Answer a new object pointing to the passed address, anInteger"
+
+	<category: 'instance creation'>
+	^(self basicNew: 1) address: anInteger
+    ]
+
+    CObject class >> new [
+	"Answer a new object pointing to NULL."
+
+	<category: 'instance creation'>
+	^self address: 0
+    ]
+
+    CObject class >> type [
+	"Nothing special in the default case - answer a CType for the receiver"
+
+	<category: 'conversion'>
+	defaultType isNil ifTrue: [defaultType := CType cObjectType: self].
+	^defaultType
+    ]
+
+    CObject class >> cObjStoredType [
+	"Private - Provide a conversion from a CObject to a Smalltalk object
+	 to be stored by #at:put:"
+
+	<category: 'private'>
+	^nil
+    ]
+
+    finalize [
+	"To make the VM call this, use #addToBeFinalized. It frees
+	 automatically any memory pointed to by the CObject. It is not
+	 automatically enabled because big trouble hits you if you use
+	 #free and the receiver doesn't point to the base of a malloc-ed
+	 area."
+
+	<category: 'finalization'>
+	self free
+    ]
+
+    addressAt: anIndex [
+	"Return a new CObject of the element type,
+	 corresponding to an object that is anIndex places past
+	 the receiver (remember that CObjects represent pointers
+	 and that C pointers behave like arrays).
+	 anIndex is zero-based, just like with all other C-style accessing."
+
+	<category: 'pointer-like behavior'>
+	| dereferencedType |
+	dereferencedType := self dereferencedType.
+	^self at: anIndex * dereferencedType sizeof type: dereferencedType
+    ]
+
+    at: anIndex [
+	"Dereference a pointer that is anIndex places past
+	 the receiver (remember that CObjects represent pointers
+	 and that C pointers behave like arrays).  anIndex is
+	 zero-based, just like with all other C-style accessing."
+
+	<category: 'pointer-like behavior'>
+	| dereferencedType offset valueType |
+	dereferencedType := self dereferencedType.
+	offset := anIndex * dereferencedType sizeof.
+	valueType := dereferencedType valueType.
+	^valueType isInteger 
+	    ifTrue: [self at: offset type: valueType]
+	    ifFalse: [(self at: offset type: dereferencedType) value]
+    ]
+
+    at: anIndex put: aValue [
+	"Store anIndex places past the receiver the passed Smalltalk
+	 object or CObject `aValue'; if it is a CObject is dereferenced:
+	 that is, this method is equivalent either to cobj[anIndex]=aValue
+	 or cobj[anIndex]=*aValue.  anIndex is zero-based, just like with
+	 all other C-style accessing.
+	 
+	 In both cases, aValue should be of the element type or of the
+	 corresponding Smalltalk type (that is, a String is ok for an
+	 array of CStrings) to avoid typing problems which however will
+	 not be signaled because C is untyped."
+
+	<category: 'pointer-like behavior'>
+	| dereferencedType offset valueType |
+	dereferencedType := self dereferencedType.
+	offset := anIndex * dereferencedType sizeof.
+	valueType := dereferencedType valueType.
+	valueType isInteger 
+	    ifTrue: 
+		[self 
+		    at: offset
+		    put: aValue
+		    type: valueType]
+	    ifFalse: [(self at: offset type: dereferencedType) value: aValue].
+	^aValue
+    ]
+
+    incr [
+	"Adjust the pointer by sizeof(dereferencedType) bytes up (i.e. ++receiver)"
+
+	<category: 'pointer-like behavior'>
+	self adjPtrBy: self dereferencedType sizeof
+    ]
+
+    decr [
+	"Adjust the pointer by sizeof(dereferencedType) bytes down (i.e. --receiver)"
+
+	<category: 'pointer-like behavior'>
+	self adjPtrBy: self dereferencedType sizeof negated
+    ]
+
+    incrBy: anInteger [
+	"Adjust the pointer by anInteger elements up (i.e. receiver += anInteger)"
+
+	<category: 'pointer-like behavior'>
+	self adjPtrBy: self dereferencedType sizeof * anInteger
+    ]
+
+    decrBy: anInteger [
+	"Adjust the pointer by anInteger elements down (i.e. receiver -= anInteger)"
+
+	<category: 'pointer-like behavior'>
+	self adjPtrBy: self dereferencedType sizeof * anInteger negated
+    ]
+
+    + anInteger [
+	"Return another instance of the receiver's class which points at
+	 &receiver[anInteger] (or, if you prefer, what `receiver +
+	 anInteger' does in C)."
+
+	<category: 'pointer-like behavior'>
+	| dereferencedType |
+	dereferencedType := self dereferencedType.
+	^self at: anInteger * dereferencedType sizeof type: self type
+    ]
+
+    - intOrPtr [
+	"If intOrPtr is an integer, return another instance of the receiver's
+	 class pointing at &receiver[-anInteger] (or, if you prefer, what
+	 `receiver - anInteger' does in C).
+	 If it is the same class as the receiver, return the difference in
+	 chars, i.e. in bytes, between the two pointed addresses (or, if
+	 you prefer, what `receiver - anotherCharPtr' does in C)"
+
+	<category: 'pointer-like behavior'>
+	| dereferencedType |
+	intOrPtr isInteger ifTrue: [^self + intOrPtr negated].
+	dereferencedType := self dereferencedType.
+	intOrPtr dereferencedType = dereferencedType 
+	    ifFalse: 
+		[^SystemExceptions.InvalidArgument signalOn: intOrPtr
+		    reason: 'arithmetic between pointers to different types'].
+	^((self addressAt: 0) address - (intOrPtr addressAt: 0) address) 
+	    // dereferencedType sizeof
+    ]
+
+    castTo: aType [
+	"Answer another CObject, pointing to the same address as the receiver,
+	 but belonging to the aType CType."
+
+	<category: 'conversion'>
+	^self at: 0 type: aType
+    ]
+
+    narrow [
+	"This method is called on CObjects returned by a C call-out whose
+	 return type is specified as a CType; it mostly allows one to
+	 change the class of the returned CObject.  By default it does
+	 nothing, and that's why it is not called when #cObject is used
+	 to specify the return type."
+
+	<category: 'conversion'>
+	
+    ]
+
+    type [
+	"Answer a CType for the receiver"
+
+	<category: 'conversion'>
+	type isNil ifTrue: [type := self class type].
+	^type
+    ]
+
+    address [
+	"Answer the address the receiver is pointing to."
+
+	<category: 'accessing'>
+	^self basicAt: self basicSize
+    ]
+
+    address: anInteger [
+	"Set the receiver to point to the passed address, anInteger"
+
+	<category: 'accessing'>
+	self basicAt: self basicSize put: anInteger
+    ]
+
+    printOn: aStream [
+	"Print a representation of the receiver"
+
+	<category: 'accessing'>
+	aStream
+	    print: self class;
+	    nextPut: $(;
+	    nextPutAll: (self address printStringRadix: 16);
+	    nextPut: $)
+    ]
+
+    type: aCType [
+	"Set the receiver's type to aCType."
+
+	<category: 'accessing'>
+	type := aCType
+    ]
+
+    adjPtrBy: byteOffset [
+	<category: 'private'>
+	self address: self address + byteOffset
+    ]
+
+    dereferencedType [
+	<category: 'private'>
+	^self type
+    ]
+
+    cObjStoredType [
+	"Private - Provide a conversion from a CObject to a Smalltalk object
+	 to be stored by #at:put:"
+
+	<category: 'private'>
+	^nil
+    ]
+
+    cObjStoredValue [
+	"Private - Provide a conversion from a CObject to a Smalltalk object
+	 to be stored by #at:put:"
+
+	<category: 'private'>
+	^self value
+    ]
+
+    at: byteOffset type: aType [
+	"Answer some data of the given type from byteOffset bytes after
+	 the pointer stored in the receiver"
+
+	<category: 'C data access'>
+	<primitive: VMpr_CObject_at>
+	byteOffset isInteger 
+	    ifFalse: 
+		[^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger].
+	^SystemExceptions.WrongClass signalOn: aType
+    ]
+
+    at: byteOffset put: aValue type: aType [
+	"Store aValue as data of the given type from byteOffset bytes after
+	 the pointer stored in the receiver"
+
+	<category: 'C data access'>
+	| type |
+	<primitive: VMpr_CObject_atPut>
+	type := aValue cObjStoredType.
+
+	"Attempt to store something meaningful from another CObject"
+	type isNil ifTrue: [type := aType].
+	^self 
+	    at: byteOffset
+	    noCObjectsPut: aValue cObjStoredValue
+	    type: type
+    ]
+
+    free [
+	"Free the receiver's pointer and set it to null. Big trouble hits
+	 you if the receiver doesn't point to the base of a malloc-ed area."
+
+	<category: 'C data access'>
+	<primitive: VMpr_CObject_free>
+	^self primitiveFailed
+    ]
+
+    at: byteOffset noCObjectsPut: aValue type: aType [
+	"Private - Store aValue as data of the given type from byteOffset bytes
+	 after the pointer stored in the receiver. This version refuses CObjects
+	 for `aValue'."
+
+	<category: 'private'>
+	<primitive: VMpr_CObject_atPut>
+	byteOffset isInteger 
+	    ifFalse: 
+		[^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger].
+	(aType isInteger or: [aType isKindOf: CType]) 
+	    ifFalse: 
+		[^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger].
+	^SystemExceptions.WrongClass signalOn: aValue
+    ]
+
+    derefAt: byteOffset type: aType [
+	<category: 'private'>
+	<primitive: VMpr_CObject_derefAt>
+	byteOffset isInteger 
+	    ifFalse: 
+		[^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger].
+	^SystemExceptions.WrongClass signalOn: aType
+    ]
+
+    derefAt: byteOffset put: aValue type: aType [
+	<category: 'private'>
+	| type |
+	<primitive: VMpr_CObject_derefAtPut>
+	type := aValue cObjStoredType.
+
+	"Attempt to store something meaningful from another CObject"
+	type isNil ifTrue: [type := aType].
+	^self 
+	    derefAt: byteOffset
+	    noCObjectsPut: aValue cObjStoredValue
+	    type: type
+    ]
+
+    derefAt: byteOffset noCObjectsPut: aValue type: aType [
+	<category: 'private'>
+	<primitive: VMpr_CObject_derefAtPut>
+	byteOffset isInteger 
+	    ifFalse: 
+		[^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger].
+	(aType isInteger or: [aType isKindOf: CType]) 
+	    ifFalse: 
+		[^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger].
+	^SystemExceptions.WrongClass signalOn: aValue
+    ]
+]
+
+
+
+CObject subclass: CScalar [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CScalar class >> value: anObject [
+	"Answer a newly allocated CObject containing the passed value,
+	 anObject. Remember to call #addToBeFinalized if you want the
+	 CObject to be automatically freed"
+
+	<category: 'instance creation'>
+	| cObject |
+	cObject := self type new.
+	cObject value: anObject.
+	^cObject
+    ]
+
+    CScalar class >> type [
+	"Answer a CType for the receiver---for example, CByteType if
+	 the receiver is CByte."
+
+	<category: 'instance creation'>
+	^self environment at: (self name , 'Type') asGlobalKey
+    ]
+
+    CScalar class >> cObjStoredType [
+	"Private - Provide a conversion from a CObject to a Smalltalk object
+	 to be stored by #at:put:"
+
+	<category: 'private'>
+	self subclassResponsibility
+    ]
+
+    cObjStoredType [
+	"Private - Provide a conversion from a CObject to a Smalltalk object
+	 to be stored by #at:put:"
+
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    value [
+	"Answer the value the receiver is pointing to. The exact returned
+	 value depends on the receiver's class"
+
+	<category: 'accessing'>
+	^self at: 0 type: self cObjStoredType
+    ]
+
+    value: aValue [
+	"Set the receiver to point to the value, aValue. The exact meaning
+	 of aValue depends on the receiver's class"
+
+	<category: 'accessing'>
+	self 
+	    at: 0
+	    put: aValue
+	    type: self cObjStoredType
+    ]
+]
+
+
+
+CScalar subclass: CSmalltalk [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CSmalltalk class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^CPtrSize
+    ]
+
+    CSmalltalk class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^CPtrSize
+    ]
+
+    CSmalltalk class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^9
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CPtrSize
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CPtrSize
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^9
+    ]
+]
+
+
+
+CScalar subclass: CLong [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CLong class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^CLongSize
+    ]
+
+    CLong class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^CLongSize
+    ]
+
+    CLong class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^4
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CLongSize
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CLongSize
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^4
+    ]
+]
+
+
+
+CScalar subclass: CULong [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CULong class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^CLongSize
+    ]
+
+    CULong class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^CLongSize
+    ]
+
+    CULong class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^5
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CLongSize
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CLongSize
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^5
+    ]
+]
+
+
+
+CScalar subclass: CInt [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CInt class >> sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CIntSize
+    ]
+
+    CInt class >> alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CIntSize
+    ]
+
+    CInt class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^10
+    ]
+
+    sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^CIntSize
+    ]
+
+    alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^CIntSize
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^10
+    ]
+]
+
+
+
+CScalar subclass: CUInt [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CUInt class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^CIntSize
+    ]
+
+    CUInt class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^CIntSize
+    ]
+
+    CUInt class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^11
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CIntSize
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CIntSize
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^11
+    ]
+]
+
+
+
+CScalar subclass: CShort [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CShort class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^CShortSize
+    ]
+
+    CShort class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^CShortSize
+    ]
+
+    CShort class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^2
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CShortSize
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CShortSize
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^2
+    ]
+]
+
+
+
+CScalar subclass: CUShort [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CUShort class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^CShortSize
+    ]
+
+    CUShort class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^CShortSize
+    ]
+
+    CUShort class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^3
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CShortSize
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CShortSize
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^3
+    ]
+]
+
+
+
+CScalar subclass: CChar [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CChar class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^1
+    ]
+
+    CChar class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^1
+    ]
+
+    CChar class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^0
+    ]
+
+    asByteArray: size [
+	"Convert size bytes pointed to by the receiver to a String"
+
+	<category: 'conversion'>
+	^ByteArray fromCData: self size: size
+    ]
+
+    asString [
+	"Convert the data pointed to by the receiver, up to the first NULL byte,
+	 to a String"
+
+	<category: 'conversion'>
+	^String fromCData: self
+    ]
+
+    asString: size [
+	"Convert size bytes pointed to by the receiver to a String"
+
+	<category: 'conversion'>
+	^String fromCData: self size: size
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^1
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^1
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^0
+    ]
+]
+
+
+
+CScalar subclass: CUChar [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CUChar class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'getting info'>
+	^1
+    ]
+
+    CUChar class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'getting info'>
+	^1
+    ]
+
+    CUChar class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'getting info'>
+	^1
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^1
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^1
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^1
+    ]
+]
+
+
+
+CScalar subclass: CFloat [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CFloat class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^CFloatSize
+    ]
+
+    CFloat class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^CFloatSize
+    ]
+
+    CFloat class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^6
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CFloatSize
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CFloatSize
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^6
+    ]
+]
+
+
+
+CScalar subclass: CDouble [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CDouble class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^CDoubleSize
+    ]
+
+    CDouble class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^CDoubleAlignment
+    ]
+
+    CDouble class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^7
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CDoubleSize
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CDoubleAlignment
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^7
+    ]
+]
+
+
+
+CScalar subclass: CLongDouble [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CLongDouble class >> sizeof [
+	"Answer the receiver's instances size"
+
+	<category: 'accessing'>
+	^CLongDoubleSize
+    ]
+
+    CLongDouble class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	<category: 'accessing'>
+	^CLongDoubleAlignment
+    ]
+
+    CLongDouble class >> cObjStoredType [
+	"Private - Answer an index referring to the receiver's instances scalar type"
+
+	<category: 'accessing'>
+	^12
+    ]
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CLongDoubleSize
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CLongDoubleAlignment
+    ]
+
+    cObjStoredType [
+	"Private - Answer an index referring to the receiver's scalar type"
+
+	<category: 'accessing'>
+	^12
+    ]
+]
+
+
+
+CObject subclass: CAggregate [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CAggregate class >> sizeof [
+	"Answer the receiver's instances size"
+
+	"This is the closest possible guess for CArrays"
+
+	<category: 'accessing'>
+	^CPtrSize
+    ]
+
+    CAggregate class >> alignof [
+	"Answer the receiver's instances required aligment"
+
+	"This is the closest possible guess for CArrays"
+
+	<category: 'accessing'>
+	^CPtrSize
+    ]
+
+    elementType [
+	"Answer the type over which the receiver is constructed."
+
+	<category: 'accessing'>
+	^self type elementType
+    ]
+]
+
+
+
+CAggregate subclass: CArray [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^self type numberOfElements * self elementType sizeof
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^self elementType alignof
+    ]
+
+    dereferencedType [
+	<category: 'private'>
+	^self type elementType
+    ]
+
+    cObjStoredType [
+	"Private - Provide a conversion from a CObject to a Smalltalk object
+	 to be stored by #at:put:"
+
+	"If they want to store the receiver with #at:put:, they store the
+	 address (of the first character) without dereferencing the pointer."
+
+	<category: 'private'>
+	^CLong cObjStoredType
+    ]
+
+    cObjStoredValue [
+	"Private - Provide a conversion from a CObject to a Smalltalk object
+	 to be stored by #at:put:"
+
+	"If they want to store the receiver with #at:put:, they
+	 store the address without dereferencing the pointer."
+
+	<category: 'private'>
+	^self address
+    ]
+]
+
+
+
+CAggregate subclass: CPtr [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    sizeof [
+	"Answer the receiver's size"
+
+	<category: 'accessing'>
+	^CPtrSize
+    ]
+
+    alignof [
+	"Answer the receiver's required aligment"
+
+	<category: 'accessing'>
+	^CPtrSize
+    ]
+
+    value [
+	"Answer the address of the location pointed to by the receiver."
+
+	<category: 'accessing'>
+	^self derefAt: 0 type: self type elementType
+    ]
+
+    value: anObject [
+	"Set the address of the location pointed to by the receiver
+	 to anObject, which can be either an Integer or a CObject.
+	 if anObject is an Integer, it is interpreted as a 32-bit
+	 or 64-bit address.  If it is a CObject, its address is
+	 stored."
+
+	<category: 'accessing'>
+	anObject isInteger 
+	    ifTrue: 
+		[^self 
+		    at: 0
+		    put: anObject
+		    type: CLong cObjStoredType].
+	self 
+	    at: 0
+	    put: anObject address
+	    type: CLong cObjStoredType
+    ]
+]
+
+
+
+CPtr subclass: CString [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: 'Technically, CString is really a pointer to CChar.  However, it can be
 very useful as a distinct datatype because it is a separate datatype
 in Smalltalk, so we allow developers to express their semantics more
 precisely by using a more descriptive type.
@@ -172,1057 +1263,164 @@ char *, use CChar>>#asString.
 In general, I behave like a cross between an array of characters and a pointer
 to a character.  I provide the protocol for both data types.  My #value
 method returns a Smalltalk String, as you would expect for a scalar datatype.
-'!
+'>
 
-CByte comment: 'You know what a byte is, don''t you?!?'!
+    CString class >> value: anObject [
+	"Answer a newly allocated CObject containing the passed value,
+	 anObject. Remember to call #addToBeFinalized if you want the
+	 CObject to be automatically freed"
 
-CBoolean comment: 'I return true if a byte is not zero, false otherwise.'!
+	<category: 'instance creation'>
+	| cObject |
+	cObject := self type new.
+	cObject value: anObject.
+	^cObject
+    ]
 
+    CString class >> type [
+	"Answer a CType for the receiver---for example, CByteType if
+	 the receiver is CByte."
 
-
-!CObject class methodsFor: 'subclassing'!
+	<category: 'instance creation'>
+	^CStringType
+    ]
 
-subclass: aSymbol
-    "Create a subclass with the given name."
-    ^(super subclass: aSymbol)
-	shape: #word;
-	yourself
-! !
-
-!CObject class methodsFor: 'instance creation'!
+    CString class >> cObjStoredType [
+	"Private - Provide a conversion from a CObject to a Smalltalk object
+	 to be stored by #at:put:"
 
-alloc: nBytes
-    "Allocate nBytes bytes and return an instance of the receiver"
-    ^self alloc: nBytes type: nil
-!
+	<category: 'accessing'>
+	^8
+    ]
 
-new: nBytes
-    "Allocate nBytes bytes and return an instance of the receiver"
-    ^self alloc: nBytes type: nil
-!
+    cObjStoredType [
+	"Private - Provide a conversion from a CObject to a Smalltalk object
+	 to be stored by #at:put:"
 
-alloc: nBytes type: cTypeObject
-    "Allocate nBytes bytes and return a CObject of the given type"
-    <primitive: VMpr_CObject_allocType>
-    nBytes isInteger ifFalse: [
-	^SystemExceptions.WrongClass signalOn: nBytes mustBe: SmallInteger
-    ].
-    ^SystemExceptions.WrongClass signalOn: cTypeObject mustBe: CType
-! !
+	<category: 'accessing'>
+	^8
+    ]
 
+    value [
+	"Answer the value the receiver is pointing to. The exact returned
+	 value depends on the receiver's class"
 
-
-!CObject class methodsFor: 'instance creation'!
+	<category: 'accessing'>
+	^self at: 0 type: 8
+    ]
 
-address: anInteger
-    "Answer a new object pointing to the passed address, anInteger"
-    ^(self basicNew: 1)
-	address: anInteger
-!
+    value: aValue [
+	"Set the receiver to point to the value, aValue. The exact meaning
+	 of aValue depends on the receiver's class"
 
-new
-    "Answer a new object pointing to NULL."
-    ^self address: 0
-! !
-
-
-!CObject class methodsFor: 'conversion'!
-
-type
-    "Nothing special in the default case - answer a CType for the receiver"
-    defaultType isNil ifTrue: [ defaultType := CType cObjectType: self ].
-    ^defaultType
-! !
-
-
-!CObject methodsFor: 'finalization'!
-
-finalize
-    "To make the VM call this, use #addToBeFinalized. It frees
-     automatically any memory pointed to by the CObject. It is not
-     automatically enabled because big trouble hits you if you use
-     #free and the receiver doesn't point to the base of a malloc-ed
-     area."
-    self free
-! !
-
-
-!CObject methodsFor: 'pointer-like behavior'!
-
-addressAt: anIndex
-    "Return a new CObject of the element type,
-     corresponding to an object that is anIndex places past
-     the receiver (remember that CObjects represent pointers
-     and that C pointers behave like arrays).
-     anIndex is zero-based, just like with all other C-style accessing."
-    | dereferencedType |
-    dereferencedType := self dereferencedType.
-    ^self at: (anIndex * dereferencedType sizeof) type: dereferencedType
-!
-
-at: anIndex
-    "Dereference a pointer that is anIndex places past
-     the receiver (remember that CObjects represent pointers
-     and that C pointers behave like arrays).  anIndex is
-     zero-based, just like with all other C-style accessing."
-    | dereferencedType offset valueType |
-    dereferencedType := self dereferencedType.
-    offset := anIndex * dereferencedType sizeof.
-    valueType := dereferencedType valueType.
-    ^valueType isInteger
-        ifTrue: [ self at: offset type: valueType ]
-        ifFalse: [ (self at: offset type: dereferencedType) value ]
-!
-
-at: anIndex put: aValue
-    "Store anIndex places past the receiver the passed Smalltalk
-     object or CObject `aValue'; if it is a CObject is dereferenced:
-     that is, this method is equivalent either to cobj[anIndex]=aValue
-     or cobj[anIndex]=*aValue.  anIndex is zero-based, just like with
-     all other C-style accessing.
-
-     In both cases, aValue should be of the element type or of the
-     corresponding Smalltalk type (that is, a String is ok for an
-     array of CStrings) to avoid typing problems which however will
-     not be signaled because C is untyped."
-    | dereferencedType offset valueType |
-    dereferencedType := self dereferencedType.
-    offset := anIndex * dereferencedType sizeof.
-    valueType := dereferencedType valueType.
-    valueType isInteger
-        ifTrue: [ self at: offset put: aValue type: valueType ]
-        ifFalse: [ (self at: offset type: dereferencedType) value: aValue ].
-    ^aValue
-!
-
-incr
-    "Adjust the pointer by sizeof(dereferencedType) bytes up (i.e. ++receiver)"
-    self adjPtrBy: self dereferencedType sizeof 
-!
-
-decr
-    "Adjust the pointer by sizeof(dereferencedType) bytes down (i.e. --receiver)"
-    self adjPtrBy: self dereferencedType sizeof negated
-!
-
-incrBy: anInteger
-    "Adjust the pointer by anInteger elements up (i.e. receiver += anInteger)"
-    self adjPtrBy: self dereferencedType sizeof * anInteger
-!
-
-decrBy: anInteger
-    "Adjust the pointer by anInteger elements down (i.e. receiver -= anInteger)"
-    self adjPtrBy: self dereferencedType sizeof * anInteger negated
-!
-
-+ anInteger
-    "Return another instance of the receiver's class which points at
-    &receiver[anInteger] (or, if you prefer, what `receiver +
-    anInteger' does in C)."
-
-    | dereferencedType |
-    dereferencedType := self dereferencedType.
-    ^self at: (anInteger * dereferencedType sizeof) type: self type
-!
-
-- intOrPtr
-    "If intOrPtr is an integer, return another instance of the receiver's
-     class pointing at &receiver[-anInteger] (or, if you prefer, what
-     `receiver - anInteger' does in C).
-     If it is the same class as the receiver, return the difference in
-     chars, i.e. in bytes, between the two pointed addresses (or, if
-     you prefer, what `receiver - anotherCharPtr' does in C)"
-    | dereferencedType |
-    intOrPtr isInteger ifTrue: [ ^self + intOrPtr negated ].
-
-    dereferencedType := self dereferencedType.
-    intOrPtr dereferencedType = dereferencedType ifFalse: [
-	^SystemExceptions.InvalidArgument
-	    signalOn: intOrPtr
-	    reason: 'arithmetic between pointers to different types' ].
-
-    ^((self addressAt: 0) address -
-	(intOrPtr addressAt: 0) address) // dereferencedType sizeof
-! !
-
-
-!CObject methodsFor: 'conversion'!
-
-castTo: aType
-    "Answer another CObject, pointing to the same address as the receiver,
-     but belonging to the aType CType."
-    ^self at: 0 type: aType
-!
-
-narrow
-    "This method is called on CObjects returned by a C call-out whose
-     return type is specified as a CType; it mostly allows one to
-     change the class of the returned CObject.  By default it does
-     nothing, and that's why it is not called when #cObject is used
-     to specify the return type."
-!
-
-type
-    "Answer a CType for the receiver"
-    type isNil ifTrue: [ type := self class type ].
-    ^type 
-! !
-
-
-!CObject methodsFor: 'accessing'!
-
-address
-    "Answer the address the receiver is pointing to."
-    ^self basicAt: self basicSize
-!
-
-address: anInteger
-    "Set the receiver to point to the passed address, anInteger"
-    self basicAt: self basicSize put: anInteger
-!
-
-printOn: aStream
-    "Print a representation of the receiver"
-    aStream
-	print: self class;
-	nextPut: $(;
-	nextPutAll: (self address printStringRadix: 16);
-	nextPut: $)
-!
-
-type: aCType
-    "Set the receiver's type to aCType."
-    type := aCType
-! !
-
-
-!CObject class methodsFor: 'private'!
-
-cObjStoredType
-    "Private - Provide a conversion from a CObject to a Smalltalk object
-     to be stored by #at:put:"
-    ^nil
-! !
-
-!CObject methodsFor: 'private'!
-
-adjPtrBy: byteOffset
-    self address: self address + byteOffset
-!
-
-dereferencedType
-    ^self type
-!
-
-cObjStoredType
-    "Private - Provide a conversion from a CObject to a Smalltalk object
-     to be stored by #at:put:"
-    ^nil
-!
-
-cObjStoredValue
-    "Private - Provide a conversion from a CObject to a Smalltalk object
-     to be stored by #at:put:"
-    ^self value
-! !
-
-
-!CScalar class methodsFor: 'instance creation'!
-
-value: anObject
-    "Answer a newly allocated CObject containing the passed value,
-     anObject. Remember to call #addToBeFinalized if you want the
-     CObject to be automatically freed"
-    | cObject |
-    cObject := self type new.
-    cObject value: anObject.
-    ^cObject
-!
-
-type
-    "Answer a CType for the receiver---for example, CByteType if
-     the receiver is CByte."
-    ^self environment at: (self name, 'Type') asGlobalKey
-! !
-
-!CScalar class methodsFor: 'private'!
-
-cObjStoredType
-    "Private - Provide a conversion from a CObject to a Smalltalk object
-     to be stored by #at:put:"
-    self subclassResponsibility
-! !
-
-
-!CScalar methodsFor: 'accessing'!
-
-cObjStoredType
-    "Private - Provide a conversion from a CObject to a Smalltalk object
-     to be stored by #at:put:"
-    self subclassResponsibility
-!
-
-value
-    "Answer the value the receiver is pointing to. The exact returned
-     value depends on the receiver's class"
-    ^self at: 0 type: self cObjStoredType
-!
-
-value: aValue
-    "Set the receiver to point to the value, aValue. The exact meaning
-     of aValue depends on the receiver's class"
-    self at: 0 put: aValue type: self cObjStoredType
-! !
+	<category: 'accessing'>
+	self 
+	    at: 0
+	    put: aValue
+	    type: 8
+    ]
+]
 
 
 
-!CSmalltalk class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^CPtrSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^CPtrSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^9
-! !
+CUChar subclass: CByte [
     
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: 'You know what a byte is, don''t you?!?'>
 
-!CSmalltalk methodsFor: 'accessing'!
+    CByte class >> cObjStoredType [
+	"Nothing special in the default case - answer a CType for the receiver"
 
-sizeof
-    "Answer the receiver's size"
-    ^CPtrSize
-!
+	<category: 'conversion'>
+	^self type
+    ]
 
-alignof
-    "Answer the receiver's required aligment"
-    ^CPtrSize
-!
+    CByte class >> type [
+	"Answer a CType for the receiver"
 
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^9
-! !
+	<category: 'conversion'>
+	^CByteType
+    ]
+
+    cObjStoredType [
+	"Nothing special in the default case - answer the receiver's CType"
+
+	<category: 'accessing'>
+	^self type
+    ]
+
+    value [
+	"Answer the value the receiver is pointing to. The returned value
+	 is a SmallInteger"
+
+	<category: 'accessing'>
+	^(self at: 0 type: super cObjStoredType) value
+    ]
+
+    value: aValue [
+	"Set the receiver to point to the value, aValue (a SmallInteger)."
+
+	<category: 'accessing'>
+	self 
+	    at: 0
+	    put: aValue asCharacter
+	    type: super cObjStoredType
+    ]
+]
 
 
 
-!CLong class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^CLongSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^CLongSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^4
-! !
+CByte subclass: CBoolean [
     
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: 'I return true if a byte is not zero, false otherwise.'>
 
-!CLong methodsFor: 'accessing'!
+    value [
+	"Get the receiver's value - answer true if it is != 0, false if it is 0."
 
-sizeof
-    "Answer the receiver's size"
-    ^CLongSize
-!
+	<category: 'accessing'>
+	^super value > 0
+    ]
 
-alignof
-    "Answer the receiver's required aligment"
-    ^CLongSize
-!
+    value: aBoolean [
+	"Set the receiver's value - it's the same as for CBytes, but we
+	 get a Boolean, not a Character"
 
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^4
-! !
+	<category: 'accessing'>
+	^super value: aBoolean asCBooleanValue
+    ]
+]
 
-
-
-!CULong class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^CLongSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^CLongSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^5
-! !
-    
-!CULong methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^CLongSize
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^CLongSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^5
-! !
-
-
-!CInt class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^CIntSize
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^CIntSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^10
-! !
-    
-
-!CInt methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^CIntSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^CIntSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^10
-! !
-
-
-
-!CUInt class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^CIntSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^CIntSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^11
-! !
-    
-
-
-!CUInt methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^CIntSize
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^CIntSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^11
-! !
-
-
-
-
-!CShort class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^CShortSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^CShortSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^2
-! !
-    
-
-
-!CShort methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^CShortSize
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^CShortSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^2
-! !
-
-
-
-!CUShort class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^CShortSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^CShortSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^3
-! !
-    
-
-!CUShort methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^CShortSize
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^CShortSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^3
-! !
-
-
-
-
-!CChar class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^1
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^1
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^0
-! !
-    
-
-!CChar methodsFor: 'conversion'!
-
-asByteArray: size
-    "Convert size bytes pointed to by the receiver to a String"
-    ^ByteArray fromCData: self size: size!
-
-asString
-    "Convert the data pointed to by the receiver, up to the first NULL byte,
-     to a String"
-    ^String fromCData: self!
-
-asString: size
-    "Convert size bytes pointed to by the receiver to a String"
-    ^String fromCData: self size: size! !
-
-!CChar methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^1
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^1
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^0
-! !
-
-
-
-
-
-!CUChar class methodsFor: 'getting info'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^1
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^1
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^1
-! !
-
-!CUChar methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^1
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^1
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^1
-! !
-
-
-
-
-!CFloat class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^CFloatSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^CFloatSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^6
-! !
-    
-!CFloat methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^CFloatSize
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^CFloatSize
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^6
-! !
-
-
-
-
-!CDouble class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^CDoubleSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^CDoubleAlignment
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^7
-! !
-    
-!CDouble methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^CDoubleSize
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^CDoubleAlignment
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^7
-! !
-
-
-!CLongDouble class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    ^CLongDoubleSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    ^CLongDoubleAlignment
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's instances scalar type"
-    ^12
-! !
-    
-!CLongDouble methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^CLongDoubleSize
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^CLongDoubleAlignment
-!
-
-cObjStoredType
-    "Private - Answer an index referring to the receiver's scalar type"
-    ^12
-! !
-
-
-!CAggregate class methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's instances size"
-    "This is the closest possible guess for CArrays"
-    ^CPtrSize
-!
-
-alignof
-    "Answer the receiver's instances required aligment"
-    "This is the closest possible guess for CArrays"
-    ^CPtrSize
-! !
-
-
-
-!CAggregate methodsFor: 'accessing'!
-
-elementType
-    "Answer the type over which the receiver is constructed."
-    ^self type elementType
-! !
-
-
-
-!CArray methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^self type numberOfElements * self elementType sizeof
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^self elementType alignof
-! !
-
-!CArray methodsFor: 'private'!
-
-dereferencedType
-    ^self type elementType
-!
-
-cObjStoredType
-    "Private - Provide a conversion from a CObject to a Smalltalk object
-     to be stored by #at:put:"
-
-    "If they want to store the receiver with #at:put:, they store the
-     address (of the first character) without dereferencing the pointer."
-    ^CLong cObjStoredType
-!
-
-cObjStoredValue
-    "Private - Provide a conversion from a CObject to a Smalltalk object
-     to be stored by #at:put:"
-
-    "If they want to store the receiver with #at:put:, they
-     store the address without dereferencing the pointer."
-    ^self address
-! !
-
-
-
-!CPtr methodsFor: 'accessing'!
-
-sizeof
-    "Answer the receiver's size"
-    ^CPtrSize
-!
-
-alignof
-    "Answer the receiver's required aligment"
-    ^CPtrSize
-!
-
-value
-    "Answer the address of the location pointed to by the receiver."
-    ^self derefAt: 0 type: self type elementType
-!
-
-value: anObject
-    "Set the address of the location pointed to by the receiver
-     to anObject, which can be either an Integer or a CObject.
-     if anObject is an Integer, it is interpreted as a 32-bit
-     or 64-bit address.  If it is a CObject, its address is
-     stored."
-    anObject isInteger
-        ifTrue: [ ^self at: 0 put: anObject type: CLong cObjStoredType ].
-
-    self at: 0 put: anObject address type: CLong cObjStoredType
-! !
 
 
 "Forward define CType instances"
-Smalltalk at: #CCharType put: nil!
-Smalltalk at: #CStringType put: nil!
-
-
-!CString class methodsFor: 'instance creation'!
-
-value: anObject
-    "Answer a newly allocated CObject containing the passed value,
-     anObject. Remember to call #addToBeFinalized if you want the
-     CObject to be automatically freed"
-    | cObject |
-    cObject := self type new.
-    cObject value: anObject.
-    ^cObject
-!
-
-type
-    "Answer a CType for the receiver---for example, CByteType if
-     the receiver is CByte."
-    ^CStringType
-! !
-
-
-!CString class methodsFor: 'accessing'!
-
-cObjStoredType
-    "Private - Provide a conversion from a CObject to a Smalltalk object
-     to be stored by #at:put:"
-    ^8
-! !
-
-!CString methodsFor: 'accessing'!
-
-cObjStoredType
-    "Private - Provide a conversion from a CObject to a Smalltalk object
-     to be stored by #at:put:"
-    ^8
-!
-
-value
-    "Answer the value the receiver is pointing to. The exact returned
-     value depends on the receiver's class"
-    ^self at: 0 type: 8
-!
-
-value: aValue
-    "Set the receiver to point to the value, aValue. The exact meaning
-     of aValue depends on the receiver's class"
-    self at: 0 put: aValue type: 8
-! !
 
 
 
-
-!CByte class methodsFor: 'conversion'!
-
-cObjStoredType
-    "Nothing special in the default case - answer a CType for the receiver"
-    ^self type
-!
-
-type
-    "Answer a CType for the receiver"
-    ^CByteType
-! !
-
-
-!CByte methodsFor: 'accessing'!
-
-cObjStoredType
-    "Nothing special in the default case - answer the receiver's CType"
-    ^self type
-!
-
-value
-    "Answer the value the receiver is pointing to. The returned value
-     is a SmallInteger"
-    ^(self at: 0 type: super cObjStoredType) value
-!
-
-value: aValue
-    "Set the receiver to point to the value, aValue (a SmallInteger)."
-    self at: 0 put: aValue asCharacter type: super cObjStoredType
-! !
+Eval [
+    Smalltalk at: #CCharType put: nil.
+    Smalltalk at: #CStringType put: nil
+]
 
 
 
+UndefinedObject extend [
 
-!CBoolean methodsFor: 'accessing'!
+    free [
+	"Do nothing, a NULL pointer can be safely freed."
 
-value
-    "Get the receiver's value - answer true if it is != 0, false if it is 0."
-    ^super value > 0
-!
+	<category: 'CObject interoperability'>
+	
+    ]
 
-value: aBoolean
-    "Set the receiver's value - it's the same as for CBytes, but we
-     get a Boolean, not a Character"
-    ^super value: aBoolean asCBooleanValue
-! !
+    narrow [
+	"Return the receiver: a NULL pointer is always nil, whatever its type."
 
+	<category: 'CObject interoperability'>
+	^self
+    ]
 
-
-!UndefinedObject methodsFor: 'CObject interoperability'!
+]
 
-free
-    "Do nothing, a NULL pointer can be safely freed."
-!
-
-narrow
-    "Return the receiver: a NULL pointer is always nil, whatever its type."
-    ^self
-! !
-
-
-!CObject methodsFor: 'C data access'!
-
-at: byteOffset type: aType
-    "Answer some data of the given type from byteOffset bytes after
-     the pointer stored in the receiver"
-    <primitive: VMpr_CObject_at>
-    byteOffset isInteger ifFalse: [
-	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
-    ].
-    ^SystemExceptions.WrongClass signalOn: aType
-!
-    
-at: byteOffset put: aValue type: aType
-    "Store aValue as data of the given type from byteOffset bytes after
-     the pointer stored in the receiver"
-    | type |
-    <primitive: VMpr_CObject_atPut>
-
-    "Attempt to store something meaningful from another CObject"
-    type := aValue cObjStoredType.
-    type isNil ifTrue: [ type := aType ].
-    ^self at: byteOffset noCObjectsPut: aValue cObjStoredValue type: type
-!
-
-free
-    "Free the receiver's pointer and set it to null. Big trouble hits
-     you if the receiver doesn't point to the base of a malloc-ed area."
-    <primitive: VMpr_CObject_free>
-    ^self primitiveFailed
-! !
-
-
-
-!CObject methodsFor: 'private'!
-
-at: byteOffset noCObjectsPut: aValue type: aType
-    "Private - Store aValue as data of the given type from byteOffset bytes
-     after the pointer stored in the receiver. This version refuses CObjects
-     for `aValue'. "
-    <primitive: VMpr_CObject_atPut>
-
-    byteOffset isInteger ifFalse: [
-	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
-    ].
-    (aType isInteger or: [ aType isKindOf: CType ]) ifFalse: [
-	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
-    ].
-    ^SystemExceptions.WrongClass signalOn: aValue
-!
-
-derefAt: byteOffset type: aType
-    <primitive: VMpr_CObject_derefAt>
-
-    byteOffset isInteger ifFalse: [
-	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
-    ].
-    ^SystemExceptions.WrongClass signalOn: aType
-!
-
-derefAt: byteOffset put: aValue type: aType
-    | type |
-    <primitive: VMpr_CObject_derefAtPut>
-
-    "Attempt to store something meaningful from another CObject"
-    type := aValue cObjStoredType.
-    type isNil ifTrue: [ type := aType ].
-    ^self derefAt: byteOffset noCObjectsPut: aValue cObjStoredValue type: type
-!
-
-derefAt: byteOffset noCObjectsPut: aValue type: aType
-    <primitive: VMpr_CObject_derefAtPut>
-
-    byteOffset isInteger ifFalse: [
-	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
-    ].
-    (aType isInteger or: [ aType isKindOf: CType ]) ifFalse: [
-	^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger
-    ].
-    ^SystemExceptions.WrongClass signalOn: aValue
-! !
-
-

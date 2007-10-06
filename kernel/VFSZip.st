@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2007 Free Software Foundation, Inc.
@@ -30,251 +29,318 @@
 |
  ======================================================================"
 
-Namespace current: Kernel!
 
-VFS.ArchiveFileHandler subclass: #ZipFileHandler
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Streams-Files'
-! 
-
-ZipFileHandler comment: 'ZipFileHandler transparently extracts
-files from a ZIP archive.'!
-
-VFS.ArchiveMemberHandler subclass: #StoredZipMember
-       instanceVariableNames: 'offset'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Streams-Files'
-! 
-
-StoredZipMember comment: 'ArchiveMemberHandler is the handler
-class for stored ZIP archive members, which are optimized.'!
-
-Stream subclass: #LimitedStream
-       instanceVariableNames: 'stream offset limit'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Streams-Files'
-! 
-
-LimitedStream comment: 'I provide a view of a part of a substream.'!
-
-!ZipFileHandler class methodsFor: 'registering'!
-
-priority
-    "Answer the priority for this class (higher number = higher priority) in
-     case multiple classes implement the same file system."
-    ^-10!
-
-fileSystems
-    "Answer the virtual file systems that can be processed by this subclass."
-    ^#('uzip')! !
 
-!ZipFileHandler methodsFor: 'members'!
+Namespace current: Kernel [
 
-createDir: dirName
-    "Create a subdirectory of the receiver, naming it dirName."
+VFS.VFS.ArchiveFileHandler subclass: ZipFileHandler [
+    
+    <category: 'Streams-Files'>
+    <comment: 'ZipFileHandler transparently extracts
+files from a ZIP archive.'>
 
-    self notYetImplemented!
+    ZipFileHandler class >> priority [
+	"Answer the priority for this class (higher number = higher priority) in
+	 case multiple classes implement the same file system."
 
-member: anArchiveMemberHandler mode: bits
-    "Set the permission bits for the file in anArchiveMemberHandler."
+	<category: 'registering'>
+	^-10
+    ]
 
-    self notYetImplemented!
+    ZipFileHandler class >> fileSystems [
+	"Answer the virtual file systems that can be processed by this subclass."
 
-extractMember: anArchiveMemberHandler into: temp
-    "Extract the contents of anArchiveMemberHandler into a file
-     that resides on disk, and answer the name of the file."
-    Smalltalk system: ('unzip -p %1 %2 > %3'
-	% { self realFileName. anArchiveMemberHandler name. temp name })!
+	<category: 'registering'>
+	^#('uzip')
+    ]
 
-removeMember: anArchiveMemberHandler
-    "Remove the member represented by anArchiveMemberHandler."
+    createDir: dirName [
+	"Create a subdirectory of the receiver, naming it dirName."
 
-    Smalltalk system: ('zip -d %1 %2'
-	% { self realFileName. anArchiveMemberHandler name. })!
+	<category: 'members'>
+	self notYetImplemented
+    ]
 
-updateMember: anArchiveMemberHandler
-    "Update the member represented by anArchiveMemberHandler by
-     copying the file into which it was extracted back to the
-     archive."
+    member: anArchiveMemberHandler mode: bits [
+	"Set the permission bits for the file in anArchiveMemberHandler."
 
-    self notYetImplemented!
+	<category: 'members'>
+	self notYetImplemented
+    ]
 
-centralDirectoryOf: f
-    | r beginCD size comLen buf ofsCD |
-    size := f size.
-    r := 21.
+    extractMember: anArchiveMemberHandler into: temp [
+	"Extract the contents of anArchiveMemberHandler into a file
+	 that resides on disk, and answer the name of the file."
 
-    "Great idea, that of putting a variable-length item at the end.  Luckily,
-     we can make a sanity check of the data and find the correct spot of the
-     central directory's final record."
-    size - 22 to: size - 65535 - 22 by: -257 do: [ :pos |
-        buf := (f copyFrom: pos to: pos + r) asByteArray.
-        beginCD := buf indexOfSubCollection: #[16r50 16r4B 5 6] ifAbsent: [ 0 ].
-        beginCD = 0 ifFalse: [
-            comLen := (buf at: beginCD + 21) * 256 + (buf at: beginCD + 20).
-            (pos + beginCD + 21 + comLen) = size ifTrue: [
-                ofsCD := ((buf at: beginCD + 19) * 16777216)
-                     + ((buf at: beginCD + 18) * 65536)
-                     + ((buf at: beginCD + 17) * 256)
-                     + (buf at: beginCD + 16).
+	<category: 'members'>
+	Smalltalk 
+	    system: 'unzip -p %1 %2 > %3' % 
+			{self realFileName.
+			anArchiveMemberHandler name.
+			temp name}
+    ]
 
-                ^(f copyFrom: ofsCD to: pos + beginCD - 2) asByteArray ] ].
+    removeMember: anArchiveMemberHandler [
+	"Remove the member represented by anArchiveMemberHandler."
 
-        r := 278 ].
+	<category: 'members'>
+	Smalltalk 
+	    system: 'zip -d %1 %2' % 
+			{self realFileName.
+			anArchiveMemberHandler name}
+    ]
 
-    self error: 'invalid data in ZIP file'
-!
+    updateMember: anArchiveMemberHandler [
+	"Update the member represented by anArchiveMemberHandler by
+	 copying the file into which it was extracted back to the
+	 archive."
 
-files
-    "Extract the directory listing from the archive"
+	<category: 'members'>
+	self notYetImplemented
+    ]
 
-    ^Generator on: [ :gen |
-	| f cd data path date method dataSize fileSize fnsize extra comment attr ofs |
-	f := self open: FileStream read ifFail: [
-	    self error: 'cannot open file for input' ].
-        cd := ByteStream on: (self centralDirectoryOf: f).
-	f close.
+    centralDirectoryOf: f [
+	<category: 'members'>
+	| r beginCD size comLen buf ofsCD |
+	size := f size.
+	r := 21.
 
-        date := DateTime now.
-        [ cd atEnd ] whileFalse: [
-	    cd skip: 10.
-	    method := cd nextUshort.
-	    data := method = 0
-		ifTrue: [ Array new: 5 ]
-		ifFalse: [ Array new: 4 ].
+	"Great idea, that of putting a variable-length item at the end.  Luckily,
+	 we can make a sanity check of the data and find the correct spot of the
+	 central directory's final record."
+	size - 22 to: size - 65535 - 22
+	    by: -257
+	    do: 
+		[:pos | 
+		buf := (f copyFrom: pos to: pos + r) asByteArray.
+		beginCD := buf indexOfSubCollection: #[80 75 5 6] ifAbsent: [0].
+		beginCD = 0 
+		    ifFalse: 
+			[comLen := (buf at: beginCD + 21) * 256 + (buf at: beginCD + 20).
+			pos + beginCD + 21 + comLen = size 
+			    ifTrue: 
+				[ofsCD := (buf at: beginCD + 19) * 16777216 
+					    + ((buf at: beginCD + 18) * 65536) + ((buf at: beginCD + 17) * 256) 
+					    + (buf at: beginCD + 16).
+				^(f copyFrom: ofsCD to: pos + beginCD - 2) asByteArray]].
+		r := 278].
+	self error: 'invalid data in ZIP file'
+    ]
 
-	    data at: 3 put: date.
+    files [
+	"Extract the directory listing from the archive"
 
-	    cd skip: 12.
-	    data at: 2 put: cd nextUlong.
-	    fnsize := cd nextUshort.
-	    extra := cd nextUshort.
-	    comment := cd nextUshort.
-	    cd skip: 4.
-	    attr := cd nextUlong.
-	    ofs := cd nextUlong.
+	<category: 'members'>
+	^Generator on: 
+		[:gen | 
+		| f cd data path date method dataSize fileSize fnsize extra comment attr ofs |
+		f := self open: FileStream read
+			    ifFail: [self error: 'cannot open file for input'].
+		cd := ByteStream on: (self centralDirectoryOf: f).
+		f close.
+		date := DateTime now.
+		[cd atEnd] whileFalse: 
+			[cd skip: 10.
+			method := cd nextUshort.
+			data := method = 0 ifTrue: [Array new: 5] ifFalse: [Array new: 4].
+			data at: 3 put: date.
+			cd skip: 12.
+			data at: 2 put: cd nextUlong.
+			fnsize := cd nextUshort.
+			extra := cd nextUshort.
+			comment := cd nextUshort.
+			cd skip: 4.
+			attr := cd nextUlong.
+			ofs := cd nextUlong.
+			data at: 1 put: (cd next: fnsize).
+			cd skip: extra + comment.
+			data at: 4 put: (attr bitAnd: 16) = 16.
+			method = 0 
+			    ifTrue: 
+				[data at: 5
+				    put: ((StoredZipMember new)
+					    name: (data at: 1);
+					    parent: self;
+					    offset: ofs;
+					    yourself)].
+			gen yield: data]]
+    ]
+]
 
-	    data at: 1 put: (cd next: fnsize).
-	    cd skip: extra + comment.
+]
 
-	    data at: 4 put: (attr bitAnd: 16) = 16.
-	    method = 0 ifTrue: [
-		data at: 5 put: (StoredZipMember new
-		    name: (data at: 1);
-		    parent: self;
-		    offset: ofs;
-		    yourself) ].
 
-	    gen yield: data ] ]! !
-
-!StoredZipMember methodsFor: 'accessing'!
-
-offset
-    ^offset!
-
-offset: anInteger
-    offset := anInteger!
-
-!StoredZipMember methodsFor: 'opening'!
-
-open: class mode: mode ifFail: aBlock
-    | file |
-    mode = FileStream read ifFalse: [ ^self notYetImplemented ].
-    file := self parent open: class mode: mode ifFail: [ ^aBlock value ].
-    file skip: self offset + 26.
-    file skip: file nextUshort + file nextUshort.
-    file setName: self fullName.
-    ^LimitedStream on: file from: file position to: file position + self size - 1! !
-
-!LimitedStream class methodsFor: 'instance creation'!
-
-on: aStream from: start to: end
-    ^self new
-	stream: aStream;
-	offset: start;
-	limit: end + 1;
-	yourself!
-
-!LimitedStream methodsFor: 'stream operations'!
-
-atEnd
-    ^stream position >= limit or: [ stream atEnd ]!
-
-copyFrom: start to: end
-    (start between: 0 and: limit - offset)
-        ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: start ].
-    (end between: 0 and: limit - offset)
-        ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: end ].
-    ^stream copyFrom: offset + start to: offset + end!
-
-isPositionable
-    ^true!
-
-next
-    self atEnd ifTrue: [ ^self pastEnd ].
-    ^stream next!
-
-nextHunk
-    ^stream next: (1024 min: limit - stream position)!
-
-peek
-    self atEnd ifTrue: [ ^nil ].
-    ^stream peek!
-
-peekFor: aCharacter
-    self atEnd ifTrue: [ ^false ].
-    ^stream peek!
-
-position
-    ^stream position - offset!
-
-position: anInteger
-    (anInteger between: 0 and: limit - offset)
-        ifTrue: [ stream position: offset + anInteger ]
-        ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger ]!
-
-setToEnd
-    stream position: limit!
-
-size
-    ^limit - offset!
-
-skip: anInteger
-    self position: anInteger + self position! !
-
-!LimitedStream methodsFor: 'printing'!
-
-printOn: aStream
-    aStream
-	print: stream;
-	nextPut: $[;
-	print: offset;
-	nextPut: $:;
-	print: limit;
-	nextPut: $]! !
-
-!LimitedStream methodsFor: 'accessing'!
-
-name
-    ^stream name!
-
-species
-    ^stream species!
-
-stream: aStream
-    stream := aStream!
-
-limit: anInteger
-    limit := anInteger!
-
-offset: anInteger
-    offset := anInteger! !
 
+Namespace current: Kernel [
 
-Namespace current: Smalltalk!
+VFS.VFS.ArchiveMemberHandler subclass: StoredZipMember [
+    | offset |
+    
+    <category: 'Streams-Files'>
+    <comment: 'ArchiveMemberHandler is the handler
+class for stored ZIP archive members, which are optimized.'>
 
-Kernel.ZipFileHandler register!
+    offset [
+	<category: 'accessing'>
+	^offset
+    ]
+
+    offset: anInteger [
+	<category: 'accessing'>
+	offset := anInteger
+    ]
+
+    open: class mode: mode ifFail: aBlock [
+	<category: 'opening'>
+	| file |
+	mode = FileStream read ifFalse: [^self notYetImplemented].
+	file := self parent 
+		    open: class
+		    mode: mode
+		    ifFail: [^aBlock value].
+	file skip: self offset + 26.
+	file skip: file nextUshort + file nextUshort.
+	file setName: self fullName.
+	^LimitedStream 
+	    on: file
+	    from: file position
+	    to: file position + self size - 1
+    ]
+]
+
+]
+
+
+
+Namespace current: Kernel [
+
+Stream subclass: LimitedStream [
+    | stream offset limit |
+    
+    <category: 'Streams-Files'>
+    <comment: 'I provide a view of a part of a substream.'>
+
+    LimitedStream class >> on: aStream from: start to: end [
+	<category: 'instance creation'>
+	^(self new)
+	    stream: aStream;
+	    offset: start;
+	    limit: end + 1;
+	    yourself
+    ]
+
+    atEnd [
+	<category: 'stream operations'>
+	^stream position >= limit or: [stream atEnd]
+    ]
+
+    copyFrom: start to: end [
+	<category: 'stream operations'>
+	(start between: 0 and: limit - offset) 
+	    ifFalse: [SystemExceptions.IndexOutOfRange signalOn: self withIndex: start].
+	(end between: 0 and: limit - offset) 
+	    ifFalse: [SystemExceptions.IndexOutOfRange signalOn: self withIndex: end].
+	^stream copyFrom: offset + start to: offset + end
+    ]
+
+    isPositionable [
+	<category: 'stream operations'>
+	^true
+    ]
+
+    next [
+	<category: 'stream operations'>
+	self atEnd ifTrue: [^self pastEnd].
+	^stream next
+    ]
+
+    nextHunk [
+	<category: 'stream operations'>
+	^stream next: (1024 min: limit - stream position)
+    ]
+
+    peek [
+	<category: 'stream operations'>
+	self atEnd ifTrue: [^nil].
+	^stream peek
+    ]
+
+    peekFor: aCharacter [
+	<category: 'stream operations'>
+	self atEnd ifTrue: [^false].
+	^stream peek
+    ]
+
+    position [
+	<category: 'stream operations'>
+	^stream position - offset
+    ]
+
+    position: anInteger [
+	<category: 'stream operations'>
+	(anInteger between: 0 and: limit - offset) 
+	    ifTrue: [stream position: offset + anInteger]
+	    ifFalse: 
+		[SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger]
+    ]
+
+    setToEnd [
+	<category: 'stream operations'>
+	stream position: limit
+    ]
+
+    size [
+	<category: 'stream operations'>
+	^limit - offset
+    ]
+
+    skip: anInteger [
+	<category: 'stream operations'>
+	self position: anInteger + self position
+    ]
+
+    printOn: aStream [
+	<category: 'printing'>
+	aStream
+	    print: stream;
+	    nextPut: $[;
+	    print: offset;
+	    nextPut: $:;
+	    print: limit;
+	    nextPut: $]
+    ]
+
+    name [
+	<category: 'accessing'>
+	^stream name
+    ]
+
+    species [
+	<category: 'accessing'>
+	^stream species
+    ]
+
+    stream: aStream [
+	<category: 'accessing'>
+	stream := aStream
+    ]
+
+    limit: anInteger [
+	<category: 'accessing'>
+	limit := anInteger
+    ]
+
+    offset: anInteger [
+	<category: 'accessing'>
+	offset := anInteger
+    ]
+]
+
+]
+
+
+
+Eval [
+    Kernel.ZipFileHandler register
+]
+

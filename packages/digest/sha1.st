@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2007 Free Software Foundation, Inc.
@@ -30,71 +29,84 @@
 |
  ======================================================================"
 
-MessageDigest subclass: #SHA1
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Modules'!
 
-!SHA1 class methodsFor: 'C call-outs'!
+
+MessageDigest subclass: SHA1 [
+    
+    <comment: nil>
+    <category: 'Examples-Modules'>
 
-new
-    ^self basicNew initialize
-! !
+    SHA1 class >> new [
+	<category: 'C call-outs'>
+	^self basicNew initialize
+    ]
 
-!SHA1 methodsFor: 'C call-outs'!
+    newState [
+	<category: 'C call-outs'>
+	<cCall: 'SHA1AllocOOP' returning: #smalltalk args: #()>
+	
+    ]
 
-newState
-    <cCall: 'SHA1AllocOOP' returning: #smalltalk args: #()>
-!
+    combine: input size: len into: context [
+	<category: 'C call-outs'>
+	<cCall: 'SHA1Update' returning: #void args: #(#byteArray #int #byteArrayOut)>
+	
+    ]
 
-combine: input size: len into: context
-    <cCall: 'SHA1Update' returning: #void args: #(#byteArray #int #byteArrayOut)>
-!
+    finalize: state in: digest [
+	<category: 'C call-outs'>
+	<cCall: 'SHA1Final' returning: #void args: #(#byteArray #byteArrayOut)>
+	
+    ]
 
-finalize: state in: digest
-    <cCall: 'SHA1Final' returning: #void args: #(#byteArray #byteArrayOut)>
-! !
+    initialize [
+	<category: 'initialization'>
+	self state: self newState
+    ]
 
-!SHA1 methodsFor: 'initialization'!
+    nextPut: char [
+	<category: 'checksumming'>
+	self 
+	    combine: (String with: char)
+	    size: 1
+	    into: self state
+    ]
 
-initialize
-    self state: self newState
-! !
+    nextPutAll: aStringOrStream [
+	<category: 'checksumming'>
+	| buffer n |
+	(aStringOrStream isKindOf: String) 
+	    ifTrue: 
+		[self 
+		    combine: aStringOrStream
+		    size: aStringOrStream size
+		    into: self state]
+	    ifFalse: 
+		[buffer := aStringOrStream species new: 1024.
+		n := 0.
+		aStringOrStream do: 
+			[:each | 
+			n := n + 1.
+			buffer at: n put: each.
+			n = 1024 
+			    ifTrue: 
+				[self 
+				    combine: buffer
+				    size: n
+				    into: self state.
+				n := 0]].
+		self 
+		    combine: buffer
+		    size: n
+		    into: self state]
+    ]
 
-!SHA1 methodsFor: 'checksumming'!
+    digest [
+	<category: 'checksumming'>
+	| answer |
+	answer := ByteArray new: 20.
+	self finalize: self state in: answer.
+	^answer
+    ]
+]
 
-nextPut: char
-    self combine: (String with: char) size: 1 into: self state
-!
-
-nextPutAll: aStringOrStream
-    | buffer n |
-    (aStringOrStream isKindOf: String)
-	ifTrue: [
-	    self
-		combine: aStringOrStream
-		size: aStringOrStream size
-		into: self state
-	]
-	ifFalse: [
-	    buffer := aStringOrStream species new: 1024.
-	    n := 0.
-	    aStringOrStream do: [ :each |
-		n := n + 1.
-		buffer at: n put: each.
-		n = 1024 ifTrue: [
-		    self combine: buffer size: n into: self state.
-		    n := 0
-		]
-	    ].
-	    self combine: buffer size: n into: self state.
-	]
-!
-
-digest
-    | answer |
-    answer := ByteArray new: 20.
-    self finalize: self state in: answer.
-    ^answer
-! !

@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002, 2007
@@ -32,99 +31,93 @@
  ======================================================================"
 
 
-AbstractNamespace variableSubclass: #RootNamespace
-	   instanceVariableNames: ''
-	   classVariableNames: ''
-	   poolDictionaries: ''
-	   category: 'Language-Implementation'
-!
-
-RootNamespace comment: 
-'I am a special form of dictionary.  Classes hold on
-an instance of me; it is called their `environment''. ' !
-
 
-!RootNamespace class methodsFor: 'instance creation'!
+AbstractNamespace subclass: RootNamespace [
+    
+    <shape: #pointer>
+    <category: 'Language-Implementation'>
+    <comment: 'I am a special form of dictionary.  Classes hold on
+an instance of me; it is called their `environment''. '>
 
-new: spaceName
-    "Create a new root namespace with the given name, and add to Smalltalk
-    a key that references it."
-    ^Smalltalk
-        at: spaceName asGlobalKey
-        put: ((super new: 24) setSuperspace: nil)
-! !
+    RootNamespace class >> new: spaceName [
+	"Create a new root namespace with the given name, and add to Smalltalk
+	 a key that references it."
 
-
-!RootNamespace methodsFor: 'overrides for superspaces'!
-
-inheritedKeys
-    "Answer a Set of all the keys in the receiver and its superspaces"
-    ^Set new
-!
-
-set: key to: newValue ifAbsent: aBlock
-    "Assign newValue to the variable named as specified by `key'.
-    This method won't define a new variable; instead if the key
-    is not found it will search in superspaces and evaluate
-    aBlock if it is not found. Answer newValue."
-
-    | index |
-    index := self findIndexOrNil: key.
-    index isNil ifTrue: [ ^aBlock value ].
-    (self primAt: index) value: newValue.
-    ^newValue
-! !
-
-
-
-!RootNamespace methodsFor: 'namespace hierarchy'!
-
-siblings
-    "Answer all the other root namespaces"
-    ^RootNamespace allInstances asSet
-	remove: self;
-	yourself
-!
-
-siblingsDo: aBlock
-    "Evaluate aBlock once for each of the other root namespaces,
-    passing the namespace as a parameter."
-    RootNamespace allInstances asSet do: [ :space |
-	space == self ifFalse: [ aBlock value: space ]
+	<category: 'instance creation'>
+	^Smalltalk at: spaceName asGlobalKey
+	    put: ((super new: 24) setSuperspace: nil)
     ]
-! !
 
-
-!RootNamespace methodsFor: 'printing'!
+    inheritedKeys [
+	"Answer a Set of all the keys in the receiver and its superspaces"
 
-printOn: aStream in: aNamespace
-    "Print on aStream some Smalltalk code compiling to the receiver
-     when the current namespace is aNamespace"
+	<category: 'overrides for superspaces'>
+	^Set new
+    ]
 
-    | reference |
-    reference := aNamespace at: self name asGlobalKey ifAbsent: [ nil ].
-    reference == self ifFalse: [
-        aStream nextPutAll: 'Smalltalk.'.
-    ].
+    set: key to: newValue ifAbsent: aBlock [
+	"Assign newValue to the variable named as specified by `key'.
+	 This method won't define a new variable; instead if the key
+	 is not found it will search in superspaces and evaluate
+	 aBlock if it is not found. Answer newValue."
 
-    aStream nextPutAll: self name
-!
+	<category: 'overrides for superspaces'>
+	| index |
+	index := self findIndexOrNil: key.
+	index isNil ifTrue: [^aBlock value].
+	(self primAt: index) value: newValue.
+	^newValue
+    ]
 
-nameIn: aNamespace
-    "Answer Smalltalk code compiling to the receiver when the current
-     namespace is aNamespace"
-    | reference |
-    reference := aNamespace at: self name asGlobalKey ifAbsent: [ nil ].
-    ^reference == self
-	ifTrue: [ self name asString ]
-	ifFalse: [ 'Smalltalk.', self name ]
-!
+    siblings [
+	"Answer all the other root namespaces"
 
-storeOn: aStream
-    "Store Smalltalk code compiling to the receiver"
-    self name isNil ifTrue: [ self error: 'cannot print unnamed namespace' ].
-    aStream
-	nextPutAll: 'Smalltalk.';
-	nextPutAll: self name
-! !
+	<category: 'namespace hierarchy'>
+	^(RootNamespace allInstances asSet)
+	    remove: self;
+	    yourself
+    ]
+
+    siblingsDo: aBlock [
+	"Evaluate aBlock once for each of the other root namespaces,
+	 passing the namespace as a parameter."
+
+	<category: 'namespace hierarchy'>
+	RootNamespace allInstances asSet 
+	    do: [:space | space == self ifFalse: [aBlock value: space]]
+    ]
+
+    printOn: aStream in: aNamespace [
+	"Print on aStream some Smalltalk code compiling to the receiver
+	 when the current namespace is aNamespace"
+
+	<category: 'printing'>
+	| reference |
+	reference := aNamespace at: self name asGlobalKey ifAbsent: [nil].
+	reference == self ifFalse: [aStream nextPutAll: 'Smalltalk.'].
+	aStream nextPutAll: self name
+    ]
+
+    nameIn: aNamespace [
+	"Answer Smalltalk code compiling to the receiver when the current
+	 namespace is aNamespace"
+
+	<category: 'printing'>
+	| reference |
+	reference := aNamespace at: self name asGlobalKey ifAbsent: [nil].
+	^reference == self 
+	    ifTrue: [self name asString]
+	    ifFalse: ['Smalltalk.' , self name]
+    ]
+
+    storeOn: aStream [
+	"Store Smalltalk code compiling to the receiver"
+
+	<category: 'printing'>
+	self name isNil ifTrue: [self error: 'cannot print unnamed namespace'].
+	aStream
+	    nextPutAll: 'Smalltalk.';
+	    nextPutAll: self name
+    ]
+]
 

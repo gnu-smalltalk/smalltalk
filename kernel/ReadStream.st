@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2006
@@ -32,42 +31,43 @@
  ======================================================================"
 
 
-PositionableStream subclass: #ReadStream
-		   instanceVariableNames: ''
-		   classVariableNames: ''
-		   poolDictionaries: ''
-		   category: 'Streams-Collections'
-!
-
-ReadStream comment: 
-'I implement the set of read-only stream objects.  You may read from
-my objects, but you may not write to them.' !
-
 
-!ReadStream class methodsFor: 'instance creation'!
+PositionableStream subclass: ReadStream [
+    
+    <category: 'Streams-Collections'>
+    <comment: 'I implement the set of read-only stream objects.  You may read from
+my objects, but you may not write to them.'>
 
-on: aCollection
-    "Answer a new stream working on aCollection from its start."
-    ^(self basicNew initCollection: aCollection limit: aCollection size) beReadOnly
-!
+    ReadStream class >> on: aCollection [
+	"Answer a new stream working on aCollection from its start."
 
-on: aCollection from: firstIndex to: lastIndex
-    "Answer an instance of the receiver streaming from
-     the firstIndex-th item of aCollection to the lastIndex-th"
-    firstIndex = 1 ifFalse: [
-	^super on: aCollection from: firstIndex to: lastIndex ].
-    lastIndex > aCollection size ifTrue: [
-        ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: lastIndex ].
+	<category: 'instance creation'>
+	^(self basicNew initCollection: aCollection limit: aCollection size) 
+	    beReadOnly
+    ]
 
-    ^(self basicNew initCollection: aCollection limit: lastIndex) beReadOnly
-! !
+    ReadStream class >> on: aCollection from: firstIndex to: lastIndex [
+	"Answer an instance of the receiver streaming from
+	 the firstIndex-th item of aCollection to the lastIndex-th"
 
+	<category: 'instance creation'>
+	firstIndex = 1 
+	    ifFalse: 
+		[^super 
+		    on: aCollection
+		    from: firstIndex
+		    to: lastIndex].
+	lastIndex > aCollection size 
+	    ifTrue: 
+		[^SystemExceptions.IndexOutOfRange signalOn: self withIndex: lastIndex].
+	^(self basicNew initCollection: aCollection limit: lastIndex) beReadOnly
+    ]
 
-
-!ReadStream methodsFor: 'private methods'!
+    initCollection: aCollection limit: anInteger [
+	<category: 'private methods'>
+	collection := aCollection.
+	ptr := 1.
+	endPtr := anInteger
+    ]
+]
 
-initCollection: aCollection limit: anInteger
-    collection := aCollection.
-    ptr := 1.
-    endPtr := anInteger.
-! !

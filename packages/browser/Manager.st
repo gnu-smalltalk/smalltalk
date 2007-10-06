@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -29,169 +28,191 @@
  ======================================================================
 "
 
-View subclass:  #Manager
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
 
-Manager comment: 
-nil!
-
-!Manager methodsFor: 'childViews'!
-
-addChildView: aChildView 
-    "Add childView to list of childViews of a view"
-
-    childViews isNil 
-	ifTrue: 
-	    ["Initialize childViews collection"
-
-	    childViews := OrderedCollection new].
-    childViews add: aChildView.
-    "Set parentView of aChildView to self"
-    aChildView parentView: self!
-
-addLabel: aString at: aPoint 
-    (BLabel new: self blox label: aString) origin: aPoint!
-
-addLabel: aString below: aPrimitive 
-    (BLabel new: self blox label: aString) posVert: aPrimitive blox!
-
-addLabel: aString rightOf: aPrimitive 
-    (BLabel new: self blox label: aString) posHoriz: aPrimitive blox!
-
-allPrimitivesDo: aBlock
-    childViews isNil ifTrue: [ ^self ].
-    super allPrimitivesDo: aBlock!
-
-deleteChildView: aChildView 
-    childViews notNil 
-	ifTrue: 
-	    [childViews remove: aChildView.
-	    aChildView remove]! !
-
-
-Manager subclass:  #Form
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
-
-Form comment: 
-nil!
-
-!Form class methodsFor: 'instance creation'!
-
-new: aString in: view 
-    | aView |
-    aView := super new: aString in: view.
-    aView blox: (BForm new: view blox).
-    ^aView! !
-
-
-Manager subclass:  #OrderedForm
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
-
-OrderedForm comment: 
-nil!
-
-!OrderedForm class methodsFor: 'instance creation'!
-
-new: aString in: view 
-    | aView |
-    aView := super new: aString in: view.
-    aView blox: (BContainer new: view blox).
-    ^aView! 
+
+View subclass: Manager [
     
-horizontal: aString in: view
-    | result |
-    result := self new: aString in: view.
-    result blox setVerticalLayout: false.
-    ^result! !
+    <comment: nil>
+    <category: 'Graphics-Windows'>
+
+    addChildView: aChildView [
+	"Add childView to list of childViews of a view"
+
+	<category: 'childViews'>
+	childViews isNil 
+	    ifTrue: 
+		["Initialize childViews collection"
+
+		childViews := OrderedCollection new].
+	childViews add: aChildView.
+	"Set parentView of aChildView to self"
+	aChildView parentView: self
+    ]
+
+    addLabel: aString at: aPoint [
+	<category: 'childViews'>
+	(BLabel new: self blox label: aString) origin: aPoint
+    ]
+
+    addLabel: aString below: aPrimitive [
+	<category: 'childViews'>
+	(BLabel new: self blox label: aString) posVert: aPrimitive blox
+    ]
+
+    addLabel: aString rightOf: aPrimitive [
+	<category: 'childViews'>
+	(BLabel new: self blox label: aString) posHoriz: aPrimitive blox
+    ]
+
+    allPrimitivesDo: aBlock [
+	<category: 'childViews'>
+	childViews isNil ifTrue: [^self].
+	super allPrimitivesDo: aBlock
+    ]
+
+    deleteChildView: aChildView [
+	<category: 'childViews'>
+	childViews notNil 
+	    ifTrue: 
+		[childViews remove: aChildView.
+		aChildView remove]
+    ]
+]
 
 
-Manager subclass:  #TopLevelShell
-	instanceVariableNames: 'menuBar '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
+
+Manager subclass: Form [
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-TopLevelShell comment: 
-nil!
+    Form class >> new: aString in: view [
+	<category: 'instance creation'>
+	| aView |
+	aView := super new: aString in: view.
+	aView blox: (BForm new: view blox).
+	^aView
+    ]
+]
 
-!TopLevelShell class methodsFor: 'instance creation'!
 
-new: aLabel 
-    "Initialize TopLevelShell"
+
+Manager subclass: OrderedForm [
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-    | view |
-    view := self new initialize: aLabel.
-    BrowserMain shell isNil ifFalse: [BrowserMain addWindow: view].
-    ^view! !
+    OrderedForm class >> new: aString in: view [
+	<category: 'instance creation'>
+	| aView |
+	aView := super new: aString in: view.
+	aView blox: (BContainer new: view blox).
+	^aView
+    ]
 
-!TopLevelShell methodsFor: 'closing'!
+    OrderedForm class >> horizontal: aString in: view [
+	<category: 'instance creation'>
+	| result |
+	result := self new: aString in: view.
+	result blox setVerticalLayout: false.
+	^result
+    ]
+]
 
-canClose
-    self rootView allPrimitivesDo: [:view | view canUpdate ifFalse: [^false]].
-    ^true!
 
-close
-    | canClose |
-    canClose := self canClose.
-    canClose 
-	ifTrue: 
-	    [self blox destroy.
-	    self remove].
-    ^canClose!
+
+Manager subclass: TopLevelShell [
+    | menuBar |
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-destroyed
-    "This method is invoked from the callback which is activated when the
-     user closes a window.  Each view is sent an canUpdate message.  If
-     there is some information which has been cached and not incorporated
-     into the data object (modified text which has not been compiled), this
-     method will inform the callback by returning nil.  If the window can
-     be closed, the top level widget is returned.  The widget value is
-     needed so that the view's supporting widget hierarchy can be disposed
-     properly"
+    TopLevelShell class >> new: aLabel [
+	"Initialize TopLevelShell"
 
-    ^self canClose!
+	<category: 'instance creation'>
+	| view |
+	view := self new initialize: aLabel.
+	BrowserMain shell isNil ifFalse: [BrowserMain addWindow: view].
+	^view
+    ]
 
-remove
-    super remove.
-    BrowserMain removeWindow: self! !
+    canClose [
+	<category: 'closing'>
+	self rootView allPrimitivesDo: [:view | view canUpdate ifFalse: [^false]].
+	^true
+    ]
 
-!TopLevelShell methodsFor: 'displaying'!
+    close [
+	<category: 'closing'>
+	| canClose |
+	canClose := self canClose.
+	canClose 
+	    ifTrue: 
+		[self blox destroy.
+		self remove].
+	^canClose
+    ]
 
-display
-    self blox map! !
+    destroyed [
+	"This method is invoked from the callback which is activated when the
+	 user closes a window.  Each view is sent an canUpdate message.  If
+	 there is some information which has been cached and not incorporated
+	 into the data object (modified text which has not been compiled), this
+	 method will inform the callback by returning nil.  If the window can
+	 be closed, the top level widget is returned.  The widget value is
+	 needed so that the view's supporting widget hierarchy can be disposed
+	 properly"
 
-!TopLevelShell methodsFor: 'initialize'!
+	<category: 'closing'>
+	^self canClose
+    ]
 
-data: aData 
-    "Even though this view is not properly a data view, the data view 
-     is associated with a TopLevelShell to support change control. When a 
-     user attempts to close the window, the close method which is invoked can 
-     communicate this to the data objects's views by sending a message to the data 
-     object associated with it."
+    remove [
+	<category: 'closing'>
+	super remove.
+	BrowserMain removeWindow: self
+    ]
 
-    data := aData!
+    display [
+	<category: 'displaying'>
+	self blox map
+    ]
 
-initialize: aLabel 
-    blox := BWindow new: aLabel.
-    self blox callback: self message: #destroyed.
-    #('Control-1' 'Control-2' 'Control-3')
-	with: #(#openWorksheet #openBrowser #openNamespaceBrowser)
-	do: [:key :sel | self blox onKeyEvent: key send: sel to: BrowserMain]!
+    data: aData [
+	"Even though this view is not properly a data view, the data view
+	 is associated with a TopLevelShell to support change control. When a
+	 user attempts to close the window, the close method which is invoked can
+	 communicate this to the data objects's views by sending a message to the data
+	 object associated with it."
 
-menu: aMenu 
-    self menuBar add: aMenu blox!
+	<category: 'initialize'>
+	data := aData
+    ]
 
-menuBar
-    menuBar isNil ifTrue: [menuBar := BMenuBar new: self blox].
-    ^menuBar! !
+    initialize: aLabel [
+	<category: 'initialize'>
+	blox := BWindow new: aLabel.
+	self blox callback: self message: #destroyed.
+	#('Control-1' 'Control-2' 'Control-3') 
+	    with: #(#openWorksheet #openBrowser #openNamespaceBrowser)
+	    do: 
+		[:key :sel | 
+		self blox 
+		    onKeyEvent: key
+		    send: sel
+		    to: BrowserMain]
+    ]
 
+    menu: aMenu [
+	<category: 'initialize'>
+	self menuBar add: aMenu blox
+    ]
+
+    menuBar [
+	<category: 'initialize'>
+	menuBar isNil ifTrue: [menuBar := BMenuBar new: self blox].
+	^menuBar
+    ]
+]
 

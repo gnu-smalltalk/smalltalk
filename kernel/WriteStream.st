@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2006,2007
@@ -32,148 +31,150 @@
  ======================================================================"
 
 
-PositionableStream subclass: #WriteStream
-		   instanceVariableNames: ''
-		   classVariableNames: ''
-		   poolDictionaries: ''
-		   category: 'Streams-Collections'
-!
-
-WriteStream comment: 
-'I am the class of writeable streams.  I only allow write operations to
-my instances; reading is strictly forbidden.' !
-
 
-!WriteStream class methodsFor: 'instance creation'!
+PositionableStream subclass: WriteStream [
+    
+    <category: 'Streams-Collections'>
+    <comment: 'I am the class of writeable streams.  I only allow write operations to
+my instances; reading is strictly forbidden.'>
 
-on: aCollection
-    "Answer a new instance of the receiver which streams on aCollection.
-     Every item of aCollection is discarded."
-    ^(self basicNew initCollection: aCollection)
-	beWriteOnly; 
-	truncate;
-	yourself
-!
+    WriteStream class >> on: aCollection [
+	"Answer a new instance of the receiver which streams on aCollection.
+	 Every item of aCollection is discarded."
 
-with: aCollection
-    "Answer a new instance of the receiver which streams from the end
-     of aCollection."
-    ^(self basicNew initCollection: aCollection)
-	beWriteOnly; 
-	moveToEnd;
-	yourself
-!
+	<category: 'instance creation'>
+	^(self basicNew initCollection: aCollection)
+	    beWriteOnly;
+	    truncate;
+	    yourself
+    ]
 
-with: aCollection from: firstIndex to: lastIndex
-    "Answer a new instance of the receiver which streams from the
-     firstIndex-th item of aCollection to the lastIndex-th. The
-     pointer is moved to the last item in that range."
-    ^self with: (aCollection copyFrom: firstIndex to: lastIndex).
-! !
+    WriteStream class >> with: aCollection [
+	"Answer a new instance of the receiver which streams from the end
+	 of aCollection."
 
-
-!WriteStream methodsFor: 'accessing'!
+	<category: 'instance creation'>
+	^(self basicNew initCollection: aCollection)
+	    beWriteOnly;
+	    moveToEnd;
+	    yourself
+    ]
 
-contents
-    "Returns a collection of the same type that the stream accesses, up to
-    and including the final element."
-    ^collection copyFrom: 1 to: ptr - 1
-! !
+    WriteStream class >> with: aCollection from: firstIndex to: lastIndex [
+	"Answer a new instance of the receiver which streams from the
+	 firstIndex-th item of aCollection to the lastIndex-th. The
+	 pointer is moved to the last item in that range."
 
+	<category: 'instance creation'>
+	^self with: (aCollection copyFrom: firstIndex to: lastIndex)
+    ]
 
-
-!WriteStream methodsFor: 'accessing-writing'!
+    contents [
+	"Returns a collection of the same type that the stream accesses, up to
+	 and including the final element."
 
-nextPut: anObject
-    "Store anObject as the next item in the receiver. Grow the
-     collection if necessary"
+	<category: 'accessing-writing'>
+	^collection copyFrom: 1 to: ptr - 1
+    ]
 
-    "(access bitAnd: 2) = 0
-       ifTrue: [ ^self shouldNotImplement ]."
-    ptr > endPtr ifTrue: [
-	ptr > collection size ifTrue: [ self growCollection ].
-	endPtr := ptr
-    ].
-    collection at: ptr put: anObject.
-    ptr := ptr + 1.
-    ^anObject
-!
+    nextPut: anObject [
+	"Store anObject as the next item in the receiver. Grow the
+	 collection if necessary"
 
-next: n putAll: aCollection startingAt: pos
-    "Put n characters or bytes of aCollection, starting at the pos-th,
-     in the collection buffer."
+	"(access bitAnd: 2) = 0
+	 ifTrue: [ ^self shouldNotImplement ]."
 
-    | end written amount |
-    ptr = collection size ifTrue: [ self growCollection ].
-    written := 0.
-    [
-        end := collection size min: ptr + (n - written - 1).
-	end >= ptr ifTrue: [
-	    collection
-		replaceFrom: ptr
-		to: end
-		with: aCollection
-		startingAt: pos + written.
-            written := written + (end - ptr + 1).
-	    ptr := end + 1 ].
-        written < n
-    ] whileTrue: [ self growCollection ].
-    ptr > endPtr ifTrue: [ endPtr := ptr - 1 ]!
+	<category: 'accessing-writing'>
+	ptr > endPtr 
+	    ifTrue: 
+		[ptr > collection size ifTrue: [self growCollection].
+		endPtr := ptr].
+	collection at: ptr put: anObject.
+	ptr := ptr + 1.
+	^anObject
+    ]
 
-contents
-    "Returns a collection of the same type that the stream accesses, up to 
-    and including the final element."
-    ^collection copyFrom: 1 to: ptr - 1
-!
+    next: n putAll: aCollection startingAt: pos [
+	"Put n characters or bytes of aCollection, starting at the pos-th,
+	 in the collection buffer."
 
-readStream
-    "Answer a ReadStream on the same contents as the receiver"
-    ^ReadStream on: collection from: 1 to: ptr - 1
-!
+	<category: 'accessing-writing'>
+	| end written amount |
+	ptr = collection size ifTrue: [self growCollection].
+	written := 0.
+	
+	[end := collection size min: ptr + (n - written - 1).
+	end >= ptr 
+	    ifTrue: 
+		[collection 
+		    replaceFrom: ptr
+		    to: end
+		    with: aCollection
+		    startingAt: pos + written.
+		written := written + (end - ptr + 1).
+		ptr := end + 1].
+	written < n] 
+		whileTrue: [self growCollection].
+	ptr > endPtr ifTrue: [endPtr := ptr - 1]
+    ]
 
-reverseContents
-    "Returns a collection of the same type that the stream accesses, up to 
-    and including the final element, but in reverse order."
-    | newCollection |
-    newCollection := self species new: ptr - 1.
-    1 to: endPtr do:
-	[ :i | newCollection at: i put: (collection at: ptr - i) ].
-    ^newCollection
-!
+    readStream [
+	"Answer a ReadStream on the same contents as the receiver"
 
+	<category: 'accessing-writing'>
+	^ReadStream 
+	    on: collection
+	    from: 1
+	    to: ptr - 1
+    ]
 
-
-!WriteStream methodsFor: 'positioning'!
+    reverseContents [
+	"Returns a collection of the same type that the stream accesses, up to
+	 and including the final element, but in reverse order."
 
-emptyStream
-    "Extension - Reset the stream"
-    ptr := 1.
-    endPtr := 0
-! !
+	<category: 'accessing-writing'>
+	| newCollection |
+	newCollection := self species new: ptr - 1.
+	1 to: endPtr do: [:i | newCollection at: i put: (collection at: ptr - i)].
+	^newCollection
+    ]
 
-
-!WriteStream methodsFor: 'private methods'!
+    emptyStream [
+	"Extension - Reset the stream"
 
-initCollection: aCollection
-    collection := aCollection.
-    ptr := 1.
-    endPtr := 0.
-!
+	<category: 'positioning'>
+	ptr := 1.
+	endPtr := 0
+    ]
 
-moveToEnd
-    endPtr := collection size.
-    ptr := endPtr + 1
-!
+    initCollection: aCollection [
+	<category: 'private methods'>
+	collection := aCollection.
+	ptr := 1.
+	endPtr := 0
+    ]
 
-growCollection
-   "Private - Double the size of the collection or, if its size < 8,
-    grow it to 8 places"
-   | size |
-   size := collection size.
+    moveToEnd [
+	<category: 'private methods'>
+	endPtr := collection size.
+	ptr := endPtr + 1
+    ]
 
-   "Guess which collection is which :-)"
-   collection := ((collection copyEmpty: (size * 2 max: 8))
-	replaceFrom: 1 to: collection size with: collection startingAt: 1;
-	yourself).
-! !
+    growCollection [
+	"Private - Double the size of the collection or, if its size < 8,
+	 grow it to 8 places"
+
+	<category: 'private methods'>
+	| size |
+	size := collection size.
+
+	"Guess which collection is which :-)"
+	collection := (collection copyEmpty: (size * 2 max: 8))
+		    replaceFrom: 1
+			to: collection size
+			with: collection
+			startingAt: 1;
+		    yourself
+    ]
+]
 

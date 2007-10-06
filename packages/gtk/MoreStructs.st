@@ -4,7 +4,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2004 Free Software Foundation, Inc.
@@ -31,99 +30,83 @@
 |
  ======================================================================"
 
-CStruct subclass: #GTypeClass
-    "FIXME autogen"
-    declaration: #(
-    (#g_type #uLong)
-    )
-   classVariableNames: ''
-   poolDictionaries: ''
-   category: 'GTK'
-   !
 
-CObject variableWordSubclass: #GtkTreeModel
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gtk'!
+
+CStruct subclass: GTypeClass [
+    
+    <category: 'GTK'>
+    <comment: nil>
+    <declaration: #(#(#'g_type' #uLong ) )>
+]
 
 
+
+CObject subclass: GtkTreeModel [
+    
+    <shape: #word>
+    <category: 'Gtk'>
+    <comment: nil>
+]
+
+
+
 "FIXME: passing #cObjectPtr should be smarter or something"
-CStruct subclass: #GtkTreeModelPointer
-  declaration: #(
-  (#model (#ptr #GtkTreeModel))
-  )
-  classVariableNames: ''
-  poolDictionaries: ''
-  category: 'GTK'
-  !
 
-CStruct subclass: #GtkRequisition
-  declaration: #(
-  (#width #int)
-  (#height #int)
-  )
-  classVariableNames: ''
-  poolDictionaries: ''
-  category: 'GTK'
-  !
 
-CStruct subclass: #GSList
-  declaration: #(
-    (#data (#ptr #CObject))
-    (#next (#ptr #GSList))
-  )
-  classVariableNames: ''
-  poolDictionaries: ''
-  category: 'GTK'
-  !
+
+CStruct subclass: GtkTreeModelPointer [
+    
+    <category: 'GTK'>
+    <comment: nil>
+    <declaration: #(#(#model #(#ptr #GtkTreeModel ) ) )>
+]
 
+
+
+CStruct subclass: GtkRequisition [
+    
+    <category: 'GTK'>
+    <comment: nil>
+    <declaration: #(#(#width #int ) #(#height #int ) )>
+]
+
+
+
+CStruct subclass: GSList [
+    
+    <category: 'GTK'>
+    <comment: nil>
+    <declaration: #(#(#data #(#ptr #CObject ) ) #(#next #(#ptr #GSList ) ) )>
+]
+
+
+
 "FIXME more events needed"
-CStruct subclass: #GdkEventButton
-  declaration: #(
-    (#type #uint)
-    (#window (#ptr #CObject))
-    (#sendEvent #byte)
-    (#time #uint)
-    (#x #double)
-    (#y #double)
-    (#axes (#ptr #double))
-    (#state #uint)
-    (#button #uint)
-    (#device (#ptr #CObject))
-    (#xRoot #double)
-    (#yRoot #double))
-  classVariableNames: ''
-  poolDictionaries: ''
-  category: 'GTK'!
 
-CStruct subclass: #GdkEventMotion
-  declaration: #(
-    (#type #uint)
-    (#window (#ptr #CObject))
-    (#sendEvent #byte)
-    (#time #uint)
-    (#x #double)
-    (#y #double)
-    (#axes (#ptr #double))
-    (#state #uint)
-    (#isHint #short)
-    (#device (#ptr #CObject))
-    (#xRoot #double)
-    (#yRoot #double))
-  classVariableNames: ''
-  poolDictionaries: ''
-  category: 'GTK'!
 
-CStruct subclass: #GdkEventConfigure
-  declaration: #(
-    (#type #uint)
-    (#window (#ptr #CObject))
-    (#sendEvent #byte)
-    (#x #int)
-    (#y #int)
-    (#width #int)
-    (#height #int))
-  classVariableNames: ''
-  poolDictionaries: ''
-  category: 'GTK'!
+
+CStruct subclass: GdkEventButton [
+    
+    <category: 'GTK'>
+    <comment: nil>
+    <declaration: #(#(#type #uint ) #(#window #(#ptr #CObject ) ) #(#sendEvent #byte ) #(#time #uint ) #(#x #double ) #(#y #double ) #(#axes #(#ptr #double ) ) #(#state #uint ) #(#button #uint ) #(#device #(#ptr #CObject ) ) #(#xRoot #double ) #(#yRoot #double ) )>
+]
+
+
+
+CStruct subclass: GdkEventMotion [
+    
+    <category: 'GTK'>
+    <comment: nil>
+    <declaration: #(#(#type #uint ) #(#window #(#ptr #CObject ) ) #(#sendEvent #byte ) #(#time #uint ) #(#x #double ) #(#y #double ) #(#axes #(#ptr #double ) ) #(#state #uint ) #(#isHint #short ) #(#device #(#ptr #CObject ) ) #(#xRoot #double ) #(#yRoot #double ) )>
+]
+
+
+
+CStruct subclass: GdkEventConfigure [
+    
+    <category: 'GTK'>
+    <comment: nil>
+    <declaration: #(#(#type #uint ) #(#window #(#ptr #CObject ) ) #(#sendEvent #byte ) #(#x #int ) #(#y #int ) #(#width #int ) #(#height #int ) )>
+]
+

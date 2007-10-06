@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002, 2007
@@ -32,499 +31,563 @@
  ======================================================================"
 
 
-BindingDictionary variableSubclass: #AbstractNamespace
-	   instanceVariableNames: 'name subspaces'
-	   classVariableNames: ''
-	   poolDictionaries: ''
-	   category: 'Language-Implementation'
-!
-
-AbstractNamespace comment: 
-'I am a special form of dictionary.  Classes hold on
-an instance of me; it is called their `environment''. ' !
-
 
-!AbstractNamespace methodsFor: 'basic & copying'!
-
-= arg
-    "Answer whether the receiver is equal to arg. The equality test is
-     by default the same as that for equal objects. = must not fail;
-     answer false if the receiver cannot be compared to arg"
-    <primitive: VMpr_Object_identity>
-!
-
-hash
-    "Answer an hash value for the receiver.  This is the same as the
-     object's #identityHash."
-    <primitive: VMpr_Object_hash>
-! !
-
-!AbstractNamespace class methodsFor: 'instance creation'!
-
-new
-    "Disabled - use #new to create instances"
-    SystemExceptions.WrongMessageSent signalOn: #new useInstead: #new:
-!
-
-primNew: parent name: spaceName
-    "Private - Create a new namespace with the given name and parent, and
-     add to the parent a key that references it."
-    (parent at: spaceName ifAbsent: [ nil ]) isNamespace
-	ifTrue: [ ^parent at: spaceName asGlobalKey ].
-
-    ^parent
-        at: spaceName asGlobalKey
-        put: ((super new: 24)
-		setSuperspace: parent;
-		name: spaceName asSymbol;
-		yourself)
-! !
-
-
-!AbstractNamespace methodsFor: 'copying'!
-
-whileCurrentDo: aBlock
-    "Evaluate aBlock with the current namespace set to the receiver.
-     Answer the result of the evaluation."
-    | oldCurrent |
-    oldCurrent := Namespace current.
-    Namespace current: self.
-    ^aBlock ensure: [ Namespace current: oldCurrent ]
-! !
-
-
-!AbstractNamespace methodsFor: 'copying'!
-
-copyEmpty: newSize
-    "Answer an empty copy of the receiver whose size is newSize"
-    ^(super copyEmpty: newSize)
-        name: self name;
-        setSubspaces: self subspaces;
-        yourself
-! !
-
-
-!AbstractNamespace methodsFor: 'accessing'!
-
-allAssociations
-    "Answer a Dictionary with all of the associations in the receiver
-    and each of its superspaces (duplicate keys are associated to the
-    associations that are deeper in the namespace hierarchy)"
-    | allAssociations value |
-    allAssociations := Dictionary new.
-    self withAllSuperspaces reverseDo: [ :each |
-	1 to: each primSize do: [ :index |
-	    value := each primAt: index.
-	    value isNil ifFalse: [ allAssociations add: value copy ]
-	].
-    ].
-    ^allAssociations
-!
-
-allBehaviorsDo: aBlock
-    "Evaluate aBlock once for each class and metaclass in the namespace."
-    Behavior withAllSubclassesDo: [ :subclass |
-	(subclass isClass) | (subclass isMetaclass) ifFalse: [
-	    subclass allInstancesDo: [ :each |
-	        each environment == self
-		    ifTrue: [ aBlock value: each ]
-	    ]
-	]
-    ].
-    "Special case classes and metaclasses because #allInstancesDo: is very
-     slow - the less we use it, the better it is."
-    Class allSubclassesDo: [ :eachMeta |
-	eachMeta environment == self
-	    ifTrue: [ aBlock value: eachMeta; value: eachMeta instanceClass ]
-    ]
-!
-
-allClassesDo: aBlock
-    "Evaluate aBlock once for each class in the namespace."
-    Class allSubclassesDo: [ :eachMeta |
-	eachMeta environment == self
-	    ifTrue: [ aBlock value: eachMeta instanceClass ]
-    ]
-!
-
-allClassObjectsDo: aBlock
-    "Evaluate aBlock once for each class and metaclass in the namespace."
-    Class allSubclassesDo: [ :eachMeta |
-	eachMeta environment == self
-	    ifTrue: [ aBlock value: eachMeta; value: eachMeta instanceClass ]
-    ]
-!
-
-allMetaclassesDo: aBlock
-    "Evaluate aBlock once for each metaclass in the namespace."
-    Class allSubclassesDo: [ :eachMeta |
-	eachMeta environment == self
-	    ifTrue: [ aBlock value: eachMeta ]
-    ]
-!
-
-classAt: aKey
-    "Answer the value corrisponding to aKey if it is a class. Fail
-     if either aKey is not found or it is associated to something different
-     from a class."
-    ^self classAt: aKey ifAbsent: 
-	[ SystemExceptions.NotFound signalOn: aKey what: 'class' ]
-!
-
-classAt: aKey ifAbsent: aBlock
-    "Answer the value corrisponding to aKey if it is a class. Evaluate
-     aBlock and answer its result if either aKey is not found or it is
-     associated to something different from a class."
-    | class |
-    class := self at: aKey asGlobalKey ifAbsent: [ ^aBlock value ].
-    class isClass ifFalse: [ ^aBlock value ].
-    ^class
-! !
-
-
-!AbstractNamespace methodsFor: 'overrides for superspaces'!
-
-definedKeys
-    "Answer a kind of Set containing the keys of the receiver"
-    | aSet value |
-    aSet := self keysClass new: tally * 4 // 3.
-    1 to: self primSize do: [ :index |
-        value := self primAt: index.
-        value isNil ifFalse: [ aSet add: value key ]
-    ].
-    ^aSet
-!
-
-definesKey: key
-    "Answer whether the receiver defines the given key. `Defines'
-    means that the receiver's superspaces, if any, are not considered."
-    ^super includesKey: key
-!
-
-hereAt: key ifAbsent: aBlock
-    "Return the value associated to the variable named as specified
-    by `key' *in this namespace*. If the key is not found search will
-    *not* be carried on in superspaces and aBlock will be immediately
-    evaluated."
-    ^super at: key ifAbsent: aBlock
-!
-
-hereAt: key
-    "Return the value associated to the variable named as specified
-    by `key' *in this namespace*. If the key is not found search will
-    *not* be carried on in superspaces and the method will fail."
-    ^self hereAt: key
-	ifAbsent: [ SystemExceptions.NotFound signalOn: key what: 'key' ]
-!
-
-inheritedKeys
-    "Answer a Set of all the keys in the receiver and its superspaces"
-    self subclassResponsibility
-!
-
-set: key to: newValue
-    "Assign newValue to the variable named as specified by `key'.
-    This method won't define a new variable; instead if the key
-    is not found it will search in superspaces and raising an
-    error if the variable cannot be found in any of the superspaces.
-    Answer newValue."
-    ^self set: key to: newValue
-	ifAbsent: [ SystemExceptions.NotFound signalOn: key what: 'key' ]
-!
-
-set: key to: newValue ifAbsent: aBlock
-    "Assign newValue to the variable named as specified by `key'.
-    This method won't define a new variable; instead if the key
-    is not found it will search in superspaces and evaluate
-    aBlock if it is not found. Answer newValue."
-
-    self subclassResponsibility
-!
-
-values
-    "Answer a Bag containing the values of the receiver"
-    | aBag value |
-    aBag := Bag new: tally.
-    1 to: self primSize do: [ :index |
-        value := self primAt: index.
-        value isNil ifFalse: [ aBag add: value value ]
-    ].
-    ^aBag
-! !
-
-
-
-!AbstractNamespace methodsFor: 'namespace hierarchy'!
-
-addSubspace: aSymbol
-    "Create a namespace named aSymbol, add it to the receiver's
-     subspaces, and answer it."
-    ^Namespace primNew: self name: aSymbol
-!
-
-allSubassociationsDo: aBlock
-    "Invokes aBlock once for every association in each of the receiver's
-     subspaces."
-    self allSubspacesDo:
-    	[ :subspace | subspace associationsDo: aBlock ]
-!
-
-allSubspacesDo: aBlock
-    "Invokes aBlock for all subspaces, both direct and indirect."
-    self subspaces notNil
-	ifTrue: [ self subspaces do: [ :space | aBlock value: space.
-					    space allSubspacesDo: aBlock ]
-		      ]
-!
-
-allSubspaces
-    "Answer the direct and indirect subspaces of the receiver in a Set"
-    | aSet |
-    aSet := Set new.
-    self allSubspacesDo: [ :subspace | aSet add: subspace ].
-    ^aSet
-!
-
-allSuperspaces
-    "Answer all the receiver's superspaces in a collection"
-    | supers |
-    supers := OrderedCollection new.
-    self allSuperspacesDo:
-    	[ :superspace | supers addLast: superspace ].
-    ^supers
-!
-
-allSuperspacesDo: aBlock
-    "Evaluate aBlock once for each of the receiver's superspaces"
-    | space |
-    space := self.
-    [ space := space superspace.
-      space notNil ] whileTrue: [ aBlock value: space ]
-!
-
-includesClassNamed: aString
-    "Answer whether the receiver or any of its superspaces include the
-     given class -- note that this method (unlike #includesKey:) does not
-     require aString to be interned and (unlike #includesGlobalNamed:) only
-     returns true if the global is a class object."
-    | possibleClass |
-    possibleClass := Symbol 
-        hasInterned: aString
-        ifTrue: [ :aSymbol | self at: aSymbol ifAbsent: [nil] ].
-        
-    ^possibleClass isClass
-!
-
-includesGlobalNamed: aString
-    "Answer whether the receiver or any of its superspaces include the
-     given key -- note that this method (unlike #includesKey:) does not
-     require aString to be interned but (unlike #includesClassNamed:)
-     returns true even if the global is not a class object."
-    Symbol 
-        hasInterned: aString
-        ifTrue: [ :aSymbol | self at: aSymbol ifPresent: [ :value | ^true] ].
-
-    ^false
-!
-
-inheritsFrom: aNamespace
-    "Answer whether aNamespace is one of the receiver's direct and
-     indirect superspaces"
-    | space |
-    space := self.
-    [ space := space superspace.
-      space == aNamespace ifTrue: [ ^true ].
-      space notNil ] whileTrue
-!
-
-removeSubspace: aSymbol
-    "Remove my subspace named aSymbol from the hierarchy."
-    | spaceName |
-    spaceName := aSymbol asGlobalKey. "as with primNew:name:"
-    self subspaces remove: (self hereAt: spaceName)
-		   ifAbsent: [SystemExceptions.InvalidValue
-				  signalOn: aSymbol
-				  reason: 'aSymbol must name a subspace'].
-    ^self removeKey: spaceName
-!
-
-selectSubspaces: aBlock
-    "Return a Set of subspaces of the receiver satisfying aBlock."
-    | aSet |
-    aSet := Set new.
-    self allSubspacesDo: [ :subspace | (aBlock value: subspace)
-    	    	    	    	    	    ifTrue: [ aSet add: subspace ] ].
-    ^aSet
-!
-
-selectSuperspaces: aBlock
-    "Return a Set of superspaces of the receiver satisfying aBlock."
-    | aSet |
-    aSet := Set new.
-    self allSuperspacesDo: [ :superspace | (aBlock value: superspace)
-    	    	    	    	    	    ifTrue: [ aSet add: superspace ] ].
-    ^aSet
-!
-
-siblings
-    "Answer all the other children of the same namespace as the receiver."
-    self subclassResponsibility
-!
-
-siblingsDo: aBlock
-    "Evaluate aBlock once for each of the other root namespaces,
-    passing the namespace as a parameter."
-    self subclassResponsibility
-!
-
-superspace
-    "Answer the receiver's superspace."
-    ^environment!
-
-superspace: aNamespace
-    "Set the superspace of the receiver to be 'aNamespace'.  Also
-     adds the receiver as a subspace of it."
-
-    | oldSuperspace newSuperspace root |
-    oldSuperspace := self superspace.
-    newSuperspace := aNamespace.
-
-    oldSuperspace == newSuperspace ifTrue: [ ^self ].	"don't need to change anything"
+BindingDictionary subclass: AbstractNamespace [
+    | name subspaces |
     
-    oldSuperspace isNil
-	ifTrue: [
-	    oldSuperspace := Smalltalk.
-	    self become: ((Namespace basicNew: self primSize) copyAllFrom: self).
-	]
-	ifFalse: [
-	    oldSuperspace subspaces remove: self.
-	].
-  
-    newSuperspace isNil
-	ifTrue: [
-	    newSuperspace := Smalltalk.
-	    self become: ((AbstractNamespace basicNew: self primSize) copyAllFrom: self).
-	]
-	ifFalse: [
-	    aNamespace subspaces add: self
-	].
+    <shape: #pointer>
+    <category: 'Language-Implementation'>
+    <comment: 'I am a special form of dictionary.  Classes hold on
+an instance of me; it is called their `environment''. '>
 
-    environment := aNamespace.
+    AbstractNamespace class >> new [
+	"Disabled - use #new to create instances"
 
-    newSuperspace
-	add: (oldSuperspace remove: self name asGlobalKey -> nil).
-
-    self do: [ :each |
-	each isClass ifTrue: [
-	    each recompileAll.
-	    each class recompileAll.
-	]
-    ].
-    self allSubassociationsDo: [ :assoc |
-	assoc value isClass ifTrue: [
-	    assoc value recompileAll.
-	    assoc value class recompileAll.
-	]
-    ].
-!
-
-subspaces
-    "Answer the receiver's direct subspaces"
-    subspaces isNil ifTrue: [ subspaces := IdentitySet new ].
-    ^subspaces
-!
-
-subspacesDo: aBlock
-    "Invokes aBlock for all direct subspaces."
-    self subspaces do: aBlock
-!
-
-withAllSubspaces
-    "Answer a Set containing the receiver together with its direct and
-     indirect subspaces"
-    | aSet |
-    aSet := Set with: self.
-    aSet addAll: self allSubspaces.
-    ^aSet
-!
-
-withAllSubspacesDo: aBlock
-    "Invokes aBlock for the receiver and all subclasses, both direct
-     and indirect."
-    aBlock value: self.
-    self subspaces do: [ :subspace |
-	aBlock value: subspace.
-	subspace allSubspacesDo: aBlock
+	<category: 'instance creation'>
+	SystemExceptions.WrongMessageSent signalOn: #new useInstead: #new:
     ]
-!
 
-withAllSuperspaces
-    "Answer the receiver and all of its superspaces in a collection"
-    | supers |
-    supers := OrderedCollection with: self.
-    self allSuperspacesDo:
-    	[ :superspace | supers addLast: superspace ].
-    ^supers
-!
+    AbstractNamespace class >> primNew: parent name: spaceName [
+	"Private - Create a new namespace with the given name and parent, and
+	 add to the parent a key that references it."
 
-withAllSuperspacesDo: aBlock
-    "Invokes aBlock for the receiver and all superspaces, both direct
-     and indirect."
-    | space |
-    space := self.
-    [ aBlock value: space.
-      space := space superspace.
-      space notNil ] whileTrue
-! !
+	<category: 'instance creation'>
+	(parent at: spaceName ifAbsent: [nil]) isNamespace 
+	    ifTrue: [^parent at: spaceName asGlobalKey].
+	^parent at: spaceName asGlobalKey
+	    put: ((super new: 24)
+		    setSuperspace: parent;
+		    name: spaceName asSymbol;
+		    yourself)
+    ]
 
-
-!AbstractNamespace methodsFor: 'printing'!
+    = arg [
+	"Answer whether the receiver is equal to arg. The equality test is
+	 by default the same as that for equal objects. = must not fail;
+	 answer false if the receiver cannot be compared to arg"
 
-nameIn: aNamespace
-    "Answer Smalltalk code compiling to the receiver when the current
-     namespace is aNamespace"
-    self subclassResponsibility
-!
+	<category: 'basic & copying'>
+	<primitive: VMpr_Object_identity>
+	
+    ]
 
-name
-    "Answer the receiver's name"
-    ^name
-!
+    hash [
+	"Answer an hash value for the receiver.  This is the same as the
+	 object's #identityHash."
 
-name: aSymbol
-    "Change the receiver's name to aSymbol"
-    name := aSymbol
-!
+	<category: 'basic & copying'>
+	<primitive: VMpr_Object_hash>
+	
+    ]
 
-printOn: aStream
-    "Print a representation of the receiver"
-    aStream nextPutAll: self name
-!
+    whileCurrentDo: aBlock [
+	"Evaluate aBlock with the current namespace set to the receiver.
+	 Answer the result of the evaluation."
 
-storeOn: aStream
-    "Store Smalltalk code compiling to the receiver"
-    self subclassResponsibility
-! !
+	<category: 'copying'>
+	| oldCurrent |
+	oldCurrent := Namespace current.
+	Namespace current: self.
+	^aBlock ensure: [Namespace current: oldCurrent]
+    ]
 
-
-!AbstractNamespace methodsFor: 'private'!
+    copyEmpty: newSize [
+	"Answer an empty copy of the receiver whose size is newSize"
 
-setSuperspace: newSuperspace
-    self environment: newSuperspace.
-    self environment subspaces add: self.
-!
+	<category: 'copying'>
+	^(super copyEmpty: newSize)
+	    name: self name;
+	    setSubspaces: self subspaces;
+	    yourself
+    ]
 
-setSubspaces: newSubspaces
-    subspaces := newSubspaces
-! !
+    allAssociations [
+	"Answer a Dictionary with all of the associations in the receiver
+	 and each of its superspaces (duplicate keys are associated to the
+	 associations that are deeper in the namespace hierarchy)"
 
-
-!AbstractNamespace methodsFor: 'testing'!
+	<category: 'accessing'>
+	| allAssociations value |
+	allAssociations := Dictionary new.
+	self withAllSuperspaces reverseDo: 
+		[:each | 
+		1 to: each primSize
+		    do: 
+			[:index | 
+			value := each primAt: index.
+			value isNil ifFalse: [allAssociations add: value copy]]].
+	^allAssociations
+    ]
 
-isNamespace
-    ^true
-!
+    allBehaviorsDo: aBlock [
+	"Evaluate aBlock once for each class and metaclass in the namespace."
 
-isSmalltalk
-    ^false
-! !
+	<category: 'accessing'>
+	Behavior withAllSubclassesDo: 
+		[:subclass | 
+		subclass isClass | subclass isMetaclass 
+		    ifFalse: 
+			[subclass 
+			    allInstancesDo: [:each | each environment == self ifTrue: [aBlock value: each]]]].
+	"Special case classes and metaclasses because #allInstancesDo: is very
+	 slow - the less we use it, the better it is."
+	Class allSubclassesDo: 
+		[:eachMeta | 
+		eachMeta environment == self 
+		    ifTrue: 
+			[aBlock
+			    value: eachMeta;
+			    value: eachMeta instanceClass]]
+    ]
+
+    allClassesDo: aBlock [
+	"Evaluate aBlock once for each class in the namespace."
+
+	<category: 'accessing'>
+	Class allSubclassesDo: 
+		[:eachMeta | 
+		eachMeta environment == self 
+		    ifTrue: [aBlock value: eachMeta instanceClass]]
+    ]
+
+    allClassObjectsDo: aBlock [
+	"Evaluate aBlock once for each class and metaclass in the namespace."
+
+	<category: 'accessing'>
+	Class allSubclassesDo: 
+		[:eachMeta | 
+		eachMeta environment == self 
+		    ifTrue: 
+			[aBlock
+			    value: eachMeta;
+			    value: eachMeta instanceClass]]
+    ]
+
+    allMetaclassesDo: aBlock [
+	"Evaluate aBlock once for each metaclass in the namespace."
+
+	<category: 'accessing'>
+	Class allSubclassesDo: 
+		[:eachMeta | 
+		eachMeta environment == self ifTrue: [aBlock value: eachMeta]]
+    ]
+
+    classAt: aKey [
+	"Answer the value corrisponding to aKey if it is a class. Fail
+	 if either aKey is not found or it is associated to something different
+	 from a class."
+
+	<category: 'accessing'>
+	^self classAt: aKey
+	    ifAbsent: [SystemExceptions.NotFound signalOn: aKey what: 'class']
+    ]
+
+    classAt: aKey ifAbsent: aBlock [
+	"Answer the value corrisponding to aKey if it is a class. Evaluate
+	 aBlock and answer its result if either aKey is not found or it is
+	 associated to something different from a class."
+
+	<category: 'accessing'>
+	| class |
+	class := self at: aKey asGlobalKey ifAbsent: [^aBlock value].
+	class isClass ifFalse: [^aBlock value].
+	^class
+    ]
+
+    definedKeys [
+	"Answer a kind of Set containing the keys of the receiver"
+
+	<category: 'overrides for superspaces'>
+	| aSet value |
+	aSet := self keysClass new: tally * 4 // 3.
+	1 to: self primSize
+	    do: 
+		[:index | 
+		value := self primAt: index.
+		value isNil ifFalse: [aSet add: value key]].
+	^aSet
+    ]
+
+    definesKey: key [
+	"Answer whether the receiver defines the given key. `Defines'
+	 means that the receiver's superspaces, if any, are not considered."
+
+	<category: 'overrides for superspaces'>
+	^super includesKey: key
+    ]
+
+    hereAt: key ifAbsent: aBlock [
+	"Return the value associated to the variable named as specified
+	 by `key' *in this namespace*. If the key is not found search will
+	 *not* be carried on in superspaces and aBlock will be immediately
+	 evaluated."
+
+	<category: 'overrides for superspaces'>
+	^super at: key ifAbsent: aBlock
+    ]
+
+    hereAt: key [
+	"Return the value associated to the variable named as specified
+	 by `key' *in this namespace*. If the key is not found search will
+	 *not* be carried on in superspaces and the method will fail."
+
+	<category: 'overrides for superspaces'>
+	^self hereAt: key
+	    ifAbsent: [SystemExceptions.NotFound signalOn: key what: 'key']
+    ]
+
+    inheritedKeys [
+	"Answer a Set of all the keys in the receiver and its superspaces"
+
+	<category: 'overrides for superspaces'>
+	self subclassResponsibility
+    ]
+
+    set: key to: newValue [
+	"Assign newValue to the variable named as specified by `key'.
+	 This method won't define a new variable; instead if the key
+	 is not found it will search in superspaces and raising an
+	 error if the variable cannot be found in any of the superspaces.
+	 Answer newValue."
+
+	<category: 'overrides for superspaces'>
+	^self 
+	    set: key
+	    to: newValue
+	    ifAbsent: [SystemExceptions.NotFound signalOn: key what: 'key']
+    ]
+
+    set: key to: newValue ifAbsent: aBlock [
+	"Assign newValue to the variable named as specified by `key'.
+	 This method won't define a new variable; instead if the key
+	 is not found it will search in superspaces and evaluate
+	 aBlock if it is not found. Answer newValue."
+
+	<category: 'overrides for superspaces'>
+	self subclassResponsibility
+    ]
+
+    values [
+	"Answer a Bag containing the values of the receiver"
+
+	<category: 'overrides for superspaces'>
+	| aBag value |
+	aBag := Bag new: tally.
+	1 to: self primSize
+	    do: 
+		[:index | 
+		value := self primAt: index.
+		value isNil ifFalse: [aBag add: value value]].
+	^aBag
+    ]
+
+    addSubspace: aSymbol [
+	"Create a namespace named aSymbol, add it to the receiver's
+	 subspaces, and answer it."
+
+	<category: 'namespace hierarchy'>
+	^Namespace primNew: self name: aSymbol
+    ]
+
+    allSubassociationsDo: aBlock [
+	"Invokes aBlock once for every association in each of the receiver's
+	 subspaces."
+
+	<category: 'namespace hierarchy'>
+	self allSubspacesDo: [:subspace | subspace associationsDo: aBlock]
+    ]
+
+    allSubspacesDo: aBlock [
+	"Invokes aBlock for all subspaces, both direct and indirect."
+
+	<category: 'namespace hierarchy'>
+	self subspaces notNil 
+	    ifTrue: 
+		[self subspaces do: 
+			[:space | 
+			aBlock value: space.
+			space allSubspacesDo: aBlock]]
+    ]
+
+    allSubspaces [
+	"Answer the direct and indirect subspaces of the receiver in a Set"
+
+	<category: 'namespace hierarchy'>
+	| aSet |
+	aSet := Set new.
+	self allSubspacesDo: [:subspace | aSet add: subspace].
+	^aSet
+    ]
+
+    allSuperspaces [
+	"Answer all the receiver's superspaces in a collection"
+
+	<category: 'namespace hierarchy'>
+	| supers |
+	supers := OrderedCollection new.
+	self allSuperspacesDo: [:superspace | supers addLast: superspace].
+	^supers
+    ]
+
+    allSuperspacesDo: aBlock [
+	"Evaluate aBlock once for each of the receiver's superspaces"
+
+	<category: 'namespace hierarchy'>
+	| space |
+	space := self.
+	
+	[space := space superspace.
+	space notNil] whileTrue: [aBlock value: space]
+    ]
+
+    includesClassNamed: aString [
+	"Answer whether the receiver or any of its superspaces include the
+	 given class -- note that this method (unlike #includesKey:) does not
+	 require aString to be interned and (unlike #includesGlobalNamed:) only
+	 returns true if the global is a class object."
+
+	<category: 'namespace hierarchy'>
+	| possibleClass |
+	possibleClass := Symbol hasInterned: aString
+		    ifTrue: [:aSymbol | self at: aSymbol ifAbsent: [nil]].
+	^possibleClass isClass
+    ]
+
+    includesGlobalNamed: aString [
+	"Answer whether the receiver or any of its superspaces include the
+	 given key -- note that this method (unlike #includesKey:) does not
+	 require aString to be interned but (unlike #includesClassNamed:)
+	 returns true even if the global is not a class object."
+
+	<category: 'namespace hierarchy'>
+	Symbol hasInterned: aString
+	    ifTrue: [:aSymbol | self at: aSymbol ifPresent: [:value | ^true]].
+	^false
+    ]
+
+    inheritsFrom: aNamespace [
+	"Answer whether aNamespace is one of the receiver's direct and
+	 indirect superspaces"
+
+	<category: 'namespace hierarchy'>
+	| space |
+	space := self.
+	
+	[space := space superspace.
+	space == aNamespace ifTrue: [^true].
+	space notNil] 
+		whileTrue
+    ]
+
+    removeSubspace: aSymbol [
+	"Remove my subspace named aSymbol from the hierarchy."
+
+	<category: 'namespace hierarchy'>
+	| spaceName |
+	spaceName := aSymbol asGlobalKey.	"as with primNew:name:"
+	self subspaces remove: (self hereAt: spaceName)
+	    ifAbsent: 
+		[SystemExceptions.InvalidValue signalOn: aSymbol
+		    reason: 'aSymbol must name a subspace'].
+	^self removeKey: spaceName
+    ]
+
+    selectSubspaces: aBlock [
+	"Return a Set of subspaces of the receiver satisfying aBlock."
+
+	<category: 'namespace hierarchy'>
+	| aSet |
+	aSet := Set new.
+	self 
+	    allSubspacesDo: [:subspace | (aBlock value: subspace) ifTrue: [aSet add: subspace]].
+	^aSet
+    ]
+
+    selectSuperspaces: aBlock [
+	"Return a Set of superspaces of the receiver satisfying aBlock."
+
+	<category: 'namespace hierarchy'>
+	| aSet |
+	aSet := Set new.
+	self 
+	    allSuperspacesDo: [:superspace | (aBlock value: superspace) ifTrue: [aSet add: superspace]].
+	^aSet
+    ]
+
+    siblings [
+	"Answer all the other children of the same namespace as the receiver."
+
+	<category: 'namespace hierarchy'>
+	self subclassResponsibility
+    ]
+
+    siblingsDo: aBlock [
+	"Evaluate aBlock once for each of the other root namespaces,
+	 passing the namespace as a parameter."
+
+	<category: 'namespace hierarchy'>
+	self subclassResponsibility
+    ]
+
+    superspace [
+	"Answer the receiver's superspace."
+
+	<category: 'namespace hierarchy'>
+	^environment
+    ]
+
+    superspace: aNamespace [
+	"Set the superspace of the receiver to be 'aNamespace'.  Also
+	 adds the receiver as a subspace of it."
+
+	<category: 'namespace hierarchy'>
+	| oldSuperspace newSuperspace root |
+	oldSuperspace := self superspace.
+	newSuperspace := aNamespace.
+	oldSuperspace == newSuperspace ifTrue: [^self].	"don't need to change anything"
+	oldSuperspace isNil 
+	    ifTrue: 
+		[oldSuperspace := Smalltalk.
+		self become: ((Namespace basicNew: self primSize) copyAllFrom: self)]
+	    ifFalse: [oldSuperspace subspaces remove: self].
+	newSuperspace isNil 
+	    ifTrue: 
+		[newSuperspace := Smalltalk.
+		self 
+		    become: ((AbstractNamespace basicNew: self primSize) copyAllFrom: self)]
+	    ifFalse: [aNamespace subspaces add: self].
+	environment := aNamespace.
+	newSuperspace add: (oldSuperspace remove: self name asGlobalKey -> nil).
+	self do: 
+		[:each | 
+		each isClass 
+		    ifTrue: 
+			[each recompileAll.
+			each class recompileAll]].
+	self allSubassociationsDo: 
+		[:assoc | 
+		assoc value isClass 
+		    ifTrue: 
+			[assoc value recompileAll.
+			assoc value class recompileAll]]
+    ]
+
+    subspaces [
+	"Answer the receiver's direct subspaces"
+
+	<category: 'namespace hierarchy'>
+	subspaces isNil ifTrue: [subspaces := IdentitySet new].
+	^subspaces
+    ]
+
+    subspacesDo: aBlock [
+	"Invokes aBlock for all direct subspaces."
+
+	<category: 'namespace hierarchy'>
+	self subspaces do: aBlock
+    ]
+
+    withAllSubspaces [
+	"Answer a Set containing the receiver together with its direct and
+	 indirect subspaces"
+
+	<category: 'namespace hierarchy'>
+	| aSet |
+	aSet := Set with: self.
+	aSet addAll: self allSubspaces.
+	^aSet
+    ]
+
+    withAllSubspacesDo: aBlock [
+	"Invokes aBlock for the receiver and all subclasses, both direct
+	 and indirect."
+
+	<category: 'namespace hierarchy'>
+	aBlock value: self.
+	self subspaces do: 
+		[:subspace | 
+		aBlock value: subspace.
+		subspace allSubspacesDo: aBlock]
+    ]
+
+    withAllSuperspaces [
+	"Answer the receiver and all of its superspaces in a collection"
+
+	<category: 'namespace hierarchy'>
+	| supers |
+	supers := OrderedCollection with: self.
+	self allSuperspacesDo: [:superspace | supers addLast: superspace].
+	^supers
+    ]
+
+    withAllSuperspacesDo: aBlock [
+	"Invokes aBlock for the receiver and all superspaces, both direct
+	 and indirect."
+
+	<category: 'namespace hierarchy'>
+	| space |
+	space := self.
+	
+	[aBlock value: space.
+	space := space superspace.
+	space notNil] whileTrue
+    ]
+
+    nameIn: aNamespace [
+	"Answer Smalltalk code compiling to the receiver when the current
+	 namespace is aNamespace"
+
+	<category: 'printing'>
+	self subclassResponsibility
+    ]
+
+    name [
+	"Answer the receiver's name"
+
+	<category: 'printing'>
+	^name
+    ]
+
+    name: aSymbol [
+	"Change the receiver's name to aSymbol"
+
+	<category: 'printing'>
+	name := aSymbol
+    ]
+
+    printOn: aStream [
+	"Print a representation of the receiver"
+
+	<category: 'printing'>
+	aStream nextPutAll: self name
+    ]
+
+    storeOn: aStream [
+	"Store Smalltalk code compiling to the receiver"
+
+	<category: 'printing'>
+	self subclassResponsibility
+    ]
+
+    setSuperspace: newSuperspace [
+	<category: 'private'>
+	self environment: newSuperspace.
+	self environment subspaces add: self
+    ]
+
+    setSubspaces: newSubspaces [
+	<category: 'private'>
+	subspaces := newSubspaces
+    ]
+
+    isNamespace [
+	<category: 'testing'>
+	^true
+    ]
+
+    isSmalltalk [
+	<category: 'testing'>
+	^false
+    ]
+]
+

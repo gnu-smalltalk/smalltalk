@@ -4,7 +4,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2003 Free Software Foundation, Inc.
@@ -29,93 +28,138 @@
 |
  ======================================================================"
 
-Namespace current: GTK!
 
-Object subclass: #EntryExample
-	instanceVariableNames: 'entry window'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: nil!
+
+Namespace current: GTK [
 
-!EntryExample methodsFor: 'event handling'!
+Object subclass: EntryExample [
+    | entry window |
+    
+    <category: nil>
+    <comment: nil>
 
-activate: object data: data
-    entry getText displayNl
-!
+    activate: object data: data [
+	<category: 'event handling'>
+	entry getText displayNl
+    ]
 
-clicked: object data: data
-    window destroy
-!
+    clicked: object data: data [
+	<category: 'event handling'>
+	window destroy
+    ]
 
-toggled: object data: selector
-    entry perform: selector with: object getActive
-!
+    toggled: object data: selector [
+	<category: 'event handling'>
+	entry perform: selector with: object getActive
+    ]
 
-destroy: object data: data
-    Gtk mainQuit
-!
+    destroy: object data: data [
+	<category: 'event handling'>
+	Gtk mainQuit
+    ]
 
-delete: object event: event data: data
-    window destroy
-! !
+    delete: object event: event data: data [
+	<category: 'event handling'>
+	window destroy
+    ]
 
-!EntryExample methodsFor: 'layout'!
+    open [
+	<category: 'layout'>
+	| vbox hbox button check pos |
+	window := GtkWindow new: Gtk gtkWindowToplevel.
+	window setSizeRequest: 200 height: 100.
+	window setTitle: 'GTK Entry'.
+	window 
+	    connectSignal: 'destroy'
+	    to: self
+	    selector: #destroy:data:
+	    userData: nil.
+	window 
+	    connectSignal: 'delete_event'
+	    to: self
+	    selector: #delete:event:data:
+	    userData: nil.
+	vbox := GtkVBox new: false spacing: 0.
+	window add: vbox.
+	vbox show.
+	entry := GtkEntry new.
+	entry setMaxLength: 50.
+	entry 
+	    connectSignal: 'activate'
+	    to: self
+	    selector: #activate:data:
+	    userData: nil.
+	entry setText: 'hello'.
 
-open
-    | vbox hbox button check pos |
-    
-    window := GtkWindow new: Gtk gtkWindowToplevel.
-    window setSizeRequest: 200 height: 100.
-    window setTitle: 'GTK Entry'.
-    
-    window connectSignal: 'destroy' to: self selector: #destroy:data: userData: nil.
-    window connectSignal: 'delete_event' to: self selector: #delete:event:data: userData: nil.
-    
-    vbox := GtkVBox new: false spacing: 0.
-    window add: vbox.
-    vbox show.
-    
-    entry := GtkEntry new.
-    entry setMaxLength: 50.
-    entry connectSignal: 'activate' to: self selector: #activate:data: userData: nil.
-    entry setText: 'hello'.
-    
-    "This function needs an int* as the last parameter, so we allocate it."
-    pos := CIntType new.
-    pos value: entry getText size.
-    entry insertText: ' world' newTextLength: -1 position: pos.
-    pos free.
-    
-    entry selectRegion: 0 end: entry getText size.
-    vbox packStart: entry expand: true fill: true padding: 0.
-    entry show.
-    
-    hbox := GtkHBox new: false spacing: 0.
-    vbox add: hbox.
-    hbox show.
-    
-    check := GtkCheckButton newWithLabel: 'Editable'.
-    hbox packStart: check expand: true fill: true padding: 0.
-    check connectSignal: 'toggled' to: self selector: #toggled:data: userData: #setEditable:.
-    check setActive: true.
-    check show.
-    
-    check := GtkCheckButton newWithLabel: 'Visible'.
-    hbox packStart: check expand: true fill: true padding: 0.
-    check connectSignal: 'toggled' to: self selector: #toggled:data: userData: #setVisibility:.
-    check setActive: true.
-    check show.
-    
-    button := GtkButton newFromStock: 'gtk-close'.
-    button connectSignal: 'clicked' to: self selector: #clicked:data: userData: nil.
-    vbox packStart: button expand: true fill: true padding: 0.
-    button setFlags: Gtk gtkCanDefault.
-    button grabDefault.
-    button show.
-    
-    window show
-! !
-    
-Gtk gstGtkInit!
-EntryExample new open!
-Gtk main!
+	"This function needs an int* as the last parameter, so we allocate it."
+	pos := CIntType new.
+	pos value: entry getText size.
+	entry 
+	    insertText: ' world'
+	    newTextLength: -1
+	    position: pos.
+	pos free.
+	entry selectRegion: 0 end: entry getText size.
+	vbox 
+	    packStart: entry
+	    expand: true
+	    fill: true
+	    padding: 0.
+	entry show.
+	hbox := GtkHBox new: false spacing: 0.
+	vbox add: hbox.
+	hbox show.
+	check := GtkCheckButton newWithLabel: 'Editable'.
+	hbox 
+	    packStart: check
+	    expand: true
+	    fill: true
+	    padding: 0.
+	check 
+	    connectSignal: 'toggled'
+	    to: self
+	    selector: #toggled:data:
+	    userData: #setEditable:.
+	check setActive: true.
+	check show.
+	check := GtkCheckButton newWithLabel: 'Visible'.
+	hbox 
+	    packStart: check
+	    expand: true
+	    fill: true
+	    padding: 0.
+	check 
+	    connectSignal: 'toggled'
+	    to: self
+	    selector: #toggled:data:
+	    userData: #setVisibility:.
+	check setActive: true.
+	check show.
+	button := GtkButton newFromStock: 'gtk-close'.
+	button 
+	    connectSignal: 'clicked'
+	    to: self
+	    selector: #clicked:data:
+	    userData: nil.
+	vbox 
+	    packStart: button
+	    expand: true
+	    fill: true
+	    padding: 0.
+	button setFlags: Gtk gtkCanDefault.
+	button grabDefault.
+	button show.
+	window show
+    ]
+]
+
+]
+
+
+
+Namespace current: GTK [
+    Gtk gstGtkInit.
+    EntryExample new open.
+    Gtk main
+]
+

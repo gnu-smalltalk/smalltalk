@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2002, 2007 Free Software Foundation, Inc.
@@ -29,481 +28,589 @@
  ======================================================================"
 
 
-Namespace current: Kernel!
+
+Namespace current: Kernel [
 
-Stream subclass: #ConcatenatedStream
-       instanceVariableNames: 'streams startPos curPos last lastStart'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Useful tools'
-!
-
-Stream subclass: #FilteringStream
-       instanceVariableNames: 'stream block result next atEnd'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Useful tools'
-!
-
-Stream subclass: #CollectingStream
-       instanceVariableNames: 'stream block'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Useful tools'
-!
-
-Stream subclass: #PeekableStream
-       instanceVariableNames: 'stream haveLookahead lookahead'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Useful tools'
-!
-
-Stream subclass: #LineStream
-       instanceVariableNames: 'charStream'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Useful tools'
-!
-
-!ConcatenatedStream class methodsFor: 'all'!
-
-new
-    ^#() readStream
-!
-
-with: stream1
-    ^self basicNew
-	streams: { stream1 };
-	startPos: 0
-!
-
-with: stream1 with: stream2
-    ^self basicNew
-	streams: { stream1. stream2 };
-	startPos: 0
-!
-
-withAll: array
-    ^self basicNew
-	streams: array;
-	startPos: 0
-! !
-
-!ConcatenatedStream methodsFor: 'all'!
-
-, aStream
-    ^self copy addStream: aStream; yourself
-!
-
-postCopy
-    streams := streams copy
-!
-
-atEnd
-    [
-	streams first atEnd
-    ] whileTrue: [
-	streams size = 1 ifTrue: [ ^true ].
-	lastStart := startPos.
-	startPos := startPos + curPos.
-	curPos := 0.
-	last := streams removeFirst ].
-    ^false
-!
-
-name
-    self atEnd ifTrue: [ ^nil ].
-    ^streams first name
-!
+Stream subclass: ConcatenatedStream [
+    | streams startPos curPos last lastStart |
     
-next
-    self atEnd ifFalse: [ curPos := curPos + 1 ].
-    ^streams first next
-!
+    <category: 'Examples-Useful tools'>
+    <comment: nil>
 
-pastEnd
-    ^streams last pastEnd
-!
+    ConcatenatedStream class >> new [
+	<category: 'all'>
+	^#() readStream
+    ]
 
-peekFor: aCharacter
-    | result |
-    self atEnd ifTrue: [ self pastEnd. ^false ].
-    result := streams first peekFor: aCharacter.
-    result ifTrue: [ curPos := curPos + 1 ].
-    ^result
-!
+    ConcatenatedStream class >> with: stream1 [
+	<category: 'all'>
+	^(self basicNew)
+	    streams: {stream1};
+	    startPos: 0
+    ]
 
-peek
-    self atEnd ifTrue: [ ^self pastEnd ].
-    ^streams first peek
-!
+    ConcatenatedStream class >> with: stream1 with: stream2 [
+	<category: 'all'>
+	^(self basicNew)
+	    streams: 
+		    {stream1.
+		    stream2};
+	    startPos: 0
+    ]
 
-position
-    self atEnd.
-    ^startPos + curPos
-!
+    ConcatenatedStream class >> withAll: array [
+	<category: 'all'>
+	^(self basicNew)
+	    streams: array;
+	    startPos: 0
+    ]
 
-position: anInteger
-    self atEnd ifTrue: [ self pastEnd. ^self ].
-    streams first position: anInteger - startPos.
-    curPos := anInteger - startPos
-!
+    , aStream [
+	<category: 'all'>
+	^(self copy)
+	    addStream: aStream;
+	    yourself
+    ]
 
-copyFrom: start to: end
-    "needed to do the documentation"
-    | adjust stream |
-    self atEnd.
-    end + 1 = start ifTrue: [ ^'' ].
-    end <= startPos
-	ifTrue: [ stream := last. adjust := lastStart ]
-	ifFalse: [ stream := streams first. adjust := startPos ].
-    ^stream copyFrom: (start - adjust max: 0) to: end - adjust
-!
+    postCopy [
+	<category: 'all'>
+	streams := streams copy
+    ]
 
-segmentFrom: start to: end
-    "needed to do the documentation"
-    | adjust stream |
-    self atEnd.
-    end + 1 = start ifTrue: [ ^'' ].
-    end <= startPos
-	ifTrue: [ stream := last. adjust := lastStart ]
-	ifFalse: [ stream := streams first. adjust := startPos ].
-    ^stream segmentFrom: (start - adjust max: 0) to: end - adjust
-!
+    atEnd [
+	<category: 'all'>
+	[streams first atEnd] whileTrue: 
+		[streams size = 1 ifTrue: [^true].
+		lastStart := startPos.
+		startPos := startPos + curPos.
+		curPos := 0.
+		last := streams removeFirst].
+	^false
+    ]
 
-!ConcatenatedStream methodsFor: 'initializing'!
+    name [
+	<category: 'all'>
+	self atEnd ifTrue: [^nil].
+	^streams first name
+    ]
 
-startPos: anInteger
-    startPos := anInteger.
-    curPos := 0
-!
+    next [
+	<category: 'all'>
+	self atEnd ifFalse: [curPos := curPos + 1].
+	^streams first next
+    ]
 
-addStream: stream
-    streams addLast: stream
-!
+    pastEnd [
+	<category: 'all'>
+	^streams last pastEnd
+    ]
 
-streams: arrayOfStreams
-    streams := arrayOfStreams asOrderedCollection.
-! !
+    peekFor: aCharacter [
+	<category: 'all'>
+	| result |
+	self atEnd 
+	    ifTrue: 
+		[self pastEnd.
+		^false].
+	result := streams first peekFor: aCharacter.
+	result ifTrue: [curPos := curPos + 1].
+	^result
+    ]
 
-!FilteringStream class methodsFor: 'all'!
+    peek [
+	<category: 'all'>
+	self atEnd ifTrue: [^self pastEnd].
+	^streams first peek
+    ]
 
-on: aStream select: selectBlock
-   ^self new initStream: aStream block: selectBlock result: true
-!
+    position [
+	<category: 'all'>
+	self atEnd.
+	^startPos + curPos
+    ]
 
-on: aStream reject: selectBlock
-   ^self new initStream: aStream block: selectBlock result: false
-! !
+    position: anInteger [
+	<category: 'all'>
+	self atEnd 
+	    ifTrue: 
+		[self pastEnd.
+		^self].
+	streams first position: anInteger - startPos.
+	curPos := anInteger - startPos
+    ]
 
-!FilteringStream methodsFor: 'initializing'!
+    copyFrom: start to: end [
+	"needed to do the documentation"
 
-initStream: aStream block: selectBlock result: aBoolean
-    stream := aStream.
-    block := selectBlock.
-    result := aBoolean.
-    atEnd := false.
-    self lookahead
-! !
+	<category: 'all'>
+	| adjust stream |
+	self atEnd.
+	end + 1 = start ifTrue: [^''].
+	end <= startPos 
+	    ifTrue: 
+		[stream := last.
+		adjust := lastStart]
+	    ifFalse: 
+		[stream := streams first.
+		adjust := startPos].
+	^stream copyFrom: (start - adjust max: 0) to: end - adjust
+    ]
 
-!FilteringStream methodsFor: 'streaming'!
+    segmentFrom: start to: end [
+	"needed to do the documentation"
 
-atEnd
-    ^atEnd
-!
+	<category: 'all'>
+	| adjust stream |
+	self atEnd.
+	end + 1 = start ifTrue: [^''].
+	end <= startPos 
+	    ifTrue: 
+		[stream := last.
+		adjust := lastStart]
+	    ifFalse: 
+		[stream := streams first.
+		adjust := startPos].
+	^stream segmentFrom: (start - adjust max: 0) to: end - adjust
+    ]
 
-next
-    | result |
-    atEnd ifTrue: [ self pastEnd. ^nil ].
-    result := next.
-    self lookahead.
-    ^result
-!
+    startPos: anInteger [
+	<category: 'initializing'>
+	startPos := anInteger.
+	curPos := 0
+    ]
 
-pastEnd
-    ^stream pastEnd
-!
+    addStream: stream [
+	<category: 'initializing'>
+	streams addLast: stream
+    ]
 
-peek
-    atEnd ifTrue: [ ^nil ].
-    ^next
-!
+    streams: arrayOfStreams [
+	<category: 'initializing'>
+	streams := arrayOfStreams asOrderedCollection
+    ]
+]
 
-peekFor: aCharacter
-    atEnd ifTrue: [ self pastEnd. ^false ].
-    next == aCharacter ifTrue: [ self lookahead. ^true ].
-    ^false
-! !
+]
 
-!FilteringStream methodsFor: 'basic'!
 
-name
-    ^stream name
-!
+
+Namespace current: Kernel [
 
-species
-    ^stream species
-! !
+Stream subclass: FilteringStream [
+    | stream block result next atEnd |
+    
+    <category: 'Examples-Useful tools'>
+    <comment: nil>
 
-!FilteringStream methodsFor: 'private'!
+    FilteringStream class >> on: aStream select: selectBlock [
+	<category: 'all'>
+	^self new 
+	    initStream: aStream
+	    block: selectBlock
+	    result: true
+    ]
 
-lookahead
-    [
-	stream atEnd ifTrue: [ atEnd := true. ^self ].
+    FilteringStream class >> on: aStream reject: selectBlock [
+	<category: 'all'>
+	^self new 
+	    initStream: aStream
+	    block: selectBlock
+	    result: false
+    ]
+
+    initStream: aStream block: selectBlock result: aBoolean [
+	<category: 'initializing'>
+	stream := aStream.
+	block := selectBlock.
+	result := aBoolean.
+	atEnd := false.
+	self lookahead
+    ]
+
+    atEnd [
+	<category: 'streaming'>
+	^atEnd
+    ]
+
+    next [
+	<category: 'streaming'>
+	| result |
+	atEnd 
+	    ifTrue: 
+		[self pastEnd.
+		^nil].
+	result := next.
+	self lookahead.
+	^result
+    ]
+
+    pastEnd [
+	<category: 'streaming'>
+	^stream pastEnd
+    ]
+
+    peek [
+	<category: 'streaming'>
+	atEnd ifTrue: [^nil].
+	^next
+    ]
+
+    peekFor: aCharacter [
+	<category: 'streaming'>
+	atEnd 
+	    ifTrue: 
+		[self pastEnd.
+		^false].
+	next == aCharacter 
+	    ifTrue: 
+		[self lookahead.
+		^true].
+	^false
+    ]
+
+    name [
+	<category: 'basic'>
+	^stream name
+    ]
+
+    species [
+	<category: 'basic'>
+	^stream species
+    ]
+
+    lookahead [
+	<category: 'private'>
+	
+	[stream atEnd 
+	    ifTrue: 
+		[atEnd := true.
+		^self].
 	next := stream next.
-	(block value: next) == result
-    ] whileFalse
-! !
+	(block value: next) == result] 
+		whileFalse
+    ]
+]
 
-!CollectingStream class methodsFor: 'instance creation'!
+]
 
-on: aStream collect: collectBlock
-   ^self new initStream: aStream block: collectBlock
-! !
 
-!CollectingStream methodsFor: 'initializing'!
+
+Namespace current: Kernel [
 
-initStream: aStream block: collectBlock
-    stream := aStream.
-    block := collectBlock.
-! !
-
-!CollectingStream methodsFor: 'positioning'!
-
-atEnd
-    ^stream atEnd
-!
-
-next
-    stream atEnd ifTrue: [ ^stream pastEnd ].
-    ^block value: stream next
-!
-
-pastEnd
-    ^stream pastEnd
-!
-
-peek
-    stream atEnd ifTrue: [ ^nil ].
-    ^block value: stream peek
-!
-
-peekFor: anObject
-    | result |
-    stream atEnd ifTrue: [ stream pastEnd. ^false ].
-    result := (block value: stream peek) = anObject
-    result ifTrue: [ stream next ].
-    ^result
-!
+Stream subclass: CollectingStream [
+    | stream block |
     
-position
-    ^stream position
-!
+    <category: 'Examples-Useful tools'>
+    <comment: nil>
 
-position: anInteger
-    stream position: anInteger
-! !
+    CollectingStream class >> on: aStream collect: collectBlock [
+	<category: 'instance creation'>
+	^self new initStream: aStream block: collectBlock
+    ]
 
-!CollectingStream methodsFor: 'basic'!
+    initStream: aStream block: collectBlock [
+	<category: 'initializing'>
+	stream := aStream.
+	block := collectBlock
+    ]
 
-name
-    ^stream name
-!
+    atEnd [
+	<category: 'positioning'>
+	^stream atEnd
+    ]
 
-species
-    ^stream species
-! !
+    next [
+	<category: 'positioning'>
+	stream atEnd ifTrue: [^stream pastEnd].
+	^block value: stream next
+    ]
 
-!PeekableStream class methodsFor: 'instance creation'!
+    pastEnd [
+	<category: 'positioning'>
+	^stream pastEnd
+    ]
 
-on: aStream
-    ^self new initStream: aStream
-! !
+    peek [
+	<category: 'positioning'>
+	stream atEnd ifTrue: [^nil].
+	^block value: stream peek
+    ]
 
-!PeekableStream methodsFor: 'basic'!
+    peekFor: anObject [
+	<category: 'positioning'>
+	| result |
+	stream atEnd 
+	    ifTrue: 
+		[stream pastEnd.
+		^false].
+	result := (block value: stream peek) = anObject result 
+		    ifTrue: [stream next].
+	^result
+    ]
 
-species
-    ^stream species
-!
+    position [
+	<category: 'positioning'>
+	^stream position
+    ]
 
-name
-    ^stream name
-!
+    position: anInteger [
+	<category: 'positioning'>
+	stream position: anInteger
+    ]
 
-next
-    | char |
-    ^haveLookahead
-	ifTrue: [
-	    haveLookahead := false.
-	    char := lookahead.
-	    lookahead := nil.
-	    char ]
-	ifFalse: [ stream next ].
-!
+    name [
+	<category: 'basic'>
+	^stream name
+    ]
 
-atEnd
-    "Answer whether the input stream has no more tokens."
-    ^haveLookahead not and: [ stream atEnd ]
-!
+    species [
+	<category: 'basic'>
+	^stream species
+    ]
+]
 
-pastEnd
-    ^stream pastEnd
-!
+]
 
-peek
-    "Returns the next element of the stream without moving the pointer.
-     Returns nil when at end of stream."
-    haveLookahead ifFalse: [
-	stream atEnd ifTrue: [ ^nil ].
-	haveLookahead := true. lookahead := stream next ].
-    ^lookahead
-!
 
-peekFor: anObject
-    "Answer a new whitespace-separated token from the input stream"
-    | result |
-    haveLookahead ifFalse: [
-	stream atEnd ifTrue: [ self pastEnd. ^false ].
-	lookahead := stream next ].
+
+Namespace current: Kernel [
 
-    result := lookahead = anObject.
-    result ifTrue: [ lookahead := nil ].
-    haveLookahead := result not.
-    ^result
-! !
+Stream subclass: PeekableStream [
+    | stream haveLookahead lookahead |
+    
+    <category: 'Examples-Useful tools'>
+    <comment: nil>
 
-!PeekableStream methodsFor: 'private'!
+    PeekableStream class >> on: aStream [
+	<category: 'instance creation'>
+	^self new initStream: aStream
+    ]
 
-initStream: aStream
-    stream := aStream.
-    haveLookahead := false
-! !
+    species [
+	<category: 'basic'>
+	^stream species
+    ]
 
-!LineStream class methodsFor: 'instance creation'!
+    name [
+	<category: 'basic'>
+	^stream name
+    ]
 
-on: aStream
-    "Answer a LineStream working on aStream"
-    ^self new initStream: aStream
-! !
+    next [
+	<category: 'basic'>
+	| char |
+	^haveLookahead 
+	    ifTrue: 
+		[haveLookahead := false.
+		char := lookahead.
+		lookahead := nil.
+		char]
+	    ifFalse: [stream next]
+    ]
 
-!LineStream methodsFor: 'basic'!
+    atEnd [
+	"Answer whether the input stream has no more tokens."
 
-name
-    ^charStream name
-!
+	<category: 'basic'>
+	^haveLookahead not and: [stream atEnd]
+    ]
 
-next
-    ^charStream nextLine
-!
+    pastEnd [
+	<category: 'basic'>
+	^stream pastEnd
+    ]
 
-atEnd
-    ^charStream atEnd
-!
+    peek [
+	"Returns the next element of the stream without moving the pointer.
+	 Returns nil when at end of stream."
 
-pastEnd
-    ^charStream pastEnd
-! !
+	<category: 'basic'>
+	haveLookahead 
+	    ifFalse: 
+		[stream atEnd ifTrue: [^nil].
+		haveLookahead := true.
+		lookahead := stream next].
+	^lookahead
+    ]
 
-!LineStream methodsFor: 'private'!
+    peekFor: anObject [
+	"Answer a new whitespace-separated token from the input stream"
 
-initStream: aStream
-    charStream := aStream.
-! !
+	<category: 'basic'>
+	| result |
+	haveLookahead 
+	    ifFalse: 
+		[stream atEnd 
+		    ifTrue: 
+			[self pastEnd.
+			^false].
+		lookahead := stream next].
+	result := lookahead = anObject.
+	result ifTrue: [lookahead := nil].
+	haveLookahead := result not.
+	^result
+    ]
 
-Namespace current: Smalltalk!
+    initStream: aStream [
+	<category: 'private'>
+	stream := aStream.
+	haveLookahead := false
+    ]
+]
 
-!Stream methodsFor: 'filtering'!
+]
 
-, aStream
-    "Answer a new stream that concatenates the data in the receiver with the
-     data in aStream.  Both the receiver and aStream should be readable."
-    ^Kernel.ConcatenatedStream with: self with: aStream
-!
 
-lines
-    "Answer a new stream that answers lines from the receiver."
-    ^Kernel.LineStream on: self
-!
+
+Namespace current: Kernel [
 
-peek
-    "Returns the next element of the stream without moving the pointer.
-     Returns nil when at end of stream.  Lookahead is implemented automatically
-     for streams that are not positionable but can be copied."
- 
-    | copy |
-    copy := self copy.
-    copy == self ifTrue: [ ^self shouldNotImplement ].
-    self become: (Kernel.PeekableStream on: copy).
-    ^self peek
-!
+Stream subclass: LineStream [
+    | charStream |
+    
+    <category: 'Examples-Useful tools'>
+    <comment: nil>
 
-peekFor: aCharacter
-    "Returns true and gobbles the next element from the stream of it is
-     equal to anObject, returns false and doesn't gobble the next element
-     if the next element is not equal to anObject.  Lookahead is implemented
-     automatically for streams that are not positionable but can be copied."
- 
-    | copy |
-    copy := self copy.
-    copy == self ifTrue: [ ^self shouldNotImplement ].
-    self become: (Kernel.PeekableStream on: copy).
-    ^self peekFor: aCharacter
-!
+    LineStream class >> on: aStream [
+	"Answer a LineStream working on aStream"
 
-fold: aBlock
-    "First, pass to binaryBlock the first and second elements of the
-     receiver; for each subsequent element, pass the result of the previous
-     evaluation and an element. Answer the result of the last invocation,
-     or the first element if the stream has a single element."
+	<category: 'instance creation'>
+	^self new initStream: aStream
+    ]
 
-    | result |
-    result := self next.
-    [ self atEnd ] whileFalse: [
-	result := aBlock value: result value: self next ].
-    ^result
-!
+    name [
+	<category: 'basic'>
+	^charStream name
+    ]
 
-inject: value into: aBlock
-    "First, pass to binaryBlock value and the first element of the
-     receiver; for each subsequent element, pass the result of the previous
-     evaluation and an element. Answer the result of the last invocation,
-     or value if the stream is empty."
+    next [
+	<category: 'basic'>
+	^charStream nextLine
+    ]
 
-    | result |
-    result := value.
-    [ self atEnd ] whileFalse: [
-	result := aBlock value: result value: self next ].
-    ^result
-!
+    atEnd [
+	<category: 'basic'>
+	^charStream atEnd
+    ]
 
-select: aBlock
-    "Answer a new stream that only returns those objects for which aBlock
-     returns true.  Note that the returned stream will not be positionable."
+    pastEnd [
+	<category: 'basic'>
+	^charStream pastEnd
+    ]
 
-    "Example: Sieve of Erathostenes.
-     GNU Smalltalk does not detect that i escapes, so we need to avoid
-     optimizations of #to:do:.
+    initStream: aStream [
+	<category: 'private'>
+	charStream := aStream
+    ]
+]
 
-	s := (2 to: 100) readStream.
-	(2 to: 10) do: [ :i |
-	    s := s reject: [ :n | n > i and: [ n \\ i = 0 ] ] ].
-	s contents printNl"
+]
 
-    ^Kernel.FilteringStream on: self select: aBlock
-!
 
-reject: aBlock
-    "Answer a new stream that only returns those objects for which aBlock
-     returns false.  Note that the returned stream will not be positionable."
-    ^Kernel.FilteringStream on: self reject: aBlock
-!
+
+Stream extend [
 
-collect: aBlock
-    "Answer a new stream that will pass the returned objects through aBlock,
-     and return whatever object is returned by aBlock instead.  Note that when
-     peeking in the returned stream, the block will be invoked multiple times,
-     with possibly surprising results."
-    ^Kernel.CollectingStream on: self collect: aBlock
-! !
+    , aStream [
+	"Answer a new stream that concatenates the data in the receiver with the
+	 data in aStream.  Both the receiver and aStream should be readable."
+
+	<category: 'filtering'>
+	^Kernel.ConcatenatedStream with: self with: aStream
+    ]
+
+    lines [
+	"Answer a new stream that answers lines from the receiver."
+
+	<category: 'filtering'>
+	^Kernel.LineStream on: self
+    ]
+
+    peek [
+	"Returns the next element of the stream without moving the pointer.
+	 Returns nil when at end of stream.  Lookahead is implemented automatically
+	 for streams that are not positionable but can be copied."
+
+	<category: 'filtering'>
+	| copy |
+	copy := self copy.
+	copy == self ifTrue: [^self shouldNotImplement].
+	self become: (Kernel.PeekableStream on: copy).
+	^self peek
+    ]
+
+    peekFor: aCharacter [
+	"Returns true and gobbles the next element from the stream of it is
+	 equal to anObject, returns false and doesn't gobble the next element
+	 if the next element is not equal to anObject.  Lookahead is implemented
+	 automatically for streams that are not positionable but can be copied."
+
+	<category: 'filtering'>
+	| copy |
+	copy := self copy.
+	copy == self ifTrue: [^self shouldNotImplement].
+	self become: (Kernel.PeekableStream on: copy).
+	^self peekFor: aCharacter
+    ]
+
+    fold: aBlock [
+	"First, pass to binaryBlock the first and second elements of the
+	 receiver; for each subsequent element, pass the result of the previous
+	 evaluation and an element. Answer the result of the last invocation,
+	 or the first element if the stream has a single element."
+
+	<category: 'filtering'>
+	| result |
+	result := self next.
+	[self atEnd] whileFalse: [result := aBlock value: result value: self next].
+	^result
+    ]
+
+    inject: value into: aBlock [
+	"First, pass to binaryBlock value and the first element of the
+	 receiver; for each subsequent element, pass the result of the previous
+	 evaluation and an element. Answer the result of the last invocation,
+	 or value if the stream is empty."
+
+	<category: 'filtering'>
+	| result |
+	result := value.
+	[self atEnd] whileFalse: [result := aBlock value: result value: self next].
+	^result
+    ]
+
+    select: aBlock [
+	"Answer a new stream that only returns those objects for which aBlock
+	 returns true.  Note that the returned stream will not be positionable."
+
+	"Example: Sieve of Erathostenes.
+	 GNU Smalltalk does not detect that i escapes, so we need to avoid
+	 optimizations of #to:do:.
+	 
+	 s := (2 to: 100) readStream.
+	 (2 to: 10) do: [ :i |
+	 s := s reject: [ :n | n > i and: [ n \\ i = 0 ] ] ].
+	 s contents printNl"
+
+	<category: 'filtering'>
+	^Kernel.FilteringStream on: self select: aBlock
+    ]
+
+    reject: aBlock [
+	"Answer a new stream that only returns those objects for which aBlock
+	 returns false.  Note that the returned stream will not be positionable."
+
+	<category: 'filtering'>
+	^Kernel.FilteringStream on: self reject: aBlock
+    ]
+
+    collect: aBlock [
+	"Answer a new stream that will pass the returned objects through aBlock,
+	 and return whatever object is returned by aBlock instead.  Note that when
+	 peeking in the returned stream, the block will be invoked multiple times,
+	 with possibly surprising results."
+
+	<category: 'filtering'>
+	^Kernel.CollectingStream on: self collect: aBlock
+    ]
+
+]
 

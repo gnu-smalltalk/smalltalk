@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002
@@ -31,48 +30,45 @@
 |
  ======================================================================"
 
-LookupTable variableSubclass: #IdentityDictionary
-	   instanceVariableNames: ''
-	   classVariableNames: ''
-	   poolDictionaries: ''
-	   category: 'Collections-Keyed'
-!
-
-IdentityDictionary comment:
-'I am similar to LookupTable, except that I use the object identity
-comparision message == to determine equivalence of indices.' !
 
 
-!IdentityDictionary methodsFor: 'private methods'!
+LookupTable subclass: IdentityDictionary [
+    
+    <shape: #pointer>
+    <category: 'Collections-Keyed'>
+    <comment: 'I am similar to LookupTable, except that I use the object identity
+comparision message == to determine equivalence of indices.'>
 
-keysClass
-    "Answer the class answered by #keys"
-    ^IdentitySet
-!
+    keysClass [
+	"Answer the class answered by #keys"
 
-hashFor: anObject
-    "Return an hash value for the item, anObject"
-    ^anObject identityHash
-!
+	<category: 'private methods'>
+	^IdentitySet
+    ]
 
-findIndex: anObject
-    "Tries to see if anObject exists as an indexed variable. As soon as nil
-    or anObject is found, the index of that slot is answered"
+    hashFor: anObject [
+	"Return an hash value for the item, anObject"
 
-    | index size element |
-    self beConsistent.
+	<category: 'private methods'>
+	^anObject identityHash
+    ]
 
-    "Sorry for the lack of readability, but I want speed... :-)"
-    index := (anObject identityHash scramble
-                bitAnd: (size := self primSize) - 1) + 1.
+    findIndex: anObject [
+	"Tries to see if anObject exists as an indexed variable. As soon as nil
+	 or anObject is found, the index of that slot is answered"
 
-    [
-        ((element := self primAt: index) isNil
-            or: [ element == anObject ])
-                ifTrue: [ ^index ].
+	<category: 'private methods'>
+	| index size element |
+	self beConsistent.
 
-        index == size
-            ifTrue: [ index := 1 ]
-            ifFalse: [ index := index + 1 ]
-    ] repeat
-! !
+	"Sorry for the lack of readability, but I want speed... :-)"
+	index := (anObject identityHash scramble 
+		    bitAnd: (size := self primSize) - 1) + 1.
+	
+	[((element := self primAt: index) isNil or: [element == anObject]) 
+	    ifTrue: [^index].
+	index == size ifTrue: [index := 1] ifFalse: [index := index + 1]] 
+		repeat
+    ]
+]
+

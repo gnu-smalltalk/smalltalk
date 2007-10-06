@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2002 Free Software Foundation, Inc.
@@ -31,68 +30,60 @@
  ======================================================================"
 
 
-Association subclass: #HomedAssociation
-	  instanceVariableNames: 'environment'
-	  classVariableNames: ''
-	  poolDictionaries: ''
-	  category: 'Language-Data types'
-!
-
-HomedAssociation comment: 
-'My instances represent know about their parent namespace, which
-is of use when implementing weak collections and finalizations.'!
-	      
-
-!HomedAssociation class methodsFor: 'basic'!
-
-key: aKey value: aValue environment: aNamespace
-    "Answer a new association with the given key and value"
-    ^(self key: aKey value: aValue) environment: aNamespace
-! !
-
-
 
-!HomedAssociation methodsFor: 'accessing'!
+Association subclass: HomedAssociation [
+    | environment |
+    
+    <category: 'Language-Data types'>
+    <comment: 'My instances represent know about their parent namespace, which
+is of use when implementing weak collections and finalizations.'>
 
-environment
-    "Answer the namespace in which I live."
-    ^environment
-!
+    HomedAssociation class >> key: aKey value: aValue environment: aNamespace [
+	"Answer a new association with the given key and value"
 
-environment: aNamespace
-    "Set the namespace in which I live to be aNamespace."
-    environment := aNamespace
-! !
+	<category: 'basic'>
+	^(self key: aKey value: aValue) environment: aNamespace
+    ]
 
+    environment [
+	"Answer the namespace in which I live."
 
-
-!HomedAssociation methodsFor: 'storing'!
+	<category: 'accessing'>
+	^environment
+    ]
 
-storeOn: aStream
-    "Put on aStream some Smalltalk code compiling to the receiver"
-    aStream nextPut: $(.
-    aStream store: self class.
-    aStream nextPutAll: ' key: '.
-    self key storeOn: aStream.
-    aStream nextPutAll: ' value: '.
-    self value storeOn: aStream.
-    aStream nextPutAll: ' environment: '.
-    self environment storeOn: aStream.
-    aStream nextPut: $)
-! !
+    environment: aNamespace [
+	"Set the namespace in which I live to be aNamespace."
 
+	<category: 'accessing'>
+	environment := aNamespace
+    ]
 
-
-!HomedAssociation methodsFor: 'finalization'!
+    storeOn: aStream [
+	"Put on aStream some Smalltalk code compiling to the receiver"
 
-mourn
-    "This message is sent to the receiver when the object is made ephemeron
-     (which is common when HomedAssociations are used by a WeakKeyDictionary
-     or a WeakSet).  The mourning of the object's key is first of all demanded
-     to the environment (which will likely remove the object from itself), and
-     then performed as usual by clearing the key and value fields."
+	<category: 'storing'>
+	aStream nextPut: $(.
+	aStream store: self class.
+	aStream nextPutAll: ' key: '.
+	self key storeOn: aStream.
+	aStream nextPutAll: ' value: '.
+	self value storeOn: aStream.
+	aStream nextPutAll: ' environment: '.
+	self environment storeOn: aStream.
+	aStream nextPut: $)
+    ]
 
-    self environment mourn: self.
-    super mourn
-! !
+    mourn [
+	"This message is sent to the receiver when the object is made ephemeron
+	 (which is common when HomedAssociations are used by a WeakKeyDictionary
+	 or a WeakSet).  The mourning of the object's key is first of all demanded
+	 to the environment (which will likely remove the object from itself), and
+	 then performed as usual by clearing the key and value fields."
+
+	<category: 'finalization'>
+	self environment mourn: self.
+	super mourn
+    ]
+]
 

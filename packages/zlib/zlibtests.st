@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2007 Free Software Foundation, Inc.
@@ -28,114 +27,163 @@
 |
  ======================================================================"
 
-TestCase subclass: #ZlibStreamTest
-	 instanceVariableNames: 'oldBufSize'
-	 classVariableNames: ''
-	 poolDictionaries: ''
-	 category: 'Examples-Useful'!
 
-!ZlibStreamTest class methodsFor: 'testing'!
+
+TestCase subclass: ZlibStreamTest [
+    | oldBufSize |
+    
+    <comment: nil>
+    <category: 'Examples-Useful'>
 
-fooVector
-    "Return a long and repetitive string."
-    | original size answer |
-    original := 'The quick brown fox jumps over the lazy dog
+    ZlibStreamTest class >> fooVector [
+	"Return a long and repetitive string."
+
+	<category: 'testing'>
+	| original size answer |
+	original := 'The quick brown fox jumps over the lazy dog
 '.
-    size := original size.
-    answer := String new: size * 81.
-    1 to: 81 do: [:idx |
-	answer replaceFrom: (idx - 1) * size + 1 to: idx * size
-	       with: original].
-    ^answer! !
+	size := original size.
+	answer := String new: size * 81.
+	1 to: 81
+	    do: 
+		[:idx | 
+		answer 
+		    replaceFrom: (idx - 1) * size + 1
+		    to: idx * size
+		    with: original].
+	^answer
+    ]
 
-!ZlibStreamTest methodsFor: 'testing'!
+    setUp [
+	<category: 'testing'>
+	oldBufSize := ZlibStream bufferSize.
+	ZlibStream bufferSize: 512
+    ]
 
-setUp
-    oldBufSize := ZlibStream bufferSize.
-    ZlibStream bufferSize: 512!
+    tearDown [
+	<category: 'testing'>
+	ZlibStream bufferSize: oldBufSize
+    ]
 
-tearDown
-    ZlibStream bufferSize: oldBufSize!
+    assertFooVector: string [
+	"SUnit-Assert that string = `self fooVector'."
 
-assertFooVector: string
-    "SUnit-Assert that string = `self fooVector'."
-    self assert: string = self fooVector!
+	<category: 'testing'>
+	self assert: string = self fooVector
+    ]
 
-fooVector
-    "Refactored to class."
-    ^self class fooVector!
+    fooVector [
+	"Refactored to class."
 
-doDeflate
-    "Deflate the long string and return the result."
-    ^(DeflateStream on: self fooVector readStream) contents!
+	<category: 'testing'>
+	^self class fooVector
+    ]
 
-testError
-    "Test whether catching errors works."
-    self should: [ (InflateStream on: #[12 34 56] readStream) contents ]
-	 raise: ZlibError!
+    doDeflate [
+	"Deflate the long string and return the result."
 
-testSyncFlush
-    "Test flushing the WriteStream version of DeflateStream."
-    | dest stream contents |
-    stream := String new writeStream.
-    dest := DeflateStream compressingTo: stream.
-    dest nextPutAll: self fooVector; syncFlush.
-    contents := stream contents.
-    self assert: (contents asByteArray last: 4) = #[0 0 255 255].
-    self assert: (InflateStream on: contents readStream) contents = self fooVector!
+	<category: 'testing'>
+	^(DeflateStream on: self fooVector readStream) contents
+    ]
 
-testWrite
-    "Test the WriteStream version of DeflateStream."
-    | dest |
-    dest := DeflateStream compressingTo: String new writeStream.
-    dest nextPutAll: self fooVector.
-    self assert: dest contents asByteArray = self doDeflate asByteArray!
+    testError [
+	"Test whether catching errors works."
 
-testRaw
-    "Test connecting a DeflateStream back-to-back with an InflateStream."
-    | deflate |
-    deflate := RawDeflateStream on: self fooVector readStream.
-    self assertFooVector: (RawInflateStream on: deflate) contents!
+	<category: 'testing'>
+	self should: [(InflateStream on: #[12 34 56] readStream) contents]
+	    raise: ZlibError
+    ]
 
-testGZip
-    "Test connecting a DeflateStream back-to-back with an InflateStream."
-    | deflate |
-    deflate := GZipDeflateStream on: self fooVector readStream.
-    self assertFooVector: (GZipInflateStream on: deflate) contents!
+    testSyncFlush [
+	"Test flushing the WriteStream version of DeflateStream."
 
-testDirect
-    "Test connecting a DeflateStream back-to-back with an InflateStream."
-    | deflate |
-    deflate := DeflateStream on: self fooVector readStream.
-    self assertFooVector: (InflateStream on: deflate) contents!
+	<category: 'testing'>
+	| dest stream contents |
+	stream := String new writeStream.
+	dest := DeflateStream compressingTo: stream.
+	dest
+	    nextPutAll: self fooVector;
+	    syncFlush.
+	contents := stream contents.
+	self assert: (contents asByteArray last: 4) = #[0 0 255 255].
+	self 
+	    assert: (InflateStream on: contents readStream) contents = self fooVector
+    ]
 
-testInflate
-    "Basic compression/decompression test."
-    self assertFooVector: (InflateStream on: self doDeflate readStream) contents!
+    testWrite [
+	"Test the WriteStream version of DeflateStream."
 
-testNextHunk
-    "Test accessing data with nextHunk (needed to file-in compressed data)."
-    | stream data |
-    stream := InflateStream on: self doDeflate readStream.
+	<category: 'testing'>
+	| dest |
+	dest := DeflateStream compressingTo: String new writeStream.
+	dest nextPutAll: self fooVector.
+	self assert: dest contents asByteArray = self doDeflate asByteArray
+    ]
 
-    data := String new.
-    [ stream atEnd ] whileFalse: [ data := data, stream nextHunk ].
-    self assertFooVector: data!
+    testRaw [
+	"Test connecting a DeflateStream back-to-back with an InflateStream."
 
-testRandomAccess
-    "Test random access to deflated data."
-    | original stream data ok |
-    original := self fooVector.
-    stream := InflateStream on: self doDeflate readStream.
-    stream contents.
+	<category: 'testing'>
+	| deflate |
+	deflate := RawDeflateStream on: self fooVector readStream.
+	self assertFooVector: (RawInflateStream on: deflate) contents
+    ]
 
-    stream position: 0.
-    self assert: (original copyFrom: 1 to: 512) = (stream next: 512).
-    stream position: 512.
-    self assert: (original copyFrom: 513 to: 1024) = (stream next: 512).
-    stream position: 1536.
-    self assert: (original copyFrom: 1537 to: 2048) = (stream next: 512).
-    stream position: 1.
-    self assert: (original copyFrom: 2 to: 512) = (stream next: 511).
-    stream position: 514.
-    self assert: (original copyFrom: 515 to: 1024) = (stream next: 510)! !
+    testGZip [
+	"Test connecting a DeflateStream back-to-back with an InflateStream."
+
+	<category: 'testing'>
+	| deflate |
+	deflate := GZipDeflateStream on: self fooVector readStream.
+	self assertFooVector: (GZipInflateStream on: deflate) contents
+    ]
+
+    testDirect [
+	"Test connecting a DeflateStream back-to-back with an InflateStream."
+
+	<category: 'testing'>
+	| deflate |
+	deflate := DeflateStream on: self fooVector readStream.
+	self assertFooVector: (InflateStream on: deflate) contents
+    ]
+
+    testInflate [
+	"Basic compression/decompression test."
+
+	<category: 'testing'>
+	self 
+	    assertFooVector: (InflateStream on: self doDeflate readStream) contents
+    ]
+
+    testNextHunk [
+	"Test accessing data with nextHunk (needed to file-in compressed data)."
+
+	<category: 'testing'>
+	| stream data |
+	stream := InflateStream on: self doDeflate readStream.
+	data := String new.
+	[stream atEnd] whileFalse: [data := data , stream nextHunk].
+	self assertFooVector: data
+    ]
+
+    testRandomAccess [
+	"Test random access to deflated data."
+
+	<category: 'testing'>
+	| original stream data ok |
+	original := self fooVector.
+	stream := InflateStream on: self doDeflate readStream.
+	stream contents.
+	stream position: 0.
+	self assert: (original copyFrom: 1 to: 512) = (stream next: 512).
+	stream position: 512.
+	self assert: (original copyFrom: 513 to: 1024) = (stream next: 512).
+	stream position: 1536.
+	self assert: (original copyFrom: 1537 to: 2048) = (stream next: 512).
+	stream position: 1.
+	self assert: (original copyFrom: 2 to: 512) = (stream next: 511).
+	stream position: 514.
+	self assert: (original copyFrom: 515 to: 1024) = (stream next: 510)
+    ]
+]
+

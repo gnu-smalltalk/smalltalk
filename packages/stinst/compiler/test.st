@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
@@ -28,9 +27,12 @@
 |
  ======================================================================"
 
-PackageLoader fileInPackage: #Compiler!
 
-STInST.STFileInParser parseSmalltalk: '
+
+Eval [
+    PackageLoader fileInPackage: #Compiler.
+    STInST.STFileInParser 
+	parseSmalltalk: '
    | i |
    i := ##(| a | a := -2. ''before everything'' printNl. a).
    [ i < 5 ] whileTrue:  [ i printNl. i := i + 1 ].
@@ -66,6 +68,6 @@ Arrays... and multi-line strings'') printNl.
        value: ''finally, many parameters, ''
        value: ''cascading ''
        value: ''and block temporaries too! ''.
-!'.
+!'
+]
 
-!

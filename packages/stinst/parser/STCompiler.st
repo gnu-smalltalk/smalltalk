@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999,2000,2001,2002,2003,2006,2007 Free Software Foundation, Inc.
@@ -29,40 +28,34 @@
  ======================================================================"
 
 
-RBProgramNodeVisitor subclass: #STFakeCompiler
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: 'VMOtherConstants VMByteCodeNames'
-       category: 'System-Compiler'
-! 
-
-STFakeCompiler comment:
-'I am the Smalltalk equivalent of a wimp. I never do nothing: they tell me
+
+RBProgramNodeVisitor subclass: STFakeCompiler [
+    
+    <import: VMOtherConstants>
+    <import: VMByteCodeNames>
+    <comment: 'I am the Smalltalk equivalent of a wimp. I never do nothing: they tell me
 to compile something, and I just return nil...
 
-Actually, I am used when conditionally compiled code has to be skipped.'!
+Actually, I am used when conditionally compiled code has to be skipped.'>
+    <category: 'System-Compiler'>
 
-!STFakeCompiler class methodsFor: 'evaluation'!
+    STFakeCompiler class >> evaluate: aSequenceNode parser: aParser [
+	<category: 'evaluation'>
+	^nil
+    ]
 
-evaluate: aSequenceNode parser: aParser
-    ^nil
-! !
+    STFakeCompiler class >> compile: methodDefNode for: aBehavior classified: aString parser: aParser [
+	<category: 'compilation'>
+	^nil
+    ]
+]
 
-!STFakeCompiler class methodsFor: 'compilation'!
 
-compile: methodDefNode for: aBehavior classified: aString parser: aParser
-    ^nil
-! !
-
-STFakeCompiler subclass: #STCompiler
-       instanceVariableNames: 'node destClass symTable parser bytecodes depth maxDepth isInsideBlock '
-       classVariableNames: 'OneNode TrueNode FalseNode NilNode SuperVariable SelfVariable ThisContextVariable'
-       poolDictionaries: ''
-       category: 'System-Compiler'
-! 
-
-STCompiler comment:
-'Unlike my brother STFakeCompiler, I am a real worker. Give me some nodes, and
+
+STFakeCompiler subclass: STCompiler [
+    | node destClass symTable parser bytecodes depth maxDepth isInsideBlock |
+    
+    <comment: 'Unlike my brother STFakeCompiler, I am a real worker. Give me some nodes, and
 I will output a full-fledged CompiledMethod!!
 
 Compilation takes place as a visit of a tree of RBParseNodes, through the
@@ -90,903 +83,887 @@ indexed'' bytecode. The resulting stream is
 
 	push true
 	push literal corresponding to (#stdout -> stdout)
-	send message with 0 args, selector = #printOn:'!
+	send message with 0 args, selector = #printOn:'>
+    <category: 'System-Compiler'>
 
-!STCompiler class methodsFor: 'initialize'!
+    OneNode := nil.
+    TrueNode := nil.
+    FalseNode := nil.
+    NilNode := nil.
+    SuperVariable := nil.
+    SelfVariable := nil.
+    ThisContextVariable := nil.
 
-initialize
-    OneNode := RBLiteralNode value: 1.
-    TrueNode := RBLiteralNode value: true.
-    FalseNode := RBLiteralNode value: false.
-    NilNode := RBLiteralNode value: nil.
-    SelfVariable := RBVariableNode named: 'self'.
-    SuperVariable := RBVariableNode named: 'super'.
-    ThisContextVariable := RBVariableNode named: 'thisContext'! !
-
-!STCompiler class methodsFor: 'evaluation'!
-
-evaluate: aSequenceNode parser: aParser
-    | cm methodNode |
-    aSequenceNode addReturn.
-    methodNode := RBMethodNode new
-	arguments: #();
-	body: aSequenceNode;
-	selector: #Doit;
-	source: nil;
-	yourself.
-
-    cm := self
-	compile: methodNode asMethodOf: UndefinedObject classified: nil
-	parser: aParser environment: Namespace current.
-
-    ^nil perform: cm
-! !
-
-!STCompiler class methodsFor: 'compilation'!
-
-canCompile: code
-    "Answer whether I know how to compile the given code directly, on
-     behalf of a Behavior."
-    ^(code isKindOf: RBProgramNode) and: [code isMethod]
-!
-
-compile: methodNode for: aBehavior classified: aString parser: aParser
-    ^aBehavior
-	addSelector: methodNode selector
-	withMethod: (self
-			compile: methodNode
-			asMethodOf: aBehavior
-			classified: aString
-			parser: aParser)
-!
-
-compile: methodNode asMethodOf: aBehavior classified: aString parser: aParser
-    ^self
-	compile: methodNode
-	asMethodOf: aBehavior
-	classified: aString
-	parser: aParser
-	environment: nil!
-
-compile: methodNode asMethodOf: aBehavior classified: aString parser: aParser
-    environment: aNamespace
-
-    | compiler |
-    compiler := self new.
-    compiler class: aBehavior parser: aParser.
-    aNamespace isNil ifFalse: [ compiler addPool: aNamespace ].
-
-    ^(compiler visitNode: methodNode)
-	methodCategory: aString;
-	yourself
-! !
-
-!STCompiler methodsFor: 'private'!
-
-class: aBehavior parser: aParser
-    destClass := aBehavior.
-    symTable := STSymbolTable new.
-    parser := aParser.
-    bytecodes := WriteStream on: (ByteArray new: 240).
-    isInsideBlock := 0.
-
-    symTable declareEnvironment: aBehavior.
-! !
-
-
-!STCompiler methodsFor: 'accessing'!
-
-addLiteral: literal
-    ^symTable addLiteral: literal
-!
-
-addPool: aNamespace
-    ^symTable addPool: aNamespace
-!
-
-bytecodesFor: aBlockNode
-    ^self bytecodesFor: aBlockNode atEndDo: []
-!
-
-bytecodesFor: aBlockNode atEndDo: aBlock
-    | saveBytecodes result |
-    saveBytecodes := bytecodes.
-    bytecodes := WriteStream on: (ByteArray new: 240).
-    self declareArgumentsAndTemporaries: aBlockNode.
-    self compileStatements: aBlockNode body.
-    self undeclareArgumentsAndTemporaries: aBlockNode.
-    aBlock value.
-
-    result := bytecodes contents.
-    bytecodes := saveBytecodes.
-    ^result
-!
-
-checkStore: aVariableName
-    (symTable canStore: aVariableName) ifFalse: [
-	self compileError: 'cannot store in argument ', aVariableName
+    STCompiler class >> initialize [
+	<category: 'initialize'>
+	OneNode := RBLiteralNode value: 1.
+	TrueNode := RBLiteralNode value: true.
+	FalseNode := RBLiteralNode value: false.
+	NilNode := RBLiteralNode value: nil.
+	SelfVariable := RBVariableNode named: 'self'.
+	SuperVariable := RBVariableNode named: 'super'.
+	ThisContextVariable := RBVariableNode named: 'thisContext'
     ]
-!
 
-compileError: aString
-    parser parserError: aString
-!
+    STCompiler class >> evaluate: aSequenceNode parser: aParser [
+	<category: 'evaluation'>
+	| cm methodNode |
+	aSequenceNode addReturn.
+	methodNode := (RBMethodNode new)
+		    arguments: #();
+		    body: aSequenceNode;
+		    selector: #Doit;
+		    source: nil;
+		    yourself.
+	cm := self 
+		    compile: methodNode
+		    asMethodOf: UndefinedObject
+		    classified: nil
+		    parser: aParser
+		    environment: Namespace current.
+	^nil perform: cm
+    ]
 
-compileBackJump: displacement
-    | jumpLen |
-    jumpLen := displacement + 2.
-    jumpLen := displacement + (self sizeOfJump: jumpLen).
-    jumpLen := displacement + (self sizeOfJump: jumpLen).
-    self compileByte: JumpBack arg: displacement
-!
+    STCompiler class >> canCompile: code [
+	"Answer whether I know how to compile the given code directly, on
+	 behalf of a Behavior."
 
-compileJump: displacement if: jmpCondition
-    displacement < 0 ifTrue: [
-	 "Should not happen"
-	 ^self error: 'Cannot compile backwards conditional jumps'.
-    ].
-    self depthDecr: 1.
-    jmpCondition
-	ifFalse: [ self compileByte: PopJumpFalse arg: displacement ]
-	ifTrue: [ self compileByte: PopJumpTrue arg: displacement ].
-!
+	<category: 'compilation'>
+	^(code isKindOf: RBProgramNode) and: [code isMethod]
+    ]
 
-compileWarning: aString
-    parser parserWarning: aString
-!
+    STCompiler class >> compile: methodNode for: aBehavior classified: aString parser: aParser [
+	<category: 'compilation'>
+	^aBehavior addSelector: methodNode selector
+	    withMethod: (self 
+		    compile: methodNode
+		    asMethodOf: aBehavior
+		    classified: aString
+		    parser: aParser)
+    ]
 
-declareTemporaries: node
-    node temporaries do: [ :aTemp |
-	symTable
-	    declareTemporary: aTemp name
-	    canStore: true
-	    for: self
-    ].
-!
+    STCompiler class >> compile: methodNode asMethodOf: aBehavior classified: aString parser: aParser [
+	<category: 'compilation'>
+	^self 
+	    compile: methodNode
+	    asMethodOf: aBehavior
+	    classified: aString
+	    parser: aParser
+	    environment: nil
+    ]
 
-declareArgumentsAndTemporaries: node
-    node arguments do: [ :anArg |
-	symTable
-	    declareTemporary: anArg name
-	    canStore: false
-	    for: self
-    ].
-    self declareTemporaries: node body
-!
+    STCompiler class >> compile: methodNode asMethodOf: aBehavior classified: aString parser: aParser environment: aNamespace [
+	<category: 'compilation'>
+	| compiler |
+	compiler := self new.
+	compiler class: aBehavior parser: aParser.
+	aNamespace isNil ifFalse: [compiler addPool: aNamespace].
+	^(compiler visitNode: methodNode)
+	    methodCategory: aString;
+	    yourself
+    ]
 
-maxDepth
-    ^maxDepth
-!
+    class: aBehavior parser: aParser [
+	<category: 'private'>
+	destClass := aBehavior.
+	symTable := STSymbolTable new.
+	parser := aParser.
+	bytecodes := WriteStream on: (ByteArray new: 240).
+	isInsideBlock := 0.
+	symTable declareEnvironment: aBehavior
+    ]
 
-depthDecr: n
-    depth := depth - n
-!
+    addLiteral: literal [
+	<category: 'accessing'>
+	^symTable addLiteral: literal
+    ]
 
-depthIncr
-    depth = maxDepth
-	ifTrue: [ depth := depth + 1. maxDepth := maxDepth + 1 ]
-	ifFalse: [ depth := depth + 1 ]
-!
+    addPool: aNamespace [
+	<category: 'accessing'>
+	^symTable addPool: aNamespace
+    ]
 
-depthSet: n
-    "n can be an integer, or a previously returned value (in which case the
-     exact status at the moment of the previous call is remembered)"
-    | oldDepth |
-    oldDepth := n -> maxDepth.
-    n isInteger
-	ifTrue: [ depth := maxDepth := n ]
-	ifFalse: [ depth := n key. maxDepth := n value ].
-    ^oldDepth
-!
+    bytecodesFor: aBlockNode [
+	<category: 'accessing'>
+	^self bytecodesFor: aBlockNode atEndDo: []
+    ]
 
-literals
-    ^symTable literals
-!
+    bytecodesFor: aBlockNode atEndDo: aBlock [
+	<category: 'accessing'>
+	| saveBytecodes result |
+	saveBytecodes := bytecodes.
+	bytecodes := WriteStream on: (ByteArray new: 240).
+	self declareArgumentsAndTemporaries: aBlockNode.
+	self compileStatements: aBlockNode body.
+	self undeclareArgumentsAndTemporaries: aBlockNode.
+	aBlock value.
+	result := bytecodes contents.
+	bytecodes := saveBytecodes.
+	^result
+    ]
 
-lookupName: variable
-    | definition |
-    definition := symTable lookupName: variable for: self.
+    checkStore: aVariableName [
+	<category: 'accessing'>
+	(symTable canStore: aVariableName) 
+	    ifFalse: [self compileError: 'cannot store in argument ' , aVariableName]
+    ]
 
-    definition isNil ifTrue: [
-	"Might want to declare this puppy as a local and go on
-	 notwithstanding the error"
+    compileError: aString [
+	<category: 'accessing'>
+	parser parserError: aString
+    ]
 
-	 self compileError: 'Undefined variable ', 
-	     variable printString, ' referenced.'
-    ].
-    ^definition
-!
+    compileBackJump: displacement [
+	<category: 'accessing'>
+	| jumpLen |
+	jumpLen := displacement + 2.
+	jumpLen := displacement + (self sizeOfJump: jumpLen).
+	jumpLen := displacement + (self sizeOfJump: jumpLen).
+	self compileByte: JumpBack arg: displacement
+    ]
 
-compileByte: aByte
-    self compileByte: aByte arg: 0.
-!
+    compileJump: displacement if: jmpCondition [
+	<category: 'accessing'>
+	displacement < 0 
+	    ifTrue: 
+		["Should not happen"
 
-compileByte: aByte arg: arg
-    | n |
-    n := 0.
-    [ (arg bitShift: n) > 255 ] whileTrue: [ n := n - 8 ].
-    n to: -8 by: 8 do: [ :shift |
+		^self error: 'Cannot compile backwards conditional jumps'].
+	self depthDecr: 1.
+	jmpCondition 
+	    ifFalse: [self compileByte: PopJumpFalse arg: displacement]
+	    ifTrue: [self compileByte: PopJumpTrue arg: displacement]
+    ]
+
+    compileWarning: aString [
+	<category: 'accessing'>
+	parser parserWarning: aString
+    ]
+
+    declareTemporaries: node [
+	<category: 'accessing'>
+	node temporaries do: 
+		[:aTemp | 
+		symTable 
+		    declareTemporary: aTemp name
+		    canStore: true
+		    for: self]
+    ]
+
+    declareArgumentsAndTemporaries: node [
+	<category: 'accessing'>
+	node arguments do: 
+		[:anArg | 
+		symTable 
+		    declareTemporary: anArg name
+		    canStore: false
+		    for: self].
+	self declareTemporaries: node body
+    ]
+
+    maxDepth [
+	<category: 'accessing'>
+	^maxDepth
+    ]
+
+    depthDecr: n [
+	<category: 'accessing'>
+	depth := depth - n
+    ]
+
+    depthIncr [
+	<category: 'accessing'>
+	depth = maxDepth 
+	    ifTrue: 
+		[depth := depth + 1.
+		maxDepth := maxDepth + 1]
+	    ifFalse: [depth := depth + 1]
+    ]
+
+    depthSet: n [
+	"n can be an integer, or a previously returned value (in which case the
+	 exact status at the moment of the previous call is remembered)"
+
+	<category: 'accessing'>
+	| oldDepth |
+	oldDepth := n -> maxDepth.
+	n isInteger 
+	    ifTrue: [depth := maxDepth := n]
+	    ifFalse: 
+		[depth := n key.
+		maxDepth := n value].
+	^oldDepth
+    ]
+
+    literals [
+	<category: 'accessing'>
+	^symTable literals
+    ]
+
+    lookupName: variable [
+	<category: 'accessing'>
+	| definition |
+	definition := symTable lookupName: variable for: self.
+	definition isNil 
+	    ifTrue: 
+		["Might want to declare this puppy as a local and go on
+		 notwithstanding the error"
+
+		self 
+		    compileError: 'Undefined variable ' , variable printString , ' referenced.'].
+	^definition
+    ]
+
+    compileByte: aByte [
+	<category: 'accessing'>
+	self compileByte: aByte arg: 0
+    ]
+
+    compileByte: aByte arg: arg [
+	<category: 'accessing'>
+	| n |
+	n := 0.
+	[(arg bitShift: n) > 255] whileTrue: [n := n - 8].
+	n to: -8
+	    by: 8
+	    do: 
+		[:shift | 
+		bytecodes
+		    nextPut: ExtByte;
+		    nextPut: ((arg bitShift: shift) bitAnd: 255)].
 	bytecodes
-	    nextPut: ExtByte;
-	    nextPut: ((arg bitShift: shift) bitAnd: 255).
-    ].
-    bytecodes
-	nextPut: aByte;
-	nextPut: (arg bitAnd: 255)
-!
+	    nextPut: aByte;
+	    nextPut: (arg bitAnd: 255)
+    ]
 
-compileByte: aByte arg: arg1 arg: arg2
-    self compileByte: aByte arg: (arg1 bitShift: 8) + arg2
-!
+    compileByte: aByte arg: arg1 arg: arg2 [
+	<category: 'accessing'>
+	self compileByte: aByte arg: (arg1 bitShift: 8) + arg2
+    ]
 
-nextPutAll: aByteArray
-    bytecodes nextPutAll: aByteArray.
-!
+    nextPutAll: aByteArray [
+	<category: 'accessing'>
+	bytecodes nextPutAll: aByteArray
+    ]
 
-isInsideBlock
-    ^isInsideBlock > 0
-!
+    isInsideBlock [
+	<category: 'accessing'>
+	^isInsideBlock > 0
+    ]
 
-pushLiteral: value
-    | definition |
-    (value isInteger and: [ value >= 0 and: [ value <= 16r3FFFFFFF ]])
-	    ifTrue: [ self compileByte: PushInteger arg: value. ^self ].
+    pushLiteral: value [
+	<category: 'accessing'>
+	| definition |
+	(value isInteger and: [value >= 0 and: [value <= 1073741823]]) 
+	    ifTrue: 
+		[self compileByte: PushInteger arg: value.
+		^self].
+	definition := self addLiteral: value.
+	self compileByte: PushLitConstant arg: definition
+    ]
 
-    definition := self addLiteral: value.
-    self compileByte: PushLitConstant arg: definition
-!
+    pushLiteralVariable: value [
+	<category: 'accessing'>
+	| definition |
+	definition := self addLiteral: value.
+	self compileByte: PushLitVariable arg: definition
+    ]
 
-pushLiteralVariable: value
-    | definition |
-    definition := self addLiteral: value.
-    self compileByte: PushLitVariable arg: definition
-!
+    sizeOfJump: distance [
+	<category: 'accessing'>
+	distance < 256 ifTrue: [^2].
+	distance < 65536 ifTrue: [^4].
+	distance < 16777216 ifTrue: [^6].
+	^8
+    ]
 
-sizeOfJump: distance
-    distance < 256 ifTrue: [ ^2 ].
-    distance < 65536 ifTrue: [ ^4 ].
-    distance < 16777216 ifTrue: [ ^6 ].
-    ^8
-!
-
-displacementsToJumpAround: jumpAroundOfs and: initialCondLen
-    | jumpAroundLen oldJumpAroundLen finalJumpOfs finalJumpLen |
-    jumpAroundLen := oldJumpAroundLen := 0.
-    [
-	finalJumpOfs := initialCondLen + oldJumpAroundLen + jumpAroundOfs.
+    displacementsToJumpAround: jumpAroundOfs and: initialCondLen [
+	<category: 'accessing'>
+	| jumpAroundLen oldJumpAroundLen finalJumpOfs finalJumpLen |
+	jumpAroundLen := oldJumpAroundLen := 0.
+	
+	[finalJumpOfs := initialCondLen + oldJumpAroundLen + jumpAroundOfs.
 	finalJumpLen := self sizeOfJump: finalJumpOfs.
 	jumpAroundLen := self sizeOfJump: jumpAroundOfs + finalJumpLen.
-	oldJumpAroundLen = jumpAroundLen
-    ]   whileFalse: [
-	oldJumpAroundLen := jumpAroundLen
-    ].
-
-    ^(finalJumpLen + finalJumpOfs) -> (jumpAroundOfs + finalJumpLen)
-!
-
-insideNewScopeDo: aBlock
-    | result |
-    isInsideBlock := isInsideBlock + 1.
-    symTable scopeEnter.
-    result := aBlock value.
-    symTable scopeLeave.
-    isInsideBlock := isInsideBlock - 1.
-    ^result
-!
-
-bindingOf: anOrderedCollection
-    | binding |
-    binding := symTable bindingOf: anOrderedCollection for: self.
-    binding isNil ifTrue: [
-	 self compileError: 'Undefined variable binding', 
-	     anOrderedCollection asArray printString, 'referenced.'
-    ].
-    ^binding
-!
-
-undeclareTemporaries: aNode
-    aNode temporaries do: [ :each | symTable undeclareTemporary: each name ].
-!
-
-undeclareArgumentsAndTemporaries: aNode
-    self undeclareTemporaries: aNode body.
-    aNode arguments do: [ :each | symTable undeclareTemporary: each name ]
-! !
-
-!STCompiler methodsFor: 'visiting RBSequenceNodes'!
-
-acceptSequenceNode: node
-    | statements method |
-    node addSelfReturn.
-    depth := maxDepth := 0.
-    self declareTemporaries: node.
-    self compileStatements: node.
-    self undeclareTemporaries: node.
-    symTable finish.
-
-    method := CompiledMethod
-	literals: symTable literals
-	numArgs: 0
-	numTemps: symTable numTemps
-	attributes: #()
-	bytecodes: bytecodes contents
-	depth: maxDepth + symTable numTemps.
-
-    method descriptor
-	setSourceCode: node source;
-	methodClass: UndefinedObject;
-	selector: #executeStatements.
-
-    ^method
-! !
-
-"--------------------------------------------------------------------"
-
-!STCompiler methodsFor: 'visiting RBMethodNodes'!
-
-acceptMethodNode: node
-    | statements method attributes |
-    node body addSelfReturn.
-
-    depth := maxDepth := 0.
-
-    self declareArgumentsAndTemporaries: node.
-    self compileStatements: node body.
-    self undeclareArgumentsAndTemporaries: node.
-    symTable finish.
-
-    attributes := self compileMethodAttributes: node primitiveSources.
-    method := CompiledMethod
-	literals: symTable literals
-	numArgs: node arguments size
-	numTemps: node body temporaries size
-	attributes: attributes
-	bytecodes: bytecodes contents
-	depth: maxDepth + node body temporaries size + node arguments size.
-
-    method descriptor
-	setSourceCode: node source;
-	methodClass: symTable environment;
-	selector: node selector.
-
-    method attributesDo: [ :ann || handler error |
-	handler := symTable environment pragmaHandlerFor: ann selector.
-	handler notNil ifTrue: [
-	    error := handler value: method value: ann.
-	    error notNil ifTrue: [ self compileError: error ] ] ].
-
-    ^method
-! !
-
-"--------------------------------------------------------------------"
-
-!STCompiler methodsFor: 'visiting RBArrayConstructorNodes'!
-
-acceptArrayConstructorNode: aNode
-    "STArrayNode is the parse node class for {...} style array constructors.
-     It is compiled like a normal inlined block, but with the statements
-     preceded by (Array new: <size of the array>) and with each statement
-     followed with a <pop into instance variable of new stack top>
-     instead of a simple pop."
-
-    self
-	depthIncr;
-	pushLiteralVariable: (Smalltalk associationAt: #Array);
-	depthIncr;
-	compileByte: PushInteger arg: aNode body statements size;
-	depthDecr: 1;
-	compileByte: SendImmediate arg: NewColonSpecial.
-
-    aNode body statements keysAndValuesDo: [ :index :each |
-	each acceptVisitor: self.
-	self
-	    depthDecr: 1;
-	    compileByte: PopStoreIntoArray arg: index - 1.
+	oldJumpAroundLen = jumpAroundLen] 
+		whileFalse: [oldJumpAroundLen := jumpAroundLen].
+	^finalJumpLen + finalJumpOfs -> (jumpAroundOfs + finalJumpLen)
     ]
-! !
 
-"--------------------------------------------------------------------"
+    insideNewScopeDo: aBlock [
+	<category: 'accessing'>
+	| result |
+	isInsideBlock := isInsideBlock + 1.
+	symTable scopeEnter.
+	result := aBlock value.
+	symTable scopeLeave.
+	isInsideBlock := isInsideBlock - 1.
+	^result
+    ]
 
-!STCompiler methodsFor: 'visiting RBBlockNodes'!
+    bindingOf: anOrderedCollection [
+	<category: 'accessing'>
+	| binding |
+	binding := symTable bindingOf: anOrderedCollection for: self.
+	binding isNil 
+	    ifTrue: 
+		[self 
+		    compileError: 'Undefined variable binding' 
+			    , anOrderedCollection asArray printString , 'referenced.'].
+	^binding
+    ]
 
-acceptBlockNode: aNode
-    "STBlockNode has a variable that contains a string for each parameter,
-     and one that contains a list of statements. Here is how STBlockNodes
-     are compiled:
+    undeclareTemporaries: aNode [
+	<category: 'accessing'>
+	aNode temporaries do: [:each | symTable undeclareTemporary: each name]
+    ]
 
-	push BlockClosure or CompiledBlock literal
-	make dirty block                    <--- only if pushed CompiledBlock
+    undeclareArgumentsAndTemporaries: aNode [
+	<category: 'accessing'>
+	self undeclareTemporaries: aNode body.
+	aNode arguments do: [:each | symTable undeclareTemporary: each name]
+    ]
 
-     Statements are put in a separate CompiledBlock object that is referenced
-     by the BlockClosure that the sequence above pushes or creates.
+    acceptSequenceNode: node [
+	<category: 'visiting RBSequenceNodes'>
+	| statements method |
+	node addSelfReturn.
+	depth := maxDepth := 0.
+	self declareTemporaries: node.
+	self compileStatements: node.
+	self undeclareTemporaries: node.
+	symTable finish.
+	method := CompiledMethod 
+		    literals: symTable literals
+		    numArgs: 0
+		    numTemps: symTable numTemps
+		    attributes: #()
+		    bytecodes: bytecodes contents
+		    depth: maxDepth + symTable numTemps.
+	(method descriptor)
+	    setSourceCode: node source;
+	    methodClass: UndefinedObject;
+	    selector: #executeStatements.
+	^method
+    ]
 
-     compileStatements: creates the bytecodes.  It is this method that is
-     called by STCompiler>>bytecodesFor: and STCompiler>>bytecodesFor:append:"
+    acceptMethodNode: node [
+	<category: 'visiting RBMethodNodes'>
+	| statements method attributes |
+	node body addSelfReturn.
+	depth := maxDepth := 0.
+	self declareArgumentsAndTemporaries: node.
+	self compileStatements: node body.
+	self undeclareArgumentsAndTemporaries: node.
+	symTable finish.
+	attributes := self compileMethodAttributes: node primitiveSources.
+	method := CompiledMethod 
+		    literals: symTable literals
+		    numArgs: node arguments size
+		    numTemps: node body temporaries size
+		    attributes: attributes
+		    bytecodes: bytecodes contents
+		    depth: maxDepth + node body temporaries size + node arguments size.
+	(method descriptor)
+	    setSourceCode: node source;
+	    methodClass: symTable environment;
+	    selector: node selector.
+	method attributesDo: 
+		[:ann | 
+		| handler error |
+		handler := symTable environment pragmaHandlerFor: ann selector.
+		handler notNil 
+		    ifTrue: 
+			[error := handler value: method value: ann.
+			error notNil ifTrue: [self compileError: error]]].
+	^method
+    ]
 
-    | bc depth block clean |
-    depth := self depthSet: aNode arguments size + aNode body temporaries size.
-   
-    aNode body statements isEmpty ifTrue: [
-	aNode body addNode: (RBLiteralNode value: nil).
-    ].
- 
-    bc := self insideNewScopeDo: [
-	self bytecodesFor: aNode atEndDo: [
-	    aNode body lastIsReturn
-		ifFalse: [ self compileByte: ReturnContextStackTop ]
-	]
-    ].
+    acceptArrayConstructorNode: aNode [
+	"STArrayNode is the parse node class for {...} style array constructors.
+	 It is compiled like a normal inlined block, but with the statements
+	 preceded by (Array new: <size of the array>) and with each statement
+	 followed with a <pop into instance variable of new stack top>
+	 instead of a simple pop."
 
-    block := CompiledBlock
-	numArgs: aNode arguments size
-	numTemps: aNode body temporaries size
-	bytecodes: bc
-	depth: self maxDepth
-	literals: self literals.
-
-    self depthSet: depth.
-
-    clean := block flags.
-    clean == 0 ifTrue: [
-        self pushLiteral: (BlockClosure
-	    block: block
-	    receiver: symTable environment).
-
-        ^aNode ].
-
-    self pushLiteral: block.
-    self compileByte: MakeDirtyBlock
-!
-
-compileStatements: aNode
-    aNode statements keysAndValuesDo: [ :index :each |
-	index = 1 ifFalse: [
-	    self
-		depthDecr: 1;
-		compileByte: PopStackTop
-	].
-	each acceptVisitor: self.
-    ].
-    aNode statements isEmpty ifTrue: [
+	<category: 'visiting RBArrayConstructorNodes'>
 	self
 	    depthIncr;
-	    compileByte: PushSpecial arg: NilIndex
-    ].
-! !
+	    pushLiteralVariable: (Smalltalk associationAt: #Array);
+	    depthIncr;
+	    compileByte: PushInteger arg: aNode body statements size;
+	    depthDecr: 1;
+	    compileByte: SendImmediate arg: NewColonSpecial.
+	aNode body statements keysAndValuesDo: 
+		[:index :each | 
+		each acceptVisitor: self.
+		self
+		    depthDecr: 1;
+		    compileByte: PopStoreIntoArray arg: index - 1]
+    ]
 
+    acceptBlockNode: aNode [
+	"STBlockNode has a variable that contains a string for each parameter,
+	 and one that contains a list of statements. Here is how STBlockNodes
+	 are compiled:
+	 
+	 push BlockClosure or CompiledBlock literal
+	 make dirty block                    <--- only if pushed CompiledBlock
+	 
+	 Statements are put in a separate CompiledBlock object that is referenced
+	 by the BlockClosure that the sequence above pushes or creates.
+	 
+	 compileStatements: creates the bytecodes.  It is this method that is
+	 called by STCompiler>>bytecodesFor: and STCompiler>>bytecodesFor:append:"
 
-"--------------------------------------------------------------------"
-!STCompiler methodsFor: 'visiting RBCascadeNodes'!
+	<category: 'visiting RBBlockNodes'>
+	| bc depth block clean |
+	depth := self depthSet: aNode arguments size + aNode body temporaries size.
+	aNode body statements isEmpty 
+	    ifTrue: [aNode body addNode: (RBLiteralNode value: nil)].
+	bc := self insideNewScopeDo: 
+			[self bytecodesFor: aNode
+			    atEndDo: 
+				[aNode body lastIsReturn ifFalse: [self compileByte: ReturnContextStackTop]]].
+	block := CompiledBlock 
+		    numArgs: aNode arguments size
+		    numTemps: aNode body temporaries size
+		    bytecodes: bc
+		    depth: self maxDepth
+		    literals: self literals.
+	self depthSet: depth.
+	clean := block flags.
+	clean == 0 
+	    ifTrue: 
+		[self 
+		    pushLiteral: (BlockClosure block: block receiver: symTable environment).
+		^aNode].
+	self pushLiteral: block.
+	self compileByte: MakeDirtyBlock
+    ]
 
-acceptCascadeNode: aNode
-    "RBCascadeNode holds a collection with one item per message."
+    compileStatements: aNode [
+	<category: 'visiting RBBlockNodes'>
+	aNode statements keysAndValuesDo: 
+		[:index :each | 
+		index = 1 
+		    ifFalse: 
+			[self
+			    depthDecr: 1;
+			    compileByte: PopStackTop].
+		each acceptVisitor: self].
+	aNode statements isEmpty 
+	    ifTrue: 
+		[self
+		    depthIncr;
+		    compileByte: PushSpecial arg: NilIndex]
+    ]
 
-    | messages first |
-    messages := aNode messages.
-    first := messages at: 1.
-    first receiver = SuperVariable ifTrue: [
-	aNode messages
-	    do: [ :each | self compileSendToSuper: each ]
-	    separatedBy: [ self depthDecr: 1; compileByte: PopStackTop ].
+    acceptCascadeNode: aNode [
+	"RBCascadeNode holds a collection with one item per message."
 
-	^aNode
-    ].
+	<category: 'visiting RBCascadeNodes'>
+	| messages first |
+	messages := aNode messages.
+	first := messages at: 1.
+	first receiver = SuperVariable 
+	    ifTrue: 
+		[aNode messages do: [:each | self compileSendToSuper: each]
+		    separatedBy: 
+			[self
+			    depthDecr: 1;
+			    compileByte: PopStackTop].
+		^aNode].
+	first receiver acceptVisitor: self.
+	self
+	    depthIncr;
+	    compileByte: DupStackTop.
+	self compileMessage: first.
+	messages 
+	    from: 2
+	    to: messages size - 1
+	    do: 
+		[:each | 
+		self
+		    compileByte: PopStackTop;
+		    compileByte: DupStackTop.
+		self compileMessage: each].
+	self
+	    depthDecr: 1;
+	    compileByte: PopStackTop.
+	self compileMessage: messages last
+    ]
 
-    first receiver acceptVisitor: self.
-    self depthIncr; compileByte: DupStackTop.
-    self compileMessage: first.
+    acceptOptimizedNode: aNode [
+	<category: 'visiting RBOptimizedNodes'>
+	self depthIncr.
+	self pushLiteral: (self class evaluate: aNode body parser: parser)
+    ]
 
-    messages
-	from: 2 to: messages size - 1
-	do: [ :each |
-	    self compileByte: PopStackTop; compileByte: DupStackTop.
-	    self compileMessage: each ].
+    acceptLiteralNode: aNode [
+	"STLiteralNode has one instance variable, the token for the literal
+	 it represents."
 
-    self depthDecr: 1; compileByte: PopStackTop.
-    self compileMessage: messages last.
-! !
+	<category: 'visiting RBLiteralNodes'>
+	self depthIncr.
+	aNode compiler: self.
+	self pushLiteral: aNode value
+    ]
 
-"--------------------------------------------------------------------"
+    acceptAssignmentNode: aNode [
+	"First compile the assigned, then the assignment to the assignee..."
 
-!STCompiler methodsFor: 'visiting RBOptimizedNodes'!
+	<category: 'visiting RBAssignmentNodes'>
+	aNode value acceptVisitor: self.
+	(VMSpecialIdentifiers includesKey: aNode variable name) 
+	    ifTrue: [self compileError: 'cannot assign to ' , aNode variable name].
+	self compileAssignmentFor: aNode variable
+    ]
 
-acceptOptimizedNode: aNode
-    self depthIncr.
+    acceptMessageNode: aNode [
+	"RBMessageNode contains a message send. Its instance variable are
+	 a receiver, selector, and arguments."
 
-    self pushLiteral: (self class evaluate: aNode body parser: parser)
-! !
+	<category: 'compiling'>
+	| specialSelector |
+	aNode receiver = SuperVariable 
+	    ifTrue: 
+		[self compileSendToSuper: aNode.
+		^true].
+	specialSelector := VMSpecialMethods at: aNode selector ifAbsent: [nil].
+	specialSelector isNil 
+	    ifFalse: [(self perform: specialSelector with: aNode) ifTrue: [^false]].
+	aNode receiver acceptVisitor: self.
+	self compileMessage: aNode
+    ]
 
-"--------------------------------------------------------------------"
+    compileMessage: aNode [
+	"RBMessageNode contains a message send. Its instance variable are
+	 a receiver, selector, and arguments.  The receiver has already
+	 been compiled."
 
-!STCompiler methodsFor: 'visiting RBLiteralNodes'!
+	<category: 'compiling'>
+	| args litIndex |
+	aNode arguments do: [:each | each acceptVisitor: self].
+	VMSpecialSelectors at: aNode selector
+	    ifPresent: 
+		[:idx | 
+		idx <= LastImmediateSend 
+		    ifTrue: [self compileByte: idx arg: 0]
+		    ifFalse: [self compileByte: SendImmediate arg: idx].
+		^aNode].
+	args := aNode arguments size.
+	litIndex := self addLiteral: aNode selector.
+	self 
+	    compileByte: Send
+	    arg: litIndex
+	    arg: args
+    ]
 
-acceptLiteralNode: aNode
-    "STLiteralNode has one instance variable, the token for the literal
-     it represents."
-    self depthIncr.
+    compileWhileLoop: aNode [
+	"Answer whether the while loop can be optimized (that is,
+	 whether the only parameter is a STBlockNode)"
 
-    aNode compiler: self.
-    self pushLiteral: aNode value.
-! !
+	<category: 'compiling'>
+	| whileBytecodes argBytecodes jumpOffsets |
+	aNode receiver isBlock ifFalse: [^false].
+	(aNode receiver arguments isEmpty 
+	    and: [aNode receiver body temporaries isEmpty]) ifFalse: [^false].
+	argBytecodes := #().
+	aNode arguments do: 
+		[:onlyArgument | 
+		onlyArgument isBlock ifFalse: [^false].
+		(onlyArgument arguments isEmpty 
+		    and: [onlyArgument body temporaries isEmpty]) ifFalse: [^false].
+		argBytecodes := self bytecodesFor: onlyArgument
+			    atEndDo: 
+				[self
+				    compileByte: PopStackTop;
+				    depthDecr: 1]].
+	whileBytecodes := self bytecodesFor: aNode receiver.
+	self nextPutAll: whileBytecodes.
+	aNode selector == #repeat 
+	    ifFalse: 
+		[jumpOffsets := self displacementsToJumpAround: argBytecodes size
+			    and: whileBytecodes size + 2.	"for jump around jump"
 
-"--------------------------------------------------------------------"
+		"The if: clause means: if selector is whileFalse:, compile
+		 a 'pop/jump if true'; else compile a 'pop/jump if false'"
+		self compileJump: (self sizeOfJump: jumpOffsets value)
+		    if: (aNode selector == #whileTrue or: [aNode selector == #whileTrue:]).
+		self compileByte: Jump arg: jumpOffsets value.
+		argBytecodes isNil ifFalse: [self nextPutAll: argBytecodes].
+		self compileByte: JumpBack arg: jumpOffsets key]
+	    ifTrue: [self compileBackJump: whileBytecodes size].
 
-!STCompiler methodsFor: 'visiting RBAssignmentNodes'!
-
-acceptAssignmentNode: aNode
-    "First compile the assigned, then the assignment to the assignee..."
-    aNode value acceptVisitor: self.
-    (VMSpecialIdentifiers includesKey: aNode variable name)
-	ifTrue: [
-	    self compileError: 'cannot assign to ', aNode variable name
-	].
-
-    self compileAssignmentFor: aNode variable.
-! !
-
-"--------------------------------------------------------------------"
-
-!STCompiler methodsFor: 'compiling'!
-
-acceptMessageNode: aNode
-    "RBMessageNode contains a message send. Its instance variable are
-     a receiver, selector, and arguments."
-    | specialSelector |
-
-    aNode receiver = SuperVariable ifTrue: [
-	self compileSendToSuper: aNode.
+	"Somebody might want to use the return value of #whileTrue:
+	 and #whileFalse:"
+	self
+	    depthIncr;
+	    compileByte: PushSpecial arg: NilIndex.
 	^true
-    ].
+    ]
 
-    specialSelector := VMSpecialMethods at: aNode selector ifAbsent: [ nil ].
-    specialSelector isNil ifFalse: [
-	(self perform: specialSelector with: aNode) ifTrue: [ ^false ] ].
-
-    aNode receiver acceptVisitor: self.
-    self compileMessage: aNode
-!
-
-compileMessage: aNode
-    "RBMessageNode contains a message send. Its instance variable are
-     a receiver, selector, and arguments.  The receiver has already
-     been compiled."
-    | args litIndex |
-    aNode arguments do: [ :each | each acceptVisitor: self ].
-
-    VMSpecialSelectors at: aNode selector ifPresent: [ :idx |
-	idx <= LastImmediateSend
-	    ifTrue: [ self compileByte: idx arg: 0 ]
-	    ifFalse: [ self compileByte: SendImmediate arg: idx ].
-	^aNode
-    ].
-
-    args := aNode arguments size.
-    litIndex := self addLiteral: aNode selector.
-    self compileByte: Send arg: litIndex arg: args.
-!
-
-compileWhileLoop: aNode
-    "Answer whether the while loop can be optimized (that is,
-     whether the only parameter is a STBlockNode)"
-
-    | whileBytecodes argBytecodes jumpOffsets |
-
-    aNode receiver isBlock ifFalse: [ ^false ].
-    (aNode receiver arguments isEmpty and: [
-	aNode receiver body temporaries isEmpty ]) ifFalse: [ ^false ].
-
-    argBytecodes := #().
-    aNode arguments do: [ :onlyArgument |
-	onlyArgument isBlock ifFalse: [ ^false ].
-        (onlyArgument arguments isEmpty and: [
-	    onlyArgument body temporaries isEmpty ])
-		ifFalse: [ ^false ].
-
-	argBytecodes := self bytecodesFor: onlyArgument atEndDo: [
-	    self compileByte: PopStackTop; depthDecr: 1 ]
-    ].
-    whileBytecodes := self bytecodesFor: aNode receiver.
-    self nextPutAll: whileBytecodes.
-
-    aNode selector == #repeat
-	ifFalse: [
-            jumpOffsets := self
-		displacementsToJumpAround: argBytecodes size
-		and: whileBytecodes size + 2.   "for jump around jump"
-
-	    "The if: clause means: if selector is whileFalse:, compile
-	     a 'pop/jump if true'; else compile a 'pop/jump if false'"
-	    self
-		compileJump: (self sizeOfJump: jumpOffsets value)
-	        if: (aNode selector == #whileTrue or: [ aNode selector == #whileTrue: ]).
-
-	    self
-	        compileByte: Jump
-	        arg: jumpOffsets value.
-
-	    argBytecodes isNil ifFalse: [
-	        self nextPutAll: argBytecodes
-	    ].
-
-	    self
-		compileByte: JumpBack
-		arg: jumpOffsets key
-        ]
-	ifTrue: [
-	    self compileBackJump: whileBytecodes size
-	].
-
-    "Somebody might want to use the return value of #whileTrue:
-     and #whileFalse:"
-
-    self depthIncr; compileByte: PushSpecial arg: NilIndex.
-    ^true
-!
-
-compileSendToSuper: aNode
-    | litIndex args |
-    self depthIncr; compileByte: PushSelf.
-    aNode arguments do: [ :each | each acceptVisitor: self ].
-    self pushLiteral: destClass superclass.
-    VMSpecialSelectors at: aNode selector ifPresent: [ :idx |
-	self compileByte: SendImmediateSuper arg: idx.
-	^aNode
-    ].
-
-    litIndex := self addLiteral: aNode selector.
-    args := aNode arguments size.
-    self compileByte: SendSuper arg: litIndex arg: args.
-    self depthDecr: aNode arguments size.
-!
-
-compileTimesRepeat: aNode
-    | block |
-    "aNode receiver acceptVisitor: self."
-    block := aNode arguments first.
-    (block arguments isEmpty and: [
-	block body temporaries isEmpty ]) ifFalse: [ ^false ].
-
-    ^false
-!
-
-compileLoop: aNode
-    | stop step block |
-    "aNode receiver acceptVisitor: self."
-    aNode arguments do: [ :each |
-	stop := step.			"to:"
-	step := block.			"by:"
-	block := each.			"do:"
-    ].
-    (block arguments size = 1 and: [
-	block body temporaries isEmpty ]) ifFalse: [ ^false ].
-
-    stop isNil
-	ifTrue: [ stop := step. step := OneNode ]	"#to:do:"
-	ifFalse: [ step isImmediate ifFalse: [ ^false ] ].
-
-    ^false
-!
-
-compileBoolean: aNode
-    | bc1 ret1 bc2 selector |
-    aNode arguments do: [ :each |
-        (each arguments isEmpty and: [
-	    each body temporaries isEmpty ]) ifFalse: [ ^false ].
-
-	bc1 isNil
-	    ifTrue: [
-		bc1 := self bytecodesFor: each.
-		ret1 := each isReturn ]
-	    ifFalse: [
-		bc2 := self bytecodesFor: each ].
-    ].
-
-    aNode receiver acceptVisitor: self.
-    selector := aNode selector.
-    bc2 isNil ifTrue: [
-	"Transform everything into #ifTrue:ifFalse: or #ifFalse:ifTrue:"
-
-	selector == #ifTrue: ifTrue: [
-	    selector := #ifTrue:ifFalse: . bc2 := NilIndex. "Push nil"
-	].
-	selector == #ifFalse: ifTrue: [
-	    selector := #ifFalse:ifTrue: . bc2 := NilIndex. "Push nil"
-	].
-	selector == #and: ifTrue: [
-	    selector := #ifTrue:ifFalse: . bc2 := FalseIndex. "Push false"
-	].
-	selector == #or: ifTrue: [
-	    selector := #ifFalse:ifTrue: . bc2 := TrueIndex. "Push true"
-	].
-	bc2 := { PushSpecial. bc2 }.
-	^self compileBoolean: aNode
-	    longBranch: bc1 returns: ret1 shortBranch: bc2
-	    longIfTrue: selector == #ifTrue:ifFalse:
-    ].
-
-    selector == #ifTrue:ifFalse: ifTrue: [
-	^self compileIfTrue: bc1 returns: ret1 ifFalse: bc2
-    ].
-    selector == #ifFalse:ifTrue: ifTrue: [
-	^self compileIfFalse: bc1 returns: ret1 ifTrue: bc2
-    ].
-    ^self error: 'bad boolean message selector'
-!
-
-compileBoolean: aNode longBranch: bc1 returns: ret1 shortBranch: bc2
-	longIfTrue: longIfTrue
-
-    self
-	compileJump: bc1 size + (ret1 ifTrue: [ 0 ] ifFalse: [ 2 ])
-	if: longIfTrue not.
-
-    self nextPutAll: bc1.
-    ret1 ifFalse: [
-	self compileByte: Jump arg: bc2 size.
-    ].
-    self nextPutAll: bc2.
-    ^true
-!
-
-compileIfTrue: bcTrue returns: bcTrueReturns ifFalse: bcFalse
-
-    | trueSize |
-    trueSize := bcTrueReturns
-	ifTrue: [ bcTrue size ]
-	ifFalse: [ bcTrue size + (self sizeOfJump: bcFalse size) ].
-
-    self compileJump: trueSize if: false.
-    self nextPutAll: bcTrue.
-    bcTrueReturns ifFalse: [
-	self compileByte: Jump arg: bcFalse size.
-    ].
-    self nextPutAll: bcFalse.
-    ^true
-!
-
-compileIfFalse: bcFalse returns: bcFalseReturns ifTrue: bcTrue
-
-    | falseSize |
-    falseSize := bcFalseReturns
-	ifTrue: [ bcFalse size ]
-	ifFalse: [ bcFalse size + (self sizeOfJump: bcTrue size) ].
-
-    self compileJump: falseSize if: true.
-    self nextPutAll: bcFalse.
-    bcFalseReturns ifFalse: [
-	self compileByte: Jump arg: bcTrue size.
-    ].
-    self nextPutAll: bcTrue.
-    ^true
-! !
-
-"--------------------------------------------------------------------"
-
-!STCompiler methodsFor: 'compiling'!
-
-acceptReturnNode: aNode
-    aNode value acceptVisitor: self.
-    self isInsideBlock
-	ifTrue: [ self compileByte: ReturnMethodStackTop ]
-	ifFalse: [ self compileByte: ReturnContextStackTop ]
-! !
-
-"--------------------------------------------------------------------"
-
-!STCompiler methodsFor: 'visiting RBVariableNodes'!
-
-compileAssignmentFor: aNode
-    "RBVariableNode has one instance variable, the name of the variable
-     that it represents."
-    | definition |
-
-    self checkStore: aNode name.
-    definition := self lookupName: aNode name.
-
-    (symTable isTemporary: aNode name) ifTrue: [
-	^self
-	    compileStoreTemporary: definition
-	    scopes: (symTable outerScopes: aNode name)
-    ].    
-
-    (symTable isReceiver: aNode name) ifTrue: [
-	^self compileByte: StoreReceiverVariable arg: definition.
-    ].
-    
-    self compileByte: StoreLitVariable arg: definition.
-    self compileByte: PopStackTop.
-    self compileByte: PushLitVariable arg: definition
-!
-
-acceptVariableNode: aNode
-    | locationType definition |
-
-    self depthIncr.
-    VMSpecialIdentifiers at: aNode name ifPresent: [ :block |
-	block value: self.
-	^aNode
-    ].
-
-    definition := self lookupName: aNode name.
-
-    (symTable isTemporary: aNode name) ifTrue: [
-	^self
-	    compilePushTemporary: definition
-	    scopes: (symTable outerScopes: aNode name)
-    ].    
-    (symTable isReceiver: aNode name) ifTrue: [
-	self compileByte: PushReceiverVariable arg: definition.
-	^aNode
-    ].
-    
-    self
-	compileByte: PushLitVariable arg: definition.
-!
-
-compilePushTemporary: number scopes: outerScopes
-    outerScopes = 0 ifFalse: [
+    compileSendToSuper: aNode [
+	<category: 'compiling'>
+	| litIndex args |
 	self
-	    compileByte: PushOuterVariable
-	    arg: number
-	    arg: outerScopes.
-	^self
-    ].
-    self
-	compileByte: PushTemporaryVariable
-	arg: number
-!
+	    depthIncr;
+	    compileByte: PushSelf.
+	aNode arguments do: [:each | each acceptVisitor: self].
+	self pushLiteral: destClass superclass.
+	VMSpecialSelectors at: aNode selector
+	    ifPresent: 
+		[:idx | 
+		self compileByte: SendImmediateSuper arg: idx.
+		^aNode].
+	litIndex := self addLiteral: aNode selector.
+	args := aNode arguments size.
+	self 
+	    compileByte: SendSuper
+	    arg: litIndex
+	    arg: args.
+	self depthDecr: aNode arguments size
+    ]
 
-compileStoreTemporary: number scopes: outerScopes
-    outerScopes = 0 ifFalse: [
-	self
-	    compileByte: StoreOuterVariable
-	    arg: number
-	    arg: outerScopes.
-	^self
-    ].
-    self
-	compileByte: StoreTemporaryVariable
-	arg: number
-! !
+    compileTimesRepeat: aNode [
+	<category: 'compiling'>
+	"aNode receiver acceptVisitor: self."
 
-"--------------------------------------------------------------------"
+	| block |
+	block := aNode arguments first.
+	(block arguments isEmpty and: [block body temporaries isEmpty]) 
+	    ifFalse: [^false].
+	^false
+    ]
 
-!STCompiler methodsFor: 'compiling method attributes'!
+    compileLoop: aNode [
+	<category: 'compiling'>
+	"aNode receiver acceptVisitor: self."
 
-compileMethodAttributes: attributes
-    ^attributes asArray collect: [ :each |
-	self compileAttribute: (RBScanner on: each readStream) ]!
+	| stop step block |
+	aNode arguments do: 
+		[:each | 
+		stop := step.	"to:"
+		step := block.	"by:"
+		block := each	"do:"].
+	(block arguments size = 1 and: [block body temporaries isEmpty]) 
+	    ifFalse: [^false].
+	stop isNil 
+	    ifTrue: 
+		[stop := step.
+		step := OneNode	"#to:do:"]
+	    ifFalse: [step isImmediate ifFalse: [^false]].
+	^false
+    ]
 
-scanTokenFrom: scanner
-    scanner atEnd
-	ifTrue: [^self compileError: 'method attributes must end with ''>'''].
-    ^scanner next!
+    compileBoolean: aNode [
+	<category: 'compiling'>
+	| bc1 ret1 bc2 selector |
+	aNode arguments do: 
+		[:each | 
+		(each arguments isEmpty and: [each body temporaries isEmpty]) 
+		    ifFalse: [^false].
+		bc1 isNil 
+		    ifTrue: 
+			[bc1 := self bytecodesFor: each.
+			ret1 := each isReturn]
+		    ifFalse: [bc2 := self bytecodesFor: each]].
+	aNode receiver acceptVisitor: self.
+	selector := aNode selector.
+	bc2 isNil 
+	    ifTrue: 
+		["Transform everything into #ifTrue:ifFalse: or #ifFalse:ifTrue:"
 
-compileAttribute: scanner
-    | currentToken selectorBuilder selector arguments argParser node |
-    currentToken := self scanTokenFrom: scanner.
-    (currentToken isBinary and: [currentToken value == #<])
-	ifFalse: [^self compileError:
-		      'method attributes must begin with ''<'''].
+		selector == #ifTrue: 
+		    ifTrue: 
+			[selector := #ifTrue:ifFalse:.
+			bc2 := NilIndex	"Push nil"].
+		selector == #ifFalse: 
+		    ifTrue: 
+			[selector := #ifFalse:ifTrue:.
+			bc2 := NilIndex	"Push nil"].
+		selector == #and: 
+		    ifTrue: 
+			[selector := #ifTrue:ifFalse:.
+			bc2 := FalseIndex	"Push false"].
+		selector == #or: 
+		    ifTrue: 
+			[selector := #ifFalse:ifTrue:.
+			bc2 := TrueIndex	"Push true"].
+		bc2 := 
+			{PushSpecial.
+			bc2}.
+		^self 
+		    compileBoolean: aNode
+		    longBranch: bc1
+		    returns: ret1
+		    shortBranch: bc2
+		    longIfTrue: selector == #ifTrue:ifFalse:].
+	selector == #ifTrue:ifFalse: 
+	    ifTrue: 
+		[^self 
+		    compileIfTrue: bc1
+		    returns: ret1
+		    ifFalse: bc2].
+	selector == #ifFalse:ifTrue: 
+	    ifTrue: 
+		[^self 
+		    compileIfFalse: bc1
+		    returns: ret1
+		    ifTrue: bc2].
+	^self error: 'bad boolean message selector'
+    ]
 
-    selectorBuilder := WriteStream on: String new.
-    arguments := WriteStream on: Array new.
-    currentToken := self scanTokenFrom: scanner.
-    [ currentToken isBinary and: [currentToken value == #>] ] whileFalse: [
-	currentToken isKeyword
-	    ifFalse: [^self compileError: 'keyword expected in method attribute'].
-	selectorBuilder nextPutAll: currentToken value.
+    compileBoolean: aNode longBranch: bc1 returns: ret1 shortBranch: bc2 longIfTrue: longIfTrue [
+	<category: 'compiling'>
+	self compileJump: bc1 size + (ret1 ifTrue: [0] ifFalse: [2])
+	    if: longIfTrue not.
+	self nextPutAll: bc1.
+	ret1 ifFalse: [self compileByte: Jump arg: bc2 size].
+	self nextPutAll: bc2.
+	^true
+    ]
 
-        argParser := RBParser new.
-        argParser errorBlock: parser errorBlock.
-        argParser scanner: scanner.
-        node := argParser parseBinaryMessageNoGreater.
-	node := RBSequenceNode statements: {node}.
-	arguments nextPut: (self class evaluate: node parser: argParser).
-	currentToken := argParser currentToken.
-    ].
+    compileIfTrue: bcTrue returns: bcTrueReturns ifFalse: bcFalse [
+	<category: 'compiling'>
+	| trueSize |
+	trueSize := bcTrueReturns 
+		    ifTrue: [bcTrue size]
+		    ifFalse: [bcTrue size + (self sizeOfJump: bcFalse size)].
+	self compileJump: trueSize if: false.
+	self nextPutAll: bcTrue.
+	bcTrueReturns ifFalse: [self compileByte: Jump arg: bcFalse size].
+	self nextPutAll: bcFalse.
+	^true
+    ]
 
-    selector := selectorBuilder contents asSymbol.
-    ^Message selector: selector arguments: arguments contents! !
+    compileIfFalse: bcFalse returns: bcFalseReturns ifTrue: bcTrue [
+	<category: 'compiling'>
+	| falseSize |
+	falseSize := bcFalseReturns 
+		    ifTrue: [bcFalse size]
+		    ifFalse: [bcFalse size + (self sizeOfJump: bcTrue size)].
+	self compileJump: falseSize if: true.
+	self nextPutAll: bcFalse.
+	bcFalseReturns ifFalse: [self compileByte: Jump arg: bcTrue size].
+	self nextPutAll: bcTrue.
+	^true
+    ]
 
-STCompiler initialize!
+    acceptReturnNode: aNode [
+	<category: 'compiling'>
+	aNode value acceptVisitor: self.
+	self isInsideBlock 
+	    ifTrue: [self compileByte: ReturnMethodStackTop]
+	    ifFalse: [self compileByte: ReturnContextStackTop]
+    ]
+
+    compileAssignmentFor: aNode [
+	"RBVariableNode has one instance variable, the name of the variable
+	 that it represents."
+
+	<category: 'visiting RBVariableNodes'>
+	| definition |
+	self checkStore: aNode name.
+	definition := self lookupName: aNode name.
+	(symTable isTemporary: aNode name) 
+	    ifTrue: 
+		[^self compileStoreTemporary: definition
+		    scopes: (symTable outerScopes: aNode name)].
+	(symTable isReceiver: aNode name) 
+	    ifTrue: [^self compileByte: StoreReceiverVariable arg: definition].
+	self compileByte: StoreLitVariable arg: definition.
+	self compileByte: PopStackTop.
+	self compileByte: PushLitVariable arg: definition
+    ]
+
+    acceptVariableNode: aNode [
+	<category: 'visiting RBVariableNodes'>
+	| locationType definition |
+	self depthIncr.
+	VMSpecialIdentifiers at: aNode name
+	    ifPresent: 
+		[:block | 
+		block value: self.
+		^aNode].
+	definition := self lookupName: aNode name.
+	(symTable isTemporary: aNode name) 
+	    ifTrue: 
+		[^self compilePushTemporary: definition
+		    scopes: (symTable outerScopes: aNode name)].
+	(symTable isReceiver: aNode name) 
+	    ifTrue: 
+		[self compileByte: PushReceiverVariable arg: definition.
+		^aNode].
+	self compileByte: PushLitVariable arg: definition
+    ]
+
+    compilePushTemporary: number scopes: outerScopes [
+	<category: 'visiting RBVariableNodes'>
+	outerScopes = 0 
+	    ifFalse: 
+		[self 
+		    compileByte: PushOuterVariable
+		    arg: number
+		    arg: outerScopes.
+		^self].
+	self compileByte: PushTemporaryVariable arg: number
+    ]
+
+    compileStoreTemporary: number scopes: outerScopes [
+	<category: 'visiting RBVariableNodes'>
+	outerScopes = 0 
+	    ifFalse: 
+		[self 
+		    compileByte: StoreOuterVariable
+		    arg: number
+		    arg: outerScopes.
+		^self].
+	self compileByte: StoreTemporaryVariable arg: number
+    ]
+
+    compileMethodAttributes: attributes [
+	<category: 'compiling method attributes'>
+	^attributes asArray 
+	    collect: [:each | self compileAttribute: (RBScanner on: each readStream)]
+    ]
+
+    scanTokenFrom: scanner [
+	<category: 'compiling method attributes'>
+	scanner atEnd 
+	    ifTrue: [^self compileError: 'method attributes must end with ''>'''].
+	^scanner next
+    ]
+
+    compileAttribute: scanner [
+	<category: 'compiling method attributes'>
+	| currentToken selectorBuilder selector arguments argParser node |
+	currentToken := self scanTokenFrom: scanner.
+	(currentToken isBinary and: [currentToken value == #<]) 
+	    ifFalse: [^self compileError: 'method attributes must begin with ''<'''].
+	selectorBuilder := WriteStream on: String new.
+	arguments := WriteStream on: Array new.
+	currentToken := self scanTokenFrom: scanner.
+	[currentToken isBinary and: [currentToken value == #>]] whileFalse: 
+		[currentToken isKeyword 
+		    ifFalse: [^self compileError: 'keyword expected in method attribute'].
+		selectorBuilder nextPutAll: currentToken value.
+		argParser := RBParser new.
+		argParser errorBlock: parser errorBlock.
+		argParser scanner: scanner.
+		node := argParser parseBinaryMessageNoGreater.
+		node := RBSequenceNode statements: {node}.
+		arguments nextPut: (self class evaluate: node parser: argParser).
+		currentToken := argParser currentToken].
+	selector := selectorBuilder contents asSymbol.
+	^Message selector: selector arguments: arguments contents
+    ]
+]
+
+
+
+Eval [
+    STCompiler initialize
+]
+

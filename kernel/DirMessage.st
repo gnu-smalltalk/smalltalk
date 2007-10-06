@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
@@ -31,101 +30,105 @@
  ======================================================================"
 
 
-
-Message subclass: #DirectedMessage
-    instanceVariableNames: 'receiver '
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Language-Implementation'!
-
-DirectedMessage comment: 
-'I represent a message send: I contain the receiver, selector and arguments
-for a message.'!
-	   
 
-!DirectedMessage methodsFor: 'basic'!
+Message subclass: DirectedMessage [
+    | receiver |
+    
+    <category: 'Language-Implementation'>
+    <comment: 'I represent a message send: I contain the receiver, selector and arguments
+for a message.'>
 
-printOn: aStream
-    "Print a representation of the receiver on aStream"
+    DirectedMessage class >> selector: aSymbol arguments: anArray [
+	<category: 'creating instances'>
+	self shouldNotImplement
+    ]
 
-    aStream print: receiver; space.
-    super printOn: aStream
-!
+    DirectedMessage class >> selector: aSymbol arguments: anArray receiver: anObject [
+	"Create a new instance of the receiver"
 
-send
-    "Send the message"
-    ^self sendTo: receiver
-!
+	<category: 'creating instances'>
+	^(super selector: aSymbol arguments: anArray) receiver: anObject
+    ]
 
-value
-    "Send the message (this message provides interoperability
-     between DirectedMessages and blocks)"
-    ^self sendTo: receiver
-! !
+    printOn: aStream [
+	"Print a representation of the receiver on aStream"
 
-
-!DirectedMessage methodsFor: 'accessing'!
+	<category: 'basic'>
+	aStream
+	    print: receiver;
+	    space.
+	super printOn: aStream
+    ]
 
-receiver: anObject
-    "Change the receiver"
-    receiver := anObject
-!
+    send [
+	"Send the message"
 
-receiver
-    "Answer the receiver"
-    ^receiver
-! !
+	<category: 'basic'>
+	^self sendTo: receiver
+    ]
 
-
-!DirectedMessage methodsFor: 'multiple process'!
+    value [
+	"Send the message (this message provides interoperability
+	 between DirectedMessages and blocks)"
 
-fork
-    "Create a new process executing the receiver and start it"
-    ^Process
-        on: self
-        at: Processor activePriority
-        suspend: false
-!
+	<category: 'basic'>
+	^self sendTo: receiver
+    ]
 
-forkAt: priority
-    "Create a new process executing the receiver with given priority
-     and start it"
-    ^Process
-        on: self
-        at: priority
-        suspend: false
-!
+    receiver: anObject [
+	"Change the receiver"
 
-newProcess
-    "Create a new process executing the receiver in suspended state.
-     The priority is the same as for the calling process. The receiver
-     must not contain returns"
-    ^Process
-        on: self
-        at: Processor activePriority
-        suspend: true
-! !
+	<category: 'accessing'>
+	receiver := anObject
+    ]
 
-
-!DirectedMessage methodsFor: 'saving and loading'!
+    receiver [
+	"Answer the receiver"
 
-reconstructOriginalObject
-    "This method is used when DirectedMessages are used together
-     with PluggableProxies (see ObjectDumper).  It sends the receiver
-     to reconstruct the object that was originally stored."
-    ^self send
-! !
+	<category: 'accessing'>
+	^receiver
+    ]
 
-
-!DirectedMessage class methodsFor: 'creating instances'!
+    fork [
+	"Create a new process executing the receiver and start it"
 
-selector: aSymbol arguments: anArray 
-    self shouldNotImplement
-!
+	<category: 'multiple process'>
+	^Process 
+	    on: self
+	    at: Processor activePriority
+	    suspend: false
+    ]
 
-selector: aSymbol arguments: anArray receiver: anObject
-    "Create a new instance of the receiver"
+    forkAt: priority [
+	"Create a new process executing the receiver with given priority
+	 and start it"
 
-    ^(super selector: aSymbol arguments: anArray)
-	receiver: anObject
-! !
+	<category: 'multiple process'>
+	^Process 
+	    on: self
+	    at: priority
+	    suspend: false
+    ]
+
+    newProcess [
+	"Create a new process executing the receiver in suspended state.
+	 The priority is the same as for the calling process. The receiver
+	 must not contain returns"
+
+	<category: 'multiple process'>
+	^Process 
+	    on: self
+	    at: Processor activePriority
+	    suspend: true
+    ]
+
+    reconstructOriginalObject [
+	"This method is used when DirectedMessages are used together
+	 with PluggableProxies (see ObjectDumper).  It sends the receiver
+	 to reconstruct the object that was originally stored."
+
+	<category: 'saving and loading'>
+	^self send
+    ]
+]
+

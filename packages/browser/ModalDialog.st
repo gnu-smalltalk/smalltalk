@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -30,135 +29,145 @@
 "
 
 
-BLOX.Gui subclass:  #ModalDialog
-	instanceVariableNames: 'dialogShell messageDispatch '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
+
+BLOX.Gui subclass: ModalDialog [
+    | dialogShell messageDispatch |
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-ModalDialog comment: 
-nil!
+    display: parent [
+	<category: 'displaying'>
+	dialogShell map.
+	blox loop
+    ]
 
-!ModalDialog methodsFor: 'displaying'!
+    addButton: label message: block [
+	<category: 'initialization'>
+	messageDispatch at: messageDispatch size + 1 put: block.
+	blox 
+	    addButton: label
+	    receiver: self
+	    index: messageDispatch size
+    ]
 
-display: parent 
-    dialogShell map.
-    blox loop! !
+    alertMessage: queryString in: parent [
+	<category: 'initialization'>
+	self message: queryString in: parent.
+	self addButton: 'Ok' message: [].
+	self display: parent
+    ]
 
-!ModalDialog methodsFor: 'initialization'!
+    message: queryString in: parent [
+	"Initialize dialog and button actions"
 
-addButton: label message: block 
-    messageDispatch at: messageDispatch size + 1 put: block.
-    blox 
-	addButton: label
-	receiver: self
-	index: messageDispatch size!
+	<category: 'initialization'>
+	messageDispatch := LookupTable new.
+	dialogShell := BTransientWindow new: 'Modal dialog'
+		    in: parent rootView blox.
+	dialogShell width: 200 height: 140.
+	blox := BDialog 
+		    new: dialogShell
+		    label: queryString
+		    prompt: nil
+    ]
 
-alertMessage: queryString in: parent 
-    self message: queryString in: parent.
-    self addButton: 'Ok' message: [].
-    self display: parent!
-
-message: queryString in: parent 
-    "Initialize dialog and button actions"
-
-    messageDispatch := LookupTable new.
-    dialogShell := BTransientWindow new: 'Modal dialog'
-		in: parent rootView blox.
-    dialogShell width: 200 height: 140.
-    blox := BDialog 
-		new: dialogShell
-		label: queryString
-		prompt: nil! !
-
-!ModalDialog methodsFor: 'private'!
-
-dispatch: index 
-    (messageDispatch at: index) value! !
-
+    dispatch: index [
+	<category: 'private'>
+	(messageDispatch at: index) value
+    ]
+]
 
 
-BLOX.Gui subclass:  #Prompter
-	instanceVariableNames: 'defaultResponse '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
+
+BLOX.Gui subclass: Prompter [
+    | defaultResponse |
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-Prompter comment: 
-nil!
+    Prompter class >> message: aString default: aResponse in: view [
+	<category: 'instance creation'>
+	^self new 
+	    message: aString
+	    default: aResponse
+	    in: view
+    ]
 
-!Prompter class methodsFor: 'instance creation'!
+    Prompter class >> message: aString in: view [
+	<category: 'instance creation'>
+	^self new 
+	    message: aString
+	    default: ''
+	    in: view
+    ]
 
-message: aString default: aResponse in: view 
-    ^self new 
-	message: aString
-	default: aResponse
-	in: view!
+    Prompter class >> openFileName: aString default: default in: view [
+	<category: 'instance creation'>
+	^BDialog 
+	    chooseFileToOpen: view rootView blox
+	    label: aString
+	    default: default
+	    defaultExtension: 'st'
+	    types: #(#('Smalltalk files' '.st') #('Text files' '.txt'))
+    ]
 
-message: aString in: view 
-    ^self new 
-	message: aString
-	default: ''
-	in: view!
+    Prompter class >> saveFileName: aString default: default in: view [
+	<category: 'instance creation'>
+	^BDialog 
+	    chooseFileToSave: view rootView blox
+	    label: aString
+	    default: default
+	    defaultExtension: 'st'
+	    types: #(#('Smalltalk files' '.st') #('Text files' '.txt'))
+    ]
 
-openFileName: aString default: default in: view 
-    ^BDialog 
-	chooseFileToOpen: view rootView blox
-	label: aString
-	default: default
-	defaultExtension: 'st'
-	types: #(#('Smalltalk files' '.st') #('Text files' '.txt'))!
+    accept [
+	"Truncate string after newline character"
 
-saveFileName: aString default: default in: view 
-    ^BDialog 
-	chooseFileToSave: view rootView blox
-	label: aString
-	default: default
-	defaultExtension: 'st'
-	types: #(#('Smalltalk files' '.st') #('Text files' '.txt'))! !
+	<category: 'accessing'>
+	| index |
+	defaultResponse := blox contents.
+	(index := defaultResponse findFirst: [:ch | ch == Character nl]) > 0 
+	    ifTrue: [defaultResponse := defaultResponse copyFrom: 1 to: index - 1]
+    ]
 
-!Prompter methodsFor: 'accessing'!
+    cancel [
+	<category: 'accessing'>
+	defaultResponse := ''
+    ]
 
-accept
-    "Truncate string after newline character"
+    response [
+	"Return default response"
 
-    | index |
-    defaultResponse := blox contents.
-    (index := defaultResponse findFirst: [:ch | ch == Character nl]) > 0 
-	ifTrue: [defaultResponse := defaultResponse copyFrom: 1 to: index - 1]!
+	<category: 'accessing'>
+	^defaultResponse
+    ]
 
-cancel
-    defaultResponse := ''!
+    message: queryString default: aResponse in: view [
+	"Prompt user for string input.  The default response, queryString, is displayed in
+	 text portion"
 
-response
-    "Return default response"
-
-    ^defaultResponse! !
-
-!Prompter methodsFor: 'initialize-delete'!
-
-message: queryString default: aResponse in: view 
-    "Prompt user for string input.  The default response, queryString, is displayed in
-     text portion"
-
-    | dialogShell |
-    defaultResponse := aResponse.
-    dialogShell := BTransientWindow new: 'Prompter dialog'
-		in: view rootView blox.
-    dialogShell width: 300 height: 180.
-    self blox: (BDialog 
-		new: dialogShell
-		label: queryString
-		prompt: aResponse).
-    blox 
-	addButton: 'OK'
-	receiver: self
-	message: #accept.
-    blox 
-	addButton: 'Cancel'
-	receiver: self
-	message: #cancel.
-    dialogShell map.
-    self blox loop! !
-
+	<category: 'initialize-delete'>
+	| dialogShell |
+	defaultResponse := aResponse.
+	dialogShell := BTransientWindow new: 'Prompter dialog'
+		    in: view rootView blox.
+	dialogShell width: 300 height: 180.
+	self blox: (BDialog 
+		    new: dialogShell
+		    label: queryString
+		    prompt: aResponse).
+	blox 
+	    addButton: 'OK'
+	    receiver: self
+	    message: #accept.
+	blox 
+	    addButton: 'Cancel'
+	    receiver: self
+	    message: #cancel.
+	dialogShell map.
+	self blox loop
+    ]
+]
 

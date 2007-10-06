@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2003, 2007 Free Software Foundation, Inc.
@@ -30,15 +29,13 @@
 |
  ======================================================================"
 
-Stream subclass: #Generator
-	  instanceVariableNames: 'next genCC consCC atEnd'
-	  classVariableNames: ''
-	  poolDictionaries: ''
-	  category: 'Streams-Generators'
-!
 
-Generator comment:
-'A Generator object provides a way to use blocks to define a Stream
+
+Stream subclass: Generator [
+    | next genCC consCC atEnd |
+    
+    <category: 'Streams-Generators'>
+    <comment: 'A Generator object provides a way to use blocks to define a Stream
 of many return values.  The return values are computed one at a time,
 as needed, and hence need not even be finite.
 
@@ -70,111 +67,131 @@ expression and function call behaves like a generator, and if a
 statement manages scalars, it automatically uses up all the results
 that the corresponding generator provides; on the other hand, Icon
 does not represent generators as first-class objects like Python and
-Smalltalk do.'!
+Smalltalk do.'>
 
-!Generator class methodsFor: 'instance creation'!
+    Generator class >> on: aBlock [
+	"Return a generator and pass it to aBlock.  When #next is sent
+	 to the generator, the block will start execution, and will be
+	 suspended again as soon as #yield: is sent from the block to
+	 the generator."
 
-on: aBlock
-    "Return a generator and pass it to aBlock.  When #next is sent
-     to the generator, the block will start execution, and will be
-     suspended again as soon as #yield: is sent from the block to
-     the generator."
-    ^self new
-	forkOn: aBlock;	
-	yourself
-!
-
-on: aCollection do: aBlock
-    "Return a generator; for each item of aCollection, evaluate aBlock
-     passing the generator and the item."
-    ^self on: [ :gen |
-	aCollection do: [ :each | aBlock value: gen value: each ] ]
-!
-
-inject: aValue into: aBlock
-    "Return an infinite generator; the first item is aValue, the following
-     items are obtained by passing the previous value to aBlock."
-    ^self on: [ :gen |
-        | last |
-        last := aValue.
-        [
-            gen yield: last.
-            last := aBlock value: last
-        ] repeat
+	<category: 'instance creation'>
+	^(self new)
+	    forkOn: aBlock;
+	    yourself
     ]
-! !
 
-!Generator methodsFor: 'stream protocol'!
+    Generator class >> on: aCollection do: aBlock [
+	"Return a generator; for each item of aCollection, evaluate aBlock
+	 passing the generator and the item."
 
-atEnd
-    "Answer whether more data can be generated."
-    atEnd isNil ifTrue: [ genCC := genCC callCC ].
-    ^atEnd
-!
+	<category: 'instance creation'>
+	^self on: [:gen | aCollection do: [:each | aBlock value: gen value: each]]
+    ]
 
-next
-    "Evaluate the generator until it generates the next value or
-     decides that nothing else can be generated."
-    | result |
-    self atEnd ifTrue: [ ^self pastEnd ].
-    result := next.
-    next := nil.
-    atEnd := nil.
-    ^result
-!
+    Generator class >> inject: aValue into: aBlock [
+	"Return an infinite generator; the first item is aValue, the following
+	 items are obtained by passing the previous value to aBlock."
 
-peek
-    "Evaluate the generator until it generates the next value or
-     decides that nothing else can be generated, and save the value
-     so that #peek or #next will return it again."
-    self atEnd ifTrue: [ ^nil ].
-    ^next
-!
+	<category: 'instance creation'>
+	^self on: 
+		[:gen | 
+		| last |
+		last := aValue.
+		
+		[gen yield: last.
+		last := aBlock value: last] repeat]
+    ]
 
-peekFor: anObject
-    "Evaluate the generator until it generates the next value or
-     decides that nothing else can be generated, and if it is not equal
-     to anObject, save the value so that #peek or #next will return it
-     again."
-    self atEnd ifTrue: [ self pastEnd. ^false ].
-    ^next = anObject
-        ifTrue: [ next := nil. atEnd := nil. true ]
-        ifFalse: [ false ]
-!
+    atEnd [
+	"Answer whether more data can be generated."
 
-yield: anObject
-    "When entering from the generator the code in the block is executed and
-     control flow goes back to the consumer.  When entering from the consumer,
-     the code after the continuation is executed, which resumes execution of
-     the generator block."
-    atEnd := false.
-    next := anObject.
-    consCC := consCC callCC.
+	<category: 'stream protocol'>
+	atEnd isNil ifTrue: [genCC := genCC callCC].
+	^atEnd
+    ]
 
-    "Make sure that an exception (or any other event that causes #yield: not
-     to be invoked again) terminates the generator.  Also, generators should
-     not reenter."
-    genCC := nil.
-    atEnd := true! !
+    next [
+	"Evaluate the generator until it generates the next value or
+	 decides that nothing else can be generated."
 
-!Generator methodsFor: 'private - continuations'!
-
-forkOn: aBlock
-    "When initializing, we just store the current continuation and exit;
-     the ^self is where the control flow is actually split.  When #next is
-     called first, the code after the continuation is executed, which
-     executes the generator block and finally resumes execution of the
-     consumer when the block leaves.
-
-     This is the only time we create a continuation with a block; after
-     this, we just replace a continuation with another through
-     Continuation>>#callCC."
-    consCC := Continuation escapeDo: [ :cc |
-	genCC := cc.
+	<category: 'stream protocol'>
+	| result |
+	self atEnd ifTrue: [^self pastEnd].
+	result := next.
+	next := nil.
 	atEnd := nil.
-	^self ].
+	^result
+    ]
 
-    atEnd := true.
-    genCC := nil.
-    aBlock value: self.
-    consCC oneShotValue! !
+    peek [
+	"Evaluate the generator until it generates the next value or
+	 decides that nothing else can be generated, and save the value
+	 so that #peek or #next will return it again."
+
+	<category: 'stream protocol'>
+	self atEnd ifTrue: [^nil].
+	^next
+    ]
+
+    peekFor: anObject [
+	"Evaluate the generator until it generates the next value or
+	 decides that nothing else can be generated, and if it is not equal
+	 to anObject, save the value so that #peek or #next will return it
+	 again."
+
+	<category: 'stream protocol'>
+	self atEnd 
+	    ifTrue: 
+		[self pastEnd.
+		^false].
+	^next = anObject 
+	    ifTrue: 
+		[next := nil.
+		atEnd := nil.
+		true]
+	    ifFalse: [false]
+    ]
+
+    yield: anObject [
+	"When entering from the generator the code in the block is executed and
+	 control flow goes back to the consumer.  When entering from the consumer,
+	 the code after the continuation is executed, which resumes execution of
+	 the generator block."
+
+	<category: 'stream protocol'>
+	atEnd := false.
+	next := anObject.
+	consCC := consCC callCC.
+
+	"Make sure that an exception (or any other event that causes #yield: not
+	 to be invoked again) terminates the generator.  Also, generators should
+	 not reenter."
+	genCC := nil.
+	atEnd := true
+    ]
+
+    forkOn: aBlock [
+	"When initializing, we just store the current continuation and exit;
+	 the ^self is where the control flow is actually split.  When #next is
+	 called first, the code after the continuation is executed, which
+	 executes the generator block and finally resumes execution of the
+	 consumer when the block leaves.
+	 
+	 This is the only time we create a continuation with a block; after
+	 this, we just replace a continuation with another through
+	 Continuation>>#callCC."
+
+	<category: 'private - continuations'>
+	consCC := Continuation escapeDo: 
+			[:cc | 
+			genCC := cc.
+			atEnd := nil.
+			^self].
+	atEnd := true.
+	genCC := nil.
+	aBlock value: self.
+	consCC oneShotValue
+    ]
+]
+

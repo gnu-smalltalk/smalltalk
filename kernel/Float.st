@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2003,2007
@@ -32,586 +31,630 @@
  ======================================================================"
 
 
-Number variableByteSubclass: #Float
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: 'CSymbols'
-       category: 'Language-Data types'
-!
-
-Float comment: 
-'My instances represent floating point numbers that have arbitrary
+
+Number subclass: Float [
+    
+    <shape: #byte>
+    <import: CSymbols>
+    <category: 'Language-Data types'>
+    <comment: 'My instances represent floating point numbers that have arbitrary
 precision.  Besides the standard numerical operations, they provide
 transcendental operations too.  They implement IEEE-754 correctly
-if the hardware supports it.'  !
+if the hardware supports it.'>
 
-
-!Float class methodsFor: 'byte-order dependancies'!
+    Float class >> signByte [
+	"Answer the byte of the receiver that contains the sign bit"
 
-signByte
-    "Answer the byte of the receiver that contains the sign bit"
-    self subclassResponsibility
-! !
+	<category: 'byte-order dependancies'>
+	self subclassResponsibility
+    ]
 
-
-!Float class methodsFor: 'characterization'!
+    Float class >> e [
+	"Returns the value of e. Hope is that it is precise enough"
 
-e
-    "Returns the value of e. Hope is that it is precise enough"
-    ^2.7182818284590452353602874713527d0
-!
+	<category: 'characterization'>
+	^2.718281828459045
+    ]
 
-log10Base2
-    "Returns the value of log2 10. Hope is that it is precise enough"
-    ^3.3219280948873623478703194294894d0
-!
+    Float class >> log10Base2 [
+	"Returns the value of log2 10. Hope is that it is precise enough"
 
-ln10
-    "Returns the value of ln 10. Hope is that it is precise enough"
-    ^2.3025850929940456840179914546844d0
-!
+	<category: 'characterization'>
+	^3.321928094887363
+    ]
 
-pi
-    "Returns the value of pi. Hope is that it is precise enough"
-    ^3.14159265358979323846264338327950288d0
-!
+    Float class >> ln10 [
+	"Returns the value of ln 10. Hope is that it is precise enough"
 
-radix
-    "Answer the base in which computations between instances of the receiver 
-     are made.  This should be 2 on about every known computer, so GNU
-     Smalltalk always answers 2."
-    ^2
-!
+	<category: 'characterization'>
+	^2.302585092994045
+    ]
 
-denormalized
-    "Answer whether instances of the receiver can be in denormalized
-     form."
-    ^self fminDenormalized > 0
-!
+    Float class >> pi [
+	"Returns the value of pi. Hope is that it is precise enough"
 
-fminDenormalized
-    "Return the smallest Float that is > 0 if denormalized values
-     are supported, else return 0."
-    ^self fminNormalized timesTwoPower: 1 - self precision
-!
+	<category: 'characterization'>
+	^3.141592653589793
+    ]
 
-fmin
-    "Return the smallest Float that is > 0."
-    | fminDen fmin |
-    fmin := self fminNormalized.
-    fminDen := fmin timesTwoPower: 1 - self precision.
-    ^fminDen = 0 ifTrue: [ fmin ] ifFalse: [ fminDen ].
-!
+    Float class >> radix [
+	"Answer the base in which computations between instances of the receiver
+	 are made.  This should be 2 on about every known computer, so GNU
+	 Smalltalk always answers 2."
 
-epsilon
-    "Return the smallest Float x for which is 1 + x ~= 1"
-    ^(self coerce: 2) timesTwoPower: self precision negated
-! !
+	<category: 'characterization'>
+	^2
+    ]
 
+    Float class >> denormalized [
+	"Answer whether instances of the receiver can be in denormalized
+	 form."
 
-
-!Float methodsFor: 'basic'!
+	<category: 'characterization'>
+	^self fminDenormalized > 0
+    ]
 
-hash
-    "Answer an hash value for the receiver"
-    "Hack so that 2 hash = 2.0 hash"
-    ^self fractionPart = 0.0
-        ifTrue: [ self asInteger hash ]
-        ifFalse: [ self primHash ]
-! !
+    Float class >> fminDenormalized [
+	"Return the smallest Float that is > 0 if denormalized values
+	 are supported, else return 0."
 
-
-!Float methodsFor: 'arithmetic'!
+	<category: 'characterization'>
+	^self fminNormalized timesTwoPower: 1 - self precision
+    ]
 
-negated
-    "Return the negation of the receiver.  Unlike 0-self, this converts
-     correctly signed zeros."
-    ^self * -1
-!
+    Float class >> fmin [
+	"Return the smallest Float that is > 0."
 
-integerPart
-    "Return the receiver's integer part"
-    ^self - self fractionPart
-!
+	<category: 'characterization'>
+	| fminDen fmin |
+	fmin := self fminNormalized.
+	fminDen := fmin timesTwoPower: 1 - self precision.
+	^fminDen = 0 ifTrue: [fmin] ifFalse: [fminDen]
+    ]
 
-raisedToInteger: anInteger
-    "Return self raised to the anInteger-th power"
+    Float class >> epsilon [
+	"Return the smallest Float x for which is 1 + x ~= 1"
 
-    | exp adjustExp val mant |
+	<category: 'characterization'>
+	^(self coerce: 2) timesTwoPower: self precision negated
+    ]
 
-    "Some special cases first"
-    anInteger isInteger ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: Integer ].
-    anInteger = 0 ifTrue: [ ^self unity ].
-    anInteger = 1 ifTrue: [ ^self ].
+    hash [
+	"Answer an hash value for the receiver"
 
-    "Avoid overflow when the result is denormal and we would have an
-     unrepresentable intermediate result for its reciprocal."
-    adjustExp := self exponent.
-    exp := anInteger abs.
-    (anInteger > 0 or: [ (adjustExp + 1) * exp < self class emax ])
-	ifTrue: [
-	    mant := self.
-	    adjustExp := 0 ]
-	ifFalse: [
-	    mant := self timesTwoPower: 0 - adjustExp.
-	    adjustExp := adjustExp * anInteger ].
+	"Hack so that 2 hash = 2.0 hash"
 
-    "Fire the big loop."
-    val := mant
-        raisedToInteger: exp
-        withCache: ((Array new: (255 min: exp))
-                        at: 1 put: mant;
-                        yourself).
+	<category: 'basic'>
+	^self fractionPart = 0.0 
+	    ifTrue: [self asInteger hash]
+	    ifFalse: [self primHash]
+    ]
 
-    anInteger < 0 ifTrue: [ val := val reciprocal ].
-    adjustExp = 0 ifFalse: [ val := val timesTwoPower: adjustExp ].
-    ^val
-! !
+    negated [
+	"Return the negation of the receiver.  Unlike 0-self, this converts
+	 correctly signed zeros."
 
+	<category: 'arithmetic'>
+	^self * -1
+    ]
 
-
-!Float methodsFor: 'testing'!
+    integerPart [
+	"Return the receiver's integer part"
 
-isNaN
-    "Answer whether the receiver represents a NaN"
-    ^self ~= self
-!
+	<category: 'arithmetic'>
+	^self - self fractionPart
+    ]
 
-isFinite
-    "Answer whether the receiver does not represent infinity, nor a NaN"
-    ^self - self = self zero
-!
+    raisedToInteger: anInteger [
+	"Return self raised to the anInteger-th power"
 
-isInfinite
-    "Answer whether the receiver represents positive or negative infinity"
-    ^self = self class infinity
-	or: [ self = self class negativeInfinity ]
-!
+	<category: 'arithmetic'>
+	"Some special cases first"
 
-negative
-    "Answer whether the receiver is negative"
-    ^self <= self zero and: [ self unity / self <= self zero ]
-!
+	| exp adjustExp val mant |
+	anInteger isInteger 
+	    ifFalse: [SystemExceptions.WrongClass signalOn: anInteger mustBe: Integer].
+	anInteger = 0 ifTrue: [^self unity].
+	anInteger = 1 ifTrue: [^self].
 
-strictlyPositive
-    "Answer whether the receiver is > 0"
-    ^self > self zero
-!
+	"Avoid overflow when the result is denormal and we would have an
+	 unrepresentable intermediate result for its reciprocal."
+	adjustExp := self exponent.
+	exp := anInteger abs.
+	(anInteger > 0 or: [(adjustExp + 1) * exp < self class emax]) 
+	    ifTrue: 
+		[mant := self.
+		adjustExp := 0]
+	    ifFalse: 
+		[mant := self timesTwoPower: 0 - adjustExp.
+		adjustExp := adjustExp * anInteger].
 
-positive
-    "Answer whether the receiver is positive.  Negative zero is
-     not positive, so the definition is not simply >= 0."
-    ^self >= self zero and: [ self unity / self >= self zero ]
-!
+	"Fire the big loop."
+	val := mant raisedToInteger: exp
+		    withCache: ((Array new: (255 min: exp))
+			    at: 1 put: mant;
+			    yourself).
+	anInteger < 0 ifTrue: [val := val reciprocal].
+	adjustExp = 0 ifFalse: [val := val timesTwoPower: adjustExp].
+	^val
+    ]
 
-sign
-    "Answer 1 if the receiver is greater than 0, -1 if less than 0,
-     else 0.  Negative zero is the same as positive zero."
+    isNaN [
+	"Answer whether the receiver represents a NaN"
 
-    self = self zero ifTrue: [^0].
-    ^self < 0 ifTrue: [-1] ifFalse: [1]
-! !
+	<category: 'testing'>
+	^self ~= self
+    ]
 
+    isFinite [
+	"Answer whether the receiver does not represent infinity, nor a NaN"
 
-
-!Float methodsFor: 'coercing'!
+	<category: 'testing'>
+	^self - self = self zero
+    ]
 
-truncated
-    "Convert the receiver to an Integer.  Only used for LargeIntegers,
-     there are primitives for the other cases."
+    isInfinite [
+	"Answer whether the receiver represents positive or negative infinity"
 
-    | exponent bytes positive float |
+	<category: 'testing'>
+	^self = self class infinity or: [self = self class negativeInfinity]
+    ]
 
-    self isFinite ifFalse: [^self].
-    (positive := self > 0)
-        ifTrue: [ float := self ]
-        ifFalse: [ float := self negated ].
+    negative [
+	"Answer whether the receiver is negative"
 
-    exponent := float exponent.
-    bytes := LargePositiveInteger new: (self class precision + 7) // 8 + 1.
-    float := float timesTwoPower: float class precision - exponent - 8.
+	<category: 'testing'>
+	^self <= self zero and: [self unity / self <= self zero]
+    ]
 
-    1 to: bytes size do: [ :i |
-         bytes digitAt: i put: (float fractionPart timesTwoPower: 8) truncated.
-         float := float integerPart timesTwoPower: -8.
-    ].
+    strictlyPositive [
+	"Answer whether the receiver is > 0"
 
-    bytes := bytes bitShift: (exponent - float class precision).
-    positive ifFalse: [ bytes := bytes negated ].
-    ^bytes
-!
+	<category: 'testing'>
+	^self > self zero
+    ]
 
-asExactFraction
-    "Convert the receiver into a fraction with optimal approximation,
-     but with usually huge terms."
+    positive [
+	"Answer whether the receiver is positive.  Negative zero is
+	 not positive, so the definition is not simply >= 0."
 
-    | shift mantissa |
-    self checkCoercion.
-    shift := self exponent negated + self class precision.
-    mantissa := (self timesTwoPower: shift) truncated.
-    ^shift negative
-        ifTrue: [mantissa * (1 bitShift: shift negated)]
-        ifFalse: [mantissa / (1 bitShift: shift)]
-!
+	<category: 'testing'>
+	^self >= self zero and: [self unity / self >= self zero]
+    ]
 
-asFraction
-    "Convert the receiver into a fraction with a good (but undefined)
-     approximation"
+    sign [
+	"Answer 1 if the receiver is greater than 0, -1 if less than 0,
+	 else 0.  Negative zero is the same as positive zero."
 
-    | a x n2 d2 n1 d1 n0 d0 eps abs gcd |
+	<category: 'testing'>
+	self = self zero ifTrue: [^0].
+	^self < 0 ifTrue: [-1] ifFalse: [1]
+    ]
 
-    self checkCoercion.
+    truncated [
+	"Convert the receiver to an Integer.  Only used for LargeIntegers,
+	 there are primitives for the other cases."
 
-    "This uses an algorithm based on continued fractions.
-      n2/d2 = numerator and denominator of the fraction two steps ago
-      n1/d1 = numerator and denominator of the fraction a steps ago
-      n0/d0 = numerator and denominator of the fraction at the current step"
+	<category: 'coercing'>
+	| exponent bytes positive float |
+	self isFinite ifFalse: [^self].
+	(positive := self > 0) 
+	    ifTrue: [float := self]
+	    ifFalse: [float := self negated].
+	exponent := float exponent.
+	bytes := LargePositiveInteger new: (self class precision + 7) // 8 + 1.
+	float := float timesTwoPower: float class precision - exponent - 8.
+	1 to: bytes size
+	    do: 
+		[:i | 
+		bytes digitAt: i put: (float fractionPart timesTwoPower: 8) truncated.
+		float := float integerPart timesTwoPower: -8].
+	bytes := bytes bitShift: exponent - float class precision.
+	positive ifFalse: [bytes := bytes negated].
+	^bytes
+    ]
 
-    n1  := d0 := 0.
-    n0  := d1 := 1.
-    abs := self abs timesTwoPower: self exponent negated.
-    eps := self class epsilon.
-    x   := abs.
+    asExactFraction [
+	"Convert the receiver into a fraction with optimal approximation,
+	 but with usually huge terms."
 
-    [   a := x truncated.
-	n2 := n1. d2 := d1.
-	n1 := n0. d1 := d0.
+	<category: 'coercing'>
+	| shift mantissa |
+	self checkCoercion.
+	shift := self exponent negated + self class precision.
+	mantissa := (self timesTwoPower: shift) truncated.
+	^shift negative 
+	    ifTrue: [mantissa * (1 bitShift: shift negated)]
+	    ifFalse: [mantissa / (1 bitShift: shift)]
+    ]
+
+    asFraction [
+	"Convert the receiver into a fraction with a good (but undefined)
+	 approximation"
+
+	<category: 'coercing'>
+	| a x n2 d2 n1 d1 n0 d0 eps abs gcd |
+	self checkCoercion.
+
+	"This uses an algorithm based on continued fractions.
+	 n2/d2 = numerator and denominator of the fraction two steps ago
+	 n1/d1 = numerator and denominator of the fraction a steps ago
+	 n0/d0 = numerator and denominator of the fraction at the current step"
+	n1 := d0 := 0.
+	n0 := d1 := 1.
+	abs := self abs timesTwoPower: self exponent negated.
+	eps := self class epsilon.
+	x := abs.
+	
+	[a := x truncated.
+	n2 := n1.
+	d2 := d1.
+	n1 := n0.
+	d1 := d0.
 	n0 := n1 * a + n2.
 	d0 := d1 * a + d2.
-	(x := self unity / x fractionPart) isInfinite or: [
-	    ((self coerce: n0) / (self coerce: d0) - abs) abs < eps ]
-    ]   whileFalse.
+	(x := self unity / x fractionPart) isInfinite 
+	    or: [((self coerce: n0) / (self coerce: d0) - abs) abs < eps]] 
+		whileFalse.
+	self exponent < 0 
+	    ifTrue: [d0 := d0 * (2 raisedToInteger: self exponent negated)]
+	    ifFalse: [n0 := n0 * (2 raisedToInteger: self exponent)].
+	gcd := n0 gcd: d0.
+	n0 := n0 divExact: gcd.
+	d0 := d0 divExact: gcd.
+	^Fraction numerator: (self < 0 ifTrue: [n0 negated] ifFalse: [n0])
+	    denominator: d0
+    ]
 
-    self exponent < 0
-	ifTrue: [ d0 := d0 * (2 raisedToInteger: self exponent negated) ]
-	ifFalse: [ n0 := n0 * (2 raisedToInteger: self exponent) ].
+    log [
+	<category: 'transcendental operations'>
+	^self ln / self class ln10
+    ]
 
-    gcd := n0 gcd: d0.
-    n0 := n0 divExact: gcd.
-    d0 := d0 divExact: gcd.
+    ceilingLog: radix [
+	"Answer (self log: radix) ceiling."
 
-    ^Fraction
-	numerator: (self < 0 ifTrue: [ n0 negated ] ifFalse: [ n0 ])
-	denominator: d0
-! !
+	<category: 'transcendental operations'>
+	self < self zero 
+	    ifTrue: 
+		[^self arithmeticError: 'cannot extract logarithm of a negative number'].
+	radix <= radix unity 
+	    ifTrue: 
+		[radix <= radix zero ifTrue: [^self arithmeticError: 'bad radix'].
+		radix = radix unity ifTrue: [^self arithmeticError: 'bad radix']].
+	^(self log: radix) ceiling
+    ]
 
-
-!Float methodsFor: 'transcendental operations'!
+    floorLog: radix [
+	"Answer (self log: radix) floor."
 
-log
-    ^self ln / self class ln10
-!
+	<category: 'transcendental operations'>
+	self < self zero 
+	    ifTrue: 
+		[^self arithmeticError: 'cannot extract logarithm of a negative number'].
+	radix <= radix unity 
+	    ifTrue: 
+		[radix <= radix zero ifTrue: [^self arithmeticError: 'bad radix'].
+		radix = radix unity ifTrue: [^self arithmeticError: 'bad radix']].
+	^(self log: radix) floor
+    ]
 
-ceilingLog: radix
-    "Answer (self log: radix) ceiling."
+    estimatedLog [
+	"Answer an estimate of (self abs floorLog: 10)"
 
-    self < self zero ifTrue: [
-       ^self arithmeticError: 'cannot extract logarithm of a negative number'
-    ].
-    radix <= radix unity ifTrue: [
-        (radix <= radix zero) ifTrue: [ ^self arithmeticError: 'bad radix' ].
-        (radix = radix unity) ifTrue: [ ^self arithmeticError: 'bad radix' ] ].
-    ^(self log: radix) ceiling
-!
+	<category: 'transcendental operations'>
+	^(self exponent + 1) asFloatD / FloatD log10Base2
+    ]
 
-floorLog: radix
-    "Answer (self log: radix) floor."
+    asFloat [
+	"Just defined for completeness.  Return the receiver."
 
-    self < self zero ifTrue: [
-       ^self arithmeticError: 'cannot extract logarithm of a negative number'
-    ].
-    radix <= radix unity ifTrue: [
-        (radix <= radix zero) ifTrue: [ ^self arithmeticError: 'bad radix' ].
-        (radix = radix unity) ifTrue: [ ^self arithmeticError: 'bad radix' ] ].
-    ^(self log: radix) floor
-!
+	<category: 'transcendental operations'>
+	^self
+    ]
 
-estimatedLog
-    "Answer an estimate of (self abs floorLog: 10)"
-    ^(self exponent + 1) asFloatD / FloatD log10Base2
-!
+    min: aNumber [
+	"Answer the minimum between the receiver and aNumber.  Redefine
+	 in subclasses if necessary to ensure that if either self or
+	 aNumber is a NaN, it is always answered."
 
-asFloat
-    "Just defined for completeness.  Return the receiver."
-    ^self
-! !
+	"If both self and aNumber are zero, return aNumber in case it
+	 has a negative sign, because we assume our zero is positive.
+	 If the test is false, always answer aNumber in case it is a
+	 NaN, because we assume that self is not a NaN."
 
-
-!Float methodsFor: 'comparing'!
+	<category: 'comparing'>
+	^aNumber < self 
+	    ifTrue: [aNumber]
+	    ifFalse: 
+		[self = aNumber 
+		    ifFalse: [aNumber = aNumber ifFalse: [aNumber] ifTrue: [self]]
+		    ifTrue: 
+			["Remember than -0.0 - +0.0 = -0.0, but the other pairs are +0.0."
 
-min: aNumber
-    "Answer the minimum between the receiver and aNumber.  Redefine
-     in subclasses if necessary to ensure that if either self or
-     aNumber is a NaN, it is always answered."
+			self = self zero ifTrue: [(self * -1 - aNumber) * -1] ifFalse: [self]]]
+    ]
 
-    "If both self and aNumber are zero, return aNumber in case it
-     has a negative sign, because we assume our zero is positive.
-     If the test is false, always answer aNumber in case it is a
-     NaN, because we assume that self is not a NaN."
+    max: aNumber [
+	"Answer the maximum between the receiver and aNumber.  Redefine
+	 in subclasses if necessary to ensure that if either self or
+	 aNumber is a NaN, it is always answered."
 
-    ^aNumber < self
-	ifTrue: [ aNumber ]
-	ifFalse: [
-	    self = aNumber
-		ifFalse: [
-		    aNumber = aNumber
-			ifFalse: [ aNumber ]
-			ifTrue: [ self ] ]
-		ifTrue: [
-		    "Remember than -0.0 - +0.0 = -0.0, but the other pairs are +0.0."
-		    self = self zero
-			ifTrue: [ (self * -1 - aNumber) * -1 ]
-			ifFalse: [ self ] ] ]!
+	<category: 'comparing'>
+	^aNumber > self 
+	    ifTrue: [aNumber]
+	    ifFalse: 
+		[self = aNumber 
+		    ifFalse: [aNumber = aNumber ifFalse: [aNumber] ifTrue: [self]]
+		    ifTrue: 
+			["Remember than -0.0 + -0.0 = -0.0, but the other pairs are +0.0."
 
-max: aNumber
-    "Answer the maximum between the receiver and aNumber.  Redefine
-     in subclasses if necessary to ensure that if either self or
-     aNumber is a NaN, it is always answered."
+			self = self zero ifTrue: [self + aNumber] ifFalse: [self]]]
+    ]
 
-    ^aNumber > self
-	ifTrue: [ aNumber ]
-	ifFalse: [
-	    self = aNumber
-		ifFalse: [
-		    aNumber = aNumber
-			ifFalse: [ aNumber ]
-			ifTrue: [ self ] ]
-		ifTrue: [
-		    "Remember than -0.0 + -0.0 = -0.0, but the other pairs are +0.0."
-		    self = self zero
-			ifTrue: [ self + aNumber ]
-			ifFalse: [ self ] ] ]!
+    withSignOf: aNumber [
+	"Answer the receiver, with its sign possibly changed to match
+	 that of aNumber."
 
-withSignOf: aNumber
-    "Answer the receiver, with its sign possibly changed to match
-     that of aNumber."
-    ^aNumber positive == self positive
-	ifTrue: [ self ]
-	ifFalse: [ self negated ]
-! !
+	<category: 'comparing'>
+	^aNumber positive == self positive ifTrue: [self] ifFalse: [self negated]
+    ]
 
+    printOn: aStream [
+	"Print a representation of the receiver on aStream"
 
-
-!Float methodsFor: 'printing'!
+	<category: 'printing'>
+	self printOn: aStream special: #('Inf' '-Inf' 'NaN')
+    ]
 
-printOn: aStream
-    "Print a representation of the receiver on aStream"
-    self
-	printOn: aStream
-	special: #('Inf' '-Inf' 'NaN')
-! !
+    isLiteralObject [
+	"Answer whether the receiver is expressible as a Smalltalk literal."
 
+	<category: 'storing'>
+	^true
+    ]
 
-
-!Float methodsFor: 'storing'!
+    storeLiteralOn: aStream [
+	"Store on aStream some Smalltalk code which compiles to the receiver"
 
-isLiteralObject
-    "Answer whether the receiver is expressible as a Smalltalk literal."
-    ^true
-!
+	<category: 'storing'>
+	self storeOn: aStream
+    ]
 
-storeLiteralOn: aStream
-    "Store on aStream some Smalltalk code which compiles to the receiver"
-    self storeOn: aStream
-!
+    storeOn: aStream [
+	"Print a representation of the receiver on aStream"
 
-storeOn: aStream
-    "Print a representation of the receiver on aStream"
-    | printString |
-    (self isInfinite or: [ self isNaN ])
-	ifTrue: [
-	     ^self
-	          printOn: aStream
-	          special: #('%1 infinity' '%1 negativeInfinity' '%1 nan') ].
-    printString := self printString.
-    aStream nextPutAll: printString.
+	<category: 'storing'>
+	| printString |
+	(self isInfinite or: [self isNaN]) 
+	    ifTrue: 
+		[^self printOn: aStream
+		    special: #('%1 infinity' '%1 negativeInfinity' '%1 nan')].
+	printString := self printString.
+	aStream nextPutAll: printString.
 
-    "For FloatE/FloatQ, force printing the exponent at the end."
-    self exponentLetter == $d ifTrue: [ ^self ].
-    (printString includes: self exponentLetter)
-	ifFalse: [ aStream nextPut: self exponentLetter ]! !
+	"For FloatE/FloatQ, force printing the exponent at the end."
+	self exponentLetter == $d ifTrue: [^self].
+	(printString includes: self exponentLetter) 
+	    ifFalse: [aStream nextPut: self exponentLetter]
+    ]
 
+    checkCoercion [
+	"Private - Fail if the receiver is only representable as a Float"
 
-
-!Float methodsFor: 'private'!
+	<category: 'private'>
+	self isInfinite 
+	    ifTrue: [self arithmeticError: 'Infinity can only be a Float'].
+	self isNaN 
+	    ifTrue: [self arithmeticError: 'Not-a-Number can only be a Float']
+    ]
 
-checkCoercion
-    "Private - Fail if the receiver is only representable as a Float"
+    printOn: aStream special: whatToPrintArray [
+	"Private - Print a decimal representation of the receiver on aStream,
+	 printing one of the three elements of whatToPrintArray if it is
+	 infinity, negative infinity, or a NaN"
 
-    self isInfinite
-	ifTrue: [self arithmeticError: 'Infinity can only be a Float'].
-    self isNaN
-	ifTrue: [self arithmeticError: 'Not-a-Number can only be a Float'].
-!
+	<category: 'private'>
+	"First, take care of the easy cases."
 
-printOn: aStream special: whatToPrintArray
-    "Private - Print a decimal representation of the receiver on aStream,
-     printing one of the three elements of whatToPrintArray if it is
-     infinity, negative infinity, or a NaN"
-    | me exponential small num weight prevWeight digit eps
-      precision digits digitStream exponent
-      dotPrinted |
+	| me exponential small num weight prevWeight digit eps precision digits digitStream exponent dotPrinted |
+	self isNaN 
+	    ifTrue: [^aStream nextPutAll: (whatToPrintArray at: 3) % {self class}].
+	self = self class infinity 
+	    ifTrue: [^aStream nextPutAll: (whatToPrintArray at: 1) % {self class}].
+	self = self class negativeInfinity 
+	    ifTrue: [^aStream nextPutAll: (whatToPrintArray at: 2) % {self class}].
 
-    "First, take care of the easy cases."
-    self isNaN ifTrue: [
-	^aStream nextPutAll: ((whatToPrintArray at: 3) % { self class }) ].
-    self = self class infinity ifTrue: [
-	^aStream nextPutAll: ((whatToPrintArray at: 1) % { self class }) ].
-    self = self class negativeInfinity ifTrue: [
-	^aStream nextPutAll: ((whatToPrintArray at: 2) % { self class }) ].
+	"We deal only with positive values."
+	me := self abs.
+	self negative ifTrue: [aStream nextPut: $-].
+	self = self zero 
+	    ifTrue: 
+		[aStream nextPutAll: '0.0'.
+		^self].
 
-    "We deal only with positive values."
-    me := self abs.
-    self negative ifTrue: [ aStream nextPut: $- ].
-    self = self zero ifTrue: [ aStream nextPutAll: '0.0'. ^self ].
+	"Figure out some quantities and the way we'll print the number."
+	exponential := me exponent abs > me class precision.
+	small := me < me unity.
+	exponent := (me floorLog: 10) + 1.
 
-    "Figure out some quantities and the way we'll print the number."
-    exponential := me exponent abs > me class precision.
-    small := me < me unity.
-    exponent := (me floorLog: 10) + 1.
+	"Compute the digits one by one."
+	num := me asExactFraction.
+	digits := 0.
+	weight := 10 raisedToInteger: exponent - 1.
+	me class decimalDigits timesRepeat: 
+		[digit := num // weight.
+		digits := digits * 10 + digit.
+		num := num - (digit * weight).
+		prevWeight := weight.
+		weight := weight / 10].
+	num = 0 
+	    ifFalse: 
+		["Smallest number such that me + eps ~= eps"
 
-    "Compute the digits one by one."
-    num := me asExactFraction.
-    digits := 0.
-    weight := 10 raisedToInteger: exponent - 1.
-    me class decimalDigits timesRepeat: [
-	digit := num // weight.
-	digits := digits * 10 + digit.
-	num := num - (digit * weight).
-	prevWeight := weight.
-	weight := weight / 10 ].
+		eps := 2 raisedToInteger: me exponent - me class precision + 1.
+		"For large numbers, don't let round-to-even bite us."
+		eps isInteger ifTrue: [eps := eps / 2].
+		(num - prevWeight quo: eps) = 0 ifTrue: [digits := digits + 1]].
+	digits := digits printString.
 
-    num = 0 ifFalse: [
-        "Smallest number such that me + eps ~= eps"
-        eps := 2 raisedToInteger: me exponent - me class precision + 1.
-        "For large numbers, don't let round-to-even bite us."
-        eps isInteger ifTrue: [ eps := eps / 2 ].
-        (num - prevWeight quo: eps) = 0 ifTrue: [ digits := digits + 1 ] ].
+	"Print the non-significant zeros."
+	dotPrinted := false.
+	(small and: [exponential not]) 
+	    ifTrue: 
+		[1 - exponent timesRepeat: 
+			[aStream nextPut: $0.
+			dotPrinted 
+			    ifFalse: 
+				[dotPrinted := true.
+				aStream nextPut: $.].
+			exponent := exponent + 1]].
 
-    digits := digits printString.
+	"Make a stream with the significant digits."
+	precision := digits findLast: [:ch | ch ~= $0].
+	digitStream := ReadStream 
+		    on: digits
+		    from: 1
+		    to: precision.
 
-    "Print the non-significant zeros."
-    dotPrinted := false.
-    (small and: [ exponential not ]) ifTrue: [
-        1 - exponent timesRepeat: [
-            aStream nextPut: $0.
-	    dotPrinted ifFalse: [ dotPrinted := true. aStream nextPut: $. ].
-	    exponent := exponent + 1 ] ].
-
-    "Make a stream with the significant digits."
-    precision := digits findLast: [ :ch | ch ~= $0 ].
-    digitStream := ReadStream on: digits from: 1 to: precision.
-
-    "Print the integer part (only one digit if using exponential notation)."
-    [
-        digitStream atEnd
-            ifTrue: [ aStream nextPut: $0 ]
-            ifFalse: [ aStream nextPut: digitStream next ].
-
+	"Print the integer part (only one digit if using exponential notation)."
+	
+	[digitStream atEnd 
+	    ifTrue: [aStream nextPut: $0]
+	    ifFalse: [aStream nextPut: digitStream next].
 	exponent := exponent - 1.
-        exponent > 0 and: [ exponential not ] ] whileTrue.
+	exponent > 0 and: [exponential not]] 
+		whileTrue.
 
-    "Print the fractional part."
-    digitStream atEnd
-    	ifTrue: [
-            dotPrinted ifFalse: [ aStream nextPutAll: '.0' ] ]
-    	ifFalse: [
-            dotPrinted ifFalse: [ aStream nextPut: $. ].
-	    digitStream do: [ :each | aStream nextPut: each ] ].
+	"Print the fractional part."
+	digitStream atEnd 
+	    ifTrue: [dotPrinted ifFalse: [aStream nextPutAll: '.0']]
+	    ifFalse: 
+		[dotPrinted ifFalse: [aStream nextPut: $.].
+		digitStream do: [:each | aStream nextPut: each]].
 
-    "Finally, print the exponent if necessary."
-    exponential ifTrue: [
-        aStream nextPut: me exponentLetter; print: exponent ].
-! !
+	"Finally, print the exponent if necessary."
+	exponential 
+	    ifTrue: 
+		[aStream
+		    nextPut: me exponentLetter;
+		    print: exponent]
+    ]
 
-
-!Float methodsFor: 'testing functionality'!
+    isFloat [
+	<category: 'testing functionality'>
+	^true
+    ]
 
-isFloat
-    ^true
-! !
+    exp [
+	"Answer 'e' (2.718281828459...) raised to the receiver"
 
-!Float methodsFor: 'built ins'!
+	<category: 'built ins'>
+	<primitive: VMpr_Float_exp>
+	self primitiveFailed
+    ]
 
-exp
-    "Answer 'e' (2.718281828459...) raised to the receiver"
-    <primitive: VMpr_Float_exp>
-    self primitiveFailed
-!
+    ln [
+	"Answer the logarithm of the receiver in base 'e' (2.718281828459...)"
 
-ln
-    "Answer the logarithm of the receiver in base 'e' (2.718281828459...)"
-    <primitive: VMpr_Float_ln>
-    self primitiveFailed
-!
+	<category: 'built ins'>
+	<primitive: VMpr_Float_ln>
+	self primitiveFailed
+    ]
 
-raisedTo: aNumber
-    "Answer the receiver raised to its aNumber power"
-    <primitive: VMpr_Float_pow>
-    aNumber isFloat ifTrue: [ self arithmeticError: 'invalid operands' ].
-    ^self raisedTo: (self coerce: aNumber)
-!
+    raisedTo: aNumber [
+	"Answer the receiver raised to its aNumber power"
 
-sqrt
-    "Answer the square root of the receiver"
-    <primitive: VMpr_Float_sqrt>
-    self primitiveFailed
-!
+	<category: 'built ins'>
+	<primitive: VMpr_Float_pow>
+	aNumber isFloat ifTrue: [self arithmeticError: 'invalid operands'].
+	^self raisedTo: (self coerce: aNumber)
+    ]
 
-ceiling
-    "Answer the integer part of the receiver, truncated towards +infinity"
-    <primitive: VMpr_Float_ceil>
-    self checkCoercion.
-    ^self > 0
-	ifTrue: [ self truncated + self fractionPart sign ]
-	ifFalse: [ self truncated ]
-!
+    sqrt [
+	"Answer the square root of the receiver"
 
-primHash
-    "Private - Answer an hash value for the receiver"
-    <primitive: VMpr_String_hash>
-    ^0
-!
+	<category: 'built ins'>
+	<primitive: VMpr_Float_sqrt>
+	self primitiveFailed
+    ]
 
-floor
-    "Answer the integer part of the receiver, truncated towards -infinity"
-    <primitive: VMpr_Float_floor>
-    self checkCoercion.
-    ^self < 0
-	ifTrue: [ self truncated + self fractionPart sign ]
-	ifFalse: [ self truncated ]
-!
+    ceiling [
+	"Answer the integer part of the receiver, truncated towards +infinity"
 
-sin
-    "Answer the sine of the receiver"
-    <primitive: VMpr_Float_sin>
-    self primitiveFailed
-!
+	<category: 'built ins'>
+	<primitive: VMpr_Float_ceil>
+	self checkCoercion.
+	^self > 0 
+	    ifTrue: [self truncated + self fractionPart sign]
+	    ifFalse: [self truncated]
+    ]
 
-cos
-    "Answer the cosine of the receiver"
-    <primitive: VMpr_Float_cos>
-    self primitiveFailed
-!
+    primHash [
+	"Private - Answer an hash value for the receiver"
 
-tan
-    "Answer the tangent of the receiver"
-    <primitive: VMpr_Float_tan>
-!
+	<category: 'built ins'>
+	<primitive: VMpr_String_hash>
+	^0
+    ]
 
-arcSin
-    "Answer the arc-sine of the receiver"
-    <primitive: VMpr_Float_arcSin>
-    ^self arithmeticError: 'argument out of range'
-!
+    floor [
+	"Answer the integer part of the receiver, truncated towards -infinity"
 
-arcCos
-    "Answer the arc-cosine of the receiver"
-    <primitive: VMpr_Float_arcCos>
-    ^self arithmeticError: 'argument out of range'
-!
+	<category: 'built ins'>
+	<primitive: VMpr_Float_floor>
+	self checkCoercion.
+	^self < 0 
+	    ifTrue: [self truncated + self fractionPart sign]
+	    ifFalse: [self truncated]
+    ]
 
-arcTan
-    "Answer the arc-tangent of the receiver"
-    <primitive: VMpr_Float_arcTan>
-! !
+    sin [
+	"Answer the sine of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Float_sin>
+	self primitiveFailed
+    ]
+
+    cos [
+	"Answer the cosine of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Float_cos>
+	self primitiveFailed
+    ]
+
+    tan [
+	"Answer the tangent of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Float_tan>
+	
+    ]
+
+    arcSin [
+	"Answer the arc-sine of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Float_arcSin>
+	^self arithmeticError: 'argument out of range'
+    ]
+
+    arcCos [
+	"Answer the arc-cosine of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Float_arcCos>
+	^self arithmeticError: 'argument out of range'
+    ]
+
+    arcTan [
+	"Answer the arc-tangent of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Float_arcTan>
+	
+    ]
+]
+

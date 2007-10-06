@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2006
@@ -32,15 +31,12 @@
  ======================================================================"
 
 
-CharacterArray variable: #character subclass: #String
-		  instanceVariableNames: ''
-		  classVariableNames: ''
-		  poolDictionaries: ''
-		  category: 'Collections-Text'
-!
-
-String comment: 
-'My instances represent 8-bit character strings.  Being a very common
+
+CharacterArray subclass: String [
+    
+    <shape: #character>
+    <category: 'Collections-Text'>
+    <comment: 'My instances represent 8-bit character strings.  Being a very common
 case, they are particularly optimized.
 
 Note that, if you care about multilingualization, you should treat
@@ -48,230 +44,279 @@ String only as an encoded representation of a UnicodeString.  The I18N
 package adds more Unicode-friendliness to the system so that encoding
 and decoding is performed automatically in more cases.  In that case,
 String represents a case when the encoding is either unknown, irrelevant,
-or assumed to be the system default.'!
+or assumed to be the system default.'>
 
-
-!String methodsFor: 'basic'!
+    String class >> fromCData: aCObject [
+	"Answer a String containing the bytes starting at the location pointed
+	 to by aCObject, up to the first NUL character."
 
-= aString
-    "Answer whether the receiver's items match those in aCollection"
+	<category: 'instance creation'>
+	<primitive: VMpr_String_fromCData>
+	^self primitiveFailed
+    ]
 
-    aString isString ifFalse: [ ^super = aString ].
+    String class >> fromCData: aCObject size: anInteger [
+	"Answer a String containing anInteger bytes starting at the location pointed
+	 to by aCObject"
 
-    "Also a String, no need to check the encoding."
-    self size = aString size ifFalse: [ ^false ].
-    self hash == aString hash ifFalse: [ ^false ].
-    1 to: self size do: [ :i |
-        (self at: i) == (aString at: i) ifFalse: [ ^false ]
-    ].
-    ^true
-!
+	<category: 'instance creation'>
+	<primitive: VMpr_String_fromCData_size>
+	^SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger
+    ]
 
-, aString
-    "Answer a new instance of an ArrayedCollection containing all the elements
-     in the receiver, followed by all the elements in aSequenceableCollection"
-    | newString mySize |
-    aString class == String ifFalse: [ ^super, aString ].
+    = aString [
+	"Answer whether the receiver's items match those in aCollection"
 
-    newString := self copyEmpty: ((mySize := self size) + aString size).
-    newString primReplaceFrom: 1 to: mySize with: self startingAt: 1.
-    newString primReplaceFrom: mySize + 1 to: newString size
-	      with: aString startingAt: 1.
-    ^newString
-! !
+	<category: 'basic'>
+	aString isString ifFalse: [^super = aString].
 
-
-!String methodsFor: 'converting'!
+	"Also a String, no need to check the encoding."
+	self size = aString size ifFalse: [^false].
+	self hash == aString hash ifFalse: [^false].
+	1 to: self size
+	    do: [:i | (self at: i) == (aString at: i) ifFalse: [^false]].
+	^true
+    ]
 
-encoding
-    "Answer the encoding of the receiver.  This is not implemented unless
-     you load the Iconv package."
-    self notYetImplemented
-!
+    , aString [
+	"Answer a new instance of an ArrayedCollection containing all the elements
+	 in the receiver, followed by all the elements in aSequenceableCollection"
 
-asByteArray
-    "Return the receiver, converted to a ByteArray of ASCII values"
-    | byteArray size |
-    size := self size.
-    byteArray := ByteArray new: size.
-    byteArray replaceFrom: 1 to: size withString: self startingAt: 1.
-    ^byteArray
-!
+	<category: 'basic'>
+	| newString mySize |
+	aString class == String ifFalse: [^super , aString].
+	newString := self copyEmpty: (mySize := self size) + aString size.
+	newString 
+	    primReplaceFrom: 1
+	    to: mySize
+	    with: self
+	    startingAt: 1.
+	newString 
+	    primReplaceFrom: mySize + 1
+	    to: newString size
+	    with: aString
+	    startingAt: 1.
+	^newString
+    ]
 
-asSymbol
-    "Returns the symbol corresponding to the receiver"
-    ^Symbol intern: self
-!
+    encoding [
+	"Answer the encoding of the receiver.  This is not implemented unless
+	 you load the Iconv package."
 
-asString
-    "But I already am a String!  Really!"
-    ^self
-! !
+	<category: 'converting'>
+	self notYetImplemented
+    ]
 
+    asByteArray [
+	"Return the receiver, converted to a ByteArray of ASCII values"
 
-
-!String methodsFor: 'testing functionality'!
+	<category: 'converting'>
+	| byteArray size |
+	size := self size.
+	byteArray := ByteArray new: size.
+	byteArray 
+	    replaceFrom: 1
+	    to: size
+	    withString: self
+	    startingAt: 1.
+	^byteArray
+    ]
 
-isString
-    ^true
-! !
+    asSymbol [
+	"Returns the symbol corresponding to the receiver"
 
-
-!String methodsFor: 'printing'!
+	<category: 'converting'>
+	^Symbol intern: self
+    ]
 
-displayString
-    "Answer a String representing the receiver. For most objects
-     this is simply its #printString, but for CharacterArrays and characters,
-     superfluous dollars or extra pair of quotes are stripped."
-    ^self
-!
+    asString [
+	"But I already am a String!  Really!"
 
-displayOn: aStream
-    "Print a representation of the receiver on aStream. Unlike
-     #printOn:, this method strips extra quotes."
-    aStream nextPutAll: self
-!
+	<category: 'converting'>
+	^self
+    ]
 
-isLiteralObject
-    "Answer whether the receiver is expressible as a Smalltalk literal."
-    ^self isReadOnly not
-!
+    isString [
+	<category: 'testing functionality'>
+	^true
+    ]
 
-storeLiteralOn: aStream
-    "Store a Smalltalk literal compiling to the receiver on aStream"
-    aStream nextPut: $'.
-    self do:
-    	[ :char | char == $' ifTrue: [ aStream nextPut: char ].
-	    	  aStream nextPut: char ].
-    aStream nextPut: $'.
-!
+    displayString [
+	"Answer a String representing the receiver. For most objects
+	 this is simply its #printString, but for CharacterArrays and characters,
+	 superfluous dollars or extra pair of quotes are stripped."
 
-storeOn: aStream
-    "Store Smalltalk code compiling to the receiver on aStream"
-    self storeLiteralOn: aStream.
-    self isReadOnly
-	ifFalse: [ aStream nextPutAll: ' copy' ]
-!
+	<category: 'printing'>
+	^self
+    ]
 
-printOn: aStream
-    "Print a representation of the receiver on aStream"
-    aStream nextPut: $'.
-    self do:
-    	[ :char | char == $' ifTrue: [ aStream nextPut: char ].
-	    	  aStream nextPut: char ].
-    aStream nextPut: $'
-! !
+    displayOn: aStream [
+	"Print a representation of the receiver on aStream. Unlike
+	 #printOn:, this method strips extra quotes."
 
+	<category: 'printing'>
+	aStream nextPutAll: self
+    ]
 
-!String methodsFor: 'accessing'!
+    isLiteralObject [
+	"Answer whether the receiver is expressible as a Smalltalk literal."
 
-byteAt: index
-    "Answer the ascii value of index-th character variable of the receiver"
-    ^self valueAt: index
-!
- 
-byteAt: index put: value
-    "Store (Character value: value) in the index-th indexed instance variable
-     of the receiver"
-    ^self valueAt: index put: value
-! !
+	<category: 'printing'>
+	^self isReadOnly not
+    ]
 
-
-!String class methodsFor: 'instance creation'!
+    storeLiteralOn: aStream [
+	"Store a Smalltalk literal compiling to the receiver on aStream"
 
-fromCData: aCObject
-    "Answer a String containing the bytes starting at the location pointed
-     to by aCObject, up to the first NUL character."
-    <primitive: VMpr_String_fromCData>
-    ^self primitiveFailed!
+	<category: 'printing'>
+	aStream nextPut: $'.
+	self do: 
+		[:char | 
+		char == $' ifTrue: [aStream nextPut: char].
+		aStream nextPut: char].
+	aStream nextPut: $'
+    ]
 
-fromCData: aCObject size: anInteger
-    "Answer a String containing anInteger bytes starting at the location pointed
-     to by aCObject"
-    <primitive: VMpr_String_fromCData_size>
-    ^SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger
-! !
+    storeOn: aStream [
+	"Store Smalltalk code compiling to the receiver on aStream"
 
+	<category: 'printing'>
+	self storeLiteralOn: aStream.
+	self isReadOnly ifFalse: [aStream nextPutAll: ' copy']
+    ]
 
-
-!String methodsFor: 'built ins'!
+    printOn: aStream [
+	"Print a representation of the receiver on aStream"
 
-hash
-    "Answer an hash value for the receiver"
-    <primitive: VMpr_String_hash>
-    ^0
-!
+	<category: 'printing'>
+	aStream nextPut: $'.
+	self do: 
+		[:char | 
+		char == $' ifTrue: [aStream nextPut: char].
+		aStream nextPut: char].
+	aStream nextPut: $'
+    ]
 
-similarityTo: aString
-    "Answer a number that denotes the similarity between aString and
-     the receiver.  0 indicates equality, negative numbers indicate
-     some difference.  Implemented as a primitive for speed."
-    <primitive: VMpr_String_similarityTo>
-    ^SystemExceptions.WrongClass signalOn: aString mustBe: String
-!
-    
-size
-    "Answer the size of the receiver"
-    <primitive: VMpr_Object_basicSize>
-    ^self primitiveFailed
-!
+    byteAt: index [
+	"Answer the ascii value of index-th character variable of the receiver"
 
-replaceFrom: start to: stop withByteArray: byteArray startingAt: replaceStart
-    "Replace the characters from start to stop with new characters whose
-     ASCII codes are contained in byteArray, starting at the replaceStart
-     location of byteArray"
-    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
-    ^super replaceFrom: start to: stop with: byteArray asString startingAt: replaceStart
-!
+	<category: 'accessing'>
+	^self valueAt: index
+    ]
 
-replaceFrom: start to: stop with: aString startingAt: replaceStart
-    "Replace the characters from start to stop with new characters whose
-     ASCII codes are contained in aString, starting at the replaceStart
-     location of aString"
-    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
-    ^super replaceFrom: start to: stop with: aString startingAt: replaceStart
-!
+    byteAt: index put: value [
+	"Store (Character value: value) in the index-th indexed instance variable
+	 of the receiver"
 
-primReplaceFrom: start to: stop with: replacementString 
-    startingAt: replaceStart    
-    "Private - Replace the characters from start to stop with new
-     characters contained in replacementString (which, actually, can be
-     any variable byte class, starting at the replaceStart location of
-     replacementString"
-    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
-    ^self primitiveFailed
-!
+	<category: 'accessing'>
+	^self valueAt: index put: value
+    ]
 
-at: anIndex
-    "Answer the index-th indexed instance variable of the receiver"
-    <primitive: VMpr_Object_basicAt>
-    self checkIndexableBounds: anIndex
-!
+    hash [
+	"Answer an hash value for the receiver"
 
-basicAt: anIndex
-    "Answer the index-th indexed instance variable of the receiver.
-     This method must not be overridden, override at: instead"
-    <primitive: VMpr_Object_basicAt>
-    self checkIndexableBounds: anIndex
-!
+	<category: 'built ins'>
+	<primitive: VMpr_String_hash>
+	^0
+    ]
 
-at: anIndex put: value
-    "Store value in the index-th indexed instance variable of the receiver"
-    <primitive: VMpr_Object_basicAtPut>
-   self checkIndexableBounds: anIndex put: value
-!
+    similarityTo: aString [
+	"Answer a number that denotes the similarity between aString and
+	 the receiver.  0 indicates equality, negative numbers indicate
+	 some difference.  Implemented as a primitive for speed."
 
-basicAt: anIndex put: value
-    "Store value in the index-th indexed instance variable of the receiver
-     This method must not be overridden, override at:put: instead"
+	<category: 'built ins'>
+	<primitive: VMpr_String_similarityTo>
+	^SystemExceptions.WrongClass signalOn: aString mustBe: String
+    ]
 
-    <primitive: VMpr_Object_basicAtPut>
-    self checkIndexableBounds: anIndex put: value
-!
+    size [
+	"Answer the size of the receiver"
 
-asCData: aCType
-    "Convert the receiver to a CObject with the given type"
-    <primitive: VMpr_String_asCData>
-    ^self primitiveFailed
-! !
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicSize>
+	^self primitiveFailed
+    ]
+
+    replaceFrom: start to: stop withByteArray: byteArray startingAt: replaceStart [
+	"Replace the characters from start to stop with new characters whose
+	 ASCII codes are contained in byteArray, starting at the replaceStart
+	 location of byteArray"
+
+	<category: 'built ins'>
+	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	^super 
+	    replaceFrom: start
+	    to: stop
+	    with: byteArray asString
+	    startingAt: replaceStart
+    ]
+
+    replaceFrom: start to: stop with: aString startingAt: replaceStart [
+	"Replace the characters from start to stop with new characters whose
+	 ASCII codes are contained in aString, starting at the replaceStart
+	 location of aString"
+
+	<category: 'built ins'>
+	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	^super 
+	    replaceFrom: start
+	    to: stop
+	    with: aString
+	    startingAt: replaceStart
+    ]
+
+    primReplaceFrom: start to: stop with: replacementString startingAt: replaceStart [
+	"Private - Replace the characters from start to stop with new
+	 characters contained in replacementString (which, actually, can be
+	 any variable byte class, starting at the replaceStart location of
+	 replacementString"
+
+	<category: 'built ins'>
+	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	^self primitiveFailed
+    ]
+
+    at: anIndex [
+	"Answer the index-th indexed instance variable of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAt>
+	self checkIndexableBounds: anIndex
+    ]
+
+    basicAt: anIndex [
+	"Answer the index-th indexed instance variable of the receiver.
+	 This method must not be overridden, override at: instead"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAt>
+	self checkIndexableBounds: anIndex
+    ]
+
+    at: anIndex put: value [
+	"Store value in the index-th indexed instance variable of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAtPut>
+	self checkIndexableBounds: anIndex put: value
+    ]
+
+    basicAt: anIndex put: value [
+	"Store value in the index-th indexed instance variable of the receiver
+	 This method must not be overridden, override at:put: instead"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAtPut>
+	self checkIndexableBounds: anIndex put: value
+    ]
+
+    asCData: aCType [
+	"Convert the receiver to a CObject with the given type"
+
+	<category: 'built ins'>
+	<primitive: VMpr_String_asCData>
+	^self primitiveFailed
+    ]
+]
 

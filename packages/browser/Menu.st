@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002,2003 Free Software Foundation, Inc.
@@ -29,109 +28,113 @@
  ======================================================================
 "
 
-BLOX.Gui subclass:  #Menu
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
 
-Menu comment: 
-nil!
+
+BLOX.Gui subclass: Menu [
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-!Menu class methodsFor: 'initializing'!
+    Menu class >> new: view label: title [
+	<category: 'initializing'>
+	| aMenu |
+	aMenu := Menu new.
+	aMenu blox: (BMenu new: view menuBar label: title).
+	^aMenu
+    ]
 
-new: view label: title 
-    | aMenu |
-    aMenu := Menu new.
-    aMenu blox: (BMenu new: view menuBar label: title).
-    ^aMenu! !
+    replaceArgWith: arg in: selectorsArray [
+	<category: 'initializing'>
+	| selectors |
+	selectors := selectorsArray deepCopy.
 
-!Menu methodsFor: 'initializing'!
+	"(label unarySelector (... submenu ...)) should not be changed
+	 (label keywordSelector arg) should be changed
+	 (label keywordSelector arg (... submenu ...)) should be changed"
+	selectorsArray with: selectors
+	    do: 
+		[:item :changed | 
+		(item size > 2 and: [(item at: 2) numArgs >= 1]) 
+		    ifTrue: [changed at: 3 put: arg].
+		(item size > 1 and: [item last isArray]) 
+		    ifTrue: 
+			[changed at: changed size put: (self replaceArgWith: arg in: item last)]].
+	^selectors
+    ]
 
-replaceArgWith: arg in: selectorsArray
-    | selectors |
-    selectors := selectorsArray deepCopy.
+    selectors: selectors receiver: receiver [
+	<category: 'initializing'>
+	blox callback: receiver using: selectors
+    ]
 
-    "(label unarySelector (... submenu ...)) should not be changed
-     (label keywordSelector arg) should be changed
-     (label keywordSelector arg (... submenu ...)) should be changed"
-
-    selectorsArray with: selectors
-	do: 
-	    [:item :changed | 
-	    (item size > 2 and: [(item at: 2) numArgs >= 1]) 
-		ifTrue: [changed at: 3 put: arg].
-
-	    (item size > 1 and: [item last isArray]) ifTrue: [
-		changed
-		    at: changed size
-		    put: (self replaceArgWith: arg in: item last)
-	    ]].
-
-    ^selectors!
-
-selectors: selectors receiver: receiver
-    blox
-	callback: receiver
-	using: selectors!
-
-selectors: selectors receiver: receiver argument: arg 
-    blox
-	callback: receiver
-	using: (self replaceArgWith: arg in: selectors)! !
+    selectors: selectors receiver: receiver argument: arg [
+	<category: 'initializing'>
+	blox callback: receiver using: (self replaceArgWith: arg in: selectors)
+    ]
+]
 
 
-Menu subclass:  #PopupMenu
-	instanceVariableNames: 'windowMenu'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
+
+Menu subclass: PopupMenu [
+    | windowMenu |
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-PopupMenu comment: 
-nil!
+    PopupMenu class >> new: view [
+	<category: 'initializing'>
+	^self new: view label: nil
+    ]
 
-!PopupMenu class methodsFor: 'initializing'!
+    PopupMenu class >> new: view label: title [
+	<category: 'initializing'>
+	| aMenu blox theTitle |
+	aMenu := self new.
+	theTitle := (title notNil and: [title isEmpty]) 
+		    ifTrue: [nil]
+		    ifFalse: [title].
+	blox := theTitle isNil 
+		    ifTrue: [BPopupMenu new: view blox label: '']
+		    ifFalse: [BPopupMenu new: view blox label: theTitle].
+	aMenu blox: blox.
 
-new: view
-    ^self new: view label: nil
-!
+	"We were given a menu name, add to the menu bar as well"
+	theTitle isNil 
+	    ifFalse: 
+		[aMenu windowMenu: (Menu new: view rootView label: theTitle).
+		view rootView menu: aMenu windowMenu].
+	^aMenu
+    ]
 
-new: view label: title 
-    | aMenu blox theTitle |
-    aMenu := self new.
-    theTitle := (title notNil and: [ title isEmpty ])
-	ifTrue: [ nil ]
-	ifFalse: [ title ].
+    windowMenu [
+	<category: 'initializing'>
+	^windowMenu
+    ]
 
-    blox := theTitle isNil
-	ifTrue: [ BPopupMenu new: view blox label: '' ]
-	ifFalse: [ BPopupMenu new: view blox label: theTitle ].
+    windowMenu: aMenu [
+	<category: 'initializing'>
+	windowMenu := aMenu
+    ]
 
-    aMenu blox: blox.
+    selectors: selectorsArray receiver: receiver [
+	<category: 'initializing'>
+	super selectors: selectorsArray receiver: receiver.
+	windowMenu isNil 
+	    ifFalse: [windowMenu selectors: selectorsArray receiver: receiver]
+    ]
 
-    "We were given a menu name, add to the menu bar as well"
-    theTitle isNil ifFalse: [
-	aMenu windowMenu: (Menu new: view rootView label: theTitle).
-	view rootView menu: aMenu windowMenu.
-    ].
-    ^aMenu! !
+    selectors: selectorsArray receiver: receiver argument: arg [
+	<category: 'initializing'>
+	super 
+	    selectors: selectorsArray
+	    receiver: receiver
+	    argument: arg.
+	windowMenu isNil 
+	    ifFalse: 
+		[windowMenu 
+		    selectors: selectorsArray
+		    receiver: receiver
+		    argument: arg]
+    ]
+]
 
-!PopupMenu methodsFor: 'initializing'!
-
-windowMenu
-    ^windowMenu!
-
-windowMenu: aMenu
-    windowMenu := aMenu!
-
-selectors: selectorsArray receiver: receiver
-    super selectors: selectorsArray receiver: receiver.
-    windowMenu isNil ifFalse: [
-	windowMenu selectors: selectorsArray receiver: receiver
-    ]!
-
-selectors: selectorsArray receiver: receiver argument: arg
-    super selectors: selectorsArray receiver: receiver argument: arg.
-    windowMenu isNil ifFalse: [
-	windowMenu selectors: selectorsArray receiver: receiver argument: arg
-    ]! !

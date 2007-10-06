@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2003,2006
@@ -31,324 +30,340 @@
 |
  ======================================================================"
 
-Object subclass: #UndefinedObject
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-Implementation'
-!
-
-UndefinedObject comment:
-'I have the questionable distinction of being a class with only one
-instance, which is the object "nil".' !
-
 
 
-!UndefinedObject methodsFor: 'basic'!
+Object subclass: UndefinedObject [
+    
+    <category: 'Language-Implementation'>
+    <comment: 'I have the questionable distinction of being a class with only one
+instance, which is the object "nil".'>
 
-copy
-    ^self
-!
+    copy [
+	<category: 'basic'>
+	^self
+    ]
 
-shallowCopy
-    ^self
-!
+    shallowCopy [
+	<category: 'basic'>
+	^self
+    ]
 
-deepCopy
-    ^self
-!
+    deepCopy [
+	<category: 'basic'>
+	^self
+    ]
 
-!UndefinedObject methodsFor: 'testing'!
+    isNil [
+	"Answer whether the receiver is the undefined object nil. Always
+	 answer true."
 
-isNil
-    "Answer whether the receiver is the undefined object nil. Always
-     answer true."
-    ^true
-!
+	<category: 'testing'>
+	^true
+    ]
 
-notNil
-    "Answer whether the receiver is not the undefined object nil. Always
-     answer false."
-    ^false
-!
+    notNil [
+	"Answer whether the receiver is not the undefined object nil. Always
+	 answer false."
 
-ifNil: nilBlock
-    "Evaluate nilBlock if the receiver is nil, else answer nil"
-    ^nilBlock value
-!
+	<category: 'testing'>
+	^false
+    ]
 
-ifNil: nilBlock ifNotNil: notNilBlock
-    "Evaluate nilBlock if the receiver is nil, else evaluate
-     notNilBlock, passing the receiver."
-    ^nilBlock value
-!
+    ifNil: nilBlock [
+	"Evaluate nilBlock if the receiver is nil, else answer nil"
 
-ifNotNil: notNilBlock
-    "Evaluate notNilBlock if the receiver is not nil, passing the receiver.
-     Else answer nil"
-    ^nil
-!
+	<category: 'testing'>
+	^nilBlock value
+    ]
 
-ifNotNil: notNilBlock ifNil: nilBlock
-    "Evaluate nilBlock if the receiver is nil, else evaluate
-     notNilBlock, passing the receiver."
-    ^nilBlock value
-! !
+    ifNil: nilBlock ifNotNil: notNilBlock [
+	"Evaluate nilBlock if the receiver is nil, else evaluate
+	 notNilBlock, passing the receiver."
 
-
-!UndefinedObject methodsFor: 'dependents access'!
+	<category: 'testing'>
+	^nilBlock value
+    ]
 
-addDependent: ignored 
-    "Fail, nil does not support dependents."
+    ifNotNil: notNilBlock [
+	"Evaluate notNilBlock if the receiver is not nil, passing the receiver.
+	 Else answer nil"
 
-    self shouldNotImplement!
+	<category: 'testing'>
+	^nil
+    ]
 
-release
-    "Ignore this call, nil does not support dependents."
-! !
+    ifNotNil: notNilBlock ifNil: nilBlock [
+	"Evaluate nilBlock if the receiver is nil, else evaluate
+	 notNilBlock, passing the receiver."
 
-
-!UndefinedObject methodsFor: 'printing'!
+	<category: 'testing'>
+	^nilBlock value
+    ]
 
-printOn: aStream in: aNamespace
-    "Print on aStream a representation of the receiver as it would be accessed
-     from aNamespace: nil is the same everywhere, so print the same as
-     #printOn:"
-    aStream nextPutAll: 'nil'
-!
+    addDependent: ignored [
+	"Fail, nil does not support dependents."
 
-printOn: aStream
-    "Print a representation of the receiver on aStream."
-    aStream nextPutAll: 'nil'
-! !
+	<category: 'dependents access'>
+	self shouldNotImplement
+    ]
 
+    release [
+	"Ignore this call, nil does not support dependents."
 
-
-!UndefinedObject methodsFor: 'storing'!
+	<category: 'dependents access'>
+	
+    ]
 
-isLiteralObject
-    "Answer whether the receiver is expressible as a Smalltalk literal."
-    ^true
-!
+    printOn: aStream in: aNamespace [
+	"Print on aStream a representation of the receiver as it would be accessed
+	 from aNamespace: nil is the same everywhere, so print the same as
+	 #printOn:"
 
-storeLiteralOn: aStream
-    "Store on aStream some Smalltalk code which compiles to the receiver"
-    self storeOn: aStream
-!
+	<category: 'printing'>
+	aStream nextPutAll: 'nil'
+    ]
 
-storeOn: aStream
-    "Store Smalltalk code compiling to the receiver on aStream."
-    self printOn: aStream
-! !
+    printOn: aStream [
+	"Print a representation of the receiver on aStream."
 
-
-!UndefinedObject methodsFor: 'class creation - alternative'!
+	<category: 'printing'>
+	aStream nextPutAll: 'nil'
+    ]
 
-subclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^self
-	subclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category'
-!
+    isLiteralObject [
+	"Answer whether the receiver is expressible as a Smalltalk literal."
 
-subclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^(self
-	subclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category')
-	classInstanceVariableNames: stringClassInstVarNames;
-	yourself
-!
+	<category: 'storing'>
+	^true
+    ]
 
-variableSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^self
-	variableSubclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category'
-!
+    storeLiteralOn: aStream [
+	"Store on aStream some Smalltalk code which compiles to the receiver"
 
-variableSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^(self
-	variableSubclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category')
-	classInstanceVariableNames: stringClassInstVarNames;
-	yourself
-!
+	<category: 'storing'>
+	self storeOn: aStream
+    ]
 
-variableByteSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^self
-	variableByteSubclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category'
-!
+    storeOn: aStream [
+	"Store Smalltalk code compiling to the receiver on aStream."
 
-variableByteSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^(self
-	variableByteSubclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category')
-	classInstanceVariableNames: stringClassInstVarNames;
-	yourself
-!
+	<category: 'storing'>
+	self printOn: aStream
+    ]
 
-variableLongSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^self
-	variable: #uint subclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category'
-!
+    subclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
 
-variableLongSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^(self
-	variable: #uint subclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category')
-	classInstanceVariableNames: stringClassInstVarNames;
-	yourself
-! !
+	<category: 'class creation - alternative'>
+	^self 
+	    subclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category'
+    ]
 
-
-!UndefinedObject methodsFor: 'class polymorphism'!
+    subclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
 
-methodDictionary
-    ^nil!
+	<category: 'class creation - alternative'>
+	^(self 
+	    subclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category')
+	    classInstanceVariableNames: stringClassInstVarNames;
+	    yourself
+    ]
 
-removeSubclass: aClass
-	"Ignored -- necessary to support disjoint class hierarchies"!
+    variableSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
 
-subclass: classNameString
-    instanceVariableNames: stringInstVarNames
-    classVariableNames: stringOfClassVarNames
-    poolDictionaries: stringOfPoolNames
-    category: categoryNameString
-    "Define a fixed subclass of the receiver with the given name, instance
-     variables, class variables, pool dictionaries and category. If the
-     class is already defined, if necessary, recompile everything needed."
+	<category: 'class creation - alternative'>
+	^self 
+	    variableSubclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category'
+    ]
 
-    | meta |
-    KernelInitialized ifFalse: [
-	^(Smalltalk at: classNameString) category: categoryNameString
-    ].
+    variableSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
 
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
-	  environment: Namespace current
-	  subclassOf: self
-	  instanceVariableNames: stringInstVarNames
-	  shape: nil
-	  classVariableNames: stringOfClassVarNames
-	  poolDictionaries: stringOfPoolNames
-	  category: categoryNameString
-!
+	<category: 'class creation - alternative'>
+	^(self 
+	    variableSubclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category')
+	    classInstanceVariableNames: stringClassInstVarNames;
+	    yourself
+    ]
 
-variable: shape subclass: classNameString
-    instanceVariableNames: stringInstVarNames
-    classVariableNames: stringOfClassVarNames
-    poolDictionaries: stringOfPoolNames
-    category: categoryNameString
-    "Define a variable subclass of the receiver with the given name,
-     shape, instance variables, class variables, pool dictionaries and
-     category. If the class is already defined, if necessary, recompile
-     everything needed.  The shape can be one of #byte #int8 #character
-     #short #ushort #int #uint #int64 #uint64 #utf32 #float #double or
-     #pointer."
+    variableByteSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
 
-    | meta |
-    KernelInitialized ifFalse: [
-	^(Smalltalk at: classNameString) category: categoryNameString
-    ].
+	<category: 'class creation - alternative'>
+	^self 
+	    variableByteSubclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category'
+    ]
 
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
-	  environment: Namespace current
-	  subclassOf: self
-	  instanceVariableNames: stringInstVarNames
-	  shape: shape
-	  classVariableNames: stringOfClassVarNames
-	  poolDictionaries: stringOfPoolNames
+    variableByteSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
+
+	<category: 'class creation - alternative'>
+	^(self 
+	    variableByteSubclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category')
+	    classInstanceVariableNames: stringClassInstVarNames;
+	    yourself
+    ]
+
+    variableLongSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
+
+	<category: 'class creation - alternative'>
+	^self 
+	    variable: #uint
+	    subclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category'
+    ]
+
+    variableLongSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
+
+	<category: 'class creation - alternative'>
+	^(self 
+	    variable: #uint
+	    subclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category')
+	    classInstanceVariableNames: stringClassInstVarNames;
+	    yourself
+    ]
+
+    methodDictionary [
+	<category: 'class polymorphism'>
+	^nil
+    ]
+
+    removeSubclass: aClass [
+	"Ignored -- necessary to support disjoint class hierarchies"
+
+	<category: 'class polymorphism'>
+	
+    ]
+
+    subclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
+	"Define a fixed subclass of the receiver with the given name, instance
+	 variables, class variables, pool dictionaries and category. If the
+	 class is already defined, if necessary, recompile everything needed."
+
+	<category: 'class polymorphism'>
+	| meta |
+	KernelInitialized 
+	    ifFalse: [^(Smalltalk at: classNameString) category: categoryNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
+	    environment: Namespace current
+	    subclassOf: self
+	    instanceVariableNames: stringInstVarNames
+	    shape: nil
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString
-!
+    ]
 
-subclass: classNameString
-    "Define a subclass of the receiver with the given name.  If the class
-     is already defined, don't modify its instance or class variables
-     but still, if necessary, recompile everything needed."
+    variable: shape subclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
+	"Define a variable subclass of the receiver with the given name,
+	 shape, instance variables, class variables, pool dictionaries and
+	 category. If the class is already defined, if necessary, recompile
+	 everything needed.  The shape can be one of #byte #int8 #character
+	 #short #ushort #int #uint #int64 #uint64 #utf32 #float #double or
+	 #pointer."
 
-    | meta |
-    KernelInitialized ifFalse: [ ^(Smalltalk at: classNameString) ].
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
-          environment: Namespace current
-          subclassOf: self!
-
-variableSubclass: classNameString
-    instanceVariableNames: stringInstVarNames
-    classVariableNames: stringOfClassVarNames
-    poolDictionaries: stringOfPoolNames
-    category: categoryNameString
-    "Define a variable pointer subclass of the receiver with the given
-     name, instance variables, class variables, pool dictionaries and
-     category. If the class is already defined, if necessary, recompile
-     everything needed."
-
-    | meta |
-    KernelInitialized ifFalse: [
-	^(Smalltalk at: classNameString) category: categoryNameString
-    ].
-
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
-	  environment: Namespace current
-	  subclassOf: self
-	  instanceVariableNames: stringInstVarNames
-	  shape: #pointer
-	  classVariableNames: stringOfClassVarNames
-	  poolDictionaries: stringOfPoolNames
+	<category: 'class polymorphism'>
+	| meta |
+	KernelInitialized 
+	    ifFalse: [^(Smalltalk at: classNameString) category: categoryNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
+	    environment: Namespace current
+	    subclassOf: self
+	    instanceVariableNames: stringInstVarNames
+	    shape: shape
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString
-!
+    ]
 
-variableWordSubclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    "Define a word variable subclass of the receiver with the given
-     name, instance variables, class variables, pool dictionaries and
-     category. If the class is already defined, if necessary, recompile
-     everything needed."
+    subclass: classNameString [
+	"Define a subclass of the receiver with the given name.  If the class
+	 is already defined, don't modify its instance or class variables
+	 but still, if necessary, recompile everything needed."
 
-    | meta |
-    KernelInitialized ifFalse: [
-	^(Smalltalk at: classNameString) category: categoryNameString
-    ].
+	<category: 'class polymorphism'>
+	| meta |
+	KernelInitialized ifFalse: [^Smalltalk at: classNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
+	    environment: Namespace current
+	    subclassOf: self
+    ]
 
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
+    variableSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
+	"Define a variable pointer subclass of the receiver with the given
+	 name, instance variables, class variables, pool dictionaries and
+	 category. If the class is already defined, if necessary, recompile
+	 everything needed."
+
+	<category: 'class polymorphism'>
+	| meta |
+	KernelInitialized 
+	    ifFalse: [^(Smalltalk at: classNameString) category: categoryNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
+	    environment: Namespace current
+	    subclassOf: self
+	    instanceVariableNames: stringInstVarNames
+	    shape: #pointer
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: categoryNameString
+    ]
+
+    variableWordSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
+	"Define a word variable subclass of the receiver with the given
+	 name, instance variables, class variables, pool dictionaries and
+	 category. If the class is already defined, if necessary, recompile
+	 everything needed."
+
+	<category: 'class polymorphism'>
+	| meta |
+	KernelInitialized 
+	    ifFalse: [^(Smalltalk at: classNameString) category: categoryNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
 	    environment: Namespace current
 	    subclassOf: self
 	    instanceVariableNames: stringInstVarNames
@@ -356,25 +371,21 @@ variableWordSubclass: classNameString
 	    classVariableNames: stringOfClassVarNames
 	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString
-!
+    ]
 
-variableByteSubclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    "Define a byte variable subclass of the receiver with the given
-     name, instance variables, class variables, pool dictionaries
-     and category. If the class is already defined, if necessary,
-     recompile everything needed."
+    variableByteSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
+	"Define a byte variable subclass of the receiver with the given
+	 name, instance variables, class variables, pool dictionaries
+	 and category. If the class is already defined, if necessary,
+	 recompile everything needed."
 
-    | meta |
-    KernelInitialized ifFalse: [
-	^(Smalltalk at: classNameString) category: categoryNameString
-    ].
-
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
+	<category: 'class polymorphism'>
+	| meta |
+	KernelInitialized 
+	    ifFalse: [^(Smalltalk at: classNameString) category: categoryNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
 	    environment: Namespace current
 	    subclassOf: self
 	    instanceVariableNames: stringInstVarNames
@@ -382,29 +393,34 @@ variableByteSubclass: classNameString
 	    classVariableNames: stringOfClassVarNames
 	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString
-!
+    ]
 
-metaclassFor: classNameString
-    "Create a Metaclass object for the given class name. The metaclass
-     is a subclass of Class"
-    | className class |
-    className := classNameString asSymbol.
-    class := Namespace current hereAt: className ifAbsent: [ nil ].
+    metaclassFor: classNameString [
+	"Create a Metaclass object for the given class name. The metaclass
+	 is a subclass of Class"
 
-    ^(class isNil or: [ class isClass not ])
-        ifTrue: [ Metaclass subclassOf: Class ]
-        ifFalse: [ class class ]
-!
+	<category: 'class polymorphism'>
+	| className class |
+	className := classNameString asSymbol.
+	class := Namespace current hereAt: className ifAbsent: [nil].
+	^(class isNil or: [class isClass not]) 
+	    ifTrue: [Metaclass subclassOf: Class]
+	    ifFalse: [class class]
+    ]
 
-allSubclasses
-    "Return all the classes in the system."
-    ^Class allSubclasses collect: [ :each | each instanceClass ]
-! !
+    allSubclasses [
+	"Return all the classes in the system."
 
-
-!UndefinedObject methodsFor: 'private'!
+	<category: 'class polymorphism'>
+	^Class allSubclasses collect: [:each | each instanceClass]
+    ]
 
-mutate: instVarMap startAt: start newClass: class
-    "Private - Do nothing, this is here in case the WeakArray garbage
-     collects an object that is to be mutated."
-! !
+    mutate: instVarMap startAt: start newClass: class [
+	"Private - Do nothing, this is here in case the WeakArray garbage
+	 collects an object that is to be mutated."
+
+	<category: 'private'>
+	
+    ]
+]
+

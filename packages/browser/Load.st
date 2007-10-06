@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -29,11 +28,15 @@
  ======================================================================
 "
 
-Class allSubclassesDo: [ :each |
-    (each instanceClass notNil and: [
-	each instanceClass includesSelector: #inspect])
-	ifTrue: [ each instanceClass removeSelector: #inspect ]
-]!
 
-(BLOX.BLOXBrowser includesKey: #BrowserMain)
-    ifTrue: [ BLOX.BLOXBrowser.BrowserMain close ]!
+
+Eval [
+    Class allSubclassesDo: 
+	    [:each | 
+	    (each instanceClass notNil 
+		and: [each instanceClass includesSelector: #inspect]) 
+		    ifTrue: [each instanceClass removeSelector: #inspect]].
+    (BLOX.BLOXBrowser includesKey: #BrowserMain) 
+	ifTrue: [BLOX.BLOXBrowser.BrowserMain close]
+]
+

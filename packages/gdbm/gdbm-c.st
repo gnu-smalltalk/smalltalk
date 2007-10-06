@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2005, 2007 Free Software Foundation, Inc.
@@ -31,100 +30,113 @@
  ======================================================================"
 
 
-
-CObject variableWordSubclass: #GDBM
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Examples-Modules'
-!
+
+CObject subclass: GDBM [
     
-CStruct subclass: #DatumStruct
-	declaration: #(		"typedef struct {	"
-	    (#dPtr (#ptr #char))"	char *dptr;	"
-	    (#dSize #int)	"	int   dsize;	"
-	)			"      } datum;		"
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Examples-GDBM'
-!
+    <shape: #word>
+    <category: 'Examples-Modules'>
+    <comment: nil>
+
+    GDBM class >> open: fileName blockSize: size flags: flags mode: modeInt fatalFunc: funcAddr [
+	"GDBM_FILE gdbm_open(name, block_size, flags, mode, fatal_func);"
+
+	<category: 'C call-outs'>
+	<cCall: 'gdbm_open' returning: #{GDBM}
+	args: #(#string #int #int #int #cObject)>
+	
+    ]
+
+    close [
+	"void gdbm_close(dbf);"
+
+	<category: 'C call-outs'>
+	<cCall: 'gdbm_close' returning: #int args: #(#self)>
+	
+    ]
+
+    at: key put: value flag: aFlag [
+	"int gdbm_store(dbf, key, content, flag);"
+
+	<category: 'C call-outs'>
+	<cCall: 'gdbm_store' returning: #int args: #(#self #cObject #cObject #int)>
+	
+    ]
+
+    at: key [
+	"datum gdbm_fetch(dbf, key);"
+
+	<category: 'C call-outs'>
+	<cCall: 'gdbm_fetch' returning: #{DatumStruct} args: #(#self #cObject)>
+	
+    ]
+
+    removeKey: key [
+	"int gdbm_delete(dbf, key);"
+
+	<category: 'C call-outs'>
+	<cCall: 'gdbm_delete' returning: #long args: #(#self #cObject)>
+	
+    ]
+
+    firstKey [
+	"datum gdbm_firstkey(dbf);"
+
+	<category: 'C call-outs'>
+	<cCall: 'gdbm_firstkey' returning: #{DatumStruct} args: #(#self)>
+	
+    ]
+
+    nextKey: afterDatum [
+	"datum gdbm_nextkey(dbf, key);"
+
+	<category: 'C call-outs'>
+	<cCall: 'gdbm_nextkey' returning: #{DatumStruct} args: #(#self #cObject)>
+	
+    ]
+
+    reorganize [
+	"int gdbm_reorganize(dbf);"
+
+	<category: 'C call-outs'>
+	<cCall: 'gdbm_reorganize' returning: #int args: #(#self)>
+	
+    ]
+]
 
 
-!DatumStruct class methodsFor: 'instance creation'!
+
+CStruct subclass: DatumStruct [
+    
+    <category: 'Examples-GDBM'>
+    <comment: nil>
+    <declaration: #(#(#dPtr #(#ptr #char ) ) #(#dSize #int ) )>
 
-fromString: aString
-    | obj strObj len |
-    obj := self new.
-    len := aString size.
-    obj dSize value: len.
-    obj dPtr value: (aString asCData: CCharType).
-    obj addToBeFinalized.
-    ^obj
-! !
+    DatumStruct class >> fromString: aString [
+	<category: 'instance creation'>
+	| obj strObj len |
+	obj := self new.
+	len := aString size.
+	obj dSize value: len.
+	obj dPtr value: (aString asCData: CCharType).
+	obj addToBeFinalized.
+	^obj
+    ]
 
+    asString [
+	<category: 'accessing'>
+	| len ptr str |
+	len := self dSize value.
+	ptr := self dPtr value.
+	str := String new: len.
+	1 to: len do: [:i | str at: i put: (ptr at: i - 1)].
+	^str
+    ]
 
-!DatumStruct methodsFor: 'accessing'!
-
-asString
-    | len ptr str |
-    len := self dSize value.
-    ptr := self dPtr value.
-    str := String new: len.
-    1 to: len do: 
-	[ :i | str at: i put: (ptr at: i - 1) ].
-    ^str
-!
-
-free
-    self removeToBeFinalized.
-    self dPtr value free.
-    super free
-! !
-
-
-!GDBM class methodsFor: 'C call-outs'!
-
-open: fileName blockSize: size flags: flags
-    mode: modeInt fatalFunc: funcAddr
-
-    "GDBM_FILE gdbm_open(name, block_size, flags, mode, fatal_func);"
-    <cCall: 'gdbm_open' returning: #{GDBM}
-	args: #(#string #int #int #int #cObject)>! !
-
-!GDBM methodsFor: 'C call-outs'!
-
-close
-    "void gdbm_close(dbf);"
-    <cCall: 'gdbm_close' returning: #int args: #(#self)>
-!
-
-at: key put: value flag: aFlag
-    "int gdbm_store(dbf, key, content, flag);"
-    <cCall: 'gdbm_store' returning: #int args: #(#self #cObject #cObject #int)>
-!
-
-at: key
-    "datum gdbm_fetch(dbf, key);"
-    <cCall: 'gdbm_fetch' returning: #{DatumStruct} args: #(#self #cObject)>
-!
-
-removeKey: key
-    "int gdbm_delete(dbf, key);"
-    <cCall: 'gdbm_delete' returning: #long args: #(#self #cObject)>
-!
-
-firstKey
-    "datum gdbm_firstkey(dbf);"
-    <cCall: 'gdbm_firstkey' returning: #{DatumStruct} args: #(#self)>
-!
-
-nextKey: afterDatum
-    "datum gdbm_nextkey(dbf, key);"
-    <cCall: 'gdbm_nextkey' returning: #{DatumStruct} args: #(#self #cObject)>
-!
-
-reorganize
-    "int gdbm_reorganize(dbf);"
-    <cCall: 'gdbm_reorganize' returning: #int args: #(#self)>
-! !
+    free [
+	<category: 'accessing'>
+	self removeToBeFinalized.
+	self dPtr value free.
+	super free
+    ]
+]
 

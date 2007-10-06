@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
@@ -31,10 +30,13 @@
  ======================================================================"
 
 
-Socket initialize!
-DatagramSocket initialize!
-ServerSocket initialize!
-IPAddress initialize!
+
+Eval [
+    Socket initialize.
+    DatagramSocket initialize.
+    ServerSocket initialize.
+    IPAddress initialize.
+    ObjectMemory addDependent: SocketAddress.
+    SocketAddress update: #returnFromSnapshot
+]
 
-ObjectMemory addDependent: SocketAddress!
-SocketAddress update: #returnFromSnapshot!

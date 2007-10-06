@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001
@@ -32,90 +31,103 @@
  ======================================================================"
 
 
-Boolean subclass: #True
-	instanceVariableNames: 'truthValue'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Language-Data types'
-!
-
-True comment: 
-'I represent truth and justice in the world.  My motto is "semper veritatis".'
-!
-
 
-!True methodsFor: 'C hacks'!
+Boolean subclass: True [
+    | truthValue |
+    
+    <category: 'Language-Data types'>
+    <comment: 'I represent truth and justice in the world.  My motto is "semper veritatis".'>
 
-asCBooleanValue
-    ^1
-! !
+    asCBooleanValue [
+	<category: 'C hacks'>
+	^1
+    ]
 
-
-!True methodsFor: 'basic'!
+    ifTrue: trueBlock ifFalse: falseBlock [
+	"We are true -- evaluate trueBlock"
 
-ifTrue: trueBlock ifFalse: falseBlock
-    "We are true -- evaluate trueBlock"
-    ^trueBlock value
-!
+	<category: 'basic'>
+	^trueBlock value
+    ]
 
-ifFalse: falseBlock ifTrue: trueBlock
-    "We are true -- evaluate trueBlock"
-    ^trueBlock value
-!
+    ifFalse: falseBlock ifTrue: trueBlock [
+	"We are true -- evaluate trueBlock"
 
-ifTrue: trueBlock
-    "We are true -- evaluate trueBlock"
-    ^trueBlock value
-!
+	<category: 'basic'>
+	^trueBlock value
+    ]
 
-ifFalse: falseBlock
-    "We are true -- answer nil"
-    ^nil
-!
+    ifTrue: trueBlock [
+	"We are true -- evaluate trueBlock"
 
-not
-    "We are true -- answer false"
-    ^false
-!
+	<category: 'basic'>
+	^trueBlock value
+    ]
 
-& aBoolean
-    "We are true -- anded with anything, we always answer the other operand"
-    ^aBoolean
-!
+    ifFalse: falseBlock [
+	"We are true -- answer nil"
 
-| aBoolean
-    "We are true -- ored with anything, we always answer true"
-    ^true
-!
+	<category: 'basic'>
+	^nil
+    ]
 
-eqv: aBoolean
-    "Answer whether the receiver and aBoolean represent the
-    same boolean value"
-    ^aBoolean
-!
+    not [
+	"We are true -- answer false"
 
-xor: aBoolean
-    "Answer whether the receiver and aBoolean represent different
-    boolean values"
-    ^aBoolean not
-!
+	<category: 'basic'>
+	^false
+    ]
 
-and: aBlock
-    "We are true -- anded with anything, we always answer the other operand,
-    so evaluate aBlock"
-    ^aBlock value
-!
+    & aBoolean [
+	"We are true -- anded with anything, we always answer the other operand"
 
-or: aBlock
-    "We are true -- ored with anything, we always answer true"
-    ^true
-! !
+	<category: 'basic'>
+	^aBoolean
+    ]
 
+    | aBoolean [
+	"We are true -- ored with anything, we always answer true"
 
-
-!True methodsFor: 'printing'!
+	<category: 'basic'>
+	^true
+    ]
 
-printOn: aStream
-    "Print a representation of the receiver on aStream"
-    aStream nextPutAll: 'true'
-! !
+    eqv: aBoolean [
+	"Answer whether the receiver and aBoolean represent the
+	 same boolean value"
+
+	<category: 'basic'>
+	^aBoolean
+    ]
+
+    xor: aBoolean [
+	"Answer whether the receiver and aBoolean represent different
+	 boolean values"
+
+	<category: 'basic'>
+	^aBoolean not
+    ]
+
+    and: aBlock [
+	"We are true -- anded with anything, we always answer the other operand,
+	 so evaluate aBlock"
+
+	<category: 'basic'>
+	^aBlock value
+    ]
+
+    or: aBlock [
+	"We are true -- ored with anything, we always answer true"
+
+	<category: 'basic'>
+	^true
+    ]
+
+    printOn: aStream [
+	"Print a representation of the receiver on aStream"
+
+	<category: 'printing'>
+	aStream nextPutAll: 'true'
+    ]
+]
+

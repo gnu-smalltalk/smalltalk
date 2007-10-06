@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2002 Free Software Foundation, Inc.
@@ -31,16 +30,14 @@
  ======================================================================"
 
 
-Process subclass: #CallinProcess
-     instanceVariableNames: 'returnedValue '
-     classVariableNames: ''
-     poolDictionaries: ''
-     category: 'Language-Processes'
-!
-
-CallinProcess comment: 
-'I represent a unit of computation for which external C code requested
+
+Process subclass: CallinProcess [
+    | returnedValue |
+    
+    <category: 'Language-Processes'>
+    <comment: 'I represent a unit of computation for which external C code requested
 execution, so I must store the returned value once my computation
 terminates and I must not survive across image saves (since those who
-invoked me no longer exist).  I am otherwise equivalent to a Process.'!
+invoked me no longer exist).  I am otherwise equivalent to a Process.'>
+]
 

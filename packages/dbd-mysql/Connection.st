@@ -31,678 +31,826 @@
  ======================================================================"
 
 
-ReadStream subclass: #MySQLReadStream
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Mysql-Driver'!
+
+ReadStream subclass: MySQLReadStream [
+    
+    <category: 'Mysql-Driver'>
+    <comment: nil>
+
+    readNullTerminatedString [
+	<category: 'accessing'>
+	^self upTo: self null asCharacter
+    ]
+
+    null [
+	<category: 'constants'>
+	^0
+    ]
+]
 
 
-WriteStream subclass: #MySQLWriteStream
-	instanceVariableNames: 'outputPacket '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Mysql-Driver'!
+
+WriteStream subclass: MySQLWriteStream [
+    | outputPacket |
+    
+    <category: 'Mysql-Driver'>
+    <comment: nil>
 
-
-Object subclass: #MySQLPacket
-	instanceVariableNames: 'packetNumber size buffer stream '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Mysql-Driver'!
-
-
-MySQLPacket subclass: #MySQLInputPacket
-	instanceVariableNames: 'readStream '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Mysql-Driver'!
-
-
-MySQLPacket subclass: #MySQLOutputPacket
-	instanceVariableNames: 'writeStream '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Mysql-Driver'!
-
-
-Connection subclass: #MySQLConnection
-	instanceVariableNames: 'socket serverInfo database responsePacket '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Mysql-Driver'!
-
-
-Object subclass: #MySQLServerInfo
-	instanceVariableNames: 'protocol serverThread serverVersion charset status hashSeed options '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Mysql-Driver'!
-
-!MySQLReadStream methodsFor: 'accessing'!
-
-readNullTerminatedString
-	^self upTo: self null asCharacter! !
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-MySQLReadStream class
-	instanceVariableNames: ''!
-
-
-!MySQLReadStream methodsFor: 'constants'!
-
-null
-	^0! !
-
-!MySQLWriteStream methodsFor: 'mysql-constants'!
-
-cmdConnect
-	^11!
-
-cmdCreateDatabase
-	^5!
-
-cmdDebug
-	^13!
-
-cmdDropDatabase
-	^6!
-
-cmdFieldList
-	^4!
-
-cmdInitializeDatabase
-	^2!
-
-cmdKillProcess
-	^12!
-
-cmdProcessInfo
-	^10!
-
-cmdQuery
-	^3!
-
-cmdQuit
-	^1!
-
-cmdRefresh
-	^7!
-
-cmdShutdown
-	^8!
-
-cmdSleep
-	^0!
-
-cmdStatistics
-	^9! !
-
-!MySQLWriteStream methodsFor: 'accessing'!
-
-flush
-	outputPacket flush!
-
-nextPutAllNullTerminated: aCollection2 
-	self nextPutAll: aCollection2.
-	self nextPut: self null asCharacter!
-
-nextPutCommand: aCommand
-	self
-		nextPut: (Character value: (self perform: aCommand));
-		nextPut: self null asCharacter!
-
-nextPutCommand: aCommand message: aString
-	self
-		nextPut: (Character value: (self perform: aCommand));
-		nextPutAllNullTerminated: aString!
-
-outputPacket
-	^outputPacket!
-
-outputPacket: p
-	outputPacket := p!
-
-setWritePosition: aPosition 
-    "aPosition timesRepeat: [ self nextPut: 0 asCharacter]"
-    ptr := aPosition + 1! !
-
-!MySQLWriteStream methodsFor: 'initialize'!
-
-initialize! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-MySQLWriteStream class
-	instanceVariableNames: ''!
-
-!MySQLWriteStream methodsFor: 'constants'!
-null
-	^0! !
-
-
-!MySQLWriteStream class methodsFor: 'instance creation'!
-on: aCollection startingAt: aPosition 
-outputPacket: op
+    MySQLWriteStream class >> on: aCollection startingAt: aPosition outputPacket: op [
+	<category: 'instance creation'>
 	| ws |
-	ws := (self on: aCollection)
-		setWritePosition: aPosition.
+	ws := (self on: aCollection) setWritePosition: aPosition.
 	ws outputPacket: op.
-	^ws! !
+	^ws
+    ]
 
-!MySQLWriteStream class methodsFor: 'instance creation'!
-xon: aCollection outputPacket: op
+    MySQLWriteStream class >> xon: aCollection outputPacket: op [
+	<category: 'instance creation'>
 	| ws |
 	ws := (super on: aCollection) initialize.
 	ws outputPacket: op.
-	^ws! !
+	^ws
+    ]
 
-!MySQLConnection class methodsFor: 'errors'!
+    cmdConnect [
+	<category: 'mysql-constants'>
+	^11
+    ]
 
-throwException: aSymbol 
-	self throwException: aSymbol message: ''!
+    cmdCreateDatabase [
+	<category: 'mysql-constants'>
+	^5
+    ]
 
-throwException: aSymbol message: aString 
-	self 
-		error: (self errorTable at: aSymbol ifAbsent: ['Unknown']) , ': ' , aString!
+    cmdDebug [
+	<category: 'mysql-constants'>
+	^13
+    ]
 
-errorTable
-	ErrorTable isNil ifTrue: [
-	    ErrorTable := IdentityDictionary new.
-	    1 to: self errorTableMap size by: 2 do: [ :i |
-	        ErrorTable
-		    at: (self errorTableMap at: i)
-	            put: (self errorTableMap at: i + 1) ] ].
+    cmdDropDatabase [
+	<category: 'mysql-constants'>
+	^6
+    ]
 
-	^ErrorTable!
+    cmdFieldList [
+	<category: 'mysql-constants'>
+	^4
+    ]
 
-errorTableMap
-	^#(#protocol 'Invalid Protocol'
-	    #authentication 'Access denied'
-	    #setDatabase   'Could not set the database'
-	    #invalidQuery 'Invalid query')! !
+    cmdInitializeDatabase [
+	<category: 'mysql-constants'>
+	^2
+    ]
 
-!MySQLConnection class methodsFor: 'instance creation'!
+    cmdKillProcess [
+	<category: 'mysql-constants'>
+	^12
+    ]
 
-driverName
-    ^'MySQL'!
+    cmdProcessInfo [
+	<category: 'mysql-constants'>
+	^10
+    ]
 
-paramConnect: aParams user: aUserName password: aPassword
-    | database connection host port |
-    database := aParams at: 'dbname' ifAbsent: [ nil ].
-    host := aParams at: 'host' ifAbsent: [ 'localhost' ].
-    port := (aParams at: 'port' ifAbsent: [ 3306 ]) asInteger.
+    cmdQuery [
+	<category: 'mysql-constants'>
+	^3
+    ]
 
-    connection := self new.
-    connection connectTo: host port: port.
-    connection login: aUserName password: aPassword.
-    database isNil ifFalse: [ connection database: database ].
-    ^connection! !
+    cmdQuit [
+	<category: 'mysql-constants'>
+	^1
+    ]
 
-!MySQLConnection methodsFor: 'querying'!
+    cmdRefresh [
+	<category: 'mysql-constants'>
+	^7
+    ]
 
-beginTransaction
-	^self do: 'START TRANSACTION'!
+    cmdShutdown [
+	<category: 'mysql-constants'>
+	^8
+    ]
 
-commitTransaction
-	^self do: 'COMMIT'!
+    cmdSleep [
+	<category: 'mysql-constants'>
+	^0
+    ]
 
-rollbackTransaction
-	^self do: 'ROLLBACK'!
+    cmdStatistics [
+	<category: 'mysql-constants'>
+	^9
+    ]
 
-database
-	^database!
+    flush [
+	<category: 'accessing'>
+	outputPacket flush
+    ]
 
-do: aSQLQuery
-	^(self prepare: aSQLQuery) execute!
+    nextPutAllNullTerminated: aCollection2 [
+	<category: 'accessing'>
+	self nextPutAll: aCollection2.
+	self nextPut: self null asCharacter
+    ]
 
-select: aSQLQuery
-	^(self prepare: aSQLQuery) execute!
-
-prepare: aQuery
-	^(MySQLStatement on: self) prepare: aQuery!
-
-!MySQLConnection methodsFor: 'closing'!
-
-finalize
-	self close!
-
-close
+    nextPutCommand: aCommand [
+	<category: 'accessing'>
 	self
-		removeToBeFinalized;
-		closeRequest;
-		closeSocket!
+	    nextPut: (Character value: (self perform: aCommand));
+	    nextPut: self null asCharacter
+    ]
 
-closeRequest
-	(self requestPacket writeStream)
-		nextPutCommand: #cmdQuit;
-		flush!
+    nextPutCommand: aCommand message: aString [
+	<category: 'accessing'>
+	self
+	    nextPut: (Character value: (self perform: aCommand));
+	    nextPutAllNullTerminated: aString
+    ]
 
-closeSocket
-	socket isNil ifFalse: [socket close].
-	socket := nil! !
+    outputPacket [
+	<category: 'accessing'>
+	^outputPacket
+    ]
 
-!MySQLConnection methodsFor: 'initialize-release'!
+    outputPacket: p [
+	<category: 'accessing'>
+	outputPacket := p
+    ]
 
-connectTo: host port: port
-    | messageText |
-    socket := TCP.Socket remote: host port: port.
-    self addToBeFinalized.
+    setWritePosition: aPosition [
+	"aPosition timesRepeat: [ self nextPut: 0 asCharacter]"
 
-    socket isNil ifTrue: [ ^self error: messageText].	
-    serverInfo := MySQLServerInfo new.
-    serverInfo readFrom: self responsePacket
-!
+	<category: 'accessing'>
+	ptr := aPosition + 1
+    ]
 
-database: aString
-    (self requestPacket writeStream)
-	nextPutCommand: #cmdInitializeDatabase message: aString;
-	flush.
-    self responsePacket checkStatusOnError: #setDatabase.
-    database := aString!
-
-oldProtocolHashes: password
-    password isEmpty ifTrue: [ ^'' ].
-    ^{ self hash2: password seed: serverInfo hashSeed }!
-
-newProtocolHashes: password
-    password isEmpty ifTrue: [ ^String new: 1 ].
-    ^{ self hashSHA1: password seed: serverInfo hashSeed.
-       self hash2: password seed: serverInfo hashSeed }!
-
-login: user password: password
-    | replyStream hashes userSent longPassword |
-    replyStream := self replyPacket writeStream.
-    serverInfo hashSeed size = 8
-	ifTrue: [
-	    hashes := self oldProtocolHashes: password.
-	    replyStream
-	        nextPutAll: (self class integerAsByteArray: 1 length: 2) asByteString;
-	        nextPutAll: (self class integerAsByteArray: 65536 length: 3) asByteString;
-	        nextPutAllNullTerminated: user;
-		nextPutAllNullTerminated: hashes first;
-		flush ]
-	ifFalse: [
-	    hashes := self newProtocolHashes: password.
-	    replyStream
-	        nextPutAll: (self class integerAsByteArray: 41477 length: 4) asByteString;
-	        nextPutAll: (self class integerAsByteArray: 65536 length: 4) asByteString;
-	        nextPut: 8 asCharacter;
-	        next: 23 put: 0 asCharacter;
-	        nextPutAllNullTerminated: user;
-		nextPut: hashes first size asCharacter;
-		nextPutAll: hashes first;
-        	flush.
-   
-	    (self responsePacket isStatus: 254 onError: #authenticate) ifTrue: [
-		replyStream := self replyPacket writeStream.
-		replyStream nextPutAll: hashes second; flush ] ]! !
-
-!MySQLConnection methodsFor: 'hashing'!
-
-hash: aString seed: aSeed for: hashMethod 
-	^self class 
-		perform: hashMethod
-		with: aString
-		with: aSeed! !
-
-!MySQLConnection methodsFor: 'accessing'!
-
-replyPacket
-	^(MySQLOutputPacket on: socket) 
-		packetNumber: responsePacket packetNumber + 1!
-
-requestPacket
-	^MySQLOutputPacket on: socket!
-
-responsePacket
-	^responsePacket := MySQLInputPacket on: socket! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-MySQLConnection class
-	instanceVariableNames: ''!
-
-
-!MySQLConnection methodsFor: 'hashing'!
-
-hashSHA1: aString seed: aSeed 
-	"This algorithm is for MySQL 4.1+."
-
-	| hashedString hashedStringSeeded result |
-	"Compute hash1 = SHA1(password), then hash2 = SHA1(hash1). The server
-	 already knows this, as that is what is held in its password table
-	 (preceded with a *)."
-
-	hashedString := SHA1 digestOf: aString.
-	hashedStringSeeded := SHA1 digestOf: hashedString.
-
-	"Append hash2 to the salt sent by the server and hash that."
-	hashedStringSeeded := SHA1 digestOf: aSeed, hashedStringSeeded.
-
-	"Finally, XOR the result with SHA1(password).  The server takes this,
-	 computes SHA1(salt.`SHA1 stored in DB`), uses the latter result to
-	 undo the XOR, computes again SHA1, and compares that with the SHA1
-	 stored in the DB."
-
-	result := String new: 20.
-	1 to: 20 do: [ :i |
-	    result at: i put: (Character value:
-		((hashedString at: i) bitXor: (hashedStringSeeded at: i))) ].
-	^result!
-
-hash2: aString seed: longSeed 
-	"This algorithm is for MySQL 3.22+."
-
-	| hashedString maxValue result num1 num2 num3 aSeed |
-	"Reserve a final byte for NULL termination"
-	aSeed := longSeed copyFrom: 1 to: 8.
-	hashedString := String new: aSeed size.
-	result := self randomInit2: aString seed: aSeed.
-	maxValue := 16r3FFFFFFF.
-	num1 := result at: 1.
-	num2 := result at: 2.
-	1 to: hashedString size
-		do: 
-			[:index | 
-			num1 := (num1 * 3 + num2) \\ maxValue.
-			num2 := (num1 + num2 + 33) \\ maxValue.
-			num3 := (num1 / maxValue * 31) truncated + 64.
-			hashedString at: index put: num3 asCharacter].
-	num1 := (num1 * 3 + num2) \\ maxValue.
-	num2 := (num1 + num2 + 33) \\ maxValue.
-	num3 := (num1 / maxValue * 31) truncated.
-	hashedString keysAndValuesDo: [:index :character | 
-		hashedString
-			at: index
-			put: (character asInteger bitXor: num3) asCharacter].
-	^hashedString!
-
-hash: aString 
-	"Hash algorithm taken from mysql in order to send password to the server"
-
-	| num1 num2 num3 |
-	num1 := 1345345333.
-	num2 := 305419889.
-	num3 := 7.
-	aString do: 
-			[:character | 
-			(character = Character space or: [character = Character tab]) 
-				ifFalse: 
-					[| charValue |
-					charValue := character asInteger.
-					num1 := num1 
-								bitXor: ((num1 bitAnd: 63) + num3) * charValue + (num1 bitShift: 8).
-					num2 := num2 + ((num2 bitShift: 8) bitXor: num1).
-					num3 := num3 + charValue]].
-	^Array with: (num1 bitAnd: 2147483647) with: (num2 bitAnd: 2147483647)!
-
-randomInit2: aString seed: aSeed 
-	| result array1 array2 |
-	result := Array new: 2.
-	array1 := self hash: aString.
-	array2 := self hash: aSeed.
-	result at: 1 put: ((array1 at: 1) bitXor: (array2 at: 1)) \\ 16r3FFFFFFF.
-	result at: 2 put: ((array1 at: 2) bitXor: (array2 at: 2)) \\ 16r3FFFFFFF.
-	^result! !
-
-!MySQLConnection class methodsFor: 'misc'!
-
-byteArrayAsInteger: ba
-    ^self byteArrayAsInteger: ba from: 1 for: ba size!
-
-byteArrayAsInteger: ba from: anOffset for: aLength 
-    | shiftAmount anInteger |
+    initialize [
+	<category: 'initialize'>
 	
-    shiftAmount := 0.	
-    anInteger := 0.
-    anOffset to: aLength
-	     do: 
-	     [:index | 
-		 anInteger := anInteger bitOr: ((ba at: index) bitShift: shiftAmount).
-		 shiftAmount := shiftAmount + 8].
-    ^anInteger!
+    ]
 
-integerAsByteArray: int length: aLength 
-
-    | aByteArray shiftAmount mask |
-    aByteArray := ByteArray new: aLength.
-    shiftAmount := 0.
-    mask := 16rFF.
-    1 to: aLength
-      do: 
-      [:index | 
-	  aByteArray at: index put: (mask bitAnd: (int bitShift: shiftAmount)).
-	  shiftAmount := shiftAmount - 8].
-    ^aByteArray!
-
-byteArrayAsByteString: ba
-    | size s |
-    size := ba size.
-    s := String new: size.
-    1 to: size do: [:index |
-	s at: index put: (Character value: (ba at: index)).
-	].
-    ^s! !
-
-!MySQLPacket methodsFor: 'accessing'!
-
-packetNumber
-	^packetNumber!
-
-packetNumber: anInteger
-	packetNumber := anInteger!
-
-size
-	^size!
-
-size: anObject
-	size := anObject!
-
-stream
-	^stream!
-
-stream: anObject
-	stream := anObject! !
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-MySQLPacket class
-	instanceVariableNames: ''!
+    null [
+	<category: 'constants'>
+	^0
+    ]
+]
 
 
-!MySQLPacket class methodsFor: 'constants'!
+
+Object subclass: MySQLPacket [
+    | packetNumber size buffer stream |
+    
+    <category: 'Mysql-Driver'>
+    <comment: nil>
 
-defaultBufferSize
-	^8192!
+    MySQLPacket class >> defaultBufferSize [
+	<category: 'constants'>
+	^8192
+    ]
 
-headerSize
-	^4!
+    MySQLPacket class >> headerSize [
+	<category: 'constants'>
+	^4
+    ]
 
-packetNumberOffset
-	^4!
+    MySQLPacket class >> packetNumberOffset [
+	<category: 'constants'>
+	^4
+    ]
 
-packetNumberSize
-	^1!
+    MySQLPacket class >> packetNumberSize [
+	<category: 'constants'>
+	^1
+    ]
 
-izeOffset
-	^1!
+    MySQLPacket class >> izeOffset [
+	<category: 'constants'>
+	^1
+    ]
 
-sizeSize
-	^3! !
+    MySQLPacket class >> sizeSize [
+	<category: 'constants'>
+	^3
+    ]
 
-!MySQLPacket class methodsFor: 'instance creation'!
-
-on: aStream 
+    MySQLPacket class >> on: aStream [
+	<category: 'instance creation'>
 	^(self new)
-		stream: aStream;
-		initialize! !
+	    stream: aStream;
+	    initialize
+    ]
 
-!MySQLInputPacket methodsFor: 'initialize-release'!
+    packetNumber [
+	<category: 'accessing'>
+	^packetNumber
+    ]
 
-initialize
-	self stream atEnd
-		ifTrue: [ size := packetNumber := 0. buffer := #[]. ^self ].
+    packetNumber: anInteger [
+	<category: 'accessing'>
+	packetNumber := anInteger
+    ]
+
+    size [
+	<category: 'accessing'>
+	^size
+    ]
+
+    size: anObject [
+	<category: 'accessing'>
+	size := anObject
+    ]
+
+    stream [
+	<category: 'accessing'>
+	^stream
+    ]
+
+    stream: anObject [
+	<category: 'accessing'>
+	stream := anObject
+    ]
+]
+
+
+
+MySQLPacket subclass: MySQLInputPacket [
+    | readStream |
+    
+    <category: 'Mysql-Driver'>
+    <comment: nil>
+
+    initialize [
+	<category: 'initialize-release'>
+	self stream atEnd 
+	    ifTrue: 
+		[size := packetNumber := 0.
+		buffer := #[].
+		^self].
 	size := self readSize.
 	packetNumber := self readPacketNumber.
 	buffer := self readBuffer.
-	readStream := MySQLReadStream on: buffer.! !
+	readStream := MySQLReadStream on: buffer
+    ]
 
-!MySQLInputPacket methodsFor: 'reading'!
+    isStatus: anInteger onError: aSymbol [
+	<category: 'reading'>
+	^(self readStatusOnError: aSymbol) = anInteger
+    ]
 
-isStatus: anInteger onError: aSymbol
-	^(self readStatusOnError: aSymbol) = anInteger!
+    checkForStatus: anInteger onError: aSymbol [
+	<category: 'reading'>
+	(self readStatusOnError: aSymbol) = anInteger 
+	    ifFalse: [self handleError: aSymbol]
+    ]
 
-checkForStatus: anInteger onError: aSymbol
-	(self readStatusOnError: aSymbol) = anInteger ifFalse: [self handleError: aSymbol]!
+    checkStatusOnError: aSymbol [
+	<category: 'reading'>
+	self checkForStatus: 0 onError: aSymbol
+    ]
 
-checkStatusOnError: aSymbol 
-	self checkForStatus: 0 onError: aSymbol!
-
-handleError: aSymbol 
+    handleError: aSymbol [
+	<category: 'reading'>
 	| ba int1 int2 |
 	ba := (readStream next: 2) asByteArray.
 	int1 := ba basicAt: 1.
 	int2 := ba basicAt: 2.
 	int2 := int2 bitShift: 8.
-
 	MySQLConnection throwException: aSymbol
-		message: (int1 + int2) printString, ' ', readStream readNullTerminatedString
-"	MySQLConnection throwException: aSymbol
-		message: (readStream next: 2) asByteArray asInteger printString , ' ' 
-				, readStream readNullTerminatedString"!
+	    message: (int1 + int2) printString , ' ' 
+		    , readStream readNullTerminatedString
+	"MySQLConnection throwException: aSymbol
+	 message: (readStream next: 2) asByteArray asInteger printString , ' '
+	 , readStream readNullTerminatedString"
+    ]
 
-readBuffer
-	^self stream next: self size!
+    readBuffer [
+	<category: 'reading'>
+	^self stream next: self size
+    ]
 
-readPacketNumber
+    readPacketNumber [
+	<category: 'reading'>
 	| ba o int1 |
-	o := (self stream next: self class packetNumberSize).
+	o := self stream next: self class packetNumberSize.
 	ba := o asByteArray.
 	int1 := ba basicAt: 1.
-	^int1.
+	^int1
 
-"	^(self stream next: self class packetNumberSize) asByteArray asInteger"!
+	"^(self stream next: self class packetNumberSize) asByteArray asInteger"
+    ]
 
-readSize
+    readSize [
+	<category: 'reading'>
 	| ba o int1 int2 int3 |
 	o := self stream next: self class sizeSize.
 	"o := String streamContents: [:aStream | 1 to: self class sizeSize
-		do: [:i | aStream nextPut: self stream next]]."
+	 do: [:i | aStream nextPut: self stream next]]."
 	ba := o asByteArray.
 	int1 := ba basicAt: 1.
 	int2 := ba basicAt: 2.
 	int2 := int2 bitShift: 8.
 	int3 := ba basicAt: 3.
 	int3 := int3 bitShift: 16.
-	^int1 + int2 + int3.
-"	^(self stream next: self class sizeSize) asByteArray asInteger
-"
-!
+	^int1 + int2 + int3
+	"^(self stream next: self class sizeSize) asByteArray asInteger"
+    ]
 
-readStatusOnError: aSymbol 
+    readStatusOnError: aSymbol [
+	<category: 'reading'>
 	| status |
 	status := readStream next asInteger.
 	status = 255 ifFalse: [^status].
-	self handleError: aSymbol! !
+	self handleError: aSymbol
+    ]
 
-!MySQLInputPacket methodsFor: 'accessing'!
+    readStream [
+	<category: 'accessing'>
+	^readStream
+    ]
+]
 
-readStream
-	^readStream! !
 
-!MySQLOutputPacket methodsFor: 'accessing'!
+
+MySQLPacket subclass: MySQLOutputPacket [
+    | writeStream |
+    
+    <category: 'Mysql-Driver'>
+    <comment: nil>
 
-writeStream
-	^writeStream! !
+    writeStream [
+	<category: 'accessing'>
+	^writeStream
+    ]
 
-!MySQLOutputPacket methodsFor: 'actions'!
-
-flush
-
+    flush [
+	<category: 'actions'>
 	| aString ba s bytesSend |
 	aString := self writeStream contents.
 	self size: aString size - self class headerSize.
-	ba := MySQLConnection integerAsByteArray: self size length: self class sizeSize.
+	ba := MySQLConnection integerAsByteArray: self size
+		    length: self class sizeSize.
 	s := MySQLConnection byteArrayAsByteString: ba.
-	aString replaceFrom: 1 to: self class sizeSize with: s startingAt: 1.
+	aString 
+	    replaceFrom: 1
+	    to: self class sizeSize
+	    with: s
+	    startingAt: 1.
+	aString at: self class sizeSize + 1
+	    put: (Character value: self packetNumber).
+	(self stream)
+	    nextPutAll: aString;
+	    flush
+    ]
 
-	aString at: self class sizeSize + 1 put: (Character value: self packetNumber).
-	(self stream) nextPutAll: aString; flush
-! !
-
-
-!MySQLOutputPacket methodsFor: 'initialize-release'!
-
-initialize
+    initialize [
+	<category: 'initialize-release'>
 	packetNumber := 0.
 	buffer := String new: self class defaultBufferSize.
-	writeStream := MySQLWriteStream
-		on: buffer
-		startingAt: (self class headerSize)
-		outputPacket: self.
+	writeStream := MySQLWriteStream 
+		    on: buffer
+		    startingAt: self class headerSize
+		    outputPacket: self
 
 	"This is a bit of a hack...I should utilize events instead"
-! !	
+    ]
+]
 
 
-!MySQLServerInfo methodsFor: 'accessing'!
+
+Connection subclass: MySQLConnection [
+    | socket serverInfo database responsePacket |
+    
+    <comment: nil>
+    <category: 'Mysql-Driver'>
 
-charset
-	^charset!
+    MySQLConnection class >> throwException: aSymbol [
+	<category: 'errors'>
+	self throwException: aSymbol message: ''
+    ]
 
-status
-	^status!
+    MySQLConnection class >> throwException: aSymbol message: aString [
+	<category: 'errors'>
+	self 
+	    error: (self errorTable at: aSymbol ifAbsent: ['Unknown']) , ': ' , aString
+    ]
 
-hashSeed
-	^hashSeed!
+    MySQLConnection class >> errorTable [
+	<category: 'errors'>
+	ErrorTable isNil 
+	    ifTrue: 
+		[ErrorTable := IdentityDictionary new.
+		1 to: self errorTableMap size
+		    by: 2
+		    do: 
+			[:i | 
+			ErrorTable at: (self errorTableMap at: i)
+			    put: (self errorTableMap at: i + 1)]].
+	^ErrorTable
+    ]
 
-options
-	^options!
+    MySQLConnection class >> errorTableMap [
+	<category: 'errors'>
+	^#(#protocol 'Invalid Protocol' #authentication 'Access denied' #setDatabase 'Could not set the database' #invalidQuery 'Invalid query')
+    ]
 
-protocol
-	^protocol!
+    MySQLConnection class >> driverName [
+	<category: 'instance creation'>
+	^'MySQL'
+    ]
 
-serverThread
-	^serverThread! !
+    MySQLConnection class >> paramConnect: aParams user: aUserName password: aPassword [
+	<category: 'instance creation'>
+	| database connection host port |
+	database := aParams at: 'dbname' ifAbsent: [nil].
+	host := aParams at: 'host' ifAbsent: ['localhost'].
+	port := (aParams at: 'port' ifAbsent: [3306]) asInteger.
+	connection := self new.
+	connection connectTo: host port: port.
+	connection login: aUserName password: aPassword.
+	database isNil ifFalse: [connection database: database].
+	^connection
+    ]
 
-!MySQLServerInfo methodsFor: 'reading'!
+    MySQLConnection class >> byteArrayAsInteger: ba [
+	<category: 'misc'>
+	^self 
+	    byteArrayAsInteger: ba
+	    from: 1
+	    for: ba size
+    ]
 
-readFrom: aResponsePacket
+    MySQLConnection class >> byteArrayAsInteger: ba from: anOffset for: aLength [
+	<category: 'misc'>
+	| shiftAmount anInteger |
+	shiftAmount := 0.
+	anInteger := 0.
+	anOffset to: aLength
+	    do: 
+		[:index | 
+		anInteger := anInteger bitOr: ((ba at: index) bitShift: shiftAmount).
+		shiftAmount := shiftAmount + 8].
+	^anInteger
+    ]
+
+    MySQLConnection class >> integerAsByteArray: int length: aLength [
+	<category: 'misc'>
+	| aByteArray shiftAmount mask |
+	aByteArray := ByteArray new: aLength.
+	shiftAmount := 0.
+	mask := 255.
+	1 to: aLength
+	    do: 
+		[:index | 
+		aByteArray at: index put: (mask bitAnd: (int bitShift: shiftAmount)).
+		shiftAmount := shiftAmount - 8].
+	^aByteArray
+    ]
+
+    MySQLConnection class >> byteArrayAsByteString: ba [
+	<category: 'misc'>
+	| size s |
+	size := ba size.
+	s := String new: size.
+	1 to: size
+	    do: [:index | s at: index put: (Character value: (ba at: index))].
+	^s
+    ]
+
+    beginTransaction [
+	<category: 'querying'>
+	^self do: 'START TRANSACTION'
+    ]
+
+    commitTransaction [
+	<category: 'querying'>
+	^self do: 'COMMIT'
+    ]
+
+    rollbackTransaction [
+	<category: 'querying'>
+	^self do: 'ROLLBACK'
+    ]
+
+    database [
+	<category: 'querying'>
+	^database
+    ]
+
+    do: aSQLQuery [
+	<category: 'querying'>
+	^(self prepare: aSQLQuery) execute
+    ]
+
+    select: aSQLQuery [
+	<category: 'querying'>
+	^(self prepare: aSQLQuery) execute
+    ]
+
+    prepare: aQuery [
+	<category: 'querying'>
+	^(MySQLStatement on: self) prepare: aQuery
+    ]
+
+    finalize [
+	<category: 'closing'>
+	self close
+    ]
+
+    close [
+	<category: 'closing'>
 	self
-		readProtocolFrom: aResponsePacket;
-		readServerVersionFrom: aResponsePacket;
-		readServerThreadFrom: aResponsePacket;
-		readHashSeedFrom: aResponsePacket;
-		readOptionsFrom: aResponsePacket.
-	aResponsePacket readStream atEnd ifFalse: [
-		self
-			readCharsetFrom: aResponsePacket;
-			readStatusFrom: aResponsePacket;
-			readMoreSeedFrom: aResponsePacket ]!
+	    removeToBeFinalized;
+	    closeRequest;
+	    closeSocket
+    ]
 
-readStatusFrom: aResponsePacket
+    closeRequest [
+	<category: 'closing'>
+	(self requestPacket writeStream)
+	    nextPutCommand: #cmdQuit;
+	    flush
+    ]
+
+    closeSocket [
+	<category: 'closing'>
+	socket isNil ifFalse: [socket close].
+	socket := nil
+    ]
+
+    connectTo: host port: port [
+	<category: 'initialize-release'>
+	| messageText |
+	socket := TCP.Socket remote: host port: port.
+	self addToBeFinalized.
+	socket isNil ifTrue: [^self error: messageText].
+	serverInfo := MySQLServerInfo new.
+	serverInfo readFrom: self responsePacket
+    ]
+
+    database: aString [
+	<category: 'initialize-release'>
+	(self requestPacket writeStream)
+	    nextPutCommand: #cmdInitializeDatabase message: aString;
+	    flush.
+	self responsePacket checkStatusOnError: #setDatabase.
+	database := aString
+    ]
+
+    oldProtocolHashes: password [
+	<category: 'initialize-release'>
+	password isEmpty ifTrue: [^''].
+	^{self hash2: password seed: serverInfo hashSeed}
+    ]
+
+    newProtocolHashes: password [
+	<category: 'initialize-release'>
+	password isEmpty ifTrue: [^String new: 1].
+	^
+	{self hashSHA1: password seed: serverInfo hashSeed.
+	self hash2: password seed: serverInfo hashSeed}
+    ]
+
+    login: user password: password [
+	<category: 'initialize-release'>
+	| replyStream hashes userSent longPassword |
+	replyStream := self replyPacket writeStream.
+	serverInfo hashSeed size = 8 
+	    ifTrue: 
+		[hashes := self oldProtocolHashes: password.
+		replyStream
+		    nextPutAll: (self class integerAsByteArray: 1 length: 2) asByteString;
+		    nextPutAll: (self class integerAsByteArray: 65536 length: 3) asByteString;
+		    nextPutAllNullTerminated: user;
+		    nextPutAllNullTerminated: hashes first;
+		    flush]
+	    ifFalse: 
+		[hashes := self newProtocolHashes: password.
+		replyStream
+		    nextPutAll: (self class integerAsByteArray: 41477 length: 4) asByteString;
+		    nextPutAll: (self class integerAsByteArray: 65536 length: 4) asByteString;
+		    nextPut: 8 asCharacter;
+		    next: 23 put: 0 asCharacter;
+		    nextPutAllNullTerminated: user;
+		    nextPut: hashes first size asCharacter;
+		    nextPutAll: hashes first;
+		    flush.
+		(self responsePacket isStatus: 254 onError: #authenticate) 
+		    ifTrue: 
+			[replyStream := self replyPacket writeStream.
+			replyStream
+			    nextPutAll: hashes second;
+			    flush]]
+    ]
+
+    hash: aString seed: aSeed for: hashMethod [
+	<category: 'hashing'>
+	^self class 
+	    perform: hashMethod
+	    with: aString
+	    with: aSeed
+    ]
+
+    replyPacket [
+	<category: 'accessing'>
+	^(MySQLOutputPacket on: socket) 
+	    packetNumber: responsePacket packetNumber + 1
+    ]
+
+    requestPacket [
+	<category: 'accessing'>
+	^MySQLOutputPacket on: socket
+    ]
+
+    responsePacket [
+	<category: 'accessing'>
+	^responsePacket := MySQLInputPacket on: socket
+    ]
+
+    hashSHA1: aString seed: aSeed [
+	"This algorithm is for MySQL 4.1+."
+
+	<category: 'hashing'>
+	"Compute hash1 = SHA1(password), then hash2 = SHA1(hash1). The server
+	 already knows this, as that is what is held in its password table
+	 (preceded with a *)."
+
+	| hashedString hashedStringSeeded result |
+	hashedString := SHA1 digestOf: aString.
+	hashedStringSeeded := SHA1 digestOf: hashedString.
+
+	"Append hash2 to the salt sent by the server and hash that."
+	hashedStringSeeded := SHA1 digestOf: aSeed , hashedStringSeeded.
+
+	"Finally, XOR the result with SHA1(password).  The server takes this,
+	 computes SHA1(salt.`SHA1 stored in DB`), uses the latter result to
+	 undo the XOR, computes again SHA1, and compares that with the SHA1
+	 stored in the DB."
+	result := String new: 20.
+	1 to: 20
+	    do: 
+		[:i | 
+		result at: i
+		    put: (Character 
+			    value: ((hashedString at: i) bitXor: (hashedStringSeeded at: i)))].
+	^result
+    ]
+
+    hash2: aString seed: longSeed [
+	"This algorithm is for MySQL 3.22+."
+
+	<category: 'hashing'>
+	"Reserve a final byte for NULL termination"
+
+	| hashedString maxValue result num1 num2 num3 aSeed |
+	aSeed := longSeed copyFrom: 1 to: 8.
+	hashedString := String new: aSeed size.
+	result := self randomInit2: aString seed: aSeed.
+	maxValue := 1073741823.
+	num1 := result at: 1.
+	num2 := result at: 2.
+	1 to: hashedString size
+	    do: 
+		[:index | 
+		num1 := (num1 * 3 + num2) \\ maxValue.
+		num2 := (num1 + num2 + 33) \\ maxValue.
+		num3 := (num1 / maxValue * 31) truncated + 64.
+		hashedString at: index put: num3 asCharacter].
+	num1 := (num1 * 3 + num2) \\ maxValue.
+	num2 := (num1 + num2 + 33) \\ maxValue.
+	num3 := (num1 / maxValue * 31) truncated.
+	hashedString keysAndValuesDo: 
+		[:index :character | 
+		hashedString at: index put: (character asInteger bitXor: num3) asCharacter].
+	^hashedString
+    ]
+
+    hash: aString [
+	"Hash algorithm taken from mysql in order to send password to the server"
+
+	<category: 'hashing'>
+	| num1 num2 num3 |
+	num1 := 1345345333.
+	num2 := 305419889.
+	num3 := 7.
+	aString do: 
+		[:character | 
+		(character = Character space or: [character = Character tab]) 
+		    ifFalse: 
+			[| charValue |
+			charValue := character asInteger.
+			num1 := num1 
+				    bitXor: ((num1 bitAnd: 63) + num3) * charValue + (num1 bitShift: 8).
+			num2 := num2 + ((num2 bitShift: 8) bitXor: num1).
+			num3 := num3 + charValue]].
+	^Array with: (num1 bitAnd: 2147483647) with: (num2 bitAnd: 2147483647)
+    ]
+
+    randomInit2: aString seed: aSeed [
+	<category: 'hashing'>
+	| result array1 array2 |
+	result := Array new: 2.
+	array1 := self hash: aString.
+	array2 := self hash: aSeed.
+	result at: 1 put: ((array1 at: 1) bitXor: (array2 at: 1)) \\ 1073741823.
+	result at: 2 put: ((array1 at: 2) bitXor: (array2 at: 2)) \\ 1073741823.
+	^result
+    ]
+]
+
+
+
+Object subclass: MySQLServerInfo [
+    | protocol serverThread serverVersion charset status hashSeed options |
+    
+    <category: 'Mysql-Driver'>
+    <comment: nil>
+
+    charset [
+	<category: 'accessing'>
+	^charset
+    ]
+
+    status [
+	<category: 'accessing'>
+	^status
+    ]
+
+    hashSeed [
+	<category: 'accessing'>
+	^hashSeed
+    ]
+
+    options [
+	<category: 'accessing'>
+	^options
+    ]
+
+    protocol [
+	<category: 'accessing'>
+	^protocol
+    ]
+
+    serverThread [
+	<category: 'accessing'>
+	^serverThread
+    ]
+
+    readFrom: aResponsePacket [
+	<category: 'reading'>
+	self
+	    readProtocolFrom: aResponsePacket;
+	    readServerVersionFrom: aResponsePacket;
+	    readServerThreadFrom: aResponsePacket;
+	    readHashSeedFrom: aResponsePacket;
+	    readOptionsFrom: aResponsePacket.
+	aResponsePacket readStream atEnd 
+	    ifFalse: 
+		[self
+		    readCharsetFrom: aResponsePacket;
+		    readStatusFrom: aResponsePacket;
+		    readMoreSeedFrom: aResponsePacket]
+    ]
+
+    readStatusFrom: aResponsePacket [
+	<category: 'reading'>
 	status := (aResponsePacket readStream next: 2) asByteArray asInteger.
-	aResponsePacket readStream next: 13!
+	aResponsePacket readStream next: 13
+    ]
 
-readCharsetFrom: aResponsePacket
-	charset := aResponsePacket readStream next value!
+    readCharsetFrom: aResponsePacket [
+	<category: 'reading'>
+	charset := aResponsePacket readStream next value
+    ]
 
-readHashSeedFrom: aResponsePacket
-	hashSeed := aResponsePacket readStream readNullTerminatedString!
+    readHashSeedFrom: aResponsePacket [
+	<category: 'reading'>
+	hashSeed := aResponsePacket readStream readNullTerminatedString
+    ]
 
-readMoreSeedFrom: aResponsePacket
-	hashSeed := hashSeed, aResponsePacket readStream readNullTerminatedString!
+    readMoreSeedFrom: aResponsePacket [
+	<category: 'reading'>
+	hashSeed := hashSeed , aResponsePacket readStream readNullTerminatedString
+    ]
 
-readOptionsFrom: aResponsePacket 
-	options := (aResponsePacket readStream next: 2) asByteArray asInteger!
+    readOptionsFrom: aResponsePacket [
+	<category: 'reading'>
+	options := (aResponsePacket readStream next: 2) asByteArray asInteger
+    ]
 
-readProtocolFrom: aResponsePacket 
-	protocol := (aResponsePacket readStatusOnError: #protocol).
-	protocol = 10 ifFalse: [MySQLConnection error: #protocol]!
+    readProtocolFrom: aResponsePacket [
+	<category: 'reading'>
+	protocol := aResponsePacket readStatusOnError: #protocol.
+	protocol = 10 ifFalse: [MySQLConnection error: #protocol]
+    ]
 
-readServerThreadFrom: aResponsePacket
-	serverThread := (aResponsePacket readStream next: 4) asByteArray asInteger!
+    readServerThreadFrom: aResponsePacket [
+	<category: 'reading'>
+	serverThread := (aResponsePacket readStream next: 4) asByteArray asInteger
+    ]
 
-readServerVersionFrom: aResponsePacket 
-	serverVersion := aResponsePacket readStream readNullTerminatedString! !
+    readServerVersionFrom: aResponsePacket [
+	<category: 'reading'>
+	serverVersion := aResponsePacket readStream readNullTerminatedString
+    ]
+]
 

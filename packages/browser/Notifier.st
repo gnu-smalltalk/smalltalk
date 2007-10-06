@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -29,137 +28,153 @@
  ======================================================================
 "
 
-GuiData subclass:  #Notifier
-	instanceVariableNames: 'callstackList debugger stacktrace
-				currentSelection errMessage topView listView '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Browser'!
 
-Notifier comment: 
-nil!
+
+GuiData subclass: Notifier [
+    | callstackList debugger stacktrace currentSelection errMessage topView listView |
+    
+    <comment: nil>
+    <category: 'Graphics-Browser'>
 
-!Notifier class methodsFor: 'debugging attributes'!
+    Notifier class >> debuggerClass [
+	<category: 'debugging attributes'>
+	^nil
+    ]
 
-debuggerClass
-    ^nil
-!
+    Notifier class >> debuggingPriority [
+	<category: 'debugging attributes'>
+	^1
+    ]
 
-debuggingPriority
-    ^1
-! !
+    Notifier class >> openOn: aProcess message: message [
+	<category: 'instance creation'>
+	self new init: message debugger: (Smalltalk.Debugger on: aProcess)
+    ]
 
-!Notifier class methodsFor: 'instance creation'!
+    Notifier class >> open [
+	<category: 'instance creation'>
+	self open: 'Notifier on %1' % {Processor activeProcess}
+    ]
 
-openOn: aProcess message: message
-    self new init: message debugger: (Smalltalk.Debugger on: aProcess)!
-
-open
-    self open: ('Notifier on %1' % { Processor activeProcess })!
-
-open: message
-    | handleErrorsWithGui |
-    handleErrorsWithGui := BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui.
-    BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui: false.
-    [ :debugger |
-        Processor activeProcess name: 'Notifier/Debugger'.
+    Notifier class >> open: message [
+	<category: 'instance creation'>
+	| handleErrorsWithGui |
+	handleErrorsWithGui := BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui.
+	BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui: false.
+	
+	[:debugger | 
+	Processor activeProcess name: 'Notifier/Debugger'.
 	self new init: message debugger: debugger.
-        BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui: handleErrorsWithGui.
-    ] forkDebugger
-! !
+	BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui: handleErrorsWithGui] 
+		forkDebugger
+    ]
 
-!Notifier methodsFor: 'accessing'!
+    currentContext [
+	<category: 'accessing'>
+	currentSelection isNil ifTrue: [currentSelection := 1].
+	^callstackList at: currentSelection
+    ]
 
-currentContext
-    currentSelection isNil ifTrue: [currentSelection := 1].
-    ^callstackList at: currentSelection! !
+    process [
+	<category: 'callback'>
+	^debugger process
+    ]
 
-!Notifier methodsFor: 'callback'!
+    debugger [
+	<category: 'callback'>
+	^debugger
+    ]
 
-process
-    ^debugger process!
+    contextSelectedFrom: assoc [
+	<category: 'callback'>
+	currentSelection := assoc key
+    ]
 
-debugger
-    ^debugger!
+    debug [
+	<category: 'callback'>
+	Debugger new: self
+    ]
 
-contextSelectedFrom: assoc 
-    currentSelection := assoc key!
+    stacktrace [
+	<category: 'callback'>
+	^stacktrace
+    ]
 
-debug
-    Debugger new: self!
+    close: aView [
+	<category: 'private'>
+	| tv |
+	tv := aView rootView blox.
+	aView rootView close ifTrue: [tv destroy]
+    ]
 
-stacktrace
-    ^stacktrace! !
+    init: aString debugger: aDebugger [
+	<category: 'private'>
+	| context lastContext contexts |
+	errMessage := aString.
+	debugger := aDebugger.
+	context := debugger suspendedContext.
+	lastContext := context environment.
+	stacktrace := OrderedCollection new.
+	contexts := OrderedCollection new.
 
-!Notifier methodsFor: 'private'!
+	"Skip top contexts that are internal to the exception-handling
+	 system."
+	[context ~~ lastContext and: [context isInternalExceptionHandlingContext]] 
+	    whileTrue: [context := context parentContext].
+	[context == lastContext] whileFalse: 
+		[context isDisabled 
+		    ifFalse: 
+			[stacktrace add: context printString.
+			contexts add: context].
+		context := context parentContext].
+	self createWindow.
+	callstackList contents: stacktrace elements: contexts.
+	topView display.
+	listView update.
+	listView select: 1
+    ]
 
-close: aView 
-    | tv |
-    tv := aView rootView blox.
-    aView rootView close ifTrue: [tv destroy]!
+    createWindow [
+	<category: 'private'>
+	| topLevel |
+	topView := (BrowserShell new: errMessage) data: self.
+	topLevel := topView blox.
+	topLevel 
+	    x: 20
+	    y: 50
+	    width: 300
+	    height: 100.
+	topView addChildView: ((listView := PList new: 'MethodSet' in: topView)
+		    initialize;
+		    data: self;
+		    listMsg: #stacktrace;
+		    handleUserChange: #contextSelectedFrom:;
+		    menuInit: ((PopupMenu new: listView label: 'Context')
+				selectors: #(#('Debug' #debug))
+				    receiver: self
+				    argument: listView;
+				selectors: #(#() #('Copy Trace' #copyAll) #('Copy Selection' #copySelection))
+				    receiver: listView
+				    argument: nil;
+				selectors: #(#() #('Close' #close))
+				    receiver: listView
+				    argument: nil;
+				yourself);
+		    yourself).
+	callstackList := listView blox
+    ]
+]
 
-init: aString debugger: aDebugger
-    | context lastContext contexts |
-    errMessage := aString.
-    debugger := aDebugger.
-    context := debugger suspendedContext.
-    lastContext := context environment.
-    stacktrace := OrderedCollection new.
-    contexts := OrderedCollection new.
 
-    "Skip top contexts that are internal to the exception-handling
-     system."
+
+Behavior extend [
 
-    [ context ~~ lastContext and: [
-        context isInternalExceptionHandlingContext ] ] whileTrue: [
-            context := context parentContext.
-    ].
+    debuggerClass [
+	<category: 'overriding'>
+	^BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui 
+	    ifTrue: [BLOX.BLOXBrowser.Notifier]
+	    ifFalse: [nil]
+    ]
 
-    [ context == lastContext ] whileFalse: [
-        context isDisabled ifFalse: [
- 	    stacktrace add: context printString.
-       	    contexts add: context ].
+]
 
-        context := context parentContext.
-    ].
-
-    self createWindow.
-    callstackList contents: stacktrace elements: contexts.
-    topView display.
-    listView update.
-    listView select: 1!
-
-createWindow
-    | topLevel |
-    topView := (BrowserShell new: errMessage) data: self.
-    topLevel := topView blox.
-    topLevel
-	x: 20
-	y: 50
-	width: 300
-	height: 100.
-    topView addChildView: ((listView := PList new: 'MethodSet' in: topView)
-		initialize;
-		data: self;
-		listMsg: #stacktrace;
-		handleUserChange: #contextSelectedFrom:;
-		menuInit: ((PopupMenu new: listView label: 'Context')
-			    selectors: #(#('Debug' #debug))
-				receiver: self
-				argument: listView;
-			    selectors: #(#() #('Copy Trace' #copyAll) #('Copy Selection' #copySelection))
-			 	receiver: listView
-				argument: nil;
-			    selectors: #(#() #('Close' #close))
-				receiver: listView
-				argument: nil;
-			    yourself);
-		yourself).
-    callstackList := listView blox! !
-
-!Behavior methodsFor: 'overriding'!
-
-debuggerClass
-    ^BLOX.BLOXBrowser.BrowserMain handleErrorsWithGui
-	ifTrue: [ BLOX.BLOXBrowser.Notifier ]
-	ifFalse: [ nil ]! !

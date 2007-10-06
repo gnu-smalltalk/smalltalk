@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2006
@@ -32,409 +31,606 @@
  ======================================================================"
 
 
-ArrayedCollection variableByteSubclass: #ByteArray
-		  instanceVariableNames: ''
-		  classVariableNames: ''
-		  poolDictionaries: 'CSymbols'
-		  category: 'Collections-Sequenceable'
-!
-
-ByteArray comment: 
-'My instances are similar to strings in that they are both represented as
-a sequence of bytes, but my individual elements are integers, where as
-a String''s elements are characters.' !
-
-
 
-!ByteArray methodsFor: 'converting'!
-
-asString
-    "Answer a String whose character's ASCII codes are the receiver's contents"
-    | string size |
-    size := self size.
-    string := String new: size.
-    string replaceFrom: 1 to: size withByteArray: self startingAt: 1.
-    ^string
-!
-
-asUnicodeString
-    "Answer a UnicodeString whose character's codes are the receiver's contents.
-     This is not implemented unless you load the I18N package."
-    self shouldNotImplement
-! !
-
-
-
-!ByteArray methodsFor: 'storing'!
-
-isLiteralObject
-    "Answer whether the receiver is expressible as a Smalltalk literal."
-    ^self isReadOnly not
-!
-
-storeLiteralOn: aStream
-    "Put a Smalltalk literal evaluating to the receiver on aStream."
-    aStream nextPut: $#.
-    aStream nextPut: $[.
-    self do: [ :elt | elt printOn: aStream; space ].
+ArrayedCollection subclass: ByteArray [
     
-    aStream nextPut: $]
-!
+    <shape: #byte>
+    <import: CSymbols>
+    <category: 'Collections-Sequenceable'>
+    <comment: 'My instances are similar to strings in that they are both represented as
+a sequence of bytes, but my individual elements are integers, where as
+a String''s elements are characters.'>
 
-storeOn: aStream
-    "Put Smalltalk code evaluating to the receiver on aStream."
-    self storeLiteralOn: aStream.
-    self isReadOnly ifFalse: [ aStream nextPutAll: ' copy' ]   
-! !
-
-!ByteArray methodsFor: 'more advanced accessing'!
+    ByteArray class >> fromCData: aCObject size: anInteger [
+	"Answer a ByteArray containing anInteger bytes starting at the location pointed
+	 to by aCObject"
 
-"Note that the types could be given symbolic names and installed in a 
-class variable, or could be methods that return the proper values (such as
-the priorities for processes)."
+	<category: 'instance creation'>
+	<primitive: VMpr_ByteArray_fromCData_size>
+	^SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger
+    ]
 
-objectAt: index 
-    "Access the Smalltalk object (OOP) at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 9 at: index size: CPtrSize - 1
-!
+    asString [
+	"Answer a String whose character's ASCII codes are the receiver's contents"
 
-charAt: index 
-    "Access the C char at the given index in the receiver. The value is
-     returned as a Smalltalk Character.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 0 at: index size: 0
-!
+	<category: 'converting'>
+	| string size |
+	size := self size.
+	string := String new: size.
+	string 
+	    replaceFrom: 1
+	    to: size
+	    withByteArray: self
+	    startingAt: 1.
+	^string
+    ]
 
-unsignedCharAt: index 
-    "Access the C unsigned char at the given index in the receiver.
-     The value is returned as a Smalltalk Character.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 1 at: index size: 0
-!
+    asUnicodeString [
+	"Answer a UnicodeString whose character's codes are the receiver's contents.
+	 This is not implemented unless you load the I18N package."
 
-ucharAt: index 
-    "Access the C unsigned char at the given index in the receiver.
-     The value is returned as a Smalltalk Character.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 1 at: index size: 0
-!
+	<category: 'converting'>
+	self shouldNotImplement
+    ]
 
-shortAt: index 
-    "Access the C short int at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 2 at: index size: CShortSize - 1
-!
+    isLiteralObject [
+	"Answer whether the receiver is expressible as a Smalltalk literal."
 
-unsignedShortAt: index 
-    "Access the C unsigned short int at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 3 at: index size: CShortSize - 1
-!
+	<category: 'storing'>
+	^self isReadOnly not
+    ]
 
-ushortAt: index 
-    "Access the C unsigned short int at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 3 at: index size: CShortSize - 1
-!
+    storeLiteralOn: aStream [
+	"Put a Smalltalk literal evaluating to the receiver on aStream."
 
-longAt: index 
-    "Access the C long int at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 4 at: index size: CLongSize - 1
-!
+	<category: 'storing'>
+	aStream nextPut: $#.
+	aStream nextPut: $[.
+	self do: 
+		[:elt | 
+		elt
+		    printOn: aStream;
+		    space].
+	aStream nextPut: $]
+    ]
 
-unsignedLongAt: index 
-    "Access the C unsigned long int at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 5 at: index size: CLongSize - 1
-!
+    storeOn: aStream [
+	"Put Smalltalk code evaluating to the receiver on aStream."
 
-ulongAt: index 
-    "Access the C unsigned long int at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 5 at: index size: CLongSize - 1
-!
+	<category: 'storing'>
+	self storeLiteralOn: aStream.
+	self isReadOnly ifFalse: [aStream nextPutAll: ' copy']
+    ]
 
-intAt: index 
-    "Access the C int at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 10 at: index size: CIntSize - 1
-!
+    objectAt: index [
+	"Access the Smalltalk object (OOP) at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-unsignedIntAt: index 
-    "Access the C unsigned int at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 11 at: index size: CIntSize - 1
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 9
+	    at: index
+	    size: CPtrSize - 1
+    ]
 
-uintAt: index 
-    "Access the C unsigned int at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 11 at: index size: CIntSize - 1
-!
+    charAt: index [
+	"Access the C char at the given index in the receiver. The value is
+	 returned as a Smalltalk Character.
+	 Indices are 1-based just like for other Smalltalk access."
 
-floatAt: index 
-    "Access the C float at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 6 at: index size: CFloatSize - 1
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 0
+	    at: index
+	    size: 0
+    ]
 
-doubleAt: index 
-    "Access the C double at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 7 at: index size: CDoubleSize - 1
-!
+    unsignedCharAt: index [
+	"Access the C unsigned char at the given index in the receiver.
+	 The value is returned as a Smalltalk Character.
+	 Indices are 1-based just like for other Smalltalk access."
 
-longDoubleAt: index 
-    "Access the C long double at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 12 at: index size: CLongDoubleSize - 1
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 1
+	    at: index
+	    size: 0
+    ]
 
-stringAt: index 
-    "Access the string pointed by the C `char *' at the given index in the
-     receiver. Indices are 1-based just like for other Smalltalk access."
-    ^self type: 8 at: index size: CPtrSize - 1
-! 
+    ucharAt: index [
+	"Access the C unsigned char at the given index in the receiver.
+	 The value is returned as a Smalltalk Character.
+	 Indices are 1-based just like for other Smalltalk access."
 
-"Storing methods"
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 1
+	    at: index
+	    size: 0
+    ]
 
-objectAt: index put: value
-    "Store a pointer (OOP) to the Smalltalk object identified by `value',
-     at the given index in the receiver.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 9 at: index put: value size: CPtrSize - 1
-!
+    shortAt: index [
+	"Access the C short int at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-charAt: index put: value
-    "Store as a C char the Smalltalk Character or Integer object
-     identified by `value', at the given index in the receiver, using
-     sizeof(char) bytes - i.e. 1 byte.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 0 at: index put: value size: 0
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 2
+	    at: index
+	    size: CShortSize - 1
+    ]
 
-unsignedCharAt: index put: value
-    "Store as a C char the Smalltalk Character or Integer object
-     identified by `value', at the given index in the receiver, using
-     sizeof(char) bytes - i.e. 1 byte.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 1 at: index put: value size: 0
-!
+    unsignedShortAt: index [
+	"Access the C unsigned short int at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-ucharAt: index put: value
-    "Store as a C char the Smalltalk Character or Integer object
-     identified by `value', at the given index in the receiver, using
-     sizeof(char) bytes - i.e. 1 byte.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 1 at: index put: value size: 0
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 3
+	    at: index
+	    size: CShortSize - 1
+    ]
 
-shortAt: index put: value
-    "Store the Smalltalk Integer object identified by `value', at the
-     given index in the receiver, using sizeof(short) bytes.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 2 at: index put: value size: CShortSize - 1
-!
+    ushortAt: index [
+	"Access the C unsigned short int at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-unsignedShortAt: index put: value
-    "Store the Smalltalk Integer object identified by `value', at the
-     given index in the receiver, using sizeof(short) bytes.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 3 at: index put: value size: CShortSize - 1
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 3
+	    at: index
+	    size: CShortSize - 1
+    ]
 
-ushortAt: index put: value
-    "Store the Smalltalk Integer object identified by `value', at the
-     given index in the receiver, using sizeof(short) bytes.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 3 at: index put: value size: CShortSize - 1
-!
+    longAt: index [
+	"Access the C long int at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-longAt: index put: value
-    "Store the Smalltalk Integer object identified by `value', at the
-     given index in the receiver, using sizeof(long) bytes.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 4 at: index put: value size: CLongSize - 1
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 4
+	    at: index
+	    size: CLongSize - 1
+    ]
 
-unsignedLongAt: index put: value
-    "Store the Smalltalk Integer object identified by `value', at the
-     given index in the receiver, using sizeof(long) bytes.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 5 at: index put: value size: CLongSize - 1
-!
+    unsignedLongAt: index [
+	"Access the C unsigned long int at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-ulongAt: index put: value
-    "Store the Smalltalk Integer object identified by `value', at the
-     given index in the receiver, using sizeof(long) bytes.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 5 at: index put: value size: CLongSize - 1
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 5
+	    at: index
+	    size: CLongSize - 1
+    ]
 
-intAt: index put: value
-    "Store the Smalltalk Integer object identified by `value', at the
-     given index in the receiver, using sizeof(int) bytes.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 10 at: index put: value size: CIntSize - 1
-!
+    ulongAt: index [
+	"Access the C unsigned long int at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-unsignedIntAt: index put: value
-    "Store the Smalltalk Integer object identified by `value', at the
-     given index in the receiver, using sizeof(int) bytes.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 11 at: index put: value size: CIntSize - 1
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 5
+	    at: index
+	    size: CLongSize - 1
+    ]
 
-uintAt: index put: value
-    "Store the Smalltalk Integer object identified by `value', at the
-     given index in the receiver, using sizeof(int) bytes.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 11 at: index put: value size: CIntSize - 1
-!
+    intAt: index [
+	"Access the C int at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-floatAt: index put: value
-    "Store the Smalltalk Float object identified by `value', at the
-     given index in the receiver, writing it like a C float.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 6 at: index put: value size: CFloatSize - 1
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 10
+	    at: index
+	    size: CIntSize - 1
+    ]
 
-doubleAt: index put: value
-    "Store the Smalltalk Float object identified by `value', at the
-     given index in the receiver, writing it like a C double.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 7 at: index put: value size: CDoubleSize - 1
-!
+    unsignedIntAt: index [
+	"Access the C unsigned int at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-longDoubleAt: index put: value
-    "Store the Smalltalk Float object identified by `value', at the
-     given index in the receiver, writing it like a C double.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 12 at: index put: value size: CLongDoubleSize - 1
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 11
+	    at: index
+	    size: CIntSize - 1
+    ]
 
-stringAt: index put: value
-    "Store the Smalltalk String object identified by `value', at the
-     given index in the receiver, writing it like a *FRESHLY
-     ALLOCATED* C string. It is the caller's responsibility to free
-     it if necessary.
-     Indices are 1-based just like for other Smalltalk access."
-    ^self type: 8 at: index put: value size: CPtrSize - 1
-! !
+    uintAt: index [
+	"Access the C unsigned int at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-
-!ByteArray methodsFor: 'private'!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 11
+	    at: index
+	    size: CIntSize - 1
+    ]
 
-growSize
-    "Answer the amount by which a ByteArray will grow if necessary.
-     Note - explicit growing of a Collection is a private thing you
-     should not employ"
-    ^self size
-!
+    floatAt: index [
+	"Access the C float at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-type: type at: index size: size
-    "Private - Use Memory class to access in the receiver a value with the
-     given type."
-    | offset |
-    index < 1
-       ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 6
+	    at: index
+	    size: CFloatSize - 1
+    ]
 
-    index > (self basicSize - size)
-       ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+    doubleAt: index [
+	"Access the C double at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-    offset := index + (CLongSize * 2 - 1).		"impl. dependent"
-     ^Memory
-	 type: type
-	 at: (ObjectMemory addressOf: self) + offset
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 7
+	    at: index
+	    size: CDoubleSize - 1
+    ]
 
-type: type at: index put: value size: size
-    "Private - Use Memory class to write to the receiver a value with the
-     given type."
-    | offset |
-    self isReadOnly ifTrue: [ ^SystemExceptions.ReadOnlyObject signal ].
+    longDoubleAt: index [
+	"Access the C long double at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-    index < 1
-       ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 12
+	    at: index
+	    size: CLongDoubleSize - 1
+    ]
 
-    index > (self basicSize - size)
-       ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
+    stringAt: index [
+	"Access the string pointed by the C `char *' at the given index in the
+	 receiver. Indices are 1-based just like for other Smalltalk access."
 
-    offset := index + (CLongSize * 2 - 1).		"impl. dependent"
-     ^Memory
-	 type: type
-	 at: (ObjectMemory addressOf: self) + offset
-	 put: value
-! !
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 8
+	    at: index
+	    size: CPtrSize - 1
+    ]
 
+    objectAt: index put: value [
+	"Store a pointer (OOP) to the Smalltalk object identified by `value',
+	 at the given index in the receiver.
+	 Indices are 1-based just like for other Smalltalk access."
 
-
-!ByteArray class methodsFor: 'instance creation'!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 9
+	    at: index
+	    put: value
+	    size: CPtrSize - 1
+    ]
 
-fromCData: aCObject size: anInteger
-    "Answer a ByteArray containing anInteger bytes starting at the location pointed
-     to by aCObject"
-    <primitive: VMpr_ByteArray_fromCData_size>
-    ^SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger
-! !
+    charAt: index put: value [
+	"Store as a C char the Smalltalk Character or Integer object
+	 identified by `value', at the given index in the receiver, using
+	 sizeof(char) bytes - i.e. 1 byte.
+	 Indices are 1-based just like for other Smalltalk access."
 
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 0
+	    at: index
+	    put: value
+	    size: 0
+    ]
 
-
-!ByteArray methodsFor: 'built ins'!
+    unsignedCharAt: index put: value [
+	"Store as a C char the Smalltalk Character or Integer object
+	 identified by `value', at the given index in the receiver, using
+	 sizeof(char) bytes - i.e. 1 byte.
+	 Indices are 1-based just like for other Smalltalk access."
 
-byteAt: index
-    "Answer the index-th indexed instance variable of the receiver"
-    <primitive: VMpr_Object_basicAt>
-    self checkIndexableBounds: index
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 1
+	    at: index
+	    put: value
+	    size: 0
+    ]
 
-byteAt: index put: value
-    "Store the `value' byte in the index-th indexed instance variable
-     of the receiver"
-    <primitive: VMpr_Object_basicAtPut>
+    ucharAt: index put: value [
+	"Store as a C char the Smalltalk Character or Integer object
+	 identified by `value', at the given index in the receiver, using
+	 sizeof(char) bytes - i.e. 1 byte.
+	 Indices are 1-based just like for other Smalltalk access."
 
-    self checkIndexableBounds: index put: value
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 1
+	    at: index
+	    put: value
+	    size: 0
+    ]
 
+    shortAt: index put: value [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given index in the receiver, using sizeof(short) bytes.
+	 Indices are 1-based just like for other Smalltalk access."
 
-hash
-    "Answer an hash value for the receiver"
-    <primitive: VMpr_String_hash>
-    ^0
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 2
+	    at: index
+	    put: value
+	    size: CShortSize - 1
+    ]
 
-replaceFrom: start to: stop withString: aString startingAt: replaceStart
-    "Replace the characters from start to stop with the
-     ASCII codes contained in aString (which, actually, can be
-     any variable byte class), starting at the replaceStart
-     location of aString"
-    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
-    ^super replaceFrom: start to: stop with: aString startingAt: replaceStart
-!
+    unsignedShortAt: index put: value [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given index in the receiver, using sizeof(short) bytes.
+	 Indices are 1-based just like for other Smalltalk access."
 
-replaceFrom: start to: stop with: aByteArray startingAt: replaceStart
-    "Replace the characters from start to stop with the
-     bytes contained in aByteArray (which, actually, can be
-     any variable byte class), starting at the replaceStart
-     location of aByteArray"
-    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
-    ^super replaceFrom: start to: stop with: aByteArray startingAt: replaceStart
-!
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 3
+	    at: index
+	    put: value
+	    size: CShortSize - 1
+    ]
 
-primReplaceFrom: start to: stop with: aByteArray startingAt: srcIndex
-    "Private - Replace the characters from start to stop with the
-     ASCII codes contained in aString (which, actually, can be
-     any variable byte class), starting at the srcIndex location of
-     aString"
-    <primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
-    ^self primitiveFailed
-!
+    ushortAt: index put: value [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given index in the receiver, using sizeof(short) bytes.
+	 Indices are 1-based just like for other Smalltalk access."
 
-asCData: aCType
-    "Convert the receiver to a CObject with the given type"
-    <primitive: VMpr_ByteArray_asCData>
-    ^self primitiveFailed
-! !
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 3
+	    at: index
+	    put: value
+	    size: CShortSize - 1
+    ]
+
+    longAt: index put: value [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given index in the receiver, using sizeof(long) bytes.
+	 Indices are 1-based just like for other Smalltalk access."
+
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 4
+	    at: index
+	    put: value
+	    size: CLongSize - 1
+    ]
+
+    unsignedLongAt: index put: value [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given index in the receiver, using sizeof(long) bytes.
+	 Indices are 1-based just like for other Smalltalk access."
+
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 5
+	    at: index
+	    put: value
+	    size: CLongSize - 1
+    ]
+
+    ulongAt: index put: value [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given index in the receiver, using sizeof(long) bytes.
+	 Indices are 1-based just like for other Smalltalk access."
+
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 5
+	    at: index
+	    put: value
+	    size: CLongSize - 1
+    ]
+
+    intAt: index put: value [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given index in the receiver, using sizeof(int) bytes.
+	 Indices are 1-based just like for other Smalltalk access."
+
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 10
+	    at: index
+	    put: value
+	    size: CIntSize - 1
+    ]
+
+    unsignedIntAt: index put: value [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given index in the receiver, using sizeof(int) bytes.
+	 Indices are 1-based just like for other Smalltalk access."
+
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 11
+	    at: index
+	    put: value
+	    size: CIntSize - 1
+    ]
+
+    uintAt: index put: value [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given index in the receiver, using sizeof(int) bytes.
+	 Indices are 1-based just like for other Smalltalk access."
+
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 11
+	    at: index
+	    put: value
+	    size: CIntSize - 1
+    ]
+
+    floatAt: index put: value [
+	"Store the Smalltalk Float object identified by `value', at the
+	 given index in the receiver, writing it like a C float.
+	 Indices are 1-based just like for other Smalltalk access."
+
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 6
+	    at: index
+	    put: value
+	    size: CFloatSize - 1
+    ]
+
+    doubleAt: index put: value [
+	"Store the Smalltalk Float object identified by `value', at the
+	 given index in the receiver, writing it like a C double.
+	 Indices are 1-based just like for other Smalltalk access."
+
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 7
+	    at: index
+	    put: value
+	    size: CDoubleSize - 1
+    ]
+
+    longDoubleAt: index put: value [
+	"Store the Smalltalk Float object identified by `value', at the
+	 given index in the receiver, writing it like a C double.
+	 Indices are 1-based just like for other Smalltalk access."
+
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 12
+	    at: index
+	    put: value
+	    size: CLongDoubleSize - 1
+    ]
+
+    stringAt: index put: value [
+	"Store the Smalltalk String object identified by `value', at the
+	 given index in the receiver, writing it like a *FRESHLY
+	 ALLOCATED* C string. It is the caller's responsibility to free
+	 it if necessary.
+	 Indices are 1-based just like for other Smalltalk access."
+
+	<category: 'more advanced accessing'>
+	^self 
+	    type: 8
+	    at: index
+	    put: value
+	    size: CPtrSize - 1
+    ]
+
+    growSize [
+	"Answer the amount by which a ByteArray will grow if necessary.
+	 Note - explicit growing of a Collection is a private thing you
+	 should not employ"
+
+	<category: 'private'>
+	^self size
+    ]
+
+    type: type at: index size: size [
+	"Private - Use Memory class to access in the receiver a value with the
+	 given type."
+
+	<category: 'private'>
+	| offset |
+	index < 1 
+	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index].
+	index > (self basicSize - size) 
+	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index].
+	offset := index + (CLongSize * 2 - 1).	"impl. dependent"
+	^Memory type: type at: (ObjectMemory addressOf: self) + offset
+    ]
+
+    type: type at: index put: value size: size [
+	"Private - Use Memory class to write to the receiver a value with the
+	 given type."
+
+	<category: 'private'>
+	| offset |
+	self isReadOnly ifTrue: [^SystemExceptions.ReadOnlyObject signal].
+	index < 1 
+	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index].
+	index > (self basicSize - size) 
+	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index].
+	offset := index + (CLongSize * 2 - 1).	"impl. dependent"
+	^Memory 
+	    type: type
+	    at: (ObjectMemory addressOf: self) + offset
+	    put: value
+    ]
+
+    byteAt: index [
+	"Answer the index-th indexed instance variable of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAt>
+	self checkIndexableBounds: index
+    ]
+
+    byteAt: index put: value [
+	"Store the `value' byte in the index-th indexed instance variable
+	 of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicAtPut>
+	self checkIndexableBounds: index put: value
+    ]
+
+    hash [
+	"Answer an hash value for the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_String_hash>
+	^0
+    ]
+
+    replaceFrom: start to: stop withString: aString startingAt: replaceStart [
+	"Replace the characters from start to stop with the
+	 ASCII codes contained in aString (which, actually, can be
+	 any variable byte class), starting at the replaceStart
+	 location of aString"
+
+	<category: 'built ins'>
+	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	^super 
+	    replaceFrom: start
+	    to: stop
+	    with: aString
+	    startingAt: replaceStart
+    ]
+
+    replaceFrom: start to: stop with: aByteArray startingAt: replaceStart [
+	"Replace the characters from start to stop with the
+	 bytes contained in aByteArray (which, actually, can be
+	 any variable byte class), starting at the replaceStart
+	 location of aByteArray"
+
+	<category: 'built ins'>
+	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	^super 
+	    replaceFrom: start
+	    to: stop
+	    with: aByteArray
+	    startingAt: replaceStart
+    ]
+
+    primReplaceFrom: start to: stop with: aByteArray startingAt: srcIndex [
+	"Private - Replace the characters from start to stop with the
+	 ASCII codes contained in aString (which, actually, can be
+	 any variable byte class), starting at the srcIndex location of
+	 aString"
+
+	<category: 'built ins'>
+	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	^self primitiveFailed
+    ]
+
+    asCData: aCType [
+	"Convert the receiver to a CObject with the given type"
+
+	<category: 'built ins'>
+	<primitive: VMpr_ByteArray_asCData>
+	^self primitiveFailed
+    ]
+]
 

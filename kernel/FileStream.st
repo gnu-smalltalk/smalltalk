@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2003,2006
@@ -32,563 +31,618 @@
  ======================================================================"
 
 
-FileDescriptor subclass: #FileStream
-		instanceVariableNames: 'writePtr writeEnd'
-		classVariableNames: 'Verbose Record Includes'
-		poolDictionaries: ''
-		category: 'Streams-Files'
-!
-
-FileStream comment: 
-'My instances are what conventional programmers think of as files.
+
+FileDescriptor subclass: FileStream [
+    | writePtr writeEnd |
+    
+    <category: 'Streams-Files'>
+    <comment: 'My instances are what conventional programmers think of as files.
 My instance creation methods accept the name of a disk file (or any named
-file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'
-!
+file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 
+    Verbose := nil.
+    Record := nil.
+    Includes := nil.
 
-
-!FileStream class methodsFor: 'standard streams'!
+    FileStream class >> stderr [
+	"Answer a FileStream that is attached the Smalltalk program's standard
+	 error file handle, which can be used for error messages and diagnostics
+	 issued by the program."
 
-stderr
-    "Answer a FileStream that is attached the Smalltalk program's standard
-     error file handle, which can be used for error messages and diagnostics
-     issued by the program."
-    ^stderr
-!
+	<category: 'standard streams'>
+	^stderr
+    ]
 
-stdin
-    "Answer a FileStream that is attached the Smalltalk program's standard
-     input file handle, which is the normal source of input for the program."
-    ^stdin
-!
+    FileStream class >> stdin [
+	"Answer a FileStream that is attached the Smalltalk program's standard
+	 input file handle, which is the normal source of input for the program."
 
-stdout
-    "Answer a FileStream that is attached the Smalltalk program's standard
-     output file handle; this is used for normal output from the program."
-    ^stdout
-! !
+	<category: 'standard streams'>
+	^stdin
+    ]
 
-
-!FileStream class methodsFor: 'file-in'!
+    FileStream class >> stdout [
+	"Answer a FileStream that is attached the Smalltalk program's standard
+	 output file handle; this is used for normal output from the program."
 
-initialize
-    "Private - Initialize the receiver's class variables"
-    Record := Verbose := false.
-! !
+	<category: 'standard streams'>
+	^stdout
+    ]
 
-
-!FileStream class methodsFor: 'file-in'!
+    FileStream class >> initialize [
+	"Private - Initialize the receiver's class variables"
 
-fileIn: aFileName
-    "File in the aFileName file. During a file in operation, global variables
-     (starting with an uppercase letter) that are not declared yet don't yield
-     an `unknown variable' error. Instead, they are defined as nil in the
-     `Undeclared' dictionary (a global variable residing in Smalltalk).
-     As soon as you add the variable to a namespace (for example by creating
-     a class) the Association will be removed from Undeclared and reused
-     in the namespace, so that the old references will automagically point
-     to the new value."
+	<category: 'file-in'>
+	Record := Verbose := false
+    ]
 
-    | oldIncludes newCollection file |
-    Verbose ifTrue: [ Transcript nextPutAll: 'Loading ', aFileName; nl ].
+    FileStream class >> fileIn: aFileName [
+	"File in the aFileName file. During a file in operation, global variables
+	 (starting with an uppercase letter) that are not declared yet don't yield
+	 an `unknown variable' error. Instead, they are defined as nil in the
+	 `Undeclared' dictionary (a global variable residing in Smalltalk).
+	 As soon as you add the variable to a namespace (for example by creating
+	 a class) the Association will be removed from Undeclared and reused
+	 in the namespace, so that the old references will automagically point
+	 to the new value."
 
-    Record ifTrue: [
-	newCollection := OrderedCollection new.
-	Includes add: aFileName -> newCollection.
-	oldIncludes := Includes.
-	Includes := newCollection
-    ].
+	<category: 'file-in'>
+	| oldIncludes newCollection file |
+	Verbose 
+	    ifTrue: 
+		[Transcript
+		    nextPutAll: 'Loading ' , aFileName;
+		    nl].
+	Record 
+	    ifTrue: 
+		[newCollection := OrderedCollection new.
+		Includes add: aFileName -> newCollection.
+		oldIncludes := Includes.
+		Includes := newCollection].
+	(self open: aFileName mode: FileStream read)
+	    fileIn;
+	    close.
+	Record ifTrue: [Includes := oldIncludes]
+    ]
 
-    (self open: aFileName mode: FileStream read)
-	fileIn;
-	close.
+    FileStream class >> fileIn: aFileName line: lineInteger from: realFileName at: aCharPos [
+	"File in the aFileName file giving errors such as if it was loaded
+	 from the given line, file name and starting position (instead of 1)."
 
-    Record ifTrue: [ Includes := oldIncludes ].
-!
+	<category: 'file-in'>
+	(self open: aFileName mode: FileStream read)
+	    fileInLine: lineInteger
+		fileName: realFileName
+		at: aCharPos;
+	    close
+    ]
 
-fileIn: aFileName line: lineInteger from: realFileName at: aCharPos
-    "File in the aFileName file giving errors such as if it was loaded
-     from the given line, file name and starting position (instead of 1)."
+    FileStream class >> fileIn: aFileName ifMissing: aSymbol [
+	"Conditionally do a file in, only if the key (often a class) specified
+	 by 'aSymbol' is not present in the Smalltalk system dictionary already.
+	 During a file in operation, global variables (starting with an
+	 uppercase letter) that are not declared don't yield an `unknown
+	 variable' error. Instead, they are defined as nil in the `Undeclared'
+	 dictionary (a global variable residing in Smalltalk).
+	 As soon as you add the variable to a namespace (for example by creating
+	 a class) the Association will be removed from Undeclared and reused
+	 in the namespace, so that the old references will automagically point
+	 to the new value."
 
-    (self open: aFileName mode: FileStream read)
-	fileInLine: lineInteger fileName: realFileName at: aCharPos;
-	close.
-!
+	<category: 'file-in'>
+	Smalltalk at: aSymbol ifAbsent: [self fileIn: aFileName]
+    ]
 
-fileIn: aFileName ifMissing: aSymbol
-    "Conditionally do a file in, only if the key (often a class) specified
-     by 'aSymbol' is not present in the Smalltalk system dictionary already.
-     During a file in operation, global variables (starting with an
-     uppercase letter) that are not declared don't yield an `unknown
-     variable' error. Instead, they are defined as nil in the `Undeclared'
-     dictionary (a global variable residing in Smalltalk).
-     As soon as you add the variable to a namespace (for example by creating
-     a class) the Association will be removed from Undeclared and reused
-     in the namespace, so that the old references will automagically point
-     to the new value."
+    FileStream class >> fileIn: aFileName ifTrue: aBoolean [
+	"Conditionally do a file in, only if the supplied boolean is true.
+	 During a file in operation, global variables (starting with an
+	 uppercase letter) that are not declared don't yield an `unknown
+	 variable' error. Instead, they are defined as nil in the `Undeclared'
+	 dictionary (a global variable residing in Smalltalk).
+	 As soon as you add the variable to a namespace (for example by creating
+	 a class) the Association will be removed from Undeclared and reused
+	 in the namespace, so that the old references will automagically point
+	 to the new value."
 
-    Smalltalk at: aSymbol
-	      ifAbsent: [ self fileIn: aFileName ]
-!
+	<category: 'file-in'>
+	aBoolean ifTrue: [self fileIn: aFileName]
+    ]
 
-fileIn: aFileName ifTrue: aBoolean
-    "Conditionally do a file in, only if the supplied boolean is true.
-     During a file in operation, global variables (starting with an
-     uppercase letter) that are not declared don't yield an `unknown
-     variable' error. Instead, they are defined as nil in the `Undeclared'
-     dictionary (a global variable residing in Smalltalk).
-     As soon as you add the variable to a namespace (for example by creating
-     a class) the Association will be removed from Undeclared and reused
-     in the namespace, so that the old references will automagically point
-     to the new value."
-							       
-    aBoolean 
-	ifTrue: [ self fileIn: aFileName ]
-!
+    FileStream class >> require: assoc [
+	"Conditionally do a file in from the value of assoc, only if the
+	 key of assoc is not present in the Smalltalk system dictionary already.
+	 During a file in operation, global variables (starting with an
+	 uppercase letter) that are not declared don't yield an `unknown
+	 variable' error. Instead, they are defined as nil in the `Undeclared'
+	 dictionary (a global variable residing in Smalltalk).
+	 As soon as you add the variable to a namespace (for example by creating
+	 a class) the Association will be removed from Undeclared and reused
+	 in the namespace, so that the old references will automagically point
+	 to the new value."
 
-require: assoc
-    "Conditionally do a file in from the value of assoc, only if the
-     key of assoc is not present in the Smalltalk system dictionary already.
-     During a file in operation, global variables (starting with an
-     uppercase letter) that are not declared don't yield an `unknown
-     variable' error. Instead, they are defined as nil in the `Undeclared'
-     dictionary (a global variable residing in Smalltalk).
-     As soon as you add the variable to a namespace (for example by creating
-     a class) the Association will be removed from Undeclared and reused
-     in the namespace, so that the old references will automagically point
-     to the new value."
-    Smalltalk at: assoc key
-	      ifAbsent: [ self fileIn: assoc value ]
-!
+	<category: 'file-in'>
+	Smalltalk at: assoc key ifAbsent: [self fileIn: assoc value]
+    ]
 
-verbose: verboseFlag
-    "Set whether Smalltalk should output debugging messages when filing in"
-    | oldVerbose |
-    oldVerbose := Verbose.
-    Verbose := verboseFlag.
-    ^oldVerbose
-!
+    FileStream class >> verbose: verboseFlag [
+	"Set whether Smalltalk should output debugging messages when filing in"
 
-record: recordFlag
-    "Set whether Smalltalk should record information about nested file-ins.
-     When recording is enabled, use #generateMakefileOnto: to automatically
-     generate a valid makefile for the intervening file-ins."
-    | oldRecord |
-    oldRecord := Record.
-    Record := recordFlag.
-    Includes := Record 
-	ifTrue: [ OrderedCollection new ]
-	ifFalse: [ nil ].
-    ^oldRecord
-!
+	<category: 'file-in'>
+	| oldVerbose |
+	oldVerbose := Verbose.
+	Verbose := verboseFlag.
+	^oldVerbose
+    ]
 
-generateMakefileOnto: aStream
-    "Generate a make file for the file-ins since record was last set to true.
-     Store it on aStream"
-    aStream nextPutAll: 
-'
+    FileStream class >> record: recordFlag [
+	"Set whether Smalltalk should record information about nested file-ins.
+	 When recording is enabled, use #generateMakefileOnto: to automatically
+	 generate a valid makefile for the intervening file-ins."
+
+	<category: 'file-in'>
+	| oldRecord |
+	oldRecord := Record.
+	Record := recordFlag.
+	Includes := Record ifTrue: [OrderedCollection new] ifFalse: [nil].
+	^oldRecord
+    ]
+
+    FileStream class >> generateMakefileOnto: aStream [
+	"Generate a make file for the file-ins since record was last set to true.
+	 Store it on aStream"
+
+	<category: 'file-in'>
+	aStream 
+	    nextPutAll: '
 #
 # Automatically generated Smalltalk dependencies
 #
 
 '.
-    self recursiveGenerateOnto: aStream with: Includes.
-    aStream nextPutAll: 
-'#
+	self recursiveGenerateOnto: aStream with: Includes.
+	aStream 
+	    nextPutAll: '#
 # End automatically generated Smalltalk dependencies
 #
 
-'.
-! !
-
-
-!FileStream class methodsFor: 'private'!
-
-recursiveGenerateOnto: aStream with: includeCollection
-    "Private - Generate a make file for the file in information in
-     includeCollection. Store it on aStream"
-
-    includeCollection isNil ifTrue: [ ^self ].
-    includeCollection do: [ :include |
-	include value size > 0 ifTrue: [
-	    aStream
-		nextPutAll: include key;
-		nextPutAll: ': '.
-	
-	    include value do: [ :subinclude |
-		aStream nextPutAll: subinclude key; space
-	    ].
-	    aStream nl; nl.
-	    self recursiveGenerateOnto: aStream with: include value
-	]
+'
     ]
-! !
 
-
-!FileStream methodsFor: 'basic'!
+    FileStream class >> recursiveGenerateOnto: aStream with: includeCollection [
+	"Private - Generate a make file for the file in information in
+	 includeCollection. Store it on aStream"
 
-peek
-    "Return the next character in the file, or nil at eof.
-     Don't advance the file pointer."
+	<category: 'private'>
+	includeCollection isNil ifTrue: [^self].
+	includeCollection do: 
+		[:include | 
+		include value size > 0 
+		    ifTrue: 
+			[aStream
+			    nextPutAll: include key;
+			    nextPutAll: ': '.
+			include value do: 
+				[:subinclude | 
+				aStream
+				    nextPutAll: subinclude key;
+				    space].
+			aStream
+			    nl;
+			    nl.
+			self recursiveGenerateOnto: aStream with: include value]]
+    ]
 
-    writePtr notNil ifTrue: [ self flush ].
-    ptr > endPtr ifTrue: [
-	self fill.
-	self atEnd ifTrue: [ ^self pastEnd ].
-    ].
-    ^collection at: ptr.
-!
+    peek [
+	"Return the next character in the file, or nil at eof.
+	 Don't advance the file pointer."
 
-next
-    "Return the next character in the file, or nil at eof"
+	<category: 'basic'>
+	writePtr notNil ifTrue: [self flush].
+	ptr > endPtr 
+	    ifTrue: 
+		[self fill.
+		self atEnd ifTrue: [^self pastEnd]].
+	^collection at: ptr
+    ]
 
-    | element |
-    writePtr notNil ifTrue: [ self flush ].
-    ptr > endPtr ifTrue: [
-	self fill.
-	self atEnd ifTrue: [ ^self pastEnd ].
-    ].
-    element := collection at: ptr.
-    ptr := ptr + 1.
-    ^element
-!
+    next [
+	"Return the next character in the file, or nil at eof"
 
-nextByte
-    "Return the next byte in the file, or nil at eof"
+	<category: 'basic'>
+	| element |
+	writePtr notNil ifTrue: [self flush].
+	ptr > endPtr 
+	    ifTrue: 
+		[self fill.
+		self atEnd ifTrue: [^self pastEnd]].
+	element := collection at: ptr.
+	ptr := ptr + 1.
+	^element
+    ]
 
-    | a |
-    a := self next.
-    ^a isNil ifTrue: [ a ] ifFalse: [ a asInteger ]
-!
+    nextByte [
+	"Return the next byte in the file, or nil at eof"
 
-nextPut: aCharacter
-    "Store aCharacter on the file"
+	<category: 'basic'>
+	| a |
+	a := self next.
+	^a isNil ifTrue: [a] ifFalse: [a asInteger]
+    ]
 
-    ptr > collection size ifTrue: [ self flush ].
+    nextPut: aCharacter [
+	"Store aCharacter on the file"
 
-    writePtr isNil
-        ifTrue: [
-	    (access bitAnd: 2) = 0
-	    	ifTrue: [ ^self shouldNotImplement ].
+	<category: 'basic'>
+	ptr > collection size ifTrue: [self flush].
+	writePtr isNil 
+	    ifTrue: 
+		[(access bitAnd: 2) = 0 ifTrue: [^self shouldNotImplement].
+		writePtr := ptr.
+		writeEnd := ptr - 1].
+	collection at: ptr put: aCharacter.
+	ptr := ptr + 1.
+	writeEnd := ptr - 1
+    ]
 
-	    writePtr := ptr. writeEnd := ptr - 1 ].
+    bufferStart [
+	"Private - Answer the offset from the start of the file corresponding
+	 to the beginning of the read buffer."
 
-    collection at: ptr put: aCharacter.
-    ptr := ptr + 1.
-    writeEnd := ptr - 1.
-!
+	<category: 'basic'>
+	^super position - endPtr
+    ]
 
-bufferStart
-    "Private - Answer the offset from the start of the file corresponding
-     to the beginning of the read buffer."
-    ^super position - endPtr
-!
+    position [
+	"Answer the zero-based position from the start of the file"
 
-position
-    "Answer the zero-based position from the start of the file"
-    ^self bufferStart + ptr - 1
-!
+	<category: 'basic'>
+	^self bufferStart + ptr - 1
+    ]
 
-position: n
-    "Set the file pointer to the zero-based position n"
+    position: n [
+	"Set the file pointer to the zero-based position n"
 
-    "There is a lot of duplicate code between here and #flush."
-    | pos bufferStart |
-    writePtr notNil ifTrue: [
-	bufferStart := self bufferStart.
-	pos := bufferStart + endPtr.
-        self
-	    fileOp: 18
-	    with: collection
-	    with: writePtr
-	    with: writeEnd
-	    with: bufferStart + writePtr - 1 ].
+	"There is a lot of duplicate code between here and #flush."
 
-    "If we didn't write, pos is nil and we always do the lseek.  It makes
-     no sense to do an lseek (to get the current file pointer in #bufferStart)
-     only to possibly skip this other lseek."
-    pos = n ifFalse: [ super position: n ].
-    ptr := 1.
-    endPtr := 0.
-    writePtr := nil.
-!
-
-size
-    "Return the current size of the file, in bytes"
-    writePtr notNil ifTrue: [ self flush ].
-    ^super size
-!
-
-truncate
-    "Truncate the file at the current position"
-    writePtr notNil ifTrue: [ self flush ].
-    super truncate
-!
-
-copyFrom: from to: to
-    "Answer the contents of the file between the two given positions"
-    | offset fromPos toPos result |
-    from > to ifTrue: [
-        to + 1 = from ifTrue: [ ^self species new ].
-        ^SystemExceptions.ArgumentOutOfRange signalOn: from mustBeBetween: 1 and: to + 1
-    ].
-
-    self checkIfPipe.
-    endPtr = 0 ifFalse: [
-        offset := self bufferStart - 1.
-        fromPos := from - offset.
-        toPos := to - offset.
-
-        (fromPos >= 1 and: [ toPos <= endPtr ])
-            ifTrue: [ ^collection copyFrom: fromPos to: toPos ] ].
-
-    writePtr notNil ifTrue: [ self flush ].
-    result := self species new: to - from + 1.
-    self fileOp: 17 with: result with: 1 with: result size with: from.
-    ^result
-! !
-
-
-!FileStream methodsFor: 'overriding inherited methods'!
-
-next: n putAll: aCollection startingAt: pos
-    | written |
-    written := collection size - ptr + 1 min: n.
-    self next: written bufferAll: aCollection startingAt: pos.
-    written = n ifTrue: [ ^self ].
-
-    self flush.
-    n - written < collection size
-        ifTrue: [ self next: n - written bufferAll: aCollection startingAt: pos + written ]
-	ifFalse: [ self write: aCollection asString from: pos + written to: pos + n - 1 ].
-!
-
-nextLine
-    "Returns a collection of the same type that the stream accesses, containing
-     the next line up to the next new-line character.  Returns the entire rest of the
-     stream's contents if no new-line character is found. "
-    | n resultStream result ch |
-    writePtr notNil ifTrue: [ self flush ].
-    ptr > endPtr ifTrue: [
-	self fill.
-	self atEnd ifTrue: [ ^self pastEnd ].
-    ].
-
-    "First, examine the buffer's contents."
-    [
-        ptr to: endPtr do: [ :i |
-	    ((ch := collection at: i) == ##(Character cr)
-		or: [ ch == ##(Character nl) ])
-		    ifTrue: [
-			result := collection copyFrom: ptr to: i - 1.
-			ptr := i + 1.
-			ch == ##(Character cr)
-			    ifTrue: [ self peekFor: ##(Character nl) ].
-
-			"If we went through the loop only once, we're done."
-			resultStream isNil ifTrue: [ ^result ].
-
-			"Else finish the stream and return its contents."
-			^resultStream nextPutAll: result; contents
-		    ]
-        ].
-
-	resultStream isNil ifTrue: [
-	    resultStream := WriteStream on: (self species new: endPtr - ptr + 20)
-	].
-	resultStream next: endPtr - ptr + 1 putAll: collection startingAt: ptr.
-	ptr := endPtr + 1.
-	self fill.
-	self atEnd
-    ] whileFalse.
-
-    ^resultStream contents
-!
-
-nextByteArray: anInteger
-    "Return the next 'anInteger' bytes from the stream, as a ByteArray."
-    ^self next: anInteger into: (ByteArray new: anInteger).
-!
-
-next: anInteger
-    "Return the next 'anInteger' characters from the stream, as a String."
-    ^self next: anInteger into: (self species new: anInteger).
-! !
-
-
-
-
-!FileStream methodsFor: 'testing'!
-
-atEnd
-    "Answer whether data has come to an end"
-    ^self basicAtEnd and: [ super atEnd ]
-! !
-
-
-!FileStream methodsFor: 'buffering'!
-
-bufferSize
-    "Answer the file's current buffer"
-    ^collection size
-!
-
-bufferSize: bufSize
-    "Flush the file and set the buffer's size to bufSize"
-    self flush.
-    collection := self species new: bufSize
-!
-
-newBuffer
-    "Private - Answer a String to be used as the receiver's buffer"
-    ^String new: 1024
-!
-
-flush
-    "Flush the output buffer."
-
-    "Decide whether to use a pwrite or a write.  In many cases, a regular
-     write can be better than a pwrite+lseek.
-
-     We are now at (self bufferStart + endPtr).  The position we will
-     set is (self bufferStart + ptr - 1).  If we perform a write, we
-     will do a single seek from (self bufferStart + endPtr) to (self
-     bufferStart + writePtr - 1), and then issue the write which will
-     set the file pointer to (self bufferStart + writeEnd): That's why
-     if writeEnd = ptr - 1, we use write.  Otherwise we use pwrite
-     and possibly an lseek after it."
-
-    (self isPipe or: [ writePtr notNil and: [ ptr - 1 = writeEnd ] ])
-	ifTrue: [
-	    writePtr notNil ifTrue: [
-	        (self isPipe or: [ writePtr - 1 = endPtr ]) ifFalse: [
-	            super skip: writePtr - 1 - endPtr ].
-
-	        self
-		    write: collection
-		    from: writePtr
-		    to: writeEnd ] ]
-	ifFalse: [
-	    writePtr notNil ifTrue: [
-	        self
+	<category: 'basic'>
+	| pos bufferStart |
+	writePtr notNil 
+	    ifTrue: 
+		[bufferStart := self bufferStart.
+		pos := bufferStart + endPtr.
+		self 
 		    fileOp: 18
 		    with: collection
 		    with: writePtr
 		    with: writeEnd
-		    with: self bufferStart + writePtr - 1 ].
+		    with: bufferStart + writePtr - 1].
 
-	    ptr - 1 = endPtr
-		ifFalse: [ super skip: ptr - 1 - endPtr ] ].
+	"If we didn't write, pos is nil and we always do the lseek.  It makes
+	 no sense to do an lseek (to get the current file pointer in #bufferStart)
+	 only to possibly skip this other lseek."
+	pos = n ifFalse: [super position: n].
+	ptr := 1.
+	endPtr := 0.
+	writePtr := nil
+    ]
 
-    ptr := 1.
-    endPtr := 0.
-    writePtr := nil.
-!
+    size [
+	"Return the current size of the file, in bytes"
 
-pendingWrite
-    "Answer whether the output buffer is full."
-    ^writePtr notNil
-!
+	<category: 'basic'>
+	writePtr notNil ifTrue: [self flush].
+	^super size
+    ]
 
-clean
-    "Synchronize the file descriptor's state with the object's state."
-    self flush
-!
+    truncate [
+	"Truncate the file at the current position"
 
-nextHunk
-    "Answer the next buffers worth of stuff in the Stream represented
-     by the receiver.  For n consecutive calls to this method, we do
-     n - 1 or n actual input operation."
+	<category: 'basic'>
+	writePtr notNil ifTrue: [self flush].
+	super truncate
+    ]
 
-    | result |
-    writePtr notNil ifTrue: [ self flush ].
-    (ptr > endPtr or: [ endPtr < collection size ]) ifTrue: [ self fill ].
-    ptr > endPtr ifTrue: [ ^self pastEnd ].
-    result := collection copyFrom: ptr to: endPtr.
-    ptr := endPtr + 1.
-    ^result
-!
+    copyFrom: from to: to [
+	"Answer the contents of the file between the two given positions"
 
-next: n bufferAll: aCollection startingAt: pos
-    "Private - Assuming that the buffer has space for n characters, store
-     n characters of aCollection in the buffer, starting from the pos-th."
-    writePtr isNil
-        ifTrue: [
-	    (access bitAnd: 2) = 0
-	    	ifTrue: [ ^self shouldNotImplement ].
+	<category: 'basic'>
+	| offset fromPos toPos result |
+	from > to 
+	    ifTrue: 
+		[to + 1 = from ifTrue: [^self species new].
+		^SystemExceptions.ArgumentOutOfRange 
+		    signalOn: from
+		    mustBeBetween: 1
+		    and: to + 1].
+	self checkIfPipe.
+	endPtr = 0 
+	    ifFalse: 
+		[offset := self bufferStart - 1.
+		fromPos := from - offset.
+		toPos := to - offset.
+		(fromPos >= 1 and: [toPos <= endPtr]) 
+		    ifTrue: [^collection copyFrom: fromPos to: toPos]].
+	writePtr notNil ifTrue: [self flush].
+	result := self species new: to - from + 1.
+	self 
+	    fileOp: 17
+	    with: result
+	    with: 1
+	    with: result size
+	    with: from.
+	^result
+    ]
 
-	    writePtr := ptr. writeEnd := ptr - 1 ].
+    next: n putAll: aCollection startingAt: pos [
+	<category: 'overriding inherited methods'>
+	| written |
+	written := collection size - ptr + 1 min: n.
+	self 
+	    next: written
+	    bufferAll: aCollection
+	    startingAt: pos.
+	written = n ifTrue: [^self].
+	self flush.
+	n - written < collection size 
+	    ifTrue: 
+		[self 
+		    next: n - written
+		    bufferAll: aCollection
+		    startingAt: pos + written]
+	    ifFalse: 
+		[self 
+		    write: aCollection asString
+		    from: pos + written
+		    to: pos + n - 1]
+    ]
 
-    n = 0 ifTrue: [ ^self ].
+    nextLine [
+	"Returns a collection of the same type that the stream accesses, containing
+	 the next line up to the next new-line character.  Returns the entire rest of the
+	 stream's contents if no new-line character is found."
 
-    collection
-        replaceFrom: ptr
-        to: ptr + n - 1
-        with: aCollection
-        startingAt: pos.
+	<category: 'overriding inherited methods'>
+	| n resultStream result ch |
+	writePtr notNil ifTrue: [self flush].
+	ptr > endPtr 
+	    ifTrue: 
+		[self fill.
+		self atEnd ifTrue: [^self pastEnd]].
 
-    ptr := ptr + n.
-    writeEnd := ptr - 1.
-!
+	"First, examine the buffer's contents."
+	
+	[ptr to: endPtr
+	    do: 
+		[:i | 
+		((ch := collection at: i) == ##(Character cr) or: [ch == ##(Character nl)]) 
+		    ifTrue: 
+			[result := collection copyFrom: ptr to: i - 1.
+			ptr := i + 1.
+			ch == ##(Character cr) ifTrue: [self peekFor: ##(Character nl)].
 
-next: anInteger into: answer
-    "Private - Read up to anInteger bytes from the stream and store them
-     into answer.  Return `answer' itself, possibly truncated if we could not
-     read the full amount of data."
-    | read last |
-    writePtr notNil ifTrue: [ self flush ].
-    read := 0.
+			"If we went through the loop only once, we're done."
+			resultStream isNil ifTrue: [^result].
 
-    "Exhaust the remaining contents of the buffer if they cannot satisfy
-     the whole request."
-    (ptr + anInteger - 1) > endPtr
-	ifTrue: [
-	    answer
-	        replaceFrom: 1
-	        to: endPtr - ptr + 1
-	        with: collection
-	        startingAt: ptr.
+			"Else finish the stream and return its contents."
+			^resultStream
+			    nextPutAll: result;
+			    contents]].
+	resultStream isNil 
+	    ifTrue: 
+		[resultStream := WriteStream on: (self species new: endPtr - ptr + 20)].
+	resultStream 
+	    next: endPtr - ptr + 1
+	    putAll: collection
+	    startingAt: ptr.
+	ptr := endPtr + 1.
+	self fill.
+	self atEnd] 
+		whileFalse.
+	^resultStream contents
+    ]
 
-	    read := endPtr - ptr + 1.
-	    ptr := endPtr + 1 ].
+    nextByteArray: anInteger [
+	"Return the next 'anInteger' bytes from the stream, as a ByteArray."
 
-    "If we did not read everything, but what's left is less than the size of
-     the buffer, try once more filling it..."
-    anInteger - read < collection size
-	ifTrue: [
-	    ptr > endPtr ifTrue: [ self fill ].
-	    last := (read + endPtr - ptr + 1) min: answer size.
-	    answer
-	        replaceFrom: read + 1
-	        to: last
-	        with: collection
-	        startingAt: ptr.
+	<category: 'overriding inherited methods'>
+	^self next: anInteger into: (ByteArray new: anInteger)
+    ]
 
-	    ptr := ptr + last - read.
-	    read := last ].
+    next: anInteger [
+	"Return the next 'anInteger' characters from the stream, as a String."
 
-    "Anything more?  We read it from the file.  We can come here only if the
-     buffer cannot be filled completely, or if we want to read really a
-     lot of data."
-    read = anInteger
-	ifFalse: [
-	    self atEnd
-		ifFalse: [ read := read + (self read: answer from: read + 1 to: answer size) ].
-	    read = anInteger
-		ifFalse: [
-		    self atEnd ifTrue: [ self pastEnd ].
-		    ^answer copyFrom: 1 to: read ] ].
+	<category: 'overriding inherited methods'>
+	^self next: anInteger into: (self species new: anInteger)
+    ]
 
-    ^answer
-!
+    atEnd [
+	"Answer whether data has come to an end"
 
-fill
-    "Private - Fill the input buffer"
-    (access bitAnd: 1) = 0
-    	ifTrue: [ ^self shouldNotImplement ].
+	<category: 'testing'>
+	^self basicAtEnd and: [super atEnd]
+    ]
 
-    ptr > endPtr ifTrue: [ self flush ].
-    endPtr := endPtr + (self read: collection from: endPtr + 1 to: collection size).
-! !
+    bufferSize [
+	"Answer the file's current buffer"
 
-FileStream initialize!
+	<category: 'buffering'>
+	^collection size
+    ]
+
+    bufferSize: bufSize [
+	"Flush the file and set the buffer's size to bufSize"
+
+	<category: 'buffering'>
+	self flush.
+	collection := self species new: bufSize
+    ]
+
+    newBuffer [
+	"Private - Answer a String to be used as the receiver's buffer"
+
+	<category: 'buffering'>
+	^String new: 1024
+    ]
+
+    flush [
+	"Flush the output buffer."
+
+	"Decide whether to use a pwrite or a write.  In many cases, a regular
+	 write can be better than a pwrite+lseek.
+	 
+	 We are now at (self bufferStart + endPtr).  The position we will
+	 set is (self bufferStart + ptr - 1).  If we perform a write, we
+	 will do a single seek from (self bufferStart + endPtr) to (self
+	 bufferStart + writePtr - 1), and then issue the write which will
+	 set the file pointer to (self bufferStart + writeEnd): That's why
+	 if writeEnd = ptr - 1, we use write.  Otherwise we use pwrite
+	 and possibly an lseek after it."
+
+	<category: 'buffering'>
+	(self isPipe or: [writePtr notNil and: [ptr - 1 = writeEnd]]) 
+	    ifTrue: 
+		[writePtr notNil 
+		    ifTrue: 
+			[(self isPipe or: [writePtr - 1 = endPtr]) 
+			    ifFalse: [super skip: writePtr - 1 - endPtr].
+			self 
+			    write: collection
+			    from: writePtr
+			    to: writeEnd]]
+	    ifFalse: 
+		[writePtr notNil 
+		    ifTrue: 
+			[self 
+			    fileOp: 18
+			    with: collection
+			    with: writePtr
+			    with: writeEnd
+			    with: self bufferStart + writePtr - 1].
+		ptr - 1 = endPtr ifFalse: [super skip: ptr - 1 - endPtr]].
+	ptr := 1.
+	endPtr := 0.
+	writePtr := nil
+    ]
+
+    pendingWrite [
+	"Answer whether the output buffer is full."
+
+	<category: 'buffering'>
+	^writePtr notNil
+    ]
+
+    clean [
+	"Synchronize the file descriptor's state with the object's state."
+
+	<category: 'buffering'>
+	self flush
+    ]
+
+    nextHunk [
+	"Answer the next buffers worth of stuff in the Stream represented
+	 by the receiver.  For n consecutive calls to this method, we do
+	 n - 1 or n actual input operation."
+
+	<category: 'buffering'>
+	| result |
+	writePtr notNil ifTrue: [self flush].
+	(ptr > endPtr or: [endPtr < collection size]) ifTrue: [self fill].
+	ptr > endPtr ifTrue: [^self pastEnd].
+	result := collection copyFrom: ptr to: endPtr.
+	ptr := endPtr + 1.
+	^result
+    ]
+
+    next: n bufferAll: aCollection startingAt: pos [
+	"Private - Assuming that the buffer has space for n characters, store
+	 n characters of aCollection in the buffer, starting from the pos-th."
+
+	<category: 'buffering'>
+	writePtr isNil 
+	    ifTrue: 
+		[(access bitAnd: 2) = 0 ifTrue: [^self shouldNotImplement].
+		writePtr := ptr.
+		writeEnd := ptr - 1].
+	n = 0 ifTrue: [^self].
+	collection 
+	    replaceFrom: ptr
+	    to: ptr + n - 1
+	    with: aCollection
+	    startingAt: pos.
+	ptr := ptr + n.
+	writeEnd := ptr - 1
+    ]
+
+    next: anInteger into: answer [
+	"Private - Read up to anInteger bytes from the stream and store them
+	 into answer.  Return `answer' itself, possibly truncated if we could not
+	 read the full amount of data."
+
+	<category: 'buffering'>
+	| read last |
+	writePtr notNil ifTrue: [self flush].
+	read := 0.
+
+	"Exhaust the remaining contents of the buffer if they cannot satisfy
+	 the whole request."
+	ptr + anInteger - 1 > endPtr 
+	    ifTrue: 
+		[answer 
+		    replaceFrom: 1
+		    to: endPtr - ptr + 1
+		    with: collection
+		    startingAt: ptr.
+		read := endPtr - ptr + 1.
+		ptr := endPtr + 1].
+
+	"If we did not read everything, but what's left is less than the size of
+	 the buffer, try once more filling it..."
+	anInteger - read < collection size 
+	    ifTrue: 
+		[ptr > endPtr ifTrue: [self fill].
+		last := read + endPtr - ptr + 1 min: answer size.
+		answer 
+		    replaceFrom: read + 1
+		    to: last
+		    with: collection
+		    startingAt: ptr.
+		ptr := ptr + last - read.
+		read := last].
+
+	"Anything more?  We read it from the file.  We can come here only if the
+	 buffer cannot be filled completely, or if we want to read really a
+	 lot of data."
+	read = anInteger 
+	    ifFalse: 
+		[self atEnd 
+		    ifFalse: 
+			[read := read + (self 
+					    read: answer
+					    from: read + 1
+					    to: answer size)].
+		read = anInteger 
+		    ifFalse: 
+			[self atEnd ifTrue: [self pastEnd].
+			^answer copyFrom: 1 to: read]].
+	^answer
+    ]
+
+    fill [
+	"Private - Fill the input buffer"
+
+	<category: 'buffering'>
+	(access bitAnd: 1) = 0 ifTrue: [^self shouldNotImplement].
+	ptr > endPtr ifTrue: [self flush].
+	endPtr := endPtr + (self 
+			    read: collection
+			    from: endPtr + 1
+			    to: collection size)
+    ]
+]
+
+
+
+Eval [
+    FileStream initialize
+]
+

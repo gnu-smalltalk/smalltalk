@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002
@@ -32,200 +31,195 @@
  ======================================================================"
 
 
-Collection subclass: #Bag
-	   instanceVariableNames: 'contents'
-	   classVariableNames: ''
-	   poolDictionaries: ''
-	   category: 'Collections-Unordered'
-!
-
-Bag comment:
-'My instances are unordered collections of objects.  You can think
+
+Collection subclass: Bag [
+    | contents |
+    
+    <category: 'Collections-Unordered'>
+    <comment: 'My instances are unordered collections of objects.  You can think
 of me as a set with a memory; that is, if the same object is added to me
-twice, then I will report that that element has been stored twice.'!
+twice, then I will report that that element has been stored twice.'>
 
+    Bag class >> new [
+	"Answer a new instance of the receiver"
 
-
-!Bag class methodsFor: 'basic'!
+	<category: 'basic'>
+	^self basicNew initContents: 31
+    ]
 
-new
-    "Answer a new instance of the receiver"
-    ^self basicNew initContents: 31
-!
+    Bag class >> new: size [
+	"Answer a new instance of the receiver, with space for size distinct
+	 objects"
 
-new: size
-    "Answer a new instance of the receiver, with space for size distinct
-     objects"
-    ^self basicNew initContents: (7 max: size)
-! !
+	<category: 'basic'>
+	^self basicNew initContents: (7 max: size)
+    ]
 
+    add: newObject withOccurrences: anInteger [
+	"If anInteger > 0, add anInteger occurrences of newObject to the
+	 receiver. If anInteger < 0, remove them. Answer newObject.  Fail
+	 if newObject is nil."
 
-
-!Bag methodsFor: 'adding'!
+	<category: 'adding'>
+	| newOccurrences |
+	newObject isNil 
+	    ifTrue: 
+		[SystemExceptions.InvalidArgument signalOn: newObject
+		    reason: 'bag elements cannot be nil'].
+	newOccurrences := contents at: newObject
+		    put: (self occurrencesOf: newObject) + anInteger.
+	newOccurrences <= 0 ifTrue: [contents removeKey: newObject].
+	^newObject
+    ]
 
-add: newObject withOccurrences: anInteger
-    "If anInteger > 0, add anInteger occurrences of newObject to the
-     receiver. If anInteger < 0, remove them. Answer newObject.  Fail
-    if newObject is nil."
+    add: newObject [
+	"Add an occurrence of newObject to the receiver. Answer newObject.
+	 Fail if newObject is nil."
 
-    | newOccurrences |
-    newObject isNil ifTrue: [
-        SystemExceptions.InvalidArgument signalOn: newObject reason:
-	    'bag elements cannot be nil' ].
+	<category: 'adding'>
+	self add: newObject withOccurrences: 1.
+	^newObject
+    ]
 
-    newOccurrences := contents at: newObject
-	     put: (self occurrencesOf: newObject) + anInteger.
+    remove: oldObject ifAbsent: anExceptionBlock [
+	"Remove oldObject from the collection and return it. If can't be
+	 found, answer instead the result of evaluationg anExceptionBlock"
 
-    newOccurrences <= 0 ifTrue: [ contents removeKey: newObject ].
-    ^newObject
-!
+	<category: 'removing'>
+	"Since we're using a dictionary, we need decrement the value until
+	 it's zero, in which case we can then remove the object from the
+	 dictionary"
 
-add: newObject
-    "Add an occurrence of newObject to the receiver. Answer newObject.
-     Fail if newObject is nil."
-    self add: newObject withOccurrences: 1.
-    ^newObject 
-! !
+	| count |
+	count := self occurrencesOf: oldObject.
+	count = 0 ifTrue: [^anExceptionBlock value].
+	count = 1 
+	    ifTrue: [contents removeKey: oldObject]
+	    ifFalse: [contents at: oldObject put: count - 1].
+	^oldObject
+    ]
 
+    sortedByCount [
+	"Answer a collection of counts with elements, sorted by decreasing count."
 
-
-!Bag methodsFor: 'removing'!
+	<category: 'extracting items'>
+	| counts |
+	counts := SortedCollection sortBlock: [:x :y | x >= y].
+	contents keysAndValuesDo: [:key :count | counts add: count -> key].
+	^counts asArray
+    ]
 
-remove: oldObject ifAbsent: anExceptionBlock
-    "Remove oldObject from the collection and return it. If can't be
-     found, answer instead the result of evaluationg anExceptionBlock"
+    occurrencesOf: anObject [
+	"Answer the number of occurrences of anObject found in the receiver"
 
-    | count |
-    "Since we're using a dictionary, we need decrement the value until
-     it's zero, in which case we can then remove the object from the
-     dictionary"
-    count := self occurrencesOf: oldObject.
-    count = 0 ifTrue: [ ^anExceptionBlock value ].
-    count = 1 ifTrue: [ contents removeKey: oldObject ]
-    	      ifFalse: [ contents at: oldObject
-	      	    	    	  put: count - 1 ].
-    ^oldObject
-! !
+	<category: 'testing collections'>
+	^contents at: anObject ifAbsent: [0]
+    ]
 
-
-!Bag methodsFor: 'extracting items'!
+    includes: anObject [
+	"Answer whether we include anObject"
 
-sortedByCount
-    "Answer a collection of counts with elements, sorted by decreasing count."
+	<category: 'testing collections'>
+	^contents includesKey: anObject
+    ]
 
-    | counts |
-    counts := SortedCollection sortBlock: [:x :y | x >= y].
-    contents keysAndValuesDo: [ :key :count |
-	counts add: count -> key].
-    
-    ^counts asArray! !
+    size [
+	"Answer the total number of objects found in the receiver"
 
-
-!Bag methodsFor: 'testing collections'!
+	<category: 'testing collections'>
+	| count |
+	count := 0.
+	contents do: [:element | count := count + element].
+	^count
+    ]
 
-occurrencesOf: anObject
-    "Answer the number of occurrences of anObject found in the receiver"
-    ^contents at: anObject ifAbsent: [ 0 ]
-!
+    hash [
+	"Answer an hash value for the receiver"
 
-includes: anObject
-    "Answer whether we include anObject"
-    ^contents includesKey: anObject
-!
+	<category: 'testing collections'>
+	^contents hash
+    ]
 
-size
-    "Answer the total number of objects found in the receiver"
-    | count |
-    count := 0.
-    contents do: [ :element | count := count + element ].
-    ^count
-!
+    = aBag [
+	"Answer whether the receiver and aBag contain the same objects"
 
-hash
-    "Answer an hash value for the receiver"
-    ^contents hash
-!
+	<category: 'testing collections'>
+	self class == aBag class ifFalse: [^false].
+	^contents = aBag contents
+    ]
 
-= aBag
-    "Answer whether the receiver and aBag contain the same objects"
-    self class == aBag class
-	ifFalse: [ ^false ].
-    ^contents = aBag contents
-! !
+    asSet [
+	"Answer a set with the elements of the receiver"
 
+	<category: 'enumerating the elements of a collection'>
+	^contents keys
+    ]
 
-
-!Bag methodsFor: 'enumerating the elements of a collection'!
+    do: aBlock [
+	"Evaluate the block for all members in the collection."
 
-asSet
-    "Answer a set with the elements of the receiver"
+	"For Bags, we need to go through the contents dictionary, and
+	 perform the block for as many occurrences of the objects as there
+	 are."
 
-    ^contents keys!
+	<category: 'enumerating the elements of a collection'>
+	contents 
+	    keysAndValuesDo: [:key :count | count timesRepeat: [aBlock value: key]]
+    ]
 
-do: aBlock
-    "Evaluate the block for all members in the collection."
-    
-    "For Bags, we need to go through the contents dictionary, and
-     perform the block for as many occurrences of the objects as there
-     are."
-    contents keysAndValuesDo:
-	[ :key :count | count timesRepeat: [ aBlock value: key ] ]
-! !
+    storeOn: aStream [
+	"Put on aStream some Smalltalk code compiling to the receiver"
 
+	<category: 'storing'>
+	| noElements |
+	aStream
+	    nextPut: $(;
+	    nextPutAll: self classNameString;
+	    nextPutAll: ' new'.
+	noElements := true.
+	contents keysAndValuesDo: 
+		[:key :count | 
+		aStream
+		    nextPutAll: ' add: ';
+		    store: key;
+		    nextPutAll: ' withOccurrences: ';
+		    store: count;
+		    nextPut: $;.
+		noElements := false].
+	noElements ifFalse: [aStream nextPutAll: '; yourself'].
+	aStream nextPut: $)
+    ]
 
-
-!Bag methodsFor: 'storing'!
+    printOn: aStream [
+	"Put on aStream a representation of the receiver"
 
-storeOn: aStream
-    "Put on aStream some Smalltalk code compiling to the receiver"
-    | noElements |
-    aStream nextPut: $(;
-	nextPutAll: self classNameString;
-	nextPutAll: ' new'.
-    noElements := true.
-    contents keysAndValuesDo:
-      [ :key :count | aStream nextPutAll: ' add: ';
-		     store: key;
-		     nextPutAll: ' withOccurrences: ';
-		     store: count;
-		     nextPut: $;.
-		 noElements := false ].
-    noElements ifFalse: [ aStream nextPutAll: '; yourself' ].
-    aStream nextPut: $)
-! !
+	<category: 'printing'>
+	aStream
+	    nextPutAll: self classNameString;
+	    nextPut: $(.
+	contents keysAndValuesDo: 
+		[:key :count | 
+		aStream
+		    print: key;
+		    nextPut: $:;
+		    print: count;
+		    space].
+	aStream nextPut: $)
+    ]
 
-
-!Bag methodsFor: 'printing'!
+    dictionaryClass [
+	<category: 'private'>
+	^LookupTable
+    ]
 
-printOn: aStream
-    "Put on aStream a representation of the receiver"
+    initContents: size [
+	<category: 'private'>
+	contents := self dictionaryClass new: size
+    ]
 
-    aStream
-	nextPutAll: self classNameString;
-	nextPut: $(.
-
-    contents keysAndValuesDo: [ :key :count |
-	aStream 
-	     print: key;
-	     nextPut: $:;
-	     print: count;
-	     space
-    ].
-    aStream nextPut: $)
-! !
-
-
-!Bag methodsFor: 'private'!
-
-dictionaryClass
-    ^LookupTable
-!
-
-initContents: size
-    contents := self dictionaryClass new: size
-!
-
-contents
-    ^contents
-! !
+    contents [
+	<category: 'private'>
+	^contents
+    ]
+]
 

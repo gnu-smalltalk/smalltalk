@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
@@ -31,229 +30,254 @@
  ======================================================================"
 
 
-Object subclass:  #NetThread
-	instanceVariableNames: 'process socket priority '
-	classVariableNames: ''
-	poolDictionaries: 'TCP '
-	category: 'Sockets-Serving framework'!
+
+Object subclass: NetThread [
+    | process socket priority |
+    
+    <import: TCP>
+    <category: 'Sockets-Serving framework'>
+    <comment: 'A NetThread runs a process attached to a specified socket.'>
 
-NetThread comment: 
-'A NetThread runs a process attached to a specified socket.'!
-
-NetThread subclass:  #NetServer
-	instanceVariableNames: 'port '
-	classVariableNames: 'Servers '
-	poolDictionaries: ''
-	category: 'Sockets-Serving framework'!
-
-NetServer comment: 
-'A NetServer keeps a socket listening on a port, and dispatches incoming
-requests to NetSession objects.'!
-
-NetThread subclass:  #NetSession
-	instanceVariableNames: 'server '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Sockets-Serving framework'!
-
-NetSession comment: 
-'NetSessions divide a session in separate requests and provide 
-exception handling for those.'!
-
-!NetThread class methodsFor: 'instance creation'!
-
-new
-    ^self basicNew initialize! !
-
-!NetThread methodsFor: 'initialize-release'!
-
-defaultPriority
-    ^Processor userSchedulingPriority!
-
-initialize
-    priority := self defaultPriority!
-
-release
-    self stop.
-    super release! !
-
-!NetThread methodsFor: 'printing'!
-
-printOn: aStream
-    aStream print: self class; nextPut: $:.
-    self isRunning ifFalse: [ ^aStream nextPutAll: 'idle' ].
-    aStream print: self socket port
-! !
-
-!NetThread methodsFor: 'private'!
-
-createSocket
-    self subclassResponsibility
-!
-
-startNewProcess
-    process := [ self run ] newProcess
-	priority: priority;
-	name: (self class name, ' Process');
-	yourself.
-
-    process resume!
-
-isPeerAlive
-    ^socket notNil and: [ socket isPeerAlive ]
-!
-
-socket
-    ^socket
-! !
-
-!NetThread methodsFor: 'running'!
-
-run
-    self subclassResponsibility
-! !
-
-!NetThread methodsFor: 'serving'!
-
-isRunning
-    ^process notNil!
-
-start
-    self isRunning ifTrue: [^self].
-    socket := self createSocket.
-    self startNewProcess!
-
-stop
-    self isRunning
-	ifTrue:
-	    [process terminate.
-	    process := nil.
-	    socket close.
-	    socket := nil]! !
-
-
-!NetServer class methodsFor: 'accessing'!
-
-at: port
-    | server |
-    Servers isNil ifTrue: [ Servers := Dictionary new ].
-    ^Servers at: port ifAbsentPut: [ (self new) port: port; yourself ].
-!
-
-initializeServer: port
-    | server |
-    server := self at: port.
-    server isRunning ifFalse: [server startOn: port].
-    ^server
-!
-
-terminateServer: port
-    Servers isNil ifTrue: [ ^self ].
-    (Servers includesKey: port) ifTrue: [ 
-	(Servers at: port) release.
-	Servers removeKey: port.
+    NetThread class >> new [
+	<category: 'instance creation'>
+	^self basicNew initialize
     ]
-! !
 
-!NetServer methodsFor: 'abstract'!
+    defaultPriority [
+	<category: 'initialize-release'>
+	^Processor userSchedulingPriority
+    ]
 
-newSession
-    self subclassResponsibility
-!
+    initialize [
+	<category: 'initialize-release'>
+	priority := self defaultPriority
+    ]
 
-respondTo: aRequest
-    self subclassResponsibility
-! !
+    release [
+	<category: 'initialize-release'>
+	self stop.
+	super release
+    ]
 
-!NetServer methodsFor: 'accessing'!
+    printOn: aStream [
+	<category: 'printing'>
+	aStream
+	    print: self class;
+	    nextPut: $:.
+	self isRunning ifFalse: [^aStream nextPutAll: 'idle'].
+	aStream print: self socket port
+    ]
 
-port
-    ^port!
+    createSocket [
+	<category: 'private'>
+	self subclassResponsibility
+    ]
 
-port: anObject
-    self stop.
-    port := anObject!
+    startNewProcess [
+	<category: 'private'>
+	process := ([self run] newProcess)
+		    priority: priority;
+		    name: self class name , ' Process';
+		    yourself.
+	process resume
+    ]
 
-priority
-    ^priority!
+    isPeerAlive [
+	<category: 'private'>
+	^socket notNil and: [socket isPeerAlive]
+    ]
 
-priority: anInteger
-    priority := anInteger.
-    self isRunning ifTrue: [process priority: priority]!
+    socket [
+	<category: 'private'>
+	^socket
+    ]
 
-startOn: aPortNumber
-    self port: aPortNumber.
-    self start
-! !
+    run [
+	<category: 'running'>
+	self subclassResponsibility
+    ]
 
-!NetServer methodsFor: 'private'!
+    isRunning [
+	<category: 'serving'>
+	^process notNil
+    ]
 
-createSocket
-    ^(ServerSocket port: port)
-!
+    start [
+	<category: 'serving'>
+	self isRunning ifTrue: [^self].
+	socket := self createSocket.
+	self startNewProcess
+    ]
 
-defaultPriority
-    ^Processor lowIOPriority!
+    stop [
+	<category: 'serving'>
+	self isRunning 
+	    ifTrue: 
+		[process terminate.
+		process := nil.
+		socket close.
+		socket := nil]
+    ]
+]
 
-run
-    Processor activeProcess name: 'listen'.
-    [
-        socket waitForConnection.
-        self newSession
+
+
+NetThread subclass: NetServer [
+    | port |
+    
+    <category: 'Sockets-Serving framework'>
+    <comment: 'A NetServer keeps a socket listening on a port, and dispatches incoming
+requests to NetSession objects.'>
+
+    Servers := nil.
+
+    NetServer class >> at: port [
+	<category: 'accessing'>
+	| server |
+	Servers isNil ifTrue: [Servers := Dictionary new].
+	^Servers at: port
+	    ifAbsentPut: 
+		[(self new)
+		    port: port;
+		    yourself]
+    ]
+
+    NetServer class >> initializeServer: port [
+	<category: 'accessing'>
+	| server |
+	server := self at: port.
+	server isRunning ifFalse: [server startOn: port].
+	^server
+    ]
+
+    NetServer class >> terminateServer: port [
+	<category: 'accessing'>
+	Servers isNil ifTrue: [^self].
+	(Servers includesKey: port) 
+	    ifTrue: 
+		[(Servers at: port) release.
+		Servers removeKey: port]
+    ]
+
+    newSession [
+	<category: 'abstract'>
+	self subclassResponsibility
+    ]
+
+    respondTo: aRequest [
+	<category: 'abstract'>
+	self subclassResponsibility
+    ]
+
+    port [
+	<category: 'accessing'>
+	^port
+    ]
+
+    port: anObject [
+	<category: 'accessing'>
+	self stop.
+	port := anObject
+    ]
+
+    priority [
+	<category: 'accessing'>
+	^priority
+    ]
+
+    priority: anInteger [
+	<category: 'accessing'>
+	priority := anInteger.
+	self isRunning ifTrue: [process priority: priority]
+    ]
+
+    startOn: aPortNumber [
+	<category: 'accessing'>
+	self port: aPortNumber.
+	self start
+    ]
+
+    createSocket [
+	<category: 'private'>
+	^ServerSocket port: port
+    ]
+
+    defaultPriority [
+	<category: 'private'>
+	^Processor lowIOPriority
+    ]
+
+    run [
+	<category: 'private'>
+	Processor activeProcess name: 'listen'.
+	
+	[socket waitForConnection.
+	(self newSession)
 	    server: self;
-	    start
-    ] repeat! !
+	    start] 
+		repeat
+    ]
+]
 
 
-!NetSession methodsFor: 'abstract'!
+
+NetThread subclass: NetSession [
+    | server |
+    
+    <category: 'Sockets-Serving framework'>
+    <comment: 'NetSessions divide a session in separate requests and provide 
+exception handling for those.'>
 
-log: request time: milliseconds
-!
+    log: request time: milliseconds [
+	<category: 'abstract'>
+	
+    ]
 
-next
-    self subclassResponsibility
-! !
+    next [
+	<category: 'abstract'>
+	self subclassResponsibility
+    ]
 
-!NetSession methodsFor: 'accessing'!
+    server [
+	<category: 'accessing'>
+	^server
+    ]
 
-server
-    ^server
-!
+    server: aServer [
+	<category: 'accessing'>
+	server := aServer
+    ]
 
-server: aServer
-    server := aServer
-! !
+    createSocket [
+	<category: 'private'>
+	^server socket accept
+    ]
 
-!NetSession methodsFor: 'private'!
-
-createSocket
-    ^server socket accept
-!
-
-run
-    | req time |
-    Processor activeProcess name: 'connection'.
-    [
+    run [
+	<category: 'private'>
+	| req time |
+	Processor activeProcess name: 'connection'.
+	
 	[
-	    req := self next.
-	    time := Time millisecondsToRun: [
-		self server respondTo: req.
-		req release
-	    ]
-	]   on: ExAll
-	    do: [ :ex |
-		"Ignore errors due to bad communication lines."
-		self isPeerAlive ifFalse: [ ex return ].
-		ex pass
-	    ].
+	[req := self next.
+	time := Time millisecondsToRun: 
+			[self server respondTo: req.
+			req release]] 
+		on: ExAll
+		do: 
+		    [:ex | 
+		    "Ignore errors due to bad communication lines."
 
+		    self isPeerAlive ifFalse: [ex return].
+		    ex pass].
 	self log: req time: time.
+	self isPeerAlive] 
+		whileTrue
+    ]
 
-	self isPeerAlive
-    ] whileTrue
-!
-
-stop
-    super stop.
-! !
+    stop [
+	<category: 'private'>
+	super stop
+    ]
+]
 

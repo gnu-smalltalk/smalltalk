@@ -1,104 +1,179 @@
-Exception subclass: #TestFailure
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'SUnitPreload'!
+Exception subclass: TestFailure [
+    
+    <category: 'SUnitPreload'>
+    <comment: nil>
+]
 
-Delay subclass: #SUnitDelay
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'SUnitPreload'!
 
-TestFailure subclass: #ResumableTestFailure
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'SUnitPreload'!
+
+Delay subclass: SUnitDelay [
+    
+    <category: 'SUnitPreload'>
+    <comment: nil>
+]
 
-Object subclass: #SUnitNameResolver
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'SUnitPreload'!
 
-!Object methodsFor: 'Camp Smalltalk'!
+
+TestFailure subclass: ResumableTestFailure [
+    
+    <category: 'SUnitPreload'>
+    <comment: nil>
 
-sunitAddDependent: anObject
-    self addDependent: anObject!
+    sunitExitWith: aValue [
+	<category: 'Camp Smalltalk'>
+	^self resume: aValue
+    ]
+]
 
-sunitChanged: aspect
-    self changed: aspect!
 
-sunitRemoveDependent: anObject
-    self removeDependent: anObject! !
+
+Object subclass: SUnitNameResolver [
+    
+    <category: 'SUnitPreload'>
+    <comment: nil>
 
-!BlockClosure methodsFor: 'Camp Smalltalk'!
+    SUnitNameResolver class >> classNamed: aSymbol [
+	<category: 'Camp Smalltalk'>
+	^(aSymbol substrings: $.) inject: Smalltalk
+	    into: [:space :key | space at: key asSymbol ifAbsent: [^nil]]
+    ]
 
-sunitEnsure: aBlock 
-    ^self ensure: aBlock!
+    SUnitNameResolver class >> defaultLogDevice [
+	<category: 'Camp Smalltalk'>
+	^Transcript
+    ]
 
-sunitOn: aSignal do: anExceptionBlock 
-    ^self on: aSignal do: anExceptionBlock! !
+    SUnitNameResolver class >> errorObject [
+	<category: 'Camp Smalltalk'>
+	^Error
+    ]
 
-!Behavior methodsFor: 'Camp Smalltalk'!
+    SUnitNameResolver class >> mnuExceptionObject [
+	<category: 'Camp Smalltalk'>
+	^MessageNotUnderstood
+    ]
 
-sunitAllSelectors
-    ^self allSelectors asSortedCollection asOrderedCollection!
+    SUnitNameResolver class >> notificationObject [
+	<category: 'Camp Smalltalk'>
+	^Notification
+    ]
+]
 
-sunitSelectors
-    ^self selectors asSortedCollection asOrderedCollection! !
 
-!String methodsFor: 'Camp Smalltalk'!
+
+Object extend [
 
-sunitAsSymbol
-    ^self asSymbol!
+    sunitAddDependent: anObject [
+	<category: 'Camp Smalltalk'>
+	self addDependent: anObject
+    ]
 
-sunitMatch: aString
-    ^self match: aString!
+    sunitChanged: aspect [
+	<category: 'Camp Smalltalk'>
+	self changed: aspect
+    ]
 
-sunitSubStrings
-    ^self substrings! !
+    sunitRemoveDependent: anObject [
+	<category: 'Camp Smalltalk'>
+	self removeDependent: anObject
+    ]
 
-!SUnitNameResolver class methodsFor: 'Camp Smalltalk'!
+]
 
-classNamed: aSymbol
-    ^(aSymbol substrings: $.) inject: Smalltalk
-        into: [ :space :key | (space at: key asSymbol ifAbsent: [ ^nil ]) ]!
 
-defaultLogDevice
-    ^Transcript!
+
+BlockClosure extend [
 
-errorObject
-    ^Error!
+    sunitEnsure: aBlock [
+	<category: 'Camp Smalltalk'>
+	^self ensure: aBlock
+    ]
 
-mnuExceptionObject
-    ^MessageNotUnderstood!
+    sunitOn: aSignal do: anExceptionBlock [
+	<category: 'Camp Smalltalk'>
+	^self on: aSignal do: anExceptionBlock
+    ]
 
-notificationObject
-    ^Notification! !
+]
 
-!Exception class methodsFor: 'Camp Smalltalk'!
 
-sunitSignalWith: aString
-    ^self signal: aString! !
+
+Behavior extend [
 
-!Exception methodsFor: 'Camp Smalltalk'!
+    sunitAllSelectors [
+	<category: 'Camp Smalltalk'>
+	^self allSelectors asSortedCollection asOrderedCollection
+    ]
 
-sunitExitWith: aValue
-    ^self return: aValue! !
+    sunitSelectors [
+	<category: 'Camp Smalltalk'>
+	^self selectors asSortedCollection asOrderedCollection
+    ]
 
-!ResumableTestFailure methodsFor: 'Camp Smalltalk'!
+]
 
-sunitExitWith: aValue
-    ^self resume: aValue! !
 
-!String methodsFor: 'Camp Smalltalk'!
+
+String extend [
 
-sunitAsClass
-    ^SUnitNameResolver classNamed: self! !
+    sunitAsSymbol [
+	<category: 'Camp Smalltalk'>
+	^self asSymbol
+    ]
 
-!Class methodsFor: 'Camp Smalltalk'!
+    sunitMatch: aString [
+	<category: 'Camp Smalltalk'>
+	^self match: aString
+    ]
 
-sunitName
-    ^self name! !
+    sunitSubStrings [
+	<category: 'Camp Smalltalk'>
+	^self substrings
+    ]
+
+]
+
+
+
+Exception class extend [
+
+    sunitSignalWith: aString [
+	<category: 'Camp Smalltalk'>
+	^self signal: aString
+    ]
+
+]
+
+
+
+Exception extend [
+
+    sunitExitWith: aValue [
+	<category: 'Camp Smalltalk'>
+	^self return: aValue
+    ]
+
+]
+
+
+
+String extend [
+
+    sunitAsClass [
+	<category: 'Camp Smalltalk'>
+	^SUnitNameResolver classNamed: self
+    ]
+
+]
+
+
+
+Class extend [
+
+    sunitName [
+	<category: 'Camp Smalltalk'>
+	^self name
+    ]
+
+]
+

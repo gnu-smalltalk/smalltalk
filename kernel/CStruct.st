@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002
@@ -32,220 +31,249 @@
  ======================================================================"
 
 
-CObject variableWordSubclass: #CCompound
-      instanceVariableNames: ''
-      classVariableNames: ''
-      poolDictionaries: ''
-      category: 'Language-C interface'
-!
-
-CCompound class instanceVariableNames: 'declaration'!
-
-CCompound variableWordSubclass: #CStruct
-      instanceVariableNames: ''
-      classVariableNames: ''
-      poolDictionaries: ''
-      category: 'Language-C interface'
-!
-
-CCompound variableWordSubclass: #CUnion
-      instanceVariableNames: ''
-      classVariableNames: ''
-      poolDictionaries: ''
-      category: 'Language-C interface'
-!
-
 
-!Integer methodsFor: 'extension'!
+CObject subclass: CCompound [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
 
-alignTo: anInteger
-    "Answer the receiver, truncated to the first higher or equal
-     multiple of anInteger (which must be a power of two)"
-    ^(self + anInteger - 1) bitClear: (anInteger - 1)
-! !
+    CCompound class [
+	| declaration |
+	
+    ]
 
-
-!CCompound class methodsFor: 'instance creation'!
+    CCompound class >> new [
+	"Allocate a new instance of the receiver. To free the memory after
+	 GC, remember to call #addToBeFinalized."
 
-new
-    "Allocate a new instance of the receiver. To free the memory after
-     GC, remember to call #addToBeFinalized."
-    ^self alloc: self sizeof
-! !
+	<category: 'instance creation'>
+	^self alloc: self sizeof
+    ]
 
-
-!CCompound class methodsFor: 'subclass creation'!
+    CCompound class >> sizeof [
+	"Answer 0, the size of an empty struct"
 
-sizeof
-    "Answer 0, the size of an empty struct"
-    ^0
-!
+	<category: 'subclass creation'>
+	^0
+    ]
 
-alignof
-    "Answer 1, the alignment of an empty struct"
-    ^1
-!
+    CCompound class >> alignof [
+	"Answer 1, the alignment of an empty struct"
 
-classPragmas
-    "Return the pragmas that are written in the file-out of this class."
-    ^super classPragmas copyWith: #declaration
-!
+	<category: 'subclass creation'>
+	^1
+    ]
 
-newStruct: structName declaration: array
-    "The old way to create a CStruct.  Superseded by #subclass:declaration:..."
-    ^self
-        subclass: structName
-	declaration: array
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Synthetic Class'
-!
+    CCompound class >> classPragmas [
+	"Return the pragmas that are written in the file-out of this class."
 
-subclass: structName declaration: array
-    classVariableNames: cvn poolDictionaries: pd category: category
+	<category: 'subclass creation'>
+	^super classPragmas copyWith: #declaration
+    ]
 
-    "Create a new class with the given name that contains code
-     to implement the given C struct.  All the parameters except
-     `array' are the same as for a standard class creation message;
-     see documentation for more information"
+    CCompound class >> newStruct: structName declaration: array [
+	"The old way to create a CStruct.  Superseded by #subclass:declaration:..."
 
-    | newClass |
-    newClass := self variableWordSubclass: structName asSymbol
-		       instanceVariableNames: ''
-		       classVariableNames: cvn
-		       poolDictionaries: pd
-		       category: category.
+	<category: 'subclass creation'>
+	^self 
+	    subclass: structName
+	    declaration: array
+	    classVariableNames: ''
+	    poolDictionaries: ''
+	    category: 'Synthetic Class'
+    ]
 
-    newClass declaration: array.
-    ^newClass
-!
+    CCompound class >> subclass: structName declaration: array classVariableNames: cvn poolDictionaries: pd category: category [
+	"Create a new class with the given name that contains code
+	 to implement the given C struct.  All the parameters except
+	 `array' are the same as for a standard class creation message;
+	 see documentation for more information"
 
-declaration
-    "Return the description of the fields in the receiver class."
-    declaration isNil ifTrue: [ declaration := #() ].
-    ^declaration
-!
+	<category: 'subclass creation'>
+	| newClass |
+	newClass := self 
+		    variableWordSubclass: structName asSymbol
+		    instanceVariableNames: ''
+		    classVariableNames: cvn
+		    poolDictionaries: pd
+		    category: category.
+	newClass declaration: array.
+	^newClass
+    ]
 
-declaration: array
-    self subclassResponsibility
-!
+    CCompound class >> declaration [
+	"Return the description of the fields in the receiver class."
 
-declaration: array inject: startOffset into: aBlock
-    "Compile methods that implement the declaration in array.  To
-     compute the offset after each field, the value of the
-     old offset plus the new field's size is passed to aBlock,
-     together with the new field's alignment requirements."
-    | offset maxAlignment inspStr |
-    (self declaration notEmpty and: [ self declaration ~= array ])
-	ifTrue: [ self error: 'cannot redefine CStruct/CUnion' ].
+	<category: 'subclass creation'>
+	declaration isNil ifTrue: [declaration := #()].
+	^declaration
+    ]
 
-    declaration := array.
-    offset := startOffset.
-    maxAlignment := self superclass alignof.
-    inspStr := WriteStream on: (String new: 8).
-    inspStr nextPutAll: 'inspectSelectorList'; nl; nextPutAll: '    ^#('.
+    CCompound class >> declaration: array [
+	<category: 'subclass creation'>
+	self subclassResponsibility
+    ]
 
-    "Iterate through each member, doing alignment, size calculations,
-     and creating accessor methods"
-    array do: [ :dcl || typeDecl name str type |
-	name := dcl at: 1.
-	typeDecl := dcl at: 2.
-	self emitInspectTo: inspStr for: name.
+    CCompound class >> declaration: array inject: startOffset into: aBlock [
+	"Compile methods that implement the declaration in array.  To
+	 compute the offset after each field, the value of the
+	 old offset plus the new field's size is passed to aBlock,
+	 together with the new field's alignment requirements."
 
-	type := CType from: typeDecl.
-	offset := aBlock value: offset value: type alignof.
-	maxAlignment := type alignof max: maxAlignment.
-
-	str := WriteStream on: (String new: 20).
-	str nextPutAll: name;
+	<category: 'subclass creation'>
+	| offset maxAlignment inspStr |
+	(self declaration notEmpty and: [self declaration ~= array]) 
+	    ifTrue: [self error: 'cannot redefine CStruct/CUnion'].
+	declaration := array.
+	offset := startOffset.
+	maxAlignment := self superclass alignof.
+	inspStr := WriteStream on: (String new: 8).
+	inspStr
+	    nextPutAll: 'inspectSelectorList';
 	    nl;
-	    nextPutAll: '    ^self at: ';
-	    print: offset;
-	    nextPutAll: ' type: ';
-	    store: type.
-	self compile: str classified: 'accessing'.
-	offset := offset + type sizeof
-    ].
+	    nextPutAll: '    ^#('.
 
-    self compile: inspStr contents, ')' classified: 'debugging'.
-    self compileSize: offset align: maxAlignment
-!
-			
-compileSize: size align: alignment
-    "Private - Compile sizeof and alignof methods"
-    | sizeofMethod alignofMethod |
+	"Iterate through each member, doing alignment, size calculations,
+	 and creating accessor methods"
+	array do: 
+		[:dcl | 
+		| typeDecl name str type |
+		name := dcl at: 1.
+		typeDecl := dcl at: 2.
+		self emitInspectTo: inspStr for: name.
+		type := CType from: typeDecl.
+		offset := aBlock value: offset value: type alignof.
+		maxAlignment := type alignof max: maxAlignment.
+		str := WriteStream on: (String new: 20).
+		str
+		    nextPutAll: name;
+		    nl;
+		    nextPutAll: '    ^self at: ';
+		    print: offset;
+		    nextPutAll: ' type: ';
+		    store: type.
+		self compile: str classified: 'accessing'.
+		offset := offset + type sizeof].
+	self compile: inspStr contents , ')' classified: 'debugging'.
+	self compileSize: offset align: maxAlignment
+    ]
 
-    sizeofMethod :=  'sizeof
-    ^', (size alignTo: alignment) printString.
-    alignofMethod := 'alignof
-    ^', (alignment printString).
+    CCompound class >> compileSize: size align: alignment [
+	"Private - Compile sizeof and alignof methods"
 
-    self compile: sizeofMethod classified: 'accessing'.
-    self class compile: sizeofMethod classified: 'accessing'.
+	<category: 'subclass creation'>
+	| sizeofMethod alignofMethod |
+	sizeofMethod := 'sizeof
+    ^' , (size alignTo: alignment) printString.
+	alignofMethod := 'alignof
+    ^' , alignment printString.
+	self compile: sizeofMethod classified: 'accessing'.
+	self class compile: sizeofMethod classified: 'accessing'.
+	self compile: alignofMethod classified: 'accessing'.
+	self class compile: alignofMethod classified: 'accessing'
+    ]
 
-    self compile: alignofMethod classified: 'accessing'.
-    self class compile: alignofMethod classified: 'accessing'.
-!
+    CCompound class >> emitInspectTo: str for: name [
+	"Private - Emit onto the given stream the code for adding the
+	 given selector to the CCompound's inspector."
 
-emitInspectTo: str for: name
-    "Private - Emit onto the given stream the code for adding the
-     given selector to the CCompound's inspector."
+	<category: 'subclass creation'>
+	str
+	    nl;
+	    next: 8 put: Character space;
+	    nextPut: $#;
+	    nextPutAll: name
+    ]
 
-    str nl;
-	next: 8 put: Character space;
-	nextPut: $#;
-	nextPutAll: name
-! !
+    inspectSelectorList [
+	"Answer a list of selectors whose return values should be inspected
+	 by #inspect."
+
+	"We can't call subclassResponsibility because #inspect should never
+	 fail - it would lead to recursive walkbacks. So answer an empty
+	 array.
+	 For subclasses, it will answer an Array of the selectors whose
+	 values are to be shown in the inspector."
+
+	<category: 'instance creation'>
+	^#()
+    ]
+
+    inspect [
+	"Inspect the contents of the receiver"
+
+	"This inspect method applies to every instance of the receiver
+	 and their subclasses, which only override #inspectSelectorList."
+
+	<category: 'instance creation'>
+	self printNl.
+	self inspectSelectorList do: 
+		[:each | 
+		Transcript
+		    nextPutAll: '    ';
+		    nextPutAll: each;
+		    nextPutAll: ': ';
+		    print: (self perform: each) value;
+		    nl]
+    ]
+]
+
 
 
-!CCompound methodsFor: 'instance creation'!
+CCompound subclass: CStruct [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
+
+    CStruct class >> declaration: array [
+	"Compile methods that implement the declaration in array."
+
+	<category: 'subclass creation'>
+	self 
+	    declaration: array
+	    inject: self superclass sizeof
+	    into: [:oldOffset :alignment | oldOffset alignTo: alignment]
+    ]
+]
 
 
-inspectSelectorList
-    "Answer a list of selectors whose return values should be inspected
-     by #inspect."
+
+CCompound subclass: CUnion [
+    
+    <shape: #word>
+    <category: 'Language-C interface'>
+    <comment: nil>
 
-    "We can't call subclassResponsibility because #inspect should never
-     fail - it would lead to recursive walkbacks. So answer an empty
-     array.
-     For subclasses, it will answer an Array of the selectors whose
-     values are to be shown in the inspector."
-    ^#()
-!
-inspect
-    "Inspect the contents of the receiver"
-    "This inspect method applies to every instance of the receiver
-     and their subclasses, which only override #inspectSelectorList."
-    self printNl.
-    self inspectSelectorList do: [ :each |
-	Transcript
-	   nextPutAll: '    ';
-	   nextPutAll: each;
-	   nextPutAll: ': ';
-	   print: (self perform: each) value;
-	   nl
-    ].
-! !
+    CUnion class >> declaration: array [
+	"Compile methods that implement the declaration in array."
 
-!CStruct class methodsFor: 'subclass creation'!
-
-declaration: array
-    "Compile methods that implement the declaration in array."
-    self
-	declaration: array
-	inject: self superclass sizeof
-	into: [ :oldOffset :alignment | oldOffset alignTo: alignment ]
-! !
-
-!CUnion class methodsFor: 'subclass creation'!
-
-declaration: array
-    "Compile methods that implement the declaration in array."
-    self
-	declaration: array
-	inject: 0
-	into: [ :oldOffset :alignment | 0 ]
-! !
+	<category: 'subclass creation'>
+	self 
+	    declaration: array
+	    inject: 0
+	    into: [:oldOffset :alignment | 0]
+    ]
+]
 
 
-CCompound initialize!
+
+Integer extend [
+
+    alignTo: anInteger [
+	"Answer the receiver, truncated to the first higher or equal
+	 multiple of anInteger (which must be a power of two)"
+
+	<category: 'extension'>
+	^self + anInteger - 1 bitClear: anInteger - 1
+    ]
+
+]
+
+
+
+Eval [
+    CCompound initialize
+]
+

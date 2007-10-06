@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1991,1992,94,95,99,2000,2001,2002
@@ -31,154 +30,171 @@
 |
  ======================================================================"
 
-Namespace current: Kernel!
 
-nil subclass: #AutoloadClass
-       instanceVariableNames: 'superClass subClasses methodDictionary
-                               instanceSpec instanceVariables
-			       environment name fileName'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Useful tools'
-!
+
+Namespace current: Kernel [
 
-AutoloadClass comment:
-'I represent the metaclass of an autoloaded class before it is autoloaded.
+nil subclass: AutoloadClass [
+    | superClass subClasses methodDictionary instanceSpec instanceVariables environment name fileName |
+    
+    <comment: 'I represent the metaclass of an autoloaded class before it is autoloaded.
 Having a proxy for the metaclass as well allows one to send messages to
 the metaclass (such as #methodsFor: to extend it with class-side methods)
-and have the class autoloaded.' !
+and have the class autoloaded.'>
+    <category: 'Examples-Useful tools'>
 
-Namespace current: Smalltalk!
+    name [
+	"Answer the name of the class to be autoloaded"
 
-nil subclass: #Autoload
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Useful tools'
-!
+	<category: 'accessing'>
+	^name
+    ]
 
-Autoload comment:
-'I am not a part of the normal Smalltalk kernel class system.  I provide the
+    name: aSymbol [
+	"Set to aSymbol the name of the class to be autoloaded"
+
+	<category: 'accessing'>
+	name := aSymbol
+    ]
+
+    environment [
+	"Answer the namespace in which the class will be autoloaded"
+
+	<category: 'accessing'>
+	^environment
+    ]
+
+    environment: aNamespace [
+	"Set to aNamespace the namespace in which the class will be autoloaded"
+
+	<category: 'accessing'>
+	environment := aNamespace
+    ]
+
+    fileName [
+	"Answer the name of the file from which the class will be autoloaded"
+
+	<category: 'accessing'>
+	^fileName
+    ]
+
+    fileName: aString [
+	"Set to aString the name of the file from which the class will be autoloaded"
+
+	<category: 'accessing'>
+	fileName := aString
+    ]
+
+    doesNotUnderstand: aMessage [
+	"Load the class and resend the message to its metaclass."
+
+	<category: 'accessing'>
+	^aMessage reinvokeFor: self loadedMetaclass
+    ]
+
+    loadedMetaclass [
+	"File-in the file and answer the metaclass for the new value of the
+	 association which held the receiver"
+
+	<category: 'accessing'>
+	^self loadedClass class
+    ]
+
+    loadedClass [
+	"File-in the file and answer the new value of the association which
+	 held the receiver"
+
+	<category: 'accessing'>
+	| class file |
+	self fileName isNil 
+	    ifFalse: 
+		[file := self fileName.
+		self fileName: nil.
+		self environment at: self name put: nil.
+		FileStream fileIn: file].
+	class := self environment at: self name ifAbsent: [nil].
+	class isNil 
+	    ifTrue: 
+		[^Autoload error: 'Autoloaded file should have defined class "' , name 
+			    , '" but didn''t'].
+	^class
+    ]
+]
+
+]
+
+
+
+nil subclass: Autoload [
+    
+    <comment: 'I am not a part of the normal Smalltalk kernel class system.  I provide the
 ability to do late ("on-demand") loading of class definitions.  Through me,
 you can define any class to be loaded when any message is sent to
 the class itself (such as to create an instance) or to its metaclass (such
-as #methodsFor: to extend it with class-side methods).' !
+as #methodsFor: to extend it with class-side methods).'>
+    <category: 'Examples-Useful tools'>
 
-
-!Kernel.AutoloadClass methodsFor: 'accessing'!
+    Autoload class >> class: nameSymbol from: fileNameString [
+	"Make Smalltalk automatically load the class named nameSymbol
+	 from fileNameString when needed"
 
-name
-    "Answer the name of the class to be autoloaded"
+	<category: 'instance creation'>
+	^self 
+	    class: nameSymbol
+	    in: Namespace current
+	    from: fileNameString
+    ]
 
-    ^name!
+    Autoload class >> class: nameSymbol in: aNamespace from: fileNameString [
+	"Make Smalltalk automatically load the class named nameSymbol
+	 and residing in aNamespace from fileNameString when needed"
 
-name: aSymbol
-    "Set to aSymbol the name of the class to be autoloaded"
+	<category: 'instance creation'>
+	"Check if the file exists."
 
-    name := aSymbol!
+	| autoload behavior newClass |
+	(FileDescriptor open: fileNameString mode: FileStream read) close.
 
-environment
-    "Answer the namespace in which the class will be autoloaded"
+	"Create the metaclass and its sole instance"
+	behavior := Behavior new superclass: Autoload.
 
-    ^environment!
+	"Turn the metaclass into an instance of AutoloadClass.  To do
+	 this we create a `prototype' in the form of an array and then..."
+	newClass := Array new: Kernel.AutoloadClass allInstVarNames size.
+	1 to: behavior class instSize
+	    do: [:i | newClass at: i put: (behavior instVarAt: i)].
 
-environment: aNamespace
-    "Set to aNamespace the namespace in which the class will be autoloaded"
+	"... change its class magically."
+	newClass changeClassTo: Kernel.AutoloadClass.
 
-    environment := aNamespace!
+	"We can now initialize it."
+	newClass
+	    name: nameSymbol;
+	    fileName: fileNameString;
+	    environment: aNamespace.
 
-fileName
-    "Answer the name of the file from which the class will be autoloaded"
+	"Now create the instance.  We go through some hops because of
+	 the very limited set of messages that these classes know
+	 about."
+	autoload := behavior new.
+	behavior become: newClass.
+	^aNamespace at: nameSymbol put: autoload
+    ]
 
-    ^fileName!
+    class [
+	"We need it to access the metaclass instance, because that's what
+	 will load the file."
 
-fileName: aString
-    "Set to aString the name of the file from which the class will be autoloaded"
+	<category: 'accessing'>
+	<primitive: VMpr_Object_class>
+	
+    ]
 
-    fileName := aString!
+    doesNotUnderstand: aMessage [
+	"Load the class and resend the message to it"
 
-doesNotUnderstand: aMessage
-    "Load the class and resend the message to its metaclass."
+	<category: 'accessing'>
+	^aMessage reinvokeFor: self class loadedClass
+    ]
+]
 
-    ^aMessage reinvokeFor: self loadedMetaclass!
-
-loadedMetaclass
-    "File-in the file and answer the metaclass for the new value of the
-     association which held the receiver"
-    ^self loadedClass class!
-    
-loadedClass
-    "File-in the file and answer the new value of the association which
-     held the receiver"
-    | class file |
-    self fileName isNil ifFalse: [
-	file := self fileName.
-	self fileName: nil.
-	self environment at: self name put: nil.
-        FileStream fileIn: file.
-    ].
-
-    class := self environment at: self name ifAbsent: [ nil ].
-    class isNil ifTrue: [ ^Autoload error: 
-'Autoloaded file should have defined class "', name, '" but didn''t' ].
-
-    ^class! !
-
-
-!Autoload class methodsFor: 'instance creation'!
-
-class: nameSymbol from: fileNameString
-    "Make Smalltalk automatically load the class named nameSymbol
-     from fileNameString when needed"
-
-    ^self class: nameSymbol in: Namespace current from: fileNameString!
-
-class: nameSymbol in: aNamespace from: fileNameString
-    "Make Smalltalk automatically load the class named nameSymbol
-     and residing in aNamespace from fileNameString when needed"
-
-    | autoload behavior newClass |
-    "Check if the file exists."
-    (FileDescriptor open: fileNameString mode: FileStream read) close.
-
-    "Create the metaclass and its sole instance"
-    behavior := Behavior new superclass: Autoload.
-
-    "Turn the metaclass into an instance of AutoloadClass.  To do
-     this we create a `prototype' in the form of an array and then..."
-
-    newClass := Array new: Kernel.AutoloadClass allInstVarNames size.
-    1 to: behavior class instSize do: [ :i |
-	newClass at: i put: (behavior instVarAt: i).
-    ].
-    
-    "... change its class magically."
-    newClass changeClassTo: Kernel.AutoloadClass.
-
-    "We can now initialize it."
-    newClass
-	name: nameSymbol;
-	fileName: fileNameString;
-	environment: aNamespace.
-
-    "Now create the instance.  We go through some hops because of
-     the very limited set of messages that these classes know
-     about."
-    autoload := behavior new.
-    behavior become: newClass.
-    ^aNamespace at: nameSymbol put: autoload
-! !
-
-
-!Autoload methodsFor: 'accessing'!
-
-class
-    "We need it to access the metaclass instance, because that's what
-     will load the file."
-    <primitive: VMpr_Object_class>
-!
-
-doesNotUnderstand: aMessage
-    "Load the class and resend the message to it"
-
-    ^aMessage reinvokeFor: self class loadedClass! !

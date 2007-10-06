@@ -31,87 +31,96 @@
  ======================================================================"
 
 
-Row variableSubclass: #MySQLRow
-	instanceVariableNames: 'isEmpty '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Mysql-Driver'!
+
+Row subclass: MySQLRow [
+    | isEmpty |
+    
+    <shape: #pointer>
+    <comment: nil>
+    <category: 'Mysql-Driver'>
 
+    MySQLRow class >> on: aResultSet readFrom: aConnection [
+	<category: 'instance creation'>
+	^(self new: aResultSet columnCount)
+	    resultSet: aResultSet;
+	    readFrom: aConnection
+    ]
 
-!MySQLRow methodsFor: 'reading'!
-
-checkForEndOrNull: aReadStream 
+    checkForEndOrNull: aReadStream [
 	"This is a bit unclean...the value 254 has been overloaded in the protocol.  When it is the only
-        value in the stream, it indicates there are no more rows.  It also indicates that the following
-        8 bytes contain the size of the field value.  The problem is that there is another condition that
-        produces a single value on the stream...a row with one column whose value is NULL."
+	 value in the stream, it indicates there are no more rows.  It also indicates that the following
+	 8 bytes contain the size of the field value.  The problem is that there is another condition that
+	 produces a single value on the stream...a row with one column whose value is NULL."
 
+	<category: 'reading'>
 	| endOrNull |
-	aReadStream size = 1 ifTrue: [
-		endOrNull := aReadStream next asInteger.
+	aReadStream size = 1 
+	    ifTrue: 
+		[endOrNull := aReadStream next asInteger.
 		isEmpty := endOrNull = 254.
-		^true ].
-	(aReadStream size < 9 and: [ aReadStream peekFor: (Character value: 254) ])
-		ifTrue: [
-			aReadStream next: aReadStream size - 1.
-			isEmpty := true.
-			^true ].
-
+		^true].
+	(aReadStream size < 9 and: [aReadStream peekFor: (Character value: 254)]) 
+	    ifTrue: 
+		[aReadStream next: aReadStream size - 1.
+		isEmpty := true.
+		^true].
 	isEmpty := false.
-	^false !
+	^false
+    ]
 
-readFrom: aReadStream 
+    readFrom: aReadStream [
+	<category: 'reading'>
 	(self checkForEndOrNull: aReadStream) ifTrue: [^self].
-
 	1 to: self columnCount
-		do: 
-			[:index | 
-			| aSize column |
-			aSize := self readSizeFrom: aReadStream.
-			aSize = -1 ifFalse: [
-				column := resultSet columnsArray at: index.
-				self at: index put: (column convert: (aReadStream next: aSize))]]!
+	    do: 
+		[:index | 
+		| aSize column |
+		aSize := self readSizeFrom: aReadStream.
+		aSize = -1 
+		    ifFalse: 
+			[column := resultSet columnsArray at: index.
+			self at: index put: (column convert: (aReadStream next: aSize))]]
+    ]
 
-readSizeFrom: aReadStream 
+    readSizeFrom: aReadStream [
+	<category: 'reading'>
 	| aSize |
 	aSize := aReadStream next asInteger.
 	aSize < 251 ifTrue: [^aSize].
 	aSize = 251 ifTrue: [^-1].
 	aSize = 252 ifTrue: [^(aReadStream next: 2) asByteArray asInteger].
 	aSize = 253 ifTrue: [^(aReadStream next: 3) asByteArray asInteger].
-	aSize = 254 ifTrue: [^(aReadStream next: 8) asByteArray asInteger]! !
+	aSize = 254 ifTrue: [^(aReadStream next: 8) asByteArray asInteger]
+    ]
 
-!MySQLRow methodsFor: 'accessing'!
+    at: aColumnName [
+	<category: 'accessing'>
+	^self basicAt: (resultSet columns at: aColumnName) index
+    ]
 
-at: aColumnName
-	^self basicAt: (resultSet columns at: aColumnName) index!
+    atIndex: anIndex [
+	<category: 'accessing'>
+	^self basicAt: anIndex
+    ]
 
-atIndex: anIndex
-	^self basicAt: anIndex!
+    columnCount [
+	<category: 'accessing'>
+	^self size
+    ]
 
-columnCount
-	^self size!
+    columns [
+	<category: 'accessing'>
+	^resultSet columns
+    ]
 
-columns
-	^resultSet columns!
+    columnNames [
+	<category: 'accessing'>
+	^resultSet columnNames
+    ]
 
-columnNames
-	^resultSet columnNames! !
-
-!MySQLRow methodsFor: 'testing'!
-
-isEmpty
-	^isEmpty! !
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-MySQLRow class
-	instanceVariableNames: ''!
-
-
-!MySQLRow class methodsFor: 'instance creation'!
-
-on: aResultSet readFrom: aConnection
-	^(self new: aResultSet columnCount)
-		resultSet: aResultSet;
-		readFrom: aConnection! !
+    isEmpty [
+	<category: 'testing'>
+	^isEmpty
+    ]
+]
 

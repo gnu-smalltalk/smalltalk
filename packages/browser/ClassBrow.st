@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2002 Free Software Foundation, Inc.
@@ -29,29 +28,30 @@
  ======================================================================
 "
 
-ClassHierarchyBrowser subclass:  #ClassBrowser
-	instanceVariableNames: 'startingClass '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Browser'!
 
-ClassBrowser comment: 
-nil!
+
+ClassHierarchyBrowser subclass: ClassBrowser [
+    | startingClass |
+    
+    <comment: nil>
+    <category: 'Graphics-Browser'>
 
-!ClassBrowser methodsFor: 'initializing'!
+    createTopView [
+	<category: 'initializing'>
+	^BrowserShell new: 'Class Browser on %1' % {startingClass}
+    ]
 
-createTopView
-    ^BrowserShell new: ('Class Browser on %1' % { startingClass })!
+    openOn: aClass [
+	"Create and open a class hierarchy browser on startingClass"
 
-openOn: aClass 
-    "Create and open a class hierarchy browser on startingClass"
+	<category: 'initializing'>
+	startingClass := aClass.
+	super open
+    ]
 
-    startingClass := aClass.
-    super open! !
-
-!ClassBrowser methodsFor: 'overrides'!
-
-topClasses
-    ^{startingClass}! !
-
+    topClasses [
+	<category: 'overrides'>
+	^{startingClass}
+    ]
+]
 

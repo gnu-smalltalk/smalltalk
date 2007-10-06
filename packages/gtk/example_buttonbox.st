@@ -4,7 +4,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2003 Free Software Foundation, Inc.
@@ -29,126 +28,154 @@
 |
  ======================================================================"
 
-Namespace current: GTK!
 
-Object subclass: #ButtonBoxExample
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: nil!
+
+Namespace current: GTK [
 
-!GtkButtonBox class methodsFor: 'creating button boxes'!
+Object subclass: ButtonBoxExample [
+    
+    <category: nil>
+    <comment: nil>
 
-createButtonBox: title spacing: spacing layout: layout
-    | box frame button |
-    frame := GtkFrame new: title.
-
-    "Note the use of polymorphism here: we are extending the Gtk binding
-     itself!  The original C example had an extra parameter to specify
-     whether to create an horizontal or vertical button box."
-    box := self new.
-    box setBorderWidth: 5.
-    frame add: box.
-    box setLayout: layout.
-    box setSpacing: spacing.
-
-    button := GtkButton newFromStock: Gtk gtkStockOk.
-    box add: button.
-
-    button := GtkButton newFromStock: Gtk gtkStockCancel.
-    box add: button.
-
-    button := GtkButton newFromStock: Gtk gtkStockHelp.
-    box add: button.
-    ^frame
-! !
-
-!ButtonBoxExample methodsFor: 'event handling'!
-
-destroy: object data: data
+    destroy: object data: data [
+	<category: 'event handling'>
 	Gtk mainQuit
-! !
+    ]
 
-!ButtonBoxExample methodsFor: 'layout'!
+    open [
+	<category: 'layout'>
+	| window mainVBox hbox vbox frameHorz frameVert |
+	window := GtkWindow new: Gtk gtkWindowToplevel.
+	window setTitle: 'Button Boxes'.
+	window 
+	    connectSignal: 'destroy'
+	    to: self
+	    selector: #destroy:data:
+	    userData: nil.
+	window setBorderWidth: 10.
+	mainVBox := GtkVBox new: false spacing: 0.
+	window add: mainVBox.
+	frameHorz := GtkFrame new: 'Horizontal Button Boxes'.
+	mainVBox 
+	    packStart: frameHorz
+	    expand: true
+	    fill: true
+	    padding: 10.
+	vbox := GtkVBox new: false spacing: 0.
+	vbox setBorderWidth: 10.
+	frameHorz add: vbox.
+	vbox 
+	    packStart: (GtkHButtonBox 
+		    createButtonBox: 'Spread (spacing 40)'
+		    spacing: 40
+		    layout: Gtk gtkButtonboxSpread)
+	    expand: true
+	    fill: true
+	    padding: 0.
+	vbox 
+	    packStart: (GtkHButtonBox 
+		    createButtonBox: 'Edge (spacing 30)'
+		    spacing: 30
+		    layout: Gtk gtkButtonboxEdge)
+	    expand: true
+	    fill: true
+	    padding: 0.
+	vbox 
+	    packStart: (GtkHButtonBox 
+		    createButtonBox: 'Start (spacing 20)'
+		    spacing: 20
+		    layout: Gtk gtkButtonboxStart)
+	    expand: true
+	    fill: true
+	    padding: 0.
+	vbox 
+	    packStart: (GtkHButtonBox 
+		    createButtonBox: 'End (spacing 10)'
+		    spacing: 10
+		    layout: Gtk gtkButtonboxEnd)
+	    expand: true
+	    fill: true
+	    padding: 0.
+	frameVert := GtkFrame new: 'Vertical Button Boxes'.
+	mainVBox 
+	    packStart: frameVert
+	    expand: true
+	    fill: true
+	    padding: 10.
+	hbox := GtkHBox new: false spacing: 0.
+	hbox setBorderWidth: 10.
+	frameVert add: hbox.
+	hbox 
+	    packStart: (GtkVButtonBox 
+		    createButtonBox: 'Spread (spacing 5)'
+		    spacing: 5
+		    layout: Gtk gtkButtonboxSpread)
+	    expand: true
+	    fill: true
+	    padding: 0.
+	hbox 
+	    packStart: (GtkVButtonBox 
+		    createButtonBox: 'Edge (spacing 30)'
+		    spacing: 30
+		    layout: Gtk gtkButtonboxEdge)
+	    expand: true
+	    fill: true
+	    padding: 0.
+	hbox 
+	    packStart: (GtkVButtonBox 
+		    createButtonBox: 'Start (spacing 20)'
+		    spacing: 20
+		    layout: Gtk gtkButtonboxStart)
+	    expand: true
+	    fill: true
+	    padding: 0.
+	hbox 
+	    packStart: (GtkVButtonBox 
+		    createButtonBox: 'End (spacing 20)'
+		    spacing: 20
+		    layout: Gtk gtkButtonboxEnd)
+	    expand: true
+	    fill: true
+	    padding: 0.
+	window showAll
+    ]
+]
 
-open
-    | window mainVBox hbox vbox frameHorz frameVert |
-    window := GtkWindow new: Gtk gtkWindowToplevel.
-    window setTitle: 'Button Boxes'.
-    window connectSignal: 'destroy' to: self selector: #destroy:data: userData: nil.
-    window setBorderWidth: 10.
-    
-    mainVBox := GtkVBox new: false spacing: 0.
-    window add: mainVBox.
-    
-    frameHorz := GtkFrame new: 'Horizontal Button Boxes'.
-    mainVBox packStart: frameHorz expand: true fill: true padding: 10.
-    vbox := GtkVBox new: false spacing: 0.
-    vbox setBorderWidth: 10.
-    frameHorz add: vbox.
-    vbox
-        packStart: (GtkHButtonBox
-    		    createButtonBox: 'Spread (spacing 40)'
-    		    spacing: 40
-    		    layout: Gtk gtkButtonboxSpread)
-        expand: true fill: true padding: 0.
-    
-    vbox
-        packStart: (GtkHButtonBox
-    		    createButtonBox: 'Edge (spacing 30)'
-    		    spacing: 30
-    		    layout: Gtk gtkButtonboxEdge)
-        expand: true fill: true padding: 0.
-    
-    vbox
-        packStart: (GtkHButtonBox
-    		    createButtonBox: 'Start (spacing 20)'
-    		    spacing: 20
-    		    layout: Gtk gtkButtonboxStart)
-        expand: true fill: true padding: 0.
-    
-    vbox
-        packStart: (GtkHButtonBox
-    		    createButtonBox: 'End (spacing 10)'
-    		    spacing: 10
-    		    layout: Gtk gtkButtonboxEnd)
-        expand: true fill: true padding: 0.
-    
-    frameVert := GtkFrame new: 'Vertical Button Boxes'.
-    mainVBox packStart: frameVert expand: true fill: true padding: 10.
-    hbox := GtkHBox new: false spacing: 0.
-    hbox setBorderWidth: 10.
-    frameVert add: hbox.
-    hbox
-        packStart: (GtkVButtonBox
-    		    createButtonBox: 'Spread (spacing 5)'
-    		    spacing: 5
-    		    layout: Gtk gtkButtonboxSpread)
-        expand: true fill: true padding: 0.
-    
-    hbox
-        packStart: (GtkVButtonBox
-    		    createButtonBox: 'Edge (spacing 30)'
-    		    spacing: 30
-    		    layout: Gtk gtkButtonboxEdge)
-        expand: true fill: true padding: 0.
-    
-    hbox
-        packStart: (GtkVButtonBox
-    		    createButtonBox: 'Start (spacing 20)'
-    		    spacing: 20
-    		    layout: Gtk gtkButtonboxStart)
-        expand: true fill: true padding: 0.
-    
-    hbox
-        packStart: (GtkVButtonBox
-    		    createButtonBox: 'End (spacing 20)'
-    		    spacing: 20
-    		    layout: Gtk gtkButtonboxEnd)
-        expand: true fill: true padding: 0.
-    
-    window showAll! !
-    
-Gtk gstGtkInit!
-ButtonBoxExample new open!
-Gtk main!
+]
+
+
+
+GtkButtonBox class extend [
+
+    createButtonBox: title spacing: spacing layout: layout [
+	<category: 'creating button boxes'>
+	| box frame button |
+	frame := GtkFrame new: title.
+
+	"Note the use of polymorphism here: we are extending the Gtk binding
+	 itself!  The original C example had an extra parameter to specify
+	 whether to create an horizontal or vertical button box."
+	box := self new.
+	box setBorderWidth: 5.
+	frame add: box.
+	box setLayout: layout.
+	box setSpacing: spacing.
+	button := GtkButton newFromStock: Gtk gtkStockOk.
+	box add: button.
+	button := GtkButton newFromStock: Gtk gtkStockCancel.
+	box add: button.
+	button := GtkButton newFromStock: Gtk gtkStockHelp.
+	box add: button.
+	^frame
+    ]
+
+]
+
+
+
+Namespace current: GTK [
+    Gtk gstGtkInit.
+    ButtonBoxExample new open.
+    Gtk main
+]
+

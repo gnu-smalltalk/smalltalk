@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002,2003,2005
@@ -32,17 +31,14 @@
  ======================================================================"
 
 
-Namespace current: Kernel!
+
+Namespace current: Kernel [
 
-Stream subclass: #RoundRobinStream
-       instanceVariableNames: 'stream first last'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-C interface'
-!
-
-RoundRobinStream comment:
-'This class implements a peculiar stream that optimizes the order
+Stream subclass: RoundRobinStream [
+    | stream first last |
+    
+    <category: 'Language-C interface'>
+    <comment: 'This class implements a peculiar stream that optimizes the order
 in which symbols are searched in dynamically linked libraries.
 When using #next, the stream will restart from the first element
 after returning nil once.  When you use #do:, the stream starts
@@ -54,108 +50,113 @@ succeeds in finding a symbol, the next time it will restart from
 the library in which it found a symbol.  Usually symbols have a
 very good locality (you find all the symbols in a library, or at
 least symbols in the same #methodsFor: come from the same library):
-so this avoids looking for symbols in the wrong library.'!
+so this avoids looking for symbols in the wrong library.'>
 
-!RoundRobinStream class methodsFor: 'demo'!
+    RoundRobinStream class >> test: s get: n [
+	<category: 'demo'>
+	n timesRepeat: [s next print].
+	Transcript nl
+    ]
 
-test: s get: n
-    n timesRepeat: [ s next print ].
-    Transcript nl.
-!
+    RoundRobinStream class >> test: s leaveAfter: n [
+	<category: 'demo'>
+	| i |
+	i := 0.
+	s do: 
+		[:each | 
+		each print.
+		(i := i + 1) = n 
+		    ifTrue: 
+			[Transcript nl.
+			^nil]].
+	Transcript nl
+    ]
 
-test: s leaveAfter: n
-    | i |
-    i := 0.
-    s do: [ :each |
-        each print.
-        (i := i + 1) = n ifTrue: [ Transcript nl. ^nil ]
-    ].
-    Transcript nl.
-!
+    RoundRobinStream class >> testOn: anArray [
+	"RoundRobinStream testOn: #(1 2 3 4 5 6)"
 
-testOn: anArray
-    "RoundRobinStream testOn: #(1 2 3 4 5 6)"
-    | s |
-    s := RoundRobinStream on: anArray readStream.
-    self test: s get: anArray size + 1.
-    self test: s get: anArray size + 1.
-    self test: s get: anArray size + 1 * 2.
-    self test: s get: 2.
-    self test: s leaveAfter: anArray size + 1.
-    self test: s leaveAfter: anArray size + 1.
-    self test: s leaveAfter: 1.
-    self test: s leaveAfter: 1.
-    self test: s leaveAfter: 2.
-    self test: s leaveAfter: 2.
-    self test: s leaveAfter: anArray size + 1.
-    self test: s leaveAfter: anArray size + 1.
-    Transcript nl!
-! !
+	<category: 'demo'>
+	| s |
+	s := RoundRobinStream on: anArray readStream.
+	self test: s get: anArray size + 1.
+	self test: s get: anArray size + 1.
+	self test: s get: (anArray size + 1) * 2.
+	self test: s get: 2.
+	self test: s leaveAfter: anArray size + 1.
+	self test: s leaveAfter: anArray size + 1.
+	self test: s leaveAfter: 1.
+	self test: s leaveAfter: 1.
+	self test: s leaveAfter: 2.
+	self test: s leaveAfter: 2.
+	self test: s leaveAfter: anArray size + 1.
+	self test: s leaveAfter: anArray size + 1.
+	Transcript nl
+    ]
 
-!RoundRobinStream class methodsFor: 'accessing'!
+    RoundRobinStream class >> on: aStream [
+	<category: 'accessing'>
+	^self new stream: aStream
+    ]
 
-on: aStream
-    ^self new stream: aStream! !
+    stream [
+	<category: 'accessing'>
+	^stream
+    ]
 
-!RoundRobinStream methodsFor: 'accessing'!
+    stream: aStream [
+	<category: 'accessing'>
+	stream := aStream
+    ]
 
-stream
-    ^stream!
+    atEnd [
+	<category: 'basic'>
+	stream atEnd 
+	    ifTrue: 
+		[stream reset.
+		"If there is no established first, we started iterating from the
+		 first element in the stream."
+		first isNil ifTrue: [^true]].
+	^(last := stream peek) = first
+    ]
 
-stream: aStream
-    stream := aStream! !
+    next [
+	<category: 'basic'>
+	^self atEnd 
+	    ifTrue: [SystemExceptions.EndOfStream signalOn: self]
+	    ifFalse: [stream next]
+    ]
 
-!RoundRobinStream methodsFor: 'basic'!
+    do: aBlock [
+	"Iterate on all the items in the Stream.  If it is not the first iteration,
+	 and the last item was retrieved with #next or passed to a #do: block *that
+	 did a global return*, return from there."
 
-atEnd
-    stream atEnd ifTrue: [
-	stream reset.
-	"If there is no established first, we started iterating from the
-	 first element in the stream."
-	first isNil ifTrue: [ ^true ].
-    ].
-    ^(last := stream peek) = first
-!
+	<category: 'basic'>
+	stream atEnd 
+	    ifTrue: 
+		[stream reset.
+		stream atEnd ifTrue: [^self]].
 
-next
-    ^self atEnd
-	ifTrue: [ SystemExceptions.EndOfStream signalOn: self ]
-	ifFalse: [ stream next ]
-!
+	"Establish the item at which we'll stop iterating.  Start from that one."
+	last isNil ifTrue: [last := stream next].
+	first := last.
+	aBlock value: last.
+	super do: aBlock.
 
-do: aBlock
-    "Iterate on all the items in the Stream.  If it is not the first iteration,
-     and the last item was retrieved with #next or passed to a #do: block *that
-     did a global return*, return from there."
-    stream atEnd
-	ifTrue: [
-	   stream reset.
-	   stream atEnd ifTrue: [ ^self ] ].
+	"Make sure we will not restart from the last item we passed to aBlock,
+	 because aBlock did not return."
+	last := nil
+    ]
+]
 
-    "Establish the item at which we'll stop iterating.  Start from that one."
-    last isNil ifTrue: [ last := stream next ].
-    first := last.
-    aBlock value: last.
-    super do: aBlock.
+]
 
-    "Make sure we will not restart from the last item we passed to aBlock,
-     because aBlock did not return."
-    last := nil.
-! !
 
-Namespace current: Smalltalk!
-
-Object subclass: #DLD
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-C interface'
-!
-
-DLD class
-	instanceVariableNames: 'libraryList libraryStream moduleList'!
-
-DLD comment: '...and Gandalf said:
+
+Object subclass: DLD [
+    
+    <category: 'Language-C interface'>
+    <comment: '...and Gandalf said:
 ``Many folk like to know beforehand what is to be set on the
 table; but those who have laboured to prepare the feast like
 to keep their secret; for wonder makes the words of praise
@@ -163,136 +164,158 @@ louder.''''
 
 I am just an ancillary class used to reference some C functions.
 Most of my actual functionality is used by redefinitions of methods
-in CFunctionDescriptor.'!
+in CFunctionDescriptor.'>
 
-
-!DLD class methodsFor: 'C call-outs'!
-
-linkFile: aFileName
-    <cCall: 'dldLink' returning: #cObject args: #(#string)>
-!
-
-library: libHandle getFunc: aFuncString
-    <cCall: 'dldGetFunc' returning: #cObject args: #(#cObject #string)>
-!
-
-defineCFunc: aName as: aFuncAddr
-    <cCall: 'defineCFunc' returning: #void args: #(#string #cObject)>
-! !
-
-
-!CFunctionDescriptor class methodsFor: 'testing'!
-
-addressOf: function
-    "Answer whether a function is registered (on the C side) with the
-     given name or is dynamically loadable."
-
-    | descriptor |
-    descriptor := self
-        for: function
-        returning: #void                "dummy"
-        withArgs: #().                  "dummy"
-
-    ((descriptor address) address = 0 and: [ DLD defineExternFunc: function ])
-	ifTrue: [
-	    "Try again."
-	    descriptor := self
-	        for: function
-	        returning: #void                "dummy"
-	        withArgs: #().                  "dummy"
-	].
-
-    ^descriptor address
-! !
-
-
-!DLD class methodsFor: 'dynamic linking'!
-
-defineExternFunc: aFuncName
-    "This method calls #primDefineExternFunc: to try to link to a function with
-     the given name, and answers whether the linkage was successful. You can
-     redefine this method to restrict the ability to do dynamic linking."
-    ^self primDefineExternFunc: aFuncName
-!
-
-primDefineExternFunc: aFuncName
-    "This method tries to link to a function with the given name, and answers
-     whether the linkage was successful. It should not be overridden."
-    
-    | couldNotLink |
-    libraryStream do: [ :lib || funcAddr |
-	lib value notNil
-	    ifTrue: [
-	        funcAddr := self library: lib value getFunc: aFuncName.
-	        funcAddr notNil ifTrue: [ 
-		    self defineCFunc: aFuncName as: funcAddr.
-		    ^true
-	        ]
-	    ]
-    ].
-
-    ^false
-!
-
-initialize
-    "Private - Initialize the receiver's class variables"
-    libraryList := OrderedCollection new.
-    libraryStream := Kernel.RoundRobinStream on: libraryList readStream.
-    moduleList := OrderedCollection new.
-    ObjectMemory addDependent: DLD
-!
-
-update: aspect
-    "Called on startup - Make DLD re-link and reset the addresses of
-     all the externally defined functions"
-    | notLoaded |
-    aspect == #returnFromSnapshot ifFalse: [ ^self ].
-    libraryList do: [ :lib | lib value: (self linkFile: lib key) ].
-
-    notLoaded := WriteStream on: Array new.
-
-    moduleList do: [ :each |
-	(self linkFile: each) isNil ifTrue: [ notLoaded nextPut: each ]
-    ].
-
-    notLoaded := notLoaded contents.
-    notLoaded isEmpty ifFalse: [
-	SystemExceptions.CInterfaceError signal: 'modules ',
-		    notLoaded printString, ' could not be loaded.'
-    ]!
-
-libraryList
-    "Answer a copy of the search path of libraries to be used by DLD"
-    ^libraryList copy
-!
-
-moduleList
-    "Answer a copy of the modules reloaded when the image is started"
-    ^moduleList copy
-!
-
-addLibrary: library
-    "Add library to the search path of libraries to be used by DLD."
-    (libraryList anySatisfy: [ :anAssociation | anAssociation key = library ])
-	ifFalse: [
-	    libraryList add: library -> (self linkFile: library).
-	    libraryStream := Kernel.RoundRobinStream on: libraryList readStream ].
-!
-
-addModule: library
-    "Add library to the list of modules to be loaded when the image is
-     started.  The gst_initModule function in the library is called,
-     but the library will not be put in the search path used whenever
-     a C function is requested but not registered."
-
-    (moduleList includes: library) ifFalse: [
-        (self linkFile: library) isNil
-           ifTrue: [
-		SystemExceptions.CInterfaceError
-		    signal: 'requested module ', library, ' was not found' ]
-           ifFalse: [ moduleList add: library ]
+    DLD class [
+	| libraryList libraryStream moduleList |
+	
     ]
-! !
 
-DLD initialize!
+    DLD class >> linkFile: aFileName [
+	<category: 'C call-outs'>
+	<cCall: 'dldLink' returning: #cObject args: #(#string)>
+	
+    ]
+
+    DLD class >> library: libHandle getFunc: aFuncString [
+	<category: 'C call-outs'>
+	<cCall: 'dldGetFunc' returning: #cObject args: #(#cObject #string)>
+	
+    ]
+
+    DLD class >> defineCFunc: aName as: aFuncAddr [
+	<category: 'C call-outs'>
+	<cCall: 'defineCFunc' returning: #void args: #(#string #cObject)>
+	
+    ]
+
+    DLD class >> defineExternFunc: aFuncName [
+	"This method calls #primDefineExternFunc: to try to link to a function with
+	 the given name, and answers whether the linkage was successful. You can
+	 redefine this method to restrict the ability to do dynamic linking."
+
+	<category: 'dynamic linking'>
+	^self primDefineExternFunc: aFuncName
+    ]
+
+    DLD class >> primDefineExternFunc: aFuncName [
+	"This method tries to link to a function with the given name, and answers
+	 whether the linkage was successful. It should not be overridden."
+
+	<category: 'dynamic linking'>
+	| couldNotLink |
+	libraryStream do: 
+		[:lib | 
+		| funcAddr |
+		lib value notNil 
+		    ifTrue: 
+			[funcAddr := self library: lib value getFunc: aFuncName.
+			funcAddr notNil 
+			    ifTrue: 
+				[self defineCFunc: aFuncName as: funcAddr.
+				^true]]].
+	^false
+    ]
+
+    DLD class >> initialize [
+	"Private - Initialize the receiver's class variables"
+
+	<category: 'dynamic linking'>
+	libraryList := OrderedCollection new.
+	libraryStream := Kernel.RoundRobinStream on: libraryList readStream.
+	moduleList := OrderedCollection new.
+	ObjectMemory addDependent: DLD
+    ]
+
+    DLD class >> update: aspect [
+	"Called on startup - Make DLD re-link and reset the addresses of
+	 all the externally defined functions"
+
+	<category: 'dynamic linking'>
+	| notLoaded |
+	aspect == #returnFromSnapshot ifFalse: [^self].
+	libraryList do: [:lib | lib value: (self linkFile: lib key)].
+	notLoaded := WriteStream on: Array new.
+	moduleList 
+	    do: [:each | (self linkFile: each) isNil ifTrue: [notLoaded nextPut: each]].
+	notLoaded := notLoaded contents.
+	notLoaded isEmpty 
+	    ifFalse: 
+		[SystemExceptions.CInterfaceError 
+		    signal: 'modules ' , notLoaded printString , ' could not be loaded.']
+    ]
+
+    DLD class >> libraryList [
+	"Answer a copy of the search path of libraries to be used by DLD"
+
+	<category: 'dynamic linking'>
+	^libraryList copy
+    ]
+
+    DLD class >> moduleList [
+	"Answer a copy of the modules reloaded when the image is started"
+
+	<category: 'dynamic linking'>
+	^moduleList copy
+    ]
+
+    DLD class >> addLibrary: library [
+	"Add library to the search path of libraries to be used by DLD."
+
+	<category: 'dynamic linking'>
+	(libraryList anySatisfy: [:anAssociation | anAssociation key = library]) 
+	    ifFalse: 
+		[libraryList add: library -> (self linkFile: library).
+		libraryStream := Kernel.RoundRobinStream on: libraryList readStream]
+    ]
+
+    DLD class >> addModule: library [
+	"Add library to the list of modules to be loaded when the image is
+	 started.  The gst_initModule function in the library is called,
+	 but the library will not be put in the search path used whenever
+	 a C function is requested but not registered."
+
+	<category: 'dynamic linking'>
+	(moduleList includes: library) 
+	    ifFalse: 
+		[(self linkFile: library) isNil 
+		    ifTrue: 
+			[SystemExceptions.CInterfaceError 
+			    signal: 'requested module ' , library , ' was not found']
+		    ifFalse: [moduleList add: library]]
+    ]
+]
+
+
+
+CFunctionDescriptor class extend [
+
+    addressOf: function [
+	"Answer whether a function is registered (on the C side) with the
+	 given name or is dynamically loadable."
+
+	<category: 'testing'>
+	| descriptor |
+	descriptor := self 
+		    for: function
+		    returning: #void
+		    withArgs: #().	"dummy"	"dummy"
+	(descriptor address address = 0 and: [DLD defineExternFunc: function]) 
+	    ifTrue: 
+		["Try again."
+
+		descriptor := self 
+			    for: function
+			    returning: #void
+			    withArgs: #()	"dummy"	"dummy"].
+	^descriptor address
+    ]
+
+]
+
+
+
+Eval [
+    DLD initialize
+]
 

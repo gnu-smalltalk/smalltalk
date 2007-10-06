@@ -1,222 +1,291 @@
-"======================================================================
-|
-|   Numerical methods - Additions to the base classes
-|
-|
- ======================================================================"
+Integer extend [
+
+    gamma [
+	"Compute the Gamma function for the receiver.
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 11/2/99"
+
+	<category: 'numerics'>
+	self > 0 
+	    ifFalse: 
+		[^self 
+		    error: 'Attempt to compute the Gamma function of a non-positive integer'].
+	^(self - 1) factorial
+    ]
+
+    random [
+	"Answer a random integer between 0 and the receiver.
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 15/2/99"
+
+	<category: 'numerics'>
+	^Dhb.DhbMitchellMooreGenerator new integerValue: self
+    ]
+
+]
 
 
-"======================================================================
-|
-| Written by Didier Besset.
-|
-| This file is distributed together with GNU Smalltalk.
-|
- ======================================================================"
+
+Number class extend [
 
-!Smalltalk.Integer methodsFor: 'numerics'!
+    random [
+	"Answers a random number between 0 and 1.
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 17/2/99"
 
-gamma
-    "Compute the Gamma function for the receiver.
-     (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 11/2/99 "
+	<category: 'numerics'>
+	^Dhb.DhbMitchellMooreGenerator new floatValue
+    ]
 
-    self > 0
-        ifFalse:[ ^self error: 'Attempt to compute the Gamma function of a non-positive integer'].
-    ^( self - 1) factorial!
+]
 
-random
-    "Answer a random integer between 0 and the receiver.
-     (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 15/2/99 "
 
-    ^Dhb.DhbMitchellMooreGenerator new integerValue: self! !
+
+Number extend [
 
-!Smalltalk.Number class methodsFor: 'numerics'!
+    addPolynomial: aPolynomial [
+	"(c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 19/4/99"
 
-random
-    "Answers a random number between 0 and 1.
-     (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 17/2/99 "
+	<category: 'numerics'>
+	^aPolynomial addNumber: self
+    ]
 
-    ^Dhb.DhbMitchellMooreGenerator new floatValue! !
+    asLimitedPrecisionReal [
+	"Convert the receiver to an instance of
+	 some subclass of LimitedPrecisionReal.
+	 This method defines what the default is."
 
-!Smalltalk.Number methodsFor: 'numerics'!
+	<category: 'numerics'>
+	^self asFloat
+    ]
 
-addPolynomial: aPolynomial
-    "(c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 19/4/99 "
+    beta: aNumber [
+	"Computes the beta function of the receiver and aNumber
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 1/3/99"
 
-    ^aPolynomial addNumber: self!
+	<category: 'numerics'>
+	^(self logBeta: aNumber) exp
+    ]
 
-asLimitedPrecisionReal
-    "Convert the receiver to an instance of
-    some subclass of LimitedPrecisionReal.
-    This method defines what the default is."
+    dividingPolynomial: aPolynomial [
+	"(c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 17/4/99"
 
-    ^self asFloat!
+	<category: 'numerics'>
+	^aPolynomial timesNumber: 1 / self
+    ]
 
-beta: aNumber
-    "Computes the beta function of the receiver and aNumber
-     (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 1/3/99 "
+    equalsTo: aNumber [
+	"(c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 21/4/99"
 
-    ^( self logBeta: aNumber) exp!
+	<category: 'numerics'>
+	^self relativelyEqualsTo: aNumber
+	    upTo: Dhb.DhbFloatingPointMachine new defaultNumericalPrecision
+    ]
 
-dividingPolynomial: aPolynomial
-    "(c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 17/4/99 "
+    errorFunction [
+	"Answer the error function for the receiver.
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 11/2/99"
 
-    ^aPolynomial timesNumber: (1 / self)!
+	<category: 'numerics'>
+	^Dhb.DhbErfApproximation new value: self
+    ]
 
-equalsTo: aNumber
-    " (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 21/4/99 "
+    gamma [
+	"Compute the Gamma function for the receiver.
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 11/2/99"
 
-    ^self relativelyEqualsTo: aNumber upTo: Dhb.DhbFloatingPointMachine new defaultNumericalPrecision
-!
+	<category: 'numerics'>
+	^self > 1 
+	    ifTrue: [^Dhb.DhbLanczosFormula new gamma: self]
+	    ifFalse: 
+		[self < 0 
+		    ifTrue: [Float pi / ((Float pi * self) sin * (1 - self) gamma)]
+		    ifFalse: [(Dhb.DhbLanczosFormula new gamma: self + 1) / self]]
+    ]
 
-errorFunction
-    "Answer the error function for the receiver.
-     (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 11/2/99 "
+    logBeta: aNumber [
+	"Computes the logarithm of the beta function of the receiver and aNumber
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 1/3/99"
 
-    ^Dhb.DhbErfApproximation new value: self
-!
+	<category: 'numerics'>
+	^self logGamma + aNumber logGamma - (self + aNumber) logGamma
+    ]
 
-gamma
-    "Compute the Gamma function for the receiver. 
-    (c) Copyrights Didier BESSET, 1999, all rights reserved. 
-    Initial code: 11/2/99"
+    logGamma [
+	"Computes the log of the Gamma function (for positive numbers only)
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 1/3/99"
 
-    ^self > 1
-        ifTrue: [^Dhb.DhbLanczosFormula new gamma: self]
-        ifFalse: [self < 0
-                ifTrue: [Float pi / ((Float pi * self) sin * (1 - self) gamma)]
-                ifFalse: [(Dhb.DhbLanczosFormula new gamma: self + 1)
-                        / self]]!
+	<category: 'numerics'>
+	^self > 1 
+	    ifTrue: [Dhb.DhbLanczosFormula new logGamma: self]
+	    ifFalse: 
+		[self > 0 
+		    ifTrue: [(Dhb.DhbLanczosFormula new logGamma: self + 1) - self ln]
+		    ifFalse: [^self error: 'Argument for the log gamma function must be positive']]
+    ]
 
-logBeta: aNumber
-    "Computes the logarithm of the beta function of the receiver and aNumber
-     (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 1/3/99 "
+    productWithMatrix: aMatrix [
+	"Answer a new matrix, product of aMatrix with the receiver.
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 11/2/99"
 
-    ^self logGamma + aNumber logGamma - ( self + aNumber) logGamma!
+	<category: 'numerics'>
+	^aMatrix class rows: (aMatrix rowsCollect: [:each | each * self])
+    ]
 
-logGamma
-    "Computes the log of the Gamma function (for positive numbers only)
-     (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 1/3/99 "
+    productWithVector: aVector [
+	"Answers a new vector product of the receiver with aVector.
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 11/2/99"
 
-    ^self > 1
-        ifTrue: [ Dhb.DhbLanczosFormula new logGamma: self]
-        ifFalse:[ self > 0
-                        ifTrue: [ ( Dhb.DhbLanczosFormula new logGamma: ( self + 1) ) - self ln ]
-                        ifFalse: [ ^self error: 'Argument for the log gamma function must be positive']
-        ]!
+	<category: 'numerics'>
+	^aVector collect: [:each | each * self]
+    ]
 
-productWithMatrix: aMatrix
-    "Answer a new matrix, product of aMatrix with the receiver.
-     (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 11/2/99 "
+    random [
+	"Answers a random number distributed between 0 and the receiver.
+	 (c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 17/2/99"
 
-    ^aMatrix class rows: ( aMatrix rowsCollect: [ :each | each * self])!
+	<category: 'numerics'>
+	^self class random * self
+    ]
 
-productWithVector: aVector
-    "Answers a new vector product of the receiver with aVector.
-     (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 11/2/99 "
+    relativelyEqualsTo: aNumber upTo: aSmallNumber [
+	"(c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 21/4/99"
 
-    ^aVector collect: [ :each | each * self]!
+	<category: 'numerics'>
+	| norm |
+	norm := self abs max: aNumber abs.
+	^norm <= Dhb.DhbFloatingPointMachine new defaultNumericalPrecision 
+	    or: [(self - aNumber) abs < (aSmallNumber * norm)]
+    ]
 
-random
-    "Answers a random number distributed between 0 and the receiver.
-     (c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 17/2/99 "
+    subtractToPolynomial: aPolynomial [
+	"(c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 19/4/99"
 
-    ^self class random * self!
+	<category: 'numerics'>
+	^aPolynomial addNumber: self negated
+    ]
 
-relativelyEqualsTo: aNumber upTo: aSmallNumber
-    "(c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 21/4/99 "
+    timesPolynomial: aPolynomial [
+	"(c) Copyrights Didier BESSET, 1999, all rights reserved.
+	 Initial code: 17/4/99"
 
-    | norm |
-    norm := self abs max: aNumber abs.
-    ^norm <= Dhb.DhbFloatingPointMachine new defaultNumericalPrecision
-        or: [ (self - aNumber) abs < ( aSmallNumber * norm)]!
+	<category: 'numerics'>
+	^aPolynomial timesNumber: self
+    ]
 
-subtractToPolynomial: aPolynomial
-    "(c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 19/4/99 "
+]
 
-    ^aPolynomial addNumber: self negated!
 
-timesPolynomial: aPolynomial
-    "(c) Copyrights Didier BESSET, 1999, all rights reserved.
-     Initial code: 17/4/99 "
+
+Point extend [
 
-    ^aPolynomial timesNumber: self! !
+    extentFromBottomLeft: aPoint [
+	"(c) Copyrights Didier BESSET, 1998, all rights reserved
+	 Initial code: 21/4/98"
 
-!Smalltalk.Point methodsFor: 'numerics'!
+	<category: 'numerics'>
+	^Rectangle origin: self 
+		    - (0 @ (aPoint isInteger ifTrue: [aPoint] ifFalse: [aPoint y]))
+	    extent: aPoint
+    ]
 
-extentFromBottomLeft: aPoint
-    "(c) Copyrights Didier BESSET, 1998, all rights reserved
-     Initial code: 21/4/98 "
+    extentFromBottomRight: aPoint [
+	"(c) Copyrights Didier BESSET, 1998, all rights reserved
+	 Initial code: 21/4/98"
 
-    ^Rectangle origin: (self - (0 @ (aPoint isInteger ifTrue: [ aPoint ]
-                                                      ifFalse:[ aPoint y ])))
-               extent: aPoint!
+	<category: 'numerics'>
+	^Rectangle origin: self - aPoint extent: aPoint
+    ]
 
-extentFromBottomRight: aPoint
-    "(c) Copyrights Didier BESSET, 1998, all rights reserved
-     Initial code: 21/4/98 "
+    extentFromCenter: aPoint [
+	"(c) Copyrights Didier BESSET, 1998, all rights reserved
+	 Initial code: 21/4/98"
 
-    ^Rectangle origin: (self - aPoint) extent: aPoint!
+	<category: 'numerics'>
+	^Rectangle origin: self - (aPoint // 2) extent: aPoint
+    ]
 
-extentFromCenter: aPoint
-    "(c) Copyrights Didier BESSET, 1998, all rights reserved
-     Initial code: 21/4/98 "
+    extentFromTopLeft: aPoint [
+	"(c) Copyrights Didier BESSET, 1998, all rights reserved
+	 Initial code: 21/4/98"
 
-    ^Rectangle origin: ( self - ( aPoint // 2)) extent: aPoint!
+	<category: 'numerics'>
+	^Rectangle origin: self extent: aPoint
+    ]
 
-extentFromTopLeft: aPoint
-    "(c) Copyrights Didier BESSET, 1998, all rights reserved
-     Initial code: 21/4/98 "
+    extentFromTopRight: aPoint [
+	"(c) Copyrights Didier BESSET, 1998, all rights reserved
+	 Initial code: 21/4/98"
 
-    ^Rectangle origin: self extent: aPoint!
+	<category: 'numerics'>
+	^Rectangle origin: self 
+		    - ((aPoint isInteger ifTrue: [aPoint] ifFalse: [aPoint x]) @ 0)
+	    extent: aPoint
+    ]
 
-extentFromTopRight: aPoint
-    "(c) Copyrights Didier BESSET, 1998, all rights reserved
-     Initial code: 21/4/98 "
+]
 
-    ^Rectangle origin: (self - ((aPoint isInteger ifTrue: [ aPoint ]
-                                                  ifFalse:[ aPoint x ]) @ 0))
-               extent: aPoint! !
 
-!Smalltalk.Rectangle methodsFor: 'numerics'!
+
+Rectangle extend [
 
-positiveRectangle
-    "(c) Copyrights Didier BESSET, 1998, all rights reserved
-     Initial code: 21/4/98 "
+    positiveRectangle [
+	"(c) Copyrights Didier BESSET, 1998, all rights reserved
+	 Initial code: 21/4/98"
 
-    ^( origin min: corner) corner: ( origin max: corner)! !
+	<category: 'numerics'>
+	^(origin min: corner) corner: (origin max: corner)
+    ]
 
-!Smalltalk.Collection methodsFor: 'numerics'!
+]
 
-asVector
-    ^(Dhb.DhbVector new: self size)
-        replaceFrom: 1 to: self size with: self startingAt: 1
-! !
 
-!Dhb.DhbPolynomial methodsFor: 'numerics'!
+
+Collection extend [
 
-generality
-    ^nil
-! !
+    asVector [
+	<category: 'numerics'>
+	^(Dhb.DhbVector new: self size) 
+	    replaceFrom: 1
+	    to: self size
+	    with: self
+	    startingAt: 1
+    ]
 
-!Dhb.DhbVector methodsFor: 'numerics'!
+]
 
-generality
-    ^nil
-! !
+
+
+DhbPolynomial extend [
+
+    generality [
+	<category: 'numerics'>
+	^nil
+    ]
+
+]
+
+
+
+DhbVector extend [
+
+    generality [
+	<category: 'numerics'>
+	^nil
+    ]
+
+]
 

@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001
@@ -32,62 +31,60 @@
  ======================================================================"
 
 
-Link subclass: #SymLink
-     instanceVariableNames: 'symbol'
-     classVariableNames: ''
-     poolDictionaries: ''
-     category: 'Language-Implementation'
-!
-
-SymLink comment: 
-'I am used to implement the Smalltalk symbol table.  My instances are
+
+Link subclass: SymLink [
+    | symbol |
+    
+    <category: 'Language-Implementation'>
+    <comment: 'I am used to implement the Smalltalk symbol table.  My instances are
 links that contain symbols, and the symbol table basically a hash table that
-points to chains of my instances.' !
+points to chains of my instances.'>
 
+    SymLink class >> symbol: aSymbol nextLink: aSymLink [
+	"Answer a new SymLink, which refers to aSymbol and points to
+	 aSymLink as the next SymLink in the chain."
 
-
-!SymLink class methodsFor: 'instance creation'!
+	<category: 'instance creation'>
+	^(self nextLink: aSymLink)
+	    symbol: aSymbol;
+	    yourself
+    ]
 
-symbol: aSymbol nextLink: aSymLink
-    "Answer a new SymLink, which refers to aSymbol and points to
-     aSymLink as the next SymLink in the chain."
-    ^(self nextLink: aSymLink)
-	symbol: aSymbol;
-	yourself
-! !
+    do: aBlock [
+	"Evaluate aBlock for each symbol in the list"
 
-
-!SymLink methodsFor: 'iteration'!
+	<category: 'iteration'>
+	| item |
+	item := self.
+	
+	[aBlock value: item symbol.
+	(item := item nextLink) isNil] whileFalse
+    ]
 
-do: aBlock
-    "Evaluate aBlock for each symbol in the list"
-    | item |
-    item := self.
-    [ aBlock value: item symbol. (item := item nextLink) isNil ] whileFalse
-! !
+    symbol [
+	"Answer the Symbol that the receiver refers to in the symbol table."
 
+	<category: 'accessing'>
+	^symbol
+    ]
 
-
-!SymLink methodsFor: 'accessing'!
+    symbol: aSymbol [
+	"Set the Symbol that the receiver refers to in the symbol table."
 
-symbol
-    "Answer the Symbol that the receiver refers to in the symbol table."
-    ^symbol
-!
+	<category: 'accessing'>
+	symbol := aSymbol
+    ]
 
-symbol: aSymbol
-    "Set the Symbol that the receiver refers to in the symbol table."
-    symbol := aSymbol
-! !
+    printOn: aStream [
+	"Print a representation of the receiver on aStream."
 
-
-!SymLink methodsFor: 'printing'!
+	<category: 'printing'>
+	aStream nextPut: $[.
+	self do: 
+		[:elt | 
+		elt printOn: aStream.
+		aStream nextPut: Character space].
+	aStream nextPut: $]
+    ]
+]
 
-printOn: aStream
-    "Print a representation of the receiver on aStream."
-    aStream nextPut: $[.
-    self do: 
-	[ :elt | elt printOn: aStream.
-		 aStream nextPut: Character space ].
-    aStream nextPut: $].
-! !

@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2006,2007
@@ -32,455 +31,511 @@
  ======================================================================"
 
 
-SequenceableCollection variableSubclass: #ArrayedCollection
-		       instanceVariableNames: ''
-		       classVariableNames: ''
-		       poolDictionaries: ''
-		       category: 'Collections-Sequenceable'
-!
-
-ArrayedCollection comment: 
-'My instances are objects that are generally fixed size, and are accessed
+
+SequenceableCollection subclass: ArrayedCollection [
+    
+    <shape: #pointer>
+    <category: 'Collections-Sequenceable'>
+    <comment: 'My instances are objects that are generally fixed size, and are accessed
 by an integer index.  The ordering of my instance''s elements is determined 
-externally; I will not rearrange the order of the elements.' !
+externally; I will not rearrange the order of the elements.'>
 
-
-!ArrayedCollection class methodsFor: 'instance creation'!
+    ArrayedCollection class >> new: size withAll: anObject [
+	"Answer a collection with the given size, whose elements are all set to
+	 anObject"
 
-new: size withAll: anObject
-    "Answer a collection with the given size, whose elements are all set to
-     anObject"
-    ^(self new: size) atAllPut: anObject; yourself
-!
+	<category: 'instance creation'>
+	^(self new: size)
+	    atAllPut: anObject;
+	    yourself
+    ]
 
-withAll: aCollection
-    "Answer a collection whose elements are the same as those in aCollection"
-    | anArrayedCollection index |
-    anArrayedCollection := self new: aCollection size.
-    index := 1.
-    aCollection do: [ :each |
-	anArrayedCollection at: index put: each.
-	index := index + 1
-    ].
-    ^anArrayedCollection
-!
+    ArrayedCollection class >> withAll: aCollection [
+	"Answer a collection whose elements are the same as those in aCollection"
 
-with: element1
-    "Answer a collection whose only element is element1"
-    
-    ^(self new: 1)
-	at: 1 put: element1;
-	yourself
-!
+	<category: 'instance creation'>
+	| anArrayedCollection index |
+	anArrayedCollection := self new: aCollection size.
+	index := 1.
+	aCollection do: 
+		[:each | 
+		anArrayedCollection at: index put: each.
+		index := index + 1].
+	^anArrayedCollection
+    ]
 
-with: element1 with: element2
-    "Answer a collection whose only elements are the parameters in the order
-     they were passed"
-    
-    ^(self new: 2)
-	at: 1 put: element1;
-	at: 2 put: element2;
-	yourself
-!
+    ArrayedCollection class >> with: element1 [
+	"Answer a collection whose only element is element1"
 
-with: element1 with: element2 with: element3
-    "Answer a collection whose only elements are the parameters in the order
-     they were passed"
-    
-    ^(self new: 3)
-	at: 1 put: element1;
-	at: 2 put: element2;
-	at: 3 put: element3;
-	yourself
-!
+	<category: 'instance creation'>
+	^(self new: 1)
+	    at: 1 put: element1;
+	    yourself
+    ]
 
-with: element1 with: element2 with: element3 with: element4
-    "Answer a collection whose only elements are the parameters in the order
-     they were passed"
-    
-    ^(self new: 4)
-	at: 1 put: element1;
-	at: 2 put: element2;
-	at: 3 put: element3;
-	at: 4 put: element4;
-	yourself
-!
+    ArrayedCollection class >> with: element1 with: element2 [
+	"Answer a collection whose only elements are the parameters in the order
+	 they were passed"
 
-with: element1 with: element2 with: element3 with: element4 with: element5
-    "Answer a collection whose only elements are the parameters in the order
-     they were passed"
-    
-    ^(self new: 5)
-	at: 1 put: element1;
-	at: 2 put: element2;
-	at: 3 put: element3;
-	at: 4 put: element4;
-	at: 5 put: element5;
-	yourself
-!
+	<category: 'instance creation'>
+	^(self new: 2)
+	    at: 1 put: element1;
+	    at: 2 put: element2;
+	    yourself
+    ]
 
-join: aCollection
-    "Where aCollection is a collection of SequenceableCollections,
-     answer a new instance with all the elements therein, in order."
-    | newInst start |
-    newInst := self new: (aCollection inject: 0 into:
-			      [:size :each | size + each size]).
-    start := 1.
-    aCollection do: [:subColl |
-	newInst replaceFrom: start to: (start := start + subColl size) - 1
-		with: subColl].
-    ^newInst
-!
+    ArrayedCollection class >> with: element1 with: element2 with: element3 [
+	"Answer a collection whose only elements are the parameters in the order
+	 they were passed"
 
-join: aCollection separatedBy: sepCollection
-    "Where aCollection is a collection of SequenceableCollections,
-     answer a new instance with all the elements therein, in order,
-     each separated by an occurrence of sepCollection."
-    | newInst start |
-    aCollection isEmpty ifTrue: [ ^self new: 0 ].
-    newInst := self new: (aCollection
-	inject: sepCollection size * (aCollection size - 1)
-	into: [:size :each | size + each size]).
+	<category: 'instance creation'>
+	^(self new: 3)
+	    at: 1 put: element1;
+	    at: 2 put: element2;
+	    at: 3 put: element3;
+	    yourself
+    ]
 
-    start := 1.
-    aCollection
-	do: [:subColl |
-	    newInst replaceFrom: start to: (start := start + subColl size) - 1
-		with: subColl]
-	separatedBy: [
-	    newInst replaceFrom: start to: (start := start + sepCollection size) - 1
-		with: sepCollection].
-    ^newInst
-! !
+    ArrayedCollection class >> with: element1 with: element2 with: element3 with: element4 [
+	"Answer a collection whose only elements are the parameters in the order
+	 they were passed"
 
+	<category: 'instance creation'>
+	^(self new: 4)
+	    at: 1 put: element1;
+	    at: 2 put: element2;
+	    at: 3 put: element3;
+	    at: 4 put: element4;
+	    yourself
+    ]
 
-
-!ArrayedCollection methodsFor: 'basic'!
+    ArrayedCollection class >> with: element1 with: element2 with: element3 with: element4 with: element5 [
+	"Answer a collection whose only elements are the parameters in the order
+	 they were passed"
 
-add: value
-    self shouldNotImplement
-!
+	<category: 'instance creation'>
+	^(self new: 5)
+	    at: 1 put: element1;
+	    at: 2 put: element2;
+	    at: 3 put: element3;
+	    at: 4 put: element4;
+	    at: 5 put: element5;
+	    yourself
+    ]
 
-, aSequenceableCollection
-    "Answer a new instance of an ArrayedCollection containing all the elements
-     in the receiver, followed by all the elements in aSequenceableCollection"
+    ArrayedCollection class >> join: aCollection [
+	"Where aCollection is a collection of SequenceableCollections,
+	 answer a new instance with all the elements therein, in order."
 
-    ^(self copyEmpty: (self size + aSequenceableCollection size))
-	replaceFrom: 1
-	       to: self size
-	       with: self
-	       startingAt: 1;
-	replaceFrom: self size + 1
-    	       to: self size + aSequenceableCollection size
-	       with: aSequenceableCollection
-	       startingAt: 1;
-	yourself
-!
+	<category: 'instance creation'>
+	| newInst start |
+	newInst := self 
+		    new: (aCollection inject: 0 into: [:size :each | size + each size]).
+	start := 1.
+	aCollection do: 
+		[:subColl | 
+		newInst 
+		    replaceFrom: start
+		    to: (start := start + subColl size) - 1
+		    with: subColl].
+	^newInst
+    ]
 
-atAll: keyCollection
-    "Answer a collection of the same kind returned by #collect:, that
-     only includes the values at the given indices. Fail if any of
-     the values in keyCollection is out of bounds for the receiver."
-    | result i |
-    result := self copyEmptyForCollect: keyCollection size.
-    i := 0.
-    keyCollection do: [ :key | result at: (i := i + 1) put: (self at: key) ].
-    ^result
-!
+    ArrayedCollection class >> join: aCollection separatedBy: sepCollection [
+	"Where aCollection is a collection of SequenceableCollections,
+	 answer a new instance with all the elements therein, in order,
+	 each separated by an occurrence of sepCollection."
 
-copyFrom: start to: stop
-    "Answer a new collection containing all the items in the receiver from the
-     start-th and to the stop-th"
+	<category: 'instance creation'>
+	| newInst start |
+	aCollection isEmpty ifTrue: [^self new: 0].
+	newInst := self 
+		    new: (aCollection inject: sepCollection size * (aCollection size - 1)
+			    into: [:size :each | size + each size]).
+	start := 1.
+	aCollection do: 
+		[:subColl | 
+		newInst 
+		    replaceFrom: start
+		    to: (start := start + subColl size) - 1
+		    with: subColl]
+	    separatedBy: 
+		[newInst 
+		    replaceFrom: start
+		    to: (start := start + sepCollection size) - 1
+		    with: sepCollection].
+	^newInst
+    ]
 
-    | len |
-    stop < start ifTrue: [
-        stop = (start - 1) ifTrue: [^self copyEmpty: 0].
-        ^SystemExceptions.ArgumentOutOfRange
-            signalOn: stop
-            mustBeBetween: start - 1 and: self size ].
+    add: value [
+	<category: 'basic'>
+	self shouldNotImplement
+    ]
 
-    len := stop - start + 1.
-    ^(self copyEmpty: len)
-	replaceFrom: 1 to: len with: self startingAt: start;
-	yourself
-!
+    , aSequenceableCollection [
+	"Answer a new instance of an ArrayedCollection containing all the elements
+	 in the receiver, followed by all the elements in aSequenceableCollection"
 
-copyWithout: oldElement
-    "Answer a copy of the receiver to which all occurrences of oldElement are
-     removed"
-    | newCollection numOccurrences i |
-    numOccurrences := 0.
-    self do: [ :element |
-	element = oldElement
-	    ifTrue: [ numOccurrences := numOccurrences + 1 ]
-    ].
-    newCollection := self copyEmpty: (self size - numOccurrences).
-    i := 1.
-    self do: [ :element |
-	element = oldElement ifFalse: [
-	    newCollection at: i put: element.
-	    i := i + 1
-	]
-    ].
-    ^newCollection
-!
+	<category: 'basic'>
+	^(self copyEmpty: self size + aSequenceableCollection size)
+	    replaceFrom: 1
+		to: self size
+		with: self
+		startingAt: 1;
+	    replaceFrom: self size + 1
+		to: self size + aSequenceableCollection size
+		with: aSequenceableCollection
+		startingAt: 1;
+	    yourself
+    ]
 
-copyWith: anElement
-    "Answer a new instance of an ArrayedCollection containing all the elements
-     in the receiver, followed by the single item anElement"
-    | result |
-    ^(self copyEmpty: (self size + 1))
-	replaceFrom: 1
-	       to: self size
-	       with: self
-	       startingAt: 1;
-	at: (self size) + 1 put: anElement;
-	yourself
-! !
+    atAll: keyCollection [
+	"Answer a collection of the same kind returned by #collect:, that
+	 only includes the values at the given indices. Fail if any of
+	 the values in keyCollection is out of bounds for the receiver."
 
-
-!ArrayedCollection methodsFor: 'enumerating the elements of a collection'!
+	<category: 'basic'>
+	| result i |
+	result := self copyEmptyForCollect: keyCollection size.
+	i := 0.
+	keyCollection do: [:key | result at: (i := i + 1) put: (self at: key)].
+	^result
+    ]
 
-select: aBlock
-    "Answer a new instance of an ArrayedCollection containing all the elements
-     in the receiver which, when passed to aBlock, answer true"
+    copyFrom: start to: stop [
+	"Answer a new collection containing all the items in the receiver from the
+	 start-th and to the stop-th"
 
-    | newCollection |
-    newCollection := WriteStream on: self copyEmpty.
-    self do: [ :element | (aBlock value: element)
-			    ifTrue: [ newCollection nextPut: element ]
-	     ].
-    ^newCollection contents
-!
+	<category: 'basic'>
+	| len |
+	stop < start 
+	    ifTrue: 
+		[stop = (start - 1) ifTrue: [^self copyEmpty: 0].
+		^SystemExceptions.ArgumentOutOfRange 
+		    signalOn: stop
+		    mustBeBetween: start - 1
+		    and: self size].
+	len := stop - start + 1.
+	^(self copyEmpty: len)
+	    replaceFrom: 1
+		to: len
+		with: self
+		startingAt: start;
+	    yourself
+    ]
 
-reject: aBlock
-    "Answer a new instance of an ArrayedCollection containing all the elements
-     in the receiver which, when passed to aBlock, answer false"
+    copyWithout: oldElement [
+	"Answer a copy of the receiver to which all occurrences of oldElement are
+	 removed"
 
-    | newCollection |
-    newCollection := WriteStream on: self copyEmpty.
-    self do: [ :element | (aBlock value: element)
-			    ifFalse: [ newCollection nextPut: element ]
-	     ].
-    ^newCollection contents
-!
+	<category: 'basic'>
+	| newCollection numOccurrences i |
+	numOccurrences := 0.
+	self 
+	    do: [:element | element = oldElement ifTrue: [numOccurrences := numOccurrences + 1]].
+	newCollection := self copyEmpty: self size - numOccurrences.
+	i := 1.
+	self do: 
+		[:element | 
+		element = oldElement 
+		    ifFalse: 
+			[newCollection at: i put: element.
+			i := i + 1]].
+	^newCollection
+    ]
 
-collect: aBlock
-    "Answer a new instance of an ArrayedCollection containing all the results
-     of evaluating aBlock passing each of the receiver's elements"
+    copyWith: anElement [
+	"Answer a new instance of an ArrayedCollection containing all the elements
+	 in the receiver, followed by the single item anElement"
 
-    | newCollection |
-    newCollection := self copyEmptyForCollect.
-    1 to: self size do: [ :i |
-	newCollection at: i put: (aBlock value: (self at: i)).
-    ].
-    ^newCollection
-!
+	<category: 'basic'>
+	| result |
+	^(self copyEmpty: self size + 1)
+	    replaceFrom: 1
+		to: self size
+		with: self
+		startingAt: 1;
+	    at: self size + 1 put: anElement;
+	    yourself
+    ]
 
-with: aSequenceableCollection collect: aBlock
-    "Evaluate aBlock for each pair of elements took respectively from the re-
-     ceiver and from aSequenceableCollection; answer a collection of the same
-     kind of the receiver, made with the block's return values. Fail if the
-     receiver has not the same size as aSequenceableCollection."
+    select: aBlock [
+	"Answer a new instance of an ArrayedCollection containing all the elements
+	 in the receiver which, when passed to aBlock, answer true"
 
-    | newCollection |
-    self size = aSequenceableCollection size
-    	ifFalse: [
-	    ^SystemExceptions.InvalidSize signalOn: aSequenceableCollection ].
+	<category: 'enumerating the elements of a collection'>
+	| newCollection |
+	newCollection := WriteStream on: self copyEmpty.
+	self 
+	    do: [:element | (aBlock value: element) ifTrue: [newCollection nextPut: element]].
+	^newCollection contents
+    ]
 
-    newCollection := self copyEmpty.
-    1 to: self size do: [ :i |
-    	newCollection at: i put:
-    	    (aBlock value: (self at: i) value: (aSequenceableCollection at: i)).
-    ].
-    ^newCollection
-!
+    reject: aBlock [
+	"Answer a new instance of an ArrayedCollection containing all the elements
+	 in the receiver which, when passed to aBlock, answer false"
 
-! !
+	<category: 'enumerating the elements of a collection'>
+	| newCollection |
+	newCollection := WriteStream on: self copyEmpty.
+	self 
+	    do: [:element | (aBlock value: element) ifFalse: [newCollection nextPut: element]].
+	^newCollection contents
+    ]
 
-
-!ArrayedCollection methodsFor: 'copying Collections'!
+    collect: aBlock [
+	"Answer a new instance of an ArrayedCollection containing all the results
+	 of evaluating aBlock passing each of the receiver's elements"
 
-copyReplaceFrom: start to: stop withObject: anObject
-    "Answer a new collection of the same class as the receiver that contains the
-    same elements as the receiver, in the same order, except for elements from
-    index `start' to index `stop'.
-    
-    If start < stop, these are replaced by stop-start+1 copies of anObject.
-    Instead, If start = (stop + 1), then every element of the receiver
-    will be present in the answered copy; the operation will be an append if
-    stop is equal to the size of the receiver or, if it is not, an insert before
-    index `start'."
+	<category: 'enumerating the elements of a collection'>
+	| newCollection |
+	newCollection := self copyEmptyForCollect.
+	1 to: self size
+	    do: [:i | newCollection at: i put: (aBlock value: (self at: i))].
+	^newCollection
+    ]
 
-    | newSize repSize result |
-    (stop - start < -1)
-	ifTrue: [ ^SystemExceptions.ArgumentOutOfRange signalOn: stop mustBeBetween: start - 1 and: self size ].
+    with: aSequenceableCollection collect: aBlock [
+	"Evaluate aBlock for each pair of elements took respectively from the re-
+	 ceiver and from aSequenceableCollection; answer a collection of the same
+	 kind of the receiver, made with the block's return values. Fail if the
+	 receiver has not the same size as aSequenceableCollection."
 
-    (stop >= start) ifTrue: [ ^self copy atAll: (start to: stop) put: anObject; yourself ].
+	<category: 'enumerating the elements of a collection'>
+	| newCollection |
+	self size = aSequenceableCollection size 
+	    ifFalse: [^SystemExceptions.InvalidSize signalOn: aSequenceableCollection].
+	newCollection := self copyEmpty.
+	1 to: self size
+	    do: 
+		[:i | 
+		newCollection at: i
+		    put: (aBlock value: (self at: i) value: (aSequenceableCollection at: i))].
+	^newCollection
+    ]
 
-    newSize := self size - (stop - start).
+    copyReplaceFrom: start to: stop withObject: anObject [
+	"Answer a new collection of the same class as the receiver that contains the
+	 same elements as the receiver, in the same order, except for elements from
+	 index `start' to index `stop'.
+	 
+	 If start < stop, these are replaced by stop-start+1 copies of anObject.
+	 Instead, If start = (stop + 1), then every element of the receiver
+	 will be present in the answered copy; the operation will be an append if
+	 stop is equal to the size of the receiver or, if it is not, an insert before
+	 index `start'."
 
-    result := self copyEmpty: newSize.
-    start > 1 ifTrue: [
-	result replaceFrom: 1 to: start - 1 with: self startingAt: 1 ].
-
-    result at: start put: anObject.
-    stop < self size ifTrue: [
-	result replaceFrom: start + 1 to: newSize with: self startingAt: stop + 1 ].
-
-    ^result
-!
-
-copyReplaceAll: oldSubCollection with: newSubCollection
-    "Answer a new collection in which all the sequences matching
-     oldSubCollection are replaced with newSubCollection"
-
-    | numOld newCollection sizeDifference newSubSize oldSubSize
-      newStart oldStart copySize index |
-    numOld := self countSubCollectionOccurrencesOf: oldSubCollection.
-    newSubSize := newSubCollection size.
-    oldSubSize := oldSubCollection size.
-    sizeDifference := newSubSize - oldSubSize.
-    newCollection := self copyEmpty: self size + (sizeDifference * numOld).
-    oldStart := newStart := 1.
-
-    [
-	index := self indexOfSubCollection: oldSubCollection startingAt: oldStart
-	    ifAbsent: [
-		"Copy the remaining part of self onto the tail of the new collection."
-		newCollection replaceFrom: newStart
-    	    	    to: newCollection size
+	<category: 'copying Collections'>
+	| newSize repSize result |
+	stop - start < -1 
+	    ifTrue: 
+		[^SystemExceptions.ArgumentOutOfRange 
+		    signalOn: stop
+		    mustBeBetween: start - 1
+		    and: self size].
+	stop >= start 
+	    ifTrue: 
+		[^(self copy)
+		    atAll: (start to: stop) put: anObject;
+		    yourself].
+	newSize := self size - (stop - start).
+	result := self copyEmpty: newSize.
+	start > 1 
+	    ifTrue: 
+		[result 
+		    replaceFrom: 1
+		    to: start - 1
 		    with: self
-		    startingAt: oldStart.
-		^newCollection
-	    ].
+		    startingAt: 1].
+	result at: start put: anObject.
+	stop < self size 
+	    ifTrue: 
+		[result 
+		    replaceFrom: start + 1
+		    to: newSize
+		    with: self
+		    startingAt: stop + 1].
+	^result
+    ]
 
+    copyReplaceAll: oldSubCollection with: newSubCollection [
+	"Answer a new collection in which all the sequences matching
+	 oldSubCollection are replaced with newSubCollection"
+
+	<category: 'copying Collections'>
+	| numOld newCollection sizeDifference newSubSize oldSubSize newStart oldStart copySize index |
+	numOld := self countSubCollectionOccurrencesOf: oldSubCollection.
+	newSubSize := newSubCollection size.
+	oldSubSize := oldSubCollection size.
+	sizeDifference := newSubSize - oldSubSize.
+	newCollection := self copyEmpty: self size + (sizeDifference * numOld).
+	oldStart := newStart := 1.
+	
+	[index := self 
+		    indexOfSubCollection: oldSubCollection
+		    startingAt: oldStart
+		    ifAbsent: 
+			["Copy the remaining part of self onto the tail of the new collection."
+
+			newCollection 
+			    replaceFrom: newStart
+			    to: newCollection size
+			    with: self
+			    startingAt: oldStart.
+			^newCollection].
 	copySize := index - oldStart.
-	newCollection replaceFrom: newStart
-	    	      to: newStart + copySize - 1
-		      with: self
-		      startingAt: oldStart.
+	newCollection 
+	    replaceFrom: newStart
+	    to: newStart + copySize - 1
+	    with: self
+	    startingAt: oldStart.
 	newStart := newStart + copySize.
-	newCollection replaceFrom: newStart
-	    	      to: newStart + newSubSize - 1
-		      with: newSubCollection
-		      startingAt: 1.
+	newCollection 
+	    replaceFrom: newStart
+	    to: newStart + newSubSize - 1
+	    with: newSubCollection
+	    startingAt: 1.
+	oldStart := oldStart + copySize + oldSubSize.
+	newStart := newStart + newSubSize] 
+		repeat
+    ]
 
-    	oldStart := oldStart + copySize + oldSubSize.
-    	newStart := newStart + newSubSize
-    ] repeat
-!
+    copyReplaceFrom: start to: stop with: replacementCollection [
+	"Answer a new collection of the same class as the receiver that contains the
+	 same elements as the receiver, in the same order, except for elements from
+	 index `start' to index `stop'.
+	 
+	 If start < stop, these are replaced by the contents of the
+	 replacementCollection.  Instead, If start = (stop + 1), like in
+	 `copyReplaceFrom: 4 to: 3 with: anArray', then every element of the receiver
+	 will be present in the answered copy; the operation will be an append if
+	 stop is equal to the size of the receiver or, if it is not, an insert before
+	 index `start'."
 
-copyReplaceFrom: start to: stop with: replacementCollection
-    "Answer a new collection of the same class as the receiver that contains the
-    same elements as the receiver, in the same order, except for elements from
-    index `start' to index `stop'.
-    
-    If start < stop, these are replaced by the contents of the
-    replacementCollection.  Instead, If start = (stop + 1), like in
-    `copyReplaceFrom: 4 to: 3 with: anArray', then every element of the receiver
-    will be present in the answered copy; the operation will be an append if
-    stop is equal to the size of the receiver or, if it is not, an insert before
-    index `start'."
+	<category: 'copying Collections'>
+	| newSize repSize result |
+	stop - start < -1 
+	    ifTrue: 
+		[^SystemExceptions.ArgumentOutOfRange 
+		    signalOn: stop
+		    mustBeBetween: start - 1
+		    and: self size].
+	repSize := replacementCollection size.
+	newSize := self size + repSize - (stop - start + 1).
+	result := self copyEmpty: newSize.
+	start > 1 
+	    ifTrue: 
+		[result 
+		    replaceFrom: 1
+		    to: start - 1
+		    with: self
+		    startingAt: 1].
+	repSize > 0 
+	    ifTrue: 
+		[result 
+		    replaceFrom: start
+		    to: start + repSize - 1
+		    with: replacementCollection].
+	stop < self size 
+	    ifTrue: 
+		[result 
+		    replaceFrom: start + repSize
+		    to: newSize
+		    with: self
+		    startingAt: stop + 1].
+	^result
+    ]
 
-    | newSize repSize result |
-    (stop - start < -1)
-	ifTrue: [ ^SystemExceptions.ArgumentOutOfRange signalOn: stop mustBeBetween: start - 1 and: self size ].
+    reverse [
+	"Answer the receivers' contents in reverse order"
 
-    repSize := replacementCollection size.
-    newSize := self size + repSize - (stop - start + 1).
+	<category: 'copying Collections'>
+	| result complement |
+	result := self copyEmpty.
+	complement := self size + 1.
+	1 to: self size do: [:i | result at: i put: (self at: complement - i)].
+	^result
+    ]
 
-    result := self copyEmpty: newSize.
-    start > 1 ifTrue: [
-	result replaceFrom: 1 to: start - 1 with: self startingAt: 1 ].
+    storeOn: aStream [
+	"Store Smalltalk code compiling to the receiver on aStream"
 
-    repSize > 0 ifTrue: [
-        result replaceFrom: start to: start + repSize - 1 with: replacementCollection ].
+	<category: 'storing'>
+	| index |
+	aStream
+	    nextPutAll: '((';
+	    nextPutAll: self classNameString;
+	    nextPutAll: ' basicNew: '.
+	self basicSize printOn: aStream.
+	aStream nextPut: $).
+	index := 1.
+	self do: 
+		[:element | 
+		aStream nextPutAll: ' at: '.
+		index printOn: aStream.
+		aStream nextPutAll: ' put: '.
+		element storeOn: aStream.
+		aStream nextPut: $;.
+		index := index + 1].
+	index > 1 ifTrue: [aStream nextPutAll: ' yourself'].
+	aStream nextPut: $)
+    ]
 
-    stop < self size ifTrue: [
-	result replaceFrom: start + repSize to: newSize with: self startingAt: stop + 1 ].
+    copyEmpty [
+	"Answer an empty copy of the receiver"
 
-    ^result
-!
+	<category: 'private'>
+	^self copyEmpty: self size
+    ]
 
-reverse
-    "Answer the receivers' contents in reverse order"
-    | result complement |
-    result := self copyEmpty.
-    complement := self size + 1.
-    1 to: self size do: [ :i |
-	result at: i put: (self at: complement - i).
-    ].
-    ^result
-! !
+    grow [
+	"Private - Grow by some amount"
 
-
-!ArrayedCollection methodsFor: 'storing'!
+	<category: 'private'>
+	self growBy: self growSize
+    ]
 
-storeOn: aStream
-    "Store Smalltalk code compiling to the receiver on aStream"
+    copyGrowTo: newSize [
+	"Private - Answer a copy of the receiver grown to newSize elements"
 
-    | index |
-    aStream nextPutAll: '(('; nextPutAll: self classNameString; 
-	nextPutAll: ' basicNew: '.
-    self basicSize printOn: aStream.
-    aStream nextPut: $).
-    index := 1.
-    self do:
-    	[ :element | aStream nextPutAll: ' at: '.
-	    	     index printOn: aStream.
-		     aStream nextPutAll: ' put: '.
-    	    	     element storeOn: aStream.
-		     aStream nextPut: $;.
-    	    	     index := index + 1 ].
-    index > 1 ifTrue: [ aStream nextPutAll: ' yourself' ].
-    aStream nextPut: $)
-! !
+	<category: 'private'>
+	| newCollection |
+	newCollection := self copyEmpty: newSize.
+	newCollection 
+	    replaceFrom: 1
+	    to: self size
+	    with: self
+	    startingAt: 1.
+	^newCollection
+    ]
 
-
-!ArrayedCollection methodsFor: 'private'!
+    growBy: delta [
+	"Private - Make the receiver grow by delta elements"
 
-copyEmpty
-    "Answer an empty copy of the receiver"
-    ^self copyEmpty: self size
-!
+	<category: 'private'>
+	^self become: (self copyGrowTo: self basicSize + delta)
+    ]
 
-grow
-    "Private - Grow by some amount"
-    self growBy: self growSize
-!
+    growTo: newSize [
+	"Private - Make the receiver grow to a size of newSize"
 
-copyGrowTo: newSize
-    "Private - Answer a copy of the receiver grown to newSize elements"
-    | newCollection |
-    newCollection := self copyEmpty: newSize.
-    newCollection replaceFrom: 1 to: self size with: self startingAt: 1.
-    ^newCollection
-!
+	<category: 'private'>
+	^self become: (self copyGrowTo: newSize)
+    ]
 
-growBy: delta
-    "Private - Make the receiver grow by delta elements"
-    ^self become: (self copyGrowTo: self basicSize + delta)
-!
+    writeStream [
+	"Answer a WriteStream streaming on the receiver"
 
-growTo: newSize
-    "Private - Make the receiver grow to a size of newSize"
-    ^self become: (self copyGrowTo: newSize)
-! !
-
+	<category: 'streams'>
+	^WriteStream on: self
+    ]
 
-!ArrayedCollection methodsFor: 'streams'!
+    size [
+	"Answer the size of the receiver"
 
-writeStream
-    "Answer a WriteStream streaming on the receiver"
-    ^WriteStream on: self
-! !
+	<category: 'built ins'>
+	<primitive: VMpr_Object_basicSize>
+	
+    ]
+]
 
-
-!ArrayedCollection methodsFor: 'built ins'!
-
-size
-    "Answer the size of the receiver"
-    <primitive: VMpr_Object_basicSize>
-
-! !

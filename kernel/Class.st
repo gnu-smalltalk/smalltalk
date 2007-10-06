@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005,2006,2007
@@ -32,389 +31,439 @@
  ======================================================================"
 
 
-ClassDescription subclass: #Class
-		 instanceVariableNames: 'name comment category environment classVariables sharedPools securityPolicy pragmaHandlers'
-		 classVariableNames: ''
-		 poolDictionaries: ''
-		 category: 'Language-Implementation'
-!
-
-Class comment: 
-'I am THE class object.  My instances are the classes of the system.
+
+ClassDescription subclass: Class [
+    | name comment category environment classVariables sharedPools securityPolicy pragmaHandlers |
+    
+    <category: 'Language-Implementation'>
+    <comment: 'I am THE class object.  My instances are the classes of the system.
 I provide information commonly attributed to classes: namely, the
 class name, class comment (you wouldn''t be reading this if it
 weren''t for me), a list of the instance variables of the class, and
-the class category.' !
+the class category.'>
 
-
-!Class methodsFor: 'accessing instances and variables'!
+    Class class >> initialize [
+	"Perform the special initialization of root classes."
 
-name
-    "Answer the class name"
-    ^name
-!
+	<category: 'initialize'>
+	self subclassesDo: [:each | each instanceClass initializeAsRootClass]
+    ]
 
-comment
-    "Answer the class comment"
-    ^comment
-!
+    name [
+	"Answer the class name"
 
-comment: aString
-    "Change the class name"
-    comment := aString
-!
+	<category: 'accessing instances and variables'>
+	^name
+    ]
 
-environment
-    ^environment
-!
+    comment [
+	"Answer the class comment"
 
-environment: aNamespace
-    "Set the receiver's environment to aNamespace and recompile everything"
-    environment := aNamespace.
-    self asClass compileAll; compileAllSubclasses.
-    self asMetaclass compileAll; compileAllSubclasses.
-!
+	<category: 'accessing instances and variables'>
+	^comment
+    ]
 
-category
-    "Answer the class category"
-    ^category
-!
+    comment: aString [
+	"Change the class name"
 
-category: aString
-    "Change the class category to aString"
-    category := aString
-!
+	<category: 'accessing instances and variables'>
+	comment := aString
+    ]
 
-superclass: aClass
-    (aClass isNil and: [ self superclass notNil ])
-	ifTrue: [ self initializeAsRootClass ].
-    super superclass: aClass.
-! !
+    environment [
+	<category: 'accessing instances and variables'>
+	^environment
+    ]
 
+    environment: aNamespace [
+	"Set the receiver's environment to aNamespace and recompile everything"
 
-
-!Class methodsFor: 'accessing instances and variables'!
+	<category: 'accessing instances and variables'>
+	environment := aNamespace.
+	(self asClass)
+	    compileAll;
+	    compileAllSubclasses.
+	(self asMetaclass)
+	    compileAll;
+	    compileAllSubclasses
+    ]
 
-addClassVarName: aString
-    "Add a class variable with the given name to the class pool dictionary."
-    | sym |
-    sym := aString asClassPoolKey.
-    (self classPool includesKey: sym)
-        ifFalse: [ self classPool at: sym put: nil ].
+    category [
+	"Answer the class category"
 
-    ^self classPool associationAt: sym
-!
+	<category: 'accessing instances and variables'>
+	^category
+    ]
 
-addClassVarName: aString value: valueBlock
-    "Add a class variable with the given name to the class pool dictionary,
-     and evaluate valueBlock as its initializer."
-    ^(self addClassVarName: aString)
-        value: valueBlock value;
-	yourself
-!
+    category: aString [
+	"Change the class category to aString"
 
-bindingFor: aString
-    "Answer the variable binding for the class variable with the
-     given name"
-    | sym |
-    sym := aString asClassPoolKey.
-    ^self classPool associationAt: sym
-!
+	<category: 'accessing instances and variables'>
+	category := aString
+    ]
 
-removeClassVarName: aString
-    "Removes the class variable from the class, error if not present, or
-     still in use."
-    | sym |
-    sym := aString asClassPoolKey.
-    (classVariables notNil and: [classVariables includesKey: sym])
-    	ifFalse: [ SystemExceptions.NotFound signalOn: aString what: 'class variable' ].
+    superclass: aClass [
+	<category: 'accessing instances and variables'>
+	(aClass isNil and: [self superclass notNil]) 
+	    ifTrue: [self initializeAsRootClass].
+	super superclass: aClass
+    ]
 
-    classVariables removeKey: sym.
-    self asClass compileAll; compileAllSubclasses.
-    self asMetaclass compileAll; compileAllSubclasses.
-!
+    addClassVarName: aString [
+	"Add a class variable with the given name to the class pool dictionary."
 
-classPool
-    "Answer the class pool dictionary"
-    classVariables isNil
-	ifTrue: [ classVariables := BindingDictionary new environment: self ].
-    ^classVariables
-!
+	<category: 'accessing instances and variables'>
+	| sym |
+	sym := aString asClassPoolKey.
+	(self classPool includesKey: sym) 
+	    ifFalse: [self classPool at: sym put: nil].
+	^self classPool associationAt: sym
+    ]
 
-classVarNames
-    "Answer the names of the variables in the class pool dictionary"
-    ^classVariables notNil
-	ifTrue: [ classVariables keys ]
-	ifFalse: [ Set new ].
-!
+    addClassVarName: aString value: valueBlock [
+	"Add a class variable with the given name to the class pool dictionary,
+	 and evaluate valueBlock as its initializer."
 
-allClassVarNames
-    "Answer the names of the variables in the receiver's class pool dictionary
-     and in each of the superclasses' class pool dictionaries"
-    | superVarNames |
-    superVarNames :=  self classVarNames.
-    self allSuperclasses do: [ :each |
-	superVarNames addAll: each classVarNames].
-    ^superVarNames.  
-!
+	<category: 'accessing instances and variables'>
+	^(self addClassVarName: aString)
+	    value: valueBlock value;
+	    yourself
+    ]
 
-addSharedPool: aDictionary
-    "Add the given shared pool to the list of the class' pool dictionaries"
-    (sharedPools includes: aDictionary)
-    	ifFalse: [ sharedPools := sharedPools copyWith: aDictionary ]
-!
+    bindingFor: aString [
+	"Answer the variable binding for the class variable with the
+	 given name"
 
-removeSharedPool: aDictionary
-    "Remove the given dictionary to the list of the class' pool dictionaries"
-    sharedPools := sharedPools copyWithout: aDictionary
-!
+	<category: 'accessing instances and variables'>
+	| sym |
+	sym := aString asClassPoolKey.
+	^self classPool associationAt: sym
+    ]
 
-sharedPools
-    "Return the names of the shared pools defined by the class"
-    | s |
-    s := Set new.
-    sharedPools notNil ifTrue: [
-	self environment associationsDo: [ :each |
-	    (sharedPools identityIncludes: each value)
-		ifTrue: [ s add: each key ]
-	]
-    ].
-    ^s
-!
+    removeClassVarName: aString [
+	"Removes the class variable from the class, error if not present, or
+	 still in use."
 
-classPragmas
-    "Return the pragmas that are written in the file-out of this class."
-    ^#(#category #comment)
-!
+	<category: 'accessing instances and variables'>
+	| sym |
+	sym := aString asClassPoolKey.
+	(classVariables notNil and: [classVariables includesKey: sym]) 
+	    ifFalse: [SystemExceptions.NotFound signalOn: aString what: 'class variable'].
+	classVariables removeKey: sym.
+	(self asClass)
+	    compileAll;
+	    compileAllSubclasses.
+	(self asMetaclass)
+	    compileAll;
+	    compileAllSubclasses
+    ]
 
-initializeAsRootClass
-    "Perform special initialization reserved to root classes."
-    self registerHandler: [ :method :ann |
-        method
-            rewriteAsCCall: (ann arguments at: 1)
-            for: self ]
-        forPragma: #cCall:.
-    self registerHandler: [ :method :ann |
-        method
-            rewriteAsCCall: (ann arguments at: 1)
-            returning: (ann arguments at: 2)
-            args: (ann arguments at: 3) ]
-        forPragma: #cCall:returning:args:.
-    self registerHandler: [ :method :ann |
-        method
-            rewriteAsAsyncCCall: (ann arguments at: 1)
-            args: (ann arguments at: 2) ]
-        forPragma: #asyncCCall:args:.
-!
+    classPool [
+	"Answer the class pool dictionary"
 
-initialize			"redefined in children (?)"
-    ^self
-! !
+	<category: 'accessing instances and variables'>
+	classVariables isNil 
+	    ifTrue: [classVariables := BindingDictionary new environment: self].
+	^classVariables
+    ]
 
-
-!Class methodsFor: 'testing'!
+    classVarNames [
+	"Answer the names of the variables in the class pool dictionary"
 
-= aClass
-    "Returns true if the two class objects are to be considered equal."
-    "^(aClass isKindOf: Class) and: [name = aClass name]"
-    ^self == aClass
-! !
+	<category: 'accessing instances and variables'>
+	^classVariables notNil ifTrue: [classVariables keys] ifFalse: [Set new]
+    ]
 
+    allClassVarNames [
+	"Answer the names of the variables in the receiver's class pool dictionary
+	 and in each of the superclasses' class pool dictionaries"
 
-
-!Class methodsFor: 'instance creation - alternative'!
+	<category: 'accessing instances and variables'>
+	| superVarNames |
+	superVarNames := self classVarNames.
+	self allSuperclasses 
+	    do: [:each | superVarNames addAll: each classVarNames].
+	^superVarNames
+    ]
 
-categoriesFor: method are: categories
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    (self >> method) methodCategory: (categories at: 1)
-!
+    addSharedPool: aDictionary [
+	"Add the given shared pool to the list of the class' pool dictionaries"
 
-subclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^self
-	subclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category'
-!
+	<category: 'accessing instances and variables'>
+	(sharedPools includes: aDictionary) 
+	    ifFalse: [sharedPools := sharedPools copyWith: aDictionary]
+    ]
 
-subclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^(self
-	subclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category')
-	classInstanceVariableNames: stringClassInstVarNames;
-	yourself
-!
+    removeSharedPool: aDictionary [
+	"Remove the given dictionary to the list of the class' pool dictionaries"
 
-variableSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^self
-	variableSubclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category'
-!
+	<category: 'accessing instances and variables'>
+	sharedPools := sharedPools copyWithout: aDictionary
+    ]
 
-variableSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^(self
-	variableSubclass: classNameString
-	instanceVariableNames: stringInstVarNames
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category')
-	classInstanceVariableNames: stringClassInstVarNames;
-	yourself
-!
+    sharedPools [
+	"Return the names of the shared pools defined by the class"
 
-variableByteSubclass: classNameString classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^self
-	variableByteSubclass: classNameString
-	instanceVariableNames: ''
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category'
-!
+	<category: 'accessing instances and variables'>
+	| s |
+	s := Set new.
+	sharedPools notNil 
+	    ifTrue: 
+		[self environment associationsDo: 
+			[:each | 
+			(sharedPools identityIncludes: each value) ifTrue: [s add: each key]]].
+	^s
+    ]
 
-variableByteSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^(self
-	variableByteSubclass: classNameString
-	instanceVariableNames: ''
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category')
-	classInstanceVariableNames: stringClassInstVarNames;
-	yourself
-!
+    classPragmas [
+	"Return the pragmas that are written in the file-out of this class."
 
-variableLongSubclass: classNameString classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^self
-	variable: #uint subclass: classNameString
-	instanceVariableNames: ''
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category'
-!
+	<category: 'accessing instances and variables'>
+	^#(#category #comment)
+    ]
 
-variableLongSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames
-    "Don't use this, it is only present to file in from IBM Smalltalk"
-    ^(self
-	variable: #uint subclass: classNameString
-	instanceVariableNames: ''
-	classVariableNames: stringOfClassVarNames
-	poolDictionaries: stringOfPoolNames
-	category: 'no category')
-	classInstanceVariableNames: stringClassInstVarNames;
-	yourself
-! !
+    initializeAsRootClass [
+	"Perform special initialization reserved to root classes."
 
-
-!Class methodsFor: 'instance creation'!
+	<category: 'accessing instances and variables'>
+	self 
+	    registerHandler: [:method :ann | method rewriteAsCCall: (ann arguments at: 1) for: self]
+	    forPragma: #cCall:.
+	self registerHandler: 
+		[:method :ann | 
+		method 
+		    rewriteAsCCall: (ann arguments at: 1)
+		    returning: (ann arguments at: 2)
+		    args: (ann arguments at: 3)]
+	    forPragma: #cCall:returning:args:.
+	self registerHandler: 
+		[:method :ann | 
+		method rewriteAsAsyncCCall: (ann arguments at: 1)
+		    args: (ann arguments at: 2)]
+	    forPragma: #asyncCCall:args:
+    ]
 
-extend
-    "Redefine a version of the receiver in the current namespace.  Note:
-    this method can bite you in various ways when sent to system classes;
-    read the section on namespaces in the manual for some examples of the
-    problems you can encounter."
+    initialize [
+	"redefined in children (?)"
 
-    | method |
-    method := self kindOfSubclass,
-	'instanceVariableNames:classVariableNames:poolDictionaries:category:'.
+	<category: 'accessing instances and variables'>
+	^self
+    ]
 
-    ^self
-        perform: method asSymbol
-        withArguments: {self name asSymbol. ''. ''. ''. 'Extensions'}
-!
+    = aClass [
+	"Returns true if the two class objects are to be considered equal."
 
-subclass: classNameString
-    "Define a subclass of the receiver with the given name.  If the class
-     is already defined, don't modify its instance or class variables
-     but still, if necessary, recompile everything needed."
+	"^(aClass isKindOf: Class) and: [name = aClass name]"
 
-    | meta |
-    KernelInitialized ifFalse: [ ^(Smalltalk at: classNameString) ].
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
-	  environment: Namespace current
-	  subclassOf: self!
+	<category: 'testing'>
+	^self == aClass
+    ]
 
-subclass: classNameString
-    instanceVariableNames: stringInstVarNames
-    classVariableNames: stringOfClassVarNames
-    poolDictionaries: stringOfPoolNames
-    category: categoryNameString
-    "Define a fixed subclass of the receiver with the given name, instance
-     variables, class variables, pool dictionaries and category. If the
-     class is already defined, if necessary, recompile everything needed."
+    categoriesFor: method are: categories [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
 
-    | meta |
-    KernelInitialized ifFalse: [
-	^(Smalltalk at: classNameString) category: categoryNameString
-    ].
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
-	  environment: Namespace current
-	  subclassOf: self
-	  instanceVariableNames: stringInstVarNames
-	  shape: nil
-	  classVariableNames: stringOfClassVarNames
-	  poolDictionaries: stringOfPoolNames
-	  category: categoryNameString
-!
+	<category: 'instance creation - alternative'>
+	self >> method methodCategory: (categories at: 1)
+    ]
 
-variableSubclass: classNameString
-    instanceVariableNames: stringInstVarNames
-    classVariableNames: stringOfClassVarNames
-    poolDictionaries: stringOfPoolNames
-    category: categoryNameString
-    "Define a variable pointer subclass of the receiver with the given
-     name, instance variables, class variables, pool dictionaries and
-     category. If the class is already defined, if necessary, recompile
-     everything needed."
+    subclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
 
-    | meta |
-    KernelInitialized ifFalse: [
-	^(Smalltalk at: classNameString) category: categoryNameString
-    ].
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
-	  environment: Namespace current
-	  subclassOf: self
-	  instanceVariableNames: stringInstVarNames
-	  shape: #pointer
-	  classVariableNames: stringOfClassVarNames
-	  poolDictionaries: stringOfPoolNames
-	  category: categoryNameString
-!
+	<category: 'instance creation - alternative'>
+	^self 
+	    subclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category'
+    ]
 
-variable: shape subclass: classNameString
-    instanceVariableNames: stringInstVarNames
-    classVariableNames: stringOfClassVarNames
-    poolDictionaries: stringOfPoolNames
-    category: categoryNameString
-    "Define a variable subclass of the receiver with the given name,
-     shape, instance variables, class variables, pool dictionaries and
-     category. If the class is already defined, if necessary, recompile
-     everything needed.  The shape can be one of #byte #int8 #character
-     #short #ushort #int #uint #int64 #uint64 #utf32 #float #double or
-     #pointer."
+    subclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
 
-    | meta |
-    KernelInitialized ifFalse: [
-	^(Smalltalk at: classNameString) category: categoryNameString
-    ].
+	<category: 'instance creation - alternative'>
+	^(self 
+	    subclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category')
+	    classInstanceVariableNames: stringClassInstVarNames;
+	    yourself
+    ]
 
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
+    variableSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
+
+	<category: 'instance creation - alternative'>
+	^self 
+	    variableSubclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category'
+    ]
+
+    variableSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
+
+	<category: 'instance creation - alternative'>
+	^(self 
+	    variableSubclass: classNameString
+	    instanceVariableNames: stringInstVarNames
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category')
+	    classInstanceVariableNames: stringClassInstVarNames;
+	    yourself
+    ]
+
+    variableByteSubclass: classNameString classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
+
+	<category: 'instance creation - alternative'>
+	^self 
+	    variableByteSubclass: classNameString
+	    instanceVariableNames: ''
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category'
+    ]
+
+    variableByteSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
+
+	<category: 'instance creation - alternative'>
+	^(self 
+	    variableByteSubclass: classNameString
+	    instanceVariableNames: ''
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category')
+	    classInstanceVariableNames: stringClassInstVarNames;
+	    yourself
+    ]
+
+    variableLongSubclass: classNameString classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
+
+	<category: 'instance creation - alternative'>
+	^self 
+	    variable: #uint
+	    subclass: classNameString
+	    instanceVariableNames: ''
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category'
+    ]
+
+    variableLongSubclass: classNameString classInstanceVariableNames: stringClassInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames [
+	"Don't use this, it is only present to file in from IBM Smalltalk"
+
+	<category: 'instance creation - alternative'>
+	^(self 
+	    variable: #uint
+	    subclass: classNameString
+	    instanceVariableNames: ''
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: 'no category')
+	    classInstanceVariableNames: stringClassInstVarNames;
+	    yourself
+    ]
+
+    extend [
+	"Redefine a version of the receiver in the current namespace.  Note:
+	 this method can bite you in various ways when sent to system classes;
+	 read the section on namespaces in the manual for some examples of the
+	 problems you can encounter."
+
+	<category: 'instance creation'>
+	| method |
+	method := self kindOfSubclass 
+		    , 'instanceVariableNames:classVariableNames:poolDictionaries:category:'.
+	^self perform: method asSymbol
+	    withArguments: 
+		{self name asSymbol.
+		''.
+		''.
+		''.
+		'Extensions'}
+    ]
+
+    subclass: classNameString [
+	"Define a subclass of the receiver with the given name.  If the class
+	 is already defined, don't modify its instance or class variables
+	 but still, if necessary, recompile everything needed."
+
+	<category: 'instance creation'>
+	| meta |
+	KernelInitialized ifFalse: [^Smalltalk at: classNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
+	    environment: Namespace current
+	    subclassOf: self
+    ]
+
+    subclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
+	"Define a fixed subclass of the receiver with the given name, instance
+	 variables, class variables, pool dictionaries and category. If the
+	 class is already defined, if necessary, recompile everything needed."
+
+	<category: 'instance creation'>
+	| meta |
+	KernelInitialized 
+	    ifFalse: [^(Smalltalk at: classNameString) category: categoryNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
+	    environment: Namespace current
+	    subclassOf: self
+	    instanceVariableNames: stringInstVarNames
+	    shape: nil
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: categoryNameString
+    ]
+
+    variableSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
+	"Define a variable pointer subclass of the receiver with the given
+	 name, instance variables, class variables, pool dictionaries and
+	 category. If the class is already defined, if necessary, recompile
+	 everything needed."
+
+	<category: 'instance creation'>
+	| meta |
+	KernelInitialized 
+	    ifFalse: [^(Smalltalk at: classNameString) category: categoryNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
+	    environment: Namespace current
+	    subclassOf: self
+	    instanceVariableNames: stringInstVarNames
+	    shape: #pointer
+	    classVariableNames: stringOfClassVarNames
+	    poolDictionaries: stringOfPoolNames
+	    category: categoryNameString
+    ]
+
+    variable: shape subclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
+	"Define a variable subclass of the receiver with the given name,
+	 shape, instance variables, class variables, pool dictionaries and
+	 category. If the class is already defined, if necessary, recompile
+	 everything needed.  The shape can be one of #byte #int8 #character
+	 #short #ushort #int #uint #int64 #uint64 #utf32 #float #double or
+	 #pointer."
+
+	<category: 'instance creation'>
+	| meta |
+	KernelInitialized 
+	    ifFalse: [^(Smalltalk at: classNameString) category: categoryNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
 	    environment: Namespace current
 	    subclassOf: self
 	    instanceVariableNames: stringInstVarNames
@@ -422,26 +471,21 @@ variable: shape subclass: classNameString
 	    classVariableNames: stringOfClassVarNames
 	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString
-!
+    ]
 
+    variableWordSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
+	"Define a word variable subclass of the receiver with the given
+	 name, instance variables (must be ''), class variables, pool
+	 dictionaries and category. If the class is already defined, if
+	 necessary, recompile everything needed."
 
-variableWordSubclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    "Define a word variable subclass of the receiver with the given
-     name, instance variables (must be ''), class variables, pool
-     dictionaries and category. If the class is already defined, if
-     necessary, recompile everything needed."
-
-    | meta |
-    KernelInitialized ifFalse: [
-	^(Smalltalk at: classNameString) category: categoryNameString
-    ].
-
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
+	<category: 'instance creation'>
+	| meta |
+	KernelInitialized 
+	    ifFalse: [^(Smalltalk at: classNameString) category: categoryNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
 	    environment: Namespace current
 	    subclassOf: self
 	    instanceVariableNames: stringInstVarNames
@@ -449,25 +493,21 @@ variableWordSubclass: classNameString
 	    classVariableNames: stringOfClassVarNames
 	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString
-!
+    ]
 
-variableByteSubclass: classNameString
-  instanceVariableNames: stringInstVarNames
-  classVariableNames: stringOfClassVarNames
-  poolDictionaries: stringOfPoolNames
-  category: categoryNameString
-    "Define a byte variable subclass of the receiver with the given
-     name, instance variables (must be ''), class variables, pool
-     dictionaries and category. If the class is already defined, if
-     necessary, recompile everything needed."
+    variableByteSubclass: classNameString instanceVariableNames: stringInstVarNames classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryNameString [
+	"Define a byte variable subclass of the receiver with the given
+	 name, instance variables (must be ''), class variables, pool
+	 dictionaries and category. If the class is already defined, if
+	 necessary, recompile everything needed."
 
-    | meta |
-    KernelInitialized ifFalse: [
-	^(Smalltalk at: classNameString) category: categoryNameString
-    ].
-
-    meta := self metaclassFor: classNameString.
-    ^meta name: classNameString
+	<category: 'instance creation'>
+	| meta |
+	KernelInitialized 
+	    ifFalse: [^(Smalltalk at: classNameString) category: categoryNameString].
+	meta := self metaclassFor: classNameString.
+	^meta 
+	    name: classNameString
 	    environment: Namespace current
 	    subclassOf: self
 	    instanceVariableNames: stringInstVarNames
@@ -475,183 +515,180 @@ variableByteSubclass: classNameString
 	    classVariableNames: stringOfClassVarNames
 	    poolDictionaries: stringOfPoolNames
 	    category: categoryNameString
-! !
+    ]
 
+    article [
+	"Answer an article (`a' or `an') which is ok for the receiver's name"
 
-
-!Class methodsFor: 'printing'!
+	<category: 'printing'>
+	| name |
+	name := self name.
+	^(name at: 1) isVowel ifTrue: ['an'] ifFalse: ['a']
+    ]
 
-article
-    "Answer an article (`a' or `an') which is ok for the receiver's name"
-    | name |
-    name := self name.
-    ^(name at: 1) isVowel ifTrue: [ 'an' ] ifFalse: [ 'a' ].
-!
+    printOn: aStream [
+	"Print a representation of the receiver on aStream"
 
-printOn: aStream
-    "Print a representation of the receiver on aStream"
-    aStream nextPutAll: (self nameIn: Smalltalk)
-!
+	<category: 'printing'>
+	aStream nextPutAll: (self nameIn: Smalltalk)
+    ]
 
-storeOn: aStream
-    "Store Smalltalk code compiling to the receiver on aStream"
-    aStream nextPutAll: (self nameIn: Smalltalk)
-! !
+    storeOn: aStream [
+	"Store Smalltalk code compiling to the receiver on aStream"
 
-
-!Class methodsFor: 'security'!
+	<category: 'printing'>
+	aStream nextPutAll: (self nameIn: Smalltalk)
+    ]
 
-policy
-    ^securityPolicy
-!
+    policy [
+	<category: 'security'>
+	^securityPolicy
+    ]
 
-policy: aSecurityPolicy
-    securityPolicy := aSecurityPolicy withOwner: self
-!
+    policy: aSecurityPolicy [
+	<category: 'security'>
+	securityPolicy := aSecurityPolicy withOwner: self
+    ]
 
-check: aPermission
-    self securityPolicy isNil ifTrue: [ ^self isUntrusted not ].
-    ^self securityPolicy check: aPermission
-! !
+    check: aPermission [
+	<category: 'security'>
+	self securityPolicy isNil ifTrue: [^self isUntrusted not].
+	^self securityPolicy check: aPermission
+    ]
 
-
-!Class methodsFor: 'pragmas'!
+    registerHandler: aBlock forPragma: pragma [
+	<category: 'pragmas'>
+	pragmaHandlers isNil ifTrue: [pragmaHandlers := IdentityDictionary new].
+	pragmaHandlers at: pragma put: aBlock
+    ]
 
-registerHandler: aBlock forPragma: pragma
-    pragmaHandlers isNil ifTrue: [ pragmaHandlers := IdentityDictionary new ].
-    pragmaHandlers at: pragma put: aBlock
-!
+    pragmaHandlerFor: aSymbol [
+	<category: 'pragmas'>
+	| handler |
+	pragmaHandlers isNil 
+	    ifFalse: 
+		[handler := pragmaHandlers at: aSymbol ifAbsent: [nil].
+		handler isNil ifFalse: [^handler]].
+	self superclass isNil 
+	    ifFalse: [^self superclass pragmaHandlerFor: aSymbol].
+	^nil
+    ]
 
-pragmaHandlerFor: aSymbol
-    | handler |
-    pragmaHandlers isNil ifFalse: [
-	handler := pragmaHandlers at: aSymbol ifAbsent: [ nil ].
-	handler isNil ifFalse: [ ^handler ].
-    ].
-    self superclass isNil ifFalse: [
-        ^self superclass pragmaHandlerFor: aSymbol
-    ].
-    ^nil
-! !
+    classInstanceVariableNames: stringClassInstVarNames [
+	<category: 'private'>
+	self class instanceVariableNames: stringClassInstVarNames
+    ]
 
-
-!Class methodsFor: 'private'!
+    setClassVariables: aDictionary [
+	<category: 'private'>
+	classVariables := aDictionary
+    ]
 
-classInstanceVariableNames: stringClassInstVarNames
-    self class instanceVariableNames: stringClassInstVarNames
-!
+    setName: aString [
+	<category: 'private'>
+	name := aString
+    ]
 
-setClassVariables: aDictionary
-    classVariables := aDictionary.
-!
+    setEnvironment: aNamespace [
+	<category: 'private'>
+	environment := aNamespace
+    ]
 
-setName: aString
-    name := aString.
-!
+    setSharedPools: anArray [
+	"Private - Set the receiver's shared pools to be those in anArray"
 
-setEnvironment: aNamespace
-    environment := aNamespace.
-!
+	<category: 'private'>
+	sharedPools := anArray
+    ]
 
-setSharedPools: anArray
-    "Private - Set the receiver's shared pools to be those in anArray"
-    sharedPools := anArray
-!
+    sharedPoolDictionaries [
+	"Return the shared pools (not the names!) defined by the class"
 
-sharedPoolDictionaries
-    "Return the shared pools (not the names!) defined by the class"
-    ^sharedPools
-!
+	<category: 'private'>
+	^sharedPools
+    ]
 
-metaclassFor: classNameString
-    "Create a Metaclass object for the given class name. The metaclass
-     is a subclass of the receiver's metaclass"
-    | className class |
-    className := classNameString asGlobalKey.
-    class := Namespace current hereAt: className ifAbsent: [ nil ].
+    metaclassFor: classNameString [
+	"Create a Metaclass object for the given class name. The metaclass
+	 is a subclass of the receiver's metaclass"
 
-    ^(class isNil or: [ class isClass not ])
-	ifTrue: [ Metaclass subclassOf: self class ]
-	ifFalse: [ class class ]
-! !
+	<category: 'private'>
+	| className class |
+	className := classNameString asGlobalKey.
+	class := Namespace current hereAt: className ifAbsent: [nil].
+	^(class isNil or: [class isClass not]) 
+	    ifTrue: [Metaclass subclassOf: self class]
+	    ifFalse: [class class]
+    ]
 
-
-!Class methodsFor: 'testing functionality'!
+    asClass [
+	<category: 'testing functionality'>
+	^self
+    ]
 
-asClass
-    ^self
-!
+    isClass [
+	<category: 'testing functionality'>
+	^true
+    ]
 
-isClass
-    ^true
-! !
+    fileOutDeclarationOn: aFileStream [
+	"File out class definition to aFileStream.  Requires package Parser."
 
-
-!Class methodsFor: 'filing'!
+	<category: 'filing'>
+	self notYetImplemented
+    ]
 
-fileOutDeclarationOn: aFileStream
-    "File out class definition to aFileStream.  Requires package Parser."
-    self notYetImplemented
-!
+    fileOutOn: aFileStream [
+	"File out complete class description:  class definition, class and
+	 instance methods.  Requires package Parser."
 
-fileOutOn: aFileStream
-    "File out complete class description:  class definition, class and
-     instance methods.  Requires package Parser."
+	<category: 'filing'>
+	self notYetImplemented
+    ]
 
-    self notYetImplemented! !
+    binaryRepresentationVersion [
+	"Answer a number >= 0 which represents the current version of the
+	 object's representation.  The default implementation answers
+	 zero."
 
-
-!Class methodsFor: 'saving and loading'!
+	<category: 'saving and loading'>
+	^0
+    ]
 
-binaryRepresentationVersion
-    "Answer a number >= 0 which represents the current version of the
-     object's representation.  The default implementation answers
-     zero."
-    ^0
-!
+    nonVersionedInstSize [
+	"Answer the number of instance variables that the class used to have
+	 when objects were stored without using a VersionableObjectProxy.
+	 The default implementation answers the current instSize."
 
-nonVersionedInstSize
-    "Answer the number of instance variables that the class used to have
-     when objects were stored without using a VersionableObjectProxy.
-     The default implementation answers the current instSize."
-    ^self instSize
-!
+	<category: 'saving and loading'>
+	^self instSize
+    ]
 
-convertFromVersion: version withFixedVariables: fixed
-			    indexedVariables: indexed
-			    for: anObjectDumper
+    convertFromVersion: version withFixedVariables: fixed indexedVariables: indexed for: anObjectDumper [
+	"This method is called if a VersionableObjectProxy is attached to
+	 a class.  It receives the version number that was stored for the
+	 object (or nil if the object did not use a VersionableObjectProxy),
+	 the fixed instance variables, the indexed instance variables,
+	 and the ObjectDumper that has read the object.
+	 The default implementation ignores the version and simply fills
+	 in an instance of the receiver with the given fixed and indexed
+	 instance variables (nil if the class instances are of fixed size).
+	 If instance variables were removed from the class, extras are
+	 ignored; if the class is now fixed and used to be indexed,
+	 indexed is not used."
 
-    "This method is called if a VersionableObjectProxy is attached to
-     a class.  It receives the version number that was stored for the
-     object (or nil if the object did not use a VersionableObjectProxy),
-     the fixed instance variables, the indexed instance variables,
-     and the ObjectDumper that has read the object.
-     The default implementation ignores the version and simply fills
-     in an instance of the receiver with the given fixed and indexed
-     instance variables (nil if the class instances are of fixed size).
-     If instance variables were removed from the class, extras are
-     ignored; if the class is now fixed and used to be indexed,
-     indexed is not used."
+	<category: 'saving and loading'>
+	| object |
+	object := self isFixed 
+		    ifTrue: [self basicNew]
+		    ifFalse: [self basicNew: indexed size].
+	fixed 
+	    from: 1
+	    to: (fixed size min: self instSize)
+	    keysAndValuesDo: [:i :obj | object instVarAt: i put: obj].
+	(self isFixed or: [indexed isNil]) ifTrue: [^object].
+	indexed keysAndValuesDo: [:i :obj | object basicAt: i put: obj].
+	^object
+    ]
+]
 
-    | object |
-    object := self isFixed
-	ifTrue: [ self basicNew ]
-	ifFalse: [ self basicNew: indexed size ].
-
-    fixed
-	from: 1
-	to: (fixed size min: self instSize)
-	keysAndValuesDo: [ :i :obj | object instVarAt: i put: obj ].
-
-    (self isFixed or: [ indexed isNil ]) ifTrue: [ ^object ].
-
-    indexed keysAndValuesDo: [ :i :obj | object basicAt: i put: obj ].
-    ^object! !
-
-
-!Class class methodsFor: 'initialize'!
-
-initialize
-    "Perform the special initialization of root classes."
-    self subclassesDo: [ :each | each instanceClass initializeAsRootClass ]
-! !

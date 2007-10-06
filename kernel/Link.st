@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002
@@ -32,74 +31,77 @@
  ======================================================================"
 
 
-Object subclass: #Link
-       instanceVariableNames: 'nextLink'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Collections-Sequenceable'
-!
-
-Link comment: 
-'I represent simple linked lists.  Generally, I am not used by myself, but
+
+Object subclass: Link [
+    | nextLink |
+    
+    <category: 'Collections-Sequenceable'>
+    <comment: 'I represent simple linked lists.  Generally, I am not used by myself, but
 rather a subclass adds other instance variables that hold the information
-for each node, and I hold the glue that keeps them together.' !
+for each node, and I hold the glue that keeps them together.'>
 
-
-!Link class methodsFor: 'instance creation'!
+    Link class >> nextLink: aLink [
+	"Create an instance with the given next link"
 
-nextLink: aLink
-    "Create an instance with the given next link"
-    ^self new nextLink: aLink
+	<category: 'instance creation'>
+	^self new nextLink: aLink
+    ]
 
-! !
+    at: index [
+	"Retrieve a node (instance of Link) that is at a distance of `index'
+	 after the receiver."
 
-
-!Link methodsFor: 'iteration'!
-
-at: index
-    "Retrieve a node (instance of Link) that is at a distance of `index'
-     after the receiver."
-    | i element |
-    i := 1.
-    element := self.
-    [
-	i = index ifTrue: [ ^element ].
+	<category: 'iteration'>
+	| i element |
+	i := 1.
+	element := self.
+	
+	[i = index ifTrue: [^element].
 	i := i + 1.
-	(element := element nextLink) isNil
-    ] whileFalse.
-    SystemExceptions.IndexOutOfRange signalOn: self withIndex: index
-!
+	(element := element nextLink) isNil] 
+		whileFalse.
+	SystemExceptions.IndexOutOfRange signalOn: self withIndex: index
+    ]
 
-at: index put: object
-    self shouldNotImplement
-!
+    at: index put: object [
+	<category: 'iteration'>
+	self shouldNotImplement
+    ]
 
-do: aBlock
-    "Evaluate aBlock for each element in the list"
-    | item |
-    item := self.
-    [ aBlock value: item. (item := item nextLink) isNil ] whileFalse
-!
+    do: aBlock [
+	"Evaluate aBlock for each element in the list"
 
-size
-    "Answer the number of elements in the list. Warning: this is O(n)"
-    | item count |
-    item := self.
-    count := 1.
-    [ (item := item nextLink) isNil ] whileFalse: [ count := count + 1 ].
-    ^count
-! !
+	<category: 'iteration'>
+	| item |
+	item := self.
+	
+	[aBlock value: item.
+	(item := item nextLink) isNil] whileFalse
+    ]
 
-
-!Link methodsFor: 'basic'!
+    size [
+	"Answer the number of elements in the list. Warning: this is O(n)"
 
-nextLink
-    "Answer the next item in the list"
-    ^nextLink
-!
+	<category: 'iteration'>
+	| item count |
+	item := self.
+	count := 1.
+	[(item := item nextLink) isNil] whileFalse: [count := count + 1].
+	^count
+    ]
 
-nextLink: aLink
-    "Set the next item in the list"
-    nextLink := aLink
-! !
+    nextLink [
+	"Answer the next item in the list"
+
+	<category: 'basic'>
+	^nextLink
+    ]
+
+    nextLink: aLink [
+	"Set the next item in the list"
+
+	<category: 'basic'>
+	nextLink := aLink
+    ]
+]
 

@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2007 Free Software Foundation, Inc.
@@ -28,219 +27,264 @@
 |
  ======================================================================"
 
-TestCase subclass: #DebuggerTest
-         instanceVariableNames: ''
-         classVariableNames: ''
-         poolDictionaries: ''
-         category: 'System-Debugging-Test'!
 
-!DebuggerTest methodsFor: 'test'!
+
+TestCase subclass: DebuggerTest [
+    
+    <comment: nil>
+    <category: 'System-Debugging-Test'>
 
-debuggerOn: aBlock
-    "Attach aBlock to a debugger and step until aBlock's execution begins."
-    | debugger |
-    debugger := Debugger
-	on: [ Processor activeProcess suspend. aBlock value ] fork.
-    [ debugger suspendedContext method == aBlock block ]
-	whileFalse: [ debugger stepBytecode ].
-    ^debugger!
+    debuggerOn: aBlock [
+	"Attach aBlock to a debugger and step until aBlock's execution begins."
 
-testOn
-    "Test that #debuggerOn: works as we intend."
-    | debugger notReached |
-    notReached := false.
-    debugger := self debuggerOn: [ notReached := true ].
-    self assert: debugger suspendedContext isBlock.
-    self deny: notReached!
+	<category: 'test'>
+	| debugger |
+	debugger := Debugger 
+		    on: 
+			[Processor activeProcess suspend.
+			aBlock value] fork.
+	[debugger suspendedContext method == aBlock block] 
+	    whileFalse: [debugger stepBytecode].
+	^debugger
+    ]
 
-testStep
-    "Test that #step goes through the traced process a single line at a time."
-    | debugger reached1 reached2 notReached |
-    reached1 := reached2 := notReached := false.
-    debugger := self debuggerOn: [
-	reached1 := true. reached2 := true.
-	notReached := true ].
-    debugger step.
-    self assert: reached1.
-    self assert: reached2.
-    self deny: notReached!
+    testOn [
+	"Test that #debuggerOn: works as we intend."
 
-testCurrentLine
-    "Test that #currentLine does not do something completely bogus."
-    | debugger a b c prevLine |
-    debugger := self debuggerOn: [
-	a := 5.
-	b := 6.
-	c := 7 ].
+	<category: 'test'>
+	| debugger notReached |
+	notReached := false.
+	debugger := self debuggerOn: [notReached := true].
+	self assert: debugger suspendedContext isBlock.
+	self deny: notReached
+    ]
 
-    [ debugger step. a = 5 ] whileFalse.
-    prevLine := debugger currentLine.
-    debugger step.
-    self assert: prevLine + 1 = debugger currentLine!
+    testStep [
+	"Test that #step goes through the traced process a single line at a time."
 
-testForkDebugger
-    "Test forking a debugger for the current process."
-    | value |
-    [ :debugger |
-	[ debugger step. debugger suspendedContext selector = #y ] whileFalse.
+	<category: 'test'>
+	| debugger reached1 reached2 notReached |
+	reached1 := reached2 := notReached := false.
+	debugger := self debuggerOn: 
+			[reached1 := true. reached2 := true.
+			notReached := true].
+	debugger step.
+	self assert: reached1.
+	self assert: reached2.
+	self deny: notReached
+    ]
+
+    testCurrentLine [
+	"Test that #currentLine does not do something completely bogus."
+
+	<category: 'test'>
+	| debugger a b c prevLine |
+	debugger := self debuggerOn: 
+			[a := 5.
+			b := 6.
+			c := 7].
+	
+	[debugger step.
+	a = 5] whileFalse.
+	prevLine := debugger currentLine.
+	debugger step.
+	self assert: prevLine + 1 = debugger currentLine
+    ]
+
+    testForkDebugger [
+	"Test forking a debugger for the current process."
+
+	<category: 'test'>
+	| value |
+	
+	[:debugger | 
+	
+	[debugger step.
+	debugger suspendedContext selector = #y] whileFalse.
 	value := false.
 	debugger finish.
-	[ debugger step. debugger suspendedContext selector = #y ] whileFalse.
+	
+	[debugger step.
+	debugger suspendedContext selector = #y] whileFalse.
 	value := true.
 	debugger finish.
-	[ debugger step. debugger suspendedContext selector = #y ] whileFalse.
+	
+	[debugger step.
+	debugger suspendedContext selector = #y] whileFalse.
 	value := 42.
-	debugger continue
-    ] forkDebugger.
-    self y.
-    self deny: value.
-    self y.
-    self assert: value.
-    self y.
-    self assert: value = 42!
+	debugger continue] 
+		forkDebugger.
+	self y.
+	self deny: value.
+	self y.
+	self assert: value.
+	self y.
+	self assert: value = 42
+    ]
 
-testStopInferior
-    "Test using #stopInferior to restart the debugger."
-    | theDebugger value |
-    [ :debugger |
+    testStopInferior [
+	"Test using #stopInferior to restart the debugger."
+
+	<category: 'test'>
+	| theDebugger value |
+	
+	[:debugger | 
 	theDebugger := debugger.
-	[ [ debugger step ] repeat ]
-	    on: SystemExceptions.DebuggerReentered
-	    do: [ :ex | ex return ].
-
+	[[debugger step] repeat] on: SystemExceptions.DebuggerReentered
+	    do: [:ex | ex return].
 	value := 42.
-	debugger continue
-    ] forkDebugger.
+	debugger continue] 
+		forkDebugger.
+	self assert: value isNil.
+	theDebugger stopInferior.
+	self assert: value = 42
+    ]
 
-    self assert: value isNil.
-    theDebugger stopInferior.
-    self assert: value = 42!
+    testStepIntoSend [
+	"Test that #step stops at the next message send."
 
-testStepIntoSend
-    "Test that #step stops at the next message send."
-    | debugger reached notReached |
-    reached := false.
-    debugger := self debuggerOn: [
-	reached := true. notReached := 3 factorial ].
-    debugger step.
-    self assert: reached.
-    self assert: notReached isNil!
-
-testFinish
-    "Test that #finish does not proceed further in the parent context."
-    | debugger reached |
-    debugger := self debuggerOn: [
-	reached := 3 factorial ].
-    debugger step.
-    self assert: reached isNil.
-    debugger finish.
-    "The assignment has not been executed yet."
-    self assert: reached isNil.
-    debugger finish.
-    self assert: reached = 6!
-
-testStepTooMuch
-    "Test that #stepBytecode eventually raises an error."
-    | debugger reached toFinish |
-    debugger := self debuggerOn: [ 3 factorial ].
-    self
-	should: [ [debugger stepBytecode] repeat ]
-	raise: Error.
-    self deny: debugger isActive!
- 
-testFinishColon
-    "Test using #finish: to leave multiple contexts at once."
-    | debugger reached toFinish |
-    debugger := self debuggerOn: [
-	self x: [ :foo | reached := foo ]
-    ].
-
-    [
+	<category: 'test'>
+	| debugger reached notReached |
+	reached := false.
+	debugger := self debuggerOn: 
+			[reached := true. notReached := 3 factorial].
 	debugger step.
-	debugger suspendedContext selector = #x: ] whileFalse.
+	self assert: reached.
+	self assert: notReached isNil
+    ]
 
-    toFinish := debugger suspendedContext.
-    [
+    testFinish [
+	"Test that #finish does not proceed further in the parent context."
+
+	<category: 'test'>
+	| debugger reached |
+	debugger := self debuggerOn: [reached := 3 factorial].
 	debugger step.
-	debugger suspendedContext selector = #z: ] whileFalse.
+	self assert: reached isNil.
+	debugger finish.
+	"The assignment has not been executed yet."
+	self assert: reached isNil.
+	debugger finish.
+	self assert: reached = 6
+    ]
 
-    debugger finish: toFinish.
-    self assert: reached = 42.
-    self deny: debugger suspendedContext selector = #x:!
+    testStepTooMuch [
+	"Test that #stepBytecode eventually raises an error."
 
-testContinue
-    "Test that #continue terminates the controlling process."
-    | debugger reached sema1 sema2 curtailed |
-    debugger := self debuggerOn: [
-	reached := 3 factorial.
-	sema1 signal ].
+	<category: 'test'>
+	| debugger reached toFinish |
+	debugger := self debuggerOn: [3 factorial].
+	self should: [[debugger stepBytecode] repeat] raise: Error.
+	self deny: debugger isActive
+    ]
 
-    sema1 := Semaphore new.
-    sema2 := Semaphore new.
-    curtailed := true.
-    [
-	"The controlling process is terminated, so we run the test in another
+    testFinishColon [
+	"Test using #finish: to leave multiple contexts at once."
+
+	<category: 'test'>
+	| debugger reached toFinish |
+	debugger := self debuggerOn: [self x: [:foo | reached := foo]].
+	
+	[debugger step.
+	debugger suspendedContext selector = #x:] whileFalse.
+	toFinish := debugger suspendedContext.
+	
+	[debugger step.
+	debugger suspendedContext selector = #z:] whileFalse.
+	debugger finish: toFinish.
+	self assert: reached = 42.
+	self deny: debugger suspendedContext selector = #x:
+    ]
+
+    testContinue [
+	"Test that #continue terminates the controlling process."
+
+	<category: 'test'>
+	| debugger reached sema1 sema2 curtailed |
+	debugger := self debuggerOn: 
+			[reached := 3 factorial.
+			sema1 signal].
+	sema1 := Semaphore new.
+	sema2 := Semaphore new.
+	curtailed := true.
+	
+	["The controlling process is terminated, so we run the test in another
 	 process."
-        [
-	    debugger continue.
-	    curtailed := false
-	] ensure: [ sema2 signal ].
-    ] fork.
 
-    sema1 wait.
-    sema2 wait.
-    self assert: reached = 6.
-    self assert: curtailed.
-    self deny: debugger isActive!
+	
+	[debugger continue.
+	curtailed := false] ensure: [sema2 signal]] 
+		fork.
+	sema1 wait.
+	sema2 wait.
+	self assert: reached = 6.
+	self assert: curtailed.
+	self deny: debugger isActive
+    ]
 
-testStepOverPrimitive
-    "Test that #step does not go inside a primitive."
-    | debugger reached notReached |
-    debugger := self debuggerOn: [
-	reached := Object new ].
-    debugger step.
-    self assert: reached notNil!
+    testStepOverPrimitive [
+	"Test that #step does not go inside a primitive."
 
-testNext
-    "Test that #next runs a whole line independent of how many sends are there."
-    | debugger reached1 reached2 |
-    debugger := self debuggerOn: [
-	reached1 := 3 factorial. reached2 := 4 factorial ].
-    debugger next.
-    self assert: reached1 = 6.
-    self assert: reached2 = 24!
+	<category: 'test'>
+	| debugger reached notReached |
+	debugger := self debuggerOn: [reached := Object new].
+	debugger step.
+	self assert: reached notNil
+    ]
 
-testCurtailFinish
-    "Test that finish is not fooled by method returns."
-    | debugger notReached |
-    notReached := false.
-    debugger := self debuggerOn: [ self w. notReached := true ].
+    testNext [
+	"Test that #next runs a whole line independent of how many sends are there."
 
-    [ debugger step. debugger suspendedContext selector = #z: ]
-	whileFalse.
+	<category: 'test'>
+	| debugger reached1 reached2 |
+	debugger := self debuggerOn: 
+			[reached1 := 3 factorial. reached2 := 4 factorial].
+	debugger next.
+	self assert: reached1 = 6.
+	self assert: reached2 = 24
+    ]
 
-    debugger finish.
-    self assert: debugger suspendedContext selector = #y.
-    debugger finish.
-    self assert: debugger suspendedContext selector = #x:.
-    debugger step.
-    self assert: debugger suspendedContext isBlock.
-    self assert: debugger suspendedContext selector = #w.
-    debugger finish.
-    self assert: debugger isActive.
-    self deny: notReached! !
+    testCurtailFinish [
+	"Test that finish is not fooled by method returns."
 
-!DebuggerTest methodsFor: 'support'!
+	<category: 'test'>
+	| debugger notReached |
+	notReached := false.
+	debugger := self debuggerOn: 
+			[self w. notReached := true].
+	
+	[debugger step.
+	debugger suspendedContext selector = #z:] whileFalse.
+	debugger finish.
+	self assert: debugger suspendedContext selector = #y.
+	debugger finish.
+	self assert: debugger suspendedContext selector = #x:.
+	debugger step.
+	self assert: debugger suspendedContext isBlock.
+	self assert: debugger suspendedContext selector = #w.
+	debugger finish.
+	self assert: debugger isActive.
+	self deny: notReached
+    ]
 
-w
-    self x: [ :foo | ^foo ]!
+    w [
+	<category: 'support'>
+	self x: [:foo | ^foo]
+    ]
 
-x: aBlock
-    aBlock value: self y!
+    x: aBlock [
+	<category: 'support'>
+	aBlock value: self y
+    ]
 
-y
-    ^self z: 42!
+    y [
+	<category: 'support'>
+	^self z: 42
+    ]
 
-z: anObject
-    ^anObject! !
+    z: anObject [
+	<category: 'support'>
+	^anObject
+    ]
+]
 

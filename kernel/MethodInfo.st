@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2003
@@ -32,98 +31,114 @@
  ======================================================================"
 
 
-Object variableSubclass: #MethodInfo
-       instanceVariableNames: 'sourceCode category class selector '
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-Implementation'
-!
-
-MethodInfo comment: 
-'I provide information about particular methods.  I can produce the category
+
+Object subclass: MethodInfo [
+    | sourceCode category class selector |
+    
+    <shape: #pointer>
+    <category: 'Language-Implementation'>
+    <comment: 'I provide information about particular methods.  I can produce the category
 that a method was filed under, and can be used to access the source
-code of the method.' !
+code of the method.'>
 
-
-!MethodInfo methodsFor: 'accessing'!
+    category [
+	"Answer the method category"
 
-category
-    "Answer the method category"
-    category isNil ifTrue: [ category := 'still unclassified' ].
-    ^category
-!
+	<category: 'accessing'>
+	category isNil ifTrue: [category := 'still unclassified'].
+	^category
+    ]
 
-category: aCategory
-    "Set the method category"
-    category := aCategory
-!
+    category: aCategory [
+	"Set the method category"
 
-methodClass
-    "Answer the class in which the method is defined"
-    ^class
-!
+	<category: 'accessing'>
+	category := aCategory
+    ]
 
-methodClass: aClass
-    "Set the class in which the method is defined"
-    class := aClass
-!
+    methodClass [
+	"Answer the class in which the method is defined"
 
-selector
-    "Answer the selector through which the method is called"
-    ^selector
-!
+	<category: 'accessing'>
+	^class
+    ]
 
-selector: aSymbol
-    "Set the selector through which the method is called"
-    selector := aSymbol
-!
+    methodClass: aClass [
+	"Set the class in which the method is defined"
 
-stripSourceCode
-    "Remove the reference to the source code for the method"
-    sourceCode := nil
-!
+	<category: 'accessing'>
+	class := aClass
+    ]
 
-sourceCode
-    "Answer a FileSegment or String or nil containing the method source code"
-    ^sourceCode
-!
+    selector [
+	"Answer the selector through which the method is called"
 
-sourceString
-    "Answer a String containing the method source code"
-    ^sourceCode asString
-!
+	<category: 'accessing'>
+	^selector
+    ]
 
-sourceFile
-    "Answer the name of the file where the method source code is"
-    ^sourceCode fileName
-!
+    selector: aSymbol [
+	"Set the selector through which the method is called"
 
-sourcePos
-    "Answer the starting position of the method source code in the sourceFile"
-    ^sourceCode filePos
-! !
+	<category: 'accessing'>
+	selector := aSymbol
+    ]
 
-
-!MethodInfo methodsFor: 'equality'!
+    stripSourceCode [
+	"Remove the reference to the source code for the method"
 
-= aMethodInfo
-    "Compare the receiver and aMethodInfo, answer whether they're equal"
+	<category: 'accessing'>
+	sourceCode := nil
+    ]
 
-    self class == aMethodInfo class ifFalse: [ ^false ].
-    self == aMethodInfo ifTrue: [ ^true ].
+    sourceCode [
+	"Answer a FileSegment or String or nil containing the method source code"
 
-    self sourceString = aMethodInfo sourceString ifFalse: [ ^false ].
-    ^category = aMethodInfo category
-!
+	<category: 'accessing'>
+	^sourceCode
+    ]
 
-hash
-    "Answer an hash value for the receiver"
-    ^sourceCode hash bitXor: category hash
-! !
+    sourceString [
+	"Answer a String containing the method source code"
 
-
-!MethodInfo methodsFor: 'private'!
+	<category: 'accessing'>
+	^sourceCode asString
+    ]
 
-setSourceCode: source
-    sourceCode := source
-! !
+    sourceFile [
+	"Answer the name of the file where the method source code is"
+
+	<category: 'accessing'>
+	^sourceCode fileName
+    ]
+
+    sourcePos [
+	"Answer the starting position of the method source code in the sourceFile"
+
+	<category: 'accessing'>
+	^sourceCode filePos
+    ]
+
+    = aMethodInfo [
+	"Compare the receiver and aMethodInfo, answer whether they're equal"
+
+	<category: 'equality'>
+	self class == aMethodInfo class ifFalse: [^false].
+	self == aMethodInfo ifTrue: [^true].
+	self sourceString = aMethodInfo sourceString ifFalse: [^false].
+	^category = aMethodInfo category
+    ]
+
+    hash [
+	"Answer an hash value for the receiver"
+
+	<category: 'equality'>
+	^sourceCode hash bitXor: category hash
+    ]
+
+    setSourceCode: source [
+	<category: 'private'>
+	sourceCode := source
+    ]
+]
+

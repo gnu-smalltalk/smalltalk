@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992, 1994, 1995, 1999, 2000, 2001, 2002
@@ -31,5 +30,10 @@
 |
  ======================================================================"
 
-ObjectMemory addDependent: BLOX.Blox!
-BLOX.Blox update: #returnFromSnapshot!
+
+
+Eval [
+    ObjectMemory addDependent: BLOX.Blox.
+    BLOX.Blox update: #returnFromSnapshot
+]
+

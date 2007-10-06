@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2000, 2001, 2003 Free Software Foundation, Inc.
@@ -31,207 +30,228 @@
  ======================================================================"
 
 
-
-CompiledCode variableByteSubclass: #CompiledBlock
-       instanceVariableNames: 'method '
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-Implementation'
-!
-
-CompiledBlock comment:
-'I represent a block that has been compiled.' !
-
 
-!CompiledBlock class methodsFor: 'instance creation'!
+CompiledCode subclass: CompiledBlock [
+    | method |
+    
+    <shape: #byte>
+    <category: 'Language-Implementation'>
+    <comment: 'I represent a block that has been compiled.'>
 
-numArgs: args numTemps: temps bytecodes: bytecodes depth: depth literals: literalArray
-    "Answer an (almost) full fledged CompiledBlock.  To make it complete,
-     you must either set the new object's `method' variable, or put it
-     into a BlockClosure and put the BlockClosure into a CompiledMethod's
-     literals.  The clean-ness of the block is automatically computed."
+    CompiledBlock class >> numArgs: args numTemps: temps bytecodes: bytecodes depth: depth literals: literalArray [
+	"Answer an (almost) full fledged CompiledBlock.  To make it complete,
+	 you must either set the new object's `method' variable, or put it
+	 into a BlockClosure and put the BlockClosure into a CompiledMethod's
+	 literals.  The clean-ness of the block is automatically computed."
 
-    <primitive: VMpr_CompiledBlock_create>
-    self primitiveFailed
-! !
+	<category: 'instance creation'>
+	<primitive: VMpr_CompiledBlock_create>
+	self primitiveFailed
+    ]
 
-
-!CompiledBlock class methodsFor: 'instance creation'!
+    CompiledBlock class >> new: numBytecodes header: anInteger method: outerMethod [
+	"Answer a new instance of the receiver with room for the given
+	 number of bytecodes and the given header."
 
-new: numBytecodes header: anInteger method: outerMethod
-    "Answer a new instance of the receiver with room for the given
-     number of bytecodes and the given header."
-    ^(self
-	new: numBytecodes
-	header: anInteger
-	literals: outerMethod literals) method: outerMethod
-! !
-   
-
-!CompiledBlock methodsFor: 'basic'!
+	<category: 'instance creation'>
+	^(self 
+	    new: numBytecodes
+	    header: anInteger
+	    literals: outerMethod literals) method: outerMethod
+    ]
 
-methodCategory
-    "Answer the method category"
-    ^method methodCategory
-!
+    methodCategory [
+	"Answer the method category"
 
-methodCategory: aCategory
-    "Set the method category to the given string"
-    method methodCategory: aCategory
-!
+	<category: 'basic'>
+	^method methodCategory
+    ]
 
-methodSourceCode
-    "Answer the method source code (a FileSegment or String or nil)"
-    ^method methodSourceCode
-!
+    methodCategory: aCategory [
+	"Set the method category to the given string"
 
-methodSourceString
-    "Answer the method source code as a string"
-    ^method methodSourceString
-!
+	<category: 'basic'>
+	method methodCategory: aCategory
+    ]
 
-methodSourceFile
-    "Answer the file where the method source code is stored"
-    ^method methodSourceFile
-!
+    methodSourceCode [
+	"Answer the method source code (a FileSegment or String or nil)"
 
-methodSourcePos
-    "Answer the location where the method source code is stored in
-     the methodSourceFile"
-    ^method methodSourcePos
-!
+	<category: 'basic'>
+	^method methodSourceCode
+    ]
 
-= aMethod
-    "Answer whether the receiver and aMethod are equal"
+    methodSourceString [
+	"Answer the method source code as a string"
 
-    self == aMethod ifTrue: [ ^true ].
-    ^super = aMethod and: [
-	method = aMethod method ]
-! !
+	<category: 'basic'>
+	^method methodSourceString
+    ]
 
-
-!CompiledBlock methodsFor: 'accessing'!
+    methodSourceFile [
+	"Answer the file where the method source code is stored"
 
-method
-    "Answer the CompiledMethod in which the receiver lies"
-    ^method
-!
+	<category: 'basic'>
+	^method methodSourceFile
+    ]
 
-methodClass
-    "Answer the class in which the receiver is installed."
-    ^method methodClass
-!
+    methodSourcePos [
+	"Answer the location where the method source code is stored in
+	 the methodSourceFile"
 
-methodClass: methodClass
-    "Set the receiver's class instance variable"
-    method methodClass: methodClass
-!
+	<category: 'basic'>
+	^method methodSourcePos
+    ]
 
-selector: aSymbol
-    "Set the selector through which the method is called"
-    method selector: aSymbol
-!
+    = aMethod [
+	"Answer whether the receiver and aMethod are equal"
 
-selector
-    "Answer the selector through which the method is called"
-    ^method selector
-!
+	<category: 'basic'>
+	self == aMethod ifTrue: [^true].
+	^super = aMethod and: [method = aMethod method]
+    ]
 
-flags
-    "Answer the `cleanness' of the block. 
-     0 = clean;
-     1 = access to receiver variables and/or self;
-     2-30 = access to variables that are 1-29 contexts away;
-     31 = return from method or push thisContext"
-    ^header bitAnd: 31
-!
+    method [
+	"Answer the CompiledMethod in which the receiver lies"
 
-numArgs
-    "Answer the number of arguments passed to the receiver"
-    ^(header bitShift: -25) bitAnd: 31
-!
+	<category: 'accessing'>
+	^method
+    ]
 
-numTemps
-    "Answer the number of temporary variables used by the receiver"
-    ^(header bitShift: -20) bitAnd: 31
-!
+    methodClass [
+	"Answer the class in which the receiver is installed."
 
-stackDepth
-    "Answer the number of stack slots needed for the receiver"
-    ^((header bitShift: -14) bitAnd: 63) * 4
-!
+	<category: 'accessing'>
+	^method methodClass
+    ]
 
-numLiterals
-    "Answer the number of literals for the receiver"
-    ^literals size
-! !
+    methodClass: methodClass [
+	"Set the receiver's class instance variable"
 
+	<category: 'accessing'>
+	method methodClass: methodClass
+    ]
 
-
-!CompiledBlock methodsFor: 'printing'!
+    selector: aSymbol [
+	"Set the selector through which the method is called"
 
-printOn: aStream
-    "Print the receiver's class and selector on aStream"
+	<category: 'accessing'>
+	method selector: aSymbol
+    ]
 
-    aStream nextPutAll: '[] in '; print: method
-! !
+    selector [
+	"Answer the selector through which the method is called"
 
-
-!CompiledBlock methodsFor: 'private-printing'!
+	<category: 'accessing'>
+	^method selector
+    ]
 
-printHeaderOn: aStream
-    "Private - Disassemble the method header to aStream"
+    flags [
+	"Answer the `cleanness' of the block.
+	 0 = clean;
+	 1 = access to receiver variables and/or self;
+	 2-30 = access to variables that are 1-29 contexts away;
+	 31 = return from method or push thisContext"
 
-    aStream
-	nextPutAll: '    clean-ness flags: ';
-	print:      self flags;
-	nl;
-	nextPutAll: '    number of arguments: ';
-	print:      self numArgs;
-	nl;
-	nextPutAll: '    number of temporaries: ';
-	print:      self numTemps;
-	nl;
-	nextPutAll: '    number of literals: ';
-	print:      self numLiterals;
-	nl;
-	nextPutAll: '    needed stack slots: ';
-	print:      self stackDepth;
-	nl
-!
+	<category: 'accessing'>
+	^header bitAnd: 31
+    ]
 
-header: hdr literals: lits
-    "Implementation note: here is the use of the header bits:
-     - bits  0-4  = clean-ness flags
-     - bits  5-13 = unused
-     - bits 14-19 = stack depth
-     - bits 20-24 = number of temps
-     - byte 25-29 = number of args"
-    header := hdr.
-    literals := lits.
-    Behavior flushCache
-! !
+    numArgs [
+	"Answer the number of arguments passed to the receiver"
 
-!CompiledBlock methodsFor: 'saving and loading'!
+	<category: 'accessing'>
+	^(header bitShift: -25) bitAnd: 31
+    ]
 
-binaryRepresentationObject
-    "This method is implemented to allow for a PluggableProxy to be used
-     with CompiledBlocks.  Answer a DirectedMessage which sends #blockAt:
-     to the CompiledMethod containing the receiver."
-    | literalNumber |
-    self literals keysAndValuesDo: [ :i :lit |
-	lit == self
-	    ifTrue: [ ^DirectedMessage
-		selector: #blockAt:
-		arguments: (Array with: i)
-		receiver: self method
-	    ].
-	(lit class == BlockClosure and: [ lit block == self ])
-	    ifTrue: [ ^DirectedMessage
-		selector: #blockAt:
-		arguments: (Array with: i)
-		receiver: self method
-	    ]
-    ].
-    self error: 'object cannot be dumped'
-! !
+    numTemps [
+	"Answer the number of temporary variables used by the receiver"
+
+	<category: 'accessing'>
+	^(header bitShift: -20) bitAnd: 31
+    ]
+
+    stackDepth [
+	"Answer the number of stack slots needed for the receiver"
+
+	<category: 'accessing'>
+	^((header bitShift: -14) bitAnd: 63) * 4
+    ]
+
+    numLiterals [
+	"Answer the number of literals for the receiver"
+
+	<category: 'accessing'>
+	^literals size
+    ]
+
+    printOn: aStream [
+	"Print the receiver's class and selector on aStream"
+
+	<category: 'printing'>
+	aStream
+	    nextPutAll: '[] in ';
+	    print: method
+    ]
+
+    printHeaderOn: aStream [
+	"Private - Disassemble the method header to aStream"
+
+	<category: 'private-printing'>
+	aStream
+	    nextPutAll: '    clean-ness flags: ';
+	    print: self flags;
+	    nl;
+	    nextPutAll: '    number of arguments: ';
+	    print: self numArgs;
+	    nl;
+	    nextPutAll: '    number of temporaries: ';
+	    print: self numTemps;
+	    nl;
+	    nextPutAll: '    number of literals: ';
+	    print: self numLiterals;
+	    nl;
+	    nextPutAll: '    needed stack slots: ';
+	    print: self stackDepth;
+	    nl
+    ]
+
+    header: hdr literals: lits [
+	"Implementation note: here is the use of the header bits:
+	 - bits  0-4  = clean-ness flags
+	 - bits  5-13 = unused
+	 - bits 14-19 = stack depth
+	 - bits 20-24 = number of temps
+	 - byte 25-29 = number of args"
+
+	<category: 'private-printing'>
+	header := hdr.
+	literals := lits.
+	Behavior flushCache
+    ]
+
+    binaryRepresentationObject [
+	"This method is implemented to allow for a PluggableProxy to be used
+	 with CompiledBlocks.  Answer a DirectedMessage which sends #blockAt:
+	 to the CompiledMethod containing the receiver."
+
+	<category: 'saving and loading'>
+	| literalNumber |
+	self literals keysAndValuesDo: 
+		[:i :lit | 
+		lit == self 
+		    ifTrue: 
+			[^DirectedMessage 
+			    selector: #blockAt:
+			    arguments: (Array with: i)
+			    receiver: self method].
+		(lit class == BlockClosure and: [lit block == self]) 
+		    ifTrue: 
+			[^DirectedMessage 
+			    selector: #blockAt:
+			    arguments: (Array with: i)
+			    receiver: self method]].
+	self error: 'object cannot be dumped'
+    ]
+]
+

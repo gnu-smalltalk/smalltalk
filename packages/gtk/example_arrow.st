@@ -4,7 +4,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2003 Free Software Foundation, Inc.
@@ -29,62 +28,91 @@
 |
  ======================================================================"
 
-Namespace current: GTK!
+
+
+Namespace current: GTK [
+
+Object subclass: ArrowExample [
+    
+    <category: nil>
+    <comment: nil>
+
+    destroy: object data: data [
+	<category: 'event handling'>
+	Gtk mainQuit
+    ]
+
+    open [
+	<category: 'layout'>
+	| window button box |
+	window := GtkWindow new: Gtk gtkWindowToplevel.
+	window setTitle: 'Arrow Buttons'.
+	window 
+	    connectSignal: 'destroy'
+	    to: self
+	    selector: #destroy:data:
+	    userData: nil.
+	window setBorderWidth: 10.
+	box := GtkHBox new: false spacing: 0.
+	box setBorderWidth: 2.
+	window add: box.
+	button := GtkButton createArrowButton: Gtk gtkArrowUp
+		    shadowType: Gtk gtkShadowIn.
+	box 
+	    packStart: button
+	    expand: false
+	    fill: false
+	    padding: 3.
+	button := GtkButton createArrowButton: Gtk gtkArrowDown
+		    shadowType: Gtk gtkShadowOut.
+	box 
+	    packStart: button
+	    expand: false
+	    fill: false
+	    padding: 3.
+	button := GtkButton createArrowButton: Gtk gtkArrowLeft
+		    shadowType: Gtk gtkShadowEtchedIn.
+	box 
+	    packStart: button
+	    expand: false
+	    fill: false
+	    padding: 3.
+	button := GtkButton createArrowButton: Gtk gtkArrowRight
+		    shadowType: Gtk gtkShadowEtchedOut.
+	box 
+	    packStart: button
+	    expand: false
+	    fill: false
+	    padding: 3.
+	box show.
+	window show
+    ]
+]
+
+]
 
 
-Object subclass: #ArrowExample
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: nil!
+
+GtkButton class extend [
 
-!GtkButton class methodsFor: 'creating arrow buttons'!
+    createArrowButton: arrowType shadowType: shadowType [
+	<category: 'creating arrow buttons'>
+	| button arrow |
+	button := self new.
+	arrow := GtkArrow new: arrowType shadowType: shadowType.
+	button add: arrow.
+	button show.
+	arrow show.
+	^button
+    ]
 
-createArrowButton: arrowType shadowType: shadowType
-    | button arrow |
-    button := self new.
-    arrow := GtkArrow new: arrowType shadowType: shadowType.
-    button add: arrow.
-    button show.
-    arrow show.
-    ^button
-! !
+]
 
-!ArrowExample methodsFor: 'event handling'!
 
-destroy: object data: data
-    Gtk mainQuit
-! !
+
+Namespace current: GTK [
+    Gtk gstGtkInit.
+    ArrowExample new open.
+    Gtk main
+]
 
-!ArrowExample methodsFor: 'layout'!
-
-open
-    | window button box |
-    window := GtkWindow new: Gtk gtkWindowToplevel.
-    window setTitle: 'Arrow Buttons'.
-    window connectSignal: 'destroy' to: self selector: #destroy:data: userData: nil.
-    window setBorderWidth: 10.
-
-    box := GtkHBox new: false spacing: 0.
-    box setBorderWidth: 2.
-    window add: box.
-
-    button := GtkButton createArrowButton: Gtk gtkArrowUp shadowType: Gtk gtkShadowIn.
-    box packStart: button expand: false fill: false padding: 3.
-
-    button := GtkButton createArrowButton: Gtk gtkArrowDown shadowType: Gtk gtkShadowOut.
-    box packStart: button expand: false fill: false padding: 3.
-
-    button := GtkButton createArrowButton: Gtk gtkArrowLeft shadowType: Gtk gtkShadowEtchedIn.
-    box packStart: button expand: false fill: false padding: 3.
-
-    button := GtkButton createArrowButton: Gtk gtkArrowRight shadowType: Gtk gtkShadowEtchedOut.
-    box packStart: button expand: false fill: false padding: 3.
-
-    box show.
-    window show
-! !
-
-Gtk gstGtkInit!
-ArrowExample new open!
-Gtk main!

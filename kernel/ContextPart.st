@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002, 2003, 2007
@@ -32,511 +31,555 @@
  ======================================================================"
 
 
-
-Object variableSubclass: #ContextPart
-       instanceVariableNames: 'parent nativeIP ip sp receiver method '
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-Implementation'
-!
-
-ContextPart comment: 
-'My instances represent executing Smalltalk code, which represent the local
-environment of executable code. They contain a stack and also provide some
-methods that can be used in inspection or debugging.' !
-
 
-!ContextPart class methodsFor: 'private'!
-
-spIndex
-    ^4
-!
-
-checkPresenceOfJIT
-    thisContext isJIT
-	ifTrue: [ Smalltalk addFeature: #JIT ]
-	ifFalse: [ Smalltalk removeFeature: #JIT ]
-! !
-
-
-!ContextPart class methodsFor: 'exception handling'!
-
-backtrace
-    "Print a backtrace from the caller to the bottom of the stack on the
-     Transcript"
-    thisContext parentContext backtraceOn: Transcript
-!
-
-backtraceOn: aStream
-    "Print a backtrace from the caller to the bottom of the stack on aStream"
-    thisContext parentContext backtraceOn: aStream
-!
-
-removeLastUnwindPoint
-    "Private - Return and remove the last context marked as an unwind point,
-     or our environment if the last unwind point belongs to another
-     environment."
-
-    | unwindPoints |
-    unwindPoints := Processor activeProcess unwindPoints.
-
-    ^unwindPoints isEmpty
-	ifTrue: [ thisContext environment ]
-	ifFalse: [ unwindPoints removeLast ].
-!
-
-lastUnwindPoint
-    "Private - Return the last context marked as an unwind point, or
-     our environment if none is."
-
-    | unwindPoints |
-    unwindPoints := Processor activeProcess unwindPoints.
-
-    ^unwindPoints isEmpty
-	ifTrue: [ thisContext environment ]
-	ifFalse: [ unwindPoints at: unwindPoints size ].
-!
-
-unwind
-    "Return execution to the last context marked as an unwind point, returning
-     nil on that stack."
-    self unwind: nil
-!
-
-unwind: returnValue
-    "Return execution to the last context marked as an unwind point, returning
-     returnValue on that stack."
-    | point |
-    point := self removeLastUnwindPoint.
-    point isProcess ifTrue: [
-	Processor terminateActive
-	"Bye bye, we never get past here."
-    ].
-    point continue: returnValue
-! !
-
-
-!ContextPart methodsFor: 'printing'!
-
-backtrace
-    "Print a backtrace from the receiver to the bottom of the stack on the
-     Transcript."
-    self backtraceOn: Transcript
-!
-
-backtraceOn: aStream
-    "Print a backtrace from the caller to the bottom of the stack on aStream."
-    | ctx |
-    ctx := self.
-    [ ctx isNil or: [ ctx isEnvironment ] ] whileFalse: [
-	ctx isDisabled ifFalse: [
-	    ctx printOn: aStream.
-	    aStream nl
-	].
-	ctx := ctx parentContext
-    ]
-! !
-
-
-!ContextPart methodsFor: 'debugging'!
-
-currentLine
-    "Answer the 1-based number of the line that is pointed to by the receiver's
-     instruction pointer.  It is always 1 unless the DebugTools package is
-     loaded."
-    ^1
-!
-
-debugger
-    "Answer the debugger that is attached to the given context.  It
-     is always nil unless the DebugTools package is loaded."
-    ^nil
-!
-
-debuggerClass
-    "Answer which debugger should be used to debug the current
-     context chain.  The class with the highest debugging
-     priority is picked among those mentioned in the chain."
-    | ctx debuggerClass currentClass last |
-    ctx := self.
-    last := self class lastUnwindPoint.
-    [
-        currentClass := ctx receiver class debuggerClass.
-        currentClass isNil ifTrue: [ ^nil ].
-        (debuggerClass isNil
-            or: [ currentClass debuggingPriority > debuggerClass debuggingPriority ])
-                ifTrue: [ debuggerClass := currentClass ].
-
-        ctx == last | ctx isNil
-    ] whileFalse: [
-        ctx := ctx parentContext
-    ].
-    ^debuggerClass
-!
-
-isInternalExceptionHandlingContext
-    "Answer whether the receiver is a context that should be hidden to the user
-     when presenting a backtrace."
-
-    self subclassResponsibility
-! !
-
-
-!ContextPart methodsFor: 'accessing'!
-
-client
-    "Answer the client of this context, that is, the object that sent the
-     message that created this context. Fail if the receiver has no parent"
-
-    ^self parentContext receiver
-!
-
-environment
-    "To create a valid execution environment for the interpreter even before
-     it starts, GST creates a fake context whose selector is nil and which
-     can be used as a marker for the current execution environment. This
-     method answers that context.
-     For processes, it answers the process block itself"
-    | ctx next |
-    ctx := self.
-    [   next := ctx parentContext.
-	ctx isEnvironment | next isNil
-    ]   whileFalse: [ ctx := next ].
-
-    ^ctx
-!
-
-initialIP
-    "Answer the value of the instruction pointer when execution starts
-     in the current context"
-    ^0
-!
-
-isDisabled
-    "Answers whether the context is skipped when doing a return.  Contexts
-     are marked as disabled whenever a non-local return is done (either by
-     returning from the enclosing method of a block, or with the
-     #continue: method of ContextPart) and there are unwind contexts such
-     as those created by #ensure:.  All non-unwind contexts are then
-     marked as disabled."
-    self subclassResponsibility
-!
-
-isUnwind
-    "Answers whether the context must continue execution even after a
-     non-local return (a return from the enclosing method of a block, or
-     a call to the #continue: method of ContextPart).  Such contexts are
-     created by #ensure:."
-    self subclassResponsibility
-!
-
-isEnvironment
-    "To create a valid execution environment for the interpreter even
-     before it starts, GST creates a fake context which invokes a special
-     ``termination'' method.  Such a context can be used as a marker for
-     the current execution environment.  Answer whether the receiver is
-     that kind of context."
-    self subclassResponsibility
-!
-
-isProcess
-    "Answer whether the receiver represents a process context, i.e. a context
-     created by BlockClosure>>#newProcess. Such a context can be recognized
-     because it has no parent but its flags are different from those of the
-     contexts created by the VM's prepareExecutionEnvironment function."
-    ^self parentContext isNil & self isEnvironment not
-!
-
-parentContext
-    "Answer the context that called the receiver"
-    ^parent
-!
-
-parentContext: aContext
-    "Set the context to which the receiver will return"
+Object subclass: ContextPart [
+    | parent nativeIP ip sp receiver method |
     
-    "Fixed typing isn't usually good, but this is too important"
-    (aContext class superclass == ContextPart) | (aContext isNil)
-	ifFalse: [ ^SystemExceptions.WrongClass signalOn: aContext mustBe: ContextPart ].
+    <shape: #pointer>
+    <category: 'Language-Implementation'>
+    <comment: 'My instances represent executing Smalltalk code, which represent the local
+environment of executable code. They contain a stack and also provide some
+methods that can be used in inspection or debugging.'>
 
-    parent := aContext
-!
+    ContextPart class >> spIndex [
+	<category: 'private'>
+	^4
+    ]
 
-ip
-    "Answer the current instruction pointer into the receiver"
-    "This funny implementation thwarts the interpreter's optimizing effort"
-    ^ip yourself
-!
+    ContextPart class >> checkPresenceOfJIT [
+	<category: 'private'>
+	thisContext isJIT 
+	    ifTrue: [Smalltalk addFeature: #JIT]
+	    ifFalse: [Smalltalk removeFeature: #JIT]
+    ]
 
-ip: newIP
-    "Set the instruction pointer for the receiver"
-    "Fixed typing isn't usually good, but this is too important"
-    newIP isSmallInteger
-	ifFalse: [ ^SystemExceptions.WrongClass signalOn: newIP mustBe: SmallInteger ].
-    ip := newIP
-!
+    ContextPart class >> backtrace [
+	"Print a backtrace from the caller to the bottom of the stack on the
+	 Transcript"
 
-size
-    "Answer the number of valid fields for the receiver. Any read
-     access from (self size + 1) to (self basicSize) has undefined
-     results - even crashing"
-    ^self sp + 1
-!
+	<category: 'exception handling'>
+	thisContext parentContext backtraceOn: Transcript
+    ]
 
-sp
-    "Answer the current stack pointer into the receiver"
-    "This funny implementation thwarts the interpreter's optimizing effort"
-    ^sp yourself
-!
+    ContextPart class >> backtraceOn: aStream [
+	"Print a backtrace from the caller to the bottom of the stack on aStream"
 
-validSize
-    "Answer how many elements in the receiver should be inspected"
-    ^self size
-!
+	<category: 'exception handling'>
+	thisContext parentContext backtraceOn: aStream
+    ]
 
-numArgs
-    "Answer the number of arguments passed to the receiver"
-    ^self method numArgs
-!
+    ContextPart class >> removeLastUnwindPoint [
+	"Private - Return and remove the last context marked as an unwind point,
+	 or our environment if the last unwind point belongs to another
+	 environment."
 
-numTemps
-    "Answer the number of temporaries used by the receiver"
-    ^self method numTemps
-!
+	<category: 'exception handling'>
+	| unwindPoints |
+	unwindPoints := Processor activeProcess unwindPoints.
+	^unwindPoints isEmpty 
+	    ifTrue: [thisContext environment]
+	    ifFalse: [unwindPoints removeLast]
+    ]
 
-push: anObject
-    "Push an object on the receiver's stack."
+    ContextPart class >> lastUnwindPoint [
+	"Private - Return the last context marked as an unwind point, or
+	 our environment if none is."
 
-    "Since the newly accessible slots may have contained garbage, this method
-     stores into the cell *before* they become accessible."
+	<category: 'exception handling'>
+	| unwindPoints |
+	unwindPoints := Processor activeProcess unwindPoints.
+	^unwindPoints isEmpty 
+	    ifTrue: [thisContext environment]
+	    ifFalse: [unwindPoints at: unwindPoints size]
+    ]
 
-    self at: self size + 1 put: anObject.
-    sp := sp + 1
-!
+    ContextPart class >> unwind [
+	"Return execution to the last context marked as an unwind point, returning
+	 nil on that stack."
 
-sp: newSP
-    "Set the stack pointer for the receiver."
+	<category: 'exception handling'>
+	self unwind: nil
+    ]
 
-    "Storing into the stack pointer is a potentially dangerous thing, so
-     this code tests that sp is effectively a number.  Also, since the
-     newly accessible slots may have contained garbage, this method
-     stores nil into any cells that become accessible."
+    ContextPart class >> unwind: returnValue [
+	"Return execution to the last context marked as an unwind point, returning
+	 returnValue on that stack."
 
-    newSP isSmallInteger
-	ifFalse: [ ^SystemExceptions.WrongClass signalOn: newSP mustBe: SmallInteger ].
+	<category: 'exception handling'>
+	| point |
+	point := self removeLastUnwindPoint.
+	point isProcess 
+	    ifTrue: 
+		[Processor terminateActive
+		"Bye bye, we never get past here."].
+	point continue: returnValue
+    ]
 
-    newSP > sp ifTrue: [
-	sp + 1 to: newSP do: [ :i | self at: i put: nil ]
-    ].
-    sp := newSP
-!
+    ContextPart class >> thisContext [
+	"Return the value of the thisContext variable.  Called internally
+	 when the variable is accessed."
 
-method
-    "Return the CompiledMethod being executed"
-    ^method
-!
+	<category: 'built ins'>
+	<primitive: VMpr_ContextPart_thisContext>
+	
+    ]
 
-methodClass
-    "Return the class in which the CompiledMethod being executed is defined"
-    ^self method methodClass
-!
+    backtrace [
+	"Print a backtrace from the receiver to the bottom of the stack on the
+	 Transcript."
 
-isBlock
-    "Answer whether the receiver is a block context"
-    self subclassResponsibility
-!
+	<category: 'printing'>
+	self backtraceOn: Transcript
+    ]
 
-receiver
-    "Return the receiver (self) for the method being executed"
-    "This funny implementation thwarts the interpreter's optimizing effort"
-    ^receiver yourself
-!
+    backtraceOn: aStream [
+	"Print a backtrace from the caller to the bottom of the stack on aStream."
 
-selector
-    "Return the selector for the method being executed"
-    ^self method selector
-!
+	<category: 'printing'>
+	| ctx |
+	ctx := self.
+	[ctx isNil or: [ctx isEnvironment]] whileFalse: 
+		[ctx isDisabled 
+		    ifFalse: 
+			[ctx printOn: aStream.
+			aStream nl].
+		ctx := ctx parentContext]
+    ]
 
-home
-    "Answer the MethodContext to which the receiver refers"
-    self subclassResponsibility
-! !
+    currentLine [
+	"Answer the 1-based number of the line that is pointed to by the receiver's
+	 instruction pointer.  It is always 1 unless the DebugTools package is
+	 loaded."
 
-
-!ContextPart methodsFor: 'private'!
+	<category: 'debugging'>
+	^1
+    ]
 
-isJIT
-    ^nativeIP ~~ 0
-! !
+    debugger [
+	"Answer the debugger that is attached to the given context.  It
+	 is always nil unless the DebugTools package is loaded."
 
-
-!ContextPart methodsFor: 'exception handling'!
+	<category: 'debugging'>
+	^nil
+    ]
 
-mark
-    "Add the receiver as a possible unwind point"
-    Processor activeProcess unwindPoints addLast: self
-! !
+    debuggerClass [
+	"Answer which debugger should be used to debug the current
+	 context chain.  The class with the highest debugging
+	 priority is picked among those mentioned in the chain."
 
-
-!ContextPart methodsFor: 'copying'!
+	<category: 'debugging'>
+	| ctx debuggerClass currentClass last |
+	ctx := self.
+	last := self class lastUnwindPoint.
+	
+	[currentClass := ctx receiver class debuggerClass.
+	currentClass isNil ifTrue: [^nil].
+	(debuggerClass isNil 
+	    or: [currentClass debuggingPriority > debuggerClass debuggingPriority]) 
+		ifTrue: [debuggerClass := currentClass].
+	ctx == last | ctx isNil] 
+		whileFalse: [ctx := ctx parentContext].
+	^debuggerClass
+    ]
 
-deepCopy
-    "Answer a copy of the entire stack, but don't copy any
-     of the other instance variables of the context."
-    ^self copyStack!
+    isInternalExceptionHandlingContext [
+	"Answer whether the receiver is a context that should be hidden to the user
+	 when presenting a backtrace."
 
-copyStack
-    "Answer a copy of the entire stack."
-    | ret ctx |
-    ret := ctx := self copy.
-    [ ctx parentContext isNil ] whileFalse: [
-        ctx parentContext: (ctx := ctx parentContext copy) ].
+	<category: 'debugging'>
+	self subclassResponsibility
+    ]
 
-    ^ret! !
+    client [
+	"Answer the client of this context, that is, the object that sent the
+	 message that created this context. Fail if the receiver has no parent"
 
-
-!ContextPart methodsFor: 'enumerating'!
+	<category: 'accessing'>
+	^self parentContext receiver
+    ]
 
-scanBacktraceForAttribute: selector do: aBlock
-    "Scan the backtrace for contexts which have the attribute selector
-     listed in selectors; if one is found, invoke aBlock passing the
-     context and the attribute."
-    | ctx last attr |
-    ctx := self.
-    last := self class lastUnwindPoint.
-    [ ctx == last | ctx isNil ] whileFalse: [
-	(ctx isBlock not and: [
-	    attr := ctx method attributeAt: selector ifAbsent: [ nil ].
-	    attr notNil ])
-		ifTrue: [ aBlock value: ctx value: attr ].
+    environment [
+	"To create a valid execution environment for the interpreter even before
+	 it starts, GST creates a fake context whose selector is nil and which
+	 can be used as a marker for the current execution environment. This
+	 method answers that context.
+	 For processes, it answers the process block itself"
 
-	ctx := ctx parentContext
-    ].
-!
+	<category: 'accessing'>
+	| ctx next |
+	ctx := self.
+	
+	[next := ctx parentContext.
+	ctx isEnvironment | next isNil] 
+		whileFalse: [ctx := next].
+	^ctx
+    ]
 
-scanBacktraceFor: selectors do: aBlock
-    "Scan the backtrace for contexts whose selector is among those
-     listed in selectors; if one is found, invoke aBlock passing the
-     context."
-    | ctx last |
-    ctx := self.
-    last := self class lastUnwindPoint.
-    [ ctx == last | ctx isNil ] whileFalse: [
-	(ctx isBlock not and: [
-	    selectors includes: ctx selector ])
-		ifTrue: [ aBlock value: ctx ].
+    initialIP [
+	"Answer the value of the instruction pointer when execution starts
+	 in the current context"
 
-	ctx := ctx parentContext
-    ].
-! !
+	<category: 'accessing'>
+	^0
+    ]
 
-
-!ContextPart methodsFor: 'security checks'!
+    isDisabled [
+	"Answers whether the context is skipped when doing a return.  Contexts
+	 are marked as disabled whenever a non-local return is done (either by
+	 returning from the enclosing method of a block, or with the
+	 #continue: method of ContextPart) and there are unwind contexts such
+	 as those created by #ensure:.  All non-unwind contexts are then
+	 marked as disabled."
 
-securityCheckForName: name
-    self isUntrusted ifFalse: [ ^self ].
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
 
-    ^self doSecurityCheckForName: name actions: #() target: nil
-!
+    isUnwind [
+	"Answers whether the context must continue execution even after a
+	 non-local return (a return from the enclosing method of a block, or
+	 a call to the #continue: method of ContextPart).  Such contexts are
+	 created by #ensure:."
 
-securityCheckForName: name action: action
-    self isUntrusted ifFalse: [ ^self ].
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
 
-    ^self doSecurityCheckForName: name actions: { action } target: nil
-!
+    isEnvironment [
+	"To create a valid execution environment for the interpreter even
+	 before it starts, GST creates a fake context which invokes a special
+	 ``termination'' method.  Such a context can be used as a marker for
+	 the current execution environment.  Answer whether the receiver is
+	 that kind of context."
 
-securityCheckForName: name target: target
-    self isUntrusted ifFalse: [ ^self ].
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
 
-    ^self doSecurityCheckForName: name actions: #() target: target
-!
+    isProcess [
+	"Answer whether the receiver represents a process context, i.e. a context
+	 created by BlockClosure>>#newProcess. Such a context can be recognized
+	 because it has no parent but its flags are different from those of the
+	 contexts created by the VM's prepareExecutionEnvironment function."
 
-securityCheckForName: name actions: actions target: target
-    self isUntrusted ifFalse: [ ^self ].
+	<category: 'accessing'>
+	^self parentContext isNil & self isEnvironment not
+    ]
 
-    ^self doSecurityCheckForName: name actions: actions target: target
-!
+    parentContext [
+	"Answer the context that called the receiver"
 
-doSecurityCheckForName: name actions: actions target: target
-    | perm ctx |
-    perm := Permission new
-	name: name
-	actions: actions;
-	target: target.
+	<category: 'accessing'>
+	^parent
+    ]
 
-    (self checkSecurityFor: perm)
-	ifFalse: [ (SecurityError for: perm) signal ].
-!
+    parentContext: aContext [
+	"Set the context to which the receiver will return"
 
-checkSecurityFor: perm
-    | state foundAnnotation |
-    "First of all, check against the static permissions for this
-     context."
-    (self receiver class check: perm) ifFalse: [ ^false ].
+	"Fixed typing isn't usually good, but this is too important"
 
-    "Then, check the dynamic permissions.  So:
-     1) check if a method was specifically denying access,
-     2) look for a deeper context whose static permissions
-	denies access, but stop if a method is specifically
-	granting access."
+	<category: 'accessing'>
+	aContext class superclass == ContextPart | aContext isNil 
+	    ifFalse: [^SystemExceptions.WrongClass signalOn: aContext mustBe: ContextPart].
+	parent := aContext
+    ]
 
-    self method isAnnotated ifTrue: [
-	foundAnnotation := false.
-	self method attributesDo: [ :each || newPerm |
-	    each selector = #permission: ifTrue: [
-		newPerm := each arguments at: 1.
+    ip [
+	"Answer the current instruction pointer into the receiver"
 
-		(newPerm implies: perm) ifTrue: [
-		    "Should we check if the granted permission is statically
-		     available?  Of course, you can only grant permissions if you
-		     own them statically, so the real question is, should we
-		     check perm or newPerm?  The answer is perm (which has
-		     already been found to be available), hence we can skip
-		     an expensive static permission check.  Suppose we have a
-		     method that grants access to all files: it makes more sense
-		     if it means ``grant access to all files allowed by the class
-		     security policy'', rather than ``grant access to all files if
-		     the security policy allows it, else do not grant access to
-		     any file''."
-		    foundAnnotation := true.
-		    state := newPerm isAllowing
-		]
-	    ]
-	].
-	foundAnnotation ifTrue: [ ^state ].
-    ].
+	"This funny implementation thwarts the interpreter's optimizing effort"
 
-    "Nope, no special regulations were found in this method.  Look in the
-     parent context, and grant permission if the bottom is reached."
+	<category: 'accessing'>
+	^ip yourself
+    ]
 
-    ^self parentContext isNil or: [
-	self parentContext checkSecurityFor: perm ]
-! !
+    ip: newIP [
+	"Set the instruction pointer for the receiver"
 
-
-!ContextPart class methodsFor: 'built ins'!
+	"Fixed typing isn't usually good, but this is too important"
 
-thisContext
-    "Return the value of the thisContext variable.  Called internally
-     when the variable is accessed."
+	<category: 'accessing'>
+	newIP isSmallInteger 
+	    ifFalse: [^SystemExceptions.WrongClass signalOn: newIP mustBe: SmallInteger].
+	ip := newIP
+    ]
 
-    <primitive: VMpr_ContextPart_thisContext>
-! !
+    size [
+	"Answer the number of valid fields for the receiver. Any read
+	 access from (self size + 1) to (self basicSize) has undefined
+	 results - even crashing"
 
-!ContextPart methodsFor: 'built ins'!
+	<category: 'accessing'>
+	^self sp + 1
+    ]
 
-continue: anObject
-    "Resume execution from the receiver, faking that the context on
-     top of it in the execution chain has returned anObject.  The
-     receiver must belong to the same process as the executing context,
-     otherwise the results are not predictable.  All #ensure: (and
-     possibly #ifCurtailed:) blocks between the currently executing
-     context and the receiver are evaluated (which is not what
-     would happen if you directly bashed at the parent context of
-     thisContext)."
+    sp [
+	"Answer the current stack pointer into the receiver"
 
-    <primitive: VMpr_ContextPart_continue>
-    self badReturnError
-! !
+	"This funny implementation thwarts the interpreter's optimizing effort"
 
-
+	<category: 'accessing'>
+	^sp yourself
+    ]
+
+    validSize [
+	"Answer how many elements in the receiver should be inspected"
+
+	<category: 'accessing'>
+	^self size
+    ]
+
+    numArgs [
+	"Answer the number of arguments passed to the receiver"
+
+	<category: 'accessing'>
+	^self method numArgs
+    ]
+
+    numTemps [
+	"Answer the number of temporaries used by the receiver"
+
+	<category: 'accessing'>
+	^self method numTemps
+    ]
+
+    push: anObject [
+	"Push an object on the receiver's stack."
+
+	"Since the newly accessible slots may have contained garbage, this method
+	 stores into the cell *before* they become accessible."
+
+	<category: 'accessing'>
+	self at: self size + 1 put: anObject.
+	sp := sp + 1
+    ]
+
+    sp: newSP [
+	"Set the stack pointer for the receiver."
+
+	"Storing into the stack pointer is a potentially dangerous thing, so
+	 this code tests that sp is effectively a number.  Also, since the
+	 newly accessible slots may have contained garbage, this method
+	 stores nil into any cells that become accessible."
+
+	<category: 'accessing'>
+	newSP isSmallInteger 
+	    ifFalse: [^SystemExceptions.WrongClass signalOn: newSP mustBe: SmallInteger].
+	newSP > sp ifTrue: [sp + 1 to: newSP do: [:i | self at: i put: nil]].
+	sp := newSP
+    ]
+
+    method [
+	"Return the CompiledMethod being executed"
+
+	<category: 'accessing'>
+	^method
+    ]
+
+    methodClass [
+	"Return the class in which the CompiledMethod being executed is defined"
+
+	<category: 'accessing'>
+	^self method methodClass
+    ]
+
+    isBlock [
+	"Answer whether the receiver is a block context"
+
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    receiver [
+	"Return the receiver (self) for the method being executed"
+
+	"This funny implementation thwarts the interpreter's optimizing effort"
+
+	<category: 'accessing'>
+	^receiver yourself
+    ]
+
+    selector [
+	"Return the selector for the method being executed"
+
+	<category: 'accessing'>
+	^self method selector
+    ]
+
+    home [
+	"Answer the MethodContext to which the receiver refers"
+
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    isJIT [
+	<category: 'private'>
+	^nativeIP ~~ 0
+    ]
+
+    mark [
+	"Add the receiver as a possible unwind point"
+
+	<category: 'exception handling'>
+	Processor activeProcess unwindPoints addLast: self
+    ]
+
+    deepCopy [
+	"Answer a copy of the entire stack, but don't copy any
+	 of the other instance variables of the context."
+
+	<category: 'copying'>
+	^self copyStack
+    ]
+
+    copyStack [
+	"Answer a copy of the entire stack."
+
+	<category: 'copying'>
+	| ret ctx |
+	ret := ctx := self copy.
+	[ctx parentContext isNil] 
+	    whileFalse: [ctx parentContext: (ctx := ctx parentContext copy)].
+	^ret
+    ]
+
+    scanBacktraceForAttribute: selector do: aBlock [
+	"Scan the backtrace for contexts which have the attribute selector
+	 listed in selectors; if one is found, invoke aBlock passing the
+	 context and the attribute."
+
+	<category: 'enumerating'>
+	| ctx last attr |
+	ctx := self.
+	last := self class lastUnwindPoint.
+	[ctx == last | ctx isNil] whileFalse: 
+		[(ctx isBlock not and: 
+			[attr := ctx method attributeAt: selector ifAbsent: [nil].
+			attr notNil]) 
+		    ifTrue: [aBlock value: ctx value: attr].
+		ctx := ctx parentContext]
+    ]
+
+    scanBacktraceFor: selectors do: aBlock [
+	"Scan the backtrace for contexts whose selector is among those
+	 listed in selectors; if one is found, invoke aBlock passing the
+	 context."
+
+	<category: 'enumerating'>
+	| ctx last |
+	ctx := self.
+	last := self class lastUnwindPoint.
+	[ctx == last | ctx isNil] whileFalse: 
+		[(ctx isBlock not and: [selectors includes: ctx selector]) 
+		    ifTrue: [aBlock value: ctx].
+		ctx := ctx parentContext]
+    ]
+
+    securityCheckForName: name [
+	<category: 'security checks'>
+	self isUntrusted ifFalse: [^self].
+	^self 
+	    doSecurityCheckForName: name
+	    actions: #()
+	    target: nil
+    ]
+
+    securityCheckForName: name action: action [
+	<category: 'security checks'>
+	self isUntrusted ifFalse: [^self].
+	^self 
+	    doSecurityCheckForName: name
+	    actions: {action}
+	    target: nil
+    ]
+
+    securityCheckForName: name target: target [
+	<category: 'security checks'>
+	self isUntrusted ifFalse: [^self].
+	^self 
+	    doSecurityCheckForName: name
+	    actions: #()
+	    target: target
+    ]
+
+    securityCheckForName: name actions: actions target: target [
+	<category: 'security checks'>
+	self isUntrusted ifFalse: [^self].
+	^self 
+	    doSecurityCheckForName: name
+	    actions: actions
+	    target: target
+    ]
+
+    doSecurityCheckForName: name actions: actions target: target [
+	<category: 'security checks'>
+	| perm ctx |
+	perm := (Permission new)
+		    name: name actions: actions;
+		    target: target.
+	(self checkSecurityFor: perm) ifFalse: [(SecurityError for: perm) signal]
+    ]
+
+    checkSecurityFor: perm [
+	<category: 'security checks'>
+	"First of all, check against the static permissions for this
+	 context."
+
+	| state foundAnnotation |
+	(self receiver class check: perm) ifFalse: [^false].
+
+	"Then, check the dynamic permissions.  So:
+	 1) check if a method was specifically denying access,
+	 2) look for a deeper context whose static permissions
+	 denies access, but stop if a method is specifically
+	 granting access."
+	self method isAnnotated 
+	    ifTrue: 
+		[foundAnnotation := false.
+		self method attributesDo: 
+			[:each | 
+			| newPerm |
+			each selector = #permission: 
+			    ifTrue: 
+				[newPerm := each arguments at: 1.
+				(newPerm implies: perm) 
+				    ifTrue: 
+					["Should we check if the granted permission is statically
+					 available?  Of course, you can only grant permissions if you
+					 own them statically, so the real question is, should we
+					 check perm or newPerm?  The answer is perm (which has
+					 already been found to be available), hence we can skip
+					 an expensive static permission check.  Suppose we have a
+					 method that grants access to all files: it makes more sense
+					 if it means ``grant access to all files allowed by the class
+					 security policy'', rather than ``grant access to all files if
+					 the security policy allows it, else do not grant access to
+					 any file''."
+
+					foundAnnotation := true.
+					state := newPerm isAllowing]]].
+		foundAnnotation ifTrue: [^state]].
+
+	"Nope, no special regulations were found in this method.  Look in the
+	 parent context, and grant permission if the bottom is reached."
+	^self parentContext isNil or: [self parentContext checkSecurityFor: perm]
+    ]
+
+    continue: anObject [
+	"Resume execution from the receiver, faking that the context on
+	 top of it in the execution chain has returned anObject.  The
+	 receiver must belong to the same process as the executing context,
+	 otherwise the results are not predictable.  All #ensure: (and
+	 possibly #ifCurtailed:) blocks between the currently executing
+	 context and the receiver are evaluated (which is not what
+	 would happen if you directly bashed at the parent context of
+	 thisContext)."
+
+	<category: 'built ins'>
+	<primitive: VMpr_ContextPart_continue>
+	self badReturnError
+    ]
+]
+

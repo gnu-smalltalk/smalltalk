@@ -4,7 +4,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2003 Free Software Foundation, Inc.
@@ -29,44 +28,60 @@
 |
  ======================================================================"
 
-Namespace current: GTK!
 
-Object subclass: #HelloWorldExample
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: nil!
+
+Namespace current: GTK [
 
-!HelloWorldExample methodsFor: 'event handling'!
+Object subclass: HelloWorldExample [
+    
+    <category: nil>
+    <comment: nil>
 
-clicked: widget data: data
+    clicked: widget data: data [
+	<category: 'event handling'>
 	data displayNl
-!
+    ]
 
-destroy: object data: data
+    destroy: object data: data [
+	<category: 'event handling'>
 	Gtk mainQuit
-! !
+    ]
 
-!HelloWorldExample methodsFor: 'layout'!
-
-open
-    | w b l |
-    w := GtkWindow new: Gtk gtkWindowToplevel.
-    b := GtkButton new.
-    l := GtkLabel new: '
-                Push me and watch stdout!                ', '
+    open [
+	<category: 'layout'>
+	| w b l |
+	w := GtkWindow new: Gtk gtkWindowToplevel.
+	b := GtkButton new.
+	l := GtkLabel 
+		    new: '
+                Push me and watch stdout!                ' , '
 '.
-    w add: b.
-    b add: l.
-    b show.
-    l show.
-    w setTitle: 'GTK+ bindings demo'.
+	w add: b.
+	b add: l.
+	b show.
+	l show.
+	w setTitle: 'GTK+ bindings demo'.
+	b 
+	    connectSignal: 'clicked'
+	    to: self
+	    selector: #clicked:data:
+	    userData: 'Hello, world!'.
+	w 
+	    connectSignal: 'destroy'
+	    to: self
+	    selector: #destroy:data:
+	    userData: nil.
+	w show
+    ]
+]
 
-    b connectSignal: 'clicked' to: self selector: #clicked:data: userData: 'Hello, world!'.
-    w connectSignal: 'destroy' to: self selector: #destroy:data: userData: nil.
-    w show.
-! !
+]
 
-Gtk gstGtkInit!
-HelloWorldExample new open!
-Gtk main!
+
+
+Namespace current: GTK [
+    Gtk gstGtkInit.
+    HelloWorldExample new open.
+    Gtk main
+]
+

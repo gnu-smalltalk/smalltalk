@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
@@ -31,52 +30,45 @@
  ======================================================================"
 
 
-Set variableSubclass: #IdentitySet
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Collections-Unordered'
-!
-
-IdentitySet comment:
-'I am the typical set object; I can store any objects uniquely.  I
-use the == operator to determine duplication of objects.' !
-
 
-!IdentitySet methodsFor: 'testing'!
+Set subclass: IdentitySet [
+    
+    <shape: #pointer>
+    <category: 'Collections-Unordered'>
+    <comment: 'I am the typical set object; I can store any objects uniquely.  I
+use the == operator to determine duplication of objects.'>
 
-identityIncludes: anObject
-    "Answer whether we include the anObject object; for IdentitySets
-     this is identical to #includes:"
-    ^self includes: anObject
-! !
+    identityIncludes: anObject [
+	"Answer whether we include the anObject object; for IdentitySets
+	 this is identical to #includes:"
 
-
-!IdentitySet methodsFor: 'private methods'!
+	<category: 'testing'>
+	^self includes: anObject
+    ]
 
-hashFor: anObject
-    "Return an hash value for the item, anObject"
-    ^anObject identityHash
-!
+    hashFor: anObject [
+	"Return an hash value for the item, anObject"
 
-findIndex: anObject
-    "Tries to see if anObject exists as an indexed variable. As soon as nil
-    or anObject is found, the index of that slot is answered"
+	<category: 'private methods'>
+	^anObject identityHash
+    ]
 
-    | index size element |
-    self beConsistent.
+    findIndex: anObject [
+	"Tries to see if anObject exists as an indexed variable. As soon as nil
+	 or anObject is found, the index of that slot is answered"
 
-    "Sorry for the lack of readability, but I want speed... :-)"
-    index := (anObject identityHash scramble
-                bitAnd: (size := self primSize) - 1) + 1.
+	<category: 'private methods'>
+	| index size element |
+	self beConsistent.
 
-    [
-        ((element := self primAt: index) isNil
-            or: [ element == anObject ])
-                ifTrue: [ ^index ].
+	"Sorry for the lack of readability, but I want speed... :-)"
+	index := (anObject identityHash scramble 
+		    bitAnd: (size := self primSize) - 1) + 1.
+	
+	[((element := self primAt: index) isNil or: [element == anObject]) 
+	    ifTrue: [^index].
+	index == size ifTrue: [index := 1] ifFalse: [index := index + 1]] 
+		repeat
+    ]
+]
 
-        index == size
-            ifTrue: [ index := 1 ]
-            ifFalse: [ index := index + 1 ]
-    ] repeat
-! !

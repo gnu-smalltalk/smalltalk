@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2007 Free Software Foundation, Inc.
@@ -30,115 +29,155 @@
 |
  ======================================================================"
 
-Error subclass: #ZlibError
-	instanceVariableNames: 'stream'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Examples-Useful'!
-
-ZlibError comment: 'This exception is raised whenever there is an error
-in a compressed stream.'!
-
-Stream subclass: #ZlibStream
-	instanceVariableNames: 'inBytes outBytes zlibObject stream'
-	classVariableNames: 'BufferSize DefaultCompressionLevel'
-	poolDictionaries: ''
-	category: 'Examples-Useful'!
-
-ZlibStream comment: 'This abstract class implements the basic interface to
-the zlib module.  Its layout matches what is expected by the C code.'!
 
 
-!ZlibError methodsFor: 'accessing'!
+Error subclass: ZlibError [
+    | stream |
+    
+    <category: 'Examples-Useful'>
+    <comment: 'This exception is raised whenever there is an error
+in a compressed stream.'>
 
-stream
-    "Answer the ZlibStream that caused the error."
-    ^stream!
+    stream [
+	"Answer the ZlibStream that caused the error."
 
-stream: anObject
-    "Set the ZlibStream that caused the error."
-    stream := anObject! !
+	<category: 'accessing'>
+	^stream
+    ]
 
-
-!ZlibStream class methodsFor: 'accessing'!
+    stream: anObject [
+	"Set the ZlibStream that caused the error."
 
-bufferSize
-    "Answer the size of the output buffers that are passed to zlib.  Each
-     zlib stream uses a buffer of this size."
-    BufferSize isNil ifTrue: [ BufferSize := 16384 ].
-    ^BufferSize!
-
-bufferSize: anInteger
-    "Set the size of the output buffers that are passed to zlib.  Each
-     zlib stream uses a buffer of this size."
-    BufferSize := anInteger!
-
-defaultCompressionLevel
-    "Return the default compression level used by deflating streams."
-    DefaultCompressionLevel isNil ifTrue: [ DefaultCompressionLevel := 6 ].
-    ^DefaultCompressionLevel!
-
-defaultCompressionLevel: anInteger
-    "Set the default compression level used by deflating streams.  It
-     should be a number between 1 and 9."
-    DefaultCompressionLevel := anInteger!
-
-
-!ZlibStream class methodsFor: 'instance creation'!
-
-new
-    self shouldNotImplement!
-
-on: aStream
-    "Answer an instance of the receiver that decorates aStream."
-    ^self basicNew initialize: aStream!
+	<category: 'accessing'>
+	stream := anObject
+    ]
+]
 
 
 
-!ZlibStream methodsFor: 'streaming'!
+Stream subclass: ZlibStream [
+    | inBytes outBytes zlibObject stream |
+    
+    <category: 'Examples-Useful'>
+    <comment: 'This abstract class implements the basic interface to
+the zlib module.  Its layout matches what is expected by the C code.'>
 
-stream
-    "Answer the wrapped stream."
-    ^stream!
+    BufferSize := nil.
+    DefaultCompressionLevel := nil.
 
-isExternalStream
-    "Answer whether the receiver streams on a file or socket."
-    ^stream isExternalStream!
+    ZlibStream class >> bufferSize [
+	"Answer the size of the output buffers that are passed to zlib.  Each
+	 zlib stream uses a buffer of this size."
 
-name
-    "Return the name of the underlying stream."
-    ^stream name
-!
+	<category: 'accessing'>
+	BufferSize isNil ifTrue: [BufferSize := 16384].
+	^BufferSize
+    ]
 
-species
-    "Return the type of the collections returned by #upTo: etc."
-    ^stream species! !
+    ZlibStream class >> bufferSize: anInteger [
+	"Set the size of the output buffers that are passed to zlib.  Each
+	 zlib stream uses a buffer of this size."
 
+	<category: 'accessing'>
+	BufferSize := anInteger
+    ]
 
-
-!ZlibStream methodsFor: 'private'!
+    ZlibStream class >> defaultCompressionLevel [
+	"Return the default compression level used by deflating streams."
 
-initialize: aStream
-    stream := aStream.
-    self addToBeFinalized!
+	<category: 'accessing'>
+	DefaultCompressionLevel isNil ifTrue: [DefaultCompressionLevel := 6].
+	^DefaultCompressionLevel
+    ]
 
-finalize
-    self destroyZlibObject! !
+    ZlibStream class >> defaultCompressionLevel: anInteger [
+	"Set the default compression level used by deflating streams.  It
+	 should be a number between 1 and 9."
 
-!ZlibStream methodsFor: 'private zlib interface'!
+	<category: 'accessing'>
+	DefaultCompressionLevel := anInteger
+    ]
 
-checkError
-    | error |
-    error := self getError.
-    self finalize; removeToBeFinalized.
-    error isNil ifFalse: [
-	ZlibError new messageText: error; stream: self; signal ]!
+    ZlibStream class >> new [
+	<category: 'instance creation'>
+	self shouldNotImplement
+    ]
 
-getError
-    <cCall: 'gst_zlibError' returning: #string args: #(#self)>!
+    ZlibStream class >> on: aStream [
+	"Answer an instance of the receiver that decorates aStream."
 
-destroyZlibObject
-    self subclassResponsibility!
+	<category: 'instance creation'>
+	^self basicNew initialize: aStream
+    ]
 
-processInput: atEnd size: bytes
-    self subclassResponsibility! !
+    stream [
+	"Answer the wrapped stream."
+
+	<category: 'streaming'>
+	^stream
+    ]
+
+    isExternalStream [
+	"Answer whether the receiver streams on a file or socket."
+
+	<category: 'streaming'>
+	^stream isExternalStream
+    ]
+
+    name [
+	"Return the name of the underlying stream."
+
+	<category: 'streaming'>
+	^stream name
+    ]
+
+    species [
+	"Return the type of the collections returned by #upTo: etc."
+
+	<category: 'streaming'>
+	^stream species
+    ]
+
+    initialize: aStream [
+	<category: 'private'>
+	stream := aStream.
+	self addToBeFinalized
+    ]
+
+    finalize [
+	<category: 'private'>
+	self destroyZlibObject
+    ]
+
+    checkError [
+	<category: 'private zlib interface'>
+	| error |
+	error := self getError.
+	self
+	    finalize;
+	    removeToBeFinalized.
+	error isNil 
+	    ifFalse: 
+		[(ZlibError new)
+		    messageText: error;
+		    stream: self;
+		    signal]
+    ]
+
+    getError [
+	<category: 'private zlib interface'>
+	<cCall: 'gst_zlibError' returning: #string args: #(#self)>
+	
+    ]
+
+    destroyZlibObject [
+	<category: 'private zlib interface'>
+	self subclassResponsibility
+    ]
+
+    processInput: atEnd size: bytes [
+	<category: 'private zlib interface'>
+	self subclassResponsibility
+    ]
+]
+

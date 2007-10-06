@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -29,85 +28,93 @@
  ======================================================================
 "
 
-Object subclass:  #GuiState
-	instanceVariableNames: 'state counter action '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
 
-GuiState comment: 
-nil!
+
+Object subclass: GuiState [
+    | state counter action |
+    
+    <category: 'Graphics-Windows'>
+    <comment: nil>
 
-!GuiState class methodsFor: 'accessing'!
+    GuiState class >> state: aSymbol counter: anInteger [
+	<category: 'accessing'>
+	^self new 
+	    initState: aSymbol
+	    counter: anInteger
+	    action: ValueHolder null
+    ]
 
-state: aSymbol counter: anInteger 
-    ^self new 
-	initState: aSymbol
-	counter: anInteger
-	action: ValueHolder null!
+    GuiState class >> state: aSymbol counter: anInteger action: aBlock [
+	<category: 'accessing'>
+	^self new 
+	    initState: aSymbol
+	    counter: anInteger
+	    action: aBlock
+    ]
 
-state: aSymbol counter: anInteger action: aBlock 
-    ^self new 
-	initState: aSymbol
-	counter: anInteger
-	action: aBlock! !
+    counter [
+	<category: 'accessing'>
+	^counter
+    ]
 
-!GuiState methodsFor: 'accessing'!
+    updateTo: newCounter [
+	<category: 'accessing'>
+	counter := newCounter.
+	^action value
+    ]
 
-counter
-    ^counter!
+    state [
+	<category: 'accessing'>
+	^state
+    ]
 
-updateTo: newCounter 
-    counter := newCounter.
-    ^action value!
-
-state
-    ^state! !
-
-!GuiState methodsFor: 'private - accessing'!
-
-initState: aSymbol counter: anInteger action: aBlock 
-    state := aSymbol.
-    counter := anInteger.
-    action := aBlock! !
+    initState: aSymbol counter: anInteger action: aBlock [
+	<category: 'private - accessing'>
+	state := aSymbol.
+	counter := anInteger.
+	action := aBlock
+    ]
+]
 
 
-BLOX.Gui subclass:  #GuiData
-	instanceVariableNames: 'checkpoints '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
+
+BLOX.Gui subclass: GuiData [
+    | checkpoints |
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-GuiData comment: 
-nil!
+    changeState: anObject [
+	"Record the state change denoted by anObject"
 
-!GuiData methodsFor: 'change management'!
+	<category: 'change management'>
+	| updateCount |
+	checkpoints isNil ifTrue: [checkpoints := LookupTable new].
+	updateCount := checkpoints at: anObject ifAbsent: [0].
+	checkpoints at: anObject put: updateCount + 1
+    ]
 
-changeState: anObject 
-    "Record the state change denoted by anObject"
+    getCurrentState [
+	<category: 'change management'>
+	^checkpoints copy
+    ]
 
-    | updateCount |
-    checkpoints isNil ifTrue: [checkpoints := LookupTable new].
-    updateCount := checkpoints at: anObject ifAbsent: [0].
-    checkpoints at: anObject put: updateCount + 1!
+    getStateChanges: viewState [
+	"Compare current state with viewState and return an object which describes
+	 differences"
 
-getCurrentState
-    ^checkpoints copy!
-
-getStateChanges: viewState 
-    "Compare current state with viewState and return an object which describes
-    differences"
-
-    | stateChanges |
-    viewState isNil | checkpoints isNil ifTrue: [^nil].
-    viewState keysAndValuesDo: 
-	    [:stateId :state | 
-	    | stateValue |
-	    stateValue := checkpoints at: stateId ifAbsent: [0].
-	    state counter < stateValue 
-		ifTrue: 
-		    [stateChanges isNil ifTrue: [stateChanges := Set new].
-		    stateChanges add: (GuiState state: stateId counter: stateValue)]].
-    ^stateChanges! !
-
+	<category: 'change management'>
+	| stateChanges |
+	viewState isNil | checkpoints isNil ifTrue: [^nil].
+	viewState keysAndValuesDo: 
+		[:stateId :state | 
+		| stateValue |
+		stateValue := checkpoints at: stateId ifAbsent: [0].
+		state counter < stateValue 
+		    ifTrue: 
+			[stateChanges isNil ifTrue: [stateChanges := Set new].
+			stateChanges add: (GuiState state: stateId counter: stateValue)]].
+	^stateChanges
+    ]
+]
 

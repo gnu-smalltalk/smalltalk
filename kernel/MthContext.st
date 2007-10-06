@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2007
@@ -32,111 +31,112 @@
  ======================================================================"
 
 
-ContextPart variableSubclass: #MethodContext
-       instanceVariableNames: 'flags '
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-Implementation'
-!
-
-MethodContext comment: 
-'My instances represent an actively executing method.  They record various
+
+ContextPart subclass: MethodContext [
+    | flags |
+    
+    <shape: #pointer>
+    <category: 'Language-Implementation'>
+    <comment: 'My instances represent an actively executing method.  They record various
 bits of information about the execution environment, and contain the
-execution stack.' !
+execution stack.'>
 
-
-!MethodContext methodsFor: 'printing'!
+    printOn: aStream [
+	"Print a representation for the receiver on aStream"
 
-printOn: aStream
-    "Print a representation for the receiver on aStream"
+	<category: 'printing'>
+	self receiver class printOn: aStream in: Namespace current.
+	self receiver class == self methodClass 
+	    ifFalse: 
+		[aStream nextPut: $(.
+		self methodClass printOn: aStream in: Namespace current.
+		aStream nextPut: $)].
+	aStream
+	    nextPutAll: '>>';
+	    nextPutAll: self selector.
+	self selector = #doesNotUnderstand: 
+	    ifTrue: 
+		[aStream
+		    space;
+		    print: (self at: 1) selector].
+	self isDisabled ifTrue: [aStream nextPutAll: ' <disabled>']
+    ]
 
-    self receiver class printOn: aStream in: Namespace current.
+    isInternalExceptionHandlingContext [
+	"Answer whether the receiver is a context that should be hidden to the user
+	 when presenting a backtrace.  Such contexts are identified through the
+	 #exceptionHandlingInternal: attribute: if there is such a context in
+	 the backtrace, all those above it are marked as internal.
+	 
+	 That is, the attribute being set to true means that the context and all those
+	 above it are to be hidden, while the attribute being set to false means
+	 that the contexts above it must be hidden, but not the context itself."
 
-    self receiver class == self methodClass ifFalse: [
-	aStream nextPut: $(.
-	self methodClass printOn: aStream in: Namespace current.
-	aStream nextPut: $) ].
-    aStream
-	nextPutAll: '>>';
-	nextPutAll: self selector.
+	<category: 'debugging'>
+	| attr |
+	attr := self method attributeAt: #exceptionHandlingInternal:
+		    ifAbsent: [nil].
+	attr isNil ifFalse: [^attr arguments at: 1].
+	self scanBacktraceForAttribute: #exceptionHandlingInternal:
+	    do: [:ctx :attr | ^true].
+	^false
+    ]
 
-    self selector = #doesNotUnderstand: ifTrue: [
-	aStream space; print: (self at: 1) selector ].
+    isDisabled [
+	"Answers whether the receiver has actually ended execution and will
+	 be skipped when doing a return.  BlockContexts are removed from the
+	 chain whenever a non-local return is done, but MethodContexts need to
+	 stay there in case there is a non-local return from the #ensure:
+	 block."
 
-    self isDisabled ifTrue: [
-	aStream nextPutAll: ' <disabled>' ]
-! !
+	<category: 'accessing'>
+	flags isInteger ifFalse: [^false].
+	^flags == 1
+    ]
 
-
-!MethodContext methodsFor: 'debugging'!
+    isUnwind [
+	"Answers whether the context must continue execution even after a
+	 non-local return (a return from the enclosing method of a block, or
+	 a call to the #continue: method of ContextPart).  Such contexts are
+	 created only by #ensure:."
 
-isInternalExceptionHandlingContext
-    "Answer whether the receiver is a context that should be hidden to the user
-     when presenting a backtrace.  Such contexts are identified through the
-     #exceptionHandlingInternal: attribute: if there is such a context in
-     the backtrace, all those above it are marked as internal.
+	<category: 'accessing'>
+	flags isInteger ifFalse: [^false].
+	^(flags bitAnd: 2) == 2
+    ]
 
-     That is, the attribute being set to true means that the context and all those
-     above it are to be hidden, while the attribute being set to false means
-     that the contexts above it must be hidden, but not the context itself."
+    isEnvironment [
+	"To create a valid execution environment for the interpreter even
+	 before it starts, GST creates a fake context which invokes a special
+	 ``termination'' method.  Such a context can be used as a marker for
+	 the current execution environment.  Answer whether the receiver is
+	 that kind of context."
 
-    | attr |
-    attr := self method
-        attributeAt: #exceptionHandlingInternal:
-        ifAbsent: [ nil ].
+	<category: 'accessing'>
+	flags isInteger ifFalse: [^false].
+	^(flags bitAnd: 4) == 4
+    ]
 
-    attr isNil ifFalse: [ ^attr arguments at: 1 ].
+    sender [
+	"Return the context from which the receiver was sent"
 
-    self
-        scanBacktraceForAttribute: #exceptionHandlingInternal:
-        do: [ :ctx :attr | ^true ].
+	<category: 'accessing'>
+	^self parentContext
+    ]
 
-    ^false
-! !
-
-!MethodContext methodsFor: 'accessing'!
+    home [
+	"Answer the MethodContext to which the receiver refers
+	 (i.e. the receiver itself)"
 
-isDisabled
-    "Answers whether the receiver has actually ended execution and will
-     be skipped when doing a return.  BlockContexts are removed from the
-     chain whenever a non-local return is done, but MethodContexts need to
-     stay there in case there is a non-local return from the #ensure:
-     block."
-    flags isInteger ifFalse: [ ^false ].
-    ^flags == 1
-!
+	<category: 'accessing'>
+	^self
+    ]
 
-isUnwind
-    "Answers whether the context must continue execution even after a
-     non-local return (a return from the enclosing method of a block, or
-     a call to the #continue: method of ContextPart).  Such contexts are
-     created only by #ensure:."
-    flags isInteger ifFalse: [ ^false ].
-    ^(flags bitAnd: 2) == 2
-!
+    isBlock [
+	"Answer whether the receiver is a block context"
 
-isEnvironment
-    "To create a valid execution environment for the interpreter even
-     before it starts, GST creates a fake context which invokes a special
-     ``termination'' method.  Such a context can be used as a marker for
-     the current execution environment.  Answer whether the receiver is
-     that kind of context."
-    flags isInteger ifFalse: [ ^false ].
-    ^(flags bitAnd: 4) == 4
-!
+	<category: 'accessing'>
+	^false
+    ]
+]
 
-sender
-    "Return the context from which the receiver was sent"
-    ^self parentContext
-!
-
-home
-    "Answer the MethodContext to which the receiver refers
-     (i.e. the receiver itself)"
-    ^self
-!
-
-isBlock
-    "Answer whether the receiver is a block context"
-    ^false
-! !

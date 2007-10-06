@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -29,110 +28,106 @@
  ======================================================================
 "
 
-Object subclass:  #BrowserShellMenuTemplate
-	instanceVariableNames: 'label selectors handler '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Browser'!
 
-BrowserShellMenuTemplate comment: 
-nil!
+
+Object subclass: BrowserShellMenuTemplate [
+    | label selectors handler |
+    
+    <category: 'Graphics-Browser'>
+    <comment: nil>
 
-!BrowserShellMenuTemplate class methodsFor: 'instance creation'!
+    BrowserShellMenuTemplate class >> label: label selectors: anArray handler: aOneArgumentBlock [
+	<category: 'instance creation'>
+	^self new 
+	    label: label
+	    selectors: anArray
+	    handler: aOneArgumentBlock
+    ]
 
-label: label selectors: anArray handler: aOneArgumentBlock 
-    ^self new 
-	label: label
-	selectors: anArray
-	handler: aOneArgumentBlock! !
+    defineIn: aShell [
+	<category: 'custom menus'>
+	aShell menu: ((Menu new: aShell label: label) 
+		    selectors: selectors
+		    receiver: (handler value: aShell)
+		    argument: aShell)
+    ]
 
-!BrowserShellMenuTemplate methodsFor: 'custom menus'!
-
-defineIn: aShell 
-    aShell menu: ((Menu new: aShell label: label) 
-		selectors: selectors
-		receiver: (handler value: aShell)
-		argument: aShell)! !
-
-!BrowserShellMenuTemplate methodsFor: 'private'!
-
-label: aString selectors: anArray handler: aOneArgumentBlock 
-    label := aString.
-    selectors := anArray.
-    handler := aOneArgumentBlock! !
-
-
-TopLevelShell subclass:  #BrowserShell
-	instanceVariableNames: ''
-	classVariableNames: 'Menus '
-	poolDictionaries: ''
-	category: 'Graphics-Browser'!
-
-BrowserShell comment: 
-nil!
-
-!BrowserShell class methodsFor: 'browsing'!
-
-openWorksheet: label 
-    | aBText |
-    aBText := (self openWorksheet: label withText: (String with: Character nl)) 
-		value.
-    ^TextCollector message: aBText -> #insertAtEnd:!
-
-openWorksheet: label withText: startText 
-    "Open a worksheet window."
-
-    | worksheet textView |
-    worksheet := self new: label.
-    worksheet addChildView: ((textView := PWorksheetText new: worksheet)
-		menuInit: ((PopupMenu new: textView label: 'Edit') 
-			    selectors: #(#('Cut' #gstCut) #('Copy' #gstCopy) #('Paste' #gstPaste)
-			    		 #() #('Clear' #gstClear)
-					 #() #('Line...' #line) #('Find...' #find)
-					 #() #('Do it' #eval) #('Print it' #evalAndPrintResult)
-					 #('Inspect' #evalAndInspectResult)
-					 #() #('Senders' #senders) #('Implementors' #implementors))
-			    receiver: textView
-			    argument: nil);
-		textMsg: #text;
-		canBeDirty: false;
-		yourself).
-    textView blox contents: startText.
-    textView setEvaluationKeyBindings.
-    worksheet blox x: 0.
-    worksheet blox y: 75.
-    worksheet blox height: 175.
-    worksheet blox width: 300.
-    worksheet blox map.
-    ^worksheet -> textView blox! !
-
-!BrowserShell class methodsFor: 'custom menus'!
-
-addMenu: label selectors: anArray handler: aOneArgumentBlock 
-    Menus addLast: (BrowserShellMenuTemplate 
-		label: label
-		selectors: anArray
-		handler: aOneArgumentBlock)!
-
-initialize
-    Menus := OrderedCollection new.
-    self 
-	addMenu: 'Smalltalk'
-	selectors: #(#('Worksheet' #openWorksheet)
-		     #('Class Hierarchy Browser' #openBrowser)
-		     #('Namespace Browser' #openNamespaceBrowser)
-		     #() #('Save image' #saveImage)
-		     #('Save image as...' #saveImageAs)
-		     #('Garbage collect' #garbageCollect)
-		     #() #('File in...' #fileIn)
-		     #() #('Exit without saving image' #directQuit) #('Exit...' #quit))
-	handler: [:shell | BrowserMain]! !
-
-!BrowserShell methodsFor: 'initialize'!
-
-initialize: aLabel 
-    super initialize: aLabel.
-    Menus do: [:each | each defineIn: self]! !
+    label: aString selectors: anArray handler: aOneArgumentBlock [
+	<category: 'private'>
+	label := aString.
+	selectors := anArray.
+	handler := aOneArgumentBlock
+    ]
+]
 
 
-BrowserShell initialize!
+
+TopLevelShell subclass: BrowserShell [
+    
+    <comment: nil>
+    <category: 'Graphics-Browser'>
+
+    Menus := nil.
+
+    BrowserShell class >> openWorksheet: label [
+	<category: 'browsing'>
+	| aBText |
+	aBText := (self openWorksheet: label withText: (String with: Character nl)) 
+		    value.
+	^TextCollector message: aBText -> #insertAtEnd:
+    ]
+
+    BrowserShell class >> openWorksheet: label withText: startText [
+	"Open a worksheet window."
+
+	<category: 'browsing'>
+	| worksheet textView |
+	worksheet := self new: label.
+	worksheet addChildView: ((textView := PWorksheetText new: worksheet)
+		    menuInit: ((PopupMenu new: textView label: 'Edit') 
+				selectors: #(#('Cut' #gstCut) #('Copy' #gstCopy) #('Paste' #gstPaste) #() #('Clear' #gstClear) #() #('Line...' #line) #('Find...' #find) #() #('Do it' #eval) #('Print it' #evalAndPrintResult) #('Inspect' #evalAndInspectResult) #() #('Senders' #senders) #('Implementors' #implementors))
+				receiver: textView
+				argument: nil);
+		    textMsg: #text;
+		    canBeDirty: false;
+		    yourself).
+	textView blox contents: startText.
+	textView setEvaluationKeyBindings.
+	worksheet blox x: 0.
+	worksheet blox y: 75.
+	worksheet blox height: 175.
+	worksheet blox width: 300.
+	worksheet blox map.
+	^worksheet -> textView blox
+    ]
+
+    BrowserShell class >> addMenu: label selectors: anArray handler: aOneArgumentBlock [
+	<category: 'custom menus'>
+	Menus addLast: (BrowserShellMenuTemplate 
+		    label: label
+		    selectors: anArray
+		    handler: aOneArgumentBlock)
+    ]
+
+    BrowserShell class >> initialize [
+	<category: 'custom menus'>
+	Menus := OrderedCollection new.
+	self 
+	    addMenu: 'Smalltalk'
+	    selectors: #(#('Worksheet' #openWorksheet) #('Class Hierarchy Browser' #openBrowser) #('Namespace Browser' #openNamespaceBrowser) #() #('Save image' #saveImage) #('Save image as...' #saveImageAs) #('Garbage collect' #garbageCollect) #() #('File in...' #fileIn) #() #('Exit without saving image' #directQuit) #('Exit...' #quit))
+	    handler: [:shell | BrowserMain]
+    ]
+
+    initialize: aLabel [
+	<category: 'initialize'>
+	super initialize: aLabel.
+	Menus do: [:each | each defineIn: self]
+    ]
+]
+
+
+
+Eval [
+    BrowserShell initialize
+]
+

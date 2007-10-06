@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2007 Free Software Foundation, Inc.
@@ -29,101 +28,107 @@
  ======================================================================"
 
 
-STFileInParser subclass: #SqueakFileInParser
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Refactory-Parser'!
+
+STFileInParser subclass: SqueakFileInParser [
+    
+    <comment: nil>
+    <category: 'Refactory-Parser'>
 
-!SqueakFileInParser methodsFor: 'accessing'!
+    evaluate: node [
+	"Convert some Squeak messages to GNU Smalltalk file-out syntax.
+	 This avoids that the STParsingDriver need to know about other
+	 dialects."
 
-evaluate: node
-    "Convert some Squeak messages to GNU Smalltalk file-out syntax.
-     This avoids that the STParsingDriver need to know about other
-     dialects."
-    | stmt |
-    node statements size == 1 ifFalse: [ ^super evaluate: node ].
+	<category: 'accessing'>
+	| stmt |
+	node statements size == 1 ifFalse: [^super evaluate: node].
+	stmt := node statements first.
+	stmt isMessage ifFalse: [^super evaluate: node].
+	stmt selector == #addCategory: ifTrue: [^false].
+	stmt selector == #commentStamp:prior: 
+	    ifTrue: 
+		[stmt arguments: {RBLiteralNode new literalToken: scanner nextRawChunk}.
+		stmt selector: #comment:].
+	stmt selector == #methodsFor:stamp: 
+	    ifTrue: 
+		[stmt arguments first value = 'as yet unclassified' 
+		    ifTrue: [stmt arguments first token value: nil].
+		stmt arguments: {stmt arguments first}.
+		stmt selector: #methodsFor:].
+	^super evaluate: node
+    ]
 
-    stmt := node statements first.
-    stmt isMessage ifFalse: [ ^super evaluate: node ].
-    stmt selector == #addCategory: ifTrue: [ ^false ].
-    stmt selector == #commentStamp:prior: ifTrue: [
-	stmt arguments: { RBLiteralNode new literalToken: scanner nextRawChunk }.
-	stmt selector: #comment: ].
+    scannerClass [
+	"We need a special scanner to convert the double-bangs in strings
+	 to single bangs.  Unlike in GNU Smalltalk, all bangs must be
+	 `escaped' in Squeak."
 
-    stmt selector == #methodsFor:stamp: ifTrue: [
-	stmt arguments first value = 'as yet unclassified'
-	    ifTrue: [ stmt arguments first token value: nil ].
-
-	stmt arguments: { stmt arguments first }.
-	stmt selector: #methodsFor: ].
-
-    ^super evaluate: node
-! !
-
-!SqueakFileInParser methodsFor: 'private-parsing'!
-
-scannerClass
-    "We need a special scanner to convert the double-bangs in strings
-     to single bangs.  Unlike in GNU Smalltalk, all bangs must be
-     `escaped' in Squeak."
-    ^SqueakFileInScanner! !
-
-
-STFileScanner subclass: #SqueakFileInScanner
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Refactory-Parser'!
+	<category: 'private-parsing'>
+	^SqueakFileInScanner
+    ]
+]
 
 
+
+STFileScanner subclass: SqueakFileInScanner [
+    
+    <comment: nil>
+    <category: 'Refactory-Parser'>
 
-!SqueakFileInScanner methodsFor: 'accessing'!
+    on: aStream [
+	<category: 'accessing'>
+	super on: aStream.
+	classificationTable := classificationTable copy.
+	classificationTable at: $! value put: #binary
+    ]
 
-on: aStream
-    super on: aStream.
-    classificationTable := classificationTable copy.
-    classificationTable at: $! value put: #binary!
+    scanLiteralString [
+	"In theory, this should also be applied to method comments, but the
+	 representation of comments in RBParseNode makes it more complicated;
+	 not a big deal."
 
-scanLiteralString
-    "In theory, this should also be applied to method comments, but the
-     representation of comments in RBParseNode makes it more complicated;
-     not a big deal."
-    | val |
-    val := super scanLiteralString.
-    val value: (val value copyReplaceAll: '!!' with: '!').
-    val value: (val value copyReplacing: 13 asCharacter withObject: 10 asCharacter).
-    ^val!
+	<category: 'accessing'>
+	| val |
+	val := super scanLiteralString.
+	val value: (val value copyReplaceAll: '!!' with: '!').
+	val 
+	    value: (val value copyReplacing: 13 asCharacter withObject: 10 asCharacter).
+	^val
+    ]
 
-scanLiteralCharacter
-    "Also treat ! specially here."
-    | val |
-    val := super scanLiteralCharacter.
-    val value = $! ifTrue: [ self step ].
-    ^val!
+    scanLiteralCharacter [
+	"Also treat ! specially here."
 
-scanBinary: aClass
-    "Treat ! specially, it is a binary operator in Squeak (if properly escaped).
-     This actually fails on tokens like +!! which is the binary operator +!,
-     but this are never used in practice.  It works for #!! however."
+	<category: 'accessing'>
+	| val |
+	val := super scanLiteralCharacter.
+	val value = $! ifTrue: [self step].
+	^val
+    ]
 
-    currentCharacter == $!
-	ifFalse: [^super scanBinary: aClass].
-    self step == $!
-	ifFalse: [^RBSpecialCharacterToken value: $! start: tokenStart].
-    ^super scanBinary: aClass!
+    scanBinary: aClass [
+	"Treat ! specially, it is a binary operator in Squeak (if properly escaped).
+	 This actually fails on tokens like +!! which is the binary operator +!,
+	 but this are never used in practice.  It works for #!! however."
 
-nextRawChunk
-    "Return a raw chunk, converting all double exclamation marks to single.
-     This is used for parsing Squeak class comments."
+	<category: 'accessing'>
+	currentCharacter == $! ifFalse: [^super scanBinary: aClass].
+	self step == $! 
+	    ifFalse: [^RBSpecialCharacterToken value: $! start: tokenStart].
+	^super scanBinary: aClass
+    ]
 
-    buffer reset.
-    [ currentCharacter == $! and: [self step ~~ $!] ]
-	whileFalse:
-            [buffer nextPut: currentCharacter.
-            self step].
+    nextRawChunk [
+	"Return a raw chunk, converting all double exclamation marks to single.
+	 This is used for parsing Squeak class comments."
 
-    self stripSeparators.
-    ^RBLiteralToken
-        value: buffer contents
-        start: tokenStart! !
+	<category: 'accessing'>
+	buffer reset.
+	[currentCharacter == $! and: [self step ~~ $!]] whileFalse: 
+		[buffer nextPut: currentCharacter.
+		self step].
+	self stripSeparators.
+	^RBLiteralToken value: buffer contents start: tokenStart
+    ]
+]
+

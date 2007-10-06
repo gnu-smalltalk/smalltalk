@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2003,2007
@@ -32,15 +31,12 @@
  ======================================================================"
 
 
-HashedCollection variableSubclass: #Dictionary
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Collections-Keyed'
-!
-
-Dictionary comment: 
-'I implement a dictionary, which is an object that is indexed by
+
+HashedCollection subclass: Dictionary [
+    
+    <shape: #pointer>
+    <category: 'Collections-Keyed'>
+    <comment: 'I implement a dictionary, which is an object that is indexed by
 unique objects (typcially instances of Symbol), and associates another
 object with that index.  I use the equality operator = to determine
 equality of indices.
@@ -48,513 +44,531 @@ equality of indices.
 In almost all places where you would use a plain Dictionary, a
 LookupTable would be more efficient; see LookupTable''s comment before
 you use it.  I do have a couple of special features that are useful in
-certain special cases.' !
+certain special cases.'>
 
+    Dictionary class >> from: anArray [
+	"Answer a new dictionary created from the keys and values of
+	 Associations in anArray, such as {1 -> 2. 3 -> 4}.  anArray
+	 should be specified using brace-syntax."
 
-
-!Dictionary class methodsFor: 'instance creation'!
+	<category: 'instance creation'>
+	| inst |
+	inst := self new: anArray size.
+	anArray do: [:assoc | inst at: assoc key put: assoc value].
+	^inst
+    ]
 
-from: anArray
-    "Answer a new dictionary created from the keys and values of
-     Associations in anArray, such as {1 -> 2. 3 -> 4}.  anArray
-     should be specified using brace-syntax."
-    | inst |
-    inst := self new: anArray size.
-    anArray do: [:assoc | inst at: assoc key put: assoc value].
-    ^inst
-!
+    Dictionary class >> new [
+	"Create a new dictionary with a default size"
 
-new
-    "Create a new dictionary with a default size"
-    "Builtins defines a #new method, so that during bootstrap there is a way
-     to create dictionaries.  Unfortunately, this #new method only creates
-     dictionaries, so subclasses when trying to use this method, lose big.
-     This fixes the problem."
-    ^self new: 24
-! !
+	"Builtins defines a #new method, so that during bootstrap there is a way
+	 to create dictionaries.  Unfortunately, this #new method only creates
+	 dictionaries, so subclasses when trying to use this method, lose big.
+	 This fixes the problem."
 
+	<category: 'instance creation'>
+	^self new: 24
+    ]
 
-
-!Dictionary methodsFor: 'accessing'!
+    add: newObject [
+	"Add the newObject association to the receiver"
 
-add: newObject
-    "Add the newObject association to the receiver"
-    | index assoc |
-    index := self findIndex: newObject key.
-    (assoc := self primAt: index) isNil
-	ifTrue: [
-	    self incrementTally ifTrue: [
-	        index := self findIndex: newObject key ].
-	    self primAt: index put: newObject.
-	]
-	ifFalse: [ assoc value: newObject value ].
+	<category: 'accessing'>
+	| index assoc |
+	index := self findIndex: newObject key.
+	(assoc := self primAt: index) isNil 
+	    ifTrue: 
+		[self incrementTally ifTrue: [index := self findIndex: newObject key].
+		self primAt: index put: newObject]
+	    ifFalse: [assoc value: newObject value].
+	^newObject
+    ]
 
-    ^newObject
-!
+    addAll: aCollection [
+	"Adds all the elements of 'aCollection' to the receiver, answer
+	 aCollection"
 
-addAll: aCollection
-    "Adds all the elements of 'aCollection' to the receiver, answer
-     aCollection"
-    aCollection keysAndValuesDo: [ :key :value | self at: key put: value ].
-    ^aCollection
-!
+	<category: 'accessing'>
+	aCollection keysAndValuesDo: [:key :value | self at: key put: value].
+	^aCollection
+    ]
 
-at: key put: value
-    "Store value as associated to the given key"
-    | index assoc |
-    index := self findIndex: key.
-    (assoc := self primAt: index) isNil
-	ifTrue: [
-	    self incrementTally ifTrue: [
-	        index := self findIndex: key ].
-	    self primAt: index put: (Association key: key value: value).
-	]
-	ifFalse: [ assoc value: value ].
+    at: key put: value [
+	"Store value as associated to the given key"
 
-    ^value
-!
+	<category: 'accessing'>
+	| index assoc |
+	index := self findIndex: key.
+	(assoc := self primAt: index) isNil 
+	    ifTrue: 
+		[self incrementTally ifTrue: [index := self findIndex: key].
+		self primAt: index put: (Association key: key value: value)]
+	    ifFalse: [assoc value: value].
+	^value
+    ]
 
-atAll: keyCollection
-    "Answer a Dictionary that only includes the given keys. Fail if any of
-     them is not found"
-    | result |
-    result := self class new: keyCollection size.
-    keyCollection do: [ :key | result at: key put: (self at: key) ].
-    ^result!
+    atAll: keyCollection [
+	"Answer a Dictionary that only includes the given keys. Fail if any of
+	 them is not found"
 
-at: key
-    "Answer the value associated to the given key. Fail if the key
-     is not found"
-    ^self
-	at: key
-	ifAbsent: [ SystemExceptions.NotFound signalOn: key what: 'key' ]
-!
+	<category: 'accessing'>
+	| result |
+	result := self class new: keyCollection size.
+	keyCollection do: [:key | result at: key put: (self at: key)].
+	^result
+    ]
 
-at: key ifAbsent: aBlock
-    "Answer the value associated to the given key, or the result of evaluating
-     aBlock if the key is not found"
-    | index |
-    index := self findIndexOrNil: key.
-    ^index isNil
-	ifTrue: [ aBlock value ]
-	ifFalse: [ (self primAt: index) value ]
-!
-    
-at: aKey ifAbsentPut: aBlock
-    "Answer the value associated to the given key. If the key is not found,
-     evaluate aBlock and associate the result to aKey before returning."
-    ^self at: aKey ifAbsent: [ self at: aKey put: aBlock value ]
-!
+    at: key [
+	"Answer the value associated to the given key. Fail if the key
+	 is not found"
 
-at: aKey ifPresent: aBlock
-    "If aKey is absent, answer nil. Else, evaluate aBlock passing the
-     associated value and answer the result of the invocation"
+	<category: 'accessing'>
+	^self at: key
+	    ifAbsent: [SystemExceptions.NotFound signalOn: key what: 'key']
+    ]
 
-    | index |
-    index := self findIndexOrNil: aKey.
-    ^index isNil
-	ifTrue: [ nil ]
-	ifFalse: [ aBlock value: (self primAt: index) value ]
-!
+    at: key ifAbsent: aBlock [
+	"Answer the value associated to the given key, or the result of evaluating
+	 aBlock if the key is not found"
 
-associationAt: key
-    "Answer the key/value Association for the given key. Fail if the key
-     is not found"
-    ^self
-	associationAt: key
-	ifAbsent: [ SystemExceptions.NotFound signalOn: key what: 'key' ]
-!
+	<category: 'accessing'>
+	| index |
+	index := self findIndexOrNil: key.
+	^index isNil ifTrue: [aBlock value] ifFalse: [(self primAt: index) value]
+    ]
 
-associationAt: key ifAbsent: aBlock
-    "Answer the key/value Association for the given key. Evaluate aBlock
-     (answering the result) if the key is not found"
-    | index |
-    index := self findIndexOrNil: key.
-    ^index isNil
-	ifTrue: [ aBlock value ]
-	ifFalse: [ self primAt: index ]
-!
+    at: aKey ifAbsentPut: aBlock [
+	"Answer the value associated to the given key. If the key is not found,
+	 evaluate aBlock and associate the result to aKey before returning."
 
-keyAtValue: value ifAbsent: exceptionBlock
-    "Answer the key associated to the given value. Evaluate exceptionBlock
-     (answering the result) if the value is not found.
-     IMPORTANT: == is used to compare values"
-    self keysAndValuesDo: [:key :val |
-	value == val ifTrue: [^key]
-    ].
-    ^exceptionBlock value
-!
+	<category: 'accessing'>
+	^self at: aKey ifAbsent: [self at: aKey put: aBlock value]
+    ]
 
-keyAtValue: value
-    "Answer the key associated to the given value, or nil if the value is not found"
-    ^self
-	keyAtValue: value
-	ifAbsent: [ nil ]
-!
+    at: aKey ifPresent: aBlock [
+	"If aKey is absent, answer nil. Else, evaluate aBlock passing the
+	 associated value and answer the result of the invocation"
 
-keys
-    "Answer a kind of Set containing the keys of the receiver"
-    | aSet |
-    aSet := self keysClass new: self size * 4 // 3.
-    self keysAndValuesDo: [ :key :value | aSet add: key ].
-    ^aSet
-!
+	<category: 'accessing'>
+	| index |
+	index := self findIndexOrNil: aKey.
+	^index isNil 
+	    ifTrue: [nil]
+	    ifFalse: [aBlock value: (self primAt: index) value]
+    ]
 
-values
-    "Answer an Array containing the values of the receiver"
-    | result i |
-    result := Array new: self size.
-    i := 0.
-    self keysAndValuesDo: [ :key :value |
-	result at: (i := i + 1) put: value
-    ].
-    ^result
-! !
+    associationAt: key [
+	"Answer the key/value Association for the given key. Fail if the key
+	 is not found"
 
+	<category: 'accessing'>
+	^self associationAt: key
+	    ifAbsent: [SystemExceptions.NotFound signalOn: key what: 'key']
+    ]
 
-
-!Dictionary methodsFor: 'dictionary testing'!
+    associationAt: key ifAbsent: aBlock [
+	"Answer the key/value Association for the given key. Evaluate aBlock
+	 (answering the result) if the key is not found"
 
-includesAssociation: anAssociation
-    "Answer whether the receiver contains the key which is
-     anAssociation's key and its value is anAssociation's value"
+	<category: 'accessing'>
+	| index |
+	index := self findIndexOrNil: key.
+	^index isNil ifTrue: [aBlock value] ifFalse: [self primAt: index]
+    ]
 
-    ^true == (self
-	at: anAssociation key
-	ifPresent: [ :value | value = anAssociation value ])
-!
+    keyAtValue: value ifAbsent: exceptionBlock [
+	"Answer the key associated to the given value. Evaluate exceptionBlock
+	 (answering the result) if the value is not found.
+	 IMPORTANT: == is used to compare values"
 
-includesKey: key
-    "Answer whether the receiver contains the given key"
+	<category: 'accessing'>
+	self keysAndValuesDo: [:key :val | value == val ifTrue: [^key]].
+	^exceptionBlock value
+    ]
 
-    ^super includes: key
-!
+    keyAtValue: value [
+	"Answer the key associated to the given value, or nil if the value is not found"
 
-includes: anObject
-    "Answer whether the receiver contains anObject as
-     one of its values"
-    self do: [ :element | element = anObject ifTrue: [ ^true ] ].
-    ^false
-!
+	<category: 'accessing'>
+	^self keyAtValue: value ifAbsent: [nil]
+    ]
 
-occurrencesOf: aValue
-    "Answer whether the number of occurrences of aValue as
-     one of the receiver's values"
-    | count |
-    count := 0.
-    self do: [ :element | element = aValue
-    			    ifTrue: [ count := count + 1] ].
-    ^count
-! !
+    keys [
+	"Answer a kind of Set containing the keys of the receiver"
 
+	<category: 'accessing'>
+	| aSet |
+	aSet := self keysClass new: self size * 4 // 3.
+	self keysAndValuesDo: [:key :value | aSet add: key].
+	^aSet
+    ]
 
-
-!Dictionary methodsFor: 'dictionary removing'!
+    values [
+	"Answer an Array containing the values of the receiver"
 
-removeAllKeys: keys
-    "Remove all the keys in keys, without raising any errors"
-    keys do: [ :key |
-	self removeKey: key ifAbsent: [ ] ]
-!
+	<category: 'accessing'>
+	| result i |
+	result := Array new: self size.
+	i := 0.
+	self keysAndValuesDo: [:key :value | result at: (i := i + 1) put: value].
+	^result
+    ]
 
-removeAllKeys: keys ifAbsent: aBlock
-    "Remove all the keys in keys, passing the missing keys as parameters
-     to aBlock as they're encountered"
-    keys do: [ :key |
-	self removeKey: key ifAbsent: [ aBlock value: key ] ]
-!
+    includesAssociation: anAssociation [
+	"Answer whether the receiver contains the key which is
+	 anAssociation's key and its value is anAssociation's value"
 
-remove: anAssociation
-    "Remove anAssociation's key from the dictionary"
-    | index assoc |
-    index := self findIndexOrNil: anAssociation key.
-    index isNil
-	ifTrue: [ ^SystemExceptions.NotFound signalOn: anAssociation key what: 'key' ].
+	<category: 'dictionary testing'>
+	^true == (self at: anAssociation key
+		    ifPresent: [:value | value = anAssociation value])
+    ]
 
-    assoc := self primAt: index.
-    self primAt: index put: nil.
-    self decrementTally.
-    self rehashObjectsAfter: index.
-    ^assoc
-!
+    includesKey: key [
+	"Answer whether the receiver contains the given key"
 
-remove: anAssociation ifAbsent: aBlock
-    "Remove anAssociation's key from the dictionary"
-    | index assoc |
-    index := self findIndexOrNil: anAssociation key.
-    index isNil
-	ifTrue: [ ^aBlock value ].
+	<category: 'dictionary testing'>
+	^super includes: key
+    ]
 
-    assoc := self primAt: index.
-    self primAt: index put: nil.
-    self decrementTally.
-    self rehashObjectsAfter: index.
-    ^assoc
-!
+    includes: anObject [
+	"Answer whether the receiver contains anObject as
+	 one of its values"
 
-removeKey: key
-    "Remove the passed key from the dictionary, fail if it is not found"
-    ^self removeKey: key ifAbsent: [ SystemExceptions.NotFound signalOn: key what: 'key' ]
-!
+	<category: 'dictionary testing'>
+	self do: [:element | element = anObject ifTrue: [^true]].
+	^false
+    ]
 
-removeKey: key ifAbsent: aBlock
-    "Remove the passed key from the dictionary, answer the result of
-     evaluating aBlock if it is not found"
-    | index assoc |
-    index := self findIndexOrNil: key.
-    index isNil ifTrue: [ ^aBlock value ].
+    occurrencesOf: aValue [
+	"Answer whether the number of occurrences of aValue as
+	 one of the receiver's values"
 
-    assoc := self primAt: index.
-    self primAt: index put: nil.
-    self decrementTally.
-    self rehashObjectsAfter: index.
-    ^assoc value
-! !
+	<category: 'dictionary testing'>
+	| count |
+	count := 0.
+	self do: [:element | element = aValue ifTrue: [count := count + 1]].
+	^count
+    ]
 
+    removeAllKeys: keys [
+	"Remove all the keys in keys, without raising any errors"
 
-
-!Dictionary methodsFor: 'dictionary enumerating'!
+	<category: 'dictionary removing'>
+	keys do: [:key | self removeKey: key ifAbsent: []]
+    ]
 
-associationsDo: aBlock
-    "Pass each association in the dictionary to aBlock"
-    super do: aBlock
-!
+    removeAllKeys: keys ifAbsent: aBlock [
+	"Remove all the keys in keys, passing the missing keys as parameters
+	 to aBlock as they're encountered"
 
-keysDo: aBlock
-    "Pass each key in the dictionary to aBlock"
-    super do: [ :assoc | aBlock value: assoc key ]
-!
+	<category: 'dictionary removing'>
+	keys do: [:key | self removeKey: key ifAbsent: [aBlock value: key]]
+    ]
 
-do: aBlock
-    "Pass each value in the dictionary to aBlock"
-    super do: [ :assoc | aBlock value: assoc value ]
-!
+    remove: anAssociation [
+	"Remove anAssociation's key from the dictionary"
 
-keysAndValuesDo: aBlock
-    "Pass each key/value pair in the dictionary as two distinct parameters
-     to aBlock"
-    super do: [ :assoc | aBlock value: assoc key value: assoc value ]
-!
+	<category: 'dictionary removing'>
+	| index assoc |
+	index := self findIndexOrNil: anAssociation key.
+	index isNil 
+	    ifTrue: [^SystemExceptions.NotFound signalOn: anAssociation key what: 'key'].
+	assoc := self primAt: index.
+	self primAt: index put: nil.
+	self decrementTally.
+	self rehashObjectsAfter: index.
+	^assoc
+    ]
 
-collect: aBlock
-    "Answer a new dictionary where the keys are the same and the values are
-     obtained by passing each value to aBlock and collecting the return values"
-    | aDictionary |
-    aDictionary := self copyEmpty: self capacity.
-    self keysAndValuesDo: [ :key :value |
-	aDictionary whileGrowingAt: key put: (aBlock value: value) ].
-    ^aDictionary
-!
+    remove: anAssociation ifAbsent: aBlock [
+	"Remove anAssociation's key from the dictionary"
 
-select: aBlock
-    "Answer a new dictionary containing the key/value pairs for which aBlock
-     returns true. aBlock only receives the value part of the pairs."
-    | newDict |
-    newDict := self copyEmpty: self capacity.
-    self associationsDo:
-    	[ :assoc | (aBlock value: assoc value)
-		     ifTrue: [ newDict add: assoc ] ].
-    ^newDict
-!
+	<category: 'dictionary removing'>
+	| index assoc |
+	index := self findIndexOrNil: anAssociation key.
+	index isNil ifTrue: [^aBlock value].
+	assoc := self primAt: index.
+	self primAt: index put: nil.
+	self decrementTally.
+	self rehashObjectsAfter: index.
+	^assoc
+    ]
 
-reject: aBlock
-    "Answer a new dictionary containing the key/value pairs for which aBlock
-     returns false. aBlock only receives the value part of the pairs."
-    | newDict |
-    newDict := self copyEmpty: self capacity.
-    self associationsDo:
-    	[ :assoc | (aBlock value: assoc value)
-		     ifFalse: [ newDict add: assoc ] ].
-    ^newDict
-! !
+    removeKey: key [
+	"Remove the passed key from the dictionary, fail if it is not found"
 
+	<category: 'dictionary removing'>
+	^self removeKey: key
+	    ifAbsent: [SystemExceptions.NotFound signalOn: key what: 'key']
+    ]
 
-
-!Dictionary methodsFor: 'testing'!
+    removeKey: key ifAbsent: aBlock [
+	"Remove the passed key from the dictionary, answer the result of
+	 evaluating aBlock if it is not found"
 
-= aDictionary
-    "Answer whether the receiver and aDictionary are equal"
-    self class == aDictionary class ifFalse: [ ^false ].
-    self == aDictionary ifTrue: [ ^true ].
-    self size = aDictionary size ifFalse: [ ^false ].
-    self keysAndValuesDo: [:key :val |
-	val = (aDictionary at: key ifAbsent: [ ^false ])
-	    ifFalse: [ ^false ]
-    ].
-    ^true
-!
+	<category: 'dictionary removing'>
+	| index assoc |
+	index := self findIndexOrNil: key.
+	index isNil ifTrue: [^aBlock value].
+	assoc := self primAt: index.
+	self primAt: index put: nil.
+	self decrementTally.
+	self rehashObjectsAfter: index.
+	^assoc value
+    ]
 
-hash
-    "Answer the hash value for the receiver"
-    | hashValue |
-    hashValue := tally.
-    self associationsDo: [:assoc |
-        hashValue := hashValue bitXor: (self hashFor: assoc) scramble.
+    associationsDo: aBlock [
+	"Pass each association in the dictionary to aBlock"
 
-        "hack needed because the Smalltalk dictionary contains itself"
-        assoc value == self ifFalse: [
-            hashValue := hashValue bitXor: assoc value hash scramble.
-        ]
-    ].
+	<category: 'dictionary enumerating'>
+	super do: aBlock
+    ]
 
-    ^hashValue
-! !
+    keysDo: aBlock [
+	"Pass each key in the dictionary to aBlock"
 
+	<category: 'dictionary enumerating'>
+	super do: [:assoc | aBlock value: assoc key]
+    ]
 
-
-!Dictionary methodsFor: 'printing'!
+    do: aBlock [
+	"Pass each value in the dictionary to aBlock"
 
-inspect
-    "Print all the instance variables and objects in the receiver on the
-     Transcript"
+	<category: 'dictionary enumerating'>
+	super do: [:assoc | aBlock value: assoc value]
+    ]
 
-    | class instVars i |
-    self beConsistent.
-    class := self class.
-    instVars := class allInstVarNames.
-    Transcript nextPutAll: 'An instance of '.
-    class printNl.
-    1 to: instVars size do:
-	[ :i | Transcript nextPutAll: '  ';
-	    nextPutAll: (instVars at: i);
-	    nextPutAll: ': '.
-	    (self instVarAt: i)  printNl ].
+    keysAndValuesDo: aBlock [
+	"Pass each key/value pair in the dictionary as two distinct parameters
+	 to aBlock"
 
-    Transcript nextPutAll: '  contents: ['; nl.
+	<category: 'dictionary enumerating'>
+	super do: [:assoc | aBlock value: assoc key value: assoc value]
+    ]
 
-    self associationsDo: [ :obj |
-	Transcript 
-	    nextPutAll: '    ';
-	    print: obj;
+    collect: aBlock [
+	"Answer a new dictionary where the keys are the same and the values are
+	 obtained by passing each value to aBlock and collecting the return values"
+
+	<category: 'dictionary enumerating'>
+	| aDictionary |
+	aDictionary := self copyEmpty: self capacity.
+	self 
+	    keysAndValuesDo: [:key :value | aDictionary whileGrowingAt: key put: (aBlock value: value)].
+	^aDictionary
+    ]
+
+    select: aBlock [
+	"Answer a new dictionary containing the key/value pairs for which aBlock
+	 returns true. aBlock only receives the value part of the pairs."
+
+	<category: 'dictionary enumerating'>
+	| newDict |
+	newDict := self copyEmpty: self capacity.
+	self 
+	    associationsDo: [:assoc | (aBlock value: assoc value) ifTrue: [newDict add: assoc]].
+	^newDict
+    ]
+
+    reject: aBlock [
+	"Answer a new dictionary containing the key/value pairs for which aBlock
+	 returns false. aBlock only receives the value part of the pairs."
+
+	<category: 'dictionary enumerating'>
+	| newDict |
+	newDict := self copyEmpty: self capacity.
+	self 
+	    associationsDo: [:assoc | (aBlock value: assoc value) ifFalse: [newDict add: assoc]].
+	^newDict
+    ]
+
+    = aDictionary [
+	"Answer whether the receiver and aDictionary are equal"
+
+	<category: 'testing'>
+	self class == aDictionary class ifFalse: [^false].
+	self == aDictionary ifTrue: [^true].
+	self size = aDictionary size ifFalse: [^false].
+	self keysAndValuesDo: 
+		[:key :val | 
+		val = (aDictionary at: key ifAbsent: [^false]) ifFalse: [^false]].
+	^true
+    ]
+
+    hash [
+	"Answer the hash value for the receiver"
+
+	<category: 'testing'>
+	| hashValue |
+	hashValue := tally.
+	self associationsDo: 
+		[:assoc | 
+		hashValue := hashValue bitXor: (self hashFor: assoc) scramble.
+
+		"hack needed because the Smalltalk dictionary contains itself"
+		assoc value == self 
+		    ifFalse: [hashValue := hashValue bitXor: assoc value hash scramble]].
+	^hashValue
+    ]
+
+    inspect [
+	"Print all the instance variables and objects in the receiver on the
+	 Transcript"
+
+	<category: 'printing'>
+	| class instVars i |
+	self beConsistent.
+	class := self class.
+	instVars := class allInstVarNames.
+	Transcript nextPutAll: 'An instance of '.
+	class printNl.
+	1 to: instVars size
+	    do: 
+		[:i | 
+		Transcript
+		    nextPutAll: '  ';
+		    nextPutAll: (instVars at: i);
+		    nextPutAll: ': '.
+		(self instVarAt: i) printNl].
+	Transcript
+	    nextPutAll: '  contents: [';
+	    nl.
+	self associationsDo: 
+		[:obj | 
+		Transcript
+		    nextPutAll: '    ';
+		    print: obj;
+		    nl].
+	Transcript
+	    nextPutAll: '  ]';
 	    nl
-    ].
-    Transcript nextPutAll: '  ]'; nl
-!
+    ]
 
-printOn: aStream
-    "Print a representation of the receiver on aStream"
-    aStream nextPutAll: self classNameString , ' (' ; nl.
-    self keysAndValuesDo:
-    	[ :key :value | aStream tab;
-		   print: key;
-		   nextPutAll: '->';
-		   print: value;
-		   nl ].
-    aStream nextPut: $)
-! !
+    printOn: aStream [
+	"Print a representation of the receiver on aStream"
 
+	<category: 'printing'>
+	aStream
+	    nextPutAll: self classNameString , ' (';
+	    nl.
+	self keysAndValuesDo: 
+		[:key :value | 
+		aStream
+		    tab;
+		    print: key;
+		    nextPutAll: '->';
+		    print: value;
+		    nl].
+	aStream nextPut: $)
+    ]
 
-
-!Dictionary methodsFor: 'storing'!
+    storeOn: aStream [
+	"Print Smalltalk code compiling to the receiver on aStream"
 
-storeOn: aStream
-    "Print Smalltalk code compiling to the receiver on aStream"
-    | hasElements |
-    aStream
-	nextPutAll: '((', self classNameString, ' new: ';
-	print: self size;
-	nextPut: $).
+	<category: 'storing'>
+	| hasElements |
+	aStream
+	    nextPutAll: '((' , self classNameString , ' new: ';
+	    print: self size;
+	    nextPut: $).
+	hasElements := false.
+	self associationsDo: 
+		[:assoc | 
+		aStream
+		    nextPutAll: ' at: ';
+		    store: assoc key;
+		    nextPutAll: ' put: ';
+		    store: assoc value;
+		    nextPut: $;.
+		hasElements := true].
+	hasElements ifTrue: [aStream nextPutAll: ' yourself'].
+	aStream nextPut: $)
+    ]
 
-    hasElements := false.
-    self associationsDo:
-    	[ :assoc | aStream nextPutAll: ' at: ';
-		       store: assoc key;
-		       nextPutAll: ' put: ';
-		       store: assoc value;
-		       nextPut: $;.
-		   hasElements := true ].
-    hasElements ifTrue: [ aStream nextPutAll: ' yourself' ].
-    aStream nextPut: $)
-! !
+    rehash [
+	"Rehash the receiver"
 
+	<category: 'rehashing'>
+	| copy |
+	copy := self copy.
+	self resetTally.
+	1 to: self primSize do: [:i | self primAt: i put: nil].
+	copy associationsDo: [:each | self addWhileGrowing: each]
+    ]
 
-
-!Dictionary methodsFor: 'rehashing'!
+    whileGrowingAt: key put: value [
+	"Private - Add the given key/value association to the receiver. Don't check
+	 for the set to be full - we want SPEED!."
 
-rehash
-    "Rehash the receiver"
-    | copy |
-    copy := self copy.
-    self resetTally.
+	<category: 'private methods'>
+	self addWhileGrowing: key -> value
+    ]
 
-    1 to: self primSize do: [:i |
-	self primAt: i put: nil
-    ].
+    deepCopy [
+	"Returns a deep copy of the receiver (the keys and values are
+	 copies of the receiver's instance variables)"
 
-    copy associationsDo: [:each | self addWhileGrowing: each ]
-! !
+	<category: 'private methods'>
+	| newDictionary |
+	newDictionary := self copyEmpty: self capacity.
+	self 
+	    keysAndValuesDo: [:k :v | newDictionary whileGrowingAt: k put: v copy].
+	^newDictionary
+    ]
 
-
-!Dictionary methodsFor: 'private methods'!
+    keysClass [
+	"Private - Answer the class answered by #keys"
 
-whileGrowingAt: key put: value
-    "Private - Add the given key/value association to the receiver. Don't check
-     for the set to be full - we want SPEED!."
-    self addWhileGrowing: key -> value
-!
+	<category: 'private methods'>
+	^Set
+    ]
 
-deepCopy
-    "Returns a deep copy of the receiver (the keys and values are
-     copies of the receiver's instance variables)"
-    | newDictionary |
-    newDictionary := self copyEmpty: self capacity.
-    self keysAndValuesDo: [ :k :v |
-	newDictionary whileGrowingAt: k put: v copy ].
-    ^newDictionary
-!
+    hashFor: anObject [
+	"Return an hash value for the item, anObject"
 
-keysClass
-    "Private - Answer the class answered by #keys"
-    ^Set
-!
+	<category: 'private methods'>
+	^anObject key hash
+    ]
 
-hashFor: anObject
-    "Return an hash value for the item, anObject"
-    ^anObject key hash
-!
+    findElementIndex: anObject [
+	"anObject is the content of an indexed variable. See what slot it should
+	 be inserted in."
 
-findElementIndex: anObject
-    "anObject is the content of an indexed variable. See what slot it should
-     be inserted in."
+	<category: 'private methods'>
+	^self findIndex: anObject key
+    ]
 
-    ^self findIndex: anObject key
-!
-    
-findIndex: anObject
-    "Tries to see if anObject exists as an indexed variable. As soon as nil
-    or anObject is found, the index of that slot is answered"
+    findIndex: anObject [
+	"Tries to see if anObject exists as an indexed variable. As soon as nil
+	 or anObject is found, the index of that slot is answered"
 
-    | index size element |
-    self beConsistent.
+	<category: 'private methods'>
+	| index size element |
+	self beConsistent.
 
-    "Sorry for the lack of readability, but I want speed... :-)"
-    index := (anObject hash scramble
-                bitAnd: (size := self primSize) - 1) + 1.
+	"Sorry for the lack of readability, but I want speed... :-)"
+	index := (anObject hash scramble bitAnd: (size := self primSize) - 1) + 1.
+	
+	[((element := self primAt: index) isNil or: [element key = anObject]) 
+	    ifTrue: [^index].
+	index == size ifTrue: [index := 1] ifFalse: [index := index + 1]] 
+		repeat
+    ]
 
-    [
-        ((element := self primAt: index) isNil
-            or: [ element key = anObject ])
-                ifTrue: [ ^index ].
+    findKeyIndex: key [
+	"Tries to see if key exists as a the key of an indexed variable. As soon
+	 as nil or an association with the correct key is found, the index of that
+	 slot is answered"
 
-        index == size
-            ifTrue: [ index := 1 ]
-            ifFalse: [ index := index + 1 ]
-    ] repeat
-! !
+	<category: 'awful ST-80 compatibility hacks'>
+	^self findIndex: key
+    ]
 
-
-!Dictionary methodsFor: 'awful ST-80 compatibility hacks'!
+    withAllSuperspaces [
+	"This method is needed by the compiler"
 
-findKeyIndex: key
-    "Tries to see if key exists as a the key of an indexed variable. As soon
-    as nil or an association with the correct key is found, the index of that
-    slot is answered"
-    ^self findIndex: key
-! !
+	<category: 'polymorphism hacks'>
+	^{self}
+    ]
+]
 
-!Dictionary methodsFor: 'polymorphism hacks'!
-
-withAllSuperspaces
-    "This method is needed by the compiler"
-    ^{self}
-! !

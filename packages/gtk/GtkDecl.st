@@ -4,7 +4,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2003 Free Software Foundation, Inc.
@@ -29,90 +28,122 @@
 |
  ======================================================================"
 
-Object subclass: #Pango
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gtk'!
 
-Object subclass: #Gdk
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gtk'!
+
+Object subclass: Pango [
+    
+    <category: 'Gtk'>
+    <comment: nil>
+]
 
-Object subclass: #Gnome
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gnome'!
 
-Object subclass: #GnomeVFS
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gnome'!
+
+Object subclass: Gdk [
+    
+    <category: 'Gtk'>
+    <comment: nil>
+]
 
-Object subclass: #Gtk
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gtk'!
 
-Object subclass: #Atk
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gtk'!
+
+Object subclass: Gnome [
+    
+    <category: 'Gnome'>
+    <comment: nil>
+]
 
-Object subclass: #GLib
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gtk'!
 
-GLib class
-	instanceVariableNames: 'gtkTypes'!
+
+Object subclass: GnomeVFS [
+    
+    <category: 'Gnome'>
+    <comment: nil>
+]
 
-Object subclass: #GQuark
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gtk'!
 
-CObject variableWordSubclass: #GList
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gtk'!
+
+Object subclass: Gtk [
+    
+    <category: 'Gtk'>
+    <comment: nil>
+]
 
-CObject variableWordSubclass: #GSList
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gtk'!
 
-CObject variableWordSubclass: #GdkEvent
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Gtk'!
+
+Object subclass: Atk [
+    
+    <category: 'Gtk'>
+    <comment: nil>
+]
 
-!GLib class methodsFor: 'registering GObject types'!
 
-registerAllTypes
-    gtkTypes isNil ifTrue: [ gtkTypes := OrderedCollection new ].
-    gtkTypes do: [ :each | self register: each forType: each getType ]
-!
+
+Object subclass: GLib [
+    
+    <category: 'Gtk'>
+    <comment: nil>
 
-registerType: aClass
-    gtkTypes isNil ifTrue: [ gtkTypes := OrderedCollection new ].
-    gtkTypes addLast: aClass
-!
+    GLib class [
+	| gtkTypes |
+	
+    ]
 
-update: anObject
-    anObject == #returnFromSnapshot
-        ifTrue: [ self registerAllTypes ]
-! !
+    GLib class >> registerAllTypes [
+	<category: 'registering GObject types'>
+	gtkTypes isNil ifTrue: [gtkTypes := OrderedCollection new].
+	gtkTypes do: [:each | self register: each forType: each getType]
+    ]
 
-ObjectMemory addDependent: GLib!
+    GLib class >> registerType: aClass [
+	<category: 'registering GObject types'>
+	gtkTypes isNil ifTrue: [gtkTypes := OrderedCollection new].
+	gtkTypes addLast: aClass
+    ]
+
+    GLib class >> update: anObject [
+	<category: 'registering GObject types'>
+	anObject == #returnFromSnapshot ifTrue: [self registerAllTypes]
+    ]
+]
+
+
+
+Object subclass: GQuark [
+    
+    <category: 'Gtk'>
+    <comment: nil>
+]
+
+
+
+CObject subclass: GList [
+    
+    <shape: #word>
+    <category: 'Gtk'>
+    <comment: nil>
+]
+
+
+
+CObject subclass: GSList [
+    
+    <shape: #word>
+    <category: 'Gtk'>
+    <comment: nil>
+]
+
+
+
+CObject subclass: GdkEvent [
+    
+    <shape: #word>
+    <category: 'Gtk'>
+    <comment: nil>
+]
+
+
+
+Eval [
+    ObjectMemory addDependent: GLib
+]
+

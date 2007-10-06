@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -29,189 +28,215 @@
  ======================================================================
 "
 
-BLOX.Gui subclass:  #View
-	instanceVariableNames: 'data parentView childViews '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
 
-View comment: 
-nil!
+
+BLOX.Gui subclass: View [
+    | data parentView childViews |
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-!View class methodsFor: 'instance creation'!
+    View class >> new: aString in: view [
+	<category: 'instance creation'>
+	| aView |
+	aView := self new.
+	aView parentView: view.
+	^aView
+    ]
 
-new: aString in: view 
-    | aView |
-    aView := self new.
-    aView parentView: view.
-    ^aView! !
+    data [
+	"Return view's data object"
 
-!View methodsFor: 'accessing'!
+	<category: 'accessing'>
+	^data
+    ]
 
-data
-    "Return view's data object"
+    allPrimitivesDo: aBlock [
+	"Note that this test is a necessary but not a sufficient condition of a
+	 Primitive view -- a partially created window can have a Manager which has
+	 no children"
 
-    ^data! !
+	<category: 'change management'>
+	childViews notNil 
+	    ifTrue: [childViews do: [:view | view allPrimitivesDo: aBlock]]
+	    ifFalse: [aBlock value: self]
+    ]
 
-!View methodsFor: 'change management'!
+    canChangeState [
+	<category: 'change management'>
+	| aCollection |
+	aCollection := OrderedCollection new.
+	self rootView 
+	    allPrimitivesDo: [:view | view == self ifFalse: [view canUpdate ifFalse: [^false]]].
+	^true
+    ]
 
-allPrimitivesDo: aBlock 
-    "Note that this test is a necessary but not a sufficient condition of a
-     Primitive view -- a partially created window can have a Manager which has
-     no children"
+    canUpdate [
+	"Default is to return true"
 
-    childViews notNil 
-	ifTrue: [childViews do: [:view | view allPrimitivesDo: aBlock]]
-	ifFalse: [aBlock value: self]!
+	<category: 'change management'>
+	^true
+    ]
 
-canChangeState
-    | aCollection |
-    aCollection := OrderedCollection new.
-    self rootView 
-	allPrimitivesDo: [:view | view == self ifFalse: [view canUpdate ifFalse: [^false]]].
-    ^true!
+    collectPrimitives: aCollection [
+	"Note that this test is a necessary but not a sufficient condition of a
+	 Primitive view -- a partially created window can have a Manager which has
+	 no children"
 
-canUpdate
-    "Default is to return true"
+	<category: 'change management'>
+	childViews notNil 
+	    ifTrue: [childViews do: [:view | view collectPrimitives: aCollection]]
+	    ifFalse: [aCollection add: self]
+    ]
 
-    ^true!
+    childViews [
+	"Return the view's collection of childViews"
 
-collectPrimitives: aCollection 
-    "Note that this test is a necessary but not a sufficient condition of a
-     Primitive view -- a partially created window can have a Manager which has
-     no children"
+	<category: 'childViews and parentViews'>
+	^childViews
+    ]
 
-    childViews notNil 
-	ifTrue: [childViews do: [:view | view collectPrimitives: aCollection]]
-	ifFalse: [aCollection add: self]! !
+    parentView [
+	"Return view's parentView.  If view is a rootView, nil is returned"
 
-!View methodsFor: 'childViews and parentViews'!
+	<category: 'childViews and parentViews'>
+	^parentView
+    ]
 
-childViews
-    "Return the view's collection of childViews"
+    parentView: aView [
+	"Set parentView to aView"
 
-    ^childViews!
+	<category: 'childViews and parentViews'>
+	parentView := aView
+    ]
 
-parentView
-    "Return view's parentView.  If view is a rootView, nil is returned "
+    rootView [
+	"Return rootView in view's hierarchy"
 
-    ^parentView!
+	<category: 'childViews and parentViews'>
+	^parentView isNil ifTrue: [self] ifFalse: [parentView rootView]
+    ]
 
-parentView: aView 
-    "Set parentView to aView"
+    beep [
+	"Beep once -- usually called when some user error is detected"
 
-    parentView := aView!
+	<category: 'display'>
+	Blox beep
+    ]
 
-rootView
-    "Return rootView in view's hierarchy"
-
-    ^parentView isNil ifTrue: [self] ifFalse: [parentView rootView]! !
-
-!View methodsFor: 'display'!
-
-beep
-    "Beep once -- usually called when some user error is detected"
-
-    Blox beep! !
-
-!View methodsFor: 'initialize-delete'!
-
-remove
-    data := nil.
-    childViews isNil ifFalse: [childViews do: [:view | view remove]].
-    parentView := childViews := nil! !
+    remove [
+	<category: 'initialize-delete'>
+	data := nil.
+	childViews isNil ifFalse: [childViews do: [:view | view remove]].
+	parentView := childViews := nil
+    ]
+]
 
 
-View subclass:  #Primitive
-	instanceVariableNames: 'menu dirty stateChangeMsg messageDispatch '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Windows'!
+
+View subclass: Primitive [
+    | menu dirty stateChangeMsg messageDispatch |
+    
+    <comment: nil>
+    <category: 'Graphics-Windows'>
 
-Primitive comment: 
-nil!
+    Primitive class >> updateViews [
+	"Update all the primitive views"
 
-!Primitive class methodsFor: 'displaying'!
+	<category: 'displaying'>
+	BrowserMain windowsDo: [:i | i allPrimitivesDo: [:view | view update]]
+    ]
 
-updateViews
-    "Update all the primitive views"
+    Primitive class >> new [
+	<category: 'initialize'>
+	^(super new)
+	    dirty: false;
+	    yourself
+    ]
 
-    BrowserMain windowsDo: [:i | i allPrimitivesDo: [:view | view update]]! !
+    data: aData [
+	<category: 'accessing'>
+	data := aData
+    ]
 
-!Primitive class methodsFor: 'initialize'!
+    dirty: aBoolean [
+	<category: 'accessing'>
+	dirty := aBoolean
+    ]
 
-new
-    ^(super new)
-	dirty: false;
-	yourself! !
+    isDirty [
+	<category: 'accessing'>
+	^dirty
+    ]
 
-!Primitive methodsFor: 'accessing'!
+    menu [
+	<category: 'accessing'>
+	^menu
+    ]
 
-data: aData 
-    data := aData!
+    close [
+	<category: 'blue button menu items'>
+	^self rootView close
+    ]
 
-dirty: aBoolean 
-    dirty := aBoolean!
+    display [
+	"Overridden in subclasses.  This method is used to support change/update
+	 mechanism.  In the normal case, this method redraws entire view"
 
-isDirty
-    ^dirty!
+	<category: 'displaying'>
+	^self subclassResponsibility
+    ]
 
-menu
-    ^menu! !
+    getViewState [
+	<category: 'displaying'>
+	^messageDispatch
+    ]
 
-!Primitive methodsFor: 'blue button menu items'!
+    update: stateChanges [
+	"Update object based on stateChanges"
 
-close
-    ^self rootView close! !
+	<category: 'displaying'>
+	stateChanges do: 
+		[:sc | 
+		| viewState |
+		viewState := messageDispatch at: sc state.
+		viewState updateTo: sc counter]
+    ]
 
-!Primitive methodsFor: 'displaying'!
+    update [
+	"Send a getStateChanges: currentViewState message to data object to compute state
+	 changes. Send a update: stateChanges message to self to update object"
 
-display
-    "Overridden in subclasses.  This method is used to support change/update 
-     mechanism.  In the normal case, this method redraws entire view"
+	<category: 'displaying'>
+	| stateChanges |
+	data isNil ifTrue: [^self].
+	stateChanges := data getStateChanges: self getViewState.
+	stateChanges notNil ifTrue: [self update: stateChanges]
+    ]
 
-    ^self subclassResponsibility!
+    handleUserChange: changeSelector [
+	"This is used to update the data object in response to a user
+	 modification of the view"
 
-getViewState
-    ^messageDispatch!
+	<category: 'initialize-delete'>
+	stateChangeMsg := changeSelector
+    ]
 
-update: stateChanges 
-    "Update object based on stateChanges"
+    menuInit: theMenu [
+	"The popup menu, theMenu, is stored in menu"
 
-    stateChanges do: 
-	    [:sc | 
-	    | viewState |
-	    viewState := messageDispatch at: sc state.
-	    viewState updateTo: sc counter]!
+	<category: 'initialize-delete'>
+	menu := theMenu
+    ]
 
-update
-    "Send a getStateChanges: currentViewState message to data object to compute state
-     changes. Send a update: stateChanges message to self to update object"
-
-    | stateChanges |
-    data isNil ifTrue: [^self].
-    stateChanges := data getStateChanges: self getViewState.
-    stateChanges notNil ifTrue: [self update: stateChanges]! !
-
-!Primitive methodsFor: 'initialize-delete'!
-
-handleUserChange: changeSelector 
-    "This is used to update the data object in response to a user
-     modification of the view"
-
-    stateChangeMsg := changeSelector!
-
-menuInit: theMenu 
-    "The popup menu, theMenu, is stored in menu"
-
-    menu := theMenu!
-
-stateChange: theStateChange updateWith: block 
-    messageDispatch isNil ifTrue: [messageDispatch := LookupTable new].
-    messageDispatch at: theStateChange
-	put: (GuiState 
-		state: theStateChange
-		counter: 0
-		action: block)! !
-
+    stateChange: theStateChange updateWith: block [
+	<category: 'initialize-delete'>
+	messageDispatch isNil ifTrue: [messageDispatch := LookupTable new].
+	messageDispatch at: theStateChange
+	    put: (GuiState 
+		    state: theStateChange
+		    counter: 0
+		    action: block)
+    ]
+]
 

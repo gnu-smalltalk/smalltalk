@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999,2000,2001,2002,2003,2006,2007 Free Software Foundation, Inc.
@@ -29,297 +28,368 @@
  ======================================================================"
 
 
-RBParser subclass: #STFileParser
-    instanceVariableNames: 'driver'
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Refactory-Parser'!
-
-Object subclass: #STParsingDriver
-    instanceVariableNames: 'parser'
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Refactory-Parser'!
-
-STFileParser subclass: #STFileInParser
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Refactory-Parser'!
-
-
-
-
-!STFileParser methodsFor: 'accessing'!
-
-driver
-    ^driver!
-
-driver: aSTParsingDriver
-    driver := aSTParsingDriver.
-    driver parser: self!
-
-parseSmalltalk
-    self subclassResponsibility!
-
-!STFileParser methodsFor: 'overridable - parsing file-ins'!
-
-compile: node
-    driver compile: node
-!
-
-endMethodList
-    driver endMethodList
-!
-
-evaluate: node
-    "This should be overridden because its result affects the parsing
-     process: true means 'start parsing methods', false means 'keep
-     evaluating'."
-    ^node notNil and: [ node statements size > 0 and: [ driver evaluate: node ]]
-! !
-
-!STFileParser methodsFor: 'utility'!
-
-parseStatements
-    (currentToken isSpecial and: [currentToken value == $!])
-        ifTrue: [ ^RBSequenceNode statements: #() ].
-
-    ^self parseStatements: false!
-
-parseDoit
-    | node start stop comments |
-    comments := scanner getComments.
-    start := comments isNil
-	    	ifTrue: [ currentToken start - 1 ]
-	    	ifFalse: [ comments first first - 1 ].
-	
-    tags := nil.
-    node := self parseStatements.
-    node comments isNil
-	ifTrue: [ node comments: comments ]
-	ifFalse: [
-	    comments isNil ifFalse: [ node comments: node comments, comments ] ].
-
-    "One -1 accounts for base-1 vs. base-0 (as above), the
-     other drops the bang because we have a one-token lookahead."
-    stop := currentToken start - 2.
-
-    ^self addSourceFrom: start to: stop to: node!
-
-addSourceFrom: start to: stop to: node
-    | method source |
-    node isMethod
-	ifTrue: [
-	    method := node ]
-	ifFalse: [
-	    method := RBMethodNode selectorParts: #() arguments: #().
-	    node parent: method ].
-    source := scanner stream copyFrom: start to: stop.
-    source := MappedCollection collection: source map: (1 - start to: stop).
-    method source: source.
-    ^node! !
-
-!STFileParser class methodsFor: 'accessing'!
-
-parseSmalltalk: aString with: aDriver
-    ^self parseSmalltalk: aString with: aDriver onError: nil!
-
-parseSmalltalk: aString with: aDriver onError: aBlock 
-    | parser |
-    parser := self new.
-    parser errorBlock: aBlock.
-    parser initializeParserWith: aString type: #on:errorBlock:.
-    parser driver: aDriver.
-    ^parser parseSmalltalk!
-
-parseSmalltalkStream: aStream with: aDriver
-    ^self parseSmalltalkStream: aStream with: aDriver onError: nil!
-
-parseSmalltalkStream: aStream with: aDriver onError: aBlock 
-    | parser |
-    parser := self new.
-    parser errorBlock: aBlock.
-    parser initializeParserWithStream: aStream type: #on:errorBlock:.
-    parser driver: aDriver.
-    ^parser parseSmalltalk! !
-
-!STFileInParser methodsFor: 'private-parsing'!
-
-parseSmalltalk
-    [ self parseDoits ]
-        whileTrue: [ self parseMethodDefinitionList ].
-
-    ^driver result!
-
-scannerClass
-    ^STFileScanner! !
-
-!STFileInParser methodsFor: 'private-parsing'!
-
-parseDoits
-    " Parses the stuff to be executed until a
-        ! <class expression> methodsFor: <category string> ! "
-
-    | node |
-    [
-	self atEnd ifTrue: [ ^false ].
-	node := self parseDoit.
-        scanner stripSeparators.
-	self evaluate: node
-    ] whileFalse: [
-        (currentToken isSpecial and: [currentToken value == $!])
-	    ifTrue: [ self step	]
-    ].
-    ^true
-!
-
-parseMethodFromFile
-    | node source start stop |
-    start := currentToken start - 1.
-    tags := nil.
-    node := self parseMethod.
-    node comments: (node comments select: [ :each | each last >= start ]).
-
-    "One -1 accounts for base-1 vs. base-0 (as above), the
-     other drops the bang because we have a one-token lookahead."
-    stop := currentToken start - 2.
-    node := self addSourceFrom: start to: stop to: node.
-
-    scanner stripSeparators.
-    self step.           "gobble method terminating bang"
-    ^node!
-
-parseMethodDefinitionList
-    "Called after first !, expecting a set of bang terminated
-     method definitions, followed by a bang"
-
-    self step.				"gobble doit terminating bang"
-
-    [ scanner atEnd or: [ currentToken isSpecial
-	   and: [ currentToken value == $! ] ] ] whileFalse: [
-
-	self compile: self parseMethodFromFile ].
-
-    scanner stripSeparators.
-    self step.
-    self endMethodList
-! !
-
-!STParsingDriver methodsFor: 'starting the parsing'!
-
-parseSmalltalk: aString with: aParserClass
-    ^aParserClass parseSmalltalk: aString with: self!
-
-parseSmalltalk: aString with: aParserClass onError: aBlock 
-    ^aParserClass parseSmalltalk: aString with: self onError: aBlock!
-
-parseSmalltalkStream: aStream with: aParserClass
-    ^aParserClass parseSmalltalkStream: aStream with: self!
-
-parseSmalltalkStream: aStream with: aParserClass onError: aBlock 
-    ^aParserClass parseSmalltalkStream: aStream with: self onError: aBlock!
-
-parseSmalltalkFileIn: aFilename with: aParserClass
-    ^self parseSmalltalkFileIn: aFilename with: aParserClass onError: nil!
-
-parseSmalltalkFileIn: aFilename with: aParserClass onError: aBlock 
-    | parser file |
-    file := FileStream open: aFilename mode: FileStream read.
-    [ self parseSmalltalkStream: file with: aParserClass onError: aBlock ]
-	ensure: [ file close ]! !
-
-!STParsingDriver methodsFor: 'accessing'!
-
-errorBlock
-    ^parser errorBlock
-!
-
-parserWarning: aString
-    parser parserWarning: aString
-!
-
-parserError: aString
-    parser parserError: aString
-!
-
-parser
-    ^parser!
-
-parser: aSTFileParser
-    parser := aSTFileParser! !
-
-!STParsingDriver methodsFor: 'overridable - parsing file-ins'!
-
-result
-    "return self by default"
-    ^self
-!
-
-compile: node
-    "do nothing by default"
-!
-
-endMethodList
-    "do nothing by default"
-!
-
-evaluate: node
-    "This should be overridden because its result affects the parsing
-     process: true means 'start parsing methods', false means 'keep
-     evaluating'. By default, always answer false."
-    ^false
-!
-
-currentNamespace
-    ^Namespace current
-!
-
-! !
-
-RBScanner subclass: #STFileScanner
-    instanceVariableNames: ''
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Refactory-Parser'!
-
-
-
-!STFileScanner methodsFor: 'accessing'!
-
-next
-    | token |
-    buffer reset.
-    tokenStart := stream position.
-    characterType == #eof ifTrue: [^RBToken start: tokenStart + 1].    "The EOF token should occur after the end of input"
-    token := self scanToken.
-    (token isSpecial and: [ token value == $! ])
-	 ifFalse: [ self stripSeparators ].
-    ^token!
+
+RBParser subclass: STFileParser [
+    | driver |
+    
+    <comment: nil>
+    <category: 'Refactory-Parser'>
+
+    STFileParser class >> parseSmalltalk: aString with: aDriver [
+	<category: 'accessing'>
+	^self 
+	    parseSmalltalk: aString
+	    with: aDriver
+	    onError: nil
+    ]
+
+    STFileParser class >> parseSmalltalk: aString with: aDriver onError: aBlock [
+	<category: 'accessing'>
+	| parser |
+	parser := self new.
+	parser errorBlock: aBlock.
+	parser initializeParserWith: aString type: #on:errorBlock:.
+	parser driver: aDriver.
+	^parser parseSmalltalk
+    ]
+
+    STFileParser class >> parseSmalltalkStream: aStream with: aDriver [
+	<category: 'accessing'>
+	^self 
+	    parseSmalltalkStream: aStream
+	    with: aDriver
+	    onError: nil
+    ]
+
+    STFileParser class >> parseSmalltalkStream: aStream with: aDriver onError: aBlock [
+	<category: 'accessing'>
+	| parser |
+	parser := self new.
+	parser errorBlock: aBlock.
+	parser initializeParserWithStream: aStream type: #on:errorBlock:.
+	parser driver: aDriver.
+	^parser parseSmalltalk
+    ]
+
+    driver [
+	<category: 'accessing'>
+	^driver
+    ]
+
+    driver: aSTParsingDriver [
+	<category: 'accessing'>
+	driver := aSTParsingDriver.
+	driver parser: self
+    ]
+
+    parseSmalltalk [
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    compile: node [
+	<category: 'overridable - parsing file-ins'>
+	driver compile: node
+    ]
+
+    endMethodList [
+	<category: 'overridable - parsing file-ins'>
+	driver endMethodList
+    ]
+
+    evaluate: node [
+	"This should be overridden because its result affects the parsing
+	 process: true means 'start parsing methods', false means 'keep
+	 evaluating'."
+
+	<category: 'overridable - parsing file-ins'>
+	^node notNil and: [node statements size > 0 and: [driver evaluate: node]]
+    ]
+
+    parseStatements [
+	<category: 'utility'>
+	(currentToken isSpecial and: [currentToken value == $!]) 
+	    ifTrue: [^RBSequenceNode statements: #()].
+	^self parseStatements: false
+    ]
+
+    parseDoit [
+	<category: 'utility'>
+	| node start stop comments |
+	comments := scanner getComments.
+	start := comments isNil 
+		    ifTrue: [currentToken start - 1]
+		    ifFalse: [comments first first - 1].
+	tags := nil.
+	node := self parseStatements.
+	node comments isNil 
+	    ifTrue: [node comments: comments]
+	    ifFalse: [comments isNil ifFalse: [node comments: node comments , comments]].
+
+	"One -1 accounts for base-1 vs. base-0 (as above), the
+	 other drops the bang because we have a one-token lookahead."
+	stop := currentToken start - 2.
+	^self 
+	    addSourceFrom: start
+	    to: stop
+	    to: node
+    ]
+
+    addSourceFrom: start to: stop to: node [
+	<category: 'utility'>
+	| method source |
+	node isMethod 
+	    ifTrue: [method := node]
+	    ifFalse: 
+		[method := RBMethodNode selectorParts: #() arguments: #().
+		node parent: method].
+	source := scanner stream copyFrom: start to: stop.
+	source := MappedCollection collection: source map: (1 - start to: stop).
+	method source: source.
+	^node
+    ]
+]
 
 
 
-!PositionableStream methodsFor: 'compiling'!
+Object subclass: STParsingDriver [
+    | parser |
+    
+    <category: 'Refactory-Parser'>
+    <comment: nil>
 
-name
-    "Answer a string that represents what the receiver is streaming on"
-    ^'(%1 %2)' % { self species article. self species name }
-!
+    parseSmalltalk: aString with: aParserClass [
+	<category: 'starting the parsing'>
+	^aParserClass parseSmalltalk: aString with: self
+    ]
 
-segmentFrom: startPos to: endPos
-    "Answer an object that, when sent #asString, will yield the result
-     of sending `copyFrom: startPos to: endPos' to the receiver"
-    ^self copyFrom: startPos to: endPos
-! !
+    parseSmalltalk: aString with: aParserClass onError: aBlock [
+	<category: 'starting the parsing'>
+	^aParserClass 
+	    parseSmalltalk: aString
+	    with: self
+	    onError: aBlock
+    ]
 
-!FileStream methodsFor: 'compiling'!
+    parseSmalltalkStream: aStream with: aParserClass [
+	<category: 'starting the parsing'>
+	^aParserClass parseSmalltalkStream: aStream with: self
+    ]
 
-segmentFrom: startPos to: endPos
-    "Answer an object that, when sent #asString, will yield the result
-     of sending `copyFrom: startPos to: endPos' to the receiver"
-    ^FileSegment
-	on: self name
-	startingAt: startPos
-	for: endPos - startPos + 1.
-! !
+    parseSmalltalkStream: aStream with: aParserClass onError: aBlock [
+	<category: 'starting the parsing'>
+	^aParserClass 
+	    parseSmalltalkStream: aStream
+	    with: self
+	    onError: aBlock
+    ]
+
+    parseSmalltalkFileIn: aFilename with: aParserClass [
+	<category: 'starting the parsing'>
+	^self 
+	    parseSmalltalkFileIn: aFilename
+	    with: aParserClass
+	    onError: nil
+    ]
+
+    parseSmalltalkFileIn: aFilename with: aParserClass onError: aBlock [
+	<category: 'starting the parsing'>
+	| parser file |
+	file := FileStream open: aFilename mode: FileStream read.
+	
+	[self 
+	    parseSmalltalkStream: file
+	    with: aParserClass
+	    onError: aBlock] 
+		ensure: [file close]
+    ]
+
+    errorBlock [
+	<category: 'accessing'>
+	^parser errorBlock
+    ]
+
+    parserWarning: aString [
+	<category: 'accessing'>
+	parser parserWarning: aString
+    ]
+
+    parserError: aString [
+	<category: 'accessing'>
+	parser parserError: aString
+    ]
+
+    parser [
+	<category: 'accessing'>
+	^parser
+    ]
+
+    parser: aSTFileParser [
+	<category: 'accessing'>
+	parser := aSTFileParser
+    ]
+
+    result [
+	"return self by default"
+
+	<category: 'overridable - parsing file-ins'>
+	^self
+    ]
+
+    compile: node [
+	"do nothing by default"
+
+	<category: 'overridable - parsing file-ins'>
+	
+    ]
+
+    endMethodList [
+	"do nothing by default"
+
+	<category: 'overridable - parsing file-ins'>
+	
+    ]
+
+    evaluate: node [
+	"This should be overridden because its result affects the parsing
+	 process: true means 'start parsing methods', false means 'keep
+	 evaluating'. By default, always answer false."
+
+	<category: 'overridable - parsing file-ins'>
+	^false
+    ]
+
+    currentNamespace [
+	<category: 'overridable - parsing file-ins'>
+	^Namespace current
+    ]
+]
+
+
+
+STFileParser subclass: STFileInParser [
+    
+    <comment: nil>
+    <category: 'Refactory-Parser'>
+
+    parseSmalltalk [
+	<category: 'private-parsing'>
+	[self parseDoits] whileTrue: [self parseMethodDefinitionList].
+	^driver result
+    ]
+
+    scannerClass [
+	<category: 'private-parsing'>
+	^STFileScanner
+    ]
+
+    parseDoits [
+	"Parses the stuff to be executed until a
+	 ! <class expression> methodsFor: <category string> !"
+
+	<category: 'private-parsing'>
+	| node |
+	
+	[self atEnd ifTrue: [^false].
+	node := self parseDoit.
+	scanner stripSeparators.
+	self evaluate: node] 
+		whileFalse: 
+		    [(currentToken isSpecial and: [currentToken value == $!]) 
+			ifTrue: [self step]].
+	^true
+    ]
+
+    parseMethodFromFile [
+	<category: 'private-parsing'>
+	| node source start stop |
+	start := currentToken start - 1.
+	tags := nil.
+	node := self parseMethod.
+	node comments: (node comments select: [:each | each last >= start]).
+
+	"One -1 accounts for base-1 vs. base-0 (as above), the
+	 other drops the bang because we have a one-token lookahead."
+	stop := currentToken start - 2.
+	node := self 
+		    addSourceFrom: start
+		    to: stop
+		    to: node.
+	scanner stripSeparators.
+	self step.	"gobble method terminating bang"
+	^node
+    ]
+
+    parseMethodDefinitionList [
+	"Called after first !, expecting a set of bang terminated
+	 method definitions, followed by a bang"
+
+	<category: 'private-parsing'>
+	self step.	"gobble doit terminating bang"
+	[scanner atEnd or: [currentToken isSpecial and: [currentToken value == $!]]] 
+	    whileFalse: [self compile: self parseMethodFromFile].
+	scanner stripSeparators.
+	self step.
+	self endMethodList
+    ]
+]
+
+
+
+RBScanner subclass: STFileScanner [
+    
+    <comment: nil>
+    <category: 'Refactory-Parser'>
+
+    next [
+	<category: 'accessing'>
+	| token |
+	buffer reset.
+	tokenStart := stream position.
+	characterType == #eof ifTrue: [^RBToken start: tokenStart + 1].	"The EOF token should occur after the end of input"
+	token := self scanToken.
+	(token isSpecial and: [token value == $!]) ifFalse: [self stripSeparators].
+	^token
+    ]
+]
+
+
+
+PositionableStream extend [
+
+    name [
+	"Answer a string that represents what the receiver is streaming on"
+
+	<category: 'compiling'>
+	^'(%1 %2)' % 
+		{self species article.
+		self species name}
+    ]
+
+    segmentFrom: startPos to: endPos [
+	"Answer an object that, when sent #asString, will yield the result
+	 of sending `copyFrom: startPos to: endPos' to the receiver"
+
+	<category: 'compiling'>
+	^self copyFrom: startPos to: endPos
+    ]
+
+]
+
+
+
+FileStream extend [
+
+    segmentFrom: startPos to: endPos [
+	"Answer an object that, when sent #asString, will yield the result
+	 of sending `copyFrom: startPos to: endPos' to the receiver"
+
+	<category: 'compiling'>
+	^FileSegment 
+	    on: self name
+	    startingAt: startPos
+	    for: endPos - startPos + 1
+    ]
+
+]
 

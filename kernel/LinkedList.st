@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002
@@ -32,139 +31,144 @@
  ======================================================================"
 
 
-SequenceableCollection subclass: #LinkedList
-		       instanceVariableNames: 'firstLink lastLink'
-		       classVariableNames: ''
-		       poolDictionaries: ''
-		       category: 'Collections-Sequenceable'
-!
-
-LinkedList comment:
-'I provide methods that access and manipulate linked lists.  I assume that 
+
+SequenceableCollection subclass: LinkedList [
+    | firstLink lastLink |
+    
+    <category: 'Collections-Sequenceable'>
+    <comment: 'I provide methods that access and manipulate linked lists.  I assume that 
 the elements of the linked list are subclasses of Link, because I use 
-the methods that class Link supplies to implement my methods.' !
+the methods that class Link supplies to implement my methods.'>
 
-
-!LinkedList methodsFor: 'accessing'!
+    at: index [
+	"Return the element that is index into the linked list."
 
-at: index
-    "Return the element that is index into the linked list."
-    ^firstLink at: index
-!
+	<category: 'accessing'>
+	^firstLink at: index
+    ]
 
-at: index put: object
-    self shouldNotImplement
-! !
+    at: index put: object [
+	<category: 'accessing'>
+	self shouldNotImplement
+    ]
 
+    add: aLink [
+	"Add aLink at the end of the list; return aLink."
 
-
-!LinkedList methodsFor: 'adding'!
+	<category: 'adding'>
+	self addLast: aLink.
+	^aLink
+    ]
 
-add: aLink
-    "Add aLink at the end of the list; return aLink."
-    self addLast: aLink.
-    ^aLink
-!
+    addFirst: aLink [
+	"Add aLink at the head of the list; return aLink."
 
-addFirst: aLink
-    "Add aLink at the head of the list; return aLink."
-    lastLink isNil ifTrue: [ lastLink := aLink ].
-    aLink nextLink: firstLink.
-    ^firstLink := aLink
-!
+	<category: 'adding'>
+	lastLink isNil ifTrue: [lastLink := aLink].
+	aLink nextLink: firstLink.
+	^firstLink := aLink
+    ]
 
-addLast: aLink
-    "Add aLink at then end of the list; return aLink."
-    firstLink isNil ifTrue: [ firstLink := aLink ].
-    lastLink notNil ifTrue: [ lastLink nextLink: aLink ].
-    ^lastLink := aLink
-!
+    addLast: aLink [
+	"Add aLink at then end of the list; return aLink."
 
-removeFirst
-    "Remove the first element from the list and return it, or error if the
-    list is empty."
+	<category: 'adding'>
+	firstLink isNil ifTrue: [firstLink := aLink].
+	lastLink notNil ifTrue: [lastLink nextLink: aLink].
+	^lastLink := aLink
+    ]
 
-    ^self remove: firstLink
-    	  ifAbsent: [ SystemExceptions.EmptyCollection signalOn: self ]
-!    
+    removeFirst [
+	"Remove the first element from the list and return it, or error if the
+	 list is empty."
 
-removeLast
-    "Remove the final element from the list and return it, or error if the
-    list is empty."
+	<category: 'adding'>
+	^self remove: firstLink
+	    ifAbsent: [SystemExceptions.EmptyCollection signalOn: self]
+    ]
 
-    ^self remove: lastLink
-    	  ifAbsent: [ SystemExceptions.EmptyCollection signalOn: self ]
-!
+    removeLast [
+	"Remove the final element from the list and return it, or error if the
+	 list is empty."
 
-remove: aLink ifAbsent: aBlock
-    "Remove aLink from the list and return it, or invoke aBlock if it's not
-    found in the list."
-    | prev |
-    aLink == firstLink ifTrue: [
-    	firstLink isNil ifTrue: [ ^aBlock value ].
-    	firstLink := firstLink nextLink.
-	firstLink isNil ifTrue: [ lastLink := nil ].
+	<category: 'adding'>
+	^self remove: lastLink
+	    ifAbsent: [SystemExceptions.EmptyCollection signalOn: self]
+    ]
+
+    remove: aLink ifAbsent: aBlock [
+	"Remove aLink from the list and return it, or invoke aBlock if it's not
+	 found in the list."
+
+	<category: 'adding'>
+	| prev |
+	aLink == firstLink 
+	    ifTrue: 
+		[firstLink isNil ifTrue: [^aBlock value].
+		firstLink := firstLink nextLink.
+		firstLink isNil ifTrue: [lastLink := nil].
+		aLink nextLink: nil.
+		^aLink].
+	prev := firstLink.
+	
+	[prev isNil ifTrue: [^aBlock value].
+	prev nextLink == aLink] 
+		whileFalse: [prev := prev nextLink].
+	prev nextLink: aLink nextLink.
+	aLink == lastLink ifTrue: [lastLink := prev].
 	aLink nextLink: nil.
 	^aLink
-    ].
-    prev := firstLink.
-    [
-	prev isNil ifTrue: [ ^aBlock value ].
-	prev nextLink == aLink
-    ]   whileFalse: [
-	prev := prev nextLink
-    ].
-    prev nextLink: aLink nextLink.
-    aLink == lastLink ifTrue: [ lastLink := prev ].
-    aLink nextLink: nil.
-    ^aLink
-! !
+    ]
 
+    do: aBlock [
+	"Enumerate each object in the list, passing it to aBlock (actual
+	 behavior might depend on the subclass of Link that is being used)."
 
-
-!LinkedList methodsFor: 'enumerating'!
+	<category: 'enumerating'>
+	self isEmpty ifFalse: [firstLink do: aBlock]
+    ]
 
-do: aBlock
-    "Enumerate each object in the list, passing it to aBlock (actual
-     behavior might depend on the subclass of Link that is being used)."
+    includes: anObject [
+	"Answer whether we include anObject"
 
-    self isEmpty ifFalse: [ firstLink do: aBlock ]
-! 
+	"Blah, this is roughly the same implementation as in Collection."
 
-includes: anObject 
-    "Answer whether we include anObject"
+	<category: 'enumerating'>
+	self isEmpty ifTrue: [^false].
+	firstLink do: [:element | anObject = element ifTrue: [^true]].
+	^false
+    ]
 
-    "Blah, this is roughly the same implementation as in Collection."
-    self isEmpty ifTrue: [ ^false ].
-    firstLink do: [ :element | anObject = element ifTrue: [ ^true ] ].
-    ^false
-! 
+    identityIncludes: anObject [
+	"Answer whether we include the anObject object"
 
-identityIncludes: anObject
-    "Answer whether we include the anObject object"
+	"Blah, this is roughly the same implementation as in Collection."
 
-    "Blah, this is roughly the same implementation as in Collection."
-    self isEmpty ifTrue: [ ^false ].
-    firstLink do: [ :element | anObject == element ifTrue: [ ^true ] ].
-    ^false
-! !
+	<category: 'enumerating'>
+	self isEmpty ifTrue: [^false].
+	firstLink do: [:element | anObject == element ifTrue: [^true]].
+	^false
+    ]
 
+    isEmpty [
+	"Returns true if the list contains no members"
 
-
-!LinkedList methodsFor: 'testing'!
+	<category: 'testing'>
+	^firstLink isNil
+    ]
 
-isEmpty
-    "Returns true if the list contains no members"
-    ^firstLink isNil
-!
+    notEmpty [
+	"Returns true if the list contains at least a member"
 
-notEmpty
-    "Returns true if the list contains at least a member"
-    ^firstLink notNil
-!
+	<category: 'testing'>
+	^firstLink notNil
+    ]
 
-size
-    "Answer the number of elements in the list. Warning: this is O(n)"
-    ^self isEmpty ifTrue: [ 0 ] ifFalse: [ firstLink size ]
-! !
+    size [
+	"Answer the number of elements in the list. Warning: this is O(n)"
+
+	<category: 'testing'>
+	^self isEmpty ifTrue: [0] ifFalse: [firstLink size]
+    ]
+]
 

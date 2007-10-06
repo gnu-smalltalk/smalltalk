@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2006,2007
@@ -32,60 +31,65 @@
  ======================================================================"
 
 
-WriteStream subclass: #ReadWriteStream
-	    instanceVariableNames: ''
-	    classVariableNames: ''
-	    poolDictionaries: ''
-	    category: 'Streams-Collections'
-!
-
-ReadWriteStream comment: 
-'I am the class of streams that may be read and written from simultaneously.
-In some sense, I am the best of both ReadStream and WriteStream.' !
-
-
 
-!ReadWriteStream class methodsFor: 'instance creation'!
+WriteStream subclass: ReadWriteStream [
+    
+    <category: 'Streams-Collections'>
+    <comment: 'I am the class of streams that may be read and written from simultaneously.
+In some sense, I am the best of both ReadStream and WriteStream.'>
 
-on: aCollection
-    "Answer a new stream working on aCollection from its start. The
-    stream starts at the front of aCollection."
-    ^(super on: aCollection) beReadWrite; limit: aCollection size
-!
+    ReadWriteStream class >> on: aCollection [
+	"Answer a new stream working on aCollection from its start. The
+	 stream starts at the front of aCollection."
 
-on: aCollection from: firstIndex to: lastIndex
-    "Answer an instance of the receiver streaming from
-     the firstIndex-th item of aCollection to the lastIndex-th"
-    firstIndex = 1 ifFalse: [
-        ^super on: aCollection from: firstIndex to: lastIndex ].
-    lastIndex > aCollection size ifTrue: [
-        ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: lastIndex ].
+	<category: 'instance creation'>
+	^(super on: aCollection)
+	    beReadWrite;
+	    limit: aCollection size
+    ]
 
-    ^(super on: aCollection) beReadWrite; limit: lastIndex
-!
+    ReadWriteStream class >> on: aCollection from: firstIndex to: lastIndex [
+	"Answer an instance of the receiver streaming from
+	 the firstIndex-th item of aCollection to the lastIndex-th"
 
-with: aCollection
-    "Answer a new instance of the receiver which streams from the end
-     of aCollection."
-    ^(super with: aCollection) beReadWrite
-! !
+	<category: 'instance creation'>
+	firstIndex = 1 
+	    ifFalse: 
+		[^super 
+		    on: aCollection
+		    from: firstIndex
+		    to: lastIndex].
+	lastIndex > aCollection size 
+	    ifTrue: 
+		[^SystemExceptions.IndexOutOfRange signalOn: self withIndex: lastIndex].
+	^(super on: aCollection)
+	    beReadWrite;
+	    limit: lastIndex
+    ]
 
-
-!ReadWriteStream methodsFor: 'positioning'!
+    ReadWriteStream class >> with: aCollection [
+	"Answer a new instance of the receiver which streams from the end
+	 of aCollection."
 
-contents
-    "Unlike WriteStreams, ReadWriteStreams return the whole contents of the
-     underlying collection."
-    ^collection copyFrom: 1 to: endPtr
-! !
+	<category: 'instance creation'>
+	^(super with: aCollection) beReadWrite
+    ]
 
-
-!ReadWriteStream methodsFor: 'private'!
+    contents [
+	"Unlike WriteStreams, ReadWriteStreams return the whole contents of the
+	 underlying collection."
 
-limit: anInteger
-    "Private - Makes sure that the contents message to this object
-     returns anInteger objects, not just what has been written
-     so far."
-    endPtr := collection size
-! !
-     
+	<category: 'positioning'>
+	^collection copyFrom: 1 to: endPtr
+    ]
+
+    limit: anInteger [
+	"Private - Makes sure that the contents message to this object
+	 returns anInteger objects, not just what has been written
+	 so far."
+
+	<category: 'private'>
+	endPtr := collection size
+    ]
+]
+

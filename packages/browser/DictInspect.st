@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -29,140 +28,151 @@
  ======================================================================
 "
 
-InspectorFieldList subclass:  #DictionaryInspectorFieldList
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Browser'!
 
-DictionaryInspectorFieldList comment: 
-nil!
+
+InspectorFieldList subclass: DictionaryInspectorFieldList [
+    
+    <comment: nil>
+    <category: 'Graphics-Browser'>
 
-!DictionaryInspectorFieldList methodsFor: 'accessing'!
+    currentField: assoc [
+	"Set list selection to value of index.  Force a text view update"
 
-currentField: assoc 
-    "Set list selection to value of index.  Force a text view update"
+	<category: 'accessing'>
+	assoc key <= 1 
+	    ifTrue: [currentField := assoc key]
+	    ifFalse: [currentField := fields at: assoc key]
+    ]
 
-    assoc key <= 1 
-	ifTrue: [currentField := assoc key]
-	ifFalse: [currentField := fields at: assoc key]!
+    fieldsSortBlock [
+	<category: 'accessing'>
+	^[:a :b | a = 'self' or: [b ~= 'self' and: [a displayString <= b displayString]]]
+    ]
 
-fieldsSortBlock
-    ^[ :a :b |
-	a = 'self' or: [ b ~= 'self'
-	    and: [ a displayString <= b displayString ] ] ]!
+    computeFieldList: anObject [
+	"Return sorted list of keys from set of Associations stored in fields"
 
-computeFieldList: anObject
-    "Return sorted list of keys from set of Associations stored in fields"
+	<category: 'accessing'>
+	fields add: 'self'.
+	fields addAll: anObject keys
+    ]
 
-    fields add: 'self'.
-    fields addAll: anObject keys! !
+    inspectMenu: listView [
+	"Initialize menu for variable list pane"
 
-!DictionaryInspectorFieldList methodsFor: 'initializing'!
+	<category: 'initializing'>
+	^(PopupMenu new: listView) 
+	    selectors: #(#('Inspect' #evalAndInspectResult: #listView) #('References' #references: #listView) #() #('Add key...' #addField: #listView) #('Remove...' #removeField: #listView))
+	    receiver: self
+	    argument: listView
+    ]
 
-inspectMenu: listView 
-    "Initialize menu for variable list pane"
+    currentFieldValue: obj [
+	<category: 'private'>
+	self value at: currentField put: obj
+    ]
 
-    ^(PopupMenu new: listView) 
-	selectors: #(#('Inspect' #evalAndInspectResult: #listView)
-		     #('References' #references: #listView)
-		     #() #('Add key...' #addField: #listView) #('Remove...' #removeField: #listView))
-	receiver: self
-	argument: listView! !
+    currentFieldValue [
+	<category: 'private'>
+	currentField == 0 ifTrue: [^nil].
+	currentField == 1 ifTrue: [^self value].
+	^self value at: currentField
+    ]
 
-!DictionaryInspectorFieldList methodsFor: 'private'!
+    addField: listView [
+	"Prompt user for the name of new dictionary key.  If name is valid, add it
+	 to dictionary"
 
-currentFieldValue: obj 
-    self value at: currentField put: obj!
+	<category: 'variable list menu'>
+	| key |
+	listView canChangeState ifFalse: [^self].
+	key := (Prompter message: 'Enter a new field' in: listView) response.
+	key isEmpty ifTrue: [^self].
+	(key at: 1) == $# 
+	    ifTrue: [key := (key copyFrom: 2 to: key size) asSymbol]
+	    ifFalse: [key isNumeric ifTrue: [key := key asNumber]].
 
-currentFieldValue
-    currentField == 0 ifTrue: [^nil].
-    currentField == 1 ifTrue: [^self value].
-    ^self value at: currentField! !
+	"If new key already exists, reject"
+	(self value includesKey: key) 
+	    ifTrue: 
+		[^ModalDialog new 
+		    alertMessage: 'Invalid name: the key, ' , key , ', already exists.'
+		    in: listView].
 
+	"Update variable selection"
+	currentField := key.
+	"Update dictionary"
+	self value at: key put: nil.
+	"Update instance variable governing variable list pane display"
+	fields add: key.
+	"Update text view"
+	inspector
+	    changeState: #fieldList;
+	    changeState: #text.
+	Primitive updateViews
+    ]
 
-!DictionaryInspectorFieldList methodsFor: 'variable list menu'!
+    references: listView [
+	"Open a method set browser on all methods which reference selected key"
 
-addField: listView 
-    "Prompt user for the name of new dictionary key.  If name is valid, add it
-     to dictionary"
-
-    | key |
-    listView canChangeState ifFalse: [^self].
-    key := (Prompter message: 'Enter a new field' in: listView) response.
-    key isEmpty ifTrue: [^self].
-    (key at: 1) == $#
-	ifTrue: [key := (key copyFrom: 2 to: key size) asSymbol]
-	ifFalse: [key isNumeric ifTrue: [key := key asNumber]].
-
-    "If new key already exists, reject "
-    (self value includesKey: key) 
-	ifTrue: 
-	    [^ModalDialog new 
-		alertMessage: 'Invalid name: the key, ' , key , ', already exists.'
-		in: listView].
-
-    "Update variable selection"
-    currentField := key.
-    "Update dictionary"
-    self value at: key put: nil.
-    "Update instance variable governing variable list pane display"
-    fields add: key.
-    "Update text view"
-    inspector
-	changeState: #fieldList;
-	changeState: #text.
-    Primitive updateViews!
-
-references: listView 
-    "Open a method set browser on all methods which reference selected key"
-
-    | alert keyRefs theKey |
-    currentField <= 1 ifTrue: [^listView beep].
-    keyRefs := SortedCollection new.
-    Namespace current allClassObjectsDo: 
-	    [:subclass | 
-	    (subclass 
-		whichSelectorsReferTo: (self value associationAt: currentField)) 
+	<category: 'variable list menu'>
+	| alert keyRefs theKey |
+	currentField <= 1 ifTrue: [^listView beep].
+	keyRefs := SortedCollection new.
+	Namespace current allClassObjectsDo: 
+		[:subclass | 
+		(subclass whichSelectorsReferTo: (self value associationAt: currentField)) 
 		    do: [:sel | keyRefs add: subclass printString , ' ' , sel]].
-    keyRefs isEmpty 
-	ifTrue: 
-	    [^alert := ModalDialog new 
-			alertMessage: 'No references to ' , currentField printString
-			in: listView].
-    MethodSetBrowser new 
-	openOn: keyRefs
-	title: 'References to ' , currentField printString
-	selection: currentField displayString!
+	keyRefs isEmpty 
+	    ifTrue: 
+		[^alert := ModalDialog new 
+			    alertMessage: 'No references to ' , currentField printString
+			    in: listView].
+	MethodSetBrowser new 
+	    openOn: keyRefs
+	    title: 'References to ' , currentField printString
+	    selection: currentField displayString
+    ]
 
-removeField: listView 
-    "Remove selected key from dictionary"
+    removeField: listView [
+	"Remove selected key from dictionary"
 
-    | cancel |
-    currentField isNil ifTrue: [^listView beep].
-    (ModalDialog new)
-	message: 'Are you sure you want to remove, ' , currentField displayString, '?'
-	    in: listView;
-	addButton: 'Yes' message: [cancel := false];
-	addButton: 'No' message: [cancel := true];
-	display: listView.
-    cancel ifTrue: [^self].
-    "Remove key from dictionary"
-    self value removeKey: currentField.
-    "Remove the association composed of the key and the value from the data object"
-    fields remove: currentField.
-    currentField := 0.
-    "Force a text view update to reflect deleted key"
-    inspector
-	changeState: #fieldList;
-	changeState: #text.
-    Primitive updateViews! !
+	<category: 'variable list menu'>
+	| cancel |
+	currentField isNil ifTrue: [^listView beep].
+	(ModalDialog new)
+	    message: 'Are you sure you want to remove, ' , currentField displayString 
+			, '?'
+		in: listView;
+	    addButton: 'Yes' message: [cancel := false];
+	    addButton: 'No' message: [cancel := true];
+	    display: listView.
+	cancel ifTrue: [^self].
+	"Remove key from dictionary"
+	self value removeKey: currentField.
+	"Remove the association composed of the key and the value from the data object"
+	fields remove: currentField.
+	currentField := 0.
+	"Force a text view update to reflect deleted key"
+	inspector
+	    changeState: #fieldList;
+	    changeState: #text.
+	Primitive updateViews
+    ]
+]
 
 
-!Dictionary methodsFor: 'debugging'!
+
+Dictionary extend [
 
-inspectorFieldLists
-    "Open a DictionaryInspectorFieldList window on self"
-    ^{ 'Keys' -> (BLOX.BLOXBrowser.DictionaryInspectorFieldList new value: self).
-       'Basic' -> (BLOX.BLOXBrowser.ObjectInspectorFieldList new value: self) }
-! !
+    inspectorFieldLists [
+	"Open a DictionaryInspectorFieldList window on self"
+
+	<category: 'debugging'>
+	^
+	{'Keys' -> (BLOX.BLOXBrowser.DictionaryInspectorFieldList new value: self).
+	'Basic' -> (BLOX.BLOXBrowser.ObjectInspectorFieldList new value: self)}
+    ]
+
+]
+

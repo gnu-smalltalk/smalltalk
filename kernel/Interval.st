@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2005
@@ -32,237 +31,218 @@
  ======================================================================"
 
 
-ArrayedCollection subclass: #Interval
-		  instanceVariableNames: 'start stop step'
-		  classVariableNames: ''
-		  poolDictionaries: ''
-		  category: 'Collections-Sequenceable'
-!
-
-Interval comment: 
-'My instances represent ranges of objects, typically Number type
+
+ArrayedCollection subclass: Interval [
+    | start stop step |
+    
+    <category: 'Collections-Sequenceable'>
+    <comment: 'My instances represent ranges of objects, typically Number type
 objects.  I provide iteration/enumeration messages for producing all the
-members that my instance represents.' !
+members that my instance represents.'>
 
-
-!Interval class methodsFor: 'instance creation'!
+    Interval class >> from: startInteger to: stopInteger by: stepInteger [
+	"Answer an Interval going from startInteger to the
+	 stopInteger, with a step of stepInteger"
 
-from: startInteger to: stopInteger by: stepInteger
-    "Answer an Interval going from startInteger to the
-    stopInteger, with a step of stepInteger"
-    ^self basicNew initializeFrom: startInteger to: stopInteger by: stepInteger
-!
+	<category: 'instance creation'>
+	^self basicNew 
+	    initializeFrom: startInteger
+	    to: stopInteger
+	    by: stepInteger
+    ]
 
-from: startInteger to: stopInteger    
-    "Answer an Interval going from startInteger to the
-    stopInteger, with a step of 1"
-    ^self from: startInteger to: stopInteger by: 1
-!
+    Interval class >> from: startInteger to: stopInteger [
+	"Answer an Interval going from startInteger to the
+	 stopInteger, with a step of 1"
 
-withAll: aCollection 
-     "Answer an Interval containing the same elements as aCollection.
-     Fail if it is not possible to create one."
+	<category: 'instance creation'>
+	^self 
+	    from: startInteger
+	    to: stopInteger
+	    by: 1
+    ]
 
-    | newInterval last delta |
-    aCollection keysAndValuesDo: [ :index :each |
-	index > 2
-	    ifTrue: [
-	        last - each = delta ifFalse: [
-		    SystemExceptions.InvalidArgument
-			signalOn: aCollection
-			reason: 'argument not an arithmetic progression' ].
-	    ]
-	    ifFalse: [
-		last isNil ifFalse: [ delta := last - each ]
-	    ].
+    Interval class >> withAll: aCollection [
+	"Answer an Interval containing the same elements as aCollection.
+	 Fail if it is not possible to create one."
 
-	last := each.
-    ].
-	
-    ^self
-	from: aCollection first
-	to: aCollection last
-	by: (aCollection last - aCollection first) // (aCollection size - 1).
-! !
+	<category: 'instance creation'>
+	| newInterval last delta |
+	aCollection keysAndValuesDo: 
+		[:index :each | 
+		index > 2 
+		    ifTrue: 
+			[last - each = delta 
+			    ifFalse: 
+				[SystemExceptions.InvalidArgument signalOn: aCollection
+				    reason: 'argument not an arithmetic progression']]
+		    ifFalse: [last isNil ifFalse: [delta := last - each]].
+		last := each].
+	^self 
+	    from: aCollection first
+	    to: aCollection last
+	    by: (aCollection last - aCollection first) // (aCollection size - 1)
+    ]
 
-
-!Interval methodsFor: 'basic'!
+    do: aBlock [
+	"Evaluate the receiver for each element in aBlock"
 
-"Note to the reader: these two methods (do: and collect:) are implemented
-in this expanded way, instead of just making the whileTrue: condition be a
-block that's conditionally assigned based on the sign of step and then
-invoking a single whileTrue: loop.  However, in this form, the compiler
-can optimize these while loops into direct byte codes and not have to bother
-with expensive (relatively) block and method context creation and sending
-messages to blocks. "
+	<category: 'basic'>
+	| i |
+	i := start.
+	step > 0 
+	    ifTrue: [[i <= stop] whileTrue: 
+			[aBlock value: i.
+			i := i + step]]
+	    ifFalse: [[i >= stop] whileTrue: 
+			[aBlock value: i.
+			i := i + step]]
+    ]
 
-do: aBlock
-    "Evaluate the receiver for each element in aBlock"
-    | i |
-    i := start.
-    step > 0
-    	ifTrue: [
-    	    [ i <= stop ] whileTrue:
-    	    	[ aBlock value: i.
-    	    	  i := i + step ]
-    	]
-    	ifFalse: [
-	    [ i >= stop ] whileTrue:
-    	    	[ aBlock value: i.
-    	    	  i := i + step ]
-    	]
-!
+    collect: aBlock [
+	"Evaluate the receiver for each element in aBlock,
+	 collect in an array the result of the evaluations."
 
-collect: aBlock
-    "Evaluate the receiver for each element in aBlock,
-     collect in an array the result of the evaluations."
-    | i result j |
-    result := self copyEmpty: self size.
-    i := 1.
-    j := start.
-    step > 0
-    	ifTrue: [
-	    [ j <= stop ]
-	    	whileTrue:
-		    [ result at: i put: (aBlock value: j).
-		    	j := j + step.
-			i := i + 1 ]
-    	]
-	ifFalse: [
-	    [ j >= stop ]
-	    	whileTrue:
-		    [ result at: i put: (aBlock value: j).
-		      j := j + step.
-		      i := i + 1 ]
-    	].
-    ^result
-!    
+	<category: 'basic'>
+	| i result j |
+	result := self copyEmpty: self size.
+	i := 1.
+	j := start.
+	step > 0 
+	    ifTrue: 
+		[[j <= stop] whileTrue: 
+			[result at: i put: (aBlock value: j).
+			j := j + step.
+			i := i + 1]]
+	    ifFalse: 
+		[[j >= stop] whileTrue: 
+			[result at: i put: (aBlock value: j).
+			j := j + step.
+			i := i + 1]].
+	^result
+    ]
 
-size
-    "Answer the number of elements in the receiver."
-    step > 0
-    	ifTrue: [
-	    stop >= start ifTrue: [ ^(stop - start) // step + 1 ]
-	    	    	  ifFalse: [ ^0 ]
-	]
-	ifFalse: [
-    	    start >= stop ifTrue: [ ^(stop - start) // step + 1 ]
-	    	    	  ifFalse: [ ^0 ]
-	]
-!
+    size [
+	"Answer the number of elements in the receiver."
 
-reverse
-    "Answer a copy of the receiver with all of its items reversed"
-    ^Interval
-	from: (self at: self size)
-	to: (self at: 1)
-	by: self step negated
-!
+	<category: 'basic'>
+	step > 0 
+	    ifTrue: [stop >= start ifTrue: [^(stop - start) // step + 1] ifFalse: [^0]]
+	    ifFalse: [start >= stop ifTrue: [^(stop - start) // step + 1] ifFalse: [^0]]
+    ]
 
-species
-    ^Array
-!
+    reverse [
+	"Answer a copy of the receiver with all of its items reversed"
 
+	<category: 'basic'>
+	^Interval 
+	    from: (self at: self size)
+	    to: (self at: 1)
+	    by: self step negated
+    ]
 
-at: index
-    "Answer the index-th element of the receiver."
-    (index >= 1 and: [index <= self size])
-    	ifTrue: [ ^start + (step * (index - 1)) ]
-	ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ]
-!
+    species [
+	<category: 'basic'>
+	^Array
+    ]
 
-at: index put: anObject
-    self shouldNotImplement
-! !
+    at: index [
+	"Answer the index-th element of the receiver."
 
+	<category: 'basic'>
+	(index >= 1 and: [index <= self size]) 
+	    ifTrue: [^start + (step * (index - 1))]
+	    ifFalse: [SystemExceptions.IndexOutOfRange signalOn: self withIndex: index]
+    ]
 
-
-!Interval methodsFor: 'testing'!
+    at: index put: anObject [
+	<category: 'basic'>
+	self shouldNotImplement
+    ]
 
-= anInterval
-    "Answer whether anInterval is the same interval as the receiver"
-    self class == anInterval class ifFalse: [ ^false ].
-    ^(self first = anInterval first) &
-	(self last = anInterval last) &
-	(self increment = anInterval increment)
-!
+    = anInterval [
+	"Answer whether anInterval is the same interval as the receiver"
 
-hash
-    "Answer an hash value for the receiver"
-    ^((start + stop + stop) * step) bitAnd: 16r3FFFFFFF
-! !
+	<category: 'testing'>
+	self class == anInterval class ifFalse: [^false].
+	^self first = anInterval first & (self last = anInterval last) 
+	    & (self increment = anInterval increment)
+    ]
 
+    hash [
+	"Answer an hash value for the receiver"
 
-
-!Interval methodsFor: 'printing'!
+	<category: 'testing'>
+	^(start + stop + stop) * step bitAnd: 1073741823
+    ]
 
-printOn: aStream
-    "Print a representation for the receiver on aStream"
-    | size |
-    aStream
-	nextPutAll: self classNameString;
-	nextPut: $(.
+    printOn: aStream [
+	"Print a representation for the receiver on aStream"
 
-    size := self size.
-    size > 0 ifTrue: [
-	aStream print: start
-    ].
-    size > 1 ifTrue: [
+	<category: 'printing'>
+	| size |
 	aStream
-	    space;
-	    print: start + step
-    ].
-    size > 2 ifTrue: [
-	size > 3 ifTrue: [ aStream nextPutAll: ' ...' ].
-	aStream
-	    space;
-	    print: stop
-    ].
-    aStream nextPut: $)
-!
+	    nextPutAll: self classNameString;
+	    nextPut: $(.
+	size := self size.
+	size > 0 ifTrue: [aStream print: start].
+	size > 1 
+	    ifTrue: 
+		[aStream
+		    space;
+		    print: start + step].
+	size > 2 
+	    ifTrue: 
+		[size > 3 ifTrue: [aStream nextPutAll: ' ...'].
+		aStream
+		    space;
+		    print: stop].
+	aStream nextPut: $)
+    ]
 
-first
-    ^start
-!
+    first [
+	<category: 'printing'>
+	^start
+    ]
 
-last
-    ^stop - ((stop - start) \\ step)
-!
+    last [
+	<category: 'printing'>
+	^stop - ((stop - start) \\ step)
+    ]
 
-increment
-    ^step
-! !
+    increment [
+	<category: 'printing'>
+	^step
+    ]
 
+    storeOn: aStream [
+	"Store Smalltalk code compiling to the receiver on aStream"
 
-
-!Interval methodsFor: 'storing'!
+	<category: 'storing'>
+	aStream nextPut: $(.
+	aStream nextPutAll: self classNameString.
+	aStream nextPutAll: ' from: '.
+	start storeOn: aStream.
+	aStream nextPutAll: ' to: '.
+	stop storeOn: aStream.
+	aStream nextPutAll: ' by: '.
+	step storeOn: aStream.
+	aStream nextPut: $)
+    ]
 
-storeOn: aStream
-    "Store Smalltalk code compiling to the receiver on aStream"
-    aStream nextPut: $(.
-    aStream nextPutAll: self classNameString.
-    aStream nextPutAll: ' from: '.
-    start storeOn: aStream.
-    aStream nextPutAll: ' to: '.
-    stop storeOn: aStream.
-    aStream nextPutAll: ' by: '.
-    step storeOn: aStream.
-    aStream nextPut: $)
-! !
+    copyEmpty [
+	"Answer an empty copy of the receiver, with the class answered by the
+	 collect: method."
 
+	<category: 'private methods'>
+	^self species new: self size
+    ]
 
-
-!Interval methodsFor: 'private methods'!
-
-copyEmpty
-    "Answer an empty copy of the receiver, with the class answered by the
-     collect: method."
-    ^self species new: self size
-!
-
-initializeFrom: startInteger to: stopInteger by: stepInteger
-    start := startInteger.
-    stop := stopInteger.
-    step := stepInteger
-! !
+    initializeFrom: startInteger to: stopInteger by: stepInteger [
+	<category: 'private methods'>
+	start := startInteger.
+	stop := stopInteger.
+	step := stepInteger
+    ]
+]
 

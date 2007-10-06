@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001
@@ -32,160 +31,175 @@
  ======================================================================"
 
 
-Stream subclass: #TextCollector
-    instanceVariableNames: 'semaphore receiver selector'
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Streams'
-!
-
-TextCollector comment:
-'I am a thread-safe class that maps between standard Stream protocol and
+
+Stream subclass: TextCollector [
+    | semaphore receiver selector |
+    
+    <category: 'Streams'>
+    <comment: 'I am a thread-safe class that maps between standard Stream protocol and
 a single message to another object (its selector is pluggable and should
 roughly correspond to #nextPutAll:).  I am, in fact, the class that
-implements the global Transcript object.'!
+implements the global Transcript object.'>
+
+    TextCollector class >> new [
+	<category: 'accessing'>
+	self shouldNotImplement
+    ]
+
+    TextCollector class >> message: receiverToSelectorAssociation [
+	"Answer a new instance of the receiver, that uses the message identified
+	 by anAssociation to perform write operations.  anAssociation's
+	 key is the receiver, while its value is the selector."
+
+	<category: 'accessing'>
+	^(self basicNew)
+	    initialize;
+	    message: receiverToSelectorAssociation
+    ]
+
+    message [
+	"Answer an association representing the message to be sent
+	 to perform write operations.  The key is the receiver, the value is the
+	 selector"
+
+	<category: 'set up'>
+	^receiver -> selector
+    ]
+
+    message: receiverToSelectorAssociation [
+	"Set the message to be sent to perform write operations
+	 to the one represented by anAssociation.  anAssociation's key is the
+	 receiver, while its value is the selector"
+
+	<category: 'set up'>
+	receiver := receiverToSelectorAssociation key.
+	selector := receiverToSelectorAssociation value
+    ]
+
+    cr [
+	"Emit a new-line (carriage return) to the Transcript"
+
+	<category: 'accessing'>
+	self nl
+    ]
+
+    endEntry [
+	"Emit two new-lines.  This method is present for compatibility with
+	 VisualWorks."
+
+	<category: 'accessing'>
+	self
+	    nl;
+	    nl
+    ]
+
+    nextPut: aCharacter [
+	"Emit aCharacter to the Transcript"
+
+	<category: 'accessing'>
+	self nextPutAll: (String with: aCharacter)
+    ]
+
+    next: anInteger put: anObject [
+	"Write anInteger copies of anObject to the Transcript"
+
+	<category: 'accessing'>
+	self nextPutAll: (String new: anInteger withAll: anObject)
+    ]
+
+    next: n putAll: aString startingAt: pos [
+	"Write aString to the Transcript"
+
+	<category: 'accessing'>
+	semaphore critical: 
+		[self primNextPutAll: (aString copyFrom: pos to: pos + n - 1).
+		Processor idle]
+    ]
+
+    show: aString [
+	"Write aString to the Transcript"
+
+	<category: 'accessing'>
+	semaphore critical: 
+		[self primNextPutAll: aString.
+		Processor idle]
+    ]
+
+    showCr: aString [
+	"Write aString to the Transcript, followed by a new-line character"
+
+	<category: 'accessing'>
+	semaphore critical: 
+		[self primNextPutAll: aString.
+		self primNextPutAll: Character nl asString.
+		Processor idle]
+    ]
+
+    showOnNewLine: aString [
+	"Write aString to the Transcript, preceded by a new-line character"
+
+	<category: 'accessing'>
+	semaphore critical: 
+		[self primNextPutAll: Character nl asString.
+		self primNextPutAll: aString.
+		Processor idle]
+    ]
+
+    print: anObject [
+	"Print anObject's representation to the Transcript"
+
+	<category: 'printing'>
+	semaphore critical: 
+		[self primNextPutAll: anObject printString.
+		Processor idle]
+    ]
+
+    printOn: aStream [
+	"Print a representation of the receiver onto aStream"
+
+	<category: 'printing'>
+	self == Transcript 
+	    ifTrue: [aStream nextPutAll: 'Transcript']
+	    ifFalse: [super printOn: aStream]
+    ]
+
+    store: anObject [
+	"Print Smalltalk code which evaluates to anObject on the Transcript"
+
+	<category: 'storing'>
+	semaphore critical: 
+		[self primNextPutAll: anObject storeString.
+		Processor idle]
+    ]
+
+    storeOn: aStream [
+	"Print Smalltalk code which evaluates to the receiver onto aStream"
+
+	<category: 'storing'>
+	self == Transcript 
+	    ifTrue: [aStream nextPutAll: 'Transcript']
+	    ifFalse: [super storeOn: aStream]
+    ]
+
+    primNextPutAll: aString [
+	"Private - Forward the writing request to the actual object"
+
+	<category: 'private'>
+	receiver perform: selector with: aString
+    ]
+
+    initialize [
+	"Private - Initialize the receiver's instance variables"
+
+	<category: 'private'>
+	semaphore := Semaphore forMutualExclusion
+    ]
+]
+
 
 
-!TextCollector class methodsFor: 'accessing'!
+Eval [
+    Smalltalk at: #Transcript
+	put: (TextCollector message: stdout -> #nextPutAllFlush:)
+]
 
-new
-    self shouldNotImplement
-!
-
-message: receiverToSelectorAssociation
-    "Answer a new instance of the receiver, that uses the message identified
-     by anAssociation to perform write operations.  anAssociation's 
-     key is the receiver, while its value is the selector."
-    ^self basicNew
-	initialize;
-	message: receiverToSelectorAssociation
-! !
-
-
-!TextCollector methodsFor: 'set up'!
-
-message
-    "Answer an association representing the message to be sent
-    to perform write operations.  The key is the receiver, the value is the
-    selector"
-    ^receiver -> selector
-!
-
-message: receiverToSelectorAssociation
-    "Set the message to be sent to perform write operations
-     to the one represented by anAssociation.  anAssociation's key is the
-     receiver, while its value is the selector"
-    receiver := receiverToSelectorAssociation key.
-    selector := receiverToSelectorAssociation value
-! !
-
-
-!TextCollector methodsFor: 'accessing'!
-
-cr
-    "Emit a new-line (carriage return) to the Transcript"
-    self nl
-!
-
-endEntry
-    "Emit two new-lines.  This method is present for compatibility with
-    VisualWorks."
-    self nl; nl
-!
-
-nextPut: aCharacter
-    "Emit aCharacter to the Transcript"
-    self nextPutAll: (String with: aCharacter)
-!
-
-next: anInteger put: anObject
-    "Write anInteger copies of anObject to the Transcript"
-    self nextPutAll: (String new: anInteger withAll: anObject)
-!
-
-next: n putAll: aString startingAt: pos
-    "Write aString to the Transcript"
-    semaphore critical: [
-	self primNextPutAll: (aString copyFrom: pos to: pos + n - 1).
-	Processor idle
-    ]
-!
-
-show: aString
-    "Write aString to the Transcript"
-    semaphore critical: [
-	self primNextPutAll: aString.
-	Processor idle
-    ]
-!
-
-showCr: aString
-    "Write aString to the Transcript, followed by a new-line character"
-    semaphore critical: [
-	self primNextPutAll: aString.
-	self primNextPutAll: Character nl asString.
-	Processor idle
-    ]
-!
-
-showOnNewLine: aString
-    "Write aString to the Transcript, preceded by a new-line character"
-    semaphore critical: [
-	self primNextPutAll: Character nl asString.
-	self primNextPutAll: aString.
-	Processor idle
-    ]
-! !
-
-
-!TextCollector methodsFor: 'printing'!
-
-print: anObject
-    "Print anObject's representation to the Transcript"
-    semaphore critical: [
-	self primNextPutAll: anObject printString.
-	Processor idle
-    ]
-!
-
-printOn: aStream
-    "Print a representation of the receiver onto aStream"
-    self == Transcript
-	ifTrue: [ aStream nextPutAll: 'Transcript' ]
-	ifFalse: [ super printOn: aStream ]
-! !
-
-
-!TextCollector methodsFor: 'storing'!
-
-store: anObject
-    "Print Smalltalk code which evaluates to anObject on the Transcript"
-    semaphore critical: [
-	self primNextPutAll: anObject storeString.
-	Processor idle
-    ]
-!
-
-storeOn: aStream
-    "Print Smalltalk code which evaluates to the receiver onto aStream"
-    self == Transcript
-	ifTrue: [ aStream nextPutAll: 'Transcript' ]
-	ifFalse: [ super storeOn: aStream ]
-! !
-
-
-!TextCollector methodsFor: 'private'!
-
-primNextPutAll: aString
-    "Private - Forward the writing request to the actual object"
-    receiver perform: selector with: aString
-!
-
-initialize
-    "Private - Initialize the receiver's instance variables"
-    semaphore := Semaphore forMutualExclusion
-! !
-
-Smalltalk
-    at: #Transcript
-    put: (TextCollector message: stdout -> #nextPutAllFlush:)!

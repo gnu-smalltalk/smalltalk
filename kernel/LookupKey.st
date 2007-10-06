@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
@@ -31,83 +30,76 @@
  ======================================================================"
 
 
-Magnitude subclass: #LookupKey
-	  instanceVariableNames: 'key value'
-	  classVariableNames: ''
-	  poolDictionaries: ''
-	  category: 'Language-Data types'
-!
-
-LookupKey comment: 
-'I represent a key for looking up entries in a data structure. Subclasses
-of me, such as Association, typically represent dictionary entries.'!
-
-
 
-!LookupKey class methodsFor: 'basic'!
+Magnitude subclass: LookupKey [
+    | key value |
+    
+    <category: 'Language-Data types'>
+    <comment: 'I represent a key for looking up entries in a data structure. Subclasses
+of me, such as Association, typically represent dictionary entries.'>
 
-key: aKey
-    "Answer a new instance of the receiver with the given key and value"
-    ^self new key: aKey
-! !
+    LookupKey class >> key: aKey [
+	"Answer a new instance of the receiver with the given key and value"
 
+	<category: 'basic'>
+	^self new key: aKey
+    ]
 
-
-!LookupKey methodsFor: 'accessing'!
+    key: aKey [
+	"Set the receiver's key to aKey"
 
-key: aKey
-    "Set the receiver's key to aKey"
-    key := aKey.
-!
+	<category: 'accessing'>
+	key := aKey
+    ]
 
-key
-    "Answer the receiver's key"
-    ^key
-! !
+    key [
+	"Answer the receiver's key"
 
+	<category: 'accessing'>
+	^key
+    ]
 
-
-!LookupKey methodsFor: 'testing'!
+    < aLookupKey [
+	"Answer whether the receiver's key is less than aLookupKey's"
 
-< aLookupKey
-    "Answer whether the receiver's key is less than aLookupKey's"
-    ^self key < aLookupKey key
-!
+	<category: 'testing'>
+	^self key < aLookupKey key
+    ]
 
-= aLookupKey
-    "Answer whether the receiver's key and value are the same as
-     aLookupKey's, or false if aLookupKey is not an instance of
-     the receiver"
-    ^self class == aLookupKey class and: [ self key = aLookupKey key ]
-!
+    = aLookupKey [
+	"Answer whether the receiver's key and value are the same as
+	 aLookupKey's, or false if aLookupKey is not an instance of
+	 the receiver"
 
-hash
-    "Answer an hash value for the receiver"
-    ^key hash
-! !
+	<category: 'testing'>
+	^self class == aLookupKey class and: [self key = aLookupKey key]
+    ]
 
+    hash [
+	"Answer an hash value for the receiver"
 
+	<category: 'testing'>
+	^key hash
+    ]
 
-
-!LookupKey methodsFor: 'printing'!
+    printOn: aStream [
+	"Put on aStream a representation of the receiver"
 
-printOn: aStream
-    "Put on aStream a representation of the receiver"
-    aStream nextPut: $[.
-    self key printOn: aStream.
-    aStream nextPut: $].
-! !
+	<category: 'printing'>
+	aStream nextPut: $[.
+	self key printOn: aStream.
+	aStream nextPut: $]
+    ]
 
+    storeOn: aStream [
+	"Put on aStream some Smalltalk code compiling to the receiver"
 
-
-!LookupKey methodsFor: 'storing'!
-
-storeOn: aStream
-    "Put on aStream some Smalltalk code compiling to the receiver"
-    aStream nextPut: $(.
-    aStream store: self class.
-    aStream nextPutAll: ' key: '.
-    self key storeOn: aStream.
-    aStream nextPut: $)
-! !
+	<category: 'storing'>
+	aStream nextPut: $(.
+	aStream store: self class.
+	aStream nextPutAll: ' key: '.
+	self key storeOn: aStream.
+	aStream nextPut: $)
+    ]
+]
 

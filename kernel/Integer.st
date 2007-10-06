@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005,2006
@@ -32,566 +31,589 @@
  ======================================================================"
 
 
-Number subclass: #Integer
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: 'CSymbols'
-       category: 'Language-Data types'
-!
-
-Integer comment:
-'I am the abstract integer class of the GNU Smalltalk system.  My
+
+Number subclass: Integer [
+    
+    <import: CSymbols>
+    <category: 'Language-Data types'>
+    <comment: 'I am the abstract integer class of the GNU Smalltalk system.  My
 subclasses'' instances can represent signed integers of various
 sizes (a subclass is picked according to the size), with varying
-efficiency.' !
+efficiency.'>
 
-
-!Integer class methodsFor: 'converting'!
+    Integer class >> coerce: aNumber [
+	"Answer aNumber converted to a kind of Integer"
 
-coerce: aNumber
-    "Answer aNumber converted to a kind of Integer"
-    ^aNumber truncated
-! 
+	<category: 'converting'>
+	^aNumber truncated
+    ]
 
-readFrom: aStream radix: radix
-    "Read a possibly negative number in the given radix from aStream,
-     and answer its value."
-    | value ch scale |
-    value := 0.
-    scale := (aStream peekFor: $-) ifTrue: [ -1 ] ifFalse: [ 1 ].
-    [
-	(ch := aStream peek) notNil and: 
-	    [ (ch := ch asUppercase) isDigit: radix ]
-    ] whileTrue: [
-	value := (value * radix) + ch digitValue.
-	aStream next
-    ].
-    ^value * scale
-! !
+    Integer class >> readFrom: aStream radix: radix [
+	"Read a possibly negative number in the given radix from aStream,
+	 and answer its value."
 
-
-!Integer methodsFor: 'basic'!
+	<category: 'converting'>
+	| value ch scale |
+	value := 0.
+	scale := (aStream peekFor: $-) ifTrue: [-1] ifFalse: [1].
+	[(ch := aStream peek) notNil and: [(ch := ch asUppercase) isDigit: radix]] 
+	    whileTrue: 
+		[value := value * radix + ch digitValue.
+		aStream next].
+	^value * scale
+    ]
 
-hash
-    "Answer an hash value for the receiver"
-    ^self
-! !
+    hash [
+	"Answer an hash value for the receiver"
 
+	<category: 'basic'>
+	^self
+    ]
 
-
-!Integer methodsFor: 'iterators'!
+    timesRepeat: aBlock [
+	"Evaluate aBlock a number of times equal to the receiver's value.
+	 Compiled in-line for no argument aBlocks without temporaries, and
+	 therefore not overridable."
 
-timesRepeat: aBlock
-    "Evaluate aBlock a number of times equal to the receiver's value.
-     Compiled in-line for no argument aBlocks without temporaries, and
-     therefore not overridable."
-    1 to: self do: [ :each | aBlock value ]
-! !
+	<category: 'iterators'>
+	1 to: self do: [:each | aBlock value]
+    ]
 
+    bitAt: index [
+	"Answer the index-th bit of the receiver (the LSB has an index
+	 of 1)"
 
-
-!Integer methodsFor: 'bit operators'!
+	<category: 'bit operators'>
+	^(self bitShift: (index - 1) negated) bitAnd: 1
+    ]
 
-bitAt: index
-    "Answer the index-th bit of the receiver (the LSB has an index 
-     of 1)"
-    ^(self bitShift: (index - 1) negated) bitAnd: 1
-!
+    bitAt: index put: value [
+	"Answer an integer which is identical to the receiver,
+	 possibly with the exception of the index-th bit of the
+	 receiver (the LSB having an index of 1), which assumes
+	 a value equal to the low-order bit of the second parameter."
 
-bitAt: index put: value
-    "Answer an integer which is identical to the receiver,
-     possibly with the exception of the index-th bit of the
-     receiver (the LSB having an index of 1), which assumes
-     a value equal to the low-order bit of the second parameter."
+	<category: 'bit operators'>
+	| bit |
+	bit := (value bitAnd: 1) bitXor: (self bitAt: index).
+	bit := bit bitShift: index - 1.
+	^self bitXor: bit
+    ]
 
-    | bit |
-    bit := (value bitAnd: 1) bitXor: (self bitAt: index).
-    bit := bit bitShift: (index - 1).
-    ^self bitXor: bit!
+    bitInvert [
+	"Return the 1's complement of the bits of the receiver"
 
-bitInvert
-    "Return the 1's complement of the bits of the receiver"
-    ^self bitXor: -1
-!
+	<category: 'bit operators'>
+	^self bitXor: -1
+    ]
 
-bitClear: aMask 
-    "Answer an Integer equal to the receiver, except that all the bits
-     that are set in aMask are cleared."
+    bitClear: aMask [
+	"Answer an Integer equal to the receiver, except that all the bits
+	 that are set in aMask are cleared."
 
-    ^(self bitOr: aMask) bitXor: aMask
-!
+	<category: 'bit operators'>
+	^(self bitOr: aMask) bitXor: aMask
+    ]
 
-allMask: anInteger
-    "True if all 1 bits in anInteger are 1 in the receiver"
-    ^(self bitAnd: anInteger) = anInteger
-!
+    allMask: anInteger [
+	"True if all 1 bits in anInteger are 1 in the receiver"
 
-anyMask: anInteger
-    "True if any 1 bits in anInteger are 1 in the receiver"
-    ^(self bitAnd: anInteger) ~= 0
-!
+	<category: 'bit operators'>
+	^(self bitAnd: anInteger) = anInteger
+    ]
 
-clearBit: index
-    "Clear the index-th bit of the receiver and answer a new Integer"
-    | bit |
-    bit := 1 bitShift: (index - 1).
-    ^(self bitOr: bit) bitXor: bit
-!
+    anyMask: anInteger [
+	"True if any 1 bits in anInteger are 1 in the receiver"
 
-noMask: anInteger
-    "Answer true if no 1 bits in anInteger are 1 in the receiver."
-    ^(self bitAnd: anInteger) = 0
-!
+	<category: 'bit operators'>
+	^(self bitAnd: anInteger) ~= 0
+    ]
 
-lowBit
-    "Return the index of the lowest order 1 bit of the receiver."
-    self subclassResponsibility
-!
+    clearBit: index [
+	"Clear the index-th bit of the receiver and answer a new Integer"
 
-highBit
-    "Return the index of the highest order 1 bit of the receiver."
-    self subclassResponsibility
-!
+	<category: 'bit operators'>
+	| bit |
+	bit := 1 bitShift: index - 1.
+	^(self bitOr: bit) bitXor: bit
+    ]
 
-isBitSet: index
-    "Answer whether the index-th bit of the receiver is set"
-    ^((self bitShift: (index - 1) negated) bitAnd: 1) == 1
-!
+    noMask: anInteger [
+	"Answer true if no 1 bits in anInteger are 1 in the receiver."
 
-setBit: index
-    "Set the index-th bit of the receiver and answer a new Integer"
-    ^self bitOr: (1 bitShift: (index - 1))
-! !
+	<category: 'bit operators'>
+	^(self bitAnd: anInteger) = 0
+    ]
 
+    lowBit [
+	"Return the index of the lowest order 1 bit of the receiver."
 
-
-!Integer methodsFor: 'math methods'!
+	<category: 'bit operators'>
+	self subclassResponsibility
+    ]
 
-binomial: anInteger
-    "Compute the number of combinations of anInteger objects among
-     a number of objects given by the receiver."
+    highBit [
+	"Return the index of the highest order 1 bit of the receiver."
 
-    | n k mask gcd maxNum step num den stepNum stepDen |
+	<category: 'bit operators'>
+	self subclassResponsibility
+    ]
 
-    (self < 0 or: [ anInteger < 0 or: [ anInteger > self ]]) ifTrue: [
-        ^self arithmeticError: 'binomial coefficient with invalid arguments' ].
+    isBitSet: index [
+	"Answer whether the index-th bit of the receiver is set"
 
-    "The easy one."
-    anInteger = 0 ifTrue: [ ^1 ].
+	<category: 'bit operators'>
+	^((self bitShift: (index - 1) negated) bitAnd: 1) == 1
+    ]
 
-    "The number of SmallInteger factors we computed so far"
-    step := 1.
+    setBit: index [
+	"Set the index-th bit of the receiver and answer a new Integer"
 
-    "Two stacks holding intermediate factors."
-    num := OrderedCollection new.
-    den := OrderedCollection new.
+	<category: 'bit operators'>
+	^self bitOr: (1 bitShift: index - 1)
+    ]
 
-    "The next factors to be multiplied."
-    n := self. 
-    k := anInteger+anInteger > n ifTrue: [n - anInteger] ifFalse: [ anInteger ].
-    [
-	stepNum := stepDen := 1.
-	[
-            maxNum := SmallInteger largest // n.
-	    [ stepNum <= maxNum ] whileTrue: [
-		stepNum := stepNum * n. stepDen := stepDen * k.
-		k = 1 ifTrue: [ 
-		    "We're finishing, empty the stack and then simplify the
-		     remaining common factors."
-		    gcd := stepNum gcd: stepDen.
-		    stepNum := stepNum divExact: gcd.
-		    stepDen := stepDen divExact: gcd.
+    binomial: anInteger [
+	"Compute the number of combinations of anInteger objects among
+	 a number of objects given by the receiver."
 
-		    num size timesRepeat: [
-			stepNum := stepNum * num removeLast.
-			stepDen := stepDen * den removeLast
-		    ].
+	<category: 'math methods'>
+	| n k mask gcd maxNum step num den stepNum stepDen |
+	(self < 0 or: [anInteger < 0 or: [anInteger > self]]) 
+	    ifTrue: [^self arithmeticError: 'binomial coefficient with invalid arguments'].
 
-		    ^stepNum // stepDen
-		].
-		n := n - 1. k := k - 1 ].
+	"The easy one."
+	anInteger = 0 ifTrue: [^1].
 
-	    (gcd := stepNum gcd: stepDen) > 1 and: [
-	        stepNum := stepNum divExact: gcd.
+	"The number of SmallInteger factors we computed so far"
+	step := 1.
+
+	"Two stacks holding intermediate factors."
+	num := OrderedCollection new.
+	den := OrderedCollection new.
+
+	"The next factors to be multiplied."
+	n := self.
+	k := anInteger + anInteger > n ifTrue: [n - anInteger] ifFalse: [anInteger].
+	
+	[stepNum := stepDen := 1.
+	
+	[maxNum := SmallInteger largest // n.
+	[stepNum <= maxNum] whileTrue: 
+		[stepNum := stepNum * n.
+		stepDen := stepDen * k.
+		k = 1 
+		    ifTrue: 
+			["We're finishing, empty the stack and then simplify the
+			 remaining common factors."
+
+			gcd := stepNum gcd: stepDen.
+			stepNum := stepNum divExact: gcd.
+			stepDen := stepDen divExact: gcd.
+			num size timesRepeat: 
+				[stepNum := stepNum * num removeLast.
+				stepDen := stepDen * den removeLast].
+			^stepNum // stepDen].
+		n := n - 1.
+		k := k - 1].
+	(gcd := stepNum gcd: stepDen) > 1 and: 
+		[stepNum := stepNum divExact: gcd.
 		stepDen := stepDen divExact: gcd.
- 	    
+
 		"The numerators and denominators have been simplified, try
-	         to add some more factors."
-		stepNum <= maxNum ]
-	] whileTrue.
+		 to add some more factors."
+		stepNum <= maxNum]] 
+		whileTrue.
 
-        "Pop factors from the stack and combine them.  The number of factors
-         we pop is equal to the order of the lowest bit set.
-
-         That is, on the first iteration we push a size 1 LargeInteger;
-         on the second iteration we pop it and make a size 2 LargeInteger;
-         on the third iteration we push another size 1 LargeInteger;
-         on the fourth iteration we pop it and make a size 2 LargeInteger;
-         we then combine it with the other similarly sized integer and
-         make a size 4 LargeInteger; and so on.
-
+	"Pop factors from the stack and combine them.  The number of factors
+	 we pop is equal to the order of the lowest bit set.
+	 
+	 That is, on the first iteration we push a size 1 LargeInteger;
+	 on the second iteration we pop it and make a size 2 LargeInteger;
+	 on the third iteration we push another size 1 LargeInteger;
+	 on the fourth iteration we pop it and make a size 2 LargeInteger;
+	 we then combine it with the other similarly sized integer and
+	 make a size 4 LargeInteger; and so on.
+	 
 	 For the denominator the balancing is probably worse, since we
 	 decide when to stop multiplying based on the numerator's magnitude,
 	 but it is not a serious problem."
-
-        mask := step bitXor: step - 1.
-        [ mask = 1 ] whileFalse: [
-            stepNum := stepNum * num removeLast.
-            stepDen := stepDen * den removeLast.
-            mask := mask bitShift: -1.
-        ].
+	mask := step bitXor: step - 1.
+	[mask = 1] whileFalse: 
+		[stepNum := stepNum * num removeLast.
+		stepDen := stepDen * den removeLast.
+		mask := mask bitShift: -1].
 	gcd := stepNum gcd: stepDen.
-        num addLast: (stepNum divExact: gcd).
-        den addLast: (stepDen divExact: gcd).
-        step := step + 1.
-    ] repeat
-!
+	num addLast: (stepNum divExact: gcd).
+	den addLast: (stepDen divExact: gcd).
+	step := step + 1] 
+		repeat
+    ]
 
-factorial
-    "Return the receiver's factorial."
-    | mask k n a b max stack |
+    factorial [
+	"Return the receiver's factorial."
 
-    self < 0 ifTrue: [
-        ^self arithmeticError: 'factorial of a negative number' ].
+	<category: 'math methods'>
+	| mask k n a b max stack |
+	self < 0 ifTrue: [^self arithmeticError: 'factorial of a negative number'].
+	self < 2 ifTrue: [^1].
 
-    self < 2 ifTrue: [ ^1 ].
+	"The number of SmallInteger factors we computed so far"
+	k := 1.
 
-    "The number of SmallInteger factors we computed so far"
-    k := 1.
+	"The next factor to be multiplied."
+	n := self.
 
-    "The next factor to be multiplied."
-    n := self.
-
-    "The stack holding intermediate factors."
-    stack := OrderedCollection new.
-
-    [
-	a := n - 1.
+	"The stack holding intermediate factors."
+	stack := OrderedCollection new.
+	
+	[a := n - 1.
 	b := n.
 	max := SmallInteger largest // n.
-        [
-	    n := n - 2.
-            n < 2 ifTrue: [
-		"Done, empty the stack and combine all the factors."
+	
+	[n := n - 2.
+	n < 2 
+	    ifTrue: 
+		["Done, empty the stack and combine all the factors."
+
 		a := a * b.
-		stack size timesRepeat: [ a := a * stack removeLast ].
-		^a
-	    ].
-	    b < max
-        ] whileTrue: [
-            a := a * (n - 1).
-            b := b * n
-	].
+		stack size timesRepeat: [a := a * stack removeLast].
+		^a].
+	b < max] 
+		whileTrue: 
+		    [a := a * (n - 1).
+		    b := b * n].
 
 	"Compose the two SmallInteger factors"
 	a := a * b.
 
 	"Pop factors from the stack and combine them.  The number of factors
 	 we pop is equal to the order of the lowest bit set.
-
+	 
 	 That is, on the first iteration we push a size 1 LargeInteger;
 	 on the second iteration we pop it and make a size 2 LargeInteger;
 	 on the third iteration we push another size 1 LargeInteger;
 	 on the fourth iteration we pop it and make a size 2 LargeInteger;
 	 we then combine it with the other similarly sized integer and
 	 make a size 4 LargeInteger; and so on."
-
 	mask := k bitXor: k - 1.
-	[ mask = 1 ] whileFalse: [
-	    a := a * stack removeLast.
-	    mask := mask bitShift: -1.
-	].
+	[mask = 1] whileFalse: 
+		[a := a * stack removeLast.
+		mask := mask bitShift: -1].
 	stack addLast: a.
-	k := k + 1.
-    ] repeat
-!
+	k := k + 1] 
+		repeat
+    ]
 
-estimatedLog
-    "Answer an estimate of (self abs floorLog: 10)"
-    ^(self highBit asFloatD / FloatD log10Base2) ceiling
-!
+    estimatedLog [
+	"Answer an estimate of (self abs floorLog: 10)"
 
-floorLog: radix
-    "Answer (self log: radix) floor. Optimized to answer an integer."
+	<category: 'math methods'>
+	^(self highBit asFloatD / FloatD log10Base2) ceiling
+    ]
 
-    | me answer |
+    floorLog: radix [
+	"Answer (self log: radix) floor. Optimized to answer an integer."
 
-    self < self zero ifTrue: [
-       ^self arithmeticError: 'cannot extract logarithm of a negative number'
-    ].
+	<category: 'math methods'>
+	| me answer |
+	self < self zero 
+	    ifTrue: 
+		[^self arithmeticError: 'cannot extract logarithm of a negative number'].
+	radix <= radix unity 
+	    ifTrue: 
+		[radix <= radix zero 
+		    ifTrue: [^self arithmeticError: 'base of a logarithm cannot be negative'].
+		radix = radix unity 
+		    ifTrue: [^self arithmeticError: 'base of a logarithm cannot be 1'].
+		^(self ceilingLog: radix reciprocal) negated].
+	radix isInteger ifFalse: [^(radix coerce: self) floorLog: radix].
+	me := self.
+	answer := 0.
+	[me >= radix] whileTrue: 
+		[me := me // radix.
+		answer := answer + 1].
+	^answer
+    ]
 
-    radix <= radix unity ifTrue: [
-	(radix <= radix zero)
-	    ifTrue: [ ^self arithmeticError: 'base of a logarithm cannot be negative' ].
-	(radix = radix unity)
-	    ifTrue: [ ^self arithmeticError: 'base of a logarithm cannot be 1' ].
-	^(self ceilingLog: radix reciprocal) negated
-    ].
-    radix isInteger ifFalse: [
-	^(radix coerce: self) floorLog: radix
-    ].
+    ceilingLog: radix [
+	"Answer (self log: radix) ceiling. Optimized to answer an integer."
 
-    me := self.
-    answer := 0.
-    [   me >= radix ] whileTrue: [
-	me := me // radix.
-	answer := answer + 1
-    ].
-    ^answer
-!
+	<category: 'math methods'>
+	| me answer |
+	self < self zero 
+	    ifTrue: 
+		[^self arithmeticError: 'cannot extract logarithm of a negative number'].
+	radix <= radix unity 
+	    ifTrue: 
+		[radix <= radix zero 
+		    ifTrue: [^self arithmeticError: 'base of a logarithm cannot be negative'].
+		radix = radix unity 
+		    ifTrue: [^self arithmeticError: 'base of a logarithm cannot be 1'].
+		^(self floorLog: radix reciprocal) negated].
+	radix isInteger ifFalse: [^(radix coerce: self) ceilingLog: radix].
+	me := self.
+	answer := 1.
+	[me > radix] whileTrue: 
+		[me := me // radix.
+		answer := answer + 1].
+	^answer
+    ]
 
-ceilingLog: radix
-    "Answer (self log: radix) ceiling. Optimized to answer an integer."
+    gcd: anInteger [
+	"Return the greatest common divisor (Euclid's algorithm) between the
+	 receiver and anInteger"
 
-    | me answer |
+	<category: 'math methods'>
+	| a b remainder |
+	self negative | anInteger negative ifTrue: [^self abs gcd: anInteger abs].
+	self < anInteger 
+	    ifTrue: 
+		[a := anInteger.
+		b := self]
+	    ifFalse: 
+		[a := self.
+		b := anInteger].
+	[b = 0] whileFalse: 
+		[remainder := a \\ b.
+		a := b.
+		b := remainder].
+	^a
+    ]
 
-    self < self zero ifTrue: [
-       ^self arithmeticError: 'cannot extract logarithm of a negative number'
-    ].
+    lcm: anInteger [
+	"Return the least common multiple between the receiver and anInteger"
 
-    radix <= radix unity ifTrue: [
-	(radix <= radix zero)
-	    ifTrue: [ ^self arithmeticError: 'base of a logarithm cannot be negative' ].
-	(radix = radix unity)
-	    ifTrue: [ ^self arithmeticError: 'base of a logarithm cannot be 1' ].
-	^(self floorLog: radix reciprocal) negated
-    ].
-    radix isInteger ifFalse: [
-	^(radix coerce: self) ceilingLog: radix
-    ].
+	<category: 'math methods'>
+	^((self divExact: (self gcd: anInteger)) * anInteger) abs
+    ]
 
-    me := self.
-    answer := 1.
-    [   me > radix ] whileTrue: [
-	me := me // radix.
-	answer := answer + 1
-    ].
-    ^answer
-!
+    even [
+	"Return whether the receiver is even"
 
-gcd: anInteger
-    "Return the greatest common divisor (Euclid's algorithm) between the
-     receiver and anInteger"
-    | a b remainder |
-    self negative | anInteger negative ifTrue: [ ^self abs gcd: anInteger abs ].
+	<category: 'math methods'>
+	^(self bitAnd: 1) = 0
+    ]
 
-    self < anInteger
-	ifTrue: [ a := anInteger. b := self ]
-	ifFalse: [ a := self. b := anInteger ].
-    [ b = 0 ] whileFalse: [
-	remainder := a \\ b.
-	a := b.
-	b := remainder. ].
-    ^a
-!
+    odd [
+	"Return whether the receiver is odd"
 
-lcm: anInteger
-    "Return the least common multiple between the receiver and anInteger"
-    ^((self divExact: (self gcd: anInteger)) * anInteger) abs
-!
+	<category: 'math methods'>
+	^(self bitAnd: 1) ~= 0
+    ]
 
-even
-    "Return whether the receiver is even"
-    ^(self bitAnd: 1) = 0
-!
+    asCharacter [
+	"Return self as a Character or UnicodeCharacter object."
 
-odd
-    "Return whether the receiver is odd"
-    ^(self bitAnd: 1) ~= 0
-! !
+	<category: 'converting'>
+	^Character codePoint: self
+    ]
 
+    coerce: aNumber [
+	"Coerce aNumber to the receiver's class."
 
-
-!Integer methodsFor: 'converting'!
+	<category: 'converting'>
+	^aNumber truncated
+    ]
 
-asCharacter
-    "Return self as a Character or UnicodeCharacter object."
-    ^Character codePoint: self
-!
+    ceiling [
+	"Return the receiver - it's already truncated"
 
-coerce: aNumber
-    "Coerce aNumber to the receiver's class."
-    ^aNumber truncated
-!
+	<category: 'converting'>
+	^self
+    ]
 
-ceiling
-    "Return the receiver - it's already truncated"
-    ^self
-!
+    floor [
+	"Return the receiver - it's already truncated"
 
-floor
-    "Return the receiver - it's already truncated"
-    ^self
-!
+	<category: 'converting'>
+	^self
+    ]
 
-truncated
-    "Return the receiver - it's already truncated"
-    ^self
-!
+    truncated [
+	"Return the receiver - it's already truncated"
 
-rounded
-    "Return the receiver - it's already truncated"
-    ^self
-!
+	<category: 'converting'>
+	^self
+    ]
 
-asScaledDecimal: n
-    "Answer the receiver, converted to a ScaledDecimal object.
-     The scale is forced to be 0."
-    ^ScaledDecimal
-        newFromNumber: self asFraction
-        scale: 0
-!
+    rounded [
+	"Return the receiver - it's already truncated"
 
-asFraction
-    "Return the receiver converted to a fraction"
-    ^Fraction numerator: self denominator: 1
-! !
+	<category: 'converting'>
+	^self
+    ]
 
+    asScaledDecimal: n [
+	"Answer the receiver, converted to a ScaledDecimal object.
+	 The scale is forced to be 0."
 
-
-!Integer methodsFor: 'printing'!
+	<category: 'converting'>
+	^ScaledDecimal newFromNumber: self asFraction scale: 0
+    ]
 
-isLiteralObject
-    "Answer whether the receiver is expressible as a Smalltalk literal."
-    ^true
-!
+    asFraction [
+	"Return the receiver converted to a fraction"
 
-storeLiteralOn: aStream
-    "Store on aStream some Smalltalk code which compiles to the receiver"
-    self storeOn: aStream
-!
+	<category: 'converting'>
+	^Fraction numerator: self denominator: 1
+    ]
 
-printOn: aStream base: b
-    "Print on aStream the base b representation of the receiver"
-    aStream nextPutAll: (self printString: b)
-!
+    isLiteralObject [
+	"Answer whether the receiver is expressible as a Smalltalk literal."
 
-storeOn: aStream base: b
-    "Print on aStream Smalltalk code compiling to the receiver, 
-     represented in base b"
-    aStream nextPutAll: (self printStringRadix: b)
-!
+	<category: 'printing'>
+	^true
+    ]
 
-radix: baseInteger
-    "Return the base b representation of the receiver, with BBr in
-     front of it.  This method is deprecated, use #printStringRadix:
-     instead."
-    ^self printStringRadix: baseInteger
-!
+    storeLiteralOn: aStream [
+	"Store on aStream some Smalltalk code which compiles to the receiver"
 
-printStringRadix: baseInteger
-    "Return the base b representation of the receiver, with BBr in
-     front of it"
-    | sign num string size radixSize |
-    sign := self < self zero.
-    num := sign ifFalse: [ self ] ifTrue: [ self negated ].
+	<category: 'printing'>
+	self storeOn: aStream
+    ]
 
-    radixSize := (baseInteger floorLog: 10) + 1.
-    size := (num floorLog: baseInteger) + radixSize + 2.
-    sign ifTrue: [ size := size + 1 ].
+    printOn: aStream base: b [
+	"Print on aStream the base b representation of the receiver"
 
-    string := String new: size.
-    num replace: string withStringBase: baseInteger.
+	<category: 'printing'>
+	aStream nextPutAll: (self printString: b)
+    ]
 
-    string replaceFrom: 1 to: radixSize
-        with: (baseInteger printString: 10)
-        startingAt: 1.
+    storeOn: aStream base: b [
+	"Print on aStream Smalltalk code compiling to the receiver,
+	 represented in base b"
 
-    string at: radixSize + 1 put: $r.
-    sign ifTrue: [ string at: radixSize + 2 put: $- ].
-    ^string
-!
+	<category: 'printing'>
+	aStream nextPutAll: (self printStringRadix: b)
+    ]
 
-printString: baseInteger
-    "Return the base b representation of the receiver"
-    | num string |
-    ^self < self zero
-	ifFalse: [
-	    string := String new: (self floorLog: baseInteger) + 1.
-	    self replace: string withStringBase: baseInteger
-	]
-	ifTrue: [
-	    num := self negated.
-	    string := String new: (num floorLog: baseInteger) + 2.
-	    string at: 1 put: $-.
-	    num replace: string withStringBase: baseInteger
-	].
-!
+    radix: baseInteger [
+	"Return the base b representation of the receiver, with BBr in
+	 front of it.  This method is deprecated, use #printStringRadix:
+	 instead."
 
-displayString
-    "Return the base 10 representation of the receiver"
-    ^self printString: 10
-!
+	<category: 'printing'>
+	^self printStringRadix: baseInteger
+    ]
 
-printString
-    "Return the base 10 representation of the receiver"
-    ^self printString: 10
-!
+    printStringRadix: baseInteger [
+	"Return the base b representation of the receiver, with BBr in
+	 front of it"
 
-displayOn: aStream
-    "Print on aStream the base 10 representation of the receiver"
-    aStream nextPutAll: (self printString: 10)
-!
+	<category: 'printing'>
+	| sign num string size radixSize |
+	sign := self < self zero.
+	num := sign ifFalse: [self] ifTrue: [self negated].
+	radixSize := (baseInteger floorLog: 10) + 1.
+	size := (num floorLog: baseInteger) + radixSize + 2.
+	sign ifTrue: [size := size + 1].
+	string := String new: size.
+	num replace: string withStringBase: baseInteger.
+	string 
+	    replaceFrom: 1
+	    to: radixSize
+	    with: (baseInteger printString: 10)
+	    startingAt: 1.
+	string at: radixSize + 1 put: $r.
+	sign ifTrue: [string at: radixSize + 2 put: $-].
+	^string
+    ]
 
-printOn: aStream
-    "Print on aStream the base 10 representation of the receiver"
-    aStream nextPutAll: (self printString: 10)
-! !
+    printString: baseInteger [
+	"Return the base b representation of the receiver"
 
+	<category: 'printing'>
+	| num string |
+	^self < self zero 
+	    ifFalse: 
+		[string := String new: (self floorLog: baseInteger) + 1.
+		self replace: string withStringBase: baseInteger]
+	    ifTrue: 
+		[num := self negated.
+		string := String new: (num floorLog: baseInteger) + 2.
+		string at: 1 put: $-.
+		num replace: string withStringBase: baseInteger]
+    ]
 
-
-!Integer methodsFor: 'storing'!
+    displayString [
+	"Return the base 10 representation of the receiver"
 
-storeString
-    "Return the base 10 representation of the receiver"
-    ^self printString: 10
-!
+	<category: 'printing'>
+	^self printString: 10
+    ]
 
-storeOn: aStream
-    "Print on aStream the base 10 representation of the receiver"
-    aStream nextPutAll: (self printString: 10)
-! !
+    printString [
+	"Return the base 10 representation of the receiver"
 
+	<category: 'printing'>
+	^self printString: 10
+    ]
 
-
-!Integer methodsFor: 'private'!
+    displayOn: aStream [
+	"Print on aStream the base 10 representation of the receiver"
 
-replace: string withStringBase: b
-    "Put in str the reversed base b representation of the receiver
-     (which is > 0)"
+	<category: 'printing'>
+	aStream nextPutAll: (self printString: 10)
+    ]
 
-    | num where |
-    num := self.
-    where := string size.
-    [
-	string at: where put: (Character digitValue: (num \\ b)).
+    printOn: aStream [
+	"Print on aStream the base 10 representation of the receiver"
+
+	<category: 'printing'>
+	aStream nextPutAll: (self printString: 10)
+    ]
+
+    storeString [
+	"Return the base 10 representation of the receiver"
+
+	<category: 'storing'>
+	^self printString: 10
+    ]
+
+    storeOn: aStream [
+	"Print on aStream the base 10 representation of the receiver"
+
+	<category: 'storing'>
+	aStream nextPutAll: (self printString: 10)
+    ]
+
+    replace: string withStringBase: b [
+	"Put in str the reversed base b representation of the receiver
+	 (which is > 0)"
+
+	<category: 'private'>
+	| num where |
+	num := self.
+	where := string size.
+	
+	[string at: where put: (Character digitValue: num \\ b).
 	where := where - 1.
-	(num := num // b) > 0
-    ] whileTrue.
-    ^string
-! !
+	(num := num // b) > 0] 
+		whileTrue.
+	^string
+    ]
 
-
-!Integer methodsFor: 'testing functionality'!
+    isRational [
+	"Answer whether the receiver is rational - true"
 
-isRational
-    "Answer whether the receiver is rational - true"
-    ^true
-!
+	<category: 'testing functionality'>
+	^true
+    ]
 
-isInteger
-    ^true
-! !
+    isInteger [
+	<category: 'testing functionality'>
+	^true
+    ]
 
+    numerator [
+	<category: 'accessing'>
+	^self
+    ]
 
-
-!Integer methodsFor: 'accessing'!
-
-numerator
-    ^self
-!
-
-denominator
-    ^1
-! !
+    denominator [
+	<category: 'accessing'>
+	^1
+    ]
+]
 

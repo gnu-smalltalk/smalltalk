@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002, 2007
@@ -31,325 +30,319 @@
 |
  ======================================================================"
 
-Dictionary variableSubclass: #LookupTable
-	   instanceVariableNames: ''
-	   classVariableNames: ''
-	   poolDictionaries: ''
-	   category: 'Collections-Keyed'
-!
 
-LookupTable comment:
-'I am a more efficient variant of Dictionary that cannot be used as a
+
+Dictionary subclass: LookupTable [
+    
+    <shape: #pointer>
+    <category: 'Collections-Keyed'>
+    <comment: 'I am a more efficient variant of Dictionary that cannot be used as a
 pool dictionary of variables, as I don''t use Associations to store
 key-value pairs.  I also cannot have nil as a key; if you need to be
 able to store nil as a key, use Dictionary instead.  I use the object
-equality comparison message #= to determine equivalence of indices.' !
+equality comparison message #= to determine equivalence of indices.'>
 
-
-!LookupTable class methodsFor: 'instance creation'!
-
-primNew: realSize
-    ^self basicNew: realSize * 2
-!
-
-new
-    "Create a new LookupTable with a default size"
-    ^self new: 5
-! !
-
-
-
-!LookupTable methodsFor: 'accessing'!
-
-add: anAssociation
-    "Add the anAssociation key to the receiver"
-    self at: anAssociation key put: anAssociation value.
-    ^anAssociation
-!
-
-at: key put: value
-    "Store value as associated to the given key"
-    | index |
-    index := self findIndex: key.
-    (self primAt: index) isNil ifTrue: [
-	self incrementTally ifTrue: [ index := self findIndex: key ].
-	self primAt: index put: key.
-    ].
-    
-    self valueAt: index put: value.
-    ^value
-!
-
-at: key ifAbsent: aBlock
-    "Answer the value associated to the given key, or the result of evaluating
-     aBlock if the key is not found"
-    | index |
-    index := self findIndexOrNil: key.
-    ^index isNil
-	ifTrue: [ aBlock value ]
-	ifFalse: [ self valueAt: index ]
-!    
-    
-at: aKey ifPresent: aBlock
-    "If aKey is absent, answer nil. Else, evaluate aBlock passing the
-     associated value and answer the result of the invocation"
-    | index |
-    index := self findIndexOrNil: aKey.
-    ^index isNil
-	ifTrue: [ nil ]
-	ifFalse: [ aBlock value: (self valueAt: index) ]
-!
-
-associationAt: key ifAbsent: aBlock
-    "Answer the key/value Association for the given key. Evaluate aBlock
-     (answering the result) if the key is not found"
-    | index |
-    index := self findIndexOrNil: key.
-    ^index isNil
-	ifTrue: [ aBlock value ]
-	ifFalse: [ Association key: key value: (self valueAt: index) ]
-! !
-
-
-!LookupTable methodsFor: 'removing'!
-
-remove: anAssociation
-    "Remove anAssociation's key from the dictionary"
-    ^anAssociation key -> (self removeKey: anAssociation key)
-!
-
-remove: anAssociation ifAbsent: aBlock
-    "Remove anAssociation's key from the dictionary"
-
-    "Inefficient (has a full block) but it is rarely used."
-    ^anAssociation key -> (self removeKey: anAssociation key
-				ifAbsent: [ ^aBlock value ])
-!
-
-removeKey: key ifAbsent: aBlock
-    "Remove the passed key from the LookupTable, answer the result of
-     evaluating aBlock if it is not found"
-    | index value |
-    index := self findIndexOrNil: key.
-    index isNil ifTrue: [ ^aBlock value ].
-
-    value := self valueAt: index.
-    self primAt: index put: nil.
-    self valueAt: index put: nil.
-    self decrementTally.
-    self rehashObjectsAfter: index.
-    ^ value
-! !
-
-
-
-!LookupTable methodsFor: 'enumerating'!
-
-associationsDo: aBlock
-    "Pass each association in the LookupTable to aBlock."
-
-    self keysAndValuesDo: [ :key :val | aBlock value:
-	(Association key: key value: val)
+    LookupTable class >> primNew: realSize [
+	<category: 'instance creation'>
+	^self basicNew: realSize * 2
     ]
-!
 
-keysDo: aBlock
-    "Pass each key in the LookupTable to aBlock."
+    LookupTable class >> new [
+	"Create a new LookupTable with a default size"
 
-    self beConsistent.
-    1 to: self primSize do: [:i |
-	(self primAt: i) notNil
-	    ifTrue: [ aBlock value: (self primAt: i) ]
+	<category: 'instance creation'>
+	^self new: 5
     ]
-!
 
-do: aBlock
-    "Pass each value in the LookupTable to aBlock."
+    add: anAssociation [
+	"Add the anAssociation key to the receiver"
 
-    self beConsistent.
-    1 to: self primSize do: [:i |
-	(self primAt: i) notNil
-	    ifTrue: [ aBlock value: (self valueAt: i) ]
+	<category: 'accessing'>
+	self at: anAssociation key put: anAssociation value.
+	^anAssociation
     ]
-!
 
-keysAndValuesDo: aBlock
-    "Pass each key/value pair in the LookupTable as two distinct parameters
-     to aBlock."
+    at: key put: value [
+	"Store value as associated to the given key"
 
-    1 to: self primSize do: [:i |
-	(self primAt: i) notNil
-	    ifTrue: [ aBlock value: (self primAt: i) value: (self valueAt: i) ]
+	<category: 'accessing'>
+	| index |
+	index := self findIndex: key.
+	(self primAt: index) isNil 
+	    ifTrue: 
+		[self incrementTally ifTrue: [index := self findIndex: key].
+		self primAt: index put: key].
+	self valueAt: index put: value.
+	^value
     ]
-! !
 
+    at: key ifAbsent: aBlock [
+	"Answer the value associated to the given key, or the result of evaluating
+	 aBlock if the key is not found"
 
-
-!LookupTable methodsFor: 'rehashing'!
-
-rehash
-    "Rehash the receiver"
-    | keys values n key |
-    keys := Array new: self size.
-    values := Array new: self size.
-    self resetTally.
-
-    n := 0.
-    1 to: self primSize do: [:i |
-        (key := self primAt: i) isNil ifFalse: [
-            keys at: (n := n + 1) put: key.
-            values at: n put: (self valueAt: i).
-            self primAt: i put: nil.
-            self valueAt: i put: nil
-        ]
-    ].
-
-    keys keysAndValuesDo: [ :i :key |
-        self whileGrowingAt: key put: (values at: i)
+	<category: 'accessing'>
+	| index |
+	index := self findIndexOrNil: key.
+	^index isNil ifTrue: [aBlock value] ifFalse: [self valueAt: index]
     ]
-! !
 
-
-!LookupTable methodsFor: 'hashing'!
+    at: aKey ifPresent: aBlock [
+	"If aKey is absent, answer nil. Else, evaluate aBlock passing the
+	 associated value and answer the result of the invocation"
 
-hash
-    "Answer the hash value for the receiver"
-    | hashValue |
-    hashValue := tally.
-    self keysAndValuesDo: [:key :val |
-        hashValue := hashValue bitXor: (self hashFor: key) scramble.
+	<category: 'accessing'>
+	| index |
+	index := self findIndexOrNil: aKey.
+	^index isNil ifTrue: [nil] ifFalse: [aBlock value: (self valueAt: index)]
+    ]
 
-        "hack needed because the Smalltalk dictionary contains itself"
-        val == self ifFalse: [
-            hashValue := hashValue bitXor: val hash scramble.
-        ]
-    ].
+    associationAt: key ifAbsent: aBlock [
+	"Answer the key/value Association for the given key. Evaluate aBlock
+	 (answering the result) if the key is not found"
 
-    ^hashValue
-! !
+	<category: 'accessing'>
+	| index |
+	index := self findIndexOrNil: key.
+	^index isNil 
+	    ifTrue: [aBlock value]
+	    ifFalse: [Association key: key value: (self valueAt: index)]
+    ]
 
-
-!LookupTable methodsFor: 'storing'!
+    remove: anAssociation [
+	"Remove anAssociation's key from the dictionary"
 
-storeOn: aStream
-    "Print Smalltalk code compiling to the receiver on aStream"
-    | hasElements |
-    aStream nextPutAll: '(', self class name , ' new'.
-    hasElements := false.
-    self keysAndValuesDo:
-    	[ :key :value | aStream nextPutAll: ' at: ';
-		   store: key;
-		   nextPutAll: ' put: ';
-		   store: value;
-		   nextPut: $;.
-	       hasElements := true ].
-    hasElements ifTrue: [ aStream nextPutAll: ' yourself' ].
-    aStream nextPut: $)
-! !
+	<category: 'removing'>
+	^anAssociation key -> (self removeKey: anAssociation key)
+    ]
 
+    remove: anAssociation ifAbsent: aBlock [
+	"Remove anAssociation's key from the dictionary"
 
-
-!LookupTable methodsFor: 'private methods'!
+	"Inefficient (has a full block) but it is rarely used."
 
-rehashObjectsAfter: index
-    "Rehashes all the objects in the collection after index to see if any of
-    them hash to index.  If so, that object is copied to index, and the
-    process repeats with that object's index, until a nil is encountered."
+	<category: 'removing'>
+	^anAssociation key 
+	    -> (self removeKey: anAssociation key ifAbsent: [^aBlock value])
+    ]
 
-    | i j size count key |
-    i := index.
-    size := self primSize.
-    [   i = size ifTrue: [ i := 1 ] ifFalse: [ i := i + 1 ].
+    removeKey: key ifAbsent: aBlock [
+	"Remove the passed key from the LookupTable, answer the result of
+	 evaluating aBlock if it is not found"
+
+	<category: 'removing'>
+	| index value |
+	index := self findIndexOrNil: key.
+	index isNil ifTrue: [^aBlock value].
+	value := self valueAt: index.
+	self primAt: index put: nil.
+	self valueAt: index put: nil.
+	self decrementTally.
+	self rehashObjectsAfter: index.
+	^value
+    ]
+
+    associationsDo: aBlock [
+	"Pass each association in the LookupTable to aBlock."
+
+	<category: 'enumerating'>
+	self 
+	    keysAndValuesDo: [:key :val | aBlock value: (Association key: key value: val)]
+    ]
+
+    keysDo: aBlock [
+	"Pass each key in the LookupTable to aBlock."
+
+	<category: 'enumerating'>
+	self beConsistent.
+	1 to: self primSize
+	    do: [:i | (self primAt: i) notNil ifTrue: [aBlock value: (self primAt: i)]]
+    ]
+
+    do: aBlock [
+	"Pass each value in the LookupTable to aBlock."
+
+	<category: 'enumerating'>
+	self beConsistent.
+	1 to: self primSize
+	    do: [:i | (self primAt: i) notNil ifTrue: [aBlock value: (self valueAt: i)]]
+    ]
+
+    keysAndValuesDo: aBlock [
+	"Pass each key/value pair in the LookupTable as two distinct parameters
+	 to aBlock."
+
+	<category: 'enumerating'>
+	1 to: self primSize
+	    do: 
+		[:i | 
+		(self primAt: i) notNil 
+		    ifTrue: [aBlock value: (self primAt: i) value: (self valueAt: i)]]
+    ]
+
+    rehash [
+	"Rehash the receiver"
+
+	<category: 'rehashing'>
+	| keys values n key |
+	keys := Array new: self size.
+	values := Array new: self size.
+	self resetTally.
+	n := 0.
+	1 to: self primSize
+	    do: 
+		[:i | 
+		(key := self primAt: i) isNil 
+		    ifFalse: 
+			[keys at: (n := n + 1) put: key.
+			values at: n put: (self valueAt: i).
+			self primAt: i put: nil.
+			self valueAt: i put: nil]].
+	keys 
+	    keysAndValuesDo: [:i :key | self whileGrowingAt: key put: (values at: i)]
+    ]
+
+    hash [
+	"Answer the hash value for the receiver"
+
+	<category: 'hashing'>
+	| hashValue |
+	hashValue := tally.
+	self keysAndValuesDo: 
+		[:key :val | 
+		hashValue := hashValue bitXor: (self hashFor: key) scramble.
+
+		"hack needed because the Smalltalk dictionary contains itself"
+		val == self ifFalse: [hashValue := hashValue bitXor: val hash scramble]].
+	^hashValue
+    ]
+
+    storeOn: aStream [
+	"Print Smalltalk code compiling to the receiver on aStream"
+
+	<category: 'storing'>
+	| hasElements |
+	aStream nextPutAll: '(' , self class name , ' new'.
+	hasElements := false.
+	self keysAndValuesDo: 
+		[:key :value | 
+		aStream
+		    nextPutAll: ' at: ';
+		    store: key;
+		    nextPutAll: ' put: ';
+		    store: value;
+		    nextPut: $;.
+		hasElements := true].
+	hasElements ifTrue: [aStream nextPutAll: ' yourself'].
+	aStream nextPut: $)
+    ]
+
+    rehashObjectsAfter: index [
+	"Rehashes all the objects in the collection after index to see if any of
+	 them hash to index.  If so, that object is copied to index, and the
+	 process repeats with that object's index, until a nil is encountered."
+
+	<category: 'private methods'>
+	| i j size count key |
+	i := index.
+	size := self primSize.
+	
+	[i = size ifTrue: [i := 1] ifFalse: [i := i + 1].
 	key := self primAt: i.
-	key notNil
-    ]   whileTrue: [
-	j := self findElementIndex: key.
-	(self primAt: j) isNil ifTrue: [
-	    self primAt: j put: key.
-	    self valueAt: j put: (self valueAt: i).
-	    self primAt: i put: nil.
-	    self valueAt: i put: nil
-	]
+	key notNil] 
+		whileTrue: 
+		    [j := self findElementIndex: key.
+		    (self primAt: j) isNil 
+			ifTrue: 
+			    [self primAt: j put: key.
+			    self valueAt: j put: (self valueAt: i).
+			    self primAt: i put: nil.
+			    self valueAt: i put: nil]]
     ]
-!
 
-copyAllFrom: aDictionary
-    | key |
-    1 to: aDictionary primSize do: [ :index |
-	key := aDictionary primAt: index.
-	key isNil
-	    ifFalse: [ self whileGrowingAt: key put: (aDictionary valueAt: index) ]
-    ].
-    ^self
-!
+    copyAllFrom: aDictionary [
+	<category: 'private methods'>
+	| key |
+	1 to: aDictionary primSize
+	    do: 
+		[:index | 
+		key := aDictionary primAt: index.
+		key isNil 
+		    ifFalse: [self whileGrowingAt: key put: (aDictionary valueAt: index)]].
+	^self
+    ]
 
-addWhileGrowing: association
-    self whileGrowingAt: association key put: association value
-!
+    addWhileGrowing: association [
+	<category: 'private methods'>
+	self whileGrowingAt: association key put: association value
+    ]
 
-whileGrowingAt: key put: value
-    "Private - Add the given key/value pair to the receiver. Don't check for
-     the LookupTable to be full nor for the key's presence - we want SPEED!"
-    | index |
-    self
-	primAt: (index := self findIndex: key)
-	put: key.
-    
-    self valueAt: index put: value.
-    tally := tally + 1.
-    ^value
-!
+    whileGrowingAt: key put: value [
+	"Private - Add the given key/value pair to the receiver. Don't check for
+	 the LookupTable to be full nor for the key's presence - we want SPEED!"
 
-primSize
-    ^self basicSize // 2
-!
+	<category: 'private methods'>
+	| index |
+	self primAt: (index := self findIndex: key) put: key.
+	self valueAt: index put: value.
+	tally := tally + 1.
+	^value
+    ]
 
-primAt: index
-    ^self basicAt: index + index - 1
-!
+    primSize [
+	<category: 'private methods'>
+	^self basicSize // 2
+    ]
 
-primAt: index put: object
-    ^self basicAt: index + index - 1 put: object
-!
+    primAt: index [
+	<category: 'private methods'>
+	^self basicAt: index + index - 1
+    ]
 
-valueAt: index
-    ^self basicAt: index + index
-!
+    primAt: index put: object [
+	<category: 'private methods'>
+	^self basicAt: index + index - 1 put: object
+    ]
 
-valueAt: index put: object
-    ^self basicAt: index + index put: object
-!
+    valueAt: index [
+	<category: 'private methods'>
+	^self basicAt: index + index
+    ]
 
-hashFor: anObject
-    "Return an hash value for the item, anObject"
-    ^anObject hash
-!
+    valueAt: index put: object [
+	<category: 'private methods'>
+	^self basicAt: index + index put: object
+    ]
 
-findElementIndex: anObject
-    "anObject is the content of an indexed variable. See what slot it should
-     be inserted in."
+    hashFor: anObject [
+	"Return an hash value for the item, anObject"
 
-    ^self findIndex: anObject
-!
-    
-findIndex: anObject
-    "Tries to see if anObject exists as an indexed variable. As soon as nil
-    or anObject is found, the index of that slot is answered"
+	<category: 'private methods'>
+	^anObject hash
+    ]
 
-    | index size element |
-    self beConsistent.
+    findElementIndex: anObject [
+	"anObject is the content of an indexed variable. See what slot it should
+	 be inserted in."
 
-    "Sorry for the lack of readability, but I want speed... :-)"
-    index := (anObject hash scramble
-                bitAnd: (size := self primSize) - 1) + 1.
+	<category: 'private methods'>
+	^self findIndex: anObject
+    ]
 
-    [
-        ((element := self primAt: index) isNil
-            or: [ element = anObject ])
-                ifTrue: [ ^index ].
+    findIndex: anObject [
+	"Tries to see if anObject exists as an indexed variable. As soon as nil
+	 or anObject is found, the index of that slot is answered"
 
-        index == size
-            ifTrue: [ index := 1 ]
-            ifFalse: [ index := index + 1 ]
-    ] repeat
-! !
+	<category: 'private methods'>
+	| index size element |
+	self beConsistent.
+
+	"Sorry for the lack of readability, but I want speed... :-)"
+	index := (anObject hash scramble bitAnd: (size := self primSize) - 1) + 1.
+	
+	[((element := self primAt: index) isNil or: [element = anObject]) 
+	    ifTrue: [^index].
+	index == size ifTrue: [index := 1] ifFalse: [index := index + 1]] 
+		repeat
+    ]
+]
+

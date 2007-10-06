@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2007 Free Software Foundation, Inc.
@@ -30,136 +29,180 @@
 |
  ======================================================================"
 
-ArchiveFileHandler subclass: #ExternalArchiveFileHandler
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Streams-Files'
-! 
 
-ExternalArchiveFileHandler class
-	instanceVariableNames: 'fileTypes'!
-
-ExternalArchiveFileHandler comment: 'ExternalArchiveFileHandler
+
+ArchiveFileHandler subclass: ExternalArchiveFileHandler [
+    
+    <comment: 'ExternalArchiveFileHandler
 allows for easy implementation of archive files (for example,
 transparent unzipping and untarring) with a single shell script.
 It implements a protocol that that is compatible with the Midnight
-Commander and with GNOME VFS.'!
+Commander and with GNOME VFS.'>
+    <category: 'Streams-Files'>
 
-!ExternalArchiveFileHandler class methodsFor: 'registering'!
-
-priority
-    ^-5!
-
-fileSystems
-    "Answer the virtual file systems that can be processed by this subclass.
-     These are given by the names of the executable files in the `vfs'
-     subdirectory of the image directory, of the parent of the kernel
-     directory and (if the image is not the global installed image)
-     of the `.st' directory in the home directory."
-    fileTypes := LookupTable new. 
-    [ self fileSystemsIn: Directory libexec, '/vfs' ]
-	on: Error do: [ :ex | ex return ].
-    [ self fileSystemsIn: Directory userBase, '/vfs' ]
-	on: Error do: [ :ex | ex return ].
-    Smalltalk imageLocal ifTrue: [
-        [ self fileSystemsIn: Directory image, '/vfs' ]
-	    on: Error do: [ :ex | ex return ] ].
+    ExternalArchiveFileHandler class [
+	| fileTypes |
 	
-    ^fileTypes keys asSet!
+    ]
 
-fileSystemsIn: path
-    "Registers the executable files in the given directory to be used
-     to resolve a virtual file system."
-    | dir |
-    dir := RealFileHandler for: path.
-    dir exists ifFalse: [ ^self ].
-    dir do: [ :each |
-	(File isExecutable: path, '/', each)
-	    ifTrue: [ fileTypes at: each put: path, '/', each ]
-    ]!
+    ExternalArchiveFileHandler class >> priority [
+	<category: 'registering'>
+	^-5
+    ]
 
-fileTypes
-    ^fileTypes!
+    ExternalArchiveFileHandler class >> fileSystems [
+	"Answer the virtual file systems that can be processed by this subclass.
+	 These are given by the names of the executable files in the `vfs'
+	 subdirectory of the image directory, of the parent of the kernel
+	 directory and (if the image is not the global installed image)
+	 of the `.st' directory in the home directory."
 
-release
-    "Avoid that paths stay in the image file"
-    fileTypes := nil.
-    super release! !
+	<category: 'registering'>
+	fileTypes := LookupTable new.
+	[self fileSystemsIn: Directory libexec , '/vfs'] on: Error
+	    do: [:ex | ex return].
+	[self fileSystemsIn: Directory userBase , '/vfs'] on: Error
+	    do: [:ex | ex return].
+	Smalltalk imageLocal 
+	    ifTrue: 
+		[[self fileSystemsIn: Directory image , '/vfs'] on: Error
+		    do: [:ex | ex return]].
+	^fileTypes keys asSet
+    ]
+
+    ExternalArchiveFileHandler class >> fileSystemsIn: path [
+	"Registers the executable files in the given directory to be used
+	 to resolve a virtual file system."
+
+	<category: 'registering'>
+	| dir |
+	dir := RealFileHandler for: path.
+	dir exists ifFalse: [^self].
+	dir do: 
+		[:each | 
+		(File isExecutable: path , '/' , each) 
+		    ifTrue: [fileTypes at: each put: path , '/' , each]]
+    ]
+
+    ExternalArchiveFileHandler class >> fileTypes [
+	<category: 'registering'>
+	^fileTypes
+    ]
+
+    ExternalArchiveFileHandler class >> release [
+	"Avoid that paths stay in the image file"
+
+	<category: 'registering'>
+	fileTypes := nil.
+	super release
+    ]
+
+    createDir: dirName [
+	"Create a subdirectory of the receiver, naming it dirName."
+
+	<category: 'members'>
+	Smalltalk 
+	    system: '%1 mkdir %2 %3' % 
+			{self command.
+			self realFileName.
+			dirName}
+    ]
+
+    member: anArchiveMemberHandler mode: bits [
+	"Set the permission bits for the file in anArchiveMemberHandler."
+
+	<category: 'ArchiveMemberHandler protocol'>
+	self notYetImplemented
+    ]
+
+    extractMember: anArchiveMemberHandler into: file [
+	"Extract the contents of anArchiveMemberHandler into a file
+	 that resides on disk, and answer the name of the file."
+
+	<category: 'ArchiveMemberHandler protocol'>
+	Smalltalk 
+	    system: '%1 copyout %2 %3 %4' % 
+			{self command.
+			self realFileName.
+			anArchiveMemberHandler name.
+			file name}
+    ]
+
+    removeMember: anArchiveMemberHandler [
+	"Remove the member represented by anArchiveMemberHandler."
+
+	<category: 'ArchiveMemberHandler protocol'>
+	| subcmd |
+	subcmd := anArchiveMemberHandler isDirectory 
+		    ifTrue: ['rmdir']
+		    ifFalse: ['rm'].
+	Smalltalk 
+	    system: '%1 %2 %3 %4' % 
+			{self command.
+			subcmd.
+			self realFileName.
+			anArchiveMemberHandler name}
+    ]
+
+    updateMember: anArchiveMemberHandler [
+	"Update the member represented by anArchiveMemberHandler by
+	 copying the file into which it was extracted back to the
+	 archive."
+
+	<category: 'ArchiveMemberHandler protocol'>
+	Smalltalk 
+	    system: '%1 copyin %2 %3 %4' % 
+			{self command.
+			self realFileName.
+			anArchiveMemberHandler name.
+			anArchiveMemberHandler realFileName}
+    ]
+
+    command [
+	"Return the script that is invoked by the receiver."
+
+	<category: 'ArchiveMemberHandler protocol'>
+	^self class fileTypes at: self fsName
+    ]
+
+    files [
+	"Extract the directory listing from the archive"
+
+	<category: 'ArchiveMemberHandler protocol'>
+	^Generator on: 
+		[:gen | 
+		| pipe |
+		pipe := FileStream popen: self command , ' list ' , self realFileName
+			    dir: FileStream read.
+		pipe linesDo: 
+			[:l | 
+			| line mode size path date |
+			line := l readStream.
+			mode := line next: 10.
+			line peek isSeparator ifFalse: [line skipTo: Character space].
+			line skipSeparators.
+
+			"Attributes, number of links, owner, group"
+			3 timesRepeat: 
+				[line skipTo: Character space.
+				line skipSeparators].
+			size := Number readFrom: line.	"File size"
+			line skipSeparators.
+			date := DateTime readFrom: line.	"Date"
+			line skipSeparators.
+			path := line upToAll: ' -> '.	"Path"
+			gen yield: 
+				{path.
+				size.
+				date.
+				mode}].
+		pipe close]
+    ]
+]
+
+
 
-!ExternalArchiveFileHandler methodsFor: 'members'!
+Eval [
+    ExternalArchiveFileHandler register
+]
 
-createDir: dirName
-    "Create a subdirectory of the receiver, naming it dirName."
-
-    Smalltalk system: ('%1 mkdir %2 %3' % { self command. self realFileName. dirName })! !
-
-
-!ExternalArchiveFileHandler methodsFor: 'ArchiveMemberHandler protocol'!
-
-member: anArchiveMemberHandler mode: bits
-    "Set the permission bits for the file in anArchiveMemberHandler."
-
-    self notYetImplemented!
-
-extractMember: anArchiveMemberHandler into: file
-    "Extract the contents of anArchiveMemberHandler into a file
-     that resides on disk, and answer the name of the file."
-
-    Smalltalk system: ('%1 copyout %2 %3 %4'
-	% { self command. self realFileName. anArchiveMemberHandler name. file name })!
-
-removeMember: anArchiveMemberHandler
-    "Remove the member represented by anArchiveMemberHandler."
-
-    | subcmd |
-    subcmd := anArchiveMemberHandler isDirectory
-	ifTrue: [ 'rmdir' ]
-	ifFalse: [ 'rm' ].
-
-    Smalltalk system: ('%1 %2 %3 %4'
-	% { self command. subcmd. self realFileName. anArchiveMemberHandler name. })!
-
-updateMember: anArchiveMemberHandler
-    "Update the member represented by anArchiveMemberHandler by
-     copying the file into which it was extracted back to the
-     archive."
-
-    Smalltalk system: ('%1 copyin %2 %3 %4'
-	% { self command. self realFileName. anArchiveMemberHandler name.
-	    anArchiveMemberHandler realFileName })!
-
-command
-    "Return the script that is invoked by the receiver."
-    ^self class fileTypes at: self fsName!
-
-files
-    "Extract the directory listing from the archive"
-
-    ^Generator on: [ :gen || pipe |
-        pipe := FileStream
-	    popen: self command, ' list ', self realFileName
-	    dir: FileStream read.
-
-        pipe linesDo: [ :l || line mode size path date |
-	    line := l readStream.
-	    mode := line next: 10.
-	    line peek isSeparator ifFalse: [ line skipTo: Character space ].
-	    line skipSeparators.
-
-	    "Attributes, number of links, owner, group"
-	    3 timesRepeat: [
-		line skipTo: Character space.
-	        line skipSeparators ].
-
-	    size := Number readFrom: line.		"File size"
-	    line skipSeparators.
-	    date := DateTime readFrom: line.		"Date"
-	    line skipSeparators.
-	    path := line upToAll: ' -> '.		"Path"
-
-            gen yield: { path. size. date. mode } ].
-
-        pipe close ]! !
-
-ExternalArchiveFileHandler register!

@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001
@@ -32,86 +31,93 @@
  ======================================================================"
 
 
-ArrayedCollection variableSubclass: #Array
-		  instanceVariableNames: ''
-		  classVariableNames: ''
-		  poolDictionaries: ''
-		  category: 'Collections-Sequenceable'
-!
-
-Array comment: 
-'My instances are objects that have array-like properties: they are directly 
+
+ArrayedCollection subclass: Array [
+    
+    <shape: #pointer>
+    <category: 'Collections-Sequenceable'>
+    <comment: 'My instances are objects that have array-like properties: they are directly 
 indexable by integers starting at 1, and they are fixed in size.  I inherit
 object creation behavior messages such as #with:, as well as iteration
-and general access behavior from SequenceableCollection.' !
+and general access behavior from SequenceableCollection.'>
 
-
-!Array class methodsFor: 'instance creation'!
+    Array class >> from: anArray [
+	"Answer anArray, which is expected to be an array specified with a
+	 brace-syntax expression per my inherited protocol."
 
-from: anArray
-    "Answer anArray, which is expected to be an array specified with a
-     brace-syntax expression per my inherited protocol."
-    ^anArray
-! !
-
-!Array methodsFor: 'printing'!
-
-printOn: aStream
-    "Print a representation for the receiver on aStream"
-    aStream nextPut: $(.
-    self do:
-	[ :elt | elt printOn: aStream.
-		 aStream space ].
-    aStream nextPut: $)
-!
-
-isLiteralObject
-    "Answer whether the receiver is expressible as a Smalltalk literal."
-    ^self isReadOnly not
-!
-
-storeLiteralOn: aStream
-    "Store a Smalltalk literal compiling to the receiver on aStream"
-    aStream nextPut: $#.
-    aStream nextPut: $(.
-    self do: [ :elt | elt storeLiteralOn: aStream. aStream space ].
-    aStream nextPut: $).
-!
-
-storeOn: aStream
-    "Store Smalltalk code compiling to the receiver on aStream"
-    aStream nextPut: $#.
-    aStream nextPut: $(.
-    self do: [ :elt |
-	elt isLiteralObject
-	    ifTrue: [ elt storeLiteralOn: aStream ]
-	    ifFalse: [ aStream nextPutAll: '##('; store: elt; nextPut: $) ].
-	aStream space ].
-
-    aStream nextPut: $).
-    self isReadOnly ifFalse: [ aStream nextPutAll: ' copy' ]
-! !
-
-
-!Array methodsFor: 'mutating objects'!
-
-multiBecome: anArray
-    "Transform every object in the receiver in each corresponding
-     object in anArray. anArray and the receiver must have the same
-     size"
-
-    | index |
-    index := 0.
-    ^self collect: [:object |
-	index := index + 1.
-	object become: (anArray at: index)
+	<category: 'instance creation'>
+	^anArray
     ]
-! !
 
+    printOn: aStream [
+	"Print a representation for the receiver on aStream"
 
-
-!Array methodsFor: 'testing'!
+	<category: 'printing'>
+	aStream nextPut: $(.
+	self do: 
+		[:elt | 
+		elt printOn: aStream.
+		aStream space].
+	aStream nextPut: $)
+    ]
 
-isArray
-    ^true
-! !
+    isLiteralObject [
+	"Answer whether the receiver is expressible as a Smalltalk literal."
+
+	<category: 'printing'>
+	^self isReadOnly not
+    ]
+
+    storeLiteralOn: aStream [
+	"Store a Smalltalk literal compiling to the receiver on aStream"
+
+	<category: 'printing'>
+	aStream nextPut: $#.
+	aStream nextPut: $(.
+	self do: 
+		[:elt | 
+		elt storeLiteralOn: aStream.
+		aStream space].
+	aStream nextPut: $)
+    ]
+
+    storeOn: aStream [
+	"Store Smalltalk code compiling to the receiver on aStream"
+
+	<category: 'printing'>
+	aStream nextPut: $#.
+	aStream nextPut: $(.
+	self do: 
+		[:elt | 
+		elt isLiteralObject 
+		    ifTrue: [elt storeLiteralOn: aStream]
+		    ifFalse: 
+			[aStream
+			    nextPutAll: '##(';
+			    store: elt;
+			    nextPut: $)].
+		aStream space].
+	aStream nextPut: $).
+	self isReadOnly ifFalse: [aStream nextPutAll: ' copy']
+    ]
+
+    multiBecome: anArray [
+	"Transform every object in the receiver in each corresponding
+	 object in anArray. anArray and the receiver must have the same
+	 size"
+
+	<category: 'mutating objects'>
+	| index |
+	index := 0.
+	^self collect: 
+		[:object | 
+		index := index + 1.
+		object become: (anArray at: index)]
+    ]
+
+    isArray [
+	<category: 'testing'>
+	^true
+    ]
+]
+

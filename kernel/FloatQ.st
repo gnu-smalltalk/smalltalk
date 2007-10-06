@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2002 Free Software Foundation, Inc.
@@ -31,254 +30,307 @@
  ======================================================================"
 
 
-Float variableByteSubclass: #FloatQ
-      instanceVariableNames: ''
-      classVariableNames: ''
-      poolDictionaries: ''
-      category: 'Language-Data types'
-!
-
-FloatQ comment: 
-'My instances represent floating point numbers that have the same
-accuracy as C''s "long double" numbers.'  !
-
 
-!FloatQ class methodsFor: 'converting'!
+Float subclass: FloatQ [
+    
+    <shape: #byte>
+    <category: 'Language-Data types'>
+    <comment: 'My instances represent floating point numbers that have the same
+accuracy as C''s "long double" numbers.'>
 
-coerce: aNumber
-    "Answer aNumber converted to a FloatQ"
-    ^aNumber asFloatQ
-! !
+    FloatQ class >> coerce: aNumber [
+	"Answer aNumber converted to a FloatQ"
 
-
-!FloatQ class methodsFor: 'byte-order dependancies'!
+	<category: 'converting'>
+	^aNumber asFloatQ
+    ]
 
-signByte
-    "Answer the byte of the receiver that contains the sign bit"
-    ^##(| n k |
-	n := -0.0q.
-	1 to: n size do: [ :i | (n at: i) = 128 ifTrue: [ k := i ] ].
+    FloatQ class >> signByte [
+	"Answer the byte of the receiver that contains the sign bit"
+
+	<category: 'byte-order dependancies'>
+	^##(| n k |
+	n := 0.0q.
+	1 to: n size do: [:i | (n at: i) = 128 ifTrue: [k := i]].
 	k)
-! !
+    ]
 
-
-!FloatQ class methodsFor: 'characterization'!
+    FloatQ class >> e [
+	"Returns the value of e. Hope is that it is precise enough"
 
-e
-    "Returns the value of e. Hope is that it is precise enough"
-    ^2.7182818284590452353602874713527q0
-!
+	<category: 'characterization'>
+	^2.7182818284590452216265178949363q
+    ]
 
-precision
-    "Answer the number of bits in the mantissa. 1 + (2^-precision) = 1"
-    ^CLongDoubleBinaryDigits
-!
+    FloatQ class >> precision [
+	"Answer the number of bits in the mantissa. 1 + (2^-precision) = 1"
 
-fminNormalized
-    "Return the smallest normalized FloatQ that is > 0"
-    ^CLongDoubleMin
-!
+	<category: 'characterization'>
+	^CLongDoubleBinaryDigits
+    ]
 
-fmax
-    "Return the largest normalized FloatQ that is not infinite."
-    ^CLongDoubleMax
-!
+    FloatQ class >> fminNormalized [
+	"Return the smallest normalized FloatQ that is > 0"
 
-emax
-    "Return the maximum allowable exponent for a FloatQ that is finite."
-    ^CLongDoubleMaxExp
-!
+	<category: 'characterization'>
+	^CLongDoubleMin
+    ]
 
-emin
-    "Return the maximum allowable exponent for a FloatQ that is finite."
-    ^CLongDoubleMinExp
-!
+    FloatQ class >> fmax [
+	"Return the largest normalized FloatQ that is not infinite."
 
-decimalDigits
-    "Return the number of decimal digits of precision for a FloatQ.
-     Technically, if P is the precision for the representation, then
-     the decimal precision Q is the maximum number of decimal digits
-     such that any floating point number with Q base 10 digits can be
-     rounded to a floating point number with P base 2 digits and back
-     again, without change to the Q decimal digits."
-    ^CLongDoubleDigits
-!
+	<category: 'characterization'>
+	^CLongDoubleMax
+    ]
 
-log10Base2
-    "Returns the value of log2 10. Hope is that it is precise enough"
-    ^3.3219280948873623478703194294894q0
-!
+    FloatQ class >> emax [
+	"Return the maximum allowable exponent for a FloatQ that is finite."
 
-ln10
-    "Returns the value of ln 10. Hope is that it is precise enough"
-    ^2.3025850929940456840179914546844q0
-!
+	<category: 'characterization'>
+	^CLongDoubleMaxExp
+    ]
 
-infinity
-    "Return a FloatQ that represents positive infinity."
-    ^CLongDoublePInf
-!
+    FloatQ class >> emin [
+	"Return the maximum allowable exponent for a FloatQ that is finite."
 
-negativeInfinity
-    "Return a FloatQ that represents negative infinity."
+	<category: 'characterization'>
+	^CLongDoubleMinExp
+    ]
 
-    ^CLongDoubleNInf
-!
+    FloatQ class >> decimalDigits [
+	"Return the number of decimal digits of precision for a FloatQ.
+	 Technically, if P is the precision for the representation, then
+	 the decimal precision Q is the maximum number of decimal digits
+	 such that any floating point number with Q base 10 digits can be
+	 rounded to a floating point number with P base 2 digits and back
+	 again, without change to the Q decimal digits."
 
-nan
-    "Return a FloatQ that represents a mathematically indeterminate value
-     (e.g. Inf - Inf, Inf / Inf)."
-    ^CLongDoubleNaN
-!
+	<category: 'characterization'>
+	^CLongDoubleDigits
+    ]
 
-pi
-    "Returns the value of pi. Hope is that it is precise enough"
-    ^3.14159265358979323846264338327950288q0
-! !
+    FloatQ class >> log10Base2 [
+	"Returns the value of log2 10. Hope is that it is precise enough"
 
+	<category: 'characterization'>
+	^3.3219280948873625223507781903972q
+    ]
 
-
-!FloatQ methodsFor: 'coercing'!
+    FloatQ class >> ln10 [
+	"Returns the value of ln 10. Hope is that it is precise enough"
 
-zero
-    "Coerce 0 to the receiver's class"
-    ^0.0q0
-!
+	<category: 'characterization'>
+	^2.3025850929940455480156462368249q
+    ]
 
-unity
-    "Coerce 1 to the receiver's class"
-    ^1.0q0
-!
+    FloatQ class >> infinity [
+	"Return a FloatQ that represents positive infinity."
 
-coerce: aNumber
-    "Coerce aNumber to the receiver's class"
-    ^aNumber asFloatQ
-!
+	<category: 'characterization'>
+	^CLongDoublePInf
+    ]
 
-generality
-    "Answer the receiver's generality"
-    ^420
-!
+    FloatQ class >> negativeInfinity [
+	"Return a FloatQ that represents negative infinity."
 
-asFloatQ
-    "Just defined for completeness.  Return the receiver."
-    ^self
-! !
+	<category: 'characterization'>
+	^CLongDoubleNInf
+    ]
 
-
-!FloatQ methodsFor: 'private'!
+    FloatQ class >> nan [
+	"Return a FloatQ that represents a mathematically indeterminate value
+	 (e.g. Inf - Inf, Inf / Inf)."
 
-ten
-    "Private - Return 10, converted to the receiver's class."
-    ^1.0q1
-!
+	<category: 'characterization'>
+	^CLongDoubleNaN
+    ]
 
-exponentLetter
-    "Private - Return the letter to be printed just before the exponent"
-    ^$q
-! !
+    FloatQ class >> pi [
+	"Returns the value of pi. Hope is that it is precise enough"
 
-!FloatQ methodsFor: 'built ins'!
+	<category: 'characterization'>
+	^3.1415926535897930885169542232694q
+    ]
 
-+ arg
-    "Sum the receiver and arg and answer another Number"
-    <primitive: VMpr_FloatQ_plus>
-    ^self retrySumCoercing: arg
-!
+    zero [
+	"Coerce 0 to the receiver's class"
 
-- arg
-    "Subtract arg from the receiver and answer another Number"
-    <primitive: VMpr_FloatQ_minus>
-    ^self retryDifferenceCoercing: arg
-!
+	<category: 'coercing'>
+	^0.0q
+    ]
 
-< arg
-    "Answer whether the receiver is less than arg"
-    <primitive: VMpr_FloatQ_lt>
-    ^self retryRelationalOp: #< coercing: arg
-!
+    unity [
+	"Coerce 1 to the receiver's class"
 
-> arg
-    "Answer whether the receiver is greater than arg"
-    <primitive: VMpr_FloatQ_gt>
-    ^self retryRelationalOp: #> coercing: arg
-!
+	<category: 'coercing'>
+	^1.0q
+    ]
 
-<= arg
-    "Answer whether the receiver is less than or equal to arg"
-    <primitive: VMpr_FloatQ_le>
-    ^self retryRelationalOp: #<= coercing: arg
-!
+    coerce: aNumber [
+	"Coerce aNumber to the receiver's class"
 
->= arg
-    "Answer whether the receiver is greater than or equal to arg"
-    <primitive: VMpr_FloatQ_ge>
-    ^self retryRelationalOp: #>= coercing: arg
-!
+	<category: 'coercing'>
+	^aNumber asFloatQ
+    ]
 
-= arg
-    "Answer whether the receiver is equal to arg"
-    <primitive: VMpr_FloatQ_eq>
-    ^self retryEqualityCoercing: arg
-!
+    generality [
+	"Answer the receiver's generality"
 
-~= arg
-    "Answer whether the receiver is not equal to arg"
-    <primitive: VMpr_FloatQ_ne>
-    ^self retryInequalityCoercing: arg
-!
+	<category: 'coercing'>
+	^420
+    ]
 
-* arg
-    "Multiply the receiver and arg and answer another Number"
-    <primitive: VMpr_FloatQ_times>
-    ^self retryMultiplicationCoercing: arg
-!
+    asFloatQ [
+	"Just defined for completeness.  Return the receiver."
 
-/ arg
-    "Divide the receiver by arg and answer another FloatQ"
-    <primitive: VMpr_FloatQ_divide>
-    ^self generality = arg generality
-	ifTrue: [ self zeroDivide ]
-	ifFalse: [ self retryDivisionCoercing: arg ]
-!
+	<category: 'coercing'>
+	^self
+    ]
 
-asFloatD
-    "Answer the receiver converted to a FloatD"
+    ten [
+	"Private - Return 10, converted to the receiver's class."
 
-    <primitive: VMpr_FloatQ_asFloatD>
-    self primitiveFailed
-!
+	<category: 'private'>
+	^10.0q
+    ]
 
-asFloatE
-    "Answer the receiver converted to a FloatE"
+    exponentLetter [
+	"Private - Return the letter to be printed just before the exponent"
 
-    <primitive: VMpr_FloatQ_asFloatE>
-    self primitiveFailed
-!
+	<category: 'private'>
+	^$q
+    ]
 
-truncated
-    "Truncate the receiver towards zero and answer the result"
+    + arg [
+	"Sum the receiver and arg and answer another Number"
 
-    <primitive: VMpr_FloatQ_truncated>
-    ^super truncated
-!
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_plus>
+	^self retrySumCoercing: arg
+    ]
 
-fractionPart
-    "Answer the fractional part of the receiver"
-    <primitive: VMpr_FloatQ_fractionPart>
-    self checkCoercion.
-    ^self primitiveFailed
-!
+    - arg [
+	"Subtract arg from the receiver and answer another Number"
 
-exponent
-    "Answer the exponent of the receiver in mantissa*2^exponent
-     representation ( |mantissa|<=1 ) "
-    <primitive: VMpr_FloatQ_exponent>
-!
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_minus>
+	^self retryDifferenceCoercing: arg
+    ]
 
-timesTwoPower: arg
-    "Answer the receiver multiplied by 2^arg"
-    <primitive: VMpr_FloatQ_timesTwoPower>
-! !
+    < arg [
+	"Answer whether the receiver is less than arg"
 
-
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_lt>
+	^self retryRelationalOp: #< coercing: arg
+    ]
+
+    > arg [
+	"Answer whether the receiver is greater than arg"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_gt>
+	^self retryRelationalOp: #> coercing: arg
+    ]
+
+    <= arg [
+	"Answer whether the receiver is less than or equal to arg"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_le>
+	^self retryRelationalOp: #<= coercing: arg
+    ]
+
+    >= arg [
+	"Answer whether the receiver is greater than or equal to arg"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_ge>
+	^self retryRelationalOp: #>= coercing: arg
+    ]
+
+    = arg [
+	"Answer whether the receiver is equal to arg"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_eq>
+	^self retryEqualityCoercing: arg
+    ]
+
+    ~= arg [
+	"Answer whether the receiver is not equal to arg"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_ne>
+	^self retryInequalityCoercing: arg
+    ]
+
+    * arg [
+	"Multiply the receiver and arg and answer another Number"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_times>
+	^self retryMultiplicationCoercing: arg
+    ]
+
+    / arg [
+	"Divide the receiver by arg and answer another FloatQ"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_divide>
+	^self generality = arg generality 
+	    ifTrue: [self zeroDivide]
+	    ifFalse: [self retryDivisionCoercing: arg]
+    ]
+
+    asFloatD [
+	"Answer the receiver converted to a FloatD"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_asFloatD>
+	self primitiveFailed
+    ]
+
+    asFloatE [
+	"Answer the receiver converted to a FloatE"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_asFloatE>
+	self primitiveFailed
+    ]
+
+    truncated [
+	"Truncate the receiver towards zero and answer the result"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_truncated>
+	^super truncated
+    ]
+
+    fractionPart [
+	"Answer the fractional part of the receiver"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_fractionPart>
+	self checkCoercion.
+	^self primitiveFailed
+    ]
+
+    exponent [
+	"Answer the exponent of the receiver in mantissa*2^exponent
+	 representation ( |mantissa|<=1 )"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_exponent>
+	
+    ]
+
+    timesTwoPower: arg [
+	"Answer the receiver multiplied by 2^arg"
+
+	<category: 'built ins'>
+	<primitive: VMpr_FloatQ_timesTwoPower>
+	
+    ]
+]
+

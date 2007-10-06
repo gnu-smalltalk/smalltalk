@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -29,56 +28,65 @@
  ======================================================================
 "
 
-InspectorFieldList subclass:  #CCompoundInspectorFieldList
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Browser'!
 
-CCompoundInspectorFieldList comment:
-nil!
+
+InspectorFieldList subclass: CCompoundInspectorFieldList [
+    
+    <comment: nil>
+    <category: 'Graphics-Browser'>
 
-!CCompoundInspectorFieldList methodsFor: 'accessing'!
+    currentField: assoc [
+	"Set list selection to value of index.  Force a text view update"
 
-currentField: assoc 
-    "Set list selection to value of index.  Force a text view update"
+	<category: 'accessing'>
+	assoc key == 0 
+	    ifTrue: [currentField := 0]
+	    ifFalse: [currentField := (fields at: assoc key) value]
+    ]
 
-    assoc key == 0 
-	ifTrue: [currentField := 0]
-	ifFalse: [currentField := (fields at: assoc key) value]! !
+    inspectMenu: listView [
+	"Initialize menu for variable list pane"
 
-!CCompoundInspectorFieldList methodsFor: 'initializing'!
+	<category: 'initializing'>
+	^(PopupMenu new: listView label: 'Field') 
+	    selectors: #(#('Inspect' #evalAndInspectResult: #listView))
+	    receiver: self
+	    argument: listView
+    ]
 
-inspectMenu: listView 
-    "Initialize menu for variable list pane"
+    currentFieldValue: obj [
+	"Cannot change!"
 
-    ^(PopupMenu new: listView label: 'Field') 
-	selectors: #(#('Inspect' #evalAndInspectResult: #listView))
-	receiver: self
-	argument: listView! !
+	<category: 'private'>
+	
+    ]
 
-!CCompoundInspectorFieldList methodsFor: 'private'!
+    currentFieldValue [
+	<category: 'private'>
+	currentField == 0 ifTrue: [^nil].
+	^(self value perform: currentField asSymbol) value
+    ]
 
-currentFieldValue: obj 
-    "Cannot change!"
+    computeFieldList: anObject [
+	"Initialize instance variable, fields, which governs display of
+	 variable list pane."
 
-    !
-
-currentFieldValue
-    currentField == 0 ifTrue: [^nil].
-    ^(self value perform: currentField asSymbol) value!
-
-computeFieldList: anObject 
-    "Initialize instance variable, fields, which governs display of
-     variable list pane."
-
-    self value inspectSelectorList 
-	do: [:aKey | fields add: (Association key: aKey asString value: aKey)]! !
+	<category: 'private'>
+	self value inspectSelectorList 
+	    do: [:aKey | fields add: (Association key: aKey asString value: aKey)]
+    ]
+]
 
 
-!CCompound methodsFor: 'debugging'!
+
+CCompound extend [
 
-inspectorFieldLists
-    "Open a CCompoundInspectorFieldList window on self"
-    ^{ 'Basic' -> BLOX.BLOXBrowser.CCompoundInspectorFieldList new value: self }
-! !
+    inspectorFieldLists [
+	"Open a CCompoundInspectorFieldList window on self"
+
+	<category: 'debugging'>
+	^{'Basic' -> BLOX.BLOXBrowser.CCompoundInspectorFieldList new value: self}
+    ]
+
+]
+

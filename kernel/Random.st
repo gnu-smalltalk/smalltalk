@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002
@@ -32,128 +31,133 @@
  ======================================================================"
 
 
-Stream subclass: #Random
-       instanceVariableNames: 'seed'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Streams'
-!
-
-Random class
-       instanceVariableNames: 'source'!
-
-Random comment: "Here's a random comment :-)"
-'My instances are generator streams that produce random numbers, which are 
-floating point values between 0 and 1.'!
-
 
-!Random class methodsFor: 'instance creation'!
+Stream subclass: Random [
+    | seed |
+    
+    <category: 'Streams'>
+    <comment: 'My instances are generator streams that produce random numbers, which are 
+floating point values between 0 and 1.'>
 
-seed: aFloat
-    "Create a new random number generator whose seed is aFloat"
-    ^self basicNew seed: aFloat; yourself
-!
+    Random class [
+	| source |
+	
+    ]
 
-new
-    "Create a new random number generator whose seed is given by the
-    current time on the millisecond clock"
-    ^self basicNew setSeed
-! !
+    Random class >> seed: aFloat [
+	"Create a new random number generator whose seed is aFloat"
 
+	<category: 'instance creation'>
+	^(self basicNew)
+	    seed: aFloat;
+	    yourself
+    ]
 
-
-!Random class methodsFor: 'shortcuts'!
+    Random class >> new [
+	"Create a new random number generator whose seed is given by the
+	 current time on the millisecond clock"
 
-source
-    "Return a standard source of random numbers."
-    ^source isNil
-	ifTrue: [ source := self new ]
-	ifFalse: [ source ]
-!
+	<category: 'instance creation'>
+	^self basicNew setSeed
+    ]
 
-next
-    "Return a random number between 0 and 1 (excluded)"
-    ^self source next
-!
+    Random class >> source [
+	"Return a standard source of random numbers."
 
-between: low and: high
-    "Return a random integer between the given extrema"
-    ^self source between: low and: high
-! !
+	<category: 'shortcuts'>
+	^source isNil ifTrue: [source := self new] ifFalse: [source]
+    ]
 
-
-!Random methodsFor: 'testing'!
+    Random class >> next [
+	"Return a random number between 0 and 1 (excluded)"
 
-chiSquare
-    "Compute the chi-square of the random that this class generates."
+	<category: 'shortcuts'>
+	^self source next
+    ]
 
-    "the previous algorithm's chi-square was 93.4"
-    ^self chiSquare: 1000 range: 100
-!
+    Random class >> between: low and: high [
+	"Return a random integer between the given extrema"
 
-chiSquare: n range: r
-    "Return the chi-square deduced from calculating n random
-     numbers in the 0..r range."
+	<category: 'shortcuts'>
+	^self source between: low and: high
+    ]
 
-    | f t seed |
-    seed := 0.1234567.
-    f := Array new: r + 1.
-    1 to: r + 1 do: [ :i | f at: i put: 0 ].
-    n timesRepeat: [
-	seed := (seed + Float pi) squared squared fractionPart.
-	t := (seed * r) truncated.
-	f at: t + 1 put: (f at: t + 1) + 1
-    ].
-    t := 0.
-    1 to: r do: [ :i | t := t + (f at: i) squared ].
-    ^r asFloat * t / n - n
+    chiSquare [
+	"Compute the chi-square of the random that this class generates."
 
-! !
+	"the previous algorithm's chi-square was 93.4"
 
+	<category: 'testing'>
+	^self chiSquare: 1000 range: 100
+    ]
 
-
-!Random methodsFor: 'basic'!
+    chiSquare: n range: r [
+	"Return the chi-square deduced from calculating n random
+	 numbers in the 0..r range."
 
-atEnd
-    "This stream never ends. Always answer false."
-    ^false
-!
+	<category: 'testing'>
+	| f t seed |
+	seed := 0.1234567.
+	f := Array new: r + 1.
+	1 to: r + 1 do: [:i | f at: i put: 0].
+	n timesRepeat: 
+		[seed := (seed + Float pi) squared squared fractionPart.
+		t := (seed * r) truncated.
+		f at: t + 1 put: (f at: t + 1) + 1].
+	t := 0.
+	1 to: r do: [:i | t := t + (f at: i) squared].
+	^r asFloat * t / n - n
+    ]
 
-between: low and: high
-    "Return a random integer between low and high."
-    | i range |
+    atEnd [
+	"This stream never ends. Always answer false."
 
-    range := high - low + 1.
-    i := (self next * range) truncated.
-    ^i + low
-!
+	<category: 'basic'>
+	^false
+    ]
 
-next
-    "Return the next random number in the sequence."
-    "Found on an obscure Japanese manual. Turns out to be good!"
-    ^seed := (seed + Float pi) squared squared fractionPart
-!
+    between: low and: high [
+	"Return a random integer between low and high."
 
-nextPut: value
-    self shouldNotImplement
-! !
+	<category: 'basic'>
+	| i range |
+	range := high - low + 1.
+	i := (self next * range) truncated.
+	^i + low
+    ]
 
+    next [
+	"Return the next random number in the sequence."
 
-
-!Random methodsFor: 'private'!
+	"Found on an obscure Japanese manual. Turns out to be good!"
 
-seed: aFloat
-    "Private - Set the random number seed to aFloat.
-    Ensure decent results even when integers are passed"
-    seed := (aFloat / 100000.0 + aFloat) fractionPart.
-    self next.
-    self next
-!
+	<category: 'basic'>
+	^seed := (seed + Float pi) squared squared fractionPart
+    ]
 
-setSeed
-    "Private - Set a random number seed."
-    seed := Time primSecondClock - Time primMillisecondClock.
-    seed := (seed / 16r3FFFFF.0) fractionPart.
-    self next.
-    self next
-! !
+    nextPut: value [
+	<category: 'basic'>
+	self shouldNotImplement
+    ]
+
+    seed: aFloat [
+	"Private - Set the random number seed to aFloat.
+	 Ensure decent results even when integers are passed"
+
+	<category: 'private'>
+	seed := (aFloat / 100000.0 + aFloat) fractionPart.
+	self next.
+	self next
+    ]
+
+    setSeed [
+	"Private - Set a random number seed."
+
+	<category: 'private'>
+	seed := Time primSecondClock - Time primMillisecondClock.
+	seed := (seed / 4194303.0) fractionPart.
+	self next.
+	self next
+    ]
+]
+

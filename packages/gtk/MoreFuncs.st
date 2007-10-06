@@ -1,169 +1,283 @@
-"======================================================================
-|
-|   Smalltalk Gtk+ bindings (functions in gst-gtk.c)
-|
- ======================================================================"
+Gtk class extend [
+
+    mainIteration [
+	<category: 'C call-outs'>
+	<asyncCCall: 'gstGtkMainIteration' args: #()>
+	
+    ]
+
+    mainIterationDo: blocking [
+	<category: 'C call-outs'>
+	<asyncCCall: 'gstGtkMainIterationDo' args: #(#boolean )>
+	
+    ]
+
+    main: aSemaphore [
+	<category: 'C call-outs'>
+	<asyncCCall: 'gstGtkMain' args: #(#smalltalk )>
+	
+    ]
+
+    shouldQuit [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkShouldQuit' returning: #boolean args: #()>
+	
+    ]
+
+    gstGtkInit [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkInit' returning: #void args: #()>
+	
+    ]
+
+]
 
 
-"======================================================================
-|
-| Copyright 2001, 2003 Free Software Foundation, Inc.
-| Written by Paolo Bonzini.
-|
-| This file is part of the GNU Smalltalk class library.
-|
-| The GNU Smalltalk class library is free software; you can redistribute it
-| and/or modify it under the terms of the GNU Lesser General Public License
-| as published by the Free Software Foundation; either version 2.1, or (at
-| your option) any later version.
-| 
-| The GNU Smalltalk class library is distributed in the hope that it will be
-| useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
-| General Public License for more details.
-| 
-| You should have received a copy of the GNU Lesser General Public License
-| along with the GNU Smalltalk class library; see the file COPYING.LESSER.
-| If not, write to the Free Software Foundation, 59 Temple Place - Suite
-| 330, Boston, MA 02110-1301, USA.  
-|
- ======================================================================"
+
+GLib class extend [
 
-"These differ from the standard implementation in that they run
- until all events are done.  We also need to redefine them so that
- they are asynchronous"
+    register: anObject forType: gType [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkRegisterForType' returning: #void
+	args: #(#smalltalk #unknown )>
+	
+    ]
 
-!Gtk class methodsFor: 'C call-outs'!
+]
 
-mainIteration
-    <asyncCCall: 'gstGtkMainIteration' args: #()>!
 
-mainIterationDo: blocking
-    <asyncCCall: 'gstGtkMainIterationDo' args: #(#boolean )>!
+
+GObject extend [
 
-main: aSemaphore
-    <asyncCCall: 'gstGtkMain' args: #(#smalltalk )>!
+    connectSignal: name to: handler selector: sel userData: userData [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkConnectSignal' returning: #void
+	args: #(#selfSmalltalk #string #smalltalk #smalltalk #smalltalk )>
+	
+    ]
 
-shouldQuit
-    <cCall: 'gstGtkShouldQuit' returning: #boolean args: #()>!
+    narrow [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkNarrowGObjectOOP' returning: #smalltalk
+	args: #(#self #selfSmalltalk )>
+	
+    ]
 
-gstGtkInit
-    <cCall: 'gstGtkInit' returning: #void args: #()>! !
+    free [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkFreeGObjectOOP' returning: #void args: #(#self )>
+	
+    ]
 
-!GLib class methodsFor: 'C call-outs'!
+    propertiesAt: name [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkGetProperty' returning: #smalltalk args: #(#self #string )>
+	
+    ]
 
-register: anObject forType: gType
-    <cCall: 'gstGtkRegisterForType' returning: #void
-	args: #(#smalltalk #unknown )>!
+    propertiesAt: name put: anObject [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkSetProperty' returning: #void
+	args: #(#self #string #smalltalk )>
+	
+    ]
 
-!GObject methodsFor: 'C call-outs'!
+]
 
-connectSignal: name to: handler selector: sel userData: userData
-    <cCall: 'gstGtkConnectSignal' returning: #void
-	args: #(#selfSmalltalk #string #smalltalk #smalltalk #smalltalk )>!
 
-narrow
-    <cCall: 'gstGtkNarrowGObjectOOP' returning: #smalltalk
-	args: #(#self #selfSmalltalk )>!
+
+GtkWidget extend [
 
-free
-    <cCall: 'gstGtkFreeGObjectOOP' returning: #void args: #(#self )>!
+    getAllocation [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkWidgetGetAllocation' returning: #{GtkAllocation}
+	args: #(#self )>
+	
+    ]
 
-propertiesAt: name
-    <cCall: 'gstGtkGetProperty' returning: #smalltalk args: #(#self #string )>!
+    getWindow [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkGetWindow' returning: #{GdkWindow} args: #(#self )>
+	
+    ]
 
-propertiesAt: name put: anObject
-    <cCall: 'gstGtkSetProperty' returning: #void
-	args: #(#self #string #smalltalk )>! !
+    getState [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkGetState' returning: #int args: #(#self )>
+	
+    ]
 
-!GtkWidget methodsFor: 'C call-outs'!
+    getFlags [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkGetFlags' returning: #int args: #(#self )>
+	
+    ]
 
-getAllocation
-    <cCall: 'gstGtkWidgetGetAllocation' returning: #{GtkAllocation}
-	args: #(#self )>!
+    setFlags: flags [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkSetFlags' returning: #void args: #(#self #int )>
+	
+    ]
 
-getWindow
-    <cCall: 'gstGtkGetWindow' returning: #{GdkWindow} args: #(#self )>!
+    unsetFlags: flags [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkUnsetFlags' returning: #void args: #(#self #int )>
+	
+    ]
 
-getState
-    <cCall: 'gstGtkGetState' returning: #int args: #(#self )>!
+]
 
-getFlags
-    <cCall: 'gstGtkGetFlags' returning: #int args: #(#self )>!
 
-setFlags: flags
-    <cCall: 'gstGtkSetFlags' returning: #void args: #(#self #int )>!
+
+GtkContainer extend [
 
-unsetFlags: flags
-    <cCall: 'gstGtkUnsetFlags' returning: #void args: #(#self #int )>! !
+    child: widget propertiesAt: name [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkGetChildProperty' returning: #smalltalk
+	args: #(#self #cObject #string )>
+	
+    ]
 
-!GtkContainer methodsFor: 'C call-outs'!
+    child: widget propertiesAt: name put: anObject [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkSetChildProperty' returning: #void
+	args: #(#self #cObject #string #smalltalk )>
+	
+    ]
 
-child: widget propertiesAt: name
-    <cCall: 'gstGtkGetChildProperty' returning: #smalltalk
-	args: #(#self #cObject #string )>!
+]
 
-child: widget propertiesAt: name put: anObject
-    <cCall: 'gstGtkSetChildProperty' returning: #void
-	args: #(#self #cObject #string #smalltalk )>! !
 
-!GValue class methodsFor: 'C call-outs'!
+
+GValue class extend [
 
-typeFromName: aName
-    <cCall: 'g_type_from_name' returning: #int args: #(#string )>!
+    typeFromName: aName [
+	<category: 'C call-outs'>
+	<cCall: 'g_type_from_name' returning: #int args: #(#string )>
+	
+    ]
 
-!GtkTreeModel methodsFor: 'C call-outs'!
+]
 
-getOop: iter column: aColumn
-    <cCall: 'gstGtkTreeModelGetOOP' returning: #smalltalk
-	args: #(#self #cObject #int )>!
 
-!GtkTreeStore methodsFor: 'C call-outs'!
+
+GtkTreeModel extend [
 
-setOop: iter column: aColumn value: aValue
-    <cCall: 'gstGtkTreeStoreSetOOP' returning: #void
-	args: #(#self #cObject #int #smalltalk )>!
+    getOop: iter column: aColumn [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkTreeModelGetOOP' returning: #smalltalk
+	args: #(#self #cObject #int )>
+	
+    ]
 
-!GtkListStore methodsFor: 'C call-outs'!
+]
 
-setOop: iter column: aColumn value: aValue
-    <cCall: 'gstGtkListStoreSetOOP' returning: #void
-	args: #(#self #cObject #int #smalltalk )>!
 
-!GtkDialog methodsFor: 'C call-outs'!
+
+GtkTreeStore extend [
 
-getVBox
-    <cCall: 'gstGtkDialogGetVBox' returning: #{GtkWidget} args: #(#self )>!
+    setOop: iter column: aColumn value: aValue [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkTreeStoreSetOOP' returning: #void
+	args: #(#self #cObject #int #smalltalk )>
+	
+    ]
 
-getActionArea
-    <cCall: 'gstGtkDialogGetActionArea' returning: #{GtkWidget}
-	args: #(#self )>! !
+]
 
-!GtkScrolledWindow methodsFor: 'C call-outs'!
 
-getHscrollbarVisible
-    <cCall: 'gstGtkGetHscrollbarVisible' returning: #boolean args: #(#self )>!
+
+GtkListStore extend [
 
-getVscrollbarVisible
-    <cCall: 'gstGtkGetVscrollbarVisible' returning: #boolean args: #(#self )>! !
+    setOop: iter column: aColumn value: aValue [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkListStoreSetOOP' returning: #void
+	args: #(#self #cObject #int #smalltalk )>
+	
+    ]
 
-!GtkAdjustment methodsFor: 'C call-outs'!
+]
 
-getLower
-    <cCall: 'gstGtkAdjustmentGetLower' returning: #int args: #(#self )>!
 
-getUpper
-    <cCall: 'gstGtkAdjustmentGetUpper' returning: #int args: #(#self )>!
+
+GtkDialog extend [
 
-getPageSize
-    <cCall: 'gstGtkAdjustmentGetPageSize' returning: #int args: #(#self )>! !
+    getVBox [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkDialogGetVBox' returning: #{GtkWidget} args: #(#self )>
+	
+    ]
 
-!GdkPixbufLoader methodsFor: 'C call-outs'!
+    getActionArea [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkDialogGetActionArea' returning: #{GtkWidget}
+	args: #(#self )>
+	
+    ]
 
-write: buf count: count error: error
-    "FIXME: funcs.awk is broken for this."
-    <cCall: 'gdk_pixbuf_loader_write' returning: #boolean
-	args: #(#self #byteArray #int #cObject )>! !
+]
 
-GtkTreeStore superclass: GtkTreeModel!
-GtkListStore superclass: GtkTreeModel!
+
+
+GtkScrolledWindow extend [
+
+    getHscrollbarVisible [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkGetHscrollbarVisible' returning: #boolean args: #(#self )>
+	
+    ]
+
+    getVscrollbarVisible [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkGetVscrollbarVisible' returning: #boolean args: #(#self )>
+	
+    ]
+
+]
+
+
+
+GtkAdjustment extend [
+
+    getLower [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkAdjustmentGetLower' returning: #int args: #(#self )>
+	
+    ]
+
+    getUpper [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkAdjustmentGetUpper' returning: #int args: #(#self )>
+	
+    ]
+
+    getPageSize [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkAdjustmentGetPageSize' returning: #int args: #(#self )>
+	
+    ]
+
+]
+
+
+
+GdkPixbufLoader extend [
+
+    write: buf count: count error: error [
+	"FIXME: funcs.awk is broken for this."
+
+	<category: 'C call-outs'>
+	<cCall: 'gdk_pixbuf_loader_write' returning: #boolean
+	args: #(#self #byteArray #int #cObject )>
+	
+    ]
+
+]
+
+
+
+Eval [
+    GtkTreeStore superclass: GtkTreeModel.
+    GtkListStore superclass: GtkTreeModel
+]
+

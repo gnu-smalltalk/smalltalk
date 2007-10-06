@@ -1,219 +1,366 @@
-"======================================================================
-|
-|   C function definitions
-|
-|
- ======================================================================"
+IPAddress class extend [
 
+    addressFamily [
+	<category: 'C constants'>
+	<cCall: 'TCPafInet' returning: #long args: #()>
+	
+    ]
 
-"======================================================================
-|
-| Copyright 1999, 2000, 2001, 2002, 2005 Free Software Foundation, Inc.
-| Written by Paolo Bonzini.
-|
-| This file is part of the GNU Smalltalk class library.
-|
-| The GNU Smalltalk class library is free software; you can redistribute it
-| and/or modify it under the terms of the GNU Lesser General Public License
-| as published by the Free Software Foundation; either version 2.1, or (at
-| your option) any later version.
-| 
-| The GNU Smalltalk class library is distributed in the hope that it will be
-| useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser
-| General Public License for more details.
-| 
-| You should have received a copy of the GNU Lesser General Public License
-| along with the GNU Smalltalk class library; see the file COPYING.LIB.
-| If not, write to the Free Software Foundation, 59 Temple Place - Suite
-| 330, Boston, MA 02110-1301, USA.  
-|
- ======================================================================"
+    protocolFamily [
+	<category: 'C constants'>
+	<cCall: 'TCPpfInet' returning: #long args: #()>
+	
+    ]
 
-!IPAddress class methodsFor: 'C constants'!
+]
 
-addressFamily
-    <cCall: 'TCPafInet' returning: #long args: #()>!
-
-protocolFamily
-    <cCall: 'TCPpfInet' returning: #long args: #()>! !
-
-!AbstractSocketImpl class methodsFor: 'C constants'!
-
-solSocket
-    <cCall: 'TCPsolSocket' returning: #long args: #()>!
-
-soLinger
-    <cCall: 'TCPsoLinger' returning: #long args: #()>!
-
-soError
-    <cCall: 'TCPsoError' returning: #long args: #()>!
-
-soReuseAddr
-    <cCall: 'TCPsoReuseAddr' returning: #long args: #()>!
-
-sockDgram
-    <cCall: 'TCPsockDgram' returning: #long args: #()>!
-
-sockStream
-    <cCall: 'TCPsockStream' returning: #long args: #()>!
-
-sockRDM
-    <cCall: 'TCPsockRDM' returning: #long args: #()>!
-
-sockRaw
-    <cCall: 'TCPsockRaw' returning: #long args: #()>! !
-
-!UDPSocketImpl class methodsFor: 'C constants'!
-
-ipprotoIp
-    <cCall: 'TCPipprotoIp' returning: #long args: #()>!
-
-protocol
-    <cCall: 'TCPipprotoUdp' returning: #long args: #()>! !
-
-!TCPSocketImpl class methodsFor: 'C constants'!
-
-protocol
-    <cCall: 'TCPipprotoTcp' returning: #long args: #()>! !
-
-!ICMPSocketImpl class methodsFor: 'C constants'!
-
-protocol
-    <cCall: 'TCPipprotoIcmp' returning: #long args: #()>! !
-
-!OOBSocketImpl methodsFor: 'C constants'!
-
-msgOOB
-    <cCall: 'TCPmsgOOB' returning: #long args: #()>! !
-
-!DatagramSocketImpl methodsFor: 'C constants'!
-
-msgPeek
-    <cCall: 'TCPmsgPeek' returning: #long args: #()>!
-
-ipMulticastTtl
-    <cCall: 'TCPipMulticastTtl' returning: #long args: #()>!
-
-ipMulticastIf
-    <cCall: 'TCPipMulticastIf' returning: #long args: #()>!
-
-ipAddMembership
-    <cCall: 'TCPipAddMembership' returning: #long args: #()>!
-
-ipDropMembership
-    <cCall: 'TCPipDropMembership' returning: #long args: #()>! !
 
 
-!SocketAddress class methodsFor: 'C call-outs'!
+AbstractSocketImpl class extend [
 
-lookupAllHostAddr: name withHostEnt: cObject
-    <cCall: 'TCPlookupAllHostAddr' returning: #int
-	args: #(#string #smalltalk)>!
+    solSocket [
+	<category: 'C constants'>
+	<cCall: 'TCPsolSocket' returning: #long args: #()>
+	
+    ]
 
-primName: address len: len type: addressFamily
-    <cCall: 'TCPgetHostByAddr' returning: #stringOut
-	args: #(#byteArray #int #int)>!
+    soLinger [
+	<category: 'C constants'>
+	<cCall: 'TCPsoLinger' returning: #long args: #()>
+	
+    ]
 
-primLocalName
-    <cCall: 'TCPgetLocalName' returning: #stringOut
-	args: #()>! !
+    soError [
+	<category: 'C constants'>
+	<cCall: 'TCPsoError' returning: #long args: #()>
+	
+    ]
 
-!IPAddress class methodsFor: 'C call-outs'!
+    soReuseAddr [
+	<category: 'C constants'>
+	<cCall: 'TCPsoReuseAddr' returning: #long args: #()>
+	
+    ]
 
-primAnyLocalAddress: hostName in: byteArray
-    <cCall: 'TCPgetAnyLocalAddress' returning: #void
-	args: #(#string #byteArrayOut)>! !
+    sockDgram [
+	<category: 'C constants'>
+	<cCall: 'TCPsockDgram' returning: #long args: #()>
+	
+    ]
 
-!AbstractSocketImpl methodsFor: 'C call-outs'!
+    sockStream [
+	<category: 'C constants'>
+	<cCall: 'TCPsockStream' returning: #long args: #()>
+	
+    ]
 
-accept: socket peer: peer addrLen: len
-    <cCall: 'TCPaccept' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>!
+    sockRDM [
+	<category: 'C constants'>
+	<cCall: 'TCPsockRDM' returning: #long args: #()>
+	
+    ]
 
-bind: socket to: addr addrLen: len
-    <cCall: 'TCPbind' returning: #int
-	args: #(#int #byteArray #int )>!
+    sockRaw [
+	<category: 'C constants'>
+	<cCall: 'TCPsockRaw' returning: #long args: #()>
+	
+    ]
 
-connect: socket to: addr addrLen: len
-    <cCall: 'TCPconnect' returning: #int
-	args: #(#int #byteArray #int )>!
+]
 
-listen: socket log: len
-    <cCall: 'TCPlisten' returning: #int
-	args: #(#int #int )>!
 
-getPeerName: socket addr: addr addrLen: len
-    <cCall: 'TCPgetpeername' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>!
+
+UDPSocketImpl class extend [
 
-getSockName: socket addr: addr addrLen: len
-    <cCall: 'TCPgetsockname' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>!
+    ipprotoIp [
+	<category: 'C constants'>
+	<cCall: 'TCPipprotoIp' returning: #long args: #()>
+	
+    ]
 
-receive: socket buffer: buf size: len flags: flags from: addr size: addrLen
-    <cCall: 'TCPrecvfrom' returning: #int
-	args: #(#int #byteArrayOut #int #int #byteArray #byteArrayOut )>!
+    protocol [
+	<category: 'C constants'>
+	<cCall: 'TCPipprotoUdp' returning: #long args: #()>
+	
+    ]
 
-send: socket buffer: buf size: len flags: flags to: addr size: addrLen
-    <cCall: 'TCPsendto' returning: #int
-	args: #(#int #byteArray #int #int #unknown #int )>!
+]
 
-option: socket level: level at: name put: value size: len
-    <cCall: 'TCPsetsockopt' returning: #int
-	args: #(#int #int #int #byteArray #int )>!
 
-option: socket level: level at: name get: value size: len
-    <cCall: 'TCPgetsockopt' returning: #int
-	args: #(#int #int #int #byteArrayOut #byteArrayOut )>!
+
+TCPSocketImpl class extend [
 
-create: family type: type protocol: protocol
-    <cCall: 'TCPsocket' returning: #int
-	args: #(#int #int #int )>! !
+    protocol [
+	<category: 'C constants'>
+	<cCall: 'TCPipprotoTcp' returning: #long args: #()>
+	
+    ]
 
-!AbstractSocketImpl class methodsFor: 'C call-outs'!
+]
 
-accept: socket peer: peer addrLen: len
-    <cCall: 'TCPaccept' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>!
 
-bind: socket to: addr addrLen: len
-    <cCall: 'TCPbind' returning: #int
-	args: #(#int #byteArray #int )>!
+
+ICMPSocketImpl class extend [
 
-connect: socket to: addr addrLen: len
-    <cCall: 'TCPconnect' returning: #int
-	args: #(#int #byteArray #int )>!
+    protocol [
+	<category: 'C constants'>
+	<cCall: 'TCPipprotoIcmp' returning: #long args: #()>
+	
+    ]
 
-listen: socket log: len
-    <cCall: 'TCPlisten' returning: #int
-	args: #(#int #int )>!
+]
 
-getPeerName: socket addr: addr addrLen: len
-    <cCall: 'TCPgetpeername' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>!
 
-getSockName: socket addr: addr addrLen: len
-    <cCall: 'TCPgetsockname' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>!
+
+OOBSocketImpl extend [
 
-receive: socket buffer: buf size: len flags: flags from: addr size: addrLen
-    <cCall: 'TCPrecvfrom' returning: #int
-	args: #(#int #byteArrayOut #int #int #byteArray #byteArrayOut )>!
+    msgOOB [
+	<category: 'C constants'>
+	<cCall: 'TCPmsgOOB' returning: #long args: #()>
+	
+    ]
 
-send: socket buffer: buf size: len flags: flags to: addr size: addrLen
-    <cCall: 'TCPsendto' returning: #int
-	args: #(#int #byteArray #int #int #unknown #int )>!
+]
 
-option: socket level: level at: name put: value size: len
-    <cCall: 'TCPsetsockopt' returning: #int
-	args: #(#int #int #int #byteArray #int )>!
 
-option: socket level: level at: name get: value size: len
-    <cCall: 'TCPgetsockopt' returning: #int
-	args: #(#int #int #int #byteArrayOut #byteArrayOut )>!
+
+DatagramSocketImpl extend [
 
-create: family type: type protocol: protocol
-    <cCall: 'TCPsocket' returning: #int
-	args: #(#int #int #int )>! !
+    msgPeek [
+	<category: 'C constants'>
+	<cCall: 'TCPmsgPeek' returning: #long args: #()>
+	
+    ]
+
+    ipMulticastTtl [
+	<category: 'C constants'>
+	<cCall: 'TCPipMulticastTtl' returning: #long args: #()>
+	
+    ]
+
+    ipMulticastIf [
+	<category: 'C constants'>
+	<cCall: 'TCPipMulticastIf' returning: #long args: #()>
+	
+    ]
+
+    ipAddMembership [
+	<category: 'C constants'>
+	<cCall: 'TCPipAddMembership' returning: #long args: #()>
+	
+    ]
+
+    ipDropMembership [
+	<category: 'C constants'>
+	<cCall: 'TCPipDropMembership' returning: #long args: #()>
+	
+    ]
+
+]
+
+
+
+SocketAddress class extend [
+
+    lookupAllHostAddr: name withHostEnt: cObject [
+	<category: 'C call-outs'>
+	<cCall: 'TCPlookupAllHostAddr' returning: #int
+	args: #(#string #smalltalk)>
+	
+    ]
+
+    primName: address len: len type: addressFamily [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetHostByAddr' returning: #stringOut
+	args: #(#byteArray #int #int)>
+	
+    ]
+
+    primLocalName [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetLocalName' returning: #stringOut
+	args: #()>
+	
+    ]
+
+]
+
+
+
+IPAddress class extend [
+
+    primAnyLocalAddress: hostName in: byteArray [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetAnyLocalAddress' returning: #void
+	args: #(#string #byteArrayOut)>
+	
+    ]
+
+]
+
+
+
+AbstractSocketImpl extend [
+
+    accept: socket peer: peer addrLen: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPaccept' returning: #int
+	args: #(#int #byteArrayOut #byteArray )>
+	
+    ]
+
+    bind: socket to: addr addrLen: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPbind' returning: #int
+	args: #(#int #byteArray #int )>
+	
+    ]
+
+    connect: socket to: addr addrLen: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPconnect' returning: #int
+	args: #(#int #byteArray #int )>
+	
+    ]
+
+    listen: socket log: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPlisten' returning: #int
+	args: #(#int #int )>
+	
+    ]
+
+    getPeerName: socket addr: addr addrLen: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetpeername' returning: #int
+	args: #(#int #byteArrayOut #byteArray )>
+	
+    ]
+
+    getSockName: socket addr: addr addrLen: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetsockname' returning: #int
+	args: #(#int #byteArrayOut #byteArray )>
+	
+    ]
+
+    receive: socket buffer: buf size: len flags: flags from: addr size: addrLen [
+	<category: 'C call-outs'>
+	<cCall: 'TCPrecvfrom' returning: #int
+	args: #(#int #byteArrayOut #int #int #byteArray #byteArrayOut )>
+	
+    ]
+
+    send: socket buffer: buf size: len flags: flags to: addr size: addrLen [
+	<category: 'C call-outs'>
+	<cCall: 'TCPsendto' returning: #int
+	args: #(#int #byteArray #int #int #unknown #int )>
+	
+    ]
+
+    option: socket level: level at: name put: value size: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPsetsockopt' returning: #int
+	args: #(#int #int #int #byteArray #int )>
+	
+    ]
+
+    option: socket level: level at: name get: value size: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetsockopt' returning: #int
+	args: #(#int #int #int #byteArrayOut #byteArrayOut )>
+	
+    ]
+
+    create: family type: type protocol: protocol [
+	<category: 'C call-outs'>
+	<cCall: 'TCPsocket' returning: #int
+	args: #(#int #int #int )>
+	
+    ]
+
+]
+
+
+
+AbstractSocketImpl class extend [
+
+    accept: socket peer: peer addrLen: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPaccept' returning: #int
+	args: #(#int #byteArrayOut #byteArray )>
+	
+    ]
+
+    bind: socket to: addr addrLen: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPbind' returning: #int
+	args: #(#int #byteArray #int )>
+	
+    ]
+
+    connect: socket to: addr addrLen: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPconnect' returning: #int
+	args: #(#int #byteArray #int )>
+	
+    ]
+
+    listen: socket log: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPlisten' returning: #int
+	args: #(#int #int )>
+	
+    ]
+
+    getPeerName: socket addr: addr addrLen: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetpeername' returning: #int
+	args: #(#int #byteArrayOut #byteArray )>
+	
+    ]
+
+    getSockName: socket addr: addr addrLen: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetsockname' returning: #int
+	args: #(#int #byteArrayOut #byteArray )>
+	
+    ]
+
+    receive: socket buffer: buf size: len flags: flags from: addr size: addrLen [
+	<category: 'C call-outs'>
+	<cCall: 'TCPrecvfrom' returning: #int
+	args: #(#int #byteArrayOut #int #int #byteArray #byteArrayOut )>
+	
+    ]
+
+    send: socket buffer: buf size: len flags: flags to: addr size: addrLen [
+	<category: 'C call-outs'>
+	<cCall: 'TCPsendto' returning: #int
+	args: #(#int #byteArray #int #int #unknown #int )>
+	
+    ]
+
+    option: socket level: level at: name put: value size: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPsetsockopt' returning: #int
+	args: #(#int #int #int #byteArray #int )>
+	
+    ]
+
+    option: socket level: level at: name get: value size: len [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetsockopt' returning: #int
+	args: #(#int #int #int #byteArrayOut #byteArrayOut )>
+	
+    ]
+
+    create: family type: type protocol: protocol [
+	<category: 'C call-outs'>
+	<cCall: 'TCPsocket' returning: #int
+	args: #(#int #int #int )>
+	
+    ]
+
+]
 

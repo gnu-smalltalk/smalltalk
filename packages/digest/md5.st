@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2005, 2007 Free Software Foundation, Inc.
@@ -30,71 +29,84 @@
 |
  ======================================================================"
 
-MessageDigest subclass: #MD5
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Modules'!
 
-!MD5 class methodsFor: 'C call-outs'!
+
+MessageDigest subclass: MD5 [
+    
+    <comment: nil>
+    <category: 'Examples-Modules'>
 
-new
-    ^self basicNew initialize
-! !
+    MD5 class >> new [
+	<category: 'C call-outs'>
+	^self basicNew initialize
+    ]
 
-!MD5 methodsFor: 'C call-outs'!
+    newState [
+	<category: 'C call-outs'>
+	<cCall: 'MD5AllocOOP' returning: #smalltalk args: #()>
+	
+    ]
 
-newState
-    <cCall: 'MD5AllocOOP' returning: #smalltalk args: #()>
-!
+    combine: input size: len into: context [
+	<category: 'C call-outs'>
+	<cCall: 'MD5Update' returning: #void args: #(#byteArray #int #byteArrayOut)>
+	
+    ]
 
-combine: input size: len into: context
-    <cCall: 'MD5Update' returning: #void args: #(#byteArray #int #byteArrayOut)>
-!
+    finalize: state in: digest [
+	<category: 'C call-outs'>
+	<cCall: 'MD5Final' returning: #void args: #(#byteArray #byteArrayOut)>
+	
+    ]
 
-finalize: state in: digest
-    <cCall: 'MD5Final' returning: #void args: #(#byteArray #byteArrayOut)>
-! !
+    initialize [
+	<category: 'initialization'>
+	self state: self newState
+    ]
 
-!MD5 methodsFor: 'initialization'!
+    nextPut: char [
+	<category: 'checksumming'>
+	self 
+	    combine: (String with: char)
+	    size: 1
+	    into: self state
+    ]
 
-initialize
-    self state: self newState
-! !
+    nextPutAll: aStringOrStream [
+	<category: 'checksumming'>
+	| buffer n |
+	(aStringOrStream isKindOf: String) 
+	    ifTrue: 
+		[self 
+		    combine: aStringOrStream
+		    size: aStringOrStream size
+		    into: self state]
+	    ifFalse: 
+		[buffer := aStringOrStream species new: 1024.
+		n := 0.
+		aStringOrStream do: 
+			[:each | 
+			n := n + 1.
+			buffer at: n put: each.
+			n = 1024 
+			    ifTrue: 
+				[self 
+				    combine: buffer
+				    size: n
+				    into: self state.
+				n := 0]].
+		self 
+		    combine: buffer
+		    size: n
+		    into: self state]
+    ]
 
-!MD5 methodsFor: 'checksumming'!
+    digest [
+	<category: 'checksumming'>
+	| answer |
+	answer := ByteArray new: 16.
+	self finalize: self state in: answer.
+	^answer
+    ]
+]
 
-nextPut: char
-    self combine: (String with: char) size: 1 into: self state
-!
-
-nextPutAll: aStringOrStream
-    | buffer n |
-    (aStringOrStream isKindOf: String)
-	ifTrue: [
-	    self
-		combine: aStringOrStream
-		size: aStringOrStream size
-		into: self state
-	]
-	ifFalse: [
-	    buffer := aStringOrStream species new: 1024.
-	    n := 0.
-	    aStringOrStream do: [ :each |
-		n := n + 1.
-		buffer at: n put: each.
-		n = 1024 ifTrue: [
-		    self combine: buffer size: n into: self state.
-		    n := 0
-		]
-	    ].
-	    self combine: buffer size: n into: self state.
-	]
-!
-
-digest
-    | answer |
-    answer := ByteArray new: 16.
-    self finalize: self state in: answer.
-    ^answer
-! !

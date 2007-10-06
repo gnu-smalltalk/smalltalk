@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright (C) 2007 University of Manchester
@@ -30,103 +29,128 @@
 |
  ======================================================================"
 
-Object subclass: #Continuation
-    instanceVariableNames: 'stack '
-    classVariableNames: ''
-    poolDictionaries: ''
-    category: 'Language-Implementation'!
 
-Continuation comment:
-'At my heart, I am something like the goto instruction; my creation
+
+Object subclass: Continuation [
+    | stack |
+    
+    <category: 'Language-Implementation'>
+    <comment: 'At my heart, I am something like the goto instruction; my creation
 sets the label, and my methods do the jump.  However, this is a really
 powerful kind of goto instruction. If your hair is turning green at
 this point, don''t worry as you will probably only deal with users
-of continuations, rather than with the concept itself.'!
+of continuations, rather than with the concept itself.'>
 
+    Continuation class >> escapeDo: aBlock [
+	"Pass a continuation to the one-argument block, knowing that aBlock
+	 does not fall off (either because it includes a method return, or
+	 because it yields control to another continuation).  If it does,
+	 an exception will be signalled and the current process terminated."
 
-!Continuation class methodsFor: 'instance creation'!
+	<category: 'instance creation'>
+	aBlock value: (self new stack: thisContext parentContext).
+	SystemExceptions.BadReturn signal.
+	Processor activeProcess terminate
+    ]
 
-escapeDo: aBlock
-    "Pass a continuation to the one-argument block, knowing that aBlock
-     does not fall off (either because it includes a method return, or
-     because it yields control to another continuation).  If it does,
-     an exception will be signalled and the current process terminated."
-    aBlock value: (self new stack: thisContext parentContext).
-    SystemExceptions.BadReturn signal.
-    Processor activeProcess terminate!
+    Continuation class >> current [
+	"Return a continuation."
 
-current
-    "Return a continuation."
-    ^self new stack: thisContext parentContext copyStack!
+	<category: 'instance creation'>
+	^self new stack: thisContext parentContext copyStack
+    ]
 
-currentDo: aBlock
-    "Pass a continuation to the one-argument block, aBlock and return the
-     result of evaluating it."
-    ^aBlock value: (self new stack: thisContext parentContext copyStack)! !
+    Continuation class >> currentDo: aBlock [
+	"Pass a continuation to the one-argument block, aBlock and return the
+	 result of evaluating it."
 
-!Continuation methodsFor: 'invocation'!
+	<category: 'instance creation'>
+	^aBlock value: (self new stack: thisContext parentContext copyStack)
+    ]
 
-oneShotValue
-    "Return nil to the original continuation, which becomes unusable.
-     Attempting to reactivate it will cause an exception.  This is an
-     optimization over #value."
-    ^self resume: nil nextContinuation: nil!
+    oneShotValue [
+	"Return nil to the original continuation, which becomes unusable.
+	 Attempting to reactivate it will cause an exception.  This is an
+	 optimization over #value."
 
-oneShotValue: v
-    "Return anObject to the original continuation, which becomes unusable.
-     Attempting to reactivate it will cause an exception.  This is an
-     optimization over #value:."
-    ^self resume: v nextContinuation: nil!
+	<category: 'invocation'>
+	^self resume: nil nextContinuation: nil
+    ]
 
-callCC
-    "Activate the original continuation, passing back in turn a continuation
-     for the caller.  The called continuation becomes unusable, and
-     any attempt to reactivate it will cause an exception.  This is not
-     a limitation, in general, because this method is used to replace a
-     continuation with another (see the implementation of the Generator class)."
-    | cont |
-    cont := Continuation new stack: thisContext parentContext.
-    ^self resume: cont nextContinuation: nil!
+    oneShotValue: v [
+	"Return anObject to the original continuation, which becomes unusable.
+	 Attempting to reactivate it will cause an exception.  This is an
+	 optimization over #value:."
 
-value
-    "Return nil to the original continuation, copying the stack to allow
-     another activation."
-    ^self resume: nil nextContinuation: stack copyStack!
+	<category: 'invocation'>
+	^self resume: v nextContinuation: nil
+    ]
 
-value: anObject
-    "Return anObject to the original continuation, copying the stack to allow
-     another activation."
-    ^self resume: anObject nextContinuation: stack copyStack!
+    callCC [
+	"Activate the original continuation, passing back in turn a continuation
+	 for the caller.  The called continuation becomes unusable, and
+	 any attempt to reactivate it will cause an exception.  This is not
+	 a limitation, in general, because this method is used to replace a
+	 continuation with another (see the implementation of the Generator class)."
 
-valueWithArguments: aCollection
-    "Return the sole element of aCollection to the original continuation
-     (or nil if aCollection is empty), copying the stack to allow
-     another activation"
-    aCollection size == 0 ifTrue: [ ^self value: nil ].
-    aCollection size == 1 ifFalse: [^self value: (aCollection at: 1)].
-    SystemExceptions.InvalidArgument
-	signalOn: aCollection
-	reason: 'continuations can only be resumed with zero or one argument'! !
+	<category: 'invocation'>
+	| cont |
+	cont := Continuation new stack: thisContext parentContext.
+	^self resume: cont nextContinuation: nil
+    ]
 
-!Continuation methodsFor: 'private'!
+    value [
+	"Return nil to the original continuation, copying the stack to allow
+	 another activation."
 
-resume: returnValue nextContinuation: aContext
-    <primitive: VMpr_Continuation_resume>
-    SystemExceptions.BadReturn signal.
-    Processor activeProcess terminate.
-    ^returnValue
+	<category: 'invocation'>
+	^self resume: nil nextContinuation: stack copyStack
+    ]
 
-    "The primitive is equivalent to this code:
-    | continuation |
-    stack isNil ifTrue: [ ^self primitiveFailed ].
-    continuation := stack.
-    stack := aContext.
-    thisContext parentContext: continuation.
-    ^returnValue"!
+    value: anObject [
+	"Return anObject to the original continuation, copying the stack to allow
+	 another activation."
 
-stack
-    ^stack!
+	<category: 'invocation'>
+	^self resume: anObject nextContinuation: stack copyStack
+    ]
 
-stack: s
-    stack := s! !
+    valueWithArguments: aCollection [
+	"Return the sole element of aCollection to the original continuation
+	 (or nil if aCollection is empty), copying the stack to allow
+	 another activation"
+
+	<category: 'invocation'>
+	aCollection size == 0 ifTrue: [^self value: nil].
+	aCollection size == 1 ifFalse: [^self value: (aCollection at: 1)].
+	SystemExceptions.InvalidArgument signalOn: aCollection
+	    reason: 'continuations can only be resumed with zero or one argument'
+    ]
+
+    resume: returnValue nextContinuation: aContext [
+	<category: 'private'>
+	<primitive: VMpr_Continuation_resume>
+	SystemExceptions.BadReturn signal.
+	Processor activeProcess terminate.
+	^returnValue
+
+	"The primitive is equivalent to this code:
+	 | continuation |
+	 stack isNil ifTrue: [ ^self primitiveFailed ].
+	 continuation := stack.
+	 stack := aContext.
+	 thisContext parentContext: continuation.
+	 ^returnValue"
+    ]
+
+    stack [
+	<category: 'private'>
+	^stack
+    ]
+
+    stack: s [
+	<category: 'private'>
+	stack := s
+    ]
+]
 

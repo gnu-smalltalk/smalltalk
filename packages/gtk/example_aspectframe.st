@@ -4,7 +4,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2003 Free Software Foundation, Inc.
@@ -29,43 +28,57 @@
 |
  ======================================================================"
 
-Namespace current: GTK!
 
-Object subclass: #AspectFrameExample
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: nil!
+
+Namespace current: GTK [
 
-!AspectFrameExample methodsFor: 'event handling'!
+Object subclass: AspectFrameExample [
+    
+    <category: nil>
+    <comment: nil>
 
-destroy: object data: data
+    destroy: object data: data [
+	<category: 'event handling'>
 	Gtk mainQuit
-! !
+    ]
 
-!AspectFrameExample methodsFor: 'layout'!
+    open [
+	<category: 'layout'>
+	| window aspectFrame drawingArea |
+	window := GtkWindow new: Gtk gtkWindowToplevel.
+	window 
+	    connectSignal: 'destroy'
+	    to: self
+	    selector: #destroy:data:
+	    userData: nil.
+	window setTitle: 'Aspect Frame'.
+	window setBorderWidth: 10.
+	aspectFrame := GtkAspectFrame 
+		    new: '2x1'
+		    xalign: 0.5
+		    yalign: 0.5
+		    ratio: 2
+		    obeyChild: false.
+	window add: aspectFrame.
 
-open
-    | window aspectFrame drawingArea |
-    window := GtkWindow new: Gtk gtkWindowToplevel.
-    window connectSignal: 'destroy' to: self selector: #destroy:data: userData: nil.
-    window setTitle: 'Aspect Frame'.
-    window setBorderWidth: 10.
-    
-    aspectFrame := GtkAspectFrame new: '2x1' xalign: 0.5 yalign: 0.5 ratio: 2 obeyChild: false.
-    window add: aspectFrame.
-    
-    "We ask for a 200x200 drawing area, but we are forcing a 2x1 ratio so
-     the AspectFrame will give us a 200x100 area."
-    drawingArea := GtkDrawingArea new.
-    drawingArea setSizeRequest: 200 height: 200.
-    aspectFrame add: drawingArea.
-    
-    drawingArea show.
-    aspectFrame show.
-    window show.
-! !
+	"We ask for a 200x200 drawing area, but we are forcing a 2x1 ratio so
+	 the AspectFrame will give us a 200x100 area."
+	drawingArea := GtkDrawingArea new.
+	drawingArea setSizeRequest: 200 height: 200.
+	aspectFrame add: drawingArea.
+	drawingArea show.
+	aspectFrame show.
+	window show
+    ]
+]
 
-Gtk gstGtkInit!
-AspectFrameExample new open!
-Gtk main!
+]
+
+
+
+Namespace current: GTK [
+    Gtk gstGtkInit.
+    AspectFrameExample new open.
+    Gtk main
+]
+

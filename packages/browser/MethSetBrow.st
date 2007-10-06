@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -29,264 +28,267 @@
  ======================================================================
 "
 
-GuiData subclass:  #MethodSetBrowser
-	instanceVariableNames: 'methodList theClass theSelector selection '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Browser'!
 
-MethodSetBrowser comment: 
-nil!
+
+GuiData subclass: MethodSetBrowser [
+    | methodList theClass theSelector selection |
+    
+    <comment: nil>
+    <category: 'Graphics-Browser'>
 
-!MethodSetBrowser class methodsFor: 'instance creation'!
+    MethodSetBrowser class >> referencesTo: anObject parent: listView [
+	<category: 'instance creation'>
+	| col value selection |
+	col := SortedCollection 
+		    sortBlock: [:a :b | a displayString <= b displayString].
+	(anObject isKindOf: Association) 
+	    ifTrue: 
+		[selection := anObject key.
+		value := anObject value]
+	    ifFalse: 
+		[selection := nil.
+		value := anObject].
+	Class allSubclassesDo: 
+		[:meta | 
+		(meta whichSelectorsReferTo: anObject) do: [:sel | col add: meta >> sel].
+		(meta instanceClass whichSelectorsReferTo: anObject) 
+		    do: [:sel | col add: meta instanceClass >> sel]].
+	col isEmpty 
+	    ifTrue: 
+		[^ModalDialog new alertMessage: 'No references to ' , value printString
+		    in: listView].
+	^self new 
+	    openOn: col
+	    title: 'References to ' , value printString
+	    selection: selection
+    ]
 
-referencesTo: anObject parent: listView
-    | col value selection |
-    col := SortedCollection sortBlock: [ :a :b |
-	a displayString <= b displayString ].
+    MethodSetBrowser class >> implementorsOf: aSymbol parent: listView [
+	"Opens a message set browser on all methods that implement selected method"
 
-    (anObject isKindOf: Association)
-	ifTrue: [ selection := anObject key. value := anObject value ]
-	ifFalse: [ selection := nil. value := anObject ].
+	<category: 'instance creation'>
+	| col |
+	col := SortedCollection 
+		    sortBlock: [:a :b | a displayString <= b displayString].
+	"Collect all methods which implement selected method.  Collection is sorted
+	 alphabetically"
+	Class allSubclassesDo: 
+		[:meta | 
+		(meta includesSelector: aSymbol) ifTrue: [col add: meta >> aSymbol].
+		(meta instanceClass includesSelector: aSymbol) 
+		    ifTrue: [col add: meta instanceClass >> aSymbol]].
+	col isEmpty 
+	    ifTrue: 
+		[^ModalDialog new alertMessage: 'No implementors for ' , aSymbol
+		    in: listView].
+	^self new 
+	    openOn: col
+	    title: 'Implementors of ' , aSymbol
+	    selection: nil
+    ]
 
-    Class allSubclassesDo: [:meta |
-        (meta whichSelectorsReferTo: anObject)
-            do: [:sel | col add: meta >> sel].
-        (meta instanceClass whichSelectorsReferTo: anObject)
-            do: [:sel | col add: meta instanceClass >> sel]].
+    MethodSetBrowser class >> sendersOf: aSymbol parent: listView [
+	<category: 'instance creation'>
+	| col |
+	col := SortedCollection 
+		    sortBlock: [:a :b | a displayString <= b displayString].
+	Class allSubclassesDo: 
+		[:meta | 
+		(meta whichSelectorsReferTo: aSymbol) do: [:sel | col add: meta >> sel].
+		(meta instanceClass whichSelectorsReferTo: aSymbol) 
+		    do: [:sel | col add: meta instanceClass >> sel]].
+	col isEmpty 
+	    ifTrue: 
+		[^ModalDialog new alertMessage: 'No senders for ' , aSymbol in: listView].
+	^self new 
+	    openOn: col
+	    title: 'Senders of ' , aSymbol
+	    selection: aSymbol
+    ]
 
-    col isEmpty
-        ifTrue:
-            [^ModalDialog new
-                 alertMessage: 'No references to ' , value printString
-                 in: listView].
+    methodList [
+	<category: 'accessing'>
+	^methodList
+    ]
 
-    ^self new
-        openOn: col
-        title: 'References to ' , value printString
-        selection: selection!
+    methodSelection: assoc [
+	"Derive class and selector from list selection.  The selection is derived
+	 from an item in the method list pane.  A list item may be of two
+	 forms: 1) className class selector, or 2) className selector. Form (1)
+	 contains 3 string tokens and form (2) contains 2.  To derive the class
+	 from form (1), the instance class is derived from the Smallltalk
+	 dictionary using the first string token as a key.  Then class is sent
+	 to the instance class to derive the class of the instance class.  The
+	 selector is derived from the third token.  In form (2), the instance
+	 class is derived directly from the first string token.  The selector
+	 is obtained from the second token"
 
-implementorsOf: aSymbol parent: listView 
-    "Opens a message set browser on all methods that implement selected method"
+	<category: 'accessing'>
+	| parsing className |
+	assoc value isNil ifTrue: [^theSelector := nil].
+	theClass := assoc value methodClass.
+	theSelector := assoc value selector.
+	self changeState: #text.
+	Primitive updateViews
+    ]
 
-    | col |
-    col := SortedCollection sortBlock: [ :a :b |
-	a displayString <= b displayString ].
-    "Collect all methods which implement selected method.  Collection is sorted 
-     alphabetically"
-    Class allSubclassesDo: 
-	    [:meta | 
-	    (meta includesSelector: aSymbol) 
-		ifTrue: [col add: meta >> aSymbol].
-	    (meta instanceClass includesSelector: aSymbol) 
-		ifTrue: [col add: meta instanceClass >> aSymbol]].
+    text [
+	"Return source code for the selected method"
 
-    col isEmpty 
-	ifTrue: 
-	    [^ModalDialog new alertMessage: 'No implementors for ' , aSymbol
-			in: listView].
-    ^self new 
-	openOn: col
-	title: 'Implementors of ' , aSymbol
-	selection: nil!
+	<category: 'accessing'>
+	theSelector notNil 
+	    ifTrue: [^theClass -> (theClass sourceCodeAt: theSelector)].
+	^''
+    ]
 
-sendersOf: aSymbol parent: listView 
-    | col |
-    col := SortedCollection sortBlock: [ :a :b |
-	a displayString <= b displayString ].
-    Class allSubclassesDo: 
-	    [:meta | 
-	    (meta whichSelectorsReferTo: aSymbol) 
-		do: [:sel | col add: meta >> sel].
-	    (meta instanceClass whichSelectorsReferTo: aSymbol) 
-		do: [:sel | col add: meta instanceClass >> sel]].
+    openOn: aSortedCollection title: name selection: aSymbol [
+	"Open a method set browser.  The argument aMethodDictionary consists of
+	 alpha-sorted collection of strings.  Each element is of two forms: 1) className
+	 class selector, or 2) className selector.  This browser consists of two
+	 vertically placed panes.  The top pane is a list which displays the sorted
+	 methods in aMethodDictionary.  The bottom pane is a text view which will
+	 display the source code for a selector which is selected from the top pane.
+	 In general, aSymbol denotes a selector.  If this parameter is non-nil, the
+	 first occurence of aSymbol will be selected in the text view when a
+	 selector is first selected from the top pane"
 
-    col isEmpty 
-	ifTrue: 
-	    [^ModalDialog new alertMessage: 'No senders for ' , aSymbol
-			in: listView].
-    ^self new 
-	openOn: col
-	title: 'Senders of ' , aSymbol
-	selection: aSymbol! !
+	<category: 'initializing'>
+	| topView childView aStream listView textView container |
+	aSymbol notNil 
+	    ifTrue: 
+		["Parse selector expression, aSymbol, inclusive of first colon"
 
-!MethodSetBrowser methodsFor: 'accessing'!
+		aStream := WriteStream on: (String new: 0).
+		aSymbol detect: 
+			[:ch | 
+			aStream nextPut: ch.
+			ch == $:]
+		    ifNone: [0].
+		selection := aStream contents].
+	topView := BrowserShell 
+		    new: name , ' (' , aSortedCollection size printString , ')'.
+	topView data: self.
+	topView blox x: 20.
+	topView blox y: 330.
+	topView blox height: 308.
+	topView blox width: 408.
 
-methodList
-    ^methodList!
+	"Use Form class to manage the list and text view panes"
+	childView := Form new: 'Form' in: topView.
+	topView addChildView: childView.
+	container := childView blox.
 
-methodSelection: assoc 
-    "Derive class and selector from list selection.  The selection is derived
-     from an item in the method list pane.  A list item may be of two
-     forms: 1) className class selector, or 2) className selector. Form (1)
-     contains 3 string tokens and form (2) contains 2.  To derive the class
-     from form (1), the instance class is derived from the Smallltalk
-     dictionary using the first string token as a key.  Then class is sent
-     to the instance class to derive the class of the instance class.  The
-     selector is derived from the third token.  In form (2), the instance
-     class is derived directly from the first string token.  The selector
-     is obtained from the second token"
+	"Create a list in top half of window"
+	childView 
+	    addChildView: ((listView := PList new: 'MethodSet' in: childView)
+		    initialize;
+		    data: self;
+		    stateChange: #methodList;
+		    handleUserChange: #methodSelection:;
+		    dataMsg: #methodList;
+		    menuInit: (self blueButtonMenuForMethods: listView);
+		    yourself).
+	(listView blox)
+	    inset: 2;
+	    width: 400 height: 150.
 
-    | parsing className |
-    assoc value isNil ifTrue: [^theSelector := nil].
-    theClass := assoc value methodClass.
-    theSelector := assoc value selector.
-    self changeState: #text.
-    Primitive updateViews!
+	"Create a text view and install in lower half of window"
+	childView addChildView: ((textView := PCode new: childView)
+		    data: self;
+		    stateChange: #text;
+		    handleUserChange: #compile:from:;
+		    textMsg: #text;
+		    setBrowserKeyBindings;
+		    selection: selection;
+		    yourself).
+	textView menuInit: ((PopupMenu new: textView label: 'Edit') 
+		    selectors: #(#('Cut' #gstCut) #('Copy' #gstCopy) #('Paste' #gstPaste) #() #('Clear' #gstClear) #() #('Line...' #line) #('Find...' #find) #() #('Do it' #eval) #('Print it' #evalAndPrintResult) #('Inspect' #evalAndInspectResult) #() #('Senders' #senders) #('Implementors' #implementors) #() #('Accept' #compileIt) #('Cancel' #revert) #() #('Close' #close))
+		    receiver: textView
+		    argument: nil).
+	textView blox width: 400 height: 150.
+	textView blox posVert: listView blox.
+	textView blox inset: 2.
+	"Initialize instance variable, methodList, which governs list display"
+	methodList := aSortedCollection.
+	self changeState: #methodList.
+	Primitive updateViews.
+	"Initialize all the manufactured widgets"
+	topView display
+    ]
 
-text
-    "Return source code for the selected method"
+    inspectMethod: listView [
+	"Bring up an inspector on a Class"
 
-    theSelector notNil 
-	ifTrue: [^theClass -> (theClass sourceCodeAt: theSelector)].
-    ^''! !
+	<category: 'selector list blue button menu'>
+	theSelector isNil ifTrue: [^listView beep].
+	(theClass >> theSelector) inspect
+    ]
 
-!MethodSetBrowser methodsFor: 'initializing'!
+    blueButtonMenuForMethods: theView [
+	"Create method list pane menu"
 
-openOn: aSortedCollection title: name selection: aSymbol 
-    "Open a method set browser.  The argument aMethodDictionary consists of 
-     alpha-sorted collection of strings.  Each element is of two forms: 1) className 
-     class selector, or 2) className selector.  This browser consists of two 
-     vertically placed panes.  The top pane is a list which displays the sorted 
-     methods in aMethodDictionary.  The bottom pane is a text view which will 
-     display the source code for a selector which is selected from the top pane.  
-     In general, aSymbol denotes a selector.  If this parameter is non-nil, the 
-     first occurence of aSymbol will be selected in the text view when a 
-     selector is first selected from the top pane"
+	<category: 'selector list blue button menu'>
+	^(PopupMenu new: theView label: 'Method') 
+	    selectors: #(#('File out...' #fileOutSelector: #theView) #() #('Senders' #senders: #theView) #('Implementors' #implementors: #theView) #() #(#Inspect #inspectMethod: #theView))
+	    receiver: self
+	    argument: theView
+    ]
 
-    | topView childView aStream listView textView container |
-    aSymbol notNil 
-	ifTrue: 
-	    ["Parse selector expression, aSymbol, inclusive of first colon"
+    fileOutSelector: listView [
+	"Creates a file containing description of selected method"
 
-	    aStream := WriteStream on: (String new: 0).
-	    aSymbol detect: 
-		    [:ch | 
-		    aStream nextPut: ch.
-		    ch == $:]
-		ifNone: [0].
-	    selection := aStream contents].
-    topView := BrowserShell 
-		new: name , ' (' , aSortedCollection size printString , ')'.
-    topView data: self.
-    topView blox x: 20.
-    topView blox y: 330.
-    topView blox height: 308.
-    topView blox width: 408.
+	<category: 'selector list blue button menu'>
+	| fileName |
+	theSelector isNil ifTrue: [^listView beep].
+	theClass name notNil 
+	    ifTrue: [fileName := theClass name]
+	    ifFalse: [fileName := theClass asClass name , '-class'].
 
-    "Use Form class to manage the list and text view panes"
-    childView := Form new: 'Form' in: topView.
-    topView addChildView: childView.
-    container := childView blox.
+	"If the name is too long, maybe truncate it"
+	fileName := self fileoutDir , fileName , '.' , theSelector , '.st'.
+	fileName := Prompter 
+		    saveFileName: 'File out selector'
+		    default: fileName
+		    in: listView.
+	fileName isNil 
+	    ifFalse: 
+		[theClass fileOutSelector: theSelector to: fileName.
+		self setFileoutDirFromFile: fileName]
+    ]
 
-    "Create a list in top half of window"
-    childView 
-	addChildView: ((listView := PList new: 'MethodSet' in: childView)
-		initialize;
-		data: self;
-		stateChange: #methodList;
-		handleUserChange: #methodSelection:;
-		dataMsg: #methodList;
-                menuInit: (self blueButtonMenuForMethods: listView);
-		yourself).
-    (listView blox)
-	inset: 2;
-	width: 400 height: 150.
+    implementors: listView [
+	"Open a message set browser that sends the currently selected message"
 
-    "Create a text view and install in lower half of window"
-    childView addChildView: ((textView := PCode new: childView)
-		data: self;
-		stateChange: #text;
-		handleUserChange: #compile:from:;
-		textMsg: #text;
-		setBrowserKeyBindings;
-		selection: selection;
-		yourself).
-    textView menuInit: ((PopupMenu new: textView label: 'Edit') 
-		selectors: #(#('Cut' #gstCut) #('Copy' #gstCopy) #('Paste' #gstPaste)
-			     #() #('Clear' #gstClear) #() #('Line...' #line)
-			     #('Find...' #find)
-			     #() #('Do it' #eval) #('Print it' #evalAndPrintResult)
-			     #('Inspect' #evalAndInspectResult)
-			     #() #('Senders' #senders) #('Implementors' #implementors)
-			     #() #('Accept' #compileIt) #('Cancel' #revert)
-			     #() #('Close' #close))
-		receiver: textView
-		argument: nil).
-    textView blox width: 400 height: 150.
-    textView blox posVert: listView blox.
-    textView blox inset: 2.
-    "Initialize instance variable, methodList, which governs list display"
-    methodList := aSortedCollection.
-    self changeState: #methodList.
-    Primitive updateViews.
-    "Initialize all the manufactured widgets"
-    topView display! !
+	<category: 'selector list blue button menu'>
+	theSelector isNil ifTrue: [^listView beep].
+	MethodSetBrowser implementorsOf: theSelector parent: listView
+    ]
 
-!MethodSetBrowser methodsFor: 'selector list blue button menu'!
+    senders: listView [
+	"Open a message set browser that sends the currently selected message"
 
-inspectMethod: listView
-    "Bring up an inspector on a Class"
-    theSelector isNil ifTrue: [^listView beep].
-    (theClass >> theSelector) inspect!
+	<category: 'selector list blue button menu'>
+	theSelector isNil ifTrue: [^listView beep].
+	MethodSetBrowser sendersOf: theSelector parent: listView
+    ]
 
-blueButtonMenuForMethods: theView
-    "Create method list pane menu"
+    compile: aString from: aView [
+	"Compile aString derived from text in text view for the selected selector"
 
-    ^(PopupMenu new: theView label: 'Method')
-        selectors: #(#('File out...' #fileOutSelector: #theView)
-                     #() #('Senders' #senders: #theView) #('Implementors' #implementors: #theView)
-                     #() #(#'Inspect' #inspectMethod: #theView))
-        receiver: self
-        argument: theView!
+	<category: 'text view blue button menu'>
+	theSelector isNil ifTrue: [^aView beep].
+	theClass 
+	    compile: aString
+	    classified: (theClass compiledMethodAt: theSelector) methodCategory
+	    ifError: 
+		[:fname :lineNo :errorString | 
+		aView displayError: errorString at: lineNo.
+		^nil]
+    ]
 
-fileOutSelector: listView
-    "Creates a file containing description of selected method"
-
-    | fileName |
-    theSelector isNil ifTrue: [^listView beep].
-    theClass name notNil
-        ifTrue: [fileName := theClass name]
-        ifFalse: [fileName := theClass asClass name , '-class'].
-
-    "If the name is too long, maybe truncate it"
-    fileName := self fileoutDir , fileName , '.' , theSelector , '.st'.
-    fileName := Prompter
-                saveFileName: 'File out selector'
-                default: fileName
-                in: listView.
-    fileName isNil
-        ifFalse:
-            [theClass fileOutSelector: theSelector to: fileName.
-            self setFileoutDirFromFile: fileName]!
-
-implementors: listView
-    "Open a message set browser that sends the currently selected message"
-
-    theSelector isNil ifTrue: [^listView beep].
-    MethodSetBrowser implementorsOf: theSelector parent: listView!
-
-senders: listView
-    "Open a message set browser that sends the currently selected message"
-
-    theSelector isNil ifTrue: [^listView beep].
-    MethodSetBrowser sendersOf: theSelector parent: listView! !
-
-!MethodSetBrowser methodsFor: 'text view blue button menu'!
-
-compile: aString from: aView 
-    "Compile aString derived from text in text view for the selected selector"
-
-    theSelector isNil ifTrue: [^aView beep].
-    theClass 
-	compile: aString
-	classified: (theClass compiledMethodAt: theSelector) methodCategory
-	ifError: 
-	    [:fname :lineNo :errorString | 
-	    aView displayError: errorString at: lineNo.
-	    ^nil]!
-
-selection
-    ^selection! !
-
+    selection [
+	<category: 'text view blue button menu'>
+	^selection
+    ]
+]
 

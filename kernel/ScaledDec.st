@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
@@ -31,278 +30,350 @@
  ======================================================================"
 
 
-Number subclass:  #ScaledDecimal
-	instanceVariableNames: 'fraction scale '
-	classVariableNames: 'Zero One'
-	poolDictionaries: ''
-	category: 'Language-Data types'!
-
-ScaledDecimal comment: 
-'ScaledDecimal provides a numeric representation of fixed point decimal
+
+Number subclass: ScaledDecimal [
+    | fraction scale |
+    
+    <category: 'Language-Data types'>
+    <comment: 'ScaledDecimal provides a numeric representation of fixed point decimal
 numbers able to accurately represent decimal fractions.  It supports
 unbounded precision, with no limit to the number of digits before and
-after the decimal point.'!
+after the decimal point.'>
 
-!ScaledDecimal class methodsFor: 'instance creation'!
+    Zero := nil.
+    One := nil.
 
-newFromNumber: aNumber scale: scale
-    "Answer a new instance of ScaledDecimal, representing a decimal
-     fraction with a decimal representation considered valid up to the
-     scale-th digit."
-    ^(self basicNew)
-	setFraction: aNumber asFraction scale: scale;
-	yourself! !
+    ScaledDecimal class >> newFromNumber: aNumber scale: scale [
+	"Answer a new instance of ScaledDecimal, representing a decimal
+	 fraction with a decimal representation considered valid up to the
+	 scale-th digit."
 
-!ScaledDecimal class methodsFor: 'constants'!
+	<category: 'instance creation'>
+	^(self basicNew)
+	    setFraction: aNumber asFraction scale: scale;
+	    yourself
+    ]
 
-initialize
-    "Initialize the receiver's class variables"
+    ScaledDecimal class >> initialize [
+	"Initialize the receiver's class variables"
 
-    "We cannot create ScaledDecimal with 1.0s0 during the very
-     first phases of bootstrapping, because the lexer calls in to
-     #asScaledDecimal: -- but it is not a problem."
-    One := self newFromNumber: 1 scale: 0.
-    Zero := self newFromNumber: 0 scale: 0! !
+	"We cannot create ScaledDecimal with 1.0s0 during the very
+	 first phases of bootstrapping, because the lexer calls in to
+	 #asScaledDecimal: -- but it is not a problem."
 
-!ScaledDecimal methodsFor: 'constants'!
+	<category: 'constants'>
+	One := self newFromNumber: 1 scale: 0.
+	Zero := self newFromNumber: 0 scale: 0
+    ]
 
-one
-    "Answer the receiver's representation of one."
-    ^One!
+    one [
+	"Answer the receiver's representation of one."
 
-zero
-    "Answer the receiver's representation of zero."
-    ^Zero! !
+	<category: 'constants'>
+	^One
+    ]
 
-!ScaledDecimal methodsFor: 'coercion'!
+    zero [
+	"Answer the receiver's representation of zero."
 
-fractionPart
-    "Answer the fractional part of the receiver."
-    ^ScaledDecimal newFromNumber: fraction fractionPart scale: scale!
+	<category: 'constants'>
+	^Zero
+    ]
 
-integerPart
-    "Answer the fractional part of the receiver."
-    ^ScaledDecimal newFromNumber: fraction integerPart scale: scale!
+    fractionPart [
+	"Answer the fractional part of the receiver."
 
-truncated
-    "Answer the receiver, converted to an Integer and truncated towards
-     -infinity."
-    ^fraction truncated!
+	<category: 'coercion'>
+	^ScaledDecimal newFromNumber: fraction fractionPart scale: scale
+    ]
 
-ceiling
-    "Answer the receiver, converted to an Integer and truncated towards
-     +infinity."
-    ^fraction ceiling!
+    integerPart [
+	"Answer the fractional part of the receiver."
 
-asFloatD
-    "Answer the receiver, converted to a FloatD"
-    ^fraction asFloatD!
+	<category: 'coercion'>
+	^ScaledDecimal newFromNumber: fraction integerPart scale: scale
+    ]
 
-asFloatE
-    "Answer the receiver, converted to a FloatE"
-    ^fraction asFloatE!
+    truncated [
+	"Answer the receiver, converted to an Integer and truncated towards
+	 -infinity."
 
-asFloatQ
-    "Answer the receiver, converted to a FloatQ"
-    ^fraction asFloatQ!
+	<category: 'coercion'>
+	^fraction truncated
+    ]
 
-asFraction
-    "Answer the receiver, converted to a Fraction"
-    | num denom gcd |
-    denom := 10 raisedToInteger: scale.
-    num := fraction numerator * denom quo: fraction denominator.
-    gcd := num gcd: denom.
-    ^Fraction
-	numerator: (num divExact: gcd)
-	denominator: (denom divExact: gcd)!
+    ceiling [
+	"Answer the receiver, converted to an Integer and truncated towards
+	 +infinity."
 
-coerce: aNumber
-    "Answer aNumber, converted to a ScaledDecimal with the same scale
-     as the receiver."
-    ^ScaledDecimal
-	newFromNumber: aNumber asFraction
-	scale: scale
-!
+	<category: 'coercion'>
+	^fraction ceiling
+    ]
 
-generality
-    "Return the receiver's generality"
-    ^250
-! !
+    asFloatD [
+	"Answer the receiver, converted to a FloatD"
 
-!ScaledDecimal methodsFor: 'arithmetic'!
+	<category: 'coercion'>
+	^fraction asFloatD
+    ]
 
-+ aNumber 
-    "Sum two numbers and answer the result."
+    asFloatE [
+	"Answer the receiver, converted to a FloatE"
 
-    (aNumber generality = self generality)
-	ifTrue: [^ScaledDecimal
-	    newFromNumber: fraction + aNumber fraction
-	    scale: (scale max: aNumber scale) ]
-	ifFalse: [^self retrySumCoercing: aNumber]!
+	<category: 'coercion'>
+	^fraction asFloatE
+    ]
 
-- aNumber 
-     "Subtract aNumber from the receiver and answer the result."
+    asFloatQ [
+	"Answer the receiver, converted to a FloatQ"
 
-    (aNumber generality = self generality)
-	ifTrue: [^ScaledDecimal
-	    newFromNumber: fraction - aNumber fraction
-	    scale: (scale max: aNumber scale) ]
-	ifFalse: [^self retryDifferenceCoercing: aNumber]!
+	<category: 'coercion'>
+	^fraction asFloatQ
+    ]
 
-* aNumber 
-     "Multiply two numbers and answer the result."
+    asFraction [
+	"Answer the receiver, converted to a Fraction"
 
-    (aNumber generality = self generality)
-	ifTrue: [^ScaledDecimal
-	    newFromNumber: fraction * aNumber fraction
-	    scale: (scale max: aNumber scale) ]
-	ifFalse: [^self retryMultiplicationCoercing: aNumber]!
+	<category: 'coercion'>
+	| num denom gcd |
+	denom := 10 raisedToInteger: scale.
+	num := fraction numerator * denom quo: fraction denominator.
+	gcd := num gcd: denom.
+	^Fraction numerator: (num divExact: gcd) denominator: (denom divExact: gcd)
+    ]
+
+    coerce: aNumber [
+	"Answer aNumber, converted to a ScaledDecimal with the same scale
+	 as the receiver."
+
+	<category: 'coercion'>
+	^ScaledDecimal newFromNumber: aNumber asFraction scale: scale
+    ]
+
+    generality [
+	"Return the receiver's generality"
+
+	<category: 'coercion'>
+	^250
+    ]
+
+    + aNumber [
+	"Sum two numbers and answer the result."
+
+	<category: 'arithmetic'>
+	aNumber generality = self generality 
+	    ifTrue: 
+		[^ScaledDecimal newFromNumber: fraction + aNumber fraction
+		    scale: (scale max: aNumber scale)]
+	    ifFalse: [^self retrySumCoercing: aNumber]
+    ]
+
+    - aNumber [
+	"Subtract aNumber from the receiver and answer the result."
+
+	<category: 'arithmetic'>
+	aNumber generality = self generality 
+	    ifTrue: 
+		[^ScaledDecimal newFromNumber: fraction - aNumber fraction
+		    scale: (scale max: aNumber scale)]
+	    ifFalse: [^self retryDifferenceCoercing: aNumber]
+    ]
+
+    * aNumber [
+	"Multiply two numbers and answer the result."
+
+	<category: 'arithmetic'>
+	aNumber generality = self generality 
+	    ifTrue: 
+		[^ScaledDecimal newFromNumber: fraction * aNumber fraction
+		    scale: (scale max: aNumber scale)]
+	    ifFalse: [^self retryMultiplicationCoercing: aNumber]
+    ]
+
+    / aNumber [
+	"Divide two numbers and answer the result."
+
+	<category: 'arithmetic'>
+	aNumber generality = self generality 
+	    ifTrue: 
+		[^ScaledDecimal newFromNumber: fraction / aNumber fraction
+		    scale: (scale max: aNumber scale)]
+	    ifFalse: [^self retryDivisionCoercing: aNumber]
+    ]
+
+    \\ aNumber [
+	"Answer the remainder after integer division the receiver by aNumber
+	 with truncation towards negative infinity."
+
+	<category: 'arithmetic'>
+	aNumber generality = self generality 
+	    ifTrue: 
+		[^ScaledDecimal newFromNumber: fraction \\ aNumber fraction
+		    scale: (scale max: aNumber scale)]
+	    ifFalse: [^self retry: #\\ coercing: aNumber]
+    ]
+
+    // aNumber [
+	"Answer the integer quotient after dividing the receiver by aNumber
+	 with truncation towards negative infinity."
+
+	<category: 'arithmetic'>
+	^fraction // aNumber
+    ]
+
+    < aNumber [
+	"Answer whether the receiver is less than arg."
+
+	<category: 'comparing'>
+	aNumber generality = self generality 
+	    ifTrue: [^(self compare: aNumber) < 0]
+	    ifFalse: [^self retryRelationalOp: #< coercing: aNumber]
+    ]
+
+    <= aNumber [
+	"Answer whether the receiver is less than or equal to arg."
+
+	<category: 'comparing'>
+	aNumber generality = self generality 
+	    ifTrue: [^(self compare: aNumber) <= 0]
+	    ifFalse: [^self retryRelationalOp: #<= coercing: aNumber]
+    ]
+
+    > aNumber [
+	"Answer whether the receiver is greater than arg."
+
+	<category: 'comparing'>
+	aNumber generality = self generality 
+	    ifTrue: [^(self compare: aNumber) > 0]
+	    ifFalse: [^self retryRelationalOp: #> coercing: aNumber]
+    ]
+
+    >= aNumber [
+	"Answer whether the receiver is greater than or equal to arg."
+
+	<category: 'comparing'>
+	aNumber generality = self generality 
+	    ifTrue: [^(self compare: aNumber) >= 0]
+	    ifFalse: [^self retryRelationalOp: #>= coercing: aNumber]
+    ]
+
+    = arg [
+	"Answer whether the receiver is equal to arg."
+
+	<category: 'comparing'>
+	(arg isKindOf: Number) ifFalse: [^false].
+	arg generality = self generality 
+	    ifTrue: [^(self compare: arg) = 0]
+	    ifFalse: [^self retryEqualityCoercing: arg]
+    ]
+
+    ~= arg [
+	"Answer whether the receiver is not equal arg."
+
+	<category: 'comparing'>
+	(arg isKindOf: Number) ifFalse: [^true].
+	arg generality = self generality 
+	    ifTrue: [^(self compare: arg) ~= 0]
+	    ifFalse: [^self retryInequalityCoercing: arg]
+    ]
+
+    hash [
+	"Answer an hash value for the receiver."
+
+	<category: 'comparing'>
+	^fraction hash
+    ]
+
+    displayOn: aStream [
+	"Print a representation of the receiver on aStream, intended to
+	 be directed to a user.  In this particular case, the `scale'
+	 part of the #printString is not emitted."
+
+	<category: 'printing'>
+	| aFraction fracDigits |
+	self < 0 ifTrue: [aStream nextPut: $-].
+	aFraction := fraction abs.
+	aStream nextPutAll: aFraction truncated printString.
+	scale = 0 ifTrue: [^self].
+	aStream nextPut: $..
+	fracDigits := aFraction fractionPart.
+	scale timesRepeat: 
+		[fracDigits := fracDigits * 10.
+		aStream nextPut: (Character digitValue: fracDigits truncated).
+		fracDigits := fracDigits fractionPart]
+    ]
+
+    printOn: aStream [
+	"Print a representation of the receiver on aStream."
+
+	<category: 'printing'>
+	self displayOn: aStream.
+	aStream nextPut: $s.
+	scale printOn: aStream
+    ]
+
+    isLiteralObject [
+	"Answer whether the receiver is expressible as a Smalltalk literal."
+
+	<category: 'storing'>
+	^true
+    ]
+
+    storeLiteralOn: aStream [
+	"Store on aStream some Smalltalk code which compiles to the receiver"
+
+	<category: 'storing'>
+	self storeOn: aStream
+    ]
+
+    storeOn: aStream [
+	"Print Smalltalk code that compiles to the receiver on aStream."
+
+	<category: 'storing'>
+	self printOn: aStream
+    ]
+
+    fraction [
+	"Private - Answer to full precision the fraction that the receiver
+	 represents."
+
+	<category: 'private'>
+	^fraction
+    ]
+
+    compare: arg [
+	"Private - Answer a Number that is the receiver - arg,
+	 truncated to a number of digits equal to the minimum of our
+	 scale and aScaledDecimal's."
+
+	<category: 'private'>
+	^((fraction - arg fraction) 
+	    * (10 raisedToInteger: (self scale min: arg scale))) rounded
+    ]
+
+    scale [
+	"Private - Answer a integer which represents the total number of digits
+	 used to represent the fraction part of the receiver, including trailing
+	 zeroes."
+
+	<category: 'private'>
+	^scale
+    ]
+
+    setFraction: theFraction scale: theScale [
+	"Private - Set the fraction to theFraction and the total number of digits
+	 used to represent the fraction part of the receiver, including trailing
+	 zeroes, to the Integer theScale."
+
+	<category: 'private'>
+	fraction := theFraction.
+	scale := theScale
+    ]
+]
 
 
-/ aNumber 
-     "Divide two numbers and answer the result."
+
+Eval [
+    ScaledDecimal initialize
+]
 
-    (aNumber generality = self generality)
-	ifTrue: [^ScaledDecimal
-	    newFromNumber: fraction / aNumber fraction
-	    scale: (scale max: aNumber scale) ]
-	ifFalse: [^self retryDivisionCoercing: aNumber]!
-
-\\ aNumber 
-    "Answer the remainder after integer division the receiver by aNumber 
-    with truncation towards negative infinity."
-
-    (aNumber generality = self generality)
-	ifTrue: [^ScaledDecimal
-	    newFromNumber: fraction \\ aNumber fraction
-	    scale: (scale max: aNumber scale) ]
-	ifFalse: [^self retry: #\\ coercing: aNumber]!
-
-// aNumber 
-    "Answer the integer quotient after dividing the receiver by aNumber 
-    with truncation towards negative infinity."
-    ^fraction // aNumber! !
-
-!ScaledDecimal methodsFor: 'comparing'!
-
-< aNumber 
-     "Answer whether the receiver is less than arg."
-
-    (aNumber generality = self generality)
-	ifTrue: [^(self compare: aNumber) < 0 ]
-	ifFalse: [^self retryRelationalOp: #< coercing: aNumber]!
-
-<= aNumber 
-     "Answer whether the receiver is less than or equal to arg."
-
-    (aNumber generality = self generality)
-	ifTrue: [^(self compare: aNumber) <= 0 ]
-	ifFalse: [^self retryRelationalOp: #<= coercing: aNumber]!
-
-> aNumber 
-     "Answer whether the receiver is greater than arg."
-
-    (aNumber generality = self generality)
-	ifTrue: [^(self compare: aNumber) > 0 ]
-	ifFalse: [^self retryRelationalOp: #> coercing: aNumber]!
-
->= aNumber 
-     "Answer whether the receiver is greater than or equal to arg."
-
-    (aNumber generality = self generality)
-	ifTrue: [^(self compare: aNumber) >= 0 ]
-	ifFalse: [^self retryRelationalOp: #>= coercing: aNumber]!
-
-= arg 
-     "Answer whether the receiver is equal to arg."
-
-    (arg isKindOf: Number) ifFalse: [^false].
-
-    (arg generality = self generality)
-	ifTrue: [^(self compare: arg) = 0 ]
-	ifFalse: [^self retryEqualityCoercing: arg]!
-
-~= arg 
-     "Answer whether the receiver is not equal arg."
-
-    (arg isKindOf: Number) ifFalse: [^true].
-
-    (arg generality = self generality)
-	ifTrue: [^(self compare: arg) ~= 0 ]
-	ifFalse: [^self retryInequalityCoercing: arg]!
-
-hash
-    "Answer an hash value for the receiver."
-
-    ^fraction hash! !
-
-!ScaledDecimal methodsFor: 'printing'!
-
-displayOn: aStream
-    "Print a representation of the receiver on aStream, intended to
-     be directed to a user.  In this particular case, the `scale'
-     part of the #printString is not emitted."
-    | aFraction fracDigits |
-    self < 0 ifTrue: [aStream nextPut: $-].
-    aFraction := fraction abs.
-    aStream nextPutAll: aFraction truncated printString.
-    scale = 0 ifTrue: [^self].
-    aStream nextPut: $. .
-    fracDigits := aFraction fractionPart.
-    scale timesRepeat: [
-	fracDigits := fracDigits * 10.
-	aStream nextPut: (Character digitValue: fracDigits truncated).
-	fracDigits := fracDigits fractionPart
-    ]!
-
-printOn: aStream 
-    "Print a representation of the receiver on aStream."
-    self displayOn: aStream.
-    aStream nextPut: $s.
-    scale printOn: aStream! !
-
-!ScaledDecimal methodsFor: 'storing'!
-
-isLiteralObject
-    "Answer whether the receiver is expressible as a Smalltalk literal."
-    ^true
-!
-
-storeLiteralOn: aStream
-    "Store on aStream some Smalltalk code which compiles to the receiver"
-    self storeOn: aStream
-!
-
-storeOn: aStream 
-    "Print Smalltalk code that compiles to the receiver on aStream."
-    self printOn: aStream! !
-
-!ScaledDecimal methodsFor: 'private'!
-
-fraction
-    "Private - Answer to full precision the fraction that the receiver
-     represents."
-    ^fraction
-!
-
-compare: arg
-    "Private - Answer a Number that is the receiver - arg,
-     truncated to a number of digits equal to the minimum of our
-     scale and aScaledDecimal's."
-    ^((fraction - arg fraction) *
-          (10 raisedToInteger: (self scale min: arg scale))) rounded!
-
-scale
-    "Private - Answer a integer which represents the total number of digits 
-    used to represent the fraction part of the receiver, including trailing 
-    zeroes."
-    ^scale!
-
-setFraction: theFraction scale: theScale
-    "Private - Set the fraction to theFraction and the total number of digits 
-    used to represent the fraction part of the receiver, including trailing 
-    zeroes, to the Integer theScale."
-    fraction := theFraction.
-    scale := theScale! !
-
-ScaledDecimal initialize!

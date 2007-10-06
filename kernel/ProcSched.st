@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003
@@ -32,268 +31,306 @@
  ======================================================================"
 
 
-Object subclass: #ProcessorScheduler
-       instanceVariableNames: 'processLists activeProcess idleTasks processTimeslice
-			       gcSemaphore gcArray'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-Processes'
-!
-
-ProcessorScheduler comment: 
-'I provide methods that control the execution of processes.' !
-
 
-!ProcessorScheduler class methodsFor: 'instance creation'!
-new
-    "Error---new instances of ProcessorScheduler should not be created."
+Object subclass: ProcessorScheduler [
+    | processLists activeProcess idleTasks processTimeslice gcSemaphore gcArray |
+    
+    <category: 'Language-Processes'>
+    <comment: 'I provide methods that control the execution of processes.'>
 
-    self shouldNotImplement! !
+    ProcessorScheduler class >> new [
+	"Error---new instances of ProcessorScheduler should not be created."
 
-
-!ProcessorScheduler methodsFor: 'basic'!
+	<category: 'instance creation'>
+	self shouldNotImplement
+    ]
 
-activeProcess
-    "Answer the active process"
-    ^activeProcess
-!
+    activeProcess [
+	"Answer the active process"
 
-activeDebugger
-    "Answer the active process' debugger"
-    ^self activeProcess debugger
-!
+	<category: 'basic'>
+	^activeProcess
+    ]
 
-activePriority
-    "Answer the active process' priority"
-    ^self activeProcess priority
-!
+    activeDebugger [
+	"Answer the active process' debugger"
 
-changePriorityListOf: aProcess to: aPriority suspend: aBoolean
-    "Private - Move aProcess to the execution list for aPriority,
-     answer the new execution list"
+	<category: 'basic'>
+	^self activeProcess debugger
+    ]
 
-    (processLists at: aProcess priority) remove: aProcess ifAbsent: [ ].
-    ^aBoolean
-	ifTrue: [ nil ]
-	ifFalse: [ (processLists at: aPriority) addLast: aProcess; yourself ]
-!
+    activePriority [
+	"Answer the active process' priority"
 
-processesAt: aPriority
-    "Answer a linked list of processes at the given priority"
-    ^processLists at: aPriority
-!
+	<category: 'basic'>
+	^self activeProcess priority
+    ]
 
-terminateActive
-    "Terminate the active process"
-    self activeProcess terminate
-!
+    changePriorityListOf: aProcess to: aPriority suspend: aBoolean [
+	"Private - Move aProcess to the execution list for aPriority,
+	 answer the new execution list"
 
-timeSlice: milliSeconds
-    "Set the timeslice that is assigned to each Process before it is
-     automatically preempted by the system.  Setting this to zero
-     disables preemptive multitasking.  Note that the system by
-     default is compiled with preemptive multitasking disabled, and
-     that even if it is enabled it will surely work only under BSD
-     derivatives (or, in general, systems that support ITIMER_VIRTUAL)."
-    processTimeslice := milliSeconds
-!
+	<category: 'basic'>
+	(processLists at: aProcess priority) remove: aProcess ifAbsent: [].
+	^aBoolean 
+	    ifTrue: [nil]
+	    ifFalse: 
+		[(processLists at: aPriority)
+		    addLast: aProcess;
+		    yourself]
+    ]
 
-timeSlice
-    "Answer the timeslice that is assigned to each Process before it
-     is automatically preempted by the system (in milliseconds).  An
-     answer of zero means that preemptive multitasking is disabled.
-     Note that the system by default is compiled without preemptive
-     multitasking, and that even if it is enabled it will work only
-     under BSD derivatives (or, in general, systems that support
-     ITIMER_VIRTUAL)."
-    ^processTimeslice
-!
+    processesAt: aPriority [
+	"Answer a linked list of processes at the given priority"
 
-yield
-    "Let the active process yield control to other processes"
-    self activeProcess yield
-! !
+	<category: 'basic'>
+	^processLists at: aPriority
+    ]
 
-
-!ProcessorScheduler methodsFor: 'priorities'!
+    terminateActive [
+	"Terminate the active process"
 
-priorityName: priority
-    "Private - Answer a name for the given process priority"
-    ^#('rockBottomPriority' 'systemBackgroundPriority' 'userBackgroundPriority'
-       'userSchedulingPriority' 'userInterruptPriority' 'lowIOPriority'
-       'highIOPriority' 'timingPriority' 'unpreemptedPriority') at: priority
-!
+	<category: 'basic'>
+	self activeProcess terminate
+    ]
 
-highestPriority
-    "Answer the highest valid priority"
-    ^processLists size
-!
+    timeSlice: milliSeconds [
+	"Set the timeslice that is assigned to each Process before it is
+	 automatically preempted by the system.  Setting this to zero
+	 disables preemptive multitasking.  Note that the system by
+	 default is compiled with preemptive multitasking disabled, and
+	 that even if it is enabled it will surely work only under BSD
+	 derivatives (or, in general, systems that support ITIMER_VIRTUAL)."
 
-unpreemptedPriority
-    "Answer the highest priority avilable in the system; never
-     create a process with this priority, instead use
-     BlockClosure>>#valueWithoutPreemption."
-    ^9
-!
+	<category: 'basic'>
+	processTimeslice := milliSeconds
+    ]
 
-timingPriority
-    "Answer the priority for system real-time processes."
-    ^8
-!
+    timeSlice [
+	"Answer the timeslice that is assigned to each Process before it
+	 is automatically preempted by the system (in milliseconds).  An
+	 answer of zero means that preemptive multitasking is disabled.
+	 Note that the system by default is compiled without preemptive
+	 multitasking, and that even if it is enabled it will work only
+	 under BSD derivatives (or, in general, systems that support
+	 ITIMER_VIRTUAL)."
 
-highIOPriority
-    "Answer the priority for system high-priority I/O processes,
-    such as a process handling input from a network."
-    ^7
-!
+	<category: 'basic'>
+	^processTimeslice
+    ]
 
-lowIOPriority
-    "Answer the priority for system low-priority I/O processes.
-    Examples are the process handling input from the user (keyboard, 
-    pointing device, etc.) and the process distributing input from a
-    network."
-    ^6
-!
+    yield [
+	"Let the active process yield control to other processes"
 
-userInterruptPriority
-    "Answer the priority for user interrupt-priority processes.
-    Processes run at this level will preempt the window scheduler
-    and should, therefore, not consume the processor forever."
-    ^5
-!
+	<category: 'basic'>
+	self activeProcess yield
+    ]
 
-userSchedulingPriority
-    "Answer the priority for user standard-priority processes"
-    ^4
-!
+    priorityName: priority [
+	"Private - Answer a name for the given process priority"
 
-userBackgroundPriority
-    "Answer the priority for user background-priority processes"
-    ^3
-!
+	<category: 'priorities'>
+	^#('rockBottomPriority' 'systemBackgroundPriority' 'userBackgroundPriority' 'userSchedulingPriority' 'userInterruptPriority' 'lowIOPriority' 'highIOPriority' 'timingPriority' 'unpreemptedPriority') 
+	    at: priority
+    ]
 
-systemBackgroundPriority
-    "Answer the priority for system background-priority processes.
-    Examples are an incremental garbage collector or status checker."
+    highestPriority [
+	"Answer the highest valid priority"
 
-    ^2
-!
+	<category: 'priorities'>
+	^processLists size
+    ]
 
-rockBottomPriority
-    "Answer the lowest valid priority"
-    ^1
-!
+    unpreemptedPriority [
+	"Answer the highest priority avilable in the system; never
+	 create a process with this priority, instead use
+	 BlockClosure>>#valueWithoutPreemption."
 
-lowestPriority
-    "Answer the lowest valid priority"
-    ^1
-! !
+	<category: 'priorities'>
+	^9
+    ]
 
-
-!ProcessorScheduler methodsFor: 'idle tasks'!
+    timingPriority [
+	"Answer the priority for system real-time processes."
 
-idle
-    "Private - Call the next idle task"
-    | index |
-    idleTasks size <= 1 ifTrue: [ ^self ].
-    index := idleTasks at: 1.
-    ObjectMemory incrementalGCStep.
-    (idleTasks at: index + 2) value.
-    idleTasks at: 1 put: (index + 1) \\ (idleTasks size - 1)
-!
+	<category: 'priorities'>
+	^8
+    ]
 
-idleAdd: aBlock
-    "Register aBlock to be executed when things are idle"
-    idleTasks add: aBlock
-!
+    highIOPriority [
+	"Answer the priority for system high-priority I/O processes,
+	 such as a process handling input from a network."
 
-initialize
-    "Private - Start the finalization process."
+	<category: 'priorities'>
+	^7
+    ]
 
-    | finalizerProcess |
-    idleTasks := OrderedCollection with: 0.
-    ObjectMemory addDependent: self.
-    finalizerProcess := [
-        | local localFinalizerProcess |
-	[
-            gcSemaphore wait.
-            local := gcArray.
-            gcArray := nil.
+    lowIOPriority [
+	"Answer the priority for system low-priority I/O processes.
+	 Examples are the process handling input from the user (keyboard,
+	 pointing device, etc.) and the process distributing input from a
+	 network."
 
-	    "Fire a low-priority process to finalize the objects"
-            localFinalizerProcess :=
-		[ :array | array do: [ :each | each mourn ] ]
-		    newProcessWith: { local }.
+	<category: 'priorities'>
+	^6
+    ]
 
-	    localFinalizerProcess name: 'finalization worker'.
-	    localFinalizerProcess resume.
-	] repeat.
-    ] forkAt: Processor timingPriority.
-    finalizerProcess name: 'finalization listener'.
-!
+    userInterruptPriority [
+	"Answer the priority for user interrupt-priority processes.
+	 Processes run at this level will preempt the window scheduler
+	 and should, therefore, not consume the processor forever."
 
-update: aSymbol
-    "If we left some work behind when the image was saved,
-     do it now."
+	<category: 'priorities'>
+	^5
+    ]
 
-    aSymbol == #returnFromSnapshot ifFalse: [ ^self ].
-    gcArray isNil ifFalse: [ gcSemaphore signal ].
-! !
+    userSchedulingPriority [
+	"Answer the priority for user standard-priority processes"
 
-
-!ProcessorScheduler methodsFor: 'printing'!
+	<category: 'priorities'>
+	^4
+    ]
 
-printOn: aStream
-    "Store onto aStream a printed representation of the receiver"
-    aStream nextPutAll: 'Processor'
-! !
+    userBackgroundPriority [
+	"Answer the priority for user background-priority processes"
 
-
-!ProcessorScheduler methodsFor: 'storing'!
+	<category: 'priorities'>
+	^3
+    ]
 
-storeOn: aStream
-    "Store onto aStream a Smalltalk expression which evaluates to the receiver"
-    aStream nextPutAll: 'Processor'
-! !
+    systemBackgroundPriority [
+	"Answer the priority for system background-priority processes.
+	 Examples are an incremental garbage collector or status checker."
 
-
-!ProcessorScheduler methodsFor: 'built ins'!
+	<category: 'priorities'>
+	^2
+    ]
 
-disableInterrupts
-   "Disable interrupts caused by external events while the
-    current process is executing.  Note that interrupts are
-    disabled on a per-process basis, and that calling
-    #disableInterrupts twice requires calling #enableInterrupts
-    twice as well to re-enable interrupts."
-   <primitive: VMpr_Processor_disableInterrupts>
-!
+    rockBottomPriority [
+	"Answer the lowest valid priority"
 
-enableInterrupts
-   "Re-enable interrupts caused by external events while the
-    current process is executing.  By default, interrupts are
-    enabled."
-   <primitive: VMpr_Processor_enableInterrupts>
-!
+	<category: 'priorities'>
+	^1
+    ]
 
-
-!ProcessorScheduler methodsFor: 'timed invocation'!
+    lowestPriority [
+	"Answer the lowest valid priority"
 
-isTimeoutProgrammed
-    "Private - Answer whether there is a pending call to
-    #signal:atMilliseconds:"
-    <primitive: VMpr_Processor_isTimeoutProgrammed>
-!
+	<category: 'priorities'>
+	^1
+    ]
 
-signal: aSemaphore atMilliseconds: millis
-    "Private - signal 'aSemaphore' after 'millis' milliseconds have elapsed"
-    <primitive: VMpr_Processor_signalAtMilliseconds>
-    ^self primitiveFailed
-!
+    idle [
+	"Private - Call the next idle task"
 
-signal: aSemaphore onInterrupt: anIntegerSignalNumber
-    "Private - signal 'aSemaphore' when the given C signal occurs"
-    <primitive: VMpr_Processor_signalOnInterrupt>
-    ^self primitiveFailed
-! !
+	<category: 'idle tasks'>
+	| index |
+	idleTasks size <= 1 ifTrue: [^self].
+	index := idleTasks at: 1.
+	ObjectMemory incrementalGCStep.
+	(idleTasks at: index + 2) value.
+	idleTasks at: 1 put: (index + 1) \\ (idleTasks size - 1)
+    ]
 
+    idleAdd: aBlock [
+	"Register aBlock to be executed when things are idle"
+
+	<category: 'idle tasks'>
+	idleTasks add: aBlock
+    ]
+
+    initialize [
+	"Private - Start the finalization process."
+
+	<category: 'idle tasks'>
+	| finalizerProcess |
+	idleTasks := OrderedCollection with: 0.
+	ObjectMemory addDependent: self.
+	finalizerProcess := 
+		[| local localFinalizerProcess |
+		
+		[gcSemaphore wait.
+		local := gcArray.
+		gcArray := nil.
+
+		"Fire a low-priority process to finalize the objects"
+		localFinalizerProcess := [:array | array do: [:each | each mourn]] 
+			    newProcessWith: {local}.
+		localFinalizerProcess name: 'finalization worker'.
+		localFinalizerProcess resume] 
+			repeat] 
+			forkAt: Processor timingPriority.
+	finalizerProcess name: 'finalization listener'
+    ]
+
+    update: aSymbol [
+	"If we left some work behind when the image was saved,
+	 do it now."
+
+	<category: 'idle tasks'>
+	aSymbol == #returnFromSnapshot ifFalse: [^self].
+	gcArray isNil ifFalse: [gcSemaphore signal]
+    ]
+
+    printOn: aStream [
+	"Store onto aStream a printed representation of the receiver"
+
+	<category: 'printing'>
+	aStream nextPutAll: 'Processor'
+    ]
+
+    storeOn: aStream [
+	"Store onto aStream a Smalltalk expression which evaluates to the receiver"
+
+	<category: 'storing'>
+	aStream nextPutAll: 'Processor'
+    ]
+
+    disableInterrupts [
+	"Disable interrupts caused by external events while the
+	 current process is executing.  Note that interrupts are
+	 disabled on a per-process basis, and that calling
+	 #disableInterrupts twice requires calling #enableInterrupts
+	 twice as well to re-enable interrupts."
+
+	<category: 'built ins'>
+	<primitive: VMpr_Processor_disableInterrupts>
+	
+    ]
+
+    enableInterrupts [
+	"Re-enable interrupts caused by external events while the
+	 current process is executing.  By default, interrupts are
+	 enabled."
+
+	<category: 'built ins'>
+	<primitive: VMpr_Processor_enableInterrupts>
+	
+    ]
+
+    isTimeoutProgrammed [
+	"Private - Answer whether there is a pending call to
+	 #signal:atMilliseconds:"
+
+	<category: 'timed invocation'>
+	<primitive: VMpr_Processor_isTimeoutProgrammed>
+	
+    ]
+
+    signal: aSemaphore atMilliseconds: millis [
+	"Private - signal 'aSemaphore' after 'millis' milliseconds have elapsed"
+
+	<category: 'timed invocation'>
+	<primitive: VMpr_Processor_signalAtMilliseconds>
+	^self primitiveFailed
+    ]
+
+    signal: aSemaphore onInterrupt: anIntegerSignalNumber [
+	"Private - signal 'aSemaphore' when the given C signal occurs"
+
+	<category: 'timed invocation'>
+	<primitive: VMpr_Processor_signalOnInterrupt>
+	^self primitiveFailed
+    ]
+]
 

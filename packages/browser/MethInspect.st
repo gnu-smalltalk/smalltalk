@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1992,94,95,99,2000,2001,2002 Free Software Foundation, Inc.
@@ -29,85 +28,94 @@
  ======================================================================
 "
 
-InspectorFieldList subclass:  #MethodInspectorFieldList
-	instanceVariableNames: 'lastVar '
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Graphics-Browser'!
 
-MethodInspectorFieldList comment: 
-nil!
+
+InspectorFieldList subclass: MethodInspectorFieldList [
+    | lastVar |
+    
+    <comment: nil>
+    <category: 'Graphics-Browser'>
 
-!MethodInspectorFieldList methodsFor: 'initializing'!
+    inspectMenu: listView [
+	"Initialize menu for variable list pane"
 
-inspectMenu: listView 
-    "Initialize menu for variable list pane"
+	<category: 'initializing'>
+	^(PopupMenu new: listView label: nil) 
+	    selectors: #(#('Inspect' #evalAndInspectResult: #listView) #('References' #references: #listView))
+	    receiver: self
+	    argument: listView
+    ]
 
-    ^(PopupMenu new: listView label: nil) 
-	selectors: #(#('Inspect' #evalAndInspectResult: #listView) #('References' #references: #listView))
-	receiver: self
-	argument: listView! !
+    currentFieldValue: obj [
+	<category: 'private'>
+	Blox beep
+    ]
 
-!MethodInspectorFieldList methodsFor: 'private'!
+    currentFieldValue [
+	<category: 'private'>
+	| s |
+	self currentField == 0 ifTrue: [^nil].
+	self currentField = 2 
+	    ifTrue: 
+		[s := WriteStream on: (String new: 100).
+		self value printHeaderOn: s.
+		^s contents].
+	self currentField = 1 
+	    ifTrue: 
+		[s := WriteStream on: (String new: 100).
+		self value printByteCodesOn: s.
+		^s contents].
+	^self currentField <= lastVar 
+	    ifTrue: [self value instVarAt: self currentField]
+	    ifFalse: [self value literalAt: self currentField - lastVar]
+    ]
 
-currentFieldValue: obj 
-    Blox beep!
+    computeFieldList: anObject [
+	"Initialize instance variable, fields, which governs display of
+	 variable list pane."
 
-currentFieldValue
-    | s |
-    self currentField == 0 ifTrue: [^nil].
-    self currentField = 2 
-	ifTrue: 
-	    [s := WriteStream on: (String new: 100).
-	    self value printHeaderOn: s.
-	    ^s contents].
-    self currentField = 1 
-	ifTrue: 
-	    [s := WriteStream on: (String new: 100).
-	    self value printByteCodesOn: s.
-	    ^s contents].
-    ^self currentField <= lastVar 
-	ifTrue: [self value instVarAt: self currentField]
-	ifFalse: [self value literalAt: self currentField - lastVar]!
+	<category: 'private'>
+	| string instVarNames |
+	instVarNames := self value class allInstVarNames.
+	fields add: '- bytecodes'.
+	fields add: '- header'.
+	3 to: instVarNames size
+	    do: 
+		[:x | 
+		string := (instVarNames at: x) asString.
+		fields add: string].
+	lastVar := fields size.
+	1 to: self value numLiterals do: [:x | fields add: x printString]
+    ]
 
-computeFieldList: anObject 
-    "Initialize instance variable, fields, which governs display of
-     variable list pane."
+    currentFieldString [
+	<category: 'private'>
+	self currentField < 3 ifTrue: [^self currentFieldValue].
+	^self currentFieldValue printString
+    ]
 
-    | string instVarNames |
-    instVarNames := self value class allInstVarNames.
-    fields add: '- bytecodes'.
-    fields add: '- header'.
-    3 to: instVarNames size
-	do: 
-	    [:x | 
-	    string := (instVarNames at: x) asString.
-	    fields add: string].
-    lastVar := fields size.
-    1 to: self value numLiterals do: [:x | fields add: x printString]!
+    references: listView [
+	"Open a method set browser on all methods which reference selected key"
 
-currentFieldString
-
-    self currentField < 3 ifTrue: [^self currentFieldValue].
-    ^self currentFieldValue printString
-! !
-
-!MethodInspectorFieldList methodsFor: 'variable list menu'!
-
-references: listView 
-    "Open a method set browser on all methods which reference selected key"
-
-    currentField isNil ifTrue: [^listView beep].
-    currentField <= lastVar ifTrue: [^listView beep].
-    MethodSetBrowser
-	referencesTo: (self value literalAt: currentField - lastVar)
-	parent: listView
-! !
+	<category: 'variable list menu'>
+	currentField isNil ifTrue: [^listView beep].
+	currentField <= lastVar ifTrue: [^listView beep].
+	MethodSetBrowser 
+	    referencesTo: (self value literalAt: currentField - lastVar)
+	    parent: listView
+    ]
+]
 
 
-!CompiledCode methodsFor: 'debugging'!
+
+CompiledCode extend [
 
-inspectorFieldLists
-    "Open a MethodInspectorFieldList window on self"
-    ^{ 'Basic' -> (BLOX.BLOXBrowser.MethodInspectorFieldList new value: self) }
-! !
+    inspectorFieldLists [
+	"Open a MethodInspectorFieldList window on self"
+
+	<category: 'debugging'>
+	^{'Basic' -> (BLOX.BLOXBrowser.MethodInspectorFieldList new value: self)}
+    ]
+
+]
+

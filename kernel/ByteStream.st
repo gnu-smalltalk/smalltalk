@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
@@ -31,202 +30,234 @@
  ======================================================================"
 
 
-ReadWriteStream subclass: #ByteStream
-		instanceVariableNames: ''
-		classVariableNames: ''
-		poolDictionaries: ''
-		category: 'Streams-Collections'
-!
-
-ByteStream comment: 
-'My instances are read/write streams specially crafted for ByteArrays.
-They are able to write binary data to them.'
-!
-
 
-!ByteStream methodsFor: 'basic'!
+ReadWriteStream subclass: ByteStream [
+    
+    <category: 'Streams-Collections'>
+    <comment: 'My instances are read/write streams specially crafted for ByteArrays.
+They are able to write binary data to them.'>
 
-next
-    "Return the next *character* in the ByteArray"
+    next [
+	"Return the next *character* in the ByteArray"
 
-    ^Character value: super next
-!
+	<category: 'basic'>
+	^Character value: super next
+    ]
 
-nextByte
-    "Return the next byte in the byte array"
-    ^super next
-!
+    nextByte [
+	"Return the next byte in the byte array"
 
-nextByteArray: numBytes
-    "Return the next numBytes bytes in the byte array"
-    ^(self next: numBytes) asByteArray
-!
+	<category: 'basic'>
+	^super next
+    ]
 
-nextSignedByte
-    "Return the next byte in the byte array, interpreted as a 8 bit signed number"
-    ^self nextBytes: 1 signed: true
-!
+    nextByteArray: numBytes [
+	"Return the next numBytes bytes in the byte array"
 
-nextDouble
-    "Return the next 64-bit float in the byte array"
-    ^(FloatD new: 8)
-	at: 1 put: self nextByte;
-	at: 2 put: self nextByte;
-	at: 3 put: self nextByte;
-	at: 4 put: self nextByte;
-	at: 5 put: self nextByte;
-	at: 6 put: self nextByte;
-	at: 7 put: self nextByte;
-	at: 8 put: self nextByte
-!
+	<category: 'basic'>
+	^(self next: numBytes) asByteArray
+    ]
 
-nextFloat
-    "Return the next 32-bit float in the byte array"
-    ^(FloatE new: 4)
-	at: 1 put: self nextByte;
-	at: 2 put: self nextByte;
-	at: 3 put: self nextByte;
-	at: 4 put: self nextByte
-!
+    nextSignedByte [
+	"Return the next byte in the byte array, interpreted as a 8 bit signed number"
 
-nextUint64
-    "Return the next 8 bytes in the byte array, interpreted as a 64 bit unsigned int"
-    ^self nextBytes: 8 signed: false
-!
+	<category: 'basic'>
+	^self nextBytes: 1 signed: true
+    ]
 
-nextLongLong
-    "Return the next 8 bytes in the byte array, interpreted as a 64 bit signed int"
-    ^self nextBytes: 8 signed: true
-!
+    nextDouble [
+	"Return the next 64-bit float in the byte array"
 
-nextUlong
-    "Return the next 4 bytes in the byte array, interpreted as a 32 bit unsigned int"
-    ^self nextBytes: 4 signed: false
-!
+	<category: 'basic'>
+	^(FloatD new: 8)
+	    at: 1 put: self nextByte;
+	    at: 2 put: self nextByte;
+	    at: 3 put: self nextByte;
+	    at: 4 put: self nextByte;
+	    at: 5 put: self nextByte;
+	    at: 6 put: self nextByte;
+	    at: 7 put: self nextByte;
+	    at: 8 put: self nextByte
+    ]
 
-nextLong
-    "Return the next 4 bytes in the byte array, interpreted as a 32 bit signed int"
-    ^self nextBytes: 4 signed: true
-!
+    nextFloat [
+	"Return the next 32-bit float in the byte array"
 
-nextUshort
-    "Return the next 2 bytes in the byte array, interpreted as a 16 bit unsigned int"
-    ^self nextBytes: 2 signed: false
-!
+	<category: 'basic'>
+	^(FloatE new: 4)
+	    at: 1 put: self nextByte;
+	    at: 2 put: self nextByte;
+	    at: 3 put: self nextByte;
+	    at: 4 put: self nextByte
+    ]
 
-nextShort
-    "Return the next 2 bytes in the byte array, interpreted as a 16 bit signed int"
-    ^self nextBytes: 2 signed: true
-!
+    nextUint64 [
+	"Return the next 8 bytes in the byte array, interpreted as a 64 bit unsigned int"
 
-nextPut: aChar
-    "Store aChar on the byte array"
-    aChar isCharacter
-	ifTrue: [ super nextPut: aChar value ]
-	ifFalse: [ SystemExceptions.WrongClass signalOn: aChar mustBe: Character ]
-!
+	<category: 'basic'>
+	^self nextBytes: 8 signed: false
+    ]
 
-nextPutDouble: aDouble
-    "Store aDouble as a 64-bit float in the byte array"
-    | d |
-    d := aDouble asFloatD.
-    self nextPutByte: (d at: 1).
-    self nextPutByte: (d at: 2).
-    self nextPutByte: (d at: 3).
-    self nextPutByte: (d at: 4).
-    self nextPutByte: (d at: 5).
-    self nextPutByte: (d at: 6).
-    self nextPutByte: (d at: 7).
-    self nextPutByte: (d at: 8)
-!
+    nextLongLong [
+	"Return the next 8 bytes in the byte array, interpreted as a 64 bit signed int"
 
-nextPutFloat: aFloat
-    "Return the next 32-bit float in the byte array"
-    | f |
-    f := aFloat asFloatE.
-    self nextPutByte: (f at: 1).
-    self nextPutByte: (f at: 2).
-    self nextPutByte: (f at: 3).
-    self nextPutByte: (f at: 4).
-!
+	<category: 'basic'>
+	^self nextBytes: 8 signed: true
+    ]
 
-nextPutByte: anInteger
-    "Store anInteger (range: -128..255) on the byte array"
-    | int |
-    int := anInteger.
-    int:= (anInteger < 0)
-	ifTrue: [ (anInteger negated - 1) bitXor: 255 ]
-	ifFalse: [ anInteger ].
+    nextUlong [
+	"Return the next 4 bytes in the byte array, interpreted as a 32 bit unsigned int"
 
-    ^super nextPut: (int bitAnd: 255)
-!
+	<category: 'basic'>
+	^self nextBytes: 4 signed: false
+    ]
 
-nextPutByteArray: aByteArray
-    "Store aByteArray on the byte array"
-    ^self nextPutAll: aByteArray
-!
+    nextLong [
+	"Return the next 4 bytes in the byte array, interpreted as a 32 bit signed int"
 
-nextPutInt64: anInteger
-    "Store anInteger (range: -2^63..2^64-1) on the byte array as 4 bytes"
-    self nextPutBytes: 8 of: anInteger
-!
+	<category: 'basic'>
+	^self nextBytes: 4 signed: true
+    ]
 
-nextPutLong: anInteger
-    "Store anInteger (range: -2^31..2^32-1) on the byte array as 4 bytes"
-    self nextPutBytes: 4 of: anInteger
-!
+    nextUshort [
+	"Return the next 2 bytes in the byte array, interpreted as a 16 bit unsigned int"
 
-nextPutShort: anInteger
-    "Store anInteger (range: -32768..65535) on the byte array as 2 bytes"
-    self nextPutBytes: 2 of: anInteger
-! !
+	<category: 'basic'>
+	^self nextBytes: 2 signed: false
+    ]
 
-
-!ByteStream methodsFor: 'private'!
+    nextShort [
+	"Return the next 2 bytes in the byte array, interpreted as a 16 bit signed int"
 
-basicNextByte
-    "Private - Return the next byte in the stream"
-    ^super next
-!
+	<category: 'basic'>
+	^self nextBytes: 2 signed: true
+    ]
 
-basicNextPutByte: anInteger
-    "Private - Store a byte in the stream"
-    | int |
-    int := anInteger.
-    int:= (anInteger < 0)
-	ifTrue: [ (anInteger negated - 1) bitXor: 255 ]
-	ifFalse: [ anInteger ].
+    nextPut: aChar [
+	"Store aChar on the byte array"
 
-    ^super nextPut: (int bitAnd: 255)
-!
+	<category: 'basic'>
+	aChar isCharacter 
+	    ifTrue: [super nextPut: aChar value]
+	    ifFalse: [SystemExceptions.WrongClass signalOn: aChar mustBe: Character]
+    ]
 
-nextBytes: n signed: signed
-    "Private - Get an integer out of the next anInteger bytes in the stream"
+    nextPutDouble: aDouble [
+	"Store aDouble as a 64-bit float in the byte array"
 
-    | int msb |
-    int := 0.
-    0 to: n * 8 - 16 by: 8 do: [ :i |
-	int := int + (self nextByte bitShift: i).
-    ].
+	<category: 'basic'>
+	| d |
+	d := aDouble asFloatD.
+	self nextPutByte: (d at: 1).
+	self nextPutByte: (d at: 2).
+	self nextPutByte: (d at: 3).
+	self nextPutByte: (d at: 4).
+	self nextPutByte: (d at: 5).
+	self nextPutByte: (d at: 6).
+	self nextPutByte: (d at: 7).
+	self nextPutByte: (d at: 8)
+    ]
 
-    msb := self nextByte.
-    (signed and: [ msb > 127 ]) ifTrue: [ msb := msb - 256 ].
-    ^int + (msb bitShift: n * 8 - 8)!
+    nextPutFloat: aFloat [
+	"Return the next 32-bit float in the byte array"
 
-nextPutBytes: n of: anInteger
-    "Private - Store the n least significant bytes of int in little-endian format"
-    | int |
+	<category: 'basic'>
+	| f |
+	f := aFloat asFloatE.
+	self nextPutByte: (f at: 1).
+	self nextPutByte: (f at: 2).
+	self nextPutByte: (f at: 3).
+	self nextPutByte: (f at: 4)
+    ]
 
-    int := anInteger.
-    n timesRepeat: [
-	self nextPutByte: (int bitAnd: 255).
-	int := int bitShift: -8.
-	(int = 0 and: [ anInteger < 0 ]) ifTrue: [ int := 255 ].
-    ].
-!
+    nextPutByte: anInteger [
+	"Store anInteger (range: -128..255) on the byte array"
 
-species
-    ^String
-! !
+	<category: 'basic'>
+	| int |
+	int := anInteger.
+	int := anInteger < 0 
+		    ifTrue: [anInteger negated - 1 bitXor: 255]
+		    ifFalse: [anInteger].
+	^super nextPut: (int bitAnd: 255)
+    ]
 
-
+    nextPutByteArray: aByteArray [
+	"Store aByteArray on the byte array"
+
+	<category: 'basic'>
+	^self nextPutAll: aByteArray
+    ]
+
+    nextPutInt64: anInteger [
+	"Store anInteger (range: -2^63..2^64-1) on the byte array as 4 bytes"
+
+	<category: 'basic'>
+	self nextPutBytes: 8 of: anInteger
+    ]
+
+    nextPutLong: anInteger [
+	"Store anInteger (range: -2^31..2^32-1) on the byte array as 4 bytes"
+
+	<category: 'basic'>
+	self nextPutBytes: 4 of: anInteger
+    ]
+
+    nextPutShort: anInteger [
+	"Store anInteger (range: -32768..65535) on the byte array as 2 bytes"
+
+	<category: 'basic'>
+	self nextPutBytes: 2 of: anInteger
+    ]
+
+    basicNextByte [
+	"Private - Return the next byte in the stream"
+
+	<category: 'private'>
+	^super next
+    ]
+
+    basicNextPutByte: anInteger [
+	"Private - Store a byte in the stream"
+
+	<category: 'private'>
+	| int |
+	int := anInteger.
+	int := anInteger < 0 
+		    ifTrue: [anInteger negated - 1 bitXor: 255]
+		    ifFalse: [anInteger].
+	^super nextPut: (int bitAnd: 255)
+    ]
+
+    nextBytes: n signed: signed [
+	"Private - Get an integer out of the next anInteger bytes in the stream"
+
+	<category: 'private'>
+	| int msb |
+	int := 0.
+	0 to: n * 8 - 16
+	    by: 8
+	    do: [:i | int := int + (self nextByte bitShift: i)].
+	msb := self nextByte.
+	(signed and: [msb > 127]) ifTrue: [msb := msb - 256].
+	^int + (msb bitShift: n * 8 - 8)
+    ]
+
+    nextPutBytes: n of: anInteger [
+	"Private - Store the n least significant bytes of int in little-endian format"
+
+	<category: 'private'>
+	| int |
+	int := anInteger.
+	n timesRepeat: 
+		[self nextPutByte: (int bitAnd: 255).
+		int := int bitShift: -8.
+		(int = 0 and: [anInteger < 0]) ifTrue: [int := 255]]
+    ]
+
+    species [
+	<category: 'private'>
+	^String
+    ]
+]
+

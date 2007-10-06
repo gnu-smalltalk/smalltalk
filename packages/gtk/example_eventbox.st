@@ -4,7 +4,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2003 Free Software Foundation, Inc.
@@ -29,53 +28,62 @@
 |
  ======================================================================"
 
-Namespace current: GTK!
 
-Object subclass: #EventBoxExample
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: nil!
+
+Namespace current: GTK [
 
-!EventBoxExample methodsFor: 'event handling'!
+Object subclass: EventBoxExample [
+    
+    <category: nil>
+    <comment: nil>
 
-buttonPressEvent: object event: event data: data
+    buttonPressEvent: object event: event data: data [
+	<category: 'event handling'>
 	data destroy
-!
+    ]
 
-destroy: object data: data
+    destroy: object data: data [
+	<category: 'event handling'>
 	Gtk mainQuit
-! !
+    ]
 
-!EventBoxExample methodsFor: 'layout'!
+    open [
+	<category: 'layout'>
+	| window eventBox label |
+	window := GtkWindow new: Gtk gtkWindowToplevel.
+	window 
+	    connectSignal: 'destroy'
+	    to: self
+	    selector: #destroy:data:
+	    userData: nil.
+	window setTitle: 'Event Box'.
+	window setBorderWidth: 10.
+	eventBox := GtkEventBox new.
+	window add: eventBox.
+	eventBox show.
+	label := GtkLabel new: 'Click here to quit, quit, quit, quit, quit'.
+	eventBox add: label.
+	label show.
+	label setSizeRequest: 110 height: 20.
+	eventBox setEvents: Gdk gdkButtonPressMask.
+	eventBox 
+	    connectSignal: 'button_press_event'
+	    to: self
+	    selector: #buttonPressEvent:event:data:
+	    userData: window.
+	eventBox realize.
+	eventBox getWindow setCursor: (GdkCursor new: Gdk gdkHand1).
+	window show
+    ]
+]
 
-open
-    | window eventBox label |
+]
 
-    window := GtkWindow new: Gtk gtkWindowToplevel.
-    window connectSignal: 'destroy' to: self selector: #destroy:data: userData: nil.
-    window setTitle: 'Event Box'.
-    window setBorderWidth: 10.
 
-    eventBox := GtkEventBox new.
-    window add: eventBox.
-    eventBox show.
+
+Namespace current: GTK [
+    Gtk gstGtkInit.
+    EventBoxExample new open.
+    Gtk main
+]
 
-    label := GtkLabel new: 'Click here to quit, quit, quit, quit, quit'.
-    eventBox add: label.
-    label show.
-    label setSizeRequest: 110 height: 20.
-
-    eventBox setEvents: Gdk gdkButtonPressMask.
-    eventBox
-	connectSignal: 'button_press_event' to: self
-	selector: #buttonPressEvent:event:data: userData: window.
-
-    eventBox realize.
-    eventBox getWindow setCursor: (GdkCursor new: Gdk gdkHand1).
-    window show
-! !
-
-Gtk gstGtkInit!
-EventBoxExample new open!
-Gtk main!

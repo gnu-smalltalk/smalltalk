@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
@@ -31,128 +30,143 @@
  ======================================================================"
 
 
-LookupKey subclass: #DeferredVariableBinding
-	  instanceVariableNames: 'class defaultDictionary association path'
-	  classVariableNames: ''
-	  poolDictionaries: ''
-	  category: 'Language-Data types'
-!
-
-DeferredVariableBinding comment: 
-'I represent a binding to a variable that is not tied to a particular
+
+LookupKey subclass: DeferredVariableBinding [
+    | class defaultDictionary association path |
+    
+    <category: 'Language-Data types'>
+    <comment: 'I represent a binding to a variable that is not tied to a particular
 dictionary until the first access.  Then, lookup rules for global variables
-in the scope of a given class are used.'!
+in the scope of a given class are used.'>
 
+    DeferredVariableBinding class >> path: anArray class: aClass defaultDictionary: aDictionary [
+	<category: 'basic'>
+	^(self key: anArray first)
+	    class: aClass;
+	    defaultDictionary: aDictionary;
+	    path: anArray allButFirst;
+	    yourself
+    ]
 
-
-!DeferredVariableBinding class methodsFor: 'basic'!
+    DeferredVariableBinding class >> key: aSymbol class: aClass defaultDictionary: aDictionary [
+	<category: 'basic'>
+	^(self key: aSymbol)
+	    class: aClass;
+	    defaultDictionary: aDictionary;
+	    yourself
+    ]
 
-path: anArray class: aClass defaultDictionary: aDictionary
-    ^(self key: anArray first)
-        class: aClass;
-        defaultDictionary: aDictionary;
-        path: anArray allButFirst;
-	yourself!
+    value [
+	"Answer a new instance of the receiver with the given key and value"
 
-key: aSymbol class: aClass defaultDictionary: aDictionary
-    ^(self key: aSymbol)
-        class: aClass;
-        defaultDictionary: aDictionary;
-	yourself! !
+	<category: 'basic'>
+	association isNil 
+	    ifTrue: [association := self resolvePathFrom: self resolveBinding].
+	^association value
+    ]
 
-!DeferredVariableBinding methodsFor: 'basic'!
+    value: anObject [
+	"Answer a new instance of the receiver with the given key and value"
 
-value
-    "Answer a new instance of the receiver with the given key and value"
-    association isNil
-	ifTrue: [ association := self resolvePathFrom: self resolveBinding ].
-    ^association value
-!
+	<category: 'basic'>
+	association isNil 
+	    ifTrue: [association := self resolvePathFrom: self resolveBinding].
+	association value: anObject
+    ]
 
-value: anObject
-    "Answer a new instance of the receiver with the given key and value"
-    association isNil
-	ifTrue: [ association := self resolvePathFrom: self resolveBinding ].
-    association value: anObject
-!
+    path [
+	"Answer the path followed after resolving the first key."
 
-path
-    "Answer the path followed after resolving the first key."
-    ^path
-! !
+	<category: 'basic'>
+	^path
+    ]
 
+    class: aClass [
+	<category: 'private'>
+	class := aClass
+    ]
 
-
-!DeferredVariableBinding methodsFor: 'private'!
+    defaultDictionary: aDictionary [
+	<category: 'private'>
+	defaultDictionary := aDictionary
+    ]
 
-class: aClass
-    class := aClass!
+    path: anArray [
+	<category: 'private'>
+	path := anArray isEmpty ifTrue: [nil] ifFalse: [anArray]
+    ]
 
-defaultDictionary: aDictionary
-    defaultDictionary := aDictionary!
+    resolvePathFrom: assoc [
+	"Given the resolution of the first key, resolve the rest of the path.
+	 The final element might be put in Undeclared, the ones in the middle
+	 instead must exist."
 
-path: anArray
-    path := anArray isEmpty ifTrue: [ nil ] ifFalse: [ anArray ]!
+	<category: 'private'>
+	| pathAssoc |
+	path isNil ifTrue: [^assoc].
+	pathAssoc := assoc.
+	1 to: path size - 1
+	    do: [:each | pathAssoc := pathAssoc value associationAt: (path at: each)].
+	^pathAssoc value associationAt: path last
+	    ifAbsent: 
+		[Undeclared
+		    at: path last put: nil;
+		    associationAt: path last]
+    ]
 
-resolvePathFrom: assoc
-    "Given the resolution of the first key, resolve the rest of the path.
-     The final element might be put in Undeclared, the ones in the middle
-     instead must exist."
-    | pathAssoc |
-    path isNil ifTrue: [ ^assoc ].
-    pathAssoc := assoc.
-    1 to: path size - 1 do: [ :each |
-	pathAssoc := pathAssoc value associationAt: (path at: each) ].
-    ^pathAssoc value
-	associationAt: path last
-	ifAbsent: [
-	    Undeclared
-		at: path last put: nil;
-		associationAt: path last ]!
+    resolveBinding [
+	"Look for a pool dictionary of class that includes the key.  If not found,
+	 add the variable to the defaultDictionary.  If already bound, reuse the
+	 bound that was found on the previous lookup."
 
-resolveBinding
-    "Look for a pool dictionary of class that includes the key.  If not found,
-     add the variable to the defaultDictionary.  If already bound, reuse the
-     bound that was found on the previous lookup."
+	<category: 'private'>
+	"See if a previous access has created the binding."
 
-    | assoc |
+	| assoc |
+	assoc := defaultDictionary associationAt: self key ifAbsent: [nil].
+	assoc isNil ifFalse: [^assoc].
 
-    "See if a previous access has created the binding."
-    assoc := defaultDictionary associationAt: self key ifAbsent: [ nil ].
-    assoc isNil ifFalse: [ ^assoc ].
+	"Look for the binding in the class environment."
+	class withAllSuperclassesDo: 
+		[:env | 
+		| pools |
+		assoc := env environment associationAt: self key ifAbsent: [nil].
+		assoc isNil ifFalse: [^assoc].
+		pools := env sharedPoolDictionaries.
+		pools isNil 
+		    ifFalse: 
+			[pools do: 
+				[:each | 
+				assoc := each associationAt: self key ifAbsent: [nil].
+				assoc isNil ifFalse: [^assoc]]]].
 
-    "Look for the binding in the class environment."
-    class withAllSuperclassesDo: [ :env || pools |
-        assoc := env environment associationAt: self key ifAbsent: [ nil ].
-        assoc isNil ifFalse: [ ^assoc ].
+	"Create it as a temporary."
+	defaultDictionary at: self key ifAbsentPut: [nil].
+	^defaultDictionary associationAt: self key
+    ]
 
-	pools := env sharedPoolDictionaries.
-	pools isNil ifFalse: [
-	    pools do: [ :each |
-	        assoc := each associationAt: self key ifAbsent: [ nil ].
-	        assoc isNil ifFalse: [ ^assoc ] ] ] ].
+    printOn: aStream [
+	"Put on aStream some Smalltalk code compiling to the receiver"
 
-    "Create it as a temporary."
-    defaultDictionary at: self key ifAbsentPut: [ nil ].
-    ^defaultDictionary associationAt: self key
-! !
+	<category: 'storing'>
+	aStream nextPut: ${.
+	aStream nextPutAll: self key.
+	self path isNil 
+	    ifFalse: 
+		[self path do: 
+			[:each | 
+			aStream
+			    nextPut: $.;
+			    nextPutAll: each]].
+	aStream nextPut: $}
+    ]
 
+    storeOn: aStream [
+	"Put on aStream some Smalltalk code compiling to the receiver"
 
+	<category: 'storing'>
+	aStream nextPut: $#.
+	self printOn: aStream
+    ]
+]
 
-
-!DeferredVariableBinding methodsFor: 'storing'!
-
-printOn: aStream
-    "Put on aStream some Smalltalk code compiling to the receiver"
-    aStream nextPut: ${.
-    aStream nextPutAll: self key.
-    self path isNil ifFalse: [
-	self path do: [ :each | aStream nextPut: $.; nextPutAll: each ] ].
-    aStream nextPut: $}
-!
-
-storeOn: aStream
-    "Put on aStream some Smalltalk code compiling to the receiver"
-    aStream nextPut: $#.
-    self printOn: aStream
-! !

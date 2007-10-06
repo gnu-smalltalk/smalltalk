@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2003
@@ -32,228 +31,328 @@
  ======================================================================"
 
 
-Object subclass: #Memory
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-Implementation'
-!
-
-Memory comment:
-'I provide access to actual machine addresses of OOPs and objects.  I
+
+Object subclass: Memory [
+    
+    <category: 'Language-Implementation'>
+    <comment: 'I provide access to actual machine addresses of OOPs and objects.  I
 have no instances; you send messages to my class to map between an object
 and the address of its OOP or object. In addition I provide direct
-memory access with different C types (ints, chars, OOPs, floats,...).'  !
+memory access with different C types (ints, chars, OOPs, floats,...).'>
 
+    Memory class >> at: anAddress [
+	"Access the Smalltalk object (OOP) at the given address."
 
-
-!Memory class methodsFor: 'accessing'!
+	<category: 'accessing'>
+	^self type: 9 at: anAddress
+    ]
 
-"Note that the types could be given symbolic names and installed in a 
-class variable, or could be methods that return the proper values (such as
-the priorities for processes)."
+    Memory class >> bigEndian [
+	"Answer whether we're running on a big- or little-endian system."
 
-at: anAddress
-    "Access the Smalltalk object (OOP) at the given address."
-    ^self type: 9 at: anAddress
-!
+	<category: 'accessing'>
+	^Bigendian
+    ]
 
-bigEndian
-    "Answer whether we're running on a big- or little-endian system."
-    ^Bigendian
-!
+    Memory class >> charAt: anAddress [
+	"Access the C char at the given address. The value is
+	 returned as a Smalltalk Character."
 
-charAt: anAddress
-    "Access the C char at the given address. The value is
-     returned as a Smalltalk Character."
-    ^self type: 0 at: anAddress
-!
+	<category: 'accessing'>
+	^self type: 0 at: anAddress
+    ]
 
-unsignedCharAt: anAddress
-    "Access the C unsigned char at the given address.
-     The value is returned as a Smalltalk Character."
-    ^self type: 1 at: anAddress
-!
+    Memory class >> unsignedCharAt: anAddress [
+	"Access the C unsigned char at the given address.
+	 The value is returned as a Smalltalk Character."
 
-shortAt: anAddress
-    "Access the C short int at the given address."
-    ^self type: 2 at: anAddress
-!
+	<category: 'accessing'>
+	^self type: 1 at: anAddress
+    ]
 
-unsignedShortAt: anAddress
-    "Access the C unsigned short int at the given address."
-    ^self type: 3 at: anAddress
-!
+    Memory class >> shortAt: anAddress [
+	"Access the C short int at the given address."
 
-longAt: anAddress
-    "Access the C long int at the given address."
-    ^self type: 4 at: anAddress
-!
+	<category: 'accessing'>
+	^self type: 2 at: anAddress
+    ]
 
-unsignedLongAt: anAddress
-    "Access the C unsigned long int at the given address."
-    ^self type: 5 at: anAddress
-!
+    Memory class >> unsignedShortAt: anAddress [
+	"Access the C unsigned short int at the given address."
 
-intAt: anAddress
-    "Access the C int at the given address."
-    ^self type: 10 at: anAddress
-!
+	<category: 'accessing'>
+	^self type: 3 at: anAddress
+    ]
 
-unsignedIntAt: anAddress
-    "Access the C unsigned int at the given address."
-    ^self type: 11 at: anAddress
-!
+    Memory class >> longAt: anAddress [
+	"Access the C long int at the given address."
 
-floatAt: anAddress
-    "Access the C float at the given address."
-    ^self type: 6 at: anAddress
-!
+	<category: 'accessing'>
+	^self type: 4 at: anAddress
+    ]
 
-doubleAt: anAddress
-    "Access the C double at the given address."
-    ^self type: 7 at: anAddress
-!
+    Memory class >> unsignedLongAt: anAddress [
+	"Access the C unsigned long int at the given address."
 
-longDoubleAt: anAddress
-    "Access the C long double at the given address."
-    ^self type: 12 at: anAddress
-!
+	<category: 'accessing'>
+	^self type: 5 at: anAddress
+    ]
 
-stringAt: anAddress
-    "Access the string pointed by the C `char *' at the given given address."
-    ^self type: 8 at: anAddress
-!
+    Memory class >> intAt: anAddress [
+	"Access the C int at the given address."
 
-deref: anAddress
-    "Access the C int pointed by the given address"
-    ^self intAt: anAddress
-! 
+	<category: 'accessing'>
+	^self type: 10 at: anAddress
+    ]
 
+    Memory class >> unsignedIntAt: anAddress [
+	"Access the C unsigned int at the given address."
 
-"Storing methods"
+	<category: 'accessing'>
+	^self type: 11 at: anAddress
+    ]
 
-at: anAddress put: aValue
-    "Store a pointer (OOP) to the Smalltalk object identified by `value'
-     at the given address."
-    ^self type: 9 at: anAddress put: aValue
-!
+    Memory class >> floatAt: anAddress [
+	"Access the C float at the given address."
 
-intAt: anAddress put: aValue
-    "Store the Smalltalk Integer object identified by `value', at the
-     given address, using sizeof(int) bytes."
-    ^self type: 10 at: anAddress put: aValue
-!
+	<category: 'accessing'>
+	^self type: 6 at: anAddress
+    ]
 
-unsignedIntAt: anAddress put: aValue
-    "Store the Smalltalk Integer object identified by `value', at the
-     given address, using sizeof(int) bytes."
-    ^self type: 11 at: anAddress put: aValue
-!
+    Memory class >> doubleAt: anAddress [
+	"Access the C double at the given address."
 
-uintAt: anAddress put: aValue
-    "Store the Smalltalk Integer object identified by `value', at the
-     given address, using sizeof(int) bytes."
-    ^self type: 11 at: anAddress put: aValue
-!
+	<category: 'accessing'>
+	^self type: 7 at: anAddress
+    ]
 
-charAt: anAddress put: aValue
-    "Store as a C char the Smalltalk Character or Integer object
-     identified by `value', at the given address, using sizeof(char)
-     bytes - i.e. 1 byte."
-    ^self type: 0 at: anAddress put: aValue
-!
+    Memory class >> longDoubleAt: anAddress [
+	"Access the C long double at the given address."
 
-unsignedCharAt: anAddress put: aValue
-    "Store as a C char the Smalltalk Character or Integer object
-     identified by `value', at the given address, using sizeof(char)
-     bytes - i.e. 1 byte."
-    ^self type: 1 at: anAddress put: aValue
-!
+	<category: 'accessing'>
+	^self type: 12 at: anAddress
+    ]
 
-ucharAt: anAddress put: aValue
-    "Store as a C char the Smalltalk Character or Integer object
-     identified by `value', at the given address, using sizeof(char)
-     bytes - i.e. 1 byte."
-    ^self type: 1 at: anAddress put: aValue
-!
+    Memory class >> stringAt: anAddress [
+	"Access the string pointed by the C `char *' at the given given address."
 
-shortAt: anAddress put: aValue
-    "Store the Smalltalk Integer object identified by `value', at the
-     given address, using sizeof(short) bytes."
-    ^self type: 2 at: anAddress put: aValue
-!
+	<category: 'accessing'>
+	^self type: 8 at: anAddress
+    ]
 
-unsignedShortAt: anAddress put: aValue
-    "Store the Smalltalk Integer object identified by `value', at the
-     given address, using sizeof(short) bytes."
-    ^self type: 3 at: anAddress put: aValue
-!
+    Memory class >> deref: anAddress [
+	"Access the C int pointed by the given address"
 
-ushortAt: anAddress put: aValue
-    "Store the Smalltalk Integer object identified by `value', at the
-     given address, using sizeof(short) bytes."
-    ^self type: 3 at: anAddress put: aValue
-!
+	<category: 'accessing'>
+	^self intAt: anAddress
+    ]
 
-longAt: anAddress put: aValue
-    "Store the Smalltalk Integer object identified by `value', at the
-     given address, using sizeof(long) bytes."
-    ^self type: 4 at: anAddress put: aValue
-!
+    Memory class >> at: anAddress put: aValue [
+	"Store a pointer (OOP) to the Smalltalk object identified by `value'
+	 at the given address."
 
-unsignedLongAt: anAddress put: aValue
-    "Store the Smalltalk Integer object identified by `value', at the
-     given address, using sizeof(long) bytes."
-    ^self type: 5 at: anAddress put: aValue
-!
+	<category: 'accessing'>
+	^self 
+	    type: 9
+	    at: anAddress
+	    put: aValue
+    ]
 
-ulongAt: anAddress put: aValue
-    "Store the Smalltalk Integer object identified by `value', at the
-     given address, using sizeof(long) bytes."
-    ^self type: 5 at: anAddress put: aValue
-!
+    Memory class >> intAt: anAddress put: aValue [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given address, using sizeof(int) bytes."
 
-floatAt: anAddress put: aValue
-    "Store the Smalltalk Float object identified by `value', at the
-     given address, writing it like a C float."
-    ^self type: 6 at: anAddress put: aValue
-!
+	<category: 'accessing'>
+	^self 
+	    type: 10
+	    at: anAddress
+	    put: aValue
+    ]
 
-doubleAt: anAddress put: aValue
-    "Store the Smalltalk Float object identified by `value', at the
-     given address, writing it like a C double."
-    ^self type: 7 at: anAddress put: aValue
-!
+    Memory class >> unsignedIntAt: anAddress put: aValue [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given address, using sizeof(int) bytes."
 
-longDoubleAt: anAddress put: aValue
-    "Store the Smalltalk Float object identified by `value', at the
-     given address, writing it like a C long double."
-    ^self type: 12 at: anAddress put: aValue
-!
+	<category: 'accessing'>
+	^self 
+	    type: 11
+	    at: anAddress
+	    put: aValue
+    ]
 
-stringAt: anAddress put: aValue
-    "Store the Smalltalk String object identified by `value', at the
-     given address in memory, writing it like a *FRESHLY ALLOCATED*
-     C string. It is the caller's responsibility to free it if
-     necessary."
-    ^self type: 8 at: anAddress put: aValue
-! !
+    Memory class >> uintAt: anAddress put: aValue [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given address, using sizeof(int) bytes."
 
+	<category: 'accessing'>
+	^self 
+	    type: 11
+	    at: anAddress
+	    put: aValue
+    ]
 
-
-!Memory class methodsFor: 'private'!
+    Memory class >> charAt: anAddress put: aValue [
+	"Store as a C char the Smalltalk Character or Integer object
+	 identified by `value', at the given address, using sizeof(char)
+	 bytes - i.e. 1 byte."
 
-type: aType at: anAddress
-    "Returns a particular type object from memory at anAddress"
-    <primitive: VMpr_Memory_at>
-    ^self primitiveFailed
-!
+	<category: 'accessing'>
+	^self 
+	    type: 0
+	    at: anAddress
+	    put: aValue
+    ]
 
-type: aType at: anAddress put: aValue
-    "Sets the memory location anAddress to aValue"
-    <primitive: VMpr_Memory_atPut>
-    ^self primitiveFailed
-! !
+    Memory class >> unsignedCharAt: anAddress put: aValue [
+	"Store as a C char the Smalltalk Character or Integer object
+	 identified by `value', at the given address, using sizeof(char)
+	 bytes - i.e. 1 byte."
 
+	<category: 'accessing'>
+	^self 
+	    type: 1
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> ucharAt: anAddress put: aValue [
+	"Store as a C char the Smalltalk Character or Integer object
+	 identified by `value', at the given address, using sizeof(char)
+	 bytes - i.e. 1 byte."
+
+	<category: 'accessing'>
+	^self 
+	    type: 1
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> shortAt: anAddress put: aValue [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given address, using sizeof(short) bytes."
+
+	<category: 'accessing'>
+	^self 
+	    type: 2
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> unsignedShortAt: anAddress put: aValue [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given address, using sizeof(short) bytes."
+
+	<category: 'accessing'>
+	^self 
+	    type: 3
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> ushortAt: anAddress put: aValue [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given address, using sizeof(short) bytes."
+
+	<category: 'accessing'>
+	^self 
+	    type: 3
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> longAt: anAddress put: aValue [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given address, using sizeof(long) bytes."
+
+	<category: 'accessing'>
+	^self 
+	    type: 4
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> unsignedLongAt: anAddress put: aValue [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given address, using sizeof(long) bytes."
+
+	<category: 'accessing'>
+	^self 
+	    type: 5
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> ulongAt: anAddress put: aValue [
+	"Store the Smalltalk Integer object identified by `value', at the
+	 given address, using sizeof(long) bytes."
+
+	<category: 'accessing'>
+	^self 
+	    type: 5
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> floatAt: anAddress put: aValue [
+	"Store the Smalltalk Float object identified by `value', at the
+	 given address, writing it like a C float."
+
+	<category: 'accessing'>
+	^self 
+	    type: 6
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> doubleAt: anAddress put: aValue [
+	"Store the Smalltalk Float object identified by `value', at the
+	 given address, writing it like a C double."
+
+	<category: 'accessing'>
+	^self 
+	    type: 7
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> longDoubleAt: anAddress put: aValue [
+	"Store the Smalltalk Float object identified by `value', at the
+	 given address, writing it like a C long double."
+
+	<category: 'accessing'>
+	^self 
+	    type: 12
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> stringAt: anAddress put: aValue [
+	"Store the Smalltalk String object identified by `value', at the
+	 given address in memory, writing it like a *FRESHLY ALLOCATED*
+	 C string. It is the caller's responsibility to free it if
+	 necessary."
+
+	<category: 'accessing'>
+	^self 
+	    type: 8
+	    at: anAddress
+	    put: aValue
+    ]
+
+    Memory class >> type: aType at: anAddress [
+	"Returns a particular type object from memory at anAddress"
+
+	<category: 'private'>
+	<primitive: VMpr_Memory_at>
+	^self primitiveFailed
+    ]
+
+    Memory class >> type: aType at: anAddress put: aValue [
+	"Sets the memory location anAddress to aValue"
+
+	<category: 'private'>
+	<primitive: VMpr_Memory_atPut>
+	^self primitiveFailed
+    ]
+]
 

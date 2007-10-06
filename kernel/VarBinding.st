@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2002 Free Software Foundation, Inc.
@@ -31,84 +30,77 @@
  ======================================================================"
 
 
-HomedAssociation subclass: #VariableBinding
-	  instanceVariableNames: ''
-	  classVariableNames: ''
-	  poolDictionaries: ''
-	  category: 'Language-Data types'
-!
-
-VariableBinding comment: 
-'My instances represent a mapping between a key in a namespace and
+
+HomedAssociation subclass: VariableBinding [
+    
+    <category: 'Language-Data types'>
+    <comment: 'My instances represent a mapping between a key in a namespace and
 its value.  I print different than a normal Association, and know
-about my parent namespace, otherwise my behavior is the same.'!
-	      
+about my parent namespace, otherwise my behavior is the same.'>
 
-
-!VariableBinding methodsFor: 'testing'!
+    isDefined [
+	"Answer true if this VariableBinding lives outside the
+	 Undeclared dictionary"
 
-isDefined
-    "Answer true if this VariableBinding lives outside the
-     Undeclared dictionary"
-    ^self environment ~~ Undeclared
-! !
+	<category: 'testing'>
+	^self environment ~~ Undeclared
+    ]
 
+    path [
+	"Print a dotted path that compiles to the receiver's value"
 
-
-!VariableBinding methodsFor: 'printing'!
+	<category: 'printing'>
+	^self environment storeString , '.' , self key
+    ]
 
-path
-    "Print a dotted path that compiles to the receiver's value"
-    ^self environment storeString, '.', self key
-!
+    printOn: aStream [
+	"Put on aStream a representation of the receiver"
 
-printOn: aStream
-    "Put on aStream a representation of the receiver"
+	<category: 'printing'>
+	aStream
+	    nextPut: ${;
+	    nextPutAll: self environment name;
+	    nextPut: $.;
+	    nextPutAll: self key;
+	    nextPut: $}
+    ]
 
-    aStream
-	nextPut: ${;
-        nextPutAll: self environment name;
-        nextPut: $.;
-        nextPutAll: self key;
-        nextPut: $}
-! !
+    isLiteralObject [
+	"Answer whether the receiver is expressible as a Smalltalk literal."
 
+	<category: 'storing'>
+	^true
+    ]
 
-
-!VariableBinding methodsFor: 'storing'!
+    storeLiteralOn: aStream [
+	"Store on aStream some Smalltalk code which compiles to the receiver"
 
-isLiteralObject
-    "Answer whether the receiver is expressible as a Smalltalk literal."
-    ^true
-!
+	<category: 'storing'>
+	self storeOn: aStream
+    ]
 
-storeLiteralOn: aStream
-    "Store on aStream some Smalltalk code which compiles to the receiver"
-    self storeOn: aStream
-!
+    storeOn: aStream [
+	"Put on aStream some Smalltalk code compiling to the receiver"
 
-storeOn: aStream
-    "Put on aStream some Smalltalk code compiling to the receiver"
+	<category: 'storing'>
+	aStream
+	    nextPutAll: '#{';
+	    nextPutAll: (self environment nameIn: Smalltalk);
+	    nextPut: $.;
+	    nextPutAll: self key;
+	    nextPut: $}
+    ]
 
-    aStream
-	nextPutAll: '#{';
-        nextPutAll: (self environment nameIn: Smalltalk);
-        nextPut: $.;
-        nextPutAll: self key;
-        nextPut: $}.
-! !
+    binaryRepresentationObject [
+	"This method is implemented to allow for a PluggableProxy to be used
+	 with VariableBindings.  Answer a DirectedMessage which sends #at:
+	 to the environment that holds the receiver."
 
-
-
-!VariableBinding methodsFor: 'saving and loading'!
-
-binaryRepresentationObject
-    "This method is implemented to allow for a PluggableProxy to be used
-     with VariableBindings.  Answer a DirectedMessage which sends #at:
-     to the environment that holds the receiver."
-    ^DirectedMessage
-        selector: #at:
-        arguments: (Array with: self key)
-        receiver: self environment
-! !
+	<category: 'saving and loading'>
+	^DirectedMessage 
+	    selector: #at:
+	    arguments: (Array with: self key)
+	    receiver: self environment
+    ]
+]
 

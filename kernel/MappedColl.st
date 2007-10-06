@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001,2002,2006,2007
@@ -32,15 +31,12 @@
  ======================================================================"
 
 
-Collection subclass: #MappedCollection
-	   instanceVariableNames: 'domain map'
-	   classVariableNames: ''
-	   poolDictionaries: ''
-	   category: 'Collections-Keyed'
-!
-
-MappedCollection comment: 
-'I represent collections of objects that are indirectly indexed by names.
+
+Collection subclass: MappedCollection [
+    | domain map |
+    
+    <category: 'Collections-Keyed'>
+    <comment: 'I represent collections of objects that are indirectly indexed by names.
 There are really two collections involved: domain and a map.  The map maps
 between external names and indices into domain, which contains the
 real association.  In order to work properly, the domain must be an instance
@@ -56,137 +52,161 @@ to access by index, you would access the domain directly.
 Another idea could be to implement row access or column access to a matrix
 implemented as a single n*m Array: the Array would be the domain, while the
 map would be an Interval.
-' !
+'>
 
-
-!MappedCollection class methodsFor: 'instance creation'!
+    MappedCollection class >> collection: aCollection map: aMap [
+	"Answer a new MappedCollection using the given domain (aCollection)
+	 and map"
 
-collection: aCollection map: aMap
-    "Answer a new MappedCollection using the given domain (aCollection)
-     and map"
-    ^self basicNew setCollection: aCollection andMap: aMap
-!
+	<category: 'instance creation'>
+	^self basicNew setCollection: aCollection andMap: aMap
+    ]
 
-new
-    "This method should not be used; instead, use #collection:map: to
-     create MappedCollection."
-    SystemExceptions.WrongMessageSent signalOn: #new useInstead: #collection:map:
-! !
+    MappedCollection class >> new [
+	"This method should not be used; instead, use #collection:map: to
+	 create MappedCollection."
 
+	<category: 'instance creation'>
+	SystemExceptions.WrongMessageSent signalOn: #new
+	    useInstead: #collection:map:
+    ]
 
-
-!MappedCollection methodsFor: 'basic'!
+    at: key [
+	"Answer the object at the given key"
 
-at: key
-    "Answer the object at the given key"
-    ^domain at: (map at: key)
-!
+	<category: 'basic'>
+	^domain at: (map at: key)
+    ]
 
-atAll: keyCollection
-    "Answer a new MappedCollection that only includes the given keys. The new
-     MappedCollection might use keyCollection or consecutive integers for the
-     keys, depending on the map's type. Fail if any of them is not found in
-     the map."
-    ^self class
-	collection: domain
-	map: (map atAll: keyCollection)
-!
+    atAll: keyCollection [
+	"Answer a new MappedCollection that only includes the given keys. The new
+	 MappedCollection might use keyCollection or consecutive integers for the
+	 keys, depending on the map's type. Fail if any of them is not found in
+	 the map."
 
-at: key put: value
-    "Store value at the given key"
-    ^domain at: (map at: key) put: value
-!
+	<category: 'basic'>
+	^self class collection: domain map: (map atAll: keyCollection)
+    ]
 
-domain
-    "Answer the receiver's domain"
-    ^domain
-!
+    at: key put: value [
+	"Store value at the given key"
 
-map
-    "Answer the receiver's map"
-    ^map
-!
+	<category: 'basic'>
+	^domain at: (map at: key) put: value
+    ]
 
-size
-    "Answer the receiver's size"
-    ^map size
-!
+    domain [
+	"Answer the receiver's domain"
 
-add: anObject
-    self shouldNotImplement
-!
+	<category: 'basic'>
+	^domain
+    ]
 
-contents
-    "Answer a bag with the receiver's values"
-    | aBag |
-    aBag := Bag new.
-    map do: [ :value | aBag add: (domain at: value) ].
-    ^aBag
-!
+    map [
+	"Answer the receiver's map"
 
-copyFrom: a to: b
-    ^domain atAll: (map atAll: (a to: b))
-!
+	<category: 'basic'>
+	^map
+    ]
 
-do: aBlock
-    "Evaluate aBlock for each object"
-    map do: [ :value | aBlock value: (domain at: value) ]
-!
+    size [
+	"Answer the receiver's size"
 
-keys
-    "Answer the keys that can be used to access this collection."
-    ^map keys
-!
+	<category: 'basic'>
+	^map size
+    ]
 
-keysAndValuesDo: aBlock
-    "Evaluate aBlock passing two arguments, one being a key that can be used to
-     access this collection, and the other one being the value."
-    map do: [ :key | aBlock value: key value: (self at: key) ]
-!
+    add: anObject [
+	<category: 'basic'>
+	self shouldNotImplement
+    ]
 
-keysDo: aBlock
-    "Evaluate aBlock on the keys that can be used to access this collection."
-    map do: aBlock
-!
+    contents [
+	"Answer a bag with the receiver's values"
 
-collect: aBlock
-    "Answer a Collection with the same keys as the map, where accessing
-     a key yields the value obtained by passing through aBlock the value
-     accessible from the key in the receiver.  The result need not be
-     another MappedCollection"
+	<category: 'basic'>
+	| aBag |
+	aBag := Bag new.
+	map do: [:value | aBag add: (domain at: value)].
+	^aBag
+    ]
 
-    "This is tricky.  Optimize the operation in order to perform the
-     minimal number of evaluation of aBlock"
-    ^domain size > map size
-	ifTrue: [ map collect: [ :key | aBlock value: (self at: key) ] ]
-	ifFalse: [ self class collection: (domain collect: aBlock) map: map copy ]
-!
+    copyFrom: a to: b [
+	<category: 'basic'>
+	^domain atAll: (map atAll: (a to: b))
+    ]
 
-reject: aBlock
-    "Answer the objects in the domain for which aBlock returns false"
+    do: aBlock [
+	"Evaluate aBlock for each object"
 
-    | newMap |
-    newMap := newMap reject: [ :key | aBlock value: (self at: key) ].
-    ^self class collection: domain map: newMap
-!
+	<category: 'basic'>
+	map do: [:value | aBlock value: (domain at: value)]
+    ]
 
-select: aBlock
-    "Answer the objects in the domain for which aBlock returns true"
+    keys [
+	"Answer the keys that can be used to access this collection."
 
-    | newMap |
-    newMap := newMap select: [ :key | aBlock value: (self at: key) ].
-    ^self class collection: domain map: newMap
-! !
+	<category: 'basic'>
+	^map keys
+    ]
 
+    keysAndValuesDo: aBlock [
+	"Evaluate aBlock passing two arguments, one being a key that can be used to
+	 access this collection, and the other one being the value."
 
-
-!MappedCollection methodsFor: 'private'!
+	<category: 'basic'>
+	map do: [:key | aBlock value: key value: (self at: key)]
+    ]
 
-setCollection: aCollection andMap: aMap
-    domain := aCollection.
-    map := aMap
-!
+    keysDo: aBlock [
+	"Evaluate aBlock on the keys that can be used to access this collection."
 
-species
-    ^self class
-! !
+	<category: 'basic'>
+	map do: aBlock
+    ]
+
+    collect: aBlock [
+	"Answer a Collection with the same keys as the map, where accessing
+	 a key yields the value obtained by passing through aBlock the value
+	 accessible from the key in the receiver.  The result need not be
+	 another MappedCollection"
+
+	"This is tricky.  Optimize the operation in order to perform the
+	 minimal number of evaluation of aBlock"
+
+	<category: 'basic'>
+	^domain size > map size 
+	    ifTrue: [map collect: [:key | aBlock value: (self at: key)]]
+	    ifFalse: [self class collection: (domain collect: aBlock) map: map copy]
+    ]
+
+    reject: aBlock [
+	"Answer the objects in the domain for which aBlock returns false"
+
+	<category: 'basic'>
+	| newMap |
+	newMap := newMap reject: [:key | aBlock value: (self at: key)].
+	^self class collection: domain map: newMap
+    ]
+
+    select: aBlock [
+	"Answer the objects in the domain for which aBlock returns true"
+
+	<category: 'basic'>
+	| newMap |
+	newMap := newMap select: [:key | aBlock value: (self at: key)].
+	^self class collection: domain map: newMap
+    ]
+
+    setCollection: aCollection andMap: aMap [
+	<category: 'private'>
+	domain := aCollection.
+	map := aMap
+    ]
+
+    species [
+	<category: 'private'>
+	^self class
+    ]
+]
+

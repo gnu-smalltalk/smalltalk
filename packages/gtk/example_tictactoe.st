@@ -4,7 +4,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2001, 2003 Free Software Foundation, Inc.
@@ -29,116 +28,157 @@
 |
  ======================================================================"
 
-Namespace current: GTK!
 
-Object subclass: #TicTacToe
-	instanceVariableNames: 'table buttons window turn state count'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: nil!
+
+Namespace current: GTK [
 
-!TicTacToe methodsFor: 'data'!
+Object subclass: TicTacToe [
+    | table buttons window turn state count |
+    
+    <category: nil>
+    <comment: nil>
 
-button: i setLabel: aString
-    "Note that we get a GtkLabel automagically.  That's because
-     GNU Smalltalk calls #narrow on the GtkWidget returned by
-     gtk_bin_get_child before returning it to us."
-    (buttons at: i) getChild
-	setLabel: aString
-!
+    button: i setLabel: aString [
+	"Note that we get a GtkLabel automagically.  That's because
+	 GNU Smalltalk calls #narrow on the GtkWidget returned by
+	 gtk_bin_get_child before returning it to us."
 
-reset
-    table := Array new: 9.
-    count := 0.
-    turn := 'X'.
-    state := #neutral.
-    1 to: 9 do: [ :i |
-	self button: i setLabel: i printString
+	<category: 'data'>
+	(buttons at: i) getChild setLabel: aString
     ]
-!
 
-play: which
-    state == #neutral ifFalse: [ ^self ].
-    (table at: which) isNil ifTrue: [
-	table at: which put: turn.
-	self button: which setLabel: turn.
-	count := count + 1.
-	count = 9 ifTrue: [ state := #draw ].
-	self win ifTrue: [ state := #win ].
-	state == #win ifTrue: [ self message: turn, ' wins!' ].
-	state == #draw ifTrue: [ self message: 'It''s a draw!' ].
-	turn := turn = 'X' ifTrue: [ 'O' ] ifFalse: [ 'X' ].
+    reset [
+	<category: 'data'>
+	table := Array new: 9.
+	count := 0.
+	turn := 'X'.
+	state := #neutral.
+	1 to: 9 do: [:i | self button: i setLabel: i printString]
     ]
-!
 
-win
-    "Functional programming frenzy :-)"
-    ^#((1 2 3) (4 5 6) (7 8 9) (1 4 7) (2 5 8) (3 6 9) (1 5 9) (3 5 7))
-        anySatisfy: [ :combo |
-    	    ((combo collect: [ :i | table at: i ])
-    	        fold: [ :a :b |
-    	            a = b ifTrue: [ a ] ifFalse: [ nil ]]) notNil ]
-! !
+    play: which [
+	<category: 'data'>
+	state == #neutral ifFalse: [^self].
+	(table at: which) isNil 
+	    ifTrue: 
+		[table at: which put: turn.
+		self button: which setLabel: turn.
+		count := count + 1.
+		count = 9 ifTrue: [state := #draw].
+		self win ifTrue: [state := #win].
+		state == #win ifTrue: [self message: turn , ' wins!'].
+		state == #draw ifTrue: [self message: 'It''s a draw!'].
+		turn := turn = 'X' ifTrue: ['O'] ifFalse: ['X']]
+    ]
 
-!TicTacToe methodsFor: 'event handling'!
+    win [
+	"Functional programming frenzy :-)"
 
-resetClicked: object data: data
-    self reset
-!
+	<category: 'data'>
+	^#(#(1 2 3) #(4 5 6) #(7 8 9) #(1 4 7) #(2 5 8) #(3 6 9) #(1 5 9) #(3 5 7)) 
+	    anySatisfy: 
+		[:combo | 
+		((combo collect: [:i | table at: i]) 
+		    fold: [:a :b | a = b ifTrue: [a] ifFalse: [nil]]) notNil]
+    ]
 
-clicked: object data: data
-    self play: data
-!
+    resetClicked: object data: data [
+	<category: 'event handling'>
+	self reset
+    ]
 
-destroy: object data: data
-    Gtk mainQuit
-! !
+    clicked: object data: data [
+	<category: 'event handling'>
+	self play: data
+    ]
 
-!TicTacToe methodsFor: 'window layout'!
+    destroy: object data: data [
+	<category: 'event handling'>
+	Gtk mainQuit
+    ]
 
-message: aString
-    | dialog |
-    dialog := GtkMessageDialog
-	new: window
-	flags: Gtk gtkDialogDestroyWithParent
-	type: Gtk gtkMessageInfo
-	buttons: Gtk gtkButtonsClose
-	message: aString.
+    message: aString [
+	<category: 'window layout'>
+	| dialog |
+	dialog := GtkMessageDialog 
+		    new: window
+		    flags: Gtk gtkDialogDestroyWithParent
+		    type: Gtk gtkMessageInfo
+		    buttons: Gtk gtkButtonsClose
+		    message: aString.
+	dialog
+	    run;
+	    destroy
+    ]
 
-    dialog run; destroy!
+    open [
+	<category: 'window layout'>
+	| button vbox hbox |
+	window := GtkWindow new: Gtk gtkWindowToplevel.
+	window setTitle: 'Tic-tac-toe'.
+	window 
+	    connectSignal: 'destroy'
+	    to: self
+	    selector: #destroy:data:
+	    userData: nil.
+	window setBorderWidth: 10.
+	vbox := GtkVBox new: false spacing: 0.
+	vbox setBorderWidth: 2.
+	window add: vbox.
+	buttons := Array new: 9.
+	1 to: 7
+	    by: 3
+	    do: 
+		[:i | 
+		hbox := GtkHBox new: true spacing: 0.
+		vbox 
+		    packStart: hbox
+		    expand: true
+		    fill: true
+		    padding: 0.
+		i to: i + 2
+		    do: 
+			[:j | 
+			buttons at: j put: (button := GtkButton newWithLabel: '').
+			button 
+			    connectSignal: 'clicked'
+			    to: self
+			    selector: #clicked:data:
+			    userData: j.
+			hbox 
+			    packStart: button
+			    expand: true
+			    fill: true
+			    padding: 0]].
+	button := GtkButton newWithLabel: 'Reset'.
+	button 
+	    connectSignal: 'clicked'
+	    to: self
+	    selector: #resetClicked:data:
+	    userData: nil.
+	vbox 
+	    packEnd: button
+	    expand: false
+	    fill: false
+	    padding: 0.
+	vbox 
+	    packEnd: GtkHSeparator new
+	    expand: false
+	    fill: false
+	    padding: 5.
+	self reset.
+	window setDefaultSize: 100 height: 130.
+	window showAll
+    ]
+]
 
-open
-    | button vbox hbox |
-    window := GtkWindow new: Gtk gtkWindowToplevel.
-    window setTitle: 'Tic-tac-toe'.
-    window connectSignal: 'destroy' to: self selector: #destroy:data: userData: nil.
-    window setBorderWidth: 10.
-    
-    vbox := GtkVBox new: false spacing: 0.
-    vbox setBorderWidth: 2.
-    window add: vbox.
-    
-    buttons := Array new: 9.
-    1 to: 7 by: 3 do: [ :i |
-	hbox := GtkHBox new: true spacing: 0.
-	vbox packStart: hbox expand: true fill: true padding: 0.
-        i to: i + 2 do: [ :j |
-	    buttons at: j put: (button := GtkButton newWithLabel: '').
-	    button connectSignal: 'clicked' to: self selector: #clicked:data: userData: j.
-	    hbox packStart: button expand: true fill: true padding: 0.
-	]
-    ].
-    
-    button := GtkButton newWithLabel: 'Reset'.
-    button connectSignal: 'clicked' to: self selector: #resetClicked:data: userData: nil.
-    vbox packEnd: button expand: false fill: false padding: 0.
-    vbox packEnd: GtkHSeparator new expand: false fill: false padding: 5.
-    
-    self reset.
-    window setDefaultSize: 100 height: 130.
-    window showAll
-! !
-    
-Gtk gstGtkInit!
-TicTacToe new open!
-Gtk main!
+]
+
+
+
+Namespace current: GTK [
+    Gtk gstGtkInit.
+    TicTacToe new open.
+    Gtk main
+]
+

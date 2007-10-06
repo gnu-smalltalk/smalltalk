@@ -30,248 +30,283 @@
 |
  ======================================================================"
 
-Stream subclass: #PositionableStream
-       instanceVariableNames: 'collection ptr endPtr access'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Streams-Collections'
-!
 
-PositionableStream comment: 
-'My instances represent streams where explicit positioning is permitted.
+
+Stream subclass: PositionableStream [
+    | collection ptr endPtr access |
+    
+    <category: 'Streams-Collections'>
+    <comment: 'My instances represent streams where explicit positioning is permitted.
 Thus, my streams act in a manner to normal disk files: you can read
 or write sequentially, but also position the file to a particular place
 whenever you choose.  Generally, you''ll want to use ReadStream, WriteStream
-or ReadWriteStream instead of me to create and use streams.' !
+or ReadWriteStream instead of me to create and use streams.'>
 
+    PositionableStream class >> on: aCollection [
+	"Answer an instance of the receiver streaming on the
+	 whole contents of aCollection"
 
-
-!PositionableStream class methodsFor: 'instance creation'!
+	<category: 'instance creation'>
+	self subclassResponsibility
+    ]
 
-on: aCollection
-    "Answer an instance of the receiver streaming on the
-    whole contents of aCollection"
-    self subclassResponsibility
-!
+    PositionableStream class >> on: aCollection from: firstIndex to: lastIndex [
+	"Answer an instance of the receiver streaming from
+	 the firstIndex-th item of aCollection to the lastIndex-th"
 
-on: aCollection from: firstIndex to: lastIndex
-    "Answer an instance of the receiver streaming from
-     the firstIndex-th item of aCollection to the lastIndex-th"
-    ^self on: (aCollection copyFrom: firstIndex to: lastIndex)
-! !
+	<category: 'instance creation'>
+	^self on: (aCollection copyFrom: firstIndex to: lastIndex)
+    ]
 
+    close [
+	"Disassociate a stream from its backing store."
 
-
-!PositionableStream methodsFor: 'accessing-reading'!
+	<category: 'accessing-reading'>
+	self flush.
+	collection := nil.
+	endPtr := nil.
+	ptr := nil.
+	access := nil
+    ]
 
-close
-    "Disassociate a stream from its backing store."
-    self flush.
-    collection := nil.
-    endPtr := nil.
-    ptr := nil.
-    access := nil
-!
+    next [
+	"Answer the next item of the receiver.  Returns nil when at end of stream."
 
-next
-    "Answer the next item of the receiver.  Returns nil when at end of stream."
+	<category: 'accessing-reading'>
+	| element |
+	(access bitAnd: 1) = 0 ifTrue: [^self shouldNotImplement].
+	ptr > endPtr ifTrue: [^self pastEnd].
+	element := collection at: ptr.
+	ptr := ptr + 1.
+	^element
+    ]
 
-    | element |
-    (access bitAnd: 1) = 0
-    	ifTrue: [ ^self shouldNotImplement ].
-    ptr > endPtr ifTrue: [ ^self pastEnd ].
-    element := collection at: ptr.
-    ptr := ptr + 1.
-    ^element
-!
+    peek [
+	"Returns the next element of the stream without moving the pointer.
+	 Returns nil when at end of stream."
 
-peek
-    "Returns the next element of the stream without moving the pointer.
-    Returns nil when at end of stream."
-    
-    (access bitAnd: 1) = 0
-    	ifTrue: [ ^self shouldNotImplement ].
-    ptr > endPtr ifTrue: [ ^nil ].
-    ^collection at: ptr
-!
+	<category: 'accessing-reading'>
+	(access bitAnd: 1) = 0 ifTrue: [^self shouldNotImplement].
+	ptr > endPtr ifTrue: [^nil].
+	^collection at: ptr
+    ]
 
-peekFor: anObject
-    "Returns true and gobbles the next element from the stream of it is
-    equal to anObject, returns false and doesn't gobble the next element
-    if the next element is not equal to anObject."
-    self atEnd ifTrue: [ ^false ].
-    ^self next = anObject
-    	ifTrue: [ true ]
-    	ifFalse: [ self skip: -1. false ]
-!
+    peekFor: anObject [
+	"Returns true and gobbles the next element from the stream of it is
+	 equal to anObject, returns false and doesn't gobble the next element
+	 if the next element is not equal to anObject."
 
-copyFrom: start to: end
-    "Answer the data on which the receiver is streaming, from
-     the start-th item to the end-th.  Note that this method is 0-based,
-     unlike the one in Collection, because a Stream's #position method
-     returns 0-based values."
+	<category: 'accessing-reading'>
+	self atEnd ifTrue: [^false].
+	^self next = anObject 
+	    ifTrue: [true]
+	    ifFalse: 
+		[self skip: -1.
+		false]
+    ]
 
-    ^collection copyFrom: start + 1 to: end + 1
-!
+    copyFrom: start to: end [
+	"Answer the data on which the receiver is streaming, from
+	 the start-th item to the end-th.  Note that this method is 0-based,
+	 unlike the one in Collection, because a Stream's #position method
+	 returns 0-based values."
 
-contents
-    "Returns a collection of the same type that the stream accesses, up to 
-    and including the final element."
-    ^collection copyFrom: 1 to: endPtr
-!
+	<category: 'accessing-reading'>
+	^collection copyFrom: start + 1 to: end + 1
+    ]
 
-readStream
-    "Answer a ReadStream on the same contents as the receiver"
-    ^ReadStream on: collection from: 1 to: endPtr
-!
+    contents [
+	"Returns a collection of the same type that the stream accesses, up to
+	 and including the final element."
 
-reverseContents
-    "Returns a collection of the same type that the stream accesses, up to 
-    and including the final element, but in reverse order."
-    | newCollection |
-    newCollection := collection copyEmpty: endPtr.
-    1 to: endPtr do:
-	[ :i | newCollection at: i put: (collection at: endPtr - i + 1) ].
-    ^newCollection
-! !
+	<category: 'accessing-reading'>
+	^collection copyFrom: 1 to: endPtr
+    ]
 
+    readStream [
+	"Answer a ReadStream on the same contents as the receiver"
 
-
-!PositionableStream methodsFor: 'testing'!
+	<category: 'accessing-reading'>
+	^ReadStream 
+	    on: collection
+	    from: 1
+	    to: endPtr
+    ]
 
-atEnd
-    "Answer whether the objects in the stream have reached an end"
-    ^ptr > endPtr
-!
+    reverseContents [
+	"Returns a collection of the same type that the stream accesses, up to
+	 and including the final element, but in reverse order."
 
-basicAtEnd
-    "Answer whether the objects in the stream have reached an end.
-     This method must NOT be overridden."
-    ^ptr > endPtr
-!
+	<category: 'accessing-reading'>
+	| newCollection |
+	newCollection := collection copyEmpty: endPtr.
+	1 to: endPtr
+	    do: [:i | newCollection at: i put: (collection at: endPtr - i + 1)].
+	^newCollection
+    ]
 
-isEmpty
-    "Answer whether the stream has no objects"
-    ^endPtr = 0
-! !
+    atEnd [
+	"Answer whether the objects in the stream have reached an end"
 
-
-!PositionableStream methodsFor: 'truncating'!
+	<category: 'testing'>
+	^ptr > endPtr
+    ]
 
-truncate
-    "Truncate the receiver to the current position - only valid
-     for writing streams"
+    basicAtEnd [
+	"Answer whether the objects in the stream have reached an end.
+	 This method must NOT be overridden."
 
-    (access bitAnd: 2) = 0
-	ifTrue: [ self shouldNotImplement ]
-	ifFalse: [ endPtr := ptr - 1 ]
-! !
-
-!PositionableStream methodsFor: 'positioning'!
+	<category: 'testing'>
+	^ptr > endPtr
+    ]
 
-skipSeparators
-    "Advance the receiver until we find a character that is not a
-     separator.  Answer false if we reach the end of the stream,
-     else answer true; in this case, sending #next will return the
-     first non-separator character (possibly the same to which the
-     stream pointed before #skipSeparators was sent)."
-    | ch |
-    [   (ch := self peek) isNil ifTrue: [^false].
-        ch isSeparator ] whileTrue: [ self next ].
+    isEmpty [
+	"Answer whether the stream has no objects"
 
-    ^true
-!
+	<category: 'testing'>
+	^endPtr = 0
+    ]
 
-position
-    "Answer the current value of the stream pointer"
-    ^ptr - 1
-!
+    truncate [
+	"Truncate the receiver to the current position - only valid
+	 for writing streams"
 
-position: anInteger
-    "Move the stream pointer to the anInteger-th object"
-    (anInteger between: 0 and: self size)
-	ifTrue: [ ptr := anInteger + 1 ]
-	ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger ]
-!
+	<category: 'truncating'>
+	(access bitAnd: 2) = 0 
+	    ifTrue: [self shouldNotImplement]
+	    ifFalse: [endPtr := ptr - 1]
+    ]
 
-basicPosition: anInteger
-    "Move the stream pointer to the anInteger-th object"
-    (anInteger between: 0 and: self size)
-	ifTrue: [ ptr := anInteger + 1 ]
-	ifFalse: [ SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger ]
-!
+    skipSeparators [
+	"Advance the receiver until we find a character that is not a
+	 separator.  Answer false if we reach the end of the stream,
+	 else answer true; in this case, sending #next will return the
+	 first non-separator character (possibly the same to which the
+	 stream pointed before #skipSeparators was sent)."
 
-reset
-    "Move the stream back to its first element. For write-only streams,
-    the stream is truncated there."
-    self position: 0
-!
+	<category: 'positioning'>
+	| ch |
+	
+	[(ch := self peek) isNil ifTrue: [^false].
+	ch isSeparator] 
+		whileTrue: [self next].
+	^true
+    ]
 
-setToEnd
-    "Move the current position to the end of the stream."
-    self position: self size
-!
+    position [
+	"Answer the current value of the stream pointer"
 
-size
-    "Answer the size of data on which we are streaming."
-    ^endPtr
-!
+	<category: 'positioning'>
+	^ptr - 1
+    ]
 
-isPositionable
-    "Answer true if the stream supports moving backwards with #skip:."
-    ^true
-!
+    position: anInteger [
+	"Move the stream pointer to the anInteger-th object"
 
-skip: anInteger
-    "Move the current position by anInteger places, either forwards or
-    backwards."
-    self position: ((self position + anInteger max: 0) min: endPtr).
-! !
+	<category: 'positioning'>
+	(anInteger between: 0 and: self size) 
+	    ifTrue: [ptr := anInteger + 1]
+	    ifFalse: 
+		[SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger]
+    ]
 
-
-!PositionableStream methodsFor: 'private'!
+    basicPosition: anInteger [
+	"Move the stream pointer to the anInteger-th object"
 
-beReadOnly
-    access := 1
-!
+	<category: 'positioning'>
+	(anInteger between: 0 and: self size) 
+	    ifTrue: [ptr := anInteger + 1]
+	    ifFalse: 
+		[SystemExceptions.IndexOutOfRange signalOn: self withIndex: anInteger]
+    ]
 
-beWriteOnly
-    access := 2
-!
+    reset [
+	"Move the stream back to its first element. For write-only streams,
+	 the stream is truncated there."
 
-beReadWrite
-    access := 3
-!
+	<category: 'positioning'>
+	self position: 0
+    ]
 
-collection
-    ^collection
-!
+    setToEnd [
+	"Move the current position to the end of the stream."
 
-status: aString
-    "When working with a stream on strings, this method can be useful!
-     Format of the output:
-	'ABCDEFG'   aString
-	   ^		    "
-    Transcript
-	print: (collection copyFrom: 1 to: endPtr);
-	nextPutAll: '    ';
-	nextPutAll: aString;
-	nl;
-	next: self position put: Character space;
-	nextPut: $^;
-	nl
-! !
+	<category: 'positioning'>
+	self position: self size
+    ]
 
-
-!PositionableStream methodsFor: 'class type methods'!
+    size [
+	"Answer the size of data on which we are streaming."
 
-isExternalStream
-    "We stream on a collection residing in the image, so answer false"
-    ^false
-!
+	<category: 'positioning'>
+	^endPtr
+    ]
 
-species
-    "Return the type of the collections returned by #upTo: etc., which are the
-    same kind as those returned by the collection with methods such as #select:."
-    ^collection species
-! !
+    isPositionable [
+	"Answer true if the stream supports moving backwards with #skip:."
+
+	<category: 'positioning'>
+	^true
+    ]
+
+    skip: anInteger [
+	"Move the current position by anInteger places, either forwards or
+	 backwards."
+
+	<category: 'positioning'>
+	self position: ((self position + anInteger max: 0) min: endPtr)
+    ]
+
+    beReadOnly [
+	<category: 'private'>
+	access := 1
+    ]
+
+    beWriteOnly [
+	<category: 'private'>
+	access := 2
+    ]
+
+    beReadWrite [
+	<category: 'private'>
+	access := 3
+    ]
+
+    collection [
+	<category: 'private'>
+	^collection
+    ]
+
+    status: aString [
+	"When working with a stream on strings, this method can be useful!
+	 Format of the output:
+	 'ABCDEFG'   aString
+	 ^"
+
+	<category: 'private'>
+	Transcript
+	    print: (collection copyFrom: 1 to: endPtr);
+	    nextPutAll: '    ';
+	    nextPutAll: aString;
+	    nl;
+	    next: self position put: Character space;
+	    nextPut: $^;
+	    nl
+    ]
+
+    isExternalStream [
+	"We stream on a collection residing in the image, so answer false"
+
+	<category: 'class type methods'>
+	^false
+    ]
+
+    species [
+	"Return the type of the collections returned by #upTo: etc., which are the
+	 same kind as those returned by the collection with methods such as #select:."
+
+	<category: 'class type methods'>
+	^collection species
+    ]
+]
+

@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001
@@ -32,65 +31,67 @@
  ======================================================================"
 
 
-Object subclass: #Magnitude
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-Data types'
-!
-
-Magnitude comment: 
-'I am an abstract class.  My objects represent things that are discrete and 
-map to a number line.  My instances can be compared with < and >.' !
-
 
-!Magnitude methodsFor: 'basic'!
+Object subclass: Magnitude [
+    
+    <category: 'Language-Data types'>
+    <comment: 'I am an abstract class.  My objects represent things that are discrete and 
+map to a number line.  My instances can be compared with < and >.'>
 
-"Relational operators.  '==', '~=', '~~' are inherited from Object"
+    = aMagnitude [
+	"Answer whether the receiver is equal to aMagnitude"
 
-= aMagnitude
-    "Answer whether the receiver is equal to aMagnitude"
-    self subclassResponsibility
-!
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-< aMagnitude
-    "Answer whether the receiver is less than aMagnitude"
-    self subclassResponsibility
-!
+    < aMagnitude [
+	"Answer whether the receiver is less than aMagnitude"
 
-> aMagnitude
-    "Answer whether the receiver is greater than aMagnitude"
-    ^aMagnitude < self
-!
+	<category: 'basic'>
+	self subclassResponsibility
+    ]
 
-<= aMagnitude
-    "Answer whether the receiver is less than or equal to aMagnitude"
-    ^(aMagnitude < self) not
-!
+    > aMagnitude [
+	"Answer whether the receiver is greater than aMagnitude"
 
->= aMagnitude
-    "Answer whether the receiver is greater than or equal to aMagnitude"
-    ^(self < aMagnitude) not
-! !
+	<category: 'basic'>
+	^aMagnitude < self
+    ]
 
+    <= aMagnitude [
+	"Answer whether the receiver is less than or equal to aMagnitude"
 
-
-!Magnitude methodsFor: 'misc methods'!
+	<category: 'basic'>
+	^(aMagnitude < self) not
+    ]
 
-between: min and: max
-    "Returns true if object is inclusively between min and max."
-    ^(self >= min) and: [ self <= max ]
-!
+    >= aMagnitude [
+	"Answer whether the receiver is greater than or equal to aMagnitude"
 
-min: aMagnitude
-    "Returns the least object between the receiver and aMagnitude"
-    ^self < aMagnitude ifTrue: [ self ]
-    	    	      ifFalse: [ aMagnitude ]
-!
+	<category: 'basic'>
+	^(self < aMagnitude) not
+    ]
 
-max: aMagnitude
-    "Returns the greatest object between the receiver and aMagnitude"
-    ^self > aMagnitude ifTrue: [ self ]
-    	    	      ifFalse: [ aMagnitude ]
-! !
+    between: min and: max [
+	"Returns true if object is inclusively between min and max."
+
+	<category: 'misc methods'>
+	^self >= min and: [self <= max]
+    ]
+
+    min: aMagnitude [
+	"Returns the least object between the receiver and aMagnitude"
+
+	<category: 'misc methods'>
+	^self < aMagnitude ifTrue: [self] ifFalse: [aMagnitude]
+    ]
+
+    max: aMagnitude [
+	"Returns the greatest object between the receiver and aMagnitude"
+
+	<category: 'misc methods'>
+	^self > aMagnitude ifTrue: [self] ifFalse: [aMagnitude]
+    ]
+]
 

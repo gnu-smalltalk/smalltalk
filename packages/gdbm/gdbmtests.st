@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2007 Free Software Foundation, Inc.
@@ -28,170 +27,209 @@
 |
  ======================================================================"
 
-TestCase subclass: #GDBMTest
-       instanceVariableNames: ''
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Examples-Modules'!
 
-!GDBMTest methodsFor: 'creating test files'!
+
+TestCase subclass: GDBMTest [
+    
+    <comment: nil>
+    <category: 'Examples-Modules'>
 
-data
-    ^{ 'fred'->'Fred Flintstone'. 'wilma'->'Wilma Flintstone'}!
+    data [
+	<category: 'creating test files'>
+	^
+	{'fred' -> 'Fred Flintstone'.
+	'wilma' -> 'Wilma Flintstone'}
+    ]
 
-setUp
-    self cInterfaceSetup.
-    self stInterfaceSetup!
+    setUp [
+	<category: 'creating test files'>
+	self cInterfaceSetup.
+	self stInterfaceSetup
+    ]
 
-tearDown
-    (File exists: 'test-c.gdbm') ifTrue: [ File remove: 'test-c.gdbm' ].
-    (File exists: 'test-st.gdbm') ifTrue: [ File remove: 'test-st.gdbm' ]!
+    tearDown [
+	<category: 'creating test files'>
+	(File exists: 'test-c.gdbm') ifTrue: [File remove: 'test-c.gdbm'].
+	(File exists: 'test-st.gdbm') ifTrue: [File remove: 'test-st.gdbm']
+    ]
 
-cInterfaceSetup
-    | database key value |
-    (File exists: 'test-c.gdbm') ifTrue: [ File remove: 'test-c.gdbm' ].
-    database := GDBM open: 'test-c.gdbm' blockSize: 1024 flags: 2 "write/create"
-		    mode: 8r666 fatalFunc: nil.
+    cInterfaceSetup [
+	<category: 'creating test files'>
+	| database key value |
+	(File exists: 'test-c.gdbm') ifTrue: [File remove: 'test-c.gdbm'].
+	database := GDBM 
+		    open: 'test-c.gdbm'
+		    blockSize: 1024
+		    flags: 2
+		    mode: 438
+		    fatalFunc: nil.	"write/create"
+	self data do: 
+		[:each | 
+		key := DatumStruct fromString: each key.
+		value := DatumStruct fromString: each value.
+		database 
+		    at: key
+		    put: value
+		    flag: 1.	"replace"
+		key free.
+		value free].
+	database close
+    ]
 
-    self data do: [ :each |
-        key := DatumStruct fromString: each key.
-        value := DatumStruct fromString: each value.
-        database at: key put: value flag: 1 "replace".
-        key free.
-        value free ].
+    stInterfaceSetup [
+	<category: 'creating test files'>
+	| database |
+	(File exists: 'test-st.gdbm') ifTrue: [File remove: 'test-st.gdbm'].
+	database := Database 
+		    writeCreate: 'test-st.gdbm'
+		    blockSize: 1024
+		    mode: 438.
+	self data do: [:each | database at: each key put: each value].
+	database close
+    ]
 
-    database close!
+    doTestCInterfaceAt: name [
+	<category: 'testing (low-level)'>
+	| database key value |
+	database := GDBM 
+		    open: name
+		    blockSize: 1024
+		    flags: 0
+		    mode: 438
+		    fatalFunc: nil.	"read"
+	value := database at: (DatumStruct fromString: 'wilma').
+	self assert: value asString = 'Wilma Flintstone'.
+	value free.
+	value := database at: (DatumStruct fromString: 'barney').
+	self assert: value dPtr value isNil.
+	self assert: value asString = ''.
+	value free.
+	database close
+    ]
 
-stInterfaceSetup
-    | database |
-    (File exists: 'test-st.gdbm') ifTrue: [ File remove: 'test-st.gdbm' ].
-    database := Database writeCreate: 'test-st.gdbm' blockSize: 1024 mode: 8r666.
-    self data do: [ :each | database at: each key put: each value ].
-    database close
-! !
+    doTestCInterfaceWalkKeys: name [
+	<category: 'testing (low-level)'>
+	| database newItem item value result |
+	database := GDBM 
+		    open: name
+		    blockSize: 1024
+		    flags: 0
+		    mode: 438
+		    fatalFunc: nil.	"read"
+	result := SortedCollection sortBlock: [:a :b | a key <= b key].
+	item := database firstKey.
+	[item dPtr value notNil] whileTrue: 
+		[value := database at: item.
+		result add: item asString -> value asString.
+		value free.
+		newItem := database nextKey: item.
+		item free.
+		item := newItem].
+	item free.
+	database close.
+	self assert: (result at: 1) = ('fred' -> 'Fred Flintstone').
+	self assert: (result at: 2) = ('wilma' -> 'Wilma Flintstone')
+    ]
 
-!GDBMTest methodsFor: 'testing (low-level)'!
+    doTestCInterfaceAfter: name [
+	<category: 'testing (low-level)'>
+	| database newItem item value result |
+	database := GDBM 
+		    open: name
+		    blockSize: 1024
+		    flags: 0
+		    mode: 438
+		    fatalFunc: nil.	"read"
+	result := OrderedCollection new.
+	item := database firstKey.
+	[item dPtr value notNil] whileTrue: 
+		[result add: item asString -> nil.
+		newItem := database nextKey: item.
+		result last 
+		    value: (newItem dPtr value ifNotNil: [:ignored | newItem asString]).
+		item free.
+		item := newItem].
+	item free.
+	database close.
+	self assert: (result at: 1) value = (result at: 2) key.
+	self assert: (result at: 2) value isNil
+    ]
 
-doTestCInterfaceAt: name
-    | database key value |
-    database := GDBM open: name blockSize: 1024 flags: 0 "read"
-		    mode: 8r666 fatalFunc: nil.
+    doTestAt: name [
+	<category: 'testing (high-level)'>
+	| database |
+	database := Database 
+		    read: name
+		    blockSize: 1024
+		    mode: 438.
+	self assert: (database at: 'wilma') = 'Wilma Flintstone'.
+	self assert: (database at: 'barney' ifAbsent: [nil]) isNil.
+	database close
+    ]
 
-    value := (database at: (DatumStruct fromString: 'wilma')).
-    self assert: value asString = 'Wilma Flintstone'.
-    value free.
+    doTestKeysAndValuesDo: name [
+	<category: 'testing (high-level)'>
+	| database newItem item value result |
+	database := Database 
+		    read: name
+		    blockSize: 1024
+		    mode: 438.
+	result := SortedCollection sortBlock: [:a :b | a key <= b key].
+	database keysAndValuesDo: [:item :value | result add: item -> value].
+	database close.
+	self assert: (result at: 1) = ('fred' -> 'Fred Flintstone').
+	self assert: (result at: 2) = ('wilma' -> 'Wilma Flintstone')
+    ]
 
-    value := (database at: (DatumStruct fromString: 'barney')).
-    self assert: value dPtr value isNil.
-    self assert: value asString = ''.
-    value free.
+    doTestAfter: name [
+	<category: 'testing (high-level)'>
+	| database newItem item value result |
+	database := Database 
+		    read: name
+		    blockSize: 1024
+		    mode: 438.
+	result := OrderedCollection new.
+	database 
+	    keysAndValuesDo: [:item :value | result add: item -> (database after: item)].
+	database close.
+	self assert: (result at: 1) value = (result at: 2) key.
+	self assert: (result at: 2) value isNil
+    ]
 
-    database close.
-!
+    testCInterfaceAt [
+	<category: 'testing'>
+	self doTestCInterfaceAt: 'test-c.gdbm'.
+	self doTestCInterfaceAt: 'test-st.gdbm'
+    ]
 
-doTestCInterfaceWalkKeys: name
-    | database newItem item value result |
-    database := GDBM open: name blockSize: 1024 flags: 0 "read"
-		     mode: 8r666 fatalFunc: nil.
+    testCInterfaceWalkKeys [
+	<category: 'testing'>
+	self doTestCInterfaceWalkKeys: 'test-c.gdbm'.
+	self doTestCInterfaceWalkKeys: 'test-st.gdbm'
+    ]
 
-    result := SortedCollection sortBlock: [ :a :b | a key <= b key ].
-    item := database firstKey.
-    [ item dPtr value notNil ] 
-	whileTrue: [
-	    value := database at: item.
-	    result add: item asString->value asString.
-	    value free.
+    testCInterfaceAfter [
+	<category: 'testing'>
+	self doTestCInterfaceAfter: 'test-c.gdbm'.
+	self doTestCInterfaceAfter: 'test-st.gdbm'
+    ]
 
-	    newItem := database nextKey: item.
-	    item free.
-	    item := newItem ].
+    testAt [
+	<category: 'testing'>
+	self doTestAt: 'test-c.gdbm'.
+	self doTestAt: 'test-st.gdbm'
+    ]
 
-    item free.
-    database close.
-    self assert: (result at: 1) = ('fred'->'Fred Flintstone').
-    self assert: (result at: 2) = ('wilma'->'Wilma Flintstone').
-!
+    testKeysAndValuesDo [
+	<category: 'testing'>
+	self doTestKeysAndValuesDo: 'test-c.gdbm'.
+	self doTestKeysAndValuesDo: 'test-st.gdbm'
+    ]
 
-doTestCInterfaceAfter: name
-    | database newItem item value result |
-    database := GDBM open: name blockSize: 1024 flags: 0 "read"
-                     mode: 8r666 fatalFunc: nil.
+    testAfter [
+	<category: 'testing'>
+	self doTestAfter: 'test-c.gdbm'.
+	self doTestAfter: 'test-st.gdbm'
+    ]
+]
 
-    result := OrderedCollection new.
-    item := database firstKey.
-    [ item dPtr value notNil ] 
-        whileTrue: [
-            result add: item asString->nil.
-            newItem := database nextKey: item.
-            result last value: (newItem dPtr value
-                 ifNotNil: [ :ignored | newItem asString ]).
-
-            item free.
-            item := newItem ].
-
-    item free.
-    database close.
-    self assert: (result at: 1) value = (result at: 2) key.
-    self assert: (result at: 2) value isNil
-! !
-
-!GDBMTest methodsFor: 'testing (high-level)'!
-
-doTestAt: name
-    | database |
-    database := Database read: name blockSize: 1024 mode: 8r666.
-    self assert: (database at: 'wilma') = 'Wilma Flintstone'.
-    self assert: (database at: 'barney' ifAbsent: [ nil ]) isNil.
-    database close.
-!
-
-doTestKeysAndValuesDo: name
-    | database newItem item value result |
-    database := Database read: name blockSize: 1024 mode: 8r666.
-
-    result := SortedCollection sortBlock: [ :a :b | a key <= b key ].
-    database keysAndValuesDo: [ :item :value | result add: item->value ].
-    database close.
-
-    self assert: (result at: 1) = ('fred'->'Fred Flintstone').
-    self assert: (result at: 2) = ('wilma'->'Wilma Flintstone').
-!
-
-doTestAfter: name
-    | database newItem item value result |
-    database := Database read: name blockSize: 1024 mode: 8r666.
-
-    result := OrderedCollection new.
-    database keysAndValuesDo: [ :item :value |
-	result add: item->(database after: item) ].
-    database close.
-
-    self assert: (result at: 1) value = (result at: 2) key.
-    self assert: (result at: 2) value isNil
-! !
-
-!GDBMTest methodsFor: 'testing'!
-
-testCInterfaceAt
-    self doTestCInterfaceAt: 'test-c.gdbm'.
-    self doTestCInterfaceAt: 'test-st.gdbm'!
-
-testCInterfaceWalkKeys
-    self doTestCInterfaceWalkKeys: 'test-c.gdbm'.
-    self doTestCInterfaceWalkKeys: 'test-st.gdbm'!
-
-testCInterfaceAfter
-    self doTestCInterfaceAfter: 'test-c.gdbm'.
-    self doTestCInterfaceAfter: 'test-st.gdbm'!
-
-testAt
-    self doTestAt: 'test-c.gdbm'.
-    self doTestAt: 'test-st.gdbm'!
-
-testKeysAndValuesDo
-    self doTestKeysAndValuesDo: 'test-c.gdbm'.
-    self doTestKeysAndValuesDo: 'test-st.gdbm'!
-
-testAfter
-    self doTestAfter: 'test-c.gdbm'.
-    self doTestAfter: 'test-st.gdbm'! !

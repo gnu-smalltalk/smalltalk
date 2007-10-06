@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2006 Free Software Foundation, Inc.
@@ -30,37 +29,37 @@
 |
  ======================================================================"
 
-Character subclass: #UnicodeCharacter 
-	  instanceVariableNames: ''
-	  classVariableNames: ''
-	  poolDictionaries: ''
-	  category: 'Language-Data types'
-!
 
-UnicodeCharacter comment: 
-'My instances represent the over one million characters of the Unicode
+
+Character subclass: UnicodeCharacter [
+    
+    <category: 'Language-Data types'>
+    <comment: 'My instances represent the over one million characters of the Unicode
 character set.  It provides messages to translate between integers and
 character objects.
 
 UnicodeCharacter objects are created when accessing UnicodeStrings,
-or with Character class>>#codePoint:.' !
+or with Character class>>#codePoint:.'>
 
+    UnicodeCharacter class >> value: anInteger [
+	"Returns the character object, possibly a Character, corresponding
+	 to anInteger.  Error if anInteger is not an integer, or not in
+	 0..16r10FFFF.
+	 
+	 This is only a primitive for speed.  UnicodeCharacter's #value:
+	 method is equivalent to #codePoint: (which is the same for
+	 Character and UnicodeCharacter)."
 
-!UnicodeCharacter class methodsFor: 'built ins'!
+	<category: 'built ins'>
+	<primitive: VMpr_UnicodeCharacter_create>
+	anInteger isInteger 
+	    ifFalse: 
+		[SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger]
+	    ifTrue: 
+		[SystemExceptions.ArgumentOutOfRange 
+		    signalOn: anInteger
+		    mustBeBetween: 0
+		    and: 1114111]
+    ]
+]
 
-value: anInteger
-    "Returns the character object, possibly a Character, corresponding
-     to anInteger.  Error if anInteger is not an integer, or not in
-     0..16r10FFFF.
-
-     This is only a primitive for speed.  UnicodeCharacter's #value:
-     method is equivalent to #codePoint: (which is the same for
-     Character and UnicodeCharacter)."
-     <primitive: VMpr_UnicodeCharacter_create>
-
-    anInteger isInteger
-	ifFalse: [ SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger ]
-	ifTrue: [ SystemExceptions.ArgumentOutOfRange signalOn: anInteger mustBeBetween: 0 and: 16r10FFFF ]
-! !
-
-

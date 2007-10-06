@@ -29,505 +29,539 @@
 |
  ======================================================================"
 
-ArrayedCollection variableWordSubclass: #WordArray
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Collections-Sequenceable'!
 
-Namespace current: Kernel!
+
+ArrayedCollection subclass: WordArray [
+    
+    <shape: #word>
+    <category: 'Collections-Sequenceable'>
+    <comment: '
+I am similar to a plain array, but my items are 32-bit integers.'>
+]
 
-Magnitude subclass: #LargeArraySubpart
-	instanceVariableNames: 'first last index'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Collections-Sequenceable'!
 
-Namespace current: Smalltalk!
+
+Namespace current: Kernel [
 
-ArrayedCollection subclass: #LargeArrayedCollection
-	instanceVariableNames: 'storage indices position size'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Collections-Sequenceable'!
-
-LargeArrayedCollection subclass: #LargeArray
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Collections-Sequenceable'!
-
-LargeArrayedCollection subclass: #LargeByteArray
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Collections-Sequenceable'!
-
-LargeArrayedCollection subclass: #LargeWordArray
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Collections-Sequenceable'!
-
-WordArray comment: '
-I am similar to a plain array, but my items are 32-bit integers.'.
-
-Kernel.LargeArraySubpart comment: '
+Magnitude subclass: LargeArraySubpart [
+    | first last index |
+    
+    <category: 'Collections-Sequenceable'>
+    <comment: '
 This class is an auxiliary class used to store information
 about a LargeArrayedCollection''s contents.  LargeArrayedCollections
 store their items non-contiguously in a separate storage object, and
 use a SortedCollection to map between indices in the array and indices
 in the storage object; instances of this class represent a block of
-indices that is stored contiguously in the storage object.'.
+indices that is stored contiguously in the storage object.'>
 
-LargeArrayedCollection comment: '
+    LargeArraySubpart class >> first: first last: last index: index [
+	"Answer a LargeArraySubpart which answers first, last, and index
+	 when it is sent (respectively) #first, #last and #firstIndex."
+
+	<category: 'instance creation'>
+	^self new 
+	    first: first
+	    last: last
+	    index: index
+    ]
+
+    < anObject [
+	"Answer whether the receiver points to a part of the array that
+	 is before anObject (this makes sense only if the receiver and
+	 anObject are two LargeArraySubparts referring to the same
+	 LargeArrayedCollection)."
+
+	<category: 'comparing'>
+	^self first < anObject first
+    ]
+
+    <= anObject [
+	"Answer whether the receiver points to a part of the array that
+	 is before anObject or starts at the same point (this makes sense
+	 only if the receiver and anObject are two LargeArraySubparts
+	 referring to the same LargeArrayedCollection)."
+
+	<category: 'comparing'>
+	^self first <= anObject first
+    ]
+
+    = anObject [
+	"Answer whether the receiver and anObject are equal (assuming that
+	 the receiver and anObject are two LargeArraySubparts
+	 referring to the same LargeArrayedCollection, which the receiver
+	 cannot check for)."
+
+	<category: 'comparing'>
+	^self first = anObject first
+    ]
+
+    hash [
+	"Answer an hash value for the receiver"
+
+	<category: 'comparing'>
+	^self first hash
+    ]
+
+    first: firstIndex last: lastIndex index: storagePosition [
+	"Set up the receiver so that it answers first, last, and index
+	 when it is sent (respectively) #first, #last and #firstIndex."
+
+	<category: 'accessing'>
+	first := firstIndex.
+	last := lastIndex.
+	index := storagePosition
+    ]
+
+    first [
+	"Answer the index of the first item of the LargeArrayedCollection
+	 that the receiver refers to."
+
+	<category: 'accessing'>
+	^first
+    ]
+
+    last [
+	"Answer the index of the last item of the LargeArrayedCollection
+	 that the receiver refers to."
+
+	<category: 'accessing'>
+	^last
+    ]
+
+    firstIndex [
+	"Answer the index in the collection's storage object of the first
+	 item of the LargeArrayedCollection that the receiver refers to."
+
+	<category: 'accessing'>
+	^index
+    ]
+
+    lastIndex [
+	"Answer the index in the collection's storage object of the last
+	 item of the LargeArrayedCollection that the receiver refers to."
+
+	<category: 'accessing'>
+	^index + last - first
+    ]
+
+    cutAt: position [
+	"Answer a new LargeArraySubpart whose lastIndex is position - 1,
+	 and apply a #removeFirst: to the receiver so that the firstIndex
+	 becomes position"
+
+	<category: 'modifying'>
+	| newPart newFirst |
+	newFirst := first + (position - index).
+	newPart := self class 
+		    first: first
+		    last: newFirst - 1
+		    index: index.
+	first := newFirst.
+	index := position.
+	^newPart
+    ]
+
+    grow [
+	"Add one to last and lastIndex"
+
+	<category: 'modifying'>
+	last := last + 1
+    ]
+
+    growBy: numberOfElements [
+	"Add numberOfElements to last and lastIndex"
+
+	<category: 'modifying'>
+	last := last + numberOfElements
+    ]
+
+    relocateTo: position [
+	"Move the firstIndex to position, and the lastIndex accordingly."
+
+	<category: 'modifying'>
+	index := position
+    ]
+
+    removeFirst: n [
+	"Sum n to first and firstIndex, but leave last/lastIndex untouched"
+
+	<category: 'modifying'>
+	first := first + n.
+	index := index + n
+    ]
+
+    removeLast: n [
+	"Subtract n from last and lastIndex, but leave first/firstIndex untouched"
+
+	<category: 'modifying'>
+	last := last - n
+    ]
+]
+
+]
+
+
+
+ArrayedCollection subclass: LargeArrayedCollection [
+    | storage indices position size |
+    
+    <category: 'Collections-Sequenceable'>
+    <comment: '
 I am an abstract class specially designed to save
-memory when lots of items have the same value.'.
+memory when lots of items have the same value.'>
 
-LargeArray comment: '
-I am similar to a plain array, but I''m specially designed to save
-memory when lots of items are nil.'.
+    LargeArrayedCollection class >> new: anInteger [
+	"Answer a new instance of the receiver, with room for anInteger elements."
 
-LargeByteArray comment: '
-I am similar to a plain ByteArray, but I''m specially designed to save
-memory when lots of items are zero.'.
+	<category: 'instance creation'>
+	^self basicNew initialize: anInteger
+    ]
 
-LargeWordArray comment: '
-I am similar to a plain WordArray, but I''m specially designed to save
-memory when lots of items are zero.'!
+    at: anIndex [
+	"Answer the anIndex-th item of the receiver."
 
-!Kernel.LargeArraySubpart class methodsFor: 'instance creation'!
+	<category: 'accessing'>
+	| subpart |
+	self checkIndex: anIndex.
+	subpart := self atSubpart: anIndex.
+	subpart isNil ifTrue: [^self defaultElement].
+	^storage at: anIndex - subpart first + subpart firstIndex
+    ]
 
-first: first last: last index: index
-    "Answer a LargeArraySubpart which answers first, last, and index
-     when it is sent (respectively) #first, #last and #firstIndex."
-    ^self new first: first last: last index: index
-! !
+    at: anIndex put: anObject [
+	"Replace the anIndex-th item of the receiver with anObject."
 
-!Kernel.LargeArraySubpart methodsFor: 'comparing'!
+	<category: 'accessing'>
+	| subpart |
+	self checkIndex: anIndex.
 
-< anObject
-    "Answer whether the receiver points to a part of the array that
-     is before anObject (this makes sense only if the receiver and
-     anObject are two LargeArraySubparts referring to the same
-     LargeArrayedCollection)."
-    ^self first < anObject first
-!
+	"Reset compression flag"
+	position < 0 ifTrue: [position := position negated].
+	subpart := self atPutSubpart: anIndex.
+	subpart isNil 
+	    ifTrue: 
+		[self addToStorage: anObject.
+		indices add: (Kernel.LargeArraySubpart 
+			    first: anIndex
+			    last: anIndex
+			    index: position - 1).
+		^anObject].
 
-<= anObject
-    "Answer whether the receiver points to a part of the array that
-     is before anObject or starts at the same point (this makes sense
-     only if the receiver and anObject are two LargeArraySubparts
-     referring to the same LargeArrayedCollection)."
-    ^self first <= anObject first
-!
-
-= anObject
-    "Answer whether the receiver and anObject are equal (assuming that
-     the receiver and anObject are two LargeArraySubparts
-     referring to the same LargeArrayedCollection, which the receiver
-     cannot check for)."
-    ^self first = anObject first
-!
-
-hash
-    "Answer an hash value for the receiver"
-    ^self first hash
-! !
-
-!Kernel.LargeArraySubpart methodsFor: 'accessing'!
-
-first: firstIndex last: lastIndex index: storagePosition
-    "Set up the receiver so that it answers first, last, and index
-     when it is sent (respectively) #first, #last and #firstIndex."
-    first := firstIndex.
-    last := lastIndex.
-    index := storagePosition
-!
-
-first
-    "Answer the index of the first item of the LargeArrayedCollection
-     that the receiver refers to."
-    ^first
-!
-
-last
-    "Answer the index of the last item of the LargeArrayedCollection
-     that the receiver refers to."
-    ^last
-!
-
-firstIndex
-    "Answer the index in the collection's storage object of the first
-     item of the LargeArrayedCollection that the receiver refers to."
-    ^index
-!
-
-lastIndex
-    "Answer the index in the collection's storage object of the last
-     item of the LargeArrayedCollection that the receiver refers to."
-    ^index + last - first
-! !
-
-!Kernel.LargeArraySubpart methodsFor: 'modifying'!
-
-cutAt: position
-    "Answer a new LargeArraySubpart whose lastIndex is position - 1,
-     and apply a #removeFirst: to the receiver so that the firstIndex
-     becomes position"
-
-    | newPart newFirst |
-    newFirst := first + (position - index).
-    newPart := self class first: first last: newFirst - 1 index: index.
-    first := newFirst.
-    index := position.
-    ^newPart
-!
-
-grow
-    "Add one to last and lastIndex"
-    last := last + 1
-!
-
-growBy: numberOfElements
-    "Add numberOfElements to last and lastIndex"
-    last := last + numberOfElements
-!
-
-relocateTo: position
-    "Move the firstIndex to position, and the lastIndex accordingly."
-    index := position
-!
-
-removeFirst: n
-    "Sum n to first and firstIndex, but leave last/lastIndex untouched"
-    first := first + n.
-    index := index + n.
-!
-
-removeLast: n
-    "Subtract n from last and lastIndex, but leave first/firstIndex untouched"
-    last := last - n
-! !
-
-!LargeArrayedCollection class methodsFor: 'instance creation'!
-
-new: anInteger
-    "Answer a new instance of the receiver, with room for anInteger elements."
-     ^self basicNew initialize: anInteger
-! !
-
-!LargeArrayedCollection methodsFor: 'accessing'!
-
-at: anIndex
-    "Answer the anIndex-th item of the receiver."
-    | subpart |
-    self checkIndex: anIndex.
-    subpart := self atSubpart: anIndex.
-    subpart isNil ifTrue: [ ^self defaultElement ].
-    ^storage at: (anIndex - subpart first + subpart firstIndex)
-!
-
-at: anIndex put: anObject
-    "Replace the anIndex-th item of the receiver with anObject."
-    | subpart |
-    self checkIndex: anIndex.
-
-    "Reset compression flag"
-    position < 0 ifTrue: [ position := position negated ].
-
-    subpart := self atPutSubpart: anIndex.
-    subpart isNil ifTrue: [
+	"The item was not a nil one"
+	subpart last >= anIndex 
+	    ifTrue: 
+		[^storage at: anIndex - subpart first + subpart firstIndex put: anObject].
 	self addToStorage: anObject.
-	indices add: (Kernel.LargeArraySubpart
-	    first: anIndex
-	    last: anIndex
-	    index: position - 1).
+	subpart lastIndex = (position - 2) 
+	    ifTrue: 
+		["Extend the last subpart we created"
+
+		subpart grow]
+	    ifFalse: 
+		["Create a new subpart."
+
+		indices add: (Kernel.LargeArraySubpart 
+			    first: anIndex
+			    last: anIndex
+			    index: position - 1)].
 	^anObject
-    ].
+    ]
 
-    "The item was not a nil one"
-    subpart last >= anIndex ifTrue: [
-	^storage
-	    at: (anIndex - subpart first + subpart firstIndex)
-	    put: anObject
-    ].
+    compress [
+	"Arrange the representation of the array for maximum memory saving."
 
-    self addToStorage: anObject.
-    subpart lastIndex = (position - 2)
-	ifTrue: [
-	    "Extend the last subpart we created"
-	    subpart grow.
-	]
-	ifFalse: [
-	    "Create a new subpart."
-	    indices add: (Kernel.LargeArraySubpart
-		first: anIndex
-		last: anIndex
-		index: position - 1)
-	].
-    ^anObject
-!
+	<category: 'accessing'>
+	| newStorage newIndices last startOfNils trailingNils |
+	position < 0 ifTrue: [^self].
+	newStorage := WriteStream on: (self newCollection: self size // 100 + 10).
+	newIndices := WriteStream on: (Array new: self size // 1000 + 10).
 
-compress
-    "Arrange the representation of the array for maximum memory saving."
+	"This algorithm is complicated to code but intuitive.  Read it slowly
+	 and follow its rhythm..."
+	indices do: 
+		[:each | 
+		"First, do a pass on the indices, searching for spans of nils
+		 that can be removed from the array."
 
-    | newStorage newIndices last startOfNils trailingNils |
-    position < 0 ifTrue: [ ^self ].
-    newStorage := WriteStream on: (self newCollection: self size // 100 + 10).
-    newIndices := WriteStream on: (Array new: self size // 1000 + 10).
-
-    "This algorithm is complicated to code but intuitive.  Read it slowly
-     and follow its rhythm..."
-    indices do: [ :each || oldPosition i element |
-
-	"First, do a pass on the indices, searching for spans of nils
-	 that can be removed from the array."
-	startOfNils := i := each firstIndex.
-	[ i <= each lastIndex ] whileTrue: [
-	    element := storage at: i.
-	    i := i + 1.
-	    element == self defaultElement
-		ifFalse: [ startOfNils := i ].
-
-	    i - startOfNils >= self costOfNewIndex
-		ifTrue: [
-		    "Find the end of this run of nil elements, and
-		     remove the nils from the start of the subpart"
-		    [
-			i <= each lastIndex and: [
-			    (storage at: i) == self defaultElement ]
-		    ] whileTrue: [
+		| oldPosition i element |
+		startOfNils := i := each firstIndex.
+		[i <= each lastIndex] whileTrue: 
+			[element := storage at: i.
 			i := i + 1.
-		    ].
+			element == self defaultElement ifFalse: [startOfNils := i].
+			i - startOfNils >= self costOfNewIndex 
+			    ifTrue: 
+				["Find the end of this run of nil elements, and
+				 remove the nils from the start of the subpart"
 
-		    "Create a new part that spans until the start of the nils"
-		    self
-			from: each firstIndex
-			to: startOfNils - 1
-			putOn: newStorage.
+				[i <= each lastIndex and: [(storage at: i) == self defaultElement]] 
+				    whileTrue: [i := i + 1].
 
-		    last := each cutAt: startOfNils.
-		    newIndices nextPut: last.
-		    each removeFirst: i - each firstIndex.
-	 	    startOfNils := i.
-		].
-	].
-	startOfNils <= each lastIndex ifTrue: [
-	    each removeLast: each lastIndex - startOfNils + 1.
-	].
+				"Create a new part that spans until the start of the nils"
+				self 
+				    from: each firstIndex
+				    to: startOfNils - 1
+				    putOn: newStorage.
+				last := each cutAt: startOfNils.
+				newIndices nextPut: last.
+				each removeFirst: i - each firstIndex.
+				startOfNils := i]].
+		startOfNils <= each lastIndex 
+		    ifTrue: [each removeLast: each lastIndex - startOfNils + 1].
 
-	"Now check whether we can merge the last LargeArraySubpart and
-	 this one"
-	last isNil ifFalse: [
-	    each first - last last <= self costOfNewIndex
-		ifTrue: [
-		    newStorage
-		        next: each first - last last - 1
-		        put: self defaultElement.
-	    	    last growBy: each last - last last.
-		]
-		ifFalse: [
-		    last := nil
-		]
-	].
+		"Now check whether we can merge the last LargeArraySubpart and
+		 this one"
+		last isNil 
+		    ifFalse: 
+			[each first - last last <= self costOfNewIndex 
+			    ifTrue: 
+				[newStorage next: each first - last last - 1 put: self defaultElement.
+				last growBy: each last - last last]
+			    ifFalse: [last := nil]].
 
-	"Anyway, add the items to the newStorage"
-	oldPosition := newStorage position + 1.
-	self from: each firstIndex to: each lastIndex putOn: newStorage.
+		"Anyway, add the items to the newStorage"
+		oldPosition := newStorage position + 1.
+		self 
+		    from: each firstIndex
+		    to: each lastIndex
+		    putOn: newStorage.
 
-	"Then add a new LargeArraySubpart if necessary"
-	(last isNil and: [ each lastIndex >= each firstIndex ]) ifTrue: [
-	    each relocateTo: oldPosition.
-	    newIndices nextPut: each.
-	    last := each.
-	].
-    ].
-    indices := newIndices contents asSortedCollection.
-    storage := newStorage contents.
-    position := newStorage size negated.
-! !
+		"Then add a new LargeArraySubpart if necessary"
+		(last isNil and: [each lastIndex >= each firstIndex]) 
+		    ifTrue: 
+			[each relocateTo: oldPosition.
+			newIndices nextPut: each.
+			last := each]].
+	indices := newIndices contents asSortedCollection.
+	storage := newStorage contents.
+	position := newStorage size negated
+    ]
 
-!LargeArrayedCollection methodsFor: 'basic'!
+    = aLargeArray [
+	"Answer whether the receiver and aLargeArray have the same contents"
 
-= aLargeArray
-    "Answer whether the receiver and aLargeArray have the same contents"
-    self class == aLargeArray class ifFalse: [ ^false ].
-    self == aLargeArray ifTrue: [ ^true ].
+	<category: 'basic'>
+	self class == aLargeArray class ifFalse: [^false].
+	self == aLargeArray ifTrue: [^true].
+	self compress.
+	aLargeArray compress.
+	^indices = aLargeArray indices and: [storage = aLargeArray storage]
+    ]
 
-    self compress.
-    aLargeArray compress.
+    hash [
+	"Answer an hash value for the receiver"
 
-    ^indices = aLargeArray indices and: [ storage = aLargeArray storage ].
-!
+	<category: 'basic'>
+	self compress.
+	^storage hash
+    ]
 
-hash
-    "Answer an hash value for the receiver"
-    self compress.
-    ^storage hash
-!
+    size [
+	"Answer the maximum valid index for the receiver"
 
-size
-    "Answer the maximum valid index for the receiver"
-    ^size
-! !
+	<category: 'basic'>
+	^size
+    ]
 
-!LargeArrayedCollection methodsFor: 'private'!
+    addToStorage: anObject [
+	"Add anObject to the storage, possibly growing it if necessary."
 
-addToStorage: anObject
-    "Add anObject to the storage, possibly growing it if necessary."
-    position > storage size ifTrue: [
-        storage := (self newCollection: storage size * 2)
-	    replaceFrom: 1 to: storage size with: storage startingAt: 1;
-	    yourself
-    ].
-    storage at: position put: anObject.
-    position := position + 1.
-    ^anObject
-!
+	<category: 'private'>
+	position > storage size 
+	    ifTrue: 
+		[storage := (self newCollection: storage size * 2)
+			    replaceFrom: 1
+				to: storage size
+				with: storage
+				startingAt: 1;
+			    yourself].
+	storage at: position put: anObject.
+	position := position + 1.
+	^anObject
+    ]
 
-atSubpart: index
-    "Private - Perform a binary search on the indices, searching for
-     a LargeArraySubpart referring to index."
+    atSubpart: index [
+	"Private - Perform a binary search on the indices, searching for
+	 a LargeArraySubpart referring to index."
 
-    | i j last mid element |
-    i := 1.
-    j := last := indices size.
+	<category: 'private'>
+	| i j last mid element |
+	i := 1.
+	j := last := indices size.
+	[i > j] whileFalse: 
+		[mid := (i + j + 1) // 2.
+		element := indices at: mid.
+		index > element last 
+		    ifTrue: [i := mid + 1]
+		    ifFalse: [index < element first ifTrue: [j := mid - 1] ifFalse: [^element]]].
+	^nil
+    ]
 
-    [ i > j ] whileFalse: [
-	mid := (i + j + 1) // 2.
-	element := indices at: mid.
-        index > element last
-	    ifTrue: [
-		i := mid + 1
-	    ]
-	    ifFalse: [
-	        index < element first
-		    ifTrue: [ j := mid - 1 ]
-		    ifFalse: [ ^element ]
-	    ]
-    ].
-    ^nil
-!
+    atPutSubpart: index [
+	"Private - Perform a binary search on the indices, searching for
+	 a LargeArraySubpart referring to index or (if it cannot be found)
+	 to index - 1."
 
-atPutSubpart: index
-    "Private - Perform a binary search on the indices, searching for
-     a LargeArraySubpart referring to index or (if it cannot be found)
-     to index - 1."
+	<category: 'private'>
+	| i j last mid element |
+	i := 1.
+	j := last := indices size.
+	[i > j] whileFalse: 
+		[mid := (i + j + 1) // 2.
+		element := indices at: mid.
+		index > element last 
+		    ifTrue: 
+			["Answer a LargeArraySubpart to be extended"
 
-    | i j last mid element |
-    i := 1.
-    j := last := indices size.
+			index = (element last + 1) 
+			    ifTrue: 
+				[(j = last or: [(indices at: mid + 1) first > index]) 
+				    ifTrue: [^element]
+				    ifFalse: [^indices at: mid + 1]].
 
-    [ i > j ] whileFalse: [
-	mid := (i + j + 1) // 2.
-	element := indices at: mid.
-        index > element last
-	    ifTrue: [
-		"Answer a LargeArraySubpart to be extended"
-	        index = (element last + 1) ifTrue: [
-		    (j = last or: [ (indices at: mid + 1) first > index ])
-			ifTrue: [ ^element ]
-			ifFalse: [ ^indices at: mid + 1 ].
-		].
+			"Discard up to this element"
+			i := mid + 1]
+		    ifFalse: [index < element first ifTrue: [j := mid - 1] ifFalse: [^element]]].
+	^nil
+    ]
 
-		"Discard up to this element"
-		i := mid + 1
-	    ]
-	    ifFalse: [
-	        index < element first
-		    ifTrue: [ j := mid - 1 ]
-		    ifFalse: [ ^element ]
-	    ]
-    ].
-    ^nil
-!
+    checkIndex: index [
+	"Check if the given index is valid"
 
-checkIndex: index
-    "Check if the given index is valid"
-    index isInteger ifFalse: [ ^SystemExceptions.WrongClass signalOn: index mustBe: Integer ].
-    (index < 1) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
-    (index > self size) ifTrue: [ ^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index ].
-!
+	<category: 'private'>
+	index isInteger 
+	    ifFalse: [^SystemExceptions.WrongClass signalOn: index mustBe: Integer].
+	index < 1 
+	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index].
+	index > self size 
+	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index]
+    ]
 
-from: first to: last putOn: newStorage
-    "Store on newStorage every item of the current storage from the first-th
-     to the last-th"
-    storage from: first to: last do: [ :element |
-	newStorage nextPut: element
-    ].
-!
+    from: first to: last putOn: newStorage [
+	"Store on newStorage every item of the current storage from the first-th
+	 to the last-th"
 
-indices
-    ^indices
-!
+	<category: 'private'>
+	storage 
+	    from: first
+	    to: last
+	    do: [:element | newStorage nextPut: element]
+    ]
 
-storage
-    ^storage
-! !
+    indices [
+	<category: 'private'>
+	^indices
+    ]
 
-!LargeArrayedCollection methodsFor: 'private-abstract'!
+    storage [
+	<category: 'private'>
+	^storage
+    ]
 
-costOfNewIndex
-    "Answer the maximum number of consecutive items set to the defaultElement
-     that can be present in a compressed array."
-    ^5
-!
+    costOfNewIndex [
+	"Answer the maximum number of consecutive items set to the defaultElement
+	 that can be present in a compressed array."
 
-defaultElement
-    "Answer the value which is hoped to be the most common in the array"
-    ^nil
-!
+	<category: 'private-abstract'>
+	^5
+    ]
 
-newCollection: size
-    self subclassResponsibility
-! !
+    defaultElement [
+	"Answer the value which is hoped to be the most common in the array"
 
-!LargeArrayedCollection methodsFor: 'private-initialization'!
+	<category: 'private-abstract'>
+	^nil
+    ]
 
-initialize: mySize
-    "Initialize the receiver's state"
-    indices := SortedCollection new: mySize // 1000 + 10.
-    storage := self newCollection: mySize // 100 + 10.
-    size := mySize.
-    position := -1.
-! !
+    newCollection: size [
+	<category: 'private-abstract'>
+	self subclassResponsibility
+    ]
 
-!LargeArray methodsFor: 'overridden'!
+    initialize: mySize [
+	"Initialize the receiver's state"
 
-newCollection: size
-    "Create an Array of the given size"
-    ^Array new: size
-! !
+	<category: 'private-initialization'>
+	indices := SortedCollection new: mySize // 1000 + 10.
+	storage := self newCollection: mySize // 100 + 10.
+	size := mySize.
+	position := -1
+    ]
+]
 
-!LargeByteArray methodsFor: 'overridden'!
 
-costOfNewIndex
-    "Answer the maximum number of consecutive items set to the defaultElement
-     that can be present in a compressed array."
+
+LargeArrayedCollection subclass: LargeArray [
+    
+    <category: 'Collections-Sequenceable'>
+    <comment: '
+I am similar to a plain array, but I''m specially designed to save
+memory when lots of items are nil.'>
 
-    "### Should be 40 on 64-bit machines (super costOfNewIndex * CLong sizeof)"
-    ^20
-!
+    newCollection: size [
+	"Create an Array of the given size"
 
-defaultElement
-    "Answer the value which is hoped to be the most common in the array"
-    ^0
-!
+	<category: 'overridden'>
+	^Array new: size
+    ]
+]
 
-newCollection: size
-    "Create a ByteArray of the given size"
-    ^ByteArray new: size
-! !
 
-!LargeWordArray methodsFor: 'overridden'!
+
+LargeArrayedCollection subclass: LargeByteArray [
+    
+    <category: 'Collections-Sequenceable'>
+    <comment: '
+I am similar to a plain ByteArray, but I''m specially designed to save
+memory when lots of items are zero.'>
 
-defaultElement
-    "Answer the value which is hoped to be the most common in the array"
-    ^0
-!
+    costOfNewIndex [
+	"Answer the maximum number of consecutive items set to the defaultElement
+	 that can be present in a compressed array."
 
-newCollection: size
-    "Create a WordArray of the given size"
-    ^WordArray new: size
-! !
+	"### Should be 40 on 64-bit machines (super costOfNewIndex * CLong sizeof)"
+
+	<category: 'overridden'>
+	^20
+    ]
+
+    defaultElement [
+	"Answer the value which is hoped to be the most common in the array"
+
+	<category: 'overridden'>
+	^0
+    ]
+
+    newCollection: size [
+	"Create a ByteArray of the given size"
+
+	<category: 'overridden'>
+	^ByteArray new: size
+    ]
+]
+
+
+
+LargeArrayedCollection subclass: LargeWordArray [
+    
+    <category: 'Collections-Sequenceable'>
+    <comment: '
+I am similar to a plain WordArray, but I''m specially designed to save
+memory when lots of items are zero.'>
+
+    defaultElement [
+	"Answer the value which is hoped to be the most common in the array"
+
+	<category: 'overridden'>
+	^0
+    ]
+
+    newCollection: size [
+	"Create a WordArray of the given size"
+
+	<category: 'overridden'>
+	^WordArray new: size
+    ]
+]
+

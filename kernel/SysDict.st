@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006
@@ -31,203 +30,216 @@
 |
  ======================================================================"
 
-RootNamespace variableSubclass: #SystemDictionary
-	   instanceVariableNames: ''
-	   classVariableNames: ''
-	   poolDictionaries: ''
-	   category: 'Language-Implementation'
-!
 
-SystemDictionary comment: 
-'I am a special namespace. I only have one instance, called "Smalltalk",
+
+RootNamespace subclass: SystemDictionary [
+    
+    <shape: #pointer>
+    <category: 'Language-Implementation'>
+    <comment: 'I am a special namespace. I only have one instance, called "Smalltalk",
 which is known to the Smalltalk interpreter.  I define
 several methods that are "system" related, such as #quitPrimitive.
-My instance also helps keep track of dependencies between objects.' !
+My instance also helps keep track of dependencies between objects.'>
 
+    SystemDictionary class >> initialize [
+	<category: 'initialization'>
+	Smalltalk addSubspace: #Kernel.
+	Smalltalk addFeature: #Kernel.
+	KernelInitialized := true
+    ]
 
-
-!SystemDictionary methodsFor: 'builtins'!
+    basicBacktrace [
+	"Prints the method invocation stack backtrace, as an aid to debugging"
 
-basicBacktrace
-    "Prints the method invocation stack backtrace, as an aid to debugging"
-    <primitive: VMpr_SystemDictionary_backtrace>
-    self primitiveFailed
-!
+	<category: 'builtins'>
+	<primitive: VMpr_SystemDictionary_backtrace>
+	self primitiveFailed
+    ]
 
-backtrace
-    "Prints the method invocation stack backtrace, as an aid to debugging"
-    <primitive: VMpr_SystemDictionary_backtrace>
-    self primitiveFailed
-!
+    backtrace [
+	"Print a backtrace on the Transcript."
 
-getTraceFlag: anIndex
-    "Private - Returns a boolean value which is one of the interpreter's
-     tracing flags"
-    <primitive: VMpr_SystemDictionary_getTraceFlag>
-    self primitiveFailed
-!
+	"This replaces the primitive in builtins.st"
 
-setTraceFlag: anIndex to: aBoolean
-    "Private - Sets the value of one of the interpreter's tracing flags
-    (indicated by 'anIndex') to the value aBoolean."
-    <primitive: VMpr_SystemDictionary_setTraceFlag>
-    self primitiveFailed
-!
+	<category: 'miscellaneous'>
+	thisContext parentContext backtrace
+    ]
 
-byteCodeCounter
-    "Answer the number of bytecodes executed by the VM"
-    <primitive: VMpr_SystemDictionary_byteCodeCounter>
-!
+    getTraceFlag: anIndex [
+	"Private - Returns a boolean value which is one of the interpreter's
+	 tracing flags"
 
-debug
-    "This methods provides a way to break in the VM code.  Set a breakpoint
-     in _gst_debug and call this method near the point where you think
-     the bug happens."
-    <primitive: VMpr_SystemDictionary_debug>
-!
+	<category: 'builtins'>
+	<primitive: VMpr_SystemDictionary_getTraceFlag>
+	self primitiveFailed
+    ]
 
+    setTraceFlag: anIndex to: aBoolean [
+	"Private - Sets the value of one of the interpreter's tracing flags
+	 (indicated by 'anIndex') to the value aBoolean."
 
-"==========================================================================
- These are so useful throughout the loading of the kernel methods that I
- make an exception here and put in real methods instead of just primitives.
- "
+	<category: 'builtins'>
+	<primitive: VMpr_SystemDictionary_setTraceFlag>
+	self primitiveFailed
+    ]
 
-executionTrace
-    "Answer whether executed bytecodes are printed on stdout"
-    ^self getTraceFlag: 1
-!
+    byteCodeCounter [
+	"Answer the number of bytecodes executed by the VM"
 
-executionTrace: aBoolean
-    "Set whether executed bytecodes are printed on stdout"
-    ^self setTraceFlag: 1 to: aBoolean
-!
+	<category: 'builtins'>
+	<primitive: VMpr_SystemDictionary_byteCodeCounter>
+	
+    ]
 
-declarationTrace
-    "Answer whether compiled bytecodes are printed on stdout"
-    ^self getTraceFlag: 0
-!
+    debug [
+	"This methods provides a way to break in the VM code.  Set a breakpoint
+	 in _gst_debug and call this method near the point where you think
+	 the bug happens."
 
-declarationTrace: aBoolean
-    "Set whether compiled bytecodes are printed on stdout"
-    ^self setTraceFlag: 0 to: aBoolean
-!
+	<category: 'builtins'>
+	<primitive: VMpr_SystemDictionary_debug>
+	
+    ]
 
-verboseTrace
-    "Answer whether execution tracing prints the object on the stack top"
-    ^self getTraceFlag: 2
-!
+    executionTrace [
+	"Answer whether executed bytecodes are printed on stdout"
 
-verboseTrace: aBoolean
-    "Set whether execution tracing prints the object on the stack top"
-    ^self setTraceFlag: 2 to: aBoolean
-! !
+	<category: 'builtins'>
+	^self getTraceFlag: 1
+    ]
 
-
+    executionTrace: aBoolean [
+	"Set whether executed bytecodes are printed on stdout"
 
-
-!SystemDictionary methodsFor: 'basic'!
+	<category: 'builtins'>
+	^self setTraceFlag: 1 to: aBoolean
+    ]
 
-hash
-    "Smalltalk usually contains a reference to itself, avoid infinite
-     loops"
-    ^self identityHash
-!
+    declarationTrace [
+	"Answer whether compiled bytecodes are printed on stdout"
 
-halt
-    "Interrupt interpreter"
-    ContextPart unwind
-! !
-
+	<category: 'builtins'>
+	^self getTraceFlag: 0
+    ]
 
-!SystemDictionary methodsFor: 'printing'!
+    declarationTrace: aBoolean [
+	"Set whether compiled bytecodes are printed on stdout"
 
-printOn: aStream in: aNamespace
-    "Store Smalltalk code compiling to the receiver"
-    aStream nextPutAll: 'Smalltalk'.
-!
+	<category: 'builtins'>
+	^self setTraceFlag: 0 to: aBoolean
+    ]
 
-nameIn: aNamespace
-    ^'Smalltalk'
-!
+    verboseTrace [
+	"Answer whether execution tracing prints the object on the stack top"
 
-storeOn: aStream
-    "Store Smalltalk code compiling to the receiver"
-    aStream nextPutAll: 'Smalltalk'.
-! !
+	<category: 'builtins'>
+	^self getTraceFlag: 2
+    ]
 
-
-!SystemDictionary methodsFor: 'miscellaneous'!
+    verboseTrace: aBoolean [
+	"Set whether execution tracing prints the object on the stack top"
 
-arguments
-    "Return the command line arguments after the -a switch"
-    self getArgc > 0 ifFalse: [ ^#() ].
+	<category: 'builtins'>
+	^self setTraceFlag: 2 to: aBoolean
+    ]
 
-    ^(1 to: self getArgc)
-	collect: [ :i | self getArgv: i ]
-!
+    hash [
+	"Smalltalk usually contains a reference to itself, avoid infinite
+	 loops"
 
-backtrace
-    "Print a backtrace on the Transcript."
-    "This replaces the primitive in builtins.st"
-    thisContext parentContext backtrace
-!
+	<category: 'basic'>
+	^self identityHash
+    ]
 
-hostSystem
-    "Answer the triplet corresponding to the system for which GNU
-     Smalltalk was built."
-    ^CSymbols.HostSystem
-! !
+    halt [
+	"Interrupt interpreter"
 
-
-!SystemDictionary methodsFor: 'special accessing'!
+	<category: 'basic'>
+	ContextPart unwind
+    ]
 
-hasFeatures: features
-    " Returns true if the feature or features in 'features' is one of the 
-      implementation dependent features present"
+    printOn: aStream in: aNamespace [
+	"Store Smalltalk code compiling to the receiver"
 
-    (features isKindOf: String)
-	ifTrue: [ ^Features includes: features asSymbol ]
-	ifFalse: [
-	    features do: [ :feature |
-		(Features includes: feature asSymbol) ifTrue: [ ^true ]
-	    ].
-	    ^false
-	]
-!
+	<category: 'printing'>
+	aStream nextPutAll: 'Smalltalk'
+    ]
 
-addFeature: aFeature
-    "Add the aFeature feature to the Features set"
-    Features class == Set ifFalse: [ Features := Features asSet ].
-    Features add: aFeature asSymbol.
-!
+    nameIn: aNamespace [
+	<category: 'printing'>
+	^'Smalltalk'
+    ]
 
-removeFeature: aFeature
-    "Remove the aFeature feature to the Features set"
-    Features class == Set ifFalse: [ Features := Features asSet ].
-    Features remove: aFeature ifAbsent: [ ]
-!
+    storeOn: aStream [
+	"Store Smalltalk code compiling to the receiver"
 
-version
-    "Answer the current version of the GNU Smalltalk environment"
-    ^Version
-! !
+	<category: 'printing'>
+	aStream nextPutAll: 'Smalltalk'
+    ]
 
-
-!SystemDictionary methodsFor: 'testing'!
+    arguments [
+	"Return the command line arguments after the -a switch"
 
-imageLocal
-    "Answer whether the kernel directory is a subdirectory of the image
-     directory (non-local image) or not."
-    ^(File pathFor: Directory kernel) ~= Directory image!
+	<category: 'miscellaneous'>
+	self getArgc > 0 ifFalse: [^#()].
+	^(1 to: self getArgc) collect: [:i | self getArgv: i]
+    ]
 
-isSmalltalk
-    ^true
-! !
+    hostSystem [
+	"Answer the triplet corresponding to the system for which GNU
+	 Smalltalk was built."
 
-
-!SystemDictionary class methodsFor: 'initialization'!
+	<category: 'miscellaneous'>
+	^CSymbols.HostSystem
+    ]
 
-initialize
-    Smalltalk addSubspace: #Kernel.
-    Smalltalk addFeature: #Kernel.
-    KernelInitialized := true! !
+    hasFeatures: features [
+	"Returns true if the feature or features in 'features' is one of the
+	 implementation dependent features present"
+
+	<category: 'special accessing'>
+	(features isKindOf: String) 
+	    ifTrue: [^Features includes: features asSymbol]
+	    ifFalse: 
+		[features 
+		    do: [:feature | (Features includes: feature asSymbol) ifTrue: [^true]].
+		^false]
+    ]
+
+    addFeature: aFeature [
+	"Add the aFeature feature to the Features set"
+
+	<category: 'special accessing'>
+	Features class == Set ifFalse: [Features := Features asSet].
+	Features add: aFeature asSymbol
+    ]
+
+    removeFeature: aFeature [
+	"Remove the aFeature feature to the Features set"
+
+	<category: 'special accessing'>
+	Features class == Set ifFalse: [Features := Features asSet].
+	Features remove: aFeature ifAbsent: []
+    ]
+
+    version [
+	"Answer the current version of the GNU Smalltalk environment"
+
+	<category: 'special accessing'>
+	^Version
+    ]
+
+    imageLocal [
+	"Answer whether the kernel directory is a subdirectory of the image
+	 directory (non-local image) or not."
+
+	<category: 'testing'>
+	^(File pathFor: Directory kernel) ~= Directory image
+    ]
+
+    isSmalltalk [
+	<category: 'testing'>
+	^true
+    ]
+]
+

@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1988,92,94,95,99,2000,2001
@@ -32,119 +31,119 @@
  ======================================================================"
 
 
-Object subclass: #Message
-       instanceVariableNames: 'selector args'
-       classVariableNames: ''
-       poolDictionaries: ''
-       category: 'Language-Implementation'
-!
-
-Message comment: 
-'I represent a message send.  My instances are created to hold a message
+
+Object subclass: Message [
+    | selector args |
+    
+    <category: 'Language-Implementation'>
+    <comment: 'I represent a message send.  My instances are created to hold a message
 that has failed, so that error reporting methods can examine the sender
 and arguments, but also to represent method attributes (like
 <primitive: 111> since their syntax is isomorphic to that of a
-message send.' !
-	   
+message send.'>
 
-
-!Message methodsFor: 'basic'!
+    Message class >> selector: aSymbol arguments: anArray [
+	"Create a new Message with the given selector and arguments"
 
-printAsAttributeOn: aStream
-    "Print a representation of the receiver on aStream, modeling
-     it after the source code for a attribute."
+	<category: 'creating instances'>
+	^(self new)
+	    selector: aSymbol;
+	    arguments: anArray
+    ]
 
-    aStream nextPut: $<.
+    printAsAttributeOn: aStream [
+	"Print a representation of the receiver on aStream, modeling
+	 it after the source code for a attribute."
 
-    (self selector includes: $:)
-	ifFalse: [
-	    aStream nextPutAll: self selector.
-	    self arguments do: [ :arg |
-		aStream store: arg
-	    ]
-	]
-	ifTrue: [
-	    (self selector substrings: $:) with: self arguments do: [:sel :arg |
-		aStream
-		    nextPutAll: sel;
-		    nextPutAll: ': ';
-		    store: arg;
-		    nextPut: ($ )
-	    ]
-	].
+	<category: 'basic'>
+	aStream nextPut: $<.
+	(self selector includes: $:) 
+	    ifFalse: 
+		[aStream nextPutAll: self selector.
+		self arguments do: [:arg | aStream store: arg]]
+	    ifTrue: 
+		[(self selector substrings: $:) with: self arguments
+		    do: 
+			[:sel :arg | 
+			aStream
+			    nextPutAll: sel;
+			    nextPutAll: ': ';
+			    store: arg;
+			    nextPut: $ ]].
+	aStream nextPut: $>
+    ]
 
-    aStream nextPut: $>
-!
+    printOn: aStream [
+	"Print a representation of the receiver on aStream"
 
-!Message methodsFor: 'printing'!
+	<category: 'printing'>
+	(self selector includes: $:) 
+	    ifFalse: 
+		[aStream nextPutAll: self selector.
+		self arguments do: 
+			[:arg | 
+			aStream
+			    nextPutAll: ' <';
+			    print: arg;
+			    nextPutAll: '> ']]
+	    ifTrue: 
+		[(self selector substrings: $:) with: self arguments
+		    do: 
+			[:sel :arg | 
+			aStream
+			    nextPutAll: sel;
+			    nextPutAll: ': <';
+			    print: arg;
+			    nextPutAll: '> ']]
+    ]
 
-printOn: aStream
-    "Print a representation of the receiver on aStream"
+    sendTo: aReceiver [
+	"Resend to aReceiver"
 
-    (self selector includes: $:)
-	ifFalse: [
-	    aStream nextPutAll: self selector.
-	    self arguments do: [ :arg |
-		aStream
-		    nextPutAll: ' <';
-		    print: arg;
-		    nextPutAll: '> '
-	    ]
-	]
-	ifTrue: [
-	    (self selector substrings: $:) with: self arguments do: [:sel :arg |
-		aStream
-		    nextPutAll: sel;
-		    nextPutAll: ': <';
-		    print: arg;
-		    nextPutAll: '> '
-	    ]
-	]
-!
+	<category: 'printing'>
+	^aReceiver perform: selector withArguments: args
+    ]
 
-sendTo: aReceiver
-    "Resend to aReceiver"
-    ^aReceiver perform: selector withArguments: args
-!
+    reinvokeFor: aReceiver [
+	"Resend to aReceiver - present for compatibility"
 
-reinvokeFor: aReceiver
-    "Resend to aReceiver - present for compatibility"
-    ^aReceiver perform: selector withArguments: args
-! !
+	<category: 'printing'>
+	^aReceiver perform: selector withArguments: args
+    ]
 
-
-!Message methodsFor: 'accessing'!
+    selector: aSymbol [
+	"Set the receiver's selector"
 
-selector: aSymbol
-    "Set the receiver's selector"
-    selector := aSymbol
-!
+	<category: 'accessing'>
+	selector := aSymbol
+    ]
 
-arguments: anArray
-    "Set the receiver's arguments"
-    args := anArray
-!
+    arguments: anArray [
+	"Set the receiver's arguments"
 
-selector
-    "Answer the receiver's selector"
-    ^selector
-!
+	<category: 'accessing'>
+	args := anArray
+    ]
 
-argument
-    "Answer the first of the receiver's arguments"
-    ^args at: 1
-!
+    selector [
+	"Answer the receiver's selector"
 
-arguments
-    "Answer the receiver's arguments"
-    ^args
-! !
+	<category: 'accessing'>
+	^selector
+    ]
 
-
-!Message class methodsFor: 'creating instances'!
+    argument [
+	"Answer the first of the receiver's arguments"
 
-selector: aSymbol arguments: anArray
-    "Create a new Message with the given selector and arguments"
-    ^self new selector: aSymbol; arguments: anArray
-! !
+	<category: 'accessing'>
+	^args at: 1
+    ]
+
+    arguments [
+	"Answer the receiver's arguments"
+
+	<category: 'accessing'>
+	^args
+    ]
+]
 

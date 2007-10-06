@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2006 Free Software Foundation, Inc.
@@ -31,93 +30,107 @@
  ======================================================================"
 
 
-CharacterArray variable: #utf32 subclass: #UnicodeString
-		  instanceVariableNames: ''
-		  classVariableNames: ''
-		  poolDictionaries: ''
-		  category: 'Collections-Text'
-!
-
-UnicodeString comment: 
-'My instances represent Unicode string data types.  Data is stored
-as 4-byte UTF-32 characters' !
-
 
-!UnicodeString class methodsFor: 'converting'!
+CharacterArray subclass: UnicodeString [
+    
+    <shape: #utf32>
+    <category: 'Collections-Text'>
+    <comment: 'My instances represent Unicode string data types.  Data is stored
+as 4-byte UTF-32 characters'>
 
-fromString: aString
-    "Return the String, aString, converted to its Unicode representation.
-     Unless the I18N package is loaded, this is not implemented."
-    ^aString asUnicodeString!
+    UnicodeString class >> fromString: aString [
+	"Return the String, aString, converted to its Unicode representation.
+	 Unless the I18N package is loaded, this is not implemented."
 
-!UnicodeString class methodsFor: 'multibyte encodings'!
+	<category: 'converting'>
+	^aString asUnicodeString
+    ]
 
-defaultEncoding
-    "Answer the encoding used by the receiver.  Conventionally, we
-     answer 'Unicode' to ensure that two UnicodeStrings always have
-     the same encoding."
-    ^'Unicode'!
+    UnicodeString class >> defaultEncoding [
+	"Answer the encoding used by the receiver.  Conventionally, we
+	 answer 'Unicode' to ensure that two UnicodeStrings always have
+	 the same encoding."
 
-!UnicodeString methodsFor: 'converting'!
+	<category: 'multibyte encodings'>
+	^'Unicode'
+    ]
 
-asString
-    "Returns the string corresponding to the receiver.  Without the
-     Iconv package, unrecognized Unicode characters become $?
-     characters.  When it is loaded, an appropriate single- or
-     multi-byte encoding could be used."
-    | s each |
-    s := String new: self size.
-    1 to: self size do: [ :i |
-	each := self basicAt: i.
-	s at: i put: ((each value between: 0 and: 127)
-			ifTrue: [ each asCharacter ]
-			ifFalse: [ $? ]) ].
-    ^s
-!
+    asString [
+	"Returns the string corresponding to the receiver.  Without the
+	 Iconv package, unrecognized Unicode characters become $?
+	 characters.  When it is loaded, an appropriate single- or
+	 multi-byte encoding could be used."
 
-asSymbol
-    "Returns the symbol corresponding to the receiver"
-    ^self asString asSymbol
-!
+	<category: 'converting'>
+	| s each |
+	s := String new: self size.
+	1 to: self size
+	    do: 
+		[:i | 
+		each := self basicAt: i.
+		s at: i
+		    put: ((each value between: 0 and: 127) 
+			    ifTrue: [each asCharacter]
+			    ifFalse: [$?])].
+	^s
+    ]
 
-asUnicodeString
-    "But I already am a UnicodeString!  Really!"
-    ^self
-! !
+    asSymbol [
+	"Returns the symbol corresponding to the receiver"
 
-!UnicodeString methodsFor: 'converting'!
+	<category: 'converting'>
+	^self asString asSymbol
+    ]
 
-displayOn: aStream
-    "Print a representation of the receiver on aStream"
-    self do: [ :char | char displayOn: aStream ].
-!
+    asUnicodeString [
+	"But I already am a UnicodeString!  Really!"
 
-printOn: aStream
-    "Print a representation of the receiver on aStream"
-    aStream nextPut: $'.
-    self do: [ :char | char == $' ifTrue: [ aStream nextPut: char ].
-                  char displayOn: aStream ].
-    aStream nextPut: $'
-! !
+	<category: 'converting'>
+	^self
+    ]
 
-!UnicodeString methodsFor: 'multibyte encodings'!
+    displayOn: aStream [
+	"Print a representation of the receiver on aStream"
 
-encoding
-    "Answer the encoding used by the receiver.  Conventionally, we
-     answer 'Unicode' to ensure that two UnicodeStrings always have
-     the same encoding."
-    ^'Unicode'!
+	<category: 'converting'>
+	self do: [:char | char displayOn: aStream]
+    ]
 
-numberOfCharacters
-    "Answer the number of Unicode characters in the receiver.  This is
-     the same as #size for UnicodeString."
-    ^self size! !
+    printOn: aStream [
+	"Print a representation of the receiver on aStream"
 
-
-!UnicodeString methodsFor: 'built-ins'!
+	<category: 'converting'>
+	aStream nextPut: $'.
+	self do: 
+		[:char | 
+		char == $' ifTrue: [aStream nextPut: char].
+		char displayOn: aStream].
+	aStream nextPut: $'
+    ]
 
-hash
-    "Answer an hash value for the receiver"
-    <primitive: VMpr_String_hash>
-    ^0
-! !
+    encoding [
+	"Answer the encoding used by the receiver.  Conventionally, we
+	 answer 'Unicode' to ensure that two UnicodeStrings always have
+	 the same encoding."
+
+	<category: 'multibyte encodings'>
+	^'Unicode'
+    ]
+
+    numberOfCharacters [
+	"Answer the number of Unicode characters in the receiver.  This is
+	 the same as #size for UnicodeString."
+
+	<category: 'multibyte encodings'>
+	^self size
+    ]
+
+    hash [
+	"Answer an hash value for the receiver"
+
+	<category: 'built-ins'>
+	<primitive: VMpr_String_hash>
+	^0
+    ]
+]
+

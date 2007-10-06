@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 2007 Free Software Foundation, Inc.
@@ -28,136 +27,156 @@
 |
  ======================================================================"
 
-TestCase subclass: #IconvTest
-         instanceVariableNames: ''
-         classVariableNames: ''
-         poolDictionaries: ''
-         category: 'Examples-Useful'!
 
-!IconvTest methodsFor: 'test'!
+
+TestCase subclass: IconvTest [
+    
+    <comment: nil>
+    <category: 'Examples-Useful'>
 
-testStringNumberOfCharacters
-    self assert: ($<16r438> asString: 'UTF-8') numberOfCharacters = 1.
-    self assert: ($<16rFFFE> asString: 'UTF-8') numberOfCharacters = 1.
-    self assert: ((UnicodeString new: 10) atAllPut: $<16r438>) asString
-		 numberOfCharacters = 10!
+    testStringNumberOfCharacters [
+	<category: 'test'>
+	self assert: ($<16r0438> asString: 'UTF-8') numberOfCharacters = 1.
+	self assert: ($<16rFFFE> asString: 'UTF-8') numberOfCharacters = 1.
+	self 
+	    assert: ((UnicodeString new: 10) atAllPut: $<16r0438>) asString 
+		    numberOfCharacters = 10
+    ]
 
-testUnicodeStringNumberOfCharacters
-    self assert: $<16r438> asUnicodeString numberOfCharacters = 1.
-    self assert: $<16rFFFE> asUnicodeString numberOfCharacters = 1.
-    self assert: ((UnicodeString new: 10) atAllPut: $<16r438>)
-		 numberOfCharacters = 10!
+    testUnicodeStringNumberOfCharacters [
+	<category: 'test'>
+	self assert: $<16r0438> asUnicodeString numberOfCharacters = 1.
+	self assert: $<16rFFFE> asUnicodeString numberOfCharacters = 1.
+	self 
+	    assert: ((UnicodeString new: 10) atAllPut: $<16r0438>) numberOfCharacters 
+		    = 10
+    ]
 
-testUnicodeCharAsStringColon
-    self assert: ($<16r438> asString: 'UTF-8') = #[208 184] asString.
-    self assert: ($<16rFFFE> asString: 'UTF-8') = #[239 191 190] asString.
-    self assert: ($<16r438> asString: 'KOI8-R') first value = 201.
-    self assert: ($<16r438> asString: 'KOI8-R') first class = Character.
-    self deny: ($<16r438> asString: 'KOI8-R') first = $<201>!
+    testUnicodeCharAsStringColon [
+	<category: 'test'>
+	self assert: ($<16r0438> asString: 'UTF-8') = #[208 184] asString.
+	self assert: ($<16rFFFE> asString: 'UTF-8') = #[239 191 190] asString.
+	self assert: ($<16r0438> asString: 'KOI8-R') first value = 201.
+	self assert: ($<16r0438> asString: 'KOI8-R') first class = Character.
+	self deny: ($<16r0438> asString: 'KOI8-R') first = $<16r00C9>
+    ]
 
-testEncodedStringSize
-    | str |
-    str := EncodedString
-		fromString: (String with: (Character value: 233))
-		encoding: 'KOI8-R'.
-    self assert: str size = 1.
-    str := EncodedString
-		fromString: #[16rD8 0 16rDC 0] asString
-		encoding: 'UTF-16BE'.
-    self assert: str size = 4!
+    testEncodedStringSize [
+	<category: 'test'>
+	| str |
+	str := EncodedString fromString: (String with: (Character value: 233))
+		    encoding: 'KOI8-R'.
+	self assert: str size = 1.
+	str := EncodedString fromString: #[216 0 220 0] asString
+		    encoding: 'UTF-16BE'.
+	self assert: str size = 4
+    ]
 
-testEncodedStringNumberOfCharacters
-    | str |
-    str := EncodedString
-		fromString: (String with: (Character value: 233))
-		encoding: 'KOI8-R'.
-    self assert: str numberOfCharacters = 1.
-    str := EncodedString
-		fromString: #[16rD8 0 16rDC 0] asString
-		encoding: 'UTF-16BE'.
-    self assert: str numberOfCharacters = 1!
+    testEncodedStringNumberOfCharacters [
+	<category: 'test'>
+	| str |
+	str := EncodedString fromString: (String with: (Character value: 233))
+		    encoding: 'KOI8-R'.
+	self assert: str numberOfCharacters = 1.
+	str := EncodedString fromString: #[216 0 220 0] asString
+		    encoding: 'UTF-16BE'.
+	self assert: str numberOfCharacters = 1
+    ]
 
-testEncodedStringAsUnicodeString
-    | str |
-    str := EncodedString
-		fromString: (String with: (Character value: 233))
-		encoding: 'KOI8-R'.
-    self assert: str asUnicodeString first = $<16r418>!
+    testEncodedStringAsUnicodeString [
+	<category: 'test'>
+	| str |
+	str := EncodedString fromString: (String with: (Character value: 233))
+		    encoding: 'KOI8-R'.
+	self assert: str asUnicodeString first = $<16r0418>
+    ]
 
-testCharAsStringColon
-    | ch |
-    ch := Character value: 233.
-    self assert: (ch asString: 'KOI8-R') encoding = 'KOI8-R'.
-    self deny: (ch asString: 'KOI8-R') = (ch asString: 'ISO-8859-1')!
+    testCharAsStringColon [
+	<category: 'test'>
+	| ch |
+	ch := Character value: 233.
+	self assert: (ch asString: 'KOI8-R') encoding = 'KOI8-R'.
+	self deny: (ch asString: 'KOI8-R') = (ch asString: 'ISO-8859-1')
+    ]
 
-testCharAsUnicodeStringColon
-    | ch |
-    ch := Character value: 233.
-    self assert: (ch asUnicodeString: 'KOI8-R') first = $<16r418>!
+    testCharAsUnicodeStringColon [
+	<category: 'test'>
+	| ch |
+	ch := Character value: 233.
+	self assert: (ch asUnicodeString: 'KOI8-R') first = $<16r0418>
+    ]
 
-testStringAsUnicodeStringColon
-    | str |
-    str := (Character value: 233) asString.
-    self assert: (str asUnicodeString: 'KOI8-R') first = $<16r418>.
-    self assert: (str asUnicodeString: 'ISO-8859-1') first = $<233>.
-    str := #[239 191 190] asString.
-    self assert: (str asUnicodeString: 'UTF-8') first = $<16rFFFE>.
-    str := #[208 184] asString.
-    self assert: (str asUnicodeString: 'UTF-8') first = $<16r438>!
+    testStringAsUnicodeStringColon [
+	<category: 'test'>
+	| str |
+	str := (Character value: 233) asString.
+	self assert: (str asUnicodeString: 'KOI8-R') first = $<16r0418>.
+	self assert: (str asUnicodeString: 'ISO-8859-1') first = $<16r00E9>.
+	str := #[239 191 190] asString.
+	self assert: (str asUnicodeString: 'UTF-8') first = $<16rFFFE>.
+	str := #[208 184] asString.
+	self assert: (str asUnicodeString: 'UTF-8') first = $<16r0438>
+    ]
 
-testByteArrayAsUnicodeStringColon
-    | str |
-    str := #[233].
-    self assert: (str asUnicodeString: 'KOI8-R') first = $<16r418>.
-    self assert: (str asUnicodeString: 'ISO-8859-1') first = $<233>.
-    str := #[239 191 190].
-    self assert: (str asUnicodeString: 'UTF-8') first = $<16rFFFE>.
-    str := #[208 184].
-    self assert: (str asUnicodeString: 'UTF-8') first = $<16r438>!
+    testByteArrayAsUnicodeStringColon [
+	<category: 'test'>
+	| str |
+	str := #[233].
+	self assert: (str asUnicodeString: 'KOI8-R') first = $<16r0418>.
+	self assert: (str asUnicodeString: 'ISO-8859-1') first = $<16r00E9>.
+	str := #[239 191 190].
+	self assert: (str asUnicodeString: 'UTF-8') first = $<16rFFFE>.
+	str := #[208 184].
+	self assert: (str asUnicodeString: 'UTF-8') first = $<16r0438>
+    ]
 
-testFromUTF7
-    | str |
-    self assert: ('+-' asUnicodeString: 'UTF-7') first = $+.
-    self assert: ('+BBg-' asUnicodeString: 'UTF-7') first = $<16r418>.
-    self assert: ('+BBgEOA-' asUnicodeString: 'UTF-7') second = $<16r438>.
-    self assert: ('+BBgEOAQZ-' asUnicodeString: 'UTF-7') third = $<16r419>.
-    self assert: ('+2//f/w-' asUnicodeString: 'UTF-7') size = 1.
-    self assert: ('+2//f/w-' asUnicodeString: 'UTF-7') first = $<16r10FFFF>.
-    self assert: ('+BDjb/9//-' asUnicodeString: 'UTF-7') size = 2.
-    self assert: ('+BDjb/9//-' asUnicodeString: 'UTF-7') last = $<16r10FFFF>.
-    self assert: ('+BDgEGNv/3/8-' asUnicodeString: 'UTF-7') size = 3.
-    self assert: ('+BDgEGNv/3/8-' asUnicodeString: 'UTF-7') last = $<16r10FFFF>.
+    testFromUTF7 [
+	<category: 'test'>
+	| str |
+	self assert: ('+-' asUnicodeString: 'UTF-7') first = $+.
+	self assert: ('+BBg-' asUnicodeString: 'UTF-7') first = $<16r0418>.
+	self assert: ('+BBgEOA-' asUnicodeString: 'UTF-7') second = $<16r0438>.
+	self assert: ('+BBgEOAQZ-' asUnicodeString: 'UTF-7') third = $<16r0419>.
+	self assert: ('+2//f/w-' asUnicodeString: 'UTF-7') size = 1.
+	self assert: ('+2//f/w-' asUnicodeString: 'UTF-7') first = $<16r10FFFF>.
+	self assert: ('+BDjb/9//-' asUnicodeString: 'UTF-7') size = 2.
+	self assert: ('+BDjb/9//-' asUnicodeString: 'UTF-7') last = $<16r10FFFF>.
+	self assert: ('+BDgEGNv/3/8-' asUnicodeString: 'UTF-7') size = 3.
+	self 
+	    assert: ('+BDgEGNv/3/8-' asUnicodeString: 'UTF-7') last = $<16r10FFFF>.
 
-    "Test exiting Base64 mode with a non-Base64 character."
-    str := 'A+ImIDkQ.' asUnicodeString: 'UTF-7'.
-    self assert: str size = 4.
-    self assert: str first = $A.
-    self assert: str second = $<16r2262>.
-    self assert: str third = $<16r391>.
-    self assert: str last = $. .
+	"Test exiting Base64 mode with a non-Base64 character."
+	str := 'A+ImIDkQ.' asUnicodeString: 'UTF-7'.
+	self assert: str size = 4.
+	self assert: str first = $A.
+	self assert: str second = $<16r2262>.
+	self assert: str third = $<16r0391>.
+	self assert: str last = $..
 
-    "Test handling of optional direct characters."
-    self shouldnt: [ '#' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
-    self should: [ '\' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
-    self should: [ '~' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
-    self should: [ '+BBgA' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError.
-    self should: [ '+BBg\' asUnicodeString: 'UTF-7' ] raise: InvalidSequenceError!
+	"Test handling of optional direct characters."
+	self shouldnt: ['#' asUnicodeString: 'UTF-7'] raise: InvalidSequenceError.
+	self should: ['\' asUnicodeString: 'UTF-7'] raise: InvalidSequenceError.
+	self should: ['~' asUnicodeString: 'UTF-7'] raise: InvalidSequenceError.
+	self should: ['+BBgA' asUnicodeString: 'UTF-7'] raise: InvalidSequenceError.
+	self should: ['+BBg\' asUnicodeString: 'UTF-7'] raise: InvalidSequenceError
+    ]
 
-testToUTF7
-    | str |
-    self assert: ((UnicodeString with: $+) asString: 'UTF-7') asString = '+-'.
-    str := UnicodeString with: $<16r418>.
-    self assert: (str asString: 'UTF-7') encoding = 'UTF-7'.
-    self assert: (str asString: 'UTF-7') asString = '+BBg-'.
-    self assert: ((str copyWith: $.) asString: 'UTF-7') asString = '+BBg.'.
-    self assert: ((str copyWith: $-) asString: 'UTF-7') asString = '+BBg--'.
-    self assert: ((str copyWith: $A) asString: 'UTF-7') asString = '+BBg-A'.
-    str := str copyWith: $<16r438>.
-    self assert: (str asString: 'UTF-7') asString = '+BBgEOA-'.
-    str := str copyWith: $<16r419>.
-    self assert: (str asString: 'UTF-7') asString = '+BBgEOAQZ-'.
-    str := UnicodeString with: $<16r10FFFF>.
-    self assert: (str asString: 'UTF-7') asString = '+2//f/w-'.
-!
+    testToUTF7 [
+	<category: 'test'>
+	| str |
+	self assert: ((UnicodeString with: $+) asString: 'UTF-7') asString = '+-'.
+	str := UnicodeString with: $<16r0418>.
+	self assert: (str asString: 'UTF-7') encoding = 'UTF-7'.
+	self assert: (str asString: 'UTF-7') asString = '+BBg-'.
+	self assert: ((str copyWith: $.) asString: 'UTF-7') asString = '+BBg.'.
+	self assert: ((str copyWith: $-) asString: 'UTF-7') asString = '+BBg--'.
+	self assert: ((str copyWith: $A) asString: 'UTF-7') asString = '+BBg-A'.
+	str := str copyWith: $<16r0438>.
+	self assert: (str asString: 'UTF-7') asString = '+BBgEOA-'.
+	str := str copyWith: $<16r0419>.
+	self assert: (str asString: 'UTF-7') asString = '+BBgEOAQZ-'.
+	str := UnicodeString with: $<16r10FFFF>.
+	self assert: (str asString: 'UTF-7') asString = '+2//f/w-'
+    ]
+]
 
- !

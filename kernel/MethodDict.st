@@ -5,7 +5,6 @@
 |
  ======================================================================"
 
-
 "======================================================================
 |
 | Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
@@ -31,114 +30,106 @@
  ======================================================================"
 
 
-IdentityDictionary variableSubclass: #MethodDictionary
-	   instanceVariableNames: ''
-	   classVariableNames: ''
-	   poolDictionaries: ''
-	   category: 'Language-Implementation'
-!
-
-MethodDictionary comment:
-'I am similar to an IdentityDictionary, except that removal and
-rehashing operations inside my instances look atomic to the
-interpreter.' !
-
 
-!MethodDictionary methodsFor: 'adding'!
-
-at: key put: value
-    "Store value as associated to the given key"
-    | index |
-    index := self findIndex: key.
-    (self primAt: index) isNil
-	ifTrue: [
-	    self incrementTally ifTrue: [ index := self findIndex: key ].
-	    self primAt: index put: key.
-	]
-	ifFalse: [
-	    (self valueAt: index) discardTranslation
-	].
+IdentityDictionary subclass: MethodDictionary [
     
-    self valueAt: index put: value.
-    Behavior flushCache.
-    ^value
-! !
+    <shape: #pointer>
+    <category: 'Language-Implementation'>
+    <comment: 'I am similar to an IdentityDictionary, except that removal and
+rehashing operations inside my instances look atomic to the
+interpreter.'>
 
-
-!MethodDictionary methodsFor: 'removing'!
+    at: key put: value [
+	"Store value as associated to the given key"
 
-remove: anAssociation
-    "Remove anAssociation's key from the dictionary"
+	<category: 'adding'>
+	| index |
+	index := self findIndex: key.
+	(self primAt: index) isNil 
+	    ifTrue: 
+		[self incrementTally ifTrue: [index := self findIndex: key].
+		self primAt: index put: key]
+	    ifFalse: [(self valueAt: index) discardTranslation].
+	self valueAt: index put: value.
+	Behavior flushCache.
+	^value
+    ]
 
-    "The interpreter might be using this MethodDictionary while
-    this method is running!!  Therefore we perform the removal
-    in a copy, and then atomically become that copy"
-    | copy result |
-    (self includesKey: anAssociation key)
-	ifFalse: [ SystemExceptions.NotFound signalOn: anAssociation key what: 'key' ].
-    copy := self copy.
-    result := copy dangerouslyRemove: anAssociation.
-    self become: copy.
-    Behavior flushCache.
-    ^result
-!
+    remove: anAssociation [
+	"Remove anAssociation's key from the dictionary"
 
-removeKey: anElement ifAbsent: aBlock
-    "Remove the passed key from the dictionary, answer the result of
-     evaluating aBlock if it is not found"
+	"The interpreter might be using this MethodDictionary while
+	 this method is running!!  Therefore we perform the removal
+	 in a copy, and then atomically become that copy"
 
-    "The interpreter might be using this MethodDictionary while
-    this method is running!!  Therefore we perform the removal
-    in a copy, and then atomically become that copy"
-    | copy result |
-    (self includesKey: anElement) ifFalse: [ ^aBlock value ].
-    copy := self copy.
-    result := copy dangerouslyRemoveKey: anElement.
-    self become: copy.
-    Behavior flushCache.
-    ^result
-! !
+	<category: 'removing'>
+	| copy result |
+	(self includesKey: anAssociation key) 
+	    ifFalse: [SystemExceptions.NotFound signalOn: anAssociation key what: 'key'].
+	copy := self copy.
+	result := copy dangerouslyRemove: anAssociation.
+	self become: copy.
+	Behavior flushCache.
+	^result
+    ]
 
-
-!MethodDictionary methodsFor: 'rehashing'!
+    removeKey: anElement ifAbsent: aBlock [
+	"Remove the passed key from the dictionary, answer the result of
+	 evaluating aBlock if it is not found"
 
-rehash
-    "Rehash the receiver"
-    "The interpreter might be using this MethodDictionary while
-    this method is running!!  Therefore we create a copy that
-    has correct hashing (it is built on the fly), then atomically
-    become that copy"
-    self growBy: 0
-! !
+	"The interpreter might be using this MethodDictionary while
+	 this method is running!!  Therefore we perform the removal
+	 in a copy, and then atomically become that copy"
 
-
-!MethodDictionary methodsFor: 'private methods'!
+	<category: 'removing'>
+	| copy result |
+	(self includesKey: anElement) ifFalse: [^aBlock value].
+	copy := self copy.
+	result := copy dangerouslyRemoveKey: anElement.
+	self become: copy.
+	Behavior flushCache.
+	^result
+    ]
 
-dangerouslyRemove: anAssociation
-    "This is not really dangerous.  But if normal removal
-    were done WHILE a MethodDictionary were being used, the
-    system might crash.  So instead we make a copy, then do
-    this operation (which is NOT dangerous in a copy that is
-    not being used), and then use the copy after the removal."
+    rehash [
+	"Rehash the receiver"
 
-    | association |
-    association := super remove: anAssociation.
-    association value discardTranslation.
-    ^association
-!
+	"The interpreter might be using this MethodDictionary while
+	 this method is running!!  Therefore we create a copy that
+	 has correct hashing (it is built on the fly), then atomically
+	 become that copy"
 
-dangerouslyRemoveKey: anElement
-    "This is not really dangerous.  But if normal removal
-    were done WHILE a MethodDictionary were being used, the
-    system might crash.  So instead we make a copy, then do
-    this operation (which is NOT dangerous in a copy that is
-    not being used), and then use the copy after the removal."
+	<category: 'rehashing'>
+	self growBy: 0
+    ]
 
-    | value |
-    value := super
-	removeKey: anElement
-	ifAbsent: [ self error: 'synchronization problem?' ].
+    dangerouslyRemove: anAssociation [
+	"This is not really dangerous.  But if normal removal
+	 were done WHILE a MethodDictionary were being used, the
+	 system might crash.  So instead we make a copy, then do
+	 this operation (which is NOT dangerous in a copy that is
+	 not being used), and then use the copy after the removal."
 
-    value discardTranslation.
-    ^value
-! !
+	<category: 'private methods'>
+	| association |
+	association := super remove: anAssociation.
+	association value discardTranslation.
+	^association
+    ]
+
+    dangerouslyRemoveKey: anElement [
+	"This is not really dangerous.  But if normal removal
+	 were done WHILE a MethodDictionary were being used, the
+	 system might crash.  So instead we make a copy, then do
+	 this operation (which is NOT dangerous in a copy that is
+	 not being used), and then use the copy after the removal."
+
+	<category: 'private methods'>
+	| value |
+	value := super removeKey: anElement
+		    ifAbsent: [self error: 'synchronization problem?'].
+	value discardTranslation.
+	^value
+    ]
+]
+
