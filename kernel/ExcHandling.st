@@ -555,7 +555,7 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	<exceptionHandlingInternal: false>
-        self exception instantiateNextHandler: self.
+        self exception instantiateNextHandler: self copy.
         ^self activateHandler: true
     ]
 
@@ -566,7 +566,7 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	<exceptionHandlingInternal: false>
-        self exception instantiateNextHandler: self.
+        self exception instantiateNextHandler: self copy.
         ^self return: (self activateHandler: true)
     ]
 

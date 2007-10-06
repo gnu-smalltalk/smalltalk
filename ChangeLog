@@ -1,5 +1,9 @@
 2007-10-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ExcHandling.st: Copy exception in #pass/#outer.
+
+2007-10-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/AnsiExcept.st: Add semaphore field to
 	ProcessBeingTerminated.  Remove #copyFrom:.
 	* kernel/ExcHandling.st: remove #activateOuterHandlerFor:,
