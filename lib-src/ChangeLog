@@ -1,3 +1,7 @@
+2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
+
+        * lib-src/regex.c: Fix off-by-one.
+
 2007-09-27  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
 	    Paolo Bonzini  <bonzini@gnu.org>
 

@@ -185,7 +185,7 @@ init_syntax_once ()
 
   memset (pre_syntax_table, 0, sizeof pre_syntax_table);
 
-  for (c = 0; c <= (1 << BYTEWIDTH); c++)
+  for (c = 0; c < (1 << BYTEWIDTH); c++)
     if (isalnum (c))
       pre_syntax_table[c] = Sword;
   pre_syntax_table['_'] = Sword;
