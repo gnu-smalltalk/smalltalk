@@ -201,6 +201,7 @@ dist-hook::
 	  --distdir="$(distdir)" --srcdir="$(srcdir)" \
 	  $(srcdir)/packages.xml
 	cp -p $(srcdir)/kernel/stamp-classes $(distdir)/kernel/stamp-classes
+	cp -p $(srcdir)/kernel/Makefile.frag $(distdir)/kernel/Makefile.frag
 
 # Build an image after installing the data; install-data runs after
 # install-exec, so the gst executable is already in bindir.
