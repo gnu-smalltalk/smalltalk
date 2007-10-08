@@ -55,7 +55,8 @@ Object subclass: NetThread [
 
     release [
 	<category: 'initialize-release'>
-	self stop.
+	socket close.
+	socket := nil.
 	super release
     ]
 
@@ -107,16 +108,6 @@ Object subclass: NetThread [
 	self isRunning ifTrue: [^self].
 	socket := self createSocket.
 	self startNewProcess
-    ]
-
-    stop [
-	<category: 'serving'>
-	self isRunning 
-	    ifTrue: 
-		[process terminate.
-		process := nil.
-		socket close.
-		socket := nil]
     ]
 ]
 
@@ -217,6 +208,22 @@ requests to NetSession objects.'>
 	    start] 
 		repeat
     ]
+
+    release [
+	<category: 'initialize-release'>
+	self stop.
+	super release
+    ]
+
+    stop [
+	<category: 'serving'>
+	self isRunning 
+	    ifTrue: 
+		[process terminate.
+		process := nil.
+		socket close.
+		socket := nil]
+    ]
 ]
 
 
@@ -273,11 +280,6 @@ exception handling for those.'>
 	self log: req time: time.
 	self isPeerAlive] 
 		whileTrue
-    ]
-
-    stop [
-	<category: 'private'>
-	super stop
     ]
 ]
 

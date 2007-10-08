@@ -1,3 +1,8 @@
+2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* NetServer.st: Move #stop to NetServer, since using it
+	for NetSessions might be dangerous.
+
 2007-09-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* MIME.st: More fixes to previous change.
