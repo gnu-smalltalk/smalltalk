@@ -69,13 +69,13 @@ STInST.STFileInParser subclass: GSTFileInParser [
         node isMessage ifTrue: [
             (node selectorParts first value = 'subclass:')
                 ifTrue: [self parseClass: node. ^self].
+            
+            (node selectorParts first value = 'extend')
+                ifTrue: [self parseClassExtension: node. ^self].
                 
             ((node receiver name = 'Namespace') 
                 and: [node selectorParts first value = 'current:' ])
-                    ifTrue: [self parseNamespace: node. ^self].
-            
-            (node selectorParts first value = 'extend')
-                ifTrue: [self parseClassExtension: node. ^self]].
+                    ifTrue: [self parseNamespace: node. ^self]].
         
         node isVariable 
             ifTrue: [(node name = 'Eval') 

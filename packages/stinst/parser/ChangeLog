@@ -1,3 +1,7 @@
+2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GSTParser.st: Look for class extensions before "Namespace" blocks.
+
 2007-10-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STLoader.st: Add no-category class creation methods.
