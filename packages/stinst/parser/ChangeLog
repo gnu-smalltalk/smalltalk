@@ -1,5 +1,11 @@
 2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
 
+	* STFileParser.st: Look for EOF in #parseSmalltalk.
+	* GSTParser.st: Use #parseDoits instead of #parseSmalltalk.  Leave
+	#parseDoits if looking at a close bracket.
+
+2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
+
 	* GSTParser.st: Look for class extensions before "Namespace" blocks.
 
 2007-10-05  Paolo Bonzini  <bonzini@gnu.org>

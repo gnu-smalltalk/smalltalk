@@ -54,6 +54,25 @@ STInST.STFileInParser subclass: GSTFileInParser [
         ^RBSequenceNode statements: { node }
     ]
 
+    parseDoits [
+        "Parses the stuff to be executed until a closed bracket."
+
+        <category: 'private-parsing'>
+        | node |
+
+        [self atEnd ifTrue: [^false].
+        (currentToken isSpecial and: [currentToken value == $]])
+	    ifTrue: [^false].
+
+        node := self parseDoit.
+        scanner stripSeparators.
+        self evaluate: node]
+                whileFalse:
+                    [(currentToken isSpecial and: [currentToken value == $!])
+                        ifTrue: [self step]].
+        ^true
+    ]
+
     parseDoit [
 	| node |
 	node := super parseDoit.
@@ -103,7 +122,7 @@ STInST.STFileInParser subclass: GSTFileInParser [
              argument: node arguments first name asSymbol.
            
         self evaluateStatement: node.       
-        self parseSmalltalk.
+        self parseDoits.
         self skipExpectedToken: $].
 
         "restore previous namespace"

@@ -275,6 +275,7 @@ STFileParser subclass: STFileInParser [
     parseSmalltalk [
 	<category: 'private-parsing'>
 	[self parseDoits] whileTrue: [self parseMethodDefinitionList].
+        self atEnd ifFalse: [self parserError: 'doit expected'].
 	^driver result
     ]
 
