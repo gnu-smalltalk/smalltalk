@@ -647,8 +647,8 @@ static const class_definition class_info[] = {
 
   {&_gst_delay_class, &_gst_object_class,
    ISP_FIXED, false, 2,
-   "Delay", "resumptionTime isRelative",
-   "Queue TimeoutSem MutexSem DelayProcess IdleProcess", NULL },
+   "Delay", "resumptionTime delayDuration",
+   "Queue TimeoutSem MutexSem DelayProcess IdleProcess ActiveDelay DelayEvent", NULL },
 
   {&_gst_shared_queue_class, &_gst_object_class,
    ISP_FIXED, false, 3,

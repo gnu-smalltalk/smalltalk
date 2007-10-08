@@ -5,9 +5,10 @@
 |
  ======================================================================"
 
+
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002
+| Copyright 1988,92,94,95,99,2000,2001,2002,2007
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -31,155 +32,234 @@
  ======================================================================"
 
 
-
 Object subclass: Delay [
-    | resumptionTime isRelative |
+    | resumptionTime delayDuration |
     
-    <category: 'Language-Processes'>
+    <category: 'Kernel-Processes'>
     <comment: 'I am the ultimate agent for frustration in the world.  I cause things to wait 
 (sometimes much more than is appropriate, but it is those losing operating
 systems'' fault).  When a process sends one of my instances a wait message,
 that process goes to sleep for the interval specified when the instance was
 created.'>
 
-    Queue := nil.
-    TimeoutSem := nil.
     MutexSem := nil.
+    ActiveDelay := nil.
+    DelayEvent := nil.
+    Queue := nil.
     DelayProcess := nil.
     IdleProcess := nil.
+    TimeoutSem := nil.
 
     Delay class >> forMilliseconds: millisecondCount [
-	"Answer a Delay waiting for millisecondCount milliseconds"
+        "Answer a Delay waiting for millisecondCount milliseconds"
 
-	<category: 'instance creation'>
-	^self new init: millisecondCount isRelative: true
+        <category: 'instance creation'>
+        ^self new initForMilliseconds: millisecondCount
     ]
 
     Delay class >> forSeconds: secondCount [
-	"Answer a Delay waiting for secondCount seconds"
+        "Answer a Delay waiting for secondCount seconds"
 
-	<category: 'instance creation'>
-	^self forMilliseconds: secondCount * 1000
+        <category: 'instance creation'>
+        ^self forMilliseconds: secondCount * 1000
     ]
 
     Delay class >> untilMilliseconds: millisecondCount [
-	"Answer a Delay waiting for millisecondCount milliseconds after midnight"
+        "Answer a Delay waiting for millisecondCount milliseconds after startup"
 
-	<category: 'instance creation'>
-	^self new init: millisecondCount isRelative: false
+        <category: 'instance creation'>
+        ^self new initUntilMilliseconds: millisecondCount
     ]
 
-    Delay class >> millisecondClockValue [
-	"Private - Answer the number of milliseconds since midnight"
+    Delay class >> handleDelayEvent [
+	"Handle a timer event; which can be either:
+	 - a schedule or unschedule request (DelayEvent notNil)
+	 - a timer signal (not explicitly specified)
+	 We check for timer expiry every time we get a signal."
 
-	<category: 'general inquiries'>
-	^Time primMillisecondClock
+	<category: 'timer process'>
+
+	| nextTick |
+
+	"Wait until there is work to do."
+	TimeoutSem wait.
+
+	"Process any schedule/unschedule requests"
+	DelayEvent isNil ifFalse: 
+		["Schedule the given delay"
+		DelayEvent value isNil
+		    ifTrue: [ self unscheduleDelay: DelayEvent key ]
+		    ifFalse: [ self scheduleDelay: DelayEvent key on: DelayEvent value ].
+		DelayEvent := nil].
+
+	"Signal any expired delays"
+	[ActiveDelay notNil and: [Time millisecondClockValue >= ActiveDelay key resumptionTime]] 
+	    whileTrue: 
+		[ActiveDelay value signal.
+		self unscheduleDelay: ActiveDelay key].
+
+	"Since we have processed all outstanding requests, reset the timing semaphore so
+	 that only new work will wake us up again. Do this RIGHT BEFORE setting the next
+	 wakeup call from the VM because it is only signaled once so we mustn't miss it."
+	TimeoutSem initialize.
+
+	"And signal when the next request is due."
+	ActiveDelay isNil ifFalse: [
+	    nextTick := ActiveDelay key resumptionTime - Time millisecondClockValue.
+	    Processor signal: TimeoutSem atMilliseconds: nextTick].
     ]
 
-    Delay class >> initialize [
-	"Private - Initialize the receiver and the associated process"
+    Delay class >> runDelayProcess [
+	"Run the timer event loop."
 
-	"'initalizing Delays' printNl."
+	<category: 'timer process'>
+	[[self handleDelayEvent] repeat]
+	    ifCurtailed: 
+		[DelayProcess := nil.
+		Delay startDelayLoop]
+    ]
 
-	<category: 'initialization'>
-	| queue |
-	Queue := SharedQueue sortBlock: [:a :b | a key <= b key].
-	MutexSem := Semaphore forMutualExclusion.
-	TimeoutSem := Semaphore new.
-	IdleProcess := [
-		[Processor
-		    idle;
-		    yield] repeat] 
-		    forkAt: Processor systemBackgroundPriority.
-	IdleProcess name: 'idle'.
-	Delay startDelayLoop
+    Delay class >> scheduleDelay: aDelay on: aSemaphore [
+	"Private - Schedule this Delay.  Run in the timer process, which
+	 is the only one that manipulates Queue."
+
+	<category: 'timer process'>
+	ActiveDelay isNil
+	    ifTrue: [ActiveDelay := aDelay->aSemaphore]
+	    ifFalse: 
+		[aDelay resumptionTime < ActiveDelay key resumptionTime 
+		    ifTrue: 
+			[Queue add: ActiveDelay.
+			ActiveDelay := aDelay->aSemaphore]
+		    ifFalse: [Queue add: aDelay->aSemaphore]]
+    ]
+
+    Delay class >> unscheduleDelay: aDelay [
+	"Private. Unschedule this Delay.  Run in the timer process, which
+	 is the only one that manipulates Queue."
+
+	<category: 'timer process'>
+	ActiveDelay key == aDelay 
+	    ifTrue: 
+		[Queue isEmpty 
+		    ifTrue: [ActiveDelay := nil]
+		    ifFalse: [ActiveDelay := Queue removeFirst]]
+	    ifFalse: [Queue removeAllSuchThat: [ :k | k key == aDelay ]].
     ]
 
     Delay class >> startDelayLoop [
-	"Private - Start the processes for Delays"
+	"Start the timer event loop."
 
-	<category: 'private'>
-	DelayProcess := 
-		[
-		[TimeoutSem wait.
-		MutexSem critical: 
-			[Queue next value signal.
-			Queue isEmpty ifFalse: [self timeout: Queue peek key]]] 
-			repeat] 
-			forkAt: Processor timingPriority.
-	DelayProcess name: 'timeout'
+	"Delay startDelayLoop"
+
+	<category: 'timer process'>
+	DelayProcess isNil ifFalse: [ DelayProcess terminate ].
+
+	"This semaphore does not protect Queue (which is only manipulated within
+	 one process for thread-safety, but rather DelayEvent)."
+	MutexSem := Semaphore forMutualExclusion.
+	DelayEvent := nil.
+
+	"A sorted collection of delay->semaphore associations."
+	Queue := SortedCollection
+		    sortBlock: [:d1 :d2 | d1 key resumptionTime <= d2 key resumptionTime].
+	TimeoutSem := Semaphore new.
+	DelayProcess := [self runDelayProcess] forkAt: Processor timingPriority.
+	TimeoutSem signal	"get going"
     ]
 
-    Delay class >> timeout: milliseconds [
-	"Private - Signal the TimeoutSem after the given number of milliseconds.
-	 Delays across midnight are gracefully handled."
-
-	<category: 'private'>
-	| resumeMillis |
-	resumeMillis := milliseconds - Delay millisecondClockValue.
-	resumeMillis <= 0 
-	    ifTrue: 
-		[TimeoutSem signal.
-		^self].
-	resumeMillis := (resumeMillis \\ Time millisecondsPerDay) asInteger.
-	Processor signal: TimeoutSem atMilliseconds: resumeMillis
-    ]
-
-    resumptionTime [
-	"Answer the time when a process waiting on a Delay will resume"
-
-	<category: 'accessing'>
-	isRelative 
-	    ifTrue: [^Delay millisecondClockValue + resumptionTime]
-	    ifFalse: [^resumptionTime]
-    ]
-
-    wait [
-	"Wait until the amount of time represented by the instance of Delay
-	 elapses"
-
-	<category: 'process delay'>
-	| elt sem |
-	sem := Semaphore new.
-	elt := Association key: self resumptionTime value: sem.
-	MutexSem critical: 
-		[Queue nextPut: elt.
-		"If we've become the head of the list, we need to
-		 alter the interrupt time"
-		Queue peek == elt ifTrue: [Delay timeout: elt key]].
-	sem wait
+    Delay class >> initialize [
+	<category: 'class initialization'>
+        IdleProcess := [
+                [Processor
+                    idle;
+                    yield] repeat] 
+                    forkAt: Processor systemBackgroundPriority.
+        IdleProcess name: 'idle'.
+	self startDelayLoop
     ]
 
     = aDelay [
-	"Answer whether the receiver and aDelay denote the same delay"
+        "Answer whether the receiver and aDelay denote the same delay"
 
-	<category: 'comparing'>
-	self class == aDelay class ifFalse: [^false].
-	^isRelative = aDelay isRelative 
-	    and: [resumptionTime = aDelay basicResumptionTime]
+        <category: 'comparing'>
+        self class == aDelay class ifFalse: [^false].
+	^delayDuration isNil
+            ifFalse: [delayDuration = aDelay basicDelayDuration]
+	    ifTrue: [resumptionTime = aDelay resumptionTime]
     ]
 
     hash [
-	"Answer an hash value for the receiver"
+        "Answer an hash value for the receiver"
 
-	<category: 'comparing'>
+        <category: 'comparing'>
+        ^resumptionTime hash bitXor: delayDuration hash
+    ]
+
+    schedule [
+	"Private - Schedule this Delay, but return immediately rather than
+	 waiting.  Returns a semaphore will be signalled when its delay
+	 duration has elapsed."
+
+	<category: 'private'>
+	| delaySemaphore |
+	delaySemaphore := Semaphore new.
+	resumptionTime isNil
+	    ifTrue: [ resumptionTime := Time millisecondClockValue + delayDuration ].
+	MutexSem critical: 
+		[DelayEvent := self -> delaySemaphore.
+		TimeoutSem signal].
+	^delaySemaphore
+    ]
+
+    unschedule [
+	"Private - Unschedule this Delay. Do nothing if it wasn't scheduled."
+
+	<category: 'private'>
+	| done |
+	MutexSem critical: 
+		[DelayEvent := self -> nil.
+		TimeoutSem signal]
+    ]
+
+    wait [
+	"Schedule this Delay and wait on it. The current process will be
+	 suspended for the amount of time specified when this Delay was created."
+
+	<category: 'delaying'>
+	[[self schedule wait] ifCurtailed: [self unschedule]]
+	    ensure: [delayDuration isNil ifFalse: [resumptionTime := nil]].
+    ]
+
+    resumptionTime [
+	<category: 'accessing'>
 	^resumptionTime
     ]
 
-    basicResumptionTime [
-	<category: 'private'>
-	^resumptionTime
+    delayDuration [
+	<category: 'accessing'>
+	^resumptionTime isNil
+	    ifTrue: [ delayDuration ]
+	    ifFalse: [ (resumptionTime - Time millisecondClockValue) max: 0 ]
     ]
 
-    init: milliseconds isRelative: aBoolean [
+    basicDelayDuration [
 	<category: 'private'>
-	isRelative := aBoolean.
-	resumptionTime := milliseconds
+	^delayDuration
     ]
 
-    isRelative [
-	<category: 'private'>
-	^isRelative
+    initForMilliseconds: value [
+        "Initialize a Delay waiting for millisecondCount milliseconds"
+
+        <category: 'initialization'>
+        delayDuration := value
     ]
+
+    initUntilMilliseconds: value [
+        "Initialize a Delay waiting for millisecondCount milliseconds after startup"
+
+        <category: 'instance creation'>
+        resumptionTime := value.
+    ]
+
 ]
-

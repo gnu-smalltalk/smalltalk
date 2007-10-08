@@ -1,3 +1,7 @@
+2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.c: Add necessary class variables for rewrite.
+
 2007-10-01  Stephen Compall  <scompall@nocandysw.com>
 
 	* libgst/re.c: Add init_re, registering ASCII case table.
