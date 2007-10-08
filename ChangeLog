@@ -1,3 +1,7 @@
+2007-10-06  Robin Redeker  <elmex@x-paste.de>
+
+	* example/JSON.st: Parse strings with whitespace correctly.
+
 2007-10-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Copy exception in #pass/#outer.

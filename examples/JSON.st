@@ -150,12 +150,12 @@ nextJSONString
    str := WriteStream on: (String new).
    self next.
    [
-	c := self next.
+	c := stream next.
         c = $"
    ] whileFalse: [
       c = $\
          ifTrue: [
-            c := self next.
+            c := stream next.
             c isNil ifTrue:
                [ ^self error: 'expected character, found end of self' ].
             c = $b ifTrue: [ c := 8 asCharacter ].
@@ -165,7 +165,7 @@ nextJSONString
             c = $t ifTrue: [ c := Character tab ].
             c = $u
                ifTrue: [
-		  c := (Integer readFrom: (self next: 4) readStream radix: 16) asCharacter.
+		  c := (Integer readFrom: (stream next: 4) readStream radix: 16) asCharacter.
 		  (c class == UnicodeCharacter and: [ str species == String ])
 		    ifTrue: [ str := (UnicodeString new writeStream
 					nextPutAll: str contents; yourself) ] ].
@@ -173,7 +173,7 @@ nextJSONString
       str nextPut: c.
    ].
    "Undo the conversion to UnicodeString done above."
-   ^str contents asString
+   ^str contents asString.
 !
 
 nextJSONNumber
@@ -186,28 +186,28 @@ nextJSONNumber
    int     := 0.
    intexp  := 1.
 
-   c := self peek.
+   c := stream peek.
    (c isNil) ifTrue: [ ^self error: 'expected number or -sign, but found end of self' ].
-   c = $- ifTrue: [ sgn := -1. self next. ].
+   c = $- ifTrue: [ sgn := -1. stream next. ].
 
-   c := self peek.
+   c := stream peek.
    (c isNil) ifTrue: [ ^self error: 'expected number, but found end of self' ].
    (c isDigit or: [ c = $. ]) ifFalse: [ ^self error: 'invalid JSON input' ].
 
    [ c notNil and: [ c isDigit ] ] whileTrue: [
-      self next.
+      stream next.
       int := sgn * (c digitValue) + (int * 10).
-      c := self peek
+      c := stream peek
    ].
    (c isNil) ifTrue: [ ^int ].
 
    c = $. ifTrue: [
-      self next.
+      stream next.
       isfloat := true.
-      [ c := self peek. c notNil and: [ c isDigit ] ] whileTrue: [
+      [ c := stream peek. c notNil and: [ c isDigit ] ] whileTrue: [
          sgn := sgn / 10.
          int := sgn * (c digitValue) + int.
-         self next
+         stream next
       ]
    ].
 
@@ -215,16 +215,16 @@ nextJSONNumber
    ((c = $e) or: [ c = $E ]) ifFalse: [
 	^isfloat ifTrue: [ int asFloat ] ifFalse: [ int ] ].
 
-   self next.
-   c := self peek.
+   stream next.
+   c := stream peek.
    (c isNil) ifTrue: [ ^int ].
    sgn := 1.
    c = $+ ifTrue: [ sgn :=  1. self next ].
    c = $- ifTrue: [ sgn := -1. self next ].
 
-   [ c := self peek. c notNil and: [ c isDigit ] ] whileTrue: [
+   [ c := stream peek. c notNil and: [ c isDigit ] ] whileTrue: [
       exp := (c digitValue) + (exp * 10).
-      self next
+      stream next
    ].
 
    int := int * (10 raisedToInteger: exp * sgn).
