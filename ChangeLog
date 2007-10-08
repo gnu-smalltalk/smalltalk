@@ -1,5 +1,10 @@
 2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ExcHandling.st: In #pass/#outer, call #activateHandler:
+	on the newly created Signal.  Add Signal>>#postCopy.
+
+2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Delay.st: Rewrite to manipulate Queue entirely in the
 	timing process.
 

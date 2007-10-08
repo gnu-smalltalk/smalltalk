@@ -521,6 +521,18 @@ with a lower priority.'>
 	^exception
     ]
 
+    postCopy [
+	"Modify the receiver so that it does not refer to any instantiated
+	 exception handler."
+
+	<category: 'copying'>
+	onDoBlock := nil.
+	handlerBlock := nil.
+	context := nil.
+	isNested := nil.
+	previousState := nil
+    ]
+
     defaultAction [
 	"Execute the default handler for the raised exception"
 
@@ -555,8 +567,9 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	<exceptionHandlingInternal: false>
-        self exception instantiateNextHandler: self copy.
-        ^self activateHandler: true
+	| signal |
+        self exception instantiateNextHandler: (signal := self copy).
+        ^signal activateHandler: true
     ]
 
     pass [
@@ -566,8 +579,9 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	<exceptionHandlingInternal: false>
-        self exception instantiateNextHandler: self copy.
-        ^self return: (self activateHandler: true)
+	| signal |
+        self exception instantiateNextHandler: (signal := self copy).
+        ^self return: (signal activateHandler: true)
     ]
 
     resume [
