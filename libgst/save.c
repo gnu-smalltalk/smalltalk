@@ -267,16 +267,18 @@ _gst_save_to_file (const char *fileName)
   int imageFd;
   save_file_header header;
 
-  imageFd = _gst_open_file (fileName, "r+");
-  if (imageFd < 0)
-    return (false);
-
   _gst_invoke_hook (GST_ABOUT_TO_SNAPSHOT);
-
   _gst_global_gc (0);
   _gst_finish_incremental_gc ();
 
-  ftruncate (imageFd, 0);
+  unlink (fileName);
+  imageFd = _gst_open_file (fileName, "w");
+  if (imageFd < 0)
+    {
+      _gst_invoke_hook (GST_FINISHED_SNAPSHOT);
+      return (false);
+    }
+
   memzero (&header, sizeof (header));
   myOOPTable = make_oop_table_to_be_saved (&header);
 

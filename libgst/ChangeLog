@@ -1,5 +1,9 @@
 2007-10-09  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/save.c: Break hard links when saving.
+
+2007-10-09  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/dict.inl: Do rotations correctly in scramble.
 
 2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
