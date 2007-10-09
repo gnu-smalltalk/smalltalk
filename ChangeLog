@@ -1,3 +1,7 @@
+2007-10-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CompildMeth.st: Omit sharp sign when printing.
+
 2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: In #pass/#outer, call #activateHandler:

@@ -445,7 +445,7 @@ instances.'>
 	descriptor isNil ifTrue: [^super printOn: aStream].
 	self methodClass printOn: aStream in: Namespace current.
 	aStream
-	    nextPutAll: '>>#';
+	    nextPutAll: '>>';
 	    nextPutAll: self selector
     ]
 
