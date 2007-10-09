@@ -1,3 +1,11 @@
+2007-10-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* XML.st: Move parts...
+	* SAX.st: ... here,
+	* DOM.st: ... here,
+	* NodeBuilder.st: ... here,
+	* Parser.st: ... and here.
+
 2007-06-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* XML.st: Use #%.

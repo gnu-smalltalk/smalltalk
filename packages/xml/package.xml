@@ -1,7 +1,15 @@
 <package>
   <name>XML</name>
+  <filein>SAX.st</filein>
+  <filein>DOM.st</filein>
+  <filein>Parser.st</filein>
   <filein>XML.st</filein>
+  <filein>NodeBuilder.st</filein>
 
+  <file>DOM.st</file>
+  <file>NodeBuilder.st</file>
+  <file>Parser.st</file>
+  <file>SAX.st</file>
   <file>XML.st</file>
   <file>ChangeLog</file>
 </package>

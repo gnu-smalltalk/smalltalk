@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   VisualWorks XML Framework
+|   VisualWorks XML Framework - DTD model and validating XML parser
 |
 |
  ======================================================================"
@@ -29,2181 +29,6 @@
 
 
 
-Namespace current: XML [
-    Smalltalk addSubspace: #XML.
-    XML addSubspace: #SAX
-]
-
-
-
-Namespace current: XML [
-
-Object subclass: XMLNodeBuilder [
-    | tagStack tags |
-    
-    <category: 'XML-XML-Parsing'>
-    <comment: '
-XMLNodeBuilder is an abstract superclass used by the XML parser when
-distilling an XML document into its component elements.
-
-Since XML elements are tag delimited and nest properly within each
-other in a well-formed XML document, this class contains code to
-process the tags and build a tree of xml elements.
-
-XMLNodeBuilder is part of an older parser API which we are in the
-process of removing. Consider using SAXDriver, which transforms the
-XML document into events rather than nodes. SAXDriver has a subclass
-named DOM_SAXDriver which can be used in the same way as
-XMLNodeBuilder to create a tree of XML nodes.
-
-Instance Variables:
-    tagStack		<OrderedCollection>
-    		Stack showing the nesting of XML elements within the document at the current stage of parsing.
-    tags			<Dictionary>		Currently not used. A map to make sure that within a document, tag identifiers are unique instances in order to save space.'>
-
-    XMLNodeBuilder class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
-    initialize [
-	<category: 'initialize'>
-	tagStack := OrderedCollection new.
-	tags := Dictionary new
-    ]
-
-    currentTag [
-	<category: 'accessing'>
-	^tagStack last tag
-    ]
-
-    popTag [
-	<category: 'accessing'>
-	tagStack removeLast
-    ]
-
-    pushTag: tag [
-	<category: 'accessing'>
-	tagStack addLast: (ElementContext new tag: tag)
-    ]
-
-    attribute: name value: value [
-	<category: 'building'>
-	^Attribute name: name value: value
-    ]
-
-    comment: aText [
-	<category: 'building'>
-	^Comment new text: aText
-    ]
-
-    makeText: text [
-	<category: 'building'>
-	^Text text: text
-    ]
-
-    notation: name value: val [
-	<category: 'building'>
-	^Notation new name: name identifiers: val
-    ]
-
-    pi: nm text: text [
-	<category: 'building'>
-	^PI new name: nm text: text
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Object subclass: Node [
-    | parent flags |
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-Class Node is an abstract superclass that represents a logical
-component of an XML Document.
-
-Logically, an XML document is composed of declarations, elements,
-comments, character references, and processing instructions, all of
-which are indicated in the document by explicit markup. The concrete
-subclasses of XML.Node represent these various components.
-
-Subclasses must implement the following messages:
-    printing
-    	printCanonicalOn:
-    	printHTMLOn:
-    	printNoIndentOn:endSpacing:spacing:
-
-Instance Variables:
-    parent	<XML.Node | nil> 			All nodes except for Documents are contained by other nodes--this provides a pointer from the node to the node that contains it.
-    flags	<SmallInteger> 			Provides a compact representation for any boolean attributes that the node might have. Likely to be removed in the near future.'>
-
-    Node class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
-    initialize [
-	<category: 'initialize'>
-	flags := 0
-    ]
-
-    children [
-	<category: 'accessing'>
-	^self shouldNotImplement
-    ]
-
-    discard [
-	<category: 'accessing'>
-	self flags: (self flags bitOr: 1)
-    ]
-
-    document [
-	<category: 'accessing'>
-	^parent document
-    ]
-
-    expandedName [
-	<category: 'accessing'>
-	^''
-    ]
-
-    flags [
-	<category: 'accessing'>
-	^flags
-    ]
-
-    flags: flagBits [
-	<category: 'accessing'>
-	flags := flagBits
-    ]
-
-    parent [
-	<category: 'accessing'>
-	^parent
-    ]
-
-    parent: aNode [
-	<category: 'accessing'>
-	parent := aNode
-    ]
-
-    selectNodes: aBlock [
-	<category: 'accessing'>
-	^#()
-    ]
-
-    tag [
-	<category: 'accessing'>
-	^nil
-    ]
-
-    canonicalPrintString [
-	<category: 'printing'>
-	| s |
-	s := (String new: 1024) writeStream.
-	self printCanonicalOn: s.
-	^s contents
-    ]
-
-    noIndentPrintString [
-	<category: 'printing'>
-	| s |
-	s := (String new: 1024) writeStream.
-	self printNoIndentOn: s.
-	^s contents
-    ]
-
-    printCanonical: text on: aStream [
-	"Print myself on the stream in the form described by James
-	 Clark's canonical XML."
-
-	<category: 'printing'>
-	| d |
-	d := Dictionary new.
-	d
-	    at: Character cr put: '&#13;';
-	    at: Character lf put: '&#10;';
-	    at: Character tab put: '&#9;';
-	    at: $& put: '&amp;';
-	    at: $< put: '&lt;';
-	    at: $> put: '&gt;';
-	    at: $" put: '&quot;'.
-	text do: [:c | aStream nextPutAll: (d at: c ifAbsent: [String with: c])]
-    ]
-
-    printCanonicalOn: aStream [
-	"Print myself on the stream in the form described by James
-	 Clark's canonical XML."
-
-	<category: 'printing'>
-	self saxDo: (SAXCanonicalWriter new output: aStream)
-    ]
-
-    printHTMLOn: aStream [
-	"Print myself on the stream in a form usual for HTML."
-
-	<category: 'printing'>
-	self subclassResponsibility
-    ]
-
-    printNoIndentOn: aStream [
-	"Print myself on the stream with line breaks between adjacent
-	 elements, but no indentation."
-
-	<category: 'printing'>
-	self 
-	    printNoIndentOn: aStream
-	    endSpacing: [:node :list | aStream nl]
-	    spacing: [:node :list | aStream nl]
-    ]
-
-    printOn: aStream [
-	<category: 'printing'>
-	self printOn: aStream depth: 0
-    ]
-
-    printQuoted: text on: aStream [
-	"Print myself on the stream in the form described by James
-	 Clark's canonical XML."
-
-	<category: 'printing'>
-	| d |
-	d := Dictionary new.
-	d
-	    at: $& put: '&amp;';
-	    at: $< put: '&lt;';
-	    at: $> put: '&gt;'.
-	text do: [:c | aStream nextPutAll: (d at: c ifAbsent: [String with: c])]
-    ]
-
-    simpleDescription [
-	<category: 'printing'>
-	^self printString
-    ]
-
-    hasAncestor: aNode [
-	<category: 'testing'>
-	| p |
-	p := self parent.
-	[p == nil] whileFalse: 
-		[p == aNode ifTrue: [^true].
-		p := p parent].
-	^false
-    ]
-
-    hasSubNodes [
-	<category: 'testing'>
-	^false
-    ]
-
-    isAttribute [
-	<category: 'testing'>
-	^false
-    ]
-
-    isBlankText [
-	<category: 'testing'>
-	^false
-    ]
-
-    isComment [
-	<category: 'testing'>
-	^false
-    ]
-
-    isContent [
-	<category: 'testing'>
-	^false
-    ]
-
-    isDiscarded [
-	<category: 'testing'>
-	^(self flags bitAnd: 1) = 1
-    ]
-
-    isDocument [
-	<category: 'testing'>
-	^false
-    ]
-
-    isElement [
-	<category: 'testing'>
-	^false
-    ]
-
-    isLike: aNode [
-	<category: 'testing'>
-	^self class == aNode class
-    ]
-
-    isProcessingInstruction [
-	<category: 'testing'>
-	^false
-    ]
-
-    isText [
-	<category: 'testing'>
-	^false
-    ]
-
-    precedes: aNode [
-	<category: 'testing'>
-	| n1 n2 |
-	aNode document == self document 
-	    ifFalse: 
-		[self 
-		    error: 'These nodes can''t be ordered. They are not in the same document.'].
-	aNode == self document ifTrue: [^false].
-	self == self document ifTrue: [^true].
-	n1 := self.
-	n2 := aNode.
-	(n2 hasAncestor: n1) ifTrue: [^true].
-	(n1 hasAncestor: n2) ifTrue: [^false].
-	[n1 parent == n2 parent] whileFalse: 
-		[[n1 parent hasAncestor: n2 parent] whileTrue: [n1 := n1 parent].
-		[n2 parent hasAncestor: n1 parent] whileTrue: [n2 := n2 parent].
-		n1 parent == n2 parent 
-		    ifFalse: 
-			[n1 := n1 parent.
-			n2 := n2 parent]].
-	^(n1 parent indexOf: n1) < (n1 parent indexOf: n2)
-    ]
-
-    nodesDo: aBlock [
-	<category: 'enumerating'>
-	aBlock value: self
-    ]
-
-    findNamespaceAt: qualifier [
-	<category: 'namespaces'>
-	| ns node |
-	qualifier = 'xml' ifTrue: [^XML_URI].
-	ns := nil.
-	node := self.
-	[node isElement and: [ns == nil]] whileTrue: 
-		[ns := node namespaceAt: qualifier.
-		node := node parent].
-	^ns
-    ]
-
-    findQualifierAtNamespace: ns [
-	<category: 'namespaces'>
-	| qual node |
-	qual := nil.
-	node := self.
-	[node isElement and: [qual == nil]] whileTrue: 
-		[qual := node qualifierAtNamespace: ns.
-		node := node parent].
-	^qual
-    ]
-
-    namespaceAt: qualifier [
-	<category: 'namespaces'>
-	^nil
-    ]
-
-    qualifierAtNamespace: ns [
-	<category: 'namespaces'>
-	^nil
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Node subclass: Entity [
-    | name text systemID publicID |
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-An XML document may consist of one or many storage units called
-entities. All XML entities have content and are idententified by name.
-
-Entities may be either parsed or unparsed, i.e., the XML processor is
-not required to interpret an unparsed entity. This class and its
-subclasses GeneralEntity and ParameterEntity represent parsed
-entities. Entity is the abstract superclass for the other two
-types. GeneralEntity identifies entities which can be used in the
-document''s body, and ParameterEntity identifies those that can only
-be used within the DTD. These entities are invoked by name using
-entity references and their contents are held in the text instance
-variable.
-
-Entities may also be internal or external. If the content of the
-entity is given in the declaration (within the document) itself then
-the entity is called an internal entity. If the entity is not internal
-to the document and is declared elsewhere it''s called an external
-entity.
-
-External entities have a system identifier (systemID instance
-variable) that is an URI which may be used to retrieve the entity. In
-addition to a system identifier, an external entity declaration may
-include a public identifier (publicID instance variable). The XML
-parser is allowed to try to use the publicID to try to generate an
-alternative URI to retrive the entity''s contents.
-
-Subclasses must implement the following messages:
-    accessing
-    	entityType
-
-Instance Variables:
-    name		<XML.NodeTag>  
-    					Identifies the entity in an entity reference
-    text			<nil | String>
-    					The entity''s contents
-    systemID	<String>
-    					URI used to retrieve an external entity''s contents
-    publicID	<String>
-    					Alternative URI used to retrieve an external entity''s contents'>
-
-    entityType [
-	<category: 'accessing'>
-	^self subclassResponsibility
-    ]
-
-    externalFrom: anArray [
-	<category: 'accessing'>
-	anArray class == Array 
-	    ifFalse: [self error: 'External ID is expected to be an Array'].
-	anArray size = 2 
-	    ifTrue: 
-		[publicID := anArray at: 1.
-		systemID := anArray at: 2]
-	    ifFalse: [self error: 'External ID has too many or too few identifiers']
-    ]
-
-    name [
-	<category: 'accessing'>
-	^name
-    ]
-
-    name: aName [
-	<category: 'accessing'>
-	name := aName
-    ]
-
-    publicID [
-	<category: 'accessing'>
-	^publicID
-    ]
-
-    streamFor: aParser [
-	<category: 'accessing'>
-	(aParser hasExpanded: self) 
-	    ifTrue: 
-		[aParser malformed: 'Can''t expand this entity; it is defined recursively'].
-	text == nil 
-	    ifTrue: 
-		[| str input |
-		input := aParser saxDriver resolveEntity: self publicID
-			    systemID: self systemID.
-		input == nil ifTrue: [input := InputSource for: self systemID].
-		aParser pushSource: (str := StreamWrapper 
-				    resource: input
-				    entity: self
-				    from: aParser).
-		str textDecl.
-		aParser getNextChar]
-	    ifFalse: 
-		[aParser pushSource: (StreamWrapper 
-			    resource: (InputSource 
-				    uri: nil
-				    encoding: nil
-				    stream: text readStream)
-			    entity: self
-			    from: aParser).
-		aParser getNextChar]
-    ]
-
-    systemID [
-	<category: 'accessing'>
-	^systemID
-    ]
-
-    text: aString [
-	<category: 'accessing'>
-	text := aString
-    ]
-
-    isExternal [
-	<category: 'testing'>
-	^publicID notNil or: [systemID notNil]
-    ]
-
-    isParsed [
-	<category: 'testing'>
-	^true
-    ]
-
-    printOn: aStream [
-	<category: 'printing'>
-	self basicPrintOn: aStream.
-	text == nil 
-	    ifTrue: [aStream nextPutAll: '(' , self systemID , ')']
-	    ifFalse: [aStream nextPutAll: '(' , text , ')']
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Node subclass: Document [
-    | root nodes dtd ids |
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-This class represents an XML document entity and serves as the root of
-the document entity tree. Each XML document has one entity (root)
-called the document entity, which serves as the starting point for the
-XML processor and may contain the whole document (nodes collection).
-
-According to the XML 1.0 specification, XML documents may and should
-begin with an XML declaration which specifies the version of XML
-(xmlVersion instance variable) being used.
-
-The XML document type declaration which must appear before the first
-element in a document contains or points to markup declarations that
-provide the grammar for this document. This grammar is known as
-document type definition or DTD (dtd instance variable). An XML
-document is valid if it has an associated document type declaration
-and if the document complies with the constraints expressed in it
-
-Instance Variables:
-    root	<XML.Element>							The outer-most element of the XML document.
-    nodes	<Collection>  							The root Element as well as all other PIs and Comments which precede or follow it.
-    dtd		<XML.DocumentType>				Associated document type definition 
-    ids		<KeyedCollection | Dictionary>  		Map which converts ID names to Elements, allowing a simple cross reference within the document.'>
-
-    initialize [
-	<category: 'initialize'>
-	super initialize.
-	nodes := OrderedCollection new.
-	ids := Dictionary new
-    ]
-
-    addNamespaceDefinitions [
-	<category: 'accessing'>
-	| d tag |
-	d := Dictionary new.
-	self nodesDo: 
-		[:aNode | 
-		tag := aNode tag.
-		tag isNil 
-		    ifFalse: 
-			[(d at: tag qualifier ifAbsent: [tag namespace]) = tag namespace 
-			    ifFalse: 
-				[self 
-				    error: 'Using the same tag for multiple namespaces is not currently supported'].
-			d at: tag qualifier put: tag namespace]].
-	(d at: '' ifAbsent: ['']) = '' ifTrue: [d removeKey: '' ifAbsent: []].
-	d removeKey: 'xml' ifAbsent: [].
-	d removeKey: 'xmlns' ifAbsent: [].
-	self root == nil ifFalse: [self root namespaces: d]
-    ]
-
-    addNode: aNode [
-	<category: 'accessing'>
-	nodes add: aNode.
-	aNode parent: self.
-	aNode isElement 
-	    ifTrue: 
-		[root == nil 
-		    ifTrue: [root := aNode]
-		    ifFalse: 
-			[self 
-			    error: 'It is illegal to have more than one element node at the top level in a document']]
-    ]
-
-    atID: id ifAbsent: aBlock [
-	<category: 'accessing'>
-	^ids at: id ifAbsent: aBlock
-    ]
-
-    atID: id put: element [
-	<category: 'accessing'>
-	ids at: id put: element
-    ]
-
-    children [
-	<category: 'accessing'>
-	^nodes
-    ]
-
-    document [
-	<category: 'accessing'>
-	^self
-    ]
-
-    dtd [
-	<category: 'accessing'>
-	^dtd
-    ]
-
-    dtd: aDTD [
-	<category: 'accessing'>
-	dtd := aDTD
-    ]
-
-    elements [
-	<category: 'accessing'>
-	^nodes
-    ]
-
-    indexOf: aChild [
-	<category: 'accessing'>
-	aChild parent == self ifFalse: [^nil].
-	^self children identityIndexOf: aChild ifAbsent: [nil]
-    ]
-
-    root [
-	<category: 'accessing'>
-	^root
-    ]
-
-    selectNodes: aBlock [
-	<category: 'accessing'>
-	^nodes select: aBlock
-    ]
-
-    setRoot: aNode [
-	<category: 'accessing'>
-	root := aNode
-    ]
-
-    hasSubNodes [
-	<category: 'testing'>
-	^nodes size > 0
-    ]
-
-    isContent [
-	<category: 'testing'>
-	^true
-    ]
-
-    isDocument [
-	<category: 'testing'>
-	^true
-    ]
-
-    printHTMLOn: aStream [
-	<category: 'printing'>
-	nodes do: [:n | n printHTMLOn: aStream]
-    ]
-
-    printOn: aStream [
-	<category: 'printing'>
-	nodes do: 
-		[:n | 
-		n printOn: aStream.
-		aStream nl]
-    ]
-
-    printSunCanonicalOn: aStream [
-	<category: 'printing'>
-	self dtd notNil ifTrue: [self dtd printCanonicalOn: aStream].
-	nodes do: [:n | n printCanonicalOn: aStream]
-    ]
-
-    nodesDo: aBlock [
-	<category: 'enumerating'>
-	aBlock value: self.
-	1 to: self elements size do: [:i | (self elements at: i) nodesDo: aBlock]
-    ]
-
-    saxDo: aDriver [
-	<category: 'enumerating'>
-	aDriver startDocument.
-	self dtd == nil ifFalse: [self dtd saxDo: aDriver].
-	1 to: self children size do: [:i | (self children at: i) saxDo: aDriver].
-	aDriver endDocument
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Node subclass: Element [
-    | tag attributes namespaces elements userData definition |
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-A concrete subclass of XML.Node, this represents a single XML document
-element.
-
-XML document element boundaries are either delimited by start-tags and
-end-tags, or, for empty elements, by an empty-element tag. Each
-element has a type, identified by name, sometimes called its "generic
-identifier" (GI), and may have a set of attribute specifications. Each
-attribute specification has a name and a value.
-
-Instance Variables:
-    tag				<String | NodeTag> 			the tag name of this element
-    attributes		<Collection>					A list of the attributes that appeared in the element''s start tag, usually excluding those attributes that define namespace mappings.
-    namespaces	<Dictionary>					A map from namespace qualifiers to URIs, used to resolve qualifiers within the scope of this element.
-    elements		<SequenceableCollection>	The Element, Text, Comment, and PI nodes that appear within this Element but are not contained by a child Element.
-    userData		<Object>						used by clients to add annotations to the element
-    definition		<Object>  						suspect this is unused'>
-
-    Element class >> tag: tag [
-	<category: 'instance creation'>
-	^self new 
-	    setTag: tag
-	    attributes: nil
-	    elements: nil
-    ]
-
-    Element class >> tag: tag attributes: attributes elements: elements [
-	<category: 'instance creation'>
-	^self new 
-	    setTag: tag
-	    attributes: attributes
-	    elements: elements
-    ]
-
-    Element class >> tag: tag elements: elements [
-	<category: 'instance creation'>
-	^self new 
-	    setTag: tag
-	    attributes: nil
-	    elements: elements
-    ]
-
-    initialize [
-	<category: 'initialize'>
-	super initialize.
-	tag := 'undefined'.
-	attributes := #()
-    ]
-
-    anyElementNamed: elementName [
-	"This will return the receiver if its name matches the requirement."
-
-	<category: 'accessing'>
-	| list |
-	list := self anyElementsNamed: elementName.
-	list size > 1 
-	    ifTrue: [self error: 'There is not a unique element with this tag'].
-	^list isEmpty ifFalse: [list first]
-    ]
-
-    anyElementsNamed: elementName [
-	"This includes the receiver as one of the possibilities."
-
-	<category: 'accessing'>
-	| list |
-	list := OrderedCollection new.
-	self nodesDo: 
-		[:e | 
-		(e isElement and: [e tag isLike: elementName]) ifTrue: [list add: e]].
-	^list
-    ]
-
-    attributes [
-	<category: 'accessing'>
-	^attributes == nil ifTrue: [#()] ifFalse: [attributes]
-    ]
-
-    characterData [
-	<category: 'accessing'>
-	| str all |
-	all := self elements.
-	all size = 0 ifTrue: [^''].
-	all size = 1 ifTrue: [^all first characterData].
-	str := (String new: 128) writeStream.
-	self characterDataOnto: str.
-	^str contents
-    ]
-
-    characterDataOnto: str [
-	<category: 'accessing'>
-	self elements do: [:i | i isContent ifTrue: [i characterDataOnto: str]]
-    ]
-
-    children [
-	<category: 'accessing'>
-	^elements == nil ifTrue: [#()] ifFalse: [elements]
-    ]
-
-    definition [
-	<category: 'accessing'>
-	^definition
-    ]
-
-    definition: aPattern [
-	<category: 'accessing'>
-	definition := aPattern
-    ]
-
-    description [
-	<category: 'accessing'>
-	^'an <%1> element' % {tag}
-    ]
-
-    elementNamed: elementName [
-	<category: 'accessing'>
-	| list |
-	list := self elementsNamed: elementName.
-	list size = 1 
-	    ifFalse: [self error: 'There is not a unique element with this tag'].
-	^list first
-    ]
-
-    elements [
-	<category: 'accessing'>
-	^elements == nil ifTrue: [#()] ifFalse: [elements]
-    ]
-
-    elementsNamed: elementName [
-	<category: 'accessing'>
-	^self elements select: [:e | e isElement and: [e tag isLike: elementName]]
-    ]
-
-    expandedName [
-	<category: 'accessing'>
-	^tag expandedName
-    ]
-
-    indexOf: aChild [
-	<category: 'accessing'>
-	aChild parent == self ifFalse: [^nil].
-	^aChild isAttribute 
-	    ifTrue: [-1]
-	    ifFalse: [elements identityIndexOf: aChild ifAbsent: [nil]]
-    ]
-
-    namespaces: aDictionaryOrNil [
-	<category: 'accessing'>
-	namespaces := aDictionaryOrNil
-    ]
-
-    selectNodes: aBlock [
-	<category: 'accessing'>
-	^self attributes , self elements select: aBlock
-    ]
-
-    tag [
-	<category: 'accessing'>
-	^tag
-    ]
-
-    userData [
-	<category: 'accessing'>
-	^userData
-    ]
-
-    userData: anObject [
-	<category: 'accessing'>
-	userData := anObject
-    ]
-
-    valueOfAttribute: attributeName ifAbsent: aBlock [
-	<category: 'accessing'>
-	^(self attributes detect: [:a | a tag isLike: attributeName]
-	    ifNone: [^aBlock value]) value
-    ]
-
-    printHTMLOn: aStream [
-	<category: 'printing'>
-	| elem |
-	self saxDo: (SAXWriter new output: aStream)
-	    forBodyDo: 
-		[elem := elements == nil 
-			    ifTrue: [#()]
-			    ifFalse: 
-				["reject: [:str | str isBlankText]"
-
-				elements].
-		self isHTMLBlock ifTrue: [aStream nl].
-		elem do: 
-			[:e | 
-			e printHTMLOn: aStream.
-			self isHTMLBlock ifTrue: [aStream nl]]]
-    ]
-
-    printOn: aStream depth: indent [
-	<category: 'printing'>
-	| elem |
-	self saxDo: (SAXWriter new output: aStream)
-	    forBodyDo: 
-		[elements == nil 
-		    ifFalse: 
-			[elem := elements reject: [:str | str isText and: [str isStripped]].
-			(elem size <= 1 and: [(elem contains: [:n | n isText not]) not]) 
-			    ifTrue: [elem do: [:e | e printOn: aStream depth: indent + 1]]
-			    ifFalse: 
-				[1 to: elem size
-				    do: 
-					[:i | 
-					| e |
-					e := elem at: i.
-					aStream
-					    nl;
-					    space: indent + 1.
-					e isString 
-					    ifTrue: [aStream nextPutAll: e]
-					    ifFalse: [e printOn: aStream depth: indent + 1]].
-				aStream
-				    nl;
-				    space: indent]]]
-    ]
-
-    simpleDescription [
-	<category: 'printing'>
-	^'<' , self tag asString , '>'
-    ]
-
-    namespaceAt: qualifier [
-	<category: 'namespaces'>
-	^namespaces == nil 
-	    ifTrue: [nil]
-	    ifFalse: [namespaces at: qualifier ifAbsent: [nil]]
-    ]
-
-    qualifierAtNamespace: ns [
-	<category: 'namespaces'>
-	^namespaces == nil 
-	    ifTrue: [nil]
-	    ifFalse: 
-		[namespaces 
-		    keysAndValuesDo: [:qualifier :namespace | namespace = ns ifTrue: [^qualifier]].
-		nil]
-    ]
-
-    attributes: a [
-	<category: 'private'>
-	attributes := a.
-	a == nil ifFalse: [a do: [:i | i parent: self]]
-    ]
-
-    condenseList [
-	<category: 'private'>
-	elements == nil 
-	    ifFalse: 
-		[elements size = 0 
-		    ifTrue: [elements := nil]
-		    ifFalse: [elements := elements asArray]]
-    ]
-
-    condenseText [
-	<category: 'private'>
-	| elmts str tc |
-	elmts := (Array new: elements size) writeStream.
-	str := nil.
-	elements do: 
-		[:elm | 
-		elm isText 
-		    ifTrue: 
-			[str == nil ifTrue: [str := (String new: elm text size) writeStream].
-			tc := elm class.
-			str nextPutAll: elm text]
-		    ifFalse: 
-			[str == nil ifFalse: [elmts nextPut: (tc new text: str contents)].
-			str := nil.
-			elmts nextPut: elm]].
-	str == nil ifFalse: [elmts nextPut: (tc new text: str contents)].
-	elements := elmts contents
-    ]
-
-    elements: e [
-	<category: 'private'>
-	elements := e.
-	self isEmpty 
-	    ifFalse: 
-		[self condenseText.
-		elements do: [:elm | elm parent: self]]
-    ]
-
-    setTag: t attributes: a elements: e [
-	<category: 'private'>
-	tag := t isString 
-		    ifTrue: 
-			[NodeTag new 
-			    qualifier: ''
-			    ns: ''
-			    type: t]
-		    ifFalse: [t].
-	self attributes: a.
-	self elements: e
-    ]
-
-    hasSubNodes [
-	<category: 'testing'>
-	^elements size > 0 or: [attributes size > 0]
-    ]
-
-    isContent [
-	<category: 'testing'>
-	^true
-    ]
-
-    isElement [
-	<category: 'testing'>
-	^true
-    ]
-
-    isEmpty [
-	<category: 'testing'>
-	^elements == nil
-    ]
-
-    isHTMLBlock [
-	<category: 'testing'>
-	^#('p' 'html' 'head' 'body') includes: tag asLowercase
-    ]
-
-    isLike: aNode [
-	<category: 'testing'>
-	^self class == aNode class and: [self tag isLike: aNode tag]
-    ]
-
-    notEmpty [
-	<category: 'testing'>
-	^elements ~~ nil
-    ]
-
-    nodesDo: aBlock [
-	<category: 'enumerating'>
-	aBlock value: self.
-	1 to: self attributes size
-	    do: [:i | (self attributes at: i) nodesDo: aBlock].
-	1 to: self elements size do: [:i | (self elements at: i) nodesDo: aBlock]
-    ]
-
-    saxDo: aDriver [
-	<category: 'enumerating'>
-	namespaces == nil 
-	    ifFalse: 
-		[namespaces 
-		    keysAndValuesDo: [:qual :uri | aDriver startPrefixMapping: qual uri: uri]].
-	aDriver 
-	    startElement: self tag namespace
-	    localName: self tag type
-	    qName: self tag asString
-	    attributes: self attributes.
-	1 to: self children size do: [:i | (self children at: i) saxDo: aDriver].
-	aDriver 
-	    endElement: self tag namespace
-	    localName: self tag type
-	    qName: self tag asString.
-	namespaces == nil 
-	    ifFalse: 
-		[namespaces keysAndValuesDo: [:qual :uri | aDriver endPrefixMapping: qual]]
-    ]
-
-    saxDo: aDriver forBodyDo: aBlock [
-	"a variation on #saxDo: that lets the client
-	 control how the body of the element is to be
-	 printed."
-
-	<category: 'enumerating'>
-	namespaces == nil 
-	    ifFalse: 
-		[namespaces 
-		    keysAndValuesDo: [:qual :uri | aDriver startPrefixMapping: qual uri: uri]].
-	aDriver 
-	    startElement: self tag namespace
-	    localName: self tag type
-	    qName: self tag asString
-	    attributes: self attributes.
-	(aDriver respondsTo: #closeOpenTag) ifTrue: [aDriver closeOpenTag].
-	aBlock value.
-	aDriver 
-	    endElement: self tag namespace
-	    localName: self tag type
-	    qName: self tag asString.
-	namespaces == nil 
-	    ifFalse: 
-		[namespaces keysAndValuesDo: [:qual :uri | aDriver endPrefixMapping: qual]]
-    ]
-
-    addAttribute: aNode [
-	<category: 'modifying'>
-	attributes isNil ifTrue: [attributes := OrderedCollection new].
-	attributes class == OrderedCollection 
-	    ifFalse: [attributes := attributes asOrderedCollection].
-	attributes add: aNode
-    ]
-
-    addNode: aNode [
-	<category: 'modifying'>
-	aNode parent: self.
-	elements == nil 
-	    ifTrue: [elements := OrderedCollection new: 5]
-	    ifFalse: 
-		[elements class == Array ifTrue: [elements := elements asOrderedCollection]].
-	elements addLast: aNode
-    ]
-
-    removeAttribute: aNode [
-	<category: 'modifying'>
-	attributes isNil 
-	    ifFalse: 
-		[attributes class == OrderedCollection 
-		    ifFalse: [attributes := attributes asOrderedCollection].
-		attributes remove: aNode ifAbsent: [].
-		attributes isEmpty ifTrue: [attributes := nil]]
-    ]
-
-    removeNode: aNode [
-	<category: 'modifying'>
-	elements isNil 
-	    ifFalse: 
-		[elements class == OrderedCollection 
-		    ifFalse: [elements := elements asOrderedCollection].
-		elements remove: aNode ifAbsent: [].
-		elements isEmpty ifTrue: [elements := nil]]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Node subclass: Text [
-    | text stripped |
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-A subclass of Node, this class represents an XML textual object,
-i.e. a sequence of legal characters as defined in the XML 1.0
-specification. Instances of XML.Text may represent either markup or
-character data.
-
-Instance Variables:
-    text			<CharacterArray | nil>	the actual data of the Text.
-    stripped	<Boolean>	Will be true if the text contains only white space and if the parser has determined that the client would not be interested in the data.'>
-
-    Text class >> text: aString [
-	<category: 'instance creation'>
-	^self new text: aString
-    ]
-
-    characterData [
-	<category: 'accessing'>
-	^self text
-    ]
-
-    characterDataOnto: str [
-	<category: 'accessing'>
-	str nextPutAll: self text
-    ]
-
-    description [
-	<category: 'accessing'>
-	^'text'
-    ]
-
-    strip: aBoolean [
-	<category: 'accessing'>
-	stripped := aBoolean
-    ]
-
-    text [
-	<category: 'accessing'>
-	^text
-    ]
-
-    text: aText [
-	<category: 'accessing'>
-	text := aText.
-	stripped == nil ifTrue: [stripped := false]
-    ]
-
-    printHTMLOn: aStream [
-	<category: 'printing'>
-	text == nil ifTrue: [^self].
-	self isStripped ifFalse: [self printCanonical: text on: aStream]
-    ]
-
-    printOn: aStream depth: indent [
-	<category: 'printing'>
-	text == nil 
-	    ifTrue: [aStream nextPutAll: '&nil;']
-	    ifFalse: [self printQuoted: text on: aStream]
-    ]
-
-    isBlankText [
-	<category: 'testing'>
-	^(text contains: [:i | i isSeparator not]) not
-    ]
-
-    isContent [
-	<category: 'testing'>
-	^true
-    ]
-
-    isStripped [
-	<category: 'testing'>
-	^stripped
-    ]
-
-    isText [
-	<category: 'testing'>
-	^true
-    ]
-
-    saxDo: aDriver [
-	<category: 'enumerating'>
-	aDriver 
-	    characters: text
-	    from: 1
-	    to: text size
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Entity subclass: GeneralEntity [
-    | ndata definedExternally |
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-This class represents a general entity which is a parsed entity for
-use within the XML document content.
-
-Instance Variables:
-    ndata	<Notation>			Some general entities may have a notation associated with them which identifies how they are to be processed--this instace variable identifies that Notation.'>
-
-    entityType [
-	<category: 'accessing'>
-	^'generic'
-    ]
-
-    isDefinedExternally [
-	<category: 'accessing'>
-	^definedExternally
-    ]
-
-    isDefinedExternally: aBoolean [
-	<category: 'accessing'>
-	definedExternally := aBoolean
-    ]
-
-    ndata: aNotifierNameOrNil [
-	<category: 'accessing'>
-	ndata := aNotifierNameOrNil
-    ]
-
-    isParsed [
-	<category: 'testing'>
-	^ndata == nil
-    ]
-
-    completeValidationAgainst: aParser [
-	<category: 'validation'>
-	ndata isNil 
-	    ifFalse: 
-		[aParser dtd notationAt: ndata
-		    ifAbsent: 
-			[aParser 
-			    invalid: 'Unparsed entity "%1" uses an undeclared notation "%2"' % 
-					{name.
-					ndata}]]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Object subclass: SAXDriver [
-    | locator |
-    
-    <category: 'XML-XML-SAX'>
-    <comment: '
-This class includes supports for the Simple API for XML (SAX), an
-event-driven API for parsing XML documents.
-
-All methods defined in this class, other than those defined in the
-"private" protocol, are Smalltalk-equivalent bindings of the SAX 2.0
-API, and can be overridden according to the needs of subclasses.
-
-Instance Variables:
-    locator	<nil> place holder for SAX''s Locator, which allows better error recovery.'>
-
-    comment: data from: start to: stop [
-	<category: 'other'>
-	
-    ]
-
-    idOfElement: elementID [
-	"Notify the client what was the ID of the latest startElement"
-
-	<category: 'other'>
-	
-    ]
-
-    sourcePosition: position inStream: streamWrapper [
-	"Non-standard API to ease transition from
-	 builders to SAX."
-
-	<category: 'other'>
-	
-    ]
-
-    characters: aString [
-	<category: 'content handler'>
-	
-    ]
-
-    characters: aString from: start to: stop [
-	<category: 'content handler'>
-	^self characters: (aString copyFrom: start to: stop)
-    ]
-
-    endDocument [
-	<category: 'content handler'>
-	
-    ]
-
-    endDocumentFragment [
-	"Nonstandard extension to SAX"
-
-	<category: 'content handler'>
-	
-    ]
-
-    endElement: namespaceURI localName: localName qName: name [
-	"indicates the end of an element. See startElement"
-
-	<category: 'content handler'>
-	
-    ]
-
-    endPrefixMapping: prefix [
-	"End the scope of a prefix-URI mapping.
-	 
-	 See startPrefixMapping for details. This event will always
-	 occur after the corresponding endElement event, but the
-	 order of endPrefixMapping events is not otherwise
-	 guaranteed.
-	 
-	 Parameters:
-	 prefix - The prefix that was being mapped.
-	 "
-
-	<category: 'content handler'>
-	^self
-    ]
-
-    ignorableWhitespace: aString [
-	<category: 'content handler'>
-	
-    ]
-
-    ignorableWhitespace: aString from: start to: stop [
-	<category: 'content handler'>
-	^self ignorableWhitespace: (aString copyFrom: start to: stop)
-    ]
-
-    processingInstruction: targetString data: dataString [
-	<category: 'content handler'>
-	
-    ]
-
-    setDocumentLocator: aLocator [
-	<category: 'content handler'>
-	locator := aLocator
-    ]
-
-    skippedEntity: name [
-	"Receive notification of a skipped entity.
-	 
-	 The Parser will invoke this method once for each entity skipped.
-	 Non-validating processors may skip entities if they have not seen
-	 the declarations (because, for example, the entity was declared
-	 in an external DTD subset).
-	 
-	 Parameters:
-	 name - The name of the skipped entity. If it is a parameter
-	 entity, the name will begin with '%', and if it is the external
-	 DTD subset, it will be the string '[dtd]'.
-	 "
-
-	<category: 'content handler'>
-	^self
-    ]
-
-    startDocument [
-	<category: 'content handler'>
-	
-    ]
-
-    startDocumentFragment [
-	"Nonstandard extension to SAX"
-
-	<category: 'content handler'>
-	
-    ]
-
-    startElement: namespaceURI localName: localName qName: name attributes: attributes [
-	"Receive notification of the beginning of an element.
-	 
-	 Parameters:
-	 namespaceURI <String> The Namespace URI, Nil if the element has no Namespace URI
-	 localName <String> The local name of the element (without prefix)
-	 name <String> Literal name of the element as it appears, nil if processing namespaces.
-	 attributes <SequenceableCollection of: XML.Attribute> The attributes attached to the element.
-	 
-	 Example
-	 <doc xmlns='http://www.doc.org/' xmlns:other='http://www.other.com/'>
-	 <a>A text</a>
-	 <other:b>BA text</other:b>
-	 <c other:cat='meow'>C text</c>
-	 <d xmlns='http:/nested/'></d>
-	 </doc>
-	 
-	 Parameter values to this method for each element of the above XML:
-	 
-	 local name: 'doc' namespace: 'http://www.doc.org/' name: 'doc'
-	 local name: 'a' namespace: 'http://www.doc.org/' name: 'a'
-	 local name: 'b' namespace: 'http://www.other.com/' name: 'other:b'
-	 local name: 'c' namespace: 'http://www.doc.org/' name: 'c'
-	 local name: 'd' namespace: 'http:/nested/' name: 'd'
-	 
-	 Note the attribute object also have namespaces"
-
-	<category: 'content handler'>
-	
-    ]
-
-    startPrefixMapping: prefix uri: uri [
-	"Begin the scope of a prefix-URI Namespace mapping.
-	 The information from this event is not necessary for
-	 normal Namespace processing: the SAX XML reader will
-	 automatically replace prefixes for element and attribute
-	 names when the http://xml.org/sax/features/namespaces
-	 feature is true (the default).
-	 
-	 There are cases, however, when applications need to use
-	 prefixes in character data or in attribute values, where
-	 they cannot safely be expanded automatically; the
-	 start/endPrefixMapping event supplies the information to
-	 the application to expand prefixes in those contexts itself,
-	 if necessary.
-	 
-	 Note that start/endPrefixMapping events are not
-	 guaranteed to be properly nested relative to each-other:
-	 all startPrefixMapping events will occur before the
-	 corresponding startElement event, and all
-	 endPrefixMapping events will occur after the
-	 corresponding endElement event, but their order is not
-	 otherwise guaranteed.
-	 
-	 There should never be start/endPrefixMapping events for
-	 the 'xml' prefix, since it is predeclared and immutable.
-	 
-	 Parameters:
-	 prefix - The Namespace prefix being declared.
-	 uri - The Namespace URI the prefix is mapped to.
-	 "
-
-	<category: 'content handler'>
-	^self
-    ]
-
-    fatalError: anException [
-	<category: 'error handler'>
-	anException signal
-    ]
-
-    nonFatalError: anException [
-	<category: 'error handler'>
-	anException signal
-    ]
-
-    warning: anException [
-	<category: 'error handler'>
-	Transcript
-	    nl;
-	    show: anException messageText
-    ]
-
-    notationDecl: nameString publicID: publicIDString systemID: systemIDString [
-	"Receive notification of a notation declaration event.
-	 
-	 It is up to the application to record the notation for later
-	 reference, if necessary.
-	 
-	 If a system identifier is present, and it is a URL, the SAX
-	 parser must resolve it fully before passing it to the application."
-
-	<category: 'DTD handler'>
-	
-    ]
-
-    unparsedEntityDecl: name publicID: publicID systemID: systemID notationName: notation [
-	"Receive notification of an unparsed entity declaration
-	 event.
-	 
-	 Note that the notation name corresponds to a notation
-	 reported by the notationDecl event. It is up to the
-	 application to record the entity for later reference, if
-	 necessary.
-	 
-	 If the system identifier is a URL, the parser must resolve it
-	 fully before passing it to the application.
-	 "
-
-	<category: 'DTD handler'>
-	^self
-    ]
-
-    resolveEntity: publicID systemID: systemID [
-	<category: 'entity resolver'>
-	^nil
-    ]
-
-    contentHandler [
-	<category: 'accessing'>
-	^self
-    ]
-
-    document [
-	<category: 'accessing'>
-	^nil
-    ]
-
-    dtdHandler [
-	<category: 'accessing'>
-	^self
-    ]
-
-    entityResolver [
-	<category: 'accessing'>
-	^self
-    ]
-
-    errorHandler [
-	<category: 'accessing'>
-	^self
-    ]
-
-    invalid: aMessage [
-	"Allows a SAX driver to act like a parser when accessing a DocumentType"
-
-	<category: 'private'>
-	self nonFatalError: (InvalidSignal new messageText: aMessage)
-    ]
-
-    isValidating [
-	"Allows a SAX driver to act like a parser when accessing a DocumentType"
-
-	<category: 'private'>
-	^false
-    ]
-
-    malformed: aMessage [
-	"Allows a SAX driver to act like a parser when accessing a DocumentType"
-
-	<category: 'private'>
-	self fatalError: (MalformedSignal new messageText: aMessage)
-    ]
-
-    warn: aMessage [
-	"Allows a SAX driver to act like a parser when accessing a DocumentType"
-
-	<category: 'private'>
-	self warning: (WarningSignal new messageText: aMessage)
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-SAXDriver subclass: SAXDispatcher [
-    | contentHandler dtdHandler entityResolver errorHandler |
-    
-    <category: 'XML-XML-SAX'>
-    <comment: '
-SAXDispatcher allows the SAX implementation to support mixing and
-matching of event handlers. For example, the same contentHandler could
-be used with different errorHandlers for different ciecumstances, or
-with different entityResolvers depending on what transport protocols
-are loaded.
-
-This class is primarily private, used by such methods as
-XMLParser>>contentHandler:, but its use by client code is not
-discouraged. To use it, create a SAXDispatcher, fill in its various
-handler types with instances of other SAXDrivers, and then store the
-SAXDispatcher in the parser using the #handlers: message.
-
-Instance Variables:
-    contentHandler	<XML.SAXDriver> 		handles all content events
-    dtdHandler			<XML.SAXDriver> 		handles entity and notation declarations
-    entityResolver		<XML.SAXDriver>		handles resolution of PUBLIC and SYSTEM paths
-    											into InputSources, to allow non-standard resolution
-    errorHandler		<XML.SAXDriver>		handles all errors
-'>
-
-    SAXDispatcher class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
-    contentHandler [
-	<category: 'accessing'>
-	^contentHandler
-    ]
-
-    contentHandler: aSAXDriver [
-	<category: 'accessing'>
-	contentHandler := aSAXDriver
-    ]
-
-    document [
-	<category: 'accessing'>
-	^contentHandler document
-    ]
-
-    dtdHandler [
-	<category: 'accessing'>
-	^dtdHandler
-    ]
-
-    dtdHandler: aSAXDriver [
-	<category: 'accessing'>
-	dtdHandler := aSAXDriver
-    ]
-
-    entityResolver [
-	<category: 'accessing'>
-	^entityResolver
-    ]
-
-    entityResolver: aSAXDriver [
-	<category: 'accessing'>
-	entityResolver := aSAXDriver
-    ]
-
-    errorHandler [
-	<category: 'accessing'>
-	^errorHandler
-    ]
-
-    errorHandler: aSAXDriver [
-	<category: 'accessing'>
-	errorHandler := aSAXDriver
-    ]
-
-    comment: data from: start to: stop [
-	<category: 'other'>
-	contentHandler 
-	    comment: data
-	    from: start
-	    to: stop
-    ]
-
-    idOfElement: elementID [
-	<category: 'other'>
-	contentHandler idOfElement: elementID
-    ]
-
-    sourcePosition: position inStream: stream [
-	<category: 'other'>
-	contentHandler sourcePosition: position inStream: stream
-    ]
-
-    characters: aString from: start to: stop [
-	<category: 'content handler'>
-	contentHandler 
-	    characters: aString
-	    from: start
-	    to: stop
-    ]
-
-    endDocument [
-	<category: 'content handler'>
-	contentHandler endDocument
-    ]
-
-    endDocumentFragment [
-	<category: 'content handler'>
-	contentHandler endDocumentFragment
-    ]
-
-    endElement: namespaceURI localName: localName qName: name [
-	<category: 'content handler'>
-	contentHandler 
-	    endElement: namespaceURI
-	    localName: localName
-	    qName: name
-    ]
-
-    endPrefixMapping: prefix [
-	<category: 'content handler'>
-	contentHandler endPrefixMapping: prefix
-    ]
-
-    ignorableWhitespace: aString from: start to: stop [
-	<category: 'content handler'>
-	contentHandler 
-	    ignorableWhitespace: aString
-	    from: start
-	    to: stop
-    ]
-
-    processingInstruction: targetString data: dataString [
-	<category: 'content handler'>
-	contentHandler processingInstruction: targetString data: dataString
-    ]
-
-    setDocumentLocator: aLocator [
-	<category: 'content handler'>
-	contentHandler setDocumentLocator: aLocator
-    ]
-
-    skippedEntity: name [
-	<category: 'content handler'>
-	contentHandler skippedEntity: name
-    ]
-
-    startDocument [
-	<category: 'content handler'>
-	contentHandler startDocument
-    ]
-
-    startDocumentFragment [
-	<category: 'content handler'>
-	contentHandler startDocumentFragment
-    ]
-
-    startElement: namespaceURI localName: localName qName: name attributes: attributes [
-	<category: 'content handler'>
-	contentHandler 
-	    startElement: namespaceURI
-	    localName: localName
-	    qName: name
-	    attributes: attributes
-    ]
-
-    startPrefixMapping: prefix uri: uri [
-	<category: 'content handler'>
-	contentHandler startPrefixMapping: prefix uri: uri
-    ]
-
-    notationDecl: nameString publicID: publicIDString systemID: systemIDString [
-	<category: 'DTD handler'>
-	dtdHandler 
-	    notationDecl: nameString
-	    publicID: publicIDString
-	    systemID: systemIDString
-    ]
-
-    unparsedEntityDecl: name publicID: publicID systemID: systemID notationName: notation [
-	<category: 'DTD handler'>
-	dtdHandler 
-	    unparsedEntityDecl: name
-	    publicID: publicID
-	    systemID: systemID
-	    notationName: notation
-    ]
-
-    initialize [
-	<category: 'initialize'>
-	contentHandler := NullSAXDriver new.
-	dtdHandler := contentHandler.
-	entityResolver := contentHandler.
-	errorHandler := contentHandler
-    ]
-
-    resolveEntity: publicID systemID: systemID [
-	<category: 'entity resolver'>
-	^entityResolver resolveEntity: publicID systemID: systemID
-    ]
-
-    fatalError: anException [
-	<category: 'error handler'>
-	errorHandler fatalError: anException
-    ]
-
-    nonFatalError: anException [
-	<category: 'error handler'>
-	errorHandler nonFatalError: anException
-    ]
-
-    warning: anException [
-	<category: 'error handler'>
-	errorHandler warning: anException
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Error subclass: SAXException [
-    | wrappedException |
-    
-    <category: 'XML-XML-Exceptions'>
-    <comment: '
-A special exception indicating an error in a SAX-compliant parser.
-
-All errors when parsing XML *should* be converted to
-SAXExceptions. Errors generated by the parser will usually be
-instances of subclasses of SAXException. Errors generated by user
-code, if caught, will usually be instances of other types of
-Exception, and will be wrapped in an instance of SAXException to
-simplify the task of an exception handler outside the parser.
-
-Instance Variables:
-    wrappedException	<Exception>  another exception, which has been wrapped so that a handler for SAXException will catch it.'>
-
-    SAXException class >> mayResume [
-	<category: 'testing'>
-	^true
-    ]
-
-    wrappedException [
-	<category: 'accessing'>
-	^wrappedException
-    ]
-
-    wrappedException: anException [
-	<category: 'accessing'>
-	wrappedException := anException
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Node subclass: PI [
-    | name text |
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-A concrete subclass of Node, this class represents the XML Processing
-Instruction element.
-
-Processing instructions allow XML documents to contain instructions
-for applications.  XML processing instructions are delimited by the
-start-tag ''<?'' and the end-tag ''?>''. According to the XML 1.0
-specification, the target names "XML", "xml" and so on are reserved
-for standardization.
-
-Instance Variables:
-    name		<String>
-    				the target of this processing instruction, used to identify the application
-    				to which this processing instruction is directed.
-    text			<String>
-    				the processing instructions themselves'>
-
-    PI class >> name: nm text: aString [
-	<category: 'instance creation'>
-	^self new name: nm text: aString
-    ]
-
-    name: nm text: aString [
-	<category: 'initialize'>
-	name := nm.
-	text := aString
-    ]
-
-    name [
-	<category: 'accessing'>
-	^name
-    ]
-
-    text [
-	<category: 'accessing'>
-	^text
-    ]
-
-    printHTMLOn: aStream [
-	<category: 'printing'>
-	aStream nextPutAll: '<?' , name , ' ' , text , '?>'
-    ]
-
-    printOn: aStream depth: indent [
-	<category: 'printing'>
-	aStream nextPutAll: '<?' , name , ' ' , text , '?>'
-    ]
-
-    isLike: aNode [
-	<category: 'testing'>
-	^self class == aNode class and: [self name isLike: aNode name]
-    ]
-
-    isProcessingInstruction [
-	<category: 'testing'>
-	^true
-    ]
-
-    saxDo: aDriver [
-	<category: 'enumerating'>
-	aDriver processingInstruction: name data: text
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Node subclass: Notation [
-    | name publicID systemID |
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-A concrete subclass of Node, this class represents an XML Notation
-declaration.
-
-Notations are XML elements/nodes which identify by name the format of
-unparsed entities, the format of elements which bear a notation
-attribute or the application to which a processing instruction is
-addressed.
-
-Notations are delimited in the DTD by the start-tag ''<!NOTATION'' and
-end-tag ''>''
-
-The name instance variable provides a name or identifier for the
-notation, for use in entity and attribute specifications. The publicID
-instance variable provides an external identifier which allows the XML
-processor or the client application to locate a helper application
-capable of processing data in the given notation. The systemID
-variable allows the parser to optionally resolve the publicID into the
-system identifier, file name, or other information needed to allow the
-application to call a processor for data in the notation.
-
-
-Instance Variables:
-    name		<String>		A unique identifier for the Notation within the document.
-    publicID	<String>		The public ID of the Notation, which seems to not be heavily used at present.
-    systemID	<String>		A URI for the notation, which can be used to point to an application which can process resources of this notation type, or can be used as a key in a local map to find the application which should be used.'>
-
-    name: aName identifiers: anArray [
-	<category: 'initialize'>
-	name := aName.
-	anArray size = 2 
-	    ifTrue: 
-		[systemID := anArray at: 2.
-		publicID := anArray at: 1]
-	    ifFalse: [self error: 'Invalid PUBLIC / SYSTEM identifiers']
-    ]
-
-    name [
-	<category: 'accessing'>
-	^name
-    ]
-
-    publicID [
-	<category: 'accessing'>
-	^publicID
-    ]
-
-    systemID [
-	<category: 'accessing'>
-	^systemID
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-SAXDriver subclass: SAXBuilderDriver [
-    | builder document elementStack newNamespaces |
-    
-    <category: 'XML-XML-SAX'>
-    <comment: '
-This class converts SAX events into XMLNodeBuilder events, allowing
-old builders to still be used with the new parser.
-
-This is essentially a private class for XMLParser to allow the parser
-to pretend to still support the old NodeBuilder API.
-
-Instance Variables:
-    builder				<XML.XMLNodeBuilder>		The client''s NodeBuilder, which creates XML Nodes.
-    document			<XML.Document>				The Document which models the entire XML document.
-    elementStack		<OrderedCollection>			A stack of proxies for the various elements that are in scope at the current stage of parsing.
-    newNamespaces	<Dictionary>					maps qualifiers to namespaces for the next element'>
-
-    characters: aString [
-	<category: 'content handler'>
-	| text |
-	text := builder makeText: aString.
-	text isDiscarded ifFalse: [elementStack last nodes add: text]
-    ]
-
-    endDocument [
-	<category: 'content handler'>
-	
-    ]
-
-    endDocumentFragment [
-	<category: 'content handler'>
-	^self endDocument
-    ]
-
-    endElement: namespaceURI localName: localName qName: name [
-	"indicates the end of an element. See startElement"
-
-	<category: 'content handler'>
-	| elm element |
-	elm := elementStack last.
-	element := builder 
-		    tag: elm tag
-		    attributes: elm attributes
-		    elements: (elm nodes isEmpty ifTrue: [nil] ifFalse: [elm nodes asArray])
-		    position: elm startPosition
-		    stream: elm stream.
-	element namespaces: elm namespaces.
-	elementStack removeLast.
-	elementStack isEmpty 
-	    ifTrue: 
-		[document addNode: element.
-		document dtd declaredRoot: element tag asString]
-	    ifFalse: [element isDiscarded ifFalse: [elementStack last nodes add: element]].
-	(element isDiscarded not and: [elm id notNil]) 
-	    ifTrue: [document atID: elm id put: element].
-	builder popTag
-    ]
-
-    ignorableWhitespace: aString [
-	<category: 'content handler'>
-	| text |
-	text := builder makeText: aString.
-	text isDiscarded ifFalse: [elementStack last nodes add: text]
-    ]
-
-    processingInstruction: targetString data: dataString [
-	<category: 'content handler'>
-	| pi |
-	document == nil ifTrue: [self startDocument].
-	pi := builder pi: targetString text: dataString.
-	elementStack isEmpty 
-	    ifTrue: [document addNode: pi]
-	    ifFalse: [elementStack last nodes add: pi]
-    ]
-
-    startDocument [
-	<category: 'content handler'>
-	document := Document new.
-	document dtd: DocumentType new.
-	elementStack := OrderedCollection new
-    ]
-
-    startDocumentFragment [
-	<category: 'content handler'>
-	document := DocumentFragment new.
-	document dtd: DocumentType new.
-	elementStack := OrderedCollection new
-    ]
-
-    startElement: namespaceURI localName: localName qName: name attributes: attributes [
-	<category: 'content handler'>
-	| nm |
-	document == nil ifTrue: [self startDocument].
-	nm := NodeTag new 
-		    qualifier: ((name includes: $:) ifTrue: [name copyUpTo: $:] ifFalse: [''])
-		    ns: namespaceURI
-		    type: localName.
-	elementStack addLast: (SAXElementContext new tag: nm).
-	(elementStack last)
-	    attributes: (attributes collect: [:att | att copy]);
-	    nodes: OrderedCollection new;
-	    namespaces: newNamespaces.
-	newNamespaces := nil.
-	builder pushTag: nm
-    ]
-
-    startPrefixMapping: prefix uri: uri [
-	<category: 'content handler'>
-	newNamespaces == nil ifTrue: [newNamespaces := Dictionary new].
-	newNamespaces at: prefix put: uri
-    ]
-
-    comment: data from: start to: stop [
-	<category: 'other'>
-	| comment |
-	document == nil ifTrue: [self startDocument].
-	comment := builder comment: (data copyFrom: start to: stop).
-	comment isDiscarded 
-	    ifFalse: 
-		[elementStack isEmpty 
-		    ifTrue: [document addNode: comment]
-		    ifFalse: [elementStack last nodes add: comment]]
-    ]
-
-    idOfElement: elementID [
-	"Notify the client what was the ID of the latest startElement"
-
-	<category: 'other'>
-	elementStack last id: elementID
-    ]
-
-    sourcePosition: position inStream: streamWrapper [
-	"Non-standard API to ease transition from
-	 builders to SAX."
-
-	<category: 'other'>
-	(elementStack last)
-	    startPosition: position;
-	    stream: streamWrapper
-    ]
-
-    builder: aNodeBuilder [
-	<category: 'accessing'>
-	builder := aNodeBuilder
-    ]
-
-    document [
-	<category: 'accessing'>
-	^document
-    ]
-
-    notationDecl: name publicID: publicID systemID: systemID [
-	<category: 'DTD handler'>
-	| notation |
-	notation := builder notation: name
-		    value: (Array with: publicID with: systemID).
-	document dtd 
-	    notationAt: name
-	    put: notation
-	    from: self
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
 Object subclass: Pattern [
     | followSet |
     
@@ -2368,12 +193,7 @@ Instance Variables:
     ]
 ]
 
-]
-
-
 
-Namespace current: XML [
-
 Pattern subclass: ConcretePattern [
     
     <category: 'XML-XML-Patterns'>
@@ -2479,12 +299,7 @@ Subclasses must implement the following messages:
     ]
 ]
 
-]
-
-
 
-Namespace current: XML [
-
 ConcretePattern subclass: TerminalPattern [
     
     <category: 'XML-XML-Patterns'>
@@ -2510,12 +325,7 @@ declaration.'>
     ]
 ]
 
-]
-
-
 
-Namespace current: XML [
-
 ConcretePattern subclass: InitialPattern [
     | isExternal |
     
@@ -2542,12 +352,7 @@ declaration.'>
     ]
 ]
 
-]
-
-
 
-Namespace current: XML [
-
 ConcretePattern subclass: EmptyPattern [
     
     <category: 'XML-XML-Patterns'>
@@ -2574,12 +379,7 @@ indicates that the element has no content.'>
     ]
 ]
 
-]
-
-
 
-Namespace current: XML [
-
 ConcretePattern subclass: NamePattern [
     | name |
     
@@ -2618,12 +418,7 @@ Instance Variables:
     ]
 ]
 
-]
-
-
 
-Namespace current: XML [
-
 ConcretePattern subclass: PCDATAPattern [
     
     <category: 'XML-XML-Patterns'>
@@ -2652,63 +447,287 @@ element content declaration.'>
     ]
 ]
 
+
+Pattern subclass: ComplexPattern [
+    
+    <category: 'XML-XML-Patterns'>
+    <comment: '
+A subclass of Pattern, this class is the superclass to what are
+considered ''complex'' patterns or rules in the element content
+declarations.
+
+Subclasses of ComplexPattern include ChoicePattern, MixedPattern,
+ModifiedPattern and SequencePattern.'>
+
+    isSimple [
+	<category: 'testing'>
+	^false
+    ]
 ]
 
-
 
-Namespace current: XML [
-
-Node subclass: Attribute [
-    | name value |
+ComplexPattern subclass: MixedPattern [
+    | items |
     
-    <category: 'XML-XML-Nodes'>
+    <category: 'XML-XML-Patterns'>
     <comment: '
-XML elements may have name-value pairs called attributes associated
-with them. This class instantiates a single XML attribute. Attribute
-is a subclass of Node, both because the W3C DOM model defines it that
-way, and because it provides a uniform API for applications such as
-XSLT that want to do similar sorts of processing on attributes and
-other node types.
+A subclass of ComplexPattern, this class represents the ''mixed''
+element content constraint in an element type declaration.
+
+An element type has mixed content when elements of that type may
+contain both other child elements and character data (text) as
+specified in the element content declaration.
+
+Note: For mixed content type elements, one can''t control the order in
+which the child elements, mixed in among the text, appear.
 
 Instance Variables:
-    name	<XML.Node | XML.NodeTag>		tag name
-    value	<Object>							tag value'>
+    items	<SequenceableCollection>  A list of NamedPatterns (as well as one PCDATAPattern) which can appear as content in the context controlled by the MixedPattern.'>
 
-    Attribute class >> name: nm value: val [
+    MixedPattern class >> on: aList [
 	<category: 'instance creation'>
-	^self new name: nm value: val
+	^self new on: (aList size = 0 ifTrue: [#()] ifFalse: [aList])
     ]
 
-    name: nm value: val [
+    on: aList [
 	<category: 'initialize'>
-	name := nm isString 
-		    ifTrue: 
-			[NodeTag new 
-			    qualifier: ''
-			    ns: ''
-			    type: nm]
-		    ifFalse: [nm].
-	value := val
+	items := (Array with: PCDATAPattern new) , aList
     ]
 
-    tag: aTag [
+    alternateHeads [
+	<category: 'coercing'>
+	^items , followSet
+    ]
+
+    normalizeFor: aParser [
+	"Optimized because lots of the testing needed in
+	 the superclass is not needed here."
+
+	<category: 'coercing'>
+	| result |
+	followSet := OrderedCollection withAll: items.
+	followSet add: TerminalPattern new.
+	result := InitialPattern new.
+	result followSet: followSet.
+	items do: [:i | i followSet: followSet].
+	^result
+    ]
+
+    pushDownFollowSet [
+	<category: 'coercing'>
+	items do: 
+		[:i | 
+		i
+		    addFollow: self;
+		    addFollows: followSet].
+	^items
+    ]
+
+    duplicatesNeedTested [
+	<category: 'testing'>
+	^false
+    ]
+
+    postCopy [
+	<category: 'copying'>
+	super postCopy.
+	items := items collect: [:i | i copy]
+    ]
+]
+
+
+ComplexPattern subclass: ChoicePattern [
+    | items |
+    
+    <category: 'XML-XML-Patterns'>
+    <comment: '
+A subclass of ComplexPattern, this class represents the ''choice''
+element content constraint in an element type declaration.
+
+According to the XML 1.0 specification, the ''choice'' pattern/rule
+signifies that any content particle in a choice list (declared in the
+DTD) may appear in the element content at the location where the
+choice list appears in the grammar.
+
+Instance Variables:
+    items	<Collection>
+    			Collection of content particles'>
+
+    ChoicePattern class >> on: aList [
+	<category: 'instance creation'>
+	^self new on: aList
+    ]
+
+    on: aList [
 	<category: 'initialize'>
-	name := aTag
+	items := aList
     ]
 
-    characterData [
+    alternateHeads [
+	<category: 'coercing'>
+	^items
+    ]
+
+    pushDownFollowSet [
+	<category: 'coercing'>
+	items do: [:i | i addFollows: followSet].
+	^items
+    ]
+
+    description [
+	<category: 'printing'>
+	| str |
+	str := String new writeStream.
+	str nextPutAll: '('.
+	items do: [:ch | str nextPutAll: ch description]
+	    separatedBy: [str nextPutAll: ' | '].
+	str nextPutAll: ')'.
+	^str contents
+    ]
+
+    printOn: aStream [
+	<category: 'printing'>
+	aStream nextPutAll: self description
+    ]
+
+    postCopy [
+	<category: 'copying'>
+	super postCopy.
+	items := items collect: [:i | i copy]
+    ]
+]
+
+
+ComplexPattern subclass: ModifiedPattern [
+    | node modification |
+    
+    <category: 'XML-XML-Patterns'>
+    <comment: '
+XML element content declarations can have certain optional characters
+following an element name or pattern. These characters govern whether
+the element or the content particle may occur one or more (+), zero or
+more (*), or zero or one (?) times in the element content. This class
+represents these patterns or rules.
+
+Instance Variables:
+    node			<XML.Pattern>		The base pattern which the ModifiedPattern influences.
+    modification	<Character>		Optional character denoting content element occurances'>
+
+    ModifiedPattern class >> on: aNode type: t [
+	<category: 'instance creation'>
+	^self new on: aNode type: t
+    ]
+
+    on: aNode type: t [
+	<category: 'initialize'>
+	node := aNode.
+	modification := t
+    ]
+
+    alternateHeads [
+	<category: 'coercing'>
+	^(modification = $* or: [modification = $?]) 
+	    ifTrue: [(followSet copyWith: node) replaceAll: self with: node]
+	    ifFalse: [Array with: node]
+    ]
+
+    pushDownFollowSet [
+	<category: 'coercing'>
+	(modification = $+ or: [modification = $*]) ifTrue: [node addFollow: self].
+	node addFollows: followSet.
+	^Array with: node
+    ]
+
+    description [
+	<category: 'printing'>
+	^node description copyWith: modification
+    ]
+
+    printOn: aStream [
+	<category: 'printing'>
+	aStream nextPutAll: self description
+    ]
+
+    postCopy [
+	<category: 'copying'>
+	super postCopy.
+	node := node copy
+    ]
+]
+
+
+Object subclass: AttributeDef [
+    | name default type flags |
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+XML documents may contain attribute-list declarations that are used to
+define the set of attributes pertaining to a given element type. These
+attribute-list declarations are also used to establish type
+constraints for the attributes and to provide default values for
+attributes. Attribute-list declarations contain attribute definitions
+and this class is used to instantiate these definitions.
+
+An attribute definition in a DTD specifies the name (in an
+AttributeDef instance, this is the name instance variable) of the
+attribute, the data type of the attribute (type instance variable) and
+an optional default value (default instance variable) for the
+attribute.
+
+Instance Variables:
+    name	<XML.NodeTag> 		name of attribute
+    default	<Object>  				default value, if any
+    type	<XML.AttributeType>	type used for validation
+    flags	<Integer>				encoding for fixed, implied and required type attributes'>
+
+    default [
 	<category: 'accessing'>
-	^self value
+	^default
     ]
 
-    expandedName [
+    default: n [
 	<category: 'accessing'>
-	^name expandedName
+	flags := 0.
+	default := nil.
+	n = #required 
+	    ifTrue: [flags := 1]
+	    ifFalse: 
+		[n = #implied 
+		    ifTrue: [flags := 2]
+		    ifFalse: 
+			[n class == Association ifFalse: [self error: 'Invalid default'].
+			n key ifTrue: [flags := 4].
+			default := n value]]
     ]
 
-    key [
+    hasDefault [
+	<category: 'accessing'>
+	^(self isImplied or: [self isRequired]) not
+    ]
+
+    isFixed [
+	<category: 'accessing'>
+	^(flags bitAnd: 4) = 4
+    ]
+
+    isImplied [
+	<category: 'accessing'>
+	^(flags bitAnd: 2) = 2
+    ]
+
+    isRequired [
+	<category: 'accessing'>
+	^(flags bitAnd: 1) = 1
+    ]
+
+    name [
 	<category: 'accessing'>
 	^name
+    ]
+
+    name: n [
+	<category: 'accessing'>
+	name := n
     ]
 
     tag [
@@ -2716,50 +735,662 @@ Instance Variables:
 	^name
     ]
 
+    type [
+	<category: 'accessing'>
+	^type
+    ]
+
+    type: n [
+	<category: 'accessing'>
+	type := n
+    ]
+
+    completeValidationAgainst: aParser [
+	<category: 'validating'>
+	^self type completeValidationAgainst: aParser from: self
+    ]
+
+    selfValidateFor: aParser [
+	<category: 'validating'>
+	type validateDefinition: self for: aParser
+    ]
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	type validateValueOf: anAttribute for: aParser.
+	(self isFixed not or: [anAttribute value = self default]) 
+	    ifFalse: 
+		[aParser 
+		    invalid: 'The attribute "%1" was declared FIXED, but the value used in the document ("%2") did not match the default ("%3")' 
+			    % 
+				{anAttribute tag asString.
+				anAttribute value.
+				self default}]
+    ]
+
     value [
-	<category: 'accessing'>
-	^value
+	<category: 'private'>
+	^self default
     ]
 
-    value: aValue [
-	<category: 'accessing'>
-	value := aValue
+    value: str [
+	<category: 'private'>
+	default := str
+    ]
+]
+
+
+ComplexPattern subclass: SequencePattern [
+    | items |
+    
+    <category: 'XML-XML-Patterns'>
+    <comment: '
+This class represents the ''sequence'' element content constraint in
+an element type declaration.
+
+According to the XML 1.0 specification, the ''sequence'' pattern/rule
+signifies that content particles occuring in a sequence list (declared
+in the DTD) must each appear in the element content in the order given
+in the list.
+
+Instance Variables:
+    items	<SequenceableCollection>		Collection of content particles'>
+
+    SequencePattern class >> on: aList [
+	<category: 'instance creation'>
+	^self new on: aList
     ]
 
-    printCanonicalOn: aStream [
+    on: aList [
+	<category: 'initialize'>
+	items := aList
+    ]
+
+    alternateHeads [
+	<category: 'coercing'>
+	^Array with: items first
+    ]
+
+    pushDownFollowSet [
+	<category: 'coercing'>
+	1 to: items size - 1 do: [:i | (items at: i) addFollow: (items at: i + 1)].
+	items last addFollows: followSet.
+	^items
+    ]
+
+    description [
 	<category: 'printing'>
-	aStream nextPutAll: self tag asString , '="'.
-	self printCanonical: value on: aStream.
-	aStream nextPutAll: '"'
+	| str |
+	str := String new writeStream.
+	str nextPutAll: '('.
+	items do: [:ch | str nextPutAll: ch description]
+	    separatedBy: [str nextPutAll: ' , '].
+	str nextPutAll: ')'.
+	^str contents
     ]
 
     printOn: aStream [
 	<category: 'printing'>
-	self printCanonicalOn: aStream
+	aStream nextPutAll: self description
     ]
 
-    simpleDescription [
-	<category: 'printing'>
-	^'@' , self key
+    postCopy [
+	<category: 'copying'>
+	super postCopy.
+	items := items collect: [:i | i copy]
+    ]
+]
+
+
+Object subclass: AttributeType [
+    | isExternal |
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+AttributeType is an abstract superclass that represents the type of an
+XML attribute.
+
+The XML 1.0 specification specifies that XML attribute types are of
+three kinds: a string type, a set of tokenized types, and enumerated
+types. The string type may take any literal string as a value, the
+tokenized types have varying lexical and semantic constraints and the
+enumerated type attibutes can take one of a list of values provided in
+the declaration.
+
+Subclasses of AttributeType represent the various types of XML
+attributes, e.g., CDATA, for string types, and ID for tokenized
+types.'>
+
+    completeValidationAgainst: aParser from: anAttributeDef [
+	<category: 'validating'>
+	^self
     ]
 
-    isAttribute [
+    simpleValidateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	| v |
+	v := anAttribute value copy.
+	v replaceAll: Character cr with: Character space.
+	v replaceAll: Character nl with: Character space.
+	v replaceAll: Character tab with: Character space.
+	anAttribute value: v
+    ]
+
+    stringAsTokens: aString [
+	<category: 'validating'>
+	| list str buffer hasToken |
+	list := OrderedCollection new.
+	str := aString readStream.
+	buffer := (String new: 8) writeStream.
+	hasToken := str atEnd not.
+	
+	[[str atEnd or: [str peek isSeparator]] 
+	    whileFalse: [buffer nextPut: str next].
+	hasToken 
+	    ifTrue: 
+		[list add: buffer contents.
+		buffer reset].
+	str atEnd] 
+		whileFalse: 
+		    [hasToken := true.
+		    str skipSeparators].
+	^list
+    ]
+
+    validateDefinition: anAttributeDefinition for: aParser [
+	<category: 'validating'>
+	anAttributeDefinition hasDefault 
+	    ifTrue: [self validateValueOf: anAttributeDefinition for: aParser]
+    ]
+
+    validateValueOf: anAttribute for: aParser [
+	"We're going to do this the hard way for now. Most of this has been
+	 done already, except for compressing multiple space characters that
+	 were character references."
+
+	<category: 'validating'>
+	| v v1 |
+	v := anAttribute value.
+	
+	[v1 := v copyReplaceAll: '  ' with: ' '.
+	v1 = v] whileFalse: [v := v1].
+	(v size > 1 and: [v first = Character space]) 
+	    ifTrue: [v := v copyFrom: 2 to: v size].
+	(v size > 1 and: [v last = Character space]) 
+	    ifTrue: [v := v copyFrom: 1 to: v size - 1].
+	anAttribute value: v
+    ]
+
+    isExternal [
+	<category: 'testing'>
+	^isExternal
+    ]
+
+    isID [
+	<category: 'testing'>
+	^false
+    ]
+
+    isExternal: aBoolean [
+	<category: 'accessing'>
+	isExternal := aBoolean
+    ]
+]
+
+
+AttributeType subclass: NOTATION_AT [
+    | typeNames |
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+A concrete subclass of AttributeType, this class represents the
+NOTATION attribute type.
+
+A NOTATION attribute identifies a notation element, declared in the
+DTD with associated system and/or public identifiers, to be used in
+interpreting the element to which the attribute is attached.
+
+Instance Variables:
+    typeNames	<SequenceableCollection>	A list of the legal notation names that may be used for this attribute type.'>
+
+    NOTATION_AT class >> typeNames: list [
+	<category: 'instance creation'>
+	^self new typeNames: list
+    ]
+
+    typeNames [
+	<category: 'accessing'>
+	^typeNames
+    ]
+
+    typeNames: aList [
+	<category: 'accessing'>
+	typeNames := aList
+    ]
+
+    completeValidationAgainst: aParser from: anAttributeDef [
+	<category: 'validating'>
+	typeNames do: 
+		[:nm | 
+		aParser dtd notationAt: nm
+		    ifAbsent: 
+			[aParser 
+			    invalid: 'Undeclared Notation "%1" used by attribute type "%2"' % 
+					{nm.
+					anAttributeDef tag asString}]]
+    ]
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	| v |
+	super validateValueOf: anAttribute for: aParser.
+	v := anAttribute value.
+	(typeNames includes: v) 
+	    ifFalse: 
+		[aParser 
+		    invalid: 'A NOTATION attribute (%1="%2") should have had a value from %3.' 
+			    % 
+				{anAttribute tag asString v.
+				typeNames asArray}]
+    ]
+]
+
+
+AttributeType subclass: NMTOKEN_AT [
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+A concrete subclass of AttributeType, this class represents the
+NMTOKEN attribute type.
+
+This is a tokenized type of attribute and for the purposes of
+validation, values of NMTOKEN type attributes must match a Nmtoken,
+which is any mixture of legal name characters as defined in the XML
+1.0 specification.'>
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	| v |
+	super validateValueOf: anAttribute for: aParser.
+	v := anAttribute value.
+	(v includes: Character space) 
+	    ifTrue: [aParser invalid: 'white space must not occur in NMTOKEN attributes'].
+	(aParser isValidNmToken: v) 
+	    ifFalse: 
+		[aParser 
+		    invalid: 'An NMTOKEN attribute (%1="%2") does not match the required syntax of an NmToken.' 
+			    % 
+				{anAttribute tag asString.
+				v}]
+    ]
+]
+
+
+AttributeType subclass: IDREF_AT [
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+A concrete subclass of AttributeType, this class represents the IDREF
+attribute type.
+
+This is a tokenized type of attribute and for an XML document to be
+valid, values of IDREF type attributes must match the value of some ID
+attribute on some element in the XML document.
+
+ID and IDREF attributes together provide a simple inside-the-document
+linking mechanism with every IDREF attribute required to point to an
+ID attribute as stated above.'>
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	| v |
+	super validateValueOf: anAttribute for: aParser.
+	v := anAttribute value.
+	(v includes: Character space) 
+	    ifTrue: [aParser invalid: 'white space must not occur in IDREF attributes'].
+	(aParser isValidName: v) 
+	    ifFalse: 
+		[aParser 
+		    invalid: 'An IDREF attribute (%1="%2") does not match the required syntax of a Name.' 
+			    % 
+				{anAttribute tag asString.
+				v}].
+	aParser rememberIDREF: v
+    ]
+]
+
+
+AttributeType subclass: NMTOKENS_AT [
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+A concrete subclass of AttributeType, this class represents the
+NMTOKENS attribute type.
+
+This is a tokenized type of attribute and for the purposes of
+validation, values of each NMTOKENS type attributes must match each
+Nmtoken, which is any mixture of legal name characters as defined in
+the XML 1.0 specification.'>
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	| v all |
+	super validateValueOf: anAttribute for: aParser.
+	v := anAttribute value.
+	(all := self stringAsTokens: v) do: 
+		[:nm | 
+		(aParser isValidNmToken: nm) 
+		    ifFalse: 
+			[aParser 
+			    invalid: 'An NMTOKENS attribute (%1="%2") does not match the required syntax of a list of NmTokens.' 
+				    % 
+					{anAttribute tag asString.
+					v}]].
+	all size = 0 
+	    ifTrue: [aParser invalid: 'Attribute has empty list of NMTOKENS']
+    ]
+]
+
+
+AttributeType subclass: ENTITY_AT [
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+A concrete subclass of AttributeType, this class represents the ENTITY
+attribute type.
+
+This is a tokenized type of attribute that signifies to the XML parser
+that for the purposes of validating, the values of entity type
+attributes must match the name of an unparsed entity declared in the
+document type definition.'>
+
+    completeValidationAgainst: aParser from: anAttributeDef [
+	<category: 'validating'>
+	^anAttributeDef hasDefault 
+	    ifTrue: [self validateValueOf: anAttributeDef for: aParser]
+    ]
+
+    validateDefinition: anAttributeDefinition for: aParser [
+	<category: 'validating'>
+	^self
+    ]
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	| v ent |
+	super validateValueOf: anAttribute for: aParser.
+	v := anAttribute value.
+	(v includes: Character space) 
+	    ifTrue: [aParser invalid: 'white space must not occur in ENTITY attributes'].
+	(aParser isValidName: v) 
+	    ifFalse: 
+		[aParser 
+		    invalid: 'An ENTITY attribute (%1="%2") does not match the required syntax of a Name.' 
+			    % 
+				{anAttribute tag asString.
+				v}].
+	ent := aParser dtd generalEntityAt: v.
+	ent == nil 
+	    ifTrue: 
+		[aParser 
+		    invalid: 'Undeclared unparsed entity "%1" used by attribute type "%2"' % 
+				{v.
+				anAttribute tag asString}]
+	    ifFalse: 
+		[ent isParsed 
+		    ifTrue: 
+			[aParser 
+			    invalid: 'The entity "%1" used by attribute type "%2" is a parsed entity and should be unparsed' 
+				    % 
+					{v.
+					anAttribute tag asString}]
+		    ifFalse: []]
+    ]
+]
+
+
+AttributeType subclass: CDATA_AT [
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+A concrete subclass of AttributeType, this class represents the CDATA
+attribute type.
+
+CDATA attributes are genericly typed attributes which, at the level of
+interpretation done by XMLParser, have no constraints or semantics
+applied to their contents.  '>
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	^self
+    ]
+]
+
+
+AttributeType subclass: ID_AT [
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+A concrete subclass of AttributeType, this class represents the ID
+attribute type. This is also a tokenized type of attribute and values
+of ID type attributes must match legal names as defined in the XML 1.0
+specification.
+
+For an XML document to be valid, ID values must uniquely identify the
+elements which bear them; i.e. a name must not appear more than once
+in an XML document as a value of this type. Also for validity
+purposes, an ID attribute must have a declared default of #IMPLIED or
+#REQUIRED in the DTD.
+
+ID and IDREF attributes together provide a simple inside-the-document
+linking mechanism with every IDREF attribute required to point to an
+ID attribute.'>
+
+    validateDefinition: anAttributeDefinition for: aParser [
+	<category: 'validating'>
+	anAttributeDefinition hasDefault 
+	    ifTrue: 
+		[aParser invalid: 'ID attributes must be either #REQUIRED or #IMPLIED']
+    ]
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	| v |
+	super validateValueOf: anAttribute for: aParser.
+	v := anAttribute value.
+	(v includes: Character space) 
+	    ifTrue: [aParser invalid: 'white space must not occur in ID attributes'].
+	(aParser isValidName: v) 
+	    ifFalse: 
+		[aParser 
+		    invalid: 'An ID attribute (%1="%2") does not match the required syntax of a Name.' 
+			    % 
+				{anAttribute tag asString.
+				v}].
+	aParser registerID: anAttribute
+    ]
+
+    isID [
+	<category: 'testing'>
+	^true
+    ]
+]
+
+
+AttributeType subclass: Enumeration_AT [
+    | values |
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+A concrete subclass of AttributeType, this class represents the
+Enumeration attribute type.
+
+Enumerated attributes can take one of a list of values provided in the declaration.
+
+Instance Variables:
+    values	<Collection>		A list of the possible values which the attribute may have.'>
+
+    Enumeration_AT class >> withAll: list [
+	<category: 'instance creation'>
+	^self new values: list
+    ]
+
+    values [
+	<category: 'accessing'>
+	^values
+    ]
+
+    values: aList [
+	<category: 'accessing'>
+	values := aList
+    ]
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	| v |
+	super validateValueOf: anAttribute for: aParser.
+	v := anAttribute value.
+	(values includes: v) 
+	    ifFalse: 
+		[aParser 
+		    invalid: 'An attribute (%1="%2") should have had a value from %3.' % 
+				{anAttribute tag asString.
+				v values asArray}]
+    ]
+]
+
+
+AttributeType subclass: IDREFS_AT [
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+A concrete subclass of AttributeType, this class represents the IDREFS
+attribute type.
+
+This is a tokenized type of attribute and for an XML document to be
+valid, each of the values of IDREFS type attributes must match each of
+the values of some ID attribute on some element in the XML document.'>
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	| v all |
+	super validateValueOf: anAttribute for: aParser.
+	v := anAttribute value.
+	(all := self stringAsTokens: v) do: 
+		[:nm | 
+		(aParser isValidName: nm) 
+		    ifFalse: 
+			[aParser 
+			    invalid: 'An IDREFS attribute (%1="%2") does not match the required syntax of a list of Names.' 
+				    % 
+					{anAttribute tag asString.
+					v}].
+		aParser rememberIDREF: nm].
+	all size = 0 
+	    ifTrue: [aParser invalid: 'Attribute has empty list of IDREFS']
+    ]
+]
+
+
+AttributeType subclass: ENTITIES_AT [
+    
+    <category: 'XML-XML-Attributes'>
+    <comment: '
+A concrete subclass of AttributeType, this class represents the
+ENTITIES attribute type.
+
+This is a tokenized type of attribute that signifies to the XML parser
+that for the purposes of validating, the values of entities type
+attributes must match each of the names of unparsed entities declared
+in the document type definition.'>
+
+    completeValidationAgainst: aParser from: anAttributeDef [
+	<category: 'validating'>
+	^anAttributeDef hasDefault 
+	    ifTrue: [self validateValueOf: anAttributeDef for: aParser]
+    ]
+
+    validateDefinition: anAttributeDefinition for: aParser [
+	<category: 'validating'>
+	^self
+    ]
+
+    validateValueOf: anAttribute for: aParser [
+	<category: 'validating'>
+	| v ent all |
+	super validateValueOf: anAttribute for: aParser.
+	v := anAttribute value.
+	(all := self stringAsTokens: v) do: 
+		[:nm | 
+		(aParser isValidName: nm) 
+		    ifFalse: 
+			[aParser 
+			    invalid: 'An ENTITIES attribute (%1="%2") does not match the required syntax of a list of Names.' 
+				    % 
+					{anAttribute tag asString.
+					v}].
+		ent := aParser dtd generalEntityAt: nm.
+		ent == nil 
+		    ifTrue: 
+			[aParser 
+			    invalid: 'Undeclared unparsed entity "%1" used by attribute type "%2"' % 
+					{nm.
+					anAttribute tag asString}]
+		    ifFalse: 
+			[ent isParsed 
+			    ifTrue: 
+				[aParser 
+				    invalid: 'The entity "%1" used by attribute type "%2" is a parsed entity and should be unparsed' 
+					    % 
+						{nm.
+						anAttribute tag asString}]
+			    ifFalse: []]].
+	all size = 0 
+	    ifTrue: [aParser invalid: 'Attribute has empty list of ENTITIES']
+    ]
+]
+
+
+ConcretePattern subclass: AnyPattern [
+    
+    <category: 'XML-XML-Patterns'>
+    <comment: '
+A subclass of ConcretePattern, this class represents the ANY element
+content constraint in an element type declaration.
+
+According to the XML 1.0 specification the ANY pattern/rule is used to
+indicate to the validating parser that the element can contain any
+elements in any order, as long as it doesn''t break any of the other
+rules of XML and the types of any child elements have been declared.'>
+
+    description [
+	<category: 'accessing'>
+	^'ANY'
+    ]
+
+    alternateHeads [
+	<category: 'coercing'>
+	^followSet copyWith: self
+    ]
+
+    pushDownFollowSet [
+	<category: 'coercing'>
+	self addFollow: self.
+	^nil
+    ]
+
+    couldBeText [
 	<category: 'testing'>
 	^true
     ]
 
-    isLike: aNode [
+    matchesTag: aNodeTag [
 	<category: 'testing'>
-	^self class == aNode class and: [self tag isLike: aNode tag]
+	^true
     ]
 ]
 
-]
-
-
 
-Namespace current: XML [
-
 Link subclass: StreamWrapper [
     | stream isInternal resource usedAsExternal entity cr lf parser line column |
     
@@ -3091,461 +1722,34 @@ Instance Variables:
     ]
 ]
 
-]
-
-
 
-Namespace current: XML [
-
-SAXDispatcher subclass: XMLFilter [
-    | parent |
-    
-    <category: 'XML-XML-SAX'>
-    <comment: '
-XMLFilter allows a parser to be wrapped in a SAX event handler such
-that any attempt to get or set the parser''s properties, or start a
-parse, can be intercepted by the event handler. It can thus add new
-features or properties, or change how the features are implemented, or
-modify the events coming back from the parser.
-
-One example of how this might be used is that a feature (such as
-namespace processing), if it were not implement in the parser, could
-be implemented as a SAXDriver. By letting that driver masquerade as a
-parser, we can let that driver be composed with other kinds of
-SAXDrivers in a chain, and thus compose independent features together.
-
-Instance Variables:
-    parent	<XML.XMLParser | XML.XMLFilter>  the wrapped parser, which may itself be a filter
-'>
-
-    XMLFilter class >> on: aParserOrFilter [
-	<category: 'instance creation'>
-	^self new parent: aParserOrFilter
-    ]
-
-    atFeature: aURIstring [
-	<category: 'accessing'>
-	^parent atFeature: aURIstring
-    ]
-
-    atFeature: aURIstring put: aBoolean [
-	<category: 'accessing'>
-	^parent atFeature: aURIstring put: aBoolean
-    ]
-
-    atProperty: aURIstring [
-	<category: 'accessing'>
-	^parent atProperty: aURIstring
-    ]
-
-    atProperty: aURIstring put: anOvbject [
-	<category: 'accessing'>
-	^parent atProperty: aURIstring put: anOvbject
-    ]
-
-    handlers: aSAXDriver [
-	<category: 'accessing'>
-	self contentHandler: aSAXDriver.
-	self dtdHandler: aSAXDriver.
-	self errorHandler: aSAXDriver.
-	self entityResolver: aSAXDriver
-    ]
-
-    parent [
-	<category: 'accessing'>
-	^parent
-    ]
-
-    parent: aParserOrFilter [
-	<category: 'accessing'>
-	parent := aParserOrFilter.
-	parent handlers: self
-    ]
-
-    parse: dataSource [
-	<category: 'accessing'>
-	^parent parse: dataSource
-    ]
-
-    parseElement: dataSource [
-	<category: 'accessing'>
-	^parent parseElement: dataSource
-    ]
-
-    parseElements: dataSource [
-	<category: 'accessing'>
-	^parent parseElements: dataSource
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Pattern subclass: ComplexPattern [
-    
-    <category: 'XML-XML-Patterns'>
-    <comment: '
-A subclass of Pattern, this class is the superclass to what are
-considered ''complex'' patterns or rules in the element content
-declarations.
-
-Subclasses of ComplexPattern include ChoicePattern, MixedPattern,
-ModifiedPattern and SequencePattern.'>
-
-    isSimple [
-	<category: 'testing'>
-	^false
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-ComplexPattern subclass: MixedPattern [
-    | items |
-    
-    <category: 'XML-XML-Patterns'>
-    <comment: '
-A subclass of ComplexPattern, this class represents the ''mixed''
-element content constraint in an element type declaration.
-
-An element type has mixed content when elements of that type may
-contain both other child elements and character data (text) as
-specified in the element content declaration.
-
-Note: For mixed content type elements, one can''t control the order in
-which the child elements, mixed in among the text, appear.
-
-Instance Variables:
-    items	<SequenceableCollection>  A list of NamedPatterns (as well as one PCDATAPattern) which can appear as content in the context controlled by the MixedPattern.'>
-
-    MixedPattern class >> on: aList [
-	<category: 'instance creation'>
-	^self new on: (aList size = 0 ifTrue: [#()] ifFalse: [aList])
-    ]
-
-    on: aList [
-	<category: 'initialize'>
-	items := (Array with: PCDATAPattern new) , aList
-    ]
-
-    alternateHeads [
-	<category: 'coercing'>
-	^items , followSet
-    ]
-
-    normalizeFor: aParser [
-	"Optimized because lots of the testing needed in
-	 the superclass is not needed here."
-
-	<category: 'coercing'>
-	| result |
-	followSet := OrderedCollection withAll: items.
-	followSet add: TerminalPattern new.
-	result := InitialPattern new.
-	result followSet: followSet.
-	items do: [:i | i followSet: followSet].
-	^result
-    ]
-
-    pushDownFollowSet [
-	<category: 'coercing'>
-	items do: 
-		[:i | 
-		i
-		    addFollow: self;
-		    addFollows: followSet].
-	^items
-    ]
-
-    duplicatesNeedTested [
-	<category: 'testing'>
-	^false
-    ]
-
-    postCopy [
-	<category: 'copying'>
-	super postCopy.
-	items := items collect: [:i | i copy]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-ComplexPattern subclass: ChoicePattern [
-    | items |
-    
-    <category: 'XML-XML-Patterns'>
-    <comment: '
-A subclass of ComplexPattern, this class represents the ''choice''
-element content constraint in an element type declaration.
-
-According to the XML 1.0 specification, the ''choice'' pattern/rule
-signifies that any content particle in a choice list (declared in the
-DTD) may appear in the element content at the location where the
-choice list appears in the grammar.
-
-Instance Variables:
-    items	<Collection>
-    			Collection of content particles'>
-
-    ChoicePattern class >> on: aList [
-	<category: 'instance creation'>
-	^self new on: aList
-    ]
-
-    on: aList [
-	<category: 'initialize'>
-	items := aList
-    ]
-
-    alternateHeads [
-	<category: 'coercing'>
-	^items
-    ]
-
-    pushDownFollowSet [
-	<category: 'coercing'>
-	items do: [:i | i addFollows: followSet].
-	^items
-    ]
-
-    description [
-	<category: 'printing'>
-	| str |
-	str := String new writeStream.
-	str nextPutAll: '('.
-	items do: [:ch | str nextPutAll: ch description]
-	    separatedBy: [str nextPutAll: ' | '].
-	str nextPutAll: ')'.
-	^str contents
-    ]
-
-    printOn: aStream [
-	<category: 'printing'>
-	aStream nextPutAll: self description
-    ]
-
-    postCopy [
-	<category: 'copying'>
-	super postCopy.
-	items := items collect: [:i | i copy]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-ComplexPattern subclass: ModifiedPattern [
-    | node modification |
-    
-    <category: 'XML-XML-Patterns'>
-    <comment: '
-XML element content declarations can have certain optional characters
-following an element name or pattern. These characters govern whether
-the element or the content particle may occur one or more (+), zero or
-more (*), or zero or one (?) times in the element content. This class
-represents these patterns or rules.
-
-Instance Variables:
-    node			<XML.Pattern>		The base pattern which the ModifiedPattern influences.
-    modification	<Character>		Optional character denoting content element occurances'>
-
-    ModifiedPattern class >> on: aNode type: t [
-	<category: 'instance creation'>
-	^self new on: aNode type: t
-    ]
-
-    on: aNode type: t [
-	<category: 'initialize'>
-	node := aNode.
-	modification := t
-    ]
-
-    alternateHeads [
-	<category: 'coercing'>
-	^(modification = $* or: [modification = $?]) 
-	    ifTrue: [(followSet copyWith: node) replaceAll: self with: node]
-	    ifFalse: [Array with: node]
-    ]
-
-    pushDownFollowSet [
-	<category: 'coercing'>
-	(modification = $+ or: [modification = $*]) ifTrue: [node addFollow: self].
-	node addFollows: followSet.
-	^Array with: node
-    ]
-
-    description [
-	<category: 'printing'>
-	^node description copyWith: modification
-    ]
-
-    printOn: aStream [
-	<category: 'printing'>
-	aStream nextPutAll: self description
-    ]
-
-    postCopy [
-	<category: 'copying'>
-	super postCopy.
-	node := node copy
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-SAXDriver subclass: NullSAXDriver [
-    
-    <category: 'XML-XML-SAX'>
-    <comment: '
-The XML parser requires some sort of SAXDriver to receive events. If
-the client desires to simply do syntax checking on the document
-without further processing, and wants minimal overhead, NullSAXDriver
-will do the minimal possible processing while implementing the entire
-SAX API.'>
-
-    characters: aString from: start to: stop [
-	<category: 'content handler'>
-	^self
-    ]
-
-    ignorableWhitespace: aString from: start to: stop [
-	<category: 'content handler'>
-	^self
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Entity subclass: ParameterEntity [
+LargeByteArray subclass: CharacterTable [
     
     <category: 'XML-XML-Nodes'>
     <comment: '
-This class represents a parameter entity which is a parsed entity for
-use within the document type definition.'>
+Class CharacterTable is an optimization of its superclass
+(LargeByteArray) that allows a smallish character table to masquerade
+as a large table.
 
-    entityType [
-	<category: 'accessing'>
-	^'parameter'
-    ]
+When the #at: primitive fails, the failure code checks to see if the
+index exceeded the size of the collection. If so, it answers the
+collection''s default value, which means that characters whose Unicode
+values exceed a particular value will all be classified the same.'>
 
-    streamFor: aParser addSpaces: spaces [
+    at: index [
+	"Answer the value of an indexable field in the receiver.  Fail if the
+	 argument index is not an Integer or is <= 1."
+
 	<category: 'accessing'>
-	| myText textStr input |
-	(aParser hasExpanded: self) 
-	    ifTrue: 
-		[aParser malformed: 'Can''t expand this entity; it is defined recursively'].
-	text == nil 
-	    ifTrue: 
-		[| str |
-		input := aParser saxDriver resolveEntity: self publicID
-			    systemID: self systemID.
-		input == nil ifTrue: [input := InputSource for: self systemID].
-		str := StreamWrapper 
-			    resource: input
-			    entity: self
-			    from: aParser.
-		str textDecl.
-		textStr := (String new: 32) writeStream.
-		[str atEnd] whileFalse: [textStr nextPut: str next].
-		text := textStr contents.
-		str close].
-	myText := text.
-	spaces ifTrue: [myText := ' ' , text , ' '].
-	aParser pushSource: (StreamWrapper 
-		    resource: (InputSource 
-			    uri: nil
-			    encoding: nil
-			    stream: myText readStream)
-		    entity: self
-		    from: aParser).
-	aParser getNextChar
+	^(index > self size and: [index isInteger]) 
+	    ifTrue: [(index between: self size + 1 and: 1114112) ifTrue: [1] ifFalse: [0]]
+	    ifFalse: [super at: index]
     ]
 ]
-
-]
-
 
 
-Namespace current: XML [
-
-Object subclass: Locator [
-    | parser |
-    
-    <category: 'XML-XML-SAX'>
-    <comment: '
-Locators allow SAX drivers to ask the parser where we are in the
-current parse, for error reporting.
-
-Instance Variables:
-    parser			<XML.XMLParser>  the current parser'>
-
-    column [
-	<category: 'processing'>
-	^self externalWrapper column
-    ]
-
-    line [
-	<category: 'processing'>
-	^self externalWrapper line
-    ]
-
-    publicID [
-	<category: 'processing'>
-	| ent |
-	ent := self externalWrapper entity.
-	^ent == nil ifTrue: [nil] ifFalse: [ent publicID]
-    ]
-
-    systemID [
-	<category: 'processing'>
-	| ent |
-	ent := self externalWrapper entity.
-	^ent == nil ifTrue: [nil] ifFalse: [ent systemID]
-    ]
-
-    parser: aParser [
-	<category: 'accessing'>
-	parser := aParser
-    ]
-
-    externalWrapper [
-	<category: 'private'>
-	^parser fullSourceStack reverse detect: [:s | s isInternal not]
-	    ifNone: [parser fullSourceStack first]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Object subclass: XMLParser [
-    | sourceStack hereChar lastSource currentSource dtd unresolvedIDREFs definedIDs latestID sax elementStack validating flags eol buffer nameBuffer |
+SAXParser subclass: XMLParser [
+    | sourceStack hereChar lastSource currentSource dtd unresolvedIDREFs definedIDs latestID elementStack eol buffer nameBuffer |
     
     <category: 'XML-XML-Parsing'>
     <comment: '
@@ -3950,56 +2154,6 @@ Instance Variables:
 	    yourself
     ]
 
-    XMLParser class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
-    XMLParser class >> on: aDataSource [
-	"The dataSource may be a URI, a Filename (or a String
-	 which will be treated as a Filename), or an InputSource."
-
-	<category: 'instance creation'>
-	^self new on: aDataSource
-    ]
-
-    XMLParser class >> processDocumentInFilename: aFilename [
-	<category: 'instance creation'>
-	^self processDocumentInFilename: aFilename beforeScanDo: [:parser | ]
-    ]
-
-    XMLParser class >> processDocumentInFilename: aFilename beforeScanDo: aBlock [
-	<category: 'instance creation'>
-	| stream p |
-	stream := FileStream open: aFilename mode: FileStream read.
-	p := self on: stream.
-	aBlock value: p.
-	^p scanDocument
-    ]
-
-    XMLParser class >> processDocumentString: aString [
-	<category: 'instance creation'>
-	^self processDocumentString: aString beforeScanDo: [:parser | ]
-    ]
-
-    XMLParser class >> processDocumentString: aString beforeScanDo: aBlock [
-	<category: 'instance creation'>
-	| p |
-	p := self on: aString readStream.
-	aBlock value: p.
-	^p scanDocument
-    ]
-
-    XMLParser class >> mapEncoding: anEncoding [
-	<category: 'utilities'>
-	| enc |
-	enc := anEncoding asLowercase.
-	enc = 'utf-8' ifTrue: [^'UTF_8'].
-	enc = 'utf-16' ifTrue: [^'UTF_16'].
-	enc = 'iso-8859-1' ifTrue: [^'ISO8859_1'].
-	^enc
-    ]
-
     XMLParser class >> readFileContents: fn [
 	<category: 'utilities'>
 	| s p r |
@@ -4015,17 +2169,9 @@ Instance Variables:
 	s contents] ensure: [s close]
     ]
 
-    builder: anXMLNodeBuilder [
-	<category: 'initialize'>
-	self saxDriver: (SAXBuilderDriver new builder: anXMLNodeBuilder)
-    ]
-
     initialize [
 	<category: 'initialize'>
-	validating := true.
-	self saxDriver: DOM_SAXDriver new.
-	flags := 0.
-	self processNamespaces: true.
+	super initialize.
 	eol := Character nl.
 	buffer := (String new: 32) writeStream.
 	nameBuffer := (String new: 16) writeStream
@@ -4051,21 +2197,12 @@ Instance Variables:
 	 which will be treated as a Filename), or an InputSource."
 
 	<category: 'initialize'>
+	super on: dataSource.
 	sourceStack := self wrapDataSource: dataSource.
 	elementStack := OrderedCollection new.
 	dtd := DocumentType new.
 	unresolvedIDREFs := Set new.
 	definedIDs := Set new.
-	"Clear those flags that keep track of the
-	 state of the parse, but retain those that
-	 relate to options."
-	flags := flags bitAnd: 65535 bitInvert
-    ]
-
-    saxDriver: aSAXDriver [
-	<category: 'initialize'>
-	sax := aSAXDriver.
-	sax setDocumentLocator: (Locator new parser: self)
     ]
 
     wrapDataSource: aDataSource [
@@ -4086,11 +2223,6 @@ Instance Variables:
 	    from: self) isInternal: false
     ]
 
-    document [
-	<category: 'accessing'>
-	^sax document
-    ]
-
     dtd [
 	<category: 'accessing'>
 	^dtd
@@ -4101,19 +2233,9 @@ Instance Variables:
 	^eol
     ]
 
-    saxDriver [
-	<category: 'accessing'>
-	^sax
-    ]
-
     sourceWrapper [
 	<category: 'accessing'>
 	^sourceStack	"last"
-    ]
-
-    validate: aBoolean [
-	<category: 'accessing'>
-	validating := aBoolean
     ]
 
     hasExpanded: anEntity [
@@ -4129,11 +2251,6 @@ Instance Variables:
 					anEntity name}].
 		s := s nextLink].
 	^false
-    ]
-
-    isValidating [
-	<category: 'testing'>
-	^validating
     ]
 
     shouldTestWFCEntityDeclared [
@@ -4222,6 +2339,32 @@ Instance Variables:
 	self getNextChar.
 	[self misc] whileTrue.
 	self docTypeDecl ifTrue: [[self misc] whileTrue]
+    ]
+
+    contentsOf: anInputSource for: anEntity [
+	| str textStr |
+        <category: 'api'>
+	str := StreamWrapper 
+		    resource: anInputSource
+		    entity: anEntity
+		    from: self.
+	str textDecl.
+	textStr := (String new: 32) writeStream.
+	[str atEnd] whileFalse: [textStr nextPut: str next].
+	str close.
+	^textStr contents
+    ]
+
+    pushSource: anInputSource for: anEntity [
+	| str |
+        <category: 'api'>
+	str := StreamWrapper
+            resource: anInputSource
+            entity: anEntity
+            from: self.
+	self pushSource: str.
+	anEntity text isNil ifTrue: [str textDecl].
+	self getNextChar
     ]
 
     pushSource: aStreamWrapper [
@@ -5066,12 +3209,12 @@ Instance Variables:
 	    ifTrue: 
 		[elementStack isEmpty 
 		    ifTrue: 
-			[(self hasDTD and: [self dtd declaredRoot asString = nm asString]) 
-			    ifFalse: [self invalid: 'Document type must match type of the root element']]
+			[(self hasDTD and: [self dtd declaredRoot asString ~= nm asString]) 
+			    ifTrue: [self invalid: 'Document type must match type of the root element']]
 		    ifFalse: 
 			[elm := elementStack last.
-			types := elm validateTag: nm.
-			types == nil 
+			types := self hasDTD ifTrue: [elm validateTag: nm] ifFalse: [nil].
+			(types == nil and: [ self hasDTD ])
 			    ifTrue: 
 				[self 
 				    invalid: '"%1" is not permitted at this point in the "%2" node' % 
@@ -5080,11 +3223,12 @@ Instance Variables:
 			elm types: types].
 		elementStack addLast: (ElementContext new tag: nm).
 		p := self dtd elementFor: nm from: self.
-		p == nil 
+		self hasDTD
 		    ifTrue: 
-			[self invalid: 'Using a tag (%1) without declaring it is not permitted' 
-				    % {nm asString}].
-		elementStack last type: p]
+			[p == nil
+			    ifTrue: [self invalid: 'Using a tag (%1) without declaring it is not permitted' 
+					    % {nm asString}]
+			    ifFalse: [elementStack last type: p]]]
 	    ifFalse: [elementStack addLast: (ElementContext new tag: nm)]
     ]
 
@@ -5093,7 +3237,7 @@ Instance Variables:
 	| elm textType types |
 	textType := #characters.
 	stop < start ifTrue: [^textType].
-	self isValidating 
+	(self isValidating and: [ self hasDTD ])
 	    ifTrue: 
 		[elm := elementStack last.
 		types := elm 
@@ -5458,7 +3602,7 @@ Instance Variables:
 			    [self 
 				malformed: 'The attribute "%1" was used twice in this element''s tag' 
 					% {attributes last tag asString}]].
-	self isValidating 
+	(self hasDTD and: [ self isValidating ])
 	    ifTrue: [attributes := self validateAttributes: attributes for: nm].
 	attributes := self resolveNamespaces: attributes.
 	^attributes
@@ -5671,21 +3815,6 @@ Instance Variables:
 	self fullSourceStack do: [:str | str close]
     ]
 
-    documentNode [
-	<category: 'private'>
-	^self document
-    ]
-
-    expected: string [
-	<category: 'private'>
-	self malformed: '%1 expected, but not found' % {string}
-    ]
-
-    expectedWhitespace [
-	<category: 'private'>
-	self malformed: 'White space expected but not found'
-    ]
-
     fullSourceStack [
 	<category: 'private'>
 	| out s |
@@ -5728,11 +3857,6 @@ Instance Variables:
 	^nameBuffer contents
     ]
 
-    invalid: aMessage [
-	<category: 'private'>
-	sax nonFatalError: (InvalidSignal new messageText: aMessage)
-    ]
-
     isValidNameChar: c [
 	<category: 'private'>
 	^c = $: 
@@ -5745,11 +3869,6 @@ Instance Variables:
 	^c = $: 
 	    ifTrue: [self processNamespaces not]
 	    ifFalse: [((CharacterClasses at: c asInteger + 1) bitAnd: 4) = 4]
-    ]
-
-    malformed: aMessage [
-	<category: 'private'>
-	sax fatalError: (MalformedSignal new messageText: aMessage)
     ]
 
     nmToken [
@@ -5789,21 +3908,9 @@ Instance Variables:
 					% {encName}]]
     ]
 
-    warn: aMessage [
-	<category: 'private'>
-	sax warning: (WarningSignal new messageText: aMessage)
-    ]
-
     with: list add: node [
 	<category: 'private'>
 	node isDiscarded ifFalse: [list add: node]
-    ]
-
-    declaredStandalone: aBoolean [
-	<category: 'flags'>
-	^aBoolean 
-	    ifTrue: [flags := flags bitOr: 2]
-	    ifFalse: [flags := flags bitAnd: 2 bitInvert]
     ]
 
     flagsComment [
@@ -5814,30 +3921,12 @@ Instance Variables:
 	 documents which bits have been assigned and for
 	 which purpose.
 	 
-	 State bits [0..15]
+	 Additional state bits [0..15]
 	 0 -- parser is currently inside an <![IGNORE[ section
-	 1 -- document has standalone='yes' declaration
-	 2 -- document has a DTD
-	 3 -- document has an externalDTD
-	 4 -- document uses parameter entity references to define part of the DTD
-	 
-	 Option bits [16..29]
-	 16 -- do namespace attributes
-	 17 -- pass namespace declarations on to the client
 	 "
 
 	<category: 'flags'>
 	^self commentOnly
-    ]
-
-    hasDTD [
-	<category: 'flags'>
-	^(flags bitAnd: 4) = 4
-    ]
-
-    hasExternalDTD [
-	<category: 'flags'>
-	^(flags bitAnd: 8) = 8
     ]
 
     ignore [
@@ -5850,55 +3939,6 @@ Instance Variables:
 	^aBoolean 
 	    ifTrue: [flags := flags bitOr: 1]
 	    ifFalse: [flags := flags bitAnd: 1 bitInvert]
-    ]
-
-    isDeclaredStandalone [
-	<category: 'flags'>
-	^(flags bitAnd: 2) = 2
-    ]
-
-    noteDTD [
-	<category: 'flags'>
-	flags := flags bitOr: 4
-    ]
-
-    noteExternalDTD [
-	<category: 'flags'>
-	flags := flags bitOr: 8
-    ]
-
-    notePEReference [
-	<category: 'flags'>
-	flags := flags bitOr: 16
-    ]
-
-    processNamespaces [
-	<category: 'flags'>
-	^(flags bitAnd: 65536) = 65536
-    ]
-
-    processNamespaces: aBoolean [
-	<category: 'flags'>
-	^aBoolean 
-	    ifTrue: [flags := flags bitOr: 65536]
-	    ifFalse: [flags := flags bitAnd: 65536 bitInvert]
-    ]
-
-    showNamespaceDeclarations [
-	<category: 'flags'>
-	^(flags bitAnd: 131072) = 131072
-    ]
-
-    showNamespaceDeclarations: aBoolean [
-	<category: 'flags'>
-	^aBoolean 
-	    ifTrue: [flags := flags bitOr: 131072]
-	    ifFalse: [flags := flags bitAnd: 131072 bitInvert]
-    ]
-
-    usesParameterEntities [
-	<category: 'flags'>
-	^(flags bitAnd: 16) = 16
     ]
 
     correctAttributeTag: attribute [
@@ -5987,113 +4027,6 @@ Instance Variables:
 	^newAttributes isEmpty ifTrue: [nil] ifFalse: [newAttributes asArray]
     ]
 
-    atFeature: aURIstring [
-	<category: 'SAX accessing'>
-	aURIstring = SAXValidate ifTrue: [^self isValidating].
-	aURIstring = SAXNamespace ifTrue: [^self processNamespaces].
-	aURIstring = SAXNamespacePrefixes 
-	    ifTrue: [^self showNamespaceDeclarations].
-	aURIstring = SAXExternalGeneralEntities 
-	    ifTrue: [^SAXNotSupportedException signal].
-	aURIstring = SAXExternalParameterEntities 
-	    ifTrue: [^SAXNotSupportedException signal].
-	SAXNotRecognizedException new signal
-    ]
-
-    atFeature: aURIstring put: aBoolean [
-	<category: 'SAX accessing'>
-	aURIstring = SAXValidate ifTrue: [^self validate: aBoolean].
-	aURIstring = SAXNamespace ifTrue: [^self processNamespaces: aBoolean].
-	aURIstring = SAXNamespacePrefixes 
-	    ifTrue: [^self showNamespaceDeclarations: aBoolean].
-	aURIstring = SAXExternalGeneralEntities 
-	    ifTrue: [^SAXNotSupportedException signal].
-	aURIstring = SAXExternalParameterEntities 
-	    ifTrue: [^SAXNotSupportedException signal].
-	SAXNotRecognizedException new signal
-    ]
-
-    atProperty: aURIstring [
-	<category: 'SAX accessing'>
-	SAXNotRecognizedException new signal
-    ]
-
-    atProperty: aURIstring put: anObject [
-	<category: 'SAX accessing'>
-	SAXNotRecognizedException new signal
-    ]
-
-    contentHandler [
-	<category: 'SAX accessing'>
-	^sax contentHandler
-    ]
-
-    contentHandler: aSAXDriver [
-	<category: 'SAX accessing'>
-	| newSax |
-	newSax := sax class == SAXDispatcher 
-		    ifTrue: [sax]
-		    ifFalse: [SAXDispatcher new handlers: sax].
-	newSax contentHandler: aSAXDriver.
-	self saxDriver: newSax
-    ]
-
-    dtdHandler [
-	<category: 'SAX accessing'>
-	^sax dtdHandler
-    ]
-
-    dtdHandler: aSAXDriver [
-	<category: 'SAX accessing'>
-	| newSax |
-	newSax := sax class == SAXDispatcher 
-		    ifTrue: [sax]
-		    ifFalse: [SAXDispatcher new handlers: sax].
-	newSax dtdHandler: aSAXDriver.
-	self saxDriver: newSax
-    ]
-
-    entityResolver [
-	<category: 'SAX accessing'>
-	^sax entityResolver
-    ]
-
-    entityResolver: aSAXDriver [
-	<category: 'SAX accessing'>
-	| newSax |
-	newSax := sax class == SAXDispatcher 
-		    ifTrue: [sax]
-		    ifFalse: [SAXDispatcher new handlers: sax].
-	newSax entityResolver: aSAXDriver.
-	self saxDriver: newSax
-    ]
-
-    errorHandler [
-	<category: 'SAX accessing'>
-	^sax errorHandler
-    ]
-
-    errorHandler: aSAXDriver [
-	<category: 'SAX accessing'>
-	| newSax |
-	newSax := sax class == SAXDispatcher 
-		    ifTrue: [sax]
-		    ifFalse: [SAXDispatcher new handlers: sax].
-	newSax errorHandler: aSAXDriver.
-	self saxDriver: newSax
-    ]
-
-    handlers: aSAXDriver [
-	<category: 'SAX accessing'>
-	self saxDriver: aSAXDriver
-    ]
-
-    parse: dataSource [
-	<category: 'SAX accessing'>
-	self on: dataSource.
-	^self scanDocument
-    ]
-
     parseElement [
 	<category: 'SAX accessing'>
 	^
@@ -6104,13 +4037,6 @@ Instance Variables:
 	sax endDocumentFragment.
 	sax document == nil ifTrue: [nil] ifFalse: [sax document elements first]] 
 		ifCurtailed: [self closeAllFiles]
-    ]
-
-    parseElement: dataSource [
-	<category: 'SAX accessing'>
-	self validate: false.
-	self on: dataSource.
-	^self parseElement
     ]
 
     parseElements [
@@ -6125,721 +4051,10 @@ Instance Variables:
 	sax document == nil ifTrue: [nil] ifFalse: [sax document elements]] 
 		ifCurtailed: [self closeAllFiles]
     ]
-
-    parseElements: dataSource [
-	<category: 'SAX accessing'>
-	self validate: false.
-	self on: dataSource.
-	^self parseElements
-    ]
 ]
-
-]
-
 
 
-Namespace current: XML [
-
-SAXException subclass: SAXParseException [
-    
-    <category: 'XML-XML-Exceptions'>
-    <comment: nil>
-]
-
-]
-
-
-
-Namespace current: XML [
-
-SAXParseException subclass: MalformedSignal [
-    
-    <category: 'XML-XML-Exceptions'>
-    <comment: nil>
-]
-
-]
-
-
-
-Namespace current: XML [
-
-SAXParseException subclass: InvalidSignal [
-    
-    <category: 'XML-XML-Exceptions'>
-    <comment: nil>
-]
-
-]
-
-
-
-Namespace current: XML [
-
-SAXException subclass: SAXNotSupportedException [
-    
-    <category: 'XML-XML-Exceptions'>
-    <comment: nil>
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Node subclass: Comment [
-    | text |
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-A concrete subclass of XML.Node, this class represents an XML comment.
-
-XML comments may appear anywhere in an XML document outside other
-markup or within the document type declaration at places allowed by
-grammar. XML comments are delimited by the start-tag ''<!--'' and the
-end-tag ''-->''.
-
-According to the XML 1.0 specification, for compatibilty,
-double-hyphens (the string ''--'') must not occur within comments.
-
-Instance Variables:
-    text		<String>  	contents of the comment element'>
-
-    printHTMLOn: aStream [
-	<category: 'printing'>
-	self printOn: aStream
-    ]
-
-    printOn: aStream depth: indent [
-	<category: 'printing'>
-	aStream 
-	    nextPutAll: '<!--' , (text == nil ifTrue: [''] ifFalse: [text]) , '-->'
-    ]
-
-    text [
-	<category: 'accessing'>
-	^text
-    ]
-
-    text: aText [
-	<category: 'accessing'>
-	text := aText
-    ]
-
-    isComment [
-	<category: 'testing'>
-	^true
-    ]
-
-    saxDo: aDriver [
-	<category: 'enumerating'>
-	aDriver 
-	    comment: text
-	    from: 1
-	    to: text size
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-SAXParseException subclass: WarningSignal [
-    
-    <category: 'XML-XML-Exceptions'>
-    <comment: nil>
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Object subclass: AttributeDef [
-    | name default type flags |
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-XML documents may contain attribute-list declarations that are used to
-define the set of attributes pertaining to a given element type. These
-attribute-list declarations are also used to establish type
-constraints for the attributes and to provide default values for
-attributes. Attribute-list declarations contain attribute definitions
-and this class is used to instantiate these definitions.
-
-An attribute definition in a DTD specifies the name (in an
-AttributeDef instance, this is the name instance variable) of the
-attribute, the data type of the attribute (type instance variable) and
-an optional default value (default instance variable) for the
-attribute.
-
-Instance Variables:
-    name	<XML.NodeTag> 		name of attribute
-    default	<Object>  				default value, if any
-    type	<XML.AttributeType>	type used for validation
-    flags	<Integer>				encoding for fixed, implied and required type attributes'>
-
-    default [
-	<category: 'accessing'>
-	^default
-    ]
-
-    default: n [
-	<category: 'accessing'>
-	flags := 0.
-	default := nil.
-	n = #required 
-	    ifTrue: [flags := 1]
-	    ifFalse: 
-		[n = #implied 
-		    ifTrue: [flags := 2]
-		    ifFalse: 
-			[n class == Association ifFalse: [self error: 'Invalid default'].
-			n key ifTrue: [flags := 4].
-			default := n value]]
-    ]
-
-    hasDefault [
-	<category: 'accessing'>
-	^(self isImplied or: [self isRequired]) not
-    ]
-
-    isFixed [
-	<category: 'accessing'>
-	^(flags bitAnd: 4) = 4
-    ]
-
-    isImplied [
-	<category: 'accessing'>
-	^(flags bitAnd: 2) = 2
-    ]
-
-    isRequired [
-	<category: 'accessing'>
-	^(flags bitAnd: 1) = 1
-    ]
-
-    name [
-	<category: 'accessing'>
-	^name
-    ]
-
-    name: n [
-	<category: 'accessing'>
-	name := n
-    ]
-
-    tag [
-	<category: 'accessing'>
-	^name
-    ]
-
-    type [
-	<category: 'accessing'>
-	^type
-    ]
-
-    type: n [
-	<category: 'accessing'>
-	type := n
-    ]
-
-    completeValidationAgainst: aParser [
-	<category: 'validating'>
-	^self type completeValidationAgainst: aParser from: self
-    ]
-
-    selfValidateFor: aParser [
-	<category: 'validating'>
-	type validateDefinition: self for: aParser
-    ]
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	type validateValueOf: anAttribute for: aParser.
-	(self isFixed not or: [anAttribute value = self default]) 
-	    ifFalse: 
-		[aParser 
-		    invalid: 'The attribute "%1" was declared FIXED, but the value used in the document ("%2") did not match the default ("%3")' 
-			    % 
-				{anAttribute tag asString.
-				anAttribute value.
-				self default}]
-    ]
-
-    value [
-	<category: 'private'>
-	^self default
-    ]
-
-    value: str [
-	<category: 'private'>
-	default := str
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Document subclass: DocumentFragment [
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-DocumentFragment is a subclass of Document which can be used to model
-documents which do not correctly conform to the XML standard. Such
-fragments may contain text that is not contained within any element,
-or may contain more than one element at the top level.
-
-At present it is not possible to represent a Document fragment that
-contains the start tag but not the end tag of an element, or contains
-the end tag but not the start tag.  '>
-
-    addNode: aNode [
-	<category: 'accessing'>
-	nodes add: aNode.
-	aNode parent: self.
-	aNode isElement ifTrue: [root == nil ifTrue: [root := aNode]]
-    ]
-
-    saxDo: aDriver [
-	<category: 'enumerating'>
-	aDriver startDocumentFragment.
-	self dtd == nil ifFalse: [self dtd saxDo: aDriver].
-	1 to: self children size do: [:i | (self children at: i) saxDo: aDriver].
-	aDriver endDocumentFragment
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-SAXDriver subclass: DOM_SAXDriver [
-    | stack document newNamespaces |
-    
-    <category: 'XML-XML-SAX'>
-    <comment: '
-This class represents a specialized type of SAX (Simple API for XML)
-processor that follows the ''object model'' for processing XML
-documents to build a Document Object Model (DOM) tree from the
-processed XML document.
-
-As a way to distinguish between the two, SAX is an event driven API
-for reading XML documents. Character groups within the document are
-mapped to one or more callbacks to a SAXDriver, but no assumption is
-made that any objects will necessarily be created as a result of those
-events. DOM, on the other hand, is an object API for reading
-XML. Character groups within the document are mapped to subclasses of
-Node.
-
-SAX is very useful for speed and memory conservation if the document
-can be processed linearly. DOM is very useful if a substantial amount
-of non-linear processing is required.
-
-Instance Variables:
-    stack				<OrderedCollection>		A stack containing the various elements that contain the current parse position.
-    document			<XML.Document>			The Document or DocumentFragment which models the entire XML document being parsed.
-    newNamespaces	<Dictionary>				maps qualifiers to namespaces for the next element'>
-
-    comment: data from: start to: stop [
-	<category: 'other'>
-	document == nil ifTrue: [self startDocument].
-	stack last addNode: (Comment new text: (data copyFrom: start to: stop))
-    ]
-
-    idOfElement: elementID [
-	"Notify the client what was the ID of the latest startElement"
-
-	<category: 'other'>
-	document atID: elementID put: stack last
-    ]
-
-    characters: aString [
-	<category: 'content handler'>
-	stack last addNode: (Text text: aString)
-    ]
-
-    endDocument [
-	<category: 'content handler'>
-	document := stack removeLast.
-	document isDocument ifFalse: [self error: 'End of Document not expected'].
-	stack isEmpty ifFalse: [self error: 'End of Document not expected']
-    ]
-
-    endDocumentFragment [
-	<category: 'content handler'>
-	document := stack removeLast.
-	document isDocument ifFalse: [self error: 'End of Document not expected'].
-	stack isEmpty ifFalse: [self error: 'End of Document not expected']
-    ]
-
-    endElement: namespaceURI localName: localName qName: name [
-	"indicates the end of an element. See startElement"
-
-	<category: 'content handler'>
-	stack removeLast condenseList
-    ]
-
-    ignorableWhitespace: aString [
-	<category: 'content handler'>
-	stack last addNode: (Text text: aString)
-    ]
-
-    processingInstruction: targetString data: dataString [
-	<category: 'content handler'>
-	document == nil ifTrue: [self startDocument].
-	stack last addNode: (PI name: targetString text: dataString)
-    ]
-
-    startDocument [
-	<category: 'content handler'>
-	document := Document new.
-	document dtd: DocumentType new.
-	stack := OrderedCollection with: document
-    ]
-
-    startDocumentFragment [
-	<category: 'content handler'>
-	document := DocumentFragment new.
-	document dtd: DocumentType new.
-	stack := OrderedCollection with: document
-    ]
-
-    startElement: namespaceURI localName: localName qName: name attributes: attributes [
-	<category: 'content handler'>
-	| element tag |
-	document == nil ifTrue: [self startDocument].
-	tag := NodeTag new 
-		    qualifier: ((name includes: $:) ifTrue: [name copyUpTo: $:] ifFalse: [''])
-		    ns: namespaceURI
-		    type: localName.
-	element := Element 
-		    tag: tag
-		    attributes: attributes
-		    elements: OrderedCollection new.
-	element namespaces: newNamespaces.
-	newNamespaces := nil.
-	stack size = 1 ifTrue: [document dtd declaredRoot: name].
-	stack last addNode: element.
-	stack addLast: element
-    ]
-
-    startPrefixMapping: prefix uri: uri [
-	<category: 'content handler'>
-	newNamespaces == nil ifTrue: [newNamespaces := Dictionary new].
-	newNamespaces at: prefix put: uri
-    ]
-
-    notationDecl: name publicID: publicID systemID: systemID [
-	<category: 'DTD handler'>
-	| notation |
-	notation := Notation new name: name
-		    identifiers: (Array with: publicID with: systemID).
-	document dtd 
-	    notationAt: name
-	    put: notation
-	    from: self
-    ]
-
-    document [
-	<category: 'accessing'>
-	^document
-    ]
-
-    endElement [
-	<category: 'compat'>
-	| namespaceURI localName name tag |
-	tag := stack last tag.
-	tag isString 
-	    ifTrue: 
-		[localName := name := tag.
-		namespaceURI := '']
-	    ifFalse: 
-		[localName := tag type.
-		name := tag asString.
-		namespaceURI := tag namespace].
-	^self 
-	    endElement: namespaceURI
-	    localName: localName
-	    qName: name
-    ]
-
-    startElement: tag atts: attrs [
-	<category: 'compat'>
-	| namespaceURI localName name attributes |
-	tag isString 
-	    ifTrue: 
-		[localName := name := tag.
-		namespaceURI := '']
-	    ifFalse: 
-		[localName := tag type.
-		name := tag asString.
-		namespaceURI := tag namespace].
-	attributes := attrs == nil ifTrue: [#()] ifFalse: [attrs].
-	^self 
-	    startElement: namespaceURI
-	    localName: localName
-	    qName: name
-	    attributes: attributes
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-ComplexPattern subclass: SequencePattern [
-    | items |
-    
-    <category: 'XML-XML-Patterns'>
-    <comment: '
-This class represents the ''sequence'' element content constraint in
-an element type declaration.
-
-According to the XML 1.0 specification, the ''sequence'' pattern/rule
-signifies that content particles occuring in a sequence list (declared
-in the DTD) must each appear in the element content in the order given
-in the list.
-
-Instance Variables:
-    items	<SequenceableCollection>		Collection of content particles'>
-
-    SequencePattern class >> on: aList [
-	<category: 'instance creation'>
-	^self new on: aList
-    ]
-
-    on: aList [
-	<category: 'initialize'>
-	items := aList
-    ]
-
-    alternateHeads [
-	<category: 'coercing'>
-	^Array with: items first
-    ]
-
-    pushDownFollowSet [
-	<category: 'coercing'>
-	1 to: items size - 1 do: [:i | (items at: i) addFollow: (items at: i + 1)].
-	items last addFollows: followSet.
-	^items
-    ]
-
-    description [
-	<category: 'printing'>
-	| str |
-	str := String new writeStream.
-	str nextPutAll: '('.
-	items do: [:ch | str nextPutAll: ch description]
-	    separatedBy: [str nextPutAll: ' , '].
-	str nextPutAll: ')'.
-	^str contents
-    ]
-
-    printOn: aStream [
-	<category: 'printing'>
-	aStream nextPutAll: self description
-    ]
-
-    postCopy [
-	<category: 'copying'>
-	super postCopy.
-	items := items collect: [:i | i copy]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-MalformedSignal subclass: BadCharacterSignal [
-    
-    <category: 'XML-XML-Exceptions'>
-    <comment: nil>
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Magnitude subclass: NodeTag [
-    | namespace type qualifier |
-    
-    <category: 'XML-XML-Parsing'>
-    <comment: '
-NodeTag is used as the "tag" of an Element or Attribute. It acts as
-the name or identifier of its owner. It is subclassed from Magnitude
-as a convenience to allow NodeTags to easily understand sorting
-protocol.
-
-In XML all elements or nodes are delimited by start and end tags (or
-empty-element tags) and instances of this class are used to represent
-these element tags. The name of the tag (type instance variable) gives
-the element type.
-
-
-Instance Variables:
-    namespace	<String>		A URI in string form that uniquely identifies the XML namespace to which the type belongs. May be an empty string if the type is outside all namespaces.
-    type			<String>		Name of tag, used to indicate element or attribute type.
-    qualifier		<String>		In XML documents, the namespace is mapped to a qualifier, which is used as a prefix for the type. The namespace is assumed to be unique across all documents, but is quite clumsy. The qualifier is not unique across documents, but is unambiguous at the point where it is used and is short enough to be convenient. The qualifier may be the empty string if the namespace is empty or if the namespace is the current default namespace.'>
-
-    qualifier: q ns: ns type: typeStr [
-	<category: 'initialize'>
-	namespace := ns.
-	type := typeStr.
-	qualifier := q
-    ]
-
-    expandedName [
-	<category: 'accessing'>
-	^namespace isEmpty ifTrue: [type] ifFalse: [namespace , '#' , type]
-    ]
-
-    namespace [
-	<category: 'accessing'>
-	^namespace
-    ]
-
-    qualifier [
-	<category: 'accessing'>
-	^qualifier
-    ]
-
-    type [
-	<category: 'accessing'>
-	^type
-    ]
-
-    asString [
-	<category: 'converting'>
-	^qualifier isEmpty ifTrue: [type] ifFalse: [qualifier , ':' , type]
-    ]
-
-    isLike: aName [
-	<category: 'testing'>
-	^aName isString 
-	    ifTrue: [namespace isEmpty and: [type = aName]]
-	    ifFalse: [namespace = aName namespace and: [type = aName type]]
-    ]
-
-    printOn: aStream [
-	<category: 'printing'>
-	aStream nextPutAll: '{' , self asString , '}'
-    ]
-
-    < aNodeTag [
-	"Answer whether the receiver is less than the argument."
-
-	<category: 'comparing'>
-	^self asString < aNodeTag asString
-    ]
-
-    = aNodeTag [
-	<category: 'comparing'>
-	^self class = aNodeTag class and: 
-		[self type = aNodeTag type and: 
-			[self namespace == nil 
-			    ifTrue: [self qualifier = aNodeTag qualifier]
-			    ifFalse: [self namespace = aNodeTag namespace]]]
-    ]
-
-    hash [
-	"The hash value is not dependent on either the namespace
-	 or the qualifier, but equality is dependent on this. We think
-	 this will not be a problem because collisions between tags
-	 that have the same type but different namespaces or qualifiers
-	 should be rare in the majority of cases."
-
-	<category: 'comparing'>
-	^self type hash
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-SAXException subclass: SAXNotRecognizedException [
-    
-    <category: 'XML-XML-Exceptions'>
-    <comment: nil>
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Object subclass: DocumentType [
-    | attributeDefs elementDefs generalEntities parameterEntities notations declaredRoot |
-    
-    <category: 'XML-XML-Parsing'>
-    <comment: '
-This class represents an XML document type definition or DTD.
-
-The document type declaration can point to an external subset
-containing markup declarations, or can contain the markup declarations
-directly in an internal subset, or can do both. The DTD for a document
-consists of both subsets taken together.
-
-Instance Variables:
-    attributeDefs		<Dictionary>			Type definitions of the attributes for each element.
-    elementDefs		<Dictionary>		Type definitions for the elements that are legal in the document.
-    generalEntities		<Dictionary>		Definitions for the general entities that can be used in the body of the document.
-    parameterEntities	<Dictionary>		Definitions for the parameter entities that can be used in the DTD of the document.
-    notations			<Dictionary>		Notations defined in the DTD.
-    declaredRoot 		<XML.NodeTag>		The NodeTag which the DTD declares will be the root element of the document--a document cannot be valid if this does not match the tag of the root element.'>
-
-    DocumentType class >> new [
-	<category: 'instance creation'>
-	^super new initialize
-    ]
-
-    initialize [
-	<category: 'initialize'>
-	notations := Dictionary new.
-	elementDefs := Dictionary new.
-	attributeDefs := Dictionary new.
-	generalEntities := Dictionary new.
-	parameterEntities := Dictionary new
-    ]
-
-    attributeFor: key subKey: k2 from: anErrorReporter [
-	<category: 'accessing'>
-	| val |
-	(val := attributeDefs at: key asString ifAbsent: []) == nil 
-	    ifTrue: 
-		[anErrorReporter 
-		    invalid: 'The attribute "%1 %2" has not been defined' % 
-				{key asString.
-				k2 asString}].
-	^val at: k2 asString
-	    ifAbsent: 
-		[anErrorReporter 
-		    invalid: 'The attribute "%1 %2" has not been defined' % 
-				{key asString.
-				k2 asString}]
-    ]
-
+DocumentType extend [
     attributeFor: key subKey: k2 put: value from: anErrorReporter [
 	<category: 'accessing'>
 	| dict |
@@ -6857,964 +4072,40 @@ Instance Variables:
 	dict at: k2 asString put: value
     ]
 
-    attributesFor: key [
-	<category: 'accessing'>
-	^attributeDefs at: key asString ifAbsent: [Dictionary new]
-    ]
-
     attributeTypeFor: key subKey: k2 from: anErrorReporter [
-	<category: 'accessing'>
-	| val |
-	(val := attributeDefs at: key asString ifAbsent: []) == nil 
-	    ifTrue: [^CDATA_AT new].
-	^(val at: k2 asString ifAbsent: [^CDATA_AT new]) type
-    ]
-
-    declaredRoot [
-	<category: 'accessing'>
-	^declaredRoot
-    ]
-
-    declaredRoot: aTag [
-	<category: 'accessing'>
-	declaredRoot := aTag
-    ]
-
-    elementFor: key from: anErrorReporter [
-	<category: 'accessing'>
-	| val |
-	(val := elementDefs at: key asString ifAbsent: []) == nil 
-	    ifTrue: 
-		[anErrorReporter 
-		    warn: 'The element "%1" has not been defined' % {key asString}].
-	^val
-    ]
-
-    elementFor: key put: value from: anErrorReporter [
-	<category: 'accessing'>
-	(elementDefs includesKey: key asString) 
-	    ifTrue: 
-		[| msg |
-		msg := 'The element "%1" has been defined more than once' % {key asString}.
-		anErrorReporter isValidating 
-		    ifTrue: [anErrorReporter invalid: msg]
-		    ifFalse: [anErrorReporter warn: msg]].
-	elementDefs at: key asString put: value
-    ]
-
-    generalEntityAt: key [
-	"We do some tricks to make sure that, if the value
-	 is predefined in the parser, we use the predefined
-	 value. We could just store the predefined values
-	 in with the general ones, but we don't want to show
-	 warnings if the user (very correctly) defines them.
-	 An enhancement would be to let the user use his own
-	 values rather than the predefined ones, but we know
-	 that the predefined ones will be correct--we don't know
-	 that his will be."
-
-	<category: 'accessing'>
-	| val |
-	val := PredefinedEntities at: key ifAbsent: [].
-	val == nil ifTrue: [val := generalEntities at: key ifAbsent: []].
-	^val
-    ]
-
-    generalEntityAt: key put: value from: anErrorReporter [
-	<category: 'accessing'>
-	(generalEntities includesKey: key) 
-	    ifTrue: 
-		[^anErrorReporter 
-		    warn: 'The general entity "%1" has been defined more than once' % {key}].
-	generalEntities at: key put: value
-    ]
-
-    notationAt: name from: anErrorReporter [
-	<category: 'accessing'>
-	^notations at: name
-	    ifAbsent: [anErrorReporter invalid: 'Reference to an undeclared Notation']
-    ]
-
-    notationAt: name ifAbsent: aBlock [
-	<category: 'accessing'>
-	^notations at: name ifAbsent: aBlock
-    ]
-
-    notationAt: name put: notation from: anErrorReporter [
-	<category: 'accessing'>
-	(notations includesKey: name) 
-	    ifTrue: [anErrorReporter invalid: 'Duplicate definitions for a Notation'].
-	notations at: name put: notation
-    ]
-
-    parameterEntityAt: key [
-	<category: 'accessing'>
-	^parameterEntities at: key ifAbsent: []
-    ]
-
-    parameterEntityAt: key put: value from: anErrorReporter [
-	<category: 'accessing'>
-	(parameterEntities includesKey: key) 
-	    ifTrue: 
-		[^anErrorReporter 
-		    warn: 'The parameter entity "%1" has been defined more than once' % {key}].
-	parameterEntities at: key put: value
+        <category: 'accessing'>
+        | val |
+        (val := attributeDefs at: key asString ifAbsent: []) == nil
+            ifTrue: [^CDATA_AT new].
+        ^(val at: k2 asString ifAbsent: [^CDATA_AT new]) type
     ]
 
     completeValidationAgainst: aParser [
-	<category: 'private'>
-	generalEntities 
-	    keysAndValuesDo: [:eName :entity | entity completeValidationAgainst: aParser].
-	attributeDefs keysAndValuesDo: 
-		[:eName :attribs | 
-		attribs 
-		    keysAndValuesDo: [:aName :attrib | attrib completeValidationAgainst: aParser]]
-    ]
-
-    printCanonicalOn: aStream [
-	"Jumping through hoops to get Notations printed
-	 just as Sun desires--Are public IDs really supposed
-	 to have their white space normalized? If so, we
-	 should move normalization to the parser."
-
-	<category: 'printing'>
-	| s s1 |
-	notations isEmpty ifTrue: [^self].
-	aStream
-	    nextPutAll: '<!DOCTYPE ';
-	    nextPutAll: declaredRoot asString;
-	    nextPutAll: ' [';
-	    nl.
-	(notations asSortedCollection: [:n1 :n2 | n1 name < n2 name]) do: 
-		[:n | 
-		aStream
-		    nextPutAll: '<!NOTATION ';
-		    nextPutAll: n name;
-		    space.
-		n publicID == nil 
-		    ifTrue: [aStream nextPutAll: 'SYSTEM']
-		    ifFalse: 
-			[s := n publicID copy.
-			s replaceAll: Character cr with: Character space.
-			s replaceAll: Character nl with: Character space.
-			s replaceAll: Character tab with: Character space.
-			
-			[s1 := s copyReplaceAll: '  ' with: ' '.
-			s1 = s] whileFalse: [s := s1].
-			aStream
-			    nextPutAll: 'PUBLIC ''';
-			    nextPutAll: s;
-			    nextPut: $'].
-		n systemID == nil 
-		    ifFalse: 
-			[aStream
-			    nextPutAll: ' ''';
-			    nextPutAll: n systemID;
-			    nextPut: $'].
-		aStream
-		    nextPutAll: '>';
-		    nl].
-	aStream
-	    nextPutAll: ']>';
-	    nl
-    ]
-
-    saxDo: aDriver [
-	<category: 'enumerating'>
-	notations == nil 
-	    ifFalse: 
-		[notations do: 
-			[:n | 
-			aDriver 
-			    notationDecl: n name
-			    publicID: n publicID
-			    systemID: n systemID]]
+        <category: 'private'>
+        generalEntities
+            keysAndValuesDo: [:eName :entity | entity completeValidationAgainst: aParser].
+        attributeDefs keysAndValuesDo:
+                [:eName :attribs |
+                attribs
+                    keysAndValuesDo: [:aName :attrib | attrib completeValidationAgainst: aParser]]
     ]
 ]
 
-]
-
-
-
-Namespace current: XML [
-
-Object subclass: AttributeType [
-    | isExternal |
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-AttributeType is an abstract superclass that represents the type of an
-XML attribute.
-
-The XML 1.0 specification specifies that XML attribute types are of
-three kinds: a string type, a set of tokenized types, and enumerated
-types. The string type may take any literal string as a value, the
-tokenized types have varying lexical and semantic constraints and the
-enumerated type attibutes can take one of a list of values provided in
-the declaration.
-
-Subclasses of AttributeType represent the various types of XML
-attributes, e.g., CDATA, for string types, and ID for tokenized
-types.'>
-
-    completeValidationAgainst: aParser from: anAttributeDef [
-	<category: 'validating'>
-	^self
-    ]
-
-    simpleValidateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	| v |
-	v := anAttribute value copy.
-	v replaceAll: Character cr with: Character space.
-	v replaceAll: Character nl with: Character space.
-	v replaceAll: Character tab with: Character space.
-	anAttribute value: v
-    ]
-
-    stringAsTokens: aString [
-	<category: 'validating'>
-	| list str buffer hasToken |
-	list := OrderedCollection new.
-	str := aString readStream.
-	buffer := (String new: 8) writeStream.
-	hasToken := str atEnd not.
-	
-	[[str atEnd or: [str peek isSeparator]] 
-	    whileFalse: [buffer nextPut: str next].
-	hasToken 
-	    ifTrue: 
-		[list add: buffer contents.
-		buffer reset].
-	str atEnd] 
-		whileFalse: 
-		    [hasToken := true.
-		    str skipSeparators].
-	^list
-    ]
-
-    validateDefinition: anAttributeDefinition for: aParser [
-	<category: 'validating'>
-	anAttributeDefinition hasDefault 
-	    ifTrue: [self validateValueOf: anAttributeDefinition for: aParser]
-    ]
-
-    validateValueOf: anAttribute for: aParser [
-	"We're going to do this the hard way for now. Most of this has been
-	 done already, except for compressing multiple space characters that
-	 were character references."
-
-	<category: 'validating'>
-	| v v1 |
-	v := anAttribute value.
-	
-	[v1 := v copyReplaceAll: '  ' with: ' '.
-	v1 = v] whileFalse: [v := v1].
-	(v size > 1 and: [v first = Character space]) 
-	    ifTrue: [v := v copyFrom: 2 to: v size].
-	(v size > 1 and: [v last = Character space]) 
-	    ifTrue: [v := v copyFrom: 1 to: v size - 1].
-	anAttribute value: v
-    ]
-
-    isExternal [
-	<category: 'testing'>
-	^isExternal
-    ]
-
-    isID [
-	<category: 'testing'>
-	^false
-    ]
-
-    isExternal: aBoolean [
-	<category: 'accessing'>
-	isExternal := aBoolean
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-AttributeType subclass: NOTATION_AT [
-    | typeNames |
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-A concrete subclass of AttributeType, this class represents the
-NOTATION attribute type.
-
-A NOTATION attribute identifies a notation element, declared in the
-DTD with associated system and/or public identifiers, to be used in
-interpreting the element to which the attribute is attached.
-
-Instance Variables:
-    typeNames	<SequenceableCollection>	A list of the legal notation names that may be used for this attribute type.'>
-
-    NOTATION_AT class >> typeNames: list [
-	<category: 'instance creation'>
-	^self new typeNames: list
-    ]
-
-    typeNames [
-	<category: 'accessing'>
-	^typeNames
-    ]
-
-    typeNames: aList [
-	<category: 'accessing'>
-	typeNames := aList
-    ]
-
-    completeValidationAgainst: aParser from: anAttributeDef [
-	<category: 'validating'>
-	typeNames do: 
-		[:nm | 
-		aParser dtd notationAt: nm
-		    ifAbsent: 
-			[aParser 
-			    invalid: 'Undeclared Notation "%1" used by attribute type "%2"' % 
-					{nm.
-					anAttributeDef tag asString}]]
-    ]
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	| v |
-	super validateValueOf: anAttribute for: aParser.
-	v := anAttribute value.
-	(typeNames includes: v) 
-	    ifFalse: 
-		[aParser 
-		    invalid: 'A NOTATION attribute (%1="%2") should have had a value from %3.' 
-			    % 
-				{anAttribute tag asString v.
-				typeNames asArray}]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-AttributeType subclass: NMTOKEN_AT [
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-A concrete subclass of AttributeType, this class represents the
-NMTOKEN attribute type.
-
-This is a tokenized type of attribute and for the purposes of
-validation, values of NMTOKEN type attributes must match a Nmtoken,
-which is any mixture of legal name characters as defined in the XML
-1.0 specification.'>
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	| v |
-	super validateValueOf: anAttribute for: aParser.
-	v := anAttribute value.
-	(v includes: Character space) 
-	    ifTrue: [aParser invalid: 'white space must not occur in NMTOKEN attributes'].
-	(aParser isValidNmToken: v) 
-	    ifFalse: 
-		[aParser 
-		    invalid: 'An NMTOKEN attribute (%1="%2") does not match the required syntax of an NmToken.' 
-			    % 
-				{anAttribute tag asString.
-				v}]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-AttributeType subclass: IDREF_AT [
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-A concrete subclass of AttributeType, this class represents the IDREF
-attribute type.
-
-This is a tokenized type of attribute and for an XML document to be
-valid, values of IDREF type attributes must match the value of some ID
-attribute on some element in the XML document.
-
-ID and IDREF attributes together provide a simple inside-the-document
-linking mechanism with every IDREF attribute required to point to an
-ID attribute as stated above.'>
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	| v |
-	super validateValueOf: anAttribute for: aParser.
-	v := anAttribute value.
-	(v includes: Character space) 
-	    ifTrue: [aParser invalid: 'white space must not occur in IDREF attributes'].
-	(aParser isValidName: v) 
-	    ifFalse: 
-		[aParser 
-		    invalid: 'An IDREF attribute (%1="%2") does not match the required syntax of a Name.' 
-			    % 
-				{anAttribute tag asString.
-				v}].
-	aParser rememberIDREF: v
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-AttributeType subclass: NMTOKENS_AT [
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-A concrete subclass of AttributeType, this class represents the
-NMTOKENS attribute type.
-
-This is a tokenized type of attribute and for the purposes of
-validation, values of each NMTOKENS type attributes must match each
-Nmtoken, which is any mixture of legal name characters as defined in
-the XML 1.0 specification.'>
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	| v all |
-	super validateValueOf: anAttribute for: aParser.
-	v := anAttribute value.
-	(all := self stringAsTokens: v) do: 
-		[:nm | 
-		(aParser isValidNmToken: nm) 
-		    ifFalse: 
-			[aParser 
-			    invalid: 'An NMTOKENS attribute (%1="%2") does not match the required syntax of a list of NmTokens.' 
-				    % 
-					{anAttribute tag asString.
-					v}]].
-	all size = 0 
-	    ifTrue: [aParser invalid: 'Attribute has empty list of NMTOKENS']
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-AttributeType subclass: ENTITY_AT [
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-A concrete subclass of AttributeType, this class represents the ENTITY
-attribute type.
-
-This is a tokenized type of attribute that signifies to the XML parser
-that for the purposes of validating, the values of entity type
-attributes must match the name of an unparsed entity declared in the
-document type definition.'>
-
-    completeValidationAgainst: aParser from: anAttributeDef [
-	<category: 'validating'>
-	^anAttributeDef hasDefault 
-	    ifTrue: [self validateValueOf: anAttributeDef for: aParser]
-    ]
-
-    validateDefinition: anAttributeDefinition for: aParser [
-	<category: 'validating'>
-	^self
-    ]
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	| v ent |
-	super validateValueOf: anAttribute for: aParser.
-	v := anAttribute value.
-	(v includes: Character space) 
-	    ifTrue: [aParser invalid: 'white space must not occur in ENTITY attributes'].
-	(aParser isValidName: v) 
-	    ifFalse: 
-		[aParser 
-		    invalid: 'An ENTITY attribute (%1="%2") does not match the required syntax of a Name.' 
-			    % 
-				{anAttribute tag asString.
-				v}].
-	ent := aParser dtd generalEntityAt: v.
-	ent == nil 
-	    ifTrue: 
-		[aParser 
-		    invalid: 'Undeclared unparsed entity "%1" used by attribute type "%2"' % 
-				{v.
-				anAttribute tag asString}]
-	    ifFalse: 
-		[ent isParsed 
-		    ifTrue: 
-			[aParser 
-			    invalid: 'The entity "%1" used by attribute type "%2" is a parsed entity and should be unparsed' 
-				    % 
-					{v.
-					anAttribute tag asString}]
-		    ifFalse: []]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-AttributeType subclass: CDATA_AT [
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-A concrete subclass of AttributeType, this class represents the CDATA
-attribute type.
-
-CDATA attributes are genericly typed attributes which, at the level of
-interpretation done by XMLParser, have no constraints or semantics
-applied to their contents.  '>
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	^self
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-AttributeType subclass: ID_AT [
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-A concrete subclass of AttributeType, this class represents the ID
-attribute type. This is also a tokenized type of attribute and values
-of ID type attributes must match legal names as defined in the XML 1.0
-specification.
-
-For an XML document to be valid, ID values must uniquely identify the
-elements which bear them; i.e. a name must not appear more than once
-in an XML document as a value of this type. Also for validity
-purposes, an ID attribute must have a declared default of #IMPLIED or
-#REQUIRED in the DTD.
-
-ID and IDREF attributes together provide a simple inside-the-document
-linking mechanism with every IDREF attribute required to point to an
-ID attribute.'>
-
-    validateDefinition: anAttributeDefinition for: aParser [
-	<category: 'validating'>
-	anAttributeDefinition hasDefault 
-	    ifTrue: 
-		[aParser invalid: 'ID attributes must be either #REQUIRED or #IMPLIED']
-    ]
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	| v |
-	super validateValueOf: anAttribute for: aParser.
-	v := anAttribute value.
-	(v includes: Character space) 
-	    ifTrue: [aParser invalid: 'white space must not occur in ID attributes'].
-	(aParser isValidName: v) 
-	    ifFalse: 
-		[aParser 
-		    invalid: 'An ID attribute (%1="%2") does not match the required syntax of a Name.' 
-			    % 
-				{anAttribute tag asString.
-				v}].
-	aParser registerID: anAttribute
-    ]
-
-    isID [
-	<category: 'testing'>
-	^true
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-AttributeType subclass: Enumeration_AT [
-    | values |
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-A concrete subclass of AttributeType, this class represents the
-Enumeration attribute type.
-
-Enumerated attributes can take one of a list of values provided in the declaration.
-
-Instance Variables:
-    values	<Collection>		A list of the possible values which the attribute may have.'>
-
-    Enumeration_AT class >> withAll: list [
-	<category: 'instance creation'>
-	^self new values: list
-    ]
-
-    values [
-	<category: 'accessing'>
-	^values
-    ]
-
-    values: aList [
-	<category: 'accessing'>
-	values := aList
-    ]
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	| v |
-	super validateValueOf: anAttribute for: aParser.
-	v := anAttribute value.
-	(values includes: v) 
-	    ifFalse: 
-		[aParser 
-		    invalid: 'An attribute (%1="%2") should have had a value from %3.' % 
-				{anAttribute tag asString.
-				v values asArray}]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-AttributeType subclass: IDREFS_AT [
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-A concrete subclass of AttributeType, this class represents the IDREFS
-attribute type.
-
-This is a tokenized type of attribute and for an XML document to be
-valid, each of the values of IDREFS type attributes must match each of
-the values of some ID attribute on some element in the XML document.'>
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	| v all |
-	super validateValueOf: anAttribute for: aParser.
-	v := anAttribute value.
-	(all := self stringAsTokens: v) do: 
-		[:nm | 
-		(aParser isValidName: nm) 
-		    ifFalse: 
-			[aParser 
-			    invalid: 'An IDREFS attribute (%1="%2") does not match the required syntax of a list of Names.' 
-				    % 
-					{anAttribute tag asString.
-					v}].
-		aParser rememberIDREF: nm].
-	all size = 0 
-	    ifTrue: [aParser invalid: 'Attribute has empty list of IDREFS']
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-AttributeType subclass: ENTITIES_AT [
-    
-    <category: 'XML-XML-Attributes'>
-    <comment: '
-A concrete subclass of AttributeType, this class represents the
-ENTITIES attribute type.
-
-This is a tokenized type of attribute that signifies to the XML parser
-that for the purposes of validating, the values of entities type
-attributes must match each of the names of unparsed entities declared
-in the document type definition.'>
-
-    completeValidationAgainst: aParser from: anAttributeDef [
-	<category: 'validating'>
-	^anAttributeDef hasDefault 
-	    ifTrue: [self validateValueOf: anAttributeDef for: aParser]
-    ]
-
-    validateDefinition: anAttributeDefinition for: aParser [
-	<category: 'validating'>
-	^self
-    ]
-
-    validateValueOf: anAttribute for: aParser [
-	<category: 'validating'>
-	| v ent all |
-	super validateValueOf: anAttribute for: aParser.
-	v := anAttribute value.
-	(all := self stringAsTokens: v) do: 
-		[:nm | 
-		(aParser isValidName: nm) 
-		    ifFalse: 
-			[aParser 
-			    invalid: 'An ENTITIES attribute (%1="%2") does not match the required syntax of a list of Names.' 
-				    % 
-					{anAttribute tag asString.
-					v}].
-		ent := aParser dtd generalEntityAt: nm.
-		ent == nil 
-		    ifTrue: 
-			[aParser 
-			    invalid: 'Undeclared unparsed entity "%1" used by attribute type "%2"' % 
-					{nm.
-					anAttribute tag asString}]
-		    ifFalse: 
-			[ent isParsed 
-			    ifTrue: 
-				[aParser 
-				    invalid: 'The entity "%1" used by attribute type "%2" is a parsed entity and should be unparsed' 
-					    % 
-						{nm.
-						anAttribute tag asString}]
-			    ifFalse: []]].
-	all size = 0 
-	    ifTrue: [aParser invalid: 'Attribute has empty list of ENTITIES']
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-ConcretePattern subclass: AnyPattern [
-    
-    <category: 'XML-XML-Patterns'>
-    <comment: '
-A subclass of ConcretePattern, this class represents the ANY element
-content constraint in an element type declaration.
-
-According to the XML 1.0 specification the ANY pattern/rule is used to
-indicate to the validating parser that the element can contain any
-elements in any order, as long as it doesn''t break any of the other
-rules of XML and the types of any child elements have been declared.'>
-
-    description [
-	<category: 'accessing'>
-	^'ANY'
-    ]
-
-    alternateHeads [
-	<category: 'coercing'>
-	^followSet copyWith: self
-    ]
-
-    pushDownFollowSet [
-	<category: 'coercing'>
-	self addFollow: self.
-	^nil
-    ]
-
-    couldBeText [
-	<category: 'testing'>
-	^true
-    ]
-
-    matchesTag: aNodeTag [
-	<category: 'testing'>
-	^true
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-LargeByteArray subclass: CharacterTable [
-    
-    <category: 'XML-XML-Nodes'>
-    <comment: '
-Class CharacterTable is an optimization of its superclass
-(LargeByteArray) that allows a smallish character table to masquerade
-as a large table.
-
-When the #at: primitive fails, the failure code checks to see if the
-index exceeded the size of the collection. If so, it answers the
-collection''s default value, which means that characters whose Unicode
-values exceed a particular value will all be classified the same.'>
-
-    at: index [
-	"Answer the value of an indexable field in the receiver.  Fail if the
-	 argument index is not an Integer or is <= 1."
-
-	<category: 'accessing'>
-	^(index > self size and: [index isInteger]) 
-	    ifTrue: [(index between: self size + 1 and: 1114112) ifTrue: [1] ifFalse: [0]]
-	    ifFalse: [super at: index]
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-XMLNodeBuilder subclass: NodeBuilder [
-    
-    <category: 'XML-XML-Parsing'>
-    <comment: '
-A subclass of XMLNodeBuilder, this class is used by the XML parser to
-distill an XML document into its component elements.
-
-This NodeBuilder class in particular is used to create instances of
-the various XML elements that are included in the scanned-in XML
-document or document string.
-
-This class can be subclassed in order to instantiate custom node
-types. The main method to override would be
-NodeBuilder>>tag:attributes:elements:position:stream:, since most of
-the other methods in XMLNodeBuilder''s "building" protocol are very
-secondary in importance compared to this method. But consider
-subclassing DOM_SAXDriver rather than this class, and using the SAX
-protocol to do your parsing.'>
-
-    tag: tag attributes: attributes elements: elements position: p stream: stream [
-	<category: 'building'>
-	^Element 
-	    tag: tag
-	    attributes: attributes
-	    elements: elements
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Object subclass: ElementContext [
-    | tag type namespaces isExternal |
-    
-    <category: 'XML-XML-Parsing'>
-    <comment: '
-This class includes some functionality to support XML namespaces. XML
-namespaces provide a simple method for qualifying element and
-attribute names used in XML documents
-
-Instance Variables:
-    tag				<XML.NodeTag>					The name of the current element.
-    type			<nil | XML.ConcretePattern>		A type definition for the current element, used to validate the contents.
-    namespaces	<Dictionary>						A map from namespace qualifiers to namespace URIs, which is used to interpret the meaning of namespace qualifiers within the scope of the element.'>
-
+ElementContext extend [
     followSetDescription [
-	<category: 'accessing'>
-	| types |
-	types := IdentitySet new.
-	self types do: [:tp | types addAll: tp followSet].
-	^types asArray printString
-    ]
-
-    namespaces [
-	<category: 'accessing'>
-	namespaces == nil ifTrue: [namespaces := Dictionary new].
-	^namespaces
-    ]
-
-    tag [
-	<category: 'accessing'>
-	^tag
-    ]
-
-    tag: aTag [
-	<category: 'accessing'>
-	tag := aTag isString 
-		    ifTrue: 
-			[NodeTag new 
-			    qualifier: ''
-			    ns: ''
-			    type: aTag]
-		    ifFalse: [aTag]
-    ]
-
-    type [
-	<category: 'accessing'>
-	^self shouldNotImplement
-    ]
-
-    type: anElementType [
-	<category: 'accessing'>
-	type := Array with: anElementType.
-	isExternal := anElementType isExternal
-    ]
-
-    types [
-	<category: 'accessing'>
-	^type
-    ]
-
-    types: anArray [
-	<category: 'accessing'>
-	type := anArray
-    ]
-
-    defineDefaultNamespace: attribute [
-	<category: 'namespaces'>
-	self namespaces at: '' put: attribute value
-    ]
-
-    defineNamespace: attribute from: aParser [
-	<category: 'namespaces'>
-	(#('xmlns' 'xml') includes: attribute tag type) 
-	    ifTrue: 
-		[self error: 'It is illegal to redefine the qualifier "%1".' 
-			    % {attribute tag type}].
-	attribute value isEmpty 
-	    ifTrue: 
-		[aParser 
-		    invalid: 'It is not permitted to have an empty URI as a namespace name'].
-	self namespaces at: attribute tag type put: attribute value
-    ]
-
-    findNamespace: ns [
-	<category: 'namespaces'>
-	^namespaces isNil 
-	    ifTrue: [nil]
-	    ifFalse: [namespaces at: ns ifAbsent: [nil]]
+        <category: 'accessing'>
+        | types |
+        self types isNil ifTrue: [ ^'()' ].
+        types := IdentitySet new.
+        self types do: [:tp | types addAll: tp followSet].
+        ^types asArray printString
     ]
 
     canTerminate [
-	<category: 'testing'>
-	self types do: [:i | i canTerminate ifTrue: [^true]].
-	^false
-    ]
-
-    definesNamespaces [
-	<category: 'testing'>
-	^namespaces notNil and: [namespaces isEmpty not]
-    ]
-
-    isDefinedExternal [
-	<category: 'testing'>
-	^isExternal
+        <category: 'testing'>
+        self types isNil ifTrue: [ ^true ].
+        self types do: [:i | i canTerminate ifTrue: [^true]].
+        ^false
     ]
 
     validateTag: nm [
@@ -7846,507 +4137,22 @@ Instance Variables:
     ]
 ]
 
-]
-
-
-
-Namespace current: XML [
-
-ElementContext subclass: SAXElementContext [
-    | attributes nodes stream startPosition id |
-    
-    <category: 'XML-XML-SAX'>
-    <comment: '
-This class holds all the descriptive information that SAXBuilderDriver
-needs to remember from the startElement until the endElement, to send
-the right information to the builder.
-
-
-Instance Variables:
-    attributes	<Collection> 
-    nodes	<Array> 
-    stream	<XML.StreamWrapper> 
-    startPosition	<Integer> 
-    id	<nil | String> '>
-
-    attributes [
-	<category: 'accessing'>
-	^attributes
-    ]
-
-    attributes: aCollection [
-	<category: 'accessing'>
-	attributes := aCollection
-    ]
-
-    id [
-	<category: 'accessing'>
-	^id
-    ]
-
-    id: anID [
-	<category: 'accessing'>
-	id := anID
-    ]
-
-    namespaces: aDictionary [
-	<category: 'accessing'>
-	namespaces := aDictionary
-    ]
-
-    nodes [
-	<category: 'accessing'>
-	^nodes
-    ]
-
-    nodes: aCollection [
-	<category: 'accessing'>
-	nodes := aCollection
-    ]
-
-    startPosition [
-	<category: 'accessing'>
-	^startPosition
-    ]
-
-    startPosition: anInteger [
-	<category: 'accessing'>
-	^startPosition := anInteger
-    ]
-
-    stream [
-	<category: 'accessing'>
-	^stream
-    ]
-
-    stream: aStream [
-	<category: 'accessing'>
-	^stream := aStream
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-Object subclass: InputSource [
-    | uri encoding stream |
-    
-    <category: 'XML-XML-Resources'>
-    <comment: '
-An InputSource represents a data source which may have been fetched
-locally or from the net, and which has various properties. An
-InputSource may be created by a SAXDriver in response to the
-#resolveEntity:systemID: message.
-
-In release 5i.4, we record the URI and the data, and if possible the
-encoding. In future we may want to also incorporate things like the
-MIME type or other attributes.
-
-Instance Variables:
-    uri				<nil | NetClients.URL>	The URI of the data source, if known
-    encoding		<nil | Symbol> 		If the transport protocol specified an encoding,
-    									this should take precedence over the encoding
-    									contained in the <?xml?> declaration
-    stream			<Stream>			the data source'>
-
-    InputSource class >> for: uri [
-	<category: 'private'>
-	| stream |
-	stream := NetClients.URIResolver openStreamOn: uri.
-	^self 
-	    uri: (uri isString ifTrue: [NetClients.URL fromString: uri] ifFalse: [uri])
-	    encoding: nil
-	    stream: stream
-    ]
-
-    InputSource class >> uri: aURI encoding: anEncodingName stream: aStream [
-	<category: 'instance creation'>
-	^self new 
-	    uri: aURI
-	    encoding: anEncodingName
-	    stream: aStream
-    ]
-
-    uri: aURI encoding: anEncodingName stream: aStream [
-	<category: 'initialize'>
-	uri := aURI.
-	encoding := anEncodingName.
-	stream := aStream
-    ]
-
-    encoding [
-	<category: 'accessing'>
-	^encoding
-    ]
-
-    stream [
-	<category: 'accessing'>
-	^stream
-    ]
-
-    uri [
-	<category: 'accessing'>
-	^uri
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
-
-SAXDriver subclass: SAXWriter [
-    | output textMap attrMap hasOpenTag normalizeText notations newNamespaces |
-    
-    <category: 'XML-XML-SAX'>
-    <comment: '
-SAXWriter is a kind of SAXDriver that converts SAX events back into
-textual XML documents.
-
-Instance Variables:
-    attrMap	<Dictionary>	Lists the characters that are not allowed to appear literally in attributes, and maps them to their quoted form.
-    hasOpenTag	<Boolean>	True if we are inside an element that has no content as yet. This allows us to know when we reach the end tag whether we can write the element as <x/> rather than <x></x>.
-    newNamespaces	<nil | Dictionary>	Maps namespace qualifiers to URIs, for namespaces which the current element defines differently than its parent.
-    normalizeText	<Boolean>	Should be true in almost all cases--can be false only if the "XML" document being parsed is actually not XML, in which case it may be legal to not quote characters such as $<.
-    notations	<Collection>	List of notations defined in the document being parsed.
-    output	<Stream>	Stream on which the XML is rendered as text.
-    textMap	<Dictionary>	Lists the characters that are not allowed to appear literally in text, and maps them to their quoted form.
-
-'>
-
-    characters: aString from: start to: stop [
-	<category: 'content handler'>
-	| ch mapped |
-	self closeOpenTag.
-	normalizeText 
-	    ifTrue: 
-		[start to: stop
-		    do: 
-			[:i | 
-			ch := aString at: i.
-			mapped := textMap at: ch ifAbsent: [nil].
-			mapped == nil 
-			    ifTrue: [output nextPut: ch]
-			    ifFalse: [output nextPutAll: mapped]]]
+GeneralEntity extend [
+    completeValidationAgainst: aParser [
+	<category: 'validation'>
+	ndata isNil 
 	    ifFalse: 
-		[output 
-		    next: stop + 1 - start
-		    putAll: aString
-		    startingAt: start]
-    ]
-
-    comment: data from: start to: stop [
-	<category: 'content handler'>
-	output
-	    nextPutAll: '<!--';
-	    next: stop + 1 - start
-		putAll: data
-		startingAt: start;
-	    nextPutAll: '-->'
-    ]
-
-    endElement: namespaceURI localName: localName qName: name [
-	<category: 'content handler'>
-	hasOpenTag == true 
-	    ifTrue: [output nextPutAll: '/>']
-	    ifFalse: [output nextPutAll: '</' , name , '>'].
-	hasOpenTag := false
-    ]
-
-    processingInstruction: targetString data: dataString [
-	<category: 'content handler'>
-	output
-	    nextPutAll: '<?';
-	    nextPutAll: targetString;
-	    space;
-	    nextPutAll: dataString;
-	    nextPutAll: '?>'
-    ]
-
-    startDocument [
-	<category: 'content handler'>
-	hasOpenTag := false
-    ]
-
-    startDocumentFragment [
-	"Nonstandard extension to SAX"
-
-	<category: 'content handler'>
-	hasOpenTag := false
-    ]
-
-    startElement: namespaceURI localName: localName qName: name attributes: attributes [
-	<category: 'content handler'>
-	| val |
-	notations == nil ifFalse: [self emitDTD: name].
-	self closeOpenTag.
-	output nextPutAll: '<'.
-	output nextPutAll: name.
-	(self sort: attributes) do: 
-		[:att | 
-		output space.
-		output nextPutAll: att tag asString.
-		output nextPutAll: '="'.
-		1 to: att value size
-		    do: 
-			[:i | 
-			| ch mapped |
-			ch := att value at: i.
-			mapped := attrMap at: ch ifAbsent: [nil].
-			mapped == nil 
-			    ifTrue: [output nextPut: ch]
-			    ifFalse: [output nextPutAll: mapped]].
-		output nextPutAll: '"'].
-	newNamespaces == nil 
-	    ifFalse: 
-		[newNamespaces keys asSortedCollection do: 
-			[:key | 
-			output space.
-			output 
-			    nextPutAll: (key isEmpty ifTrue: ['xmlns'] ifFalse: ['xmlns:' , key]).
-			output nextPutAll: '="'.
-			val := newNamespaces at: key.
-			1 to: val size
-			    do: 
-				[:i | 
-				| ch mapped |
-				ch := val at: i.
-				mapped := attrMap at: ch ifAbsent: [nil].
-				mapped == nil 
-				    ifTrue: [output nextPut: ch]
-				    ifFalse: [output nextPutAll: mapped]].
-			output nextPutAll: '"']].
-	newNamespaces := nil.
-	hasOpenTag := true
-    ]
-
-    startPrefixMapping: prefix uri: uri [
-	<category: 'content handler'>
-	newNamespaces == nil ifTrue: [newNamespaces := Dictionary new].
-	newNamespaces at: prefix put: uri
-    ]
-
-    minimalCharacterMapping [
-	<category: 'initialize'>
-	textMap := (Dictionary new)
-		    at: $< put: '&lt;';
-		    at: $& put: '&amp;';
-		    yourself.
-	attrMap := (Dictionary new)
-		    at: $< put: '&lt;';
-		    at: $& put: '&amp;';
-		    at: $" put: '&quot;';
-		    yourself
-    ]
-
-    normalizeText: aBoolean [
-	<category: 'initialize'>
-	normalizeText := aBoolean
-    ]
-
-    output: aStream [
-	<category: 'initialize'>
-	output := aStream.
-	normalizeText := true.
-	notations := nil.
-	textMap == nil ifTrue: [self minimalCharacterMapping]
-    ]
-
-    notationDecl: nameString publicID: publicIDString systemID: systemIDString [
-	<category: 'DTD handler'>
-	notations == nil ifTrue: [notations := OrderedCollection new].
-	notations add: (Array 
-		    with: nameString
-		    with: publicIDString
-		    with: systemIDString)
-    ]
-
-    closeOpenTag [
-	<category: 'private'>
-	hasOpenTag == true 
-	    ifTrue: 
-		[output nextPutAll: '>'.
-		hasOpenTag := false]
-    ]
-
-    emitDTD: name [
-	<category: 'private'>
-	| list |
-	output
-	    nextPutAll: '<!DOCTYPE ';
-	    nextPutAll: name;
-	    nextPutAll: ' [';
-	    nl.
-	list := notations asSortedCollection: [:a1 :a2 | a1 first < a2 first].
-	list do: 
-		[:notation | 
-		self emitNotation: notation.
-		output nl].
-	output
-	    nextPutAll: ']>';
-	    nl.
-	notations := nil
-    ]
-
-    emitNotation: array [
-	<category: 'private'>
-	output
-	    nextPutAll: '<!NOTATION ';
-	    nextPutAll: (array at: 1);
-	    space;
-	    nextPutAll: ((array at: 2) == nil ifTrue: ['SYSTEM'] ifFalse: ['PUBLIC']).
-	(array at: 2) == nil 
-	    ifFalse: 
-		[output
-		    nextPutAll: ' ''';
-		    nextPutAll: (array at: 2);
-		    nextPutAll: ''''].
-	(array at: 3) == nil 
-	    ifFalse: 
-		[output
-		    nextPutAll: ' ''';
-		    nextPutAll: (array at: 3);
-		    nextPutAll: ''''].
-	output nextPutAll: '>'
-    ]
-
-    sort: attributes [
-	<category: 'private'>
-	^attributes 
-	    asSortedCollection: [:a1 :a2 | a1 tag asString < a2 tag asString]
+		[aParser dtd notationAt: ndata
+		    ifAbsent: 
+			[aParser 
+			    invalid: 'Unparsed entity "%1" uses an undeclared notation "%2"' % 
+					{name.
+					ndata}]]
     ]
 ]
-
-]
-
 
 
-Namespace current: XML [
-
-SAXWriter subclass: SAXCanonicalWriter [
-    | baseURI |
-    
-    <category: 'XML-XML-SAX'>
-    <comment: '
-SAXCanonicalWriter is a subclass of SAXWriter that translates XML into
-a textual form conforming to the Sun Canonical XML specification used
-by the OASIS (http://www.oasis-open.org/) consortium in their XML
-conformance tests.
-
-Instance Variables:
-    baseURI	<URI>	When parsing, this remembers the URI of the document so that relative URIs (in Notations, for example) can be resolved to absolute URIs.
-
-'>
-
-    comment: data from: start to: stop [
-	"Canonical XML surpresses comments"
-
-	<category: 'content handler'>
-	^self
-    ]
-
-    startElement: namespaceURI localName: localName qName: name attributes: attributes [
-	<category: 'content handler'>
-	super 
-	    startElement: namespaceURI
-	    localName: localName
-	    qName: name
-	    attributes: attributes.
-	self closeOpenTag
-    ]
-
-    emitNotation: array [
-	<category: 'private'>
-	| sysID frag |
-	sysID := array at: 3.
-	sysID == nil ifTrue: [^super emitNotation: array].
-	sysID size to: 2
-	    by: -1
-	    do: 
-		[:i | 
-		frag := sysID copyFrom: i to: sysID size.
-		frag replaceAll: $: with: $/.
-		frag replaceAll: $\ with: $/.
-		([(baseURI resolvePath: frag) asString = sysID] on: Error
-		    do: [:x | x return: false]) 
-			ifTrue: 
-			    [^super emitNotation: ((array copy)
-					at: 3 put: frag;
-					yourself)]].
-	super emitNotation: array
-    ]
-
-    baseURI: url [
-	<category: 'initialize'>
-	baseURI := url
-    ]
-
-    minimalCharacterMapping [
-	<category: 'initialize'>
-	textMap := (Dictionary new)
-		    at: $< put: '&lt;';
-		    at: $> put: '&gt;';
-		    at: $" put: '&quot;';
-		    at: $& put: '&amp;';
-		    at: (Character value: 9) put: '&#9;';
-		    at: (Character value: 10) put: '&#10;';
-		    at: (Character value: 13) put: '&#13;';
-		    yourself.
-	attrMap := (Dictionary new)
-		    at: $< put: '&lt;';
-		    at: $> put: '&gt;';
-		    at: $& put: '&amp;';
-		    at: $" put: '&quot;';
-		    at: (Character value: 9) put: '&#9;';
-		    at: (Character value: 10) put: '&#10;';
-		    at: (Character value: 13) put: '&#13;';
-		    yourself
-    ]
-]
-
-]
-
-
-
-Namespace current: XML [
+Eval [
     XML at: #CharacterClasses put: XML.XMLParser characterTable.
-    XML at: #PredefinedEntities
-	put: ((Dictionary new)
-		at: 'amp'
-		    put: ((GeneralEntity new)
-			    name: 'amp';
-			    text: '&#38;');
-		at: 'lt'
-		    put: ((GeneralEntity new)
-			    name: 'lt';
-			    text: '&#60;');
-		at: 'gt'
-		    put: ((GeneralEntity new)
-			    name: 'gt';
-			    text: (String with: $>));
-		at: 'apos'
-		    put: ((GeneralEntity new)
-			    name: 'apos';
-			    text: (String with: $'));
-		at: 'quot'
-		    put: ((GeneralEntity new)
-			    name: 'quot';
-			    text: (String with: $"));
-		yourself).
-    XML at: #XML_URI put: 'http://www.w3.org/XML/1998/namespace'.
-    XML.SAX
-	at: #SAXExternalParameterEntities
-	    put: 'http://xml.org/sax/features/external-parameter-entities';
-	at: #SAXValidate put: 'http://xml.org/sax/features/validation';
-	at: #SAXNamespacePrefixes
-	    put: 'http://xml.org/sax/features/namespace-prefixes';
-	at: #SAXNamespace put: 'http://xml.org/sax/features/namespaces';
-	at: #XMLSignal put: XML.SAXException;
-	at: #SAXExternalGeneralEntities
-	    put: 'http://xml.org/sax/features/external-general-entities'
 ]
 
