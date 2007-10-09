@@ -578,7 +578,7 @@ uintptr_t
 scramble (uintptr_t x)
 {
 #if SIZEOF_OOP == 4
-  int y = ~x;
+  uintptr_t y = ~x;
   x += (y << 10) | (y >> 22);
   x += (x << 6)  | (x >> 26);
   x -= (x << 16) | (x >> 16);

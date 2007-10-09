@@ -1,3 +1,7 @@
+2007-10-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.inl: Do rotations correctly in scramble.
+
 2007-09-27  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
 	    Paolo Bonzini  <bonzini@gnu.org>
 
