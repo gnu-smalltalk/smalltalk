@@ -815,11 +815,18 @@ next
     ^answer
 ! !
 
-!Iconv methodsFor: 'private - living across snapshots'!
+!Iconv class methodsFor: 'private - living across snapshots'!
+
+initialize
+    ObjectMemory addDependent: self
+!
 
 update: aspect
-    aspect == #aboutToSnapshot ifTrue: [ self release ].
-!
+    aspect == #aboutToSnapshot ifTrue: [
+	Iconv allInstancesDo: [ :each | each release ] ].
+! !
+
+!Iconv methodsFor: 'private - living across snapshots'!
 
 release
     self removeToBeFinalized; finalize
@@ -837,7 +844,6 @@ iconvOpen
     iconvHandle address = 16rFFFFFFFF
 	ifTrue: [ ^InvalidCharsetError signal: { from. to } ].
     self addToBeFinalized.
-    ObjectMemory addDependent: self
 ! !
 
 !Iconv methodsFor: 'private - conversion'!
@@ -1483,6 +1489,7 @@ utf32Encoding
     "Answer the encoding of the underlying collection, assuming it's UTF-32"
     ^'UTF-32BE'! !
 
+Encoders.Iconv initialize!
 Encoders.ToUTF7 initialize!
 Encoders.FromUTF7 initialize!
 EncodedStream initialize!
