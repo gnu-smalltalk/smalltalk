@@ -900,6 +900,17 @@ the only step in the conversions, sometimes the structure is
 ToUTF32+SplitUTF32xx+Iconv or Iconv+ComposeUTF32xx+FromUTF32, rarely
 Iconv is skipped altogether and only Smalltalk converters are used.'>
 
+    Iconv class >> initialize [
+	<category: 'private - living across snapshots'>
+	ObjectMemory addDependent: self
+    ]
+
+    Iconv class >> update: aspect [
+	<category: 'private - living across snapshots'>
+	aspect == #aboutToSnapshot
+	    ifTrue: [self allInstancesDo: [:each | each release]]
+    ]
+
     iconvOpen: to from: from [
 	<category: 'C call-outs'>
 	<cCall: 'iconv_open' returning: #cObject args: #(#string #string)>
@@ -942,11 +953,6 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 	^answer
     ]
 
-    update: aspect [
-	<category: 'private - living across snapshots'>
-	aspect == #aboutToSnapshot ifTrue: [self release]
-    ]
-
     release [
 	<category: 'private - living across snapshots'>
 	self
@@ -970,7 +976,6 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 			{from.
 			to}].
 	self addToBeFinalized.
-	ObjectMemory addDependent: self
     ]
 
     atEndOfBuffer [
@@ -1770,6 +1775,7 @@ Stream extend [
 
 
 Namespace current: I18N [
+    Encoders.Iconv initialize.
     Encoders.ToUTF7 initialize.
     Encoders.FromUTF7 initialize.
     EncodedStream initialize

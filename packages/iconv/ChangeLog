@@ -1,3 +1,7 @@
+2007-10-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Sets.st: Make the Iconv class dependent of ObjectMemory.
+
 2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Sets.st: Add some methods, skip BOM when converting to UnicodeString.
