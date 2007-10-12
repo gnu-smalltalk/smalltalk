@@ -577,18 +577,12 @@ char_new (int codePoint)
 uintptr_t
 scramble (uintptr_t x)
 {
-#if SIZEOF_OOP == 4
-  uintptr_t y = ~x;
-  x += (y << 10) | (y >> 22);
-  x += (x << 6)  | (x >> 26);
-  x -= (x << 16) | (x >> 16);
-#else
-  x ^= (~x) >> 31;
-  x += (x << 21) | (x >> 11);
-  x += (x << 5) | (x >> 27);
-  x += (x << 27) | (x >> 5);
-  x += (x << 31);
+#if SIZEOF_OOP == 8
+  x ^= (x >> 31) | ( x << 33);
 #endif
+  x ^= (x << 10) | (x >> 22);
+  x ^= (x << 6)  | (x >> 26);
+  x ^= (x << 16) | (x >> 16);
 
   return x & MAX_ST_INT;
 }

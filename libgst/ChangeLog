@@ -1,3 +1,8 @@
+2007-10-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.inl: Use another scramble function suggested by
+	Andres Valloud.
+
 2007-10-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/save.c: Break hard links when saving.
