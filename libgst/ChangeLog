@@ -1,5 +1,10 @@
 2007-10-12  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/gst-parse.c: Don't replace instance variables except
+	in the first declaration inside a subclass declaration.
+
+2007-10-12  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/dict.inl: Use another scramble function suggested by
 	Andres Valloud.
 

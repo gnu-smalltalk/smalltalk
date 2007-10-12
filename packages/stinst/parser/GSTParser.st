@@ -133,7 +133,7 @@ STInST.STFileInParser subclass: GSTFileInParser [
     
     parseClassExtension: node [
         class := node receiver.
-        self parseClassBody.
+        self parseClassBody: false.
         class := nil
     ]
     
@@ -143,16 +143,20 @@ STInST.STFileInParser subclass: GSTFileInParser [
              argument: (node arguments first name asSymbol).
              
         class := node arguments first.
-        self parseClassBody.
+        self parseClassBody: true.
         class := nil.
     ]
     
-    parseClassBody [
-        [ self skipToken: $] ]
-            whileFalse: [ self parseClassBodyElement ]
+    parseClassBody: extend [
+	| addInstVars |
+	addInstVars := extend.
+        [ self skipToken: $] ] whileFalse: [
+	    addInstVars := self
+		parseClassBodyElement: addInstVars
+		withinExtend: extend ]
     ]
     
-    parseClassBodyElement [
+    parseClassBodyElement: addInstVars withinExtend: extend [
         | node classNode |
 
 	"drop comments"
@@ -160,11 +164,11 @@ STInST.STFileInParser subclass: GSTFileInParser [
         
         "look for class tag"
         (currentToken value = #< and: [self nextToken isKeyword])
-            ifTrue: [self parseClassTag. ^self].
+            ifTrue: [self parseClassTag. ^addInstVars].
         
         "look for class variable"
         (currentToken isIdentifier and: [self nextToken isAssignment])
-            ifTrue: [self parseClassVariable. ^self].
+            ifTrue: [self parseClassVariable. ^addInstVars].
             
         "class side"
         ((currentToken isIdentifier 
@@ -178,12 +182,12 @@ STInST.STFileInParser subclass: GSTFileInParser [
                                      (self nextToken value = #>>)
                                         ifTrue: [self step. self step.
                                                  self parseMethodSourceOn: (self makeClassOf: classNode). 
-                                                 ^self ].
+                                                 ^addInstVars ].
                                             
                                      "look for metaclass"
                                      (self nextToken value = $[)
-                                        ifTrue: [self parseMetaclass.
-                                                 ^self ].
+                                        ifTrue: [self parseMetaclass: extend.
+                                                 ^addInstVars ].
                                         
                                      self parserError: 'invalid class body element'].
                           
@@ -193,7 +197,7 @@ STInST.STFileInParser subclass: GSTFileInParser [
                             ifTrue: ["TODO: check that classNode is a superclass of the current class"
                                      self step.
                                      self parseMethodSourceOn: (self makeClassOf: classNode).
-                                     ^self]. 
+                                     ^addInstVars]. 
                           
                           self parserError: 'invalid class body element' ].
                         
@@ -203,17 +207,17 @@ STInST.STFileInParser subclass: GSTFileInParser [
                      classNode := RBVariableNode identifierToken: currentToken.
                      self step. self step.
                      self parseMethodSourceOn: classNode.
-                     ^self].
+                     ^addInstVars].
                
         node := self parseMessagePattern.
         
         "look for method"
         (self skipToken: $[)
-            ifTrue: [self parseMethodSource: node. ^self].
+            ifTrue: [self parseMethodSource: node. ^addInstVars].
         
         "look for instance variables"
         (node selectorParts first value = #|)
-            ifTrue: [self parseInstanceVariables: node. ^self].
+            ifTrue: [self parseInstanceVariables: node add: addInstVars. ^true].
             
         self parserError: 'invalid class body element'
     ]
@@ -262,13 +266,13 @@ STInST.STFileInParser subclass: GSTFileInParser [
         self evaluateStatement: stmt.
     ]
     
-    parseMetaclass [
+    parseMetaclass: extend [
         | tmpClass |     
         
         self step. self step.
         tmpClass := class.
         class := self makeClassOf: class.
-        self parseClassBody.
+        self parseClassBody: extend.
         class := tmpClass
     ]
     
@@ -300,9 +304,11 @@ STInST.STFileInParser subclass: GSTFileInParser [
         self compile: methodNode
     ]
     
-    parseInstanceVariables: node [
+    parseInstanceVariables: node add: addThem [
         | vars |
             
+	"FIXME: support adding more instance variables."
+	addThem ifTrue: [ self notYetImplemented ].
         vars := (node arguments at: 1) name.
         [currentToken isIdentifier]
             whileTrue: [vars := vars , ' ' , currentToken value.

@@ -804,7 +804,7 @@ Account extend [
 @end example
 
 This instructs Smalltalk to pick an existing class, rather than
-trying to subclass it.
+trying to create a subclass.
 
 @node Defining methods, Instance methods, Documenting the class, Creating classes
 @subsection Defining a method for the class
@@ -863,7 +863,7 @@ how to process this message.  It finds our new definition, and
 starts running it.  The first line, @code{| r |}, creates a local
 variable named @code{r} which can be used as a placeholder for
 the objects we create.  @code{r} will go away as soon as the message
-is done being processed; note the parallel with @code{balance}, who
+is done being processed; note the parallel with @code{balance}, which
 goes away as soon as the object is not used anymore.  And note that
 here you have to declare local variables explicitly, unlike what
 you did in previous examples.
@@ -1410,22 +1410,20 @@ class.
 
 @example
 Checking extend [
-    | checknum checksleft history |
+    | history |
 @end example
 
-This is the same syntax as the last time we defined a
-checking account, except that we start with @code{extend}
-(since the class is already there) and have three instance variables:
-the @code{checknum} and @code{checksleft} which have always been
-there, and our new @code{history} variable; since we have removed no
-instance variables, the old method will be recompiled without
-errors.  We must now feed in our definitions for each of the
-messages our object can handle, since we are basically
-defining a new class under an old name.
+This is the same syntax as the last time we defined a checking account,
+except that we start with @code{extend} (since the class is already
+there).  Then, the two instance variables we had defined remain, and we
+add a new @code{history} variable; the old methods will be recompiled
+without errors.  We must now feed in our definitions for each of the
+messages our object can handle, since we are basically defining a new
+class under an old name.
 
-With our new Checking instance variable, we are all set
-to start recording our checking history.  Our first change
-will be in the handling of the @code{init} message:
+With our new Checking instance variable, we are all set to start recording
+our checking history.  Our first change will be in the handling of the
+@code{init} message:
 @example
        init [
            <category: 'initialization'>

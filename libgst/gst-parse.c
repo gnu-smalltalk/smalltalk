@@ -108,13 +108,15 @@ static void parse_eval_definition (gst_parser *p);
 static mst_Boolean parse_namespace_definition (gst_parser *p,
 					       tree_node first_stmt);
 static mst_Boolean parse_class_definition (gst_parser *p,
-					   OOP classOOP);
+					   OOP classOOP,	
+					   mst_Boolean extend);
 static OOP parse_namespace (tree_node name);
 static OOP parse_class (tree_node list);
 static void parse_scoped_method (gst_parser *p,
 				 OOP classOOP);
 static void parse_instance_variables (gst_parser *p,
-				      OOP classOOP);
+				      OOP classOOP,	
+				      mst_Boolean extend);
 
 static void parse_method_list (gst_parser *p);
 static void parse_method (gst_parser *p,
@@ -515,7 +517,7 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
 	  if (IS_NIL (classOOP))
 	    _gst_had_error = true;
 	  else
-	    return parse_class_definition (p, classOOP);  
+	    return parse_class_definition (p, classOOP, false);  
 	}
     }
 
@@ -547,7 +549,7 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
 	    _gst_msg_sendf (NULL, "%v %o current: %o",
 			    _gst_namespace_class, namespace_new);
 	  
- 	  ret_value = parse_class_definition (p, classOrMetaclassOOP);
+ 	  ret_value = parse_class_definition (p, classOrMetaclassOOP, true);
 
 	  if (namespace_new != namespace_old)
 	    _gst_msg_sendf (NULL, "%v %o current: %o",
@@ -617,9 +619,10 @@ parse_namespace_definition (gst_parser *p, tree_node first_stmt)
 }
 
 static mst_Boolean
-parse_class_definition (gst_parser *p, OOP classOOP)
+parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 {
   int t1, t2, t3;
+  mst_Boolean add_inst_vars = extend;
 
   for (;;)
     {
@@ -802,7 +805,7 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 		  else
 		    {
 		      lex_consume (p, 3);
-		      parse_class_definition (p, OOP_CLASS (classOOP));
+		      parse_class_definition (p, OOP_CLASS (classOOP), extend);
 		      lex_skip_mandatory (p, ']');
 		    }
 		  continue;
@@ -826,7 +829,8 @@ parse_class_definition (gst_parser *p, OOP classOOP)
 #if 0
 		  printf ("parse instance variables\n");
 #endif
-		  parse_instance_variables (p, classOOP);
+		  parse_instance_variables (p, classOOP, add_inst_vars);
+		  add_inst_vars = true;
 		  continue;
 		}
 	      else if (t3 == '[')
@@ -1008,11 +1012,24 @@ parse_namespace (tree_node list)
    | empty */
 
 static void
-parse_instance_variables (gst_parser *p, OOP classOOP)
+parse_instance_variables (gst_parser *p, OOP classOOP, mst_Boolean extend)
 {
   char *vars;
   Filament *fil = filnew (NULL, 0);
   
+  if (extend)
+    {
+      gst_behavior class = (gst_behavior) OOP_TO_OBJ (classOOP);
+      OOP *instVars = OOP_TO_OBJ (class->instanceVariables)->data;
+      int n = NUM_INDEXABLE_FIELDS (class->instanceVariables);
+      for (; n--; instVars++)
+	{
+	  char *s = _gst_to_cstring (*instVars);
+          filprintf (fil, "%s ", s);
+	  xfree (s);
+	}
+    }
+
   lex_skip_mandatory (p, '|');
   while (!lex_skip_if (p, '|', true))
     {

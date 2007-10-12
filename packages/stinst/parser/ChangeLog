@@ -1,3 +1,8 @@
+2007-10-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GSTParser.st: Don't replace instance variables except
+	in the first declaration inside a subclass declaration.
+
 2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STFileParser.st: Look for EOF in #parseSmalltalk.
