@@ -2048,10 +2048,10 @@ future however a full object model will be available that hides the
 usage of @acronym{SQL}.
 
 Classes that are independent of the database management system that is
-in use reside in package @code{DB}, while the drivers proper reside
-in separate packages which have @code{DB} as a prerequisite; currently,
-the only driver that is currently supplied is for @emph{MySQL} (loaded
-with package @emph{MySQL}).
+in use reside in package @code{DBI}, while the drivers proper reside
+in separate packages which have @code{DBI} as a prerequisite; currently,
+drivers are supplied for @emph{MySQL} and @emph{PostgreSQL}, in packages
+@code{DBD-MySQL} and @code{DBD-PostgreSQL} respectively.
 
 Using the library is fairly simple.  To execute a query you need to 
 create a connection to the database, create a statement on the connection,
@@ -2062,10 +2062,10 @@ my password is @code{mypass}.
 @example
 | connection statement result |
 
-connection := Jdm MySQL JdmConnection on: 
-    (Jdm JdmConnectionSpec new initialize
-        user: 'doe'; password: 'mypass';
-        database: 'test').
+connection := DBI.Connection
+    connect: 'dbi:MySQL:dbname=test:host=localhost'
+    user: 'doe'
+    password: 'mypass').
 @end example
 
 You can see that the @acronym{DBMS}-specific classes live in a sub-namespace
@@ -2076,61 +2076,22 @@ also an acronym for @emph{Just a Database Manager}---silly acronym, I know.
 Here is how I execute a query.
 
 @example
-statement := connection createStatement.
-result := statement
-    executeQuery: 'insert into aTable (aField) values (aValue)'.
+statement := connection execute: 'insert into aTable (aField) values (123)'.
 @end example
 
-The result that is returned is a @code{JdmResult}.  It holds two values:
-the result type and the actual result value.  For update queries
-the type is set to #update and the value is an integer designating the
-number of rows effected.  For read queries (such as selection queries)
-the type is set to #read and the value is a @code{JdmResultSet}.
+The result that is returned is a @code{ResultSet}.  For date queries
+the object returns the number of ows affected.  For read queries (such
+as selection queries) the result set supports standard stream protocol
+(@code{next}, @code{atEnd} to read rows off the result stream) and
+can also supply collection of column information.  These are
+instances of @code{ColumnInfo}) and describe the type, size, and
+other characteristics of the returned column.
 
-A @code{JdmResultSet} reads rows off the result stream.  It also contains a
-collection of column information (instances of @code{JdmColumn}) which
-describe the type, size, and other characteristics of the returned column.
-Generally you grab the columns by sending the "next" message to the result
-set.  The next message returns a Boolean which indicates whether or not
-there are any more rows to be read.  Do NOT read past the last row:
-currently the driver will block when this happens.
-
-A common usage of a JdmResultSet would be:
+A common usage of a ResultSet would be:
 
 @example
-| resultSet value |
-[resultSet next] whileFalse: [value := resultSet valueNamed: 'columnName'].
-@end example
-
-The result set has several accessing methods. They are:
-
-@table @code
-@item valueAt: anInteger
-returns the Smalltalk value at column number anInteger
-
-@item rawValueAt: anInteger
-returns the raw (String) value at column number anInteger
-
-@item valueNamed: aString
-returns the Smalltalk value for the column named aString.
-
-@item rawValueNamed: aString
-returns the raw (String) value for the column named aString
-@end table
-
-To run the test suites your mysql server needs to be on the local machine,
-the database "test" needs to exist, and a user named `utente' on the
-localhost need full access to the database "test".
-
-The aforementioned conditions are true when Mysql is first installed.
-
-The tests run fairly slow since each row consists of all possible
-Mysql types and many of the inserted values are generated.
-
-To run the tests execute the following:
-
-@example
-Jdm.MySQL.JdmMysqlTestSuite new run printNl
+| resultSet values |
+[resultSet atEnd] whileFalse: [values add: (resultSet next at: 'columnName') ].
 @end example
 
 @node Locales
