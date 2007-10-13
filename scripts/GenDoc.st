@@ -118,7 +118,7 @@ Options:
 		    ifFalse: [
 	                classes addAll:
 			    (allClasses select: [ :each |
-			        (each nameIn: Smalltalk) = pat ]) ] ] ].
+			        pat match: (each nameIn: Smalltalk) ]) ] ] ].
 
     outFile isNil
         ifTrue: [

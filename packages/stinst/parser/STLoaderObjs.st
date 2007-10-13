@@ -190,7 +190,7 @@ LoadedMetaclass comment:
 by an STClassLoader.'!
 
 Object subclass: #LoadedMethod
-        instanceVariableNames: 'node'
+        instanceVariableNames: 'node category'
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -1099,7 +1099,30 @@ node
 !
 
 node: aRBMethodNode
-    node := aRBMethodNode
+    node := aRBMethodNode.
+    category := node category.
+    category isNil ifTrue: [ self extractMethodCategory ]
+!
+
+extractMethodCategory
+    node primitiveSources do: [:each |
+	self extractMethodCategory: (RBScanner on: each readStream).
+	category isNil ifFalse: [ ^self ] ]
+!
+
+extractMethodCategory: scanner
+    | currentToken argument |
+    currentToken := scanner next.
+    (currentToken isBinary and: [currentToken value == #<]) ifFalse: [^self].
+    currentToken := scanner next.
+    currentToken isKeyword ifFalse: [^self].
+    currentToken value = 'category:' ifFalse: [^self].
+    currentToken := scanner next.
+    currentToken isLiteral ifFalse: [^self].
+    argument := currentToken value.
+    currentToken := scanner next.
+    (currentToken isBinary and: [currentToken value == #>]) ifFalse: [^self].
+    category := argument.
 !
 
 methodParseNode
@@ -1107,7 +1130,7 @@ methodParseNode
 !
 
 methodCategory
-    ^node category
+    ^category
 !
 
 methodSourceCode

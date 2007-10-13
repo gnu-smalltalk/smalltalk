@@ -133,7 +133,7 @@ STInST.STFileInParser subclass: GSTFileInParser [
     
     parseClassExtension: node [
         class := node receiver.
-        self parseClassBody: false.
+        self parseClassBody: true.
         class := nil
     ]
     
@@ -143,7 +143,7 @@ STInST.STFileInParser subclass: GSTFileInParser [
              argument: (node arguments first name asSymbol).
              
         class := node arguments first.
-        self parseClassBody: true.
+        self parseClassBody: false.
         class := nil.
     ]
     

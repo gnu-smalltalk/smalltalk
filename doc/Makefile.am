@@ -15,7 +15,8 @@ HELP2MAN = $(top_srcdir)/build-aux/help2man -p gst
 
 info_TEXINFOS = gst.texi gst-base.texi gst-libs.texi
 gst_TEXINFOS = tutorial.texi vers-gst.texi
-gst_libs_TEXINFOS = blox.texi tcp.texi i18n.texi using-xml.texi vers-libs.texi
+gst_libs_TEXINFOS = blox.texi tcp.texi i18n.texi complex.texi debug.texi \
+	dbi.texi zlib.texi using-xml.texi vers-libs.texi
 gst_base_TEXINFOS = classes.texi vers-base.texi
 TEXI2DVI=pool_size=750000 $(top_srcdir)/build-aux/texi2dvi --expand
 
@@ -89,6 +90,26 @@ $(srcdir)/tcp.texi: $(top_srcdir)/packages/tcp/stamp-classes
 	$(GST_DOC) -p TCP -o $(srcdir)/tcp.texi TCP.* || \
 	  rm -f $(srcdir)/tcp.texi
 	test -f $(srcdir)/tcp.texi && touch $(srcdir)/gst-libs.texi 
+
+$(srcdir)/complex.texi: $(top_srcdir)/packages/complex/stamp-classes
+	$(GST_DOC) -p Complex -o $(srcdir)/complex.texi Complex || \
+	  rm -f $(srcdir)/complex.texi
+	test -f $(srcdir)/complex.texi && touch $(srcdir)/gst-libs.texi 
+
+$(srcdir)/debug.texi: $(top_srcdir)/packages/debug/stamp-classes
+	$(GST_DOC) -p DebugTools -o $(srcdir)/debug.texi Debugger* || \
+	  rm -f $(srcdir)/debug.texi
+	test -f $(srcdir)/debug.texi && touch $(srcdir)/gst-libs.texi 
+
+$(srcdir)/zlib.texi: $(top_srcdir)/packages/dbi/stamp-classes
+	$(GST_DOC) -p ZLib -o $(srcdir)/zlib.texi ZLib.* || \
+	  rm -f $(srcdir)/zlib.texi
+	test -f $(srcdir)/zlib.texi && touch $(srcdir)/gst-libs.texi 
+
+$(srcdir)/dbi.texi: $(top_srcdir)/packages/dbi/stamp-classes
+	$(GST_DOC) -p DBI -o $(srcdir)/dbi.texi DBI.* || \
+	  rm -f $(srcdir)/dbi.texi
+	test -f $(srcdir)/dbi.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/i18n.texi: $(top_srcdir)/packages/iconv/stamp-classes $(top_srcdir)/packages/i18n/stamp-classes
 	$(GST_DOC) -p Iconv -p I18N -o $(srcdir)/i18n.texi I18N.* || \

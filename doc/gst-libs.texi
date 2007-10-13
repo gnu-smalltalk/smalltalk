@@ -82,30 +82,50 @@ together with the @gst{} programming language.
 @end ifnottex
 
 @menu
-* BLOX::                The GUI library
-* TCP::                 The sockets library
-* Iconv/I18N::          The internationalization library
-* XML::                 Using the XML library
+* BLOX package::           The GUI library
+* Complex package::        Complex number computations
+* DBI package::            The database connectivity library
+* DebugTools package::     Controlling the execution of Smalltalk processes
+* TCP package::            The sockets library
+* Iconv/I18N packages::    The internationalization library
+* XML/XPath/XSL packages:: Using the XML library
+* ZLib package::           Bindings to the popular data compression library
 
-* Class index::         Index to the classes in the class reference
-* Method index::        Index to the method selectors in the class reference
-* Cross-reference::     Cross-reference between selectors
+* Class index::            Index to the classes in the class reference
+* Method index::           Index to the method selectors in the class reference
+* Cross-reference::        Cross-reference between selectors
 @end menu
 
-@node BLOX
+@node BLOX package
 @chapter Graphical users interfaces with BLOX
 @include blox.texi
 
-@node TCP
-@chapter Network programming with TCP
-@include tcp.texi
+@node Complex package
+@chapter Complex number computations
+@include complex.texi
 
-@node Iconv/I18N
+@node DBI package
+@chapter Database connectivity with DBI
+@include dbi.texi
+
+@node DebugTools package
+@chapter Controlling Smalltalk processes with DebugTools
+@include debug.texi
+
+@node Iconv/I18N packages
 @chapter Multilingual and international support with Iconv and I18N
 @include i18n.texi
 
-@node XML
-@chapter XML
+@node TCP package
+@chapter Network programming with TCP
+@include tcp.texi
+
+@node ZLib package
+@chapter Compressing and decompressing data with ZLib
+@include zlib.texi
+
+@node XML/XPath/XSL packages
+@chapter Libraries for the SAX, DOM, XPath and XSLT standards
 @include using-xml.texi
 
 @node Class index

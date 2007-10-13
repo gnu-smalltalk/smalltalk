@@ -1,3 +1,8 @@
+2007-10-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GSTParser.st: Invert true/false in previous checkin.
+	* STLoaderObjs.st: Extract category from parsed methods.
+
 2007-10-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GSTParser.st: Don't replace instance variables except
