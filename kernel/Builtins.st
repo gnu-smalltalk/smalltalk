@@ -168,13 +168,13 @@ Class extend [
     
         comment := aString
     ]
-
-    import: aString [
-    ]
 ]
     
 ClassDescription extend [
     instanceVariableNames: ivn [
+    ]
+
+    import: aString [
     ]
 ]
     

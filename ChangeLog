@@ -1,3 +1,8 @@
+2007-10-14  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/Builtins.st: Promote #import: to ClassDescription.
+	* kernel/ClassDesc.st: Document promotion requirement.
+
 2007-10-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildMeth.st: Omit sharp sign when printing.

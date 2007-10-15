@@ -380,6 +380,8 @@ files.'>
 
     import: aDictionary [
 	"Add the given shared pool to the list of the class' pool dictionaries"
+	"If you promote this method, you must also promote the version
+	 in Builtins.st."
 
 	<category: 'parsing class declarations'>
 	self addSharedPool: aDictionary
