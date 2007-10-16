@@ -76,7 +76,8 @@ I also provide some methods for implementing critical sections.'>
 	         semaphore obtained)."
 	        caught := true.
 	        self wait ] on: ProcessBeingTerminated do: [ :ex |
-		    ex semaphore isNil ifFalse: [ caught := false ] ].
+		    ex semaphore isNil ifFalse: [ caught := false ].
+		    ex pass ].
 	    aBlock value ]
 		ensure: [caught ifTrue: [self signal] ]
     ]

@@ -202,7 +202,7 @@ Eval [
      signaling the semaphore."
     | s p |
     s := Semaphore new.
-    p := [s critical:[]] fork.
+    p := [s critical:[]. 'a' printNl] fork.
     [p isWaiting] whileFalse: [Processor yield].
     p ensureTermination.
     ^s signals = 0
