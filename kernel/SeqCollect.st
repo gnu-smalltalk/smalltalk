@@ -496,8 +496,13 @@ some access and manipulation methods.'>
 		    mustBeBetween: minStop
 		    and: maxStop].
 	delta := start - repStart.
-	start to: stop
-	    do: [:i | self at: i put: (replacementCollection at: i - delta)]
+	repStart > start
+	    ifTrue: [
+		start to: stop do: [:i |
+		    self at: i put: (replacementCollection at: i - delta)] ]
+	    ifFalse: [
+		stop to: start by: -1 do: [:i |
+		    self at: i put: (replacementCollection at: i - delta)] ]
     ]
 
     replaceFrom: start to: stop with: replacementCollection [

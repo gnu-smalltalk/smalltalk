@@ -143,3 +143,20 @@ Eval [
    sc add: n8.
    sc printNl
 ]
+
+"--------------"
+
+"Test for memmove semantics of #replaceFrom:to:with:startingAt:"
+
+Eval [
+    | a |
+    (a := #(1 2 3 4 5) copy) replaceFrom: 2 to: 4 with: a startingAt: 1.
+    a printNl.
+    (a := #(1 2 3 4 5) copy) replaceFrom: 1 to: 3 with: a startingAt: 2.
+    a printNl.
+
+    (a := 'abcde' copy) replaceFrom: 2 to: 4 with: a startingAt: 1.
+    a printNl.
+    (a := 'abcde' copy) replaceFrom: 1 to: 3 with: a startingAt: 2.
+    a printNl.
+]

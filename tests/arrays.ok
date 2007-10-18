@@ -100,3 +100,10 @@ returned value is '(() )'
 Execution begins...
 SortedCollection (8->1 12->1 4->2 7->2 5->3 6->3 9->8 )
 returned value is SortedCollection new: 10 "<0>"
+
+Execution begins...
+(1 1 2 3 5 )
+(2 3 4 4 5 )
+'aabce'
+'bcdde'
+returned value is 'bcdde'

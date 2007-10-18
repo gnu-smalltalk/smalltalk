@@ -1,3 +1,10 @@
+2007-10-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/SeqCollect.st: Avoid overlapping array problems in
+	#replaceFrom:to:with:startingAt:.
+	* tests/arrays.st: Add corresponding test.
+	* tests/arrays.ok: Adjust output.
+
 2007-10-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Semaphore.st: Pass the ProcessBeingTerminated exception.	
