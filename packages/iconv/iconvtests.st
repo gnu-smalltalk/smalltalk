@@ -115,7 +115,8 @@ TestCase subclass: IconvTest [
 	str := #[239 191 190] asString.
 	self assert: (str asUnicodeString: 'UTF-8') first = $<16rFFFE>.
 	str := #[208 184] asString.
-	self assert: (str asUnicodeString: 'UTF-8') first = $<16r0438>
+	self assert: (str asUnicodeString: 'UTF-8') first = $<16r0438>.
+	self assert: ('' asUnicodeString: 'UTF-8') isEmpty
     ]
 
     testByteArrayAsUnicodeStringColon [
@@ -127,7 +128,8 @@ TestCase subclass: IconvTest [
 	str := #[239 191 190].
 	self assert: (str asUnicodeString: 'UTF-8') first = $<16rFFFE>.
 	str := #[208 184].
-	self assert: (str asUnicodeString: 'UTF-8') first = $<16r0438>
+	self assert: (str asUnicodeString: 'UTF-8') first = $<16r0438>.
+	self assert: (#[] asUnicodeString: 'UTF-8') isEmpty
     ]
 
     testFromUTF7 [
