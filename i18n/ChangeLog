@@ -1,6 +1,12 @@
+2007-10-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* i18n/Sets.st: Return true from #convertMore if iconv yields no
+	output.
+
 2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
-	* i18n/Sets.st: Add some methods, skip BOM when converting to UnicodeString.
+	* i18n/Sets.st: Add some methods, skip BOM when converting to
+	UnicodeString.
 
 2007-07-02  Paolo Bonzini  <bonzini@gnu.org>
 

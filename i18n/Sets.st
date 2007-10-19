@@ -924,16 +924,13 @@ convertMore
     recodedEnd := self bufferSize - (bytesLeft at: 2).
     recodedPos := 1.
 
-    fine ifFalse: [
-	 InvalidSequenceError signal.
-	 ^false ].
+    fine ifFalse: [ InvalidSequenceError signal. ^true ].
+    self atEndOfInput ifFalse: [ ^false ].
 
-    self atEndOfInput ifFalse: [ ^true ].
-    readPos > readEnd
-	ifTrue: [ readBuffer := nil ]
-	ifFalse: [ IncompleteSequenceError signal ].
-
-    ^false
+    "At end of input, check whether the last character was complete."
+    readBuffer := nil.
+    readPos <= readEnd ifTrue: [ IncompleteSequenceError signal. ^true ].
+    ^recodedEnd = 0
 ! !
 
 
