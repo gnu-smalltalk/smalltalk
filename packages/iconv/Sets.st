@@ -996,10 +996,10 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 	    ifTrue: 
 		[readBuffer 
 		    replaceFrom: 1
-		    to: readEnd - readPos
+		    to: readEnd - readPos + 1
 		    with: readBuffer
 		    startingAt: readPos.
-		readEnd := readEnd - readPos.
+		readEnd := readEnd - readPos + 1.
 		readPos := 1].
 	[readEnd >= self bufferSize or: [self atEndOfInput]] whileFalse: 
 		[readEnd := readEnd + 1.
@@ -1044,7 +1044,7 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 
     convertMore [
 	<category: 'private - conversion'>
-	| bytesLeft fine |
+	| oldReadPos bytesLeft fine |
 	recodedBuffer isNil ifTrue: [self initBuffers].
 	readBuffer isNil ifTrue: [^true].
 	iconvHandle isNil ifTrue: [self iconvOpen].
@@ -1058,15 +1058,18 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 		    to: recodedBuffer
 		    size: self bufferSize
 		    state: bytesLeft.
-	readPos := self bufferSize - (bytesLeft at: 1).
+	oldReadPos := readPos.
+	readPos := readEnd + 1 - (bytesLeft at: 1).
 	recodedEnd := self bufferSize - (bytesLeft at: 2).
 	recodedPos := 1.
 	fine ifFalse: [InvalidSequenceError signal. ^true].
+	readPos > readEnd ifFalse: [
+	    readPos = oldReadPos ifTrue: [ IncompleteSequenceError signal ].
+	    ^readPos = oldReadPos ].
 	self atEndOfInput ifFalse: [^false].
 
 	"At end of input, check whether the last character was complete."
 	readBuffer := nil.
-	readPos <= readEnd ifTrue: [IncompleteSequenceError signal. ^true].
 	^recodedEnd = 0
     ]
 ]

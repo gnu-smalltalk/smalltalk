@@ -180,5 +180,53 @@ TestCase subclass: IconvTest [
 	str := UnicodeString with: $<16r10FFFF>.
 	self assert: (str asString: 'UTF-7') asString = '+2//f/w-'
     ]
+
+    testRoundTrip [
+	<category: 'test'>
+	| s |
+	s := String new: 1 withAll: $x.
+	self assert: (s asUnicodeString asString: 'UTF-8') = s.
+	s := String new: 1024 withAll: $x.
+	self assert: (s asUnicodeString asString: 'UTF-8') = s.
+	s := String new: 1025 withAll: $x.
+	self assert: (s asUnicodeString asString: 'UTF-8') = s.
+	s := UnicodeString new: 1 withAll: $x.
+	self assert: (s asString: 'UTF-8') asUnicodeString = s.
+	s := UnicodeString new: 1024 withAll: $x.
+	self assert: (s asString: 'UTF-8') asUnicodeString = s.
+	s := UnicodeString new: 1025 withAll: $x.
+	self assert: (s asString: 'UTF-8') asUnicodeString = s.
+	s := UnicodeString new: 1025 withAll: $<16r4000>.
+	self assert: (s asString: 'UTF-8') asUnicodeString = s.
+	s := UnicodeString new: 1025 withAll: $<16r4000>.
+	self assert: (s asString: 'UTF-8') asUnicodeString = s
+    ]
+
+    testExceptions [
+	<category: 'test'>
+	| b |
+	self should: [ #[228] asUnicodeString ] raise: IncompleteSequenceError.
+	self should: [ #[128] asUnicodeString ] raise: InvalidSequenceError.
+	self should: [ #[228 128] asUnicodeString ] raise: IncompleteSequenceError.
+
+	"On some OSes we return IncompleteSequenceError for the following."
+	"self should: [ #[228 228] asUnicodeString ] raise: InvalidSequenceError."
+
+	b := ByteArray new: 1026.
+	b atAll: (1 to: 1026 by: 3) put: 228.
+	b atAll: (2 to: 1026 by: 3) put: 128.
+	b atAll: (3 to: 1026 by: 3) put: 128.
+	self shouldnt: [ b asUnicodeString ] raise: IncompleteSequenceError.
+
+	b := b copyFrom: 1 to: 1025.
+	self should: [ b asUnicodeString ] raise: IncompleteSequenceError.
+
+	b at: 1025 put: 228.
+	"On some OSes we return IncompleteSequenceError for the following."
+	"self should: [ b asUnicodeString ] raise: InvalidSequenceError."
+
+	b := b copyFrom: 1 to: 1024.
+	self should: [ b asUnicodeString ] raise: IncompleteSequenceError.
+    ]
 ]
 

@@ -1,3 +1,8 @@
+2007-10-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Sets.st: Fix all sort of off-by-one errors.
+	* iconvtests.st: Add regression tests.
+
 2007-10-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Sets.st: Return true from #convertMore if iconv yields no output.
