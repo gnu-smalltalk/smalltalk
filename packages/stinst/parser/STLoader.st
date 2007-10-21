@@ -248,7 +248,7 @@ defineMethod: node
 !
 
 compile: node
-    self defineMethod: node.
+    ^self defineMethod: node
 ! !
 
 !STClassLoader methodsFor: 'evaluating statements'!

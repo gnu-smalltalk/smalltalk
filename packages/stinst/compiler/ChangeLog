@@ -1,3 +1,7 @@
+2007-10-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* StartCompiler.st: Remove #parserClass from Behavior.
+
 2007-10-02  Stephen Compall  <scompall@nocandysw.com>
 
 	* StartCompiler.st: Use GSTFileInParser instead to support new

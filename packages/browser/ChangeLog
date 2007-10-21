@@ -1,3 +1,13 @@
+2007-10-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* ClassHierBrow.st: Replace #sourceCodeAt: with
+	#methodRecompilationSourceString.
+	* MethSetBrow.st: Likewise.
+	* PCode.st: Add #parserClass, use it.
+
+	* DebugSupport.st: Make VariableNames class>>#on: accept
+	a CompiledMethod in order to use its #parserClass.
+
 2007-08-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* PCode.st: Turn FIXME into a comment.

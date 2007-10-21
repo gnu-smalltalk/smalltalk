@@ -263,7 +263,9 @@ Object subclass: FileOutExporter [
                     ifTrue: [ outStream nextPutAll: outClass name; nextPutAll: ' class >> '.
                               outClass asMetaclass ]
                     ifFalse: [ outClass ].
-        outStream nextPutAll: (class sourceCodeAt: selector) trimSeparators; nl.
+        outStream
+	    nextPutAll: (class >> selector) methodRecompilationSourceString;
+	    nl.
     ]
 
     fileOutInitialize [
@@ -294,9 +296,7 @@ FileOutExporter subclass: FormattingExporter [
                         outClass asMetaclass ]
                     ifFalse: [ outClass ].
                     
-	source := STInST.RBFormatter new
-		      initialIndent: 1;
-                      format: (class parseNodeAt: selector).
+	source := (class compiledMethodAt: selector) methodFormattedSourceString.
         outStream nextPutAll: source; nl.
     ]
 ]
@@ -308,10 +308,31 @@ Behavior extend [
 ]
 
 CompiledMethod extend [
+    methodFormattedSourceString [
+        "Answer the method source code as a string"
+
+        <category: 'compiling'>
+	^STInST.RBFormatter new
+		      initialIndent: 1;
+                      format: self methodParseNode.
+    ]
+
     methodParseNode [
-	^STInST.RBParser 
+        "Answer the parse tree for the receiver, or nil if there is an
+         error."
+
+        <category: 'compiling'>
+	^self parserClass
             parseMethod: self methodSourceString
             category: self methodCategory
+	    onError: [ :message :position | ^nil ]
+    ]
+
+    parserClass [
+        <category: 'compiling'>
+	^self isOldSyntax
+	    ifTrue: [ STInST.RBParser ]
+	    ifFalse: [ STInST.RBBracketedMethodParser ]
     ]
 ]
 
@@ -341,3 +362,26 @@ ClassDescription extend [
         STInST.FileOutExporter fileOutCategory: category of: self to: aFileStream
     ]
 ]
+
+RBParser subclass: RBBracketedMethodParser [
+    skipToken: tokenValue [
+        (currentToken value = tokenValue)
+            ifTrue: [self step. ^true]
+            ifFalse: [^false]
+    ]
+
+    skipExpectedToken: tokenValue [
+        (self skipToken: tokenValue)
+            ifFalse: [self parserError: ('expected ' , tokenValue asSymbol)]
+    ]
+
+    parseMethodInto: methodNode [
+        <category: 'private-parsing'>
+        self skipExpectedToken: $[.
+	super parseMethodInto: methodNode.
+        self skipExpectedToken: $].
+        ^methodNode
+    ]
+]
+
+

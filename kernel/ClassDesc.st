@@ -386,45 +386,5 @@ files.'>
 	<category: 'parsing class declarations'>
 	self addSharedPool: aDictionary
     ]
-
-    instanceVariableNames: instVarNames [
-	"Set the instance variables for the receiver to be those
-	 in instVarNames"
-
-	<category: 'parsing class declarations'>
-	| variableArray variableString oldInstVarNames |
-	variableArray := self parseInstanceVariableString: instVarNames.
-	variableArray := self subclassInstVarNames , variableArray.
-	oldInstVarNames := self allInstVarNames.
-
-	"If instance variables change, update  instance variables and
-	 instance spec of the class and all its subclasses"
-	variableArray = oldInstVarNames ifTrue: [^self].
-	self updateInstanceVars: variableArray shape: self shape.
-
-	"If no variable has been removed, no need to recompile"
-	(oldInstVarNames allSatisfy: [:each | variableArray includes: each]) 
-	    ifTrue: [^self].
-	Transcript
-	    nextPutAll: 'Recompiling classes...';
-	    nl.
-	self compileAll.
-	self compileAllSubclasses
-    ]
-
-    parseInstanceVariableString: variableString [
-	<category: 'parsing class declarations'>
-	| variableArray |
-	variableArray := self parseVariableString: variableString.
-	^variableArray collect: [:each | each asSymbol]
-    ]
-
-    parseVariableString: aString [
-	<category: 'parsing class declarations'>
-	| tokens |
-	tokens := aString subStrings asArray.
-	tokens do: [:token | self validateIdentifier: token].
-	^tokens
-    ]
 ]
 

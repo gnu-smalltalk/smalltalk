@@ -202,15 +202,20 @@ BLOX.BText subclass: BCode [
 	    to: endPos]
     ]
 
+    parserClass [
+	<category: 'syntax highlighting'>
+	^STInST.RBBracketedMethodParser
+    ]
+
     highlightSyntax [
 	<category: 'syntax highlighting'>
 	| parser |
 	source = self contents 
 	    ifFalse: 
-		["FIXME: this is wrong, something is being dropped elsewhere with respect to content updates"
-
+		["FIXME: this is wrong, something is being dropped
+		 elsewhere with respect to content updates"
 		source := self contents].
-	parser := (STInST.RBParser new)
+	parser := (self parserClass new)
 		    errorBlock: [:string :pos | ^self];
 		    initializeParserWith: source type: #on:errorBlock:;
 		    yourself.

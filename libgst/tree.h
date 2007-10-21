@@ -181,6 +181,7 @@ typedef struct method_node
   tree_node attributes;
   tree_node statements;
   int64_t endPos;
+  mst_Boolean isOldSyntax;
 }
 method_node;
 
@@ -230,7 +231,8 @@ extern tree_node _gst_make_method (YYLTYPE *startLocation,
 				   tree_node selectorExpr,
 				   tree_node temporaries,
 				   tree_node attributes,
-				   tree_node statements)
+				   tree_node statements,
+				   int isOldSyntax)
   ATTRIBUTE_HIDDEN;
 
 /* Create an expr_node to be passed to _gst_make_method for a unary

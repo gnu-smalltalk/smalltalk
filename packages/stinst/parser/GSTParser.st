@@ -307,15 +307,19 @@ STInST.STFileInParser subclass: GSTFileInParser [
     parseInstanceVariables: node add: addThem [
         | vars |
             
-	"FIXME: support adding more instance variables."
-	addThem ifTrue: [ self notYetImplemented ].
-        vars := (node arguments at: 1) name.
+	vars := addThem
+	    ifTrue: [
+	        (self resolveClass: class) instVarNames
+		    fold: [ :a :b | a, ' ', b ] ]
+	    ifFalse: [ '' ].
+
+        vars := vars, ' ', (node arguments at: 1) name.
         [currentToken isIdentifier]
             whileTrue: [vars := vars , ' ' , currentToken value.
         
                         self step ].       
+
         self skipExpectedToken: #|.
-        
         self evaluateMessageOn: class 
              selector: #instanceVariableNames:
              argument: vars.

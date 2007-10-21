@@ -276,7 +276,10 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 		    | needToRecompileMetaclasses) | (aClass shape ~~ realShape) 
 	    ifTrue: 
 		[aClass instanceCount > 0 ifTrue: [ObjectMemory globalGarbageCollect].
-		aClass updateInstanceVars: variableArray shape: realShape].
+		aClass
+		    updateInstanceVars: variableArray
+		    numInherited: superclass instSize
+		    shape: realShape].
 
 	"Now add/remove pool dictionaries.  FIXME: They may affect name binding,
 	 so we should probably recompile everything if they change."
@@ -299,8 +302,11 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 
 		self superclass allInstVarNames ~= superclass class allInstVarNames 
 		    ifTrue: 
-			[aClass class updateInstanceVars: superclass class allInstVarNames 
-				    , aClass class instVarNames
+			[aClass class
+			    updateInstanceVars:
+				superclass class allInstVarNames,
+				aClass class instVarNames
+			    numInherited: superclass class instSize
 			    shape: aClass class shape].
 
 		"Fix references between classes..."

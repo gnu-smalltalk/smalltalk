@@ -171,14 +171,14 @@ Class extend [
 ]
     
 ClassDescription extend [
-    instanceVariableNames: ivn [
-    ]
-
     import: aString [
     ]
 ]
     
 Behavior extend [
+    instanceVariableNames: ivn [
+    ]
+
     shape: aSymbol [
     ]
 ]

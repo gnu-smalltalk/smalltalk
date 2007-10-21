@@ -130,7 +130,7 @@ CObject subclass: CCompound [
 	maxAlignment := self superclass alignof.
 	inspStr := WriteStream on: (String new: 8).
 	inspStr
-	    nextPutAll: 'inspectSelectorList';
+	    nextPutAll: 'inspectSelectorList [';
 	    nl;
 	    nextPutAll: '    ^#('.
 
@@ -148,14 +148,18 @@ CObject subclass: CCompound [
 		str := WriteStream on: (String new: 20).
 		str
 		    nextPutAll: name;
+		    nextPutAll: ' [';
 		    nl;
 		    nextPutAll: '    ^self at: ';
 		    print: offset;
 		    nextPutAll: ' type: ';
-		    store: type.
+		    store: type;
+		    nl;
+		    nextPut: $].
 		self compile: str classified: 'accessing'.
 		offset := offset + type sizeof].
-	self compile: inspStr contents , ')' classified: 'debugging'.
+	inspStr nextPut: $); nl; nextPut: $].
+	self compile: inspStr contents classified: 'debugging'.
 	self compileSize: offset align: maxAlignment
     ]
 
@@ -164,10 +168,12 @@ CObject subclass: CCompound [
 
 	<category: 'subclass creation'>
 	| sizeofMethod alignofMethod |
-	sizeofMethod := 'sizeof
-    ^' , (size alignTo: alignment) printString.
-	alignofMethod := 'alignof
-    ^' , alignment printString.
+	sizeofMethod := 'sizeof [
+    ^' , (size alignTo: alignment) printString, '
+]'.
+	alignofMethod := 'alignof [
+    ^' , alignment printString, '
+]'.
 	self compile: sizeofMethod classified: 'accessing'.
 	self class compile: sizeofMethod classified: 'accessing'.
 	self compile: alignofMethod classified: 'accessing'.

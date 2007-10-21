@@ -314,7 +314,7 @@ _gst_parse_method ()
   p.state = PARSE_METHOD;
   lex_init (&p);
   if (setjmp (p.recover) == 0)
-    parse_method (&p, EOF);
+    parse_method (&p, ']');
   else
     _gst_had_error = false;
 
@@ -1021,7 +1021,14 @@ parse_instance_variables (gst_parser *p, OOP classOOP, mst_Boolean extend)
     {
       gst_behavior class = (gst_behavior) OOP_TO_OBJ (classOOP);
       OOP *instVars = OOP_TO_OBJ (class->instanceVariables)->data;
-      int n = NUM_INDEXABLE_FIELDS (class->instanceVariables);
+      int n = CLASS_FIXED_FIELDS (classOOP);
+      OOP superclassOOP = SUPERCLASS (classOOP);
+      if (!IS_NIL (superclassOOP))
+	{
+	  int superclassVars = CLASS_FIXED_FIELDS (superclassOOP);
+	  instVars += superclassVars;
+	  n -= superclassVars;
+	}
       for (; n--; instVars++)
 	{
 	  char *s = _gst_to_cstring (*instVars);
@@ -1088,7 +1095,8 @@ parse_method (gst_parser *p, int at_end)
     current_pos.file_offset++;
 
   method = _gst_make_method (&pat->location, &current_pos,
-			     pat, temps, attrs, stmts);
+			     pat, temps, attrs, stmts,
+			     at_end != ']');
 
   if (!_gst_had_error && !_gst_skip_compilation)
     {

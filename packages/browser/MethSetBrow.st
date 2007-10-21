@@ -137,7 +137,7 @@ GuiData subclass: MethodSetBrowser [
 
 	<category: 'accessing'>
 	theSelector notNil 
-	    ifTrue: [^theClass -> (theClass sourceCodeAt: theSelector)].
+	    ifTrue: [^theClass -> (theClass >> theSelector) methodRecompilationSourceString].
 	^''
     ]
 

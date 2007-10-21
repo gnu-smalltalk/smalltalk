@@ -89,12 +89,18 @@ RBParser subclass: STFileParser [
 
     compile: node [
 	<category: 'overridable - parsing file-ins'>
-	driver compile: node
+	^driver compile: node
     ]
 
     endMethodList [
 	<category: 'overridable - parsing file-ins'>
 	driver endMethodList
+    ]
+
+    resolveClass: node [
+	<category: 'overridable - parsing file-ins'>
+	self evaluate: node.
+	^self result
     ]
 
     evaluate: node [
@@ -240,7 +246,7 @@ Object subclass: STParsingDriver [
 	"do nothing by default"
 
 	<category: 'overridable - parsing file-ins'>
-	
+	^nil
     ]
 
     endMethodList [
@@ -326,9 +332,13 @@ STFileParser subclass: STFileInParser [
 	 method definitions, followed by a bang"
 
 	<category: 'private-parsing'>
+	| method |
+
 	self step.	"gobble doit terminating bang"
 	[scanner atEnd or: [currentToken isSpecial and: [currentToken value == $!]]] 
-	    whileFalse: [self compile: self parseMethodFromFile].
+	    whileFalse: [
+		method := self compile: self parseMethodFromFile.
+		method isNil ifFalse: [method noteOldSyntax]].
 	scanner stripSeparators.
 	self step.
 	self endMethodList

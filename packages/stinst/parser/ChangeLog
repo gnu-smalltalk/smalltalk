@@ -1,3 +1,15 @@
+2007-10-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Exporter.st: Add #methodFormattedSourceString and use it.
+	Add #parserClass.
+	* GSTParser.st: Support adding more instance variables to a class.
+	* RBParser.st: Add RBBracketedMethodParser.
+	* SIFParser.st: Send #noteOldSyntax to compiled methods.
+	* STFileParser.st: Return compiled methods from #compile:.  Add
+	#resolveClass:.  Send #noteOldSyntax to compiled methods.
+	* STLoader.st: Return compiled methods from #compile:.
+	* STLoaderObjs.st: Add dummy #noteOldSyntax method to LoadedMethod.
+
 2007-10-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GSTParser.st: Invert true/false in previous checkin.

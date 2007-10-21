@@ -1,3 +1,24 @@
+2007-10-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Move recompilation methods to CompiledMethod.
+	Move #instanceVariableNames: and related methods from ClassDescription.
+	Change #updateInstanceVars:shape: to
+	#updateInstanceVars:numInherited:shape:.
+	* kernel/Builtins.st: Promote #instanceVariableNames: to Behavior.
+	* kernel/CStruct.st: Compile methods as new syntax.
+	* kernel/ClassDesc.st: Remove #instanceVariableNames: and related
+	methods.
+	* kernel/CompildMeth.st: Add #methodFormattedSourceString,
+	#methodRecompilationSourceString, #isOldSyntax, #noteOldSyntax,
+	#recompile, #recompileNotifying:.  Support recompiling methods from
+	both syntaxes.
+	* kernel/Metaclass.st: Change #updateInstanceVars:shape: to
+	#updateInstanceVars:numInherited:shape:.
+	* kernel/UndefObject.st: Add #instSize for polymorphism.
+	
+	* tests/mutate.st: Add new tests on class extension.
+	* tests/mutate.ok: Update test results.
+
 2007-10-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Avoid overlapping array problems in

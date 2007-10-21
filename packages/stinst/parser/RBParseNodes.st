@@ -1078,19 +1078,6 @@ Instance Variables:
 ]
 
 
-
-Behavior extend [
-
-    parseTreeFor: aSymbol [
-	"Answer the parse tree for the given selector, or nil if there was an
-	 error.  Requires the Parser package to be loaded."
-
-	<category: 'RefactoringBrowser'>
-	^RBParser parseMethod: (self sourceCodeAt: aSymbol)
-	    onError: [:aString :pos | ^nil]
-    ]
-
-]
 
 
 

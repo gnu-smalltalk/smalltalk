@@ -112,7 +112,6 @@ hidden from other objects trying to work with a RBParser''s scanner.
     ]
 ]
 
-
 
 STParsingDriver subclass: STEvaluationDriver [
     | curCategory curClass curCompilerClass evalFor lastResult method |
@@ -264,8 +263,7 @@ RBParser extend [
 Behavior extend [
 
     compilerClass [
-	"This method is present for symmetry with #parserClass.  It
-	 specifies the class that will be used to compile the parse
+	"Return the class that will be used to compile the parse
 	 nodes into bytecodes."
 
 	<category: 'compiling'>
@@ -285,14 +283,6 @@ Behavior extend [
 
 	<category: 'compiling'>
 	^STInST.GSTFileInParser
-    ]
-
-    parserClass [
-	"Answer the class to be used by my method-compiling methods to
-	 parse methods for delivery to my #compilerClass."
-
-	<category: 'compiling'>
-	^STInST.RBParser
     ]
 
 ]

@@ -1,3 +1,12 @@
+2007-10-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Add brackets to source code of #methodsFor:.  
+	Set isOldSyntax bit of the CompiledMethod header.
+	* libgst/comp.h: Add isOldSyntax bit.
+	* libgst/gst-parse.c: Parse isolated methods with new syntax.
+	* libgst/tree.c: Add isOldSyntax argument to _gst_make_method.
+	* libgst/tree.h: Likewise, and add it to AST.
+
 2007-10-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gst-parse.c: Don't replace instance variables except

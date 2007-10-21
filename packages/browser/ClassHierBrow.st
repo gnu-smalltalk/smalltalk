@@ -243,7 +243,7 @@ GuiData subclass: ClassHierarchyBrowser [
 		curClass fileOutDeclarationOn: aStream.
 		^aStream contents].
 	"Display method source for selected class"
-	^self getClass -> (self getClass sourceCodeAt: curSelector)
+	^self getClass -> (self getClass >> curSelector) methodRecompilationSourceString
     ]
 
     addCategory: listView [

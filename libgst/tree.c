@@ -124,7 +124,8 @@ _gst_make_method (YYLTYPE *location,
 		  tree_node selectorExpr,
 		  tree_node temporaries,
 		  tree_node attributes,
-		  tree_node statements)
+		  tree_node statements,
+		  int isOldSyntax)
 {
   tree_node result;
 
@@ -134,6 +135,7 @@ _gst_make_method (YYLTYPE *location,
   result->v_method.temporaries = temporaries;
   result->v_method.attributes = attributes;
   result->v_method.statements = statements;
+  result->v_method.isOldSyntax = isOldSyntax;
   return (result);
 }
 
@@ -707,6 +709,11 @@ print_method_node (tree_node node,
   indent (level);
   printf ("statements: ");
   _gst_print_tree (node->v_method.statements, level + 12);
+  indent (level);
+  if (node->v_method.isOldSyntax)
+    printf ("old syntax\n");
+  else
+    printf ("new syntax\n");
 }
 
 static void

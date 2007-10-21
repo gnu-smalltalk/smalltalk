@@ -88,7 +88,7 @@
 #define MTH_DEPTH_BITS		6
 #define MTH_TEMPS_BITS		6
 #define MTH_ARGS_BITS		5
-#define MTH_PRIM_BITS		10
+#define MTH_PRIM_BITS		9
 #define MTH_FLAG_BITS		3
 
 #define MTH_NORMAL		0
@@ -108,8 +108,8 @@ typedef struct method_header
 #endif
   unsigned :1;			/* sign - must be 0 */
   unsigned headerFlag:MTH_FLAG_BITS;	/* prim _gst_self, etc.  */
-  unsigned primitiveIndex:MTH_PRIM_BITS;	/* index of primitve,
-						   or 0 */
+  unsigned isOldSyntax:1;
+  unsigned primitiveIndex:MTH_PRIM_BITS;	/* index of primitive, or 0 */
   unsigned numTemps:MTH_TEMPS_BITS;
   unsigned stack_depth:MTH_DEPTH_BITS;
   unsigned numArgs:MTH_ARGS_BITS;
@@ -121,6 +121,7 @@ typedef struct method_header
   unsigned numTemps:MTH_TEMPS_BITS;
   unsigned primitiveIndex:MTH_PRIM_BITS;	/* index of primitve,
 						   or 0 */
+  unsigned isOldSyntax:1;
   unsigned headerFlag:MTH_FLAG_BITS;	/* prim _gst_self, etc.  */
   unsigned :1;			/* sign - must be 0 */
 #if SIZEOF_OOP == 8

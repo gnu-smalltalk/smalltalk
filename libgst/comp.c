@@ -472,12 +472,12 @@ _gst_install_initial_methods (void)
   install_method (termination_method);
 
   methodsForString = "\
-methodsFor: aCategoryString \
+methodsFor: aCategoryString [\
     \"Calling this method prepares the parser to receive methods \
       to be compiled and installed in the receiver's method dictionary. \
       The methods are put in the category identified by the parameter.\" \
     <primitive: VMpr_Behavior_methodsFor> \
-";
+]";
   _gst_set_compilation_class (_gst_behavior_class);
   _gst_set_compilation_category (_gst_string_new ("compiling methods"));
   _gst_push_smalltalk_string (_gst_string_new (methodsForString));
@@ -662,7 +662,7 @@ _gst_execute_statements (tree_node temps,
   methodOOP =
     _gst_compile_method (_gst_make_method (&statements->location, &loc,
 					   messagePattern, temps, NULL,
-					   statements),
+					   statements, false),
 			 true, false);
 
   SET_CLASS_ENVIRONMENT (_gst_undefined_object_class,
@@ -793,6 +793,7 @@ _gst_compile_method (tree_node method,
   int primitiveIndex;
   int stack_depth;
   inc_ptr incPtr;
+  gst_compiled_method compiledMethod;
 
   dup_message_receiver = false;
   literal_vec_curr = literal_vec;
@@ -900,6 +901,9 @@ _gst_compile_method (tree_node method,
 					_gst_this_category,
 					method->location.file_offset,
 					method->v_method.endPos);
+
+      compiledMethod = (gst_compiled_method) OOP_TO_OBJ (methodOOP);
+      compiledMethod->header.isOldSyntax = method->v_method.isOldSyntax;
       INC_ADD_OOP (methodOOP);
 
       if (install)
@@ -2689,6 +2693,7 @@ _gst_make_new_method (int primitiveIndex,
   inc_ptr incPtr;
 
   maximumStackDepth += numArgs + numTemps;
+  memset (&header, 0, sizeof (method_header));
 
   incPtr = INC_SAVE_POINTER ();
   if (primitiveIndex)
@@ -2867,6 +2872,8 @@ _gst_block_new (int numArgs,
   maximumStackDepth++;		/* just to be sure */
 
   numByteCodes = _gst_bytecode_length (bytecodes);
+
+  memset (&header, 0, sizeof (header));
   header.numArgs = numArgs;
   header.numTemps = numTemps;
   header.depth = maximumStackDepth;

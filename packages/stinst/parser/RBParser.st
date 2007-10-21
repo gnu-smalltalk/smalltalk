@@ -1420,6 +1420,33 @@ Stream subclass: RBScanner [
     ]
 ]
 
+
+
+RBParser subclass: RBBracketedMethodParser [
+
+    <category: 'Refactory-Parser'>
+    <comment: 'A subclass of RBParser that discards a pair of brackets around
+methods.'>
+
+    skipToken: tokenValue [
+        (currentToken value = tokenValue)
+            ifTrue: [self step. ^true]
+            ifFalse: [^false]
+    ]
+
+    skipExpectedToken: tokenValue [
+        (self skipToken: tokenValue)
+            ifFalse: [self parserError: ('expected ' , tokenValue asSymbol)]
+    ]
+
+    parseMethodInto: methodNode [
+        <category: 'private-parsing'>
+        self skipExpectedToken: $[.
+       super parseMethodInto: methodNode.
+        self skipExpectedToken: $].
+        ^methodNode
+    ]
+]
 
 
 Eval [

@@ -257,6 +257,11 @@ instance, which is the object "nil".'>
 	    yourself
     ]
 
+    instSize [
+	<category: 'class polymorphism'>
+	^0
+    ]
+
     methodDictionary [
 	<category: 'class polymorphism'>
 	^nil

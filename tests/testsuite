@@ -2555,7 +2555,7 @@ $at_traceon
     at_setup_line='testsuite.at:45'
     at_desc="mutate.st"
     $at_quiet $ECHO_N " 19: mutate.st                                      $ECHO_C"
-    at_xfail=yes
+    at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
       echo "19. testsuite.at:45: testing ..."

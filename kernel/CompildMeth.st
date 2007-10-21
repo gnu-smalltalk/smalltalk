@@ -101,30 +101,56 @@ instances.'>
     methodCategory [
 	"Answer the method category"
 
-	<category: 'basic'>
+	<category: 'accessing'>
 	^descriptor category
     ]
 
     methodCategory: aCategory [
 	"Set the method category to the given string"
 
-	<category: 'basic'>
+	<category: 'accessing'>
 	descriptor category: aCategory
     ]
 
     methodSourceCode [
 	"Answer the method source code (a FileSegment or String or nil)"
 
-	<category: 'basic'>
+	<category: 'source code'>
 	^(descriptor sourceCode isNil or: [descriptor sourceFile = 'stdin']) 
 	    ifTrue: [nil]
 	    ifFalse: [descriptor sourceCode]
     ]
 
+    methodParseNode [
+	"Answer the parse tree for the receiver, or nil if there is an error.
+	 Requires the Parser package to be loaded."
+
+	<category: 'source code'>
+	self notYetImplemented
+    ]
+
+    methodFormattedSourceString [
+	"Answer the pretty-printed method source code as a string.
+	 Requires the Parser package to be loaded."
+
+	<category: 'source code'>
+	self notYetImplemented
+    ]
+
+    methodRecompilationSourceString [
+	"Answer the method source code as a string, ensuring that it is
+	 in new syntax (it has brackets)."
+
+	<category: 'source code'>
+	^self isOldSyntax
+	    ifTrue: [ self methodFormattedSourceString ]
+	    ifFalse: [ self methodSourceString trimSeparators ].
+    ]
+
     methodSourceString [
 	"Answer the method source code as a string"
 
-	<category: 'basic'>
+	<category: 'source code'>
 	^(descriptor sourceCode isNil or: [descriptor sourceFile = 'stdin']) 
 	    ifTrue: [nil]
 	    ifFalse: [descriptor sourceString]
@@ -133,7 +159,7 @@ instances.'>
     methodSourceFile [
 	"Answer the file where the method source code is stored"
 
-	<category: 'basic'>
+	<category: 'source code'>
 	^(descriptor sourceCode isNil or: [descriptor sourceFile = 'stdin']) 
 	    ifTrue: [nil]
 	    ifFalse: [descriptor sourceFile]
@@ -143,7 +169,7 @@ instances.'>
 	"Answer the location where the method source code is stored in
 	 the methodSourceFile"
 
-	<category: 'basic'>
+	<category: 'source code'>
 	^(descriptor sourceCode isNil or: [descriptor sourceFile = 'stdin']) 
 	    ifTrue: [nil]
 	    ifFalse: [descriptor sourcePos]
@@ -248,7 +274,23 @@ instances.'>
 	"Answer the primitive called by the receiver"
 
 	<category: 'accessing'>
-	^(header bitShift: -17) bitAnd: 1023
+	^(header bitShift: -17) bitAnd: 511
+    ]
+
+    isOldSyntax [
+	"Answer whether the method was written with the old (chunk-format)
+	 syntax"
+
+	<category: 'accessing'>
+	^((header bitShift: -26) bitAnd: 1) == 1
+    ]
+
+    noteOldSyntax [
+	"Remember that the method is written with the old (chunk-format)
+         syntax"
+
+        <category: 'accessing'>
+	header := header bitOr: (1 bitShift: 26)
     ]
 
     allLiterals [
@@ -299,6 +341,52 @@ instances.'>
 	self flags = 6 
 	    ifTrue: [self subclassResponsibility]
 	    ifFalse: [anObject perform: self withArguments: args]
+    ]
+
+    recompile [
+	"Recompile the method in the scope of the class where it leaves."
+
+	<category: 'compiling'>
+        | source category ok |
+        ok :=
+                [source := self methodRecompilationSourceString.
+                category := self methodCategory.
+                true]
+                        on: Error
+                        do: [:ex | ex return: false].
+        ok ifFalse: [^nil].
+        RegressionTesting
+            ifFalse:
+                [Transcript
+                    nextPutAll: 'Recompiling selector: ';
+                    print: self selector asSymbol;
+                    nl].
+        ^self methodClass compile: source classified: category
+    ]
+
+    recompileNotifying: aNotifier [
+	"Recompile the method in the scope of the class where it leaves,
+	 notifying errors to aNotifier by sending it #error:."
+
+	<category: 'compiling'>
+        | source category ok |
+        ok :=
+                [source := self methodRecompilationSourceString.
+                category := self methodCategory.
+                true]
+                        on: Error
+                        do: [:ex | ex return: false].
+        ok ifFalse: [^nil].
+        RegressionTesting
+            ifFalse:
+                [Transcript
+                    nextPutAll: 'Recompiling selector: ';
+                    print: self selector asSymbol;
+                    nl].
+        ^self methodClass
+	    compile: source
+	    classified: category
+	    notifying: aNotifier
     ]
 
     isAnnotated [

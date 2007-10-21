@@ -54,7 +54,10 @@ method dictionary, and iterating over the class hierarchy.'>
 		    ifTrue: [{symbol}]
 		    ifFalse: [instanceVariables copyWith: symbol].
 	duplicated := self superclass allInstVarNames includes: symbol.
-	self updateInstanceVars: newInstanceVariables shape: self shape.
+	self
+	    updateInstanceVars: newInstanceVariables
+	    numInherited: self superclass instSize
+	    shape: self shape.
 	duplicated ifTrue: [self compileAll].
 	self compileAllSubclasses
     ]
@@ -73,10 +76,56 @@ method dictionary, and iterating over the class hierarchy.'>
 		    copyReplaceFrom: index
 		    to: index
 		    with: #().
-	self updateInstanceVars: newInstanceVariables shape: self shape.
+	self
+	    updateInstanceVars: newInstanceVariables
+	    numInherited: self superclass instSize
+	    shape: self shape.
 	self
 	    compileAll;
 	    compileAllSubclasses
+    ]
+
+    instanceVariableNames: instVarNames [
+        "Set the instance variables for the receiver to be those
+         in instVarNames"
+
+        <category: 'instance variables'>
+        | variableArray oldInstVarNames |
+        variableArray := self parseInstanceVariableString: instVarNames.
+        variableArray := self subclassInstVarNames, variableArray.
+        oldInstVarNames := self allInstVarNames.
+
+        "If instance variables change, update  instance variables and
+         instance spec of the class and all its subclasses"
+        variableArray = oldInstVarNames ifTrue: [^self].
+        self
+	    updateInstanceVars: variableArray
+	    numInherited: self superclass instSize
+	    shape: self shape.
+
+        "If no variable has been removed, no need to recompile"
+        (oldInstVarNames allSatisfy: [:each | variableArray includes: each])
+            ifTrue: [^self].
+        Transcript
+            nextPutAll: 'Recompiling classes...';
+            nl.
+        self compileAll.
+        self compileAllSubclasses
+    ]
+
+    parseInstanceVariableString: variableString [
+        <category: 'parsing class declarations'>
+        | variableArray |
+        variableArray := self parseVariableString: variableString.
+        ^variableArray collect: [:each | each asSymbol]
+    ]
+
+    parseVariableString: aString [
+        <category: 'parsing class declarations'>
+        | tokens |
+        tokens := aString subStrings asArray.
+        tokens do: [:token | self validateIdentifier: token].
+        ^tokens
     ]
 
     createGetMethod: what default: value [
@@ -261,21 +310,7 @@ method dictionary, and iterating over the class hierarchy.'>
 	 the new CompiledMethod if everything's ok."
 
 	<category: 'method dictionary'>
-	| source category ok |
-	ok := 
-		[source := self sourceCodeAt: selector.
-		category := (self compiledMethodAt: selector) methodCategory.
-		true] 
-			on: Error
-			do: [:ex | ex return: false].
-	ok ifFalse: [^nil].
-	RegressionTesting 
-	    ifFalse: 
-		[Transcript
-		    nextPutAll: 'Recompiling selector: ';
-		    print: selector asSymbol;
-		    nl].
-	^self compile: source classified: category
+	(self >> selector) recompile.
     ]
 
     recompile: selector notifying: aNotifier [
@@ -284,24 +319,7 @@ method dictionary, and iterating over the class hierarchy.'>
 	 compilation"
 
 	<category: 'method dictionary'>
-	| source category ok |
-	ok := 
-		[source := self sourceCodeAt: selector.
-		category := (self compiledMethodAt: selector) methodCategory.
-		true] 
-			on: Error
-			do: [:ex | ex return: false].
-	ok ifFalse: [^nil].
-	RegressionTesting 
-	    ifFalse: 
-		[Transcript
-		    nextPutAll: 'Recompiling selector: ';
-		    print: selector asSymbol;
-		    nl].
-	^self 
-	    compile: source
-	    classified: category
-	    notifying: aNotifier
+	(self >> selector) recompileNotifying: aNotifier.
     ]
 
     decompile: selector [
@@ -309,7 +327,7 @@ method dictionary, and iterating over the class hierarchy.'>
 
 	<category: 'method dictionary'>
 	| method source |
-	method := self compiledMethodAt: selector.
+	method := self >> selector.
 	source := method methodSourceString.
 	^source isNil & self decompilerClass notNil 
 	    ifTrue: [self decompilerClass decompile: selector in: self]
@@ -321,7 +339,7 @@ method dictionary, and iterating over the class hierarchy.'>
 
 	<category: 'method dictionary'>
 	| method sourceFile sourcePos |
-	method := self compiledMethodAt: selector.
+	method := self >> selector.
 	sourceFile := method methodSourceFile.
 	sourceFile isNil 
 	    ifTrue: [^self error: 'decompiler can''t edit methods without source'].
@@ -364,7 +382,7 @@ method dictionary, and iterating over the class hierarchy.'>
 			    nextPutAll: 'Recompiling class: ';
 			    print: self;
 			    nl].
-		self methodDictionary keysDo: [:selector | self recompile: selector]]
+		self methodDictionary do: [:method | method recompile]]
     ]
 
     compileAll: aNotifier [
@@ -380,8 +398,7 @@ method dictionary, and iterating over the class hierarchy.'>
 			    nextPutAll: 'Recompiling class: ';
 			    print: self;
 			    nl].
-		self methodDictionary 
-		    keysDo: [:selector | self recompile: selector notifying: aNotifier]]
+		self methodDictionary do: [:method | method recompileNotifying: aNotifier]]
     ]
 
     evalString: aString to: anObject [
@@ -595,7 +612,7 @@ method dictionary, and iterating over the class hierarchy.'>
 	 error.  Requires the Parser package to be loaded."
 
 	<category: 'accessing the methodDictionary'>
-	self notYetImplemented
+	^(self >> selector) methodParseNode
     ]
 
     sourceCodeAt: selector [
@@ -603,7 +620,7 @@ method dictionary, and iterating over the class hierarchy.'>
 
 	<category: 'accessing the methodDictionary'>
 	| source |
-	source := (self compiledMethodAt: selector) methodSourceCode.
+	source := (self >> selector) methodSourceCode.
 	source isNil ifTrue: [^'" *** SOURCE CODE NOT AVAILABLE *** "' copy].
 	^source asString
     ]
@@ -994,8 +1011,11 @@ method dictionary, and iterating over the class hierarchy.'>
 		[realShape := CSymbols.CLongSize = 4 ifTrue: [#uint] ifFalse: [#uint64]].
 	shape = #inherit ifTrue: [realShape := self superclass shape].
 	self shape == realShape ifTrue: [^false].
-	realShape isNil 
-	    ifTrue: [^self updateInstanceVars: self allInstVarNames shape: nil].
+	realShape isNil ifTrue: [
+            self
+	        updateInstanceVars: self allInstVarNames
+	        numInherited: self superclass instSize
+	        shape: nil ].
 	self isVariable 
 	    ifTrue: 
 		[SystemExceptions.MutationError 
@@ -1317,15 +1337,13 @@ method dictionary, and iterating over the class hierarchy.'>
 	^true
     ]
 
-    updateInstanceVars: variableArray shape: shape [
+    updateInstanceVars: variableArray numInherited: numInherited shape: shape [
 	"Update instance variables and instance spec of the class and all
 	 its subclasses"
 
 	<category: 'private'>
 	| instVarMap startOfInstanceVars endOfInstanceVars newInstanceVars oldInstVars oldClass instances |
-	startOfInstanceVars := self superclass isNil 
-		    ifTrue: [1]
-		    ifFalse: [self superclass instSize + 1].
+	startOfInstanceVars := numInherited + 1.
 	endOfInstanceVars := self instSize.
 	newInstanceVars := variableArray copyFrom: startOfInstanceVars
 		    to: variableArray size.

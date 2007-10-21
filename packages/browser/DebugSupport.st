@@ -36,7 +36,7 @@ STInST.STInST.RBProgramNodeVisitor subclass: VariableNames [
     <category: 'System-Compiler'>
     <comment: nil>
 
-    VariableNames class >> on: aString [
+    VariableNames class >> on: method [
 	"Parse aString and return a collection of collections of variable
 	 names.  Each collection corresponds to a site where arguments
 	 and/or temporaries can be defined (that is, the method and each
@@ -47,7 +47,7 @@ STInST.STInST.RBProgramNodeVisitor subclass: VariableNames [
 	<category: 'visiting RBSequenceNodes'>
 	^(self new)
 	    initialize;
-	    visitNode: (STInST.RBParser parseMethod: aString);
+	    visitNode: (method parserClass parseMethod: method methodSourceString);
 	    varNames
     ]
 
@@ -193,7 +193,7 @@ CompiledMethod extend [
 	| source |
 	source := self methodSourceString.
 	source isNil ifTrue: [^super variableNames].
-	^(BLOX.BLOXBrowser.VariableNames on: source) at: 1
+	^(BLOX.BLOXBrowser.VariableNames on: self) at: 1
     ]
 
 ]
@@ -221,7 +221,7 @@ CompiledBlock extend [
 			    ifTrue: 
 				["Ok, now parse the source code."
 
-				^(BLOX.BLOXBrowser.VariableNames on: source) at: index].
+				^(BLOX.BLOXBrowser.VariableNames on: self method) at: index].
 			index := index + 1]].
 	^super variableNames
     ]

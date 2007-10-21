@@ -39,7 +39,9 @@ STFileInParser subclass: #SIFFileInParser
 
 parseMethodDefinitionList
     "Methods are defined one by one in SIF."
-    self compile: self parseMethodFromFile.
+    | method |
+    method := self compile: self parseMethodFromFile.
+    method isNil ifFalse: [ method noteOldSyntax ].
     self endMethodList
 ! !
 

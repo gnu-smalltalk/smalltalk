@@ -419,13 +419,13 @@ includesSelector: selector
 
 parseNodeAt: selector
     "Answer the parse tree (if available) for the given selector"
-    ^(self compiledMethodAt: selector) methodParseNode
+    ^(self >> selector) methodParseNode
 !
 
 sourceCodeAt: selector
     "Answer source code (if available) for the given selector"
     | source |
-    source := (self compiledMethodAt: selector) methodSourceCode.
+    source := (self >> selector) methodSourceCode.
     source isNil ifTrue: [ '" *** SOURCE CODE NOT AVAILABLE *** "' copy ].
     ^source asString
 !
@@ -1148,7 +1148,12 @@ methodSourceString
 
 !LoadedMethod methodsFor: 'empty stubs'!
 
+noteOldSyntax
+    "Do nothing"
+!
+
 discardTranslation
+    "Do nothing"
 ! !
 
 !PseudoNamespace methodsFor: 'abstract'!

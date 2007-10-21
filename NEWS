@@ -66,6 +66,12 @@ o   The #writeStream method was moved down from SequenceableCollection to
 o   The database access library has been replaced by a new DBI-like library,
     contributed by Mike Anderson.
 
+o   In general, GNU Smalltalk is able to load files with the old syntax.
+    In some cases, however, it will be necessary to either convert them
+    using the gst-convert tool, or load the Parser package before them.
+    This is the case if you get a "not yet implemented" error while loading
+    the files.
+
 
 Packages improvements:
 

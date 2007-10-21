@@ -123,3 +123,11 @@ Eval [ (C shape -> C classPool keys asArray -> C allInstVarNames -> C sharedPool
 
 Eval [ C class compile: 'foo [ ^MutationError ]' ]
 Eval [ C foo == SystemExceptions.MutationError ]
+
+Object subclass: Foo [ | a | ]
+Foo subclass: Bar [ | xyz | ]
+Foo subclass: Bar [ | b | | c | ]
+Eval [ Bar allInstVarNames printNl ]
+Foo extend [ | d | ]
+Eval [ Bar allInstVarNames printNl ]
+Eval [ Foo allInstVarNames printNl ]
