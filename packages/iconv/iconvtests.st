@@ -80,7 +80,14 @@ TestCase subclass: IconvTest [
 	self assert: str numberOfCharacters = 1.
 	str := EncodedString fromString: #[216 0 220 0] asString
 		    encoding: 'UTF-16BE'.
-	self assert: str numberOfCharacters = 1
+	self assert: str numberOfCharacters = 1.
+
+	"Test that the BOM is skipped for both big- and little-endian UTF-16."
+	str := EncodedString fromString: (String new: 2) encoding: 'UTF-16'.
+	str valueAt: 1 put: 254; valueAt: 2 put: 255.
+	self assert: str numberOfCharacters = 0.
+	str valueAt: 1 put: 255; valueAt: 2 put: 254.
+	self assert: str numberOfCharacters = 0
     ]
 
     testEncodedStringAsUnicodeString [

@@ -151,6 +151,8 @@ assumed to be the system default.'>
 
     encoding [
 	<category: 'accessing'>
+	encoding = 'UTF-32' ifTrue: [^string utf32Encoding ].
+	encoding = 'UTF-16' ifTrue: [^string utf16Encoding ].
 	^encoding
     ]
 
@@ -232,14 +234,6 @@ assumed to be the system default.'>
 
     encoding: aString [
 	<category: 'initializing'>
-	aString = 'UTF-32' 
-	    ifTrue: 
-		[encoding := string utf32Encoding.
-		^self].
-	aString = 'UTF-16' 
-	    ifTrue: 
-		[encoding := string utf16Encoding.
-		^self].
 	encoding := aString
     ]
 ]
