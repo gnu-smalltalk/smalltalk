@@ -60,6 +60,14 @@ accessing and manipulation methods for strings.'>
 	^self with: Character nl
     ]
 
+    CharacterArray class >> isUnicode [
+	"Answer whether the receiver stores bytes (i.e. an encoded
+	 form) or characters (if true is returned)."
+
+	<category: 'multibyte encodings'>
+	self subclassResponsibility
+    ]
+
     = aString [
 	"Answer whether the receiver's items match those in aCollection"
 
@@ -186,6 +194,14 @@ accessing and manipulation methods for strings.'>
 			    at: i.
 		result notNil ifTrue: [^i to: result]].
 	^nil
+    ]
+
+    isUnicode [
+	"Answer whether the receiver stores bytes (i.e. an encoded
+	 form) or characters (if true is returned)."
+
+	<category: 'multibyte encodings'>
+	^self class isUnicode
     ]
 
     encoding [

@@ -100,6 +100,7 @@ assumed to be the system default.'>
 	<category: 'instance creation'>
 	| str |
 	str := aString asString.
+	str encoding = str class defaultEncoding ifTrue: [ ^str ].
 	^self fromString: str encoding: str encoding
     ]
 
@@ -109,6 +110,7 @@ assumed to be the system default.'>
 	str := aString isString 
 		    ifTrue: [aString]
 		    ifFalse: [aString asString: encoding].
+	str encoding = encoding ifTrue: [ ^str ].
 	^(self basicNew)
 	    setString: aString;
 	    encoding: encoding
@@ -122,6 +124,14 @@ assumed to be the system default.'>
     EncodedString class >> new: size [
 	<category: 'instance creation'>
 	self shouldNotImplement
+    ]
+
+    EncodedString class >> isUnicode [
+	"Answer false; the receiver stores bytes (i.e. an encoded
+	 form), not characters."
+
+	<category: 'accessing'>
+	^false
     ]
 
     asString [
@@ -277,6 +287,14 @@ Encoders can return EncodedString objects with the correct encoding.'>
 
 	<category: 'instance creation'>
 	^EncodedString fromString: (String new: size) encoding: self encoding
+    ]
+
+    isUnicode [
+	"Answer false; the receiver stores bytes (i.e. an encoded
+	 form), not characters."
+
+	<category: 'accessing'>
+	^false
     ]
 
     encoding [
@@ -1760,6 +1778,35 @@ Stream extend [
 
     utf32Encoding [
 	"Answer the encoding of the underlying collection, assuming it's UTF-32"
+
+	<category: 'converting'>
+	^'UTF-32BE'
+    ]
+
+]
+
+
+
+FileDescriptor extend [
+
+    encoding [
+	"Answer the encoding that is used when storing Unicode characters."
+
+	<category: 'converting'>
+	^self species defaultEncoding
+    ]
+
+    utf16Encoding [
+	"Answer the encoding of the underlying collection, assuming it's UTF-16.
+	 Return big-endian UTF-16 since that's the default."
+
+	<category: 'converting'>
+	^'UTF-16BE'
+    ]
+
+    utf32Encoding [
+	"Answer the encoding of the underlying collection, assuming it's UTF-32.
+	 Return big-endian UTF-32 since that's the default."
 
 	<category: 'converting'>
 	^'UTF-32BE'

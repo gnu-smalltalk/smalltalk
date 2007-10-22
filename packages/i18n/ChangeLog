@@ -1,3 +1,7 @@
+2007-10-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Locale.st: Store charsets as strings, not symbols.
+
 2007-06-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* i18n.c: Move part to iconv package.

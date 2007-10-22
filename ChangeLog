@@ -1,3 +1,12 @@
+2007-10-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Collection.st: Add #isUnicode.
+	* kernel/CharArray.st: Add an abstract #isUnicode method to class side.
+	* kernel/String.st: Add class-side #isUnicode.
+	* kernel/UniString.st: Add class-side #isUnicode.
+	* kernel/Stream.st: Add #encoding.  Forward #isUnicode to the
+	species class.
+
 2007-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Move recompilation methods to CompiledMethod.

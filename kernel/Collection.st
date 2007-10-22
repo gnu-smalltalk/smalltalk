@@ -132,6 +132,14 @@ of objects.'>
 	^newInst
     ]
 
+    Collection class >> isUnicode [
+	"Answer true; the receiver is able to store arbitrary
+	 Unicode characters."
+
+	<category: 'multibyte encodings'>
+	^true
+    ]
+
     add: newObject [
 	"Add newObject to the receiver, answer it"
 

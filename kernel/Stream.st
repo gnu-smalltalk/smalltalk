@@ -312,7 +312,15 @@ provide for writing collections sequentially.'>
 	 whose value is above 127."
 
 	<category: 'character writing'>
-	^self species shape ~~ #character
+	^self species isUnicode
+    ]
+
+    encoding [
+	"Answer the encoding to be used when storing Unicode characters."
+
+	<category: 'character writing'>
+	self species isUnicode ifTrue: [ ^'Unicode' ].
+	^self species defaultEncoding
     ]
 
     cr [

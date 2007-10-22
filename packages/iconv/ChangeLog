@@ -1,5 +1,11 @@
 2007-10-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Sets.st: Don't return an EncodedString if the wrapped String
+	already has that encoding.  Add #isUnicode to EncodedString
+	and EncodedStringFactory.  Override #encoding for FileDescriptor.
+
+2007-10-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Sets.st: Delay BOM detection in EncodedString.
 	* iconvtests.st: Add regression tests.
 

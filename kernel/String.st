@@ -64,6 +64,14 @@ or assumed to be the system default.'>
 	^SystemExceptions.WrongClass signalOn: anInteger mustBe: SmallInteger
     ]
 
+    String class >> isUnicode [
+	"Answer false; the receiver stores bytes (i.e. an encoded
+	 form), not characters."
+
+	<category: 'multibyte encodings'>
+	^false
+    ]
+
     = aString [
 	"Answer whether the receiver's items match those in aCollection"
 

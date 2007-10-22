@@ -55,6 +55,13 @@ as 4-byte UTF-32 characters'>
 	^'Unicode'
     ]
 
+    UnicodeString class >> isUnicode [
+	"Answer true; the receiver stores characters."
+
+	<category: 'multibyte encodings'>
+	^true
+    ]
+
     asString [
 	"Returns the string corresponding to the receiver.  Without the
 	 Iconv package, unrecognized Unicode characters become $?
