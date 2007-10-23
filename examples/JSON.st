@@ -32,7 +32,7 @@
 
 
 Stream subclass: #JSONReader
-    instanceVariableNames: 'stream'
+    instanceVariableNames: 'stream outputEncoding'
     classVariableNames: ''
     poolDictionaries: ''
     category: nil !
@@ -54,14 +54,52 @@ fromJSON: string
    ^(self on: string readStream) nextJSONObject
 !
 
+fromJSON: string inputEncoding: inputEncString outputEncoding: outputEncString
+    "I'm responsible for decoding the JSON string to objects."
+    | str |
+    str := string readStream.
+    str := I18N.EncodedStream unicodeOn: str encoding: inputEncString.
+    ^(self on: str outputEncoding: outputEncString) nextJSONObject
+!
+
+fromJSON: string inputEncoding: encString
+    "I'm responsible for decoding the JSON string to objects."
+    | str |
+    str := string readStream.
+    str := I18N.EncodedStream unicodeOn: str encoding: encString.
+    ^(self on: str) nextJSONObject
+!
+
+fromJSON: string outputEncoding: encString
+   "I'm responsible for decoding the JSON string to objects."
+   ^(self on: string readStream outputEncoding: encString) nextJSONObject
+!
+
 on: aStream
-    ^self new stream: aStream
+    ^self on: aStream outputEncoding: String defaultEncoding
+!
+
+on: aStream outputEncoding: encString
+    | str |
+    str := aStream.
+    aStream isUnicode ifFalse: [ str := I18N.EncodedStream unicodeOn: str ].
+    ^self new stream: str; outputEncoding: encString; yourself
 ! !
 
 !JSONReader methodsFor: 'json'!
 
+outputEncoding
+    ^outputEncoding
+!
+
+outputEncoding: aString
+    outputEncoding := aString
+!
+
 stream: aStream
-    stream := aStream
+   stream := aStream isUnicode
+	ifTrue: [ aStream ]
+	ifFalse: [ I18N.EncodedStream unicodeOn: aStream ]
 !
 
 peek
@@ -147,7 +185,7 @@ nextJSONDict
 nextJSONString
    "I'm extracting a JSON string from self and return them as String."
    | c obj str |
-   str := WriteStream on: (String new).
+   str := ReadWriteStream on: UnicodeString new.
    self next.
    [
 	c := stream next.
@@ -165,22 +203,19 @@ nextJSONString
             c = $t ifTrue: [ c := Character tab ].
             c = $u
                ifTrue: [
-		  c := (Integer readFrom: (stream next: 4) readStream radix: 16) asCharacter.
-		  (c class == UnicodeCharacter and: [ str species == String ])
-		    ifTrue: [ str := (UnicodeString new writeStream
-					nextPutAll: str contents; yourself) ] ].
+		  c := (Integer readFrom: (stream next: 4) readStream radix: 16) asCharacter ].
          ].
       str nextPut: c.
    ].
-   "Undo the conversion to UnicodeString done above."
-   ^str contents asString.
+
+   "Same as 'str contents asString: self outputEncoding', a little more efficient."
+   "str reset. ^(I18N.EncodedStream encoding: str as: self outputEncoding) contents"
+   ^str contents asString: self outputEncoding
 !
 
 nextJSONNumber
    "I'm extracting a number in JSON format from self and return Integer or Float depending on the input."
-   | c num sgn int intexp frac exp isfloat |
-   num := WriteStream on: (String new).
-
+   | c sgn int intexp frac exp isfloat |
    isfloat := false.
    sgn     := 1.
    int     := 0.
@@ -344,7 +379,13 @@ jsonPrintOn: aStream
     self subclassResponsibility
 !
 
+toJSON: encoding
+    ^(UnicodeString streamContents: [ :aStream | self jsonPrintOn: aStream ])
+	asString: encoding
+!
+
 toJSON
-    ^String streamContents: [ :aStream | self jsonPrintOn: aStream ]
+    ^(UnicodeString streamContents: [ :aStream | self jsonPrintOn: aStream ])
+	asString
 ! !
 

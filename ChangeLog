@@ -1,4 +1,9 @@
 2007-10-23  Paolo Bonzini  <bonzini@gnu.org>
+	    Robin Redeker  <elmex@x-paste.de>
+
+	* examples/JSON.st: Make it work on Unicode.
+
+2007-10-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildMeth.st: Fix return value of
 	#valueWithReceiver:withArguments:, reported by Sam Phillips.
