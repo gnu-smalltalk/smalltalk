@@ -338,7 +338,7 @@ instances.'>
 	 fails with a #subclassResponsibility error."
 
 	<category: 'invoking'>
-	self flags = 6 
+	^self flags = 6 
 	    ifTrue: [self subclassResponsibility]
 	    ifFalse: [anObject perform: self withArguments: args]
     ]
