@@ -1,3 +1,7 @@
+2007-10-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/re.c: Call init_re from exported functions.
+
 2007-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/comp.c: Add brackets to source code of #methodsFor:.  

@@ -277,9 +277,6 @@ make_re_results (OOP srcOOP, struct pre_registers *regs)
   if (!regs->beg || regs->beg[0] == -1)
     return _gst_nil_oop;
 
-  if (!regexClassOOP)
-    init_re ();
-
   resultsOOP = _gst_object_alloc (resultsClassOOP, 0);
   results = (gst_registers) OOP_TO_OBJ (resultsOOP);
   results->subjectOOP = srcOOP;
@@ -327,6 +324,9 @@ _gst_re_search (OOP srcOOP, OOP patternOOP, int from, int to)
   RegexCaching caching;
   OOP resultOOP;
 
+  if (!regexClassOOP)
+    init_re ();
+
   caching = lookupRegex (patternOOP, &regex);
   if (caching != REGEX_CACHE_HIT && compileRegex (patternOOP, regex) != NULL)
     return NULL;
@@ -355,6 +355,9 @@ _gst_re_match (OOP srcOOP, OOP patternOOP, int from, int to)
   const char *src;
   struct pre_pattern_buffer *regex;
   RegexCaching caching;
+
+  if (!regexClassOOP)
+    init_re ();
 
   caching = lookupRegex (patternOOP, &regex);
   if (caching != REGEX_CACHE_HIT && compileRegex (patternOOP, regex) != NULL)
