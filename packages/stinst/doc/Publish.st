@@ -28,6 +28,18 @@
 |
  ======================================================================"
 
+String extend [
+    caseSensitiveCompareTo: aCharacterArray [
+        | c1 c2 |
+        1 to: (self size min: aCharacterArray size)
+            do:
+                [:i |
+                c1 := (self at: i) value.
+                c2 := (aCharacterArray at: i) value.
+                c1 = c2 ifFalse: [^c1 - c2]].
+        ^self size - aCharacterArray size
+    ]
+]
 
 
 Object subclass: ClassPublisher [
@@ -694,7 +706,8 @@ ClassPublisher subclass: DocPublisher [
 		[:assoc | 
 		assoc value methodSourceString isNil 
 		    ifFalse: [categoryMethods add: assoc key -> assoc value methodSourceString]].
-	categoryMethods := categoryMethods asSortedCollection.
+	categoryMethods := categoryMethods asSortedCollection: [ :a :b |
+	    (a key caseSensitiveCompareTo: b key) <= 0 ].
 	categories add: (category , kind) -> categoryMethods.
 	self emitLink: category kind: kind
     ]
