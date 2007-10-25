@@ -34,6 +34,17 @@ Namespace current: ClassPublisher!
 
 !String methodsFor: 'useful functionality'!
 
+caseSensitiveCompareTo: aCharacterArray
+    | c1 c2 |
+    1 to: (self size min: aCharacterArray size)
+        do:
+            [:i |
+            c1 := (self at: i) value.
+            c2 := (aCharacterArray at: i) value.
+            c1 = c2 ifFalse: [^c1 - c2]].
+    ^self size - aCharacterArray size
+!
+
 linesDo: aBlock
     "Send 'aBlock' a substring of the receiver for each newline delimited
      line in the receiver"
@@ -648,7 +659,8 @@ emitCategory: category
 	    categoryMethods add: assoc key -> assoc value methodSourceString
 	]
     ].
-    categoryMethods := categoryMethods asSortedCollection.
+    categoryMethods := categoryMethods asSortedCollection: [ :a :b |
+        (a key caseSensitiveCompareTo: b key) <= 0 ].
     categories add: (category, kind) -> categoryMethods.
 
     self emitLink: category kind: kind

@@ -1,3 +1,8 @@
+2007-10-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Publish.st: Compare strings case-sensitively to avoid differences
+	due to hashing.
+
 2007-09-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Metaclass.st: Mutate the class object if the list of class-

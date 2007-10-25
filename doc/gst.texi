@@ -1501,7 +1501,7 @@ The @code{DLD} class enhances the C callout mechanism to automatically look
 for unresolved functions in a series of program-specified libraries.  To
 add a library to the list, evaluate code like the following:
 @example
-     DLD addLibrary: '/usr/lib/libc'
+     DLD addLibrary: 'libc'
 @end example
 
 The extension (@file{.so}, @file{.sl}, @file{.a}, @file{.dll} depending
