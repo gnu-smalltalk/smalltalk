@@ -1,3 +1,20 @@
+2007-10-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/regex.c: Clear optimization options at the beginning
+	of compilation.  Remove //p, fix meaning of //m and //s options.
+	Compile `$' to endbuf2 if //m is not active, always compile `\Z'
+	to endbuf2.  Compile `.' to anychar or anychar_nl depending
+	on //s, don't look at //s on execution, so that we don't
+	set PRE_OPTIMIZE_ANCHOR for anychar (only for anychar_nl).
+	Set PRE_MAY_IGNORECASE when compiling, not when computing fastmap.
+	Compute fastmap for endbuf2 as for endline.  Match `$' and `\Z'
+	at end of buffer even if just after a newline.
+	* lib-src/regex.h: Remove PRE_OPTIMIZE_BMATCH.
+
+2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
+
+        * lib-src/regex.c: Fix off-by-one.
+
 2007-09-27  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
 	    Paolo Bonzini  <bonzini@gnu.org>
 

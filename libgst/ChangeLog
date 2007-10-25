@@ -1,3 +1,7 @@
+2007-10-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/re.c: Backport bugfixes from devo.
+
 2007-10-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Do rotations correctly in scramble.
