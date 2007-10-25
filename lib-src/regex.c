@@ -317,6 +317,8 @@ enum regexpcode
 				   subsequent number.  */
   anychar,			/* Matches any (more or less) one character excluding newlines.  */
   anychar_repeat,		/* Matches sequence of characters excluding newlines.  */
+  anychar_nl,			/* Matches any (more or less) one character including newlines.  */
+  anychar_nl_repeat,		/* Matches sequence of characters including newlines.  */
   charset,			/* Matches any one char belonging to specified set.
 				   First following byte is number of bitmap bytes.
 				   Then come bytes for a bitmap saying which chars are in.
@@ -596,6 +598,14 @@ print_partial_compiled_pattern (start, end)
 	  printf ("/anychar_repeat");
 	  break;
 
+	case anychar_nl:
+	  printf ("/anychar_nl");
+	  break;
+
+	case anychar_nl_repeat:
+	  printf ("/anychar_nl_repeat");
+	  break;
+
 	case charset:
 	case charset_not:
 	  {
@@ -802,6 +812,8 @@ calculate_must_string (start, end)
 	case pop_and_fail:
 	case anychar:
 	case anychar_repeat:
+	case anychar_nl:
+	case anychar_nl_repeat:
 	case begline:
 	case endline:
 	case wordbound:
@@ -1096,8 +1108,16 @@ pre_compile_pattern (pattern, size, bufp)
   int had_num_literal = 0;
   int had_char_class = 0;
 
-  int options = bufp->options;
+  int options;
   int old_options = 0;
+
+  if (bufp->options & PRE_OPTION_IGNORECASE)
+    bufp->options |= PRE_MAY_IGNORECASE;
+  else
+    bufp->options &= ~PRE_MAY_IGNORECASE;
+
+  bufp->options &= ~(PRE_OPTIMIZE_ANCHOR | PRE_OPTIMIZE_EXACTN);
+  options = bufp->options;
 
   bufp->fastmap_accurate = 0;
   bufp->must = 0;
@@ -1128,11 +1148,7 @@ pre_compile_pattern (pattern, size, bufp)
       switch (c)
 	{
 	case '$':
-	  if (bufp->options & PRE_OPTION_SINGLELINE)
-	    {
-	      BUFPUSH (endbuf);
-	    }
-	  else
+	  if (options & PRE_OPTION_MULTILINE)
 	    {
 	      p0 = p;
 	      /* When testing what follows the $,
@@ -1148,13 +1164,17 @@ pre_compile_pattern (pattern, size, bufp)
 		}
 	      BUFPUSH (endline);
 	    }
+	  else
+	    {
+	      BUFPUSH (endbuf2);
+	    }
 	  break;
 
 	case '^':
-	  if (bufp->options & PRE_OPTION_SINGLELINE)
-	    BUFPUSH (begbuf);
-	  else
+	  if (options & PRE_OPTION_MULTILINE)
 	    BUFPUSH (begline);
+	  else
+	    BUFPUSH (begbuf);
 	  break;
 
 	case '+':
@@ -1196,16 +1216,18 @@ pre_compile_pattern (pattern, size, bufp)
 	  if (!laststart)
 	    break;
 
-	  if (greedy && many_times_ok && *laststart == anychar
+	  if (greedy && many_times_ok
+	      && (*laststart == anychar || *laststart == anychar_nl)
 	      && b - laststart <= 2)
 	    {
+	      int op = *laststart + (anychar_repeat - anychar);
 	      if (b[-1] == stop_paren)
 		b--;
 	      if (zero_times_ok)
-		*laststart = anychar_repeat;
+		*laststart = op;
 	      else
 		{
-		  BUFPUSH (anychar_repeat);
+		  BUFPUSH (op);
 		}
 	      break;
 	    }
@@ -1253,7 +1275,10 @@ pre_compile_pattern (pattern, size, bufp)
 
 	case '.':
 	  laststart = b;
-	  BUFPUSH (anychar);
+	  if (options & PRE_OPTION_SINGLELINE)
+	    BUFPUSH (anychar_nl);
+	  else
+	    BUFPUSH (anychar);
 	  break;
 
 	case '[':
@@ -1540,7 +1565,7 @@ pre_compile_pattern (pattern, size, bufp)
 	      switch (c)
 		{
 		case 'x':
-		case 'p':
+		case 's':
 		case 'm':
 		case 'i':
 		case '-':
@@ -1563,35 +1588,19 @@ pre_compile_pattern (pattern, size, bufp)
 			    options |= PRE_OPTION_EXTENDED;
 			  break;
 
-			case 'p':
+			case 's':
 			  if (negative)
-			    {
-			      if ((options & PRE_OPTION_POSIXLINE) ==
-				  PRE_OPTION_POSIXLINE)
-				{
-				  options &= ~PRE_OPTION_POSIXLINE;
-				}
-			    }
-			  else if ((options & PRE_OPTION_POSIXLINE) !=
-				   PRE_OPTION_POSIXLINE)
-			    {
-			      options |= PRE_OPTION_POSIXLINE;
-			    }
+			    options &= ~PRE_OPTION_SINGLELINE;
+			  else
+			    options |= PRE_OPTION_SINGLELINE;
 			  push_option = 1;
 			  break;
 
 			case 'm':
 			  if (negative)
-			    {
-			      if (options & PRE_OPTION_MULTILINE)
-				{
-				  options &= ~PRE_OPTION_MULTILINE;
-				}
-			    }
-			  else if (!(options & PRE_OPTION_MULTILINE))
-			    {
-			      options |= PRE_OPTION_MULTILINE;
-			    }
+			    options &= ~PRE_OPTION_MULTILINE;
+			  else
+			    options |= PRE_OPTION_MULTILINE;
 			  push_option = 1;
 			  break;
 
@@ -1607,6 +1616,7 @@ pre_compile_pattern (pattern, size, bufp)
 			  else if (!(options & PRE_OPTION_IGNORECASE))
 			    {
 			      options |= PRE_OPTION_IGNORECASE;
+			      bufp->options |= PRE_MAY_IGNORECASE;
 			      BUFPUSH (casefold_on);
 			    }
 			  break;
@@ -2134,12 +2144,9 @@ pre_compile_pattern (pattern, size, bufp)
 	      break;
 
 	    case 'Z':
-	      if ((bufp->options & PRE_OPTION_SINGLELINE) == 0)
-		{
-		  BUFPUSH (endbuf2);
-		  break;
-		}
-	      /* fall through */
+	      BUFPUSH (endbuf2);
+	      break;
+
 	    case 'z':
 	      BUFPUSH (endbuf);
 	      break;
@@ -2283,7 +2290,7 @@ pre_compile_pattern (pattern, size, bufp)
 	laststart += 3;
       else if (*laststart == try_next)
 	laststart += 3;
-      if (*laststart == anychar_repeat)
+      if (*laststart == anychar_nl_repeat)
 	{
 	  bufp->options |= PRE_OPTIMIZE_ANCHOR;
 	}
@@ -2293,7 +2300,7 @@ pre_compile_pattern (pattern, size, bufp)
 
 	  laststart++;
 	  EXTRACT_NUMBER_AND_INCR (mcnt, laststart);
-	  if (mcnt == 4 && *laststart == anychar)
+	  if (mcnt == 4 && *laststart == anychar_nl)
 	    {
 	      switch ((enum regexpcode) laststart[1])
 		{
@@ -2627,7 +2634,6 @@ pre_compile_fastmap (bufp)
 		fastmap[translate[p[2]]] = 2;
 	      else
 		fastmap[p[2]] = 2;
-	      bufp->options |= PRE_OPTIMIZE_BMATCH;
 	    }
 	  else if (TRANSLATE_P ())
 	    fastmap[translate[p[1]]] = 1;
@@ -2638,7 +2644,6 @@ pre_compile_fastmap (bufp)
 	case begline:
 	case begbuf:
 	case endbuf:
-	case endbuf2:
 	case wordbound:
 	case notwordbound:
 	case wordbeg:
@@ -2650,7 +2655,6 @@ pre_compile_fastmap (bufp)
 	  continue;
 
 	case casefold_on:
-	  bufp->options |= PRE_MAY_IGNORECASE;
 	case casefold_off:
 	  options ^= PRE_OPTION_IGNORECASE;
 	  continue;
@@ -2659,14 +2663,13 @@ pre_compile_fastmap (bufp)
 	  options = *p++;
 	  continue;
 
+	case endbuf2:
 	case endline:
 	  if (TRANSLATE_P ())
 	    fastmap[translate['\n']] = 1;
 	  else
 	    fastmap['\n'] = 1;
-	  if ((options & PRE_OPTION_SINGLELINE) == 0
-	      && bufp->can_be_null == 0)
-	    bufp->can_be_null = 2;
+	  bufp->can_be_null = 2;
 	  break;
 
 	case jump_n:
@@ -2748,13 +2751,25 @@ pre_compile_fastmap (bufp)
 	case duplicate:
 	  bufp->can_be_null = 1;
 	  fastmap['\n'] = 1;
+	case anychar_nl_repeat:
+	case anychar_nl:
+	  for (j = 0; j < (1 << BYTEWIDTH); j++)
+	    fastmap[j] = 1;
+	  if (bufp->can_be_null)
+	    {
+	      FREE_AND_RETURN_VOID (stackb);
+	    }
+	  /* Don't return; check the alternative paths
+	     so we can set can_be_null if appropriate.  */
+	  if ((enum regexpcode) p[-1] == anychar_nl_repeat)
+	    continue;
+	  break;
+
 	case anychar_repeat:
 	case anychar:
 	  for (j = 0; j < (1 << BYTEWIDTH); j++)
-	    {
-	      if (j != '\n' || (options & PRE_OPTION_MULTILINE))
-		fastmap[j] = 1;
-	    }
+	    if (j != '\n')
+	      fastmap[j] = 1;
 	  if (bufp->can_be_null)
 	    {
 	      FREE_AND_RETURN_VOID (stackb);
@@ -2762,9 +2777,7 @@ pre_compile_fastmap (bufp)
 	  /* Don't return; check the alternative paths
 	     so we can set can_be_null if appropriate.  */
 	  if ((enum regexpcode) p[-1] == anychar_repeat)
-	    {
-	      continue;
-	    }
+	    continue;
 	  break;
 
 	case wordchar:
@@ -2890,7 +2903,7 @@ pre_search (bufp, string, size, startpos, range, regs)
     }
   if (bufp->options & PRE_OPTIMIZE_ANCHOR)
     {
-      if (bufp->options & PRE_OPTION_SINGLELINE)
+      if ((bufp->options & PRE_OPTION_MULTILINE) == 0)
 	{
 	  goto begbuf_match;
 	}
@@ -3511,8 +3524,7 @@ pre_match (bufp, string_arg, size, pos, regs)
 
 	case anychar:
 	  PREFETCH;
-	  if (!(options & PRE_OPTION_MULTILINE)
-	      && (TRANSLATE_P ()? translate[*d] : *d) == '\n')
+	  if ((TRANSLATE_P ()? translate[*d] : *d) == '\n')
 	    goto fail;
 	  SET_REGS_MATCHED;
 	  d++;
@@ -3523,9 +3535,24 @@ pre_match (bufp, string_arg, size, pos, regs)
 	    {
 	      PUSH_FAILURE_POINT (p, d);
 	      PREFETCH;
-	      if (!(options & PRE_OPTION_MULTILINE) &&
-		  (TRANSLATE_P ()? translate[*d] : *d) == '\n')
+	      if ((TRANSLATE_P ()? translate[*d] : *d) == '\n')
 		goto fail;
+	      SET_REGS_MATCHED;
+	      d++;
+	    }
+	  break;
+
+	case anychar_nl:
+	  PREFETCH;
+	  SET_REGS_MATCHED;
+	  d++;
+	  break;
+
+	case anychar_nl_repeat:
+	  for (;;)
+	    {
+	      PUSH_FAILURE_POINT (p, d);
+	      PREFETCH;
 	      SET_REGS_MATCHED;
 	      d++;
 	    }
@@ -3565,10 +3592,7 @@ pre_match (bufp, string_arg, size, pos, regs)
 
 	case endline:
 	  if (AT_STRINGS_END (d))
-	    {
-	      if (size == 0 || d[-1] != '\n')
-		break;
-	    }
+	    break;
 	  else if (*d == '\n')
 	    break;
 	  goto fail;
@@ -3588,10 +3612,7 @@ pre_match (bufp, string_arg, size, pos, regs)
 	  /* Match at the very end of the data. */
 	case endbuf2:
 	  if (AT_STRINGS_END (d))
-	    {
-	      if (size == 0 || d[-1] != '\n')
-		break;
-	    }
+	    break;
 	  /* .. or newline just before the end of the data. */
 	  if (*d == '\n' && AT_STRINGS_END (d + 1))
 	    break;

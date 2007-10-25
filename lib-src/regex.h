@@ -55,18 +55,15 @@
 /* perl-style extended pattern available */
 #define PRE_OPTION_EXTENDED   (PRE_OPTION_IGNORECASE<<1)
 /* newline will be included for . */
-#define PRE_OPTION_MULTILINE  (PRE_OPTION_EXTENDED<<1)
-/* ^ and $ ignore newline */
-#define PRE_OPTION_SINGLELINE (PRE_OPTION_MULTILINE<<1)
-/* works line Perl's /s; it's called POSIX for wrong reason */
-#define PRE_OPTION_POSIXLINE  (PRE_OPTION_MULTILINE|PRE_OPTION_SINGLELINE)
+#define PRE_OPTION_SINGLELINE (PRE_OPTION_EXTENDED<<1)
+/* ^ and $ look at newline */
+#define PRE_OPTION_MULTILINE  (PRE_OPTION_SINGLELINE<<1)
 /* search for longest match, in accord with POSIX regexp */
-#define PRE_OPTION_LONGEST    (PRE_OPTION_SINGLELINE<<1)
+#define PRE_OPTION_LONGEST    (PRE_OPTION_MULTILINE<<1)
 
 #define PRE_MAY_IGNORECASE    (PRE_OPTION_LONGEST<<1)
 #define PRE_OPTIMIZE_ANCHOR   (PRE_MAY_IGNORECASE<<1)
 #define PRE_OPTIMIZE_EXACTN   (PRE_OPTIMIZE_ANCHOR<<1)
-#define PRE_OPTIMIZE_BMATCH   (PRE_OPTIMIZE_EXACTN<<1)
 
 /* Structure used in pre_match() */
 
