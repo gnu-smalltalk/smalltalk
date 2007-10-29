@@ -188,20 +188,38 @@ Object extend [
 
 
 ValueHolder subclass: Promise [
-    | sema |
+    | sema error |
     
     <category: 'Language-Data types'>
     <comment: 'I store my value in a variable, and know whether I have been
 initialized or not.  If you ask for my value and I have not been
 initialized, I suspend the process until a value has been assigned.'>
 
+    Promise class >> for: aBlock [
+	<category: 'creating instances'>
+	| p |
+	p := Promise new.
+	[[ p value: aBlock value ]
+	    on: Error
+	    do: [ :ex | p errorValue: ex. ex return ]] fork.
+	^p
+    ]
+
     Promise class >> null [
 	<category: 'creating instances'>
 	self shouldNotImplement
     ]
 
+    hasError [
+	"Answer whether calling #value will raise an exception."
+
+	<category: 'accessing'>
+	^error notNil
+    ]
+
     hasValue [
-	"Answer whether we already have a value."
+	"Answer whether we already have a value (or calling #value will
+	 raise an error)."
 
 	<category: 'accessing'>
 	^sema isNil
@@ -211,34 +229,42 @@ initialized, I suspend the process until a value has been assigned.'>
 	"Set the value of the receiver."
 
 	<category: 'accessing'>
+
 	super value: anObject.
-	
-	[sema notifyAll.
-	sema := nil] valueWithoutPreemption
+	[sema notifyAll. sema := nil] valueWithoutPreemption
+    ]
+
+    errorValue: anException [
+	"Private - Raise anException whenever #value is called."
+
+	error := anException.
+	[sema notifyAll. sema := nil] valueWithoutPreemption
     ]
 
     value [
 	"Get the value of the receiver."
 
-	"Notice the power of closures!!!"
-
 	<category: 'accessing'>
 	
-	[| waitSem |
-	waitSem := sema.
-	self hasValue ifFalse: [waitSem wait]] 
-		valueWithoutPreemption.
-	^super value
+	"This is guaranteed to execute atomically by the VM!"
+	sema == nil ifFalse: [sema wait].
+
+	^error isNil
+	    ifTrue: [ super value ]
+	    ifFalse: [ error copy signal ]
     ]
 
     printOn: aStream [
 	"Print a representation of the receiver"
 
 	<category: 'printing'>
+	aStream print: self class.
+	self hasValue ifFalse: [ aStream nextPutAll: '(???)' ].
+	self hasError ifTrue: [ aStream nextPutAll: '(Error!)' ].
+
 	aStream
-	    print: self class;
 	    nextPut: $(;
-	    nextPutAll: (self hasValue ifTrue: [self value printString] ifFalse: ['???']);
+	    print: self value;
 	    nextPut: $)
     ]
 
