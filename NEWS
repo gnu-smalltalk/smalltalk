@@ -170,6 +170,11 @@ o   The MySQL driver was updated to support MySQL 4.x authentication.
     (the given user, password and database should already exists when
     `make check' is run; the default is "root:root:test").
 
+o   The XML package has been split in five smaller packages, XML-SAXDriver,
+    XML-DOM, XML-SAXParser, XML-NodeBuilder and XML-XMLParser.  The previous
+    name XML can still be used.  In the future it may load a different but
+    compatible (e.g. Expat-based) parser.
+
 o   When declaring a C function, the #returning: argument now supports
     specifying CPtr and CArray types, the same way it is done in CStruct
     and CUnion declarations.  For example, since you can specify an "int *"

@@ -1,0 +1,7 @@
+<package>
+  <name>XML-SAXDriver</name>
+  <namespace>XML</namespace>
+
+  <filein>SAX.st</filein>
+  <file>SAX.st</file>
+</package>

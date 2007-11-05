@@ -1,5 +1,17 @@
 2007-11-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	Split into separate directories.
+	* builder/package.xml: New.
+	* dom/package.xml: New.
+	* parser/package.xml: New.
+	* saxdriver/package.xml: New.
+	* saxparser/package.xml: New.
+	* xpath/package.xml: Moved from ../xpath.  Load in the XML namespace,
+	depend on XML-DOM.
+	* xsl/package.xml: Moved from ../xsl.
+
+2007-11-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* package.xml: Load in the XML namespace.
 	* DOM.st: Add more DocumentType accessors.  Move parts of DocumentType...
 	* Parser.st: ... here as class extensions.

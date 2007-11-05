@@ -327,9 +327,13 @@ GST_PACKAGE_ENABLE([TCP], [tcp],
   [gst_cv_inet_sockets],
   [Makefile], [tcp.la])
 GST_PACKAGE_ENABLE([VFSAddOns], [vfs], [], [], [Makefile])
-GST_PACKAGE_ENABLE([XML], [xml])
-GST_PACKAGE_ENABLE([XPath], [xpath])
-GST_PACKAGE_ENABLE([XSL], [xsl])
+GST_PACKAGE_ENABLE([XML-XMLNodeBuilder], [xml/builder])
+GST_PACKAGE_ENABLE([XML-DOM], [xml/dom])
+GST_PACKAGE_ENABLE([XML-XMLParser], [xml/parser])
+GST_PACKAGE_ENABLE([XML-SAXDriver], [xml/saxdriver])
+GST_PACKAGE_ENABLE([XML-SAXParser], [xml/saxparser])
+GST_PACKAGE_ENABLE([XPath], [xml/xpath])
+GST_PACKAGE_ENABLE([XSL], [xml/xsl])
 GST_PACKAGE_ENABLE([ZLib],
   [zlib],
   [AC_CHECK_HEADER([zlib.h])],

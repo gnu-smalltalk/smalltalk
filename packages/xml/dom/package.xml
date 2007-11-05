@@ -1,0 +1,9 @@
+<package>
+  <name>XML-DOM</name>
+  <namespace>XML</namespace>
+
+  <prereq>XML-SAXDriver</prereq>
+
+  <filein>DOM.st</filein>
+  <file>DOM.st</file>
+</package>

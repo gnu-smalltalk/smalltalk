@@ -1,0 +1,9 @@
+<package>
+  <name>XML-XMLParser</name>
+  <namespace>XML</namespace>
+
+  <prereq>XML-XMLNodeBuilder</prereq>
+
+  <filein>XML.st</filein>
+  <file>XML.st</file>
+</package>

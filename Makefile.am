@@ -62,7 +62,7 @@ nodist_pkgconfig_DATA = gnu-smalltalk.pc
 pkglib_DATA = libc.la
 noinst_DATA = gst.im
 dist_noinst_DATA += smalltalk-mode.el.in gst-mode.el.in .gdbinit \
-	scripts/Finish.st gsticon.ico
+	scripts/Finish.st gsticon.ico packages/xml/ChangeLog
 
 if WITH_EMACS
 nodist_lisp_LISP = smalltalk-mode.el

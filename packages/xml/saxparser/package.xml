@@ -1,0 +1,9 @@
+<package>
+  <name>XML-SAXParser</name>
+  <namespace>XML</namespace>
+
+  <prereq>XML-SAXDriver</prereq>
+
+  <filein>Parser.st</filein>
+  <file>Parser.st</file>
+</package>

@@ -2545,11 +2545,15 @@ other Smalltalk dialects and ported to @gst{}.  Future version of
 @node XML
 @section An XML parser and object model for @gst{}
 
-The @sc{xml} parser library for Smalltalk, loaded as package XML
+The @sc{xml} parser library for Smalltalk, loaded as package @code{XML}
 includes a validating @sc{xml} parser and Document Object Model.
 This library is rapidly becoming a standard in the Smalltalk world
-and a @sc{xsl} interpreter based on it is bundled with @gst{} as
-well (see packages XPath and @sc{xsl}).
+and a @sc{xslr} interpreter based on it is bundled with @gst{} as
+well (see packages @code{XPath} and @code{XSL}).
+
+Parts of the basic XML package can be loaded independently using packages
+@code{XML-DOM}, @code{XML-SAXParser}, @code{XML-XMLParser},
+@code{XML-SAXDriver}, @code{XML-XMLNodeBuilder}.
 
 @node Other packages
 @section Other packages

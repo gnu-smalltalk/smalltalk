@@ -1,5 +1,7 @@
 <package>
   <name>XSL</name>
+  <namespace>XSL</namespace>
+
   <prereq>XML</prereq>
   <prereq>XPath</prereq>
   <filein>XSL.st</filein>
