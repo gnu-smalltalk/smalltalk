@@ -1,6 +1,7 @@
-2007-10-29  Paolo Bonzini  <bonzini@gnu.org>
+2007-11-05  Stephen Compall  <scompall@nocandysw.com>
 
-	* kernel/Promise.st: Add #for: class method.
+	* examples/JSON.st: Make it return UnicodeStrings if no output
+	encoding is given.
 
 2007-10-23  Paolo Bonzini  <bonzini@gnu.org>
 	    Robin Redeker  <elmex@x-paste.de>

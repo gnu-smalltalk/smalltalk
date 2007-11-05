@@ -76,14 +76,14 @@ fromJSON: string outputEncoding: encString
 !
 
 on: aStream
-    ^self on: aStream outputEncoding: String defaultEncoding
-!
-
-on: aStream outputEncoding: encString
     | str |
     str := aStream.
     aStream isUnicode ifFalse: [ str := I18N.EncodedStream unicodeOn: str ].
-    ^self new stream: str; outputEncoding: encString; yourself
+    ^self new stream: str; yourself
+!
+
+on: aStream outputEncoding: encString
+    ^(self on: aStream) outputEncoding: encString; yourself
 ! !
 
 !JSONReader methodsFor: 'json'!
@@ -185,7 +185,7 @@ nextJSONDict
 nextJSONString
    "I'm extracting a JSON string from self and return them as String."
    | c obj str |
-   str := ReadWriteStream on: UnicodeString new.
+   str := WriteStream on: (UnicodeString new: 8).
    self next.
    [
 	c := stream next.
@@ -210,7 +210,9 @@ nextJSONString
 
    "Same as 'str contents asString: self outputEncoding', a little more efficient."
    "str reset. ^(I18N.EncodedStream encoding: str as: self outputEncoding) contents"
-   ^str contents asString: self outputEncoding
+   ^self outputEncoding isNil
+       ifTrue: [str contents]
+       ifFalse: [str contents asString: self outputEncoding]
 !
 
 nextJSONNumber
