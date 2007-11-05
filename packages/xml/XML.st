@@ -4054,43 +4054,6 @@ Instance Variables:
 ]
 
 
-DocumentType extend [
-    attributeFor: key subKey: k2 put: value from: anErrorReporter [
-	<category: 'accessing'>
-	| dict |
-	dict := attributeDefs at: key asString ifAbsentPut: [Dictionary new].
-	(dict includesKey: k2 asString) 
-	    ifTrue: 
-		[^anErrorReporter 
-		    warn: 'The attribute "%1 %2" has been defined more than once' % 
-				{key asString.
-				k2 asString}].
-	(value type isID and: [dict contains: [:attr | attr type isID]]) 
-	    ifTrue: 
-		[^anErrorReporter 
-		    invalid: 'The element %1 has two attributes typed as ID' % {key asString}].
-	dict at: k2 asString put: value
-    ]
-
-    attributeTypeFor: key subKey: k2 from: anErrorReporter [
-        <category: 'accessing'>
-        | val |
-        (val := attributeDefs at: key asString ifAbsent: []) == nil
-            ifTrue: [^CDATA_AT new].
-        ^(val at: k2 asString ifAbsent: [^CDATA_AT new]) type
-    ]
-
-    completeValidationAgainst: aParser [
-        <category: 'private'>
-        generalEntities
-            keysAndValuesDo: [:eName :entity | entity completeValidationAgainst: aParser].
-        attributeDefs keysAndValuesDo:
-                [:eName :attribs |
-                attribs
-                    keysAndValuesDo: [:aName :attrib | attrib completeValidationAgainst: aParser]]
-    ]
-]
-
 ElementContext extend [
     followSetDescription [
         <category: 'accessing'>
@@ -4148,6 +4111,93 @@ GeneralEntity extend [
 			    invalid: 'Unparsed entity "%1" uses an undeclared notation "%2"' % 
 					{name.
 					ndata}]]
+    ]
+]
+
+DocumentType extend [
+    | attributeDefs elementDefs |
+    attributeFor: key subKey: k2 from: anErrorReporter [
+        <category: 'accessing'>
+        | val |
+        attributeDefs isNil
+            ifTrue:
+                [anErrorReporter
+                    invalid: 'The attribute "%1 %2" has not been defined' %
+                                {key asString.
+                                k2 asString}].
+        (val := attributeDefs at: key asString ifAbsent: []) == nil
+            ifTrue:
+                [anErrorReporter
+                    invalid: 'The attribute "%1 %2" has not been defined' %
+                                {key asString.
+                                k2 asString}].
+        ^val at: k2 asString
+            ifAbsent:
+                [anErrorReporter
+                    invalid: 'The attribute "%1 %2" has not been defined' %
+                                {key asString.
+                                k2 asString}]
+    ]
+
+    attributeFor: key subKey: k2 put: value from: anErrorReporter [
+       <category: 'accessing'>
+       | dict |
+       dict := self attributesFor: key.
+       (dict includesKey: k2 asString) 
+           ifTrue: 
+               [^anErrorReporter 
+                   warn: 'The attribute "%1 %2" has been defined more than once' % 
+                               {key asString.
+                               k2 asString}].
+       (value type isID and: [dict contains: [:attr | attr type isID]]) 
+           ifTrue: 
+               [^anErrorReporter 
+                   invalid: 'The element %1 has two attributes typed as ID' % {key asString}].
+       dict at: k2 asString put: value
+    ]
+
+    attributesFor: key [
+        <category: 'accessing'>
+        attributeDefs isNil ifTrue: [attributeDefs := Dictionary new].
+        ^attributeDefs at: key asString ifAbsent: [Dictionary new]
+    ]
+
+    completeValidationAgainst: aParser [
+        <category: 'private'>
+        generalEntities
+            keysAndValuesDo: [:eName :entity | entity completeValidationAgainst: aParser].
+        attributeDefs keysAndValuesDo:
+                [:eName :attribs |
+                attribs
+                    keysAndValuesDo: [:aName :attrib | attrib completeValidationAgainst: aParser]]
+    ]
+
+    elementFor: key from: anErrorReporter [
+        <category: 'accessing'>
+        | val |
+        elementDefs isNil
+            ifTrue:
+                [anErrorReporter
+                    warn: 'The element "%1" has not been defined' % {key asString}].
+        (val := elementDefs at: key asString ifAbsent: []) == nil
+            ifTrue:
+                [anErrorReporter
+                    warn: 'The element "%1" has not been defined' % {key asString}].
+        ^val
+    ]
+
+    elementFor: key put: value from: anErrorReporter [
+        <category: 'accessing'>
+        elementDefs isNil
+            ifTrue: [elementDefs := Dictionary new].
+        (elementDefs includesKey: key asString)
+            ifTrue:
+                [| msg |
+                msg := 'The element "%1" has been defined more than once' % {key asString}.
+                anErrorReporter isValidating
+                    ifTrue: [anErrorReporter invalid: msg]
+                    ifFalse: [anErrorReporter warn: msg]].
+        elementDefs at: key asString put: value
     ]
 ]
 

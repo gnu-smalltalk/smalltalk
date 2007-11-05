@@ -1761,7 +1761,7 @@ Instance Variables:
 
 
 Object subclass: DocumentType [
-    | attributeDefs elementDefs generalEntities parameterEntities notations declaredRoot |
+    | generalEntities parameterEntities notations declaredRoot |
     
     <category: 'XML-XML-Parsing'>
     <comment: '
@@ -1773,8 +1773,6 @@ directly in an internal subset, or can do both. The DTD for a document
 consists of both subsets taken together.
 
 Instance Variables:
-    attributeDefs		<Dictionary>			Type definitions of the attributes for each element.
-    elementDefs		<Dictionary>		Type definitions for the elements that are legal in the document.
     generalEntities		<Dictionary>		Definitions for the general entities that can be used in the body of the document.
     parameterEntities	<Dictionary>		Definitions for the parameter entities that can be used in the DTD of the document.
     notations			<Dictionary>		Notations defined in the DTD.
@@ -1788,32 +1786,8 @@ Instance Variables:
     initialize [
 	<category: 'initialize'>
 	notations := Dictionary new.
-	elementDefs := Dictionary new.
-	attributeDefs := Dictionary new.
 	generalEntities := Dictionary new.
 	parameterEntities := Dictionary new
-    ]
-
-    attributeFor: key subKey: k2 from: anErrorReporter [
-	<category: 'accessing'>
-	| val |
-	(val := attributeDefs at: key asString ifAbsent: []) == nil 
-	    ifTrue: 
-		[anErrorReporter 
-		    invalid: 'The attribute "%1 %2" has not been defined' % 
-				{key asString.
-				k2 asString}].
-	^val at: k2 asString
-	    ifAbsent: 
-		[anErrorReporter 
-		    invalid: 'The attribute "%1 %2" has not been defined' % 
-				{key asString.
-				k2 asString}]
-    ]
-
-    attributesFor: key [
-	<category: 'accessing'>
-	^attributeDefs at: key asString ifAbsent: [Dictionary new]
     ]
 
     declaredRoot [
@@ -1824,28 +1798,6 @@ Instance Variables:
     declaredRoot: aTag [
 	<category: 'accessing'>
 	declaredRoot := aTag
-    ]
-
-    elementFor: key from: anErrorReporter [
-	<category: 'accessing'>
-	| val |
-	(val := elementDefs at: key asString ifAbsent: []) == nil 
-	    ifTrue: 
-		[anErrorReporter 
-		    warn: 'The element "%1" has not been defined' % {key asString}].
-	^val
-    ]
-
-    elementFor: key put: value from: anErrorReporter [
-	<category: 'accessing'>
-	(elementDefs includesKey: key asString) 
-	    ifTrue: 
-		[| msg |
-		msg := 'The element "%1" has been defined more than once' % {key asString}.
-		anErrorReporter isValidating 
-		    ifTrue: [anErrorReporter invalid: msg]
-		    ifFalse: [anErrorReporter warn: msg]].
-	elementDefs at: key asString put: value
     ]
 
     generalEntityAt: key [
@@ -1866,6 +1818,11 @@ Instance Variables:
 	^val
     ]
 
+    generalEntityAt: key put: value [
+	<category: 'accessing'>
+	generalEntities at: key put: value
+    ]
+
     generalEntityAt: key put: value from: anErrorReporter [
 	<category: 'accessing'>
 	(generalEntities includesKey: key) 
@@ -1873,6 +1830,11 @@ Instance Variables:
 		[^anErrorReporter 
 		    warn: 'The general entity "%1" has been defined more than once' % {key}].
 	generalEntities at: key put: value
+    ]
+
+    notationAt: name [
+	<category: 'accessing'>
+	^notations at: name ifAbsent: [nil]
     ]
 
     notationAt: name from: anErrorReporter [
@@ -1886,6 +1848,11 @@ Instance Variables:
 	^notations at: name ifAbsent: aBlock
     ]
 
+    notationAt: name put: notation [
+	<category: 'accessing'>
+	notations at: name put: notation
+    ]
+
     notationAt: name put: notation from: anErrorReporter [
 	<category: 'accessing'>
 	(notations includesKey: name) 
@@ -1896,6 +1863,11 @@ Instance Variables:
     parameterEntityAt: key [
 	<category: 'accessing'>
 	^parameterEntities at: key ifAbsent: []
+    ]
+
+    parameterEntityAt: key put: value [
+	<category: 'accessing'>
+	parameterEntities at: key put: value
     ]
 
     parameterEntityAt: key put: value from: anErrorReporter [

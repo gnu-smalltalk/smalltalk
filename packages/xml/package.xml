@@ -1,5 +1,7 @@
 <package>
   <name>XML</name>
+  <namespace>XML</namespace>
+
   <filein>SAX.st</filein>
   <filein>DOM.st</filein>
   <filein>Parser.st</filein>
