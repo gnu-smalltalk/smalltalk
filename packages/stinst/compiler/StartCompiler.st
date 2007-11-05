@@ -189,7 +189,8 @@ STParsingDriver subclass: STEvaluationDriver [
 		    compile: node
 		    for: curClass
 		    classified: curCategory
-		    parser: self
+		    parser: self.
+	^method
     ]
 
     endMethodList [
