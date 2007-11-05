@@ -59,9 +59,9 @@ o   The ABI for external usage has changed.  libgst.a does not know anymore
     how to parse options, but exports functions to achieve the same effect
     as options.
 
-o   The #writeStream method was moved down from SequenceableCollection to
-    ArrayedCollection, since it does not really work well on variable-sized
-    collections such as OrderedCollections.
+o   The #writeStream and #streamContents: method were moved down from
+    SequenceableCollection to ArrayedCollection, since they did not really
+    work on variable-sized collections such as OrderedCollections.
 
 o   The database access library has been replaced by a new DBI-like library,
     contributed by Mike Anderson.

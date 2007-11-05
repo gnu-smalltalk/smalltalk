@@ -50,6 +50,19 @@ externally; I will not rearrange the order of the elements.'>
 	    yourself
     ]
 
+    ArrayedCollection class >> streamContents: aBlock [
+	"Create a ReadWriteStream on an empty instance of the receiver;
+	 pass the stream to aBlock, then retrieve its contents and
+	 answer them."
+
+	<category: 'instance creation'>
+	| stream |
+	stream := ReadWriteStream on: (self new: 10).
+	stream truncate.
+	aBlock value: stream.
+	^stream contents
+    ]
+
     ArrayedCollection class >> withAll: aCollection [
 	"Answer a collection whose elements are the same as those in aCollection"
 

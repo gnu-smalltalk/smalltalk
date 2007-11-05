@@ -1,3 +1,8 @@
+2007-11-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/SeqCollect.st: Move #streamContents:...
+	* kernel/ArrayColl.st: ... here.
+
 2007-11-05  Stephen Compall  <scompall@nocandysw.com>
 
 	* examples/JSON.st: Make it return UnicodeStrings if no output

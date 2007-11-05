@@ -38,19 +38,6 @@ Collection subclass: SequenceableCollection [
     <comment: 'My instances represent collections of objects that are ordered.  I provide
 some access and manipulation methods.'>
 
-    SequenceableCollection class >> streamContents: aBlock [
-	"Create a ReadWriteStream on an empty instance of the receiver;
-	 pass the stream to aBlock, then retrieve its contents and
-	 answer them."
-
-	<category: 'instance creation'>
-	| stream |
-	stream := ReadWriteStream on: (self new: 10).
-	stream truncate.
-	aBlock value: stream.
-	^stream contents
-    ]
-
     SequenceableCollection class >> join: aCollection separatedBy: sepCollection [
 	"Where aCollection is a collection of SequenceableCollections,
 	 answer a new instance with all the elements therein, in order,
