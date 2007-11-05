@@ -233,6 +233,7 @@ constantFunction (ipprotoIcmp, IPPROTO_ICMP);
 constantFunction (ipprotoUdp, IPPROTO_UDP);
 constantFunction (ipprotoTcp, IPPROTO_TCP);
 constantFunction (ipprotoIp, IPPROTO_IP);
+constantFunction (tcpNodelay, TCP_NODELAY);
 
 #ifdef IP_MULTICAST_TTL
 constantFunction (ipMulticastTtl, IP_MULTICAST_TTL);
@@ -273,6 +274,7 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("TCPipMulticastIf", ipMulticastIf);
   vmProxy->defineCFunc ("TCPipAddMembership", ipAddMembership);
   vmProxy->defineCFunc ("TCPipDropMembership", ipDropMembership);
+  vmProxy->defineCFunc ("TCPtcpNodelay", tcpNodelay);
   vmProxy->defineCFunc ("TCPmsgPeek", msgPeek);
   vmProxy->defineCFunc ("TCPmsgOOB", msgOOB);
   vmProxy->defineCFunc ("TCPsolSocket", solSocket);

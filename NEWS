@@ -128,6 +128,11 @@ o   Evaluated code now puts undeclared variables in a private namespace (so
     latter case, you will have to declare temporaries explicitly, or the
     code will be compiled to use the slower deferred variable binding).
 
+o   Flushing a socket tries to push data all the way down to the network.
+    This usually removes the need for TCP_NODELAY option.  If you have
+    applications that want to use #flush to send data to the OS, but
+    not to the network, we're all ears.
+
 o   Image load uses copy-on-write memory mapped files.  This means that, as
     long as a loaded object is not touched, the operating system will map
     it to the same physical memory, for different copies of the GNU Smalltalk

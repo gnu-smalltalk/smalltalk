@@ -96,6 +96,18 @@ TCPSocketImpl class extend [
 	
     ]
 
+    ipprotoTcp [
+	<category: 'C constants'>
+	<cCall: 'TCPipprotoTcp' returning: #long args: #()>
+	
+    ]
+
+    tcpNodelay [
+	<category: 'C constants'>
+	<cCall: 'TCPtcpNodelay' returning: #long args: #()>
+	
+    ]
+
 ]
 
 

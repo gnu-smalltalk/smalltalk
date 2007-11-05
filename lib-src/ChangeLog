@@ -1,3 +1,7 @@
+2007-11-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/socketx.h: Include netinet/tcp.h.
+
 2007-10-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/regex.c: Clear optimization options at the beginning

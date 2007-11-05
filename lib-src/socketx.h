@@ -108,6 +108,8 @@ int win_recv(int fd, void* buffer, int n, int flags);
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
+
 #define closesocket(x)            close(x)
 #define is_socket_error(err)      (errno == (err))
 #define clear_socket_error()      (errno = 0)

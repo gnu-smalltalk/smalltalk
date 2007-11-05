@@ -1094,7 +1094,9 @@ AbstractSocket subclass: Socket [
 	"Flush the write buffer to the operating system"
 
 	<category: 'stream protocol'>
-	self writeBuffer notNil ifTrue: [self writeBuffer flush]
+	self writeBuffer notNil ifTrue: [
+	    self implementation valueWithoutBuffering: [
+		self writeBuffer flush]]
     ]
 
     isPeerAlive [

@@ -1,3 +1,12 @@
+2007-11-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* AbstractSocketImpl.st: Add #valueWithoutBuffering:.
+	* IPSocketImpl.st: Likewise.
+	* Sockets.st: Use it when flushing.
+	* cfuncs.st: Add IPPROTO_TCP and TCP_NODELAY constants
+	as TCPSocketImpl class methods.
+	* tcp.c: Add a function that exports TCP_NODELAY.
+
 2007-03-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Buffers.st: Adjust for changes to Stream>>#copyFrom:.

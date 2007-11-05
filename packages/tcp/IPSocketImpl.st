@@ -381,6 +381,20 @@ SocketImpl subclass: TCPSocketImpl [
 	<category: 'implementation'>
 	^OOBSocketImpl
     ]
+
+    valueWithoutBuffering: aBlock [
+        "Evaluate aBlock, ensuring that any data that it writes to the socket
+         is sent immediately to the network."
+
+        <category: 'socket options'>
+        ^[self optionAt: self class tcpNodelay
+	    level: self class ipprotoTcp
+	    put: 1.
+	aBlock value] ensure:
+            [self optionAt: self class tcpNodelay
+		level: self class ipprotoTcp
+		put: 0]
+    ]
 ]
 
 

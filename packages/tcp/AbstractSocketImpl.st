@@ -257,6 +257,14 @@ FileDescriptor subclass: AbstractSocketImpl [
 	^remotePort
     ]
 
+    valueWithoutBuffering: aBlock [
+	"Evaluate aBlock, ensuring that any data that it writes to the socket
+	 is sent immediately to the network."
+
+	<category: 'socket options'>
+	aBlock value
+    ]
+
     optionAt: opt level: level size: size [
 	"Answer in a ByteArray of the given size the value of a socket option.
 	 The option identifier is in `opt' and the level is in `level'.  A
