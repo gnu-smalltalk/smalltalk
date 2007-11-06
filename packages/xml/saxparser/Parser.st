@@ -29,7 +29,7 @@
 
 
 Object subclass: SAXParser [
-    | sax validating flags |
+    | sax dtd validating flags |
     
     <category: 'XML-XML-SAX'>
     <comment: '
@@ -46,6 +46,7 @@ Version 1.0 specification.
 
 Instance Variables:
     sax				<XML.SAXDriver>			the output
+    dtd                         <XML.DocumentType>      the document type definition for the current document
     validating	<Boolean>						if true then the parse validates the XML
     flags		<SmallInteger>				sundry boolean values that are not accessed often enough
     											to need separate instance variables.'>
@@ -92,12 +93,7 @@ Instance Variables:
 
     SAXParser class >> mapEncoding: anEncoding [
 	<category: 'utilities'>
-	| enc |
-	enc := anEncoding asLowercase.
-	enc = 'utf-8' ifTrue: [^'UTF_8'].
-	enc = 'utf-16' ifTrue: [^'UTF_16'].
-	enc = 'iso-8859-1' ifTrue: [^'ISO8859_1'].
-	^enc
+	^anEncoding asUppercase
     ]
 
     initialize [
@@ -116,7 +112,8 @@ Instance Variables:
 	"Clear those flags that keep track of the
 	 state of the parse, but retain those that
 	 relate to options."
-	flags := flags bitAnd: 65535 bitInvert
+	flags := flags bitAnd: 65535 bitInvert.
+	dtd := DocumentType new.
     ]
 
     saxDriver: aSAXDriver [
@@ -132,7 +129,7 @@ Instance Variables:
 
     dtd [
 	<category: 'accessing'>
-	self subclassResponsibility
+	^dtd
     ]
 
     saxDriver [
@@ -148,16 +145,6 @@ Instance Variables:
     isValidating [
 	<category: 'testing'>
 	^validating
-    ]
-
-    hasExpanded: anEntity [
-        <category: 'testing'>
-	self subclassResponsibility
-    ]
-
-    contentsOf: anInputSource for: anEntity [
-        <category: 'api'>
-	self subclassResponsibility
     ]
 
     pushSource: anInputSource for: anEntity [
@@ -431,9 +418,6 @@ Instance Variables:
 Entity extend [
     streamFor: aParser [
 	<category: 'accessing'>
-	(aParser hasExpanded: self) 
-	    ifTrue: 
-		[aParser malformed: 'Can''t expand this entity; it is defined recursively'].
 	text == nil 
 	    ifTrue: 
 		[| str input |
@@ -450,29 +434,6 @@ Entity extend [
     ]
 ]
 
-ParameterEntity extend [
-    streamFor: aParser addSpaces: spaces [
-	<category: 'accessing'>
-	| myText textStr input |
-	(aParser hasExpanded: self) 
-	    ifTrue: 
-		[aParser malformed: 'Can''t expand this entity; it is defined recursively'].
-	text == nil 
-	    ifTrue: 
-		[| str |
-		input := aParser saxDriver resolveEntity: self publicID
-			    systemID: self systemID.
-		input == nil ifTrue: [input := InputSource for: self systemID].
-		text := aParser contentsOf: input for: self].
-	myText := text.
-	spaces ifTrue: [myText := ' ' , text , ' '].
-	aParser pushSource: (InputSource 
-			        uri: nil
-			        encoding: nil
-			        stream: myText readStream)
-		for: self.
-    ]
-]
 
 SAXException subclass: SAXNotRecognizedException [
     

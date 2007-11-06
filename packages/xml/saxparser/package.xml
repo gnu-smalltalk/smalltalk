@@ -3,6 +3,7 @@
   <namespace>XML</namespace>
 
   <prereq>XML-SAXDriver</prereq>
+  <prereq>XML-DOM</prereq>
 
   <filein>Parser.st</filein>
   <file>Parser.st</file>

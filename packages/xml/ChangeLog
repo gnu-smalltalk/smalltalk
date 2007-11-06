@@ -1,3 +1,14 @@
+2007-11-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* saxparser/package.xml: Fix dependency.
+	* parser/XMLParser.st: Remove #contentsOf:for:.  Test
+	recursive expansion of entities in #pushSource:for:.  Add
+	#wrapSourceInSpaces and use it instead of #streamFor:addSpaces:.
+	Add #attributeTypeFor:subKey:from:.  Move dtd...
+	* saxparser/Parser.st: ... here.  Port #mapEncoding: to gst.  Remove
+	abstract methods #hasExpanded: and #contentsOf:for:.  Remove checks
+	for recursive expansion of entities and #streamFor:addSpaces:.
+
 2007-11-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	Split into separate directories.

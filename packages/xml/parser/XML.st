@@ -1749,7 +1749,7 @@ values exceed a particular value will all be classified the same.'>
 
 
 SAXParser subclass: XMLParser [
-    | sourceStack hereChar lastSource currentSource dtd unresolvedIDREFs definedIDs latestID elementStack eol buffer nameBuffer |
+    | sourceStack hereChar lastSource currentSource unresolvedIDREFs definedIDs latestID elementStack eol buffer nameBuffer |
     
     <category: 'XML-XML-Parsing'>
     <comment: '
@@ -1769,7 +1769,6 @@ Instance Variables:
     hereChar		<Character>  				the current character being parsed
     lastSource		<XML.StreamWrapper>	record of previous source used to check correct nesting
     currentSource	<XML.StreamWrapper>	current input stream (the top of sourceStack)
-    dtd				<XML.DocumentType>	the document type definition for the current document
     unresolvedIDREFs		<Set>				collection of IDREfs that have yet to be resolved.
     											Used for validation
     definedIDs		<Set>						IDs that have already been seen.
@@ -2200,7 +2199,6 @@ Instance Variables:
 	super on: dataSource.
 	sourceStack := self wrapDataSource: dataSource.
 	elementStack := OrderedCollection new.
-	dtd := DocumentType new.
 	unresolvedIDREFs := Set new.
 	definedIDs := Set new.
     ]
@@ -2221,11 +2219,6 @@ Instance Variables:
 	    resource: resource
 	    entity: nil
 	    from: self) isInternal: false
-    ]
-
-    dtd [
-	<category: 'accessing'>
-	^dtd
     ]
 
     eol [
@@ -2341,23 +2334,12 @@ Instance Variables:
 	self docTypeDecl ifTrue: [[self misc] whileTrue]
     ]
 
-    contentsOf: anInputSource for: anEntity [
-	| str textStr |
-        <category: 'api'>
-	str := StreamWrapper 
-		    resource: anInputSource
-		    entity: anEntity
-		    from: self.
-	str textDecl.
-	textStr := (String new: 32) writeStream.
-	[str atEnd] whileFalse: [textStr nextPut: str next].
-	str close.
-	^textStr contents
-    ]
-
     pushSource: anInputSource for: anEntity [
 	| str |
         <category: 'api'>
+        (self hasExpanded: anEntity) 
+            ifTrue: 
+                [self malformed: 'Can''t expand this entity; it is defined recursively'].
 	str := StreamWrapper
             resource: anInputSource
             entity: anEntity
@@ -2371,6 +2353,20 @@ Instance Variables:
 	<category: 'api'>
 	aStreamWrapper nextLink: sourceStack.
 	sourceStack := aStreamWrapper
+    ]
+
+    wrapSourceInSpaces [
+	| entity source text |
+	source := sourceStack.
+	entity := sourceStack entity.
+	sourceStack := sourceStack nextLink.
+	text := ' ', source contents, ' '.
+	source close.
+        self pushSource: (InputSource
+                              uri: nil
+                              encoding: nil
+                              stream: text readStream)
+             for: entity
     ]
 
     scanDocument [
@@ -2753,7 +2749,9 @@ Instance Variables:
 				[self 
 				    pushSource: (StreamWrapper emptyWithExtraSpace: refType ~= #data from: self).
 				self getNextChar]]
-		    ifFalse: [exp streamFor: self addSpaces: refType ~= #data].
+		    ifFalse:
+			[exp streamFor: self.
+			refType = #data ifFalse: [self wrapSourceInSpaces]].
 		(refType ~= #data and: [self sourceWrapper uri notNil]) 
 		    ifTrue: [self sourceWrapper usedAsExternal: true].
 		true]
@@ -4156,10 +4154,20 @@ DocumentType extend [
        dict at: k2 asString put: value
     ]
 
+    attributeTypeFor: key subKey: k2 from: anErrorReporter [
+        | val |
+        attributeDefs == nil
+            ifTrue: [^CDATA_AT new].
+        (val := attributeDefs at: key asString ifAbsent: []) == nil
+            ifTrue: [^CDATA_AT new].
+        ^(val at: k2 asString
+            ifAbsent: [^CDATA_AT new]) type
+    ]
+
     attributesFor: key [
         <category: 'accessing'>
         attributeDefs isNil ifTrue: [attributeDefs := Dictionary new].
-        ^attributeDefs at: key asString ifAbsent: [Dictionary new]
+        ^attributeDefs at: key asString ifAbsentPut: [Dictionary new]
     ]
 
     completeValidationAgainst: aParser [
