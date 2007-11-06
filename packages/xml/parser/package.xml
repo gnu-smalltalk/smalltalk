@@ -2,7 +2,8 @@
   <name>XML-XMLParser</name>
   <namespace>XML</namespace>
 
-  <prereq>XML-XMLNodeBuilder</prereq>
+  <prereq>XML-SAXParser</prereq>
+  <prereq>XML-DOM</prereq>
 
   <filein>XML.st</filein>
   <file>XML.st</file>

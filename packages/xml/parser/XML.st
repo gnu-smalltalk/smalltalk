@@ -1749,7 +1749,7 @@ values exceed a particular value will all be classified the same.'>
 
 
 SAXParser subclass: XMLParser [
-    | sourceStack hereChar lastSource currentSource unresolvedIDREFs definedIDs latestID elementStack eol buffer nameBuffer |
+    | sourceStack dtd hereChar lastSource currentSource unresolvedIDREFs definedIDs latestID elementStack eol buffer nameBuffer |
     
     <category: 'XML-XML-Parsing'>
     <comment: '
@@ -1766,6 +1766,7 @@ Version 1.0 specification.
 
 Instance Variables:
     sourceStack	<XML.StreamWrapper>	stack of input streams that handles inclusion.
+    dtd                         <XML.DocumentType>      the document type definition for the current document
     hereChar		<Character>  				the current character being parsed
     lastSource		<XML.StreamWrapper>	record of previous source used to check correct nesting
     currentSource	<XML.StreamWrapper>	current input stream (the top of sourceStack)
@@ -2199,6 +2200,7 @@ Instance Variables:
 	super on: dataSource.
 	sourceStack := self wrapDataSource: dataSource.
 	elementStack := OrderedCollection new.
+	dtd := DocumentType new.
 	unresolvedIDREFs := Set new.
 	definedIDs := Set new.
     ]
@@ -2219,6 +2221,11 @@ Instance Variables:
 	    resource: resource
 	    entity: nil
 	    from: self) isInternal: false
+    ]
+
+    dtd [
+	<category: 'accessing'>
+	^dtd
     ]
 
     eol [
@@ -2332,6 +2339,23 @@ Instance Variables:
 	self getNextChar.
 	[self misc] whileTrue.
 	self docTypeDecl ifTrue: [[self misc] whileTrue]
+    ]
+
+    pushSourceFor: entity [
+        <category: 'entities'>
+        entity text == nil
+            ifTrue: 
+                [| str input |
+                input := sax resolveEntity: entity publicID
+                            systemID: entity systemID.
+                input == nil ifTrue: [input := InputSource for: entity systemID].
+                self pushSource: input for: entity ]
+            ifFalse:
+                [self pushSource: (InputSource
+                                        uri: nil
+                                        encoding: nil
+                                        stream: entity text readStream)
+                        for: entity]
     ]
 
     pushSource: anInputSource for: anEntity [
@@ -2750,7 +2774,7 @@ Instance Variables:
 				    pushSource: (StreamWrapper emptyWithExtraSpace: refType ~= #data from: self).
 				self getNextChar]]
 		    ifFalse:
-			[exp streamFor: self.
+			[self pushSourceFor: exp.
 			refType = #data ifFalse: [self wrapSourceInSpaces]].
 		(refType ~= #data and: [self sourceWrapper uri notNil]) 
 		    ifTrue: [self sourceWrapper usedAsExternal: true].
@@ -3173,7 +3197,7 @@ Instance Variables:
 		    ifFalse: 
 			[self 
 			    malformed: 'References to unparsed entities other than in an attribute of type ENTITY are not permitted'].
-		exp streamFor: self]
+		self pushSourceFor: exp]
     ]
 
     getElement [

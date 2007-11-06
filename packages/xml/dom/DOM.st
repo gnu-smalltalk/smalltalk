@@ -1941,69 +1941,6 @@ Instance Variables:
 ]
 
 
-Object subclass: InputSource [
-    | uri encoding stream |
-    
-    <category: 'XML-XML-Resources'>
-    <comment: '
-An InputSource represents a data source which may have been fetched
-locally or from the net, and which has various properties. An
-InputSource may be created by a SAXDriver in response to the
-#resolveEntity:systemID: message.
-
-In release 5i.4, we record the URI and the data, and if possible the
-encoding. In future we may want to also incorporate things like the
-MIME type or other attributes.
-
-Instance Variables:
-    uri				<nil | NetClients.URL>	The URI of the data source, if known
-    encoding		<nil | Symbol> 		If the transport protocol specified an encoding,
-    									this should take precedence over the encoding
-    									contained in the <?xml?> declaration
-    stream			<Stream>			the data source'>
-
-    InputSource class >> for: uri [
-	<category: 'private'>
-	| stream |
-	stream := NetClients.URIResolver openStreamOn: uri.
-	^self 
-	    uri: (uri isString ifTrue: [NetClients.URL fromString: uri] ifFalse: [uri])
-	    encoding: nil
-	    stream: stream
-    ]
-
-    InputSource class >> uri: aURI encoding: anEncodingName stream: aStream [
-	<category: 'instance creation'>
-	^self new 
-	    uri: aURI
-	    encoding: anEncodingName
-	    stream: aStream
-    ]
-
-    uri: aURI encoding: anEncodingName stream: aStream [
-	<category: 'initialize'>
-	uri := aURI.
-	encoding := anEncodingName.
-	stream := aStream
-    ]
-
-    encoding [
-	<category: 'accessing'>
-	^encoding
-    ]
-
-    stream [
-	<category: 'accessing'>
-	^stream
-    ]
-
-    uri [
-	<category: 'accessing'>
-	^uri
-    ]
-]
-
-
 SAXDriver extend [
     isValidating [
 	"Allows a SAX driver to act like a parser when accessing a DocumentType"

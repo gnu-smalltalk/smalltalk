@@ -29,7 +29,7 @@
 
 
 Object subclass: SAXParser [
-    | sax dtd validating flags |
+    | sax validating flags |
     
     <category: 'XML-XML-SAX'>
     <comment: '
@@ -46,7 +46,6 @@ Version 1.0 specification.
 
 Instance Variables:
     sax				<XML.SAXDriver>			the output
-    dtd                         <XML.DocumentType>      the document type definition for the current document
     validating	<Boolean>						if true then the parse validates the XML
     flags		<SmallInteger>				sundry boolean values that are not accessed often enough
     											to need separate instance variables.'>
@@ -113,7 +112,6 @@ Instance Variables:
 	 state of the parse, but retain those that
 	 relate to options."
 	flags := flags bitAnd: 65535 bitInvert.
-	dtd := DocumentType new.
     ]
 
     saxDriver: aSAXDriver [
@@ -125,11 +123,6 @@ Instance Variables:
     document [
 	<category: 'accessing'>
 	^sax document
-    ]
-
-    dtd [
-	<category: 'accessing'>
-	^dtd
     ]
 
     saxDriver [
@@ -145,11 +138,6 @@ Instance Variables:
     isValidating [
 	<category: 'testing'>
 	^validating
-    ]
-
-    pushSource: anInputSource for: anEntity [
-        <category: 'api'>
-	self subclassResponsibility
     ]
 
     scanDocument [
@@ -413,26 +401,6 @@ Instance Variables:
     ]
 ]
 
-
-
-Entity extend [
-    streamFor: aParser [
-	<category: 'accessing'>
-	text == nil 
-	    ifTrue: 
-		[| str input |
-		input := aParser saxDriver resolveEntity: self publicID
-			    systemID: self systemID.
-		input == nil ifTrue: [input := InputSource for: self systemID].
-		aParser pushSource: input for: self]
-	    ifFalse:
-		[aParser pushSource: (InputSource 
-				        uri: nil
-				        encoding: nil
-				        stream: text readStream)
-			for: self]
-    ]
-]
 
 
 SAXException subclass: SAXNotRecognizedException [

@@ -1,10 +1,23 @@
 2007-11-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* saxdriver/SAX.st: Add stub DOM_SAXDriver.  Move InputSource here...
+	* dom/DOM.st: ... from here.
+	* saxparser/Parser.st: Remove #pushSource:for: abstract method, move
+	#dtd (undoing part of the previous commit) and Entity>>#streamFor:...
+	* parser/XML.st: ... here as #pushSourceFor:.
+
+	* saxparser/package.xml: Remove XML-DOM dependency.
+	* parser/package.xml: Remove XML-XMLNodeBuilder dependency, add
+	XML-DOM dependency.
+	* builder/package.xml: Add XML-DOM dependency.
+
+2007-11-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* saxparser/package.xml: Fix dependency.
 	* parser/XMLParser.st: Remove #contentsOf:for:.  Test
 	recursive expansion of entities in #pushSource:for:.  Add
 	#wrapSourceInSpaces and use it instead of #streamFor:addSpaces:.
-	Add #attributeTypeFor:subKey:from:.  Move dtd...
+	Add #attributeTypeFor:subKey:from:.  Move #dtd...
 	* saxparser/Parser.st: ... here.  Port #mapEncoding: to gst.  Remove
 	abstract methods #hasExpanded: and #contentsOf:for:.  Remove checks
 	for recursive expansion of entities and #streamFor:addSpaces:.

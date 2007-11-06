@@ -1,6 +1,7 @@
 <packages>
 <package>
   <name>XML</name>
+  <prereq>XML-XMLNodeBuilder</prereq>
   <prereq>XML-XMLParser</prereq>
 </package>
 

@@ -2,6 +2,7 @@
   <name>XML-XMLNodeBuilder</name>
   <namespace>XML</namespace>
 
+  <prereq>XML-DOM</prereq>
   <prereq>XML-SAXParser</prereq>
 
   <filein>NodeBuilder.st</filein>
