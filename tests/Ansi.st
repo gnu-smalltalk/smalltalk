@@ -5220,9 +5220,9 @@ protocol
 runCase 
 	self setUp.
 	[(self receiverFor: testSelector) perform: testSelector]
-		ifError: [:msg :rcvr |
+		on: Error do: [:ex |
 			self tearDown.
-			self error: msg] "Don't know yet how to set the original :rcvr"!
+			ex pass]!
 
 setUp
 	| helper1 |

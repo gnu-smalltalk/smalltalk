@@ -91,11 +91,11 @@ phoneNumber
 
 Eval [ '(111) 111-1111' phoneNumber ]
 
-Eval [ (Object compile: 'foo <category: ''bar''> ^5') methodCategory ]
+Eval [ (Object compile: 'foo [ <category: ''bar''> ^5 ]') methodCategory ]
 
 Eval [
     a := Undeclared keys size.
-    1 to: 100 do: [ :i | Object compile: 'a%1 ^A%1' % {i} ].
+    1 to: 100 do: [ :i | Object compile: 'a%1 [ ^A%1 ]' % {i} ].
     Undeclared keys size - a
 ]
 
@@ -130,6 +130,6 @@ Eval [ BugTest c ]
 "Compiling a method should not capture the current temporaries dictionary."
 Eval [
     a:=42.
-    Object compile: 'gotcha "shouldn''t compile!" ^a'
+    Object compile: 'gotcha [ "shouldn''t compile!" ^a ]'
 ]
 Eval [ nil gotcha ]

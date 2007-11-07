@@ -134,22 +134,23 @@ method dictionary, and iterating over the class hierarchy.'>
 
 	<category: 'method dictionary'>
 	^self 
-	    compile: '%1
-    "Answer the receiver''s %1. Its default value is %2"
-    %1 isNil ifTrue: [ %1 := %2 ].
-    ^%1' 
-		    % 
-			{what.
-			value}
+	    compile: '%1 [
+	"Answer the receiver''s %1. Its default value is %2"
+	%1 isNil ifTrue: [ %1 := %2 ].
+	^%1
+    ]' 
+		    % {what. value}
     ]
 
     createGetMethod: what [
 	"Create a method accessing the variable `what'."
 
 	<category: 'method dictionary'>
-	^self compile: '%1
-    "Answer the receiver''s %1"
-    ^%1' % {what}
+	^self compile: '%1 [
+	"Answer the receiver''s %1"
+	^%1
+    ]'
+		% {what}
     ]
 
     createSetMethod: what [
@@ -159,11 +160,11 @@ method dictionary, and iterating over the class hierarchy.'>
 	| parameter |
 	parameter := what = 'value' ifTrue: ['theValue'] ifFalse: ['value'].
 	^self 
-	    compile: '%1: %2
-    "Set the receiver''s %1 to %2"
-    %1 := %2' % 
-			{what.
-			parameter}
+	    compile: '%1: %2 [
+	"Set the receiver''s %1 to %2"
+	%1 := %2
+    ]'
+		% {what. parameter}
     ]
 
     defineAsyncCFunc: cFuncNameString withSelectorArgs: selectorAndArgs args: argsArray [
@@ -172,8 +173,9 @@ method dictionary, and iterating over the class hierarchy.'>
 
 	<category: 'method dictionary'>
 	| code |
-	code := '%1
-    <asyncCCall: ''%2'' args: #%3>' % 
+	code := '%1 [
+	<asyncCCall: ''%2'' args: #%3>
+    ]' % 
 			{selectorAndArgs.
 			cFuncNameString.
 			argsArray printString}.
@@ -186,8 +188,9 @@ method dictionary, and iterating over the class hierarchy.'>
 
 	<category: 'method dictionary'>
 	| code |
-	code := '%1
-    <cCall: ''%2'' returning: %3 args: #%4>' % 
+	code := '%1 [
+	<cCall: ''%2'' returning: %3 args: #%4>
+    ]' % 
 			{selectorAndArgs.
 			cFuncNameString.
 			returnTypeSymbol storeString.
@@ -410,8 +413,8 @@ method dictionary, and iterating over the class hierarchy.'>
 	s := ReadStream on: aString.
 	
 	[next := self extractEvalChunk: s.
-	method := anObject class compile: 'Doit ^ [
-' , next , ' ] value '
+	method := anObject class compile: 'Doit [ ^ [
+' , next , ' ] value ]'
 		    ifError: [:fname :line :error | nil].
 	method isNil | (next allSatisfy: [:each | each = Character space]) 
 	    ifFalse: [[result := anObject perform: method] valueWithUnwind].
@@ -431,8 +434,8 @@ method dictionary, and iterating over the class hierarchy.'>
 	s := ReadStream on: aString.
 	
 	[next := self extractEvalChunk: s.
-	method := anObject class compile: 'Doit ^ [
-' , next , ' ] value '
+	method := anObject class compile: 'Doit [ ^ [
+' , next , ' ] value ] '
 		    ifError: 
 			[:fname :lineNo :errorString | 
 			aBlock 

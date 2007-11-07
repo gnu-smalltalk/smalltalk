@@ -653,7 +653,7 @@ nil doMarli: 3!"
 
 "testComp
     Object compile: (FileStream open: 'test.st' mode: 'r')"
-"    Object compile: 'rambo ''Hi there'' print'"
+"    Object compile: 'rambo [ ''Hi there'' print' ]"
 "! !"
 
 "nil testComp.

@@ -168,7 +168,7 @@ code as `self'').'>
 	stream
 	    nextPutAll: 'STT_Cache';
 	    print: self asOop;
-	    nextPutAll: ': out';
+	    nextPutAll: ': out [';
 	    nl.
 	lastIndex := 1.
 	
@@ -200,7 +200,7 @@ code as `self'').'>
 	self 
 	    writeOutputCodeFor: (self sttCode copyFrom: lastIndex to: sttCode size)
 	    on: stream.
-	stream nextPutAll: '^out'
+	stream nextPutAll: '^out ]'
     ]
 
     writeOutputCodeFor: aString on: aStream [

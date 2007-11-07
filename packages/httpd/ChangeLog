@@ -1,3 +1,7 @@
+2007-10-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STT.st: Add brackets around compiled methods.
+
 2007-07-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STT.st: Use #compile: on the WriteStream.

@@ -1,3 +1,15 @@
+2007-11-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/Methods.st: Add brackets around compiled methods.
+	* kernel/Behavior.st: Likewise.
+	* tests/compiler.st: Likewise.
+	* tests/objects.st: Likewise.
+	* tests/untrusted.st: Likewise.
+	* unsupported/cint/CToken.st: Likewise.
+	* unsupported/t.st: Likewise.
+
+	* tests/Ansi.st: Use exception handling.
+
 2007-11-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Move #streamContents:...

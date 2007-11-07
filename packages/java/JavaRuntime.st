@@ -611,11 +611,11 @@ compileFieldInitializer
     instanceStream := WriteStream on: (String new: 40).
     classStream := WriteStream on: (String new: 40).
     instanceStream
-	nextPutAll: 'initialize'; nl; tab;
+	nextPutAll: 'initialize ['; nl; tab;
 	nextPutAll: 'super initialize.'.
 
     classStream
-	nextPutAll: 'initialize'.
+	nextPutAll: 'initialize ['.
 
     javaClass fields do: [ :each |
 	(self needToInitialize: each) ifTrue: [
@@ -641,6 +641,8 @@ compileFieldInitializer
 	instanceStream
 	    nl; tab; nextPutAll: 'self addToBeFinalized' ].
 
+    instanceStream nextPutAll: ' ]'.
+    classStream nextPutAll: ' ]'.
     self compile: instanceStream contents.
     self class compile: classStream contents!
 
@@ -649,11 +651,13 @@ compileSetterFor: field in: destClass
     stream := WriteStream on: (String new: 60).
     stream
     	nextPutAll: field putSelector;
-    	nextPutAll: ' assignedValue$';
+    	nextPutAll: ' assignedValue$ [';
     	nl;
     	tab;
     	nextPutAll: field name;
-    	nextPutAll: ' := assignedValue$'.
+    	nextPutAll: ' := assignedValue$';
+	nl;
+	nextPut: $].
 
     method := destClass compile: stream contents.
     auxName := (field name copyWith: $:) asSymbol.
@@ -665,6 +669,7 @@ compileGetterFor: field in: destClass
     stream := WriteStream on: (String new: 100).
     stream
     	nextPutAll: field getSelector;
+	nextPutAll: ' [';
     	nl.
 
     field isStatic ifTrue: [
@@ -676,7 +681,9 @@ compileGetterFor: field in: destClass
     stream
     	tab;
     	nextPut: $^;
-    	nextPutAll: field name.
+    	nextPutAll: field name;
+	nl;
+	nextPut: $].
 
     method := destClass compile: stream contents.
     auxName := field name asSymbol.
@@ -688,11 +695,14 @@ compileConstantFieldAccessor: constantField in: destClass
     stream := WriteStream on: (String new: 40).
     stream
     	nextPutAll: constantField getSelector;
+	nextPutAll: ' [';
     	nl;
     	tab;
     	nextPutAll: '^##(';
     	store: constantField constantValue;
-	nextPut: $).
+	nextPut: $);
+	nl;
+	nextPut: $].
 
     method := destClass compile: stream contents.
     auxName := constantField name asSymbol.

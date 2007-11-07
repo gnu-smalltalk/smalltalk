@@ -112,10 +112,10 @@ Eval [
  	Test superclass: Object.
 	Transcript nextPutAll: 'Superclass assigned'; nl.
 
- 	Test compile: 'new			^super new'.
+ 	Test compile: 'new [ ^super new ]'.
 	Transcript nextPutAll: 'First method compiled'; nl.
 
- 	Test compile: 'printTestMessage	''test message'' printNl.'.
+ 	Test compile: 'printTestMessage	[ ''test message'' printNl ]'.
 	Transcript nextPutAll: 'Second method compiled'; nl.
 
  	t := Test new.

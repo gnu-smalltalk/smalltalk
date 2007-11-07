@@ -190,22 +190,22 @@ isBinary
 						   poolDictionaries: ''
 						   category: 'Compiler'.
 			  class class compile: '
-value: aValue
+value: aValue [
     value _ aValue
-'.
+]'.
 
 			  class  compile: '
-value
+value [
     ^value
-'.
+]'.
 			  class class compile: '
-value
+value [
     ^value
-'.
+]'.
 			  class  compile: '
-valueString
+valueString [
     ^value
-'.
+]'.
 			  class value: value
 			  ]
 !

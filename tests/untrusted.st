@@ -86,10 +86,10 @@ Eval [
 
 Eval [
     Processor activeProcess makeUntrusted: true.
-    Set compile: 'lovelyMethod ^tally'.
-    Set compile: 'dangerousMethod tally := 0'.
-    Set compile: 'lovelyMethod ^Array'.
-    Set compile: 'dangerousMethod Array := 0'
+    Set compile: 'lovelyMethod [ ^tally ]'.
+    Set compile: 'dangerousMethod [ tally := 0 ]'.
+    Set compile: 'lovelyMethod [ ^Array ]'.
+    Set compile: 'dangerousMethod [ Array := 0 ]'
 ]
 
 Eval [

@@ -108,12 +108,12 @@ test
     | foo bar |
     foo := Behavior new.
     foo superclass: Object.
-    foo compile: 'one: a      (''foo one'' -> a) printNl'.
-    foo compile: 'two: a      (''foo two'' -> a) printNl. self one: a'.
+    foo compile: 'one: a [ (''foo one'' -> a) printNl ]'.
+    foo compile: 'two: a [ (''foo two'' -> a) printNl. self one: a ]'.
 
     bar := Behavior new.
     bar superclass: Object.
-    bar compile: 'one: a      (''bar one'' -> a) printNl'.
+    bar compile: 'one: a [ (''bar one'' -> a) printNl ]'.
     bar addSelector: #two: withMethod: (ForwardingMethod to: foo -> #two:).
 
     foo new two: 1.
