@@ -1,3 +1,7 @@
+2007-11-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/ackermann.st: Add "iterative" implementation.
+
 2007-11-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/Methods.st: Add brackets around compiled methods.

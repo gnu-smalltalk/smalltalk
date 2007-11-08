@@ -34,6 +34,28 @@ Integer extend [
         n = 0 ifTrue: [ ^self - 1 ack: 1 ].
         ^self - 1 ack: (self ack: n - 1)
     ]
+
+    ackIt: nn [
+	| n |
+	^[
+	    | m stack |
+	    m := self. n := nn.
+	    stack := OrderedCollection new.
+	    [ m = 0
+		ifTrue: [
+		    n := n + 1.
+		    m := stack removeLast ]
+		ifFalse: [
+		    n = 0
+			ifTrue: [
+			    m := m - 1.
+			    n := 1 ]
+			ifFalse: [
+			    stack addLast: m - 1.
+			    n := n - 1 ] ]
+	    ] repeat
+	] on: Error do: [ :ex | ex return: n ]
+    ]
 ]
 
 Eval [
@@ -41,6 +63,5 @@ Eval [
 	ifTrue: [ 4 ]
 	ifFalse: [ Smalltalk arguments first asInteger ].
 	
-    ('Ack(3,%1): %2' % { n. (3 ack: n) }) displayNl
-
+    ('Ack(3,%1): %2' % { n. (3 ack: n) }) displayNl.
 ]
