@@ -61,6 +61,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <errno.h>
 
 const char *program_name;
 const char *kernel_dir;
@@ -355,23 +356,26 @@ main(int argc, const char **argv)
 {
   int smalltalk_argc;
   const char **smalltalk_argv;
+  const char *executable_name;
   int i;
   int result;
 
-  program_name = strrchr (argv[0], '/');
-  if (program_name)
-    program_name++;
+  executable_name = strrchr (argv[0], '/');
+  if (executable_name)
+    executable_name++;
   else
-    program_name = argv[0];
+    executable_name = argv[0];
 
   /* Check if used in the build tree.  */
-  if (!strcmp (program_name, "gst-tool")
-      || !strcmp (program_name, "lt-gst-tool"))
+  if (!strcmp (executable_name, "gst-tool")
+      || !strcmp (executable_name, "lt-gst-tool"))
     {
       argv++, argc--;
       program_name = argv[0];
       flags |= GST_IGNORE_USER_FILES;
     }
+  else
+    program_name = executable_name;
 
   for (i = 0; ; i++)
     if (!tools[i].name)
@@ -411,7 +415,10 @@ main(int argc, const char **argv)
   if (result != 0)
     exit (result < 0 ? 1 : result);
     
-  gst_process_file (tools[i].script, GST_DIR_KERNEL_SYSTEM);
+  if (!gst_process_file (tools[i].script, GST_DIR_KERNEL_SYSTEM))
+    fprintf (stderr, "%s: Couldn't open kernel file `%s': %s\n",
+	     executable_name, tools[i].script, strerror (errno));
+
   gst_invoke_hook (GST_ABOUT_TO_QUIT);
   exit (0);
 }

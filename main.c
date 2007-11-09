@@ -62,6 +62,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #ifdef ENABLE_DISASSEMBLER
 #define TRUE_FALSE_ALREADY_DEFINED
@@ -381,13 +382,16 @@ main(int argc, const char **argv)
 
       else
 	{
+	  errno = 0;
 	  if (!gst_process_file (file->file_name,
 				 file->kernel_path ? GST_DIR_BASE : GST_DIR_ABS))
 	    {
 	      if (file->kernel_path)
-		fprintf (stderr, "gst: Couldn't open kernel file %s\n", file->file_name);
+		fprintf (stderr, "gst: Couldn't open kernel file `%s': %s\n",
+			 file->file_name, strerror (errno));
 	      else
-		fprintf (stderr, "gst: Couldn't open file %s\n", file->file_name);
+		fprintf (stderr, "gst: Couldn't open file `%s': %s\n",
+			 file->file_name, strerror (errno));
 	    }
 	}
     }

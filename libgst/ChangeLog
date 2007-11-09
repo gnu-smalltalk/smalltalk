@@ -1,3 +1,11 @@
+2007-11-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/input.c: Return false if file cannot be opened by
+	gst_process_file, and set errno appropriately.
+	* libgst/files.c: Use errno on return from gst_process_file.
+	* main.c: Use errno on return from gst_process_file.
+	* gst-tool.c: Use errno on return from gst_process_file.
+
 2007-10-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/re.c: Call init_re from exported functions.

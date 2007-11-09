@@ -844,8 +844,12 @@ _gst_process_file (const char *fileName, enum gst_file_dir dir)
 
   f = _gst_find_file (fileName, dir);
   if (!f)
-    return false;
+    {
+      errno = ENOENT;
+      return false;
+    }
 
+  errno = 0;
   fd = _gst_open_file (f, "r");
   if (fd != -1)
     {
@@ -857,10 +861,11 @@ _gst_process_file (const char *fileName, enum gst_file_dir dir)
       _gst_parse_stream (false);
       _gst_pop_stream (true);
       _gst_set_undeclared (old);
+      errno = 0;
     }
 
   xfree (f);
-  return (true);
+  return (fd != -1);
 }
 
 

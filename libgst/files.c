@@ -565,7 +565,8 @@ load_standard_files (void)
     {
       if (!_gst_process_file (fileName, GST_DIR_KERNEL))
 	{
-	  _gst_errorf ("can't find system file '%s'", fileName);
+	  _gst_errorf ("couldn't load system file '%s': %s", fileName,
+		       strerror (errno));
 	  _gst_errorf ("image bootstrap failed, use option --kernel-directory");
 	  return 1;
 	}
