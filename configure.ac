@@ -259,6 +259,7 @@ AC_ARG_ENABLE(mysql-tests,
                           test MySQL bindings [default=root:root:test]], ,
 [enable_mysql_tests=no])
 AC_SUBST(enable_mysql_tests)
+AC_MSG_RESULT($enable_mysql_tests)
 
 GST_PACKAGE_ENABLE([DBD-PostgreSQL], [dbd-postgresql],
    [GST_HAVE_LIB(pq, PQconnectdb)],
