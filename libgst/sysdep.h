@@ -130,12 +130,10 @@ extern unsigned _gst_get_milli_time (void)
 extern time_t _gst_get_time (void)
   ATTRIBUTE_HIDDEN;
 
-/* Returns the time the file FILENAME was last modified.  On UNIX
-   machines, this is the number of seconds since midnight Jan 1 1970
-   GMT.  On other platforms/environments, it's probably not important
-   exactly what it returns as long as it's unites consistent with
-   other accesses that client code may do to the file system.  */
-extern time_t _gst_get_file_modify_time (const char *fileName)
+/* Returns whether FILE1 is newer (or last modified at the same time as)
+   FILE2.  Returns true if FILE2 is not readable, false if FILE1 is not
+   readable.  */
+extern mst_Boolean _gst_file_is_newer (const char *file1, const char *file2)
   ATTRIBUTE_HIDDEN;
 
 /* Sets the time when FILENAME was last modified.  The times are in

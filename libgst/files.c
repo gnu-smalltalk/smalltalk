@@ -528,29 +528,27 @@ _gst_initialize (const char *kernel_dir,
 mst_Boolean
 ok_to_load_binary (void)
 {
-  time_t imageFileTime;
   const char *fileName;
 
-  imageFileTime = _gst_get_file_modify_time (_gst_binary_image_name);
-
-  if (imageFileTime == 0)	/* not found */
+  if (!_gst_file_is_readable (_gst_binary_image_name))
     return (false);
 
   for (fileName = standard_files; *fileName; fileName += strlen (fileName) + 1)
     {
       char *fullFileName = _gst_find_file (fileName, GST_DIR_KERNEL);
-      mst_Boolean ok = (imageFileTime > _gst_get_file_modify_time (fullFileName));
+      mst_Boolean ok = _gst_file_is_newer (_gst_binary_image_name,
+					   fullFileName);
       xfree (fullFileName);
       if (!ok)
         return (false);
     }
 
   if (site_pre_image_file
-      && imageFileTime <= _gst_get_file_modify_time (site_pre_image_file))
+      && !_gst_file_is_newer (_gst_binary_image_name, site_pre_image_file))
     return (false);
 
   if (user_pre_image_file
-      && imageFileTime <= _gst_get_file_modify_time (user_pre_image_file))
+      && !_gst_file_is_newer (_gst_binary_image_name, user_pre_image_file))
     return (false);
 
   return (true);
@@ -602,11 +600,7 @@ _gst_find_file (const char *fileName,
 		dir == GST_DIR_BASE ? "" : LOCAL_KERNEL_DIR_NAME "/",
 		fileName);
 
-      if (_gst_file_is_readable (localFileName)
-          /* If the system file is newer, use the system file instead.  */
-          && (!_gst_file_is_readable (fullFileName) ||
-	      _gst_get_file_modify_time (localFileName) >=
-	      _gst_get_file_modify_time (fullFileName)))
+      if (_gst_file_is_newer (localFileName, fullFileName))
 	{
 	  xfree (fullFileName);
 	  return localFileName;

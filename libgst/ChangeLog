@@ -1,3 +1,10 @@
+2007-11-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/files.c: Use _gst_file_is_newer.
+	* libgst/sysdep.c: Remove _gst__gst_get_file_modify_time, add
+	_gst_file_is_newer.
+	* libgst/sysdep.h: Likewise.
+
 2007-11-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.c: Return false if file cannot be opened by

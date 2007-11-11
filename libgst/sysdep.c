@@ -943,16 +943,44 @@ error:
 
 
 
-time_t
-_gst_get_file_modify_time (const char *fileName)
+mst_Boolean
+_gst_file_is_newer (const char *file1, const char *file2)
 {
-  struct stat st;
+  static char *prev_file1;
+  static struct stat st1;
+  struct stat st2;
 
-  if (stat (fileName, &st) < 0)
-    return (0);
+  if (!prev_file1 || strcmp (file1, prev_file1))
+    {
+      if (prev_file1)
+	xfree (prev_file1);
+      prev_file1 = xstrdup (file1);
 
-  else
-    return (_gst_adjust_time_zone (st.st_mtime));
+      if (!_gst_file_is_readable (file1))
+        return false;
+      if (stat (file1, &st1) < 0)
+	return false;
+    }
+
+  if (!_gst_file_is_readable (file2))
+    return true;
+  if (stat (file2, &st2) < 0)
+    return true;
+
+  if (st1.st_mtime != st2.st_mtime)
+    return st1.st_mtime > st2.st_mtime;
+
+  /* 15 years have passed and nothing seems to have changed.  */
+#if defined HAVE_STRUCT_STAT_ST_MTIMENSEC
+  return st1.st_mtimensec >= st2.st_mtimensec;
+#elif defined HAVE_STRUCT_STAT_ST_MTIM_TV_NSEC
+  return st1.st_mtim.tv_nsec >= st2.st_mtim.tv_nsec;
+#elif defined HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
+  return st1.st_mtimespec.tv_nsec >= st2.st_mtimespec.tv_nsec;
+#else
+  /* Say that the image file is newer.  */
+  return true;
+#endif
 }
 
 
