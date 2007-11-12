@@ -3,7 +3,7 @@
 ** implement new syntax (done)
 *** option processing for scripts/Convert.st (done)
 *** implement GST syntax parser for STClassLoader (done)
-*** mega conversion of old source code and bug shaking
+*** mega conversion of old source code and bug shaking (done)
 
 ** faster startup (done)
 
@@ -11,7 +11,7 @@
 
 ** avoid installing bash scripts (done)
 
-** more complete testsuite covering (as time permits)
+** more complete testsuite covering
 *** iconv (done)
 *** debugger/single-step mode (done)
 
@@ -21,6 +21,27 @@ Virtual File System infrastructure. (done)
 *** force .star files to be uncompressed, and implement a "view" on
 FileStream that only shows a segment of the file (done).
 
+----------------------------------------------------------------------
+
+
+* 3.1
+
+* IPv6
+
+* Expat
+
+* improvements to DBI
+** SQLite support
+** refactoring and prepared statements support
+** merge ROE?
+
+* Seaside
+
+* more libraries
+** gnuplot
+** gnutls
+
+----------------------------------------------------------------------
 
 * sometime
 
@@ -34,8 +55,6 @@ in sync.  Maybe with CVS support (see Smalltalk/X).
 
 ** cute BlockClosure implementations
 
-** port more software (Seaside, Ref. Browser?)
-
 
 ----------------------------------------------------------------------
 
@@ -43,8 +62,6 @@ in sync.  Maybe with CVS support (see Smalltalk/X).
 * bindings
 
 ** use zlib bindings to implement direct ZIP-file access in VFS.
-
-** IPv6.  Not hard to do.
 
 ** provide cool examples of XML using RSS feeds, SOAP, XML-RPC, whatever.
 
