@@ -1206,11 +1206,11 @@ encoded characters to UTF-32 values (encoded as 32-bit Integers).'>
 
 		(self atEndOfInput or: [self isDirect: (ch := self nextInput codePoint)]) 
 		    ifTrue: 
-			["Terminate the stream by left-aligning the last byte"
-
+			[lookahead := ch.
+			left = 0 ifTrue: [left := -2. ^$-].
+			"Terminate the stream by left-aligning the last byte"
 			value := value bitShift: 6 - (left \\ 6).
-			left := left + 6 - (left \\ 6).
-			lookahead := ch]
+			left := left + 6 - (left \\ 6)]
 		    ifFalse: 
 			[ch < 65536 
 			    ifTrue: 

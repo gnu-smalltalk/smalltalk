@@ -185,7 +185,11 @@ TestCase subclass: IconvTest [
 	str := str copyWith: $<16r0419>.
 	self assert: (str asString: 'UTF-7') asString = '+BBgEOAQZ-'.
 	str := UnicodeString with: $<16r10FFFF>.
-	self assert: (str asString: 'UTF-7') asString = '+2//f/w-'
+	self assert: (str asString: 'UTF-7') asString = '+2//f/w-'.
+
+	"Test that, if there are no bits left to emit, we exit base64 immediately."
+	str := UnicodeString with: $<12376> with: $<12435> with: $\ with: $u.
+	self assert: (str asString: 'UTF-7') asString = '+MFgwkwBc-u'
     ]
 
     testRoundTrip [
