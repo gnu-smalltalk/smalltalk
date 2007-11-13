@@ -1,3 +1,7 @@
+2007-11-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/powl.c: New.
+
 2007-11-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/socketx.h: Include netinet/tcp.h.

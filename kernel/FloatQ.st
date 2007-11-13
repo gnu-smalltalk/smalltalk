@@ -332,5 +332,14 @@ accuracy as C''s "long double" numbers.'>
 	<primitive: VMpr_FloatQ_timesTwoPower>
 	
     ]
+
+    raisedTo: aNumber [
+        "Return self raised to aNumber power"
+
+        <category: 'misc math'>
+        ^aNumber isInteger
+            ifTrue: [self raisedToInteger: aNumber]
+            ifFalse: [self raisedTo: aNumber asFloatQ]
+    ]
 ]
 

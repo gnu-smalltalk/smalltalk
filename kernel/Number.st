@@ -814,8 +814,10 @@ implicit type coercing code for binary operations.'>
 	"Return self raised to aNumber power"
 
 	<category: 'misc math'>
-	^aNumber isInteger 
-	    ifTrue: [self raisedToInteger: aNumber]
+	aNumber isInteger 
+	    ifTrue: [^self raisedToInteger: aNumber].
+	^aNumber generality > 1.0d generality
+	    ifTrue: [(aNumber coerce: self) raisedTo: aNumber]
 	    ifFalse: [self asFloatD raisedTo: aNumber asFloatD]
     ]
 

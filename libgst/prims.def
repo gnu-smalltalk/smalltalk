@@ -4202,7 +4202,7 @@ primitive VMpr_Float_pow [succeed,fail]
            liberty to make these results be NaN.  */
         SET_STACKTOP (floatq_new (lfarg1 + lfarg2));
       else
-        SET_STACKTOP (floatq_new (expl (lfarg2 * logl (lfarg1))));
+        SET_STACKTOP (floatq_new (powl (lfarg1, lfarg2)));
     }
 
   else
@@ -4213,7 +4213,7 @@ primitive VMpr_Float_pow [succeed,fail]
            liberty to make these results be NaN.  */
         SET_STACKTOP (floatd_new (farg1 + farg2));
       else
-        SET_STACKTOP (floatd_new (exp (lfarg2 * log (lfarg1))));
+        SET_STACKTOP (floatd_new (pow (farg1, farg2)));
     }
 
   PRIM_SUCCEEDED;

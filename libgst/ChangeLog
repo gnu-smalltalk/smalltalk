@@ -1,3 +1,7 @@
+2007-11-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Use pow/powl.
+
 2007-11-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/files.c: Use _gst_file_is_newer.
