@@ -846,58 +846,58 @@ $T2H_EXTRA_HEAD = '
 
       if (checkVersion()) {
              homeon = new Image();
-             homeon.src = "homeon.png";
+             homeon.src = "images/homeon.png";
 
              homeoff = new Image();
-             homeoff.src = "home.png";
+             homeoff.src = "images/home.png";
 
              tocon = new Image();
-             tocon.src = "tocon.png";
+             tocon.src = "images/tocon.png";
 
              tocoff = new Image();
-             tocoff.src = "toc.png";
+             tocoff.src = "images/toc.png";
 
              indexon = new Image();
-             indexon.src = "indexon.png";
+             indexon.src = "images/indexon.png";
 
              indexoff = new Image();
-             indexoff.src = "index.png";
+             indexoff.src = "images/index.png";
 
              helpon = new Image();
-             helpon.src = "helpon.png";
+             helpon.src = "images/helpon.png";
 
              helpoff = new Image();
-             helpoff.src = "help.png";
+             helpoff.src = "images/help.png";
 
              backon = new Image();
-             backon.src = "backon.png";
+             backon.src = "images/backon.png";
 
              backoff = new Image();
-             backoff.src = "back.png";
+             backoff.src = "images/back.png";
 
              forwardon = new Image();
-             forwardon.src = "forwardon.png";
+             forwardon.src = "images/forwardon.png";
 
              forwardoff = new Image();
-             forwardoff.src = "forward.png";
+             forwardoff.src = "images/forward.png";
 
              prevon = new Image();
-             prevon.src = "prevon.png";
+             prevon.src = "images/prevon.png";
 
              prevoff = new Image();
-             prevoff.src = "prev.png";
+             prevoff.src = "images/prev.png";
 
              nexton = new Image();
-             nexton.src = "nexton.png";
+             nexton.src = "images/nexton.png";
 
              nextoff = new Image();
-             nextoff.src = "next.png";
+             nextoff.src = "images/next.png";
 
              upon = new Image();
-             upon.src = "upon.png";
+             upon.src = "images/upon.png";
 
              upoff = new Image();
-             upoff.src = "up.png";
+             upoff.src = "images/up.png";
          }
 
      function img_act(imgName) {
@@ -970,30 +970,16 @@ EOT
 sub T2H_DEFAULT_print_head_navigation
 {
   my $fh = shift;
-    print $fh <<EOT;
-<table border="0" cellpadding="0" cellspacing="0">
-<tr valign="top">
-<td align="left" bgcolor=\"#e6e6e6\" width=50 >
-EOT
   &$T2H_print_navigation($fh);
-    print $fh <<EOT;
-</td>
-<td width=20 >
-</td>
-<td align="left">
-EOT
+  print $fh "<hr size=1>\n";
 }
 
 sub T2H_DEFAULT_print_foot_navigation
 {
   my $fh = shift;
   my $nwords = shift;
-    print $fh <<EOT;
-</td>
-</tr>
-</table>
-EOT
-
+  print $fh "<hr size=1>\n";
+  &$T2H_print_navigation($fh);
   print $fh "<hr size=1>\n";
 }
 
@@ -1052,7 +1038,7 @@ sub T2H_DEFAULT_button_icon_img
   my $button = shift;
   my $icon = shift;
   my $name = shift;
-  return qq{<img src="$icon.png" border="0" alt="$button: $name" name="$icon" align="middle">};
+  return qq{<img src="images/$icon.png" border="0" alt="$button: $name" name="$icon" align="middle">};
 }
 
 # Names of text as alternative for icons
@@ -1080,12 +1066,12 @@ sub T2H_DEFAULT_print_navigation
   my $fh = shift;
   my $spacing = 1;
 
-  print $fh "<table cellpadding=$spacing cellspacing=$spacing border=0>\n";
+  print $fh "<table bgcolor=\"#e6e6e6\" cellpadding=$spacing cellspacing=$spacing border=0>\n";
+  print $fh "<tr valign=top>\n";
 
   for $button (@$T2H_BUTTONS)
   {
-    print $fh qq{<tr valign="top" align="left">\n};
-    print $fh qq{<td valign="middle" align="left">};
+    print $fh "<td valign=middle align=left>";
     if (ref($button) eq 'CODE')
     {
       &$button($fh, 1);
@@ -1118,8 +1104,8 @@ sub T2H_DEFAULT_print_navigation
 	 
     }
     print $fh "</td>\n";
-    print $fh "</tr>\n";
   }
+  print $fh "</tr>\n";
   print $fh "</table>\n";
 }
 
