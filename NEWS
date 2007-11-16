@@ -197,6 +197,8 @@ o   A new package DebugTools provides a generic Debugger class that can
 
 o   Complex numbers support added (package Complex).
 
+o   GNUPlot bindings
+
 o   JSON reader/writer contributed by Robin Redeker.
 
 o   MD5 packages renamed to Digest, SHA1 support added.

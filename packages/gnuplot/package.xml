@@ -1,0 +1,16 @@
+<package>
+  <name>GNUPlot</name>
+  <namespace>GNUPlot</namespace>
+
+  <filein>Base.st</filein>
+  <filein>Terminals.st</filein>
+  <filein>Expressions.st</filein>
+  <filein>2D.st</filein>
+  <filein>Examples.st</filein>
+
+  <file>Base.st</file>
+  <file>Terminals.st</file>
+  <file>Expressions.st</file>
+  <file>2D.st</file>
+  <file>Examples.st</file>
+</package>
