@@ -15,6 +15,9 @@ dnl built and will be preloaded by the wrapper script in `tests/gst'.
 AC_DEFUN([GST_PACKAGE_PREFIX], [
 m4_define([_GST_PKG_PREFIX], [$1/])])
 
+AC_DEFUN([GST_PACKAGE_DEPENDENCIES], [
+m4_define([_GST_PKG_DEPENDENCIES], [$1])])
+
 m4_define([_GST_RULES_PREPARE],
 [m4_expand_once([
   PACKAGE_RULES=pkgrules.tmp
@@ -63,7 +66,7 @@ AC_DEFUN([GST_PACKAGE_ENABLE], [
 
   cat >> pkgrules.tmp << \EOF
 all-local: $(srcdir)/_GST_PKG_STAMP
-$1.star: _GST_PKG_XML $(srcdir)/_GST_PKG_STAMP
+$1.star: _GST_PKG_XML $(srcdir)/_GST_PKG_STAMP _GST_PKG_DEPENDENCIES
 	_GST_PKG_IF_FILE([$5], [Makefile], [cd _GST_PKG_DIR && $(MAKE)
 	])$(GST_[]PACKAGE) --srcdir=$(srcdir) --target-directory=. $<
 
