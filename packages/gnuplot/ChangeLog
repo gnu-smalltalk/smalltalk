@@ -1,5 +1,10 @@
 2007-11-16  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Base.st: Support multiplots.
+	* Examples.st: Add example.
+
+2007-11-16  Paolo Bonzini  <bonzini@gnu.org>
+
 	* 2D.st: New.
 	* Base.st: New.
 	* Examples.st: New.

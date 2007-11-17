@@ -85,7 +85,7 @@ Object subclass: GPObject [
 ]
 
 GPObject subclass: GNUPlot [
-    | commands terminal |
+    | plots terminal cols |
     
     <category: 'GNUPlot'>
     <comment: 'I am the main class to interact with GNU plot.
@@ -117,11 +117,11 @@ GPObject subclass: GNUPlot [
 
     initialize [
 	<category: 'initialize-release'>
-	commands := OrderedCollection new
+	plots := OrderedCollection new
     ]
 
     output: aFileName [
-	<category: 'commands'>
+	<category: 'accessing'>
 	self terminal isInteractive ifTrue: [ self terminal: GPPngTerminal new ].
 	self terminal output: aFileName
     ]
@@ -130,21 +130,68 @@ GPObject subclass: GNUPlot [
 	^self terminal display: self
     ]
 
+    cols [
+	^cols
+    ]
+
+    cols: anInteger [
+	cols := anInteger
+    ]
+
+    add: aPlot [
+	<category: 'accessing'>
+	^plots add: aPlot
+    ]
+	
     plot [
 	"Adding a plot command and returning GPPlot instance ready for accepting parameters"
 
-	<category: 'commands'>
-	^commands add: GPPlot new
+	<category: 'accessing'>
+	plots size > 1 ifTrue: [ self error: 'cannot use #plot in multiplot' ].
+	plots size = 1 ifTrue: [ ^plots first ].
+	^self add: GPPlot new
+    ]
+
+    multiplotLayout [
+	| theCols theRows |
+	<category: 'converting'>
+	theCols := cols isNil ifTrue: [plots size sqrt ceiling] ifFalse: [cols].
+	^theCols @ (plots size / theCols) ceiling
     ]
 
     displayOn: aStream [
+	| layout row col thisRowCols |
 	<category: 'converting'>
-	commands do: 
-		[:each | 
-		each isString 
-		    ifTrue: [aStream nextPutAll: each]
-		    ifFalse: [each displayOn: aStream]]
-	    separatedBy: [aStream nl]
+        aStream nextPutAll: 'reset'; nl.
+	plots size = 1 ifTrue: [
+	    plots first displayOn: aStream.
+	    ^self ].
+
+	layout := self multiplotLayout.
+	aStream
+	    nextPutAll: 'set size %1, %2' % {
+		layout x asFloat / (layout x max: layout y).
+		layout y asFloat / (layout x max: layout y) };
+	    nl.
+
+	row := col := 0.
+	thisRowCols := layout x.
+	aStream nextPutAll: 'set multiplot'; nl.
+	plots keysAndValuesDo: 
+	    [:i :each | 
+            aStream
+		nextPutAll: 'reset'; nl;
+		nextPutAll: 'set size %1, %2' % { 1.0/layout x. 1.0/layout y } ; nl;
+		nextPutAll: 'set origin %1, %2' % {
+			(col + ((layout x - thisRowCols) / 2.0)) / layout x.
+			(layout y - 1.0 - row) / layout y }; nl;
+		display: each; nl.
+		col := col + 1.
+		col = layout x ifTrue: [
+		    col := 0.
+		    row := row + 1.
+		    thisRowCols := (i + layout x min: plots size) - i]].
+	aStream nextPutAll: 'unset multiplot'; nl
     ]
 
     terminal [
@@ -153,7 +200,7 @@ GPObject subclass: GNUPlot [
     ]
 
     terminal: aGPTerminal [
-	<category: 'commands'>
+	<category: 'accessing'>
 	terminal := aGPTerminal
     ]
 ]
@@ -645,7 +692,6 @@ GPObject subclass: GPAbstractPlot [
     displayOn: aStream [
         <category: 'printing'>
 	| defs |
-        aStream nextPutAll: 'reset'; nl.
 	defs := Set new.
         self displayPrologOn: aStream into: defs.
         aStream nextPutAll: 'plot '.
@@ -656,6 +702,7 @@ GPObject subclass: GPAbstractPlot [
             separatedBy: [aStream nl].
     ]
 ]
+
 GPObject subclass: GPTerminal [
     
     <category: 'GNUPlot'>

@@ -34,6 +34,13 @@ GPObject subclass: GNUPlotExamples [
     <category: 'GNUPlot-Tests and examples'>
     <comment: 'See class side for methods with examples'>
 
+    GNUPlotExamples class >> newPngTerminal [
+	^GPPngTerminal new
+	    size: 300 @ 300;
+	    "colors: (GPTerminalColors new borders: Color darkGray); FIXME"
+	    yourself
+    ]
+
     GNUPlotExamples class >> example1 [
 	| p |
 	p := GNUPlot new.
@@ -51,12 +58,8 @@ GPObject subclass: GNUPlotExamples [
 	| p |
 	p := GNUPlot new.
 	file isNil ifFalse: [
-	    p terminal: ((GPPngTerminal new)
-		    size: 300 @ 300;
-		    "colors: (GPTerminalColors new borders: Color darkGray); FIXME"
-		    yourself).
-	    p output: file
-	].
+	    p terminal: self newPngTerminal.
+	    p output: file ].
 
 	p plot
 	    lines: #(1 5 2 8 3)
@@ -73,13 +76,8 @@ GPObject subclass: GNUPlotExamples [
 	| p |
 	p := GNUPlot new.
 	file isNil ifFalse: [
-	    p terminal: ((GPPngTerminal new)
-		    transparent: true;
-		    size: 300 @ 300;
-		    "colors: (GPTerminalColors new borders: Color darkGray); FIXME"
-		    yourself).
-	    p output: file
-	].
+	    p terminal: self newPngTerminal.
+	    p output: file ].
 
 	p plot
 	    "first plot"
@@ -104,12 +102,8 @@ GPObject subclass: GNUPlotExamples [
 	| p |
 	p := GNUPlot new.
 	file isNil ifFalse: [
-	    p terminal: ((GPPngTerminal new)
-		    size: 300 @ 300;
-		    "colors: (GPTerminalColors new borders: Color darkGray); FIXME"
-		    yourself).
-	    p output: file
-	].
+	    p terminal: self newPngTerminal.
+	    p output: file ].
 
 	p plot
 	    lines: #(1 5 2 8 3)
@@ -130,13 +124,8 @@ GPObject subclass: GNUPlotExamples [
 	| p fit data |
 	p := GNUPlot new.
 	file isNil ifFalse: [
-	    p terminal: ((GPPngTerminal new)
-		    transparent: true;
-		    size: 300 @ 300;
-		    "colors: (GPTerminalColors new borders: Color darkGray); FIXME"
-		    yourself).
-	    p output: file
-	].
+	    p terminal: self newPngTerminal.
+	    p output: file ].
 
 	data := #((0.1 0.2) (1 2) (2 1) (3 3) (4 2) (4.9 3.8)).
 
@@ -146,6 +135,25 @@ GPObject subclass: GNUPlotExamples [
 	    function: [ :x |
 		x fit: data to: [ :a :b | a * x + b ] name: 'f' ].
 
+	Transcript display: p; nl.
+	p execute
+    ]
+
+    GNUPlotExamples class >> multiplot [
+	^self multiplotOn: nil
+    ]
+
+    GNUPlotExamples class >> multiplotOn: file [
+	| p plot |
+	p := GNUPlot new.
+	file isNil ifFalse: [
+	    p terminal: self newPngTerminal.
+	    p output: file ].
+
+	(plot := GPPlot new)
+	    lines: #(1 5 2 8 3)
+	    with: [:series | series params title: 'Title' ].
+	p add: plot; add: plot; add: plot.
 	Transcript display: p; nl.
 	p execute
     ]
