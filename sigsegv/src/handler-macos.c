@@ -1,5 +1,5 @@
 /* Fault handler information.  MacOSX version.
-   Copyright (C) 1993-1999, 2002-2003  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 1993-1999, 2002-2003, 2007  Bruno Haible <bruno@clisp.org>
    Copyright (C) 2003  Paolo Bonzini <bonzini@gnu.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -223,15 +223,21 @@ catch_exception_raise (mach_port_t exception_port,
      Otherwise, treat it like a normal SIGSEGV.  */
   if (addr <= sp + 4096 && sp <= addr + 4096)
     {
+      unsigned long new_safe_esp;
 #ifdef DEBUG_EXCEPTION_HANDLING
       fprintf (stderr, "Treating as stack overflow, sp = 0x%lx\n", (char *) sp);
 #endif
-      SIGSEGV_STACK_POINTER (thread_state) =
+      new_safe_esp =
 #if STACK_DIRECTION < 0
         stk_extra_stack + stk_extra_stack_size - 256;
 #else
         stk_extra_stack + 256;
 #endif
+#ifdef __i386__
+      new_safe_esp &= -16; /* align */
+      new_safe_esp -= 4; /* make room for (unused) return address slot */
+#endif
+      SIGSEGV_STACK_POINTER (thread_state) = new_safe_esp;
       /* Continue handling this fault in the faulting thread.  (We cannot longjmp while
          in the exception handling thread, so we need to mimic what signals do!)  */
       SIGSEGV_PROGRAM_COUNTER (thread_state) = (unsigned long) altstack_handler;

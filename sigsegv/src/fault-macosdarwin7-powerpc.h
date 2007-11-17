@@ -1,5 +1,5 @@
 /* Fault handler information.  MacOSX/Darwin7/PowerPC version.
-   Copyright (C) 2002-2004  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 2002-2004, 2007  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,4 +21,8 @@
 #define SIGSEGV_FAULT_ADDRESS  (unsigned long) get_fault_addr (sip, ucp)
 #define SIGSEGV_FAULT_CONTEXT  ucp
 #define SIGSEGV_FAULT_ADDRESS_FROM_SIGINFO
+#if __DARWIN_UNIX03
+#define SIGSEGV_FAULT_STACKPOINTER  ucp->uc_mcontext->ss.__r1
+#else
 #define SIGSEGV_FAULT_STACKPOINTER  ucp->uc_mcontext->ss.r1
+#endif

@@ -1,3 +1,70 @@
+2007-11-16  Bruno Haible  <bruno@clisp.org>
+
+	* src/fault-freebsd-i386.h (SIGSEGV_FAULT_STACKPOINTER): Use sc_rsp
+	also on x86_64-freebsd platform.
+	Reported by Dmitri Hrapof <hrapof@common-lisp.ru> and
+	Petr Salinger <Petr.Salinger@seznam.cz>.
+
+2007-11-15  Bruno Haible  <bruno@clisp.org>
+
+	* configure.ac (CFG_SIGNALS, CFG_FAULT): Port to i586-kfreebsd-gnu
+	and x86_64-kfreebsd-gnu.
+	* src/fault-freebsd-i386.h (SIGSEGV_FAULT_STACKPOINTER): Likewise.
+	Based on patch by Petr Salinger <Petr.Salinger@seznam.cz>.
+
+2007-11-11  Bruno Haible  <bruno@clisp.org>
+
+	* Version 2.5 released.
+
+2007-11-11  Bruno Haible  <bruno@clisp.org>
+
+	* configure.ac: Bump version number to 2.5.
+	* src/sigsegv.h.in (LIBSIGSEGV_VERSION): Likewise.
+
+2007-10-28  Bruno Haible  <bruno@clisp.org>
+
+	* src/handler-macos.c (catch_exception_raise): Align the new stack
+	pointer on a 16-byte boundary.
+	* src/handler-win32.c (main_exception_filter): Correct alignment:
+	%esp must be aligned to == -4 mod 16 upon function entry.
+
+2007-10-28  Bruno Haible  <bruno@clisp.org>
+
+	* src/sigsegv.h.in (stackoverflow_install_handler): Avoid comment
+	inside comment.
+	Reported by Chris Willmore <willmc@rpi.edu>.
+
+2007-10-28  Bruno Haible  <bruno@clisp.org>
+
+	* src/machfault-macos-powerpc.h (SIGSEGV_FAULT_ADDRESS,
+	SIGSEGV_STACK_POINTER, SIGSEGV_PROGRAM_COUNTER): Add __DARWIN_UNIX03
+	conditional.
+	* src/machfault-macos-i386.h (SIGSEGV_FAULT_ADDRESS,
+	SIGSEGV_STACK_POINTER, SIGSEGV_PROGRAM_COUNTER): Likewise.
+	* src/fault-macosdarwin7-powerpc.h (SIGSEGV_FAULT_STACKPOINTER):
+	Likewise.
+	* src/fault-macosdarwin7-powerpc.c (get_fault_addr): Likewise.
+	Reported by Chris Willmore <willmc@rpi.edu>.
+
+2007-01-12  Bruno Haible  <bruno@clisp.org>
+
+	* Makefile.am (check-next): Don't ask for reports from x86_64-*-linux*
+	platforms.
+
+2006-07-14  Bruno Haible  <bruno@clisp.org>
+
+	* m4/sigaltstack.m4 (SV_SIGALTSTACK): Use SIGSTKSZ instead of
+	hardcoding 16384.
+	* m4/sigaltstack-longjmp.m4 (SV_TRY_LEAVE_HANDLER_LONGJMP): Likewise.
+	* m4/sigaltstack-siglongjmp.m4 (SV_TRY_LEAVE_HANDLER_SIGLONGJMP):
+	Likewise.
+	* tests/stackoverflow1.c (main): Likewise.
+	* tests/stackoverflow2.c (main): Likewise.
+	* src/sigsegv.h.in (stackoverflow_install_handler): Update
+	recommendation for extra_stack_size.
+	Needed for ia64.
+	Reported by Peter Van Eynde <pvaneynd@users.sourceforge.net>.
+
 2006-06-23  Bruno Haible  <bruno@clisp.org>
 
 	* Version 2.4 released.

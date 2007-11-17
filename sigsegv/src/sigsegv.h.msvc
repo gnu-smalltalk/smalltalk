@@ -1,5 +1,5 @@
 /* Page fault handling library.
-   Copyright (C) 1998-1999, 2002, 2004-2006  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 1998-1999, 2002, 2004-2007  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-#define LIBSIGSEGV_VERSION 0x0204    /* version number: (major<<8) + minor */
+#define LIBSIGSEGV_VERSION 0x0205    /* version number: (major<<8) + minor */
 extern int libsigsegv_version;       /* Likewise */
 
 /* -------------------------------------------------------------------------- */
@@ -96,8 +96,12 @@ typedef void (*stackoverflow_handler_t) (int emergency, stackoverflow_context_t 
  * Installs a stack overflow handler.
  * The extra_stack argument is a pointer to a pre-allocated area used as a
  * stack for executing the handler. It is typically allocated by use of
- * `alloca' during `main'. Its size should be sufficiently large (typically
- * 16 KB).
+ * `alloca' during `main'. Its size should be sufficiently large.
+ * The following code determines an appropriate size:
+ *   #include <signal.h>
+ *   #ifndef SIGSTKSZ         / * glibc defines SIGSTKSZ for this purpose * /
+ *   # define SIGSTKSZ 16384  / * on most platforms, 16 KB are sufficient * /
+ *   #endif
  * Returns 0 on success, or -1 if the system doesn't support catching stack
  * overflow.
  */

@@ -41,6 +41,9 @@
 # include <sys/time.h>
 # include <sys/resource.h>
 #endif
+#ifndef SIGSTKSZ
+# define SIGSTKSZ 16384
+#endif
 
 jmp_buf mainloop;
 sigset_t mainsigset;
@@ -101,7 +104,9 @@ recurse (volatile int n)
 int
 main ()
 {
-  char mystack[16384];
+  /* glibc says: Users should use SIGSTKSZ as the size of user-supplied
+     buffers.  */
+  char mystack[SIGSTKSZ];
   sigset_t emptyset;
   void *p;
 

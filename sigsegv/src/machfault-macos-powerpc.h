@@ -1,5 +1,5 @@
 /* Fault handler information.  MacOSX/PowerPC version.
-   Copyright (C) 2003-2004  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 2003-2004, 2007  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,6 +21,12 @@
 #define SIGSEGV_THREAD_STATE_TYPE                   ppc_thread_state_t
 #define SIGSEGV_THREAD_STATE_FLAVOR                 PPC_THREAD_STATE
 #define SIGSEGV_THREAD_STATE_COUNT                  PPC_THREAD_STATE_COUNT
+#if __DARWIN_UNIX03
+#define SIGSEGV_FAULT_ADDRESS(thr_state,exc_state)  (exc_state).__dar
+#define SIGSEGV_STACK_POINTER(thr_state)            (thr_state).__r1
+#define SIGSEGV_PROGRAM_COUNTER(thr_state)          (thr_state).__srr0
+#else
 #define SIGSEGV_FAULT_ADDRESS(thr_state,exc_state)  (exc_state).dar
 #define SIGSEGV_STACK_POINTER(thr_state)            (thr_state).r1
 #define SIGSEGV_PROGRAM_COUNTER(thr_state)          (thr_state).srr0
+#endif

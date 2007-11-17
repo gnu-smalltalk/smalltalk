@@ -1,3 +1,7 @@
+New in 2.5:
+
+* Support for MacOS X 10.5.
+
 New in 2.4:
 
 * Support for GCC 4 on more platforms.

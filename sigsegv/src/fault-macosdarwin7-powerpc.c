@@ -36,7 +36,12 @@ static void *
 get_fault_addr (siginfo_t *sip, ucontext_t *ucp)
 {
   unsigned int instr = *(unsigned int *) sip->si_addr;
-  unsigned int *regs = &ucp->uc_mcontext->ss.r0; /* r0..r31 */
+  unsigned int *regs =
+#if __DARWIN_UNIX03
+    &ucp->uc_mcontext->ss.__r0; /* r0..r31 */
+#else
+    &ucp->uc_mcontext->ss.r0; /* r0..r31 */
+#endif
   int disp = 0;
   int tmp;
   unsigned int baseA = 0;

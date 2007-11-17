@@ -1,5 +1,5 @@
 /* Test the stack overflow handler.
-   Copyright (C) 2002-2005  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 2002-2006  Bruno Haible <bruno@clisp.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,6 +40,9 @@
 # include <sys/time.h>
 # include <sys/resource.h>
 #endif
+#ifndef SIGSTKSZ
+# define SIGSTKSZ 16384
+#endif
 
 jmp_buf mainloop;
 sigset_t mainsigset;
@@ -73,7 +76,9 @@ recurse (volatile int n)
 int
 main ()
 {
-  char mystack[16384];
+  /* glibc says: Users should use SIGSTKSZ as the size of user-supplied
+     buffers.  */
+  char mystack[SIGSTKSZ];
   sigset_t emptyset;
 
 #if HAVE_SETRLIMIT && defined RLIMIT_STACK

@@ -1,5 +1,5 @@
 /* Fault handler information.  Woe32 version.
-   Copyright (C) 1993-1999, 2002-2003  Bruno Haible <bruno@clisp.org>
+   Copyright (C) 1993-1999, 2002-2003, 2007  Bruno Haible <bruno@clisp.org>
    Copyright (C) 2003  Paolo Bonzini <bonzini@gnu.org>
 
    This program is free software; you can redistribute it and/or modify
@@ -172,7 +172,9 @@ main_exception_filter (EXCEPTION_POINTERS *ExceptionInfo)
               CONTEXT *orig_context = ExceptionInfo->ContextRecord;
               CONTEXT *safe_context = (CONTEXT *) (new_safe_esp -= sizeof (CONTEXT)); /* make room */
               memcpy (safe_context, orig_context, sizeof (CONTEXT));
-              new_safe_esp -= 12; /* make room for arguments */
+              new_safe_esp -= 8; /* make room for arguments */
+              new_safe_esp &= -16; /* align */
+              new_safe_esp -= 4; /* make room for (unused) return address slot */
               ExceptionInfo->ContextRecord->Esp = new_safe_esp;
               /* Call stack_overflow_handler(faulting_page_address,safe_context).  */
               ExceptionInfo->ContextRecord->Eip = (unsigned long)&stack_overflow_handler;

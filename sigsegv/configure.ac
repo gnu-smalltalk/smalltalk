@@ -1,7 +1,7 @@
 dnl Autoconf configuration for libsigsegv.
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl Copyright (C) 2002-2006  Bruno Haible <bruno@clisp.org>
+dnl Copyright (C) 2002-2007  Bruno Haible <bruno@clisp.org>
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -17,17 +17,17 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program; if not, write to the Free Software Foundation,
 dnl Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-AC_PREREQ(2.60)
+AC_PREREQ(2.52)
 AC_INIT
 AC_CONFIG_SRCDIR(src/sigsegv.h.in)
-AC_CONFIG_AUX_DIR(../build-aux)
-AC_CONFIG_MACRO_DIR(../build-aux)
+AC_CONFIG_AUX_DIR([../build-aux])
+AC_CONFIG_MACRO_DIR([../build-aux])
 
 RSE_BOLD
 
 { echo; echo "${term_bold}Build Tools:${term_norm}"; } >& AS_MESSAGE_FD
 
-AM_INIT_AUTOMAKE(libsigsegv, 2.4)
+AM_INIT_AUTOMAKE(libsigsegv, 2.5)
 AM_CONFIG_HEADER(config.h)
 
 AC_PROG_CC
@@ -76,7 +76,7 @@ AC_CHECK_HEADERS([sys/signal.h])
 dnl List of signals that are sent when an invalid virtual memory address
 dnl is accessed, or when the stack overflows.
 case "$host_os" in
-  sunos4* | freebsd* | openbsd* | netbsd*)
+  sunos4* | freebsd* | openbsd* | netbsd* | kfreebsd* | knetbsd*)
     CFG_SIGNALS=signals-bsd.h ;;
   hpux*)
     CFG_SIGNALS=signals-hpux.h ;;
@@ -300,7 +300,7 @@ if test -z "$CFG_FAULT" && test "$sv_cv_fault_hurd" = yes; then
 fi
 if test -z "$CFG_FAULT" && test "$sv_cv_fault_bsd" = yes; then
   case "$host_os" in
-    freebsd*)
+    freebsd* | kfreebsd*)
       case "$host_cpu" in
         i?86 | x86_64)
           CFG_FAULT=fault-freebsd-i386.h
