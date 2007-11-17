@@ -19,7 +19,7 @@
 ## Process this file with automake to produce Makefile.in.
 
 AUTOMAKE_OPTIONS = 1.7h gnu no-dependencies
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I ../build-aux
 
 SUBDIRS = src tests
 
