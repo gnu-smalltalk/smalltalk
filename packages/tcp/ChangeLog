@@ -1,3 +1,7 @@
+2007-11-18  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+
+	* tcp.c: Look for winsock 2.2.
+
 2007-11-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* AbstractSocketImpl.st: Add #valueWithoutBuffering:.

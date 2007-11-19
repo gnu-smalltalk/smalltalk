@@ -1,4 +1,12 @@
 2007-11-18  Paolo Bonzini  <bonzini@gnu.org>
+            Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+
+	* gst-tool.c: Use EXEEXT.  Look for backslashes as directory
+	separators.
+	* libgst/cint.c: Add my_mkdir and my_mkdtemp.
+	* libgst/sysdep.c: Fix syntax error under Win32.
+
+2007-11-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* main.c: Don't use asprintf.
 

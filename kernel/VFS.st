@@ -56,6 +56,7 @@ actually accessing or ``molding'''' the filesystem.'>
 	["Extract the file name and path, and resolve the first virtual
 	 file path (for example abc#uzip/def in abc#uzip/def#ugz)"
 
+	file := file copyReplaceAll: Directory pathSeparatorString with: '/'.
 	fsName := file copyFrom: pos1 + 1
 		    to: (file 
 			    indexOf: $/

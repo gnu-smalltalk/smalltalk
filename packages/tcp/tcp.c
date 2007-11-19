@@ -250,6 +250,16 @@ constantFunction (ipDropMembership, -1);
 void
 gst_initModule (VMProxy * proxy)
 {
+#ifdef _WIN32
+  WSADATA wsaData;
+  int iRet;
+  iRet = WSAStartup(MAKEWORD(2,2), &wsaData);
+  if (iRet != 0) {
+    printf("WSAStartup failed (looking for Winsock 2.2): %d\n", iRet);
+    return;
+  }
+#endif /* _WIN32 */
+
   vmProxy = proxy;
   vmProxy->defineCFunc ("TCPlookupAllHostAddr", myGetHostByName);
   vmProxy->defineCFunc ("TCPgetHostByAddr", myGetHostByAddr);

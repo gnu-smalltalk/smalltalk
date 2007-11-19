@@ -16,7 +16,31 @@
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
 
 #include <config.h>
-#include <alloca.h>
+
+/* AIX is so broken that requires this to be the first thing in the file.  */
+#if defined(_AIX)
+#pragma alloca
+#else
+# if !defined(alloca)		/* predefined by HP cc +Olibcalls */
+#  ifdef __GNUC__
+#   define alloca(size) __builtin_alloca(size)
+#  else
+#   if HAVE_ALLOCA_H
+#    include <alloca.h>
+#   else
+#    if defined(__hpux)
+void *alloca ();
+#    else
+#     if !defined(__OS2__) && !defined(WIN32)
+char *alloca ();
+#     else
+#      include <malloc.h>	/* OS/2 defines alloca in here */
+#     endif
+#    endif
+#   endif
+#  endif
+# endif
+#endif
 
 #include <errno.h>
 #ifndef __set_errno

@@ -174,7 +174,9 @@ static int my_lstat (const char *name,
 		     gst_stat * out);
 static int my_putenv (const char *str);
 static int my_chdir (const char *str);
-static int my_symlink(const char* oldpath, const char* newpath);
+static int my_symlink (const char* oldpath, const char* newpath);
+static char *my_mkdtemp (char* template);
+static int my_mkdir (const char* name, int mode);
 static DIR *my_opendir (const char *str);
 static char *extract_dirent_name (struct dirent *dir);
 
@@ -351,6 +353,21 @@ my_chdir (const char *dir)
   return (status);
 }
 
+static int 
+my_mkdir (const char* name,
+	  int mode)
+{
+  int retstat;
+#ifdef _WIN32
+  retstat = mkdir (name);
+  if (retstat == 0)
+    retstat = chmod (name, mode);
+#else
+  retstat = mkdir (name, mode);
+#endif
+  return retstat;
+}
+
 DIR *
 my_opendir (const char *dir)
 {
@@ -488,8 +505,8 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("rename", rename);
   _gst_define_cfunc ("rmdir", rmdir);
   _gst_define_cfunc ("chdir", my_chdir);
-  _gst_define_cfunc ("mkdir", mkdir);
-  _gst_define_cfunc ("mkdtemp", mkdtemp);
+  _gst_define_cfunc ("mkdir", my_mkdir);
+  _gst_define_cfunc ("mkdtemp", my_mkdtemp);
   _gst_define_cfunc ("getCurDirName", _gst_get_cur_dir_name);
 
   _gst_define_cfunc ("fileIsReadable", _gst_file_is_readable);
@@ -1223,9 +1240,18 @@ _gst_set_errno(int errnum)
 #endif
 }
 
+
+/* TODO: check if this can be changed to an extern declaration and/or
+   an AC_CHECK_DECLS test.  */
+
 int
 my_symlink (const char* oldpath, const char* newpath)
 {
   return symlink (oldpath,  newpath);
 }
  
+char*
+my_mkdtemp(char* template)
+{
+  return mkdtemp(template);
+}

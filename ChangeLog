@@ -1,3 +1,7 @@
+2007-11-18  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+
+	* kernel/VFS.st: Support backslashes as directory separators
+
 2007-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Number.st: Coerce #raisedTo: to aNumber's precision if necessary.

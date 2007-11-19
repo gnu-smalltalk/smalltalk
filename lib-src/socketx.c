@@ -24,6 +24,9 @@
 #include <conio.h>
 
 #define MAX_WIN_HANDLES	300	/* max number of fd we can handle */
+#define CONSOLE_HUP -1
+
+static int get_number_of_console_key_events (HANDLE h);
 
 /* n = maxfd + 1 */
 int
@@ -90,15 +93,48 @@ win_select (int n, fd_set * rfds, fd_set * wfds, fd_set * efds,
   nset = 0;
   for (i = 0; i < nhandles; i++)
     {
-      ret = WaitForSingleObject (handle_array[i], 0);
-      if (ret == WAIT_OBJECT_0)
-	{
-	  FD_SET (handle_fd[i], handle_set[i]);
-	  nset++;
-	}
+      HANDLE h = handle_array[i];
+      ret = WaitForSingleObject (h, 0);
+      if (ret != WAIT_OBJECT_0)
+	continue;
+
+      /* Discard non-key events.  */
+      if (GetFileType (h) == FILE_TYPE_CHAR
+	  && get_number_of_console_key_events (h) == 0)
+	 continue;
+
+      FD_SET (handle_fd[i], handle_set[i]);
+      nset++;
     }
 
   return nset;
+}
+
+int
+get_number_of_console_key_events (HANDLE h)
+{
+  BOOL bRet;
+  int i, ret, data_available;
+  size_t nread;
+  INPUT_RECORD *irbuffer;
+  DWORD nevents, nbuffer;
+
+  nbuffer = nevents = 0;
+  bRet = GetNumberOfConsoleInputEvents (h, &nbuffer);
+  if (!bRet || nbuffer == 0)
+    return CONSOLE_HUP;
+
+  irbuffer = (INPUT_RECORD *) alloca (nbuffer * sizeof (INPUT_RECORD));
+  bRet = PeekConsoleInput (h, irbuffer, nbuffer, &nevents);
+  if (!bRet || nevents == 0)
+    return CONSOLE_HUP;
+
+  nread = 0;
+  for (i = 0; i < nevents; i++)
+    if (irbuffer[i].EventType == KEY_EVENT)
+      nread++;
+
+  return nread;
 }
 
 /*
@@ -111,41 +147,26 @@ win_select (int n, fd_set * rfds, fd_set * wfds, fd_set * efds,
 int
 win_recv (int fd, void *buffer, int n, int flags)
 {
-  BOOL bRet;
-  int i, ret, data_available;
-  size_t nread;
-  INPUT_RECORD *irbuffer;
-  DWORD nevents, nbuffer;
-  HANDLE h = (HANDLE) _get_osfhandle (fd);
-  ret = WaitForSingleObject (h, 0);
-  if (ret == WAIT_OBJECT_0)
-    data_available = 1;
-  else
-    data_available = 0;
+  HANDLE h;
+  int ret;
 
   if (flags != MSG_PEEK)
     return 0;
 
-  /* MSG_PEEK */
+  h = (HANDLE) _get_osfhandle (fd);
+  ret = WaitForSingleObject (h, 0);
+  if (ret != WAIT_OBJECT_0)
+    return 0;
+
   if (GetFileType (h) != FILE_TYPE_CHAR)
-    return (data_available ? 1 : 0);
+    return 1;
 
-  /* console (FILE_TYPE_CHAR) */
-  nbuffer = nevents = 0;
-  bRet = GetNumberOfConsoleInputEvents (h, &nbuffer);
-  if (!bRet || nbuffer == 0)
-    return 0;
-
-  irbuffer = (INPUT_RECORD *) alloca (nbuffer * sizeof (INPUT_RECORD));
-  bRet = PeekConsoleInput (h, irbuffer, nbuffer, &nevents);
-  if (!bRet || nevents == 0)
-    return 0;
-
-  nread = 0;
-  for (i = 0; i < nevents; i++)
-    if (irbuffer[i].EventType == KEY_EVENT)
-      nread++;
-
-  return nread;
+  else
+    {
+      int keys = get_number_of_console_key_events (h);
+      return (keys == CONSOLE_HUP ? 0 : keys);
+    }
 }
+
+
 #endif

@@ -28,12 +28,12 @@ regress:
 	cd $(srcdir) || exit 1; \
 	for test in $(TESTS); do \
 	  result=`echo $$test | $(SED) 's/st$$/ok/'`; \
-	  @abs_top_builddir@/gst -I @abs_top_builddir@/gst.im -r $$test 2>&1 | tee $$result; \
+	  @abs_top_builddir@/gst --image=@abs_top_builddir@/gst.im -r $$test 2>&1 | tee $$result; \
 	done
 
 gst.im: ../kernel/stamp-classes AnsiLoad.st Ansi.st AnsiDB.st
-	echo "PackageLoader fileInPackage: #SUnit. ObjectMemory snapshot: 'gst.im'" | ./gst -I ../gst.im -
-	cd $(srcdir) && @abs_builddir@/gst -SI @abs_top_builddir@/tests/gst.im AnsiLoad.st
+	echo "PackageLoader fileInPackage: #SUnit. ObjectMemory snapshot: 'gst.im'" | ./gst --image=../gst.im -
+	cd $(srcdir) && @abs_builddir@/gst -S --image=@abs_top_builddir@/tests/gst.im AnsiLoad.st
 
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 	{                                      \

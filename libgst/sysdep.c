@@ -801,6 +801,7 @@ _gst_get_full_file_name (const char *name)
 
 #if defined WIN32 && !defined __CYGWIN__
   {
+    struct stat st;
     DWORD retval = GetFullPathNameA (name, path_max, rpath, NULL);
     if (retval > path_max)
       {

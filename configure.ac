@@ -126,6 +126,8 @@ GST_C_GOTO_VOID_P
 
 AC_DEFINE_UNQUOTED(HOST_SYSTEM, "$host",
   [Define to the host triplet.])
+AC_DEFINE_UNQUOTED(EXEEXT, "$ac_exeext",
+  [Define to the extension for executable files.])
 
 AC_C_BIGENDIAN
 AC_CHECK_ALIGNOF(double)
@@ -224,7 +226,7 @@ gt_FUNC_SETENV
 AC_REPLACE_FUNCS(putenv strdup strerror strsignal mkstemp getpagesize \
 	getdtablesize strstr ftruncate floorl ceill sqrtl frexpl ldexpl asinl \
 	acosl atanl logl expl tanl sinl cosl powl truncl lrintl strsep strpbrk \
-	symlink)
+	symlink mkdtemp)
 AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname sbrk usleep lstat \
 	grantpt popen getrusage gettimeofday fork strchr utimes utime readlink \
 	sigsetmask alarm select mprotect madvise waitpid \

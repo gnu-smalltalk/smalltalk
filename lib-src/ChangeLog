@@ -1,3 +1,10 @@
+2007-11-18  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
+            Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/mkdtemp.c: New.
+	* lib-src/setenv.c: Add alloca prologue.
+	* lib-src/socketx.c: Discard non-key console events.
+
 2007-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/powl.c: New.

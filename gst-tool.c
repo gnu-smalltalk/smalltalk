@@ -360,15 +360,22 @@ main(int argc, const char **argv)
   int i;
   int result;
 
+#ifdef _WIN32
+  executable_name = strrchr (argv[0], '\\');
+  if (!executable_name || strchr (executable_name, '/'))
+    executable_name = strrchr (argv[0], '/');
+#else
   executable_name = strrchr (argv[0], '/');
+#endif /* _WIN32 */
+
   if (executable_name)
     executable_name++;
   else
     executable_name = argv[0];
 
   /* Check if used in the build tree.  */
-  if (!strcmp (executable_name, "gst-tool")
-      || !strcmp (executable_name, "lt-gst-tool"))
+  if (!strcmp (executable_name, "gst-tool" EXEEXT)
+      || !strcmp (executable_name, "lt-gst-tool" EXEEXT))
     {
       argv++, argc--;
       program_name = argv[0];
