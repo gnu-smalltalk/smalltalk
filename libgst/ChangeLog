@@ -1,3 +1,7 @@
+2007-11-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* main.c: Don't use asprintf.
+
 2007-11-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Use pow/powl.

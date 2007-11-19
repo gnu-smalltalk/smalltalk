@@ -356,11 +356,13 @@ main(int argc, const char **argv)
       flags |= GST_MAYBE_REBUILD_IMAGE;
       if (image_dir)
         {
-	  char *p;
-	  asprintf (&p, "%s/gst.im", image_dir);
+	  int len = strlen (image_dir);
+	  char *p = malloc (len + 8);
+	  memcpy (p, image_dir, len);
+	  strcpy (p + len, "/gst.im");
 	  image_file = p;
           flags |= GST_IGNORE_BAD_IMAGE_PATH;
-          fprintf (stderr, "SMALLTALK_IMAGE variable deprecated, "
+          fprintf (stderr, "gst: SMALLTALK_IMAGE variable deprecated, "
 		           "use -I instead\n");
         }
     }
