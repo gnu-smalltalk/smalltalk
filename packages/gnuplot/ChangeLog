@@ -1,5 +1,9 @@
 2007-11-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Base.st: Don't fail on printing GPInteractiveTerminal.
+
+2007-11-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Base.st: Don't fail if no plots are present.
 
 2007-11-16  Paolo Bonzini  <bonzini@gnu.org>

@@ -766,9 +766,8 @@ that plots data on the display.'>
 	pipe close
     ]
 
-    display: aGNUPlot on: aStream [
-	<category: 'executing'>
-	^aStream display: aGNUPlot; yourself
+    displayOn: aStream [
+	<category: 'printing'>
     ]
 
     isInteractive [
