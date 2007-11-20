@@ -162,6 +162,8 @@ GPObject subclass: GNUPlot [
     displayOn: aStream [
 	| layout row col thisRowCols |
 	<category: 'converting'>
+	plots size = 0 ifTrue: [ ^self ].
+
         aStream nextPutAll: 'reset'; nl.
 	plots size = 1 ifTrue: [
 	    plots first displayOn: aStream.
