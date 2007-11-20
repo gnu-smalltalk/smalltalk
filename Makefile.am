@@ -90,6 +90,7 @@ gst-mode.el: gst-mode.el.in
 ###########################################################
 
 AM_CPPFLAGS = -I$(top_srcdir)/libgst		\
+	-I$(top_srcdir)/lib-src			\
 	-DCMD_ZIP="\"$(ZIP)\""			\
 	-DCMD_INSTALL="\"$(INSTALL)\""		\
 	-DCMD_LN_S="\"$(LN_S)\""		\

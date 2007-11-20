@@ -139,6 +139,9 @@
 #define PATH_MAX  1024		/* max length of a file and path */
 #endif
 
+#ifndef MAXSYMLINKS
+#define MAXSYMLINKS 5
+#endif
 
 /* Yield A - B, measured in seconds.
    This function is copied from the GNU C Library.  */
