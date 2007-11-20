@@ -54,10 +54,7 @@ method dictionary, and iterating over the class hierarchy.'>
 		    ifTrue: [{symbol}]
 		    ifFalse: [instanceVariables copyWith: symbol].
 	duplicated := self superclass allInstVarNames includes: symbol.
-	self
-	    updateInstanceVars: newInstanceVariables
-	    numInherited: self superclass instSize
-	    shape: self shape.
+	self updateInstanceVars: newInstanceVariables shape: self shape.
 	duplicated ifTrue: [self compileAll].
 	self compileAllSubclasses
     ]
@@ -77,10 +74,7 @@ method dictionary, and iterating over the class hierarchy.'>
 		    to: index
 		    with: #().
 	self
-	    updateInstanceVars: newInstanceVariables
-	    numInherited: self superclass instSize
-	    shape: self shape.
-	self
+	    updateInstanceVars: newInstanceVariables shape: self shape;
 	    compileAll;
 	    compileAllSubclasses
     ]
@@ -98,10 +92,7 @@ method dictionary, and iterating over the class hierarchy.'>
         "If instance variables change, update  instance variables and
          instance spec of the class and all its subclasses"
         variableArray = oldInstVarNames ifTrue: [^self].
-        self
-	    updateInstanceVars: variableArray
-	    numInherited: self superclass instSize
-	    shape: self shape.
+        self updateInstanceVars: variableArray shape: self shape.
 
         "If no variable has been removed, no need to recompile"
         (oldInstVarNames allSatisfy: [:each | variableArray includes: each])
@@ -976,8 +967,9 @@ method dictionary, and iterating over the class hierarchy.'>
 
 	<category: 'testing the class hierarchy'>
 	| sc |
+	aClass isNil ifTrue: [^true].
+
 	sc := self.
-	
 	[sc := sc superclass.
 	sc isNil] whileFalse: [sc == aClass ifTrue: [^true]].
 	^false
@@ -1015,10 +1007,7 @@ method dictionary, and iterating over the class hierarchy.'>
 	shape = #inherit ifTrue: [realShape := self superclass shape].
 	self shape == realShape ifTrue: [^false].
 	realShape isNil ifTrue: [
-            self
-	        updateInstanceVars: self allInstVarNames
-	        numInherited: self superclass instSize
-	        shape: nil ].
+            self updateInstanceVars: self allInstVarNames shape: nil ].
 	self isVariable 
 	    ifTrue: 
 		[SystemExceptions.MutationError 
@@ -1340,24 +1329,44 @@ method dictionary, and iterating over the class hierarchy.'>
 	^true
     ]
 
-    updateInstanceVars: variableArray numInherited: numInherited shape: shape [
+    updateInstanceVars: variableArray shape: shape [
 	"Update instance variables and instance spec of the class and all
-	 its subclasses"
+	 its subclasses.  variableArray lists the new variables, including
+	 inherited ones."
+	^self
+	    updateInstanceVars: variableArray
+	    superclass: self superclass
+	    shape: shape
+    ]
+
+    updateInstanceVars: variableArray superclass: newSuper shape: shape [
+	"Update instance variables and instance spec of the class and all
+	 its subclasses.  variableArray lists the new variables, including
+	 those inherited from newSuper."
 
 	<category: 'private'>
-	| instVarMap startOfInstanceVars endOfInstanceVars newInstanceVars oldInstVars oldClass instances |
-	startOfInstanceVars := numInherited + 1.
-	endOfInstanceVars := self instSize.
-	newInstanceVars := variableArray copyFrom: startOfInstanceVars
-		    to: variableArray size.
+	| instVarMap newInstVars oldInstVars oldClass instances oldSuper |
+
+	"Find a common superclass."
+	oldSuper := self superclass.
+	newSuper == oldSuper ifFalse: [
+	    [ newSuper includesBehavior: oldSuper ] whileFalse: [
+	        oldSuper := oldSuper superclass ] ].
+
+	"Make map for inherited instance variables."
 	oldInstVars := self allInstVarNames.
-	instVarMap := Array new: newInstanceVars size.
-	startOfInstanceVars to: endOfInstanceVars
-	    do: 
-		[:i | 
-		| map |
-		map := newInstanceVars findLast: [:each | each = (oldInstVars at: i)].
-		map > 0 ifTrue: [instVarMap at: map put: i]].
+	instVarMap := Array new: oldInstVars size.
+	1 to: oldSuper instSize do: [ :i |
+	    instVarMap at: i put: i ].
+
+	"Make map for this class's instance variables."
+	newInstVars := variableArray copyFrom: newSuper instSize + 1.
+	oldInstVars
+	    from: oldSuper instSize + 1 to: oldInstVars size
+	    keysAndValuesDo: [ :index :var |
+	        | map |
+	        map := newInstVars findLast: [:each | each = var].
+	        map > 0 ifTrue: [instVarMap at: index put: map + newSuper instSize]].
 
 	"Fix up all subclasses."
 	self allSubclassesDo: 
@@ -1367,21 +1376,16 @@ method dictionary, and iterating over the class hierarchy.'>
 		oldClass superclass: sc.
 		instances := sc allInstances.
 		instances do: [:each | each changeClassTo: oldClass].
-		iv := sc allInstVarNames 
-			    copyReplaceFrom: startOfInstanceVars
-			    to: endOfInstanceVars
-			    with: newInstanceVars.
+		iv := variableArray, (sc allInstVarNames 
+			    copyFrom: oldInstVars size + 1
+			    to: sc allInstVarNames size).
 		sc setInstanceVariables: iv.
 		sc setInstanceSpec: sc shape instVars: sc allInstVarNames size.
 
 		"Mutate all instances of the class to conform to new memory model
 		 of the class."
-		instances do: 
-			[:each | 
-			each 
-			    mutate: instVarMap
-			    startAt: startOfInstanceVars
-			    newClass: sc]].
+		instances do: [:each | 
+		    sc mutate: each via: instVarMap]].
 
 	"Now update this class' instance vars"
 	oldClass := Behavior new.
@@ -1390,12 +1394,36 @@ method dictionary, and iterating over the class hierarchy.'>
 	instances do: [:each | each changeClassTo: oldClass].
 	self setInstanceVariables: variableArray.
 	self setInstanceSpec: shape instVars: variableArray size.
-	instances do: 
-		[:each | 
-		each 
-		    mutate: instVarMap
-		    startAt: startOfInstanceVars
-		    newClass: self]
+	instances do: [:each | 
+	    self mutate: each via: instVarMap]
+    ]
+
+    mutate: object via: instVarMap [
+        "Private - Mutate object to a new class representation. instVarMap
+         maps from old instVarAt: indices to new instVarAt:put: indices.
+         start is the first instance variable to change."
+
+        <category: 'private'>
+        | aCopy mappedValue end adjustment |
+        aCopy := object class isVariable
+                    ifTrue: [self basicNew: object basicSize]
+                    ifFalse: [self basicNew].
+
+        "Copy old instance variables to their new positions using instVarMap."
+        1 to: instVarMap size do: [:i |
+            mappedValue := instVarMap at: i.
+            mappedValue notNil
+                ifTrue: [aCopy instVarAt: mappedValue put: (object instVarAt: i)]].
+
+        "If mutating a subclass, instVarMap is smaller than `object class instSize';
+         in this case, everything after it must be copied."
+        adjustment := self instSize - object class instSize.
+        instVarMap size + 1 to: object class instSize
+            do: [:i | aCopy instVarAt: i + adjustment put: (object instVarAt: i)].
+
+        "Copy the indexed variables, if any."
+        1 to: object basicSize do: [:i | aCopy basicAt: i put: (object basicAt: i)].
+        ^object become: aCopy
     ]
 
     isBehavior [

@@ -744,37 +744,6 @@ All classes in the system are subclasses of me.'>
 	^name
     ]
 
-    mutate: instVarMap startAt: start newClass: class [
-	"Private - Mutate object to a new class representation. instVarMap
-	 maps between old instVarAt: indices and new instVarAt:put: indices.
-	 start is the first instance variable to change."
-
-	<category: 'private'>
-	| aCopy mappedValue end adjustment |
-	adjustment := self class instSize - class instSize.
-	aCopy := self class isVariable 
-		    ifTrue: [class basicNew: self basicSize]
-		    ifFalse: [class basicNew].
-	end := instVarMap size + start - 1.
-
-	"Copy the instance variables, if any"
-	1 to: start - 1 do: [:i | aCopy instVarAt: i put: (self instVarAt: i)].
-
-	"Copy old instance variables to their new positions using instVarMap"
-	start to: end
-	    do: 
-		[:i | 
-		mappedValue := instVarMap at: i - start + 1.
-		mappedValue notNil 
-		    ifTrue: [aCopy instVarAt: i put: (self instVarAt: mappedValue)]].
-	end + 1 to: class instSize
-	    do: [:i | aCopy instVarAt: i put: (self instVarAt: i + adjustment)].
-
-	"Copy the indexed variables, if any."
-	1 to: self basicSize do: [:i | aCopy basicAt: i put: (self basicAt: i)].
-	^self become: aCopy
-    ]
-
     allOwners [
 	"Return an Array of Objects that point to the receiver."
 

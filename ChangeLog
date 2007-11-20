@@ -1,3 +1,24 @@
+2007-11-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Partially undo change from
+	#updateInstanceVars:shape: to
+	#updateInstanceVars:numInherited:shape:.
+	Add back #updateInstanceVars:shape: and add new
+	#updateInstanceVars:superclass:shape:.  Return true from
+	#inheritsFrom: if passed nil.  Use new keyword argument to
+	include superclass variables in instVarMap.  Reverse direction of
+	instVarMap.  Simplify creation of subclasses' instance variable
+	array.	Add here #mutate:via: (taken from kernel/Object.st)
+	and use it instead of #mutate:startingAt:newClass:.
+        * kernel/Object.st: Remove #mutate:startingAt:newClass:.
+	* kernel/Metaclass.st: Rename "superclass" argument to
+	"theSuperclass" or "newSuperclass".  Call
+	#updateInstanceVars:superclass:shape:.
+
+	* tests/mutate.st: Add minimal testcase for GTK+ loading failure.
+	Test that class-instance variables are copied around correctly.
+	Test that moving up the hierarchy preserves instance variables.
+
 2007-11-18  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
 
 	* kernel/VFS.st: Support backslashes as directory separators

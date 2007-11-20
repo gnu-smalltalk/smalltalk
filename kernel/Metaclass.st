@@ -161,15 +161,15 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	^self instanceClass pragmaHandlerFor: aSymbol
     ]
 
-    name: className environment: aNamespace subclassOf: superclass [
+    name: className environment: aNamespace subclassOf: theSuperclass [
 	"Private - create a full featured class and install it, or change the
 	 superclass or shape of an existing one; instance variable names,
 	 class variable names and pool dictionaries are left untouched."
 
 	<category: 'basic'>
 	| aClass variableArray |
-	variableArray := superclass notNil 
-		    ifTrue: [superclass allInstVarNames]
+	variableArray := theSuperclass notNil 
+		    ifTrue: [theSuperclass allInstVarNames]
 		    ifFalse: [#()].
 
 	"Look for an existing metaclass"
@@ -179,7 +179,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 		[^self 
 		    newMeta: className
 		    environment: aNamespace
-		    subclassOf: superclass
+		    subclassOf: theSuperclass
 		    instanceVariableArray: variableArray
 		    shape: nil
 		    classPool: BindingDictionary new
@@ -189,7 +189,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	^self 
 	    name: className
 	    environment: aNamespace
-	    subclassOf: superclass
+	    subclassOf: theSuperclass
 	    instanceVariableArray: variableArray
 	    shape: aClass shape
 	    classPool: aClass classPool
@@ -197,7 +197,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	    category: aClass category
     ]
 
-    name: newName environment: aNamespace subclassOf: superclass instanceVariableNames: stringOfInstVarNames shape: shape classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryName [
+    name: newName environment: aNamespace subclassOf: theSuperclass instanceVariableNames: stringOfInstVarNames shape: shape classVariableNames: stringOfClassVarNames poolDictionaries: stringOfPoolNames category: categoryName [
 	"Private - parse the instance and class variables, and the pool
 	 dictionaries, then create the class."
 
@@ -206,8 +206,8 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 
 	| variableArray classVarDict sharedPoolNames |
 	variableArray := self parseInstanceVariableString: stringOfInstVarNames.
-	variableArray := superclass notNil 
-		    ifTrue: [superclass allInstVarNames , variableArray]
+	variableArray := theSuperclass notNil 
+		    ifTrue: [theSuperclass allInstVarNames , variableArray]
 		    ifFalse: [variableArray].
 	classVarDict := self parse: stringOfClassVarNames
 		    toDictionary: BindingDictionary new.
@@ -215,7 +215,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	^self 
 	    name: newName asSymbol
 	    environment: aNamespace
-	    subclassOf: superclass
+	    subclassOf: theSuperclass
 	    instanceVariableArray: variableArray
 	    shape: shape
 	    classPool: classVarDict
@@ -223,7 +223,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	    category: categoryName
     ]
 
-    name: className environment: aNamespace subclassOf: superclass instanceVariableArray: variableArray shape: shape classPool: classVarDict poolDictionaries: sharedPoolNames category: categoryName [
+    name: className environment: aNamespace subclassOf: newSuperclass instanceVariableArray: variableArray shape: shape classPool: classVarDict poolDictionaries: sharedPoolNames category: categoryName [
 	"Private - create a full featured class and install it, or change an
 	 existing one"
 
@@ -240,7 +240,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 		[^self 
 		    newMeta: className
 		    environment: aNamespace
-		    subclassOf: superclass
+		    subclassOf: newSuperclass
 		    instanceVariableArray: variableArray
 		    shape: realShape
 		    classPool: classVarDict
@@ -252,7 +252,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 		    ifFalse: 
 			[SystemExceptions.MutationError 
 			    signal: 'Cannot change shape of variable class']].
-	superclass isUntrusted & self class isUntrusted not 
+	newSuperclass isUntrusted & self class isUntrusted not 
 	    ifTrue: 
 		[SystemExceptions.MutationError 
 		    signal: 'Cannot move trusted class below untrusted superclass'].
@@ -278,7 +278,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 		[aClass instanceCount > 0 ifTrue: [ObjectMemory globalGarbageCollect].
 		aClass
 		    updateInstanceVars: variableArray
-		    numInherited: superclass instSize
+		    superclass: newSuperclass
 		    shape: realShape].
 
 	"Now add/remove pool dictionaries.  FIXME: They may affect name binding,
@@ -296,29 +296,29 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 			    ifFalse: 
 				[aClass removeSharedPool: dict.
 				needToRecompileMetaclasses := true]]].
-	aClass superclass ~~ superclass 
+	aClass superclass ~~ newSuperclass 
 	    ifTrue: 
 		["Mutate the class if the set of class-instance variables changes."
 
-		self superclass allInstVarNames ~= superclass class allInstVarNames 
+		self superclass allInstVarNames ~= newSuperclass class allInstVarNames 
 		    ifTrue: 
 			[aClass class
 			    updateInstanceVars:
-				superclass class allInstVarNames,
+				newSuperclass class allInstVarNames,
 				aClass class instVarNames
-			    numInherited: superclass class instSize
+			    superclass: newSuperclass class
 			    shape: aClass class shape].
 
 		"Fix references between classes..."
 		aClass superclass removeSubclass: aClass.
-		superclass addSubclass: aClass.
-		aClass superclass: superclass.
+		newSuperclass addSubclass: aClass.
+		aClass superclass: newSuperclass.
 		needToRecompileClasses := true.
 
 		"...and between metaclasses..."
 		self superclass removeSubclass: self.
-		superclass class addSubclass: self.
-		self superclass: superclass class.
+		newSuperclass class addSubclass: self.
+		self superclass: newSuperclass class.
 		needToRecompileMetaclasses := true].
 	aClass category: categoryName.
 
@@ -340,7 +340,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	^aClass
     ]
 
-    newMeta: className environment: aNamespace subclassOf: superclass instanceVariableArray: arrayOfInstVarNames shape: shape classPool: classVarDict poolDictionaries: sharedPoolNames category: categoryName [
+    newMeta: className environment: aNamespace subclassOf: theSuperclass instanceVariableArray: arrayOfInstVarNames shape: shape classPool: classVarDict poolDictionaries: sharedPoolNames category: categoryName [
 	"Private - create a full featured class and install it"
 
 	<category: 'basic'>
@@ -349,17 +349,17 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	classVarDict environment: aClass.
 	instanceClass := aClass.
 	aNamespace at: className put: aClass.
-	superclass isNil ifFalse: [superclass addSubclass: aClass].
+	theSuperclass isNil ifFalse: [theSuperclass addSubclass: aClass].
 	Behavior flushCache.
 	^aClass
-	    superclass: superclass;
+	    superclass: theSuperclass;
 	    setName: className;
 	    setEnvironment: aNamespace;
 	    setInstanceVariables: arrayOfInstVarNames;
 	    setInstanceSpec: shape instVars: arrayOfInstVarNames size;
 	    setClassVariables: classVarDict;
 	    setSharedPools: sharedPoolNames;
-	    makeUntrusted: superclass isUntrusted;
+	    makeUntrusted: theSuperclass isUntrusted;
 	    category: categoryName;
 	    yourself
     ]
@@ -417,10 +417,10 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	aStream nextPutAll: ' class'
     ]
 
-    initMetaclass: superclass [
+    initMetaclass: theSuperclass [
 	<category: 'private'>
-	instanceVariables := superclass allInstVarNames.
-	instanceSpec := superclass instanceSpec
+	instanceVariables := theSuperclass allInstVarNames.
+	instanceSpec := theSuperclass instanceSpec
     ]
 
     parsePools: aString in: aNamespace [

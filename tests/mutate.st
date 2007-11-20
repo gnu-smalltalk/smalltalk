@@ -124,6 +124,13 @@ Eval [ (C shape -> C classPool keys asArray -> C allInstVarNames -> C sharedPool
 Eval [ C class compile: 'foo [ ^MutationError ]' ]
 Eval [ C foo == SystemExceptions.MutationError ]
 
+"Test mutating the class when the new superclass has additional class-instance
+ variables"
+CObject subclass: CFoo [ ]
+CStruct subclass: CFoo [ ]
+Eval [ CFoo environment printNl ]
+
+"Test adding variables with multiple |...| blocks or with extend."
 Object subclass: Foo [ | a | ]
 Foo subclass: Bar [ | xyz | ]
 Foo subclass: Bar [ | b | | c | ]
@@ -131,3 +138,20 @@ Eval [ Bar allInstVarNames printNl ]
 Foo extend [ | d | ]
 Eval [ Bar allInstVarNames printNl ]
 Eval [ Foo allInstVarNames printNl ]
+
+"Test moving to an upper superclass, but preserving instance variables
+ because they are specified in the instanceVariableNames: keyword."
+Association subclass: Blah [ ]
+Eval [
+    | blah |
+    blah := Blah new.
+    blah value: 'abc'.
+    Object
+	subclass: #Blah
+	instanceVariableNames: 'key value'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: ''.
+
+    blah instVarAt: 2
+]
