@@ -68,11 +68,11 @@ GPObject subclass: GNUPlotExamples [
 	p execute
     ]
 
-    GNUPlotExamples class >> threePlots [
-	^self threePlotsOn: nil
+    GNUPlotExamples class >> fullPlot [
+	^self fullPlotOn: nil
     ]
 
-    GNUPlotExamples class >> threePlotsOn: file [
+    GNUPlotExamples class >> fullPlotOn: file [
 	| p |
 	p := GNUPlot new.
 	file isNil ifFalse: [
@@ -88,7 +88,9 @@ GPObject subclass: GNUPlotExamples [
 	    function: [ :x | x sin ];
 
 	    "third plot, notice no title appears"
-	    boxes: #(6 3 1 5 4).
+	    boxes: #(6 3 1 5 4);
+
+	    bubbles: #((1.5 7 6)).
 
 	Transcript display: p; nl.
 	p execute

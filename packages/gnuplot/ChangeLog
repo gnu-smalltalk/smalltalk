@@ -1,3 +1,14 @@
+2007-11-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Base.st: Support GPInteractiveTerminal options.  Add non-string
+	parameters and pointStyle in particular.  Add GPDataSeriesParms
+	to support smooth parameter.  Add ticlabels support to GPDataSeries.
+	Move GPSmalltalkDataSource>>#asGPDataSource up to GPDataSource.
+	Support multiple data sources within one GPSmalltalkDataSource and
+	support including Strings in it.
+	* 2D.st: Add labels and bubbles plot types.
+	* Examples.st: Add a bubble data series to #fullPlot.
+
 2007-11-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Base.st: Don't fail on printing GPInteractiveTerminal.

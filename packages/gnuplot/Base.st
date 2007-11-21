@@ -316,6 +316,13 @@ function or data set.'>
 		    ifFalse: [aColorSpec])"
     ]
 
+    pointStyle: aNumber [
+	"Tells plot to use previously defined line style (via set style line <number> ... command )"
+
+	<category: 'styles'>
+	params at: #pointstyle put: aNumber
+    ]
+
     lineStyle: aNumber [
 	"Tells plot to use previously defined line style (via set style line <number> ... command )"
 
@@ -408,7 +415,7 @@ function or data set.'>
 		[:key :val | 
 		aStream
 		    space; nextPutAll: key;
-		    space; nextPutAll: val]
+		    space; display: val]
     ]
 
     title: aTitle [
@@ -482,14 +489,23 @@ GPSeries subclass: GPFunctionSeries [
     ]
 ]
 
+GPSeriesParams subclass: GPDataSeriesParams [
+    smooth: aSymbol [
+	"aSymbol is any of #unique, #frequency, #csplines, #bezier, #sbezier"
+	
+	<category: 'styles'>
+	params at: #smooth put: aSymbol asString
+    ]
+]
+
 GPSeries subclass: GPDataSeries [
     <category: 'GNUPlot'>
     <comment: 'My instances are used to define a plotted data set.'>
 
-    | columns dataSource style |
-    "GPDataSeries >> defaultParamsClass [
+    | columns dataSource style ticColumns |
+    GPDataSeries >> defaultParamsClass [
 	^GPDataSeriesParams
-    ]"
+    ]
 
     GPDataSeries class >> on: aDataSource [
 	<category: 'instance creation'>
@@ -531,6 +547,17 @@ GPSeries subclass: GPDataSeries [
 	columns
 	    do: [ :each | each displayOn: aStream ]
 	    separatedBy: [ aStream nextPut: $: ].
+
+	"Add xticlabels etc. fake columns."
+	ticColumns isNil ifFalse: [
+	    ticColumns keysAndValuesDo: [ :k :v |
+		aStream
+		    nextPut: $:;
+		    nextPutAll: k;
+		    nextPut: $(;
+		    display: v;
+		    nextPut: $) ] ].
+
 	aStream nextPutAll: ' with '; nextPutAll: style; space.
 	super displayOn: aStream.
     ]
@@ -543,6 +570,60 @@ GPSeries subclass: GPDataSeries [
     displayPrologOn: aStream into: defs [
 	columns do: [ :each | each displayPrologOn: aStream into: defs ]
     ]
+
+    ticColumns [
+	^ticColumns ifNil: [ ticColumns := LookupTable new ]
+    ]
+
+    xTicColumn [
+	^self ticColumns at: 'xtic' ifAbsent: [ nil ]
+    ]
+
+    xTicColumn: column [
+	^column isNil
+	    ifTrue: [ self ticColumns removeKey: 'xtic' ifAbsent: [ nil ] ]
+	    ifFalse: [ self ticColumns at: 'xtic' put: column ]
+    ]
+
+    x2TicColumn [
+	^self ticColumns at: 'x2tic' ifAbsent: [ nil ]
+    ]
+
+    x2TicColumn: column [
+	^column isNil
+	    ifTrue: [ self ticColumns removeKey: 'x2tic' ifAbsent: [ nil ] ]
+	    ifFalse: [ self ticColumns at: 'x2tic' put: column ]
+    ]
+
+    yTicColumn [
+	^self ticColumns at: 'ytic' ifAbsent: [ nil ]
+    ]
+
+    yTicColumn: column [
+	^column isNil
+	    ifTrue: [ self ticColumns removeKey: 'ytic' ifAbsent: [ nil ] ]
+	    ifFalse: [ self ticColumns at: 'ytic' put: column ]
+    ]
+
+    y2TicColumn [
+	^self ticColumns at: 'y2tic' ifAbsent: [ nil ]
+    ]
+
+    y2TicColumn: column [
+	^column isNil
+	    ifTrue: [ self ticColumns removeKey: 'y2tic' ifAbsent: [ nil ] ]
+	    ifFalse: [ self ticColumns at: 'y2tic' put: column ]
+    ]
+
+    "zTicColumn [
+	^self ticColumns at: 'ztic' ifAbsent: [ nil ]
+    ]
+
+    zTicColumn: column [
+	^column isNil
+	    ifTrue: [ self ticColumns removeKey: 'ztic' ifAbsent: [ nil ] ]
+	    ifFalse: [ self ticColumns at: 'ztic' put: column ]
+    ]"
 ]
 
 GPObject subclass: GPDataSource [
@@ -556,6 +637,10 @@ GPObject subclass: GPDataSource [
     printDataOn: aStream [
 	<category: 'printing'>
 	"Do nothing by default"
+    ]
+
+    asGPDataSource [
+	^self
     ]
 ]
 
@@ -600,19 +685,20 @@ GPDataSource subclass: GPSmalltalkDataSource [
 as the source of a plot.'>
 
     | data |
-    GPSmalltalkDataSource class >> on: aString [
+    GPSmalltalkDataSource class >> on: aCollection [
 	<category: 'instance creation'>
-	^self new data: aString
+	^self new
+	    add: aCollection; yourself
     ]
 
-    data [
-	<category: 'accessing'>
-	^data
-    ]
-
-    data: aString [
+    initialize [
 	<category: 'private - initialization'>
-	data := aString
+	data := OrderedCollection new
+    ]
+
+    add: aCollection [
+	<category: 'private - initialization'>
+	data add: aCollection
     ]
 
     defaultTitle [
@@ -623,17 +709,23 @@ as the source of a plot.'>
 	'''-''' displayOn: aStream
     ]
 
-    printData: coll on: aStream separatedBy: aBlock [
-	coll
-	    do: [:each |
-                each isNumber
-                    ifTrue: [each printOn: aStream]
-                    ifFalse: [self printData: each on: aStream separatedBy: [aStream space]]]
-            separatedBy: aBlock.
+    printData: anObject on: aStream level: n [
+        anObject isNumber ifTrue: [anObject printOn: aStream. ^self].
+
+        anObject isString ifTrue: [
+	    aStream nextPut: $".
+	    aStream nextPutAll: (anObject copyReplaceAll: '"' with: '\"').
+	    aStream nextPut: $".
+	    ^self ].
+
+	anObject
+	    do: [:each | self printData: each on: aStream level: n + 1]
+            separatedBy: [
+		n = 3 ifTrue: [ aStream space ] ifFalse: [ aStream nl ] ]
     ]
 
     printDataOn: aStream [
-	self printData: data on: aStream separatedBy: [aStream nl].
+	self printData: data on: aStream level: 1.
         aStream
             nl;
             nextPut: $e
@@ -641,10 +733,6 @@ as the source of a plot.'>
 
     Object >> asGPDataSource [
 	^GNUPlot.GPSmalltalkDataSource on: self
-    ]
-
-    asGPDataSource [
-	^self
     ]
 ]
 
@@ -694,6 +782,7 @@ GPObject subclass: GPAbstractPlot [
     displayOn: aStream [
         <category: 'printing'>
 	| defs |
+	series isNil ifTrue: [ ^self ].
 	defs := Set new.
         self displayPrologOn: aStream into: defs.
         aStream nextPutAll: 'plot '.
@@ -768,6 +857,18 @@ that plots data on the display.'>
 
     displayOn: aStream [
 	<category: 'printing'>
+	| options |
+	options := String streamContents: [ :s | self printOptionsOn: s ].
+	options isEmpty ifTrue: [ ^self ].
+	aStream nextPutAll: 'set macros'; nl.
+	super displayOn: aStream
+    ]
+
+    name [
+	"Return a string identifying terminal type"
+
+	<category: 'printing'>
+	^'@GNUTERM'
     ]
 
     isInteractive [

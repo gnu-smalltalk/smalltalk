@@ -119,6 +119,38 @@ GPAbstractPlot subclass: GPPlot [
 	^series
     ]
 
+    labels: aDataSourceOrArray [
+	<category: 'building'>
+	"For now, center is passed from here.  Later, GPTextSeries will have
+	 its own params class."
+	^self add: ((GPTextSeries on: aDataSourceOrArray)
+			style: 'labels center';
+			yourself)
+    ]
+
+    labels: aDataSourceOrArray with: aBlock [
+	<category: 'building'>
+	| series |
+	series := self labels: aDataSourceOrArray.
+	aBlock value: series.
+	^series
+    ]
+
+    bubbles: aDataSourceOrArray [
+	<category: 'building'>
+	^self add: ((GPBubbleSeries on: aDataSourceOrArray)
+			style: 'points';
+			yourself)
+    ]
+
+    bubbles: aDataSourceOrArray with: aBlock [
+	<category: 'building'>
+	| series |
+	series := self bubbles: aDataSourceOrArray.
+	aBlock value: series.
+	^series
+    ]
+
     impulses: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXYSeries on: aDataSourceOrArray)
@@ -321,6 +353,46 @@ GPDataSeries subclass: GPXYSeries [
     x: xExpr y: yExpr [
 	self columns: { xExpr asGPExpression.
 			yExpr asGPExpression  }
+    ]
+]
+
+GPXYSeries subclass: GPBubbleSeries [
+    <category: 'GNUPlot'>
+    <comment: 'My instance is used to define a data series for (x,y,size) values,
+i.e. a bubble plot.'>
+
+    GPBubbleSeries class >> defaultParams [
+	^defaultParams ifNil: [ super defaultParams pointType: 6; yourself ]
+    ]
+
+    initialize [
+	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
+			GPColumnRef column: 3 }
+    ]
+
+    x: xExpr y: yExpr size: sizeExpr [
+	self columns: { xExpr asGPExpression. yExpr asGPExpression.
+			sizeExpr asGPExpression }
+    ]
+
+    displayOn: aStream [
+	super displayOn: aStream.
+	aStream nextPutAll: ' ps variable'
+    ]
+]
+
+GPXYSeries subclass: GPTextSeries [
+    <category: 'GNUPlot'>
+    <comment: 'My instance is used to define a data series for (x,y,text) values.'>
+
+    initialize [
+	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
+			GPColumnRef column: 3 }
+    ]
+
+    x: xExpr y: yExpr text: textExpr [
+	self columns: { xExpr asGPExpression. yExpr asGPExpression.
+			textExpr asGPExpression }
     ]
 ]
 
