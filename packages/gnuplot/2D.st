@@ -33,8 +33,59 @@ GPAbstractPlot subclass: GPPlot [
     <category: 'GNUPlot'>
     <comment: 'My instance is used to define a single ''plot'' command.'>
 
+    | xAxis x2Axis yAxis y2Axis |
+
     GPPlot class >> defaultParamsClass [
         ^GPPlotParams 
+    ]
+
+    axes [
+	<category: 'printing'>
+	"Note we don't use the accessors!"
+	^{ xAxis ifNotNil: [ :axis | axis withName: 'x' ].
+	   x2Axis ifNotNil: [ :axis | axis withName: 'x2' ].
+	   yAxis ifNotNil: [ :axis | axis withName: 'y' ].
+	   y2Axis  ifNotNil: [ :axis | axis withName: 'y2' ] }
+    ]
+
+    xAxis [
+	<category: 'accessing'>
+	^xAxis ifNil: [ xAxis := GPAxis new name: 'x'; yourself ]
+    ]
+
+    xAxis: aGPAxis [
+	<category: 'accessing'>
+	xAxis := aGPAxis
+    ]
+
+    x2Axis [
+	<category: 'accessing'>
+	^x2Axis ifNil: [ x2Axis := GPAxis new name: 'x2'; yourself ]
+    ]
+
+    x2Axis: aGPAxis [
+	<category: 'accessing'>
+	x2Axis := aGPAxis
+    ]
+
+    yAxis [
+	<category: 'accessing'>
+	^yAxis ifNil: [ yAxis := GPAxis new name: 'y'; yourself ]
+    ]
+
+    yAxis: aGPAxis [
+	<category: 'accessing'>
+	yAxis := aGPAxis
+    ]
+
+    y2Axis [
+	<category: 'accessing'>
+	^y2Axis ifNil: [ y2Axis := GPAxis new name: 'y2'; yourself ]
+    ]
+
+    y2Axis: aGPAxis [
+	<category: 'accessing'>
+	y2Axis := aGPAxis
     ]
 
     function: exprBlock [
@@ -332,7 +383,7 @@ GPAbstractPlot subclass: GPPlot [
     ]
 ]
 
-GPObject subclass: GPPlotParams [
+GPParams subclass: GPPlotParams [
     <category: 'GNUPlot'>
     <comment: 'My instance is used to define parameters for a ''plot'' command.'>
 

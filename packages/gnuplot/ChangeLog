@@ -1,3 +1,10 @@
+2007-11-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Base.st: Add GPAxis.  Extract GPParams and GPLineParams out of
+	GPSeriesParams.  Beautify printing of multiple series.
+	* 2D.st: Add #axes and accessors for GPAxis objects.
+	* Examples.st: Add #logPlot example.
+
 2007-11-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Base.st: Support GPInteractiveTerminal options.  Add non-string

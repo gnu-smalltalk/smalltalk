@@ -207,78 +207,312 @@ GPObject subclass: GNUPlot [
     ]
 ]
 
-GPObject subclass: GPSeries [
+
+GPObject subclass: GPAxis [
     <category: 'GNUPlot'>
-    <comment: 'My instances are used to define a plotted function or data set.'>
+    <comment: 'My instances are used to customize the appearance of a plotted
+axis.'>
 
-    | params |
-    GPSeries class [
-	| defaultParams |
-	defaultParamsClass [
-	    ^GPSeriesParams
-	]
+    | name range logScale mirrorTics outwardTics ticRange ticSpacing
+	ticSubdivision majorGrid minorGrid tics style label |
 
-	defaultParams [
-            ^defaultParams ifNil: [ defaultParams := self defaultParamsClass new ]
-	]
+    name: aString [
+	<category: 'private - initialization'>
+	name := aString
     ]
 
-    defaultTitle [
-	self subclassResponsibility
+    withName: aString [
+	<category: 'private - initialization'>
+	^name = aString
+	    ifTrue: [ self ]
+	    ifFalse: [ self copy name: aString ]
     ]
 
-    params [
-	^params ifNil: [ params := self class defaultParams copy ].
+    from: a to: b [
+        <category: 'accessing'>
+        range := { a. b }
     ]
 
-    printDataOn: aStream [
-	<category: 'printing'>
+    from [
+        <category: 'accessing'>
+        ^range ifNotNil: [ :r | r first ]
+    ]
+
+    to [
+        <category: 'accessing'>
+        ^range ifNotNil: [ :r | r second ]
+    ]
+
+    ticAt: value put: string [
+        <category: 'accessing'>
+	tics ifNil: [ tics := OrderedCollection new ].
+	tics add: value asGPExpression->string
+    ]
+
+    ticFrom: a to: b [
+        <category: 'accessing'>
+        ticRange := { a. b }
+    ]
+
+    ticFrom [
+        <category: 'accessing'>
+        ^ticRange ifNotNil: [ :r | r first ]
+    ]
+
+    ticTo [
+        <category: 'accessing'>
+        ^ticRange ifNotNil: [ :r | r second ]
+    ]
+
+    ticSpacing [
+        <category: 'accessing'>
+        ^ticSpacing
+    ]
+
+    ticSpacing: aNumber [
+        <category: 'accessing'>
+        ticSpacing := aNumber
+    ]
+
+    label [
+        <category: 'accessing'>
+        ^label
+    ]
+
+    label: aString [
+        <category: 'accessing'>
+        label := aString
+    ]
+
+    ticSubdivision [
+        <category: 'accessing'>
+        ^ticSubdivision
+    ]
+
+    ticSubdivision: aNumber [
+        <category: 'accessing'>
+        ticSubdivision := aNumber
+    ]
+
+    majorGrid [
+        <category: 'accessing'>
+        ^majorGrid
+    ]
+
+    majorGrid: aPlotParams [
+        <category: 'accessing'>
+        aPlotParams == true ifTrue: [ majorGrid := GPLineParams new. ^self ].
+        aPlotParams == false ifTrue: [ majorGrid := nil. ^self ].
+        majorGrid := aPlotParams
+    ]
+
+    minorGrid [
+        <category: 'accessing'>
+        ^minorGrid
+    ]
+
+    minorGrid: aPlotParams [
+        <category: 'accessing'>
+        aPlotParams == true ifTrue: [ minorGrid := GPLineParams new. ^self ].
+        aPlotParams == false ifTrue: [ minorGrid := nil. ^self ].
+        minorGrid := aPlotParams
+    ]
+
+    style [
+        <category: 'accessing'>
+        ^style
+    ]
+
+    style: aPlotParams [
+        <category: 'accessing'>
+        aPlotParams == true ifTrue: [ style := GPLineParams new. ^self ].
+        aPlotParams == false ifTrue: [ style := nil. ^self ].
+        style := aPlotParams
+    ]
+
+    logScale [
+        <category: 'accessing'>
+        ^logScale ifNil: [ logScale := false ]
+    ]
+
+    logScale: aBoolean [
+        <category: 'accessing'>
+        logScale := aBoolean
+    ]
+
+    mirrorTics [
+        <category: 'accessing'>
+        ^mirrorTics ifNil: [ mirrorTics := true ]
+    ]
+
+    mirrorTics: aBoolean [
+        <category: 'accessing'>
+        mirrorTics := aBoolean
+    ]
+
+    outwardTics [
+        <category: 'accessing'>
+        ^outwardTics ifNil: [ outwardTics := false ]
+    ]
+
+    outwardTics: aBoolean [
+        <category: 'accessing'>
+        outwardTics := aBoolean
+    ]
+
+    displayGridOn: aStream [
+        <category: 'printing'>
+	| majGrid |
+        aStream
+            nextPutAll: 'set grid '.
+	minorGrid isNil ifFalse: [ aStream nextPut: $m ].
+	aStream
+            nextPutAll: name;
+            nextPutAll: 'tics'.
+
+	majGrid := (majorGrid isNil and: [ minorGrid notNil ])
+	    ifTrue: [ minorGrid ]
+	    ifFalse: [ majorGrid ].
+
+	majGrid notNil
+	    ifTrue: [
+		majGrid isDefault
+		    ifTrue: [ aStream nextPutAll: ' ls 0' ]
+		    ifFalse: [ aStream display: majGrid ] ].
+
+	minorGrid isNil ifTrue: [ ^self ].
+	aStream nextPut: $,.
+	minorGrid isDefault
+	    ifTrue: [ aStream nextPutAll: ' ls 0' ]
+	    ifFalse: [ aStream display: minorGrid ].
+    ]
+
+    displayRangeOn: aStream [
+        <category: 'printing'>
+        aStream
+            nextPutAll: 'set ';
+            nextPutAll: name;
+            nextPutAll: 'range [';
+            display: range first;
+            nextPut: $:;
+            display: range second;
+            nextPut: $];
+            nl
+    ]
+
+    displayTicsOn: aStream [
+        <category: 'printing'>
+	| spacing |
+        aStream
+            nextPutAll: 'set ';
+            nextPutAll: name;
+            nextPutAll: 'tics'.
+	self mirrorTics ifFalse: [ aStream nextPutAll: ' nomirror' ].
+	self outwardTics ifTrue: [ aStream nextPutAll: ' out' ].
+	ticRange isNil
+	    ifTrue: [
+		ticSpacing isNil ifFalse: [ aStream space; display: ticSpacing ] ]
+	    ifFalse: [
+	        spacing :=
+		    ticSpacing ifNil: [ (self ticTo - self ticFrom) / 4.0 ].
+		aStream
+		     space; display: self ticFrom;
+		     nextPut: $,; display: spacing;
+		     nextPut: $,; display: self ticTo ].
+		    
+        aStream nl
+    ]
+
+    displayUserTicsOn: aStream [
+        <category: 'printing'>
+        aStream
+            nextPutAll: 'set ';
+            nextPutAll: name;
+            nextPutAll: 'tics add ('.
+	tics
+	    do: [ :each |
+	        aStream
+		    print: each value; 
+		    space;
+		    display: each key ]
+	    separatedBy: [ aStream nextPut: $, ].
+	aStream nextPut: $); nl
     ]
 
     displayOn: aStream [
-	<category: 'printing'>
-	| theParameters |
-	theParameters := params ifNil: [ self class defaultParams ].
-	theParameters displayOn: aStream for: self
-    ]
+        <category: 'printing'>
+	| spacing |
+        range isNil ifFalse: [
+            self displayRangeOn: aStream ].
+	(ticRange notNil or: [ ticSpacing notNil
+		or: [ self mirrorTics not or: [ self outwardTics ]]])
+	    ifTrue: [ self displayTicsOn: aStream ].
+	tics notNil
+	    ifTrue: [ self displayUserTicsOn: aStream ].
+	(minorGrid notNil or: [ majorGrid notNil ])
+	    ifTrue: [ self displayGridOn: aStream ].
 
-    displayPrologOn: aStream into: defs [
+	self label isNil ifFalse: [
+            aStream
+                nextPutAll: 'set ';
+                nextPutAll: name;
+                nextPutAll: 'label ';
+		print: label;
+                nl ].
+
+	self logScale ifTrue: [
+            aStream
+                nextPutAll: 'set logscale ';
+                nextPutAll: name;
+                nl ].
+
+	self style isNil ifFalse: [
+            aStream
+                nextPutAll: 'set ';
+                nextPutAll: name;
+                nextPutAll: 'zeroaxis';
+                display: self style;
+                nl ].
+
+	self ticSubdivision isNil ifFalse: [
+            aStream
+                nextPutAll: 'set m';
+                nextPutAll: name;
+                nextPutAll: 'tics ';
+                display: self ticSubdivision;
+                nl ].
     ]
 ]
-
-GPObject subclass: GPSeriesParams [
+
+GPObject subclass: GPParams [
     <category: 'GNUPlot'>
-    <comment: 'My instances are used to customize the appearance of a plotted
-function or data set.'>
+    <comment: 'My instances are used to customize the appearance of a plot
+element.'>
 
-    | x2 y2 title params |
-    
-    <category: 'GNUPlot'>
-    <comment: nil>
-
-    y2 [
-	<category: 'axes'>
-	^y2 ifNil: [ false ]
-    ]
-
-    y2: aBoolean [
-	<category: 'axes'>
-	y2 := aBoolean
-    ]
-
-    x2 [
-	<category: 'axes'>
-	^x2 ifNil: [ false ]
-    ]
-
-    x2: aBoolean [
-	<category: 'axes'>
-	x2 := aBoolean
-    ]
+    | params |
 
     initialize [
 	<category: 'initialize-release'>
 	params := Dictionary new
+    ]
+
+    isDefault [
+	^params isEmpty
+    ]
+
+    displayOn: aStream [
+	<category: 'printing'>
+	params keysAndValuesDo: 
+		[:key :val | 
+		aStream
+		    space; nextPutAll: key;
+		    space; display: val]
+    ]
+]
+
+GPParams subclass: GPLineParams [
+    lineColor [
+	^params at: #linecolor ifAbsent: [ nil ]
     ]
 
     lineColor: aColorSpec [
@@ -316,18 +550,8 @@ function or data set.'>
 		    ifFalse: [aColorSpec])"
     ]
 
-    pointStyle: aNumber [
-	"Tells plot to use previously defined line style (via set style line <number> ... command )"
-
-	<category: 'styles'>
-	params at: #pointstyle put: aNumber
-    ]
-
-    lineStyle: aNumber [
-	"Tells plot to use previously defined line style (via set style line <number> ... command )"
-
-	<category: 'styles'>
-	params at: #linestyle put: aNumber
+    lineType [
+	^params at: #linetype ifAbsent: [ nil ]
     ]
 
     lineType: aNumber [
@@ -339,15 +563,47 @@ function or data set.'>
 	params at: #linetype put: aNumber
     ]
 
+    lineWidth [
+	^params at: #linewidth ifAbsent: [ nil ]
+    ]
+
     lineWidth: aParam [
 	"You may also scale the line width and point size for a plot by using <line width> and <point size>,
 	 which are specified relative to the default values for each terminal. The pointsize may also be altered
-	 globally — see set pointsize (p. 111) for details. But note that both <point size> as set here and
-	 as set by set pointsize multiply the default point size — their effects are not cumulative. That is, set
+	 globally; see set pointsize for details. But note that both <point size> as set here and
+	 as set by set pointsize multiply the default point size; their effects are not cumulative. That is, set
 	 pointsize 2; plot x w p ps 3 will use points three times default size, not six."
 
 	<category: 'styles'>
 	params at: #linewidth put: aParam
+    ]
+]
+
+GPLineParams subclass: GPSeriesParams [
+    <category: 'GNUPlot'>
+    <comment: 'My instances are used to customize the appearance of a plotted
+function or data set.'>
+
+    | x2 y2 title |
+    
+    y2 [
+	<category: 'axes'>
+	^y2 ifNil: [ false ]
+    ]
+
+    y2: aBoolean [
+	<category: 'axes'>
+	y2 := aBoolean
+    ]
+
+    x2 [
+	<category: 'axes'>
+	^x2 ifNil: [ false ]
+    ]
+
+    x2: aBoolean [
+	<category: 'axes'>
+	x2 := aBoolean
     ]
 
     notitle [
@@ -398,24 +654,18 @@ function or data set.'>
     ]
 
     displayOn: aStream [
-	^self displayOn: aStream for: nil
+	self displayOn: aStream for: nil
     ]
 
     displayOn: aStream for: aSeries [
 	"#axes #title #with comes first, then rest"
 
 	<category: 'converting'>
-	| d |
-	d := OrderedCollection new.
 	(self x2 or: [ self y2 ])
 	    ifTrue: [ aStream space; nextPutAll: self axes ].
 	(title notNil or: [ aSeries notNil ])
 	    ifTrue: [ aStream space; nextPutAll: (self titleFor: aSeries) ].
-	params keysAndValuesDo: 
-		[:key :val | 
-		aStream
-		    space; nextPutAll: key;
-		    space; display: val]
+	super displayOn: aStream
     ]
 
     title: aTitle [
@@ -427,10 +677,48 @@ function or data set.'>
 	 modifiers specified will be included in the default title.
 	 "
 
-	"sig: using single quotes to prevent backslash conversion"
-
 	<category: 'title'>
-	title := 'title ''%1''' % { aTitle asString }
+	"Using printString, i.e. single quotes, to prevent backslash conversion"
+	title := 'title ', aTitle printString
+    ]
+]
+
+GPObject subclass: GPSeries [
+    <category: 'GNUPlot'>
+    <comment: 'My instances are used to define a plotted function or data set.'>
+
+    | params |
+    GPSeries class [
+	| defaultParams |
+	defaultParamsClass [
+	    ^GPSeriesParams
+	]
+
+	defaultParams [
+            ^defaultParams ifNil: [ defaultParams := self defaultParamsClass new ]
+	]
+    ]
+
+    defaultTitle [
+	self subclassResponsibility
+    ]
+
+    params [
+	^params ifNil: [ params := self class defaultParams copy ].
+    ]
+
+    printDataOn: aStream [
+	<category: 'printing'>
+    ]
+
+    displayOn: aStream [
+	<category: 'printing'>
+	| theParameters |
+	theParameters := params ifNil: [ self class defaultParams ].
+	theParameters displayOn: aStream for: self
+    ]
+
+    displayPrologOn: aStream into: defs [
     ]
 ]
 
@@ -464,14 +752,17 @@ GPSeries subclass: GPFunctionSeries [
     ]
 
     from [
+        <category: 'accessing'>
 	^range ifNotNil: [ :r | r first ]
     ]
 
     to [
+        <category: 'accessing'>
 	^range ifNotNil: [ :r | r second ]
     ]
 
     displayOn: aStream [
+        <category: 'printing'>
 	range isNil ifFalse: [
 	    aStream
 		nextPut: $[;
@@ -564,7 +855,6 @@ GPSeries subclass: GPDataSeries [
 
     printDataOn: aStream [
 	dataSource printDataOn: aStream.
-	aStream nl.
     ]
 
     displayPrologOn: aStream into: defs [
@@ -626,6 +916,7 @@ GPSeries subclass: GPDataSeries [
     ]"
 ]
 
+
 GPObject subclass: GPDataSource [
     <category: 'GNUPlot'>
     <comment: 'My instances are used to define the source of a plotted data set.'>
@@ -714,21 +1005,19 @@ as the source of a plot.'>
 
         anObject isString ifTrue: [
 	    aStream nextPut: $".
-	    aStream nextPutAll: (anObject copyReplaceAll: '"' with: '\"').
+	    aStream display: (anObject copyReplaceAll: '"' with: '\"').
 	    aStream nextPut: $".
 	    ^self ].
 
 	anObject
-	    do: [:each | self printData: each on: aStream level: n + 1]
-            separatedBy: [
+	    do: [:each |
+		self printData: each on: aStream level: n + 1.
 		n = 3 ifTrue: [ aStream space ] ifFalse: [ aStream nl ] ]
     ]
 
     printDataOn: aStream [
 	self printData: data on: aStream level: 1.
-        aStream
-            nl;
-            nextPut: $e
+        aStream nextPut: $e; nl.
     ]
 
     Object >> asGPDataSource [
@@ -753,6 +1042,11 @@ GPObject subclass: GPAbstractPlot [
     params: aGPPlotParams [
         <category: 'accessing'>
         params := aGPPlotParams.
+    ]
+
+    axes [
+        <category: 'printing'>
+	self subclassResponsibility
     ]
 
     add: aSeries [
@@ -785,12 +1079,13 @@ GPObject subclass: GPAbstractPlot [
 	series isNil ifTrue: [ ^self ].
 	defs := Set new.
         self displayPrologOn: aStream into: defs.
+        self axes do: [ :d |
+	    d isNil ifFalse: [ aStream display: d; nl ] ].
         aStream nextPutAll: 'plot '.
         series do: [:d | d displayOn: aStream]
             separatedBy: [aStream nextPutAll: ' , '].
         aStream nl.
         series do: [:d | d printDataOn: aStream]
-            separatedBy: [aStream nl].
     ]
 ]
 
@@ -877,6 +1172,7 @@ that plots data on the display.'>
     ]
 ]
 
+
 GPTerminal subclass: GPFileTerminal [
     
     <category: 'GNUPlot'>
@@ -916,5 +1212,3 @@ that saves plots to a file.'>
 	^false
     ]
 ]
-
-

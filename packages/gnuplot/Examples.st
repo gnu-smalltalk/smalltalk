@@ -118,6 +118,29 @@ GPObject subclass: GNUPlotExamples [
 	p execute
     ]
 
+    GNUPlotExamples class >> logPlot [
+	^self logPlotOn: nil
+    ]
+
+    GNUPlotExamples class >> logPlotOn: file [
+	| p fit data |
+	p := GNUPlot new.
+	file isNil ifFalse: [
+	    p terminal: self newPngTerminal.
+	    p output: file ].
+
+	p plot
+	    function: [ :x | x raisedTo: 2 ];
+	    function: [ :x | x raisedTo: 3 ];
+	    function: [ :x | x exp ].
+
+	p plot xAxis from: 1 to: 10; logScale: true.
+	p plot yAxis from: 1 to: 1000; logScale: true.
+
+	Transcript display: p; nl.
+	p execute
+    ]
+
     GNUPlotExamples class >> fit [
 	^self fitOn: nil
     ]

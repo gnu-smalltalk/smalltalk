@@ -35,11 +35,13 @@ FileStream that only shows a segment of the file (done).
 ** refactoring and prepared statements support
 ** merge ROE?
 
+* cookies and redirects for HTTPClient
+
 * Seaside
 
 * more libraries
-** gnuplot
 ** gnutls
+** 3D gnuplot?
 
 ----------------------------------------------------------------------
 
