@@ -1,3 +1,9 @@
+2007-11-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-tool.c: Test both EXEEXT and ARGV_EXEEXT.
+	* libgst/cint.c: Fix my_mkdir for Cygwin.
+	Reported by Freddie Akeroyd.
+
 2007-11-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.c: Provide a default MAXSYMLINKS, for Cygwin.

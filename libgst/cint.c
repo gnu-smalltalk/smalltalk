@@ -358,7 +358,7 @@ my_mkdir (const char* name,
 	  int mode)
 {
   int retstat;
-#ifdef _WIN32
+#ifdef __MSVCRT__
   retstat = mkdir (name);
   if (retstat == 0)
     retstat = chmod (name, mode);

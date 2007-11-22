@@ -126,8 +126,17 @@ GST_C_GOTO_VOID_P
 
 AC_DEFINE_UNQUOTED(HOST_SYSTEM, "$host",
   [Define to the host triplet.])
+
 AC_DEFINE_UNQUOTED(EXEEXT, "$ac_exeext",
   [Define to the extension for executable files.])
+
+case "$ac_exeext:$host_os" in
+  :*) ac_argv_exeext= ;;
+  .exe:cygwin*) ac_argv_exeext= ;;
+  .exe:*) ac_argv_exeext=$ac_exeext ;;
+esac
+AC_DEFINE_UNQUOTED(ARGV_EXEEXT, "$ac_argv_exeext",
+  [Define to the extension for executable files, as it appears in argv[0].])
 
 AC_C_BIGENDIAN
 AC_CHECK_ALIGNOF(double)

@@ -375,7 +375,9 @@ main(int argc, const char **argv)
 
   /* Check if used in the build tree.  */
   if (!strcmp (executable_name, "gst-tool" EXEEXT)
-      || !strcmp (executable_name, "lt-gst-tool" EXEEXT))
+      || !strcmp (executable_name, "gst-tool" ARGV_EXEEXT)
+      || !strcmp (executable_name, "lt-gst-tool" EXEEXT)
+      || !strcmp (executable_name, "lt-gst-tool" ARGV_EXEEXT))
     {
       argv++, argc--;
       program_name = argv[0];
