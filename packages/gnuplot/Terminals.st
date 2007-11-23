@@ -59,7 +59,7 @@ GPFileTerminal subclass: GPPngTerminal [
     <comment: 'My instances describe an abstract GNU Plot terminal
 that saves plots to a PNG file.'>
 
-    | transparent interlace trueColor rounded font size enhanced |
+    | transparent interlace trueColor crop rounded font size enhanced |
     
     enhanced [
 	<category: 'accessing'>
@@ -78,6 +78,8 @@ that saves plots to a PNG file.'>
 
     font: aSymbolOrString [
 	<category: 'accessing'>
+	"font could be a one of: tiny | small | medium | large | giant
+	 (symbols), or '<face> {pointsize}' "
 	font := aSymbolOrString
     ]
 
@@ -85,12 +87,14 @@ that saves plots to a PNG file.'>
 	"Set default values"
 
 	<category: 'initialize-release'>
+	super initialize.
 	transparent := false.
 	interlace := false.
 	trueColor := true.
+	crop := false.
 	rounded := true.
 	font := #medium.
-	size := 800 @ 600.
+	size := 640 @ 480.
 	enhanced := false.
     ]
 
@@ -110,12 +114,12 @@ that saves plots to a PNG file.'>
 	str nextPutAll: 'transparent '.
 	interlace ifFalse: [str nextPutAll: 'no'].
 	str nextPutAll: 'interlace '.
+	crop ifFalse: [str nextPutAll: 'no'].
+	str nextPutAll: 'crop '.
 	trueColor ifFalse: [str nextPutAll: 'no'].
 	str
 	    nextPutAll: 'truecolor ';
 	    nextPutAll: (rounded ifTrue: ['rounded '] ifFalse: ['butt ']);
-	    "font could be a one of: tiny | small | medium | large | giant , or font <face> {pointsize}"
-	    nextPutAll: font;
 	    nextPut: Character space;
 	    nextPutAll: 'size ';
 	    display: size x;
@@ -125,6 +129,22 @@ that saves plots to a PNG file.'>
 
 	enhanced ifFalse: [str nextPutAll: 'no'].
 	str nextPutAll: 'enhanced '.
+
+	font isNil ifFalse: [
+	    font isSymbol
+		ifTrue: [ str nextPutAll: font ]
+		ifFalse: [ str nextPutAll: 'font '; print: font ].
+	    str space ]
+    ]
+
+    crop [
+	<category: 'accessing'>
+	^crop
+    ]
+
+    crop: aBoolean [
+	<category: 'accessing'>
+	crop := aBoolean
     ]
 
     rounded [
@@ -170,5 +190,311 @@ that saves plots to a PNG file.'>
     trueColor: aBoolean [
 	<category: 'accessing'>
 	trueColor := aBoolean
+    ]
+]
+
+
+GPFileTerminal subclass: GPGifTerminal [
+    <category: 'GNUPlot'>
+    <comment: 'My instances describe an abstract GNU Plot terminal
+that saves plots to a PNG file.'>
+
+    | crop transparent animate font size enhanced |
+    
+    handlesMultiplot [
+	^self animate
+    ]
+
+    enhanced [
+	<category: 'accessing'>
+	^enhanced
+    ]
+
+    enhanced: aBoolean [
+	<category: 'accessing'>
+	enhanced := aBoolean
+    ]
+
+    font [
+	<category: 'accessing'>
+	^font
+    ]
+
+    font: aSymbolOrString [
+	<category: 'accessing'>
+	"font could be a one of: tiny | small | medium | large | giant
+	 (symbols), or '<face> {pointsize}' "
+	font := aSymbolOrString
+    ]
+
+    crop [
+	<category: 'accessing'>
+	^crop
+    ]
+
+    crop: aBoolean [
+	<category: 'accessing'>
+	crop := aBoolean
+    ]
+
+    initialize [
+	"Set default values"
+
+	<category: 'initialize-release'>
+	super initialize.
+	transparent := false.
+	animate := false.
+	crop := false.
+	size := 640 @ 480.
+	enhanced := false.
+    ]
+
+    printOptionsOn: str [
+	<category: 'printing'>
+	transparent ifFalse: [str nextPutAll: 'no'].
+	str nextPutAll: 'transparent '.
+	crop ifFalse: [str nextPutAll: 'no'].
+	str nextPutAll: 'crop '.
+	animate ifFalse: [str nextPutAll: 'no'].
+	str
+	    nextPutAll: 'animate size ';
+	    display: size x;
+	    nextPut: $, ;
+	    display: size y;
+	    space.
+
+	enhanced ifFalse: [str nextPutAll: 'no'].
+	str nextPutAll: 'enhanced '.
+
+	font isNil ifFalse: [ str nextPutAll: 'font '; print: font; space ]
+    ]
+
+    size [
+	<category: 'accessing'>
+	^size
+    ]
+
+    size: aPoint [
+	<category: 'accessing'>
+	size := aPoint
+    ]
+
+    name [
+	<category: 'printing'>
+	^'gif'
+    ]
+
+    transparent [
+	<category: 'accessing'>
+	^transparent
+    ]
+
+    transparent: aBoolean [
+	<category: 'accessing'>
+	transparent := aBoolean
+    ]
+
+    animate [
+	<category: 'accessing'>
+	^animate
+    ]
+
+    animate: aBoolean [
+	<category: 'accessing'>
+	animate := aBoolean
+    ]
+]
+
+
+
+GPFileTerminal subclass: GPPostscriptTerminal [
+    <category: 'GNUPlot'>
+    <comment: 'My instances describe an abstract GNU Plot terminal
+that saves plots to a EPS file.'>
+
+    | color rounded font enhanced size |
+    
+    enhanced [
+	<category: 'accessing'>
+	^enhanced
+    ]
+
+    enhanced: aBoolean [
+	<category: 'accessing'>
+	enhanced := aBoolean
+    ]
+
+    font [
+	<category: 'accessing'>
+	^font
+    ]
+
+    font: aSymbolOrString [
+	<category: 'accessing'>
+	font := aSymbolOrString
+    ]
+
+    initialize [
+	"Set default values"
+
+	<category: 'initialize-release'>
+	super initialize.
+	color := false.
+	rounded := true.
+	size := 5 @ 3.5.
+	enhanced := false.
+    ]
+
+    printOptionsOn: str [
+	<category: 'printing'>
+	enhanced ifFalse: [str nextPutAll: 'no'].
+	str nextPutAll: 'enhanced '.
+	str
+	    nextPutAll: (color ifTrue: ['color '] ifFalse: ['monochrome ']);
+	    nextPutAll: (rounded ifTrue: ['rounded'] ifFalse: ['butt']);
+	    nextPutAll: ' size ';
+	    display: size x;
+	    nextPut: $, ;
+	    display: size y;
+	    space.
+
+	font isNil ifFalse: [ str nextPutAll: 'font '; print: font; space ]
+    ]
+
+    rounded [
+	<category: 'accessing'>
+	^rounded
+    ]
+
+    rounded: aBoolean [
+	<category: 'accessing'>
+	rounded := aBoolean
+    ]
+
+    size [
+	<category: 'accessing'>
+	^size
+    ]
+
+    size: aPoint [
+	<category: 'accessing'>
+	size := aPoint
+    ]
+
+    color [
+	<category: 'accessing'>
+	^color
+    ]
+
+    color: aBoolean [
+	<category: 'accessing'>
+	color := aBoolean
+    ]
+]
+
+
+GPPostscriptTerminal subclass: GPEpsTerminal [
+    name [
+	<category: 'printing'>
+	^'postscript eps'
+    ]
+
+]
+
+GPPostscriptTerminal subclass: GPPsTerminal [
+    name [
+	<category: 'printing'>
+	^'pdf'
+    ]
+
+]
+
+GPFileTerminal subclass: GPSvgTerminal [
+    <category: 'GNUPlot'>
+    <comment: 'My instances describe an abstract GNU Plot terminal
+that saves plots to a EPS file.'>
+
+    | resizable rounded font enhanced size |
+    
+    enhanced [
+	<category: 'accessing'>
+	^enhanced
+    ]
+
+    enhanced: aBoolean [
+	<category: 'accessing'>
+	enhanced := aBoolean
+    ]
+
+    font [
+	<category: 'accessing'>
+	^font
+    ]
+
+    font: aSymbolOrString [
+	<category: 'accessing'>
+	font := aSymbolOrString
+    ]
+
+    initialize [
+	"Set default values"
+
+	<category: 'initialize-release'>
+	super initialize.
+	resizable := false.
+	rounded := true.
+	size := 640 @ 480.
+	enhanced := false.
+    ]
+
+    printOptionsOn: str [
+	<category: 'printing'>
+	enhanced ifFalse: [str nextPutAll: 'no'].
+	str nextPutAll: 'enhanced '.
+	str
+	    nextPutAll: (resizable ifTrue: ['dynamic '] ifFalse: ['fixed ']);
+	    nextPutAll: (rounded ifTrue: ['rounded'] ifFalse: ['butt']);
+	    nextPutAll: ' size ';
+	    display: size x;
+	    nextPut: $, ;
+	    display: size y;
+	    space.
+
+	font isNil ifFalse: [ str nextPutAll: 'font '; print: font; space ]
+    ]
+
+    rounded [
+	<category: 'accessing'>
+	^rounded
+    ]
+
+    rounded: aBoolean [
+	<category: 'accessing'>
+	rounded := aBoolean
+    ]
+
+    size [
+	<category: 'accessing'>
+	^size
+    ]
+
+    size: aPoint [
+	<category: 'accessing'>
+	size := aPoint
+    ]
+
+    name [
+	<category: 'printing'>
+	^'svg'
+    ]
+
+    resizable [
+	<category: 'accessing'>
+	^resizable
+    ]
+
+    resizable: aBoolean [
+	<category: 'accessing'>
+	resizable := aBoolean
     ]
 ]

@@ -35,8 +35,8 @@ GPAbstractPlot subclass: GPPlot [
 
     | xAxis x2Axis yAxis y2Axis |
 
-    GPPlot class >> defaultParamsClass [
-        ^GPPlotParams 
+    GPPlot class >> defaultStyleClass [
+        ^GPPlotStyle 
     ]
 
     axes [
@@ -381,9 +381,15 @@ GPAbstractPlot subclass: GPPlot [
 	aBlock value: series.
 	^series
     ]
+
+    displaySeriesOn: aStream [
+	<category: 'printing'>
+        aStream nextPutAll: 'plot '.
+        super displaySeriesOn: aStream
+    ]
 ]
 
-GPParams subclass: GPPlotParams [
+GPStyle subclass: GPPlotStyle [
     <category: 'GNUPlot'>
     <comment: 'My instance is used to define parameters for a ''plot'' command.'>
 
@@ -394,6 +400,7 @@ GPDataSeries subclass: GPXYSeries [
     <comment: 'My instance is used to define a data series for (x,y) values.'>
 
     initialize [
+	super initialize.
 	self columns: { GPColumnRef column: 1 }
     ]
 
@@ -412,11 +419,12 @@ GPXYSeries subclass: GPBubbleSeries [
     <comment: 'My instance is used to define a data series for (x,y,size) values,
 i.e. a bubble plot.'>
 
-    GPBubbleSeries class >> defaultParams [
-	^defaultParams ifNil: [ super defaultParams pointType: 6; yourself ]
+    GPBubbleSeries class >> defaultStyle [
+	^defaultStyle ifNil: [ super defaultStyle pointType: 6; yourself ]
     ]
 
     initialize [
+	super initialize.
 	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
 			GPColumnRef column: 3 }
     ]
@@ -437,6 +445,7 @@ GPXYSeries subclass: GPTextSeries [
     <comment: 'My instance is used to define a data series for (x,y,text) values.'>
 
     initialize [
+	super initialize.
 	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
 			GPColumnRef column: 3 }
     ]
@@ -464,6 +473,7 @@ GPDataSeries subclass: GPErrorSeries [
 with a (vertical) error bar.'>
 
     initialize [
+	super initialize.
 	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
 			GPColumnRef column: 3 }
     ]
@@ -497,6 +507,7 @@ GPErrorSeries subclass: GPErrorBoxSeries [
 with an adjustable width and a (vertical) error bar.'>
 
     initialize [
+	super initialize.
 	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
 			GPColumnRef column: 3 }
     ]
@@ -533,6 +544,7 @@ GPDataSeries subclass: GPXErrorSeries [
 with an horizontal error bar.'>
 
     initialize [
+	super initialize.
 	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
 			GPColumnRef column: 3 }
     ]
@@ -566,6 +578,7 @@ GPXErrorSeries subclass: GPXErrorBoxSeries [
 with an adjustable width and an horizontal error bar.'>
 
     initialize [
+	super initialize.
 	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
 			GPColumnRef column: 3 }
     ]
@@ -602,6 +615,7 @@ GPDataSeries subclass: GPXYErrorSeries [
 with 2D error bars.'>
 
     initialize [
+	super initialize.
 	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
 			GPColumnRef column: 3. GPColumnRef column: 4 }
     ]
@@ -641,6 +655,7 @@ GPDataSeries subclass: GPVectorSeries [
     <comment: 'My instance is used to define a data series for vector fields.'>
 
     initialize [
+	super initialize.
 	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
 			GPColumnRef column: 3. GPColumnRef column: 4 }
     ]
@@ -705,6 +720,7 @@ GPDataSeries subclass: GPFinancialDataSeries [
 low/high/open/close values.'>
 
     initialize [
+	super initialize.
 	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
 			GPColumnRef column: 3. GPColumnRef column: 4.
 			GPColumnRef column: 5 }

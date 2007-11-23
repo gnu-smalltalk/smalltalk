@@ -1,5 +1,18 @@
 2007-11-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* 2D.st: Override GPPlot>>#displaySeriesOn:.  Rename *Params
+	to *Style.
+	* Base.st: Rename *Params to *Style.  Extract GPElement from
+	GPSeries.  Extract GPContainer from GPPlot, use double dispatch
+	to add something to a GPContainer.  Support creating animations
+	instead of multiplots.	Extract some classes...
+	* Series.st: ... to here.  Add axis label style.  Add GPContainer
+	support to GPSeries.  Rename *Params to *Style.
+	* Objects.st: ... and here.  Add GPGraphicalObject hierarchy.
+	* Terminals.st: Add EPS, GIF, PDF terminals.
+
+2007-11-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Base.st: Add GPAxis.  Extract GPParams and GPLineParams out of
 	GPSeriesParams.  Beautify printing of multiple series.
 	* 2D.st: Add #axes and accessors for GPAxis objects.
