@@ -46,7 +46,7 @@ GPObject subclass: GNUPlotExamples [
 	p := GNUPlot new.
 	p plot
 	    lines: #(1 2 3 4 5)
-	    with: [:series | series params title: 'Title' ].
+	    with: [:series | series style title: 'Title' ].
 	^p asString
     ]
 
@@ -63,7 +63,7 @@ GPObject subclass: GNUPlotExamples [
 
 	p plot
 	    lines: #(1 5 2 8 3)
-	    with: [:series | series params title: 'Title' ].
+	    with: [:series | series style title: 'Title' ].
 	Transcript display: p; nl.
 	p execute
     ]
@@ -82,7 +82,7 @@ GPObject subclass: GNUPlotExamples [
 	p plot
 	    "first plot"
 	    lines: #(1 5 2 8 3)
-	    with: [:series | series params title: 'Zig-zag' ];
+	    with: [:series | series style title: 'Zig-zag' ];
 
 	    "second plot"
 	    function: [ :x | x sin ];
@@ -109,7 +109,7 @@ GPObject subclass: GNUPlotExamples [
 
 	p plot
 	    lines: #(1 5 2 8 3)
-	    with: [:series | series params title: 'Zig-zag' ];
+	    with: [:series | series style title: 'Zig-zag' ];
 
 	    "second plot"
 	    function: [ :x | x sin ].
@@ -177,7 +177,7 @@ GPObject subclass: GNUPlotExamples [
 
 	(plot := GPPlot new)
 	    lines: #(1 5 2 8 3)
-	    with: [:series | series params title: 'Title' ].
+	    with: [:series | series style title: 'Title' ].
 	p add: plot; add: plot; add: plot.
 	Transcript display: p; nl.
 	p execute
