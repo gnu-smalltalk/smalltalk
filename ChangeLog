@@ -1,3 +1,10 @@
+2007-11-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FloatD.st: Fix #signByte, add #fromBytes:.
+	* kernel/FloatE.st: Fix #signByte, add #fromBytes:.
+	* kernel/FloatQ.st: Fix #signByte.
+	* tests/floatmath.st: Use #fromBytes:.
+
 2007-11-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Partially undo change from

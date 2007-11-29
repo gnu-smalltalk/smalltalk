@@ -50,8 +50,8 @@ accuracy as C''s "long double" numbers.'>
 
 	<category: 'byte-order dependancies'>
 	^##(| n k |
-	n := 0.0q.
-	1 to: n size do: [:i | (n at: i) = 128 ifTrue: [k := i]].
+	n := -2.0q.
+	1 to: n size do: [:i | (n at: i) >= 128 ifTrue: [k := i]].
 	k)
     ]
 

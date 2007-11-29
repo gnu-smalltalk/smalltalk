@@ -50,9 +50,27 @@ accuracy as C''s "float" numbers.'>
 
 	<category: 'byte-order dependancies'>
 	^##(| n k |
-	n := 0.0e.
-	1 to: n size do: [:i | (n at: i) = 128 ifTrue: [k := i]].
+	n := -2.0e.
+	1 to: n size do: [:i | (n at: i) >= 128 ifTrue: [k := i]].
 	k)
+    ]
+
+    FloatE class >> fromBytes: aByteArray [
+        "Answer a float with the bytes in aByteArray, which are in
+         big-endian format."
+
+        <category: 'byte-order dependencies'>
+        | b permutation |
+        permutation := ##(| signByte perm |
+            signByte := FloatE signByte.
+            signByte = 1 ifTrue: [ perm := #[1 2 3 4] ].
+            signByte = 4 ifTrue: [ perm := #[4 3 2 1] ].
+            perm).
+        b := FloatE new: 4.
+        1 to: 4 do: [ :i |
+            b at: i put: (aByteArray at: (permutation at: i)) ].
+        b makeReadOnly: true.
+        ^b
     ]
 
     FloatE class >> e [

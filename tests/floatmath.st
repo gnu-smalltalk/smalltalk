@@ -173,10 +173,8 @@ Eval [
   
 Float class extend [
     test: bytes [
-	| b f |
-	b := Memory bigEndian ifTrue: [ bytes reverse ] ifFalse: [ bytes ].
-	f := self new: b size.
-	1 to: f size do: [ :i | f at: i put: (b at: i) ].
+	| f |  "for historical results this uses little endian, reverse here."
+	f := self fromBytes: bytes reverse.
         (true->f) printNl.
 	^f
     ]

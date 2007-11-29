@@ -48,11 +48,31 @@ accuracy as C''s "double" numbers.'>
     FloatD class >> signByte [
 	"Answer the byte of the receiver that contains the sign bit"
 
-	<category: 'byte-order dependancies'>
+	<category: 'byte-order dependencies'>
 	^##(| n k |
-	n := 0.0.
-	1 to: n size do: [:i | (n at: i) = 128 ifTrue: [k := i]].
+	n := -2.0.
+	1 to: n size do: [:i | (n at: i) >= 128 ifTrue: [k := i]].
 	k)
+    ]
+
+    FloatD class >> fromBytes: aByteArray [
+	"Answer a float with the bytes in aByteArray, which are in
+	 big-endian format."
+
+	<category: 'byte-order dependencies'>
+	| b permutation |
+	permutation := ##(| signByte perm |
+	    signByte := FloatD signByte.
+	    signByte = 1 ifTrue: [ perm := #[1 2 3 4 5 6 7 8] ].
+	    signByte = 4 ifTrue: [ perm := #[4 3 2 1 8 7 6 5] ].
+	    signByte = 5 ifTrue: [ perm := #[5 6 7 8 1 2 3 4] ].
+	    signByte = 8 ifTrue: [ perm := #[8 7 6 5 4 3 2 1] ].
+	    perm).
+	b := FloatD new: 8.
+	1 to: 8 do: [ :i |
+	    b at: i put: (aByteArray at: (permutation at: i)) ].
+	b makeReadOnly: true.
+	^b
     ]
 
     FloatD class >> precision [
