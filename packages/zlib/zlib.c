@@ -79,10 +79,11 @@ typedef struct zlib_stream {
 void
 gst_deflateInit (OOP oop, int factor, int winSize)
 {
-  zlib_stream zs = (zlib_stream) OOP_TO_OBJ (oop);
   z_stream *zlib_obj = calloc (1, sizeof (z_stream));
 
-  zs->zlibObject = vmProxy->cObjectToOOP (zlib_obj);
+  OOP zlibObjOOP = vmProxy->cObjectToOOP (zlib_obj);
+  zlib_stream zs = (zlib_stream) OOP_TO_OBJ (oop);
+  zs->zlibObject = zlibObjOOP;
   deflateInit2 (zlib_obj, factor, Z_DEFLATED, winSize, 8, Z_DEFAULT_STRATEGY);
 }
 
@@ -90,10 +91,11 @@ gst_deflateInit (OOP oop, int factor, int winSize)
 void
 gst_inflateInit (OOP oop, int winSize)
 {
-  zlib_stream zs = (zlib_stream) OOP_TO_OBJ (oop);
   z_stream *zlib_obj = calloc (1, sizeof (z_stream));
 
-  zs->zlibObject = vmProxy->cObjectToOOP (zlib_obj);
+  OOP zlibObjOOP = vmProxy->cObjectToOOP (zlib_obj);
+  zlib_stream zs = (zlib_stream) OOP_TO_OBJ (oop);
+  zs->zlibObject = zlibObjOOP;
   inflateInit2 (zlib_obj, winSize);
 }
 

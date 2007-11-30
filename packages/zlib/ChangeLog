@@ -1,14 +1,18 @@
+2007-11-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* zlib.c: Fix potential GC problem.  Reported by Daniele Sciascia.
+
 2007-10-13  Paolo Bonzini  <bonzini@gnu.org>
 
-	* zlib/package.xml: Put into the ZLib namespace.
+	* package.xml: Put into the ZLib namespace.
 
 2007-08-23  Paolo Bonzini  <bonzini@gnu.org>
 
-	* zlib/ZLibWriteStream.st: Remove #nextPutAll:.
+	* ZLibWriteStream.st: Remove #nextPutAll:.
 
 2007-08-23  Paolo Bonzini  <bonzini@gnu.org>
 
-	* zlib/ZLibReadStream.st: Delay blocking until first access.
+	* ZLibReadStream.st: Delay blocking until first access.
 
 2007-08-22  Paolo Bonzini  <bonzini@gnu.org>
 
