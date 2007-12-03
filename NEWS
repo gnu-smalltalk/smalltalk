@@ -64,7 +64,8 @@ o   The #writeStream and #streamContents: method were moved down from
     work on variable-sized collections such as OrderedCollections.
 
 o   The database access library has been replaced by a new DBI-like library,
-    contributed by Mike Anderson.
+    contributed by Mike Anderson, with bindings to PostgreSQL (also contributed
+    by Mike), SQLite (by Daniele Sciascia) and MySQL.
 
 o   In general, GNU Smalltalk is able to load files with the old syntax.
     In some cases, however, it will be necessary to either convert them

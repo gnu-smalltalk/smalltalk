@@ -620,7 +620,7 @@ at_times_file=$at_suite_dir/at-times
 # List of the tested programs.
 at_tested='gst'
 # List of the all the test groups.
-at_groups_all=' banner-1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 banner-2 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 banner-3 41 42 banner-4 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 banner-5 108 109 110 111 112 113 114 115 116 117'
+at_groups_all=' banner-1 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 banner-2 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 banner-3 41 42 banner-4 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 banner-5 108 109 110 111 112 113 114 115 116 117 118'
 # As many question marks as there are digits in the last test group number.
 # Used to normalize the test group numbers so that `ls' lists them in
 # numerical order.
@@ -735,14 +735,15 @@ at_help_all="1;testsuite.at:27;arrays.st;base;
 107;testsuite.at:139;ZeroDivideFactoryANSITest;ANSI SUnit;
 108;testsuite.at:142;Complex;Complex SUnit;
 109;testsuite.at:143;Continuations;Continuations SUnit;
-110;testsuite.at:144;DebugTools;DebugTools SUnit;
-111;testsuite.at:145;DhbNumericalMethods;DhbNumericalMethods SUnit;
-112;testsuite.at:146;Digest;Digest SUnit;
-113;testsuite.at:147;GDBM;GDBM SUnit;
-114;testsuite.at:148;Iconv;Iconv SUnit;
-115;testsuite.at:149;MySQL;MySQL SUnit;
-116;testsuite.at:150;Sport;Sport SUnit;
-117;testsuite.at:151;ZLib;ZLib SUnit;
+110;testsuite.at:144;DBD-MySQL;DBD-MySQL SUnit;
+111;testsuite.at:145;DBD-SQLite;DBD-SQLite SUnit;
+112;testsuite.at:146;DebugTools;DebugTools SUnit;
+113;testsuite.at:147;DhbNumericalMethods;DhbNumericalMethods SUnit;
+114;testsuite.at:148;Digest;Digest SUnit;
+115;testsuite.at:149;GDBM;GDBM SUnit;
+116;testsuite.at:150;Iconv;Iconv SUnit;
+117;testsuite.at:151;Sport;Sport SUnit;
+118;testsuite.at:152;ZLib;ZLib SUnit;
 "
 
 at_prev=
@@ -8710,10 +8711,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  110 ) # 110. testsuite.at:144: DebugTools
+  110 ) # 110. testsuite.at:144: DBD-MySQL
     at_setup_line='testsuite.at:144'
-    at_desc="DebugTools"
-    $at_quiet $ECHO_N "110: DebugTools                                     $ECHO_C"
+    at_desc="DBD-MySQL"
+    $at_quiet $ECHO_N "110: DBD-MySQL                                      $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -8722,21 +8723,13 @@ $at_traceon
 
 
 
-
-
-  case $AUTOTEST_PATH in
-    tests) image_path="-I $abs_top_builddir/gst.im" ;;
-    *) image_path="" ;;
-  esac
-
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:144: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:144: test \"\$enable_mysql_tests\" != no || exit 77"
 echo testsuite.at:144 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+    case "test \"$enable_mysql_tests\" != no || exit 77" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8744,12 +8737,60 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; test "$enable_mysql_tests" != no || exit 77 ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; test "$enable_mysql_tests" != no || exit 77 ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+$at_diff "$at_devnull" "$at_stdout" || at_failed=:
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:144: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+
+  case $AUTOTEST_PATH in
+    tests) image_path="-I $abs_top_builddir/gst.im" ;;
+    *) image_path="" ;;
+  esac
+
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p DBD-MySQL); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  $at_traceoff
+echo "$at_srcdir/testsuite.at:144: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose \$mysqlvars -p DBD-MySQL); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo testsuite.at:144 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p DBD-MySQL); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p DBD-MySQL); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p DBD-MySQL); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8778,10 +8819,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  111 ) # 111. testsuite.at:145: DhbNumericalMethods
+  111 ) # 111. testsuite.at:145: DBD-SQLite
     at_setup_line='testsuite.at:145'
-    at_desc="DhbNumericalMethods"
-    $at_quiet $ECHO_N "111: DhbNumericalMethods                            $ECHO_C"
+    at_desc="DBD-SQLite"
+    $at_quiet $ECHO_N "111: DBD-SQLite                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -8797,27 +8838,43 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DBD-SQLite
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:145: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:145: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p DBD-SQLite
+    ret=\$?
+    case \$ret in
+      2) exit 77 ;;
+      0|1) exit \$ret ;;
+    esac); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:145 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
+    echo 'Not enabling shell tracing (command contains an embedded newline)'
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DBD-SQLite
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DBD-SQLite
+    ret=$?
+    case $ret in
+      2) exit 77 ;;
+      0|1) exit $ret ;;
+    esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8846,10 +8903,10 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  112 ) # 112. testsuite.at:146: Digest
+  112 ) # 112. testsuite.at:146: DebugTools
     at_setup_line='testsuite.at:146'
-    at_desc="Digest"
-    $at_quiet $ECHO_N "112: Digest                                         $ECHO_C"
+    at_desc="DebugTools"
+    $at_quiet $ECHO_N "112: DebugTools                                     $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
@@ -8865,14 +8922,14 @@ $at_traceon
     *) image_path="" ;;
   esac
 
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:146: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo "$at_srcdir/testsuite.at:146: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
 echo testsuite.at:146 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
         *'
 '*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
  *) at_trace_this=yes ;;
@@ -8880,12 +8937,12 @@ if test -n "$at_traceon"; then
 fi
 
 if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
     at_status=$?
     grep '^ *+' "$at_stder1" >&2
     grep -v '^ *+' "$at_stder1" >"$at_stderr"
 else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DebugTools); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
     at_status=$?
 fi
 
@@ -8914,14 +8971,150 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  113 ) # 113. testsuite.at:147: GDBM
+  113 ) # 113. testsuite.at:147: DhbNumericalMethods
     at_setup_line='testsuite.at:147'
-    at_desc="GDBM"
-    $at_quiet $ECHO_N "113: GDBM                                           $ECHO_C"
+    at_desc="DhbNumericalMethods"
+    $at_quiet $ECHO_N "113: DhbNumericalMethods                            $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
       echo "113. testsuite.at:147: testing ..."
+      $at_traceon
+
+
+
+
+
+  case $AUTOTEST_PATH in
+    tests) image_path="-I $abs_top_builddir/gst.im" ;;
+    *) image_path="" ;;
+  esac
+
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  $at_traceoff
+echo "$at_srcdir/testsuite.at:147: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo testsuite.at:147 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p DhbNumericalMethods); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:147: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+
+        $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  114 ) # 114. testsuite.at:148: Digest
+    at_setup_line='testsuite.at:148'
+    at_desc="Digest"
+    $at_quiet $ECHO_N "114: Digest                                         $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "114. testsuite.at:148: testing ..."
+      $at_traceon
+
+
+
+
+
+  case $AUTOTEST_PATH in
+    tests) image_path="-I $abs_top_builddir/gst.im" ;;
+    *) image_path="" ;;
+  esac
+
+  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
+  $at_traceoff
+echo "$at_srcdir/testsuite.at:148: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo testsuite.at:148 >"$at_check_line_file"
+
+at_trace_this=
+if test -n "$at_traceon"; then
+    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
+        *'
+'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
+ *) at_trace_this=yes ;;
+    esac
+fi
+
+if test -n "$at_trace_this"; then
+    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
+    at_status=$?
+    grep '^ *+' "$at_stder1" >&2
+    grep -v '^ *+' "$at_stder1" >"$at_stderr"
+else
+    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Digest); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
+    at_status=$?
+fi
+
+at_failed=false
+$at_diff "$at_devnull" "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+case $at_status in
+   77) echo 77 > "$at_status_file"; exit 77;;
+   0) ;;
+   *) echo "$at_srcdir/testsuite.at:148: exit code was $at_status, expected 0"
+      at_failed=:;;
+esac
+if $at_failed; then
+
+
+  echo 1 > "$at_status_file"
+  exit 1
+fi
+
+$at_traceon
+
+
+        $at_traceoff
+      $at_times_p && times >"$at_times_file"
+    ) 5>&1 2>&1 | eval $at_tee_pipe
+    at_status=`cat "$at_status_file"`
+    ;;
+
+  115 ) # 115. testsuite.at:149: GDBM
+    at_setup_line='testsuite.at:149'
+    at_desc="GDBM"
+    $at_quiet $ECHO_N "115: GDBM                                           $ECHO_C"
+    at_xfail=no
+    echo "#                             -*- compilation -*-" >> "$at_group_log"
+    (
+      echo "115. testsuite.at:149: testing ..."
       $at_traceon
 
 
@@ -8940,13 +9133,13 @@ $at_traceon
       0|1) exit $ret ;;
     esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:147: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p GDBM
+echo "$at_srcdir/testsuite.at:149: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p GDBM
     ret=\$?
     case \$ret in
       2) exit 77 ;;
       0|1) exit \$ret ;;
     esac); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
-echo testsuite.at:147 >"$at_check_line_file"
+echo testsuite.at:149 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -8979,7 +9172,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:147: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:149: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -8998,14 +9191,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  114 ) # 114. testsuite.at:148: Iconv
-    at_setup_line='testsuite.at:148'
+  116 ) # 116. testsuite.at:150: Iconv
+    at_setup_line='testsuite.at:150'
     at_desc="Iconv"
-    $at_quiet $ECHO_N "114: Iconv                                          $ECHO_C"
+    $at_quiet $ECHO_N "116: Iconv                                          $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "114. testsuite.at:148: testing ..."
+      echo "116. testsuite.at:150: testing ..."
       $at_traceon
 
 
@@ -9024,13 +9217,13 @@ $at_traceon
       0|1) exit $ret ;;
     esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:148: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Iconv
+echo "$at_srcdir/testsuite.at:150: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Iconv
     ret=\$?
     case \$ret in
       2) exit 77 ;;
       0|1) exit \$ret ;;
     esac); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
-echo testsuite.at:148 >"$at_check_line_file"
+echo testsuite.at:150 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -9063,7 +9256,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:148: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:150: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -9082,122 +9275,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  115 ) # 115. testsuite.at:149: MySQL
-    at_setup_line='testsuite.at:149'
-    at_desc="MySQL"
-    $at_quiet $ECHO_N "115: MySQL                                          $ECHO_C"
-    at_xfail=no
-    echo "#                             -*- compilation -*-" >> "$at_group_log"
-    (
-      echo "115. testsuite.at:149: testing ..."
-      $at_traceon
-
-
-
-  $at_traceoff
-echo "$at_srcdir/testsuite.at:149: test \"\$enable_mysql_tests\" != no || exit 77"
-echo testsuite.at:149 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "test \"$enable_mysql_tests\" != no || exit 77" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; test "$enable_mysql_tests" != no || exit 77 ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; test "$enable_mysql_tests" != no || exit 77 ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-$at_diff "$at_devnull" "$at_stdout" || at_failed=:
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:149: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-
-  case $AUTOTEST_PATH in
-    tests) image_path="-I $abs_top_builddir/gst.im" ;;
-    *) image_path="" ;;
-  esac
-
-  echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p MySQL); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
-  $at_traceoff
-echo "$at_srcdir/testsuite.at:149: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose \$mysqlvars -p MySQL); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
-echo testsuite.at:149 >"$at_check_line_file"
-
-at_trace_this=
-if test -n "$at_traceon"; then
-    case "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p MySQL); echo exit $? > retcode; } | tr -d '\\r' | tee stdout; . retcode" in
-        *'
-'*) echo 'Not enabling shell tracing (command contains an embedded newline)' ;;
- *) at_trace_this=yes ;;
-    esac
-fi
-
-if test -n "$at_trace_this"; then
-    ( $at_traceon; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p MySQL); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stder1"
-    at_status=$?
-    grep '^ *+' "$at_stder1" >&2
-    grep -v '^ *+' "$at_stder1" >"$at_stderr"
-else
-    ( :; { (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose $mysqlvars -p MySQL); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode ) >"$at_stdout" 2>"$at_stderr"
-    at_status=$?
-fi
-
-at_failed=false
-$at_diff "$at_devnull" "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-case $at_status in
-   77) echo 77 > "$at_status_file"; exit 77;;
-   0) ;;
-   *) echo "$at_srcdir/testsuite.at:149: exit code was $at_status, expected 0"
-      at_failed=:;;
-esac
-if $at_failed; then
-
-
-  echo 1 > "$at_status_file"
-  exit 1
-fi
-
-$at_traceon
-
-
-        $at_traceoff
-      $at_times_p && times >"$at_times_file"
-    ) 5>&1 2>&1 | eval $at_tee_pipe
-    at_status=`cat "$at_status_file"`
-    ;;
-
-  116 ) # 116. testsuite.at:150: Sport
-    at_setup_line='testsuite.at:150'
+  117 ) # 117. testsuite.at:151: Sport
+    at_setup_line='testsuite.at:151'
     at_desc="Sport"
-    $at_quiet $ECHO_N "116: Sport                                          $ECHO_C"
+    $at_quiet $ECHO_N "117: Sport                                          $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "116. testsuite.at:150: testing ..."
+      echo "117. testsuite.at:151: testing ..."
       $at_traceon
 
 
@@ -9211,8 +9296,8 @@ $at_traceon
 
   echo "{ (cd $abs_top_builddir && gst $image_path -f $abs_top_srcdir/scripts/Test.st --verbose  -p Sport); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:150: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Sport); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
-echo testsuite.at:150 >"$at_check_line_file"
+echo "$at_srcdir/testsuite.at:151: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p Sport); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
+echo testsuite.at:151 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -9239,7 +9324,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:150: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:151: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then
@@ -9258,14 +9343,14 @@ $at_traceon
     at_status=`cat "$at_status_file"`
     ;;
 
-  117 ) # 117. testsuite.at:151: ZLib
-    at_setup_line='testsuite.at:151'
+  118 ) # 118. testsuite.at:152: ZLib
+    at_setup_line='testsuite.at:152'
     at_desc="ZLib"
-    $at_quiet $ECHO_N "117: ZLib                                           $ECHO_C"
+    $at_quiet $ECHO_N "118: ZLib                                           $ECHO_C"
     at_xfail=no
     echo "#                             -*- compilation -*-" >> "$at_group_log"
     (
-      echo "117. testsuite.at:151: testing ..."
+      echo "118. testsuite.at:152: testing ..."
       $at_traceon
 
 
@@ -9284,13 +9369,13 @@ $at_traceon
       0|1) exit $ret ;;
     esac); echo exit $? > retcode; } | tr -d '\r' | tee stdout; . retcode"
   $at_traceoff
-echo "$at_srcdir/testsuite.at:151: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
+echo "$at_srcdir/testsuite.at:152: { (cd \$abs_top_builddir && gst \$image_path -f \$abs_top_srcdir/scripts/Test.st --verbose  -p ZLib
     ret=\$?
     case \$ret in
       2) exit 77 ;;
       0|1) exit \$ret ;;
     esac); echo exit \$? > retcode; } | tr -d '\\r' | tee stdout; . retcode"
-echo testsuite.at:151 >"$at_check_line_file"
+echo testsuite.at:152 >"$at_check_line_file"
 
 at_trace_this=
 if test -n "$at_traceon"; then
@@ -9323,7 +9408,7 @@ echo stdout:; cat "$at_stdout"
 case $at_status in
    77) echo 77 > "$at_status_file"; exit 77;;
    0) ;;
-   *) echo "$at_srcdir/testsuite.at:151: exit code was $at_status, expected 0"
+   *) echo "$at_srcdir/testsuite.at:152: exit code was $at_status, expected 0"
       at_failed=:;;
 esac
 if $at_failed; then

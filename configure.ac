@@ -279,6 +279,12 @@ AC_MSG_RESULT($enable_mysql_tests)
 GST_PACKAGE_ENABLE([DBD-PostgreSQL], [dbd-postgresql],
    [GST_HAVE_LIB(pq, PQconnectdb)],
    [ac_cv_lib_pq_PQconnectdb])
+
+GST_PACKAGE_ENABLE([DBD-SQLite], [dbd-sqlite],
+   [AC_CHECK_HEADER([sqlite3.h])],
+   [ac_cv_header_sqlite3_h],
+   [Makefile], [dbd-sqlite3.la])
+
 GST_PACKAGE_ENABLE([DBI], [dbi])
 
 GST_PACKAGE_ENABLE([GDBM], [gdbm],
