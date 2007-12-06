@@ -1462,8 +1462,8 @@ add_first_link (OOP semaphoreOOP,
     sem->lastLink = processOOP;
 }
 
-void
-suspend_process (OOP processOOP)
+static void
+remove_process_from_list (OOP processOOP)
 {
   gst_semaphore sem;
   gst_process process, lastProcess;
@@ -1504,6 +1504,12 @@ suspend_process (OOP processOOP)
     }
 
   process->nextLink = _gst_nil_oop;
+}
+
+void
+suspend_process (OOP processOOP)
+{
+  remove_process_from_list (processOOP);
   if (get_scheduled_process() == processOOP)
     ACTIVE_PROCESS_YIELD ();
 }
@@ -1685,11 +1691,25 @@ resume_process (OOP processOOP,
 
   /* 2002-19-12: tried get_active_process instead of get_scheduled_process.  */
   activeOOP = get_active_process ();
-  if (processOOP == activeOOP)
-    return (true);
-
   active = (gst_process) OOP_TO_OBJ (activeOOP);
   process = (gst_process) OOP_TO_OBJ (processOOP);
+  priority = TO_INT (process->priority);
+
+  /* As a special exception, don't preempt a process that has disabled
+     interrupts. ### this behavior is currently disabled.  */
+  ints_enabled = IS_NIL (active->interrupts)
+	         || TO_INT(active->interrupts) <= 0;
+
+  /* resume_process is also used when changing the priority of a ready/active
+     process.  In this case, first remove the process from its current list.  */
+  if (processOOP == activeOOP)
+    {
+      assert (!alwaysPreempt);
+      remove_process_from_list (processOOP);
+    }
+  else if (priority >= TO_INT (active->priority) /* && ints_enabled */ )
+    alwaysPreempt = true;
+
   if (IS_NIL (processOOP) || is_process_terminating (processOOP))
     /* The process was terminated - nothing to resume, fail */
     return (false);
@@ -1701,17 +1721,10 @@ resume_process (OOP processOOP,
       return (true);
     }
 
-  /* As a special exception, don't preempt a process that has disabled
-     interrupts. ### this behavior is currently disabled.  */
-  ints_enabled = IS_NIL (active->interrupts)
-	         || TO_INT(active->interrupts) <= 0;
-
-  priority = TO_INT (process->priority);
   processLists = GET_PROCESS_LISTS ();
   processList = ARRAY_AT (processLists, priority);
 
-  if ((priority >= TO_INT (active->priority) /* && ints_enabled */ )
-      || alwaysPreempt)
+  if (alwaysPreempt)
     {
       /* We're resuming a process with a *equal or higher* priority, so sleep
          the current one and activate the new one */
@@ -1719,11 +1732,14 @@ resume_process (OOP processOOP,
       activate_process (processOOP);
     }
   else
-    /* this process has a lower priority than the active one, so the
-       policy is that it doesn't preempt the currently running one.
-       Anyway, it must be the first in its priority queue - so don't
-       put it to sleep.  */
-    add_first_link (processList, processOOP);
+    {
+      /* this process has a lower priority than the active one, so the
+         policy is that it doesn't preempt the currently running one.
+         Anyway, it must be the first in its priority queue - so don't
+         put it to sleep.  */
+      add_first_link (processList, processOOP);
+      ACTIVE_PROCESS_YIELD ();
+    }
 
   return (true);
 }

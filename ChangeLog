@@ -1,3 +1,16 @@
+2007-12-06  Paolo Bonzini  <bonzini@gnu.org>
+
+        * kernel/BlkClosure.st: Don't modify the stack top in #asContext:.
+        * kernel/ProcSched.st: Remove #changePriorityListOf:to:suspend:.
+        * kernel/Process.st: Implement #suspend with a primitive.
+        Use #resume to restart the process in the right priority list when
+        the priority is changed and the process was not/is not to be suspended.
+        Remove #setPriorityFrom:to:suspend:.
+
+        * tests/processes.st: Be more robust in running processes to a
+        sync point.  Avoid busy waiting which may or may not work depending
+        on the execution order of the process.
+
 2007-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FloatD.st: Fix #signByte, add #fromBytes:.

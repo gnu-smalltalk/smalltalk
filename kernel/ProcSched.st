@@ -66,20 +66,6 @@ Object subclass: ProcessorScheduler [
 	^self activeProcess priority
     ]
 
-    changePriorityListOf: aProcess to: aPriority suspend: aBoolean [
-	"Private - Move aProcess to the execution list for aPriority,
-	 answer the new execution list"
-
-	<category: 'basic'>
-	(processLists at: aProcess priority) remove: aProcess ifAbsent: [].
-	^aBoolean 
-	    ifTrue: [nil]
-	    ifFalse: 
-		[(processLists at: aPriority)
-		    addLast: aProcess;
-		    yourself]
-    ]
-
     processesAt: aPriority [
 	"Answer a linked list of processes at the given priority"
 

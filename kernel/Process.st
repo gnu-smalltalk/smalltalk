@@ -114,13 +114,8 @@ can suspend themselves and resume themselves however they wish.'>
 	 another process. Suspending is nothing more than taking ourselves out
 	 of every scheduling list and THEN yielding control to another process"
 
-	<category: 'basic'>
-	self isSuspended ifTrue: [^nil].
-	myList := Processor 
-		    changePriorityListOf: self
-		    to: priority
-		    suspend: true.
-	self yield
+	<category: 'builtins'>
+	<primitive: VMpr_Process_suspend>
     ]
 
     finalize [
@@ -237,45 +232,20 @@ can suspend themselves and resume themselves however they wish.'>
 	"Change the receiver's priority to anInteger"
 
 	<category: 'accessing'>
-	| old |
-	anInteger < Processor lowestPriority 
-	    | (anInteger > Processor highestPriority) 
-		ifTrue: 
+	(anInteger between: Processor lowestPriority 
+	    and: Processor highestPriority) 
+		ifFalse: 
 		    [SystemExceptions.ArgumentOutOfRange 
 			signalOn: anInteger
 			mustBeBetween: Processor lowestPriority
 			and: Processor highestPriority].
-	self 
-	    setPriorityFrom: Processor activePriority
-	    to: anInteger
-	    suspend: false
-    ]
 
-    setPriorityFrom: activePriority to: anInteger suspend: aBoolean [
-	"Change the priority to anInteger.  If aBoolean is true,
-	 suspend the process after having done so; if it is false,
-	 check if it is nicer to relinquish control from the running
-	 process (based on the priority of the active process, that
-	 is passed in activePriority) and if this is the case, preempt it."
-
-	<category: 'accessing'>
-	| state |
-	
-	[state := #wait.
-	self isReady ifTrue: [state := #ready].
-	self isActive ifTrue: [state := #active].
-	state = #wait 
-	    ifFalse: 
-		[myList := Processor 
-			    changePriorityListOf: self
-			    to: anInteger
-			    suspend: aBoolean].
-	priority := anInteger.
-	(aBoolean or: 
-		[(state = #ready and: [activePriority < priority]) 
-		    or: [state = #active and: [activePriority > priority]]]) 
-	    ifTrue: [Processor yield]] 
-		valueWithoutPreemption
+	[
+	    | waiting |
+	    waiting := self isActive not and: [ self isReady not ].
+	    priority := anInteger.
+	    waiting ifFalse: [self resume]
+	] valueWithoutPreemption
     ]
 
     valueWithoutInterrupts: aBlock [
@@ -304,7 +274,7 @@ can suspend themselves and resume themselves however they wish.'>
 		    ifTrue: [^SystemExceptions.ProcessTerminated signalOn: self].
 		semaphore := myList.
 		suspended := self isReady not.
-		block := suspended 
+		block := suspended
 			    ifFalse: 
 				[self suspend.
 				aBlock]
@@ -372,14 +342,12 @@ can suspend themselves and resume themselves however they wish.'>
 
 	| closure activePriority |
 	activePriority := Processor activePriority.
-	closure := 
-		[
-		[
-		[self 
-		    setPriorityFrom: activePriority
-		    to: aPriority
-		    suspend: aBoolean.
-		aBlockClosure value] 
+	closure :=
+	    [[[
+		"Inlined #priority: to be able to suspend the process."
+		priority := aPriority.
+		aBoolean ifTrue: [self suspend] ifFalse: [self resume].
+		aBlockClosure value]
 			on: SystemExceptions.ProcessBeingTerminated
 			do: 
 			    [:sig | 

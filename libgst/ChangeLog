@@ -1,3 +1,10 @@
+2007-12-06  Paolo Bonzini  <bonzini@gnu.org>
+
+        * libgst/interp.c: Extract part of suspend_process into
+        remove_process_from_list.  Use it in resume_process if the process
+        is active.  Yield the active process.
+        * libgst/prims.def: Add VMpr_Process_suspend.
+
 2007-11-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Loosen tests of usage of instantiate and

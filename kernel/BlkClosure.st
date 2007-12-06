@@ -165,15 +165,17 @@ creation of Processes from blocks.'>
 	 Note that the block has no home, so it cannot contain returns."
 
 	<category: 'private'>
-	| top block |
-	block := BlockContext fromClosure: self parent: parent.
-	parent isNil 
-	    ifFalse: 
-		[top := parent sp == 0 
+	^BlockContext
+	    fromClosure: [
+	        | top |
+	        top := parent isNil
+		    ifTrue: [nil]
+		    ifFalse: [
+			parent sp == 0 
 			    ifTrue: [parent receiver]
-			    ifFalse: [parent at: parent sp].
-		parent sp: parent sp - 1].
-	^block
+			    ifFalse: [parent at: parent sp]].
+	        self value. top]
+	    parent: parent.
     ]
 
     on: anException do: aBlock [

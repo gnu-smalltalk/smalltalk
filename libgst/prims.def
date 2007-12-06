@@ -2809,6 +2809,17 @@ primitive VMpr_Semaphore_waitAfterSignalling [succeed,check_interrupt]
   PRIM_SUCCEEDED;
 }
 
+/* Process suspend */
+primitive VMpr_Process_suspend [succeed]
+{
+  OOP oop1;
+  _gst_primitives_executed++;
+
+  oop1 = STACKTOP ();
+  suspend_process (oop1);
+  PRIM_SUCCEEDED;
+}
+
 /* Process resume */
 primitive VMpr_Process_resume [succeed,fail,check_interrupt]
 {

@@ -51,12 +51,15 @@ Eval [
 
 "Test Process suspend/resume"
 Eval [
+    goOn := false.
     p := [
         'inside p' printNl.
+	goOn := true.
         p suspend.
         'suspension finished' printNl ] newProcess name: 'test 2'; yourself.
     p printNl.
     p resume.
+    [ goOn ] whileFalse: [ Processor yield ].
     p printNl.
     p executeUntilTermination.
     p printNl
@@ -65,12 +68,15 @@ Eval [
 
 "Test processes yielding control to each other without suspending themselves"
 Eval [
+    goOn := false.
     p := [
         'inside p' printNl.
+	goOn := true.
         Processor yield.
         'yielded back to p' printNl ] newProcess name: 'test 3'; yourself.
     p printNl.
     p resume.
+    [ goOn ] whileFalse: [ Processor yield ].
     p printNl.
     p executeUntilTermination.
     p printNl
@@ -85,6 +91,7 @@ Eval [
         'wait finished' printNl ] newProcess name: 'test 4'; yourself.
     p printNl.
     p resume.
+    [ s size = 0 ] whileTrue: [ Processor yield ].
     p printNl.
     s signal.
     p printNl
@@ -94,7 +101,7 @@ Eval [
 "Now test process interrupts"
 Eval [
     s := Semaphore new.
-    ([ [ false ] whileFalse: [ ] ]
+    ([ [ false ] whileFalse: [ Processor yield ] ]
         forkAt: Processor userBackgroundPriority)
         name: 'background';
         queueInterrupt: [ (p := Processor activeProcess) printNl. s signal ].
@@ -123,11 +130,14 @@ Eval [
 
 "Resume a process and check that it is removed from the semaphore"
 Eval [
+    | p1 p2 s p1ok p2ok |
     s := Semaphore new.
     p1 := [ [ s wait ] ensure: [ p1ok := true ] ] fork.
     p2 := [ [ s wait ] ensure: [ p2ok := true ] ] fork.
+    [ s size = 2 ] whileFalse: [ Processor yield ].
     p2 resume.
     s signal.
+    p1 ensureTermination.
     ^p1ok & p2ok & s size = 0
 ]
 
@@ -136,8 +146,10 @@ Eval [
     s := Semaphore new.
     p1 := [ [ s wait ] ensure: [ p1ok := true ] ] fork.
     p2 := [ [ s wait ] ensure: [ p2ok := true ] ] fork.
+    [ s size = 2 ] whileFalse: [ Processor yield ].
     p1 resume.
     s signal.
+    p2 ensureTermination.
     ^p1ok & p2ok & s size = 0
 ]
 
