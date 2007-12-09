@@ -1,6 +1,10 @@
 2007-12-09  Paolo Bonzini  <bonzini@gnu.org>
 
-	* libgst/xlat.c: Fix store into DeferredVariableBinding.
+	* libgst/xlat.c: Fix code generation for DeferredVariableBinding store.
+
+2007-12-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/xlat.c: Fix IR generation for DeferredVariableBinding store.
 
 2007-12-06  Paolo Bonzini  <bonzini@gnu.org>
 

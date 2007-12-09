@@ -249,7 +249,8 @@ typedef mst_Boolean (*decode_func) (gst_uchar b, gst_uchar *bp);
 #define TREE_BINARY_BOOL	00003	/* 2 skipped - reserved to LIT_CONST */
 #define TREE_UNARY_SPECIAL	00004
 #define TREE_UNARY_BOOL		00005
-#define TREE_DIRTY_BLOCK	00006	/* doesn't use tree->data! */
+#define TREE_STORE_LIT_VAR	00006	/* receiver in V1 */
+#define TREE_DIRTY_BLOCK	00007	/* doesn't use tree->data! */
 
 /* stack suboperations 			   value of tree->data		*/
 #define TREE_REC_VAR		00000	/* variable number */
@@ -341,6 +342,7 @@ static void gen_send (code_tree *tree);
 static void gen_binary_int (code_tree *tree);
 static void gen_pop_into_array (code_tree *tree);
 static void gen_binary_bool (code_tree *tree);
+static void gen_send_store_lit_var (code_tree *tree);
 static void gen_dirty_block (code_tree *tree);
 static void gen_unary_special (code_tree *tree);
 static void gen_unary_bool (code_tree *tree);
@@ -375,7 +377,7 @@ static void gen_invalid (code_tree *tree);
 /* Function table for the code generator */
 static const emit_func emit_operation_funcs[96] = {
   gen_send, gen_binary_int, gen_invalid, gen_binary_bool,
-  gen_unary_special, gen_unary_bool, gen_dirty_block, gen_invalid,
+  gen_unary_special, gen_unary_bool, gen_send_store_lit_var, gen_dirty_block,
 
   gen_store_rec_var, gen_store_temp, gen_invalid, gen_store_lit_var,
   gen_invalid, gen_invalid, gen_store_outer, gen_pop_into_array,
@@ -1052,10 +1054,10 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
 /* Common pieces of code for generating stack operations */
 
 /* Save the old stack top if it was cached in V0 */
-#define BEFORE_PUSH do {						\
+#define BEFORE_PUSH(reg) do {						\
   sp_delta += sizeof (PTR);						\
   if (sp_delta > 0) {							\
-    jit_stxi_p(sp_delta, JIT_V2, JIT_V0);				\
+    jit_stxi_p(sp_delta, JIT_V2, (reg));				\
   }									\
 } while(0)
 
@@ -1065,7 +1067,7 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
  */
 #define BEFORE_SET_TOP do {						\
   if (tree->child) {							\
-    emit_code_tree(tree->child);						\
+    emit_code_tree(tree->child);					\
   }									\
   if (sp_delta < 0) {							\
     jit_subi_p(JIT_V2, JIT_V2, sizeof (PTR));	/* pop stack top */	\
@@ -1181,10 +1183,10 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
 
 /* Export V2 (the stack pointer) into the sp variable; the top of the
  * stack is assured to be in *sp, not in V0.  */
-#define EXPORT_SP do {							\
+#define EXPORT_SP(reg) do {						\
   if (sp_delta >= 0) {							\
     sp_delta += sizeof (PTR);						\
-    jit_stxi_p(sp_delta, JIT_V2, JIT_V0);				\
+    jit_stxi_p(sp_delta, JIT_V2, (reg));				\
     jit_addi_p(JIT_V2, JIT_V2, sp_delta);				\
     jit_sti_p(&sp, JIT_V2);						\
     sp_delta = -sizeof (PTR);						\
@@ -1197,7 +1199,7 @@ defer_send (code_tree *tree, mst_Boolean isBool, jit_insn *address, int reg0, in
   if (sp_delta < 0) {							\
     jit_ldr_p(JIT_V0, JIT_V2);						\
   } else { 								\
-    EXPORT_SP;								\
+    EXPORT_SP (JIT_V0);							\
   }									\
 } while(0)
 
@@ -1413,7 +1415,7 @@ gen_send (code_tree *tree)
   if (ic->is_super)
     KEEP_V0_EXPORT_SP;
   else
-    EXPORT_SP;
+    EXPORT_SP (JIT_V0);
 
   jit_movi_ul (JIT_R0, tree->bp - bc + BYTECODE_SIZE);
   jit_ldxi_p (JIT_R1, JIT_V1, jit_field (inline_cache, cachedIP));
@@ -1807,7 +1809,7 @@ gen_binary_int (code_tree *tree)
       break;
     }
 
-  EXPORT_SP;
+  EXPORT_SP (JIT_V0);
   if (overflow)
     finish_deferred_send ();
 }
@@ -1869,9 +1871,28 @@ gen_binary_bool (code_tree *tree)
 #undef FALSE_BRANCH
 #undef FALSE_SET
 
-  EXPORT_SP;
+  EXPORT_SP (JIT_V0);
   if (deferredSend)
     finish_deferred_send ();
+}
+
+void
+gen_send_store_lit_var (code_tree *tree)
+{
+  inline_cache *ic = (inline_cache *) tree->data;
+  label *overflow;
+  int reg0, reg1;
+  OOP oop;
+  intptr_t imm;
+  jit_insn *addr;
+
+  /* tree->child = value
+     tree->child->next = var.  */
+  BEFORE_STORE;
+  emit_code_tree(tree->child->next);
+  BEFORE_PUSH (JIT_V1);
+  EXPORT_SP (JIT_V0);
+  gen_send (tree);
 }
 
 void
@@ -2117,7 +2138,7 @@ gen_store_outer (code_tree *tree)
 void
 gen_push_rec_var (code_tree *tree)
 {
-  BEFORE_PUSH;
+  BEFORE_PUSH (JIT_V0);
   CACHE_REC_VAR;
 
   jit_ldxi_p (JIT_V0, JIT_R1, REC_VAR_OFS (tree));
@@ -2127,7 +2148,7 @@ gen_push_rec_var (code_tree *tree)
 void
 gen_push_temp (code_tree *tree)
 {
-  BEFORE_PUSH;
+  BEFORE_PUSH (JIT_V0);
   CACHE_TEMP;
 
   jit_ldxi_p (JIT_V0, JIT_V1, TEMP_OFS (tree));
@@ -2137,7 +2158,7 @@ gen_push_temp (code_tree *tree)
 void
 gen_push_lit_const (code_tree *tree)
 {
-  BEFORE_PUSH;
+  BEFORE_PUSH (JIT_V0);
 
   jit_movi_p (JIT_V0, tree->data);
   self_cached = false;
@@ -2147,7 +2168,7 @@ void
 gen_push_lit_var (code_tree *tree)
 {
   char *assocOOP = ((char *) tree->data) + jit_ptr_field (OOP, object);
-  BEFORE_PUSH;
+  BEFORE_PUSH (JIT_V0);
 
   jit_ldi_p (JIT_V0, assocOOP);
   jit_ldxi_p (JIT_V0, JIT_V0, jit_ptr_field (gst_association, value));
@@ -2160,13 +2181,13 @@ gen_dup_top (code_tree *tree)
   if (sp_delta < 0)
     jit_ldr_p (JIT_V0, JIT_V2);
 
-  BEFORE_PUSH;
+  BEFORE_PUSH (JIT_V0);
 }
 
 void
 gen_push_self (code_tree *tree)
 {
-  BEFORE_PUSH;
+  BEFORE_PUSH (JIT_V0);
 
   if (!self_cached)
     jit_ldi_p (JIT_V0, &_gst_self);
@@ -2177,7 +2198,7 @@ gen_push_self (code_tree *tree)
 void
 gen_push_outer (code_tree *tree)
 {
-  BEFORE_PUSH;
+  BEFORE_PUSH (JIT_V0);
   CACHE_OUTER_CONTEXT;
 
   jit_ldxi_p (JIT_V0, JIT_V1, STACK_OFS (tree));
@@ -3388,18 +3409,16 @@ decode_bytecode (gst_uchar *bp)
 			    TREE_STORE | TREE_LIT_VAR, literals[n]);
       else
 	{
-	  code_tree *value = pop_tree_node (NULL);
-          code_tree *var = push_tree_node_oop (IP0, NULL,
-					       TREE_PUSH | TREE_LIT_CONST,
-					       literals[n]);
-	  pop_tree_node (NULL);
-
+	  code_tree *value, *var;
+          push_tree_node_oop (IP0, NULL,
+			      TREE_ALT_PUSH | TREE_LIT_CONST, literals[n]);
           inline_cache *ic =
 	    set_inline_cache (_gst_builtin_selectors[VALUE_COLON_SPECIAL].symbol,
 			      1, false, TREE_SEND, 0);
 
-	  var->next = value;
-	  push_tree_node (IP0, var, TREE_SEND, (PTR) ic);
+	  var = pop_tree_node (NULL);
+	  value = pop_tree_node (var);
+	  push_tree_node (IP0, value, TREE_SEND | TREE_STORE_LIT_VAR, (PTR) ic);
 	}
     }
 
