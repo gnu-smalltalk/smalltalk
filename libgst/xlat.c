@@ -3392,6 +3392,8 @@ decode_bytecode (gst_uchar *bp)
           code_tree *var = push_tree_node_oop (IP0, NULL,
 					       TREE_PUSH | TREE_LIT_CONST,
 					       literals[n]);
+	  pop_tree_node (NULL);
+
           inline_cache *ic =
 	    set_inline_cache (_gst_builtin_selectors[VALUE_COLON_SPECIAL].symbol,
 			      1, false, TREE_SEND, 0);
