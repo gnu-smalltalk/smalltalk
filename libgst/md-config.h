@@ -87,13 +87,7 @@
 # define REG_AVAILABILITY 0
 # define __DECL_REG1 __asm("%esi")
 # define __DECL_REG2 __asm("%edi")
-# if defined __APPLE__
-#  define __DECL_REG3 /* bug on Apple GCC? */
-# elif defined __PIC__ || defined __pic__
-#  define __DECL_REG3 __asm("%edx")   /* Don't conflict with GOT pointer... */
-# else
-#  define __DECL_REG3 __asm("%ebx")   /* ...but prefer a callee-save reg.  */
-# endif
+# define __DECL_REG3 /* no more caller-save regs if PIC is in use!  */
 #endif
 
 #if !defined(__DECL_REG1) && defined(PPC) || defined(_POWER) || defined(_IBMR2)
