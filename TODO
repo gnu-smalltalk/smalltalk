@@ -31,7 +31,6 @@ FileStream that only shows a segment of the file (done).
 * Expat
 
 * improvements to DBI
-** SQLite support
 ** refactoring and prepared statements support
 ** merge ROE?
 

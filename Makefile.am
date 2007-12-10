@@ -110,10 +110,6 @@ gst_DEPENDENCIES += opcode/libdisass.la
 AM_CPPFLAGS += -I$(top_srcdir)/opcode
 endif
 
-# By default, we do not build the installed VM as a shared library: it is
-# a bit slower, and on x86 we also exchange the PIC register for the frame
-gst_LDFLAGS = -export-dynamic -static
-
 # The single gst-tool executable is installed with multiple names, hence
 # we use noinst here.
 noinst_PROGRAMS = gst-tool
