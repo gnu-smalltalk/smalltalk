@@ -252,8 +252,8 @@ implicit type coercing code for binary operations.'>
 	selfGen := self generality.
 	aNumGen := aNumber generality.
 	aNumGen isNil ifTrue: [^true].
-	selfGen > aNumGen ifTrue: [^false == (self ~= (self coerce: aNumber))].
-	selfGen < aNumGen ifTrue: [^false == ((aNumber coerce: self) ~= aNumber)].
+	selfGen > aNumGen ifTrue: [^false == (self = (self coerce: aNumber))].
+	selfGen < aNumGen ifTrue: [^false == ((aNumber coerce: self) = aNumber)].
 	self retryError
     ]
 

@@ -1,3 +1,8 @@
+2007-12-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Number.st: Fix thinko in #retryInequalityCoercing:,
+	fixing (3 perform: #~= with: 3.0).
+
 2007-12-06  Paolo Bonzini  <bonzini@gnu.org>
 
         * kernel/BlkClosure.st: Don't modify the stack top in #asContext:.
