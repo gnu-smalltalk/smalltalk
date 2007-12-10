@@ -1,3 +1,7 @@
+2007-12-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Series.st: Allow autoscaling one end of the axes.
+
 2007-11-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* 2D.st: Override GPPlot>>#displaySeriesOn:.  Rename *Params

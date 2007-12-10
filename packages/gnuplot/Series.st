@@ -614,9 +614,9 @@ axis.'>
             nextPutAll: 'set ';
             nextPutAll: name;
             nextPutAll: 'range [';
-            display: range first;
+            display: (range first ifNil: [ '*' ]);
             nextPut: $:;
-            display: range second;
+            display: (range second ifNil: [ '*' ]);
             nextPut: $];
             nl
     ]
