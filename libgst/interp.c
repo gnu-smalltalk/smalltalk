@@ -1738,7 +1738,6 @@ resume_process (OOP processOOP,
          Anyway, it must be the first in its priority queue - so don't
          put it to sleep.  */
       add_first_link (processList, processOOP);
-      ACTIVE_PROCESS_YIELD ();
     }
 
   return (true);

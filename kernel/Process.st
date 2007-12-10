@@ -241,10 +241,14 @@ can suspend themselves and resume themselves however they wish.'>
 			and: Processor highestPriority].
 
 	[
-	    | waiting |
+	    | activePriority waiting |
+            activePriority := Processor activePriority.
 	    waiting := self isActive not and: [ self isReady not ].
 	    priority := anInteger.
-	    waiting ifFalse: [self resume]
+	    waiting ifFalse: [
+		"Atomically move the process to the right list."
+                self resume.
+                anInteger > activePriority ifTrue: [ Processor yield ] ].
 	] valueWithoutPreemption
     ]
 
@@ -344,9 +348,17 @@ can suspend themselves and resume themselves however they wish.'>
 	activePriority := Processor activePriority.
 	closure :=
 	    [[[
-		"Inlined #priority: to be able to suspend the process."
+		"#priority: is inlined for two reasons.  First, to be able to
+		 suspend the process, and second because we need to invert
+		 the test on activePriority!  This because here we may want to
+		 yield to the creator, while in #priority: we may want to yield
+		 to the process whose priority was changed."
 		priority := aPriority.
-		aBoolean ifTrue: [self suspend] ifFalse: [self resume].
+		aBoolean
+		    ifTrue: [self suspend]
+		    ifFalse: [
+			self resume.
+			aPriority < activePriority ifTrue: [ Processor yield ] ].
 		aBlockClosure value]
 			on: SystemExceptions.ProcessBeingTerminated
 			do: 
@@ -365,7 +377,8 @@ can suspend themselves and resume themselves however they wish.'>
 	priority := Processor unpreemptedPriority.
 	self
 	    addToBeFinalized;
-	    resume
+	    resume.
+	aPriority > Processor activePriority ifTrue: [ Processor yield ].
     ]
 
     isActive [

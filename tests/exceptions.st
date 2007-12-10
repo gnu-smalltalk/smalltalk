@@ -175,7 +175,7 @@ Eval [ [ [ ^#block printNl ] ifCurtailed: [ ^#inner printNl ] ] ifCurtailed: [ ^
 Eval [ [ self halt ] on: 1 do: [ :ex | 'blah' printNl ] ]
 
 "Test error handling within a process."
-Eval [ [^'test'] fork ]
+Eval [ p := [^'test'] fork. [p isReady] whileTrue: [Processor yield]]
 
 "Test error handling within a process."
-Eval [ [self error: 'test'] fork ]
+Eval [ p := [self error: 'test'] fork. [p isReady] whileTrue: [Processor yield]]

@@ -1,5 +1,12 @@
 2007-12-10  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Process.st: Call ProcessorScheduler>>#yield if needed
+	after changing the priority.
+	* tests/exceptions.st: Wait for the process to exit, just to be
+	sure.
+
+2007-12-10  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Number.st: Fix thinko in #retryInequalityCoercing:,
 	fixing (3 perform: #~= with: 3.0).
 
