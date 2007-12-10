@@ -51,23 +51,6 @@
 
 #include "gstpriv.h"
 
-/* Define to provide a log of memory allocations on stderr.  */
-/* #define LOG_MEMORY_OPERATIONS */
-
-/* MinGW32 and MacOS X have problems redefining malloc and friends.  In this
-   case, we use a completely separate area than the one used by the system
-   malloc and we don't cause trouble.
-
-   For MacOS X, these problems only show up when using readline: readline
-   will use the system malloc because of Mach-O's unique two-level namespaces
-   "feature", and as you can imagine we have some problems when we try to use
-   *our* routine to reallocate memory that readline has allocated.  Even
-   if we did not try reallocating readline memory, we would not have a way
-   to free it.  */
-#if defined __MSVCRT__ || defined __MACH__
-#define NO_MALLOC_OVERRIDE
-#endif
-
 #define	SMALL2FREE(B, N)	((heap_freeobj*)(((char *)(B)->vSmall.data) + (N)*(B)->size))
 
 #define	MEM2BLOCK(M)		((heap_block*)(((intptr_t)(M)) & -pagesize))
@@ -110,10 +93,6 @@ static void heap_add_to_free_list (heap_data *h, heap_block *);
 static void heap_primitive_free (heap_data *h, heap_block *);
 static PTR morecore (size_t);
 
-#ifdef LOG_MEMORY_OPERATIONS
-static int in_xmalloc;
-static void log_memory (char *op, int n, PTR block);
-#endif
 
 
 /* This list was produced by this command 
@@ -706,7 +685,6 @@ morecore (size_t size)
      can replace malloc (which we cannot do on MacOS X, see above).  */
   static heap current_heap = NULL;
 
-#ifdef NO_MALLOC_OVERRIDE
   if (current_heap == NULL)
     {
       just_allocated_heap = _gst_heap_create (NULL, MMAP_AREA_SIZE);
@@ -714,7 +692,6 @@ morecore (size_t size)
 	return (NULL);
       current_heap = just_allocated_heap;
     }
-#endif
 
   for (;;)
     {
@@ -750,83 +727,6 @@ morecore (size_t size)
 }
 
 
-#ifndef NO_MALLOC_OVERRIDE
-static heap_data default_heap;
-static int default_heap_init;
-
-PTR 
-malloc (size_t n)
-{
-  PTR block;
-
-  if (!default_heap_init)
-    {
-      init_heap (&default_heap, 0, 0);
-      default_heap_init = 1;
-    }
-
-  block = _gst_mem_alloc(&default_heap, n);
-#ifdef LOG_MEMORY_OPERATIONS
-  log_memory ("Alloc", n, block);
-#endif
-  return (block);
-}
-
-PTR 
-calloc (size_t n, size_t m)
-{
-  PTR block;
-
-  if (!default_heap_init)
-    {
-      init_heap (&default_heap, 0, 0);
-      default_heap_init = 1;
-    }
-
-  block = _gst_mem_alloc(&default_heap, n * m);
-  memzero (block, n * m);
-#ifdef LOG_MEMORY_OPERATIONS
-  log_memory ("Alloc", n * m, block);
-#endif
-  return (block);
-}
-
-PTR 
-realloc (PTR block, size_t n)
-{
-  if (!default_heap_init)
-    {
-      init_heap (&default_heap, 0, 0);
-      default_heap_init = 1;
-    }
-
-#ifdef LOG_MEMORY_OPERATIONS
-  {
-    char *op = "  -->";
-    if (block)
-      log_memory ("Realloc", n, block);
-    else
-      op = "Alloc";
-#endif
-  block = _gst_mem_realloc(&default_heap, block, n);
-#ifdef LOG_MEMORY_OPERATIONS
-    log_memory (op, -1, block);
-  }
-#endif
-  return (block);
-}
-
-void
-free (PTR block)
-{
-#ifdef LOG_MEMORY_OPERATIONS
-  if (block)
-    log_memory ("Free", -1, block);
-#endif
-  _gst_mem_free(&default_heap, block);
-}
-#endif /* !NO_MALLOC_OVERRIDE */
-
 char *
 xstrdup (const char *str)
 {
@@ -841,13 +741,7 @@ xmalloc (size_t n)
 {
   PTR block;
 
-#ifdef LOG_MEMORY_OPERATIONS
-  in_xmalloc++;
-#endif
   block = malloc(n);
-#ifdef LOG_MEMORY_OPERATIONS
-  in_xmalloc--;
-#endif
   if (!block && n)
     nomemory(1);
 
@@ -859,13 +753,7 @@ xcalloc (size_t n, size_t s)
 {
   PTR block;
 
-#ifdef LOG_MEMORY_OPERATIONS
-  in_xmalloc++;
-#endif
   block = calloc(n, s);
-#ifdef LOG_MEMORY_OPERATIONS
-  in_xmalloc--;
-#endif
   if (!block && n && s)
     nomemory(1);
 
@@ -877,13 +765,7 @@ xrealloc (PTR p, size_t n)
 {
   PTR block;
 
-#ifdef LOG_MEMORY_OPERATIONS
-  in_xmalloc++;
-#endif
   block = realloc(p, n);
-#ifdef LOG_MEMORY_OPERATIONS
-  in_xmalloc--;
-#endif
   if (!block && n)
     nomemory(1);
 
@@ -893,14 +775,8 @@ xrealloc (PTR p, size_t n)
 void
 xfree (PTR p)
 {
-#ifdef LOG_MEMORY_OPERATIONS
-  in_xmalloc++;
-#endif
   if (p)
     free(p);
-#ifdef LOG_MEMORY_OPERATIONS
-  in_xmalloc--;
-#endif
 }
 
 void
@@ -913,58 +789,4 @@ nomemory (int fatal)
   if (fatal)
     exit (1);
 }
-
-#ifdef LOG_MEMORY_OPERATIONS
-/* Don't use printf to avoid infinite loops */
-static void
-log_memory (char *op, int n, PTR block)
-{
-  char buf[40];
-  intptr_t k;
-  int i;
-
-  memset (buf, ' ', 40);
-  buf[40] = 0;
-#ifndef HAVE_EXECINFO_H
-  buf[39] = '\n';
-#endif
-
-  memcpy (buf, op, strlen(op));
-
-  k = (intptr_t) block;
-  i = 18;
-  do
-    buf[i--] = (k & 15) + ((k & 15) < 10 ? '0' : 'a');
-  while (k >>= 4);
-  buf[i--] = 'x';
-  buf[i] = '0';
-
-  if (n >= 0)
-    {
-      k = (intptr_t) n;
-      i = 38;
-      do
-        buf[i--] = (k % 10) + '0';
-      while (k /= 10);
-    }
-
-  write (STDERR_FILENO, buf, 40);
-
-#ifdef HAVE_EXECINFO_H
-  {
-    PTR backtrace_info[4];
-    int count = backtrace (backtrace_info, 4);
-    int interesting;
-
-    /* 0 is me, 1 is malloc, 2 might be xmalloc */
-    interesting = in_xmalloc ? 3 : 2;
-
-    if (count < interesting + 1)
-      write (STDERR_FILENO, "\n", 1);
-    else
-      backtrace_symbols_fd (backtrace_info + interesting, 1, STDERR_FILENO);
-  }
-#endif
-}
-#endif
 

@@ -102,6 +102,7 @@ bin_PROGRAMS = gst
 gst_SOURCES = main.c
 gst_LDADD = libgst/libgst.la @ICON@
 gst_DEPENDENCIES = libgst/libgst.la @ICON@
+gst_LDFLAGS = -export-dynamic
 
 if ENABLE_DISASSEMBLER
 gst_LDADD += opcode/libdisass.la
@@ -119,7 +120,7 @@ noinst_PROGRAMS = gst-tool
 gst_tool_SOURCES = gst-tool.c
 gst_tool_LDADD = libgst/libgst.la
 gst_tool_DEPENDENCIES = libgst/libgst.la
-gst_tool_LDFLAGS = -export-dynamic -static
+gst_tool_LDFLAGS = -export-dynamic
 
 GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package gst-convert gst-doc
 

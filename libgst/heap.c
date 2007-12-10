@@ -154,24 +154,23 @@ _gst_heap_destroy (heap hd)
 {
   struct heap mtemp;
 
-  if (hd != NULL)
-    {
-      /* The heap descriptor that we are using is currently located in
-	 region we are about to unmap, so we first make a local copy of
-	 it on the stack and use the copy.  */
-      mtemp = *(struct heap *) (hd - HEAP_DELTA);
+  assert (hd);
 
-      /* Now unmap all the pages associated with this region by asking
-         for a negative increment equal to the current size of the
-         region.  */
-      if ((heap_sbrk_internal (&mtemp, mtemp.base - mtemp.top)) == NULL)
-	/* Update the original heap descriptor with any changes */
-	*(struct heap *) (hd - HEAP_DELTA) = mtemp;
-      else
-	{
-	  _gst_osmem_release (mtemp.base, mtemp.areasize);
-	  hd = NULL;
-	}
+  /* The heap descriptor that we are using is currently located in
+     region we are about to unmap, so we first make a local copy of
+     it on the stack and use the copy.  */
+  mtemp = *(struct heap *) (hd - HEAP_DELTA);
+
+  /* Now unmap all the pages associated with this region by asking
+     for a negative increment equal to the current size of the
+     region.  */
+  if ((heap_sbrk_internal (&mtemp, mtemp.base - mtemp.top)) == NULL)
+    /* Update the original heap descriptor with any changes */
+    *(struct heap *) (hd - HEAP_DELTA) = mtemp;
+  else
+    {
+      _gst_osmem_release (mtemp.base, mtemp.areasize);
+      hd = NULL;
     }
 
   return (hd);
@@ -183,16 +182,7 @@ _gst_heap_sbrk (heap hd,
 {
   struct heap *hdp;
 
-  if (!hd)
-#if HAVE_SBRK
-    return sbrk (size);
-#else
-    {
-      errno = ENOMEM;
-      return (PTR) -1;
-    }
-#endif
-
+  assert (hd);
   hdp = (struct heap *) (hd - HEAP_DELTA);
   return heap_sbrk_internal (hdp, size);
 }

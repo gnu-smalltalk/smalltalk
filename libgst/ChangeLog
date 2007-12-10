@@ -1,5 +1,10 @@
 2007-12-10  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/alloc.c: Never override malloc.
+	* libgst/heap.c: Never defer to sbrk.
+
+2007-12-10  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/interp.c: Don't yield in resume_process.
 
 2007-12-10  Paolo Bonzini  <bonzini@gnu.org>
