@@ -56,7 +56,10 @@ TestCase subclass: SQLiteBaseTest [
     ]
     
     tearDown [
-        connection close
+	| f |
+        connection close.
+	f := File name: 'testdb'.
+	f exists ifTrue: [ f remove ].
     ]
     
     connection [

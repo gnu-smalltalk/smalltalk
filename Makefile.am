@@ -214,10 +214,10 @@ install-data-hook::
 	  --srcdir="$(srcdir)" $(srcdir)/packages.xml
 	$(mkdir_p) $(DESTDIR)$(imagedir)
 	cd $(DESTDIR)$(imagedir) && \
-	  $(DESTDIR)$(bindir)/gst --no-user-files -i \
+	  "@abs_top_builddir@/gst" --no-user-files -i \
 	    --kernel-dir="$(DESTDIR)$(pkgdatadir)/kernel" \
 	    --image="$(DESTDIR)$(imagedir)/gst.im" \
-	    -f @abs_top_srcdir@/scripts/Finish.st \
+	    -f "@abs_top_srcdir@/scripts/Finish.st" \
 	    "$(pkgdatadir)" "$(imagedir)" $(MODULES)
 
 uninstall-local:: gst-tool
