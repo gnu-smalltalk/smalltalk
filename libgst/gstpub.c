@@ -146,13 +146,13 @@ gst_process_file (const char *fileName, enum gst_file_dir dir)
 }
 
 int
-gst_get_var (int index)
+gst_get_var (enum gst_var_index index)
 {
   return _gst_get_var (index);
 }
 
 int
-gst_set_var (int index, int value)
+gst_set_var (enum gst_var_index index, int value)
 {
   return _gst_set_var (index, value);
 }
@@ -405,6 +405,30 @@ gst_long_double_to_oop (long double f)
 }
 
 OOP
+gst_wchar_to_oop (wchar_t c)
+{
+  return _gst_wchar_to_oop (c);
+}
+
+OOP
+gst_wstring_to_oop (const wchar_t *str)
+{
+  return _gst_wstring_to_oop (str);
+}
+
+wchar_t
+gst_oop_to_wchar (OOP oop)
+{
+  return _gst_oop_to_wchar (oop);
+}
+
+wchar_t *
+gst_oop_to_wstring (OOP oop)
+{
+  return _gst_oop_to_wstring (oop);
+}
+
+OOP
 gst_get_object_class (OOP oop)
 {
   return _gst_get_object_class (oop);
@@ -426,6 +450,12 @@ mst_Boolean
 gst_object_is_kind_of (OOP oop, OOP candidate)
 {
   return _gst_object_is_kind_of (oop, candidate);
+}
+
+OOP
+gst_perform (OOP oop, OOP selector)
+{
+  return _gst_perform (oop, selector);
 }
 
 OOP

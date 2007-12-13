@@ -226,8 +226,8 @@ extern void gst_process_stdin (const char *prompt);
 extern mst_Boolean gst_process_file (const char *fileName, enum gst_file_dir dir);
 
 /* Functions in interp.h.  */
-extern int gst_get_var (int index);
-extern int gst_set_var (int index, int value);
+extern int gst_get_var (enum gst_var_index index);
+extern int gst_set_var (enum gst_var_index index, int value);
 
 /* Functions in comp.h.  */
 extern void gst_invoke_hook (enum gst_vm_hook);
@@ -278,6 +278,8 @@ extern OOP gst_get_object_class (OOP oop);
 extern OOP gst_get_superclass (OOP oop);
 extern mst_Boolean gst_class_is_kind_of (OOP oop, OOP candidate);
 extern mst_Boolean gst_object_is_kind_of (OOP oop, OOP candidate);
+extern void gst_set_c_object (OOP oop, PTR co);
+extern OOP gst_perform (OOP oop, OOP selector);
 extern OOP gst_perform_with (OOP oop, OOP selector, OOP arg);
 extern mst_Boolean gst_class_implements_selector (OOP class_oop, OOP selector);
 extern mst_Boolean gst_class_can_understand (OOP class_oop, OOP selector);
@@ -285,6 +287,10 @@ extern mst_Boolean gst_responds_to (OOP oop, OOP selector);
 extern size_t gst_oop_size (OOP oop);
 extern OOP gst_oop_at (OOP oop, size_t index);
 extern OOP gst_oop_at_put (OOP oop, size_t index, OOP new_oop); 
+extern OOP gst_wchar_to_oop (wchar_t c);
+extern OOP gst_wstring_to_oop (const wchar_t *str);
+extern wchar_t gst_oop_to_wchar (OOP oop);
+extern wchar_t *gst_oop_to_wstring (OOP oop);
 
 /* This is exclusively for programs who link with libgst.a; plugins
    should not use this VMProxy but rather the one they receive in
