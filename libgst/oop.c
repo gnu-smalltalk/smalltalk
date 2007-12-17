@@ -1643,9 +1643,6 @@ _gst_tenure_all_survivors ()
 void
 check_weak_refs ()
 {
-  OOP oop = NULL, *field;
-  mst_Boolean mourn;
-
   rb_node_t *node;
   rb_traverse_t t;
 
@@ -1653,11 +1650,15 @@ check_weak_refs ()
        node; node = rb_next (&t))
     {
       weak_area_tree *area = (weak_area_tree *) node;
+      mst_Boolean mourn = false;
+      OOP *field;
 
-      mourn = false;
+      if (!IS_OOP_VALID_GC (area->oop))
+	continue;
+
       for (field = area->base; field < area->end; field++)
         {
-	  oop = *field;
+	  OOP oop = *field;
           if (IS_INT (oop))
 	    continue;
 
@@ -1669,7 +1670,7 @@ check_weak_refs ()
         }
 
       if (mourn)
-        _gst_add_buf_pointer (oop);
+        _gst_add_buf_pointer (area->oop);
     }
 }
 

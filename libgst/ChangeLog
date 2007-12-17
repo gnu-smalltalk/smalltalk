@@ -1,5 +1,16 @@
 2007-12-17  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/oop.c (check_weak_refs): Undo part, only fix the thinko.
+	(sweep_oop): Undo previous change.
+
+2007-12-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/oop.c (check_weak_refs): Make dead weak objects non-weak,
+	fix thinko.
+	(sweep_oop): Don't make dead weak objects non-weak.
+
+2007-12-17  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/genpr-parse.y: Declare _gst_primitives_md5 as unsigned char.
 	* libgst/interp.h: Ditto.
 
