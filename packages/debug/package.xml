@@ -10,4 +10,5 @@
 
   <file>DebugTools.st</file>
   <file>debugtests.st</file>
+  <file>ChangeLog</file>
 </package>

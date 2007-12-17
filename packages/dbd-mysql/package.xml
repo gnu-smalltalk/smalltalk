@@ -24,4 +24,5 @@
   <file>ResultSet.st</file>
   <file>Row.st</file>
   <file>Statement.st</file>
+  <file>ChangeLog</file>
 </package>

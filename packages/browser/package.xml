@@ -57,4 +57,5 @@
   <file>GuiData.st</file>
   <file>ModalDialog.st</file>
   <file>StrcInspect.st</file>
+  <file>ChangeLog</file>
 </package>
