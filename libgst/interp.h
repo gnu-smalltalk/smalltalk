@@ -554,7 +554,7 @@ prim_table_entry;
 /* The checksum of the table of primitive numbers.  Right now it is an MD5,
    computed from part of the C source code of prims.inl.  We compare it when
    loading an image, to avoid having to reload the primitive table.  */
-extern int _gst_primitives_md5[4];
+extern unsigned char _gst_primitives_md5[16];
 
 /* The table of functions that implement the primitives.  */
 extern prim_table_entry _gst_primitive_table[NUM_PRIMITIVES];

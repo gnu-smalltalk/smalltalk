@@ -1,3 +1,8 @@
+2007-12-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/genpr-parse.y: Declare _gst_primitives_md5 as unsigned char.
+	* libgst/interp.h: Ditto.
+
 2007-12-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gstpub.h: Declare functions only accessible via the VMProxy.

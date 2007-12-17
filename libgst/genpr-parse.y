@@ -357,7 +357,7 @@ void
 output()
 {
   char *proto, *stmt, *def;
-  unsigned int md5[16 / sizeof (int)];
+  unsigned char md5[16];
 
   gen_proto ("VMpr_HOLE");
 
@@ -380,7 +380,9 @@ output()
 	  "  PRIM_FAILED;\n"
 	  "}\n"
 	  "\n"
-	  "int _gst_primitives_md5[4] = { 0x%x, 0x%x, 0x%x, 0x%x };\n"
+	  "unsigned char\n"
+	  "_gst_primitives_md5[16] = { %d, %d, %d, %d, %d, %d, %d, %d,\n"
+	  "                            %d, %d, %d, %d, %d, %d, %d, %d };\n"
 	  "\n"
 	  "void\n"
 	  "_gst_init_primitives()\n"
@@ -398,7 +400,8 @@ output()
 	  "}\n"
 	  "\n",
 	  proto, stmt,
-	  md5[0], md5[1], md5[2], md5[3],
+	  md5[0], md5[1], md5[2], md5[3], md5[4], md5[5], md5[6], md5[7],
+	  md5[8], md5[9], md5[10], md5[11], md5[12], md5[13], md5[14], md5[15],
 	  def, prim_no + 1);
 
   free (proto);
