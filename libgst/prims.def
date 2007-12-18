@@ -333,7 +333,11 @@ primitive VMpr_SmallInteger_bitShift [succeed,fail]
       iarg2 = TO_INT (oop2);
       if (iarg2 < 0)
 	{
-	  PUSH_INT (iarg1 >> -iarg2);
+	  if (iarg2 >= -ST_INT_SIZE)
+	    PUSH_INT (iarg1 >> -iarg2);
+	  else
+	    PUSH_INT (iarg1 >> ST_INT_SIZE);
+
 	  PRIM_SUCCEEDED;
 	}
       if COMMON (iarg2 < ST_INT_SIZE)

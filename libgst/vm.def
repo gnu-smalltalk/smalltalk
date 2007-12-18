@@ -367,10 +367,10 @@ operation BIT_SHIFT_SPECIAL ( op1 op2 -- op ) {
       iarg2 = TO_INT (op2);
       if (iarg2 < 0)
         {
-          if COMMON (iarg2 < -ST_INT_SIZE)
-            op = FROM_INT (0);
-	  else
+          if COMMON (iarg2 >= -ST_INT_SIZE)
             op = FROM_INT (iarg1 >> -iarg2);
+	  else
+            op = FROM_INT (iarg1 >> ST_INT_SIZE);
 
           break;
         }

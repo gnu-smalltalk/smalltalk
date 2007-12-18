@@ -1,3 +1,8 @@
+2007-12-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Fix right #bitShift: with high RHS and LHS<0.
+	* libgst/vm.def: Fix right #bitShift: with high RHS and LHS<0.
+
 2007-12-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c (check_weak_refs): Undo part, only fix the thinko.
