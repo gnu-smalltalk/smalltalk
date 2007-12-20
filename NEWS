@@ -113,6 +113,9 @@ o   Added #from: to Collection, which constructs an instance of the class
     returns a string and is the same as using #, repeatedly, but is more
     efficient.
 
+o   All collection classes support #readStream, though the default
+    implementation (which uses generators) could be slow.
+
 o   Continuations and generators have moved to the base image.  More complex
     examples of continuations still reside in the Continuations package.
 

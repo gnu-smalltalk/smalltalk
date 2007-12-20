@@ -294,6 +294,13 @@ of objects.'>
 	
     ]
 
+    readStream [
+        "Answer a stream that gives elements of the receiver"
+
+	<category: 'enumeration'>
+	^Generator on: self do: [ :gen :each | gen yield: each ]
+    ]
+
     do: aBlock [
 	"Enumerate each object of the receiver, passing them to aBlock"
 
