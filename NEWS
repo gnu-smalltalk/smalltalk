@@ -77,9 +77,7 @@ o   In general, GNU Smalltalk is able to load files with the old syntax.
 Packages improvements:
 
 o   All packages in the distribution are now installed in the new ".star"
-    format (for SmallTalk ARchive).  In the future, the configure macros
-    that are used to ease this process may be extracted in order to create
-    a standard skeleton for package tarballs.
+    format (for SmallTalk ARchive).
 
     ".star" files include at the top a package.xml file (whose format
     is the same as the <package> tag of packages.xml).  The name of
@@ -90,6 +88,9 @@ o   In install mode, gst-package automatically creates a ".star" file.
     gst-package also accepts ".star" files on the command line; in this case,
     install mode will simply copy the file instead of rebuilding it from
     scratch.
+
+o   gst-package supports preparing a standard skeleton for package tarballs,
+    using the --prepare option.
 
 o   Packages can specify a "testing-only" subpackage that is loaded when
     running tests (e.g. with "gst-load --test" or "gst-sunit --package"),

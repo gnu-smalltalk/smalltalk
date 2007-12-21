@@ -138,25 +138,28 @@ Legal concerns:
 * LGPL::                Complying with the GNU LGPL.
 
 Features:
-* Memory access::      The direct memory accessing classes and methods.
-* Namespaces::         Avoiding clashes between class names.
-* Disk file-IO::       Methods for reading and writing disk files.
-* Object dumping::     Methods that read and write objects in binary format.
-* GC::                 The @gst{} memory manager.
-* Security::           Sandboxing and access control.
-* Special objects::    Methods to assign particular properties to objects.
-* Dynamic loading::    Picking external libraries and modules at run-time.
+* Extended streams::    Extensions to streams, and generators
+* Regular expressions:: String matching extensions
+* Namespaces::          Avoiding clashes between class names.
+* Disk file-IO::        Methods for reading and writing disk files.
+* Object dumping::      Methods that read and write objects in binary format.
+* Dynamic loading::     Picking external libraries and modules at run-time.
+* Documentation::       Automatic documentation generation.
+* Memory access::       The direct memory accessing classes and methods, plus
+                        broadcasts from the virtual machine.
+* GC::                  The @gst{} memory manager.
+* Security::            Sandboxing and access control.
+* Special objects::     Methods to assign particular properties to objects.
 
 Packages
-* Blox::                   @gst{}'s user interface building blocks.
-* Smalltalk-in-Smalltalk:: Beyond Smalltalk's standard reflective abilities.
-* Database::               Access databases from Smalltalk programs.
-* Locales::                Internationalize and localize Smalltalk programs
-* SUnit:                   SUnit.
-* Network support::        An interface to TCP/IP and UDP and support for
-                           popular network protocols.
-* XML::                    An XML parser and XSL processor.
-* Other packages::         Various interesting modules.
+* Blox, BloxTK, and Browser:             Blox.
+* Parser, STInST, Compiler:              Smalltalk-in-Smalltalk.
+* DB and MySQL:                          Database.
+* I18N:                                  Locales.
+* SUnit:                                 SUnit.
+* TCP, WebServer, NetClients:            Network support.
+* XML, XPath, XSL:                       XML.
+* Other packages:                        Other packages.
 
 Emacs
 * Autoloading::       Autoloading @gst{} mode.
@@ -164,14 +167,16 @@ Emacs
 * Interactor::        Smalltalk interactor mode.
 
 C and Smalltalk:
-* External modules::   Linking your libraries to the virtual machine
-* C callout::          Calls from Smalltalk to C.
-* C data types::       Manipulating C data from Smalltalk.
-* Smalltalk types::    Manipulating Smalltalk data from C.
-* Smalltalk callin::   Calls from C to Smalltalk.
-* Using Smalltalk::    Using the Smalltalk environment as an extension library.
-* Incubator::          Protecting newly created objects from garbage
-                       collections.
+* External modules::        Linking your libraries to the virtual machine
+* C callout::               Calls from Smalltalk to C
+* C data types::            Manipulating C data from Smalltalk
+* Smalltalk types::         Manipulating Smalltalk data from C
+* Smalltalk callin::        Calls from C to Smalltalk
+* Object representation::   Manipulating your own Smalltalk objects
+* Incubator::               Protecting newly created objects from garbage
+                            collections
+* Other C functions::       Handling and creating OOPs
+* Using Smalltalk::         The Smalltalk environment as an extension library
 
 Tutorial:
 * Getting started::              Starting to explore @gst{}
@@ -184,6 +189,7 @@ Tutorial:
 * Debugging::                    Things go bad in Smalltalk too!
 * More subclassing::             Coexisting in the class hierarchy
 * Streams::                      Something really powerful
+* Exception handling::           More sophisticated error handling
 * Behind the scenes::            Some nice stuff from the Smalltalk innards
 * And now::                      Some final words
 * The syntax::                   For the most die-hard computer scientists
@@ -868,76 +874,165 @@ Collection's @code{allSatisfy:} and @code{anySatisfy:} methods and many
 methods in SystemDictionary (the Smalltalk dictionary's class).
 
 @menu
-* Memory access::      The direct memory accessing classes and methods, plus
-                       broadcasts from the virtual machine.
-* Namespaces::         Avoiding clashes between class names.
-* Disk file-IO::       Methods for reading and writing disk files.
-* Object dumping::     Methods that read and write objects in binary format.
-* GC::                 The @gst{} memory manager.
-* Security::           Sandboxing and access control.
-* Special objects::    Methods to assign particular properties to objects.
-* Dynamic loading::    Picking external libraries and modules at run-time.
-* Documentation::      Automatic documentation generation.
+* Extended streams::    Extensions to streams, and generators
+* Regular expressions:: String matching extensions
+* Namespaces::          Avoiding clashes between class names.
+* Disk file-IO::        Methods for reading and writing disk files.
+* Object dumping::      Methods that read and write objects in binary format.
+* Dynamic loading::     Picking external libraries and modules at run-time.
+* Documentation::       Automatic documentation generation.
+* Memory access::       The direct memory accessing classes and methods, plus
+                        broadcasts from the virtual machine.
+* GC::                  The @gst{} memory manager.
+* Security::            Sandboxing and access control.
+* Special objects::     Methods to assign particular properties to objects.
 @end menu
 
 
-@node Memory access
-@section Memory accessing methods
+@node Extended streams
+@section Extended streams
 
-@gst{} provides methods to query its own internal data structures.
-You may determine the real memory address of an object or the real 
-memory address of the OOP table that points to a given object, by
-using messages to the @code{Memory} class, described below.
+The basic image in @gst{} includes powerful extensions to the @emph{Stream}
+hierarchy found in ANSI Smalltalk (and Smalltalk-80).  In particular:
 
-@defmethod Object asOop
-Returns the index of the OOP for anObject.  This index is immume from
-garbage collection and is the same value used by default as an hash
-value for anObject (it is returned by Object's implementation of
-@code{hash} and @code{identityHash}).
-@end defmethod
+@itemize @bullet
+@item
+Read streams support all the iteration protocols available for collections.  In
+some cases (like @code{fold:}, @code{detect:}, @code{inject:into:}) these
+are completely identical.  For messages that return a new stream, such
+as @code{select:} and @code{collect:}, the blocks are evaluated lazily,
+as elements are requested from the stream using @code{next}.
 
-@defmethod Integer asObject
-Converts the given OOP @emph{index} (not address) back to an object.
-Fails if no object is associated to the given index.
-@end defmethod
+@item
+Read streams can be concatenated using @code{,} like SequenceableCollections.
 
-@defmethod Integer asObjectNoFail
-Converts the given OOP @emph{index} (not address) back to an object.
-Returns nil if no object is associated to the given index.
-@end defmethod
+@item
+@dfn{Generators} are supported as a quick way to create a Stream.
+A generator is a kind of pluggable stream, in that a user-supplied
+blocks defines which values are in a stream.
 
-Other methods in ByteArray and Memory allow to read various C types
-(@code{doubleAt:}, @code{ucharAt:}, etc.).  For examples of using
-@code{asOop} and @code{asObject}, look at the Blox source code in
-@file{blox-tk/BloxBasic.st}.
+For example, here is an empty generator and two infinite generators:
 
-Another interesting class is ObjectMemory.  This provides a few methods
-that enable one to tune the virtual machine's usage of memory; many
-methods that in the past were instance methods of Smalltalk or class
-methods of Memory are now class methods of ObjectMemory.  In addition,
-and that's what the rest of this section is about, the virtual machines
-signals events to its dependents exactly through this class.
+@example
+"Returns an empty stream"
+Generator on: [ :gen | ]
 
-The events that can be received are
-@table @dfn
-@item returnFromSnapshot
-This is sent every time an image is restarted, and substitutes the
-concept of an @dfn{init block} that was present in previous versions.
+"Return an infinite stream of 1's"
+Generator on: [ :gen | [ gen yield: 1 ] repeat ]
 
-@item aboutToQuit
-This is sent just before the interpreter is exiting, either because
-@code{ObjectMemory quit} was sent or because the specified files were
-all filed in.  Exiting from within this event might cause an infinite
-loop, so be careful.
+"Return an infinite stream of integers counting up from 1"
+Generator inject: 1 into: [ :value | value + 1 ]
+@end example
 
-@item aboutToSnapshot
-This is sent just before an image file is created.  Exiting from within
-this event will leave any preexisting image untouched.
+The block is put ``on hold'' and starts executing as soon as @code{#next}
+or @code{#atEnd} are sent to the generator.  When the block sends
+@code{#yield:} to the generator, it is again put on hold and the argument
+becomes the next object in the stream.
 
-@item finishedSnapshot
-This is sent just after an image file is created.  Exiting from within
-this event will not make the image unusable.
-@end table
+Generators use @dfn{continuations}, but they shield the users from their
+complexity by presenting the same simple interface as streams.
+@end itemize
+
+
+@node Regular expressions
+@section Regular expression matching
+
+@emph{Regular expressions}, or "regexes", are a sophisticated way to
+efficiently match patterns of text.  If you are unfamiliar with regular
+expressions in general, see @ref{Regexps, Syntax of Regular Expressions,
+20.5 Syntax of Regular Expressions, emacs, GNU Emacs Manual}, for a
+guide for those who have never used regular expressions.
+
+@gst{} supports regular expressions in the core image with methods
+on @code{String}.
+
+The GNU @gst{} expression library is derived from GNU libc,
+with modifications made originally for Ruby to support Perl-like syntax.
+It will always use its included library, and never the ones installed on
+your system; this may change in the future in backwards-compatible ways.
+Regular expressions are currently 8-bit clean, meaning they can
+work with any ordinary String, but do not support full Unicode, even
+when package @code{I18N} is loaded.
+
+Broadly speaking, these regexes support Perl 5 syntax; register groups
+@samp{()} and repetition @samp{@{@}} must not be given with backslashes,
+and their counterpart literal characters should.  For example,
+@samp{\@{@{1,3@}} matches @samp{@{}, @samp{@{@{}, @samp{@{@{@{};
+correspondingly, @samp{(a)(\()} matches @samp{a(}, with @samp{a} and
+@samp{(} as the first and second register groups respectively.
+@gst{} also supports the regex modifiers @samp{imsx}, as in Perl.  You can't
+put regex modifiers like @samp{im} after Smalltalk strings to
+specify them, because they aren't part of Smalltalk syntax.  Instead,
+use the inline modifier syntax.  For example, @samp{(?is:abc.)}
+is equivalent to @samp{[Aa][Bb][Cc](?:.|\n)}.
+
+In most cases, you should specify regular expressions as ordinary
+strings.  @gst{} always caches compiled regexes, and uses a special
+high-efficiency caching when looking up literal strings (i.e. most
+regexes), to hide the compiled @code{Regex} objects from most code.
+For special cases where this caching is not good enough, simply send
+@code{#asRegex} to a string to retrieved a compiled form, which
+works in all places in the public API where you would specify a regex
+string.  You should always rely on the cache until you have demonstrated
+that using Regex objects makes a noticeable performance difference in
+your code.
+
+Smalltalk strings only have one escape, the @samp{'} given by
+@samp{''}, so backslashes used in regular expression strings will be
+understood as backslashes, and a literal backslash can be given directly
+with @samp{\\}@footnote{Whereas it must be given as @samp{\\\\}
+in a literal Emacs Lisp string, for example.}.
+
+The methods on the compiled Regex object are private to this interface.
+As a public interface, @gst{} provides methods on String, in the category
+@samp{regex}.  There are several methods for matching, replacing, pattern
+expansion, iterating over matches, and other useful things.
+
+The fundamental operator is @code{#searchRegex:}, usually written as
+@code{#=~}, reminiscent of Perl syntax.  This method will always
+return a @code{RegexResults}, which you can query for whether
+the regex matched, the location Interval and contents of the match and
+any register groups as a collection, and other features.  For example,
+here is a simple configuration file line parser:
+
+@example
+| file config |
+config := LookupTable new.
+file := (File name: 'myapp.conf') readStream.
+file linesDo: [:line |
+    (line =~ '(\w+)\s*=\s*((?: ?\w+)+)') ifMatched: [:match |
+        config at: (match at: 1) put: (match at: 2)]].
+file close.
+config printNl.
+@end example
+
+As with Perl, @code{=~} will scan the entire string and answer the
+leftmost match if any is to be found, consuming as many characters as
+possible from that position.  You can anchor the search with variant
+messages like @code{#matchRegex:}, or of course @code{^} and
+@code{$} with their usual semantics if you prefer.
+
+You shouldn't modify the string while you want a particular RegexResults
+object matched on it to remain valid, because changes to the matched
+text may propagate to the RegexResults object.
+@c (currently "will", but best to leave open)
+
+Analogously to the Perl @code{s} operator, @gst{} provides
+@code{#replacingRegex:with:}.  Unlike Perl, @gst{} employs the pattern expansion
+syntax of the @code{#%} message here.  For example, @code{'The ratio is
+16/9.' replacingRegex: '(\d+)/(\d+)' with: '$%1\over%2$'} answers
+@code{'The ratio is $16\over9$.'}.  In place of the @code{g}
+modifier, use the @code{#replacingAllRegex:with:} message instead.
+
+One other interesting String message is @code{#onOccurrencesOfRegex:do:}, which
+invokes its second argument, a block, on every successful match found in the
+receiver.  Internally, every search will start at the end of the previous
+successful match.  For example, this will print all the words in a stream:
+
+@example
+stream contents onOccurrencesOfRegex: '\w+'
+                do: [:each | each match printNl]
+@end example
 
 @node Namespaces
 @section Namespaces
@@ -1296,6 +1391,138 @@ For more information on the usage of the @code{ObjectDumper}, look in the
 class reference.
 
 
+@node Dynamic loading
+@section Dynamic loading
+
+The @code{DLD} class enhances the C callout mechanism to automatically look
+for unresolved functions in a series of program-specified libraries.  To
+add a library to the list, evaluate code like the following:
+@example
+     DLD addLibrary: 'libc'
+@end example
+
+The extension (@file{.so}, @file{.sl}, @file{.a}, @file{.dll} depending
+on your operating system) will be added automatically.  You are advised
+not to specify it for portability reasons.
+
+You will then be able to use the standard C call-out mechanisms
+to define all the functions in the C run-time library.  Note
+that this is a potential security problem (especially if your program is
+SUID root under Unix), so you might want to disable dynamic loading when
+using @gst{} as an extension language.  To disable dynamic loading,
+configure @gst{} passing the @option{--disable-dld} switch.
+
+Note that a @code{DLD} class will be present even if dynamic loading is
+disabled (either because your system is not supported, or by the
+@option{--disable-dld} configure switch) but any attempt to perform
+dynamic linking will result in an error.
+
+@node Documentation
+@section Automatic documentation generator
+
+@gst{} includes an automatic documentation generator invoked via the
+@command{gst-doc} command.  The code is actually part of the
+@code{ClassPublisher} package, and @command{gst-doc} takes care
+of reading the code to be documented and firing a @code{ClassPublisher}.
+
+Currently, @command{gst-doc} can only generate output in Texinfo
+format, though this will change in future releases.
+
+@command{gst-doc} can document code that is already in the image, or
+it can load external files and packages.  Note that the latter approach
+will not work for files and packages that programmatically create code
+or file in other files/packages.
+
+@command{gst-doc} is invoked as follows:
+
+@example
+gst-doc [ @var{flag} ... ] @var{class} ...
+@end example
+
+The following options are supported:
+
+@table @option
+@item -p @var{package}
+@itemx --package=@var{package}
+Produce documentation for the classes inside the @var{package} package.
+
+@item -f @var{file}
+@itemx --file=@var{file}
+Produce documentation for the classes inside the @var{file} file.
+
+@item -I
+@itemx --image-file
+Produce documentation for the code that is already in the given image.
+
+@item -o
+@itemx --output=@var{file}
+Emit documentation in the named file.
+@end table
+
+@var{class} is either a class name, or a namespace name followed by
+@code{.*}.  Documentation will be written for classes that are specified
+in the command line.  @var{class} can be omitted if a @option{-f} or
+@option{-p} option is given.  In this case, documentation will be
+written for all the classes in the package.
+
+@node Memory access
+@section Memory accessing methods
+
+@gst{} provides methods to query its own internal data structures.
+You may determine the real memory address of an object or the real 
+memory address of the OOP table that points to a given object, by
+using messages to the @code{Memory} class, described below.
+
+@defmethod Object asOop
+Returns the index of the OOP for anObject.  This index is immume from
+garbage collection and is the same value used by default as an hash
+value for anObject (it is returned by Object's implementation of
+@code{hash} and @code{identityHash}).
+@end defmethod
+
+@defmethod Integer asObject
+Converts the given OOP @emph{index} (not address) back to an object.
+Fails if no object is associated to the given index.
+@end defmethod
+
+@defmethod Integer asObjectNoFail
+Converts the given OOP @emph{index} (not address) back to an object.
+Returns nil if no object is associated to the given index.
+@end defmethod
+
+Other methods in ByteArray and Memory allow to read various C types
+(@code{doubleAt:}, @code{ucharAt:}, etc.).  For examples of using
+@code{asOop} and @code{asObject}, look at the Blox source code in
+@file{blox-tk/BloxBasic.st}.
+
+Another interesting class is ObjectMemory.  This provides a few methods
+that enable one to tune the virtual machine's usage of memory; many
+methods that in the past were instance methods of Smalltalk or class
+methods of Memory are now class methods of ObjectMemory.  In addition,
+and that's what the rest of this section is about, the virtual machines
+signals events to its dependents exactly through this class.
+
+The events that can be received are
+@table @dfn
+@item returnFromSnapshot
+This is sent every time an image is restarted, and substitutes the
+concept of an @dfn{init block} that was present in previous versions.
+
+@item aboutToQuit
+This is sent just before the interpreter is exiting, either because
+@code{ObjectMemory quit} was sent or because the specified files were
+all filed in.  Exiting from within this event might cause an infinite
+loop, so be careful.
+
+@item aboutToSnapshot
+This is sent just before an image file is created.  Exiting from within
+this event will leave any preexisting image untouched.
+
+@item finishedSnapshot
+This is sent just after an image file is created.  Exiting from within
+this event will not make the image unusable.
+@end table
+
 @node GC
 @section Memory management in @gst{}
 
@@ -1637,80 +1864,6 @@ which has been replaced by @code{WeakKeyDictionary}; the usage is completely
 identical, but the implementation was changed to use a more efficient
 approach based on ephemeron objects.
 
-@node Dynamic loading
-@section Dynamic loading
-
-The @code{DLD} class enhances the C callout mechanism to automatically look
-for unresolved functions in a series of program-specified libraries.  To
-add a library to the list, evaluate code like the following:
-@example
-     DLD addLibrary: 'libc'
-@end example
-
-The extension (@file{.so}, @file{.sl}, @file{.a}, @file{.dll} depending
-on your operating system) will be added automatically.  You are advised
-not to specify it for portability reasons.
-
-You will then be able to use the standard C call-out mechanisms
-to define all the functions in the C run-time library.  Note
-that this is a potential security problem (especially if your program is
-SUID root under Unix), so you might want to disable dynamic loading when
-using @gst{} as an extension language.  To disable dynamic loading,
-configure @gst{} passing the @option{--disable-dld} switch.
-
-Note that a @code{DLD} class will be present even if dynamic loading is
-disabled (either because your system is not supported, or by the
-@option{--disable-dld} configure switch) but any attempt to perform
-dynamic linking will result in an error.
-
-@node Documentation
-@section Automatic documentation generator
-
-@gst{} includes an automatic documentation generator invoked via the
-@command{gst-doc} command.  The code is actually part of the
-@code{ClassPublisher} package, and @command{gst-doc} takes care
-of reading the code to be documented and firing a @code{ClassPublisher}.
-
-Currently, @command{gst-doc} can only generate output in Texinfo
-format, though this will change in future releases.
-
-@command{gst-doc} can document code that is already in the image, or
-it can load external files and packages.  Note that the latter approach
-will not work for files and packages that programmatically create code
-or file in other files/packages.
-
-@command{gst-doc} is invoked as follows:
-
-@example
-gst-doc [ @var{flag} ... ] @var{class} ...
-@end example
-
-The following options are supported:
-
-@table @option
-@item -p @var{package}
-@itemx --package=@var{package}
-Produce documentation for the classes inside the @var{package} package.
-
-@item -f @var{file}
-@itemx --file=@var{file}
-Produce documentation for the classes inside the @var{file} file.
-
-@item -I
-@itemx --image-file
-Produce documentation for the code that is already in the given image.
-
-@item -o
-@itemx --output=@var{file}
-Emit documentation in the named file.
-@end table
-
-@var{class} is either a class name, or a namespace name followed by
-@code{.*}.  Documentation will be written for classes that are specified
-in the command line.  @var{class} can be omitted if a @option{-f} or
-@option{-p} option is given.  In this case, documentation will be
-written for all the classes in the package.
-
 @node Packages
 @chapter Packages
 
@@ -1747,7 +1900,7 @@ together with the virtual machine.  For example, you can do:
 @t{@ @ @ @ gst-load Browser Blox Compiler}
 
 @noindent
-and GST will automatically file in:
+and @gst{} will automatically file in:
 
 @itemize @bullet
 @bulletize BloxTK, needed by Blox
@@ -1790,8 +1943,8 @@ together with the package, but this may change in future versions.
 Do not save the image after loading.
 @end table
 
-To provide support for this system, you have to give away with your GST
-goodies a small file (say you call it @file{mypkg.xml}) which looks like
+To provide support for this system, you have to give away with your @gst{}
+goodies a small file (usually called @file{package.xml}) which looks like
 this:
 @example
 <packages>
@@ -1816,7 +1969,6 @@ this:
   <filein>BloxText.st</filein>
   <filein>BloxExtend.st</filein>
   <filein>Blox.st</filein>
-  <filein>../browser/test.st</filein>
   
   <!-- @i{@r{The @code{file} tag identifies packages that
        compose this package's distribution.}} -->
@@ -1855,8 +2007,9 @@ should list @code{SUnit} among the prerequisites.
 
 @item test
 Specifies a subpackage that is only loaded by @file{gst-sunit} in order
-to test the package.  The subpackage may include arbitrary tags except
-@code{name}.  The @code{Sunit} package is implicitly made a prerequisite
+to test the package.  The subpackage may include arbitrary tags (including
+@code{file}, @code{filein} and @code{sunit}) but not @code{name}.
+The @code{SUnit} package is implicitly made a prerequisite
 of the testing subpackage, and the default value of @code{directory} and
 @code{namespace} is the one given for the outer package.
 @end table
@@ -1866,14 +2019,14 @@ To install your package, you only have to do
     gst-package path/to/package.xml
 @end example
 
-@command{gst-package} is a Smalltalk script which will create a
-@file{.star} archive in the current image directory, with the files
-specified in the @code{file} tags (you can use the option
-@option{--target-directory} to create the @file{.star} file
-elsewhere).
+@command{gst-package} is a Smalltalk script which will create
+a @file{.star} archive in the current image directory, with the
+files specified in the @code{file} tags.  By default the package is
+placed in the system-wide package directory; you can use the option
+@option{--target-directory} to create the @file{.star} file elsewhere).
 
 Alternatively, @code{gst-package} can be used to create a skeleton
-GNU style source tree.  This include a @file{configure.ac} that will
+GNU style source tree.  This includes a @file{configure.ac} that will
 find the installation path of GNU Smalltalk, and a @file{Makefile.am}
 to support all the standard Makefile targets (including @command{make
 install} and @command{make dist}).  To do so, go in the directory that
@@ -1883,11 +2036,10 @@ is to become the top of the source tree and type.
     gst-package --prepare path1/package.xml path2/package.xml
 @end example
 
-In this case the generated configure script and Makefile will use
-some of the more advanced features of @command{gst-package} (to be
-documented).  The @gst{} makefile similarly uses
-@command{gst-package} to install packages and to prepare the distribution
-tarballs.
+In this case the generated configure script and Makefile will use more
+features of @command{gst-package}, which are yet to be documented.
+The @gst{} makefile similarly uses @command{gst-package} to install
+packages and to prepare the distribution tarballs.
 
 The rest of this chapter discusses some of the packages provided with @gst{}.
 
@@ -4347,20 +4499,20 @@ While the flags that can be passed as the last parameter to
 @code{gst_initialize} are any combination of these:
 
 @table @code
-@item GST_REBUILD_IMAGE,
-@item GST_MAYBE_REBUILD_IMAGE,
-@item GST_IGNORE_USER_FILES,
-@item GST_IGNORE_BAD_IMAGE_NAME,
-@item GST_IGNORE_BAD_IMAGE_PATH,
-@item GST_IGNORE_BAD_KERNEL_PATH,
+@item GST_REBUILD_IMAGE
+@item GST_MAYBE_REBUILD_IMAGE
+@item GST_IGNORE_USER_FILES
+@item GST_IGNORE_BAD_IMAGE_NAME
+@item GST_IGNORE_BAD_IMAGE_PATH
+@item GST_IGNORE_BAD_KERNEL_PATH
 @item GST_NO_TTY
 @end table
 
 Note that @code{gst_initialize} will likely take some time (from a
 tenth of a second to 3-4 seconds), because it has to check if the image
-file must be be rebuilt and, if so, it reloads and recompiles the 37000
-lines of Smalltalk code in a basic image.  To avoid this check, pass a
-valid image file as the third argument to @code{gst_initialize}:
+file must be be rebuilt and, if so, it reloads and recompiles the over 50,000
+lines of Smalltalk code that form a basic image.  To avoid this check, pass a
+valid image file as the second argument to @code{gst_initialize}.
 
 The result of @code{gst_init_smalltalk} is @code{0} for success,
 while anything else is an error code.

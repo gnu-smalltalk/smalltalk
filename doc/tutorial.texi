@@ -27,13 +27,14 @@ programming: editing, moving files, and so forth.
 * Code blocks (II)::             Guess what?  More control structures
 * Debugging::                    Things go bad in Smalltalk too!
 * More subclassing::             Coexisting in the class hierarchy
-* Streams::                      Something really powerful
+* Streams::                      A powerful abstraction useful in scripts
+* Exception handling::           More sophisticated error handling
 * Behind the scenes::            Some nice stuff from the Smalltalk innards
 * And now::                      Some final words
 * The syntax::                   For the most die-hard computer scientists
 @end menu
 
-@node Getting started, Some classes, Tutorial, Tutorial
+@node Getting started
 @section Getting started
 
 @menu
@@ -44,7 +45,7 @@ programming: editing, moving files, and so forth.
 * Math in Smalltalk::            But in a peculiar way of course...
 @end menu
 
-@node Starting Smalltalk, Saying hello, Getting started, Getting started
+@node Starting Smalltalk
 @subsection Starting up Smalltalk
 
 Assuming that @gst{} has been installed on your
@@ -64,7 +65,7 @@ You are now ready to try your hand at Smalltalk!  By the
 way, when you're ready to quit, you exit Smalltalk by typing
 @kbd{control-D} on an empty line.
 
-@node Saying hello, What happened, Starting Smalltalk, Getting started
+@node Saying hello
 @subsection Saying hello
 An initial exercise is to make Smalltalk say ``hello'' to
 you.  Type in the following line (@code{printNl} is a upper case
@@ -83,7 +84,7 @@ time because the snipped evaluated to the 'Hello, world' string.@footnote{
 @end example
 }
 
-@node What happened, Doing math, Saying hello, Getting started
+@node What happened
 @subsection What actually happened
 
 The front-line Smalltalk interpreter gathers all text
@@ -128,7 +129,7 @@ The central point is that an object is entirely self-contained;
 only the object knew how to print itself out.  When we want an
 object to print out, we ask the object itself to do the printing.
 
-@node Doing math, Math in Smalltalk, What happened, Getting started
+@node Doing math
 @subsection Doing math
 
 A similar piece of code prints numbers:
@@ -157,7 +158,7 @@ This example could also have looked like:
               1234 printNl
 @end example
 
-However, GNU Smalltalk tries to execute each line by itself if
+However, @gst{} tries to execute each line by itself if
 possible.  If you wanted to write the code on two lines, you
 might have written something like:
 @example
@@ -165,7 +166,7 @@ might have written something like:
     printNl)
 @end example
 
-From now on, we'll omit @code{printNl} since GNU Smalltalk
+From now on, we'll omit @code{printNl} since @gst{}
 does the service of printing the answer for us.
 
 An integer can be sent a number of messages in addition
@@ -180,7 +181,7 @@ Answers (correctly!) the value 16.  The way that it does
 this, however, is a significant departure from a procedural
 language.
 
-@node Math in Smalltalk, , Doing math, Getting started
+@node Math in Smalltalk
 @subsection Math in Smalltalk
 
 In this case, what happened was that the object @code{9} (an
@@ -209,7 +210,7 @@ examples should get you started:
    2 + (3 * 4)
 @end example
 
-@node Some classes, The hierarchy, Getting started, Tutorial
+@node Some classes
 @section Using some of the Smalltalk classes
 
 This chapter has examples which need a place to hold
@@ -226,7 +227,7 @@ Now let's create some new objects.
 * Closing thoughts::         There always ought to be some closing thoughts
 @end menu
 
-@node Arrays, Sets, Some classes, Some classes
+@node Arrays
 @subsection An array in Smalltalk
 
 An array in Smalltalk is similar to an array in any
@@ -323,7 +324,7 @@ things like:
 which (assuming you've been typing in the examples) will
 print 100.
 
-@node Sets, Dictionaries, Arrays, Some classes
+@node Sets
 @subsection A set in Smalltalk
 
 We're done with the array we've been using, so we'll
@@ -451,7 +452,7 @@ false---nothing else.  So they're very useful for answers to
 yes or no questions, like the ones we just posed.  Let's
 take a look at just one more kind of data structure:
 
-@node Dictionaries, Closing thoughts, Sets, Some classes
+@node Dictionaries
 @subsection Dictionaries
 
 A dictionary is a special kind of collection.  With a
@@ -510,10 +511,10 @@ we have created, and send them to oblivion:
    x!
 @end example
 
-The exclamation mark deleted GNU Smalltalk's knowledge of both
+The exclamation mark deleted @gst{}'s knowledge of both
 variables.  Asking for them again will return just @code{nil}.
 
-@node Closing thoughts, , Dictionaries, Some classes
+@node Closing thoughts
 @subsection Closing thoughts
 
 You've seen how Smalltalk provides you with some very
@@ -532,7 +533,7 @@ Smalltalk with new types of objects.  Now that you've
 been exposed to the basics of Smalltalk manipulation, we can
 begin to look at this object-oriented technique of programming.
 
-@node The hierarchy, Creating classes, Some classes, Tutorial
+@node The hierarchy
 @section The Smalltalk class hierarchy
 
 When programming in Smalltalk, you sometimes need to
@@ -550,7 +551,7 @@ point.
 * But why::                     The bottom line of the class hierarchy
 @end menu
 
-@node Class Object, Animals, The hierarchy, The hierarchy
+@node Class Object
 @subsection Class @code{Object}
 
 Smalltalk organizes all of its classes as a tree hierarchy.
@@ -569,7 +570,7 @@ art as science, and there are no hard-and-fast rules to nail
 it down.  We'll take a look at three kinds of objects to
 give you a feel for how this organization matters.
 
-@node Animals, But why, Class Object, The hierarchy
+@node Animals
 @subsection Animals
 
 Imagine that we have three kinds of objects, representing
@@ -665,7 +666,7 @@ yourself.  Notice that now sending @i{sing} to a Pig does
 indeed not say ``Tweet''---it will cause a Smalltalk error
 instead.
 
-@node But why, , Animals, The hierarchy
+@node But why
 @subsection The bottom line of the class hierarchy
 
 The goal of the class hierarchy is to allow you to
@@ -686,7 +687,7 @@ a Smalltalk @i{pro} stops and thinks carefully at this stage,
 so don't be daunted if your first choices seem difficult and
 error-prone.
 
-@node Creating classes, Creating subclasses, The hierarchy, Tutorial
+@node Creating classes
 @section Creating a new class of objects
 
 With the basic techniques presented in the preceding
@@ -735,7 +736,7 @@ have added.
 * Next coming::                  Yeah, what's next?!?
 @end menu
 
-@node A new class, Documenting the class, Creating classes, Creating classes
+@node A new class
 @subsection Creating a new class
 
 Guess how you create a new class?  This should be getting
@@ -748,7 +749,7 @@ following message:
    Account instanceVariableNames: 'balance'.
 @end example
 
-Quite a mouthful, isn't it?  GNU Smalltalk provides a
+Quite a mouthful, isn't it?  @gst{} provides a
 simpler way to write this, but for now let's stick with this.
 Conceptually, it isn't really that bad.  The Smalltalk variable
 @i{Object} is bound to the grand-daddy of all classes on the
@@ -758,7 +759,7 @@ Then, @code{instanceVariableNames: 'balance'} tells the new
 class that each of its objects (@dfn{instances}) will have a
 hidden variable named @code{balance}.
 
-@node Documenting the class, Defining methods, A new class, Creating classes
+@node Documenting the class
 @subsection Documenting the class
 
 The next step is to associate a description with the
@@ -806,7 +807,7 @@ Account extend [
 This instructs Smalltalk to pick an existing class, rather than
 trying to create a subclass.
 
-@node Defining methods, Instance methods, Documenting the class, Creating classes
+@node Defining methods
 @subsection Defining a method for the class
 
 We have created a class, but it isn't ready to do any
@@ -915,7 +916,7 @@ r is attached to}.  This means that whoever sent to Account
 the @code{new} message will get back this brand new account.  At
 the same time, our temporary variable @code{r} ceases to exist.
 
-@node Instance methods, A look at our object, Defining methods, Creating classes
+@node Instance methods
 @subsection Defining an instance method
 
 We need to define the @code{init} method for our Account
@@ -956,7 +957,7 @@ the value of void functions.  After all, at
 the time Smalltalk was being designed, C didn't
 even have a void data type.}
 
-@node A look at our object, Moving money around, Instance methods, Creating classes
+@node A look at our object
 @subsection Looking at our Account
 
 Let's create an instance of class Account:
@@ -1019,7 +1020,7 @@ enclose our string within quotes.  Finally, @code{balance printOn: stream}
 asks whatever object is hooked to the @code{balance} variable to print
 itself to the stream.  We set @code{balance} to 0, so the 0 gets printed out.
 
-@node Moving money around, Next coming, A look at our object, Creating classes
+@node Moving money around
 @subsection Moving money around
 
 We can now create accounts, and look at them.  As it
@@ -1048,7 +1049,7 @@ money.  Try these operations:
    a spend: 10
 @end example
 
-@node Next coming, , Moving money around, Creating classes
+@node Next coming
 @subsection What's next?
 
 We now have a generic concept, an ``Account''.  We can create them,
@@ -1058,7 +1059,7 @@ information that particular types of accounts might
 want.  In the next chapter, we'll take a look at fixing this
 problem using subclasses.
 
-@node Creating subclasses, Code blocks (I), Creating classes, Tutorial
+@node Creating subclasses
 @section Two Subclasses for the Account Class
 
 This chapter continues from the previous chapter in
@@ -1075,7 +1076,7 @@ kinds of accounts.
 * Writing checks::              Only in Smalltalk, of course
 @end menu
 
-@node The Savings class, The Checking class, Creating subclasses, Creating subclasses
+@node The Savings class
 @subsection The Savings class
 
 We create the Savings class as a subclass of Account.
@@ -1184,7 +1185,7 @@ want to try their hand at implementing such an
 enhancement.}
 
 
-@node The Checking class, Writing checks, The Savings class, Creating subclasses
+@node The Checking class
 @subsection The Checking class
 
 Our second subclass of Account represents a checking
@@ -1224,7 +1225,7 @@ alone, but set the number of checks in our checkbook to
 zero.  We finish by letting our parent class do its own
 initialization.
 
-@node Writing checks, , The Checking class, Creating subclasses
+@node Writing checks
 @subsection Writing checks
 
 We will finish this chapter by adding a method for
@@ -1282,7 +1283,7 @@ problems.  In the following chapters we will be filling in
 details on further language mechanisms and types, and providing
 details on how to debug software written in Smalltalk.
 
-@node Code blocks (I), Code blocks (II), Creating subclasses, Tutorial
+@node Code blocks (I)
 @section Code blocks
 
 The Account/Saving/Checking example from the last chapter
@@ -1298,7 +1299,7 @@ control structures.
 * Iteration::                Making some loops
 @end menu
 
-@node Conditions, Iteration, Code blocks (I), Code blocks (I)
+@node Conditions
 @subsection Conditions and decision making
 
 Let's first add some code to keep you from writing too
@@ -1380,7 +1381,7 @@ but can also invoke the conditional functions directly:
    false ifFalse: [ 'Hello, world!' printNl ]
 @end example
 
-@node Iteration, , Conditions, Code blocks (I)
+@node Iteration
 @subsection Iteration and collections
 
 Now that we have some sanity checking in place, it
@@ -1575,7 +1576,7 @@ it).  In the next chapter
 we'll see more on how code blocks are used; we'll also look at how
 you can invoke code blocks in your own code.
 
-@node Code blocks (II), Debugging, Code blocks (I), Tutorial
+@node Code blocks (II)
 @section Code blocks, part two
 
 In the last chapter, we looked at how code blocks could
@@ -1599,7 +1600,7 @@ for yourself.
 * Invoking code blocks::     You can do it, too
 @end menu
 
-@node Integer loops, Intervals, Code blocks (II), Code blocks (II)
+@node Integer loops
 @subsection Integer loops
 
 Integer loops are constructed by telling a number to
@@ -1625,7 +1626,7 @@ Note that the @code{x} variable is local to the block.
 @noindent
 just prints @code{nil}.
 
-@node Intervals, Invoking code blocks, Integer loops, Code blocks (II)
+@node Intervals
 @subsection Intervals
      It is also possible to represent a range of numbers as
 a standalone object.  This allows you to represent a range
@@ -1644,7 +1645,7 @@ for our numeric loop above:
    i do: [:x| x printNl]
 @end example
 
-@node Invoking code blocks, , Intervals, Code blocks (II)
+@node Invoking code blocks
 @subsection Invoking code blocks
 
 Let us revisit the checking example and add a method
@@ -1728,7 +1729,7 @@ code block.
 Note that @code{extend} will also overwrite methods.  Try
 the same tests as above, they should yield the same result!
 
-@node Debugging, More subclassing, Code blocks (II), Tutorial
+@node Debugging
 @section When Things Go Bad
 
 So far we've been working with examples which work the
@@ -1750,7 +1751,7 @@ your code using very powerful techniques.
 * Looking at objects::              Trying to figure it out
 @end menu
 
-@node Simple errors, Nested calls, Debugging, Debugging
+@node Simple errors
 @subsection A Simple Error
 
 First, let's take a look at a typical error.  Type:
@@ -1783,7 +1784,7 @@ stack backtrace.  The most recent call is the one nearer the
 top of the screen.  In the next example, we will cause an
 error which happens deeper within an object.
 
-@node Nested calls, Looking at objects, Simple errors, Debugging
+@node Nested calls
 @subsection Nested Calls
 
 Type the following lines:
@@ -1831,13 +1832,15 @@ Thus, without even looking at the code for Dictionary itself, we can
 guess something of the code for Dictionary's implementation:
 
 @example
-   findIndex: key ifAbsent: errCodeBlock
+   findIndex: key ifAbsent: errCodeBlock [
        @i{@r{@dots{}look for key@dots{}}}
        (keyNotFound) ifTrue: [ ^(errCodeBlock value) ]
        @i{@r{@dots{}}}
+   ]
 
-   at: key
+   at: key [
        ^self at: key ifAbsent: [^self error: 'key not found']
+   ]
 @end example
 
 Actually, @code{findIndex:ifAbsent:} lies in class @code{HashedCollection},
@@ -1849,7 +1852,7 @@ provide this feature.  Of course, you have the source code
 available...
 
 
-@node Looking at objects, , Nested calls, Debugging
+@node Looking at objects
 @subsection Looking at Objects
 
 When you are chasing an error, it is often helpful to
@@ -1891,7 +1894,7 @@ objects.  It can be used both for explicit user-caused
 errors, as well as in internal sanity checks.
 
 
-@node More subclassing, Streams, Debugging, Tutorial
+@node More subclassing
 @section Coexisting in the Class Hierarchy
 
 The early chapters of this tutorial discussed classes in
@@ -1920,7 +1923,7 @@ Smalltalk classes.
 * Inheritance and Polymorphism::     Sounds daunting, doesn't it?
 @end menu
 
-@node The existing hierarchy, Playing with Arrays, More subclassing, More subclassing
+@node The existing hierarchy
 @subsection The Existing Class Hierarchy
 
 To discuss where a new class might go, it is helpful to
@@ -2110,7 +2113,7 @@ of as objects themselves: @i{Namespace}, @i{Class} and even
 mechanism which will be discussed later, in @ref{Why is #new
 there?!?, , The truth on metaclasses}.
 
-@node Playing with Arrays, New kinds of Numbers, The existing hierarchy, More subclassing
+@node Playing with Arrays
 @subsection Playing with Arrays
 
 Imagine that you need an array, but alas you need that if an index
@@ -2213,7 +2216,7 @@ result is discarded; but one could write a program which uses it, so
 we'll write it this way anyway.
 
 
-@node New kinds of Numbers, Inheritance and Polymorphism, Playing with Arrays, More subclassing
+@node New kinds of Numbers
 @subsection Adding a New Kind of Number
 
 If we were programming an application which did a large
@@ -2334,7 +2337,7 @@ There should be surprisingly little which is actually
 new in this example.  The printing method uses both @code{printOn:}
 as well as @code{nextPut:} to do its printing.  While we haven't
 covered it, it's pretty clear that @code{$+} generates the ASCII
-character @code{+} as an object@footnote{A GNU Smalltalk extension
+character @code{+} as an object@footnote{A @gst{} extension
   allows you to type characters by ASCII code too, as in
   @code{$<43>}.}, and @code{nextPut:} puts its argument
 as the next thing on the stream.
@@ -2348,7 +2351,7 @@ use the return value and send a message directly to the new
 object.  Our initialization code explicitly returns self;
 what would happen if we left this off?
 
-@node Inheritance and Polymorphism, , New kinds of Numbers, More subclassing
+@node Inheritance and Polymorphism
 @subsection Inheritance and Polymorphism
 
 This is a good time to look at what we've done with the
@@ -2399,7 +2402,7 @@ of number.  Finally, you need to examine the @code{coerce:} handling
 in each numeric class.
 
 
-@node Streams, Behind the scenes, More subclassing, Tutorial
+@node Streams
 @section Smalltalk Streams
 
 Our examples have used a mechanism extensively, even
@@ -2422,7 +2425,7 @@ random access to the medium.
 * Dynamic Strings::                  A useful application of Streams
 @end menu
 
-@node The output stream, Your own stream, Streams, Streams
+@node The output stream
 @subsection The Output Stream
 
 The examples in this book all work because they write
@@ -2450,7 +2453,7 @@ the last @code{inspect} statement will show you how the @code{Transcript} is
 linked to @code{stdout}@footnote{Try executing it under Blox, where the
 Transcript is linked to the omonymous window!}.
 
-@node Your own stream, Files, The output stream, Streams
+@node Your own stream
 @subsection Your Own Stream
 
 Unlike a pipe you might create in C, the underlying
@@ -2542,7 +2545,7 @@ can use @code{next:put:}, like this:
    s do: [:x | x printNl]
 @end example
 
-@node Files, Dynamic Strings, Your own stream, Streams
+@node Files
 @subsection Files
 
 Streams can also operate on files.  If you wanted to
@@ -2562,7 +2565,7 @@ image:
    FileStream fileIn: '/Users/myself/src/source.st'
 @end example
 
-@node Dynamic Strings, , Files, Streams
+@node Dynamic Strings
 @subsection Dynamic Strings
 
 Streams provide a powerful abstraction for a number of
@@ -2602,7 +2605,427 @@ the String class whose contents are the printed representation
 of the very object receiving the message.
 
 
-@node Behind the scenes, And now, Streams, Tutorial
+@node Exception handling
+@section Exception handling in Smalltalk
+
+Up to this point of the tutorial, you used the original Smalltalk-80
+error signalling mechanism:
+
+@example
+   check: num [
+       | c |
+       c := history
+           at: num
+           ifAbsent: [ ^self error: 'No such check #' ].
+       ^c
+   ]
+@end example
+
+In the above code, if a matching check number is found, the method will
+answer the object associated to it.  If no prefix is found, Smalltalk
+will unwind the stack and print an error message including the message
+you gave and stack information.
+
+@example
+CheckingAccount new: 31 "<0x33788>" error: No such check #
+@i{@r{@dots{}blah blah@dots{}}}
+CheckingAccount>>#error:
+[] in Dictionary>>#at:ifAbsent:
+Dictionary(HashedCollection)>>#findIndex:ifAbsent:
+Dictionary>>#at:ifAbsent:
+[] in CheckingAccount>>#check:
+CheckingAccount>>#check:
+UndefinedObject(Object)>>#executeStatements
+@end example
+
+Above we see the object that received the #error: message, the message
+text itself, and the frames (innermost-first) running when the error was
+captured by the system.  In addition, the rest of the code in methods
+like @code{CheckingAccount>>#check:} was not executed.
+
+So simple error reporting gives us most of the features we want:
+
+@itemize @bullet
+@item
+Execution stops immediately, preventing programs from continuing as if
+nothing is wrong.
+
+@item
+The failing code provides a more-or-less useful error message.
+
+@item
+Basic system state information is provided for diagnosis.
+
+@item
+A debugger can drill further into the state, providing information like
+details of the receivers and arguments on the stack.
+@end itemize
+
+However, there is a more powerful and complex error handling mechanism,
+that is @dfn{exception}.  They are like "exceptions" in other programming
+languages, but are more powerful and do not always indicate error
+conditions.  Even though we use the term "signal" often with regard
+to them, do not confuse them with the signals like @code{SIGTERM} and
+@code{SIGINT} provided by some operating systems; they are a different
+concept altogether.
+
+Deciding to use exceptions instead of @code{#error:} is a matter of
+aesthetics, but you can use a simple rule: use exceptions only if you want
+to provide callers with a way to recover sensibly from certain errors,
+and then only for signalling those particular errors.
+
+For example, if you are writing a word processor, you might provide the
+user with a way to make regions of text read-only.  Then, if the user
+tries to edit the text, the objects that model the read-only text can
+signal a @code{ReadOnlyText} or other kind of exception, whereupon the
+user interface code can stop the exception from unwinding and report
+the error to the user.
+
+When in doubt about whether exceptions would be useful, err on the side
+of simplicity; use @code{#error:} instead.  It is much easier to convert an
+#error: to an explicit exception than to do the opposite.
+
+@menu
+* Creating exceptions::                Starting to use the mechanism
+* Raising exceptions::                 What to do when exceptional events happen
+* Handling exceptions::                The other side
+* When an exception isn't handled::    Default actions
+* Creating new exception classes::     Your own exceptions
+* Hooking into the stack unwinding::   An alternative exception handling system
+* Handler stack unwinding caveat::     Differences with other languages
+@end menu
+
+@node Creating exceptions
+@subsection Creating exceptions
+
+@gst{} provides a few exceptions, all of which are subclasses of
+@code{Exception}.  Most of the ones you might want to create yourself are
+in the @code{SystemExceptions} namespace.  You can browse the builtin
+exceptions in the base library reference, and look at their names with
+@code{Exception printHierarchy}.
+
+Some useful examples from the system exceptions are
+@code{SystemExceptions.InvalidValue}, whose meaning should be obvious, and
+@code{SystemExceptions.WrongMessageSent}, which we will demonstrate below.
+
+Let's say that you change one of your classes to no longer support #new
+for creating new instances.  However, because you use the first-class
+classes feature of Smalltalk, it is not so easy to find and change
+all sends.  Now, you can do something like this:
+
+@example
+Object subclass: Toaster [
+    Toaster class >> new [
+        ^SystemExceptions.WrongMessageSent
+            signalOn: #new useInstead: #toast:
+    ]
+
+    Toaster class >> toast: reason [
+        ^super new reason: reason; yourself
+    ]
+
+    ...
+]
+@end example
+
+Admittedly, this doesn't quite fit the conditions for using exceptions.
+However, since the exception type is already provided, it is probably
+easier to use it than #error: when you are doing defensive programming
+of this sort.
+
+@node Raising exceptions
+@subsection Raising exceptions
+
+Raising an exception is really a two-step process.  First, you create
+the exception object; then, you send it @code{#signal}.
+
+If you look through the hierarchy, you'll see many class methods
+that combine these steps for convenience.  For example, the class
+@code{Exception} provides @code{#new} and @code{#signal}, where the
+latter is just @code{^self new signal}.
+
+You may be tempted to provide only a signalling variant of your own
+exception creation methods.  However, this creates the problem that
+your subclasses will not be able to trivially provide new instance
+creation methods.
+
+@example
+Error subclass: ReadOnlyText [
+    ReadOnlyText class >> signalOn: aText range: anInterval [
+        ^self new initText: aText range: anInterval; signal
+    ]
+
+    initText: aText range: anInterval [
+        &lt;category: 'private'>
+        ...
+    ]
+]
+@end example
+
+Here, if you ever want to subclass @code{ReadOnlyText} and add new
+information to the instance before signalling it, you'll have to use
+the private method #initText:range:.
+
+We recommend leaving out the signalling instance-creation variant in new
+code, as it saves very little work and makes signalling code less clear.
+Use your own judgement and evaluation of the situation to determine when
+to include a signalling variant.
+
+@node Handling exceptions
+@subsection Handling exceptions
+
+To handle an exception when it occurs in a particular block of code,
+use @code{#on:do:} like this:
+
+@example
+^[someText add: inputChar beforeIndex: i]
+    on: ReadOnlyText
+    do: [:sig | sig return: nil]
+@end example
+
+This code will put a handler for @code{ReadOnlyText} signals on the
+handler stack while the first block is executing.  If such an exception
+occurs, and it is not handled by any handlers closer to the point of
+signalling on the stack (known as "inner handlers"), the exception object
+will pass itself to the handler block given as the do: argument.
+
+You will almost always want to use this object to handle the exception
+somehow.  There are six basic handler actions, all sent as messages to
+the exception object:
+
+@table @code
+@item return:
+Exit the block that received this #on:do:, returning the given value.
+You can also leave out the argument by sending #return, in which case
+it will be nil.  If you want this handler to also handle exceptions in
+whatever value you might provide, you should use #retryUsing: with a
+block instead.
+
+@item retry
+Acts sort of like a "goto" by restarting the first block.  Obviously,
+this can lead to an infinite loop if you don't fix the situation that
+caused the exception.
+
+@code{#retry} is a good way to implement reinvocation upon recovery,
+because it does not increase the stack height.  For example, this:
+
+@example
+  frobnicate: n [
+    ^[do some stuff with n]
+        on: SomeError
+        do: [:sig | sig return: (self frobnicate: n + 1)]
+    ]
+@end example
+
+@noindent
+should be replaced with retry:
+
+@example
+  frobnicate: aNumber [
+    | n |
+    n := aNumber.
+    ^[do some stuff with n]
+        on: SomeError
+        do: [:sig | n := 1 + n. sig retry]
+  ]
+@end example
+
+@item retryUsing:
+Like @code{#retry}, except that it effectively replaces the original
+block with the one given as an argument.
+
+@item pass
+If you want to tell the exception to let an outer handler handle it,
+use @code{#pass} instead of @code{#signal}.  This is just like rethrowing
+a caught exception in other languages.
+
+@item resume:
+This is the really interesting one.  Instead of unwinding the stack,
+this will effectively answer the argument from the @code{#signal} send.
+Code that sends @code{#signal} to resumable exceptions can use this
+value, or ignore it, and continue executing.  You can also leave out
+the argument, in which case the @code{#signal} send will answer nil.
+Exceptions that want to be resumable must register this capability by
+answering @code{true} from the @code{#isResumable} method, which is
+checked on every @code{#resume:} send.
+
+@item outer
+This is like @code{#pass}, but if an outer handler uses #resume:, this
+handler block will be resumed  (and #outer will answer the argument
+given to #resume:) rather than the piece of code that sent #signal in
+the first place.
+@end table
+
+None of these methods return to the invoking handler block except for
+@code{#outer}, and that only in certain cases described for it above.
+
+Exceptions provide several more features; see the methods on the classes
+@code{Signal} and @code{Exception} for the various things you can do
+with them.  Fortunately, the above methods can do what you want in almost
+all cases.
+
+If you don't use one of these methods or another exception feature to exit
+your handler, Smalltalk will assume that you meant to @code{sig return:}
+whatever you answer from your handler block.  We don't recommend relying
+on this; you should use an explicit @code{sig return:} instead.
+
+A quick shortcut to handling multiple exception types is the
+@code{ExceptionSet}, which allows you to have a single handler for the
+exceptions of a union of classes:
+
+@example
+^[do some stuff with n]
+    on: SomeError, ReadOnlyError
+    do: [:sig | ...]
+@end example
+
+In this code, any @code{SomeError} or @code{ReadOnlyError} signals will
+be handled by the given handler block.
+
+@node When an exception isn't handled
+@subsection When an exception isn't handled
+
+Every exception chooses one of the above handler actions by default when
+no handler is found, or they all use @code{#pass}.  This is invoked by
+sending @code{#defaultAction} to the class.
+
+One example of a default action is presented above as part of the example
+of @code{#error:} usage; that default action prints a message, backtrace,
+and unwinds the stack all the way.
+
+The easiest way to choose a default action for your own exception classes
+is to subclass from an exception class that already chose the right one,
+as explained in the next section.  For example, some exceptions, such
+as warnings, resume by default, and thus should be treated as if they
+will almost always resume.
+
+Selecting by superclass is by no means a requirement.  Specializing your
+@code{Error} subclass to be resumable, or even to resume by default,
+is perfectly acceptable when it makes sense for your design.
+
+@node Creating new exception classes
+@subsection Creating new exception classes
+
+If you want code to be able to handle your signalled exceptions, you will
+probably want to provide a way to pick those kinds out automatically.
+The easiest way to do this is to subclass @code{Exception}.
+
+First, you should choose an exception class to specialize.  @code{Error}
+is the best choice for non-resumable exceptions, and @code{Notification}
+or its subclass @code{Warning} is best for exceptions that should resume
+with @code{nil} by default.
+
+Exceptions are just normal objects; include whatever information you think
+would be useful to handlers.  Note that there are two textual description
+fields, a @dfn{description} and a @dfn{message text}.  The description,
+if provided, should be a more-or-less constant string answered from a
+override method on @code{#description}, meant to describe all instances
+of your exception class.  The message text is meant to be provided at
+the point of signalling, and should be used for any extra information
+that code might want to provide.  Your signalling code can provide the
+@code{messageText} by using @code{#signal:} instead of @code{#signal}.
+This is yet another reason why signalling variants of instance creation
+messages can be more trouble than they're worth.
+
+@node Hooking into the stack unwinding
+@subsection Hooking into the stack unwinding
+
+More often useful than even @code{#on:do:} is @code{#ensure:}, which
+guarantees that some code is executed when the stack unwinds, whether
+because of normal execution or because of a signalled exception.
+
+Here is an example of use of @code{#ensure:} and a situation where the
+stack can unwind even without a signal:
+
+@example
+Object subclass: ExecuteWithBreak [
+  | breakBlock |
+
+  break: anObject [
+    breakBlock value: anObject
+  ]
+
+  valueWithBreak: aBlock [
+    "Sets up breakBlock before entering the block,
+     and passes self to the block."
+    | oldBreakBlock |
+    oldBreakBlock := breakBlock.
+    ^[breakBlock := [:arg | ^arg].
+      aBlock value]
+        ensure: [breakBlock := oldBreakBlock]
+  ]
+]
+@end example
+
+This class provides a way to stop the execution of a block without
+exiting the whole method as using @code{^} inside a block would do.
+The use of #ensure: guarantees (hence the name "ensure") that even
+if @code{breakBlock} is invoked or an error is handled by unwinding,
+the old ``break block'' will be restored.
+
+The definition of @code{breakBlock} is extremely simply; it is an
+example of the general unwinding feature of blocks, that you have
+probably already used:
+
+@example
+       (history includesKey: num)
+           ifTrue: [ ^self error: 'Duplicate check number' ].
+@end example
+
+You have probably been using #ensure: without knowing.  For example,
+@code{File>>#withReadStreamDo:} uses it to ensure that the file is
+closed when leaving the block.
+
+@node Handler stack unwinding caveat
+@subsection Handler stack unwinding caveat 
+
+One important difference between Smalltalk and other languages is
+that when a handler is invoked, the stack is not unwound.  
+The Smalltalk exception system is designed this way because it's rare
+to write code that could break because of this difference, and the
+@code{#resume:} feature doesn't make sense if the stack is unwound.
+It is easy enough to unwind a stack later, and is not so easy to wind
+it again if done too early.
+
+For almost all applications, this will not matter, but it technically
+changes the semantics significantly so should be kept in mind.  One
+important case in which it might matter is when using @code{#ensure:}
+blocks @emph{and} exception handlers.  For comparison, this Smalltalk
+code:
+
+@example
+| n |
+n := 42.
+[[self error: 'error'] ensure: [n := 24]]
+    on: Error
+    do: [:sig | n printNl. sig return].
+n printNl.
+@end example
+
+@noindent
+will put "42" followed by "24" on the transcript, because the @code{n :=
+24} will not be executed until @code{sig return} is invoked, unwinding
+the stack.  Similar Java code acts differently:
+
+@example
+int n = 42;
+try
+  @{
+    try @{throw new Exception ("42");@}
+    finally @{n = 24;@}
+  @}
+catch (Exception e)
+  @{
+    System.out.println (n);
+  @}
+System.out.println (n);
+@end example
+
+@noindent
+printing "24" twice, because the stack unwinds before executing the
+catch block.
+
+@node Behind the scenes
 @section Some nice stuff from the Smalltalk innards
 
 Just like with everything else, you'd probably end up asking yourself:
@@ -2615,7 +3038,7 @@ how's it done?  So here's this chapter, just to wheten your appetite...
 * Performance::			     Hmm...  they told me Smalltalk is slow...
 @end menu
 
-@node Inside Arrays, Two flavors of equality, Behind the scenes, Behind the scenes
+@node Inside Arrays
 @subsection How Arrays Work
 Smalltalk provides a very adequate selection of predefined
 classes from which to choose.  Eventually, however,
@@ -2843,7 +3266,7 @@ each level must coordinate its use of the underlying array
 with other levels.
 
 
-@node Two flavors of equality, Why is #new there?!?, Inside Arrays, Behind the scenes
+@node Two flavors of equality
 @subsection Two flavors of equality
 As first seen in chapter two, Smalltalk keys its dictionary
 with things like @i{#word}, whereas we generally use
@@ -2918,7 +3341,7 @@ instead of @code{=}:
 Using C terms, @code{=} compares contents like @code{strcmp()}.
 @code{==} compares storage addresses, like a pointer comparison.
 
-@node Why is #new there?!?, Performance, Two flavors of equality, Behind the scenes
+@node Why is #new there?!?
 @subsection The truth about metaclasses
 
 Everybody, sooner or later, looks for the implementation of the
@@ -3087,7 +3510,7 @@ is what allows classes to talk about themselves, posing the
 foundation for the creation of browsers.
 
 
-@node Performance, , Why is #new there?!?, Behind the scenes
+@node Performance
 @subsection The truth of Smalltalk performance
 
 Everybody says Smalltalk is slow, yet this is not completely true for
@@ -3127,7 +3550,7 @@ save space.  This is the case for @code{#do:} for example.
 Three selectors (@code{#at:}, @code{#at:put:}, @code{#size}) are
 assigned to special bytecodes because they are subject to a special
 caching optimization.  These selectors often result in calling a
-virtual machine primitive, so GNU Smalltalk remembers which primitve
+virtual machine primitive, so @gst{} remembers which primitve
 was last called as the result of sending them.  If we send @code{#at:}
 100 times for the same class, the last 99 sends are directly mapped
 to the primitive, skipping the method lookup phase.
@@ -3201,7 +3624,7 @@ That's all.  If you want to know more, look at the virtual machine's source
 code in @file{libgst/interp-bc.inl} and at the compiler in
 @file{libgst/comp.c}.
 
-@node And now, The syntax, Behind the scenes, Tutorial
+@node And now
 @section Some final words
 
 The question is always how far to go in one document.
@@ -3262,7 +3685,7 @@ No guarantees, but the subscribers will surely do their best!
 @end table
 
 
-@node The syntax, , And now, Tutorial
+@node The syntax
 @section A Simple Overview of Smalltalk Syntax
 
 Smalltalk's power comes from its treatment of objects.
