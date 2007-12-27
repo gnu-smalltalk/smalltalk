@@ -44,12 +44,24 @@ Notification subclass: PackageSkip [
 
 
 
-Namespace current: Kernel [
+Namespace current: SystemExceptions [
 
-Exception subclass: PackageNotAvailable [
+NotFound subclass: PackageNotAvailable [
     
     <category: 'Language-Packaging'>
     <comment: nil>
+
+    PackageNotAvailable class >> signal: aString [
+	^super signalOn: aString what: 'package'
+    ]
+
+    isResumable [
+        "Answer true.  Package unavailability is resumable, because the
+	 package files might just lie elsewhere."
+
+        <category: 'description'>
+        ^true
+    ]
 ]
 
 ]
@@ -84,7 +96,7 @@ XML.'>
 
     at: aString [
 	<category: 'accessing'>
-	^self at: aString ifAbsent: [self error: 'package not found']
+	^self at: aString ifAbsent: [PackageNotAvailable signal: aString]
     ]
 
     at: aString ifAbsent: aBlock [
@@ -324,7 +336,7 @@ XML.'>
 	file := [FileStream open: fileName mode: FileStream read] on: Error
 		    do: [:ex | ^self].
 	
-	[[self parse: file] on: PackageNotAvailable
+	[[self parse: file] on: SystemExceptions.PackageNotAvailable
 	    do: [:ex | ex resignalAs: PackageSkip new]] 
 		ensure: [file close].
 	packages := packages reject: [:each | each isDisabled]
@@ -1104,7 +1116,7 @@ XML.'>
 
 	"TODO: should put the name and baseDirectories into the exception."
 	"name printNl.  baseDirectories printNl."
-	PackageNotAvailable signal: self
+	SystemExceptions.PackageNotAvailable signal: self name
     ]
 
     directory [
@@ -1117,7 +1129,7 @@ XML.'>
 		| name |
 		name := Directory append: self relativeDirectory to: dir.
 		(Directory exists: name) ifTrue: [^name]].
-	PackageNotAvailable signal: self
+	SystemExceptions.PackageNotAvailable signal: self name
     ]
 
     relativeDirectory [
@@ -1486,7 +1498,7 @@ into a Smalltalk image, correctly handling dependencies.'>
 	packagesList isEmpty ifTrue: [^self].
 	self refresh.
 	toBeLoaded := root extractDependenciesFor: packagesList
-		    ifMissing: [:name | ^self error: 'package not available: ' , name].
+		    ifMissing: [:name | SystemExceptions.PackageNotAvailable signal: name].
 	toBeLoaded do: 
 		[:each | 
 		OutputVerbosity > 0 
