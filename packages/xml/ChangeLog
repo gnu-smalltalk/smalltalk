@@ -1,3 +1,7 @@
+2007-12-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* xsl/package.xml: Don't use XML metapackage as prereq.
+
 2007-11-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* saxdriver/SAX.st: Add stub DOM_SAXDriver.  Move InputSource here...
