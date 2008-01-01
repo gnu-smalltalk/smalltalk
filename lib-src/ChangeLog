@@ -1,3 +1,8 @@
+2007-12-31  Tony Garnock-Jones  <tonyg@lshift.net>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/socketx.h: Reorder includes.  Guard inclusion of sys/select.h.
+
 2007-11-18  Freddie Akeroyd  <F.A.Akeroyd@rl.ac.uk>
             Paolo Bonzini  <bonzini@gnu.org>
 

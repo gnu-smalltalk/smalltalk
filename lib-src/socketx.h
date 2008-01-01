@@ -103,8 +103,13 @@ int win_recv(int fd, void* buffer, int n, int flags);
 
 #else /* !__MSVCRT__ */
 
+#include <sys/types.h>
+#include <sys/time.h>
+#include <unistd.h>
 #include <errno.h>
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#endif
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
