@@ -465,7 +465,8 @@ scan_newline (int c,
       && last_token != 0
       && last_token != '.' && last_token != '!' && last_token != KEYWORD
       && last_token != BINOP && last_token != '|' && last_token != '<'
-      && last_token != '>' && last_token != ';')
+      && last_token != '>' && last_token != ';'
+      && last_token != ASSIGNMENT && last_token != SCOPE_SEPARATOR)
     return ('.');
   else
     return 0;
