@@ -91,3 +91,9 @@ returned value is nil
 
 Execution begins...
 returned value is 'this is a test'
+
+Execution begins...
+returned value is StructB
+
+Execution begins...
+returned value is StructB

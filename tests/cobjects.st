@@ -122,5 +122,15 @@ Eval [
     ^cObject asString
 ]
 
+Eval [
+    CStruct subclass: #StructB.
+    (CStruct subclass: #StructC) declaration: #((#b (#ptr #StructB))).
+    ^StructC new b elementType cObjectType
+]
+Eval [
+    (CStruct subclass: #StructD) declaration: #((#b (#ptr #{StructB}))).
+    ^StructD new b elementType cObjectType
+]
+
 " ### need a lot more!"
 

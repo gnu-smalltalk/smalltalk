@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1990,91,92,94,95,99,2000,2001
+| Copyright 1990,91,92,94,95,99,2000,2001,2007,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -119,7 +119,7 @@ elements.'>
 	"must be a type name, either built in or struct, either a Symbol
 	 or an Association"
 	type isSymbol ifFalse: [^self cObjectBinding: type].
-	^TypeMap at: type ifAbsent: [Namespace current at: type]
+	^TypeMap at: type ifAbsent: [(Namespace current at: type) type]
     ]
 
     CType class >> computeAggregateType: type [
@@ -211,7 +211,7 @@ elements.'>
 	    nextPut: $(;
 	    print: self class;
 	    nextPutAll: ' cObjectType: ';
-	    print: cObjectType;
+	    print: self cObjectType;
 	    nextPut: $)
     ]
 
