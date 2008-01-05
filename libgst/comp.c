@@ -113,12 +113,6 @@ mst_Boolean _gst_skip_compilation = false;
    Most often, the caller does not care about the returned value,
    since it often is called from a radically different context.  */
 OOP _gst_last_returned_value = NULL;
-
-/* This is set to true by the parser or the compiler if an error
-   (respectively, a parse error or a semantic error) is found, and
-   avoids that _gst_execute_statements tries to execute the result of
-   the compilation.  */
-mst_Boolean _gst_had_error = false;
 
 
 

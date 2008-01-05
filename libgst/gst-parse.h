@@ -53,35 +53,35 @@
 #define GST_PARSE_H
 
 #define TOKEN_DEFS \
-  TOKEN_DEF (SCOPE_SEPARATOR, 261, "'.' or '::'", -1) TOKEN_SEP \
-  TOKEN_DEF (ASSIGNMENT, 262, "'_' or ':='", -1) TOKEN_SEP \
-  TOKEN_DEF (SHEBANG, 263, "'#!'", -1) TOKEN_SEP \
-  TOKEN_DEF (IDENTIFIER, 264, "identifier", -1) TOKEN_SEP \
-  TOKEN_DEF (BINOP, 265, "binary operator", -1) TOKEN_SEP \
-  TOKEN_DEF (KEYWORD, 266, "keyword", -1) TOKEN_SEP \
-  TOKEN_DEF (STRING_LITERAL, 267, "string literal", -1) TOKEN_SEP \
-  TOKEN_DEF (SYMBOL_LITERAL, 268, "symbol literal", -1) TOKEN_SEP \
-  TOKEN_DEF (INTEGER_LITERAL, 269, "integer literal", -1) TOKEN_SEP \
-  TOKEN_DEF (LARGE_INTEGER_LITERAL, 270, "integer literal", 269) TOKEN_SEP \
-  TOKEN_DEF (BYTE_LITERAL, 271, "small integer literal", 269) TOKEN_SEP \
-  TOKEN_DEF (FLOATD_LITERAL, 272, "floating-point literal", -1) TOKEN_SEP \
-  TOKEN_DEF (FLOATE_LITERAL, 273, "floating-point literal", 272) TOKEN_SEP \
-  TOKEN_DEF (FLOATQ_LITERAL, 274, "floating-point literal", 272) TOKEN_SEP \
-  TOKEN_DEF (SCALED_DECIMAL_LITERAL, 275, "decimal literal", -1) TOKEN_SEP \
-  TOKEN_DEF (CHAR_LITERAL, 276, "character literal", -1)
+  TOKEN_DEF (SCOPE_SEPARATOR, 261, "'.' or '::'", -1) \
+  TOKEN_DEF (ASSIGNMENT, 262, "'_' or ':='", -1) \
+  TOKEN_DEF (SHEBANG, 263, "'#!'", -1) \
+  TOKEN_DEF (IDENTIFIER, 264, "identifier", -1) \
+  TOKEN_DEF (BINOP, 265, "binary operator", -1) \
+  TOKEN_DEF (KEYWORD, 266, "keyword", -1) \
+  TOKEN_DEF (STRING_LITERAL, 267, "string literal", -1) \
+  TOKEN_DEF (SYMBOL_LITERAL, 268, "symbol literal", -1) \
+  TOKEN_DEF (INTEGER_LITERAL, 269, "integer literal", -1) \
+  TOKEN_DEF (LARGE_INTEGER_LITERAL, 270, "integer literal", 269) \
+  TOKEN_DEF (BYTE_LITERAL, 271, "small integer literal", 269) \
+  TOKEN_DEF (FLOATD_LITERAL, 272, "floating-point literal", -1) \
+  TOKEN_DEF (FLOATE_LITERAL, 273, "floating-point literal", 272) \
+  TOKEN_DEF (FLOATQ_LITERAL, 274, "floating-point literal", 272) \
+  TOKEN_DEF (SCALED_DECIMAL_LITERAL, 275, "decimal literal", -1) \
+  TOKEN_DEF (CHAR_LITERAL, 276, "character literal", -1) \
+  TOKEN_DEF (ERROR_RECOVERY, 277, "newline", -1)
 
 #define FIRST_TOKEN (SCOPE_SEPARATOR)
 #define NUM_TOKENS (CHAR_LITERAL - SCOPE_SEPARATOR + 1)
 
-#define TOKEN_SEP ,
 #define TOKEN_DEF(name, val, str, subsume) \
-  name = val
+  name = val,
 
 enum yytokentype {
   TOKEN_DEFS
+  FIRST_UNUSED_TOKEN
 };
 
-#undef TOKEN_SEP
 #undef TOKEN_DEF
 
 typedef union YYSTYPE {

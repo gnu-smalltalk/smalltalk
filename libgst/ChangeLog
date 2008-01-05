@@ -1,3 +1,17 @@
+2008-01-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Remove _gst_had_error.
+	* libgst/comp.h: Remove _gst_had_error.
+	* libgst/lex.c: Add _gst_had_error and _gst_error_recovery, use the
+	latter in scan_newline.
+	* libgst/lex.h: Add _gst_had_error and _gst_error_recovery.
+	* libgst/gst-parse.c: Nest error recovery jmp_bufs when
+	_gst_push_temporaries_dictionary is used.  Don't call _gst_free_tree
+	when an error is recovered.  Set _gst_error_recovery in recover_error
+	and look for ERROR_RECOVERY tokens too.  Don't define TOKEN_SEP.
+	* libgst/gst-parse.h: Remove need for TOKEN_SEP definition.  Add
+	ERROR_RECOVERY token.
+
 2008-01-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Do not imply '.' after assignment operator.

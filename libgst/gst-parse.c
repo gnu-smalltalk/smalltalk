@@ -349,6 +349,9 @@ parse_chunks (gst_parser *p)
   else
     {
       OOP oldTemporaries = _gst_push_temporaries_dictionary ();
+      jmp_buf old_recover;
+      memcpy (old_recover, p->recover, sizeof (p->recover));
+      setjmp (p->recover);
       while (token (p, 0) != EOF && token (p, 0) != '!')
         {
           /* Pick the production here, so that subsequent 
@@ -361,6 +364,7 @@ parse_chunks (gst_parser *p)
 
       lex_skip_if (p, '!', false);
       _gst_pop_temporaries_dictionary (oldTemporaries);
+      memcpy (p->recover, old_recover, sizeof (p->recover));
     }
 }
 
@@ -393,7 +397,6 @@ expected (gst_parser *p, int token, ...)
       token = va_arg (ap, int);
     }
 
-#define TOKEN_SEP
 #define TOKEN_DEF(name, val, str, subsume)				\
   if ((named_tokens & (1 << (val - FIRST_TOKEN))) != 0			\
       && (subsume == -1							\
@@ -405,7 +408,6 @@ expected (gst_parser *p, int token, ...)
 
   TOKEN_DEFS
 #undef TOKEN_DEF
-#undef TOKEN_SEP
 
     msg = fildelete (out_fil);
   _gst_errorf ("%s", msg);
@@ -420,19 +422,18 @@ static void
 recover_error (gst_parser *p)
 {
   if (p->state != PARSE_METHOD)
-    for (;;)
-      {
-	/* Find the final bang.  */
-	if (token (p, 0) == EOF)
-	  break;
-	if (token (p, 0) == '!')
-	  {
-	    _gst_free_tree ();
-	    lex (p);
-	    break;
-	  }
+    {
+      _gst_error_recovery = true;
+
+      /* Find the final bang or, if in the REPL, a newline.  */
+      while (token (p, 0) != EOF
+	     && token (p, 0) != '!'
+	     && token (p, 0) != ERROR_RECOVERY)
 	lex (p);
-      }
+
+      _gst_error_recovery = false;
+      lex_skip_if (p, ERROR_RECOVERY, false);
+    }
 
   longjmp (p->recover, 1);
 }
@@ -568,12 +569,17 @@ parse_scoped_definition (gst_parser *p, tree_node first_stmt)
 static void
 parse_eval_definition (gst_parser *p)
 {
-  tree_node tmps = NULL, stmts;
-  tree_node first_stmt = NULL;
+  tree_node tmps = NULL, stmts = NULL;
   OOP oldDictionary = _gst_push_temporaries_dictionary ();
+  jmp_buf old_recover;
 
-  tmps = parse_temporaries (p, false);
-  stmts = parse_statements (p, first_stmt, true);
+  memcpy (old_recover, p->recover, sizeof (p->recover));
+  if (setjmp (p->recover) == 0)
+    {
+      tmps = parse_temporaries (p, false);
+      stmts = parse_statements (p, NULL, true);
+    }
+
   if (stmts && !_gst_had_error)
     {
       if (_gst_regression_testing)
@@ -584,11 +590,14 @@ parse_eval_definition (gst_parser *p)
 
       if (_gst_regression_testing && !_gst_had_error)
         printf ("returned value is %O\n", _gst_last_returned_value);
+      _gst_had_error = false;
     }
 
-  _gst_pop_temporaries_dictionary (oldDictionary);
   _gst_free_tree ();
-  _gst_had_error = false;
+  _gst_pop_temporaries_dictionary (oldDictionary);
+  memcpy (p->recover, old_recover, sizeof (p->recover));
+  if (_gst_had_error)
+    longjmp (p->recover, 1);
 }
 
 static mst_Boolean

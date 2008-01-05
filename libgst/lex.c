@@ -84,6 +84,16 @@ struct obstack *_gst_compilation_obstack = NULL;
    code.  */
 mst_Boolean _gst_report_errors = true;
 
+/* This is set to true by the parser or the compiler if an error
+   (respectively, a parse error or a semantic error) is found, and
+   avoids that _gst_execute_statements tries to execute the result of
+   the compilation.  */
+mst_Boolean _gst_had_error = false;
+
+/* This is set to true by the parser if error recovery is going on.
+   In this case ERROR_RECOVERY tokens are generated.  */
+mst_Boolean _gst_error_recovery = false;
+
 /* The location of the first error reported, stored here so that
    compilation primitives can pass them to Smalltalk code.  */
 char *_gst_first_error_str = NULL;
@@ -460,16 +470,22 @@ int
 scan_newline (int c,
 	      YYSTYPE * lvalp)
 {
-  if (_gst_get_cur_stream_prompt ()
-      && parenthesis_depth == 0
-      && last_token != 0
-      && last_token != '.' && last_token != '!' && last_token != KEYWORD
-      && last_token != BINOP && last_token != '|' && last_token != '<'
-      && last_token != '>' && last_token != ';'
-      && last_token != ASSIGNMENT && last_token != SCOPE_SEPARATOR)
-    return ('.');
-  else
-    return 0;
+  if (_gst_get_cur_stream_prompt ())
+    {
+      /* Newline is special-cased in the REPL.  */
+      if (_gst_error_recovery)
+        return ERROR_RECOVERY;
+
+      if (parenthesis_depth == 0
+          && last_token != 0
+          && last_token != '.' && last_token != '!' && last_token != KEYWORD
+          && last_token != BINOP && last_token != '|' && last_token != '<'
+          && last_token != '>' && last_token != ';'
+          && last_token != ASSIGNMENT && last_token != SCOPE_SEPARATOR)
+        return ('.');
+    }
+
+  return 0;
 }
 
 

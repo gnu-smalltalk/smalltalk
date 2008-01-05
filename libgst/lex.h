@@ -61,6 +61,18 @@
 extern mst_Boolean _gst_report_errors 
   ATTRIBUTE_HIDDEN;
 
+/* This is set to true by the parser or the compiler if an error
+   (respectively, a parse error or a semantic error) is found, and
+   avoids that _gst_execute_statements tries to execute the result of
+   the compilation.  */
+extern mst_Boolean _gst_had_error
+  ATTRIBUTE_HIDDEN;
+
+/* This is set to true by the parser if error recovery is going on.
+   In this case ERROR_RECOVERY tokens are generated.  */
+extern mst_Boolean _gst_error_recovery
+  ATTRIBUTE_HIDDEN;
+
 /* The location of the first error reported, stored here so that
    compilation primitives can pass them to Smalltalk code.  */
 extern char *_gst_first_error_str 

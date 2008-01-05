@@ -253,13 +253,6 @@ extern int _gst_declare_tracing
 extern mst_Boolean _gst_skip_compilation 
   ATTRIBUTE_HIDDEN;
 
-/* This is set to true by the parser or the compiler if an error
-   (respectively, a parse error or a semantic error) is found, and
-   avoids that _gst_execute_statements tries to execute the result of
-   the compilation.  */
-extern mst_Boolean _gst_had_error 
-  ATTRIBUTE_HIDDEN;
-
 /* This holds whether the compiler should make the compiled methods
    untrusted.  */
 extern mst_Boolean _gst_untrusted_methods 
