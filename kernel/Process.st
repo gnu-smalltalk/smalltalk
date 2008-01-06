@@ -146,6 +146,22 @@ can suspend themselves and resume themselves however they wish.'>
 	SystemExceptions.ProcessBeingTerminated signal
     ]
 
+    update: aSymbol [
+	"Private - Terminate the process when ObjectMemory class>>#quit:
+	 is sent.  This is invoked only after #terminateOnQuit."
+
+	<category: 'private'>
+        aSymbol == #aboutToQuit ifTrue: [ self terminate ]
+    ]
+
+    terminateOnQuit [
+	"Mark the receiver so that it is terminated when
+	 ObjectMemory class>>#quit: is sent."
+
+	<category: 'basic'>
+        ObjectMemory addDependent: self
+    ]
+
     primTerminate [
 	"Terminate the receiver - This is nothing more than prohibiting to
 	 resume the process, then suspending it."

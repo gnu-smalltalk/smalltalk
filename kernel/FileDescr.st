@@ -257,10 +257,7 @@ do arbitrary processing on the files.'>
 
 	<category: 'initialization'>
 	ObjectMemory addDependent: self.
-	AllOpenFiles := WeakIdentitySet 
-		    with: stdin
-		    with: stdout
-		    with: stderr
+	AllOpenFiles := WeakIdentitySet new.
     ]
 
     FileDescriptor class >> update: aspect [
@@ -273,7 +270,11 @@ do arbitrary processing on the files.'>
 		stdout flush.
 		stderr flush].
 	aspect == #aboutToQuit 
-	    ifTrue: [AllOpenFiles asArray do: [:each | each close]]
+	    ifTrue: 
+		[stdin flush.
+		stdout flush.
+		stderr flush.
+	        AllOpenFiles asArray do: [:each | each close]]
     ]
 
     checkError [
