@@ -77,10 +77,6 @@
 /* Define this flag to turn on debugging code for oldspace management */
 /* #define MMAN_DEBUG_OUTPUT */
 
-#if !defined HAVE_SIGSEGV_RECOVERY || !(HAVE_SIGSEGV_RECOVERY-0)
-#define NO_SIGSEGV_HANDLING
-#endif
-
 #if defined(GC_DEBUG_OUTPUT)
 #define GC_DEBUGGING
 #endif

@@ -61,6 +61,11 @@
    This is also necessary to run valgrind on GNU Smalltalk.  */
 /* #define NO_SIGSEGV_HANDLING */
 
+/* ... but always define it if libsigsegv does not support this platform.  */
+#if !defined HAVE_SIGSEGV_RECOVERY || !(HAVE_SIGSEGV_RECOVERY-0)
+#define NO_SIGSEGV_HANDLING
+#endif
+
 #define NUM_CHAR_OBJECTS	256
 #define NUM_BUILTIN_OBJECTS	3
 #define FIRST_OOP_INDEX		(-NUM_CHAR_OBJECTS-NUM_BUILTIN_OBJECTS)

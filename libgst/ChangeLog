@@ -1,5 +1,10 @@
 2008-01-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/oop.c: Move definition of NO_SIGSEGV_HANDLING...
+	* libgst/oop.h: ... here.
+
+2008-01-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/mpz.c: Don't fail for 0 divExact: x.
 
 2008-01-06  Paolo Bonzini  <bonzini@gnu.org>
