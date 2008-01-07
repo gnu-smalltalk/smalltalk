@@ -308,6 +308,7 @@ represent signed 30 bit integers and are as efficient as possible.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_SmallInteger_quo>
+	self = 0 ifTrue: [^0].
 	arg = 0 ifTrue: [^self zeroDivide].
 	^self retry: #divExact: coercing: arg
     ]

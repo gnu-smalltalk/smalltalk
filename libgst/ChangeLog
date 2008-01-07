@@ -1,3 +1,7 @@
+2008-01-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/mpz.c: Don't fail for 0 divExact: x.
+
 2008-01-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Use gst_invoke_hook.

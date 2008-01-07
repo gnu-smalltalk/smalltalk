@@ -1525,7 +1525,7 @@ _gst_mpz_divexact (gst_mpz *quot, const gst_mpz *num, const gst_mpz *den)
   np = num->d;
   dp = den->d;
 
-  if (nsize == 0)
+  if (nsize == 0 || (nsize == 1 && np[0] == 0))
     {
       quot->size = 0;
       return;

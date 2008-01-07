@@ -38,6 +38,10 @@ if test "$GCC" != yes; then
   AC_MSG_ERROR([Please use GCC to compile GNU Smalltalk.])
 fi
 
+case "$host" in
+  alpha*-*-*) CFLAGS="$CFLAGS -mieee" ;;
+esac
+
 AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_LN_S
