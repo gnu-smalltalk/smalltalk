@@ -1,29 +1,28 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 2.3.6 TO 2.95g
+NEWS FROM 2.3.6 TO 3.0
 
 Important changes:
 
 o   A completely new syntax for defining classes is now present.  This is
-    detailed in the manual (currently, only in the tutorial section) and
-    the entire source code of the system will be converted to the new
-    syntax.
+    detailed in the manual (see the tutorial section) and the entire
+    source code of the system uses the new syntax.
 
 o   A different startup sequence is used which improves the possibility to
     customize GNU Smalltalk, both site-wide and per-user.  The details are
-    in the manual, the main changes are these: the `.stinit' and `.stpre'
-    files are now named `.st/init.st' and `.st/pre.st'; files requested
-    with the `-K' command-line option are sought for in the `.st' directory
-    too (in the home directory); kernel files may be overridden by placing
-    them in `.st/kernel'; a site-wide customization file can be placed
-    in `/usr/local/share/smalltalk/site-pre.st'.
+    in the manual, the main changes are these: the `~/.stinit' and `~/.stpre'
+    files are now named `~/.st/init.st' and `~/.st/pre.st'; files requested
+    with the `-K' command-line option are sought for in the `~/.st' directory
+    too; kernel files may be overridden by placing them in
+    `~/.st/kernel'; a site-wide customization file can be placed in
+    `/usr/local/share/smalltalk/site-pre.st'.
 
     The kernel path is stored in the image and not changed when the image
     is loaded.  In addition, `Directory systemKernel' and `Directory
     localKernel' are not used anymore, and just return the same as
     `Directory kernel'.
 
-    Finally, Smalltalk programs have access to the aforementioned `.st'
+    Finally, Smalltalk programs have access to the aforementioned `~`/.st'
     directory as `Directory userKernel' (name subject to change).  A
     `packages.xml' file, as well as `.star' files (see later) can be put
     there.
@@ -131,7 +130,7 @@ o   Evaluated code now puts undeclared variables in a private namespace (so
     Unfortunately, this slows down evaluated code noticeably; you can get
     back the performance by putting code in a method or an Eval (in the
     latter case, you will have to declare temporaries explicitly, or the
-    code will be compiled to use the slower deferred variable binding).
+    code will still use the slower deferred variable binding).
 
 o   Flushing a socket tries to push data all the way down to the network.
     This usually removes the need for TCP_NODELAY option.  If you have
@@ -214,7 +213,7 @@ o   New DBI-like library replacing the old one, contributed by Mike Anderson.
 
 NEWS FROM 2.3.5 TO 2.3.6
 
-   Added #% as a shortcut for CharacterArray>>#bindWithArguments:.
+o   Added #% as a shortcut for CharacterArray>>#bindWithArguments:.
 
 o   Added #allButFirst, #allButFirst:, #allButLast, #allButLast:, #atAll:,
     #removeAllSuchThat: to Collection.
