@@ -574,7 +574,11 @@ load_normal_oops (int imageFd)
   gst_object object = NULL;
   size_t size = 0;
   mst_Boolean use_copy_on_write
-    = buf_used_mmap && ~wrong_endianness && ot_delta == 0;
+    =
+#ifdef NO_SIGSEGV_HANDLING
+      0 &&
+#endif 
+      buf_used_mmap && ~wrong_endianness && ot_delta == 0;
 
   /* Now walk the oop table.  Load the data (or get the addresses from the
      mmap-ed area) and fix the byte order.  */

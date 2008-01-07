@@ -1,5 +1,10 @@
 2008-01-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/save.c: Disable copy-on-write if libsigsegv is not
+	available.
+
+2008-01-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/oop.c: Move definition of NO_SIGSEGV_HANDLING...
 	* libgst/oop.h: ... here.
 
