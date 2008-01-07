@@ -245,6 +245,7 @@ AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname usleep lstat \
 	sigsetmask alarm select mprotect madvise waitpid \
 	setsid spawnl nanosleep pread pwrite _NSGetExecutablePath)
 
+GST_FUNC_LRINT
 GST_FUNC_STRTOUL
 GST_FUNC_LOCALTIME
 
