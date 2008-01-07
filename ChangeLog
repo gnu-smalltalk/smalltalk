@@ -1,5 +1,9 @@
 2008-01-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Object.st: Fix #basicPrintNl.
+
+2008-01-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/SmallInt.st: Don't coerce for 0 divExact: x.
 
 2008-01-06  Paolo Bonzini  <bonzini@gnu.org>

@@ -571,7 +571,7 @@ All classes in the system are subclasses of me.'>
 	<category: 'printing'>
 	stdout flush.
 	self basicPrint.
-	stdout nextPutAllFlush: Character nl
+	stdout nextPut: Character nl; flush
     ]
 
     storeString [
