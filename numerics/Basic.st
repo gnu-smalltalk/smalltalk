@@ -676,7 +676,7 @@ normalize: aNumber
 		 Initial code: 9/6/99 "
 
     exponent := (self class digits - (aNumber log: 10)) floor.
-    mantissa := (aNumber * (10 raisedToInteger: exponent)) truncated.
+    mantissa := (aNumber * (10 raisedToInteger: exponent)) rounded.
     ^self! !
 
 

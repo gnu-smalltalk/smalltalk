@@ -1,5 +1,10 @@
 2007-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Fraction.st: Fix multiplication/division by zero.
+	* numerics/Basic.st: Fix rounding.
+
+2007-05-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* numerics/NumericsAdds.st: Make all tests pass.
 	* numerics/NumericsTests.st: Update usage of SUnit logging API.
 
