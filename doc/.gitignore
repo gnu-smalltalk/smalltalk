@@ -1,0 +1,8 @@
+blox.texi
+classes.texi
+i18n.texi
+tcp.texi
+vers*.texi
+.*.info*
+.*.1
+stamp-*
