@@ -86,7 +86,7 @@ while [ -n "$1" ]; do
 
 	--l | --li | --lis | --list | --list- | \
 	--list-f | --list-fi | --list-fil | --list-file | \
-	--list-files)	 shift; list_files="$1"		   ;;
+	--list-files)	 shift; list_files="$list_files $1" ;;
 
 	--s | --sr | --src | --srcd | --srcdi | \
 	--srcdir)	 shift; srcdir="$1"		   ;;
@@ -148,22 +148,17 @@ fi
 # Process --list-files now, then exit.
 
 if [ -n "$list_files" ]; then
-  for i in $list_files; do
-    dir="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+  for pkg in $list_files; do
+    dir="`sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
 	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files | sed 1q`"
 
-    list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	      -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' $files `"
-
-    for j in $list; do
-      echo $dir/$j
-    done
-
-    list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	      -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `"
-
-    for j in $list; do
-      echo $dir/$j
+    sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
+	-e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' \
+	-e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files | while read file; do
+      case $file in
+        /*) echo "$file" ;;
+	*) echo "$dir/$file" ;;
+      esac
     done
   done
   exit 0
@@ -175,26 +170,18 @@ pkgs=`sed -e '/<name>/!d' \
           -e 's,.*<name>\([^<]*\)<.name>,\1 ,' $files `
 
 if $uninstall; then
-  for i in $pkgs; do
-    dir="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+  for pkg in $pkgs; do
+    dir="`sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
 	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files | sed 1q`"
 
-    list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	      -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' $files `"
-    for j in $list; do
-      case $j in
-        /*) dest=$DESTDIR$j ;;
-	*) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
+    sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
+	-e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' \
+	-e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files | while read file; do
+      case $file in
+        /*) dest=$DESTDIR$file ;;
+	*) dest="$DESTDIR$IMAGE_PATH/$dir/$file" ;;
       esac
 
-      echo "rm -f $dest"
-      $dry_run || rm -f "$dest"
-    done
-
-    list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	      -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `"
-    for j in $list; do
-      dest="$DESTDIR$IMAGE_PATH/$dir/$j"
       echo "rm -f $dest"
       $dry_run || rm -f "$dest"
     done
@@ -210,37 +197,35 @@ if $dist; then
 else
   base="$DESTDIR$IMAGE_PATH/packages.xml"
   if test -f $base; then
-    for i in $files; do
-      if test $i -ef $base; then
-        add=
-        break
-      fi
+    merged_files="$base"
+    for file in $files; do
+      test $file -ef $base || merged_files="$merged_files $file"
     done
-    files="$base${base:+ }$files"
+  else
+    merged_files="$files"
   fi
 
-  echo "Merging $files..."
+  echo "Merging $files into $base..."
   $dry_run || {
     sed -e '$i\
-</packages>' -e '/<.packages>/,/<packages>/d' \
-      $files > packages.tmp
+</packages>' -e '/<.packages>/,/<packages>/d' $merged_files > packages.tmp
 
     mv packages.tmp $DESTDIR$IMAGE_PATH/packages.xml
   }
 fi
 
 if $install; then
-  for i in $pkgs; do
-    dir="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+  for pkg in $pkgs; do
+    dir="`sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
 	     -e 's,.*<directory>\([^<]*\)<.directory>,\1,p' $files | sed 1q`"
-    dirs="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
+    dirs="`sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
 	      -e 's,.*<built-file>\([^<]*\)/<.built-file>,\1,p' \
 	      -e 's,.*<file>\([^<]*\)/<.file>,\1,p' $files `"
 
-    for j in . $dirs; do
-      case $j in
-        /*) dest=$DESTDIR$j ;;
-	*) dest=$DESTDIR$IMAGE_PATH/$dir/$j ;;
+    for subdir in . $dirs; do
+      case $subdir in
+        /*) dest=$DESTDIR$subdir ;;
+	*) dest=$DESTDIR$IMAGE_PATH/$dir/$subdir ;;
       esac
 
       # The following part emulates the mkinstalldirs script
@@ -266,43 +251,56 @@ if $install; then
     done
 
     if $dist; then
-      list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	        -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `"
-
       wd=`cd $srcdir && pwd`
-      for j in $list; do
-        case $j in
-          /*) dest=$DESTDIR$j ;;
-	  *) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
+      sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
+	  -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files | while read file; do
+        case $file in
+          /*)
+	   dest=$DESTDIR$file
+	   orig_file=$file ;;
+	  *)
+	   dest="$DESTDIR$IMAGE_PATH/$dir/$file"
+	   file=$dir/$file
+	   orig_file=$file
+	   test -f "$file" || file=$wd/$file ;;
         esac
 
-        echo @LN_S@ -f "$wd/$dir/$j" "$dest"
-        $dry_run || @LN_S@ -f "$wd/$dir/$j" "$dest"
+	test -f "$file" || {
+	  echo gst-package: "$orig_file" not found
+	  exit 1
+	}
+
+        echo "@LN_S@ -f $file $dest"
+        $dry_run || @LN_S@ -f "$file" "$dest"
       done
 
     else
-      list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	        -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' $files `"
-      for j in $list; do
-        case $j in
-          /*) dest=$DESTDIR$j ;;
-	  *) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
+      sed -ne '/<name>'"$pkg"'<.name>/,/<.*package>/!d' \
+	  -e 's,.*<built-file>\([^<]*[^/]\)<.built-file>,\1,p' \
+	  -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files | while read file; do
+        case "$file" in
+          /*)
+	    dest="$DESTDIR$file"
+	    orig_file=$file ;;
+	  *)
+	    dest="$DESTDIR$IMAGE_PATH/$dir/$file"
+	    file=$dir/$file
+	    orig_file=$file
+	    test -f "$file" || file=$srcdir/$file ;;
         esac
 
-        echo "@INSTALL@ -m 644 $dir/$j $dest"
-        $dry_run || (rm -f "$dest" && cp "$dir/$j" "$dest" && chmod 644 "$dest")
-      done
+	test -f "$file" || {
+	  echo gst-package: "$orig_file" not found
+	  exit 1
+	}
 
-      list="`sed -ne '/<name>'"$i"'<.name>/,/<.*package>/!d' \
-	        -e 's,.*<file>\([^<]*[^/]\)<.file>,\1,p' $files `"
-      for j in $list; do
-        case $j in
-          /*) dest=$DESTDIR$j ;;
-	  *) dest="$DESTDIR$IMAGE_PATH/$dir/$j" ;;
-        esac
-
-        echo "@INSTALL@ -m 644 $srcdir/$dir/$j $dest"
-        $dry_run || (rm -f "$dest" && cp "$srcdir/$dir/$j" "$dest" && chmod 644 "$dest")
+        if test -x "$file"; then
+	  echo "@INSTALL@ -m 755 $file $dest"
+          $dry_run || (rm -f "$dest" && cp "$file" "$dest" && chmod 755 "$dest")
+	else
+	  echo "@INSTALL@ -m 644 $file $dest"
+          $dry_run || (rm -f "$dest" && cp "$file" "$dest" && chmod 644 "$dest")
+	fi
       done
     fi
   done
