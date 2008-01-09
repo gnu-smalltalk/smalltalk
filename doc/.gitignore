@@ -1,0 +1,12 @@
+blox.texi
+classes.texi
+complex.texi
+dbi.texi
+debug.texi
+i18n.texi
+tcp.texi
+vers*.texi
+zlib.texi
+*.info*
+*.1
+stamp-*
