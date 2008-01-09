@@ -10,14 +10,14 @@ EXTRA_DIST = i386/Makefile.frag \
 
 @lightning_frag@
 
-LIGHTNING_FILES = funcs-common.h core-common.h fp-common.h asm-common.h \
-	asm.h core.h funcs.h fp.h $(LIGHTNING_TARGET_FILES)
+LIGHTNING_COMMON_FILES = funcs-common.h core-common.h fp-common.h asm-common.h
 
 if LIGHTNING_MAIN
 
 lightningdir = $(includedir)/lightning
 dist_pkgdata_DATA = Makefile.am
-dist_lightning_HEADERS = $(LIGHTNING_FILES)
+dist_lightning_HEADERS = $(LIGHTNING_COMMON_FILES)
+nodist_lightning_HEADERS = asm.h core.h funcs.h fp.h $(LIGHTNING_TARGET_FILES)
 
 else
 all-am:
