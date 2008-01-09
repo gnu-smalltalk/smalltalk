@@ -239,7 +239,10 @@
 <package>
   <name>DhbNumericalMethods</name>
   <namespace>Dhb</namespace>
+
+  <tests>Dhb.DhbTestCase*</tests>
   <prereq>SUnit</prereq>
+
   <filein>Basic.st</filein>
   <filein>Statistics.st</filein>
   <filein>RNG.st</filein>

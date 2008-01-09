@@ -35,11 +35,11 @@ random
 !Smalltalk.Number class methodsFor: 'numerics'!
 
 random
-    "Answers a random number between 0 and the receiver
+    "Answers a random number between 0 and 1.
      (c) Copyrights Didier BESSET, 1999, all rights reserved.
      Initial code: 17/2/99 "
 
-    ^Dhb.DhbMitchellMooreGenerator new floatValue * self! !
+    ^Dhb.DhbMitchellMooreGenerator new floatValue! !
 
 !Smalltalk.Number methodsFor: 'numerics'!
 
@@ -205,7 +205,7 @@ positiveRectangle
 
 asVector
     ^(Dhb.DhbVector new: self size)
-        replaceElementsFrom: 1 to: self size withArray: self startingAt: 1
+        replaceFrom: 1 to: self size with: self startingAt: 1
 ! !
 
 !Dhb.DhbPolynomial methodsFor: 'numerics'!

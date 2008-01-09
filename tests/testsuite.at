@@ -139,6 +139,7 @@ AT_ANSI_TEST([ZeroDivideFactoryANSITest])
 
 AT_BANNER([Other packages.])
 AT_PACKAGE_TEST([Continuations])
+AT_PACKAGE_TEST([DhbNumericalMethods])
 AT_OPTIONAL_PACKAGE_TEST([GDBM])
 AT_PACKAGE_TEST([MD5])
 AT_OPTIONAL_PACKAGE_TEST([ZLib])
