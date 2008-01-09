@@ -93,7 +93,7 @@ static const char help_text[] =
   "\n   -v --version\t\t\t Print the Smalltalk version number and exit."
   "\n   -V --verbose\t\t\t Show names of loaded files and execution stats."
   "\n      --emacs-mode\t\t Execute as a `process' (from within Emacs)"
-  "\n      --kernel-dir DIR\t\t Look for kernel files in directory DIR."
+  "\n      --kernel-directory DIR\t Look for kernel files in directory DIR."
   "\n      --no-user-files\t\t Don't read user customization files.\n"
   "\n   -\t\t\t\t Read input from standard input explicitly."
   "\n"

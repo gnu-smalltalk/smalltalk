@@ -351,7 +351,7 @@ are named explicitly on the command line, unless the flag is given
 multiple times on the command line.
 
 @item -e
-@itemx --user-execution-trace
+@itemx --execution-trace
 Print the byte codes being executed as the interpreter operates.  Only
 works for statements explicitly issued by the user (either interactively
 or from files given on the command line), unless the flag is given
@@ -361,7 +361,7 @@ This option is disabled when the dynamic
 translator (@pxref{Dynamic translator}) is enabled.
 @end ignore
 
-@item --kernel-dir
+@item --kernel-directory
 Specify the directory from which the kernel source files will be loaded.
 This is used mostly while compiling @gst{} itself.  Smalltalk code can
 retrieve this information with @code{Directory kernel}.
