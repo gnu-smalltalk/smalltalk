@@ -1,3 +1,9 @@
+2007-01-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: When changing an object's class, allow the
+	new class to not be a kind of Behavior, as long as the superclass
+	flagged in it is.
+
 2007-01-03  Paolo Bonzini  <bonzini@gnu.org>
 
         * libgst/events.c: Avoid infinite loop.

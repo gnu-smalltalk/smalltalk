@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006,2007
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -2886,15 +2886,17 @@ primitive VMpr_CompiledCode_discardTranslation [succeed]
 /* Object changeClassTo: */
 primitive VMpr_Object_changeClassTo [succeed,fail]
 {
-  OOP oop1;
+  OOP oop1, oop2;
+  gst_object obj1, obj2;
   _gst_primitives_executed++;
 
   oop1 = POP_OOP ();
-  if (is_a_kind_of (OOP_CLASS (oop1), _gst_behavior_class))
+  oop2 = STACKTOP ();
+  obj1 = OOP_TO_OBJ (oop1);
+  obj2 = OOP_TO_OBJ (oop2);
+  if (NUM_WORDS (obj1) > 0 && is_a_kind_of (obj1->data[0], _gst_behavior_class))
     {
-      gst_object obj;
-      obj = OOP_TO_OBJ (STACKTOP ());
-      obj->objClass = oop1;
+      obj2->objClass = oop1;
       PRIM_SUCCEEDED;
     }
   UNPOP (1);			/* trying to do Bad Things */
