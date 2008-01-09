@@ -227,11 +227,14 @@ update: aspect
     "Private - Remove the files before quitting, and register the virtual
      filesystems specified by the subclasses upon image load."
 
-    aspect == #returnFromSnapshot ifTrue: [
+    (aspect == #returnFromSnapshot or: [ aspect == #finishedSnapshot ]) ifTrue: [
 	Registry := LookupTable new.
 	self allSubclassesDo: [ :each |
 	    each fileSystems do: [ :fs | self register: fs forClass: each ]
 	]
+    ].
+    (aspect == #aboutToQuit or: [ aspect == #aboutToSnapshot ]) ifTrue: [
+	self allSubclassesDo: [ :each | each release ].
     ].
     aspect == #aboutToQuit ifTrue: [
 	self allSubinstancesDo: [ :each | each release ]
@@ -795,6 +798,10 @@ fileSystemsIn: path
 	(File isExecutable: path, '/', each)
 	    ifTrue: [ FileTypes at: each put: path, '/', each ]
     ]!
+
+release
+    "Avoid that paths stay in the image file"
+    FileTypes := nil!
 
 vfsFor: file name: fsName subPath: subPath
     "Create a temporary file and use it to construct the contents of the given
