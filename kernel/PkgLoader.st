@@ -96,7 +96,8 @@ XML.'>
 
     at: aString [
 	<category: 'accessing'>
-	^self at: aString ifAbsent: [PackageNotAvailable signal: aString]
+	^self at: aString
+	    ifAbsent: [SystemExceptions.PackageNotAvailable signal: aString]
     ]
 
     at: aString ifAbsent: aBlock [
