@@ -1,4 +1,5 @@
 enable_mysql_tests='@enable_mysql_tests@'
+host='@host_triplet@'
 mysqlvars=`echo $enable_mysql_tests | awk '
   BEGIN { FS=":" }
   /^(yes|no)$/ { next }
