@@ -57,29 +57,20 @@
 @sc{gnu}
 @end macro
 
-@dircategory GNU Smalltalk
+@dircategory Software development
 @direntry
-     * GNU Smalltalk: (gst).                 The @gst{} environment.
+* Smalltalk: (gst).             The @gst{} user's guide.
 @end direntry
 
 @copying
-This file documents @sc{gnu} Smalltalk version @value{VERSION}.
-It was last updated on @value{UPDATED}.
-
-Copyright @copyright{} 1988, 1989, 1991, 1992, 1994, 1995, 1999,
-2000, 2001, 2002, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
-
-This document is released under the terms of the @sc{gnu} Free
-Documentation License as published by the Free Software Foundation;
-either version 1.1, or (at your option) any later version.
-
-You should have received a copy of the @sc{gnu} Free Documentation
-License along with @sc{gnu} Smalltalk; see the file @file{COPYING.DOC}.
-If not, write to the Free Software Foundation, 59 Temple Place - Suite
-330, Boston, MA 02110-1301, USA.  
-
-There are no Cover Texts and no Invariant Sections; this text, along
-with its equivalent in the printed manual, constitutes the Title Page.
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled
+``GNU Free Documentation License''.
+@end quotation
 @end copying
 
 @titlepage

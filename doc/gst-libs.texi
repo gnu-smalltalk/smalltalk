@@ -33,27 +33,20 @@
 @sc{gnu}
 @end macro
 
-@dircategory GNU Smalltalk
+@dircategory Software development
 @direntry
-     * Libraries: (gst-libs).                The GNU Smalltalk class libraries.
+* Smalltalk libraries: (gst-libs).      The GNU Smalltalk class libraries.
 @end direntry
 
 @copying
-This file documents GNU Smalltalk Version @value{VERSION}.
-It was last updated on @value{UPDATED}.
-
-Copyright @copyright{} 1988-92, 1994-95, 1999-2006 Free Software Foundation, Inc.
-
-This document is released under the terms of the GNU Free Documentation
-License as published by the Free Software Foundation; either version 1.1, or
-(at your option) any later version.
-
-You should have received a copy of the GNU Free Documentation License along
-with GNU Smalltalk; see the file @file{COPYING.DOC}.  If not, write to the Free
-Software Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  
-
-There are no Cover Texts and no Invariant Sections; this text, along
-with its equivalent in the printed manual, constitutes the Title Page.
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the section entitled
+``GNU Free Documentation License''.
+@end quotation
 @end copying
 
 @setchapternewpage odd
