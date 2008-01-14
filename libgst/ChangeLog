@@ -1,3 +1,8 @@
+2008-01-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Fix #signal:atMilliseconds: for negative
+	argument.
+
 2008-01-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/save.c: Disable copy-on-write if libsigsegv is not

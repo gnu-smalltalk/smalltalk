@@ -3000,10 +3000,8 @@ primitive VMpr_Processor_signalAtMilliseconds [succeed,fail,check_interrupt]
 	  _gst_enable_interrupts ();
 	}
       else
-	{
-	  _gst_async_timed_wait (oop1, arg2);
-	  PRIM_SUCCEEDED;
-	}
+	_gst_async_timed_wait (oop1, arg2);
+      PRIM_SUCCEEDED;
     }
 
   UNPOP (2);
