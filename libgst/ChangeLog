@@ -1,3 +1,8 @@
+2008-01-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Do not pop arguments that end up in an
+	object that the primitive creates.
+
 2008-01-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Fix #signal:atMilliseconds: for negative
