@@ -51,23 +51,17 @@ ColumnInfo subclass: MySQLColumnInfo [
 
     MySQLColumnInfo class >> writeDate: aDate on: aStream [
 	<category: 'converting-smalltalk'>
-	self printMysqlDate: aDate on: aStream
-    ]
-
-    MySQLColumnInfo class >> writeDouble: aDouble on: aStream [
-	<category: 'converting-smalltalk'>
-	| readStream character |
-	readStream := ReadStream on: aDouble printString.
-	
-	[character := readStream next.
-	character isNil] whileFalse: 
-		    [character = $d 
-			ifTrue: 
-			    [character := readStream next.
-			    character isNil ifTrue: [^self].
-			    aStream nextPut: $e.
-			    character = $- ifFalse: [aStream nextPut: $+]].
-		    aStream nextPut: character]
+	aDate year printOn: aStream.
+	aStream nextPut: $-.
+	self 
+	    print: aDate month
+	    on: aStream
+	    next: 2.
+	aStream nextPut: $-.
+	self 
+	    print: aDate day
+	    on: aStream
+	    next: 2
     ]
 
     MySQLColumnInfo class >> writeFloat: aFloat on: aStream [
@@ -77,11 +71,14 @@ ColumnInfo subclass: MySQLColumnInfo [
 	
 	[character := readStream next.
 	character isNil] whileFalse: 
-		    [character = $e 
-			ifTrue: 
-			    [aStream nextPut: character.
-			    character := readStream next.
-			    character = $- ifFalse: [aStream nextPut: $+]].
+		    [(character = $d 
+		        or: [ character = $e
+		        or: [ character = $q ]])
+			    ifTrue: 
+			        [character := readStream next.
+			        character isNil ifTrue: [^self].
+			        aStream nextPut: $e.
+			        character = $- ifFalse: [aStream nextPut: $+]].
 		    aStream nextPut: character]
     ]
 
@@ -115,12 +112,48 @@ ColumnInfo subclass: MySQLColumnInfo [
 
     MySQLColumnInfo class >> writeTime: aTime on: aStream [
 	<category: 'converting-smalltalk'>
-	self printMysqlTime: aTime on: aStream
+	self 
+	    print: aTime hour
+	    on: aStream
+	    next: 2.
+	aStream nextPut: $:.
+	self 
+	    print: aTime minute
+	    on: aStream
+	    next: 2.
+	aStream nextPut: $:.
+	self 
+	    print: aTime second
+	    on: aStream
+	    next: 2
     ]
 
-    MySQLColumnInfo class >> writeTimestamp: aTimestamp on: aStream [
+    MySQLColumnInfo class >> writeTimestamp: aDateTime on: aStream [
 	<category: 'converting-smalltalk'>
-	self printMysqlTimestamp: aTimestamp on: aStream
+	self 
+	    print: aDateTime year
+	    on: aStream
+	    next: 4.
+	self 
+	    print: aDateTime month
+	    on: aStream
+	    next: 2.
+	self 
+	    print: aDateTime day
+	    on: aStream
+	    next: 2.
+	self 
+	    print: aDateTime hour
+	    on: aStream
+	    next: 2.
+	self 
+	    print: aDateTime minute
+	    on: aStream
+	    next: 2.
+	self 
+	    print: aDateTime second
+	    on: aStream
+	    next: 2
     ]
 
     MySQLColumnInfo class >> convertToMysql: aValue [
@@ -134,7 +167,7 @@ ColumnInfo subclass: MySQLColumnInfo [
     MySQLColumnInfo class >> convertToMysql: aValue on: aStream [
 	<category: 'actions'>
 	| aSelector |
-	aSelector := ConverterSelectors at: aValue class name
+	aSelector := ConverterSelectors at: aValue class
 		    ifAbsent: 
 			[aValue printOn: aStream.
 			^self].
@@ -148,12 +181,13 @@ ColumnInfo subclass: MySQLColumnInfo [
 	<category: 'private-initialize'>
 	ConverterSelectors := IdentityDictionary new.
 	ConverterSelectors
-	    at: #Boolean put: #writeBoolean:on:;
-	    at: #FloatD put: #writeDouble:on:;
-	    at: #FloatE put: #writeFloat:on:;
-	    at: #Time put: #writeQuotedTime:on:;
-	    at: #DateTime put: #writeQuotedTimestamp:on:;
-	    at: #Date put: #writeQuotedDate:on:
+	    at: Boolean put: #writeBoolean:on:;
+	    at: FloatD put: #writeFloat:on:;
+	    at: FloatE put: #writeFloat:on:;
+	    at: FloatQ put: #writeFloat:on:;
+	    at: Time put: #writeQuotedTime:on:;
+	    at: DateTime put: #writeQuotedTimestamp:on:;
+	    at: Date put: #writeQuotedDate:on:
     ]
 
     MySQLColumnInfo class >> buildTypeNameMap [
@@ -222,120 +256,6 @@ ColumnInfo subclass: MySQLColumnInfo [
 	    buildTypeMap;
 	    buildTypeNameMap;
 	    buildConversionMap
-    ]
-
-    MySQLColumnInfo class >> readDateFrom: aStream [
-	<category: 'reading mysql'>
-	| day month year |
-	year := Integer readFrom: aStream.
-	aStream next.
-	month := Integer readFrom: aStream.
-	aStream next.
-	day := Integer readFrom: aStream.
-	^Date 
-	    newDay: day
-	    monthIndex: month
-	    year: year
-    ]
-
-    MySQLColumnInfo class >> readTimeFrom: aStream [
-	<category: 'reading mysql'>
-	| hour minute second |
-	hour := Integer readFrom: aStream.
-	aStream next.
-	minute := Integer readFrom: aStream.
-	aStream next.
-	second := Integer readFrom: aStream.
-	^Time fromSeconds: 60 * (60 * hour + minute) + second
-    ]
-
-    MySQLColumnInfo class >> readTimestampFrom: aStream [
-	<category: 'reading mysql'>
-	| year month day hour minute second separators |
-	year := self readIntegerFrom: aStream next: 4.
-	separators := aStream peekFor: $-.
-	month := self readIntegerFrom: aStream next: 2.
-	separators ifTrue: [aStream next].
-	day := self readIntegerFrom: aStream next: 2.
-	separators ifTrue: [aStream next].
-	hour := self readIntegerFrom: aStream next: 2.
-	separators ifTrue: [aStream next].
-	minute := self readIntegerFrom: aStream next: 2.
-	separators ifTrue: [aStream next].
-	second := self readIntegerFrom: aStream next: 2.
-	^DateTime 
-	    fromDays: (Date 
-		    newDay: day
-		    monthIndex: month
-		    year: year) days
-	    seconds: 3600 * hour + (60 * minute) + second
-	    offset: Duration zero
-    ]
-
-    MySQLColumnInfo class >> readIntegerFrom: aStream next: anInteger [
-	<category: 'private-reading'>
-	^Integer readFrom: (ReadStream on: (aStream next: anInteger))
-    ]
-
-    MySQLColumnInfo class >> printMysqlDate: aDate on: aStream [
-	<category: 'reading mysql'>
-	aDate year printOn: aStream.
-	aStream nextPut: $-.
-	self 
-	    print: aDate month
-	    on: aStream
-	    next: 2.
-	aStream nextPut: $-.
-	self 
-	    print: aDate day
-	    on: aStream
-	    next: 2
-    ]
-
-    MySQLColumnInfo class >> printMysqlTime: aTime on: aStream [
-	<category: 'reading mysql'>
-	self 
-	    print: aTime hour
-	    on: aStream
-	    next: 2.
-	aStream nextPut: $:.
-	self 
-	    print: aTime minute
-	    on: aStream
-	    next: 2.
-	aStream nextPut: $:.
-	self 
-	    print: aTime second
-	    on: aStream
-	    next: 2
-    ]
-
-    MySQLColumnInfo class >> printMysqlTimestamp: aDateTime on: aStream [
-	<category: 'reading mysql'>
-	self 
-	    print: aDateTime year
-	    on: aStream
-	    next: 4.
-	self 
-	    print: aDateTime month
-	    on: aStream
-	    next: 2.
-	self 
-	    print: aDateTime day
-	    on: aStream
-	    next: 2.
-	self 
-	    print: aDateTime hour
-	    on: aStream
-	    next: 2.
-	self 
-	    print: aDateTime minute
-	    on: aStream
-	    next: 2.
-	self 
-	    print: aDateTime second
-	    on: aStream
-	    next: 2
     ]
 
     MySQLColumnInfo class >> print: anInteger on: aStream next: n [
@@ -646,12 +566,22 @@ ColumnInfo subclass: MySQLColumnInfo [
 
     toDate: aString [
 	<category: 'converting'>
-	^self class readDateFrom: (ReadStream on: aString)
+	| aStream day month year |
+	aStream := aString readStream.
+	year := Integer readFrom: aStream.
+	aStream next.
+	month := Integer readFrom: aStream.
+	aStream next.
+	day := Integer readFrom: aStream.
+	^Date 
+	    newDay: day
+	    monthIndex: month
+	    year: year
     ]
 
     toDateTime: aString [
 	<category: 'converting'>
-	^self class readTimestampFrom: aString readStream
+	^self toTimestamp: aString
     ]
 
     toDouble: aString [
@@ -695,12 +625,38 @@ ColumnInfo subclass: MySQLColumnInfo [
 
     toTime: aString [
 	<category: 'converting'>
-	^self class readTimeFrom: (ReadStream on: aString)
+	| aStream hour minute second |
+	aStream := aString readStream.
+	hour := Integer readFrom: aStream.
+	aStream next.
+	minute := Integer readFrom: aStream.
+	aStream next.
+	second := Integer readFrom: aStream.
+	^Time fromSeconds: 60 * (60 * hour + minute) + second
     ]
 
     toTimestamp: aString [
 	<category: 'converting'>
-	^self class readTimestampFrom: (ReadStream on: aString)
+	| aStream year separators month day hour minute second |
+	aStream := aString readStream.
+	year := (aStream next: 4) asInteger.
+	separators := aStream peekFor: $-.
+	month := (aStream next: 2) asInteger.
+	separators ifTrue: [aStream next].
+	day := (aStream next: 2) asInteger.
+	separators ifTrue: [aStream next].
+	hour := (aStream next: 2) asInteger.
+	separators ifTrue: [aStream next].
+	minute := (aStream next: 2) asInteger.
+	separators ifTrue: [aStream next].
+	second := (aStream next: 2) asInteger.
+	^DateTime 
+	    fromDays: (Date 
+		    newDay: day
+		    monthIndex: month
+		    year: year) days
+	    seconds: 3600 * hour + (60 * minute) + second
+	    offset: Duration zero
     ]
 
     charset [
