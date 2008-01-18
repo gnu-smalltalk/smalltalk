@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2007 Free Software Foundation, Inc.
+| Copyright 2007, 2008 Free Software Foundation, Inc.
 | Written by Daniele Sciascia.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -111,15 +111,18 @@ STInST.STFileInParser subclass: GSTFileInParser [
     ]
     
     parseNamespace: node [   
-        | namespace fullNamespace |
+        | namespace fullNamespace newNamespace |
         namespace := RBVariableNode
 	    named: self driver currentNamespace name asString.
         fullNamespace := RBVariableNode
 	    named: (self driver currentNamespace nameIn: Smalltalk).
 
-        self evaluateMessageOn: namespace
-             selector: #addSubspace:
-             argument: node arguments first name asSymbol.
+	newNamespace := node arguments first name asSymbol.
+	(self driver currentNamespace includesKey: newNamespace)
+	    ifFalse: [
+	        self evaluateMessageOn: namespace
+	             selector: #addSubspace:
+	             argument: node arguments first name asSymbol ].
            
         self evaluateStatement: node.       
         self parseDoits.
