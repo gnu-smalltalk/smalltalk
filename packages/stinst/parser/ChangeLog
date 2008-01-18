@@ -1,3 +1,8 @@
+2008-01-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STLoader.st: Add #fullyDefinedLoadedClasses.
+	* STLoaderObjs.st: Add #fullyDefinedLoadedClasses.
+
 2007-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Exporter.st: Add #methodFormattedSourceString and use it.
