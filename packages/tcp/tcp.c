@@ -211,7 +211,15 @@ getAnyLocalAddress (char *name, char *whereToPut)
   struct hostent *hostEnt;
 
   hostEnt = gethostbyname (name);
-  memcpy (whereToPut, hostEnt->h_addr, 4);
+  if (hostEnt)
+    memcpy (whereToPut, hostEnt->h_addr, 4);
+  else
+    {
+      whereToPut[0] = 127;
+      whereToPut[1] = 0;
+      whereToPut[2] = 0;
+      whereToPut[3] = 1;
+    }
 }
 
 #define constantFunction(name, constant) \
