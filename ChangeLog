@@ -1,5 +1,10 @@
 2008-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Package.st: Support multiple --list-files options, add
+	--load and --test suboptions to --list-files.
+
+2008-01-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ObjMemory.st: Make #snapshot return the same as #snapshot:.
 
 2008-01-10  Paolo Bonzini  <bonzini@gnu.org>

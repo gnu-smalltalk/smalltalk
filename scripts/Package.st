@@ -267,14 +267,23 @@ Object subclass: Command [
     runOnPackage: aPackage [ ]
 
     listFiles: listFiles [
-	| base vpathBase vpath |
+	| base vpathBase vpath source test |
 	vpath := self isOption: 'vpath'.
+	source := self isOption: 'load'.
+	test := self isOption: 'test'.
 	base := self installDir.
 	vpathBase := Directory name: self srcdir.
 
-        listFiles do: [ :each || package |
+        listFiles do: [ :each || package files |
 	    package := self packages at: each.
-	    package allFiles do: [ :file |
+	    files := source
+		ifFalse: [ package allFiles ]
+		ifTrue: [ package fileIns ].
+
+	    (test and: [ source and: [ package test notNil ]])
+		ifTrue: [ files := files, package test fileIns ].
+
+	    files do: [ :file |
 		| path relativePath |
 		path := package fullPathOf: file.
 		relativePath := base pathTo: path.
@@ -474,7 +483,7 @@ Command subclass: PkgUninstall [
 ]
 
 Command subclass: PkgList [
-    validOptions [ ^#('list-files' 'vpath') ]
+    validOptions [ ^#('list-files' 'vpath' 'load') ]
     validateDestDir: destdir installDir: installDir [ ]
 ]
 
@@ -682,6 +691,8 @@ Common suboptions:
 	--load                  also load the Smalltalk files in the image
 
 --list-files suboptions:
+	--load                  only list files that are filed in when loading
+	--test                  with --load, also include unit test files
 	--vpath			Omit path to srcdir for files that are there
 
 --dist suboptions:
@@ -730,7 +741,8 @@ The default target directory is ', Directory image, '
 		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
 		mode := PkgPrepare ].
             opt = 'list-files' ifTrue: [
-		mode isNil ifFalse: [ self error: 'multiple modes specified' ].
+		(mode isNil or: [ mode = PkgList ])
+		     ifFalse: [ self error: 'multiple modes specified' ].
 		listFiles add: arg.
 		mode := PkgList ].
 
