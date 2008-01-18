@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002, 2007 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of GNU Smalltalk.
@@ -557,6 +557,11 @@ isDefined
     ^true
 !
 
+isFullyDefined
+    self isDefined ifFalse: [ ^false ].
+    ^self superclass isNil or: [ self superclass isFullyDefined ]
+! !
+
 
 !PseudoBehavior methodsFor: 'abstract'!
 
@@ -653,6 +658,16 @@ initialize: aSTClassLoader
 
 on: aClass for: aSTClassLoader
     ^(self for: aSTClassLoader) setProxy: aClass
+! !
+
+!ProxyClass methodsFor: 'testing'!
+
+isDefined
+     ^true
+!
+
+isFullyDefined
+     ^true
 ! !
 
 !ProxyClass methodsFor: 'delegation'!
