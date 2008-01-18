@@ -31,19 +31,21 @@
 "Load the prerequisites"
 PackageLoader fileInPackage: #ClassPublisher!
 
-| package outFile publisher files classes classPatterns loader |
+| package outFile publisher files classes classPatterns loader defaultNamespace |
 
 classPatterns := OrderedCollection new.
 publisher := STInST.TexinfoDocPublisher.
+defaultNamespace := Smalltalk.
 
 helpString :=
 'Usage:
     gst-doc [ flag ... ] class ...
 
 Options:
+    -I --image-file=FILE  look for classes in the given image
     -p --package=PKG      look for classes in the given package
     -f --file=FILE        look for classes in the given file
-    -I --image-file=FILE  look for classes in the given image
+    -n --namespace=NAMESP load files in the given namespace
     -o --output=FILE      emit documentation in the given file (default=stdout)
        --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message
@@ -56,7 +58,7 @@ Options:
 
     "Parse the command-line arguments."
     Smalltalk
-        arguments: '-h|--help --version -p|--package: -f|--file:
+        arguments: '-h|--help --version -p|--package: -f|--file: -n|--namespace:
                     -I|--image-file: -o|--output: --kernel-directory:'
         do: [ :opt :arg |
 
@@ -73,6 +75,17 @@ Options:
 	        self error: '--output specified multiple times' ].
 	    outFile := arg ].
 
+	opt = 'namespace' ifTrue: [
+            defaultNamespace := Smalltalk.
+            (arg subStrings: $.) do:
+                [:each |  
+                | key |
+                key := each asSymbol.
+                (defaultNamespace includesKey: key)
+		    ifFalse: [defaultNamespace addSubspace: key].
+                defaultNamespace := defaultNamespace at: key].
+	        loader currentNamespace: defaultNamespace ].
+
         opt = 'package' ifTrue: [
 	    package := PackageLoader packageAt: arg.
 	    loader currentNamespace: package createNamespace.
@@ -83,7 +96,7 @@ Options:
 	            parseSmalltalkStream: file
 	            with: STInST.GSTFileInParser ].
 
-	    loader currentNamespace: Smalltalk ].
+	    loader currentNamespace: defaultNamespace ].
 
         opt = 'file' ifTrue: [
 	    file := FileStream open: arg mode: FileStream read.
@@ -99,12 +112,12 @@ Options:
 
     classPatterns isEmpty
         ifTrue: [
-            classes := loader loadedClasses.
+            classes := loader fullyDefinedLoadedClasses.
             classes isEmpty
 	        ifTrue: [ self error: 'specify -p, -f, or a class name' ] ]
         ifFalse: [
 	    allClasses :=
-	        loader loadedClasses,
+	        loader fullyDefinedLoadedClasses,
 	        (Class allSubclasses collect: [ :each | each instanceClass ]).
 
 	    classes := IdentitySet new.

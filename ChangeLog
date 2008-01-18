@@ -1,5 +1,9 @@
 2008-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/GenDoc.st: Add --namespace, use #fullyDefinedLoadedClasses.
+
+2008-01-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Package.st: Support multiple --list-files options, add
 	--load and --test suboptions to --list-files.
 
