@@ -1,5 +1,15 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 3.0 TO ???
+
+o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
+    the instance of GNU Smalltalk that produced the snapshot, and
+    true in the instance of GNU Smalltalk that was restored from the
+    snapshot.  Note that this does not apply to CallinProcesses, since
+    those are stopped in saved images (will this be true in 3.1?).
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 2.3.6 TO 3.0
 
 Important changes:

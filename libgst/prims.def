@@ -5058,12 +5058,22 @@ primitive VMpr_ObjectMemory_snapshot [succeed,fail]
       fileName = _gst_to_cstring (oop2);
       errno = 0;
 
+      /* first overwrite the stack top with true. When we resume from
+	 the save, the stack will be in this state. See below. */
+      SET_STACKTOP (_gst_true_oop);
+
       PROTECT_CURRENT_PROCESS_WITH (&localJmpBuf)
 	success = _gst_save_to_file (fileName);
       
       xfree (fileName);
       if (success)
-	PRIM_SUCCEEDED;
+	{
+	  /* We're returning in the parent, not resuming from
+	     save. Overwite the stack top again, with false this time,
+	     to let the caller know which side of the fork we're on. */
+	  SET_STACKTOP (_gst_false_oop);
+	  PRIM_SUCCEEDED;
+        }
       else
         _gst_set_errno (errno);
     }

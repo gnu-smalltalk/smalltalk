@@ -1,3 +1,8 @@
+2008-01-17  Tony Garnock-Jones  <tonygarnockjones@gmail.com>
+
+	* libgst/prims.def: Differentiate the return value for the
+	two processes.
+
 2008-01-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Do not pop arguments that end up in an
