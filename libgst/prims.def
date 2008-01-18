@@ -2204,17 +2204,16 @@ primitive VMpr_CompiledCode_verificationResult [succeed]
 /* CompiledBlock numArgs:numTemps:bytecodes:depth:literals: */
 primitive VMpr_CompiledBlock_create [succeed]
 {
-  OOP *_gst_literals = OOP_TO_OBJ (STACK_AT (0))->data;
-  int depth = TO_INT (STACK_AT (1));
-  OOP bytecodesOOP = STACK_AT (2);
-  int blockTemps = TO_INT (STACK_AT (3));
-  int blockArgs = TO_INT (STACK_AT (4));
+  OOP *_gst_literals = OOP_TO_OBJ (POP_OOP ())->data;
+  int depth = TO_INT (POP_OOP ());
+  OOP bytecodesOOP = POP_OOP ();
+  int blockTemps = TO_INT (POP_OOP ());
+  int blockArgs = TO_INT (POP_OOP ());
   bc_vector bytecodes = _gst_extract_bytecodes (bytecodesOOP);
 
   OOP block =
     _gst_block_new (blockArgs, blockTemps, bytecodes, depth, _gst_literals);
 
-  POP_N_OOPS (5);
   OOP_CLASS(block) = STACKTOP ();
 
   _gst_primitives_executed++;
@@ -2237,11 +2236,12 @@ primitive VMpr_CompiledMethod_create [succeed,fail]
   if (primitive == -1)
     PRIM_FAILED;
 
+  POP_N_OOPS(6);
+
   method = _gst_make_new_method (primitive, methodArgs, methodTemps, depth,
 			         literals, bytecodes, _gst_nil_oop,
 				 _gst_nil_oop, _gst_nil_oop, -1, -1);
 
-  POP_N_OOPS(6);
   OOP_CLASS(method) = STACKTOP ();
 
   _gst_primitives_executed++;
@@ -3914,21 +3914,22 @@ primitive VMpr_CObject_allocType [succeed,fail]
   OOP oop3;
   _gst_primitives_executed++;
 
-  oop1 = STACK_AT (0);
-  oop2 = STACK_AT (1);
-  oop3 = STACK_AT (2);
+  oop1 = POP_OOP ();
+  oop2 = POP_OOP ();
+  oop3 = STACKTOP ();
   if (IS_INT (oop2)
       && (IS_NIL (oop1) || is_a_kind_of (OOP_CLASS (oop1), _gst_c_type_class))
       && COMMON (RECEIVER_IS_A_KIND_OF (oop3, _gst_c_object_class)))
     {
-      intptr_t arg2 = TO_INT (oop2);
-      PTR ptr = xmalloc (arg2);
-      OOP cObjectOOP = _gst_c_object_new (ptr, oop1, oop3);
+      intptr_t arg2;
+      PTR ptr;
+      arg2 = TO_INT (oop2);
+      ptr = xmalloc (arg2);
 
-      POP_N_OOPS (2);
-      SET_STACKTOP (cObjectOOP);
+      SET_STACKTOP (_gst_c_object_new (ptr, oop1, oop3));
       PRIM_SUCCEEDED;
     }
+  UNPOP (2);
   PRIM_FAILED;
 }
 
@@ -4813,25 +4814,36 @@ primitive VMpr_String_ByteArray_asCData :
      prim_id VMpr_String_asCData [checks_receiver],
      prim_id VMpr_ByteArray_asCData [checks_receiver]
 {
+  PTR data;
+  int size;
   OOP oop1;
   OOP oop2;
   _gst_primitives_executed++;
 
-  oop2 = STACK_AT (0);
-  oop1 = STACK_AT (1);
-  if (is_a_kind_of (OOP_CLASS (oop2), _gst_c_type_class))
+  oop2 = POP_OOP ();
+  oop1 = STACKTOP ();
+#ifndef OPTIMIZE
+  if ((IS_CLASS (oop1, _gst_string_class)
+       && id == prim_id (VMpr_String_asCData))
+      || (IS_CLASS (oop1, _gst_byte_array_class)
+	  && id == prim_id (VMpr_ByteArray_asCData)))
     {
-      int size = NUM_INDEXABLE_FIELDS (oop1);
-      PTR data = xmalloc (size);
-      if (data)
+#endif
+      if (is_a_kind_of (OOP_CLASS (oop2), _gst_c_type_class))
 	{
-	  OOP cObjectOOP = _gst_c_object_new (data, oop2, _gst_c_object_class);
-	  memcpy (data, OOP_TO_OBJ (oop1)->data, size);
-	  POP_OOP ();
-	  SET_STACKTOP (cObjectOOP);
-	  PRIM_SUCCEEDED;
+	  size = NUM_INDEXABLE_FIELDS (oop1);
+	  data = xmalloc (size);
+	  if (data)
+	    {
+	      memcpy (data, OOP_TO_OBJ (oop1)->data, size);
+	      SET_STACKTOP (_gst_c_object_new (data, oop2, _gst_c_object_class));
+	      PRIM_SUCCEEDED;
+	    }
 	}
+#ifndef OPTIMIZE
     }
+#endif
+  UNPOP (1);
   PRIM_FAILED;
 }
 
@@ -5024,9 +5036,10 @@ primitive VMpr_CFuncDescriptor_create [succeed,fail]
   OOP oop4;
   _gst_primitives_executed++;
 
-  oop4 = STACK_AT (0);
-  oop3 = STACK_AT (1);
-  oop2 = STACK_AT (2);
+  oop4 = POP_OOP ();
+  oop3 = POP_OOP ();
+  oop2 = POP_OOP ();
+  oop1 = POP_OOP ();
 
   if (IS_CLASS (oop2, _gst_string_class)
       && (IS_CLASS (oop3, _gst_symbol_class)
@@ -5034,13 +5047,11 @@ primitive VMpr_CFuncDescriptor_create [succeed,fail]
       && (IS_CLASS (oop4, _gst_array_class)
 	  || IS_CLASS (oop4, _gst_undefined_object_class)))
     {
-      OOP cFuncDescrOOP = _gst_make_descriptor (oop2, oop3, oop4);
-      POP_N_OOPS (3);
-      SET_STACKTOP (cFuncDescrOOP);
+      PUSH_OOP (_gst_make_descriptor (oop2, oop3, oop4));
       PRIM_SUCCEEDED;
     }
-  else
-    PRIM_FAILED;
+  UNPOP (4);
+  PRIM_FAILED;
 }
 
 /* Object snapshot: aString */
@@ -5139,18 +5150,18 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
   OOP *oopVec = alloca (numArgs * sizeof (OOP));
   int i;
   intptr_t arg1;
-  OOP resultOOP;
 
   _gst_primitives_executed++;
 
   for (i = numArgs; --i >= 0;)
     oopVec[i] = POP_OOP ();
 
-  resultOOP = oop1 = STACKTOP ();
-  UNPOP (numArgs);
-
+  oop1 = STACKTOP ();
   if (!IS_INT (oopVec[0]))
-    goto fail;
+    {
+      UNPOP (numArgs);
+      PRIM_FAILED;
+    }
 
   arg1 = TO_INT (oopVec[0]);
   switch (arg1) {
@@ -5202,13 +5213,16 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 
       xfree (fileName);
       if (fd < 0)
-	goto fail;
+        {
+	  UNPOP (numArgs);
+	  PRIM_FAILED;
+        }
 
       _gst_set_file_stream_file (oop1, fd, oopVec[1],
 			         is_pipe, access, false);
-
-      goto succeed;
     }
+
+    PRIM_SUCCEEDED;
 
   case PRIM_MK_TEMP:
     fileName = _gst_to_cstring (oopVec[1]);
@@ -5219,27 +5233,31 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
     if (fd < 0)
       {
         xfree (fileName2);
-	goto fail;
+	UNPOP (numArgs);
+	PRIM_FAILED;
       }
     
     _gst_set_file_stream_file (oop1, fd, _gst_string_new (fileName2),
 			       false, O_RDWR, false);
 
     xfree (fileName2);
-    goto succeed;
+    PRIM_SUCCEEDED;
   }
 
   fileStream = (gst_file_stream) OOP_TO_OBJ (oop1);
   if (!IS_INT (fileStream->file))
-    goto fail;
+    {
+      UNPOP (numArgs);
+      PRIM_FAILED;
+    }
 
   fd = TO_INT (fileStream->file);
   switch (arg1)
     {
 
     case PRIM_CLOSE_FILE:	/* FileDescriptor close */
-      resultOOP = FROM_INT (close (fd));
-      goto succeed;
+      SET_STACKTOP_INT (close (fd));
+      PRIM_SUCCEEDED;
 
     case PRIM_FSEEK_SET:		/* FileDescriptor position: position */
       if (IS_OFF_T (oopVec[1]) &&
@@ -5249,7 +5267,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	  break;
 	}
       else
-        goto succeed;
+	PRIM_SUCCEEDED;
 
     case PRIM_FTELL:		/* FileDescriptor position */
       {
@@ -5260,24 +5278,19 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	    break;
 	  }
 
-	resultOOP = FROM_OFF_T (off);
-	goto succeed;
+	SET_STACKTOP (FROM_OFF_T (off));
+	PRIM_SUCCEEDED;
       }
 
     case PRIM_FEOF:
       {				/* FileDescriptor atEnd */
 	off_t oldPos;
 	oldPos = lseek (fd, 0, SEEK_CUR);
-	if (oldPos >= 0 && lseek (fd, 0, SEEK_END) == oldPos)
-	  resultOOP = _gst_true_oop;
-	else
-	  {
-	    resultOOP = _gst_false_oop;
-	    if (oldPos >= 0)
-	      lseek (fd, oldPos, SEEK_SET);
-	  }
+	SET_STACKTOP_BOOLEAN (oldPos >= 0
+			      && lseek (fd, 0, SEEK_END) == oldPos);
+	lseek (fd, oldPos, SEEK_SET);
 	errno = 0;
-	goto succeed;
+	PRIM_SUCCEEDED;
       }
 
     case PRIM_FSIZE:
@@ -5288,8 +5301,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	    errno = 0;
 	    break;
 	  }
-	resultOOP = FROM_INT (statBuf.st_size);
-	goto succeed;
+	SET_STACKTOP_INT (statBuf.st_size);
+	PRIM_SUCCEEDED;
       }
 
     case PRIM_PUT_CHARS:
@@ -5306,8 +5319,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	      result = _gst_write (fd, data + from - 1, to - from + 1);
 	      if (result >= 0)
 		{
-		  resultOOP = FROM_INT (result);
-		  goto succeed;
+		  SET_STACKTOP_INT (result);
+		  PRIM_SUCCEEDED;
 		}
 	    }
 	}
@@ -5332,8 +5345,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 
 	      if (result >= 0)
 		{
-		  resultOOP = FROM_INT (result);
-		  goto succeed;
+		  SET_STACKTOP_INT (result);
+		  PRIM_SUCCEEDED;
 		}
 	    }
 	}
@@ -5372,8 +5385,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 
 	      if (result >= 0)
 		{
-		  resultOOP = FROM_INT (result);
-		  goto succeed;
+		  SET_STACKTOP_INT (result);
+		  PRIM_SUCCEEDED;
 		}
 	    }
 	}
@@ -5412,8 +5425,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 
 	      if (result >= 0)
 		{
-		  resultOOP = FROM_INT (result);
-		  goto succeed;
+		  SET_STACKTOP_INT (result);
+		  PRIM_SUCCEEDED;
 		}
 	    }
 	}
@@ -5427,7 +5440,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	  break;
 
 	ftruncate (fd, pos);
-	goto succeed;
+	PRIM_SUCCEEDED;
       }
 
     case PRIM_FSEEK_CUR:		/* FileDescriptor skip: */
@@ -5435,7 +5448,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	  lseek (fd, TO_OFF_T (oopVec[1]), SEEK_CUR) < 0)
 	break;
       else
-	goto succeed;
+	PRIM_SUCCEEDED;
 
     case PRIM_SYNC_POLL:
       {
@@ -5444,8 +5457,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	result = _gst_sync_file_polling (fd, TO_INT (oopVec[1]));
 	if (result >= 0)
 	  {
-	    resultOOP = FROM_INT (result);
-	    goto succeed;
+	    SET_STACKTOP_INT (result);
+	    PRIM_SUCCEEDED;
 	  }
       }
       break;
@@ -5457,7 +5470,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	result =
 	  _gst_async_file_polling (fd, TO_INT (oopVec[1]), oopVec[2]);
 	if (result >= 0)
-	  goto succeed;
+	  PRIM_SUCCEEDED;
       }
       break;
 
@@ -5466,21 +5479,25 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	off_t result;
 
 	result = lseek (fd, 0, SEEK_END);
-	if (result != -1)
+	if (result == -1)
+	  {
+	    if (errno == ESPIPE || errno == EINVAL)
+	      {
+		SET_STACKTOP (_gst_true_oop);
+		errno = 0;
+	      }
+	    else
+	      PRIM_FAILED;
+	  }
+	else
 	  {
 	    lseek (fd, result, SEEK_SET);
-	    resultOOP = _gst_false_oop;
-	    goto succeed;
-	  }
-	else if (errno == ESPIPE || errno == EINVAL)
-	  {
-	    resultOOP = _gst_true_oop;
-	    errno = 0;
-	    goto succeed;
+	    SET_STACKTOP (_gst_false_oop);
 	  }
 
-	goto fail;
+	PRIM_SUCCEEDED;
       }
+      break;
 
     case PRIM_SHUTDOWN_WRITE:
       shutdown (fd, 1);
@@ -5492,19 +5509,14 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 	  errno = 0;
 	}
 #endif
-      goto succeed;
+      break;
     }
 
- fail:
   if (errno)
     _gst_set_errno (errno);
 
+  UNPOP (numArgs);
   PRIM_FAILED;
-
- succeed:
-  POP_N_OOPS (numArgs);
-  SET_STACKTOP (resultOOP);
-  PRIM_SUCCEEDED;
 }
 
 /* FileDescriptor>>#socketOp..., socket version, variadic */
@@ -5513,7 +5525,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 {
   gst_file_stream fileStream;
   int fd;
-  OOP oop1, resultOOP;
+  OOP oop1;
   OOP *oopVec = alloca (numArgs * sizeof (OOP));
   int i;
   intptr_t arg1;
@@ -5524,16 +5536,20 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
   for (i = numArgs; --i >= 0;)
     oopVec[i] = POP_OOP ();
 
-  resultOOP = oop1 = STACKTOP ();
-  UNPOP (numArgs);
+  oop1 = STACKTOP ();
   if (!IS_INT (oopVec[0]))
-    goto fail;
+    {
+      UNPOP (numArgs);
+      PRIM_FAILED;
+    }
 
   arg1 = TO_INT (oopVec[0]);
   fileStream = (gst_file_stream) OOP_TO_OBJ (oop1);
   if (IS_NIL (fileStream->file))
-    goto fail;
-
+    {
+      UNPOP (numArgs);
+      PRIM_FAILED;
+    }
   fd = TO_INT (fileStream->file);
   switch (arg1)
     {
@@ -5541,8 +5557,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
     case PRIM_CLOSE_FILE:	/* FileDescriptor close */
       {
         int result = closesocket (fd);
-        resultOOP = FROM_INT (result);
-        goto succeed;
+        SET_STACKTOP_INT (result);
+        PRIM_SUCCEEDED;
       }
 
     case PRIM_PUT_CHARS:
@@ -5562,8 +5578,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 		abort ();
 	      if (result >= 0)
 		{
-		  resultOOP = FROM_INT (result);
-		  goto succeed;
+		  SET_STACKTOP_INT (result);
+		  PRIM_SUCCEEDED;
 		}
 	    }
 	}
@@ -5596,8 +5612,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 
 	      if (result >= 0)
 		{
-		  resultOOP = FROM_INT (result);
-		  goto succeed;
+		  SET_STACKTOP_INT (result);
+		  PRIM_SUCCEEDED;
 		}
 	    }
 	}
@@ -5610,8 +5626,8 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 	result = _gst_sync_file_polling (fd, TO_INT (oopVec[1]));
 	if (result >= 0)
 	  {
-	    resultOOP = FROM_INT (result);
-	    goto succeed;
+	    SET_STACKTOP_INT (result);
+	    PRIM_SUCCEEDED;
 	  }
       }
       break;
@@ -5623,25 +5639,22 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 	result =
 	  _gst_async_file_polling (fd, TO_INT (oopVec[1]), oopVec[2]);
 	if (result >= 0)
-	  goto succeed;
+	  PRIM_SUCCEEDED;
       }
       break;
 
     case PRIM_IS_PIPE:
-      resultOOP =_gst_true_oop;
-      goto succeed;
+      {
+	SET_STACKTOP (_gst_true_oop);
+	PRIM_SUCCEEDED;
+      }
       break;
     }
 
+  UNPOP (numArgs);
 #endif
 
- fail:
   PRIM_FAILED;
-
- succeed:
-  POP_N_OOPS (numArgs);
-  SET_STACKTOP (resultOOP);
-  PRIM_SUCCEEDED;
 }
 
 /* C callout primitives.  */
