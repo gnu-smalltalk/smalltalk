@@ -1,5 +1,10 @@
 2008-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* GSTParser.st: Don't add an existing namespace when parsing
+	"Namespace current: ... [ ]".
+
+2008-01-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* STLoader.st: Add #fullyDefinedLoadedClasses.
 	* STLoaderObjs.st: Add #fullyDefinedLoadedClasses.
 
