@@ -8,9 +8,11 @@
   </test>
 
   <filein>Sets.st</filein>
+  <filein>UTF7.st</filein>
 
   <module>iconv</module>
 
   <file>Sets.st</file>
+  <file>UTF7.st</file>
   <file>iconvtests.st</file>
 </package>
