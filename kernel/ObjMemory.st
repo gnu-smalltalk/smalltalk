@@ -50,7 +50,7 @@ state.'>
 	"Save a snapshot on the image file that was loaded on startup."
 
 	<category: 'saving the image'>
-	self snapshot: File image
+	^self snapshot: File image
     ]
 
     ObjectMemory class >> changed: aSymbol [
