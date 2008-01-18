@@ -484,7 +484,13 @@ Command subclass: PkgUninstall [
 
 Command subclass: PkgList [
     validOptions [ ^#('list-files' 'vpath' 'load') ]
-    validateDestDir: destdir installDir: installDir [ ]
+    validateDestDir: destdir installDir: installDir [
+	destdir = ''
+	    ifFalse: [ self error: '--destdir not needed with --list-files' ].
+	installDir isNil
+	    ifFalse: [ self error: '--target-directory not needed with --list-files' ]
+    ]
+    defaultInstallDir [ ^'.' ]
 ]
 
 PkgList subclass: PkgPackageList [
