@@ -100,8 +100,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/libgst		\
 bin_PROGRAMS = gst
 
 gst_SOURCES = main.c
-gst_LDADD = libgst/libgst.la @ICON@
-gst_DEPENDENCIES = libgst/libgst.la @ICON@
+gst_LDADD = libgst/libgst.la lib-src/library.la @ICON@
+gst_DEPENDENCIES = libgst/libgst.la lib-src/library.la @ICON@
 gst_LDFLAGS = -export-dynamic
 
 if ENABLE_DISASSEMBLER
@@ -114,8 +114,8 @@ endif
 # we use noinst here.
 noinst_PROGRAMS = gst-tool
 gst_tool_SOURCES = gst-tool.c
-gst_tool_LDADD = libgst/libgst.la
-gst_tool_DEPENDENCIES = libgst/libgst.la
+gst_tool_LDADD = libgst/libgst.la lib-src/library.la
+gst_tool_DEPENDENCIES = libgst/libgst.la lib-src/library.la
 gst_tool_LDFLAGS = -export-dynamic
 
 GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package gst-convert gst-doc
