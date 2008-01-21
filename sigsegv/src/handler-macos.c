@@ -1,6 +1,6 @@
 /* Fault handler information.  MacOSX version.
    Copyright (C) 1993-1999, 2002-2003, 2007  Bruno Haible <bruno@clisp.org>
-   Copyright (C) 2003  Paolo Bonzini <bonzini@gnu.org>
+   Copyright (C) 2003, 2008  Paolo Bonzini <bonzini@gnu.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -157,6 +157,22 @@ altstack_handler ()
   terminating_handler ();
 }
 
+static inline int
+call_user_handler (void *addr, int serious)
+{
+  int done;
+  if (!user_handler)
+    return 0;
+
+#ifdef DEBUG_EXCEPTION_HANDLING
+  fprintf (stderr, "Calling user handler, addr = 0x%lx\n", (char *) addr);
+#endif
+  done = (*user_handler) ((void *) addr, serious);
+#ifdef DEBUG_EXCEPTION_HANDLING
+  fprintf (stderr, "Back from user handler\n");
+#endif
+  return done;
+}
 
 /* Handle an exception by invoking the user's fault handler and/or forwarding
    the duty to the previously installed handlers.  */
@@ -199,6 +215,19 @@ catch_exception_raise (mach_port_t exception_port,
     }
 #endif
 
+  /* It turns out any Darwin kernel starting at 10.2 contains a "fast" path
+     to determine the address of a fault: it is located into code[1].
+     MacOS X exception delivery is really slow, so we also pass code
+     and make getting the EXC_STATE conditional.  */
+  addr = (unsigned long) (SIGSEGV_FAULT_ADDRESS (code, exc_state));
+
+  /* It gets worse if we want to retrieve the machine registers, so we
+     call the user handler before detecting if the exception is really a
+     stack fault.  */
+  if (call_user_handler ((void *) addr, 0))
+    return KERN_SUCCESS;
+
+  /* See http://web.mit.edu/darwin/src/modules/xnu/osfmk/man/thread_get_state.html.  */
   state_count = SIGSEGV_THREAD_STATE_COUNT;
   if (thread_get_state (thread, SIGSEGV_THREAD_STATE_FLAVOR,
                         (void *) &thread_state, &state_count)
@@ -212,7 +241,6 @@ catch_exception_raise (mach_port_t exception_port,
       return KERN_FAILURE;
     }
 
-  addr = (unsigned long) (SIGSEGV_FAULT_ADDRESS (thread_state, exc_state));
   sp = (unsigned long) (SIGSEGV_STACK_POINTER (thread_state));
 
   /* Got the thread's state. Now extract the address that caused the
@@ -244,19 +272,9 @@ catch_exception_raise (mach_port_t exception_port,
     }
   else
     {
-      if (user_handler)
-        {
-          int done;
-#ifdef DEBUG_EXCEPTION_HANDLING
-          fprintf (stderr, "Calling user handler, addr = 0x%lx\n", (char *) addr);
-#endif
-          done = (*user_handler) ((void *) addr, 1);
-#ifdef DEBUG_EXCEPTION_HANDLING
-          fprintf (stderr, "Back from user handler\n");
-#endif
-          if (done)
-            return KERN_SUCCESS;
-        }
+      if (call_user_handler ((void *) addr, 1))
+        return KERN_SUCCESS;
+
       SIGSEGV_PROGRAM_COUNTER (thread_state) = (unsigned long) terminating_handler;
     }
 
