@@ -1,3 +1,14 @@
+2008-01-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* src/handler-macos.c (call_user_handler): New.
+	(catch_exception_raise): Do two-phase call of the user handler
+	as in handler-unix.c, for speed.  Pass CODE instead of the
+	thread_state to SIGSEGV_FAULT_ADDRESS.
+	* src/machfault-macos-i386.h (SIGSEGV_EXC_STATE_TYPE,
+	SIGSEGV_EXC_STATE_FLAVOR, SIGSEGV_EXC_STATE_COUNT): Remove.
+	(SIGSEGV_FAULT_ADDRESS): Use code[1].
+	* src/machfault-macos-powerpc.h: Likewise.
+
 2007-11-16  Bruno Haible  <bruno@clisp.org>
 
 	* src/fault-freebsd-i386.h (SIGSEGV_FAULT_STACKPOINTER): Use sc_rsp
