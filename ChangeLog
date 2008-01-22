@@ -1,5 +1,9 @@
 2008-01-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CompildCode.st: Eliminate possible infinite loop in #hash.
+
+2008-01-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Dictionary.st: Rewrite #findElementIndex:.
 	* kernel/WeakObjects.st: Ditto.
 	* kernel/HashedColl.st: Ditto, and store nil before calling it
