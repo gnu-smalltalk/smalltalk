@@ -286,11 +286,20 @@ one of them, I swiftly remove all.'>
     ]
 
     findElementIndex: anObject [
-	"anObject is the content of an indexed variable. See what slot it should
-	 be inserted in."
+        "Tries to see if anObject exists as an indexed variable. As soon as nil
+         is found, the index of that slot is answered"
 
-	<category: 'private'>
-	^self findIndex: anObject key
+        <category: 'private methods'>
+        | index size element |
+        self beConsistent.
+
+        "Sorry for the lack of readability, but I want speed... :-)"
+        index := (anObject key hash scramble bitAnd: (size := self primSize) - 1) + 1.
+   
+        [(element := self primAt: index) isNil
+            ifTrue: [^index].
+        index == size ifTrue: [index := 1] ifFalse: [index := index + 1]]
+                repeat
     ]
 
     findIndex: anObject [

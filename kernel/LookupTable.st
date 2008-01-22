@@ -250,13 +250,12 @@ equality comparison message #= to determine equivalence of indices.'>
 	key := self primAt: i.
 	key notNil] 
 		whileTrue: 
-		    [j := self findElementIndex: key.
-		    (self primAt: j) isNil 
-			ifTrue: 
-			    [self primAt: j put: key.
-			    self valueAt: j put: (self valueAt: i).
-			    self primAt: i put: nil.
-			    self valueAt: i put: nil]]
+		    [self primAt: i put: nil.
+		    j := self findElementIndex: key.
+		    self primAt: j put: key.
+		    j = i ifFalse: [
+			self valueAt: j put: (self valueAt: i).
+			self valueAt: i put: nil]]
     ]
 
     copyAllFrom: aDictionary [
@@ -282,7 +281,7 @@ equality comparison message #= to determine equivalence of indices.'>
 
 	<category: 'private methods'>
 	| index |
-	self primAt: (index := self findIndex: key) put: key.
+	self primAt: (index := self findElementIndex: key) put: key.
 	self valueAt: index put: value.
 	tally := tally + 1.
 	^value
@@ -321,11 +320,21 @@ equality comparison message #= to determine equivalence of indices.'>
     ]
 
     findElementIndex: anObject [
-	"anObject is the content of an indexed variable. See what slot it should
-	 be inserted in."
+        "Tries to see where anObject can be placed as an indexed variable.
+	 As soon as nil is found, the index of that slot is answered.
+	 anObject also comes from an indexed variable."
 
-	<category: 'private methods'>
-	^self findIndex: anObject
+        <category: 'private methods'>
+        | index size element |
+        self beConsistent.
+
+        "Sorry for the lack of readability, but I want speed... :-)"
+        index := (anObject hash scramble bitAnd: (size := self primSize) - 1) + 1.
+   
+        [(element := self primAt: index) isNil
+            ifTrue: [^index].
+        index == size ifTrue: [index := 1] ifFalse: [index := index + 1]]
+                repeat
     ]
 
     findIndex: anObject [

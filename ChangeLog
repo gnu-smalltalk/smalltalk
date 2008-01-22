@@ -1,3 +1,11 @@
+2008-01-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Dictionary.st: Rewrite #findElementIndex:.
+	* kernel/WeakObjects.st: Ditto.
+	* kernel/HashedColl.st: Ditto, and store nil before calling it
+	from #rehashObjectsAfter:.
+	* kernel/LookupTable.st: Ditto, and also use it in #whileGrowingAt:put:.
+
 2008-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Package.st: Change default -t value for --list-files,
