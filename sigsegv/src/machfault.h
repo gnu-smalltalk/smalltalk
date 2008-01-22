@@ -19,13 +19,16 @@
 
      SIGSEGV_EXC_STATE_TYPE
           is a type containing state describing details of an exception,
-          excluding the thread state.
+          excluding the thread state.  Not needed if for example the
+	  fault address is found in code[1].
      SIGSEGV_EXC_STATE_FLAVOR
           is a macro expanding to a constant int value denoting the
-          SIGSEGV_EXC_STATE_TYPE type.
+          SIGSEGV_EXC_STATE_TYPE type.  Only needed if SIGSEGV_EXC_STATE_TYPE
+	  is given.
      SIGSEGV_EXC_STATE_COUNT
           is a macro expanding to the number of words of the
-          SIGSEGV_EXC_STATE_TYPE type.
+          SIGSEGV_EXC_STATE_TYPE type.  Only needed if SIGSEGV_EXC_STATE_TYPE
+	  is given.
 
      SIGSEGV_THREAD_STATE_TYPE
           is a type containing the state of a (stopped or interrupted) thread.
@@ -36,8 +39,8 @@
           is a macro expanding to the number of words of the
           SIGSEGV_THREAD_STATE_TYPE type.
 
-     SIGSEGV_FAULT_ADDRESS(thr_state, exc_state)
-          is a macro for fetching the fault address.
+     SIGSEGV_FAULT_ADDRESS(code, exc_state)
+          is a macro for fetching the fault address.  Defaults to code[1].
 
      SIGSEGV_STACK_POINTER(thr_state)
           is a macro, expanding to an lvalue, for fetching the stackpointer at
@@ -52,3 +55,7 @@
  */
 
 #include CFG_MACHFAULT
+
+#ifndef SIGSEGV_FAULT_ADDRESS
+#define SIGSEGV_FAULT_ADDRESS(code,exc_state)       (code[1])
+#endif

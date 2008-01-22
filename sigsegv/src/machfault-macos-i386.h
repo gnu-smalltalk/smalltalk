@@ -18,11 +18,21 @@
 #define SIGSEGV_THREAD_STATE_TYPE                   i386_thread_state_t
 #define SIGSEGV_THREAD_STATE_FLAVOR                 i386_THREAD_STATE
 #define SIGSEGV_THREAD_STATE_COUNT                  i386_THREAD_STATE_COUNT
-#define SIGSEGV_FAULT_ADDRESS(code,exc_state)       (code[1])
 #if __DARWIN_UNIX03
 #define SIGSEGV_STACK_POINTER(thr_state)            (thr_state).__esp
 #define SIGSEGV_PROGRAM_COUNTER(thr_state)          (thr_state).__eip
 #else
 #define SIGSEGV_STACK_POINTER(thr_state)            (thr_state).esp
 #define SIGSEGV_PROGRAM_COUNTER(thr_state)          (thr_state).eip
+#endif
+
+#ifdef _LP64
+# define SIGSEGV_EXC_STATE_TYPE                      i386_exception_state_t
+# define SIGSEGV_EXC_STATE_FLAVOR                    i386_EXCEPTION_STATE
+# define SIGSEGV_EXC_STATE_COUNT                     i386_EXCEPTION_STATE_COUNT
+# if __DARWIN_UNIX03
+#  define SIGSEGV_FAULT_ADDRESS(thr_state,exc_state)  (exc_state).__faultvaddr
+# else
+#  define SIGSEGV_FAULT_ADDRESS(thr_state,exc_state)  (exc_state).faultvaddr
+# endif
 #endif
