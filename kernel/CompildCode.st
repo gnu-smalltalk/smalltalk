@@ -163,8 +163,8 @@ superclass for blocks and methods'>
 
 	<category: 'basic'>
 	| hashValue |
-	hashValue := (header hash bitAnd: 536870911) 
-		    + (literals hash bitAnd: 536870911).
+	hashValue := header hash bitAnd: 536870911
+		    + (literals size hash bitAnd: 536870911).
 	1 to: self basicSize
 	    do: 
 		[:i | 
