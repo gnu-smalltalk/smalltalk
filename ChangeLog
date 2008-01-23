@@ -1,3 +1,7 @@
+2008-01-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Regex.st: Add #allOccurrencesOfRegex:, remove dead code.
+
 2008-01-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CompildCode.st: Eliminate possible infinite loop in #hash.

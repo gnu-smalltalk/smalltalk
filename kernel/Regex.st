@@ -720,6 +720,38 @@ String extend [
 	    to: self size
     ]
 
+    allOccurrencesOfRegex: pattern from: from to: to [
+	"Find all the matches of pattern within the receiver and within the
+	 given range of indices.  Collect them into an OrderedCollection,
+	 which is then returned."
+
+	<category: 'regex'>
+	| idx regex regs result |
+	regex := pattern asRegex.
+	idx := from.
+	result := OrderedCollection new.
+	[regs := self 
+		    searchRegexInternal: regex
+		    from: idx
+		    to: to.
+	regs notNil] 
+		whileTrue: 
+		    [result add: regs match.
+		    idx := regs to + 1 max: regs from + 1].
+	^result
+    ]
+
+    allOccurrencesOfRegex: pattern [
+	"Find all the matches of pattern within the receiver and
+	 collect them into an OrderedCollection."
+
+	<category: 'regex'>
+	^self 
+	    allOccurrencesOfRegex: pattern
+	    from: 1
+	    to: self size
+    ]
+
     replacingRegex: pattern with: str [
 	"Returns the receiver if the pattern has no match in it.  If it has
 	 a match, it is replaced with str after substituting %n sequences
@@ -911,7 +943,6 @@ String extend [
 		whileTrue: 
 		    [aBlock value: regs.
 		    idx := regs to + 1 max: regs from + 1].
-	regs free
     ]
 
     onOccurrencesOfRegex: pattern do: body [
