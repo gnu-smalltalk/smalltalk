@@ -1,5 +1,9 @@
 2008-01-23  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/SeqCollect.st: Add #atRandom.
+
+2008-01-23  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Regex.st: Add #allOccurrencesOfRegex:, remove dead code.
 
 2008-01-22  Paolo Bonzini  <bonzini@gnu.org>

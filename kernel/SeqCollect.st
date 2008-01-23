@@ -153,6 +153,11 @@ some access and manipulation methods.'>
 	^self at: anIndex
     ]
 
+    atRandom [
+	"Return a random item of the receiver."
+	^self at: (Random between: 1 and: self size)
+    ]
+
     atAll: keyCollection [
 	"Answer a collection of the same kind returned by #collect:, that
 	 only includes the values at the given indices. Fail if any of
