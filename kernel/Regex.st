@@ -881,10 +881,11 @@ String extend [
 	 of the match (as in #%)."
 
 	<category: 'regex'>
-	| res idx regex beg end regs |
+	| res idx regex beg end regs emptyOk |
 	regex := pattern asRegex.
 	res := WriteStream on: (String new: to - from + 1).
 	idx := from.
+	emptyOk := true.
 	
 	[regs := self 
 		    searchRegexInternal: regex
@@ -894,17 +895,20 @@ String extend [
 		whileFalse: 
 		    [beg := regs from.
 		    end := regs to.
-		    res 
-			next: beg - idx
-			putAll: self
-			startingAt: idx.
-		    res nextPutAll: str % regs.
-		    idx := end + 1.
-		    beg > end 
-			ifTrue: 
-			    [res nextPut: (self at: idx).
-			    idx := idx + 1].
-		    idx > self size ifTrue: [^res contents]].
+		    (beg <= end or: [ beg > idx or: [ emptyOk ]])
+			ifTrue: [
+			    emptyOk := false.
+			    res 
+			        next: beg - idx
+			        putAll: self
+			        startingAt: idx.
+		            res nextPutAll: str % regs.
+			    idx := end + 1]
+			ifFalse: [
+			    beg <= to ifFalse: [^res contents].
+			    emptyOk := true.
+			    res nextPut: (self at: beg).
+			    idx := beg + 1]].
 	res 
 	    next: to - idx + 1
 	    putAll: self
@@ -963,11 +967,11 @@ String extend [
 	 are separated and stored into an Array of Strings that is returned."
 
 	<category: 'regex'>
-	| res idx regex regs tokStart |
+	| res idx tokStart regex regs beg end emptyOk |
 	regex := pattern asRegex.
 	res := WriteStream on: (Array new: 10).
-	idx := from.
-	tokStart := 1.
+	idx := tokStart := from.
+	emptyOk := false.
 	
 	[regs := self 
 		    searchRegexInternal: regex
@@ -975,10 +979,27 @@ String extend [
 		    to: to.
 	regs notNil] 
 		whileTrue: 
-		    [res nextPut: (self copyFrom: tokStart to: regs from - 1).
-		    tokStart := regs to + 1.
-		    idx := regs to + 1 max: regs from + 1].
-	res nextPut: (self copyFrom: tokStart to: to).
+		    [beg := regs from.
+		    end := regs to.
+		    (beg <= end or: [ beg > idx or: [ emptyOk ]])
+			ifTrue: [
+			    emptyOk := false.
+			    res nextPut: (self copyFrom: tokStart to: beg - 1).
+			    idx := tokStart := end + 1 ]
+			ifFalse: [
+			    "If we reach the end of the string exit
+			     without adding the token.  tokStart must have been
+			     set above to TO + 1 (it was set above just before
+			     setting emptyOk to false), so we'd add an empty
+			     token we don't want."
+			    beg <= to ifFalse: [^res contents].
+			    emptyOk := true.
+
+			    "By not updating tokStart we put the character in the
+			     next token."
+			    idx := beg + 1]].
+	(tokStart <= to or: [ emptyOk ])
+	    ifTrue: [ res nextPut: (self copyFrom: tokStart to: to) ].
 	^res contents
     ]
 

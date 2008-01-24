@@ -1,5 +1,12 @@
 2008-01-24  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Regex.st: Fix global substitution and tokenization for
+	regexes that can match the empty string.
+	* tests/strings.st: Add testcases.
+	* tests/strings.ok: Regenerate.
+
+2008-01-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Symbol.st: Fix #numArgs for underscores in the symbol,
 	reported by Sam Phillips.
 
