@@ -11,6 +11,8 @@
 | Written by Josh Miller, ported by Markus Fritsche,
 | refactored/rewritten by Paolo Bonzini
 |
+| Copyright 2003, 2007, 2008 Free Software Foundation, Inc.
+|
 | This file is part of GNU Smalltalk.
 |
 | The GNU Smalltalk class library is free software; you can redistribute it

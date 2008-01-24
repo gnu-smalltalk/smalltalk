@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright (C) 1999  Free Software Foundation.
+| Copyright (C) 1999, 2007  Free Software Foundation.
 | Written by Paolo Bonzini
 |
 | This file is part of GNU Smalltalk.
