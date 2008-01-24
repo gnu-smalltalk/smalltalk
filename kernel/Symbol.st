@@ -228,8 +228,9 @@ representation are in fact the same instance.'>
 	 to be a valid message name (#+, #not, #printOn:, #ifTrue:ifFalse:, etc.)"
 
 	<category: 'basic'>
-	(self at: 1) isLetter ifFalse: [^1].
-	^(self at: self size) = $: ifTrue: [self occurrencesOf: $:] ifFalse: [0]
+	(self at: self size) = $: ifTrue: [^self occurrencesOf: $:].
+	(self anySatisfy: [ :ch | ch isLetter or: [ ch = $_ ]]) ifTrue: [^0].
+	^1
     ]
 
     keywords [
