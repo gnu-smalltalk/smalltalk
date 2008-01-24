@@ -106,9 +106,19 @@ Eval [ 'baa' copyReplacingAllRegex: 'a*' with: 'x' ]		"xbx"
 Eval [ 'baaa' copyReplacingAllRegex: 'a*' with: 'x' ]		"xbx"
 Eval [ 'bc' copyReplacingAllRegex: 'a*' with: 'x' ]		"xbxcx"
 Eval [ 'bac' copyReplacingAllRegex: 'a*' with: 'x' ]		"xbxcx"
+
 Eval [ ('abc def ' tokenize: ' ') printString ]			"(abc def)"
 Eval [ (' abc def ' tokenize: ' ') printString ]		"('' abc def)"
 Eval [ ('abc' tokenize: 'x*') printString ]			"(a b c)"
 Eval [ ('axxx' tokenize: 'x*') printString ]			"(a)"
 Eval [ ('ax' tokenize: 'x*') printString ]			"(a)"
 Eval [ ('a' tokenize: 'x*') printString ]			"(a)"
+
+Eval [ ('abc' allOccurrencesOfRegex: 'x*') size ]		"4"
+Eval [ ('axbc' allOccurrencesOfRegex: 'x*') size ]
+Eval [ ('axbxc' allOccurrencesOfRegex: 'x*') size ]
+Eval [ ('axbxcx' allOccurrencesOfRegex: 'x*') size ]
+Eval [ ('xaxbxcx' allOccurrencesOfRegex: 'x*') size ]
+Eval [ ('xaxbxxcx' allOccurrencesOfRegex: 'x*') size ]
+Eval [ ('f' allOccurrencesOfRegex: 'o*\Z') size ]		"1"
+Eval [ ('fo' allOccurrencesOfRegex: 'o*\Z') size ]

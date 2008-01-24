@@ -1,5 +1,11 @@
 2008-01-24  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Regex.st: Do same fix for #allOccurrencesOfRegex:.
+	* tests/strings.st: Add testcases.
+	* tests/strings.ok: Regenerate.
+
+2008-01-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Regex.st: Fix global substitution and tokenization for
 	regexes that can match the empty string.
 	* tests/strings.st: Add testcases.
