@@ -726,18 +726,29 @@ String extend [
 	 which is then returned."
 
 	<category: 'regex'>
-	| idx regex regs result |
+	| idx regex regs result beg end emptyOk |
 	regex := pattern asRegex.
 	idx := from.
 	result := OrderedCollection new.
+	emptyOk := true.
+
 	[regs := self 
 		    searchRegexInternal: regex
 		    from: idx
 		    to: to.
-	regs notNil] 
-		whileTrue: 
-		    [result add: regs match.
-		    idx := regs to + 1 max: regs from + 1].
+	regs isNil] 
+		whileFalse:
+                    [beg := regs from.
+                    end := regs to.
+                    (beg <= end or: [ beg > idx or: [ emptyOk ]])
+                        ifTrue: [
+                            result addLast: regs match.
+                            emptyOk := false.
+                            idx := end + 1]
+                        ifFalse: [
+                            beg <= to ifFalse: [^result].
+                            emptyOk := true.
+                            idx := beg + 1]].
 	^result
     ]
 
