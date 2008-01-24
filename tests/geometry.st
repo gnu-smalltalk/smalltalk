@@ -10,7 +10,7 @@
 
 "======================================================================
 |
-| Copyright (C) 1995, 1999, 2005  Free Software Foundation.
+| Copyright (C) 1995, 1999, 2005, 2007  Free Software Foundation.
 | Written by Doug McCallum.
 |
 | This file is part of GNU Smalltalk.

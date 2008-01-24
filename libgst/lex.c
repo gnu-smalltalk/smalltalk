@@ -7,8 +7,8 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2004,2005,2006,2007
- * Free Software Foundation, Inc.
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,
+ * 2004,2005,2006,2007,2008 Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
  * This file is part of GNU Smalltalk.
