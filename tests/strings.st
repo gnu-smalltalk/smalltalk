@@ -95,3 +95,20 @@ Eval [ '388350028456431097' formatAs: 'Card Number #### ###### #### Expires ##/#
 Eval [ '543' formatAs: '###-###-####' ]
 Eval [ '' formatAs: '###-###-####' ]
 Eval [ '1234' formatAs: '' ]
+
+"Have fun with regexes that can match the empty string."
+Eval [ 'abc' copyReplacingAllRegex: 'x*' with: 'x' ]		"xaxbxcx"
+Eval [ 'f' copyReplacingAllRegex: 'o*$' with: 'x' ]		"fx"
+Eval [ 'fo' copyReplacingAllRegex: 'o*$' with: 'x' ]		"fx"
+Eval [ 'foo' copyReplacingAllRegex: 'o*$' with: 'x' ]		"fx"
+Eval [ 'ba' copyReplacingAllRegex: 'a*' with: 'x' ]		"xbx"
+Eval [ 'baa' copyReplacingAllRegex: 'a*' with: 'x' ]		"xbx"
+Eval [ 'baaa' copyReplacingAllRegex: 'a*' with: 'x' ]		"xbx"
+Eval [ 'bc' copyReplacingAllRegex: 'a*' with: 'x' ]		"xbxcx"
+Eval [ 'bac' copyReplacingAllRegex: 'a*' with: 'x' ]		"xbxcx"
+Eval [ ('abc def ' tokenize: ' ') printString ]			"(abc def)"
+Eval [ (' abc def ' tokenize: ' ') printString ]		"('' abc def)"
+Eval [ ('abc' tokenize: 'x*') printString ]			"(a b c)"
+Eval [ ('axxx' tokenize: 'x*') printString ]			"(a)"
+Eval [ ('ax' tokenize: 'x*') printString ]			"(a)"
+Eval [ ('a' tokenize: 'x*') printString ]			"(a)"
