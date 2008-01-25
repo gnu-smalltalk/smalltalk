@@ -163,3 +163,44 @@ Eval [
     sum denominator printNl.
     ^sum
 ]
+
+
+"Another fraction torture test"
+Stream subclass: PiSeries [
+    | i s tot |
+    PiSeries class >> new [
+	^super new initialize
+    ]
+
+    initialize [
+	i := 1.
+	s := 4.
+	tot := 4
+    ]
+
+    next [
+        ^tot := tot + ((s := 0 - s) / (i := i + 2))
+    ]
+]
+
+Stream extend [
+    accelerate [
+	^Generator on: [ :gen |
+   	    |s0 s1 s2|
+   	    s0 := self next.
+   	    s1 := self next.
+   	    [
+		s2 := self next.
+   	        gen yield: s2 - ((s2 - s1) squared / (s0 - s1 - s1 + s2)).
+	        s0 := s1. s1 := s2] repeat]
+    ]
+]
+
+Eval [
+    g := PiSeries new.
+    9 timesRepeat: [ g := g accelerate ].
+    pi := g peek.
+    pi numerator size printNl.
+    pi denominator size printNl.
+    (pi * 100000) asInteger
+]

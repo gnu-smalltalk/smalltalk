@@ -1543,7 +1543,8 @@ _gst_mpz_divexact (gst_mpz *quot, const gst_mpz *num, const gst_mpz *den)
   /* Avoid quadratic behaviour, but do it conservatively.  */
   if (nsize - dsize > 1500)
     {
-      gst_mpz r;
+      gst_mpz r = { 0, 0, NULL };
+      gst_mpz_realloc (&r, dsize + 1);
       _gst_mpz_tdiv_qr (quot, &r, num, den);
       _gst_mpz_clear (&r);
       return;
