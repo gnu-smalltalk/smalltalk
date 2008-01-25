@@ -1,3 +1,8 @@
+2008-01-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/intmath.st: Add LargeInteger testcase from SICP.
+	* tests/intmath.ok: Regenerate.
+
 2008-01-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Regex.st: Do same fix for #allOccurrencesOfRegex:.
