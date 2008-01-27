@@ -155,6 +155,8 @@ some access and manipulation methods.'>
 
     atRandom [
 	"Return a random item of the receiver."
+
+	<category: 'basic'>
 	^self at: (Random between: 1 and: self size)
     ]
 

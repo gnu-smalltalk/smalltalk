@@ -1,5 +1,9 @@
 2008-01-27  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/SeqCollect.st: Add category to #atRandom.
+
+2008-01-27  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/OrderColl.st: Avoid grow-shrink pingpong.
 
 2008-01-25  Paolo Bonzini  <bonzini@gnu.org>
