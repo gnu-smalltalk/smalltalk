@@ -423,7 +423,7 @@ on content (such as add:after:)'>
 
     shrinkSize [
 	<category: 'private methods'>
-	^self basicSize // 2
+	^self basicSize // 3
     ]
 
     shrink [
