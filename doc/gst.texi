@@ -2172,14 +2172,15 @@ which are specific to @gst{}.  The first is a compiler for Smalltalk
 methods written in Smalltalk itself, whose source code provides good
 insights into the @gst{} virtual machine.
 
-The second is the automatic documentation extractor, contained in
-two files, @file{compiler/STLoader.st} and @file{compiler/STLoaderObjs.st}.
-To be able to create Texinfo files even if the library cannot be loaded
-(for example, @code{BLOX} requires a running X server) Smalltalk source code is
-interpreted and objects for the classes and methods being read in
-are created; then, polymorphism allows one to treat these exactly
-like usual classes which can be fed to @gst{}'s @code{ClassPublisher}
-(found in @file{examples/Publish.st}.
+The second is the automatic documentation extractor, contained in two
+files, @file{packages/stinst/compiler/STLoader.st} and
+@file{packages/stinst/compiler/STLoaderObjs.st}.  To be able to create
+Texinfo files even if the library cannot be loaded (for example,
+@code{BLOX} requires a running X server) Smalltalk source code is
+interpreted and objects for the classes and methods being read in are
+created; then, polymorphism allows one to treat these exactly like usual
+classes which can be fed to @gst{}'s @code{ClassPublisher} (found in
+@file{packages/stinst/doc/Publish.st}.
 
 @node Database
 @section Database connectivity
