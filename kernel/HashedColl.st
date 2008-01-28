@@ -40,7 +40,7 @@ Collection subclass: HashedCollection [
 give fast responses on their presence in the collection.'>
 
     HashedCollection class >> primNew: realSize [
-	<category: 'instance creation'>
+	<category: 'private-instance creation'>
 	^self basicNew: realSize
     ]
 

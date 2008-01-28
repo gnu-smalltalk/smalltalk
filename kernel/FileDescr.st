@@ -731,12 +731,14 @@ do arbitrary processing on the files.'>
     ]
 
     addToBeFinalized [
+	"Add me to the list of open files."
 	<category: 'initialize-release'>
 	AllOpenFiles add: self.
 	super addToBeFinalized
     ]
 
     removeToBeFinalized [
+	"Remove me from the list of open files."
 	<category: 'initialize-release'>
 	AllOpenFiles remove: self ifAbsent: [].
 	super removeToBeFinalized
@@ -762,6 +764,7 @@ do arbitrary processing on the files.'>
     ]
 
     readStream [
+	"Answer myself, or an alternate stream coerced for reading."
 	<category: 'initialize-release'>
 	^(access bitAnd: 1) = 0 
 	    ifTrue: [self class open: self name mode: FileStream read]

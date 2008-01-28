@@ -54,11 +54,11 @@ state.'>
     ]
 
     ObjectMemory class >> changed: aSymbol [
+	"Before quitting, wait until all processes are done."
 	<category: 'initialization'>
 	aSymbol == #aboutToQuit 
 	    ifTrue: 
-		["Wait until all processes are done"
-
+		[
 		Processor activeProcess priority: Processor rockBottomPriority.
 		[super changed: aSymbol] forkAt: Processor userSchedulingPriority]
 	    ifFalse: [super changed: aSymbol]

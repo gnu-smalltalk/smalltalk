@@ -49,12 +49,14 @@ object is used whenever possible (when converting Strings to Regex, the
 cache is sought for an equivalent, already constructed Regex).'>
 
     Regex class >> fromString: aString [
+	"Like `aString asRegex'."
 	<category: 'instance creation'>
 	<cCall: 'reh_make_cacheable' returning: #smalltalk args: #(#smalltalk)>
 	
     ]
 
     Regex class >> new [
+	"Do not send this message."
 	<category: 'instance creation'>
 	self error: 'please use #fromString: to create instances'
     ]
@@ -475,14 +477,14 @@ RegexResults subclass: FailedMatchRegexResults [
 String extend [
 
     lengthOfRegexMatch: pattern from: from to: to [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'reh_match' returning: #int
 	args: #(#selfSmalltalk #smalltalk #int #int)>
 	
     ]
 
     searchRegexInternal: pattern from: from to: to [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'reh_search' returning: #smalltalk
 	args: #(#selfSmalltalk #smalltalk #int #int)>
 	

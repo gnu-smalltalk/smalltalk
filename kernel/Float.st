@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2007
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2007,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -307,6 +307,7 @@ if the hardware supports it.'>
     ]
 
     log [
+	"Answer log base 10 of the receiver."
 	<category: 'transcendental operations'>
 	^self ln / self class ln10
     ]

@@ -1,3 +1,7 @@
+2008-01-27  Stephen Compall  <scompall@nocandysw.com>
+
+        * Publish.st: Comment or private-ize uncommented methods.
+
 2007-10-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Publish.st: Compare strings case-sensitively to avoid differences

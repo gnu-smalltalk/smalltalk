@@ -7,8 +7,8 @@
 
 "======================================================================
 |
-| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006,2007
-| Free Software Foundation, Inc.
+| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,
+| 2005,2006,2007,2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -105,6 +105,8 @@ method dictionary, and iterating over the class hierarchy.'>
     ]
 
     parseInstanceVariableString: variableString [
+	"As with #parseVariableString:, but answer symbols that name
+	 the variables instead of strings."
         <category: 'parsing class declarations'>
         | variableArray |
         variableArray := self parseVariableString: variableString.
@@ -112,6 +114,10 @@ method dictionary, and iterating over the class hierarchy.'>
     ]
 
     parseVariableString: aString [
+	"Answer an array of instance variable names.  aString should
+	 specify these in traditional file-in `instanceVariableNames'
+	 format.  Signal an error if aString contains something other
+	 than valid Smalltalk variables."
         <category: 'parsing class declarations'>
         | tokens |
         tokens := aString subStrings asArray.
@@ -906,6 +912,8 @@ method dictionary, and iterating over the class hierarchy.'>
     ]
 
     isBits [
+	"Answer whether my instances' variables are immediate, non-OOP
+	 values."
 	<category: 'testing the form of the instances'>
 	^self shape notNil and: [self isPointers not]
     ]
@@ -985,7 +993,8 @@ method dictionary, and iterating over the class hierarchy.'>
     ]
 
     shapes [
-	<category: 'testing the class hierarchy'>
+	"Used by #shape to map a bitfield to symbolic shapes."
+	<category: 'private-testing the class hierarchy'>
 	^#(#int8 #byte #character #short #ushort #int #uint #float #int64 #uint64 #double #utf32 nil nil nil #pointer)
     ]
 
@@ -1018,6 +1027,7 @@ method dictionary, and iterating over the class hierarchy.'>
     ]
 
     shape [
+	"Answer the symbolic shape of my instances."
 	<category: 'testing the class hierarchy'>
 	self isVariable ifFalse: [^nil].
 	^self shapes at: (instanceSpec bitAnd: 15) + 1

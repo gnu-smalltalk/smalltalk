@@ -52,6 +52,8 @@ NotFound subclass: PackageNotAvailable [
     <comment: nil>
 
     PackageNotAvailable class >> signal: aString [
+	"Signal an exception saying that the package named aString
+	 can't be found."
 	^super signalOn: aString what: 'package'
     ]
 
@@ -931,6 +933,7 @@ information on a Smalltalk package, and can output my description in
 XML.'>
 
     Package class >> parse: file [
+	"Answer a package from the XML description in file."
 	<category: 'instance creation'>
 	| ch tag |
 	
@@ -1180,7 +1183,7 @@ XML.'>
     ]
 
     parse: file tag: openingTag [
-	<category: 'accessing'>
+	<category: 'private-initializing'>
 	| stack cdata ch tag testPackage |
 	stack := OrderedCollection new.
 	stack addLast: openingTag.

@@ -43,7 +43,7 @@ able to store nil as a key, use Dictionary instead.  I use the object
 equality comparison message #= to determine equivalence of indices.'>
 
     LookupTable class >> primNew: realSize [
-	<category: 'instance creation'>
+	<category: 'private-instance creation'>
 	^self basicNew: realSize * 2
     ]
 

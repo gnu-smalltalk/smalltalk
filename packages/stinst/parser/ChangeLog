@@ -1,3 +1,7 @@
+2008-01-27  Stephen Compall  <scompall@nocandysw.com>
+
+        * Exporter.st: Comment or private-ize uncommented methods.
+
 2008-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* GSTParser.st: Don't add an existing namespace when parsing

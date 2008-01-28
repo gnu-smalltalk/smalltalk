@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -624,6 +624,8 @@ instances.'>
     ]
 
     isValidCCall [
+	"Answer whether I appear to have the valid flags, information,
+	 and ops to invoke a C function and answer its result."
 	<category: 'c call-outs'>
 	^(self bytecodeAt: 1) == 66 and: 
 		[(self bytecodeAt: 2) == 0 

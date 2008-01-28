@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2007
+| Copyright 1988,92,94,95,99,2000,2001,2002,2007,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne and Paolo Bonzini.
 |
@@ -30,6 +30,7 @@
 
 String extend [
     caseSensitiveCompareTo: aCharacterArray [
+	<category: 'private-ClassPublisher extensions'>
         | c1 c2 |
         1 to: (self size min: aCharacterArray size)
             do:

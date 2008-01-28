@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 2007 Free Software Foundation, Inc.
+| Copyright 2007, 2008 Free Software Foundation, Inc.
 | Written by Daniele Sciascia.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -303,13 +303,16 @@ FileOutExporter subclass: FormattingExporter [
 
 Behavior extend [
     parseNodeAt: selector [
+	"Available only when the Parser package is loaded--Answer an
+	 RBMethodNode that compiles to my method named by selector."
         ^(self compiledMethodAt: selector) methodParseNode
     ]
 ]
 
 CompiledMethod extend [
     methodFormattedSourceString [
-        "Answer the method source code as a string"
+        "Answer the method source code as a string, formatted using
+	 the RBFormatter.  Requires package Parser."
 
         <category: 'compiling'>
 	^STInST.RBFormatter new
@@ -319,7 +322,7 @@ CompiledMethod extend [
 
     methodParseNode [
         "Answer the parse tree for the receiver, or nil if there is an
-         error."
+         error.  Requires package Parser."
 
         <category: 'compiling'>
 	^self parserClass
@@ -329,6 +332,8 @@ CompiledMethod extend [
     ]
 
     parserClass [
+	"Answer a parser class, similar to Behavior>>parserClass, that
+	 can parse my source code.  Requires package Parser."
         <category: 'compiling'>
 	^self isOldSyntax
 	    ifTrue: [ STInST.RBParser ]
@@ -338,11 +343,16 @@ CompiledMethod extend [
 
 Class extend [
     fileOutDeclarationOn: aFileStream [
+	"File out class definition to aFileStream.  Requires package Parser."
+	<category: 'filing'>
         (STInST.FileOutExporter on: self to: aFileStream)
             fileOutDeclaration: [ ]
     ]
 
     fileOutOn: aFileStream [
+	"File out complete class description:  class definition, class and
+	 instance methods.  Requires package Parser."
+	<category: 'filing'>
         STInST.FileOutExporter fileOut: self to: aFileStream
     ]
 ]

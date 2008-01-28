@@ -361,6 +361,7 @@ CPtrCType subclass: CArrayCType [
     ]
 
     storeOn: aStream [
+	"As with super."
 	<category: 'storing'>
 	aStream
 	    nextPutAll: '(CArrayCType elementType: ';

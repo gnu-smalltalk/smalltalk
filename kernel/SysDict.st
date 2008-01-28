@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006
+| Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2006,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -42,6 +42,7 @@ several methods that are "system" related, such as #quitPrimitive.
 My instance also helps keep track of dependencies between objects.'>
 
     SystemDictionary class >> initialize [
+	"Create the kernel's private namespace."
 	<category: 'initialization'>
 	Smalltalk addSubspace: #Kernel.
 	Smalltalk addFeature: #Kernel.

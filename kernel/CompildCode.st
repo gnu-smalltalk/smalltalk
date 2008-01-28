@@ -41,11 +41,16 @@ ArrayedCollection subclass: CompiledCode [
 superclass for blocks and methods'>
 
     CompiledCode class >> specialSelectors [
+	"Answer an array of message names that don't need to be in
+	 literals to be sent in a method.  Their position here
+	 reflects their integer code in bytecode."
 	<category: 'tables'>
 	^#(#+ #- #< #> #<= #>= #= #~= #* #/ #\\ #bitXor: #bitShift: #// #bitAnd: #bitOr: #at: #at:put: #size #class #isNil #notNil #value #value: #== #javaAsInt #javaAsLong nil nil nil nil nil #new: #thisContext #callInto: #narrow #nextPutAll: #yourself #, #on: #subclassResponsibility #add: #nl #printString #contents #name #isEmpty #properties #container #error: #first #tclEval: #collect: #tclResult #key #asTkString #abs #basicNew #negated #not #close #includes: #at:ifAbsent: #asSymbol #with: #copy #copyFrom:to: #print: #last #initialize #tclEval:with:with: #assert: #primitiveFailed #initialize: #asString #cr #should: #arguments #x #readStream #y #tclEval:with:with:with: #asInteger #space #new #shouldNotImplement #-> #numArgs #with:with: #species #blox #step #signal #parent #selector #at:ifPresent: #to: #addLast: #squared #generality #signalOn:mustBe: #ensure: #body #max: #keysAndValuesDo: #printOn: #isKindOf: #visitNode: #addAll: #isInteger #name: #hash #sqrt #beep #primAt: #environment #position #at:ifAbsentPut: #signal: #postCopy #readFrom: #coefficients: #clientPI #flush #value:value: #asFloatD #on:do: #basicAt:put: #primSize #evaluate #connected #reset #copyEmpty: #start #signalOn: #basicAt: #asClass #ln #implementation #checkResponse #average #upTo: #receiver #peek #basicSize #x:y: #foregroundColor: #rows: #text #exp #statements #body: #| #sizeof #includesKey: #pi #completedSuccessfully #writeStream #superclass #arguments: #state #truncated #inject:into: #replaceFrom:to:with:startingAt: #current #between:and: #retryRelationalOp:coercing: #connectIfClosed #detect:ifNone: #checkError #executeAndWait:arguments: #min: #width #parentContext #removeLast #zero #bindWith:with: #temporaries #asOop #width:height: #methodDictionary #accumulate: #count #asLowercase #asArray #exists #signalOn:what: #select: #parent: #selector: #signalOn:withIndex: #bind:to:of:parameters: #return: #~~ #changeState: #sign #variance #asVector #getResponse #wait #instanceClass #asOrderedCollection #keys #asFloat #random #origin #superspace #stop #perform: #backgroundColor: #login #data: #nextToken #primAt:put: #method #allSatisfy: #position: #default #atAllPut: #asSortedCollection #invalidArgsError: #nameIn: #allSubclassesDo: #signalError #height #source #asNumber #primitive #store: #updateViews #errorContents: #displayString #skipSeparators #origin:corner: #activeProcess #bindWith: #beConsistent #at:type: #skip: #days #tclEval:with: #fromSeconds: #& #upToEnd #variable #become: #with:do: #findIndexOrNil: #asSeconds #copyWith: #background #status #selectors:receiver:argument: #create: #coerce: #bytecodeAt:)
     ]
 
     CompiledCode class >> specialSelectorsNumArgs [
+	"Answer a harmoniously-indexed array of arities for the
+	 messages answered by #specialSelectors."
 	<category: 'tables'>
 	^#[1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 0 0 0 0 0 1 1 0 0 255 255 255 255 255 1 0 1 0 1 0 1 1 0 1 0 0 0 0 0 0 0 1 0 1 1 0 0 0 0 0 0 0 0 1 2 0 1 0 2 1 0 0 3 1 0 1 0 0 1 0 0 0 0 4 0 0 0 0 1 0 2 0 0 0 0 0 0 2 1 1 0 0 2 1 0 1 1 1 1 1 1 0 1 0 0 0 1 0 0 2 1 0 1 1 0 0 2 0 2 2 0 0 0 0 1 0 1 1 0 0 0 0 0 1 0 0 0 2 1 1 0 0 0 1 1 0 1 0 0 0 0 1 0 0 2 4 0 2 2 0 2 0 2 1 0 0 0 0 2 0 0 2 0 1 0 0 0 0 2 1 1 1 2 4 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 1 0 2 0 1 1 0 1 0 1 1 1 0 0 0 0 0 1 0 1 0 0 2 0 1 0 2 1 0 2 1 1 0 0 1 2 1 0 1 0 0 3 1 1 1]
     ]
@@ -175,6 +180,7 @@ superclass for blocks and methods'>
     ]
 
     allLiteralSymbolsDo: aBlock [
+	"As with #allLiteralsDo:, but only call aBlock with found Symbols."
 	<category: 'literals - iteration'>
 	literals isNil ifTrue: [^self].
 	self traverseLiteral: literals
@@ -182,13 +188,15 @@ superclass for blocks and methods'>
     ]
 
     allLiteralsDo: aBlock [
+	"Walk my literals, descending into Arrays and Messages,
+	 invoking aBlock with each touched object."
 	<category: 'literals - iteration'>
 	literals isNil ifTrue: [^self].
 	self traverseLiteral: literals with: aBlock
     ]
 
     traverseLiteral: anArray with: aBlock [
-	<category: 'literals - iteration'>
+	<category: 'private-literals - iteration'>
 	anArray do: 
 		[:each | 
 		aBlock value: each.
@@ -200,6 +208,7 @@ superclass for blocks and methods'>
     ]
 
     literalsDo: aBlock [
+	"Invoke aBlock with each object immediately in my list of literals."
 	<category: 'literals - iteration'>
 	literals isNil ifTrue: [^self].
 	literals do: aBlock
@@ -259,6 +268,8 @@ superclass for blocks and methods'>
     ]
 
     literals [
+	"Answer the literals referenced by my code or any CompiledCode
+	 instances I own."
 	<category: 'accessing'>
 	^literals isNil ifTrue: [#()] ifFalse: [literals]
     ]

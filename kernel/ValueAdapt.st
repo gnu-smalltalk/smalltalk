@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2008 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -196,6 +196,9 @@ initialized or not.  If you ask for my value and I have not been
 initialized, I suspend the process until a value has been assigned.'>
 
     Promise class >> for: aBlock [
+	"Invoke aBlock at an indeterminate time in an indeterminate
+	 process before answering its value from #value sent to my
+	 result."
 	<category: 'creating instances'>
 	| p |
 	p := Promise new.

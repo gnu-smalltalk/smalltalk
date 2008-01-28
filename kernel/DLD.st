@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1992,94,95,99,2000,2001,2002,2003,2005
+| Copyright 1992,94,95,99,2000,2001,2002,2003,2005,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -172,18 +172,21 @@ in CFunctionDescriptor.'>
     ]
 
     DLD class >> linkFile: aFileName [
-	<category: 'C call-outs'>
+	"Private-used by addLibrary: and addModule:."
+	<category: 'private-C call-outs'>
 	<cCall: 'dldLink' returning: #cObject args: #(#string)>
 	
     ]
 
     DLD class >> library: libHandle getFunc: aFuncString [
-	<category: 'C call-outs'>
+	"Private-used for library searches."
+	<category: 'private-C call-outs'>
 	<cCall: 'dldGetFunc' returning: #cObject args: #(#cObject #string)>
 	
     ]
 
     DLD class >> defineCFunc: aName as: aFuncAddr [
+	"Register aFuncAddr as the target for cCalls to aName."
 	<category: 'C call-outs'>
 	<cCall: 'defineCFunc' returning: #void args: #(#string #cObject)>
 	

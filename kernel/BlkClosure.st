@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+| Copyright 1999, 2000, 2001, 2002, 2003, 2007, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -45,12 +45,12 @@ control flow methods.  They also provide some methods that are used in the
 creation of Processes from blocks.'>
 
     BlockClosure class >> exceptionHandlerResetBlock [
-	<category: 'instance creation'>
+	<category: 'private-instance creation'>
 	^[:context | context at: context numArgs + 1 put: 0]
     ]
 
     BlockClosure class >> exceptionHandlerSearchBlock [
-	<category: 'instance creation'>
+	<category: 'private-instance creation'>
 	^
 	[:context :signal | 
 	| best bestGoodness goodness activeHandlers nested |
@@ -152,6 +152,7 @@ creation of Processes from blocks.'>
     ]
 
     deepCopy [
+	"Answer a shallow copy."
 	<category: 'overriding'>
 	^self shallowCopy	"it's about as deep as we need to get"
     ]
