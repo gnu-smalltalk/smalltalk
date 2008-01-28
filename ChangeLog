@@ -1,3 +1,33 @@
+2008-01-27  Stephen Compall  <scompall@nocandysw.com>
+
+        * kernel/AnsiExcept.st: Comment or private-ize uncommented methods.
+        * kernel/Behavior.st: Likewise.
+        * kernel/BlkClosure.st: Likewise.
+        * kernel/CType.st: Likewise.
+        * kernel/Class.st: Likewise.
+        * kernel/CompildCode.st: Likewise.
+        * kernel/CompildMeth.st: Likewise.
+        * kernel/DLD.st: Likewise.
+        * kernel/DeferBinding.st: Likewise.
+        * kernel/Delay.st: Likewise.
+        * kernel/Directory.st: Likewise.
+        * kernel/File.st: Likewise.
+        * kernel/FileDescr.st: Likewise.
+        * kernel/FileStream.st: Likewise.
+        * kernel/Float.st: Likewise.
+        * kernel/HashedColl.st: Likewise.
+        * kernel/Interval.st: Likewise.
+        * kernel/LookupTable.st: Likewise.
+        * kernel/MappedColl.st: Likewise.
+        * kernel/Metaclass.st: Likewise.
+        * kernel/Number.st: Likewise.
+        * kernel/ObjMemory.st: Likewise.
+        * kernel/PkgLoader.st: Likewise.
+        * kernel/Regex.st: Likewise.
+        * kernel/SysDict.st: Likewise.
+        * kernel/VFS.st: Likewise.
+        * kernel/ValueAdapt.st: Likewise.
+
 2008-01-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Add category to #atRandom.

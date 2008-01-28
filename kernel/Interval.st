@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2005
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -206,6 +206,7 @@ members that my instance represents.'>
     ]
 
     last [
+	"Answer the last value."
 	<category: 'printing'>
 	^stop - ((stop - start) \\ step)
     ]

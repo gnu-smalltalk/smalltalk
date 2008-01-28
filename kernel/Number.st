@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2007
+| Copyright 1988,92,94,95,99,2000,2001,2002,2007,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -741,7 +741,7 @@ implicit type coercing code for binary operations.'>
     ]
 
     log [
-	"Answer log base aNumber of the receiver"
+	"Answer log base 10 of the receiver"
 
 	<category: 'misc math'>
 	^self asFloatD ln / FloatD ln10

@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2000, 2001, 2002, 2007 Free Software Foundation, Inc.
+| Copyright 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -984,6 +984,8 @@ WrongClass subclass: MustBeBoolean [
     <comment: 'I am raised when one invokes a boolean method on a non-boolean.'>
 
     MustBeBoolean class >> signalOn: anObject [
+	"Signal a new exception, with the bad value in question being
+	 anObject."
 	<category: 'signaling'>
 	^self signalOn: anObject mustBe: #(#{Boolean})
     ]

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2007
+| Copyright 1988,92,94,95,99,2000,2001,2002,2007,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -169,7 +169,7 @@ created.'>
     ]
 
     Delay class >> initialize [
-	<category: 'class initialization'>
+	<category: 'private-class initialization'>
         IdleProcess := [
                 [Processor
                     idle;
@@ -237,6 +237,7 @@ created.'>
     ]
 
     delayDuration [
+	"Answer the time I have left to wait, in milliseconds."
 	<category: 'accessing'>
 	^resumptionTime isNil
 	    ifTrue: [ delayDuration ]

@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2006
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2006,2008
 | Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
@@ -374,6 +374,7 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
     ]
 
     next: n putAll: aCollection startingAt: pos [
+	"Write n values from aCollection, the first being at pos."
 	<category: 'overriding inherited methods'>
 	| written |
 	written := collection size - ptr + 1 min: n.

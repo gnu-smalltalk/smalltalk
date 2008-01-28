@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+| Copyright 2007, 2008 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -40,6 +40,8 @@ dictionary until the first access.  Then, lookup rules for global variables
 in the scope of a given class are used.'>
 
     DeferredVariableBinding class >> path: anArray class: aClass defaultDictionary: aDictionary [
+	"As with #key:class:defaultDictionary:, but accepting an array
+	 of symbols, representing a namespace path, instead."
 	<category: 'basic'>
 	^(self key: anArray first)
 	    class: aClass;
@@ -49,6 +51,9 @@ in the scope of a given class are used.'>
     ]
 
     DeferredVariableBinding class >> key: aSymbol class: aClass defaultDictionary: aDictionary [
+	"Answer a binding that will look up aSymbol as a variable in
+	 aClass's environment at first access.  See #resolveBinding's
+	 comment for aDictionary's meaning."
 	<category: 'basic'>
 	^(self key: aSymbol)
 	    class: aClass;

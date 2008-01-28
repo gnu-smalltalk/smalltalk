@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2006,2007
+| Copyright 1988,92,94,95,99,2000,2001,2002,2006,2007,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -132,6 +132,8 @@ map would be an Interval.
     ]
 
     copyFrom: a to: b [
+	"Answer a new collection containing all the items in the receiver from the
+	 a-th to the b-th."
 	<category: 'basic'>
 	^domain atAll: (map atAll: (a to: b))
     ]

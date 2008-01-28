@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2005,2007
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005,2007,2008
 | Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
@@ -42,13 +42,13 @@ working directory (which alas must be a real directory and not a
 virtual one).'>
 
     Directory class >> primCreateTemporary: dirName [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'mkdtemp' returning: #void args: #(#stringOut)>
 	
     ]
 
     Directory class >> primWorking: dirName [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'chdir' returning: #void args: #(#string)>
 	
     ]
@@ -166,6 +166,7 @@ virtual one).'>
     ]
 
     Directory class >> working [
+	"Answer the current working directory, not following symlinks."
 	<category: 'file operations'>
 	<cCall: 'getCurDirName' returning: #stringOut args: #()>
 	
@@ -191,6 +192,7 @@ virtual one).'>
     ]
 
     Directory class >> allFilesMatching: aPattern do: aBlock [
+	"Invoke #allFilesMatching:do: on the current working directory."
 	<category: 'file operations'>
 	(self name: self working) allFilesMatching: aPattern do: aBlock
     ]

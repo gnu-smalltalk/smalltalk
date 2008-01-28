@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2005
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005,2007,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne, Brad Diller and Paolo Bonzini.
 |
@@ -157,6 +157,8 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
     ]
 
     pragmaHandlerFor: aSymbol [
+	"Answer the (possibly inherited) registered handler for pragma
+	 aSymbol, or nil if not found."
 	<category: 'delegation'>
 	^self instanceClass pragmaHandlerFor: aSymbol
     ]

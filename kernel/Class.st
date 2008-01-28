@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005,2006,2007
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2005,2006,2007,2008
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -103,6 +103,7 @@ the class category.'>
     ]
 
     superclass: aClass [
+	"Set the receiver's superclass."
 	<category: 'accessing instances and variables'>
 	(aClass isNil and: [self superclass notNil]) 
 	    ifTrue: [self initializeAsRootClass].
@@ -557,12 +558,17 @@ the class category.'>
     ]
 
     registerHandler: aBlock forPragma: pragma [
+	"While compiling methods, on every encounter of the pragma
+	 with the given name, call aBlock with the CompiledMethod and
+	 an array of pragma argument values."
 	<category: 'pragmas'>
 	pragmaHandlers isNil ifTrue: [pragmaHandlers := IdentityDictionary new].
 	pragmaHandlers at: pragma put: aBlock
     ]
 
     pragmaHandlerFor: aSymbol [
+	"Answer the (possibly inherited) registered handler for pragma
+	 aSymbol, or nil if not found."
 	<category: 'pragmas'>
 	| handler |
 	pragmaHandlers isNil 

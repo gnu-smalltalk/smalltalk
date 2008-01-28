@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2005,2006,2007
+| Copyright 1988,92,94,95,99,2000,2001,2002,2005,2006,2007,2008
 | Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
@@ -42,12 +42,14 @@ I expose information about files (both real and virtual) such as their
 size and timestamps.'>
 
     File class >> stringError: errno [
+	"Answer C strerror's result for errno."
 	<category: 'C functions'>
 	<cCall: 'strerror' returning: #string args: #(#int)>
 	
     ]
 
     File class >> errno [
+	"Answer the current value of C errno."
 	<category: 'C functions'>
 	<cCall: 'errno' returning: #long args: #()>
 	
@@ -181,6 +183,8 @@ size and timestamps.'>
     ]
 
     File class >> pathFrom: srcName to: destName [
+	"Answer the relative path to destName when the current
+	 directory is srcName's directory."
 	<category: 'file name management'>
 	^self computePathFrom: (File fullNameFor: srcName)
 	    to: (File fullNameFor: destName)
@@ -628,6 +632,8 @@ size and timestamps.'>
     ]
 
     withReadStreamDo: aBlock [
+	"Invoke aBlock with a reading stream open on me, closing it
+	 when the dynamic extent of aBlock ends."
 	<category: 'file operations'>
 	| stream |
 	stream := self readStream.
@@ -642,6 +648,8 @@ size and timestamps.'>
     ]
 
     withWriteStreamDo: aBlock [
+	"Invoke aBlock with a writing stream open on me, closing it
+	 when the dynamic extent of aBlock ends."
 	<category: 'file operations'>
 	| stream |
 	stream := self writeStream.

@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2002, 2005, 2007 Free Software Foundation, Inc.
+| Copyright 2002, 2005, 2007, 2008 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -165,97 +165,97 @@ actually accessing or ``molding'''' the filesystem.'>
     ]
 
     lstatOn: fileName into: statStruct [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'lstat' returning: #int args: #(#string #cObject)>
 	
     ]
 
     statOn: fileName into: statStruct [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'stat' returning: #int args: #(#string #cObject)>
 	
     ]
 
     openDir: dirName [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'opendir' returning: #cObject args: #(#string)>
 	
     ]
 
     closeDir: dirObject [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'closedir' returning: #int args: #(#cObject)>
 	
     ]
 
     primChmod: name mode: mode [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'chmod' returning: #int args: #(#string #int)>
 	
     ]
 
     primIsReadable: name [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'fileIsReadable' returning: #boolean args: #(#string)>
 	
     ]
 
     primIsWriteable: name [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'fileIsWriteable' returning: #boolean args: #(#string)>
 	
     ]
 
     primIsExecutable: name [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'fileIsExecutable' returning: #boolean args: #(#string)>
 	
     ]
 
     primSymlink: srcName as: destName [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'symlink' returning: #void args: #(#string #string)>
 	
     ]
 
     primUnlink: fileName [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'unlink' returning: #void args: #(#string)>
 	
     ]
 
     primRename: oldFileName to: newFileName [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'rename' returning: #void args: #(#string #string)>
 	
     ]
 
     primRemoveDir: fileName [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'rmdir' returning: #void args: #(#string)>
 	
     ]
 
     primCreateDir: dirName mode: mode [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'mkdir' returning: #void args: #(#string #int)>
 	
     ]
 
     extractDirentName: dirent [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'extractDirentName' returning: #string args: #(#cObject)>
 	
     ]
 
     readDir: dirObject [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'readdir' returning: #cObject args: #(#cObject)>
 	
     ]
 
     rewindDir: dirObject [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'rewinddir' returning: #void args: #(#cObject)>
 	
     ]
@@ -495,12 +495,13 @@ up being on disk when they are opened for the first time.'>
     Epoch := nil.
 
     RealFileHandler class >> setTimeFor: file atime: atimeSeconds mtime: mtimeSeconds [
-	<category: 'C call-outs'>
+	<category: 'private-C call-outs'>
 	<cCall: 'utime' returning: #int args: #(#string #long #long)>
 	
     ]
 
     RealFileHandler class >> working [
+	"Answer the working directory."
 	<category: 'C call-outs'>
 	<cCall: 'getCurDirName' returning: #stringOut args: #()>
 	
@@ -827,6 +828,7 @@ command on it, and then read from the result.'>
     ]
 
     name [
+	"Answer the VFS name for my file."
 	<category: 'accessing'>
 	^self parent name , '#' , self fsName
     ]
@@ -837,6 +839,7 @@ command on it, and then read from the result.'>
     ]
 
     realFileName [
+	"Answer the container file containing me."
 	<category: 'accessing'>
 	^self parent realFileName
     ]
@@ -1000,6 +1003,7 @@ FileHandlerWrapper subclass: DecodedFileHandler [
     ]
 
     at: aName [
+	"Signal an error, as this can't represent a file container."
 	<category: 'files'>
 	SystemExceptions.FileError signal: 'not a tree-shaped filesystem'
     ]
