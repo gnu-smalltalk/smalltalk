@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -29,16 +29,8 @@
  ======================================================================"
 
 
-"
-|     Change Log
-| ============================================================================
-| Author       Date       Change 
-|
-"
 
-
-"### It's not clear that this should be a descendat of PushBackStream"
-PushBackStream subclass: #StreamStack
+Stream subclass: #StreamStack
        instanceVariableNames: 'stack'
        classVariableNames: ''
        poolDictionaries: ''
@@ -79,12 +71,6 @@ atEnd
     ^self hasStreams not
 !
 
-putBack: anElement
-    self hasStreams
-	ifTrue: [ self topStream putBack: anElement ]
-	ifFalse: [ ^self error: 'can''t putBack with no stacked streams' ]
-!
-
 close
     " ??? Not sure whether just the top should be closed or all"
     '$$$ Attempting to close stream stack' printNl.
@@ -105,9 +91,8 @@ topStream
 !
 
 popStream
-    | stream |
-    stream _ stack removeFirst.
-    stream close
+    self topStream close.
+    stack removeFirst.
 !
 
 hasStreams
@@ -119,10 +104,20 @@ popFinishedStreams
 	whileTrue: [ self popStream ]
 ! !
 
+!StreamStack methodsFor: 'hacks'!
+
+peekChar
+    ^self topStream peekChar
+!
+
+nextLine
+    ^self topStream nextLine
+! !
+
 
 
 !StreamStack methodsFor: 'private'!
 
 init
-    stack _ OrderedCollection new: 0.
+    stack _ OrderedCollection new.
 ! !

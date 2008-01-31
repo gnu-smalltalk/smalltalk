@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -27,13 +27,6 @@
 | Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  
 |
  ======================================================================"
-
-"
-|     Change Log
-| ============================================================================
-| Author       Date       Change 
-|
-"
 
 "Base class for C symbol table entries"
 

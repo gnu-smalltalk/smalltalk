@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -28,16 +28,7 @@
 |
  ======================================================================"
 
-"
-|     Change Log
-| ============================================================================
-| Author       Date       Change 
-|
-"
-
-FileStream fileIn: 'CToken.st' ifMissing: #CToken !
-
-PushBackStream subclass: #StringUnquoteStream
+StreamWrapper subclass: #StringUnquoteStream
 	       instanceVariableNames: ''
 	       classVariableNames: ''
 	       poolDictionaries: ''
@@ -57,8 +48,8 @@ strings and chars are "fixed"'!
 next
     | result nextTok |
     result _ super next.
-    ((result isKindOf: StringTok) or: 
-	 [ result isKindOf: CharLiteralTok ])
+    ((result isKindOf: CStringToken) or: 
+	 [ result isKindOf: CCharacterToken ])
 	ifTrue: [ ^self processQuotedChars: result ]
 	ifFalse: [ ^result ]     
 ! !

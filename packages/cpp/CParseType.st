@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -28,19 +28,6 @@
 |
  ======================================================================"
 
-"
-|     Change Log
-| ============================================================================
-| Author       Date       Change 
-|
-"
-
-
-
-FileStream require: #PreprocessorStream -> 'CPP.st' !
-FileStream require: #CSymbol -> 'CSymbol.st'!
-FileStream require: #CDeclarationNode -> 'CDeclNode.st'!
-FileStream require: #CSymbolTable -> 'CSymbolTable.st'!
 
 
 "Here's the probelm:
@@ -112,7 +99,7 @@ declaring.
 Object subclass: #CTypeParser
        instanceVariableNames: 'stream'
        classVariableNames: 'SymbolTable'
-       poolDictionaries: 'CKeywords'
+       poolDictionaries: 'CKeywords CToks'
        category: nil
 !
 
@@ -333,7 +320,7 @@ isStructoidToken: token
 
 isTypeName: token
     | symbol |
-    token class == IdentifierTok ifTrue: 
+    token class == CIdentifierToken ifTrue: 
 	[ symbol _ SymbolTable at: token.
 	  symbol notNil ifTrue: 
 	      [ ^symbol isTypedef ].
@@ -432,11 +419,11 @@ parseEnumSpecifier
     token _ stream peek.
 
     "can have either ident or open curly"
-    token class == IdentifierTok ifTrue:
+    token class == CIdentifierToken ifTrue:
 	[ enumName _ stream next.
 	  token _ stream peek ].
     
-    token class == OpenBraceTok ifTrue: 
+    token == OpenBraceTok ifTrue: 
 	[ enumList _ self parseEnumList ].
     
     enumName notNil
@@ -510,13 +497,13 @@ parseStructoid
      structType _ stream next.	"either 'struct' or 'union'"
      
      token _ stream peek.
-     token class == IdentifierTok ifTrue: 
+     token class == CIdentifierToken ifTrue: 
 	 [ structName _ stream next.
 	   token _ stream peek ].
      
      memberList _ OrderedCollection new.
 
-     token class == OpenBraceTok ifTrue: 
+     token == OpenBraceTok ifTrue: 
 	 [ memberList _ self parseStructoidMemberList ].
      
      structType == StructKey
@@ -598,7 +585,7 @@ parseMemberDeclarator
     "Hmm -- guessing about parseDeclarator: "
     declarator _ self parseDeclarator.
     token _ stream peek.
-    token class == ColonTok
+    token == ColonTok
 	ifTrue: [ stream next.	"gobble it"
 		  bitSize _ self parseConstantExpression.
 		  "!!! this may not be the right way to use declaration 
@@ -685,7 +672,7 @@ parseInitializer
      "
 
     token _ stream peek.
-    token class == OpenBraceTok
+    token == OpenBraceTok
 	ifTrue: [ ^self parseInitializerList. ]
 	ifFalse: [ ^self parseAssignmentExpression ]
 !
@@ -705,7 +692,7 @@ parseInitializerList
     stream next.		"gobble '{'"
     initializerList _ OrderedCollection new.
     [ token _ stream peek.
-      token class == OpenBraceTok
+      token == OpenBraceTok
 	  ifTrue: [ initializer _ self parseInitializerList ]
 	  ifFalse: [ initializer _ self parseAssignmentExpression ].
       initializerList add: initializer.
@@ -769,12 +756,12 @@ parseDeclarator
 	ifTrue: [ stream next.	"gobble the token "
 		  declarator _ self parseDeclarator.
 		  ^CDeclarationPtr declarator: declarator ].
-    token class == OpenParenTok
+    token == OpenParenTok
 	ifTrue: [ stream next.	"gobble '('"
 		  declarator _ self parseDeclarator.
 		  stream next.	"gobble ')'" ].
     "We can do this because token hasn't changed and the choices are mutex"
-    token class == IdentifierTok
+    token class == CIdentifierToken
 	ifTrue: [ declarator _ CDeclarationName name: stream next.
 		  "should be an ident" ].
     
@@ -791,11 +778,11 @@ parseDeclaratorSuffixList: baseDeclarator
 
     token _ stream peek.
 
-    token class == OpenParenTok
+    token == OpenParenTok
 	ifTrue: 
 	    [ declarator _ self parseFunctionDeclaration: baseDeclarator. 
 	      ^self parseDeclaratorSuffixList: declarator ].
-    token class == OpenBracketTok
+    token == OpenBracketTok
 	ifTrue: 
 	    [ declarator _ self parseArrayDimension: baseDeclarator. 
 	      ^self parseDeclaratorSuffixList: declarator ].
@@ -973,7 +960,7 @@ gobbleCloseBraceTok
 
     token _ stream peek.
 
-    token class == CloseBraceTok ifTrue:
+    token == CloseBraceTok ifTrue:
 	[ stream next.		"gobble it!"
 	  ^true ].
     ^false

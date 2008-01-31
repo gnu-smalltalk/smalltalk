@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -29,60 +29,32 @@
  ======================================================================"
 
 
-"
-|     Change Log
-| ============================================================================
-| Author       Date       Change 
-"
-
-
-FileStream fileIn: 'ExpansionStreamStack.st' ifMissing: #ExpansionStreamStack!
-
-
-PushBackStream subclass: #ExpansionStream
-	       instanceVariableNames: ''
-	       classVariableNames: ''
-	       poolDictionaries: ''
-	       category: nil
-!
-
-
-!ExpansionStream class methodsFor: 'instance creation'!
-
-new
-    ^super on: ExpansionStreamStack new
-! !
-
-
-!ExpansionStream methodsFor: '???'!
-
-
-addStream: aStream
-    stream pushStream: aStream forMacro: nil
-!
-
-recordExpansionOf: aMacroName into: tokenCollection
-    stream pushStream: (ReadStream on: tokenCollection) forMacro: aMacroName
-!
-
-isAlreadyExpanded: aMacroName
-    ^stream containsExpansion: aMacroName
+StreamStack subclass: #ExpansionStreamStack
+       instanceVariableNames: ''
+       classVariableNames: ''
+       poolDictionaries: ''
+       category: nil
 ! 
 
-nextBypass
-    ^stream nextBypass
+
+!ExpansionStreamStack methodsFor: 'accessing'!
+
+pushStream: aStream
+    super pushStream: (aStream -> nil)
 !
 
-atRealEnd
-    ^stream atRealEnd
+pushStream: aStream forMacro: macroName
+    super pushStream: (aStream -> macroName)
+! 
+
+topStream
+    ^super topStream key
+!
+
+isAlreadyExpanded: macroName
+  "  '>>>>>>>> checking containing of: ' print. macroName printNl."
+    ^(stack detect: [ :element | element value = macroName ]
+	   ifNone: [ "'did not find it!!!' printNl. "nil ]) notNil
 ! !
 
-"
-??? DO we heave to add these?
-atEnd?
-next
-peek
-putBack ?
-
-"
 

@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -28,27 +28,6 @@
 |
  ======================================================================"
 
-"
-|     Change Log
-| ============================================================================
-| Author       Date       Change 
-| pb	       8 Jan 99	  Yes! Started reintegrating everything into 1.1.6!
-|			  Added support for '#   define Foo Bar'
-|
-"
-
-
-| dir |
-dir := Directory working.
-Directory working: Directory kernel, '/../cint'.
-FileStream fileIn: 'LineStream.st'.
-FileStream fileIn: 'LineTokenStream.st'.
-FileStream fileIn: 'CPStrUnq.st'.
-FileStream fileIn: 'CPStrConc.st'.
-FileStream fileIn: 'ExpansionStream.st'.
-FileStream fileIn: 'CTreeBuilder.st'.
-FileStream fileIn: 'CollapsedStream.st'.
-Directory working: dir!
 
 "Overall structure of the scanner:
 
@@ -77,17 +56,10 @@ Directory working: dir!
 
 "
 
-PushBackStream subclass: #PPStream
-       instanceVariableNames: 'lineStream stateStack state cppSymbols'
-       classVariableNames: 'DirectiveHandlers'
-       poolDictionaries: ''
-       category: nil
-! 
-
 Stream subclass: #PreprocessorStream
-       instanceVariableNames: 'stream'
-       classVariableNames: 'Defines SystemDefines IncludePaths SystemIncludePaths'
-       poolDictionaries: ''
+       instanceVariableNames: 'streamStack lineStream stateStack state cppSymbols'
+       classVariableNames: 'DirectiveHandlers Defines SystemDefines IncludePaths SystemIncludePaths'
+       poolDictionaries: 'CToks'
        category: nil
 ! 
 
@@ -226,45 +198,38 @@ test2
 
 test3
     | s |
-    "s := LineStream onStream: (FileStream open: '/usr/openwin/include/X11/Xlib.h' mode: 'r')."
-    "s := LineStream onStream: (FileStream open: 'xl.h' mode: 'r')."
-    s := LineStream onStream: (FileStream open: 'lib/sym.c' mode: 'r').
-    s := LineTokenStream onStream: s.
-    s := PPStream onStream: s.
+    "s := FileStream open: '/usr/openwin/include/X11/Xlib.h' mode: 'r'."
+    s := FileStream open: 'lib/sym.c' mode: 'r'.
+    s := PreprocessorStream onStream: s.
     s printNl.
     s do: [ :line | line printNl. ].
 !
 
 test4
     | s |
-    "s := LineStream onStream: (FileStream open: '/usr/openwin/include/X11/Xlib.h' mode: 'r')."
-    "s := LineStream onStream: (FileStream open: 'xl.h' mode: 'r')."
-    s := LineStream onStream: (FileStream open: 'lib/sym.c' mode: 'r').
+    "s := FileStream open: '/usr/openwin/include/X11/Xlib.h' mode: 'r'."
+    "s := FileStream open: 'xl.h' mode: 'r'."
+    s := FileStream open: 'lib/sym.c' mode: 'r'.
     s := LineTokenStream onStream: s.
     s inspect.
-    s := CollapsedStream on: s.
     s printNl.
     s do: [ :line | line printNl. ].
 !
 
 test5
     | s expStream |
-    "s := LineStream onStream: (FileStream open: '/usr/openwin/include/X11/Xlib.h' mode: 'r')."
-    "s := LineStream onStream: (FileStream open: 'xl.h' mode: 'r')."
-    s := LineStream onStream: (FileStream open: 'lib/sym.c' mode: 'r').
+    "s := FileStream open: '/usr/openwin/include/X11/Xlib.h' mode: 'r'."
+    "s := FileStream open: 'xl.h' mode: 'r'."
+    s := FileStream open: 'lib/sym.c' mode: 'r'.
     s := LineTokenStream onStream: s.
-    expStream := ExpansionStream new.
-    expStream addStream: (CollapsedStream on: s).
-    s := expStream.
-    s printNl.
-    s do: [ :line | line printNl. ].
+    s do: [ :line |
+	expStream := ExpansionStreamStack new.
+	expStream pushStream: line readStream.
+	s printNl.
+        line printNl ].
 ! !
 
 !PreprocessorStream class methodsFor: 'instance creation'!
-
-on: aStream
-    ^self new init: aStream
-!
 
 test: aFilename
     | s str |
@@ -277,17 +242,17 @@ test: aFilename
 define: symbol
     Defines
 	at: symbol
-	put: (PPMacroDefinition params: nil definition: (IntegerTok value: 1))
+	put: (PPMacroDefinition params: nil definition: (CIntegerToken value: 1))
 !
 
 systemDefine: symbol
     SystemDefines
 	at: symbol
-	put: (PPMacroDefinition params: nil definition: (IntegerTok value: 1)).
+	put: (PPMacroDefinition params: nil definition: (CIntegerToken value: 1)).
 
     Defines
 	at: symbol
-	put: (PPMacroDefinition params: nil definition: (IntegerTok value: 1))
+	put: (PPMacroDefinition params: nil definition: (CIntegerToken value: 1))
 !
 
 resetSymbols
@@ -309,59 +274,6 @@ initialize
     Features do: [ :each |
 	(each at: 1) = $_ ifTrue: [ self systemDefine: each ]
     ].
-! !
-
-
-!PreprocessorStream methodsFor: 'accessing'!
-
-next
-    ^stream next
-!
-
-peek
-    ^stream peek
-!
-
-atEnd
-    ^stream atEnd
-! !
-
-
-!PreprocessorStream methodsFor: 'private'!
-
-init: aStream
-    | str | 
-    "This works by stacking different kinds of preprocessing streams
-     one on top of another, each doing a specific task.  As in Unix, 
-     this sacrifices performance for some elegance/simplicity."
-    str _ LineStream onStream: aStream.
-    str _ LineTokenStream onStream: str.
-    str _ PPStream onStream: str.
-
-    str _ StringUnquoteStream on: str.
-    str _ StringConcatStream on: str.
-    stream _ str.
-! !
-
-
-"!!! change all code below not to use this precious name"
-
-
-
-
-
-!PPStream class methodsFor: 'instance creation'!
-
-onStream: aStream
-    ^self new setStream: aStream
-! !
-
-
-
-!PPStream class methodsFor: 'initialization'!
-
-initialize
-    "??? perhaps add in the default ones that we have"
 
     DirectiveHandlers _ Dictionary new.
     DirectiveHandlers 
@@ -374,25 +286,39 @@ initialize
 	at: 'endif' put: #handleEndif;
 	at: 'define' put: #handleDefine;
 	at: 'undef' put: #handleUndef.
+!
+
+on: aCollection
+    ^self onStream: aCollection readStream
+!
+
+onStream: aStream
+    "This works by stacking different kinds of preprocessing streams
+     one on top of another, each doing a specific task.  Additional
+     layers are in LineTokenStream and StreamStack.  As in Unix, 
+     this sacrifices performance for some elegance/simplicity."
+    | str |
+    str _ StringUnquoteStream on: aStream.
+    str _ self new setStream: str.
+    ^StringConcatStream on: str.
 ! !
 
 
 
-!PPStream methodsFor: 'scanning'!
+!PreprocessorStream methodsFor: 'scanning'!
 
-next
-    | tok |
-    queue size > 0
-	ifTrue: [ ^queue removeFirst ].
-    
-    " ??? do we need to ensure that lineStream is non-nil, or will init:
-     take care of that for us?"
+atEnd
     [ (lineStream isNil or: [ lineStream atEnd ]) ]
 	  whileTrue: [
-	      "!!! need to check for real end of stream "
 	       lineStream _ self nextLine.
-	       lineStream isNil ifTrue: [ ^nil ].
+	       lineStream isNil ifTrue: [ ^true ].
 	  ].
+
+    ^false
+!
+
+next
+    self atEnd ifTrue: [ ^nil ].
 
     "lineStream is already macro-expanded for us.  thanks nextLine."
     ^lineStream next
@@ -401,50 +327,34 @@ next
 expandDefinedFrom: expStream
     "Either 'defined/\ <anIdent>' or 'defined/\(<anIdent>)'"
     | ident tok result|
-    self skipWhitespaceOn: expStream.
     tok _ expStream next.
-    tok class == OpenParenTok
-	ifTrue: [ self skipWhitespaceOn: expStream.
-		  ident _ expStream next.
-		  self skipWhitespaceOn: expStream. 
+    tok == OpenParenTok
+	ifTrue: [ ident _ expStream next.
 		  expStream next "gobble ')' " ]
 	ifFalse: [ ident _ tok ].
     
-   'expanding defined' print. ident printNl.  
+   "'expanding defined' print. ident printNl.  "
 
-    result _ OrderedCollection new.
-    result addLast: 
-	(IntegerTok value: ((cppSymbols includesKey: ident)
+    ^{ CIntegerToken value: ((cppSymbols includesKey: ident)
 			    ifTrue: [ 1 ] 
-			    ifFalse: [ 0 ])).
-    ^result
+			    ifFalse: [ 0 ]) }
 !
 
 nextLine
-    | line ch |
-    [ stream atEnd ] whileFalse: 
-	[ line _ stream next.
-    "'consumed' print.
-    line printNl."
-	  lineStream _ ReadStream on: line.
-    
-	  self skipWhitespace.
-	  lineStream atEnd
-	      ifFalse: 
-		  [ ch _ lineStream peek.
-		    (self isSharp: ch)
-			ifTrue: 
-			    [ "It's for us!!!"
-			      lineStream next. "gobble '#'"
-			      self dispatchDirective.
-			      ]
-			ifFalse: [
-				  ^PushBackStream on: (state isIgnoring
-					  ifTrue: [ lineStream ]
-					  ifFalse: [ ReadStream on: self macroExpandRemainder ])
-			 ]
-		  ]
-
+    | ch |
+    [ streamStack atEnd ] whileFalse: 
+	  [ ch _ streamStack peek.
+	    (self isSharp: ch)
+		ifTrue: 
+		    [ "It's for us!!!"
+		      streamStack next. "gobble '#'"
+		      self dispatchDirective.
+		      ]
+		ifFalse: [
+			  state isIgnoring
+				ifTrue: [ streamStack nextLine ]
+				ifFalse: [ ^self macroExpandRemainder ]
+		 ]
 	].
     ^nil
 !
@@ -453,50 +363,32 @@ nextLine
 
 
 macroExpandRemainder
-    | result expStream expansion token |
-    result _ OrderedCollection new.
-    self pushBackRemainder.
-    expStream _ ExpansionStream new.
-    expStream addStream: (CollapsedStream on: stream).
+    | result lineTokens expStream expansion token |
+    lineTokens _ streamStack nextLine.
+    result _ WriteStream on: (Array new: lineTokens size).
+    expStream _ ExpansionStreamStack new.
+    expStream pushStream: lineTokens readStream.
     [ expStream atEnd ] whileFalse:
 	[ token _ expStream next.
-   "'reading from exp: ' print. token printNl."
+	   "'reading from exp: ' print. token printNl."
    
-	  "
-   ((token isMemberOf: IdentifierTok) and: 
-	      [ (cppSymbols includesKey: token) ])
-       ifTrue: [ '#######' print. token printNl.
-		 (expStream isAlreadyExpanded: token) printNl.
-		     
-		     ].
-	   "
-	  ((token isMemberOf: IdentifierTok) and: 
+	  ((token isMemberOf: CIdentifierToken) and: 
 	       [ (cppSymbols includesKey: token) and: 
 		     [ (expStream isAlreadyExpanded: token ) not ] ])
 	      ifTrue: [ expansion _ self expandMacro: token from: expStream.
-			expStream recordExpansionOf: token
-				  into: expansion ]
-	      ifFalse: [ result addLast: token ]
+			expStream pushStream: expansion readStream
+				  forMacro: token ]
+	      ifFalse: [ result nextPut: token ]
 	 ].
     lineStream _ nil.		"force a reload"
     "'expanded into: ' print. result printNl."
-    ^result
+    ^result readStream
 !
 	      
 
 
-pushBackRemainder
-    "push back whatever is left in lineStream"
-    | remainder |
-    remainder _ OrderedCollection new.
-""    'pushingback' printNl.  ""
-    lineStream do: [ :token | remainder addLast: token ""printNl"" ].
-    stream putBack: remainder.
-!
-
 expandMacro: macroName from: expStream
     | defn body params result str paramName |
-    macroName value printNl.
     macroName value = 'defined'
 	ifTrue: [ ^self expandDefinedFrom: expStream ].
     defn _ cppSymbols at: macroName.
@@ -506,11 +398,11 @@ expandMacro: macroName from: expStream
     "Assume we're looking at: 'foo/\ (...'"
     params _ self parseMacroActuals: defn params fromStream: expStream.
      
- ""  '%%%%% macro actuals: ' print. params printNl.""
+    "  '%%%%% macro actuals: ' print. params printNl."
 
     body _ defn definition.
     
-    result _ OrderedCollection new.
+    result _ OrderedCollection new: body size.
     str _ ReadStream on: body.
     str do: 
 	[ :token | self processMacroToken: token
@@ -524,36 +416,32 @@ expandMacro: macroName from: expStream
 processMacroToken: token into: result fromStream: expStream withParams: params
     | paramName lastToken nextToken nextParams |
     
-    (token isMemberOf: WhitespaceTok) ifTrue: [ ^self "reject these asap" ].
- ""   '******** debbie does macros ' print. token printNl. ""
     (token class == CBinaryOperatorToken 
 	and: [ token value = '##' ]) 
 	ifTrue: 
 	    [ lastToken _ result removeLast.
-	      self skipWhitespaceOn: expStream.
 	      nextToken _ expStream next.
 	      "'[[[[[[[[[ next is ' print. nextToken printNl."
-	      (nextToken class == IdentifierTok
+	      (nextToken class == CIdentifierToken
 		   and: [ params includesKey: nextToken ])
 		  ifTrue: [ nextParams _ params at: nextToken.
 			    "!!! Here we assume we always have identifiertokens"
-			    lastToken class == IdentifierTok
+			    lastToken class == CIdentifierToken
 				ifFalse: [^self error: '## called with non identifier' ].
-			    lastToken _ IdentifierTok value: 
+			    lastToken _ CIdentifierToken value: 
 				lastToken value , nextParams removeFirst valueString.
 			    nextParams addFirst: lastToken.
 			    ^result addAllLast: nextParams ]
-		  ifFalse: [ lastToken _ IdentifierTok value: 
+		  ifFalse: [ lastToken _ CIdentifierToken value: 
 				 lastToken value, nextToken valueString.
 			     ^result addLast: lastToken ]
 	      ].
     (self isSharp: token)
-	ifTrue: [ self skipWhitespaceOn: expStream.
-		  paramName _ expStream next.
+	ifTrue: [ paramName _ expStream next.
 		  ^result addLast: 
 		      (self stringifyActual: 
 			   (params at: paramName)) ].
-    (token class == IdentifierTok
+    (token class == CIdentifierToken
 	 and: [ params includesKey: token ])
 	ifTrue: [ ^result addAllLast: 
 		      (params at: token) ].
@@ -572,11 +460,11 @@ stringifyActual: macroActualParam
 		   tokenString _ self toString: token.
 		   result nextPutAll: tokenString.
 		       ].
-    ^StringTok value: result contents
+    ^CStringToken value: result contents
 !
 
 toString: token
-    (token isKindOf: StringoidTok)
+    (token isKindOf: CStringoidToken)
 	  ifTrue: [ ^token quotedStringValue ].
     ^token valueString
 !
@@ -585,17 +473,16 @@ parseMacroActuals: names fromStream: expStream
     "this has to work with whatever stream is sitting below it, essentially
      the stream stack.  This means that the line stream has to be wrapped into
      something that behaves like a normal stream"
-    | paramDict actual bypass |
+    | paramDict actual |
     " expecting scanner to be at foo/\ (arg1, arg2, ...), leaves after eating
      the close paren"
     paramDict _ Dictionary new.
-    self skipWhitespaceOn: expStream.
     expStream next.		"gobble ("
 
     names do: 
 	[ :name | actual _ self parseMacroActual: expStream.
 		  paramDict at: name put: actual.
-		  bypass next. "gobble the trailing delimiter" 
+		  expStream next. "gobble the trailing delimiter" 
 		  ].
     "!!! should put back the remainder of the queue (if any)"
     ^paramDict
@@ -612,26 +499,21 @@ parseMacroActual: expStream
 	 or a comma, returning the list, minus white spaces at either end"
     | result token parenLevel |
     result _ OrderedCollection new.
-    self skipWhitespaceOn: expStream.
     parenLevel _ 0.
     
     [ token _ expStream peek.
       parenLevel == 0
-	  and: [ (token class == CloseParenTok)
+	  and: [ (token == CloseParenTok)
 		     or: [ token class == CBinaryOperatorToken and: 
 			       [ token value = ',' ] ] ] ]
 	whileFalse: [ result addLast: token.
 		      expStream next. "gobble it"
-		      token class == OpenParenTok
+		      token == OpenParenTok
 			  ifTrue: [ parenLevel _ parenLevel + 1 ].
-		      token class == CloseParenTok
+		      token == CloseParenTok
 			  ifTrue: [ parenLevel _ parenLevel - 1 ]. 
 		      ].
 
-    " trim trailing whitespace "
-    [ result size > 0 
-	  and: [ (result at: result size) class == WhitespaceTok ]]
-	whileTrue: [ result removeLast ].
     ^result
 !
 
@@ -663,8 +545,7 @@ isSharp: token
 
 dispatchDirective
     | directive |
-    self skipWhitespace.
-    directive := lineStream next.
+    directive := streamStack next.
 
     self perform: (DirectiveHandlers
 	at: directive value
@@ -672,16 +553,15 @@ dispatchDirective
 ! !
 
 
-!PPStream methodsFor: 'handling directives'!
+!PreprocessorStream methodsFor: 'handling directives'!
 
 handleUndef
     | symbol |
     state isIgnoring
 	ifTrue: [ ^true ].
 
-    self skipWhitespace.
-    symbol _ lineStream next.
-    'undefining' print. symbol value printNl.
+    symbol _ streamStack next.
+    "'undefining' print. symbol value printNl."
     cppSymbols removeKey: symbol ifAbsent: [].
 !
     
@@ -690,62 +570,36 @@ handleDefine
     state isIgnoring
 	ifTrue: [ ^true ].
 
-    self skipWhitespace.
-    symbol _ lineStream next.
+    symbol _ streamStack next.
 
-    'defining' print. symbol value printNl.
-    tok _ lineStream peek.
-    tok class == OpenParenTok
-	ifTrue: [ 'doing parameters' printNl. params _ self parseMacroParams ].
-
-    self skipWhitespace.
-    definition _ OrderedCollection new.
-    [ lineStream atEnd ] whileFalse:
-	[ definition addLast: lineStream next ].
-    "we'll let the #<name> directive deal with trailing white space
-     removal, other things don't care"
+    "'defining' print. symbol value printNl."
+    streamStack peekChar = $(
+	ifTrue: [
+	    "'doing parameters' printNl." params _ self parseMacroParams ].
 
     macroDef _ PPMacroDefinition params: params
-				 definition: definition.
+				 definition: streamStack nextLine.
     cppSymbols at: symbol put: macroDef.
 !
 
 parseMacroParams
     "scanner at #define foo/\(...) "
     | params ident tok |
-    lineStream next.		"gobble paren"
+    streamStack next.		"gobble paren"
     params _ OrderedCollection new.
-    tok _ lineStream peek.
+    tok _ streamStack peek.
     tok class ~~ CloseParenTok 
 	ifTrue: 
-	    [ [ self skipWhitespace.
-		ident _ lineStream next.
+	    [ [ ident _ streamStack next.
 		params addLast: ident.
-		self skipWhitespace.
-		tok _ lineStream next.
+		tok _ streamStack next.
 		tok value = ',' ] whileTrue: [ ] ]
-	ifFalse: [ lineStream next ].
+	ifFalse: [ streamStack next ].
     "must have gobbled the close paren already (we're not a full C
      language, and we presume syntactically correct C programs), so we
      are done."
     ^params
 !
-
-
-skipWhitespace
-    ^self skipWhitespaceOn: lineStream
-!
-
-"!!! this should probably be a method on the individual stream"
-skipWhitespaceOn: aStream
-    | tok |
-    [ aStream atEnd not
-	  and: [ tok _ aStream peek.
-		 tok class == WhitespaceTok ]
-	  ]
-	whileTrue: [ aStream next ]
-!
-
 
 
 handleIfdef
@@ -756,11 +610,10 @@ handleIfdef
 		  "we continue ignoring and do no further processing"
 		  ^self ].
 		  
-    self skipWhitespace.
-    symbol _ lineStream next.
+    symbol _ streamStack next.
     
     isDefined _ (cppSymbols includesKey: symbol).
-    'ifdef' print. symbol value printNl.  isDefined printNl.
+    "'ifdef' print. symbol value printNl.  isDefined printNl."
     state _ PPState ignoring: isDefined not handled: isDefined
 ! 
 
@@ -772,11 +625,10 @@ handleIfndef
 		  "we continue ignoring and do no further processing"
 		  ^self ].
 		  
-    self skipWhitespace.
-    symbol _ lineStream next.
+    symbol _ streamStack next.
     
     isDefined _ (cppSymbols includesKey: symbol).
-    'ifndef' print. symbol value printNl.  isDefined printNl.
+    "'ifndef' print. symbol value printNl.  isDefined printNl."
     state _ PPState ignoring: isDefined handled: isDefined not
 !
 
@@ -785,16 +637,15 @@ handleInclude
     state isIgnoring
 	ifTrue: [ ^true ].
 
-    self skipWhitespace.
-    token _ lineStream next.
-    token class == StringTok
+    token _ streamStack next.
+    token class == CStringToken
 	ifTrue: [ fileName _ token value.
 		  searchLocal _ true ]
 	ifFalse:
 	    [ "should be < dir/dir/dir.../filename > "
 	      searchLocal _ false.
 	      fileName _ ''.
-	      [ token _ lineStream next.
+	      [ token _ streamStack next.
 		token value ~= '>' ] whileTrue:
 		    [ fileName _ fileName, token value ].
 	      ].
@@ -807,11 +658,11 @@ handleInclude
 !
 
 pushStream: aStream
-    stream pushStream: aStream
-! 
+    streamStack pushStream: (LineTokenStream onStream: aStream).
+!
 
 findIncludeFile: fileName locally: locally
-    | paths file stream |
+    | paths file |
     " !!! should this be smarter and search the current directory by default,
      that is, the directory of the includer, or not?.  GNU CPP uses for quote
      delimited include file names the directory of the current input file (as 
@@ -835,11 +686,6 @@ addIncludePath: aPath
     ^PreprocessorStream addUserIncludePath: aPath
 !
 
-"???how to handle defined?  One alternative is to have all macros
- expanded by now (I think a requirement), and have part of the macro
- expansion specially check for defined and do the right thing"
-
-
 handleIf
     | expr exprBool |
     stateStack addFirst: state.
@@ -851,23 +697,21 @@ handleIf
     expr _ self parseExpression.
     
     exprBool _ (expr evaluate) ~= 0.
-    'if' print. exprBool printNl.
+    "'if' print. exprBool printNl."
     state _ PPState ignoring: exprBool not
 		    handled: exprBool
 ! 
 
 parseExpression
-    " parse some set of stuff from lineStream and return it as an expression
+    " parse a line of stuff from streamStack and return it as an expression
      tree"
     | exprParser expr cleanedLine |
     
-    cleanedLine _ self macroExpandRemainder reject:
-	[ :token | token isMemberOf: WhitespaceTok ].
+    cleanedLine _ self macroExpandRemainder.
 
-    'parsing. ' print. cleanedLine printNl.
+    "'parsing. ' print. cleanedLine copy upToEnd printNl."
 
-    exprParser _ CExpressionParser onStream: (PushBackStream on: 
-						  (ReadStream on: cleanedLine)).
+    exprParser _ CExpressionParser onStream: cleanedLine.
     expr _ exprParser parseExpression.
     ^expr
 !
@@ -877,7 +721,7 @@ handleElse
 	ifTrue: [ state ignoring: true ]
 	ifFalse: [ state ignoring: false.
 		   state handled: true ].
-    'else ' print. state isIgnoring printNl.
+    "'else ' print. state isIgnoring printNl."
 !
 
 handleElif
@@ -888,31 +732,31 @@ handleElif
 	    [ expr _ self parseExpression.
 	      (expr evaluate) ~= 0
 		  ifTrue: [ state handled: true; ignoring: false ]
-		  ifFalse: [ state ignoring: false ] ].
-    'elif ' print. state isIgnoring printNl.
+		  ifFalse: [ state ignoring: true ] ].
+    "'elif ' print. state isIgnoring printNl."
 !
 
 handleEndif
-    'endif ' printNl.
+    "'endif ' printNl."
     state _ stateStack removeFirst.
 ! 
 
 skipDirective
     "does doing nothing work for pragmas etc.?"
-    ^self
+    streamStack nextLine
 ! !
 
 
-!PPStream methodsFor: 'private'!
+!PreprocessorStream methodsFor: 'private'!
 
 setStream: aStream
-    super init: aStream.
+    streamStack := StreamStack new.
+    self pushStream: aStream.
     state _ PPState ignoring: false handled: false.
     stateStack _ OrderedCollection new.
     cppSymbols _ PreprocessorStream symbols.
-    cppSymbols at: (IdentifierTok value: 'defined') put: 1. "value does not matter"
+    cppSymbols at: (CIdentifierToken value: 'defined') put: 1. "value does not matter"
 ! !
 
 
-PPStream initialize!
 PreprocessorStream initialize!

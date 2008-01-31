@@ -1,0 +1,7 @@
+This directory implements a C preprocessor. It does not have error
+handling but it should mostly work.
+
+Several files are the beginning of a parser for C header files.
+It is broken and it lacks several important parts of the grammar
+(it was probably test code already in 1.1.5).  If you want to take
+a look at it, you're welcome.

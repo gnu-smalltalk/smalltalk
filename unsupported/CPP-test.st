@@ -1,9 +1,5 @@
 "Test out the C Preprocessor"
 
-'here we go' printNl!
+PackageLoader fileInPackage: 'CParser'!
 
-FileStream fileIn: 'CPP.st'!
-
-| s |
-    PreprocessorStream test: '/usr/openwin/include/X11/Xlib.h'
-!
+CParser.PreprocessorStream test: '/usr/include/sqlite3.h'!

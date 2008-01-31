@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -29,12 +29,6 @@
  ======================================================================"
 
 
-"
-|     Change Log
-| ============================================================================
-| Author       Date       Change 
-|
-"
 
 "Issues:
 
@@ -43,8 +37,6 @@ problems.  We could plug in a dummy one which just terminates the recursions.
 Or, each could check for nil.   Or we bottle neck all through an inherited 
 method which does the nil check.
 "
-
-FileStream require: #CSymbol -> 'CSymbol.st'!
 
 
 Object subclass: #CDeclarationNode

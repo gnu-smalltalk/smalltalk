@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,1999,2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -29,71 +29,49 @@
  ======================================================================"
 
 
-ReadStream subclass: #PushBackStream
-	   instanceVariableNames: 'queue stream '
+Stream subclass: #StreamWrapper
+	   instanceVariableNames: 'stream '
 	   classVariableNames: ''
 	   poolDictionaries: ''
 	   category: 'Examples-Useful'
 !
 
-PushBackStream comment:
-'LIFO pushback capability on top of ReadStreams'
+StreamWrapper comment:
+'decorator capability for Streams'
 !
 
 
-!PushBackStream class methodsFor: 'instance creation'!
+!StreamWrapper class methodsFor: 'instance creation'!
 
 on: aStream
     ^super new init: aStream
 ! !
 
 
-!PushBackStream methodsFor: 'accessing' !
+!StreamWrapper methodsFor: 'accessing' !
+
+atEnd
+    ^stream atEnd
+!
 
 next
-    | char |
-    queue size > 0 
-	ifTrue: [ ^queue removeFirst ].
-    ^self atEnd
-	ifTrue: [ nil ]
-	ifFalse: [ stream next ]
-!
-
-nextBypass
-    "hack!!"
-    ^self next
-!
-
-peek
-    self atEnd ifTrue: [ ^nil ].
-    ^queue size == 0 
-	ifTrue: [ self putBack: self next ]
-	ifFalse: [ queue at: 1 ]
+    ^stream next
 !
 
 position
-    ^stream position - queue size
+    ^stream position
 !
 
 position: pos
     stream position: pos.
-    queue := OrderedCollection new
 !
 
 stream
     ^stream
 !
 
-atEnd
-    ^(queue size == 0) and: [ (stream atEnd) ]
-!
-
-atRealEnd
-    ^self atEnd
-!
-
-putBack: anElement
-    ^queue addFirst: anElement
+species
+    ^stream species
 !
 
 close
@@ -102,17 +80,8 @@ close
 
 
 
-
-
-
-!PushBackStream methodsFor: 'private'!
-
-do: aBlock
-    | next |
-    [ (next := self next) isNil ] whileFalse: [ aBlock value: next ]
-!
+!StreamWrapper methodsFor: 'private'!
 
 init: aStream
-    stream _ aStream.
-    queue _ OrderedCollection new.
+    stream _ aStream
 ! !

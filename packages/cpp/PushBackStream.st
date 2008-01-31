@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   Test CParseType
+|   A stream wrapper with unlimited push back capabilites
 |
 |
  ======================================================================"
@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -28,23 +28,66 @@
 |
  ======================================================================"
 
-FileStream require: #CTypeParser -> 'CParseType.st'!
 
-ObjectMemory snapshot!
-
-| x |
-     CTypeParser test: 'test.c'
+StreamWrapper subclass: #PushBackStream
+	   instanceVariableNames: 'queue '
+	   classVariableNames: ''
+	   poolDictionaries: ''
+	   category: 'Examples-Useful'
 !
 
-| x |
-     CTypeParser testJust2: 'test.c'
+PushBackStream comment:
+'LIFO pushback capability on top of ReadStreams'
 !
 
-| x |
-     CTypeParser test2: 'test.c'
+
+!PushBackStream methodsFor: 'accessing' !
+
+next
+    | char |
+    queue size > 0 
+	ifTrue: [ ^queue removeFirst ].
+    ^self atEnd
+	ifTrue: [ nil ]
+	ifFalse: [ super next ]
 !
 
-| x |
-     CTypeParser test2: '/usr/include/dbm.h'
+peek
+    self atEnd ifTrue: [ ^nil ].
+    ^queue size == 0 
+	ifTrue: [ self putBack: self next ]
+	ifFalse: [ queue at: 1 ]
 !
 
+position
+    ^super position - queue size
+!
+
+position: pos
+    super position: pos.
+    queue := OrderedCollection new
+!
+
+stream
+    ^stream
+!
+
+atEnd
+    ^(queue size == 0) and: [ super atEnd ]
+!
+
+putBack: anElement
+    ^queue addFirst: anElement
+! !
+
+
+
+
+
+
+!PushBackStream methodsFor: 'private'!
+
+init: aStream
+    super init: aStream.
+    queue _ OrderedCollection new.
+! !

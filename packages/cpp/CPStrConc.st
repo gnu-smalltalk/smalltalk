@@ -8,7 +8,7 @@
 
 "======================================================================
 |
-| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -28,16 +28,7 @@
 |
  ======================================================================"
 
-"
-|     Change Log
-| ============================================================================
-| Author       Date       Change 
-|
-"
-
-FileStream fileIn: 'CToken.st' ifMissing: #CToken !
-
-PushBackStream subclass: #StringConcatStream
+StreamWrapper subclass: #StringConcatStream
 	       instanceVariableNames: ''
 	       classVariableNames: ''
 	       poolDictionaries: ''
@@ -55,12 +46,12 @@ into one long string token.'
 next
     | result nextTok |
     result _ super next.
-    (result isKindOf: StringTok)
+    (result isKindOf: CStringToken)
 	ifTrue: 
 	    [ [ stream atEnd not and: 
-		    [ (nextTok _ super peek) isKindOf: StringTok ] ]
+		    [ (nextTok _ super peek) isKindOf: CStringToken ] ]
 		  whileTrue: [ super next. "gobble the string"
-			       result _ StringTok value: (result value, 
+			       result _ CStringToken value: (result value, 
 							      nextTok value) ].
 	      ].
     ^result

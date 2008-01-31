@@ -1,0 +1,37 @@
+<package>
+  <name>CParser</name>
+  <namespace>CParser</namespace>
+
+  <filein>StreamWrapper.st</filein>
+  <filein>PushBackStream.st</filein>
+  <filein>CToken.st</filein>
+  <filein>LineTokenStream.st</filein>
+  <filein>CPStrUnq.st</filein>
+  <filein>CPStrConc.st</filein>
+  <filein>StreamStack.st</filein>
+  <filein>ExpansionStreamStack.st</filein>
+  <filein>CExpressionNode.st</filein>
+  <filein>CParseExpr.st</filein>
+  <filein>CPP.st</filein>
+  <filein>CSymbol.st</filein>
+  <filein>CDeclNode.st</filein>
+  <filein>CSymbolTable.st</filein>
+  <filein>CParseType.st</filein>
+
+  <file>StreamWrapper.st</file>
+  <file>PushBackStream.st</file>
+  <file>CToken.st</file>
+  <file>LineTokenStream.st</file>
+  <file>CPStrUnq.st</file>
+  <file>CPStrConc.st</file>
+  <file>StreamStack.st</file>
+  <file>ExpansionStreamStack.st</file>
+  <file>CExpressionNode.st</file>
+  <file>CParseExpr.st</file>
+  <file>CPP.st</file>
+  <file>CSymbol.st</file>
+  <file>CDeclNode.st</file>
+  <file>CSymbolTable.st</file>
+  <file>CParseType.st</file>
+  <file>README</file>
+</package>

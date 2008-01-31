@@ -15,40 +15,10 @@
 </package>
 
 <disabled-package>
-  <name>CInt</name>
-  <prereq>Tokenizer</prereq>
-  <filein>CPP.st</filein>
-  <filein>CParseType.st</filein>
-  <filein>CTok.st</filein>
-  <directory>unsupported/cint</directory>
-
-  <file>CDeclNode.st</file>
-  <file>CSymbol.st</file>
-  <file>ExpansionStream.st</file>
-  <file>CExpressionNode.st</file>
-  <file>CSymbolTable.st</file>
-  <file>ExpansionStreamStack.st</file>
-  <file>CPP.st</file>
-  <file>CTok.st</file>
-  <file>LineStream.st</file>
-  <file>CPStrConc.st</file>
-  <file>CToken.st</file>
-  <file>LineTokenStream.st</file>
-  <file>CPStrUnq.st</file>
-  <file>CTreeBuilder.st</file>
-  <file>README</file>
-  <file>CParseType.st</file>
-  <file>CollapsedStream.st</file>
-  <file>StreamStack.st</file>
-</disabled-package>
-
-<disabled-package>
   <name>OtherExamples</name>
   <directory>unsupported</directory>
   <file>CPP-test.st</file>
-  <file>CParseT1.st</file>
-  <file>CParseT2.st</file>
-  <file>CParseT3.st</file>
+  <file>CParseType-test.st</file>
   <file>CString.st</file>
   <file>DLD.st</file>
   <file>Interr.st</file>
@@ -89,7 +59,6 @@
   <file>PrtHier.st</file>
   <file>Case.st</file>
   <file>RegExp.st</file>
-  <file>PushBack.st</file>
   <file>SortCriter.st</file>
   <file>shell</file>
   <file>pepe.sed</file>

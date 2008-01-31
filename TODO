@@ -117,7 +117,7 @@ outside #new and so on).
 
 * other
 
-** make the smalltalk cpp work - nothing less, nothing more ;-)
+** finish the smalltalk CPP and C header file parser
 
 ** print entities correctly in the URIResolver.  A file named abc&def
 should print abc&amp;def in the file list.

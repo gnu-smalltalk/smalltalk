@@ -270,6 +270,7 @@ GST_PACKAGE_ENABLE([BloxTK], [blox/tk],
 GST_PACKAGE_ENABLE([Browser], [browser])
 GST_PACKAGE_ENABLE([Complex], [complex])
 GST_PACKAGE_ENABLE([Continuations], [continuations])
+GST_PACKAGE_ENABLE([CParser], [cpp])
 GST_PACKAGE_ENABLE([DebugTools], [debug])
 
 GST_PACKAGE_ENABLE([DBD-MySQL], [dbd-mysql])

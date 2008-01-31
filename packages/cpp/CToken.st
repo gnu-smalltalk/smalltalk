@@ -9,7 +9,7 @@
 
 "======================================================================
 |
-| Copyright 1988-92, 1994-95, 1999, 2000 Free Software Foundation, Inc.
+| Copyright 1993, 1999, 2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.
@@ -29,15 +29,8 @@
 |
  ======================================================================"
 
-"
-|     Change Log
-| ============================================================================
-| Author       Date       Change 
-|
-"
-
 Object subclass: #CToken
-       instanceVariableNames: 'location'
+       instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries:''
        category: 'Compiler'
@@ -169,61 +162,33 @@ isBinary
     ^false
 ! !
 
-| name value class |
-#(  (#DotTok '.')
-    (#ColonTok ':')
-    (#OpenParenTok '(')
-    (#CloseParenTok ')')
-    (#SemiTok ';')
-    (#QuestionTok '?')
-    (#OpenBracketTok '[')
-    (#CloseBracketTok ']')
-    (#OpenBraceTok '{')
-    (#CloseBraceTok '}')
-    (#DotDotDotTok '...')
-    (#WhitespaceTok ' ')
-) do: [ :classNameValue | name _ classNameValue at: 1.
-			  value _ classNameValue at: 2.
-			  class _ CToken subclass: name
-						   instanceVariableNames: ''
-						   classVariableNames: 'value'
-						   poolDictionaries: ''
-						   category: 'Compiler'.
-			  class class compile: '
-value: aValue [
-    value _ aValue
-]'.
-
-			  class  compile: '
-value [
-    ^value
-]'.
-			  class class compile: '
-value [
-    ^value
-]'.
-			  class  compile: '
-valueString [
-    ^value
-]'.
-			  class value: value
-			  ]
+CValueToken subclass: #CIdentifierToken
+	   instanceVariableNames: ''
+	   classVariableNames: ''
+	   poolDictionaries: ''
+	   category: 'Compiler'
 !
-
-#(  #IntegerTok
-    #FloatTok
-    #StringoidTok
-    #CommentTok
-    #IdentifierTok
-) do: [ :className | CValueToken subclass: className
-			   instanceVariableNames: ''
-			   classVariableNames: ''
-			   poolDictionaries: ''
-			   category: 'Compiler' ]
+CValueToken subclass: #CStringoidToken
+	   instanceVariableNames: ''
+	   classVariableNames: ''
+	   poolDictionaries: ''
+	   category: 'Compiler'
+!
+CValueToken subclass: #CFloatToken
+	   instanceVariableNames: ''
+	   classVariableNames: ''
+	   poolDictionaries: ''
+	   category: 'Compiler'
+!
+CValueToken subclass: #CIntegerToken
+	   instanceVariableNames: ''
+	   classVariableNames: ''
+	   poolDictionaries: ''
+	   category: 'Compiler'
 !
 
 
-!StringoidTok methodsFor: 'interpretation'!
+!CStringoidToken methodsFor: 'interpretation'!
 
 quotedStringValue
     "Returns the value as a string, with an extra level of C style quotes
@@ -250,28 +215,28 @@ delimiterChar
 
 
 
-StringoidTok subclass: #StringTok
+CStringoidToken subclass: #CStringToken
        instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: nil
 ! 
 
-!StringTok methodsFor: 'interpretation'!
+!CStringToken methodsFor: 'interpretation'!
 
 delimiterChar
     ^$"
 ! !
 
 
-StringoidTok subclass: #CharLiteralTok
+CStringoidToken subclass: #CCharacterToken
        instanceVariableNames: ''
        classVariableNames: ''
        poolDictionaries: ''
        category: nil
 ! 
 
-!CharLiteralTok methodsFor: 'interpretation'!
+!CCharacterToken methodsFor: 'interpretation'!
 
 quotedStringValue
     "Returns the value as a string, with an extra level of C style quotes
@@ -295,43 +260,43 @@ delimiterChar
 
 
 
-!IntegerTok methodsFor: 'accessing'!
+!CIntegerToken methodsFor: 'accessing'!
 
 valueString
     ^value printString
 ! !
 
-!FloatTok methodsFor: 'accessing'!
+!CFloatToken methodsFor: 'accessing'!
 
 valueString
     ^value printString
 ! !
 
 
-Object subclass: #Keyword
+Object subclass: #CKeyword
        instanceVariableNames: 'value'
        classVariableNames: ''
        poolDictionaries: ''
        category: nil
 ! 
 
-Keyword comment:
+CKeyword comment:
 'I exist only to provide unique instances which correspond to C keywords.
 .' !
 
-!Keyword class methodsFor: 'instance creation'!
+!CKeyword class methodsFor: 'instance creation'!
 
 value: aName
     ^self new init: aName
 ! !
 
-!Keyword methodsFor: 'accessing'!
+!CKeyword methodsFor: 'accessing'!
 
 value
     ^value
 ! !
 
-!Keyword methodsFor: 'private'!
+!CKeyword methodsFor: 'private'!
 
 init: aName
     value _ aName.
@@ -344,47 +309,61 @@ printOn: aStream
 
 
 
-Smalltalk at: #CKeywords put: Dictionary new!
+Namespace current at: #CKeywords put: Dictionary new!
 
-CKeywords at: #AutoKey put: (Keyword value: 'auto').
-CKeywords at: #BreakKey put: (Keyword value: 'break').
-CKeywords at: #CaseKey put: (Keyword value: 'case').
-CKeywords at: #CharKey put: (Keyword value: 'char').
-CKeywords at: #ConstKey put: (Keyword value: 'const').
-CKeywords at: #ContinueKey put: (Keyword value: 'continue').
-CKeywords at: #DefaultKey put: (Keyword value: 'default').
-CKeywords at: #DoKey put: (Keyword value: 'do').
-CKeywords at: #DoubleKey put: (Keyword value: 'double').
-CKeywords at: #ElseKey put: (Keyword value: 'else').
-CKeywords at: #EnumKey put: (Keyword value: 'enum').
-CKeywords at: #ExternKey put: (Keyword value: 'extern')!
+CKeywords at: #AutoKey put: (CKeyword value: 'auto').
+CKeywords at: #BreakKey put: (CKeyword value: 'break').
+CKeywords at: #CaseKey put: (CKeyword value: 'case').
+CKeywords at: #CharKey put: (CKeyword value: 'char').
+CKeywords at: #ConstKey put: (CKeyword value: 'const').
+CKeywords at: #ContinueKey put: (CKeyword value: 'continue').
+CKeywords at: #DefaultKey put: (CKeyword value: 'default').
+CKeywords at: #DoKey put: (CKeyword value: 'do').
+CKeywords at: #DoubleKey put: (CKeyword value: 'double').
+CKeywords at: #ElseKey put: (CKeyword value: 'else').
+CKeywords at: #EnumKey put: (CKeyword value: 'enum').
+CKeywords at: #ExternKey put: (CKeyword value: 'extern')!
 
-CKeywords at: #FloatKey put: (Keyword value: 'float').
-CKeywords at: #ForKey put: (Keyword value: 'for').
-CKeywords at: #GotoKey put: (Keyword value: 'goto').
-CKeywords at: #IfKey put: (Keyword value: 'if').
-CKeywords at: #IntKey put: (Keyword value: 'int').
-CKeywords at: #LongKey put: (Keyword value: 'long').
-CKeywords at: #RegisterKey put: (Keyword value: 'register').
-CKeywords at: #ReturnKey put: (Keyword value: 'return').
-CKeywords at: #ShortKey put: (Keyword value: 'short').
-CKeywords at: #SignedKey put: (Keyword value: 'signed').
-CKeywords at: #SizeofKey put: (Keyword value: 'sizeof').
-CKeywords at: #StaticKey put: (Keyword value: 'static').
-CKeywords at: #StructKey put: (Keyword value: 'struct').
-CKeywords at: #SwitchKey put: (Keyword value: 'switch').
-CKeywords at: #TypedefKey put: (Keyword value: 'typedef').
-CKeywords at: #UnionKey put: (Keyword value: 'union').
-CKeywords at: #UnsignedKey put: (Keyword value: 'unsigned').
-CKeywords at: #VoidKey put: (Keyword value: 'void').
-CKeywords at: #VolatileKey put: (Keyword value: 'volatile').
-CKeywords at: #WhileKey put: (Keyword value: 'while')!
+CKeywords at: #FloatKey put: (CKeyword value: 'float').
+CKeywords at: #ForKey put: (CKeyword value: 'for').
+CKeywords at: #GotoKey put: (CKeyword value: 'goto').
+CKeywords at: #IfKey put: (CKeyword value: 'if').
+CKeywords at: #IntKey put: (CKeyword value: 'int').
+CKeywords at: #LongKey put: (CKeyword value: 'long').
+CKeywords at: #RegisterKey put: (CKeyword value: 'register').
+CKeywords at: #ReturnKey put: (CKeyword value: 'return').
+CKeywords at: #ShortKey put: (CKeyword value: 'short').
+CKeywords at: #SignedKey put: (CKeyword value: 'signed').
+CKeywords at: #SizeofKey put: (CKeyword value: 'sizeof').
+CKeywords at: #StaticKey put: (CKeyword value: 'static').
+CKeywords at: #StructKey put: (CKeyword value: 'struct').
+CKeywords at: #SwitchKey put: (CKeyword value: 'switch').
+CKeywords at: #TypedefKey put: (CKeyword value: 'typedef').
+CKeywords at: #UnionKey put: (CKeyword value: 'union').
+CKeywords at: #UnsignedKey put: (CKeyword value: 'unsigned').
+CKeywords at: #VoidKey put: (CKeyword value: 'void').
+CKeywords at: #VolatileKey put: (CKeyword value: 'volatile').
+CKeywords at: #WhileKey put: (CKeyword value: 'while')!
 
+Namespace current at: #CPPKeywords put: Dictionary new!
 
-CKeywords at: #IfdefKey put: (Keyword value: 'ifdef').
-CKeywords at: #DefinedKey put: (Keyword value: 'defined').
-CKeywords at: #ElifKey put: (Keyword value: 'elif').
-CKeywords at: #EndifKey put: (Keyword value: 'endif').
-CKeywords at: #IfndefKey put: (Keyword value: 'ifndef').
-!
+CPPKeywords at: #IfdefKey put: (CKeyword value: 'ifdef').
+CPPKeywords at: #DefinedKey put: (CKeyword value: 'defined').
+CPPKeywords at: #ElifKey put: (CKeyword value: 'elif').
+CPPKeywords at: #EndifKey put: (CKeyword value: 'endif').
+CPPKeywords at: #IfndefKey put: (CKeyword value: 'ifndef').
+
+Namespace current at: #CToks put: Dictionary new!
+
+CToks at: #DotTok put: (CValueToken value: '.').
+CToks at: #ColonTok put: (CValueToken value: ':').
+CToks at: #OpenParenTok put: (CValueToken value: '(').
+CToks at: #CloseParenTok put: (CValueToken value: ')').
+CToks at: #SemiTok put: (CValueToken value: ';').
+CToks at: #QuestionTok put: (CValueToken value: '?').
+CToks at: #OpenBracketTok put: (CValueToken value: '[').
+CToks at: #CloseBracketTok put: (CValueToken value: ']').
+CToks at: #OpenBraceTok put: (CValueToken value: '{').
+CToks at: #CloseBraceTok put: (CValueToken value: '}').
+CToks at: #DotDotDotTok put: (CValueToken value: '...')!
 
