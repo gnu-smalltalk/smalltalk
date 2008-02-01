@@ -1,12 +1,48 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 3.0 TO ???
+NEWS FROM 3.0.??? TO 3.???
 
 o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
     the instance of GNU Smalltalk that produced the snapshot, and
     true in the instance of GNU Smalltalk that was restored from the
     snapshot.  Note that this does not apply to CallinProcesses, since
     those are stopped in saved images (will this be true in 3.1?).
+
+-----------------------------------------------------------------------------
+
+NEWS FROM 3.0 TO 3.0.1
+
+o   `gst-package --list-files' emits file paths relative from the current
+    directory.  The --destdir and -t options are rejected. --list-files
+    supports options --load and --test.
+
+o   The documentation for a package can now be built even if the corresponding
+    .star file is not installed.  Since documentation is part of the tarball,
+    this problem with 3.0 was actually only visible if you modified packages
+    for which you lacked the support libraries in /usr/lib (e.g. Tcl/Tk for
+    package BloxTK).
+
+o   Added SequenceableCollection>>#atRandom and String>>#allOccurrencesOfRegex:
+
+o   Eliminated possible infinite loop in CompiledCode>>#hash.
+
+o   Fixed crash on LargeInteger>>#divExact: for huge numerator and small
+    denominator.
+
+o   Fixed ping-pong between two sizes (continuously growing and shrinking) in
+    OrderedCollection.
+
+o   Fixed undeclared variable PackageNotAvailable in the default image.
+
+o   Fixed Symbol>>#numArgs for methods starting with an underscore.
+
+o   Fixed problems with substitution of regexes that match the empty string.
+
+o   Fixed problems with very short delays.
+
+o   Fixed segmentation violation when gethostbyname returned NULL.
+
+o   Test floatmath.st is XFAILed on alpha due to kernel bug 9751.
 
 -----------------------------------------------------------------------------
 
