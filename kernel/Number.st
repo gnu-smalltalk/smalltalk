@@ -919,6 +919,42 @@ implicit type coercing code for binary operations.'>
 		i := i + self unity]
     ]
 
+    to: stop collect: aBlock [
+	"Evaluate aBlock for each value in the interval going from the receiver
+         to stop by 1.  The results are collected in an Array and returned."
+
+	<category: 'shortcuts and iterators'>
+	| size result i j |
+        size := (stop - self) truncated + 1 max: 0.
+	result := Array new: size.
+	i := self.
+	j := 1.
+	[j <= size] whileTrue: 
+		[result at: j put: (aBlock value: i).
+		i := i + self unity. j := j + 1].
+	^result
+    ]
+
+    to: stop by: step collect: aBlock [
+	"Evaluate aBlock for each value in the interval going from the receiver
+         to stop with the given step.  The results are collected in an Array
+	 and returned."
+
+	<category: 'shortcuts and iterators'>
+	| size result i j |
+        size := step > 0
+            ifTrue: [stop >= self ifTrue: [(stop - self) // step + 1] ifFalse: [0]]
+            ifFalse: [self >= stop ifTrue: [(stop - self) // step + 1] ifFalse: [0]].
+
+	result := Array new: size.
+	i := self.
+	j := 1.
+	[j <= size] whileTrue: 
+		[result at: j put: (aBlock value: i).
+		i := i + step. j := j + 1].
+	^result
+    ]
+
     arithmeticError: message [
 	<category: 'errors'>
 	self error: message

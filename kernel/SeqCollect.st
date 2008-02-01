@@ -914,6 +914,49 @@ some access and manipulation methods.'>
 	^newCollection
     ]
 
+    with: aSequenceableCollection [
+	"Return an Array with the same size as the receiver and
+	 aSequenceableCollection, each element of which is a 2-element
+	 Arrays including one element from the receiver and one from
+	 aSequenceableCollection."
+	<category: 'concatenating'>
+	self size = aSequenceableCollection size 
+	    ifFalse: [^SystemExceptions.InvalidSize signalOn: aSequenceableCollection].
+	^1 to: self size collect: [ :each |
+	    { self at: each. aSequenceableCollection at: each } ]
+    ]
+
+    with: seqColl1 with: seqColl2 [
+	"Return an Array with the same size as the receiver and
+	 the arguments, each element of which is a 3-element
+	 Arrays including one element from the receiver and one from
+	 each argument."
+	<category: 'concatenating'>
+	self size = seqColl1 size 
+	    ifFalse: [^SystemExceptions.InvalidSize signalOn: seqColl1].
+	self size = seqColl2 size 
+	    ifFalse: [^SystemExceptions.InvalidSize signalOn: seqColl2].
+	^1 to: self size collect: [ :each |
+	    { self at: each. seqColl1 at: each. seqColl2 at: each } ]
+    ]
+
+    with: seqColl1 with: seqColl2 with: seqColl3 [
+	"Return an Array with the same size as the receiver and
+	 the arguments, each element of which is a 4-element
+	 Arrays including one element from the receiver and one from
+	 each argument."
+	<category: 'concatenating'>
+	self size = seqColl1 size 
+	    ifFalse: [^SystemExceptions.InvalidSize signalOn: seqColl1].
+	self size = seqColl2 size 
+	    ifFalse: [^SystemExceptions.InvalidSize signalOn: seqColl2].
+	self size = seqColl3 size 
+	    ifFalse: [^SystemExceptions.InvalidSize signalOn: seqColl3].
+	^1 to: self size collect: [ :each |
+	    { self at: each. seqColl1 at: each. seqColl2 at: each.
+	      seqColl3 at: each } ]
+    ]
+
     matchSubCollection: aSubCollection startingAt: anIndex [
 	"Private - Answer whether the items from index anIndex match those in
 	 aSubCollection. The first item is ignored"
