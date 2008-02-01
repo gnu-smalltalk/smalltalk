@@ -507,6 +507,129 @@ Stream subclass: LineStream [
 
 
 
+Namespace current: Kernel [
+
+Stream subclass: OneOfEachStream [
+    | streams delta |
+    
+    <category: 'Examples-Useful tools'>
+    <comment: nil>
+
+    OneOfEachStream class >> new [
+	<category: 'all'>
+	^#() readStream
+    ]
+
+    OneOfEachStream class >> with: stream1 [
+	<category: 'all'>
+	^(self basicNew)
+	    streams: {stream1}
+    ]
+
+    OneOfEachStream class >> with: stream1 with: stream2 [
+	<category: 'all'>
+	^(self basicNew)
+	    streams: 
+		    {stream1.
+		    stream2}
+    ]
+
+    OneOfEachStream class >> with: stream1 with: stream2 with: stream3 [
+	<category: 'all'>
+	^(self basicNew)
+	    streams: 
+		    {stream1.
+		    stream2.
+		    stream3}
+    ]
+
+    OneOfEachStream class >> with: stream1 with: stream2 with: stream3 with: stream4 [
+	<category: 'all'>
+	^(self basicNew)
+	    streams: 
+		    {stream1.
+		    stream2.
+		    stream3.
+		    stream4}
+    ]
+
+    OneOfEachStream class >> withAll: array [
+	<category: 'all'>
+	^(self basicNew)
+	    streams: array
+    ]
+
+    atEnd [
+	<category: 'all'>
+	^streams anySatisfy: [ :each | each atEnd]
+    ]
+
+    do: aBlock [
+	<category: 'all'>
+	[
+	    aBlock value:
+		(streams collect: [:each |
+		    each atEnd ifTrue: [ ^self ].
+		    each next ])
+	] repeat
+    ]
+
+    next [
+	<category: 'all'>
+	^streams collect: [:each |
+	    each atEnd ifTrue: [ ^self pastEnd ] ifFalse: [ each next ]]
+    ]
+
+    pastEnd [
+	<category: 'all'>
+	^streams first pastEnd
+    ]
+
+    peekFor: anObject [
+	<category: 'all'>
+	^self peek = anObject
+	    ifTrue: [ streams do: [ :each | streams next ] ];
+	    yourself
+    ]
+
+    peek [
+	<category: 'all'>
+	^streams collect: [:each |
+	    each atEnd ifTrue: [ ^self pastEnd ] ifFalse: [ each peek ]]
+    ]
+
+    position [
+	<category: 'all'>
+	^streams first position - delta
+    ]
+
+    position: anInteger [
+	<category: 'all'>
+	^self skip: anInteger - self position
+    ]
+
+    reset [
+	<category: 'all'>
+	self position: 0
+    ]
+
+    skip: anInteger [
+	<category: 'all'>
+	streams do: [ :each | each skip: anInteger ]
+    ]
+
+    streams: arrayOfStreams [
+	<category: 'initializing'>
+	streams := arrayOfStreams.
+	delta := arrayOfStreams first position.
+    ]
+]
+
+]
+
+
+
+
 Stream extend [
 
     , aStream [
@@ -612,5 +735,29 @@ Stream extend [
 	^Kernel.CollectingStream on: self collect: aBlock
     ]
 
+    with: aStream [
+	"Return a new Stream whose elements are 2-element
+	 Arrays, including one element from the receiver and one from
+	 aStream."
+	<category: 'concatenating'>
+	^Kernel.OneOfEachStream with: self with: aStream
+    ]
+
+    with: stream1 with: stream2 [
+	"Return a new Stream whose elements are 3-element
+	 Arrays, including one element from the receiver and one from
+	 each argument."
+	<category: 'concatenating'>
+	^Kernel.OneOfEachStream with: self with: stream1 with: stream2
+    ]
+
+    with: stream1 with: stream2 with: stream3 [
+	"Return a new Stream whose elements are 3-element
+	 Arrays, including one element from the receiver and one from
+	 each argument."
+	<category: 'concatenating'>
+	^Kernel.OneOfEachStream
+	    with: self with: stream1 with: stream2 with: stream3
+    ]
 ]
 

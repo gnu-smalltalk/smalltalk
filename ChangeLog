@@ -1,3 +1,9 @@
+2008-02-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Number.st: Add #to:collect: and #to:by:collect:.
+	* kernel/SeqCollect.st: Add instance side #with:...
+	* kernel/StreamOps.st: Add #with:... and a class implementing it.
+
 2008-01-27  Stephen Compall  <scompall@nocandysw.com>
 
         * kernel/AnsiExcept.st: Comment or private-ize uncommented methods.
