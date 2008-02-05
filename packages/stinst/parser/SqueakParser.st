@@ -107,15 +107,36 @@ STFileScanner subclass: SqueakFileInScanner [
     ]
 
     scanBinary: aClass [
-	"Treat ! specially, it is a binary operator in Squeak (if properly escaped).
-	 This actually fails on tokens like +!! which is the binary operator +!,
-	 but this are never used in practice.  It works for #!! however."
+	"Treat ! specially, it is a binary operator in Squeak (if properly
+	 escaped)."
 
-	<category: 'accessing'>
-	currentCharacter == $! ifFalse: [^super scanBinary: aClass].
-	self step == $! 
-	    ifFalse: [^RBSpecialCharacterToken value: $! start: tokenStart].
-	^super scanBinary: aClass
+        <category: 'private-scanning'>
+        | val |
+	currentCharacter == $! ifTrue: [
+	    self step == $! 
+	        ifFalse: [^RBSpecialCharacterToken value: $! start: tokenStart]].
+
+        buffer nextPut: currentCharacter.
+        self step.
+        (characterType == #binary and: [currentCharacter ~~ $-])
+            ifTrue:
+		[currentCharacter == $!
+		    ifTrue:
+			[self step == $!
+			    ifTrue: [
+				buffer nextPut: $!.
+				self step]
+			    ifFalse: [
+				stream skip: -1.
+				currentCharacter := $!.
+				characterType := #binary]]
+		    ifFalse:
+	                [buffer nextPut: currentCharacter.
+	                self step]].
+
+        val := buffer contents.
+        val := val asSymbol.
+        ^aClass value: val start: tokenStart
     ]
 
     nextRawChunk [
