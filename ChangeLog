@@ -1,5 +1,10 @@
 2008-02-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CharArray.st: Add #endsWith:.
+	* kernel/SeqCollect.st: Add #sort and #sortBy:.
+
+2008-02-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Convert.st: Return method from #compile:.
 
 2008-02-01  Paolo Bonzini  <bonzini@gnu.org>

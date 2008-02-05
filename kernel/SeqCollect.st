@@ -957,6 +957,29 @@ some access and manipulation methods.'>
 	      seqColl3 at: each } ]
     ]
 
+    sort [
+	"Sort the contents of the receiver according to the default
+	 sort block, which uses #<= to compare items."
+        <category: 'sorting'>
+	self
+	    replaceFrom: 1
+	    to: self size
+	    with: self asSortedCollection
+	    startingAt: 1
+    ]
+
+    sortBy: sortBlock [
+	"Sort the contents of the receiver according to the given
+	 sort block, which accepts pair of items and returns true if
+	 the first item is less than the second one."
+        <category: 'sorting'>
+	self
+	    replaceFrom: 1
+	    to: self size
+	    with: (self asSortedCollection: sortBlock)
+	    startingAt: 1
+    ]
+
     matchSubCollection: aSubCollection startingAt: anIndex [
 	"Private - Answer whether the items from index anIndex match those in
 	 aSubCollection. The first item is ignored"
