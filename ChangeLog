@@ -1,3 +1,7 @@
+2008-02-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Convert.st: Return method from #compile:.
+
 2008-02-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Number.st: Add #to:collect: and #to:by:collect:.

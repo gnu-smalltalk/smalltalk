@@ -1140,6 +1140,16 @@ extractMethodCategory: scanner
     category := argument.
 !
 
+methodFormattedSourceString
+    "Answer the method source code as a string, formatted using
+     the RBFormatter."
+
+    <category: 'compiling'>
+    ^STInST.RBFormatter new
+                  initialIndent: 1;
+                  format: self methodParseNode
+!
+
 methodParseNode
     ^self node
 !

@@ -256,7 +256,8 @@ STInST.STClassLoader subclass: SyntaxConverter [
         method := self defineMethod: rewritten.                
         (classesToEmit includesKey: currentClass asClass)
             ifTrue: [ self addMethod: method toLoadedClass: currentClass ]
-            ifFalse: [ self addMethod: method toExtensionClass: currentClass ]
+            ifFalse: [ self addMethod: method toExtensionClass: currentClass ].
+	^method
     ]
     
     lastEval [
