@@ -950,6 +950,14 @@ Object subclass: SpFilename [
 	^SpTimestamp fromSeconds: entry lastModifyTime
     ]
 
+    name [
+	"a String
+	 return the filename identified by self."
+
+	<category: 'initialize-release'>
+	^filename
+    ]
+
     named: aString [
 	"^self
 	 I initialize myself to represent the filename identified by aString."

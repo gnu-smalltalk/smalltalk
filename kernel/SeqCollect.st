@@ -532,8 +532,7 @@ some access and manipulation methods.'>
 	<category: 'copying SequenceableCollections'>
 	^self copyFrom: 1
 	    to: (self indexOf: anObject
-		    ifAbsent: [^SystemExceptions.NotFound signalOn: anObject what: 'object']) 
-			- 1
+		    ifAbsent: [self size + 1]) - 1
     ]
 
     copyReplaceFrom: start to: stop withObject: anObject [
