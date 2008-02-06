@@ -351,6 +351,7 @@ GST_PACKAGE_ENABLE([Parser], [stinst/parser])
 GST_PACKAGE_ENABLE([ClassPublisher], [stinst/doc])
 GST_PACKAGE_ENABLE([Sport], [sport])
 GST_PACKAGE_ENABLE([SUnit], [sunit])
+GST_PACKAGE_ENABLE([Swazoo], [swazoo-httpd])
 GST_PACKAGE_ENABLE([TCP], [tcp],
   [GST_INET_SOCKETS],
   [gst_cv_inet_sockets],

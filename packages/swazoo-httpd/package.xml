@@ -1,0 +1,48 @@
+<package>
+  <name>Swazoo</name>
+  <prereq>Sport</prereq>
+  <namespace>Swazoo</namespace>
+
+  <test>
+    <sunit>
+      Swazoo.CompositeResourceTest
+      Swazoo.FileResourceTest
+      Swazoo.HTTPRequestTest
+      Swazoo.HTTPResponseTest
+      Swazoo.HTTPServerTest
+      Swazoo.HeaderFieldTest
+      Swazoo.HelloWorldResourceTest
+      Swazoo.HomeResourceTest
+      Swazoo.RedirectionResourceTest
+      Swazoo.ResourceTest
+      Swazoo.SiteIdentifierTest
+      Swazoo.SiteTest
+      Swazoo.SwazooBaseExtensionsTest
+      Swazoo.SwazooCacheControlTest
+      Swazoo.SwazooCompilerTest
+      Swazoo.SwazooConfigurationTest
+      Swazoo.SwazooServerTest
+      Swazoo.SwazooSocketTest
+      Swazoo.SwazooStreamTest
+      Swazoo.SwazooURITest
+      Swazoo.URIParsingTest
+      Swazoo.URIResolutionTest
+    </sunit>
+    <filein>Tests.st</filein>
+  </test>
+
+  <filein>Exceptions.st</filein>
+  <filein>Headers.st</filein>
+  <filein>Messages.st</filein>
+  <filein>Core.st</filein>
+  <filein>Resources.st</filein>
+  <filein>HTTP.st</filein>
+
+  <file>Exceptions.st</file>
+  <file>Headers.st</file>
+  <file>Messages.st</file>
+  <file>Core.st</file>
+  <file>Resources.st</file>
+  <file>HTTP.st</file>
+  <file>Tests.st</file>
+</package>
