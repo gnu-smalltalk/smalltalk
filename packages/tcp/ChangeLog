@@ -1,3 +1,7 @@
+2008-02-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Sockets.st: Add methods needed by Sport.
+
 2008-01-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tcp.c: Cope with gethostbyname returning NULL.

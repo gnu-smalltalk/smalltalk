@@ -382,7 +382,7 @@ Object subclass: SpEnvironment [
 
 	<category: 'compiling'>
 	^Behavior 
-	    evaluate: aString for: anObject
+	    evaluate: aString to: anObject
     ]
 
     SpEnvironment class >> hexStringFromByteArray: aByteArray [
@@ -1233,7 +1233,7 @@ Object subclass: SpSocket [
 	 I return true if a read operation will return some number of bytes."
 
 	<category: 'services-io'>
-	^self underlyingSocket canRead
+	^self underlyingSocket available
     ]
 
     setAddressReuse: aBoolean [
@@ -1260,7 +1260,7 @@ Object subclass: SpSocket [
 
 	<category: 'services-io'>
 	| bad sem timeout socketWait |
-	self underlyingSocket canRead ifTrue: [ ^true ].
+	self underlyingSocket available ifTrue: [ ^true ].
 	sem := Semaphore new.
 	timeout :=
 	    [ (Delay forMilliseconds: aNumberOfMilliseconds) wait. sem signal ]
@@ -1271,7 +1271,7 @@ Object subclass: SpSocket [
 	[ sem wait ] ensure: [
 	    timeout terminate.
 	    socketWait terminate ].
-	^self underlyingSocket canRead
+	^self underlyingSocket available
     ]
 
     write: sourceByteArray [
@@ -1280,8 +1280,11 @@ Object subclass: SpSocket [
 	 I return the number of bytes written."
 
 	<category: 'services-io'>
+	"TODO: accept bytearrays in sockets."
 	^SpExceptionContext 
-	    for: [self underlyingSocket nextPutAllFlush: sourceByteArray]
+	    for: [self underlyingSocket
+		     nextPutAllFlush: sourceByteArray asString.
+		sourceByteArray size]
 	    on: Error
 	    do: [:ex | SpSocketError raiseSignal: ex]
     ]
@@ -1291,12 +1294,14 @@ Object subclass: SpSocket [
 	 I return the number of bytes actually written."
 
 	<category: 'services-io'>
+	"TODO: accept bytearrays in sockets."
 	^SpExceptionContext 
 	    for: 
 		[self underlyingSocket 
 		    next: length
-		    putAll: aByteArray
-		    startingAt: startIndex; flush]
+		    putAll: aByteArray asString
+		    startingAt: startIndex; flush.
+		length]
 	    on: Error
 	    do: [:ex | SpSocketError raiseSignal: ex]
     ]
