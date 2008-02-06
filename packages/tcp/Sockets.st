@@ -159,6 +159,13 @@ Stream subclass: AbstractSocket [
 	self subclassResponsibility
     ]
 
+    ensureReadable [
+	"Suspend the current process until more data is available on the
+	 socket."
+
+	self implementation ensureReadable
+    ]
+
     available [
 	"Answer whether there is data available on the socket."
 
@@ -1050,6 +1057,13 @@ AbstractSocket subclass: Socket [
 
 	<category: 'stream protocol'>
 	^self peek isNil
+    ]
+
+    ensureReadable [
+	"Suspend the current process until more data is available in the
+	 socket's read buffer or from the operating system."
+
+	self available ifFalse: [ super ensureReadable ]
     ]
 
     available [

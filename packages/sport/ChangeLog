@@ -1,4 +1,8 @@
 2008-02-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* sport.st: Fix sockets for Swazoo.
+
+2008-02-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* packages/sport/sport.st: Add SpFilename>>#name.
 
