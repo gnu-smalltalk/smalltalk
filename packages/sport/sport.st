@@ -1280,10 +1280,8 @@ Object subclass: SpSocket [
 	 I return the number of bytes written."
 
 	<category: 'services-io'>
-	"TODO: accept bytearrays in sockets."
 	^SpExceptionContext 
-	    for: [self underlyingSocket
-		     nextPutAllFlush: sourceByteArray asString.
+	    for: [self underlyingSocket nextPutAllFlush: sourceByteArray.
 		sourceByteArray size]
 	    on: Error
 	    do: [:ex | SpSocketError raiseSignal: ex]
@@ -1294,12 +1292,11 @@ Object subclass: SpSocket [
 	 I return the number of bytes actually written."
 
 	<category: 'services-io'>
-	"TODO: accept bytearrays in sockets."
 	^SpExceptionContext 
 	    for: 
 		[self underlyingSocket 
 		    next: length
-		    putAll: aByteArray asString
+		    putAll: aByteArray
 		    startingAt: startIndex; flush.
 		length]
 	    on: Error
