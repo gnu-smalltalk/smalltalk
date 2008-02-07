@@ -41,6 +41,196 @@ Stream subclass: AbstractSocket [
     Timeout := nil.
     DefaultAddressClass := nil.
 
+    Ports := nil.
+
+    AbstractSocket class >> defaultPortAt: protocol [
+	"Answer the port that is used (by default) for the given service (high
+	 level protocol)"
+
+	<category: 'well known ports'>
+	^Ports at: protocol
+    ]
+
+    AbstractSocket class >> defaultPortAt: protocol ifAbsent: port [
+	"Answer the port that is used (by default) for the given service (high
+	 level protocol), or the specified port if none is registered."
+
+	<category: 'well known ports'>
+	^Ports at: protocol ifAbsent: port
+    ]
+
+    AbstractSocket class >> defaultPortAt: protocol put: port [
+	"Associate the given port to the service specified by `protocol'."
+
+	<category: 'well known ports'>
+	^Ports at: protocol put: port
+    ]
+
+    AbstractSocket class >> initialize [
+	self
+	    timeout: 30000;
+	    checkPeriod: 100;
+	    defaultAddressClass: IPAddress.
+	Ports := (Dictionary new)
+		    at: 'ftp' put: 21;
+		    at: 'telnet' put: 23;
+		    at: 'smtp' put: 25;
+		    at: 'dns' put: 42;
+		    at: 'whois' put: 43;
+		    at: 'finger' put: 79;
+		    at: 'http' put: 80;
+		    at: 'pop3' put: 110;
+		    at: 'nntp' put: 119;
+		    yourself
+    ]
+
+    AbstractSocket class >> portEcho [
+	"Answer the port on which the ECHO service listens"
+
+	<category: 'well known ports'>
+	^7
+    ]
+
+    AbstractSocket class >> portDiscard [
+	"Answer the port on which the DISCARD service listens"
+
+	<category: 'well known ports'>
+	^9
+    ]
+
+    AbstractSocket class >> portSystat [
+	"Answer the port on which the SYSTAT service listens"
+
+	<category: 'well known ports'>
+	^11
+    ]
+
+    AbstractSocket class >> portDayTime [
+	"Answer the port on which the TOD service listens"
+
+	<category: 'well known ports'>
+	^13
+    ]
+
+    AbstractSocket class >> portNetStat [
+	"Answer the port on which the NETSTAT service listens"
+
+	<category: 'well known ports'>
+	^15
+    ]
+
+    AbstractSocket class >> portFTP [
+	"Answer the port on which the FTP daemon listens"
+
+	<category: 'well known ports'>
+	^21
+    ]
+
+    AbstractSocket class >> portSSH [
+	"Answer the port on which the SSH daemon listens"
+
+	<category: 'well known ports'>
+	^22
+    ]
+
+    AbstractSocket class >> portTelnet [
+	"Answer the port on which the TELNET daemon listens"
+
+	<category: 'well known ports'>
+	^23
+    ]
+
+    AbstractSocket class >> portSMTP [
+	"Answer the port on which the SMTP daemon listens"
+
+	<category: 'well known ports'>
+	^25
+    ]
+
+    AbstractSocket class >> portTimeServer [
+	"Answer the port on which the time server listens"
+
+	<category: 'well known ports'>
+	^37
+    ]
+
+    AbstractSocket class >> portDNS [
+	"Answer the port on which the DNS listens"
+
+	<category: 'well known ports'>
+	^53
+    ]
+
+    AbstractSocket class >> portWhois [
+	"Answer the port on which the WHOIS daemon listens"
+
+	<category: 'well known ports'>
+	^43
+    ]
+
+    AbstractSocket class >> portGopher [
+	"Answer the port on which the Gopher daemon listens"
+
+	<category: 'well known ports'>
+	^70
+    ]
+
+    AbstractSocket class >> portFinger [
+	"Answer the port on which the finger daemon listens"
+
+	<category: 'well known ports'>
+	^79
+    ]
+
+    AbstractSocket class >> portHTTP [
+	"Answer the port on which the http daemon listens"
+
+	<category: 'well known ports'>
+	^80
+    ]
+
+    AbstractSocket class >> portPOP3 [
+	"Answer the port on which the pop3 daemon listens"
+
+	<category: 'well known ports'>
+	^110
+    ]
+
+    AbstractSocket class >> portNNTP [
+	"Answer the port on which the nntp daemon listens"
+
+	<category: 'well known ports'>
+	^119
+    ]
+
+    AbstractSocket class >> portExecServer [
+	"Answer the port on which the exec server listens"
+
+	<category: 'well known ports'>
+	^512
+    ]
+
+    AbstractSocket class >> portLoginServer [
+	"Answer the port on which the rlogin daemon listens"
+
+	<category: 'well known ports'>
+	^513
+    ]
+
+    AbstractSocket class >> portCmdServer [
+	"Answer the port on which the rsh daemon listens"
+
+	<category: 'well known ports'>
+	^514
+    ]
+
+    AbstractSocket class >> portReserved [
+	"Answer the last port reserved to privileged processes"
+
+	<category: 'well known ports'>
+	^1023
+    ]
+
     AbstractSocket class >> checkPeriod [
 	"Answer the period that is to elapse between socket polls if data
 	 data is not ready and the connection is still open (in milliseconds)"
@@ -739,207 +929,36 @@ AbstractSocket subclass: ServerSocket [
 
 
 
-AbstractSocket subclass: Socket [
-    | lookahead peerDead readBuffer writeBuffer outOfBand |
+AbstractSocket subclass: StreamSocket [
+    | lookahead peerDead readBuffer outOfBand |
     
     <category: 'Sockets-Streams'>
     <comment: nil>
 
-    Ports := nil.
     ReadBufferSize := nil.
-    WriteBufferSize := nil.
 
-    Socket class >> portEcho [
-	"Answer the port on which the ECHO service listens"
-
-	<category: 'well known ports'>
-	^7
-    ]
-
-    Socket class >> portDiscard [
-	"Answer the port on which the DISCARD service listens"
-
-	<category: 'well known ports'>
-	^9
-    ]
-
-    Socket class >> portSystat [
-	"Answer the port on which the SYSTAT service listens"
-
-	<category: 'well known ports'>
-	^11
-    ]
-
-    Socket class >> portDayTime [
-	"Answer the port on which the TOD service listens"
-
-	<category: 'well known ports'>
-	^13
-    ]
-
-    Socket class >> portNetStat [
-	"Answer the port on which the NETSTAT service listens"
-
-	<category: 'well known ports'>
-	^15
-    ]
-
-    Socket class >> portFTP [
-	"Answer the port on which the FTP daemon listens"
-
-	<category: 'well known ports'>
-	^21
-    ]
-
-    Socket class >> portSSH [
-	"Answer the port on which the SSH daemon listens"
-
-	<category: 'well known ports'>
-	^22
-    ]
-
-    Socket class >> portTelnet [
-	"Answer the port on which the TELNET daemon listens"
-
-	<category: 'well known ports'>
-	^23
-    ]
-
-    Socket class >> portSMTP [
-	"Answer the port on which the SMTP daemon listens"
-
-	<category: 'well known ports'>
-	^25
-    ]
-
-    Socket class >> portTimeServer [
-	"Answer the port on which the time server listens"
-
-	<category: 'well known ports'>
-	^37
-    ]
-
-    Socket class >> portDNS [
-	"Answer the port on which the DNS listens"
-
-	<category: 'well known ports'>
-	^53
-    ]
-
-    Socket class >> portWhois [
-	"Answer the port on which the WHOIS daemon listens"
-
-	<category: 'well known ports'>
-	^43
-    ]
-
-    Socket class >> portGopher [
-	"Answer the port on which the Gopher daemon listens"
-
-	<category: 'well known ports'>
-	^70
-    ]
-
-    Socket class >> portFinger [
-	"Answer the port on which the finger daemon listens"
-
-	<category: 'well known ports'>
-	^79
-    ]
-
-    Socket class >> portHTTP [
-	"Answer the port on which the http daemon listens"
-
-	<category: 'well known ports'>
-	^80
-    ]
-
-    Socket class >> portPOP3 [
-	"Answer the port on which the pop3 daemon listens"
-
-	<category: 'well known ports'>
-	^110
-    ]
-
-    Socket class >> portNNTP [
-	"Answer the port on which the nntp daemon listens"
-
-	<category: 'well known ports'>
-	^119
-    ]
-
-    Socket class >> portExecServer [
-	"Answer the port on which the exec server listens"
-
-	<category: 'well known ports'>
-	^512
-    ]
-
-    Socket class >> portLoginServer [
-	"Answer the port on which the rlogin daemon listens"
-
-	<category: 'well known ports'>
-	^513
-    ]
-
-    Socket class >> portCmdServer [
-	"Answer the port on which the rsh daemon listens"
-
-	<category: 'well known ports'>
-	^514
-    ]
-
-    Socket class >> portReserved [
-	"Answer the last port reserved to privileged processes"
-
-	<category: 'well known ports'>
-	^1023
-    ]
-
-    Socket class >> defaultPortAt: protocol [
-	"Answer the port that is used (by default) for the given service (high
-	 level protocol)"
-
-	<category: 'well known ports'>
-	^Ports at: protocol
-    ]
-
-    Socket class >> defaultPortAt: protocol ifAbsent: port [
-	"Answer the port that is used (by default) for the given service (high
-	 level protocol), or the specified port if none is registered."
-
-	<category: 'well known ports'>
-	^Ports at: protocol ifAbsent: port
-    ]
-
-    Socket class >> defaultPortAt: protocol put: port [
-	"Associate the given port to the service specified by `protocol'."
-
-	<category: 'well known ports'>
-	^Ports at: protocol put: port
-    ]
-
-    Socket class >> initialize [
+    StreamSocket class >> initialize [
 	"Initialize the receiver's defaults"
 
-	<category: 'well known ports'>
-	self
-	    readBufferSize: 1024;
-	    writeBufferSize: 256.
-	Ports := (Dictionary new)
-		    at: 'ftp' put: 21;
-		    at: 'telnet' put: 23;
-		    at: 'smtp' put: 25;
-		    at: 'dns' put: 42;
-		    at: 'whois' put: 43;
-		    at: 'finger' put: 79;
-		    at: 'http' put: 80;
-		    at: 'pop3' put: 110;
-		    at: 'nntp' put: 119;
-		    yourself
+	<category: 'initialize'>
+	self readBufferSize: 1024.
     ]
 
-    Socket class >> defaultImplementationClass [
+    StreamSocket class >> readBufferSize [
+	"Answer the size of the read buffer for newly-created sockets"
+
+	<category: 'accessing'>
+	^ReadBufferSize
+    ]
+
+    StreamSocket class >> readBufferSize: anInteger [
+	"Set the size of the read buffer for newly-created sockets"
+
+	<category: 'accessing'>
+	ReadBufferSize := anInteger
+    ]
+
+    StreamSocket class >> defaultImplementationClass [
 	"Answer the default implementation class.  Depending on the
 	 subclass, this might be the default stream socket implementation
 	 class of the default address class, or rather its default datagram
@@ -949,35 +968,7 @@ AbstractSocket subclass: Socket [
 	^self defaultAddressClass defaultStreamSocketImplClass
     ]
 
-    Socket class >> readBufferSize [
-	"Answer the size of the read buffer for newly-created sockets"
-
-	<category: 'accessing'>
-	^ReadBufferSize
-    ]
-
-    Socket class >> readBufferSize: anInteger [
-	"Set the size of the read buffer for newly-created sockets"
-
-	<category: 'accessing'>
-	ReadBufferSize := anInteger
-    ]
-
-    Socket class >> writeBufferSize [
-	"Answer the size of the write buffer for newly-created sockets"
-
-	<category: 'accessing'>
-	^WriteBufferSize
-    ]
-
-    Socket class >> writeBufferSize: anInteger [
-	"Set the size of the write buffer for newly-created sockets"
-
-	<category: 'accessing'>
-	WriteBufferSize := anInteger
-    ]
-
-    Socket class >> remote: ipAddressOrString port: remotePort [
+    StreamSocket class >> remote: ipAddressOrString port: remotePort [
 	"Create a new socket and connect to the given host (passed as a
 	 String to be resolved or as a SocketAddress), and to the given port."
 
@@ -989,7 +980,7 @@ AbstractSocket subclass: Socket [
 	    port: 0
     ]
 
-    Socket class >> remote: ipAddressOrString port: remotePort local: ipAddress port: localPort [
+    StreamSocket class >> remote: ipAddressOrString port: remotePort local: ipAddress port: localPort [
 	"Create a new socket and connect to the given host (passed as a
 	 String to be resolved or as a SocketAddress), and to the given remotePort.
 	 Then bind it to the local address passed in ipAddress, on the localPort
@@ -1112,15 +1103,6 @@ AbstractSocket subclass: Socket [
 	self readBuffer notNil ifTrue: [self readBuffer fill]
     ]
 
-    flush [
-	"Flush the write buffer to the operating system"
-
-	<category: 'stream protocol'>
-	self writeBuffer notNil ifTrue: [
-	    self implementation valueWithoutBuffering: [
-		self writeBuffer flush]]
-    ]
-
     isPeerAlive [
 	"Answer whether the connection with the peer remote machine is still
 	 valid."
@@ -1162,26 +1144,6 @@ AbstractSocket subclass: Socket [
 	result := (String with: lookahead) , (self readBuffer next: count - 1).
 	lookahead := nil.
 	^result
-    ]
-
-    nextPut: char [
-	"Write a character to the socket; this acts as a bit-bucket when
-	 the socket is closed.  This might yield control to other
-	 Smalltalk Processes."
-
-	<category: 'stream protocol'>
-	self writeBuffer isNil ifTrue: [^self].
-	self writeBuffer nextPut: char
-    ]
-
-    next: n putAll: aCollection startingAt: pos [
-	"Write aString to the socket; this acts as a bit-bucket when
-	 the socket is closed.  This might yield control to other
-	 Smalltalk Processes."
-
-	<category: 'stream protocol'>
-	self writeBuffer isNil ifTrue: [^self].
-	self writeBuffer next: n putAll: aCollection startingAt: pos
     ]
 
     peek [
@@ -1228,24 +1190,13 @@ AbstractSocket subclass: Socket [
 	readBuffer := self newReadBuffer: size
     ]
 
-    writeBufferSize: size [
-	"Create a new write buffer of the given size, flushing the
-	 old one is needed.  This might yield control to other
-	 Smalltalk Processes."
-
-	<category: 'stream protocol'>
-	writeBuffer isNil ifTrue: [^self].
-	self hasWriteBuffer ifTrue: [writeBuffer flush].
-	writeBuffer := self newWriteBuffer: size
-    ]
-
     deleteBuffers [
 	<category: 'private - buffering'>
-	readBuffer := writeBuffer := nil
+	readBuffer := nil
     ]
 
     noBufferFlag [
-	"Value that means `lazily initialize the readBuffer and writeBuffer'."
+	"Value that means `lazily initialize the buffer'."
 
 	<category: 'private - buffering'>
 	^0
@@ -1256,15 +1207,10 @@ AbstractSocket subclass: Socket [
 	^readBuffer ~~ self noBufferFlag
     ]
 
-    hasWriteBuffer [
-	<category: 'private - buffering'>
-	^writeBuffer ~~ self noBufferFlag
-    ]
-
     initialize: implementation [
 	<category: 'private - buffering'>
 	super initialize: implementation.
-	readBuffer := writeBuffer := self noBufferFlag
+	readBuffer := self noBufferFlag
     ]
 
     newReadBuffer: size [
@@ -1279,29 +1225,11 @@ AbstractSocket subclass: Socket [
 			0]]
     ]
 
-    newWriteBuffer: size [
-	<category: 'private - buffering'>
-	^(WriteBuffer on: (String new: size)) flushBlock: 
-		[:data :size | 
-		| alive |
-		self implementation ensureWriteable.
-		alive := self implementation isOpen 
-			    and: [(self implementation write: data numBytes: size) > -1].
-		alive ifFalse: [self deleteBuffers]]
-    ]
-
     readBuffer [
 	<category: 'private - buffering'>
 	readBuffer == self noBufferFlag 
 	    ifTrue: [readBuffer := self newReadBuffer: ReadBufferSize].
 	^readBuffer
-    ]
-
-    writeBuffer [
-	<category: 'private - buffering'>
-	writeBuffer == self noBufferFlag 
-	    ifTrue: [writeBuffer := self newWriteBuffer: WriteBufferSize].
-	^writeBuffer
     ]
 
     outOfBand [
@@ -1321,10 +1249,116 @@ AbstractSocket subclass: Socket [
 
 
 
+StreamSocket subclass: Socket [
+    | writeBuffer |
+    
+    <category: 'Sockets-Streams'>
+    <comment: nil>
+
+    WriteBufferSize := nil.
+
+    Socket class >> initialize [
+	"Initialize the receiver's defaults"
+
+	<category: 'well known ports'>
+	self writeBufferSize: 256.
+    ]
+
+    Socket class >> writeBufferSize [
+	"Answer the size of the write buffer for newly-created sockets"
+
+	<category: 'accessing'>
+	^WriteBufferSize
+    ]
+
+    Socket class >> writeBufferSize: anInteger [
+	"Set the size of the write buffer for newly-created sockets"
+
+	<category: 'accessing'>
+	WriteBufferSize := anInteger
+    ]
+
+    flush [
+	"Flush the write buffer to the operating system"
+
+	<category: 'stream protocol'>
+	self writeBuffer notNil ifTrue: [
+	    self implementation valueWithoutBuffering: [
+		self writeBuffer flush]]
+    ]
+
+    nextPut: char [
+	"Write a character to the socket; this acts as a bit-bucket when
+	 the socket is closed.  This might yield control to other
+	 Smalltalk Processes."
+
+	<category: 'stream protocol'>
+	self writeBuffer isNil ifTrue: [^self].
+	self writeBuffer nextPut: char
+    ]
+
+    next: n putAll: aCollection startingAt: pos [
+	"Write aString to the socket; this acts as a bit-bucket when
+	 the socket is closed.  This might yield control to other
+	 Smalltalk Processes."
+
+	<category: 'stream protocol'>
+	self writeBuffer isNil ifTrue: [^self].
+	self writeBuffer next: n putAll: aCollection startingAt: pos
+    ]
+
+    writeBufferSize: size [
+	"Create a new write buffer of the given size, flushing the
+	 old one is needed.  This might yield control to other
+	 Smalltalk Processes."
+
+	<category: 'stream protocol'>
+	writeBuffer isNil ifTrue: [^self].
+	self hasWriteBuffer ifTrue: [writeBuffer flush].
+	writeBuffer := self newWriteBuffer: size
+    ]
+
+    deleteBuffers [
+	<category: 'private - buffering'>
+	super deleteBuffers.
+	writeBuffer := nil
+    ]
+
+    hasWriteBuffer [
+	<category: 'private - buffering'>
+	^writeBuffer ~~ self noBufferFlag
+    ]
+
+    initialize: implementation [
+	<category: 'private - buffering'>
+	super initialize: implementation.
+	writeBuffer := self noBufferFlag
+    ]
+
+    newWriteBuffer: size [
+	<category: 'private - buffering'>
+	^(WriteBuffer on: (String new: size)) flushBlock: 
+		[:data :size | 
+		| alive |
+		self implementation ensureWriteable.
+		alive := self implementation isOpen 
+			    and: [(self implementation write: data numBytes: size) > -1].
+		alive ifFalse: [self deleteBuffers]]
+    ]
+
+    writeBuffer [
+	<category: 'private - buffering'>
+	writeBuffer == self noBufferFlag 
+	    ifTrue: [writeBuffer := self newWriteBuffer: WriteBufferSize].
+	^writeBuffer
+    ]
+]
+
+
+
 Eval [
-    AbstractSocket
-	timeout: 30000;
-	checkPeriod: 100;
-	defaultAddressClass: IPAddress
+    AbstractSocket initialize.
+    StreamSocket initialize.
+    Socket initialize.
 ]
 

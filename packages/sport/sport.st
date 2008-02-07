@@ -1048,7 +1048,7 @@ Object subclass: SpSocket [
 	 I return a new instance of myself that represents an unconfigured TCP socket."
 
 	<category: 'instance creation'>
-	^self new onClass: TCP.Socket
+	^self new onClass: TCP.StreamSocket
     ]
 
     SpSocket class >> onNativeclientSocket: aNativeSocket for: aServerSocket [
@@ -1072,7 +1072,7 @@ Object subclass: SpSocket [
 	    for: 
 		[| clientSpecificSocket |
 		
-		[(clientSpecificSocket := self underlyingSocket accept) isNil] 
+		[(clientSpecificSocket := self underlyingSocket accept: TCP.StreamSocket) isNil] 
 			whileTrue: [ Processor yield ].
 		self class onNativeclientSocket: clientSpecificSocket for: self]
 	    on: Error
@@ -1281,7 +1281,7 @@ Object subclass: SpSocket [
 
 	<category: 'services-io'>
 	^SpExceptionContext 
-	    for: [self underlyingSocket nextPutAllFlush: sourceByteArray.
+	    for: [self underlyingSocket nextPutAll: sourceByteArray.
 		sourceByteArray size]
 	    on: Error
 	    do: [:ex | SpSocketError raiseSignal: ex]
@@ -1297,7 +1297,7 @@ Object subclass: SpSocket [
 		[self underlyingSocket 
 		    next: length
 		    putAll: aByteArray
-		    startingAt: startIndex; flush.
+		    startingAt: startIndex.
 		length]
 	    on: Error
 	    do: [:ex | SpSocketError raiseSignal: ex]

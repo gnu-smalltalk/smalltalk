@@ -8,6 +8,12 @@ o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
     snapshot.  Note that this does not apply to CallinProcesses, since
     those are stopped in saved images (will this be true in 3.1?).
 
+o   Unbuffered sockets available from class TCP.StreamSocket.
+
+New goodies:
+
+o   Swazoo web server
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 3.0 TO 3.0.1

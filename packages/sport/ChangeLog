@@ -1,5 +1,9 @@
 2008-02-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* sport.st: Use TCP.StreamSocket.
+
+2008-02-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* sport.st: Remove previous workaround, added one in TCP now. :-)
 
 2008-02-06  Paolo Bonzini  <bonzini@gnu.org>
