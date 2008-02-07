@@ -1,3 +1,7 @@
+2008-02-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Sockets.st: Replace #nextPutAll: with #next:putAll:startingAt:.
+
 2008-02-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Sockets.st: Add methods needed by Sport.

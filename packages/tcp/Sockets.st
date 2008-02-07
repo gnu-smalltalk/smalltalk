@@ -285,6 +285,14 @@ Stream subclass: AbstractSocket [
 	^self implementation next
     ]
 
+    next: n putAll: aCollection startingAt: pos [
+	"Write `char' to the socket, failing if the connection is dead.  The
+	 SIGPIPE signal is automatically caught and ignored by the system."
+
+	<category: 'stream protocol'>
+	^self implementation next: n putAll: aCollection startingAt: pos
+    ]
+
     nextPut: char [
 	"Write `char' to the socket, failing if the connection is dead.  The
 	 SIGPIPE signal is automatically caught and ignored by the system."
@@ -1166,14 +1174,14 @@ AbstractSocket subclass: Socket [
 	self writeBuffer nextPut: char
     ]
 
-    nextPutAll: aString [
+    next: n putAll: aCollection startingAt: pos [
 	"Write aString to the socket; this acts as a bit-bucket when
 	 the socket is closed.  This might yield control to other
 	 Smalltalk Processes."
 
 	<category: 'stream protocol'>
 	self writeBuffer isNil ifTrue: [^self].
-	self writeBuffer nextPutAll: aString
+	self writeBuffer next: n putAll: aCollection startingAt: pos
     ]
 
     peek [
