@@ -63,10 +63,16 @@
 #include <stdio.h>
 #include <errno.h>
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 const char *program_name;
 const char *kernel_dir;
 const char *image_file;
 int flags = GST_NO_TTY;
+int run_as_daemon;
+int usage;
 
 struct tool {
   const char *name;
@@ -118,6 +124,12 @@ struct tool tools[] = {
     "gst-doc", "scripts/GenDoc.st",
     "-h|--help --version -p|--package: -f|--file: -I|--image-file: \
         -n|--namespace: -o|--output: --kernel-directory:",
+    NULL
+  },
+  {
+    "gst-remote", "scripts/Remote.st",
+    "-h|--help --version --daemon --server -p|--port -f|--file: -e|--eval: \
+        --pid --kill --snapshot:: -I|--image-file: --kernel-directory:",
     NULL
   },
   { NULL, NULL, NULL, NULL }
@@ -243,7 +255,61 @@ parse_option (int short_opt, const char *long_opt, const char *arg)
 	option_error ("duplicate --kernel-directory option");
       kernel_dir = arg;
     }
+
+  if (long_opt && !strcmp (long_opt, "daemon"))
+    {
+#ifdef HAVE_FORK
+      run_as_daemon = 1;
+#else
+      fprintf (stderr, "Daemon operation not supported.");
+      exit (77);
+#endif
+    }
+
+  if (long_opt && !strcmp (long_opt, "version"))
+    usage = 1;
+
+  if (short_opt == 'h'
+      || (long_opt && !strcmp (long_opt, "help")))
+    usage = 1;
 }
+
+#ifdef HAVE_FORK
+static void
+fork_daemon (void)
+{
+  int child_pid;
+
+#ifdef SIGHUP
+  signal (SIGHUP, SIG_IGN);
+#endif
+
+  child_pid = fork();
+  if (child_pid < 0)
+    {
+      perror("Failed to fork daemon");
+      exit(1);
+    }
+
+  /* Stop parent.  */
+  if (child_pid != 0)
+    exit (0);
+
+  /* Detach and spawn server.
+     Create a new SID for the child process */
+#ifdef HAVE_SETSID
+  if (setsid() < 0)
+    {
+      perror("setsid failed");
+      exit(1);
+    }
+#endif
+
+#ifdef SIGHUP
+  signal (SIGHUP, SIG_DFL);
+#endif
+}
+#endif
 
 int
 parse_short_options (const char *name, const char *arg)
@@ -394,6 +460,11 @@ main(int argc, const char **argv)
 
   setup_options (tools[i].options);
   parse_options (&argv[1]);
+
+#ifdef HAVE_FORK
+  if (run_as_daemon && !usage)
+    fork_daemon ();
+#endif
 
   if (tools[i].force_opt)
     {

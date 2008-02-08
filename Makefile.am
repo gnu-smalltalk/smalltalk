@@ -118,7 +118,8 @@ gst_tool_LDADD = libgst/libgst.la lib-src/library.la
 gst_tool_DEPENDENCIES = libgst/libgst.la lib-src/library.la
 gst_tool_LDFLAGS = -export-dynamic
 
-GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package gst-convert gst-doc
+GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package gst-convert \
+	gst-doc gst-remote
 
 uninstall-local::
 	@for i in gst-load $(GST_EXTRA_TOOLS); do \

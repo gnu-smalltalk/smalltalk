@@ -1,4 +1,10 @@
 2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
+            Mike Anderson  <gnu-smalltalk@gingerbread.plus.com>
+
+	* scripts/Remote.st: New.
+	* gst-tool.c: Handle --daemon option.
+
+2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Print error messages on the Transcript.
 

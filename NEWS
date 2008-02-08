@@ -8,7 +8,11 @@ o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
     snapshot.  Note that this does not apply to CallinProcesses, since
     those are stopped in saved images (will this be true in 3.1?).
 
+o   New tool gst-remote allows remote control of a GNU Smalltalk VM
+    via a TCP socket.
+
 o   Unbuffered sockets available from class TCP.StreamSocket.
+
 
 New goodies:
 
