@@ -304,7 +304,8 @@ STInST.STFileInParser subclass: GSTFileInParser [
              selector: #methodsFor:
              argument: nil.
         
-        self compile: methodNode
+        self compile: methodNode.
+	self endMethodList.
     ]
     
     parseInstanceVariables: node add: addThem [
