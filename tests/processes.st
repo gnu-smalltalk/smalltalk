@@ -220,3 +220,20 @@ Eval [
     ^s signals = 0
 ]
 
+"Test that processes with the same priority are executed fairly.  See
+ http://permalink.gmane.org/gmane.comp.lang.smalltalk.squeak.general/122772
+ for a proposed patch to Squeak that would break this testcase.
+ The two producer processes would ping-pong control to each other,
+ and the delay won't even be started."
+Eval [
+    | queue stop s |
+    queue := SharedQueue new.
+    stop := false.
+    s := Semaphore new.
+    [ s signal.
+      [ stop ] whileFalse: [ queue nextPut: true. Processor yield ] ] fork.
+    s wait.
+    [ (Delay forMilliseconds: 500) wait. stop := true ] fork.
+    [ stop ] whileFalse: [ queue nextPut: false. Processor yield ].
+]
+
