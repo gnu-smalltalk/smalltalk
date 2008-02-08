@@ -1,3 +1,8 @@
+2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/processes.st: Test that processes with the same priority
+	are scheduled fairly.
+
 2008-02-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Don't fail in #copyUpTo: if the character
