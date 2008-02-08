@@ -180,7 +180,7 @@ server ifTrue: [
 	commands do: [ :each |
 	    s nextPutAll: each; nextPut: $<0>; flush.
 	    [ s peekFor: $<0> ] whileFalse: [
-		stdout nextPut: s next; flush.
+		stdout nextPut: s next.
 		s available
 		    ifFalse: [ stdout flush ].
 		s isPeerAlive
@@ -190,13 +190,13 @@ server ifTrue: [
 ]
     on: Error
     do: [ :ex |
+	stdout flush.
 	s isPeerAlive ifFalse: [ s close. ex return ].
         ('gst-remote: ', ex messageText, '
 ') displayOn: stderr.
+	stderr flush.
         "ex pass."
-	server
-	    ifTrue: [ stderr flush ]
-	    ifFalse: [ ObjectMemory quit: 1 ] ].
+	server ifFalse: [ ObjectMemory quit: 1 ] ].
 
 server
     ifTrue: [ Processor activeProcess suspend ]

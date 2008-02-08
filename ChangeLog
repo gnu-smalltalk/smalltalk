@@ -1,4 +1,8 @@
 2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Remote.st: Fix flushing of stdout.
+
+2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
             Mike Anderson  <gnu-smalltalk@gingerbread.plus.com>
 
 	* scripts/Remote.st: New.
