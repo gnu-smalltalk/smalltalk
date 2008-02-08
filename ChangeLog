@@ -1,3 +1,7 @@
+2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ExcHandling.st: Print error messages on the Transcript.
+
 2008-02-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Don't fail in #copyUpTo: if the character

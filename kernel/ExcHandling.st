@@ -751,8 +751,7 @@ Object extend [
 
 	<category: 'built ins'>
 	| debugger debuggerClass context |
-	Transcript initialize.
-	stdout flush.
+	Transcript flush.
 	debugger := Processor activeDebugger.
 	debugger isNil ifFalse: [^debugger stopInferior: message].
 	debuggerClass := thisContext debuggerClass.
@@ -761,7 +760,7 @@ Object extend [
 
 	"Default behavior - print backtrace"
 	RegressionTesting ifFalse: [self basicPrint].
-	stdout
+	Transcript
 	    nextPutAll: ' error: ';
 	    display: message;
 	    nl.
@@ -771,7 +770,6 @@ Object extend [
 		[context isInternalExceptionHandlingContext] 
 		    whileTrue: [context := context parentContext].
 		context backtraceOn: stdout].
-	stdout flush.
 	ContextPart unwind
     ]
 
