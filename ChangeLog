@@ -1,5 +1,10 @@
 2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Remote.st: Ignore errors on the server side, to allow a
+	computation to be interrupted by ^C-ing the client-side.
+
+2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Remote.st: Fix flushing of stdout.
 
 2008-02-08  Paolo Bonzini  <bonzini@gnu.org>

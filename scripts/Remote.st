@@ -49,15 +49,21 @@ TextCollector subclass: MultiplexingTextCollector [
     ]
 
     unregister [
-	semaphore critical: [ outputs removeKey: Processor activeProcess ]
+	semaphore critical: [
+	    outputs removeKey: Processor activeProcess ifAbsent: [] ]
     ]
 
     primNextPutAll: aString [
         | dest |
         dest := outputs at: Processor activeProcess ifAbsent: [ nil ].
 	dest isNil
-	    ifTrue: [ super primNextPutAll: aString ]
-	    ifFalse: [ dest nextPutAllFlush: aString ]
+	    ifFalse: [
+		[ dest nextPutAllFlush: aString ]
+		    ifCurtailed: [
+			self unregister.
+			Processor activeProcess terminate ] ]
+
+	    ifTrue: [ super primNextPutAll: aString ].
     ]
 ]
 
@@ -140,26 +146,32 @@ Smalltalk
 server ifTrue: [
     PackageLoader fileInPackage: 'Compiler'.
     "PackageLoader fileInPackage: 'Swazoo'."
-    s := TCP.ServerSocket port: port bindTo: host.
     Transcript := MultiplexingTextCollector message: Transcript message.
     [
+	| s |
+	s := TCP.ServerSocket port: port bindTo: host.
 	[
 	    [
 		s waitForConnection.
-		conn := s accept.
 		[
-		    [ conn isPeerAlive ] whileTrue: [
+		    | conn |
+		    conn := s accept.
+		    [[
 			Transcript register: conn.
-			Behavior
-			    evaluate: (conn upTo: $<0>)
-			    to: nil
-			    ifError: [ :fname :line :msg |
-				conn nextPutAll: ('Error at line %1: %2
+		        [ conn isPeerAlive ] whileTrue: [
+			    Behavior
+			        evaluate: (conn upTo: $<0>)
+			        to: nil
+			        ifError: [ :fname :line :msg |
+				    conn nextPutAll: ('gst-remote: error at line %1: %2
 ' % { line. msg }) ].
-			conn nextPut: $<0>; flush.
-			Transcript unregister.
-		    ].
-		    [ conn close ] on: Error do: [ :ex | ex return ]
+			    conn nextPut: $<0>; flush ] ]
+			on: Error
+			do: [ :ex | ex return ]]
+
+			    ensure: [
+				Transcript unregister.
+				conn close ]
 		] fork
 	    ] repeat
 	]
@@ -173,6 +185,7 @@ server ifTrue: [
     Transcript nextPutAll: 'gst-remote server started.'; nl ].
 
 [
+    | s |
     commands isEmpty ifFalse: [
 	s := host isNil
 	    ifTrue: [ TCP.Socket remote: TCP.IPAddress anyLocalAddress port: port ]
@@ -181,20 +194,20 @@ server ifTrue: [
 	    s nextPutAll: each; nextPut: $<0>; flush.
 	    [ s peekFor: $<0> ] whileFalse: [
 		stdout nextPut: s next.
-		s available
-		    ifFalse: [ stdout flush ].
-		s isPeerAlive
-		    ifFalse: [ self nextPutAll: 'gst-remote: server unavailable' ] ]
-	].
+		s available ifFalse: [ stdout flush ] ] ].
 	s close ]
 ]
     on: Error
-    do: [ :ex |
+    do: [ :ex || msg |
 	stdout flush.
-	s isPeerAlive ifFalse: [ s close. ex return ].
-        ('gst-remote: ', ex messageText, '
+	msg := (s notNil and: [ s isPeerAlive not ])
+	    ifTrue: [ 'server unavailable' ]
+	    ifFalse: [ ex messageText ].
+
+        ('gst-remote: ', msg, '
 ') displayOn: stderr.
 	stderr flush.
+	s isNil ifFalse: [ s close ].
         "ex pass."
 	server ifFalse: [ ObjectMemory quit: 1 ] ].
 
