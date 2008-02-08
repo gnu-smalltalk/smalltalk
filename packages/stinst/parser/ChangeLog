@@ -1,3 +1,8 @@
+2008-02-08  Stephen Compall  <scompall@nocandysw.com>
+
+	* GSTParser.st: Always reverse a #methodsFor: with an
+	#endMethodList when compiling new-syntax methods.
+
 2008-02-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* SqueakParser.st: Fix parsing of binary message at end of chunk.
