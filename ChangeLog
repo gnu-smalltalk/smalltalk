@@ -1,5 +1,10 @@
 2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Remote.st: Close transcript before quitting, send
+	file contents instead of filing in remotely.
+
+2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Remote.st: Ignore errors on the server side, to allow a
 	computation to be interrupted by ^C-ing the client-side.
 

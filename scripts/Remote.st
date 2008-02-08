@@ -115,8 +115,7 @@ Smalltalk
 	port := arg asInteger ].
 
     opt = 'file' ifTrue: [
-	commands add: 'FileStream fileIn: ',
-		      (Directory append: arg to: Directory working) storeString ].
+	commands add: (File name: arg) ].
 
     opt = 'eval' ifTrue: [
 	commands add: arg ].
@@ -125,7 +124,7 @@ Smalltalk
 	commands add: 'Smalltalk getpid printNl' ].
 
     opt = 'kill' ifTrue: [
-	commands add: 'ObjectMemory quit: 0' ].
+	commands add: 'Transcript nextPut: $<0>. ObjectMemory quit: 0' ].
 
     opt = 'snapshot' ifTrue: [
 	arg isNil
@@ -148,14 +147,14 @@ server ifTrue: [
     "PackageLoader fileInPackage: 'Swazoo'."
     Transcript := MultiplexingTextCollector message: Transcript message.
     [
-	| s |
-	s := TCP.ServerSocket port: port bindTo: host.
+	| queue |
+	queue := TCP.ServerSocket port: port bindTo: host.
 	[
 	    [
-		s waitForConnection.
+		queue waitForConnection.
 		[
 		    | conn |
-		    conn := s accept.
+		    conn := queue accept.
 		    [[
 			Transcript register: conn.
 		        [ conn isPeerAlive ] whileTrue: [
@@ -185,13 +184,15 @@ server ifTrue: [
     Transcript nextPutAll: 'gst-remote server started.'; nl ].
 
 [
-    | s |
     commands isEmpty ifFalse: [
 	s := host isNil
 	    ifTrue: [ TCP.Socket remote: TCP.IPAddress anyLocalAddress port: port ]
 	    ifFalse: [ TCP.Socket remote: host port: port ].
+
 	commands do: [ :each |
-	    s nextPutAll: each; nextPut: $<0>; flush.
+	    "Using #readStream" makes it work both for Strings and Files."
+	    s nextPutAll: each readStream; nextPut: $<0>; flush.
+
 	    [ s peekFor: $<0> ] whileFalse: [
 		stdout nextPut: s next.
 		s available ifFalse: [ stdout flush ] ] ].
