@@ -1,3 +1,7 @@
+2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* StartCompiler.st: Fix typo in message #parseSmalltalk:with:onError:.
+
 2007-11-05  Stephen Compall  <scompall@nocandysw.com>
 
 	* StartCompiler.st: Answer the method node from the driver's
