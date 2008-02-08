@@ -1,3 +1,7 @@
+2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Sockets.st: Add #isPeerAlive to AbstractSocket.
+
 2008-02-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Sockets.st: Move some methods up to AbstractSocket, create
