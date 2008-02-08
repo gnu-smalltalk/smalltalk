@@ -166,6 +166,14 @@ Stream subclass: AbstractSocket [
 	self implementation ensureReadable
     ]
 
+    isPeerAlive [
+	"Answer whether the connection with the peer remote machine is still
+	 valid."
+
+	<category: 'accessing'>
+	^self implementation isOpen
+    ]
+	
     available [
 	"Answer whether there is data available on the socket."
 
@@ -1116,7 +1124,7 @@ AbstractSocket subclass: Socket [
 	"Flush the write buffer to the operating system"
 
 	<category: 'stream protocol'>
-	self writeBuffer notNil ifTrue: [
+	self isPeerAlive ifTrue: [
 	    self implementation valueWithoutBuffering: [
 		self writeBuffer flush]]
     ]
@@ -1126,7 +1134,7 @@ AbstractSocket subclass: Socket [
 	 valid."
 
 	<category: 'stream protocol'>
-	^self readBuffer notNil
+	^self readBuffer notNil and: [ super isPeerAlive ]
     ]
 
     next [
