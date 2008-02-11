@@ -226,7 +226,32 @@ operation INVALID arg ( -- ) {
 }
 
 operation PLUS_SPECIAL ( op1 op2 -- op ) {
-  INTERP_BASIC_OP (op, op1, op2, iarg1 += iarg2, farg1 + farg2);
+  if COMMON (ARE_INTS(op1, op2))
+    {
+      intptr_t iop1 = (intptr_t) op1;
+      intptr_t iop2 = ((intptr_t) op2) - 1;
+      intptr_t iresult = iop1 + iop2;
+      if (iresult < iop1)
+        {
+	  if (iop2 < 0)
+	    {
+	      op = (OOP) iresult;
+	      break;
+	    }
+        }
+      else
+        {
+	  if (iop2 >= 0)
+	    {
+	      op = (OOP) iresult;
+	      break;
+	    }
+        }
+    }
+  else if COMMON ((IS_INT (op1) || OOP_CLASS(op1) == _gst_floatd_class)
+                  && (IS_INT (op2) || OOP_CLASS(op2) == _gst_floatd_class))
+    RAW_FLOATD_OP(op, op1, op2, farg1 + farg2);
+
   PREPARE_STACK ();
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[PLUS_SPECIAL].symbol, 1);
@@ -235,7 +260,32 @@ operation PLUS_SPECIAL ( op1 op2 -- op ) {
 }
 
 operation MINUS_SPECIAL ( op1 op2 -- op ) {
-  INTERP_BASIC_OP (op, op1, op2, iarg1 -= iarg2, farg1 - farg2);
+  if COMMON (ARE_INTS(op1, op2))
+    {
+      intptr_t iop1 = (intptr_t) op1;
+      intptr_t iop2 = ((intptr_t) op2) - 1;
+      intptr_t iresult = iop1 - iop2;
+      if (iresult < iop1)
+        {
+	  if (iop2 >= 0)
+	    {
+	      op = (OOP) iresult;
+	      break;
+	    }
+        }
+      else
+        {
+	  if (iop2 < 0)
+	    {
+	      op = (OOP) iresult;
+	      break;
+	    }
+        }
+    }
+  else if COMMON ((IS_INT (op1) || OOP_CLASS(op1) == _gst_floatd_class)
+                  && (IS_INT (op2) || OOP_CLASS(op2) == _gst_floatd_class))
+    RAW_FLOATD_OP(op, op1, op2, farg1 - farg2);
+
   PREPARE_STACK ();
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[MINUS_SPECIAL].symbol, 1);
