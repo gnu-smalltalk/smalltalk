@@ -1,5 +1,10 @@
 2008-02-11  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/oop.c: Move inclusion of sigsegv.h...
+	* libgst/gstpriv.h: ... here.
+
+2008-02-11  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/vm.def: Microoptimization of + and - (avoid shifts).
 	* libgst/gstpriv.h: Microoptimization of integer overflow detection.
 
