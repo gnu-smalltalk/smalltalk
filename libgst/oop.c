@@ -54,10 +54,6 @@
 
 #include "gstpriv.h"
 
-#ifdef HAVE_SIGSEGV_H
-#include "sigsegv.h"
-#endif
-
 #define	K		1024
 #define INIT_NUM_INCUBATOR_OOPS   50
 #define INCUBATOR_CHUNK_SIZE	  20

@@ -106,6 +106,10 @@
 #include <inttypes.h>
 #endif
 
+#ifdef HAVE_SIGSEGV_H
+#include "sigsegv.h"
+#endif
+
 #include "gst.h"
 
 /* Convenience macros to test the versions of GCC.  Note - they won't
