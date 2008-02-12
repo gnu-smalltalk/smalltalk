@@ -1,3 +1,7 @@
+2008-02-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sport.st: Fix namespace of FileError.
+
 2008-02-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sport.st: Use TCP.StreamSocket.
