@@ -411,6 +411,26 @@ some access and manipulation methods.'>
 	    ifAbsent: [^0]
     ]
 
+    identityIndexOfLast: anElement ifAbsent: exceptionBlock [
+	"Answer the last index which contains an object identical to anElement.
+	 Invoke exceptionBlock and answer its result if no item is found"
+
+	<category: 'basic'>
+	self size to: 1 by: -1
+	    do: [:index | (self at: index) == anElement ifTrue: [^index]].
+	^exceptionBlock value
+    ]
+
+    indexOfLast: anElement ifAbsent: exceptionBlock [
+	"Answer the last index which contains anElement.
+	 Invoke exceptionBlock and answer its result if no item is found"
+
+	<category: 'basic'>
+	self size to: 1 by: -1
+	    do: [:index | (self at: index) = anElement ifTrue: [^index]].
+	^exceptionBlock value
+    ]
+
     indexOf: anElement ifAbsent: exceptionBlock [
 	"Answer the index of the first occurrence of anElement in the receiver.
 	 Invoke exceptionBlock and answer its result if no item is found"
@@ -525,6 +545,22 @@ some access and manipulation methods.'>
 	anIndex to: stopIndex do: [:index | self at: index put: replacementObject]
     ]
 
+    copyAfter: anObject [
+	"Answer a new collection holding all the elements of the receiver
+	 after the first occurrence of anObject, up to the last."
+
+	<category: 'copying SequenceableCollections'>
+	^self copyFrom: (self indexOf: anObject ifAbsent: [self size]) + 1
+    ]
+
+    copyAfterLast: anObject [
+	"Answer a new collection holding all the elements of the receiver
+	 after the last occurrence of anObject, up to the last."
+
+	<category: 'copying SequenceableCollections'>
+	^self copyFrom: (self indexOfLast: anObject ifAbsent: [self size]) + 1
+    ]
+
     copyUpTo: anObject [
 	"Answer a new collection holding all the elements of the receiver
 	 from the first up to the first occurrence of anObject, excluded."
@@ -532,6 +568,16 @@ some access and manipulation methods.'>
 	<category: 'copying SequenceableCollections'>
 	^self copyFrom: 1
 	    to: (self indexOf: anObject
+		    ifAbsent: [self size + 1]) - 1
+    ]
+
+    copyUpToLast: anObject [
+	"Answer a new collection holding all the elements of the receiver
+	 from the first up to the last occurrence of anObject, excluded."
+
+	<category: 'copying SequenceableCollections'>
+	^self copyFrom: 1
+	    to: (self indexOfLast: anObject
 		    ifAbsent: [self size + 1]) - 1
     ]
 
