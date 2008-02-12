@@ -386,6 +386,15 @@ of objects.'>
 	^true
     ]
 
+    noneSatisfy: aBlock [
+	"Search the receiver for an element for which aBlock returns true.
+	 Answer true if none does, false otherwise."
+
+	<category: 'enumeration'>
+	self do: [:element | (aBlock value: element) ifTrue: [^false]].
+	^true
+    ]
+
     anySatisfy: aBlock [
 	"Search the receiver for an element for which aBlock returns true.
 	 Answer true if some does, false otherwise."
