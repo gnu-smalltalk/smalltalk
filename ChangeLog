@@ -1,5 +1,9 @@
 2008-02-12  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/SeqCollect.st: Add more methods for Seaside.
+
+2008-02-12  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Collection.st: Add #count:.
 	* kernel/DirMessage.st: Implement more creation messages.
 	* kernel/Number.st: Modify #coerce: so as to not return Fractions if
