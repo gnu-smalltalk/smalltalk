@@ -777,8 +777,10 @@ mul_powl (long double mant,
       k <<= 1;
     }
 
-  mant = (n < 0) ? mant / result : mant * result;
-  return ldexpl (mant, exp * n);
+  if (n < 0)
+    return ldexpl (mant, exp * n) / result;
+  else
+    return ldexpl (mant * result, exp * n);
 }
 
 int
