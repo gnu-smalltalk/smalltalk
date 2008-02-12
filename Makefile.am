@@ -123,15 +123,15 @@ GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package gst-convert \
 
 uninstall-local::
 	@for i in gst-load $(GST_EXTRA_TOOLS); do \
-	  echo rm -f "$(DESTDIR)$(bindir)/$$i"; \
-	  rm -f "$(DESTDIR)$(bindir)/$$i"; \
+	  echo rm -f "$(DESTDIR)$(bindir)/$$i$(EXEEXT)"; \
+	  rm -f "$(DESTDIR)$(bindir)/$$i$(EXEEXT)"; \
 	done
 
 install-exec-hook::
 	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL) gst-tool "$(DESTDIR)$(bindir)/gst-load"
 	@for i in $(GST_EXTRA_TOOLS); do \
-	  echo $(LN) -f "$(DESTDIR)$(bindir)/gst-load" "$(DESTDIR)$(bindir)/$$i"; \
-	  $(LN) -f "$(DESTDIR)$(bindir)/gst-load" "$(DESTDIR)$(bindir)/$$i"; \
+	  echo $(LN) -f "$(DESTDIR)$(bindir)/gst-load$(EXEEXT)" "$(DESTDIR)$(bindir)/$$i$(EXEEXT)"; \
+	  $(LN) -f "$(DESTDIR)$(bindir)/gst-load$(EXEEXT)" "$(DESTDIR)$(bindir)/$$i$(EXEEXT)"; \
 	done
 
 nodist_noinst_HEADERS = config.h
