@@ -139,10 +139,10 @@ struct tool tools[] = {
    Does not support canonical option names, otherwise it is pretty
    complete.  */
  
-struct option {
+struct long_option {
   char arg;
   const char *name;
-  struct option *next;
+  struct long_option *next;
 };
 
 #define OPT_NONE	0
@@ -150,7 +150,7 @@ struct option {
 #define OPT_OPTIONAL	2
 
 char short_opts[1 << (sizeof (char) * 8)];
-struct option *long_opts;
+struct long_option *long_opts;
 
 void
 option_error (const char *s, ...)
@@ -203,7 +203,7 @@ setup_option (char *p, char *end)
 
       if (long_opt)
 	{
-	  struct option *opt = malloc (sizeof (struct option));
+	  struct long_option *opt = malloc (sizeof (struct long_option));
 	  opt->name = strdup (long_opt);
 	  opt->arg = arg;
 	  opt->next = long_opts;
@@ -340,7 +340,7 @@ parse_short_options (const char *name, const char *arg)
 int
 parse_long_option (const char *name, const char *arg)
 {
-  struct option *all_opts, *opt = NULL;
+  struct long_option *all_opts, *opt = NULL;
   int num_matches = 0;
   int len;
   const char *p = strchr (name, '=');

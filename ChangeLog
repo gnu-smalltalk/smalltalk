@@ -1,5 +1,9 @@
 2008-02-12  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gst-tool.c: Rename "struct option".
+
+2008-02-12  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Collection.st: Add #noneSatisfy:.
 
 2008-02-12  Paolo Bonzini  <bonzini@gnu.org>
