@@ -43,6 +43,7 @@ implicit type coercing code for binary operations.'>
 	"Answer aNumber - whatever class it belongs to, it is good"
 
 	<category: 'converting'>
+	aNumber class == Fraction ifTrue: [ ^aNumber asFloatD ].
 	^aNumber
     ]
 
@@ -62,7 +63,7 @@ implicit type coercing code for binary operations.'>
 	ch = $. 
 	    ifFalse: 
 		[aStream skip: -1.
-		^value].
+		^self coerce: value].
 	
 	[aStream atEnd ifTrue: [^self coerce: value].
 	(ch := aStream next) isDigit] 
@@ -116,9 +117,10 @@ implicit type coercing code for binary operations.'>
     ]
 
     coerce: aNumber [
-	"Answer aNumber - whatever class it belongs to, it is good"
+	"Answer aNumber, converted to an integer or floating-point number."
 
 	<category: 'converting'>
+	aNumber class == Fraction ifTrue: [ ^aNumber asFloatD ].
 	^aNumber
     ]
 

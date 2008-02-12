@@ -366,6 +366,17 @@ of objects.'>
 	^exceptionBlock value
     ]
 
+    count: aBlock [
+	"Count the elements of the receiver for which aBlock returns true,
+	 and return their number."
+
+	<category: 'enumeration'>
+	| count |
+	count := 0.
+	self do: [:element | (aBlock value: element) ifTrue: [count := count + 1]].
+	^count
+    ]
+
     allSatisfy: aBlock [
 	"Search the receiver for an element for which aBlock returns false.
 	 Answer true if none does, false otherwise."

@@ -43,6 +43,20 @@ for a message.'>
 	self shouldNotImplement
     ]
 
+    DirectedMessage class >> receiver: anObject selector: aSymbol [
+	"Create a new instance of the receiver"
+
+	<category: 'creating instances'>
+	^(super selector: aSymbol arguments: #()) receiver: anObject
+    ]
+
+    DirectedMessage class >> receiver: anObject selector: aSymbol arguments: anArray [
+	"Create a new instance of the receiver"
+
+	<category: 'creating instances'>
+	^(super selector: aSymbol arguments: anArray) receiver: anObject
+    ]
+
     DirectedMessage class >> selector: aSymbol arguments: anArray receiver: anObject [
 	"Create a new instance of the receiver"
 
