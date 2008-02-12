@@ -562,7 +562,7 @@ Object subclass: SpExceptionContext [
 	 broken."
 
 	<category: 'native exceptions'>
-	^FileError
+	^SystemExceptions.FileError
     ]
 
     SpExceptionContext class >> for: aBlock on: anException do: exceptionBlock [
