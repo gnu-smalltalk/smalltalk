@@ -31,16 +31,15 @@
 
 
 
-String subclass: Regex [
+Object subclass: Regex [
     
     <shape: #character>
     <category: 'Collections-Text'>
     <comment: '
-A Regex is equivalent to a String, except that it is read-only and that
-the regular expression matcher caches a compiled representation of the
-most recently used Regexes, thus speeding up matching.  Regex objects
-are constructed automatically by methods that expect to match many
-times the same regular expression, but can be constructed explicitly
+A Regex is a read-only string for which the regular expression matcher
+can cache a compiled representation, thus speeding up matching.  Regex
+objects are constructed automatically by methods that expect to match many
+times the same regular expression, but can also be constructed explicitly
 sending #asRegex to a String or Symbol.
 
 Creation of Regex objects inside a loop is of course slower than creating
@@ -127,9 +126,9 @@ cache is sought for an equivalent, already constructed Regex).'>
 
 	<category: 'printing'>
 	aStream nextPut: $/.
-	self do: 
+	self asString do: 
 		[:each | 
-		each = $/ ifTrue: [aStream nextPut: $\].
+		each = $/ ifTrue: [ aStream nextPut: $\ ].
 		aStream nextPut: each].
 	aStream nextPut: $/
     ]
