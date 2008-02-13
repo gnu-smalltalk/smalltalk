@@ -192,9 +192,18 @@ size and timestamps.'>
 
     File class >> computePathFrom: srcName to: destName [
 	<category: 'private'>
-	| src dest srcComponent destComponent path |
-	src := srcName subStrings: Directory pathSeparator.
-	dest := destName subStrings: Directory pathSeparator.
+	| src dest srcCanon destCanon path |
+	"A Windows path may contain both / and \ separators. Clean it up
+	 to allow easy parsing"
+	srcCanon := Directory pathSeparator = $/ 
+		    ifTrue: [srcName]
+		    ifFalse: [srcName copyReplacing: $/ withObject: Directory pathSeparator].
+	destCanon := Directory pathSeparator = $/ 
+		    ifTrue: [destName]
+		    ifFalse: [destName copyReplacing: $/ withObject: Directory pathSeparator].
+
+	src := srcCanon subStrings: Directory pathSeparator.
+	dest := destCanon subStrings: Directory pathSeparator.
 	src := src asOrderedCollection.
 	src removeLast.
 	dest := dest asOrderedCollection.
@@ -208,7 +217,7 @@ size and timestamps.'>
 				dest removeFirst].
 			src collect: [:each | '..']].
 	path addAllLast: dest.
-	^path fold: [:a :b | a , '/' , b]
+	^path fold: [:a :b | a , Directory pathSeparatorString , b]
     ]
 
     File class >> checkError [
