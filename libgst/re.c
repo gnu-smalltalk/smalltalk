@@ -210,7 +210,7 @@ _gst_re_make_cacheable (OOP patternOOP)
   if (!regexClassOOP)
     init_re ();
 
-  if (!IS_OOP_READONLY (patternOOP))
+  if (IS_OOP_READONLY (patternOOP))
     return patternOOP;
 
   /* Search in the cache */
