@@ -1,5 +1,9 @@
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
+	* ColumnInfo.st: Improve printing.
+
+2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
+
 	* ColumnInfo.st: Add #isNullable.
 	* Connection.st: Add #database.
 

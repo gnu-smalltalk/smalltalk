@@ -77,21 +77,6 @@ ColumnInfo subclass: SQLiteColumnInfo [
 	    <category: 'accessing'>
         ^TypeNames at: (resultSet columnTypeAt: self index)
     ]
-
-    size [
-	    "Return the size of the column (abstract)."
-	    <category: 'accessing'>
-	    self notYetImplemented
-    ]
-
-    printOn: aStream [
-	    <category: 'printing'>
-	    aStream
-	        nextPutAll: self name;
-	        nextPut: $(;
-	        nextPutAll: self type;
-	        nextPut: $)
-    ]
 ]
 
 Eval [

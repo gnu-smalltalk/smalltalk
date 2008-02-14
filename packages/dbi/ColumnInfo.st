@@ -65,17 +65,29 @@ Object subclass: ColumnInfo [
     size [
 	"Return the size of the column (abstract)."
 	<category: 'accessing'>
-	self subclassResponsibility
+	^nil
     ]
 
     printOn: aStream [
 	"Print a representation of the receiver on aStream."
 	<category: 'printing'>
 	aStream
-	    nextPutAll: self name;
+	    print: self class;
 	    nextPut: $(;
-	    nextPutAll: self type;
+	    display: self;
 	    nextPut: $)
+    ]
+
+    displayOn: aStream [
+	"Print a representation of the receiver on aStream."
+	<category: 'printing'>
+	aStream
+	    nextPutAll: self name;
+	    space;
+	    nextPutAll: self type.
+	((self type includes: $( ) not and: [ self size notNil ])
+	    ifTrue: [ aStream nextPut: $(; print: self size; nextPut: $) ].
+	self isNullable ifFalse: [ aStream nextPutAll: ' not null' ].
     ]
 ]
 
