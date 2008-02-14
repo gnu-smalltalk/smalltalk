@@ -1,5 +1,13 @@
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Connection.st: Add table accessors.
+	* ResultSet.st: Documentation fix.
+	* Row.st: Add #asArray and #asDictionary.
+	* Table.st: New.
+	* TableColumnInfo.st: New.
+
+2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
+
 	* ColumnInfo.st: Improve printing.
 
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>

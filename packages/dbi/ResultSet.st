@@ -72,7 +72,7 @@ case I only hold the number of rows affected.'>
     ]
 
     columns [
-	"Answer a Dictionary of column -> index pairs (abstract)."
+	"Answer a Dictionary of column name -> ColumnInfo pairs (abstract)."
 
 	<category: 'accessing'>
 	self subclassResponsibility

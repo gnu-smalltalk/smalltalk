@@ -37,6 +37,8 @@ Object subclass: Connection [
     <category: 'DBI-Framework'>
     <comment: 'I represent a connection to a database.'>
 
+    | tables |
+
     Drivers := LookupTable new.
 
     Connection class >> updateDriverList [
@@ -93,6 +95,36 @@ Object subclass: Connection [
 	    paramConnect: info params
 	    user: aUserName
 	    password: aPassword
+    ]
+
+    >> aString [
+	"Returns a Table object corresponding to the given table."
+
+	<category: 'accessing'>
+	^self tableAt: aString
+    ]
+
+    primTableAt: aString ifAbsent: aBlock [
+	"Returns a Table object corresponding to the given table.  Should be
+	 overridden by subclasses."
+
+	<category: 'querying'>
+	self subclassResponsibility
+    ]
+
+    tableAt: aString [
+	"Returns a Table object corresponding to the given table."
+
+	<category: 'accessing'>
+	^self tableAt: aString ifAbsent: [self error: 'Unknown table: ', aString]
+    ]
+
+    tableAt: aString ifAbsent: aBlock [
+	"Returns a Table object corresponding to the given table."
+
+	<category: 'accessing'>
+	tables isNil ifTrue: [ tables := LookupTable new ].
+	^tables at: aString ifAbsentPut: [self primTableAt: aString ifAbsent: aBlock]
     ]
 
     do: aSQLQuery [

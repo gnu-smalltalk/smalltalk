@@ -11,6 +11,8 @@
   <filein>ResultSet.st</filein>
   <filein>Row.st</filein>
   <filein>Statement.st</filein>
+  <filein>Table.st</filein>
+  <filein>TableColumnInfo.st</filein>
 
   <test>
     <sunit>DBI.MySQL.DBIMySQLTestSuite</sunit>
@@ -24,5 +26,7 @@
   <file>ResultSet.st</file>
   <file>Row.st</file>
   <file>Statement.st</file>
+  <file>Table.st</file>
+  <file>TableColumnInfo.st</file>
   <file>ChangeLog</file>
 </package>

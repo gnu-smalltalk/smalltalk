@@ -15,6 +15,8 @@
   <filein>Statement.st</filein>
   <filein>Row.st</filein>
   <filein>ColumnInfo.st</filein>
+  <filein>Table.st</filein>
+  <filein>TableColumnInfo.st</filein>
   
   <file>SQLite.st</file>
   <file>Connection.st</file>
@@ -22,6 +24,8 @@
   <file>Statement.st</file>
   <file>Row.st</file>
   <file>ColumnInfo.st</file>
+  <file>Table.st</file>
+  <file>TableColumnInfo.st</file>
   
   <file>SQLiteTests.st</file>
 

@@ -57,6 +57,23 @@ Object subclass: Row [
 	self subclassResponsibility
     ]
 
+    asArray [
+	"Return the values of the columns."
+
+	<category: 'accessing'>
+	^1 to: self columns size collect: [:index | self atIndex: index]
+    ]
+
+    asDictionary [
+	"Return the names and values of the columns as a dictionary."
+
+	| d |
+	<category: 'accessing'>
+	d := LookupTable new.
+	self keysAndValuesDo: [ :key :value | d at: key put: value ].
+	^d
+    ]
+
     atIndex: aColumnIndex [
 	"Return the value of the column at the given 1-based index (abstract)."
 

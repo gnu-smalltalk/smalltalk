@@ -7,12 +7,16 @@
   <filein>Array.st</filein>
   <filein>SQL.st</filein>
   <test>
+    <prereq>DBD-SQLite</prereq>
     <filein>Tests.st</filein>
-    <sunit>ROE.RATestMapping ROE.RATestEvaluatorSemantics ROE.RATestSyntax</sunit>
+    <filein>SQLiteTests.st</filein>
+    <sunit>ROE.RATestMapping ROE.RATestEvaluatorSemantics ROE.RATestSyntax 
+	ROE.RATestSQLiteSemantics</sunit>
   </test>
 
   <file>Array.st</file>
   <file>Core.st</file>
+  <file>SQLiteTests.st</file>
   <file>SQL.st</file>
   <file>Tests.st</file>
   <file>Extensions.st</file>

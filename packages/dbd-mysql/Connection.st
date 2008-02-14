@@ -757,6 +757,19 @@ Connection subclass: MySQLConnection [
 	result at: 2 put: ((array1 at: 2) bitXor: (array2 at: 2)) \\ 1073741823.
 	^result
     ]
+
+    primTableAt: aString ifAbsent: aBlock [
+	| table |
+	[
+	    table := (MySQLTable name: aString connection: self)
+		columnsArray;
+		yourself ]
+	    on: Error
+	    do: [ :ex | ex return ].
+
+	table isNil ifTrue: [ ^aBlock value ].
+	^table
+    ]
 ]
 
 

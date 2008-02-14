@@ -108,4 +108,17 @@ Connection subclass: SQLiteConnection [
                     handle: stmtHandle;
                     queryString: aSQLQuery.
     ]
+
+    primTableAt: aString ifAbsent: aBlock [
+	| table |
+	[
+	    table := (SQLiteTable name: aString connection: self)
+		columnsArray;
+		yourself ]
+	    on: Error
+	    do: [ :ex | ex return ].
+
+	table isNil ifTrue: [ ^aBlock value ].
+	^table
+    ]
 ]

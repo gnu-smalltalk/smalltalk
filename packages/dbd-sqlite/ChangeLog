@@ -1,5 +1,11 @@
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Connection.st: Add #primTableAt:ifAbsent:.
+	* Table.st: New.
+	* TableColumnInfo.st: New.
+
+2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
+
 	* ColumnInfo.st: Remove two superfluous methods.
 
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>

@@ -1,5 +1,11 @@
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Connection.st: Add #primTableAt:ifAbsent:.
+	* Table.st: New.
+	* TableColumnInfo.st: New.
+
+2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Column.st: Add #isNullable.
 
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>

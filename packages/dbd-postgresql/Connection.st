@@ -142,10 +142,16 @@ Connection subclass: PGConnection [
     ]
 
     database [
-	<category: 'PG specific'>
+	<category: 'accessing'>
 	^handle database
     ]
 
+    primTableAt: aString ifAbsent: aBlock [
+	| table |
+	table := PGTable name: aString connection: self.
+	table columnsArray isEmpty ifTrue: [ ^aBlock value ].
+	^table
+    ]
 ]
 
 

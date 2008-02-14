@@ -8,9 +8,13 @@
   <filein>ResultSet.st</filein>
   <filein>Row.st</filein>
   <filein>ColumnInfo.st</filein>
+  <filein>Table.st</filein>
+  <filein>TableColumnInfo.st</filein>
 
   <file>Connection.st</file>
   <file>ResultSet.st</file>
   <file>Row.st</file>
   <file>ColumnInfo.st</file>
+  <file>Table.st</file>
+  <file>TableColumnInfo.st</file>
 </package>

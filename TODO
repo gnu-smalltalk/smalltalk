@@ -32,11 +32,13 @@ FileStream that only shows a segment of the file (done).
 
 * improvements to DBI
 ** refactoring and prepared statements support
-** merge ROE?
+** merge ROE (done)
 
 * cookies and redirects for HTTPClient
 
 * Seaside
+
+* Swazoo (done)
 
 * more libraries
 ** gnutls

@@ -1,6 +1,7 @@
 <package>
   <name>DBI</name>
   <namespace>DBI</namespace>
+  <prereq>ROE</prereq>
 
   <filein>ConnectionInfo.st</filein>
   <filein>Connection.st</filein>
@@ -8,6 +9,7 @@
   <filein>ResultSet.st</filein>
   <filein>Row.st</filein>
   <filein>ColumnInfo.st</filein>
+  <filein>Table.st</filein>
   <filein>FieldConverter.st</filein>
 
   <file>ConnectionInfo.st</file>
@@ -16,6 +18,7 @@
   <file>ResultSet.st</file>
   <file>Row.st</file>
   <file>ColumnInfo.st</file>
+  <file>Table.st</file>
   <file>FieldConverter.st</file>
 
   <file>ChangeLog</file>
