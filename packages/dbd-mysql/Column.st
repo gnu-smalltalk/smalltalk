@@ -331,6 +331,11 @@ ColumnInfo subclass: MySQLColumnInfo [
 	^self hasFlag: self class multipleKeyFlag
     ]
 
+    isNullable [
+	<category: 'testing'>
+	^self isNotNull not
+    ]
+
     isNotNull [
 	<category: 'testing'>
 	^self hasFlag: self class notNullFlag

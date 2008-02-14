@@ -33,7 +33,7 @@
 
 
 Connection subclass: SQLiteConnection [
-	| stmtHandles handle |
+	| dbName stmtHandles handle |
 	
 	<category: 'DBI-Drivers'>
 	<comment: 'I represent a connection to a SQLite database'>
@@ -48,12 +48,23 @@ Connection subclass: SQLiteConnection [
 		aSqlite3Handle := SQLite3DBHandle open: dbName.
 		^(self new)
 		    initializeWithHandle: aSqlite3Handle;
+		    database: dbName;
 		    yourself
 	]
 	
 	initializeWithHandle: aSqlite3Handle [ 
 	    handle := aSqlite3Handle.
 	    stmtHandles := WeakIdentitySet new.
+	]
+	
+	database: aString [
+	    <category: 'accessing'>
+	    dbName := aString
+	]
+	
+	database [
+	    <category: 'accessing'>
+	    ^dbName
 	]
 	
 	close [

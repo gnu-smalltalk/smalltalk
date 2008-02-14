@@ -1,5 +1,10 @@
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
+	* ColumnInfo.st: Add #isNullable.
+	* Connection.st: Add #database.
+
+2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Connection.st: Add methods to get FieldConverter
 	* FieldConverter.st: New.
 

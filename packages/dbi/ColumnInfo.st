@@ -49,6 +49,13 @@ Object subclass: ColumnInfo [
 	self subclassResponsibility
     ]
 
+    isNullable [
+	"Return whether the column can be NULL (always returns true in
+	 ColumnInfo)."
+	<category: 'accessing'>
+	^true
+    ]
+
     type [
 	"Return a string containing the type of the column (abstract)."
 	<category: 'accessing'>

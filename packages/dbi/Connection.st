@@ -134,6 +134,14 @@ Object subclass: Connection [
 	<category: 'accessing'>
 	^self class fieldConverterClass uniqueInstance
     ]
+
+    database [
+	"Returns the database name for this connection.  This corresponds
+	 to the catalog in SQL standard parlance (abstract)."
+
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
 ]
 
 
