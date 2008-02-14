@@ -10,7 +10,9 @@
 | Copyright 2002 Josh Miller
 | Written by Josh Miller, ported by Paolo Bonzini
 |
-| This file is part of GNU Smalltalk.
+| Copyright 2003, 2007, 2008 Free Software Foundation, Inc.
+|
+| This file is part of the GNU Smalltalk class library.
 |
 | The GNU Smalltalk class library is free software; you can redistribute it
 | and/or modify it under the terms of the GNU Lesser General Public License
