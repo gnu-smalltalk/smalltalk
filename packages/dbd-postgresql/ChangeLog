@@ -1,3 +1,8 @@
+2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Connection.st: Use Postgres-specific PGFieldConverter.
+	* FieldConverter.st: New.
+
 2007-12-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* ResultSet.st: Fix missing period.

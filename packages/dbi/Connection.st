@@ -55,6 +55,12 @@ Object subclass: Connection [
 	^nil
     ]
 
+    Connection class >> fieldConverterClass [
+	"Override this method, returning a subclass of FieldConverter, in every
+	 concrete subclass of Connection that needs it."
+	^FieldConverter
+    ]
+
     Connection class >> paramConnect: params user: aUserName password: aPassword [
 	"Connect to the database server using the parameters in params (a
 	Dictionary) and the given username and password (abstract)."
@@ -119,6 +125,14 @@ Object subclass: Connection [
 
 	<category: 'connecting'>
 	self subclassResponsibility
+    ]
+
+    fieldConverter [
+	"Returns a FieldConverter that can be used to insert Smalltalk
+	 objects into queries."
+
+	<category: 'accessing'>
+	^self class fieldConverterClass uniqueInstance
     ]
 ]
 

@@ -540,8 +540,8 @@ Object subclass: DBIMySQLTestSupport [
 			    [:type | 
 			    | valueSelector |
 			    valueSelector := mysqlValues at: type ifAbsent: #null.
-			    MySQLColumnInfo 
-				convertToMysql: ((self perform: valueSelector) value: type value: self)]);
+			    DBI.FieldConverter uniqueInstance
+				printString: ((self perform: valueSelector) value: type value: self)]);
 	    nextPut: $).
 	^writeStream contents
     ]

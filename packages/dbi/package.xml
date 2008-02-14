@@ -8,6 +8,7 @@
   <filein>ResultSet.st</filein>
   <filein>Row.st</filein>
   <filein>ColumnInfo.st</filein>
+  <filein>FieldConverter.st</filein>
 
   <file>ConnectionInfo.st</file>
   <file>Connection.st</file>
@@ -15,4 +16,7 @@
   <file>ResultSet.st</file>
   <file>Row.st</file>
   <file>ColumnInfo.st</file>
+  <file>FieldConverter.st</file>
+
+  <file>ChangeLog</file>
 </package>

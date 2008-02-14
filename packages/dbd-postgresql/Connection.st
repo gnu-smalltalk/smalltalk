@@ -43,6 +43,11 @@ Connection subclass: PGConnection [
 	^'PostgreSQL'
     ]
 
+    PGConnection class >> fieldConverterClass [
+	<category: 'initialization'>
+	^PGFieldConverter
+    ]
+
     ConnectionStatus := #(#CONNECTION_OK
 	#CONNECTION_BAD
 	#CONNECTION_STARTED
