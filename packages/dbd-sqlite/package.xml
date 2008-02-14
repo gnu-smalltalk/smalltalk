@@ -24,4 +24,6 @@
   <file>ColumnInfo.st</file>
   
   <file>SQLiteTests.st</file>
+
+  <file>ChangeLog</file>
 </package>
