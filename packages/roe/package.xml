@@ -1,0 +1,19 @@
+<package>
+  <name>ROE</name>
+  <namespace>ROE</namespace>
+
+  <filein>Extensions.st</filein>
+  <filein>Core.st</filein>
+  <filein>Array.st</filein>
+  <filein>SQL.st</filein>
+  <test>
+    <filein>Tests.st</filein>
+    <sunit>ROE.RATestMapping ROE.RATestEvaluatorSemantics ROE.RATestSyntax</sunit>
+  </test>
+
+  <file>Array.st</file>
+  <file>Core.st</file>
+  <file>SQL.st</file>
+  <file>Tests.st</file>
+  <file>Extensions.st</file>
+</package>
