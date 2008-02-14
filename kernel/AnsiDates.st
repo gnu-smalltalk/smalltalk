@@ -306,6 +306,7 @@ Date subclass: DateTime [
 
 	<category: 'time zones'>
 	| newSecs |
+	self offset asSeconds = 0 ifTrue: [ ^self ].
 	newSecs := self seconds - self offset asSeconds.
 	^newSecs < 0 
 	    ifTrue: 
