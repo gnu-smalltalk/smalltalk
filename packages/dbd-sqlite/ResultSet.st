@@ -62,7 +62,7 @@ ResultSet subclass: SQLiteResultSet [
         [ resCode := self handle exec.
           resCode = 100
         ] whileTrue: [rows addLast: 
-                        (SQLiteRow forValues: (self handle returnedRow) in: self)].
+                        (SQLiteRow forValues: self handle returnedRow copy in: self)].
         
         self handle checkError: resCode = 101.
     ]
