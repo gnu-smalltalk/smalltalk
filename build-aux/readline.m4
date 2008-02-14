@@ -47,7 +47,7 @@ EOF
         gst_cv_readline_libs="-lreadline $lib"
         test "x$with_readline" != x && test "$with_readline" != yes \
 	  && test -d "$with_readline" \
-	  && gst_cv_readline_libs="-L$with_readline $gst_readline_libs"
+	  && gst_cv_readline_libs="-L$with_readline $gst_cv_readline_libs"
         break
       fi
     done
