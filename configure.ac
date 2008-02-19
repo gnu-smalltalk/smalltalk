@@ -72,7 +72,21 @@ AM_MISSING_PROG(AUTOM4TE, autom4te, $missing_dir)
 dnl 
 dnl ------------------------------ SUBDIRS --------------------
 
-AC_CONFIG_SUBDIRS(libffi)
+AC_ARG_WITH(system-libffi,
+[  --with-system-libffi[=PATH]   use system libffi.la (search in PATH if given)],
+[], [with_system_libffi=no])
+
+if test $with_system_libffi = no; then
+  AC_CONFIG_SUBDIRS(libffi)
+  INCFFI='-I$(top_srcdir)/libffi/include -I$(top_builddir)/libffi/include'
+  LIBFFI='$(top_builddir)/libffi/libffi.la'
+elif test $with_system_libffi = yes; then
+  INCFFI= LIBFFI=-lffi
+else
+  INCFFI="-I$withval/../include" LIBFFI="-L$withval -lffi"
+fi
+AC_SUBST(INCFFI)
+AC_SUBST(LIBFFI)
 
 case $ac_configure_args in
   *--enable-subdir) ;;
@@ -87,12 +101,27 @@ AC_ARG_ENABLE(generational-gc,
         *-*-cygwin* | *-*-mingw* | ia64-*-* ) enable_generational_gc=no ;;
         *) enable_generational_gc=yes ;;
 esac])
-if test $enable_generational_gc != no; then
-  AC_CONFIG_SUBDIRS(sigsegv)
-  AC_DEFINE(HAVE_SIGSEGV_H, 1,
-    [Define to 1 if libsigsegv is being used])
+
+AC_ARG_WITH(system-libsigsegv,
+[  --with-system-libsigsegv[=PATH]   use system libsigsegv.la likewise],
+[], [with_system_libsigsegv=no])
+
+if test $enable_generational_gc = no; then
+  INCSIGSEGV= LIBSIGSEGV=
+else
+  AC_DEFINE(HAVE_SIGSEGV_H, 1, [Define to 1 if libsigsegv is being used])
+  if test $with_system_libsigsegv = no; then
+    AC_CONFIG_SUBDIRS(sigsegv)
+    INCSIGSEGV='-I$(top_srcdir)/sigsegv/src -I$(top_builddir)/sigsegv/src'
+    LIBSIGSEGV='$(top_builddir)/sigsegv/src/libsigsegv.la'
+  elif test $with_system_libsigsegv = yes; then
+    INCSIGSEGV= LIBSIGSEGV=-lsigsegv
+  else
+    INCSIGSEGV="-I$withval/../include" LIBSIGSEGV="-L$withval -lsigsegv"
+  fi
 fi
-AM_CONDITIONAL(HAVE_SIGSEGV, test "$enable_generational_gc" != no)
+AC_SUBST(INCSIGSEGV)
+AC_SUBST(LIBSIGSEGV)
 
 AC_ARG_WITH(imagedir,
 [  --with-imagedir=PATH   path where to place the system image
