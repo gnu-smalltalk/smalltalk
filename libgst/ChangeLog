@@ -1,3 +1,7 @@
+2008-02-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Don't specify the path to ffi.h.
+
 2008-02-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/re.c: Don't convert read-only strings to Regexes,
