@@ -7,17 +7,12 @@ AM_YFLAGS = -vy
 AM_CPPFLAGS = -DKERNEL_PATH=\"$(pkgdatadir)/kernel\" \
   -DIMAGE_PATH=\"$(imagedir)\" -DMODULE_PATH=\"$(pkglibdir)\" \
   -DLIBEXEC_PATH=\"$(libexecdir)/$(PACKAGE)\" \
-  -I$(top_srcdir)/lib-src -I$(top_srcdir)/libffi/include \
-  -I$(top_builddir)/libffi/include $(INCLIGHTNING) \
-  @INCSNPRINTFV@ $(INCSIGSEGV) -I$(top_builddir)/lib-src
+  -I$(top_srcdir)/lib-src $(INCFFI) $(INCLIGHTNING) \
+  $(INCSNPRINTFV) $(INCSIGSEGV) -I$(top_builddir)/lib-src
 
 if !HAVE_INSTALLED_LIGHTNING
 AM_CPPFLAGS += -I$(top_srcdir)/lightning -I$(top_builddir)/lightning \
   -I$(top_srcdir) -I$(top_builddir)
-endif
-
-if HAVE_SIGSEGV
-AM_CPPFLAGS += -I$(top_srcdir)/sigsegv/src -I$(top_builddir)/sigsegv/src
 endif
 
 include_HEADERS = gstpub.h gst.h
@@ -28,15 +23,9 @@ CLEANFILES = genprims$(EXEEXT) genbc$(EXEEXT) genvm$(EXEEXT)
 # definitions for libgst.la
 
 libgst_la_LIBADD=$(top_builddir)/lib-src/library.la \
-	$(top_builddir)/libffi/libffi.la @LIBSNPRINTFV@ @LIBREADLINE@ @LIBGMP@
+	$(LIBSIGSEGV) $(LIBFFI) $(LIBSNPRINTFV) $(LIBREADLINE) $(LIBGMP)
 
-libgst_la_DEPENDENCIES=$(top_builddir)/lib-src/library.la \
-	$(top_builddir)/libffi/libffi.la @LIBSNPRINTFV@
-
-if HAVE_SIGSEGV
-libgst_la_LIBADD += $(top_builddir)/sigsegv/src/libsigsegv.la
-libgst_la_DEPENDENCIES += $(top_builddir)/sigsegv/src/libsigsegv.la
-endif
+libgst_la_DEPENDENCIES=$(top_builddir)/lib-src/library.la @LIBSNPRINTFV@
 
 libgst_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined \
 	-export-symbols-regex "^gst_.*"
