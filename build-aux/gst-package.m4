@@ -97,7 +97,7 @@ EOF
       [(for i in $4; do
 	eval ac_var='${'$i'-bad}'
 	case "$ac_var" in
-	  no | 'not found' )
+	  no* )
 	    exit 1 ;;
 	  bad )
 	    AC_MSG_WARN([variable $i not set, proceeding as if \"no\"])
