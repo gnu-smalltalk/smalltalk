@@ -55,7 +55,7 @@
 #include "gstpriv.h"
 #include "re.h"
 
-#include "../libffi/include/ffi.h"
+#include "ffi.h"
 #include <ltdl.h>
 
 typedef struct symbol_type_map
