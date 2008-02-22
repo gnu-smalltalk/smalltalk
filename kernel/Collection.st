@@ -377,6 +377,19 @@ of objects.'>
 	^count
     ]
 
+    gather: aBlock [
+	"Answer a new instance of a Collection containing all the results
+	 of evaluating aBlock, joined together.  aBlock should return
+	 collections.  The result is the same kind of the receiver,
+	 independent of the type of collection returned by aBlock."
+
+	<category: 'enumeration'>
+	| newCollection |
+	newCollection := self copyEmptyForCollect.
+	self do: [:element | newCollection addAll: (aBlock value: element)].
+	^newCollection
+    ]
+
     allSatisfy: aBlock [
 	"Search the receiver for an element for which aBlock returns false.
 	 Answer true if none does, false otherwise."
