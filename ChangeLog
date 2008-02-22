@@ -1,3 +1,8 @@
+2008-02-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Collection.st: Add #gather:.
+	* kernel/ArrayColl.st: Likewise.
+
 2008-02-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Regex.st: Make Regex a subclass of Object.
