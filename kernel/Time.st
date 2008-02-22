@@ -56,10 +56,16 @@ time value, and a block execution timing facility.'>
 	"Answer a time representing the current time of day in Coordinated
 	 Universal Time (UTC)"
 
-	"\\ rounds towards -infinity, so it is good for negative numbers too"
-
 	<category: 'basic (UTC)'>
 	^self new setSeconds: self utcSecondClock
+    ]
+
+    Time class >> midnight [
+	"Answer a time representing midnight in Coordinated
+	 Universal Time (UTC)"
+
+	<category: 'basic (UTC)'>
+	^self new setSeconds: 0
     ]
 
     Time class >> timezoneBias [
@@ -333,15 +339,24 @@ time value, and a block execution timing facility.'>
 	^seconds
     ]
 
-    addTime: timeAmount [
+    addSeconds: timeAmount [
 	"Answer a new Time that is timeAmount seconds after the receiver"
+
+	<category: 'arithmetic'>
+	^Time new setSeconds: seconds + timeAmount
+    ]
+
+    addTime: timeAmount [
+	"Answer a new Time that is timeAmount seconds after the receiver;
+	 timeAmount is a Time."
 
 	<category: 'arithmetic'>
 	^Time new setSeconds: seconds + timeAmount asSeconds
     ]
 
     subtractTime: timeAmount [
-	"Answer a new Time that is timeAmount seconds before the receiver"
+	"Answer a new Time that is timeAmount seconds before the receiver;
+	 timeAmount is a Time."
 
 	<category: 'arithmetic'>
 	^Time new setSeconds: seconds - timeAmount asSeconds
