@@ -93,6 +93,18 @@ certain special cases.'>
 	^aCollection
     ]
 
+    associations [
+	"Returns the content of a Dictionary as a Set of Associations."
+
+	<category: 'accessing'>
+	| array i |
+	array := Array new: self size.
+	i := 0.
+	self associationsDo: [ :each |
+	    array at: (i := i + 1) put: each ].
+	^array
+    ]
+
     at: key put: value [
 	"Store value as associated to the given key"
 

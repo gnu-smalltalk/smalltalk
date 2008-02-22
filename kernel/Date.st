@@ -385,6 +385,13 @@ method.'>
 	^self days
     ]
 
+    - aDate [
+	"Answer a new Date pointing dayCount before the receiver"
+
+	<category: 'basic'>
+	^Duration days: self days - aDate days
+    ]
+
     addDays: dayCount [
 	"Answer a new Date pointing dayCount past the receiver"
 

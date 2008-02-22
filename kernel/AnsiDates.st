@@ -52,14 +52,34 @@ Date subclass: DateTime [
     ]
 
     DateTime class >> fromDays: days seconds: secs offset: ofs [
-	"Answer a DateTime denoting the d-th day of the given (as a number)
-	 month and year. Set the offset field to ofs (a Duration), and
-	 the the time part to the given hour, minute, and second"
+	"Answer a DateTime denoting the given date (as days since
+	 January 1, 1901) and time (as seconds since midnight). Set the
+	 offset field to ofs (a Duration)."
 
 	<category: 'instance creation (non-ANSI)'>
 	^(self fromDays: days)
 	    setSeconds: secs;
 	    setOffset: ofs
+    ]
+
+    DateTime class >> date: aDate time: aTime offset: ofs [
+	"Answer a DateTime denoting the given date and time. Set the
+	 offset field to ofs (a Duration)."
+
+	<category: 'instance creation (non-ANSI)'>
+	^(self fromDays: aDate days)
+	    setSeconds: aTime asSeconds;
+	    setOffset: ofs
+    ]
+
+    DateTime class >> date: aDate time: aTime [
+	"Answer a DateTime denoting the given date and time. Set the
+	 offset field to ofs (a Duration)."
+
+	<category: 'instance creation (non-ANSI)'>
+	^(self fromDays: aDate days)
+	    setSeconds: aTime asSeconds;
+	    setOffset: Duration zero
     ]
 
     DateTime class >> readFrom: aStream [
