@@ -50,6 +50,13 @@ for a message.'>
 	^(super selector: aSymbol arguments: #()) receiver: anObject
     ]
 
+    DirectedMessage class >> receiver: receiverObject selector: aSymbol argument: argumentObject [
+	"Create a new instance of the receiver"
+
+	<category: 'creating instances'>
+	^(super selector: aSymbol argument: argumentObject) receiver: receiverObject
+    ]
+
     DirectedMessage class >> receiver: anObject selector: aSymbol arguments: anArray [
 	"Create a new instance of the receiver"
 

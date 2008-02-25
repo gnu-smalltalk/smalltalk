@@ -1,3 +1,8 @@
+2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/DirMessage.st: Add #receiver:selector:argument:.
+	* kernel/Message.st: Add #selector:argument:.
+
 2008-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiDates.st: Add #date:time:offset:, #date:time:.
