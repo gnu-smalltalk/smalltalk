@@ -347,7 +347,7 @@ Behavior extend [
 	(self compilerClass canCompile: code) 
 	    ifTrue: 
 		[| dummyParser |
-		dummyParser := self parserClass new.
+		dummyParser := STInST.RBParser new.
 		dummyParser errorBlock: 
 			[:m :l | 
 			^block 
@@ -376,7 +376,7 @@ Behavior extend [
 	source := aString isString 
 		    ifTrue: [aString]
 		    ifFalse: [source := aString contents].
-	parser := self parserClass new.
+	parser := STInST.RBParser new.
 	parser initializeParserWith: source type: #on:errorBlock:.
 	^self compilerClass 
 	    compile: (parser parseMethod: source)
@@ -391,7 +391,7 @@ Behavior extend [
 	source := aString isString 
 		    ifTrue: [aString]
 		    ifFalse: [source := aString contents].
-	parser := self parserClass new.
+	parser := STInST.RBParser new.
 	parser errorBlock: 
 		[:m :l | 
 		^aBlock 
