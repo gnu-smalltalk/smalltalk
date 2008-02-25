@@ -1932,6 +1932,12 @@ together with the package, but this may change in future versions.
 @item -n
 @item --dry-run
 Do not save the image after loading.
+
+@item --start[=ARG]
+Start the services identified by the package.  If an argument is
+given, only one package can be specified on the command-line.  If
+at least one package specifies a startup script, @code{gst-load}
+won't exit.
 @end table
 
 To provide support for this system, you have to give away with your @gst{}
@@ -1995,6 +2001,18 @@ within the tag is available to be called from Smalltalk code.
 Specifies a testing script that @file{gst-sunit} (@pxref{SUnit}) will
 run in order to test the package.  If this is specified, the package
 should list @code{SUnit} among the prerequisites.
+
+@item start
+Specifies a Smalltalk script that @file{gst-load} and @file{gst-remote}
+will execute in order to start the execution of the service implemented
+in the package.  Before executing the script, @code{%1} is replaced 
+with either @code{nil} or a String literal.
+
+@item stop
+Specifies a Smalltalk script that @file{gst-remote}
+will execute in order to shut down the service implemented
+in the package.  Before executing the script, @code{%1} is replaced 
+with either @code{nil} or a String literal.
 
 @item test
 Specifies a subpackage that is only loaded by @file{gst-sunit} in order

@@ -591,6 +591,22 @@ XML.'>
 	    collection: self builtFiles
 	    tag: 'built-file'
 	    indent: indent.
+	self startScript isNil 
+	    ifFalse: 
+		[aStream
+		    nextPutAll: '  <start>';
+		    nextPutAll: self startScript;
+		    nextPutAll: '</start>';
+		    nl;
+		    space: indent].
+	self stopScript isNil 
+	    ifFalse: 
+		[aStream
+		    nextPutAll: '  <stop>';
+		    nextPutAll: self stopScript;
+		    nextPutAll: '</stop>';
+		    nl;
+		    space: indent].
 	aStream
 	    nextPutAll: '</';
 	    nextPutAll: tag;
@@ -716,6 +732,20 @@ XML.'>
 	self subclassResponsibility
     ]
 
+    startScript [
+	"Answer the start script for the package."
+
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    stopScript [
+	"Answer the stop script for the package."
+
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
     callouts [
 	"Answer a (modifiable) Set of call-outs that are required to load
 	 the package.  Their presence is checked after the libraries and
@@ -743,6 +773,46 @@ XML.'>
     loaded [
 	<category: 'accessing'>
 	^self name notNil and: [Smalltalk hasFeatures: self name]
+    ]
+
+    start [
+	"File in the receiver and evaluate its start script, passing nil
+	 as the argument."
+
+	<category: 'accessing'>
+	self fileIn.
+	self startScript isNil ifTrue: [ ^self ].
+	(self startScript % { 'nil' }) readStream fileIn.
+    ]
+
+    start: anObject [
+	"File in the receiver and evaluate its start script, passing anObject's
+	 displayString as the argument."
+
+	<category: 'accessing'>
+	self fileIn.
+	self startScript isNil ifTrue: [ ^self ].
+	(self startScript % { anObject displayString storeString }) readStream fileIn.
+    ]
+
+    stop [
+	"Evaluate the stop script of the receiver, passing nil as the
+	 argument."
+
+	<category: 'accessing'>
+	self loaded ifFalse: [ ^self ].
+	self stopScript isNil ifTrue: [ ^self ].
+	(self stopScript % { 'nil' }) readStream fileIn.
+    ]
+
+    stop: anObject [
+	"Evaluate the stop script of the receiver, passing anObject's
+	 displayString as the argument."
+
+	<category: 'accessing'>
+	self loaded ifFalse: [ ^self ].
+	self stopScript isNil ifTrue: [ ^self ].
+	(self stopScript % { anObject displayString storeString }) readStream fileIn.
     ]
 
     allFiles: prefix [
@@ -857,6 +927,20 @@ PackageInfo subclass: StarPackage [
 	^self loadedPackage modules
     ]
 
+    startScript [
+	"Answer the start script for the package."
+
+	<category: 'accessing'>
+	^self loadedPackage startScript
+    ]
+
+    stopScript [
+	"Answer the stop script for the package."
+
+	<category: 'accessing'>
+	^self loadedPackage stopScript
+    ]
+
     sunitScripts [
 	"Answer a (modifiable) OrderedCollection of SUnit scripts that
 	 compose the package's test suite."
@@ -925,7 +1009,9 @@ PackageInfo subclass: StarPackage [
 
 
 Kernel.PackageInfo subclass: Package [
-    | features prerequisites builtFiles files fileIns relativeDirectory baseDirectories libraries modules callouts namespace sunitScripts test |
+    | features prerequisites builtFiles files fileIns relativeDirectory
+	baseDirectories libraries modules callouts namespace sunitScripts
+	startScript stopScript test |
     
     <category: 'Language-Packaging'>
     <comment: 'I am not part of a standard Smalltalk system. I store internally the
@@ -977,6 +1063,34 @@ XML.'>
 	    add: self name.
 	aPackage owner: self.
 	test := aPackage
+    ]
+
+    startScript [
+	"Answer the start script for the package."
+
+	<category: 'accessing'>
+	^startScript
+    ]
+
+    startScript: aString [
+	"Set the start script for the package to aString."
+
+	<category: 'accessing'>
+	startScript := aString
+    ]
+
+    stopScript [
+	"Answer the start script for the package."
+
+	<category: 'accessing'>
+	^stopScript
+    ]
+
+    stopScript: aString [
+	"Set the stop script for the package to aString."
+
+	<category: 'accessing'>
+	stopScript := aString
     ]
 
     namespace [
@@ -1204,45 +1318,22 @@ XML.'>
 				ifFalse: [^self error: 'error in packages file: unmatched end tag ' , tag].
 
 			    "I tried to put these from the most common to the least common"
-			    tag = 'file' 
-				ifTrue: [self files add: cdata]
-				ifFalse: 
-				    [tag = 'filein' 
-					ifTrue: [self fileIns add: cdata]
-					ifFalse: 
-					    [tag = 'prereq' 
-						ifTrue: [self prerequisites add: cdata]
-						ifFalse: 
-						    [tag = 'provides' 
-							ifTrue: [self features add: cdata]
-							ifFalse: 
-							    [tag = 'module' 
-								ifTrue: [self modules add: cdata]
-								ifFalse: 
-								    [tag = 'directory' 
-									ifTrue: [self relativeDirectory: cdata]
-									ifFalse: 
-									    [tag = 'name' 
-										ifTrue: [self name: cdata]
-										ifFalse: 
-										    [tag = 'namespace' 
-											ifTrue: [self namespace: cdata]
-											ifFalse: 
-											    [tag = 'library' 
-												ifTrue: [self libraries add: cdata]
-												ifFalse: 
-												    [tag = 'built-file' 
-													ifTrue: [self builtFiles add: cdata]
-													ifFalse: 
-													    [tag = 'sunit' 
-														ifTrue: [self sunitScripts add: cdata]
-														ifFalse: 
-														    [tag = 'callout' 
-															ifTrue: [self callouts add: cdata]
-															ifFalse: 
-															    [tag = openingTag 
-																ifTrue: [^self]
-																ifFalse: [self error: 'invalid tag ' , tag]]]]]]]]]]]]].
+			    tag = 'file' ifTrue: [self files add: cdata] ifFalse: [
+			    tag = 'filein' ifTrue: [self fileIns add: cdata] ifFalse: [
+			    tag = 'prereq' ifTrue: [self prerequisites add: cdata] ifFalse: [
+			    tag = 'provides' ifTrue: [self features add: cdata] ifFalse: [
+			    tag = 'module' ifTrue: [self modules add: cdata] ifFalse: [
+			    tag = 'directory' ifTrue: [self relativeDirectory: cdata] ifFalse: [
+			    tag = 'name' ifTrue: [self name: cdata] ifFalse: [
+			    tag = 'namespace' ifTrue: [self namespace: cdata] ifFalse: [
+			    tag = 'library' ifTrue: [self libraries add: cdata] ifFalse: [
+			    tag = 'built-file' ifTrue: [self builtFiles add: cdata] ifFalse: [
+			    tag = 'sunit' ifTrue: [self sunitScripts add: cdata] ifFalse: [
+			    tag = 'start' ifTrue: [self startScript: cdata] ifFalse: [
+			    tag = 'stop' ifTrue: [self stopScript: cdata] ifFalse: [
+			    tag = 'callout' ifTrue: [self callouts add: cdata] ifFalse: [
+			    tag = openingTag ifTrue: [^self] ifFalse: [
+				self error: 'invalid tag ' , tag]]]]]]]]]]]]]]].
 			    cdata := nil].
 		    ch isAlphaNumeric 
 			ifTrue: 

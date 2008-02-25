@@ -3,6 +3,20 @@
   <prereq>Sport</prereq>
   <namespace>Swazoo</namespace>
 
+  <start>
+    %1 isNil ifTrue: [ ^Swazoo.SwazooServer start ].
+    %1 ~ '^[0-9]+$' ifTrue: [ ^Swazoo.SwazooServer startOn: %1 asNumber ].
+    (File name: %1) exists ifTrue: [ ^Swazoo.SwazooServer configureFrom: %1 ].
+    %1 = 'swazoodemo' ifTrue: [ ^Swazoo.SwazooServer demoStart ].
+    Swazoo.SwazooServer startSite: %1
+  </start>
+
+  <stop>
+    %1 isNil ifTrue: [ ^Swazoo.SwazooServer stop ].
+    %1 ~ '^[0-9]+$' ifTrue: [ ^Swazoo.SwazooServer stopOn: %1 asNumber ].
+    Swazoo.SwazooServer stopSite: %1
+  </stop>
+
   <test>
     <sunit>
       Swazoo.CompositeResourceTest

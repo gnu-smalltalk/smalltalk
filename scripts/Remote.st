@@ -75,26 +75,29 @@ host := nil.
 
 helpString :=
 'Usage:
-    gst-load [ flag ... ] package ...
+    gst-remote [ flag ... ] host
 
 Options:
-       --daemon           start background server
-       --server           start daemon
-    -p --port=PORT        connect/listen on given port (default 5432)
-    -f --file=FILE        file in FILE
-    -e --eval=CODE        evaluate CODE
-       --kill             kill daemon
-       --snapshot[=FILE]  save image
-       --pid              print daemon pid
-    -h --help             show this message
-       --version          print version information and exit
+       --daemon               start background server
+       --server               start daemon
+    -p --port=PORT            connect/listen on given port (default 5432)
+    -f --file=FILE            file in FILE
+    -e --eval=CODE            evaluate CODE
+       --kill                 kill daemon
+       --snapshot[=FILE]      save image
+       --package=PACKAGE      load package
+       --start=PACKAGE[:DATA] load package and start it (defined in package.xml)
+       --stop=PACKAGE[:DATA]  load package and start it (defined in package.xml)
+       --pid                  print daemon pid
+    -h --help                 show this message
+       --version              print version information and exit
 '.
 
 "Parse the command-line arguments."
 Smalltalk
     arguments: '-h|--help --version --daemon --server -p|--port -f|--file:
-		-e|--eval: --pid --kill --snapshot::
-		-I|--image: --kernel-directory:'
+		-e|--eval: --pid --kill --snapshot:: --start: --stop:
+		--package: -I|--image: --kernel-directory:'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
@@ -114,8 +117,33 @@ Smalltalk
     opt = 'port' ifTrue: [
 	port := arg asInteger ].
 
+    opt = 'start' ifTrue: [
+	| package data |
+	package := arg copyUpTo: $:.
+	package = arg
+	    ifTrue: [
+		commands add: '(PackageLoader packageAt: %1) start'
+				% {package storeString} ]
+	    ifFalse: [
+		commands add: '(PackageLoader packageAt: %1) start: %2'
+				% {package storeString. (arg copyAfter: $:) storeString } ] ].
+
+    opt = 'stop' ifTrue: [
+	| package data |
+	package := arg copyUpTo: $:.
+	package = arg
+	    ifTrue: [
+		commands add: '(PackageLoader packageAt: %1) stop'
+				% {package storeString} ]
+	    ifFalse: [
+		commands add: '(PackageLoader packageAt: %1) stop: %2'
+				% {package storeString. (arg copyAfter: $:) storeString } ] ].
+
     opt = 'file' ifTrue: [
 	commands add: (File name: arg) ].
+
+    opt = 'package' ifTrue: [
+	commands add: 'PackageLoader fileInPackage: %1' % {arg storeString} ].
 
     opt = 'eval' ifTrue: [
 	commands add: arg ].
@@ -144,24 +172,24 @@ Smalltalk
 
 server ifTrue: [
     PackageLoader fileInPackage: 'Compiler'.
-    "PackageLoader fileInPackage: 'Swazoo'."
     Transcript := MultiplexingTextCollector message: Transcript message.
     [
 	| queue |
 	queue := TCP.ServerSocket port: port bindTo: host.
 	[
 	    [
-		queue waitForConnection.
+		| conn |
 		[
-		    | conn |
-		    conn := queue accept.
+		    queue waitForConnection.
+		    (conn := queue accept) isNil ] whileTrue: [ Processor yield ].
+		[
 		    [[
 			Transcript register: conn.
 		        [ conn isPeerAlive ] whileTrue: [
 			    Behavior
 			        evaluate: (conn upTo: $<0>)
 			        to: nil
-			        ifError: [ :fname :line :msg |
+			        ifError: [ :fname :msg :line |
 				    conn nextPutAll: ('gst-remote: error at line %1: %2
 ' % { line. msg }) ].
 			    conn nextPut: $<0>; flush ] ]
@@ -190,7 +218,7 @@ server ifTrue: [
 	    ifFalse: [ TCP.Socket remote: host port: port ].
 
 	commands do: [ :each |
-	    "Using #readStream" makes it work both for Strings and Files."
+	    "Using #readStream makes it work both for Strings and Files."
 	    s nextPutAll: each readStream; nextPut: $<0>; flush.
 
 	    [ s peekFor: $<0> ] whileFalse: [

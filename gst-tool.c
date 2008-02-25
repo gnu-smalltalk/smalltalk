@@ -92,13 +92,13 @@ struct tool tools[] = {
   {
     "gst-load", "scripts/Load.st",
     "-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
-	-t|--test -I|--image-file: --kernel-directory:",
+	--start:: -t|--test -I|--image-file: --kernel-directory:",
     NULL
   },
   {
     "gst-reload", "scripts/Load.st",
     "-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
-	-t|--test -I|--image-file: --kernel-directory:",
+	--start:: -t|--test -I|--image-file: --kernel-directory:",
     "--force"
   },
   {
@@ -129,7 +129,8 @@ struct tool tools[] = {
   {
     "gst-remote", "scripts/Remote.st",
     "-h|--help --version --daemon --server -p|--port -f|--file: -e|--eval: \
-        --pid --kill --snapshot:: -I|--image-file: --kernel-directory:",
+ 	-package: --start: --stop: --pid --kill --snapshot:: -I|--image-file: \
+	--kernel-directory:",
     NULL
   },
   { NULL, NULL, NULL, NULL }

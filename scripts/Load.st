@@ -30,12 +30,14 @@
 
 Smalltalk arguments isEmpty ifTrue: [ ObjectMemory quit ]!
 
-| helpString quiet verbose wasVerbose snapshot force test sunit packages |
+| helpString quiet verbose wasVerbose snapshot force test sunit packages
+  startMessage |
 snapshot := true.
 quiet := false.
 verbose := false.
 force := false.
 test := false.
+startMessage := Message selector: #fileIn arguments: #().
 wasVerbose := FileStream verbose: false.
 packages := OrderedCollection new.
 sunit := ''.
@@ -50,6 +52,7 @@ Options:
     -f --force            reload package if already loaded
     -n --dry-run          don''t save the image after loading
     -t --test             run SUnit tests if available
+       --start[=ARG]      start the package and keep running the image
     -I --image-file=FILE  load into the specified image
        --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message
@@ -59,7 +62,8 @@ Options:
 "Parse the command-line arguments."
 Smalltalk
     arguments: '-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run
-		-f|--force -t|--test -I|--image-file: --kernel-directory:'
+		-f|--force -t|--test -I|--image-file: --kernel-directory:
+		--start::'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
@@ -88,6 +92,11 @@ Smalltalk
     opt = 'test' ifTrue: [
 	test := true ].
 
+    opt = 'start' ifTrue: [
+	startMessage := Message
+	    selector: (arg isNil ifTrue: [ #start ] ifFalse: [ #start: ])
+	    arguments: (arg isNil ifTrue: [ #() ] ifFalse: [ { arg } ]) ].
+
     opt = 'dry-run' ifTrue: [
 	snapshot := false ].
 
@@ -99,10 +108,17 @@ Smalltalk
 
 force ifTrue: [
     packages do: [ :each | Smalltalk removeFeature: each asSymbol ] ].
+
 [
+    (startMessage selector == #start: and: [
+	(packages count: [ :each | each startScript notNil ]) > 1]) ifTrue: [
+	    stderr nextPutAll: 'gst-load: Cannot pass start argument to multiple packages
+'.
+	    ^self ].
+
     packages := packages collect: [ :each | PackageLoader packageAt: each ].
     packages do: [ :each |
-	each fileIn.
+	each perform: startMessage.
         sunit := sunit, ' ', each sunitScript ] ]
     ifCurtailed: [ ObjectMemory quit: 1 ].
 
@@ -134,5 +150,9 @@ test
 	    (File name: tmpFileName) remove ] ]
 
     ifFalse: [
-	snapshot ifTrue: [ ObjectMemory snapshot ] ]!
+	snapshot ifTrue: [ ObjectMemory snapshot ] ].
+
+(startMessage selector ~= #fileIn and: [ 
+    packages anySatisfy: [ :pkg | pkg startScript notNil ]])
+	ifTrue: [ Processor activeProcess suspend ]!
 
