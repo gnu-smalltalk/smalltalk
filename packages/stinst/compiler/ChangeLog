@@ -1,3 +1,7 @@
+2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* StartCompiler.st: Remove references to #parserClass.
+
 2008-02-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* StartCompiler.st: Fix typo in message #parseSmalltalk:with:onError:.
