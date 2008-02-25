@@ -1035,7 +1035,9 @@ Object subclass: SpSocket [
 		    bindSocketAddress: (SpIPAddress hostName: 'localhost' port: 3523);
 		    listenBackloggingUpTo: 50.
 	s2 := SpSocket connectToServerOnHost: 'localhost' port: 3523.
-        [ (s3 := s1 accept) isNil ] whileTrue: [ Processor yield ] ] 
+        [
+	    s1 waitForConnection.
+	    (s3 := s1 accept) isNil ] whileTrue: [ Processor yield ] ] 
 		ifCurtailed: 
 		    [s1 close.
 		    s2 close].
@@ -1071,8 +1073,8 @@ Object subclass: SpSocket [
 	^SpExceptionContext 
 	    for: 
 		[| clientSpecificSocket |
-		
-		[(clientSpecificSocket := self underlyingSocket accept) isNil] 
+		[self underlyingSocket waitForConnection.
+		(clientSpecificSocket := self underlyingSocket accept) isNil] 
 			whileTrue: [ Processor yield ].
 		self class onNativeclientSocket: clientSpecificSocket for: self]
 	    on: Error
