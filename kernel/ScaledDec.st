@@ -40,9 +40,6 @@ numbers able to accurately represent decimal fractions.  It supports
 unbounded precision, with no limit to the number of digits before and
 after the decimal point.'>
 
-    Zero := nil.
-    One := nil.
-
     ScaledDecimal class >> newFromNumber: aNumber scale: scale [
 	"Answer a new instance of ScaledDecimal, representing a decimal
 	 fraction with a decimal representation considered valid up to the
@@ -54,30 +51,18 @@ after the decimal point.'>
 	    yourself
     ]
 
-    ScaledDecimal class >> initialize [
-	"Initialize the receiver's class variables"
-
-	"We cannot create ScaledDecimal with 1.0s0 during the very
-	 first phases of bootstrapping, because the lexer calls in to
-	 #asScaledDecimal: -- but it is not a problem."
-
-	<category: 'constants'>
-	One := self newFromNumber: 1 scale: 0.
-	Zero := self newFromNumber: 0 scale: 0
-    ]
-
     one [
 	"Answer the receiver's representation of one."
 
 	<category: 'constants'>
-	^One
+	^self class newFromNumber: 1 scale: scale
     ]
 
     zero [
 	"Answer the receiver's representation of zero."
 
 	<category: 'constants'>
-	^Zero
+	^self class newFromNumber: 0 scale: scale
     ]
 
     fractionPart [
@@ -370,10 +355,3 @@ after the decimal point.'>
 	scale := theScale
     ]
 ]
-
-
-
-Eval [
-    ScaledDecimal initialize
-]
-

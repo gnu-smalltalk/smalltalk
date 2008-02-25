@@ -1,5 +1,10 @@
 2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ScaledDec.st: Make #zero and #one return a number with
+	the same scale as the receiver.
+
+2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/DirMessage.st: Add #receiver:selector:argument:.
 	* kernel/Message.st: Add #selector:argument:.
 
