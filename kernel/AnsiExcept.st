@@ -213,7 +213,7 @@ CoreException, so the two mechanisms are actually interchangeable.'>
 
 	<category: 'exception signaling'>
 	self exception instantiateNextHandler: self.
-	^self activateHandler: self isResumable
+	^self activateHandler: (onDoBlock isNil and: [ self isResumable ])
     ]
 
     signal: messageText [

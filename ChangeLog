@@ -1,3 +1,8 @@
+2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/AnsiExcept.st: Upon executing off the end of an
+	exception handler, always return from the associated #on:do:.
+
 2008-02-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiDates.st: Add #date:time:offset:, #date:time:.
