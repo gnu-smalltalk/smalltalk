@@ -1,5 +1,10 @@
 2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/DirMessage.st: Add #receiver:selector:argument:.
+	* kernel/Message.st: Add #selector:argument:.
+
+2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/AnsiExcept.st: Upon executing off the end of an
 	exception handler, always return from the associated #on:do:.
 

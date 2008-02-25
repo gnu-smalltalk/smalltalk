@@ -42,6 +42,15 @@ and arguments, but also to represent method attributes (like
 <primitive: 111> since their syntax is isomorphic to that of a
 message send.'>
 
+    Message class >> selector: aSymbol argument: anObject [
+	"Create a new Message with the given selector and argument"
+
+	<category: 'creating instances'>
+	^(self new)
+	    selector: aSymbol;
+	    arguments: { anObject }
+    ]
+
     Message class >> selector: aSymbol arguments: anArray [
 	"Create a new Message with the given selector and arguments"
 
