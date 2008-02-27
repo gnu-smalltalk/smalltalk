@@ -78,12 +78,13 @@ FileDescriptor subclass: AbstractSocketImpl [
 	 active server socket."
 
 	<category: 'socket operations'>
-	| peer sizePtr newFD |
+	| peer sizePtr newFD fd |
 	peer := ByteArray new: CSockAddrStruct sizeof.
 	sizePtr := ByteArray new: CInt sizeof.
 	sizePtr intAt: 1 put: CSockAddrStruct sizeof.
+	(fd := self fd) isNil ifTrue: [ ^SystemExceptions.EndOfStream signal ].
 	newFD := self 
-		    accept: self fd
+		    accept: fd
 		    peer: peer
 		    addrLen: sizePtr.
 	^(implementationClass on: newFD)
@@ -105,11 +106,12 @@ FileDescriptor subclass: AbstractSocketImpl [
 	 attaching the local endpoint of the socket."
 
 	<category: 'socket operations'>
-	| addr |
+	| addr fd |
 	addr := ipAddress port: port.
 	
+	(fd := self fd) isNil ifTrue: [ ^self ].
 	[self 
-	    bind: self fd
+	    bind: fd
 	    to: addr
 	    addrLen: addr size.
 	File checkError] 
@@ -194,12 +196,13 @@ FileDescriptor subclass: AbstractSocketImpl [
 	 local endpoint of the socket."
 
 	<category: 'socket operations'>
-	| sock sizePtr |
+	| sock sizePtr fd |
 	sock := ByteArray new: CSockAddrStruct sizeof.
 	sizePtr := ByteArray new: CInt sizeof.
 	sizePtr intAt: 1 put: CSockAddrStruct sizeof.
+	(fd := self fd) isNil ifTrue: [ ^nil ].
 	self 
-	    getSockName: self fd
+	    getSockName: fd
 	    addr: sock
 	    addrLen: sizePtr.
 	^sock
@@ -210,7 +213,9 @@ FileDescriptor subclass: AbstractSocketImpl [
 	 queue of the given size."
 
 	<category: 'socket operations'>
-	self listen: self fd log: backlog
+	| fd |
+	(fd := self fd) isNil ifTrue: [ ^self ].
+	self listen: fd log: backlog
     ]
 
     connectTo: ipAddress port: port [
@@ -272,12 +277,13 @@ FileDescriptor subclass: AbstractSocketImpl [
 	 so this will be rarely used."
 
 	<category: 'socket options'>
-	| result sizeArray |
+	| result sizeArray fd |
 	result := ByteArray new: size.
 	sizeArray := ByteArray new: CInt sizeof.
 	sizeArray intAt: 1 put: size.
+	(fd := self fd) isNil ifTrue: [ ^nil ].
 	self 
-	    option: self fd
+	    option: fd
 	    level: level
 	    at: opt
 	    get: result
@@ -293,10 +299,11 @@ FileDescriptor subclass: AbstractSocketImpl [
 	 used."
 
 	<category: 'socket options'>
-	| ba |
+	| ba fd |
 	ba := self makeByteArray: anObject.
+	(fd := self fd) isNil ifTrue: [ ^self ].
 	self 
-	    option: self fd
+	    option: fd
 	    level: level
 	    at: opt
 	    put: ba
@@ -514,11 +521,12 @@ AbstractSocketImpl subclass: SocketImpl [
 	 machine."
 
 	<category: 'socket operations'>
-	| addr |
+	| addr fd |
 	addr := ipAddress port: port.
 	
-	[self 
-	    connect: self fd
+	[(fd := self fd) isNil ifTrue: [ ^self ].
+	self 
+	    connect: fd
 	    to: addr
 	    addrLen: addr size.
 	File checkError] 
@@ -534,10 +542,11 @@ AbstractSocketImpl subclass: SocketImpl [
 	 remote endpoint of the socket."
 
 	<category: 'socket operations'>
-	| peer sizePtr |
+	| peer sizePtr fd |
 	peer := ByteArray new: CSockAddrStruct sizeof.
 	sizePtr := ByteArray new: CInt sizeof.
 	sizePtr intAt: 1 put: CSockAddrStruct sizeof.
+	(fd := self fd) isNil ifTrue: [ ^nil ].
 	self 
 	    getPeerName: self fd
 	    addr: peer
@@ -632,13 +641,14 @@ AbstractSocketImpl subclass: DatagramSocketImpl [
 	 to only peek for it without removing it from the queue."
 
 	<category: 'socket operations'>
-	| address port data from addrLen |
+	| address port data from addrLen fd |
 	addrLen := ByteArray new: CInt sizeof.
 	data := ByteArray new: self bufferSize.
 	from := ByteArray new: CSockAddrStruct sizeof.
 	addrLen intAt: 1 put: from size.
+	(fd := self fd) isNil ifTrue: [ ^SystemExceptions.EndOfStream signal ].
 	self 
-	    receive: self fd
+	    receive: fd
 	    buffer: data
 	    size: data size
 	    flags: (self flags bitOr: flags)
@@ -656,14 +666,15 @@ AbstractSocketImpl subclass: DatagramSocketImpl [
 	"Send aDatagram on the socket to the given receiver and port"
 
 	<category: 'socket operations'>
-	| size receiver |
+	| size receiver fd |
 	theReceiver isNil 
 	    ifTrue: [receiver := size := 0]
 	    ifFalse: 
 		[receiver := theReceiver port: port.
 		size := receiver size].
+	(fd := self fd) isNil ifTrue: [ ^SystemExceptions.EndOfStream signal ].
 	self 
-	    send: self fd
+	    send: fd
 	    buffer: aDatagram data
 	    size: aDatagram data size
 	    flags: self flags
