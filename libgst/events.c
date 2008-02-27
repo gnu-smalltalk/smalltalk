@@ -192,6 +192,46 @@ _gst_sync_file_polling (int fd,
     return 0;
 }
 
+void
+_gst_remove_fd_polling_handlers (int fd)
+{
+  polling_queue *node, **pprev;
+
+  if (num_used_pollfds == 0)
+    return;
+
+  /* Disable interrupts while playing with global variables */
+  _gst_disable_interrupts ();
+
+  num_used_pollfds = 0;
+  for (node = head, pprev = &head; node; node = *pprev)
+    {
+      struct pollfd *poll = &pollfds[node->poll];
+
+      if (poll->fd == fd)
+	{
+	  _gst_async_signal_and_unregister (node->semaphoreOOP);
+
+	  /* Pass over the current node */
+	  *pprev = node->next;
+	  if (p_tail_next == &node->next)
+	    p_tail_next = pprev;
+
+	  xfree (node);
+	}
+       else
+	{
+	  node->poll = num_used_pollfds;
+	  pollfds[num_used_pollfds++] = *poll;
+
+	  /* Prepare to get the next node */
+	  pprev = &(node->next);
+	}
+    }
+
+  _gst_enable_interrupts ();
+}
+
 RETSIGTYPE
 file_polling_handler (int sig)
 {

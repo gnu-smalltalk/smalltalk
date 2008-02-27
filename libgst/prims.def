@@ -5246,8 +5246,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
   fd = TO_INT (fileStream->file);
   switch (arg1)
     {
-
     case PRIM_CLOSE_FILE:	/* FileDescriptor close */
+      _gst_remove_fd_polling_handlers (fd);
       resultOOP = FROM_INT (close (fd));
       goto succeed;
 
@@ -5550,6 +5550,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 
     case PRIM_CLOSE_FILE:	/* FileDescriptor close */
       {
+        _gst_remove_fd_polling_handlers (fd);
         int result = closesocket (fd);
         resultOOP = FROM_INT (result);
         goto succeed;

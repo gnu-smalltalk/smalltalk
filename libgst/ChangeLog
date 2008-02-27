@@ -1,3 +1,9 @@
+2008-02-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/events.c: Add _gst_remove_fd_polling_handlers.
+	* libgst/events.h: Declare it.
+	* libgst/prims.def: Use it.
+
 2008-02-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Don't specify the path to ffi.h.
