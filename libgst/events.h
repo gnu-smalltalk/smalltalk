@@ -78,6 +78,10 @@ extern mst_Boolean _gst_is_timeout_programmed (void)
   ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
 
+/* Fire and remove all I/O handlers for file descriptor FD.  */
+extern void _gst_remove_fd_polling_handlers (int fd)
+  ATTRIBUTE_HIDDEN;
+
 /* Check whether I/O is possible on the FD file descriptor; COND is 0
    to check for pending input, 1 to check for the possibility of doing
    non-blocking output, 2 to check for pending exceptional situations
