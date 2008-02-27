@@ -70,7 +70,7 @@ TextCollector subclass: MultiplexingTextCollector [
 | helpString commands server port host |
 commands := OrderedCollection new.
 server := false.
-port := 5432.
+port := 12345.
 host := nil.
 
 helpString :=
@@ -80,7 +80,7 @@ helpString :=
 Options:
        --daemon               start background server
        --server               start daemon
-    -p --port=PORT            connect/listen on given port (default 5432)
+    -p --port=PORT            connect/listen on given port (default 12345)
     -f --file=FILE            file in FILE
     -e --eval=CODE            evaluate CODE
        --kill                 kill daemon
@@ -95,7 +95,7 @@ Options:
 
 "Parse the command-line arguments."
 Smalltalk
-    arguments: '-h|--help --version --daemon --server -p|--port -f|--file:
+    arguments: '-h|--help --version --daemon --server -p|--port: -f|--file:
 		-e|--eval: --pid --kill --snapshot:: --start: --stop:
 		--package: -I|--image: --kernel-directory:'
     do: [ :opt :arg |

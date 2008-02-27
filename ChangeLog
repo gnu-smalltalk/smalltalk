@@ -1,9 +1,14 @@
+2008-02-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-tool.c: Fix pasto.
+	* scripts/Remote.st: Change default port to 12345.
+
 2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/PkgLoader.st: Add start/stop script support.
 	* scripts/Load.st: Add start/stop script support.
 	* scripts/Remote.st: Add start/stop script support.
-	* gst-load.c: Keep options synchronized.
+	* gst-tool.c: Keep options synchronized.
 
 2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
 
