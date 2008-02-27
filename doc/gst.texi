@@ -145,8 +145,9 @@ Features:
 Packages
 * Blox, BloxTK, and Browser:             Blox.
 * Parser, STInST, Compiler:              Smalltalk-in-Smalltalk.
-* DB and MySQL:                          Database.
+* DBI:                                   Database.
 * I18N:                                  Locales.
+* Swazoo:                                Swazoo.
 * SUnit:                                 SUnit.
 * TCP, WebServer, NetClients:            Network support.
 * XML, XPath, XSL:                       XML.
@@ -2055,8 +2056,9 @@ The rest of this chapter discusses some of the packages provided with @gst{}.
 @menu
 * Blox, BloxTK, and Browser:             Blox.
 * Parser, STInST, Compiler:              Smalltalk-in-Smalltalk.
-* DB and MySQL:                          Database.
+* DBI:                                   Database.
 * I18N:                                  Locales.
+* Swazoo:                                Swazoo.
 * SUnit:                                 SUnit.
 * TCP, WebServer, NetClients:            Network support.
 * XML, XPath, XSL:                       XML.
@@ -2231,9 +2233,7 @@ connection := DBI.Connection
 @end example
 
 You can see that the @acronym{DBMS}-specific classes live in a sub-namespace
-of @code{Jdm}, while @acronym{DBMS}-independent classes live in @code{Jdm}.
-@code{Jdm} are the initials of the original developer of the driver, and
-also an acronym for @emph{Just a Database Manager}---silly acronym, I know.
+of @code{DBI}, while @acronym{DBMS}-independent classes live in @code{DBI}.
 
 Here is how I execute a query.
 
@@ -2446,6 +2446,63 @@ internationalized programs is guaranteed to the end user.
 
 In addition, the representation of translated strings is the standard
 @sc{mo} file format adopted by the @gnu{} @code{gettext} library.
+
+@node Swazoo
+@section The Swazoo web server
+
+Swazoo (Smalltalk Web Application Zoo) is a free Smalltalk HTTP server
+supporting both static web serving and a fully-featured web request
+resolution framework.
+
+The server can be started using
+@example
+$ gst-load --start@i{[=@var{ARG}]} Swazoo
+@end example
+
+@noindent
+or loaded into a background GNU Smalltalk virtual machine with
+@example
+$ gst-remote --start=Swazoo@i{[:@var{ARG}]}
+@end example
+
+Usually, the first time you start Swazoo @var{ARG} is @code{swazoodemo}
+(which starts a simple ``Hello, World!'' servlet) or a path to a
+configuration file like this one:
+
+@example
+<Site name: 'hello'; port: 8080>
+ <CompositeResource uriPattern: ''/''>
+  <HelloWorldResource uriPattern: ''hello.html''>
+ </CompositeResource>
+</Site>
+@end example
+
+After this initial step, @var{ARG} can take the following meanings:
+@itemize @bullet
+@item if omitted altogether, all the sites registered on the server
+  are started;
+@item if a number, all the sites registered on the server
+  on that port are started;
+@item if a configuration file name, the server configuration is
+  @emph{replaced} with the one loaded from that file;
+@item if any other string, the site named @var{ARG} is started.
+@end itemize
+
+In addition, a background server can be stopped using
+
+@example
+$ gst-remote --stop=Swazoo@i{[:@var{ARG}]}
+@end example
+
+@noindent
+where @var{ARG} can have the same meanings, except for being a
+configuration file.
+
+In addition, package @code{WebServer} implements an older web server
+engine which is now superseded by Swazoo.  It is based on the @sc{gpl}'ed
+WikiWorks project.  Apart from porting to @gst{}, a number of changes were
+made to the code, including refactoring of classes, better aesthetics,
+authentication support, virtual hosting, and @sc{http} 1.1 compliance.
 
 @node SUnit
 @section The SUnit testing package
@@ -2668,34 +2725,8 @@ and using both server and client sockets; after creation, sockets behave
 practically the same as standard Smalltalk streams, so you should not
 have particular problems.  For more information, refer to @ref{TCP, ,
 Network programming with TCP, gst-libs, the @gst{} Library Reference}.
-
-In addition, package @code{WebServer} implements a servlet-based web
-serving framework engine, including support for file servers as well as
-Wiki-style servers@footnote{A Wiki is a kind of collaborative web site,
-which allows one to edit the contents of a page.}; each server is a
-subclass of @code{Servlet}, and different servers can live together
-under different paths.  See the class side examples protocol of
-WebServer to get it up and running quick.
-
-The server is based on the @sc{gpl}'ed WikiWorks project. For up to
-date/more info go see
-@url{http://wiki.cs.uiuc.edu/VisualWorks/WikiWorks>}.  Many thanks go to
-the various people who had worked on the version on which the server is
-based:
-
-@display
-Joseph Bacanskas @mailto{joeb@@mutual.navigant.com}
-Travis Griggs @mailto{tgriggs@@keyww.com}
-Ralph Johnson @mailto{johnson@@cs.uiuc.edu}
-Eliot Miranda @mailto{eliot@@objectshare.com}
-Ken Treis @mailto{ktreis@@keyww.com}
-John Brant @mailto{brant@@cs.uiuc.edu}
-Joe Whitesell @mailto{whitesell@@physsoft.com}
-@end display
-
-Apart from porting to @gst{}, a number of changes were made to the code,
-including refactoring of classes, better aesthetics, authentication
-support, virtual hosting, and @sc{http} 1.1 compliance.
+The library is also used by many other packages, including Swazoo
+and the MySQL driver.
 
 There is also code implementing the most popular Internet protocols:
 @sc{ftp}, @sc{http}, @sc{nntp}, @sc{smtp}, @sc{pop3} and @sc{imap}.
