@@ -1,3 +1,8 @@
+2008-02-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ExcHandling.st: Backtrace on the Transcript.
+	* kernel/Transcript.st: Handle errors while printing on the Transcript.
+
 2008-02-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gst-tool.c: Fix pasto.

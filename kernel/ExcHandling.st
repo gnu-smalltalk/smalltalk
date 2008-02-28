@@ -769,7 +769,7 @@ Object extend [
 		[context := thisContext.
 		[context isInternalExceptionHandlingContext] 
 		    whileTrue: [context := context parentContext].
-		context backtraceOn: stdout].
+		context backtraceOn: Transcript].
 	ContextPart unwind
     ]
 

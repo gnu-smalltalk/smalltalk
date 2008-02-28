@@ -185,7 +185,8 @@ implements the global Transcript object.'>
 	"Private - Forward the writing request to the actual object"
 
 	<category: 'private'>
-	receiver perform: selector with: aString
+	[receiver perform: selector with: aString]
+	    on: Error do: [:ex | stderr nextPutAll: aString; flush. ex return]
     ]
 
     initialize [
