@@ -416,7 +416,7 @@ GPObject subclass: GPAxis [
     <comment: 'My instances are used to customize the appearance of a plotted
 axis.'>
 
-    | name range logScale mirrorTics outwardTics ticRange ticSpacing
+    | name range logScale mirrorTics outwardTics ticRange ticSpacing ticFormat
 	ticSubdivision majorGrid minorGrid tics style label labelStyle |
 
     name: aString [
@@ -495,6 +495,16 @@ axis.'>
     labelStyle: aString [
         <category: 'accessing'>
         labelStyle := aString
+    ]
+
+    ticFormat [
+        <category: 'accessing'>
+        ^ticFormat
+    ]
+
+    ticFormat: aBoolean [
+        <category: 'accessing'>
+        ticFormat := aBoolean
     ]
 
     ticSubdivision [
@@ -687,6 +697,14 @@ axis.'>
 	    ifTrue: [ self displayGridOn: aStream ].
 	label notNil
 	    ifTrue: [ self displayLabelOn: aStream ].
+
+	self ticFormat isNil ifFalse: [
+            aStream
+                nextPutAll: 'set format ';
+                nextPutAll: name;
+                space;
+                print: self ticFormat;
+                nl ].
 
 	self logScale ifTrue: [
             aStream

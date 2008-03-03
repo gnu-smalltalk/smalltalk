@@ -1,3 +1,7 @@
+2008-03-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Series.st: Add "set format" support.
+
 2007-12-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Series.st: Allow autoscaling one end of the axes.
