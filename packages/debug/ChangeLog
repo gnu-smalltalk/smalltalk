@@ -1,4 +1,8 @@
-2007-01-16  Paolo Bonzini  <bonzini@gnu.org>
+2008-03-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* debugtests.st: Use #newProcess to start a suspended process.
+
+2008-01-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* debugtests.st: Remove useless fileInPackage:.
 

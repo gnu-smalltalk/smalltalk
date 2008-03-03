@@ -39,10 +39,7 @@ TestCase subclass: DebuggerTest [
 
 	<category: 'test'>
 	| debugger |
-	debugger := Debugger 
-		    on: 
-			[Processor activeProcess suspend.
-			aBlock value] fork.
+	debugger := Debugger on: aBlock newProcess.
 	[debugger suspendedContext method == aBlock block] 
 	    whileFalse: [debugger stepBytecode].
 	^debugger
