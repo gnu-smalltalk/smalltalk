@@ -298,6 +298,7 @@ GPSeries subclass: GPDataSeries [
 
     columns [
 	<category: 'accessing'>
+	columns ifNil: [ ^self defaultColumns ].
 	^columns
     ]
 
@@ -316,6 +317,10 @@ GPSeries subclass: GPDataSeries [
 	dataSource := aDataSource
     ]
 
+    defaultColumns [
+	self subclassResponsibility
+    ]
+
     defaultTitle [
 	^dataSource defaultTitle
     ]
@@ -328,7 +333,7 @@ GPSeries subclass: GPDataSeries [
     displayOn: aStream [
 	dataSource displayOn: aStream.
 	aStream nextPutAll: ' using '.
-	columns
+	self columns
 	    do: [ :each | each displayOn: aStream ]
 	    separatedBy: [ aStream nextPut: $: ].
 
@@ -352,6 +357,7 @@ GPSeries subclass: GPDataSeries [
 
     displayPrologOn: aStream into: defs [
 	super displayPrologOn: aStream into: defs.
+	columns isNil ifTrue: [ ^self ].
 	columns do: [ :each | each displayPrologOn: aStream into: defs ]
     ]
 
