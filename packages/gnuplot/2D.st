@@ -399,9 +399,16 @@ GPDataSeries subclass: GPXYSeries [
     <category: 'GNUPlot'>
     <comment: 'My instance is used to define a data series for (x,y) values.'>
 
-    initialize [
-	super initialize.
-	self columns: { GPColumnRef column: 1 }
+    defaultColumns [
+	| c0 c1 c2 |
+	c0 := GPColumnRef column: 0.
+	c1 := GPColumnRef column: 1.
+	(self ticColumns notNil and: [ self ticColumns includes: 2 ])
+	    ifTrue: [ ^{ c0. c1 } ].
+
+	c2 := GPColumnRef column: 2.
+	^{ c2 ifValid: [ c1 ] ifNotValid: [ c0 ].
+	   c2 ifValid: [ c2 ] ifNotValid: [ c1 ] }
     ]
 
     data: expr [
@@ -423,10 +430,9 @@ i.e. a bubble plot.'>
 	^defaultStyle ifNil: [ super defaultStyle pointType: 6; yourself ]
     ]
 
-    initialize [
-	super initialize.
-	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
-			GPColumnRef column: 3 }
+    defaultColumns [
+	^{ GPColumnRef column: 1. GPColumnRef column: 2.
+	   GPColumnRef column: 3 }
     ]
 
     x: xExpr y: yExpr size: sizeExpr [
@@ -444,10 +450,9 @@ GPXYSeries subclass: GPTextSeries [
     <category: 'GNUPlot'>
     <comment: 'My instance is used to define a data series for (x,y,text) values.'>
 
-    initialize [
-	super initialize.
-	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
-			GPColumnRef column: 3 }
+    defaultColumns [
+	^{ GPColumnRef column: 1. GPColumnRef column: 2.
+	   GPColumnRef column: 3 }
     ]
 
     x: xExpr y: yExpr text: textExpr [
@@ -472,10 +477,9 @@ GPDataSeries subclass: GPErrorSeries [
     <comment: 'My instance is used to define a data series for (x,y) values
 with a (vertical) error bar.'>
 
-    initialize [
-	super initialize.
-	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
-			GPColumnRef column: 3 }
+    defaultColumns [
+	^{ GPColumnRef column: 1. GPColumnRef column: 2.
+	   GPColumnRef column: 3 }
     ]
 
     x: xExpr y: yExpr error: errExpr [
@@ -506,10 +510,9 @@ GPErrorSeries subclass: GPErrorBoxSeries [
     <comment: 'My instance is used to define a data series for (x,y) values
 with an adjustable width and a (vertical) error bar.'>
 
-    initialize [
-	super initialize.
-	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
-			GPColumnRef column: 3 }
+    defaultColumns [
+	^{ GPColumnRef column: 1. GPColumnRef column: 2.
+	   GPColumnRef column: 3 }
     ]
 
     x: xExpr y: yExpr error: errExpr width: widthExpr [
@@ -543,10 +546,9 @@ GPDataSeries subclass: GPXErrorSeries [
     <comment: 'My instance is used to define a data series for (x,y) values
 with an horizontal error bar.'>
 
-    initialize [
-	super initialize.
-	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
-			GPColumnRef column: 3 }
+    defaultColumns [
+	^{ GPColumnRef column: 1. GPColumnRef column: 2.
+	   GPColumnRef column: 3 }
     ]
 
     x: xExpr error: errExpr y: yExpr [
@@ -577,10 +579,9 @@ GPXErrorSeries subclass: GPXErrorBoxSeries [
     <comment: 'My instance is used to define a data series for (x,y) values
 with an adjustable width and an horizontal error bar.'>
 
-    initialize [
-	super initialize.
-	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
-			GPColumnRef column: 3 }
+    defaultColumns [
+	^{ GPColumnRef column: 1. GPColumnRef column: 2.
+	   GPColumnRef column: 3 }
     ]
 
     x: xExpr error: errExpr y: yExpr width: widthExpr [
@@ -614,10 +615,9 @@ GPDataSeries subclass: GPXYErrorSeries [
     <comment: 'My instance is used to define a data series for (x,y) values
 with 2D error bars.'>
 
-    initialize [
-	super initialize.
-	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
-			GPColumnRef column: 3. GPColumnRef column: 4 }
+    defaultColumns [
+	^{ GPColumnRef column: 1. GPColumnRef column: 2.
+	   GPColumnRef column: 3. GPColumnRef column: 4 }
     ]
 
     x: xExpr error: xErrExpr y: yExpr error: yErrExpr [
@@ -654,10 +654,9 @@ GPDataSeries subclass: GPVectorSeries [
     <category: 'GNUPlot'>
     <comment: 'My instance is used to define a data series for vector fields.'>
 
-    initialize [
-	super initialize.
-	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
-			GPColumnRef column: 3. GPColumnRef column: 4 }
+    defaultColumns [
+	^{ GPColumnRef column: 1. GPColumnRef column: 2.
+	   GPColumnRef column: 3. GPColumnRef column: 4 }
     ]
 
     x: xExpr dx: dxExpr y: yExpr [
@@ -719,11 +718,10 @@ GPDataSeries subclass: GPFinancialDataSeries [
     <comment: 'My instance is used to define a data series for
 low/high/open/close values.'>
 
-    initialize [
-	super initialize.
-	self columns: { GPColumnRef column: 1. GPColumnRef column: 2.
-			GPColumnRef column: 3. GPColumnRef column: 4.
-			GPColumnRef column: 5 }
+    defaultColumns [
+	^{ GPColumnRef column: 1. GPColumnRef column: 2.
+	   GPColumnRef column: 3. GPColumnRef column: 4.
+	   GPColumnRef column: 5 }
     ]
 
     x: xExpr open: openExpr low: lowExpr high: highExpr close: closeExpr [

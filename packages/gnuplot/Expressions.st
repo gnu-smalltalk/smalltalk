@@ -390,6 +390,43 @@ GPExpression subclass: GPBinaryExpression [
     ]
 ]
 
+GPExpression subclass: GPCondExpression [
+    <category: 'GNUPlot'>
+    <comment: 'My instances are used in the syntax tree of plotted functions.'>
+
+    | cond trueBranch falseBranch |
+
+    GPCondExpression class >> condition: condExpr ifTrue: trueExpr ifFalse: falseExpr [
+	^self new
+	    condition: condExpr ifTrue: trueExpr ifFalse: falseExpr;
+	    yourself
+    ]
+
+    precedence [
+	^-10
+    ]
+
+    displayAsOperandOn: aStream [
+	self printOperand: cond on: aStream.
+	aStream nextPut: $?.
+	self printOperand: trueBranch on: aStream.
+	aStream nextPut: $:.
+	self printOperand: falseBranch on: aStream.
+    ]
+ 
+    displayPrologOn: aStream into: defs [
+	cond displayPrologOn: aStream into: defs.
+	trueBranch displayPrologOn: aStream into: defs.
+	falseBranch displayPrologOn: aStream into: defs
+    ]
+
+    condition: condExpr ifTrue: trueExpr ifFalse: falseExpr [
+	cond := condExpr.
+	trueBranch := trueExpr value.
+	falseBranch := falseExpr value
+    ]
+]
+
 GPExpression subclass: GPPrimaryExpression [
     <category: 'GNUPlot'>
     <comment: 'My instances are used in the syntax tree of plotted functions.'>
@@ -424,6 +461,53 @@ and refer to columns of external data sets.'>
 	<category: 'printing'>
 	aStream nextPut: $$.
 	column printOn: aStream
+    ]
+
+    displayOn: aStream [
+	<category: 'printing'>
+	column printOn: aStream
+    ]
+
+    valid [
+	<category: 'building'>
+	^GPColumnRefValidExpression column: self column
+    ]
+
+    ifValid: validBlock ifNotValid: invalidBlock [
+	<category: 'building'>
+	^GPCondExpression
+	    condition: self valid
+	    ifTrue: validBlock
+	    ifFalse: invalidBlock
+    ]
+]
+
+GPPrimaryExpression subclass: GPColumnRefValidExpression [
+    <category: 'GNUPlot'>
+    <comment: 'My instances are used in the syntax tree of plotted functions
+and refer to columns of external data sets.'>
+
+    | column |
+    GPColumnRefValidExpression class >> column: anInteger [
+	<category: 'instance creation'>
+	^self new column: anInteger
+    ]
+
+    column [
+	<category: 'accessing'>
+	^column
+    ]
+
+    column: aString [
+	<category: 'private - initialization'>
+	column := aString
+    ]
+
+    displayAsOperandOn: aStream [
+	<category: 'printing'>
+	aStream nextPutAll: 'valid('.
+	column printOn: aStream.
+	aStream nextPut: $).
     ]
 
     displayOn: aStream [
