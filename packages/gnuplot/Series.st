@@ -163,6 +163,68 @@ function or data set.'>
     ]
 ]
 
+Object subclass: GPSeriesGroup [
+    <category: 'GNUPlot'>
+    <comment: 'I am used internally to track the series that have already
+been plotted in a group.'>
+
+    | id barWidth barOffset dataOffset |
+    = anObject [
+	<category: 'basic'>
+	^self class == anObject class and: [ self id = anObject id ]
+    ]
+
+    hash [
+	<category: 'basic'>
+	^id hash
+    ]
+
+    id [
+	<category: 'accessing'>
+	id isNil ifTrue: [ id := 0 ].
+	^id
+    ]
+
+    id: anInteger [
+	<category: 'accessing'>
+	id := anInteger
+    ]
+
+    barWidth [
+	<category: 'accessing'>
+	barWidth isNil ifTrue: [ barWidth := 0.5 ].
+	^barWidth
+    ]
+
+    barWidth: aNumber [
+	<category: 'accessing'>
+	barWidth := aNumber
+    ]
+
+    barOffset [
+	<category: 'accessing'>
+	barOffset isNil ifTrue: [ barOffset := 0 ].
+	^barOffset
+    ]
+
+    barOffset: aNumber [
+	<category: 'accessing'>
+	barOffset := aNumber
+    ]
+
+    dataOffset [
+	<category: 'accessing'>
+	^dataOffset
+    ]
+
+    stackData: aColumn [
+	<category: 'accessing'>
+	dataOffset := dataOffset isNil
+	    ifTrue: [ aColumn ]
+	    ifFalse: [ dataOffset + aColumn ]
+    ]
+]
+
 GPContainer subclass: GPSeries [
     <category: 'GNUPlot'>
     <comment: 'My instances are used to define a plotted function or data set.'>
@@ -171,14 +233,25 @@ GPContainer subclass: GPSeries [
 	^GPSeriesStyle
     ]
 
+    addTo: aGPPlot [
+	<category: 'private - double dispatch'>
+	aGPPlot addSeries: self
+    ]
+
     defaultTitle [
 	<category: 'dwim'>
 	self subclassResponsibility
     ]
 
-    addTo: aGPPlot [
-	<category: 'private - double dispatch'>
-	aGPPlot addSeries: self
+    group [
+	<category: 'accessing'>
+	^0
+    ]
+
+    group: anInteger [
+	<category: 'accessing'>
+	"Do nothing.  Grouping would not affect the way most data
+	 series are drawn."
     ]
 
     printDataOn: aStream [
@@ -187,6 +260,17 @@ GPContainer subclass: GPSeries [
 
     displayOn: aStream [
 	<category: 'printing'>
+	| group |
+	group := GPSeriesGroup new id: self group; yourself.
+	self displayOn: aStream group: group.
+    ]
+
+    displayOn: aStream group: aGroup [
+	<category: 'printing'>
+	self displayStyleOn: aStream group: aGroup
+    ]
+
+    displayStyleOn: aStream group: aGroup [
 	| theParameters |
 	theParameters := style ifNil: [ self class defaultStyle ].
 	theParameters displayOn: aStream for: self
@@ -248,7 +332,7 @@ GPSeries subclass: GPFunctionSeries [
 	^range ifNotNil: [ :r | r second ]
     ]
 
-    displayOn: aStream [
+    displayOn: aStream group: aGroup [
         <category: 'printing'>
 	range isNil ifFalse: [
 	    aStream
@@ -259,7 +343,7 @@ GPSeries subclass: GPFunctionSeries [
 		nextPut: $];
 		space ].
 	expression displayOn: aStream.
-	super displayOn: aStream
+	super displayOn: aStream group: aGroup
     ]
 
     displayPrologOn: aStream into: defs [
@@ -330,13 +414,27 @@ GPSeries subclass: GPDataSeries [
 	graphType := aString
     ]
 
-    displayOn: aStream [
-	dataSource displayOn: aStream.
+    displayOn: aStream group: aGroup [
+	self dataSource displayOn: aStream.
 	aStream nextPutAll: ' using '.
+	self displayColumnsOn: aStream group: aGroup.
+	self displayTicLabelsOn: aStream group: aGroup.
+	super displayOn: aStream group: aGroup.
+    ]
+
+    displayStyleOn: aStream group: aGroup [
+	graphType isNil ifFalse: [
+	    aStream nextPutAll: ' with '; nextPutAll: graphType; space ].
+        super displayStyleOn: aStream group: aGroup
+    ]
+
+    displayColumnsOn: aStream group: aGroup [
 	self columns
 	    do: [ :each | each displayOn: aStream ]
 	    separatedBy: [ aStream nextPut: $: ].
+    ]
 
+    displayTicLabelsOn: aStream group: aGroup [
 	"Add xticlabels etc. fake columns."
 	ticColumns isNil ifFalse: [
 	    ticColumns keysAndValuesDo: [ :k :v |
@@ -346,9 +444,6 @@ GPSeries subclass: GPDataSeries [
 		    nextPut: $(;
 		    display: v;
 		    nextPut: $) ] ].
-
-	aStream nextPutAll: ' with '; nextPutAll: style; space.
-	super displayOn: aStream.
     ]
 
     printDataOn: aStream [
@@ -416,6 +511,24 @@ GPSeries subclass: GPDataSeries [
     ]"
 ]
 
+GPDataSeries subclass: GPGroupSeries [
+    <category: 'GNUPlot'>
+    <comment: 'My instances are used to define plotted data sets when
+more series can be grouped together (e.g. in stacked bars).'>
+
+    | group |
+    group [
+	<category: 'accessing'>
+	group isNil ifTrue: [ group := 0 ].
+	^group
+    ]
+
+    group: anInteger [
+	<category: 'accessing'>
+	group := anInteger.
+    ]
+]
+
 
 GPObject subclass: GPAxis [
     <category: 'GNUPlot'>
@@ -423,7 +536,7 @@ GPObject subclass: GPAxis [
 axis.'>
 
     | name range logScale mirrorTics outwardTics ticRange ticSpacing ticFormat
-	ticSubdivision majorGrid minorGrid tics style label labelStyle |
+      ticSubdivision majorGrid minorGrid tics style label labelStyle |
 
     name: aString [
 	<category: 'private - initialization'>

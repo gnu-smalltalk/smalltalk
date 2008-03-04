@@ -464,12 +464,49 @@ GPContainer subclass: GPAbstractPlot [
         series do: [:d | d displayPrologOn: aStream into: defs ].
     ]
 
+    groupedSeries [
+	"Assign groups to series that do not have one, and return a
+	 Dictionary of OrderedCollections, holding the series according
+	 to their #group."
+	<category: 'private'>
+
+	| groupedSeries maxGroup |
+	maxGroup := series inject: 0 into: [ :old :each |
+	    each group = 0 ifTrue: [ each group: old + 1 ].
+	    each group ].
+
+	groupedSeries := LookupTable new.
+	series do: [:d |
+	    (groupedSeries
+		at: (self newGroup: d group of: maxGroup)
+		ifAbsentPut: [ OrderedCollection new ])
+		    add: d ].
+
+	^groupedSeries
+    ]
+
+    newGroup: anInteger of: maxGroup [
+	<category: 'private - factory'>
+	^GPSeriesGroup new
+	    id: anInteger;
+	    yourself
+    ]
+
     displaySeriesOn: aStream [
         <category: 'printing'>
-        series do: [:d | d displayOn: aStream]
-            separatedBy: [aStream nextPutAll: ', '].
+	| groupedSeries first |
+	groupedSeries := self groupedSeries.
+	first := true.
+	groupedSeries
+	    keysAndValuesDo: [:group :list |
+	        list do: [:d |
+		    first ifFalse: [aStream nextPutAll: ', '].
+		    first := false.
+		    d displayOn: aStream group: group]].
+
         aStream nl.
-        series do: [:d | d printDataOn: aStream]
+	groupedSeries do: [:list |
+	    list do: [:d | d printDataOn: aStream]]
     ]
 
     displayOn: aStream [
