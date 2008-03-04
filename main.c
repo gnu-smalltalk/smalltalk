@@ -229,6 +229,7 @@ parse_args (int argc,
 	case OPT_EMACS_MODE:
 	  stdin_prompt = EMACS_PROCESS_MARKER "st> ";
 	  gst_set_var (GST_VERBOSITY, 1);
+	  flags |= GST_NO_TTY;
 	  break;
 	case 'q':
 	case 'Q':

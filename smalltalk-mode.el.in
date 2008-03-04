@@ -355,13 +355,13 @@ expressions."
 (defun smalltalk-bang ()
   (interactive)
   (cond ((or (smalltalk-in-string) (smalltalk-in-comment)) (insert "!"))
-        (t (if (smalltalk-in-bang-syntax)
-               (progn (insert "!")
-	         (save-excursion
-	           (beginning-of-line)
-	           (if (looking-at "^[ \t]+!")
-		       (delete-horizontal-space)))))
-          (smalltalk-end-of-defun))))
+        ((smalltalk-in-bang-syntax)
+           (progn (insert "!")
+	     (save-excursion
+	       (beginning-of-line)
+	       (if (looking-at "^[ \t]+!")
+		   (delete-horizontal-space)))))
+        (t (smalltalk-end-of-defun))))
 
 (defun smalltalk-end-of-defun ()
   (interactive)

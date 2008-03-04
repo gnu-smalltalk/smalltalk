@@ -364,9 +364,9 @@ running."
 	    (progn (end-of-line)
 		   (insert "\n"))))
 
-      (if mode (setq mode-status mode)))
+      (if mode (setq mode-status mode))
 
-    (if fileinfo
+      (if fileinfo
 	(let (temp-file buf switch-back old-buf)
 	  (setq temp-file (concat "/tmp/" (make-temp-name "gst")))
 	  (save-excursion
@@ -382,8 +382,8 @@ running."
 	   (format
 	    "FileStream fileIn: '%s' line: %d from: '%s' at: %d\n"
 	    temp-file (nth 0 fileinfo) (nth 1 fileinfo) (nth 2 fileinfo))))
-      (comint-send-string *smalltalk-process* str))
-    (switch-to-buffer-other-window (process-buffer *smalltalk-process*)))
+        (comint-send-string *smalltalk-process* str))
+      (switch-to-buffer-other-window (process-buffer *smalltalk-process*))))
 
 
 (provide 'gst-mode)

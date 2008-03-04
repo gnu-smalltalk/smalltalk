@@ -1,3 +1,9 @@
+2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* main.c: Set GST_NO_TTY in Emacs mode.
+	* smalltalk-mode.el.in: Fix smalltalk-bang for old syntax.
+	* gst-mode.el.in: Wrap send-to-smalltalk with save-window-excursion.
+
 2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: The final word on floating-point printing.
