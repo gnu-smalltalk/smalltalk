@@ -1,5 +1,10 @@
 2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Series.st: Add special ticSpacing value of 0 to suppress tics.
+	Add GPAxis>>#from: and GPAxis>>#to:
+
+2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Series.st: Subclass GPSeriesStyle from GPRectangleStyle.
 
 2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
