@@ -86,6 +86,11 @@ function or data set.'>
 	x2 := aBoolean
     ]
 
+    fillStyle [
+        <category: 'styles'>
+        ^params at: #fillstyle ifAbsent: [ #empty ]
+    ]
+
     notitle [
 	"The line title and sample can be omitted from the key by using the keyword notitle"
 

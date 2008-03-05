@@ -1,5 +1,9 @@
 2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Series.st: Unlike rectangles, series are by default empty.
+
+2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Base.st: Add GPDataSource>>#at:.
 
 2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
