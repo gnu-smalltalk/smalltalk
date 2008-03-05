@@ -438,18 +438,28 @@ axis.'>
     ]
 
     from: a to: b [
-        <category: 'accessing'>
-        range := { a. b }
+	<category: 'accessing'>
+	range := { a. b }
     ]
 
     from [
         <category: 'accessing'>
-        ^range ifNotNil: [ :r | r first ]
+	^range ifNotNil: [ :r | r first ]
+    ]
+
+    from: a [
+	<category: 'accessing'>
+	range := { a. self to }
     ]
 
     to [
         <category: 'accessing'>
-        ^range ifNotNil: [ :r | r second ]
+	^range ifNotNil: [ :r | r second ]
+    ]
+
+    to: b [
+	<category: 'accessing'>
+	range := { self from. b }
     ]
 
     ticAt: value put: string [
@@ -644,20 +654,28 @@ axis.'>
             nextPutAll: 'set ';
             nextPutAll: name;
             nextPutAll: 'tics'.
+
 	self mirrorTics ifFalse: [ aStream nextPutAll: ' nomirror' ].
 	self outwardTics ifTrue: [ aStream nextPutAll: ' out' ].
+	self displayTicRangeOn: aStream.
+        aStream nl
+    ]
+
+    displayTicRangeOn: aStream [
+        <category: 'printing'>
+	| spacing |
 	ticRange isNil
 	    ifTrue: [
-		ticSpacing isNil ifFalse: [ aStream space; display: ticSpacing ] ]
+		(ticSpacing isNil and: [ ticSpacing > 0 ])
+		    ifFalse: [ aStream space; display: ticSpacing ] ]
 	    ifFalse: [
-	        spacing :=
-		    ticSpacing ifNil: [ (self ticTo - self ticFrom) / 4.0 ].
+	        spacing := ticSpacing.
+		spacing = 0 ifTrue: [ spacing := self ticTo - self ticFrom ].
+		spacing isNil ifTrue: [ spacing := (self ticTo - self ticFrom) / 4.0 ].
 		aStream
 		     space; display: self ticFrom;
 		     nextPut: $,; display: spacing;
 		     nextPut: $,; display: self ticTo ].
-		    
-        aStream nl
     ]
 
     displayUserTicsOn: aStream [
