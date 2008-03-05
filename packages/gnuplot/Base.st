@@ -222,6 +222,11 @@ GPObject subclass: GPDataSource [
     <category: 'GNUPlot'>
     <comment: 'My instances are used to define the source of a plotted data set.'>
 
+    at: anObject [
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
     defaultTitle [
 	self subclassResponsibility
     ]
@@ -240,14 +245,25 @@ GPDataSource subclass: GPFileDataSource [
     <category: 'GNUPlot'>
     <comment: 'My instances allow to use a file as the source of a plot.'>
 
-    | fileName |
+    | fileName index |
     GPFileDataSource class >> on: aString [
 	<category: 'instance creation'>
 	^self new fileName: aString
     ]
 
+    at: anObject [
+	<category: 'accessing'>
+	index isNil ifFalse: [ self error: 'data set already chosen' ]
+	^self copy index: anInteger - 1; yourself
+    ]
+
     defaultTitle [
 	^fileName
+    ]
+
+    index: anInteger [
+	<category: 'private'>
+	index := anInteger
     ]
 
     fileName [
@@ -262,6 +278,8 @@ GPDataSource subclass: GPFileDataSource [
 
     displayOn: aStream [
 	fileName printOn: aStream
+	index isNil
+	    ifFalse: [ aStream nextPutAll: ' index '; display: index ]
     ]
 ]
 
@@ -287,6 +305,11 @@ as the source of a plot.'>
 	<category: 'private - initialization'>
 	super initialize.
 	data := OrderedCollection new
+    ]
+
+    at: anInteger [
+	<category: 'accessing'>
+	^self class on: (data at: anInteger)
     ]
 
     add: aCollection [
