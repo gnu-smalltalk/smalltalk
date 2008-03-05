@@ -311,7 +311,7 @@ GPSeries subclass: GPDataSeries [
     <category: 'GNUPlot'>
     <comment: 'My instances are used to define a plotted data set.'>
 
-    | columns dataSource style ticColumns |
+    | columns dataSource graphType ticColumns |
     GPDataSeries class >> defaultStyleClass [
 	^GPDataSeriesStyle
     ]
@@ -350,9 +350,9 @@ GPSeries subclass: GPDataSeries [
 	^dataSource defaultTitle
     ]
 
-    style: aString [
+    graphType: aString [
 	<category: 'private - initialization'>
-	style := aString
+	graphType := aString
     ]
 
     displayOn: aStream group: aGroup [
@@ -372,7 +372,7 @@ GPSeries subclass: GPDataSeries [
 		    display: v;
 		    nextPut: $) ] ].
 
-	aStream nextPutAll: ' with '; nextPutAll: style; space.
+	aStream nextPutAll: ' with '; nextPutAll: graphType; space.
 	super displayOn: aStream group: aGroup.
     ]
 
