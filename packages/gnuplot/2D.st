@@ -33,7 +33,7 @@ GPAbstractPlot subclass: GPPlot [
     <category: 'GNUPlot'>
     <comment: 'My instance is used to define a single ''plot'' command.'>
 
-    | xAxis x2Axis yAxis y2Axis |
+    | xAxis x2Axis yAxis y2Axis barWidth barGap |
 
     GPPlot class >> defaultStyleClass [
         ^GPPlotStyle 
@@ -86,6 +86,38 @@ GPAbstractPlot subclass: GPPlot [
     y2Axis: aGPAxis [
 	<category: 'accessing'>
 	y2Axis := aGPAxis
+    ]
+
+    barGap [
+	<category: 'accessing'>
+	^barGap
+    ]
+
+    barGap: anInteger [
+	<category: 'accessing'>
+	barGap := anInteger
+    ]
+
+    barWidth [
+	<category: 'accessing'>
+	barWidth isNil ifTrue: [ barWidth := 1 ].
+	^barWidth
+    ]
+
+    barWidth: aNumber [
+	<category: 'accessing'>
+	barWidth := aNumber
+    ]
+
+    newGroup: anInteger of: maxGroup [
+	<category: 'private'>
+	| gap |
+	gap := (self barGap ifNil: [ #(##(1/2) 1) at: maxGroup ifAbsent: [2] ])
+	  - (1 - self barWidth).
+	^(super newGroup: anInteger of: maxGroup)
+	    barOffset: (2 * anInteger - 1 - maxGroup) / 2 / (maxGroup + gap);
+	    barWidth: self barWidth / (maxGroup + gap);
+	    yourself
     ]
 
     function: exprBlock [
@@ -228,6 +260,19 @@ GPAbstractPlot subclass: GPPlot [
 	<category: 'building'>
 	| series |
 	series := self vectors: aDataSourceOrArray.
+	aBlock value: series.
+	^series
+    ]
+
+    bars: aDataSourceOrArray [
+	<category: 'building'>
+	^self add: (GPBarSeries on: aDataSourceOrArray)
+    ]
+
+    bars: aDataSourceOrArray with: aBlock [
+	<category: 'building'>
+	| series |
+	series := self bars: aDataSourceOrArray.
 	aBlock value: series.
 	^series
     ]
@@ -378,6 +423,75 @@ GPStyle subclass: GPPlotStyle [
     <category: 'GNUPlot'>
     <comment: 'My instance is used to define parameters for a ''plot'' command.'>
 
+]
+
+GPGroupSeries subclass: GPBarSeries [
+    <category: 'GNUPlot'>
+    <comment: 'My instance is used to define a data series for an histogram.'>
+
+    defaultColumns [
+	^{ GPColumnRef column: 1 }
+    ]
+
+    data [
+	^self columns first
+    ]
+
+    data: expr [
+	self columns: { expr asGPExpression }
+    ]
+
+    displayOn: aStream group: aGroup [
+        self dataSource displayOn: aStream.
+        aStream nextPutAll: ' using '.
+        self displayColumnsOn: aStream group: aGroup.
+        self displayStyleOn: aStream group: aGroup.
+	aGroup stackData: self data.
+        self displayTicLabelsOn: aStream group: aGroup.
+    ]
+
+    displayColumnsOn: aStream group: aGroup [
+	aStream nextPutAll: '($0'.
+	aGroup barOffset < 0 ifFalse: [ aStream nextPut: $+ ].
+	aStream print: aGroup barOffset asFloat.
+	aStream nextPutAll: '):'.
+	aGroup dataOffset isNil
+	    ifTrue: [
+		aStream display: self data.
+		aStream nextPutAll: ':('.
+		aStream display: aGroup barWidth asFloat.
+		aStream nextPut: $) ]
+	    ifFalse: [
+		aStream display: aGroup dataOffset + (self data / 2).
+		aStream nextPutAll: ':('.
+		aStream display: (aGroup barWidth / 2) asFloat.
+		aStream nextPutAll: '):'.
+		aStream display: self data / 2 ].
+    ]
+
+    displayStyleOn: aStream group: aGroup [
+	aGroup dataOffset isNil
+	    ifTrue: [ aStream nextPutAll: ' with boxes' ]
+	    ifFalse: [ aStream nextPutAll: ' with boxxyerrorbars' ].
+	super displayStyleOn: aStream group: aGroup
+    ]
+
+    displayTicLabelsOn: aStream group: aGroup [
+	ticColumns isNil ifFalse: [
+	    aStream nextPutAll: ', '.
+	    self dataSource displayOn: aStream.
+	    aStream nextPutAll: ' using 0:'.
+	    aStream display: aGroup dataOffset.
+	    aStream nextPutAll: ':""'.
+	    super displayTicLabelsOn: aStream group: aGroup.
+	    aStream nextPutAll: ' notitle with labels'.
+	]
+    ]
+
+    printDataOn: aStream [
+	super printDataOn: aStream.
+	ticColumns isNil ifFalse: [ super printDataOn: aStream ].
+    ]
 ]
 
 GPDataSeries subclass: GPXYSeries [

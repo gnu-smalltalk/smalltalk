@@ -182,4 +182,57 @@ GPObject subclass: GNUPlotExamples [
 	Transcript display: p; nl.
 	p execute
     ]
+
+    GNUPlotExamples class >> bars [
+	^self barsOn: nil
+    ]
+
+    GNUPlotExamples class >> barsOn: file [
+	| p plot data |
+	p := GNUPlot new.
+	file isNil ifFalse: [
+	    p terminal: self newPngTerminal.
+	    p output: file ].
+
+	data := #((1 2 'a') (2 3 'b') (3 4 'c') (4 5 'd') (5 6 'e')).
+
+	(plot := GPPlot new)
+	    bars: data
+	    with: [:series |
+		series style fillStyle: #solid.
+		series data: (GPColumnRef column: 1) ];
+
+	    bars: data
+	    with: [:series |
+		series style fillStyle: #solid.
+		series data: (GPColumnRef column: 2); xTicColumn: 3 ].
+
+	plot xAxis ticSpacing: 0.
+	plot xAxis from: -0.5 to: 4.5.
+	plot yAxis from: 0.
+	p add: plot.
+
+	data := #((1 1 'a') (2 1 'b') (3 1 'c') (4 1 'd') (5 1 'e')).
+
+	(plot := GPPlot new)
+	    bars: data
+	    with: [:series |
+		series style fillStyle: #solid.
+		series group: 1.
+		series data: (GPColumnRef column: 1) ];
+
+	    bars: data
+	    with: [:series |
+		series style fillStyle: #solid.
+		series group: 1.
+		series data: (GPColumnRef column: 2); xTicColumn: 3 ].
+
+	plot xAxis ticSpacing: 0.
+	plot xAxis from: -0.5 to: 4.5.
+	plot yAxis from: 0.
+
+	p add: plot.
+	Transcript display: p; nl.
+	p execute
+    ]
 ]

@@ -1,5 +1,14 @@
 2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* 2D.st: Add #barGap, #barWidth, #bars:, GPBarSeries.
+	* Base.st: Fix some things in the design of grouped series.
+	* Examples.st: Add bar graph example.
+	* Series.st: Implement GPSeriesGroup.  Use template method
+	pattern for GPSeries>>#displayOn:group: and
+	GPDataSeries>>#displayOn:group:.
+
+2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Series.st: Add special ticSpacing value of 0 to suppress tics.
 	Add GPAxis>>#from: and GPAxis>>#to:
 

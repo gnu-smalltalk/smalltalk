@@ -477,11 +477,15 @@ GPContainer subclass: GPAbstractPlot [
 
 	groupedSeries := LookupTable new.
 	series do: [:d |
-	    (groupedSeries at: d group ifAbsent: [ OrderedCollection new ])
-		add: d ]
+	    (groupedSeries
+		at: (self newGroup: d group of: maxGroup)
+		ifAbsentPut: [ OrderedCollection new ])
+		    add: d ].
+
+	^groupedSeries
     ]
 
-    newGroup: anInteger [
+    newGroup: anInteger of: maxGroup [
 	<category: 'private - factory'>
 	^GPSeriesGroup new
 	    id: anInteger;
@@ -490,15 +494,15 @@ GPContainer subclass: GPAbstractPlot [
 
     displaySeriesOn: aStream [
         <category: 'printing'>
-	| groupedSeries |
+	| groupedSeries first |
 	groupedSeries := self groupedSeries.
+	first := true.
 	groupedSeries
-	    keysAndValuesDo: [:group :list || g |
-	        g := self newGroup: group.
-	        list
-		    do: [:d | d displayOn: aStream group: g]
-                    separatedBy: [aStream nextPutAll: ', ']]
-	    separatedBy: [aStream nextPutAll: ', '].
+	    keysAndValuesDo: [:group :list |
+	        list do: [:d |
+		    first ifFalse: [aStream nextPutAll: ', '].
+		    first := false.
+		    d displayOn: aStream group: group]].
 
         aStream nl.
 	groupedSeries do: [:list |
