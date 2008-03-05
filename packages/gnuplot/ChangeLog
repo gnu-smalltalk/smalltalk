@@ -1,5 +1,9 @@
 2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Series.st: Subclass GPSeriesStyle from GPRectangleStyle.
+
+2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Series.st: Rename GPDataSeries' style instance variable to graphType.
 	* 2D.st: Likewise.  Remove non-existent style xerrorboxes.
 

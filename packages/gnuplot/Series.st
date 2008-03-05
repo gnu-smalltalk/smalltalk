@@ -53,7 +53,7 @@
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
     OTHER DEALINGS IN THE SOFTWARE."
 
-GPLineStyle subclass: GPSeriesStyle [
+GPRectangleStyle subclass: GPSeriesStyle [
     <category: 'GNUPlot'>
     <comment: 'My instances are used to customize the appearance of a plotted
 function or data set.'>
