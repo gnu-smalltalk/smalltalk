@@ -98,7 +98,7 @@ GPAbstractPlot subclass: GPPlot [
     lrSteps: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXYSeries on: aDataSourceOrArray)
-			style: 'steps';
+			graphType: 'steps';
 			yourself)
     ]
 
@@ -113,7 +113,7 @@ GPAbstractPlot subclass: GPPlot [
     ulSteps: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXYSeries on: aDataSourceOrArray)
-			style: 'fsteps';
+			graphType: 'fsteps';
 			yourself)
     ]
 
@@ -128,7 +128,7 @@ GPAbstractPlot subclass: GPPlot [
     centerSteps: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXYSeries on: aDataSourceOrArray)
-			style: 'histeps';
+			graphType: 'histeps';
 			yourself)
     ]
 
@@ -143,7 +143,7 @@ GPAbstractPlot subclass: GPPlot [
     dots: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXYSeries on: aDataSourceOrArray)
-			style: 'dots';
+			graphType: 'dots';
 			yourself)
     ]
 
@@ -158,7 +158,7 @@ GPAbstractPlot subclass: GPPlot [
     points: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXYSeries on: aDataSourceOrArray)
-			style: 'points';
+			graphType: 'points';
 			yourself)
     ]
 
@@ -175,7 +175,7 @@ GPAbstractPlot subclass: GPPlot [
 	"For now, center is passed from here.  Later, GPTextSeries will have
 	 its own params class."
 	^self add: ((GPTextSeries on: aDataSourceOrArray)
-			style: 'labels center';
+			graphType: 'labels center';
 			yourself)
     ]
 
@@ -190,7 +190,7 @@ GPAbstractPlot subclass: GPPlot [
     bubbles: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPBubbleSeries on: aDataSourceOrArray)
-			style: 'points';
+			graphType: 'points';
 			yourself)
     ]
 
@@ -205,7 +205,7 @@ GPAbstractPlot subclass: GPPlot [
     impulses: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXYSeries on: aDataSourceOrArray)
-			style: 'impulses';
+			graphType: 'impulses';
 			yourself)
     ]
 
@@ -220,7 +220,7 @@ GPAbstractPlot subclass: GPPlot [
     vectors: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPVectorSeries on: aDataSourceOrArray)
-			style: 'vectors';
+			graphType: 'vectors';
 			yourself)
     ]
 
@@ -235,7 +235,7 @@ GPAbstractPlot subclass: GPPlot [
     boxes: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPBoxSeries on: aDataSourceOrArray)
-			style: 'boxes';
+			graphType: 'boxes';
 			yourself)
     ]
 
@@ -250,7 +250,7 @@ GPAbstractPlot subclass: GPPlot [
     xyErrorBoxes: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXYErrorSeries on: aDataSourceOrArray)
-			style: 'xyerrorboxes';
+			graphType: 'boxxyerrorbars';
 			yourself)
     ]
 
@@ -262,25 +262,10 @@ GPAbstractPlot subclass: GPPlot [
 	^series
     ]
 
-    xErrorBoxes: aDataSourceOrArray [
-	<category: 'building'>
-	^self add: ((GPXErrorBoxSeries on: aDataSourceOrArray)
-			style: 'xerrorboxes';
-			yourself)
-    ]
-
-    xErrorBoxes: aDataSourceOrArray with: aBlock [
-	<category: 'building'>
-	| series |
-	series := self xErrorBoxes: aDataSourceOrArray.
-	aBlock value: series.
-	^series
-    ]
-
     errorBoxes: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPErrorBoxSeries on: aDataSourceOrArray)
-			style: 'yerrorboxes';
+			graphType: 'boxerrorbars';
 			yourself)
     ]
 
@@ -295,7 +280,7 @@ GPAbstractPlot subclass: GPPlot [
     candleSticks: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPFinancialDataSeries on: aDataSourceOrArray)
-			style: 'candlesticks';
+			graphType: 'candlesticks';
 			yourself)
     ]
 
@@ -310,7 +295,7 @@ GPAbstractPlot subclass: GPPlot [
     financeBars: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPFinancialDataSeries on: aDataSourceOrArray)
-			style: 'financebars';
+			graphType: 'financebars';
 			yourself)
     ]
 
@@ -325,7 +310,7 @@ GPAbstractPlot subclass: GPPlot [
     lines: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXYSeries on: aDataSourceOrArray)
-			style: 'lines';
+			graphType: 'lines';
 			yourself)
     ]
 
@@ -340,7 +325,7 @@ GPAbstractPlot subclass: GPPlot [
     xyErrorBars: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXYErrorSeries on: aDataSourceOrArray)
-			style: 'xyerrorbars';
+			graphType: 'xyerrorbars';
 			yourself)
     ]
 
@@ -355,7 +340,7 @@ GPAbstractPlot subclass: GPPlot [
     xErrorBars: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPXErrorSeries on: aDataSourceOrArray)
-			style: 'xerrorbars';
+			graphType: 'xerrorbars';
 			yourself)
     ]
 
@@ -370,7 +355,7 @@ GPAbstractPlot subclass: GPPlot [
     errorBars: aDataSourceOrArray [
 	<category: 'building'>
 	^self add: ((GPErrorSeries on: aDataSourceOrArray)
-			style: 'errorbars';
+			graphType: 'errorbars';
 			yourself)
     ]
 
@@ -571,42 +556,6 @@ with an horizontal error bar.'>
 			yExpr asGPExpression.
 			minExpr asGPExpression.
 			maxExpr asGPExpression }
-    ]
-]
-
-GPXErrorSeries subclass: GPXErrorBoxSeries [
-    <category: 'GNUPlot'>
-    <comment: 'My instance is used to define a data series for (x,y) values
-with an adjustable width and an horizontal error bar.'>
-
-    defaultColumns [
-	^{ GPColumnRef column: 1. GPColumnRef column: 2.
-	   GPColumnRef column: 3 }
-    ]
-
-    x: xExpr error: errExpr y: yExpr width: widthExpr [
-	self columns: { xExpr asGPExpression.
-			yExpr asGPExpression.
-			errExpr asGPExpression.
-			widthExpr asGPExpression }
-    ]
-
-    min: minExpr max: maxExpr y: yExpr width: widthExpr [
-	| x err min max |
-	min := minExpr asGPExpression.
-        max := maxExpr asGPExpression.
-	x := (min + max) / 2.
-	err := (max - min) / 2.
-	self columns: { x. yExpr asGPExpression. err.
-			widthExpr asGPExpression }
-    ]
-
-    x: xExpr min: minExpr max: maxExpr y: yExpr width: widthExpr [
-	self columns: { xExpr asGPExpression.
-			yExpr asGPExpression.
-			minExpr asGPExpression.
-			maxExpr asGPExpression.
-			widthExpr asGPExpression }
     ]
 ]
 

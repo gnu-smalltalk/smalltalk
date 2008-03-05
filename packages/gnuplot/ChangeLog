@@ -1,5 +1,10 @@
 2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Series.st: Rename GPDataSeries' style instance variable to graphType.
+	* 2D.st: Likewise.  Remove non-existent style xerrorboxes.
+
+2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* 2D.st: Detect 1- and 2-column GPXYSeries datasets.  Use #defaultColumns.
 	* Expression.st: Add GPCondExpression, GPColumnRefValidExpression.
 	* Series.st: Use #defaultColumns.
