@@ -251,9 +251,9 @@ GPDataSource subclass: GPFileDataSource [
 	^self new fileName: aString
     ]
 
-    at: anObject [
+    at: anInteger [
 	<category: 'accessing'>
-	index isNil ifFalse: [ self error: 'data set already chosen' ]
+	index isNil ifFalse: [ self error: 'data set already chosen' ].
 	^self copy index: anInteger - 1; yourself
     ]
 
