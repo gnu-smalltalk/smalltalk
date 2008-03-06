@@ -1,3 +1,7 @@
+2008-03-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sport.st: Revert previous patch.
+
 2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sport.st: Don't busy-wait on #accept:.

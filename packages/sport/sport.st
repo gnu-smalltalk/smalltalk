@@ -1036,7 +1036,6 @@ Object subclass: SpSocket [
 		    listenBackloggingUpTo: 50.
 	s2 := SpSocket connectToServerOnHost: 'localhost' port: 3523.
         [
-	    s1 waitForConnection.
 	    (s3 := s1 accept) isNil ] whileTrue: [ Processor yield ] ] 
 		ifCurtailed: 
 		    [s1 close.
