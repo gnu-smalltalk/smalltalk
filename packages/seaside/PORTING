@@ -1,0 +1,126 @@
+Portability problems not fixed upstream:
+
+1) testCompileString, remove #sourceCodeAt: (issue 7)
+2) remove testColorAsHtmlColor (issue 5)
+3) should add to SeasidePlatformSupport #asMethodReturningString:named:,
+   to use it in WAViewer too (issue 1)
+4) hashing-dependent WAHtmlRootTest>>#testLinkElement (issue 27)
+
+More methods to test for in WAPlatformTest:
+
+1) SequenceableCollection>>#associationsDo:
+2) Object>>#printStringLimitedTo:
+3) Dictionary>>#keysSortedSafely
+4) SmallInteger>>#day / #hour / #minute / #second
+5) Object>>#isCollection / Collection>>#isCollection
+6) String>>#caseInsensitiveLessOrEqual:
+7) #defaultDirectoryName
+8) #platformString
+
+----------
+
+Changes to do manually:
+1) add imports to the classes in Seaside-Adapters-Swazoo and namespaces to superclasses
+2) BlockContext -> BlockClosure
+3) WAMiniCalendar rewrite
+4) UnicodeString in testNonLatinWindowsPath?
+5) remove testColorAsHtmlColor (bogus)
+6) remove testCapitalizedUmlauts (unsupported in GST)
+7) remove testLanguageNameIso3 (unsupported in Seaside)
+8) make sure SeasideSite's defaultPort is 8080.
+9) add #asSortedCollection before #do: in WALinkElement>>#addMedia:
+
+
+----------
+
+broken functional tests:
+- getting dnu's from swazoo
+- urlencoded encoding
+- error (deprecated etc, more or less expected)
+- exception
+
+----------
+
+The script I used for conversion:
+
+cd mcz
+for i in *.mcz; do
+  unzip -p $i snapshot/source.st | tr \\r \\n > ../sq/$i.st
+done
+cd ../sq
+for i in *.st Seaside-Tests-Functional.st; do
+  if test $i = Seaside-Tests-Functional.st; then
+    cat_func=-c'^Seaside-Tests-Functional$'
+    in=`echo Seaside-Tests-*`
+  else
+    cat_func=-c'-^Seaside-Tests-Functional$'
+    in=$i
+  fi
+  echo converting $in to $i
+  ../../gst -I ../../gst.im -f ../../../scripts/Convert.st -f squeak $cat_func \
+    -C'-^Continuation$' \
+    -r'Float->FloatD' \
+    -r'MessageSend->DirectedMessage' \
+    -r'DateAndTime->DateTime' \
+    -r'(``@object ifNil: ``@arg ifNotNil: [ | `@t2 | `@.s2 ] )->
+       (``@object ifNil: ``@arg ifNotNil: [ :foo || `@t2 | `@.s2 ])' \
+    -r'(``@object ifNotNil: [ | `@t2 | `@.s2 ] ifNil: ``@arg )->
+       (``@object ifNotNil: [ :foo || `@t2 | `@.s2 ] ifNil: ``@arg)' \
+    -r'(``@object ifNotNil: [ | `@t2 | `@.s2 ] )->
+       (``@object ifNotNil: [ :foo || `@t2 | `@.s2 ])' \
+    -r'(``@object ifNil: ``@arg1 ifNotNilDo: ``@arg2 )->
+       (``@object ifNil: ``@arg1 ifNotNil: ``@arg2)' \
+    -r'(``@object ifNotNilDo: ``@arg2 ifNil: ``@arg1 )->
+       (``@object ifNotNil: ``@arg2 ifNil: ``@arg1)' \
+    -r'(``@object ifNotNilDo: ``@arg2 )->
+       (``@object ifNotNil: ``@arg2)' \
+    -r'(``@object doIfNotNil: ``@arg2 )->
+       (``@object ifNotNil: ``@arg2)' \
+    -r'(``@object on: ``@arg2 do: [ | `@t2 | `@.s2 ])->
+       (``@object on: ``@arg2 do: [ :ex || `@t2 | `@.s2 ])' \
+    -r'(``@object findTokens: Character cr )->
+       (``@object lines)' \
+    -r'(``@object subStrings: String crlf )->
+       (``@object lines)' \
+    -r'(``@object newFrom: ``@arg2 )->
+       (``@object from: ``@arg2)' \
+    -r'(``@object withIndexDo: ``@arg2 )->
+       (``@object doWithIndex: ``@arg2)' \
+    -r'[Character value: 65535. 65535]->
+       [Character codePoint: 65535. 65535]' \
+    -r'(Month daysInMonthNumber: ``@arg1 forYear: ``@arg2 )->
+       (Date daysInMonthNumber: ``@arg1 forYear: ``@arg2)' \
+    -r'(Time hour: ``@arg1 minute: ``@arg2 second: ``@arg3)->
+       (Time hours: ``@arg1 minutes: ``@arg2 seconds: ``@arg3)' \
+    -r'(Date year: ``@arg1 month: ``@arg2 day: ``@arg3)->
+       (Date newDay: ``@arg3 monthNumber: ``@arg2 year: ``@arg1)' \
+    -r'(``@obj sender)->
+       (``@obj parentContext)' \
+    -r'(Dictionary withAll: ``@arg2 )->
+       (Dictionary from: ``@arg2)' \
+    -r'(Time totalSeconds)->
+       (Time secondClock)' \
+    -r'(``@obj beginsWith: ``@arg2 )->
+       (``@obj startsWith: ``@arg2)' \
+    -r'(``@obj asUnicode)->
+       (``@obj codePoint)' \
+    -r'(``@obj trimBlanks)->
+       (``@obj trimSeparators)' \
+    -r'(``@obj raiseSignal)->
+       (``@obj signal)' \
+    -r'(``@obj raiseSignal: ``@arg2 )->
+       (``@obj signal: ``@arg2)' \
+    -r'(``@obj allSubInstancesDo: ``@arg2 )->
+       (``@obj allSubinstancesDo: ``@arg2)' \
+    -r'((Character value: ``@arg2 ) toString)->
+       ((Character codePoint: ``@arg2) asString)' \
+    $in ../gst/$i
+done
+
+echo mv Seaside-Adapters-Core-* ../../../packages/seaside/core/Seaside-Adapters-Core.st 
+echo mv Seaside-Adapters-Tests-* ../../../packages/seaside/core/Seaside-Adapters-Tests.st 
+echo mv Seaside-Core-* ../../../packages/seaside/core/Seaside-Core.st 
+echo mv Seaside-Development-Core-* ../../../packages/seaside/dev/Seaside-Development-Core.st 
+echo mv Seaside-Examples-* ../../../packages/seaside/examples/Seaside-Examples.st 
+echo mv Seaside-Tests-* ../../packages/seaside/core/Seaside-Tests.st
+echo mv Seaside-Tests-Functional.st ../../packages/seaside/examples/

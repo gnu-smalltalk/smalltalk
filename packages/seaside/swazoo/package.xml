@@ -1,0 +1,17 @@
+<package>
+  <name>Seaside-Swazoo</name>
+  <namespace>Seaside</namespace>
+
+  <prereq>Seaside-Core</prereq>
+  <prereq>Swazoo</prereq>
+
+  <start>
+    Seaside.SwazooSeaside startOn: (%1
+	ifNil: [ Seaside.SeasideSite defaultPort ]
+	ifNotNil: [ :port | port asNumber ])
+  </start>
+  <stop>Seaside.SwazooSeaside stop</stop>
+
+  <filein>Seaside-Adapters-Swazoo.st</filein>
+  <file>Seaside-Adapters-Swazoo.st</file>
+</package>

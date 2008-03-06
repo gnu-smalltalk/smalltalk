@@ -6,6 +6,22 @@
 </package>
 
 <package>
+  <name>Seaside</name>
+  <directory>packages/seaside</directory>
+  <prereq>Seaside-Core</prereq>
+  <prereq>Seaside-Swazoo</prereq>
+
+  <start>
+    Seaside.SwazooSeaside startOn: (%1
+	ifNil: [ Seaside.SeasideSite defaultPort ]
+	ifNotNil: [ :port | port asNumber ])
+  </start>
+  <stop>Seaside.SwazooSeaside stop</stop>
+
+  <file>PORTING</file>
+</package>
+
+<package>
   <name>MD5</name>
   <prereq>Digest</prereq>
 </package>

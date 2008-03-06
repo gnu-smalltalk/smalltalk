@@ -29,7 +29,9 @@ o   DBI supports querying tables for schema information, and is integrated
     with the "ROE" (Relational Object Expression) package.  ROE support is
     present for all back-ends (MySQL, PostgreSQL, SQLite).
 
-o   Swazoo web server
+o   Seaside application server/web framework.
+
+o   Swazoo web server.
 
 -----------------------------------------------------------------------------
 

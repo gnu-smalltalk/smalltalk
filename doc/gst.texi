@@ -147,6 +147,7 @@ Packages
 * Parser, STInST, Compiler:              Smalltalk-in-Smalltalk.
 * DBI:                                   Database.
 * I18N:                                  Locales.
+* Seaside:                               Seaside.
 * Swazoo:                                Swazoo.
 * SUnit:                                 SUnit.
 * TCP, WebServer, NetClients:            Network support.
@@ -2058,6 +2059,7 @@ The rest of this chapter discusses some of the packages provided with @gst{}.
 * Parser, STInST, Compiler:              Smalltalk-in-Smalltalk.
 * DBI:                                   Database.
 * I18N:                                  Locales.
+* Seaside:                               Seaside.
 * Swazoo:                                Swazoo.
 * SUnit:                                 SUnit.
 * TCP, WebServer, NetClients:            Network support.
@@ -2446,6 +2448,69 @@ internationalized programs is guaranteed to the end user.
 
 In addition, the representation of translated strings is the standard
 @sc{mo} file format adopted by the @gnu{} @code{gettext} library.
+
+@node Seaside
+@section The Seaside web framework
+
+Seaside is a framework to build highly interactive web applications
+quickly, reusably and maintainably.  Features of Seaside include
+callback-based request handling, hierarchical (component-based)
+page design, and modal session management to easily implement
+complex workflows.
+
+A simple Seaside component looks like this:
+
+@example
+Seaside.WAComponent subclass: MyCounter [
+    | count |
+    MyCounter class >> canBeRoot [ ^true ]
+
+    initialize [
+        super initialize.
+        count := 0.
+    ]
+    states [ ^@{ self @} ]
+    renderContentOn: html [
+        html heading: count.
+        html anchor callback: [ count := count + 1 ]; with: '++'.
+        html space.
+        html anchor callback: [ count := count - 1 ]; with: '--'.
+    ]
+]
+
+MyCounter registerAsApplication: 'mycounter'
+@end example
+
+Most of the time, you will run Seaside in a background virtual machine.
+First of all, you should load the Seaside packages into an image like
+this:
+
+@example
+$ gst
+st> PackageLoader fileInPackage: 'Seaside'
+st> PackageLoader fileInPackage: 'Seaside-Development'
+st> PackageLoader fileInPackage: 'Seaside-Examples'
+st> ObjectMemory snapshot: 'seaside.im'
+@end example
+
+@noindent
+Then, you can start Seaside with
+
+@example
+$ gst-remote -I seaside.im --daemon --start=Seaside
+@end example
+
+@noindent
+which will start serving pages at @url{http://localhost:8080/seaside}.
+
+You can stop serving Seaside pages, and bring down the server,
+respectively with these commands:
+
+@example
+$ gst-remote --kill
+$ gst-remote --stop=Seaside
+@end example
+
 
 @node Swazoo
 @section The Swazoo web server

@@ -1,0 +1,10 @@
+<package>
+  <name>Seaside-Development</name>
+  <namespace>Seaside</namespace>
+
+  <prereq>Seaside-Core</prereq>
+
+  <filein>Seaside-Development-Core.st</filein>
+  <file>Seaside-Development-Core.st</file>
+</package>
+

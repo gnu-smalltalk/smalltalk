@@ -1,0 +1,40 @@
+<package>
+  <name>Seaside-Core</name>
+  <namespace>Seaside</namespace>
+  <prereq>Iconv</prereq>
+  <prereq>Sport</prereq>
+
+  <test>
+    <prereq>Seaside-Examples</prereq>
+    <prereq>Seaside-Development</prereq>
+    <filein>Seaside-Tests.st</filein>
+    <filein>Seaside-Adapters-Tests.st</filein>
+
+    <sunit>Seaside.WACodecTest Seaside.WAPlatformTest Seaside.ContinuationTest
+      Seaside.WAAttributesTest Seaside.WAConfigurationTest
+      Seaside.WACookieUnitTest Seaside.WADictionaryTest
+      Seaside.WADynamicVariableTest Seaside.WAResponseTest
+      Seaside.WAUrlTest Seaside.WAAcceptTest Seaside.WABacktrackingTest
+      Seaside.WACanvasBrushTest Seaside.WAFormTagTest
+      Seaside.WAHtmlBuilderTest Seaside.WAHtmlRootTest
+      Seaside.WAEncoderTest Seaside.WAExternalIDTest Seaside.WAMimeTypeTest
+      Seaside.WAProxyTest Seaside.WAFileLibraryTest Seaside.WAFileTest
+      Seaside.WALocaleTest Seaside.WAResourceBaseUrlTest
+      Seaside.WADispatcherTest Seaside.WADocumentHandlerTest
+    </sunit>
+  </test>
+
+  <filein>Seaside-GST.st</filein>
+  <filein>Seaside-Adapters-Core.st</filein>
+  <filein>Seaside-Adapters-GST.st</filein>
+  <filein>Seaside-Core.st</filein>
+  <filein>Seaside-GST-Override.st</filein>
+
+  <file>Seaside-Core.st</file>
+  <file>Seaside-GST.st</file>
+  <file>Seaside-GST-Override.st</file>
+  <file>Seaside-Tests.st</file>
+  <file>Seaside-Adapters-Core.st</file>
+  <file>Seaside-Adapters-GST.st</file>
+  <file>Seaside-Adapters-Tests.st</file>
+</package>
