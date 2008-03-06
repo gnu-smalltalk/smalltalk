@@ -1,5 +1,54 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 3.0.1 TO 3.0.2
+
+o   Fixed bugs in floating-point I/O
+
+o   Fixed bugs in comparisons between ScaledDecimals and Integers.
+
+o   Fixes for MinGW
+
+o   Fixes to the Emacs modes.
+
+o   Improved GNUPlot bindings (support for histograms).
+
+o   Improved SqueakParser
+
+o   Number>>#readFrom: will return floating-point numbers, not fractions.
+
+o   New methods:
+
+    AbstractSocket>>#isPeerAlive
+    CharacterArray>>#endsWith:
+    Collection>>#count:
+    Collection>>#gather:
+    Collection>>#noneSatisfy:
+    Date>>#-
+    DateTime>>#date:time:
+    DateTime>>#date:time:offset:
+    Dictionary>>#associations
+    Message>>#selector:argument:
+    Number>>#to:collect:
+    Number>>#to:by:collect:
+    SequenceableCollection>>#copyAfter:
+    SequenceableCollection>>#copyAfterLast:
+    SequenceableCollection>>#copyUpToLast:
+    SequenceableCollection>>#identityIndexOfLast:ifAbsent:
+    SequenceableCollection>>#indexOfLast:ifAbsent:
+    SequenceableCollection>>#sort
+    SequenceableCollection>>#sortBy:
+    SequenceableCollection>>#with: (also #with:#with: etc.)
+    Stream>>#with: (also #with:#with: etc.)
+    Time>>#addSeconds:
+    Time>>#midnight
+
+o   Regex is now a subclass of Object
+
+o   SQLite bindings return a different Row object for each #next call
+    to a ResultSet.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 3.0 TO 3.0.1
 
 o   `gst-package --list-files' emits file paths relative from the current
