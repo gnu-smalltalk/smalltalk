@@ -181,7 +181,11 @@ server ifTrue: [
 		| conn |
 		[
 		    queue waitForConnection.
-		    (conn := queue accept) isNil ] whileTrue: [ Processor yield ].
+		    (conn := queue accept) isNil
+		] whileTrue: [
+		    queue isOpen ifFalse: [ Processor activeProcess terminate ].
+		    Processor yield
+		].
 		[
 		    [[
 			Transcript register: conn.
