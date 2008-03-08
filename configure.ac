@@ -115,7 +115,7 @@ else
     INCSIGSEGV='-I$(top_srcdir)/sigsegv/src -I$(top_builddir)/sigsegv/src'
     LIBSIGSEGV='$(top_builddir)/sigsegv/src/libsigsegv.la'
   elif test $with_system_libsigsegv = yes; then
-    INCFFI= LIBFFI=-lsigsegv
+    INCSIGSEGV= LIBSIGSEGV=-lsigsegv
   else
     INCSIGSEGV="-I$withval/../include" LIBSIGSEGV="-L$withval -lsigsegv"
   fi
