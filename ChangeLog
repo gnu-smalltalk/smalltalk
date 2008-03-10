@@ -1,3 +1,8 @@
+2008-03-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CharArray.st: Move #startsWith: and #endsWith:...
+	* kernel/SeqCollect.st: ... here.
+
 2008-03-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Remote.st: Exit when the server socket is closed.

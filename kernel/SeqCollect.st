@@ -144,6 +144,30 @@ some access and manipulation methods.'>
 	^hash
     ]
 
+    endsWith: aSequenceableCollection [
+	"Returns true if the receiver ends with the same characters as aSequenceableCollection."
+
+	<category: 'comparing'>
+	| delta |
+	delta := self size - aSequenceableCollection size.
+	delta >= 0 ifFalse: [ ^false ].
+	aSequenceableCollection 
+	    keysAndValuesDo: [:i :each |
+		(self at: i + delta) = each ifFalse: [^false]].
+	^true
+    ]
+
+    startsWith: aSequenceableCollection [
+	"Returns true if the receiver starts with the same characters as aSequenceableCollection."
+
+	<category: 'comparing'>
+	self size >= aSequenceableCollection size ifFalse: [ ^false ].
+	aSequenceableCollection 
+	    keysAndValuesDo: [:i :each |
+		(self at: i) = each ifFalse: [^false]].
+	^true
+    ]
+
     at: anIndex ifAbsent: aBlock [
 	"Answer the anIndex-th item of the collection, or evaluate aBlock
 	 and answer the result if the index is out of range"

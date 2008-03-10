@@ -127,30 +127,6 @@ accessing and manipulation methods for strings.'>
 	^(self caseInsensitiveCompareTo: aCharacterArray) = 0
     ]
 
-    endsWith: aCharacterArray [
-	"Returns true if the receiver ends with the same characters as aCharacterArray."
-
-	<category: 'comparing'>
-	| delta |
-	delta := self size - aCharacterArray size.
-	delta >= 0 ifFalse: [ ^false ].
-	aCharacterArray 
-	    keysAndValuesDo: [:i :each |
-		(self at: i + delta) = each ifFalse: [^false]].
-	^true
-    ]
-
-    startsWith: aCharacterArray [
-	"Returns true if the receiver starts with the same characters as aCharacterArray."
-
-	<category: 'comparing'>
-	self size >= aCharacterArray size ifFalse: [ ^false ].
-	aCharacterArray 
-	    keysAndValuesDo: [:i :each |
-		(self at: i) = each ifFalse: [^false]].
-	^true
-    ]
-
     match: aCharacterArray [
 	"Answer whether aCharacterArray matches the pattern contained in the
 	 receiver. # in the receiver means 'match any character', * in
