@@ -1,3 +1,8 @@
+2008-03-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Load.st: Add -i.
+	* gst-tool.c: Likewise.
+
 2008-03-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CharArray.st: Move #startsWith: and #endsWith:...

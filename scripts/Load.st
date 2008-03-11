@@ -53,6 +53,7 @@ Options:
     -n --dry-run          don''t save the image after loading
     -t --test             run SUnit tests if available
        --start[=ARG]      start the package and keep running the image
+    -i --rebuild-image    load into a newly-created image
     -I --image-file=FILE  load into the specified image
        --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message
@@ -63,7 +64,7 @@ Options:
 Smalltalk
     arguments: '-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run
 		-f|--force -t|--test -I|--image-file: --kernel-directory:
-		--start::'
+		--start:: -i|--rebuild-image'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
