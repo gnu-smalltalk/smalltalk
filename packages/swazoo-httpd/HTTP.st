@@ -268,16 +268,12 @@ Object subclass: HTTPConnection [
     nextPutError: aResponse [
 	<category: 'serving-responses'>
 	aResponse informConnectionClose.
-	aResponse writeTo: self stream.
-	self stream closeResponse
+	aResponse writeTo: self stream
     ]
 
     nextPutResponse: aMessage toRequest: aRequest [
 	<category: 'serving-responses'>
-	aRequest isHead 
-	    ifTrue: [aMessage writeHeaderTo: self stream]
-	    ifFalse: [aMessage writeTo: self stream].
-	self stream closeResponse
+	aMessage writeTo: self stream inResponseTo: aRequest
     ]
 
     produceResponseFor: aSwazooTask [

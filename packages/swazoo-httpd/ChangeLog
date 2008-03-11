@@ -1,0 +1,5 @@
+2008-03-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* HTTP.st: Only send one message to the HTTPResponse.
+	* Messages.st: Test if the passed SwazooStream is nil
+	before going on, decide here whether to serve entity.

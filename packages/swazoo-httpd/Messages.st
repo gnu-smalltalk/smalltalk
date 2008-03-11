@@ -1741,8 +1741,16 @@ HTTPMessage subclass: HTTPResponse [
 
     writeTo: aSwazooStream [
 	<category: 'sending'>
+        self writeTo: aSwazooStream inResponseTo: nil
+    ]
+
+    writeTo: aSwazooStream inResponseTo: aRequest [
+	<category: 'sending'>
+	aSwazooStream isNil ifTrue: [ ^self ].
 	self writeHeaderTo: aSwazooStream.
-	self printEntityOn: aSwazooStream
+	(aRequest isNil or: [ aRequest isHead not ])
+	    ifTrue: [ self printEntityOn: aSwazooStream ].
+	aSwazooStream closeResponse
     ]
 ]
 
