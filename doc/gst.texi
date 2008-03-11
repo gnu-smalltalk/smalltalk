@@ -1910,6 +1910,11 @@ Then it will save the Smalltalk image, and finally exit.
 @itemx --image-file
 Load the packages inside the given image.
 
+@item -i
+@itemx --rebuild-image
+Build an image from scratch and load the package into it.  Useful
+when the image specified with @option{-I} does not exist yet.
+
 @item -q
 @itemx --quiet
 Hide the script's output.
@@ -2014,7 +2019,7 @@ To install your package, you only have to do
 a @file{.star} archive in the current image directory, with the
 files specified in the @code{file} tags.  By default the package is
 placed in the system-wide package directory; you can use the option
-@option{--target-directory} to create the @file{.star} file elsewhere).
+@option{--target-directory} to create the @file{.star} file elsewhere.
 
 Alternatively, @code{gst-package} can be used to create a skeleton
 GNU style source tree.  This includes a @file{configure.ac} that will

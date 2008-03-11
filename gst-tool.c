@@ -86,13 +86,13 @@ struct tool tools[] = {
   {
     "gst-load", "scripts/Load.st",
     "-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
-	-t|--test -I|--image-file: --kernel-directory:",
+	-t|--test -I|--image-file: --kernel-directory: -i|--rebuild-image",
     NULL
   },
   {
     "gst-reload", "scripts/Load.st",
     "-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run -f|--force \
-	-t|--test -I|--image-file: --kernel-directory:",
+	-t|--test -I|--image-file: --kernel-directory: -i|--rebuild-image",
     "--force"
   },
   {
@@ -243,6 +243,10 @@ parse_option (int short_opt, const char *long_opt, const char *arg)
 	option_error ("duplicate --kernel-directory option");
       kernel_dir = arg;
     }
+
+  if (short_opt == 'i'
+      || (long_opt && !strcmp (long_opt, "rebuild-image")))
+    flags |= GST_REBUILD_IMAGE;
 }
 
 int

@@ -50,6 +50,7 @@ Options:
     -f --force            reload package if already loaded
     -n --dry-run          don''t save the image after loading
     -t --test             run SUnit tests if available
+    -i --rebuild-image    load into a newly-created image
     -I --image-file=FILE  load into the specified image
        --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message
@@ -59,7 +60,8 @@ Options:
 "Parse the command-line arguments."
 Smalltalk
     arguments: '-h|--help --version -q|--quiet -v|-V|--verbose -n|--dry-run
-		-f|--force -t|--test -I|--image-file: --kernel-directory:'
+		-f|--force -t|--test -I|--image-file: --kernel-directory:
+		-i|--rebuild-image'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
