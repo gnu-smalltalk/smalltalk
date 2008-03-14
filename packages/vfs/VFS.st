@@ -51,11 +51,12 @@ Commander and with GNOME VFS.'>
     ]
 
     ExternalArchiveFileHandler class >> fileSystems [
-	"Answer the virtual file systems that can be processed by this subclass.
-	 These are given by the names of the executable files in the `vfs'
-	 subdirectory of the image directory, of the parent of the kernel
-	 directory and (if the image is not the global installed image)
-	 of the `.st' directory in the home directory."
+	"Answer the virtual file systems that can be processed by this
+	 subclass.  These are given by the names of the executable
+	 files in the `vfs' subdirectory of the image directory (if
+	 the image is not the global installed image), in the
+	 `/usr/local/libexec/smalltalk/vfs' directory and in the
+	 `.st/vfs' subdirectory of the home directory."
 
 	<category: 'registering'>
 	fileTypes := LookupTable new.

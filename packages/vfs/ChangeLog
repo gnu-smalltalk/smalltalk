@@ -1,4 +1,4 @@
-2007-07-03  Paolo Bonzini  <bonzini@gnu.org>
+2008-03-14  Paolo Bonzini  <bonzini@gnu.org>
 
-	* VFS.st: Move ExternalArchiveFileHandler here from kernel/VFS.st,
-	complying to the new ArchiveFileHandler protocol.
+	* VFS.st: Fix documentation; VFS scripts are searched
+	for in /usr/local/libexec/smalltalk/vfs.
