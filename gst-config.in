@@ -2,7 +2,12 @@
 
 : ${prefix:=@prefix@}
 : ${exec_prefix:=@exec_prefix@}
+: ${libdir:="@libdir@"}
 : ${datarootdir:=@datarootdir@}
+: ${pkglibdir:="@libdir@/@PACKAGE@"}
+: ${pkgdatadir:="@datadir@/@PACKAGE@"}
+: ${moduledir:="@moduledir@"}
+
 exec_prefix_set=no
 
 usage()
@@ -80,9 +85,7 @@ while test $# -gt 0; do
   shift
 done
 
-: ${pkglibdir:="@libdir@/@PACKAGE@"}
-: ${pkgdatadir:="@datadir@/@PACKAGE@"}
-gst_libs="-L${pkglibdir} @LIBS@"
+gst_libs="-L${libdir} @LIBS@"
 
 if test "$echo_prefix" = "yes"; then
 	echo $prefix
@@ -113,5 +116,5 @@ if test "$echo_datadir" = "yes"; then
 fi
 
 if test "$echo_libdir" = "yes"; then
-      echo $pkglibdir
+      echo $moduledir
 fi

@@ -1,7 +1,7 @@
-gst_module_ldflags = -rpath $(pkglibdir) -release $(VERSION) -module \
+gst_module_ldflags = -rpath $(moduledir) -release $(VERSION) -module \
         -no-undefined -export-symbols-regex gst_initModule
 
-pkglib_LTLIBRARIES = digest.la
+module_LTLIBRARIES = digest.la
 digest_la_SOURCES = digest.c
 digest_la_LIBADD = ../../lib-src/library.la
 digest_la_LDFLAGS = $(gst_module_ldflags)

@@ -1,6 +1,6 @@
-pkglib_LTLIBRARIES = tcp.la
+module_LTLIBRARIES = tcp.la
 
-gst_module_ldflags = -rpath $(pkglibdir) -release $(VERSION) -module \
+gst_module_ldflags = -rpath $(moduledir) -release $(VERSION) -module \
 	-no-undefined -export-symbols-regex gst_initModule
 
 tcp_la_SOURCES = tcp.c

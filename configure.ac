@@ -125,12 +125,19 @@ AC_SUBST(LIBSIGSEGV)
 
 AC_ARG_WITH(imagedir,
 [  --with-imagedir=PATH   path where to place the system image
-			  (default: /usr/local/var/lib/smalltalk)],
+			  (default: /usr/local/var/lib/$PACKAGE)],
 [imagedir="$withval"],
 [imagedir=`echo "$libdir" | sed \
 		-e 's,${exec_prefix},${localstatedir},' \
 		-e "s,${exec_prefix},\${localstatedir}," `/$PACKAGE ])
 AC_SUBST(imagedir)
+
+AC_ARG_WITH(moduledir,
+[  --with-moduledir=PATH  path where to look for modules
+			  (default: /usr/local/lib/$PACKAGE)],
+[moduledir="$withval"],
+[moduledir='${pkglibdir}'])
+AC_SUBST(moduledir)
 
 dnl 
 dnl ------------------------------ C COMPILER / OS ------------

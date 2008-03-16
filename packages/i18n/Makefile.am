@@ -1,6 +1,6 @@
-pkglib_LTLIBRARIES = i18n.la
+module_LTLIBRARIES = i18n.la
 
-gst_module_ldflags = -rpath $(pkglibdir) -release $(VERSION) -module \
+gst_module_ldflags = -rpath $(moduledir) -release $(VERSION) -module \
 	-no-undefined -export-symbols-regex gst_initModule
 
 i18n_la_LDFLAGS = $(gst_module_ldflags)

@@ -3,12 +3,12 @@ CLEANFILES = $(nodist_noinst_SCRIPTS) $(nodist_noinst_HEADERS) \
 
 EXTRA_DIST = cpp.awk structs.awk funcs.awk mk_enums.awk mk_sizeof.awk order.st
 
-gst_module_ldflags = -rpath $(pkglibdir) -release $(VERSION) -module \
+gst_module_ldflags = -rpath $(moduledir) -release $(VERSION) -module \
 	-no-undefined # -export-symbols-regex gst_initModule
 
 ALL_LIBS = $(GLIB_LIBS) $(GTK_LIBS) $(PANGO_LIBS) $(ATK_LIBS)
 
-pkglib_LTLIBRARIES = gst-gtk.la
+module_LTLIBRARIES = gst-gtk.la
 gst_gtk_la_LDFLAGS = $(gst_module_ldflags)
 gst_gtk_la_LIBADD = $(ALL_LIBS)
 dist_gst_gtk_la_SOURCES = gst-gtk.c placer.c
