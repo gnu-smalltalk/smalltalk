@@ -8,6 +8,31 @@ o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
     snapshot.  Note that this does not apply to CallinProcesses, since
     those are stopped in saved images (will this be true in 3.1?).
 
+o   If possible, the installation is made relocatable.  To this end,
+    the following conditions should be satisfied: 1) the exec-prefix
+    and prefix should be identical; 2) the installation should reside
+    entirely within the prefix; 3) on Windows, the bindir and libdir
+    should be the same or shared libraries should be disabled; 4) if
+    neither on Windows nor under a glibc-based system, shared libraries
+    should be disabled.
+
+    If the above conditions are satisfied, and you want a relocatable
+    install, it is suggested that you configure with a non-existent
+    prefix such as "--prefix=/nonexistent".  To move the installation,
+    you can install into a staging area and move it from there.
+
+      ./configure --prefix=/nonexistent
+      make
+      make install DESTDIR=`pwd`
+      (cd nonexistent && tar cvf - .) | (cd $HOME && tar xvf -)
+      (cd nonexistent && tar cvf - .) | (cd /usr/local && tar xvf -)
+
+    In order to support relocatable installation, libgst clients should
+    call gst_set_executable_path *before* gst_initialize.  Failure to
+    do so won't cause any problem, except that relocatable installation
+    will be disabled and the program will look for its files only in
+    the configured prefix.
+
 o   The semantics of #on:do: were changed: executing off the end of an
     exception handler will always return from the associated #on:do:.
     Older versions of GNU Smalltalk either returned or resumed depending

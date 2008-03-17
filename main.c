@@ -290,8 +290,9 @@ parse_args (int argc,
 	  break;
 
 	case 'v':
-	  printf (copyright_and_legal_stuff_text, VERSION, KERNEL_PATH,
-		  IMAGE_PATH);
+	  printf (copyright_and_legal_stuff_text, VERSION,
+		  gst_relocate_path (KERNEL_PATH),
+		  gst_relocate_path (IMAGE_PATH));
 	  exit (0);
 
 	case '\1':
@@ -337,6 +338,7 @@ main(int argc, const char **argv)
   loaded_files =
     (struct loaded_file *) alloca (sizeof (struct loaded_file) * argc);
 
+  gst_set_executable_path (argv[0]);
   parse_args (argc, argv);
 
   /* These might go away in the next release.  */

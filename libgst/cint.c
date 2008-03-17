@@ -456,7 +456,11 @@ init_dld (void)
 {
   char *modules;
   lt_dlinit ();
-  lt_dladdsearchdir (MODULE_PATH);
+
+  modules = _gst_relocate_path (MODULE_PATH);
+  lt_dladdsearchdir (modules);
+  free (modules);
+
   if ((modules = getenv ("SMALLTALK_MODULES")))
     lt_dladdsearchdir (modules);
 

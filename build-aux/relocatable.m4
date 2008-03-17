@@ -68,7 +68,6 @@ AC_DEFUN([AC_RELOCATABLE_LIBRARY],
 dnl Support for relocatable packages for which it is a nop.
 AC_DEFUN([AC_RELOCATABLE_NOP],
 [
-  AC_MSG_CHECKING([whether to activate relocatable installation])
   AC_ARG_ENABLE(relocatable,
     [  --enable-relocatable    install a package that can be moved in the filesystem],
     [if test "$enableval" != no; then
@@ -76,9 +75,8 @@ AC_DEFUN([AC_RELOCATABLE_NOP],
      else
        RELOCATABLE=no
      fi
-    ], RELOCATABLE=no)
+    ], RELOCATABLE=yes)
   AC_SUBST(RELOCATABLE)
-  AC_MSG_RESULT([$RELOCATABLE])
 ])
 
 dnl Determine the platform dependent parameters needed to use relocatability:

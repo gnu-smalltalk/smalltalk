@@ -467,6 +467,190 @@ fi
 GST_ARG_ENABLE_MODULES([Blox,TCP])
 
 dnl 
+dnl ------------------------------- RELOCATABILITY ------------
+
+# See if we can make the installed binaries relocatable
+
+AC_MSG_CHECKING([whether to enable relocatable install])
+AC_RELOCATABLE_NOP
+relocatable_reason=$RELOCATABLE
+
+# First of all, compute the final paths for the various components.
+
+AC_LIB_PREPARE_PREFIX
+
+acl_final_datadir=`echo "${datadir}" | sed \
+	-e "s,\\\${datarootdir},$datarootdir," \
+	-e "s,\\\${exec_prefix},$acl_final_exec_prefix," \
+	-e "s,\\\${prefix},$acl_final_prefix," `
+acl_final_bindir=`echo "${bindir}" | sed \
+	-e "s,\\\${exec_prefix},$acl_final_exec_prefix," \
+	-e "s,\\\${prefix},$acl_final_prefix," `
+acl_final_libdir=`echo "${libdir}" | sed \
+	-e "s,\\\${exec_prefix},$acl_final_exec_prefix," \
+	-e "s,\\\${prefix},$acl_final_prefix," `
+acl_final_libexecdir=`echo "${libexecdir}" | sed \
+	-e "s,\\\${exec_prefix},$acl_final_exec_prefix," \
+	-e "s,\\\${prefix},$acl_final_prefix," `
+
+acl_final_pkgdatadir="$acl_final_datadir/$PACKAGE"
+acl_final_pkglibdir="$acl_final_libdir/$PACKAGE"
+
+acl_final_imagedir=`echo "${imagedir}" | sed \
+	-e "s,\\\${localstatedir},$localstatedir," \
+	-e "s,\\\${pkgdatadir},$pkgdatadir," \
+	-e "s,\\\${datadir},$datadir," \
+	-e "s,\\\${docdir},$docdir," \
+	-e "s,\\\${datarootdir},$datarootdir," \
+	-e "s,\\\${pkglibdir},$acl_final_pkglibdir," \
+	-e "s,\\\${libdir},$acl_final_libdir," \
+	-e "s,\\\${exec_prefix},$acl_final_exec_prefix," \
+	-e "s,\\\${prefix},$acl_final_prefix," `
+acl_final_moduledir=`echo "${moduledir}" | sed \
+	-e "s,\\\${localstatedir},$localstatedir," \
+	-e "s,\\\${pkgdatadir},$pkgdatadir," \
+	-e "s,\\\${datadir},$datadir," \
+	-e "s,\\\${docdir},$docdir," \
+	-e "s,\\\${datarootdir},$datarootdir," \
+	-e "s,\\\${pkglibdir},$acl_final_pkglibdir," \
+	-e "s,\\\${libdir},$acl_final_libdir," \
+	-e "s,\\\${exec_prefix},$acl_final_exec_prefix," \
+	-e "s,\\\${prefix},$acl_final_prefix," `
+
+
+# If shared libraries are enabled, there are a few extra constraints.
+
+if test "$enable_shared" != no; then
+  case $host in
+    *-*-cygwin* | *-*-mingw*)
+      # For Windows, the shared library must be in the bindir
+      if test "$acl_final_libdir" != "${acl_final_bindir}"; then
+        relocatable_reason='no, libdir not equal to bindir'
+      fi
+      ;;
+
+    *-linux*)
+      # For Linux, we can use a relative rpath via -Wl,-rpath,...
+      case "$acl_final_libdir" in
+        "${acl_final_exec_prefix}"/*) ;;
+        /*) relocatable_reason='no, libdir outside exec-prefix' ;;
+        *) relocatable_reason='no, relative libdir' ;;
+      esac
+      ;;
+
+    *)
+      relocatable_reason="no,
+	relocatable shared libraries not supported on $host"
+      ;;
+  esac
+fi
+
+# Further OS-independent tests ensure that we can make relative
+# paths from the executable's location.
+
+if test "$relocatable_reason" = yes; then
+  case "${acl_final_bindir}" in
+    "${acl_final_exec_prefix}"/*) ;;
+    /*) relocatable_reason='no, bindir outside exec-prefix' ;;
+    *) relocatable_reason='no, relative bindir' ;;
+  esac
+  case "${acl_final_libexecdir}" in
+    ${acl_final_exec_prefix}/*) ;;
+    /*) relocatable_reason='no, libexecdir outside exec_prefix' ;;
+    *) relocatable_reason='no, relative libexecdir' ;;
+  esac
+  case "${acl_final_datadir}" in
+    ${acl_final_prefix}/*) ;;
+    /*) relocatable_reason='no, datadir outside prefix' ;;
+    *) relocatable_reason='no, relative datadir' ;;
+  esac
+  case "${acl_final_imagedir}" in
+    ${acl_final_prefix}/*) ;;
+    /*) relocatable_reason='no, imagedir outside prefix' ;;
+    *) relocatable_reason='no, relative imagedir' ;;
+  esac
+  case "${acl_final_moduledir}" in
+    ${acl_final_prefix}/*) ;;
+    /*) relocatable_reason='no, moduledir outside prefix' ;;
+    *) relocatable_reason='no, relative moduledir' ;;
+  esac
+
+  test "$acl_final_prefix" != "$acl_final_exec_prefix" && \
+    relocatable_reason='no, prefix does not match exec prefix'
+fi
+
+# echo the relative path from ${acl_final_bindir} to $1
+# (Works only if both are absolute.)
+[func_make_relpath ()
+{
+  dir=$1
+  idir=${acl_final_bindir}
+
+  while true; do
+    dfirst=`echo "$dir" | sed -n -e 's,^//*\([^/]*\).*$,/\1,p'`
+    ifirst=`echo "$idir" | sed -n -e 's,^//*\([^/]*\).*$,/\1,p'`
+    test x"$dfirst" = x && break
+    test x"$ifirst" = x && break
+    test "$dfirst" != "$ifirst" && break
+
+    dir=`echo "$dir" | sed -e 's,^//*[^/]*,,'`
+    idir=`echo "$idir" | sed -e 's,^//*[^/]*,,'`
+  done
+  idir=`echo "$idir" | sed -e 's,//*[^/]*,/..,g' -e 's,^/,,' `
+  if test x"$idir$dir" = x; then
+    echo .
+  else
+    echo "$idir$dir"
+  fi
+}]
+
+case "$relocatable_reason" in
+  yes)
+    # Command-line option to include a relative search path for
+    # shared libraries
+    if test "$enable_shared" != no; then
+      case "$host" in
+        *-linux*)
+          RELOC_LDFLAGS='-Wl,-rpath,"\$$ORIGIN/'`func_make_relpath ${acl_final_libdir}`'"'
+	  ;;
+      esac
+    fi
+
+    KERNEL_PATH=`func_make_relpath ${acl_final_pkgdatadir}/kernel`
+    IMAGE_PATH=`func_make_relpath ${acl_final_imagedir}`
+    MODULE_PATH=`func_make_relpath ${acl_final_moduledir}`
+    LIBEXEC_PATH=`func_make_relpath "${acl_final_libexecdir}/${PACKAGE}"`
+    AC_DEFINE_UNQUOTED(KERNEL_PATH, "$KERNEL_PATH",
+		       [The relative path from the program to the kernel path.
+		        Defined only for relocatable installs.])
+    AC_DEFINE_UNQUOTED(IMAGE_PATH, "$IMAGE_PATH",
+		       [The relative path from the program to the image path.
+		        Defined only for relocatable installs.])
+    AC_DEFINE_UNQUOTED(MODULE_PATH, "$MODULE_PATH",
+		       [The relative path from the program to the module path.
+		        Defined only for relocatable installs.])
+    AC_DEFINE_UNQUOTED(LIBEXEC_PATH, "$LIBEXEC_PATH",
+		       [The relative path from the program to the per-package
+			libexec path.  Defined only for relocatable installs.])
+    ;;
+
+  *)
+    # Pass paths on the command-line to allow specifying a prefix at "make"
+    # time.
+    RELOC_CPPFLAGS='-DKERNEL_PATH=\""${pkgdatadir}/kernel"\" \
+	-DIMAGE_PATH=\""${imagedir}"\" \
+	-DMODULE_PATH=\""${moduledir}"\" \
+	-DLIBEXEC_PATH=\""${libexecdir}/${PACKAGE}"\"'
+    ;;
+esac
+
+RELOC_CPPFLAGS=$RELOC_CPPFLAGS' \
+	-DDEFAULT_EXECUTABLE=\""${bindir}/gst${EXEEXT}"\"'
+AC_MSG_RESULT([$relocatable_reason])
+AC_SUBST(RELOC_CPPFLAGS)
+AC_SUBST(RELOC_LDFLAGS)
+
+dnl 
 dnl ------------------------------- FILE GENERATION -----------
 
 { echo; echo "${term_bold}Output substitutions:${term_norm}"; } >& AS_MESSAGE_FD

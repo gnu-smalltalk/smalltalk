@@ -198,6 +198,9 @@ typedef struct VMProxy
   int (*getVar) (enum gst_var_index index);
   int (*setVar) (enum gst_var_index index, int value);
   void (*invokeHook) (enum gst_vm_hook);
+
+  /* 3.1+ functions.  */
+  char *(*relocatePath) (const char *);
 } VMProxy;
 
 /* Compatibility section */
@@ -231,6 +234,10 @@ extern int gst_set_var (enum gst_var_index index, int value);
 
 /* Functions in comp.h.  */
 extern void gst_invoke_hook (enum gst_vm_hook);
+
+/* Functions in sysdep.h.  */
+extern void gst_set_executable_path (const char *);
+extern char *gst_relocate_path (const char *);
 
 /* These are the library counterparts of the functions in
    gst_vm_proxy.  */

@@ -81,6 +81,9 @@
 
 typedef RETSIGTYPE (*SigHandler) ();
 
+/* The path to the executable.  */
+extern const char *_gst_executable_path;
+
 /* Saves and returns the current state of the software interrupt
    system.  Disables all interrupts.  */
 extern void _gst_disable_interrupts (void)
@@ -185,7 +188,12 @@ extern mst_Boolean _gst_file_is_executable (const char *fileName)
   ATTRIBUTE_HIDDEN;
 
 /* Return a path to the executable given argv[0].  */
-extern char *_gst_find_executable (const char *argv0)
+extern void _gst_set_executable_path (const char *argv0)
+  ATTRIBUTE_HIDDEN;
+
+/* Return the absolute path for PATH, interpreted relative to the
+   executable.  */
+char *_gst_relocate_path (const char *path)
   ATTRIBUTE_HIDDEN;
 
 /* Answer true if the file descriptor FD is associated to a pipe

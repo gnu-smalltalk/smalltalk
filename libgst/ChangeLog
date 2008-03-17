@@ -1,3 +1,15 @@
+2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Relocate MODULE_PATH.
+	* libgst/dict.c: Relocate paths placed in the Smalltalk dictionary.
+	* libgst/files.c: Relocate image and kernel paths.  Apply default
+	executable path.
+	* libgst/files.h: Remove _gst_executable_path.
+	* libgst/gstpub.c: Add gst_relocate_path, gst_set_executable_path.
+	* libgst/gstpub.h: Add gst_relocate_path, gst_set_executable_path.
+	* libgst/sysdep.c: Add _gst_relocate_path, _gst_set_executable_path.
+	* libgst/sysdep.h: Add _gst_relocate_path, _gst_set_executable_path.
+
 2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Avoid mixed declarations and code.

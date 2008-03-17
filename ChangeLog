@@ -1,3 +1,8 @@
+2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-tool.c: Support relocatable installation.
+	* main.c: Support relocatable installation.
+
 2008-03-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Load.st: Add -i.

@@ -1011,6 +1011,9 @@ _gst_file_is_executable (const char *fileName)
 static int executable_fd = -1;
 #endif
 
+/* The path to the executable, derived from argv[0].  */
+const char *_gst_executable_path = NULL;
+
 /* Tests whether a given pathname may belong to the executable.  */
 static mst_Boolean
 maybe_executable (const char *filename)
@@ -1044,8 +1047,8 @@ maybe_executable (const char *filename)
    Return NULL if unknown.  Guaranteed to work on Linux and Win32, Mac OS X.
    Likely to work on the other Unixes (maybe except BeOS), under most
    conditions.  */
-char *
-_gst_find_executable (const char *argv0)
+static char *
+find_executable (const char *argv0)
 {
 #if defined WIN32
   char location[MAX_PATH];
@@ -1156,6 +1159,46 @@ _gst_find_executable (const char *argv0)
 #endif
   return NULL;
 #endif
+}
+
+void
+_gst_set_executable_path (const char *argv0)
+{
+  _gst_executable_path = find_executable (argv0);
+}
+
+char *
+_gst_relocate_path (const char *path)
+{
+  const char *p;
+  char *s;
+
+  /* Detect absolute paths.  */
+#if defined(MSDOS) || defined(WIN32) || defined(__OS2__)
+  if ((path[0] && path[1] == ':')
+      || path[0] == '/' || path[0] == '\\')
+    return xstrdup (path);
+#else
+  if (path[0] == '/')
+    return xstrdup (path);
+#endif
+
+  /* Remove filename from executable path.  */
+  p = _gst_executable_path + strlen (_gst_executable_path);
+  do
+    --p;
+  while (p >= _gst_executable_path
+         && *p != '/'
+#if defined(MSDOS) || defined(WIN32) || defined(__OS2__)
+	 && *p != '\\'
+#endif
+	);
+  p++;
+
+  /* Now p points just past the last separator (if any).  */
+  s = alloca (p - _gst_executable_path + strlen (path) + 1);
+  sprintf (s, "%.*s%s", p - _gst_executable_path, _gst_executable_path, path);
+  return _gst_get_full_file_name (s);
 }
 
 

@@ -94,15 +94,14 @@ AM_CPPFLAGS = -I$(top_srcdir)/libgst		\
 	-DCMD_ZIP="\"$(ZIP)\""			\
 	-DCMD_INSTALL="\"$(INSTALL)\""		\
 	-DCMD_LN_S="\"$(LN_S)\""		\
-	-DKERNEL_PATH=\"$(pkgdatadir)/kernel\"	\
-	-DIMAGE_PATH=\"$(imagedir)\"
+	$(RELOC_CPPFLAGS)
 
 bin_PROGRAMS = gst
 
 gst_SOURCES = main.c
 gst_LDADD = libgst/libgst.la lib-src/library.la @ICON@
 gst_DEPENDENCIES = libgst/libgst.la lib-src/library.la @ICON@
-gst_LDFLAGS = -export-dynamic
+gst_LDFLAGS = -export-dynamic $(RELOC_LDFLAGS)
 
 if ENABLE_DISASSEMBLER
 gst_LDADD += opcode/libdisass.la
@@ -116,7 +115,7 @@ noinst_PROGRAMS = gst-tool
 gst_tool_SOURCES = gst-tool.c
 gst_tool_LDADD = libgst/libgst.la lib-src/library.la
 gst_tool_DEPENDENCIES = libgst/libgst.la lib-src/library.la
-gst_tool_LDFLAGS = -export-dynamic
+gst_tool_LDFLAGS = -export-dynamic $(RELOC_LDFLAGS)
 
 GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package gst-convert \
 	gst-doc gst-remote

@@ -4,11 +4,9 @@ LEX_OUTPUT_ROOT = lex.yy
 ## CFLAGS=-O0 -g
 AM_LFLAGS = -Cfe -o$(LEX_OUTPUT_ROOT).c
 AM_YFLAGS = -vy
-AM_CPPFLAGS = -DKERNEL_PATH=\"$(pkgdatadir)/kernel\" \
-  -DIMAGE_PATH=\"$(imagedir)\" -DMODULE_PATH=\"$(moduledir)\" \
-  -DLIBEXEC_PATH=\"$(libexecdir)/$(PACKAGE)\" \
-  -I$(top_srcdir)/lib-src $(INCFFI) $(INCLIGHTNING) \
-  $(INCSNPRINTFV) $(INCSIGSEGV) -I$(top_builddir)/lib-src
+AM_CPPFLAGS = $(RELOC_CPPFLAGS) \
+  -I$(top_srcdir)/lib-src -I$(top_builddir)/lib-src \
+  $(INCFFI) $(INCLIGHTNING) $(INCSNPRINTFV) $(INCSIGSEGV)
 
 if !HAVE_INSTALLED_LIGHTNING
 AM_CPPFLAGS += -I$(top_srcdir)/lightning -I$(top_builddir)/lightning \

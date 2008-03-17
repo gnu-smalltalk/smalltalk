@@ -90,9 +90,6 @@ const char *_gst_image_file_path = NULL;
    home directory.  */
 const char *_gst_user_file_base_path = NULL;
 
-/* The path to the executable, derived from argv[0].  */
-const char *_gst_executable_path = NULL;
-
 /* Whether to look for user files.  */
 static mst_Boolean no_user_files = false;
 
@@ -308,7 +305,6 @@ _gst_smalltalk_args (int argc,
 {
   smalltalk_argc = argc;
   smalltalk_argv = argv;
-  _gst_executable_path = _gst_find_executable (argv[0]);
 }
 
    
@@ -329,6 +325,9 @@ _gst_initialize (const char *kernel_dir,
      invoke us.  */
   _gst_smalltalk_initialized = true;
   _gst_init_snprintfv ();
+
+  if (!_gst_executable_path)
+    _gst_executable_path = DEFAULT_EXECUTABLE;
 
   /* By default, apply this kludge fpr OSes such as Windows and MS-DOS
      which have no concept of home directories.  */
@@ -352,6 +351,8 @@ _gst_initialize (const char *kernel_dir,
 	}
     }
 
+  /* For the image file, it is okay to find none if we can/should rebuild
+     the image file.  */
   if (image_file
       && (flags & (GST_REBUILD_IMAGE | GST_MAYBE_REBUILD_IMAGE)) == 0
       && !_gst_file_is_readable (image_file))
@@ -365,6 +366,8 @@ _gst_initialize (const char *kernel_dir,
 	}
     }
 
+  /* The image path can be used as the default kernel path, so we split
+     it anyway into directory+filename.  */
   if (image_file)
     {
       const char *p;
@@ -395,26 +398,31 @@ _gst_initialize (const char *kernel_dir,
     }
   else
     {
-      /* No image file given, we use the system default but revert to the
+      /* No image file given, we use the system default or revert to the
 	 current directory.  */
-      if (_gst_file_is_readable (IMAGE_PATH))
-        _gst_image_file_path = IMAGE_PATH;
+      str = _gst_relocate_path (IMAGE_PATH);
+      if (_gst_file_is_readable (str))
+        _gst_image_file_path = str;
       else
-        _gst_image_file_path = xstrdup (currentDirectory);
+	{
+          free (str);
+          _gst_image_file_path = xstrdup (currentDirectory);
+	}
+
       flags |= GST_IGNORE_BAD_IMAGE_PATH;
       image_file = "gst.im";
     }
 
   if (!kernel_dir)
     {
-      if (_gst_file_is_readable (KERNEL_PATH))
-        kernel_dir = KERNEL_PATH;
-      else
+      str = _gst_relocate_path (KERNEL_PATH);
+      if (!_gst_file_is_readable (str))
 	{
-          char *kernel_file_path;
-	  asprintf (&kernel_file_path, "%s/kernel", _gst_image_file_path);
-	  kernel_dir = kernel_file_path;
+          free (str);
+	  asprintf (&str, "%s/kernel", _gst_image_file_path);
 	}
+
+      kernel_dir = str;
     }
 
   xfree (currentDirectory);

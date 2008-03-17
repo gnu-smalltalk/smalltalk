@@ -110,7 +110,10 @@ VMProxy gst_interpreter_proxy = {
   _gst_process_stdin,
   _gst_process_file,
   _gst_get_var, _gst_set_var,
-  _gst_invoke_hook
+  _gst_invoke_hook,
+
+  /* New in 3.1.  */
+  _gst_relocate_path
 };
 
 /* Functions in comp.h.  */
@@ -499,6 +502,19 @@ gst_oop_at_put (OOP oop, size_t index, OOP new_oop)
   return _gst_oop_at_put (oop, index, new_oop);
 }
 
+
+/* Functions in systep.h.  */
+void
+gst_set_executable_path (const char *argv0)
+{
+  _gst_set_executable_path (argv0);
+}
+
+char *
+gst_relocate_path (const char *path)
+{
+  return _gst_relocate_path (path);
+}
 
 static void
 init_vmproxy (void)

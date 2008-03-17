@@ -1057,9 +1057,17 @@ add_smalltalk (const char *globalName,
 void
 init_runtime_objects (void)
 {
+  char *s;
   add_smalltalk ("UserFileBasePath", _gst_string_new (_gst_user_file_base_path));
-  add_smalltalk ("ModulePath", _gst_string_new (MODULE_PATH));
-  add_smalltalk ("LibexecPath", _gst_string_new (LIBEXEC_PATH));
+
+  s = _gst_relocate_path (MODULE_PATH);
+  add_smalltalk ("ModulePath", _gst_string_new (s));
+  free (s);
+
+  s = _gst_relocate_path (LIBEXEC_PATH);
+  add_smalltalk ("LibexecPath", _gst_string_new (s));
+  free (s);
+
   add_smalltalk ("ImageFilePath", _gst_string_new (_gst_image_file_path));
   add_smalltalk ("ExecutableFileName", _gst_string_new (_gst_executable_path));
   add_smalltalk ("ImageFileName", _gst_string_new (_gst_binary_image_name));

@@ -4573,7 +4573,8 @@ int     argc;
 char    **argv;
 @{
   gst_set_var (GST_VERBOSITY, 1);
-  gst_smalltalk_args (argc, argv);
+  gst_smalltalk_args (argc - 1, argv + 1);
+  gst_set_executable_path (argv[0]);
   result = gst_initialize ("@var{kernel-dir}", "@var{image-file}", GST_NO_TTY);
   if (result != 0)
     exit (result < 0 ? 1 : result);

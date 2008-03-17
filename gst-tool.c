@@ -498,6 +498,7 @@ main(int argc, const char **argv)
 
   gst_set_var (GST_VERBOSITY, 0);
   gst_smalltalk_args (smalltalk_argc, smalltalk_argv);
+  gst_set_executable_path (argv[0]);
   result = gst_initialize (kernel_dir, image_file, flags);
   if (result != 0)
     exit (result < 0 ? 1 : result);
