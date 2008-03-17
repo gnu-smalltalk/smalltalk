@@ -25,78 +25,37 @@ EXTRA_DIST = LICENSE ChangeLog.v1 ChangeLog.libgcj configure.host \
 	src/sh/ffi.c src/sh/sysv.S src/sh/ffitarget.h \
 	src/sh64/ffi.c src/sh64/sysv.S src/sh64/ffitarget.h \
 	src/sparc/v8.S src/sparc/v9.S src/sparc/ffitarget.h \
-	src/sparc/ffi.c \
+	src/sparc/ffi.c src/x86/darwin64.S \
 	src/x86/ffi.c src/x86/sysv.S src/x86/win32.S src/x86/darwin.S \
+	src/x86/freebsd.S \
 	src/x86/ffi64.c src/x86/unix64.S src/x86/ffitarget.h \
 	src/pa/ffitarget.h src/pa/ffi.c src/pa/linux.S src/pa/hpux32.S \
-	src/frv/ffi.c src/frv/eabi.S src/frv/ffitarget.h
+	src/frv/ffi.c src/frv/eabi.S src/frv/ffitarget.h src/dlmalloc.c \
+	libtool-version ChangeLog.libffi
 
 ## ################################################################
-
-##
-## This section is for make and multilib madness.
-##
-
-# Work around what appears to be a GNU make bug handling MAKEFLAGS
-# values defined in terms of make variables, as is the case for CC and
-# friends when we are called from the top level Makefile.
-AM_MAKEFLAGS = \
-	"AR_FLAGS=$(AR_FLAGS)" \
-	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
-	"CFLAGS=$(CFLAGS)" \
-	"CXXFLAGS=$(CXXFLAGS)" \
-	"CFLAGS_FOR_BUILD=$(CFLAGS_FOR_BUILD)" \
-	"CFLAGS_FOR_TARGET=$(CFLAGS_FOR_TARGET)" \
-	"INSTALL=$(INSTALL)" \
-	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-	"INSTALL_SCRIPT=$(INSTALL_SCRIPT)" \
-	"JC1FLAGS=$(JC1FLAGS)" \
-	"LDFLAGS=$(LDFLAGS)" \
-	"LIBCFLAGS=$(LIBCFLAGS)" \
-	"LIBCFLAGS_FOR_TARGET=$(LIBCFLAGS_FOR_TARGET)" \
-	"MAKE=$(MAKE)" \
-	"MAKEINFO=$(MAKEINFO) $(MAKEINFOFLAGS)" \
-	"PICFLAG=$(PICFLAG)" \
-	"PICFLAG_FOR_TARGET=$(PICFLAG_FOR_TARGET)" \
-	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
-	"SHELL=$(SHELL)" \
-	"exec_prefix=$(exec_prefix)" \
-	"infodir=$(infodir)" \
-	"libdir=$(libdir)" \
-	"prefix=$(prefix)" \
-	"AR=$(AR)" \
-	"AS=$(AS)" \
-	"CC=$(CC)" \
-	"CXX=$(CXX)" \
-	"LD=$(LD)" \
-	"NM=$(NM)" \
-	"RANLIB=$(RANLIB)" \
-	"DESTDIR=$(DESTDIR)"
-
-MAKEOVERRIDES=
 
 noinst_LTLIBRARIES = libffi.la
 
 libffi_la_SOURCES = src/debug.c src/prep_cif.c src/types.c \
-		src/raw_api.c src/java_raw_api.c
+		src/raw_api.c src/java_raw_api.c src/closures.c
 
 nodist_libffi_la_SOURCES =
 
-if MIPS_IRIX
+if MIPS
 nodist_libffi_la_SOURCES += src/mips/ffi.c src/mips/o32.S src/mips/n32.S
-endif
-if MIPS_LINUX
-nodist_libffi_la_SOURCES += src/mips/ffi.c src/mips/o32.S
 endif
 if X86
 nodist_libffi_la_SOURCES += src/x86/ffi.c src/x86/sysv.S
+endif
+if X86_FREEBSD
+nodist_libffi_la_SOURCES += src/x86/ffi.c src/x86/freebsd.S
 endif
 if X86_WIN32
 nodist_libffi_la_SOURCES += src/x86/ffi.c src/x86/win32.S
 endif
 if X86_DARWIN
-nodist_libffi_la_SOURCES += src/x86/ffi.c src/x86/darwin.S
+nodist_libffi_la_SOURCES += src/x86/ffi.c src/x86/darwin.S src/x86/ffi64.c src/x86/darwin64.S
 endif
 if SPARC
 nodist_libffi_la_SOURCES += src/sparc/ffi.c src/sparc/v8.S src/sparc/v9.S

@@ -16,13 +16,14 @@
    The above copyright notice and this permission notice shall be included
    in all copies or substantial portions of the Software.
 
-   THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS
-   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-   IN NO EVENT SHALL CYGNUS SOLUTIONS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-   OTHER DEALINGS IN THE SOFTWARE.
+   THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
    ----------------------------------------------------------------------- */
 
 /* This file defines generic functions for use with the raw api. */
@@ -209,22 +210,20 @@ ffi_translate_args (ffi_cif *cif, void *rvalue,
   (*cl->fun) (cif, rvalue, raw, cl->user_data);
 }
 
-/* Again, here is the generic version of ffi_prep_raw_closure, which
- * will install an intermediate "hub" for translation of arguments from
- * the pointer-array format, to the raw format */
-
 ffi_status
-ffi_prep_raw_closure (ffi_raw_closure* cl,
-		      ffi_cif *cif,
-		      void (*fun)(ffi_cif*,void*,ffi_raw*,void*),
-		      void *user_data)
+ffi_prep_raw_closure_loc (ffi_raw_closure* cl,
+			  ffi_cif *cif,
+			  void (*fun)(ffi_cif*,void*,ffi_raw*,void*),
+			  void *user_data,
+			  void *codeloc)
 {
   ffi_status status;
 
-  status = ffi_prep_closure ((ffi_closure*) cl,
-			     cif,
-			     &ffi_translate_args,
-			     (void*)cl);
+  status = ffi_prep_closure_loc ((ffi_closure*) cl,
+				 cif,
+				 &ffi_translate_args,
+				 codeloc,
+				 codeloc);
   if (status == FFI_OK)
     {
       cl->fun       = fun;
@@ -236,4 +235,22 @@ ffi_prep_raw_closure (ffi_raw_closure* cl,
 
 #endif /* FFI_CLOSURES */
 #endif /* !FFI_NATIVE_RAW_API */
+
+#if FFI_CLOSURES
+
+/* Again, here is the generic version of ffi_prep_raw_closure, which
+ * will install an intermediate "hub" for translation of arguments from
+ * the pointer-array format, to the raw format */
+
+ffi_status
+ffi_prep_raw_closure (ffi_raw_closure* cl,
+		      ffi_cif *cif,
+		      void (*fun)(ffi_cif*,void*,ffi_raw*,void*),
+		      void *user_data)
+{
+  return ffi_prep_raw_closure_loc (cl, cif, fun, user_data, cl);
+}
+
+#endif /* FFI_CLOSURES */
+
 #endif /* !FFI_NO_RAW_API */
