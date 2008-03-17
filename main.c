@@ -403,7 +403,7 @@ main(int argc, const char **argv)
     gst_process_stdin (stdin_prompt);
 
   if (snapshot_after_load)
-    gst_msg_sendf (NULL, "%O snapshot: %O", 
+    gst_msg_sendf (NULL, "%v %o snapshot: %o", 
 		   gst_class_name_to_oop ("ObjectMemory"),
                    gst_str_msg_send (gst_class_name_to_oop ("File"),
 				     "image", NULL));
