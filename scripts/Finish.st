@@ -33,7 +33,7 @@
 | ok |
 ok := false.
 [
-    PackageLoader fileInPackages: (Smalltalk arguments copyFrom: 3).
+    PackageLoader fileInPackages: Smalltalk arguments allButFirst.
     ok := true
 ] valueWithUnwind.
 
@@ -41,20 +41,21 @@ ok ifFalse: [ ObjectMemory quit: 1 ]!
 
 "Symbol rebuildTable."
 
-"Remove DESTDIR and references to the build directory, from the paths
- stored in the image"
-| newImagePath oldKernelBasePath newKernelBasePath |
-oldKernelBasePath := File pathFor: KernelFilePath.
-newKernelBasePath := Smalltalk arguments at: 1.
-newImagePath := Smalltalk arguments at: 2.
-oldKernelBasePath = newKernelBasePath ifFalse: [
-    FileSegment relocateFrom: oldKernelBasePath to: newKernelBasePath ].
+Eval [
+    thisContext method stripSourceCode.
 
-ImageFileName := 'gst.im'.
-ImageFilePath := newImagePath.
-KernelFilePath := newKernelBasePath, '/kernel'.
-ExecutableFileName := nil.
-UserFileBasePath := nil!
+    "Remove DESTDIR and references to the build directory, from the paths
+     stored in the image"
+    ImageFileName := 'gst.im'.
+    ImageFilePath := Smalltalk arguments first.
+    ExecutableFileName := nil.
+    UserFileBasePath := nil.
 
-PackageLoader flush!
-ObjectMemory snapshot!
+    "The image is built using the uninstalled executable (the installed
+     executable does not work if DESTDIR is in effect and the package is
+     no relocatable!).  So, FileSegment>>#relocate does not necessarily
+     set this to nil."
+    KernelFilePath := nil.
+
+    PackageLoader flush
+]

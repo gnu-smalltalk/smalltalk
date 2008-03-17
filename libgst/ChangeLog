@@ -1,5 +1,11 @@
 2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/dict.c: Add SystemKernelPath.
+	* libgst/files.c: Call `FileSegment relocate' before loading
+	pre-image files.
+
+2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/cint.c: Relocate MODULE_PATH.
 	* libgst/dict.c: Relocate paths placed in the Smalltalk dictionary.
 	* libgst/files.c: Relocate image and kernel paths.  Apply default

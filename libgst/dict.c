@@ -1060,6 +1060,10 @@ init_runtime_objects (void)
   char *s;
   add_smalltalk ("UserFileBasePath", _gst_string_new (_gst_user_file_base_path));
 
+  s = _gst_relocate_path (KERNEL_PATH);
+  add_smalltalk ("SystemKernelPath", _gst_string_new (s));
+  free (s);
+
   s = _gst_relocate_path (MODULE_PATH);
   add_smalltalk ("ModulePath", _gst_string_new (s));
   free (s);

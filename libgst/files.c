@@ -578,6 +578,8 @@ load_standard_files (void)
 	}
     }
 
+  _gst_msg_sendf (NULL, "%v %o relocate", _gst_file_segment_class);
+
   if (site_pre_image_file)
     _gst_process_file (site_pre_image_file, GST_DIR_ABS);
 

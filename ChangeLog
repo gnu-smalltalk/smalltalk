@@ -1,5 +1,15 @@
 2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
 
+        * kernel/Directory.st: Readd Directory class>>#systemKernel.
+        Default Directory class>>#kernel to it.
+        * kernel/FileSegment.st: Change #relocateFrom:to: to #relocate:,
+        and #relocateFrom:to:map: to #relocateFrom:map:.
+        * scripts/Finish.st: Do not call #relocate, strip source code
+        from the last evaluated method to remove its FileSegment from the
+        image.
+
+2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FileSegment.st: Add a warning that relative FileSegments
 	are always interpreted from the kernel directory, and apply this
 	rule in #fileName.

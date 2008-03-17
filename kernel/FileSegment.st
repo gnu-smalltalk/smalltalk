@@ -40,19 +40,16 @@ Object subclass: FileSegment [
 compiler to record source code locations.  I am not a part of the normal
 Smalltalk-80 kernel; I am specific to the GNU Smalltalk implementation.'>
 
-    FileSegment class >> relocateFrom: startPath to: endPath [
-	"Remove startPath from all paths that start with it, and replace it
-	 with endPath.  Needed to support $(DESTDIR) when installing"
+    FileSegment class >> relocate [
+	"Remove the kernel path from all paths that start with it.  Needed to
+	 support $(DESTDIR) and relocatable installation."
 
 	<category: 'installing'>
-	| map |
+	| map startPath |
 	map := IdentityDictionary new.
-	self allInstancesDo: 
-		[:each | 
-		each 
-		    relocateFrom: startPath
-		    to: endPath
-		    map: map]
+	startPath := Directory kernel.
+	self allInstancesDo: [:each | each relocateFrom: startPath map: map].
+	startPath = Directory systemKernel ifTrue: [KernelFilePath := nil].
     ]
 
     FileSegment class >> on: aFile startingAt: startPos for: sizeInteger [
@@ -99,11 +96,10 @@ Smalltalk-80 kernel; I am specific to the GNU Smalltalk implementation.'>
 	    withFileDo: [:fileStream | fileStream copyFrom: startPos to: startPos + size - 1]
     ]
 
-    relocateFrom: startPath to: endPath map: map [
-	"If the path starts with startPath, remove that part of the path
-	 and replace it with endPath.  map is a Dictionary that is used
-	 so that equal filenames stay equal, without increasing the amount
-	 of memory that the image uses."
+    relocateFrom: startPath map: map [
+	"If the path starts with startPath, remove that part of the path.
+	 map is a Dictionary that is used so that equal filenames stay equal,
+	 without increasing the amount of memory that the image uses."
 
 	<category: 'basic'>
 	file := map at: self fileName
@@ -111,7 +107,7 @@ Smalltalk-80 kernel; I am specific to the GNU Smalltalk implementation.'>
 			[(self fileName startsWith: startPath) 
 			    ifTrue: 
 				[map at: self fileName
-				    put: endPath , (file copyFrom: startPath size + 1 to: file size)]
+				    put: (file copyFrom: startPath size + 2)]
 			    ifFalse: [file]]
     ]
 

@@ -82,16 +82,15 @@ virtual one).'>
     ]
 
     Directory class >> systemKernel [
-	"Answer the path to the GNU Smalltalk kernel's Smalltalk source files.
-	 Same as `Directory kernel' since GNU Smalltalk 2.4."
+	"Answer the path to the installed Smalltalk kernel source files."
 
 	<category: 'reading system defaults'>
-	^self kernel
+	^SystemKernelPath
     ]
 
     Directory class >> localKernel [
 	"Answer the path to the GNU Smalltalk kernel's Smalltalk source files.
-	 Same as `Directory kernel' since GNU Smalltalk 2.4."
+	 Same as `Directory kernel' since GNU Smalltalk 3.0."
 
 	<category: 'reading system defaults'>
 	^self kernel
@@ -122,10 +121,12 @@ virtual one).'>
 
     Directory class >> kernel [
 	"Answer the path in which a local version of the GNU Smalltalk kernel's
-	 Smalltalk source files were searched when the image was created"
+	 Smalltalk source files were searched when the image was created."
 
 	<category: 'reading system defaults'>
-	^KernelFilePath
+	^KernelFilePath isNil
+	    ifTrue: [ SystemKernelPath ]
+	    ifFalse: [ KernelFilePath ]
     ]
 
     Directory class >> append: fileName to: directory [
