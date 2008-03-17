@@ -57,7 +57,10 @@ Smalltalk-80 kernel; I am specific to the GNU Smalltalk implementation.'>
 
     FileSegment class >> on: aFile startingAt: startPos for: sizeInteger [
 	"Create a new FileSegment referring to the contents of the given file,
-	 from the startPos-th byte and for sizeInteger bytes"
+	 from the startPos-th byte and for sizeInteger bytes.  Note that
+	 FileSegments should always be created with full paths because
+	 relative paths are interpreted to be relative to the kernel
+	 directory."
 
 	<category: 'basic'>
 	^self new 
@@ -126,7 +129,7 @@ Smalltalk-80 kernel; I am specific to the GNU Smalltalk implementation.'>
 	"Answer the name of the file containing the segment"
 
 	<category: 'basic'>
-	^file
+	^Directory append: file to: Directory kernel
     ]
 
     filePos [

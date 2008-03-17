@@ -1,5 +1,11 @@
 2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/FileSegment.st: Add a warning that relative FileSegments
+	are always interpreted from the kernel directory, and apply this
+	rule in #fileName.
+
+2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* main.c: Fix -S.
 
 2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
