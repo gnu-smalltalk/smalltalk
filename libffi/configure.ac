@@ -2,7 +2,7 @@ dnl Process this with autoconf to create configure
 
 AC_PREREQ(2.59)
 
-AC_INIT([libffi], [2.1], [http://gcc.gnu.org/bugs.html])
+AC_INIT([libffi], [3.0.4], [http://gcc.gnu.org/bugs.html])
 AC_CONFIG_HEADERS([fficonfig.h])
 
 AC_CONFIG_AUX_DIR(../build-aux)
@@ -27,61 +27,127 @@ AM_CONDITIONAL(TESTSUBDIR, test -d $srcdir/testsuite)
 
 TARGETDIR="unknown"
 case "$host" in
-i*86-*-linux*) TARGET=X86; TARGETDIR=x86;;
-i*86-*-gnu*) TARGET=X86; TARGETDIR=x86;;
-i*86-*-solaris2.1[[0-9]]*) TARGET=X86_64; TARGETDIR=x86;;
-i*86-*-solaris*) TARGET=X86; TARGETDIR=x86;;
-i*86-*-beos*) TARGET=X86; TARGETDIR=x86;;
-i*86-*-darwin*) TARGET=X86_DARWIN; TARGETDIR=x86;;
-i*86-*-freebsd* | i*86-*-kfreebsd*-gnu) TARGET=X86; TARGETDIR=x86;;
-i*86-*-netbsdelf* | i*86-*-knetbsd*-gnu) TARGET=X86; TARGETDIR=x86;;
-i*86-*-rtems*) TARGET=X86; TARGETDIR=x86;;
-i*86-*-win32*) TARGET=X86_WIN32; TARGETDIR=x86;;
-i*86-*-cygwin*) TARGET=X86_WIN32; TARGETDIR=x86;;
-i*86-*-mingw*) TARGET=X86_WIN32; TARGETDIR=x86;;
-frv-*-*) TARGET=FRV; TARGETDIR=frv;;
-sparc-sun-4*) TARGET=SPARC; TARGETDIR=sparc;;
-sparc*-sun-*) TARGET=SPARC; TARGETDIR=sparc;;
-sparc-*-linux* | sparc-*-netbsdelf* | sparc-*-knetbsd*-gnu) TARGET=SPARC; TARGETDIR=sparc;;
-sparc*-*-rtems*) TARGET=SPARC; TARGETDIR=sparc;;
-sparc64-*-linux* | sparc64-*-freebsd* | sparc64-*-netbsd* | sparc64-*-knetbsd*-gnu) TARGET=SPARC; TARGETDIR=sparc;;
-alpha*-*-linux* | alpha*-*-osf* | alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu | alpha*-*-netbsd* | alpha*-*-knetbsd*-gnu) TARGET=ALPHA; TARGETDIR=alpha;;
-ia64*-*-*) TARGET=IA64; TARGETDIR=ia64;;
-m32r*-*-linux* ) TARGET=M32R; TARGETDIR=m32r;;
-m68k-*-linux*) TARGET=M68K; TARGETDIR=m68k;;
-mips64*-*);;
-mips-sgi-irix5.* | mips-sgi-irix6.*) TARGET=MIPS_IRIX; TARGETDIR=mips;;
-mips*-*-linux*) TARGET=MIPS_LINUX; TARGETDIR=mips;;
-powerpc*-*-linux* | powerpc-*-sysv*) TARGET=POWERPC; TARGETDIR=powerpc;;
-powerpc-*-beos*) TARGET=POWERPC; TARGETDIR=powerpc;;
-powerpc-*-darwin*) TARGET=POWERPC_DARWIN; TARGETDIR=powerpc;;
-powerpc-*-aix*) TARGET=POWERPC_AIX; TARGETDIR=powerpc;;
-powerpc-*-freebsd*) TARGET=POWERPC_FREEBSD; TARGETDIR=powerpc;;
-powerpc*-*-rtems*) TARGET=POWERPC; TARGETDIR=powerpc;;
-rs6000-*-aix*) TARGET=POWERPC_AIX; TARGETDIR=powerpc;;
-arm*-*-linux-*) TARGET=ARM; TARGETDIR=arm;;
-arm*-*-netbsdelf* | arm*-*-knetbsd*-gnu) TARGET=ARM; TARGETDIR=arm;;
-arm*-*-rtems*) TARGET=ARM; TARGETDIR=arm;;
-cris-*-*) TARGET=LIBFFI_CRIS; TARGETDIR=cris;;
-s390-*-linux-*) TARGET=S390; TARGETDIR=s390;;
-s390x-*-linux-*) TARGET=S390; TARGETDIR=s390;;
-x86_64-*-linux* | x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu) TARGET=X86_64; TARGETDIR=x86;;
-sh-*-linux* | sh[[34]]*-*-linux*) TARGET=SH; TARGETDIR=sh;;
-sh-*-rtems*) TARGET=SH; TARGETDIR=sh;;
-sh64-*-linux* | sh5*-*-linux*) TARGET=SH64; TARGETDIR=sh64;;
-hppa*-*-linux* | parisc*-*-linux*) TARGET=PA_LINUX; TARGETDIR=pa;;
-hppa*64-*-hpux*) TARGET=PA64_HPUX; TARGETDIR=pa;;
-hppa*-*-hpux*) TARGET=PA_HPUX; TARGETDIR=pa;;
+  alpha*-*-*)
+	TARGET=ALPHA; TARGETDIR=alpha;
+	# Support 128-bit long double, changable via command-line switch.
+	HAVE_LONG_DOUBLE='defined(__LONG_DOUBLE_128__)'
+	;;
+
+  arm*-*-*)
+	TARGET=ARM; TARGETDIR=arm
+	;;
+
+  amd64-*-freebsd*)
+	TARGET=X86_64; TARGETDIR=x86
+  	;;
+
+  cris-*-*)
+	TARGET=LIBFFI_CRIS; TARGETDIR=cris
+	;;
+
+  frv-*-*)
+	TARGET=FRV; TARGETDIR=frv
+	;;
+
+  hppa*-*-linux* | parisc*-*-linux*)
+	TARGET=PA_LINUX; TARGETDIR=pa
+	;;
+  hppa*64-*-hpux*)
+	TARGET=PA64_HPUX; TARGETDIR=pa
+	;;
+  hppa*-*-hpux*)
+	TARGET=PA_HPUX; TARGETDIR=pa
+	;;
+
+  i386-*-freebsd* | i386-*-openbsd*)
+	TARGET=X86_FREEBSD; TARGETDIR=x86
+	;;
+  i?86-win32* | i?86-*-cygwin* | i?86-*-mingw*)
+	TARGET=X86_WIN32; TARGETDIR=x86
+	;;
+  i?86-*-darwin*)
+	TARGET=X86_DARWIN; TARGETDIR=x86
+	;;
+  i?86-*-solaris2.1[[0-9]]*)
+	TARGET=X86_64; TARGETDIR=x86
+	;;
+  i?86-*-*)
+	TARGET=X86; TARGETDIR=x86
+	;;
+
+  ia64*-*-*)
+	TARGET=IA64; TARGETDIR=ia64
+	;;
+
+  m32r*-*-*)
+	TARGET=M32R; TARGETDIR=m32r
+	;;
+
+  m68k-*-*)
+	TARGET=M68K; TARGETDIR=m68k
+	;;
+
+  mips-sgi-irix5.* | mips-sgi-irix6.*)
+	TARGET=MIPS; TARGETDIR=mips
+	;;
+  mips*-*-linux*)
+	TARGET=MIPS; TARGETDIR=mips
+	;;
+
+  powerpc*-*-linux* | powerpc-*-sysv*)
+	TARGET=POWERPC; TARGETDIR=powerpc
+	;;
+  powerpc-*-beos*)
+	TARGET=POWERPC; TARGETDIR=powerpc
+	;;
+  powerpc-*-darwin*)
+	TARGET=POWERPC_DARWIN; TARGETDIR=powerpc
+	;;
+  powerpc-*-aix* | rs6000-*-aix*)
+	TARGET=POWERPC_AIX; TARGETDIR=powerpc
+	;;
+  powerpc-*-freebsd*)
+	TARGET=POWERPC_FREEBSD; TARGETDIR=powerpc
+	;;
+  powerpc*-*-rtems*)
+	TARGET=POWERPC; TARGETDIR=powerpc
+	;;
+
+  s390-*-* | s390x-*-*)
+	TARGET=S390; TARGETDIR=s390
+	;;
+
+  sh-*-* | sh[[34]]*-*-*)
+	TARGET=SH; TARGETDIR=sh
+	;;
+  sh64-*-* | sh5*-*-*)
+	TARGET=SH64; TARGETDIR=sh64
+	;;
+
+  sparc*-*-*)
+	TARGET=SPARC; TARGETDIR=sparc
+	;;
+
+  x86_64-*-darwin*)
+	TARGET=X86_DARWIN; TARGETDIR=x86
+	;;
+  x86_64-*-cygwin* | x86_64-*-mingw*)
+	;;
+  x86_64-*-*)
+	TARGET=X86_64; TARGETDIR=x86
+	;;
 esac
+
+AC_SUBST(AM_RUNTESTFLAGS)
 
 if test $TARGETDIR = unknown; then
   AC_MSG_ERROR(["libffi has not been ported to $host."])
 fi
 
-AM_CONDITIONAL(MIPS_IRIX, test x$TARGET = xMIPS_IRIX)
-AM_CONDITIONAL(MIPS_LINUX, test x$TARGET = xMIPS_LINUX)
+AM_CONDITIONAL(MIPS, test x$TARGET = xMIPS)
 AM_CONDITIONAL(SPARC, test x$TARGET = xSPARC)
 AM_CONDITIONAL(X86, test x$TARGET = xX86)
+AM_CONDITIONAL(X86_FREEBSD, test x$TARGET = xX86_FREEBSD)
 AM_CONDITIONAL(X86_WIN32, test x$TARGET = xX86_WIN32)
 AM_CONDITIONAL(X86_DARWIN, test x$TARGET = xX86_DARWIN)
 AM_CONDITIONAL(ALPHA, test x$TARGET = xALPHA)
@@ -103,27 +169,38 @@ AM_CONDITIONAL(PA_LINUX, test x$TARGET = xPA_LINUX)
 AM_CONDITIONAL(PA_HPUX, test x$TARGET = xPA_HPUX)
 AM_CONDITIONAL(PA64_HPUX, test x$TARGET = xPA64_HPUX)
 
-case x$TARGET in
-  xMIPS*) TARGET=MIPS ;;
-  *) ;;
-esac
-
 AC_HEADER_STDC
+AC_CHECK_FUNCS(memcpy)
 AC_FUNC_ALLOCA
+
 AC_CHECK_SIZEOF(double)
 AC_CHECK_SIZEOF(long double)
 
 # Also AC_SUBST this variable for ffi.h.
-HAVE_LONG_DOUBLE=0
-if test $ac_cv_sizeof_double != $ac_cv_sizeof_long_double; then
-  if test $ac_cv_sizeof_long_double != 0; then
-    HAVE_LONG_DOUBLE=1
-    AC_DEFINE(HAVE_LONG_DOUBLE, 1, [Define if you have the long double type and it is bigger than a double])
+if test -z "$HAVE_LONG_DOUBLE"; then
+  HAVE_LONG_DOUBLE=0
+  if test $ac_cv_sizeof_double != $ac_cv_sizeof_long_double; then
+    if test $ac_cv_sizeof_long_double != 0; then
+      HAVE_LONG_DOUBLE=1
+      AC_DEFINE(HAVE_LONG_DOUBLE, 1, [Define if you have the long double type and it is bigger than a double])
+    fi
   fi
 fi
 AC_SUBST(HAVE_LONG_DOUBLE)
 
 AC_C_BIGENDIAN
+
+AC_CACHE_CHECK([assembler .cfi pseudo-op support],
+    libffi_cv_as_cfi_pseudo_op, [
+    libffi_cv_as_cfi_pseudo_op=unknown
+    AC_TRY_COMPILE([asm (".cfi_startproc\n\t.cfi_endproc");],,
+		   [libffi_cv_as_cfi_pseudo_op=yes],
+		   [libffi_cv_as_cfi_pseudo_op=no])
+])
+if test "x$libffi_cv_as_cfi_pseudo_op" = xyes; then
+    AC_DEFINE(HAVE_AS_CFI_PSEUDO_OP, 1,
+	      [Define if your assembler supports .cfi_* directives.])
+fi
 
 if test x$TARGET = xSPARC; then
     AC_CACHE_CHECK([assembler and linker support unaligned pc related relocs],

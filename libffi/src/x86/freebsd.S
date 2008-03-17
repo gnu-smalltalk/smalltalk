@@ -1,8 +1,8 @@
 /* -----------------------------------------------------------------------
-   darwin.S - Copyright (c) 1996, 1998, 2001, 2002, 2003, 2005  Red Hat, Inc.
-	Copyright (C) 2008  Free Software Foundation, Inc.
-
-   X86 Foreign Function Interface
+   freebsd.S - Copyright (c) 1996, 1998, 2001, 2002, 2003, 2005  Red Hat, Inc.
+	       Copyright (c) 2008  Björn König
+	
+   X86 Foreign Function Interface for FreeBSD
 
    Permission is hereby granted, free of charge, to any person obtaining
    a copy of this software and associated documentation files (the
@@ -15,15 +15,15 @@
    The above copyright notice and this permission notice shall be included
    in all copies or substantial portions of the Software.
 
-   THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS
-   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
-	ANY CLAIM, DAMAGES OR
-   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-   OTHER DEALINGS IN THE SOFTWARE.
-   ----------------------------------------------------------------------- */
+   THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+   HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+----------------------------------------------------------------------- */
 
 #ifndef __x86_64__
 
@@ -33,18 +33,18 @@
 
 .text
 
-.globl _ffi_prep_args
+.globl ffi_prep_args
 
 	.align 4
-.globl _ffi_call_SYSV
+.globl ffi_call_SYSV
+        .type    ffi_call_SYSV,@function
 
-_ffi_call_SYSV:
+ffi_call_SYSV:
 .LFB1:
         pushl %ebp
 .LCFI0:
         movl  %esp,%ebp
 .LCFI1:
-        subl $8,%esp
 	/* Make room for all of the new args.  */
 	movl  16(%ebp),%ecx
 	subl  %ecx,%esp
@@ -52,13 +52,12 @@ _ffi_call_SYSV:
 	movl  %esp,%eax
 
 	/* Place all of the ffi_prep_args in position  */
-	subl  $8,%esp
 	pushl 12(%ebp)
 	pushl %eax
 	call  *8(%ebp)
 
 	/* Return stack to previous state and call the function  */
-	addl  $16,%esp	
+	addl  $8,%esp	
 
 	call  *28(%ebp)
 
@@ -78,28 +77,30 @@ _ffi_call_SYSV:
 	jne   noretval
 	fstp  %st(0)
 
-	jmp   epilogue
+        jmp   epilogue
+
 0:
-	.align 4
-	call 1f
+	call  1f
+
 .Lstore_table:
-	.long   noretval-.Lstore_table		/* FFI_TYPE_VOID */
-	.long   retint-.Lstore_table		/* FFI_TYPE_INT */
-	.long   retfloat-.Lstore_table		/* FFI_TYPE_FLOAT */
-	.long   retdouble-.Lstore_table		/* FFI_TYPE_DOUBLE */
-	.long   retlongdouble-.Lstore_table     /* FFI_TYPE_LONGDOUBLE */
-	.long   retuint8-.Lstore_table		/* FFI_TYPE_UINT8 */
-	.long   retsint8-.Lstore_table		/* FFI_TYPE_SINT8 */
-	.long   retuint16-.Lstore_table		/* FFI_TYPE_UINT16 */
-	.long   retsint16-.Lstore_table		/* FFI_TYPE_SINT16 */
-	.long   retint-.Lstore_table		/* FFI_TYPE_UINT32 */
-	.long   retint-.Lstore_table		/* FFI_TYPE_SINT32 */
-	.long   retint64-.Lstore_table		/* FFI_TYPE_UINT64 */
-	.long   retint64-.Lstore_table		/* FFI_TYPE_SINT64 */
-	.long   retstruct-.Lstore_table		/* FFI_TYPE_STRUCT */
-	.long   retint-.Lstore_table		/* FFI_TYPE_POINTER */
+	.long	noretval-.Lstore_table	/* FFI_TYPE_VOID */
+	.long	retint-.Lstore_table	/* FFI_TYPE_INT */
+	.long	retfloat-.Lstore_table	/* FFI_TYPE_FLOAT */
+	.long	retdouble-.Lstore_table	/* FFI_TYPE_DOUBLE */
+	.long	retlongdouble-.Lstore_table	/* FFI_TYPE_LONGDOUBLE */
+	.long	retuint8-.Lstore_table	/* FFI_TYPE_UINT8 */
+	.long	retsint8-.Lstore_table	/* FFI_TYPE_SINT8 */
+	.long	retuint16-.Lstore_table	/* FFI_TYPE_UINT16 */
+	.long	retsint16-.Lstore_table	/* FFI_TYPE_SINT16 */
+	.long	retint-.Lstore_table	/* FFI_TYPE_UINT32 */
+	.long	retint-.Lstore_table	/* FFI_TYPE_SINT32 */
+	.long	retint64-.Lstore_table	/* FFI_TYPE_UINT64 */
+	.long	retint64-.Lstore_table	/* FFI_TYPE_SINT64 */
+	.long	retstruct-.Lstore_table	/* FFI_TYPE_STRUCT */
+	.long	retint-.Lstore_table	/* FFI_TYPE_POINTER */
 	.long   retstruct1b-.Lstore_table	/* FFI_TYPE_SMALL_STRUCT_1B */
 	.long   retstruct2b-.Lstore_table	/* FFI_TYPE_SMALL_STRUCT_2B */
+
 1:
 	pop  %esi
 	add  (%esi, %ecx, 4), %esi
@@ -124,29 +125,29 @@ retuint16:
 
 retfloat:
 	/* Load %ecx with the pointer to storage for the return value  */
-	movl  24(%ebp),%ecx
+	movl  24(%ebp),%ecx	
 	fstps (%ecx)
 	jmp   epilogue
 
 retdouble:
 	/* Load %ecx with the pointer to storage for the return value  */
-	movl  24(%ebp),%ecx
+	movl  24(%ebp),%ecx	
 	fstpl (%ecx)
 	jmp   epilogue
 
 retlongdouble:
 	/* Load %ecx with the pointer to storage for the return value  */
-	movl  24(%ebp),%ecx
+	movl  24(%ebp),%ecx	
 	fstpt (%ecx)
 	jmp   epilogue
-
-retint64:
+	
+retint64:	
 	/* Load %ecx with the pointer to storage for the return value  */
-	movl  24(%ebp),%ecx
+	movl  24(%ebp),%ecx	
 	movl  %eax,0(%ecx)
 	movl  %edx,4(%ecx)
 	jmp   epilogue
-
+	
 retstruct1b:
 	/* Load %ecx with the pointer to storage for the return value  */
 	movl  24(%ebp),%ecx
@@ -161,7 +162,7 @@ retstruct2b:
 
 retint:
 	/* Load %ecx with the pointer to storage for the return value  */
-	movl  24(%ebp),%ecx
+	movl  24(%ebp),%ecx	
 	movl  %eax,0(%ecx)
 
 retstruct:
@@ -169,19 +170,20 @@ retstruct:
 
 noretval:
 epilogue:
-	popl %esi
-	movl %ebp,%esp
-	popl %ebp
-	ret
-
+        popl %esi
+        movl %ebp,%esp
+        popl %ebp
+        ret
 .LFE1:
 .ffi_call_SYSV_end:
+        .size    ffi_call_SYSV,.ffi_call_SYSV_end-ffi_call_SYSV
 
 	.align	4
 FFI_HIDDEN (ffi_closure_SYSV)
-.globl _ffi_closure_SYSV
+.globl ffi_closure_SYSV
+	.type	ffi_closure_SYSV, @function
 
-_ffi_closure_SYSV:
+ffi_closure_SYSV:
 .LFB2:
 	pushl	%ebp
 .LCFI2:
@@ -194,10 +196,17 @@ _ffi_closure_SYSV:
 	movl	%edx, 4(%esp)	/* args = __builtin_dwarf_cfa () */
 	leal	-12(%ebp), %edx
 	movl	%edx, (%esp)	/* &resp */
+#if defined HAVE_HIDDEN_VISIBILITY_ATTRIBUTE || !defined __PIC__
+	call	ffi_closure_SYSV_inner
+#else
 	movl	%ebx, 8(%esp)
 .LCFI7:
-	call	L_ffi_closure_SYSV_inner$stub
+	call	1f
+1:	popl	%ebx
+	addl	$_GLOBAL_OFFSET_TABLE_+[.-1b], %ebx
+	call	ffi_closure_SYSV_inner@PLT
 	movl	8(%esp), %ebx
+#endif
 	movl	-12(%ebp), %ecx
 	cmpl	$FFI_TYPE_INT, %eax
 	je	.Lcls_retint
@@ -208,7 +217,7 @@ _ffi_closure_SYSV:
 	jge	0f
 	cmpl	$FFI_TYPE_UINT8, %eax
 	jge	.Lcls_retint
-
+	
 0:	cmpl	$FFI_TYPE_FLOAT, %eax
 	je	.Lcls_retfloat
 	cmpl	$FFI_TYPE_DOUBLE, %eax
@@ -250,11 +259,11 @@ _ffi_closure_SYSV:
 	movswl	(%ecx), %eax
 	jmp	.Lcls_epilogue
 .Lcls_retstruct:
-	lea -8(%ebp),%esp
 	movl	%ebp, %esp
 	popl	%ebp
-	ret $4
+	ret	$4
 .LFE2:
+	.size	ffi_closure_SYSV, .-ffi_closure_SYSV
 
 #if !FFI_NO_RAW_API
 
@@ -265,9 +274,10 @@ _ffi_closure_SYSV:
 
 	.align	4
 FFI_HIDDEN (ffi_closure_raw_SYSV)
-.globl _ffi_closure_raw_SYSV
+.globl ffi_closure_raw_SYSV
+	.type	ffi_closure_raw_SYSV, @function
 
-_ffi_closure_raw_SYSV:
+ffi_closure_raw_SYSV:
 .LFB3:
 	pushl	%ebp
 .LCFI4:
@@ -326,117 +336,122 @@ _ffi_closure_raw_SYSV:
 	movl	-20(%ebp), %edx
 	jmp	.Lrcls_epilogue
 .LFE3:
+	.size	ffi_closure_raw_SYSV, .-ffi_closure_raw_SYSV
 #endif
 
-.section __IMPORT,__jump_table,symbol_stubs,self_modifying_code+pure_instructions,5
-L_ffi_closure_SYSV_inner$stub:
-	.indirect_symbol _ffi_closure_SYSV_inner
-	hlt ; hlt ; hlt ; hlt ; hlt
-
-
-.section __TEXT,__eh_frame,coalesced,no_toc+strip_static_syms+live_support
-EH_frame1:
-	.set	L$set$0,LECIE1-LSCIE1
-	.long	L$set$0
-LSCIE1:
-	.long	0x0
-	.byte	0x1
-	.ascii "zR\0"
-	.byte	0x1
-	.byte	0x7c
-	.byte	0x8
-	.byte	0x1
-	.byte	0x10
-	.byte	0xc
-	.byte	0x5
-	.byte	0x4
-	.byte	0x88
-	.byte	0x1
-	.align 2
-LECIE1:
-.globl _ffi_call_SYSV.eh
-_ffi_call_SYSV.eh:
-LSFDE1:
-	.set	L$set$1,LEFDE1-LASFDE1
-	.long	L$set$1
-LASFDE1:
-	.long	LASFDE1-EH_frame1
-	.long	.LFB1-.
-	.set L$set$2,.LFE1-.LFB1
-	.long L$set$2
-	.byte	0x0
-	.byte	0x4
-	.set L$set$3,.LCFI0-.LFB1
-	.long L$set$3
-	.byte	0xe
-	.byte	0x8
-	.byte	0x84
-	.byte	0x2
-	.byte	0x4
-	.set L$set$4,.LCFI1-.LCFI0
-	.long L$set$4
-	.byte	0xd
-	.byte	0x4
-	.align 2
-LEFDE1:
-.globl _ffi_closure_SYSV.eh
-_ffi_closure_SYSV.eh:
-LSFDE2:
-	.set	L$set$5,LEFDE2-LASFDE2
-	.long	L$set$5
-LASFDE2:
-	.long	LASFDE2-EH_frame1
-	.long	.LFB2-.
-	.set L$set$6,.LFE2-.LFB2
-	.long L$set$6
-	.byte	0x0
-	.byte	0x4
-	.set L$set$7,.LCFI2-.LFB2
-	.long L$set$7
-	.byte	0xe
-	.byte	0x8
-	.byte	0x84
-	.byte	0x2
-	.byte	0x4
-	.set L$set$8,.LCFI3-.LCFI2
-	.long L$set$8
-	.byte	0xd
-	.byte	0x4
-	.align 2
-LEFDE2:
+	.section	.eh_frame,EH_FRAME_FLAGS,@progbits
+.Lframe1:
+	.long	.LECIE1-.LSCIE1	/* Length of Common Information Entry */
+.LSCIE1:
+	.long	0x0	/* CIE Identifier Tag */
+	.byte	0x1	/* CIE Version */
+#ifdef __PIC__
+	.ascii "zR\0"	/* CIE Augmentation */
+#else
+	.ascii "\0"	/* CIE Augmentation */
+#endif
+	.byte	0x1	/* .uleb128 0x1; CIE Code Alignment Factor */
+	.byte	0x7c	/* .sleb128 -4; CIE Data Alignment Factor */
+	.byte	0x8	/* CIE RA Column */
+#ifdef __PIC__
+	.byte	0x1	/* .uleb128 0x1; Augmentation size */
+	.byte	0x1b	/* FDE Encoding (pcrel sdata4) */
+#endif
+	.byte	0xc	/* DW_CFA_def_cfa */
+	.byte	0x4	/* .uleb128 0x4 */
+	.byte	0x4	/* .uleb128 0x4 */
+	.byte	0x88	/* DW_CFA_offset, column 0x8 */
+	.byte	0x1	/* .uleb128 0x1 */
+	.align 4
+.LECIE1:
+.LSFDE1:
+	.long	.LEFDE1-.LASFDE1	/* FDE Length */
+.LASFDE1:
+	.long	.LASFDE1-.Lframe1	/* FDE CIE offset */
+#ifdef __PIC__
+	.long	.LFB1-.	/* FDE initial location */
+#else
+	.long	.LFB1	/* FDE initial location */
+#endif
+	.long	.LFE1-.LFB1	/* FDE address range */
+#ifdef __PIC__
+	.byte	0x0	/* .uleb128 0x0; Augmentation size */
+#endif
+	.byte	0x4	/* DW_CFA_advance_loc4 */
+	.long	.LCFI0-.LFB1
+	.byte	0xe	/* DW_CFA_def_cfa_offset */
+	.byte	0x8	/* .uleb128 0x8 */
+	.byte	0x85	/* DW_CFA_offset, column 0x5 */
+	.byte	0x2	/* .uleb128 0x2 */
+	.byte	0x4	/* DW_CFA_advance_loc4 */
+	.long	.LCFI1-.LCFI0
+	.byte	0xd	/* DW_CFA_def_cfa_register */
+	.byte	0x5	/* .uleb128 0x5 */
+	.align 4
+.LEFDE1:
+.LSFDE2:
+	.long	.LEFDE2-.LASFDE2	/* FDE Length */
+.LASFDE2:
+	.long	.LASFDE2-.Lframe1	/* FDE CIE offset */
+#ifdef __PIC__
+	.long	.LFB2-.	/* FDE initial location */
+#else
+	.long	.LFB2
+#endif
+	.long	.LFE2-.LFB2	/* FDE address range */
+#ifdef __PIC__
+	.byte	0x0	/* .uleb128 0x0; Augmentation size */
+#endif
+	.byte	0x4	/* DW_CFA_advance_loc4 */
+	.long	.LCFI2-.LFB2
+	.byte	0xe	/* DW_CFA_def_cfa_offset */
+	.byte	0x8	/* .uleb128 0x8 */
+	.byte	0x85	/* DW_CFA_offset, column 0x5 */
+	.byte	0x2	/* .uleb128 0x2 */
+	.byte	0x4	/* DW_CFA_advance_loc4 */
+	.long	.LCFI3-.LCFI2
+	.byte	0xd	/* DW_CFA_def_cfa_register */
+	.byte	0x5	/* .uleb128 0x5 */
+#if !defined HAVE_HIDDEN_VISIBILITY_ATTRIBUTE && defined __PIC__
+	.byte	0x4	/* DW_CFA_advance_loc4 */
+	.long	.LCFI7-.LCFI3
+	.byte	0x83	/* DW_CFA_offset, column 0x3 */
+	.byte	0xa	/* .uleb128 0xa */
+#endif
+	.align 4
+.LEFDE2:
 
 #if !FFI_NO_RAW_API
 
-.globl _ffi_closure_raw_SYSV.eh
-_ffi_closure_raw_SYSV.eh:
-LSFDE3:
-	.set	L$set$10,LEFDE3-LASFDE3
-	.long	L$set$10
-LASFDE3:
-	.long	LASFDE3-EH_frame1
-	.long	.LFB3-.
-	.set L$set$11,.LFE3-.LFB3
-	.long L$set$11
-	.byte	0x0
-	.byte	0x4
-	.set L$set$12,.LCFI4-.LFB3
-	.long L$set$12
-	.byte	0xe
-	.byte	0x8
-	.byte	0x84
-	.byte	0x2
-	.byte	0x4
-	.set L$set$13,.LCFI5-.LCFI4
-	.long L$set$13
-	.byte	0xd
-	.byte	0x4
-	.byte	0x4
-	.set L$set$14,.LCFI6-.LCFI5
-	.long L$set$14
-	.byte	0x85
-	.byte	0x3
-	.align 2
-LEFDE3:
+.LSFDE3:
+	.long	.LEFDE3-.LASFDE3	/* FDE Length */
+.LASFDE3:
+	.long	.LASFDE3-.Lframe1	/* FDE CIE offset */
+#ifdef __PIC__
+	.long	.LFB3-.	/* FDE initial location */
+#else
+	.long	.LFB3
+#endif
+	.long	.LFE3-.LFB3	/* FDE address range */
+#ifdef __PIC__
+	.byte	0x0	/* .uleb128 0x0; Augmentation size */
+#endif
+	.byte	0x4	/* DW_CFA_advance_loc4 */
+	.long	.LCFI4-.LFB3
+	.byte	0xe	/* DW_CFA_def_cfa_offset */
+	.byte	0x8	/* .uleb128 0x8 */
+	.byte	0x85	/* DW_CFA_offset, column 0x5 */
+	.byte	0x2	/* .uleb128 0x2 */
+	.byte	0x4	/* DW_CFA_advance_loc4 */
+	.long	.LCFI5-.LCFI4
+	.byte	0xd	/* DW_CFA_def_cfa_register */
+	.byte	0x5	/* .uleb128 0x5 */
+	.byte	0x4	/* DW_CFA_advance_loc4 */
+	.long	.LCFI6-.LCFI5
+	.byte	0x86	/* DW_CFA_offset, column 0x6 */
+	.byte	0x3	/* .uleb128 0x3 */
+	.align 4
+.LEFDE3:
 
 #endif
 

@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------
-   osf.S - Copyright (c) 1998, 2001 Red Hat
+   osf.S - Copyright (c) 1998, 2001, 2007 Red Hat
    
    Alpha/OSF Foreign Function Interface 
 
@@ -17,7 +17,8 @@
    THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS
    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-   IN NO EVENT SHALL CYGNUS SOLUTIONS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+	ANY CLAIM, DAMAGES OR
    OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
    ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
    OTHER DEALINGS IN THE SOFTWARE.
@@ -40,6 +41,8 @@
 	.align	3
 	.globl	ffi_call_osf
 	.ent	ffi_call_osf
+	FFI_HIDDEN(ffi_call_osf)
+
 ffi_call_osf:
 	.frame	$15, 32, $26, 0
 	.mask   0x4008000, -32
@@ -127,6 +130,8 @@ $LFE1:
 	.align	3
 	.globl	ffi_closure_osf
 	.ent	ffi_closure_osf
+	FFI_HIDDEN(ffi_closure_osf)
+
 ffi_closure_osf:
 	.frame	$30, 16*8, $26, 0
 	.mask	0x4000000, -16*8
@@ -263,7 +268,7 @@ $load_table:
 	.gprel32 $load_32	# FFI_TYPE_INT
 	.gprel32 $load_float	# FFI_TYPE_FLOAT
 	.gprel32 $load_double	# FFI_TYPE_DOUBLE
-	.gprel32 $load_double	# FFI_TYPE_LONGDOUBLE
+	.gprel32 $load_none	# FFI_TYPE_LONGDOUBLE
 	.gprel32 $load_u8	# FFI_TYPE_UINT8
 	.gprel32 $load_s8	# FFI_TYPE_SINT8
 	.gprel32 $load_u16	# FFI_TYPE_UINT16
