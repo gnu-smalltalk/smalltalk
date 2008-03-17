@@ -1,5 +1,9 @@
 2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* main.c: Fix -S.
+
+2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* gst-tool.c: Support relocatable installation.
 	* main.c: Support relocatable installation.
 
