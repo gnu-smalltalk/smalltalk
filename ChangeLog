@@ -1,5 +1,10 @@
 2008-03-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/FileDescr.st: Add a couple of methods for polymorphism
+	with sockets.
+
+2008-03-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Class.st: Rename #policy/#policy: to
 	#securityPolicy/#securityPolicy:.
 

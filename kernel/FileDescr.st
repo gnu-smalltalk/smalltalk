@@ -350,6 +350,17 @@ do arbitrary processing on the files.'>
 		self pastEnd]
     ]
 
+    peekFor: anObject [
+	"Returns whether the next element of the stream is equal to anObject,
+	 without moving the pointer if it is not."
+
+	<category: 'basic'>
+	| result |
+	^self peek = anObject
+	    ifTrue: [ self next ];
+	    yourself
+    ]
+
     peek [
 	"Returns the next element of the stream without moving the pointer.
 	 Returns nil when at end of stream."
@@ -577,6 +588,14 @@ do arbitrary processing on the files.'>
 	    fileOp: 13
 	    with: 2
 	    ifFail: [self close]
+    ]
+
+    isPeerAlive [
+	"Present for compatibility with sockets.  For files, it answers
+	 whether the file is still open"
+
+	<category: 'accessing'>
+	^self isOpen
     ]
 
     isOpen [
