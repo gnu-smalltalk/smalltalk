@@ -541,12 +541,12 @@ the class category.'>
 	aStream nextPutAll: (self nameIn: Smalltalk)
     ]
 
-    policy [
+    securityPolicy [
 	<category: 'security'>
 	^securityPolicy
     ]
 
-    policy: aSecurityPolicy [
+    securityPolicy: aSecurityPolicy [
 	<category: 'security'>
 	securityPolicy := aSecurityPolicy withOwner: self
     ]
