@@ -1,5 +1,10 @@
 2008-03-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Remote.st: Implement ssh connections.
+	* gst-tool.c: Add --login to gst-remote.
+
+2008-03-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Remote.st: Use #canRead instead of #available.
 
 2008-03-18  Paolo Bonzini  <bonzini@gnu.org>

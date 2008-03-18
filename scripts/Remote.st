@@ -67,15 +67,16 @@ TextCollector subclass: MultiplexingTextCollector [
     ]
 ]
 
-| helpString commands server port host |
+| helpString commands server port host login |
 commands := OrderedCollection new.
 server := false.
 port := 12345.
 host := nil.
+login := nil.
 
 helpString :=
 'Usage:
-    gst-remote [ flag ... ] host
+    gst-remote [ flag ... ] [user@]host
 
 Options:
        --daemon               start background server
@@ -83,6 +84,7 @@ Options:
     -p --port=PORT            connect/listen on given port (default 12345)
     -f --file=FILE            file in FILE
     -e --eval=CODE            evaluate CODE
+    -l --login=USER           use remote ssh connection
        --kill                 kill daemon
        --snapshot[=FILE]      save image
        --package=PACKAGE      load package
@@ -91,13 +93,17 @@ Options:
        --pid                  print daemon pid
     -h --help                 show this message
        --version              print version information and exit
+
+If a remote login name is given, gst-remote will use the SSH environment
+variable (if present) to launch commands remotely.  Netcat (nc) should be
+available in the PATH of the remote machine.
 '.
 
 "Parse the command-line arguments."
-Smalltalk
+[Smalltalk
     arguments: '-h|--help --version --daemon --server -p|--port: -f|--file:
 		-e|--eval: --pid --kill --snapshot:: --start: --stop:
-		--package: -I|--image: --kernel-directory:'
+		-l|--login: --package: -I|--image: --kernel-directory:'
     do: [ :opt :arg |
 
     opt = 'help' ifTrue: [
@@ -107,6 +113,10 @@ Smalltalk
     opt = 'version' ifTrue: [
 	('gst-remote - %1' % {Smalltalk version}) displayNl.
 	ObjectMemory quit: 0 ].
+
+    opt = 'login' ifTrue: [
+	login isNil ifFalse: [ self error: 'multiple logins are invalid' ].
+	login := arg ].
 
     opt = 'daemon' ifTrue: [
 	server := true ].
@@ -161,12 +171,19 @@ Smalltalk
 				     (Directory append: arg to: Directory working) storeString ] ].
 
     opt isNil ifTrue: [
-	host isNil ifFalse: [
-	    helpString displayOn: stderr.
-	    ObjectMemory quit: 1 ].
-	host := arg ] ]
-
-    ifError: [
+	host isNil ifFalse: [ self error: 'multiple hosts are invalid' ].
+	(arg includes: $@)
+	    ifFalse: [ host := arg ]
+	    ifTrue: [
+		login isNil ifFalse: [ self error: 'multiple logins are invalid' ].
+		login := arg copyUpTo: $@.
+		host := arg copyAfter: $@ ] ].
+    ]
+]
+    on: Error do: [ :ex |
+        ('gst-remote: ', ex messageText, '
+') displayOn: stderr.
+	stderr flush.
 	helpString displayOn: stderr.
 	ObjectMemory quit: 1 ].
 
@@ -217,9 +234,16 @@ server ifTrue: [
 
 [
     commands isEmpty ifFalse: [
-	s := host isNil
-	    ifTrue: [ TCP.Socket remote: TCP.IPAddress anyLocalAddress port: port ]
-	    ifFalse: [ TCP.Socket remote: host port: port ].
+	s := (login isNil or: [ host isNil ])
+	    ifTrue: [
+	        host isNil ifTrue: [ host := TCP.IPAddress anyLocalAddress ].
+	        TCP.Socket remote: host port: port ]
+	    ifFalse: [
+		FileStream
+		    popen: '%1 %2@%3 nc localhost %4' % {
+			(Smalltalk getenv: 'SSH') ifNil: [ 'ssh' ].
+			login. host. port}
+		    dir: 'r+' ].
 
 	commands do: [ :each |
 	    "Using #readStream makes it work both for Strings and Files."

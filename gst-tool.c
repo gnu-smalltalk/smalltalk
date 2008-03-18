@@ -131,8 +131,8 @@ struct tool tools[] = {
   {
     "gst-remote", "scripts/Remote.st",
     "-h|--help --version --daemon --server -p|--port: -f|--file: -e|--eval: \
- 	--package: --start: --stop: --pid --kill --snapshot:: -I|--image-file: \
-	--kernel-directory:",
+ 	-l|--login: --package: --start: --stop: --pid --kill --snapshot:: \
+	-I|--image-file: --kernel-directory:",
     NULL
   },
   { NULL, NULL, NULL, NULL }
