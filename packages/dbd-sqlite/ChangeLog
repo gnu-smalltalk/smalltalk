@@ -1,3 +1,7 @@
+2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sqlite3.c: Never call sqlite3_finalize twice.
+
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* ResultSet.st: Unshare rows.

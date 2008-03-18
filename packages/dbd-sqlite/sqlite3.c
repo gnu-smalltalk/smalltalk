@@ -217,8 +217,11 @@ gst_sqlite3_finalize (OOP self)
   SQLite3StmtHandle h;
 
   h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
-  stmt = (sqlite3_stmt *) vmProxy->OOPToCObject (h->stmt);
+  if (h->stmt == vmProxy->nilOOP)
+    return 0;
 
+  stmt = (sqlite3_stmt *) vmProxy->OOPToCObject (h->stmt);
+  h->stmt = vmProxy->nilOOP;
   return sqlite3_finalize (stmt);
 }
 
