@@ -172,17 +172,21 @@ RAConcreteRelation subclass: RASQLRelation [
 		    nextPutAll: self name;
 		    nextPutAll: ' ('.
 		attributeNames do: 
-			[:each | 
-			stream
-			    nextPut: $";
-			    nextPutAll: each;
-			    nextPut: $"]
+			[:each | self printAttribute: each on: stream ]
 		    separatedBy: [stream nextPutAll: ', '].
 		stream nextPutAll: ') VALUES ('.
 		anArray do: 
 			[:each | self print: each on: stream ]
 		    separatedBy: [stream nextPutAll: ', '].
 		stream nextPutAll: ')']
+    ]
+
+    printAttribute: each on: aStream [
+        <category: 'printing'>
+	stream
+	    nextPut: $";
+	    nextPutAll: each;
+	    nextPut: $"
     ]
 
     print: anObject on: aStream [

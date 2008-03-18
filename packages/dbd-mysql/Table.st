@@ -53,4 +53,12 @@ Table subclass: MySQLTable [
 		MySQLTableColumnInfo from: row index: (i := i + 1) ] ].
 	^columnsArray
     ]
+
+    printAttribute: each on: aStream [
+	<category: 'printing'>
+	stream
+	    nextPut: $`;
+	    nextPutAll: each;
+	    nextPut: $`
+    ]
 ]
