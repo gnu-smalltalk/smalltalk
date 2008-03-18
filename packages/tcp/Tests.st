@@ -71,9 +71,8 @@ Socket class extend [
 			    nextPutAll: sendBuf;
 			    flush.
 			bytesSent := bytesSent + sendBuf size.
-			[client available] whileTrue: 
-				[client fill.
-				bytesReceived := bytesReceived + client bufferContents size].
+			[client canRead] whileTrue: 
+				[bytesReceived := bytesReceived + client nextHunk size].
 			bytesSent >= bytesToSend and: [bytesReceived = bytesSent]] 
 				whileFalse].
 	Transcript
@@ -141,9 +140,8 @@ Socket class extend [
 				[queueReady wait.
 				client := Socket remote: queue localAddress port: 54321.
 				
-				[[client available] whileTrue: 
-					[client fill.
-					bytesReceived := bytesReceived + client bufferContents size].
+				[[client canRead] whileTrue: 
+					[bytesReceived := bytesReceived + client nextHunk size].
 				bytesSent >= bytesToSend and: [bytesReceived = bytesSent]] 
 					whileFalse: [Processor yield].
 				sema signal] 
@@ -189,7 +187,7 @@ Socket class extend [
 			    nextPut: datagram;
 			    flush.
 			bytesSent := bytesSent + datagram data size.
-			[client available] 
+			[client canRead] 
 			    whileTrue: [bytesReceived := bytesReceived + client next data size].
 			bytesReceived < bytesToSend] 
 				whileTrue.

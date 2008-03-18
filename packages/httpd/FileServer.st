@@ -280,12 +280,8 @@ to upload a file.'>
     nextChunk [
 	<category: 'multipart'>
 	
-	[request stream isPeerAlive ifFalse: [^''].
-	request stream available] 
-		whileFalse: [Processor yield].
-	^(request stream)
-	    fill;
-	    bufferContents
+	request stream isPeerAlive ifFalse: [^''].
+	^request stream nextHunk
     ]
 
     localFileFor: remoteName [

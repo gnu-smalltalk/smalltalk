@@ -1234,7 +1234,7 @@ Object subclass: SpSocket [
 	 I return true if a read operation will return some number of bytes."
 
 	<category: 'services-io'>
-	^self underlyingSocket available
+	^self underlyingSocket canRead
     ]
 
     setAddressReuse: aBoolean [
@@ -1261,7 +1261,7 @@ Object subclass: SpSocket [
 
 	<category: 'services-io'>
 	| bad sem timeout socketWait |
-	self underlyingSocket available ifTrue: [ ^true ].
+	self underlyingSocket canRead ifTrue: [ ^true ].
 	sem := Semaphore new.
 	timeout :=
 	    [ (Delay forMilliseconds: aNumberOfMilliseconds) wait. sem signal ]
@@ -1272,7 +1272,7 @@ Object subclass: SpSocket [
 	[ sem wait ] ensure: [
 	    timeout terminate.
 	    socketWait terminate ].
-	^self underlyingSocket available
+	^self underlyingSocket canRead
     ]
 
     write: sourceByteArray [

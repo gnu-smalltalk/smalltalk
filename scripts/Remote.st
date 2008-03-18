@@ -227,7 +227,7 @@ server ifTrue: [
 
 	    [ s peekFor: $<0> ] whileFalse: [
 		stdout nextPut: s next.
-		s available ifFalse: [ stdout flush ] ] ].
+		s canRead ifFalse: [ stdout flush ] ] ].
 	s close ]
 ]
     on: Error
