@@ -397,6 +397,50 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 		    to: pos + n - 1]
     ]
 
+    upTo: aCharacter [
+	"Returns a collection of the same type that the stream accesses,
+	 containing data up to aCharacter.  Returns the entire rest of
+	 the stream's contents if no such character is found."
+
+	<category: 'overriding inherited methods'>
+	| n resultStream result ch |
+	writePtr notNil ifTrue: [self flush].
+	ptr > endPtr 
+	    ifTrue: 
+		[self fill.
+		self atEnd ifTrue: [^self pastEnd]].
+
+	"First, examine the buffer's contents."
+	
+	[ptr to: endPtr
+	    do: 
+		[:i | 
+		(ch := collection at: i) == aCharacter
+		    ifTrue: 
+			[result := collection copyFrom: ptr to: i - 1.
+			ptr := i + 1.
+
+			"If we went through the loop only once, we're done."
+			resultStream isNil ifTrue: [^result].
+
+			"Else finish the stream and return its contents."
+			^resultStream
+			    nextPutAll: result;
+			    contents]].
+	resultStream isNil 
+	    ifTrue: 
+		[resultStream := WriteStream on: (self species new: endPtr - ptr + 20)].
+	resultStream 
+	    next: endPtr - ptr + 1
+	    putAll: collection
+	    startingAt: ptr.
+	ptr := endPtr + 1.
+	self fill.
+	self atEnd] 
+		whileFalse.
+	^resultStream contents
+    ]
+
     nextLine [
 	"Returns a collection of the same type that the stream accesses, containing
 	 the next line up to the next new-line character.  Returns the entire rest of the

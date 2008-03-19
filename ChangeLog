@@ -1,3 +1,7 @@
+2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FileStream.st: Implement #upTo: like #nextLine.
+
 2008-03-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Remote.st: Implement ssh connections.
