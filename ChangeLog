@@ -1,5 +1,9 @@
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/File.st: Add #fileIn.
+
+2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Regex.st: Add #allOccurrencesOfRegex:do:.
 
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>

@@ -656,6 +656,13 @@ size and timestamps.'>
 	^self open: FileStream read
     ]
 
+    fileIn [
+	"File in the receiver"
+
+	<category: 'file operations'>
+	self withReadStreamDo: [ :fs | fs fileIn ]
+    ]
+
     withWriteStreamDo: aBlock [
 	"Invoke aBlock with a writing stream open on me, closing it
 	 when the dynamic extent of aBlock ends."
