@@ -1,3 +1,8 @@
+2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/files.c: Load BlockClosure before the first closures
+	are executed (by the JIT).
+
 2008-03-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Avoid mixed declarations and code.
