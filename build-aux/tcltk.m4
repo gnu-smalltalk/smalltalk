@@ -43,7 +43,7 @@ if test "x$with_tcl" = x || test "$with_tcl" = yes; then
   AC_MSG_RESULT($TCLSH)
 fi
 if test "x$with_tk" = x || test "$with_tk" = yes; then
-  with_tk=`echo "$with_tcl" | sed -e 's/tcl/tk/g' -e 's/Tcl/Tk/g'`
+  with_tk=`echo "$with_tcl" | sed -e 's/tcl/tk/g' -e 's/tktk/tcltk/g' -e 's/Tcl/Tk/g'`
   test -f "$with_tk/tkConfig.sh" || with_tk=no
 fi
 if test "$with_tcl" != no; then
