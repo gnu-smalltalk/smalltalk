@@ -727,29 +727,10 @@ String extend [
 	 which is then returned."
 
 	<category: 'regex'>
-	| idx regex regs result beg end emptyOk |
-	regex := pattern asRegex.
-	idx := from.
+	| result |
 	result := OrderedCollection new.
-	emptyOk := true.
-
-	[regs := self 
-		    searchRegexInternal: regex
-		    from: idx
-		    to: to.
-	regs isNil] 
-		whileFalse:
-                    [beg := regs from.
-                    end := regs to.
-                    (beg <= end or: [ beg > idx or: [ emptyOk ]])
-                        ifTrue: [
-                            result addLast: regs match.
-                            emptyOk := false.
-                            idx := end + 1]
-                        ifFalse: [
-                            beg <= to ifFalse: [^result].
-                            emptyOk := true.
-                            idx := beg + 1]].
+	self allOccurrencesOfRegex: pattern from: from to: to
+	    do: [ :each | result add: each match ].
 	^result
     ]
 
@@ -762,6 +743,48 @@ String extend [
 	    allOccurrencesOfRegex: pattern
 	    from: 1
 	    to: self size
+    ]
+
+    allOccurrencesOfRegex: pattern from: from to: to do: aBlock [
+	"Find all the matches of pattern within the receiver and within the
+	 given range of indices.  For each match, pass the RegexResults object
+	 to aBlock."
+
+	<category: 'regex'>
+	| idx regex regs beg end emptyOk |
+	regex := pattern asRegex.
+	idx := from.
+	emptyOk := true.
+
+	[regs := self 
+		    searchRegexInternal: regex
+		    from: idx
+		    to: to.
+	regs isNil] 
+		whileFalse:
+                    [beg := regs from.
+                    end := regs to.
+                    (beg <= end or: [ beg > idx or: [ emptyOk ]])
+                        ifTrue: [
+                            aBlock value: regs.
+                            emptyOk := false.
+                            idx := end + 1]
+                        ifFalse: [
+                            beg <= to ifFalse: [^self].
+                            emptyOk := true.
+                            idx := beg + 1]].
+    ]
+
+    allOccurrencesOfRegex: pattern do: aBlock [
+	"Find all the matches of pattern within the receiver and
+	 pass the RegexResults objects to aBlock."
+
+	<category: 'regex'>
+	^self 
+	    allOccurrencesOfRegex: pattern
+	    from: 1
+	    to: self size
+	    do: aBlock
     ]
 
     replacingRegex: pattern with: str [

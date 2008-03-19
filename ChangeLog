@@ -1,3 +1,7 @@
+2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Regex.st: Add #allOccurrencesOfRegex:do:.
+
 2008-03-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Class.st: Rename #policy/#policy: to
