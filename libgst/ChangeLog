@@ -1,5 +1,10 @@
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/prims.def: Mark VMpr_Process_suspend as a possible
+	source of interrupts.
+
+2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/files.c: Load BlockClosure before the first closures
 	are executed (by the JIT).
 
