@@ -557,7 +557,7 @@ Object subclass: WAGNUSmalltalkPlatform [
 	directory := Directory name: aPathString.
 	^(directory contents
 		reject: [ :each | each first = $. ])
-		collect: [ :each | Directory append: (directory nameAt: each) ]
+		collect: [ :each | Directory append: each to: directory name ]
     ]
 
     localNameOf: aFilename [
