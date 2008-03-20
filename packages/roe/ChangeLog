@@ -1,3 +1,7 @@
+2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* SQL.st: Fix borked checkin.
+
 2008-03-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* SQL.st: Extract #printAttribute:on: and use it.
