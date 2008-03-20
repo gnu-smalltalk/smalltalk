@@ -1,5 +1,10 @@
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/File.st: Return result of evaluating block from
+	File>>#withReadStreamDo: and File>>#withWriteStreamDo:.
+
+2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Regex.st: Add #allOccurrencesOfRegex:do:.
 
 2008-03-18  Paolo Bonzini  <bonzini@gnu.org>
