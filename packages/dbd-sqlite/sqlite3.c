@@ -116,29 +116,33 @@ gst_sqlite3_prepare (OOP self, const char *sql)
   db = (sqlite3 *) vmProxy->OOPToCObject (h->db);
 
   rc = sqlite3_prepare (db, sql, -1, &stmt, 0);
-  tmpOOP = vmProxy->cObjectToOOP (stmt);
-  h->stmt = tmpOOP;
-
   if (rc != SQLITE_OK)
     return rc;
 
-  cols = sqlite3_column_count (stmt);
+  tmpOOP = vmProxy->cObjectToOOP (stmt);
+  h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
+  h->stmt = tmpOOP;
 
+  cols = sqlite3_column_count (stmt);
   tmpOOP = vmProxy->intToOOP (cols);
   h->colCount = tmpOOP;
 
   tmpOOP = vmProxy->objectAlloc (vmProxy->arrayClass, cols);
+  h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
   h->colTypes = tmpOOP;
 
   tmpOOP = vmProxy->objectAlloc (vmProxy->arrayClass, cols);
+  h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
   h->colNames = tmpOOP;
 
   tmpOOP = vmProxy->objectAlloc (vmProxy->arrayClass, cols);
+  h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
   h->returnedRow = tmpOOP;
 
   for (i = 0; i < cols; i++)
     {
       tmpOOP = vmProxy->stringToOOP (sqlite3_column_name (stmt, i));
+      h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
       vmProxy->OOPAtPut (h->colNames, i, tmpOOP);
     }
 
@@ -153,8 +157,10 @@ gst_sqlite3_exec (OOP self)
   SQLite3StmtHandle h;
 
   h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
-  stmt = (sqlite3_stmt *) vmProxy->OOPToCObject (h->stmt);
+  if (h->stmt == vmProxy->nilOOP)
+    return SQLITE_MISUSE;
 
+  stmt = (sqlite3_stmt *) vmProxy->OOPToCObject (h->stmt);
   rc = sqlite3_step (stmt);
 
   if (rc == SQLITE_ROW)
@@ -191,6 +197,7 @@ gst_sqlite3_exec (OOP self)
 		       "returned type not recognized");
 	    }
 
+	  h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
 	  vmProxy->OOPAtPut (h->returnedRow, i, tmpOOP);
 	}
     }
