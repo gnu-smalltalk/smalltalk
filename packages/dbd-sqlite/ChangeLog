@@ -1,3 +1,7 @@
+2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sqlite3.c: Fix GC problems.
+
 2008-03-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sqlite3.c: Never call sqlite3_finalize twice.
