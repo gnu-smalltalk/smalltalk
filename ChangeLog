@@ -1,5 +1,10 @@
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/File.st: Return result of evaluating block from
+	File>>#withReadStreamDo: and File>>#withWriteStreamDo:.
+
+2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/File.st: Add #fileIn.
 
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>

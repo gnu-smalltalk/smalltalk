@@ -646,7 +646,7 @@ size and timestamps.'>
 	<category: 'file operations'>
 	| stream |
 	stream := self readStream.
-	[aBlock value: stream] ensure: [stream close]
+	^[aBlock value: stream] ensure: [stream close]
     ]
 
     readStream [
@@ -669,7 +669,7 @@ size and timestamps.'>
 	<category: 'file operations'>
 	| stream |
 	stream := self writeStream.
-	[aBlock value: stream] ensure: [stream close]
+	^[aBlock value: stream] ensure: [stream close]
     ]
 
     writeStream [
