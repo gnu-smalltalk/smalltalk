@@ -1,5 +1,5 @@
 <package>
-  <name>Seaside-Swazoo</name>
+  <name>Seaside</name>
   <namespace>Seaside</namespace>
 
   <prereq>Seaside-Core</prereq>
