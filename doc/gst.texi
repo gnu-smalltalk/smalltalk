@@ -2487,29 +2487,27 @@ MyCounter registerAsApplication: 'mycounter'
 @end example
 
 Most of the time, you will run Seaside in a background virtual machine.
-First of all, you should load the Seaside packages into an image like
+First of all, you should load the Seaside packages into a new image like
 this:
 
 @example
-$ gst
-st> PackageLoader fileInPackage: 'Seaside'
-st> PackageLoader fileInPackage: 'Seaside-Development'
-st> PackageLoader fileInPackage: 'Seaside-Examples'
-st> ObjectMemory snapshot: 'seaside.im'
+$ gst-load -iI seaside.im Seaside Seaside-Development Seaside-Examples
 @end example
 
 @noindent
-Then, you can start Seaside with
+Then, you can start Seaside with either of these commands
 
 @example
+$ gst-load -I seaside.im --start Seaside
 $ gst-remote -I seaside.im --daemon --start=Seaside
 @end example
 
 @noindent
 which will start serving pages at @url{http://localhost:8080/seaside}.
-
-You can stop serving Seaside pages, and bring down the server,
-respectively with these commands:
+The former starts the server in foreground, the latter instead runs a
+virtual machine that you can control using further invocations of
+@command{gst-remote}.  For example, you can stop serving Seaside
+pages, and bring down the server, respectively with these commands:
 
 @example
 $ gst-remote --kill
