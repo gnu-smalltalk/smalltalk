@@ -101,8 +101,10 @@ AC_CONFIG_SUBDIRS(snprintfv)
 AC_ARG_ENABLE(generational-gc,
 [  --disable-generational-gc disable generational garbage collection], ,
 [case $host in
-        *-*-cygwin* | *-*-mingw* | ia64-*-* ) enable_generational_gc=no ;;
-        *) enable_generational_gc=yes ;;
+        *-*-cygwin* | *-*-mingw* | ia64-*-* | alpha*-*-* )
+	  enable_generational_gc=no ;;
+        *)
+	  enable_generational_gc=yes ;;
 esac])
 
 AC_ARG_WITH(system-libsigsegv,
