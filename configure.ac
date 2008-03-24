@@ -81,7 +81,10 @@ if test $with_system_libffi = no; then
   INCFFI='-I$(top_srcdir)/libffi/include -I$(top_builddir)/libffi/include'
   LIBFFI='$(top_builddir)/libffi/libffi.la'
 elif test $with_system_libffi = yes; then
-  INCFFI= LIBFFI=-lffi
+  PKG_CHECK_MODULES(FFI, libffi,
+    [ INCFFI="$FFI_CFLAGS" LIBFFI="$FFI_LIBS" ],
+    [ INCFFI= LIBFFI=-lffi ]
+  )
 else
   INCFFI="-I$withval/../include" LIBFFI="-L$withval -lffi"
 fi
