@@ -1,3 +1,7 @@
+2008-03-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FileDescr.st: Open URLs from #open:mode:ifFail:.
+
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/File.st: Return result of evaluating block from
