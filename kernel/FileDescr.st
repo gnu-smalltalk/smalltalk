@@ -556,15 +556,6 @@ do arbitrary processing on the files.'>
 	"If the file is open, wait until we can write to it.  The wait
 	 allows other Processes to run."
 
-	"2002-02-07 commented out the code below because not all devices
-	 support sending SIGIO's when they become writeable -- notably,
-	 tty's under Linux :-("
-
-	"self isPipe ifFalse: [ ^self ].
-	 self isOpen ifFalse: [ ^self ].
-	 
-	 self fileOp: 14 with: 1 with: Semaphore new"
-
 	<category: 'accessing'>
 	self 
 	    fileOp: 13
@@ -834,16 +825,17 @@ do arbitrary processing on the files.'>
 	| count available |
 	self ensureReadable.
 	available := peek isNil ifTrue: [0] ifFalse: [1].
+	peek isNil 
+	    ifFalse: 
+		[byteArray byteAt: 1 put: peek value.
+		peek := nil].
+	self isOpen ifFalse: [^available].
 	count := self 
 		    fileOp: 3
 		    with: byteArray
 		    with: available + 1
 		    with: byteArray size
 		    ifFail: [self checkError].
-	peek isNil 
-	    ifFalse: 
-		[byteArray byteAt: 1 put: peek value.
-		peek := nil].
 	count := count + available.
 	count = 0 ifTrue: [atEnd := true].
 	^count
@@ -857,16 +849,17 @@ do arbitrary processing on the files.'>
 	| count available |
 	self ensureReadable.
 	available := peek isNil ifTrue: [0] ifFalse: [1].
+	peek isNil 
+	    ifFalse: 
+		[byteArray byteAt: 1 put: peek value.
+		peek := nil].
+	self isOpen ifFalse: [^available].
 	count := self 
 		    fileOp: 3
 		    with: byteArray
 		    with: 1 + available
 		    with: (anInteger min: byteArray size)
 		    ifFail: [self checkError].
-	peek isNil 
-	    ifFalse: 
-		[byteArray byteAt: 1 put: peek value.
-		peek := nil].
 	count := count + available.
 	count = 0 ifTrue: [atEnd := true].
 	^count
@@ -880,16 +873,17 @@ do arbitrary processing on the files.'>
 	| count available |
 	self ensureReadable.
 	available := peek isNil ifTrue: [0] ifFalse: [1].
+	peek isNil 
+	    ifFalse: 
+		[byteArray byteAt: position put: peek value.
+		peek := nil].
+	self isOpen ifFalse: [^available].
 	count := self 
 		    fileOp: 3
 		    with: byteArray
 		    with: position + available
 		    with: (end min: byteArray size)
 		    ifFail: [self checkError].
-	peek isNil 
-	    ifFalse: 
-		[byteArray byteAt: 1 put: peek value.
-		peek := nil].
 	count := count + available.
 	count = 0 ifTrue: [atEnd := true].
 	^count
@@ -928,6 +922,7 @@ do arbitrary processing on the files.'>
 	last := end min: byteArray size.
 	[cur <= last] whileTrue: 
 		[self ensureWriteable.
+		self isOpen ifFalse: [^cur - position].
 		result := self 
 			    fileOp: 2
 			    with: byteArray
