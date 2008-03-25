@@ -1,3 +1,7 @@
+2008-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FileDescr.st: Move open checks to #checkError, use #isOpen.
+
 2008-03-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Open URLs from #open:mode:ifFail:.

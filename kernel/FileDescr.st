@@ -282,6 +282,7 @@ do arbitrary processing on the files.'>
 	 File class>>#checkError."
 
 	<category: 'basic'>
+	self isOpen ifFalse: [SystemExceptions.FileError signal: 'file closed'].
 	File checkError.
 	^0
     ]
@@ -298,7 +299,7 @@ do arbitrary processing on the files.'>
 	 on read-write pipes."
 
 	<category: 'basic'>
-	file isNil ifTrue: [^self].
+	self isOpen ifFalse: [^self].
 	self flush.
 	self fileOp: 19.
 	self checkError.
@@ -309,7 +310,7 @@ do arbitrary processing on the files.'>
 	"Close the file"
 
 	<category: 'basic'>
-	file isNil ifTrue: [^self].
+	self isOpen ifFalse: [^self].
 	self flush.
 	self changed: #beforeClosing.
 	self fileOp: 1.
@@ -324,7 +325,7 @@ do arbitrary processing on the files.'>
 
 	<category: 'basic'>
 	AllOpenFiles remove: self ifAbsent: [].
-	file isNil ifFalse: [self close]
+	self isOpen ifFalse: [self close]
     ]
 
     next [
@@ -943,7 +944,6 @@ do arbitrary processing on the files.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_FileDescriptor_fileOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
 	self checkError.
 	^nil
     ]
@@ -961,7 +961,6 @@ do arbitrary processing on the files.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_FileDescriptor_fileOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
 	self checkError.
 	^nil
     ]
@@ -979,7 +978,6 @@ do arbitrary processing on the files.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_FileDescriptor_fileOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
 	self checkError.
 	^nil
     ]
@@ -997,7 +995,6 @@ do arbitrary processing on the files.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_FileDescriptor_fileOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
 	self checkError.
 	^nil
     ]
@@ -1015,7 +1012,6 @@ do arbitrary processing on the files.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_FileDescriptor_fileOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
 	self checkError.
 	^nil
     ]

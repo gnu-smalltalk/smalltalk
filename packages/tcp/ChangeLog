@@ -1,3 +1,7 @@
+2008-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* AbstractSocketImpl.st: Use instance-side #checkError.
+
 2008-03-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Buffers.st: Add WriteBuffer>>#isFull.
