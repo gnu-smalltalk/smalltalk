@@ -1,3 +1,7 @@
+2008-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/callin.c: Never register the "nil" object, it is useless.
+
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Mark VMpr_Process_suspend as a possible

@@ -938,7 +938,7 @@ _gst_register_oop (OOP oop)
   oop_registry *node;
   oop_registry *entry = NULL;
 
-  if (!oop)
+  if (!oop || IS_NIL (oop))
     return (oop);
 
   while (*p)
@@ -974,7 +974,7 @@ _gst_unregister_oop (OOP oop)
 
   /* Speed things up, this will never be in the registry (but we allow
      it to simplify client code).  */
-  if (!oop)
+  if (!oop || IS_NIL (oop))
     return;
 
   while (entry)
