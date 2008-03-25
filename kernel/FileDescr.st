@@ -106,12 +106,8 @@ do arbitrary processing on the files.'>
 	 finished with it anyway, using #close. To keep a file open even when
 	 no references exist anymore, send it #removeToBeFinalized"
 
-	<category: 'instance creation'>
-	((fileName indexOfSubCollection: '://') > 0 
-	    and: [fileMode = FileStream read]) 
-		ifTrue: [^NetClients.URIResolver openStreamOn: fileName].
-	^(VFS.VFSHandler for: fileName) 
-	    open: self
+	^self
+	    open: fileName
 	    mode: fileMode
 	    ifFail: [SystemExceptions.FileError signal: 'could not open ' , fileName]
     ]
@@ -132,6 +128,9 @@ do arbitrary processing on the files.'>
 	 no references exist anymore, send it #removeToBeFinalized"
 
 	<category: 'instance creation'>
+	((fileName indexOfSubCollection: '://') > 0 
+	    and: [fileMode = FileStream read]) 
+		ifTrue: [^NetClients.URIResolver openStreamOn: fileName ifFail: aBlock ].
 	^(VFS.VFSHandler for: fileName) 
 	    open: self
 	    mode: fileMode
