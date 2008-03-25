@@ -5134,9 +5134,10 @@ primitive VMpr_Stream_fileInLine [succeed,fail]
       parse_stream_with_protection (false);
       _gst_set_undeclared (old);
       _gst_pop_stream (false);
+      PRIM_SUCCEEDED;
     }
 
-  PRIM_SUCCEEDED;
+  PRIM_FAILED;
 }
 
 /* FileDescriptor>>#fileOp..., variadic */

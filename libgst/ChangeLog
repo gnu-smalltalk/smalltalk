@@ -1,3 +1,7 @@
+2008-03-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Make #fileIn primitive fail if the filename is bad.
+
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Mark VMpr_Process_suspend as a possible
