@@ -262,6 +262,16 @@ static inline int64_t to_c_int_64 (OOP oop);
 #define IS_C_ULONG(oop)		is_c_uint_64(oop)
 #endif
 
+#if SIZEOF_OFF_T == 4
+#define FROM_OFF_T(integer)    from_c_int_32(integer)
+#define TO_OFF_T(integer)      to_c_int_32(integer)
+#define IS_OFF_T(oop)          is_c_int_32(oop)
+#else
+#define FROM_OFF_T(integer)    from_c_int_64(integer)
+#define TO_OFF_T(integer)      to_c_int_64(integer)
+#define IS_OFF_T(oop)          is_c_int_64(oop)
+#endif
+
 /* Answer the INDEX'th instance variable of RECEIVER.  */
 #define INSTANCE_VARIABLE(receiver, index) \
   (OOP_TO_OBJ (receiver)->data[index])

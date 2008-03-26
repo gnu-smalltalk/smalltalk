@@ -105,15 +105,25 @@ typedef struct cfunc_info
 }
 cfunc_info;
 
-typedef struct gst_stat
+struct gst_stat_struct
 {
   unsigned short st_mode;	/* protection */
   long st_size;			/* total size, in bytes */
   long st_aTime;		/* time of last access */
   long st_mTime;		/* time of last modification */
   long st_cTime;		/* time of last change */
+};
+
+typedef struct gst_stat
+{
+  OBJ_HEADER;
+  OOP st_mode;		/* protection */
+  OOP st_size;		/* total size, in bytes */
+  OOP st_aTime;		/* time of last access */
+  OOP st_mTime;		/* time of last modification */
+  OOP st_cTime;		/* time of last change */
 }
-gst_stat;
+*gst_stat;
 
 
 
@@ -168,10 +178,14 @@ static OOP classify_type_symbol (OOP symbolOOP,
 static int get_errno (void);
 
 /* Encapsulate binary incompatibilities between various C libraries.  */
+static int my_stat_old (const char *name,
+		        struct gst_stat_struct * out);
+static int my_lstat_old (const char *name,
+		         struct gst_stat_struct * out);
 static int my_stat (const char *name,
-		    gst_stat * out);
+		    OOP out);
 static int my_lstat (const char *name,
-		     gst_stat * out);
+		     OOP out);
 static int my_putenv (const char *str);
 static int my_chdir (const char *str);
 static int my_symlink (const char* oldpath, const char* newpath);
@@ -284,12 +298,18 @@ get_errno (void)
   return (old);
 }
 
-int
-my_stat (const char *name,
-	 gst_stat * out)
+static inline int
+adjust_time (time_t t)
+{
+  return _gst_adjust_time_zone (t) - 86400 * 10957;
+}
+
+static inline int
+my_stat_old (const char *name,
+	     struct gst_stat_struct * out)
 {
   int result;
-  static struct stat statOut;
+  struct stat statOut;
 
   result = stat (name, &statOut);
   if (!result)
@@ -297,20 +317,41 @@ my_stat (const char *name,
       errno = 0;
       out->st_mode = statOut.st_mode;
       out->st_size = statOut.st_size;
-      out->st_aTime = _gst_adjust_time_zone (statOut.st_atime) - 86400 * 10957;
-      out->st_mTime = _gst_adjust_time_zone (statOut.st_mtime) - 86400 * 10957;
-      out->st_cTime = _gst_adjust_time_zone (statOut.st_ctime) - 86400 * 10957;
+      out->st_aTime = adjust_time (statOut.st_atime);
+      out->st_mTime = adjust_time (statOut.st_mtime);
+      out->st_cTime = adjust_time (statOut.st_ctime);
+    }
+  return (result);
+}
+
+int
+my_stat (const char *name,
+	 OOP out)
+{
+  int result;
+  struct stat statOut;
+
+  result = stat (name, &statOut);
+  if (!result)
+    {
+      gst_stat obj = (gst_stat) OOP_TO_OBJ (out);
+      errno = 0;
+      obj->st_mode = FROM_INT (statOut.st_mode);
+      obj->st_aTime = FROM_INT (adjust_time (statOut.st_atime));
+      obj->st_mTime = FROM_INT (adjust_time (statOut.st_mtime));
+      obj->st_cTime = FROM_INT (adjust_time (statOut.st_ctime));
+      obj->st_size = FROM_OFF_T (statOut.st_size);
     }
   return (result);
 }
 
 #ifdef HAVE_LSTAT
-int
-my_lstat (const char *name,
-	 gst_stat * out)
+static inline int
+my_lstat_old (const char *name,
+	      struct gst_stat_struct * out)
 {
   int result;
-  static struct stat statOut;
+  struct stat statOut;
 
   result = lstat (name, &statOut);
   if (!result)
@@ -318,14 +359,36 @@ my_lstat (const char *name,
       errno = 0;
       out->st_mode = statOut.st_mode;
       out->st_size = statOut.st_size;
-      out->st_aTime = _gst_adjust_time_zone (statOut.st_atime) - 86400 * 10957;
-      out->st_mTime = _gst_adjust_time_zone (statOut.st_mtime) - 86400 * 10957;
-      out->st_cTime = _gst_adjust_time_zone (statOut.st_ctime) - 86400 * 10957;
+      out->st_aTime = adjust_time (statOut.st_atime);
+      out->st_mTime = adjust_time (statOut.st_mtime);
+      out->st_cTime = adjust_time (statOut.st_ctime);
+    }
+  return (result);
+}
+
+int
+my_lstat (const char *name,
+	 OOP out)
+{
+  int result;
+  struct stat statOut;
+
+  result = lstat (name, &statOut);
+  if (!result)
+    {
+      gst_stat obj = (gst_stat) OOP_TO_OBJ (out);
+      errno = 0;
+      obj->st_mode = FROM_INT (statOut.st_mode);
+      obj->st_aTime = FROM_INT (adjust_time (statOut.st_atime));
+      obj->st_mTime = FROM_INT (adjust_time (statOut.st_mtime));
+      obj->st_cTime = FROM_INT (adjust_time (statOut.st_ctime));
+      obj->st_size = FROM_OFF_T (statOut.st_size);
     }
   return (result);
 }
 #else
 #define my_lstat my_stat
+#define my_lstat_old my_stat_old
 #endif
 
 int
@@ -493,8 +556,10 @@ _gst_init_cfuncs (void)
 
   _gst_define_cfunc ("errno", get_errno);
   _gst_define_cfunc ("strerror", strerror);
-  _gst_define_cfunc ("stat", my_stat);
-  _gst_define_cfunc ("lstat", my_lstat);
+  _gst_define_cfunc ("stat", my_stat_old);
+  _gst_define_cfunc ("lstat", my_lstat_old);
+  _gst_define_cfunc ("stat_obj", my_stat);
+  _gst_define_cfunc ("lstat_obj", my_lstat);
   _gst_define_cfunc ("utime", _gst_set_file_access_times);
   _gst_define_cfunc ("chmod", chmod);
 

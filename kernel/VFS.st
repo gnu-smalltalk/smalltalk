@@ -164,15 +164,15 @@ actually accessing or ``molding'''' the filesystem.'>
 	^subPath isNil ifTrue: [handler] ifFalse: [handler at: subPath]
     ]
 
-    lstatOn: fileName into: statStruct [
+    lstatOn: fileName into: stat [
 	<category: 'private-C call-outs'>
-	<cCall: 'lstat' returning: #int args: #(#string #cObject)>
+	<cCall: 'lstat_obj' returning: #int args: #(#string #smalltalk)>
 	
     ]
 
-    statOn: fileName into: statStruct [
+    statOn: fileName into: stat [
 	<category: 'private-C call-outs'>
-	<cCall: 'stat' returning: #int args: #(#string #cObject)>
+	<cCall: 'stat_obj' returning: #int args: #(#string #smalltalk)>
 	
     ]
 
@@ -544,14 +544,14 @@ up being on disk when they are opened for the first time.'>
 	"Answer the size of the file identified by the receiver"
 
 	<category: 'accessing'>
-	^self stat stSize value
+	^self stat stSize
     ]
 
     mode [
 	"Answer the octal permissions for the file."
 
 	<category: 'accessing'>
-	^self stat stMode value bitAnd: 4095
+	^self stat stMode bitAnd: 4095
     ]
 
     mode: mode [
@@ -566,7 +566,7 @@ up being on disk when they are opened for the first time.'>
 	"Answer whether the file is a directory."
 
 	<category: 'accessing'>
-	^(self stat stMode value bitAnd: 61440) = 16384
+	^(self stat stMode bitAnd: 61440) = 16384
     ]
 
     isSymbolicLink [
@@ -581,7 +581,7 @@ up being on disk when they are opened for the first time.'>
 	"Answer the last access time of the file identified by the receiver"
 
 	<category: 'accessing'>
-	^self getDateAndTime: self stat stAtime value
+	^self getDateAndTime: self stat stAtime
     ]
 
     lastChangeTime [
@@ -591,7 +591,7 @@ up being on disk when they are opened for the first time.'>
 	 file creation time."
 
 	<category: 'accessing'>
-	^self getDateAndTime: self stat stCtime value
+	^self getDateAndTime: self stat stCtime
     ]
 
     creationTime [
@@ -601,7 +601,7 @@ up being on disk when they are opened for the first time.'>
 	 like)."
 
 	<category: 'accessing'>
-	^self getDateAndTime: self stat stCtime value
+	^self getDateAndTime: self stat stCtime
     ]
 
     lastModifyTime [
@@ -609,30 +609,17 @@ up being on disk when they are opened for the first time.'>
 	 (the `last modify time' has to do with the actual file contents)."
 
 	<category: 'accessing'>
-	^self getDateAndTime: self stat stMtime value
-    ]
-
-    finalize [
-	"Free the statistics for the receiver"
-
-	<category: 'accessing'>
-	| statVar |
-	statVar := stat.
-	stat := nil.
-	statVar free
+	^self getDateAndTime: self stat stMtime
     ]
 
     refresh [
 	"Refresh the statistics for the receiver"
 
 	<category: 'accessing'>
-	stat isNil 
-	    ifTrue: 
-		[stat := CStatStruct new.
-		self addToBeFinalized].
+	stat isNil ifTrue: [stat := Kernel.Stat new].
 	self lstatOn: self realFileName into: stat.
 	File checkError.
-	isSymbolicLink := (stat stMode value bitAnd: 61440) = 40960.	"S_IFLNK"
+	isSymbolicLink := (stat stMode bitAnd: 61440) = 40960.	"S_IFLNK"
 	isSymbolicLink 
 	    ifTrue: 
 		[self statOn: self realFileName into: stat.
@@ -643,13 +630,10 @@ up being on disk when they are opened for the first time.'>
 	"Answer whether a file with the name contained in the receiver does exist."
 
 	<category: 'testing'>
-	stat isNil 
-	    ifTrue: 
-		[stat := CStatStruct new.
-		self addToBeFinalized].
+	stat isNil ifTrue: [stat := Kernel.Stat new].
 	self lstatOn: self realFileName into: stat.
 	File errno == 0 ifFalse: [^false].
-	isSymbolicLink := (stat stMode value bitAnd: 61440) = 40960.	"S_IFLNK"
+	isSymbolicLink := (stat stMode bitAnd: 61440) = 40960.	"S_IFLNK"
 	isSymbolicLink ifTrue: [self statOn: self realFileName into: stat].
 	^true
     ]
@@ -1652,13 +1636,16 @@ ArchiveMemberHandler subclass: TmpFileArchiveMemberHandler [
 
 
 
-Namespace current: VFS [
+Namespace current: Kernel [
 
-CStruct subclass: CStatStruct [
+Object subclass: Stat [
     
-    <category: 'Streams-Files'>
-    <comment: nil>
-    <declaration: #(#(#stMode #uShort ) #(#stSize #long ) #(#stAtime #long ) #(#stMtime #long ) #(#stCtime #long ) )>
+    | stMode stSize stAtime stMtime stCtime |
+    stMode [ ^stMode ]
+    stSize [ ^stSize ]
+    stAtime [ ^stAtime ]
+    stMtime [ ^stMtime ]
+    stCtime [ ^stCtime ]
 ]
 
 ]
