@@ -395,6 +395,13 @@ itself.'>
 	^Character value: (UpperTable at: 1 + codePoint ifAbsent: [codePoint])
     ]
 
+    * aNumber [
+	"Returns a String with aNumber occurrences of the receiver."
+
+	<category: 'coercion methods'>
+	^String new: aNumber withAll: self
+    ]
+
     asString [
 	"Returns the character self as a string.  Only valid if the character
 	 is between 0 and 255."

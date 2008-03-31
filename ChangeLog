@@ -1,3 +1,11 @@
+2008-03-31  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Character.st: Add #*.
+	* kernel/UniChar.st: Add #*.
+
+	* kernel/Regex.st: Add #asArray for results, accept blocks for
+	substitutions.
+
 2008-03-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFS.st: Use new variants of stat/lstat that fill in

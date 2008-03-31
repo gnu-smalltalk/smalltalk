@@ -61,5 +61,12 @@ or with Character class>>#codePoint:.'>
 		    mustBeBetween: 0
 		    and: 1114111]
     ]
+
+    * aNumber [
+	"Returns a String with aNumber occurrences of the receiver."
+
+	<category: 'coercion methods'>
+	^UnicodeString new: aNumber withAll: self
+    ]
 ]
 

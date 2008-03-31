@@ -195,6 +195,14 @@ caller.'>
 	self subclassResponsibility
     ]
 
+    asArray [
+	"If the regular expression was matched, return an Array with
+	 the subexpressions that were present in the regular expression."
+
+	<category: 'accessing'>
+	^1 to: self size collect: [ :each | self at: each ]
+    ]
+
     subject [
 	"If the regular expression was matched, return the text
 	 that was matched against it."
@@ -787,10 +795,12 @@ String extend [
 	    do: aBlock
     ]
 
-    replacingRegex: pattern with: str [
+    replacingRegex: pattern with: aStringOrBlock [
 	"Returns the receiver if the pattern has no match in it.  If it has
-	 a match, it is replaced with str after substituting %n sequences
-	 with the captured subexpressions of the match (as in #%)."
+	 a match, it is replaced using aStringOrBlock as follows: if it is
+	 a block, a RegexResults object is passed, while if it is a string,
+	 %n sequences are replaced with the captured subexpressions of the
+	 match (as in #%)."
 
 	<category: 'regex'>
 	| regs beg end repl res |
@@ -801,7 +811,10 @@ String extend [
 	regs isNil ifTrue: [^self].
 	beg := regs from.
 	end := regs to.
-	repl := str % regs.
+	repl := aStringOrBlock isString
+	    ifTrue: [ aStringOrBlock % regs ]
+	    ifFalse: [ aStringOrBlock value: regs ].
+
 	^(res := self species new: self size - (end - beg + 1) + repl size)
 	    replaceFrom: 1
 		to: beg - 1
@@ -817,14 +830,16 @@ String extend [
 		startingAt: end + 1
     ]
 
-    replacingAllRegex: pattern with: str [
+    replacingAllRegex: pattern with: aStringOrBlock [
 	"Returns the receiver if the pattern has no match in it.  Otherwise,
-	 any match of pattern in that part of the string is replaced with
-	 str after substituting %n sequences with the captured subexpressions
-	 of the match (as in #%)."
+	 any match of pattern in that part of the string is replaced
+	 using aStringOrBlock as follows: if it is a block, a RegexResults
+	 object is passed, while if it is a string, %n sequences are
+	 replaced with the captured subexpressions of the match (as
+	 in #%).
 
 	<category: 'regex'>
-	| res idx regex beg end regs |
+	| res idx regex beg end regs repl |
 	regex := pattern asRegex.
 	regs := self 
 		    searchRegexInternal: regex
@@ -833,6 +848,9 @@ String extend [
 	regs isNil ifTrue: [^self].
 	res := WriteStream on: (String new: self size).
 	idx := 1.
+	repl := aStringOrBlock isString
+	    ifTrue: [ [ :regs | aStringOrBlock % regs ] ]
+	    ifFalse: [ aStringOrBlock ].
 	
 	[beg := regs from.
 	end := regs to.
@@ -840,7 +858,7 @@ String extend [
 	    next: beg - idx
 	    putAll: self
 	    startingAt: idx.
-	res nextPutAll: str % regs.
+	res nextPutAll: (repl value: regs).
 	idx := end + 1.
 	beg > end 
 	    ifTrue: 
@@ -860,11 +878,13 @@ String extend [
 	^res contents
     ]
 
-    copyFrom: from to: to replacingRegex: pattern with: str [
+    copyFrom: from to: to replacingRegex: pattern with: aStringOrBlock [
 	"Returns the substring of the receiver between from and to.
 	 If pattern has a match in that part of the string, the match
-	 is replaced with str after substituting %n sequences with the
-	 captured subexpressions of the match (as in #%)."
+	 is replaced using aStringOrBlock as follows: if it is
+	 a block, a RegexResults object is passed, while if it is a string,
+	 %n sequences are replaced with the captured subexpressions of the
+	 match (as in #%)."
 
 	<category: 'regex'>
 	| regs beg end repl res |
@@ -876,7 +896,9 @@ String extend [
 	    ifFalse: 
 		[beg := regs from.
 		end := regs to.
-		repl := str % regs.
+		repl := aStringOrBlock isString
+		    ifTrue: [ aStringOrBlock % regs ]
+		    ifFalse: [ aStringOrBlock value: regs ].
 		res := self species new: to - from - (end - beg) + repl size.
 		res 
 		    replaceFrom: 1
@@ -896,31 +918,37 @@ String extend [
 	^res
     ]
 
-    copyReplacingRegex: pattern with: str [
+    copyReplacingRegex: pattern with: aStringOrBlock [
 	"Returns the receiver after replacing the first match of pattern (if
-	 any) with str.  %n sequences present in str are substituted with the
-	 captured subexpressions of the match (as in #%)."
+	 any) using aStringOrBlock as follows: if it is a block, a
+	 RegexResults object is passed, while if it is a string, %n
+	 sequences are replaced with the captured subexpressions of the
+	 match (as in #%)."
 
 	<category: 'regex'>
 	^self 
 	    copyFrom: 1
 	    to: self size
 	    replacingRegex: pattern
-	    with: str
+	    with: aStringOrBlock
     ]
 
-    copyFrom: from to: to replacingAllRegex: pattern with: str [
+    copyFrom: from to: to replacingAllRegex: pattern with: aStringOrBlock [
 	"Returns the substring of the receiver between from and to.
-	 Any match of pattern in that part of the string is replaced with
-	 str after substituting %n sequences with the captured subexpressions
-	 of the match (as in #%)."
+	 Any match of pattern in that part of the string is replaced
+	 using aStringOrBlock as follows: if it is a block, a RegexResults
+	 object is passed, while if it is a string, %n sequences are
+	 replaced with the captured subexpressions of the match (as in #%)."
 
 	<category: 'regex'>
-	| res idx regex beg end regs emptyOk |
+	| res idx regex beg end regs emptyOk repl |
 	regex := pattern asRegex.
 	res := WriteStream on: (String new: to - from + 1).
 	idx := from.
 	emptyOk := true.
+	repl := aStringOrBlock isString
+	    ifTrue: [ [ :regs | aStringOrBlock % regs ] ]
+	    ifFalse: [ aStringOrBlock ].
 	
 	[regs := self 
 		    searchRegexInternal: regex
@@ -937,7 +965,7 @@ String extend [
 			        next: beg - idx
 			        putAll: self
 			        startingAt: idx.
-		            res nextPutAll: str % regs.
+		            res nextPutAll: (repl value: regs).
 			    idx := end + 1]
 			ifFalse: [
 			    beg <= to ifFalse: [^res contents].
@@ -951,17 +979,18 @@ String extend [
 	^res contents
     ]
 
-    copyReplacingAllRegex: pattern with: str [
+    copyReplacingAllRegex: pattern with: aStringOrBlock [
 	"Returns the receiver after replacing all the matches of pattern (if
-	 any) with str.  %n sequences present in str are substituted with the
-	 captured subexpressions of the match (as in #%)."
+	 any) using aStringOrBlock as follows: if it is a block, a RegexResults
+	 object is passed, while if it is a string, %n sequences are
+	 replaced with the captured subexpressions of the match (as in #%)."
 
 	<category: 'regex'>
 	^self 
 	    copyFrom: 1
 	    to: self size
 	    replacingAllRegex: pattern
-	    with: str
+	    with: aStringOrBlock
     ]
 
     onOccurrencesOfRegex: pattern from: from to: to do: aBlock [
