@@ -17,6 +17,7 @@ m4_define([_GST_PKG_PREFIX], [$1/])])
 
 AC_DEFUN([GST_PACKAGE_DEPENDENCIES], [
 m4_define([_GST_PKG_DEPENDENCIES], [$1])])
+m4_define([_GST_PKG_DEPENDENCIES], [])
 
 m4_define([_GST_RULES_PREPARE],
 [m4_expand_once([
