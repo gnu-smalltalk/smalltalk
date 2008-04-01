@@ -2563,7 +2563,7 @@ _gst_show_backtrace (void)
 	      if (IS_NIL(context->parentContext))
 	        printf ("<bottom>\n");
 	      else
-	        printf ("<call-in>\n");
+	        printf ("<unwind point>\n");
 	      continue;
 	    }
 

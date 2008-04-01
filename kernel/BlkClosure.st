@@ -304,7 +304,7 @@ creation of Processes from blocks.'>
 
 	<category: 'unwind protection'>
 	thisContext mark.
-	^[self value] ensure: [ContextPart removeLastUnwindPoint]
+	^self value
     ]
 
     repeat [

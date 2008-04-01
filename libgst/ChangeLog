@@ -1,3 +1,8 @@
+2008-04-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp.c: Correct output for execution environment contexts
+	that have a parent.
+
 2008-03-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Add stat/lstat versions that return an object.

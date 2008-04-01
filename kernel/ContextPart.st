@@ -68,31 +68,6 @@ methods that can be used in inspection or debugging.'>
 	thisContext parentContext backtraceOn: aStream
     ]
 
-    ContextPart class >> removeLastUnwindPoint [
-	"Private - Return and remove the last context marked as an unwind point,
-	 or our environment if the last unwind point belongs to another
-	 environment."
-
-	<category: 'exception handling'>
-	| unwindPoints |
-	unwindPoints := Processor activeProcess unwindPoints.
-	^unwindPoints isEmpty 
-	    ifTrue: [thisContext environment]
-	    ifFalse: [unwindPoints removeLast]
-    ]
-
-    ContextPart class >> lastUnwindPoint [
-	"Private - Return the last context marked as an unwind point, or
-	 our environment if none is."
-
-	<category: 'exception handling'>
-	| unwindPoints |
-	unwindPoints := Processor activeProcess unwindPoints.
-	^unwindPoints isEmpty 
-	    ifTrue: [thisContext environment]
-	    ifFalse: [unwindPoints at: unwindPoints size]
-    ]
-
     ContextPart class >> unwind [
 	"Return execution to the last context marked as an unwind point, returning
 	 nil on that stack."
@@ -102,17 +77,13 @@ methods that can be used in inspection or debugging.'>
     ]
 
     ContextPart class >> unwind: returnValue [
-	"Return execution to the last context marked as an unwind point, returning
-	 returnValue on that stack."
+	"Return execution to the innermost #valueWithUnwind call, passing it
+	 returnValue."
 
 	<category: 'exception handling'>
-	| point |
-	point := self removeLastUnwindPoint.
-	point isProcess 
-	    ifTrue: 
-		[Processor terminateActive
-		"Bye bye, we never get past here."].
-	point continue: returnValue
+	SystemExceptions.UnhandledException new
+	    tag: returnValue;
+	    signal
     ]
 
     ContextPart class >> thisContext [
@@ -171,14 +142,13 @@ methods that can be used in inspection or debugging.'>
 	<category: 'debugging'>
 	| ctx debuggerClass currentClass last |
 	ctx := self.
-	last := self class lastUnwindPoint.
 	
 	[currentClass := ctx receiver class debuggerClass.
 	currentClass isNil ifTrue: [^nil].
 	(debuggerClass isNil 
 	    or: [currentClass debuggingPriority > debuggerClass debuggingPriority]) 
 		ifTrue: [debuggerClass := currentClass].
-	ctx == last | ctx isNil] 
+	ctx isNil or: [ctx isEnvironment]]
 		whileFalse: [ctx := ctx parentContext].
 	^debuggerClass
     ]
@@ -419,13 +389,6 @@ methods that can be used in inspection or debugging.'>
 	^nativeIP ~~ 0
     ]
 
-    mark [
-	"Add the receiver as a possible unwind point"
-
-	<category: 'exception handling'>
-	Processor activeProcess unwindPoints addLast: self
-    ]
-
     deepCopy [
 	"Answer a copy of the entire stack, but don't copy any
 	 of the other instance variables of the context."
@@ -451,10 +414,9 @@ methods that can be used in inspection or debugging.'>
 	 context and the attribute."
 
 	<category: 'enumerating'>
-	| ctx last attr |
+	| ctx attr |
 	ctx := self.
-	last := self class lastUnwindPoint.
-	[ctx == last | ctx isNil] whileFalse: 
+	[ctx isNil or: [ctx isEnvironment]] whileFalse: 
 		[(ctx isBlock not and: 
 			[attr := ctx method attributeAt: selector ifAbsent: [nil].
 			attr notNil]) 
@@ -468,10 +430,9 @@ methods that can be used in inspection or debugging.'>
 	 context."
 
 	<category: 'enumerating'>
-	| ctx last |
+	| ctx |
 	ctx := self.
-	last := self class lastUnwindPoint.
-	[ctx == last | ctx isNil] whileFalse: 
+	[ctx isNil or: [ctx isEnvironment]] whileFalse: 
 		[(ctx isBlock not and: [selectors includes: ctx selector]) 
 		    ifTrue: [aBlock value: ctx].
 		ctx := ctx parentContext]

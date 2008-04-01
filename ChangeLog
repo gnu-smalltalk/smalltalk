@@ -1,5 +1,14 @@
 2008-04-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiExcept.st: Add UnhandledException.
+	* kernel/ContextPart.st: Rewrite #unwind: to raise UnhandledException.
+	Use #isEnvironment to delimit stack scanning.
+	* kernel/BlkClosure.st: Rewrite #valueWithUnwind to trap
+	UnhandledException.
+	* kernel/MthContext.st: Rewrite #mark.
+
+2008-04-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Regex.st: Sob.
 
 2008-03-31  Paolo Bonzini  <bonzini@gnu.org>

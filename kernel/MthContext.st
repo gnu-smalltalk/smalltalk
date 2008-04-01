@@ -117,6 +117,16 @@ execution stack.'>
 	^(flags bitAnd: 4) == 4
     ]
 
+    mark [
+	"To create a valid execution environment for the interpreter even
+	 before it starts, GST creates a fake context which invokes a special
+	 ``termination'' method.  A similar context is created by
+	 #valueWithUnwind, by using this method."
+
+	<category: 'accessing'>
+	flags := flags bitOr: 4
+    ]
+
     sender [
 	"Return the context from which the receiver was sent"
 

@@ -305,7 +305,6 @@ even though it is not to be considered an error.'
     ]
 ]
 
-
 
 Error subclass: Halt [
     
@@ -1412,6 +1411,33 @@ of concrete subclass.'>
 
 	<category: 'accessing'>
 	^'method is responsibility of a subclass'
+    ]
+]
+
+]
+
+
+
+Namespace current: SystemExceptions [
+
+Exception subclass: UnhandledException [
+
+    <category: 'Language-Exception'>
+    <comment: 'I am raised when a backtrace is shown to terminate the
+current process.'>
+
+    description [
+	"Answer a textual description of the exception."
+
+	<category: 'accessing'>
+	^'an unhandled exception occurred in the current process'
+    ]
+
+    defaultAction [
+	"Terminate the currrent process."
+
+	<category: 'accessing'>
+	thisContext environment continue: self tag
     ]
 ]
 
