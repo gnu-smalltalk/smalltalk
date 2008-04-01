@@ -5017,6 +5017,7 @@ primitive VMpr_CFuncDescriptor_create [succeed,fail]
   oop4 = STACK_AT (0);
   oop3 = STACK_AT (1);
   oop2 = STACK_AT (2);
+  oop1 = STACK_AT (3);
 
   if (IS_CLASS (oop2, _gst_string_class)
       && (IS_CLASS (oop3, _gst_symbol_class)
@@ -5024,13 +5025,16 @@ primitive VMpr_CFuncDescriptor_create [succeed,fail]
       && (IS_CLASS (oop4, _gst_array_class)
 	  || IS_CLASS (oop4, _gst_undefined_object_class)))
     {
-      OOP cFuncDescrOOP = _gst_make_descriptor (oop2, oop3, oop4);
-      POP_N_OOPS (3);
-      SET_STACKTOP (cFuncDescrOOP);
-      PRIM_SUCCEEDED;
+      OOP cFuncDescrOOP = _gst_make_descriptor (oop1, oop2, oop3, oop4);
+      if (cFuncDescrOOP)
+	{
+	  POP_N_OOPS (3);
+	  SET_STACKTOP (cFuncDescrOOP);
+	  PRIM_SUCCEEDED;
+	}
     }
-  else
-    PRIM_FAILED;
+
+  PRIM_FAILED;
 }
 
 /* Object snapshot: aString */

@@ -33,7 +33,7 @@
 
 
 Object subclass: CFunctionDescriptor [
-    | cFunction cFunctionName returnType numFixedArgs |
+    | cFunction cFunctionName returnType tag |
     
     <shape: #pointer>
     <category: 'Language-C interface'>
@@ -42,12 +42,52 @@ about C functions that can be called from within Smalltalk, such as number
 and type of parameters.  This information is used by the C callout mechanism
 to perform the actual call-out to C routines.'>
 
-    CFunctionDescriptor class >> for: funcNameString returning: returnTypeSymbol withArgs: argsArray [
-	"Private - Answer a CFunctionDescriptor"
+    CFunctionDescriptor class >> mapType: aSymbol [
+	"Private - Map a Smalltalk symbols representing a C type to an integer."
+
+	<category: 'private - instance creation'>
+	aSymbol isSymbol ifFalse: [
+	    SystemExceptions.WrongClass signalOn: aSymbol mustBe: Symbol ].
+
+	^(#(#char #uchar #short #ushort #long #ulong #float #double
+	    #string #smalltalk #int #uint #longDouble #unknown #stringOut
+	    #symbol #byteArray #byteArrayOut #boolean #void #variadic
+	    #variadicSmalltalk #cObject #cObjectPtr #self #selfSmalltalk
+	    #wchar #wstring #wstringOut #symbolOut)
+		indexOf: aSymbol
+		ifAbsent: [ self error: 'invalid C argument type ', aSymbol storeString ]) - 1
+    ]
+
+    CFunctionDescriptor class >> mapReturnType: aSymbolOrType [
+	"We cannot use polymorphism here or we crash the VM..."
+
+	<category: 'private - instance creation'>
+	aSymbolOrType isSymbol ifTrue: [ ^self mapType: aSymbolOrType ].
+	(aSymbolOrType isKindOf: CType) ifTrue: [ ^aSymbolOrType ].
+        SystemExceptions.WrongClass signalOn: aSymbolOrType
+            mustBe: #(#{Symbol} #{CType})  
+    ]
+
+    CFunctionDescriptor class >> for: funcNameOrAddress returning: returnTypeSymbol withArgs: argsArray [
+	"Answer a CFunctionDescriptor with the given function name, return type
+	 and arguments.  If funcNameOrAddress is a String, GNU Smalltalk will try
+	 to relink it at the next startup.  If it is a CObject, the address will
+	 be reset to nil upon image save (and it's the user's task to figure out
+	 a why to reinitialize it!)"
 
 	<category: 'instance creation'>
+	| result |
 	<primitive: VMpr_CFuncDescriptor_create>
-	^self primitiveFailed
+
+	"As a side effect, this returns a nice error message."
+	result := self new: argsArray size.
+	result returnType: (self mapReturnType: returnTypeSymbol).
+	argsArray keysAndValuesDo: [ :i :each | 
+	    result at: i put: (self mapType: each) ].
+
+	funcNameOrAddress isString ifTrue: [ self primitiveFailed ].
+	result address: funcNameOrAddress.
+	^result
     ]
 
     CFunctionDescriptor class >> addressOf: function [
@@ -96,6 +136,27 @@ to perform the actual call-out to C routines.'>
 	^cFunctionName
     ]
 
+    returnType: anInteger [
+	<category: 'private - instance creation'>
+        returnType := anInteger
+    ]
+
+    tag [
+	"Answer an arbitrary object that can be used to store extra information
+	 (subclasses cannot add more instance variables)."
+
+	<category: 'accessing'>
+        ^tag
+    ]
+    
+    tag: anObject [
+	"Set the receiver's tag, an arbitrary object that can be used to store
+	 extra information (subclasses cannot add more instance variables)."
+
+	<category: 'private - instance creation'>
+        tag := anObject
+    ]
+    
     isValid [
 	"Answer whether the function represented by the receiver is actually
 	 a registered one"
@@ -114,11 +175,15 @@ to perform the actual call-out to C routines.'>
 	<category: 'printing'>
 	aStream
 	    print: self class;
-	    nextPut: $(;
-	    nextPutAll: self name;
-	    nextPutAll: ' @ ';
-	    nextPutAll: (self address address printStringRadix: 16);
-	    nextPut: $)
+	    nextPut: $(.
+
+	self name isNil ifFalse: [ aStream nextPutAll: self name ].
+	self address isNil ifFalse: [
+	    self name isNil ifFalse: [ aStream nextPutAll: ' @ ' ].
+	    aStream nextPutAll: (self address address printStringRadix: 16)
+	].
+
+	aStream nextPut: $)
     ]
 
     asyncCall [

@@ -675,7 +675,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   if (!c_func_cur)
     return (NULL);
 
-  fixedArgs = TO_INT (desc->numFixedArgs);
+  fixedArgs = NUM_INDEXABLE_FIELDS (cFuncOOP);
   totalArgs = 0;
   for (si = i = 0; i < fixedArgs; i++)
     {
@@ -1218,7 +1218,8 @@ bad_type (OOP class_oop,
 
 
 OOP
-_gst_make_descriptor (OOP funcNameOOP,
+_gst_make_descriptor (OOP classOOP,
+		      OOP funcNameOOP,
 		      OOP returnTypeOOP,
 		      OOP argsOOP)
 {
@@ -1247,23 +1248,34 @@ _gst_make_descriptor (OOP funcNameOOP,
   INC_ADD_OOP (cFunction);
 
   cFunctionName = _gst_string_new (funcName);
+  xfree (funcName);
   INC_ADD_OOP (cFunctionName);
 
-  desc = (gst_cfunc_descriptor)
-    new_instance_with (_gst_c_func_descriptor_class, numArgs,
-		       &descOOP);
+  desc = (gst_cfunc_descriptor) new_instance_with (classOOP, numArgs, &descOOP);
 
   desc->cFunction = cFunction;
   desc->cFunctionName = cFunctionName;
-  desc->numFixedArgs = FROM_INT (numArgs);
+  desc->tagOOP = _gst_nil_oop;
   desc->returnType = classify_type_symbol (returnTypeOOP, true);
-  for (i = 1; i <= numArgs; i++)
-    desc->argTypes[i - 1] =
-      classify_type_symbol (ARRAY_AT (argsOOP, i), false);
+  if (desc->returnType == _gst_nil_oop)
+    goto error;
 
-  xfree (funcName);
+  for (i = 1; i <= numArgs; i++)
+    {
+      OOP type;
+      type = desc->argTypes[i - 1] =
+        classify_type_symbol (ARRAY_AT (argsOOP, i), false);
+      if (type == _gst_nil_oop)
+	goto error;
+    }
+
   INC_RESTORE_POINTER (incPtr);
   return (descOOP);
+
+ error:
+  INC_RESTORE_POINTER (incPtr);
+  return (NULL);
+
 }
 
 OOP
@@ -1271,8 +1283,6 @@ classify_type_symbol (OOP symbolOOP,
 		      mst_Boolean isReturn)
 {
   const symbol_type_map *sp;
-  char *symbolName;
-
   for (sp = type_map; sp->symbol != NULL; sp++)
     {
       if (*sp->symbol == symbolOOP)
@@ -1285,14 +1295,7 @@ classify_type_symbol (OOP symbolOOP,
 	return (symbolOOP);	/* this is the type we want! */
     }
 
-  symbolName = _gst_to_cstring (symbolOOP);	/* yeah, yeah...but
-						   they have the same
-						   representation! */
-  _gst_errorf ("Unknown data type symbol: %s", symbolName);
-
-  xfree (symbolName);
-
-  return (FROM_INT (CDATA_UNKNOWN));
+  return _gst_nil_oop;
 }
 
 void

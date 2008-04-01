@@ -717,7 +717,7 @@ static const class_definition class_info[] = {
   {&_gst_c_func_descriptor_class, &_gst_object_class,
    ISP_POINTER, true, 4,
    "CFunctionDescriptor",
-   "cFunction cFunctionName returnType numFixedArgs",
+   "cFunction cFunctionName returnType tag",
    NULL, NULL },
 
   {&_gst_memory_class, &_gst_object_class,

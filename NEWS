@@ -33,6 +33,15 @@ o   If possible, the installation is made relocatable.  To this end,
     will be disabled and the program will look for its files only in
     the configured prefix.
 
+o   It is possible to create CFunctionDescriptors that are not attached
+    to a function that the VM knows about, simply by passing a CObject
+    to CFunctionDescriptor>>#for:returning:withArgs:.  The address
+    however is reset to "nil" on image restart and it is up to the
+    user to reinitialize it.  To aid in this, since CFunctionDescriptor
+    subclasses cannot add instance variables, a subclass can add
+    more info in the new "tag" instance variable of CFunctionDescriptor,
+    which is unused by the VM.
+
 o   The semantics of #on:do: were changed: executing off the end of an
     exception handler will always return from the associated #on:do:.
     Older versions of GNU Smalltalk either returned or resumed depending

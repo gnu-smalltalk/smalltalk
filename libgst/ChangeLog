@@ -1,5 +1,17 @@
 2008-04-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/cint.c: Don't use numFixedArgs instance variable of
+	a CFunctionDescriptor.  Add classOOP parameters to _gst_make_descriptor.
+	Return NULL if there is a problem instead of printing an error.
+	* libgst/cint.h: Rename numFixedArgs field of gst_cfunc_descriptor
+	to tagOOP.  Adjust prototype of _gst_make_descriptor.
+	* libgst/dict.c Rename numFixedArgs variable to tag here too.
+	* libgst/prims.def: Create subclasses of CFunctionDescriptor
+	if VMpr_CFuncDescriptor_create is sent to a subclass.  Fail
+	if _gst_make_descriptor returns NULL.
+
+2008-04-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/dict.c: Rename unwindPoints variable of Process to environment.
 	* libgst/files.c: Load ProcEnv.st.
 

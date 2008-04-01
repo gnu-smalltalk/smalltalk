@@ -113,12 +113,8 @@ typedef struct gst_cfunc_descriptor
                                    addr */ 
   OOP cFunctionName;            /* Name of C function in mapping table */
   OOP returnType;               /* Smalltalk return type */
-  OOP numFixedArgs;             /* number of real arguments passed from
-                                   smalltalk (excluding "self" parameters
-                                   which are synthetically added when 
-                                   calling the C function).  */
-  OOP argTypes[1];              /* variable length, really numFixedArgs
-                                   long */
+  OOP tagOOP;
+  OOP argTypes[1];              /* variable length.  */
 }
  *gst_cfunc_descriptor;
 
@@ -146,13 +142,14 @@ extern void _gst_define_cfunc (const char *funcName, PTR funcAddr)
 extern void _gst_init_cfuncs (void) 
   ATTRIBUTE_HIDDEN;
 
-/* Makes a C based descriptor for a callout method.  Returns a
-   gst_cfunc_descriptor object which holds onto the descriptor.  This
-   descriptor is subsequently used when the called out function
-   FUNCNAMEOOP (a Smalltalk String) is invoked. RETURNOOP is a Symbol
-   or CType which indicates the return type and ARGSOOP is a Smalltalk
-   Array containing the argument types (as Symbols).  */
-extern OOP _gst_make_descriptor (OOP funcNameOOP,
+/* Makes a CFunctionDescriptor (the actual class is in CLASSOOP) for a
+   callout method.  Returns a gst_cfunc_descriptor object which holds onto
+   the descriptor.  This descriptor is subsequently used when the called
+   out function FUNCNAMEOOP (a Smalltalk String) is invoked. RETURNOOP
+   is a Symbol or CType which indicates the return type and ARGSOOP is
+   a Smalltalk Array containing the argument types (as Symbols).  */
+extern OOP _gst_make_descriptor (OOP classOOP,
+				 OOP funcNameOOP,
 				 OOP returnTypeOOP,
 				 OOP argsOOP) 
   ATTRIBUTE_HIDDEN;

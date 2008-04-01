@@ -91,6 +91,71 @@ instances.'>
 	    header: (6 bitShift: 27) + args literals: #()
     ]
 
+    CompiledMethod class >> cCall: func returning: returnType args: argsArray 
+	numArgs: numArgs attributes: attributesArray [
+	"Return a CompiledMethod corresponding to a #cCall:returning:args:
+	pragma with the given arguments."
+	<category: 'c call-outs'>
+	| descr literals bytecodes returnCType |
+	(CFunctionDescriptor isFunction: func) 
+	    ifFalse: [^'C function not defined '].
+
+	returnCType := (returnType isSymbol or: [returnType isKindOf: CType]) 
+		    ifTrue: [returnType]
+		    ifFalse: [CType from: returnType].
+	descr := CFunctionDescriptor 
+		    for: func
+		    returning: returnCType
+		    withArgs: argsArray.
+
+	"One of these:
+	 descr callInto: nil. ^self
+	 ^(descr callInto: ValueHolder now) value
+	 ^(descr callInto: ValueHolder now) value narrow"
+	returnType == #void 
+	    ifTrue: 
+		[literals := {descr}.
+		bytecodes := #[179 1 45 0 30 34 66 0]]
+	    ifFalse: 
+		[literals := {descr.  #{ValueHolder}}.
+		bytecodes := (returnCType isKindOf: CType) 
+			    ifTrue: [#[179 1 34 1 30 84 30 34 22 0 30 35 51 0]]
+			    ifFalse: [#[179 1 34 1 30 84 30 34 22 0 51 0]]].
+	^self
+	    literals: literals
+	    numArgs: numArgs
+	    numTemps: 0
+	    attributes: attributesArray
+	    bytecodes: bytecodes
+	    depth: numArgs + 4
+    ]
+
+    CompiledMethod class >> asyncCCall: func args: argsArray 
+	numArgs: numArgs attributes: attributesArray [
+	"Return a CompiledMethod corresponding to a #asyncCCall:args:
+	pragma with the given arguments."
+
+	<category: 'c call-outs'>
+	| descr literals bytecodes |
+	(CFunctionDescriptor isFunction: func) 
+	    ifFalse: [^'C function not defined '].
+	descr := CFunctionDescriptor 
+		    for: func
+		    returning: #void
+		    withArgs: argsArray.
+
+	"descr asyncCall. ^self"
+	literals := {descr.  #asyncCall}.
+	bytecodes := #[179 1 65 1 66 0].
+	^self 
+	    literals: literals
+	    numArgs: numArgs
+	    numTemps: 0
+	    attributes: attributesArray
+	    bytecodes: bytecodes
+	    depth: numArgs + 3.
+    ]
+
     CompiledMethod class >> stripSourceCode [
 	"Remove all the references to method source code from the system"
 
@@ -649,40 +714,14 @@ instances.'>
 
     rewriteAsCCall: func returning: returnType args: argsArray [
 	<category: 'c call-outs'>
-	| descr literals bytecodes newMethod returnCType |
+	| newMethod |
 	self isValidCCall ifFalse: [^'C call-out not empty'].
-	(CFunctionDescriptor isFunction: func) 
-	    ifFalse: [^'C function not defined '].
-	returnCType := (returnType isSymbol or: [returnType isKindOf: CType]) 
-		    ifTrue: [returnType]
-		    ifFalse: [CType from: returnType].
-	descr := CFunctionDescriptor 
-		    for: func
-		    returning: returnCType
-		    withArgs: argsArray.
-
-	"One of these:
-	 descr callInto: nil. ^self
-	 ^(descr callInto: ValueHolder now) value
-	 ^(descr callInto: ValueHolder now) value narrow"
-	returnType == #void 
-	    ifTrue: 
-		[literals := {descr}.
-		bytecodes := #[179 1 45 0 30 34 66 0]]
-	    ifFalse: 
-		[literals := 
-			{descr.
-			#{ValueHolder}}.
-		bytecodes := (returnCType isKindOf: CType) 
-			    ifTrue: [#[179 1 34 1 30 84 30 34 22 0 30 35 51 0]]
-			    ifFalse: [#[179 1 34 1 30 84 30 34 22 0 51 0]]].
-	newMethod := CompiledMethod 
-		    literals: literals
-		    numArgs: self numArgs
-		    numTemps: self numTemps
-		    attributes: self attributes
-		    bytecodes: bytecodes
-		    depth: self numArgs + 4.
+	newMethod := CompiledMethod
+	    cCall: func
+	    returning: returnType
+	    args: argsArray
+	    numArgs: self numArgs
+	    attributes: self attributes.
 	newMethod descriptor: self descriptor.
 	self become: newMethod.
 	^nil
@@ -690,27 +729,13 @@ instances.'>
 
     rewriteAsAsyncCCall: func args: argsArray [
 	<category: 'c call-outs'>
-	| descr literals bytecodes newMethod |
+	| newMethod |
 	self isValidCCall ifFalse: [^'C call-out not empty'].
-	(CFunctionDescriptor isFunction: func) 
-	    ifFalse: [^'C function not defined '].
-	descr := CFunctionDescriptor 
-		    for: func
-		    returning: #void
-		    withArgs: argsArray.
-
-	"descr asyncCall. ^self"
-	literals := 
-		{descr.
-		#asyncCall}.
-	bytecodes := #[179 1 65 1 66 0].
-	newMethod := CompiledMethod 
-		    literals: literals
-		    numArgs: self numArgs
-		    numTemps: self numTemps
-		    attributes: self attributes
-		    bytecodes: bytecodes
-		    depth: self numArgs + 3.
+	newMethod := CompiledMethod
+	    asyncCCall: func
+	    args: argsArray
+	    numArgs: self numArgs
+	    attributes: self attributes.
 	newMethod descriptor: self descriptor.
 	self become: newMethod.
 	^nil
