@@ -1,5 +1,9 @@
 2008-04-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CFuncs.st: Accept Associations too.
+
+2008-04-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/CFuncs.st: Change numFixedArgs to tag.  Add Smalltalk
 	counterpart of classify_type_symbol.  Add setters.  Improve #printOn:.
 	* kernel/CompildMeth.st: Extract creation of C call-out methods

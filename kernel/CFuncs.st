@@ -63,9 +63,10 @@ to perform the actual call-out to C routines.'>
 
 	<category: 'private - instance creation'>
 	aSymbolOrType isSymbol ifTrue: [ ^self mapType: aSymbolOrType ].
+	(aSymbolOrType isKindOf: Association) ifTrue: [ ^aSymbolOrType ].
 	(aSymbolOrType isKindOf: CType) ifTrue: [ ^aSymbolOrType ].
         SystemExceptions.WrongClass signalOn: aSymbolOrType
-            mustBe: #(#{Symbol} #{CType})  
+            mustBe: #(#{Symbol} #{CType} #{Association})
     ]
 
     CFunctionDescriptor class >> for: funcNameOrAddress returning: returnTypeSymbol withArgs: argsArray [
