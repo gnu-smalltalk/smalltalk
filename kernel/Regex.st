@@ -836,7 +836,7 @@ String extend [
 	 using aStringOrBlock as follows: if it is a block, a RegexResults
 	 object is passed, while if it is a string, %n sequences are
 	 replaced with the captured subexpressions of the match (as
-	 in #%).
+	 in #%)."
 
 	<category: 'regex'>
 	| res idx regex beg end regs repl |

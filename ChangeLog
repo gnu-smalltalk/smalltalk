@@ -1,3 +1,7 @@
+2008-04-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Regex.st: Sob.
+
 2008-03-31  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Character.st: Add #*.
