@@ -33,7 +33,7 @@
 
 
 Link subclass: Process [
-    | suspendedContext priority myList name unwindPoints interruptLock interrupts |
+    | suspendedContext priority myList name environment interruptLock interrupts |
     
     <category: 'Language-Processes'>
     <comment: 'I represent a unit of computation.  My instances are independantly
@@ -319,10 +319,16 @@ can suspend themselves and resume themselves however they wish.'>
 		ensure: [terminated ifFalse: [unwindBlock value]]
     ]
 
-    unwindPoints [
+    environment [
+	"This is private because it is not thread-safe.  Access via
+	 ProcessorScheduler>>#environment only touches the environment
+	 of the current process, so expensive semaphores are unnecessary.
+	 We may want to revisit this in the future, but it won't be
+	 backwards-incompatible."
+
 	<category: 'private'>
-	unwindPoints isNil ifTrue: [unwindPoints := OrderedCollection new].
-	^unwindPoints
+	environment isNil ifTrue: [environment := LookupTable new].
+	^environment
     ]
 
     interruptLock [

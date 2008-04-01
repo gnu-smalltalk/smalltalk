@@ -41,6 +41,9 @@ o   The semantics of #on:do: were changed: executing off the end of an
 o   New tool gst-remote allows remote control of a GNU Smalltalk VM
     via a TCP socket.
 
+o   Processes support thread-local variables, which are accessed through
+    a special dictionary returned by ProcessorScheduler>>#processEnvironment.
+
 o   Packages can specify start/stop scripts.  Start scripts can be activated
     with gst-load, while both start and stop scripts are supported by
     gst-remote.

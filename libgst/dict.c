@@ -419,7 +419,7 @@ static const class_definition class_info[] = {
   {&_gst_process_class, &_gst_link_class,
    ISP_FIXED, true, 7,
    "Process",
-   "suspendedContext priority myList name unwindPoints interrupts interruptLock",
+   "suspendedContext priority myList name environment interrupts interruptLock",
    NULL, NULL },
 
   {&_gst_callin_process_class, &_gst_process_class,

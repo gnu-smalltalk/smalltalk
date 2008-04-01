@@ -1,5 +1,10 @@
 2008-04-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/dict.c: Rename unwindPoints variable of Process to environment.
+	* libgst/files.c: Load ProcEnv.st.
+
+2008-04-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/interp.c: Correct output for execution environment contexts
 	that have a parent.
 

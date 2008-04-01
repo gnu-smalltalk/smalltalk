@@ -61,3 +61,13 @@ returned value is true
 
 Execution begins...
 returned value is nil
+
+Execution begins...
+nil
+1
+2
+nil
+3
+2
+2
+returned value is 2

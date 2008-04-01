@@ -264,7 +264,8 @@ static const char standard_files[] = {
   "CFuncs.st\0"
   "CStruct.st\0"
 
-  /* Exception handling */
+  /* Exception handling and ProcessEnvironment */
+  "ProcEnv.st\0"
   "ExcHandling.st\0"
   "AnsiExcept.st\0"
 

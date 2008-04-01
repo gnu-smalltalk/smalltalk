@@ -237,3 +237,36 @@ Eval [
     [ stop ] whileFalse: [ queue nextPut: false. Processor yield ].
 ]
 
+
+"Test ProcessEnvironment and ProcessVariable"
+Eval [
+    "Value defaults to nil"
+    b := Processor processEnvironment associationAt: #a.
+    b value printNl.
+
+    "#at:put: affects #value"
+    Processor processEnvironment at: #a put: 1.
+    b value printNl.
+
+    "and #value: affects #at:"
+    b value: 2.
+    (Processor processEnvironment at: #a) printNl.
+    s := Semaphore new.
+    [
+	"Value defaults to nil here too."
+        b value printNl.
+
+	"Requesting value has not created the variable."
+        Processor processEnvironment at: #a ifAbsentPut: [3].
+        b value printNl.
+        s signal
+    ] fork.
+    s wait.
+
+    "The variable exists here..."
+    Processor processEnvironment at: #a ifAbsentPut: [4].
+
+    "... and its value is still 2."
+    (Processor processEnvironment at: #a) printNl.
+    b value printNl
+]

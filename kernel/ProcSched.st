@@ -45,6 +45,18 @@ Object subclass: ProcessorScheduler [
 	self shouldNotImplement
     ]
 
+    processEnvironment [
+	"Answer another singleton object hosting thread-local variables
+	 for the Smalltalk processes.  This acts like a normal Dictionary
+	 with a couple of differences: a) using #associationAt: will
+	 return special associations that retrieve a thread-local value;
+	 b) requesting missing keys will return nil, and removing them
+	 will be a nop."
+
+	<category: 'basic'>
+	^ProcessEnvironment uniqueInstance
+    ]
+
     activeProcess [
 	"Answer the active process"
 

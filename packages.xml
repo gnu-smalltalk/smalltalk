@@ -149,6 +149,7 @@
   <file>CType.st</file>
   <file>IdentitySet.st</file>
   <file>ProcSched.st</file>
+  <file>ProcEnv.st</file>
   <file>ValueAdapt.st</file>
   <file>CharArray.st</file>
   <file>Integer.st</file>
