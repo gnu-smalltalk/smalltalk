@@ -34,4 +34,5 @@
   <file>CSymbolTable.st</file>
   <file>CParseType.st</file>
   <file>README</file>
+  <file>ChangeLog</file>
 </package>

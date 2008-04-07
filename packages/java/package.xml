@@ -50,4 +50,5 @@
   <file>java_util_zip_Deflater.st</file>
   <file>java_util_zip_Inflater.st</file>
   <file>test.st</file>
+  <file>ChangeLog</file>
 </package>

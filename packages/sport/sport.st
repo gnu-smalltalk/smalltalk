@@ -723,7 +723,7 @@ Object subclass: SpFileStream [
 
 	<category: 'initialize-release'>
 	filename := aString.
-	underlyingStream := (File name: aString) readStream.
+	underlyingStream := (File path: aString) readStream.
 	^self
     ]
 
@@ -778,8 +778,7 @@ Object subclass: SpFileStream [
 
 	<category: 'initialize-release'>
 	filename := aString.
-	underlyingStream := (File name: aString) writeStream.
-	underlyingStream lineEndTransparent.
+	underlyingStream := (File path: aString) writeStream.
 	^self
     ]
 

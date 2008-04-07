@@ -31,26 +31,30 @@
 
 
 
-ArchiveFileHandler subclass: ExternalArchiveFileHandler [
+ArchiveFile subclass: ExternalArchiveFile [
+    | command |
     
-    <comment: 'ExternalArchiveFileHandler
+    <comment: 'ExternalArchiveFile
 allows for easy implementation of archive files (for example,
 transparent unzipping and untarring) with a single shell script.
 It implements a protocol that that is compatible with the Midnight
 Commander and with GNOME VFS.'>
     <category: 'Streams-Files'>
 
-    ExternalArchiveFileHandler class [
+    ExternalArchiveFile class [
 	| fileTypes |
 	
     ]
 
-    ExternalArchiveFileHandler class >> priority [
-	<category: 'registering'>
-	^-5
+    ExternalArchiveFile class >> update: aSymbol [
+	aSymbol == #returnedFromSnapshot ifTrue: [ self release ].
     ]
 
-    ExternalArchiveFileHandler class >> fileSystems [
+    ExternalArchiveFile class >> release [
+	fileTypes := nil
+    ]
+
+    ExternalArchiveFile class >> refreshFileSystemList [
 	"Answer the virtual file systems that can be processed by this
 	 subclass.  These are given by the names of the executable
 	 files in the `vfs' subdirectory of the image directory (if
@@ -60,120 +64,127 @@ Commander and with GNOME VFS.'>
 
 	<category: 'registering'>
 	fileTypes := LookupTable new.
-	[self fileSystemsIn: Directory libexec , '/vfs'] on: Error
-	    do: [:ex | ex return].
-	[self fileSystemsIn: Directory userBase , '/vfs'] on: Error
+	[self fileSystemsIn: Directory libexec / 'vfs'] on: Error
+	    do: [:ex | ex pass].
+	[self fileSystemsIn: Directory userBase / 'vfs'] on: Error
 	    do: [:ex | ex return].
 	Smalltalk imageLocal 
 	    ifTrue: 
-		[[self fileSystemsIn: Directory image , '/vfs'] on: Error
+		[[self fileSystemsIn: Directory image / 'vfs'] on: Error
 		    do: [:ex | ex return]].
 	^fileTypes keys asSet
     ]
 
-    ExternalArchiveFileHandler class >> fileSystemsIn: path [
+    ExternalArchiveFile class >> fileSystemsIn: dir [
 	"Registers the executable files in the given directory to be used
 	 to resolve a virtual file system."
 
 	<category: 'registering'>
-	| dir |
-	dir := RealFileHandler for: path.
-	dir exists ifFalse: [^self].
+	dir isDirectory ifFalse: [^self].
 	dir do: 
 		[:each | 
-		(File isExecutable: path , '/' , each) 
-		    ifTrue: [fileTypes at: each put: path , '/' , each]]
+		each isExecutable
+		    ifTrue: [fileTypes at: each stripPath put: each asString]]
     ]
 
-    ExternalArchiveFileHandler class >> fileTypes [
+    ExternalArchiveFile class >> commandFor: fileSystem [
 	<category: 'registering'>
-	^fileTypes
+	fileTypes isNil ifTrue: [ self refreshFileSystemList ].
+	^fileTypes at: fileSystem asString
     ]
 
-    ExternalArchiveFileHandler class >> release [
-	"Avoid that paths stay in the image file"
+    command: aString [
+	<category: 'string'>
 
-	<category: 'registering'>
-	fileTypes := nil.
-	super release
+	command := aString
     ]
 
-    createDir: dirName [
+    createDirectory: dirName [
 	"Create a subdirectory of the receiver, naming it dirName."
 
 	<category: 'members'>
 	Smalltalk 
 	    system: '%1 mkdir %2 %3' % 
-			{self command.
-			self realFileName.
+			{command.
+			self file name.
 			dirName}
     ]
 
-    member: anArchiveMemberHandler mode: bits [
-	"Set the permission bits for the file in anArchiveMemberHandler."
+    full [
+	"Answer the size of the file identified by the receiver"
 
-	<category: 'ArchiveMemberHandler protocol'>
+	<category: 'delegation'>
+	self isAbsolute ifTrue: [ ^self ].
+	^super full
+	    command: command;
+	    yourself
+    ]
+
+    member: anArchiveMember mode: bits [
+	"Set the permission bits for the file in anArchiveMember."
+
+	<category: 'ArchiveMember protocol'>
 	self notYetImplemented
     ]
 
-    extractMember: anArchiveMemberHandler into: file [
-	"Extract the contents of anArchiveMemberHandler into a file
+    extractMember: anArchiveMember into: file [
+	"Extract the contents of anArchiveMember into a file
 	 that resides on disk, and answer the name of the file."
 
-	<category: 'ArchiveMemberHandler protocol'>
+	<category: 'ArchiveMember protocol'>
 	Smalltalk 
 	    system: '%1 copyout %2 %3 %4' % 
-			{self command.
-			self realFileName.
-			anArchiveMemberHandler name.
+			{command.
+			self file name.
+			anArchiveMember name.
 			file name}
     ]
 
-    removeMember: anArchiveMemberHandler [
-	"Remove the member represented by anArchiveMemberHandler."
+    removeMember: anArchiveMember [
+	"Remove the member represented by anArchiveMember."
 
-	<category: 'ArchiveMemberHandler protocol'>
+	<category: 'ArchiveMember protocol'>
 	| subcmd |
-	subcmd := anArchiveMemberHandler isDirectory 
+	subcmd := anArchiveMember isDirectory 
 		    ifTrue: ['rmdir']
 		    ifFalse: ['rm'].
 	Smalltalk 
 	    system: '%1 %2 %3 %4' % 
-			{self command.
+			{command.
 			subcmd.
-			self realFileName.
-			anArchiveMemberHandler name}
+			self file name.
+			anArchiveMember name}
     ]
 
-    updateMember: anArchiveMemberHandler [
-	"Update the member represented by anArchiveMemberHandler by
+    updateMember: anArchiveMember [
+	"Update the member represented by anArchiveMember by
 	 copying the file into which it was extracted back to the
 	 archive."
 
-	<category: 'ArchiveMemberHandler protocol'>
+	<category: 'ArchiveMember protocol'>
 	Smalltalk 
 	    system: '%1 copyin %2 %3 %4' % 
-			{self command.
-			self realFileName.
-			anArchiveMemberHandler name.
-			anArchiveMemberHandler realFileName}
+			{command.
+			self file name.
+			anArchiveMember name.
+			anArchiveMember file name}
     ]
 
     command [
 	"Return the script that is invoked by the receiver."
 
-	<category: 'ArchiveMemberHandler protocol'>
+	<category: 'ArchiveMember protocol'>
 	^self class fileTypes at: self fsName
     ]
 
     files [
 	"Extract the directory listing from the archive"
 
-	<category: 'ArchiveMemberHandler protocol'>
+	<category: 'ArchiveMember protocol'>
 	^Generator on: 
 		[:gen | 
 		| pipe |
-		pipe := FileStream popen: self command , ' list ' , self realFileName
+		pipe := FileStream popen: command , ' list ' , self file name
 			    dir: FileStream read.
 		pipe linesDo: 
 			[:l | 
@@ -201,9 +212,21 @@ Commander and with GNOME VFS.'>
     ]
 ]
 
-
 
-Eval [
-    ExternalArchiveFileHandler register
-]
+FilePath extend [
+    archive: kind [
+	"Return a FilePath for the receiver, interpreted as an archive file
+	 of the given kind."
+	<category: 'factory'>
+	^(VFS.ExternalArchiveFile on: self)
+	    command: (VFS.ExternalArchiveFile commandFor: kind);
+	    yourself
+    ]
 
+    zip [
+	"Return a FilePath for the receiver, interpreted as an archive file
+	 of the given kind."
+	<category: 'factory'>
+	^self archive: 'uzip'
+    ]
+]

@@ -1,5 +1,34 @@
 2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Directory.st: Inherit from Object.  Remove methods now
+	in File or FilePath.  Return File objects from methods that return
+	system parameters.
+	* kernel/File.st: Inherit from FilePath.  Remove methods now in
+	FilePath.  Do not delegate to a VFSHandler.
+	* kernel/FileDescr.st: Rename instance variable "name" to "file"
+	and adjust.  Remove VFS indirection for #open:mode:.  Use new
+	4-argument filein primitive.
+	* kernel/FilePath.st: New.
+	* kernel/FileSegment.st: Support storing a File object in the
+	FileSegment.
+	* kernel/ObjMemory.st: Add indirection for #snapshot: to support
+	passing a File.
+	* kernel/PkgLoader.st: Store files and directories as File objects.
+	Adjust for VFS changes.
+	* kernel/Stream.st: Support 4-argument filein primitive.
+	* kernel/SysDict.st: Use Files more extensively.
+	* kernel/URL.st: Support converting Files to URLs.
+	* kernel/VFS.st: Rewrite.
+	* kernel/VFSZip.st: Rewrite.
+
+	* scripts/Load.st: Use new File methods.
+	* scripts/Package.st: Adjust for PackageLoader changes.
+	* scripts/Remote.st: Use new File methods.
+	* tests/AnsiLoad.st: Adjust for Directory class>>#working returning
+	a File.
+
+2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FileDescr.st: Rename fd instance variable to file.
 
 2008-04-01  Paolo Bonzini  <bonzini@gnu.org>

@@ -123,6 +123,7 @@
   <file>Number.st</file>
   <file>Symbol.st</file>
   <file>ByteArray.st</file>
+  <file>FilePath.st</file>
   <file>File.st</file>
   <file>ObjDumper.st</file>
   <file>SysDict.st</file>

@@ -261,7 +261,7 @@ XML.'>
 Namespace current: Kernel [
 
 PackageGroup subclass: PackageDirectory [
-    | packages fileName baseDirectories baseDirCache |
+    | packages file baseDirectories baseDirCache |
     
     <category: 'Language-Packaging'>
     <comment: 'I am not part of a standard Smalltalk system. I store internally the
@@ -273,21 +273,26 @@ XML.'>
 	self shouldNotImplement
     ]
 
-    PackageDirectory class >> on: aString baseDirectories: aBlock [
+    PackageDirectory class >> on: aFile baseDirectories: aBlock [
 	<category: 'accessing'>
 	^(super new)
-	    fileName: aString;
+	    file: aFile;
 	    baseDirectories: aBlock
+    ]
+
+    file [
+	<category: 'accessing'>
+	^file
     ]
 
     fileName [
 	<category: 'accessing'>
-	^fileName
+	^self file name
     ]
 
-    fileName: aString [
+    file: aFile [
 	<category: 'accessing'>
-	fileName := aString
+	file := aFile
     ]
 
     baseDirectories: aBlock [
@@ -316,13 +321,12 @@ XML.'>
 	 Package objects along the way."
 
 	<category: 'refreshing'>
-	| dir file allDirs |
-	file := File name: fileName.
-	dir := Directory name: file path.
+	| dir allDirs |
+	dir := self file parent.
 	allDirs := Smalltalk imageLocal 
 		    ifTrue: [{Directory image} , baseDirectories value]
 		    ifFalse: [baseDirectories value].
-	((file exists and: [file lastModifyTime > loadDate]) or: 
+	((self file exists and: [self file lastModifyTime > loadDate]) or: 
 		[(dir exists and: [dir lastModifyTime > loadDate]) 
 		    or: [allDirs ~= baseDirCache]]) 
 	    ifTrue: 
@@ -334,25 +338,24 @@ XML.'>
 
     refreshPackageList [
 	<category: 'refreshing'>
-	| file |
 	baseDirCache isEmpty ifTrue: [^self].
-	file := [FileStream open: fileName mode: FileStream read] on: Error
-		    do: [:ex | ^self].
-	
-	[[self parse: file] on: SystemExceptions.PackageNotAvailable
-	    do: [:ex | ex resignalAs: PackageSkip new]] 
-		ensure: [file close].
+	self file exists ifFalse: [^self].
+	self file withReadStreamDo: [ :fileStream |
+	    [self parse: fileStream]
+		on: SystemExceptions.PackageNotAvailable
+	        do: [:ex | ex resignalAs: PackageSkip new]].
+ 
 	packages := packages reject: [:each | each isDisabled]
     ]
 
     refreshStarList: dir [
 	<category: 'refreshing'>
 	dir exists ifFalse: [^self].
-	dir namesMatching: '*.star'
+	dir filesMatching: '*.star'
 	    do: 
-		[:starName | 
+		[:starFile | 
 		| package |
-		package := Kernel.StarPackage fileName: starName.
+		package := Kernel.StarPackage file: starFile.
 		packages at: package name put: package]
     ]
 
@@ -391,7 +394,7 @@ XML.'>
 			    package notNil 
 				ifTrue: 
 				    [package name isNil 
-					ifTrue: [^self error: 'missing package name in ' , fileName].
+					ifTrue: [^self error: 'missing package name in ' , self fileName].
 				    
 				    [package baseDirectories: baseDirCache.
 				    packages at: package name put: package] 
@@ -454,9 +457,7 @@ XML.'>
 
 	<category: 'accessing'>
 	^aCollection collect: 
-		[:fileName | 
-		| name |
-		name := self fullPathOf: fileName]
+		[:fileName | self fullPathOf: fileName]
     ]
 
     fullPathOf: fileName [
@@ -818,13 +819,13 @@ XML.'>
     allFiles: prefix [
 	<category: 'private - subpackages'>
 	prefix isNil ifTrue: [^self allFiles].
-	^self allFiles collect: [:each | Directory append: each to: prefix]
+	^self allFiles collect: [:each | File append: each to: prefix]
     ]
 
     allDistFiles: prefix [
 	<category: 'private - subpackages'>
 	prefix isNil ifTrue: [^self allDistFiles].
-	^self allDistFiles collect: [:each | Directory append: each to: prefix]
+	^self allDistFiles collect: [:each | File append: each to: prefix]
     ]
 ]
 
@@ -835,16 +836,16 @@ XML.'>
 Namespace current: Kernel [
 
 PackageInfo subclass: StarPackage [
-    | fileName loadedPackage |
+    | file loadedPackage |
     
     <category: 'Language-Packaging'>
     <comment: nil>
 
-    StarPackage class >> fileName: fileName [
+    StarPackage class >> file: file [
 	<category: 'accessing'>
 	^(self new)
-	    fileName: fileName;
-	    name: (File stripPathFrom: (File stripExtensionFrom: fileName));
+	    file: file;
+	    name: (File stripPathFrom: (File stripExtensionFrom: file name));
 	    yourself
     ]
 
@@ -965,17 +966,22 @@ PackageInfo subclass: StarPackage [
 
     directory [
 	<category: 'accessing'>
-	^fileName , '#uzip'
+	^(File name: self fileName) zip
+    ]
+
+    file [
+	<category: 'accessing'>
+	^file
     ]
 
     fileName [
 	<category: 'accessing'>
-	^fileName
+	^self file name
     ]
 
-    fileName: aString [
+    file: aFile [
 	<category: 'accessing'>
-	fileName := aString
+	file := aFile
     ]
 
     primFileIn [
@@ -987,9 +993,8 @@ PackageInfo subclass: StarPackage [
 	<category: 'accessing'>
 	| file package |
 	loadedPackage isNil ifFalse: [^loadedPackage].
-	file := FileStream open: fileName , '#uzip/package.xml'
-		    mode: FileStream read.
-	[package := Package parse: file] ensure: [file close].
+	package := self file zip / 'package.xml'
+		withReadStreamDo: [ :fileStream | Package parse: fileStream].
 	package isNil 
 	    ifTrue: [^self error: 'invalid disabled-package tag inside a star file'].
 	package relativeDirectory: self relativeDirectory.
@@ -1223,17 +1228,16 @@ XML.'>
 	 found that contains the file."
 
 	<category: 'accessing'>
-	| name |
 	baseDirectories do: 
-		[:dir | 
-		name := dir.
+		[:baseDir || dir file |
+		dir := baseDir.
 		self relativeDirectory isNil 
-		    ifFalse: [name := Directory append: self relativeDirectory to: dir].
-		name := Directory append: fileName to: name.
-		(File exists: name) ifTrue: [^name]].
+		    ifFalse: [dir := dir / self relativeDirectory].
+		file := dir / fileName.
+		file exists ifTrue: [^file]].
 
 	"TODO: should put the name and baseDirectories into the exception."
-	"name printNl.  baseDirectories printNl."
+	"fileName printNl.  baseDirectories printNl."
 	SystemExceptions.PackageNotAvailable signal: self name
     ]
 
@@ -1243,10 +1247,10 @@ XML.'>
 	<category: 'accessing'>
 	self relativeDirectory isNil ifTrue: [^nil].
 	self baseDirectories do: 
-		[:dir | 
-		| name |
-		name := Directory append: self relativeDirectory to: dir.
-		(Directory exists: name) ifTrue: [^name]].
+		[:baseDir || dir |
+		dir := baseDir / relativeDirectory.
+		dir exists ifTrue: [^dir]].
+
 	SystemExceptions.PackageNotAvailable signal: self name
     ]
 
@@ -1288,7 +1292,7 @@ XML.'>
 			(CFunctionDescriptor isFunction: func) 
 			    ifFalse: [^self error: 'C callout not available: ' , func]]].
 	loadedFiles := self fullPathsOf: self fileIns.
-	loadedFiles do: [:each | FileStream fileIn: each].
+	loadedFiles do: [:each | each fileIn].
 	self name isNil ifFalse: [Smalltalk addFeature: self name].
 	self features do: [:each | Smalltalk addFeature: each]] 
 		ensure: 
@@ -1409,12 +1413,12 @@ that package.
     ]
 
     baseDirectories [
-	"Answer the namespace in which the package is loaded."
+	"Answer the directories in which package files are sought."
 
 	<category: 'accessing'>
 	^super baseDirectories ifNil: 
 		[owner baseDirectories 
-		    collect: [:each | Directory append: owner relativeDirectory to: each]]
+		    collect: [:each | each / owner relativeDirectory]]
     ]
 ]
 
@@ -1443,7 +1447,7 @@ into a Smalltalk image, correctly handling dependencies.'>
     ]
 
     PackageLoader class >> directoryFor: package [
-	"Answer a complete path to the given package's files"
+	"Answer a Directory object to the given package's files"
 
 	<category: 'accessing'>
 	^(self packageAt: package) directory
@@ -1565,14 +1569,13 @@ into a Smalltalk image, correctly handling dependencies.'>
 	    ifTrue: 
 		[self flush.
 		root := Kernel.PackageDirectories new.
-		root add: (Kernel.PackageDirectory on: self packageFileName
-			    baseDirectories: 
-				[
+		root add: (Kernel.PackageDirectory on: self packageFile
+			    baseDirectories: [
 				{Directory userBase.
-				Directory kernel , '/..'}]).
-		root add: (Kernel.PackageDirectory on: self userPackageFileName
+				Directory kernel / '..'}]).
+		root add: (Kernel.PackageDirectory on: self userPackageFile
 			    baseDirectories: [{Directory userBase}]).
-		root add: (Kernel.PackageDirectory on: self localPackageFileName
+		root add: (Kernel.PackageDirectory on: self localPackageFile
 			    baseDirectories: [#()])].
 	root refresh: loadDate.
 	loadDate := Date dateAndTimeNow
@@ -1620,19 +1623,19 @@ into a Smalltalk image, correctly handling dependencies.'>
 	^root includesKey: feature asString
     ]
 
-    PackageLoader class >> packageFileName [
+    PackageLoader class >> packageFile [
 	<category: 'private - packages file'>
-	^Directory kernel , '/../packages.xml'
+	^Directory kernel / '../packages.xml'
     ]
 
-    PackageLoader class >> userPackageFileName [
+    PackageLoader class >> userPackageFile [
 	<category: 'private - packages file'>
-	^Directory userBase , '/packages.xml'
+	^Directory userBase / 'packages.xml'
     ]
 
-    PackageLoader class >> localPackageFileName [
+    PackageLoader class >> localPackageFile [
 	<category: 'private - packages file'>
-	^Directory image , '/packages.xml'
+	^Directory image / 'packages.xml'
     ]
 
     PackageLoader class >> rebuildPackageFile [
@@ -1643,15 +1646,10 @@ into a Smalltalk image, correctly handling dependencies.'>
 	<category: 'private - packages file'>
 	| file |
 	self refresh.
-	file := FileStream open: Directory image , '/packages.xml'
-		    mode: FileStream write.
-	
-	[file nextPutAll: '<!-- GNU Smalltalk packages description file -->'.
-	file
-	    nl;
-	    nl.
-	root printOn: file] 
-		ensure: [file close]
+	Directory image / 'packages.xml' withWriteStreamDo: [ :file |
+	    file nextPutAll: '<!-- GNU Smalltalk packages description file -->'.
+	    file nl; nl.
+	    root printOn: file] 
     ]
 ]
 

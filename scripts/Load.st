@@ -129,8 +129,7 @@ test
     ifTrue: [
 	| tmpFile tmpFileName result |
 	snapshot ifTrue: [
-	    tmpFile := FileDescriptor openTemporaryFile: (Directory
-		append: 'im-' to: Directory temporary).
+	    tmpFile := FileDescriptor openTemporaryFile: Directory temporary / 'im-'.
 	    tmpFileName := tmpFile name.
 	    ObjectMemory snapshot: tmpFileName.
 	    wasVerbose := FileStream verbose: wasVerbose ].

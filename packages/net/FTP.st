@@ -259,7 +259,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	<category: 'ftp'>
 	| fname directory tail |
 	self login.
-	fname := File name: fileName.
+	fname := File path: fileName.
 	directory := fname path asString.
 	tail := fname stripPath asString.
 	tail isEmpty 
@@ -280,7 +280,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	<category: 'ftp'>
 	| fname directory tail |
 	self login.
-	fname := File name: pathName.
+	fname := File path: pathName.
 	directory := fname path asString.
 	tail := fname stripPath asString.
 	self clientPI ftpCwd: directory.

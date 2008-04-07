@@ -127,22 +127,23 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	"check fragment and query parts"
 
 	| fragmentIndex queryIndex limit fragmentLimit queryLimit urlString url |
-	limit := aString size + 1.
-	(queryIndex := aString indexOf: $?) ~= 0 
+	urlString := aString asString.
+	limit := urlString size + 1.
+	(queryIndex := urlString indexOf: $?) ~= 0 
 	    ifTrue: 
 		[limit := queryIndex.
-		queryLimit := aString 
+		queryLimit := urlString 
 			    indexOf: $#
 			    startingAt: queryIndex + 1
-			    ifAbsent: [aString size + 1]].
-	(fragmentIndex := aString indexOf: $#) ~= 0 
+			    ifAbsent: [urlString size + 1]].
+	(fragmentIndex := urlString indexOf: $#) ~= 0 
 	    ifTrue: 
 		[limit := limit min: fragmentIndex.
-		fragmentLimit := aString 
+		fragmentLimit := urlString 
 			    indexOf: $?
 			    startingAt: fragmentIndex + 1
-			    ifAbsent: [aString size + 1]].
-	urlString := aString copyFrom: 1 to: limit - 1.
+			    ifAbsent: [urlString size + 1]].
+	urlString := urlString copyFrom: 1 to: limit - 1.
 	url := self fromURLString: urlString.
 	queryIndex > 0 
 	    ifTrue: [url query: (urlString copyFrom: queryIndex + 1 to: queryLimit - 1)].

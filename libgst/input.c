@@ -60,7 +60,7 @@
 typedef struct gst_file_segment
 {
   OBJ_HEADER;
-  OOP fileName;
+  OOP fileOOP;
   OOP startPos;
   OOP length;
 }
@@ -104,7 +104,7 @@ typedef struct input_stream
   int column;
   const char *prompt;
 
-  OOP fileNameOOP;		/* the full path name for file */
+  OOP fileOOP;			/* the object stored in FileSegments */
   const char *fileName;
   off_t fileOffset;
 
@@ -125,6 +125,10 @@ typedef struct input_stream
 
 /* The internal interface used by _gst_next_char.  */
 static int my_getc (input_stream stream);
+
+/* Return the File object or a file name for the topmost stream in the stack
+   if it is of type STREAM_FILE; nil otherwise.  */
+static OOP get_cur_file (void);
 
 /* Print a line indicator in front of an error message.  */
 static void line_stamp (int line);
@@ -214,9 +218,7 @@ _gst_pop_stream (mst_Boolean closeIt)
 
   stream = in_stream;
   in_stream = in_stream->prevStream;
-
-  if (!IS_NIL (stream->fileNameOOP))
-    _gst_unregister_oop (stream->fileNameOOP);
+  _gst_unregister_oop (stream->fileOOP);
 
   switch (stream->type)
     {
@@ -336,7 +338,7 @@ push_new_stream (stream_type type)
   newStream->type = type;
   newStream->fileName = NULL;
   newStream->prompt = NULL;
-  newStream->fileNameOOP = _gst_nil_oop;
+  newStream->fileOOP = _gst_nil_oop;
   newStream->prevStream = in_stream;
   in_stream = newStream;
   return (newStream);
@@ -345,19 +347,19 @@ push_new_stream (stream_type type)
 
 void
 _gst_set_stream_info (int line,
+		      OOP fileOOP,
 		      OOP fileNameOOP,
 		      int fileOffset)
 {
   in_stream->line = line;
   in_stream->column = 0;
-  if (!IS_NIL (fileNameOOP))
-    {
-      in_stream->fileName = _gst_to_cstring (fileNameOOP);
-      _gst_register_oop (in_stream->fileNameOOP);
-    }
 
-  in_stream->fileNameOOP = fileNameOOP;
+  _gst_register_oop (fileOOP);
+  in_stream->fileOOP = fileOOP;
   in_stream->fileOffset = fileOffset;
+
+  if (!IS_NIL (fileNameOOP))
+    in_stream->fileName = _gst_to_cstring (fileNameOOP);
 }
  
 void
@@ -489,18 +491,18 @@ _gst_get_source_string (off_t startPos, off_t endPos)
 
   if (startPos != -1 && !_gst_get_cur_stream_prompt ())
     {
-      OOP fileName;
+      OOP fileOOP;
       gst_file_segment fileSegment;
       inc_ptr incPtr;
 
       incPtr = INC_SAVE_POINTER ();
-      fileName = _gst_get_cur_file_name ();
-      INC_ADD_OOP (fileName);
+      fileOOP = get_cur_file ();
+      INC_ADD_OOP (fileOOP);
 
       fileSegment = (gst_file_segment) new_instance (_gst_file_segment_class,
                                                      &result);
 
-      fileSegment->fileName = fileName;
+      fileSegment->fileOOP = fileOOP;
       fileSegment->startPos = from_c_int_64 (startPos);
       fileSegment->length = from_c_int_64 (endPos - startPos);
 
@@ -548,15 +550,15 @@ _gst_get_source_string (off_t startPos, off_t endPos)
 }
 
 OOP
-_gst_get_cur_file_name (void)
+get_cur_file (void)
 {
-  char *fullFileName;
+  const char *fullFileName;
 
   if (!in_stream)
     return _gst_nil_oop;
 
-  if (!IS_NIL (in_stream->fileNameOOP))
-    return in_stream->fileNameOOP;
+  if (!IS_NIL (in_stream->fileOOP))
+    return in_stream->fileOOP;
 
   if (in_stream->type != STREAM_FILE)
     return (_gst_nil_oop);
@@ -567,9 +569,9 @@ _gst_get_cur_file_name (void)
     fullFileName =
       _gst_get_full_file_name (in_stream->fileName);
 
-  in_stream->fileNameOOP = _gst_string_new (fullFileName);
-  _gst_register_oop (in_stream->fileNameOOP);
-  return (in_stream->fileNameOOP);
+  in_stream->fileOOP = _gst_string_new (fullFileName);
+  _gst_register_oop (in_stream->fileOOP);
+  return (in_stream->fileOOP);
 }
 
 
@@ -700,14 +702,7 @@ line_stamp (int line)
   if (_gst_report_errors)
     {
       if (in_stream)
-	{
-	  if (in_stream->fileName)
-	    fprintf (stderr, "%s:", in_stream->fileName);
-	  else if (!IS_NIL (in_stream->fileNameOOP))
-	    fprintf (stderr, "%#O:", in_stream->fileNameOOP);
-
-	  fprintf (stderr, "%d: ", line);
-	}
+	fprintf (stderr, "%s:%d: ", in_stream->fileName, line);
       else
 	fprintf (stderr, "gst: ");
     }

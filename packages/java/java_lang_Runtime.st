@@ -142,7 +142,7 @@ java_lang_Runtime_insertSystemProperties_java_util_Properties: arg1
     put value: 'java.vm.specification.vendor'  value: 'Sun Microsystems Inc.'.
 
     put value: 'java.class.path'    value: JavaClassFileReader classPath.
-    put value: 'java.home'          value: Directory image.
+    put value: 'java.home'          value: Directory image name.
     put value: 'os.name'            value: os.
     put value: 'os.arch'            value: cpu.
     put value: 'os.version'         value: '1'.
@@ -150,8 +150,8 @@ java_lang_Runtime_insertSystemProperties_java_util_Properties: arg1
     put value: 'path.separator'     value: ':'.
     put value: 'line.separator'     value: (Character nl asString).
     put value: 'user.name'          value: (Smalltalk getenv: 'USER').
-    put value: 'user.home'          value: (Smalltalk getenv: 'HOME').
-    put value: 'user.dir'           value: (Smalltalk getenv: 'HOME').
+    put value: 'user.home'          value: Directory home name.
+    put value: 'user.dir'           value: Directory home name.
 
     put value: 'java.io.tmpdir'     value: tmpDir.
     put value: 'java.tmpdir'        value: tmpDir! !

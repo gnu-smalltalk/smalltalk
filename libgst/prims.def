@@ -5103,8 +5103,9 @@ primitive VMpr_Object_makeWeak [succeed,fail]
 
 primitive VMpr_Stream_fileInLine [succeed,fail]
 {
+  OOP oop4 = POP_OOP ();
   OOP oop3 = POP_OOP ();
-  OOP oop2 = POP_OOP ();
+  OOP oop2 = (numArgs == 4 ? POP_OOP () : oop3);
   OOP oop1 = POP_OOP ();
   OOP streamOOP = STACKTOP ();
   enum undeclared_strategy old;
@@ -5113,16 +5114,16 @@ primitive VMpr_Stream_fileInLine [succeed,fail]
     PRIM_FAILED;
 
   if (IS_INT (oop1)
-      && (IS_NIL (oop2)
-	  || (IS_CLASS (oop2, _gst_string_class) && IS_INT (oop3))))
+      && (IS_NIL (oop3)
+	  || (IS_CLASS (oop3, _gst_string_class) && IS_INT (oop4))))
     {
       intptr_t arg1;
-      intptr_t arg3;
+      intptr_t arg4;
       arg1 = TO_INT (oop1);
-      arg3 = TO_INT (oop3);
+      arg4 = TO_INT (oop4);
 
       _gst_push_stream_oop (streamOOP);
-      _gst_set_stream_info (arg1, oop2, arg3);
+      _gst_set_stream_info (arg1, oop2, oop3, arg4);
       old = _gst_set_undeclared (UNDECLARED_GLOBALS);
       parse_stream_with_protection (false);
       _gst_set_undeclared (old);

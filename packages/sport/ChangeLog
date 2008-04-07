@@ -1,3 +1,7 @@
+2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sport.st: Use new methods on File.
+
 2008-03-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sport.st: Use #canRead instead of #available.

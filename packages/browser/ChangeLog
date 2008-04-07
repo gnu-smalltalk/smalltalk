@@ -1,3 +1,7 @@
+2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* ClassHierBrow.st: Use #name after accessing variables.
+
 2007-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* ClassHierBrow.st: Replace #sourceCodeAt: with

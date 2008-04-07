@@ -235,7 +235,7 @@ My instance also helps keep track of dependencies between objects.'>
 	 directory (non-local image) or not."
 
 	<category: 'testing'>
-	^(File pathFor: Directory kernel) ~= Directory image
+	^Directory kernel parent ~= Directory image
     ]
 
     isSmalltalk [

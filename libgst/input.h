@@ -115,6 +115,7 @@ extern void _gst_pop_stream (mst_Boolean closeIt)
    a subsection of a real file via a temporary file what the real
    source of the text is.  */
 extern void _gst_set_stream_info (int line,
+				  OOP fileOOP,
 				  OOP fileNameOOP,
 				  int fileOffset) 
   ATTRIBUTE_HIDDEN;
@@ -171,12 +172,6 @@ extern mst_Boolean _gst_get_cur_stream_prompt (void)
 
 /* Return the type of the topmost stream in the stack.  */
 extern stream_type _gst_get_cur_stream_type (void)
-  ATTRIBUTE_PURE 
-  ATTRIBUTE_HIDDEN;
-
-/* Return the name of the topmost stream in the stack if it is of type
-   STREAM_FILE; nil otherwise.  */
-extern OOP _gst_get_cur_file_name (void)
   ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
 

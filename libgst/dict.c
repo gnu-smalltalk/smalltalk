@@ -617,7 +617,7 @@ static const class_definition class_info[] = {
 
   {&_gst_file_descriptor_class, &_gst_byte_stream_class,
    ISP_FIXED, true, 5,
-   "FileDescriptor", "fd name isPipe atEnd peek", "AllOpenFiles", NULL },
+   "FileDescriptor", "fd file isPipe atEnd peek", "AllOpenFiles", NULL },
 
   {&_gst_file_stream_class, &_gst_file_descriptor_class,
    ISP_FIXED, true, 2,
@@ -1054,24 +1054,28 @@ add_smalltalk (const char *globalName,
   return globalValue;
 }
 
+static OOP
+relocate_path_oop (const char *s)
+{
+  OOP resultOOP;
+  char *path = _gst_relocate_path (s);
+  if (path)
+    resultOOP = _gst_string_new (path);
+  else
+    resultOOP = _gst_nil_oop;
+
+  free (path);
+  return resultOOP;
+}
+
 void
 init_runtime_objects (void)
 {
-  char *s;
   add_smalltalk ("UserFileBasePath", _gst_string_new (_gst_user_file_base_path));
 
-  s = _gst_relocate_path (KERNEL_PATH);
-  add_smalltalk ("SystemKernelPath", _gst_string_new (s));
-  free (s);
-
-  s = _gst_relocate_path (MODULE_PATH);
-  add_smalltalk ("ModulePath", _gst_string_new (s));
-  free (s);
-
-  s = _gst_relocate_path (LIBEXEC_PATH);
-  add_smalltalk ("LibexecPath", _gst_string_new (s));
-  free (s);
-
+  add_smalltalk ("SystemKernelPath", relocate_path_oop (KERNEL_PATH));
+  add_smalltalk ("ModulePath", relocate_path_oop (MODULE_PATH));
+  add_smalltalk ("LibexecPath", relocate_path_oop (LIBEXEC_PATH));
   add_smalltalk ("ImageFilePath", _gst_string_new (_gst_image_file_path));
   add_smalltalk ("ExecutableFileName", _gst_string_new (_gst_executable_path));
   add_smalltalk ("ImageFileName", _gst_string_new (_gst_binary_image_name));

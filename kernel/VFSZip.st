@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   Virtual File System for ZIP files
+|   Virtual File System (new classes)
 |
 |
  ======================================================================"
@@ -29,69 +29,52 @@
 |
  ======================================================================"
 
+Namespace current: VFS [
 
-
-Namespace current: Kernel [
-
-VFS.VFS.ArchiveFileHandler subclass: ZipFileHandler [
+ArchiveFile subclass: ZipFile [
     
     <category: 'Streams-Files'>
-    <comment: 'ZipFileHandler transparently extracts
+    <comment: 'ZipFile transparently extracts
 files from a ZIP archive.'>
 
-    ZipFileHandler class >> priority [
-	"Answer the priority for this class (higher number = higher priority) in
-	 case multiple classes implement the same file system."
-
-	<category: 'registering'>
-	^-10
-    ]
-
-    ZipFileHandler class >> fileSystems [
-	"Answer the virtual file systems that can be processed by this subclass."
-
-	<category: 'registering'>
-	^#('uzip')
-    ]
-
-    createDir: dirName [
+    createDirectory: dirName [
 	"Create a subdirectory of the receiver, naming it dirName."
 
 	<category: 'members'>
 	self notYetImplemented
     ]
 
-    member: anArchiveMemberHandler mode: bits [
-	"Set the permission bits for the file in anArchiveMemberHandler."
+    member: anArchiveMember mode: bits [
+	"Set the permission bits for the file in anArchiveMember."
 
 	<category: 'members'>
 	self notYetImplemented
     ]
 
-    extractMember: anArchiveMemberHandler into: temp [
-	"Extract the contents of anArchiveMemberHandler into a file
+    extractMember: anArchiveMember into: temp [
+	"Extract the contents of anArchiveMember into a file
 	 that resides on disk, and answer the name of the file."
 
 	<category: 'members'>
 	Smalltalk 
 	    system: 'unzip -p %1 %2 > %3' % 
-			{self realFileName.
-			anArchiveMemberHandler name.
+			{self file name.
+			anArchiveMember name.
 			temp name}
     ]
 
-    removeMember: anArchiveMemberHandler [
-	"Remove the member represented by anArchiveMemberHandler."
+    removeMember: anArchiveMember [
+	"Remove the member represented by anArchiveMember."
 
 	<category: 'members'>
 	Smalltalk 
 	    system: 'zip -d %1 %2' % 
-			{self realFileName.
-			anArchiveMemberHandler name}
+			{self file name.
+			anArchiveMember name}
     ]
 
-    updateMember: anArchiveMemberHandler [
-	"Update the member represented by anArchiveMemberHandler by
+    updateMember: anArchiveMember [
+	"Update the member represented by anArchiveMember by
 	 copying the file into which it was extracted back to the
 	 archive."
 
@@ -160,7 +143,7 @@ files from a ZIP archive.'>
 				[data at: 5
 				    put: ((StoredZipMember new)
 					    name: (data at: 1);
-					    parent: self;
+					    archive: self;
 					    offset: ofs;
 					    yourself)].
 			gen yield: data]]
@@ -171,13 +154,13 @@ files from a ZIP archive.'>
 
 
 
-Namespace current: Kernel [
+Namespace current: VFS [
 
-VFS.VFS.ArchiveMemberHandler subclass: StoredZipMember [
+TmpFileArchiveMember subclass: StoredZipMember [
     | offset |
     
     <category: 'Streams-Files'>
-    <comment: 'ArchiveMemberHandler is the handler
+    <comment: 'ArchiveMember is the handler
 class for stored ZIP archive members, which are optimized.'>
 
     offset [
@@ -192,24 +175,25 @@ class for stored ZIP archive members, which are optimized.'>
 
     open: class mode: mode ifFail: aBlock [
 	<category: 'opening'>
-	| file |
-	mode = FileStream read ifFalse: [^self notYetImplemented].
-	file := self parent 
+	| fileStream |
+	(mode = FileStream read or: [ self extracted ])
+	    ifFalse: [^super open: class mode: mode ifFail: aBlock].
+
+	fileStream := self archive 
 		    open: class
 		    mode: mode
 		    ifFail: [^aBlock value].
-	file skip: self offset + 26.
-	file skip: file nextUshort + file nextUshort.
-	file setName: self fullName.
+	fileStream skip: self offset + 26.
+	fileStream skip: fileStream nextUshort + fileStream nextUshort.
+	fileStream setFile: self.
 	^LimitedStream 
-	    on: file
-	    from: file position
-	    to: file position + self size - 1
+	    on: fileStream
+	    from: fileStream position
+	    to: fileStream position + self size - 1
     ]
 ]
 
 ]
-
 
 
 Namespace current: Kernel [
@@ -334,13 +318,36 @@ Stream subclass: LimitedStream [
 	<category: 'accessing'>
 	offset := anInteger
     ]
-]
+
+    fileIn [
+        "File in the contents of the receiver.
+         During a file in operation, global variables (starting with an
+         uppercase letter) that are not declared don't yield an `unknown
+         variable' error. Instead, they are defined as nil in the `Undeclared'
+         dictionary (a global variable residing in Smalltalk).
+         As soon as you add the variable to a namespace (for example by creating
+         a class) the Association will be removed from Undeclared and reused
+         in the namespace, so that the old references will automagically point
+         to the new value."
+
+        <category: 'built ins'>
+        | pos |
+        stream isPipe ifTrue: [ ^super fileIn ].
+        ^self
+            fileInLine: 1
+            file: stream file full
+            fileName: stream name
+            at: self position
+    ]
 
 ]
 
-
-
-Eval [
-    Kernel.ZipFileHandler register
 ]
 
+
+FilePath extend [
+    zip [
+        <category: 'virtual filesystems'>
+        ^VFS.ZipFile on: self
+    ]
+]

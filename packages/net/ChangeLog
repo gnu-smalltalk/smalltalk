@@ -1,3 +1,9 @@
+2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* FTP.st: Use new methods on File.
+	* URIResolver.st: Likewise.  Remove distinction between File and
+	Directory objects.
+
 2007-10-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* NetServer.st: Move #stop to NetServer, since using it

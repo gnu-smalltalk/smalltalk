@@ -80,8 +80,8 @@ PackageLoader fileInPackage: #SUnit!
 
 | ps loaded |
 FileStream verbose: true.
-Directory working indexOfSubCollection: 'tests'
-	ifAbsent: [ Directory working: Directory kernel, '/../tests' ].
+Directory working name indexOfSubCollection: 'tests'
+	ifAbsent: [ Directory working: Directory kernel / '../tests' ].
 
 ps := Smalltalk at: #ProtocolSpec ifAbsent: [ nil ].
 loaded := (ps respondsTo: #includesProtocolNamed:)

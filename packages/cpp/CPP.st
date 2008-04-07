@@ -673,7 +673,7 @@ findIncludeFile: fileName locally: locally
     paths _ self includePaths.
     locally ifTrue: [ paths addFirst: '.' ].
     paths do: 
-	[ :path | file _ File name: path , '/', fileName.
+	[ :path | file _ path / fileName.
 		  file exists ifTrue: [ ^file readStream ] ].
     ^nil
 !

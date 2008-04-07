@@ -42,6 +42,18 @@ o   It is possible to create CFunctionDescriptors that are not attached
     more info in the new "tag" instance variable of CFunctionDescriptor,
     which is unused by the VM.
 
+o   The VFS subsystem was rewritten.  Virtual filesystems are now
+    accessible via special methods on File (such as File>>#zip,
+    for example "(File name: 'abc.zip') zip") and not anymore with
+    special filenames that could conflict with real files.
+
+    This caused a few incompatible changes.  The most important are:
+    1) methods like `File image' and `Directory kernel' return a File
+    object, not a String; 2) Directory objects are not created anymore
+    and instead File objects also support the Directory protocol;
+    3) Directory>>#do: passes File objects rather than file names to the
+    block; 4) Directory>>#contents is now called Directory>>#entryNames.
+
 o   The semantics of #on:do: were changed: executing off the end of an
     exception handler will always return from the associated #on:do:.
     Older versions of GNU Smalltalk either returned or resumed depending

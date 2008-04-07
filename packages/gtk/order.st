@@ -124,7 +124,7 @@ Object subclass: IncludesScanner [
 	    ifFalse: 
 		[paths do: 
 			[:each | 
-			f := File name: each , '/' , aFile.
+			f := each / aFile.
 			f isReadable ifTrue: [^f]]].
 	paths do: [:each | ('looked in ' , each) displayNl].
 	self error: 'Can''t find: ' , aFile printString
@@ -154,7 +154,7 @@ Object subclass: IncludesScanner [
 				 one with the #include directory.  If it succeeds, use
 				 an absolute path."
 
-				f := File name: (Directory append: fname to: dir).
+				f := dir / fname.
 				f isReadable ifTrue: [prefix := dir]].
 			(self hasCorrectPrefix: fname) ifTrue: [r add: prefix , fname]]].
 	^r

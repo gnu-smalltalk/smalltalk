@@ -1,3 +1,7 @@
+2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
+
+        * order.st: Use #/.
+
 2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* MoreFuncs.st: Switch to the new syntax for "returning:".

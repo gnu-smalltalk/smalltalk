@@ -381,8 +381,7 @@ Gui class extend [
 
     validImageFile [
 	<category: 'testing single controls'>
-	^FileStream open: Directory systemKernel , '/../blox/bear.gif'
-	    mode: FileStream read
+	^(Directory kernel / '../blox/bear.gif') readStream
     ]
 
     labelTest [

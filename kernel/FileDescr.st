@@ -33,7 +33,7 @@
 
 
 ByteStream subclass: FileDescriptor [
-    | fd name isPipe atEnd peek |
+    | fd file isPipe atEnd peek |
     
     <category: 'Streams-Files'>
     <comment: 'My instances are what conventional programmers think of as files.
@@ -131,8 +131,8 @@ do arbitrary processing on the files.'>
 	((fileName indexOfSubCollection: '://') > 0 
 	    and: [fileMode = FileStream read]) 
 		ifTrue: [^NetClients.URIResolver openStreamOn: fileName ifFail: aBlock ].
-	^(VFS.VFSHandler for: fileName) 
-	    open: self
+	^self
+	    fopen: fileName
 	    mode: fileMode
 	    ifFail: aBlock
     ]
@@ -148,7 +148,7 @@ do arbitrary processing on the files.'>
 	<category: 'instance creation'>
 	^(self basicNew)
 	    fileOp: 16
-		with: baseName
+		with: baseName asString
 		ifFail: [SystemExceptions.FileError signal: 'could not open temporary file'];
 	    initialize;
 	    yourself
@@ -167,9 +167,10 @@ do arbitrary processing on the files.'>
 	<category: 'instance creation'>
 	^(self basicNew)
 	    fileOp: 0
-		with: fileName
+		with: fileName asString
 		with: fileMode
 		ifFail: [SystemExceptions.FileError signal: 'could not open ' , fileName];
+	    setFile: (File name: fileName);
 	    initialize;
 	    yourself
     ]
@@ -186,9 +187,10 @@ do arbitrary processing on the files.'>
 	<category: 'instance creation'>
 	^(self basicNew)
 	    fileOp: 0
-		with: fileName
+		with: fileName asString
 		with: fileMode
 		ifFail: [^aBlock value];
+	    setFile: (File name: fileName);
 	    initialize;
 	    yourself
     ]
@@ -611,24 +613,30 @@ do arbitrary processing on the files.'>
 	^fd
     ]
 
+    file [
+	"Return the name of the file"
+
+	<category: 'accessing'>
+	^file
+    ]
+
     name [
 	"Return the name of the file"
 
 	<category: 'accessing'>
-	^name
+	file isNil ifTrue: [^'descriptor #', fd printString ].
+	^file displayString
     ]
 
     printOn: aStream [
 	"Print a representation of the receiver on aStream"
 
 	<category: 'printing'>
-	| text |
-	text := name isNil 
-		    ifTrue: ['File descriptor #' , file printString]
-		    ifFalse: [(self isPipe ifTrue: ['Pipe on '] ifFalse: ['File ']) , name].
 	aStream
 	    nextPut: $<;
-	    nextPutAll: text;
+	    nextPutAll: (self isPipe ifTrue: ['Pipe'] ifFalse: [self class name]);
+	    nextPutAll: ' on ';
+	    nextPutAll: self name;
 	    nextPut: $>
     ]
 
@@ -711,9 +719,9 @@ do arbitrary processing on the files.'>
 		[SystemExceptions.FileError signal: 'cannot do that to a pipe or socket.']
     ]
 
-    setName: aString [
+    setFile: aString [
 	<category: 'private'>
-	name := aString
+	file := aString
     ]
 
     setFD: anInteger [
@@ -776,7 +784,7 @@ do arbitrary processing on the files.'>
 	"Answer myself, or an alternate stream coerced for reading."
 	<category: 'initialize-release'>
 	^(access bitAnd: 1) = 0 
-	    ifTrue: [self class open: self name mode: FileStream read]
+	    ifTrue: [self file readStream]
 	    ifFalse: [self]
     ]
 
@@ -931,6 +939,27 @@ do arbitrary processing on the files.'>
 		result = 0 ifTrue: [^cur - position].
 		cur := cur + result].
 	^cur - position
+    ]
+
+    fileIn [
+        "File in the contents of the receiver.
+         During a file in operation, global variables (starting with an
+         uppercase letter) that are not declared don't yield an `unknown
+         variable' error. Instead, they are defined as nil in the `Undeclared'
+         dictionary (a global variable residing in Smalltalk).
+         As soon as you add the variable to a namespace (for example by creating
+         a class) the Association will be removed from Undeclared and reused
+         in the namespace, so that the old references will automagically point
+         to the new value."
+
+        <category: 'built ins'>
+        | pos |
+	self isPipe ifTrue: [ ^super fileIn ].
+        ^self
+            fileInLine: 1
+            file: self file full
+            fileName: self name
+            at: self position
     ]
 
     fileOp: ioFuncIndex [

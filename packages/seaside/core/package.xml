@@ -37,4 +37,5 @@
   <file>Seaside-Adapters-Core.st</file>
   <file>Seaside-Adapters-GST.st</file>
   <file>Seaside-Adapters-Tests.st</file>
+  <file>ChangeLog</file>
 </package>

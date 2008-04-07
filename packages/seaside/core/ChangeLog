@@ -1,0 +1,3 @@
+2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* core/Seaside-GST.st: Use new File methods.

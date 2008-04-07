@@ -904,7 +904,7 @@ findClassFile: aClass
     self classDirectories isNil
 	ifTrue: [ self error: 'CLASSPATH not set' ].
     self classDirectories do: [:dir || file |
-        file := File name: (Directory append: path to: dir).
+        file := dir / path.
         file exists ifTrue: [ ^file ]].
 
     ^nil

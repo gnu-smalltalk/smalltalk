@@ -547,21 +547,21 @@ Object subclass: WAGNUSmalltalkPlatform [
 
     ensureExistenceOfFolder: aString [
 	"creates a folder named aString in the image directory"
-	(Directory append: aString to: Directory image) create
+	(Directory image / aString) create
     ]
 
     filesIn: aPathString [
 	"Return a collection of absolute paths for all the files (no directories) in the directory given by aPathString
 	must not include file names that start with ."
 	| directory |
-	directory := Directory name: aPathString.
-	^(directory contents
+	directory := File name: aPathString.
+	^(directory files
 		reject: [ :each | each first = $. ])
-		collect: [ :each | Directory append: each to: directory name ]
+		collect: [ :each | each asString ]
     ]
 
     localNameOf: aFilename [
-	^(File name: aFilename) name
+	^File fullNameFor: aFilename
     ]
 
     mimeDocumentClass [
@@ -612,7 +612,7 @@ Object subclass: WAGNUSmalltalkPlatform [
 
     defaultDirectoryName [
 	<category: '*Seaside-Squeak-Core'>
-	^Directory working
+	^Directory working name
     ]
 
     platformString [
@@ -645,10 +645,8 @@ Object subclass: WAGNUSmalltalkPlatform [
     write: aStringOrByteArray toFile: aFileNameString inFolder: aFolderString [
 	"writes aStringOrByteArray to a file named aFilenameString in the folder aFolderString"
 	| stream fileName |
-	fileName := Directory append: aFileNameString to: aFolderString.
-	stream := FileStream open: fileName mode: 'w'.
-	[ stream nextPutAll: aStringOrByteArray ]
-		ensure: [ stream close ]
+	aFolderString / aFileNameString withWriteStreamDo: [ :stream |
+	    stream nextPutAll: aStringOrByteArray ]
     ]
 ]
 

@@ -45,11 +45,11 @@ Smalltalk-80 kernel; I am specific to the GNU Smalltalk implementation.'>
 	 support $(DESTDIR) and relocatable installation."
 
 	<category: 'installing'>
-	| map startPath |
+	| map startPath startPathString |
 	map := IdentityDictionary new.
-	startPath := Directory kernel.
+	startPath := Directory kernel asString.
 	self allInstancesDo: [:each | each relocateFrom: startPath map: map].
-	startPath = Directory systemKernel ifTrue: [KernelFilePath := nil].
+	Directory kernel = Directory systemKernel ifTrue: [KernelFilePath := nil].
     ]
 
     FileSegment class >> on: aFile startingAt: startPos for: sizeInteger [
@@ -116,16 +116,24 @@ Smalltalk-80 kernel; I am specific to the GNU Smalltalk implementation.'>
 	 identified by the receiver is stored"
 
 	<category: 'basic'>
-	| result fileStream |
-	fileStream := FileStream open: self fileName mode: FileStream read.
-	^[aBlock value: fileStream] ensure: [fileStream close]
+	^self file withReadStreamDo: aBlock
+    ]
+
+    file [
+	"Answer the File object for the file containing the segment"
+
+	<category: 'basic'>
+	| f |
+	f := file asFile.
+	f isRelative ifTrue: [ f := Directory kernel / file ].
+	^f
     ]
 
     fileName [
 	"Answer the name of the file containing the segment"
 
 	<category: 'basic'>
-	^Directory append: file to: Directory kernel
+	^file asString
     ]
 
     filePos [

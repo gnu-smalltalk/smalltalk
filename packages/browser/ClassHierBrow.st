@@ -598,9 +598,8 @@ GuiData subclass: ClassHierarchyBrowser [
 		["If the image directory is a subdirectory of the home directory, the default is
 		 the image directory. Else the default is the home directory"
 
-		fileoutDir := Directory image , '/'.
-		home := Directory home.
-		home = '.' ifTrue: [home := Directory working].
+		fileoutDir := Directory image name , '/'.
+		home := Directory home name.
 		home isEmpty 
 		    ifFalse: 
 			[fileoutDir size < home size ifTrue: [^fileoutDir := home , '/'].

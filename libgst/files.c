@@ -270,6 +270,7 @@ static const char standard_files[] = {
   "AnsiExcept.st\0"
 
   /* Virtual filesystem layer */
+  "FilePath.st\0"
   "File.st\0"
   "Directory.st\0"
   "VFS.st\0"

@@ -569,6 +569,27 @@ provide for writing collections sequentially.'>
 	    at: pos
     ]
 
+    fileInLine: lineNum file: aFile at: charPosInt [
+	"Private - Much like a preprocessor #line directive; it is used internally
+	 by #fileIn, and explicitly by the Emacs Smalltalk mode."
+
+	<category: 'built ins'>
+	^self
+	    fileInLine: 1
+	    file: aFile full
+	    fileName: aFile displayString
+	    at: charPosInt
+    ]
+
+    fileInLine: lineNum file: aFile fileName: aString at: charPosInt [
+	"Private - Much like a preprocessor #line directive; it is used internally
+	 by #fileIn, and explicitly by the Emacs Smalltalk mode."
+
+	<category: 'private'>
+	<primitive: VMpr_Stream_fileInLine>
+	self primitiveFailed
+    ]
+
     fileInLine: lineNum fileName: aString at: charPosInt [
 	"Private - Much like a preprocessor #line directive; it is used internally
 	 by #fileIn, and explicitly by the Emacs Smalltalk mode."

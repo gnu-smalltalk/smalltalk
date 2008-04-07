@@ -599,7 +599,7 @@ E. Acknowledgements (Non-Normative)
 
     RuleDatabase class >> examplesDirectory [
 	<category: 'examples'>
-	^Directory append: 'xml' to: Directory image
+	^Directory image / 'xml'
     ]
 
     RuleDatabase class >> store: document on: filename [
@@ -951,7 +951,7 @@ E. Acknowledgements (Non-Normative)
     readString: aString [
 	<category: 'loading'>
 	| doc |
-	self initURI: 'file' name: (Directory append: 'xxx' to: Directory working).
+	self initURI: 'file' name: (Directory working / 'xxx') name.
 	doc := XMLParser processDocumentString: aString
 		    beforeScanDo: 
 			[:parser | 

@@ -1,3 +1,7 @@
+2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* GetText.st: Use new File classes.
+
 2007-10-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Locale.st: Store charsets as strings, not symbols.

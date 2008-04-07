@@ -2313,7 +2313,7 @@ Instance Variables:
 	s := self fullSourceStack reverse detect: [:i | i uri notNil] ifNone: [nil].
 	^s == nil 
 	    ifTrue: 
-		[NetClients.URL fromString: (Directory append: 'foo' to: Directory working)]
+		[NetClients.URL fromString: (Directory working / 'foo')]
 	    ifFalse: [s uri]
     ]
 

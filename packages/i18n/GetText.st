@@ -134,7 +134,7 @@ LocaleConventions subclass: LcMessages [
 	| catalog |
 	self isPosixLocale ifTrue: [^self dummyDomain].
 	^LcMessagesDomain id: self id
-	    on: (Directory append: aString , '.mo' to: dirName)
+	    on: dirName / aString , '.mo'
     ]
 
     dummyDomain [
@@ -175,11 +175,12 @@ longer than the traditional
 	 from a path to the MO file"
 
 	<category: 'opening MO files'>
-	| stream found |
+	| stream found file |
 	found := false.
-	(File exists: aFileName) 
+	file := aFileName asFile.
+	file exists
 	    ifTrue: 
-		[stream := FileStream open: aFileName mode: FileStream read.
+		[stream := file readStream.
 		found := 
 			[stream littleEndianMagicNumber: #[222 18 4 149]
 			    bigEndianMagicNumber: #[149 4 18 222].

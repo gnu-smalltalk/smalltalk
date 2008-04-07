@@ -168,7 +168,7 @@ available in the PATH of the remote machine.
 	arg isNil
 	    ifTrue: [ commands add: 'ObjectMemory snapshot' ]
 	    ifFalse: [ commands add: 'ObjectMemory snapshot: ',
-				     (Directory append: arg to: Directory working) storeString ] ].
+			     (Directory working / arg) name storeString ] ].
 
     opt isNil ifTrue: [
 	host isNil ifFalse: [ self error: 'multiple hosts are invalid' ].

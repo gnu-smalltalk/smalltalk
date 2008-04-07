@@ -1,5 +1,15 @@
 2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/dict.c: Rename name variable of FileDescriptor to file.
+	Support non-existent relocated paths by setting the variable to nil.
+	* libgst/files.c: Load FilePath.st.
+	* libgst/input.c: Support separate filename (for printing errors) and
+	File object (for FileSegments).
+	* libgst/input.h: Adjust prototypes.
+	* libgst/prims.def: Add fourth optional argument to filein primitive.
+ 
+2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/dict.c: Likewise.
 
 2008-04-01  Paolo Bonzini  <bonzini@gnu.org>

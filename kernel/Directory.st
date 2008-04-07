@@ -32,7 +32,7 @@
 
 
 
-File subclass: Directory [
+Object subclass: Directory [
     
     <category: 'Streams-Files'>
     <comment: 'I am the counterpart of File in a tree-structured file system: I can
@@ -57,35 +57,38 @@ virtual one).'>
 	"Answer the path to the user's home directory"
 
 	<category: 'reading system defaults'>
-	^Smalltalk getenv: 'HOME'
+	^File name: (Smalltalk getenv: 'HOME')
     ]
 
     Directory class >> image [
 	"Answer the path to GNU Smalltalk's image file"
 
 	<category: 'reading system defaults'>
-	^ImageFilePath
+	^File name: ImageFilePath
     ]
 
     Directory class >> module [
 	"Answer the path to GNU Smalltalk's dynamically loaded modules"
 
 	<category: 'reading system defaults'>
-	^ModulePath
+	ModulePath isNil ifTrue:[ ^nil ].
+	^File name: ModulePath
     ]
 
     Directory class >> libexec [
 	"Answer the path to GNU Smalltalk's auxiliary executables"
 
 	<category: 'reading system defaults'>
-	^LibexecPath
+	LibexecPath isNil ifTrue:[ ^nil ].
+	^File name: LibexecPath
     ]
 
     Directory class >> systemKernel [
 	"Answer the path to the installed Smalltalk kernel source files."
 
 	<category: 'reading system defaults'>
-	^SystemKernelPath
+	SystemKernelPath isNil ifTrue:[ ^nil ].
+	^File name: SystemKernelPath
     ]
 
     Directory class >> localKernel [
@@ -101,7 +104,7 @@ virtual one).'>
 	 Smalltalk are stored."
 
 	<category: 'reading system defaults'>
-	^UserFileBasePath
+	^File name: UserFileBasePath
     ]
 
     Directory class >> temporary [
@@ -110,13 +113,13 @@ virtual one).'>
 
 	<category: 'reading system defaults'>
 	| d |
-	(d := Smalltalk getenv: 'TMPDIR') isNil ifFalse: [^d].
-	(d := Smalltalk getenv: 'TEMP') isNil ifFalse: [^d].
+	(d := Smalltalk getenv: 'TMPDIR') isNil ifFalse: [^File name: d].
+	(d := Smalltalk getenv: 'TEMP') isNil ifFalse: [^File name: d].
 	(d := self home) isNil 
 	    ifFalse: 
-		[d := d , '/tmp'.
-		(Directory exists: d) ifTrue: [^d]].
-	^'/tmp'
+		[d := d / 'tmp'.
+		d isDirectory ifTrue: [^File name: d]].
+	^File name: '/tmp'
     ]
 
     Directory class >> kernel [
@@ -125,8 +128,8 @@ virtual one).'>
 
 	<category: 'reading system defaults'>
 	^KernelFilePath isNil
-	    ifTrue: [ SystemKernelPath ]
-	    ifFalse: [ KernelFilePath ]
+	    ifTrue: [ File name: SystemKernelPath ]
+	    ifFalse: [ File name: KernelFilePath ]
     ]
 
     Directory class >> append: fileName to: directory [
@@ -169,6 +172,12 @@ virtual one).'>
     Directory class >> working [
 	"Answer the current working directory, not following symlinks."
 	<category: 'file operations'>
+	^File name: Directory workingName
+    ]
+
+    Directory class >> workingName [
+	"Answer the current working directory, not following symlinks."
+	<category: 'private'>
 	<cCall: 'getCurDirName' returning: #stringOut args: #()>
 	
     ]
@@ -177,8 +186,8 @@ virtual one).'>
 	"Change the current working directory to dirName."
 
 	<category: 'file operations'>
-	self primWorking: dirName.
-	self checkError
+	self primWorking: dirName asString.
+	File checkError
     ]
 
     Directory class >> createTemporary: prefix [
@@ -186,143 +195,23 @@ virtual one).'>
 
 	<category: 'file operations'>
 	| name |
-	name := prefix , 'XXXXXX'.
+	name := prefix asString , 'XXXXXX'.
 	self primCreateTemporary: name.
-	self checkError.
-	^Directory name: name
+	File checkError.
+	^File name: name
     ]
 
     Directory class >> allFilesMatching: aPattern do: aBlock [
 	"Invoke #allFilesMatching:do: on the current working directory."
 	<category: 'file operations'>
-	(self name: self working) allFilesMatching: aPattern do: aBlock
+	(File name: self working) allFilesMatching: aPattern do: aBlock
     ]
 
     Directory class >> create: dirName [
 	"Create a directory named dirName and answer it."
 
 	<category: 'file operations'>
-	| parent handler |
-	parent := File pathFor: dirName ifNone: [Directory working].
-	handler := VFS.VFSHandler for: parent.
-	handler createDir: (File stripPathFrom: dirName).
-	^Directory name: dirName
+	^(File name: dirName) createDirectory
     ]
 
-    pathTo: destName [
-	"Compute the relative path from the receiver to destName."
-
-	<category: 'accessing'>
-	| destFullName |
-	destFullName := File fullNameFor: destName.
-	vfsHandler realFileName = destFullName ifTrue: [^'.'].
-	^File computePathFrom: vfsHandler realFileName , '/somefile'
-	    to: destFullName
-    ]
-
-    fileAt: aName [
-	"Answer a File object for a file named `aName' residing in the
-	 directory represented by the receiver."
-
-	<category: 'accessing'>
-	^File on: (vfsHandler at: aName)
-    ]
-
-    at: aName [
-	"Answer a File or Directory object as appropriate for a file named
-	 'aName' in the directory represented by the receiver."
-
-	<category: 'accessing'>
-	| f |
-	f := vfsHandler at: aName.
-	^((f exists and: [f isDirectory]) ifTrue: [Directory] ifFalse: [File]) 
-	    on: f
-    ]
-
-    directoryAt: aName [
-	"Answer a Directory object for a file named `aName' residing in the
-	 directory represented by the receiver."
-
-	<category: 'accessing'>
-	^Directory on: (vfsHandler at: aName)
-    ]
-
-    includes: aName [
-	"Answer whether a file named `aName' exists in the directory represented
-	 by the receiver."
-
-	<category: 'accessing'>
-	^(vfsHandler at: aName) exists
-    ]
-
-    fullNameAt: aName [
-	"Answer a String containing the full path to a file named `aName' which
-	 resides in the directory represented by the receiver."
-
-	<category: 'accessing'>
-	^Directory append: aName to: self fullName
-    ]
-
-    nameAt: aName [
-	"Answer a String containing the path to a file named `aName' which
-	 resides in the directory represented by the receiver."
-
-	<category: 'accessing'>
-	^Directory append: aName to: self name
-    ]
-
-    allFilesMatching: aPattern do: aBlock [
-	"Evaluate aBlock on the File objects that match aPattern (according to
-	 String>>#match:) in the directory named by the receiver. Recursively
-	 descend into directories."
-
-	<category: 'enumerating'>
-	self do: 
-		[:name | 
-		| f |
-		f := self at: name.
-		(aPattern match: name) ifTrue: [aBlock value: f].
-		f isDirectory 
-		    ifTrue: 
-			[((#('.' '..') includes: name) or: [f isSymbolicLink]) 
-			    ifFalse: [f allFilesMatching: aPattern do: aBlock]]]
-    ]
-
-    contents [
-	"Answer an Array with the names of the files in the directory
-	 represented by the receiver."
-
-	<category: 'enumerating'>
-	| ws |
-	ws := WriteStream on: (Array new: 50).
-	self do: [:each | ws nextPut: each].
-	^ws contents
-    ]
-
-    do: aBlock [
-	"Evaluate aBlock once for each file in the directory represented by the
-	 receiver, passing its name. aBlock should not return."
-
-	<category: 'enumerating'>
-	vfsHandler do: aBlock
-    ]
-
-    filesMatching: aPattern do: block [
-	"Evaluate block on the File objects that match aPattern (according to
-	 String>>#match:) in the directory named by the receiver."
-
-	<category: 'enumerating'>
-	self 
-	    do: [:name | (aPattern match: name) ifTrue: [block value: (self at: name)]]
-    ]
-
-    namesMatching: aPattern do: block [
-	"Evaluate block on the file names that match aPattern (according to
-	 String>>#match:) in the directory named by the receiver."
-
-	<category: 'enumerating'>
-	self 
-	    do: [:name | (aPattern match: name) ifTrue: [block value: (self nameAt: name)]]
-    ]
 ]
-

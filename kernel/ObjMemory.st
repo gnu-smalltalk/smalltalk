@@ -46,13 +46,6 @@ manager, while instance-side methods are used together with the #current
 class-side method to take a look at statistics on the memory manager''s
 state.'>
 
-    ObjectMemory class >> snapshot [
-	"Save a snapshot on the image file that was loaded on startup."
-
-	<category: 'saving the image'>
-	^self snapshot: File image
-    ]
-
     ObjectMemory class >> changed: aSymbol [
 	"Before quitting, wait until all processes are done."
 	<category: 'initialization'>
@@ -293,14 +286,28 @@ state.'>
 	^self primitiveFailed
     ]
 
-    ObjectMemory class >> snapshot: aString [
+    ObjectMemory class >> primSnapshot: aString [
 	"Save an image on the aString file"
 
-	<category: 'builtins'>
+	<category: 'private - builtins'>
 	<primitive: VMpr_ObjectMemory_snapshot>
 	^aString isString 
 	    ifFalse: [SystemExceptions.WrongClass signalOn: aString mustBe: String]
 	    ifTrue: [File checkError]
+    ]
+
+    ObjectMemory class >> snapshot [
+	"Save a snapshot on the image file that was loaded on startup."
+
+	<category: 'saving the image'>
+	^self primSnapshot: File image asString
+    ]
+
+    ObjectMemory class >> snapshot: aString [
+	"Save an image on the aString file"
+
+	<category: 'saving the image'>
+	^self primSnapshot: aString asString
     ]
 
     ObjectMemory class >> gcMessage [

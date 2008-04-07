@@ -229,7 +229,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	    nextPutAll: 'Up to higher level directory</a>';
 	    nl;
 	    nl.
-	aDirectory contents asSortedCollection do: 
+	aDirectory entryNames asSortedCollection do: 
 		[:name | 
 		| file isDirectory fileSize |
 		file := aDirectory at: name.
@@ -279,13 +279,10 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
     getFileContents [
 	<category: 'file accessing'>
 	| file result |
-	file := url path isNil 
-		    ifTrue: [File name: '/']
-		    ifFalse: [File name: url path].
-	file exists not ifTrue: [^self errorContents: 'No such file'].
+	file := File name: (url path ifNil: '/').
+	file exists ifFalse: [^self errorContents: 'No such file'].
 	file isReadable ifFalse: [^self errorContents: 'Cannot read'].
-	file isDirectory 
-	    ifTrue: [^self getDirectoryContentsOf: (Directory name: file name)].
+	file isDirectory ifTrue: [^self getDirectoryContentsOf: file].
 	^(WebEntity new)
 	    url: url;
 	    canCache: false;
@@ -328,7 +325,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	    ifTrue: [path := '/']
 	    ifFalse: [path := url path].
 	stream := self tmpFile.
-	tmpFile := File name: stream name.
+	tmpFile := stream file.
 	^
 	[
 	[client 
@@ -364,7 +361,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	baseURL := url copy.
 	baseURL path isNil 
 	    ifTrue: [baseURL path: '/junk']
-	    ifFalse: [baseURL path: (Directory append: 'junk' to: baseURL path)].
+	    ifFalse: [baseURL path: (File append: 'junk' to: baseURL path)].
 	maxSize := 32.
 	stream := ReadWriteStream on: (String new: 512).
 	title := 'Directory listing of ' , url printString.
@@ -507,7 +504,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	client reporter 
 	    statusString: 'Connect: Host contacted. Waiting for reply...'.
 	stream := self tmpFile.
-	tmpFile := File name: stream name.
+	tmpFile := stream file.
 	
 	[
 	[
@@ -579,7 +576,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	client reporter 
 	    statusString: 'Connect: Host contacted. Waiting for reply...'.
 	stream := self tmpFile.
-	tmpFile := File name: stream name.
+	tmpFile := stream file.
 	protocolError := false.
 	
 	[
@@ -653,7 +650,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	client reporter 
 	    statusString: 'Connect: Host contacted. Waiting for reply...'.
 	stream := self tmpFile.
-	tmpFile := File name: stream name.
+	tmpFile := stream file.
 	protocolError := false.
 	
 	[
@@ -763,7 +760,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	<category: 'news accessing'>
 	| tmpFile stream contents |
 	stream := self tmpFile.
-	tmpFile := File name: stream name.
+	tmpFile := stream file.
 	
 	[
 	[client articleAt: '<' , articleId , '>' into: stream.
@@ -787,7 +784,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	<category: 'news accessing'>
 	| tmpFile stream contents |
 	stream := self tmpFile.
-	tmpFile := File name: stream name.
+	tmpFile := stream file.
 	
 	[
 	[client 
