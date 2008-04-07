@@ -33,7 +33,7 @@
 
 
 ByteStream subclass: FileDescriptor [
-    | file name isPipe atEnd peek |
+    | fd name isPipe atEnd peek |
     
     <category: 'Streams-Files'>
     <comment: 'My instances are what conventional programmers think of as files.
@@ -291,7 +291,7 @@ do arbitrary processing on the files.'>
 	"Invalidate a file descriptor"
 
 	<category: 'basic'>
-	file := nil
+	fd := nil
     ]
 
     shutdown [
@@ -593,7 +593,7 @@ do arbitrary processing on the files.'>
 	"Answer whether the file is still open"
 
 	<category: 'accessing'>
-	^file isInteger and: [file positive]
+	^fd isInteger and: [fd positive]
     ]
 
     isPipe [
@@ -608,7 +608,7 @@ do arbitrary processing on the files.'>
 	"Return the OS file descriptor of the file"
 
 	<category: 'accessing'>
-	^file
+	^fd
     ]
 
     name [
@@ -716,11 +716,10 @@ do arbitrary processing on the files.'>
 	name := aString
     ]
 
-    setFD: fd [
+    setFD: anInteger [
 	<category: 'private'>
 	access := 3.
-	file := fd.
-	name := 'descriptor #' , fd printString.
+	fd := anInteger.
 	isPipe := nil
     ]
 

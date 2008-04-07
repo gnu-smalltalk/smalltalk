@@ -617,7 +617,7 @@ static const class_definition class_info[] = {
 
   {&_gst_file_descriptor_class, &_gst_byte_stream_class,
    ISP_FIXED, true, 5,
-   "FileDescriptor", "file name isPipe atEnd peek", "AllOpenFiles", NULL },
+   "FileDescriptor", "fd name isPipe atEnd peek", "AllOpenFiles", NULL },
 
   {&_gst_file_stream_class, &_gst_file_descriptor_class,
    ISP_FIXED, true, 2,
