@@ -76,9 +76,15 @@ virtual files that refer to a real file on disk.'>
     ]
 
     asString [
-	"Answer the container file containing me."
+	"Answer the string representation of the receiver's path."
 	<category: 'accessing'>
 	^self file asString
+    ]
+
+    name [
+	"Answer the full path to the receiver."
+	<category: 'accessing'>
+	^self file name
     ]
 
     isAbsolute [
@@ -95,6 +101,20 @@ virtual files that refer to a real file on disk.'>
 	^self class on: self file full
     ]
 
+    mode [
+	"Answer the permission bits for the file identified by the receiver"
+
+	<category: 'delegation'>
+	^self file mode
+    ]
+
+    mode: anInteger [
+	"Answer the permission bits for the file identified by the receiver"
+
+	<category: 'delegation'>
+	self file mode: anInteger
+    ]
+
     size [
 	"Answer the size of the file identified by the receiver"
 
@@ -107,6 +127,77 @@ virtual files that refer to a real file on disk.'>
 
 	<category: 'delegation'>
 	^self file lastAccessTime
+    ]
+
+    exists [
+        "Answer whether a file with the name contained in the receiver
+	 does exist."
+
+        <category: 'testing'>
+        ^self file exists
+    ]
+
+    isAbsolute [
+        "Answer whether the receiver identifies an absolute path."
+
+        <category: 'testing'>
+        ^self file isAbsolute
+    ]
+
+    isReadable [
+        "Answer whether a file with the name contained in the receiver does exist
+         and is readable"
+
+        <category: 'testing'>
+        ^self file isReadable
+    ]
+
+    isWriteable [
+        "Answer whether a file with the name contained in the receiver does exist
+         and is writeable"
+
+        <category: 'testing'>
+        ^self file isWriteable
+    ]
+
+    isExecutable [
+        "Answer whether a file with the name contained in the receiver does exist
+         and is executable"
+
+        <category: 'testing'>
+        ^self file isExecutable
+    ]
+
+    isAccessible [
+        "Answer whether a directory with the name contained in the receiver does
+         exist and can be accessed"
+
+        <category: 'testing'>
+        ^self file isAccessible
+    ]
+
+    isDirectory [
+        "Answer whether a file with the name contained in the receiver
+	 does exist identifies a directory."
+
+        <category: 'testing'>
+        ^self file isDirectory
+    ]
+
+    isSymbolicLink [
+        "Answer whether a file with the name contained in the receiver
+	 does exist and identifies a symbolic link."
+
+        <category: 'testing'>
+        ^self file isSymbolicLink
+    ]
+
+    lastAccessTime: accessDateTime lastModifyTime: modifyDateTime [
+        "Update the timestamps of the file corresponding to the receiver, to be
+         accessDateTime and modifyDateTime."
+
+        <category: 'accessing'>
+        self file lastAccessTime: accessDateTime lastModifyTime: modifyDateTime
     ]
 
     lastChangeTime [
@@ -179,6 +270,59 @@ virtual files that refer to a real file on disk.'>
 	self file remove
     ]
 
+    symlinkAs: destName [
+        "Create destName as a symbolic link of the receiver.  The appropriate
+         relative path is computed automatically."
+
+        <category: 'file operations'>
+        ^self file symlinkAs: destName
+    ]
+
+    pathFrom: dirName [
+        "Compute the relative path from the directory dirName to the receiver"
+
+        <category: 'file operations'>
+        ^self file pathFrom: dirName
+    ]
+
+    symlinkFrom: srcName [
+        "Create the receiver as a symbolic link from srcName (relative to the
+         path of the receiver)."
+
+        <category: 'file operations'>
+        ^self file symlinkFrom: srcName
+    ]
+
+    renameTo: newName [
+        "Rename the file identified by the receiver to newName"
+
+        <category: 'file operations'>
+        ^self file renameTo: newName
+    ]
+
+    pathTo: destName [
+        "Compute the relative path from the receiver to destName."
+
+        <category: 'accessing'>
+        ^self file pathTo: destName
+    ]
+
+    at: aName [
+        "Answer a File or Directory object as appropriate for a file named
+         'aName' in the directory represented by the receiver."
+
+        <category: 'accessing'>
+        ^self class on: (self file at: aName)
+    ]
+
+    namesDo: aBlock [
+        "Evaluate aBlock once for each file in the directory represented by the
+         receiver, passing its name."
+
+        <category: 'enumerating'>
+        self file namesDo: aBlock
+    ]
+
     file [
 	<category: 'private'>
 	^file
@@ -192,6 +336,55 @@ virtual files that refer to a real file on disk.'>
 
 ]
 
+
+Namespace current: Kernel [
+
+VFS.FileWrapper subclass: RecursiveFileWrapper [
+
+     do: aBlock [
+	"Same as the wrapped #do:, but reuses the file object for efficiency."
+
+	<category: 'enumerating'>
+        self file namesDo: 
+                [:name |
+                | f fullName |
+                f := self at: name. 
+                aBlock value: f.
+                f isDirectory 
+                    ifTrue:
+                        [((#('.' '..') includes: name) or: [f isSymbolicLink])
+                            ifFalse: [f do: aBlock]]]
+     ]
+
+     namesDo: aBlock prefixLength: anInteger [
+	"Same as the wrapped #namesDo:, but navigates the entire directory
+	 tree recursively.  Since the objects created by #at: also contain the
+	 path to the receiver, anInteger is used to trim it."
+
+	<category: 'private'>
+        self file namesDo: 
+                [:name |
+                | f fullName |
+                f := self at: name. 
+                aBlock value: (f asString copyFrom: anInteger).
+                f isDirectory 
+                    ifTrue:
+                        [((#('.' '..') includes: name) or: [f isSymbolicLink])
+                            ifFalse: [f
+				namesDo: aBlock
+				prefixLength: anInteger ]]]
+     ]
+
+     namesDo: aBlock [
+	"Same as the wrapped #namesDo:, but navigates the entire directory
+	 tree recursively."
+
+	<category: 'enumerating'>
+        self namesDo: aBlock prefixLength: self asString size + 2
+     ]
+]
+
+]
 
 Namespace current: VFS [
 

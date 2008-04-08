@@ -298,7 +298,7 @@ size and timestamps.'>
 	 to be aDateTime."
 
 	<category: 'accessing'>
-	self subclassResponsibility
+	self lastAccessTime: aDateTime lastModifyTime: self lastModifyTime
     ]
 
     lastAccessTime: accessDateTime lastModifyTime: modifyDateTime [
@@ -341,7 +341,7 @@ size and timestamps.'>
 	 receiver, to be aDateTime."
 
 	<category: 'accessing'>
-	self subclassResponsibility
+	self lastAccessTime: self lastAccessTime lastModifyTime: aDateTime
     ]
 
     lastModifyTime [
@@ -367,7 +367,15 @@ size and timestamps.'>
 
     isSymbolicLink [
 	"Answer whether a file with the name contained in the receiver does exist
-	 and does not identify a directory."
+	 and identifies a symbolic link."
+
+	<category: 'testing'>
+	self subclassResponsibility
+    ]
+
+    isDirectory [
+	"Answer whether a file with the name contained in the receiver does exist
+	 and identifies a directory."
 
 	<category: 'testing'>
 	self subclassResponsibility
@@ -460,6 +468,13 @@ size and timestamps.'>
 
 	<category: 'file name management'>
 	^self class path: (File pathFor: self name ifNone: [ '.' ])
+    ]
+
+    name [
+	"Answer the full path to the receiver"
+
+	<category: 'file name management'>
+	self subclassResponsibility
     ]
 
     path [
@@ -658,21 +673,21 @@ size and timestamps.'>
         ^(self at: aName) exists
     ]
 
+    all [
+	"Return a decorator of the receiver that will provide recursive
+	 descent into directories for iteration methods."
+
+	<category: 'decoration'>
+	^Kernel.RecursiveFileWrapper on: self
+    ]
+
     allFilesMatching: aPattern do: aBlock [
 	"Evaluate aBlock on the File objects that match aPattern (according to
 	 String>>#match:) in the directory named by the receiver. Recursively
 	 descend into directories."
 
 	<category: 'enumerating'>
-	self namesDo: 
-		[:name | 
-		| f |
-		f := self at: name.
-		(aPattern match: name) ifTrue: [aBlock value: f].
-		f isDirectory 
-		    ifTrue: 
-			[((#('.' '..') includes: name) or: [f isSymbolicLink]) 
-			    ifFalse: [f allFilesMatching: aPattern do: aBlock]]]
+	self all filesMatching: aPattern do: aBlock
     ]
 
     files [
@@ -792,6 +807,6 @@ size and timestamps.'>
 
 	<category: 'enumerating'>
 	self namesDo: [:name |
-	     (aPattern match: name) ifTrue: [block value: (self nameAt: name)]]
+	     (aPattern match: name) ifTrue: [block value: name]]
     ]
 ]
