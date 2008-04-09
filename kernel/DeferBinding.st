@@ -138,12 +138,9 @@ in the scope of a given class are used.'>
 		assoc := env environment associationAt: self key ifAbsent: [nil].
 		assoc isNil ifFalse: [^assoc].
 		pools := env sharedPoolDictionaries.
-		pools isNil 
-		    ifFalse: 
-			[pools do: 
-				[:each | 
-				assoc := each associationAt: self key ifAbsent: [nil].
-				assoc isNil ifFalse: [^assoc]]]].
+		pools do: [:each | 
+		    assoc := each associationAt: self key ifAbsent: [nil].
+		    assoc isNil ifFalse: [^assoc]]].
 
 	"Create it as a temporary."
 	defaultDictionary at: self key ifAbsentPut: [nil].
