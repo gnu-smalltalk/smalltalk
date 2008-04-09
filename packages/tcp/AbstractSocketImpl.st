@@ -124,8 +124,7 @@ FileDescriptor subclass: AbstractSocketImpl [
 
 	<category: 'socket operations'>
 	<primitive: VMpr_FileDescriptor_socketOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
-	File checkError.
+	self checkError.
 	^nil
     ]
 
@@ -142,8 +141,7 @@ FileDescriptor subclass: AbstractSocketImpl [
 
 	<category: 'socket operations'>
 	<primitive: VMpr_FileDescriptor_socketOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
-	File checkError.
+	self checkError.
 	^nil
     ]
 
@@ -160,8 +158,7 @@ FileDescriptor subclass: AbstractSocketImpl [
 
 	<category: 'socket operations'>
 	<primitive: VMpr_FileDescriptor_socketOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
-	File checkError.
+	self checkError.
 	^nil
     ]
 
@@ -178,8 +175,7 @@ FileDescriptor subclass: AbstractSocketImpl [
 
 	<category: 'socket operations'>
 	<primitive: VMpr_FileDescriptor_socketOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
-	File checkError.
+	self checkError.
 	^nil
     ]
 

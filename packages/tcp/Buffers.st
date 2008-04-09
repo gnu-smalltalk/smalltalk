@@ -60,6 +60,11 @@ collection.'>
 	<category: 'private'>
 	self flush
     ]
+
+    isFull [
+	<category: 'testing'>
+	^self position = self collection size
+    ]
 ]
 
 

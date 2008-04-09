@@ -1,3 +1,12 @@
+2008-04-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* AbstractSocketImpl.st: Use instance-side #checkError.
+	* Buffers.st: Add WriteBuffer>>#isFull.
+	* Sockets.st: Add #canRead, #canWrite, #ensureReadable,
+	#ensureWriteable.  Map #available to #canRead (for backwards
+	compatibility).
+	* Tests.st: Use #canRead and #nextHunk.
+
 2008-02-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* AbstractSocketImpl.st: Make sure fd is not nil when calling

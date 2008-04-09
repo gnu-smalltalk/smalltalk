@@ -159,6 +159,13 @@ Stream subclass: AbstractSocket [
 	self subclassResponsibility
     ]
 
+    ensureWriteable [
+	"Suspend the current process until more data can be written on the
+	 socket."
+
+	self implementation ensureWriteable
+    ]
+
     ensureReadable [
 	"Suspend the current process until more data is available on the
 	 socket."
@@ -175,10 +182,25 @@ Stream subclass: AbstractSocket [
     ]
 	
     available [
+	"Answer whether there is data available on the socket.  Same as
+	 #canRead, present for backwards compatibility."
+
+	<category: 'accessing'>
+	^self canRead
+    ]
+
+    canRead [
 	"Answer whether there is data available on the socket."
 
 	<category: 'accessing'>
 	^self implementation canRead
+    ]
+
+    canWrite [
+	"Answer whether there is free space in the socket's write buffer."
+
+	<category: 'accessing'>
+	^self implementation canWrite
     ]
 
     close [
@@ -707,7 +729,7 @@ AbstractSocket subclass: ServerSocket [
 	 one, else answer nil."
 
 	<category: 'accessing'>
-	self available ifFalse: [^nil].	"Make it non-blocking"
+	self canRead ifFalse: [^nil].	"Make it non-blocking"
 	^self primAccept: Socket
     ]
 
@@ -717,7 +739,7 @@ AbstractSocket subclass: ServerSocket [
 	 DatagramSockets."
 
 	<category: 'accessing'>
-	self available ifFalse: [^nil].	"Make it non-blocking"
+	self canRead ifFalse: [^nil].	"Make it non-blocking"
 	^self primAccept: socketClass
     ]
 
@@ -1079,16 +1101,16 @@ AbstractSocket subclass: Socket [
 	"Suspend the current process until more data is available in the
 	 socket's read buffer or from the operating system."
 
-	self available ifFalse: [ super ensureReadable ]
+	self canRead ifFalse: [ super ensureReadable ]
     ]
 
-    available [
+    canRead [
 	"Answer whether more data is available in the socket's read buffer
 	 or from the operating system."
 
 	<category: 'stream protocol'>
 	^(self hasReadBuffer and: [self readBuffer notEmpty]) 
-	    or: [super available]
+	    or: [super canRead]
     ]
 
     bufferContents [
@@ -1273,6 +1295,23 @@ AbstractSocket subclass: Socket [
 	<category: 'private - buffering'>
 	super initialize: implementation.
 	readBuffer := writeBuffer := self noBufferFlag
+    ]
+
+    ensureWriteable [
+	"Answer whether more data is available in the socket's read buffer
+	 or from the operating system."
+
+	<category: 'stream protocol'>
+	self canWrite ifFalse: [super ensureWriteable]
+    ]
+
+    canWrite [
+	"Answer whether more data is available in the socket's read buffer
+	 or from the operating system."
+
+	<category: 'stream protocol'>
+	^(self hasWriteBuffer and: [self readBuffer isFull not]) 
+	    or: [super canWrite]
     ]
 
     newReadBuffer: size [

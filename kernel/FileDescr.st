@@ -282,6 +282,7 @@ do arbitrary processing on the files.'>
 	 File class>>#checkError."
 
 	<category: 'basic'>
+	self isOpen ifFalse: [SystemExceptions.FileError signal: 'file closed'].
 	File checkError.
 	^0
     ]
@@ -298,7 +299,7 @@ do arbitrary processing on the files.'>
 	 on read-write pipes."
 
 	<category: 'basic'>
-	file isNil ifTrue: [^self].
+	self isOpen ifFalse: [^self].
 	self flush.
 	self fileOp: 19.
 	self checkError.
@@ -309,7 +310,7 @@ do arbitrary processing on the files.'>
 	"Close the file"
 
 	<category: 'basic'>
-	file isNil ifTrue: [^self].
+	self isOpen ifFalse: [^self].
 	self flush.
 	self changed: #beforeClosing.
 	self fileOp: 1.
@@ -324,7 +325,7 @@ do arbitrary processing on the files.'>
 
 	<category: 'basic'>
 	AllOpenFiles remove: self ifAbsent: [].
-	file isNil ifFalse: [self close]
+	self isOpen ifFalse: [self close]
     ]
 
     next [
@@ -543,15 +544,6 @@ do arbitrary processing on the files.'>
     ensureWriteable [
 	"If the file is open, wait until we can write to it.  The wait
 	 allows other Processes to run."
-
-	"2002-02-07 commented out the code below because not all devices
-	 support sending SIGIO's when they become writeable -- notably,
-	 tty's under Linux :-("
-
-	"self isPipe ifFalse: [ ^self ].
-	 self isOpen ifFalse: [ ^self ].
-	 
-	 self fileOp: 14 with: 1 with: Semaphore new"
 
 	<category: 'accessing'>
 	self 
@@ -814,16 +806,17 @@ do arbitrary processing on the files.'>
 	| count available |
 	self ensureReadable.
 	available := peek isNil ifTrue: [0] ifFalse: [1].
+	peek isNil 
+	    ifFalse: 
+		[byteArray byteAt: 1 put: peek value.
+		peek := nil].
+	self isOpen ifFalse: [^available].
 	count := self 
 		    fileOp: 3
 		    with: byteArray
 		    with: available + 1
 		    with: byteArray size
 		    ifFail: [self checkError].
-	peek isNil 
-	    ifFalse: 
-		[byteArray byteAt: 1 put: peek value.
-		peek := nil].
 	count := count + available.
 	count = 0 ifTrue: [atEnd := true].
 	^count
@@ -837,16 +830,17 @@ do arbitrary processing on the files.'>
 	| count available |
 	self ensureReadable.
 	available := peek isNil ifTrue: [0] ifFalse: [1].
+	peek isNil 
+	    ifFalse: 
+		[byteArray byteAt: 1 put: peek value.
+		peek := nil].
+	self isOpen ifFalse: [^available].
 	count := self 
 		    fileOp: 3
 		    with: byteArray
 		    with: 1 + available
 		    with: (anInteger min: byteArray size)
 		    ifFail: [self checkError].
-	peek isNil 
-	    ifFalse: 
-		[byteArray byteAt: 1 put: peek value.
-		peek := nil].
 	count := count + available.
 	count = 0 ifTrue: [atEnd := true].
 	^count
@@ -860,16 +854,17 @@ do arbitrary processing on the files.'>
 	| count available |
 	self ensureReadable.
 	available := peek isNil ifTrue: [0] ifFalse: [1].
+	peek isNil 
+	    ifFalse: 
+		[byteArray byteAt: position put: peek value.
+		peek := nil].
+	self isOpen ifFalse: [^available].
 	count := self 
 		    fileOp: 3
 		    with: byteArray
 		    with: position + available
 		    with: (end min: byteArray size)
 		    ifFail: [self checkError].
-	peek isNil 
-	    ifFalse: 
-		[byteArray byteAt: 1 put: peek value.
-		peek := nil].
 	count := count + available.
 	count = 0 ifTrue: [atEnd := true].
 	^count
@@ -908,6 +903,7 @@ do arbitrary processing on the files.'>
 	last := end min: byteArray size.
 	[cur <= last] whileTrue: 
 		[self ensureWriteable.
+		self isOpen ifFalse: [^cur - position].
 		result := self 
 			    fileOp: 2
 			    with: byteArray
@@ -924,7 +920,6 @@ do arbitrary processing on the files.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_FileDescriptor_fileOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
 	self checkError.
 	^nil
     ]
@@ -942,7 +937,6 @@ do arbitrary processing on the files.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_FileDescriptor_fileOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
 	self checkError.
 	^nil
     ]
@@ -960,7 +954,6 @@ do arbitrary processing on the files.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_FileDescriptor_fileOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
 	self checkError.
 	^nil
     ]
@@ -978,7 +971,6 @@ do arbitrary processing on the files.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_FileDescriptor_fileOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
 	self checkError.
 	^nil
     ]
@@ -996,7 +988,6 @@ do arbitrary processing on the files.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_FileDescriptor_fileOp>
-	file isNil ifTrue: [SystemExceptions.FileError signal: 'file closed'].
 	self checkError.
 	^nil
     ]
