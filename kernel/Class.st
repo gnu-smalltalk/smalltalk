@@ -191,6 +191,7 @@ the class category.'>
 	"Add the given shared pool to the list of the class' pool dictionaries"
 
 	<category: 'accessing instances and variables'>
+	sharedPools ifNil: [sharedPools := #()].
 	(sharedPools includes: aDictionary) 
 	    ifFalse: [sharedPools := sharedPools copyWith: aDictionary]
     ]
@@ -199,6 +200,7 @@ the class category.'>
 	"Remove the given dictionary to the list of the class' pool dictionaries"
 
 	<category: 'accessing instances and variables'>
+	sharedPools ifNil: [sharedPools := #()].
 	sharedPools := sharedPools copyWithout: aDictionary
     ]
 
@@ -208,7 +210,7 @@ the class category.'>
 	<category: 'accessing instances and variables'>
 	| s |
 	s := Set new.
-	sharedPools notNil 
+	(sharedPools notNil and: [sharedPools notEmpty])
 	    ifTrue: 
 		[self environment associationsDo: 
 			[:each | 
@@ -604,14 +606,14 @@ the class category.'>
 	"Private - Set the receiver's shared pools to be those in anArray"
 
 	<category: 'private'>
-	sharedPools := anArray
+	sharedPools := anArray ifNil: [#()]
     ]
 
     sharedPoolDictionaries [
 	"Return the shared pools (not the names!) defined by the class"
 
 	<category: 'private'>
-	^sharedPools
+	^sharedPools ifNil: [#()]
     ]
 
     metaclassFor: classNameString [

@@ -1,3 +1,9 @@
+2008-04-08  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/Class.st: Never answer nil from #sharedPoolDictionaries.
+	* kernel/DeferBinding.st: Remove symmetric nil check.
+	* kernel/Metaclass.st: Likewise.
+
 2008-03-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Open URLs from #open:mode:ifFail:.

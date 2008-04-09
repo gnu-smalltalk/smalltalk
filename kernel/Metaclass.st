@@ -285,7 +285,7 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 
 	"Now add/remove pool dictionaries.  FIXME: They may affect name binding,
 	 so we should probably recompile everything if they change."
-	aClass sharedPoolDictionaries isNil 
+	aClass sharedPoolDictionaries isEmpty
 	    ifTrue: [aClass setSharedPools: sharedPoolNames]
 	    ifFalse: 
 		[sharedPoolNames do: 
