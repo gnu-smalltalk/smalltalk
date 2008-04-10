@@ -33,7 +33,7 @@
 
 
 Object subclass: Behavior [
-    | superClass subClasses methodDictionary instanceSpec instanceVariables |
+    | superClass methodDictionary instanceSpec subClasses instanceVariables |
     
     <category: 'Language-Implementation'>
     <comment: 'I am the parent class of all "class" type methods.  My instances know

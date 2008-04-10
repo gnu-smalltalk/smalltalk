@@ -659,7 +659,7 @@ static const class_definition class_info[] = {
   {&_gst_behavior_class, &_gst_object_class,
    ISP_FIXED, true, 5,
    "Behavior",
-   "superClass subClasses methodDictionary instanceSpec instanceVariables",
+   "superClass methodDictionary instanceSpec subClasses instanceVariables",
    NULL, NULL },
 
   {&_gst_class_description_class, &_gst_behavior_class,

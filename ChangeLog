@@ -1,3 +1,8 @@
+2008-04-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Put fundamental instance variables at the
+	beginning.
+
 2008-04-08  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/Class.st: Never answer nil from #sharedPoolDictionaries.

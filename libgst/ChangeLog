@@ -1,3 +1,9 @@
+2008-04-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.c: Put fundamental instance variables of Behavior
+	at the beginning.
+	* libgst/dict.h: Likewise.
+
 2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Rename name variable of FileDescriptor to file.

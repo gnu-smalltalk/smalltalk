@@ -130,9 +130,9 @@ typedef struct gst_identity_dictionary
 #define BEHAVIOR_HEADER \
   OBJ_HEADER; \
   OOP		superclass; \
-  OOP		subClasses; \
   OOP		methodDictionary; \
   intptr_t	instanceSpec; \
+  OOP		subClasses; \
   OOP		instanceVariables
 
 typedef struct gst_behavior
