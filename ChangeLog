@@ -1,3 +1,9 @@
+2008-04-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/File.st: Don't prepend a \ if an absolute path is
+	created by #computePathFrom:to: and the destination path has a
+	disk letter in it.
+
 2008-04-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Move #isOpen checks after #ensureReadable
