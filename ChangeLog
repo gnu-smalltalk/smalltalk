@@ -1,5 +1,10 @@
 2008-04-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CompildMeth.st: Fix error message for undefined C
+	functions.
+
+2008-04-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FilePath.st: Don't prepend a \ if an absolute path is
 	created by #computePathFrom:to: and the destination path has a
 	disk letter in it.

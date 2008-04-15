@@ -98,7 +98,7 @@ instances.'>
 	<category: 'c call-outs'>
 	| descr literals bytecodes returnCType |
 	(CFunctionDescriptor isFunction: func) 
-	    ifFalse: [^'C function not defined '].
+	    ifFalse: [^nil].
 
 	returnCType := (returnType isSymbol or: [returnType isKindOf: CType]) 
 		    ifTrue: [returnType]
@@ -138,7 +138,7 @@ instances.'>
 	<category: 'c call-outs'>
 	| descr literals bytecodes |
 	(CFunctionDescriptor isFunction: func) 
-	    ifFalse: [^'C function not defined '].
+	    ifFalse: [^nil].
 	descr := CFunctionDescriptor 
 		    for: func
 		    returning: #void
@@ -722,6 +722,7 @@ instances.'>
 	    args: argsArray
 	    numArgs: self numArgs
 	    attributes: self attributes.
+	newMethod isNil ifTrue: [^'C function not defined'].
 	newMethod descriptor: self descriptor.
 	self become: newMethod.
 	^nil
@@ -736,6 +737,7 @@ instances.'>
 	    args: argsArray
 	    numArgs: self numArgs
 	    attributes: self attributes.
+	newMethod isNil ifTrue: [^'C function not defined'].
 	newMethod descriptor: self descriptor.
 	self become: newMethod.
 	^nil
