@@ -205,13 +205,14 @@ size and timestamps.'>
 
     FilePath class >> computePathFrom: srcName to: destName [
 	<category: 'private'>
-	| src dest srcCanon destCanon path |
+	| src dest srcCanon destCanon path isUnix |
 	"A Windows path may contain both / and \ separators. Clean it up
 	 to allow easy parsing"
-	srcCanon := Directory pathSeparator = $/ 
+	isUnix := Directory pathSeparator = $/.
+	srcCanon := isUnix
 		    ifTrue: [srcName]
 		    ifFalse: [srcName copyReplacing: $/ withObject: Directory pathSeparator].
-	destCanon := Directory pathSeparator = $/ 
+	destCanon := isUnix
 		    ifTrue: [destName]
 		    ifFalse: [destName copyReplacing: $/ withObject: Directory pathSeparator].
 
@@ -221,14 +222,19 @@ size and timestamps.'>
 	src removeLast.
 	dest := dest asOrderedCollection.
 	dest isEmpty ifTrue: [dest addLast: ''].
-	path := (src notEmpty and: [src first ~= dest first]) 
+	path := (src notEmpty and: [src first ~= dest first])
+	    ifTrue: [
+		"Don't prepend a \ if the destination path has a disk letter."
+		(isUnix or: [ (dest first at: 2 ifAbsent: [ nil ]) ~= $: ]) 
 		    ifTrue: [OrderedCollection with: '']
-		    ifFalse: 
-			[[src isEmpty or: [dest size = 1 or: [src first ~= dest first]]] 
-			    whileFalse: 
-				[src removeFirst.
-				dest removeFirst].
-			src collect: [:each | '..']].
+		    ifFalse: [OrderedCollection new]]
+	    ifFalse: 
+		[[src isEmpty or: [dest size = 1 or: [src first ~= dest first]]] 
+		    whileFalse: 
+			[src removeFirst.
+			dest removeFirst].
+		src collect: [:each | '..']].
+
 	path addAllLast: dest.
 	^path fold: [:a :b | a , Directory pathSeparatorString , b]
     ]
