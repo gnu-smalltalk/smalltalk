@@ -111,7 +111,7 @@ Object subclass: IncludesScanner [
 	file := self findFile: aFileName.
 	incs := self scanForIncludes: file.
 	incs do: [:each | self processFile: each].
-	ordered add: file fullName
+	ordered add: file name
     ]
 
     findFile: aFile [
