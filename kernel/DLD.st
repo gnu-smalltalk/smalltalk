@@ -227,7 +227,6 @@ in CFunctionDescriptor.'>
 	libraryList := OrderedCollection new.
 	libraryStream := Kernel.RoundRobinStream on: libraryList readStream.
 	moduleList := OrderedCollection new.
-	ObjectMemory addDependent: DLD
     ]
 
     DLD class >> update: aspect [

@@ -1,3 +1,9 @@
+2008-04-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/DLD.st: Don't register DLD with ObjectMemory.
+	* kernel/ObjMemory.st: Execute #returnFromSnapshot callback
+	at high priority, and pass it to DLD before anything else.
+
 2008-04-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/File.st: Don't prepend a \ if an absolute path is
