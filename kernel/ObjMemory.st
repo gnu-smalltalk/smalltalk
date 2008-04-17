@@ -47,14 +47,29 @@ class-side method to take a look at statistics on the memory manager''s
 state.'>
 
     ObjectMemory class >> changed: aSymbol [
-	"Before quitting, wait until all processes are done."
 	<category: 'initialization'>
-	aSymbol == #aboutToQuit 
-	    ifTrue: 
-		[
-		Processor activeProcess priority: Processor rockBottomPriority.
-		[super changed: aSymbol] forkAt: Processor userSchedulingPriority]
-	    ifFalse: [super changed: aSymbol]
+	| sema prio |
+	prio := aSymbol == #returnFromSnapshot
+	    ifTrue: [Processor highIOPriority]
+	    ifFalse: [Processor userSchedulingPriority].
+
+	Processor activePriority < prio
+	    ifTrue: [
+		sema := Semaphore new.
+
+		"Ensure that modules and libraries are initialized before
+		 anything else happens."
+		[DLD update: aSymbol. super changed: aSymbol. 
+		sema signal]
+		    forkAt: prio.
+		sema wait]
+	    ifFalse: [
+		DLD update: aSymbol. super changed: aSymbol].
+
+	"Before quitting, wait until all processes are done."
+	aSymbol == #aboutToQuit ifTrue: [
+	    Processor activeProcess priority: Processor rockBottomPriority.
+	    Processor yield].
     ]
 
     ObjectMemory class >> initialize [
