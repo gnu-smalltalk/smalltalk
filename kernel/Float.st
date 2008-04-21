@@ -254,6 +254,13 @@ if the hardware supports it.'>
 	^bytes
     ]
 
+    asCNumber [
+	"Convert the receiver to a kind of number that is understood by
+	 the C call-out mechanism."
+	<category: 'coercion'>
+	^self
+    ]
+
     asExactFraction [
 	"Convert the receiver into a fraction with optimal approximation,
 	 but with usually huge terms."

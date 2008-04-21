@@ -95,6 +95,13 @@ after the decimal point.'>
 	^fraction ceiling
     ]
 
+    asCNumber [
+	"Convert the receiver to a kind of number that is understood by
+	 the C call-out mechanism."
+	<category: 'coercion'>
+	^self asFloatD
+    ]
+
     asFloatD [
 	"Answer the receiver, converted to a FloatD"
 

@@ -336,6 +336,13 @@ fraction.'>
 	^Fraction numerator: self truncated denominator: 1
     ]
 
+    asCNumber [
+	"Convert the receiver to a kind of number that is understood by
+	 the C call-out mechanism."
+	<category: 'coercion'>
+	^self asFloat: FloatD
+    ]
+
     asFloatD [
 	"Answer the receiver converted to a FloatD"
 
