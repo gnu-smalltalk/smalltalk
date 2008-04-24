@@ -41,7 +41,7 @@ setting for the current process.'>
 
     environment [
 	<category: 'accessing'>
-	^Processor activeProcess
+	^ProcessEnvironment uniqueInstance
     ]
 
     value [

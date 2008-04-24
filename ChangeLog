@@ -1,3 +1,7 @@
+2008-04-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ProcEnv.st: Fix thinko in ProcessVariable>>#environment.
+
 2008-04-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Define #asCNumber.
