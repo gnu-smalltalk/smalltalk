@@ -1,48 +1,31 @@
-* 3.0
-
-** implement new syntax (done)
-*** option processing for scripts/Convert.st (done)
-*** implement GST syntax parser for STClassLoader (done)
-*** mega conversion of old source code and bug shaking (done)
-
-** faster startup (done)
-
-** restructure init/pre/kernel files (done)
-
-** avoid installing bash scripts (done)
-
-** more complete testsuite covering
-*** iconv (done)
-*** debugger/single-step mode (done)
-
-** implement a better packaging system allowing zipped source files with
-XML package descriptions to be delivered and installed, basing it on the
-Virtual File System infrastructure. (done)
-*** force .star files to be uncompressed, and implement a "view" on
-FileStream that only shows a segment of the file (done).
-
-----------------------------------------------------------------------
-
-
 * 3.1
 
-* IPv6
+* new File classes (done)
+** maybe add renaming as in Squeak's Rio?
 
-* Expat
+* ROE (done)
 
-* improvements to DBI
-** refactoring and prepared statements support
-** merge ROE (done)
-
-* cookies and redirects for HTTPClient
-
-* Seaside
+* Seaside (done)
 
 * Swazoo (done)
 
+* TwistedPools (almost there)
+
 * more libraries
+** Cairo (must be documented, cross-platform checking)
+** SDL (likewise)
+
+* less likely
+** Expat
 ** gnutls
 ** 3D gnuplot?
+
+* maybe
+** allocate CStructs in ByteArrays?
+** DBI refactoring and prepared statements support
+** IPv6
+** cookies and redirects for HTTPClient
+
 
 ----------------------------------------------------------------------
 
