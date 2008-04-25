@@ -397,7 +397,7 @@ FileStream extend [
 
 	<category: 'compiling'>
 	^FileSegment 
-	    on: self name
+	    on: self file
 	    startingAt: startPos
 	    for: endPos - startPos + 1
     ]

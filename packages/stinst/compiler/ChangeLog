@@ -1,3 +1,8 @@
+2008-04-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* StartCompiler.st: Override the "right" methods, reported
+	by Stephen Compall.
+
 2008-02-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* StartCompiler.st: Remove references to #parserClass.

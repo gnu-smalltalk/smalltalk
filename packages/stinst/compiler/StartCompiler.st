@@ -292,13 +292,22 @@ Behavior extend [
 
 Stream extend [
 
-    fileIn [
+    fileInLine: lineNum file: aFile at: charPosInt [
 	<category: 'file-in'>
 	
+	([charPosInt = self position] on: Error do: [ :ex | ex return: true ])
+	     ifFalse: [self notYetImplemented].
+
 	[STInST.STSymbolTable nowInsideFileIn.
 	STInST.STEvaluationDriver new parseSmalltalkStream: self
 	    with: STInST.GSTFileInParser] 
 		ensure: [STInST.STSymbolTable nowOutsideFileIn]
+    ]
+
+    fileInLine: lineNum file: aFile fileName: aString at: charPosInt [
+	<category: 'file-in'>
+	
+        ^self fileInLine: lineNum file: aFile at: charPosInt 
     ]
 
 ]

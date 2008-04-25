@@ -1,3 +1,7 @@
+2008-04-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* STFileParser.st: Create FileSegments with Files in it.
+
 2008-04-25  Stephen Compall  <scompall@nocandysw.com>
 
 	* PoolResolutionTests.st: Test the importation of shared pools and
