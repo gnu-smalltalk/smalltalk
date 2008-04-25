@@ -54,6 +54,17 @@ o   The VFS subsystem was rewritten.  Virtual filesystems are now
     3) Directory>>#do: passes File objects rather than file names to the
     block; 4) Directory>>#contents is now called Directory>>#entryNames.
 
+o   The order for searching pool dictionaries changed.  The new order,
+    codenamed "TwistedPools", builds on three ideas: 1) the environment
+    of a class always has lower priority than the imports, so the
+    environment is always excluded from the imports if the environment
+    is a superspace of the imports; 2) apart from this, the imports are
+    visited in topological order, so that if two imports have a superspace
+    in common, the imports are always visited before the superspace; 3)
+    each class in the inheritance order is visited separately, so the
+    imports of a superclass have lower priority than the environment of
+    the subclass.
+
 o   The semantics of #on:do: were changed: executing off the end of an
     exception handler will always return from the associated #on:do:.
     Older versions of GNU Smalltalk either returned or resumed depending

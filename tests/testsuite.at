@@ -50,6 +50,7 @@ AT_DIFF_TEST([mutate.st])
 AT_DIFF_TEST([untrusted.st])
 AT_DIFF_TEST([getopt.st])
 AT_DIFF_TEST([quit.st])
+AT_DIFF_TEST([pools.st])
 
 AT_BANNER([Other simple tests.])
 AT_DIFF_TEST([ackermann.st])

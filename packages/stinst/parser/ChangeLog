@@ -1,3 +1,13 @@
+2008-04-25  Stephen Compall  <scompall@nocandysw.com>
+
+	* PoolResolutionTests.st: Test the importation of shared pools and
+	class pools from superclasses, as well as that only the direct
+	superclass's namespaces are eliminated from the namespace walk.
+	* STSymTable.st: Factor pool binding search into a separate class
+	hierarchy, allowing global and class-by-class setting.  By
+	default, use newly-created semantics for pool search.
+	* PoolResolutionTests.st: New file, testing the above.
+
 2008-02-08  Stephen Compall  <scompall@nocandysw.com>
 
 	* GSTParser.st: Always reverse a #methodsFor: with an

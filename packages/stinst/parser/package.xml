@@ -21,8 +21,12 @@
   <filein>Exporter.st</filein>
 
   <test>
+   <namespace>STInST.Tests</namespace>
    <sunit>STInST.Tests.TestStandardRewrites</sunit>
+   <sunit>STInST.Tests.TestDefaultPoolResolution</sunit>
+   <sunit>STInST.Tests.TestClassicPoolResolution</sunit>
    <filein>RewriteTests.st</filein>
+   <filein>PoolResolutionTests.st</filein>
   </test>
 
 
@@ -32,6 +36,7 @@
   <file>RBParser.st</file>
   <file>RBToken.st</file>
   <file>OrderedSet.st</file>
+  <file>PoolResolutionTests.st</file>
   <file>STCompLit.st</file>
   <file>STCompiler.st</file>
   <file>STDecompiler.st</file>

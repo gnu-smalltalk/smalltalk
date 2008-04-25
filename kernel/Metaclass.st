@@ -77,6 +77,14 @@ it should be...the Smalltalk metaclass system is strange and complex.'>
 	^nil
     ]
 
+    allSharedPoolDictionariesDo: aBlock [
+	"Answer the shared pools visible from methods in the metaclass,
+	 in the correct search order."
+
+	<category: 'delegation'>
+	self asClass allSharedPoolDictionariesDo: aBlock
+    ]
+
     category [
 	"Answer the class category"
 

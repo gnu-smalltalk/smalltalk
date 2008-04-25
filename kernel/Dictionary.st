@@ -586,11 +586,129 @@ certain special cases.'>
 	^self findIndex: key
     ]
 
-    withAllSuperspaces [
-	"This method is needed by the compiler"
+    allSuperspaces [
+        "Answer all the receiver's superspaces in a collection"
 
-	<category: 'polymorphism hacks'>
-	^{self}
+        <category: 'namespace protocol'>
+        | supers |
+        supers := OrderedCollection new.
+        self allSuperspacesDo: [:superspace | supers addLast: superspace].
+        ^supers
+    ]
+
+    allSuperspacesDo: aBlock [
+        "Evaluate aBlock once for each of the receiver's superspaces (which
+	 is none for BindingDictionary)."
+
+        <category: 'namespace protocol'>
+    ]
+
+    definedKeys [
+        "Answer a kind of Set containing the keys of the receiver"
+
+        <category: 'namespace protocol'>
+        | aSet value |
+        aSet := self keysClass new: tally * 4 // 3.
+        1 to: self primSize
+            do:
+                [:index |
+                value := self primAt: index.
+                value isNil ifFalse: [aSet add: value key]].
+        ^aSet
+    ]
+
+    inheritsFrom: aNamespace [
+        "Answer whether aNamespace is one of the receiver's direct and
+         indirect superspaces"
+
+        <category: 'namespace protocol'>
+        | space |
+        space := self.
+
+        [space := space superspace.
+        space == aNamespace ifTrue: [^true].
+        space notNil]
+                whileTrue
+    ]
+
+    superspace [
+        "Answer the receiver's superspace, which is nil for BindingDictionary."
+
+        <category: 'namespace protocol'>
+        ^nil
+    ]
+
+    withAllSuperspaces [
+        "Answer the receiver and all of its superspaces in a collection,
+	 which is none for BindingDictionary"
+
+        <category: 'namespace protocol'>
+        | supers |
+        supers := OrderedCollection with: self.
+        self allSuperspacesDo: [:superspace | supers addLast: superspace].
+        ^supers
+    ]
+
+    withAllSuperspacesDo: aBlock [
+        "Invokes aBlock for the receiver and all superspaces, both direct
+         and indirect (though a BindingDictionary does not have any)."
+
+        <category: 'namespace protocol'>
+        aBlock value: self.
+        self allSuperspacesDo: aBlock
+    ]
+
+    definesKey: key [
+        "Answer whether the receiver defines the given key. `Defines'
+         means that the receiver's superspaces, if any, are not considered."
+
+        <category: 'namespace protocol'>
+	^super includes: key
+    ]
+
+    hereAssociationAt: key ifAbsent: aBlock [
+        "Return the association for the variable named as specified
+         by `key' *in this namespace*. If the key is not found search will
+         *not* be carried on in superspaces and aBlock will be immediately
+         evaluated."
+ 
+        <category: 'namespace protocol'>
+	| index |
+	index := self findIndexOrNil: key.
+	^index isNil ifTrue: [aBlock value] ifFalse: [self primAt: index]
+    ]
+ 
+    hereAssociationAt: key [
+        "Return the association for the variable named as specified
+         by `key' *in this namespace*. If the key is not found search will
+         *not* be carried on in superspaces and the method will fail."
+ 
+        <category: 'namespace protocol'>
+        ^self hereAssociationAt: key
+            ifAbsent: [SystemExceptions.NotFound signalOn: key what: 'key']
+    ]
+
+    hereAt: key ifAbsent: aBlock [
+        "Return the value associated to the variable named as specified
+         by `key' *in this namespace*. If the key is not found search will
+         *not* be carried on in superspaces and aBlock will be immediately
+         evaluated."
+
+        <category: 'namespace protocol'>
+	| index |
+	index := self findIndexOrNil: key.
+	^index isNil ifTrue: [aBlock value] ifFalse: [(self primAt: index) value]
+    ]
+
+    hereAt: key [
+        "Return the value associated to the variable named as specified
+         by `key' *in this namespace*. If the key is not found search will
+         *not* be carried on in superspaces and the method will fail."
+
+        <category: 'namespace protocol'>
+        ^self hereAt: key
+            ifAbsent: [SystemExceptions.NotFound signalOn: key what: 'key']
     ]
 ]
+
 

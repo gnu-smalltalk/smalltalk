@@ -44,6 +44,24 @@ My keys are (expected to be) symbols, so I use == to match searched keys
 to those in the dictionary -- this is done expecting that it brings a bit
 more speed.'>
 
+    = arg [
+        "Answer whether the receiver is equal to arg. The equality test is
+         by default the same as that for equal objects. = must not fail;
+         answer false if the receiver cannot be compared to arg"
+
+        <category: 'basic & copying'>
+        <primitive: VMpr_Object_identity>
+    ]
+
+    hash [
+        "Answer an hash value for the receiver.  This is the same as the
+         object's #identityHash."
+
+        <category: 'basic & copying'>
+        <primitive: VMpr_Object_hash>
+
+    ]
+
     copy [
 	<category: 'copying'>
 	^self
@@ -273,4 +291,3 @@ more speed.'>
 	^IdentityDictionary
     ]
 ]
-

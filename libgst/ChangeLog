@@ -1,3 +1,10 @@
+2008-04-25  Paolo Bonzini  <bonzini@gnu.org>
+            Stephen Compall  <scompall@nocandysw.com>
+
+	* libgst/sym.c: Document (prose by Stephen Compall) and
+	implement TwistedPools, using a linearized list of pool dictionaries
+	for the lookup.
+
 2008-04-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Put fundamental instance variables of Behavior

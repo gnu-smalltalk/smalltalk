@@ -61,25 +61,6 @@ an instance of me; it is called their `environment''. '>
 		    yourself)
     ]
 
-    = arg [
-	"Answer whether the receiver is equal to arg. The equality test is
-	 by default the same as that for equal objects. = must not fail;
-	 answer false if the receiver cannot be compared to arg"
-
-	<category: 'basic & copying'>
-	<primitive: VMpr_Object_identity>
-	
-    ]
-
-    hash [
-	"Answer an hash value for the receiver.  This is the same as the
-	 object's #identityHash."
-
-	<category: 'basic & copying'>
-	<primitive: VMpr_Object_hash>
-	
-    ]
-
     whileCurrentDo: aBlock [
 	"Evaluate aBlock with the current namespace set to the receiver.
 	 Answer the result of the evaluation."
@@ -194,48 +175,6 @@ an instance of me; it is called their `environment''. '>
 	^class
     ]
 
-    definedKeys [
-	"Answer a kind of Set containing the keys of the receiver"
-
-	<category: 'overrides for superspaces'>
-	| aSet value |
-	aSet := self keysClass new: tally * 4 // 3.
-	1 to: self primSize
-	    do: 
-		[:index | 
-		value := self primAt: index.
-		value isNil ifFalse: [aSet add: value key]].
-	^aSet
-    ]
-
-    definesKey: key [
-	"Answer whether the receiver defines the given key. `Defines'
-	 means that the receiver's superspaces, if any, are not considered."
-
-	<category: 'overrides for superspaces'>
-	^super includesKey: key
-    ]
-
-    hereAt: key ifAbsent: aBlock [
-	"Return the value associated to the variable named as specified
-	 by `key' *in this namespace*. If the key is not found search will
-	 *not* be carried on in superspaces and aBlock will be immediately
-	 evaluated."
-
-	<category: 'overrides for superspaces'>
-	^super at: key ifAbsent: aBlock
-    ]
-
-    hereAt: key [
-	"Return the value associated to the variable named as specified
-	 by `key' *in this namespace*. If the key is not found search will
-	 *not* be carried on in superspaces and the method will fail."
-
-	<category: 'overrides for superspaces'>
-	^self hereAt: key
-	    ifAbsent: [SystemExceptions.NotFound signalOn: key what: 'key']
-    ]
-
     inheritedKeys [
 	"Answer a Set of all the keys in the receiver and its superspaces"
 
@@ -319,16 +258,6 @@ an instance of me; it is called their `environment''. '>
 	^aSet
     ]
 
-    allSuperspaces [
-	"Answer all the receiver's superspaces in a collection"
-
-	<category: 'namespace hierarchy'>
-	| supers |
-	supers := OrderedCollection new.
-	self allSuperspacesDo: [:superspace | supers addLast: superspace].
-	^supers
-    ]
-
     allSuperspacesDo: aBlock [
 	"Evaluate aBlock once for each of the receiver's superspaces"
 
@@ -363,20 +292,6 @@ an instance of me; it is called their `environment''. '>
 	Symbol hasInterned: aString
 	    ifTrue: [:aSymbol | self at: aSymbol ifPresent: [:value | ^true]].
 	^false
-    ]
-
-    inheritsFrom: aNamespace [
-	"Answer whether aNamespace is one of the receiver's direct and
-	 indirect superspaces"
-
-	<category: 'namespace hierarchy'>
-	| space |
-	space := self.
-	
-	[space := space superspace.
-	space == aNamespace ifTrue: [^true].
-	space notNil] 
-		whileTrue
     ]
 
     removeSubspace: aSymbol [
@@ -508,29 +423,6 @@ an instance of me; it is called their `environment''. '>
 		[:subspace | 
 		aBlock value: subspace.
 		subspace allSubspacesDo: aBlock]
-    ]
-
-    withAllSuperspaces [
-	"Answer the receiver and all of its superspaces in a collection"
-
-	<category: 'namespace hierarchy'>
-	| supers |
-	supers := OrderedCollection with: self.
-	self allSuperspacesDo: [:superspace | supers addLast: superspace].
-	^supers
-    ]
-
-    withAllSuperspacesDo: aBlock [
-	"Invokes aBlock for the receiver and all superspaces, both direct
-	 and indirect."
-
-	<category: 'namespace hierarchy'>
-	| space |
-	space := self.
-	
-	[aBlock value: space.
-	space := space superspace.
-	space notNil] whileTrue
     ]
 
     nameIn: aNamespace [

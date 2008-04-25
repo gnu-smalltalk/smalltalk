@@ -1,3 +1,13 @@
+2008-04-25  Paolo Bonzini  <bonzini@gnu.org>
+            Stephen Compall  <scompall@nocandysw.com>
+
+	* tests/pools.st: New.
+	* tests/pools.ok: New.
+
+	* kernel/Class.st: Eliminate only the direct superclass's
+	namespaces from the namespace walk while searching pools, and walk
+	every superclass's pools as well as my own.
+
 2008-04-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ProcEnv.st: Fix thinko in ProcessVariable>>#environment.

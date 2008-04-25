@@ -730,17 +730,34 @@ method dictionary, and iterating over the class hierarchy.'>
 	^self superclass isNil ifTrue: [#()] ifFalse: [self superclass sharedPools]
     ]
 
-    allSharedPools [
-	"Return the names of the shared pools defined by the class and any of
-	 its superclasses"
+    allSharedPoolDictionariesDo: aBlock [
+        "Answer the shared pools visible from methods in the metaclass,
+         in the correct search order."
+
+        self superclass allSharedPoolDictionariesDo: aBlock
+    ]
+
+    allSharedPoolDictionaries [
+	"Return the shared pools defined by the class and any of
+	 its superclasses, in the correct search order."
 
 	<category: 'accessing instances and variables'>
 	| result |
-	result := self sharedPools asSet.
-	self environment 
-	    withAllSuperspacesDo: [:each | result add: each name asSymbol].
-	self allSuperclassesDo: [:each | result addAll: each sharedPools].
-	^result asArray
+	result := OrderedCollection new.
+	self allSharedPoolDictionariesDo: [:each | result add: each].
+	^result
+    ]
+
+    allSharedPools [
+	"Return the names of the shared pools defined by the class and any of
+	 its superclasses, in the correct search order."
+
+	<category: 'accessing instances and variables'>
+	| result |
+	result := OrderedCollection new.
+	self allSharedPoolDictionariesDo: [:each |
+		result add: (each nameIn: self environment)].
+	^result
     ]
 
     subclasses [

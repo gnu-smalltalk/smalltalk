@@ -616,6 +616,68 @@ the class category.'>
 	^sharedPools ifNil: [#()]
     ]
 
+    allSharedPoolDictionariesDo: aBlock [
+        "Answer the shared pools visible from methods in the metaclass,
+         in the correct search order."
+
+        | superclassSpaces |
+        self withAllSuperclassesDo: [:behavior || classSpaces |
+	    aBlock value: behavior classPool.
+
+	    "Extract the spaces of this class from superclassSpaces into
+	     classSpaces..."
+            superclassSpaces isNil
+		ifTrue: [classSpaces := IdentitySet new.
+			 behavior environment withAllSuperspacesDo: [ :each |
+			     classSpaces add: each]]
+		ifFalse: [classSpaces := superclassSpaces].
+
+	    "... and visit them."
+            behavior
+                allLocalSharedPoolDictionariesExcept: classSpaces
+                do: aBlock.
+
+	    "Collect those spaces that have to be skipped in the search."
+	    superclassSpaces := IdentitySet new.
+	    behavior superclass ifNotNil: [:superclass |
+		superclass environment withAllSuperspacesDo: [ :each |
+		    superclassSpaces add: each ]].
+
+	    "Now proceed with the `natural' (non-imported spaces)."
+            behavior environment withAllSuperspacesDo: [:each |
+                (superclassSpaces includes: each)
+		    ifFalse: [ aBlock value: each ]]]
+    ]
+
+    allLocalSharedPoolDictionariesExcept: inWhite do: aBlock [
+        "Answer the result of combining the list of pools imported
+	 into the receiver using a topological sort, preferring dependent
+	 to prerequisite, and then left to right.  Any pool that is
+	 already in inWhite will not be answered."
+        <category: 'private'>
+        | white grey order descend list |
+	list := self sharedPoolDictionaries.
+	list isEmpty ifTrue: [ ^self ].
+
+	white := inWhite copy.
+        grey := IdentitySet new: list size.
+        order := OrderedCollection new: list size.
+        descend := [:pool |
+            (white includes: pool) ifFalse:
+                [(grey includes: pool) ifTrue:
+                     [^SystemExceptions.InvalidValue
+                          signalOn: list
+                          reason: 'includes circular dependency'].
+
+                "#allSuperspaces is not available on all pools"
+                grey add: pool.
+                pool allSuperspaces reverseDo: descend.
+                order addFirst: pool.
+                white add: pool]].
+        list reverseDo: descend.
+        order do: aBlock
+    ]
+
     metaclassFor: classNameString [
 	"Create a Metaclass object for the given class name. The metaclass
 	 is a subclass of the receiver's metaclass"

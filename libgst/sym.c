@@ -53,6 +53,7 @@
 
 
 #include "gstpriv.h"
+#include "pointer-set.h"
 
 typedef struct
 {
@@ -83,6 +84,16 @@ struct scope
   unsigned int numArguments;
   unsigned int numTemporaries;
   symbol_list symbols;
+};
+
+/* Represents all the pools (namespaces) which are declared in the
+   current scope.  This information is relatively complex to compute,
+   so it's kept cached.  */
+typedef struct pool_list *pool_list;
+struct pool_list
+{
+  OOP poolOOP;
+  pool_list next;
 };
 
 
@@ -257,6 +268,7 @@ static symbol_list find_local_var (scope scope,
 static OOP find_class_variable (OOP varName);
 
 static scope cur_scope = NULL;
+static pool_list linearized_pools = NULL;
 
 /* This is an array of symbols which the virtual machine knows about,
    and is used to restore the global variables upon image load.  */
@@ -377,8 +389,17 @@ _gst_pop_old_scope (void)
 void
 _gst_pop_all_scopes (void)
 {
+  pool_list next;
+
   while (cur_scope)
     _gst_pop_old_scope ();
+
+  while (linearized_pools)
+    {
+      next = linearized_pools->next;
+      xfree (linearized_pools);
+      linearized_pools = next;
+    }
 }
 
 
@@ -478,6 +499,103 @@ free_scope_symbols (scope scope)
       xfree (oldList);
     }
 }
+
+/* Here are some notes on the design of the shared pool resolution order,
+   codenamed "TwistedPools".
+
+   The design should maintain a sense of containment within namespaces,
+   while still allowing reference to all inherited environments, as is
+   traditionally expected.
+
+   The fundamental problem is that when a subclass is not in the same
+   namespace as the superclass, we want to give a higher priority to
+   the symbols in the namespaces imported by the subclass, than to the
+   symbols in the superclass namespaces.  As such, no simple series of
+   walks up the inheritance tree paired with pool-adds will give us a
+   good search order.  Instead, we build a complete linearization of
+   the namespaces (including the superspaces) and look up a symbol in
+   each namespace locally, without looking at the superspaces.
+
+   This is the essential variable search algorithm for TwistedPools.
+
+   1. Given a class, starting with the method-owning class:
+
+      a. Search the class pool.
+
+      b. Search this class's shared pools in topological order,
+         left-to-right, skipping any pools that are any of
+         this class's namespace or superspaces.
+
+      c. Search this class's namespace and each superspace in turn
+         before first encounter of a namespace that contains, directly or
+         indirectly, the superclass. This means that if the superclass is
+         in the same namespace or a subspace, no namespaces are searched.
+
+   2. Move to the superclass, and repeat from #1.
+
+   Combination details
+   ===================
+
+   While the add-namespaces step above could be less eager to add namespaces,
+   by allowing any superclass to stop the namespace crawl, rather than
+   just the direct superclasses, it is already less eager than the shared
+   pool manager. The topological sort is an obviously good choice, but
+   why not allow superclasses' namespaces to provide deletions as well
+   as the pool-containing class? While both alternatives have benefits,
+   an eager import of all superspaces, besides those that already contain
+   the pool-containing class, would most closely match what's expected.
+
+   An argument could also be made that by adding a namespace to shared pools,
+   you expect all superspaces to be included. However, consider the usual
+   case of namespaces in shared pools: imports. While you would want it to
+   completely load an alternate namespace hierarchy, I think you would not
+   want it to inject Smalltalk early into the variable search. Consider
+   this diagram:
+
+               Smalltalk
+                   |
+               MyCompany
+               /      \
+              /        \
+         MyProject     MyLibrary
+            /            /    \
+           /           ModA   ModB
+     MyLibModule
+
+    If you were to use ModB as a pool in a class in MyLibModule, I think
+    it is most reasonable that ModB and MyLibrary be immediately imported,
+    but MyCompany and Smalltalk wait until you reach that point in the
+    namespace walk.  In other words, pools only add that part of themselves,
+    which would not be otherwise reachable via the class environment.
+
+    (Note that, as a side effect, adding MyCompany as a pool will have
+    no effect). 
+
+    Another argument could be made to delay further the namespace walk,
+    waiting to resolve until no superclass is contained in a given namespace,
+    based on the idea of exiting a namespace hierarchy while walking
+    superclasses, then reentering it. Disregarding the unlikelihood of such
+    an organization, it probably would be less confusing to resolve the
+    hierarchy being left first, in case the interloping hierarchy introduces
+    conflicting symbols of its own.
+
+    There is no objective argument regarding the above points of
+    contention, and no formal proofs, because convenient global name
+    resolution is entirely a matter of feeling, because a formal
+    programmer could always explicitly spell out the path to every
+    variable.
+
+    What if namespace had imports of their own?
+    ===========================================
+
+    I have an idea to add shared pools to namespaces, thereby allowing users
+    to import external namespaces for every class in a namespace, rather
+    than each class. If this is integrated, it would need to twist nicely.
+
+    Here is how I think it would best work: after searching any namespace,
+    combine its shared pools using IPCA, removing all elements that are any
+    of this namespace or its superspaces, and search the combination from
+    left to right.  */
 
 
 OOP
@@ -493,53 +611,237 @@ _gst_get_class_object (OOP classOOP)
   return classOOP;
 }
 
+
+/* Add poolOOP after the node whose next pointer is in P_END.  Return
+   the new next node (actually its next pointer).  */
+
+static pool_list *
+add_pool (OOP poolOOP, pool_list *p_end)
+{
+  pool_list entry;
+  if (IS_NIL (poolOOP))
+    return p_end;
+
+  entry = xmalloc (sizeof (struct pool_list));
+  entry->poolOOP = poolOOP;
+  entry->next = NULL;
+
+  *p_end = entry;
+  return &entry->next;
+}
+
+
+/* Make a pointer set with POOLOOP and all of its superspaces.  */
+
+static struct pointer_set_t *
+make_with_all_superspaces_set (OOP poolOOP)
+{
+  struct pointer_set_t *pset = pointer_set_create ();
+  if (is_a_kind_of (OOP_CLASS (poolOOP), _gst_class_class))
+    poolOOP = _gst_class_variable_dictionary (poolOOP);
+
+  while (is_a_kind_of (OOP_CLASS (poolOOP), _gst_abstract_namespace_class))
+    {
+      gst_namespace pool;
+      pointer_set_insert (pset, poolOOP);
+      pool = (gst_namespace) OOP_TO_OBJ (poolOOP);
+      poolOOP = pool->superspace;
+    }
+
+  /* Add the last if not nil.  */
+  if (is_a_kind_of (OOP_CLASS (poolOOP), _gst_dictionary_class))
+    pointer_set_insert (pset, poolOOP);
+  return pset;
+}
+
+
+/* Add, after the node whose next pointer is in P_END, the namespace
+   POOLOOP and all of its superspaces except those in EXCEPT.
+   The new last node is returned (actually its next pointer).  */
+
+static pool_list *
+add_namespace (OOP poolOOP, struct pointer_set_t *except, pool_list *p_end)
+{
+  if (is_a_kind_of (OOP_CLASS (poolOOP), _gst_class_class))
+    poolOOP = _gst_class_variable_dictionary (poolOOP);
+
+  for (;;)
+    {
+      gst_namespace pool;
+      if (!is_a_kind_of (OOP_CLASS (poolOOP), _gst_dictionary_class))
+        return p_end;
+
+      if (!except || !pointer_set_contains (except, poolOOP))
+        p_end = add_pool (poolOOP, p_end);
+
+      /* Try to find a super-namespace */
+      if (!is_a_kind_of (OOP_CLASS (poolOOP), _gst_abstract_namespace_class))
+        return p_end;
+
+      pool = (gst_namespace) OOP_TO_OBJ (poolOOP);
+      poolOOP = pool->superspace;
+    }
+}
+
+
+/* Add POOLOOP and all of its superspaces to the list in the right order:
+
+   1. Start a new list.
+
+   2. From right to left, descend into each given pool not visited.
+
+   3. Recursively visit the superspace, then...
+
+   4. Mark this pool as visited, and add to the beginning of #1's list.
+
+   5. After all recursions exit, the list is appended at the end of the
+      linearized list of pools.
+
+   This function takes care of 3-4.  These two steps implement
+   a topological sort on the reverse of the namespace tree; it is
+   explicitly modeled after CLOS class precedence.  */
+
+static void
+visit_pool (OOP poolOOP, struct pointer_set_t *grey,
+	    struct pointer_set_t *white,
+	    pool_list *p_head, pool_list *p_tail)
+{
+  pool_list entry;
+
+  if (is_a_kind_of (OOP_CLASS (poolOOP), _gst_class_class))
+    poolOOP = _gst_class_variable_dictionary (poolOOP);
+  if (!is_a_kind_of (OOP_CLASS (poolOOP), _gst_dictionary_class))
+    return;
+
+  if (pointer_set_contains (white, poolOOP))
+    return;
+
+  if (pointer_set_contains (grey, poolOOP))
+    {
+      _gst_errorf ("circular dependency in pool dictionaries");
+      return;
+    }
+
+  /* Visit the super-namespace first, this amounts to processing the
+     hierarchy in reverse order (see Class>>#allSharedPoolDictionariesDo:). */
+  pointer_set_insert (grey, poolOOP);
+  if (is_a_kind_of (OOP_CLASS (poolOOP), _gst_abstract_namespace_class))
+    {
+      gst_namespace pool = (gst_namespace) OOP_TO_OBJ (poolOOP);
+      if (!IS_NIL (pool->superspace))
+	visit_pool (pool->superspace, grey, white, p_head, p_tail);
+    }
+  pointer_set_insert (white, poolOOP);
+
+  /* Add an entry for this one at the beginning of the list.  We need
+     to maintain the tail too, because combine_local_pools must return
+     it.  */
+  entry = xmalloc (sizeof (struct pool_list));
+  entry->poolOOP = poolOOP;
+  entry->next = *p_head;
+  *p_head = entry;
+  if (!*p_tail)
+    *p_tail = entry;
+}
+
+/* Run visit_pool on all the shared pools, starting with WHITE as
+   the visited set so that those are not added.  The resulting
+   list is built separately, and at the end all of the namespaces
+   in the list are tacked after the node whose next pointer is
+   in P_END.  The new last node is returned (actually its next pointer).  */
+
+static pool_list *
+combine_local_pools (OOP sharedPoolsOOP, struct pointer_set_t *white, pool_list *p_end)
+{
+  struct pointer_set_t *grey = pointer_set_create ();
+  pool_list head = NULL;
+  pool_list tail = NULL;
+  int numPools, i;
+
+  /* Visit right-to-left because visit_pool adds to the beginning.  */
+  numPools = NUM_OOPS (OOP_TO_OBJ (sharedPoolsOOP));
+  for (i = numPools; --i >= 0; )
+    {
+      OOP poolDictionaryOOP = ARRAY_AT (sharedPoolsOOP, i + 1);
+      visit_pool (poolDictionaryOOP, grey, white, &head, &tail);
+    }
+
+  pointer_set_destroy (grey);
+  if (head)
+    {
+      /* If anything was found, tack the list after P_END and return
+	 the new tail.  */
+      *p_end = head;
+      return &tail->next;
+    }
+  else
+    return p_end;
+}
+
+
+/* Add the list of resolved pools for CLASS_OOP.  This includes:
+   1) its class pool; 2) its shared pools as added by
+   combine_local_pools, and excluding those found from the
+   environment; 3) the environment and its superspaces,
+   excluding those reachable also from the environment of
+   the superclass.  */
+
+static pool_list *
+add_local_pool_resolution (OOP class_oop, pool_list *p_end)
+{
+  OOP environmentOOP;
+  gst_class class;
+  struct pointer_set_t *pset;
+
+  /* First search in the class pool.  */
+  p_end = add_pool (_gst_class_variable_dictionary (class_oop), p_end);
+
+  /* Then in all the imports not reachable from the environment.  */
+  class = (gst_class) OOP_TO_OBJ (class_oop);
+  environmentOOP = class->environment;
+  pset = make_with_all_superspaces_set (environmentOOP);
+  p_end = combine_local_pools (class->sharedPools, pset, p_end);
+  pointer_set_destroy (pset);
+
+  /* Then search in the `environments', except those that are already
+     reachable from the superclass. */
+  class_oop = SUPERCLASS (class_oop);
+  class = (gst_class) OOP_TO_OBJ (class_oop);
+  if (!IS_NIL (class_oop))
+    pset = make_with_all_superspaces_set (class->environment);
+  else
+    pset = NULL;
+  
+  p_end = add_namespace (environmentOOP, pset, p_end);
+  if (pset)
+    pointer_set_destroy (pset);
+  return p_end;
+}
+
 OOP
 find_class_variable (OOP varName)
 {
-  OOP class_oop, assocOOP, poolDictionaryOOP;
-  OOP myClass;
-  int numPools, i;
-  gst_class class;
+  pool_list pool;
+  OOP assocOOP;
 
-  myClass = _gst_get_class_object (_gst_this_class);
+  if (!linearized_pools)
+    {
+      pool_list *p_end = &linearized_pools;
+      OOP myClass;
 
-  /* Now search in the class pools */
-  for (class_oop = myClass; !IS_NIL (class_oop);
-       class_oop = SUPERCLASS (class_oop))
+      /* Add pools separately for each class.  */
+      for (myClass = _gst_get_class_object (_gst_this_class); !IS_NIL (myClass);
+           myClass = SUPERCLASS (myClass))
+        p_end = add_local_pool_resolution (myClass, p_end);
+    }
+
+  for (pool = linearized_pools; pool; pool = pool->next)
     {
       assocOOP =
-	dictionary_association_at (_gst_class_variable_dictionary
-				   (class_oop), varName);
+	dictionary_association_at (pool->poolOOP, varName);
 
       if (!IS_NIL (assocOOP))
 	return (assocOOP);
-    }
-
-  /* Now search in the `environments' */
-  for (class_oop = myClass; !IS_NIL (class_oop);
-       class_oop = SUPERCLASS (class_oop))
-    {
-      class = (gst_class) OOP_TO_OBJ (class_oop);
-      assocOOP =
-	_gst_namespace_association_at (class->environment, varName);
-      if (!IS_NIL (assocOOP))
-	return (assocOOP);
-    }
-
-  /* and in the shared pools */
-  for (class_oop = myClass; !IS_NIL (class_oop);
-       class_oop = SUPERCLASS (class_oop))
-    {
-      class = (gst_class) OOP_TO_OBJ (class_oop);
-      numPools = NUM_OOPS (OOP_TO_OBJ (class->sharedPools));
-      for (i = 0; i < numPools; i++)
-	{
-	  poolDictionaryOOP = ARRAY_AT (class->sharedPools, i + 1);
-	  assocOOP =
-	    _gst_namespace_association_at (poolDictionaryOOP, varName);
-	  if (!IS_NIL (assocOOP))
-	    return (assocOOP);
-	}
     }
 
   return (_gst_nil_oop);

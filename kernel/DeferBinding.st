@@ -132,15 +132,10 @@ in the scope of a given class are used.'>
 	assoc isNil ifFalse: [^assoc].
 
 	"Look for the binding in the class environment."
-	class withAllSuperclassesDo: 
+	class allSharedPoolDictionariesDo: 
 		[:env | 
-		| pools |
-		assoc := env environment associationAt: self key ifAbsent: [nil].
-		assoc isNil ifFalse: [^assoc].
-		pools := env sharedPoolDictionaries.
-		pools do: [:each | 
-		    assoc := each associationAt: self key ifAbsent: [nil].
-		    assoc isNil ifFalse: [^assoc]]].
+		assoc := env hereAssociationAt: self key ifAbsent: [nil].
+		assoc isNil ifFalse: [^assoc]].
 
 	"Create it as a temporary."
 	defaultDictionary at: self key ifAbsentPut: [nil].
