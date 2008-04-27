@@ -359,7 +359,9 @@ Object subclass: STSymbolTable [
 	<category: 'private'>
 	self class insideFilein ifFalse: [^nil].
 	(symbol at: 1) isUppercase ifFalse: [^nil].
-	^Undeclared associationAt: symbol ifAbsent: [Undeclared add: symbol -> nil]
+	^Undeclared associationAt: symbol ifAbsent:
+	    [Undeclared add: (VariableBinding key: symbol value: nil
+					      environment: Undeclared)]
     ]
 ]
 
