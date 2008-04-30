@@ -314,7 +314,8 @@ All classes in the system are subclasses of me.'>
 	| dependencies |
 	dependencies := Dependencies at: self ifAbsent: [^anObject].
 	dependencies remove: anObject ifAbsent: [].
-	dependencies size < 1 ifTrue: [self release].
+	dependencies size < 1 ifTrue: [
+	    Dependencies removeKey: self ifAbsent: []].
 	^anObject
     ]
 

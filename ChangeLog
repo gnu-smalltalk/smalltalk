@@ -1,3 +1,7 @@
+2008-04-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Object.st: Inline call to #release.
+
 2008-04-25  Paolo Bonzini  <bonzini@gnu.org>
             Stephen Compall  <scompall@nocandysw.com>
 
