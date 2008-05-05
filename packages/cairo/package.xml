@@ -1,0 +1,18 @@
+<package>
+  <name>Cairo</name>
+  <namespace>Cairo</namespace>
+
+  <filein>CairoFuncs.st</filein>
+  <filein>CairoContext.st</filein>
+  <filein>CairoTransform.st</filein>
+  <filein>CairoSurface.st</filein>
+  <filein>CairoPattern.st</filein>
+
+  <library>libcairo</library>
+
+  <file>CairoFuncs.st</file>
+  <file>CairoContext.st</file>
+  <file>CairoTransform.st</file>
+  <file>CairoSurface.st</file>
+  <file>CairoPattern.st</file>
+</package>

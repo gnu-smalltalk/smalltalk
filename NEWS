@@ -85,7 +85,11 @@ o   Packages can specify start/stop scripts.  Start scripts can be activated
 
 o   Unbuffered sockets available from class TCP.StreamSocket.
 
+
 New goodies:
+
+o   Bindings to Cairo and LibSDL provided by Tony Garnock-Jones and
+    Brad Watson.
 
 o   DBI supports querying tables for schema information, and is integrated
     with the "ROE" (Relational Object Expression) package.  ROE support is

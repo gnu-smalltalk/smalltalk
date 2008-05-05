@@ -42,6 +42,13 @@ case "$host" in
   alpha*-*-*) CFLAGS="$CFLAGS -mieee" ;;
 esac
 
+# We don't require Automake 1.10, so invoke _AM_DEPENDENCIES manually.  And
+# since we actually use Objective-C only on Mac OS (for libsdl), for now we
+# get by with using gcc as an Objective-C compiler.
+AC_SUBST(OBJC, [$CC])
+AC_SUBST(OBJCFLAGS, [$CFLAGS])
+_AM_DEPENDENCIES(OBJC)
+
 AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_LN_S
@@ -387,6 +394,35 @@ GST_PACKAGE_ENABLE([NCurses],
   [ac_cv_lib_ncurses_initscr])
 GST_PACKAGE_ENABLE([NetClients], [net])
 GST_PACKAGE_ENABLE([DhbNumericalMethods], [numerics])
+
+GST_PACKAGE_ENABLE([Cairo], [cairo],
+  [GST_HAVE_LIB(cairo, cairo_save)],
+  [ac_cv_lib_cairo_cairo_save])
+
+GST_PACKAGE_ENABLE([LibSDL], [sdl/libsdl],
+  [AM_PATH_SDL([], gst_cv_sdl=yes, gst_cv_sdl=no)
+  case "$SDL_LIBS" in
+    *-framework,Cocoa* | *"-framework Cocoa"*) gst_cv_sdl_uses_cocoa=yes ;;
+    *) gst_cv_sdl_uses_cocoa=no ;;
+  esac
+  AM_CONDITIONAL([HAVE_COCOA], [test $gst_cv_sdl_uses_cocoa = yes])],
+  [gst_cv_sdl],
+  [Makefile], [sdl.la])
+GST_PACKAGE_ENABLE([CairoSDL], [sdl/cairo],
+  [ac_cv_lib_cairo_cairo_save gst_cv_sdl])
+GST_PACKAGE_ENABLE([LibSDL_image], [sdl/libsdl_image],
+  [GST_HAVE_LIB(SDL_image, IMG_Linked_Version)],
+  [ac_cv_lib_SDL_image_IMG_Linked_Version])
+GST_PACKAGE_ENABLE([LibSDL_mixer], [sdl/libsdl_mixer],
+  [GST_HAVE_LIB(SDL_mixer, Mix_Linked_Version)],
+  [ac_cv_lib_SDL_mixer_Mix_Linked_Version])
+GST_PACKAGE_ENABLE([LibSDL_sound], [sdl/libsdl_sound],
+  [GST_HAVE_LIB(SDL_sound, Sound_GetLinkedVersion)],
+  [ac_cv_lib_SDL_sound_Sound_GetLinkedVersion])
+GST_PACKAGE_ENABLE([LibSDL_ttf], [sdl/libsdl_ttf],
+  [GST_HAVE_LIB(SDL_ttf, TTF_Init)],
+  [ac_cv_lib_SDL_ttf_TTF_Init])
+
 GST_PACKAGE_ENABLE([Compiler], [stinst/compiler])
 GST_PACKAGE_ENABLE([Parser], [stinst/parser])
 GST_PACKAGE_ENABLE([ClassPublisher], [stinst/doc])

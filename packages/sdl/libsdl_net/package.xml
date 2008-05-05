@@ -1,0 +1,10 @@
+<package>
+  <name>LibSDL_net</name>
+  <namespace>SDL</namespace>
+
+  <filein>SDL_net.st</filein>
+
+  <library>libSDL_net</library>
+
+  <file>SDL_net.st</file>
+</package>

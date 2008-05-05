@@ -53,6 +53,8 @@
   <file>README</file>
   <file>GenClasses.st</file>
   <file>Dinner.st</file>
+  <file>CairoBlit.st</file>
+  <file>CairoDemo.st</file>
   <file>Prolog.st</file>
   <file>EditStream.st</file>
   <file>PipeStream.st</file>

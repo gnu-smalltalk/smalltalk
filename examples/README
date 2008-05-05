@@ -11,6 +11,9 @@ Dan Ingalls! 	Squeak.  It executes two pieces of code and deduces the
 		case) -- they usually coincide to two digits with the speeds
 		given by the GST runtime!
 
+CairoBlit.st    A simple example of the Cairo and SDL bindings.
+by tonyg
+
 Case.st		A nice object for C-switch like behavior. Although it is slower
 by Ulf		than compiler-optimized ifs, try it: it really works nice.
 Dambacher

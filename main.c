@@ -339,7 +339,12 @@ main(int argc, const char **argv)
     (struct loaded_file *) alloca (sizeof (struct loaded_file) * argc);
 
   gst_set_executable_path (argv[0]);
-  parse_args (argc, argv);
+#ifdef __APPLE__
+  if (argc >= 2 && strncmp (argv[1], "-psn", 4) == 0)
+    gst_smalltalk_args (argc - 1, argv + 1);
+  else
+#endif
+    parse_args (argc, argv);
 
   /* These might go away in the next release.  */
   if (!kernel_dir)

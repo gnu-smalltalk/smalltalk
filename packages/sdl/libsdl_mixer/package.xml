@@ -1,0 +1,10 @@
+<package>
+  <name>LibSDL_mixer</name>
+  <namespace>SDL</namespace>
+
+  <filein>SDL_mixer.st</filein>
+
+  <library>libSDL_mixer</library>
+
+  <file>SDL_mixer.st</file>
+</package>

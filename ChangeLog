@@ -1,3 +1,8 @@
+2008-05-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/CairoBlit.st: New.
+	* examples/CairoDemo.st: New.
+
 2008-04-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Object.st: Inline call to #release.
