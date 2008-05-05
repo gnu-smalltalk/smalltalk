@@ -409,6 +409,7 @@ GST_PACKAGE_ENABLE([LibSDL], [sdl/libsdl],
   [gst_cv_sdl],
   [Makefile], [sdl.la])
 GST_PACKAGE_ENABLE([CairoSDL], [sdl/cairo],
+  [],
   [ac_cv_lib_cairo_cairo_save gst_cv_sdl])
 GST_PACKAGE_ENABLE([LibSDL_image], [sdl/libsdl_image],
   [GST_HAVE_LIB(SDL_image, IMG_Linked_Version)],
