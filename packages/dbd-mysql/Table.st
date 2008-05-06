@@ -56,7 +56,7 @@ Table subclass: MySQLTable [
 
     printAttribute: each on: aStream [
 	<category: 'printing'>
-	stream
+	aStream
 	    nextPut: $`;
 	    nextPutAll: each;
 	    nextPut: $`
