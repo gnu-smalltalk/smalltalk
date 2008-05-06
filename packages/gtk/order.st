@@ -157,6 +157,7 @@ Object subclass: IncludesScanner [
 				f := dir / fname.
 				f isReadable ifTrue: [prefix := dir]].
 			(self hasCorrectPrefix: fname) ifTrue: [r add: prefix , fname]]].
+	fs close.
 	^r
     ]
 

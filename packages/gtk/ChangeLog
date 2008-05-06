@@ -1,3 +1,7 @@
+2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* order.st: Close those files!
+
 2008-04-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* order.st: Fix problem with new file classes.
