@@ -652,6 +652,63 @@ lookup_function (const char *funcName)
 }
 
 
+int
+_gst_c_type_size (int type)
+{
+  switch (type)
+    {
+    case CDATA_CHAR:
+      return sizeof (char);
+    case CDATA_UCHAR:
+      return sizeof (unsigned char);
+
+    case CDATA_SHORT:
+      return sizeof (short);
+    case CDATA_USHORT:
+      return sizeof (unsigned short);
+
+    case CDATA_INT:
+      return sizeof (int);
+    case CDATA_UINT:
+      return sizeof (unsigned int);
+
+    case CDATA_LONG:
+      return sizeof (long);
+    case CDATA_ULONG:
+      return sizeof (unsigned long);
+
+    case CDATA_FLOAT:
+      return sizeof (float);
+    case CDATA_DOUBLE:
+      return sizeof (double);
+    case CDATA_LONG_DOUBLE:
+      return sizeof (long double);
+
+    case CDATA_OOP:
+      return sizeof (OOP);
+
+    case CDATA_WCHAR:
+      return sizeof (wchar_t);
+
+    case CDATA_WSTRING:
+      return sizeof (wchar_t *);
+
+    case CDATA_STRING:
+    case CDATA_STRING_OUT:
+    case CDATA_SYMBOL:
+    case CDATA_BYTEARRAY:
+    case CDATA_BYTEARRAY_OUT:
+    case CDATA_SYMBOL_OUT:
+      return sizeof (char *);
+
+    case CDATA_COBJECT:
+      return sizeof (void *);
+
+    case CDATA_COBJECT_PTR:
+      return sizeof (void **);
+    }
+}
+
 OOP
 _gst_invoke_croutine (OOP cFuncOOP,
 		      OOP receiver,
@@ -671,7 +728,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   if (IS_NIL (desc->cFunction))
     return (NULL);
 
-  c_func_cur = (cfunc_info *) COBJECT_VALUE (desc->cFunction);
+  c_func_cur = (cfunc_info *) cobject_value (desc->cFunction);
   if (!c_func_cur)
     return (NULL);
 
@@ -752,7 +809,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
         switch (arg->cType)
           {
           case CDATA_COBJECT_PTR:
-	    SET_COBJECT_VALUE (arg->oop, arg->u.cObjectPtrVal.ptrVal);
+	    set_cobject_value (arg->oop, arg->u.cObjectPtrVal.ptrVal);
 	    continue;
 
           case CDATA_WSTRING_OUT:
@@ -1053,13 +1110,13 @@ push_smalltalk_obj (OOP oop,
 	  /* Set up an indirect pointer to protect against the OOP
 	     moving during the call-out.  */
 	  cp->u.cObjectPtrVal.pPtrVal = &cp->u.cObjectPtrVal.ptrVal;
-	  cp->u.cObjectPtrVal.ptrVal = COBJECT_VALUE (oop);
+	  cp->u.cObjectPtrVal.ptrVal = cobject_value (oop);
 	  cp->oop = oop;
 	  SET_TYPE (&ffi_type_pointer);
 	  return;
 
 	case CDATA_COBJECT:
-	  cp->u.ptrVal = COBJECT_VALUE (oop);
+	  cp->u.ptrVal = cobject_value (oop);
 	  SET_TYPE (&ffi_type_pointer);
 	  return;
 	}
@@ -1162,8 +1219,8 @@ c_to_smalltalk (cparam *result, OOP returnTypeOOP)
 	{
 	  if (IS_INT (returnTypeOOP))
 	    returnTypeOOP = _gst_nil_oop;
-	  resultOOP = _gst_c_object_new (result->u.ptrVal, returnTypeOOP,
-					 _gst_c_object_class);
+	  resultOOP = COBJECT_NEW (result->u.ptrVal, returnTypeOOP,
+				   _gst_c_object_class);
 	}
       else if (returnType == CDATA_STRING || returnType == CDATA_STRING_OUT)
 	{
@@ -1244,7 +1301,7 @@ _gst_make_descriptor (OOP classOOP,
      OOPs */
   incPtr = INC_SAVE_POINTER ();
 
-  cFunction = COBJECT_NEW (cfi);
+  cFunction = COBJECT_NEW (cfi, _gst_nil_oop, _gst_c_object_class);
   INC_ADD_OOP (cFunction);
 
   cFunctionName = _gst_string_new (funcName);

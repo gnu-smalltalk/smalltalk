@@ -118,6 +118,9 @@ typedef struct gst_cfunc_descriptor
 }
  *gst_cfunc_descriptor;
 
+/* Returns the size of an object passed to a C routine with type TYPE.  */
+extern int _gst_c_type_size (int type);
+
 /* Invokes a C routine.  Arguments passed from Smalltalk are stored starting
    from ARGS, and the object to which the message that called-out was
    sent is RECEIVER.  CFUNCOOP is the C function descriptor used

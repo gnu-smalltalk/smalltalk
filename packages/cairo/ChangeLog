@@ -1,0 +1,4 @@
+2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* CairoContext.st: Use GCed CStructs.
+	* CairoTransform.st: Use GCed CStructs.

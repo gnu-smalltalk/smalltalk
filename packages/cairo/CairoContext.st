@@ -772,11 +772,9 @@ CairoContextProvider subclass: CairoContext [
 	 in particular, affects the advance and not the extent."
 	<category: 'text'>
 	| ext |
-	ext := CairoTextExtents new.
-	^[
-	    Cairo textExtents: context utf8: aString extents: ext.
-	    TextExtents from: ext
-	] ensure: [ ext free ]
+	ext := CairoTextExtents gcNew.
+	Cairo textExtents: context utf8: aString extents: ext.
+	^TextExtents from: ext
     ]
 ].
 

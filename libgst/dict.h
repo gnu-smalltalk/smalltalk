@@ -291,6 +291,7 @@ typedef struct gst_cobject
 {
   OBJ_HEADER;
   OOP type;
+  OOP storage;
 }
  *gst_cobject;
 
@@ -516,12 +517,14 @@ extern OOP _gst_shared_pool_dictionary (OOP class_oop)
   ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
 
-/* Creates a new CObject pointing to cObjPtr, extracting the class
+/* Creates a new CObject pointing to cObjOfs bytes in BASEOOP (or
+   at the absolute address cObjOfs if BASEOOP is NULL), extracting the class
    to be instantiated from the CType, TYPEOOP, or using the provided
    class if TYPEOOP is nil.  */
-extern OOP _gst_c_object_new (PTR cObjPtr,
-			      OOP typeOOP,
-			      OOP defaultClassOOP) 
+extern OOP _gst_c_object_new_base (OOP baseOOP,
+			           uintptr_t cObjOfs,
+			           OOP typeOOP,
+			           OOP defaultClassOOP) 
   ATTRIBUTE_HIDDEN;
 
 /* Creates a new String with LEN indexed instance variables.  */

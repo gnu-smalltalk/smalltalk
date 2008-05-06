@@ -1,3 +1,16 @@
+2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ByteArray.st: Rewrite memory access methods in terms
+	of CObject.
+	* kernel/CObject.st: Add support for ByteArrays as CObject storage.
+	Add #= and #hash.
+	* kernel/CStruct.st: Add #gcNew.
+	* kernel/CType.st: Add #gcNew.
+	* kernel/Object.st: Add #isCObject.
+
+	* tests/cobjects.st: Add more tests.
+	* tests/cobjects.ok: Update.
+
 2008-05-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CObject.st: Remove odd cases of #at:put:type: and

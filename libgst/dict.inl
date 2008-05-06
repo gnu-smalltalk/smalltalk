@@ -198,6 +198,17 @@ static inline OOP floate_new (double f);
    problems.  */
 static inline OOP floatq_new (long double f);
 
+/* Returns the address of the data stored in a CObject.  */
+static inline PTR cobject_value (OOP oop);
+
+/* Sets the address of the data stored in a CObject.  */
+static inline void set_cobject_value (OOP oop, PTR val);
+
+/* Return whether the address of the data stored in a CObject, offsetted
+   by OFFSET bytes, is still in bounds.  */
+static inline mst_Boolean cobject_index_check (OOP oop, intptr_t offset,
+					       size_t size);
+
 /* Answer true if OOP is a SmallInteger or a LargeInteger of an
    appropriate size.  */
 static inline mst_Boolean is_c_int_32 (OOP oop);
@@ -304,26 +315,19 @@ static inline int64_t to_c_int_64 (OOP oop);
   (((gst_message)OOP_TO_OBJ(messageOOP))->args)
 
 /* Answer a new CObject pointing to COBJPTR.  */
-#define COBJECT_NEW(cObjPtr) \
-  (_gst_c_object_new(cObjPtr, _gst_nil_oop, _gst_c_object_class))
+#define COBJECT_NEW(cObjPtr, typeOOP, defaultClassOOP) \
+  (_gst_c_object_new_base(_gst_nil_oop, (uintptr_t) cObjPtr, \
+		          typeOOP, defaultClassOOP))
 
-/* Answer the void * extracted from a CObject, COBJ (*not* an OOP,
+/* Answer the offset component of the a CObject, COBJ (*not* an OOP,
    but an object pointer).  */
-#define COBJECT_VALUE_OBJ(cObj) \
-  ( ((PTR *) cObj) [TO_INT(((gst_object)cObj)->objSize) - 1])
+#define COBJECT_OFFSET_OBJ(cObj) \
+  ( ((uintptr_t *) cObj) [TO_INT(cObj->objSize) - 1])
 
-/* Sets to VALUE the void * pointed to by the CObject, COBJ (*not* an
+/* Sets to VALUE the offset component of the CObject, COBJ (*not* an
    OOP, but an object pointer).  */
-#define SET_COBJECT_VALUE_OBJ(cObj, value) \
-  ( ((PTR *) cObj) [TO_INT(((gst_object)cObj)->objSize) - 1] = (PTR)(value))
-
-/* Sets to VALUE the void * pointed to by the CObject, COBJOOP.  */
-#define COBJECT_VALUE(cObjOOP) \
-  COBJECT_VALUE_OBJ(OOP_TO_OBJ(cObjOOP))
-
-/* Sets to VALUE the void * pointed to by the CObject, COBJOOP.  */
-#define SET_COBJECT_VALUE(cObjOOP, value) \
-  SET_COBJECT_VALUE_OBJ(OOP_TO_OBJ(cObjOOP), value)
+#define SET_COBJECT_OFFSET_OBJ(cObj, value) \
+  ( ((uintptr_t *) cObj) [TO_INT(cObj->objSize) - 1] = (uintptr_t)(value))
 
 /* Answer the superclass of the Behavior, CLASS_OOP.  */
 #define SUPERCLASS(class_oop) \
@@ -1483,4 +1487,49 @@ from_c_uint_64 (uint64_t ui)
   ba->bytes[7] = (gst_uchar) (ui >> 56);
 
   return (oop);
+}
+
+static inline PTR
+cobject_value (OOP oop)
+{
+  gst_cobject cObj = (gst_cobject) OOP_TO_OBJ (oop);
+  if (IS_NIL (cObj->storage))
+    return (PTR) COBJECT_OFFSET_OBJ (cObj);
+  else
+    {
+      gst_uchar *baseAddr = ((gst_byte_array) OOP_TO_OBJ (cObj->storage))->bytes;
+      return (PTR) (baseAddr + COBJECT_OFFSET_OBJ (cObj));
+    }
+}
+
+/* Sets the address of the data stored in a CObject.  */
+static inline void
+set_cobject_value (OOP oop, PTR val)
+{
+  gst_cobject cObj = (gst_cobject) OOP_TO_OBJ (oop);
+  cObj->storage = _gst_nil_oop;
+  SET_COBJECT_OFFSET_OBJ (cObj, (uintptr_t) val);
+}
+  
+
+/* Return whether the address of the data stored in a CObject, offsetted
+   by OFFSET bytes, is still in bounds.  */
+static inline mst_Boolean cobject_index_check (OOP oop, intptr_t offset,
+					       size_t size)
+{
+  gst_cobject cObj = (gst_cobject) OOP_TO_OBJ (oop);
+  OOP baseOOP = cObj->storage;
+  intptr_t maxOffset;
+  if (IS_NIL (baseOOP))
+    return true;
+  
+  offset += COBJECT_OFFSET_OBJ (cObj);
+  if (offset < 0)
+    return false;
+
+  maxOffset = SIZE_TO_BYTES (NUM_WORDS (OOP_TO_OBJ (baseOOP)));
+  if (baseOOP->flags & F_BYTE)
+    maxOffset -= (baseOOP->flags & EMPTY_BYTES);
+
+  return (offset + size - 1 < maxOffset);
 }

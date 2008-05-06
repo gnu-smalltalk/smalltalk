@@ -97,3 +97,36 @@ returned value is StructB
 
 Execution begins...
 returned value is StructB
+
+Execution begins...
+8
+4369
+8738
+ByteArray (0 0 17 17 34 34 51 51 )
+ error: Invalid argument 8: offset out of range
+returned value is nil
+
+Execution begins...
+ error: Invalid argument -1: offset out of range
+returned value is nil
+
+Execution begins...
+ error: Invalid argument 7: offset out of range
+returned value is nil
+
+Execution begins...
+4369
+ error: Invalid argument 8: offset out of range
+returned value is nil
+
+Execution begins...
+returned value is true
+
+Execution begins...
+CInt(0 0 0 0 0 0 0 0 @ 8)
+ error: Invalid argument 8: offset out of range
+returned value is nil
+
+Execution begins...
+ByteArray (0 0 0 0 65 0 0 0 )
+returned value is ByteArray new: 8 "<0>"

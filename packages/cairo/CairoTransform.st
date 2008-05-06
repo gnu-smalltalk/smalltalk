@@ -41,11 +41,6 @@ CStruct subclass: CairoMatrix [
 
     <category: 'Cairo-C interface'>
 
-    CairoMatrix class >> new [
-	<category: 'instance creation'>
-	^ super new addToBeFinalized
-    ]
-
     initIdentity [
 	<category: 'initialize'>
         Cairo matrixInitIdentity: self.
@@ -53,20 +48,16 @@ CStruct subclass: CairoMatrix [
 
     withPoint: aPoint do: block [
 	<category: 'using'>
-        | ox oy |
-	ox := CDouble value: aPoint x.
-	oy := CDouble value: aPoint y.
-	^ [
-	    block value:self value:ox value: oy
-	] ensure: [
-	    ox ifNotNil: [ :x | x free ].
-	    oy ifNotNil: [ :y | y free ]].
+	^block
+	    value: self 
+	    value: (CDouble gcValue: aPoint x)
+	    value: (CDouble gcValue: aPoint y)
     ]
 
     copy [
 	<category: 'copying'>
         | shiny |
-        shiny := CairoMatrix new.
+        shiny := CairoMatrix gcNew.
         Cairo matrixInit: shiny 
 	      xx: self xx value
 	      yx: self yx value
@@ -340,7 +331,7 @@ Transform subclass: MatrixTransform [
 	"Initialize the receiver so that it represents the identity transform."
 
 	<category: 'initialize'>
-        matrix := CairoMatrix new initIdentity.
+        matrix := CairoMatrix gcNew initIdentity.
     ]
 
     accept: aVisitor [

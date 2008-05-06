@@ -43,6 +43,14 @@ CObject subclass: CCompound [
 	
     ]
 
+    CCompound class >> gcNew [
+	"Allocate a new instance of the receiver, backed by garbage-collected
+	 storage."
+
+	<category: 'instance creation'>
+	^self gcAlloc: self sizeof
+    ]
+
     CCompound class >> new [
 	"Allocate a new instance of the receiver. To free the memory after
 	 GC, remember to call #addToBeFinalized."

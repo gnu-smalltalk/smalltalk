@@ -1782,12 +1782,12 @@ effect that the VM can simply delay the releasing of the memory associated
 to the object, instead of being forced to waste memory even after
 finalization happens. 
 
-An object must be explicitly marked as to be finalized @emph{every time the
-image is loaded}; that is, finalizability is not preserved by an
-image save.  This was done because in most cases finalization is
-used together with @code{CObject}s that would be stale when the image is
-loaded again, causing a segmentation violation as soon as they are accessed
-by the finalization method.
+An object must be explicitly marked as to be finalized @emph{every time
+the image is loaded}; that is, finalizability is not preserved by an
+image save.  This was done because in most cases finalization is used
+together with operating system resources that would be stale when the
+image is loaded again.  For @code{CObject}s, in particular, freeing them
+would cause a segmentation violation.
 @end defmethod
 
 @defmethod Object removeToBeFinalized
@@ -3431,14 +3431,39 @@ subclass called @code{CScalar}, which has subclasses called
 @code{C@var{mumble}}.  These subclasses can answer size and alignment
 information.
 
-Instances of @code{CObject} holds a pointer to a C type variable.  The
-variable can be allocated from Smalltalk by doing @code{@var{type}
-new}, where @var{type} is a @code{CType} subclass instance, or it
-may have been returned through the C callout mechanism as a return
-value.  Remember that @code{CObject} and its subclasses represent a
-pointer to a C object and as such provide the full range of operations
-supported by C pointers.
+Instances of @code{CObject} can hold a raw C pointer (for example in
+@code{malloc}ed heap)), or can delegate their storage to a @code{ByteArray}.
+In the latter case, the storage is automatically garbage collected when
+the @code{CObject} becomes dead, and the VM checks accesses to make sure
+they are in bounds.  On the other hand, the storage may move, and for this
+reason extra care must be put when using this kind of @code{CObject} with
+C routines that call back into Smalltalk, or that store the passed pointer
+somewhere.
 
+Instances of @code{CObject} can be created in many ways:
+@itemize
+@item creating an instance with @code{@var{class} new} initializes
+  the pointer to @code{NULL};
+
+@item doing @code{@var{type} new}, where @var{type} is a @code{CType}
+  subclass instance, allocates a new instance with @code{malloc}.
+
+@item doing @code{@var{type} gcNew}, where @var{type} is a @code{CType}
+  subclass instance, allocates a new instance backed by garbage-collected
+  storage.
+
+@end itemize
+
+@code{CStruct} and @code{CUnion} subclasses are special.  First,
+@code{new} allocates a new instance with @code{malloc} instead of initializing
+the pointer to @code{NULL}. Second, they support @code{gcNew} which
+creates a new instance backed by garbage-collected storage.
+
+@code{CObject}s created by the C callout mechanism are never backed by
+garbage-collected storage.
+
+@code{CObject} and its subclasses represent a pointer to a C object and
+as such provide the full range of operations supported by C pointers.
 For example, @code{+} @code{anInteger} which returns a CObject which is
 higher in memory by @code{anInteger} times the size of each item. There
 is also @code{-} which acts like @code{+} if it is given an
@@ -3449,37 +3474,35 @@ backward, by either 1 or @code{n} characters.  Only the pointer to the
 string is changed; the actual characters in the string remain untouched.
 
 CObjects can be divided into two families, scalars and non-scalars,
-just like C data types.  Scalars fetch a Smalltalk object when sent
-the @code{value} message, and change their value when sent the
-@code{value:} message.  Non-scalars do not support these two messages.
+just like C data types.  Scalars fetch a Smalltalk object when sent the
+@code{value} message, and change their value when sent the @code{value:}
+message.  Non-scalars do not support these two messages.  Non-scalars
+include instances of @code{CArray} and subclasses of @code{CStruct}
+and @code{CUnion} (but not @code{CPtr}).
 
-@code{replaceWith:} @code{aString} replaces the string the instance
-points to with the new string.  Actually, it copies the bytes from the
-Smalltalk @code{String} instance aString into the C string object, and null
-terminates.  Be sure that the C string has enough room!  You can also
-use a Smalltalk @code{ByteArray} as the data source.
-
-Non-scalars include instances of @code{CArray}, @code{CPtr} and
-subclasses of @code{CStruct} and @code{CUnion}.
-
-CPtrs and CArrays get their underlying element type through a
+@code{CPtr}s and @code{CArray}s get their underlying element type through a
 @code{CType} subclass instance which is associated with the
 @code{CArray} or @code{CPtr} instance.
 
-CPtr's also have @code{value} and @code{value:} which get or change the
-underlying value that's pointed to.  In practice, @code{value} dereferences
-the pointer.  CString is a subclass that answers a Smalltalk @code{String} when
-sent @code{value}, and automatically allocates storage to copy and
-null-terminate a Smalltalk @code{String} when sent @code{value:}.
+@code{CPtr}'s @code{value} and @code{value:} method get or change
+the underlying value that's pointed to.  @code{value} returns another
+@code{CObject} corresponding to the pointed value.  That's because, for
+example, a @code{CPtr} to @code{long} points to a place in memory where
+a pointer to long is stored.  It is really a @code{long **} and must be
+dereferenced twice with @code{cPtr value value} to get the @code{long}.
 
-Note that a @code{CPtr} to @code{long} points to a place in memory where
-a pointer to long is stored.  In other words it is really a @code{long **}
-and must be dereferenced twice with @code{cPtr value value} to get the
-@code{long}.
+@code{CString} is a subclass of @code{CPtr} that answers a Smalltalk
+@code{String} when sent @code{value}, and automatically allocates
+storage to copy and null-terminate a Smalltalk @code{String} when sent
+@code{value:}.  @code{replaceWith:} replaces the string the instance
+points to with a new string or @code{ByteArray}, passed as the argument.
+Actually, it copies the bytes from the Smalltalk @code{String} instance
+aString into the same buffer already pointed to by the @code{CString},
+with a null terminator.
 
 Finally, there are @code{CStruct} and @code{CUnion}, which are abstract
 subclasses of @code{CObject}@footnote{Actually they have a common superclass
-named @code{CCompound}.}.  In the following I will refer to CStruct, but the
+named @code{CCompound}.}.  The following will refer to CStruct, but the
 same considerations apply to CUnion as well, with the only difference that
 CUnions of course implement the semantics of a C union.
 

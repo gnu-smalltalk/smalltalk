@@ -245,13 +245,12 @@ as the destination for a Cairo surface.'>
 
 	<category: 'drawing-SDL'>
 	| r |
-	r := SDL.SdlRect new.
-	[r x value: aRect left.
+	r := SDL.SdlRect gcNew.
+	r x value: aRect left.
 	r y value: aRect top.
 	r w value: aRect width.
 	r h value: aRect height.
-	SdlVideo sdlFillRect: surface dstRect: r color: aColorNumber ]
-	    ensure: [ r free ]
+	SdlVideo sdlFillRect: surface dstRect: r color: aColorNumber
     ]
 
     critical: aBlock [

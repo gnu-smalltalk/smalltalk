@@ -9,11 +9,13 @@
 
 * Swazoo (done)
 
-* TwistedPools (almost there)
+* TwistedPools (done)
+
+** garbage-collected storage for CObjects (done)
 
 * more libraries
-** Cairo (must be documented, cross-platform checking)
-** SDL (likewise)
+** Cairo (missing cross-platform checking)
+** SDL (missing likewise)
 
 * less likely
 ** Expat
@@ -21,7 +23,6 @@
 ** 3D gnuplot?
 
 * maybe
-** allocate CStructs in ByteArrays?
 ** DBI refactoring and prepared statements support
 ** IPv6
 ** cookies and redirects for HTTPClient

@@ -2,6 +2,17 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 3.0.2 TO 3.0a
 
+o   CObjects can be backed with garbage-collected (as opposed to
+    heap-allocated) storage.  Using this is not always possible, for
+    example for CObjects stored by external libraries or passed to
+    functions that call back to Smalltalk or otherwise may cause garbage
+    collections.  If it is, however, it is easier to use, faster and
+    more predictable than finalization.  As an added benefit,
+    garbage-collected CObjects accesses are bounds-checked.
+
+    Garbage-collected CObjects are created by sending #gcNew instead
+    of #new.
+
 o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
     the instance of GNU Smalltalk that produced the snapshot, and
     true in the instance of GNU Smalltalk that was restored from the

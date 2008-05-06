@@ -3913,7 +3913,7 @@ primitive VMpr_CObject_allocType [succeed,fail]
     {
       intptr_t arg2 = TO_INT (oop2);
       PTR ptr = xmalloc (arg2);
-      OOP cObjectOOP = _gst_c_object_new (ptr, oop1, oop3);
+      OOP cObjectOOP = COBJECT_NEW (ptr, oop1, oop3);
 
       POP_N_OOPS (2);
       SET_STACKTOP (cObjectOOP);
@@ -4394,7 +4394,7 @@ primitive VMpr_CObject_at :
 
   oop3 = POP_OOP ();
   oop2 = POP_OOP ();
-  oop1 = POP_OOP ();
+  oop1 = STACKTOP ();
   if (IS_INT (oop2)
       && ((IS_INT (oop3) && id == prim_id (VMpr_CObject_at))
 	  || is_a_kind_of (OOP_CLASS (oop3), _gst_c_type_class)))
@@ -4404,40 +4404,41 @@ primitive VMpr_CObject_at :
       arg2 = TO_INT (oop2);
       if (IS_INT (oop3))
 	{			/* int type spec means a scalar type */
-	  intptr_t arg3;
-	  addr = COBJECT_VALUE (oop1);
-          addr += arg2;		/* compute effective address */
-	  arg3 = TO_INT (oop3);
+	  intptr_t arg3 = TO_INT (oop3);
 
+	  if (!cobject_index_check (oop1, arg2, _gst_c_type_size (arg3)))
+	    goto fail;
+
+	  addr = ((char *) cobject_value (oop1)) + arg2;
 	  switch (arg3)
 	    {
 	    case CDATA_CHAR:
 	    case CDATA_UCHAR:
-	      PUSH_OOP (CHAR_OOP_AT (*(gst_uchar *) addr));
+	      SET_STACKTOP (CHAR_OOP_AT (*(gst_uchar *) addr));
 	      PRIM_SUCCEEDED;
 
 	    case CDATA_SHORT:
-	      PUSH_INT (*(short *) addr);
+	      SET_STACKTOP_INT (*(short *) addr);
 	      PRIM_SUCCEEDED;
 
 	    case CDATA_USHORT:
-	      PUSH_INT (*(unsigned short *) addr);
+	      SET_STACKTOP_INT (*(unsigned short *) addr);
 	      PRIM_SUCCEEDED;
 
 	    case CDATA_LONG:
-	      PUSH_OOP (FROM_C_LONG (*(long *) addr));
+	      SET_STACKTOP (FROM_C_LONG (*(long *) addr));
 	      PRIM_SUCCEEDED;
 
 	    case CDATA_ULONG:
-	      PUSH_OOP (FROM_C_ULONG (*(unsigned long *) addr));
+	      SET_STACKTOP (FROM_C_ULONG (*(unsigned long *) addr));
 	      PRIM_SUCCEEDED;
 
 	    case CDATA_FLOAT:
-	      PUSH_OOP (floate_new (*(float *) addr));
+	      SET_STACKTOP (floate_new (*(float *) addr));
 	      PRIM_SUCCEEDED;
 
 	    case CDATA_DOUBLE:
-	      PUSH_OOP (floatd_new (*(double *) addr));
+	      SET_STACKTOP (floatd_new (*(double *) addr));
 	      PRIM_SUCCEEDED;
 
 	    case CDATA_STRING:
@@ -4446,62 +4447,78 @@ primitive VMpr_CObject_at :
 		strAddr = (char **) addr;
 		if (*strAddr)
 		  {
-		    PUSH_OOP (_gst_string_new (*strAddr));
+		    SET_STACKTOP (_gst_string_new (*strAddr));
 		    PRIM_SUCCEEDED;
 		  }
 		else
 		  {
-		    PUSH_OOP (_gst_nil_oop);
+		    SET_STACKTOP (_gst_nil_oop);
 		    PRIM_SUCCEEDED;
 		  }
 	      }
 	    case CDATA_OOP:
-	      PUSH_OOP (*(OOP *) addr);
+	      SET_STACKTOP (*(OOP *) addr);
 	      PRIM_SUCCEEDED;
 
 	    case CDATA_INT:
-	      PUSH_OOP (FROM_C_INT (*(int *) addr));
+	      SET_STACKTOP (FROM_C_INT (*(int *) addr));
 	      PRIM_SUCCEEDED;
 
 	    case CDATA_UINT:
-	      PUSH_OOP (FROM_C_UINT (*(unsigned int *) addr));
+	      SET_STACKTOP (FROM_C_UINT (*(unsigned int *) addr));
 	      PRIM_SUCCEEDED;
 
 	    case CDATA_LONG_DOUBLE:
-	      PUSH_OOP (floatq_new (*(long double *) addr));
+	      SET_STACKTOP (floatq_new (*(long double *) addr));
 	      PRIM_SUCCEEDED;
 	    }
-
 	}
       else
 	{
+	  OOP baseOOP;
+	  uintptr_t ofs;
+	  inc_ptr incPtr;
+
 	  /* Non-integer oop3: use it as the type of the effective address. */
 
 	  if (id == prim_id (VMpr_CObject_derefAt))
 	    {
-	      addr = *(char **) COBJECT_VALUE (oop1);
-	      if (addr == 0)
+	      if (!cobject_index_check (oop1, arg2, sizeof (uintptr_t)))
+		goto fail;
+
+	      ofs = *(uintptr_t *) (((char *)cobject_value (oop1)) + arg2);
+	      baseOOP = _gst_nil_oop;
+	      if (ofs == 0)
 		{
-		  PUSH_OOP (_gst_nil_oop);
+		  SET_STACKTOP (_gst_nil_oop);
 		  PRIM_SUCCEEDED;
 		}
 	    }
           else
-	    addr = COBJECT_VALUE (oop1);
+	    {
+	      /* No need to enforce bounds here (if we ever will, remember
+		 that a pointer that is one-past the end of the object is
+		 valid!).  */
+		 
+	      gst_cobject cObj = (gst_cobject) OOP_TO_OBJ (oop1);
+	      baseOOP = cObj->storage;
+	      ofs = COBJECT_OFFSET_OBJ (cObj) + arg2;
+	    }
 
-          addr += arg2;		/* compute effective address */
-
-	  /* oop3 could get GC'ed out of existence before it gets used:
-	     it is not on the stack, and _gst_c_object_new could cause a GC */
-	  inc_ptr incPtr;
+	  /* oop3 could get GC'ed out of existence before it gets used: it is
+	     not on the stack, and _gst_c_object_new_base could cause a GC */
 	  incPtr = INC_SAVE_POINTER ();
+	  INC_ADD_OOP (baseOOP);
 	  INC_ADD_OOP (oop3);
-	  PUSH_OOP (_gst_c_object_new (addr, oop3, _gst_c_object_class));
+	  SET_STACKTOP (_gst_c_object_new_base (baseOOP, ofs, oop3,
+					        _gst_c_object_class));
 	  INC_RESTORE_POINTER (incPtr);
 	  PRIM_SUCCEEDED;
 	}
     }
-  UNPOP (3);
+
+ fail:
+  UNPOP (2);
   PRIM_FAILED;
 }
 
@@ -4522,13 +4539,12 @@ primitive VMpr_CObject_atPut [succeed,fail]
   if (IS_INT (oop2) && IS_INT (oop4))
     {
       char *addr;
-      intptr_t arg2;
-      intptr_t arg4;
-      arg2 = TO_INT (oop2);
-      addr = COBJECT_VALUE (oop1);
+      intptr_t arg2 = TO_INT (oop2);
+      intptr_t arg4 = TO_INT (oop4);
+      if (!cobject_index_check (oop1, arg2, _gst_c_type_size (arg4)))
+	goto fail;
 
-      addr += arg2;		/* compute effective address */
-      arg4 = TO_INT (oop4);
+      addr = ((char *) cobject_value (oop1)) + arg2;
       switch (arg4)
 	{
 	case CDATA_CHAR:		/* char */
@@ -4680,7 +4696,50 @@ primitive VMpr_CObject_atPut [succeed,fail]
 	}
     }
 
+ fail:
   UNPOP (3);
+  PRIM_FAILED;
+}
+
+/* CObject address */
+primitive VMpr_CObject_address [succeed]
+{
+  OOP oop1;
+  gst_cobject cObj;
+  uintptr_t ptr;
+  _gst_primitives_executed++;
+
+  oop1 = STACKTOP ();
+  cObj = (gst_cobject) OOP_TO_OBJ (oop1);
+  ptr = (uintptr_t) COBJECT_OFFSET_OBJ (cObj);
+
+  if (IS_NIL (cObj->storage))
+    SET_STACKTOP (FROM_C_ULONG (ptr));
+  else
+    SET_STACKTOP (FROM_C_LONG (ptr));
+
+  PRIM_SUCCEEDED;
+}
+
+
+/* CObject address: */
+primitive VMpr_CObject_addressColon [succeed, fail]
+{
+  OOP oop1, oop2;
+  gst_cobject cObj;
+  _gst_primitives_executed++;
+
+  oop2 = POP_OOP ();
+  oop1 = STACKTOP ();
+  cObj = (gst_cobject) OOP_TO_OBJ (oop1);
+
+  if (IS_NIL (cObj->storage) ? IS_C_ULONG (oop2) : IS_C_LONG (oop2))
+    {
+      SET_COBJECT_OFFSET_OBJ (cObj, TO_C_LONG (oop2));
+      PRIM_SUCCEEDED;
+    }
+
+  UNPOP (1);
   PRIM_FAILED;
 }
 
@@ -4706,7 +4765,7 @@ primitive VMpr_CString_replaceWith [succeed,fail]
       srcBase = STRING_OOP_CHARS (oop2);
       srcLen = NUM_INDEXABLE_FIELDS (oop2);
 
-      dstBase = *(gst_uchar **) COBJECT_VALUE (oop1);
+      dstBase = *(gst_uchar **) cobject_value (oop1);
       memcpy (dstBase, srcBase, srcLen);
       dstBase[srcLen] = '\0';	/* since it's a CString type, we NUL
 				   term it */
@@ -4731,7 +4790,7 @@ primitive VMpr_ByteArray_fromCData_size [succeed,fail]
     {
       intptr_t arg3 = TO_INT (oop3);
       OOP byteArrayOOP =
-	_gst_byte_array_new (COBJECT_VALUE (oop2), arg3);
+	_gst_byte_array_new (cobject_value (oop2), arg3);
       SET_STACKTOP (byteArrayOOP);
       PRIM_SUCCEEDED;
     }
@@ -4754,7 +4813,7 @@ primitive VMpr_String_fromCData_size [succeed,fail]
     {
       intptr_t arg3 = TO_INT (oop3);
       OOP stringOOP =
-	_gst_counted_string_new (COBJECT_VALUE (oop2), arg3);
+	_gst_counted_string_new (cobject_value (oop2), arg3);
       SET_STACKTOP (stringOOP);
       PRIM_SUCCEEDED;
     }
@@ -4772,7 +4831,7 @@ primitive VMpr_String_fromCData [succeed]
 
   oop2 = POP_OOP ();
   oop1 = STACKTOP ();
-  stringOOP = _gst_string_new (COBJECT_VALUE (oop2));
+  stringOOP = _gst_string_new (cobject_value (oop2));
   SET_STACKTOP (stringOOP);
   PRIM_SUCCEEDED;
 }
@@ -4795,7 +4854,7 @@ primitive VMpr_String_ByteArray_asCData :
       PTR data = xmalloc (size);
       if (data)
 	{
-	  OOP cObjectOOP = _gst_c_object_new (data, oop2, _gst_c_object_class);
+	  OOP cObjectOOP = COBJECT_NEW (data, oop2, _gst_c_object_class);
 	  memcpy (data, OOP_TO_OBJ (oop1)->data, size);
 	  POP_OOP ();
 	  SET_STACKTOP (cObjectOOP);

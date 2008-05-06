@@ -33,7 +33,7 @@
 
 
 Object subclass: CObject [
-    | type |
+    | type storage |
     
     <shape: #word>
     <import: CSymbols>
@@ -58,6 +58,31 @@ into their corresponding C values for use in external routines.'>
 	    yourself
     ]
 
+    CObject class >> alloc: nBytes type: cTypeObject [
+	"Allocate nBytes bytes and return a CObject of the given type"
+
+	<category: 'primitive allocation'>
+	<primitive: VMpr_CObject_allocType>
+	nBytes isInteger 
+	    ifFalse: [^SystemExceptions.WrongClass signalOn: nBytes mustBe: SmallInteger].
+	^SystemExceptions.WrongClass signalOn: cTypeObject mustBe: CType
+    ]
+
+    CObject class >> gcAlloc: nBytes type: cTypeObject [
+	"Allocate nBytes bytes and return a CObject of the given type"
+
+	<category: 'primitive allocation'>
+	| class |
+	class := cTypeObject isNil
+	    ifTrue: [ self ]
+	    ifFalse: [ cTypeObject cObjectType ].
+
+	^(class address: 0)
+	    type: cTypeObject;
+	    storage: (ByteArray new: nBytes);
+	    yourself
+    ]
+
     CObject class >> alloc: nBytes [
 	"Allocate nBytes bytes and return an instance of the receiver"
 
@@ -65,21 +90,25 @@ into their corresponding C values for use in external routines.'>
 	^self alloc: nBytes type: nil
     ]
 
+    CObject class >> gcAlloc: nBytes [
+	"Allocate nBytes bytes and return an instance of the receiver"
+
+	<category: 'instance creation'>
+	^self gcAlloc: nBytes type: nil
+    ]
+
+    CObject class >> gcNew: nBytes [
+	"Allocate nBytes bytes and return an instance of the receiver"
+
+	<category: 'instance creation'>
+	^self gcAlloc: nBytes type: nil
+    ]
+
     CObject class >> new: nBytes [
 	"Allocate nBytes bytes and return an instance of the receiver"
 
 	<category: 'instance creation'>
 	^self alloc: nBytes type: nil
-    ]
-
-    CObject class >> alloc: nBytes type: cTypeObject [
-	"Allocate nBytes bytes and return a CObject of the given type"
-
-	<category: 'instance creation'>
-	<primitive: VMpr_CObject_allocType>
-	nBytes isInteger 
-	    ifFalse: [^SystemExceptions.WrongClass signalOn: nBytes mustBe: SmallInteger].
-	^SystemExceptions.WrongClass signalOn: cTypeObject mustBe: CType
     ]
 
     CObject class >> address: anInteger [
@@ -110,6 +139,24 @@ into their corresponding C values for use in external routines.'>
 
 	<category: 'private'>
 	^nil
+    ]
+
+    = anObject [
+	"Return true if the receiver and aCObject are equal."
+
+	<category: 'basic'>
+	^self class == anObject class and: [
+	    self type = anObject type and: [
+	    self storage == anObject storage and: [
+	    self address = anObject address ]]]
+    ]
+
+    hash [
+	"Return a hash value for anObject."
+
+	<category: 'basic'>
+	^self type hash
+	    bitXor: (self storage identityHash * self sizeof + self address)
     ]
 
     finalize [
@@ -177,6 +224,11 @@ into their corresponding C values for use in external routines.'>
 		    type: valueType]
 	    ifFalse: [(self at: offset type: dereferencedType) value: aValue].
 	^aValue
+    ]
+
+    isCObject [
+	<category: 'testing functionality'>
+	^true
     ]
 
     incr [
@@ -265,10 +317,37 @@ into their corresponding C values for use in external routines.'>
 	^type
     ]
 
-    address [
-	"Answer the address the receiver is pointing to."
+    isAbsolute [
+	"Answer whether the object points into a garbage-collected Smalltalk
+	 storage, or it is an absolute address."
 
 	<category: 'accessing'>
+	^storage isNil
+    ]
+
+    storage [
+	"Answer the storage that the receiver is pointing into, or nil
+	 if the address is absolute."
+
+	<category: 'accessing'>
+	^storage
+    ]
+
+    storage: anObject [
+	"Change the receiver to point to the storage of anObject."
+
+	<category: 'accessing'>
+	storage := anObject.
+    ]
+
+    address [
+	"Answer the address the receiver is pointing to.  The address can
+	 be absolute if the storage is nil, or relative to the Smalltalk
+	 object in #storage.  In this case, an address of 0 corresponds to
+	 the first instance variable."
+
+	<category: 'accessing'>
+	<primitive: VMpr_CObject_address>
 	^self basicAt: self basicSize
     ]
 
@@ -276,7 +355,8 @@ into their corresponding C values for use in external routines.'>
 	"Set the receiver to point to the passed address, anInteger"
 
 	<category: 'accessing'>
-	self basicAt: self basicSize put: anInteger
+	<primitive: VMpr_CObject_addressColon>
+	SystemExceptions.WrongClass signalOn: anInteger mustBe: Integer
     ]
 
     printOn: aStream [
@@ -285,9 +365,15 @@ into their corresponding C values for use in external routines.'>
 	<category: 'accessing'>
 	aStream
 	    print: self class;
-	    nextPut: $(;
-	    nextPutAll: (self address printStringRadix: 16);
-	    nextPut: $)
+	    nextPut: $(.
+
+	self isAbsolute
+	    ifTrue: [ aStream nextPutAll: (self address printStringRadix: 16) ]
+	    ifFalse: [
+		self storage do: [ :each | aStream print: each; space ].
+		aStream nextPutAll: '@ '; print: self address ].
+	
+	aStream nextPut: $)
     ]
 
     type: aCType [
@@ -332,6 +418,10 @@ into their corresponding C values for use in external routines.'>
 	byteOffset isInteger 
 	    ifFalse: 
 		[^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger].
+	(self isAbsolute not and: [ aType isInteger ]) ifTrue: [
+	    ^SystemExceptions.InvalidArgument signalOn: self address + byteOffset
+		reason: 'offset out of range' ].
+
 	^SystemExceptions.WrongClass signalOn: aType
     ]
 
@@ -342,6 +432,11 @@ into their corresponding C values for use in external routines.'>
 	<category: 'C data access'>
 	| type |
 	<primitive: VMpr_CObject_atPut>
+
+	(self isAbsolute not and: [ aValue isCObject not ]) ifTrue: [
+	    ^SystemExceptions.InvalidArgument signalOn: self address + byteOffset
+		reason: 'offset out of range' ].
+
 	type := aValue cObjStoredType.
 
 	"Attempt to store something meaningful from another CObject"
@@ -403,6 +498,17 @@ CObject subclass: CScalar [
 	<category: 'instance creation'>
 	| cObject |
 	cObject := self type new.
+	cObject value: anObject.
+	^cObject
+    ]
+
+    CScalar class >> gcValue: anObject [
+	"Answer a newly allocated CObject containing the passed value,
+	 anObject, in garbage-collected storage."
+
+	<category: 'instance creation'>
+	| cObject |
+	cObject := self type gcNew.
 	cObject value: anObject.
 	^cObject
     ]

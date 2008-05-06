@@ -110,7 +110,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 9
 	    at: index
-	    size: CPtrSize - 1
     ]
 
     charAt: index [
@@ -122,7 +121,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 0
 	    at: index
-	    size: 0
     ]
 
     unsignedCharAt: index [
@@ -134,7 +132,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 1
 	    at: index
-	    size: 0
     ]
 
     ucharAt: index [
@@ -146,7 +143,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 1
 	    at: index
-	    size: 0
     ]
 
     shortAt: index [
@@ -157,7 +153,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 2
 	    at: index
-	    size: CShortSize - 1
     ]
 
     unsignedShortAt: index [
@@ -168,7 +163,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 3
 	    at: index
-	    size: CShortSize - 1
     ]
 
     ushortAt: index [
@@ -179,7 +173,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 3
 	    at: index
-	    size: CShortSize - 1
     ]
 
     longAt: index [
@@ -190,7 +183,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 4
 	    at: index
-	    size: CLongSize - 1
     ]
 
     unsignedLongAt: index [
@@ -201,7 +193,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 5
 	    at: index
-	    size: CLongSize - 1
     ]
 
     ulongAt: index [
@@ -212,7 +203,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 5
 	    at: index
-	    size: CLongSize - 1
     ]
 
     intAt: index [
@@ -223,7 +213,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 10
 	    at: index
-	    size: CIntSize - 1
     ]
 
     unsignedIntAt: index [
@@ -234,7 +223,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 11
 	    at: index
-	    size: CIntSize - 1
     ]
 
     uintAt: index [
@@ -245,7 +233,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 11
 	    at: index
-	    size: CIntSize - 1
     ]
 
     floatAt: index [
@@ -256,7 +243,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 6
 	    at: index
-	    size: CFloatSize - 1
     ]
 
     doubleAt: index [
@@ -267,7 +253,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 7
 	    at: index
-	    size: CDoubleSize - 1
     ]
 
     longDoubleAt: index [
@@ -278,7 +263,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 12
 	    at: index
-	    size: CLongDoubleSize - 1
     ]
 
     stringAt: index [
@@ -289,7 +273,6 @@ a String''s elements are characters.'>
 	^self 
 	    type: 8
 	    at: index
-	    size: CPtrSize - 1
     ]
 
     objectAt: index put: value [
@@ -302,7 +285,6 @@ a String''s elements are characters.'>
 	    type: 9
 	    at: index
 	    put: value
-	    size: CPtrSize - 1
     ]
 
     charAt: index put: value [
@@ -316,7 +298,6 @@ a String''s elements are characters.'>
 	    type: 0
 	    at: index
 	    put: value
-	    size: 0
     ]
 
     unsignedCharAt: index put: value [
@@ -330,7 +311,6 @@ a String''s elements are characters.'>
 	    type: 1
 	    at: index
 	    put: value
-	    size: 0
     ]
 
     ucharAt: index put: value [
@@ -344,7 +324,6 @@ a String''s elements are characters.'>
 	    type: 1
 	    at: index
 	    put: value
-	    size: 0
     ]
 
     shortAt: index put: value [
@@ -357,7 +336,6 @@ a String''s elements are characters.'>
 	    type: 2
 	    at: index
 	    put: value
-	    size: CShortSize - 1
     ]
 
     unsignedShortAt: index put: value [
@@ -370,7 +348,6 @@ a String''s elements are characters.'>
 	    type: 3
 	    at: index
 	    put: value
-	    size: CShortSize - 1
     ]
 
     ushortAt: index put: value [
@@ -383,7 +360,6 @@ a String''s elements are characters.'>
 	    type: 3
 	    at: index
 	    put: value
-	    size: CShortSize - 1
     ]
 
     longAt: index put: value [
@@ -396,7 +372,6 @@ a String''s elements are characters.'>
 	    type: 4
 	    at: index
 	    put: value
-	    size: CLongSize - 1
     ]
 
     unsignedLongAt: index put: value [
@@ -409,7 +384,6 @@ a String''s elements are characters.'>
 	    type: 5
 	    at: index
 	    put: value
-	    size: CLongSize - 1
     ]
 
     ulongAt: index put: value [
@@ -422,7 +396,6 @@ a String''s elements are characters.'>
 	    type: 5
 	    at: index
 	    put: value
-	    size: CLongSize - 1
     ]
 
     intAt: index put: value [
@@ -435,7 +408,6 @@ a String''s elements are characters.'>
 	    type: 10
 	    at: index
 	    put: value
-	    size: CIntSize - 1
     ]
 
     unsignedIntAt: index put: value [
@@ -448,7 +420,6 @@ a String''s elements are characters.'>
 	    type: 11
 	    at: index
 	    put: value
-	    size: CIntSize - 1
     ]
 
     uintAt: index put: value [
@@ -461,7 +432,6 @@ a String''s elements are characters.'>
 	    type: 11
 	    at: index
 	    put: value
-	    size: CIntSize - 1
     ]
 
     floatAt: index put: value [
@@ -474,7 +444,6 @@ a String''s elements are characters.'>
 	    type: 6
 	    at: index
 	    put: value
-	    size: CFloatSize - 1
     ]
 
     doubleAt: index put: value [
@@ -487,7 +456,6 @@ a String''s elements are characters.'>
 	    type: 7
 	    at: index
 	    put: value
-	    size: CDoubleSize - 1
     ]
 
     longDoubleAt: index put: value [
@@ -500,7 +468,6 @@ a String''s elements are characters.'>
 	    type: 12
 	    at: index
 	    put: value
-	    size: CLongDoubleSize - 1
     ]
 
     stringAt: index put: value [
@@ -515,7 +482,6 @@ a String''s elements are characters.'>
 	    type: 8
 	    at: index
 	    put: value
-	    size: CPtrSize - 1
     ]
 
     growSize [
@@ -527,36 +493,21 @@ a String''s elements are characters.'>
 	^self size
     ]
 
-    type: type at: index size: size [
+    type: type at: index [
 	"Private - Use Memory class to access in the receiver a value with the
 	 given type."
 
 	<category: 'private'>
-	| offset |
-	index < 1 
-	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index].
-	index > (self basicSize - size) 
-	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index].
-	offset := index + (CLongSize * 2 - 1).	"impl. dependent"
-	^Memory type: type at: (ObjectMemory addressOf: self) + offset
+	^(CObject new storage: self) at: index - 1 type: type
     ]
 
-    type: type at: index put: value size: size [
+    type: type at: index put: value [
 	"Private - Use Memory class to write to the receiver a value with the
 	 given type."
 
 	<category: 'private'>
-	| offset |
 	self isReadOnly ifTrue: [^SystemExceptions.ReadOnlyObject signal].
-	index < 1 
-	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index].
-	index > (self basicSize - size) 
-	    ifTrue: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index].
-	offset := index + (CLongSize * 2 - 1).	"impl. dependent"
-	^Memory 
-	    type: type
-	    at: (ObjectMemory addressOf: self) + offset
-	    put: value
+	^(CObject new storage: self) at: index - 1 put: value type: type
     ]
 
     byteAt: index [

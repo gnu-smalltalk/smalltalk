@@ -707,8 +707,8 @@ static const class_definition class_info[] = {
    "SecurityPolicy", "dictionary owner", NULL, NULL },
 
   {&_gst_c_object_class, &_gst_object_class,
-   ISP_ULONG, true, 1,	/* leave this this way */
-   "CObject", "type", NULL, "CSymbols" },
+   ISP_ULONG, true, 2,
+   "CObject", "type storage", NULL, "CSymbols" },
 
   {&_gst_c_type_class, &_gst_object_class,
    ISP_FIXED, true, 1,
@@ -2080,9 +2080,10 @@ _gst_message_new_args (OOP selectorOOP,
 }
 
 OOP
-_gst_c_object_new (PTR cObjPtr,
-		   OOP typeOOP,
-		   OOP defaultClassOOP)
+_gst_c_object_new_base (OOP baseOOP,
+		        uintptr_t cObjOfs,
+		        OOP typeOOP,
+		        OOP defaultClassOOP)
 {
   gst_cobject cObject;
   gst_ctype cType;
@@ -2099,7 +2100,8 @@ _gst_c_object_new (PTR cObjPtr,
     
   cObject = (gst_cobject) new_instance_with (classOOP, 1, &cObjectOOP);
   cObject->type = typeOOP;
-  SET_COBJECT_VALUE_OBJ (cObject, cObjPtr);
+  cObject->storage = baseOOP;
+  SET_COBJECT_OFFSET_OBJ (cObject, cObjOfs);
 
   return (cObjectOOP);
 }
@@ -2111,10 +2113,13 @@ _gst_free_cobject (OOP cObjOOP)
   gst_cobject cObject;
 
   cObject = (gst_cobject) OOP_TO_OBJ (cObjOOP);
-  xfree ((PTR) COBJECT_VALUE_OBJ (cObject));
+  if (!IS_NIL (cObject->storage))
+    cObject->storage = _gst_nil_oop;
+  else
+    xfree ((PTR) COBJECT_OFFSET_OBJ (cObject));
 
-  /* at least make it not point to falsely valid storage */
-  SET_COBJECT_VALUE_OBJ (cObject, NULL);
+  /* make it not point to falsely valid storage */
+  SET_COBJECT_OFFSET_OBJ (cObject, NULL);
 }
 
 void

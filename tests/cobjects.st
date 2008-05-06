@@ -132,5 +132,61 @@ Eval [
     ^StructD new b elementType cObjectType
 ]
 
+
+"test some GCed CObjects."
+Eval [
+    cObject := (CShortType arrayType: 4) gcNew.
+    cObject storage size printNl.
+    cObject at: 1 put: 16r1111.
+    cObject at: 2 put: 16r2222.
+    cObject decr.
+    (cObject at: 2) printNl.
+    (cObject at: 3) printNl.
+    cObject at: 4 put: 16r3333.
+    cObject storage printNl.
+    cObject at: 5 put: 16rDEAD.
+]
+
+"test partly out of bound accesses"
+Eval [
+    cObject := (CShortType arrayType: 4) gcNew.
+    cObject adjPtrBy: 7.
+    cObject at: -4
+]
+
+Eval [
+    cObject := (CShortType arrayType: 4) gcNew.
+    cObject adjPtrBy: 7.
+    cObject at: 0
+]
+
+Eval [
+    cObject := (CShortType arrayType: 4) gcNew.
+    cIntObject := (cObject + 2) castTo: CIntType.
+    cIntObject value: 16r11111111.
+    (cObject at: 2) printNl.
+    cIntObject at: 1
+]
+
+Eval [
+    cObject := CCharType gcNew.
+    nil testCObjectPtr: cObject.
+    ^cObject isAbsolute	"must be true"
+]
+
+CStruct subclass: A [ <declaration: #((#a #int) (#b #char))> ]
+Eval [
+    cObj := A gcNew.
+    cObj incr.
+    cObj a printNl.
+    cObj a value
+]
+
+Eval [
+    cObj := A gcNew.
+    cObj b value: $A.
+    cObj storage printNl
+]
+
 " ### need a lot more!"
 

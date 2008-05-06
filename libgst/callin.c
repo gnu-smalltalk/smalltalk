@@ -234,7 +234,8 @@ _gst_va_msg_sendf (PTR resultPtr,
           break;
 
         case 'C':
-          args[++i] = COBJECT_NEW (va_arg (ap, PTR));
+          args[++i] = COBJECT_NEW (va_arg (ap, PTR), _gst_nil_oop,
+				   _gst_c_object_class);
 	  INC_ADD_OOP (args[i]);
           break;
 
@@ -259,8 +260,7 @@ _gst_va_msg_sendf (PTR resultPtr,
 	    ctype = _gst_type_name_to_oop (va_arg (ap, const char *));
 	    INC_ADD_OOP (ctype);
 
-	    args[++i] =
-	      _gst_c_object_new (va_arg (ap, PTR), ctype, _gst_nil_oop);
+	    args[++i] = COBJECT_NEW (va_arg (ap, PTR), ctype, _gst_nil_oop);
 
 	    INC_ADD_OOP (args[i]);
           }
@@ -271,8 +271,7 @@ _gst_va_msg_sendf (PTR resultPtr,
           {
     	    OOP ctype;
     	    ctype = va_arg (ap, OOP);
-    	    args[++i] =
-    	      _gst_c_object_new (va_arg (ap, PTR), ctype, _gst_nil_oop);
+    	    args[++i] = COBJECT_NEW (va_arg (ap, PTR), ctype, _gst_nil_oop);
 
 	    INC_ADD_OOP (args[i]);
           }
@@ -307,7 +306,7 @@ _gst_va_msg_sendf (PTR resultPtr,
 
 	case 'C':
 	  *(PTR *) resultPtr =
-	    IS_NIL (result) ? NULL : COBJECT_VALUE (result);
+	    IS_NIL (result) ? NULL : cobject_value (result);
 	  break;
 
 	case 's':
@@ -588,7 +587,7 @@ _gst_c_object_to_oop (PTR co)
   if (co == NULL)
     return (_gst_nil_oop);
   else
-    return (INC_ADD_OOP (COBJECT_NEW (co)));
+    return (INC_ADD_OOP (COBJECT_NEW (co, _gst_nil_oop, _gst_c_object_class)));
 }
 
 void
@@ -597,7 +596,7 @@ _gst_set_c_object (OOP oop, PTR co)
   if (!_gst_smalltalk_initialized)
     _gst_initialize (NULL, NULL, GST_NO_TTY);
 
-  SET_COBJECT_VALUE(oop, co);
+  set_cobject_value (oop, co);
 }
 
 
@@ -630,7 +629,7 @@ _gst_oop_to_c (OOP oop)
     return (0);
 
   else if (is_a_kind_of (OOP_CLASS (oop), _gst_c_object_class))
-    return ((long) COBJECT_VALUE (oop));
+    return ((long) cobject_value (oop));
 
   else
     return (0);
@@ -758,7 +757,7 @@ _gst_oop_to_c_object (OOP oop)
   if (IS_NIL (oop))
     return (NULL);
   else
-    return (COBJECT_VALUE (oop));
+    return (cobject_value (oop));
 }
 
 OOP

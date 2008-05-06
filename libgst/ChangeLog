@@ -1,5 +1,25 @@
 2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/callin.c: Adjust calls to COBJECT_NEW, COBJECT_VALUE,
+	SET_COBJECT_VALUE.
+	* libgst/cint.c: Likewise.  Add _gst_c_type_size.
+	* libgst/cint.h: Declare _gst_c_type_size.
+	* libgst/dict.c: Likewise.  Rename _gst_c_object_new to
+	_gst_c_object_new_base, add new instance variable to CObject.
+	Make CObject absolute in _gst_free_cobject.
+	* libgst/dict.h: Adjust struct gst_cobject and rename
+	prototype of _gst_c_object_new to _gst_c_object_new_base.
+	* libgst/dict.inl: Add cobject_value, set_cobject_value,
+	cobject_index_check.  Adjust COBJECT_NEW.  Rename COBJECT_VALUE_OBJ
+	and SET_COBJECT_VALUE_OBJ to COBJECT_OFFSET_OBJ and
+	SET_COBJECT_OFFSET_OBJ, respectively.
+	* libgst/prims.def: Adjust calls to COBJECT_NEW, COBJECT_VALUE,
+	SET_COBJECT_VALUE.  Add calls to cobject_index_check.  Handle
+	derefAt:type: from a garbage-collected CObject specially, and
+	otherwise preserve the base when casting a CObject.
+
+2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/prims.def: Eliminate VMpr_CObject_derefAtPut,
 	restrict VMpr_CObject_derefAt to CObject types.
 

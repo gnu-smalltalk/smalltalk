@@ -136,6 +136,15 @@ elements.'>
 	structureType == #ptr ifTrue: [^CPtrCType from: type]
     ]
 
+    gcNew [
+	"Allocate a new CObject with the type (class) identified by the receiver.
+	 The object is movable in memory, but on the other hand it is
+	 garbage-collected automatically."
+
+	<category: 'C instance creation'>
+	^CObject gcAlloc: self sizeof type: self
+    ]
+
     new [
 	"Allocate a new CObject with the type (class) identified by the receiver.
 	 It is the caller's responsibility to free the memory allocated for it."
