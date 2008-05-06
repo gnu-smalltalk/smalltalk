@@ -91,14 +91,11 @@ Object subclass: EntryExample [
 	    userData: nil.
 	entry setText: 'hello'.
 
-	"This function needs an int* as the last parameter, so we allocate it."
-	pos := CIntType new.
-	pos value: entry getText size.
+	"This function needs an int* as the last parameter."
 	entry 
 	    insertText: ' world'
 	    newTextLength: -1
-	    position: pos.
-	pos free.
+	    position: (CInt gcValue: entry getText size).
 	entry selectRegion: 0 end: entry getText size.
 	vbox 
 	    packStart: entry

@@ -2813,7 +2813,7 @@ elements.'>
 
 	<category: 'accessing'>
 	| pPath ok path index |
-	pPath := GTK.GtkTreePath type ptrType new.
+	pPath := GTK.GtkTreePath type ptrType gcNew.
 	ok := self 
 		    getPathAtPos: point x
 		    y: point y
@@ -2822,7 +2822,6 @@ elements.'>
 		    cellX: nil
 		    cellY: nil.
 	path := pPath value.
-	pPath free.
 	index := ok ifTrue: [path getIndices value] ifFalse: [self elements size].
 	path free.
 	^index
@@ -3366,8 +3365,8 @@ it wasn''t for me... )):->'>
 
 	<category: 'private'>
 	| px py |
-	px := CIntType new.
-	py := CIntType new.
+	px := CIntType gcNew.
+	py := CIntType gcNew.
 	self container getPosition: px rootY: py.
 	x := px value.
 	y := py value.
@@ -3377,9 +3376,7 @@ it wasn''t for me... )):->'>
 	width := px value.
 	height := py value.
 	self isMapped 
-	    ifTrue: [self container setDefaultSize: width height: height].
-	px free.
-	py free
+	    ifTrue: [self container setDefaultSize: width height: height]
     ]
 
     container [

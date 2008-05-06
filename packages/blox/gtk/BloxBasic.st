@@ -1056,18 +1056,15 @@ I expose class methods that do many interesting event-handling things.'>
 	 If the mouse pointer isn't on the same screen as window then answer nil."
 
 	<category: 'utility'>
-	| x y result |
-	x := CIntType new.
-	y := CIntType new.
+	| x y |
+	x := CIntType gcNew.
+	y := CIntType gcNew.
 	GdkDisplay getDefault 
 	    getPointer: nil
 	    x: x
 	    y: y
 	    mask: nil.
-	result := x value @ y value.
-	x free.
-	y free.
-	^result
+	^x value @ y value.
     ]
 
     Blox class >> platform [
@@ -1085,14 +1082,11 @@ I expose class methods that do many interesting event-handling things.'>
 	 drawn (under Windows and the Macintosh, that's always 0 @ 0)"
 
 	<category: 'utility'>
-	| x y result |
-	x := CIntType new.
-	y := CIntType new.
+	| x y |
+	x := CIntType gcNew.
+	y := CIntType gcNew.
 	Gdk getDefaultRootWindow getOrigin: x y: y.
-	result := x value negated @ y value negated.
-	x free.
-	y free.
-	^result
+	^x value negated @ y value negated.
     ]
 
     Blox class >> screenResolution [
@@ -1112,14 +1106,11 @@ I expose class methods that do many interesting event-handling things.'>
 	 the size of the screen)"
 
 	<category: 'utility'>
-	| height width result |
-	width := CIntType new.
-	height := CIntType new.
+	| height width |
+	width := CIntType gcNew.
+	height := CIntType gcNew.
 	Gdk getDefaultRootWindow getSize: width height: height.
-	result := width value @ height value.
-	width free.
-	height free.
-	^result
+	^width value @ height value
     ]
 
     state [

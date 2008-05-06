@@ -1,0 +1,6 @@
+2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* BloxBasic.st: Use GC-allocated CObjects.
+	* BloxWidgets.st: Use GC-allocated CObjects.
+
+
