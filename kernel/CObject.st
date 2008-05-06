@@ -156,7 +156,7 @@ into their corresponding C values for use in external routines.'>
 
 	<category: 'basic'>
 	^self type hash
-	    bitXor: (self storage identityHash * self sizeof + self address)
+	    bitXor: (self storage identityHash * self storage size + self address)
     ]
 
     finalize [

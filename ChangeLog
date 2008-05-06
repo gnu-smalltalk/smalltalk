@@ -1,5 +1,9 @@
 2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CObject.st: Fix typo.
+
+2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ByteArray.st: Rewrite memory access methods in terms
 	of CObject.
 	* kernel/CObject.st: Add support for ByteArrays as CObject storage.
