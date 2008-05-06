@@ -4396,27 +4396,17 @@ primitive VMpr_CObject_at :
   oop2 = POP_OOP ();
   oop1 = POP_OOP ();
   if (IS_INT (oop2)
-      && (IS_INT (oop3) || is_a_kind_of (OOP_CLASS (oop3), _gst_c_type_class)))
+      && ((IS_INT (oop3) && id == prim_id (VMpr_CObject_at))
+	  || is_a_kind_of (OOP_CLASS (oop3), _gst_c_type_class)))
     {
       char *addr;
       intptr_t arg2;
       arg2 = TO_INT (oop2);
-      if (id == prim_id (VMpr_CObject_derefAt))
-	{
-	  addr = *(char **) COBJECT_VALUE (oop1);
-	  if (addr == 0)
-	    {
-	      PUSH_OOP (_gst_nil_oop);
-	      PRIM_SUCCEEDED;
-	    }
-	}
-      else
-	addr = COBJECT_VALUE (oop1);
-
-      addr += arg2;		/* compute effective address */
       if (IS_INT (oop3))
 	{			/* int type spec means a scalar type */
 	  intptr_t arg3;
+	  addr = COBJECT_VALUE (oop1);
+          addr += arg2;		/* compute effective address */
 	  arg3 = TO_INT (oop3);
 
 	  switch (arg3)
@@ -4484,14 +4474,26 @@ primitive VMpr_CObject_at :
 
 	}
       else
-	{			/* non int type means use the type as
-				   the type of the effective address */
-	  /* It's an oddball case, but it does seem possible that oop3
-	     could get GC'ed out of existence before it gets used,
-	     since oop3 is not on the stack, and if
-	     _gst_c_object_new could cause a GC */
-	  inc_ptr incPtr;
+	{
+	  /* Non-integer oop3: use it as the type of the effective address. */
 
+	  if (id == prim_id (VMpr_CObject_derefAt))
+	    {
+	      addr = *(char **) COBJECT_VALUE (oop1);
+	      if (addr == 0)
+		{
+		  PUSH_OOP (_gst_nil_oop);
+		  PRIM_SUCCEEDED;
+		}
+	    }
+          else
+	    addr = COBJECT_VALUE (oop1);
+
+          addr += arg2;		/* compute effective address */
+
+	  /* oop3 could get GC'ed out of existence before it gets used:
+	     it is not on the stack, and _gst_c_object_new could cause a GC */
+	  inc_ptr incPtr;
 	  incPtr = INC_SAVE_POINTER ();
 	  INC_ADD_OOP (oop3);
 	  PUSH_OOP (_gst_c_object_new (addr, oop3, _gst_c_object_class));
@@ -4503,14 +4505,9 @@ primitive VMpr_CObject_at :
   PRIM_FAILED;
 }
 
-/* set the value; 184 derefs first *
- * CObject at: byteOffset put: aValue type: aType */
-primitive VMpr_CObject_atPut :
-     prim_id VMpr_CObject_derefAtPut [succeed,fail],
-     prim_id VMpr_CObject_atPut [succeed,fail]
+/* CObject at: byteOffset put: aValue type: aType */
+primitive VMpr_CObject_atPut [succeed,fail]
 {
-  /* I don't think that this deals properly with setting the pointer
-     value as opposed to setting the pointed-to value.  */
   OOP oop1;
   OOP oop2;
   OOP oop3;
@@ -4522,181 +4519,164 @@ primitive VMpr_CObject_atPut :
   oop2 = POP_OOP ();
   oop1 = STACKTOP ();
 
-  if (IS_INT (oop2))
+  if (IS_INT (oop2) && IS_INT (oop4))
     {
       char *addr;
       intptr_t arg2;
+      intptr_t arg4;
       arg2 = TO_INT (oop2);
-      if (id == prim_id (VMpr_CObject_derefAtPut))
-	addr = *(char **) COBJECT_VALUE (oop1);
-      else
-	addr = COBJECT_VALUE (oop1);
+      addr = COBJECT_VALUE (oop1);
 
       addr += arg2;		/* compute effective address */
-      if (IS_INT (oop4))
-	{			/* int type spec means a scalar type */
-	  intptr_t arg4;
-	  arg4 = TO_INT (oop4);
-	  switch (arg4)
+      arg4 = TO_INT (oop4);
+      switch (arg4)
+	{
+	case CDATA_CHAR:		/* char */
+	case CDATA_UCHAR:		/* uchar */
+	  if (IS_CLASS (oop3, _gst_char_class)
+	      || (IS_CLASS (oop3, _gst_unicode_character_class)
+		  && CHAR_OOP_VALUE (oop3) <= 127))
 	    {
-	    case CDATA_CHAR:		/* char */
-	    case CDATA_UCHAR:		/* uchar */
-	      if (IS_CLASS (oop3, _gst_char_class)
-		  || (IS_CLASS (oop3, _gst_unicode_character_class)
-		      && CHAR_OOP_VALUE (oop3) <= 127))
-		{
-		  *addr = CHAR_OOP_VALUE (oop3);
-		  PRIM_SUCCEEDED;
-		}
-	      else if (IS_INT (oop3))
-		{
-		  *(char *) addr = (char) TO_INT (oop3);
-		  PRIM_SUCCEEDED;
-		}
-	      break;
+	      *addr = CHAR_OOP_VALUE (oop3);
+	      PRIM_SUCCEEDED;
+	    }
+	  else if (IS_INT (oop3))
+	    {
+	      *(char *) addr = (char) TO_INT (oop3);
+	      PRIM_SUCCEEDED;
+	    }
+	  break;
 
-	    case CDATA_SHORT:		/* short */
-	    case CDATA_USHORT:		/* ushort */
-	      if (IS_INT (oop3))
-		{
-		  *(short *) addr = (short) TO_INT (oop3);
-		  PRIM_SUCCEEDED;
-		}
-	      break;
+	case CDATA_SHORT:		/* short */
+	case CDATA_USHORT:		/* ushort */
+	  if (IS_INT (oop3))
+	    {
+	      *(short *) addr = (short) TO_INT (oop3);
+	      PRIM_SUCCEEDED;
+	    }
+	  break;
 
-	    case CDATA_LONG:		/* long */
-	    case CDATA_ULONG:		/* ulong */
-	      if (IS_C_LONG (oop3))
-		{
-		  *(long *) addr = (long) TO_C_LONG (oop3);
-		  PRIM_SUCCEEDED;
-		}
-	      break;
+	case CDATA_LONG:		/* long */
+	case CDATA_ULONG:		/* ulong */
+	  if (IS_C_LONG (oop3))
+	    {
+	      *(long *) addr = (long) TO_C_LONG (oop3);
+	      PRIM_SUCCEEDED;
+	    }
+	  break;
 
-	    case CDATA_FLOAT:
+	case CDATA_FLOAT:
+	  {
+	    float *floatAddr;
+	    floatAddr = (float *) addr;
+	    if (IS_INT (oop3))
 	      {
-		float *floatAddr;
-		floatAddr = (float *) addr;
-		if (IS_INT (oop3))
-		  {
-		    *floatAddr = (float) TO_INT (oop3);
-		    PRIM_SUCCEEDED;
-		  }
-		else if (IS_CLASS (oop3, _gst_floatd_class))
-		  {
-		    *floatAddr = (float) FLOATD_OOP_VALUE (oop3);
-		    PRIM_SUCCEEDED;
-		  }
-		else if (IS_CLASS (oop3, _gst_floate_class))
-		  {
+		*floatAddr = (float) TO_INT (oop3);
+		PRIM_SUCCEEDED;
+	      }
+	    else if (IS_CLASS (oop3, _gst_floatd_class))
+	      {
+		*floatAddr = (float) FLOATD_OOP_VALUE (oop3);
+		PRIM_SUCCEEDED;
+	      }
+	    else if (IS_CLASS (oop3, _gst_floate_class))
+	      {
 		    *floatAddr = (float) FLOATE_OOP_VALUE (oop3);
 		    PRIM_SUCCEEDED;
-		  }
-		else if (IS_CLASS (oop3, _gst_floatq_class))
-		  {
-		    *floatAddr = (float) FLOATQ_OOP_VALUE (oop3);
-		    PRIM_SUCCEEDED;
-		  }
 	      }
-	      break;
-
-	    case CDATA_DOUBLE:		/* double */
+	    else if (IS_CLASS (oop3, _gst_floatq_class))
 	      {
-		double *doubleAddr;
-		doubleAddr = (double *) addr;
-		if (IS_INT (oop3))
-		  {
-		    *doubleAddr = TO_INT (oop3);
-		    PRIM_SUCCEEDED;
-		  }
-		else if (IS_CLASS (oop3, _gst_floatd_class))
-		  {
-		    *doubleAddr = FLOATD_OOP_VALUE (oop3);
-		    PRIM_SUCCEEDED;
-		  }
-		else if (IS_CLASS (oop3, _gst_floate_class))
-		  {
-		    *doubleAddr = FLOATE_OOP_VALUE (oop3);
-		    PRIM_SUCCEEDED;
-		  }
-		else if (IS_CLASS (oop3, _gst_floatq_class))
-		  {
-		    *doubleAddr = FLOATQ_OOP_VALUE (oop3);
-		    PRIM_SUCCEEDED;
-		  }
+	        *floatAddr = (float) FLOATQ_OOP_VALUE (oop3);
+	        PRIM_SUCCEEDED;
 	      }
-	      break;
+	  }
+	  break;
 
-	    case CDATA_STRING:		/* string */
-	      {			/* note that this does not allow for
-				   replacemnt in place */
-		/* to replace in place, use replaceFrom: */
-		char **strAddr;
-		strAddr = (char **) addr;
-		if (oop3 == _gst_nil_oop)
-		  {
-		    *strAddr = (char *) 0;
-		    PRIM_SUCCEEDED;
-		  }
-		else
-		  {
-		    if (is_a_kind_of
-			(OOP_CLASS (oop3), _gst_string_class))
-		      {
-			*strAddr = (char *) _gst_to_cstring (oop3);
-			PRIM_SUCCEEDED;
-		      }
-		  }
-		break;
-	      }
-
-	    case CDATA_OOP:
-	      *(OOP *) addr = oop3;
-	      PRIM_SUCCEEDED;
-
-	    case CDATA_INT:		/* int */
-	    case CDATA_UINT:		/* uint */
-	      if (IS_C_INT (oop3))
-		{
-		  *(int *) addr = (int) TO_C_INT (oop3);
-		  PRIM_SUCCEEDED;
-		}
-	      break;
-
-	    case CDATA_LONG_DOUBLE:	/* long double */
+	case CDATA_DOUBLE:		/* double */
+	  {
+	    double *doubleAddr;
+	    doubleAddr = (double *) addr;
+	    if (IS_INT (oop3))
 	      {
-		long double *longDoubleAddr;
-		longDoubleAddr = (long double *) addr;
-		if (IS_INT (oop3))
-		  {
-		    *longDoubleAddr = TO_INT (oop3);
-		    PRIM_SUCCEEDED;
-		  }
-		else if (IS_CLASS (oop3, _gst_floatd_class))
-		  {
-		    *longDoubleAddr = FLOATD_OOP_VALUE (oop3);
-		    PRIM_SUCCEEDED;
-		  }
-		else if (IS_CLASS (oop3, _gst_floate_class))
-		  {
-		    *longDoubleAddr = FLOATE_OOP_VALUE (oop3);
-		    PRIM_SUCCEEDED;
-		  }
-		else if (IS_CLASS (oop3, _gst_floatq_class))
-		  {
-		    *longDoubleAddr = FLOATQ_OOP_VALUE (oop3);
-		    PRIM_SUCCEEDED;
-		  }
+	        *doubleAddr = TO_INT (oop3);
+	        PRIM_SUCCEEDED;
 	      }
-	      break;
+	    else if (IS_CLASS (oop3, _gst_floatd_class))
+	      {
+	        *doubleAddr = FLOATD_OOP_VALUE (oop3);
+	        PRIM_SUCCEEDED;
+	      }
+	    else if (IS_CLASS (oop3, _gst_floate_class))
+	      {
+	        *doubleAddr = FLOATE_OOP_VALUE (oop3);
+	        PRIM_SUCCEEDED;
+	      }
+	    else if (IS_CLASS (oop3, _gst_floatq_class))
+	      {
+	        *doubleAddr = FLOATQ_OOP_VALUE (oop3);
+	        PRIM_SUCCEEDED;
+	      }
+	  }
+	  break;
 
-	    }
-	}
-      else
-	{			/* non int type means use the type as
-				   the type of the effective address */
-	  *(PTR *) addr = COBJECT_VALUE (oop3);	/* IS THIS RIGHT?!? */
+	case CDATA_STRING:		/* string */
+	  {				/* note that this does not allow for
+					   replacemnt in place */
+	    /* to replace in place, use replaceFrom: */
+	    char **strAddr;
+	    strAddr = (char **) addr;
+	    if (oop3 == _gst_nil_oop)
+	      {
+	        *strAddr = (char *) 0;
+	        PRIM_SUCCEEDED;
+	      }
+	    else if (is_a_kind_of (OOP_CLASS (oop3), _gst_string_class))
+	      {
+		*strAddr = (char *) _gst_to_cstring (oop3);
+		PRIM_SUCCEEDED;
+	      }
+	    break;
+	  }
+
+	case CDATA_OOP:
+	  *(OOP *) addr = oop3;
 	  PRIM_SUCCEEDED;
+
+	case CDATA_INT:		/* int */
+	case CDATA_UINT:		/* uint */
+	  if (IS_C_INT (oop3))
+	    {
+	      *(int *) addr = (int) TO_C_INT (oop3);
+	      PRIM_SUCCEEDED;
+	    }
+	  break;
+
+	case CDATA_LONG_DOUBLE:	/* long double */
+	  {
+	    long double *longDoubleAddr;
+	    longDoubleAddr = (long double *) addr;
+	    if (IS_INT (oop3))
+	      {
+	        *longDoubleAddr = TO_INT (oop3);
+	        PRIM_SUCCEEDED;
+	      }
+	    else if (IS_CLASS (oop3, _gst_floatd_class))
+	      {
+	        *longDoubleAddr = FLOATD_OOP_VALUE (oop3);
+	        PRIM_SUCCEEDED;
+	      }
+	    else if (IS_CLASS (oop3, _gst_floate_class))
+	      {
+	        *longDoubleAddr = FLOATE_OOP_VALUE (oop3);
+	        PRIM_SUCCEEDED;
+	      }
+	    else if (IS_CLASS (oop3, _gst_floatq_class))
+	      {
+	        *longDoubleAddr = FLOATQ_OOP_VALUE (oop3);
+	        PRIM_SUCCEEDED;
+	      }
+	  }
+	  break;
 	}
     }
 

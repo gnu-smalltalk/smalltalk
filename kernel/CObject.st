@@ -385,32 +385,6 @@ into their corresponding C values for use in external routines.'>
 		[^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger].
 	^SystemExceptions.WrongClass signalOn: aType
     ]
-
-    derefAt: byteOffset put: aValue type: aType [
-	<category: 'private'>
-	| type |
-	<primitive: VMpr_CObject_derefAtPut>
-	type := aValue cObjStoredType.
-
-	"Attempt to store something meaningful from another CObject"
-	type isNil ifTrue: [type := aType].
-	^self 
-	    derefAt: byteOffset
-	    noCObjectsPut: aValue cObjStoredValue
-	    type: type
-    ]
-
-    derefAt: byteOffset noCObjectsPut: aValue type: aType [
-	<category: 'private'>
-	<primitive: VMpr_CObject_derefAtPut>
-	byteOffset isInteger 
-	    ifFalse: 
-		[^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger].
-	(aType isInteger or: [aType isKindOf: CType]) 
-	    ifFalse: 
-		[^SystemExceptions.WrongClass signalOn: byteOffset mustBe: SmallInteger].
-	^SystemExceptions.WrongClass signalOn: aValue
-    ]
 ]
 
 

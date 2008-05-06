@@ -1,5 +1,10 @@
 2008-05-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CObject.st: Remove odd cases of #at:put:type: and
+	#derefAt:put:type:.
+
+2008-05-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* examples/CairoBlit.st: New.
 	* examples/CairoDemo.st: New.
 

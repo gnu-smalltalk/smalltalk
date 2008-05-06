@@ -1,3 +1,8 @@
+2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Eliminate VMpr_CObject_derefAtPut,
+	restrict VMpr_CObject_derefAt to CObject types.
+
 2008-04-25  Paolo Bonzini  <bonzini@gnu.org>
             Stephen Compall  <scompall@nocandysw.com>
 
