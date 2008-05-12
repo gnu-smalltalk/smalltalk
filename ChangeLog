@@ -1,3 +1,8 @@
+2008-05-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/xml.sed: Fix for VW7.
+	* scripts/Convert.st: Sync with trunk.  Apply rewrites to doits too.
+
 2008-04-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Object.st: Inline call to #release.

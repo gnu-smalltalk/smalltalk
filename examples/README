@@ -131,7 +131,7 @@ format.  These are:
   script can be slow.
 - `xml.sed', that converts from an XML DTD designed for Smalltalk source.  This
   script does not convert `statics' (that's how the DTD calls class variables)
-  yet.
+  yet.  Requires GNU sed.
 
 The `unsupported/misc' directory contains some other small example GNU
 Smalltalk programs which test more advanced aspects of Smalltalk, either

@@ -69,7 +69,7 @@ Namespace current: Smalltalk!
   d
 }
 
-1,/<st-source>/d
+0,/<st-source>/d
 /<\/st-source>/,$ d
 
 # Turn copyright into a Smalltalk comment; "..." becomes `...'
