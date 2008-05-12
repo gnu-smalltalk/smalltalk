@@ -1,3 +1,11 @@
+2008-05-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/BlkClosure.st: Add #cull:, #cull:cull:, #cull:cull:cull:.
+	* kernel/ExcHandling.st: Use it for the exception handlers.
+	* kernel/Object.st: Use it for #ifNotNil:.
+	* tests/blocks.st: New tests.
+	* tests/blocks.ok: Regenerate.
+
 2008-05-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/xml.sed: Fix for VW7.

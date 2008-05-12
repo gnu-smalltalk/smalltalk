@@ -59,12 +59,12 @@ test: anObject
 !Case methodsFor: 'testing'!
 
 test: anObject
-    test _ anObject.
-    found _ false.
+    test := anObject.
+    found := false.
 !
 
 reset
-    found _ false
+    found := false
 !
 
 else: aBlock
@@ -94,10 +94,8 @@ when: aBlock do: aBlock2
 !Case methodsFor: 'private'!
 
 do: aBlock
-    found _ true.
-    ^result := (aBlock numArgs = 0
-	ifTrue: [ aBlock value ]
-	ifFalse: [ aBlock value: test ])
+    found := true.
+    ^result := (aBlock cull: test)
 ! !
 
 

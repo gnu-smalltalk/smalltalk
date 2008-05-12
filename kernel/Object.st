@@ -143,7 +143,7 @@ All classes in the system are subclasses of me.'>
 	 notNilBlock, passing the receiver."
 
 	<category: 'testing functionality'>
-	^notNilBlock value: self
+	^notNilBlock cull: self
     ]
 
     ifNotNil: notNilBlock [
@@ -151,7 +151,7 @@ All classes in the system are subclasses of me.'>
 	 Else answer nil."
 
 	<category: 'testing functionality'>
-	^notNilBlock value: self
+	^notNilBlock cull: self
     ]
 
     ifNotNil: notNilBlock ifNil: nilBlock [
@@ -159,7 +159,7 @@ All classes in the system are subclasses of me.'>
 	 notNilBlock, passing the receiver."
 
 	<category: 'testing functionality'>
-	^notNilBlock value: self
+	^notNilBlock cull: self
     ]
 
     isCObject [

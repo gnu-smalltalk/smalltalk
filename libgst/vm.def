@@ -632,7 +632,7 @@ operation VALUE_SPECIAL ( rec -- rec ) {
   EXPORT_REGS ();
   if (UNCOMMON (IS_INT (rec))
       || UNCOMMON (OOP_CLASS (rec) != _gst_block_closure_class)
-      || UNCOMMON (send_block_value (0)))
+      || UNCOMMON (send_block_value (0, 0)))
     SEND_MESSAGE (_gst_builtin_selectors[VALUE_SPECIAL].symbol, 0);
 
   IMPORT_REGS ();
@@ -644,7 +644,7 @@ operation VALUE_COLON_SPECIAL ( rec blk_arg -- rec blk_arg ) {
   EXPORT_REGS ();
   if (UNCOMMON (IS_INT (rec))
       || UNCOMMON (OOP_CLASS (rec) != _gst_block_closure_class)
-      || UNCOMMON (send_block_value (1)))
+      || UNCOMMON (send_block_value (1, 0)))
     SEND_MESSAGE (_gst_builtin_selectors[VALUE_COLON_SPECIAL].symbol, 1);
 
   IMPORT_REGS ();

@@ -2,6 +2,11 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 3.0.2 TO 3.0a
 
+o   BlockClosure methods #cull:, #cull:cull:, #cull:cull:cull:
+    evaluate blocks removing parameters that are not accepted by
+    the block.  Thanks to this new functionality, the parameter to
+    #on:do: and #ifNotNil: can be omitted.
+
 o   CObjects can be backed with garbage-collected (as opposed to
     heap-allocated) storage.  Using this is not always possible, for
     example for CObjects stored by external libraries or passed to

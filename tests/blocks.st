@@ -153,3 +153,22 @@ Eval [
 Eval [ (nil blockTest11: 3) value ]	"should be invalid; we're returning to non-
 					 existent parent"
 
+"Various tests on #cull:cull:cull: and friends."
+Eval [   [] cull: 1     ]
+Eval [   [] cull: 1 cull: 2     ]
+Eval [   [] cull: 1 cull: 2 cull: 3    ]
+
+Eval [   [:a |a] cull: 1     ]
+Eval [   [:a |a] cull: 1 cull: 2     ]
+Eval [   [:a |a] cull: 1 cull: 2 cull: 3    ]
+
+Eval [   [:a :b |a] cull: 1     ]
+Eval [   [:a :b |a] cull: 1 cull: 2   ]
+Eval [   [:a :b |a] cull: 1 cull: 2 cull: 3   ]
+Eval [   [:a :b |b] cull: 1 cull: 2    ]
+Eval [   [:a :b |b] cull: 1 cull: 2 cull: 3    ]
+
+Eval [   [:a :b :c |a] cull: 1 cull: 2    ]
+Eval [   [:a :b :c |a] cull: 1 cull: 2 cull: 3    ]
+Eval [   [:a :b :c |b] cull: 1 cull: 2 cull: 3    ]
+Eval [   [:a :b :c |c] cull: 1 cull: 2 cull: 3    ]

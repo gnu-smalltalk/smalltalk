@@ -684,7 +684,7 @@ with a lower priority.'>
 		[:object | 
 		self resetHandler.
 		^object].
-	result := handlerBlock value: self.
+	result := handlerBlock cull: self.
 	resumeBoolean 
 	    ifTrue: 
 		[self resetHandler.

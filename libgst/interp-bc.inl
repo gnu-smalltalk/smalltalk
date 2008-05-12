@@ -396,7 +396,7 @@ _gst_send_method (OOP methodOOP)
 
 
 static mst_Boolean
-send_block_value (int numArgs)
+send_block_value (int numArgs, int cull_up_to)
 {
   OOP closureOOP;
   block_header header;
@@ -406,10 +406,15 @@ send_block_value (int numArgs)
   closureOOP = STACK_AT (numArgs);
   closure = (gst_block_closure) OOP_TO_OBJ (closureOOP);
   header = ((gst_compiled_block) OOP_TO_OBJ (closure->block))->header;
+
+  /* Check numArgs.  Remove up to CULL_UP_TO extra arguments if needed.  */
   if UNCOMMON (numArgs != header.numArgs)
     {
-      /* check numArgs asap */
-      return (true);
+      if (numArgs < header.numArgs || numArgs > header.numArgs + cull_up_to)
+        return (true);
+
+      POP_N_OOPS (numArgs - header.numArgs);
+      numArgs = header.numArgs;
     }
 
   /* prepare the new state, loading data from the closure */

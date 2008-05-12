@@ -2581,7 +2581,19 @@ primitive VMpr_Continuation_resume [fail,reload_ip]
 primitive VMpr_BlockClosure_value [fail,reload_ip,cache_new_ip]
 {
   _gst_primitives_executed++;
-  if UNCOMMON (send_block_value (numArgs))
+  if UNCOMMON (send_block_value (numArgs, 0))
+    PRIM_FAILED;
+  else
+    PRIM_SUCCEEDED_RELOAD_IP;
+}
+
+/* BlockClosure cull:
+   BlockClosure cull:cull:
+   BlockClosure cull:cull:cull: */
+primitive VMpr_BlockClosure_cull [fail,reload_ip]
+{
+  _gst_primitives_executed++;
+  if UNCOMMON (send_block_value (numArgs, numArgs))
     PRIM_FAILED;
   else
     PRIM_SUCCEEDED_RELOAD_IP;
@@ -2598,7 +2610,7 @@ primitive VMpr_BlockClosure_valueAndResumeOnUnwind [fail,reload_ip]
 
   context = (gst_method_context) OOP_TO_OBJ (_gst_this_context_oop);
   context->flags |= MCF_IS_UNWIND_CONTEXT;
-  if UNCOMMON (send_block_value (numArgs))
+  if UNCOMMON (send_block_value (numArgs, 0))
     PRIM_FAILED;
   else
     PRIM_SUCCEEDED_RELOAD_IP;
@@ -2621,7 +2633,7 @@ primitive VMpr_BlockClosure_valueWithArguments [fail,reload_ip]
       for (i = 1; i <= numArgs; i++)
 	PUSH_OOP (ARRAY_AT (oop2, i));
 
-      if UNCOMMON (send_block_value (numArgs))
+      if UNCOMMON (send_block_value (numArgs, 0))
 	{
 	  POP_N_OOPS (numArgs);
 	  PUSH_OOP (oop2);
@@ -5026,7 +5038,7 @@ primitive VMpr_Behavior_primCompileIfError [fail,succeed,reload_ip]
 	  xfree (_gst_first_error_str);
 	  _gst_first_error_str = _gst_first_error_file = NULL;
 	  _gst_report_errors = oldReportErrors;
-	  if (send_block_value (3))
+	  if (send_block_value (3, 3))
 	    PRIM_FAILED;
 	  else
 	    PRIM_SUCCEEDED_RELOAD_IP;

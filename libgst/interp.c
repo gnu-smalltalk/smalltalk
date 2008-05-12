@@ -424,9 +424,10 @@ static inline OOP create_args_array (int numArgs);
    the arguments in the block context, which have been copied out of
    the caller's context. 
 
-   On failure return true, on success (i.e. if NUMARGS matches what
-   the BlockClosure says) return false.  */
-static mst_Boolean send_block_value (int numArgs);
+   The block should accept between NUMARGS - CULL_UP_TO and
+   NUMARGS arguments.  If this is not true (failure) return true;
+   on success return false.  */
+static mst_Boolean send_block_value (int numArgs, int cull_up_to);
 
 /* This is a kind of simplified _gst_send_message_internal that,
    instead of setting up a context for a particular receiver, stores

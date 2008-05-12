@@ -1,3 +1,11 @@
+2008-05-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp.c: Adjust send_block_value prototype.
+	* libgst/interp-bc.inl: Support block argument culling.
+	* libgst/interp-jit.inl: Support block argument culling.
+	* libgst/prims.def: Add primitives for block argument culling.
+	* libgst/vm.def: Adjust calls to send_block_value.
+
 2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Adjust calls to COBJECT_NEW, COBJECT_VALUE,

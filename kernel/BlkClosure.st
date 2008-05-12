@@ -410,16 +410,13 @@ creation of Processes from blocks.'>
 
     forkWithoutPreemption [
 	"Evaluate the receiver in a process that cannot be preempted.
-	 If the receiver expect a parameter, pass the current process
-	 (can be useful for queuing interrupts from within the
-	 uninterruptible process)."
+	 If the receiver expect a parameter, pass the current process."
 
 	<category: 'multiple process'>
-	| closure args process result |
-	closure := [self valueWithArguments: args].
-	args := self numArgs = 0 ifTrue: [#()] ifFalse: [{Processor activeProcess}].
+	| creator |
+	creator := Processor activeProcess.
 	^Process 
-	    on: closure
+	    on: [self cull: creator]
 	    at: Processor unpreemptedPriority
 	    suspend: false
     ]
@@ -587,6 +584,33 @@ creation of Processes from blocks.'>
 
 	<category: 'built ins'>
 	<primitive: VMpr_BlockClosure_value>
+	SystemExceptions.WrongArgumentCount signal
+    ]
+
+    cull: arg1 [
+	"Evaluate the receiver, passing arg1 as the only parameter if
+	 the receiver has parameters."
+
+	<category: 'built ins'>
+	<primitive: VMpr_BlockClosure_cull>
+	SystemExceptions.WrongArgumentCount signal
+    ]
+
+    cull: arg1 cull: arg2 [
+	"Evaluate the receiver, passing arg1 and arg2 as parameters if
+	 the receiver accepts them."
+
+	<category: 'built ins'>
+	<primitive: VMpr_BlockClosure_cull>
+	SystemExceptions.WrongArgumentCount signal
+    ]
+
+    cull: arg1 cull: arg2 cull: arg3 [
+	"Evaluate the receiver, passing arg1, arg2 and arg3 as parameters if
+	 the receiver accepts them."
+
+	<category: 'built ins'>
+	<primitive: VMpr_BlockClosure_cull>
 	SystemExceptions.WrongArgumentCount signal
     ]
 
