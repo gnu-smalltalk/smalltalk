@@ -231,7 +231,7 @@ STInST.STClassLoader subclass: SyntaxConverter [
 	node comments isEmpty ifFalse: [
 	    stuffToEmit add: (EmittedComments comments: node comments source: node source) ].
 
-        ^super evaluate: node
+        ^super evaluate: rewritten
     ]
     
     addRule: searchString [
@@ -511,9 +511,11 @@ Options:
 	outFile close
     ]
 	on: Notification do: [ :ex |
-	    verbose ifTrue: [ stderr nextPutAll: 'gst-convert: ', ex messageText; nl; flush ] ]
+	    verbose ifTrue: [ stderr nextPutAll: 'gst-convert: ', ex messageText; nl; flush ].
+	    ex resume ]
 	on: Warning do: [ :ex |
-	    quiet ifFalse: [ stderr nextPutAll: 'gst-convert: warning: ', ex messageText; nl; flush ] ]
+	    quiet ifFalse: [ stderr nextPutAll: 'gst-convert: warning: ', ex messageText; nl; flush ].
+	    ex resume ]
 	on: Error do: [ :ex |
 	    stderr nextPutAll: 'gst-convert: error: ', ex messageText; nl; flush.
 	    outFile = stdout ifFalse: [

@@ -1,3 +1,9 @@
+2008-05-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/xml.sed: Fix for VW7.
+	* scripts/Convert.st: Fix for 2008-02-25 change to exception handling.
+	Apply rewrites to doits too.
+
 2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CObject.st: Fix typo.
