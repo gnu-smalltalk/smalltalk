@@ -921,6 +921,24 @@ _gst_oop_at_put (OOP oop, size_t index, OOP new)
   index_oop_put (oop, index + 1, new);
   return old;
 }
+
+void *
+_gst_oop_indexed_base (OOP oop)
+{
+  if (!_gst_smalltalk_initialized)
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
+
+  return OOP_TO_OBJ (oop)->data[OOP_FIXED_FIELDS (oop)];
+}
+
+enum gst_indexed_kind
+_gst_oop_indexed_kind (OOP oop)
+{
+  if (!_gst_smalltalk_initialized)
+    _gst_initialize (NULL, NULL, GST_NO_TTY);
+
+  return OOP_INSTANCE_SPEC (oop) & ISP_INDEXEDVARS;
+}
 
 
 

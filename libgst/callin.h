@@ -250,6 +250,10 @@ extern OOP _gst_oop_at (OOP oop, size_t index)
   ATTRIBUTE_HIDDEN;
 extern OOP _gst_oop_at_put (OOP oop, size_t index, OOP new)
   ATTRIBUTE_HIDDEN;
+extern void *_gst_oop_indexed_base (OOP oop)
+  ATTRIBUTE_HIDDEN;
+extern enum gst_indexed_kind _gst_oop_indexed_kind (OOP oop)
+  ATTRIBUTE_HIDDEN;
 
 
 /* Marks/copies the registered OOPs (they are part of the rootset by

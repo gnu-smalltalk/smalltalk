@@ -113,7 +113,9 @@ VMProxy gst_interpreter_proxy = {
   _gst_invoke_hook,
 
   /* New in 3.1.  */
-  _gst_relocate_path
+  _gst_relocate_path,
+  _gst_oop_indexed_base,
+  _gst_oop_indexed_kind
 };
 
 /* Functions in comp.h.  */
@@ -500,6 +502,18 @@ OOP
 gst_oop_at_put (OOP oop, size_t index, OOP new_oop)
 {
   return _gst_oop_at_put (oop, index, new_oop);
+}
+
+enum gst_indexed_kind
+gst_oop_indexed_kind (OOP oop)
+{
+  return _gst_oop_indexed_kind (oop);
+}
+
+void *
+gst_oop_indexed_base (OOP oop)
+{
+  return _gst_oop_indexed_base (oop);
 }
 
 

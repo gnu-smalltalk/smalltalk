@@ -201,6 +201,8 @@ typedef struct VMProxy
 
   /* 3.1+ functions.  */
   char *(*relocatePath) (const char *);
+  void *(*OOPIndexedBase) (OOP oop);
+  enum gst_indexed_kind (*OOPIndexedKind) (OOP oop); 
 } VMProxy;
 
 /* Compatibility section */
@@ -294,6 +296,8 @@ extern mst_Boolean gst_responds_to (OOP oop, OOP selector);
 extern size_t gst_oop_size (OOP oop);
 extern OOP gst_oop_at (OOP oop, size_t index);
 extern OOP gst_oop_at_put (OOP oop, size_t index, OOP new_oop); 
+extern void *gst_oop_indexed_base (OOP oop);
+extern enum gst_indexed_kind gst_oop_indexed_kind (OOP oop); 
 extern OOP gst_wchar_to_oop (wchar_t c);
 extern OOP gst_wstring_to_oop (const wchar_t *str);
 extern wchar_t gst_oop_to_wchar (OOP oop);

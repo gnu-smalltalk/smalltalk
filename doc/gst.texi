@@ -4252,6 +4252,14 @@ and is zero-based.  The function aborts if the index is out of range.
 The function returns the old value of the indexed instance variable.
 @end deftypefun
 
+@deftypefun {enum gst_indexed_kind} OOPIndexedKind (OOP)
+Return the kind of indexed instance variables that the given object has.
+@end deftypefun
+
+@deftypefun {void *} OOPIndexedBase (OOP)
+Return a pointer to the first indexed instance variable of the given object.
+The program should first retrieve the kind of data using OOPIndexedKind.
+@end deftypefun
 
 @deftypefun OOP getObjectClass (OOP)
 Return the class of the Smalltalk object passed as a parameter.
