@@ -293,11 +293,11 @@ static const char *feature_strings[] = {
 
 static const class_definition class_info[] = {
   {&_gst_object_class, &_gst_nil_oop,
-   ISP_FIXED, true, 0,
+   GST_ISP_FIXED, true, 0,
    "Object", NULL, "Dependencies FinalizableObjects", "VMPrimitives" },
 
   {&_gst_object_memory_class, &_gst_object_class,
-   ISP_FIXED, true, 34,
+   GST_ISP_FIXED, true, 34,
    "ObjectMemory", "bytesPerOOP bytesPerOTE "
    "edenSize survSpaceSize oldSpaceSize fixedSpaceSize "
    "edenUsedBytes survSpaceUsedBytes oldSpaceUsedBytes "
@@ -311,425 +311,425 @@ static const class_definition class_info[] = {
    "allocFailures allocMatches allocSplits allocProbes", NULL, NULL },
 
   {&_gst_message_class, &_gst_object_class,
-   ISP_FIXED, true, 2,
+   GST_ISP_FIXED, true, 2,
    "Message", "selector args", NULL, NULL },
 
   {&_gst_directed_message_class, &_gst_message_class,
-   ISP_FIXED, false, 1,
+   GST_ISP_FIXED, false, 1,
    "DirectedMessage", "receiver", NULL, NULL },
 
   {&_gst_magnitude_class, &_gst_object_class,
-   ISP_FIXED, false, 0,
+   GST_ISP_FIXED, false, 0,
    "Magnitude", NULL, NULL, NULL },
 
   {&_gst_char_class, &_gst_magnitude_class,
-   ISP_FIXED, true, 1,
+   GST_ISP_FIXED, true, 1,
    "Character", "codePoint", "Table UpperTable LowerTable", NULL },
 
   {&_gst_unicode_character_class, &_gst_char_class,
-   ISP_FIXED, true, 0,
+   GST_ISP_FIXED, true, 0,
    "UnicodeCharacter", NULL, NULL, NULL },
 
   {&_gst_time_class, &_gst_magnitude_class,
-   ISP_FIXED, false, 1,
+   GST_ISP_FIXED, false, 1,
    "Time", "seconds",
    "SecondClockAdjustment ClockOnStartup", NULL },
 
   {&_gst_date_class, &_gst_magnitude_class,
-   ISP_FIXED, false, 4,
+   GST_ISP_FIXED, false, 4,
    "Date", "days day month year",
    "DayNameDict MonthNameDict", NULL },
 
   {&_gst_number_class, &_gst_magnitude_class,
-   ISP_FIXED, false, 0,
+   GST_ISP_FIXED, false, 0,
    "Number", NULL, NULL, NULL },
 
   {&_gst_float_class, &_gst_number_class,
-   ISP_UCHAR, true, 0,
+   GST_ISP_UCHAR, true, 0,
    "Float", NULL, NULL, "CSymbols" },
 
   {&_gst_floatd_class, &_gst_float_class,
-   ISP_UCHAR, true, 0,
+   GST_ISP_UCHAR, true, 0,
    "FloatD", NULL, NULL, "CSymbols" },
 
   {&_gst_floate_class, &_gst_float_class,
-   ISP_UCHAR, true, 0,
+   GST_ISP_UCHAR, true, 0,
    "FloatE", NULL, NULL, "CSymbols" },
 
   {&_gst_floatq_class, &_gst_float_class,
-   ISP_UCHAR, true, 0,
+   GST_ISP_UCHAR, true, 0,
    "FloatQ", NULL, NULL, "CSymbols" },
 
   {&_gst_fraction_class, &_gst_number_class,
-   ISP_FIXED, false, 2,
+   GST_ISP_FIXED, false, 2,
    "Fraction", "numerator denominator", "Zero One", NULL },
 
   {&_gst_integer_class, &_gst_number_class,
-   ISP_FIXED, true, 0,
+   GST_ISP_FIXED, true, 0,
    "Integer", NULL, NULL, "CSymbols" },
 
   {&_gst_small_integer_class, &_gst_integer_class,
-   ISP_FIXED, true, 0,
+   GST_ISP_FIXED, true, 0,
    "SmallInteger", NULL, NULL, NULL },
 
   {&_gst_large_integer_class, &_gst_integer_class,	/* these four
 							   classes
 							   added by */
-   ISP_UCHAR, true, 0,	/* pb Sep 10 18:06:49 1998 */
+   GST_ISP_UCHAR, true, 0,	/* pb Sep 10 18:06:49 1998 */
    "LargeInteger", NULL,
    "Zero One ZeroBytes OneBytes LeadingZeros TrailingZeros", NULL },
 
   {&_gst_large_positive_integer_class, &_gst_large_integer_class,
-   ISP_UCHAR, true, 0,
+   GST_ISP_UCHAR, true, 0,
    "LargePositiveInteger", NULL, NULL, NULL },
 
   {&_gst_large_zero_integer_class, &_gst_large_positive_integer_class,
-   ISP_UCHAR, true, 0,
+   GST_ISP_UCHAR, true, 0,
    "LargeZeroInteger", NULL, NULL, NULL },
 
   {&_gst_large_negative_integer_class, &_gst_large_integer_class,
-   ISP_UCHAR, true, 0,
+   GST_ISP_UCHAR, true, 0,
    "LargeNegativeInteger", NULL, NULL, NULL },
 
   {&_gst_lookup_key_class, &_gst_magnitude_class,
-   ISP_FIXED, true, 1,
+   GST_ISP_FIXED, true, 1,
    "LookupKey", "key", NULL, NULL },
 
   {&_gst_deferred_variable_binding_class, &_gst_lookup_key_class,
-   ISP_FIXED, true, 4,
+   GST_ISP_FIXED, true, 4,
    "DeferredVariableBinding", "class defaultDictionary association path",
    NULL, NULL },
 
   {&_gst_association_class, &_gst_lookup_key_class,
-   ISP_FIXED, true, 1,
+   GST_ISP_FIXED, true, 1,
    "Association", "value", NULL, NULL },
 
   {&_gst_homed_association_class, &_gst_association_class,
-   ISP_FIXED, false, 1,
+   GST_ISP_FIXED, false, 1,
    "HomedAssociation", "environment", NULL, NULL },
 
   {&_gst_variable_binding_class, &_gst_homed_association_class,
-   ISP_FIXED, true, 0,
+   GST_ISP_FIXED, true, 0,
    "VariableBinding", NULL, NULL, NULL },
 
   {&_gst_link_class, &_gst_object_class,
-   ISP_FIXED, false, 1,
+   GST_ISP_FIXED, false, 1,
    "Link", "nextLink", NULL, NULL },
 
   {&_gst_process_class, &_gst_link_class,
-   ISP_FIXED, true, 7,
+   GST_ISP_FIXED, true, 7,
    "Process",
    "suspendedContext priority myList name environment interrupts interruptLock",
    NULL, NULL },
 
   {&_gst_callin_process_class, &_gst_process_class,
-   ISP_FIXED, true, 1,
+   GST_ISP_FIXED, true, 1,
    "CallinProcess",
    "returnedValue",
    NULL, NULL },
 
   {&_gst_sym_link_class, &_gst_link_class,
-   ISP_FIXED, true, 1,
+   GST_ISP_FIXED, true, 1,
    "SymLink", "symbol", NULL, NULL },
 
   {&_gst_collection_class, &_gst_object_class,
-   ISP_FIXED, false, 0,
+   GST_ISP_FIXED, false, 0,
    "Collection", NULL, NULL, NULL },
 
   {&_gst_sequenceable_collection_class, &_gst_collection_class,
-   ISP_FIXED, false, 0,
+   GST_ISP_FIXED, false, 0,
    "SequenceableCollection", NULL, NULL, NULL },
 
   {&_gst_linked_list_class, &_gst_sequenceable_collection_class,
-   ISP_FIXED, false, 2,
+   GST_ISP_FIXED, false, 2,
    "LinkedList", "firstLink lastLink", NULL, NULL },
 
   {&_gst_semaphore_class, &_gst_linked_list_class,
-   ISP_FIXED, true, 2,
+   GST_ISP_FIXED, true, 2,
    "Semaphore", "signals name", NULL, NULL },
 
   {&_gst_arrayed_collection_class, &_gst_sequenceable_collection_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "ArrayedCollection", NULL, NULL, NULL },
 
   {&_gst_array_class, &_gst_arrayed_collection_class,
-   ISP_POINTER, true, 0,
+   GST_ISP_POINTER, true, 0,
    "Array", NULL, NULL, NULL },
 
   {&_gst_weak_array_class, &_gst_array_class,
-   ISP_FIXED, false, 2,
+   GST_ISP_FIXED, false, 2,
    "WeakArray", "values nilValues", NULL, NULL },
 
   {&_gst_character_array_class, &_gst_arrayed_collection_class,
-   ISP_ULONG, false, 0,
+   GST_ISP_ULONG, false, 0,
    "CharacterArray", NULL, NULL, NULL },
 
   {&_gst_string_class, &_gst_character_array_class,
-   ISP_CHARACTER, true, 0,
+   GST_ISP_CHARACTER, true, 0,
    "String", NULL, NULL, NULL },
 
   {&_gst_unicode_string_class, &_gst_character_array_class,
-   ISP_UTF32, true, 0,
+   GST_ISP_UTF32, true, 0,
    "UnicodeString", NULL, NULL, NULL },
 
   {&_gst_symbol_class, &_gst_string_class,
-   ISP_CHARACTER, true, 0,
+   GST_ISP_CHARACTER, true, 0,
    "Symbol", NULL, NULL, NULL },
 
   {&_gst_byte_array_class, &_gst_arrayed_collection_class,
-   ISP_UCHAR, true, 0,
+   GST_ISP_UCHAR, true, 0,
    "ByteArray", NULL, NULL, "CSymbols" },
 
   {&_gst_compiled_code_class, &_gst_arrayed_collection_class,
-   ISP_UCHAR, false, 2,
+   GST_ISP_UCHAR, false, 2,
    "CompiledCode", "literals header",
    NULL, NULL },
 
   {&_gst_compiled_block_class, &_gst_compiled_code_class,
-   ISP_UCHAR, true, 1,
+   GST_ISP_UCHAR, true, 1,
    "CompiledBlock", "method",
    NULL, NULL },
 
   {&_gst_compiled_method_class, &_gst_compiled_code_class,
-   ISP_UCHAR, true, 1,
+   GST_ISP_UCHAR, true, 1,
    "CompiledMethod", "descriptor ",
    NULL, NULL },
 
   {&_gst_interval_class, &_gst_arrayed_collection_class,
-   ISP_FIXED, true, 3,
+   GST_ISP_FIXED, true, 3,
    "Interval", "start stop step", NULL, NULL },
 
   {&_gst_ordered_collection_class, &_gst_sequenceable_collection_class,
-   ISP_POINTER, false, 2,
+   GST_ISP_POINTER, false, 2,
    "OrderedCollection", "firstIndex lastIndex", NULL, NULL },
 
   {&_gst_sorted_collection_class, &_gst_ordered_collection_class,
-   ISP_POINTER, false, 3,
+   GST_ISP_POINTER, false, 3,
    "SortedCollection", "lastOrdered sorted sortBlock",
    "DefaultSortBlock",
    NULL },
 
   {&_gst_bag_class, &_gst_collection_class,
-   ISP_FIXED, false, 1,
+   GST_ISP_FIXED, false, 1,
    "Bag", "contents", NULL, NULL },
 
   {&_gst_mapped_collection_class, &_gst_collection_class,
-   ISP_FIXED, false, 2,
+   GST_ISP_FIXED, false, 2,
    "MappedCollection", "domain map", NULL, NULL },
 
   {&_gst_hashed_collection_class, &_gst_collection_class,
-   ISP_POINTER, false, 1,
+   GST_ISP_POINTER, false, 1,
    "HashedCollection", "tally", NULL, NULL },
 
   {&_gst_set_class, &_gst_hashed_collection_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "Set", NULL, NULL, NULL },
 
   {&_gst_weak_set_class, &_gst_set_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "WeakSet", NULL, NULL, NULL },
 
   {&_gst_identity_set_class, &_gst_set_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "IdentitySet", NULL, NULL, NULL },
 
   {&_gst_weak_identity_set_class, &_gst_weak_set_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "WeakIdentitySet", NULL, NULL, NULL },
 
   {&_gst_dictionary_class, &_gst_hashed_collection_class,
-   ISP_POINTER, true, 0,
+   GST_ISP_POINTER, true, 0,
    "Dictionary", NULL, NULL, NULL },
 
   {&_gst_weak_key_dictionary_class, &_gst_dictionary_class,
-   ISP_POINTER, false, 1,
+   GST_ISP_POINTER, false, 1,
    "WeakKeyDictionary", "keys", NULL, NULL },
 
   {&_gst_weak_key_identity_dictionary_class, &_gst_weak_key_dictionary_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "WeakKeyIdentityDictionary", NULL, NULL, NULL },
 
   {&_gst_lookup_table_class, &_gst_dictionary_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "LookupTable", NULL, NULL, NULL },
 
   {&_gst_weak_value_lookup_table_class, &_gst_lookup_table_class,
-   ISP_POINTER, false, 1,
+   GST_ISP_POINTER, false, 1,
    "WeakValueLookupTable", "values", NULL, NULL },
 
   {&_gst_weak_value_identity_dictionary_class, &_gst_weak_value_lookup_table_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "WeakValueIdentityDictionary", NULL, NULL, NULL },
 
   {&_gst_identity_dictionary_class, &_gst_lookup_table_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "IdentityDictionary", NULL, NULL, NULL },
 
   {&_gst_method_dictionary_class, &_gst_lookup_table_class,
-   ISP_POINTER, true, 0,
+   GST_ISP_POINTER, true, 0,
    "MethodDictionary", NULL, NULL, NULL },
 
   /* These five MUST have the same structure as dictionary; they're
      used interchangeably within the C portion of the system */
   {&_gst_binding_dictionary_class, &_gst_dictionary_class,
-   ISP_POINTER, true, 1,
+   GST_ISP_POINTER, true, 1,
    "BindingDictionary", "environment", NULL, NULL },
 
   {&_gst_abstract_namespace_class, &_gst_binding_dictionary_class,
-   ISP_POINTER, true, 2,
+   GST_ISP_POINTER, true, 2,
    "AbstractNamespace", "name subspaces", NULL, NULL },
 
   {&_gst_root_namespace_class, &_gst_abstract_namespace_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "RootNamespace", NULL, NULL, NULL },
 
   {&_gst_namespace_class, &_gst_abstract_namespace_class,
-   ISP_POINTER, true, 0,
+   GST_ISP_POINTER, true, 0,
    "Namespace", NULL, "Current", NULL },
 
   {&_gst_system_dictionary_class, &_gst_root_namespace_class,
-   ISP_POINTER, false, 0,
+   GST_ISP_POINTER, false, 0,
    "SystemDictionary", NULL, NULL, NULL },
 
   {&_gst_stream_class, &_gst_object_class,
-   ISP_FIXED, false, 0,
+   GST_ISP_FIXED, false, 0,
    "Stream", NULL, NULL, NULL },
 
   {&_gst_positionable_stream_class, &_gst_stream_class,
-   ISP_FIXED, false, 4,
+   GST_ISP_FIXED, false, 4,
    "PositionableStream", "collection ptr endPtr access", NULL, NULL },
 
   {&_gst_read_stream_class, &_gst_positionable_stream_class,
-   ISP_FIXED, false, 0,
+   GST_ISP_FIXED, false, 0,
    "ReadStream", NULL, NULL, NULL },
 
   {&_gst_write_stream_class, &_gst_positionable_stream_class,
-   ISP_FIXED, false, 0,
+   GST_ISP_FIXED, false, 0,
    "WriteStream", NULL, NULL, NULL },
 
   {&_gst_read_write_stream_class, &_gst_write_stream_class,
-   ISP_FIXED, false, 0,
+   GST_ISP_FIXED, false, 0,
    "ReadWriteStream", NULL, NULL, NULL },
 
   {&_gst_byte_stream_class, &_gst_read_write_stream_class,
-   ISP_FIXED, false, 0,
+   GST_ISP_FIXED, false, 0,
    "ByteStream", NULL, NULL, NULL },
 
   {&_gst_file_descriptor_class, &_gst_byte_stream_class,
-   ISP_FIXED, true, 5,
+   GST_ISP_FIXED, true, 5,
    "FileDescriptor", "fd file isPipe atEnd peek", "AllOpenFiles", NULL },
 
   {&_gst_file_stream_class, &_gst_file_descriptor_class,
-   ISP_FIXED, true, 2,
+   GST_ISP_FIXED, true, 2,
    "FileStream", "writePtr writeEnd", "Verbose Record Includes", NULL },
 
   {&_gst_undefined_object_class, &_gst_object_class,
-   ISP_FIXED, true, 0,
+   GST_ISP_FIXED, true, 0,
    "UndefinedObject", NULL, NULL, NULL },
 
   {&_gst_boolean_class, &_gst_object_class,
-   ISP_FIXED, true, 0,
+   GST_ISP_FIXED, true, 0,
    "Boolean", NULL, NULL, NULL },
 
   {&_gst_false_class, &_gst_boolean_class,
-   ISP_FIXED, true, 1,
+   GST_ISP_FIXED, true, 1,
    "False", "truthValue", NULL, NULL },
 
   {&_gst_true_class, &_gst_boolean_class,
-   ISP_FIXED, true, 1,
+   GST_ISP_FIXED, true, 1,
    "True", "truthValue", NULL, NULL },
 
   {&_gst_processor_scheduler_class, &_gst_object_class,
-   ISP_FIXED, false, 6,
+   GST_ISP_FIXED, false, 6,
    "ProcessorScheduler",
    "processLists activeProcess idleTasks processTimeslice gcSemaphore gcArray",
    NULL, NULL },
 
   {&_gst_delay_class, &_gst_object_class,
-   ISP_FIXED, false, 2,
+   GST_ISP_FIXED, false, 2,
    "Delay", "resumptionTime delayDuration",
    "Queue TimeoutSem MutexSem DelayProcess IdleProcess ActiveDelay DelayEvent", NULL },
 
   {&_gst_shared_queue_class, &_gst_object_class,
-   ISP_FIXED, false, 3,
+   GST_ISP_FIXED, false, 3,
    "SharedQueue", "queueSem valueReady queue", NULL, NULL },
 
   /* Change this, classDescription, or gst_class, and you must change
      the implementaion of new_metaclass some */
   {&_gst_behavior_class, &_gst_object_class,
-   ISP_FIXED, true, 5,
+   GST_ISP_FIXED, true, 5,
    "Behavior",
    "superClass methodDictionary instanceSpec subClasses instanceVariables",
    NULL, NULL },
 
   {&_gst_class_description_class, &_gst_behavior_class,
-   ISP_FIXED, true, 0,
+   GST_ISP_FIXED, true, 0,
    "ClassDescription", NULL, NULL, NULL },
 
   {&_gst_class_class, &_gst_class_description_class,
-   ISP_FIXED, true, 8,
+   GST_ISP_FIXED, true, 8,
    "Class",
    "name comment category environment classVariables sharedPools "
    "securityPolicy pragmaHandlers",
    NULL, NULL },
 
   {&_gst_metaclass_class, &_gst_class_description_class,
-   ISP_FIXED, true, 1,
+   GST_ISP_FIXED, true, 1,
    "Metaclass", "instanceClass", NULL, NULL },
 
   {&_gst_context_part_class, &_gst_object_class,
-   ISP_POINTER, true, 6,
+   GST_ISP_POINTER, true, 6,
    "ContextPart", "parent nativeIP ip sp receiver method ",
    NULL, NULL },
 
   {&_gst_method_context_class, &_gst_context_part_class,
-   ISP_POINTER, true, 1,
+   GST_ISP_POINTER, true, 1,
    "MethodContext", "flags ", NULL, NULL },
 
   {&_gst_block_context_class, &_gst_context_part_class,
-   ISP_POINTER, true, 1,
+   GST_ISP_POINTER, true, 1,
    "BlockContext", "outerContext ", NULL, NULL },
 
   {&_gst_continuation_class, &_gst_object_class,
-   ISP_FIXED, true, 1,
+   GST_ISP_FIXED, true, 1,
    "Continuation", "stack ", NULL, NULL },
 
   {&_gst_block_closure_class, &_gst_object_class,
-   ISP_FIXED, true, 3,
+   GST_ISP_FIXED, true, 3,
    "BlockClosure", "outerContext block receiver", NULL, NULL },
 
   {&_gst_permission_class, &_gst_object_class,
-   ISP_FIXED, true, 4,
+   GST_ISP_FIXED, true, 4,
    "Permission", "name actions target positive", NULL, NULL },
 
   {&_gst_security_policy_class, &_gst_object_class,
-   ISP_FIXED, true, 2,
+   GST_ISP_FIXED, true, 2,
    "SecurityPolicy", "dictionary owner", NULL, NULL },
 
   {&_gst_c_object_class, &_gst_object_class,
-   ISP_ULONG, true, 2,
+   GST_ISP_ULONG, true, 2,
    "CObject", "type storage", NULL, "CSymbols" },
 
   {&_gst_c_type_class, &_gst_object_class,
-   ISP_FIXED, true, 1,
+   GST_ISP_FIXED, true, 1,
    "CType", "cObjectType", NULL, NULL },
 
   {&_gst_c_func_descriptor_class, &_gst_object_class,
-   ISP_POINTER, true, 4,
+   GST_ISP_POINTER, true, 4,
    "CFunctionDescriptor",
    "cFunction cFunctionName returnType tag",
    NULL, NULL },
 
   {&_gst_memory_class, &_gst_object_class,
-   ISP_FIXED, false, 0,
+   GST_ISP_FIXED, false, 0,
    "Memory", NULL, NULL, NULL },
 
   {&_gst_method_info_class, &_gst_object_class,
-   ISP_POINTER, true, 4,
+   GST_ISP_POINTER, true, 4,
    "MethodInfo", "sourceCode category class selector", NULL, NULL },
 
   {&_gst_file_segment_class, &_gst_object_class,
-   ISP_FIXED, true, 3,
+   GST_ISP_FIXED, true, 3,
    "FileSegment", "file startPos size", NULL, NULL }
 
 /* Classes not defined here (like Point/Rectangle/RunArray) are
@@ -941,7 +941,7 @@ init_metaclass (OOP metaclassOOP)
 				       "classVariables sharedPools securityPolicy "
 				       "pragmaHandlers");
 
-  metaclass->instanceSpec = ISP_INTMARK | ISP_FIXED |
+  metaclass->instanceSpec = GST_ISP_INTMARK | GST_ISP_FIXED |
     (((sizeof (struct gst_class) -
        sizeof (gst_object_header)) /
       sizeof (OOP)) << ISP_NUMFIXEDFIELDS);
@@ -1264,7 +1264,7 @@ create_class (const class_definition *ci)
 
   class->objClass = NULL;
   class->superclass = superClassOOP;
-  class->instanceSpec = ISP_INTMARK
+  class->instanceSpec = GST_ISP_INTMARK
     | ci->instanceSpec
     | (numFixedFields << ISP_NUMFIXEDFIELDS);
 

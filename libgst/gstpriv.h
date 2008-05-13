@@ -392,68 +392,6 @@ enum {
   (oop)->flags |= F_EPHEMERON;
 
 
-/*
-      3                   2                   1 
-    1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |    # fixed fields             |      unused       |I| kind  |1|
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-   I'm moving it to bits 13-30 (it used to stay at bits 5-30),
-   allocating space for more flags in case they're needed.
-   If you change ISP_NUMFIXEDFIELDS you should modify Behavior.st too.
-   Remember to shift by ISP_NUMFIXEDFIELDS-1 there, since Smalltalk does
-   not see ISP_INTMARK!!
-
-   Keep these in sync with _gst_sizes, in dict.c.
-
-   FIXME: these should be exported in a pool dictionary.  */
-
-enum {
-  /* This is a shift count.  */
-  ISP_NUMFIXEDFIELDS = 13,
-
-  /* Set if the indexed instance variables are pointers.  */
-  ISP_FIXED = 0,
-  ISP_SCHAR = 32,
-  ISP_UCHAR = 34,
-  ISP_CHARACTER = 36,
-  ISP_SHORT = 38,
-  ISP_USHORT = 40,
-  ISP_INT = 42,
-  ISP_UINT = 44,
-  ISP_FLOAT = 46,
-  ISP_INT64 = 48,
-  ISP_UINT64 = 50,
-  ISP_DOUBLE = 52,
-  ISP_UTF32 = 54,
-  ISP_LAST_SCALAR = 54,
-  ISP_POINTER = 62,
-
-#if SIZEOF_OOP == 8
-  ISP_LONG = ISP_INT64,
-  ISP_ULONG = ISP_UINT64,
-  ISP_LAST_UNALIGNED = ISP_FLOAT,
-#else
-  ISP_LONG = ISP_INT,
-  ISP_ULONG = ISP_UINT,
-  ISP_LAST_UNALIGNED = ISP_USHORT,
-#endif
-
-  /* Set if the instances of the class have indexed instance
-     variables.  */
-  ISP_ISINDEXABLE = 32,
-
-  /* These represent the shape of the indexed instance variables of
-     the instances of the class.  */
-  ISP_INDEXEDVARS = 62,
-  ISP_SHAPE = 30,
-
-  /* Set to 1 to mark a SmallInteger.  */
-  ISP_INTMARK = 1
-};
-
-
 /* the current execution stack pointer */
 #ifndef ENABLE_JIT_TRANSLATION
 # define sp		_gst_sp

@@ -158,6 +158,34 @@ typedef struct gst_behavior
 #define COBJECT_INT_TYPE		FROM_INT(10)
 #define COBJECT_UNSIGNED_INT_TYPE	FROM_INT(11)
 
+/*    3                   2                   1
+    1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    # fixed fields             |      unused       |I| kind  |1|
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   I'm moving it to bits 13-30 (it used to stay at bits 5-30),
+   allocating space for more flags in case they're needed.
+   If you change ISP_NUMFIXEDFIELDS you should modify Behavior.st too.
+   Remember to shift by ISP_NUMFIXEDFIELDS-1 there, since Smalltalk does
+   not see GST_ISP_INTMARK!!  */
+
+enum {
+  ISP_NUMFIXEDFIELDS = 13,
+
+  /* Set if the instances of the class have indexed instance
+     variables.  */
+  ISP_ISINDEXABLE = 32,
+
+  /* These represent the shape of the indexed instance variables of
+     the instances of the class.  */
+  ISP_INDEXEDVARS = 62,
+  ISP_SHAPE = 30,
+
+  /* Set to 1 to mark a SmallInteger.  */
+  GST_ISP_INTMARK = 1
+};
+
 typedef struct gst_class_description
 {
   CLASS_DESCRIPTION_HEADER;

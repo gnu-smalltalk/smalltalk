@@ -430,7 +430,7 @@ static inline int64_t to_c_int_64 (OOP oop);
    CLASS_OOP are pointers.  */
 #define CLASS_IS_UNALIGNED(class_oop) \
   ((CLASS_INSTANCE_SPEC(class_oop) & ISP_ISINDEXABLE) \
-   && (CLASS_INSTANCE_SPEC(class_oop) & ISP_INDEXEDVARS) <= ISP_LAST_UNALIGNED)
+   && (CLASS_INSTANCE_SPEC(class_oop) & ISP_INDEXEDVARS) <= GST_ISP_LAST_UNALIGNED)
 
 /* Answer whether instances of CLASS_OOP have indexed instance variables.  */
 #define CLASS_IS_INDEXABLE(class_oop) \
@@ -439,7 +439,7 @@ static inline int64_t to_c_int_64 (OOP oop);
 /* Answer whether instances of CLASS_OOP have indexed instance variables.  */
 #define CLASS_IS_SCALAR(class_oop) \
   ((CLASS_INSTANCE_SPEC(class_oop) & ISP_ISINDEXABLE) \
-   && (CLASS_INSTANCE_SPEC(class_oop) & ISP_INDEXEDVARS) <= ISP_LAST_SCALAR)
+   && (CLASS_INSTANCE_SPEC(class_oop) & ISP_INDEXEDVARS) <= GST_ISP_LAST_SCALAR)
 
 /* Answer the size in bytes of the object data for OOP.  */
 #define OBJECT_SIZE_BYTES(obj) \
@@ -707,7 +707,7 @@ instantiate_with (OOP class_oop,
   (*p_oop)->flags |= (class_oop->flags & F_UNTRUSTED);
 
   instanceSpec = CLASS_INSTANCE_SPEC (class_oop);
-  if COMMON ((instanceSpec & ISP_INDEXEDVARS) == ISP_POINTER)
+  if COMMON ((instanceSpec & ISP_INDEXEDVARS) == GST_ISP_POINTER)
     nil_fill (p_instance->data,
 	      (instanceSpec >> ISP_NUMFIXEDFIELDS) + numIndexFields);
   else
@@ -956,79 +956,79 @@ index_oop_spec (OOP oop,
 
   switch (instanceSpec & ISP_INDEXEDVARS)
     {
-      case ISP_SCHAR: {
+      case GST_ISP_SCHAR: {
         int8_t i;
         DO_INDEX_OOP (int8_t, i);
         return FROM_INT (i);
       }
 
-      case ISP_UCHAR: {
+      case GST_ISP_UCHAR: {
         uint8_t i;
         DO_INDEX_OOP (uint8_t, i);
         return FROM_INT (i);
       }
 
-      case ISP_CHARACTER: {
+      case GST_ISP_CHARACTER: {
         uint8_t i;
         DO_INDEX_OOP (uint8_t, i);
         return CHAR_OOP_AT (i);
       }
 
-      case ISP_SHORT: {
+      case GST_ISP_SHORT: {
         uint16_t i;
         DO_INDEX_OOP (int16_t, i);
         return FROM_INT (i);
       }
 
-      case ISP_USHORT: {
+      case GST_ISP_USHORT: {
         uint16_t i;
         DO_INDEX_OOP (uint16_t, i);
         return FROM_INT (i);
       }
 
-      case ISP_INT: {
+      case GST_ISP_INT: {
         uint32_t i;
         DO_INDEX_OOP (int32_t, i);
         return from_c_int_32 (i);
       }
 
-      case ISP_UINT: {
+      case GST_ISP_UINT: {
         uint32_t i;
         DO_INDEX_OOP (uint32_t, i);
         return from_c_uint_32 (i);
       }
 
-      case ISP_FLOAT: {
+      case GST_ISP_FLOAT: {
         float f;
         DO_INDEX_OOP (float, f);
         return floate_new (f);
       }
 
-      case ISP_INT64: {
+      case GST_ISP_INT64: {
         uint64_t i;
         DO_INDEX_OOP (int64_t, i);
         return from_c_int_64 (i);
       }
 
-      case ISP_UINT64: {
+      case GST_ISP_UINT64: {
         uint64_t i;
         DO_INDEX_OOP (uint64_t, i);
         return from_c_uint_64 (i);
       }
 
-      case ISP_DOUBLE: {
+      case GST_ISP_DOUBLE: {
         double d;
         DO_INDEX_OOP (double, d);
         return floatd_new (d);
       }
 
-      case ISP_UTF32: {
+      case GST_ISP_UTF32: {
         uint32_t i;
         DO_INDEX_OOP (uint32_t, i);
         return char_new (i);
       }
 
-      case ISP_POINTER:
+      case GST_ISP_POINTER:
         maxIndex = NUM_WORDS (object);
         index += instanceSpec >> ISP_NUMFIXEDFIELDS;
         if UNCOMMON (index >= maxIndex)
@@ -1098,7 +1098,7 @@ index_oop_put_spec (OOP oop,
 
   switch (instanceSpec & ISP_INDEXEDVARS)
     {
-      case ISP_SCHAR: {
+      case GST_ISP_SCHAR: {
         DO_INDEX_OOP_PUT (int8_t,
 			  IS_INT (value)
 			  && TO_INT (value) >= -128
@@ -1107,7 +1107,7 @@ index_oop_put_spec (OOP oop,
         return (false);
       }
 
-      case ISP_UCHAR: {
+      case GST_ISP_UCHAR: {
         DO_INDEX_OOP_PUT (uint8_t,
 			  IS_INT (value)
 			  && TO_INT (value) >= 0
@@ -1116,7 +1116,7 @@ index_oop_put_spec (OOP oop,
         return (false);
       }
 
-      case ISP_CHARACTER: {
+      case GST_ISP_CHARACTER: {
         DO_INDEX_OOP_PUT (uint8_t,
 			  !IS_INT (value)
 			  && OOP_CLASS (value) == _gst_char_class,
@@ -1124,7 +1124,7 @@ index_oop_put_spec (OOP oop,
         return (false);
       }
 
-      case ISP_SHORT: {
+      case GST_ISP_SHORT: {
         DO_INDEX_OOP_PUT (uint16_t,
 			  IS_INT (value)
 			  && TO_INT (value) >= -32768
@@ -1133,7 +1133,7 @@ index_oop_put_spec (OOP oop,
 	return (false);
       }
 
-      case ISP_USHORT: {
+      case GST_ISP_USHORT: {
         DO_INDEX_OOP_PUT (uint16_t,
 			  IS_INT (value)
 			  && TO_INT (value) >= 0
@@ -1142,17 +1142,17 @@ index_oop_put_spec (OOP oop,
 	return (false);
       }
 
-      case ISP_INT: {
+      case GST_ISP_INT: {
         DO_INDEX_OOP_PUT (int32_t, is_c_int_32 (value), to_c_int_32 (value));
 	return (false);
       }
 
-      case ISP_UINT: {
+      case GST_ISP_UINT: {
         DO_INDEX_OOP_PUT (uint32_t, is_c_uint_32 (value), to_c_int_32 (value));
 	return (false);
       }
 
-      case ISP_FLOAT: {
+      case GST_ISP_FLOAT: {
         DO_INDEX_OOP_PUT (float, IS_INT (value), TO_INT (value));
         DO_INDEX_OOP_PUT (float, OOP_CLASS (value) == _gst_floate_class,
 			  FLOATE_OOP_VALUE (value));
@@ -1163,17 +1163,17 @@ index_oop_put_spec (OOP oop,
         return (false);
       }
 
-      case ISP_INT64: {
+      case GST_ISP_INT64: {
         DO_INDEX_OOP_PUT (int64_t, is_c_int_64 (value), to_c_int_64 (value));
 	return (false);
       }
 
-      case ISP_UINT64: {
+      case GST_ISP_UINT64: {
         DO_INDEX_OOP_PUT (uint64_t, is_c_uint_64 (value), to_c_int_64 (value));
 	return (false);
       }
 
-      case ISP_DOUBLE: {
+      case GST_ISP_DOUBLE: {
         DO_INDEX_OOP_PUT (double, IS_INT (value), TO_INT (value));
         DO_INDEX_OOP_PUT (double, OOP_CLASS (value) == _gst_floatd_class,
 			  FLOATD_OOP_VALUE (value));
@@ -1184,7 +1184,7 @@ index_oop_put_spec (OOP oop,
         return (false);
       }
 
-      case ISP_UTF32: {
+      case GST_ISP_UTF32: {
         DO_INDEX_OOP_PUT (uint32_t,
 			  !IS_INT (value)
 			  && (OOP_CLASS (value) == _gst_unicode_character_class
@@ -1194,7 +1194,7 @@ index_oop_put_spec (OOP oop,
         return (false);
       }
 
-      case ISP_POINTER:
+      case GST_ISP_POINTER:
         maxIndex = NUM_WORDS (object);
         index += instanceSpec >> ISP_NUMFIXEDFIELDS;
         if UNCOMMON (index >= maxIndex)

@@ -1,3 +1,13 @@
+2008-05-13  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gstpriv.h: Move ISP_* constants...
+	* libgst/dict.h: ... here...
+	* libgst/gst.h: ... and here.  Prefix these with GST_.
+	* libgst/dict.c: Adjust uses.
+	* libgst/dict.inl: Adjust uses.
+	* libgst/prims.def: Adjust uses.
+	* libgst/xlat.c: Adjust uses.
+
 2008-05-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Adjust send_block_value prototype.

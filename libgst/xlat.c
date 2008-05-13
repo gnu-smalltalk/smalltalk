@@ -2532,10 +2532,10 @@ emit_basic_size_in_r0 (OOP classOOP, mst_Boolean tagged, int objectReg)
     }
 
   /* Not yet implemented.  */
-  if (shape != ISP_POINTER
-      && shape != ISP_SCHAR
-      && shape != ISP_CHARACTER
-      && shape != ISP_UCHAR)
+  if (shape != GST_ISP_POINTER
+      && shape != GST_ISP_SCHAR
+      && shape != GST_ISP_CHARACTER
+      && shape != GST_ISP_UCHAR)
     abort ();
 
   adjust = CLASS_FIXED_FIELDS (classOOP) +
@@ -2549,7 +2549,7 @@ emit_basic_size_in_r0 (OOP classOOP, mst_Boolean tagged, int objectReg)
 
   jit_ldxi_l (JIT_R0, objectReg, jit_ptr_field (gst_object, objSize));
 
-  if (shape != ISP_POINTER)
+  if (shape != GST_ISP_POINTER)
     jit_ldxi_p (JIT_V1, JIT_V0, jit_ptr_field (OOP, flags));
 
   if (!tagged)
@@ -2558,7 +2558,7 @@ emit_basic_size_in_r0 (OOP classOOP, mst_Boolean tagged, int objectReg)
   else
     adjust = adjust * 2;
 
-  if (shape != ISP_POINTER)
+  if (shape != GST_ISP_POINTER)
     {
       jit_andi_l (JIT_V1, JIT_V1, EMPTY_BYTES);
       jit_lshi_l (JIT_R0, JIT_R0, LONG_SHIFT);
@@ -2604,8 +2604,8 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	    return PRIM_FAIL | PRIM_INLINED;
 	  }
 
-	else if (shape != ISP_POINTER && shape != ISP_UCHAR
-		 && shape != ISP_SCHAR && shape != ISP_CHARACTER)
+	else if (shape != GST_ISP_POINTER && shape != GST_ISP_UCHAR
+		 && shape != GST_ISP_SCHAR && shape != GST_ISP_CHARACTER)
 	  /* too complicated to return LargeIntegers */
 	  break;
 
@@ -2632,12 +2632,12 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	   (SOMETHING depends on the shape).  */
 	switch (shape)
 	  {
-	  case ISP_POINTER:
+	  case GST_ISP_POINTER:
 	    jit_lshi_ul (JIT_V1, JIT_V1, LONG_SHIFT);
 	    jit_ldxr_p (JIT_R0, JIT_R2, JIT_V1);
 	    break;
 
-	  case ISP_UCHAR:
+	  case GST_ISP_UCHAR:
 	    jit_ldxr_uc (JIT_R0, JIT_R2, JIT_V1);
 
 	    /* Tag the byte we read */
@@ -2645,7 +2645,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	    jit_addi_ul (JIT_R0, JIT_R0, 1);
 	    break;
 
-	  case ISP_SCHAR:
+	  case GST_ISP_SCHAR:
 	    jit_ldxr_c (JIT_R0, JIT_R2, JIT_V1);
 
 	    /* Tag the byte we read */
@@ -2653,7 +2653,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	    jit_addi_ul (JIT_R0, JIT_R0, 1);
 	    break;
 
-	  case ISP_CHARACTER:
+	  case GST_ISP_CHARACTER:
 	    {
 	      jit_ldxr_uc (JIT_R0, JIT_R2, JIT_V1);
 
@@ -2701,7 +2701,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	    return PRIM_FAIL | PRIM_INLINED;
 	  }
 
-	if (shape != ISP_UCHAR && shape != ISP_POINTER)
+	if (shape != GST_ISP_UCHAR && shape != GST_ISP_POINTER)
 	  /* too complicated to convert LargeIntegers */
 	  break;
 
@@ -2725,7 +2725,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	jit_subi_ul (JIT_V1, JIT_V1, 1);
 	fail2 = jit_bger_ul (jit_get_label (), JIT_V1, JIT_R0);
 
-	if (shape == ISP_POINTER)
+	if (shape == GST_ISP_POINTER)
 	  jit_lshi_ul (JIT_V1, JIT_V1, LONG_SHIFT);
 
 	/* Compute the effective address to free V1 for the operand */
@@ -2734,7 +2734,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 
 	switch (shape)
 	  {
-	  case ISP_UCHAR:
+	  case GST_ISP_UCHAR:
 	    /* Check and untag the byte we store */
 	    fail3 = jit_bmci_l (jit_get_label (), JIT_V1, 1);
 	    jit_rshi_ul (JIT_R0, JIT_V1, 1);
@@ -2743,7 +2743,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	    jit_str_uc (JIT_R2, JIT_R0);
 	    break;
 
-	  case ISP_CHARACTER:
+	  case GST_ISP_CHARACTER:
 	    /* Check the character we store */
 	    fail3 = jit_bmsi_l (jit_get_label (), JIT_V1, 1);
 
@@ -2754,7 +2754,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
 	    jit_str_uc (JIT_R2, JIT_R0);
 	    break;
 
-	  case ISP_POINTER:
+	  case GST_ISP_POINTER:
 	    fail3 = fail4 = NULL;
 	    jit_str_p (JIT_R2, JIT_V1);
 	  }
@@ -2792,7 +2792,7 @@ emit_inlined_primitive (int primitive, int numArgs, int attr)
         if (numArgs != 0)
 	  break;
 
-	if (shape != 0 && shape != ISP_UCHAR && shape != ISP_POINTER)
+	if (shape != 0 && shape != GST_ISP_UCHAR && shape != GST_ISP_POINTER)
 	  /* too complicated to convert LargeIntegers */
 	  break;
 

@@ -176,6 +176,37 @@ struct object_s
 #define IS_OOP(oop) \
   (! IS_INT(oop) )
 
+/* Keep these in sync with _gst_sizes, in dict.c.
+   FIXME: these should be exported in a pool dictionary.  */
+enum gst_indexed_kind {
+  GST_ISP_FIXED = 0,
+  GST_ISP_SCHAR = 32,
+  GST_ISP_UCHAR = 34,
+  GST_ISP_CHARACTER = 36,
+  GST_ISP_SHORT = 38,
+  GST_ISP_USHORT = 40,
+  GST_ISP_INT = 42,
+  GST_ISP_UINT = 44,
+  GST_ISP_FLOAT = 46,
+  GST_ISP_INT64 = 48,
+  GST_ISP_UINT64 = 50,
+  GST_ISP_DOUBLE = 52,
+  GST_ISP_UTF32 = 54,
+  GST_ISP_LAST_SCALAR = 54,
+  GST_ISP_POINTER = 62,
+
+#if SIZEOF_OOP == 8
+  GST_ISP_LONG = GST_ISP_INT64,
+  GST_ISP_ULONG = GST_ISP_UINT64,
+  GST_ISP_LAST_UNALIGNED = GST_ISP_FLOAT,
+#else
+  GST_ISP_LONG = GST_ISP_INT,
+  GST_ISP_ULONG = GST_ISP_UINT,
+  GST_ISP_LAST_UNALIGNED = GST_ISP_USHORT,
+#endif
+};
+
+
 /* enum types used by the public APIs.  */
 enum gst_file_dir {
   GST_DIR_ABS,

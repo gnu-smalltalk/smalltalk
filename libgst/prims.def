@@ -2110,11 +2110,11 @@ primitive VMpr_CharacterArray_valueAt = 60 [succeed,fail]
 
   switch (spec & ISP_INDEXEDVARS)
     {
-    case ISP_CHARACTER:
-      spec ^= ISP_CHARACTER ^ ISP_UCHAR;
+    case GST_ISP_CHARACTER:
+      spec ^= GST_ISP_CHARACTER ^ GST_ISP_UCHAR;
       break;
-    case ISP_UTF32:
-      spec ^= ISP_UTF32 ^ ISP_UINT;
+    case GST_ISP_UTF32:
+      spec ^= GST_ISP_UTF32 ^ GST_ISP_UINT;
       break;
     default:
       UNPOP (1);
@@ -2152,11 +2152,11 @@ primitive VMpr_CharacterArray_valueAtPut = 61 [succeed,fail,inlined]
 
   switch (spec & ISP_INDEXEDVARS)
     {
-    case ISP_CHARACTER:
-      spec ^= ISP_CHARACTER ^ ISP_UCHAR;
+    case GST_ISP_CHARACTER:
+      spec ^= GST_ISP_CHARACTER ^ GST_ISP_UCHAR;
       break;
-    case ISP_UTF32:
-      spec ^= ISP_UTF32 ^ ISP_UINT;
+    case GST_ISP_UTF32:
+      spec ^= GST_ISP_UTF32 ^ GST_ISP_UINT;
       break;
     default:
       UNPOP (2);
@@ -3030,13 +3030,13 @@ primitive VMpr_String_similarityTo [succeed,fail]
   oop2 = STACKTOP ();
   oop1 = STACKTOP ();
 
-  if ((OOP_INSTANCE_SPEC (oop1) & (~0 << ISP_NUMFIXEDFIELDS))
-      || (OOP_INSTANCE_SPEC (oop1) & ISP_INDEXEDVARS) != ISP_CHARACTER)
+  if (OOP_FIXED_FIELDS (oop1)
+      || (OOP_INSTANCE_SPEC (oop1) & ISP_INDEXEDVARS) != GST_ISP_CHARACTER)
     PRIM_FAILED;
 
 #ifndef OPTIMIZE
-  if ((OOP_INSTANCE_SPEC (oop1) & (~0 << ISP_NUMFIXEDFIELDS))
-      || (OOP_INSTANCE_SPEC (oop1) & ISP_INDEXEDVARS) != ISP_CHARACTER)
+  if (OOP_FIXED_FIELDS (oop1)
+      || (OOP_INSTANCE_SPEC (oop1) & ISP_INDEXEDVARS) != GST_ISP_CHARACTER)
     PRIM_FAILED;
 #endif
 
@@ -3093,9 +3093,9 @@ primitive VMpr_ByteArray_replaceFromToWithStartingAt [succeed,fail]
     {
       intptr_t spec = OOP_INSTANCE_SPEC (srcOOP);
       if (!(spec & (~0 << ISP_NUMFIXEDFIELDS))
-          && ((spec & ISP_INDEXEDVARS) == ISP_UCHAR
-               || (spec & ISP_INDEXEDVARS) == ISP_SCHAR
-               || (spec & ISP_INDEXEDVARS) == ISP_CHARACTER))
+          && ((spec & ISP_INDEXEDVARS) == GST_ISP_UCHAR
+               || (spec & ISP_INDEXEDVARS) == GST_ISP_SCHAR
+               || (spec & ISP_INDEXEDVARS) == GST_ISP_CHARACTER))
 	{
 	  /* dstEnd is inclusive: (1 to: 1) has length 1 */
 	  dstEndIndex = TO_INT (dstEndIndexOOP);
@@ -5350,7 +5350,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       }
 
     case PRIM_PUT_CHARS:
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
@@ -5371,7 +5371,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       break;
 
     case PRIM_GET_CHARS:		/* only works for strings */
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
@@ -5397,7 +5397,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       break;
 
     case PRIM_GET_CHARS_AT:
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0
 	  && IS_OFF_T (oopVec[4]))
 	{
@@ -5437,7 +5437,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       break;
 
     case PRIM_PUT_CHARS_AT:
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0
 	  && IS_OFF_T (oopVec[4]))
 	{
@@ -5605,7 +5605,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       }
 
     case PRIM_PUT_CHARS:
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
@@ -5629,7 +5629,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       break;
 
     case PRIM_GET_CHARS:		/* only works for strings */
-      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != ISP_FIXED
+      if ((OOP_INSTANCE_SPEC (oopVec[1]) & ISP_INDEXEDVARS) != GST_ISP_FIXED
           && _gst_log2_sizes[OOP_INSTANCE_SPEC (oopVec[1]) & ISP_SHAPE] == 0)
 	{
 	  char *data = STRING_OOP_CHARS (oopVec[1]);
