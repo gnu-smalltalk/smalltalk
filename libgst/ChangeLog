@@ -1,3 +1,9 @@
+2008-05-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/oop.c: Add ephemerons to buffer before marking their class
+	(else, if the class actually has to be marked, we won't add them to the
+	buffer at all).
+
 2008-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Make #fileIn primitive fail if the filename is bad.
