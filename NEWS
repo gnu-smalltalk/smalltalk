@@ -1,6 +1,6 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 3.0.2 TO 3.0a
+NEWS FROM 3.0.3 TO 3.0b
 
 o   BlockClosure methods #cull:, #cull:cull:, #cull:cull:cull:
     evaluate blocks removing parameters that are not accepted by
@@ -86,9 +86,6 @@ o   The semantics of #on:do: were changed: executing off the end of an
     Older versions of GNU Smalltalk either returned or resumed depending
     on the resumability of the exception.
 
-o   The callback for the #returnFromSnapshot event is executed as a
-    high-priority process.  Remember this!
-
 o   New tool gst-remote allows remote control of a GNU Smalltalk VM
     via a TCP socket.
 
@@ -115,21 +112,71 @@ o   Seaside application server/web framework.
 
 o   Swazoo web server.
 
+
+-----------------------------------------------------------------------------
+
+
+NEWS FROM 3.0.2 TO 3.0.3
+
+o   File>>#withReadStreamDo: and File>>#withWriteStreamDo: now return
+    the result of evaluating their argument, instead of returning the
+    File object.
+
+o   Fixed command-line option -S to actually work.
+
+o   Fixed GC bugs in SQLite bindings.  Also, the bindings could sometimes
+    call sqlite3_finalize twice.
+
+o   Fixed rare finalization bug.
+
+o   Fixes to the JIT compiler.
+
+o   Generational GC is now disabled on Alpha.
+
+o   More fixes for MinGW.
+
+o   New command-line option -i (--rebuild-image) for gst-load.
+
+o   New methods:
+
+    Number>>#asCNumber
+    String>>allOccurrencesOfRegex:do:
+    String>>allOccurrencesOfRegex:from:to:do:
+    TCP.AbstractSocket>>#canRead
+    TCP.AbstractSocket>>#canWrite
+    TCP.AbstractSocket>>#ensureReadable
+    TCP.AbstractSocket>>#ensureWriteable
+
+o   The callback for the #returnFromSnapshot event is executed as a
+    high-priority process.  While relatively invasive, this change was
+    needed to fix crashes when reloading images that used C bindings
+    extensively.
+
+o   A system-installed libffi can be used.  The included libffi has been
+    upgraded to version 3.0.4.
+
+o   URLs can be passed to FileDescriptor class>>#open:mode:ifFail:.
+
+
+Thanks to everyone who reported bugs and/or provided fixes that went
+into this release, including Stephen Compall, Thomas Girard, Tim Kack,
+Cesar Rabak.
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 3.0.1 TO 3.0.2
 
-o   Fixed bugs in floating-point I/O
+o   Fixed bugs in floating-point I/O.
 
 o   Fixed bugs in comparisons between ScaledDecimals and Integers.
 
-o   Fixes for MinGW
+o   Fixes for MinGW.
 
 o   Fixes to the Emacs modes.
 
 o   Improved GNUPlot bindings (support for histograms).
 
-o   Improved SqueakParser
+o   Improved SqueakParser.
 
 o   Number>>#readFrom: will return floating-point numbers, not fractions.
 
@@ -159,7 +206,7 @@ o   New methods:
     Time>>#addSeconds:
     Time>>#midnight
 
-o   Regex is now a subclass of Object
+o   Regex is now a subclass of Object.
 
 o   SQLite bindings return a different Row object for each #next call
     to a ResultSet.
