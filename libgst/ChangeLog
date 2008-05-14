@@ -1,3 +1,9 @@
+2008-05-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/oop.c: Add ephemerons to buffer before marking their class
+	(else, if the class actually has to be marked, we won't add them to the
+	buffer at all).
+
 2008-05-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.h: Add _gst_oop_indexed_base and _gst_oop_indexed_kind.

@@ -2197,14 +2197,14 @@ _gst_mark_an_oop_internal (OOP oop,
 	    }
 	  else if UNCOMMON (oop->flags & (F_EPHEMERON | F_WEAK))
 	    {
+	      if (oop->flags & F_EPHEMERON)
+	        _gst_add_buf_pointer (oop);
+
 	      /* In general, there will be many instances of a class,
 		 but only the first time will it be unmarked.  So I'm
 		 marking this as uncommon.  */
 	      if UNCOMMON (!IS_OOP_MARKED (objClass))
 		TAIL_MARK_OOP (objClass);
-
-	      if (oop->flags & F_EPHEMERON)
-	        _gst_add_buf_pointer (oop);
 	    }
 	  else
 	    {
