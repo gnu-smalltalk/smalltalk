@@ -340,22 +340,20 @@ SocketAddress subclass: IPAddress [
 	<category: 'private'>
 	port < 0 | (port > 65535) ifTrue: [self error: 'port out of range'].
 	^(ByteArray new: CSockAddrStruct sizeof)
+	    "Write sin_addr"
 	    replaceFrom: CSockAddrStruct sizeof - 11
 		to: CSockAddrStruct sizeof - 8
 		with: address
 		startingAt: 1;
+
+	    "Write sin_family = AF_INET in host order"
 	    shortAt: 1 put: self class addressFamily;
+
+	    "Write sin_port in network order (big endian)"
 	    at: CSockAddrStruct sizeof - 13 put: port // 256;
 	    at: CSockAddrStruct sizeof - 12 put: (port bitAnd: 255);
 	    yourself
 
-	"Write sin_addr"
-
-	"Write sin_family = AF_INET in host order"
-
-	"Write sin_port in network order (big endian)"
-
-	"ouf..."
     ]
 ]
 
@@ -548,6 +546,10 @@ RawSocketImpl subclass: ICMPSocketImpl [
 
 Eval [
     CStruct newStruct: #CSockAddrStruct
-	declaration: #(#(#sinFamily #short) #(#sinPort #(#array #byte 2)) #(#sinAddr #(#array #byte 4)) #(#sinZero #(#array #byte 8)))
+	declaration: #(
+		#(#sinFamily #short)
+		#(#sinPort #(#array #byte 2))
+		#(#sinAddr #(#array #byte 4))
+		#(#sinZero #(#array #byte 8)))
 ]
 

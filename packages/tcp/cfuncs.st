@@ -184,7 +184,7 @@ SocketAddress class extend [
     primName: address len: len type: addressFamily [
 	<category: 'C call-outs'>
 	<cCall: 'TCPgetHostByAddr' returning: #stringOut
-	args: #(#byteArray #int #int)>
+	args: #(#cObject #int #int)>
 	
     ]
 
@@ -204,7 +204,7 @@ IPAddress class extend [
     primAnyLocalAddress: hostName in: byteArray [
 	<category: 'C call-outs'>
 	<cCall: 'TCPgetAnyLocalAddress' returning: #void
-	args: #(#string #byteArrayOut)>
+	args: #(#string #cObject)>
 	
     ]
 
@@ -217,21 +217,21 @@ AbstractSocketImpl extend [
     accept: socket peer: peer addrLen: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPaccept' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>
+	args: #(#int #cObject #cObject )>
 	
     ]
 
     bind: socket to: addr addrLen: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPbind' returning: #int
-	args: #(#int #byteArray #int )>
+	args: #(#int #cObject #int )>
 	
     ]
 
     connect: socket to: addr addrLen: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPconnect' returning: #int
-	args: #(#int #byteArray #int )>
+	args: #(#int #cObject #int )>
 	
     ]
 
@@ -245,42 +245,42 @@ AbstractSocketImpl extend [
     getPeerName: socket addr: addr addrLen: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPgetpeername' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>
+	args: #(#int #cObject #cObject )>
 	
     ]
 
     getSockName: socket addr: addr addrLen: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPgetsockname' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>
+	args: #(#int #cObject #cObject )>
 	
     ]
 
     receive: socket buffer: buf size: len flags: flags from: addr size: addrLen [
 	<category: 'C call-outs'>
 	<cCall: 'TCPrecvfrom' returning: #int
-	args: #(#int #byteArrayOut #int #int #byteArray #byteArrayOut )>
+	args: #(#int #cObject #int #int #cObject #cObject )>
 	
     ]
 
     send: socket buffer: buf size: len flags: flags to: addr size: addrLen [
 	<category: 'C call-outs'>
 	<cCall: 'TCPsendto' returning: #int
-	args: #(#int #byteArray #int #int #unknown #int )>
+	args: #(#int #cObject #int #int #cObject #int )>
 	
     ]
 
     option: socket level: level at: name put: value size: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPsetsockopt' returning: #int
-	args: #(#int #int #int #byteArray #int )>
+	args: #(#int #int #int #cObject #int )>
 	
     ]
 
     option: socket level: level at: name get: value size: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPgetsockopt' returning: #int
-	args: #(#int #int #int #byteArrayOut #byteArrayOut )>
+	args: #(#int #int #int #cObject #cObject )>
 	
     ]
 
@@ -300,21 +300,21 @@ AbstractSocketImpl class extend [
     accept: socket peer: peer addrLen: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPaccept' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>
+	args: #(#int #cObject #cObject )>
 	
     ]
 
     bind: socket to: addr addrLen: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPbind' returning: #int
-	args: #(#int #byteArray #int )>
+	args: #(#int #cObject #int )>
 	
     ]
 
     connect: socket to: addr addrLen: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPconnect' returning: #int
-	args: #(#int #byteArray #int )>
+	args: #(#int #cObject #int )>
 	
     ]
 
@@ -328,42 +328,42 @@ AbstractSocketImpl class extend [
     getPeerName: socket addr: addr addrLen: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPgetpeername' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>
+	args: #(#int #cObject #cObject )>
 	
     ]
 
     getSockName: socket addr: addr addrLen: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPgetsockname' returning: #int
-	args: #(#int #byteArrayOut #byteArray )>
+	args: #(#int #cObject #cObject )>
 	
     ]
 
     receive: socket buffer: buf size: len flags: flags from: addr size: addrLen [
 	<category: 'C call-outs'>
 	<cCall: 'TCPrecvfrom' returning: #int
-	args: #(#int #byteArrayOut #int #int #byteArray #byteArrayOut )>
+	args: #(#int #cObject #int #int #cObject #cObject )>
 	
     ]
 
     send: socket buffer: buf size: len flags: flags to: addr size: addrLen [
 	<category: 'C call-outs'>
 	<cCall: 'TCPsendto' returning: #int
-	args: #(#int #byteArray #int #int #unknown #int )>
+	args: #(#int #cObject #int #int #cObject #int )>
 	
     ]
 
     option: socket level: level at: name put: value size: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPsetsockopt' returning: #int
-	args: #(#int #int #int #byteArray #int )>
+	args: #(#int #int #int #cObject #int )>
 	
     ]
 
     option: socket level: level at: name get: value size: len [
 	<category: 'C call-outs'>
 	<cCall: 'TCPgetsockopt' returning: #int
-	args: #(#int #int #int #byteArrayOut #byteArrayOut )>
+	args: #(#int #int #int #cObject #cObject )>
 	
     ]
 

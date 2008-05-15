@@ -1,3 +1,11 @@
+2008-05-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* AbstractSocketImpl.st: Replace ByteArray buffers with
+	garbage-collected CObjects.
+	* IPSocketImpl.st: Likewise.
+	* cfuncs.st: Change #byteArray and #byteArrayOut arguments
+	to #cObject.
+
 2008-03-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* AbstractSocketImpl.st: Use instance-side #checkError.

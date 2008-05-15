@@ -78,15 +78,14 @@ FileDescriptor subclass: AbstractSocketImpl [
 	 active server socket."
 
 	<category: 'socket operations'>
-	| peer sizePtr newFD fd |
+	| peer addrLen newFD fd |
 	peer := ByteArray new: CSockAddrStruct sizeof.
-	sizePtr := ByteArray new: CInt sizeof.
-	sizePtr intAt: 1 put: CSockAddrStruct sizeof.
+	addrLen := CInt gcValue: CSockAddrStruct sizeof.
 	(fd := self fd) isNil ifTrue: [ ^SystemExceptions.EndOfStream signal ].
 	newFD := self 
 		    accept: fd
 		    peer: peer
-		    addrLen: sizePtr.
+		    addrLen: addrLen.
 	^(implementationClass on: newFD)
 	    hasBeenBound;
 	    hasBeenConnectedTo: peer;
@@ -192,15 +191,14 @@ FileDescriptor subclass: AbstractSocketImpl [
 	 local endpoint of the socket."
 
 	<category: 'socket operations'>
-	| sock sizePtr fd |
+	| sock addrLen fd |
 	sock := ByteArray new: CSockAddrStruct sizeof.
-	sizePtr := ByteArray new: CInt sizeof.
-	sizePtr intAt: 1 put: CSockAddrStruct sizeof.
+	addrLen := CInt gcValue: CSockAddrStruct sizeof.
 	(fd := self fd) isNil ifTrue: [ ^nil ].
 	self 
 	    getSockName: fd
 	    addr: sock
-	    addrLen: sizePtr.
+	    addrLen: addrLen.
 	^sock
     ]
 
@@ -273,17 +271,16 @@ FileDescriptor subclass: AbstractSocketImpl [
 	 so this will be rarely used."
 
 	<category: 'socket options'>
-	| result sizeArray fd |
+	| result len fd |
 	result := ByteArray new: size.
-	sizeArray := ByteArray new: CInt sizeof.
-	sizeArray intAt: 1 put: size.
+	len := CInt gcValue: size.
 	(fd := self fd) isNil ifTrue: [ ^nil ].
 	self 
 	    option: fd
 	    level: level
 	    at: opt
 	    get: result
-	    size: sizeArray.
+	    size: len.
 	^result
     ]
 
@@ -538,15 +535,14 @@ AbstractSocketImpl subclass: SocketImpl [
 	 remote endpoint of the socket."
 
 	<category: 'socket operations'>
-	| peer sizePtr fd |
+	| peer addrLen fd |
 	peer := ByteArray new: CSockAddrStruct sizeof.
-	sizePtr := ByteArray new: CInt sizeof.
-	sizePtr intAt: 1 put: CSockAddrStruct sizeof.
+	addrLen := CInt gcValue: CSockAddrStruct sizeof.
 	(fd := self fd) isNil ifTrue: [ ^nil ].
 	self 
 	    getPeerName: self fd
 	    addr: peer
-	    addrLen: sizePtr.
+	    addrLen: addrLen.
 	^peer
     ]
 
@@ -638,10 +634,9 @@ AbstractSocketImpl subclass: DatagramSocketImpl [
 
 	<category: 'socket operations'>
 	| address port data from addrLen fd |
-	addrLen := ByteArray new: CInt sizeof.
 	data := ByteArray new: self bufferSize.
 	from := ByteArray new: CSockAddrStruct sizeof.
-	addrLen intAt: 1 put: from size.
+	addrLen := CInt gcValue: from size.
 	(fd := self fd) isNil ifTrue: [ ^SystemExceptions.EndOfStream signal ].
 	self 
 	    receive: fd
@@ -664,7 +659,7 @@ AbstractSocketImpl subclass: DatagramSocketImpl [
 	<category: 'socket operations'>
 	| size receiver fd |
 	theReceiver isNil 
-	    ifTrue: [receiver := size := 0]
+	    ifTrue: [receiver := nil. size := 0]
 	    ifFalse: 
 		[receiver := theReceiver port: port.
 		size := receiver size].

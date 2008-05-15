@@ -1,3 +1,8 @@
+2008-05-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Allow passing any object with non-pointer indexed
+	instance variables as a #cObject.
+
 2008-05-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Add ephemerons to buffer before marking their class

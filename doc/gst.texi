@@ -3320,7 +3320,16 @@ passed as @code{double}
 passed as @code{long double}
 
 @item cObject     
-C object value passed as @code{void *}
+C object value passed as @code{void *}.
+
+Any class with non-pointer indexed instance variables can be passed as
+a @code{#cObject}, and GNU Smalltalk will pass the address of the first indexed
+instance variable.  This however should never be done for functions that
+allocate objects, call back into Smalltalk code or otherwise may cause
+a garbage collection: after a GC, pointers passed as @code{#cObject} may be
+invalidated.  In this case, it is safer to pass every object as
+@code{#smalltalk}, or to only pass @code{CObject}s that were returned
+by a C function previously.
 
 @item cObjectPtr
 Pointer to C object value passed as @code{void **}.  The @code{CObject}
@@ -3354,6 +3363,7 @@ Table of parameter conversions:
 @item boolean             @tab Boolean (True, False)@tab int
 @item byteArray           @tab ByteArray            @tab char *
 @item cObject             @tab CObject              @tab void *
+@item cObject             @tab ByteArray, etc.      @tab void *
 @item cObjectPtr          @tab CObject              @tab void **
 @item char                @tab Boolean (True, False)@tab int
 @item char                @tab Character            @tab int (C promotion rule)

@@ -1138,6 +1138,23 @@ push_smalltalk_obj (OOP oop,
 	}
     }
 
+  /* #cObject can pass every object with non-pointer indexed instance
+     variables.  */
+  if (cType == CDATA_COBJECT)
+    {
+      switch (CLASS_INSTANCE_SPEC (class) & ISP_INDEXEDVARS)
+	{
+	case GST_ISP_FIXED:
+	case GST_ISP_POINTER:
+	  break;
+
+	default:
+	  /* Byte indexed variables, pass the pointer through.  */
+	  cp->u.ptrVal = OOP_TO_OBJ (oop)->data + CLASS_FIXED_FIELDS (class);
+	  SET_TYPE (&ffi_type_pointer);
+	  return;
+	}
+    }
 
   bad_type (class, cType);
 }

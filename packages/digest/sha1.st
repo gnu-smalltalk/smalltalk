@@ -49,13 +49,13 @@ MessageDigest subclass: SHA1 [
 
     combine: input size: len into: context [
 	<category: 'C call-outs'>
-	<cCall: 'SHA1Update' returning: #void args: #(#byteArray #int #byteArrayOut)>
+	<cCall: 'SHA1Update' returning: #void args: #(#cObject #int #cObject)>
 	
     ]
 
     finalize: state in: digest [
 	<category: 'C call-outs'>
-	<cCall: 'SHA1Final' returning: #void args: #(#byteArray #byteArrayOut)>
+	<cCall: 'SHA1Final' returning: #void args: #(#cObject #cObject)>
 	
     ]
 

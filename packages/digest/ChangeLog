@@ -1,3 +1,8 @@
+2008-05-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* packages/digest/md5.st: Pass data to C functions as #cObject.
+	* packages/digest/sha1.st: Pass data to C functions as #cObject.
+
 2007-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* packages/digest/package.xml: Add new files, rename module.
