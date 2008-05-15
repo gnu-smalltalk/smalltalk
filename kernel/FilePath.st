@@ -168,14 +168,14 @@ size and timestamps.'>
 	path := OrderedCollection new.
 	(self isAbsolute: aString)
 	    ifFalse: 
-		[path addAll: (Directory workingName substrings: Directory pathSeparator)].
+		[path addAll: (Directory workingName subStrings: Directory pathSeparator)].
 
 	"A Windows path may contain both / and \ separators. Clean it up
 	 to allow easy parsing"
 	canonical := Directory pathSeparator = $/ 
 		    ifTrue: [aString]
 		    ifFalse: [aString copyReplacing: $/ withObject: Directory pathSeparator].
-	(canonical substrings: Directory pathSeparator) do: 
+	(canonical subStrings: Directory pathSeparator) do: 
 		[:each | 
 		each = '.' 
 		    ifFalse: 
@@ -187,12 +187,18 @@ size and timestamps.'>
 		    into: [:old :each | old , Directory pathSeparatorString , each].
 
 	"Remove initial / from /C:/"
-	^(isWindows and: 
+	(isWindows and: 
 		[result size >= 4 and: 
 			[(result at: 1) isPathSeparator 
 			    and: [(result at: 3) = $: and: [(result at: 4) isPathSeparator]]]]) 
-	    ifTrue: [result copyFrom: 2]
-	    ifFalse: [result]
+	    ifTrue: [^result copyFrom: 2].
+
+	"Restore UNC paths."
+	(isWindows and: [(aString at: 1) isPathSeparator and: [
+		(aString at: 2) isPathSeparator]])
+	    ifTrue: [^'\', result].
+
+	^result
     ]
 
     FilePath class >> pathFrom: srcName to: destName [
@@ -205,7 +211,7 @@ size and timestamps.'>
 
     FilePath class >> computePathFrom: srcName to: destName [
 	<category: 'private'>
-	| src dest srcCanon destCanon path isUnix |
+	| src dest srcCanon destCanon srcUNC destUNC path isUnix |
 	"A Windows path may contain both / and \ separators. Clean it up
 	 to allow easy parsing"
 	isUnix := Directory pathSeparator = $/.
@@ -218,17 +224,27 @@ size and timestamps.'>
 
 	src := srcCanon subStrings: Directory pathSeparator.
 	dest := destCanon subStrings: Directory pathSeparator.
+
 	src := src asOrderedCollection.
-	src removeLast.
 	dest := dest asOrderedCollection.
+
+	src removeLast.
 	dest isEmpty ifTrue: [dest addLast: ''].
-	path := (src notEmpty and: [src first ~= dest first])
-	    ifTrue: [
+
+	"\abc\def and \\abc\def are different!"
+	srcUNC := isUnix not and: [ srcCanon startsWith: '\\' ].
+	destUNC := isUnix not and: [ destCanon startsWith: '\\' ].
+
+	path := (src isEmpty or: [src first = dest first and: [srcUNC = destUNC]])
+	    ifFalse: [
+	        srcUNC ifTrue: [ src addFirst: '' ].
+	        destUNC ifTrue: [ dest addFirst: '' ].
+
 		"Don't prepend a \ if the destination path has a disk letter."
-		(isUnix or: [ (dest first at: 2 ifAbsent: [ nil ]) ~= $: ]) 
+		(isUnix or: [ (dest first at: 2 ifAbsent: [ nil ]) ~= $: ])
 		    ifTrue: [OrderedCollection with: '']
 		    ifFalse: [OrderedCollection new]]
-	    ifFalse: 
+	    ifTrue: 
 		[[src isEmpty or: [dest size = 1 or: [src first ~= dest first]]] 
 		    whileFalse: 
 			[src removeFirst.
