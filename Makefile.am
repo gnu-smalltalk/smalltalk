@@ -128,7 +128,7 @@ uninstall-local::
 	done
 
 install-exec-hook::
-	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL) gst-tool "$(DESTDIR)$(bindir)/gst-load"
+	$(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(INSTALL) gst-tool$(EXEEXT) "$(DESTDIR)$(bindir)/gst-load$(EXEEXT)"
 	@for i in $(GST_EXTRA_TOOLS); do \
 	  echo $(LN) -f "$(DESTDIR)$(bindir)/gst-load$(EXEEXT)" "$(DESTDIR)$(bindir)/$$i$(EXEEXT)"; \
 	  $(LN) -f "$(DESTDIR)$(bindir)/gst-load$(EXEEXT)" "$(DESTDIR)$(bindir)/$$i$(EXEEXT)"; \
