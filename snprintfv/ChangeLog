@@ -1,3 +1,8 @@
+2008-05-16  Paolo Bonzini  <bonzini@gnu.org>
+
+        * snprintf/format.c: Fix bad comment termination, spotted by Bruno
+	Haible.
+
 2006-11-26  Bruce Korb  <bkorb@gnu.org>
 
 	* snprintfv/printf.c (call_argtype_function, parse_printf_format,
