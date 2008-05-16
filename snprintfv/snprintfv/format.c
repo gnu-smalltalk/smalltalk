@@ -1141,7 +1141,7 @@ copysignl (long double x, long double y)
 #  endif /* !HAVE_COPYSIGN */
 }
 # endif /* !HAVE_COPYSIGNL */
-#endif /* !NO_FLOAT_PRINTING && HAVE_LONG_DOUBLE)
+#endif /* !NO_FLOAT_PRINTING && HAVE_LONG_DOUBLE */
 
 
 
