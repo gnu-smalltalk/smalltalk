@@ -659,7 +659,9 @@ _gst_oop_to_float (OOP oop)
   if (!_gst_smalltalk_initialized)
     _gst_initialize (NULL, NULL, GST_NO_TTY);
 
-  if (IS_CLASS (oop, _gst_floatd_class))
+  if (IS_INT (oop))
+    return (TO_INT (oop));
+  else if (IS_CLASS (oop, _gst_floatd_class))
     return (FLOATD_OOP_VALUE (oop));
   else if (IS_CLASS (oop, _gst_floate_class))
     return (FLOATE_OOP_VALUE (oop));
@@ -675,7 +677,9 @@ _gst_oop_to_long_double (OOP oop)
   if (!_gst_smalltalk_initialized)
     _gst_initialize (NULL, NULL, GST_NO_TTY);
 
-  if (IS_CLASS (oop, _gst_floatd_class))
+  if (IS_INT (oop))
+    return (TO_INT (oop));
+  else if (IS_CLASS (oop, _gst_floatd_class))
     return (FLOATD_OOP_VALUE (oop));
   else if (IS_CLASS (oop, _gst_floate_class))
     return (FLOATE_OOP_VALUE (oop));

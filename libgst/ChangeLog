@@ -1,3 +1,7 @@
+2008-05-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/callin.c: Allow ints in OOP->float conversions.
+
 2008-05-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Allow passing any object with non-pointer indexed
