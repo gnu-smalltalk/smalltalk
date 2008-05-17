@@ -70,13 +70,16 @@ Namespace current: STInST.Tests.MyProject.MyLibWrapper [
 
 Eval [
     "note this changes my superspace"
-    MyProject at: #Exception put: #Exception
+    MyProject at: #Exception put: #Exception.
+    Namespace current import:
+	(Dictionary from: {#Blah -> 6667. #Scoobs -> 785}).
 ]
 
 MyLibrary.Foo subclass: Baz [
     scape [^Scape]
     exception [^Exception]
     valueAdaptor [^ValueAdaptor]
+    blah [^Blah]
 ]
 
 ] "end namespace MyProject.MyLibWrapper"
@@ -86,6 +89,8 @@ Namespace current: STInST.Tests.MyLibrary [
 "you ask, Who would do this? to which I say..."
 MyProject.MyLibWrapper.Baz subclass: BackForMore [
     pkgVersion [^PkgVersion]
+    blah [^Blah]
+    scoobs [^Scoobs]
 ]
 
 ] "end namespace MyLibrary"
@@ -136,6 +141,15 @@ TestCase subclass: TestDefaultPoolResolution [
 	self assertVariable: #PkgVersion of: backformore is: 'MyLibrary 1.0'
 	     description: 'namespace walk stops only at direct-super-common space'.
     ]
+
+    testNamespacePools [
+	self assertVariable: #Blah of: baz is: 6667
+	     description: 'this-class ns pool var found'.
+	self assertVariable: #Blah of: backformore is: MyLibrary.Blah
+	     description: 'here-namespace searched first'.
+	self assertVariable: #Scoobs of: backformore is: 785
+	     description: 'superclass ns pools inherited'.
+    ]
 ]
 
 TestCase subclass: TestClassicPoolResolution [
@@ -182,6 +196,15 @@ TestCase subclass: TestClassicPoolResolution [
 	     description: 'top class''s namespace goes first'.
 	self assertVariable: #PkgVersion of: backformore is: 'MyLibrary 1.0'
 	     description: 'not surprising, really'.
+    ]
+    
+    testNamespacePools [
+	self assertVariable: #Blah of: baz is: MyLibrary.Blah
+	     description: 'ns pool vars not searched'.
+	self assertVariable: #Blah of: backformore is: MyLibrary.Blah
+	     description: 'mostly vacuous'.
+	self assert: (backformore lookupBindingOf: #Scoobs) isNil
+	    description: 'ns pools really not searched'.
     ]
 ]
 

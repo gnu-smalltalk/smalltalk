@@ -111,6 +111,7 @@ typedef struct gst_namespace
   OOP superspace;
   OOP name;
   OOP subspaces;
+  OOP sharedPools;
   OOP assoc[1];
 
   /* Other, indexable fields that are the associations for this

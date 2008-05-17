@@ -42,6 +42,34 @@ class name, class comment (you wouldn''t be reading this if it
 weren''t for me), a list of the instance variables of the class, and
 the class category.'>
 
+    Class class >> allPoolDictionaries: list except: inWhite do: aBlock [
+        "Invoke aBlock with each of the result of combining the list
+	 of pools using a topological sort, preferring dependent to
+	 prerequisite, and then left to right.  Any pool that is
+	 already in inWhite will not be answered."
+        <category: 'private'>
+        | white grey order descend |
+	list isEmpty ifTrue: [ ^self ].
+
+	white := inWhite copy.
+        grey := IdentitySet new: list size.
+        order := OrderedCollection new: list size.
+        descend := [:pool |
+            (white includes: pool) ifFalse:
+                [(grey includes: pool) ifTrue:
+                     [^SystemExceptions.InvalidValue
+                          signalOn: list
+                          reason: 'includes circular dependency'].
+
+                "#allSuperspaces is not available on all pools"
+                grey add: pool.
+                pool allSuperspaces reverseDo: descend.
+                order addFirst: pool.
+                white add: pool]].
+        list reverseDo: descend.
+        order do: aBlock
+    ]
+
     Class class >> initialize [
 	"Perform the special initialization of root classes."
 
@@ -645,8 +673,12 @@ the class category.'>
 
 	    "Now proceed with the `natural' (non-imported spaces)."
             behavior environment withAllSuperspacesDo: [:each |
-                (superclassSpaces includes: each)
-		    ifFalse: [ aBlock value: each ]]]
+                (superclassSpaces includes: each) ifFalse:
+		    [aBlock value: each.
+		     "also visit the namespace shared pools"
+		     Class allPoolDictionaries: each sharedPoolDictionaries
+			   except: classSpaces
+			   do: aBlock]]]
     ]
 
     allLocalSharedPoolDictionariesExcept: inWhite do: aBlock [
@@ -655,27 +687,8 @@ the class category.'>
 	 to prerequisite, and then left to right.  Any pool that is
 	 already in inWhite will not be answered."
         <category: 'private'>
-        | white grey order descend list |
-	list := self sharedPoolDictionaries.
-	list isEmpty ifTrue: [ ^self ].
-
-	white := inWhite copy.
-        grey := IdentitySet new: list size.
-        order := OrderedCollection new: list size.
-        descend := [:pool |
-            (white includes: pool) ifFalse:
-                [(grey includes: pool) ifTrue:
-                     [^SystemExceptions.InvalidValue
-                          signalOn: list
-                          reason: 'includes circular dependency'].
-
-                "#allSuperspaces is not available on all pools"
-                grey add: pool.
-                pool allSuperspaces reverseDo: descend.
-                order addFirst: pool.
-                white add: pool]].
-        list reverseDo: descend.
-        order do: aBlock
+	Class allPoolDictionaries: self sharedPoolDictionaries
+	      except: inWhite do: aBlock
     ]
 
     metaclassFor: classNameString [

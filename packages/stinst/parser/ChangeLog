@@ -1,3 +1,8 @@
+2008-05-17  Stephen Compall  <scompall@nocandysw.com>
+
+	* packages/stinst/parser/PoolResolutionTests.st: Test for
+	namespace shared pools.
+
 2008-04-27  Stephen Compall  <scompall@nocandysw.com>
 
 	* STSymTable.st: Create VariableBindings directly to add to

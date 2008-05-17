@@ -592,10 +592,18 @@ free_scope_symbols (scope scope)
     to import external namespaces for every class in a namespace, rather
     than each class. If this is integrated, it would need to twist nicely.
 
-    Here is how I think it would best work: after searching any namespace,
-    combine its shared pools using IPCA, removing all elements that are any
-    of this namespace or its superspaces, and search the combination from
-    left to right.  */
+    Here is how I think it would best work: after searching any
+    namespace, combine its shared pools as classes' shared pools are
+    combined, removing all elements that are any of this namespace or
+    its superspaces, and search the combination from left to
+    right.
+
+    There is one important difference between namespace-sharedpools
+    and class-sharedpools: while class sharedpools export their
+    imports to subclasses, namespaces should not reexport bindings
+    made available by way of shared pools.  As such, the bindings
+    provided by a namespace are only available when compiling methods
+    that actually exist in that namespace.  */
 
 
 OOP
@@ -654,6 +662,9 @@ make_with_all_superspaces_set (OOP poolOOP)
   return pset;
 }
 
+/* predeclared for add_namespace */
+static pool_list *combine_local_pools
+  (OOP sharedPoolsOOP, struct pointer_set_t *white, pool_list *p_end);
 
 /* Add, after the node whose next pointer is in P_END, the namespace
    POOLOOP and all of its superspaces except those in EXCEPT.
@@ -668,17 +679,27 @@ add_namespace (OOP poolOOP, struct pointer_set_t *except, pool_list *p_end)
   for (;;)
     {
       gst_namespace pool;
+      OOP importsOOP;
       if (!is_a_kind_of (OOP_CLASS (poolOOP), _gst_dictionary_class))
         return p_end;
 
       if (!except || !pointer_set_contains (except, poolOOP))
         p_end = add_pool (poolOOP, p_end);
 
-      /* Try to find a super-namespace */
+      /* Add imports and try to find a super-namespace */
       if (!is_a_kind_of (OOP_CLASS (poolOOP), _gst_abstract_namespace_class))
         return p_end;
 
       pool = (gst_namespace) OOP_TO_OBJ (poolOOP);
+      importsOOP = pool->sharedPools;
+      if (NUM_OOPS (OOP_TO_OBJ (importsOOP)))
+	{
+	  struct pointer_set_t *pset;
+	  pset = make_with_all_superspaces_set (poolOOP);
+	  p_end = combine_local_pools (importsOOP, pset, p_end);
+	  pointer_set_destroy (pset);
+	}
+
       poolOOP = pool->superspace;
     }
 }

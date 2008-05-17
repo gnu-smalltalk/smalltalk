@@ -576,8 +576,8 @@ static const class_definition class_info[] = {
    "BindingDictionary", "environment", NULL, NULL },
 
   {&_gst_abstract_namespace_class, &_gst_binding_dictionary_class,
-   GST_ISP_POINTER, true, 2,
-   "AbstractNamespace", "name subspaces", NULL, NULL },
+   GST_ISP_POINTER, true, 3,
+   "AbstractNamespace", "name subspaces sharedPools", NULL, NULL },
 
   {&_gst_root_namespace_class, &_gst_abstract_namespace_class,
    GST_ISP_POINTER, false, 0,
@@ -772,7 +772,8 @@ init_proto_oops()
   nil_fill (symbolTable->data,
 	    numWords - OBJ_HEADER_SIZE_WORDS);
 
-  numWords = OBJ_HEADER_SIZE_WORDS + INITIAL_SMALLTALK_SIZE + 4;
+  /* 5 is the # of fixed instvars in gst_namespace */
+  numWords = OBJ_HEADER_SIZE_WORDS + INITIAL_SMALLTALK_SIZE + 5;
 
   /* ... now the Smalltalk dictionary ...  */
   smalltalkDictionary = (gst_namespace) _gst_alloc_words (numWords);
@@ -783,6 +784,7 @@ init_proto_oops()
   smalltalkDictionary->name = _gst_smalltalk_namespace_symbol;
   smalltalkDictionary->superspace = _gst_nil_oop;
   smalltalkDictionary->subspaces = _gst_nil_oop;
+  smalltalkDictionary->sharedPools = _gst_nil_oop;
   nil_fill (smalltalkDictionary->assoc,
 	    INITIAL_SMALLTALK_SIZE);
 

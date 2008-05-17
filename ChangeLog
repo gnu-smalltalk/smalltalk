@@ -1,3 +1,13 @@
+2008-05-17  Stephen Compall  <scompall@nocandysw.com>
+
+	* kernel/AbstNamespc.st: Add `sharedPools' instvar and methods for
+	it similar to Class's.
+	* kernel/Class.st: Refactor
+	allLocalSharedPoolDictionariesExcept:do: to a list-independent
+	class method.  Use it to import shared pools from namespaces as
+	they are visited.
+	* tests/pools.st: Test for namespace shared pools.
+
 2008-05-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FilePath.st: Deal correctly with UNC paths.

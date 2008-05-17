@@ -33,7 +33,7 @@
 
 
 BindingDictionary subclass: AbstractNamespace [
-    | name subspaces |
+    | name subspaces sharedPools |
     
     <shape: #pointer>
     <category: 'Language-Implementation'>
@@ -173,6 +173,35 @@ an instance of me; it is called their `environment''. '>
 	class := self at: aKey asGlobalKey ifAbsent: [^aBlock value].
 	class isClass ifFalse: [^aBlock value].
 	^class
+    ]
+
+    addSharedPool: aDictionary [
+	"Import the given bindings for classes compiled with me as
+	 environment."
+	<category: 'compiling'>
+	sharedPools isNil ifTrue: [^sharedPools := {aDictionary}].
+	(sharedPools includes: aDictionary) ifFalse:
+	    [sharedPools := sharedPools copyWith: aDictionary].
+    ]
+
+    import: aDictionary [
+	"Import the given bindings for classes compiled with me as
+	 environment."
+	<category: 'compiling'>
+	self addSharedPool: aDictionary
+    ]
+
+    removeSharedPool: aDictionary [
+	"Remove aDictionary from my list of direct pools."
+	<category: 'compiling'>
+	sharedPools isNil ifFalse:
+	    [sharedPools := sharedPools copyWithout: aDictionary]
+    ]
+
+    sharedPoolDictionaries [
+	"Answer the shared pools (not names) imported for my classes."
+	<category: 'compiling'>
+	^sharedPools ifNil: [#()]
     ]
 
     inheritedKeys [

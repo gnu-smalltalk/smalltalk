@@ -66,14 +66,18 @@ Namespace current: MyLibrary [
 ] "end namespace MyLibrary"
 
 Namespace current: MyProject.MyLibWrapper [
+    
+    Namespace current import:
+	(Dictionary from: {#Blah -> 6667. #Scoobs -> 785}).
 
     "note this changes my superspace"
     MyProject at: #Exception put: #Exception.
-
+    
     MyLibrary.Foo subclass: Baz [
         scape [^Scape]
         exception [^Exception]
         valueAdaptor [^ValueAdaptor]
+	blah [^Blah]
     ]
 
 ] "end namespace MyProject.MyLibWrapper"
@@ -83,6 +87,8 @@ Namespace current: MyLibrary [
     "you ask, Who would do this? to which I say..."
     MyProject.MyLibWrapper.Baz subclass: BackForMore [
         pkgVersion [^PkgVersion]
+	blah [^Blah]
+	scoobs [^Scoobs]
     ]
 
 ] "end namespace MyLibrary"
@@ -122,3 +128,8 @@ MyProject.MyLibWrapper.Baz class extend [ TryThis := ##(Scape printNl) ]
 MyProject.MyLibWrapper.Baz class extend [ TryThis := ##(Exception printNl) ]
 MyProject.MyLibWrapper.Baz class extend [ TryThis := ##(ValueAdaptor printNl) ]
 MyLibrary.BackForMore class extend [ TryThis := ##(PkgVersion printNl) ]"
+
+"test namespace-sharedpools"
+Eval [ MyProject.MyLibWrapper.Baz new blah ] "6667"
+Eval [ MyLibrary.BackForMore new blah ] "Blah"
+Eval [ MyLibrary.BackForMore new scoobs ] "785"

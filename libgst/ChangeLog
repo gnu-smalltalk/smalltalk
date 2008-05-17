@@ -1,3 +1,10 @@
+2008-05-17  Stephen Compall  <scompall@nocandysw.com>
+
+	* libgst/dict.h: Add `sharedPools' instvar to gst_namespace.
+	* libgst/dict.c: Likewise.
+	* libgst/sym.c: Import shared pools from namespaces as they are
+	visited, and expand the comment on TwistedPools to document this.
+
 2008-05-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/callin.c: Fix _gst_oop_indexed_base.
