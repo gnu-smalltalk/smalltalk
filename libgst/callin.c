@@ -932,7 +932,7 @@ _gst_oop_indexed_base (OOP oop)
   if (!_gst_smalltalk_initialized)
     _gst_initialize (NULL, NULL, GST_NO_TTY);
 
-  return OOP_TO_OBJ (oop)->data[OOP_FIXED_FIELDS (oop)];
+  return &OOP_TO_OBJ (oop)->data[OOP_FIXED_FIELDS (oop)];
 }
 
 enum gst_indexed_kind
