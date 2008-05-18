@@ -1,3 +1,8 @@
+2008-05-18  Stephen Compall  <scompall@nocandysw.com>
+
+	* tests/pools.st: Test that namespace pragmas work, at least for
+	imports.
+
 2008-05-17  Stephen Compall  <scompall@nocandysw.com>
 
 	* kernel/AbstNamespc.st: Add `sharedPools' instvar and methods for

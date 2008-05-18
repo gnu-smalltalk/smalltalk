@@ -1,3 +1,7 @@
+2008-05-18  Stephen Compall  <scompall@nocandysw.com>
+
+	* packages/stinst/parser/GSTParser.st: Support namespace pragmas.
+
 2008-05-17  Stephen Compall  <scompall@nocandysw.com>
 
 	* packages/stinst/parser/PoolResolutionTests.st: Test for

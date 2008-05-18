@@ -31,7 +31,7 @@
  ======================================================================"
 
 STInST.STFileInParser subclass: GSTFileInParser [
-    | class currentDeclaration |
+    | taggee class currentDeclaration |
 
     parseStatements [
         | returnPosition statements node |
@@ -75,6 +75,8 @@ STInST.STFileInParser subclass: GSTFileInParser [
 
     parseDoit [
 	| node |
+	(taggee notNil and: [currentToken value = #<]) ifTrue:
+	    [self parseClassTag. ^nil].
 	node := super parseDoit.
         (currentToken isSpecial and: [ self skipToken: $[ ])
             ifTrue: [self parseDeclaration: node statements first. ^nil].
@@ -125,15 +127,18 @@ STInST.STFileInParser subclass: GSTFileInParser [
 	             argument: node arguments first name asSymbol ].
            
         self evaluateStatement: node.       
+	taggee := RBVariableNode named:
+	    (self driver currentNamespace nameIn: Smalltalk).
         self parseDoits.
         self skipExpectedToken: $].
 
         "restore previous namespace"
+	taggee := fullNamespace.
         node parent: nil.
         node arguments: { fullNamespace }.
         self evaluateStatement: node
     ]
-    
+
     parseClassExtension: node [
         class := node receiver.
         self parseClassBody: true.
@@ -151,12 +156,15 @@ STInST.STFileInParser subclass: GSTFileInParser [
     ]
     
     parseClassBody: extend [
-	| addInstVars |
+	| addInstVars oldTaggee |
+	oldTaggee := taggee.
+	taggee := class.
 	addInstVars := extend.
         [ self skipToken: $] ] whileFalse: [
 	    addInstVars := self
 		parseClassBodyElement: addInstVars
-		withinExtend: extend ]
+		withinExtend: extend ].
+	taggee := oldTaggee.
     ]
     
     parseClassBodyElement: addInstVars withinExtend: extend [
@@ -239,11 +247,11 @@ STInST.STFileInParser subclass: GSTFileInParser [
         
         argument isVariable
             ifTrue: [stmt := RBMessageNode
-    	                     receiver: class
+    	                     receiver: taggee
     	                     selector: selector
     	                     arguments: { argument }.
                      self evaluateStatement: stmt]
-            ifFalse: [self evaluateMessageOn: class
+            ifFalse: [self evaluateMessageOn: taggee
                            selector: selector
                            argument: argument token value]
     ]

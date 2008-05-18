@@ -105,6 +105,8 @@ static mst_Boolean parse_scoped_definition (gst_parser *p,
 
 static void parse_eval_definition (gst_parser *p);
 
+static mst_Boolean parse_and_send_attribute (gst_parser *p,
+					     OOP receiverOOP);
 static mst_Boolean parse_namespace_definition (gst_parser *p,
 					       tree_node first_stmt);
 static mst_Boolean parse_class_definition (gst_parser *p,
@@ -601,6 +603,41 @@ parse_eval_definition (gst_parser *p)
 }
 
 static mst_Boolean
+parse_and_send_attribute (gst_parser *p, OOP receiverOOP)
+{
+  OOP selectorOOP, args[1];
+  tree_node keyword, value;
+
+#if 0
+  printf ("parse attribute\n");
+#endif
+  lex_skip_mandatory (p, '<');
+  keyword = parse_keyword_expression (p, NULL, EXPR_KEYWORD);
+  if (keyword->v_expr.expression->v_list.next != NULL)
+    {
+      _gst_errorf ("expected one keyword only");
+      _gst_had_error = true;
+    }
+  else
+    {
+      value = keyword->v_expr.expression->v_list.value;
+      selectorOOP = _gst_compute_keyword_selector (keyword->v_expr.expression);
+      value = _gst_make_statement_list (&value->location, value);
+      args[0] = _gst_execute_statements (NULL, value,
+					 UNDECLARED_NONE, true);
+
+      if (!args[0])
+	_gst_had_error = true;
+
+      if (!_gst_had_error)
+	_gst_nvmsg_send (receiverOOP, selectorOOP, args, 1);
+    }
+
+  lex_skip_mandatory (p, '>');
+  return !_gst_had_error;
+}
+
+static mst_Boolean
 parse_namespace_definition (gst_parser *p, tree_node first_stmt)
 {      
   tree_node expr = first_stmt->v_expr.expression;
@@ -615,7 +652,12 @@ parse_namespace_definition (gst_parser *p, tree_node first_stmt)
 		      _gst_namespace_class, new_namespace);
       
       while (token (p, 0) != ']' && token (p, 0) != EOF && token (p, 0) != '!')
-        parse_doit (p, true);	
+	{
+	  if (token (p, 0) == '<')
+	    parse_and_send_attribute (p, new_namespace);
+	  else
+	    parse_doit (p, true);
+	}
 
       _gst_msg_sendf (NULL, "%v %o current: %o",
 		      _gst_namespace_class, old_namespace);
@@ -679,35 +721,7 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
 	    }
 	  else if (t2 == KEYWORD) 
 	    {
-	      OOP selectorOOP, args[1];
-	      tree_node keyword, value;
-	      
-#if 0
-	      printf ("parse attribute\n");
-#endif
-	      lex_skip_mandatory (p, '<');
-	      keyword = parse_keyword_expression (p, NULL, EXPR_KEYWORD);
-	      if (keyword->v_expr.expression->v_list.next != NULL)
-		{
-		  _gst_errorf ("expected one keyword only");
-		  _gst_had_error = true;
-		}
-	      else
-		{
-		  value = keyword->v_expr.expression->v_list.value;
-		  selectorOOP = _gst_compute_keyword_selector (keyword->v_expr.expression);
-		  value = _gst_make_statement_list (&value->location, value);
-		  args[0] = _gst_execute_statements (NULL, value,
-						     UNDECLARED_NONE, true);
-	      
-		  if (!args[0])
-		    _gst_had_error = true;
-
-		  if (!_gst_had_error)
-		    _gst_nvmsg_send (classOOP, selectorOOP, args, 1);
-		}
-
-	      lex_skip_mandatory (p, '>');
+	      parse_and_send_attribute (p, classOOP);
 	      continue;
 	    }
 	  break;

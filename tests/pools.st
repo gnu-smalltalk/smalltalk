@@ -29,7 +29,7 @@
 |
  ======================================================================"
 
-Smalltalk addSubspace: #MyLibrary; addSubspace: #MyProject.
+Smalltalk addSubspace: #MyLibrary; addSubspace: #MyProject; addSubspace: #MyImports.
 MyProject addSubspace: #MyLibWrapper.
 
 "actually for later, to demonstrate the need for the `direct
@@ -93,6 +93,20 @@ Namespace current: MyLibrary [
 
 ] "end namespace MyLibrary"
 
+Namespace current: MyImports [
+    <import: MyLibrary>
+
+    Object subclass: MITest [
+	test [^Foo]
+    ]
+
+    <import: MyProject.MyLibWrapper>
+
+    MITest extend [
+	test2 [^Baz]
+    ]
+]
+
 "here start the tests..."
 
 "prefer class pool to namespace"
@@ -133,3 +147,7 @@ MyLibrary.BackForMore class extend [ TryThis := ##(PkgVersion printNl) ]"
 Eval [ MyProject.MyLibWrapper.Baz new blah ] "6667"
 Eval [ MyLibrary.BackForMore new blah ] "Blah"
 Eval [ MyLibrary.BackForMore new scoobs ] "785"
+
+"test namespace pragmas"
+Eval [ MyImports.MITest new test nameIn: Smalltalk ] "MyLibrary.Foo"
+Eval [ MyImports.MITest new test2 nameIn: Smalltalk ] "MyProject.MyLibWrapper.Baz"

@@ -28,3 +28,9 @@ returned value is Blah
 
 Execution begins...
 returned value is 785
+
+Execution begins...
+returned value is 'MyLibrary.Foo'
+
+Execution begins...
+returned value is 'MyProject.MyLibWrapper.Baz'
