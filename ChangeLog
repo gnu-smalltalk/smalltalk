@@ -1,3 +1,7 @@
+2008-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Directory.st: Fix when TMPDIR and TEMP are not set.
+
 2008-05-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Integer.st: Fix off-by-one in #binomial:.

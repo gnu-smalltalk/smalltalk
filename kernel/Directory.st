@@ -118,7 +118,7 @@ virtual one).'>
 	(d := self home) isNil 
 	    ifFalse: 
 		[d := d / 'tmp'.
-		d isDirectory ifTrue: [^File name: d]].
+		d isDirectory ifTrue: [^d]].
 	^File name: '/tmp'
     ]
 
