@@ -183,7 +183,8 @@ efficiency.'>
 	    ifTrue: [^self arithmeticError: 'binomial coefficient with invalid arguments'].
 
 	"The easy one."
-	anInteger = 0 ifTrue: [^1].
+	k := anInteger + anInteger > self ifTrue: [self - anInteger] ifFalse: [anInteger].
+	k = 0 ifTrue: [^1].
 
 	"The number of SmallInteger factors we computed so far"
 	step := 1.
@@ -192,9 +193,8 @@ efficiency.'>
 	num := OrderedCollection new.
 	den := OrderedCollection new.
 
-	"The next factors to be multiplied."
+	"The next factors to be multiplied are k and n."
 	n := self.
-	k := anInteger + anInteger > n ifTrue: [n - anInteger] ifFalse: [anInteger].
 	
 	[stepNum := stepDen := 1.
 	
