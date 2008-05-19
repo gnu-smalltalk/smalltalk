@@ -394,6 +394,14 @@ GST_PACKAGE_ENABLE([NCurses],
   [ac_cv_lib_ncurses_initscr])
 GST_PACKAGE_ENABLE([NetClients], [net])
 GST_PACKAGE_ENABLE([DhbNumericalMethods], [numerics])
+GST_PACKAGE_ENABLE([OpenGL], [opengl],
+   [GST_HAVE_OPENGL],
+   [gst_cv_opengl_libs],
+   [Makefile], [gstopengl.la])
+GST_PACKAGE_ENABLE([GLUT], [glut],
+   [GST_HAVE_GLUT],
+   [gst_cv_glut_libs],
+   [Makefile], [gstglut.la])
 
 GST_PACKAGE_ENABLE([Cairo], [cairo],
   [GST_HAVE_LIB(cairo, cairo_save)],

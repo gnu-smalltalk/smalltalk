@@ -108,6 +108,8 @@ New goodies:
 o   Bindings to Cairo and LibSDL provided by Michael Bridgen, Tony
     Garnock-Jones and Brad Watson.
 
+o   Bindings to OpenGL and GLUT contributed by Olivier Blanc.
+
 o   DBI supports querying tables for schema information, and is integrated
     with the "ROE" (Relational Object Expression) package.  ROE support is
     present for all back-ends (MySQL, PostgreSQL, SQLite).

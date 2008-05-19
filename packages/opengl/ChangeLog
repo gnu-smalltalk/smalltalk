@@ -1,0 +1,31 @@
+2008-05-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* OpenGL.st: Replace vertex functions with functions accepting OOPs.
+	* OpenGLObjects.st: Initialize w to 1.0.
+	* OpenGLU.st: Add some quadric wrappers.
+	* gstopengl.c: Add generic bridge functions.
+	* gstGl.c: Rewrite Smalltalk->C conversion of input parameters.
+	* gstGlu.c: Rewrite Smalltalk->C conversion of input parameters.
+
+2008-05-07  Olivier Blanc  <olivier.blanc@laposte.net>
+
+	* OpenGL.st: First version with support for 3.0 syntax.
+	* OpenGLEnum.st: First version with support for 3.0 syntax.
+	* OpenGLObjects.st: First version with support for 3.0 syntax.
+	* OpenGLU.st: First version with support for 3.0 syntax.
+	* OpenGLUEnum.st: First version with support for 3.0 syntax.
+	* gstGl.c: First version with support for 3.0 syntax.
+	* gstGlu.c: First version with support for 3.0 syntax.
+	* gstopengl.c: First version with support for 3.0 syntax.
+
+2006-09-23  Olivier Blanc  <olivier.blanc@laposte.net>
+
+	* OpenGL.st: First version.
+	* OpenGLEnum.st: First version.
+	* OpenGLObjects.st: First version.
+	* OpenGLU.st: First version.
+	* OpenGLUEnum.st: First version.
+	* gstGl.c: First version.
+	* gstGlu.c: First version with.
+	* gstopengl.c: First version.
+

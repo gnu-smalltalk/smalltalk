@@ -16,6 +16,7 @@
 * more libraries
 ** Cairo (missing cross-platform checking)
 ** SDL (missing likewise)
+** OpenGL (add some examples of SDL+OpenGL usage)
 
 * less likely
 ** Expat

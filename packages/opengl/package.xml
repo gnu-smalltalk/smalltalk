@@ -1,0 +1,28 @@
+<package>
+  <name>OpenGL</name>
+  <namespace>OpenGL</namespace>
+
+  <filein>OpenGL.st</filein>
+  <filein>OpenGLEnum.st</filein>
+  <filein>OpenGLU.st</filein>
+  <filein>OpenGLUEnum.st</filein>
+
+  <filein>OpenGLObjects.st</filein>
+
+  <module>gstopengl</module>
+
+  <file>OpenGL.st</file>
+  <file>OpenGLEnum.st</file>
+  <file>OpenGLU.st</file>
+  <file>OpenGLUEnum.st</file>
+  <file>OpenGLObjects.st</file>
+
+  <file>test/bezsurf.st</file>
+  <file>test/cubemap.st</file>
+  <file>test/list.st</file>
+  <file>test/robot.st</file>
+  <file>test/test.st</file>
+  <file>test/test2.st</file>
+  <file>test/texturesurf.st</file>
+  <file>test/unproject.st</file>
+</package>
