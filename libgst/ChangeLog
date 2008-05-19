@@ -1,3 +1,8 @@
+2008-05-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sym.c: Improve comment on TwistedPools wrt namespace
+	imports.
+
 2008-05-18  Stephen Compall  <scompall@nocandysw.com>
 
 	* libgst/gst-parse.c: Refactor pragma evaluation into new

@@ -585,25 +585,22 @@ free_scope_symbols (scope scope)
     programmer could always explicitly spell out the path to every
     variable.
 
-    What if namespace had imports of their own?
-    ===========================================
-
-    I have an idea to add shared pools to namespaces, thereby allowing users
-    to import external namespaces for every class in a namespace, rather
-    than each class. If this is integrated, it would need to twist nicely.
+    Namespaces also have imports (shared pools) of their own, thereby
+    allowing users to import external namespaces for every class in a
+    namespace, rather than each class.  These shared pools should also
+    twist nicely.
 
     Here is how I think it would best work: after searching any
     namespace, combine its shared pools as classes' shared pools are
     combined, removing all elements that are any of this namespace or
-    its superspaces, and search the combination from left to
-    right.
+    its superspaces, and search the combination from left to right.
 
     There is one important difference between namespace-sharedpools
     and class-sharedpools: while class sharedpools export their
     imports to subclasses, namespaces should not reexport bindings
     made available by way of shared pools.  As such, the bindings
     provided by a namespace are only available when compiling methods
-    that actually exist in that namespace.  */
+    that actually exist in that namespace (including its subspaces).  */
 
 
 OOP

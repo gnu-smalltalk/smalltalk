@@ -81,6 +81,10 @@ o   The order for searching pool dictionaries changed.  The new order,
     imports of a superclass have lower priority than the environment of
     the subclass.
 
+    At the same time, support for imports were added to namespaces (via the
+    <import: ...> pragma, as for classes).  Unlike the superspace, imports
+    are not made visible through #at:.
+
 o   The semantics of #on:do: were changed: executing off the end of an
     exception handler will always return from the associated #on:do:.
     Older versions of GNU Smalltalk either returned or resumed depending
