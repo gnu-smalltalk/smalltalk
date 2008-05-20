@@ -11,6 +11,7 @@
 
   <module>gstopengl</module>
 
+  <file>ChangeLog</file>
   <file>OpenGL.st</file>
   <file>OpenGLEnum.st</file>
   <file>OpenGLU.st</file>

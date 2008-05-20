@@ -1,3 +1,7 @@
+2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gstGlu.c: Fix pasto.
+
 2008-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* OpenGL.st: Replace vertex functions with functions accepting OOPs.

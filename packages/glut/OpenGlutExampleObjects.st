@@ -31,7 +31,6 @@
 
 
 
-Object subclass: Glut [
 OpenGLInterface extend [
     glutWireCube: aScale [
 	<category: 'GLUT'>

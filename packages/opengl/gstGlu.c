@@ -63,9 +63,9 @@ void gst_opengl_gluLookAtv (OOP eyeOOP, OOP centerOOP, OOP upOOP)
   GLfloat center[3], *pcenter ;
   GLfloat up[3], *pup ;
 
-  peye = gst_opengl_oop_to_array (eye, peye, 3);
-  pcenter = gst_opengl_oop_to_array (center, pcenter, 3);
-  pup = gst_opengl_oop_to_array (up, pup, 3);
+  peye = gst_opengl_oop_to_array (eye, eyeOOP, 3);
+  pcenter = gst_opengl_oop_to_array (center, centerOOP, 3);
+  pup = gst_opengl_oop_to_array (up, upOOP, 3);
 
   if (!peye || !pcenter || !pup)
     return;					/* Should fire an exception */
