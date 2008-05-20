@@ -714,10 +714,10 @@ static const class_definition class_info[] = {
    GST_ISP_FIXED, true, 1,
    "CType", "cObjectType", NULL, NULL },
 
-  {&_gst_c_func_descriptor_class, &_gst_object_class,
-   GST_ISP_POINTER, true, 4,
+  {&_gst_c_func_descriptor_class, &_gst_c_object_class,
+   GST_ISP_ULONG, true, 3,
    "CFunctionDescriptor",
-   "cFunction cFunctionName returnType tag",
+   "cFunctionName returnType argTypes",
    NULL, NULL },
 
   {&_gst_memory_class, &_gst_object_class,
@@ -2100,7 +2100,7 @@ _gst_c_object_new_base (OOP baseOOP,
   else
     classOOP = defaultClassOOP;
     
-  cObject = (gst_cobject) new_instance_with (classOOP, 1, &cObjectOOP);
+  cObject = (gst_cobject) instantiate_with (classOOP, 1, &cObjectOOP);
   cObject->type = typeOOP;
   cObject->storage = baseOOP;
   SET_COBJECT_OFFSET_OBJ (cObject, cObjOfs);

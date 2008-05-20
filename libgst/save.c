@@ -734,10 +734,11 @@ fixup_object (OOP oop, gst_object dest, gst_object src, int numBytes)
 
   /* The other case is to reset CFunctionDescriptor objects, so that we'll
      relink the external functions when we reload the image.  */
-  else if (class_oop == _gst_c_func_descriptor_class)
+  else if (is_a_kind_of (class_oop, _gst_c_func_descriptor_class))
     {
       gst_cfunc_descriptor desc = (gst_cfunc_descriptor) dest;
-      desc->cFunction = _gst_nil_oop;
+      if (desc->storageOOP == _gst_nil_oop)
+        SET_COBJECT_OFFSET_OBJ (desc, 0);
     }
 
 }

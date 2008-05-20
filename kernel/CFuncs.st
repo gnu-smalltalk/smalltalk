@@ -32,10 +32,10 @@
 
 
 
-Object subclass: CFunctionDescriptor [
-    | cFunction cFunctionName returnType tag |
+CObject subclass: CFunctionDescriptor [
+    | cFunctionName returnType argTypes |
     
-    <shape: #pointer>
+    <shape: #inherit>
     <category: 'Language-C interface'>
     <comment: 'I am not part of the Smalltalk definition.  My instances contain information
 about C functions that can be called from within Smalltalk, such as number
@@ -77,17 +77,14 @@ to perform the actual call-out to C routines.'>
 	 a why to reinitialize it!)"
 
 	<category: 'instance creation'>
-	| result |
+	| result args |
 	<primitive: VMpr_CFuncDescriptor_create>
 
 	"As a side effect, this returns a nice error message."
-	result := self new: argsArray size.
+	args := argsArray asArray collect: [ :each | self mapType: each ].
+	result := funcNameOrAddress castTo: CFunctionDescriptor type.
 	result returnType: (self mapReturnType: returnTypeSymbol).
-	argsArray keysAndValuesDo: [ :i :each | 
-	    result at: i put: (self mapType: each) ].
-
-	funcNameOrAddress isString ifTrue: [ self primitiveFailed ].
-	result address: funcNameOrAddress.
+	result argTypes: args.
 	^result
     ]
 
@@ -101,8 +98,8 @@ to perform the actual call-out to C routines.'>
 	descriptor := self 
 		    for: function
 		    returning: #void
-		    withArgs: #().	"dummy"	"dummy"
-	^descriptor address
+		    withArgs: #().
+	^descriptor castTo: CObject type
     ]
 
     CFunctionDescriptor class >> isFunction: function [
@@ -113,22 +110,6 @@ to perform the actual call-out to C routines.'>
 	^(self addressOf: function) address ~= 0
     ]
 
-    address [
-	"Answer the address (CObject) of the function represented by
-	 the receiver"
-
-	<category: 'accessing'>
-	^cFunction
-    ]
-
-    address: aCObject [
-	"Set to aCObject the address of the function represented by
-	 the receiver"
-
-	<category: 'accessing'>
-	cFunction := aCObject
-    ]
-
     name [
 	"Answer the name of the function (on the C side) represented by the
 	 receiver"
@@ -137,37 +118,26 @@ to perform the actual call-out to C routines.'>
 	^cFunctionName
     ]
 
+    argTypes: anArray [
+	<category: 'private - instance creation'>
+        argTypes := anArray
+    ]
+
     returnType: anInteger [
 	<category: 'private - instance creation'>
         returnType := anInteger
     ]
 
-    tag [
-	"Answer an arbitrary object that can be used to store extra information
-	 (subclasses cannot add more instance variables)."
-
-	<category: 'accessing'>
-        ^tag
-    ]
-    
-    tag: anObject [
-	"Set the receiver's tag, an arbitrary object that can be used to store
-	 extra information (subclasses cannot add more instance variables)."
-
-	<category: 'private - instance creation'>
-        tag := anObject
-    ]
-    
     isValid [
 	"Answer whether the function represented by the receiver is actually
 	 a registered one"
 
 	<category: 'accessing'>
 	| newAddress |
-	(cFunction notNil and: [cFunction address ~= 0]) ifTrue: [^true].
+	self address = 0 ifFalse: [^true].
 	newAddress := CFunctionDescriptor addressOf: self name.
-	self address: newAddress.
-	^newAddress address ~= 0
+	self address: newAddress address.
+	^self address ~= 0
     ]
 
     printOn: aStream [
@@ -179,9 +149,9 @@ to perform the actual call-out to C routines.'>
 	    nextPut: $(.
 
 	self name isNil ifFalse: [ aStream nextPutAll: self name ].
-	self address isNil ifFalse: [
+	self address = 0 ifFalse: [
 	    self name isNil ifFalse: [ aStream nextPutAll: ' @ ' ].
-	    aStream nextPutAll: (self address address printStringRadix: 16)
+	    aStream nextPutAll: (self address printStringRadix: 16)
 	].
 
 	aStream nextPut: $)

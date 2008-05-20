@@ -1,5 +1,11 @@
 2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CFuncs.st: Make a subclass of CObject.  Reorganize creation,
+	avoid overriding #address, remove #tag/#tag:.
+	* kernel/DLD.st: Adjust for above changes.
+
+2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/VFS.st: Add "rm -rf" functionality to RecursiveFileWrapper.
 	* scripts/Package.st: Use it.
 

@@ -109,12 +109,11 @@ typedef void (*p_void_func) ();
 typedef struct gst_cfunc_descriptor
 {
   OBJ_HEADER;
-  OOP cFunction;                /* gst_cobject whose C value is func
-                                   addr */ 
+  OOP typeOOP;		        /* CObject fields */ 
+  OOP storageOOP;	        /* CObject fields */ 
   OOP cFunctionName;            /* Name of C function in mapping table */
   OOP returnType;               /* Smalltalk return type */
-  OOP tagOOP;
-  OOP argTypes[1];              /* variable length.  */
+  OOP argTypesOOP;
 }
  *gst_cfunc_descriptor;
 

@@ -1,5 +1,13 @@
 2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/cint.c: Make CFunctionDescriptor a subclass of CObject,
+	moving in turn the indexed instance variables into an array.
+	* libgst/dict.c: Adjust definition.  Change uninitialized creation
+	in _gst_cobject_new_base to initialized.
+	* libgst/save.c: Adjust saving.
+
+2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/cint.c: Complete 2008-04-01 change by splitting part of
 	c_func_info in a cache accessed with a pointer_map.  This way, the
 	CFunctionDescriptor can store the function pointer instead of the

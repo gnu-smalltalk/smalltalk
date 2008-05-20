@@ -728,17 +728,14 @@ _gst_invoke_croutine (OOP cFuncOOP,
   cdata_type cType;
   cparam result, *local_arg_vec, *arg;
   void *funcAddr, **p_slot, **ffi_arg_vec;
-  OOP oop;
+  OOP *argTypes, oop;
   int i, si, fixedArgs, totalArgs;
   mst_Boolean haveVariadic, needPostprocessing;
   inc_ptr incPtr;
 
   incPtr = INC_SAVE_POINTER ();
 
-  desc = (gst_cfunc_descriptor) OOP_TO_OBJ (cFuncOOP);
-  if (IS_NIL (desc->cFunction))
-    return (NULL);
-  funcAddr = cobject_value (desc->cFunction);
+  funcAddr = cobject_value (cFuncOOP);
   if (!funcAddr)
     return (NULL);
 
@@ -746,13 +743,16 @@ _gst_invoke_croutine (OOP cFuncOOP,
   if (!*p_slot)
     *p_slot = xcalloc (1, sizeof (cfunc_cif_cache));
 
+  desc = (gst_cfunc_descriptor) OOP_TO_OBJ (cFuncOOP);
+  argTypes = OOP_TO_OBJ (desc->argTypesOOP)->data;
+
   c_func_cur = *p_slot;
-  fixedArgs = NUM_INDEXABLE_FIELDS (cFuncOOP);
+  fixedArgs = NUM_INDEXABLE_FIELDS (desc->argTypesOOP);
   totalArgs = 0;
   haveVariadic = needPostprocessing = false;
   for (si = i = 0; i < fixedArgs; i++)
     {
-      cType = TO_INT (desc->argTypes[i]);
+      cType = TO_INT (argTypes[i]);
       switch (cType)
 	{
 	case CDATA_VOID:
@@ -804,7 +804,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   /* Push the arguments */
   for (si = i = 0; i < fixedArgs; i++)
     {
-      cType = TO_INT (desc->argTypes[i]);
+      cType = TO_INT (argTypes[i]);
       if (cType == CDATA_SELF || cType == CDATA_SELF_OOP)
 	push_smalltalk_obj (receiver,
 			    cType == CDATA_SELF ? CDATA_UNKNOWN : CDATA_OOP);
@@ -1329,8 +1329,9 @@ _gst_make_descriptor (OOP classOOP,
   p_void_func funcAddr;
   int numArgs, i;
   gst_cfunc_descriptor desc;
+  gst_object argTypes;
   inc_ptr incPtr;
-  OOP cFunction, cFunctionName, descOOP;
+  OOP argTypesOOP, cFunctionName, descOOP;
 
   funcName = (char *) _gst_to_cstring (funcNameOOP);
   funcAddr = lookup_function (funcName);
@@ -1344,27 +1345,28 @@ _gst_make_descriptor (OOP classOOP,
      OOPs */
   incPtr = INC_SAVE_POINTER ();
 
-  cFunction = COBJECT_NEW (funcAddr, _gst_nil_oop, _gst_c_object_class);
-  INC_ADD_OOP (cFunction);
-
   cFunctionName = _gst_string_new (funcName);
   xfree (funcName);
   INC_ADD_OOP (cFunctionName);
 
-  desc = (gst_cfunc_descriptor) new_instance_with (classOOP, numArgs, &descOOP);
+  descOOP = COBJECT_NEW (funcAddr, _gst_nil_oop, classOOP);
+  INC_ADD_OOP (descOOP);
 
-  desc->cFunction = cFunction;
+  argTypes = new_instance_with (_gst_array_class, numArgs, &argTypesOOP);
+
+  desc = (gst_cfunc_descriptor) OOP_TO_OBJ (descOOP);
   desc->cFunctionName = cFunctionName;
-  desc->tagOOP = _gst_nil_oop;
   desc->returnType = classify_type_symbol (returnTypeOOP, true);
   if (desc->returnType == _gst_nil_oop)
     goto error;
 
+  desc->argTypesOOP = argTypesOOP;
+
   for (i = 1; i <= numArgs; i++)
     {
       OOP type;
-      type = desc->argTypes[i - 1] =
-        classify_type_symbol (ARRAY_AT (argsOOP, i), false);
+      type = argTypes->data[i - 1] =
+	classify_type_symbol (ARRAY_AT (argsOOP, i), false);
       if (type == _gst_nil_oop)
 	goto error;
     }

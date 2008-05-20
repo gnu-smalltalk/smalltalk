@@ -302,7 +302,7 @@ CFunctionDescriptor class extend [
 		    for: function
 		    returning: #void
 		    withArgs: #().	"dummy"	"dummy"
-	(descriptor address address = 0 and: [DLD defineExternFunc: function]) 
+	(descriptor address = 0 and: [DLD defineExternFunc: function]) 
 	    ifTrue: 
 		["Try again."
 
@@ -310,7 +310,7 @@ CFunctionDescriptor class extend [
 			    for: function
 			    returning: #void
 			    withArgs: #()	"dummy"	"dummy"].
-	^descriptor address
+	^descriptor castTo: CObject type
     ]
 
 ]

@@ -52,11 +52,10 @@ o   If possible, the installation is made relocatable.  To this end,
 o   It is possible to create CFunctionDescriptors that are not attached
     to a function that the VM knows about, simply by passing a CObject
     to CFunctionDescriptor>>#for:returning:withArgs:.  The address
-    however is reset to "nil" on image restart and it is up to the
-    user to reinitialize it.  To aid in this, since CFunctionDescriptor
-    subclasses cannot add instance variables, a subclass can add
-    more info in the new "tag" instance variable of CFunctionDescriptor,
-    which is unused by the VM.
+    however is reset to NULL on image restart and it is up to the
+    user to reinitialize it.  To aid in this, CFunctionDescriptor
+    is now a subclass of CObject and can have additional instance
+    variables.
 
 o   The VFS subsystem was rewritten.  Virtual filesystems are now
     accessible via special methods on File (such as File>>#zip,
