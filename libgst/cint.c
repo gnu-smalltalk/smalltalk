@@ -54,6 +54,7 @@
 
 #include "gstpriv.h"
 #include "re.h"
+#include "pointer-set.h"
 
 #include "ffi.h"
 #include <ltdl.h>
@@ -92,10 +93,11 @@ typedef struct cfunc_info
   avl_node_t avl;
   const char *funcName;
   p_void_func funcAddr;
+} cfunc_info;
 
-  OOP cacheCFuncDesc;		/* used to test cache validity */
-  int cacheVariadic;		/* Is the function called with variadic parms? */
-  int needPostprocessing;	/* Is the function called with string/bytearray parms? */
+typedef struct cfunc_cif_cache
+{
+  unsigned cacheValid : 1;		/* Is the function called with variadic parms? */
   ffi_cif cacheCif;		/* cached ffi_cif representation */
 
   int types_size;
@@ -103,7 +105,7 @@ typedef struct cfunc_info
   cparam *args;
   ffi_type **types;
 }
-cfunc_info;
+cfunc_cif_cache;
 
 struct gst_stat_struct
 {
@@ -139,10 +141,10 @@ static void bad_type (OOP class_oop,
 static void push_smalltalk_obj (OOP oop,
 				cdata_type cType);
 
-/* Returns a descriptor for the latest C function which has been
+/* Returns the address for the latest C function which has been
    registered using _gst_define_cfunc with the name FUNCNAME.  Returns
    NULL if there is no such function.  */
-extern cfunc_info *lookup_function (const char *funcName);
+extern p_void_func lookup_function (const char *funcName);
 
 /* Converts the return type as stored in RESULT to an OOP, based
    on the RETURNTYPEOOP that is stored in the descriptor.  */
@@ -157,7 +159,7 @@ static void init_dld (void);
 
 /* Wrapper around lt_dlopenext that invokes gst_initModule if it is found
    in the library.  */
-PTR dld_open (const char *filename);
+static PTR dld_open (const char *filename);
 
 /* Callout to tests callins.  */
 static void test_callin (OOP oop);
@@ -201,8 +203,11 @@ static const char *get_argv (int n);
 /* The binary tree of function names vs. function addresses.  */
 static cfunc_info *c_func_root = NULL;
 
-/* The cfunc_info that's being called.  */
-static cfunc_info *c_func_cur = NULL;
+/* The binary tree of function names vs. function addresses.  */
+static struct pointer_map_t *cif_cache;
+
+/* The cfunc_cif_cache that's being filled in.  */
+static cfunc_cif_cache *c_func_cur = NULL;
 
 /* printable names for corresponding C types */
 static const char *c_type_name[] = {
@@ -540,6 +545,8 @@ _gst_init_cfuncs (void)
 {
   extern char *getenv (const char *);
 
+  cif_cache = pointer_map_create ();
+
   /* Access to command line args */
   _gst_define_cfunc ("getArgc", get_argc);
   _gst_define_cfunc ("getArgv", get_argv);
@@ -632,7 +639,7 @@ _gst_define_cfunc (const char *funcName,
 
 
 
-cfunc_info *
+p_void_func
 lookup_function (const char *funcName)
 {
   cfunc_info *cfi = c_func_root;
@@ -643,12 +650,12 @@ lookup_function (const char *funcName)
 
       cmp = strcmp(funcName, cfi->funcName);
       if (cmp == 0)
-	return cfi;
+	return cfi->funcAddr;
       
       cfi = (cfunc_info *) (cmp < 0 ? cfi->avl.avl_left : cfi->avl.avl_right);
     }
 
-  return NULL;
+  return (p_void_func) NULL;
 }
 
 
@@ -706,6 +713,9 @@ _gst_c_type_size (int type)
 
     case CDATA_COBJECT_PTR:
       return sizeof (void **);
+
+    default:
+      return 0;
     }
 }
 
@@ -717,9 +727,10 @@ _gst_invoke_croutine (OOP cFuncOOP,
   gst_cfunc_descriptor desc;
   cdata_type cType;
   cparam result, *local_arg_vec, *arg;
-  void **ffi_arg_vec;
+  void *funcAddr, **p_slot, **ffi_arg_vec;
   OOP oop;
   int i, si, fixedArgs, totalArgs;
+  mst_Boolean haveVariadic, needPostprocessing;
   inc_ptr incPtr;
 
   incPtr = INC_SAVE_POINTER ();
@@ -727,25 +738,50 @@ _gst_invoke_croutine (OOP cFuncOOP,
   desc = (gst_cfunc_descriptor) OOP_TO_OBJ (cFuncOOP);
   if (IS_NIL (desc->cFunction))
     return (NULL);
-
-  c_func_cur = (cfunc_info *) cobject_value (desc->cFunction);
-  if (!c_func_cur)
+  funcAddr = cobject_value (desc->cFunction);
+  if (!funcAddr)
     return (NULL);
 
+  p_slot = pointer_map_insert (cif_cache, cFuncOOP);
+  if (!*p_slot)
+    *p_slot = xcalloc (1, sizeof (cfunc_cif_cache));
+
+  c_func_cur = *p_slot;
   fixedArgs = NUM_INDEXABLE_FIELDS (cFuncOOP);
   totalArgs = 0;
+  haveVariadic = needPostprocessing = false;
   for (si = i = 0; i < fixedArgs; i++)
     {
       cType = TO_INT (desc->argTypes[i]);
-      if (cType == CDATA_VARIADIC || cType == CDATA_VARIADIC_OOP)
+      switch (cType)
 	{
+	case CDATA_VOID:
+	  break;
+
+	case CDATA_VARIADIC:
+	case CDATA_VARIADIC_OOP:
 	  oop = args[si++];
 	  totalArgs += NUM_WORDS (OOP_TO_OBJ (oop));
+	  haveVariadic = true;
+	  break;
+
+        case CDATA_SELF:
+	case CDATA_SELF_OOP:
+	  totalArgs++;
+	  break;
+
+        case CDATA_COBJECT_PTR:
+        case CDATA_WSTRING_OUT:
+        case CDATA_STRING_OUT:
+        case CDATA_BYTEARRAY_OUT:
+	  needPostprocessing = true;
+	  /* fall through */
+
+	default:
+	  totalArgs++;
+	  si++;
+	  break;
 	}
-      else if (cType == CDATA_SELF || cType == CDATA_SELF_OOP)
-	totalArgs++;
-      else if (cType != CDATA_VOID)
-	totalArgs++, si++;
     }
 
   ffi_arg_vec = (void **) alloca (totalArgs * sizeof (void *));
@@ -761,7 +797,6 @@ _gst_invoke_croutine (OOP cFuncOOP,
     }
 
   c_func_cur->arg_idx = 0;
-  c_func_cur->cacheVariadic = false;
 
   for (i = 0; i < totalArgs; i++)
     ffi_arg_vec[i] = &local_arg_vec[i].u;
@@ -780,7 +815,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
 
   /* If the previous call was done through the same function descriptor,
      the ffi_cif is already ok.  */
-  if (c_func_cur->cacheCFuncDesc != cFuncOOP)
+  if (!c_func_cur->cacheValid)
     {
       ffi_prep_cif (&c_func_cur->cacheCif, FFI_DEFAULT_ABI, totalArgs,
                     get_ffi_type (desc->returnType),
@@ -788,19 +823,17 @@ _gst_invoke_croutine (OOP cFuncOOP,
 
       /* For variadic functions, we cannot cache the ffi_cif because
 	 the argument types change every time.  */
-      if (!c_func_cur->cacheVariadic)
-        c_func_cur->cacheCFuncDesc = cFuncOOP;
+      c_func_cur->cacheValid = !haveVariadic;
     }
 
   errno = 0;
-  ffi_call (&c_func_cur->cacheCif, FFI_FN (c_func_cur->funcAddr),
-	    &result.u, ffi_arg_vec);
+  ffi_call (&c_func_cur->cacheCif, FFI_FN (funcAddr), &result.u, ffi_arg_vec);
 
   _gst_set_errno (errno);
   oop = c_to_smalltalk (&result, desc->returnType);
 
   /* Fixup all returned string variables */
-  if (c_func_cur->needPostprocessing)
+  if (needPostprocessing)
     for (i = 0, arg = local_arg_vec; i < totalArgs; i++, arg++)
       {
         if (!arg->oop)
@@ -929,7 +962,6 @@ push_smalltalk_obj (OOP oop,
     case CDATA_VARIADIC:
       if (class == _gst_array_class)
 	{
-	  c_func_cur->cacheVariadic = true;
 	  for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
 	    push_smalltalk_obj (ARRAY_AT (oop, i), CDATA_UNKNOWN);
 	}
@@ -941,7 +973,6 @@ push_smalltalk_obj (OOP oop,
     case CDATA_VARIADIC_OOP:
       if (class == _gst_array_class)
 	{
-	  c_func_cur->cacheVariadic = true;
 	  for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
 	    push_smalltalk_obj (ARRAY_AT (oop, i), CDATA_OOP);
 	}
@@ -1063,7 +1094,6 @@ push_smalltalk_obj (OOP oop,
       else
         cp->u.ptrVal = (gst_uchar *) _gst_to_cstring (oop);
 
-      c_func_cur->needPostprocessing = true;
       SET_TYPE (&ffi_type_pointer);
       return;
     }
@@ -1074,7 +1104,6 @@ push_smalltalk_obj (OOP oop,
       cp->oop = oop;
       cp->u.ptrVal = (gst_uchar *) _gst_to_wide_cstring (oop);
 
-      c_func_cur->needPostprocessing = true;
       SET_TYPE (&ffi_type_pointer);
       return;
     }
@@ -1105,7 +1134,6 @@ push_smalltalk_obj (OOP oop,
       switch (cType)
 	{
 	case CDATA_COBJECT_PTR:
-          c_func_cur->needPostprocessing = true;
 
 	  /* Set up an indirect pointer to protect against the OOP
 	     moving during the call-out.  */
@@ -1298,7 +1326,6 @@ _gst_make_descriptor (OOP classOOP,
 		      OOP argsOOP)
 {
   char *funcName;
-  cfunc_info *cfi;
   p_void_func funcAddr;
   int numArgs, i;
   gst_cfunc_descriptor desc;
@@ -1306,8 +1333,7 @@ _gst_make_descriptor (OOP classOOP,
   OOP cFunction, cFunctionName, descOOP;
 
   funcName = (char *) _gst_to_cstring (funcNameOOP);
-  cfi = lookup_function (funcName);
-  funcAddr = cfi ? cfi->funcAddr : NULL;
+  funcAddr = lookup_function (funcName);
 
   if (argsOOP == _gst_nil_oop)
     numArgs = 0;
@@ -1318,7 +1344,7 @@ _gst_make_descriptor (OOP classOOP,
      OOPs */
   incPtr = INC_SAVE_POINTER ();
 
-  cFunction = COBJECT_NEW (cfi, _gst_nil_oop, _gst_c_object_class);
+  cFunction = COBJECT_NEW (funcAddr, _gst_nil_oop, _gst_c_object_class);
   INC_ADD_OOP (cFunction);
 
   cFunctionName = _gst_string_new (funcName);

@@ -1,3 +1,10 @@
+2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Complete 2008-04-01 change by splitting part of
+	c_func_info in a cache accessed with a pointer_map.  This way, the
+	CFunctionDescriptor can store the function pointer instead of the
+	pointer to the c_func_info.
+
 2008-05-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sym.c: Improve comment on TwistedPools wrt namespace
