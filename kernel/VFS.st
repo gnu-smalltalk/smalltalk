@@ -347,7 +347,7 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 	<category: 'enumerating'>
         self file namesDo: 
                 [:name |
-                | f fullName |
+                | f |
                 f := self at: name. 
                 aBlock value: f.
                 f isDirectory 
@@ -364,7 +364,7 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 	<category: 'private'>
         self file namesDo: 
                 [:name |
-                | f fullName |
+                | f |
                 f := self at: name. 
                 aBlock value: (f asString copyFrom: anInteger).
                 f isDirectory 
@@ -381,6 +381,23 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 
 	<category: 'enumerating'>
         self namesDo: aBlock prefixLength: self asString size + 2
+     ]
+
+     remove [
+	"Removes the entire directory tree recursively."
+
+	<category: 'file operations'>
+	self isDirectory ifTrue: [
+            self file namesDo: 
+                [:name |
+                | f |
+                f := self at: name. 
+                f isDirectory 
+                    ifTrue:
+                        [((#('.' '..') includes: name) or: [f isSymbolicLink])
+                            ifFalse: [f all remove]]
+		    ifFalse: [f remove]]].
+	super remove
      ]
 ]
 

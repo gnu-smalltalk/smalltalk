@@ -359,7 +359,7 @@ Command subclass: PkgInstall [
         "Create the installation directory."
         self installDir emitMkdir.
 	[ super run ] ensure: [
-	    tmpDir isNil ifFalse: [ tmpDir remove ] ].
+	    tmpDir isNil ifFalse: [ tmpDir all remove ] ].
 
 	(Command dryRun not and: [ self isOption: 'load' ])
 	    ifTrue: [ ^self loadPackages ].
@@ -442,14 +442,7 @@ Command subclass: PkgInstall [
 	        (self installDir / aPackage name, '.star')
 		    emitZipDir: baseDir
 	    ]
-	    ensure: [
-	        "Clean up our mess."
-	        (baseDir / 'package.xml') remove.
-                files do: [ :file |
-	            (baseDir / file) remove ].
-	        dirs asSet asSortedCollection do: [ :dir |
-	            (baseDir / dir) remove ]
-	    ].
+	    ensure: [ baseDir all remove ].
     ]
 
     runOnStar: aPackage [

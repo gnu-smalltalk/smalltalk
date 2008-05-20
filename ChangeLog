@@ -1,3 +1,8 @@
+2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFS.st: Add "rm -rf" functionality to RecursiveFileWrapper.
+	* scripts/Package.st: Use it.
+
 2008-05-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Directory.st: Fix when TMPDIR and TEMP are not set.
