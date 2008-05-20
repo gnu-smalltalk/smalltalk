@@ -78,11 +78,12 @@ to perform the actual call-out to C routines.'>
 
 	<category: 'instance creation'>
 	| result args |
-	<primitive: VMpr_CFuncDescriptor_create>
+	result := funcNameOrAddress isString
+	    ifTrue: [ self new name: funcNameOrAddress; yourself ]
+	    ifFalse: [ funcNameOrAddress castTo: self type ].
 
 	"As a side effect, this returns a nice error message."
 	args := argsArray asArray collect: [ :each | self mapType: each ].
-	result := funcNameOrAddress castTo: CFunctionDescriptor type.
 	result returnType: (self mapReturnType: returnTypeSymbol).
 	result argTypes: args.
 	^result
@@ -94,12 +95,8 @@ to perform the actual call-out to C routines.'>
 	 registered."
 
 	<category: 'testing'>
-	| descriptor |
-	descriptor := self 
-		    for: function
-		    returning: #void
-		    withArgs: #().
-	^descriptor castTo: CObject type
+	<primitive: VMpr_CFuncDescriptor_addressOf>
+	^CObject new
     ]
 
     CFunctionDescriptor class >> isFunction: function [
@@ -116,6 +113,14 @@ to perform the actual call-out to C routines.'>
 
 	<category: 'accessing'>
 	^cFunctionName
+    ]
+
+    name: aString [
+	"Set the name of the function (on the C side) represented by the
+	 receiver"
+
+	<category: 'accessing'>
+	cFunctionName := aString
     ]
 
     argTypes: anArray [

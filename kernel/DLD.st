@@ -297,20 +297,10 @@ CFunctionDescriptor class extend [
 	 given name or is dynamically loadable."
 
 	<category: 'testing'>
-	| descriptor |
-	descriptor := self 
-		    for: function
-		    returning: #void
-		    withArgs: #().	"dummy"	"dummy"
-	(descriptor address = 0 and: [DLD defineExternFunc: function]) 
-	    ifTrue: 
-		["Try again."
-
-		descriptor := self 
-			    for: function
-			    returning: #void
-			    withArgs: #()	"dummy"	"dummy"].
-	^descriptor castTo: CObject type
+	<primitive: VMpr_CFuncDescriptor_addressOf>
+	^(DLD defineExternFunc: function) 
+	    ifTrue: [self addressOf: function] "Try again."
+	    ifFalse: [CObject new]
     ]
 
 ]

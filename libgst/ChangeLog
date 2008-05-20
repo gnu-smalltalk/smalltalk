@@ -1,5 +1,14 @@
 2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/cint.c: Remove symbol_type_map, type_map, classify_type_symbol,
+	_gst_make_descriptor.  Make lookup_function global.
+	* libgst/cint.h: Declare _gst_lookup_function instead of
+	_gst_make_descriptor.
+	* libgst/prims.def: Replace VMpr_CFuncDescriptor_create with
+	VMpr_CFuncDescriptor_addressOf.
+
+2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/cint.c: Make CFunctionDescriptor a subclass of CObject,
 	moving in turn the indexed instance variables into an array.
 	* libgst/dict.c: Adjust definition.  Change uninitialized creation

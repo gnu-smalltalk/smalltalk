@@ -59,13 +59,6 @@
 #include "ffi.h"
 #include <ltdl.h>
 
-typedef struct symbol_type_map
-{
-  OOP *symbol;
-  cdata_type type;
-}
-symbol_type_map;
-
 typedef struct cparam
 {
   union {
@@ -92,7 +85,7 @@ typedef struct cfunc_info
 {
   avl_node_t avl;
   const char *funcName;
-  p_void_func funcAddr;
+  void (*funcAddr) ();
 } cfunc_info;
 
 typedef struct cfunc_cif_cache
@@ -140,11 +133,6 @@ static void bad_type (OOP class_oop,
 /* Determines the appropriate C mapping for OOP and stores it.  */
 static void push_smalltalk_obj (OOP oop,
 				cdata_type cType);
-
-/* Returns the address for the latest C function which has been
-   registered using _gst_define_cfunc with the name FUNCNAME.  Returns
-   NULL if there is no such function.  */
-extern p_void_func lookup_function (const char *funcName);
 
 /* Converts the return type as stored in RESULT to an OOP, based
    on the RETURNTYPEOOP that is stored in the descriptor.  */
@@ -242,41 +230,6 @@ static const char *c_type_name[] = {
   "wchar_t *",			/* CDATA_WSTRING */
   "wchar_t *",			/* CDATA_WSTRING_OUT */
   "char *",			/* CDATA_SYMBOL_OUT */
-};
-
-/* A map between symbols and the cdata_type enum.  */
-static const symbol_type_map type_map[] = {
-  {&_gst_unknown_symbol, CDATA_UNKNOWN},
-  {&_gst_char_symbol, CDATA_CHAR},
-  {&_gst_uchar_symbol, CDATA_UCHAR},
-  {&_gst_short_symbol, CDATA_SHORT},
-  {&_gst_ushort_symbol, CDATA_USHORT},
-  {&_gst_string_symbol, CDATA_STRING},
-  {&_gst_string_out_symbol, CDATA_STRING_OUT},
-  {&_gst_symbol_symbol, CDATA_SYMBOL},
-  {&_gst_symbol_out_symbol, CDATA_SYMBOL_OUT},
-  {&_gst_byte_array_symbol, CDATA_BYTEARRAY},
-  {&_gst_byte_array_out_symbol, CDATA_BYTEARRAY_OUT},
-  {&_gst_boolean_symbol, CDATA_BOOLEAN},
-  {&_gst_int_symbol, CDATA_INT},
-  {&_gst_uint_symbol, CDATA_UINT},
-  {&_gst_long_symbol, CDATA_LONG},
-  {&_gst_ulong_symbol, CDATA_ULONG},
-  {&_gst_float_symbol, CDATA_FLOAT},
-  {&_gst_double_symbol, CDATA_DOUBLE},
-  {&_gst_long_double_symbol, CDATA_LONG_DOUBLE},
-  {&_gst_void_symbol, CDATA_VOID},
-  {&_gst_variadic_symbol, CDATA_VARIADIC},
-  {&_gst_variadic_smalltalk_symbol, CDATA_VARIADIC_OOP},
-  {&_gst_c_object_symbol, CDATA_COBJECT},
-  {&_gst_c_object_ptr_symbol, CDATA_COBJECT_PTR},
-  {&_gst_smalltalk_symbol, CDATA_OOP},
-  {&_gst_self_symbol, CDATA_SELF},
-  {&_gst_self_smalltalk_symbol, CDATA_SELF_OOP},
-  {&_gst_wchar_symbol, CDATA_WCHAR},
-  {&_gst_wstring_symbol, CDATA_WSTRING},
-  {&_gst_wstring_out_symbol, CDATA_WSTRING_OUT},
-  {NULL, CDATA_UNKNOWN}
 };
 
 /* The errno on output from a callout */
@@ -639,8 +592,8 @@ _gst_define_cfunc (const char *funcName,
 
 
 
-p_void_func
-lookup_function (const char *funcName)
+PTR
+_gst_lookup_function (const char *funcName)
 {
   cfunc_info *cfi = c_func_root;
 
@@ -650,12 +603,12 @@ lookup_function (const char *funcName)
 
       cmp = strcmp(funcName, cfi->funcName);
       if (cmp == 0)
-	return cfi->funcAddr;
+	return (PTR) cfi->funcAddr;
       
       cfi = (cfunc_info *) (cmp < 0 ? cfi->avl.avl_left : cfi->avl.avl_right);
     }
 
-  return (p_void_func) NULL;
+  return NULL;
 }
 
 
@@ -1318,87 +1271,6 @@ bad_type (OOP class_oop,
 }
 
 
-
-OOP
-_gst_make_descriptor (OOP classOOP,
-		      OOP funcNameOOP,
-		      OOP returnTypeOOP,
-		      OOP argsOOP)
-{
-  char *funcName;
-  p_void_func funcAddr;
-  int numArgs, i;
-  gst_cfunc_descriptor desc;
-  gst_object argTypes;
-  inc_ptr incPtr;
-  OOP argTypesOOP, cFunctionName, descOOP;
-
-  funcName = (char *) _gst_to_cstring (funcNameOOP);
-  funcAddr = lookup_function (funcName);
-
-  if (argsOOP == _gst_nil_oop)
-    numArgs = 0;
-  else
-    numArgs = NUM_OOPS (OOP_TO_OBJ (argsOOP));
-
-  /* since these are all either ints or new objects, I'm not moving the
-     OOPs */
-  incPtr = INC_SAVE_POINTER ();
-
-  cFunctionName = _gst_string_new (funcName);
-  xfree (funcName);
-  INC_ADD_OOP (cFunctionName);
-
-  descOOP = COBJECT_NEW (funcAddr, _gst_nil_oop, classOOP);
-  INC_ADD_OOP (descOOP);
-
-  argTypes = new_instance_with (_gst_array_class, numArgs, &argTypesOOP);
-
-  desc = (gst_cfunc_descriptor) OOP_TO_OBJ (descOOP);
-  desc->cFunctionName = cFunctionName;
-  desc->returnType = classify_type_symbol (returnTypeOOP, true);
-  if (desc->returnType == _gst_nil_oop)
-    goto error;
-
-  desc->argTypesOOP = argTypesOOP;
-
-  for (i = 1; i <= numArgs; i++)
-    {
-      OOP type;
-      type = argTypes->data[i - 1] =
-	classify_type_symbol (ARRAY_AT (argsOOP, i), false);
-      if (type == _gst_nil_oop)
-	goto error;
-    }
-
-  INC_RESTORE_POINTER (incPtr);
-  return (descOOP);
-
- error:
-  INC_RESTORE_POINTER (incPtr);
-  return (NULL);
-
-}
-
-OOP
-classify_type_symbol (OOP symbolOOP,
-		      mst_Boolean isReturn)
-{
-  const symbol_type_map *sp;
-  for (sp = type_map; sp->symbol != NULL; sp++)
-    {
-      if (*sp->symbol == symbolOOP)
-	return (FROM_INT (sp->type));
-    }
-
-  if (isReturn)
-    {
-      if (is_a_kind_of (OOP_CLASS (symbolOOP), _gst_c_type_class))
-	return (symbolOOP);	/* this is the type we want! */
-    }
-
-  return _gst_nil_oop;
-}
 
 void
 _gst_set_errno(int errnum)

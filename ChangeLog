@@ -1,5 +1,11 @@
 2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CFuncs.st: Always execute #for:returning:withArgs: as
+	Smalltalk code, make #addressOf: a primitive.  Add #name:.
+	* kernel/DLD.st: Make overridden #addressOf: a primitive.
+
+2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/CFuncs.st: Make a subclass of CObject.  Reorganize creation,
 	avoid overriding #address, remove #tag/#tag:.
 	* kernel/DLD.st: Adjust for above changes.

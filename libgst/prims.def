@@ -5057,30 +5057,21 @@ primitive VMpr_Behavior_primCompileIfError [fail,succeed,reload_ip]
 /* CFunctionDescriptor for: funcNameString
             returning: returnTypeSymbol
 	    withArgs: argsArray */
-primitive VMpr_CFuncDescriptor_create [succeed,fail]
+primitive VMpr_CFuncDescriptor_addressOf [succeed,fail]
 {
   OOP oop1;
-  OOP oop2;
-  OOP oop3;
-  OOP oop4;
   _gst_primitives_executed++;
 
-  oop4 = STACK_AT (0);
-  oop3 = STACK_AT (1);
-  oop2 = STACK_AT (2);
-  oop1 = STACK_AT (3);
+  oop1 = STACKTOP ();
 
-  if (IS_CLASS (oop2, _gst_string_class)
-      && (IS_CLASS (oop3, _gst_symbol_class)
-	  || is_a_kind_of (OOP_CLASS (oop3), _gst_c_type_class))
-      && (IS_CLASS (oop4, _gst_array_class)
-	  || IS_CLASS (oop4, _gst_undefined_object_class)))
+  if (IS_CLASS (oop1, _gst_string_class))
     {
-      OOP cFuncDescrOOP = _gst_make_descriptor (oop1, oop2, oop3, oop4);
-      if (cFuncDescrOOP)
+      char *funcName = (char *) _gst_to_cstring (oop1);
+      void *funcAddr = _gst_lookup_function (funcName);
+      if (funcAddr)
 	{
-	  POP_N_OOPS (3);
-	  SET_STACKTOP (cFuncDescrOOP);
+	  POP_N_OOPS (1);
+	  SET_STACKTOP (COBJECT_NEW (funcAddr, _gst_nil_oop, _gst_c_object_class));
 	  PRIM_SUCCEEDED;
 	}
     }

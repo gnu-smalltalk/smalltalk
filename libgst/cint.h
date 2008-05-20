@@ -103,9 +103,6 @@ cdata_type;
 extern int _gst_errno 
   ATTRIBUTE_HIDDEN;
 
-/* Element type for the name-to-C-function mapping table.  */
-typedef void (*p_void_func) ();
-
 typedef struct gst_cfunc_descriptor
 {
   OBJ_HEADER;
@@ -144,20 +141,14 @@ extern void _gst_define_cfunc (const char *funcName, PTR funcAddr)
 extern void _gst_init_cfuncs (void) 
   ATTRIBUTE_HIDDEN;
 
-/* Makes a CFunctionDescriptor (the actual class is in CLASSOOP) for a
-   callout method.  Returns a gst_cfunc_descriptor object which holds onto
-   the descriptor.  This descriptor is subsequently used when the called
-   out function FUNCNAMEOOP (a Smalltalk String) is invoked. RETURNOOP
-   is a Symbol or CType which indicates the return type and ARGSOOP is
-   a Smalltalk Array containing the argument types (as Symbols).  */
-extern OOP _gst_make_descriptor (OOP classOOP,
-				 OOP funcNameOOP,
-				 OOP returnTypeOOP,
-				 OOP argsOOP) 
-  ATTRIBUTE_HIDDEN;
-
 /* Set the value of errno which is checked by Smalltalk to be errnum.  */
 extern void _gst_set_errno(int errnum) 
+  ATTRIBUTE_HIDDEN;
+
+/* Returns the address for the latest C function which has been
+   registered using _gst_define_cfunc with the name FUNCNAME.  Returns
+   NULL if there is no such function.  */
+extern PTR _gst_lookup_function (const char *funcName)
   ATTRIBUTE_HIDDEN;
 
 #endif /* GST_CINT_H */
