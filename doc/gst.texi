@@ -3958,6 +3958,9 @@ All these functions handle properly the case of specifying, say, 5 arguments
 for a 3-argument selector---see the description of the single functions
 for more information).
 
+In all cases except @code{msgSendf}, passing NULL as the selector will
+expect the receiver to be a block and evaluate it.
+
 
 @deftypefun OOP msgSend (OOP receiver, OOP selector, @dots{})
 This function sends the given selector (should be a Symbol, otherwise
@@ -4125,6 +4128,7 @@ registry (@pxref{Smalltalk types}).  @dfn{receiver_type} and
           f               double          Float (see floatToOOP)
           F            long double        Float (see longDoubleToOOP)
           b                int            True or False (see boolToOOP)
+          B                OOP            BlockClosure
           c                char           Character (see charToOOP)
           C               PTR             CObject (see cObjToOOP)
           s               char *          String (see stringToOOP)
@@ -4145,6 +4149,9 @@ the second instead will be the CObject's address.  If you specify
 Smalltalk @code{CType} via @code{typeNameToOOP} (@pxref{Smalltalk
 types}); instead, if you specify @samp{%T}, you will have to directly
 pass an OOP for the new CObject's type.
+
+For @samp{%B} you should not pass a selector, and the block will be
+evaluated.
 
 The type specifiers you can pass for @dfn{result_type} are a bit
 different:

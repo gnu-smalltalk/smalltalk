@@ -1,5 +1,10 @@
 2008-05-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/callin.c: Support '%B' for the receiver in msgSendf.
+	* libgst/interp.c: Callins evaluate blocks if the selector is NULL.
+
+2008-05-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/cint.c: Replace CFunctionDescriptor references with CCallable.
 	Allow OOPs in the argument vector and parse them as #cObject.
 	* libgst/cint.h: Likewise.

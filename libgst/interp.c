@@ -2198,7 +2198,9 @@ _gst_nvmsg_send (OOP receiver,
   for (i = 0; i < sendArgs; i++)
     PUSH_OOP (args[i]);
 
-  if (OOP_CLASS (sendSelector) == _gst_symbol_class)
+  if (!sendSelector)
+    send_block_value (sendArgs, sendArgs);
+  else if (OOP_CLASS (sendSelector) == _gst_symbol_class)
     SEND_MESSAGE (sendSelector, sendArgs);
   else
     _gst_send_method (sendSelector);

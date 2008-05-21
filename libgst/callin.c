@@ -169,6 +169,7 @@ _gst_va_msg_sendf (PTR resultPtr,
   const char *fp;
   char *s, selectorBuf[256];
   inc_ptr incPtr;
+  mst_Boolean receiver_is_block = false;
 
   if (!_gst_smalltalk_initialized)
     _gst_initialize (NULL, NULL, GST_NO_TTY);
@@ -187,6 +188,8 @@ _gst_va_msg_sendf (PTR resultPtr,
 	      *s++ = '%';
 	      numArgs--;
 	    }
+	  else if (*fp == 'B')
+	    receiver_is_block = true;
 	}
       else if (*fp != ' ' && *fp != '\t')
 	*s++ = *fp;
@@ -194,7 +197,10 @@ _gst_va_msg_sendf (PTR resultPtr,
 
   *s = '\0';
 
-  selector = _gst_intern_string (selectorBuf);
+  if (receiver_is_block)
+    selector = NULL;
+  else
+    selector = _gst_intern_string (selectorBuf);
 
   if (numArgs != 1 + _gst_selector_num_args (selector))
     return;
@@ -249,6 +255,7 @@ _gst_va_msg_sendf (PTR resultPtr,
 	  INC_ADD_OOP (args[i]);
           break;
 
+        case 'B':
         case 'o':
           args[++i] = va_arg (ap, OOP);
 	  INC_ADD_OOP (args[i]);
