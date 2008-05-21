@@ -103,16 +103,15 @@ cdata_type;
 extern int _gst_errno 
   ATTRIBUTE_HIDDEN;
 
-typedef struct gst_cfunc_descriptor
+typedef struct gst_c_callable
 {
   OBJ_HEADER;
   OOP typeOOP;		        /* CObject fields */ 
   OOP storageOOP;	        /* CObject fields */ 
-  OOP cFunctionName;            /* Name of C function in mapping table */
   OOP returnType;               /* Smalltalk return type */
   OOP argTypesOOP;
 }
- *gst_cfunc_descriptor;
+ *gst_c_callable;
 
 /* Returns the size of an object passed to a C routine with type TYPE.  */
 extern int _gst_c_type_size (int type);

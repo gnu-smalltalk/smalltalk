@@ -677,7 +677,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
 		      OOP receiver,
 		      OOP *args)
 {
-  gst_cfunc_descriptor desc;
+  gst_c_callable desc;
   cdata_type cType;
   cparam result, *local_arg_vec, *arg;
   void *funcAddr, **p_slot, **ffi_arg_vec;
@@ -696,7 +696,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   if (!*p_slot)
     *p_slot = xcalloc (1, sizeof (cfunc_cif_cache));
 
-  desc = (gst_cfunc_descriptor) OOP_TO_OBJ (cFuncOOP);
+  desc = (gst_c_callable) OOP_TO_OBJ (cFuncOOP);
   argTypes = OOP_TO_OBJ (desc->argTypesOOP)->data;
 
   c_func_cur = *p_slot;
@@ -705,7 +705,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   haveVariadic = needPostprocessing = false;
   for (si = i = 0; i < fixedArgs; i++)
     {
-      cType = TO_INT (argTypes[i]);
+      cType = IS_OOP (argTypes[i]) ? CDATA_COBJECT : TO_INT (argTypes[i]);
       switch (cType)
 	{
 	case CDATA_VOID:
@@ -757,7 +757,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   /* Push the arguments */
   for (si = i = 0; i < fixedArgs; i++)
     {
-      cType = TO_INT (argTypes[i]);
+      cType = IS_OOP (argTypes[i]) ? CDATA_COBJECT : TO_INT (argTypes[i]);
       if (cType == CDATA_SELF || cType == CDATA_SELF_OOP)
 	push_smalltalk_obj (receiver,
 			    cType == CDATA_SELF ? CDATA_UNKNOWN : CDATA_OOP);

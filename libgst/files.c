@@ -261,6 +261,7 @@ static const char standard_files[] = {
   /* C call-out facilities */
   "CObject.st\0"
   "CType.st\0"
+  "CCallable.st\0"
   "CFuncs.st\0"
   "CStruct.st\0"
 

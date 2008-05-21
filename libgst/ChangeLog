@@ -1,3 +1,13 @@
+2008-05-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Replace CFunctionDescriptor references with CCallable.
+	Allow OOPs in the argument vector and parse them as #cObject.
+	* libgst/cint.h: Likewise.
+	* libgst/dict.c: Add _gst_c_callable_class and definition of CCallable.
+	* libgst/dict.h: Add _gst_c_callable_class.
+	* libgst/files.c: Load CCallable.st.
+	* libgst/save.c: Replace CFunctionDescriptor references with CCallable.
+
 2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Remove symbol_type_map, type_map, classify_type_symbol,

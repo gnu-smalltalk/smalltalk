@@ -345,6 +345,7 @@ extern OOP _gst_block_context_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_boolean_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_byte_array_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_byte_stream_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_c_callable_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_c_func_descriptor_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_c_object_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_c_object_type_ctype ATTRIBUTE_HIDDEN;

@@ -1,3 +1,10 @@
+2008-05-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CCallable.st: Split from part of...
+	* kernel/CFuncs.st: ... this.  Change superclass to CCallable.
+	* kernel/CompildMeth.st: Accept a descriptor in the class methods
+	that create C call-out method.
+
 2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CFuncs.st: Always execute #for:returning:withArgs: as

@@ -49,13 +49,16 @@ o   If possible, the installation is made relocatable.  To this end,
     will be disabled and the program will look for its files only in
     the configured prefix.
 
-o   It is possible to create CFunctionDescriptors that are not attached
-    to a function that the VM knows about, simply by passing a CObject
-    to CFunctionDescriptor>>#for:returning:withArgs:.  The address
-    however is reset to NULL on image restart and it is up to the
-    user to reinitialize it.  To aid in this, CFunctionDescriptor
-    is now a subclass of CObject and can have additional instance
-    variables.
+o   It is possible to create C call-outs that are not attached
+    to a function that the VM knows about, using the method
+    CCallable class>>#for:returning:withArgs:.  The returned object
+    can then be used to create CompiledMethods using
+    CompiledMethod class>>#cCall:numArgs:attributes:.
+
+    The address however is reset to NULL on image restart and it is up to
+    the user to reinitialize it.  You can also subclass CCallable and
+    override the #link method (the existing CFunctionDescriptor class
+    is now implemented on top of this).
 
 o   The VFS subsystem was rewritten.  Virtual filesystems are now
     accessible via special methods on File (such as File>>#zip,
