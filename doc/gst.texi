@@ -1267,7 +1267,7 @@ option to the @gst{} @acronym{XML} package description used by
 @code{PackageLoader}, or wrapping your code like this:
 @example
     Namespace current: NewNS [
-        @dots{}
+        @r{@dots{}}
     ]
 @end example
 
@@ -1290,7 +1290,7 @@ can use code like
     Namespace current: NewNS [
         Smalltalk.Set subclass: #Set [
             <category: 'My application-Extensions'>
-            @dots{}
+            @r{@dots{}}
         ]
     ]
 @end example
@@ -2390,7 +2390,7 @@ multiple languages.
 Basic usage of the @code{I18N} package involves a single selector, the
 question mark (@code{?}), which is a rarely used yet valid character for
 a Smalltalk binary message.  The meaning of the question mark selector
-is ``Hey, how do you say @dots{} under your convention?''.  You can send
+is ``How do you say @dots{} under your convention?''.  You can send
 @code{?} to either a specific instance of a subclass of @code{Locale},
 or to the class itself; in this case, rules for the default locale
 (which is specified via environment variables) apply.  You might say,
@@ -3008,6 +3008,7 @@ with it, but I am interested in hearing your opinions on the subject.
 * C data types::            Manipulating C data from Smalltalk
 * Smalltalk types::         Manipulating Smalltalk data from C
 * Smalltalk callin::        Calls from C to Smalltalk
+* Smalltalk callbacks::     Smalltalk blocks as C function pointers
 * Object representation::   Manipulating your own Smalltalk objects
 * Incubator::               Protecting newly created objects from garbage
                             collections
@@ -3330,6 +3331,11 @@ a garbage collection: after a GC, pointers passed as @code{#cObject} may be
 invalidated.  In this case, it is safer to pass every object as
 @code{#smalltalk}, or to only pass @code{CObject}s that were returned
 by a C function previously.
+
+In addition, @code{#cObject} can be used for function pointers.  These are
+instances of @code{CCallable} or one of its subclasses.  See @ref{Smalltalk
+callbacks} for more information on how to create function pointers for
+Smalltalk blocks.
 
 @item cObjectPtr
 Pointer to C object value passed as @code{void **}.  The @code{CObject}
@@ -3896,7 +3902,7 @@ cIntType = typeNameToOOP("CIntType");
 myOwnCStructType = typeNameToOOP("MyOwnCStruct type");
 @end example
 
-This method is primarily used by msgSendf (@pxref{Smalltalk callin}),
+This method is primarily used by @code{msgSendf} (@pxref{Smalltalk callin}),
 but it can be useful if you use lower level call-in methods. This method
 is slow too; you can safely cache its result.
 @end deftypefun
@@ -4177,10 +4183,64 @@ Note that, if resultPtr is @code{NULL}, the @dfn{result_type} is always
 treated as @samp{%v}.  If an error occurs, the value in the `result if
 nil' column is returned.
 
+@node Smalltalk callbacks
+@section Smalltalk blocks as C function pointers
+
+The Smalltalk callin mechanism can be used effectively to construct
+bindings to C libraries that require callbacks into Smalltalk.
+However, it is a ``static'' mechanism, as the callback functions
+passed to the libraries have to be written in C and their type
+signatures are fixed.
+
+If the signatures of the callbacks are not known in advance,
+and the only way to define callbacks is via C function pointers (as
+opposed to reflective mechanisms such as the ones in GTK+), then
+the @code{VMProxy} functions for Smalltalk callin are not enough.
+
+@gst{} provides a more dynamic way to convert Smalltalk blocks into
+C function pointers through the @code{CCallbackDescriptor} class.
+This class has a constructor method that is similar to the
+@code{cCall:} annotation used for callouts.  The method is
+called @code{for:returning:withArgs:} and its parameters are:
+
+@itemize @bullet
+@item a block, whose number of arguments is variable
+@item a symbol representing the return type
+@item an array representing the type of the arguments.
+@end itemize
+
+The array passed as the third parameter represents values that
+are passed @emph{from C to Smalltalk} and, as such, should be
+filled with the same rules that are used by the @emph{return
+  type} of a C callout.  In particular, if the C callback
+accepts an @code{int *} it is possible (and indeed useful)
+to specify the type of the argument as @code{#@{CInt@}},
+so that the block will receive a @code{CInt} object.
+
+Here is an example of creating a callback which is passed to
+@code{glutReshapeFunc}@footnote{The GLUT bindings use a different
+  scheme for setting up callbacks.}.  The desired
+signature in C is @code{void (*) (int, int)}.
+@example
+| glut |
+@r{@dots{}}
+glut glutReshapeFunc: (CCallbackDescriptor
+    for: [ :x :y | self reshape: x@@y ]
+    returning: #void
+    withArgs: #(#int #int))
+@end example
+
+It is important to note that this kind of callback does not survive
+across an image load (this restriction may be lifted in a future version).
+When the image is loaded, it has to be reset by sending it the @code{link}
+message before it is passed to any C function.  Sending the @code{link}
+message to an already valid callback is harmless and cheap.
+
+
 @node Other C functions
 @section Other functions available to modules
 
-In addition to the functions above, the @code{VMProxy} that is made
+In addition to the functions described so far, the @code{VMProxy} that is
 available to modules contains entry-points for many functions that aid
 in developing @gst{} extensions in C.  This node documents these
 functions and the macros that are defined by @file{libgst/gstpub.h}.
@@ -4243,11 +4303,11 @@ variables in the object that is going to be created.  Simple uses of
 OOP myClassOOP;
 OOP myNewObject;
 myNewObjectData obj;
-@dots{}
+@r{@dots{}}
 myNewObject = objectAlloc(myClassOOP, 0);
 obj = (myNewObjectData) OOP_TO_OBJ (myNewObject);
 obj->arguments = objectAlloc(classNameToOOP("Array"), 10);
-@dots{}
+@r{@dots{}}
 @end example
 @end deftypefun
 
@@ -4537,7 +4597,7 @@ Now you can use the fields in the object like in this pseudo-code:
     /* These are retrieved via classNameToOOP and then cached in global
        variables */
     OOP sqlUpdateQueryClass, sqlActionClass, sqlObjectCreationClass;
-    @dots{}
+    @r{@dots{}}
     invoke_sql_query(
         vmProxy->oopToCObject(action->database),
         vmProxy->oopToString(action->request);

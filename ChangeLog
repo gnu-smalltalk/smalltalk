@@ -1,5 +1,10 @@
 2008-05-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CCallback.st: New.
+	* tests/cobject.st: Test closures.
+
+2008-05-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/CCallable.st: Split from part of...
 	* kernel/CFuncs.st: ... this.  Change superclass to CCallable.
 	* kernel/CompildMeth.st: Accept a descriptor in the class methods

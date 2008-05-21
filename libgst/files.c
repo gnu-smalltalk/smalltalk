@@ -263,6 +263,7 @@ static const char standard_files[] = {
   "CType.st\0"
   "CCallable.st\0"
   "CFuncs.st\0"
+  "CCallback.st\0"
   "CStruct.st\0"
 
   /* Exception handling and ProcessEnvironment */

@@ -108,8 +108,9 @@ typedef struct gst_c_callable
   OBJ_HEADER;
   OOP typeOOP;		        /* CObject fields */ 
   OOP storageOOP;	        /* CObject fields */ 
-  OOP returnType;               /* Smalltalk return type */
-  OOP argTypesOOP;
+  OOP returnTypeOOP;            /* Smalltalk return type */
+  OOP argTypesOOP;		/* array of argument types */
+  OOP blockOOP;			/* only for CCallbackDescriptor */
 }
  *gst_c_callable;
 
@@ -148,6 +149,15 @@ extern void _gst_set_errno(int errnum)
    registered using _gst_define_cfunc with the name FUNCNAME.  Returns
    NULL if there is no such function.  */
 extern PTR _gst_lookup_function (const char *funcName)
+  ATTRIBUTE_HIDDEN;
+
+/* Creates a closure for the CCallbackDescriptor CALLBACKOOP and stores it
+   in the object.  */
+extern void _gst_make_closure (OOP callbackOOP)
+  ATTRIBUTE_HIDDEN;
+
+/* Frees the info for the closure in the CCallbackDescriptor CALLBACKOOP.  */
+extern void _gst_free_closure (OOP callbackOOP)
   ATTRIBUTE_HIDDEN;
 
 #endif /* GST_CINT_H */

@@ -100,6 +100,20 @@ typedef struct cfunc_cif_cache
 }
 cfunc_cif_cache;
 
+typedef struct gst_ffi_closure
+{
+  // This field must come first, since the address of this field will
+  // be the same as the address of the overall structure.  This is due
+  // to disabling interior pointers in the GC.
+  ffi_closure closure;
+  void *address;
+  OOP callbackOOP;
+  ffi_cif cif;
+  ffi_type *return_type;
+  ffi_type *arg_types[1];
+}
+gst_ffi_closure;
+
 struct gst_stat_struct
 {
   unsigned short st_mode;	/* protection */
@@ -149,20 +163,14 @@ static void init_dld (void);
    in the library.  */
 static PTR dld_open (const char *filename);
 
-/* Callout to tests callins.  */
-static void test_callin (OOP oop);
+/* Callout to tests callins and callbacks.  */
+static void test_callin (OOP oop, int(*callback)(const char *));
 
 /* Callout to test the CString class */
 static void test_cstring (char **string);
 
 /* Callout to test #cObjectPtr parameters */
 static void test_cobject_ptr (const void **string);
-
-/* Converts a Symbol to a SmallInteger so that it is stored in the
-   CFunctionDescriptor.  For the return type isReturn is passed as
-   true and a CType is alwso considered valid.  */
-static OOP classify_type_symbol (OOP symbolOOP,
-				 mst_Boolean isReturn);
 
 /* Return the errno on output from the last callout.  */
 static int get_errno (void);
@@ -402,18 +410,19 @@ my_opendir (const char *dir)
 }
 
 void
-test_callin (OOP oop)
+test_callin (OOP oop, int(*callback)(const char *))
 {
   OOP o, sel;
   double f;
+  int i;
   _gst_str_msg_send (oop, "printNl", NULL);
 
   o = _gst_string_to_oop ("abc");
   sel = _gst_symbol_to_oop ("printNl");
   _gst_str_msg_send (_gst_str_msg_send (o, ",", o, NULL), "printNl",
 		     NULL);
-  _gst_msg_sendf (NULL, "%s %s printNl", "this is a test");
-  _gst_msg_sendf (&f, "%f %i + %f", 3, 4.7);
+  i = callback ("this is a test");
+  _gst_msg_sendf (&f, "%f %i + %f", i, 4.7);
   printf ("result = %f\n", f);
 }
 
@@ -771,7 +780,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   if (!c_func_cur->cacheValid)
     {
       ffi_prep_cif (&c_func_cur->cacheCif, FFI_DEFAULT_ABI, totalArgs,
-                    get_ffi_type (desc->returnType),
+                    get_ffi_type (desc->returnTypeOOP),
 		    c_func_cur->types);
 
       /* For variadic functions, we cannot cache the ffi_cif because
@@ -783,7 +792,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   ffi_call (&c_func_cur->cacheCif, FFI_FN (funcAddr), &result.u, ffi_arg_vec);
 
   _gst_set_errno (errno);
-  oop = c_to_smalltalk (&result, desc->returnType);
+  oop = c_to_smalltalk (&result, desc->returnTypeOOP);
 
   /* Fixup all returned string variables */
   if (needPostprocessing)
@@ -883,57 +892,26 @@ get_ffi_type (OOP returnTypeOOP)
    }
 }
 
-#define SET_TYPE(t)  c_func_cur->types[c_func_cur->arg_idx++] = (t);
-
-void
-push_smalltalk_obj (OOP oop,
-		    cdata_type cType)
+ffi_type *
+smalltalk_to_c (OOP oop,
+		cparam *cp,
+		cdata_type cType)
 {
-  OOP class;
-  int i;
-  cparam *cp = &c_func_cur->args[c_func_cur->arg_idx];
+  OOP class = OOP_INT_CLASS (oop);
 
-  class = OOP_INT_CLASS (oop);
-
-  switch (cType)
-    {
-    case CDATA_UNKNOWN:
-      cType =
-	(oop == _gst_true_oop || oop == _gst_false_oop) ? CDATA_BOOLEAN :
-	oop == _gst_nil_oop ? CDATA_COBJECT :
-	class == _gst_char_class ? CDATA_CHAR :
-	class == _gst_unicode_character_class ? CDATA_WCHAR :
-	class == _gst_byte_array_class ? CDATA_BYTEARRAY : 
-	is_a_kind_of (class, _gst_integer_class) ? CDATA_LONG :
-	is_a_kind_of (class, _gst_string_class) ? CDATA_STRING :
-	is_a_kind_of (class, _gst_unicode_string_class) ? CDATA_WSTRING :
-	is_a_kind_of (class, _gst_c_object_class) ? CDATA_COBJECT :
-	is_a_kind_of (class, _gst_float_class) ? CDATA_DOUBLE :
-	CDATA_OOP;
-      break;
-
-    case CDATA_VARIADIC:
-      if (class == _gst_array_class)
-	{
-	  for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
-	    push_smalltalk_obj (ARRAY_AT (oop, i), CDATA_UNKNOWN);
-	}
-      else
-        bad_type (class, cType);
-
-      return;
-
-    case CDATA_VARIADIC_OOP:
-      if (class == _gst_array_class)
-	{
-	  for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
-	    push_smalltalk_obj (ARRAY_AT (oop, i), CDATA_OOP);
-	}
-      else
-        bad_type (class, cType);
-
-      return;
-    }
+  if (cType == CDATA_UNKNOWN)
+    cType =
+      (oop == _gst_true_oop || oop == _gst_false_oop) ? CDATA_BOOLEAN :
+      oop == _gst_nil_oop ? CDATA_COBJECT :
+      class == _gst_char_class ? CDATA_CHAR :
+      class == _gst_unicode_character_class ? CDATA_WCHAR :
+      class == _gst_byte_array_class ? CDATA_BYTEARRAY : 
+      is_a_kind_of (class, _gst_integer_class) ? CDATA_LONG :
+      is_a_kind_of (class, _gst_string_class) ? CDATA_STRING :
+      is_a_kind_of (class, _gst_unicode_string_class) ? CDATA_WSTRING :
+      is_a_kind_of (class, _gst_c_object_class) ? CDATA_COBJECT :
+      is_a_kind_of (class, _gst_float_class) ? CDATA_DOUBLE :
+      CDATA_OOP;
 
   cp->oop = NULL;
   cp->cType = cType;
@@ -942,8 +920,7 @@ push_smalltalk_obj (OOP oop,
     {
       cp->u.ptrVal = (PTR) oop;
       INC_ADD_OOP (oop);	/* make sure it doesn't get gc'd */
-      SET_TYPE (&ffi_type_pointer);
-      return;
+      return &ffi_type_pointer;
     }
 
   else if (is_a_kind_of (class, _gst_integer_class))
@@ -954,47 +931,39 @@ push_smalltalk_obj (OOP oop,
 	case CDATA_ULONG:
 	  cp->u.longVal = TO_C_LONG (oop);
 #if LONG_MAX == 2147483647
-          SET_TYPE (&ffi_type_sint32);
+          return &ffi_type_sint32;
 #else
-          SET_TYPE (&ffi_type_sint64);
+          return &ffi_type_sint64;
 #endif
-	  return;
 
         case CDATA_INT:
 	case CDATA_UINT:
 	  cp->u.intVal = TO_C_INT (oop);
-	  SET_TYPE (&ffi_type_sint);
-	  return;
+	  return &ffi_type_sint;
 
 	case CDATA_CHAR:
 	  cp->u.intVal = (char) TO_C_INT (oop);
-	  SET_TYPE (&ffi_type_sint);
-	  return;
+	  return &ffi_type_sint;
 
 	case CDATA_UCHAR:
 	  cp->u.intVal = (unsigned char) TO_C_INT (oop);
-	  SET_TYPE (&ffi_type_sint);
-	  return;
+	  return &ffi_type_sint;
 
 	case CDATA_SHORT:
 	  cp->u.intVal = (short) TO_C_INT (oop);
-	  SET_TYPE (&ffi_type_sint);
-	  return;
+	  return &ffi_type_sint;
 
 	case CDATA_USHORT:
 	  cp->u.intVal = (unsigned short) TO_C_INT (oop);
-	  SET_TYPE (&ffi_type_sint);
-	  return;
+	  return &ffi_type_sint;
 
 	case CDATA_DOUBLE:
           cp->u.doubleVal = (double) TO_C_LONG (oop);
-	  SET_TYPE (&ffi_type_double);
-	  return;
+	  return &ffi_type_double;
 
 	case CDATA_FLOAT:
           cp->u.floatVal = (float) TO_C_LONG (oop);
-	  SET_TYPE (&ffi_type_float);
-	  return;
+	  return &ffi_type_float;
 	}
     }
 
@@ -1006,11 +975,10 @@ push_smalltalk_obj (OOP oop,
 	case CDATA_ULONG:
 	  cp->u.longVal = (oop == _gst_true_oop);
 #if LONG_MAX == 2147483647
-          SET_TYPE (&ffi_type_sint32);
+          return &ffi_type_sint32;
 #else
-          SET_TYPE (&ffi_type_sint64);
+          return &ffi_type_sint64;
 #endif
-	  return;
 
         case CDATA_INT:
 	case CDATA_UINT:
@@ -1020,8 +988,7 @@ push_smalltalk_obj (OOP oop,
 	case CDATA_USHORT:
 	case CDATA_BOOLEAN:
 	  cp->u.intVal = (oop == _gst_true_oop);
-	  SET_TYPE (&ffi_type_sint);
-	  return;
+	  return &ffi_type_sint;
 	}
     }
 
@@ -1030,8 +997,7 @@ push_smalltalk_obj (OOP oop,
            || (class == _gst_unicode_character_class && cType == CDATA_WCHAR))
     {
       cp->u.intVal = CHAR_OOP_VALUE (oop);
-      SET_TYPE (&ffi_type_sint);
-      return;
+      return &ffi_type_sint;
     }
 
   else if (((class == _gst_string_class || class == _gst_byte_array_class)
@@ -1047,8 +1013,7 @@ push_smalltalk_obj (OOP oop,
       else
         cp->u.ptrVal = (gst_uchar *) _gst_to_cstring (oop);
 
-      SET_TYPE (&ffi_type_pointer);
-      return;
+      return &ffi_type_pointer;
     }
 
   else if (class == _gst_unicode_string_class
@@ -1057,8 +1022,7 @@ push_smalltalk_obj (OOP oop,
       cp->oop = oop;
       cp->u.ptrVal = (gst_uchar *) _gst_to_wide_cstring (oop);
 
-      SET_TYPE (&ffi_type_pointer);
-      return;
+      return &ffi_type_pointer;
     }
 
   else if (is_a_kind_of (class, _gst_float_class))
@@ -1067,18 +1031,15 @@ push_smalltalk_obj (OOP oop,
 	{
 	case CDATA_LONG_DOUBLE:
 	  cp->u.longDoubleVal = _gst_oop_to_float (oop);
-	  SET_TYPE (&ffi_type_longdouble);
-	  return;
+	  return &ffi_type_longdouble;
 
 	case CDATA_DOUBLE:
 	  cp->u.doubleVal = _gst_oop_to_float (oop);
-	  SET_TYPE (&ffi_type_double);
-	  return;
+	  return &ffi_type_double;
 
 	case CDATA_FLOAT:
 	  cp->u.floatVal = (float) _gst_oop_to_float (oop);
-	  SET_TYPE (&ffi_type_float);
-	  return;
+	  return &ffi_type_float;
 	}
     }
 
@@ -1093,13 +1054,11 @@ push_smalltalk_obj (OOP oop,
 	  cp->u.cObjectPtrVal.pPtrVal = &cp->u.cObjectPtrVal.ptrVal;
 	  cp->u.cObjectPtrVal.ptrVal = cobject_value (oop);
 	  cp->oop = oop;
-	  SET_TYPE (&ffi_type_pointer);
-	  return;
+	  return &ffi_type_pointer;
 
 	case CDATA_COBJECT:
 	  cp->u.ptrVal = cobject_value (oop);
-	  SET_TYPE (&ffi_type_pointer);
-	  return;
+	  return &ffi_type_pointer;
 	}
     }
 
@@ -1114,8 +1073,7 @@ push_smalltalk_obj (OOP oop,
 	case CDATA_STRING_OUT:
 	case CDATA_SYMBOL:
 	  cp->u.ptrVal = NULL;
-	  SET_TYPE (&ffi_type_pointer);
-	  return;
+	  return &ffi_type_pointer;
 	}
     }
 
@@ -1132,12 +1090,38 @@ push_smalltalk_obj (OOP oop,
 	default:
 	  /* Byte indexed variables, pass the pointer through.  */
 	  cp->u.ptrVal = OOP_TO_OBJ (oop)->data + CLASS_FIXED_FIELDS (class);
-	  SET_TYPE (&ffi_type_pointer);
-	  return;
+	  return &ffi_type_pointer;
 	}
     }
 
   bad_type (class, cType);
+  return NULL;
+}
+
+void
+push_smalltalk_obj (OOP oop,
+		    cdata_type cType)
+{
+  if (cType == CDATA_VARIADIC || cType == CDATA_VARIADIC_OOP)
+    {
+      int i;
+      if (OOP_INT_CLASS (oop) != _gst_array_class)
+	{
+          bad_type (OOP_INT_CLASS (oop), cType);
+          return;
+	}
+
+      cType = (cType == CDATA_VARIADIC) ? CDATA_UNKNOWN : CDATA_OOP;
+      for (i = 1; i <= NUM_WORDS (OOP_TO_OBJ (oop)); i++)
+	push_smalltalk_obj (ARRAY_AT (oop, i), cType);
+    }
+  else
+    {
+      cparam *cp = &c_func_cur->args[c_func_cur->arg_idx];
+      ffi_type *type = smalltalk_to_c (oop, cp, cType);
+      if (type)
+	c_func_cur->types[c_func_cur->arg_idx++] = type;
+    }
 }
 
 OOP
@@ -1269,9 +1253,86 @@ bad_type (OOP class_oop,
 
   _gst_show_backtrace ();
 }
+
 
+/* This function does the unmarshaling of the libffi arguments to Smalltalk,
+   and calls the block that is stored in the CCallbackDescriptor.  */
 
+static void
+closure_msg_send (ffi_cif* cif, void* result, void** args, void* userdata)
+{
+  gst_ffi_closure *closure = userdata;
+  OOP callbackOOP = closure->callbackOOP;
+  gst_c_callable desc;
+  int numArgs, i;
+  OOP *argsOOP, *argTypes, resultOOP;
+  cdata_type cType;
+  cparam cp;
 
+  desc = (gst_c_callable) OOP_TO_OBJ (callbackOOP);
+  numArgs = NUM_INDEXABLE_FIELDS (desc->argTypesOOP);
+  argsOOP = alloca (sizeof (OOP) * numArgs);
+
+  for (i = 0; i < numArgs; i++)
+    {
+      memcpy (&cp.u, args[i], sizeof (ffi_arg));
+      desc = (gst_c_callable) OOP_TO_OBJ (callbackOOP);
+      argTypes = OOP_TO_OBJ (desc->argTypesOOP)->data;
+      argsOOP[i] = c_to_smalltalk (&cp, argTypes[i]);
+    }
+
+  desc = (gst_c_callable) OOP_TO_OBJ (callbackOOP);
+  resultOOP = _gst_nvmsg_send (desc->blockOOP, NULL, argsOOP, numArgs);
+
+  desc = (gst_c_callable) OOP_TO_OBJ (callbackOOP);
+  cType = IS_OOP (desc->returnTypeOOP) ? CDATA_COBJECT : TO_INT (desc->returnTypeOOP);
+  if (cType != CDATA_VOID)
+    {
+      smalltalk_to_c (resultOOP, &cp, cType);
+      memcpy (result, &cp.u, sizeof (ffi_arg));
+    }
+}
+
+void
+_gst_make_closure (OOP callbackOOP)
+{
+  gst_c_callable desc;
+  OOP *argTypes;
+  void *code;
+  gst_ffi_closure *closure;
+  int numArgs, i;
+
+  if (cobject_value (callbackOOP))
+    return;
+
+  desc = (gst_c_callable) OOP_TO_OBJ (callbackOOP);
+  numArgs = NUM_INDEXABLE_FIELDS (desc->argTypesOOP);
+  argTypes = OOP_TO_OBJ (desc->argTypesOOP)->data;
+  closure = (gst_ffi_closure *) ffi_closure_alloc (
+    sizeof (gst_ffi_closure) + sizeof(ffi_type *) * (numArgs - 1), &code);
+
+  closure->address = closure;
+  closure->callbackOOP = callbackOOP;
+  closure->return_type = get_ffi_type (desc->returnTypeOOP);
+  for (i = 0; i < numArgs; i++)
+    closure->arg_types[i] = get_ffi_type (argTypes[i]);
+
+  ffi_prep_cif (&closure->cif, FFI_DEFAULT_ABI,
+		numArgs, closure->return_type, closure->arg_types);
+
+  ffi_prep_closure_loc (&closure->closure, &closure->cif, closure_msg_send,
+			closure, code);
+  set_cobject_value (callbackOOP, code);
+}
+
+void
+_gst_free_closure (OOP callbackOOP)
+{
+  gst_ffi_closure *exec_closure = cobject_value (callbackOOP);
+  ffi_closure_free (exec_closure->address); 
+  set_cobject_value (callbackOOP, NULL);
+}
+
 void
 _gst_set_errno(int errnum)
 {

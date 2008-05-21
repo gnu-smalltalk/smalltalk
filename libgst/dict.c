@@ -89,6 +89,7 @@ OOP _gst_boolean_class = NULL;
 OOP _gst_byte_array_class = NULL;
 OOP _gst_byte_stream_class = NULL;
 OOP _gst_c_callable_class = NULL;
+OOP _gst_c_callback_descriptor_class = NULL;
 OOP _gst_c_func_descriptor_class = NULL;
 OOP _gst_c_object_class = NULL;
 OOP _gst_c_type_class = NULL;
@@ -725,6 +726,12 @@ static const class_definition class_info[] = {
    GST_ISP_ULONG, false, 1,
    "CFunctionDescriptor",
    "cFunctionName",
+   NULL, NULL },
+
+  {&_gst_c_callback_descriptor_class, &_gst_c_callable_class,
+   GST_ISP_ULONG, false, 1,
+   "CCallbackDescriptor",
+   "block",
    NULL, NULL },
 
   {&_gst_memory_class, &_gst_object_class,

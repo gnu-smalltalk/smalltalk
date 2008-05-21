@@ -4233,13 +4233,20 @@ primitive VMpr_Float_pow [succeed,fail]
 }
 
 /* CObject free */
-primitive VMpr_CObject_free [checks_receiver]
+primitive VMpr_CObject_free [succeed,fail]
 {
   OOP oop1;
   _gst_primitives_executed++;
 
   oop1 = STACKTOP ();
-  if COMMON (RECEIVER_IS_A_KIND_OF (OOP_CLASS (oop1), _gst_c_object_class))
+  if COMMON (is_a_kind_of (OOP_CLASS (oop1), _gst_c_callback_descriptor_class))
+    {
+      _gst_free_closure (oop1);
+      SET_STACKTOP (_gst_nil_oop);
+      PRIM_SUCCEEDED;
+    }
+
+  else if COMMON (RECEIVER_IS_A_KIND_OF (OOP_CLASS (oop1), _gst_c_object_class))
     {
       _gst_free_cobject (oop1);	/* free allocated space */
       SET_STACKTOP (_gst_nil_oop);
@@ -5054,9 +5061,20 @@ primitive VMpr_Behavior_primCompileIfError [fail,succeed,reload_ip]
   PRIM_FAILED;
 }
 
-/* CFunctionDescriptor for: funcNameString
-            returning: returnTypeSymbol
-	    withArgs: argsArray */
+/* CCallbackDescriptor link */
+primitive VMpr_CCallbackDescriptor_link [succeed,fail]
+{
+  OOP oop1;
+  _gst_primitives_executed++;
+
+  oop1 = STACKTOP ();
+  _gst_make_closure (oop1);
+
+  /* Always fail so as to run the Smalltalk code that finishes the setup.  */
+  PRIM_FAILED;
+}
+
+/* CFunctionDescriptor addressOf: funcNameString */
 primitive VMpr_CFuncDescriptor_addressOf [succeed,fail]
 {
   OOP oop1;

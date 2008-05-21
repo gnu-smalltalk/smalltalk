@@ -100,8 +100,8 @@ Eval [ 3 testAsync ]
 
 Object extend [
 
-    testCallin [
-        <cCall: 'testCallin' returning: #void args: #(#selfSmalltalk)>
+    testCallin: aCallback [
+        <cCall: 'testCallin' returning: #void args: #(#selfSmalltalk #cObject)>
     ]
 
     testCString: cString [
@@ -113,7 +113,8 @@ Object extend [
     ]
 ]
 
-Eval [ true testCallin ]
+Eval [ true testCallin: (CCallbackDescriptor for: [ :x | x printNl. 3 ]
+	returning: #int withArgs: #(#string)) ]
 Eval [ nil testCString: (CString value: 'this is a test') ]
 
 Eval [

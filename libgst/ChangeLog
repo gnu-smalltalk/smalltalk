@@ -1,5 +1,15 @@
 2008-05-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/cint.c: Extract part of push_smalltalk_obj into c_to_smalltalk.
+	Add closure support.
+	* libgst/cint.h: Declare functions for closures.
+	* libgst/dict.c: Add CCallbackDescriptor.
+	* libgst/dict.h: Add CCallbackDescriptor.
+	* libgst/files.c: Load CCallback.st.
+	* libgst/prims.def: Declare closure primitives.
+
+2008-05-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/callin.c: Support '%B' for the receiver in msgSendf.
 	* libgst/interp.c: Callins evaluate blocks if the selector is NULL.
 
