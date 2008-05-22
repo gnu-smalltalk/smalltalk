@@ -1209,7 +1209,7 @@ on them, to extract them to a real file, and so on.'>
 
 		"Create an item in the tree for directories, and
 		 add an association to the allFiles SortedCollection"
-		directory := (mode bitAnd: 61440) = 16384 
+		directory := (mode bitAnd: 8r170000) = 8r40000 
 			    ifTrue: [current at: name put: LookupTable new]
 			    ifFalse: [current at: name put: nil].
 		data at: 1 put: directory.
@@ -1220,7 +1220,7 @@ on them, to extract them to a real file, and so on.'>
 	"Leave the LookupTables to be garbage collected, we are now interested
 	 in the file names only."
 	topLevelFiles := directoryTree keys asArray.
-	allFiles 
+	allFiles
 	    do: [:data | (data at: 1) isNil ifFalse: [data at: 1 put: (data at: 1) keys asArray]]
     ]
 
@@ -1276,7 +1276,7 @@ on them, to extract them to a real file, and so on.'>
 	mode isNumber ifTrue: [^mode].
 	mode isString ifTrue: [^self convertModeString: mode].
 	mode isCharacter ifTrue: [^self convertMode: mode == $d].
-	^mode ifTrue: [16877] ifFalse: [420]
+	^mode ifTrue: [8r40755] ifFalse: [8r644]
     ]
 
     convertModeString: modeString [
@@ -1285,11 +1285,11 @@ on them, to extract them to a real file, and so on.'>
 	<category: 'private'>
 	| mode |
 	mode := 0.
-	(modeString at: 1) = $l ifTrue: [mode := 40960].
-	(modeString at: 1) = $d ifTrue: [mode := 16384].
-	(modeString at: 4) asLowercase = $s ifTrue: [mode := mode + 2048].
-	(modeString at: 7) asLowercase = $s ifTrue: [mode := mode + 1024].
-	(modeString at: 10) asLowercase = $t ifTrue: [mode := mode + 512].
+	(modeString at: 1) = $l ifTrue: [mode := 8r120000].
+	(modeString at: 1) = $d ifTrue: [mode := 8r40000].
+	(modeString at: 4) asLowercase = $s ifTrue: [mode := mode + 8r4000].
+	(modeString at: 7) asLowercase = $s ifTrue: [mode := mode + 8r2000].
+	(modeString at: 10) asLowercase = $t ifTrue: [mode := mode + 8r1000].
 	modeString 
 	    from: 2
 	    to: 10
@@ -1323,9 +1323,9 @@ on them, to extract them to a real file, and so on.'>
 						directory := LookupTable new.
 						allFiles at: (path copyFrom: 1 to: i - 1)
 						    put: 
-							{0.
+							{directory. 0.
 							self creationTime.
-							directory}.
+							self mode bitOr: 8r40111}.
 						directory]].
 			last := i + 1]].
 	^current
@@ -1496,13 +1496,22 @@ extracting files from an archive.'>
 	self parent member: self mode: (mode bitAnd: 4095)
     ]
 
+    isSymbolicLink [
+	"Answer whether a file with the name contained in the receiver does exist
+	 and identifies a symbolic link."
+
+	<category: 'testing'>
+	size isNil ifTrue: [self refresh].
+	^(mode bitAnd: 8r170000) = 8r120000
+    ]
+
     isDirectory [
 	"Answer whether a file with the name contained in the receiver does exist
 	 and identifies a directory."
 
 	<category: 'testing'>
 	size isNil ifTrue: [self refresh].
-	^(mode bitAnd: 61440) = 16384
+	^(mode bitAnd: 8r170000) = 8r40000
     ]
 
     isReadable [
