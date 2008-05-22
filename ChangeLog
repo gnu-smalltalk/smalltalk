@@ -1,5 +1,9 @@
 2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/VFS.st: Fix #all on archives.
+
+2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Array.st: Add #replaceFrom:to:with:startingAt: primitive,
 	simplify #storeOn:.
 	* kernel/ByteArray.st: Rename the primitive.
