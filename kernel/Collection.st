@@ -380,14 +380,11 @@ of objects.'>
     gather: aBlock [
 	"Answer a new instance of a Collection containing all the results
 	 of evaluating aBlock, joined together.  aBlock should return
-	 collections.  The result is the same kind of the receiver,
-	 independent of the type of collection returned by aBlock."
+	 collections.  The result is the same kind as the first collection,
+	 returned by aBlock (as for #join)."
 
 	<category: 'enumeration'>
-	| newCollection |
-	newCollection := self copyEmptyForCollect.
-	self do: [:element | newCollection addAll: (aBlock value: element)].
-	^newCollection
+	^(self collect: aBlock) join
     ]
 
     allSatisfy: aBlock [
@@ -722,4 +719,3 @@ of objects.'>
 	self == Object finalizableObjects ifTrue: [anObject key finalize]
     ]
 ]
-
