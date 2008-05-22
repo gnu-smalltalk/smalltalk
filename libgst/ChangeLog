@@ -1,5 +1,12 @@
 2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/cint.h: Declare _gst_invalidate_croutine_cache.
+	* libgst/cint.c: Define it.  Replace cache validity boolean with
+	a cache generation number.
+	* libgst/oop.c: Call it after GC.
+
+2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/prims.def: Make VMpr_ByteArray_replaceFromToWithStartingAt
 	more generic.
 

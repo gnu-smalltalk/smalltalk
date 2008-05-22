@@ -90,7 +90,7 @@ typedef struct cfunc_info
 
 typedef struct cfunc_cif_cache
 {
-  unsigned cacheValid : 1;		/* Is the function called with variadic parms? */
+  unsigned cacheGeneration;	/* Is the function called with variadic parms? */
   ffi_cif cacheCif;		/* cached ffi_cif representation */
 
   int types_size;
@@ -200,7 +200,10 @@ static const char *get_argv (int n);
 static cfunc_info *c_func_root = NULL;
 
 /* The binary tree of function names vs. function addresses.  */
-static struct pointer_map_t *cif_cache;
+static struct pointer_map_t *cif_cache = NULL;
+
+/* Used to invalidate the cache upon GC.  */
+static unsigned cif_cache_generation = 1;
 
 /* The cfunc_cif_cache that's being filled in.  */
 static cfunc_cif_cache *c_func_cur = NULL;
@@ -681,6 +684,16 @@ _gst_c_type_size (int type)
     }
 }
 
+void
+_gst_invalidate_croutine_cache (void)
+{
+  /* May want to delete and recreate completely upon global GC,
+     and do the cheap invalidation only for scavenging?  For now,
+     we do the simplest thing.  Incrementing by 2 makes sure that
+     the generation number is never 0.  */
+  cif_cache_generation += 2;
+}
+
 OOP
 _gst_invoke_croutine (OOP cFuncOOP,
 		      OOP receiver,
@@ -777,7 +790,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
 
   /* If the previous call was done through the same function descriptor,
      the ffi_cif is already ok.  */
-  if (!c_func_cur->cacheValid)
+  if (c_func_cur->cacheGeneration != cif_cache_generation)
     {
       ffi_prep_cif (&c_func_cur->cacheCif, FFI_DEFAULT_ABI, totalArgs,
                     get_ffi_type (desc->returnTypeOOP),
@@ -785,7 +798,8 @@ _gst_invoke_croutine (OOP cFuncOOP,
 
       /* For variadic functions, we cannot cache the ffi_cif because
 	 the argument types change every time.  */
-      c_func_cur->cacheValid = !haveVariadic;
+      if (!haveVariadic)
+	c_func_cur->cacheGeneration = cif_cache_generation;
     }
 
   errno = 0;

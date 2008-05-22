@@ -117,6 +117,10 @@ typedef struct gst_c_callable
 /* Returns the size of an object passed to a C routine with type TYPE.  */
 extern int _gst_c_type_size (int type);
 
+/* Called after GC to invalidate the cache for the libffi representation
+   of CFunctionDescriptors.  */
+extern void _gst_invalidate_croutine_cache (void);
+
 /* Invokes a C routine.  Arguments passed from Smalltalk are stored starting
    from ARGS, and the object to which the message that called-out was
    sent is RECEIVER.  CFUNCOOP is the C function descriptor used

@@ -1154,6 +1154,7 @@ _gst_global_gc (int next_allocation)
   if (!_gst_mem.old->heap_limit)
     _gst_mem.old->heap_limit = old_limit;
 
+  _gst_invalidate_croutine_cache ();
   mourn_objects ();
 }
 
@@ -1235,6 +1236,7 @@ _gst_scavenge (void)
     _gst_mem.factor * tenuredBytes +
     (1 - _gst_mem.factor) * _gst_mem.tenuredBytesPerScavenge;
 
+  _gst_invalidate_croutine_cache ();
   mourn_objects ();
 }
 
