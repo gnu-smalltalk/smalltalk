@@ -149,8 +149,6 @@ typedef struct weak_area_tree
 {
   rb_node_t rb;
   OOP oop;			/* Weak OOP */
-  OOP *base;			/* Base of weak OOP data */
-  OOP *end;			/* End of weak OOP data */
 }
 weak_area_tree;
 

@@ -624,8 +624,6 @@ _gst_make_oop_weak (OOP oop)
   weak_area_tree *node = NULL;
   rb_node_t **p = (rb_node_t **) &_gst_mem.weak_areas;
 
-  /* Weak OOPs must be fixed.  */
-  _gst_make_oop_fixed (oop);
   oop->flags |= F_WEAK;
   _gst_mem.numWeakOOPs++;
 
@@ -638,16 +636,10 @@ _gst_make_oop_weak (OOP oop)
       else if (oop > node->oop)
         p = &(*p)->rb_right;
       else
-        {
-	  node->base = (OOP *) oop->object;
-	  node->end = (OOP *) oop->object + TO_INT (oop->object->objSize);
-	  return;
-	}
+	return;
     }
 
   entry = (weak_area_tree *) xmalloc (sizeof (weak_area_tree));
-  entry->base = (OOP *) oop->object;
-  entry->end = (OOP *) oop->object + TO_INT (oop->object->objSize);
   entry->oop = oop;
   entry->rb.rb_parent = &node->rb;
   entry->rb.rb_left = entry->rb.rb_right = NULL;
@@ -1645,12 +1637,15 @@ check_weak_refs ()
     {
       weak_area_tree *area = (weak_area_tree *) node;
       mst_Boolean mourn = false;
-      OOP *field;
+      OOP *field, oop;
+      int n;
 
-      if (!IS_OOP_VALID_GC (area->oop))
+      oop = area->oop;
+      if (!IS_OOP_VALID_GC (oop))
 	continue;
 
-      for (field = area->base; field < area->end; field++)
+      for (field = (OOP *) oop->object, n = TO_INT (oop->object->objSize);
+	   n--; field++)
         {
 	  OOP oop = *field;
           if (IS_INT (oop))
@@ -1756,7 +1751,12 @@ scan_grey_pages ()
   for (last = NULL, next = &_gst_mem.grey_pages.head; (node = *next); )
     {
 #if defined(GC_DEBUG_OUTPUT) || defined(MMAN_DEBUG_OUTPUT)
-      printf ("Scanning grey page %p...%p\n", node->base, node->base + node->n);
+      printf ("Scanning grey page %p...%p ", node->base, node->base + node->n);
+#if defined(GC_DEBUG_OUTPUT)
+      putchar ('\n');
+#else
+      fflush (stdout);
+#endif
 #endif
 
       PREFETCH_START (node->base, PREF_READ | PREF_NTA);
@@ -1793,6 +1793,9 @@ scan_grey_pages ()
       else
 #endif
 	{
+#if defined (MMAN_DEBUG_OUTPUT)
+	  printf ("Found %d pointers\n", n);
+#endif
 	  last = node;
 	  next = &(node->next);
 	}

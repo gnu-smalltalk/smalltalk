@@ -1,5 +1,10 @@
 2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/oop.c: Don't pin weak objects to a fixed location.
+	* libgst/oop.h: Remove now unused fields.
+
+2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/cint.h: Declare _gst_invalidate_croutine_cache.
 	* libgst/cint.c: Define it.  Replace cache validity boolean with
 	a cache generation number.
