@@ -1,3 +1,10 @@
+2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/OrderColl.st: Override #first and #last for speed.
+	* kernel/StreamOps.st: Avoid repeatedly colling #first.
+	* kernel/SeqCollect.st: Use #replaceFrom:to:with:startingAt: when doing
+	#replaceFrom:to:with: with a sequenceable collection argument.
+
 2008-05-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CCallback.st: New.
