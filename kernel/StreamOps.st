@@ -46,23 +46,21 @@ Stream subclass: ConcatenatedStream [
 	<category: 'all'>
 	^(self basicNew)
 	    streams: {stream1};
-	    startPos: 0
+	    yourself
     ]
 
     ConcatenatedStream class >> with: stream1 with: stream2 [
 	<category: 'all'>
 	^(self basicNew)
-	    streams: 
-		    {stream1.
-		    stream2};
-	    startPos: 0
+	    streams: {stream1.  stream2};
+	    yourself
     ]
 
     ConcatenatedStream class >> withAll: array [
 	<category: 'all'>
 	^(self basicNew)
 	    streams: array;
-	    startPos: 0
+	    yourself
     ]
 
     , aStream [
@@ -77,15 +75,21 @@ Stream subclass: ConcatenatedStream [
 	streams := streams copy
     ]
 
-    atEnd [
+    stream [
 	<category: 'all'>
-	[streams first atEnd] whileTrue: 
-		[streams size = 1 ifTrue: [^true].
+	| s |
+	[(s := streams first) atEnd] whileTrue: 
+		[streams size = 1 ifTrue: [^nil].
 		lastStart := startPos.
 		startPos := startPos + curPos.
 		curPos := 0.
 		last := streams removeFirst].
-	^false
+	^s
+    ]
+
+    atEnd [
+	<category: 'all'>
+	^self stream isNil
     ]
 
     name [
@@ -96,8 +100,10 @@ Stream subclass: ConcatenatedStream [
 
     next [
 	<category: 'all'>
-	self atEnd ifFalse: [curPos := curPos + 1].
-	^streams first next
+	| s |
+	^(s := self stream) isNil
+	    ifTrue: [self pastEnd]
+	    ifFalse: [curPos := curPos + 1.  s next]
     ]
 
     pastEnd [
@@ -107,35 +113,37 @@ Stream subclass: ConcatenatedStream [
 
     peekFor: aCharacter [
 	<category: 'all'>
-	| result |
-	self atEnd 
+	| s result |
+	(s := self stream) isNil
 	    ifTrue: 
 		[self pastEnd.
 		^false].
-	result := streams first peekFor: aCharacter.
+	result := s peekFor: aCharacter.
 	result ifTrue: [curPos := curPos + 1].
 	^result
     ]
 
     peek [
 	<category: 'all'>
-	self atEnd ifTrue: [^self pastEnd].
-	^streams first peek
+	| s |
+	(s := self stream) isNil ifTrue: [^self pastEnd].
+	^s peek
     ]
 
     position [
 	<category: 'all'>
-	self atEnd.
+	self stream.
 	^startPos + curPos
     ]
 
     position: anInteger [
 	<category: 'all'>
-	self atEnd 
+	| s |
+	(s := self stream) isNil
 	    ifTrue: 
 		[self pastEnd.
 		^self].
-	streams first position: anInteger - startPos.
+	s position: anInteger - startPos.
 	curPos := anInteger - startPos
     ]
 
@@ -144,15 +152,11 @@ Stream subclass: ConcatenatedStream [
 
 	<category: 'all'>
 	| adjust stream |
-	self atEnd.
+	stream := self stream.
 	end + 1 = start ifTrue: [^''].
-	end <= startPos 
-	    ifTrue: 
-		[stream := last.
-		adjust := lastStart]
-	    ifFalse: 
-		[stream := streams first.
-		adjust := startPos].
+	adjust := end <= startPos 
+	    ifTrue: [stream := last. lastStart]
+	    ifFalse: [startPos].
 	^stream copyFrom: (start - adjust max: 0) to: end - adjust
     ]
 
@@ -161,22 +165,12 @@ Stream subclass: ConcatenatedStream [
 
 	<category: 'all'>
 	| adjust stream |
-	self atEnd.
+	stream := self stream.
 	end + 1 = start ifTrue: [^''].
-	end <= startPos 
-	    ifTrue: 
-		[stream := last.
-		adjust := lastStart]
-	    ifFalse: 
-		[stream := streams first.
-		adjust := startPos].
+	adjust := end <= startPos 
+	    ifTrue: [stream := last. lastStart]
+	    ifFalse: [adjust := startPos].
 	^stream segmentFrom: (start - adjust max: 0) to: end - adjust
-    ]
-
-    startPos: anInteger [
-	<category: 'initializing'>
-	startPos := anInteger.
-	curPos := 0
     ]
 
     addStream: stream [
@@ -186,7 +180,8 @@ Stream subclass: ConcatenatedStream [
 
     streams: arrayOfStreams [
 	<category: 'initializing'>
-	streams := arrayOfStreams asOrderedCollection
+	streams := arrayOfStreams asOrderedCollection.
+	startPos := curPos := 0
     ]
 ]
 

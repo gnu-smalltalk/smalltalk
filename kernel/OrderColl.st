@@ -56,6 +56,26 @@ on content (such as add:after:)'>
 	^self new: 16
     ]
 
+    first [
+	"Answer the first item of the receiver"
+
+	<category: 'accessing'>
+	self beConsistent.
+	^lastIndex >= firstIndex
+	    ifTrue: [self basicAt: firstIndex]
+	    ifFalse: [SystemExceptions.IndexOutOfRange signalOn: self withIndex: 1]
+    ]
+
+    last [
+	"Answer the last item of the receiver"
+
+	<category: 'accessing'>
+	self beConsistent.
+	^lastIndex >= firstIndex
+	    ifTrue: [self basicAt: lastIndex]
+	    ifFalse: [SystemExceptions.IndexOutOfRange signalOn: self withIndex: 0]
+    ]
+
     at: anIndex [
 	"Answer the anIndex-th item of the receiver"
 
@@ -63,9 +83,9 @@ on content (such as add:after:)'>
 	| index |
 	self beConsistent.
 	index := anIndex + firstIndex - 1.
-	(index >= firstIndex and: [index <= lastIndex]) 
-	    ifTrue: [^self basicAt: index]
-	    ifFalse: [^SystemExceptions.IndexOutOfRange signalOn: self withIndex: anIndex]
+	^(index >= firstIndex and: [index <= lastIndex]) 
+	    ifTrue: [self basicAt: index]
+	    ifFalse: [SystemExceptions.IndexOutOfRange signalOn: self withIndex: anIndex]
     ]
 
     at: anIndex put: anObject [

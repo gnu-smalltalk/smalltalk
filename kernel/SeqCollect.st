@@ -529,6 +529,9 @@ some access and manipulation methods.'>
 	i := start - 1.
 	stop - i = replacementCollection size 
 	    ifFalse: [^SystemExceptions.InvalidSize signalOn: replacementCollection size].
+        replacementCollection isSequenceable ifTrue: [
+	    ^self replaceFrom: start to: stop with: replacementCollection startingAt: 1 ].
+
 	replacementCollection do: [:each | self at: (i := i + 1) put: each]
     ]
 
