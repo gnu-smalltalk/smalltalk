@@ -68,6 +68,20 @@ and general access behavior from SequenceableCollection.'>
 	^self isReadOnly not
     ]
 
+    replaceFrom: start to: stop with: byteArray startingAt: replaceStart [
+	"Replace the characters from start to stop with new characters whose
+	 ASCII codes are contained in byteArray, starting at the replaceStart
+	 location of byteArray"
+
+	<category: 'built ins'>
+	<primitive: VMpr_ArrayedCollection_replaceFromToWithStartingAt>
+	^super 
+	    replaceFrom: start
+	    to: stop
+	    with: byteArray
+	    startingAt: replaceStart
+    ]
+
     storeLiteralOn: aStream [
 	"Store a Smalltalk literal compiling to the receiver on aStream"
 
@@ -88,15 +102,8 @@ and general access behavior from SequenceableCollection.'>
 	aStream nextPut: $#.
 	aStream nextPut: $(.
 	self do: 
-		[:elt | 
-		elt isLiteralObject 
-		    ifTrue: [elt storeLiteralOn: aStream]
-		    ifFalse: 
-			[aStream
-			    nextPutAll: '##(';
-			    store: elt;
-			    nextPut: $)].
-		aStream space].
+		[:elt | elt storeLiteralOn: aStream]
+		separatedBy: [aStream space].
 	aStream nextPut: $).
 	self isReadOnly ifFalse: [aStream nextPutAll: ' copy']
     ]

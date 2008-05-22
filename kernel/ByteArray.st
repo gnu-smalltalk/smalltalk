@@ -542,7 +542,7 @@ a String''s elements are characters.'>
 	 location of aString"
 
 	<category: 'built ins'>
-	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	<primitive: VMpr_ArrayedCollection_replaceFromToWithStartingAt>
 	^super 
 	    replaceFrom: start
 	    to: stop
@@ -557,23 +557,12 @@ a String''s elements are characters.'>
 	 location of aByteArray"
 
 	<category: 'built ins'>
-	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	<primitive: VMpr_ArrayedCollection_replaceFromToWithStartingAt>
 	^super 
 	    replaceFrom: start
 	    to: stop
 	    with: aByteArray
 	    startingAt: replaceStart
-    ]
-
-    primReplaceFrom: start to: stop with: aByteArray startingAt: srcIndex [
-	"Private - Replace the characters from start to stop with the
-	 ASCII codes contained in aString (which, actually, can be
-	 any variable byte class), starting at the srcIndex location of
-	 aString"
-
-	<category: 'built ins'>
-	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
-	^self primitiveFailed
     ]
 
     asCData: aCType [

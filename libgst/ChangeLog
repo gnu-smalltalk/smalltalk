@@ -1,3 +1,8 @@
+2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Make VMpr_ByteArray_replaceFromToWithStartingAt
+	more generic.
+
 2008-05-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Extract part of push_smalltalk_obj into c_to_smalltalk.

@@ -2122,11 +2122,13 @@ implementation, but that might break some code in the image, so it
 is not practical.  Why not add a subclass?
 
 @example
-   Array subclass: NiledArray [
-       "We could write <shape: #pointer>, but we just use the same shape
-        as the superclass.  That's a good idea because the superclass
-        instance creation methods should work if we do not change the shape."
-       <shape: #inherit>
+   "We could subclass from Array, but that class is specifically
+    optimized by the VM (which assumes, among other things, that
+    it does not have any instance variables).  So we use its
+    abstract superclass instead.  The discussion below holds
+    equally well."
+   ArrayedCollection subclass: NiledArray [
+       <shape: #pointer>
 
        boundsCheck: index [
            ^(index < 1) | (index > (self basicSize))

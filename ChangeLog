@@ -1,5 +1,13 @@
 2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Array.st: Add #replaceFrom:to:with:startingAt: primitive,
+	simplify #storeOn:.
+	* kernel/ByteArray.st: Rename the primitive.
+	* kernel/LargeInt.st: Rename the primitive.
+	* kernel/String.st: Rename the primitive.
+
+2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/OrderColl.st: Override #first and #last for speed.
 	* kernel/StreamOps.st: Avoid repeatedly colling #first.
 	* kernel/SeqCollect.st: Use #replaceFrom:to:with:startingAt: when doing

@@ -208,7 +208,7 @@ to speed them up a bit.'>
 	 replacementString"
 
 	<category: 'built-ins'>
-	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	<primitive: VMpr_ArrayedCollection_replaceFromToWithStartingAt>
 	^self primitiveFailed
     ]
 

@@ -95,12 +95,12 @@ or assumed to be the system default.'>
 	aString class == String ifFalse: [^super , aString].
 	newString := self copyEmpty: (mySize := self size) + aString size.
 	newString 
-	    primReplaceFrom: 1
+	    replaceFrom: 1
 	    to: mySize
 	    with: self
 	    startingAt: 1.
 	newString 
-	    primReplaceFrom: mySize + 1
+	    replaceFrom: mySize + 1
 	    to: newString size
 	    with: aString
 	    startingAt: 1.
@@ -252,7 +252,7 @@ or assumed to be the system default.'>
 	 location of byteArray"
 
 	<category: 'built ins'>
-	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	<primitive: VMpr_ArrayedCollection_replaceFromToWithStartingAt>
 	^super 
 	    replaceFrom: start
 	    to: stop
@@ -266,23 +266,12 @@ or assumed to be the system default.'>
 	 location of aString"
 
 	<category: 'built ins'>
-	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
+	<primitive: VMpr_ArrayedCollection_replaceFromToWithStartingAt>
 	^super 
 	    replaceFrom: start
 	    to: stop
 	    with: aString
 	    startingAt: replaceStart
-    ]
-
-    primReplaceFrom: start to: stop with: replacementString startingAt: replaceStart [
-	"Private - Replace the characters from start to stop with new
-	 characters contained in replacementString (which, actually, can be
-	 any variable byte class, starting at the replaceStart location of
-	 replacementString"
-
-	<category: 'built ins'>
-	<primitive: VMpr_ByteArray_replaceFromToWithStartingAt>
-	^self primitiveFailed
     ]
 
     at: anIndex [
