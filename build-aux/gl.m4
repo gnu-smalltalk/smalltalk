@@ -26,7 +26,7 @@ if test "$gst_cv_opengl_libs" != "not found"; then
   if test $ac_cv_header_OpenGL_gl_h = yes; then
     gst_cv_opengl_header_dir='OpenGL'
   else
-    gst_cv_opengl_header='GL'
+    gst_cv_opengl_header_dir='GL'
   fi
   AC_DEFINE_UNQUOTED(GL_GL_H, [<$gst_cv_opengl_header_dir/gl.h>], [Define to the #include directive for OpenGL.])
   AC_DEFINE_UNQUOTED(GL_GLU_H, [<$gst_cv_opengl_header_dir/glu.h>], [Define to the #include directive for OpenGL glu functions.])
