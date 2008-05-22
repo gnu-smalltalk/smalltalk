@@ -1,5 +1,10 @@
 2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ArrayColl.st: Remove implementation of #gather:.
+	* kernel/Collection.st: Implement #gather: in terms of #join.
+
+2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/VFS.st: Fix #all on archives.
 
 2008-05-22  Paolo Bonzini  <bonzini@gnu.org>

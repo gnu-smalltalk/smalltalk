@@ -272,18 +272,6 @@ externally; I will not rearrange the order of the elements.'>
 	    yourself
     ]
 
-    gather: aBlock [
-	"Answer a new instance of a Collection containing all the results
-	 of evaluating aBlock, joined together.  aBlock should return
-	 collections.  The result is the same kind of the receiver,
-	 independent of the type of collection returned by aBlock."
-
-	<category: 'enumeration'>
-	| newCollection |
-	newCollection := self copyEmptyForCollect: 0.
-	^newCollection class join: (self collect: aBlock)
-    ]
-
     select: aBlock [
 	"Answer a new instance of an ArrayedCollection containing all the elements
 	 in the receiver which, when passed to aBlock, answer true"
