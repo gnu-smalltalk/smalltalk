@@ -334,6 +334,16 @@ Stream subclass: LimitedStream [
 	<category: 'accessing'>
 	offset := anInteger
     ]
+
+    flush [
+	<category: 'stream protocol'>
+	stream flush
+    ]
+
+    close [
+	<category: 'stream protocol'>
+	stream close
+    ]
 ]
 
 ]
