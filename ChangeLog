@@ -1,3 +1,7 @@
+2008-05-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFSZip.st: Avoid leaking file descriptors for LimitedStreams.
+
 2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ArrayColl.st: Remove implementation of #gather:.

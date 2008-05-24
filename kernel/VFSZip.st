@@ -340,6 +340,15 @@ Stream subclass: LimitedStream [
             at: self position
     ]
 
+    flush [
+	<category: 'stream protocol'>
+	stream flush
+    ]
+
+    close [
+	<category: 'stream protocol'>
+	stream close
+    ]
 ]
 
 ]
