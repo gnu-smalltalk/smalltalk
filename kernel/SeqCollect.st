@@ -740,21 +740,6 @@ some access and manipulation methods.'>
 	^result
     ]
 
-    join [
-	"Answer a new collection like my first element, with all the
-	 elements (in order) of all my elements, which should be
-	 collections.
-	 
-	 I use my first element instead of myself as a prototype because
-	 my elements are more likely to share the desired properties than
-	 I am, such as in:
-	 
-	 #('hello, ' 'world') join => 'hello, world'"
-
-	<category: 'concatenating'>
-	^self isEmpty ifTrue: [#()] ifFalse: [self first species join: self]
-    ]
-
     join: sepCollection [
 	"Answer a new collection like my first element, with all the
 	 elements (in order) of all my elements (which should be
@@ -790,7 +775,7 @@ some access and manipulation methods.'>
 	"Answer an unspecified element of the collection."
 
 	<category: 'enumerating'>
-	^self at: 1
+	^self first
     ]
 
     do: aBlock [

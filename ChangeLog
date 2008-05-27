@@ -1,3 +1,8 @@
+2008-05-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/SeqCollect.st: Move #join...
+	* kernel/Collection.st: ... here.  Use #anyOne.
+
 2008-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFSZip.st: Avoid leaking file descriptors for LimitedStreams.
