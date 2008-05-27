@@ -339,36 +339,20 @@ externally; I will not rearrange the order of the elements.'>
 	 index `start'."
 
 	<category: 'copying Collections'>
-	| newSize repSize result |
+	| newSize end result |
 	stop - start < -1 
 	    ifTrue: 
 		[^SystemExceptions.ArgumentOutOfRange 
 		    signalOn: stop
 		    mustBeBetween: start - 1
 		    and: self size].
-	stop >= start 
-	    ifTrue: 
-		[^(self copy)
-		    atAll: (start to: stop) put: anObject;
-		    yourself].
-	newSize := self size - (stop - start).
-	result := self copyEmpty: newSize.
-	start > 1 
-	    ifTrue: 
-		[result 
-		    replaceFrom: 1
-		    to: start - 1
-		    with: self
-		    startingAt: 1].
-	result at: start put: anObject.
-	stop < self size 
-	    ifTrue: 
-		[result 
-		    replaceFrom: start + 1
-		    to: newSize
-		    with: self
-		    startingAt: stop + 1].
-	^result
+
+	end := stop >= start ifTrue: [ stop ] ifFalse: [ start ].
+	^(self copyEmpty: (newSize := end + (self size - stop)))
+	    replaceFrom: 1 to: start - 1 with: self startingAt: 1;
+	    replaceFrom: start to: end withObject: anObject;
+	    replaceFrom: end + 1 to: newSize with: self startingAt: stop + 1;
+	    yourself
     ]
 
     copyReplaceAll: oldSubCollection with: newSubCollection [
@@ -426,7 +410,7 @@ externally; I will not rearrange the order of the elements.'>
 	 index `start'."
 
 	<category: 'copying Collections'>
-	| newSize repSize result |
+	| newSize repSize |
 	stop - start < -1 
 	    ifTrue: 
 		[^SystemExceptions.ArgumentOutOfRange 
@@ -435,28 +419,11 @@ externally; I will not rearrange the order of the elements.'>
 		    and: self size].
 	repSize := replacementCollection size.
 	newSize := self size + repSize - (stop - start + 1).
-	result := self copyEmpty: newSize.
-	start > 1 
-	    ifTrue: 
-		[result 
-		    replaceFrom: 1
-		    to: start - 1
-		    with: self
-		    startingAt: 1].
-	repSize > 0 
-	    ifTrue: 
-		[result 
-		    replaceFrom: start
-		    to: start + repSize - 1
-		    with: replacementCollection].
-	stop < self size 
-	    ifTrue: 
-		[result 
-		    replaceFrom: start + repSize
-		    to: newSize
-		    with: self
-		    startingAt: stop + 1].
-	^result
+	^(self copyEmpty: newSize)
+	    replaceFrom: 1 to: start - 1 with: self startingAt: 1;
+	    replaceFrom: start to: start + repSize - 1 with: replacementCollection;
+	    replaceFrom: start + repSize to: newSize with: self startingAt: stop + 1;
+	    yourself
     ]
 
     reverse [

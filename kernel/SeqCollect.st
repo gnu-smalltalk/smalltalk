@@ -563,7 +563,7 @@ some access and manipulation methods.'>
 	"Replace every item from start to stop with replacementObject."
 
 	<category: 'replacing items'>
-	stopIndex < anIndex 
+	stopIndex - anIndex < -1
 	    ifTrue: 
 		[^SystemExceptions.ArgumentOutOfRange 
 		    signalOn: stopIndex

@@ -1,3 +1,10 @@
+2008-05-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ArrayColl.st: Avoid useless checks.
+	* kernel/SeqCollect.st: Allow replacing zero elements with
+	#replaceFrom:to:withObject:.
+	* tests/Ansi.st: Adjust testsuite.
+
 2008-05-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/VFSZip.st: Avoid leaking file descriptors for LimitedStreams.
