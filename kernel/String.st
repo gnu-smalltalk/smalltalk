@@ -72,18 +72,12 @@ or assumed to be the system default.'>
 	^false
     ]
 
-    = aString [
+    = aCollection [
 	"Answer whether the receiver's items match those in aCollection"
 
 	<category: 'basic'>
-	aString isString ifFalse: [^super = aString].
-
-	"Also a String, no need to check the encoding."
-	self size = aString size ifFalse: [^false].
-	self hash == aString hash ifFalse: [^false].
-	1 to: self size
-	    do: [:i | (self at: i) == (aString at: i) ifFalse: [^false]].
-	^true
+	<primitive: VMpr_ArrayedCollection_equal>
+	^super = aCollection
     ]
 
     , aString [

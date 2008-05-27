@@ -527,6 +527,14 @@ a String''s elements are characters.'>
 	self checkIndexableBounds: index put: value
     ]
 
+    = aCollection [
+	"Answer whether the receiver's items match those in aCollection"
+
+	<category: 'basic'>
+	<primitive: VMpr_ArrayedCollection_equal>
+	^false
+    ]
+
     hash [
 	"Answer an hash value for the receiver"
 

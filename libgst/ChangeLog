@@ -1,3 +1,7 @@
+2008-05-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Add VMpr_ArrayedCollection_equal.
+
 2008-05-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Don't pin weak objects to a fixed location.

@@ -1,5 +1,10 @@
 2008-05-27  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ByteArray.st: Use VMpr_ArrayedCollection_equal.
+	* kernel/String.st: Use VMpr_ArrayedCollection_equal.
+
+2008-05-27  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ArrayColl.st: Avoid useless checks.
 	* kernel/SeqCollect.st: Allow replacing zero elements with
 	#replaceFrom:to:withObject:.

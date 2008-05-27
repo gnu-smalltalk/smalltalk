@@ -3073,6 +3073,49 @@ primitive VMpr_String_hash [checks_receiver]
   PRIM_SUCCEEDED;
 }
 
+/* LargeInteger =
+   ByteArray =
+   String =
+   Array = */
+primitive VMpr_ArrayedCollection_equal [succeed,fail]
+{
+  OOP srcOOP, dstOOP;
+  int dstLen, srcLen;
+  gst_uchar *dstBase, *srcBase;
+  _gst_primitives_executed++;
+
+  srcOOP = POP_OOP ();
+  dstOOP = STACKTOP ();
+  if COMMON (OOP_INT_CLASS (srcOOP) == OOP_INT_CLASS (dstOOP))
+    {
+      intptr_t spec = OOP_INSTANCE_SPEC (srcOOP);
+      if (spec & (~0 << ISP_NUMFIXEDFIELDS))
+	goto bad;
+
+      /* dstEnd is inclusive: (1 to: 1) has length 1 */
+      dstLen = NUM_INDEXABLE_FIELDS (dstOOP);
+      srcLen = NUM_INDEXABLE_FIELDS (srcOOP);
+
+      if (dstLen != srcLen)
+	SET_STACKTOP_BOOLEAN (false);
+      else if UNCOMMON (dstLen == 0)
+	SET_STACKTOP_BOOLEAN (true);
+      else
+	{
+	  /* do the comparison */
+	  dstBase = (gst_uchar *) OOP_TO_OBJ (dstOOP)->data;
+	  srcBase = (gst_uchar *) OOP_TO_OBJ (srcOOP)->data;
+	  dstLen <<= _gst_log2_sizes[spec & ISP_SHAPE];
+	  SET_STACKTOP_BOOLEAN (!memcmp (dstBase, srcBase, dstLen));
+	}
+      PRIM_SUCCEEDED;
+    }
+
+ bad:
+  UNPOP (1);
+  PRIM_FAILED;
+}
+
 /* LargeInteger primReplaceFrom:to:with:startingAt
    ByteArray replaceFrom:to:withString:startingAt:
    String replaceFrom:to:withByteArray:startingAt:
@@ -3126,8 +3169,8 @@ primitive VMpr_ArrayedCollection_replaceFromToWithStartingAt [succeed,fail]
       if COMMON (dstRangeLen > 0)
 	{
 	  /* do the copy */
-	  dstBase = STRING_OOP_CHARS (dstOOP);
-	  srcBase = STRING_OOP_CHARS (srcOOP);
+	  dstBase = (gst_uchar *) OOP_TO_OBJ (dstOOP)->data;
+	  srcBase = (gst_uchar *) OOP_TO_OBJ (srcOOP)->data;
 	  dstStartIndex = (dstStartIndex - 1) << size;
 	  srcIndex = (srcIndex - 1) << size;
 	  dstRangeLen <<= size;
