@@ -279,6 +279,21 @@ of objects.'>
 	self do: [:each | ^each]
     ]
 
+    join [
+	"Answer a new collection like my first element, with all the
+	 elements (in order) of all my elements, which should be
+	 collections.
+	 
+	 I use my first element instead of myself as a prototype because
+	 my elements are more likely to share the desired properties than
+	 I am, such as in:
+	 
+	 #('hello, ' 'world') join => 'hello, world'"
+
+	<category: 'concatenating'>
+	^self isEmpty ifTrue: [#()] ifFalse: [self anyOne species join: self]
+    ]
+
     beConsistent [
 	"This method is private, but it is quite interesting so it is
 	 documented. It ensures that a collection is in a consistent

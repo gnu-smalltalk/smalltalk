@@ -1,5 +1,10 @@
 2008-05-27  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/SeqCollect.st: Move #join...
+	* kernel/Collection.st: ... here.  Use #anyOne.
+
+2008-05-27  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ByteArray.st: Use VMpr_ArrayedCollection_equal.
 	* kernel/String.st: Use VMpr_ArrayedCollection_equal.
 
