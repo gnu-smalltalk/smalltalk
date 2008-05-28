@@ -87,7 +87,7 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	 to the new value."
 
 	<category: 'file-in'>
-	| oldIncludes newCollection file |
+	| oldIncludes newCollection file stream |
 	Verbose 
 	    ifTrue: 
 		[Transcript
@@ -99,10 +99,10 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 		Includes add: aFileName -> newCollection.
 		oldIncludes := Includes.
 		Includes := newCollection].
-	(self open: aFileName mode: FileStream read)
-	    fileIn;
-	    close.
-	Record ifTrue: [Includes := oldIncludes]
+	stream := self open: aFileName mode: FileStream read.
+	[ stream fileIn ] ensure: [
+	    stream close.
+	    Record ifTrue: [Includes := oldIncludes] ]
     ]
 
     FileStream class >> fileIn: aFileName line: lineInteger from: realFileName at: aCharPos [

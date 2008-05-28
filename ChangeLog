@@ -1,3 +1,7 @@
+2008-05-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FileStream.st: Use #ensure: in #fileIn:.
+
 2008-05-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Move #join...
