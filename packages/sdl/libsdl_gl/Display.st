@@ -86,7 +86,3 @@ SdlDisplay subclass: SdlGLDisplay [
 	self flip
     ]
 ]
-
-Eval [
-    SdlDisplay initialize
-]
