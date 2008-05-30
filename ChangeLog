@@ -1,5 +1,9 @@
 2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gst-tool.c: Remove executable extension if present.
+
+2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
+
 	* examples/CairoBlit.st: Hack together OpenGL support here.
 
 2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
