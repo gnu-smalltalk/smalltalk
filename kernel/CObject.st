@@ -1444,7 +1444,7 @@ CUChar subclass: CByte [
 	<category: 'accessing'>
 	self 
 	    at: 0
-	    put: aValue asCharacter
+	    put: (Character value: aValue)
 	    type: super cObjStoredType
     ]
 ]

@@ -1,5 +1,9 @@
 2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CObject.st: Fix CByte.
+
+2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/CCallable.st: Support both #uint and #uInt spelling
 	(and similarly for #ushort, #uchar, #ulong).
 
