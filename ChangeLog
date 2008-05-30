@@ -1,3 +1,7 @@
+2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CObject.st: Fix CByte.
+
 2008-05-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SeqCollect.st: Move #join...
