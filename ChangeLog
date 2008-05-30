@@ -1,3 +1,8 @@
+2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CCallable.st: Support both #uint and #uInt spelling
+	(and similarly for #ushort, #uchar, #ulong).
+
 2008-05-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileStream.st: Use #ensure: in #fileIn:.

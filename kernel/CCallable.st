@@ -47,23 +47,31 @@ to perform the actual call-out to C routines.'>
 	 to an integer."
 
 	<category: 'private - accessing'>
-	^#(#char #uchar #short #ushort #long #ulong #float #double
-	    #string #smalltalk #int #uint #longDouble #unknown #stringOut
-	    #symbol #byteArray #byteArrayOut #boolean #void #variadic
-	    #variadicSmalltalk #cObject #cObjectPtr #self #selfSmalltalk
-	    #wchar #wstring #wstringOut #symbolOut)
+	^##(| reverse dict |
+	    reverse := #(#char #uChar #short #uShort #long #uLong #float #double
+	        #string #smalltalk #int #uInt #longDouble #unknown #stringOut
+	        #symbol #byteArray #byteArrayOut #boolean #void #variadic
+	        #variadicSmalltalk #cObject #cObjectPtr #self #selfSmalltalk
+	        #wchar #wstring #wstringOut #symbolOut).
+
+	    dict := LookupTable new.
+	    reverse keysAndValuesDo: [ :k :v |
+		dict
+		    at: v put: k - 1;
+		    at: v asLowercase asSymbol put: k - 1 ].
+	    dict)
     ]
 
     CCallable class >> mapType: aSymbolOrType [
 	"Private - Map a Smalltalk symbols representing a C type to an integer."
 
 	<category: 'private - instance creation'>
-	^(self typeMap
-		indexOf: aSymbolOrType
-		ifAbsent: [
-		    (aSymbolOrType isKindOf: CType) ifTrue: [ ^aSymbolOrType ].
-	            aSymbolOrType isSymbol ifFalse: [ ^CType from: aSymbolOrType].
-		    ^self error: 'invalid C argument type ', aSymbolOrType storeString ]) - 1
+	^self typeMap
+	    at: aSymbolOrType
+	    ifAbsent: [
+		(aSymbolOrType isKindOf: CType) ifTrue: [ ^aSymbolOrType ].
+	        aSymbolOrType isSymbol ifFalse: [ ^CType from: aSymbolOrType].
+		^self error: 'invalid C argument type ', aSymbolOrType storeString ]
     ]
 
     CCallable class >> for: aCObject returning: returnTypeSymbol withArgs: argsArray [
