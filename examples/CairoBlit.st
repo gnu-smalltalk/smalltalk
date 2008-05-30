@@ -30,6 +30,7 @@
 
 
 PackageLoader fileInPackage: #CairoSDL.
+PackageLoader fileInPackage: #'LibSDL_GL'.
 
 SDL.SdlEventHandler subclass: BlitDemo [
     <import: SDL>
@@ -43,9 +44,10 @@ SDL.SdlEventHandler subclass: BlitDemo [
     ]
 
     run [
+        SdlDisplay current: SdlGLDisplay new.
         SdlDisplay current eventSource handler: self; startEventLoop.
         Processor activeProcess terminateOnQuit.
-        self winningDirectAccess.
+        SdlDisplay current isGLDisplay ifFalse: [ self winningDirectAccess ].
         self blitStuff.
     ]
 
@@ -53,16 +55,29 @@ SDL.SdlEventHandler subclass: BlitDemo [
         ^ ((Random between: 0 and: 255) / 255) asFloat
     ]
 
+    transparentFill: surface [
+	"Just an example that would allow showing other OpenGL stuff behind
+	 the Cairo graphics."
+	surface withContextDo: [ :context |
+            context
+		operator: #source;
+	        sourceRed: 0 green: 0 blue: 0 alpha: 0;
+	        paint;
+		operator: #over ].
+    ]
+
     blitStuff [
-        | maxw maxh x y w h startTime count surface |
+        | maxw maxh x y w h startTime count surface frameRects |
         startTime := Time millisecondClock.
         surface := Cairo.CairoSdlSurface on: SdlDisplay current.
         count := 0.
         maxw := SdlDisplay current extent x.
         maxh := SdlDisplay current extent y.
+	frameRects := SdlDisplay current isGLDisplay ifTrue: [1] ifFalse: [100].
+        SdlDisplay current isGLDisplay ifTrue: [ self transparentFill: surface ].
         [
 	    surface withContextDo: [ :context |
-		100 timesRepeat: [
+		frameRects timesRepeat: [
 		    x := Random between: 0 and: maxw.
 		    y := Random between: 0 and: maxh.
 		    w := Random between: 0 and: maxw - x.
@@ -74,10 +89,11 @@ SDL.SdlEventHandler subclass: BlitDemo [
 		            blue: self randomColorComponent;
 		        fill: [ context rectangle: (x@y extent: w@h)]]].
 
-	    Transcript << count << ' frames, '
+	    count \\ 100 == 0 ifTrue: [
+	        Transcript << count << ' frames, '
 		  << (count / ((Time millisecondClock - startTime) / 1000.0))
 		  << ' fps'; nl.
-	    Processor yield.
+	        Processor yield ].
         ] repeat.
     ]
 

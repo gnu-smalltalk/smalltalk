@@ -1,0 +1,10 @@
+2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libsdl/Display.st: Add #shutdown.  Move SdlGLDisplay...
+	* libsdl_gl/Display.st: ... here.
+	* cairo/CairoSDL.st: Add OpenGL support.
+
+2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libsdl/Display.st: Use GCed CStructs.
+

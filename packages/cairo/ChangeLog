@@ -1,3 +1,9 @@
+2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* CairoContext.st: Add #operator and #operator:.
+	* CairoFuncs.st: Add cairo_{get,set}_operator.
+	* CairoSurface.st: Add #free.
+
 2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* CairoContext.st: Use GCed CStructs.

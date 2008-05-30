@@ -416,6 +416,8 @@ GST_PACKAGE_ENABLE([LibSDL], [sdl/libsdl],
   AM_CONDITIONAL([HAVE_COCOA], [test $gst_cv_sdl_uses_cocoa = yes])],
   [gst_cv_sdl],
   [Makefile], [sdl.la])
+GST_PACKAGE_ENABLE([LibSDL_GL], [sdl/libsdl_gl], [],
+		   [gst_cv_sdl gst_cv_opengl_libs])
 GST_PACKAGE_ENABLE([CairoSDL], [sdl/cairo],
   [],
   [ac_cv_lib_cairo_cairo_save gst_cv_sdl])

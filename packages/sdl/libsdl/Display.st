@@ -295,8 +295,13 @@ as the destination for a Cairo surface.'>
             self changed: #returnFromSnapshot.
             ^self].
         aspect == #aboutToQuit ifTrue: [
+	    self shutdown.
             self eventSource interruptEventLoop.
             ^self].
+    ]
+
+    shutdown [
+	self sdlSurface: nil.
     ]
 
     eventSource [
@@ -362,6 +367,7 @@ as the destination for a Cairo surface.'>
 	"Change the extent of the display to newSize."
 
 	<category: 'resize'>
+	self shutdown.
 	extent := newSize.
 	self create.
 	self changed: #resize
@@ -420,57 +426,6 @@ as the destination for a Cairo surface.'>
 		 rects: sdlrects.
     ]
 ].
-
-Object subclass: SdlGLDisplay [
-    flags [
-	"Private - Return the SDL_SetVideoMode flags."
-
-	<vategory: 'private'>
-	^super flags bitOr: SdlVideo sdlOpenGl
-    ]
-
-    critical: aBlock [
-	"Execute aBlock while the surface is locked.  This is a no-op
-	 for OpenGL, it just evaluates aBlock.  In the future we might
-	 consider using a mutex for OpenGL operations."
-
-	<category: 'drawing-direct'>
-	^aBlock value
-    ]
-
-    flip [
-	"Move the contents of the surface to the screen.  OpenGL surfaces
-	 are always double-buffered."
-
-	<category: 'drawing-SDL'>
-	SdlVideo sdlGLSwapBuffers
-    ]
-
-    isGLDisplay [
-	"Return true if this is an OpenGL display and graphics should be
-	 performed using OpenGL calls."
-
-	<category: 'testing'>
-	^true
-    ]
-
-    updateRectangle: aRect [
-	"Move the contents of the given rectangle from the surface to the
-	 screen.  OpenGL actually always flips the entire surface."
-
-	<category: 'drawing-SDL'>
-	self flip
-    ]
-
-    updateRectangles: upTo rects: sdlrects [
-	"Private - Move the contents of the given SdlRect objects from the
-	 surface to the screen.  OpenGL actually always flips the entire
-	 surface."
-
-	<category: 'drawing-SDL'>
-	self flip
-    ]
-]
 
 Eval [
     SdlDisplay initialize

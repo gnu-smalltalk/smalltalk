@@ -1,3 +1,8 @@
+2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* OpenGL.st: Add glPushAttrib, glPopAttrib, glBlendFunc,
+	glTexSubImage1D, glTexSubImage2D.
+
 2008-05-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gstGlu.c: Fix pasto.

@@ -692,6 +692,12 @@ CairoContextProvider subclass: CairoContext [
 	^self class lookupLineJoinValue: (Cairo getLineJoin: context).
     ]
 
+    operator [
+	"Set how cairo will composite the destination, source and mask."
+	<category: 'accessing'>
+	^self class lookupOperatorValue: (Cairo getOperator: context).
+    ]
+
     miterLimit [
 	"Answer the miter limit of the cairo context, i.e. the ratio between
 	 miter length and line width above which a #miter line join is
@@ -730,6 +736,12 @@ CairoContextProvider subclass: CairoContext [
 	 aSymbol can be one of #miter, #round, #bevel."
 	<category: 'accessing'>
 	Cairo setLineJoin: context lineJoin: (self class lookupLineJoin: aSymbol).
+    ]
+
+    operator: aSymbol [
+	"Set how cairo will composite the destination, source and mask."
+	<category: 'accessing'>
+	Cairo setOperator: context operator: (self class lookupOperator: aSymbol).
     ]
 
     miterLimit: aNumber [

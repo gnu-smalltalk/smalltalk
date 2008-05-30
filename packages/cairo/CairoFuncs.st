@@ -355,6 +355,10 @@ CairoContext.'>
         <cCall: 'cairo_get_line_width' returning: #double args: #(#cObject )>
     ]
 
+    Cairo class >> getOperator: cr [
+        <cCall: 'cairo_get_operator' returning: #int args: #(#cObject )>
+    ]
+
     Cairo class >> setSource: cr source: source [
         <cCall: 'cairo_set_source' returning: #void args: #(#cObject #cObject )>
     ]
@@ -389,6 +393,10 @@ CairoContext.'>
 
     Cairo class >> setLineWidth: cr width: width [
         <cCall: 'cairo_set_line_width' returning: #void args: #(#cObject #double )>
+    ]
+
+    Cairo class >> setOperator: cr operator: lineJoin [
+        <cCall: 'cairo_set_operator' returning: #void args: #(#cObject #int )>
     ]
 
     Cairo class >> showText: cr utf8: utf8 [

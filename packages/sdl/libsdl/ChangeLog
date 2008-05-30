@@ -1,4 +1,0 @@
-2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
-
-	* Display.st: Use GCed CStructs.
-

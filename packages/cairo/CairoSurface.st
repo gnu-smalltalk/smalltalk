@@ -74,6 +74,11 @@ CairoContextProvider subclass: CairoSurface [
 
     finalize [
 	<category: 'private-finalization'>
+	self free
+    ]
+
+    free [
+	<category: 'private-finalization'>
 	surface ifNil: [ ^self ].
 	Cairo surfaceDestroy: surface.
 	surface := nil.

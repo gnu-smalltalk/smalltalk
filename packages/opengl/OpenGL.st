@@ -198,6 +198,18 @@ See OpenGL programming guide for more informations.'>
 	
     ]
 
+    glPushAttrib: aProperty [
+	<category: 'GL'>
+	<cCall: 'glPushAttrib' returning: #void args: #( #int )>
+	
+    ]
+
+    glPopAttrib [
+	<category: 'GL'>
+	<cCall: 'glPopAttrib' returning: #void args: #( #void )>
+	
+    ]
+
     glEnable: aProperty [
 	<category: 'GL'>
 	<cCall: 'glEnable' returning: #void args: #( #int )>
@@ -243,6 +255,12 @@ See OpenGL programming guide for more informations.'>
     glEvalCoord2f: aX y: aY [
 	<category: 'GL'>
 	<cCall: 'glEvalCoord2f' returning: #void args: #( #float #float )>
+	
+    ]
+
+    glBlendFunc: sfactor dfactor: dfactor [
+	<category: 'GL'>
+	<cCall: 'glBlendFunc' returning: #void args: #(#int #int)>
 	
     ]
 
@@ -556,13 +574,25 @@ See OpenGL programming guide for more informations.'>
 
     glTexImage1D: target level: level internalFormat: internalFormat width: aWidht border: aBorder format: aFormat type: aType pixels: pixels [
 	<category: 'Textures'>
-	<cCall: 'glTexImage1D' returning: #void args: #(#int #int #int #int #int #int #int #byteArray)>
+	<cCall: 'glTexImage1D' returning: #int args: #(#int #int #int #int #int #int #int #cObject)>
 	
     ]
 
     glTexImage2D: target level: level internalFormat: internalFormat width: aWidht height: aHeight border: aBorder format: aFormat type: aType pixels: pixels [
 	<category: 'Textures'>
-	<cCall: 'glTexImage2D' returning: #void args: #(#int #int #int #int #int #int #int #int #byteArray)>
+	<cCall: 'glTexImage2D' returning: #int args: #(#int #int #int #int #int #int #int #int #cObject)>
+	
+    ]
+
+    glTexSubImage1D: target level: level xoffset: xoffset yoffset: yoffset width: aWidht format: aFormat type: aType pixels: pixels [
+	<category: 'Textures'>
+	<cCall: 'glTexSubImage1D' returning: #int args: #(#int #int #int #int #int #int #int #cObject)>
+	
+    ]
+
+    glTexSubImage2D: target level: level xoffset: xoffset yoffset: yoffset width: aWidht height: aHeight format: aFormat type: aType pixels: pixels [
+	<category: 'Textures'>
+	<cCall: 'glTexSubImage2D' returning: #int args: #(#int #int #int #int #int #int #int #int #cObject)>
 	
     ]
 
