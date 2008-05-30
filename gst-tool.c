@@ -63,7 +63,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-const char *program_name;
+char *program_name;
 const char *kernel_dir;
 const char *image_file;
 int flags = GST_NO_TTY;
@@ -378,17 +378,26 @@ main(int argc, const char **argv)
     executable_name = argv[0];
 
   /* Check if used in the build tree.  */
-  if (!strcmp (executable_name, "gst-tool" EXEEXT)
-      || !strcmp (executable_name, "gst-tool" ARGV_EXEEXT)
-      || !strcmp (executable_name, "lt-gst-tool" EXEEXT)
-      || !strcmp (executable_name, "lt-gst-tool" ARGV_EXEEXT))
+  if (!strcasecmp (executable_name, "gst-tool" EXEEXT)
+      || !strcasecmp (executable_name, "gst-tool" ARGV_EXEEXT)
+      || !strcasecmp (executable_name, "lt-gst-tool" EXEEXT)
+      || !strcasecmp (executable_name, "lt-gst-tool" ARGV_EXEEXT))
     {
-      argv++, argc--;
-      program_name = argv[0];
+      program_name = strdup (argv[1]);
       flags |= GST_IGNORE_USER_FILES;
+      argv++, argc--;
     }
   else
-    program_name = executable_name;
+    {
+      int n = strlen (executable_name);
+      program_name = strdup (executable_name);
+
+      /* Strip the executable extension if needed.  */
+      if (EXEEXT[0]
+	  && n > strlen (EXEEXT)
+	  && !strcasecmp (program_name + n - strlen (EXEEXT), EXEEXT))
+	program_name[n - strlen (EXEEXT)] = 0;
+    }
 
   for (i = 0; ; i++)
     if (!tools[i].name)
