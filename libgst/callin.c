@@ -279,7 +279,11 @@ _gst_va_msg_sendf (PTR resultPtr,
           break;
 
         case 'w':
-          args[++i] = char_new ((char) va_arg (ap, wchar_t));
+#if SIZEOF_WCHAR_T <= SIZEOF_INT
+          args[++i] = char_new ((wchar_t) va_arg (ap, int));
+#else
+          args[++i] = char_new ((wchar_t) va_arg (ap, wchar_t));
+#endif
 	  INC_ADD_OOP (args[i]);
           break;
 
