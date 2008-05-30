@@ -31,11 +31,13 @@
 PackageLoader fileInPackage: 'TCP'.
 DLD addLibrary: 'libc'.
 
-SystemDictionary extend [
-    getpid [
-        <cCall: 'getpid' returning: #int args: #()>
-    ]
-]
+(CFunctionDescriptor isFunction: 'getpid')
+    ifTrue: [
+        SystemDictionary compile: '
+            getpid [ <cCall: ''getpid'' returning: #int args: #()> ]' ]
+    ifFalse: [
+        SystemDictionary compile: '
+            getpid [ ^''--pid not available'' ]' ].
 
 TextCollector subclass: MultiplexingTextCollector [
     | default outputs |
@@ -159,7 +161,7 @@ available in the PATH of the remote machine.
 	commands add: arg ].
 
     opt = 'pid' ifTrue: [
-	commands add: 'Smalltalk getpid printNl' ].
+	commands add: 'Smalltalk getpid displayNl' ].
 
     opt = 'kill' ifTrue: [
 	commands add: 'Transcript nextPut: $<0>. ObjectMemory quit: 0' ].
@@ -179,6 +181,10 @@ available in the PATH of the remote machine.
 		login := arg copyUpTo: $@.
 		host := arg copyAfter: $@ ] ].
     ]
+
+    ifError: [
+        helpString displayOn: stderr.
+        ObjectMemory quit: 1 ].
 ]
     on: Error do: [ :ex |
         ('gst-remote: ', ex messageText, '
