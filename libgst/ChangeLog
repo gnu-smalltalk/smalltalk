@@ -1,3 +1,7 @@
+2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/callin.c: Fix %w in _gst_msg_sendf.
+
 2008-05-27  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/prims.def: Add VMpr_ArrayedCollection_equal.
