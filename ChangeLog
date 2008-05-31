@@ -1,3 +1,7 @@
+2008-05-31  Daniele Sciascia  <daniele.sciascia@lu.unisi.ch>
+
+	* scripts/Convert.st: --quiet was verbose.
+
 2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gst-tool.c: Remove executable extension if present.
