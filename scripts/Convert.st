@@ -430,8 +430,8 @@ Options:
 	        ObjectMemory quit: 0 ].
 
 	    opt = 'quiet' ifTrue: [
-		quiet := false.
-		verbose := true ].
+		quiet := true.
+		verbose := false ].
 
 	    opt = 'verbose' ifTrue: [
 		quiet := false.
