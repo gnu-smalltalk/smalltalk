@@ -229,7 +229,7 @@ hold on to a CoreException via a class-instance variable.'>
 	signal := (signalClass new)
 		    initArguments: #();
 		    initException: self.
-	self instantiateNextHandler: signal.
+	self instantiateNextHandler: signal from: thisContext.
 	^signal activateHandler: false
     ]
 
@@ -243,7 +243,7 @@ hold on to a CoreException via a class-instance variable.'>
 	signal := (signalClass new)
 		    initArguments: {arg};
 		    initException: self.
-	self instantiateNextHandler: signal.
+	self instantiateNextHandler: signal from: thisContext.
 	^signal activateHandler: false
     ]
 
@@ -260,7 +260,7 @@ hold on to a CoreException via a class-instance variable.'>
 			    {arg.
 			    arg2};
 		    initException: self.
-	self instantiateNextHandler: signal.
+	self instantiateNextHandler: signal from: thisContext.
 	^signal activateHandler: false
     ]
 
@@ -275,7 +275,7 @@ hold on to a CoreException via a class-instance variable.'>
 	signal := (signalClass new)
 		    initArguments: args;
 		    initException: self.
-	self instantiateNextHandler: signal.
+	self instantiateNextHandler: signal from: thisContext.
 	^signal activateHandler: false
     ]
 
@@ -329,20 +329,19 @@ hold on to a CoreException via a class-instance variable.'>
 	depth := anInteger
     ]
 
-    instantiateNextHandler: aSignal [
+    instantiateNextHandler: aSignal from: aContext [
 	"Private - Tell aSignal what it needs on the next handler for the receiver.
 	 If none is found, look for an handler for our parent, until one
 	 is found or ExAll if reached and there is no handler. In this case, answer
 	 the default handler for anException."
 
 	<category: 'private'>
-	thisContext scanBacktraceForAttribute: #exceptionHandlerSearch:reset:
+	aContext parentContext scanBacktraceForAttribute: #exceptionHandlerSearch:reset:
 	    do: 
 		[:context :attr | 
 		| status |
 		status := (attr arguments at: 1) value: context value: aSignal.
-		status == #found ifTrue: [^self].
-		status == #skip ifTrue: [aSignal isNested: true]].
+		status == #found ifTrue: [^self]].
 	aSignal 
 	    onDoBlock: nil
 	    handlerBlock: self actualDefaultHandler
@@ -568,7 +567,9 @@ with a lower priority.'>
 	<category: 'exception handling'>
 	<exceptionHandlingInternal: false>
 	| signal |
-        self exception instantiateNextHandler: (signal := self copy).
+	signal := self copy.
+	signal isNested: true.
+        self exception instantiateNextHandler: signal from: self context.
         ^signal activateHandler: true
     ]
 
@@ -580,7 +581,9 @@ with a lower priority.'>
 	<category: 'exception handling'>
 	<exceptionHandlingInternal: false>
 	| signal |
-        self exception instantiateNextHandler: (signal := self copy).
+	signal := self copy.
+	signal isNested: true.
+        self exception instantiateNextHandler: signal from: self context.
         ^self return: (signal activateHandler: true)
     ]
 
@@ -621,7 +624,8 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	Kernel.CoreException resetAllHandlers.
-        replacementException exception instantiateNextHandler: replacementException.
+        replacementException exception
+	    instantiateNextHandler: replacementException from: thisContext.
         ^replacementException return: (replacementException activateHandler: true)
     ]
 

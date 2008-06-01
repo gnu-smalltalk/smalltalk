@@ -76,6 +76,18 @@ Eval [
 ]
 
 Eval [
+    "Test that passing disables all exception handlers in the #on:do: snippet."
+
+    Transcript cr; show: 'testPass (2)...'.
+    [[self error: 'abc']
+		on: Exception do: [ :ex | Transcript show: 'failed' ]
+		on: Error do: [ :ex | Transcript show: 'passing...'. ex pass ]]
+	on: Error do: [ :ex | Transcript show: 'ok' ].
+
+    Transcript cr
+]
+
+Eval [
     [   Transcript cr; show: 'testEnsure...'.
             self error: ' Ignore this error']
         ensure: [Transcript show: 'passed'; cr]

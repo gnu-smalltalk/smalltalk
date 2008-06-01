@@ -212,7 +212,7 @@ CoreException, so the two mechanisms are actually interchangeable.'>
 	"Raise the exceptional event represented by the receiver"
 
 	<category: 'exception signaling'>
-	self exception instantiateNextHandler: self.
+	self exception instantiateNextHandler: self from: thisContext.
 	^self activateHandler: (onDoBlock isNil and: [ self isResumable ])
     ]
 

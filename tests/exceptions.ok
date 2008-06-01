@@ -19,6 +19,11 @@ returned value is TextCollector new "<0>"
 
 Execution begins...
 
+testPass (2)...passing...ok
+returned value is TextCollector new "<0>"
+
+Execution begins...
+
 testEnsure... error:  Ignore this error
 passed
 returned value is nil
