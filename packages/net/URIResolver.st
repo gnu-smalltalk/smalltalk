@@ -58,8 +58,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	[entity := (self on: url)
 		    noCache: true;
 		    contentsNoSignal] 
-		on: Error
-		do: [:sig | sig return: aBlock value].
+		on: ProtocolError do: [:sig | sig return: aBlock value]
+		on: Error do: [:sig | sig return: aBlock value].
 	^entity
     ]
 
@@ -522,7 +522,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		do: 
 		    [:ex | 
 		    protocolError := true.
-		    ex resume]
+		    ex pass]
 		on: HTTP.HTTPRedirection
 		do: 
 		    [:ex | 
@@ -596,7 +596,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		do: 
 		    [:ex | 
 		    protocolError := true.
-		    ex resume]
+		    ex pass]
 		on: HTTP.HTTPRedirection
 		do: 
 		    [:ex | 
@@ -674,7 +674,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		do: 
 		    [:ex | 
 		    protocolError := true.
-		    ex resume]
+		    ex pass]
 		on: HTTP.HTTPRedirection
 		do: 
 		    [:ex | 
