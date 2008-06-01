@@ -100,27 +100,16 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	"Parse the given URL and answer an URL object based on it."
 
 	"URL fromString: 'http://www/dir/file.html'."
-
 	"URL fromString: 'http://www:10080/dir/file.html'."
-
 	"URL fromString: 'http://www:10080/dir/file.html?x=100'."
-
 	"URL fromString: 'http://www:10080/dir/file.html#section'."
-
 	"URL fromString: 'ftp://ftp/pub/smalltalk'."
-
 	"URL fromString: 'ftp://ftp:21/pub/smalltalk'."
-
 	"URL fromString: 'ftp://user@ftp:21/pub/smalltalk'."
-
 	"URL fromString: 'ftp://user@ftp/pub/smalltalk'."
-
 	"URL fromString: 'ftp://user:passwd@ftp:21/pub/smalltalk'."
-
 	"URL fromString: 'news:fj.lang.smalltalk'."
-
 	"URL fromString: '/dir/file.html'."
-
 	"URL fromString: 'file.html'."
 
 	<category: 'instance creation'>
@@ -201,25 +190,15 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     URL class >> fromURLString: aString [
 	"URL fromString: 'http://www/dir/file.html'."
-
 	"URL fromString: 'http://www:10080/dir/file.html'."
-
 	"URL fromString: 'ftp://ftp/pub/smalltalk'."
-
 	"URL fromString: 'ftp://ftp:21/pub/smalltalk'."
-
 	"URL fromString: 'ftp://user@ftp:21/pub/smalltalk'."
-
 	"URL fromString: 'ftp://user@ftp/pub/smalltalk'."
-
 	"URL fromString: 'ftp://user:passwd@ftp:21/pub/smalltalk'."
-
 	"URL fromString: 'news:fj.lang.smalltalk'."
-
 	"URL fromString: '/dir/file.html'."
-
 	"URL fromString: '//host/dir/file.html'."
-
 	"URL fromString: 'file.html'."
 
 	<category: 'private'>
@@ -602,7 +581,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	 GET request)."
 
 	<category: 'accessing'>
-	hasPostData := true
+	hasPostData := aBoolean
     ]
 
     host [
@@ -797,6 +776,20 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		[stream
 		    nextPut: $#;
 		    nextPutAll: fragment]
+    ]
+
+    contents [
+	<contents: 'streaming'>
+	| s |
+	^[ (s := self readStream) contents ] ensure: [
+	    s ifNotNil: [ s close ] ]
+    ]
+
+    readStream [
+	<contents: 'streaming'>
+	| s |
+	^NetClients.URIResolver openStreamOn: self ifFail: [
+	    SystemExceptions.FileError signal: 'could not open %1' % {self} ]
     ]
 ]
 

@@ -493,7 +493,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     requestHttpContents: urlString [
 	<category: 'http accessing'>
-	| requestHeaders tmpFile stream protocolError response type string |
+	| requestHeaders tmpFile stream protocolError response string |
 	requestHeaders := OrderedCollection new.
 	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
 	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
@@ -519,7 +519,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		do: 
 		    [:ex | 
 		    protocolError := true.
-		    ex return]
+		    ex resume]
 		on: HTTP.HTTPRedirection
 		do: 
 		    [:ex | 
@@ -541,7 +541,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	    ifTrue: 
 		[string := tmpFile contents.
 		tmpFile remove.
-		(WebEntity readFrom: string readStream type: type)
+		(WebEntity new)
+		    body: string;
 		    url: url;
 		    canCache: false;
 		    guessMimeType;
@@ -566,7 +567,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     requestHttpHead: urlString [
 	<category: 'http accessing'>
-	| requestHeaders tmpFile stream protocolError response type string |
+	| requestHeaders tmpFile stream protocolError response string |
 	requestHeaders := OrderedCollection new.
 	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
 	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
@@ -592,7 +593,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		do: 
 		    [:ex | 
 		    protocolError := true.
-		    ex return]
+		    ex resume]
 		on: HTTP.HTTPRedirection
 		do: 
 		    [:ex | 
@@ -614,7 +615,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	    ifTrue: 
 		[string := tmpFile contents.
 		tmpFile remove.
-		(WebEntity readFrom: string readStream type: type)
+		(WebEntity new)
+		    body: string;
 		    url: url;
 		    canCache: false;
 		    guessMimeTypeFromResponse: response;
@@ -642,7 +644,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     postHttpContents: contents urlString: urlString [
 	<category: 'http accessing'>
-	| requestHeaders tmpFile stream protocolError response type string |
+	| requestHeaders tmpFile stream protocolError response string |
 	requestHeaders := OrderedCollection new.
 	requestHeaders add: 'User-Agent: GNU-Smalltalk/' , Smalltalk version.
 	requestHeaders add: 'Accept: text/html, image/gif, */*; q=0.2'.
@@ -669,7 +671,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		do: 
 		    [:ex | 
 		    protocolError := true.
-		    ex return]
+		    ex resume]
 		on: HTTP.HTTPRedirection
 		do: 
 		    [:ex | 
@@ -691,7 +693,8 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 	    ifTrue: 
 		[string := tmpFile contents.
 		tmpFile remove.
-		(WebEntity readFrom: string readStream type: type)
+		(WebEntity new)
+		    body: string;
 		    url: url;
 		    canCache: false;
 		    guessMimeTypeFromResponse: response;
