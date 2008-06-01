@@ -1,5 +1,13 @@
 2008-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiExcept.st: Adjust call to #instantiateNextHandler:.
+	* kernel/ExcHandling.st: Scan for outer exception handlers from the
+	handler's context.
+	* tests/exceptions.st: Add test case.
+	* tests/exceptions.ok: Regenerate.
+
+2008-06-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/URL.st: Fix redirects including a GET query.
 	Add #contents and #readStream.
 
