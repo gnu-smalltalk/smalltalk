@@ -8687,13 +8687,13 @@ testXreplaceFromXtoXwithObjectX
 				to: 1 
 				withObject: putValue]
 		raise: TestResult error.
-	self
+	"self
 		should: 
 			[sequencedCollection 
 				replaceFrom: 1 
 				to: -1
 				withObject: putValue]
-		raise: TestResult error.
+		raise: TestResult error."
 	self
 		should: 
 			[sequencedCollection 

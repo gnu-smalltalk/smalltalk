@@ -1,5 +1,9 @@
 2008-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* tests/Ansi.st: Remove one testcase.
+
+2008-06-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/AnsiExcept.st: Adjust call to #instantiateNextHandler:.
 	* kernel/ExcHandling.st: Scan for outer exception handlers from the
 	handler's context.
