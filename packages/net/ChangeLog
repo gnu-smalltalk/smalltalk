@@ -1,5 +1,9 @@
 2008-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* URIResolver.st: Handle ProtocolError in a saner way.
+
+2008-06-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Base.st: Make ProtocolError resumable.
 	* MIME.st: Trim whitespace in front of fields.
 	* URIResolver.st: Fix case when there is a protocol error.
