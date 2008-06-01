@@ -345,7 +345,7 @@ Object subclass: SimpleScanner [
 	"Notify that there is a problem at current token."
 
 	<category: 'error handling'>
-	^self notify: ('<1s> expected' expandMacrosWith: aString)
+	^self notify: 'expected `%1''' % {aString}
     ]
 
     notify: string [
@@ -1435,6 +1435,7 @@ Instance Variables:
 	| fname |
 	fname := rfc822Stream scanFieldName.
 	rfc822Stream mustMatch: $: notify: 'Invalid Field (Missing colon)'.
+	rfc822Stream skipWhiteSpace.
 	^fname asLowercase
     ]
 

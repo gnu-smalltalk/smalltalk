@@ -1274,6 +1274,11 @@ NetClientError subclass: ProtocolError [
     
     <category: 'NetClients-Framework'>
     <comment: nil>
+
+    isResumable [
+	<category: 'exception handling'>
+	^true
+    ]
 ]
 
 
