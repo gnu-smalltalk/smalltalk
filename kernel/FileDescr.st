@@ -617,7 +617,7 @@ do arbitrary processing on the files.'>
 	"Return the name of the file"
 
 	<category: 'accessing'>
-	^file
+	^file asFile
     ]
 
     name [

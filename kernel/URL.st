@@ -117,29 +117,30 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
 	| fragmentIndex queryIndex limit fragmentLimit queryLimit urlString url |
 	urlString := aString asString.
-	limit := urlString size + 1.
-	(queryIndex := urlString indexOf: $?) ~= 0 
+	urlString == aString ifFalse: [ ^self fromString: urlString ].
+
+	limit := aString size + 1.
+	(queryIndex := aString indexOf: $?) ~= 0 
 	    ifTrue: 
 		[limit := queryIndex.
-		queryLimit := urlString 
+		queryLimit := aString 
 			    indexOf: $#
 			    startingAt: queryIndex + 1
-			    ifAbsent: [urlString size + 1]].
-	(fragmentIndex := urlString indexOf: $#) ~= 0 
+			    ifAbsent: [aString size + 1]].
+	(fragmentIndex := aString indexOf: $#) ~= 0 
 	    ifTrue: 
 		[limit := limit min: fragmentIndex.
-		fragmentLimit := urlString 
+		fragmentLimit := aString 
 			    indexOf: $?
 			    startingAt: fragmentIndex + 1
-			    ifAbsent: [urlString size + 1]].
-	urlString := urlString copyFrom: 1 to: limit - 1.
+			    ifAbsent: [aString size + 1]].
+	urlString := aString copyFrom: 1 to: limit - 1.
 	url := self fromURLString: urlString.
 	queryIndex > 0 
-	    ifTrue: [url query: (urlString copyFrom: queryIndex + 1 to: queryLimit - 1)].
+	    ifTrue: [url query: (aString copyFrom: queryIndex + 1 to: queryLimit - 1)].
 	fragmentIndex > 0 
 	    ifTrue: 
-		[url 
-		    fragment: (urlString copyFrom: fragmentIndex + 1 to: fragmentLimit - 1)].
+		[url fragment: (aString copyFrom: fragmentIndex + 1 to: fragmentLimit - 1)].
 	^url
     ]
 
