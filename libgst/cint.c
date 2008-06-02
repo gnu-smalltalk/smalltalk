@@ -149,8 +149,9 @@ static void push_smalltalk_obj (OOP oop,
 				cdata_type cType);
 
 /* Converts the return type as stored in RESULT to an OOP, based
-   on the RETURNTYPEOOP that is stored in the descriptor.  */
-static OOP c_to_smalltalk (cparam *result, OOP returnTypeOOP);
+   on the RETURNTYPEOOP that is stored in the descriptor.  #void is
+   converted to RECEIVEROOP.  */
+static OOP c_to_smalltalk (cparam *result, OOP receiverOOP, OOP returnTypeOOP);
 
 /* Converts the return type CTYPE, stored in a descriptor to a
    libffi type.  */
@@ -806,7 +807,7 @@ _gst_invoke_croutine (OOP cFuncOOP,
   ffi_call (&c_func_cur->cacheCif, FFI_FN (funcAddr), &result.u, ffi_arg_vec);
 
   _gst_set_errno (errno);
-  oop = c_to_smalltalk (&result, desc->returnTypeOOP);
+  oop = c_to_smalltalk (&result, receiver, desc->returnTypeOOP);
 
   /* Fixup all returned string variables */
   if (needPostprocessing)
@@ -1139,7 +1140,7 @@ push_smalltalk_obj (OOP oop,
 }
 
 OOP
-c_to_smalltalk (cparam *result, OOP returnTypeOOP)
+c_to_smalltalk (cparam *result, OOP receiverOOP, OOP returnTypeOOP)
 {
   cdata_type returnType;
   OOP resultOOP;
@@ -1152,7 +1153,7 @@ c_to_smalltalk (cparam *result, OOP returnTypeOOP)
   switch (returnType)
     {
     case CDATA_VOID:
-      resultOOP = _gst_nil_oop;
+      resultOOP = receiverOOP;
       break;
 
     case CDATA_CHAR:
@@ -1292,7 +1293,7 @@ closure_msg_send (ffi_cif* cif, void* result, void** args, void* userdata)
       memcpy (&cp.u, args[i], sizeof (ffi_arg));
       desc = (gst_c_callable) OOP_TO_OBJ (callbackOOP);
       argTypes = OOP_TO_OBJ (desc->argTypesOOP)->data;
-      argsOOP[i] = c_to_smalltalk (&cp, argTypes[i]);
+      argsOOP[i] = c_to_smalltalk (&cp, _gst_nil_oop, argTypes[i]);
     }
 
   desc = (gst_c_callable) OOP_TO_OBJ (callbackOOP);
