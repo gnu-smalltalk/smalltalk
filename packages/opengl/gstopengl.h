@@ -69,8 +69,11 @@ typedef GLvoid (*GLUfuncptr)(GLvoid);
 
 extern VMProxy *vm_proxy;
 
+extern void gst_initModule_gluNurbs (void);
 extern void gst_initModule_glu (void);
 extern void gst_initModule_gl (void);
+
+extern int gst_opengl_glMap_size (GLenum target);
 
 extern void gst_opengl_scale_array (GLfloat *, OOP);
 extern GLfloat *gst_opengl_oop_to_array_2 (GLfloat *, OOP, int, int);

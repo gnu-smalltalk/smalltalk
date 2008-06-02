@@ -285,4 +285,6 @@ void gst_initModule_glu() {
   vm_proxy->defineCFunc ("gluSphere", gst_opengl_gluSphere) ;
   vm_proxy->defineCFunc ("gluUnProject", gst_opengl_gluUnProject) ;
   vm_proxy->defineCFunc ("gluUnProject4", gst_opengl_gluUnProject4) ;
+
+  gst_initModule_gluNurbs ();
 }

@@ -71,7 +71,7 @@ Object subclass: OpenGLTest [
 			    bitOr: Glut glutDepth).
 		aWindow glutInitWindowSize: (Point x: 500 y: 500).
 		aWindow glutInitWindowPosition: (Point x: 100 y: 100).
-		windowNumber := aWindow glutCreateWindow: 'Une sphere...'.
+		windowNumber := aWindow glutCreateWindow: 'Une surface de bezier...'.
 
 		"Init window color and shading model"
 		aWindow glClearColor: Color black.

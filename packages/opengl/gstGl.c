@@ -221,7 +221,7 @@ gst_opengl_glMultTransposeMatrixv (OOP matrixOOP)
   return 0;
 }
 
-static int
+int
 gst_opengl_glMap_size (GLenum target)
 {
   switch (target)

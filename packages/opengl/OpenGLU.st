@@ -61,16 +61,6 @@ OpenGLInterface extend [
 	
     ]
 
-    gluBeginSurface: aNurb [
-	<category: 'GLU'>
-	^aNurb gluBeginSurface
-    ]
-
-    gluEndSurface: aNurb [
-	<category: 'GLU'>
-	^aNurb gluEndSurface
-    ]
-
     gluCylinder: base top: top height: height slices: slices stacks: stacks [
 
 	<category: 'GLU'>

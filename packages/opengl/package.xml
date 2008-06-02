@@ -6,6 +6,7 @@
   <filein>OpenGLEnum.st</filein>
   <filein>OpenGLU.st</filein>
   <filein>OpenGLUEnum.st</filein>
+  <filein>OpenGLUNurbs.st</filein>
 
   <filein>OpenGLObjects.st</filein>
 
@@ -16,12 +17,15 @@
   <file>OpenGLEnum.st</file>
   <file>OpenGLU.st</file>
   <file>OpenGLUEnum.st</file>
+  <file>OpenGLUNurbs.st</file>
   <file>OpenGLObjects.st</file>
 
   <file>test/bezsurf.st</file>
   <file>test/cubemap.st</file>
   <file>test/list.st</file>
   <file>test/robot.st</file>
+  <file>test/surface.st</file>
+  <file>test/surfpoints.st</file>
   <file>test/test.st</file>
   <file>test/test2.st</file>
   <file>test/texturesurf.st</file>
