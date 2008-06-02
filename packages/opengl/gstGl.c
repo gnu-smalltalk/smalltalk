@@ -1396,6 +1396,11 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc("glTexSubImage2D", glTexSubImage2D);
   
 #if 0
+  vm_proxy->defineCFunc ("glTextureRangeAPPLE", glTextureRangeAPPLE);
+  vm_proxy->defineCFunc ("glFinishObjectAPPLE", glFinishObjectAPPLE);
+#endif
+
+#if 0
   vm_proxy->defineCFunc ("glActiveTextureARB", glActiveTextureARB);
   vm_proxy->defineCFunc ("glClientActiveTextureARB", glClientActiveTextureARB);
   vm_proxy->defineCFunc ("glMultiTexCoord1dARB", glMultiTexCoord1dARB);

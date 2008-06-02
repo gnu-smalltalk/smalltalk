@@ -37,7 +37,7 @@ CairoSurface subclass: CairoSdlSurface [
 an SdlDisplay.  Do not forget to lock the display while using
 the surface.'>
 
-    | display data textureId size |
+    | display data textureId size haveAppleClientStorage |
 
     CairoSdlSurface class >> on: aDisplay [
 	<category: 'instance creation'>
@@ -99,15 +99,23 @@ the surface.'>
     ]
 
     glInit [
-	| const |
+	| const extensions |
 	const := display openGLInterface class.
 
 	data := (CByteType arrayType: size x * size y * 4) new.
 	textureId := (display openGLInterface glGenTextures: 1) first.
+	extensions := display openGLInterface glGetString: const glExtensions.
+	haveAppleClientStorage := extensions subStrings
+	    includes: 'GL_APPLE_client_storage'.
+
 	self glClear.
 
 	display openGLInterface
 	    glBindTexture: const glTextureRectangleArb to: textureId;
+	    "glTextureRangeAPPLE: const glTextureRectangleArb
+		size: size x * size y * 4
+		data: data;"
+
 	    glTexImage2D: const glTextureRectangleArb level: 0
 		internalFormat: const glRgba8
 		width: size x height: size y border: 0
@@ -126,6 +134,7 @@ the surface.'>
 	const := display openGLInterface class.
 
 	display openGLInterface
+	    glPushClientAttrib: const glClientPixelStoreBit;
 	    glPushAttrib: const glColorBufferBit + const glCurrentBit +
 		const glDepthBufferBit + const glEnableBit +
 		const glPolygonBit + const glTransformBit + const glViewportBit;
@@ -159,6 +168,13 @@ the surface.'>
 	    glOrtho: 0.0 right: 1.0 bottom: 0.0 top: 1.0 near: -1.0 far: 1.0;
 	
 	    glBindTexture: const glTextureRectangleArb to: textureId;
+
+	    "TODO: support PBOs, see http://www.songho.ca/opengl/gl_pbo.html"
+	    glPixelStorei: const glUnpackClientStorageApple value: 1;
+	    glTexParameteri: const glTextureRectangleArb
+		property: const glTextureStorageHintApple
+		value: const glStorageSharedApple;
+
 	    glTexSubImage2D: const glTextureRectangleArb level: 0
 		xoffset: 0 yoffset: 0
 		width: size x height: size y
@@ -188,10 +204,12 @@ the surface.'>
 	    glPopMatrix;
 	    glMatrixMode: const glModelview;
 	    glPopMatrix;
-	    glPopAttrib.
+	    glPopAttrib;
+	    glPopClientAttrib.
 
 	display flip.
-	self glClear
+	self glClear.
+	haveAppleClientStorage ifTrue: [ display openGLInterface glFinish ].
     ]
 
     withContextDo: aBlock [

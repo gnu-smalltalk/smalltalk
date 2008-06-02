@@ -1,3 +1,8 @@
+2008-06-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* cairo/CairoSDL.st: Add GL_APPLE_client_storage and
+	GL_TEXTURE_STORAGE_HINT_APPLE support.
+
 2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libsdl_gl/Display.st: Avoid double initialization of SdlDisplay.

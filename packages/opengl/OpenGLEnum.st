@@ -18583,6 +18583,20 @@ OpenGLInterface class extend [
 	^34081
     ]
 
+    glTextureStorageHintApple [
+	"GL_TEXTURE_STORAGE_HINT_APPLE  0x85BC"
+
+	<category: 'constants Ext'>
+	^34236
+    ]
+
+    glStoragePrivateApple [
+	"GL_STORAGE_PRIVATE_APPLE  0x85BD"
+
+	<category: 'constants Ext'>
+	^34237
+    ]
+
     glStorageCachedApple [
 	"GL_STORAGE_CACHED_APPLE  0x85BE"
 

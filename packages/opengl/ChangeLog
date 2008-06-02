@@ -1,3 +1,11 @@
+2008-06-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* OpenGL.st: Add glFinish, glPushClientAttrib, glPopClientAttrib,
+	glGetString.
+	* OpenGLEnum.st: Add GL_TEXTURE_STORAGE_HINT_APPLE-related constants.
+	* OpenGLU.st: Add gluCheckExtension.
+	* gstGl.c: Add (commented out) a couple of Apple extensions.
+
 2008-05-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* OpenGL.st: Add glPushAttrib, glPopAttrib, glBlendFunc,

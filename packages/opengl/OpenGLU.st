@@ -32,6 +32,10 @@
 
 
 OpenGLInterface extend [
+    gluCheckExtension: ext in: extList [
+	<category: 'GLU'>
+	<cCall: 'gluCheckExtension' returning: #boolean args: #( #string #string )>
+    ]
 
     gluLookAt: anEye center: aCenter up: aDirection [
 	<category: 'GLU'>

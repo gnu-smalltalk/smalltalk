@@ -94,6 +94,12 @@ See OpenGL programming guide for more informations.'>
 	
     ]
 
+    glFinish [
+	<category: 'GL'>
+	<cCall: 'glFinish' returning: #void args: #()>
+	
+    ]
+
     glFlush [
 	<category: 'GL'>
 	<cCall: 'glFlush' returning: #void args: #()>
@@ -207,6 +213,18 @@ See OpenGL programming guide for more informations.'>
     glPopAttrib [
 	<category: 'GL'>
 	<cCall: 'glPopAttrib' returning: #void args: #( #void )>
+	
+    ]
+
+    glPushClientAttrib: aProperty [
+	<category: 'GL'>
+	<cCall: 'glPushClientAttrib' returning: #void args: #( #int )>
+	
+    ]
+
+    glPopClientAttrib [
+	<category: 'GL'>
+	<cCall: 'glPopClientAttrib' returning: #void args: #( #void )>
 	
     ]
 
@@ -683,6 +701,14 @@ See OpenGL programming guide for more informations.'>
 
 	<category: 'Get functions'>
 	<cCall: 'glGetIntegerv' returning: #smalltalk args: #(#int)>
+	
+    ]
+
+    glGetString: mode [
+	"the returned value is an array of integer"
+
+	<category: 'Get functions'>
+	<cCall: 'glGetString' returning: #string args: #(#int)>
 	
     ]
 ]
