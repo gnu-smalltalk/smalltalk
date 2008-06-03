@@ -149,7 +149,7 @@ gst_opengl_glNormalv (OOP normalOOP)
   return 0;
 }
 
-static int
+int
 gst_opengl_glVertexv (OOP vertexOOP)
 {
   GLfloat vertex[4];

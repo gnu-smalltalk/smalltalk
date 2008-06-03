@@ -84,7 +84,7 @@ Object subclass: Color [
 	    red: 1.0;
 	    green: 0.0;
 	    blue: 0.0;
-	    alpha: 0.0
+	    alpha: 1.0
     ]
 
     Color class >> green [
@@ -93,7 +93,7 @@ Object subclass: Color [
 	    red: 0.0;
 	    green: 1.0;
 	    blue: 0.0;
-	    alpha: 0.0
+	    alpha: 1.0
     ]
 
     Color class >> blue [
@@ -102,7 +102,7 @@ Object subclass: Color [
 	    red: 0.0;
 	    green: 0.0;
 	    blue: 1.0;
-	    alpha: 0.0
+	    alpha: 1.0
     ]
 
     red [
@@ -145,22 +145,29 @@ Object subclass: Color [
 	self at: 4 put: aFloat
     ]
 
+    + aColor [
+	<category: 'Transforming'>
+	^self class
+	    red: self red + aColor red
+	    green: self green + aColor green
+	    blue: self blue + aColor blue
+	    alpha: self alpha + aColor alpha
+    ]
+
+    * coeff [
+	<category: 'Transforming'>
+	^self class
+	    red: self red * coeff
+	    green: self green * coeff
+	    blue: self blue * coeff
+	    alpha: self alpha * coeff
+    ]
+
     asArray [
 	<category: 'Transforming'>
-	| anArray |
-	self alpha isNil 
-	    ifTrue: 
-		[anArray := Array 
-			    with: self red
-			    with: self green
-			    with: self blue]
-	    ifFalse: 
-		[anArray := Array 
-			    with: self red
-			    with: self green
-			    with: self blue
-			    with: self alpha].
-	^anArray
+	^self alpha = 1.0
+	    ifTrue: [ { self red. self green. self blue } ]
+	    ifFalse: [ { self red. self green. self blue. self alpha } ]
     ]
 
     do: aBlock [
@@ -186,23 +193,26 @@ Object subclass: Color [
 
 
 Object subclass: Vertex [
-    | size |
     
     <shape: #float>
     <category: 'OpenGL'>
     <comment: 'My instances are vertexes in either a 2D or 3D space. I also have
 another axis for matrix works'>
 
+    Vertex class >> fromArray: anArray [
+	<category: 'Creating'>
+	^(self basicNew: self numElements) initialize: anArray
+    ]
+
     Vertex class >> new [
 	<category: 'Creating'>
 	| v |
-	v := self basicNew: self maxSize.
+	v := self basicNew: self numElements.
 	v basicAt: 4 put: 1.0.
-	v size: 2.
 	^v
     ]
 
-    Vertex class >> maxSize [
+    Vertex class >> numElements [
 	<category: 'Creating'>
 	^4
     ]
@@ -214,21 +224,12 @@ another axis for matrix works'>
 
     Vertex class >> x: anX y: aY z: aZ [
 	<category: 'Creating'>
-	^(self new)
-	    size: 3;
-	    x: anX
-		y: aY
-		z: aZ
+	^self new x: anX y: aY z: aZ
     ]
 
     Vertex class >> x: anX y: aY z: aZ w: aW [
 	<category: 'Creating'>
-	^(self new)
-	    size: 4;
-	    x: anX
-		y: aY
-		z: aZ
-		w: aW
+	^self new x: anX y: aY z: aZ w: aW
     ]
 
     x [
@@ -243,50 +244,32 @@ another axis for matrix works'>
 
     z [
 	<category: 'accessing'>
-	self size >= 3 
-	    ifTrue: [^self at: 3]
-	    ifFalse: 
-		[^SystemExceptions.ArgumentOutOfRange 
-		    signalOn: 3
-		    mustBeBetween: 1
-		    and: self size]
+	^self at: 3
     ]
 
     w [
 	<category: 'accessing'>
-	self size >= 4 
-	    ifTrue: [^self at: 4]
-	    ifFalse: 
-		[^SystemExceptions.ArgumentOutOfRange 
-		    signalOn: 4
-		    mustBeBetween: 1
-		    and: self size]
+	^self at: 4
     ]
 
     x: aFloat [
 	<category: 'accessing'>
 	self at: 1 put: aFloat.
-	^self
     ]
 
     y: aFloat [
 	<category: 'accessing'>
 	self at: 2 put: aFloat.
-	^self
     ]
 
     z: aFloat [
 	<category: 'accessing'>
 	self at: 3 put: aFloat.
-	self size < 3 ifTrue: [self size: 3].
-	^self
     ]
 
     w: aFloat [
 	<category: 'accessing'>
 	self at: 4 put: aFloat.
-	self size < 4 ifTrue: [self size: 4].
-	^self
     ]
 
     x: anX y: aY [
@@ -297,7 +280,6 @@ another axis for matrix works'>
 
     x: anX y: aY z: aZ [
 	<category: 'accessing'>
-	self size < 3 ifTrue: [self size: 3].
 	self at: 1 put: anX.
 	self at: 2 put: aY.
 	self at: 3 put: aZ
@@ -305,70 +287,52 @@ another axis for matrix works'>
 
     x: anX y: aY z: aZ w: aW [
 	<category: 'accessing'>
-	self size < 4 ifTrue: [self size: 4].
 	self at: 1 put: anX.
 	self at: 2 put: aY.
 	self at: 3 put: aZ.
 	self at: 4 put: aW
     ]
 
-    size [
-	<category: 'Internal'>
-	^size
-    ]
-
-    size: aSize [
-	<category: 'Internal'>
-	size := aSize.
-	^self
-    ]
-
-    load: anArray [
+    initialize: anArray [
 	<category: 'Loading'>
 	| aSize |
 	aSize := anArray size.
-	aSize > Vertex maxSize ifTrue: [aSize := Vertex maxSize].
+	aSize > Vertex numElements ifTrue: [aSize := Vertex numElements].
 	self size: aSize.
-	(1 to: aSize) do: 
-		[:i | 
-		Transcript
-		    show: (anArray at: i) printString;
-		    nl.
-		self at: i put: (anArray at: i).
-		Transcript
-		    show: (self at: i) printString;
-		    nl]
+	1 to: aSize do: [:i | self at: i put: (anArray at: i) ]
+    ]
+
+    + aVertex [
+	<category: 'Transforming'>
+	^self class
+	    x: (self x / self w) + (aVertex x / aVertex w)
+	    y: (self y / self w) + (aVertex y / aVertex w)
+	    z: (self z / self w) + (aVertex z / aVertex w)
+	    w: 1.0
+    ]
+
+    * coeff [
+	<category: 'Transforming'>
+	^self class
+	    x: self x * coeff
+	    y: self y * coeff
+	    z: self z * coeff
+	    w: self w
     ]
 
     asArray [
 	<category: 'Transforming'>
-	| anArray |
-	self z isNil 
-	    ifTrue: [anArray := Array with: self x with: self y]
-	    ifFalse: 
-		[self w isNil 
-		    ifTrue: 
-			[anArray := Array 
-				    with: self x
-				    with: self y
-				    with: self z]
-		    ifFalse: 
-			[anArray := Array 
-				    with: self x
-				    with: self y
-				    with: self z
-				    with: self w]].
-	^anArray
+	^self w = 1.0
+	    ifFalse: [ { self x. self y. self z. self w } ]
+	    ifTrue: 
+		[self z = 0.0
+		    ifFalse: [ { self x. self y. self z } ]
+		    ifTrue: [ { self x. self y } ]]
     ]
 
     do: aBlock [
 	<category: 'block'>
 	1 to: self size do: [:i | aBlock value: (self at: i)]
-    ]
-
-    doWithIndex: aBlock [
-	<category: 'block'>
-	1 to: self size do: [:i | aBlock value: (self at: i) value: i]
     ]
 
     printOn: aStream [

@@ -1,3 +1,12 @@
+2008-06-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* OpenGLObjects.st: Add #+ and #*, rewrite #asArray and #fromArray:
+	operations.
+	* OpenGLUTess.st: New.
+	* gstGl.c: Export gst_opengl_glVertexv.
+	* gstGluTess.c: New, more or less copied from gstGluNurbs.c.
+	* gstopengl.h: Declare gst_opengl_glVertexv.
+
 2008-06-02  Olivier Blanc  <olivier.blanc@laposte.net>
 
 	* OpenGLU.st: Remove nurbs functions.

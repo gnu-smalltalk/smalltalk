@@ -7,6 +7,7 @@
   <filein>OpenGLU.st</filein>
   <filein>OpenGLUEnum.st</filein>
   <filein>OpenGLUNurbs.st</filein>
+  <filein>OpenGLUTess.st</filein>
 
   <filein>OpenGLObjects.st</filein>
 
@@ -18,6 +19,7 @@
   <file>OpenGLU.st</file>
   <file>OpenGLUEnum.st</file>
   <file>OpenGLUNurbs.st</file>
+  <file>OpenGLUTess.st</file>
   <file>OpenGLObjects.st</file>
 
   <file>test/bezsurf.st</file>
