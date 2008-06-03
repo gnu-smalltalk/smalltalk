@@ -1,3 +1,7 @@
+2008-06-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gstGluTess.c: Don't set glEdgeFlag callback.
+
 2008-06-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* OpenGLObjects.st: Add #+ and #*, rewrite #asArray and #fromArray:
