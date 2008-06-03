@@ -28,6 +28,7 @@
   <file>test/robot.st</file>
   <file>test/surface.st</file>
   <file>test/surfpoints.st</file>
+  <file>test/tess.st</file>
   <file>test/test.st</file>
   <file>test/test2.st</file>
   <file>test/texturesurf.st</file>
