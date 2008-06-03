@@ -9,7 +9,7 @@
 "======================================================================
 |
 | Copyright 2008 Free Software Foundation, Inc.
-| Written by Tony Garnock-Jones
+| Written by Tony Garnock-Jones and Michael Bridgen.
 |
 | This file is part of the GNU Smalltalk class library.
 |
@@ -173,8 +173,8 @@ matrix implementation for composing heterogeneous transformations.'>
 	 about aPoint rather than about 0@0."
 
 	<category: 'composing'>
-        ^ ((Translation by: aPoint * -1)
-              before: self) before: (Translation by: aPoint)
+        ^ ((Translation by: aPoint)
+              before: self) before: (Translation by: aPoint * -1)
     ]
 
     translateBy: aPoint [
@@ -346,7 +346,7 @@ Transform subclass: MatrixTransform [
          aTransform first, then by self."
 
 	<category: 'composing'>
-	^ aTransform asMatrixTrasform
+	^ aTransform asMatrixTransform
 	    copyOp: [:n | Cairo matrixMultiply: n a: n b: self matrix]
     ]
 
@@ -458,7 +458,7 @@ rotation and translation.  I am an abstract class.'>
 	 to a transformation matrix."
 
 	<category: 'converting'>
-        matrix isNil ifFalse: [matrix := self after: MatrixTransform new].
+        matrix isNil ifTrue: [matrix := self after: MatrixTransform new].
 	^matrix
     ]
 

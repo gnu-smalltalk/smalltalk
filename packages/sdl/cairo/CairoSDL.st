@@ -9,7 +9,8 @@
 "======================================================================
 |
 | Copyright 2006 Free Software Foundation, Inc.
-| Written by Tony Garnock-Jones
+| Written by Tony Garnock-Jones and Michael Bridgen.
+| OpenGL support by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
 |
