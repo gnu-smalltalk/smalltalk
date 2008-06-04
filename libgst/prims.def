@@ -5036,6 +5036,7 @@ primitive VMpr_Behavior_primCompile [succeed]
 {
   OOP oop1;
   OOP oop2;
+  mst_Boolean interrupted;
   _gst_primitives_executed++;
 
   oop2 = POP_OOP ();
@@ -5047,9 +5048,13 @@ primitive VMpr_Behavior_primCompile [succeed]
 
   _gst_set_compilation_class (oop1);
   _gst_set_compilation_category (_gst_string_new ("still unclassified"));
-  parse_stream_with_protection (true);
+  interrupted = parse_stream_with_protection (true);
   _gst_pop_stream (true);
   PUSH_OOP (_gst_latest_compiled_method);
+
+  if (interrupted)
+    stop_execution ();
+
   PRIM_SUCCEEDED;
 }
 
@@ -5067,6 +5072,7 @@ primitive VMpr_Behavior_primCompileIfError [fail,succeed,reload_ip]
   if (IS_CLASS (oop3, _gst_block_closure_class))
     {
       mst_Boolean oldReportErrors = _gst_report_errors;
+      mst_Boolean interrupted;
 
       if (oldReportErrors)
 	{
@@ -5081,12 +5087,17 @@ primitive VMpr_Behavior_primCompileIfError [fail,succeed,reload_ip]
 
       _gst_set_compilation_class (oop1);
       _gst_set_compilation_category (_gst_string_new ("still unclassified"));
-      parse_stream_with_protection (true);
+      interrupted = parse_stream_with_protection (true);
       _gst_pop_stream (true);
+      _gst_report_errors = oldReportErrors;
+      PUSH_OOP (_gst_latest_compiled_method);
 
-      if (_gst_first_error_str != NULL)
+      if (interrupted)
+        stop_execution ();
+
+      else if (_gst_first_error_str != NULL)
 	{
-	  PUSH_OOP (oop3);	/* block context */
+	  SET_STACKTOP (oop3);	/* block context */
 	  if (_gst_first_error_file != NULL)
 	    {
 	      PUSH_OOP (_gst_string_new (_gst_first_error_file));
@@ -5105,11 +5116,7 @@ primitive VMpr_Behavior_primCompileIfError [fail,succeed,reload_ip]
 	  else
 	    PRIM_SUCCEEDED_RELOAD_IP;
 	}
-      else
-	{
-	  _gst_report_errors = oldReportErrors;
-	  PUSH_OOP (_gst_latest_compiled_method);
-	}
+
       PRIM_SUCCEEDED;
     }
   UNPOP (3);
@@ -5162,8 +5169,7 @@ primitive VMpr_ObjectMemory_snapshot [succeed,fail]
   oop2 = POP_OOP ();
   if (IS_CLASS (oop2, _gst_string_class))
     {
-      interp_jmp_buf localJmpBuf;
-      mst_Boolean success = false;
+      mst_Boolean success;
       fileName = _gst_to_cstring (oop2);
       errno = 0;
 
@@ -5171,9 +5177,7 @@ primitive VMpr_ObjectMemory_snapshot [succeed,fail]
 	 the save, the stack will be in this state. See below. */
       SET_STACKTOP (_gst_true_oop);
 
-      PROTECT_CURRENT_PROCESS_WITH (&localJmpBuf)
-	success = _gst_save_to_file (fileName);
-      
+      success = _gst_save_to_file (fileName);
       xfree (fileName);
       if (success)
 	{
@@ -5232,17 +5236,19 @@ primitive VMpr_Stream_fileInLine [succeed,fail]
       && (IS_NIL (oop3)
 	  || (IS_CLASS (oop3, _gst_string_class) && IS_INT (oop4))))
     {
-      intptr_t arg1;
-      intptr_t arg4;
-      arg1 = TO_INT (oop1);
-      arg4 = TO_INT (oop4);
+      mst_Boolean interrupted;
+      intptr_t arg1 = TO_INT (oop1);
+      intptr_t arg4 = TO_INT (oop4);
 
       _gst_push_stream_oop (streamOOP);
       _gst_set_stream_info (arg1, oop2, oop3, arg4);
       old = _gst_set_undeclared (UNDECLARED_GLOBALS);
-      parse_stream_with_protection (false);
+      interrupted = parse_stream_with_protection (false);
       _gst_set_undeclared (old);
       _gst_pop_stream (false);
+      if (interrupted)
+	stop_execution ();
+
       PRIM_SUCCEEDED;
     }
 
@@ -5771,10 +5777,10 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 
 primitive VMpr_CFuncDescriptor_asyncCall [succeed,fail]
 {
-  volatile OOP result = NULL;
+  OOP resultOOP;
   volatile gst_method_context context;
   OOP contextOOP, cFuncOOP, receiverOOP;
-  interp_jmp_buf localJmpBuf;
+  interp_jmp_buf jb;
 
   _gst_primitives_executed++;
 
@@ -5792,11 +5798,20 @@ primitive VMpr_CFuncDescriptor_asyncCall [succeed,fail]
     }
 
   cFuncOOP = STACKTOP ();
-  PROTECT_FROM_INTERRUPT_WITH (&localJmpBuf)
-    result = _gst_invoke_croutine (cFuncOOP, receiverOOP,
-                                   context->contextStack);
+  push_jmp_buf (&jb, false, _gst_nil_oop);
+  if (setjmp (jb.jmpBuf) == 0)
+    resultOOP = _gst_invoke_croutine (cFuncOOP, receiverOOP,
+				   context->contextStack);
+  else
+    resultOOP = NULL;
 
-  if (result)
+  if (pop_jmp_buf ())
+    {
+      stop_execution ();
+      PRIM_SUCCEEDED;
+    }
+
+  else if (resultOOP)
     {
       SET_EXCEPT_FLAG (true);
       PRIM_SUCCEEDED;
@@ -5809,15 +5824,15 @@ primitive VMpr_CFuncDescriptor_asyncCall [succeed,fail]
 
 primitive VMpr_CFuncDescriptor_call [succeed,fail]
 {
-  volatile OOP result = NULL;		/* initialize to please GCC */
   volatile gst_method_context context;
-  gst_object resultObj;
-  OOP receiverOOP, contextOOP, resultOOP, cFuncOOP;
-  interp_jmp_buf localJmpBuf;
+  gst_object resultHolderObj;
+  OOP receiverOOP, contextOOP, cFuncOOP, resultOOP;
+  volatile OOP resultHolderOOP;
+  interp_jmp_buf jb;
 
   _gst_primitives_executed++;
 
-  resultOOP = POP_OOP ();
+  resultHolderOOP = POP_OOP ();
   if (numArgs == 2)
     {
       contextOOP = POP_OOP ();
@@ -5835,18 +5850,27 @@ primitive VMpr_CFuncDescriptor_call [succeed,fail]
 
   /* Make the result reachable, and also push it before the
      active process can change.  */
-  PUSH_OOP (resultOOP);
+  PUSH_OOP (resultHolderOOP);
 
-  PROTECT_CURRENT_PROCESS_WITH (&localJmpBuf)
-    result = _gst_invoke_croutine (cFuncOOP, receiverOOP,
-				   context->contextStack);
+  push_jmp_buf (&jb, false, get_active_process ());
+  if (setjmp (jb.jmpBuf) == 0)
+    resultOOP = _gst_invoke_croutine (cFuncOOP, receiverOOP,
+				      context->contextStack);
+  else
+    resultOOP = NULL;
 
-  if (result)
+  if (pop_jmp_buf ())
     {
-      if (!IS_NIL (resultOOP))
+      stop_execution ();
+      PRIM_SUCCEEDED;
+    }
+
+  else if (resultOOP)
+    {
+      if (!IS_NIL (resultHolderOOP))
 	{
-          resultObj = OOP_TO_OBJ (resultOOP);
-          resultObj->data[0] = result;
+          resultHolderObj = OOP_TO_OBJ (resultHolderOOP);
+          resultHolderObj->data[0] = resultOOP;
 	}
       SET_EXCEPT_FLAG (true);
       PRIM_SUCCEEDED;
@@ -5857,7 +5881,7 @@ primitive VMpr_CFuncDescriptor_call [succeed,fail]
   PUSH_OOP (cFuncOOP);
   if (numArgs == 2)
     PUSH_OOP (contextOOP);
-  PUSH_OOP (resultOOP);
+  PUSH_OOP (resultHolderOOP);
   PRIM_FAILED;
 }
 

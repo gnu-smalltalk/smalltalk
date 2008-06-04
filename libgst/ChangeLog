@@ -1,3 +1,13 @@
+2008-06-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp-bc.inl: Create a jmp_buf for _gst_interpret.
+	* libgst/interp-jit.inl: Likewise.
+	* libgst/interp.c: Rewrite handling of interp_jmp_buf and signals.  Use
+	the jmp_buf from _gst_interpret when SIGINT is sent but the current
+	process is terminated.
+	* libgst/prims.def: Use push_jmp_buf and pop_jmp_buf.  Propagate
+	interruptions until the interpreter is reached.
+
 2008-06-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Return the receiver, not nil, if the returned type

@@ -441,6 +441,9 @@ _gst_validate_method_cache_entries (void)
 OOP
 _gst_interpret (OOP processOOP)
 {
+  interp_jmp_buf jb;
+  gst_callin_process process;
+
 #ifdef LOCAL_REGS
 # undef  sp
 # undef  ip
@@ -494,21 +497,23 @@ _gst_interpret (OOP processOOP)
 
 #include "vm.inl"
 
-  /* Set the global variables holding the pointers to the bytecode
-     routines.  */
+  /* Global pointers to the bytecode routines are used to interrupt the
+     bytecode interpreter "from the outside" and divert it to
+     monitor_byte_codes.  */
   global_normal_bytecodes = normal_byte_codes;
   global_monitored_bytecodes = monitored_byte_codes;
   dispatch_vec = normal_byte_codes;
 
-  /* The first time through, evaluate the monitoring code in order to
-     process the execution tracing flag.  */
-  _gst_except_flag = true;
-
-  _gst_register_oop (processOOP);
-  in_interpreter = true;
-
   /* Prime the interpreter's registers.  */
   IMPORT_REGS ();
+
+  push_jmp_buf (&jb, true, processOOP);
+  if (setjmp (jb.jmpBuf) == 0)
+    goto monitor_byte_codes;
+  else
+    goto return_value;
+
+  /* The code blocks that follow are executed in threaded-code style.  */
 
 monitor_byte_codes:
   SET_EXCEPT_FLAG (false);
@@ -548,12 +553,7 @@ monitor_byte_codes:
     }
 
   if (is_process_terminating (processOOP))
-    {
-      gst_callin_process process = (gst_callin_process) OOP_TO_OBJ (processOOP);
-      _gst_unregister_oop (processOOP);
-      in_interpreter = false;
-      return (process->returnedValue);
-    }
+    goto return_value;
 
   if UNCOMMON (_gst_abort_execution)
     {
@@ -561,6 +561,7 @@ monitor_byte_codes:
       selectorOOP = _gst_intern_string ((char *) _gst_abort_execution);
       _gst_abort_execution = NULL;
       SEND_MESSAGE (selectorOOP, 0);
+      IMPORT_REGS ();
     }
 
   if UNCOMMON (_gst_execution_tracing)
@@ -603,6 +604,13 @@ lookahead_dup_false:
   PREFETCH_VEC (false_byte_codes);
   PUSH_OOP (_gst_false_oop);
   NEXT_BC_VEC (false_byte_codes);
+
+ return_value:
+  process = (gst_callin_process) OOP_TO_OBJ (processOOP);
+  if (pop_jmp_buf ())
+    stop_execution ();
+
+  return (process->returnedValue);
 }
 
 

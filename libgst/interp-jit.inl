@@ -379,98 +379,100 @@ refresh_native_ips (OOP contextOOP)
 OOP
 _gst_interpret (OOP processOOP)
 {
-  _gst_register_oop (processOOP);
-  in_interpreter = true;
+  gst_callin_process process;
+  push_jmp_buf (&jb, true, processOOP);
 
-  for (;;)
-    {
-      gst_method_context thisContext;
+  if (setjmp (jb.jmpBuf) == 0)
+    for (;;)
+      {
+        gst_method_context thisContext;
 
-      if (!native_ip)
-	return (_gst_nil_oop);
+        if (!native_ip)
+	  return (_gst_nil_oop);
 
-      native_ip = _gst_run_native_code (native_ip);
+        native_ip = _gst_run_native_code (native_ip);
 
-      if (!_gst_except_flag)
-	{
-          OOP activeProcessOOP = get_scheduled_process ();
-          gst_callin_process process = (gst_callin_process) OOP_TO_OBJ (activeProcessOOP);
-          process->returnedValue = POP_OOP ();
-          _gst_terminate_process (activeProcessOOP);
-	}
+        if (!_gst_except_flag)
+	  {
+            OOP activeProcessOOP = get_scheduled_process ();
+            gst_callin_process process = (gst_callin_process) OOP_TO_OBJ (activeProcessOOP);
+            process->returnedValue = POP_OOP ();
+            _gst_terminate_process (activeProcessOOP);
+	  }
 
-      if UNCOMMON (_gst_abort_execution)
-	{
-	  OOP selectorOOP;
-	  selectorOOP = _gst_intern_string ((char *)_gst_abort_execution);
-	  _gst_abort_execution = NULL;
-	  SEND_MESSAGE (selectorOOP, 0);
-	}
+        if UNCOMMON (_gst_abort_execution)
+	  {
+	    OOP selectorOOP;
+	    selectorOOP = _gst_intern_string ((char *)_gst_abort_execution);
+	    _gst_abort_execution = NULL;
+	    SEND_MESSAGE (selectorOOP, 0);
+	  }
 
-      if (!disable_preemption)
-        {
-	  _gst_disable_interrupts ();	/* block out everything! */
-          if UNCOMMON (async_queue_index)
-	    {
-	      /* deal with any async signals */
-	      int i;
-	      for (i = 0; i < async_queue_index; i++)
-	        {
-	          sync_signal (queued_async_signals[i].sem);
-	          if (queued_async_signals[i].unregister)
-		    _gst_unregister_oop (queued_async_signals[i].sem);
-	        }
+        if (!disable_preemption)
+          {
+	    _gst_disable_interrupts ();	/* block out everything! */
+            if UNCOMMON (async_queue_index)
+	      {
+	        /* deal with any async signals */
+	        int i;
+	        for (i = 0; i < async_queue_index; i++)
+	          {
+	            sync_signal (queued_async_signals[i].sem);
+	            if (queued_async_signals[i].unregister)
+		      _gst_unregister_oop (queued_async_signals[i].sem);
+	          }
 
-	      async_queue_index = 0;
-	    }
-          _gst_enable_interrupts ();
-	}
+	        async_queue_index = 0;
+	      }
+            _gst_enable_interrupts ();
+	  }
 
-      thisContext =
-	(gst_method_context) OOP_TO_OBJ (_gst_this_context_oop);
-      thisContext->native_ip = GET_NATIVE_IP (native_ip);
+        thisContext =
+	  (gst_method_context) OOP_TO_OBJ (_gst_this_context_oop);
+        thisContext->native_ip = GET_NATIVE_IP (native_ip);
 
-      _gst_except_flag = false;
+        _gst_except_flag = false;
 
-      if UNCOMMON (!IS_NIL (switch_to_process))
-	{
-	  change_process_context (switch_to_process);
-          if UNCOMMON (single_step_semaphore)
-            {
-              _gst_async_signal (single_step_semaphore);
-              single_step_semaphore = NULL;
-            }
-	}
+        if UNCOMMON (!IS_NIL (switch_to_process))
+	  {
+	    change_process_context (switch_to_process);
+            if UNCOMMON (single_step_semaphore)
+              {
+                _gst_async_signal (single_step_semaphore);
+                single_step_semaphore = NULL;
+              }
+	  }
 
-      else if UNCOMMON (time_to_preempt)
-	ACTIVE_PROCESS_YIELD ();
+        else if UNCOMMON (time_to_preempt)
+	  ACTIVE_PROCESS_YIELD ();
 
-      if (is_process_terminating (processOOP))
-        {
-          gst_callin_process process = (gst_callin_process) OOP_TO_OBJ (processOOP);
-          if (!IS_NIL (switch_to_process))
-            change_process_context (switch_to_process);
+        if (is_process_terminating (processOOP))
+          break;
 
-	  _gst_unregister_oop (processOOP);
-	  in_interpreter = false;
-          return (process->returnedValue);
-        }
+        /* If the native_ip in the context is not valid, this is a
+           process that we have not restarted yet! Get a fresh
+           native_ip for each context in the chain, recompiling
+           methods if needed. */
+        thisContext =
+	  (gst_method_context) OOP_TO_OBJ (_gst_this_context_oop);
 
-      /* If the native_ip in the context is not valid, this is a
-         process that we have not restarted yet! Get a fresh
-         native_ip for each context in the chain, recompiling
-         methods if needed. */
-      thisContext =
-	(gst_method_context) OOP_TO_OBJ (_gst_this_context_oop);
+        if (!(_gst_this_method->flags & F_XLAT)
+	    || thisContext->native_ip == DUMMY_NATIVE_IP)
+	  {
+	    refresh_native_ips (_gst_this_context_oop);
+	    native_ip = GET_CONTEXT_IP (thisContext);
+	  }
 
-      if (!(_gst_this_method->flags & F_XLAT)
-	  || thisContext->native_ip == DUMMY_NATIVE_IP)
-	{
-	  refresh_native_ips (_gst_this_context_oop);
-	  native_ip = GET_CONTEXT_IP (thisContext);
-	}
+        if UNCOMMON (time_to_preempt)
+	  set_preemption_timer ();
+      }
 
-      if UNCOMMON (time_to_preempt)
-	set_preemption_timer ();
-    }
+  if (!IS_NIL (switch_to_process))
+    change_process_context (switch_to_process);
+
+  process = (gst_callin_process) OOP_TO_OBJ (processOOP);
+  if (pop_jmp_buf ())
+    stop_execution ();
+
+  return (process->returnedValue);
 }

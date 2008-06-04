@@ -128,10 +128,12 @@ async_queue_entry;
 
 typedef struct interp_jmp_buf
 {
-  struct interp_jmp_buf *next;
-  int suspended;
-  OOP processOOP;
   jmp_buf jmpBuf;
+  struct interp_jmp_buf *next;
+  unsigned short suspended;
+  unsigned char interpreter;
+  unsigned char interrupted;
+  OOP processOOP;
 }
 interp_jmp_buf;
 
@@ -217,9 +219,6 @@ OOP _gst_this_method = NULL;
 
 /* Signal this semaphore at the following instruction.  */
 static OOP single_step_semaphore = NULL;
-
-/* Answer whether we are in the interpreter or in application code.  */
-static mst_Boolean in_interpreter = false;
 
 /* CompiledMethod cache which memoizes the methods and some more
    information for each class->selector pairs.  */
@@ -328,17 +327,12 @@ static OOP next_scheduled_process (void);
    CONTEXTOOP context, and answer it.  */
 static OOP create_callin_process (OOP contextOOP);
 
-/* Sets flags so that the interpreter starts returning immediately from
-   whatever byte codes it's executing.  It returns via a normal message
-   send of the unary selector MSG, so that the world is in a consistent 
-   state when it's done.  */
-static void stop_executing (const char *msg);
-
 /* Set a timer at the end of which we'll preempt the current process.  */
 static void set_preemption_timer (void);
 
-/* Same as _gst_parse_stream, but creating a reentrancy_jmpbuf.  */
-static void parse_stream_with_protection (mst_Boolean method);
+/* Same as _gst_parse_stream, but creating a reentrancy_jmpbuf.  Returns
+   true if interrupted. */
+static mst_Boolean parse_stream_with_protection (mst_Boolean method);
 
 /* Put the given process to sleep by rotating the list of processes for
    PROCESSOOP's priority (i.e. it was the head of the list and becomes
@@ -517,54 +511,28 @@ static mst_Boolean unwind_to (OOP returnContextOOP);
    doing a local return.  */
 static mst_Boolean disable_non_unwind_contexts (OOP returnContextOOP);
 
-/* Called to handle signals that are not passed to the Smalltalk
-   program, such as interrupts or segmentation violation.  In the
-   latter case, try to show a method invocation backtrace if possibly,
-   otherwise try to show where the system was in the file it was
-   processing when the error occurred.  */
-static RETSIGTYPE interrupt_handler (int sig);
-
 /* Called to preempt the current process after a specified amount
    of time has been spent in the GNU Smalltalk interpreter.  */
 #ifdef ENABLE_PREEMPTION
 static RETSIGTYPE preempt_smalltalk_process (int sig);
 #endif
 
-/* This macro acts as a block statement (if, for, while); it
-   accepts a pointer to an interp_jmp_buf and executes its body
-   so that the current process is suspended and SIGINT breaks
-   out of it.  */
-#define PROTECT_CURRENT_PROCESS_WITH(jb) \
-  for ((jb)->next = reentrancy_jmp_buf, \
-       (jb)->suspended = 0, \
-       (jb)->processOOP = get_active_process (), \
-       _gst_register_oop ((jb)->processOOP), \
-       reentrancy_jmp_buf = (jb), \
-       in_interpreter = false; \
-       !in_interpreter; \
-       in_interpreter = true, \
-       _gst_unregister_oop ((jb)->processOOP), \
-       reentrancy_jmp_buf = reentrancy_jmp_buf->next) \
-    if (setjmp (reentrancy_jmp_buf->jmpBuf) != 0) \
-      continue; \
-    else \
+/* Push an execution state for process PROCESSOOP.  The process is
+   used for two reasons: 1) it is suspended if there is a call-in
+   while the execution state is on the top of the stack; 2) it is
+   sent #userInterrupt if the user presses Ctrl-C.  */
+static void push_jmp_buf (interp_jmp_buf *jb,
+			  int for_interpreter,
+			  OOP processOOP);
 
-/* This macro acts as a block statement (if, for, while); it
-   accepts a pointer to an interp_jmp_buf and executes its body
-   so that the current process is not suspended (like in
-   asynchronous C call-outs) but SIGINT breaks out of it.  */
-#define PROTECT_FROM_INTERRUPT_WITH(jb) \
-  for ((jb)->next = reentrancy_jmp_buf, \
-       (jb)->suspended = 0, \
-       (jb)->processOOP = _gst_nil_oop, \
-       reentrancy_jmp_buf = (jb), \
-       in_interpreter = false; \
-       !in_interpreter; \
-       in_interpreter = true, \
-       reentrancy_jmp_buf = reentrancy_jmp_buf->next) \
-    if (setjmp (reentrancy_jmp_buf->jmpBuf) != 0) \
-      continue; \
-    else \
+/* Pop an execution state.  Return true if the interruption has to
+   be propagated up.  */
+static mst_Boolean pop_jmp_buf (void);
+
+/* Jump out of the top execution state.  This is used by C call-out
+   primitives to jump out repeatedly until a Smalltalk process is
+   encountered and terminated.  */
+static void stop_execution (void);
 
 /* Pick a process that is the highest-priority process different from
    the currently executing one, and schedule it for execution after
@@ -2217,14 +2185,9 @@ _gst_nvmsg_send (OOP receiver,
   /* Re-enable the previously executing process *now*, because a
      primitive might expect the current stack pointer to be that
      of the process that was executing.  */
-  if (reentrancy_jmp_buf && !--reentrancy_jmp_buf->suspended)
+  if (reentrancy_jmp_buf && !--reentrancy_jmp_buf->suspended
+      && !is_process_terminating (reentrancy_jmp_buf->processOOP))
     {
-      if (is_process_terminating (reentrancy_jmp_buf->processOOP))
-	{
-	  _gst_errorf ("Process terminated during call-out, VM confused!\n");
-	  abort ();
-	}
-
       resume_process (reentrancy_jmp_buf->processOOP, true);
       if (!IS_NIL (switch_to_process))
         change_process_context (switch_to_process);
@@ -2430,80 +2393,31 @@ _gst_restore_object_pointers (void)
   SET_EXCEPT_FLAG (true);	/* force to import registers */
 }
 
-void
-_gst_init_signals (void)
+static RETSIGTYPE
+interrupt_on_signal (int sig)
 {
-  if (!_gst_make_core_file)
-    {
-#ifdef ENABLE_JIT_TRANSLATION
-      _gst_set_signal_handler (SIGILL, interrupt_handler);
-#endif
-      _gst_set_signal_handler (SIGABRT, interrupt_handler);
-    }
-  _gst_set_signal_handler (SIGTERM, interrupt_handler);
-  _gst_set_signal_handler (SIGINT, interrupt_handler);
-  _gst_set_signal_handler (SIGFPE, interrupt_handler);
-  _gst_set_signal_handler (SIGUSR1, interrupt_handler);
-}
-
-
-void
-stop_executing (const char *msg)
-{
-  _gst_abort_execution = msg;
-  SET_EXCEPT_FLAG (true);
   if (reentrancy_jmp_buf)
-    longjmp (reentrancy_jmp_buf->jmpBuf, 1);	/* throw out from C
-						   code */
+    stop_execution ();
+  else
+    {
+      _gst_set_signal_handler (sig, SIG_DFL);
+      raise (sig);
+    }
 }
 
-
-RETSIGTYPE
-interrupt_handler (int sig)
+static void
+backtrace_on_signal_1 (mst_Boolean is_serious_error, mst_Boolean c_backtrace)
 {
-  mst_Boolean is_serious_error = true;
-  mst_Boolean in_c_code = !in_interpreter || !ip || _gst_gc_running;
+  static int reentering = -1;
 
-  switch (sig)
-    {
-    case SIGTERM:
-      is_serious_error = false;
-      break;
+  /* Avoid recursive signals */
+  reentering++;
 
-    case SIGUSR1:
-      is_serious_error = false;
-      _gst_set_signal_handler (sig, interrupt_handler);
-      break;
-
-    case SIGFPE:
-      _gst_set_signal_handler (sig, interrupt_handler);
-      return;
-
-    case SIGINT:
-      is_serious_error = false;
-      if (!_gst_non_interactive && in_interpreter)
-	{
-	  _gst_set_signal_handler (sig, interrupt_handler);
-	  stop_executing ("userInterrupt");
-	  return;
-	}
-      break;
-
-    default:
-      break;
-    }
-
-  if (sig != SIGUSR1)
-    _gst_errorf ("%s", strsignal (sig));
-
-  if (!in_c_code)
-    {
-      /* Avoid recursive signals */
-      mst_Boolean save_in_interpreter = in_interpreter;
-      in_interpreter = false;
-      _gst_show_backtrace ();
-      in_interpreter = save_in_interpreter;
-    }
+  if ((reentrancy_jmp_buf && reentrancy_jmp_buf->interpreter)
+      && !reentering
+      && ip
+      && !_gst_gc_running)
+    _gst_show_backtrace ();
   else
     {
       if (is_serious_error)
@@ -2512,8 +2426,7 @@ interrupt_handler (int sig)
 #ifdef HAVE_EXECINFO_H
       /* Don't print a backtrace, for example, if exiting during a
 	 compilation.  */
-      if ((_gst_verbosity == 3 && (ip || _gst_gc_running))
-	  || is_serious_error || sig == SIGUSR1)
+      if (c_backtrace && !reentering)
 	{
           PTR array[11];
           size_t size = backtrace (array, 11);
@@ -2522,20 +2435,42 @@ interrupt_handler (int sig)
 #endif
     }
 
-  switch (sig)
-    {
-    case SIGUSR1:
-      return;
-
-    case SIGTERM:
-    case SIGINT:
-      exit (0);
-
-    default:
-      _gst_set_signal_handler (sig, SIG_DFL);
-      raise (sig);
-    }
+  reentering--;
 }
+
+static RETSIGTYPE
+backtrace_on_signal (int sig)
+{
+  _gst_errorf ("%s", strsignal (sig));
+  _gst_set_signal_handler (sig, backtrace_on_signal);
+  backtrace_on_signal_1 (sig != SIGTERM, sig != SIGTERM);
+  _gst_set_signal_handler (sig, SIG_DFL);
+  raise (sig);
+}
+
+static RETSIGTYPE
+user_backtrace_on_signal (int sig)
+{
+  _gst_set_signal_handler (sig, user_backtrace_on_signal);
+  backtrace_on_signal_1 (false, true);
+}
+
+void
+_gst_init_signals (void)
+{
+  if (!_gst_make_core_file)
+    {
+#ifdef ENABLE_JIT_TRANSLATION
+      _gst_set_signal_handler (SIGILL, backtrace_on_signal);
+#endif
+      _gst_set_signal_handler (SIGABRT, backtrace_on_signal);
+    }
+  _gst_set_signal_handler (SIGTERM, backtrace_on_signal);
+  _gst_set_signal_handler (SIGINT, interrupt_on_signal);
+  _gst_set_signal_handler (SIGFPE, SIG_IGN);
+  _gst_set_signal_handler (SIGUSR1, user_backtrace_on_signal);
+}
+
 
 void
 _gst_show_backtrace (void)
@@ -2683,10 +2618,55 @@ _gst_set_primitive_attributes (int primitive, prim_table_entry *pte)
 }
 
 void
+push_jmp_buf (interp_jmp_buf *jb, int for_interpreter, OOP processOOP)
+{
+  jb->next = reentrancy_jmp_buf;
+  jb->processOOP = processOOP;
+  jb->suspended = 0;
+  jb->interpreter = for_interpreter;
+  jb->interrupted = false;
+  _gst_register_oop (processOOP);
+  reentrancy_jmp_buf = jb;
+}
+
+mst_Boolean
+pop_jmp_buf (void)
+{
+  interp_jmp_buf *jb = reentrancy_jmp_buf;
+  reentrancy_jmp_buf = jb->next;
+
+  if (jb->interpreter && !is_process_terminating (jb->processOOP))
+    _gst_terminate_process (jb->processOOP);
+    
+  _gst_unregister_oop (jb->processOOP);
+  return jb->interrupted && reentrancy_jmp_buf;
+}
+
+void
+stop_execution (void)
+{
+  reentrancy_jmp_buf->interrupted = true;
+
+  if (reentrancy_jmp_buf->interpreter
+      && !is_process_terminating (reentrancy_jmp_buf->processOOP))
+    {
+      _gst_abort_execution = "userInterrupt";
+      SET_EXCEPT_FLAG (true);
+      if (get_active_process () != reentrancy_jmp_buf->processOOP)
+	resume_process (reentrancy_jmp_buf->processOOP, true);
+    }
+  else
+    longjmp (reentrancy_jmp_buf->jmpBuf, 1);
+}
+
+mst_Boolean
 parse_stream_with_protection (mst_Boolean method)
 {
-  interp_jmp_buf localJmpBuf;
+  interp_jmp_buf jb;
 
-  PROTECT_CURRENT_PROCESS_WITH (&localJmpBuf)
+  push_jmp_buf (&jb, false, get_active_process ());
+  if (setjmp (jb.jmpBuf) == 0)
     _gst_parse_stream (method);
+
+  return pop_jmp_buf ();
 }
