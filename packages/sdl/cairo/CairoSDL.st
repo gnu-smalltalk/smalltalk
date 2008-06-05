@@ -166,7 +166,7 @@ the surface.'>
 	    glMatrixMode: const glProjection;
 	    glPushMatrix;
 	    glLoadIdentity;
-	    glOrtho: 0.0 right: 1.0 bottom: 0.0 top: 1.0 near: -1.0 far: 1.0;
+	    glOrtho: 0.0 right: 1.0 bottom: 1.0 top: 0.0 near: -1.0 far: 1.0;
 	
 	    glBindTexture: const glTextureRectangleArb to: textureId;
 

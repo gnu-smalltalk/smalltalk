@@ -1,3 +1,7 @@
+2008-06-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* CairoPattern.st: Rewrite #cachedPattern.
+
 2008-06-03  Michael Bridgen  <mikeb@lshift.net>
 
 	* CairoTransform.st: Fix bugs.

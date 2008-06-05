@@ -30,6 +30,7 @@
 
 
 PackageLoader fileInPackage: #CairoSDL.
+PackageLoader fileInPackage: #'LibSDL_GL'.
 
 SDL.SdlEventHandler subclass: CairoDemo [
     | context surface |
@@ -163,7 +164,7 @@ SDL.SdlEventHandler subclass: CairoDemo [
     ]
 
     png [
-	| png scale translate |
+	| png scale translate surf |
 	(File exists: 'demo.png') ifFalse: [ ^self ].
 	png := CairoPngSurface on: 'demo.png'.
 	scale := 256.0 / (png extent x max: png extent y).
@@ -171,7 +172,10 @@ SDL.SdlEventHandler subclass: CairoDemo [
 	context
 	    translateBy: translate;
 	    scaleBy: scale;
-	    paintWith: (SurfacePattern on: png)
+	    paintWith: (surf := SurfacePattern on: png).
+
+	surf release.
+	png release
     ]
 	
     fillRule [
@@ -255,10 +259,12 @@ SDL.SdlEventHandler subclass: CairoDemo [
 	    resizable: true;
 	    extent: self displaySize.
 
+        "SdlDisplay current: SdlGLDisplay new."
         SdlDisplay current eventSource handler: self; startEventLoop.
         Processor activeProcess terminateOnQuit.
         surface := CairoSdlSurface on: SdlDisplay current.
 	self draw.
+	(CairoPngSurface on: 'demo.png' with: surface) save.
     ]
     
     handleResize: size [
@@ -272,7 +278,6 @@ SDL.SdlEventHandler subclass: CairoDemo [
 	    context paintWith: Color white.
 	    self samples keysAndValuesDo: [ :index :sel |
 	        self draw: sel inside: (self clippingRectangle: index) ] ].
-	(CairoPngSurface on: 'demo.png' with: surface) save.
     ]
     
     draw: sel inside: rect [

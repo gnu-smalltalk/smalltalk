@@ -1,3 +1,7 @@
+2008-06-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* examples/CairoDemo.st: Minor changes.
+
 2008-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/Ansi.st: Remove one testcase.

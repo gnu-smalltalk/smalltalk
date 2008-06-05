@@ -83,7 +83,7 @@ BlockClosure extend [
 ]
 
 Object subclass: CairoPattern [
-    | pattern canonical |
+    | cachedPattern canonical |
 
     Patterns := nil.
     CairoPattern class >> initialize [
@@ -105,36 +105,27 @@ Object subclass: CairoPattern [
 	    Patterns := WeakKeyDictionary new].
     ]
 
-    pattern [
-	"Return the C representation of the pattern if the receiver
-	 is present in the Patterns class variable."
+    cachedPattern [
+	"Return the C representation of the pattern."
 
 	<category: 'private-persistence'>
-	^pattern
+	cachedPattern isNil ifFalse: [ ^cachedPattern ].
+	Patterns at: self put: self.
+	self addToBeFinalized.
+	canonical := self.
+	^cachedPattern := self createCachedPattern
     ]
 
-    cachedPattern [
+    pattern [
 	"Return the C representation of the pattern, looking it up
 	 in the Patterns class variable and associating it to the
 	 receiver if none is found."
 
 	<category: 'private-persistence'>
-	[canonical isNil] whileTrue: [
-	    Patterns
-		at: self
-		ifAbsentPut: [
-		    self addToBeFinalized.
-		    pattern := self createCachedPattern.
-		    canonical := self ].
-	    "Keep the canonical object alive so we don't need to
-	     reference count its pattern.  The #at:ifAbsent: call
-	     makes the code resistant to finalization races."
-	    canonical := pattern isNil
-	        ifTrue: [Patterns at: self ifAbsent: [nil]]
-		ifFalse: [self]].
+	canonical isNil
+	    ifTrue: [ canonical := Patterns at: self ifAbsentPut: [ self ] ].
 
-	pattern isNil ifTrue: [ ^canonical cachedPattern ].
-	^pattern
+	^canonical cachedPattern
     ]
 
     createCachedPattern [
@@ -150,13 +141,13 @@ Object subclass: CairoPattern [
 	 in the canonical object, not in this one."
 
 	<category: 'private-persistence'>
-	pattern := nil.
+	cachedPattern := nil.
     ]
 
     finalize [
 	<category: 'private-persistence'>
-	pattern ifNotNil: [ :p |
-	    pattern := nil.
+	cachedPattern ifNotNil: [ :p |
+	    cachedPattern := nil.
 	    Cairo patternDestroy: p ].
     ]
 	
@@ -180,14 +171,14 @@ Object subclass: CairoPattern [
 	"Private - Used by Cairo to do double-dispatch on #mask:"
 
 	<category: 'cairo double dispatch'>
-	Cairo.Cairo mask: context pattern: self cachedPattern
+	Cairo.Cairo mask: context pattern: self pattern
     ]
 
     setSourceOn: context [
 	"Private - Used by Cairo to do double-dispatch on #source:"
 
 	<category: 'cairo double dispatch'>
-	Cairo setSource: context source: self cachedPattern
+	Cairo setSource: context source: self pattern
     ]
 
     on: context withSourceDo: paintBlock [
@@ -449,7 +440,7 @@ GradientPattern subclass: RadialGradient [
 	^super = anObject and: [
 	    point0 = anObject from and: [
 	    r0 = anObject fromRadius and: [
-	    point0 = anObject to and: [
+	    point1 = anObject to and: [
 	    r1 = anObject toRadius ]]]]
     ]
 

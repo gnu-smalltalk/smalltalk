@@ -1,3 +1,7 @@
+2008-06-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* cairo/CairoSDL.st: Flip the projection matrix.
+
 2008-06-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* cairo/CairoSDL.st: Add GL_APPLE_client_storage and
