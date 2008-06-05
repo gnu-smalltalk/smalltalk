@@ -195,6 +195,15 @@ Glut extend [
 	^callbacks
     ]
 
+    addCallback: anEvent to: aBlock [
+	<category: 'callbacks definition'>
+	callbacks isNil 
+	    ifTrue: [callbacks := Array new: Glut lastEventIndex withAll: nil].
+	callbacks at: anEvent put: (Array with: aBlock with: nil).
+	self connect: anEvent.
+	^self
+    ]
+
     addCallback: anEvent to: anObject selector: aSelector [
 	<category: 'callbacks definition'>
 	callbacks isNil 
