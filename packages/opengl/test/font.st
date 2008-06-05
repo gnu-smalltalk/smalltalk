@@ -151,7 +151,7 @@ Object subclass: Font [
 
 	aWindow glPushAttrib: OpenGLInterface glListBit.
 	aWindow glListBase: self fontOffset.
-	aWindow glCallLists: aString size type: OpenGLInterface glUnsignedByte lists: aString.
+	aWindow glCallLists: aString.
 	aWindow glPopAttrib.
 	]
 

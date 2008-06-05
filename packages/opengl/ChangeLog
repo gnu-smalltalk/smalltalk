@@ -1,3 +1,12 @@
+2008-06-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gstopengl.c: Change generic gst_opengl_oop_to_type to
+	gst_opengl_get_gl_type.
+	* gstGl.c: Use it to avoid conversions of the glCallLists
+	arguments if possible.	Accept the range of call lists array
+	that has to be rendered.  Use gst_opengl_oop_to_int_array.
+	* OpenGL.st: Change arguments of glCallLists.
+
 2008-06-04  Olivier Blanc  <olivier.blanc@laposte.net>
 
 	* OpenGL.st: Add more support for the drawing lists.

@@ -530,7 +530,13 @@ See OpenGL programming guide for more informations.'>
 	
     ]
 
-    glCallLists: n type: type lists: lists [
+    glCallLists: lists [
+	<category: 'Display List'>
+	^self glCallLists: 1 to: lists size lists: lists
+	
+    ]
+
+    glCallLists: from to: to lists: lists [
 	<category: 'Display List'>
 	<cCall: 'glCallLists' returning: #void args: #( #int #int #smalltalk ) >
 	

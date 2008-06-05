@@ -1002,7 +1002,7 @@ gst_opengl_glDeleteTextures ( OOP texturesOOP )
 
   /* retrieving datas from OpenGL */
   textures = (GLint *) alloca (sizeof (GLint) * size);
-  textures = (GLint*)gst_opengl_oop_to_type(GL_INT, textures, texturesOOP, size);
+  textures = gst_opengl_oop_to_int_array (textures, texturesOOP, size);
   if (!textures)
     return;
 
@@ -1016,23 +1016,40 @@ gst_opengl_glBitmap( GLsizei width, GLsizei height,
 					 GLfloat xmove, GLfloat ymove,
 					 OOP bitmap )
 {
-  int size = (width>>3) * height ;
-  GLubyte* openglBitmap = (GLubyte*) alloca (sizeof(GLubyte) * size) ;
-  openglBitmap = (GLubyte*)gst_opengl_oop_to_type(GL_UNSIGNED_BYTE, openglBitmap, bitmap, size) ;
-  if(!openglBitmap)
-	return ;
-  glBitmap(width, height, xorig, yorig, xmove, ymove, openglBitmap) ;
+  int size = (width >> 3) * height;
+  GLubyte* openglBitmap = (GLubyte *) alloca (sizeof(GLubyte) * size);
+  openglBitmap = gst_opengl_oop_to_ubyte_array (openglBitmap, bitmap, size);
+  if (!openglBitmap)
+    return;
+
+  glBitmap(width, height, xorig, yorig, xmove, ymove, openglBitmap);
 }
 
 
 static void 
-gst_opengl_glCallLists( GLsizei n, GLenum type,	OOP listsOOP )
+gst_opengl_glCallLists( GLsizei first, GLsizei last, OOP listsOOP )
 {
-  GLvoid *lists = alloca(gst_opengl_get_type_size(type) * n) ;
-  lists = gst_opengl_oop_to_type(type, lists, listsOOP, n) ;
-  if(!lists)
-	return ;
-  glCallLists(n, type, lists) ;
+  GLenum type = gst_opengl_get_gl_type (listsOOP);
+  GLsizei size = vm_proxy->basicSize (listsOOP);
+  GLsizei elt_size;
+  GLubyte *lists;
+  if (first < 1 || last > size || last < first)
+    return;
+
+  if (type == -1)
+    {
+      type = GL_INT;
+      lists = alloca (sizeof (GLint) * size);
+      lists = (GLubyte *)
+	gst_opengl_oop_to_int_array ((GLint *) lists, listsOOP, size);
+      if(!lists)
+	return;
+    }
+  else
+    lists = vm_proxy->OOPIndexedBase (listsOOP);
+
+  elt_size = gst_opengl_get_type_size (type);
+  glCallLists (last - first + 1, type, lists + (first - 1) * elt_size);
 }
 
 void gst_initModule_gl()
@@ -1043,7 +1060,7 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glArrayElement", glArrayElement);
   vm_proxy->defineCFunc ("glBegin", glBegin);
   vm_proxy->defineCFunc ("glBindTexture", glBindTexture);
-  vm_proxy->defineCFunc ("glBitmap", gst_opengl_glBitmap) ;
+  vm_proxy->defineCFunc ("glBitmap", gst_opengl_glBitmap);
   vm_proxy->defineCFunc ("glBlendEquation", glBlendEquation);
   vm_proxy->defineCFunc ("glBlendFunc", glBlendFunc);
   vm_proxy->defineCFunc ("glCallList", glCallList); 

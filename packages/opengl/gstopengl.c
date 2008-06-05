@@ -260,7 +260,7 @@ gst_opengl_oop_to_int_array (GLint *dest, OOP sourceOOP, int n)
 	{
 	  OOP *p = base;
 	  for (i = 0; i < n; i++)
-	    dest[i] = vm_proxy->OOPToFloat (p[i]);
+	    dest[i] = vm_proxy->OOPToC (p[i]);
 	  break;
 	}
 
@@ -316,7 +316,7 @@ gst_opengl_oop_to_ubyte_array (GLubyte *dest, OOP sourceOOP, int n)
 	{
 	  OOP *p = base;
 	  for (i = 0; i < n; i++)
-	    dest[i] = (GLubyte)vm_proxy->OOPToInt (p[i]);
+	    dest[i] = (GLubyte)vm_proxy->OOPToC (p[i]);
 	  break;
 	}
 
@@ -371,101 +371,45 @@ gst_opengl_get_type_size (GLenum type)
   return 0;
 }
 
-GLvoid*
-gst_opengl_oop_to_type(GLenum type, void* dest, OOP sourceOOP, GLsizei n)
+GLenum
+gst_opengl_get_gl_type (OOP sourceOOP)
 {
   enum gst_indexed_kind kind;
-  void *base; 
-  int size;
-
-  size = vm_proxy->basicSize (sourceOOP);
-  if (size < n)
-    return NULL;
 
   kind = vm_proxy->OOPIndexedKind (sourceOOP);
-  base = vm_proxy->OOPIndexedBase (sourceOOP);
-
 
   switch (kind)
-	{
-
-#define LOOP_TYPE(type)						\
-  {								\
-    int i; \
-    type *p = base;						\
-    type *d = (type *)dest;	\
-    for (i = 0; i < n; i++)					\
-      d[i] = p[i];						\
-  }								\
-  break;
-	case GST_ISP_CHARACTER:
-	  return base;
-	  break;
-	case GST_ISP_SCHAR:
-	  return base;
-	  break;
-	case GST_ISP_UCHAR:
-	  return base;
-	  break;
-	case GST_ISP_SHORT:
-	  LOOP_TYPE (short);
-	case GST_ISP_USHORT:
-	  LOOP_TYPE (unsigned short);
-	case GST_ISP_INT:
-	  LOOP_TYPE (int);
-	case GST_ISP_UINT:
-	  LOOP_TYPE (unsigned int);
-	case GST_ISP_FLOAT:
-	case GST_ISP_DOUBLE:
-	  LOOP_TYPE (float);
-	  break;
-	case GST_ISP_POINTER :
-	  {
-
-#define POINTER_LOOP(type, operation)				\
-  {								\
-    int i;							\
-    OOP *p = base;						\
-    type *d = (type*)dest;					\
-    for (i = 0; i < n; i++)					\
-      d[i] = (type)vm_proxy->operation (p[i]);			\
-  }
-
-	    switch(type) 
-	      {	
-	      case GL_BYTE:
-	      case GL_UNSIGNED_BYTE:
-	    	POINTER_LOOP(GLubyte, OOPToC);
-	    	break;
-	      case GL_SHORT:
-	      case GL_UNSIGNED_SHORT:
-	    	POINTER_LOOP(GLushort, OOPToC);
-	    	break;
-	      case GL_INT:
-	      case GL_UNSIGNED_INT:
-	    	POINTER_LOOP(GLuint, OOPToC);
-	    	break;
-	      case GL_FLOAT:
-	    	POINTER_LOOP(GLfloat, OOPToFloat);
-	      case GL_DOUBLE:
-	    	POINTER_LOOP(GLdouble, OOPToFloat);
-	    	break;
-	      case GL_2_BYTES:
-	      case GL_3_BYTES:
-	      case GL_4_BYTES:
-	    	POINTER_LOOP(GLubyte, OOPToC);
-	    	break;
-	      default:
-	    	return NULL;
-	    	break;
-	      }
-	  }
-	  break;
-	default : 
-	  return NULL;
-	}
-  return dest;
+    {
+    case GST_ISP_SCHAR:
+      return GL_BYTE;
+      break;
+    case GST_ISP_CHARACTER:
+    case GST_ISP_UCHAR:
+      return GL_UNSIGNED_BYTE;
+      break;
+    case GST_ISP_SHORT:
+      return GL_SHORT;
+      break;
+    case GST_ISP_USHORT:
+      return GL_UNSIGNED_SHORT;
+      break;
+    case GST_ISP_INT:
+      return GL_INT;
+      break;
+    case GST_ISP_UINT:
+      return GL_UNSIGNED_INT;
+      break;
+    case GST_ISP_FLOAT:
+      return GL_FLOAT;
+      break;
+    case GST_ISP_DOUBLE:
+      return GL_DOUBLE;
+      break;
+    default:
+      return -1;
+    }
 }
+
 
 void
 gst_initModule(VMProxy *proxy)
