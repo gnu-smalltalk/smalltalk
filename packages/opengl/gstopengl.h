@@ -82,5 +82,8 @@ extern GLfloat *gst_opengl_oop_to_array_2 (GLfloat *, OOP, int, int);
 extern GLfloat *gst_opengl_oop_to_array (GLfloat *, OOP, int);
 extern GLint *gst_opengl_oop_to_int_array (GLint *, OOP, int);
 extern GLdouble *gst_opengl_oop_to_dbl_array (GLdouble *, OOP, int);
+extern GLubyte *gst_opengl_oop_to_ubyte_array (GLubyte *, OOP, int);
+extern size_t gst_opengl_get_type_size (GLenum type) ;
+extern GLvoid* gst_opengl_oop_to_type(GLenum type, void* dest, OOP sourceOOP, GLsizei n) ;
 
 #endif

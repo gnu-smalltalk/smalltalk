@@ -1002,7 +1002,7 @@ gst_opengl_glDeleteTextures ( OOP texturesOOP )
 
   /* retrieving datas from OpenGL */
   textures = (GLint *) alloca (sizeof (GLint) * size);
-  textures = gst_opengl_oop_to_int_array (textures, texturesOOP, size);
+  textures = (GLint*)gst_opengl_oop_to_type(GL_INT, textures, texturesOOP, size);
   if (!textures)
     return;
 
@@ -1010,6 +1010,30 @@ gst_opengl_glDeleteTextures ( OOP texturesOOP )
   glDeleteTextures (size, textures);
 }
 
+static void 
+gst_opengl_glBitmap( GLsizei width, GLsizei height,
+					 GLfloat xorig, GLfloat yorig,
+					 GLfloat xmove, GLfloat ymove,
+					 OOP bitmap )
+{
+  int size = (width>>3) * height ;
+  GLubyte* openglBitmap = (GLubyte*) alloca (sizeof(GLubyte) * size) ;
+  openglBitmap = (GLubyte*)gst_opengl_oop_to_type(GL_UNSIGNED_BYTE, openglBitmap, bitmap, size) ;
+  if(!openglBitmap)
+	return ;
+  glBitmap(width, height, xorig, yorig, xmove, ymove, openglBitmap) ;
+}
+
+
+static void 
+gst_opengl_glCallLists( GLsizei n, GLenum type,	OOP listsOOP )
+{
+  GLvoid *lists = alloca(gst_opengl_get_type_size(type) * n) ;
+  lists = gst_opengl_oop_to_type(type, lists, listsOOP, n) ;
+  if(!lists)
+	return ;
+  glCallLists(n, type, lists) ;
+}
 
 void gst_initModule_gl()
 {
@@ -1019,10 +1043,11 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glArrayElement", glArrayElement);
   vm_proxy->defineCFunc ("glBegin", glBegin);
   vm_proxy->defineCFunc ("glBindTexture", glBindTexture);
+  vm_proxy->defineCFunc ("glBitmap", gst_opengl_glBitmap) ;
   vm_proxy->defineCFunc ("glBlendEquation", glBlendEquation);
   vm_proxy->defineCFunc ("glBlendFunc", glBlendFunc);
   vm_proxy->defineCFunc ("glCallList", glCallList); 
-  vm_proxy->defineCFunc ("glCallLists", glCallLists); 
+  vm_proxy->defineCFunc ("glCallLists", gst_opengl_glCallLists); 
   vm_proxy->defineCFunc ("glClear", glClear); 
   vm_proxy->defineCFunc ("glClearAccum", glClearAccum);
   vm_proxy->defineCFunc ("glClearColor", glClearColor);
@@ -1435,6 +1460,7 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glMultiTexCoord4ivARB", glMultiTexCoord4ivARB);
   vm_proxy->defineCFunc ("glMultiTexCoord4sARB", glMultiTexCoord4sARB);
   vm_proxy->defineCFunc ("glMultiTexCoord4svARB", glMultiTexCoord4svARB);
+  
 #endif
   
 #if 0

@@ -33,4 +33,5 @@
   <file>test/test2.st</file>
   <file>test/texturesurf.st</file>
   <file>test/unproject.st</file>
+  <file>test/font.st</file>
 </package>

@@ -1,3 +1,11 @@
+2008-06-04  Olivier Blanc  <olivier.blanc@laposte.net>
+
+	* OpenGL.st: Add more support for the drawing lists.
+	* gstopengl.h: Add more support for the drawing lists.
+	* gstopengl.c: Add a generic conversion tool to GL arrays.
+	* gstGl.c: Add more support for bitmaps and drawing lists.
+	* test/font.st: New.
+
 2008-06-03  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gstGluTess.c: Don't set glEdgeFlag callback.

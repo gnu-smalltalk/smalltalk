@@ -345,6 +345,12 @@ See OpenGL programming guide for more informations.'>
 	
     ]
 
+    glRasterPos2i: aX y: aY [
+	<category: 'GL'>
+	<cCall: 'glRasterPos2i' returning: #void args: #(#int #int)>
+	
+    ]
+
     glRasterPos3f: aX y: aY z: aZ [
 	<category: 'GL'>
 	<cCall: 'glRasterPos3f' returning: #void args: #(#float #float #float)>
@@ -526,7 +532,7 @@ See OpenGL programming guide for more informations.'>
 
     glCallLists: n type: type lists: lists [
 	<category: 'Display List'>
-	<cCall: 'glCallLists' returning: #void args: #( #int #int #cObject ) >
+	<cCall: 'glCallLists' returning: #void args: #( #int #int #smalltalk ) >
 	
     ]
 
@@ -710,6 +716,11 @@ See OpenGL programming guide for more informations.'>
 	<category: 'Get functions'>
 	<cCall: 'glGetString' returning: #string args: #(#int)>
 	
+    ]
+	
+    glBitmap: w height: h x: x  y: y moveX: mx moveY: my pixels: pixels [
+	<category: 'C Interfacefunctions'>
+	<cCall: 'glBitmap' returning: #void args: #(#int #int #float #float #float #float #smalltalk )>
     ]
 ]
 
