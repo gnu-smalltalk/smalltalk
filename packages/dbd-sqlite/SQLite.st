@@ -107,6 +107,21 @@ SQLite3Handle subclass: SQLite3StmtHandle [
         <cCall: 'gst_sqlite3_exec' returning: #int args: #(#self)>
     ]
     
+    bindingAt: index put: value [
+        <category: 'sqlite3 wrapper'>
+        <cCall: 'gst_sqlite3_bind' returning: #int args: #(#self #smalltalk #smalltalk)>
+    ]
+    
+    clearBindings [
+        <category: 'sqlite3 wrapper'>
+        <cCall: 'gst_sqlite3_clear_bindings' returning: #int args: #(#self)>
+    ]
+    
+    reset [
+        <category: 'sqlite3 wrapper'>
+        <cCall: 'gst_sqlite3_reset' returning: #int args: #(#self)>
+    ]
+    
     colCount [
         <category: 'accessing'>
         ^colCount

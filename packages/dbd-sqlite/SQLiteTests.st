@@ -146,6 +146,53 @@ SQLiteBaseTest subclass: SQLiteRowTestCase [
     ]
 ]
 
+
+SQLiteBaseTest subclass: SQLitePreparedStatementTestCase [
+    | stmt stmt2 stmt3 |
+    
+    setUp [
+        super setUp.
+        stmt := self connection prepare: 'SELECT * FROM test WHERE int_field = ?'.
+        stmt2 := self connection prepare: 'SELECT * FROM test WHERE int_field = ? AND string_field = ? AND double_field = ?'.
+        stmt3 := self connection prepare: 'SELECT * FROM test WHERE int_field = :i AND string_field = :s AND double_field = :d'.
+    ]
+    
+    testExecute [
+        | rs row |
+        "execute with one parameter"
+        rs := stmt executeWith: 1.
+        row := rs rows at: 1.
+        self should: [(row atIndex: 1) = 1].
+        
+        "re-execute so that we are sure that the statement is reset"
+        rs := stmt executeWith: 2.
+        row := rs rows at: 1.
+        self should: [(row atIndex: 1) = 2].
+    ]
+    
+    testExecuteWithAllNamed [
+        | rs row |
+        rs := stmt3 executeWithAll: (Dictionary from: {
+	    ':i' -> 1. ':s' -> 'one'. ':d' -> 1.0 }).
+        row := rs rows at: 1.
+        self should: [(row atIndex: 1) = 1].
+        
+        rs := stmt3 executeWithAll: (Dictionary from: {
+	    ':i' -> 1. ':s' -> 'two'. ':d' -> 3.0 }).
+        self should: [rs rows size = 0].
+    ]
+    
+    testExecuteWithAll [
+        | rs row |
+        rs := stmt2 executeWithAll: #(1 'one' 1.0).
+        row := rs rows at: 1.
+        self should: [(row atIndex: 1) = 1].
+        
+        rs := stmt2 executeWithAll: #(1 'two' 3.0).
+        self should: [rs rows size = 0].
+    ]
+]
+
 TestSuite subclass: SQLiteTestSuite [
     SQLiteTestSuite class >> suite [
         ^super new initialize
@@ -162,5 +209,9 @@ TestSuite subclass: SQLiteTestSuite [
         self addTest: (SQLiteRowTestCase selector: #testAtIndex).
 
         self addTest: (SQLiteDMLResultSetTestCase selector: #testRowsAffected).
+        
+        self addTest: (SQLitePreparedStatementTestCase selector: #testExecute).
+        self addTest: (SQLitePreparedStatementTestCase selector: #testExecuteWithAll).
+        self addTest: (SQLitePreparedStatementTestCase selector: #testExecuteWithAllNamed).
     ]
 ]

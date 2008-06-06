@@ -52,6 +52,7 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "gstpub.h"
 #include "sqlite3.h"
 
@@ -76,7 +77,7 @@ typedef struct st_SQLite3StmtHandle
 static VMProxy *vmProxy;
 
 
-int
+static int
 gst_sqlite3_open (OOP self, const char *db_name)
 {
   int rc;
@@ -92,7 +93,7 @@ gst_sqlite3_open (OOP self, const char *db_name)
   return rc;
 }
 
-int
+static int
 gst_sqlite3_close (OOP self)
 {
   sqlite3 *db;
@@ -103,7 +104,7 @@ gst_sqlite3_close (OOP self)
   return sqlite3_close (db);
 }
 
-int
+static int
 gst_sqlite3_prepare (OOP self, const char *sql)
 {
   int rc, i, cols;
@@ -149,7 +150,7 @@ gst_sqlite3_prepare (OOP self, const char *sql)
   return rc;
 }
 
-int
+static int
 gst_sqlite3_exec (OOP self)
 {
   int rc;
@@ -205,7 +206,104 @@ gst_sqlite3_exec (OOP self)
   return rc;
 }
 
-const char *
+static int
+gst_sqlite3_bind (OOP self, OOP key, OOP value)
+{
+    sqlite3_stmt *stmt;
+    SQLite3StmtHandle h;
+    int index;
+    
+    h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
+    if (h->stmt == vmProxy->nilOOP)
+        return SQLITE_MISUSE;
+        
+    stmt = (sqlite3_stmt *) vmProxy->OOPToCObject (h->stmt);
+    if (vmProxy->objectIsKindOf (key, vmProxy->smallIntegerClass))
+      index = vmProxy->OOPToInt (key);
+
+    else if (vmProxy->objectIsKindOf (key, vmProxy->stringClass))
+      {
+	char *name = vmProxy->OOPToString (key);
+	index = sqlite3_bind_parameter_index(stmt, name);
+	free (name);
+	if (index == 0)
+	  return SQLITE_OK;
+      }
+
+    else
+      return -1;
+
+    if (vmProxy->objectIsKindOf (value, vmProxy->smallIntegerClass))
+#if SIZEOF_LONG == 4
+        return sqlite3_bind_int (stmt, index, vmProxy->OOPToInt (value));
+#else
+        return sqlite3_bind_int64 (stmt, index,
+				   (sqlite_int64) vmProxy->OOPToInt (value));
+#endif
+        
+    if (vmProxy->objectIsKindOf (value, vmProxy->stringClass)
+	|| vmProxy->objectIsKindOf (value, vmProxy->byteArrayClass))
+        return sqlite3_bind_text (stmt, index, vmProxy->OOPIndexedBase (value),
+				  vmProxy->basicSize (value), SQLITE_TRANSIENT);
+        
+    if (vmProxy->objectIsKindOf (value, vmProxy->floatDClass))
+        return sqlite3_bind_double (stmt, index, vmProxy->OOPToFloat (value));
+        
+    if (value == vmProxy->nilOOP)
+        return sqlite3_bind_null (stmt, index);
+
+    return -1;
+}
+
+#ifndef HAVE_LIBSQLITE3_SQLITE3_CLEAR_BINDINGS
+#define sqlite3_clear_bindings my_sqlite3_clear_bindings
+
+static int
+sqlite3_clear_bindings (sqlite3_stmt *stmt)
+{
+  int n = sqlite3_bind_parameter_count (stmt);
+  int index;
+
+  for (index = 1; index <= n; index++)
+    {
+      int result = sqlite3_bind_null (stmt, index);
+      if (result != SQLITE_OK)
+	return result;
+    }
+
+  return SQLITE_OK;
+}
+
+#endif
+static int 
+gst_sqlite3_clear_bindings (OOP self) 
+{
+    sqlite3_stmt *stmt;
+    SQLite3StmtHandle h;
+    
+    h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
+    if (h->stmt == vmProxy->nilOOP)
+        return SQLITE_MISUSE;
+        
+    stmt = (sqlite3_stmt *) vmProxy->OOPToCObject (h->stmt);
+    return sqlite3_clear_bindings (stmt);   
+}
+
+static int 
+gst_sqlite3_reset (OOP self) 
+{
+    sqlite3_stmt *stmt;
+    SQLite3StmtHandle h;
+    
+    h = (SQLite3StmtHandle) OOP_TO_OBJ (self);
+    if (h->stmt == vmProxy->nilOOP)
+        return SQLITE_MISUSE;
+        
+    stmt = (sqlite3_stmt *) vmProxy->OOPToCObject (h->stmt);
+    return sqlite3_reset (stmt);   
+}
+
+static const char *
 gst_sqlite3_error_message (OOP self)
 {
   sqlite3 *db;
@@ -217,7 +315,7 @@ gst_sqlite3_error_message (OOP self)
   return sqlite3_errmsg (db);
 }
 
-int
+static int
 gst_sqlite3_finalize (OOP self)
 {
   sqlite3_stmt *stmt;
@@ -232,7 +330,7 @@ gst_sqlite3_finalize (OOP self)
   return sqlite3_finalize (stmt);
 }
 
-int
+static int
 gst_sqlite3_changes (OOP self)
 {
   sqlite3 *db;
@@ -252,6 +350,9 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("gst_sqlite3_close", gst_sqlite3_close);
   vmProxy->defineCFunc ("gst_sqlite3_prepare", gst_sqlite3_prepare);
   vmProxy->defineCFunc ("gst_sqlite3_exec", gst_sqlite3_exec);
+  vmProxy->defineCFunc ("gst_sqlite3_bind", gst_sqlite3_bind);
+  vmProxy->defineCFunc ("gst_sqlite3_clear_bindings", gst_sqlite3_clear_bindings);
+  vmProxy->defineCFunc ("gst_sqlite3_reset", gst_sqlite3_reset);
   vmProxy->defineCFunc ("gst_sqlite3_changes", gst_sqlite3_changes);
   vmProxy->defineCFunc ("gst_sqlite3_error_message", gst_sqlite3_error_message);
   vmProxy->defineCFunc ("gst_sqlite3_finalize", gst_sqlite3_finalize);

@@ -1,3 +1,10 @@
+2008-06-07  Daniele Sciascia  <daniele.sciascia@gmail.com>
+
+	* SQLite.st: Add bindings for prepared statements.
+	* SQLiteTests.st: Add tests for prepared statements.
+	* Statement.st: Implement #executeWithAll:.
+	* sqlite3.c.st: Add and export functions for prepared statements.
+
 2008-03-19  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sqlite3.c: Fix GC problems.
