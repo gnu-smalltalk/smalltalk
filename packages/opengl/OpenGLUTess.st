@@ -160,7 +160,7 @@ CObject subclass: Tesselator [
 	
     ]
 
-    connect: aCallback to: aBlock [
+    callback: aCallback to: aBlock [
 	<category: 'internal - callback definition'>
 	"Associate a callback to a block"
 	callbacks ifNil: [callbacks := Dictionary new].

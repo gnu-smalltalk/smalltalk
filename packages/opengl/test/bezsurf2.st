@@ -71,7 +71,7 @@ Object subclass: OpenGLTest [
 			    bitOr: Glut glutDepth).
 		aWindow glutInitWindowSize: (Point x: 500 y: 500).
 		aWindow glutInitWindowPosition: (Point x: 100 y: 100).
-		windowNumber := aWindow glutCreateWindow: 'Une sphere...'.
+		windowNumber := aWindow glutCreateWindow: 'Une surface de Bezier...'.
 
 		"Init window color and shading model"
 		aWindow glClearColor: Color black.
@@ -125,13 +125,12 @@ Object subclass: OpenGLTest [
                 aWindow glEnable: OpenGLInterface glLight0.
                 aWindow glEnable: OpenGLInterface glDepthTest.
 		aWindow 
-		    addCallback: Glut displayFuncEvent
-		    to: self
-		    selector: #display.
+		    callback: Glut displayFuncEvent
+		    to: [self display].
 		aWindow 
-		    addCallback: Glut reshapeFuncEvent
-		    to: self
-		    selector: #reshape:height:]
+		    callback: Glut reshapeFuncEvent
+		    to: [:w :h | self reshape: w height: h]
+		]
     ]
 
     mainIteration [

@@ -497,11 +497,9 @@ See OpenGL programming guide for more informations.'>
 
     mainIteration [
 	<category: 'Main interactions'>
-	'Forking  main interaction...' printNl.
 	^ ([self realMainIteration] 
 		forkAt: Processor userBackgroundPriority)
 	    name: 'OpenGLMainIteration';
-		printNl;
 		resume;
 		yourself
 	

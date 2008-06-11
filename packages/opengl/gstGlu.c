@@ -74,21 +74,6 @@ void gst_opengl_gluLookAtv (OOP eyeOOP, OOP centerOOP, OOP upOOP)
 	      pup[0], pup[1], pup[2]) ;
 }
 
-void gst_opengl_gluLoadSamplingMatrices (OOP nurb, OOP modelMatrix, OOP projectionMatrix, OOP viewportVertex)
-{
-  GLfloat model[16], *pmodel ;
-  GLfloat projection[16], *pproj ;
-  GLint viewport[4], *pvport ;
-
-  pmodel = gst_opengl_oop_to_array (model, modelMatrix, 16);
-  pproj = gst_opengl_oop_to_array (projection, projectionMatrix, 16);
-  pvport = gst_opengl_oop_to_int_array (viewport, viewportVertex, 4);
-
-  if (!pmodel || !pproj || !pvport)
-    return;					/* Should fire an exception */
-
-  gluLoadSamplingMatrices (vm_proxy->OOPToCObject(nurb), pmodel, pproj, pvport) ;
-}
 
 void gst_opengl_gluPickMatrix (GLdouble x, GLdouble y, GLdouble delX, GLdouble delY, OOP viewportVertex)
 {
@@ -123,18 +108,6 @@ OOP gst_opengl_gluProject (GLdouble objX, GLdouble objY, GLdouble objZ, OOP mode
 	  vm_proxy->OOPAtPut(result, 2, vm_proxy->floatToOOP(winZ)) ;
 	}
   return result ;
-}
-
-void gst_opengl_gluPwlCurve (OOP nurb, GLint count, OOP data, GLint stride, GLenum type)
-{
-  GLfloat* dataFloat, *p ;
-
-  dataFloat = alloca (sizeof (GLfloat) * count);
-  p = gst_opengl_oop_to_array (dataFloat, data, count);
-  if (!p)
-    return;
-
-  gluPwlCurve (vm_proxy->OOPToCObject(nurb), count, p, stride, type) ;
 }
 
 OOP gst_opengl_gluUnProject (GLdouble winX, GLdouble winY, GLdouble winZ, OOP modelMatrix, OOP projectionMatrix, OOP viewportVertex)
@@ -271,7 +244,6 @@ void gst_initModule_glu() {
   vm_proxy->defineCFunc ("gluEndSurface", gluEndSurface) ;
   vm_proxy->defineCFunc ("gluEndTrim", gluEndTrim) ;
   vm_proxy->defineCFunc ("gluGetTessProperty", gluGetTessProperty) ;
-  vm_proxy->defineCFunc ("gluLoadSamplingMatrices", gst_opengl_gluLoadSamplingMatrices) ;
   vm_proxy->defineCFunc ("gluLookAt", gluLookAt) ;
   vm_proxy->defineCFunc ("gluLookAtv", gst_opengl_gluLookAtv) ;
   vm_proxy->defineCFunc ("gluNextContour", gluNextContour) ;
@@ -280,7 +252,6 @@ void gst_initModule_glu() {
   vm_proxy->defineCFunc ("gluPerspective", gluPerspective) ;
   vm_proxy->defineCFunc ("gluPickMatrix", gst_opengl_gluPickMatrix) ;
   vm_proxy->defineCFunc ("gluProject", gst_opengl_gluProject) ;
-  vm_proxy->defineCFunc ("gluPwlCurve", gst_opengl_gluPwlCurve) ;
   vm_proxy->defineCFunc ("gluScaleImage", gluScaleImage) ;
   vm_proxy->defineCFunc ("gluSphere", gst_opengl_gluSphere) ;
   vm_proxy->defineCFunc ("gluUnProject", gst_opengl_gluUnProject) ;

@@ -95,25 +95,21 @@ Object subclass: OpenGLTest [
 		aWindow glEnable: OpenGLInterface glDepthTest.
 
 		aWindow 
-		    addCallback: Glut idleFuncEvent
-		    to: self
-		    selector: #idle.
+		    callback: Glut idleFuncEvent
+		    to: [self idle].
 		aWindow 
-		    addCallback: Glut displayFuncEvent
-		    to: self
-		    selector: #display.
+		    callback: Glut displayFuncEvent
+		    to: [self display].
 		aWindow 
-		    addCallback: Glut reshapeFuncEvent
-		    to: self
-		    selector: #reshape:height:.
+		    callback: Glut reshapeFuncEvent
+		    to: [:w :h | self reshape: w height: h].
 		aWindow 
-		    addCallback: Glut mouseFuncEvent
-		    to: self
-		    selector: #mouse:state:x:y:.
+		    callback: Glut mouseFuncEvent
+		    to: [:button :state :x :y | self mouse: button state: state x: x y: y].
 		aWindow 
-		    addCallback: Glut motionFuncEvent
-		    to: self
-		    selector: #follow:y:]
+		    callback: Glut motionFuncEvent
+		    to: [:x :y | self follow: x y: y]
+		]
     ]
 
     mainIteration [

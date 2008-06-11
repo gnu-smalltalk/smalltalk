@@ -129,33 +129,30 @@ Object subclass: SurfPoints [
 	aNurb gluNurbsProperty: OpenGLInterface gluDisplayMode value: OpenGLInterface gluFill.
 
 	aNurb 
-	    connect: OpenGLInterface gluNurbsBegin
+	    callback: OpenGLInterface gluNurbsBegin
 	    to: [:n | self beginCallback: n].
 	aNurb 
-	    connect: OpenGLInterface gluNurbsVertex
+	    callback: OpenGLInterface gluNurbsVertex
 	    to: [:x :y :z | self vertexCallback: x y: y z: z].
 	aNurb 
-	    connect: OpenGLInterface gluNurbsNormal
+	    callback: OpenGLInterface gluNurbsNormal
 	    to: [:x :y :z | self normalCallback:x y: y z: z].
 	aNurb 
-	    connect: OpenGLInterface gluNurbsEnd
+	    callback: OpenGLInterface gluNurbsEnd
 	    to: [self endCallback].
 	"aNurb
 	    callback: OpenGLInterface gluNurbsError
 	    to: [:error | Transcript show: (aWindow gluErrorString: error); nl]."
 
 	aWindow 
-	    addCallback: Glut keyboardFuncEvent
-	    to: self
-	    selector: #keyboard:x:y:.
+	    callback: Glut keyboardFuncEvent
+	    to: [:k :x :y | self keyboard: k x: x y: y].
 	aWindow 
-	    addCallback: Glut displayFuncEvent
-	    to: self
-	    selector: #display.
+	    callback: Glut displayFuncEvent
+	    to: [self display].
 	aWindow 
-	    addCallback: Glut reshapeFuncEvent
-	    to: self
-	    selector: #reshape:height:
+	    callback: Glut reshapeFuncEvent
+	    to: [:w :h | self reshape:w height: h]
 
     ]
 
@@ -316,7 +313,7 @@ Object subclass: SurfPoints [
 	    ifTrue: 
 		[showPoints := showPoints not.
 		aWindow glutPostRedisplay.
-		Transcript show: 'Points : ' , showPoints printString].
+		Transcript show: 'Points : ' , showPoints printString; nl].
 	aKey = $x ifTrue: [translate x: translate x + 0.5].
 	aKey = $X ifTrue: [translate x: translate x - 0.5].
 	aKey = $y ifTrue: [translate y: translate y + 0.5].

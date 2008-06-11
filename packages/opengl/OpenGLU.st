@@ -191,7 +191,7 @@ OpenGLInterface extend [
 		    modelview: mvMatrix
 		    projection: projMatrix
 		    viewport: aViewport.
-	^Vertex new load: anArray
+	^Vertex fromArray: anArray
     ]
 
 ]

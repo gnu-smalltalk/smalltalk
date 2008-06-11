@@ -94,13 +94,11 @@ Object subclass: OpenGLTest [
 	"Init window color."
 	aWindow glClearColor: Color black.
 	aWindow 
-	    addCallback: Glut displayFuncEvent
-	    to: self
-	    selector: #display.
+	    callback: Glut displayFuncEvent
+	    to: [ self display ].
 	aWindow 
 	    addCallback: Glut reshapeFuncEvent
-	    to: self
-	    selector: #reshape:height:
+	    to: [ :w :h | self reshape: w height: h ]
     ]
 
     mainIteration [
@@ -146,7 +144,7 @@ Object subclass: OpenGLTest [
 		gluTessProperty: OpenGLInterface gluTessWindingRule
 		value: OpenGLInterface gluTessWindingNonzero.
 	    tess3
-		connect: OpenGLInterface gluTessVertex
+		callback: OpenGLInterface gluTessVertex
 		to: [ :v | aWindow glColor: v color; glVertex: v vertex ] ].
 
 	tess3
@@ -191,7 +189,7 @@ Object subclass: OpenGLTest [
 	tess1 isNil ifTrue: [
 	    tess1 := Tesselator new.
 	    tess1
-		connect: OpenGLInterface gluTessVertex
+		callback: OpenGLInterface gluTessVertex
 		to: [ :v | aWindow glColor: (self colorAt: v * 0.25); glVertex: v ] ].
 	size := 8 sqrt negated.
 	tess1

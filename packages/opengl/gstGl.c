@@ -433,8 +433,10 @@ gst_opengl_glTexParameterv_size (GLenum pname)
     case GL_TEXTURE_MIN_FILTER:
     case GL_TEXTURE_WRAP_S:
     case GL_TEXTURE_WRAP_T:
+#ifndef GL_EXT_texture_object
     case GL_TEXTURE_PRIORITY:
     case GL_TEXTURE_RESIDENT:
+#endif
       return 1;
     case GL_TEXTURE_BORDER_COLOR:
       return 4;
@@ -602,6 +604,7 @@ gst_opengl_glGetv_size (GLenum pname)
 #endif
 
 #ifdef GL_VERSION_1_1
+#ifndef GL_EXT_vertex_array
     case GL_TEXTURE_COORD_ARRAY:
     case GL_TEXTURE_COORD_ARRAY_SIZE:
     case GL_TEXTURE_COORD_ARRAY_STRIDE:
@@ -610,15 +613,21 @@ gst_opengl_glGetv_size (GLenum pname)
     case GL_VERTEX_ARRAY_SIZE:
     case GL_VERTEX_ARRAY_STRIDE:
     case GL_VERTEX_ARRAY_TYPE:
+#endif
+#ifndef GL_EXT_polygon_offset
     case GL_POLYGON_OFFSET_FACTOR:
-    case GL_POLYGON_OFFSET_UNITS:
     case GL_POLYGON_OFFSET_FILL:
+#endif
+    case GL_POLYGON_OFFSET_UNITS:
     case GL_POLYGON_OFFSET_LINE:
     case GL_POLYGON_OFFSET_POINT:
+#ifndef GL_EXT_vertex_array
     case GL_NORMAL_ARRAY:
     case GL_NORMAL_ARRAY_STRIDE:
     case GL_NORMAL_ARRAY_TYPE:
+#endif
     case GL_INDEX_LOGIC_OP:
+#ifndef GL_EXT_vertex_array
     case GL_INDEX_ARRAY:
     case GL_INDEX_ARRAY_STRIDE:
     case GL_INDEX_ARRAY_TYPE:
@@ -628,6 +637,7 @@ gst_opengl_glGetv_size (GLenum pname)
     case GL_COLOR_ARRAY_SIZE:
     case GL_COLOR_ARRAY_STRIDE:
     case GL_COLOR_ARRAY_TYPE:
+#endif
     case GL_COLOR_LOGIC_OP:
       return 1;
 #endif

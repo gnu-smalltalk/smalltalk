@@ -42,6 +42,15 @@ Object subclass: Color [
 	^self basicNew: 4
     ]
 
+    Color class >> grey: value [
+	<category: 'Creating'>
+	^(self new)
+	    red: value;
+	    green: value;
+	    blue: value;
+	    alpha: 1.0
+	]
+
     Color class >> red: aRed green: aGreen blue: aBlue [
 	<category: 'Creating'>
 	^(self new)
@@ -298,7 +307,6 @@ another axis for matrix works'>
 	| aSize |
 	aSize := anArray size.
 	aSize > Vertex numElements ifTrue: [aSize := Vertex numElements].
-	self size: aSize.
 	1 to: aSize do: [:i | self at: i put: (anArray at: i) ]
     ]
 

@@ -133,10 +133,10 @@ Object subclass: Font [
 	self makeRasterFont.
 
 	aWindow 
-	    addCallback: Glut displayFuncEvent
+	    callback: Glut displayFuncEvent
 	    to: [self display].
 	aWindow 
-	    addCallback: Glut reshapeFuncEvent
+	    callback: Glut reshapeFuncEvent
 	    to: [:w :h | self reshape: w height: h].
 
 

@@ -90,13 +90,11 @@ Object subclass: OpenGLTest [
 		aWindow glEnable: OpenGLInterface glLight0.
 		aWindow glEnable: OpenGLInterface glDepthTest.
 		aWindow 
-		    addCallback: Glut displayFuncEvent
-		    to: self
-		    selector: #display.
+		    callback: Glut displayFuncEvent
+		    to: [self display].
 		aWindow 
-		    addCallback: Glut reshapeFuncEvent
-		    to: self
-		    selector: #reshape:height:]
+		    callback: Glut reshapeFuncEvent
+		    to: [:w :h | self reshape: w height: h]
     ]
 
     mainIteration [

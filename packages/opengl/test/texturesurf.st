@@ -148,13 +148,11 @@ Object subclass: TextureSurface [
 	aWindow glEnable: OpenGLInterface glDepthTest.
 	aWindow glShadeModel: OpenGLInterface glSmooth.
 	aWindow 
-	    addCallback: Glut displayFuncEvent
-	    to: self
-	    selector: #display.
+	    callback: Glut displayFuncEvent
+	    to: [self display].
 	aWindow 
-	    addCallback: Glut reshapeFuncEvent
-	    to: self
-	    selector: #reshape:height:
+	    callback: Glut reshapeFuncEvent
+	    to: [:w :h | self reshape: w height: h]
     ]
 
     reshape: w height: h [

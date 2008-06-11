@@ -123,17 +123,14 @@ Object subclass: UnProject [
 	aWindow glutInitWindowPosition: (Point x: 100 y: 100).
 	aWindow glutCreateWindow: 'UnProject'.
 	aWindow 
-	    addCallback: Glut displayFuncEvent
-	    to: self
-	    selector: #display.
+	    callback: Glut displayFuncEvent
+	    to: [self display].
 	aWindow 
-	    addCallback: Glut reshapeFuncEvent
-	    to: self
-	    selector: #reshape:height:.
+	    callback: Glut reshapeFuncEvent
+	    to: [:w :h | self reshape: w height: h].
 	aWindow 
-	    addCallback: Glut mouseFuncEvent
-	    to: self
-	    selector: #mouse:state:x:y:
+	    callback: Glut mouseFuncEvent
+	    to: [:m :s :x :y | self mouse: m state: s x: x y: y]
     ]
 ]
 

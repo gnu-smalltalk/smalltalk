@@ -53,7 +53,7 @@ Object subclass: List [
 		    bitOr: Glut glutDepth).
 	aWindow glutInitWindowSize: (Point x: 650 y: 50).
 	aWindow glutInitWindowPosition: (Point x: 100 y: 100).
-	windowNumber := aWindow glutCreateWindow: 'Une surface nurbs'.
+	windowNumber := aWindow glutCreateWindow: 'Call lists'.
 	listName := aWindow glGenLists: 1.
 	aWindow glNewList: listName mode: OpenGLInterface glCompile.
 	aWindow glColor: Color red.
@@ -69,13 +69,11 @@ Object subclass: List [
 	aWindow glEndList.
 	aWindow glShadeModel: OpenGLInterface glFlat.
 	aWindow 
-	    addCallback: Glut displayFuncEvent
-	    to: self
-	    selector: #display.
+	    callback: Glut displayFuncEvent
+	    to: [self display].
 	aWindow 
-	    addCallback: Glut reshapeFuncEvent
-	    to: self
-	    selector: #reshape:height:
+	    callback: Glut reshapeFuncEvent
+	    to: [:w :h | self reshape: w height: h]
     ]
 
     reshape: w height: h [

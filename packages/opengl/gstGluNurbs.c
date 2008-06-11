@@ -244,6 +244,35 @@ int gst_opengl_gluNurbsSurface (GLUnurbs *nurb,
   return 0;
 }
 
+void gst_opengl_gluPwlCurve (GLUnurbs* nurb, GLint count, OOP data, GLint stride, GLenum type)
+{
+  GLfloat* dataFloat, *p ;
+
+  dataFloat = alloca (sizeof (GLfloat) * count * stride);
+  p = gst_opengl_oop_to_array (dataFloat, data, count*stride);
+  if (!p)
+    return;
+
+  gluPwlCurve (nurb, count, p, stride, type) ;
+}
+
+void gst_opengl_gluLoadSamplingMatrices (GLUnurbs* nurb, OOP modelMatrix, OOP projectionMatrix, OOP viewportVertex)
+{
+  GLfloat model[16], *pmodel ;
+  GLfloat projection[16], *pproj ;
+  GLint viewport[4], *pvport ;
+
+  pmodel = gst_opengl_oop_to_array (model, modelMatrix, 16);
+  pproj = gst_opengl_oop_to_array (projection, projectionMatrix, 16);
+  pvport = gst_opengl_oop_to_int_array (viewport, viewportVertex, 4);
+
+  if (!pmodel || !pproj || !pvport)
+    return;					/* Should fire an exception */
+
+  gluLoadSamplingMatrices (nurb, pmodel, pproj, pvport) ;
+}
+
+
 /* Init module */
 void gst_initModule_gluNurbs() {
   /* Define C Functions */
@@ -256,6 +285,8 @@ void gst_initModule_gluNurbs() {
   vm_proxy->defineCFunc ("gluNurbsProperty", gluNurbsProperty);
   vm_proxy->defineCFunc ("gluNurbsCurve", gst_opengl_gluNurbsCurve);
   vm_proxy->defineCFunc ("gluNurbsSurface", gst_opengl_gluNurbsSurface);
+  vm_proxy->defineCFunc ("gluPwlCurve", gst_opengl_gluPwlCurve) ;
+  vm_proxy->defineCFunc ("gluLoadSamplingMatrices", gst_opengl_gluLoadSamplingMatrices) ;
 
   vm_proxy->defineCFunc ("gluNurbsConnectSignal", gst_opengl_gluNurbsConnectSignal);
 }

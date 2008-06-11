@@ -99,17 +99,14 @@ Object subclass: OpenGLTest [
 	aNurb gluNurbsProperty: OpenGLInterface gluSamplingTolerance value: 25.0.
 	aNurb gluNurbsProperty: OpenGLInterface gluDisplayMode value: OpenGLInterface gluFill.
 	aWindow 
-	    addCallback: Glut keyboardFuncEvent
-	    to: self
-	    selector: #keyboard:x:y:.
+	    callback: Glut keyboardFuncEvent
+	    to: [:k :x :y | self keyboard: k x: x y: y].
 	aWindow 
-	    addCallback: Glut displayFuncEvent
-	    to: self
-	    selector: #display.
+	    callback: Glut displayFuncEvent
+	    to: [self display].
 	aWindow 
-	    addCallback: Glut reshapeFuncEvent
-	    to: self
-	    selector: #reshape:height:
+	    callback: Glut reshapeFuncEvent
+	    to: [:w :h | self reshape: w height: h]
     ]
 
     makeImage [

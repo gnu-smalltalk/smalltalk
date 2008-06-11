@@ -80,6 +80,11 @@ CObject subclass: Nurbs [
 	
     ]
 
+    gluPwlCurve: count edge: someDatas stride: aStride type: aType [
+	<category: 'private - C interface'>
+	<cCall: 'gluPwlCurve' returning: #void args: #(#self #int #smalltalk #int #int)>
+    ]
+
     gluBeginSurface [
 	<category: 'C interface'>
 	<cCall: 'gluBeginSurface' returning: #void args: #(#self)>
@@ -92,12 +97,37 @@ CObject subclass: Nurbs [
 	
     ]
 
-    connect: aCallback to: aBlock [
+    gluBeginTrim [
+	<category: 'C interface'>
+	<cCall: 'gluBeginTrim' returning: #void args: #(#self)>
+	
+    ]
+
+    gluEndTrim [
+	<category: 'C interface'>
+	<cCall: 'gluEndTrim' returning: #void args: #(#self)>
+	
+    ]
+
+    gluBeginCurve [
+	<category: 'C interface'>
+	<cCall: 'gluBeginCurve' returning: #void args: #(#self)>
+	
+    ]
+
+    gluEndCurve [
+	<category: 'C interface'>
+	<cCall: 'gluEndCurve' returning: #void args: #(#self)>
+	
+    ]
+
+
+    callback: aCallback to: aBlock [
 	<category: 'internal - callback definition'>
 	"Associate a callback to a block"
 	callbacks ifNil: [callbacks := Dictionary new].
 	callbacks at: aCallback put: aBlock.
-	self connect: aCallback printNl.
+	self connect: aCallback
     ]
 
     getCallback: aCallback  [
