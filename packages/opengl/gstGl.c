@@ -234,6 +234,7 @@ gst_opengl_glMap_size (GLenum target)
 
     case GL_MAP1_TEXTURE_COORD_2:
     case GL_MAP2_TEXTURE_COORD_2:
+    case GLU_MAP1_TRIM_2:
       return 2;
 
     case GL_MAP1_TEXTURE_COORD_3:
@@ -242,6 +243,7 @@ gst_opengl_glMap_size (GLenum target)
     case GL_MAP2_VERTEX_3:
     case GL_MAP1_NORMAL:
     case GL_MAP2_NORMAL:
+    case GLU_MAP1_TRIM_3:
       return 3;
 
     case GL_MAP1_TEXTURE_COORD_4:

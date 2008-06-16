@@ -95,6 +95,7 @@ Object subclass: OpenGLTest [
 		aWindow 
 		    callback: Glut reshapeFuncEvent
 		    to: [:w :h | self reshape: w height: h]
+	    ]
     ]
 
     mainIteration [
