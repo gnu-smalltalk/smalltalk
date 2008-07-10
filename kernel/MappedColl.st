@@ -164,7 +164,7 @@ map would be an Interval.
 	"Evaluate aBlock on the keys that can be used to access this collection."
 
 	<category: 'basic'>
-	map do: aBlock
+	map keysDo: aBlock
     ]
 
     collect: aBlock [
