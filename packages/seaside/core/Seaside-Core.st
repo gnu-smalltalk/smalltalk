@@ -15801,13 +15801,18 @@ Object subclass: WAResponse [
     ]
 
     WAResponse class >> forbidden: locationString [
-	<category: 'instance creation'>
-	^(self new)
-	    forbidden;
-	    nextPutAll: '<h1> Error: you are forbidden to access "';
-	    nextPutAll: locationString;
-	    nextPutAll: '". </h1>';
-	    yourself
+	| response content |
+	response := self new forbidden.
+	content := (WARenderCanvas builder)
+		    fullDocument: true;
+		    rootBlock: [:root | root title: 'Internal Error'];
+		    render: 
+			    [:html | 
+			    (html heading)
+				level1;
+				with: 'Error: you are forbidden to access "', locationString, '".'].
+	response nextPutAll: content.
+	^response
     ]
 
     WAResponse class >> internalError: anError [
@@ -15839,12 +15844,18 @@ Object subclass: WAResponse [
 
     WAResponse class >> notFound: locationString [
 	<category: 'instance creation'>
-	^(self new)
-	    notFound;
-	    nextPutAll: '<h1> Error: "';
-	    nextPutAll: locationString;
-	    nextPutAll: '" not found. </h1>';
-	    yourself
+	| response content |
+	response := self new notFound.
+	content := (WARenderCanvas builder)
+		    fullDocument: true;
+		    rootBlock: [:root | root title: 'Internal Error'];
+		    render: 
+			    [:html | 
+			    (html heading)
+				level1;
+				with: 'Error: "', locationString, '" not found.'].
+	response nextPutAll: content.
+	^response
     ]
 
     WAResponse class >> redirectTo: locationString [
