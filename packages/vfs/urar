@@ -75,15 +75,15 @@ mcrarfs_mkdir ()
     mkdir -p "$2"  
 # rar cannot create an empty directory    
     touch "$2"/.rarfs
-    $RAR a -r "$1" "$2" &>/dev/null
-    $RAR d "$1" "$2"/.rarfs &>/dev/null
+    $RAR a -r "$1" "$2" >/dev/null 2>&1
+    $RAR d "$1" "$2"/.rarfs >/dev/null 2>&1
     cd $pwd
     rm -rf $dir
 }
 
 mcrarfs_rm ()
 {
-    $RAR d "$1" "$2" &>/dev/null
+    $RAR d "$1" "$2" >/dev/null 2>&1
 }
 
 umask 077
