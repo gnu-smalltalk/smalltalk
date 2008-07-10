@@ -35,7 +35,7 @@
 Namespace current: Kernel [
 
 nil subclass: AutoloadClass [
-    | superClass subClasses methodDictionary instanceSpec instanceVariables environment name fileName |
+    | superClass methodDictionary instanceSpec subClasses instanceVariables environment name fileName |
     
     <comment: 'I represent the metaclass of an autoloaded class before it is autoloaded.
 Having a proxy for the metaclass as well allows one to send messages to

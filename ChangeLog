@@ -1,3 +1,7 @@
+2008-07-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Autoload.st: Fix order of metaclass instance variables.
+
 2008-06-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* examples/CairoDemo.st: Minor changes.

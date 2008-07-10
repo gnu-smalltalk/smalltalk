@@ -952,7 +952,7 @@ init_metaclass (OOP metaclassOOP)
      them here by hand */
   metaclass->instanceVariables =
     _gst_make_instance_variable_array (_gst_nil_oop,
-				       "superclass subClasses methodDictionary instanceSpec "
+				       "superClass methodDictionary instanceSpec subClasses "
 				       "instanceVariables name comment category environment "
 				       "classVariables sharedPools securityPolicy "
 				       "pragmaHandlers");
