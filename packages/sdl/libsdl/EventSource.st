@@ -218,12 +218,20 @@ SdlKeyBoardEvent extend [
 	^ r
     ]
 
+    keySym [
+	| s |
+	s := self sym value.
+	^ (s > 127)
+	    ifTrue: [s]
+	    ifFalse: [Character value: s]
+    ]
+
     dispatchTo: handler [
 	<category: 'dispatch'>
 	handler handleKey: self which value asInteger
 		state: self state value asInteger ~= 0
 		scanCode: self scanCode value asInteger
-		sym: (Character value: self sym value)
+		sym: self keySym
 		mod: self keyboardModifiers
 		unicode: (Character codePoint: self unicode value)
     ]
