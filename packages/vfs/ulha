@@ -34,7 +34,7 @@
 # Define your awk
 AWK=gawk
 
-if ls -de . >& /dev/null;
+if ls -de . > /dev/null 2>&1;
 then
     LS_COMMAND="ls -le"
 else

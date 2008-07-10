@@ -1,3 +1,9 @@
+2008-07-10  Paolo Bonzini  <bonzini@gnu.org>
+
+	* uzip: Remove bashism.
+	* urar: Remove bashism.
+	* ulha: Remove bashism.
+
 2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* VFS.st: Rewrite.
