@@ -1,3 +1,8 @@
+2008-07-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/opt.c: Rewrite _gst_optimize_bytecodes to build a CFG
+	and reassemble the method at the end of the optimization.
+
 2008-07-10  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.c: Fix order of instance variables for metaclass.
