@@ -133,3 +133,55 @@ Eval [
     Object compile: 'gotcha [ "shouldn''t compile!" ^a ]'
 ]
 Eval [ nil gotcha ]
+
+"Regression test for a compiler bug.  Check that jump threading is
+ performed correctly (or not performed at all) if the threaded jump
+ requires extension bytes and the original one had none."
+
+Number extend [
+    inWords [
+        | tens part1 part2 |
+        
+        ((self \\ 100) < 20 and: [(self \\ 100) > 10]) ifTrue: [
+            part1 := ''.
+            ((self \\ 100) = 19) ifTrue: [ part2 := 'nineteen'.  ].
+        ] ifFalse: [
+            ((self \\ 10) = 0) ifTrue: [
+                part1 := ''.  ].
+            ((self \\ 10) = 1) ifTrue: [
+                part1 := 'one'.  ].
+            ((self \\ 10) = 2) ifTrue: [
+                part1 := 'two'.  ].
+            ((self \\ 10) = 3) ifTrue: [
+                part1 := 'three'.  ].
+            ((self \\ 10) = 4) ifTrue: [
+                part1 := 'four'.  ].
+            ((self \\ 10) = 5) ifTrue: [
+                part1 := 'five'.  ].
+            ((self \\ 10) = 6) ifTrue: [
+                part1 := 'six'.  ].
+            ((self \\ 10) = 7) ifTrue: [
+                part1 := 'seven'.  ].
+            ((self \\ 10) = 8) ifTrue: [
+                part1 := 'eight'.  ].
+            ((self \\ 10) = 9) ifTrue: [
+                part1 := 'nine'.  ].
+            
+            tens := tens - (tens \\ 10).
+            ((tens \\ 100) = 10) ifTrue: [ part2 := 'ten'.  ].
+            ((tens \\ 100) = 20) ifTrue: [ part2 := 'twenty'.  ].
+            ((tens \\ 100) = 30) ifTrue: [ part2 := 'thirty'.  ].
+            ((tens \\ 100) = 40) ifTrue: [ part2 := 'forty'.  ].
+            ((tens \\ 100) = 50) ifTrue: [ part2 := 'fifty'.  ].
+            ((tens \\ 100) = 60) ifTrue: [ part2 := 'sixty'.  ].
+            ((tens \\ 100) = 70) ifTrue: [ part2 := 'seventy'.  ].
+            ((tens \\ 100) = 80) ifTrue: [ part2 := 'eighty'.  ].
+            ((tens \\ 100) = 90) ifTrue: [ part2 := 'ninety'.  ].
+        ].
+        
+        ^part2, part1
+    ]
+]
+
+Eval [ 19 inWords ]
+

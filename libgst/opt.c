@@ -95,29 +95,25 @@
    itself.  */
 typedef struct block_boundary
 {
-  short byte;
-  short id;
+  /* Bytecode at the end of the basic block, -1 if not a jump.  */
+  int kind;
+
+  /* Start of the basic block.  */
+  int start, end;
+
+  /* Destination IP for the jump at the end of the basic block.  */
+  int dest;
+
+  /* Destination basic block for the jump at the end of the basic block.  */
+  struct block_boundary *dest_bb;
+
+  /* Size of the optimized basic block.  */
+  int opt_length;
+
+  /* Offset of the basic block in the optimized method.  */
+  int final_byte;
 }
 block_boundary;
-
-/* This structure defines how to fix the jumps after the optimized
-   basic blocks are put together.  Everything is done after the
-   peephole pass because this allows us to handle forward jumps and
-   backward jumps in the same way.
-
-   When single blocks are optimized, the sorted block_boundaries are
-   examined one at a time.  As we process blocks, we fill an array of
-   jump structures with offsets in the optimized bytecode.  We fill a
-   single field at a time -- the id's sign in the block_boundary says
-   which field is to be filled, the absolute value gives which jump
-   structure is to be filled.  In the end, block_boundaries whose id's
-   absolute value is the same are all paired.  */
-typedef struct jump
-{
-  int from;			/* where the jump bytecode lies */
-  int dest;			/* where the jump bytecode lands */
-}
-jump;
 
 /* Basic block data structure, common to the JIT and the verifier.  */
 typedef struct basic_block_item {
@@ -184,22 +180,28 @@ static inline int search_superop_fixed_arg_2 (int bc1,
 					      int bc2,
 					      int arg);
 
-/* Scan the bytecodes between FROM and TO, performing a handful
-   of peephole optimizations.  As they are overwritten with an
-   optimized version; then, superoperators are created with
-   optimize_superoperators and _gst_compile_bytecodes() is
-   used to append the final bytecodes to the stream of optimized
-   bytecodes.  */
-static void optimize_basic_block (gst_uchar * from,
-				  gst_uchar * to);
+/* Scan the bytecodes between FROM and TO, performing a handful of
+   peephole optimizations and creating superoperators with
+   optimize_superoperators.  The optimized bytecodes are written
+   starting at FROM.  */
+static int optimize_basic_block (gst_uchar * from,
+				 gst_uchar * to);
 
-/* Scan the peephole-optimized bytecodes between FROM and TO.  */
-gst_uchar *optimize_superoperators (gst_uchar * from,
-			            gst_uchar * to);
+/* Scan the peephole-optimized bytecodes between FROM and TO.  Generate
+   superoperators and rewrite in-place starting at FROM.  Return the
+   pointer just past the final byte written. */
+static gst_uchar *optimize_superoperators (gst_uchar * from,
+					   gst_uchar * to);
 
 /* This compares two block_boundary structures according to their
-   bytecode position.  */
+   ending bytecode position.  */
 static int compare_blocks (const PTR a, const PTR b) ATTRIBUTE_PURE;
+
+/* And this compares an int (A) with the starting bytecode of block B.  */
+static int search_block (const PTR a, const PTR b) ATTRIBUTE_PURE;
+
+/* Computes the length of a jump at distance OFS.  */
+static int compute_jump_length (int ofs) ATTRIBUTE_PURE;
 
 /* This answers how the dirtyness of BLOCKOOP affects
    the block that encloses it.  */
@@ -383,7 +385,39 @@ compare_blocks (const PTR a, const PTR b)
   const block_boundary *ba = (const block_boundary *) a;
   const block_boundary *bb = (const block_boundary *) b;
 
-  return (ba->byte - bb->byte);
+  /* Sort by bytecode.  */
+  if (ba->end != bb->end)
+    return (ba->end - bb->end);
+
+  /* Put first the element representing the jump.  */
+  else if (ba->kind != -1 && bb->kind == -1)
+    return -1;
+  else if (bb->kind != -1 && ba->kind == -1)
+    return 1;
+
+  return 0;
+}
+
+int
+search_block (const PTR a, const PTR b)
+{
+  const int *ia = (const int *) a;
+  const block_boundary *bb = (const block_boundary *) b;
+
+  return (*ia - bb->start);
+}
+
+int
+compute_jump_length (int ofs)
+{
+  if (ofs > -256 && ofs < 256)
+    return 2;
+  else if (ofs > -65536 && ofs < 65536)
+    return 4;
+  else if (ofs > -16777216 && ofs < 16777216)
+    return 6;
+  else
+    return 8;
 }
 
 bc_vector
@@ -393,11 +427,10 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
   return (bytecodes);
 #else
   bc_vector old_bytecodes;
-  block_boundary *blocks, *current;
-  jump *jumps;
-  gst_uchar *bp;
-  gst_uchar *end, *first;
-  int num;
+  block_boundary *blocks, *block, *last;
+  gst_uchar *bp, *opt, *end, *first;
+  int i;
+  mst_Boolean changed;
 
   bp = bytecodes->base;
   end = bytecodes->ptr;
@@ -406,16 +439,17 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
 
   /* 1) Split into basic blocks.  This part cheats so that the final
      fixup also performs jump optimization.  */
-  for (current = blocks, num = 0; bp != end; bp += BYTECODE_SIZE)
+  for (last = blocks; bp != end; )
     {
       gst_uchar *dest = bp;
-      gst_uchar *first_byte;
+      gst_uchar *dest_ip0;
       mst_Boolean canOptimizeJump, split;
+      int kind = 0;
       split = false;
 
       do
 	{
-	  first_byte = dest;
+	  dest_ip0 = dest;
 	  canOptimizeJump = false;
 	  MATCH_BYTECODES (THREAD_JUMPS, dest, (
 	    MAKE_DIRTY_BLOCK,
@@ -465,13 +499,13 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
 		}
 	      else
 		{
-	          /* Don't optimize jumps that land on one which has extension
-		     bytes.  But if we jump to a return, we can safely optimize:
-		     returns are never extended, and the interpreter ignores the
-		     extension byte.  */
+	          /* Don't optimize jumps that have extension bytes.  But if we
+		     jump to a return, we can safely optimize: returns are
+		     never extended, and the interpreter ignores the extension
+		     byte.  TODO: check if this is still true.  */
 	          canOptimizeJump = (*IP0 != EXT_BYTE);
-	          dest = IP0 + ofs;
-	  	  current->byte = dest - bytecodes->base;
+		  kind = IP[-2];
+	          dest_ip0 = dest = IP0 + ofs;
 	          canOptimizeJump |= IS_RETURN_BYTECODE (*dest);
 		  split = true;
 		}
@@ -480,10 +514,10 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
 	    POP_JUMP_TRUE, POP_JUMP_FALSE {
 	      /* Jumps to CONDITIONAL jumps must not be touched, either because
 		 they were unconditional or because they pop the stack top! */
-	      if (first_byte == bp)
+	      if (dest_ip0 == bp)
 		{
-		  dest = IP0 + ofs;
-	  	  current->byte = dest - bytecodes->base;
+		  kind = IP[-2];
+		  dest_ip0 = dest = IP0 + ofs;
 		  split = true;
 		}
 	    }
@@ -503,85 +537,126 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
 	  ));
 	}
       while (canOptimizeJump);
-      if (split)
-	{
-	  current->id = ++num;
-	  current++;
-	  current->byte = bp - bytecodes->base;
-	  current->id = -num;
-	  current++;
-	}
 
       while (*bp == EXT_BYTE)
 	bp += BYTECODE_SIZE;
+      bp += BYTECODE_SIZE;
+
+      if (split)
+	{
+	  assert (bp[-2] == kind);
+	  assert (kind == JUMP || kind == JUMP_BACK
+	  	  || kind == POP_JUMP_TRUE || kind == POP_JUMP_FALSE);
+
+	  last->dest = -1;
+  	  last->end = dest_ip0 - bytecodes->base;
+	  last->kind = -1;
+	  last++;
+	  last->dest = dest_ip0 - bytecodes->base;
+	  last->end = bp - bytecodes->base;
+	  last->kind = kind;
+	  last++;
+	}
     }
+
+  last->dest = -1;
+  last->end = bp - bytecodes->base;
+  last->kind = -1;
+  last++;
 
   /* 2) Get the "real" block boundaries by sorting them according to
-     where they happen in the original bytecode.  Note that a simple
-     bucket sort is not enough because multiple jumps could end on the
-     same bytecode, and the same bytecode could be both the start and
-     the destination of a jump! */
-  qsort (blocks, current - blocks, sizeof (block_boundary), compare_blocks);
+     where they happen in the original bytecode; then complete the
+     data that was put in BLOCKS by setting the start of the basic
+     block, removing the jump bytecode at the end...  */
+  qsort (blocks, last - blocks, sizeof (block_boundary), compare_blocks);
 
-  /* 3) Optimize the single basic blocks, and reorganize into `jumps'
-     the data that was put in blocks */
-  jumps = alloca (sizeof (jump) * num);
-
-  old_bytecodes = _gst_save_bytecode_array ();
-
-  for (bp = bytecodes->base; blocks != current; blocks++)
+  i = 0;
+  for (block = blocks; block != last; block++)
     {
-      first = bp;
-      bp = bytecodes->base + blocks->byte;
-      optimize_basic_block (first, bp);
-      if (blocks->id > 0)
-	jumps[blocks->id - 1].dest = _gst_current_bytecode_length ();
+      block->start = i;
+      if (block->end == i)
+	continue;
 
-      else
-	jumps[-blocks->id - 1].from = _gst_current_bytecode_length ();
+      i = block->end;
+      bp = bytecodes->base + block->end;
+      if (bp[-2] == JUMP || bp[-2] == JUMP_BACK
+	  || bp[-2] == POP_JUMP_TRUE || bp[-2] == POP_JUMP_FALSE)
+	{
+	  do
+	    block->end -= BYTECODE_SIZE, bp -= BYTECODE_SIZE;
+	  while (block->end != block->start && bp[-2] == EXT_BYTE);
+	}
     }
 
-  optimize_basic_block (bp, end);
-  _gst_free_bytecodes (bytecodes);
-  bytecodes = _gst_get_bytecodes ();
+  /* ... and computing the destination of the jump as a basic block */
+  for (block = blocks; block != last; block++)
+    if (block->kind != -1)
+      block->dest_bb = bsearch (&block->dest, blocks, last - blocks,
+				sizeof (block_boundary), search_block);
 
-  /* 4) Fix the jumps so that they correctly point to the start of the
-     same basic block */
-  for (; num--; jumps++)
+  /* Optimize the single basic blocks.  */
+  i = 0;
+  for (bp = opt = bytecodes->base, block = blocks; block != last; block++)
     {
-      int ofs;
+      first = bytecodes->base + block->start;
+      bp = bytecodes->base + block->end;
+      block->opt_length = optimize_basic_block (first, bp);
+      block->final_byte = i;
+      i += block->opt_length;
+    }
 
-      bp = bytecodes->base + jumps->from;
-      ofs = jumps->dest - jumps->from - 2;
+  /* Compute the size of the jump bytecodes.  */
+  do
+    {
+      changed = false;
+      i = 0;
+      for (bp = bytecodes->base, block = blocks; block != last; block++)
+        {
+          int jump_length;
+          if (block->final_byte != i)
+	    {
+	      block->final_byte = i;
+	      changed = true;
+	    }
+          if (block->kind != -1)
+	    jump_length =
+	      compute_jump_length (block->dest_bb->final_byte
+				   - (block->final_byte + block->opt_length));
+          else
+	    jump_length = 0;
+          i += block->opt_length + jump_length;
+	}
+    }
+  while (changed);
 
-      /* Fill the bytes from the topmost one.  */
-      while (*bp == EXT_BYTE)
-        ofs -= 2, bp += BYTECODE_SIZE;
+  /* Put together the whole method.  */
+  old_bytecodes = _gst_save_bytecode_array ();
+  for (block = blocks; block != last; block++)
+    {
+      _gst_compile_bytecodes (bytecodes->base + block->start,
+			      bytecodes->base + block->start + block->opt_length);
+      if (block->kind != -1)
+        {
+	  int jump_length =
+	    compute_jump_length (block->dest_bb->final_byte
+				 - (block->final_byte + block->opt_length));
+          int ofs = block->dest_bb->final_byte
+		    - (block->final_byte + block->opt_length + jump_length);
 
-      if (ofs == 0 && (*bp & ~1) != JUMP)
-	{
 	  /* Use pop stack top for conditionals which jump to
 	     the following bytecode.  */
-	  bp[0] = POP_STACK_TOP;
-	  bp[1] = 0;
-	}
-      else
-	{
-	  if (ofs < 0)
-	    ofs = -ofs;
-
-	  do
-	    {
-	      bp[1] = ofs & 255;
-	      bp -= BYTECODE_SIZE;
-	      ofs >>= 8;
-	    }
-	  while UNCOMMON (*bp == EXT_BYTE);
+          if (ofs == 0 && block->kind != JUMP)
+	    _gst_compile_byte (POP_STACK_TOP, 0);
+	  if (block->kind == JUMP_BACK)
+	    _gst_compile_byte (JUMP_BACK, -ofs);
+	  else
+	    _gst_compile_byte (block->kind, ofs);
 	}
     }
 
+  _gst_free_bytecodes (bytecodes);
+  bytecodes = _gst_get_bytecodes ();
   _gst_restore_bytecode_array (old_bytecodes);
-
   return (bytecodes);
 #endif
 }
@@ -643,26 +718,25 @@ search_superop_fixed_arg_2(int bc1, int bc2, int arg)
     return -1;
 }
 
-void
-optimize_basic_block (gst_uchar * from,
-		      gst_uchar * to)
+int
+optimize_basic_block (gst_uchar *from,
+		      gst_uchar *to)
 {
-  /* Points to the optimized bytecodes that have been written. */
+  /* Points to the optimized bytecodes as they are written.  */
   gst_uchar *opt = from;
 
   /* Points to the unoptimized bytecodes as they are read.  */
   gst_uchar *bp = from;
 
   if (from == to)
-    return;
-
-  /* For simplicity, the optimizations on line number bytecodes
-     don't take into account the possibility that the line number
-     bytecode is extended (>256 lines in a method).  This almost
-     never happens, so we don't bother.  */
+    return 0;
 
   do
     {
+      /* Perform peephole optimizations.  For simplicity, the optimizations
+	 on line number bytecodes don't take into account the possibility
+	 that the line number bytecode is extended (>256 lines in
+	 a method).  This almost never happens, so we don't bother.  */
       switch (bp[0])
 	{
 	case LINE_NUMBER_BYTECODE:
@@ -745,6 +819,12 @@ optimize_basic_block (gst_uchar * from,
 	    }
 	  break;
 
+	case JUMP:
+	case JUMP_BACK:
+	case POP_JUMP_TRUE:
+	case POP_JUMP_FALSE:
+	  abort ();
+
 	default:
 	  break;
 	}
@@ -758,7 +838,7 @@ optimize_basic_block (gst_uchar * from,
 #ifndef NO_SUPEROPERATORS
   opt = optimize_superoperators (from, opt);
 #endif
-  _gst_compile_bytecodes (from, opt);
+  return opt - from;
 }
 
 gst_uchar *
