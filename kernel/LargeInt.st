@@ -743,7 +743,7 @@ to speed them up a bit.'>
 	| bytes |
 	bytes := ByteArray new: self size + 1.
 	bytes 
-	    primReplaceFrom: 1
+	    replaceFrom: 1
 	    to: self size
 	    with: self
 	    startingAt: 1.
@@ -1487,7 +1487,7 @@ precision arithmetic.'>
 		 the real quotient is guess - 1 or guess - 2.  Multiply the divisor by the
 		 guess and compare the result with the dividend."
 		sub 
-		    primReplaceFrom: 1
+		    replaceFrom: 1
 		    to: sub size
 		    with: v
 		    startingAt: 1.
