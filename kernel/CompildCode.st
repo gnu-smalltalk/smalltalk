@@ -465,7 +465,7 @@ superclass for blocks and methods'>
 	^map
     ]
 
-    jumpDestinationAt: anIndex [
+    jumpDestinationAt: anIndex forward: aBoolean [
 	"Answer where the jump at bytecode index `anIndex' lands"
 
 	<category: 'testing accesses'>
@@ -480,7 +480,7 @@ superclass for blocks and methods'>
 	ofs := ofs + 2.
 	byte = 55] 
 		whileTrue.
-	^byte = 40 ifTrue: [ofs - result] ifFalse: [ofs + result]
+	^aBoolean ifFalse: [ofs - result] ifTrue: [ofs + result]
     ]
 
     reads: instVarIndex [
@@ -719,7 +719,7 @@ superclass for blocks and methods'>
     dispatchJump: byte at: anIndex to: anObject with: param [
 	<category: 'private-decoding bytecodes'>
 	| destination |
-	destination := self jumpDestinationAt: anIndex.
+	destination := self jumpDestinationAt: anIndex forward: byte > 40.
 	byte < 42 ifTrue: [^anObject jumpTo: destination with: param].
 	byte = 42 ifTrue: [^anObject popJumpIfTrueTo: destination with: param].
 	byte = 43 ifTrue: [^anObject popJumpIfFalseTo: destination with: param]
