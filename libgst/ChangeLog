@@ -1,5 +1,9 @@
 2008-07-14  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/opt.c: Enable jump superoperators.
+
+2008-07-14  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/interp-bc.inl: Replace FETCH with FETCH_VEC.
 	* libgst/vm.def: Use ADVANCE instead of PREFETCH also for jump
 	superoperators.  Move "ip += 2" to ADVANCE.  Remove argument

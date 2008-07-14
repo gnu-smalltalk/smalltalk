@@ -512,9 +512,15 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
 	    }
 
 	    POP_JUMP_TRUE, POP_JUMP_FALSE {
+	      if (ofs == 0)
+		{
+		  dest[-2] = POP_STACK_TOP;
+		  dest[-1] = 0;
+		}
+
 	      /* Jumps to CONDITIONAL jumps must not be touched, either because
 		 they were unconditional or because they pop the stack top! */
-	      if (dest_ip0 == bp)
+	      else if (dest_ip0 == bp)
 		{
 		  kind = IP[-2];
 		  dest_ip0 = dest = IP0 + ofs;
@@ -601,6 +607,25 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
       first = bytecodes->base + block->start;
       bp = bytecodes->base + block->end;
       block->opt_length = optimize_basic_block (first, bp);
+
+#ifndef NO_SUPEROPERATORS
+      /* Make a superoperator with the last bytecode and the jump.  */
+      if (block->kind != -1
+          && block->opt_length > 0
+	  && !(block->opt_length > 2
+	       && first[block->opt_length - 4] == EXT_BYTE))
+	{
+	  int test = search_superop_fixed_arg_1 (first[block->opt_length - 2],
+					         first[block->opt_length - 1],
+					         block->kind);
+	  if (test != -1)
+	    {
+	      block->opt_length -= 2;
+	      block->kind = test;
+	    }
+	}
+#endif
+
       block->final_byte = i;
       i += block->opt_length;
     }
@@ -643,14 +668,9 @@ _gst_optimize_bytecodes (bc_vector bytecodes)
           int ofs = block->dest_bb->final_byte
 		    - (block->final_byte + block->opt_length + jump_length);
 
-	  /* Use pop stack top for conditionals which jump to
-	     the following bytecode.  */
-          if (ofs == 0 && block->kind != JUMP)
-	    _gst_compile_byte (POP_STACK_TOP, 0);
-	  if (block->kind == JUMP_BACK)
-	    _gst_compile_byte (JUMP_BACK, -ofs);
-	  else
-	    _gst_compile_byte (block->kind, ofs);
+	  if (ofs < 0)
+	    ofs = -ofs;
+	  _gst_compile_byte (block->kind, ofs);
 	}
     }
 
