@@ -1,5 +1,10 @@
 2008-07-14  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CompildCode.st: Fix printing of superoperators including
+	JUMP_BACK.
+
+2008-07-14  Paolo Bonzini  <bonzini@gnu.org>
+
 	* tests/compiler.st: Add testcase.
 	* tests/compiler.ok: Regenerate.
 
