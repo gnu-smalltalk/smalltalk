@@ -45,6 +45,7 @@ struct bytecode {
   int num;
 
   bytecode (int _num);
+  virtual void write_prefetch (std::ostream &os);
   virtual void write_vm_def (std::ostream &os);
   virtual void write_vm_def_ext_arg (std::ostream &os, int arg) = 0;
   virtual void write_vm_def_fixed_arg (std::ostream &os, int arg) = 0;
@@ -70,6 +71,11 @@ struct bytecode_unary : bytecode_elementary {
   void write_vm_def_var_arg (std::ostream &os);
 };
 
+struct bytecode_jump : bytecode_unary {
+  bytecode_jump (int _num, const char *_name);
+  void write_prefetch (std::ostream &os);
+};
+
 struct bytecode_ext : bytecode_noarg {
   bytecode_ext (int _num, const char *_name);
   void write_vm_def (std::ostream &os);
@@ -88,6 +94,7 @@ struct bytecode_superoperator : bytecode {
   int fixed_arg;
 
   bytecode_superoperator (int _num, int _bc1, int _bc2, int _arg);
+  void write_prefetch (std::ostream &os);
 };
 
 struct bytecode_with_fixed_arg_1 : bytecode_superoperator {
@@ -105,14 +112,16 @@ struct bytecode_with_fixed_arg_2 : bytecode_superoperator {
 };
 
 void
+bytecode::write_prefetch (std::ostream & os)
+{
+  os << "    PREFETCH ();" << std::endl;
+}
+
+void
 bytecode::write_vm_def (std::ostream & os)
 {
   os << "  " << num << " = bytecode bc" << num << " {" << std::endl;
-  if (num == 40 || num == 41)
-    os << "    ADVANCE ();" << std::endl;
-  else
-    os << "    PREFETCH ();" << std::endl;
-
+  write_prefetch (os);
   write_vm_def_var_arg (os);
   os << "  }" << std::endl << std::endl;
 };
@@ -175,6 +184,17 @@ bytecode_unary::write_vm_def_var_arg (std::ostream & os)
   os << "    " << name << " (arg);" << std::endl;
 }
 
+bytecode_jump::bytecode_jump (int _num, const char *_name):
+  bytecode_unary (_num, _name)
+{
+};
+
+void
+bytecode_jump::write_prefetch (std::ostream & os)
+{
+  os << "    ADVANCE ();" << std::endl;
+}
+
 bytecode_ext::bytecode_ext (int _num, const char *_name):
   bytecode_noarg (_num, _name)
 {
@@ -225,6 +245,12 @@ bytecode_superoperator::bytecode_superoperator (int _num, int _bc1, int _bc2,
 {
   if (!bc1 || !bc2)
     abort ();
+}
+
+void
+bytecode_superoperator::write_prefetch (std::ostream & os)
+{
+  bc2->write_prefetch (os);
 }
 
 bytecode_with_fixed_arg_1::bytecode_with_fixed_arg_1 (int _num, int _bc1,
@@ -332,8 +358,8 @@ bytecode_unary bc36 (36, "STORE_TEMPORARY_VARIABLE");
 bytecode_binary bc37 (37, "STORE_OUTER_TEMP");
 bytecode_unary bc38 (38, "STORE_LIT_VARIABLE");
 bytecode_unary bc39 (39, "STORE_RECEIVER_VARIABLE");
-bytecode_unary bc40 (40, "JUMP_BACK");
-bytecode_unary bc41 (41, "JUMP");
+bytecode_jump bc40 (40, "JUMP_BACK");
+bytecode_jump bc41 (41, "JUMP");
 bytecode_unary bc42 (42, "POP_JUMP_TRUE");
 bytecode_unary bc43 (43, "POP_JUMP_FALSE");
 bytecode_unary bc44 (44, "PUSH_INTEGER");
