@@ -138,6 +138,7 @@
   <file>Security.st</file>
   <file>OrderColl.st</file>
   <file>CCallable.st</file>
+  <file>CCallback.st</file>
   <file>CFuncs.st</file>
   <file>Float.st</file>
   <file>PkgLoader.st</file>
