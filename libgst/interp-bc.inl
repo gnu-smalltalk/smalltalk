@@ -578,7 +578,7 @@ monitor_byte_codes:
   if UNCOMMON (time_to_preempt)
     set_preemption_timer ();
 
-  FETCH (normal_byte_codes);
+  FETCH_VEC (normal_byte_codes);
 
   /* Some more routines we need... */
 lookahead_failed_true:

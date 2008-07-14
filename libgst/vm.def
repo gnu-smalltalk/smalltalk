@@ -148,12 +148,13 @@
 }
 #endif
 
-/* FETCH loads the whole queue and dispatches the next bytecode to its
-   execution routine.
+/* FETCH loads the whole queue.
+   FETCH_VEC does the same, but uses the given vector to execute the next
+   bytecode.
    DISPATCH keeps the current queue and dispatches the next bytecode to its
    execution routine.
-   PREFETCH prepares to execute the next bytecode.
-   PREFETCH_VEC does the same, and uses the given vector to execute the next
+   PREFETCH prepares to execute the next bytecode, including advancing ip.
+   PREFETCH_VEC does the same, but uses the given vector to execute the next
    bytecode.
    NEXT_BC assumes that the next bytecode was prefetched, loads its argument
    and dispatches it to the current dispatch vector.
@@ -164,44 +165,45 @@
    GET_ARG holds a pointer to the (possibly prefetched) argument of the next
    bytecode.  */
 #ifdef PIPELINING
-#define FETCH(v)		goto *(t = (v)[*ip], b2 = ip[2], b4 = ip[4], \
-				       arg = ip[1], arg2 = ip[3], t2 = dispatch_vec[b2], \
-				       t)
+#define FETCH                  goto *(t = dispatch_vec[*ip], b2 = ip[2], b4 = ip[4], \
+                                      arg = ip[1], arg2 = ip[3], t2 = dispatch_vec[b2], t)
+#define FETCH_VEC(v)           goto *(t = (v)[*ip], b2 = ip[2], b4 = ip[4], \
+                                      arg = ip[1], arg2 = ip[3], t2 = dispatch_vec[b2], t)
 
 #define PREFETCH	       (t = t2, t2 = dispatch_vec[b4], \
 				arg2 = ip[3], b2 = b4, b4 = ip[6], \
 				ip += 2)
-
-#define NEXT_BC			goto *(arg = GET_ARG, t)
-
 #define PREFETCH_VEC(v)	       (t = (v)[b2], t2 = dispatch_vec[b4], \
 				arg2 = ip[3], b2 = b4, b4 = ip[6], \
 				ip += 2)
 
+#define NEXT_BC			goto *(arg = GET_ARG, t)
 #define NEXT_BC_VEC(v)		goto *(arg = GET_ARG, t)
 #define NEXT_BC_NO_ARG(v)	goto *t
 #define GET_ARG			arg2
 
 #elif REG_AVAILABILITY >= 1
-#define FETCH(v)		goto *(arg = GET_ARG, (v)[*ip])
+#define FETCH                   goto *(arg = GET_ARG, dispatch_vec[*ip])
+#define FETCH_VEC(v)            goto *(arg = GET_ARG, (v)[*ip])
 #define PREFETCH		(ip += 2, prefetch = dispatch_vec[*ip])
-#define NEXT_BC			goto *(arg = GET_ARG, prefetch)
 #define PREFETCH_VEC(v) 	(ip += 2, prefetch = (v)[*ip])
+#define NEXT_BC			goto *(arg = GET_ARG, prefetch)
 #define NEXT_BC_VEC(v)		goto *(arg = GET_ARG, prefetch)
 #define NEXT_BC_NO_ARG(v)	goto *prefetch
 #define GET_ARG			(ip[1])
 
 #else
-#define FETCH(v)		goto *(arg = ip[1], (v)[*ip])
+#define FETCH                   NEXT_BC
+#define FETCH_VEC(v)            NEXT_BC_VEC(v)
 #define PREFETCH		(ip += 2)
-#define NEXT_BC			goto *(arg = GET_ARG, dispatch_vec[*ip])
 #define PREFETCH_VEC(v)		(ip += 2)
+#define NEXT_BC			goto *(arg = GET_ARG, dispatch_vec[*ip])
 #define NEXT_BC_VEC(v)		goto *(arg = GET_ARG, (v)[*ip])
 #define NEXT_BC_NO_ARG(v)	goto *(v)[*ip]
 #define GET_ARG			(ip[1])
 #endif
 
-#define DISPATCH(v) goto *(arg = GET_ARG, (v)[*ip])
+#define DISPATCH(v)		goto *(arg = GET_ARG, (v)[*ip])
 
 operation PREFETCH ( -- ) {
   PREFETCH;
@@ -209,6 +211,7 @@ operation PREFETCH ( -- ) {
 }
 
 operation ADVANCE ( -- ) {
+  ip += 2;
   LOCAL_COUNTER++;
 }
 
@@ -256,7 +259,7 @@ operation PLUS_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[PLUS_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation MINUS_SPECIAL ( op1 op2 -- op ) {
@@ -290,7 +293,7 @@ operation MINUS_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[MINUS_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation LESS_THAN_SPECIAL ( op1 op2 -- op ) {
@@ -299,7 +302,7 @@ operation LESS_THAN_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[LESS_THAN_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation GREATER_THAN_SPECIAL ( op1 op2 -- op ) {
@@ -308,7 +311,7 @@ operation GREATER_THAN_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[GREATER_THAN_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation LESS_EQUAL_SPECIAL ( op1 op2 -- op ) {
@@ -317,7 +320,7 @@ operation LESS_EQUAL_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[LESS_EQUAL_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation GREATER_EQUAL_SPECIAL ( op1 op2 -- op ) {
@@ -326,7 +329,7 @@ operation GREATER_EQUAL_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[GREATER_EQUAL_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation EQUAL_SPECIAL ( op1 op2 -- op ) {
@@ -335,7 +338,7 @@ operation EQUAL_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[EQUAL_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation NOT_EQUAL_SPECIAL ( op1 op2 -- op ) {
@@ -344,7 +347,7 @@ operation NOT_EQUAL_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[NOT_EQUAL_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation TIMES_SPECIAL ( op1 op2 -- op ) {
@@ -353,7 +356,7 @@ operation TIMES_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[TIMES_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation DIVIDE_SPECIAL ( op1 op2 -- op ) {
@@ -377,7 +380,7 @@ operation DIVIDE_SPECIAL ( op1 op2 -- op ) {
 
   SEND_MESSAGE (_gst_builtin_selectors[DIVIDE_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation REMAINDER_SPECIAL ( op1 op2 -- op ) {
@@ -392,7 +395,7 @@ operation REMAINDER_SPECIAL ( op1 op2 -- op ) {
 
   SEND_MESSAGE (_gst_builtin_selectors[REMAINDER_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation BIT_XOR_SPECIAL ( op1 op2 -- op ) {
@@ -406,7 +409,7 @@ operation BIT_XOR_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[BIT_XOR_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation BIT_SHIFT_SPECIAL ( op1 op2 -- op ) {
@@ -439,7 +442,7 @@ operation BIT_SHIFT_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[BIT_SHIFT_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation INTEGER_DIVIDE_SPECIAL ( op1 op2 -- op1 op2 ) {
@@ -454,7 +457,7 @@ operation INTEGER_DIVIDE_SPECIAL ( op1 op2 -- op1 op2 ) {
 
   SEND_MESSAGE (_gst_builtin_selectors[INTEGER_DIVIDE_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation BIT_AND_SPECIAL ( op1 op2 -- op ) {
@@ -468,7 +471,7 @@ operation BIT_AND_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[BIT_AND_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation BIT_OR_SPECIAL ( op1 op2 -- op ) {
@@ -482,7 +485,7 @@ operation BIT_OR_SPECIAL ( op1 op2 -- op ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[BIT_OR_SPECIAL].symbol, 1);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation AT_SPECIAL ( rec idx -- val ) {
@@ -493,7 +496,7 @@ operation AT_SPECIAL ( rec idx -- val ) {
     {
       SEND_MESSAGE (_gst_builtin_selectors[AT_SPECIAL].symbol, 1);
       IMPORT_REGS ();
-      FETCH (dispatch_vec);
+      FETCH;
     }
 
   if COMMON (at_cache_class == (classOOP = OOP_CLASS (rec))
@@ -515,7 +518,7 @@ operation AT_SPECIAL ( rec idx -- val ) {
       at_cache_class = classOOP;
       NEXT_BC;
     }
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation AT_PUT_SPECIAL ( rec idx val -- res ) {
@@ -526,7 +529,7 @@ operation AT_PUT_SPECIAL ( rec idx val -- res ) {
     {
       SEND_MESSAGE (_gst_builtin_selectors[AT_PUT_SPECIAL].symbol, 2);
       IMPORT_REGS ();
-      FETCH (dispatch_vec);
+      FETCH;
     }
 
   if COMMON (at_put_cache_class == (classOOP = OOP_CLASS (rec))
@@ -548,7 +551,7 @@ operation AT_PUT_SPECIAL ( rec idx val -- res ) {
       at_put_cache_class = classOOP;
       NEXT_BC;
     }
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation SIZE_SPECIAL ( rec -- val ) {
@@ -559,7 +562,7 @@ operation SIZE_SPECIAL ( rec -- val ) {
     {
       SEND_MESSAGE (_gst_builtin_selectors[SIZE_SPECIAL].symbol, 0);
       IMPORT_REGS ();
-      FETCH (dispatch_vec);
+      FETCH;
     }
 
   if COMMON (size_cache_class == (classOOP = OOP_CLASS (rec))
@@ -581,7 +584,7 @@ operation SIZE_SPECIAL ( rec -- val ) {
       size_cache_class = classOOP;
       NEXT_BC;
     }
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation CLASS_SPECIAL ( rec -- val ) {
@@ -592,7 +595,7 @@ operation CLASS_SPECIAL ( rec -- val ) {
     {
       SEND_MESSAGE (_gst_builtin_selectors[CLASS_SPECIAL].symbol, 0);
       IMPORT_REGS ();
-      FETCH (dispatch_vec);
+      FETCH;
     }
 
   if COMMON (class_cache_class == (classOOP = OOP_CLASS (rec))
@@ -614,7 +617,7 @@ operation CLASS_SPECIAL ( rec -- val ) {
       class_cache_class = classOOP;
       NEXT_BC;
     }
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation IS_NIL_SPECIAL ( rec -- val ) {
@@ -636,7 +639,7 @@ operation VALUE_SPECIAL ( rec -- rec ) {
     SEND_MESSAGE (_gst_builtin_selectors[VALUE_SPECIAL].symbol, 0);
 
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation VALUE_COLON_SPECIAL ( rec blk_arg -- rec blk_arg ) {
@@ -648,7 +651,7 @@ operation VALUE_COLON_SPECIAL ( rec blk_arg -- rec blk_arg ) {
     SEND_MESSAGE (_gst_builtin_selectors[VALUE_COLON_SPECIAL].symbol, 1);
 
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation SAME_OBJECT_SPECIAL ( op1 op2 -- op ) {
@@ -667,7 +670,7 @@ operation JAVA_AS_INT_SPECIAL ( rec -- val ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[JAVA_AS_INT_SPECIAL].symbol, 0);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation JAVA_AS_LONG_SPECIAL ( rec -- val ) {
@@ -681,7 +684,7 @@ operation JAVA_AS_LONG_SPECIAL ( rec -- val ) {
   EXPORT_REGS ();
   SEND_MESSAGE (_gst_builtin_selectors[JAVA_AS_LONG_SPECIAL].symbol, 0);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation SEND sel n ( -- ) {
@@ -689,7 +692,7 @@ operation SEND sel n ( -- ) {
   EXPORT_REGS ();
   SEND_MESSAGE (METHOD_LITERAL (sel), n);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation SEND_SUPER sel n ( -- ) {
@@ -700,7 +703,7 @@ operation SEND_SUPER sel n ( -- ) {
   EXPORT_REGS ();
   SEND_TO_SUPER (METHOD_LITERAL (sel), n, classOOP);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation SEND_IMMEDIATE n ( -- ) {
@@ -709,7 +712,7 @@ operation SEND_IMMEDIATE n ( -- ) {
   EXPORT_REGS ();
   SEND_MESSAGE (bs->symbol, bs->numArgs);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation SEND_SUPER_IMMEDIATE n ( -- ) {
@@ -721,7 +724,7 @@ operation SEND_SUPER_IMMEDIATE n ( -- ) {
   EXPORT_REGS ();
   SEND_TO_SUPER (bs->symbol, bs->numArgs, classOOP);
   IMPORT_REGS ();
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation PUSH_TEMPORARY_VARIABLE n ( -- tos ) {
@@ -753,7 +756,7 @@ operation PUSH_LIT_VARIABLE n ( -- tos ) {
       EXPORT_REGS ();
       SEND_MESSAGE (_gst_builtin_selectors[VALUE_SPECIAL].symbol, 0);
       IMPORT_REGS ();
-      FETCH (dispatch_vec);
+      FETCH;
     }
   else
     tos = ASSOCIATION_VALUE (tos);
@@ -793,7 +796,7 @@ operation STORE_LIT_VARIABLE n ( tos -- tos ) {
       EXPORT_REGS ();
       SEND_MESSAGE (_gst_builtin_selectors[VALUE_COLON_SPECIAL].symbol, 1);
       IMPORT_REGS ();
-      FETCH (dispatch_vec);
+      FETCH;
     }
   else
     SET_ASSOCIATION_VALUE (var, value);
@@ -804,15 +807,15 @@ operation STORE_RECEIVER_VARIABLE n ( tos -- tos ) {
 }
 
 operation JUMP_BACK n ( -- ) {
-  ip += 2;
+  PREPARE_STACK ();
   ip -= n;
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation JUMP n ( -- ) {
-  ip += 2;
+  PREPARE_STACK ();
   ip += n;
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation POP_JUMP_FALSE n ( tos -- ) {
@@ -821,7 +824,7 @@ operation POP_JUMP_FALSE n ( tos -- ) {
       PREPARE_STACK ();
       POP_N_OOPS(1);
       ip += n;
-      FETCH (dispatch_vec);
+      FETCH;
     }
   else if UNCOMMON (tos != _gst_true_oop)
     {
@@ -830,7 +833,7 @@ operation POP_JUMP_FALSE n ( tos -- ) {
       EXPORT_REGS();
       SEND_MESSAGE(_gst_must_be_boolean_symbol, 0);
       IMPORT_REGS();
-      FETCH (dispatch_vec);
+      FETCH;
     }
 }
 
@@ -840,7 +843,7 @@ operation POP_JUMP_TRUE n ( tos -- ) {
       PREPARE_STACK ();
       POP_N_OOPS(1);
       ip += n;
-      FETCH (dispatch_vec);
+      FETCH;
     }
   else if UNCOMMON (tos != _gst_false_oop)
     {
@@ -849,7 +852,7 @@ operation POP_JUMP_TRUE n ( tos -- ) {
       EXPORT_REGS();
       SEND_MESSAGE(_gst_must_be_boolean_symbol, 0);
       IMPORT_REGS();
-      FETCH (dispatch_vec);
+      FETCH;
     }
 }
 
@@ -884,11 +887,13 @@ operation RETURN_METHOD_STACK_TOP ( val -- val ) {
     {
       SEND_MESSAGE (_gst_bad_return_error_symbol, 0);
       IMPORT_REGS ();
-      FETCH (dispatch_vec);
     }
-  IMPORT_REGS ();
-  SET_STACKTOP (val);
-  FETCH (dispatch_vec);
+  else
+    {
+      IMPORT_REGS ();
+      SET_STACKTOP (val);
+    }
+  FETCH;
 }
 
 operation RETURN_CONTEXT_STACK_TOP ( val -- val ) {
@@ -896,7 +901,7 @@ operation RETURN_CONTEXT_STACK_TOP ( val -- val ) {
   unwind_context ();
   IMPORT_REGS ();
   SET_STACKTOP (val);
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation DUP_STACK_TOP ( tos -- tos tos2 ) {
@@ -925,7 +930,7 @@ operation EXIT_INTERPRETER ( val -- val ) {
     if (processOOP == activeProcessOOP)
       SET_EXCEPT_FLAG (true);
   }
-  FETCH (dispatch_vec);
+  FETCH;
 }
 
 operation LINE_NUMBER_BYTECODE ( -- ) {
@@ -1703,7 +1708,7 @@ table normal_byte_codes {
   }
 
   134 = bytecode bc134 {
-    PREFETCH ();
+    ADVANCE ();
     POP_STACK_TOP ();
     JUMP_BACK (arg);
   }

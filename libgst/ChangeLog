@@ -1,5 +1,13 @@
 2008-07-14  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/interp-bc.inl: Replace FETCH with FETCH_VEC.
+	* libgst/vm.def: Use ADVANCE instead of PREFETCH also for jump
+	superoperators.  Move "ip += 2" to ADVANCE.  Remove argument
+	to FETCH (it was always dispatch_vec), add PREPARE_STACK to
+	jump bytecodes.
+
+2008-07-14  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/opt.c: Rewrite _gst_optimize_bytecodes to build a CFG
 	and reassemble the method at the end of the optimization.
 
