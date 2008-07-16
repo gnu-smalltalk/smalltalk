@@ -49,7 +49,7 @@ Object subclass: SocketAddress [
 	 Socket's protocol and a low-level C interface."
 
 	<category: 'accessing'>
-	^defaultStreamSocketImplClass
+	^defaultStreamSocketImplClass ifNil: [ SocketImpl ]
     ]
 
     SocketAddress class >> defaultStreamSocketImplClass: aClass [
@@ -65,7 +65,7 @@ Object subclass: SocketAddress [
 	 Socket's protocol and a low-level C interface."
 
 	<category: 'accessing'>
-	^defaultRawSocketImplClass
+	^defaultRawSocketImplClass ifNil: [ RawSocketImpl ]
     ]
 
     SocketAddress class >> defaultRawSocketImplClass: aClass [
@@ -81,7 +81,7 @@ Object subclass: SocketAddress [
 	 Socket's protocol and a low-level C interface."
 
 	<category: 'accessing'>
-	^defaultDatagramSocketImplClass
+	^defaultDatagramSocketImplClass ifNil: [ DatagramSocketImpl ]
     ]
 
     SocketAddress class >> defaultDatagramSocketImplClass: aClass [
@@ -99,7 +99,7 @@ Object subclass: SocketAddress [
 	 Ordinary user programs usually have no need to use this method."
 
 	<category: 'initialization'>
-	^DatagramSocket new: defaultRawSocketImplClass new
+	^DatagramSocket new: self defaultRawSocketImplClass addressClass: self
     ]
 
     SocketAddress class >> flush [
@@ -260,7 +260,13 @@ Object subclass: SocketAddress [
 	 to contain the port that the structure refers to."
 
 	<category: 'abstract'>
-	self subclassResponsibility
+	| addressFamily |
+	addressFamily := aByteArray at: 2.
+	self allSubclassesDo: [ :each |
+	    each addressFamily = addressFamily ifTrue: [
+		^each fromSockAddr: aByteArray port: portAdaptor ] ].
+
+	self error: 'unknown address family'
     ]
 
     = anIPAddress [

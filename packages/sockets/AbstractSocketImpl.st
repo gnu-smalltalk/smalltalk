@@ -59,13 +59,13 @@ FileDescriptor subclass: AbstractSocketImpl [
 	self subclassResponsibility
     ]
 
-    AbstractSocketImpl class >> new [
+    AbstractSocketImpl class >> newFor: addressClass [
 	"Create a socket for the receiver."
 
 	<category: 'socket creation'>
 	| descriptor |
 	descriptor := self 
-		    create: self addressClass protocolFamily
+		    create: addressClass protocolFamily
 		    type: self socketType
 		    protocol: self protocol.
 	File checkError.
@@ -90,14 +90,6 @@ FileDescriptor subclass: AbstractSocketImpl [
 	    hasBeenBound;
 	    hasBeenConnectedTo: peer;
 	    yourself
-    ]
-
-    addressClass [
-	"Answer the class responsible for handling addresses for
-	 the receiver"
-
-	<category: 'socket operations'>
-	^self class addressClass
     ]
 
     bindTo: ipAddress port: port [
@@ -194,11 +186,10 @@ FileDescriptor subclass: AbstractSocketImpl [
 	| sock addrLen fd |
 	sock := ByteArray new: CSockAddrStruct sizeof.
 	addrLen := CInt gcValue: CSockAddrStruct sizeof.
-	(fd := self fd) isNil ifTrue: [ ^nil ].
-	self 
-	    getSockName: fd
-	    addr: sock
-	    addrLen: addrLen.
+	(fd := self fd) isNil
+	    ifTrue: [ ^nil ].
+	(self getSockName: self fd addr: sock addrLen: addrLen) = -1
+	    ifTrue: [ ^nil ].
 	^sock
     ]
 
@@ -380,13 +371,19 @@ FileDescriptor subclass: AbstractSocketImpl [
 	 class, an Integer or a Boolean."
 
 	<category: 'private'>
-	| byteArray |
-	anObject class == ByteArray ifTrue: [^anObject].
-	anObject class == self addressClass ifTrue: [^anObject asByteArray].
-	byteArray := ByteArray new: CInt sizeof.
-	anObject == true ifTrue: [byteArray intAt: 1 put: 1].
-	anObject isInteger ifTrue: [byteArray intAt: 1 put: anObject].
-	^byteArray
+	anObject == true ifTrue: [
+	    ^#[1 0 0 0]].
+	anObject == false ifTrue: [
+	    ^#[0 0 0 0]].
+	anObject isInteger ifTrue: [
+	    ^(ByteArray new: CInt sizeof)
+		at: 1 put: (anObject bitAnd: 255);
+		at: 2 put: (anObject // 256 bitAnd: 255);
+		at: 3 put: (anObject // 65536 bitAnd: 255);
+		at: 4 put: (anObject // 16777216 bitAnd: 255);
+		yourself].
+
+	^anObject asByteArray
     ]
 
     hasBeenConnectedTo: ipAddress port: port [
@@ -404,7 +401,7 @@ FileDescriptor subclass: AbstractSocketImpl [
 	| port |
 	port := ValueHolder new.
 	self 
-	    hasBeenConnectedTo: (self addressClass fromSockAddr: sockAddr port: port)
+	    hasBeenConnectedTo: (SocketAddress fromSockAddr: sockAddr port: port)
 	    port: port value
     ]
 
@@ -422,7 +419,7 @@ FileDescriptor subclass: AbstractSocketImpl [
 	<category: 'private'>
 	| port |
 	port := ValueHolder new.
-	self hasBeenBoundTo: (self addressClass fromSockAddr: sockAddr port: port)
+	self hasBeenBoundTo: (SocketAddress fromSockAddr: sockAddr port: port)
 	    port: port value
     ]
 
@@ -506,7 +503,7 @@ AbstractSocketImpl subclass: SocketImpl [
 	 on the receiver."
 
 	<category: 'abstract'>
-	self subclassResponsibility
+	^OOBSocketImpl
     ]
 
     connectTo: ipAddress port: port [
@@ -514,7 +511,7 @@ AbstractSocketImpl subclass: SocketImpl [
 	 machine."
 
 	<category: 'socket operations'>
-	| addr fd |
+	| addr fd peer |
 	addr := ipAddress port: port.
 	
 	[(fd := self fd) isNil ifTrue: [ ^self ].
@@ -527,7 +524,9 @@ AbstractSocketImpl subclass: SocketImpl [
 
 	"connect does not block, so wait for"
 	self ensureWriteable.
-	self isOpen ifTrue: [self hasBeenConnected]
+	self isOpen ifTrue: [
+	    peer := self getPeerName ifNil: [ addr ].
+	    self hasBeenConnectedTo: peer]
     ]
 
     getPeerName [
@@ -538,21 +537,13 @@ AbstractSocketImpl subclass: SocketImpl [
 	| peer addrLen fd |
 	peer := ByteArray new: CSockAddrStruct sizeof.
 	addrLen := CInt gcValue: CSockAddrStruct sizeof.
-	(fd := self fd) isNil ifTrue: [ ^nil ].
-	self 
-	    getPeerName: self fd
-	    addr: peer
-	    addrLen: addrLen.
+	(fd := self fd) isNil
+	    ifTrue: [ ^nil ].
+	(self getPeerName: self fd addr: peer addrLen: addrLen) = -1
+	    ifTrue: [ ^nil ].
 	^peer
     ]
 
-    hasBeenConnected [
-	"Retrieve and save the remote address and port that the receiver is
-	 connected to."
-
-	<category: 'private'>
-	self hasBeenConnectedTo: self getPeerName
-    ]
 ]
 
 
@@ -648,7 +639,7 @@ AbstractSocketImpl subclass: DatagramSocketImpl [
 	port := ValueHolder new.
 	^aDatagram
 	    data: data;
-	    address: (self addressClass fromSockAddr: from port: port);
+	    address: (SocketAddress fromSockAddr: from port: port);
 	    port: port value;
 	    yourself
     ]
@@ -748,3 +739,31 @@ DatagramSocketImpl subclass: RawSocketImpl [
     ]
 ]
 
+
+
+
+DatagramSocketImpl subclass: OOBSocketImpl [
+    
+    <comment: nil>
+    <category: 'Sockets-Protocols'>
+
+    canRead [
+	"Answer whether out-of-band data is available on the socket"
+
+	<category: 'implementation'>
+	^self exceptionalCondition
+    ]
+
+    ensureReadable [
+	"Stop the process until an error occurs or out-of-band data
+	 becomes available on the socket"
+
+	<category: 'implementation'>
+	^self waitForException
+    ]
+
+    flags [
+	<category: 'private'>
+	^self msgOOB
+    ]
+]

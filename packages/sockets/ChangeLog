@@ -1,5 +1,19 @@
 2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* AbstractSocketImpl.st: Remove #addressClass, replace #new with
+	#newFor:.  Use SocketAddress class>>#fromSockAddr:port:.
+	Define #outOfBandImplClass.  Check for getpeername and getsockname
+	errors better.  Move OOBSocketImpl here...
+	* IPSocketImpl.st: ... from here.  Remove class-side #addressClass
+	from AbstractSocketImpl.
+	* SocketAddress.st: Provide default implementation classes.
+	Use #new:addressClass: in #newRawSocket.  Define
+	SocketAddress class>>#fromSockAddr:port:.
+	* Sockets.st: Add AbstractSocket class>>#new:addressClass:,
+	use it instead of "self new: addressClass someSocketImplClass new"
+
+2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Datagram.st: Likewise.
 	* IPSocketImpl.st: Likewise.
 	* SocketAddress.st: Likewise.

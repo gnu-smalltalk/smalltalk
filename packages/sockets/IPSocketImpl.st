@@ -41,7 +41,7 @@ SocketAddress subclass: IPAddress [
 	"Set up the default implementation classes for the receiver"
 
 	<category: 'initialization'>
-	self defaultRawSocketImplClass: ICMPSocketImpl.
+	self defaultDatagramSocketImplClass: ICMPSocketImpl.
 	self defaultDatagramSocketImplClass: UDPSocketImpl.
 	self defaultStreamSocketImplClass: TCPSocketImpl
     ]
@@ -364,22 +364,6 @@ SocketImpl subclass: TCPSocketImpl [
     <comment: nil>
     <category: 'Sockets-Protocols'>
 
-    TCPSocketImpl class >> addressClass [
-	"Answer the class that holds network addresses for TCP sockets,
-	 i.e. IPAddress."
-
-	<category: 'implementation'>
-	^IPAddress
-    ]
-
-    outOfBandImplClass [
-	"Return an implementation class to be used for out-of-band data
-	 on the receiver."
-
-	<category: 'implementation'>
-	^OOBSocketImpl
-    ]
-
     valueWithoutBuffering: aBlock [
         "Evaluate aBlock, ensuring that any data that it writes to the socket
          is sent immediately to the network."
@@ -397,54 +381,10 @@ SocketImpl subclass: TCPSocketImpl [
 
 
 
-DatagramSocketImpl subclass: OOBSocketImpl [
-    
-    <comment: nil>
-    <category: 'Sockets-Protocols'>
-
-    OOBSocketImpl class >> addressClass [
-	"Answer the class that holds network addresses for TCP sockets,
-	 i.e. IPAddress."
-
-	<category: 'implementation'>
-	^IPAddress
-    ]
-
-    canRead [
-	"Answer whether out-of-band data is available on the socket"
-
-	<category: 'implementation'>
-	^self exceptionalCondition
-    ]
-
-    ensureReadable [
-	"Stop the process until an error occurs or out-of-band data
-	 becomes available on the socket"
-
-	<category: 'implementation'>
-	^self waitForException
-    ]
-
-    flags [
-	<category: 'private'>
-	^self msgOOB
-    ]
-]
-
-
-
 MulticastSocketImpl subclass: UDPSocketImpl [
     
     <comment: nil>
     <category: 'Sockets-Protocols'>
-
-    UDPSocketImpl class >> addressClass [
-	"Answer the class that holds network addresses for UDP sockets,
-	 i.e. IPAddress."
-
-	<category: 'implementation'>
-	^IPAddress
-    ]
 
     ipMulticastIf [
 	"Answer the local device for a multicast socket (in the form of
@@ -533,23 +473,15 @@ RawSocketImpl subclass: ICMPSocketImpl [
     <comment: nil>
     <category: 'Sockets-Protocols'>
 
-    ICMPSocketImpl class >> addressClass [
-	"Answer the class that holds network addresses for ICMP sockets,
-	 i.e. IPAddress."
-
-	<category: 'implementation'>
-	^IPAddress
-    ]
 ]
 
 
 
-Eval [
-    CStruct newStruct: #CSockAddrStruct
-	declaration: #(
+CStruct subclass: CSockAddrStruct [
+    <declaration: #(
 		#(#sinFamily #short)
 		#(#sinPort #(#array #byte 2))
 		#(#sinAddr #(#array #byte 4))
-		#(#sinZero #(#array #byte 8)))
+		#(#sinZero #(#array #byte 8))) >
 ]
 

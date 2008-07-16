@@ -302,6 +302,15 @@ Stream subclass: AbstractSocket [
 	^super new initialize: implementation
     ]
 
+    AbstractSocket class >> new: implementationClass addressClass: addressClass [
+	"Answer a new instance of the receiver, using as the underlying
+	 layer a new instance of `implementationClass' and using the
+	 protocol family of `addressClass'."
+
+	<category: 'instance creation'>
+	^self new: (implementationClass newFor: addressClass)
+    ]
+
     AbstractSocket class >> new [
 	<category: 'instance creation'>
 	self shouldNotImplement
@@ -624,7 +633,7 @@ AbstractSocket subclass: DatagramSocket [
 	localAddr := ipAddress isNil 
 		    ifTrue: [addressClass anyLocalAddress]
 		    ifFalse: [ipAddress].
-	^(self new: addressClass defaultDatagramSocketImplClass new) 
+	^(self new: addressClass defaultDatagramSocketImplClass addressClass: addressClass)
 	    remote: remoteAddr
 	    port: remotePort
 	    local: localAddr
@@ -886,7 +895,7 @@ AbstractSocket subclass: ServerSocket [
 	localAddr := ipAddress isNil 
 		    ifTrue: [addressClass unknownAddress]
 		    ifFalse: [ipAddress].
-	^(self new: addressClass defaultStreamSocketImplClass new) 
+	^(self new: addressClass defaultStreamSocketImplClass addressClass: addressClass) 
 	    port: anInteger
 	    queueSize: backlog
 	    bindTo: localAddr
@@ -1031,7 +1040,7 @@ AbstractSocket subclass: StreamSocket [
 	addressClass := ipAddress isNil 
 		    ifTrue: [addressClass]
 		    ifFalse: [ipAddress class].
-	^(self new: addressClass defaultStreamSocketImplClass new) 
+	^(self new: addressClass defaultStreamSocketImplClass addressClass: addressClass)
 	    remote: remoteAddr
 	    port: remotePort
 	    local: localAddr
