@@ -6,6 +6,11 @@
 </package>
 
 <package>
+  <name>TCP</name>
+  <prereq>Sockets</prereq>
+</package>
+
+<package>
   <name>MD5</name>
   <prereq>Digest</prereq>
 </package>

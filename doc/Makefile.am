@@ -15,7 +15,7 @@ HELP2MAN = $(top_srcdir)/build-aux/help2man -p gst
 
 info_TEXINFOS = gst.texi gst-base.texi gst-libs.texi
 gst_TEXINFOS = tutorial.texi vers-gst.texi
-gst_libs_TEXINFOS = blox.texi tcp.texi i18n.texi complex.texi debug.texi \
+gst_libs_TEXINFOS = blox.texi sockets.texi i18n.texi complex.texi debug.texi \
 	dbi.texi zlib.texi using-xml.texi vers-libs.texi
 gst_base_TEXINFOS = classes.texi vers-base.texi
 TEXI2DVI=pool_size=750000 $(top_srcdir)/build-aux/texi2dvi --expand
@@ -90,13 +90,13 @@ $(srcdir)/blox.texi: $(top_srcdir)/packages/blox/tk/stamp-classes
 	  rm -f $(srcdir)/blox.texi
 	test -f $(srcdir)/blox.texi && touch $(srcdir)/gst-libs.texi 
 
-$(srcdir)/tcp.texi: $(top_srcdir)/packages/tcp/stamp-classes
+$(srcdir)/sockets.texi: $(top_srcdir)/packages/sockets/stamp-classes
 	$(GST_PACKAGE) $(patsubst %, %/package.xml, $(^D)) \
-	  --load --list-files=TCP | \
+	  --load --list-files=Sockets | \
 	  sed s,^,-f, | \
-	  xargs $(GST_DOC) -n TCP -o $(srcdir)/tcp.texi TCP.* || \
-	  rm -f $(srcdir)/tcp.texi
-	test -f $(srcdir)/tcp.texi && touch $(srcdir)/gst-libs.texi 
+	  xargs $(GST_DOC) -n Sockets -o $(srcdir)/sockets.texi Sockets.* || \
+	  rm -f $(srcdir)/sockets.texi
+	test -f $(srcdir)/sockets.texi && touch $(srcdir)/gst-libs.texi 
 
 $(srcdir)/complex.texi: $(top_srcdir)/packages/complex/stamp-classes
 	$(GST_PACKAGE) $(patsubst %, %/package.xml, $(^D)) \

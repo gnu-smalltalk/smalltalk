@@ -1,3 +1,10 @@
+2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Base.st: Use Sockets namespace.
+	* FTP.st: Use Sockets namespace.
+	* NetServer.st: Use Sockets namespace.
+	* URIResolver.st: Use Sockets namespace.
+
 2008-06-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* URIResolver.st: Handle ProtocolError in a saner way.

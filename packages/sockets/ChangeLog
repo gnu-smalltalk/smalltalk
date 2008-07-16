@@ -1,3 +1,11 @@
+2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Datagram.st: Likewise.
+	* IPSocketImpl.st: Likewise.
+	* SocketAddress.st: Likewise.
+	* Sockets.st: Likewise.
+	* init.st: Likewise.  Create TCP "forwarding" namespace.
+
 2008-05-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* AbstractSocketImpl.st: Replace ByteArray buffers with

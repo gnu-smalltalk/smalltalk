@@ -1048,7 +1048,7 @@ Object subclass: SpSocket [
 	 I return a new instance of myself that represents an unconfigured TCP socket."
 
 	<category: 'instance creation'>
-	^self new onClass: TCP.StreamSocket
+	^self new onClass: Sockets.StreamSocket
     ]
 
     SpSocket class >> onNativeclientSocket: aNativeSocket for: aServerSocket [
@@ -1072,7 +1072,7 @@ Object subclass: SpSocket [
 	    for: 
 		[| clientSpecificSocket |
 		[self underlyingSocket waitForConnection.
-		(clientSpecificSocket := self underlyingSocket accept: TCP.StreamSocket) isNil] 
+		(clientSpecificSocket := self underlyingSocket accept: Sockets.StreamSocket) isNil] 
 			whileTrue: [ Processor yield ].
 		self class onNativeclientSocket: clientSpecificSocket for: self]
 	    on: Error
@@ -1125,7 +1125,7 @@ Object subclass: SpSocket [
 
 	<category: 'services-status'>
 	underlyingSocket := class
-	    remote: (TCP.IPAddress fromBytes: aSocketAddress hostAddress)
+	    remote: (Sockets.IPAddress fromBytes: aSocketAddress hostAddress)
 	    port: aSocketAddress portNumber
     ]
 
@@ -1167,7 +1167,7 @@ Object subclass: SpSocket [
 	 to be broken - I get a primitive error when I try to use it"
 
 	<category: 'services-status'>
-	underlyingSocket := TCP.ServerSocket
+	underlyingSocket := Sockets.ServerSocket
 	    port: socketAddress portNumber
 	    queueSize: aNumberOfConnections.
 	^self
@@ -1348,7 +1348,7 @@ SpSocketAddress subclass: SpIPAddress [
 	 a new instance of myself with >>host:port:"
 
 	<category: 'instance creation'>
-	^self host: (TCP.IPAddress fromString: aHostNameString) asByteArray
+	^self host: (Sockets.IPAddress fromString: aHostNameString) asByteArray
 	    port: aPortNumber
     ]
 

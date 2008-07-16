@@ -449,10 +449,10 @@ GST_PACKAGE_ENABLE([Seaside], [seaside/swazoo])
 GST_PACKAGE_ENABLE([Sport], [sport])
 GST_PACKAGE_ENABLE([SUnit], [sunit])
 GST_PACKAGE_ENABLE([Swazoo], [swazoo-httpd])
-GST_PACKAGE_ENABLE([TCP], [tcp],
+GST_PACKAGE_ENABLE([Sockets], [sockets],
   [GST_INET_SOCKETS],
   [gst_cv_inet_sockets],
-  [Makefile], [tcp.la])
+  [Makefile], [sockets.la])
 GST_PACKAGE_ENABLE([VFSAddOns], [vfs], [], [], [Makefile])
 GST_PACKAGE_ENABLE([XML-XMLNodeBuilder], [xml/builder])
 GST_PACKAGE_ENABLE([XML-DOM], [xml/dom])

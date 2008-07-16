@@ -35,7 +35,7 @@
 Object subclass: URIResolver [
     | url reporter noCache client entity |
     
-    <import: TCP>
+    <import: Sockets>
     <import: MIME>
     <category: 'NetClients-URIResolver'>
     <comment: '

@@ -1,6 +1,6 @@
 <package>
   <name>NetClients</name>
-  <prereq>TCP</prereq>
+  <prereq>Sockets</prereq>
   <prereq>SUnit</prereq>
 
   <filein>MIME.st</filein>

@@ -34,7 +34,7 @@
 Object subclass: NetThread [
     | process socket priority |
     
-    <import: TCP>
+    <import: Sockets>
     <category: 'Sockets-Serving framework'>
     <comment: 'A NetThread runs a process attached to a specified socket.'>
 

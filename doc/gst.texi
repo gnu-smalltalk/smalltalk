@@ -150,7 +150,7 @@ Packages
 * Seaside:                               Seaside.
 * Swazoo:                                Swazoo.
 * SUnit:                                 SUnit.
-* TCP, WebServer, NetClients:            Network support.
+* Sockets, WebServer, NetClients:        Network support.
 * XML, XPath, XSL:                       XML.
 * Other packages:                        Other packages.
 
@@ -1991,7 +1991,7 @@ Other tags exist:
 Loads a dynamic shared object and calls the @code{gst_initModule}
 function in it.  Modules can register functions so that Smalltalk
 code can call them, and can interact with or manipulate Smalltalk
-objects.  The @code{TCP} package uses a module to provide a bridge
+objects.  The @code{Sockets} package uses a module to provide a bridge
 to the socket functions.
 
 @item library
@@ -2067,7 +2067,7 @@ The rest of this chapter discusses some of the packages provided with @gst{}.
 * Seaside:                               Seaside.
 * Swazoo:                                Swazoo.
 * SUnit:                                 SUnit.
-* TCP, WebServer, NetClients:            Network support.
+* Sockets, WebServer, NetClients:        Network support.
 * XML, XPath, XSL:                       XML.
 * Other packages:                        Other packages.
 @end menu
@@ -2779,7 +2779,7 @@ not specified by the user.
 @end table
 
 @node Network support
-@section TCP, WebServer, NetClients
+@section Sockets, WebServer, NetClients
 
 @gst{} includes an almost complete abstraction of the @sc{tcp}, @sc{udp}
 and @sc{ip} protocols.  Although based on the standard @sc{bsd} sockets,
@@ -2791,8 +2791,8 @@ demonstrate both client and server connection), which are class methods
 in @code{Socket}.  This code should guide you in the process of creating
 and using both server and client sockets; after creation, sockets behave
 practically the same as standard Smalltalk streams, so you should not
-have particular problems.  For more information, refer to @ref{TCP, ,
-Network programming with TCP, gst-libs, the @gst{} Library Reference}.
+have particular problems.  For more information, refer to @ref{Sockets, ,
+Network programming with Sockets, gst-libs, the @gst{} Library Reference}.
 The library is also used by many other packages, including Swazoo
 and the MySQL driver.
 

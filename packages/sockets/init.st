@@ -1,6 +1,6 @@
 "======================================================================
 |
-|   Smalltalk TCP/IP sockets classes (initialization script).
+|   Smalltalk sockets classes (initialization script).
 |
 |
  ======================================================================"
@@ -37,6 +37,10 @@ Eval [
     ServerSocket initialize.
     IPAddress initialize.
     ObjectMemory addDependent: SocketAddress.
-    SocketAddress update: #returnFromSnapshot
+    SocketAddress update: #returnFromSnapshot.
+
+    "Backwards compatibility."
+    Sockets addSubspace: #TCP.
+    Smalltalk at: #TCP put: Sockets.TCP.
 ]
 

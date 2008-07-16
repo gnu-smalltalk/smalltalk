@@ -1,3 +1,7 @@
+2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Connection.st: Use Sockets namespace.
+
 2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Table.st: Do it right.

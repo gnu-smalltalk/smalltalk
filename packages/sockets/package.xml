@@ -1,6 +1,6 @@
 <package>
-  <name>TCP</name>
-  <namespace>TCP</namespace>
+  <name>Sockets</name>
+  <namespace>Sockets</namespace>
   <filein>Buffers.st</filein>
   <filein>Datagram.st</filein>
   <filein>SocketAddress.st</filein>
@@ -11,7 +11,7 @@
   <filein>cfuncs.st</filein>
   <filein>init.st</filein>
 
-  <module>tcp</module>
+  <module>sockets</module>
 
   <file>Buffers.st</file>
   <file>Datagram.st</file>

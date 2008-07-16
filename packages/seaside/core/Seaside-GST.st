@@ -141,7 +141,7 @@ Object extend [
 
     printStringLimitedTo: anInteger [
 	<category: 'accessing'>
-	^(TCP.WriteBuffer on: (String new: anInteger))
+	^(Sockets.WriteBuffer on: (String new: anInteger))
 	    flushBlock: [ :coll :size | ^(coll copyFrom: 1 to: size), '...' ];
 	    print: self;
 	    contents

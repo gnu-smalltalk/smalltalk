@@ -79,7 +79,7 @@ together with the @gst{} programming language.
 * Complex package::        Complex number computations
 * DBI package::            The database connectivity library
 * DebugTools package::     Controlling the execution of Smalltalk processes
-* TCP package::            The sockets library
+* Sockets package::        The sockets library
 * Iconv/I18N packages::    The internationalization library
 * XML/XPath/XSL packages:: Using the XML library
 * ZLib package::           Bindings to the popular data compression library
@@ -109,9 +109,9 @@ together with the @gst{} programming language.
 @chapter Multilingual and international support with Iconv and I18N
 @include i18n.texi
 
-@node TCP package
-@chapter Network programming with TCP
-@include tcp.texi
+@node Sockets package
+@chapter Network programming with Sockets
+@include sockets.texi
 
 @node ZLib package
 @chapter Compressing and decompressing data with ZLib

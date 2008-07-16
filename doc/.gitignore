@@ -4,7 +4,7 @@ complex.texi
 dbi.texi
 debug.texi
 i18n.texi
-tcp.texi
+sockets.texi
 vers*.texi
 zlib.texi
 *.info*

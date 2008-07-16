@@ -1,6 +1,6 @@
 <package>
   <name>Sport</name>
-  <prereq>TCP</prereq>
+  <prereq>Sockets</prereq>
 
   <test>
     <sunit>SpDateTimeTest SpErrorTest SpWeakArrayTest SpEnvironmentTest SpStringUtilitiesTest SpSocketBasics SpSocketBasicTests</sunit>

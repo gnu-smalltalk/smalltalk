@@ -102,7 +102,12 @@ o   Packages can specify start/stop scripts.  Start scripts can be activated
     with gst-load, while both start and stop scripts are supported by
     gst-remote.
 
-o   Unbuffered sockets available from class TCP.StreamSocket.
+o   The sockets package (and the namespace it is installed in) was renamed
+    from TCP to Sockets.  While the old namespace is still available
+    for backwards compatibility, it is suggested to use the Sockets
+    namespace instead.
+
+o   Unbuffered sockets available from class Sockets.StreamSocket.
 
 
 New goodies:

@@ -124,7 +124,7 @@ serving.'>
 	virtualHosts := CompositeServlet new.
 	virtualHosts parent: self.
 	self
-	    defaultVirtualHost: TCP.SocketAddress localHostName;
+	    defaultVirtualHost: Sockets.SocketAddress localHostName;
 	    handler: CompositeServlet new
     ]
 

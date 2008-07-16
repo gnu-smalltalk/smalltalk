@@ -3645,7 +3645,7 @@ Lots of experience can be gained by looking at the source code
 for system methods; all of them are visible: data structure classes,
 the innards of the magic that makes classes be themselves objects and
 have a class, a compiler written in Smalltalk itself, the classes
-that implement the Smalltalk GUI and those that wrap sockets and TCP/IP.  
+that implement the Smalltalk GUI and those that wrap sockets.  
 
 @item Other Ways to Collect Objects
 We've seen Array, ByteArray, Dictionary, Set, and the

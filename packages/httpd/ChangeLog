@@ -1,3 +1,7 @@
+2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* WebServer.st: Use Sockets namespace.
+
 2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* FileServer.st: Use new File classes.

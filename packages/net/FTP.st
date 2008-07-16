@@ -303,7 +303,7 @@ Namespace current: NetClients.FTP [
 
 NetProtocolInterpreter subclass: FTPProtocolInterpreter [
     
-    <import: TCP>
+    <import: Sockets>
     <comment: nil>
     <category: 'NetClients-FTP'>
 

@@ -582,7 +582,7 @@ Connection subclass: MySQLConnection [
     connectTo: host port: port [
 	<category: 'initialize-release'>
 	| messageText |
-	socket := TCP.Socket remote: host port: port.
+	socket := Sockets.Socket remote: host port: port.
 	self addToBeFinalized.
 	socket isNil ifTrue: [^self error: messageText].
 	serverInfo := MySQLServerInfo new.

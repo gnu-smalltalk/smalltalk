@@ -2,7 +2,7 @@
   <name>DBD-MySQL</name>
   <namespace>DBI.MySQL</namespace>
   <prereq>DBI</prereq>
-  <prereq>TCP</prereq>
+  <prereq>Sockets</prereq>
   <prereq>Digest</prereq>
 
   <filein>Column.st</filein>

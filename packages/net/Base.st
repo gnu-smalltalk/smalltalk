@@ -248,7 +248,7 @@ Object subclass: NetEnvironment [
 Object subclass: NetClient [
     | hostName portNumber user reporter clientPI |
     
-    <import: TCP>
+    <import: Sockets>
     <category: 'NetClients-Framework'>
     <comment: '
 Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
