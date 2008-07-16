@@ -1,3 +1,7 @@
+2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/File.st: Add #isSocket.
+
 2008-07-14  Tony Garnock-Jones  <tonyg@lshift.net>
 
 	* kernel/LargeInt.st: Fix a bootstrapping bug by correcting a send of

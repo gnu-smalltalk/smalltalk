@@ -10,6 +10,18 @@ Socket class extend [
 	s close
     ]
 
+    testPort2For: anAddressClass [
+	<category: 'tests'>
+	anAddressClass == UnixAddress ifTrue: [ ^'/tmp/gst.test2' ].
+	^54322
+    ]
+	
+    testPortFor: anAddressClass [
+	<category: 'tests'>
+	anAddressClass == UnixAddress ifTrue: [ ^'/tmp/gst.test' ].
+	^54321
+    ]
+	
     tweakedLoopbackTest [
 	"Send data from one socket to another on the local machine, trying to avoid
 	 buffering overhead.  Tests most of the socket primitives.  Comparison of
@@ -35,16 +47,34 @@ Socket class extend [
 	 output buffer sizes."
 
 	<category: 'tests'>
+	^self loopbackTest: bufferSizes addressClass: Socket defaultAddressClass
+    ]
+
+    loopbackTestOn: addressClass [
+	"Send data from one socket to another on the local machine. Tests most of
+	 the socket primitives.  The parameter is the address class (family)
+	 to use."
+
+	<category: 'tests'>
+	^self loopbackTest: nil addressClass: addressClass
+    ]
+
+    loopbackTest: bufferSizes addressClass: addressClass [
+	"Send data from one socket to another on the local machine. Tests most of
+	 the socket primitives.  The parameters are the size of the input and
+	 output buffer sizes, and the address class (family) to use."
+
+	<category: 'tests'>
 	| queue server client bytesToSend sendBuf bytesSent bytesReceived t extraBytes timeout process |
 	Transcript
 	    cr;
 	    show: 'starting loopback test';
 	    cr.
 	queue := ServerSocket 
-		    port: 54321
+		    port: (self testPortFor: addressClass)
 		    queueSize: 5
-		    bindTo: nil.
-	client := Socket remote: queue localAddress port: 54321.
+		    bindTo: addressClass loopbackHost.
+	client := Socket remote: queue localAddress port: (self testPortFor: addressClass).
 	bufferSizes isNil 
 	    ifFalse: 
 		[client
@@ -88,13 +118,21 @@ Socket class extend [
 	client close.
 	queue close.
 	Transcript
-	    show: 'loopback test done; ' , (t / 100.0) printString , ' seconds';
+	    show: 'loopback test done; ' , (t / 1000.0) printString , ' seconds';
 	    cr;
 	    show: (bytesToSend asFloat / t roundTo: 0.01) printString;
 	    showCr: ' kBytes/sec'
     ]
 
     producerConsumerTest [
+	"Send data from one datagram socket to another on the local machine. Tests most of the
+	 socket primitives and works with different processes."
+
+	<category: 'tests'>
+	^self producerConsumerTestOn: Socket defaultAddressClass
+    ]
+
+    producerConsumerTestOn: addressClass [
 	"Send data from one socket to another on the local machine. Tests most of the
 	 socket primitives and works with different processes."
 
@@ -112,9 +150,9 @@ Socket class extend [
 			[producer := 
 				[| timeout process sendBuf |
 				queue := ServerSocket 
-					    port: 54321
+					    port: (self testPortFor: addressClass)
 					    queueSize: 5
-					    bindTo: nil.
+					    bindTo: addressClass loopbackHost.
 				queueReady signal.
 				timeout := false.
 				process := 
@@ -138,7 +176,7 @@ Socket class extend [
 					fork.
 			consumer := 
 				[queueReady wait.
-				client := Socket remote: queue localAddress port: 54321.
+				client := Socket remote: queue localAddress port: (self testPortFor: addressClass).
 				
 				[[client canRead] whileTrue: 
 					[bytesReceived := bytesReceived + client nextHunk size].
@@ -155,32 +193,42 @@ Socket class extend [
 	client close.
 	queue close.
 	Transcript
-	    show: 'loopback test done; ' , (t / 100.0) printString , ' seconds';
+	    show: 'loopback test done; ' , (t / 1000.0) printString , ' seconds';
 	    cr;
 	    show: (bytesToSend asFloat / t roundTo: 0.01) printString;
 	    showCr: ' kBytes/sec'
     ]
 
-    udpLoopbackTest [
-	"Send data from one UDP socket to another on the local machine. Tests most of the
+    datagramLoopbackTest [
+	"Send data from one datagram socket to another on the local machine. Tests most of the
+	 socket primitives and works with different processes."
+
+	<category: 'tests'>
+	^self datagramLoopbackTestOn: Socket defaultAddressClass
+    ]
+
+    datagramLoopbackTestOn: addressClass [
+	"Send data from one datagram socket to another on the local machine. Tests most of the
 	 socket primitives and works with different processes."
 
 	<category: 'tests'>
 	| bytesToSend bytesSent bytesReceived t |
 	Transcript
 	    cr;
-	    show: 'starting udp loopback test';
+	    show: 'starting datagram loopback test';
 	    cr.
 	bytesToSend := 5000000.
 	bytesSent := bytesReceived := 0.
 	t := Time millisecondsToRun: 
 			[| server client datagram |
-			client := DatagramSocket port: 54322.
+			client := DatagramSocket
+				    local: addressClass loopbackHost
+				    port: (self testPort2For: addressClass).
 			server := DatagramSocket 
-				    remote: IPAddress anyLocalAddress
-				    port: 54322
+				    remote: addressClass loopbackHost
+				    port: (self testPort2For: addressClass)
 				    local: nil
-				    port: 54321.
+				    port: (self testPortFor: addressClass).
 			datagram := Datagram data: (String new: 128 withAll: $x) asByteArray.
 			
 			[server
@@ -197,7 +245,7 @@ Socket class extend [
 			server close.
 			client close].
 	Transcript
-	    show: 'udp loopback test done; ' , (t / 100.0) printString , ' seconds';
+	    show: 'udp loopback test done; ' , (t / 1000.0) printString , ' seconds';
 	    cr;
 	    show: '% packets lost ' 
 			, (100 - (bytesReceived / bytesSent * 100)) asFloat printString;
@@ -244,8 +292,7 @@ Socket class extend [
 	    cr.
 	sock close.
 	Transcript
-	    show: 'send test done; time = ' , (t / 1000) asFloat printString 
-			, ' seconds';
+	    show: 'send test done; time = ' , (t / 1000.0) printString, ' seconds';
 	    cr;
 	    show: (bytesToSend asFloat / t) printString;
 	    showCr: ' kBytes/sec'

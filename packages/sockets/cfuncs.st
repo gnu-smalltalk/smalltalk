@@ -14,6 +14,22 @@ IPAddress class extend [
 
 ]
 
+UnixAddress class extend [
+
+    addressFamily [
+	<category: 'C constants'>
+	<cCall: 'TCPafUnix' returning: #long args: #()>
+	
+    ]
+
+    protocolFamily [
+	<category: 'C constants'>
+	<cCall: 'TCPpfUnix' returning: #long args: #()>
+	
+    ]
+
+]
+
 
 
 AbstractSocketImpl class extend [

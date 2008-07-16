@@ -112,6 +112,8 @@ o   Unbuffered sockets available from class Sockets.StreamSocket.
 
 New goodies:
 
+o   AF_UNIX sockets (in the Sockets package).
+
 o   Bindings to Cairo and LibSDL provided by Michael Bridgen, Tony
     Garnock-Jones and Brad Watson.
 

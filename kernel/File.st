@@ -340,12 +340,20 @@ FilePath subclass: File [
 	File checkError
     ]
 
+    isSocket [
+	"Answer whether the file is an AF_UNIX socket."
+
+	<category: 'accessing'>
+	self exists ifFalse: [ ^false ].
+	^(self stat stMode bitAnd: 8r170000) = 8r140000
+    ]
+
     isDirectory [
 	"Answer whether the file is a directory."
 
 	<category: 'accessing'>
 	self exists ifFalse: [ ^false ].
-	^(self stat stMode bitAnd: 61440) = 16384
+	^(self stat stMode bitAnd: 8r170000) = 8r40000
     ]
 
     isSymbolicLink [

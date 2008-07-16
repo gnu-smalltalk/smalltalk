@@ -284,16 +284,23 @@ and vice versa.'>
 	self error: 'unknown address family'
     ]
 
-    = anIPAddress [
-	"Answer whether the receiver and anIPAddress represent
+    = aSocketAddress [
+	"Answer whether the receiver and aSocketAddress represent
 	 the same machine.  The host name is not checked because
 	 an IPAddress created before a DNS is activated is named
 	 after its numbers-and-dots notation, while the same IPAddress,
 	 created when a DNS is active, is named after its resolved name."
 
 	<category: 'accessing'>
-	^self class == anIPAddress class 
-	    and: [self asByteArray = anIPAddress asByteArray]
+	^self class == aSocketAddress class 
+	    and: [self asByteArray = aSocketAddress asByteArray]
+    ]
+
+    isMulticast [
+	"Answer whether an address is reserved for multicast connections."
+
+	<category: 'testing'>
+	^false
     ]
 
     hash [

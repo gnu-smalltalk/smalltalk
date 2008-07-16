@@ -226,7 +226,9 @@ getAnyLocalAddress (char *name, char *whereToPut)
   static long name(void) { return (constant); }
 
 constantFunction (afInet, AF_INET);
+constantFunction (afUnix, AF_UNIX);
 constantFunction (pfInet, PF_INET);
+constantFunction (pfUnix, PF_UNIX);
 constantFunction (msgOOB, MSG_OOB);
 constantFunction (msgPeek, MSG_PEEK);
 constantFunction (solSocket, SOL_SOCKET);
@@ -287,7 +289,9 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("TCPsocket", socket);
 
   vmProxy->defineCFunc ("TCPpfInet", pfInet);
+  vmProxy->defineCFunc ("TCPpfUnix", pfUnix);
   vmProxy->defineCFunc ("TCPafInet", afInet);
+  vmProxy->defineCFunc ("TCPafUnix", afUnix);
   vmProxy->defineCFunc ("TCPipMulticastTtl", ipMulticastTtl);
   vmProxy->defineCFunc ("TCPipMulticastIf", ipMulticastIf);
   vmProxy->defineCFunc ("TCPipAddMembership", ipAddMembership);

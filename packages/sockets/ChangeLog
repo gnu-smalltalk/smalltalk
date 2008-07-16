@@ -1,4 +1,13 @@
 2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* SocketAddress.st: Fix parameter name for #=, add #isMulticast.
+	* UnixSocketImpl.st: New.
+	* cfuncs.st: Add AF_UNIX/PF_UNIX constants.
+	* package.xml: Add UnixSocketImpl.st.
+	* sockets.c: Add AF_UNIX/PF_UNIX constants.
+	* Tests.st: Make tests independent of the address family.
+
+2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
     
 	* AbstractSocketImpl.st: Document classes, add #activeSocketImplClass.
 	* Datagram.st: Document classes.
