@@ -35,7 +35,14 @@ Object subclass: Datagram [
     | data address port |
     
     <category: 'Sockets-Protocols'>
-    <comment: nil>
+    <comment: '
+This class models a packet of data that is to be sent across the network
+using a connectionless protocol such as UDP.  It contains the data
+to be send, as well as the destination address and port.  Note that
+datagram packets can arrive in any order and are not guaranteed to be
+delivered at all.
+
+This class can also be used for receiving data from the network.'>
 
     Datagram class >> data: aByteArray [
 	"Answer a new datagram with the specified data."

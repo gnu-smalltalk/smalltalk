@@ -35,7 +35,12 @@ Object subclass: SocketAddress [
     | name |
     
     <category: 'Sockets-Protocols'>
-    <comment: nil>
+    <comment: '
+This class is the abstract class for machine addresses over a network.
+It also fulfills the function of the C style functions gethostname(),
+gethostbyname(), and gethostbyaddr(), resolves machine names into their
+corresponding numeric addresses (via DNS, /etc/hosts, or other mechanisms)
+and vice versa.'>
 
     SocketAddress class [
 	| anyLocalAddress localHostName loopbackHost unknownAddress defaultStreamSocketImplClass defaultDatagramSocketImplClass defaultRawSocketImplClass |
@@ -90,6 +95,16 @@ Object subclass: SocketAddress [
 
 	<category: 'accessing'>
 	defaultDatagramSocketImplClass := aClass
+    ]
+
+    SocketAddress class >> newSocket: socketClass [
+        "Answer a new instance of socketClass, using the protocol
+         family of the receiver."
+
+        <category: 'private-instance creation'>
+        ^socketClass
+            new: (socketClass defaultImplementationClassFor: self)
+            addressClass: self
     ]
 
     SocketAddress class >> newRawSocket [

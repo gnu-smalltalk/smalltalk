@@ -34,14 +34,16 @@
 SocketAddress subclass: IPAddress [
     | address |
     
-    <comment: nil>
+    <comment: '
+This class models an IPv4 address.  It also acts as a factory for IPv4
+stream (TCP), datagram (UDP) and raw sockets.'>
     <category: 'Sockets-Protocols'>
 
     IPAddress class >> initialize [
 	"Set up the default implementation classes for the receiver"
 
 	<category: 'initialization'>
-	self defaultDatagramSocketImplClass: ICMPSocketImpl.
+	self defaultRawSocketImplClass: ICMPSocketImpl.
 	self defaultDatagramSocketImplClass: UDPSocketImpl.
 	self defaultStreamSocketImplClass: TCPSocketImpl
     ]
@@ -361,7 +363,11 @@ SocketAddress subclass: IPAddress [
 
 SocketImpl subclass: TCPSocketImpl [
     
-    <comment: nil>
+    <comment: '
+Unless the application installs its own implementation, this is the
+default socket implementation that will be used for IPv4 stream
+sockets.  It uses C call-outs to implement standard BSD style sockets
+of family AF_INET and type SOCK_STREAM.'>
     <category: 'Sockets-Protocols'>
 
     valueWithoutBuffering: aBlock [
@@ -383,7 +389,11 @@ SocketImpl subclass: TCPSocketImpl [
 
 MulticastSocketImpl subclass: UDPSocketImpl [
     
-    <comment: nil>
+    <comment: '
+Unless the application installs its own implementation, this is the
+default socket implementation that will be used for IPv4 datagram
+sockets.  It uses C call-outs to implement standard BSD style sockets
+of family AF_INET and type SOCK_DGRAM.'>
     <category: 'Sockets-Protocols'>
 
     ipMulticastIf [
@@ -470,7 +480,11 @@ MulticastSocketImpl subclass: UDPSocketImpl [
 
 RawSocketImpl subclass: ICMPSocketImpl [
     
-    <comment: nil>
+    <comment: '
+Unless the application installs its own implementation, this is the
+default socket implementation that will be used for IPv4 raw
+sockets.  It uses C call-outs to implement standard BSD style sockets
+of family AF_INET, type SOCK_RAW, protocol IPPROTO_ICMP.'>
     <category: 'Sockets-Protocols'>
 
 ]

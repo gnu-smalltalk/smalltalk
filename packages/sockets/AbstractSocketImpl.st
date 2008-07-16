@@ -35,7 +35,14 @@ FileDescriptor subclass: AbstractSocketImpl [
     | localAddress localPort remoteAddress remotePort |
     
     <category: 'Sockets-Protocols'>
-    <comment: nil>
+    <comment: '
+This abstract class serves as the parent class for socket implementations.
+The implementation class serves an intermediary to routines that
+perform the actual socket operations.  It hides the buffering and
+blocking behavior of the Socket classes.
+
+A default implementation is provided by each address family, but
+this can be changed by class methods on SocketAddress sublcasses.'>
 
     AbstractSocketImpl class >> addressClass [
 	"Answer the class responsible for handling addresses for
@@ -489,13 +496,22 @@ FileDescriptor subclass: AbstractSocketImpl [
 AbstractSocketImpl subclass: SocketImpl [
     
     <category: 'Sockets-Protocols'>
-    <comment: nil>
+    <comment: '
+This abstract class serves as the parent class for stream socket
+implementations.'>
 
     SocketImpl class >> socketType [
 	"Answer the socket type parameter for `create'."
 
 	<category: 'parameters'>
 	^self sockStream
+    ]
+
+    activeSocketImplClass [
+	"Return an implementation class to be used for the active socket
+	 created when a connection is accepted by a listening socket.
+	 The default is simply the same class as the receiver."
+	^self class
     ]
 
     outOfBandImplClass [
@@ -552,7 +568,9 @@ AbstractSocketImpl subclass: DatagramSocketImpl [
     | bufSize |
     
     <category: 'Sockets-Protocols'>
-    <comment: nil>
+    <comment: '
+This abstract class serves as the parent class for datagram socket
+implementations.'>
 
     DatagramSocketImpl class >> socketType [
 	"Answer the socket type parameter for `create'."
@@ -675,7 +693,9 @@ AbstractSocketImpl subclass: DatagramSocketImpl [
 DatagramSocketImpl subclass: MulticastSocketImpl [
     
     <category: 'Sockets-Protocols'>
-    <comment: nil>
+    <comment: '
+This abstract class serves as the parent class for datagram socket
+implementations that support multicast.'>
 
     ipMulticastIf [
 	"Answer the local device for a multicast socket (in the form of
@@ -729,7 +749,9 @@ DatagramSocketImpl subclass: MulticastSocketImpl [
 DatagramSocketImpl subclass: RawSocketImpl [
     
     <category: 'Sockets-Protocols'>
-    <comment: nil>
+    <comment: '
+This abstract class serves as the parent class for raw socket
+implementations.  Raw socket packets are modeled as datagrams.'>
 
     RawSocketImpl class >> socketType [
 	"Answer the socket type parameter for `create'."
@@ -744,8 +766,10 @@ DatagramSocketImpl subclass: RawSocketImpl [
 
 DatagramSocketImpl subclass: OOBSocketImpl [
     
-    <comment: nil>
     <category: 'Sockets-Protocols'>
+    <comment: '
+This abstract class serves as the parent class for socket
+implementations that send out-of-band data over a stream socket.'>
 
     canRead [
 	"Answer whether out-of-band data is available on the socket"

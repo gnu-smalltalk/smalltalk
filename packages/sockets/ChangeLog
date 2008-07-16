@@ -1,4 +1,15 @@
 2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
+    
+	* AbstractSocketImpl.st: Document classes, add #activeSocketImplClass.
+	* Datagram.st: Document classes.
+	* IPSocketImpl.st: Document classes.
+	* SocketAddress.st: Document classes.  Add #newSocket:.
+	* Sockets.st: Document classes.  Change #defaultImplementationClass
+	to #defaultImplementationClassFor: or #activeSocketImplClass, use
+	SocketAddress class>>#newSocket: instead of using directly
+	AbstractSocket class>>#new:addressClass:.
+
+2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* AbstractSocketImpl.st: Remove #addressClass, replace #new with
 	#newFor:.  Use SocketAddress class>>#fromSockAddr:port:.

@@ -35,7 +35,18 @@ Stream subclass: AbstractSocket [
     | impl |
     
     <category: 'Sockets-Streams'>
-    <comment: nil>
+    <comment: '
+This class models a client site socket.  A socket is a TCP/IP endpoint
+for network communications conceptually similar to a file handle.
+
+This class only takes care of buffering and blocking if requested.
+It uses an underlying socket implementation object which is
+a subclass of AbstractSocketImpl.  This is necessary to hide
+some methods in FileDescriptor that are not relevant to sockets,
+as well as to implement buffering independently of the implementation
+nuances required by the different address families.  The address
+family class (a subclass of SocketAddress) acts as a factory for socket
+implementation objects.'>
 
     CheckPeriod := nil.
     Timeout := nil.
@@ -265,11 +276,11 @@ Stream subclass: AbstractSocket [
 	Timeout := anInteger truncated
     ]
 
-    AbstractSocket class >> defaultImplementationClass [
+    AbstractSocket class >> defaultImplementationClassFor: aSocketAddressClass [
 	"Answer the default implementation class.  Depending on the
 	 subclass, this might be the default stream socket implementation
-	 class of the default address class, or rather its default datagram
-	 socket implementation class"
+	 class of the given address class, or rather its default datagram
+	 socket implementation class."
 
 	<category: 'defaults'>
 	self subclassResponsibility
@@ -302,13 +313,13 @@ Stream subclass: AbstractSocket [
 	^super new initialize: implementation
     ]
 
-    AbstractSocket class >> new: implementationClass addressClass: addressClass [
+    AbstractSocket class >> new: implClass addressClass: addressClass [
 	"Answer a new instance of the receiver, using as the underlying
 	 layer a new instance of `implementationClass' and using the
 	 protocol family of `addressClass'."
 
 	<category: 'instance creation'>
-	^self new: (implementationClass newFor: addressClass)
+	^self new: (implClass newFor: addressClass)
     ]
 
     AbstractSocket class >> new [
@@ -543,18 +554,29 @@ Stream subclass: AbstractSocket [
 AbstractSocket subclass: DatagramSocket [
     
     <category: 'Sockets-Streams'>
-    <comment: nil>
+    <comment: '
+This class models a connectionless datagram socket that sends
+individual packets of data across the network.  In the TCP/IP world,
+this means UDP.  Datagram packets do not have guaranteed delivery,
+or any guarantee about the order the data will be received on the
+remote host.
+
+This class uses an underlying socket implementation object which is
+a subclass of DatagramSocketImpl.  This is less necessary for
+datagram sockets than for stream sockets (except for hiding some
+methods in FileDescriptor that are not relevant to sockets),
+but it is done for cleanliness and symmetry.'>
 
     DefaultBufferSize := nil.
 
-    DatagramSocket class >> defaultImplementationClass [
+    DatagramSocket class >> defaultImplementationClassFor: aSocketAddressClass [
 	"Answer the default implementation class.  Depending on the
 	 subclass, this might be the default stream socket implementation
-	 class of the default address class, or rather its default datagram
-	 socket implementation class"
+	 class of the given address class, or rather its default datagram
+	 socket implementation class."
 
 	<category: 'accessing'>
-	^self defaultAddressClass defaultDatagramSocketImplClass
+	^aSocketAddressClass defaultDatagramSocketImplClass
     ]
 
     DatagramSocket class >> defaultBufferSize [
@@ -611,15 +633,15 @@ AbstractSocket subclass: DatagramSocket [
 
     DatagramSocket class >> remote: ipAddressOrString port: remotePort local: ipAddress port: localPort [
 	"Create a new socket and bind it to the given host (passed as a
-	 String to be resolved or as an IPAddress), and to the given remotePort.
+	 String to be resolved or as a SocketAddress), and to the given remotePort.
 	 The default destination for the datagrams will be ipAddressOrString
 	 (if not nil), on the remotePort port."
 
 	<category: 'instance creation'>
 	| localAddr remoteAddr addressClass |
 	ipAddressOrString isString 
-	    ifTrue: 
-		[remoteAddr := SocketAddress byName: ipAddressOrString.
+	    ifTrue: [
+		remoteAddr := SocketAddress byName: ipAddressOrString.
 		remoteAddr isNil 
 		    ifTrue: 
 			[self error: 'cannot resolve host name ' , ipAddressOrString printString]]
@@ -633,7 +655,7 @@ AbstractSocket subclass: DatagramSocket [
 	localAddr := ipAddress isNil 
 		    ifTrue: [addressClass anyLocalAddress]
 		    ifFalse: [ipAddress].
-	^(self new: addressClass defaultDatagramSocketImplClass addressClass: addressClass)
+	^(addressClass newSocket: self)
 	    remote: remoteAddr
 	    port: remotePort
 	    local: localAddr
@@ -754,7 +776,14 @@ AbstractSocket subclass: DatagramSocket [
 DatagramSocket subclass: MulticastSocket [
     
     <category: 'Sockets-Streams'>
-    <comment: nil>
+    <comment: '
+This class models a multicast socket that sends packets to a multicast
+group.  All members of the group listening on that address and port will
+receive all the messages sent to the group.
+
+In the TCP/IP world, these sockets are UDP-based and a multicast group
+consists of a multicast address (a class D internet address, i.e. one
+whose most significant bits are 1110), and a well known port number.'>
 
     interface [
 	"Answer the local device supporting the multicast socket.  This
@@ -817,7 +846,22 @@ DatagramSocket subclass: MulticastSocket [
 AbstractSocket subclass: ServerSocket [
     
     <category: 'Sockets-Streams'>
-    <comment: nil>
+    <comment: '
+This class models server side sockets.  The basic model is that the
+server socket is created and bound to some well known port.  It then
+listens for and accepts connections.  At that point the client and
+server sockets are ready to communicate with one another utilizing
+whatever application layer protocol they desire.
+
+As with the other AbstractSocket subclasses, most instance methods of
+this class simply redirect their calls to an implementation class.'>
+
+    ServerSocket class >> defaultImplementationClassFor: aSocketAddressClass [
+	"Answer the default implementation class."
+
+	<category: 'accessing'>
+	^aSocketAddressClass defaultStreamSocketImplClass
+    ]
 
     ServerSocket class >> defaultQueueSize [
 	"Answer the default length of the queue for pending connections.  When
@@ -895,7 +939,7 @@ AbstractSocket subclass: ServerSocket [
 	localAddr := ipAddress isNil 
 		    ifTrue: [addressClass unknownAddress]
 		    ifFalse: [ipAddress].
-	^(self new: addressClass defaultStreamSocketImplClass addressClass: addressClass) 
+	^(addressClass newSocket: self)
 	    port: anInteger
 	    queueSize: backlog
 	    bindTo: localAddr
@@ -948,7 +992,7 @@ AbstractSocket subclass: ServerSocket [
 
 	<category: 'accessing'>
 	| implClass newImpl |
-	implClass := socketClass defaultImplementationClass.
+	implClass := self implementation activeSocketImplClass.
 	newImpl := self implementation accept: implClass.
 	^socketClass new: newImpl
     ]
@@ -972,7 +1016,8 @@ AbstractSocket subclass: StreamSocket [
     | lookahead peerDead readBuffer outOfBand |
     
     <category: 'Sockets-Streams'>
-    <comment: nil>
+    <comment: '
+This class adds a read buffer to the basic model of AbstractSocket.'>
 
     ReadBufferSize := nil.
 
@@ -997,14 +1042,14 @@ AbstractSocket subclass: StreamSocket [
 	ReadBufferSize := anInteger
     ]
 
-    StreamSocket class >> defaultImplementationClass [
+    StreamSocket class >> defaultImplementationClassFor: aSocketAddressClass [
 	"Answer the default implementation class.  Depending on the
 	 subclass, this might be the default stream socket implementation
-	 class of the default address class, or rather its default datagram
-	 socket implementation class"
+	 class of the given address class, or rather its default datagram
+	 socket implementation class."
 
 	<category: 'accessing'>
-	^self defaultAddressClass defaultStreamSocketImplClass
+	^aSocketAddressClass defaultStreamSocketImplClass
     ]
 
     StreamSocket class >> remote: ipAddressOrString port: remotePort [
@@ -1040,7 +1085,7 @@ AbstractSocket subclass: StreamSocket [
 	addressClass := ipAddress isNil 
 		    ifTrue: [addressClass]
 		    ifFalse: [ipAddress class].
-	^(self new: addressClass defaultStreamSocketImplClass addressClass: addressClass)
+	^(addressClass newSocket: self)
 	    remote: remoteAddr
 	    port: remotePort
 	    local: localAddr
@@ -1292,7 +1337,8 @@ StreamSocket subclass: Socket [
     | writeBuffer |
     
     <category: 'Sockets-Streams'>
-    <comment: nil>
+    <comment: '
+This class adds read and write buffers to the basic model of AbstractSocket.'>
 
     WriteBufferSize := nil.
 
