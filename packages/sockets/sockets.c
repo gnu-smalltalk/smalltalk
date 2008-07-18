@@ -206,9 +206,11 @@ myGetHostName (void)
 
 constantFunction (afUnspec, AF_UNSPEC);
 constantFunction (afInet, AF_INET);
+constantFunction (afInet6, AF_INET6);
 constantFunction (afUnix, AF_UNIX);
 constantFunction (pfUnspec, PF_UNSPEC);
 constantFunction (pfInet, PF_INET);
+constantFunction (pfInet6, PF_INET6);
 constantFunction (pfUnix, PF_UNIX);
 constantFunction (msgOOB, MSG_OOB);
 constantFunction (msgPeek, MSG_PEEK);
@@ -220,6 +222,7 @@ constantFunction (sockStream, SOCK_STREAM);
 constantFunction (sockRaw, SOCK_RAW);
 constantFunction (sockRDM, SOCK_RDM);
 constantFunction (sockDgram, SOCK_DGRAM);
+constantFunction (ipprotoIcmpv6, IPPROTO_ICMPV6);
 constantFunction (ipprotoIcmp, IPPROTO_ICMP);
 constantFunction (ipprotoUdp, IPPROTO_UDP);
 constantFunction (ipprotoTcp, IPPROTO_TCP);
@@ -292,9 +295,11 @@ gst_initModule (VMProxy * proxy)
 
   vmProxy->defineCFunc ("TCPpfUnspec", pfUnspec);
   vmProxy->defineCFunc ("TCPpfInet", pfInet);
+  vmProxy->defineCFunc ("TCPpfInet6", pfInet6);
   vmProxy->defineCFunc ("TCPpfUnix", pfUnix);
   vmProxy->defineCFunc ("TCPafUnspec", afUnspec);
   vmProxy->defineCFunc ("TCPafInet", afInet);
+  vmProxy->defineCFunc ("TCPafInet6", afInet6);
   vmProxy->defineCFunc ("TCPafUnix", afUnix);
   vmProxy->defineCFunc ("TCPipMulticastTtl", ipMulticastTtl);
   vmProxy->defineCFunc ("TCPipMulticastIf", ipMulticastIf);
@@ -315,6 +320,7 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("TCPipprotoTcp", ipprotoTcp);
   vmProxy->defineCFunc ("TCPipprotoUdp", ipprotoUdp);
   vmProxy->defineCFunc ("TCPipprotoIcmp", ipprotoIcmp);
+  vmProxy->defineCFunc ("TCPipprotoIcmpv6", ipprotoIcmpv6);
   vmProxy->defineCFunc ("TCPaiAddrconfig", aiAddrconfig);
   vmProxy->defineCFunc ("TCPaiCanonname", aiCanonname);
   vmProxy->defineCFunc ("TCPaiAll", aiAll);

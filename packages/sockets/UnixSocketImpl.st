@@ -191,7 +191,3 @@ It unlinks the filesystem path when the socket is closed.
 	    port isNil ifFalse: [ port asFile remove ] ]
     ]
 ]
-
-Eval [
-    UnixAddress initialize
-]

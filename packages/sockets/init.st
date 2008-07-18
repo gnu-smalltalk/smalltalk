@@ -36,6 +36,8 @@ Eval [
     DatagramSocket initialize.
     ServerSocket initialize.
     IPAddress initialize.
+    IP6Address initialize.
+    UnixAddress initialize.
     ObjectMemory addDependent: SocketAddress.
     SocketAddress update: #returnFromSnapshot.
 

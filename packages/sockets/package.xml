@@ -6,6 +6,7 @@
   <filein>SocketAddress.st</filein>
   <filein>AbstractSocketImpl.st</filein>
   <filein>IPSocketImpl.st</filein>
+  <filein>IP6SocketImpl.st</filein>
   <filein>UnixSocketImpl.st</filein>
   <filein>Sockets.st</filein>
   <filein>Tests.st</filein>
@@ -19,6 +20,7 @@
   <file>SocketAddress.st</file>
   <file>AbstractSocketImpl.st</file>
   <file>IPSocketImpl.st</file>
+  <file>IP6SocketImpl.st</file>
   <file>UnixSocketImpl.st</file>
   <file>Sockets.st</file>
   <file>Tests.st</file>

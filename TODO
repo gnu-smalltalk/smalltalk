@@ -25,7 +25,6 @@
 
 * maybe
 ** DBI refactoring and prepared statements support
-** IPv6
 ** cookies and redirects for HTTPClient
 
 

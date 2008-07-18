@@ -1,5 +1,13 @@
 2008-07-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* IP6SocketImpl.st: New.
+	* UnixSocketImpl.st: Move initialization...
+	* init.st: ... here.
+	* cfuncs.st: Add IPv6 functions.
+	* sockets.c: Add IPv6 functions.
+
+2008-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* AbstractSocketImpl.st: Use a big ByteArray for addresses.
 	* IPSocketImpl.st: Remove #createLocalAddress, CSockAddrStruct,
 	#extractAddressesAfterLookup:.

@@ -42,6 +42,34 @@ IPAddress class extend [
 
 ]
 
+IP6Address class extend [
+
+    addressFamily [
+	<category: 'C constants'>
+	<cCall: 'TCPafInet6' returning: #long args: #()>
+	
+    ]
+
+    protocolFamily [
+	<category: 'C constants'>
+	<cCall: 'TCPpfInet6' returning: #long args: #()>
+	
+    ]
+
+    aiAll [
+	<category: 'C constants'>
+	<cCall: 'TCPaiAll' returning: #long args: #()>
+	
+    ]
+
+    aiV4mapped [
+	<category: 'C constants'>
+	<cCall: 'TCPaiV4mapped' returning: #long args: #()>
+	
+    ]
+
+]
+
 UnixAddress class extend [
 
     addressFamily [
@@ -149,6 +177,18 @@ TCPSocketImpl class extend [
     tcpNodelay [
 	<category: 'C constants'>
 	<cCall: 'TCPtcpNodelay' returning: #long args: #()>
+	
+    ]
+
+]
+
+
+
+ICMP6SocketImpl class extend [
+
+    protocol [
+	<category: 'C constants'>
+	<cCall: 'TCPipprotoIcmpv6' returning: #long args: #()>
 	
     ]
 
