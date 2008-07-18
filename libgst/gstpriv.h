@@ -533,7 +533,7 @@ extern OOP _gst_nil_oop
    because they are likely to be optimized.  */
 
 #if SIZEOF_OOP == 4
-# if !defined(WORDS_BIGENDIAN) && defined (HAVE_INET_SOCKETS)
+# if !defined(WORDS_BIGENDIAN) && defined (HAVE_SOCKETS)
 #  define BYTE_INVERT(x) htonl((x))
 # elif defined _OS_OSBYTEORDERPPC_H
 #  define BYTE_INVERT(x) OSReadSwapInt32(&(x), 0)

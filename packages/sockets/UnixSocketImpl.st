@@ -59,14 +59,6 @@ a String or a File object.
 	    ^uniqueInstance
         ]
 
-	createLocalAddress [
-	    "Answer an object representing a local address in the address
-	     family for the receiver"
-
-	    <category: 'initialization'>
-	    ^self uniqueInstance
-        ]
-
 	createLoopbackHost [
 	    "Answer an object representing the loopback host in the address
 	     family for the receiver.  This is 127.0.0.1 for IPv4."

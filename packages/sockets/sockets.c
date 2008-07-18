@@ -71,8 +71,8 @@
 #include <errno.h>
 #include "socketx.h"
 
-#ifndef HAVE_INET_SOCKETS
-#error Internet sockets not available.
+#ifndef HAVE_SOCKETS
+#error Sockets not available.
 #endif
 
 #ifdef HAVE_SYS_UTSNAME_H
@@ -129,49 +129,45 @@ myConnect (int fd, const struct sockaddr *sockaddr, int len)
     errno = 0;
 }
 
-static int
-myGetHostByName (char *name, OOP result)
-{
-  struct hostent *hostEnt;
-  char *data, **h, *i;
-  int n;
-
-  hostEnt = gethostbyname (name);
-  if (!hostEnt)
-    return (-1);
-
-  for (n = 1, h = hostEnt->h_addr_list; *h; h++)
-    n++;
-
-  data = malloc (n * hostEnt->h_length);
-  for (i = data, h = hostEnt->h_addr_list; *h; h++)
-    {
-      memcpy (i, *h, hostEnt->h_length);
-      i += hostEnt->h_length;
-    }
-
-  memset (i, 0, hostEnt->h_length);
-
-  vmProxy->setCObject(result, data);
-  return hostEnt->h_addrtype;
-}
-
 static char *
 myGetHostByAddr (char *addr, int len, int type)
 {
   struct hostent *hostEnt;
   char *result;
 
+#if HAVE_GETIPNODEBYADDR
+  int error;
+  hostEnt = getipnodebyaddr (addr, len, type, &error);
+#else
   hostEnt = gethostbyaddr (addr, len, type);
+#endif
+
   if (hostEnt)
     {
       result = malloc (128);	/* out of a hat */
       strncpy (result, hostEnt->h_name, 128);
+#if HAVE_GETIPNODEBYADDR
+      freehostent (hostEnt);
+#endif
     }
   else
     result = NULL;
   
   return (result);
+}
+
+/* The offsets of these two fields are not portable.  */
+
+static char **
+get_aiCanonname (struct addrinfo *ai)
+{
+  return &ai->ai_canonname;
+}
+
+static struct sockaddr **
+get_aiAddr (struct addrinfo *ai)
+{
+  return &ai->ai_addr;
 }
 
 static char *
@@ -205,28 +201,13 @@ myGetHostName (void)
   return (result);
 }
 
-static void
-getAnyLocalAddress (char *name, char *whereToPut)
-{
-  struct hostent *hostEnt;
-
-  hostEnt = gethostbyname (name);
-  if (hostEnt)
-    memcpy (whereToPut, hostEnt->h_addr, 4);
-  else
-    {
-      whereToPut[0] = 127;
-      whereToPut[1] = 0;
-      whereToPut[2] = 0;
-      whereToPut[3] = 1;
-    }
-}
-
 #define constantFunction(name, constant) \
   static long name(void) { return (constant); }
 
+constantFunction (afUnspec, AF_UNSPEC);
 constantFunction (afInet, AF_INET);
 constantFunction (afUnix, AF_UNIX);
+constantFunction (pfUnspec, PF_UNSPEC);
 constantFunction (pfInet, PF_INET);
 constantFunction (pfUnix, PF_UNIX);
 constantFunction (msgOOB, MSG_OOB);
@@ -257,6 +238,25 @@ constantFunction (ipAddMembership, -1);
 constantFunction (ipDropMembership, -1);
 #endif
 
+#ifndef AI_ADDRCONFIG
+#define AI_ADDRCONFIG	0
+#endif
+
+#ifndef AI_ALL
+#define AI_ALL	0
+#endif
+
+#ifndef AI_V4MAPPED
+#define AI_V4MAPPED	0
+#endif
+
+constantFunction (aiAddrconfig, AI_ADDRCONFIG)
+constantFunction (aiCanonname, AI_CANONNAME)
+constantFunction (aiAll, AI_ALL)
+constantFunction (aiV4mapped, AI_V4MAPPED)
+
+
+
 void
 gst_initModule (VMProxy * proxy)
 {
@@ -271,10 +271,12 @@ gst_initModule (VMProxy * proxy)
 #endif /* _WIN32 */
 
   vmProxy = proxy;
-  vmProxy->defineCFunc ("TCPlookupAllHostAddr", myGetHostByName);
+  vmProxy->defineCFunc ("TCPgetaddrinfo", getaddrinfo);
+  vmProxy->defineCFunc ("TCPfreeaddrinfo", freeaddrinfo);
   vmProxy->defineCFunc ("TCPgetHostByAddr", myGetHostByAddr);
   vmProxy->defineCFunc ("TCPgetLocalName", myGetHostName);
-  vmProxy->defineCFunc ("TCPgetAnyLocalAddress", getAnyLocalAddress);
+  vmProxy->defineCFunc ("TCPgetAiCanonname", get_aiCanonname);
+  vmProxy->defineCFunc ("TCPgetAiAddr", get_aiAddr);
 
   vmProxy->defineCFunc ("TCPaccept", accept);
   vmProxy->defineCFunc ("TCPbind", bind);
@@ -288,8 +290,10 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("TCPgetsockopt", getsockopt);
   vmProxy->defineCFunc ("TCPsocket", socket);
 
+  vmProxy->defineCFunc ("TCPpfUnspec", pfUnspec);
   vmProxy->defineCFunc ("TCPpfInet", pfInet);
   vmProxy->defineCFunc ("TCPpfUnix", pfUnix);
+  vmProxy->defineCFunc ("TCPafUnspec", afUnspec);
   vmProxy->defineCFunc ("TCPafInet", afInet);
   vmProxy->defineCFunc ("TCPafUnix", afUnix);
   vmProxy->defineCFunc ("TCPipMulticastTtl", ipMulticastTtl);
@@ -311,4 +315,8 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("TCPipprotoTcp", ipprotoTcp);
   vmProxy->defineCFunc ("TCPipprotoUdp", ipprotoUdp);
   vmProxy->defineCFunc ("TCPipprotoIcmp", ipprotoIcmp);
+  vmProxy->defineCFunc ("TCPaiAddrconfig", aiAddrconfig);
+  vmProxy->defineCFunc ("TCPaiCanonname", aiCanonname);
+  vmProxy->defineCFunc ("TCPaiAll", aiAll);
+  vmProxy->defineCFunc ("TCPaiV4mapped", aiV4mapped);
 }

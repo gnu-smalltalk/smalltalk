@@ -86,8 +86,8 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 
 	<category: 'socket operations'>
 	| peer addrLen newFD fd |
-	peer := ByteArray new: CSockAddrStruct sizeof.
-	addrLen := CInt gcValue: CSockAddrStruct sizeof.
+	peer := ByteArray new: 128.
+	addrLen := CInt gcValue: 128.
 	(fd := self fd) isNil ifTrue: [ ^SystemExceptions.EndOfStream signal ].
 	newFD := self 
 		    accept: fd
@@ -191,8 +191,8 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 
 	<category: 'socket operations'>
 	| sock addrLen fd |
-	sock := ByteArray new: CSockAddrStruct sizeof.
-	addrLen := CInt gcValue: CSockAddrStruct sizeof.
+	sock := ByteArray new: 128.
+	addrLen := CInt gcValue: 128.
 	(fd := self fd) isNil
 	    ifTrue: [ ^nil ].
 	(self getSockName: self fd addr: sock addrLen: addrLen) = -1
@@ -551,8 +551,8 @@ implementations.'>
 
 	<category: 'socket operations'>
 	| peer addrLen fd |
-	peer := ByteArray new: CSockAddrStruct sizeof.
-	addrLen := CInt gcValue: CSockAddrStruct sizeof.
+	peer := ByteArray new: 128.
+	addrLen := CInt gcValue: 128.
 	(fd := self fd) isNil
 	    ifTrue: [ ^nil ].
 	(self getPeerName: self fd addr: peer addrLen: addrLen) = -1
@@ -644,8 +644,8 @@ implementations.'>
 	<category: 'socket operations'>
 	| address port data from addrLen fd |
 	data := ByteArray new: self bufferSize.
-	from := ByteArray new: CSockAddrStruct sizeof.
-	addrLen := CInt gcValue: from size.
+	from := ByteArray new: 128.
+	addrLen := CInt gcValue: 128.
 	(fd := self fd) isNil ifTrue: [ ^SystemExceptions.EndOfStream signal ].
 	self 
 	    receive: fd

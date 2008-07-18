@@ -1754,7 +1754,7 @@ _gst_recv (int fd,
 	   int size,
 	   int flags)
 {
-#ifdef HAVE_INET_SOCKETS
+#ifdef HAVE_SOCKETS
   int result;
   int save_errno = errno;
 
@@ -1786,7 +1786,7 @@ _gst_send (int fd,
 	   int size,
 	   int flags)
 {
-#ifdef HAVE_INET_SOCKETS
+#ifdef HAVE_SOCKETS
   int result;
   int save_errno = errno;
 

@@ -1,3 +1,31 @@
+SocketAddress class extend [
+
+    addressFamily [
+	<category: 'C constants'>
+	<cCall: 'TCPafUnspec' returning: #long args: #()>
+	
+    ]
+
+    protocolFamily [
+	<category: 'C constants'>
+	<cCall: 'TCPpfUnspec' returning: #long args: #()>
+	
+    ]
+
+    aiAddrconfig [
+	<category: 'C constants'>
+	<cCall: 'TCPaiAddrconfig' returning: #long args: #()>
+	
+    ]
+
+    aiCanonname [
+	<category: 'C constants'>
+	<cCall: 'TCPaiCanonname' returning: #long args: #()>
+	
+    ]
+
+]
+
 IPAddress class extend [
 
     addressFamily [
@@ -188,14 +216,37 @@ DatagramSocketImpl extend [
 
 
 
-SocketAddress class extend [
-
-    lookupAllHostAddr: name withHostEnt: cObject [
+CAddrInfoStruct extend [
+    free [
 	<category: 'C call-outs'>
-	<cCall: 'TCPlookupAllHostAddr' returning: #int
-	args: #(#string #smalltalk)>
+	<cCall: 'TCPfreeaddrinfo' returning: #void
+	args: #(#self)>
 	
     ]
+
+    CAddrInfoStruct class >> getaddrinfo: name service: servname hints: hints result: res [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetaddrinfo' returning: #int
+	args: #(#string #string #cObject #cObjectPtr)>
+	
+    ]
+
+    aiAddr [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetAiAddr' returning: #(#ptr #{CSockAddrStruct})
+	args: #(#self)>
+	
+    ]
+
+    aiCanonname [
+	<category: 'C call-outs'>
+	<cCall: 'TCPgetAiCanonname' returning: #{CString}
+	args: #(#self)>
+	
+    ]
+]
+
+SocketAddress class extend [
 
     primName: address len: len type: addressFamily [
 	<category: 'C call-outs'>
@@ -208,19 +259,6 @@ SocketAddress class extend [
 	<category: 'C call-outs'>
 	<cCall: 'TCPgetLocalName' returning: #stringOut
 	args: #()>
-	
-    ]
-
-]
-
-
-
-IPAddress class extend [
-
-    primAnyLocalAddress: hostName in: byteArray [
-	<category: 'C call-outs'>
-	<cCall: 'TCPgetAnyLocalAddress' returning: #void
-	args: #(#string #cObject)>
 	
     ]
 

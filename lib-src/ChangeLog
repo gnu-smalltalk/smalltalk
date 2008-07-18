@@ -1,3 +1,10 @@
+2008-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* getaddrinfo.c: New.
+	* getaddrinfo.h: New.
+	* inet_ntop.c: New.
+	* socketx.h: Include getaddrinfo.h.
+
 2008-04-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* pointer-set.c: New.

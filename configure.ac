@@ -287,6 +287,7 @@ AC_FUNC_OBSTACK
 AC_CHECK_LIB(m, atan)
 GST_REPLACE_POLL
 gt_FUNC_SETENV
+GST_SOCKETS
 AC_REPLACE_FUNCS(putenv strdup strerror strsignal mkstemp getpagesize \
 	getdtablesize strstr ftruncate floorl ceill sqrtl frexpl ldexpl asinl \
 	acosl atanl logl expl tanl sinl cosl powl truncl lrintl strsep strpbrk \
@@ -449,9 +450,8 @@ GST_PACKAGE_ENABLE([Seaside], [seaside/swazoo])
 GST_PACKAGE_ENABLE([Sport], [sport])
 GST_PACKAGE_ENABLE([SUnit], [sunit])
 GST_PACKAGE_ENABLE([Swazoo], [swazoo-httpd])
-GST_PACKAGE_ENABLE([Sockets], [sockets],
-  [GST_INET_SOCKETS],
-  [gst_cv_inet_sockets],
+GST_PACKAGE_ENABLE([Sockets], [sockets], [],
+  [gst_cv_sockets],
   [Makefile], [sockets.la])
 GST_PACKAGE_ENABLE([VFSAddOns], [vfs], [], [], [Makefile])
 GST_PACKAGE_ENABLE([XML-XMLNodeBuilder], [xml/builder])

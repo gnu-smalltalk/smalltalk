@@ -1,3 +1,9 @@
+2008-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/gstpriv.h: Change HAVE_INET_SOCKETS to HAVE_SOCKETS.
+	* libgst/prims.def: Change HAVE_INET_SOCKETS to HAVE_SOCKETS.
+	* libgst/sysdep.c: Change HAVE_INET_SOCKETS to HAVE_SOCKETS.
+
 2008-07-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/opt.c: Enable jump superoperators.

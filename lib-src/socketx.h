@@ -55,7 +55,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_INET_SOCKETS
+#ifdef HAVE_SOCKETS
 
 #ifdef __MSVCRT__
 #include <windows.h>
@@ -111,7 +111,6 @@ int win_recv(int fd, void* buffer, int n, int flags);
 #include <sys/select.h>
 #endif
 #include <sys/socket.h>
-#include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 
@@ -120,6 +119,8 @@ int win_recv(int fd, void* buffer, int n, int flags);
 #define clear_socket_error()      (errno = 0)
 #endif /* !__MSVCRT__ */
 
-#endif /* HAVE_INET_SOCKETS */
+#include "getaddrinfo.h"
+
+#endif /* HAVE_SOCKETS */
 
 #endif /* GST_SOCKETX_H */

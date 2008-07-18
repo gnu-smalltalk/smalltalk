@@ -1,3 +1,18 @@
+2008-07-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* AbstractSocketImpl.st: Use a big ByteArray for addresses.
+	* IPSocketImpl.st: Remove #createLocalAddress, CSockAddrStruct,
+	#extractAddressesAfterLookup:.
+	* SocketAddress.st: Rewrite access to class-instance variables,
+	allow calling #allByName: on subclasses, use getaddrinfo,
+	implement #extractAddressesAfterLookup: here.
+	* UnixSocketImpl.st: Remove #createLocalAddress.
+	* cfuncs.st: Add SocketAddress class accessors, getaddrinfo,
+	freeaddrinfo.  Remove TCPlookupAllHostAddr and TCPgetAnyLocalAddress.
+	* sockets.c: Remove myGetHostByName and getAnyLocalAddress,
+	add afUnspec/pfUnspec, getaddrinfo/freeaddrinfo, addrinfo
+	accessors.  Use getipnodebyaddr if available.
+
 2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* SocketAddress.st: Fix parameter name for #=, add #isMulticast.

@@ -5647,7 +5647,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 
   _gst_primitives_executed++;
 
-#ifdef HAVE_INET_SOCKETS
+#ifdef HAVE_SOCKETS
   for (i = numArgs; --i >= 0;)
     oopVec[i] = POP_OOP ();
 

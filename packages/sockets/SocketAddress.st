@@ -43,11 +43,12 @@ corresponding numeric addresses (via DNS, /etc/hosts, or other mechanisms)
 and vice versa.'>
 
     SocketAddress class [
-	| anyLocalAddress localHostName loopbackHost unknownAddress defaultStreamSocketImplClass defaultDatagramSocketImplClass defaultRawSocketImplClass |
+	| anyLocalAddress loopbackHost unknownAddress defaultStreamSocketImplClass defaultDatagramSocketImplClass defaultRawSocketImplClass |
 	
     ]
 
     Cache := nil.
+    LocalHostName := nil.
 
     SocketAddress class >> defaultStreamSocketImplClass [
 	"Answer the class that, by default, is used to map between the
@@ -101,7 +102,7 @@ and vice versa.'>
         "Answer a new instance of socketClass, using the protocol
          family of the receiver."
 
-        <category: 'private-instance creation'>
+        <category: 'private-creating sockets'>
         ^socketClass
             new: (socketClass defaultImplementationClassFor: self)
             addressClass: self
@@ -113,28 +114,30 @@ and vice versa.'>
 	 (for example, the C protocol family PF_INET for the IPAddress class)
 	 Ordinary user programs usually have no need to use this method."
 
-	<category: 'initialization'>
+	<category: 'creating sockets'>
 	^DatagramSocket new: self defaultRawSocketImplClass addressClass: self
+    ]
+
+    SocketAddress class >> initLocalAddresses [
+	"Private - Initialize the anyLocalAddress class-instance variable
+	 for the entire hierarchy."
+	<category: 'initialization'>
+	| all |
+	"Initialize to the loopback host."
+	self withAllSubclassesDo: [ :each | each anyLocalAddress: each loopbackHost].
+
+	"Override with resolved addresses."
+	all := self allByName: self localHostName.
+	all do: [ :each | each class anyLocalAddress: each ]
     ]
 
     SocketAddress class >> flush [
 	"Flush the cached IP addresses."
 
 	<category: 'initialization'>
-	localHostName := self primLocalName.
-	anyLocalAddress := self createLocalAddress.
-	unknownAddress := self createUnknownAddress.
-	loopbackHost := self createLoopbackHost.
-	loopbackHost isNil ifFalse: [loopbackHost name: localHostName].
-	Cache := Dictionary new
-    ]
-
-    SocketAddress class >> createLocalAddress [
-	"Answer an object representing a local address in the address
-	 family for the receiver"
-
-	<category: 'initialization'>
-	^nil
+	LocalHostName := nil.
+	Cache := Dictionary new.
+	self withAllSubclassesDo: [:each | each anyLocalAddress: nil ].
     ]
 
     SocketAddress class >> createUnknownAddress [
@@ -142,40 +145,40 @@ and vice versa.'>
 	 family for the receiver"
 
 	<category: 'initialization'>
-	^nil
+	^Socket defaultAddressClass unknownAddress
     ]
 
     SocketAddress class >> createLoopbackHost [
 	"Answer an object representing the loopback host in the address
-	 family for the receiver.  By default this is the same as
-	 #createLocalAddress, since the loopback host is actually a
-	 local address that some implementations optimize specially."
+	 family for the receiver."
 
 	<category: 'initialization'>
-	^nil
+	^Socket defaultAddressClass loopbackHost
     ]
 
     SocketAddress class >> update: aspect [
 	"Flush all the caches for IPAddress subclasses"
 
 	<category: 'initialization'>
-	aspect == #returnFromSnapshot 
-	    ifTrue: [self withAllSubclassesDo: [:each | each flush]]
-    ]
-
-    SocketAddress class >> addressFamily [
-	"Answer the address family used for sockets whose endpoint is
-	 an instance of the receiver."
-
-	<category: 'accessing'>
-	^nil
+	aspect == #returnFromSnapshot ifTrue: [self flush].
     ]
 
     SocketAddress class >> anyLocalAddress [
 	"Answer an IPAddress representing a local address."
 
 	<category: 'accessing'>
+	"The local address can be computed with a single lookup for all
+	 the classes."
+	anyLocalAddress isNil ifTrue: [ SocketAddress initLocalAddresses ].
 	^anyLocalAddress
+    ]
+
+    SocketAddress class >> anyLocalAddress: anObject [
+	"Private - Store an object representing a local address in the address
+	 family for the receiver"
+
+	<category: 'initialization'>
+	anyLocalAddress := anObject
     ]
 
     SocketAddress class >> at: host cache: aBlock [
@@ -184,11 +187,23 @@ and vice versa.'>
 	 evaluate aBlock and cache and answer the result."
 
 	<category: 'accessing'>
-	^Cache at: host ifAbsentPut: aBlock
+	self == SocketAddress ifFalse: [ ^aBlock value ].
+
+	^Cache at: host ifAbsent: [
+	    | result |
+	    result := aBlock value.
+	    result isNil
+		ifTrue: [ nil ]
+		ifFalse: [ Cache at: host put: result ] ]
+    ]
+
+    SocketAddress class >> aiFlags [
+	<category: 'private'>
+	^self == SocketAddress ifTrue: [ self aiAddrconfig ] ifFalse: [ 0 ]
     ]
 
     SocketAddress class >> isDigitAddress: aString [
-	"Answer whether the receiver can interpret aStrnig as a valid
+	"Answer whether the receiver can interpret aString as a valid
 	 address without going through a resolver."
 
 	<category: 'accessing'>
@@ -199,7 +214,8 @@ and vice versa.'>
 	"Answer the name of the local machine."
 
 	<category: 'accessing'>
-	^localHostName
+	LocalHostName isNil ifTrue: [ LocalHostName := self primLocalName ].
+	^LocalHostName
     ]
 
     SocketAddress class >> loopbackHost [
@@ -207,17 +223,18 @@ and vice versa.'>
 	 (127.0.0.1 in the IPv4 family)."
 
 	<category: 'accessing'>
-	^loopbackHost	"127.0.0.1"
+	loopbackHost isNil ifTrue: [ loopbackHost := self createLoopbackHost ].
+	loopbackHost name: self localHostName.
+	^loopbackHost
     ]
 
     SocketAddress class >> unknownAddress [
 	"Answer an instance of the receiver representing an unknown machine
 	 (0.0.0.0 in the IPv4 family)."
 
-	"Answer an IPAddress representing an unknown machine (0.0.0.0)."
-
 	<category: 'accessing'>
-	^unknownAddress	"0.0.0.0"
+	unknownAddress isNil ifTrue: [ unknownAddress := self createUnknownAddress ].
+	^unknownAddress
     ]
 
     SocketAddress class >> allByName: aString [
@@ -227,25 +244,25 @@ and vice versa.'>
 	 resolved to an IP address, answer nil."
 
 	<category: 'host name lookup'>
-	| host |
+	| host addresses |
 	host := aString asLowercase.
 	self withAllSubclassesDo: 
 		[:c | 
 		(c isDigitAddress: host) 
 		    ifTrue: [^self at: host cache: [Array with: (c fromString: host)]]].
-	^self at: host
-	    cache: 
-		[| type addresses result class |
-		result := CByte new.
-		type := self lookupAllHostAddr: host withHostEnt: result.
-		type >= 0 
-		    ifTrue: 
-			[
-			[class := self withAllSubclasses detect: [:c | c addressFamily = type]
-				    ifNone: [self error: 'unsupported address family'].
-			addresses := class extractAddressesAfterLookup: result] 
-				ensure: [result free]].
-		addresses]
+	addresses := self at: host
+	    cache: [ | hints result |
+		hints := CAddrInfoStruct gcNew.
+		hints aiFamily value: self protocolFamily.
+		hints aiFlags value: (self aiFlags bitOr: self aiCanonname).
+		result := hints getaddrinfo: host.
+		result isNil
+		    ifTrue: [ nil ]
+		    ifFalse: [
+			[self extractAddressesAfterLookup: result] 
+				ensure: [result free]]].
+
+	^addresses
     ]
 
     SocketAddress class >> byName: aString [
@@ -256,32 +273,62 @@ and vice versa.'>
 
 	<category: 'host name lookup'>
 	| all |
-	aString isEmpty ifTrue: [^loopbackHost].
+	aString isEmpty ifTrue: [^self loopbackHost].
 	all := self allByName: aString.
-	^all isNil ifTrue: [nil] ifFalse: [all anyOne]
+	all isNil ifTrue: [^nil].
+	^all anyOne
     ]
 
-    SocketAddress class >> extractAddressesAfterLookup: result [
+    SocketAddress class >> extractAddressesAfterLookup: aiHead [
 	"Private - Given a CByte object, extract the arrays returned by
 	 gethostbyname and answer them."
 
 	<category: 'private'>
-	self subclassResponsibility
+	| result addrBytes addr ai name |
+	result := OrderedCollection new.
+	name := aiHead aiCanonname value.
+	ai := aiHead.
+	[ ai isNil ] whileFalse: [
+	    addrBytes := ByteArray fromCData: ai aiAddr value size: ai aiAddrlen value.
+	    addr := self
+		extractFromSockAddr: addrBytes
+		port: NullValueHolder uniqueInstance.
+	    addr isNil ifFalse: [
+		addr name: name.
+		(result includes: addr) ifFalse: [ result add: addr ] ].
+	    ai := ai aiNext value ].
+	^result
     ]
 
-    SocketAddress class >> fromSockAddr: aByteArray port: portAdaptor [
-	"Private - Answer a new IPAddress from a ByteArray containing a
+    SocketAddress class >> extractFromSockAddr: aByteArray port: portAdaptor [
+	"Private - Answer a new SocketAddress from a ByteArray containing a
 	 C sockaddr structure.  The portAdaptor's value is changed
 	 to contain the port that the structure refers to."
 
 	<category: 'abstract'>
 	| addressFamily |
+	"MacOS X places a length byte at offset 1, so look-up offset 2
+	 first.  If it is 0, we're on a little-endian system without
+	 the sa_len field, so use offset 1 as a second possibility."
 	addressFamily := aByteArray at: 2.
-	self allSubclassesDo: [ :each |
+	addressFamily = 0 ifTrue: [ addressFamily := aByteArray at: 1 ].
+
+	self withAllSubclassesDo: [ :each |
 	    each addressFamily = addressFamily ifTrue: [
 		^each fromSockAddr: aByteArray port: portAdaptor ] ].
 
-	self error: 'unknown address family'
+	^nil
+    ]
+
+    SocketAddress class >> fromSockAddr: aByteArray port: portAdaptor [
+	"Private - Answer a new IPAddress from a ByteArray containing a
+	 C sockaddr structure.  The portAdaptor's value is changed
+	 to contain the port that the structure refers to.  Raise an error
+	 if the address family is unknown."
+
+	<category: 'abstract'>
+	^(self extractFromSockAddr: aByteArray port: portAdaptor)
+	    ifNil: [ self error: 'unknown address family' ]
     ]
 
     = aSocketAddress [
@@ -364,6 +411,35 @@ and vice versa.'>
 
 	<category: 'private'>
 	name := newName
+    ]
+]
+
+
+
+CStruct subclass: CAddrInfoStruct [
+    <declaration: #(
+		#(#aiFlags #int)
+		#(#aiFamily #int)
+		#(#aiSocktype #int)
+		#(#aiProtocol #int)
+		#(#aiAddrlen #int)
+		#(#aiCanonname #string)
+		#(#aiAddr #(#ptr #{CObject}))
+		#(#aiNext #(#ptr #{CAddrInfoStruct}))) >
+
+    getaddrinfo: name [
+	<category: 'C function wrappers'>
+	^self getaddrinfo: name service: nil
+    ]
+
+    getaddrinfo: name service: service [
+	<category: 'C function wrappers'>
+	| res |
+	res := self class address: 0.
+	(CAddrInfoStruct getaddrinfo: name service: service
+	    hints: self result: res) = -1 ifTrue: [ ^nil ].
+	res address = 0 ifTrue: [ ^nil ].
+	^res
     ]
 ]
 

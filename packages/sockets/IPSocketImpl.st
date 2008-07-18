@@ -48,17 +48,6 @@ stream (TCP), datagram (UDP) and raw sockets.'>
 	self defaultStreamSocketImplClass: TCPSocketImpl
     ]
 
-    IPAddress class >> createLocalAddress [
-	"Answer an object representing a local address in the address
-	 family for the receiver"
-
-	<category: 'initialization'>
-	| localAddrBytes |
-	self primAnyLocalAddress: localHostName
-	    in: (localAddrBytes := ByteArray new: 4).
-	^IPAddress fromBytes: localAddrBytes
-    ]
-
     IPAddress class >> createLoopbackHost [
 	"Answer an object representing the loopback host in the address
 	 family for the receiver.  This is 127.0.0.1 for IPv4."
@@ -107,10 +96,8 @@ stream (TCP), datagram (UDP) and raw sockets.'>
 	 to contain the port that the structure refers to."
 
 	<category: 'instance creation'>
-	| s |
-	s := CSockAddrStruct sizeof.
-	portAdaptor value: (aByteArray at: s - 13) * 256 + (aByteArray at: s - 12).
-	^self fromBytes: (aByteArray copyFrom: s - 11 to: s - 8)
+	portAdaptor value: (aByteArray at: 3) * 256 + (aByteArray at: 4).
+	^self fromBytes: (aByteArray copyFrom: 5 to: 8)
     ]
 
     IPAddress class >> fromString: aString [
@@ -214,28 +201,8 @@ stream (TCP), datagram (UDP) and raw sockets.'>
 		    with: b4) makeReadOnly: true)
     ]
 
-    IPAddress class >> extractAddressesAfterLookup: result [
-	"Private - Given a CByte object, extract the arrays returned by
-	 gethostbyname and answer them."
-
-	<category: 'private'>
-	| addresses index addr |
-	addresses := WriteStream on: (Array new: 1).
-	index := 0.
-	
-	[addr := self 
-		    with: (result at: index)
-		    with: (result at: index + 1)
-		    with: (result at: index + 2)
-		    with: (result at: index + 3).
-	index := index + 4.
-	addr = unknownAddress] 
-		whileFalse: [addresses nextPut: addr].
-	^addresses contents
-    ]
-
     IPAddress class >> isDigitAddress: aString [
-	"Answer whether the receiver is a valid address in a.b.c.d form."
+	"Answer whether aString is a valid address in a.b.c.d form."
 
 	<category: 'private'>
 	| dots |
@@ -341,10 +308,10 @@ stream (TCP), datagram (UDP) and raw sockets.'>
 
 	<category: 'private'>
 	port < 0 | (port > 65535) ifTrue: [self error: 'port out of range'].
-	^(ByteArray new: CSockAddrStruct sizeof)
+	^(ByteArray new: 16)
 	    "Write sin_addr"
-	    replaceFrom: CSockAddrStruct sizeof - 11
-		to: CSockAddrStruct sizeof - 8
+	    replaceFrom: 5
+		to: 8
 		with: address
 		startingAt: 1;
 
@@ -352,8 +319,8 @@ stream (TCP), datagram (UDP) and raw sockets.'>
 	    shortAt: 1 put: self class addressFamily;
 
 	    "Write sin_port in network order (big endian)"
-	    at: CSockAddrStruct sizeof - 13 put: port // 256;
-	    at: CSockAddrStruct sizeof - 12 put: (port bitAnd: 255);
+	    at: 3 put: port // 256;
+	    at: 4 put: (port bitAnd: 255);
 	    yourself
 
     ]
@@ -487,15 +454,5 @@ sockets.  It uses C call-outs to implement standard BSD style sockets
 of family AF_INET, type SOCK_RAW, protocol IPPROTO_ICMP.'>
     <category: 'Sockets-Protocols'>
 
-]
-
-
-
-CStruct subclass: CSockAddrStruct [
-    <declaration: #(
-		#(#sinFamily #short)
-		#(#sinPort #(#array #byte 2))
-		#(#sinAddr #(#array #byte 4))
-		#(#sinZero #(#array #byte 8))) >
 ]
 
