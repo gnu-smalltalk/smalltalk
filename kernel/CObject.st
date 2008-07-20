@@ -155,8 +155,10 @@ into their corresponding C values for use in external routines.'>
 	"Return a hash value for anObject."
 
 	<category: 'basic'>
+	| addr |
+	addr := self address bitAnd: SmallInteger largest.
 	^self type hash
-	    bitXor: (self storage identityHash * self storage size + self address)
+	    bitXor: (self storage identityHash * self storage size + addr)
     ]
 
     finalize [

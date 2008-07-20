@@ -1,3 +1,7 @@
+2008-07-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/CObject.st: Avoid returning a LargeInteger for the hash value.
+
 2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/File.st: Add #isSocket.
