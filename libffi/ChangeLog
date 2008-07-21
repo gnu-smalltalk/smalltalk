@@ -1,3 +1,7 @@
+2008-07-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* src/x86/ffi.c (ffi_prep_closure_loc): Fix thinko.
+
 2008-01-24  David Edelsohn  <edelsohn@gnu.org>
 
 	* configure: Regenerate.
