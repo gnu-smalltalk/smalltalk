@@ -340,7 +340,7 @@ GST_PACKAGE_ENABLE([DBD-PostgreSQL], [dbd-postgresql],
 
 GST_PACKAGE_ENABLE([DBD-SQLite], [dbd-sqlite],
    [AC_CHECK_HEADER([sqlite3.h])
-    AC_CHECK_LIB(sqlite3, sqlite3_clear_bindings)],
+    GST_HAVE_LIB(sqlite3, sqlite3_clear_bindings)],
    [ac_cv_header_sqlite3_h],
    [Makefile], [dbd-sqlite3.la])
 
