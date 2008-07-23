@@ -74,13 +74,15 @@ and also provide some methods that can be used in inspection or debugging.'>
 	<category: 'printing'>
 	outerContext isNil 
 	    ifTrue: 
-		[aStream
-		    nextPutAll: 'optimized ';
-		    print: self method]
+		[aStream nextPutAll: 'optimized '.
+		self method printOn: aStream.
+		aStream
+		    nextPutAll: ' (line ';
+		    print: self currentLine;
+		    nextPut: $)]
 	    ifFalse: 
-		[aStream
-		    nextPutAll: '[] in ';
-		    print: self home]
+		[aStream nextPutAll: '[] in '.
+		self home printOn: aStream line: self currentLine]
     ]
 
     isInternalExceptionHandlingContext [

@@ -1,3 +1,10 @@
+2008-07-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ContextPart.st: Implement #currentLine in an inefficient
+	but correct way.
+	* kernel/BlkContext.st: Include line numbers in the representation.
+	* kernel/MthContext.st: Add #printOn:line:.  Use it to print contexts.
+
 2008-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CObject.st: Avoid returning a LargeInteger for the hash value.

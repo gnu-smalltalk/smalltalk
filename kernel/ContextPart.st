@@ -119,11 +119,11 @@ methods that can be used in inspection or debugging.'>
 
     currentLine [
 	"Answer the 1-based number of the line that is pointed to by the receiver's
-	 instruction pointer.  It is always 1 unless the DebugTools package is
-	 loaded."
+	 instruction pointer.  The DebugTools package caches information,
+	 thus making the implementation faster."
 
 	<category: 'debugging'>
-	^1
+	^self method sourceCodeMap at: self ip + 1 ifAbsent: [1]
     ]
 
     debugger [
