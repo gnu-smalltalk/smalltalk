@@ -340,6 +340,13 @@ FilePath subclass: File [
 	File checkError
     ]
 
+    isFileSystemPath [
+	"Answer whether the receiver corresponds to a real filesystem path."
+
+	<category: 'testing'>
+	^true
+    ]
+
     isSocket [
 	"Answer whether the file is an AF_UNIX socket."
 

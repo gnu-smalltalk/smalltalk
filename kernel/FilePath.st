@@ -457,6 +457,13 @@ size and timestamps.'>
 	self subclassResponsibility
     ]
 
+    isFileSystemPath [
+	"Answer whether the receiver corresponds to a real filesystem path."
+
+	<category: 'testing'>
+	^false
+    ]
+
     extension [
 	"Answer the extension of the receiver"
 

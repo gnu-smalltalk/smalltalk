@@ -1,5 +1,11 @@
 2008-07-24  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/File.st: Add #isFileSystemPath.
+	* kernel/FilePath.st: Likewise.
+	* kernel/VFS.st: Likewise.
+	
+2008-07-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/BlkContext.st: Use #currentLineInFile to print contexts.
 	* kernel/CompildCode.st: Add abstract #sourceCodeLinesDelta,
 	discard the first line number bytecode in #sourceCodeMap.

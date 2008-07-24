@@ -399,6 +399,13 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 		    ifFalse: [f remove]]].
 	super remove
      ]
+
+    isFileSystemPath [
+	"Answer whether the receiver corresponds to a real filesystem path."
+
+	<category: 'testing'>
+	^self file isFileSystemPath
+    ]
 ]
 
 ]
