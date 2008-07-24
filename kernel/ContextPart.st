@@ -117,6 +117,15 @@ methods that can be used in inspection or debugging.'>
 		ctx := ctx parentContext]
     ]
 
+    currentLineInFile [
+	"Answer the 1-based number of the line that is pointed to by the
+	 receiver's instruction pointer, relative to the method's file.
+	 The implementation is slow unless the DebugTools package is loaded."
+
+	<category: 'debugging'>
+	^self currentLine + self method sourceCodeLinesDelta
+    ]
+
     currentLine [
 	"Answer the 1-based number of the line that is pointed to by the receiver's
 	 instruction pointer.  The DebugTools package caches information,

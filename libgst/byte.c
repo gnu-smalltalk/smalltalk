@@ -86,19 +86,57 @@ _gst_extract_bytecodes (OOP byteArrayOOP)
 }
 
 void
-_gst_line_number (int n, mst_Boolean force)
+_gst_line_number (int n, int flags)
 {
-  static int line;
-  if (n > 65535) n = 65535;
+  static int emit_absolute;
+  static int prev_line;
+  static int line_offset;
+  int emitted_line;
 
-  if (n == line && !force)
-    return;
+  if (n > 65535)
+    n = 65535;
 
-  line = n;
-  if (n < 0)
-    return;
+  if (flags & LN_RESET)
+    {
+      if (n == -1)
+	{
+	  prev_line = -1;
+          emit_absolute = true;
+	}
+      else
+	{
+	  /* When we are reading from stdin, it's better to write
+	     line numbers where 1 is the first line *in the current
+	     doit*, because for now the prompt does not include the
+	     line number.  This might change in the future, in which
+	     case this special casing will become useless and LN_RESET
+	     will always be called with n == -1.  */
+	  prev_line = 1;
+          line_offset = n - 1;
+          emit_absolute = false;
+	}
+      return;
+    }
 
-  _gst_compile_byte (LINE_NUMBER_BYTECODE, n);
+  if (emit_absolute)
+    {
+      assert (n != -1);
+      assert (!(flags & LN_FORCE));
+      emitted_line = n;
+      line_offset = n - 1;
+      emit_absolute = false;
+    }
+  else
+    {
+      emitted_line = n - line_offset;
+      if (emitted_line <= 0)
+        return;
+      if (!(flags & LN_FORCE) && n == prev_line)
+        return;
+    }
+
+  prev_line = n;
+  _gst_compile_byte (LINE_NUMBER_BYTECODE, emitted_line);
 }
 
 void

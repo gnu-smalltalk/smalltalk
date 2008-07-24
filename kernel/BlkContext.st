@@ -78,11 +78,11 @@ and also provide some methods that can be used in inspection or debugging.'>
 		self method printOn: aStream.
 		aStream
 		    nextPutAll: ' (line ';
-		    print: self currentLine;
+		    print: self currentLineInFile;
 		    nextPut: $)]
 	    ifFalse: 
 		[aStream nextPutAll: '[] in '.
-		self home printOn: aStream line: self currentLine]
+		self home printOn: aStream line: self currentLineInFile]
     ]
 
     isInternalExceptionHandlingContext [

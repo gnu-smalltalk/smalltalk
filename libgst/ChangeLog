@@ -1,3 +1,13 @@
+2008-07-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/byte.c: Modify _gst_line_number to store the line offset
+	and emit the first line number as absolute.
+	* libgst/byte.h: Add LN_RESET and LN_FORCE.
+	* libgst/comp.c: Use new _gst_line_number functionality instead
+	of line_offset.
+	* libgst/opt.c: Rewrite is_simple_return to account for line numbers
+	that are >= 256.
+
 2008-07-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/gstpriv.h: Change HAVE_INET_SOCKETS to HAVE_SOCKETS.

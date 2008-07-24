@@ -143,6 +143,19 @@ instances.'>
 	self allInstancesDo: [:each | each stripSourceCode]
     ]
 
+    sourceCodeLinesDelta [
+	"Answer the delta from the numbers in LINE_NUMBER bytecodes
+	 to source code line numbers."
+
+	<category: 'accessing'>
+	| line |
+	self allByteCodeIndicesDo: 
+		[:each :byte :operand | 
+		(self class bytecodeInfoTable at: byte * 4 + 4) >= 128 
+		    ifTrue: [^operand - 1]].
+	^0
+    ]
+
     methodCategory [
 	"Answer the method category"
 

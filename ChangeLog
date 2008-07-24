@@ -1,3 +1,13 @@
+2008-07-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/BlkContext.st: Use #currentLineInFile to print contexts.
+	* kernel/CompildCode.st: Add abstract #sourceCodeLinesDelta,
+	discard the first line number bytecode in #sourceCodeMap.
+	* kernel/CompildMeth.st: Add #sourceCodeLinesDelta.
+	* kernel/CompiledBlk.st: Add #sourceCodeLinesDelta and #sourceCodeMap.
+	* kernel/ContextPart.st: Add #currentLineInFile.
+	* kernel/MthContext.st: Use #currentLineInFile to print contexts.
+
 2008-07-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ContextPart.st: Implement #currentLine in an inefficient

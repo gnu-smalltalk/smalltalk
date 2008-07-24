@@ -44,7 +44,7 @@ execution stack.'>
     printOn: aStream [
 	"Print a representation for the receiver on aStream"
 	<category: 'printing'>
-	self printOn: aStream line: self currentLine
+	self printOn: aStream line: self currentLineInFile
     ]
 
     printOn: aStream line: line [

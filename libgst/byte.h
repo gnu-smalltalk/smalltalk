@@ -126,6 +126,17 @@ enum {
   RECEIVER_INDEX = -129
 };
 
+enum {
+  /* Causes _gst_line_number to always emit a line number bytecode.  */
+  LN_FORCE = 1,
+
+  /* If line is -1, causes _gst_line_number to emit an absolute line
+     number (and use that line number as the offset) on the *next* call.
+     If line is > 0, causes _gst_line_number to emit line numbers
+     relatives to that line.  */
+  LN_RESET = 2
+};
+
 typedef struct bytecode_array
 {
   gst_uchar *base;		/* base of the byte code array */
@@ -204,7 +215,7 @@ extern void _gst_truncate_bytecodes (gst_uchar * here,
 
 /* This compiles a LINE_NUMBER_BYTECODE if line is different from the
    last line we compiled, or if FORCE is true.  */
-extern void _gst_line_number (int line, mst_Boolean force) 
+extern void _gst_line_number (int line, int flags) 
   ATTRIBUTE_HIDDEN;
 
 /* This tacks the bytecode BYTE, with argument ARG, at the end of the

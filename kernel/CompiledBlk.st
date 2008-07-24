@@ -67,6 +67,33 @@ CompiledCode subclass: CompiledBlock [
 	^method methodCategory
     ]
 
+    sourceCodeLinesDelta [
+	"Answer the delta from the numbers in LINE_NUMBER bytecodes
+	 to source code line numbers."
+
+	<category: 'accessing'>
+	^method sourceCodeLinesDelta
+    ]
+
+    sourceCodeMap [
+	"Answer an array which maps bytecode indices to source code
+	 line numbers.  0 values represent invalid instruction
+	 pointer indices."
+
+	<category: 'accessing'>
+	| map line |
+	map := ByteArray new: self size.
+	line := 1.
+	self allByteCodeIndicesDo: 
+		[:each :byte :operand | 
+		(self class bytecodeInfoTable at: byte * 4 + 4) >= 128 
+		    ifTrue: 
+			[line := operand.
+			operand > 255 ifTrue: [map := map asArray]].
+		map at: each put: line].
+	^map
+    ]
+
     methodCategory: aCategory [
 	"Set the method category to the given string"
 

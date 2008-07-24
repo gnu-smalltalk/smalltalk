@@ -232,6 +232,7 @@ _gst_is_simple_return (bc_vector bytecodes)
   size_t byteCodeLen;
   int maybe = MTH_NORMAL;
   OOP maybe_object = NULL;
+  int i;
 
   if (bytecodes == NULL)
     return (MTH_NORMAL);
@@ -239,51 +240,54 @@ _gst_is_simple_return (bc_vector bytecodes)
   byteCodeLen = _gst_bytecode_length (bytecodes);
   bytes = bytecodes->base;
 
-  if (bytes[0] == LINE_NUMBER_BYTECODE)
+  for (i = 1; i <= 3; i++)
     {
-      byteCodeLen -= BYTECODE_SIZE;
-      bytes += BYTECODE_SIZE;
-    }
+      int should_have_been_return = (maybe != MTH_NORMAL);
+      if (bytes == bytecodes->ptr)
+        return (MTH_NORMAL);
 
-  MATCH_BYTECODES (IS_SIMPLE_RETURN, bytes, (
-    PUSH_SELF { maybe = MTH_RETURN_SELF; }
-    PUSH_RECEIVER_VARIABLE { maybe = (n << 8) | MTH_RETURN_INSTVAR; }
-    PUSH_LIT_CONSTANT { maybe = (n << 8) | MTH_RETURN_LITERAL; }
-    PUSH_INTEGER { maybe_object = FROM_INT (n); maybe = MTH_RETURN_LITERAL; }
-    PUSH_SPECIAL {
-      maybe = MTH_RETURN_LITERAL;
-      switch (n)
-	{
-	  case NIL_INDEX: maybe_object = _gst_nil_oop; break;
-          case TRUE_INDEX: maybe_object = _gst_true_oop; break;
-          case FALSE_INDEX: maybe_object = _gst_false_oop; break;
-	  default: abort ();
+      MATCH_BYTECODES (IS_SIMPLE_RETURN, bytes, (
+        PUSH_SELF { maybe = MTH_RETURN_SELF; }
+        PUSH_RECEIVER_VARIABLE { maybe = (n << 8) | MTH_RETURN_INSTVAR; }
+        PUSH_LIT_CONSTANT { maybe = (n << 8) | MTH_RETURN_LITERAL; }
+        PUSH_INTEGER { maybe_object = FROM_INT (n); maybe = MTH_RETURN_LITERAL; }
+        PUSH_SPECIAL {
+          maybe = MTH_RETURN_LITERAL;
+          switch (n)
+	    {
+	      case NIL_INDEX: maybe_object = _gst_nil_oop; break;
+              case TRUE_INDEX: maybe_object = _gst_true_oop; break;
+              case FALSE_INDEX: maybe_object = _gst_false_oop; break;
+	      default: abort ();
+	    }
+        }
+
+        LINE_NUMBER_BYTECODE { }
+        RETURN_CONTEXT_STACK_TOP {
+	  if (maybe_object)
+	    _gst_add_forced_object (maybe_object);
+	  return maybe;
 	}
+
+        STORE_RECEIVER_VARIABLE,
+        PUSH_OUTER_TEMP, STORE_OUTER_TEMP,
+        JUMP, POP_JUMP_TRUE, POP_JUMP_FALSE,
+        PUSH_TEMPORARY_VARIABLE, PUSH_LIT_VARIABLE,
+        STORE_TEMPORARY_VARIABLE, STORE_LIT_VARIABLE,
+        SEND, POP_INTO_NEW_STACKTOP,
+        POP_STACK_TOP, DUP_STACK_TOP,
+        SEND_IMMEDIATE, EXIT_INTERPRETER,
+        SEND_ARITH, SEND_SPECIAL, MAKE_DIRTY_BLOCK,
+        RETURN_METHOD_STACK_TOP { return (MTH_NORMAL); }
+
+        INVALID { abort(); }
+      ));
+
+      if (should_have_been_return)
+	return (MTH_NORMAL);
     }
 
-    LINE_NUMBER_BYTECODE,
-    STORE_RECEIVER_VARIABLE,
-    PUSH_OUTER_TEMP, STORE_OUTER_TEMP,
-    JUMP, POP_JUMP_TRUE, POP_JUMP_FALSE,
-    PUSH_TEMPORARY_VARIABLE, PUSH_LIT_VARIABLE,
-    RETURN_CONTEXT_STACK_TOP,
-    STORE_TEMPORARY_VARIABLE, STORE_LIT_VARIABLE,
-    SEND, POP_INTO_NEW_STACKTOP,
-    POP_STACK_TOP, DUP_STACK_TOP,
-    SEND_IMMEDIATE, EXIT_INTERPRETER,
-    SEND_ARITH, SEND_SPECIAL, MAKE_DIRTY_BLOCK,
-    RETURN_METHOD_STACK_TOP { return (MTH_NORMAL); }
-
-    INVALID { abort(); }
-  ));
-
-  if (bytes[0] != RETURN_CONTEXT_STACK_TOP)
-    return (MTH_NORMAL);
-
-  if (maybe_object)
-    _gst_add_forced_object (maybe_object);
-
-  return (maybe);
+  return (MTH_NORMAL);
 }
 
 int

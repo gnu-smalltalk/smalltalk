@@ -446,20 +446,30 @@ superclass for blocks and methods'>
 	^false
     ]
 
+    sourceCodeLinesDelta [
+	"Answer the delta from the numbers in LINE_NUMBER bytecodes
+	 to source code line numbers."
+
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
     sourceCodeMap [
 	"Answer an array which maps bytecode indices to source code
 	 line numbers.  0 values represent invalid instruction
 	 pointer indices."
 
 	<category: 'testing accesses'>
-	| map line |
+	| map line first |
 	map := ByteArray new: self size.
 	line := 1.
+	first := true.
 	self allByteCodeIndicesDo: 
 		[:each :byte :operand | 
 		(self class bytecodeInfoTable at: byte * 4 + 4) >= 128 
 		    ifTrue: 
-			[line := operand.
+			[first ifFalse: [line := operand].
+			first := false.
 			operand > 255 ifTrue: [map := map asArray]].
 		map at: each put: line].
 	^map

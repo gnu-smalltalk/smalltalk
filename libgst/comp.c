@@ -391,9 +391,6 @@ static void install_method (OOP methodOOP);
    _gst_prepare_execution_environment.  */
 static OOP termination_method;
 
-/* Used to number the lines starting from 1.  */
-static int line_offset;
-
 /* Used to abort really losing compiles, jumps back to the top level
    of the compiler */
 static jmp_buf bad_method;
@@ -794,8 +791,6 @@ _gst_compile_method (tree_node method,
   this_method_category = _gst_this_category;
   _gst_unregister_oop (_gst_latest_compiled_method);
   _gst_latest_compiled_method = _gst_nil_oop;
-  _gst_line_number (-1, true);
-  line_offset = method->location.first_line - 1;
 
   incPtr = INC_SAVE_POINTER ();
 
@@ -803,6 +798,11 @@ _gst_compile_method (tree_node method,
   _gst_push_new_scope ();
   inside_block = 0;
   selector = compute_selector (method->v_method.selectorExpr);
+  if (method->location.file_offset != -1 && _gst_get_cur_stream_prompt ())
+    _gst_line_number (method->location.first_line, LN_RESET);
+  else
+    _gst_line_number (-1, LN_RESET);
+
   INC_ADD_OOP (selector);
 
   if (_gst_declare_tracing)
@@ -961,7 +961,7 @@ compile_expression (tree_node expr)
 void
 compile_simple_expression (tree_node expr)
 {
-  _gst_line_number (expr->location.first_line - line_offset, false);
+  _gst_line_number (expr->location.first_line, 0);
   switch (expr->nodeType)
     {
     case TREE_VARIABLE_NODE:
@@ -1190,7 +1190,7 @@ compile_statements (tree_node statementList,
 
   if (isBlock)
     {
-      _gst_line_number (statementList->location.first_line - line_offset, true);
+      _gst_line_number (statementList->location.first_line, LN_FORCE);
       inside_block++;
     }
 
@@ -1215,7 +1215,7 @@ compile_statements (tree_node statementList,
 
   if (isBlock)
     {
-      _gst_line_number (-1, false);
+      _gst_line_number (-1, 0);
       inside_block--;
     }
 
@@ -1902,7 +1902,7 @@ compile_assignments (tree_node varList)
     {
       tree_node varName = varList->v_list.value;
 
-      _gst_line_number (varList->location.first_line - line_offset, false);
+      _gst_line_number (varList->location.first_line, 0);
       if (!_gst_find_variable (&variable, varName))
 	{
           if (varName->v_list.next)
