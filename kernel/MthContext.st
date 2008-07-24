@@ -43,13 +43,14 @@ execution stack.'>
 
     printOn: aStream [
 	"Print a representation for the receiver on aStream"
+
 	<category: 'printing'>
 	self printOn: aStream line: self currentLineInFile
     ]
 
     printOn: aStream line: line [
 	"Print a representation for the receiver on aStream, using the
-	 given line number."
+	 given line number and printing aString before the method name."
 
 	<category: 'private-printing'>
 	self receiver class printOn: aStream in: Namespace current.
@@ -67,7 +68,13 @@ execution stack.'>
 		    space;
 		    print: (self at: 1) selector].
 
-	aStream nextPutAll: ' (line '; print: line; nextPut: $).
+	aStream
+	    nextPutAll: ' (';
+	    display: self currentFileName;
+	    nextPut: $:;
+	    display: line;
+	    nextPut: $).
+
 	self isDisabled ifTrue: [aStream nextPutAll: ' <disabled>']
     ]
 

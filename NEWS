@@ -18,7 +18,7 @@ o   CObjects can be backed with garbage-collected (as opposed to
     Garbage-collected CObjects are created by sending #gcNew instead
     of #new.
 
-o   Error backtraces include line numbers.
+o   Error backtraces include line numbers and filenames.
 
 o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
     the instance of GNU Smalltalk that produced the snapshot, and

@@ -129,6 +129,22 @@ Smalltalk-80 kernel; I am specific to the GNU Smalltalk implementation.'>
 	^f
     ]
 
+    printedFileName [
+	"Answer a printed representation of the file containing the segment.
+	 While introducing some ambiguity, this representation is compact
+	 eliminates the path for kernel files, and produces a relative path
+	 from the current working directory for other files."
+
+	<category: 'printing'>
+	| f |
+	f := file asFile.
+	f isRelative
+	    ifTrue: [ ^f stripPath asString ].
+	f isFileSystemPath
+	    ifFalse: [ ^'%1/%2' % { f archive displayString copyAfterLast: $/. f name } ].
+	^(f pathFrom: Directory working) asString
+    ]
+
     fileName [
 	"Answer the name of the file containing the segment"
 

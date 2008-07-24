@@ -1,5 +1,12 @@
 2008-07-24  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/BlkContext.st: Include filename in the representation.
+	* kernel/ContextPart.st: Add #currentFileName.
+	* kernel/FileSegment.st: Add #printedFileName.
+	* kernel/MthContext.st: Include filename in the representation.
+
+2008-07-24  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/File.st: Add #isFileSystemPath.
 	* kernel/FilePath.st: Likewise.
 	* kernel/VFS.st: Likewise.

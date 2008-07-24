@@ -126,6 +126,17 @@ methods that can be used in inspection or debugging.'>
 	^self currentLine + self method sourceCodeLinesDelta
     ]
 
+    currentFileName [
+	"Answer the name of the file where the method source code is"
+
+	<category: 'accessing'>
+	| sourceCode |
+	sourceCode := self method methodSourceCode.
+	sourceCode isString ifTrue: [ ^'a String' ].
+	sourceCode isNil ifTrue: [ ^'source not available' ].
+	^sourceCode printedFileName
+    ]
+
     currentLine [
 	"Answer the 1-based number of the line that is pointed to by the receiver's
 	 instruction pointer.  The DebugTools package caches information,

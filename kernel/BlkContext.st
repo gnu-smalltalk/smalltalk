@@ -72,17 +72,21 @@ and also provide some methods that can be used in inspection or debugging.'>
 	"Print a representation for the receiver on aStream"
 
 	<category: 'printing'>
-	outerContext isNil 
-	    ifTrue: 
-		[aStream nextPutAll: 'optimized '.
-		self method printOn: aStream.
+	outerContext isNil
+	    ifTrue: [
 		aStream
-		    nextPutAll: ' (line ';
-		    print: self currentLineInFile;
-		    nextPut: $)]
-	    ifFalse: 
-		[aStream nextPutAll: '[] in '.
-		self home printOn: aStream line: self currentLineInFile]
+		    nextPutAll: ': optimized ';
+		    display: self method;
+		    nextPutAll: ' (';
+		    display: self currentFileName;
+		    nextPut: $:;
+		    display: self currentLineInFile;
+		    nextPut: $) ]
+	    ifFalse: [
+		aStream nextPutAll: '[] in '.
+		self home
+		    printOn: aStream
+		    line: self currentLineInFile]
     ]
 
     isInternalExceptionHandlingContext [
