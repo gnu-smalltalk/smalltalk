@@ -4,7 +4,6 @@ config.sub
 depcomp
 elisp-comp
 install-sh
-ltmain.sh
 mdate-sh
 missing
 texinfo.tex
