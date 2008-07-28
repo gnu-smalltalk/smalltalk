@@ -32,22 +32,23 @@
 ReadWriteStream subclass: SwazooBuffer [
     
     <category: 'Swazoo-HTTP'>
-    <comment: 'SwazooBuffer is used for efficient buffering of receiving or sending dato to TCP socket. Efficiency is achieved with reusing of stream content array instead of initializing it everytime buffer is emptied, as was in previous Swazoo versions. 
+    <comment: 'SwazooBuffer is used for efficient buffering of receiving or sending data to TCP socket. Efficiency is achieved with reusing of stream content array instead of initializing it everytime buffer is emptied, as was in previous Swazoo versions. 
 
-SwazooBuffer is a subclass of ReadWriteStream, with additional #clear to empty buffer.'>
+SwazooBuffer is a subclass of ReadWriteStream, with additional #clear to empty buffer.
+
+'>
 
     SwazooBuffer class >> defaultBufferSize [
 	"length of buffer at creation. Later not nessesary exactly this number!!"
 
 	<category: 'defaults'>
 	^8000	"about 8KB-preamble"
-	"^65000"	"about 64K"
-	"^16376"	"16KB-preamble-2"
     ]
 
     SwazooBuffer class >> newRead [
 	<category: 'instance creation'>
-	^super on: (ByteArray new: self defaultBufferSize)
+	^(super on: (ByteArray new: self defaultBufferSize))
+		truncate
     ]
 
     SwazooBuffer class >> newWrite [
@@ -64,13 +65,9 @@ SwazooBuffer is a subclass of ReadWriteStream, with additional #clear to empty b
 	^6
     ]
 
-    clear [
-	"reset as you'd make another one, just don't replace content array"
-
-	<category: 'initialize-release'>
-	self reset.
-	endPtr := 0.
-	self initPreamble
+    atEnd [
+	<category: 'testing'>
+	^super atEnd	"for now"
     ]
 
     closeChunkTo: aSocket [
@@ -99,6 +96,16 @@ SwazooBuffer is a subclass of ReadWriteStream, with additional #clear to empty b
 	<category: 'accessing'>
 	endPtr := endPtr max: ptr.
 	^self copyFrom: self class preambleSize - 1 to: endPtr - 1
+    ]
+
+    copyBufferTo: anIndex [
+	"from current position to desired index"
+
+	<category: 'mime boundary'>
+	| start |
+	start := ptr.
+	ptr := anIndex.
+	^self copyFrom: start to: anIndex - 1
     ]
 
     flushChunkTo: aSocket [
@@ -139,14 +146,32 @@ SwazooBuffer is a subclass of ReadWriteStream, with additional #clear to empty b
 	remaining := chunkedBoolean 
 		    ifTrue: [ptr	"ensure to send preamble too"]
 		    ifFalse: [ptr - self class preambleSize].	"skip preamble"
-	[ remaining > 0] whileTrue: 
+	[remaining > 0] whileTrue: 
 		[start := ptr - remaining.
 		written := aSocket 
 			    writeFrom: collection
 			    startingAt: start
 			    for: ptr - start.
 		remaining := remaining - written].
-	self clear
+	self writeClear
+    ]
+
+    indexOfBoundary: aBoundaryBytes [
+	"index of boundary start, beeing full boundary or part at the end of buffer. 0 if not found"
+
+	<category: 'mime boundary'>
+	| inx innerInx firstInx |
+	inx := ptr + 1.
+	[inx <= endPtr] whileTrue: 
+		[innerInx := 1.
+		firstInx := inx.
+		[(aBoundaryBytes at: innerInx) = (collection at: inx)] whileTrue: 
+			[innerInx = aBoundaryBytes size ifTrue: [^firstInx].	"full boundary found"
+			inx = endPtr ifTrue: [^firstInx].	"partial boundary at the edge of buffer found"
+			inx := inx + 1.
+			innerInx := innerInx + 1].
+		inx := inx + 1].
+	^0
     ]
 
     initPreamble [
@@ -156,16 +181,95 @@ SwazooBuffer is a subclass of ReadWriteStream, with additional #clear to empty b
 	ptr := self class preambleSize
     ]
 
+    isBinary [
+	<category: 'testing'>
+	^collection class == ByteArray
+    ]
+
     isFull [
 	"buffer full or even more"
 
 	<category: 'testing'>
-	^ptr >= collection size
+	^ptr >= self class defaultBufferSize
+    ]
+
+    readClear [
+	"reset as you'd make another one, just don't replace content array"
+
+	<category: 'initialize-release'>
+	ptr := 1.
+	endPtr := self class defaultBufferSize
+    ]
+
+    readContents [
+	<category: 'accessing'>
+	"whole buffer?"
+	^(ptr = 1 and: [endPtr = collection size]) 
+	    ifTrue: [collection	"avoid copying for performance"]
+	    ifFalse: [collection copyFrom: ptr to: endPtr - 1]
+    ]
+
+    refillFrom: aSocket [
+	"reset and read from to the tcp socket as direclty as possible
+	 (directly from stream's instvar collection)"
+
+	<category: 'reading'>
+	aSocket isNil ifTrue: [^self].	"if SwazooStream is used for tests only"
+	self readClear.	"just reset pointers, not a collection!!"
+	endPtr := aSocket 
+		    readInto: collection
+		    startingAt: 1
+		    for: collection size.	"nr. of actuall bytes read"
+	self atEnd 
+	    ifTrue: 
+		[SwazooStreamNoDataError 
+		    raiseSignal: 'No data available.  Socket probably closed']
+    ]
+
+    signsOfBoundary: aBoundaryBytes [
+	"detect as fast as possible if any if not all MIME part boundary is present in buffer contents"
+
+	"return number of bundary bytes detected, 0 = no boundary"
+
+	<category: 'mime boundary'>
+	| first index |
+	first := aBoundaryBytes first.
+	"fast test"
+	((self ptr + 1 to: endPtr) 
+	    contains: [:inx | (collection at: inx) = first]) ifFalse: [^0].
+	"full or partial boundary on the edge of buffer test"
+	index := self indexOfBoundary: aBoundaryBytes.	"index of full, or partial boundary at the edge"
+	index = 0 ifTrue: [^0].	"no boundary found"
+	endPtr - index >= aBoundaryBytes size ifTrue: [^aBoundaryBytes size].	"full boundary detected"
+	^endPtr - index + 1	"partial boundary at the end of buffer"
     ]
 
     size [
 	<category: 'accessing'>
 	^ptr - self class preambleSize
+    ]
+
+    startsWith: aPartialBoundaryBytes [
+	"is remaining part of MIME part boundary at the start of buffer?"
+
+	"VW specific!!"
+
+	<category: 'mime boundary'>
+	1 to: aPartialBoundaryBytes size
+	    do: 
+		[:inx | 
+		(collection at: ptr + inx) = (aPartialBoundaryBytes at: inx) 
+		    ifFalse: [^false]].
+	^true
+    ]
+
+    writeClear [
+	"reset as you'd make another one, just don't replace content array"
+
+	<category: 'initialize-release'>
+	self reset.
+	endPtr := 0.
+	self initPreamble
     ]
 ]
 
@@ -188,7 +292,7 @@ Object subclass: HTTPConnection [
 	    ifTrue: 
 		[self stream close.
 		stream := nil].
-	self server removeConnection: self.
+	self server notNil ifTrue: [self server removeConnection: self].
 	self loop notNil 
 	    ifTrue: 
 		[self loop terminate.
@@ -243,6 +347,13 @@ Object subclass: HTTPConnection [
 	 *And* the thing called a loop that was in this method was no such thing.  In all circumstances, >>getAndDispatchMessages handles exactly one requst and then closes the socket!! (very non-HTTP1.1).  Anyway, for now I'm just going to make that explicit.  This needs to be re-visited to support HTTP 1.1."
     ]
 
+    isOpen [
+	"not yet closed"
+
+	<category: 'testing'>
+	^self stream notNil
+    ]
+
     keepAliveTimeout [
 	<category: 'testing'>
 	| seconds |
@@ -268,12 +379,14 @@ Object subclass: HTTPConnection [
     nextPutError: aResponse [
 	<category: 'serving-responses'>
 	aResponse informConnectionClose.
-	aResponse writeTo: self stream
+	aResponse writeTo: self stream.
     ]
 
     nextPutResponse: aMessage toRequest: aRequest [
 	<category: 'serving-responses'>
-	aMessage writeTo: self stream inResponseTo: aRequest
+	aRequest isHead 
+	    ifTrue: [aMessage writeHeaderTo: self stream]
+	    ifFalse: [aMessage writeTo: self stream].
     ]
 
     produceResponseFor: aSwazooTask [
@@ -282,28 +395,32 @@ Object subclass: HTTPConnection [
 
 	<category: 'serving'>
 	aSwazooTask request isNil ifTrue: [^nil].
-	SpExceptionContext for: 
-		[aSwazooTask response: (self server answerTo: aSwazooTask request).
-		aSwazooTask request ensureFullRead.	"in case if defered parsing not done in HTTPost"
-		aSwazooTask request wantsConnectionClose 
-		    ifTrue: [aSwazooTask response informConnectionClose]
-		    ifFalse: 
-			[aSwazooTask request isKeepAlive 
-			    ifTrue: [aSwazooTask response informConnectionKeepAlive]].
-		aSwazooTask response isStreamed 
-		    ifFalse: 
-			["streamed ones did that by themselves"
+	"SpExceptionContext for:
+	 ["
+	aSwazooTask response: (self server answerTo: aSwazooTask request).
+	aSwazooTask request ensureFullRead.	"in case if defered parsing not done in HTTPost"
+	aSwazooTask request wantsConnectionClose 
+	    ifTrue: [aSwazooTask response informConnectionClose]
+	    ifFalse: 
+		[aSwazooTask request isKeepAlive 
+		    ifTrue: [aSwazooTask response informConnectionKeepAlive]].
+	aSwazooTask response isStreamed 
+	    ifFalse: 
+		["streamed ones did that by themselves"
 
-			self nextPutResponse: aSwazooTask response toRequest: aSwazooTask request]
-		    ifTrue: [aSwazooTask response waitClose].	"to be sure all is sent"
-		aSwazooTask request isGet ifFalse: [self close]	"to avoid strange 200 bad requests
+		self nextPutResponse: aSwazooTask response toRequest: aSwazooTask request]
+	    ifTrue: [aSwazooTask response waitClose].	"to be sure all is sent"
+	aSwazooTask request isGet 
+	    ifFalse: 
+		[self close	"to avoid strange 200 bad requests
 		 after two consecutive POSTs, but it is really a hack and original reason
-		 must be found!!"]
-	    onAnyExceptionDo: 
-		[:ex | 
-		self nextPutError: HTTPResponse internalServerError.
-		ex defaultAction.	"usually raise an UHE window"
-		self close]
+		 must be found!!"
+		"onAnyExceptionDo:
+		 [:ex |
+		 self halt.
+		 self nextPutError: HTTPResponse internalServerError.
+		 ex defaultAction."	"usually raise an UHE window"	"
+		 self close]"]
     ]
 
     readRequestFor: aSwazooTask [
@@ -749,11 +866,6 @@ Object subclass: SwazooSocket [
     <category: 'Swazoo-HTTP'>
     <comment: nil>
 
-    SwazooSocket class [
-	| socketClass |
-	
-    ]
-
     SwazooSocket class >> accessor: aSocketAccessor [
 	<category: 'private'>
 	^self new accessor: aSocketAccessor
@@ -762,42 +874,24 @@ Object subclass: SwazooSocket [
     SwazooSocket class >> connectTo: aHostString port: anInteger [
 	<category: 'instance creation'>
 	| newSocket |
-	newSocket := self socketClass newTCPSocket.
+	newSocket := SpSocket newTCPSocket.
 	newSocket connectTo: (SpIPAddress hostName: aHostString port: anInteger).
 	^self accessor: newSocket
     ]
 
     SwazooSocket class >> connectedPair [
 	<category: 'instance creation'>
-	^self socketClass newSocketPair collect: [:each | self accessor: each]
+	^SpSocket newSocketPair collect: [:each | self accessor: each]
     ]
 
     SwazooSocket class >> serverOnIP: anIPString port: anInteger [
 	<category: 'instance creation'>
 	| newSocket |
-	newSocket := self socketClass newTCPSocket.
+	newSocket := SpSocket newTCPSocket.
 	newSocket
 	    setAddressReuse: true;
 	    bindSocketAddress: (SpIPAddress hostName: anIPString port: anInteger).
 	^self accessor: newSocket
-    ]
-
-    SwazooSocket class >> socketClass [
-	"^a Class
-	 I return the class of my underlying socket.  This may in fact be a pseudo socket thing if we are testing."
-
-	<category: 'private'>
-	socketClass isNil ifTrue: [socketClass := SpSocket].
-	^socketClass
-    ]
-
-    SwazooSocket class >> socketClass: aClass [
-	"^self
-	 I record the class of my underlying socket."
-
-	<category: 'private'>
-	socketClass := aClass.
-	^self
     ]
 
     accept [
@@ -836,13 +930,8 @@ Object subclass: SwazooSocket [
     ]
 
     read: anInteger [
-	"^a ByteArray
-	 I delegate this to my underlying socket.  I always return bytes, not characters.  Character encoding issues must be handles by the sender."
-
 	<category: 'accessing'>
-	| readByteArray |
-	readByteArray := self accessor read: anInteger.
-	^readByteArray
+	^self accessor read: anInteger
     ]
 
     read: anInteger timeout: aNumberOfMilliseconds [
@@ -850,6 +939,14 @@ Object subclass: SwazooSocket [
 	^(self accessor waitForReadDataUpToMs: aNumberOfMilliseconds) 
 	    ifTrue: [self read: anInteger]
 	    ifFalse: [ByteArray new]
+    ]
+
+    readInto: aByteArray startingAt: start for: length [
+	<category: 'accessing'>
+	^self accessor 
+	    readInto: aByteArray
+	    startingAt: start
+	    for: length
     ]
 
     remoteAddress [
@@ -893,7 +990,7 @@ Object subclass: SwazooStream [
 	"use only for testing!!"
 
 	<category: 'instance creation'>
-	^self new readBuffer: (ReadStream on: aString)
+	^self new readBuffer: (SwazooBuffer on: aString)
     ]
 
     SwazooStream class >> socket: aSwazooSocket [
@@ -907,7 +1004,7 @@ Object subclass: SwazooStream [
 
 	<category: 'accessing-reading'>
 	self readBuffer atEnd ifFalse: [^true].	"data is there from before"
-	self readBuffer: (ReadStream on: (self socket read: 1024)).
+	self fillBuffer.
 	^self readBuffer atEnd not
     ]
 
@@ -923,12 +1020,12 @@ Object subclass: SwazooStream [
 
 	<category: 'initialize-release'>
 	self socket close.
-	writeBuffer := nil.
-	readBuffer := nil	"to GC buffers"
+	self nilWriteBuffer.
+	self nilReadBuffer	"to GC buffers"
     ]
 
     closeResponse [
-	"for chunked response close it by sending null chunk"
+	"for chunked response: close it by sending null chunk"
 
 	"do a bit cleanup after response is sent"
 
@@ -938,7 +1035,11 @@ Object subclass: SwazooStream [
 	    ifTrue: 
 		[self writeBuffer closeChunkTo: self socket.
 		self resetChunked].
-	self nilWriteBuffer	"to release memory"
+	self socket notNil 
+	    ifTrue: 
+		["not simulation"
+
+		self nilWriteBuffer]	"to release memory"
     ]
 
     cr [
@@ -947,37 +1048,37 @@ Object subclass: SwazooStream [
     ]
 
     crlf [
-	"^self
-	 I write a CRLF pair to my underlying stream."
-
 	<category: 'accessing-writing'>
 	self
 	    cr;
-	    lf.
-	^self
+	    lf
     ]
 
     fillBuffer [
 	<category: 'private'>
 	self socket isNil ifTrue: [^self].	"if SwazooStream is used for tests only"
-	self readBuffer: (ReadStream on: (self socket read: 1024)).
-	self readBuffer atEnd 
-	    ifTrue: 
-		[SwazooStreamNoDataError 
-		    raiseSignal: 'No data available.  Socket probably closed']
+	self readBuffer refillFrom: self socket
     ]
 
     flush [
 	"actually write to the tcp socket and clear write buffer"
 
 	<category: 'initialize-release'>
+	self socket isNil ifTrue: [^nil].	"for simulations and tests"
 	self isChunked 
 	    ifTrue: [self writeBuffer flushChunkTo: self socket]
 	    ifFalse: [self writeBuffer flushTo: self socket]
     ]
 
+    initReadBuffer [
+	"temporary read buffer"
+
+	<category: 'initialize-release'>
+	readBuffer := SwazooBuffer newRead
+    ]
+
     initWriteBuffer [
-	"temporary stream. flush it to socket ocassionaly!!"
+	"temporary write buffer. flush it to socket ocassionaly!!"
 
 	<category: 'initialize-release'>
 	writeBuffer := SwazooBuffer newWrite
@@ -1001,17 +1102,8 @@ Object subclass: SwazooStream [
     ]
 
     next: anInteger [
-	"^aString
-	 We use a Stream to convert the ByteArray to a String because in GemStone
-	 ByteArray>>asString always returns the string 'aByteArray' :-/
-	 ... but of course, this does not handle character encoding properly."
-
 	<category: 'accessing-reading'>
-	| targetStream |
-	targetStream := WriteStream on: String new.
-	(self nextBytes: anInteger) 
-	    do: [:aByte | targetStream nextPut: aByte asCharacter].
-	^targetStream contents
+	^(self nextBytes: anInteger) asString
     ]
 
     nextByte [
@@ -1020,27 +1112,20 @@ Object subclass: SwazooStream [
 	^self readBuffer next
     ]
 
-    nextBytes: requestedNumberOfBytes [
-	"^a ByteArray
-	 I read the requestedNumberOfBytes from my underlying ReadStream.  This is expexted to be the raw HTTP byte stream."
-
+    nextBytes: aNumber [
 	<category: 'private-stream'>
-	| nextBytes |
-	nextBytes := ByteArray new: requestedNumberOfBytes.
-	1 to: requestedNumberOfBytes
-	    do: [:index | nextBytes at: index put: self nextByte].
-	^nextBytes
+	| array |
+	array := ByteArray new: aNumber.
+	1 to: aNumber do: [:index | array at: index put: self nextByte].
+	^array
     ]
 
     nextLine [
-	"^a String
-	 I return the next line from my underlying stream.  This means reading everything up to the next crlf."
-
 	<category: 'accessing-reading'>
-	| targetStream |
-	targetStream := WriteStream on: String new.
-	self writeNextLineTo: targetStream.
-	^targetStream contents
+	| stream |
+	stream := WriteStream on: (String new: 50).
+	self writeNextLineTo: stream.
+	^stream contents
     ]
 
     nextPut: aCharacterOrInteger [
@@ -1070,35 +1155,30 @@ Object subclass: SwazooStream [
     ]
 
     nextPutLine: aByteStringOrArray [
-	"^self
-	 I write aString to stream followed by a >>crlf."
-
 	<category: 'accessing-writing'>
 	self nextPutAll: aByteStringOrArray.
-	self crlf.
-	^self
+	self crlf
     ]
 
     nextUnfoldedLine [
-	"^a String
-	 c.f. RFC 2616 2.2 Basic Rules
-	 HTTP/1.1 header field values can be folded onto multiple lines if the
-	 continuation line begins with a space or horizontal tab.
-	 So, I read the next line, the I read subsequent lines until I get to one that is not a contuation.  I add the contents of the continuation lines to the target stream.  I leave my underlying stream positioned at the immediately after the last continuation.  If the initial line is empty this is the last line in the stream, so I read no more."
-
 	<category: 'accessing-reading'>
-	| targetStream |
-	targetStream := WriteStream on: String new.
-	self writeNextLineTo: targetStream.
-	targetStream contents isEmpty 
+	| stream ch |
+	stream := WriteStream on: (String new: 50).
+	self writeNextLineTo: stream.
+	stream contents isEmpty 
 	    ifFalse: 
 		[
-		[| nextCharacter |
-		nextCharacter := self peek.
-		nextCharacter notNil 
-		    and: [nextCharacter == Character space or: [nextCharacter == Character tab]]] 
-			whileTrue: [self writeNextLineTo: targetStream]].
-	^targetStream contents
+		[ch := self peek.
+		ch notNil and: [ch == Character space or: [ch == Character tab]]] 
+			whileTrue: [self writeNextLineTo: stream]].
+	^stream contents
+    ]
+
+    nilReadBuffer [
+	"to release memory"
+
+	<category: 'initialize-release'>
+	readBuffer := nil
     ]
 
     nilWriteBuffer [
@@ -1127,16 +1207,14 @@ Object subclass: SwazooStream [
     ]
 
     readBuffer [
-	"^a ReadStream
-	 I return a ReadStream on the current read buffer.  See >>fillBuffer to understand how the buffer is filled."
-
 	<category: 'private'>
+	readBuffer isNil ifTrue: [self initReadBuffer].
 	^readBuffer
     ]
 
-    readBuffer: aStream [
+    readBuffer: aSwazooBuffer [
 	<category: 'private'>
-	readBuffer := aStream
+	readBuffer := aSwazooBuffer
     ]
 
     resetChunked [
@@ -1155,8 +1233,12 @@ Object subclass: SwazooStream [
 
     setSocket: aSwazooSocket [
 	<category: 'private'>
-	self socket: aSwazooSocket.
-	self readBuffer: (ReadStream on: ByteArray new)
+	self socket: aSwazooSocket
+    ]
+
+    skip: anInteger [
+	<category: 'accessing-reading'>
+	anInteger timesRepeat: [self nextByte]
     ]
 
     socket [
@@ -1357,7 +1439,7 @@ Object subclass: SwazooURI [
 		[targetStream
 		    nextPut: $:;
 		    nextPutAll: self port printString].
-	targetStream nextPutAll: self identifier.
+	self identifier notNil ifTrue: [targetStream nextPutAll: self identifier].
 	self printQueriesOn: targetStream.
 	^self
     ]
@@ -1599,10 +1681,8 @@ URIIdentifier subclass: SiteIdentifier [
     ]
 
     hostMatch: aSiteIdentifier [
-	"ip can be in numbers or named!!"
-
 	<category: 'private-comparing'>
-	(self host match: aSiteIdentifier host) ifTrue: [^true].
+	self host asLowercase = aSiteIdentifier host asLowercase ifTrue: [^true].
 	(self host = '*' or: [aSiteIdentifier host = '*']) ifTrue: [^true].	"is this always good?"
 	^false
     ]
@@ -1661,7 +1741,7 @@ URIIdentifier subclass: SiteIdentifier [
 
     printHostPortStringOn: stream [
 	<category: 'private'>
-	stream nextPutAll: self host.
+	stream nextPutAll: (self host notNil ifTrue: [self host] ifFalse: ['']).
 	self port = 80 
 	    ifFalse: 
 		[stream

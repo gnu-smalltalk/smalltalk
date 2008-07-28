@@ -392,7 +392,7 @@ Object subclass: SwazooCompiler [
 
     SwazooCompiler class >> evaluate: aString [
 	<category: 'evaluation'>
-	^SpEnvironment
+	^SpEnvironment 
 	    evaluate: aString
 	    receiver: SwazooCompiler
 	    in: self class environment
@@ -405,6 +405,30 @@ Object subclass: SwazooCompiler [
 	    receiver: anObject
 	    in: self class environment
     ]
+]
+
+
+
+SpFilename extend [
+
+    etag [
+	"^a String
+	 The etag of a file entity is taken to be the date last modified as a String.
+	 We use the SpTimestamp in"
+
+	<category: '*Swazoo-accessing'>
+	^self lastModified asRFC1123String
+    ]
+
+    lastModified [
+	"| info |
+	 info := self dates at: #modified.
+	 ^SpTimestamp fromDate: info first andTime: info last"
+
+	<category: '*Swazoo-accessing'>
+	^SpTimestamp now
+    ]
+
 ]
 
 

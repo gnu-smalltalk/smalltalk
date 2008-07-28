@@ -424,6 +424,11 @@ HTTPMessage subclass: HTTPRequest [
 	aStream
 	    cr;
 	    tab;
+	    nextPutAll: ' host: ';
+	    nextPutAll: (self headerAt: 'Host' ifAbsent: ['']) hostName.
+	aStream
+	    cr;
+	    tab;
 	    nextPutAll: ' url: '.
 	self uri printOn: aStream.
 	self userAgent notNil 
@@ -777,6 +782,58 @@ Instance Variables:
 	^self
     ]
 
+    blockStreamingFrom: aSwazooStream to: outStream until: aBoundaryBytes [
+	"detected"
+
+	"copy by 8k blocks for optimal performance until a boundary of MIME part is detected"
+
+	"Finish appropriatelly streaming at the end (skip crlf etc.)"
+
+	<category: 'private-parsing support'>
+	| boundary nrOfBoundary contents inPrevious remainingBoundary boundaryIndex |
+	boundary := aSwazooStream readBuffer isBinary 
+		    ifTrue: [aBoundaryBytes asByteArray]
+		    ifFalse: [aBoundaryBytes asByteString].
+	[true] whileTrue: 
+		[nrOfBoundary := 0.
+		[nrOfBoundary = 0] whileTrue: 
+			[nrOfBoundary := aSwazooStream readBuffer signsOfBoundary: boundary.
+			nrOfBoundary = 0 
+			    ifTrue: 
+				["no boundary in current buffer content"
+
+				contents := aSwazooStream readBuffer readContents.
+				outStream nextPutAll: contents.
+				self incReadPosition: contents size.
+				aSwazooStream fillBuffer]].
+		"copy and stream out content up to potential boundary"
+		boundaryIndex := aSwazooStream readBuffer indexOfBoundary: boundary.
+		inPrevious := aSwazooStream readBuffer copyBufferTo: boundaryIndex - 1.
+		outStream 
+		    nextPutAll: (inPrevious copyFrom: 1 to: (inPrevious size - 2 max: 0)).	"without potential crlf"
+		self incReadPosition: inPrevious size.	"potential crlf included!!"
+		nrOfBoundary = boundary size 
+		    ifTrue: 
+			["full boundary detected, lets finish here"
+
+			aSwazooStream skip: boundary size.	"skip boundary"
+			self incReadPosition: boundary size.
+			^true].	"streaming complete"
+		self incReadPosition: nrOfBoundary.
+		aSwazooStream fillBuffer.	"let's get next buffer"
+		remainingBoundary := boundary copyFrom: nrOfBoundary + 1 to: boundary size.
+		(aSwazooStream readBuffer startsWith: remainingBoundary) 
+		    ifTrue: 
+			["bound. ends in next buff?"
+
+			aSwazooStream skip: remainingBoundary size + 2.	"skip remaining bound. and crlf"
+			self incReadPosition: remainingBoundary size + 2.
+			^true].	"streaming complete"
+		outStream
+		    nextPutAll: (inPrevious copyFrom: inPrevious size - 2 to: inPrevious size);
+		    nextPutAll: (boundary copyFrom: 1 to: nrOfBoundary)	"potential crlf"	"boundary part in prev.buff."]	"continue from the start"
+    ]
+
     emptyData [
 	<category: 'accessing'>
 	self ensureFullRead.
@@ -816,6 +873,11 @@ Instance Variables:
 	self readPosition: self readPosition + 1
     ]
 
+    incReadPosition: anInteger [
+	<category: 'private'>
+	self readPosition: self readPosition + anInteger
+    ]
+
     initPostDataFor: aSwazooStream [
 	<category: 'initialize-release'>
 	postData := HTTPPostDataArray newOn: aSwazooStream
@@ -853,66 +915,9 @@ Instance Variables:
 	self skipMimePreambleAndBoundary: boundary from: aSwazooStream.
 	part := #something.
 	[part notNil] whileTrue: 
-		[part := self partFromStream: aSwazooStream boundary: boundary asByteArray.
+		[part := self partFromStream: aSwazooStream boundary: boundary.
 		part notNil ifTrue: [self postDataAt: part key put: part value]].
 	self skipMimeEpilogueFrom: aSwazooStream	"all to the end  as defined by contentLegth"
-    ]
-
-    nextFrom: aSwazooStream boundary: aBoundaryBytes [
-	"usually return one byte but it can be more if content looks like a boundary"
-
-	"Return nil if we are just on boundary. Boundary is skipped."
-
-	"boundary always start with '--'. Boundary is therefore actually '--',aBoundaryBytes"
-
-	<category: 'private-parsing support'>
-	| out byte inx |
-	aSwazooStream peek = $- 
-	    ifFalse: 
-		["not part of boundary"
-
-		self incReadPosition.
-		^ByteArray with: aSwazooStream nextByte].
-	out := WriteStream on: ByteArray new.
-	out nextPut: aSwazooStream nextByte.	"first -"
-	self incReadPosition.
-	byte := aSwazooStream nextByte.
-	out nextPut: byte.
-	self incReadPosition.
-	byte = $- asInteger 
-	    ifFalse: 
-		["second -"
-
-		^out contents].	"not boundary yet"
-	inx := 1.
-	[inx <= aBoundaryBytes size] whileTrue: 
-		[byte := aSwazooStream nextByte.
-		out nextPut: byte.
-		self incReadPosition.
-		byte = (aBoundaryBytes at: inx) asInteger ifFalse: [^out contents].	"not yet boundary"
-		inx := inx + 1].
-	^nil	"boundary found. Ignore it with returning nothing"
-	"Caution: what if real boundary starts somewhere in the middle?"
-    ]
-
-    nextPut: byte to: aQueue afterTwoTo: aWriteStream [
-	"buffer two bytes (crlf) which are at the end of mime part not writen to output stream"
-
-	<category: 'private-parsing support'>
-	aQueue add: byte.
-	aQueue size > 2 ifTrue: [aWriteStream nextPut: aQueue removeFirst]
-    ]
-
-    nextPutAll: aByteArray to: aQueue afterTwoTo: aSwazooStream [
-	"buffer crlf (two bytes) which are at the end of mime part not writen to output stream"
-
-	<category: 'private-parsing support'>
-	aByteArray do: 
-		[:byte | 
-		self 
-		    nextPut: byte
-		    to: aQueue
-		    afterTwoTo: aSwazooStream]
     ]
 
     parsePostDataFrom: aSwazooStream [
@@ -937,13 +942,11 @@ Instance Variables:
 	<category: 'private-parsing'>
 	| bytes name filename datum contentType |
 	bytes := aSwazooStream nextBytes: 2.
-	self
-	    incReadPosition;
-	    incReadPosition.
+	self incReadPosition: 2.
 	bytes = '--' asByteArray ifTrue: [^nil].	"end of multipart data"
 	name := nil.
 	datum := nil.
-	contentType := nil.	"just to avoid compliation warning"
+	contentType := nil.	"just to avoid compilation warning"
 	[true] whileTrue: 
 		["read all lines and at the end a body of that part"
 
@@ -964,6 +967,7 @@ Instance Variables:
 				["empty line indicates start of entity"
 
 				name isNil ifTrue: [^nil].	"name must be read in previous circle"
+				datum contentType: contentType.	"completes datum's contentType read in a prev step"
 				^name -> (self 
 					    readEntityFrom: aSwazooStream
 					    datum: datum
@@ -1068,31 +1072,15 @@ Instance Variables:
 	 a write stream in datum (for instance open a output file and stream on it)"
 
 	<category: 'private-parsing'>
-	| outStream bytes queue |
+	| outStream |
 	aDatum writeBlock notNil ifTrue: [aDatum writeBlock value: aDatum].	"this should set writeStream if not already!!"
-	outStream := aDatum isStreamed 
+	outStream := (aDatum isStreamed and: [aDatum writeStream notNil]) 
 		    ifTrue: [aDatum writeStream]
 		    ifFalse: [WriteStream on: ByteArray new].
-	queue := OrderedCollection new.	"to buffer 2bytes for crlf detection at the end"
-	[aSwazooStream peek = $-] whileFalse: 
-		["be fast until first sign of boundary"
-
-		self 
-		    nextPut: aSwazooStream nextByte
-		    to: queue
-		    afterTwoTo: outStream.
-		self incReadPosition].
-	bytes := ''.
-	[bytes notNil] whileTrue: 
-		["if nil then we are on boundary"
-
-		bytes := self nextFrom: aSwazooStream boundary: aBoundaryBytes.
-		bytes notNil 
-		    ifTrue: 
-			[self 
-			    nextPutAll: bytes
-			    to: queue
-			    afterTwoTo: outStream]].
+	self 
+	    blockStreamingFrom: aSwazooStream
+	    to: outStream
+	    until: '--' , aBoundaryBytes.	"efficient streaming"
 	aDatum isStreamed not 
 	    ifTrue: 
 		["otherwise entity is already streamed to the output"
@@ -1140,10 +1128,12 @@ Instance Variables:
 	 ..."
 
 	<category: 'private-parsing support'>
-	| bytes |
-	bytes := #something.
-	[bytes notNil] 
-	    whileTrue: [bytes := self nextFrom: aSwazooStream boundary: aBoundaryBytes]
+	| dummy |
+	dummy := WriteStream on: ByteArray new.
+	self 
+	    blockStreamingFrom: aSwazooStream
+	    to: dummy
+	    until: '--' , aBoundaryBytes
     ]
 
     urlencodedDataFrom: aStream [
@@ -1515,7 +1505,7 @@ HTTPMessage subclass: HTTPResponse [
 
     contentSize [
 	<category: 'accessing'>
-	^self entity size
+	^self entity notNil ifTrue: [self entity size] ifFalse: [0]
     ]
 
     contentType [
@@ -1741,15 +1731,15 @@ HTTPMessage subclass: HTTPResponse [
 
     writeTo: aSwazooStream [
 	<category: 'sending'>
-        self writeTo: aSwazooStream inResponseTo: nil
+	self writeTo: aSwazooStream inResponseTo: nil
     ]
 
     writeTo: aSwazooStream inResponseTo: aRequest [
 	<category: 'sending'>
-	aSwazooStream isNil ifTrue: [ ^self ].
+	aSwazooStream isNil ifTrue: [^self].
 	self writeHeaderTo: aSwazooStream.
-	(aRequest isNil or: [ aRequest isHead not ])
-	    ifTrue: [ self printEntityOn: aSwazooStream ].
+	(aRequest isNil or: [aRequest isHead not]) 
+	    ifTrue: [self printEntityOn: aSwazooStream].
 	aSwazooStream closeResponse
     ]
 ]
@@ -1825,10 +1815,10 @@ Instance Variables:
 
 '>
 
-    HTTPStreamedResponse class >> on: aConnection stream: aSwazooStream [
+    HTTPStreamedResponse class >> on: aSwazooTask stream: aSwazooStream [
 	<category: 'instance creation'>
 	^(super ok)
-	    parent: aConnection;
+	    task: aSwazooTask;
 	    stream: aSwazooStream;
 	    initialize
     ]
@@ -1862,6 +1852,13 @@ Instance Variables:
     count: aNumber [
 	<category: 'private'>
 	count := aNumber
+    ]
+
+    flush [
+	"force sending to a TCP socket"
+
+	<category: 'accessing-stream'>
+	self stream flush
     ]
 
     initSemaphore [
@@ -2189,12 +2186,9 @@ Object subclass: HTTPRequestLine [
     <category: 'Swazoo-Messages'>
     <comment: nil>
 
-    HTTPRequestLine class >> readFrom: aStream [
-	"^an HTTPRequestLine
-	 I return a new instance of myself which represents a request line read from aStream.  If no valid request line can be found, I throw an exception."
-
+    HTTPRequestLine class >> readFrom: aSwazooStream [
 	<category: 'instance creation'>
-	^self new readFrom: aStream
+	^self new readFrom: aSwazooStream
     ]
 
     httpVersion [
@@ -2447,7 +2441,7 @@ Object subclass: SwazooTask [
     response: aHTTPResponse [
 	<category: 'accessing'>
 	response := aHTTPResponse.
-	aHTTPResponse task: self
+	aHTTPResponse notNil ifTrue: [aHTTPResponse task: self]
     ]
 ]
 

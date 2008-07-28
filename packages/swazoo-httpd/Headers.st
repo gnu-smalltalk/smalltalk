@@ -718,8 +718,9 @@ HTTPAuthorizationField subclass: HTTPAuthorizationBasicField [
 
 	<category: 'private'>
 	| userPassString sourceStream |
-	userPassString := HTTPString 
-		    stringFromBytes: (Base64EncodingReadStream on: self credentials) upToEnd.
+	userPassString := userPassString := Base64MimeConverter 
+			    mimeDecode: self credentials
+			    as: String.
 	sourceStream := ReadStream on: userPassString.
 	userid := sourceStream upTo: $:.
 	password := sourceStream atEnd 
@@ -1192,7 +1193,7 @@ SpecificHeaderField subclass: HTTPIfModifiedSinceField [
 
     valuesAsStringOn: aStream [
 	<category: 'printing'>
-	self date asRFC1123StringOn: aStream.
+	self date notNil ifTrue: [self date asRFC1123StringOn: aStream].
 	^self
     ]
 ]

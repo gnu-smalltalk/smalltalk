@@ -1,3 +1,13 @@
+2008-07-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Core.st: Merge 2.2beta.
+	* Exceptions.st: Merge 2.2beta.
+	* HTTP.st: Merge 2.2beta.
+	* Headers.st: Merge 2.2beta.
+	* Messages.st: Merge 2.2beta.
+	* Resources.st: Merge 2.2beta.
+	* Tests.st: Merge 2.2beta.
+
 2008-03-11  Paolo Bonzini  <bonzini@gnu.org>
 
 	* HTTP.st: Only send one message to the HTTPResponse.

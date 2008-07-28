@@ -79,39 +79,14 @@ SpError subclass: SwazooSiteError [
 
 SpError subclass: SwazooStreamNoDataError [
     
-    
     <comment: nil>
     <category: 'Swazoo-Exceptions'>
-]
-
-
-SpFilename extend [
-
-    etag [
-	"^a String
-	 The etag of a file entity is taken to be the date last modified as a String.
-	 We use the SpTimestamp in"
-
-	<category: '*Swazoo'>
-	^self lastModified asRFC1123String
-    ]
-
-    lastModified [
-	"| info |
-	 info := self dates at: #modified.
-	 ^SpTimestamp fromDate: info first andTime: info last"
-
-	<category: '*Swazoo'>
-	^SpTimestamp now
-    ]
-
 ]
 
 
 
 Error subclass: HTTPException [
     | response |
-    
     
     <category: 'Swazoo-Exceptions'>
     <comment: 'HTTPException immediatelly returns attached HTTP response to client. That way it is easier to respond with different status codes (like 201 Created). Not only error ones! You can respond somewhere deeply in code of your resource with raising that exception and adding a prepared HTTPResponse. 

@@ -545,37 +545,37 @@ CompositeResource subclass: Site [
 
     start [
 	<category: 'start/stop'>
-	| registry |
-	registry := SwazooServer singleton.
+	| swazoo |
+	swazoo := SwazooServer singleton.
 	
 	[self aliases do: 
 		[:each | 
-		| server |
-		server := registry serverFor: each.
-		server addSite: self.
-		(registry servers includes: server) 
+		| httpServer |
+		httpServer := swazoo serverFor: each.
+		httpServer addSite: self.
+		(swazoo servers includes: httpServer) 
 		    ifFalse: 
-			[registry addServer: server.
-			server isServing ifFalse: [server start]]]] 
+			[swazoo addServer: httpServer.
+			httpServer isServing ifFalse: [httpServer start]]]] 
 		ifCurtailed: [self stop].
 	self serving: true
     ]
 
     stop [
 	<category: 'start/stop'>
-	| registry |
-	registry := SwazooServer singleton.
+	| swazoo |
+	swazoo := SwazooServer singleton.
 	self aliases do: 
 		[:each | 
-		| server |
-		server := registry serverFor: each.
-		(registry servers includes: server) 
+		| httpServer |
+		httpServer := swazoo serverFor: each.
+		(swazoo servers includes: httpServer) 
 		    ifTrue: 
-			[server removeSite: self.
-			server hasNoSites 
+			[httpServer removeSite: self.
+			httpServer hasNoSites 
 			    ifTrue: 
-				[registry removeServer: server.
-				server stop]]].
+				[swazoo removeServer: httpServer.
+				httpServer stop]]].
 	self serving: false
     ]
 
@@ -583,6 +583,10 @@ CompositeResource subclass: Site [
 	<category: 'private'>
 	uriPattern isNil ifTrue: [self initUriPattern].
 	^uriPattern
+    ]
+
+    watchdogEvent [
+	<category: 'start/stop'>
     ]
 ]
 
@@ -828,6 +832,11 @@ SwazooServer demoStart  will create and run a demo site on http://localhost:8888
 	self initServers
     ]
 
+    isWatchdogRunning [
+	<category: 'private-watchdog'>
+	^self watchdog notNil	"and: [self watchdog is not].  ?!!?"
+    ]
+
     newServerFor: aSiteIdentifier [
 	<category: 'private-servers'>
 	^aSiteIdentifier newServer
@@ -937,7 +946,8 @@ SwazooServer demoStart  will create and run a demo site on http://localhost:8888
 
     start [
 	<category: 'start/stop'>
-	self sites do: [:site | site start]
+	self sites do: [:site | site start].
+	self startWatchdog
     ]
 
     startOn: aPortNumber [
@@ -963,15 +973,31 @@ SwazooServer demoStart  will create and run a demo site on http://localhost:8888
 	^site notNil 
 	    ifTrue: 
 		[site start.
+		self isWatchdogRunning ifFalse: [self startWatchdog].
 		site]
 	    ifFalse: [nil]
+    ]
+
+    startWatchdog [
+	"SwazooServer singleton startWatchdog"
+
+	<category: 'private-watchdog'>
+	self isWatchdogRunning ifTrue: [self stopWatchdog].
+	self 
+	    watchdog: (
+		[[true] whileTrue: 
+			[self watchdogSites.
+			self watchdogOther.	"if any"
+			(Delay forSeconds: self watchdogPeriod) wait]] 
+			forkAt: Processor lowIOPriority)
     ]
 
     stop [
 	<category: 'start/stop'>
 	self sites do: [:site | site stop].
 	self servers do: [:server | server stop].
-	self initServers
+	self initServers.
+	self stopWatchdog
     ]
 
     stopOn: aPortNumber [
@@ -998,6 +1024,40 @@ SwazooServer demoStart  will create and run a demo site on http://localhost:8888
 		[site stop.
 		site]
 	    ifFalse: [nil]
+    ]
+
+    stopWatchdog [
+	<category: 'private-watchdog'>
+	self watchdog notNil 
+	    ifTrue: 
+		[self watchdog terminate.
+		self watchdog: nil]
+    ]
+
+    watchdog [
+	<category: 'private-watchdog'>
+	^watchdog
+    ]
+
+    watchdog: aProcess [
+	<category: 'private-watchdog'>
+	watchdog := aProcess
+    ]
+
+    watchdogOther [
+	<category: 'private-watchdog'>
+    ]
+
+    watchdogPeriod [
+	<category: 'private-watchdog'>
+	^10	"seconds"
+    ]
+
+    watchdogSites [
+	<category: 'private-watchdog'>
+	self sites do: 
+		[:each | 
+		each isServing ifTrue: [each watchdogEvent]]
     ]
 ]
 
