@@ -75,7 +75,7 @@ and also provide some methods that can be used in inspection or debugging.'>
 	outerContext isNil
 	    ifTrue: [
 		aStream
-		    nextPutAll: ': optimized ';
+		    nextPutAll: 'optimized ';
 		    display: self method;
 		    nextPutAll: ' (';
 		    display: self currentFileName;
