@@ -1113,6 +1113,16 @@ AbstractSocket subclass: Socket [
 	    or: [super canRead]
     ]
 
+    availableBytes [
+	"Answer how many bytes are available in the socket's read buffer
+	 or from the operating system."
+
+	<category: 'stream protocol'>
+	self canRead ifFalse: [ ^0 ].
+	self readBuffer isEmpty ifTrue: [ self readBuffer fill ].
+	^self readBuffer availableBytes
+    ]
+
     bufferContents [
 	"Answer the current contents of the read buffer"
 
