@@ -120,6 +120,12 @@ evaluates an user defined block to try to get some more data.'>
 	^contents
     ]
 
+    availableBytes [
+        "Answer how many bytes are available in the buffer."
+
+	^endPtr + 1 - ptr
+    ]
+
     fill [
 	"Fill the buffer with more data if it is empty, and answer
 	 true if the fill block was able to read more data."

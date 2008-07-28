@@ -981,6 +981,12 @@ Object subclass: SpFilename [
 	^Directory pathSeparator
     ]
 
+    lastSeparatorIndex [
+	"Answer the index of the last filename component separator in
+	 `self asString'."
+	^self asString lastIndexOf: self separator ifAbsent: [nil]
+    ]
+
     tail [
 	"Answer the filename suffix as a String."
 
@@ -1220,12 +1226,18 @@ Object subclass: SpSocket [
 	 number of bytes to be read.	We get what its there no matter how much their is!!"
 
 	<category: 'services-io'>
-	| actuallyRead |
-	aByteArray replaceFrom: startIndex to: startIndex + aNumberOfBytes - 1
-		with: (self underlyingSocket next: aNumberOfBytes)
-		startingAt: 1.
-	actuallyRead > aNumberOfBytes ifTrue: [1 halt].
-	^actuallyRead
+	| actuallyRead total |
+	total := 0.
+	self underlyingSocket ensureReadable.
+	[
+	    actuallyRead := self underlyingSocket availableBytes
+		min: aNumberOfBytes - total.
+	    actuallyRead = 0 ifTrue: [ ^total ].
+	    aByteArray replaceFrom: startIndex to: startIndex + actuallyRead - 1
+		     with: (self underlyingSocket next: actuallyRead)
+		     startingAt: total + 1.
+	    total := total + actuallyRead.
+	] repeat
     ]
 
     readyForRead [
