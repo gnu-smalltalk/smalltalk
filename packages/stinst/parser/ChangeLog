@@ -1,3 +1,8 @@
+2008-07-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* RBParser.st: Parse negative numbers as unary minus + number.
+	Simplify RBScanner>>#scanNumberValue; fix bugs in ScaledDecimals.
+
 2008-04-27  Stephen Compall  <scompall@nocandysw.com>
 
 	* STSymTable.st: Create VariableBindings directly to add to

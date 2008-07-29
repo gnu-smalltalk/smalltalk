@@ -100,4 +100,10 @@ extern void _gst_yyprint (FILE * file,
 			  PTR lval) 
   ATTRIBUTE_HIDDEN;
 
+/* Negate the semantic value YYLVAL, which must be a numeric token
+   of type TOKEN.  Returns true if YYLVAL is positive, false if it
+   is negative.  */
+extern mst_Boolean _gst_negate_yylval (int token,
+				       YYSTYPE *yylval);
+
 #endif /* GST_LEX_H */

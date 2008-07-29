@@ -1,3 +1,9 @@
+2008-07-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-parse.c: Parse negative numbers as unary minus + number.
+	* lex.c: Add _gst_negate_yylval and simplify _gst_scan_number.
+	* lex.h: Declare _gst_negate_yylval.
+
 2008-07-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/opt.c: Enable jump superoperators.

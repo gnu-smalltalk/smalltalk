@@ -643,18 +643,12 @@ scan_bin_op_1 (int c,
   else
     {
       _gst_unread_char (ic);
-
-      /* We come here also for a negative number, which we handle
-         specially.  */
-      if (maybe_number && c == '-' && is_digit (ic))
-	return (scan_number ('-', lvalp));
-
       buf[1] = 0;
     }
 
   lvalp->sval = xstrdup (buf);
 
-  if ((buf[0] == '|' || buf[0] == '<' || buf[0] == '>')
+  if ((buf[0] == '|' || buf[0] == '<' || buf[0] == '>' || buf[0] == '-')
       && buf[1] == '\0')
     return (buf[0]);
 
@@ -790,44 +784,31 @@ scan_number (int c,
   OOP numOOP;
   int base, exponent, ic;
   long double num, floatExponent;
-  mst_Boolean mantissaParsed = false, isNegative = false,
-    largeInteger = false;
+  mst_Boolean isNegative = false, largeInteger = false;
   int float_type = 0;
 
   base = 10;
   exponent = 0;
   ic = c;
 
-  if (ic != '-')
+  assert (ic != '-');
+  num = scan_digits (ic, false, 10, &largeInteger);
+  ic = _gst_next_char ();
+  if (ic == 'r')
     {
-      num = scan_digits (ic, isNegative, 10, &largeInteger);
+      char *p = obstack_finish (_gst_compilation_obstack);
+      obstack_free (_gst_compilation_obstack, p);
+
+      base = (int) num;
+      if (base > 36 || largeInteger)
+        {
+          _gst_errorf ("Numeric base too large %d", base);
+          _gst_had_error = true;
+        }
       ic = _gst_next_char ();
-      if (ic == 'r')
-	{
-          char *p = obstack_finish (_gst_compilation_obstack);
-          obstack_free (_gst_compilation_obstack, p);
 
-	  base = (int) num;
-	  if (base > 36 || largeInteger)
-	    {
-	      _gst_errorf ("Numeric base too large %d", base);
-	      _gst_had_error = true;
-	    }
-	  ic = _gst_next_char ();
-	}
-      else
-	mantissaParsed = true;
-    }
-
-  /* 
-   * here we've either
-   *  a) parsed base, an 'r' and are sitting on the following character
-   *  b) parsed the integer part of the mantissa, and are sitting on the char
-   *     following it, or
-   *  c) parsed nothing and are sitting on a - sign.
-   */
-  if (!mantissaParsed)
-    {
+      /* Having to support things like 16r-123 is a pity :-) because we
+	 actually incorrectly accept -16r-0.  */
       if (ic == '-')
 	{
 	  isNegative = true;
@@ -1334,4 +1315,72 @@ _gst_yyprint (FILE * file,
     default:
       break;
     }
+}
+
+mst_Boolean
+_gst_negate_yylval (int token, YYSTYPE *yylval)
+{
+  switch (token)
+    {
+    case INTEGER_LITERAL:
+      if (yylval->ival < 0)
+	return false;
+      yylval->ival = -yylval->ival;
+      break;
+    case FLOATD_LITERAL:
+    case FLOATE_LITERAL:
+    case FLOATQ_LITERAL:
+      if (yylval->fval < 0)
+	return false;
+      yylval->fval = -yylval->fval;
+      break;
+
+    case SCALED_DECIMAL_LITERAL:
+      {
+	int sign;
+        _gst_msg_sendf (&sign, "%i %o sign", yylval->oval);
+	if (sign < 0)
+	  return false;
+
+        _gst_msg_sendf (&yylval->oval, "%o %o negated", yylval->oval);
+        INC_ADD_OOP (yylval->oval);
+        MAKE_OOP_READONLY (yylval->oval, true);
+        break;
+      }
+
+    case LARGE_INTEGER_LITERAL:
+      {
+        byte_object bo = yylval->boval;
+        gst_uchar *digits = bo->body;
+        int size = bo->size;
+        int i;
+	
+	/* The input value must be positive.  */
+        if (digits[size - 1] >= 128)
+	  return false;
+
+        /* Do two's complement -- first invert, then increment with carry */
+        for (i = 0; i < size; i++)
+	  digits[i] ^= 255;
+
+        for (i = 0; (++digits[i]) == 0; i++);
+
+        /* Search where the number really ends -- discard trailing 111... 
+           bytes but remember, the most significant bit of the last digit
+           must be 1! */
+        for (; size > 0 && digits[size - 1] == 255; size--);
+        if (digits[size - 1] < 128)
+	  size++;
+
+        assert (size <= bo->size);
+	bo->size = size;
+	bo->class = _gst_large_negative_integer_class;
+	break;
+      }
+
+    default:
+      abort ();
+    }
+
+  return true;
 }

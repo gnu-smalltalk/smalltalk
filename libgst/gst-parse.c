@@ -654,6 +654,7 @@ parse_class_definition (gst_parser *p, OOP classOOP, mst_Boolean extend)
       switch (t1) 
 	{	
 	case '>':
+	case '-':
 	case BINOP:
 	case KEYWORD:
 #if 0
@@ -1130,7 +1131,7 @@ parse_method (gst_parser *p, int at_end)
    binary_pattern: binop IDENTIFIER
    keyword_pattern: keyword_pattern KEYWORD IDENTIFIER
    | KEYWORD IDENTIFIER
-   binop : BINOP | '<' | '>' | '|' */
+   binop : BINOP | '<' | '>' | '-' | '|' */
 
 static tree_node
 parse_message_pattern (gst_parser *p)
@@ -1149,6 +1150,7 @@ parse_message_pattern (gst_parser *p)
     case BINOP:
     case '<':
     case '>':
+    case '-':
     case '|':
       lex (p);
       arg = parse_variable (p);
@@ -1317,7 +1319,7 @@ parse_expression (gst_parser *p, enum expr_kinds kind)
     {
       if (token (p, 0) != IDENTIFIER)
 	{
-	  node = parse_primary(p);
+	  node = parse_primary (p);
 	  break;
 	}
       else
@@ -1391,6 +1393,7 @@ parse_primary (gst_parser *p)
     case SCALED_DECIMAL_LITERAL:
     case CHAR_LITERAL:
     case '#':
+    case '-':
       node = parse_literal (p, false);
       break;
 
@@ -1462,9 +1465,35 @@ parse_literal (gst_parser *p, mst_Boolean array)
 {
   tree_node node;
   int ival;
+  int tok = token (p, 0);
 
-  switch (token (p, 0))
+  switch (tok)
     {
+    case '-':
+      lex (p);
+      tok = token (p, 0);
+      switch (tok)
+	{
+	case INTEGER_LITERAL:
+	case LARGE_INTEGER_LITERAL:
+	case FLOATD_LITERAL:
+	case FLOATE_LITERAL:
+	case FLOATQ_LITERAL:
+	case SCALED_DECIMAL_LITERAL:
+          if (_gst_negate_yylval (tok, val (p, 0)))
+	    return parse_literal (p, array);
+	  else
+	    {
+	      _gst_errorf ("parse error, expected positive numeric literal");
+	      recover_error (p);
+	    }
+
+	default:
+	  expected (p, INTEGER_LITERAL, FLOATD_LITERAL, SCALED_DECIMAL_LITERAL,
+		    -1);
+	}
+      break;
+
     case '(':
       assert (array);
       node = parse_array_literal (p);
@@ -1795,6 +1824,7 @@ parse_message_expression (gst_parser *p, tree_node receiver, enum expr_kinds kin
 
 	case BINOP:
 	case '<':
+        case '-':
 	case '|':
 	  if ((kind & EXPR_BINOP) == 0)
 	    return node;
@@ -1841,6 +1871,7 @@ parse_cascaded_messages (gst_parser *p)
 	case '>':
 	case BINOP:
 	case '<':
+        case '-':
 	case '|':
 	  node = parse_binary_expression (p, NULL, EXPR_CASCADED);
 	  break;
@@ -1888,7 +1919,7 @@ parse_binary_expression (gst_parser *p, tree_node receiver, enum expr_kinds kind
   char *sel;
   tree_node arg;
   assert (token (p, 0) == BINOP || token (p, 0) == '|' || token (p, 0) == '<'
-	  || token (p, 0) == '>');
+	  || token (p, 0) == '-' || token (p, 0) == '>');
   sel = val(p, 0)->sval;
   lex (p);
   arg = parse_expression (p, kind & ~EXPR_KEYWORD & ~EXPR_BINOP);
