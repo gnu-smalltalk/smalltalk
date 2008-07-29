@@ -1,3 +1,7 @@
+2008-07-29  Janko Mivsek  <janko.mivsek@eranova.si>
+
+	* Messages.st: Fix bug in 2.2beta.
+
 2008-07-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Core.st: Merge 2.2beta.

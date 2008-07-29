@@ -830,7 +830,7 @@ Instance Variables:
 			self incReadPosition: remainingBoundary size + 2.
 			^true].	"streaming complete"
 		outStream
-		    nextPutAll: (inPrevious copyFrom: inPrevious size - 2 to: inPrevious size);
+		    nextPutAll: (inPrevious copyFrom: inPrevious size - 1 to: inPrevious size);
 		    nextPutAll: (boundary copyFrom: 1 to: nrOfBoundary)	"potential crlf"	"boundary part in prev.buff."]	"continue from the start"
     ]
 
