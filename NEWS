@@ -133,6 +133,16 @@ o   Swazoo web server.
 -----------------------------------------------------------------------------
 
 
+NEWS FROM 3.0.3 TO 3.0.4
+
+o   Code without a space between a binary minus and a number, such as "a-2",
+    is parsed correctly.  As a side effect of this change, the sign of a number
+    with an explicit radix (such as "16r10") can be placed before the radix
+    too: both -16r10 and 16r-10 are accepted.
+
+-----------------------------------------------------------------------------
+
+
 NEWS FROM 3.0.2 TO 3.0.3
 
 o   File>>#withReadStreamDo: and File>>#withWriteStreamDo: now return

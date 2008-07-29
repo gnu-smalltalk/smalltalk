@@ -535,6 +535,20 @@ Object subclass: RBParser [
 	^RBVariableNode identifierToken: token
     ]
 
+    parseNegatedNumber [
+	<category: 'private-parsing'>
+	| token |
+	self step.
+	token := currentToken.
+	(token value respondsTo: #negated) ifFalse: [
+	    ^self parserError: 'Number expected' ].
+	token value negative ifTrue: [
+	    ^self parserError: 'Positive number expected' ].
+	token value: token value negated.
+	self step.
+	^RBLiteralNode literalToken: token
+    ]
+
     parsePrimitiveLiteral [
 	<category: 'private-parsing'>
 	| token |
@@ -547,6 +561,8 @@ Object subclass: RBParser [
 	<category: 'private-parsing'>
 	currentToken isIdentifier ifTrue: [^self parsePrimitiveIdentifier].
 	currentToken isLiteral ifTrue: [^self parsePrimitiveLiteral].
+	(currentToken isBinary and: [ currentToken value == #- ])
+	    ifTrue: [^self parseNegatedNumber].
 	currentToken isSpecial 
 	    ifTrue: 
 		[currentToken value == $[ ifTrue: [^self parseBlock].
@@ -871,9 +887,7 @@ Stream subclass: RBScanner [
 
 	<category: 'accessing'>
 	characterType == #alphabetic ifTrue: [^self scanIdentifierOrKeyword].
-	(characterType == #digit 
-	    or: [currentCharacter == $- and: [(self classify: stream peek) == #digit]]) 
-		ifTrue: [^self scanNumber].
+	characterType == #digit ifTrue: [^self scanNumber].
 	characterType == #binary ifTrue: [^self scanBinary: RBBinarySelectorToken].
 	characterType == #special ifTrue: [^self scanSpecialCharacter].
 	currentCharacter == $' ifTrue: [^self scanLiteralString].
@@ -1011,36 +1025,30 @@ Stream subclass: RBScanner [
 
     scanNumberValue [
 	<category: 'private-scanning numbers'>
-	| mantissaParsed isNegative base exponent scale ch num |
-	mantissaParsed := isNegative := false.
-	base := 10.
+	| isNegative base exponent scale ch num |
+	isNegative := false.
 	exponent := nil.
-	currentCharacter == $- 
-	    ifFalse: 
-		["could be radix"
 
-		num := self scanDigits: currentCharacter base: 10.
-		currentCharacter == $r 
+	"could be radix or base-10 mantissa"
+	num := self scanDigits: currentCharacter base: 10.
+	currentCharacter == $r 
+	    ifTrue: 
+		[base := num truncated.
+		self step	"skip over 'r'".
+		currentCharacter == $- 
 		    ifTrue: 
-			[base := num truncated.
-			self step	"skip over 'r'"]
-		    ifFalse: [mantissaParsed := true]].
+			[isNegative := true.
+			self step	"skip '-'"].
+		(self isDigit: currentCharacter base: base) 
+		    ifTrue: [num := self scanDigits: currentCharacter base: base]
+		    ifFalse: [self error: 'malformed number']]
+	    ifFalse: [base := 10].
 
 	"Here we've either
 	 a) parsed base, an 'r' and are sitting on the following character
 	 b) parsed the integer part of the mantissa, and are sitting on the char
 	 following it, or
 	 c) parsed nothing and are sitting on a - sign."
-	currentCharacter == $- 
-	    ifTrue: 
-		[mantissaParsed ifTrue: [^num].
-		isNegative := true.
-		self step	"skip '-'"].
-	mantissaParsed 
-	    ifFalse: 
-		[(self isDigit: currentCharacter base: base) 
-		    ifTrue: [num := self scanDigits: currentCharacter base: base]
-		    ifFalse: [self error: 'malformed number']].
 	currentCharacter == $. 
 	    ifTrue: 
 		[stream peek isDigit 
@@ -1059,19 +1067,18 @@ Stream subclass: RBScanner [
 	    ifTrue: 
 		[self step.
 		currentCharacter isNil ifTrue: [currentCharacter := Character space].
+		exponent isNil ifTrue: [exponent := 0].
 		currentCharacter isDigit 
-		    ifTrue: [scale := self scanDigits: ch base: 10]
+		    ifTrue: [scale := self scanDigits: currentCharacter base: 10]
 		    ifFalse: 
-			[exponent isNil ifTrue: [exponent := 0].
-
-			"Might sit on the beginning of an identifier such as 123stu,
+			["Might sit on the beginning of an identifier such as 123stu,
 			 or on a ScaledDecimal literal lacking the scale such as 123s"
 			(currentCharacter == $_ or: [currentCharacter isLetter]) 
 			    ifTrue: 
 				[stream skip: -1.
 				currentCharacter := $s]
 			    ifFalse: [scale := exponent negated]].
-		^num asScaledDecimal: exponent scale: scale].
+		^num asScaledDecimal: exponent radix: base scale: scale].
 	currentCharacter == $e 
 	    ifTrue: [num := num asFloatE]
 	    ifFalse: 

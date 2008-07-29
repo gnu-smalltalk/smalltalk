@@ -185,3 +185,16 @@ Number extend [
 
 Eval [ 19 inWords ]
 
+"test the limited support for unary minus in literals"
+Eval [ 2-2 ]
+Eval [ -2 + 2 ]
+Eval [ -16r33 + 16r33 ]		"Blue Book actually says 16r-33"
+Eval [ -12345678901234567890123 + 12345678901234567890123 ]
+Eval [ -123.0 + 123.0 ]
+Eval [ -123s3 printString ]
+
+"test for errors -- we still fail on -16r-0, but that's insane..."
+Eval [ Object compile: 'a [ -16r-33 ]' ]
+Eval [ Object compile: 'a [ -16r-33.0 ]' ]
+Eval [ Object compile: 'a [ -16r-33s3 ]' ]
+Eval [ Object compile: 'a [ -16r-12345678901234567890123 ]' ]

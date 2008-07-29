@@ -1,5 +1,10 @@
 2008-07-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* tests/compiler.st: Add tests for parsing unary minus.
+	* tests/compiler.ok: Regenerate.
+
+2008-07-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/BlkContext.st: Oops, fix printing of optimized blocks.
 
 2008-07-24  Paolo Bonzini  <bonzini@gnu.org>

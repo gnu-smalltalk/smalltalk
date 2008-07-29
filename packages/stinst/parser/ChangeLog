@@ -1,11 +1,15 @@
+2008-07-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* RBParser.st: Parse negative numbers as unary minus + number.
+	Simplify RBScanner>>#scanNumberValue; fix bugs in ScaledDecimals.
+
 2008-05-18  Stephen Compall  <scompall@nocandysw.com>
 
-	* packages/stinst/parser/GSTParser.st: Support namespace pragmas.
+	* GSTParser.st: Support namespace pragmas.
 
 2008-05-17  Stephen Compall  <scompall@nocandysw.com>
 
-	* packages/stinst/parser/PoolResolutionTests.st: Test for
-	namespace shared pools.
+	* PoolResolutionTests.st: Test for namespace shared pools.
 
 2008-04-27  Stephen Compall  <scompall@nocandysw.com>
 
