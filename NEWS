@@ -135,10 +135,44 @@ o   Swazoo web server.
 
 NEWS FROM 3.0.3 TO 3.0.4
 
+o   A few operations on collections have been sped up.
+
 o   Code without a space between a binary minus and a number, such as "a-2",
     is parsed correctly.  As a side effect of this change, the sign of a number
     with an explicit radix (such as "16r10") can be placed before the radix
     too: both -16r10 and 16r-10 are accepted.
+
+o   Fixed CByte to actually work.
+
+o   Fixed directory navigation on ZIP archives (when using the VFSAddOns
+    package).
+
+o   Fixed HTTP GETs that caused a redirect and had a query.
+
+o   Fixed corner case of nested exception handlers.
+
+o   Fixed leakage of file descriptors on ZIP archives (when *not* using the
+    VFSAddOns package).
+
+o   Fixed MappedCollection>>#keysDo:.
+
+o   Fixed rare bug in the bytecode optimizer that caused invalid
+    (non-verifiable) or even incorrect bytecode to be generated.
+
+o   Fixed the tools to work on Windows even if invoked with an explicit
+    extension for the executable.
+
+o   gst-convert is now really quiet if invoked with --quiet.
+
+o   Moved SequenceableCollection>>#join to Collection.
+
+o   Removed bashisms from installed shell scripts.
+
+o   Sport fixes: fixed SpFilename>>#fail (did not work) and
+    SpSocket>>#readInto:startingAt:for: (should only do one I/O operation,
+    possibly returning a partially filled buffer).
+
+o   UNC paths are parsed correctly by File.
 
 -----------------------------------------------------------------------------
 
