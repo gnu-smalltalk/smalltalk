@@ -54,6 +54,11 @@ Eval [ 'quem' copy at: 1 put: $Q ]
 
 Eval [ 'quem' strTest ]
 
+"This was a bug introduced in 2.3.6."
+Eval [
+   'abc' readStream do: [ :each | (each->'' readStream next) printNl ]
+]
+
 Eval [
 'should be false ' print.       ('###' match: 'quem') printNl.
 'should be false ' print.       ('###' match: 'bo') printNl.

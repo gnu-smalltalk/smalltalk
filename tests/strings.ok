@@ -23,6 +23,12 @@ Execution begins...
 returned value is 'Quem'
 
 Execution begins...
+$a->nil
+$b->nil
+$c->nil
+returned value is ReadStream new "<0>"
+
+Execution begins...
 'should be false 'false
 'should be false 'false
 'should be true  'true
