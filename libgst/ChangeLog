@@ -1,5 +1,11 @@
 2008-08-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* sysdep.c: Always set SIGCHLD handler, and invoke the file
+	interrupt handler from it.  This makes sure that all children
+	are reaped.
+
+2008-08-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* sysdep.c: Fix off-by-one errors involving readlink(2).
 
 2008-07-28  Paolo Bonzini  <bonzini@gnu.org>

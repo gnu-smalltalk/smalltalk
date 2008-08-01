@@ -142,14 +142,16 @@ o   Code without a space between a binary minus and a number, such as "a-2",
     with an explicit radix (such as "16r10") can be placed before the radix
     too: both -16r10 and 16r-10 are accepted.
 
+o   Fixed bug that caused some children not to be reaped.
+
 o   Fixed CByte to actually work.
+
+o   Fixed corner case of nested exception handlers.
 
 o   Fixed directory navigation on ZIP archives (when using the VFSAddOns
     package).
 
 o   Fixed HTTP GETs that caused a redirect and had a query.
-
-o   Fixed corner case of nested exception handlers.
 
 o   Fixed leakage of file descriptors on ZIP archives (when *not* using the
     VFSAddOns package).
