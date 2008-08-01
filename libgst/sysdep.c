@@ -898,7 +898,7 @@ _gst_get_full_file_name (const char *name)
 		}
 
 	      buf = alloca (path_max);
-	      n = readlink (rpath, buf, path_max);
+	      n = readlink (rpath, buf, path_max - 1);
 	      if (n < 0)
 		{
 		  int saved_errno = errno;
@@ -1100,13 +1100,16 @@ find_executable (const char *argv0)
      enclosed in brackets, which we cannot use here.  */
   {
     char buf[6 + 10 + 5];
-    char *location = alloca (path_max);
+    char *location = xmalloc (path_max + 1);
     ssize_t n;
 
     sprintf (buf, "/proc/%d/exe", getpid ());
     n = readlink (buf, location, path_max);
     if (n > 0 && location[0] != '[')
-      return location;
+      {
+        location[n] == '\0';
+        return location;
+      }
     if (executable_fd < 0)
       executable_fd = open (buf, O_RDONLY, 0);
   }

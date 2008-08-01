@@ -1,3 +1,7 @@
+2008-08-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sysdep.c: Fix off-by-one errors involving readlink(2).
+
 2008-07-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gst-parse.c: Parse negative numbers as unary minus + number.
