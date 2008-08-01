@@ -66,8 +66,8 @@ provide for writing collections sequentially.'>
 	[i < anInteger] whileTrue: 
 		[item := self next.
 		data at: (i := i + 1) put: item]] 
-		on: EndOfStream
-		do: [:ex | SystemExceptions.NotEnoughElements signalOn: anInteger - i].
+	    on: SystemExceptions.EndOfStream
+	    do: [:ex | SystemExceptions.NotEnoughElements signalOn: anInteger - i].
 	^data
     ]
 
@@ -288,16 +288,22 @@ provide for writing collections sequentially.'>
 	 receiver is streaming on Characters)."
 
 	<category: 'enumerating'>
-	[[self atEnd] whileFalse: [aBlock value: self nextLine]] on: EndOfStream
-	    do: [:ex | ex return]
+	"FIXME: this is not very safe if the block uses the stream too.
+	 But maybe we can assume it doesn't?"
+	[[self atEnd] whileFalse: [aBlock value: self nextLine]]
+	    on: SystemExceptions.EndOfStream
+	    do: [:ex | ex stream == self ifTrue: [ex return] ifFalse: [ex resume]]
     ]
 
     do: aBlock [
 	"Evaluate aBlock once for every object in the receiver"
 
 	<category: 'enumerating'>
-	[[self atEnd] whileFalse: [aBlock value: self next]] on: EndOfStream
-	    do: [:ex | ex return]
+	"FIXME: this is not very safe if the block uses the stream too.
+	 But maybe we can assume it doesn't?"
+	[[self atEnd] whileFalse: [aBlock value: self next]]
+	    on: SystemExceptions.EndOfStream
+	    do: [:ex | ex stream == self ifTrue: [ex return] ifFalse: [ex resume]]
     ]
 
     species [

@@ -28,6 +28,10 @@ o   Fixed MappedCollection>>#keysDo:.
 o   Fixed rare bug in the bytecode optimizer that caused invalid
     (non-verifiable) or even incorrect bytecode to be generated.
 
+o   Fixed Stream>>#do: and Stream>>#linesDo:, which would terminate in
+    advance if *another* stream was read past its end during the argument
+    block's execution.
+
 o   Fixed the tools to work on Windows even if invoked with an explicit
     extension for the executable.
 
