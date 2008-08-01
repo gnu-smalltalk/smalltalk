@@ -635,17 +635,16 @@ _gst_signal_after (int deltaMilli,
     }
 }
 
+static SigHandler sigio_handler = SIG_IGN;
+
 void
 _gst_set_file_interrupt (int fd,
 			 SigHandler func)
 {
-  static SigHandler old_func;
-  if (func != old_func) 
+  if (func != sigio_handler) 
     {
-      old_func = func;
+      sigio_handler = func;
 
-      /* Trap SIGCHLD, it might reveal a POLLHUP event! */
-      _gst_set_signal_handler (SIGCHLD, func);
 #ifdef SIGPOLL
       _gst_set_signal_handler (SIGPOLL, func);
 #else
@@ -1829,18 +1828,24 @@ _gst_full_write (int fd,
 }
 
 
-#ifdef HAVE_WAITPID
 static void
 sigchld_handler (int signum)
 {
+#ifdef HAVE_WAITPID
   int pid, status, serrno;
   serrno = errno;
   do
     pid = waitpid (-1, &status, WNOHANG);
   while (pid > 0);
   errno = serrno;
-}
 #endif
+
+  /* Pass it to the SIGIO handler, it might reveal a POLLHUP event.  */
+  if (sigio_handler != SIG_DFL && sigio_handler != SIG_IGN)
+    sigio_handler (signum);
+
+  _gst_set_signal_handler (SIGCHLD, sigchld_handler);
+}
 
 void
 _gst_init_sysdep (void)
@@ -1852,10 +1857,7 @@ _gst_init_sysdep (void)
   tzset ();
 
   _gst_set_signal_handler (SIGPIPE, SIG_IGN);
-
-#ifdef HAVE_WAITPID
   _gst_set_signal_handler (SIGCHLD, sigchld_handler);
-#endif
 }
 
 void
