@@ -1,5 +1,9 @@
 2008-08-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* sysdep.c: Use O_CLOEXEC if available instead of FD_CLOEXEC.
+
+2008-08-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* sysdep.c: Always set SIGCHLD handler, and invoke the file
 	interrupt handler from it.  This makes sure that all children
 	are reaped.

@@ -1679,6 +1679,10 @@ _gst_open_file (const char *filename,
 	oflags |= O_EXCL;
     }
 
+#ifdef O_CLOEXEC
+  oflags |= O_CLOEXEC;
+#endif
+
   if (create)
     fd = open (filename, oflags | access | O_CREAT, 0666);
   else
@@ -1687,7 +1691,7 @@ _gst_open_file (const char *filename,
   if (fd < 0)
     return -1;
 
-#ifdef FD_CLOEXEC
+#if defined FD_CLOEXEC && !defined O_CLOEXEC
   fcntl (fd, F_SETFD, fcntl (fd, F_GETFD, 0) | FD_CLOEXEC);
 #endif
 

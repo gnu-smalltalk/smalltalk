@@ -255,6 +255,26 @@ constantFunction (ipAddMembership, -1);
 constantFunction (ipDropMembership, -1);
 #endif
 
+static int
+mySocket (int domain, int type, int protocol)
+{
+  int fd;
+#ifdef SOCK_CLOEXEC
+  fd = socket (domain, type | SOCK_CLOEXEC, protocol);
+
+#else
+  fd = socket (domain, type, protocol);
+
+  /* Do not do FD_CLOEXEC under MinGW.  */
+#if defined FD_CLOEXEC && !defined __MSVCRT__
+  if (fd != -1)
+    fcntl (fd, F_SETFD, fcntl (fd, F_GETFD, 0) | FD_CLOEXEC);
+#endif
+#endif
+
+  return fd;
+}
+
 void
 gst_initModule (VMProxy * proxy)
 {
@@ -284,7 +304,7 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("TCPsendto", sendto);
   vmProxy->defineCFunc ("TCPsetsockopt", setsockopt);
   vmProxy->defineCFunc ("TCPgetsockopt", getsockopt);
-  vmProxy->defineCFunc ("TCPsocket", socket);
+  vmProxy->defineCFunc ("TCPsocket", mySocket);
 
   vmProxy->defineCFunc ("TCPpfInet", pfInet);
   vmProxy->defineCFunc ("TCPafInet", afInet);
