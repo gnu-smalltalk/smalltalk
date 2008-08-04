@@ -1,3 +1,8 @@
+2008-08-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* interp.c: Move ignored signals...
+	* sysdep.c: ... here.  Reset them for exec-ed executables.
+
 2008-08-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sysdep.c: Use O_CLOEXEC if available instead of FD_CLOEXEC.

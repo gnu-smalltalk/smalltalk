@@ -2467,7 +2467,6 @@ _gst_init_signals (void)
     }
   _gst_set_signal_handler (SIGTERM, backtrace_on_signal);
   _gst_set_signal_handler (SIGINT, interrupt_on_signal);
-  _gst_set_signal_handler (SIGFPE, SIG_IGN);
   _gst_set_signal_handler (SIGUSR1, user_backtrace_on_signal);
 }
 

@@ -1513,6 +1513,7 @@ _gst_open_pipe (const char *command,
     return -1;
 
   _gst_set_signal_handler (SIGPIPE, SIG_DFL);
+  _gst_set_signal_handler (SIGFPE, SIG_DFL);
 
 #ifdef HAVE_SPAWNL
   init_pty (&pty);
@@ -1556,6 +1557,7 @@ _gst_open_pipe (const char *command,
 #endif /* !HAVE_SPAWNL */
 
   _gst_set_signal_handler (SIGPIPE, SIG_IGN);
+  _gst_set_signal_handler (SIGFPE, SIG_IGN);
 
   /* Free it in the parent too! */
   free (pty.slavenam);
@@ -1604,6 +1606,7 @@ _gst_open_pipe (const char *command,
     return -1;
 
   _gst_set_signal_handler (SIGPIPE, SIG_DFL);
+  _gst_set_signal_handler (SIGFPE, SIG_DFL);
 
 #ifdef HAVE_SPAWNL
   {
@@ -1670,6 +1673,7 @@ _gst_open_pipe (const char *command,
 
   close (child_fd);
   _gst_set_signal_handler (SIGPIPE, SIG_IGN);
+  _gst_set_signal_handler (SIGFPE, SIG_IGN);
 
   if (result == -1)
     {
@@ -1904,6 +1908,7 @@ _gst_init_sysdep (void)
   tzset ();
 
   _gst_set_signal_handler (SIGPIPE, SIG_IGN);
+  _gst_set_signal_handler (SIGFPE, SIG_IGN);
   _gst_set_signal_handler (SIGCHLD, sigchld_handler);
 }
 
