@@ -500,6 +500,23 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	^self next: anInteger into: (self species new: anInteger)
     ]
 
+    nextAvailable: anInteger [
+	"Private - Read up to anInteger bytes from the stream and store them
+	 into answer.  Return `answer' itself, or raise an exception if we 
+	 could not read the full amount of data."
+
+	<category: 'buffering'>
+	| answer last |
+	writePtr notNil ifTrue: [self flush].
+	ptr > endPtr ifTrue: [self fill].
+
+	"Fetch data from the buffer, without doing more than one I/O operation."
+	last := endPtr min: ptr + anInteger - 1.
+	answer := collection copyFrom: ptr to: last.
+	ptr := ptr + answer size.
+	^answer
+    ]
+
     atEnd [
 	"Answer whether data has come to an end"
 
@@ -620,8 +637,8 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 
     next: anInteger into: answer [
 	"Private - Read up to anInteger bytes from the stream and store them
-	 into answer.  Return `answer' itself, possibly truncated if we could not
-	 read the full amount of data."
+	 into answer.  Return `answer' itself, or raise an exception if we 
+	 could not read the full amount of data."
 
 	<category: 'buffering'>
 	| read last |
@@ -657,18 +674,11 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	"Anything more?  We read it from the file.  We can come here only if the
 	 buffer cannot be filled completely, or if we want to read really a
 	 lot of data."
-	read = anInteger 
-	    ifFalse: 
-		[self atEnd 
-		    ifFalse: 
-			[read := read + (self 
-					    read: answer
-					    from: read + 1
-					    to: answer size)].
-		read = anInteger 
-		    ifFalse: 
-			[self atEnd ifTrue: [self pastEnd].
-			^answer copyFrom: 1 to: read]].
+	[ read = anInteger ] whileFalse: [
+            self atEnd ifTrue: [
+                ^SystemExceptions.NotEnoughElements signalOn: anInteger - read].
+            read := read + (self read: answer from: read + 1 to: anInteger)
+        ].
 	^answer
     ]
 

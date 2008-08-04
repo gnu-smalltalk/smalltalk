@@ -691,10 +691,25 @@ do arbitrary processing on the files.'>
 	"Return the next 'anInteger' characters from the stream, as a String."
 
 	<category: 'overriding inherited methods'>
-	| result n |
+	| result read |
+	result := self species new: anInteger.
+	read := 0.
+	[ read = anInteger ] whileFalse: [
+            self atEnd ifTrue: [
+                ^SystemExceptions.NotEnoughElements signalOn: anInteger - read].
+            read := read + (self read: result from: read + 1 to: anInteger).
+        ].
+	^result
+    ]
+
+    nextAvailable: anInteger [
+        "Return up to anInteger objects in the receiver, stopping if
+         the end of the stream is reached"
+
+        <category: 'accessing-reading'>
+        | result n |
 	result := self species new: anInteger.
 	n := self read: result.
-	n = 0 ifTrue: [atEnd := true].
 	^n < anInteger ifTrue: [result copyFrom: 1 to: n] ifFalse: [result]
     ]
 

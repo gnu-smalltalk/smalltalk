@@ -1163,9 +1163,11 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	 or from the operating system."
 
 	<category: 'stream protocol'>
-	self canRead ifFalse: [ ^0 ].
+	| lookaheadBytes |
+	lookaheadBytes := lookahead isNil ifTrue: [ 0 ] ifFalse: [ 1 ].
+	self canRead ifFalse: [ ^lookaheadBytes ].
 	self readBuffer isEmpty ifTrue: [ self readBuffer fill ].
-	^self readBuffer availableBytes
+	^lookaheadBytes + self readBuffer availableBytes
     ]
 
     bufferContents [
@@ -1215,6 +1217,30 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	result := lookahead.
 	lookahead := nil.
 	^result
+    ]
+	
+    nextAvailable: anInteger [
+        "Return up to anInteger objects in the receiver, stopping if
+         the end of the stream is reached"
+
+        <category: 'accessing-reading'>
+	| buffer available stream |
+	self ensureReadable.
+	available := self availableBytes.
+	available >= anInteger ifTrue: [ ^self next: anInteger ].
+
+	"Try filling the first buffer."
+	buffer := self next: available.
+	available := self availableBytes min: anInteger - available.
+	available = 0 ifTrue: [ ^buffer ].
+
+	"Streams have extra costs because of copying, use them only if
+	 needed."
+	stream := WriteStream with: buffer.
+	[ (available := self availableBytes min: anInteger - stream size) > 0 ]
+	    whileTrue: [ stream nextPutAll: (self next: available) ].
+
+	^stream contents
     ]
 
     nextHunk [

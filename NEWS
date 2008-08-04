@@ -20,6 +20,11 @@ o   CObjects can be backed with garbage-collected (as opposed to
 
 o   Error backtraces include line numbers and filenames.
 
+o   FileDescriptor and FileStream raise an exception if #next: cannot
+    return the given number of bytes.  They also implement #nextAvailable:
+    which is similar to #nextHunk but returns at most the number of bytes
+    given by the argument.
+
 o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
     the instance of GNU Smalltalk that produced the snapshot, and
     true in the instance of GNU Smalltalk that was restored from the

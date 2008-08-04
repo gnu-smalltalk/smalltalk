@@ -72,8 +72,11 @@ provide for writing collections sequentially.'>
     ]
 
     nextAvailable: anInteger [
-	"Return up to anInteger objects in the receiver, stopping if
-	 the end of the stream is reached"
+	"Return up to anInteger objects in the receiver.  Besides stopping if
+	 the end of the stream is reached, this may return less than this
+	 number of bytes for various reasons.  For example, on files and sockets
+	 this operation could be non-blocking, or could do at most one I/O
+	 operation."
 
 	<category: 'accessing-reading'>
 	| stream |

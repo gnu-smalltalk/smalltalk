@@ -1205,19 +1205,10 @@ Object subclass: SpSocket [
 	 If the targetNumberOfBytes	are not available, I return what I can get."
 
 	<category: 'services-io'>
-	"FIXME: this needs targetNumberOfBytes" 
-	^SpExceptionContext 
-	    for: [
-		| result buf |
-		result := ByteArray new: targetNumberOfBytes.
-		buf := self underlyingSocket readBuffer.
-		buf isEmpty ifTrue: [ buf fill ].
-		1 to: targetNumberOfBytes do: [ :i |
-		    buf isEmpty ifTrue: [ ^result copyFrom: 1 to: i - 1 ].
-		    result at: i put: buf next asInteger ].
-		^result ]
-	    on: Error
-	    do: [:ex | SpSocketError raiseSignal: ex]
+	"FIXME: this needs #nextAvailable:into: to avoid a copy in #asByteArray"
+	^(self underlyingSocket
+	    ensureReadable;
+	    nextAvailable: targetNumberOfBytes) asByteArray
     ]
 
     readInto: aByteArray startingAt: startIndex for: aNumberOfBytes [
@@ -1226,18 +1217,13 @@ Object subclass: SpSocket [
 	 number of bytes to be read.	We get what its there no matter how much their is!!"
 
 	<category: 'services-io'>
-	| actuallyRead total |
-	total := 0.
-	self underlyingSocket ensureReadable.
-	[
-	    actuallyRead := self underlyingSocket availableBytes
-		min: aNumberOfBytes - total.
-	    actuallyRead = 0 ifTrue: [ ^total ].
-	    aByteArray replaceFrom: startIndex to: startIndex + actuallyRead - 1
-		     with: (self underlyingSocket next: actuallyRead)
-		     startingAt: total + 1.
-	    total := total + actuallyRead.
-	] repeat
+	| buffer |
+	buffer := self underlyingSocket
+	    ensureReadable;
+	    nextAvailable: aNumberOfBytes.
+	aByteArray replaceFrom: startIndex to: startIndex + buffer size - 1
+		     with: buffer startingAt: 1.
+	^buffer size
     ]
 
     readyForRead [

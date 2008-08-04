@@ -1,3 +1,11 @@
+2008-08-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FileDescr.st: Reimplement #next:, move previous implementation
+	to #nextAvailable:.
+	* kernel/FileStream.st: Modify #next:into: to fail if the given number
+	of bytes cannot be read, implement #nextAvailable:.
+	* kernel/Stream.st: Document #nextAvailable: better.
+
 2008-08-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Stream.st: Fix #do: and #linesDo: to check for the

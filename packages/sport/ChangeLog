@@ -1,3 +1,7 @@
+2008-08-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sport.st: Use StreamSocket>>#nextAvailable:.
+
 2008-07-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sport.st: Fix SpFilename>>#tail and SpSocket>>#readInto:startingAt:for:.
