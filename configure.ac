@@ -156,6 +156,7 @@ dnl ------------------------------ C COMPILER / OS ------------
 
 { echo; echo "${term_bold}Platform environment:${term_norm}"; } >& AS_MESSAGE_FD
 
+AC_USE_SYSTEM_EXTENSIONS
 AC_SYS_LARGEFILE
 AC_C_INLINE
 AC_C_RESTRICT
@@ -252,8 +253,6 @@ dnl ------------------------------- C LIBRARY -----------------
 AC_TYPE_SIGNAL
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
-
-AC_DEFINE(_GNU_SOURCE, 1, [We want the definition of every available function])
 
 AC_HEADER_ASSERT
 AC_CHECK_HEADERS_ONCE(stdint.h inttypes.h unistd.h poll.h sys/ioctl.h \
