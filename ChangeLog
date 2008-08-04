@@ -1,5 +1,9 @@
 2008-08-04  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Semaphore.st: Initialize the caught variable in #critical:.
+
+2008-08-04  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FileDescr.st: Reimplement #next:, move previous implementation
 	to #nextAvailable:.
 	* kernel/FileStream.st: Modify #next:into: to fail if the given number

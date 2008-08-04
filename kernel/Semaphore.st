@@ -65,6 +65,7 @@ I also provide some methods for implementing critical sections.'>
 
 	<category: 'mutual exclusion'>
 	| caught |
+	caught := false.
 	^[
 	    [
 		"The VM will not preempt the process between the two statements.
