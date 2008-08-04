@@ -1,3 +1,7 @@
+2008-08-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Semaphore.st: Initialize the caught variable in #critical:.
+
 2008-08-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Stream.st: Fix #do: and #linesDo: to check for the
