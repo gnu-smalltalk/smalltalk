@@ -1,3 +1,7 @@
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Extensions.st: New.
+
 2008-07-29  Janko Mivsek  <janko.mivsek@eranova.si>
 
 	* Messages.st: Fix bug in 2.2beta.
