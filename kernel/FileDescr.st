@@ -32,8 +32,8 @@
 
 
 
-ReadWriteStream subclass: FileDescriptor [
-    | fd file isPipe atEnd peek |
+Stream subclass: FileDescriptor [
+    | access fd file isPipe atEnd peek |
     
     <category: 'Streams-Files'>
     <comment: 'My instances are what conventional programmers think of as files.
@@ -334,22 +334,19 @@ do arbitrary processing on the files.'>
 	"Return the next character in the file, or nil at eof"
 
 	<category: 'basic'>
-	| result |
+	| result data |
 	peek isNil 
 	    ifFalse: 
-		[collection at: 1 put: peek.
+		[data := peek.
 		peek := nil.
 		result := 1]
 	    ifTrue: 
-		[result := self 
-			    read: collection
-			    from: 1
-			    to: 1].
+		[data := self species new: 1.
+		result := self read: data from: 1 to: 1.
+		data := data at: 1].
 	^result > 0 
-	    ifTrue: [collection at: 1]
-	    ifFalse: 
-		[atEnd := true.
-		self pastEnd]
+	    ifTrue: [data]
+	    ifFalse: [atEnd := true.  self pastEnd]
     ]
 
     peekFor: anObject [
@@ -368,14 +365,12 @@ do arbitrary processing on the files.'>
 	 Returns nil when at end of stream."
 
 	<category: 'basic'>
-	| result |
+	| result data |
 	peek isNil ifFalse: [^peek].
-	result := self 
-		    read: collection
-		    from: 1
-		    to: 1.
+	data := self species new: 1.
+	result := self read: data from: 1 to: 1.
 	^result > 0 
-	    ifTrue: [peek := collection at: 1]
+	    ifTrue: [peek := data at: 1]
 	    ifFalse: 
 		[atEnd := true.
 		self pastEnd]
@@ -758,18 +753,8 @@ do arbitrary processing on the files.'>
 
 	<category: 'initialize-release'>
 	self addToBeFinalized.
-	collection := self newBuffer.
-	ptr := 1.
-	endPtr := 0.
 	access isNil ifTrue: [access := 3].
 	atEnd := false
-    ]
-
-    newBuffer [
-	"Private - Answer a String to be used as the receiver's buffer"
-
-	<category: 'initialize-release'>
-	^String new: 1
     ]
 
     readStream [
@@ -807,7 +792,7 @@ do arbitrary processing on the files.'>
 
 	<category: 'low-level access'>
 	| count answer |
-	count := self read: (answer := String new: 1024).
+	count := self read: (answer := self species new: 1024).
 	count < answer size ifTrue: [answer := answer copyFrom: 1 to: count].
 	count = 0 
 	    ifTrue: 
@@ -1207,5 +1192,18 @@ do arbitrary processing on the files.'>
 		int := int bitShift: -8.
 		(int = 0 and: [anInteger < 0]) ifTrue: [int := 255]]
     ]
+
+    species [
+	<category: 'private'>
+	^String
+    ]
+
+    isPositionable [
+	"Answer true if the stream supports moving backwards with #skip:."
+
+	<category: 'positioning'>
+	^true
+    ]
+
 ]
 

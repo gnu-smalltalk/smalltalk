@@ -1,5 +1,13 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/FileDescr.st: Make a subclass of Stream.
+	* kernel/FileStream.st: Add here the creation of the buffer.
+	* kernel/PosStream.st: Implement #nextPutAllOn:.  Move
+	#skipSeparators...
+	* kernel/StreamOps.st: ... here.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ByteStream.st: Delete.  Copy implementation...
 	* kernel/FileDescr.st: ... here ...
 	* kernel/ObjDumper.st: ... and here.

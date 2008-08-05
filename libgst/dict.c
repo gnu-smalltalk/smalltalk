@@ -617,13 +617,13 @@ static const class_definition class_info[] = {
    GST_ISP_FIXED, false, 0,
    "ReadWriteStream", NULL, NULL, NULL },
 
-  {&_gst_file_descriptor_class, &_gst_read_write_stream_class,
-   GST_ISP_FIXED, true, 5,
-   "FileDescriptor", "fd file isPipe atEnd peek", "AllOpenFiles", NULL },
+  {&_gst_file_descriptor_class, &_gst_stream_class,
+   GST_ISP_FIXED, true, 6,
+   "FileDescriptor", "access fd file isPipe atEnd peek", "AllOpenFiles", NULL },
 
   {&_gst_file_stream_class, &_gst_file_descriptor_class,
-   GST_ISP_FIXED, true, 2,
-   "FileStream", "writePtr writeEnd", "Verbose Record Includes", NULL },
+   GST_ISP_FIXED, true, 5,
+   "FileStream", "collection ptr endPtr writePtr writeEnd", "Verbose Record Includes", NULL },
 
   {&_gst_undefined_object_class, &_gst_object_class,
    GST_ISP_FIXED, true, 0,
@@ -2174,15 +2174,9 @@ _gst_set_file_stream_file (OOP fileStreamOOP,
       fileStream->writePtr = _gst_nil_oop;
       fileStream->writeEnd = _gst_nil_oop;
     }
-  else
-    {
-      fileStream->collection = _gst_nil_oop;
-      fileStream->ptr = _gst_nil_oop;
-      fileStream->endPtr = _gst_nil_oop;
-    }
 
-  fileStream->file = FROM_INT (fd);
-  fileStream->name = fileNameOOP;
+  fileStream->fd = FROM_INT (fd);
+  fileStream->file = fileNameOOP;
   fileStream->isPipe =
     isPipe == -1 ? _gst_nil_oop :
     isPipe ? _gst_true_oop : _gst_false_oop;

@@ -655,6 +655,22 @@ Stream extend [
 	^self peek
     ]
 
+    skipSeparators [
+	"Advance the receiver until we find a character that is not a
+	 separator.  Answer false if we reach the end of the stream,
+	 else answer true; in this case, sending #next will return the
+	 first non-separator character (possibly the same to which the
+	 stream pointed before #skipSeparators was sent)."
+
+	<category: 'positioning'>
+	| ch |
+	
+	[(ch := self peek) isNil ifTrue: [^false].
+	ch isSeparator] 
+		whileTrue: [self next].
+	^true
+    ]
+
     peekFor: aCharacter [
 	"Returns true and gobbles the next element from the stream of it is
 	 equal to anObject, returns false and doesn't gobble the next element

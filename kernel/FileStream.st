@@ -33,7 +33,7 @@
 
 
 FileDescriptor subclass: FileStream [
-    | writePtr writeEnd |
+    | collection ptr endPtr writePtr writeEnd |
     
     <category: 'Streams-Files'>
     <comment: 'My instances are what conventional programmers think of as files.
@@ -521,7 +521,7 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	"Answer whether data has come to an end"
 
 	<category: 'testing'>
-	^self basicAtEnd and: [super atEnd]
+	^ptr > endPtr and: [super atEnd]
     ]
 
     bufferSize [
@@ -539,11 +539,21 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	collection := self species new: bufSize
     ]
 
+    initialize [
+        "Initialize the receiver's instance variables"
+
+        <category: 'initialize-release'>
+        super initialize.
+        collection := self newBuffer.
+        ptr := 1.
+        endPtr := 0.
+    ]
+
     newBuffer [
 	"Private - Answer a String to be used as the receiver's buffer"
 
 	<category: 'buffering'>
-	^String new: 1024
+	^self species new: 1024
     ]
 
     flush [

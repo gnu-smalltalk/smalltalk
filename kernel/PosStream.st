@@ -81,6 +81,13 @@ or ReadWriteStream instead of me to create and use streams.'>
 	^element
     ]
 
+    nextPutAllOn: aStream [
+	"Write all the objects in the receiver to aStream."
+
+	(access bitAnd: 1) = 0 ifTrue: [^self shouldNotImplement].
+	aStream next: endPtr putAll: collection startingAt: 1.
+    ]
+
     peek [
 	"Returns the next element of the stream without moving the pointer.
 	 Returns nil when at end of stream."
@@ -175,22 +182,6 @@ or ReadWriteStream instead of me to create and use streams.'>
 	(access bitAnd: 2) = 0 
 	    ifTrue: [self shouldNotImplement]
 	    ifFalse: [endPtr := ptr - 1]
-    ]
-
-    skipSeparators [
-	"Advance the receiver until we find a character that is not a
-	 separator.  Answer false if we reach the end of the stream,
-	 else answer true; in this case, sending #next will return the
-	 first non-separator character (possibly the same to which the
-	 stream pointed before #skipSeparators was sent)."
-
-	<category: 'positioning'>
-	| ch |
-	
-	[(ch := self peek) isNil ifTrue: [^false].
-	ch isSeparator] 
-		whileTrue: [self next].
-	^true
     ]
 
     position [

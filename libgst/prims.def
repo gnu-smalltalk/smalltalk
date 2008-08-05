@@ -5357,10 +5357,10 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
   }
 
   fileStream = (gst_file_stream) OOP_TO_OBJ (oop1);
-  if (!IS_INT (fileStream->file))
+  if (!IS_INT (fileStream->fd))
     goto fail;
 
-  fd = TO_INT (fileStream->file);
+  fd = TO_INT (fileStream->fd);
   switch (arg1)
     {
     case PRIM_CLOSE_FILE:	/* FileDescriptor close */
@@ -5658,10 +5658,10 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
 
   arg1 = TO_INT (oopVec[0]);
   fileStream = (gst_file_stream) OOP_TO_OBJ (oop1);
-  if (IS_NIL (fileStream->file))
+  if (IS_NIL (fileStream->fd))
     goto fail;
 
-  fd = TO_INT (fileStream->file);
+  fd = TO_INT (fileStream->fd);
   switch (arg1)
     {
 

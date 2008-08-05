@@ -69,14 +69,15 @@
 typedef struct gst_file_stream
 {
   OBJ_HEADER;
+  OOP access;
+  OOP fd;
+  OOP file;
+  OOP isPipe;
+  OOP atEnd;
+  OOP peek;
   OOP collection;
   OOP ptr;
   OOP endPtr;
-  OOP access;
-  OOP file;
-  OOP name;
-  OOP isPipe;
-  OOP peek;
   OOP writePtr;
   OOP writeEnd;
 }

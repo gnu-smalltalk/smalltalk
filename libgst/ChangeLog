@@ -1,5 +1,12 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* dict.c: Adjust layout of FileDescriptor and FileStream.  Do not
+	fill in FileStream variables in FileDescriptors.
+	* dict.h: Likewise.
+	* prims.def: Adjust uses of gst_file_stream.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* dict.c: Remove _gst_byte_stream_class.  Change superclass of
 	FileDescriptor.
 	* dict.h: Likewise.
