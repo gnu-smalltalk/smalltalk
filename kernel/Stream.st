@@ -115,7 +115,7 @@ provide for writing collections sequentially.'>
 	<category: 'accessing-reading'>
 	| stream |
 	stream := WriteStream on: (self species new: 10).
-	self do: [:each | stream nextPut: each].
+	self nextPutAllOn: stream.
 	^stream contents
     ]
 
@@ -225,26 +225,20 @@ provide for writing collections sequentially.'>
 	"Write all the objects in aCollection to the receiver"
 
 	<category: 'accessing-writing'>
+	aCollection nextPutAllOn: self.
+	^aCollection
+    ]
+
+    nextPutAllOn: aStream [
+        "Write all the objects in the receiver to aStream"
+
 	| coll |
-	aCollection isSequenceable 
-	    ifTrue: 
-		[^self 
-		    next: aCollection size
-		    putAll: aCollection
-		    startingAt: 1].
-
-	"Try to detect a Stream."
-	[aCollection atEnd] on: MessageNotUnderstood
-	    do: [:ex | ^self nextPutAll: (self species withAll: aCollection)].
-
-	"If we are in a stream, try to facilitate buffering."
-	[aCollection atEnd] whileFalse: 
-		[coll := aCollection nextHunk.
-		self 
+	[self atEnd] whileFalse: 
+		[coll := self nextHunk.
+		aStream 
 		    next: coll size
 		    putAll: coll
 		    startingAt: 1].
-	^aCollection
     ]
 
     next: anInteger put: anObject [

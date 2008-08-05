@@ -463,12 +463,12 @@ do arbitrary processing on the files.'>
 	"Answer the whole contents of the file"
 
 	<category: 'basic'>
-	| contents ch |
+	| stream |
 	^self isPipe 
 	    ifTrue: 
-		[contents := WriteStream on: (self species new: 1).
-		[(ch := self next) isNil] whileFalse: [contents nextPut: ch].
-		contents contents]
+		[stream := WriteStream on: (self species new: 10).
+		self nextPutAllOn: stream.
+		stream contents]
 	    ifFalse: [^self next: self size - self position]
     ]
 

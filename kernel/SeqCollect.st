@@ -781,6 +781,12 @@ some access and manipulation methods.'>
 	    ifFalse: [self first species join: self separatedBy: sepCollection]
     ]
 
+    nextPutAllOn: aStream [
+	"Write all the objects in the receiver to aStream"
+
+	aStream next: self size putAll: self startingAt: 1
+    ]
+
     readStream [
 	"Answer a ReadStream streaming on the receiver"
 

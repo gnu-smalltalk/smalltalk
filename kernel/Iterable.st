@@ -203,6 +203,13 @@ all possible) are left to the subclasses.'>
 	^result
     ]
 
+    nextPutAllOn: aStream [
+        "Write all the objects in the receiver to aStream"
+
+	<category: 'streaming'>
+	self do: [ :each | aStream nextPut: each ]
+    ]
+
     readStream [
 	"Return a stream with the same contents as the receiver."
 

@@ -1,5 +1,13 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Stream.st: Implement #nextPutAll: polymorphically.  Implement
+	#nextPutAllOn:.
+	* kernel/Iterable.st: Implement #nextPutAllOn:.
+	* kernel/SeqCollect.st: Implement #nextPutAllOn:.
+	* kernel/FileDescr.st: Use #nextPutAllOn: to implement #contents.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Collection.st: Move enumeration methods...
 	* kernel/Iterable.st: ... here.
 	* kernel/StreamOps.st: Change superclass.
