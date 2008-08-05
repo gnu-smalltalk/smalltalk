@@ -86,7 +86,7 @@ Socket class extend [
 		timeout := true] fork.
 	
 	[timeout ifTrue: [self error: 'could not establish connection'].
-	(server := queue accept) isNil] 
+	(server := queue accept: StreamSocket) isNil] 
 		whileTrue: [Processor yield].
 	process terminate.
 	Transcript
@@ -97,9 +97,7 @@ Socket class extend [
 	bytesSent := bytesReceived := 0.
 	t := Time millisecondsToRun: 
 			[
-			[server
-			    nextPutAll: sendBuf;
-			    flush.
+			[server nextPutAll: sendBuf.
 			bytesSent := bytesSent + sendBuf size.
 			[client canRead] whileTrue: 
 				[bytesReceived := bytesReceived + client nextHunk size].
@@ -160,7 +158,7 @@ Socket class extend [
 					timeout := true] fork.
 				
 				[timeout ifTrue: [self error: 'could not establish connection'].
-				(server := queue accept) isNil] 
+				(server := queue accept ": StreamSocket") isNil] 
 					whileTrue: [Processor yield].
 				process terminate.
 				Transcript

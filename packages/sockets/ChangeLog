@@ -1,5 +1,9 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Tests.st: Use StreamSocket for the server.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Datagram.st: Do not use ByteStream.
 
 2008-08-04  Paolo Bonzini  <bonzini@gnu.org>
