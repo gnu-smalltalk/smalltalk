@@ -611,6 +611,19 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	self flush
     ]
 
+    nextHunkPutAllOn: aStream [
+	"Copy the next buffers worth of stuff from the receiver to
+	 aStream.  For n consecutive calls to this method, we do
+	 n - 1 or n actual input operation."
+
+	<category: 'buffering'>
+	writePtr notNil ifTrue: [self flush].
+	(ptr > endPtr or: [endPtr < collection size]) ifTrue: [self fill].
+	ptr > endPtr ifTrue: [^self pastEnd].
+	aStream next: endPtr - ptr + 1 putAll: collection startingAt: ptr.
+	ptr := endPtr + 1.
+    ]
+
     nextHunk [
 	"Answer the next buffers worth of stuff in the Stream represented
 	 by the receiver.  For n consecutive calls to this method, we do

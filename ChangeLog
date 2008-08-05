@@ -1,5 +1,13 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/FileDescr.st: Move setting atEnd to true into #pastEnd.
+	Add #nextHunkPutAllOn:.  Remove duplicate #copyFrom:to: in #nextHunk.
+	* kernel/FileStream.st: Add #nextHunkPutAllOn:.
+	* kernel/Stream.st: Extract pieces of #nextPutAllOn: into
+	#nextHunkPutAllOn:.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FileDescr.st: Implement #nextPutAllOn: and #next:into:.
 	Move #next: and #nextByteArray: here...
 	* kernel/FileStream.st: ... from here.  Remove #nextByte,

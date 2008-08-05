@@ -1,3 +1,14 @@
+Stream subclass: DummyStream [
+    <category: 'Sockets-Tests'>
+
+    | n |
+    DummyStream class >> new [ ^super new initialize ]
+    initialize [ n := 0 ]
+    nextPut: anObject [ n := n + 1 ]
+    next: anInteger putAll: aCollection startingAt: pos [ n := n + anInteger ]
+    size [ ^n ]
+]
+
 Socket class extend [
 
     microTest [
@@ -65,7 +76,8 @@ Socket class extend [
 	 output buffer sizes, and the address class (family) to use."
 
 	<category: 'tests'>
-	| queue server client bytesToSend sendBuf bytesSent bytesReceived t extraBytes timeout process |
+	| queue server client bytesToSend sendBuf bytesSent bytesReceived
+	  t extraBytes timeout process recvBuf |
 	Transcript
 	    cr;
 	    show: 'starting loopback test';
@@ -94,13 +106,15 @@ Socket class extend [
 	    cr.
 	bytesToSend := 5000000.
 	sendBuf := String new: 4000 withAll: $x.
+	recvBuf := DummyStream new.
 	bytesSent := bytesReceived := 0.
 	t := Time millisecondsToRun: 
 			[
 			[server nextPutAll: sendBuf.
 			bytesSent := bytesSent + sendBuf size.
 			[client canRead] whileTrue: 
-				[bytesReceived := bytesReceived + client nextHunk size].
+				[client nextHunkPutAllOn: recvBuf.
+				bytesReceived := recvBuf size].
 			bytesSent >= bytesToSend and: [bytesReceived = bytesSent]] 
 				whileFalse].
 	Transcript
@@ -173,11 +187,14 @@ Socket class extend [
 				sema signal] 
 					fork.
 			consumer := 
-				[queueReady wait.
+				[| recvBuf |
+				recvBuf := DummyStream new.
+				queueReady wait.
 				client := Socket remote: queue localAddress port: (self testPortFor: addressClass).
 				
 				[[client canRead] whileTrue: 
-					[bytesReceived := bytesReceived + client nextHunk size].
+					[client nextHunkPutAllOn: recvBuf.
+					bytesReceived := recvBuf size].
 				bytesSent >= bytesToSend and: [bytesReceived = bytesSent]] 
 					whileFalse: [Processor yield].
 				sema signal] 

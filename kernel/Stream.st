@@ -232,13 +232,8 @@ provide for writing collections sequentially.'>
     nextPutAllOn: aStream [
         "Write all the objects in the receiver to aStream"
 
-	| coll |
 	[self atEnd] whileFalse: 
-		[coll := self nextHunk.
-		aStream 
-		    next: coll size
-		    putAll: coll
-		    startingAt: 1].
+		[self nextHunkPutAllOn: aStream].
     ]
 
     next: anInteger put: anObject [
@@ -505,6 +500,23 @@ provide for writing collections sequentially.'>
 		self atEnd ifTrue: [^false].
 		ch := self next]] 
 		repeat
+    ]
+
+    nextHunkPutAllOn: aStream [
+	"Copy to aStream a more-or-less arbitrary amount of data.  When used
+	 on files, this does at most one I/O operation.  For other kinds of
+	 stream, the definition may vary.  This method is used by the VM
+	 when loading data from a Smalltalk stream, and by various kind
+	 of Stream decorators supplied with GNU Smalltalk (including
+	 zlib streams).  Subclasses that implement nextHunk can implement
+	 this method to avoid useless work."
+
+	| coll |
+	coll := self nextHunk.
+	aStream 
+	    next: coll size
+	    putAll: coll
+	    startingAt: 1
     ]
 
     nextHunk [

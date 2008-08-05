@@ -1013,7 +1013,7 @@ this class simply redirect their calls to an implementation class.'>
 
 
 AbstractSocket subclass: StreamSocket [
-    | lookahead peerDead readBuffer outOfBand |
+    | peerDead readBuffer outOfBand |
     
     <category: 'Sockets-Streams'>
     <comment: '
@@ -1163,25 +1163,17 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	 or from the operating system."
 
 	<category: 'stream protocol'>
-	| lookaheadBytes |
-	lookaheadBytes := lookahead isNil ifTrue: [ 0 ] ifFalse: [ 1 ].
-	self canRead ifFalse: [ ^lookaheadBytes ].
+	self canRead ifFalse: [ ^0 ].
 	self readBuffer isEmpty ifTrue: [ self readBuffer fill ].
-	^lookaheadBytes + self readBuffer availableBytes
+	^self readBuffer availableBytes
     ]
 
     bufferContents [
 	"Answer the current contents of the read buffer"
 
 	<category: 'stream protocol'>
-	| result |
 	readBuffer isNil ifTrue: [^self pastEnd].
-	result := self readBuffer bufferContents.
-	lookahead isNil 
-	    ifFalse: 
-		[result := lookahead asString , result.
-		lookahead := nil].
-	^result
+	^self readBuffer bufferContents
     ]
 
     close [
@@ -1212,11 +1204,8 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	 Smalltalk Processes."
 
 	<category: 'stream protocol'>
-	| result |
-	lookahead isNil ifTrue: [^self readBuffer next].
-	result := lookahead.
-	lookahead := nil.
-	^result
+	readBuffer isNil ifTrue: [^self pastEnd].
+	^self readBuffer next
     ]
 	
     nextAvailable: anInteger [
@@ -1225,6 +1214,8 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 
         <category: 'accessing-reading'>
 	| buffer available stream |
+	readBuffer isNil ifTrue: [ ^self pastEnd ].
+
 	self ensureReadable.
 	available := self availableBytes.
 	available >= anInteger ifTrue: [ ^self next: anInteger ].
@@ -1238,9 +1229,20 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	 needed."
 	stream := WriteStream with: buffer.
 	[ (available := self availableBytes min: anInteger - stream size) > 0 ]
-	    whileTrue: [ stream nextPutAll: (self next: available) ].
+	    whileTrue: [ stream nextPutAll: (self readBuffer next: available) ].
 
 	^stream contents
+    ]
+
+    nextHunkPutAllOn: aStream [
+	"Copy the next buffers worth of stuff from the receiver to aStream.
+	 Do at most one actual input operation."
+
+	<category: 'stream protocol'>
+	"Ensure that the buffer is full"
+
+	readBuffer isNil ifTrue: [ ^self pastEnd ].
+	self readBuffer nextHunkPutAllOn: aStream
     ]
 
     nextHunk [
@@ -1250,8 +1252,8 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	"Ensure that the buffer is full"
 
 	<category: 'stream protocol'>
-	self peek.
-	^self bufferContents
+	readBuffer isNil ifTrue: [ ^self pastEnd ].
+	^self readBuffer nextHunk
     ]
 
     next: count [
@@ -1260,10 +1262,8 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 
 	<category: 'stream protocol'>
 	| result |
-	lookahead isNil ifTrue: [^self readBuffer next: count].
-	result := (String with: lookahead) , (self readBuffer next: count - 1).
-	lookahead := nil.
-	^result
+	readBuffer isNil ifTrue: [ ^self pastEnd ].
+	^self readBuffer next: count
     ]
 
     peek [
@@ -1272,12 +1272,9 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	 Smalltalk Processes."
 
 	<category: 'stream protocol'>
-	lookahead isNil 
-	    ifTrue: 
-		[self readBuffer isNil ifTrue: [^nil].
-		self readBuffer atEnd ifTrue: [^nil].
-		lookahead := self readBuffer next].
-	^lookahead
+	self readBuffer isNil ifTrue: [^nil].
+	self readBuffer atEnd ifTrue: [^nil].
+	^self readBuffer peek
     ]
 
     peekFor: anObject [
@@ -1286,16 +1283,9 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	 control to other Smalltalk Processes."
 
 	<category: 'stream protocol'>
-	lookahead isNil 
-	    ifTrue: 
-		[self readBuffer isNil ifTrue: [^false].
-		self readBuffer atEnd ifTrue: [^false].
-		lookahead := self readBuffer next].
-	^lookahead = anObject 
-	    ifTrue: 
-		[lookahead := nil.
-		true]
-	    ifFalse: [false]
+	self readBuffer isNil ifTrue: [^false].
+	self readBuffer atEnd ifTrue: [^false].
+	^self readBuffer peekFor: anObject
     ]
 
     readBufferSize: size [

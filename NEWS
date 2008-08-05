@@ -32,12 +32,6 @@ o   FileDescriptor and FileStream raise an exception if #next: cannot
 
 o   FileDescriptor is now a subclass of Stream.
 
-o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
-    the instance of GNU Smalltalk that produced the snapshot, and
-    true in the instance of GNU Smalltalk that was restored from the
-    snapshot.  Note that this does not apply to CallinProcesses, since
-    those are stopped in saved images (will this be true in 3.1?).
-
 o   If possible, the installation is made relocatable.  To this end,
     the following conditions should be satisfied: 1) the exec-prefix
     and prefix should be identical; 2) the installation should reside
@@ -74,8 +68,17 @@ o   It is possible to create C call-outs that are not attached
     override the #link method (the existing CFunctionDescriptor class
     is now implemented on top of this).
 
+o   A new method #nextHunkPutAllOn: allows to copy from stream to stream
+    while minimizing the number of allocated objects.
+
 o   ObjectDumper now accepts normal String streams.  The class ByteStream
     has been removed.
+
+o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
+    the instance of GNU Smalltalk that produced the snapshot, and
+    true in the instance of GNU Smalltalk that was restored from the
+    snapshot.  Note that this does not apply to CallinProcesses, since
+    those are stopped in saved images (will this be true in 3.1?).
 
 o   The VFS subsystem was rewritten.  Virtual filesystems are now
     accessible via special methods on File (such as File>>#zip,

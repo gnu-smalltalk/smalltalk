@@ -70,6 +70,19 @@ used for communication with zlib.'>
 	^result
     ]
 
+    nextHunkPutAllOn: aStream [
+	"Copy the next buffers worth of stuff from the receiver to
+	 aStream.  Do at most one actual compression/decompression
+	 operation."
+
+	<category: 'streaming'>
+	| result |
+	self atEnd ifTrue: [^self pastEnd].
+	aStream next: endPtr - ptr putAll: outBytes startingAt: ptr + 1.
+	ptr := endPtr.
+	^result
+    ]
+
     nextHunk [
 	"Answer the next buffers worth of stuff in the Stream represented
 	 by the receiver.  Do at most one actual compression/decompression

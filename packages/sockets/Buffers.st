@@ -120,6 +120,28 @@ evaluates an user defined block to try to get some more data.'>
 	^contents
     ]
 
+    nextHunkPutAllOn: aStream [
+	"Copy a buffer's worth of data from the receiver to aStream, doing
+	 at most one call to the fill block."
+
+	<category: 'buffer handling'>
+	self atEnd ifTrue: [^super pastEnd].
+	aStream next: endPtr - ptr + 1 putAll: self collection startingAt: ptr.
+	endPtr := ptr - 1.	"Empty the buffer"
+    ]
+
+    nextHunk [
+	"Answer a buffer's worth of data, doing at most one call
+	 to the fill block."
+
+	<category: 'buffer handling'>
+	| contents |
+	self atEnd ifTrue: [^super pastEnd].
+	contents := self collection copyFrom: ptr to: endPtr.
+	endPtr := ptr - 1.	"Empty the buffer"
+	^contents
+    ]
+
     availableBytes [
         "Answer how many bytes are available in the buffer."
 

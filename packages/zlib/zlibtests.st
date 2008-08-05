@@ -166,6 +166,17 @@ TestCase subclass: ZlibStreamTest [
 	self assertFooVector: data
     ]
 
+    testNextHunkPutAllOn [
+	"Test accessing data with nextHunkPutAllOn."
+
+	<category: 'testing'>
+	| stream data |
+	stream := InflateStream on: self doDeflate readStream.
+	data := String new writeStream.
+	[stream atEnd] whileFalse: [stream nextHunkPutAllOn: data].
+	self assertFooVector: data contents
+    ]
+
     testRandomAccess [
 	"Test random access to deflated data."
 

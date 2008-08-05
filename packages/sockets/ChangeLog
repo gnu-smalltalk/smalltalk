@@ -1,5 +1,14 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Buffers.st: Add #nextHunk and #nextHunkPutAllOn:.
+	* Sockets.st: Remove the lookahead instance variable.  Delegate
+	more stuff to the readBuffer, including #nextHunk.  Implement
+	#nextHunkPutAllOn:.
+	* Tests.st: Modify test to use #nextHunkPutAllOn: for a 3-4x
+	speed increase. :-P :-P :-P
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Tests.st: Use StreamSocket for the server.
 
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>

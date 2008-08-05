@@ -346,7 +346,7 @@ do arbitrary processing on the files.'>
 		data := data at: 1].
 	^result > 0 
 	    ifTrue: [data]
-	    ifFalse: [atEnd := true.  self pastEnd]
+	    ifFalse: [self pastEnd]
     ]
 
     peekFor: anObject [
@@ -371,9 +371,7 @@ do arbitrary processing on the files.'>
 	result := self read: data from: 1 to: 1.
 	^result > 0 
 	    ifTrue: [peek := data at: 1]
-	    ifFalse: 
-		[atEnd := true.
-		self pastEnd]
+	    ifFalse: [self pastEnd]
     ]
 
     nextByte [
@@ -817,6 +815,16 @@ do arbitrary processing on the files.'>
 	^true
     ]
 
+    nextHunkPutAllOn: aStream [
+	"Copy the next buffers worth of stuff from the receiver to aStream."
+
+	<category: 'low-level access'>
+	| count coll |
+	count := self read: (coll := self species new: 1024).
+	count = 0 ifTrue: [^self pastEnd].
+	aStream next: count putAll: coll startingAt: 1
+    ]
+
     nextHunk [
 	"Answer the next buffers worth of stuff in the Stream represented
 	 by the receiver.  Do at most one actual input operation."
@@ -825,11 +833,16 @@ do arbitrary processing on the files.'>
 	| count answer |
 	count := self read: (answer := self species new: 1024).
 	count < answer size ifTrue: [answer := answer copyFrom: 1 to: count].
-	count = 0 
-	    ifTrue: 
-		[atEnd := true.
-		^self pastEnd].
-	^answer copyFrom: 1 to: count
+	count = 0 ifTrue: [^self pastEnd].
+	^answer
+    ]
+
+    pastEnd [
+        "The end of the stream has been reached.  Signal a Notification."
+
+        <category: 'polymorphism'>
+	atEnd := true.
+	super pastEnd
     ]
 
     read: byteArray [
