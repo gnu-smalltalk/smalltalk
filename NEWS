@@ -72,6 +72,9 @@ o   It is possible to create C call-outs that are not attached
     override the #link method (the existing CFunctionDescriptor class
     is now implemented on top of this).
 
+o   ObjectDumper now accepts normal String streams.  The class ByteStream
+    has been removed.
+
 o   The VFS subsystem was rewritten.  Virtual filesystems are now
     accessible via special methods on File (such as File>>#zip,
     for example "(File name: 'abc.zip') zip") and not anymore with

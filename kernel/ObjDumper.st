@@ -177,8 +177,8 @@ references at design time and you override #storeOn: to deal with them'>
 		dump: [:client :object | ]
 		load: [:client | false];
 	    specialCaseIf: [:object | object class == SmallInteger]
-		dump: [:client :object | client stream nextPutLong: object]
-		load: [:client | client stream nextLong];
+		dump: [:client :object | client nextPutLong: object]
+		load: [:client | client nextLong];
 	    specialCaseIf: [:object | object class == Character]
 		dump: [:client :object | client stream nextPut: object]
 		load: [:client | client stream next];
@@ -200,9 +200,8 @@ references at design time and you override #storeOn: to deal with them'>
 	    specialCaseIf: [:object | object class == Symbol]
 		dump: 
 		    [:client :object | 
-		    (client stream)
-			nextPutAll: object;
-			nextPutByte: 0]
+		    client stream nextPutAll: object.
+		    client nextPutByte: 0]
 		load: [:client | client nextAsciiz asSymbol];
 	    specialCaseIf: [:object | self hasProxyFor: object class]
 		dump: 
@@ -218,13 +217,13 @@ references at design time and you override #storeOn: to deal with them'>
 		    "Special-case metaclasses and other objects"
 
 		    | index |
-		    index := client stream nextLong.
+		    index := client nextLong.
 		    index = 0 
 			ifTrue: [client register: (client loadGlobal loadFrom: client)]
 			ifFalse: [client lookupIndex: index]];
 	    specialCaseIf: [:object | object class == UnicodeCharacter]
-		dump: [:client :object | client stream nextPutLong: object codePoint]
-		load: [:client | client stream nextLong asCharacter]
+		dump: [:client :object | client nextPutLong: object codePoint]
+		load: [:client | client nextLong asCharacter]
     ]
 
     ObjectDumper class >> on: aFileStream [
@@ -294,7 +293,7 @@ references at design time and you override #storeOn: to deal with them'>
 	"Special-case metaclasses and other objects"
 
 	| index |
-	index := stream nextLong.
+	index := self nextLong.
 	^index < 0 
 	    ifTrue: [self specialCaseLoad: index]
 	    ifFalse: [self primLoad: index]
@@ -328,7 +327,7 @@ references at design time and you override #storeOn: to deal with them'>
 	<category: 'private - handling maps'>
 	| index |
 	index := fromObjects at: anObject ifAbsent: [0].
-	stream nextPutLong: index.
+	self nextPutLong: index.
 	^index > 0
     ]
 
@@ -388,7 +387,7 @@ references at design time and you override #storeOn: to deal with them'>
 
 	<category: 'private'>
 	| isMeta loadedClass |
-	isMeta := stream nextByte = 0.
+	isMeta := self nextByte = 0.
 	loadedClass := self loadGlobal.
 	(self isClass: loadedClass) ifFalse: [^self error: 'Bad class'].
 	^isMeta ifTrue: [loadedClass class] ifFalse: [loadedClass]
@@ -399,7 +398,7 @@ references at design time and you override #storeOn: to deal with them'>
 
 	<category: 'private'>
 	| object space index |
-	index := stream nextLong.
+	index := self nextLong.
 	index > 0 ifTrue: [^self lookupIndex: index].
 	space := self load.
 	space isNil ifTrue: [space := Smalltalk].
@@ -425,7 +424,7 @@ references at design time and you override #storeOn: to deal with them'>
 	<category: 'private'>
 	| object |
 	object := class isVariable 
-		    ifTrue: [class basicNew: stream nextLong]
+		    ifTrue: [class basicNew: self nextLong]
 		    ifFalse: [class basicNew].
 	self register: object.
 	1 to: class instSize do: [:i | object instVarAt: i put: self load].
@@ -452,7 +451,7 @@ references at design time and you override #storeOn: to deal with them'>
 	| class shape |
 	self storeClass: (class := anObject class).
 	self register: anObject.
-	class isVariable ifTrue: [stream nextPutLong: anObject basicSize].
+	class isVariable ifTrue: [self nextPutLong: anObject basicSize].
 	1 to: class instSize do: [:i | self dump: (anObject instVarAt: i)].
 	class isVariable ifFalse: [^self].
 	class isPointers 
@@ -461,21 +460,21 @@ references at design time and you override #storeOn: to deal with them'>
 	shape == #character 
 	    ifTrue: [^self store: anObject through: [:char | stream nextPut: char]].
 	(shape == #byte or: [shape == #int8]) 
-	    ifTrue: [^self store: anObject through: [:byte | stream nextPutByte: byte]].
+	    ifTrue: [^self store: anObject through: [:byte | self nextPutByte: byte]].
 	(shape == #short or: [shape == #ushort]) 
-	    ifTrue: [^self store: anObject through: [:short | stream nextPutShort: short]].
+	    ifTrue: [^self store: anObject through: [:short | self nextPutShort: short]].
 	(shape == #int or: [shape == #int]) 
-	    ifTrue: [^self store: anObject through: [:int | stream nextPutLong: int]].
+	    ifTrue: [^self store: anObject through: [:int | self nextPutLong: int]].
 	(shape == #int64 or: [shape == #uint64]) 
-	    ifTrue: [^self store: anObject through: [:int64 | stream nextPutInt64: int64]].
+	    ifTrue: [^self store: anObject through: [:int64 | self nextPutInt64: int64]].
 	shape == #utf32 
 	    ifTrue: 
-		[^self store: anObject through: [:char | stream nextPutLong: char codePoint]].
+		[^self store: anObject through: [:char | self nextPutLong: char codePoint]].
 	shape == #float 
-	    ifTrue: [^self store: anObject through: [:float | stream nextPutFloat: float]].
+	    ifTrue: [^self store: anObject through: [:float | self nextPutFloat: float]].
 	shape == #double 
 	    ifTrue: 
-		[^self store: anObject through: [:double | stream nextPutFloat: double]].
+		[^self store: anObject through: [:double | self nextPutFloat: double]].
 	self notYetImplemented
     ]
 
@@ -489,11 +488,11 @@ references at design time and you override #storeOn: to deal with them'>
 
 	<category: 'private'>
 	| object class realSize size fixed indexed placeholder index shape |
-	index := stream nextLong.
+	index := self nextLong.
 	index > 0 ifTrue: [^self lookupIndex: index].
 	self register: (placeholder := Object new).
 	class := self loadClass.
-	class isVariable ifTrue: [size := stream nextUlong].
+	class isVariable ifTrue: [size := self nextUlong].
 	realSize := instSize isNil 
 		    ifTrue: [class nonVersionedInstSize]
 		    ifFalse: [instSize].
@@ -504,29 +503,29 @@ references at design time and you override #storeOn: to deal with them'>
 		    ifTrue: [indexed := (1 to: size) collect: [:i | self load]].
 		shape := class shape.
 		shape == #character 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream next]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | Character value: self nextByte]].
 		(shape == #byte and: [indexed isNil]) 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextByte]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextByte]].
 		shape == #int8 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextSignByte]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextSignByte]].
 		shape == #short 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextShort]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextShort]].
 		shape == #ushort 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextUshort]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextUshort]].
 		shape == #int 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextLong]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextLong]].
 		shape == #uint 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextUlong]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextUlong]].
 		shape == #int64 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextInt64]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextInt64]].
 		shape == #uint64 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextUint64]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextUint64]].
 		shape == #utf32 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextLong asCharacter]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextLong asCharacter]].
 		shape == #float 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextFloat]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextFloat]].
 		shape == #double 
-		    ifTrue: [indexed := (1 to: size) collect: [:i | stream nextDouble]].
+		    ifTrue: [indexed := (1 to: size) collect: [:i | self nextDouble]].
 		indexed isNil ifTrue: [self shouldNotImplement]].
 	placeholder become: (class 
 		    convertFromVersion: version
@@ -550,19 +549,19 @@ references at design time and you override #storeOn: to deal with them'>
 	class isVariable ifFalse: [^object].
 	class isPointers ifTrue: [^self load: object through: [self load]].
 	shape := class shape.
-	shape == #character ifTrue: [^self load: object through: [stream next]].
-	shape == #byte ifTrue: [^self load: object through: [stream nextByte]].
-	shape == #int8 ifTrue: [^self load: object through: [stream nextSignByte]].
-	shape == #short ifTrue: [^self load: object through: [stream nextShort]].
-	shape == #ushort ifTrue: [^self load: object through: [stream nextUshort]].
-	shape == #int ifTrue: [^self load: object through: [stream nextLong]].
-	shape == #uint ifTrue: [^self load: object through: [stream nextUlong]].
-	shape == #int64 ifTrue: [^self load: object through: [stream nextInt64]].
-	shape == #uint64 ifTrue: [^self load: object through: [stream nextUint64]].
+	shape == #character ifTrue: [^self load: object through: [Character value: self nextByte]].
+	shape == #byte ifTrue: [^self load: object through: [self nextByte]].
+	shape == #int8 ifTrue: [^self load: object through: [self nextSignByte]].
+	shape == #short ifTrue: [^self load: object through: [self nextShort]].
+	shape == #ushort ifTrue: [^self load: object through: [self nextUshort]].
+	shape == #int ifTrue: [^self load: object through: [self nextLong]].
+	shape == #uint ifTrue: [^self load: object through: [self nextUlong]].
+	shape == #int64 ifTrue: [^self load: object through: [self nextInt64]].
+	shape == #uint64 ifTrue: [^self load: object through: [self nextUint64]].
 	shape == #utf32 
-	    ifTrue: [^self load: object through: [stream nextLong asCharacter]].
-	shape == #float ifTrue: [^self load: object through: [stream nextFloat]].
-	shape == #double ifTrue: [^self load: object through: [stream nextDouble]].
+	    ifTrue: [^self load: object through: [self nextLong asCharacter]].
+	shape == #float ifTrue: [^self load: object through: [self nextFloat]].
+	shape == #double ifTrue: [^self load: object through: [self nextDouble]].
 	self shouldNotImplement
     ]
 
@@ -576,9 +575,8 @@ references at design time and you override #storeOn: to deal with them'>
 		[:index :each | 
 		(each key value: anObject) 
 		    ifTrue: 
-			[stream
-			    skip: -4;
-			    nextPutLong: index negated.
+			[stream skip: -4.
+			self nextPutLong: index negated.
 			each value value: self value: anObject.
 			self register: anObject.
 			^true]].
@@ -606,8 +604,8 @@ references at design time and you override #storeOn: to deal with them'>
 
 	<category: 'private'>
 	aClass isMetaclass 
-	    ifTrue: [stream nextPutByte: 0]
-	    ifFalse: [stream nextPutByte: 1].
+	    ifTrue: [self nextPutByte: 0]
+	    ifFalse: [self nextPutByte: 1].
 	self storeGlobal: aClass asClass
     ]
 
@@ -624,9 +622,8 @@ references at design time and you override #storeOn: to deal with them'>
 	self
 	    dump: namespace;
 	    register: anObject.
-	stream
-	    nextPutAll: anObject name;
-	    nextPutByte: 0
+	stream nextPutAll: anObject name.
+	self nextPutByte: 0
     ]
 
     store: anObject through: aBlock [
@@ -637,6 +634,189 @@ references at design time and you override #storeOn: to deal with them'>
 	1 to: anObject basicSize do: [:i | aBlock value: (anObject basicAt: i)].
 	^anObject
     ]
+
+    nextByte [
+	"Return the next byte in the byte array"
+
+	<category: 'private - binary I/O'>
+	^stream next asInteger
+    ]
+
+    nextByteArray: numBytes [
+	"Return the next numBytes bytes in the byte array"
+
+	<category: 'private - binary I/O'>
+	^(stream next: numBytes) asByteArray
+    ]
+
+    nextSignedByte [
+	"Return the next byte in the byte array, interpreted as a 8 bit signed number"
+
+	<category: 'private - binary I/O'>
+	^self nextBytes: 1 signed: true
+    ]
+
+    nextDouble [
+	"Return the next 64-bit float in the byte array"
+
+	<category: 'private - binary I/O'>
+	^(FloatD new: 8)
+	    at: 1 put: self nextByte;
+	    at: 2 put: self nextByte;
+	    at: 3 put: self nextByte;
+	    at: 4 put: self nextByte;
+	    at: 5 put: self nextByte;
+	    at: 6 put: self nextByte;
+	    at: 7 put: self nextByte;
+	    at: 8 put: self nextByte
+    ]
+
+    nextFloat [
+	"Return the next 32-bit float in the byte array"
+
+	<category: 'private - binary I/O'>
+	^(FloatE new: 4)
+	    at: 1 put: self nextByte;
+	    at: 2 put: self nextByte;
+	    at: 3 put: self nextByte;
+	    at: 4 put: self nextByte
+    ]
+
+    nextUint64 [
+	"Return the next 8 bytes in the byte array, interpreted as a 64 bit unsigned int"
+
+	<category: 'private - binary I/O'>
+	^self nextBytes: 8 signed: false
+    ]
+
+    nextLongLong [
+	"Return the next 8 bytes in the byte array, interpreted as a 64 bit signed int"
+
+	<category: 'private - binary I/O'>
+	^self nextBytes: 8 signed: true
+    ]
+
+    nextUlong [
+	"Return the next 4 bytes in the byte array, interpreted as a 32 bit unsigned int"
+
+	<category: 'private - binary I/O'>
+	^self nextBytes: 4 signed: false
+    ]
+
+    nextLong [
+	"Return the next 4 bytes in the byte array, interpreted as a 32 bit signed int"
+
+	<category: 'private - binary I/O'>
+	^self nextBytes: 4 signed: true
+    ]
+
+    nextUshort [
+	"Return the next 2 bytes in the byte array, interpreted as a 16 bit unsigned int"
+
+	<category: 'private - binary I/O'>
+	^self nextBytes: 2 signed: false
+    ]
+
+    nextShort [
+	"Return the next 2 bytes in the byte array, interpreted as a 16 bit signed int"
+
+	<category: 'private - binary I/O'>
+	^self nextBytes: 2 signed: true
+    ]
+
+    nextPutDouble: aDouble [
+	"Store aDouble as a 64-bit float in the byte array"
+
+	<category: 'private - binary I/O'>
+	| d |
+	d := aDouble asFloatD.
+	self nextPutByte: (d at: 1).
+	self nextPutByte: (d at: 2).
+	self nextPutByte: (d at: 3).
+	self nextPutByte: (d at: 4).
+	self nextPutByte: (d at: 5).
+	self nextPutByte: (d at: 6).
+	self nextPutByte: (d at: 7).
+	self nextPutByte: (d at: 8)
+    ]
+
+    nextPutFloat: aFloat [
+	"Return the next 32-bit float in the byte array"
+
+	<category: 'private - binary I/O'>
+	| f |
+	f := aFloat asFloatE.
+	self nextPutByte: (f at: 1).
+	self nextPutByte: (f at: 2).
+	self nextPutByte: (f at: 3).
+	self nextPutByte: (f at: 4)
+    ]
+
+    nextPutByte: anInteger [
+	"Store anInteger (range: -128..255) on the byte array"
+
+	<category: 'private - binary I/O'>
+	| int |
+	int := anInteger < 0 
+		    ifTrue: [256 + anInteger]
+		    ifFalse: [anInteger].
+	^stream nextPut: (Character value: int)
+    ]
+
+    nextPutByteArray: aByteArray [
+	"Store aByteArray on the byte array"
+
+	<category: 'private - binary I/O'>
+	^self nextPutAll: aByteArray
+    ]
+
+    nextPutInt64: anInteger [
+	"Store anInteger (range: -2^63..2^64-1) on the byte array as 4 bytes"
+
+	<category: 'private - binary I/O'>
+	self nextPutBytes: 8 of: anInteger
+    ]
+
+    nextPutLong: anInteger [
+	"Store anInteger (range: -2^31..2^32-1) on the byte array as 4 bytes"
+
+	<category: 'private - binary I/O'>
+	self nextPutBytes: 4 of: anInteger
+    ]
+
+    nextPutShort: anInteger [
+	"Store anInteger (range: -32768..65535) on the byte array as 2 bytes"
+
+	<category: 'private - binary I/O'>
+	self nextPutBytes: 2 of: anInteger
+    ]
+
+    nextBytes: n signed: signed [
+	"Private - Get an integer out of the next anInteger bytes in the stream"
+
+	<category: 'private'>
+	| int msb |
+	int := 0.
+	0 to: n * 8 - 16
+	    by: 8
+	    do: [:i | int := int + (self nextByte bitShift: i)].
+	msb := self nextByte.
+	(signed and: [msb > 127]) ifTrue: [msb := msb - 256].
+	^int + (msb bitShift: n * 8 - 8)
+    ]
+
+    nextPutBytes: n of: anInteger [
+	"Private - Store the n least significant bytes of int in little-endian format"
+
+	<category: 'private'>
+	| int |
+	int := anInteger.
+	n timesRepeat: 
+		[self nextPutByte: (int bitAnd: 255).
+		int := int bitShift: -8.
+		(int = 0 and: [anInteger < 0]) ifTrue: [int := 255]]
+    ]
+
 ]
 
 
@@ -838,7 +1018,7 @@ information.'>
 
 	<category: 'saving and restoring'>
 	| version object instSize |
-	version := anObjectDumper stream nextLong.
+	version := anObjectDumper nextLong.
 	version := version >= 0 
 		    ifTrue: 
 			["The version was actually an object index -- move back in the stream."
@@ -847,7 +1027,7 @@ information.'>
 			instSize := nil.
 			nil]
 		    ifFalse: 
-			[instSize := anObjectDumper stream nextUlong.
+			[instSize := anObjectDumper nextUlong.
 			-1 - version].
 	^version == self object class binaryRepresentationVersion 
 	    ifTrue: [anObjectDumper load]
@@ -858,7 +1038,7 @@ information.'>
 	"Save the object with extra versioning information."
 
 	<category: 'saving and restoring'>
-	(anObjectDumper stream)
+	anObjectDumper
 	    nextPutLong: -1 - self object class binaryRepresentationVersion;
 	    nextPutLong: self object class instSize.
 	super dumpTo: anObjectDumper
@@ -931,4 +1111,3 @@ Eval [
 	registerProxyClass: PluggableProxy for: CompiledBlock;
 	registerProxyClass: SingletonProxy for: Processor class
 ]
-

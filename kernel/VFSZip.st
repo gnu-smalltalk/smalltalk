@@ -82,7 +82,7 @@ files from a ZIP archive.'>
 	self notYetImplemented
     ]
 
-    centralDirectoryOf: f [
+    centralDirectoryRangeIn: f [
 	<category: 'members'>
 	| r beginCD size comLen buf ofsCD |
 	size := f size.
@@ -103,9 +103,10 @@ files from a ZIP archive.'>
 			pos + beginCD + 21 + comLen = size 
 			    ifTrue: 
 				[ofsCD := (buf at: beginCD + 19) * 16777216 
-					    + ((buf at: beginCD + 18) * 65536) + ((buf at: beginCD + 17) * 256) 
+					    + ((buf at: beginCD + 18) * 65536)
+					    + ((buf at: beginCD + 17) * 256) 
 					    + (buf at: beginCD + 16).
-				^(f copyFrom: ofsCD to: pos + beginCD - 2) asByteArray]].
+				^ofsCD to: pos + beginCD - 2]].
 		r := 278].
 	self error: 'invalid data in ZIP file'
     ]
@@ -116,27 +117,29 @@ files from a ZIP archive.'>
 	<category: 'members'>
 	^Generator on: 
 		[:gen | 
-		| f cd data path date method dataSize fileSize fnsize extra comment attr ofs |
-		f := self open: FileStream read
-			    ifFail: [self error: 'cannot open file for input'].
-		cd := ByteStream on: (self centralDirectoryOf: f).
-		f close.
+		| f cd cdEnd data path date method dataSize fileSize fnsize
+		  extra comment attr ofs |
+		f := self readStream.
+		cd := self centralDirectoryRangeIn: f.
+		f position: cd first.
+		cdEnd := cd last.
+
 		date := DateTime now.
-		[cd atEnd] whileFalse: 
-			[cd skip: 10.
-			method := cd nextUshort.
+		[f position <= cdEnd ] whileTrue: 
+			[f skip: 10.
+			method := f nextUshort.
 			data := method = 0 ifTrue: [Array new: 5] ifFalse: [Array new: 4].
 			data at: 3 put: date.
-			cd skip: 12.
-			data at: 2 put: cd nextUlong.
-			fnsize := cd nextUshort.
-			extra := cd nextUshort.
-			comment := cd nextUshort.
-			cd skip: 4.
-			attr := cd nextUlong.
-			ofs := cd nextUlong.
-			data at: 1 put: (cd next: fnsize).
-			cd skip: extra + comment.
+			f skip: 12.
+			data at: 2 put: f nextUlong.
+			fnsize := f nextUshort.
+			extra := f nextUshort.
+			comment := f nextUshort.
+			f skip: 4.
+			attr := f nextUlong.
+			ofs := f nextUlong.
+			data at: 1 put: (f next: fnsize).
+			f skip: extra + comment.
 			data at: 4 put: (attr bitAnd: 16) = 16.
 			method = 0 
 			    ifTrue: 
@@ -146,7 +149,8 @@ files from a ZIP archive.'>
 					    archive: self;
 					    offset: ofs;
 					    yourself)].
-			gen yield: data]]
+			gen yield: data].
+		f close]
     ]
 ]
 

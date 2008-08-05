@@ -1,5 +1,15 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ByteStream.st: Delete.  Copy implementation...
+	* kernel/FileDescr.st: ... here ...
+	* kernel/ObjDumper.st: ... and here.
+	* kernel/VFSZip.st: Do not use ByteStream.
+
+	* tests/objdump.st: Adapt.
+	* tests/objdump.ok: Regenerate.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Stream.st: Implement #nextPutAll: polymorphically.  Implement
 	#nextPutAllOn:.
 	* kernel/Iterable.st: Implement #nextPutAllOn:.

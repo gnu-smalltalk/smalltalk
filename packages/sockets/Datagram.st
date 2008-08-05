@@ -92,7 +92,7 @@ This class can also be used for receiving data from the network.'>
 
 	<category: 'instance creation'>
 	| stream |
-	stream := ByteStream on: (ByteArray new: 100).
+	stream := (String new: 100) writeStream.
 	ObjectDumper dump: object to: stream.
 	^self 
 	    data: stream contents
@@ -134,7 +134,7 @@ This class can also be used for receiving data from the network.'>
 	 complementary to #object:address:port:."
 
 	<category: 'accessing'>
-	^ObjectDumper loadFrom: (ByteStream on: self data)
+	^ObjectDumper loadFrom: self data readStream
     ]
 
     getThrough: objectDumper [
@@ -147,9 +147,9 @@ This class can also be used for receiving data from the network.'>
 	<category: 'accessing'>
 	| result saveStream |
 	saveStream := objectDumper stream.
-	objectDumper stream: (ByteStream on: self data).
-	result := objectDumper load.
-	objectDumper stream: saveStream.
+	[objectDumper stream: self data readStream.
+	result := objectDumper load]
+	    ensure: [objectDumper stream: saveStream].
 	^result
     ]
 

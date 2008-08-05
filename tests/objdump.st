@@ -29,21 +29,21 @@
  ======================================================================"
 
 Eval [
-	stream := ByteStream on: (ByteArray new: 1024).
+	stream := (String new: 1024) readWriteStream.
 	(ObjectDumper on: stream) dump: Array.
 	stream reset.
 	^(ObjectDumper on: stream) load == Array
 ]
 
 Eval [
-	stream := ByteStream on: (ByteArray new: 1024).
+	stream := (String new: 1024) readWriteStream.
 	(ObjectDumper on: stream) dump: #('asdf' 1 2 $a). 
 	stream reset.
 	^(ObjectDumper on: stream) load = #('asdf' 1 2 $a)
 ]
 
 Eval [
-	stream := ByteStream on: (ByteArray new: 1024).
+	stream := (String new: 1024) readWriteStream.
 	method := Object >> #yourself.
 	(ObjectDumper on: stream) dump: method.
 	stream reset.
@@ -51,7 +51,7 @@ Eval [
 ]
 
 Eval [
-	stream := ByteStream on: (ByteArray new: 1024).
+	stream := (String new: 1024) readWriteStream.
 	array := Array new: 1.
 	array at: 1 put: array.
 	(ObjectDumper on: stream) dump: array.
@@ -61,17 +61,21 @@ Eval [
 ]
 
 Eval [
-	stream := ByteStream on: (ByteArray new: 1024).
+	stream := (String new: 1024) readWriteStream.
 	(ObjectDumper on: stream) dump: Processor.
 	stream reset.
 	^(ObjectDumper on: stream) load == Processor
 ]
 
 Eval [
-	stream := ByteStream on: (ByteArray new: 1024).
+	stream := (String new: 1024) readWriteStream.
 	(ObjectDumper on: stream) dump: 'asdf'.
 	stream reset.
 	^(ObjectDumper on: stream) load = 'asdf'
 ]
 
-
+Eval [
+	stream := (String new: 1024) writeStream.
+	(ObjectDumper on: stream) dump: #('asdf' 1 2 $a). 
+	^(ObjectDumper on: stream readStream) load = #('asdf' 1 2 $a)
+]

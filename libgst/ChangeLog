@@ -1,5 +1,12 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* dict.c: Remove _gst_byte_stream_class.  Change superclass of
+	FileDescriptor.
+	* dict.h: Likewise.
+	* files.c: Do not load ByteStream.st.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* dict.c: Add _gst_iterable_class.  Change superclass of
 	Collection and Stream.
 	* dict.h: Likewise.

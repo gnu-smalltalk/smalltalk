@@ -224,7 +224,6 @@ static const char standard_files[] = {
   "ReadStream.st\0"
   "WriteStream.st\0"
   "RWStream.st\0"
-  "ByteStream.st\0"
   "UndefObject.st\0"
   "ProcSched.st\0"
   "Delay.st\0"

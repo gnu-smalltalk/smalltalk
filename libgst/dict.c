@@ -87,7 +87,6 @@ OOP _gst_block_closure_class = NULL;
 OOP _gst_block_context_class = NULL;
 OOP _gst_boolean_class = NULL;
 OOP _gst_byte_array_class = NULL;
-OOP _gst_byte_stream_class = NULL;
 OOP _gst_c_callable_class = NULL;
 OOP _gst_c_callback_descriptor_class = NULL;
 OOP _gst_c_func_descriptor_class = NULL;
@@ -618,11 +617,7 @@ static const class_definition class_info[] = {
    GST_ISP_FIXED, false, 0,
    "ReadWriteStream", NULL, NULL, NULL },
 
-  {&_gst_byte_stream_class, &_gst_read_write_stream_class,
-   GST_ISP_FIXED, false, 0,
-   "ByteStream", NULL, NULL, NULL },
-
-  {&_gst_file_descriptor_class, &_gst_byte_stream_class,
+  {&_gst_file_descriptor_class, &_gst_read_write_stream_class,
    GST_ISP_FIXED, true, 5,
    "FileDescriptor", "fd file isPipe atEnd peek", "AllOpenFiles", NULL },
 
