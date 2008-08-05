@@ -59,16 +59,31 @@ provide for writing collections sequentially.'>
 	"Return the next anInteger objects in the receiver"
 
 	<category: 'accessing-reading'>
-	| data i item |
-	data := self species new: anInteger.
-	
-	[i := 0.
-	[i < anInteger] whileTrue: 
-		[item := self next.
-		data at: (i := i + 1) put: item]] 
-	    on: SystemExceptions.EndOfStream
-	    do: [:ex | SystemExceptions.NotEnoughElements signalOn: anInteger - i].
-	^data
+	| answer |
+	self
+	    next: anInteger
+	    into: (answer := self species new: anInteger)
+	    startingAt: 1.
+	^answer
+    ]
+
+    next: anInteger into: answer startingAt: pos [
+	"Read up to anInteger bytes from the stream and store them
+	 into answer.  Return the number of bytes that were read, raising
+	 an exception if we could not read the full amount of data."
+
+	<category: 'buffering'>
+	| read |
+	read := 0.
+	[ read = anInteger ] whileFalse: [
+            self atEnd ifTrue: [
+                ^SystemExceptions.NotEnoughElements signalOn: anInteger - read].
+            read := read + (self
+				nextAvailable: anInteger - read
+				into: answer
+				startingAt: read + pos)
+        ].
+	^answer
     ]
 
     nextAvailable: anInteger [
@@ -79,12 +94,30 @@ provide for writing collections sequentially.'>
 	 operation."
 
 	<category: 'accessing-reading'>
-	| answer |
-	answer := self species new: anInteger.
-	1 to: anInteger do: 
-		[:i | self atEnd ifTrue: [^answer copyFrom: 1 to: i - 1].
-		answer at: i put: self next].
+	| n answer |
+	n := self
+	    nextAvailable: anInteger
+	    into: (answer := self species new: anInteger)
+	    startingAt: 1.
+	n < anInteger ifTrue: [ answer := answer copyFrom: 1 to: n ].
 	^answer
+    ]
+
+    nextAvailable: anInteger into: aCollection startingAt: pos [
+	"Place the next anInteger objects from the receiver into aCollection,
+	 starting at position pos.  Return the number of items stored.
+	 Besides stopping if the end of the stream is reached, this may
+	 return less than this number of bytes for various reasons.
+	 For example, on files and sockets this operation could be
+	 non-blocking, or could do at most one I/O operation."
+
+	<category: 'accessing-reading'>
+	| i |
+	i := -1.
+	[(i := i + 1) = anInteger] whileFalse: [
+		self atEnd ifTrue: [^i].
+		aCollection at: i + pos put: self next].
+	^anInteger
     ]
 
     nextMatchFor: anObject [
@@ -527,14 +560,7 @@ provide for writing collections sequentially.'>
 	 Smalltalk (including zlib streams)."
 
 	<category: 'positioning'>
-	| s |
-	s := self species new: 1024.
-	1 to: 1024
-	    do: 
-		[:i | 
-		self atEnd ifTrue: [^s copyFrom: 1 to: i - 1].
-		s at: i put: self next].
-	^s
+	^self nextAvailable: 1024
     ]
 
     prefixTableFor: aCollection [

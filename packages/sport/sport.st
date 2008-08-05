@@ -1205,10 +1205,11 @@ Object subclass: SpSocket [
 	 If the targetNumberOfBytes	are not available, I return what I can get."
 
 	<category: 'services-io'>
-	"FIXME: this needs #nextAvailable:into: to avoid a copy in #asByteArray"
-	^(self underlyingSocket
-	    ensureReadable;
-	    nextAvailable: targetNumberOfBytes) asByteArray
+	| answer n |
+	answer := ByteArray new: targetNumberOfBytes.
+	n := self underlyingSocket nextAvailable: targetNumberOfBytes into: answer startingAt: 1.
+	n < targetNumberOfBytes ifTrue: [ answer := answer copyFrom: 1 to: n ].
+	^answer
     ]
 
     readInto: aByteArray startingAt: startIndex for: aNumberOfBytes [
@@ -1217,13 +1218,7 @@ Object subclass: SpSocket [
 	 number of bytes to be read.	We get what its there no matter how much their is!!"
 
 	<category: 'services-io'>
-	| buffer |
-	buffer := self underlyingSocket
-	    ensureReadable;
-	    nextAvailable: aNumberOfBytes.
-	aByteArray replaceFrom: startIndex to: startIndex + buffer size - 1
-		     with: buffer startingAt: 1.
-	^buffer size
+	^self underlyingSocket nextAvailable: aNumberOfBytes into: aByteArray startingAt: startIndex
     ]
 
     readyForRead [

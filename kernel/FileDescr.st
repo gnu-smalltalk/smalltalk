@@ -342,7 +342,7 @@ do arbitrary processing on the files.'>
 		result := 1]
 	    ifTrue: 
 		[data := self species new: 1.
-		result := self read: data from: 1 to: 1.
+		result := self nextAvailable: 1 into: data startingAt: 1.
 		data := data at: 1].
 	^result > 0 
 	    ifTrue: [data]
@@ -368,7 +368,7 @@ do arbitrary processing on the files.'>
 	| result data |
 	peek isNil ifFalse: [^peek].
 	data := self species new: 1.
-	result := self read: data from: 1 to: 1.
+	result := self nextAvailable: 1 into: data startingAt: 1.
 	^result > 0 
 	    ifTrue: [peek := data at: 1]
 	    ifFalse: [self pastEnd]
@@ -387,7 +387,7 @@ do arbitrary processing on the files.'>
 	"Store aCharacter on the file"
 
 	<category: 'basic'>
-	self write: aCharacter numBytes: 1
+	self next: 1 putAll: (String with: aCharacter) startingAt: 1
     ]
 
     nextPutByte: anInteger [
@@ -675,59 +675,17 @@ do arbitrary processing on the files.'>
 	bufSize = 0 ifTrue: [ ^self ].
 	buf := String new: bufSize.
 	[
-	    n := self read: buf from: 1 to: bufSize.
+	    n := self nextAvailable: bufSize into: buf startingAt: 1.
 	    aStream next: n putAll: buf startingAt: 1.
 	    n = 1024
 	] whileTrue
-    ]
-
-    next: n putAll: aCollection startingAt: position [
-	"Put the characters in the supplied range of aCollection in the file"
-
-	<category: 'overriding inherited methods'>
-	^self 
-	    write: aCollection
-	    from: position
-	    to: position + n - 1
     ]
 
     nextByteArray: anInteger [
         "Return the next 'anInteger' bytes from the stream, as a ByteArray."
 
         <category: 'overriding inherited methods'>
-        ^self next: anInteger into: (ByteArray new: anInteger)
-    ]
-
-    next: anInteger [
-        "Return the next 'anInteger' characters from the stream, as a String."
-
-        <category: 'overriding inherited methods'>
-        ^self next: anInteger into: (self species new: anInteger)
-    ]
-
-    next: anInteger into: result [
-	"Return the next 'anInteger' characters from the stream, as a String."
-
-	<category: 'overriding inherited methods'>
-	| read |
-	read := 0.
-	[ read = anInteger ] whileFalse: [
-            self atEnd ifTrue: [
-                ^SystemExceptions.NotEnoughElements signalOn: anInteger - read].
-            read := read + (self read: result from: read + 1 to: anInteger).
-        ].
-	^result
-    ]
-
-    nextAvailable: anInteger [
-        "Return up to anInteger objects in the receiver, stopping if
-         the end of the stream is reached"
-
-        <category: 'accessing-reading'>
-        | result n |
-	result := self species new: anInteger.
-	n := self read: result.
-	^n < anInteger ifTrue: [result copyFrom: 1 to: n] ifFalse: [result]
+        ^self next: anInteger into: (ByteArray new: anInteger) startingAt: 1
     ]
 
     atEnd [
@@ -815,28 +773,6 @@ do arbitrary processing on the files.'>
 	^true
     ]
 
-    nextHunkPutAllOn: aStream [
-	"Copy the next buffers worth of stuff from the receiver to aStream."
-
-	<category: 'low-level access'>
-	| count coll |
-	count := self read: (coll := self species new: 1024).
-	count = 0 ifTrue: [^self pastEnd].
-	aStream next: count putAll: coll startingAt: 1
-    ]
-
-    nextHunk [
-	"Answer the next buffers worth of stuff in the Stream represented
-	 by the receiver.  Do at most one actual input operation."
-
-	<category: 'low-level access'>
-	| count answer |
-	count := self read: (answer := self species new: 1024).
-	count < answer size ifTrue: [answer := answer copyFrom: 1 to: count].
-	count = 0 ifTrue: [^self pastEnd].
-	^answer
-    ]
-
     pastEnd [
         "The end of the stream has been reached.  Signal a Notification."
 
@@ -845,115 +781,44 @@ do arbitrary processing on the files.'>
 	super pastEnd
     ]
 
-    read: byteArray [
-	"Ignoring any buffering, try to fill byteArray with the
-	 contents of the file"
-
-	<category: 'low-level access'>
-	| count available |
-	self ensureReadable.
-	available := peek isNil ifTrue: [0] ifFalse: [1].
-	peek isNil 
-	    ifFalse: 
-		[byteArray byteAt: 1 put: peek value.
-		peek := nil].
-	self isOpen ifFalse: [^available].
-	count := self 
-		    fileOp: 3
-		    with: byteArray
-		    with: available + 1
-		    with: byteArray size
-		    ifFail: [self checkError].
-	count := count + available.
-	count = 0 ifTrue: [atEnd := true].
-	^count
-    ]
-
-    read: byteArray numBytes: anInteger [
-	"Ignoring any buffering, try to fill anInteger bytes of byteArray
+    nextAvailable: n into: aCollection startingAt: position [
+	"Ignoring any buffering, try to fill the given range of aCollection
 	 with the contents of the file"
 
 	<category: 'low-level access'>
 	| count available |
+	n = 0 ifTrue: [ ^self ].
 	self ensureReadable.
 	available := peek isNil ifTrue: [0] ifFalse: [1].
 	peek isNil 
 	    ifFalse: 
-		[byteArray byteAt: 1 put: peek value.
+		[aCollection byteAt: position put: peek value.
 		peek := nil].
 	self isOpen ifFalse: [^available].
 	count := self 
 		    fileOp: 3
-		    with: byteArray
-		    with: 1 + available
-		    with: (anInteger min: byteArray size)
-		    ifFail: [self checkError].
-	count := count + available.
-	count = 0 ifTrue: [atEnd := true].
-	^count
-    ]
-
-    read: byteArray from: position to: end [
-	"Ignoring any buffering, try to fill the given range of byteArray
-	 with the contents of the file"
-
-	<category: 'low-level access'>
-	| count available |
-	self ensureReadable.
-	available := peek isNil ifTrue: [0] ifFalse: [1].
-	peek isNil 
-	    ifFalse: 
-		[byteArray byteAt: position put: peek value.
-		peek := nil].
-	self isOpen ifFalse: [^available].
-	count := self 
-		    fileOp: 3
-		    with: byteArray
+		    with: aCollection
 		    with: position + available
-		    with: (end min: byteArray size)
+		    with: (position + n - 1 min: aCollection size)
 		    ifFail: [self checkError].
 	count := count + available.
 	count = 0 ifTrue: [atEnd := true].
 	^count
     ]
 
-    write: byteArray [
-	"Ignoring any buffering, try to write the contents of byteArray in the
-	 file"
-
-	<category: 'low-level access'>
-	^self 
-	    write: byteArray
-	    from: 1
-	    to: byteArray size
-    ]
-
-    write: byteArray numBytes: anInteger [
-	"Ignoring any buffering, try to write to the file the first anInteger
-	 bytes of byteArray"
-
-	<category: 'low-level access'>
-	^self 
-	    write: byteArray
-	    from: 1
-	    to: anInteger
-    ]
-
-    write: byteArray from: position to: end [
-	"Ignoring any buffering, try to write to the file the given range
-	 of byteArray, starting at the position-th element and ending
-	 at the end-th."
+    next: n putAll: aCollection startingAt: position [
+	"Put the characters in the supplied range of aCollection in the file"
 
 	<category: 'low-level access'>
 	| cur last soFar result |
 	cur := position.
-	last := end min: byteArray size.
+	last := position + n - 1 min: aCollection size.
 	[cur <= last] whileTrue: 
 		[self ensureWriteable.
 		self isOpen ifFalse: [^cur - position].
 		result := self 
 			    fileOp: 2
-			    with: byteArray
+			    with: aCollection
 			    with: cur
 			    with: last
 			    ifFail: [self checkError].

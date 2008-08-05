@@ -1,5 +1,9 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* ZLibReadStream.st: Add #nextAvailable:into:startingAt:.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* ZLibReadStream.st: Add #nextHunkPutAllOn:.
 	* zlibtests.st: Test it.
 

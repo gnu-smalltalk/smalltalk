@@ -1,5 +1,12 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Buffers.st: Add #nextAvailable:into:startingAt:.
+	* Sockets.st: Change #nextAvailable: into
+	#nextAvailable:into:startingAt:.  Change the fill
+	blocks to not use #read:from:to: and #write:from:to:.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Buffers.st: Add #nextHunk and #nextHunkPutAllOn:.
 	* Sockets.st: Remove the lookahead instance variable.  Delegate
 	more stuff to the readBuffer, including #nextHunk.  Implement

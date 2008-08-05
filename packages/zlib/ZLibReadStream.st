@@ -89,11 +89,25 @@ used for communication with zlib.'>
 	 operation."
 
 	<category: 'streaming'>
-	| result |
-	self atEnd ifTrue: [^self pastEnd].
-	result := outBytes copyFrom: ptr + 1 to: endPtr.
-	ptr := endPtr.
-	^result
+	^self nextAvailable: endPtr - ptr
+    ]
+
+    nextAvailable: anInteger into: aCollection startingAt: pos [
+        "Place up to anInteger objects from the receiver into
+         aCollection, starting from position pos and stopping if
+         no more data is available."
+
+        <category: 'accessing-reading'>
+        | n |
+	self atEnd ifTrue: [^0].
+        n := anInteger min: endPtr - ptr.
+        aCollection
+            replaceFrom: pos
+            to: pos + n - 1
+            with: outBytes
+            startingAt: ptr + 1.
+        ptr := ptr + n.
+        ^n
     ]
 
     peek [

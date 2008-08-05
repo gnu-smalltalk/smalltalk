@@ -379,13 +379,13 @@ encodings.'>
 	^origin next
     ]
 
-    nextInputAvailable: n [
-	"Return up to N characters from the origin.  This method is for
+    nextInputAvailable: n into: aCollection startingAt: pos [
+	"Place up to N characters from the origin in aCollection.  This method is for
 	 private use by encoders, calling it outside may corrupt the
 	 internal state of the encoder."
 
 	<category: 'stream operations'>
-	^origin nextAvailable: n
+	^origin nextAvailable: n into: aCollection startingAt: pos
     ]
 
     species [
@@ -966,6 +966,22 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 	^answer
     ]
 
+    nextAvailable: anInteger into: aCollection startingAt: pos [
+	"Answer the next buffer's worth of data from the receiver."
+
+	<category: 'stream operation'>
+	| n |
+	(self atEndOfBuffer and: [self convertMore])
+	    ifTrue: [^self pastEnd].
+	n := anInteger min: recodedEnd - recodedPos + 1.
+	aCollection
+	    replaceFrom: pos to: pos + n - 1
+	    with: recodedBuffer
+	    startingAt: recodedPos.
+	recodedPos := recodedPos + n.
+	^n
+    ]
+
     nextHunkPutAllOn: aStream [
 	"Copy the next buffer's worth of data from the receiver onto
 	 aStream."
@@ -985,12 +1001,7 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 	"Answer the next buffer's worth of data from the receiver."
 
 	<category: 'stream operation'>
-	| answer |
-	(self atEndOfBuffer and: [self convertMore])
-	    ifTrue: [^self pastEnd].
-	answer := recodedBuffer copyFrom: recodedPos to: recodedEnd.
-	recodedPos := recodedEnd + 1.
-	^answer
+	^self nextAvailable: recodedEnd - recodedPos + 1
     ]
 
     release [
@@ -1043,13 +1054,10 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 		readEnd := readEnd - readPos + 1.
 		readPos := 1].
 
-	data := self nextInputAvailable: self bufferSize - readEnd.
-	readBuffer
-	    replaceFrom: readEnd + 1 to: readEnd + data size 
-	    with: data
-	    startingAt: 1.
-
-	readEnd := readEnd + data size.
+	readEnd := readEnd + (self
+	    nextInputAvailable: self bufferSize - readEnd
+	    into: readBuffer
+	    startingAt: readEnd + 1).
     ]
 
     initializeFrom: fromEncoding to: toEncoding origin: aStringOrStream [

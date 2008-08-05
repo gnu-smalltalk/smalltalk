@@ -1164,7 +1164,6 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 
 	<category: 'stream protocol'>
 	self canRead ifFalse: [ ^0 ].
-	self readBuffer isEmpty ifTrue: [ self readBuffer fill ].
 	^self readBuffer availableBytes
     ]
 
@@ -1208,30 +1207,24 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	^self readBuffer next
     ]
 	
-    nextAvailable: anInteger [
-        "Return up to anInteger objects in the receiver, stopping if
-         the end of the stream is reached"
+    nextAvailable: anInteger into: aCollection startingAt: pos [
+        "Place up to anInteger objects from the receiver into
+	 aCollection, starting from position pos and stopping if
+         no more data is available."
 
         <category: 'accessing-reading'>
-	| buffer available stream |
+	| available read |
 	readBuffer isNil ifTrue: [ ^self pastEnd ].
-
 	self ensureReadable.
-	available := self availableBytes.
-	available >= anInteger ifTrue: [ ^self next: anInteger ].
 
-	"Try filling the first buffer."
-	buffer := self next: available.
-	available := self availableBytes min: anInteger - available.
-	available = 0 ifTrue: [ ^buffer ].
+	read := 0.
+	[ (available := self availableBytes) > 0 ] whileTrue: [
+	    read := read + (self readBuffer
+		nextAvailable: available
+		into: aCollection
+		startingAt: pos + read) ].
 
-	"Streams have extra costs because of copying, use them only if
-	 needed."
-	stream := WriteStream with: buffer.
-	[ (available := self availableBytes min: anInteger - stream size) > 0 ]
-	    whileTrue: [ stream nextPutAll: (self readBuffer next: available) ].
-
-	^stream contents
+	^read
     ]
 
     nextHunkPutAllOn: aStream [
@@ -1254,16 +1247,6 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	<category: 'stream protocol'>
 	readBuffer isNil ifTrue: [ ^self pastEnd ].
 	^self readBuffer nextHunk
-    ]
-
-    next: count [
-	"Read `count' bytes from the socket.  This might yield control to other
-	 Smalltalk Processes."
-
-	<category: 'stream protocol'>
-	| result |
-	readBuffer isNil ifTrue: [ ^self pastEnd ].
-	^self readBuffer next: count
     ]
 
     peek [
@@ -1329,7 +1312,7 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 		[:data :size | 
 		self implementation ensureReadable.
 		self implementation isOpen 
-		    ifTrue: [self implementation read: data numBytes: size]
+		    ifTrue: [self implementation nextAvailable: size into: data startingAt: 1]
 		    ifFalse: 
 			[self deleteBuffers.
 			0]]
@@ -1470,7 +1453,7 @@ This class adds read and write buffers to the basic model of AbstractSocket.'>
 		| alive |
 		self implementation ensureWriteable.
 		alive := self implementation isOpen 
-			    and: [(self implementation write: data numBytes: size) > -1].
+			    and: [(self implementation next: size putAll: data startingAt: 1) > -1].
 		alive ifFalse: [self deleteBuffers]]
     ]
 

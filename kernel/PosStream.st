@@ -88,6 +88,23 @@ or ReadWriteStream instead of me to create and use streams.'>
 	aStream next: endPtr putAll: collection startingAt: 1.
     ]
 
+    nextAvailable: anInteger into: aCollection startingAt: pos [
+        "Place up to anInteger objects from the receiver into
+	 aCollection, starting from position pos and stopping if
+         no more data is available."
+
+        <category: 'accessing-reading'>
+	| n |
+	n := anInteger min: endPtr - ptr + 1.
+	aCollection
+	    replaceFrom: pos
+	    to: pos + n - 1
+	    with: collection
+	    startingAt: ptr.
+	ptr := ptr + n.
+	^n
+    ]
+
     peek [
 	"Returns the next element of the stream without moving the pointer.
 	 Returns nil when at end of stream."

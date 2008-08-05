@@ -382,10 +382,10 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 		    bufferAll: aCollection
 		    startingAt: pos + written]
 	    ifFalse: 
-		[self 
-		    write: aCollection asString
-		    from: pos + written
-		    to: pos + n - 1]
+		[super 
+		    next: n - written
+		    putAll: aCollection asString
+		    startingAt: pos + written]
     ]
 
     upTo: aCharacter [
@@ -477,21 +477,21 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	^resultStream contents
     ]
 
-    nextAvailable: anInteger [
-	"Private - Read up to anInteger bytes from the stream and store them
-	 into answer.  Return `answer' itself, or raise an exception if we 
-	 could not read the full amount of data."
+    nextAvailable: anInteger into: aCollection startingAt: pos [
+	"Read up to anInteger bytes from the stream and store them
+	 into aCollection.  Return the number of bytes read."
 
 	<category: 'buffering'>
-	| answer last |
+	| last n |
 	writePtr notNil ifTrue: [self flush].
 	ptr > endPtr ifTrue: [self fill].
 
 	"Fetch data from the buffer, without doing more than one I/O operation."
 	last := endPtr min: ptr + anInteger - 1.
-	answer := collection copyFrom: ptr to: last.
-	ptr := ptr + answer size.
-	^answer
+	n := last - ptr + 1.
+	aCollection replaceFrom: pos to: pos + n - 1 with: collection startingAt: ptr.
+	ptr := ptr + n.
+	^n
     ]
 
     nextPutAllOn: aStream [
@@ -568,10 +568,10 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 		    ifTrue: 
 			[(self isPipe or: [writePtr - 1 = endPtr]) 
 			    ifFalse: [super skip: writePtr - 1 - endPtr].
-			self 
-			    write: collection
-			    from: writePtr
-			    to: writeEnd]]
+			super 
+			    next: writeEnd - writePtr + 1
+			    putAll: collection
+			    startingAt: writePtr]]
 	    ifFalse: 
 		[writePtr notNil 
 		    ifTrue: 
@@ -659,63 +659,16 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	writeEnd := ptr - 1
     ]
 
-    next: anInteger into: answer [
-	"Private - Read up to anInteger bytes from the stream and store them
-	 into answer.  Return `answer' itself, or raise an exception if we 
-	 could not read the full amount of data."
-
-	<category: 'buffering'>
-	| read last |
-	writePtr notNil ifTrue: [self flush].
-	read := 0.
-
-	"Exhaust the remaining contents of the buffer if they cannot satisfy
-	 the whole request."
-	ptr + anInteger - 1 > endPtr 
-	    ifTrue: 
-		[answer 
-		    replaceFrom: 1
-		    to: endPtr - ptr + 1
-		    with: collection
-		    startingAt: ptr.
-		read := endPtr - ptr + 1.
-		ptr := endPtr + 1].
-
-	"If we did not read everything, but what's left is less than the size of
-	 the buffer, try once more filling it..."
-	anInteger - read < collection size 
-	    ifTrue: 
-		[ptr > endPtr ifTrue: [self fill].
-		last := read + endPtr - ptr + 1 min: answer size.
-		answer 
-		    replaceFrom: read + 1
-		    to: last
-		    with: collection
-		    startingAt: ptr.
-		ptr := ptr + last - read.
-		read := last].
-
-	"Anything more?  We read it from the file.  We can come here only if the
-	 buffer cannot be filled completely, or if we want to read really a
-	 lot of data."
-	[ read = anInteger ] whileFalse: [
-            self atEnd ifTrue: [
-                ^SystemExceptions.NotEnoughElements signalOn: anInteger - read].
-            read := read + (self read: answer from: read + 1 to: anInteger)
-        ].
-	^answer
-    ]
-
     fill [
 	"Private - Fill the input buffer"
 
 	<category: 'buffering'>
 	(access bitAnd: 1) = 0 ifTrue: [^self shouldNotImplement].
 	ptr > endPtr ifTrue: [self flush].
-	endPtr := endPtr + (self 
-			    read: collection
-			    from: endPtr + 1
-			    to: collection size)
+	endPtr := endPtr + (super 
+			    nextAvailable: collection size - endPtr
+			    into: collection
+			    startingAt: endPtr + 1)
     ]
 ]
 

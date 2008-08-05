@@ -124,7 +124,7 @@ evaluates an user defined block to try to get some more data.'>
 	"Copy a buffer's worth of data from the receiver to aStream, doing
 	 at most one call to the fill block."
 
-	<category: 'buffer handling'>
+	<category: 'accessing-reading'>
 	self atEnd ifTrue: [^super pastEnd].
 	aStream next: endPtr - ptr + 1 putAll: self collection startingAt: ptr.
 	endPtr := ptr - 1.	"Empty the buffer"
@@ -134,18 +134,25 @@ evaluates an user defined block to try to get some more data.'>
 	"Answer a buffer's worth of data, doing at most one call
 	 to the fill block."
 
-	<category: 'buffer handling'>
-	| contents |
-	self atEnd ifTrue: [^super pastEnd].
-	contents := self collection copyFrom: ptr to: endPtr.
-	endPtr := ptr - 1.	"Empty the buffer"
-	^contents
+	<category: 'accessing-reading'>
+	^self nextAvailable: endPtr - ptr + 1
     ]
 
     availableBytes [
         "Answer how many bytes are available in the buffer."
 
+	<category: 'buffer handling'>
+	self isEmpty ifTrue: [ self fill ].
 	^endPtr + 1 - ptr
+    ]
+
+    nextAvailable: anInteger into: aCollection startingAt: pos [
+	"Place the next anInteger objects from the receiver into aCollection,
+	 starting at position pos.  Return the number of items stored."
+
+	<category: 'accessing-reading'>
+	self isEmpty ifTrue: [ self fill ].
+	^super nextAvailable: anInteger into: aCollection startingAt: pos
     ]
 
     fill [
