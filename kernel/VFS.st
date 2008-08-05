@@ -539,7 +539,7 @@ on them, to extract them to a real file, and so on.'>
 	current := currentPath := nil.
 	allFiles := LookupTable new.
 	directoryTree := LookupTable new.
-	self files do: 
+	self fileData do: 
 		[:data | 
 		| path size date mode member |
 		mode := self convertMode: (data at: 4).

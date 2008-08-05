@@ -1,3 +1,8 @@
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/VFS.st: Change #files to #fileData to avoid clash.
+	* kernel/VFSZip.st: Likewise.
+
 2008-08-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Semaphore.st: Initialize the caught variable in #critical:.

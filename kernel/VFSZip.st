@@ -110,7 +110,7 @@ files from a ZIP archive.'>
 	self error: 'invalid data in ZIP file'
     ]
 
-    files [
+    fileData [
 	"Extract the directory listing from the archive"
 
 	<category: 'members'>

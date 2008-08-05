@@ -177,7 +177,7 @@ Commander and with GNOME VFS.'>
 	^self class fileTypes at: self fsName
     ]
 
-    files [
+    fileData [
 	"Extract the directory listing from the archive"
 
 	<category: 'ArchiveMember protocol'>
