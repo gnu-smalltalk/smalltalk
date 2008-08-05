@@ -1,5 +1,10 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Stream.st: Do not use Streams in the default implementation
+	of #nextAvailable:.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FileDescr.st: Move setting atEnd to true into #pastEnd.
 	Add #nextHunkPutAllOn:.  Remove duplicate #copyFrom:to: in #nextHunk.
 	* kernel/FileStream.st: Add #nextHunkPutAllOn:.

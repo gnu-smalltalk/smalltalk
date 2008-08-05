@@ -379,6 +379,15 @@ encodings.'>
 	^origin next
     ]
 
+    nextInputAvailable: n [
+	"Return up to N characters from the origin.  This method is for
+	 private use by encoders, calling it outside may corrupt the
+	 internal state of the encoder."
+
+	<category: 'stream operations'>
+	^origin nextAvailable: n
+    ]
+
     species [
 	"We answer a string of Characters encoded in our destination
 	 encoding."
@@ -950,14 +959,37 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 
 	<category: 'stream operation'>
 	| answer |
-	self atEndOfBuffer 
-	    ifTrue: 
-		[self convertMore 
-		    ifTrue: 
-			[SystemExceptions.EndOfStream signalOn: self.
-			^nil]].
+	(self atEndOfBuffer and: [self convertMore])
+	    ifTrue: [^self pastEnd].
 	answer := recodedBuffer at: recodedPos.
 	recodedPos := recodedPos + 1.
+	^answer
+    ]
+
+    nextHunkPutAllOn: aStream [
+	"Copy the next buffer's worth of data from the receiver onto
+	 aStream."
+
+	<category: 'stream operation'>
+	(self atEndOfBuffer and: [self convertMore])
+	    ifTrue: [^self pastEnd].
+	aStream
+	    next: recodedEnd - recodedPos + 1
+	    putAll: recodedBuffer
+	    startingAt: recodedPos.
+
+	recodedPos := recodedEnd + 1.
+    ]
+
+    nextHunk [
+	"Answer the next buffer's worth of data from the receiver."
+
+	<category: 'stream operation'>
+	| answer |
+	(self atEndOfBuffer and: [self convertMore])
+	    ifTrue: [^self pastEnd].
+	answer := recodedBuffer copyFrom: recodedPos to: recodedEnd.
+	recodedPos := recodedEnd + 1.
 	^answer
     ]
 
@@ -1000,6 +1032,7 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 	 bytes in the read buffer above bufferSize-refillThreshold"
 
 	<category: 'private - conversion'>
+	| data |
 	readPos > self refillThreshold 
 	    ifTrue: 
 		[readBuffer 
@@ -1009,9 +1042,14 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 		    startingAt: readPos.
 		readEnd := readEnd - readPos + 1.
 		readPos := 1].
-	[readEnd >= self bufferSize or: [self atEndOfInput]] whileFalse: 
-		[readEnd := readEnd + 1.
-		readBuffer at: readEnd put: self nextInput]
+
+	data := self nextInputAvailable: self bufferSize - readEnd.
+	readBuffer
+	    replaceFrom: readEnd + 1 to: readEnd + data size 
+	    with: data
+	    startingAt: 1.
+
+	readEnd := readEnd + data size.
     ]
 
     initializeFrom: fromEncoding to: toEncoding origin: aStringOrStream [

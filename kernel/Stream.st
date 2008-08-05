@@ -79,12 +79,12 @@ provide for writing collections sequentially.'>
 	 operation."
 
 	<category: 'accessing-reading'>
-	| stream |
-	stream := WriteStream on: (self species new: anInteger).
-	anInteger timesRepeat: 
-		[self atEnd ifTrue: [^stream contents].
-		stream nextPut: self next].
-	^stream contents
+	| answer |
+	answer := self species new: anInteger.
+	1 to: anInteger do: 
+		[:i | self atEnd ifTrue: [^answer copyFrom: 1 to: i - 1].
+		answer at: i put: self next].
+	^answer
     ]
 
     nextMatchFor: anObject [
