@@ -32,7 +32,7 @@
 
 
 
-Object subclass: Collection [
+Iterable subclass: Collection [
     
     <category: 'Collections'>
     <comment: 'I am an abstract class.  My instances are collections of objects.  My
@@ -316,26 +316,6 @@ of objects.'>
 	^Generator on: self do: [ :gen :each | gen yield: each ]
     ]
 
-    do: aBlock [
-	"Enumerate each object of the receiver, passing them to aBlock"
-
-	<category: 'enumeration'>
-	self subclassResponsibility
-    ]
-
-    do: aBlock separatedBy: separatorBlock [
-	"Enumerate each object of the receiver, passing them to aBlock.
-	 Between every two invocations of aBlock, invoke separatorBlock"
-
-	<category: 'enumeration'>
-	| first |
-	first := true.
-	self do: 
-		[:each | 
-		first ifTrue: [first := false] ifFalse: [separatorBlock value].
-		aBlock value: each]
-    ]
-
     select: aBlock [
 	"Answer a new instance of a Collection containing all the elements
 	 in the receiver which, when passed to aBlock, answer true"
@@ -371,27 +351,6 @@ of objects.'>
 	^newCollection
     ]
 
-    detect: aBlock ifNone: exceptionBlock [
-	"Search the receiver for an element for which aBlock returns true.
-	 If some does, answer it. If none does, answer the result of evaluating
-	 aBlock"
-
-	<category: 'enumeration'>
-	self do: [:element | (aBlock value: element) ifTrue: [^element]].
-	^exceptionBlock value
-    ]
-
-    count: aBlock [
-	"Count the elements of the receiver for which aBlock returns true,
-	 and return their number."
-
-	<category: 'enumeration'>
-	| count |
-	count := 0.
-	self do: [:element | (aBlock value: element) ifTrue: [count := count + 1]].
-	^count
-    ]
-
     gather: aBlock [
 	"Answer a new instance of a Collection containing all the results
 	 of evaluating aBlock, joined together.  aBlock should return
@@ -400,91 +359,6 @@ of objects.'>
 
 	<category: 'enumeration'>
 	^(self collect: aBlock) join
-    ]
-
-    allSatisfy: aBlock [
-	"Search the receiver for an element for which aBlock returns false.
-	 Answer true if none does, false otherwise."
-
-	<category: 'enumeration'>
-	self do: [:element | (aBlock value: element) ifFalse: [^false]].
-	^true
-    ]
-
-    noneSatisfy: aBlock [
-	"Search the receiver for an element for which aBlock returns true.
-	 Answer true if none does, false otherwise."
-
-	<category: 'enumeration'>
-	self do: [:element | (aBlock value: element) ifTrue: [^false]].
-	^true
-    ]
-
-    anySatisfy: aBlock [
-	"Search the receiver for an element for which aBlock returns true.
-	 Answer true if some does, false otherwise."
-
-	<category: 'enumeration'>
-	self do: [:element | (aBlock value: element) ifTrue: [^true]].
-	^false
-    ]
-
-    conform: aBlock [
-	"Search the receiver for an element for which aBlock returns false.
-	 Answer true if none does, false otherwise."
-
-	<category: 'enumeration'>
-	self do: [:element | (aBlock value: element) ifFalse: [^false]].
-	^true
-    ]
-
-    contains: aBlock [
-	"Search the receiver for an element for which aBlock returns true.
-	 Answer true if some does, false otherwise."
-
-	<category: 'enumeration'>
-	self do: [:element | (aBlock value: element) ifTrue: [^true]].
-	^false
-    ]
-
-    detect: aBlock [
-	"Search the receiver for an element for which aBlock returns true.
-	 If some does, answer it. If none does, fail"
-
-	<category: 'enumeration'>
-	^self detect: aBlock
-	    ifNone: [SystemExceptions.NotFound signal: 'object not found']
-    ]
-
-    fold: binaryBlock [
-	"First, pass to binaryBlock the first and second elements of the
-	 receiver; for each subsequent element, pass the result of the previous
-	 evaluation and an element. Answer the result of the last invocation,
-	 or the first element if the collection has size 1.  Fail if the collection
-	 is empty."
-
-	<category: 'enumeration'>
-	| result marker |
-	self isEmpty ifTrue: [^SystemExceptions.EmptyCollection signalOn: self].
-	result := marker := Object new.
-	self do: 
-		[:element | 
-		result := result == marker 
-			    ifTrue: [element]
-			    ifFalse: [binaryBlock value: result value: element]].
-	^result
-    ]
-
-    inject: thisValue into: binaryBlock [
-	"First, pass to binaryBlock thisValue and the first element of the
-	 receiver; for each subsequent element, pass the result of the previous
-	 evaluation and an element. Answer the result of the last invocation."
-
-	<category: 'enumeration'>
-	| result |
-	result := thisValue.
-	self do: [:element | result := binaryBlock value: result value: element].
-	^result
     ]
 
     asArray [

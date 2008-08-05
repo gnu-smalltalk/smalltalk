@@ -1,5 +1,12 @@
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Collection.st: Move enumeration methods...
+	* kernel/Iterable.st: ... here.
+	* kernel/StreamOps.st: Change superclass.
+	* kernel/Stream.st: Remove duplicate code.
+
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/VFS.st: Change #files to #fileData to avoid clash.
 	* kernel/VFSZip.st: Likewise.
 

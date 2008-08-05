@@ -32,7 +32,7 @@
 
 
 
-Object subclass: Stream [
+Iterable subclass: Stream [
     
     <category: 'Streams'>
     <comment: 'I am an abstract class that provides interruptable sequential access to

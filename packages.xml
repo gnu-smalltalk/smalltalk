@@ -83,6 +83,7 @@
   <file>CompildMeth.st</file>
   <file>LookupTable.st</file>
   <file>RunArray.st</file>
+  <file>Iterable.st</file>
   <file>ArrayColl.st</file>
   <file>CompiledBlk.st</file>
   <file>Magnitude.st</file>

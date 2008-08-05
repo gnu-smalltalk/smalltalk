@@ -669,32 +669,6 @@ Stream extend [
 	^self peekFor: aCharacter
     ]
 
-    fold: aBlock [
-	"First, pass to binaryBlock the first and second elements of the
-	 receiver; for each subsequent element, pass the result of the previous
-	 evaluation and an element. Answer the result of the last invocation,
-	 or the first element if the stream has a single element."
-
-	<category: 'filtering'>
-	| result |
-	result := self next.
-	[self atEnd] whileFalse: [result := aBlock value: result value: self next].
-	^result
-    ]
-
-    inject: value into: aBlock [
-	"First, pass to binaryBlock value and the first element of the
-	 receiver; for each subsequent element, pass the result of the previous
-	 evaluation and an element. Answer the result of the last invocation,
-	 or value if the stream is empty."
-
-	<category: 'filtering'>
-	| result |
-	result := value.
-	[self atEnd] whileFalse: [result := aBlock value: result value: self next].
-	^result
-    ]
-
     select: aBlock [
 	"Answer a new stream that only returns those objects for which aBlock
 	 returns true.  Note that the returned stream will not be positionable."

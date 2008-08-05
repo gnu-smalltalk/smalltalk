@@ -7,6 +7,11 @@ o   BlockClosure methods #cull:, #cull:cull:, #cull:cull:cull:
     the block.  Thanks to this new functionality, the parameter to
     #on:do: and #ifNotNil: can be omitted.
 
+o   Collections and Streams have a common superclass, Iterable.  The
+    user-visible aspect of this is that Streams now enjoy a wider
+    range of iteration methods, such as #anySatisfy:, #detect:
+    and #count:.
+
 o   CObjects can be backed with garbage-collected (as opposed to
     heap-allocated) storage.  Using this is not always possible, for
     example for CObjects stored by external libraries or passed to

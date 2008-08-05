@@ -381,6 +381,7 @@ extern OOP _gst_homed_association_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_identity_dictionary_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_identity_set_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_integer_class ATTRIBUTE_HIDDEN;
+extern OOP _gst_iterable_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_interval_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_large_integer_class ATTRIBUTE_HIDDEN;
 extern OOP _gst_large_negative_integer_class ATTRIBUTE_HIDDEN;

@@ -1,3 +1,10 @@
+2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* dict.c: Add _gst_iterable_class.  Change superclass of
+	Collection and Stream.
+	* dict.h: Likewise.
+	* files.c: Load Iterable.st.
+
 2008-08-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* interp.c: Move ignored signals...

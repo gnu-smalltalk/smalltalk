@@ -124,6 +124,7 @@ OOP _gst_identity_dictionary_class = NULL;
 OOP _gst_identity_set_class = NULL;
 OOP _gst_integer_class = NULL;
 OOP _gst_interval_class = NULL;
+OOP _gst_iterable_class = NULL;
 OOP _gst_large_integer_class = NULL;
 OOP _gst_large_negative_integer_class = NULL;
 OOP _gst_large_positive_integer_class = NULL;
@@ -434,7 +435,11 @@ static const class_definition class_info[] = {
    GST_ISP_FIXED, true, 1,
    "SymLink", "symbol", NULL, NULL },
 
-  {&_gst_collection_class, &_gst_object_class,
+  {&_gst_iterable_class, &_gst_object_class,
+   GST_ISP_FIXED, false, 0,
+   "Iterable", NULL, NULL, NULL },
+
+  {&_gst_collection_class, &_gst_iterable_class,
    GST_ISP_FIXED, false, 0,
    "Collection", NULL, NULL, NULL },
 
@@ -593,7 +598,7 @@ static const class_definition class_info[] = {
    GST_ISP_POINTER, false, 0,
    "SystemDictionary", NULL, NULL, NULL },
 
-  {&_gst_stream_class, &_gst_object_class,
+  {&_gst_stream_class, &_gst_iterable_class,
    GST_ISP_FIXED, false, 0,
    "Stream", NULL, NULL, NULL },
 
