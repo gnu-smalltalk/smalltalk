@@ -665,6 +665,24 @@ do arbitrary processing on the files.'>
 	^self size == 0
     ]
 
+    nextPutAllOn: aStream [
+	"Put all the characters of the receiver in aStream."
+
+	<category: 'overriding inherited methods'>
+	| buf bufSize n |
+	bufSize := self isPipe
+	    ifTrue: [ self atEnd ifTrue: [ 0 ] ifFalse: [ 1024 ] ]
+	    ifFalse: [ self size - self position min: 1024 ].
+
+	bufSize = 0 ifTrue: [ ^self ].
+	buf := String new: bufSize.
+	[
+	    n := self read: buf from: 1 to: bufSize.
+	    aStream next: n putAll: buf startingAt: 1.
+	    n = 1024
+	] whileTrue
+    ]
+
     next: n putAll: aCollection startingAt: position [
 	"Put the characters in the supplied range of aCollection in the file"
 
@@ -675,12 +693,25 @@ do arbitrary processing on the files.'>
 	    to: position + n - 1
     ]
 
+    nextByteArray: anInteger [
+        "Return the next 'anInteger' bytes from the stream, as a ByteArray."
+
+        <category: 'overriding inherited methods'>
+        ^self next: anInteger into: (ByteArray new: anInteger)
+    ]
+
     next: anInteger [
+        "Return the next 'anInteger' characters from the stream, as a String."
+
+        <category: 'overriding inherited methods'>
+        ^self next: anInteger into: (self species new: anInteger)
+    ]
+
+    next: anInteger into: result [
 	"Return the next 'anInteger' characters from the stream, as a String."
 
 	<category: 'overriding inherited methods'>
-	| result read |
-	result := self species new: anInteger.
+	| read |
 	read := 0.
 	[ read = anInteger ] whileFalse: [
             self atEnd ifTrue: [

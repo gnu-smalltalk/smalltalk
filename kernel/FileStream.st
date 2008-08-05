@@ -260,15 +260,6 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	^element
     ]
 
-    nextByte [
-	"Return the next byte in the file, or nil at eof"
-
-	<category: 'basic'>
-	| a |
-	a := self next.
-	^a isNil ifTrue: [a] ifFalse: [a asInteger]
-    ]
-
     nextPut: aCharacter [
 	"Store aCharacter on the file"
 
@@ -486,20 +477,6 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	^resultStream contents
     ]
 
-    nextByteArray: anInteger [
-	"Return the next 'anInteger' bytes from the stream, as a ByteArray."
-
-	<category: 'overriding inherited methods'>
-	^self next: anInteger into: (ByteArray new: anInteger)
-    ]
-
-    next: anInteger [
-	"Return the next 'anInteger' characters from the stream, as a String."
-
-	<category: 'overriding inherited methods'>
-	^self next: anInteger into: (self species new: anInteger)
-    ]
-
     nextAvailable: anInteger [
 	"Private - Read up to anInteger bytes from the stream and store them
 	 into answer.  Return `answer' itself, or raise an exception if we 
@@ -515,6 +492,20 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	answer := collection copyFrom: ptr to: last.
 	ptr := ptr + answer size.
 	^answer
+    ]
+
+    nextPutAllOn: aStream [
+	"Put all the characters of the receiver in aStream."
+
+	<category: 'overriding inherited methods'>
+	| buf bufSize |
+	writePtr notNil ifTrue: [self flush].
+	ptr > endPtr ifTrue: [self fill].
+	[ self atEnd ] whileFalse: [
+	    aStream next: endPtr - ptr + 1 putAll: collection startingAt: ptr.
+	    ptr := endPtr + 1.
+	    self resetBuffer; fill.
+	]
     ]
 
     atEnd [
@@ -591,6 +582,16 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 			    with: writeEnd
 			    with: self bufferStart + writePtr - 1].
 		ptr - 1 = endPtr ifFalse: [super skip: ptr - 1 - endPtr]].
+
+	ptr := 1.
+	endPtr := 0.
+	writePtr := nil
+    ]
+
+    resetBuffer [
+	"Reset the buffer.  Only valid if no write is pending."
+
+	<category: 'private-buffering'>
 	ptr := 1.
 	endPtr := 0.
 	writePtr := nil
