@@ -7,10 +7,7 @@ dnl
 AC_DEFUN([GST_PROG_CC], [
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([AC_PROG_CPP])
-AC_REQUIRE([AC_PROG_GCC_TRADITIONAL])
-AC_REQUIRE([AC_AIX])
-AC_REQUIRE([AC_MINIX])
-AC_REQUIRE([AC_ISC_POSIX])
+AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
 
 AC_ARG_ENABLE(warnings, 
 [  --enable-warnings       enable compiler warnings (default=no)], ,
