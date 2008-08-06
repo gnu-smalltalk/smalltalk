@@ -114,11 +114,6 @@
    to speed up these messages for Arrays, Strings, and ByteArrays.  */
 #define METHOD_CACHE_SIZE		(1 << 11)
 
-/* Length of the queue of Semaphores to be signaled at the next
-   sequence point.  */
-#define ASYNC_QUEUE_SIZE		100
-
-
 typedef struct async_queue_entry
 {
   OOP sem;
@@ -247,9 +242,10 @@ static int class_cache_prim;
 #endif
 
 /* Queue for async (outside the interpreter) semaphore signals */
+static mst_Boolean async_queue_enabled = true;
 static int async_queue_index;
-static async_queue_entry queued_async_signals[ASYNC_QUEUE_SIZE]
-  CACHELINE_ALIGNED;
+static int async_queue_size;
+static async_queue_entry *queued_async_signals;
 
 /* When not NULL, this causes the byte code interpreter to immediately
    send the message whose selector is here to the current stack
@@ -262,10 +258,6 @@ volatile mst_Boolean _gst_except_flag = false;
 
 /* Set to non-nil if a process must preempt the current one.  */
 static OOP switch_to_process;
-
-/* Set to true if the currently running process has disabled
-   external signals.  */
-static mst_Boolean disable_preemption;
 
 /* Set to true if it is time to switch process in a round-robin
    time-sharing fashion.  */
@@ -366,8 +358,9 @@ static void copy_semaphore_oops (void);
 
 /* Signal the given SEMAPHOREOOP and if processes were queued on it
    resume the one that has waited for the longest time and is still
-   alive.  */
-static void sync_signal (OOP semaphoreOOP);
+   alive.  If INCR is true, increment its value if no processes were
+   queued.  Return true if a process was woken.  */
+static mst_Boolean sync_signal (OOP semaphoreOOP, mst_Boolean incr);
 
 /* Suspend execution of PROCESSOOP.  */
 static void suspend_process (OOP processOOP);
@@ -1291,7 +1284,7 @@ change_process_context (OOP newProcess)
   OOP processOOP;
   gst_process process;
   gst_processor_scheduler processor;
-  mst_Boolean preemption_was_disabled;
+  mst_Boolean enable_async_queue;
 
   switch_to_process = _gst_nil_oop;
 
@@ -1308,15 +1301,14 @@ change_process_context (OOP newProcess)
   if (processOOP != newProcess)
     {
       process = (gst_process) OOP_TO_OBJ (processOOP);
-      preemption_was_disabled = disable_preemption;
 
       if (!IS_NIL (processOOP) && !is_process_terminating (processOOP))
         process->suspendedContext = _gst_this_context_oop;
 
       processor->activeProcess = newProcess;
       process = (gst_process) OOP_TO_OBJ (newProcess);
-      disable_preemption = !IS_NIL (process->interrupts) &&
-		           TO_INT (process->interrupts) < 0;
+      enable_async_queue = IS_NIL (process->interrupts)
+		           || TO_INT (process->interrupts) >= 0;
 
       resume_suspended_context (process->suspendedContext);
 
@@ -1335,13 +1327,7 @@ change_process_context (OOP newProcess)
            section has terminated (see RecursionLock>>#critical: for an
            example).  */
 
-      if (preemption_was_disabled ^ disable_preemption)
-	{
-          if (disable_preemption)
-            _gst_disable_interrupts();
-          else
-            _gst_enable_interrupts();
-	}
+      async_queue_enabled = enable_async_queue;
     }
 }
 
@@ -1554,50 +1540,64 @@ is_empty (OOP processListOOP)
 }
 
 
-void
-sync_signal (OOP semaphoreOOP)
+mst_Boolean
+sync_signal (OOP semaphoreOOP, mst_Boolean incr_if_empty)
 {
   gst_semaphore sem;
   OOP freedOOP;
 
   sem = (gst_semaphore) OOP_TO_OBJ (semaphoreOOP);
-  do
+  for (;;)
     {
       /* printf ("signal %O %O\n", semaphoreOOP, sem->firstLink); */
       if (is_empty (semaphoreOOP))
 	{
-	  sem->signals = INCR_INT (sem->signals);
-	  break;
+	  if (incr_if_empty)
+	    sem->signals = INCR_INT (sem->signals);
+	  return false;
 	}
+
       freedOOP = remove_first_link (semaphoreOOP);
 
       /* If they terminated this process, well, try another */
+      if (resume_process (freedOOP, false))
+	return true;
     }
-  while (!resume_process (freedOOP, false));
+}
+
+static void
+async_signal_1 (OOP semaphoreOOP, mst_Boolean unregister)
+{
+  _gst_disable_interrupts ();	/* block out everything! */
+  
+  if (async_queue_index == async_queue_size)
+    {
+      if (async_queue_size == 0)
+	async_queue_size = 32;
+      else
+	async_queue_size *= 2;
+      queued_async_signals =
+	realloc (queued_async_signals,
+		 sizeof (async_queue_entry) * async_queue_size);
+    }
+
+  queued_async_signals[async_queue_index].sem = semaphoreOOP;
+  queued_async_signals[async_queue_index++].unregister = unregister;
+  
+  SET_EXCEPT_FLAG (true);
+  _gst_enable_interrupts ();
 }
 
 void
 _gst_async_signal (OOP semaphoreOOP)
 {
-  _gst_disable_interrupts ();	/* block out everything! */
-  
-  queued_async_signals[async_queue_index].sem = semaphoreOOP;
-  queued_async_signals[async_queue_index++].unregister = false;
-  
-  SET_EXCEPT_FLAG (true);
-  _gst_enable_interrupts ();
+  async_signal_1 (semaphoreOOP, false);
 }
 
 void
 _gst_async_signal_and_unregister (OOP semaphoreOOP)
 {
-  _gst_disable_interrupts ();	/* block out everything! */
-  
-  queued_async_signals[async_queue_index].sem = semaphoreOOP;
-  queued_async_signals[async_queue_index++].unregister = true;
-  
-  SET_EXCEPT_FLAG (true);
-  _gst_enable_interrupts ();
+  async_signal_1 (semaphoreOOP, true);
 }
 
 void
@@ -1605,8 +1605,6 @@ _gst_sync_wait (OOP semaphoreOOP)
 {
   gst_semaphore sem;
 
-  _gst_disable_interrupts ();	/* block out everything! */
-  
   sem = (gst_semaphore) OOP_TO_OBJ (semaphoreOOP);
   if (TO_INT (sem->signals) <= 0)
     {
@@ -1622,7 +1620,6 @@ _gst_sync_wait (OOP semaphoreOOP)
     sem->signals = DECR_INT (sem->signals);
 
   /* printf ("wait %O %O\n", semaphoreOOP, sem->firstLink); */
-  _gst_enable_interrupts ();
 }
 
 OOP

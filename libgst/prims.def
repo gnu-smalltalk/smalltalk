@@ -2753,11 +2753,9 @@ primitive VMpr_Semaphore_notifyAll [succeed,check_interrupt]
   _gst_primitives_executed++;
 
   oop1 = STACKTOP ();
-  _gst_disable_interrupts ();	/* block out everything! */
-  while (!is_empty (oop1))
-    sync_signal (oop1);
+  while (sync_signal (oop1, false))
+    ;
 
-  _gst_enable_interrupts ();
   PRIM_SUCCEEDED;
 }
 
@@ -2770,10 +2768,7 @@ primitive VMpr_Semaphore_signalNotify :
   _gst_primitives_executed++;
 
   oop1 = STACKTOP ();
-  _gst_disable_interrupts ();	/* block out everything! */
-  if (id == prim_id (VMpr_Semaphore_signal) || !is_empty (oop1))
-    sync_signal (oop1);
-  _gst_enable_interrupts ();
+  sync_signal (oop1, id == prim_id (VMpr_Semaphore_signal));
   PRIM_SUCCEEDED;
 }
 
@@ -2810,7 +2805,7 @@ primitive VMpr_Semaphore_waitAfterSignalling [succeed,check_interrupt]
 
   oop2 = POP_OOP ();
   oop1 = STACKTOP ();
-  sync_signal (oop2);
+  sync_signal (oop2, true);
   _gst_sync_wait (oop1);
   PRIM_SUCCEEDED;
 }
@@ -2996,11 +2991,7 @@ primitive VMpr_Processor_signalAtMilliseconds [succeed,fail,check_interrupt]
       intptr_t arg2;
       arg2 = TO_INT (oop2);
       if (arg2 <= 0)
-	{
-	  _gst_disable_interrupts ();	/* block out everything! */
-	  sync_signal (oop1);
-	  _gst_enable_interrupts ();
-	}
+	sync_signal (oop1, true);
       else
 	_gst_async_timed_wait (oop1, arg2);
       PRIM_SUCCEEDED;
@@ -3743,11 +3734,10 @@ primitive VMpr_Processor_disableEnableInterrupts :
   count = IS_NIL (process->interrupts) ? 0 : TO_INT (process->interrupts);
 
   if (id == prim_id (VMpr_Processor_disableInterrupts) && count++ == 0)
-    _gst_disable_interrupts ();
+    async_queue_enabled = false;
   else if (id == prim_id (VMpr_Processor_enableInterrupts) && --count == 0)
-    _gst_enable_interrupts ();
+    async_queue_enabled = true;
 
-  disable_preemption = count > 0;
   process->interrupts = FROM_INT (count);
 
   PRIM_SUCCEEDED;

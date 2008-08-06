@@ -408,7 +408,7 @@ _gst_interpret (OOP processOOP)
 	    SEND_MESSAGE (selectorOOP, 0);
 	  }
 
-        if (!disable_preemption)
+        if (async_queue_enabled)
           {
 	    _gst_disable_interrupts ();	/* block out everything! */
             if UNCOMMON (async_queue_index)

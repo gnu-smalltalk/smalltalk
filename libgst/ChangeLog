@@ -1,5 +1,17 @@
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* interp-bc.inl: Change disable_preemption to async_queue_enabled.
+	* interp-jit.inl: Likewise.
+	* interp.c: Make queued_async_signals a dynamic array.	Make
+	sync_signal able to behave like Semaphore>>#notify.  Do not
+	disable/enable interrupts on behalf of the Smalltalk program;
+	async_queue_enabled already fakes that.  Do not disable/enable
+	interrupts in the synchronized wait/signal functions.
+	* prims.def: Do not disable/enable interrupts around the
+	synchronized wait/signal functions.
+
+2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* input.c: Do not use #nextHunk.
 
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
