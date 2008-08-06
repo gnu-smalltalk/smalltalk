@@ -4245,6 +4245,15 @@ available to modules contains entry-points for many functions that aid
 in developing @gst{} extensions in C.  This node documents these
 functions and the macros that are defined by @file{libgst/gstpub.h}.
 
+@deftypefun void asyncCall (void (*) (OOP), OOP)
+This functions accepts a function pointer and an OOP (or @code{NULL}, but
+not an arbitrary pointer) and sets up the interpreter to call the
+function as soon as the next message send is executed.
+
+@emph{Caution:} This and the next two are the only functions in the
+@code{intepreterProxy} that can be called from within a signal handler.
+@end deftypefun
+
 @deftypefun void asyncSignal (OOP)
 This functions accepts an OOP for a @code{Semaphore} object and signals
 that object so that one of the processes waiting on that semaphore is
@@ -4258,9 +4267,6 @@ method to the object but, rather, to use:
 
 The signal request will be processed as soon as the next message send is
 executed.
-
-@emph{Caution:} This and the next one are the only functions in the
-@code{intepreterProxy} that can be called from within a signal handler.
 @end deftypefun
 
 @deftypefun void asyncSignalAndUnregister (OOP)
@@ -4268,6 +4274,24 @@ This functions accepts an OOP for a @code{Semaphore} object and signals
 that object so that one of the processes waiting on that semaphore is
 waken up; the signal request will be processed as soon as the next
 message send is executed.  The object is then removed from the registry.
+@end deftypefun
+
+@deftypefun void syncSignal (OOP, mst_Boolean)
+This functions accepts an OOP for a @code{Semaphore} object and signals
+that object so that one of the processes waiting on that semaphore is
+waken up.  If the semaphore has no process waiting in the queue and
+the second argument is true, an excess signal is added to the semaphore.
+Since a Smalltalk call-in is not an atomic operation, the correct way to
+signal a semaphore is not to send the @code{signal} or @code{notify}
+methods to the object but, rather, to use:
+
+@example
+    syncSignal(semaphoreOOP, true)
+@end example
+
+The @code{sync} in the name of this function distinguishes it from
+@code{asyncSignal}, in that it cannot be called from within a signal
+handler.
 @end deftypefun
 
 @deftypefun void syncWait (OOP)
@@ -4281,9 +4305,8 @@ but, rather, to use:
     syncWait(semaphoreOOP)
 @end example
 
-The @code{sync} in the name of this function distinguishes it from
-@code{asyncSignal}, in that it cannot be called from within a signal
-handler.
+As for @code{syncSignal}, this function cannot be called from within a
+signal handler.
 @end deftypefun
 
 

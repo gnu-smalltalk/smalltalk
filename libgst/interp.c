@@ -116,8 +116,8 @@
 
 typedef struct async_queue_entry
 {
-  OOP sem;
-  mst_Boolean unregister;
+  void (*func) (OOP);
+  OOP data;
 }
 async_queue_entry;
 
@@ -355,12 +355,6 @@ static void mark_semaphore_oops (void);
    events, the signal queue, and if any the process which we'll
    switch to at the next sequence point).  */
 static void copy_semaphore_oops (void);
-
-/* Signal the given SEMAPHOREOOP and if processes were queued on it
-   resume the one that has waited for the longest time and is still
-   alive.  If INCR is true, increment its value if no processes were
-   queued.  Return true if a process was woken.  */
-static mst_Boolean sync_signal (OOP semaphoreOOP, mst_Boolean incr);
 
 /* Suspend execution of PROCESSOOP.  */
 static void suspend_process (OOP processOOP);
@@ -1541,7 +1535,7 @@ is_empty (OOP processListOOP)
 
 
 mst_Boolean
-sync_signal (OOP semaphoreOOP, mst_Boolean incr_if_empty)
+_gst_sync_signal (OOP semaphoreOOP, mst_Boolean incr_if_empty)
 {
   gst_semaphore sem;
   OOP freedOOP;
@@ -1566,9 +1560,15 @@ sync_signal (OOP semaphoreOOP, mst_Boolean incr_if_empty)
 }
 
 static void
-async_signal_1 (OOP semaphoreOOP, mst_Boolean unregister)
+do_async_signal (OOP semaphoreOOP)
 {
-  _gst_disable_interrupts ();	/* block out everything! */
+  _gst_sync_signal (semaphoreOOP, true);
+}
+
+void
+_gst_async_call (void (*func) (OOP), OOP arg)
+{
+  _gst_disable_interrupts (false);	/* block out everything! */
   
   if (async_queue_index == async_queue_size)
     {
@@ -1581,23 +1581,26 @@ async_signal_1 (OOP semaphoreOOP, mst_Boolean unregister)
 		 sizeof (async_queue_entry) * async_queue_size);
     }
 
-  queued_async_signals[async_queue_index].sem = semaphoreOOP;
-  queued_async_signals[async_queue_index++].unregister = unregister;
+  queued_async_signals[async_queue_index].func = func;
+  queued_async_signals[async_queue_index++].data = arg;
   
   SET_EXCEPT_FLAG (true);
-  _gst_enable_interrupts ();
+  _gst_enable_interrupts (false);
 }
 
 void
 _gst_async_signal (OOP semaphoreOOP)
 {
-  async_signal_1 (semaphoreOOP, false);
+  _gst_async_call (do_async_signal, semaphoreOOP);
 }
 
 void
 _gst_async_signal_and_unregister (OOP semaphoreOOP)
 {
-  async_signal_1 (semaphoreOOP, true);
+  _gst_disable_interrupts (false);	/* block out everything! */
+  _gst_async_call (do_async_signal, semaphoreOOP);
+  _gst_async_call (_gst_unregister_oop, semaphoreOOP);
+  _gst_enable_interrupts (false);
 }
 
 void
@@ -2259,10 +2262,11 @@ copy_semaphore_oops (void)
 {
   int i;
 
-  _gst_disable_interrupts ();	/* block out everything! */
+  _gst_disable_interrupts (false);	/* block out everything! */
 
   for (i = 0; i < async_queue_index; i++)
-    MAYBE_COPY_OOP (queued_async_signals[i].sem);
+    if (queued_async_signals[i].data)
+      MAYBE_COPY_OOP (queued_async_signals[i].data);
 
   /* there does seem to be a window where this is not valid */
   if (single_step_semaphore)
@@ -2271,7 +2275,7 @@ copy_semaphore_oops (void)
   /* there does seem to be a window where this is not valid */
   MAYBE_COPY_OOP (switch_to_process);
 
-  _gst_enable_interrupts ();
+  _gst_enable_interrupts (false);
 }
 
 
@@ -2293,10 +2297,11 @@ mark_semaphore_oops (void)
 {
   int i;
 
-  _gst_disable_interrupts ();	/* block out everything! */
+  _gst_disable_interrupts (false);	/* block out everything! */
 
   for (i = 0; i < async_queue_index; i++)
-    MAYBE_MARK_OOP (queued_async_signals[i].sem);
+    if (queued_async_signals[i].data)
+      MAYBE_MARK_OOP (queued_async_signals[i].data);
 
   /* there does seem to be a window where this is not valid */
   if (single_step_semaphore)
@@ -2305,7 +2310,7 @@ mark_semaphore_oops (void)
   /* there does seem to be a window where this is not valid */
   MAYBE_MARK_OOP (switch_to_process);
 
-  _gst_enable_interrupts ();
+  _gst_enable_interrupts (false);
 }
 
 

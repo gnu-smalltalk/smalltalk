@@ -86,15 +86,18 @@ extern const char *_gst_executable_path;
 
 /* Saves and returns the current state of the software interrupt
    system.  Disables all interrupts.  */
-extern void _gst_disable_interrupts (void)
+extern void _gst_disable_interrupts (mst_Boolean fromSignalHandler)
   ATTRIBUTE_HIDDEN;
 
 /* Restores the state of the interrupt system to that which it had when
    _gst_disable_interrupts was last invoked.  */
-extern void _gst_enable_interrupts (void)
+extern void _gst_enable_interrupts (mst_Boolean fromSignalHandler)
   ATTRIBUTE_HIDDEN;
 
-/* Set the signal handler for signal SIGNUM to be HANDLERFUNC.  */
+/* Set the signal handler for signal SIGNUM to be HANDLERFUNC.  Further
+   interrupts are blocked within the signal if supported.  (The signal
+   handler should still call _gst_disable_interrupts and
+   _gst_enable_interrupts passing true to fromSignalHandler).  */
 extern SigHandler _gst_set_signal_handler (int signum,
 					   SigHandler handlerFunc)
   ATTRIBUTE_HIDDEN;

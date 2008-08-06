@@ -115,7 +115,9 @@ VMProxy gst_interpreter_proxy = {
   /* New in 3.1.  */
   _gst_relocate_path,
   _gst_oop_indexed_base,
-  _gst_oop_indexed_kind
+  _gst_oop_indexed_kind,
+  _gst_async_call,
+  _gst_sync_signal
 };
 
 /* Functions in comp.h.  */
@@ -385,6 +387,18 @@ gst_async_signal_and_unregister (OOP semaphore_oop)
   _gst_async_signal_and_unregister (semaphore_oop);
 }
 
+mst_Boolean
+gst_sync_signal (OOP semaphore_oop, mst_Boolean incr_if_empty)
+{
+  return _gst_sync_signal (semaphore_oop, incr_if_empty);
+}
+
+void
+gst_async_call (void (*func) (OOP), OOP semaphore_oop)
+{
+  _gst_async_call (func, semaphore_oop);
+}
+
 void
 gst_register_oop_array (OOP **first, OOP **last)
 {
@@ -517,7 +531,7 @@ gst_oop_indexed_base (OOP oop)
 }
 
 
-/* Functions in systep.h.  */
+/* Functions in sysdep.h.  */
 void
 gst_set_executable_path (const char *argv0)
 {

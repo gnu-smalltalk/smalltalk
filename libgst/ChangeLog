@@ -1,5 +1,25 @@
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* events.c: Use _gst_{dis,en}able_interrupts (true);
+	make a worker function for _gst_remove_fd_polling_handlers and
+	file_polling_handler.  Call it asynchronously from
+	file_polling_handler.  Do not disable interrupts from
+	_gst_async_file_polling.
+	* gstpub.c: Export _gst_async_call and _gst_sync_signal.
+	* gstpub.h: Likewise.
+	* interp-bc.inl: Perform asynchronous calls.
+	* interp-jit.inl: Perform asynchronous calls.
+	* interp.c: Adjust async_queue_entry for asynchronous calls.
+	Export sync_signal.  Adjust calls to _gst_{dis,en}able_interrupts.
+	* interp.h: Declare _gst_async_call and _gst_sync_signal.
+	* sysdep.c: Rewrite _gst_{dis,en}able_interrupts to rely on
+	sigaction setting the mask on POSIX systems.  Set up the
+	mask in _gst_set_signal_handler.
+	* sysdep.h: Adjust prototypes, adjust documentation of
+	_gst_set_signal_handler.
+
+2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* interp-bc.inl: Change disable_preemption to async_queue_enabled.
 	* interp-jit.inl: Likewise.
 	* interp.c: Make queued_async_signals a dynamic array.	Make

@@ -155,11 +155,12 @@ static void do_interrupts (mst_Boolean disable);
 
 
 #if defined SIG_BLOCK
-#define DECLARE \
-  sigset_t newSet; \
-  static sigset_t oldSet
-  
+static sigset_t oldSet;
+
+#define DECLARE
+
 #define DISABLE do { \
+  sigset_t newSet; \
   sigfillset (&newSet); \
   sigdelset (&newSet, SIGSEGV); \
   sigdelset (&newSet, SIGBUS); \
@@ -173,9 +174,11 @@ static void do_interrupts (mst_Boolean disable);
   sigprocmask (SIG_SETMASK, &oldSet, NULL)
 
 #elif defined HAVE_SIGSETMASK     /* BSD */
-#define DECLARE static int mask
-#define DISABLE mask = sigsetmask (DISABLED_MASK)
-#define ENABLE sigsetmask (mask)
+static int signalMask;
+
+#define DECLARE
+#define DISABLE signalMask = sigsetmask (DISABLED_MASK)
+#define ENABLE sigsetmask (signalMask)
 
 #elif defined HAVE_SIGHOLD 	/* SVID style */
 #define DECLARE int i
@@ -228,31 +231,36 @@ static RETSIGTYPE dummy_signal_handler (int sig)
   while (0)
 #endif
 
+static volatile int signalCount = 0;
+
 void
-do_interrupts (mst_Boolean disable)
+_gst_disable_interrupts (mst_Boolean from_signal_handler)
 {
   DECLARE;
-  static int count = 0;
   
-  /* let only the outermost calls actually block and unblock
-     signals */
-  if (disable && count++ == 0)
-    DISABLE;
-    
-  else if (!disable && --count == 0)
-    ENABLE;
+  if (signalCount++ == 0)
+    {
+#ifdef _POSIX_VERSION
+      if (from_signal_handler)
+        return;
+#endif
+      DISABLE;
+    }
 }
 
 void
-_gst_disable_interrupts ()
+_gst_enable_interrupts (mst_Boolean from_signal_handler)
 {
-  do_interrupts (true);
-}
+  DECLARE;
 
-void
-_gst_enable_interrupts ()
-{
-  do_interrupts (false);
+  if (--signalCount == 0)
+    {
+#ifdef _POSIX_VERSION
+      if (from_signal_handler)
+        return;
+#endif
+      ENABLE;
+    }
 }
 
 #undef DECLARE
@@ -271,7 +279,12 @@ _gst_set_signal_handler (int signum,
   act.sa_handler = handlerFunc;
   act.sa_flags = 0;
 
-  sigemptyset (&act.sa_mask);
+  sigfillset (&act.sa_mask);
+  sigdelset (&act.sa_mask, SIGSEGV);
+  sigdelset (&act.sa_mask, SIGBUS);
+  sigdelset (&act.sa_mask, SIGILL);
+  sigdelset (&act.sa_mask, SIGQUIT);
+  sigdelset (&act.sa_mask, SIGABRT);
   sigaction (signum, &act, &o_act);
   return o_act.sa_handler;
 

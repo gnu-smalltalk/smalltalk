@@ -384,6 +384,12 @@ extern void _gst_init_interpreter (void)
 extern void _gst_empty_context_pool (void) 
   ATTRIBUTE_HIDDEN;
 
+/* Set up so that FUNC will be called, with ARGOOP as its argument,
+   as soon as the next sequence point is reached.  */
+extern void _gst_async_call (void (*func) (OOP),
+			     OOP argOOP) 
+  ATTRIBUTE_HIDDEN;
+
 /* Signal SEMAPHOREOOP so that one of the processes waiting on that
    semaphore is waken up.  Since a Smalltalk call-in is not an atomic
    operation, the correct way to signal a semaphore is not to send
@@ -511,6 +517,18 @@ extern void _gst_send_method (OOP methodOOP)
    name of this function distinguishes it from _gst_async_signal, in
    that it cannot be called from within a signal handler.  */
 extern void _gst_sync_wait (OOP semaphoreOOP) 
+  ATTRIBUTE_HIDDEN;
+
+/* Signal the given SEMAPHOREOOP and if processes were queued on it
+   resume the one that has waited for the longest time and is still
+   alive.  If INCR is true, increment its value if no processes were
+   queued.  Return true if a process was woken.
+
+   This functions also cannot be called from within a signal handler.
+   It can be called from a function that is registered with
+   _gst_async_call, though.  */
+extern mst_Boolean _gst_sync_signal (OOP semaphoreOOP,
+			      mst_Boolean incr_if_empty)
   ATTRIBUTE_HIDDEN;
 
 /* Take a CompiledBlock and turn it into a BlockClosure that references

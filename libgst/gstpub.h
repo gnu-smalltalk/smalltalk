@@ -203,6 +203,8 @@ typedef struct VMProxy
   char *(*relocatePath) (const char *);
   void *(*OOPIndexedBase) (OOP oop);
   enum gst_indexed_kind (*OOPIndexedKind) (OOP oop); 
+  void (*asyncCall) (void (*func) (OOP), OOP argOOP);
+  void (*syncSignal) (OOP semaphoreOOP, mst_Boolean incrIfEmpty);
 } VMProxy;
 
 /* Compatibility section */
@@ -277,6 +279,8 @@ extern char *gst_oop_to_string (OOP oop);
 extern char *gst_oop_to_byte_array (OOP oop);
 extern PTR gst_oop_to_c_object (OOP oop);
 extern void gst_async_signal (OOP semaphore_oop);
+extern void gst_async_call (void (*func) (OOP), OOP arg_oop);
+extern mst_Boolean gst_sync_signal (OOP semaphore_oop, mst_Boolean incr_if_empty);
 extern void gst_sync_wait (OOP semaphore_oop);
 extern void gst_async_signal_and_unregister (OOP semaphore_oop);
 extern void gst_register_oop_array (OOP **first, OOP **last);

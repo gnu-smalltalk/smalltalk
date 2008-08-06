@@ -106,8 +106,7 @@ _gst_init_async_events (void)
 RETSIGTYPE
 signal_handler (int sig)
 {
-  _gst_set_signal_handler (sig, SIG_DFL);
-
+  _gst_disable_interrupts (true);
   if (!IS_NIL (sem_int_vec[sig]))
     {
       if (IS_CLASS (sem_int_vec[sig], _gst_semaphore_class))
@@ -122,6 +121,9 @@ signal_handler (int sig)
 	  raise (sig);
 	}
     }
+
+  _gst_enable_interrupts (true);
+  _gst_set_signal_handler (sig, SIG_DFL);
 }
 
 void
@@ -192,64 +194,24 @@ _gst_sync_file_polling (int fd,
     return 0;
 }
 
-void
-_gst_remove_fd_polling_handlers (int fd)
-{
-  polling_queue *node, **pprev;
-
-  if (num_used_pollfds == 0)
-    return;
-
-  /* Disable interrupts while playing with global variables */
-  _gst_disable_interrupts ();
-
-  num_used_pollfds = 0;
-  for (node = head, pprev = &head; node; node = *pprev)
-    {
-      struct pollfd *poll = &pollfds[node->poll];
-
-      if (poll->fd == fd)
-	{
-	  _gst_async_signal_and_unregister (node->semaphoreOOP);
-
-	  /* Pass over the current node */
-	  *pprev = node->next;
-	  if (p_tail_next == &node->next)
-	    p_tail_next = pprev;
-
-	  xfree (node);
-	}
-       else
-	{
-	  node->poll = num_used_pollfds;
-	  pollfds[num_used_pollfds++] = *poll;
-
-	  /* Prepare to get the next node */
-	  pprev = &(node->next);
-	}
-    }
-
-  _gst_enable_interrupts ();
-}
-
-RETSIGTYPE
-file_polling_handler (int sig)
+static void
+signal_polled_files (int fd, mst_Boolean try_again)
 {
   polling_queue *node, **pprev;
   int n, more;
 
-  _gst_set_signal_handler (sig, file_polling_handler);
   if (num_used_pollfds == 0)
     return;
 
   do
     {
-      do
-	{
-	  errno = 0;
-	  n = poll (pollfds, num_used_pollfds, 0);
-	}
-      while (n == -1 && errno == EINTR);
+      if (fd == -1)
+        do
+	  {
+	    errno = 0;
+	    n = poll (pollfds, num_used_pollfds, 0);
+	  }
+        while (n == -1 && errno == EINTR);
 
       num_used_pollfds = 0;
       more = false;
@@ -257,12 +219,14 @@ file_polling_handler (int sig)
 	{
 	  struct pollfd *poll = &pollfds[node->poll];
 
-	  if (poll->revents &
-	      (poll->events | POLLERR | POLLHUP | POLLNVAL))
+	  if (fd == -1
+	      ? (poll->revents & (poll->events | POLLERR | POLLHUP | POLLNVAL))
+	      : poll->fd == fd)
 	    {
-	      more = true;
+	      more = try_again;
 	      poll->events = 0;
-	      _gst_async_signal_and_unregister (node->semaphoreOOP);
+	      _gst_sync_signal (node->semaphoreOOP, false);
+	      _gst_unregister_oop (node->semaphoreOOP);
 
 	      /* Pass over the current node */
 	      *pprev = node->next;
@@ -285,6 +249,31 @@ file_polling_handler (int sig)
   while (more && num_used_pollfds);
 }
 
+void
+_gst_remove_fd_polling_handlers (int fd)
+{
+  signal_polled_files (fd, false);
+}
+
+static void
+async_signal_polled_files (OOP unusedOOP)
+{
+  signal_polled_files (-1, true);
+}
+
+RETSIGTYPE
+file_polling_handler (int sig)
+{
+  if (num_used_pollfds > 0)
+    {
+      _gst_disable_interrupts (true);
+      _gst_async_call (async_signal_polled_files, NULL);
+      _gst_enable_interrupts (true);
+    }
+
+  _gst_set_signal_handler (sig, file_polling_handler);
+}
+
 int
 _gst_async_file_polling (int fd,
 			 int cond,
@@ -301,9 +290,6 @@ _gst_async_file_polling (int fd,
   new->poll = num_used_pollfds;
   new->semaphoreOOP = semaphoreOOP;
   new->next = NULL;
-
-  /* Disable interrupts while playing with global variables */
-  _gst_disable_interrupts ();
 
   if (num_used_pollfds == num_total_pollfds)
     {
@@ -351,6 +337,5 @@ _gst_async_file_polling (int fd,
   else
     xfree (new);
 
-  _gst_enable_interrupts ();
   return (result);
 }

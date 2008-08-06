@@ -410,21 +410,17 @@ _gst_interpret (OOP processOOP)
 
         if (async_queue_enabled)
           {
-	    _gst_disable_interrupts ();	/* block out everything! */
+	    _gst_disable_interrupts (false);	/* block out everything! */
             if UNCOMMON (async_queue_index)
 	      {
 	        /* deal with any async signals */
 	        int i;
 	        for (i = 0; i < async_queue_index; i++)
-	          {
-	            sync_signal (queued_async_signals[i].sem);
-	            if (queued_async_signals[i].unregister)
-		      _gst_unregister_oop (queued_async_signals[i].sem);
-	          }
+		  queued_async_signals[i].func (queued_async_signals[i].data);
 
 	        async_queue_index = 0;
 	      }
-            _gst_enable_interrupts ();
+            _gst_enable_interrupts (false);
 	  }
 
         thisContext =
