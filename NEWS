@@ -11,6 +11,9 @@ o   Code without a space between a binary minus and a number, such as "a-2",
 
 o   Fixed bug that caused some children not to be reaped.
 
+o   Fixed bug when reading from a FIFO file and the writing side closed the
+    FIFO before GNU Smalltalk started reading it.
+
 o   Fixed CByte to actually work.
 
 o   Fixed corner case of nested exception handlers.

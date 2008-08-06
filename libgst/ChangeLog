@@ -1,3 +1,9 @@
+2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* events.c: Reset errno if _gst_sync_file_polling finds
+	POLLHUP, POLLERR or POLLNVAL.
+	* events.h: Document this.
+
 2008-08-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sysdep.c: Use O_CLOEXEC if available instead of FD_CLOEXEC.
