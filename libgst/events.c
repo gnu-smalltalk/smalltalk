@@ -184,11 +184,17 @@ _gst_sync_file_polling (int fd,
     }
   while ((result == -1) && (errno == EINTR));
 
+  if (result == -1)
+    return -1;
+
   if (pfd.revents & pfd.events)
     return 1;
 
   else if (pfd.revents & (POLLERR | POLLHUP | POLLNVAL))
-    return -1;
+    {
+      errno = 0;
+      return -1;
+    }
 
   else
     return 0;

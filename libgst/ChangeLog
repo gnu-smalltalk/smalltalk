@@ -1,5 +1,11 @@
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* events.c: Reset errno if _gst_sync_file_polling finds
+	POLLHUP, POLLERR or POLLNVAL.
+	* events.h: Document this.
+
+2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* events.c: Use _gst_{dis,en}able_interrupts (true);
 	make a worker function for _gst_remove_fd_polling_handlers and
 	file_polling_handler.  Call it asynchronously from

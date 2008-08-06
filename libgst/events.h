@@ -85,8 +85,9 @@ extern void _gst_remove_fd_polling_handlers (int fd)
 /* Check whether I/O is possible on the FD file descriptor; COND is 0
    to check for pending input, 1 to check for the possibility of doing
    non-blocking output, 2 to check for pending exceptional situations
-   (such as out-of-band data).  Answer -1 if there is an error, 0 if
-   I/O is impossible, 1 if possible.  */
+   (such as out-of-band data).  Answer -1 if there is an error (including
+   POLLHUP -- in that case errno is left to 0), 0 if I/O is impossible,
+   1 if possible.  */
 extern int _gst_sync_file_polling (int fd,
 				   int cond) 
   ATTRIBUTE_HIDDEN;
@@ -94,10 +95,10 @@ extern int _gst_sync_file_polling (int fd,
 /* Check whether I/O is possible on the FD file descriptor; COND is 0
    to check for pending input, 1 to check for the possibility of doing
    non-blocking output, 2 to check for pending exceptional situations
-   (such as out-of-band data).  Answer -1 if there is an error, 0 if
-   I/O is impossible, 1 if possible.  If 0 is answered, the virtual
-   machine arranges things so that when the given condition is true
-   SEMAPHOREOOP is signaled. 
+   (such as out-of-band data).  Answer -1 if there is an error (including
+   POLLHUP -- in that case errno is left to 0), 0 if I/O is impossible,
+   1 if possible.  If 0 is answered, the virtual machine arranges things
+   so that when the given condition is true SEMAPHOREOOP is signaled.
 
    Note: due to lack of support from many kernels, waiting for a
    semaphore to be signaled when *output* is possible is risky and
