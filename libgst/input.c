@@ -406,7 +406,7 @@ my_getc (input_stream stream)
       if (stream->st_oop.ptr == stream->st_oop.end)
 	{
 	  char *buf;
-	  _gst_msg_sendf(&buf, "%s %o nextHunk", stream->st_oop.oop);
+	  _gst_msg_sendf(&buf, "%s %o nextAvailable: %i", stream->st_oop.oop, 1024);
 	  if (!buf || !*buf)
 	    return EOF;
 

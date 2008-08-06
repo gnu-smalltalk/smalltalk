@@ -1207,6 +1207,24 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	^self readBuffer next
     ]
 	
+    nextAvailable: anInteger putAllOn: aStream [
+        "Copy up to anInteger objects from the receiver to
+	 aStream, stopping if no more data is available."
+
+        <category: 'accessing-reading'>
+	| available read |
+	readBuffer isNil ifTrue: [ ^self pastEnd ].
+	self ensureReadable.
+
+	read := 0.
+	[ (available := self availableBytes) > 0 ] whileTrue: [
+	    read := read + (self readBuffer
+		nextAvailable: available
+		putAllOn: aStream) ].
+
+	^read
+    ]
+
     nextAvailable: anInteger into: aCollection startingAt: pos [
         "Place up to anInteger objects from the receiver into
 	 aCollection, starting from position pos and stopping if
@@ -1225,28 +1243,6 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 		startingAt: pos + read) ].
 
 	^read
-    ]
-
-    nextHunkPutAllOn: aStream [
-	"Copy the next buffers worth of stuff from the receiver to aStream.
-	 Do at most one actual input operation."
-
-	<category: 'stream protocol'>
-	"Ensure that the buffer is full"
-
-	readBuffer isNil ifTrue: [ ^self pastEnd ].
-	self readBuffer nextHunkPutAllOn: aStream
-    ]
-
-    nextHunk [
-	"Answer the next buffers worth of stuff in the Stream represented
-	 by the receiver.  Do at most one actual input operation."
-
-	"Ensure that the buffer is full"
-
-	<category: 'stream protocol'>
-	readBuffer isNil ifTrue: [ ^self pastEnd ].
-	^self readBuffer nextHunk
     ]
 
     peek [

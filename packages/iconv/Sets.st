@@ -966,8 +966,26 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 	^answer
     ]
 
+    nextAvailable: anInteger putAllOn: aStream [
+	"Copy up to anInteger bytes from the next buffer's worth of data
+	 from the receiver to aStream."
+
+	<category: 'stream operation'>
+	| n |
+	(self atEndOfBuffer and: [self convertMore])
+	    ifTrue: [^self pastEnd].
+	n := anInteger min: recodedEnd - recodedPos + 1.
+	aStream
+	    next: n
+	    putAll: recodedBuffer
+	    startingAt: recodedPos.
+	recodedPos := recodedPos + n.
+	^n
+    ]
+
     nextAvailable: anInteger into: aCollection startingAt: pos [
-	"Answer the next buffer's worth of data from the receiver."
+	"Store up to anInteger bytes from the next buffer's worth of data
+	 from the receiver onto aCollection."
 
 	<category: 'stream operation'>
 	| n |
@@ -980,28 +998,6 @@ Iconv is skipped altogether and only Smalltalk converters are used.'>
 	    startingAt: recodedPos.
 	recodedPos := recodedPos + n.
 	^n
-    ]
-
-    nextHunkPutAllOn: aStream [
-	"Copy the next buffer's worth of data from the receiver onto
-	 aStream."
-
-	<category: 'stream operation'>
-	(self atEndOfBuffer and: [self convertMore])
-	    ifTrue: [^self pastEnd].
-	aStream
-	    next: recodedEnd - recodedPos + 1
-	    putAll: recodedBuffer
-	    startingAt: recodedPos.
-
-	recodedPos := recodedEnd + 1.
-    ]
-
-    nextHunk [
-	"Answer the next buffer's worth of data from the receiver."
-
-	<category: 'stream operation'>
-	^self nextAvailable: recodedEnd - recodedPos + 1
     ]
 
     release [

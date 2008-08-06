@@ -1,3 +1,7 @@
+2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* FTP.st: Do not use #nextHunk.
+
 2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Base.st: Use Sockets namespace.

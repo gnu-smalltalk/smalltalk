@@ -88,10 +88,25 @@ or ReadWriteStream instead of me to create and use streams.'>
 	aStream next: endPtr putAll: collection startingAt: 1.
     ]
 
+    nextAvailable: anInteger putAllOn: aStream [
+        "Copy up to anInteger objects from the receiver into
+	 aStream, stopping if no more data is available."
+
+        <category: 'accessing-reading'>
+	| n |
+	n := anInteger min: endPtr - ptr + 1.
+	aStream
+	    next: n
+	    putAll: collection
+	    startingAt: ptr.
+	ptr := ptr + n.
+	^n
+    ]
+
     nextAvailable: anInteger into: aCollection startingAt: pos [
         "Place up to anInteger objects from the receiver into
-	 aCollection, starting from position pos and stopping if
-         no more data is available."
+	 aCollection, starting from position pos in the collection
+	 and stopping if no more data is available."
 
         <category: 'accessing-reading'>
 	| n |

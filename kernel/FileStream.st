@@ -477,6 +477,23 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 	^resultStream contents
     ]
 
+    nextAvailable: anInteger putAllOn: aStream [
+	"Copy up to anInteger bytes from the stream into
+	 aStream.  Return the number of bytes read."
+
+	<category: 'buffering'>
+	| last n |
+	writePtr notNil ifTrue: [self flush].
+	ptr > endPtr ifTrue: [self fill].
+
+	"Fetch data from the buffer, without doing more than one I/O operation."
+	last := endPtr min: ptr + anInteger - 1.
+	n := last - ptr + 1.
+	aStream next: n putAll: collection startingAt: ptr.
+	ptr := ptr + n.
+	^n
+    ]
+
     nextAvailable: anInteger into: aCollection startingAt: pos [
 	"Read up to anInteger bytes from the stream and store them
 	 into aCollection.  Return the number of bytes read."
@@ -609,34 +626,6 @@ file object, such as /dev/rmt0 on UNIX or MTA0: on VMS).'>
 
 	<category: 'buffering'>
 	self flush
-    ]
-
-    nextHunkPutAllOn: aStream [
-	"Copy the next buffers worth of stuff from the receiver to
-	 aStream.  For n consecutive calls to this method, we do
-	 n - 1 or n actual input operation."
-
-	<category: 'buffering'>
-	writePtr notNil ifTrue: [self flush].
-	(ptr > endPtr or: [endPtr < collection size]) ifTrue: [self fill].
-	ptr > endPtr ifTrue: [^self pastEnd].
-	aStream next: endPtr - ptr + 1 putAll: collection startingAt: ptr.
-	ptr := endPtr + 1.
-    ]
-
-    nextHunk [
-	"Answer the next buffers worth of stuff in the Stream represented
-	 by the receiver.  For n consecutive calls to this method, we do
-	 n - 1 or n actual input operation."
-
-	<category: 'buffering'>
-	| result |
-	writePtr notNil ifTrue: [self flush].
-	(ptr > endPtr or: [endPtr < collection size]) ifTrue: [self fill].
-	ptr > endPtr ifTrue: [^self pastEnd].
-	result := collection copyFrom: ptr to: endPtr.
-	ptr := endPtr + 1.
-	^result
     ]
 
     next: n bufferAll: aCollection startingAt: pos [

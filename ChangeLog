@@ -1,3 +1,15 @@
+2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/PosStream.st: Add #nextAvailable:putAllOn:.
+	* kernel/FileStream.st: Add #nextAvailable:putAllOn:, and remove
+	#nextHunkPutAllOn: and #nextHunk.
+	* kernel/Stream.st: Add #nextAvailable:putAllOn: and  #next:putAllOn:,
+	remove #nextHunk, rename #nextHunkPutAllOn: to
+	#nextAvailablePutAllOn: and rewrite it.
+	* kernel/VFSZip.st: Remove #nextHunk.
+
+	* example/PipeStream.st: Switch to new block stream protocol.
+
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FileDescr.st: Remove #read:... methods, except

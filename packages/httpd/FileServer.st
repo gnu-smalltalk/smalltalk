@@ -280,7 +280,7 @@ to upload a file.'>
 	<category: 'multipart'>
 	
 	request stream isPeerAlive ifFalse: [^''].
-	^request stream nextHunk
+	^request stream nextAvailable: 1024
     ]
 
     localFileFor: remoteName [

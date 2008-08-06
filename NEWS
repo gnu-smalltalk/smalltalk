@@ -26,9 +26,7 @@ o   CObjects can be backed with garbage-collected (as opposed to
 o   Error backtraces include line numbers and filenames.
 
 o   FileDescriptor and FileStream raise an exception if #next: cannot
-    return the given number of bytes.  They also implement #nextAvailable:
-    which is similar to #nextHunk but returns at most the number of bytes
-    given by the argument.
+    return the given number of bytes.
 
 o   FileDescriptor is now a subclass of Stream.
 
@@ -68,9 +66,6 @@ o   It is possible to create C call-outs that are not attached
     override the #link method (the existing CFunctionDescriptor class
     is now implemented on top of this).
 
-o   A new method #nextHunkPutAllOn: allows to copy from stream to stream
-    while minimizing the number of allocated objects.
-
 o   ObjectDumper now accepts normal String streams.  The class ByteStream
     has been removed.
 
@@ -79,6 +74,23 @@ o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
     true in the instance of GNU Smalltalk that was restored from the
     snapshot.  Note that this does not apply to CallinProcesses, since
     those are stopped in saved images (will this be true in 3.1?).
+
+o   Streams have a set of new methods that allow to eliminate useless copies
+    when moving data from stream to stream, as well as to eliminate useless
+    creation of collections to store the data read from a stream.  Besides
+    the standard methods #next, #nextPut: and #atEnd, two more methods can be
+    implemented by Stream subclasses in order to achieve better performance
+    on block transfers, namely #nextAvailable:into:startingAt:,
+    #nextAvailable:putAllOn: and #next:putAll:startingAt:.
+
+    Another set of methods is placed in Stream; they all use the above
+    three methods and you should not need to override them.  These are
+    #next:into:startingAt:, #next:putAllOn:, #nextAvailable:,
+    #nextAvailable:putAllOn:, #nextAvailablePutAllOn:.
+
+    In addition, #nextHunk was removed.  Applications can use #nextAvailable:
+    or, better, should be rewritten to use new stream-to-stream protocol
+    such as #nextAvailablePutAllOn:.
 
 o   The VFS subsystem was rewritten.  Virtual filesystems are now
     accessible via special methods on File (such as File>>#zip,

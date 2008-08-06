@@ -113,7 +113,7 @@ Socket class extend [
 			[server nextPutAll: sendBuf.
 			bytesSent := bytesSent + sendBuf size.
 			[client canRead] whileTrue: 
-				[client nextHunkPutAllOn: recvBuf.
+				[client nextAvailablePutAllOn: recvBuf.
 				bytesReceived := recvBuf size].
 			bytesSent >= bytesToSend and: [bytesReceived = bytesSent]] 
 				whileFalse].
@@ -193,7 +193,7 @@ Socket class extend [
 				client := Socket remote: queue localAddress port: (self testPortFor: addressClass).
 				
 				[[client canRead] whileTrue: 
-					[client nextHunkPutAllOn: recvBuf.
+					[client nextAvailablePutAllOn: recvBuf.
 					bytesReceived := recvBuf size].
 				bytesSent >= bytesToSend and: [bytesReceived = bytesSent]] 
 					whileFalse: [Processor yield].

@@ -164,14 +164,38 @@ nextPut: anObject
     self isFull ifTrue: [ full notifyAll ].
     ^anObject!
 
-nextHunk
+nextAvailable: anInteger putAllOn: aStream
+    "Return a buffer worth of data, blocking until it is full or the pipe
+     is closed."
+    | n |
+    [ self isEmpty and: [ self isConnected ] ] whileTrue: [ full wait ].
+
+    "Here, the buffer is full and all writers are locked, so there is no
+     contention between the writer and the reader."
+    n := anInteger min: endPtr - ptr + 1.
+    aStream next: n putAll: collection startingAt: ptr.
+    ^n!
+
+nextAvailable: anInteger into: aCollection startingAt: pos
+    "Return a buffer worth of data, blocking until it is full or the pipe
+     is closed."
+    | n |
+    [ self isEmpty and: [ self isConnected ] ] whileTrue: [ full wait ].
+
+    "Here, the buffer is full and all writers are locked, so there is no
+     contention between the writer and the reader."
+    n := anInteger min: endPtr - ptr + 1.
+    aCollection replaceFrom: pos to: pos + n - 1 with: collection startingAt: ptr.
+    ^n!
+
+nextAvailablePutAllOn: aStream
     "Return a buffer worth of data, blocking until it is full or the pipe
      is closed."
     [ self isEmpty and: [ self isConnected ] ] whileTrue: [ full wait ].
 
     "Here, the buffer is full and all writers are locked, so there is no
      contention between the writer and the reader."
-    ^self bufferContents!
+    aStream next: endPtr - ptr + 1 putAll: collection startingAt: ptr!
 
 contents
     "Close the channel and return the full contents of the stream.  For

@@ -67,6 +67,24 @@ provide for writing collections sequentially.'>
 	^answer
     ]
 
+    next: anInteger putAllOn: aStream [
+	"Read up to anInteger bytes from the stream and store them
+	 into aStream.  Return the number of bytes that were read, raising
+	 an exception if we could not read the full amount of data."
+
+	<category: 'buffering'>
+	| read |
+	read := 0.
+	[ read = anInteger ] whileFalse: [
+            self atEnd ifTrue: [
+                ^SystemExceptions.NotEnoughElements signalOn: anInteger - read].
+            read := read + (self
+				nextAvailable: anInteger - read
+				putAllOn: aStream)
+        ].
+	^read
+    ]
+
     next: anInteger into: answer startingAt: pos [
 	"Read up to anInteger bytes from the stream and store them
 	 into answer.  Return the number of bytes that were read, raising
@@ -84,6 +102,24 @@ provide for writing collections sequentially.'>
 				startingAt: read + pos)
         ].
 	^answer
+    ]
+
+    nextAvailable: anInteger putAllOn: aStream [
+	"Copy up to anInteger objects in the receiver to aStream.  Besides
+	 stopping if the end of the stream is reached, this may return
+	 less than this number of bytes for various reasons.  For example,
+	 on files and sockets this operation could be non-blocking,
+	 or could do at most one I/O operation."
+
+	<category: 'accessing-reading'>
+	| n coll |
+	n := anInteger min: 1024.
+	n := self
+	    nextAvailable: n
+	    into: (coll := self species new: n)
+	    startingAt: 1.
+	aStream next: n putAll: coll startingAt: 1.
+	^n
     ]
 
     nextAvailable: anInteger [
@@ -266,7 +302,7 @@ provide for writing collections sequentially.'>
         "Write all the objects in the receiver to aStream"
 
 	[self atEnd] whileFalse: 
-		[self nextHunkPutAllOn: aStream].
+		[self nextAvailablePutAllOn: aStream].
     ]
 
     next: anInteger put: anObject [
@@ -535,32 +571,14 @@ provide for writing collections sequentially.'>
 		repeat
     ]
 
-    nextHunkPutAllOn: aStream [
+    nextAvailablePutAllOn: aStream [
 	"Copy to aStream a more-or-less arbitrary amount of data.  When used
 	 on files, this does at most one I/O operation.  For other kinds of
-	 stream, the definition may vary.  This method is used by the VM
-	 when loading data from a Smalltalk stream, and by various kind
-	 of Stream decorators supplied with GNU Smalltalk (including
-	 zlib streams).  Subclasses that implement nextHunk can implement
-	 this method to avoid useless work."
+	 stream, the definition may vary.  This method is used to do
+	 stream-to-stream copies."
 
-	| coll |
-	coll := self nextHunk.
-	aStream 
-	    next: coll size
-	    putAll: coll
-	    startingAt: 1
-    ]
-
-    nextHunk [
-	"Answer a more-or-less arbitrary amount of data.  When used on files, this
-	 does at most one I/O operation.  For other kinds of stream, the definition
-	 may vary.  This method is used by the VM when loading data from a Smalltalk
-	 stream, and by various kind of Stream decorators supplied with GNU
-	 Smalltalk (including zlib streams)."
-
-	<category: 'positioning'>
-	^self nextAvailable: 1024
+	<category: 'streaming protocol'>
+	self nextAvailable: 16rFFFFFFF putAllOn: aStream.
     ]
 
     prefixTableFor: aCollection [

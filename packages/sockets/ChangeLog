@@ -1,3 +1,10 @@
+2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Buffers.st: Add #nextAvailable:putAllOn:, remove #nextHunkPutAllOn:
+	and #nextHunk.
+	* Sockets.st: Likewise.
+	* tests.st: Change #nextHunkPutAllOn: to #nextAvailablePutAllOn:.
+
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Buffers.st: Add #nextAvailable:into:startingAt:.

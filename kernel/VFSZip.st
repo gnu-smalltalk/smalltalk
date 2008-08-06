@@ -236,15 +236,18 @@ Stream subclass: LimitedStream [
 	^true
     ]
 
+    nextAvailable: n into: aCollection startingAt: pos [
+	<category: 'stream operations'>
+	^stream
+	    nextAvailable: (n min: limit - stream position)
+	    into: aCollection
+	    startingAt: pos
+    ]
+
     next [
 	<category: 'stream operations'>
 	self atEnd ifTrue: [^self pastEnd].
 	^stream next
-    ]
-
-    nextHunk [
-	<category: 'stream operations'>
-	^stream next: (1024 min: limit - stream position)
     ]
 
     peek [

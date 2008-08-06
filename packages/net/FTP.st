@@ -354,7 +354,7 @@ NetProtocolInterpreter subclass: FTPProtocolInterpreter [
 
     getDataWithType: type into: aStream do: controlBlock [
 	<category: 'ftp protocol'>
-	| dataStream totalByte |
+	| dataStream totalByte coll |
 	(#(#ascii #binary) includes: type) 
 	    ifFalse: [^self error: 'type must be #ascii or #binary'].
 	type == #ascii ifTrue: [self ftpTypeAscii] ifFalse: [self ftpTypeBinary].
@@ -367,7 +367,7 @@ NetProtocolInterpreter subclass: FTPProtocolInterpreter [
 	
 	[[dataStream atEnd] whileFalse: 
 		[| byte |
-		byte := dataStream nextHunk.
+		byte := dataStream nextAvailable: 1024.
 		self reporter readByte: byte size.
 		type == #ascii 
 		    ifTrue: [aStream nextPutAll: (self decode: byte)]

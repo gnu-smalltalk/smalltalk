@@ -1,3 +1,7 @@
+2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* input.c: Do not use #nextHunk.
+
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* dict.c: Adjust layout of FileDescriptor and FileStream.  Do not

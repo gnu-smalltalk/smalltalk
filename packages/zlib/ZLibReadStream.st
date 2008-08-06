@@ -70,26 +70,20 @@ used for communication with zlib.'>
 	^result
     ]
 
-    nextHunkPutAllOn: aStream [
-	"Copy the next buffers worth of stuff from the receiver to
-	 aStream.  Do at most one actual compression/decompression
-	 operation."
+    nextAvailable: anInteger putAllOn: aStream [
+        "Copy up to anInteger objects from the receiver to
+         aStream, stopping if no more data is available."
 
-	<category: 'streaming'>
-	| result |
-	self atEnd ifTrue: [^self pastEnd].
-	aStream next: endPtr - ptr putAll: outBytes startingAt: ptr + 1.
-	ptr := endPtr.
-	^result
-    ]
-
-    nextHunk [
-	"Answer the next buffers worth of stuff in the Stream represented
-	 by the receiver.  Do at most one actual compression/decompression
-	 operation."
-
-	<category: 'streaming'>
-	^self nextAvailable: endPtr - ptr
+        <category: 'accessing-reading'>
+        | n |
+	self atEnd ifTrue: [^0].
+        n := anInteger min: endPtr - ptr.
+        aStream
+            next: n
+            putAll: outBytes
+            startingAt: ptr + 1.
+        ptr := ptr + n.
+        ^n
     ]
 
     nextAvailable: anInteger into: aCollection startingAt: pos [
@@ -150,8 +144,9 @@ used for communication with zlib.'>
 	delta := delta + endPtr.
 	ptr := 0.
 	
+	"TODO: reuse the inBytes collection."
 	[(inBytes isNil and: [self stream atEnd not]) 
-	    ifTrue: [inBytes := self stream nextHunk].
+	    ifTrue: [inBytes := self stream nextAvailable: 1024].
 	flush := inBytes isNil ifTrue: [4] ifFalse: [0].
 	endPtr := self processInput: flush size: inBytes size.
 	endPtr = 0] 
