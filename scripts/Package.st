@@ -432,8 +432,8 @@ Command subclass: PkgInstall [
 
 	        files := pkg allFiles.
                 dirs := files collect: [ :file | File pathFor: file ].
-	        dirs asSet asSortedCollection do: [ :dir |
-	            (baseDir / dir) emitMkdir ].
+	        (dirs asSet remove: '' ifAbsent: []; asSortedCollection)
+		    do: [ :dir | (baseDir / dir) emitMkdir ].
 
                 files do: [ :file || srcFile |
 	            srcFile := (aPackage fullPathOf: file).

@@ -1,5 +1,10 @@
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/FilePath.st: Prohibit accessing files with a '' filename.
+	* scripts/Package.st: ... which we were doing here.
+
+2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/PosStream.st: Add #nextAvailable:putAllOn:.
 	* kernel/FileStream.st: Add #nextAvailable:putAllOn:, and remove
 	#nextHunkPutAllOn: and #nextHunk.

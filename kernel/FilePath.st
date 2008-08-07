@@ -46,7 +46,9 @@ size and timestamps.'>
 
 	<category: 'file name management'>
 	directory isEmpty ifTrue: [^fileName].
-	fileName isEmpty ifTrue: [^directory].
+	fileName isEmpty ifTrue: [
+	    SystemExceptions.InvalidArgument signalOn: fileName
+		reason: 'empty filenames are invalid' ].
 	Directory pathSeparator == $\ 
 	    ifFalse: [(fileName at: 1) isPathSeparator ifTrue: [^fileName]]
 	    ifTrue: 
