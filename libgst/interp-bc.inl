@@ -517,19 +517,27 @@ _gst_interpret (OOP processOOP)
 
 monitor_byte_codes:
   SET_EXCEPT_FLAG (false);
+
+  /* First, deal with any async signals.  */
   if (async_queue_enabled)
     {
-      _gst_disable_interrupts (false);	/* block out everything! */
-      if UNCOMMON (async_queue_index)
+      gl_lock_lock (async_queue_lock);
+      _gst_disable_interrupts (false);
+      __sync_synchronize ();
+
+      if UNCOMMON (async_queue_index || async_queue_index_sig)
 	{
-	  /* deal with any async signals        */
 	  int i;
 	  for (i = 0; i < async_queue_index; i++)
 	    queued_async_signals[i].func (queued_async_signals[i].data);
+	  for (i = 0; i < async_queue_index_sig; i++)
+	    queued_async_signals_sig[i].func (queued_async_signals_sig[i].data);
 
-	  async_queue_index = 0;
+	  async_queue_index = async_queue_index_sig = 0;
 	}
+
       _gst_enable_interrupts (false);
+      gl_lock_unlock (async_queue_lock);
     }
 
   if UNCOMMON (time_to_preempt)

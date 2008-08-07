@@ -231,15 +231,17 @@ static RETSIGTYPE dummy_signal_handler (int sig)
   while (0)
 #endif
 
-static volatile int signalCount = 0;
+int _gst_signal_count;
 
 void
 _gst_disable_interrupts (mst_Boolean from_signal_handler)
 {
   DECLARE;
   
-  if (signalCount++ == 0)
+  __sync_synchronize ();
+  if (_gst_signal_count++ == 0)
     {
+      __sync_synchronize ();
 #ifdef _POSIX_VERSION
       if (from_signal_handler)
         return;
@@ -253,8 +255,10 @@ _gst_enable_interrupts (mst_Boolean from_signal_handler)
 {
   DECLARE;
 
-  if (--signalCount == 0)
+  __sync_synchronize ();
+  if (--_gst_signal_count == 0)
     {
+      __sync_synchronize ();
 #ifdef _POSIX_VERSION
       if (from_signal_handler)
         return;

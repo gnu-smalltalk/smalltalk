@@ -198,6 +198,11 @@
 #define PREFETCH_ADDR(x, k) \
   DO_PREFETCH ((x), 0, (k));
 
+/* Synchronization primitives.  */
+#if !defined HAVE_SYNC_BUILTINS && defined __GNUC__
+#define __sync_synchronize()	__asm__ ("" : : : "memory")
+#endif
+
 /* Kill a warning when using GNU C.  Note that this allows using
    break or continue inside a macro, unlike do...while(0) */
 #ifdef __GNUC__

@@ -4251,7 +4251,7 @@ not an arbitrary pointer) and sets up the interpreter to call the
 function as soon as the next message send is executed.
 
 @emph{Caution:} This and the next two are the only functions in the
-@code{intepreterProxy} that can be called from within a signal handler.
+@code{intepreterProxy} that are thread-safe.
 @end deftypefun
 
 @deftypefun void asyncSignal (OOP)
@@ -4290,8 +4290,9 @@ methods to the object but, rather, to use:
 @end example
 
 The @code{sync} in the name of this function distinguishes it from
-@code{asyncSignal}, in that it cannot be called from within a signal
-handler.
+@code{asyncSignal}, in that it can only be called from a procedure
+already scheduled with @code{asyncCall}, or from a call-in.  It
+cannot be called from other threads than the Smalltalk thread.
 @end deftypefun
 
 @deftypefun void syncWait (OOP)
@@ -4305,8 +4306,9 @@ but, rather, to use:
     syncWait(semaphoreOOP)
 @end example
 
-As for @code{syncSignal}, this function cannot be called from within a
-signal handler.
+As for @code{syncSignal}, this function can only be called from a
+procedure already scheduled with @code{asyncCall}, or from a call-in.
+It cannot be called from other threads than the Smalltalk thread.
 @end deftypefun
 
 

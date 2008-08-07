@@ -1,3 +1,8 @@
+2008-08-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lock.c: New.
+	* lock.h: New.
+
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* poll.c: Avoid useless calls to sysconf and fetching of errno.

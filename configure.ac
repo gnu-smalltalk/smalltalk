@@ -156,6 +156,8 @@ dnl ------------------------------ C COMPILER / OS ------------
 
 { echo; echo "${term_bold}Platform environment:${term_norm}"; } >& AS_MESSAGE_FD
 
+GST_C_SYNC_BUILTINS
+GST_LOCK
 AC_SYS_LARGEFILE
 AC_C_INLINE
 AC_C_RESTRICT

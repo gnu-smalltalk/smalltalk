@@ -392,13 +392,15 @@ _gst_interpret (OOP processOOP)
 
         native_ip = _gst_run_native_code (native_ip);
 
-        if (!_gst_except_flag)
+        if (!native_ip)
 	  {
             OOP activeProcessOOP = get_scheduled_process ();
             gst_callin_process process = (gst_callin_process) OOP_TO_OBJ (activeProcessOOP);
             process->returnedValue = POP_OOP ();
             _gst_terminate_process (activeProcessOOP);
 	  }
+
+	SET_EXCEPT_FLAG (false);
 
         if UNCOMMON (_gst_abort_execution)
 	  {
@@ -408,26 +410,31 @@ _gst_interpret (OOP processOOP)
 	    SEND_MESSAGE (selectorOOP, 0);
 	  }
 
+        /* First, deal with any async signals.  */
         if (async_queue_enabled)
           {
-	    _gst_disable_interrupts (false);	/* block out everything! */
-            if UNCOMMON (async_queue_index)
-	      {
-	        /* deal with any async signals */
-	        int i;
-	        for (i = 0; i < async_queue_index; i++)
-		  queued_async_signals[i].func (queued_async_signals[i].data);
+	    gl_lock_lock (async_queue_lock);
+	    _gst_disable_interrupts (false);
+            __sync_synchronize ();
 
-	        async_queue_index = 0;
+	    if UNCOMMON (async_queue_index || async_queue_index_sig)
+	      {
+		int i;
+		for (i = 0; i < async_queue_index; i++)
+		  queued_async_signals[i].func (queued_async_signals[i].data);
+		for (i = 0; i < async_queue_index_sig; i++)
+		  queued_async_signals_sig[i].func (queued_async_signals_sig[i].data);
+
+	        async_queue_index = async_queue_index_sig = 0;
 	      }
-            _gst_enable_interrupts (false);
+
+	    _gst_enable_interrupts (false);
+	    gl_lock_unlock (async_queue_lock);
 	  }
 
         thisContext =
 	  (gst_method_context) OOP_TO_OBJ (_gst_this_context_oop);
         thisContext->native_ip = GET_NATIVE_IP (native_ip);
-
-        _gst_except_flag = false;
 
         if UNCOMMON (!IS_NIL (switch_to_process))
 	  {

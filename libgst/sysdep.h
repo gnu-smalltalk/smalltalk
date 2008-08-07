@@ -84,6 +84,9 @@ typedef RETSIGTYPE (*SigHandler) ();
 /* The path to the executable.  */
 extern const char *_gst_executable_path;
 
+/* The count of nested _gst_disable_interrupts calls.  */
+extern int _gst_signal_count;
+
 /* Saves and returns the current state of the software interrupt
    system.  Disables all interrupts.  */
 extern void _gst_disable_interrupts (mst_Boolean fromSignalHandler)

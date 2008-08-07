@@ -1,3 +1,7 @@
+2008-08-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ProcSched.st: Document #signal:onInterrupt:.
+
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FilePath.st: Prohibit accessing files with a '' filename.

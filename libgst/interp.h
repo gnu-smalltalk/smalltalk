@@ -328,8 +328,10 @@ extern const char *_gst_abort_execution
 
 /* Set to true when some special action must be done at the next
    sequence point.  */
-extern volatile mst_Boolean _gst_except_flag 
+#ifdef ENABLE_JIT_TRANSLATION
+extern mst_Boolean _gst_except_flag 
   ATTRIBUTE_HIDDEN;
+#endif
 
 /* Create a new Process on the top of the stack, which is specially
    marked so that it stops the interpreter's execution.  This kind

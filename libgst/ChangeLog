@@ -1,3 +1,19 @@
+2008-08-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gstpriv.h: Define __sync_synchronize.
+	* interp.h: Do not export _gst_except_flag if not JIT.
+	* interp.c: Use a separate queue for async calls scheduled
+	from a signal handler.  Protect other async call queue accesses
+	with a lock.  Add memory barriers.
+	* interp-bc.inl: Protect async call queue accesses with a lock.
+	Add memory barriers.
+	* interp-jit.inl: Protect async call queue accesses with a lock.
+	Add memory barriers.  Reset _gst_except_flag earlier.
+	Use the return value of _gst_run_native_code to check if the
+	termination method was invoked.
+	* sysdep.h: Define _gst_signal_count.
+	* sysdep.c: Use it instead of a static variable.
+
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* events.c: Reset errno if _gst_sync_file_polling finds

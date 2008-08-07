@@ -324,7 +324,7 @@ Object subclass: ProcessorScheduler [
     ]
 
     signal: aSemaphore onInterrupt: anIntegerSignalNumber [
-	"Private - signal 'aSemaphore' when the given C signal occurs"
+	"Signal 'aSemaphore' when the given C signal occurs."
 
 	<category: 'timed invocation'>
 	<primitive: VMpr_Processor_signalOnInterrupt>

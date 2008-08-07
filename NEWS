@@ -30,6 +30,10 @@ o   FileDescriptor and FileStream raise an exception if #next: cannot
 
 o   FileDescriptor is now a subclass of Stream.
 
+o   Functions gst_async_signal and gst_async_signal_and_unregister are
+    now thread-safe, *not* async-signal-safe.  To trap signals from
+    Smalltalk, you have to use ProcessorScheduler>>#signal:onInterrupt:.
+
 o   If possible, the installation is made relocatable.  To this end,
     the following conditions should be satisfied: 1) the exec-prefix
     and prefix should be identical; 2) the installation should reside
