@@ -1123,7 +1123,7 @@ find_executable (const char *argv0)
     n = readlink (buf, location, path_max);
     if (n > 0 && location[0] != '[')
       {
-        location[n] == '\0';
+        location[n] = '\0';
         return location;
       }
     if (executable_fd < 0)

@@ -1,3 +1,8 @@
+2008-08-08  Samuel Tardieu  <sam@rfc1149.net>
+
+	* libgst/sysdep.c (find_executable): Correctly zero-terminate
+	"location" before returning it.
+
 2008-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* gstpriv.h: Define __sync_synchronize.
