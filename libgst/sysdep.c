@@ -148,10 +148,8 @@
 static int tm_diff (struct tm *a,
 		    struct tm *b);
 
-static void do_interrupts (mst_Boolean disable);
-
 #define DISABLED_MASK ((-1) ^ (1 << SIGSEGV) ^ (1 << SIGBUS) ^ \
-			      (1 << SIGILL) ^ (1 << SIGABRT))
+			      (1 << SIGQUIT) ^ (1 << SIGILL) ^ (1 << SIGABRT))
 
 
 #if defined SIG_BLOCK

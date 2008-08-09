@@ -1,5 +1,10 @@
 2008-08-08  Samuel Tardieu  <sam@rfc1149.net>
 
+	* libgst/sysdep.c (do_interrupts): Remove unused prototype.
+	(DISABLED_MASK): Add SIGQUIT.
+
+2008-08-08  Samuel Tardieu  <sam@rfc1149.net>
+
 	* libgst/sysdep.c (_gst_open_pipe): Remove unused variable.
 
 2008-08-08  Samuel Tardieu  <sam@rfc1149.net>
