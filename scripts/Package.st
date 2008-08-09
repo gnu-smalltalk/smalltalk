@@ -334,12 +334,13 @@ Command subclass: PkgDist [
 	    ifFalse: [ aPackage allDistFiles ].
 
         dirs := files collect: [ :file | File pathFor: file ].
-	dirs := dirs asSet asOrderedCollection.
+	dirs := dirs asSet remove: '' ifAbsent: [ ]; asSortedCollection.
 
 	baseDir := self installDir.
 	aPackage relativeDirectory isNil ifFalse: [
 	    baseDir := baseDir / aPackage relativeDirectory ].
 
+	baseDir emitMkdir.
         dirs do: [ :dir | (baseDir / dir) emitMkdir ].
 
         files do: [ :file || srcFile destName |

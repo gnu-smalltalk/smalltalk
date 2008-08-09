@@ -1,3 +1,7 @@
+2008-08-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Package.st: Another empty filename.
+
 2008-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ProcSched.st: Document #signal:onInterrupt:.
