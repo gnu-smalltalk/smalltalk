@@ -1599,7 +1599,6 @@ _gst_open_pipe (const char *command,
 {
   int fd[2];
   int our_fd, child_fd;
-  int master;
   int access;
   int result;
 
