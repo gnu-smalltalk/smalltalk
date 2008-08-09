@@ -9,8 +9,8 @@ library_la_SOURCES = \
        strspell.c signalx.c ltdl.c regex.c socketx.c pointer-set.c
 
 noinst_HEADERS = \
-       obstack.h poll_.h getopt.h md5.h sha1.h ansidecl.h strspell.h lock.c \
-       mathl.h trigl.h avltrees.h rbtrees.h trigl.c sincosl.c \
+       obstack.h poll_.h getopt.h md5.h sha1.h ansidecl.h strspell.h lock.h \
+       mathl.h trigl.h avltrees.h rbtrees.h trigl.c sincosl.c getaddrinfo.h \
        signalx.h socketx.h ltdl.h regex.h pointer-set.h
 
 DISTCLEANFILES = poll.h

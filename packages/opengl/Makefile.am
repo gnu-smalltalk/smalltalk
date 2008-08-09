@@ -3,6 +3,7 @@ gst_module_ldflags = -rpath $(pkglibdir) -release $(VERSION)  -module \
 
 pkglib_LTLIBRARIES = gstopengl.la
 gstopengl_la_SOURCES = gstopengl.c gstGl.c gstGlu.c gstGluNurbs.c gstGluTess.c
+noinst_HEADERS = gstopengl.h
 
 gstopengl_la_LIBADD = $(LIBOPENGL) -lm
 gstopengl_la_LDFLAGS = $(gst_module_ldflags)
