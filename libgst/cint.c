@@ -265,7 +265,15 @@ get_errno (void)
   int old;
   old = _gst_errno;
   _gst_errno = 0;
-  return (old);
+
+  /* When we get one of these, we don't return an error.  However,
+     the primitive still fails and the file/socket is closed by the
+     Smalltalk code.  */
+  if (old == ESHUTDOWN || old == ECONNRESET
+      || old == ECONNABORTED || old == ENETRESET)
+    return 0;
+  else
+    return (old);
 }
 
 static inline int

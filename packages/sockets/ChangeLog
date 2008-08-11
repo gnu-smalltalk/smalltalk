@@ -1,3 +1,10 @@
+2008-08-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* AbstractSocketImpl.st: Remove #soError.
+	* cfuncs.st: Implement it as a callout.
+	* sockets.c: Remove soError, add getSoError.  Do not pass POLLHUP
+	errors to Smalltalk.
+
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Buffers.st: Add #nextAvailable:putAllOn:, remove #nextHunkPutAllOn:

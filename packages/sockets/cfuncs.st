@@ -102,12 +102,6 @@ AbstractSocketImpl class extend [
 	
     ]
 
-    soError [
-	<category: 'C constants'>
-	<cCall: 'TCPsoError' returning: #long args: #()>
-	
-    ]
-
     soReuseAddr [
 	<category: 'C constants'>
 	<cCall: 'TCPsoReuseAddr' returning: #long args: #()>
@@ -139,7 +133,6 @@ AbstractSocketImpl class extend [
     ]
 
 ]
-
 
 
 UDPSocketImpl class extend [
@@ -361,6 +354,12 @@ AbstractSocketImpl extend [
 	<category: 'C call-outs'>
 	<cCall: 'TCPsendto' returning: #int
 	args: #(#int #cObject #int #int #cObject #int )>
+	
+    ]
+
+    soError [
+	<category: 'C constants'>
+	<cCall: 'TCPgetSoError' returning: #int args: #()>
 	
     ]
 

@@ -216,7 +216,6 @@ constantFunction (msgOOB, MSG_OOB);
 constantFunction (msgPeek, MSG_PEEK);
 constantFunction (solSocket, SOL_SOCKET);
 constantFunction (soLinger, SO_LINGER);
-constantFunction (soError, SO_ERROR);
 constantFunction (soReuseAddr, SO_REUSEADDR);
 constantFunction (sockStream, SOCK_STREAM);
 constantFunction (sockRaw, SOCK_RAW);
@@ -259,6 +258,23 @@ constantFunction (aiAll, AI_ALL)
 constantFunction (aiV4mapped, AI_V4MAPPED)
 
 
+
+static int
+getSoError (int fd)
+{
+  int error;
+  int size = sizeof (error);
+  getsockopt (fd, SOL_SOCKET, SO_ERROR, (char *)&error, &size);
+
+  /* When we get one of these, we don't return an error.  However,
+     the primitive still fails and the file/socket is closed by the
+     Smalltalk code.  */
+  if (error == ESHUTDOWN || error == ECONNRESET
+      || error == ECONNABORTED || error == ENETRESET)
+    return 0;
+  else
+    return error;
+}
 
 static int
 mySocket (int domain, int type, int protocol)
@@ -311,6 +327,7 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("TCPsendto", sendto);
   vmProxy->defineCFunc ("TCPsetsockopt", setsockopt);
   vmProxy->defineCFunc ("TCPgetsockopt", getsockopt);
+  vmProxy->defineCFunc ("TCPgetSoError", getSoError);
   vmProxy->defineCFunc ("TCPsocket", mySocket);
 
   vmProxy->defineCFunc ("TCPpfUnspec", pfUnspec);
@@ -330,7 +347,6 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("TCPmsgOOB", msgOOB);
   vmProxy->defineCFunc ("TCPsolSocket", solSocket);
   vmProxy->defineCFunc ("TCPsoLinger", soLinger);
-  vmProxy->defineCFunc ("TCPsoError", soError);
   vmProxy->defineCFunc ("TCPsoReuseAddr", soReuseAddr);
   vmProxy->defineCFunc ("TCPsockStream", sockStream);
   vmProxy->defineCFunc ("TCPsockRaw", sockRaw);

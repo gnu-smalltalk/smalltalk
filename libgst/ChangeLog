@@ -1,3 +1,7 @@
+2008-08-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Do not pass POLLHUP errors to Smalltalk.
+
 2008-08-08  Samuel Tardieu  <sam@rfc1149.net>
 
 	* libgst/sysdep.c (do_interrupts): Remove unused prototype.

@@ -301,18 +301,6 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	    size: ba size
     ]
 
-    soError [
-	"Answer the pending error on the socket, or 0 if none"
-
-	<category: 'socket options'>
-	| data |
-	data := self 
-		    optionAt: self class soError
-		    level: self class solSocket
-		    size: CInt sizeof.
-	^data intAt: 1
-    ]
-
     soLinger [
 	"Answer the number of seconds by which a `close' operation can block
 	 to ensure that all the packets have reliably reached the destination,
