@@ -72,7 +72,8 @@ and also provide some methods that can be used in inspection or debugging.'>
 	"Print a representation for the receiver on aStream"
 
 	<category: 'printing'>
-	outerContext isNil
+	| home |
+	(home := self home) isNil
 	    ifTrue: [
 		aStream
 		    nextPutAll: 'optimized ';
@@ -84,7 +85,7 @@ and also provide some methods that can be used in inspection or debugging.'>
 		    nextPut: $) ]
 	    ifFalse: [
 		aStream nextPutAll: '[] in '.
-		self home
+		home
 		    printOn: aStream
 		    line: self currentLineInFile]
     ]

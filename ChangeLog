@@ -1,3 +1,7 @@
+2008-08-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/BlkContext.st: Make printing more resilient to "bad" contexts.
+
 2008-08-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Package.st: Another empty filename.
