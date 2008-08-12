@@ -9,7 +9,7 @@
 
 #######################################################################
 #
-# Copyright 2001, 2003, 2005, 2006 Free Software Foundation, Inc.
+# Copyright 2001, 2003, 2005, 2006, 2008 Free Software Foundation, Inc.
 # Written by Paolo Bonzini and Dragomir Milivojevic
 #
 # This file is part of the GNU Smalltalk class library.
@@ -100,17 +100,23 @@ BEGIN {
     ptr_type["#cObject"] = "#cObject"
 
     # Fix asymmetry
-    method_regexp = "^g_param_values?_|^g_param_type_|^gtk_file_chooser_"
-    class["g_param_value_"] = "GParamSpec"
-    class["g_param_values_"] = "GParamSpec"
-    class["g_param_type_"] = "GParamSpec"
+    method_regexp = "^g_param_values?_|^g_param_type_|^gtk_file_chooser_|^gdk_window_"
+    prefix_class["g_param_value_"] = "GParamSpec"
+    prefix_class["g_param_values_"] = "GParamSpec"
+    prefix_class["g_param_type_"] = "GParamSpec"
+    self_class["g_param_value_"] = "GParamSpec"
+    self_class["g_param_values_"] = "GParamSpec"
+    self_class["g_param_type_"] = "GParamSpec"
 
     # Methods that we do not need
     method_skip_regexp = "(^$)|(_error_quark$)"
 
     # Not really exact, this belongs in GtkFileChooserWidget too.
     # We need a way to do interfaces.
-    class["gtk_file_chooser_"] = "GtkFileChooserDialog"
+    prefix_class["gtk_file_chooser_"] = "GtkFileChooserDialog"
+    prefix_class["gdk_window_"] = "GdkDrawable"
+    self_class["gtk_file_chooser_"] = "GtkFileChooserDialog"
+    self_class["gdk_window_"] = "GdkWindow"
 }
 
 # Pick the correct case for the class (e.g. CList vs. Clist)
@@ -143,17 +149,22 @@ match_function_first_line($0) {
   if (first_line[2] ~ method_skip_regexp)
     next
   else if (match(first_line[2], method_regexp))
-    className = class[substr(first_line[2], 1, RLENGTH)]
+    {
+      prefixClassName = prefix_class[substr(first_line[2], 1, RLENGTH)]
+      selfClassName = self_class[substr(first_line[2], 1, RLENGTH)]
+    }
   else if (match (first_line[2], /^(g_)?[a-z]*_/))
-    className = smalltalkize(toupper(substr(first_line[2], 1, RLENGTH - 1)))
+    prefixClassName = selfClassName = smalltalkize(toupper(substr(first_line[2], 1, RLENGTH - 1)))
 
-  if (tolower(className) in correct_case)
-    className = correct_case[tolower(className)]
+  if (tolower(prefixClassName) in correct_case)
+    prefixClassName = correct_case[tolower(prefixClassName)]
+  if (tolower(selfClassName) in correct_case)
+    selfClassName = correct_case[tolower(selfClassName)]
 
   first_line[2] = substr(first_line[2], RLENGTH + 1)
 
   # For types that are not classes, do not create the getType method
-  if (first_line[2] == "get_type" && (className in type))
+  if (first_line[2] == "get_type" && (prefixClassName in type))
     next
 
   # Move object creation methods to the class side.  We have a single
@@ -166,9 +177,9 @@ match_function_first_line($0) {
   # Lose some symmetry for the sake of intuitiveness
   self = first_line[2] ~ /(^|_)((un)?ref$|(dis)?connect)/
   if (match(first_line[2], /^paint_/))
-    className = "GtkStyle"
+    prefixClassName = selfClassName = "GtkStyle"
   if (match(first_line[2], /^draw_/))
-    className = (className == "Gdk" ? "GdkDrawable" : "GtkStyle")
+    prefixClassName = selfClassName = (prefixClassName == "Gdk" ? "GdkDrawable" : "GtkStyle")
 
   smalltalkFuncName = smalltalkize(first_line[2])
 
@@ -237,7 +248,7 @@ match_function_first_line($0) {
       continue
     }
 
-    if (i < 5 && last == className)
+    if (i < 5 && last == selfClassName)
       self = 1
 
     if (i >= 5 || !self)
@@ -274,7 +285,7 @@ match_function_first_line($0) {
   }
 
   if (creation)
-    retType = returned(className "*")
+    retType = returned(prefixClassName "*")
   else 
     retType = returned(first_line[1])
 
@@ -286,23 +297,23 @@ match_function_first_line($0) {
 
   # skip some functions that we don't have bindings for
 
-  if (type[className] == "__skip_this__" \
-      || classname ~ /^G.*(Func|Notify)$/ \
-      || className == "GType" \
-      || className == "GtkType" \
+  if (type[prefixClassName] == "__skip_this__" \
+      || prefixClassName ~ /^G.*(Func|Notify)$/ \
+      || prefixClassName == "GType" \
+      || prefixClassName == "GtkType" \
       || argdecl ~ /__skip_this__/ \
       || retType == "__skip_this__")
     next
 
   # print the declaration
 
-  print "!" className (self ? "" : " class") " methodsFor: 'C call-outs'!"
+  print "!" prefixClassName (self ? "" : " class") " methodsFor: 'C call-outs'!"
   print decl
   print "    <cCall: '" cFuncName "' returning: " retType
   print "\targs: #(" argdecl " )>! !\n"
 
   if (decl == "getType")
-    print "GLib registerType: " className "!\n"
+    print "GLib registerType: " prefixClassName "!\n"
 }
 
 
@@ -387,11 +398,12 @@ function define_class(name) {
 
   correct_case[tolower(name)] = name
   prefix = method_prefix(name)
-  if (prefix in class)
+  if (prefix in prefix_class)
     return
 
   method_regexp = method_regexp "|^" prefix
-  class[prefix] = name
+  prefix_class[prefix] = name
+  self_class[prefix] = name
   # if object methods turn up on the wrong class (i.e. GtkUIManager on Gtk,
   # check prefix here... its probably wrong.
 }

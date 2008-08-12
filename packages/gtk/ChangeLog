@@ -1,3 +1,9 @@
+2008-08-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* example_arrow.st: Fix pasto.
+	* funcs.awk: Put gdk_window_* methods in GdkDrawable to
+	support GTK+ 2.12.
+
 2008-05-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* example_entry.st: Use GC-allocated CObjects.
