@@ -93,7 +93,7 @@ Object subclass: ArrowExample [
 
 
 
-GtkButton class extend [
+GTK.GtkButton class extend [
 
     createArrowButton: arrowType shadowType: shadowType [
 	<category: 'creating arrow buttons'>

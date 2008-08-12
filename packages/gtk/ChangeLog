@@ -1,3 +1,9 @@
+2008-08-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* example_arrow.st: Fix pasto.
+	* funcs.awk: Put gdk_window_* methods in GdkDrawable to
+	support GTK+ 2.12.
+
 2007-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* MoreFuncs.st: Switch to the new syntax for "returning:".
