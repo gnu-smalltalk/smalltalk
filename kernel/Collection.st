@@ -571,7 +571,7 @@ of objects.'>
 	"Print a representation of the receiver on aStream"
 
 	<category: 'printing'>
-	aStream nextPutAll: self classNameString.
+	aStream nextPutAll: self class storeString.
 	aStream nextPutAll: ' ('.
 	self do: 
 		[:element | 
@@ -586,7 +586,7 @@ of objects.'>
 	<category: 'storing'>
 	| noElements |
 	aStream nextPut: $(.
-	aStream nextPutAll: self classNameString.
+	aStream nextPutAll: self class storeString.
 	aStream nextPutAll: ' new'.
 	noElements := true.
 	self do: 

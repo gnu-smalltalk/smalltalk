@@ -182,7 +182,7 @@ members that my instance represents.'>
 	<category: 'printing'>
 	| size |
 	aStream
-	    nextPutAll: self classNameString;
+	    nextPutAll: self class storeString;
 	    nextPut: $(.
 	size := self size.
 	size > 0 ifTrue: [aStream print: start].
@@ -221,7 +221,7 @@ members that my instance represents.'>
 
 	<category: 'storing'>
 	aStream nextPut: $(.
-	aStream nextPutAll: self classNameString.
+	aStream nextPutAll: self class storeString.
 	aStream nextPutAll: ' from: '.
 	start storeOn: aStream.
 	aStream nextPutAll: ' to: '.

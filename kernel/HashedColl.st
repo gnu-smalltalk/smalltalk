@@ -209,7 +209,7 @@ give fast responses on their presence in the collection.'>
 	| hasElements |
 	aStream
 	    nextPut: $(;
-	    nextPutAll: self classNameString;
+	    nextPutAll: self class storeString;
 	    nextPutAll: ' new'.
 	hasElements := false.
 	self do: 

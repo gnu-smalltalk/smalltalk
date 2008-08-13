@@ -174,7 +174,7 @@ twice, then I will report that that element has been stored twice.'>
 	| noElements |
 	aStream
 	    nextPut: $(;
-	    nextPutAll: self classNameString;
+	    nextPutAll: self class storeString;
 	    nextPutAll: ' new'.
 	noElements := true.
 	contents keysAndValuesDo: 
@@ -195,7 +195,7 @@ twice, then I will report that that element has been stored twice.'>
 
 	<category: 'printing'>
 	aStream
-	    nextPutAll: self classNameString;
+	    nextPutAll: self class storeString;
 	    nextPut: $(.
 	contents keysAndValuesDo: 
 		[:key :count | 

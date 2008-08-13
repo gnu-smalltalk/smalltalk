@@ -606,7 +606,7 @@ All classes in the system are subclasses of me.'>
 	| class hasSemi |
 	class := self class.
 	aStream nextPut: $(.
-	aStream nextPutAll: self classNameString.
+	aStream nextPutAll: self class storeString.
 	hasSemi := false.
 	class isVariable 
 	    ifTrue: 
@@ -738,16 +738,6 @@ All classes in the system are subclasses of me.'>
 
 	<category: 'debugging'>
 	^self basicSize
-    ]
-
-    classNameString [
-	"Answer the name of the receiver's class"
-
-	<category: 'private'>
-	| name |
-	name := self class name.
-	name isNil ifTrue: [name := self name , ' class'].
-	^name
     ]
 
     allOwners [

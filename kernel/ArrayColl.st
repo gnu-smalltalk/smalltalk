@@ -444,7 +444,7 @@ externally; I will not rearrange the order of the elements.'>
 	| index |
 	aStream
 	    nextPutAll: '((';
-	    nextPutAll: self classNameString;
+	    nextPutAll: self class storeString;
 	    nextPutAll: ' basicNew: '.
 	self basicSize printOn: aStream.
 	aStream nextPut: $).
