@@ -553,16 +553,6 @@ FilePath subclass: File [
 	File checkError
     ]
 
-    createDirectories [
-	"Create the receiver as a directory, together with all its parents."
-
-	<category: 'directory operations'>
-	| parent |
-	parent := self parent.
-	parent exists ifFalse: [ parent createDirectories ].
-	self createDirectory
-    ]
-
     namesDo: aBlock [
 	"Evaluate aBlock once for each file in the directory represented by the
 	 receiver, passing its name. aBlock should not return."

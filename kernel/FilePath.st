@@ -721,6 +721,28 @@ size and timestamps.'>
 	self all filesMatching: aPattern do: aBlock
     ]
 
+    createDirectory [
+	"Create the receiver as a directory, together with all its parents."
+
+	<category: 'directory operations'>
+	self subclassResponsibility
+    ]
+
+    createDirectories [
+	"Create the receiver as a directory, together with all its parents."
+
+	<category: 'directory operations'>
+	| parent |
+	parent := self parent.
+	parent exists
+	    ifTrue: [
+		self exists ifTrue: [
+		    self isDirectory ifFalse: [ self createDirectory ].
+		    ^self ] ]
+	    ifFalse: [ parent createDirectories ].
+	self createDirectory
+    ]
+
     files [
 	"Answer an Array with File objects for the contents of the directory
 	 represented by the receiver."
