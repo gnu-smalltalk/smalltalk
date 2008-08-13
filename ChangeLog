@@ -1,5 +1,10 @@
 2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Array.st: Fix #storeOn: for subclasses.
+	* kernel/ByteArray.st: Fix #storeOn: for subclasses.
+
+2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Collection.st: Add #includesAnyOf:.
 	* kernel/SeqCollect.st: Add #copyWithFirst: and #swap:with:.
 	* kernel/SortCollect.st: Prepend `basic' prefix to old methods

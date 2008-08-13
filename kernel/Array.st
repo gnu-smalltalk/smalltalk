@@ -86,6 +86,7 @@ and general access behavior from SequenceableCollection.'>
 	"Store a Smalltalk literal compiling to the receiver on aStream"
 
 	<category: 'printing'>
+	self class == Array ifFalse: [ ^super storeLiteralOn: aStream ].
 	aStream nextPut: $#.
 	aStream nextPut: $(.
 	self do: 
@@ -99,12 +100,8 @@ and general access behavior from SequenceableCollection.'>
 	"Store Smalltalk code compiling to the receiver on aStream"
 
 	<category: 'printing'>
-	aStream nextPut: $#.
-	aStream nextPut: $(.
-	self do: 
-		[:elt | elt storeLiteralOn: aStream]
-		separatedBy: [aStream space].
-	aStream nextPut: $).
+	self class == Array ifFalse: [ ^super storeOn: aStream ].
+	self storeLiteralOn: aStream.
 	self isReadOnly ifFalse: [aStream nextPutAll: ' copy']
     ]
 
