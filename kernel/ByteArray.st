@@ -84,12 +84,13 @@ a String''s elements are characters.'>
 	"Put a Smalltalk literal evaluating to the receiver on aStream."
 
 	<category: 'storing'>
+	self class == ByteArray ifFalse: [ ^super storeLiteralOn: aStream ].
 	aStream nextPut: $#.
 	aStream nextPut: $[.
 	self do: 
 		[:elt | 
-		elt
-		    printOn: aStream;
+		aStream
+		    print: elt;
 		    space].
 	aStream nextPut: $]
     ]
@@ -98,6 +99,7 @@ a String''s elements are characters.'>
 	"Put Smalltalk code evaluating to the receiver on aStream."
 
 	<category: 'storing'>
+	self class == ByteArray ifFalse: [ ^super storeOn: aStream ].
 	self storeLiteralOn: aStream.
 	self isReadOnly ifFalse: [aStream nextPutAll: ' copy']
     ]
