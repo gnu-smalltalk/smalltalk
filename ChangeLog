@@ -1,5 +1,9 @@
 2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Duration.st: Add #readFrom:.
+
+2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/File.st: Move #createDirectories...
 	* kernel/FilePath.st: ... here.  Make it succeed if the path
 	exists and is a directory.  Add abstract #createDirectory.
