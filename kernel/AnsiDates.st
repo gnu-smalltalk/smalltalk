@@ -497,6 +497,32 @@ Time subclass: Duration [
 	^self fromSeconds: ((d * 24 + h) * 60 + m) * 60 + s
     ]
 
+    Duration class >> readFrom: aStream [
+        "Parse an instance of the receiver (hours/minutes/seconds) from
+         aStream"
+
+        <category: 'instance creation'>
+        | t1 t2 t3 t4 i ch ws |
+        t1 := t2 := t3 := t4 := 0.
+        ch := $:.
+        i := 1.
+        [i <= 4 and: [(aStream atEnd not and: [ch isSeparator not]) or: [i < 4]]] whileTrue: [
+            ws := WriteStream on: (String new: 10).
+
+            ch := $:.
+            [aStream atEnd not and: [(ch := aStream next) isDigit not]] whileTrue.
+            ch isDigit ifTrue: [
+                [ws nextPut: ch.
+                aStream atEnd not and: [(ch := aStream next) isDigit]]
+                        whileTrue].
+	    t1 := t2.
+	    t2 := t3.
+	    t3 := t4.
+            t4 := ws contents asNumber.
+	    i := i + 1].
+        ^self fromSeconds: (t1 * 24 + t2) * 3600 + (t3 * 60) + t4
+    ]
+
     Duration class >> initialize [
 	"Initialize the receiver's instance variables"
 
