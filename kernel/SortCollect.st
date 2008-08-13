@@ -403,7 +403,7 @@ above criteria -- actually any object which responds to #value:value:.'>
 	"Put the highest item in lastOrdered and decrement the size of the heap"
 
 	| parentIndex childIndex heapSize child childB parent delta |
-	self swap: lastOrdered with: firstIndex.
+	self basicSwap: lastOrdered with: firstIndex.
 	lastOrdered := lastOrdered - 1.
 
 	"Reorder the heap"
@@ -458,7 +458,7 @@ above criteria -- actually any object which responds to #value:value:.'>
 	^less == greater ifTrue: [0] ifFalse: [less ifTrue: [-1] ifFalse: [1]]
     ]
 
-    swap: indexA ifBefore: indexB [
+    basicSwap: indexA ifBefore: indexB [
 	<category: 'private methods - sorting'>
 	| a b |
 	(sortBlock value: (a := self basicAt: indexA)
@@ -468,7 +468,7 @@ above criteria -- actually any object which responds to #value:value:.'>
 		    self basicAt: indexB put: a]
     ]
 
-    swap: indexA ifAfter: indexB [
+    basicSwap: indexA ifAfter: indexB [
 	<category: 'private methods - sorting'>
 	| a b |
 	(sortBlock value: (a := self basicAt: indexA)
@@ -478,7 +478,7 @@ above criteria -- actually any object which responds to #value:value:.'>
 		    self basicAt: indexB put: a]
     ]
 
-    swap: anIndex with: anotherIndex [
+    basicSwap: anIndex with: anotherIndex [
 	"Private - Swap the item at index anIndex with the item at index
 	 another index"
 
@@ -544,7 +544,7 @@ above criteria -- actually any object which responds to #value:value:.'>
 	| pivot mid smaller larger |
 	last - first < 2 
 	    ifTrue: 
-		[last > first ifTrue: [self swap: first ifAfter: last].
+		[last > first ifTrue: [self basicSwap: first ifAfter: last].
 		^self].
 
 	"First we pick a partititioning element.  We must find one
@@ -554,9 +554,9 @@ above criteria -- actually any object which responds to #value:value:.'>
 	 performance.
 	 We also have to to put it in the middle."
 	mid := (first + last) // 2.
-	self swap: first ifAfter: mid.
-	self swap: mid ifAfter: last.
-	self swap: first ifAfter: last.
+	self basicSwap: first ifAfter: mid.
+	self basicSwap: mid ifAfter: last.
+	self basicSwap: first ifAfter: last.
 	pivot := self basicAt: mid.
 	smaller := first.
 	larger := last.
@@ -575,7 +575,7 @@ above criteria -- actually any object which responds to #value:value:.'>
 		whileTrue: [larger := larger - 1].
 	smaller < larger] 
 		whileTrue: 
-		    [self swap: smaller with: larger.
+		    [self basicSwap: smaller with: larger.
 		    smaller := smaller + 1.
 		    larger := larger - 1].
 	smaller > larger 

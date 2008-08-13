@@ -222,6 +222,14 @@ of objects.'>
 	^self basicSize
     ]
 
+    includesAnyOf: aCollection [
+	"Answer whether we include any of the objects in aCollection"
+
+	<category: 'testing collections'>
+	self do: [:element | (aCollection includes: element) ifTrue: [^true]].
+	^false
+    ]
+
     includes: anObject [
 	"Answer whether we include anObject"
 
