@@ -328,7 +328,7 @@ Exception subclass: Halt [
 
 
 
-Halt subclass: ArithmeticError [
+Error subclass: ArithmeticError [
     
     <category: 'Language-Exceptions'>
     <comment: 'An ArithmeticError exception is raised by numeric classes when a program
@@ -341,11 +341,18 @@ negative number.'>
 	<category: 'description'>
 	^'The program attempted to do an impossible arithmetic operation'
     ]
+
+    isResumable [
+	"Answer true.  Arithmetic exceptions are by default resumable."
+
+	<category: 'description'>
+	^true
+    ]
 ]
 
 
 
-Halt subclass: MessageNotUnderstood [
+Error subclass: MessageNotUnderstood [
     | message receiver |
     
     <category: 'Language-Exceptions'>
@@ -378,6 +385,13 @@ it is the default action of the #doesNotUnderstand: handler'>
 
 	<category: 'description'>
 	^'The program sent a message which was not understood by the receiver.'
+    ]
+
+    isResumable [
+	"Answer true.  #doesNotUnderstand: exceptions are by default resumable."
+
+	<category: 'description'>
+	^true
     ]
 ]
 

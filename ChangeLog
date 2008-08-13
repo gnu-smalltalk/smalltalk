@@ -1,5 +1,10 @@
 2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiExcept.st: Change superclass of ArithmeticError
+	and MessageNotUnderstood to Error, make them resumable.
+
+2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/AnsiExcept.st: Change #primError: to #resignalAsUnhandled:.
 	Change superclass of Halt to Exception.  Move old implementation
 	of #primError: to UnhandledException>>#defaultAction.  Add
