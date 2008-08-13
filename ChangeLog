@@ -1,5 +1,11 @@
 2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Behavior.st: Add #indexOfInstVar: and
+	#indexOfInstVar:ifAbsent:.
+	* kernel/Object.st: add #instVarNamed: and #instVarNamed:put:.
+
+2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ArrayColl.st: Replace #classNameString with #storeString.
 	* kernel/Bag.st: Replace #classNameString with #storeString.
 	* kernel/Collection.st: Replace #classNameString with #storeString.

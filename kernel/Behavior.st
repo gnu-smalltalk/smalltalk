@@ -661,6 +661,22 @@ method dictionary, and iterating over the class hierarchy.'>
 	^count
     ]
 
+    indexOfInstVar: aString [
+	"Answer the index of aString in the fixed instance variables of the
+	 instances of the receiver, or 0 if the variable is missing."
+
+	<category: 'accessing instances and variables'>
+	^self allInstVarNames indexOfLast: aString asSymbol ifAbsent: [0]
+    ]
+
+    indexOfInstVar: aString ifAbsent: aBlock [
+	"Answer the index of aString in the fixed instance variables of the
+	 instances of the receiver, or 0 if the variable is missing."
+
+	<category: 'accessing instances and variables'>
+	^self allInstVarNames indexOfLast: aString asSymbol ifAbsent: aBlock
+    ]
+
     instVarNames [
 	"Answer an Array containing the instance variables defined by the receiver"
 

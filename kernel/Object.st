@@ -934,6 +934,20 @@ All classes in the system are subclasses of me.'>
 	
     ]
 
+    instVarNamed: aString [
+	"Answer the instance variable named aString in the receiver."
+
+	<category: 'introspection'>
+	^self instVarAt: (self class indexOfInstVar: aString)
+    ]
+
+    instVarNamed: aString put: anObject [
+	"Answer the instance variable named aString in the receiver."
+
+	<category: 'introspection'>
+	^self instVarAt: (self class indexOfInstVar: aString) put: anObject
+    ]
+
     instVarAt: index [
 	"Answer the index-th instance variable of the receiver.
 	 This method must not be overridden."
