@@ -1,5 +1,16 @@
 2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ArrayColl.st: Replace #classNameString with #storeString.
+	* kernel/Bag.st: Replace #classNameString with #storeString.
+	* kernel/Collection.st: Replace #classNameString with #storeString.
+	* kernel/Date.st: Replace #classNameString with #storeString.
+	* kernel/Dictionary.st: Replace #classNameString with #storeString.
+	* kernel/HashedColl.st: Replace #classNameString with #storeString.
+	* kernel/Interval.st: Replace #classNameString with #storeString.
+	* kernel/Object.st: Replace #classNameString with #storeString.
+
+2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Convert.st: Fix class-name filters, which would fail if
 	class-side extensions were present in the input.
 

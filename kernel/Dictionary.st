@@ -461,7 +461,7 @@ certain special cases.'>
 
 	<category: 'printing'>
 	aStream
-	    nextPutAll: self classNameString , ' (';
+	    nextPutAll: self class storeString , ' (';
 	    nl.
 	self keysAndValuesDo: 
 		[:key :value | 
@@ -480,7 +480,7 @@ certain special cases.'>
 	<category: 'storing'>
 	| hasElements |
 	aStream
-	    nextPutAll: '((' , self classNameString , ' new: ';
+	    nextPutAll: '((' , self class storeString , ' new: ';
 	    print: self size;
 	    nextPut: $).
 	hasElements := false.

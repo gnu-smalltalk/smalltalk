@@ -588,7 +588,7 @@ method.'>
 	<category: 'storing'>
 	aStream
 	    nextPut: $(;
-	    nextPutAll: self classNameString;
+	    nextPutAll: self class storeString;
 	    nextPutAll: ' newDay: ';
 	    store: self day;
 	    nextPutAll: ' monthIndex: ';
