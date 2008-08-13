@@ -1,5 +1,16 @@
 2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiExcept.st: Change #primError: to #resignalAsUnhandled:.
+	Change superclass of Halt to Exception.  Move old implementation
+	of #primError: to UnhandledException>>#defaultAction.  Add
+	originalException field to UnhandledException.
+	* kernel/ContextPart.st: Remove #unwind and #unwind:.
+	* kernel/ExcHandling.st: Add #resignalAsUnhandled:, remove #primError:.
+	Change #primError: to #resignalAsUnhandled:.
+	* kernel/SysDict.st: Don't use ContextPart class>>#unwind.
+
+2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Duration.st: Add #readFrom:.
 
 2008-08-13  Paolo Bonzini  <bonzini@gnu.org>

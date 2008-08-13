@@ -101,7 +101,7 @@ CoreException, so the two mechanisms are actually interchangeable.'>
 
 	<category: 'initialization'>
 	(ExAll := Kernel.CoreException basicNew)
-	    defaultHandler: [:sig | self primError: sig messageText];
+	    defaultHandler: [:sig | self resignalAsUnhandled: sig messageText];
 	    depth: 0;
 	    signalClass: Signal;
 	    isResumable: true;
@@ -205,7 +205,7 @@ CoreException, so the two mechanisms are actually interchangeable.'>
 	"Execute the default action that is attached to the receiver."
 
 	<category: 'exception description'>
-	self creator primError: self messageText
+	self resignalAsUnhandled: self messageText
     ]
 
     signal [
@@ -306,7 +306,7 @@ even though it is not to be considered an error.'
 ]
 
 
-Error subclass: Halt [
+Exception subclass: Halt [
     
     <category: 'Language-Exceptions'>
     <comment: 'Halt represents a resumable error, usually a bug.'>
@@ -1422,6 +1422,8 @@ Namespace current: SystemExceptions [
 
 Exception subclass: UnhandledException [
 
+    | originalException |
+
     <category: 'Language-Exception'>
     <comment: 'I am raised when a backtrace is shown to terminate the
 current process.'>
@@ -1434,10 +1436,45 @@ current process.'>
     ]
 
     defaultAction [
-	"Terminate the currrent process."
+	"Terminate the current process."
 
 	<category: 'accessing'>
-	thisContext environment continue: self tag
+	| debugger debuggerClass context |
+	Transcript flush.
+	debugger := Processor activeDebugger.
+	debugger isNil ifFalse: [^debugger stopInferior: self messageText ].
+	debuggerClass := thisContext debuggerClass.
+	debuggerClass isNil 
+	    ifFalse: [^debuggerClass open: self originalException creator printString , ' error: ' , self messageText ].
+
+	"Default behavior - print backtrace"
+	RegressionTesting ifFalse: [self originalException creator basicPrint].
+	Transcript
+	    nextPutAll: ' error: ';
+	    display: self messageText;
+	    nl.
+	RegressionTesting 
+	    ifFalse: 
+		[context := thisContext.
+		[context isInternalExceptionHandlingContext] 
+		    whileTrue: [context := context parentContext].
+		context backtraceOn: Transcript].
+
+	thisContext environment continue: nil
+    ]
+
+    originalException [
+	"Answer the uncaught exception."
+
+	<category: 'accessing'>
+	^originalException
+    ]
+
+    originalException: anObject [
+	"Set the uncaught exception to anObject."
+
+	<category: 'accessing'>
+	originalException := anObject
     ]
 ]
 

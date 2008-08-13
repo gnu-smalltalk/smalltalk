@@ -156,7 +156,7 @@ My instance also helps keep track of dependencies between objects.'>
 	"Interrupt interpreter"
 
 	<category: 'basic'>
-	ContextPart unwind
+	thisContext environment continue: nil
     ]
 
     printOn: aStream in: aNamespace [

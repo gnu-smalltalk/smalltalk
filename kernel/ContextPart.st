@@ -68,24 +68,6 @@ methods that can be used in inspection or debugging.'>
 	thisContext parentContext backtraceOn: aStream
     ]
 
-    ContextPart class >> unwind [
-	"Return execution to the last context marked as an unwind point, returning
-	 nil on that stack."
-
-	<category: 'exception handling'>
-	self unwind: nil
-    ]
-
-    ContextPart class >> unwind: returnValue [
-	"Return execution to the innermost #valueWithUnwind call, passing it
-	 returnValue."
-
-	<category: 'exception handling'>
-	SystemExceptions.UnhandledException new
-	    tag: returnValue;
-	    signal
-    ]
-
     ContextPart class >> thisContext [
 	"Return the value of the thisContext variable.  Called internally
 	 when the variable is accessed."

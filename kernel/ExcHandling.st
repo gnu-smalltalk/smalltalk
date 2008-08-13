@@ -587,6 +587,22 @@ with a lower priority.'>
         ^self return: (signal activateHandler: true)
     ]
 
+    resignalAsUnhandled: message [
+	"This might start the debugger... Note that we use #basicPrint
+	 'cause #printOn: might invoke an error."
+
+	<category: 'built ins'>
+	| exc |
+	exc := SystemExceptions.UnhandledException new
+	    originalException: self;
+	    messageText: message; yourself.
+	thisContext parentContext
+	    scanBacktraceFor: #(#resignalAsUnhandled:)
+	    do: [ :ctx | ^exc defaultAction ].
+
+	self resignalAs: exc
+    ]
+
     resume [
 	"If the exception is resumable, resume the execution of the block that
 	 raised the exception; the method that was used to signal the exception
@@ -596,7 +612,7 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	self isResumable 
-	    ifFalse: [self primError: 'Exception not resumable - #resume failed'].
+	    ifFalse: [self resignalAsUnhandled: 'Exception not resumable - #resume failed'].
 	self resetHandler.
 	resumeBlock value: self
     ]
@@ -610,7 +626,7 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	self isResumable 
-	    ifFalse: [self primError: 'Exception not resumable - #resume: failed'].
+	    ifFalse: [self resignalAsUnhandled: 'Exception not resumable - #resume: failed'].
 	self resetHandler.
 	resumeBlock value: anObject
     ]
@@ -635,7 +651,7 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	onDoBlock isNil 
-	    ifTrue: [self primError: 'No exception handler effective - #retry failed'].
+	    ifTrue: [self resignalAsUnhandled: 'No exception handler effective - #retry failed'].
 	Kernel.CoreException resetAllHandlers.
 	self return: onDoBlock value
     ]
@@ -661,7 +677,7 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	context isNil 
-	    ifTrue: [self primError: 'No exception handler effective - #return failed'].
+	    ifTrue: [self resignalAsUnhandled: 'No exception handler effective - #return failed'].
 	Kernel.CoreException resetAllHandlers.
 	context parentContext continue: nil
     ]
@@ -671,7 +687,7 @@ with a lower priority.'>
 
 	<category: 'exception handling'>
 	context isNil 
-	    ifTrue: [self primError: 'No exception handler effective - #return: failed'].
+	    ifTrue: [self resignalAsUnhandled: 'No exception handler effective - #return: failed'].
 	Kernel.CoreException resetAllHandlers.
 	context parentContext continue: anObject
     ]
@@ -748,34 +764,6 @@ with a lower priority.'>
 
 
 Object extend [
-
-    primError: message [
-	"This might start the debugger... Note that we use #basicPrint
-	 'cause #printOn: might invoke an error."
-
-	<category: 'built ins'>
-	| debugger debuggerClass context |
-	Transcript flush.
-	debugger := Processor activeDebugger.
-	debugger isNil ifFalse: [^debugger stopInferior: message].
-	debuggerClass := thisContext debuggerClass.
-	debuggerClass isNil 
-	    ifFalse: [^debuggerClass open: self class printString , ' error: ' , message].
-
-	"Default behavior - print backtrace"
-	RegressionTesting ifFalse: [self basicPrint].
-	Transcript
-	    nextPutAll: ' error: ';
-	    display: message;
-	    nl.
-	RegressionTesting 
-	    ifFalse: 
-		[context := thisContext.
-		[context isInternalExceptionHandlingContext] 
-		    whileTrue: [context := context parentContext].
-		context backtraceOn: Transcript].
-	ContextPart unwind
-    ]
 
 ]
 
