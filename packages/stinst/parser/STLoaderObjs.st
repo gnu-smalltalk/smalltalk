@@ -849,6 +849,44 @@ shape
     ^nil
 ! !
 
+!UndefinedMetaclass methodsFor: 'delegation'!
+
+name
+    ^self asClass name
+!
+
+category
+    "Answer the class category"
+    ^self asClass category
+!
+
+comment
+    "Answer the class comment"
+    ^self asClass comment
+!
+
+comment: aString
+    "Answer the class comment"
+    ^self asClass comment: aString
+!
+
+environment
+    "Answer the namespace in which the receiver is implemented"
+    ^self asClass environment
+!
+
+classVarNames
+    "Answer the names of the variables in the class pool dictionary"
+
+    ^self asClass classVarNames
+!
+
+sharedPools
+    "Return the names of the shared pools defined by the class"
+
+    ^self asClass sharedPools
+! !
+
 !UndefinedMetaclass methodsFor: 'testing'!
 
 isDefined
