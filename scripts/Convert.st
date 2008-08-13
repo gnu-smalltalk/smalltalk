@@ -453,7 +453,7 @@ Options:
 
 		filter := arg
 		    asFilterOn: filter
-		    through: [ :class | class nameIn: Smalltalk ] ].
+		    through: [ :class | class asClass nameIn: Smalltalk ] ].
 
 	    opt = 'category' ifTrue: [
 		[ 'a' ~ arg ] on: Error do: [ :ex |
