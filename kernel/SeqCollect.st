@@ -637,6 +637,14 @@ some access and manipulation methods.'>
 	    yourself
     ]
 
+    copyWithFirst: anObject [
+	"Answer a new collection holding all the elements of the receiver
+	 after the first occurrence of anObject, up to the last."
+
+	<category: 'copying SequenceableCollections'>
+	^self copyReplaceFrom: 1 to: 0 withObject: anObject
+    ]
+
     copyFrom: start [
 	"Answer a new collection containing all the items in the receiver from the
 	 start-th."
@@ -1047,5 +1055,17 @@ some access and manipulation methods.'>
 	<category: 'private methods'>
 	^self size
     ]
+
+    swap: anIndex with: anotherIndex [
+	"Swap the item at index anIndex with the item at index
+	 another index"
+
+	<category: 'manipulation'>
+	| saved |
+	saved := self at: anIndex.
+	self at: anIndex put: (self at: anotherIndex).
+	self at: anotherIndex put: saved
+    ]
+
 ]
 

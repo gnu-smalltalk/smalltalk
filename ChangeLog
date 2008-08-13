@@ -1,5 +1,12 @@
 2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Collection.st: Add #includesAnyOf:.
+	* kernel/SeqCollect.st: Add #copyWithFirst: and #swap:with:.
+	* kernel/SortCollect.st: Prepend `basic' prefix to old methods
+	#swap:with:, #swap:ifBefore:, #swap:ifAfter:.
+
+2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ArrayColl.st: Replace #classNameString with #storeString.
 	* kernel/Bag.st: Replace #classNameString with #storeString.
 	* kernel/Collection.st: Replace #classNameString with #storeString.
