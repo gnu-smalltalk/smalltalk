@@ -1,5 +1,9 @@
 2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Time.st: Add constructor methods compatible with Duration.
+
+2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Behavior.st: Add #indexOfInstVar: and
 	#indexOfInstVar:ifAbsent:.
 	* kernel/Object.st: add #instVarNamed: and #instVarNamed:put:.

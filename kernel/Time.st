@@ -169,6 +169,35 @@ time value, and a block execution timing facility.'>
 	^self new setSeconds: secondCount
     ]
 
+    Time class >> hour: h [
+	"Answer a Time that is the given number of hours past midnight"
+
+	<category: 'instance creation'>
+	^self fromSeconds: h * 3600
+    ]
+
+    Time class >> hour: h minute: m second: s [
+	"Answer a Time that is the given number of hours, minutes and
+	 seconds past midnight"
+
+	<category: 'instance creation'>
+	^self fromSeconds: (h * 60 + m) * 60 + s
+    ]
+
+    Time class >> minute: m [
+	"Answer a Time that is the given number of minutes past midnight"
+
+	<category: 'instance creation'>
+	^self fromSeconds: m * 60
+    ]
+
+    Time class >> second: s [
+	"Answer a Time that is the given number of seconds past midnight"
+
+	<category: 'instance creation'>
+	^self fromSeconds: s
+    ]
+
     Time class >> hours: h [
 	"Answer a Time that is the given number of hours past midnight"
 
