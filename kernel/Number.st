@@ -47,7 +47,7 @@ implicit type coercing code for binary operations.'>
 	^aNumber
     ]
 
-    Number class >> readFrom: aStream [
+    Number class >> readFrom: aStream radix: anInteger [
 	"Answer the number read from the rest of aStream, converted to an
 	 instance of the receiver. If the receiver is number, the class of the
 	 result is undefined -- but the result is good."
@@ -58,20 +58,27 @@ implicit type coercing code for binary operations.'>
 	scale := (aStream peekFor: $-) ifTrue: [-1] ifFalse: [1].
 	
 	[aStream atEnd ifTrue: [^self coerce: value].
-	(ch := aStream next) isDigit] 
-		whileTrue: [value := ch digitValue * scale + (value * 10)].
-	ch = $. 
-	    ifFalse: 
-		[aStream skip: -1.
-		^self coerce: value].
+	(ch := aStream next asUppercase) isDigit: anInteger]
+		whileTrue: [value := ch digitValue * scale + (value * anInteger)].
+	ch = $.  ifFalse: 
+	    [aStream skip: -1.  ^self coerce: value].
 	
 	[aStream atEnd ifTrue: [^self coerce: value].
-	(ch := aStream next) isDigit] 
-		whileTrue: 
-		    [scale := scale / 10.
+	(ch := aStream next asUppercase) isDigit: anInteger]
+		whileTrue: [
+		    scale := scale / anInteger.
 		    value := ch digitValue * scale + value].
 	aStream skip: -1.
 	^self coerce: value
+    ]
+
+    Number class >> readFrom: aStream [
+	"Answer the number read from the rest of aStream, converted to an
+	 instance of the receiver. If the receiver is number, the class of the
+	 result is undefined -- but the result is good."
+
+	<category: 'converting'>
+	^self readFrom: aStream radix: 10
     ]
 
     Number class >> isImmediate [

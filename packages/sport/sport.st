@@ -416,7 +416,12 @@ Object subclass: SpEnvironment [
 	 (e.g. '16rFF' -> 1.6000000000000000E+01, not 255)."
 
 	<category: 'services'>
-	^aString asNumber
+	| radix |
+	(aString indexOf: $r) = 0 ifTrue: [ ^aString asNumber ].
+	radix := (aString copyUpTo: $r) asInteger.
+	^Number
+		readFrom: (aString readStream skipTo: $r; yourself)
+		radix: radix.
 
 	"SpEnvironment integerFromString: '32'"
     ]

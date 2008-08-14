@@ -1,3 +1,7 @@
+2008-08-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sport.st: Parse integer radixes in SpEnvironment>>#readFrom:radix:.
+
 2008-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sport.st: At last use native Socket methods for #read: and
