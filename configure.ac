@@ -392,6 +392,8 @@ GST_PACKAGE_ENABLE([Iconv], [iconv],
 GST_PACKAGE_ENABLE([Java], [java])
 GST_PACKAGE_ENABLE([Digest], [digest], [], [], [Makefile], [digest.la])
 GST_PACKAGE_ENABLE([GNUPlot], [gnuplot])
+GST_PACKAGE_ENABLE([Magritte], [magritte])
+GST_PACKAGE_ENABLE([Magritte-Seaside], [seaside/magritte])
 
 GST_PACKAGE_ENABLE([NCurses],
   [ncurses],

@@ -1,0 +1,46 @@
+Changes to be made upon porting:
+
+- remember to omit MACompatibility
+- delete MADescriptionBuilder>>register and its callers
+- delete MADescriptionBuilder>>unregister and its callers
+- delete one copy of BlockClosure>>asDynamicObject if you wish
+- go through all class extensions and prefix the namespace "Magritte"
+  to all references to Magritte classes.
+- other rules needed:
+
+  Character cr->Character nl
+
+  (``@object nextPutAll: self class name) -> (``@object store: self class)
+
+  ``@object evaluatorClass) -> Behavior
+
+  (SystemChangeNotifier uniqueInstance doSilently: ``@arg2) -> ``@arg2 value
+
+  ``@object evaluatorClass) -> Behavior
+
+  (``@object organization listAtCategoryNamed: ``@arg2) -> (
+    ``@object selectors select: [ :each | (``@object >> each) methodCategory = ``@arg2 ])
+
+- remove 
+   #visitColorDescription:
+   MAColorChooser
+   MAColorComponent
+   MAColorDescription (and places where it is "added", in Magritte-Seaside)
+
+- remove String>>#lines.
+- in MAAutoSelectorAccessor add brackets to methods created by
+  #createReadAccessor: and #createWriteAccessor:
+- in MAAutoSelectorAccessorTest>>#tearDown eliminate the call to
+  #removeCategory:.
+- in MAVariableAccessor class>>#name:, add #asSymbol
+- in MAExternalFileModel>>#contents, change "stream contents" to "stream contents asByteArray"
+- remove MADynamicObjectTest>>#testNilOrNotNil (cannot pass on GNU Smalltalk right now)
+
+- there is some problem with exceptions that screws up SUnit :-) if a test
+  fails with an error.  to work around it, disable
+  MADynamicObjectTest>>#testException until you fix all testsuite errors.
+
+- in Magritte-Seaside, add "Magritte import: Seaside" at the top, and add
+  "Seaside." before class definitions that subclass from seaside (grep
+  for /^WA/).
+
