@@ -96,6 +96,14 @@ for a message.'>
 	^self sendTo: receiver
     ]
 
+    valueWithArguments: anArray [
+	"Send the message with the arguments replaced by anArray (this
+	 message provides interoperability between DirectedMessages and blocks)"
+
+	<category: 'basic'>
+	^receiver perform: self selector withArguments: anArray
+    ]
+
     receiver: anObject [
 	"Change the receiver"
 
