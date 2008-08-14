@@ -11617,7 +11617,7 @@ Instance Variables:
 
     month [
 	<category: 'accessing'>
-	^Month month: self monthIndex year: self year
+	^Date newDay: 1 monthNumber: self monthIndex year: self year
     ]
 
     month: aMonth [

@@ -1,3 +1,7 @@
+2008-08-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* core/Seaside-Core.st: Use Date instead of Month.
+
 2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* core/Seaside-GST.st: Use Sockets namespace.
