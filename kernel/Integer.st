@@ -48,21 +48,6 @@ efficiency.'>
 	^aNumber truncated
     ]
 
-    Integer class >> readFrom: aStream radix: radix [
-	"Read a possibly negative number in the given radix from aStream,
-	 and answer its value."
-
-	<category: 'converting'>
-	| value ch scale |
-	value := 0.
-	scale := (aStream peekFor: $-) ifTrue: [-1] ifFalse: [1].
-	[(ch := aStream peek) notNil and: [(ch := ch asUppercase) isDigit: radix]] 
-	    whileTrue: 
-		[value := value * radix + ch digitValue.
-		aStream next].
-	^value * scale
-    ]
-
     hash [
 	"Answer an hash value for the receiver"
 
