@@ -1,6 +1,6 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 3.0.3 TO 3.0b
+NEWS FROM 3.0.5 TO 3.0c
 
 o   BlockClosure methods #cull:, #cull:cull:, #cull:cull:cull:
     evaluate blocks removing parameters that are not accepted by
@@ -165,9 +165,14 @@ o   Seaside application server/web framework.
 
 o   Swazoo web server.
 
-
 -----------------------------------------------------------------------------
 
+NEWS FROM 3.0.4 TO 3.0.5
+
+o   gst-doc implements a -F option to choose output format.  HTML and
+    Texinfo are supported (contributed by Thomas Girard).
+
+-------------------------------------------------------------------------------
 
 NEWS FROM 3.0.3 TO 3.0.4
 

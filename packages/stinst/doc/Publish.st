@@ -949,15 +949,15 @@ Automatically yours from GNU Smalltalk''s HTMLDocPublisher! -->
 	self printHierarchyOf: sorted on: aFileStream.
 	aFileStream nextPutAll: '
     
-Alphabetic list of classes:'.
+Alphabetic list of classes:'; nl.
 	sorted do: 
 		[:each | 
 		| fileName |
 		fileName := each nameIn: Namespace current.
-		('writing documentation into ' , fileName , '.htm') displayNl.
-		self publish: each onFile: fileName , '.htm'.
+		('writing documentation into ' , fileName , '.html') displayNl.
+		self publish: each onFile: fileName , '.html'.
 		aFileStream
-		    nextPutAll: '<A HREF="%1.htm">%1</A>' % {fileName};
+		    nextPutAll: '<A HREF="%1.html">%1</A>' % {fileName};
 		    nl].
 	aFileStream nextPutAll: '</PRE></BODY></HTML>'
     ]
@@ -969,6 +969,21 @@ Alphabetic list of classes:'.
 	[self publishAll: classArray withIndexOn: stream] ensure: [stream close]
     ]
 
+    HTMLDocPublisher class >> publishAll: classArray toLocation: dirName [
+	| currentDir |
+	currentDir := Directory working.
+	dirName = '.'
+            ifFalse: [
+		(File isAccessible: dirName) ifFalse: [ Directory create: dirName ].
+		Directory working: dirName ].
+	self publishAll: classArray withIndexOnFile: 'classes.html'.
+	dirName = '.' ifFalse: [ Directory working: currentDir ]
+    ]
+
+    HTMLDocPublisher class >> publishAll: classArray [
+	self publishAll: classArray toLocation: '.'
+    ]
+
     HTMLDocPublisher class >> printTreeClass: class shouldLink: aBoolean on: aFileStream indent: indent [
 	<category: 'writing the class tree'>
 	| fileName |
@@ -977,7 +992,7 @@ Alphabetic list of classes:'.
 	    nextPutAll: indent.
 	fileName := class nameIn: Namespace current.
 	aBoolean 
-	    ifTrue: [aFileStream nextPutAll: '<A HREF="' , fileName , '.htm">']
+	    ifTrue: [aFileStream nextPutAll: '<A HREF="' , fileName , '.html">']
 	    ifFalse: [aFileStream nextPut: $(].
 	aFileStream nextPutAll: (class nameIn: Namespace current).
 	aBoolean 
@@ -1164,6 +1179,14 @@ DocPublisher subclass: TexinfoDocPublisher [
 		(each nameIn: Namespace current) displayNl.
 		self basicPublish: each on: aFileStream].
 	aFileStream nextPutAll: self footer
+    ]
+
+    TexinfoDocPublisher class >> publishAll: classArray [
+	self publishAll: classArray on: stdout
+    ]
+
+    TexinfoDocPublisher class >> publishAll: classArray toLocation: aFileName [
+	self publishAll: classArray onFile: aFileName
     ]
 
     TexinfoDocPublisher class >> publish: aClass on: aFileStream [

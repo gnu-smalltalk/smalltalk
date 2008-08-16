@@ -125,7 +125,7 @@ struct tool tools[] = {
   {
     "gst-doc", "scripts/GenDoc.st",
     "-h|--help --version -p|--package: -f|--file: -I|--image-file: \
-        -n|--namespace: -o|--output: --kernel-directory:",
+        -n|--namespace: -o|--output: --kernel-directory: -F|--output-format:",
     NULL
   },
   {
