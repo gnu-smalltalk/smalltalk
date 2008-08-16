@@ -1,5 +1,12 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 3.0.4 TO 3.0.5
+
+o   gst-doc implements a -F option to choose output format.  HTML and
+    Texinfo are supported (contributed by Thomas Girard).
+
+-------------------------------------------------------------------------------
+
 NEWS FROM 3.0.3 TO 3.0.4
 
 o   A few operations on collections have been sped up.

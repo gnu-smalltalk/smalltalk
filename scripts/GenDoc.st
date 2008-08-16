@@ -31,10 +31,9 @@
 "Load the prerequisites"
 PackageLoader fileInPackage: #ClassPublisher!
 
-| package outFile publisher files classes classPatterns loader defaultNamespace |
+| package location publisher files classes classPatterns loader defaultNamespace |
 
 classPatterns := OrderedCollection new.
-publisher := STInST.TexinfoDocPublisher.
 defaultNamespace := Smalltalk.
 
 helpString :=
@@ -48,6 +47,7 @@ Options:
     -n --namespace=NAMESP load files in the given namespace
     -o --output=FILE      emit documentation in the given file (default=stdout)
        --kernel-dir=PATH  use the specified kernel directory
+    -F --output-format=KIND   use the given publisher (HTML or default=Texinfo)
     -h --help             show this message
        --version          print version information and exit
 '.
@@ -59,7 +59,7 @@ Options:
     "Parse the command-line arguments."
     Smalltalk
         arguments: '-h|--help --version -p|--package: -f|--file: -n|--namespace:
-                    -I|--image-file: -o|--output: --kernel-directory:'
+                    -I|--image-file: -o|--output: --kernel-directory: -f|--output-format:'
         do: [ :opt :arg |
 
         opt = 'help' ifTrue: [
@@ -71,9 +71,9 @@ Options:
             ObjectMemory quit: 0 ].
 
         opt = 'output' ifTrue: [
-	    outFile isNil ifFalse: [
+	    location isNil ifFalse: [
 	        self error: '--output specified multiple times' ].
-	    outFile := arg ].
+	    location := arg ].
 
 	opt = 'namespace' ifTrue: [
             defaultNamespace := Smalltalk.
@@ -104,11 +104,23 @@ Options:
 	        parseSmalltalkStream: file
 	        with: STInST.GSTFileInParser ].
 
+        opt = 'output-format' ifTrue: [
+            publisher isNil ifFalse: [
+                self error: '--output-format specified multiple times' ].
+            arg asLowercase = 'html'
+                ifTrue: [ publisher := STInST.HTMLDocPublisher ]
+                ifFalse: [
+                    arg asLowercase = 'texinfo'
+                        ifTrue: [ publisher:= STInST.TexinfoDocPublisher ]
+                        ifFalse: [ self error: 'unknown --output-format arg' ] ] ].
+
         opt isNil ifTrue: [ classPatterns add: arg ] ]
 
         ifError: [
             helpString displayOn: stderr.
             ObjectMemory quit: 1 ].
+
+    publisher isNil ifTrue: [ publisher := STInST.TexinfoDocPublisher ].
 
     classPatterns isEmpty
         ifTrue: [
@@ -133,12 +145,12 @@ Options:
 			    (allClasses select: [ :each |
 			        pat match: (each nameIn: Smalltalk) ]) ] ] ].
 
-    outFile isNil
+    location isNil
         ifTrue: [
 	    Transcript message: stderr -> #nextPutAllFlush:.
-	    publisher publishAll: classes on: stdout ]
+	    publisher publishAll: classes ]
         ifFalse: [
-	    publisher publishAll: classes onFile: outFile ]
+	    publisher publishAll: classes toLocation: location ]
 ]
     on: Error
     do: [ :ex |
