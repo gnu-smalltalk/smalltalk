@@ -190,12 +190,16 @@ TestCase subclass: SpWeakArrayTest [
 
     testWeakArray [
 	<category: #all>
-	| strong weak |
+	| strong weak ok |
 	strong := Array with: Object new.
 	weak := SpWeakArray withAll: strong.
 	strong at: 1 put: 'Smalltalk'.
-	ObjectMemory globalGarbageCollect.	"Should call into SpEnvironment"
-	self deny: (weak at: 1) class == Object
+	5 timesRepeat: [
+	    ObjectMemory globalGarbageCollect.	"Should call into SpEnvironment"
+	    ok := (weak at: 1) class ~~ Object.
+	    ok ifTrue: [ self assert: ok. ^self ] ].
+
+	self assert: ok
     ]
 ]
 
