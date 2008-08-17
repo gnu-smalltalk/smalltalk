@@ -101,6 +101,9 @@ int win_recv(int fd, void* buffer, int n, int flags);
 #undef recv
 #define recv win_recv
 
+#define FD_TO_SOCKET(fd)   ((SOCKET) _get_osfhandle ((fd)))
+#define SOCKET_TO_FD(fh)   (_open_osfhandle ((HANDLE) (fh), O_RDWR | O_BINARY))
+
 #else /* !__MSVCRT__ */
 
 #include <sys/types.h>
@@ -117,6 +120,14 @@ int win_recv(int fd, void* buffer, int n, int flags);
 #define closesocket(x)            close(x)
 #define is_socket_error(err)      (errno == (err))
 #define clear_socket_error()      (errno = 0)
+
+#define FD_TO_SOCKET(fd)	  (fd)
+#define SOCKET_TO_FD(fd)	  (fd)
+typedef int SOCKET;
+
+#ifndef SOCKET_ERROR
+#define SOCKET_ERROR		  (-1)
+#endif
 #endif /* !__MSVCRT__ */
 
 #include "getaddrinfo.h"

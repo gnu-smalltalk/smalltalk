@@ -1,3 +1,7 @@
+2008-08-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* socketx.h: Add socket<->fd conversions.
+
 2008-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lock.c: New.

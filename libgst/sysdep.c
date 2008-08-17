@@ -1786,8 +1786,8 @@ _gst_recv (int fd,
 
   for (;;)
     {
-      result = recvfrom (fd, buffer, size, flags, NULL, NULL);
-      if (errno == EFAULT)
+      result = recvfrom (FD_TO_SOCKET (fd), buffer, size, flags, NULL, NULL);
+      if (is_socket_error (EFAULT))
         abort ();
 
       if (is_socket_error (EINTR))
@@ -1818,8 +1818,8 @@ _gst_send (int fd,
 
   for (;;)
     {
-      result = send (fd, buffer, size, flags);
-      if (errno == EFAULT)
+      result = send (FD_TO_SOCKET (fd), buffer, size, flags);
+      if (is_socket_error (EFAULT))
         abort ();
 
       if (is_socket_error (EINTR))

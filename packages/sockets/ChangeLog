@@ -1,5 +1,9 @@
 2008-08-17  Paolo Bonzini  <bonzini@gnu.org>
 
+	* sockets.c: Add wrappers for socket<->fd conversions.
+
+2008-08-17  Paolo Bonzini  <bonzini@gnu.org>
+
 	* sockets.c: Emulate FD_CLOEXEC on MinGW.
 
 2008-08-11  Paolo Bonzini  <bonzini@gnu.org>

@@ -1,5 +1,10 @@
 2008-08-17  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/prims.def: Add socket<->fd conversions.
+	* libgst/sysdep.c: Likewise.
+
+2008-08-17  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/sysdep.c: Emulate FD_CLOEXEC on MinGW.
 
 2008-08-11  Paolo Bonzini  <bonzini@gnu.org>

@@ -113,21 +113,7 @@
 
 static VMProxy *vmProxy;
 
-/* Same as connect, but forces the socket to be in non-blocking mode */
-static void
-myConnect (int fd, const struct sockaddr *sockaddr, int len)
-{
-#ifdef F_GETFL
-  int oldflags = fcntl (fd, F_GETFL, NULL);
 
-  if (!(oldflags & O_NONBLOCK))
-    fcntl (fd, F_SETFL, oldflags | O_NONBLOCK);
-#endif
-  
-  connect (fd, sockaddr, len);
-  if (is_socket_error (EINPROGRESS))
-    errno = 0;
-}
 
 static char *
 myGetHostByAddr (char *addr, int len, int type)
@@ -258,13 +244,123 @@ constantFunction (aiAll, AI_ALL)
 constantFunction (aiV4mapped, AI_V4MAPPED)
 
 
+
+static int
+mySocket (int domain, int type, int protocol)
+{
+  int fd;
+#if defined __MSVCRT__
+  SOCKET fh = socket (domain, type, protocol);
+  fd = SOCKET_TO_FD (fh);
 
+  /* Do not do FD_CLOEXEC under MinGW.  */
+  SetHandleInformation (fh, HANDLE_FLAG_INHERIT, 0);
+
+#elif defined SOCK_CLOEXEC
+  fd = socket (domain, type | SOCK_CLOEXEC, protocol);
+
+#else
+  fd = socket (domain, type, protocol);
+#ifdef FD_CLOEXEC
+  if (fd != -1)
+    fcntl (fd, F_SETFD, fcntl (fd, F_GETFD, 0) | FD_CLOEXEC);
+#endif
+#endif
+
+  return fd;
+}
+
+/* Same as connect, but forces the socket to be in non-blocking mode */
+static void
+myConnect (int fd, const struct sockaddr *sockaddr, int len)
+{
+  SOCKET sock = FD_TO_SOCKET (fd);
+#ifdef __MSVCRT__
+  unsigned long iMode = 1;
+  ioctlsocket (sock, FIONBIO, &iMode);
+
+#elif defined F_GETFL
+  int oldflags = fcntl (sock, F_GETFL, NULL);
+
+  if (!(oldflags & O_NONBLOCK))
+    fcntl (sock, F_SETFL, oldflags | O_NONBLOCK);
+#endif
+  
+  connect (sock, sockaddr, len);
+  if (is_socket_error (EINPROGRESS))
+    errno = 0;
+}
+
+static int
+myAccept (int fd, struct sockaddr *addr, int *addrlen)
+{
+  SOCKET r = accept (FD_TO_SOCKET (fd), addr, addrlen);
+  return r == SOCKET_ERROR ? -1 : SOCKET_TO_FD (r);
+}
+
+static int
+myBind (int fd, const struct sockaddr *addr, int addrlen)
+{
+  return bind (FD_TO_SOCKET (fd), addr, addrlen);
+}
+
+static int
+myGetpeername (int fd, struct sockaddr *addr, int *addrlen)
+{
+  return getpeername (FD_TO_SOCKET (fd), addr, addrlen);
+}
+
+static int
+myGetsockname (int fd, struct sockaddr *addr, int *addrlen)
+{
+  return getsockname (FD_TO_SOCKET (fd), addr, addrlen);
+}
+
+static int
+myGetsockopt (int fd, int level, int optname, char *optval, int *optlen)
+{
+  return getsockopt (FD_TO_SOCKET (fd), level, optname, optval, optlen);
+}
+
+static int
+myListen (int fd, int backlog)
+{
+  return listen (FD_TO_SOCKET (fd), backlog);
+}
+
+static int
+myRecvfrom (int fd, char *buf, int len, int flags, struct sockaddr *from,
+	    int *fromlen)
+{
+  int frombufsize = *fromlen;
+  int r = recvfrom (FD_TO_SOCKET (fd), buf, len, flags, from, fromlen);
+
+  /* Winsock recvfrom() only returns a valid 'from' when the socket is
+     connectionless.  POSIX gives a valid 'from' for all types of sockets.  */
+  if (r != SOCKET_ERROR && frombufsize == *fromlen)
+    (void) myGetpeername (fd, from, fromlen);
+
+  return r;
+}
+
+static int
+mySendto (int fd, const char *buf, int len, int flags,
+	  const struct sockaddr *to, int tolen)
+{
+  return sendto (FD_TO_SOCKET (fd), buf, len, flags, to, tolen);
+}
+
+static int
+mySetsockopt (int fd, int level, int optname, const char *optval, int optlen)
+{
+  return setsockopt (FD_TO_SOCKET (fd), level, optname, optval, optlen);
+}
 static int
 getSoError (int fd)
 {
   int error;
   int size = sizeof (error);
-  getsockopt (fd, SOL_SOCKET, SO_ERROR, (char *)&error, &size);
+  myGetsockopt (fd, SOL_SOCKET, SO_ERROR, (char *)&error, &size);
 
   /* When we get one of these, we don't return an error.  However,
      the primitive still fails and the file/socket is closed by the
@@ -276,28 +372,7 @@ getSoError (int fd)
     return error;
 }
 
-static int
-mySocket (int domain, int type, int protocol)
-{
-  int fd;
-#ifdef SOCK_CLOEXEC
-  fd = socket (domain, type | SOCK_CLOEXEC, protocol);
-
-#else
-  fd = socket (domain, type, protocol);
-
-  /* Do not do FD_CLOEXEC under MinGW.  */
-#if defined __MSVCRT__
-  SetHandleInformation (fd, HANDLE_FLAG_INHERIT, 0);
-#elif defined FD_CLOEXEC
-  if (fd != -1)
-    fcntl (fd, F_SETFD, fcntl (fd, F_GETFD, 0) | FD_CLOEXEC);
-#endif
-#endif
-
-  return fd;
-}
-
+
 void
 gst_initModule (VMProxy * proxy)
 {
@@ -319,16 +394,16 @@ gst_initModule (VMProxy * proxy)
   vmProxy->defineCFunc ("TCPgetAiCanonname", get_aiCanonname);
   vmProxy->defineCFunc ("TCPgetAiAddr", get_aiAddr);
 
-  vmProxy->defineCFunc ("TCPaccept", accept);
-  vmProxy->defineCFunc ("TCPbind", bind);
+  vmProxy->defineCFunc ("TCPaccept", myAccept);
+  vmProxy->defineCFunc ("TCPbind", myBind);
   vmProxy->defineCFunc ("TCPconnect", myConnect);
-  vmProxy->defineCFunc ("TCPgetpeername", getpeername);
-  vmProxy->defineCFunc ("TCPgetsockname", getsockname);
-  vmProxy->defineCFunc ("TCPlisten", listen);
-  vmProxy->defineCFunc ("TCPrecvfrom", recvfrom);
-  vmProxy->defineCFunc ("TCPsendto", sendto);
-  vmProxy->defineCFunc ("TCPsetsockopt", setsockopt);
-  vmProxy->defineCFunc ("TCPgetsockopt", getsockopt);
+  vmProxy->defineCFunc ("TCPgetpeername", myGetpeername);
+  vmProxy->defineCFunc ("TCPgetsockname", myGetsockname);
+  vmProxy->defineCFunc ("TCPlisten", myListen);
+  vmProxy->defineCFunc ("TCPrecvfrom", myRecvfrom);
+  vmProxy->defineCFunc ("TCPsendto", mySendto);
+  vmProxy->defineCFunc ("TCPsetsockopt", mySetsockopt);
+  vmProxy->defineCFunc ("TCPgetsockopt", myGetsockopt);
   vmProxy->defineCFunc ("TCPgetSoError", getSoError);
   vmProxy->defineCFunc ("TCPsocket", mySocket);
 

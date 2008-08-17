@@ -5600,7 +5600,7 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
       }
 
     case PRIM_SHUTDOWN_WRITE:
-      shutdown (fd, 1);
+      shutdown (FD_TO_SOCKET (fd), 1);
 #ifdef ENOTSOCK
       if (errno == ENOTSOCK && isatty (fd))
 	{
@@ -5659,7 +5659,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       {
 	int result;
         _gst_remove_fd_polling_handlers (fd);
-        result = closesocket (fd);
+        result = closesocket (FD_TO_SOCKET (fd));
         resultOOP = FROM_INT (result);
         goto succeed;
       }
