@@ -59,7 +59,7 @@ Options:
     "Parse the command-line arguments."
     Smalltalk
         arguments: '-h|--help --version -p|--package: -f|--file: -n|--namespace:
-                    -I|--image-file: -o|--output: --kernel-directory: -f|--output-format:'
+                    -I|--image-file: -o|--output: --kernel-directory: -F|--output-format:'
         do: [ :opt :arg |
 
         opt = 'help' ifTrue: [

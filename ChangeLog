@@ -1,5 +1,9 @@
 2008-08-17  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/GenDoc.st: Oops.
+
+2008-08-17  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/WeakObjects.st: Implement WeakArray>>#new.
 
 2008-08-16  Thomas Girard  <thomas.g.girard@free.fr>
