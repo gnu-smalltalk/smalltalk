@@ -39,9 +39,15 @@ Array subclass: WeakArray [
 I am similar to a plain array, but my items are stored in a weak object,
 so I track which of them are garbage collected.'>
 
+    WeakArray class >> new [
+	"Create a new WeakArray of size 0."
+
+	<category: 'instance creation'>
+	^self new: 0
+    ]
+
     WeakArray class >> new: size [
-	"Private - Initialize the values array; plus, make it weak and create
-	 the ByteArray used to track garbage collected values"
+	"Create a new WeakArray of the given size."
 
 	<category: 'instance creation'>
 	^self basicNew initialize: size
