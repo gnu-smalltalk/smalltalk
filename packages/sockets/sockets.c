@@ -287,7 +287,9 @@ mySocket (int domain, int type, int protocol)
   fd = socket (domain, type, protocol);
 
   /* Do not do FD_CLOEXEC under MinGW.  */
-#if defined FD_CLOEXEC && !defined __MSVCRT__
+#if defined __MSVCRT__
+  SetHandleInformation (fd, HANDLE_FLAG_INHERIT, 0);
+#elif defined FD_CLOEXEC
   if (fd != -1)
     fcntl (fd, F_SETFD, fcntl (fd, F_GETFD, 0) | FD_CLOEXEC);
 #endif

@@ -1754,6 +1754,8 @@ _gst_open_file (const char *filename,
 
 #if defined FD_CLOEXEC && !defined O_CLOEXEC
   fcntl (fd, F_SETFD, fcntl (fd, F_GETFD, 0) | FD_CLOEXEC);
+#elif defined __MSVCRT__
+  SetHandleInformation (_get_osfhandle (fd), HANDLE_FLAG_INHERIT, 0);
 #endif
 
   return fd;
