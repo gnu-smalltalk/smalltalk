@@ -463,6 +463,9 @@ _gst_install_initial_methods (void)
 					     _gst_terminate_symbol,
 					     _gst_this_category, -1, -1);
 
+  ((gst_compiled_method) OOP_TO_OBJ (termination_method))->header.headerFlag
+    = MTH_ANNOTATED;
+
   install_method (termination_method);
 
   methodsForString = "\

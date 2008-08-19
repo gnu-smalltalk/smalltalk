@@ -454,12 +454,12 @@ methods that can be used in inspection or debugging.'>
 	| ctx last attr |
 	ctx := self.
 	last := self class lastUnwindPoint.
-	[ctx == last | ctx isNil] whileFalse: 
-		[(ctx isBlock not and: 
-			[attr := ctx method attributeAt: selector ifAbsent: [nil].
-			attr notNil]) 
-		    ifTrue: [aBlock value: ctx value: attr].
-		ctx := ctx parentContext]
+	[(ctx isBlock not and: 
+	    [attr := ctx method attributeAt: selector ifAbsent: [nil].
+	    attr notNil]) 
+		ifTrue: [aBlock value: ctx value: attr].
+
+	ctx == last or: [(ctx := ctx parentContext) isNil]] whileFalse
     ]
 
     scanBacktraceFor: selectors do: aBlock [

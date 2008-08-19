@@ -439,6 +439,28 @@ Notification subclass: ProcessBeingTerminated [
 
     | semaphore |
 
+    ProcessBeingTerminated class >> initialize [
+	(UndefinedObject>>#'__terminate')
+	    descriptor: ((MethodInfo new: 1)
+		methodClass: UndefinedObject;
+		selector: #'__terminate';
+		at: 1 put: (Message
+		    selector: #exceptionHandlerSearch:reset:
+		    arguments: {
+			[ :context :signal |
+			    (self handles: signal)
+				ifTrue: [
+				    signal
+					onDoBlock: nil
+					handlerBlock: [ :sig | thisContext environment continue: nil ]
+					onDoContext: nil
+					previousState: nil.
+				    #found ]
+				ifFalse: [nil] ].
+			[ :context | ] });
+		yourself)
+    ]
+
     description [
 	"Answer a textual description of the exception."
 
@@ -462,7 +484,6 @@ Notification subclass: ProcessBeingTerminated [
 ]
 
 ]
-
 
 
 Namespace current: SystemExceptions [
@@ -1481,6 +1502,7 @@ Object extend [
 
 
 Eval [
-    Exception initialize
+    Exception initialize.
+    SystemExceptions.ProcessBeingTerminated initialize
 ]
 

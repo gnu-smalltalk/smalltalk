@@ -1,3 +1,7 @@
+2008-08-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Mark the termination method as annotated.
+
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* events.c: Reset errno if _gst_sync_file_polling finds

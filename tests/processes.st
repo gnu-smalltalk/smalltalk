@@ -237,3 +237,10 @@ Eval [
     [ stop ] whileFalse: [ queue nextPut: false. Processor yield ].
 ]
 
+"Test that CallinProcesses can be terminated softly"
+Eval [
+    [ [ Processor activeProcess terminate ] ensure: [ '... ' display ] ]
+	on: SystemExceptions.ProcessBeingTerminated
+	do: [ :sig | 'nothing should follow' display. sig pass ].
+    'failed' displayNl
+]
