@@ -71,3 +71,6 @@ nil
 2
 2
 returned value is 2
+
+Execution begins...
+nothing should follow... returned value is nil

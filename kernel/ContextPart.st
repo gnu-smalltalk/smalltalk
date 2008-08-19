@@ -418,12 +418,12 @@ methods that can be used in inspection or debugging.'>
 	<category: 'enumerating'>
 	| ctx attr |
 	ctx := self.
-	[ctx isNil or: [ctx isEnvironment]] whileFalse: 
-		[(ctx isBlock not and: 
-			[attr := ctx method attributeAt: selector ifAbsent: [nil].
-			attr notNil]) 
-		    ifTrue: [aBlock value: ctx value: attr].
-		ctx := ctx parentContext]
+	[(ctx isBlock not and: 
+	    [attr := ctx method attributeAt: selector ifAbsent: [nil].
+	    attr notNil]) 
+		ifTrue: [aBlock value: ctx value: attr].
+
+	ctx isEnvironment or: [(ctx := ctx parentContext) isNil]] whileFalse
     ]
 
     scanBacktraceFor: selectors do: aBlock [
