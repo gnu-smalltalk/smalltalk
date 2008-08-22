@@ -21,9 +21,10 @@ CLEANFILES = genprims$(EXEEXT) genbc$(EXEEXT) genvm$(EXEEXT)
 # definitions for libgst.la
 
 libgst_la_LIBADD=$(top_builddir)/lib-src/library.la \
-	$(LIBSIGSEGV) $(LIBFFI) $(LIBSNPRINTFV) $(LIBREADLINE) $(LIBGMP)
+	$(LIBSIGSEGV) $(LIBFFI) $(LIBSNPRINTFV) $(LIBREADLINE) $(LIBGMP) \
+	$(LIBTHREAD)
 
-libgst_la_DEPENDENCIES=$(top_builddir)/lib-src/library.la @LIBSNPRINTFV@
+libgst_la_DEPENDENCIES=$(top_builddir)/lib-src/library.la $(LIBSNPRINTFV)
 
 libgst_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined \
 	-export-symbols-regex "^gst_.*"
