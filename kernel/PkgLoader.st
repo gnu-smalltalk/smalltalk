@@ -448,7 +448,7 @@ XML.'>
 
     fullPathsOf: aCollection [
 	"Resolve the names in aCollection according to the base directories
-	 in baseDirectories, and return the collection with the full filenames.
+	 in baseDirectories, and return the collection with the FilePaths.
 	 Raise a PackageNotAvailable exception if no directory was found for one
 	 or more files in aCollection."
 
@@ -457,6 +457,16 @@ XML.'>
 		[:fileName | 
 		| name |
 		name := self fullPathOf: fileName]
+    ]
+
+    / fileName [
+	"Resolve the file name according to the base directories in
+	 baseDirectories, and return a FilePath for the full filename.
+	 Raise a PackageNotAvailable exception if no directory was found
+	 for fileName."
+
+	<category: 'accessing'>
+	^self fullPathOf: fileName
     ]
 
     fullPathOf: fileName [
