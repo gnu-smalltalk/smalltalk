@@ -223,6 +223,13 @@ itself.'>
 	^##(Character value: 12)
     ]
 
+    Character class >> ff [
+	"Returns the character 'ff', also known as 'newPage'"
+
+	<category: 'constants'>
+	^##(Character value: 12)
+    ]
+
     Character class >> space [
 	"Returns the character 'space'"
 

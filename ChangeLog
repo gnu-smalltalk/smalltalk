@@ -1,3 +1,7 @@
+2008-08-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* kernel/Character.st: Add `ff'.
+
 2008-08-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiExcept.st: Register an exception handler within
