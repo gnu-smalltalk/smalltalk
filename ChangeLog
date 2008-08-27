@@ -1,3 +1,7 @@
+2008-08-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/PkgLoader.st: Add #/ as a synonym of #fullPathOf:.
+
 2008-08-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/AnsiExcept.st: Register an exception handler within
