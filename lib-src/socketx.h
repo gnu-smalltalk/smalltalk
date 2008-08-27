@@ -72,6 +72,7 @@
 #define ENETRESET WSAENETRESET
 
 typedef int nfds_t;
+typedef int socklen_t;
 
 /* re-define FD_ISSET to avoid a WSA call while we are not using 
  * network sockets */

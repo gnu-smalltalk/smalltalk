@@ -1,3 +1,7 @@
+2008-08-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* socketx.h: Define socklen_t for Windows.
+
 2008-08-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* socketx.h: Add socket<->fd conversions.
