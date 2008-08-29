@@ -237,7 +237,7 @@ stream (TCP), datagram (UDP) and raw sockets.'>
 
     port: port [
 	"Return a ByteArray containing a struct sockaddr for the given port
-	 on the IP address represented by the receiver. Family = AF_INET."
+	 on the IP address represented by the receiver. Family = AF_INET6."
 
 	<category: 'private'>
 	port < 0 | (port > 65535) ifTrue: [self error: 'port out of range'].
@@ -248,8 +248,9 @@ stream (TCP), datagram (UDP) and raw sockets.'>
 		with: address
 		startingAt: 1;
 
-	    "Write sin_family = AF_INET in host order"
-	    shortAt: 1 put: self class addressFamily;
+            "Write sin_len and sin_family = AF_INET6"
+            at: 1 put: 28;
+            at: 2 put: self class addressFamily;
 
 	    "Write sin_port in network order (big endian)"
 	    at: 3 put: port // 256;

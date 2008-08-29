@@ -270,9 +270,25 @@ mySocket (int domain, int type, int protocol)
   return fd;
 }
 
+
+/* BSD systems have sa_len, others have not.  Smalltalk will always
+   write sockaddr structs as if they had it.  So for Linux and Winsock
+   we read the second byte (sa_family on BSD systems) and write it in the
+   entire sa_family field. */
+static inline void
+fix_sockaddr (struct sockaddr *sockaddr)
+{
+#ifndef HAVE_STRUCT_SOCKADDR_SA_LEN
+  /* Make sure sa_family is a short.  */
+  char verify[sizeof (sockaddr->sa_family) == 2 ? 1 : -1];
+
+  sockaddr->sa_family = ((unsigned char *) sockaddr)[1];
+#endif
+}
+
 /* Same as connect, but forces the socket to be in non-blocking mode */
 static void
-myConnect (int fd, const struct sockaddr *sockaddr, int len)
+myConnect (int fd, struct sockaddr *sockaddr, int len)
 {
   SOCKET sock = FD_TO_SOCKET (fd);
 #ifdef __MSVCRT__
@@ -286,6 +302,7 @@ myConnect (int fd, const struct sockaddr *sockaddr, int len)
     fcntl (sock, F_SETFL, oldflags | O_NONBLOCK);
 #endif
   
+  fix_sockaddr (sockaddr);
   connect (sock, sockaddr, len);
   if (is_socket_error (EINPROGRESS))
     errno = 0;
@@ -299,8 +316,9 @@ myAccept (int fd, struct sockaddr *addr, int *addrlen)
 }
 
 static int
-myBind (int fd, const struct sockaddr *addr, int addrlen)
+myBind (int fd, struct sockaddr *addr, int addrlen)
 {
+  fix_sockaddr (addr);
   return bind (FD_TO_SOCKET (fd), addr, addrlen);
 }
 
@@ -345,8 +363,9 @@ myRecvfrom (int fd, char *buf, int len, int flags, struct sockaddr *from,
 
 static int
 mySendto (int fd, const char *buf, int len, int flags,
-	  const struct sockaddr *to, int tolen)
+	  struct sockaddr *to, int tolen)
 {
+  fix_sockaddr (to);
   return sendto (FD_TO_SOCKET (fd), buf, len, flags, to, tolen);
 }
 
@@ -355,6 +374,7 @@ mySetsockopt (int fd, int level, int optname, const char *optval, int optlen)
 {
   return setsockopt (FD_TO_SOCKET (fd), level, optname, optval, optlen);
 }
+
 static int
 getSoError (int fd)
 {

@@ -25,6 +25,9 @@ AC_CHECK_MEMBER([struct addrinfo.ai_family],
 			   [Define if your system's netdb.h has struct addrinfo])], [],
 	        [#include <netdb.h>])
 
+dnl This is wrong for Windows, but anyway Windows does not have sa_len
+AC_CHECK_MEMBERS([struct sockaddr.sa_len], , , [#include <sys/socket.h>])
+
 if test "$ac_cv_lib_ws2_32_listen" = "yes"; then
     gst_cv_sockets=yes
 fi

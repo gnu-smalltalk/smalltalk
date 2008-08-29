@@ -307,7 +307,7 @@ and vice versa.'>
 
 	<category: 'abstract'>
 	| addressFamily |
-	"MacOS X places a length byte at offset 1, so look-up offset 2
+	"BSD systems place a length byte at offset 1, so look-up offset 2
 	 first.  If it is 0, we're on a little-endian system without
 	 the sa_len field, so use offset 1 as a second possibility."
 	addressFamily := aByteArray at: 2.

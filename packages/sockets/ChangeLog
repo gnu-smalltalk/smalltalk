@@ -1,3 +1,11 @@
+2008-08-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* IP6SocketImpl.st: Fill in sa_len dutifully for BSD systems.
+	* IPSocketImpl.st: Fill in sa_len dutifully for BSD systems.
+	* SocketAddress.st: Document brokenness of BSD systems.
+	* UnixSocketImpl.st: Fill in sa_len dutifully for BSD systems.
+	* sockets.c: Undo the above dutifully for non-BSD systems.
+
 2008-08-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sockets.c: Add wrappers for socket<->fd conversions.

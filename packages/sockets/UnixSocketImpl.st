@@ -128,7 +128,7 @@ a String or a File object.
 
     port: port [
 	"Return a ByteArray containing a struct sockaddr for the given port
-	 on the IP address represented by the receiver. Family = AF_INET."
+	 on the IP address represented by the receiver. Family = AF_UNIX."
 
 	<category: 'private'>
 	| portString |
@@ -138,8 +138,9 @@ a String or a File object.
 	portString size > 108
 	    ifTrue: [self error: 'socket path too long'].
 	^(ByteArray new: 110)
-	    "Write sin_family = AF_INET in host order"
-	    shortAt: 1 put: self class addressFamily;
+            "Write sin_len and sin_family = AF_UNIX"
+            at: 1 put: portString size + 3;
+            at: 2 put: self class addressFamily;
 	    replaceFrom: 3 to: portString size + 2 with: portString startingAt: 1;
 	    yourself
     ]

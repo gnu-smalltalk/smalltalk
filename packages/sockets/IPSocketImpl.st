@@ -315,8 +315,9 @@ stream (TCP), datagram (UDP) and raw sockets.'>
 		with: address
 		startingAt: 1;
 
-	    "Write sin_family = AF_INET in host order"
-	    shortAt: 1 put: self class addressFamily;
+	    "Write sin_len and sin_family = AF_INET"
+	    at: 1 put: 16;
+	    at: 2 put: self class addressFamily;
 
 	    "Write sin_port in network order (big endian)"
 	    at: 3 put: port // 256;
