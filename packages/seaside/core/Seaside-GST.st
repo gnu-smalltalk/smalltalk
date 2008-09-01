@@ -231,7 +231,7 @@ Stream extend [
 
     asMIMEDocumentType: mimeType [
 	<category: '*Seaside-Squeak-Core'>
-	^Seaside.WAMimeDocument contentType: mimeType toString contentStream: self
+	^Seaside.WAMimeDocument contentType: mimeType seasideString contentStream: self
     ]
 
     upToAndSkipThroughAll: aCollection [
@@ -363,7 +363,7 @@ Object subclass: WAMimeDocument [
     ]
 
     asMIMEDocumentType: type [
-	type toString = contentType toString ifTrue: [ ^self ].
+	type seasideString = contentType seasideString ifTrue: [ ^self ].
 	^self class new
 	    contentType: type contentStream: contentStream content: content
     ]
@@ -391,31 +391,31 @@ Object subclass: WAMimeDocument [
 
 
 
-"#toString implementations."
+"#seasideString implementations."
 
 CharacterArray extend [
-    toString [
+    seasideString [
 	<category: '*Seaside-Squeak-Core'>
 	^self asString
     ]
 ]
 
 Exception extend [
-    toString [
+    seasideString [
 	<category: '*Seaside-Squeak-Core'>
 	^self class fullName asString
     ]
 ]
 
 Object extend [
-    toString [
+    seasideString [
 	<category: '*Seaside-Squeak-Core'>
 	^self displayString
     ]
 ]
 
 ByteArray extend [
-    toString [
+    seasideString [
 	<category: '*Seaside-Squeak-Core'>
 	^self asString
     ]

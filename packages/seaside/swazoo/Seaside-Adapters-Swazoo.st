@@ -217,7 +217,7 @@ Swazoo.Site subclass: SeasideSite [
 	    do: [:each | swazooResponse cookie: (self cookieHeaderFor: each)].
 	swazooResponse code: aSeasideResponse status asNumber.
 	swazooResponse entity: (self contentsOfResponse: aSeasideResponse).
-	swazooResponse contentType: aSeasideResponse contentType toString.
+	swazooResponse contentType: aSeasideResponse contentType seasideString.
 	aSeasideResponse release.
 	^swazooResponse
     ]
@@ -298,7 +298,7 @@ Swazoo.Site subclass: SeasideSite [
 				with: 'Internal Error'.
 			    (html heading)
 				level2;
-				with: anError toString.
+				with: anError seasideString.
 			    (SeasidePlatformSupport walkbackStringsFor: anError) 
 				do: [:each | html text: each]
 				separatedBy: [html break]].

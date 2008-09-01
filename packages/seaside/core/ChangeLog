@@ -1,3 +1,10 @@
+2008-09-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* core/Seaside-Core.st: Change to #seasideString.
+	* core/Seaside-GST-Override.st: Change to #seasideString.
+	* core/Seaside-GST.st: Change to #seasideString.
+	* core/Seaside-Tests.st: Change to #seasideString.
+
 2008-08-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* core/Seaside-Core.st: Use Date instead of Month.

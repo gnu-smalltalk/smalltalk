@@ -58,7 +58,7 @@ WALabelledFormDialog subclass: WAViewer [
 	<category: 'rendering'>
 	(html heading)
 	    level3;
-	    with: presenter toString.
+	    with: presenter seasideString.
 	super renderContentOn: html
     ]
 
@@ -256,7 +256,7 @@ WAHtmlDocument subclass: WAPrettyPrintedDocument [
 		    (self knownRefs includes: aKey) 
 			ifTrue: 
 			    [(html anchor)
-				url: aValue toString;
+				url: aValue seasideString;
 				with: aValue]
 			ifFalse: 
 			    [(self knownEvents includes: aKey) 

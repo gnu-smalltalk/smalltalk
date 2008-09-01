@@ -1,0 +1,4 @@
+2008-09-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* swazoo/Seaside-Adapters-Swazoo.st: Change to #seasideString.
+

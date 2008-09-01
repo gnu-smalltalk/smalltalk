@@ -9,7 +9,7 @@ WAFileLibrary class extend [
         <category: 'private'>
         | code |
         code := SeasidePlatformSupport
-                    asMethodReturningString: aByteArrayOrString toString
+                    asMethodReturningString: aByteArrayOrString seasideString
                     named: aSymbol.
         SeasidePlatformSupport
             compile: code

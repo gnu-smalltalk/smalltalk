@@ -2106,7 +2106,7 @@ TestCase subclass: WAEncoderTest [
 	<category: 'testing'>
 	self 
 	    assert: #(195 188 98 101 114 116 114 105 195 177 103 195 169) asByteArray 
-		    toString
+		    seasideString
 	    encoder: WAUrlEncoder
 	    gives: '%C3%BCbertri%C3%B1g%C3%A9'
     ]
@@ -2418,7 +2418,7 @@ TestCase subclass: WAFileLibraryTest [
 
     testUrlOf [
 	<category: 'testing'>
-	self assert: (WAStandardFiles / #seasideJpg) toString 
+	self assert: (WAStandardFiles / #seasideJpg) seasideString 
 		    = ('/' , SeasidePlatformSupport defaultDispatcherName 
 			    , '/files/WAStandardFiles/seaside.jpg')
     ]
@@ -2674,11 +2674,11 @@ TestCase subclass: WALocaleTest [
 	locale := WALocale fromString: 'gsw-CHE'.
 	self assert: locale language = 'gsw'.
 	self assert: locale country = 'CHE'.
-	self assert: locale toString = 'gsw-CHE'.
+	self assert: locale seasideString = 'gsw-CHE'.
 	locale := WALocale fromString: 'gsw_CHE'.
 	self assert: locale language = 'gsw'.
 	self assert: locale country = 'CHE'.
-	self assert: locale toString = 'gsw-CHE'
+	self assert: locale seasideString = 'gsw-CHE'
     ]
 
     testLanguageName [
@@ -2696,11 +2696,11 @@ TestCase subclass: WALocaleTest [
 	locale := WALocale fromString: 'de-CH'.
 	self assert: locale language = 'de'.
 	self assert: locale country = 'CH'.
-	self assert: locale toString = 'de-CH'.
+	self assert: locale seasideString = 'de-CH'.
 	locale := WALocale fromString: 'de_CH'.
 	self assert: locale language = 'de'.
 	self assert: locale country = 'CH'.
-	self assert: locale toString = 'de-CH'
+	self assert: locale seasideString = 'de-CH'
     ]
 
     testLangugeOnly [
@@ -2709,7 +2709,7 @@ TestCase subclass: WALocaleTest [
 	locale := WALocale fromString: 'de'.
 	self assert: locale language = 'de'.
 	self assert: locale country isNil.
-	self assert: locale toString = 'de'
+	self assert: locale seasideString = 'de'
     ]
 ]
 
@@ -2727,7 +2727,7 @@ TestCase subclass: WAMimeTypeTest [
 	self assert: mimeType main = 'image'.
 	self assert: mimeType sub = 'jpeg'.
 	self assert: mimeType parameters isEmpty.
-	self assert: mimeType toString = 'image/jpeg'
+	self assert: mimeType seasideString = 'image/jpeg'
     ]
 
     testCharSet [
@@ -2735,7 +2735,7 @@ TestCase subclass: WAMimeTypeTest [
 	| mimeType |
 	mimeType := WAMimeType fromString: 'text/html'.
 	mimeType charset: 'utf-8'.
-	self assert: mimeType toString = 'text/html;charset=utf-8'
+	self assert: mimeType seasideString = 'text/html;charset=utf-8'
     ]
 
     testEquals [
@@ -2826,7 +2826,7 @@ TestCase subclass: WAMimeTypeTest [
 		self assert: mimeType sub = 'html'.
 		self assert: mimeType parameters size = 1.
 		self assert: (mimeType parameters at: 'charset') = 'utf-8'.
-		self assert: mimeType toString = 'text/html;charset=utf-8']
+		self assert: mimeType seasideString = 'text/html;charset=utf-8']
     ]
 
     testTo [
@@ -2837,7 +2837,7 @@ TestCase subclass: WAMimeTypeTest [
 	self assert: mimeType main = 'image'.
 	self assert: mimeType sub = 'jpeg'.
 	self assert: mimeType parameters isEmpty.
-	self assert: mimeType toString = 'image/jpeg'.
+	self assert: mimeType seasideString = 'image/jpeg'.
 	mimeType := mimeType toMimeType.
 	self assert: (mimeType isKindOf: WAMimeType)
     ]
@@ -3168,20 +3168,20 @@ TestCase subclass: WAPlatformTest [
 
     testToString [
 	<category: 'testing'>
-	self assert: 'Timberwolf' toString = 'Timberwolf'.
-	self assert: #DireWolf toString = 'DireWolf'.
-	self assert: true toString = 'true'.
-	self assert: 666 toString = '666'.
-	self assert: $A toString = 'A'.
-	self assert: nil toString = 'nil'.
+	self assert: 'Timberwolf' seasideString = 'Timberwolf'.
+	self assert: #DireWolf seasideString = 'DireWolf'.
+	self assert: true seasideString = 'true'.
+	self assert: 666 seasideString = '666'.
+	self assert: $A seasideString = 'A'.
+	self assert: nil seasideString = 'nil'.
 	[1 / 0] on: ZeroDivide
-	    do: [:error | self assert: error toString = 'ZeroDivide'].
-	self assert: 15.25 toString isString.
-	self assert: 15.25 toString asNumber = 15.25.
-	self assert: nil toString isString.
-	self assert: (4 @ 2) toString = '4@2'.
-	self assert: #(101 97) asByteArray toString = 'ea'.
-	self assert: Object new toString isString
+	    do: [:error | self assert: error seasideString = 'ZeroDivide'].
+	self assert: 15.25 seasideString isString.
+	self assert: 15.25 seasideString asNumber = 15.25.
+	self assert: nil seasideString isString.
+	self assert: (4 @ 2) seasideString = '4@2'.
+	self assert: #(101 97) asByteArray seasideString = 'ea'.
+	self assert: Object new seasideString isString
     ]
 
     testTotalSeconds [
@@ -3256,17 +3256,17 @@ TestCase subclass: WAUrlTest [
     testAddParamter [
 	<category: 'testing-adding'>
 	url addToPath: 'files'.
-	self assert: url toString = '/files'.
+	self assert: url seasideString = '/files'.
 	url addParameter: 'x'.
-	self assert: url toString = '/files?x'.
+	self assert: url seasideString = '/files?x'.
 	url addParameter: 'y' value: 1.
-	self assert: url toString = '/files?x&y=1'
+	self assert: url seasideString = '/files?x&y=1'
     ]
 
     testAddToPath [
 	<category: 'testing-adding'>
 	url addToPath: '/files/WAStandardFiles/seaside.jpg'.
-	self assert: url toString = '/files/WAStandardFiles/seaside.jpg'
+	self assert: url seasideString = '/files/WAStandardFiles/seaside.jpg'
     ]
 
     testEqual [
@@ -3286,7 +3286,7 @@ TestCase subclass: WAUrlTest [
 	<category: 'testing'>
 	url fragment: 'id'.
 	self assert: url fragment = 'id'.
-	self assert: url toString = '#id'
+	self assert: url seasideString = '#id'
     ]
 
     testHash [
@@ -3300,19 +3300,19 @@ TestCase subclass: WAUrlTest [
 	<category: 'testing'>
 	url hostname: 'seaside.st'.
 	self assert: url hostname = 'seaside.st'.
-	self assert: url toString = 'http://seaside.st'
+	self assert: url seasideString = 'http://seaside.st'
     ]
 
     testParameters [
 	<category: 'testing'>
 	url parameters at: '1' put: nil.
-	self assert: url toString = '?1'.
+	self assert: url seasideString = '?1'.
 	url parameters at: '2' put: 'foo'.
-	self assert: url toString = '?1&2=foo'.
+	self assert: url seasideString = '?1&2=foo'.
 	url parameters at: '3' put: 123.
-	self assert: url toString = '?1&2=foo&3=123'.
+	self assert: url seasideString = '?1&2=foo&3=123'.
 	url parameters at: '4' put: 'foo bar&zork'.
-	self assert: url toString = '?1&2=foo&3=123&4=foo+bar%26zork'
+	self assert: url seasideString = '?1&2=foo&3=123&4=foo+bar%26zork'
     ]
 
     testPassword [
@@ -3322,16 +3322,16 @@ TestCase subclass: WAUrlTest [
 	    username: 'foo';
 	    password: 'bar'.
 	self assert: url password = 'bar'.
-	self assert: url toString = 'http://foo:bar@seaside.st'
+	self assert: url seasideString = 'http://foo:bar@seaside.st'
     ]
 
     testPath [
 	<category: 'testing'>
-	self assert: url toString = ''.
+	self assert: url seasideString = ''.
 	url path add: 'aa'.
-	self assert: url toString = '/aa'.
+	self assert: url seasideString = '/aa'.
 	url path add: 'bb'.
-	self assert: url toString = '/aa/bb'.
+	self assert: url seasideString = '/aa/bb'.
 	self assert: url path asArray = #('aa' 'bb')
     ]
 
@@ -3353,7 +3353,7 @@ TestCase subclass: WAUrlTest [
 	    hostname: 'seaside.st';
 	    port: 8080.
 	self assert: url port = 8080.
-	self assert: url toString = 'http://seaside.st:8080'
+	self assert: url seasideString = 'http://seaside.st:8080'
     ]
 
     testQueryEncoding [
@@ -3371,25 +3371,25 @@ TestCase subclass: WAUrlTest [
 	    scheme: 'https';
 	    hostname: 'seaside.st'.
 	self assert: url scheme = 'https'.
-	self assert: url toString = 'https://seaside.st'.
+	self assert: url seasideString = 'https://seaside.st'.
 	"Tests from Boris"
 	url hostname: 'seaside.st'.
 	url
 	    port: 80;
 	    scheme: 'http'.
-	self assert: url toString = 'http://seaside.st'.
+	self assert: url seasideString = 'http://seaside.st'.
 	url
 	    port: 443;
 	    scheme: 'https'.
-	self assert: url toString = 'https://seaside.st'.
+	self assert: url seasideString = 'https://seaside.st'.
 	url
 	    port: 80;
 	    scheme: #http.
-	self assert: url toString = 'http://seaside.st'.
+	self assert: url seasideString = 'http://seaside.st'.
 	url
 	    port: 443;
 	    scheme: #https.
-	self assert: url toString = 'https://seaside.st'
+	self assert: url seasideString = 'https://seaside.st'
     ]
 
     testUsername [
@@ -3398,7 +3398,7 @@ TestCase subclass: WAUrlTest [
 	    hostname: 'seaside.st';
 	    username: 'foo'.
 	self assert: url username = 'foo'.
-	self assert: url toString = 'http://foo@seaside.st'
+	self assert: url seasideString = 'http://foo@seaside.st'
     ]
 ]
 

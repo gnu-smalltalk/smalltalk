@@ -30,7 +30,7 @@ String extend [
 
     asMIMEDocumentType: mimeType [
 	<category: '*Seaside-Core'>
-	^SeasidePlatformSupport mimeDocumentClass contentType: mimeType toString
+	^SeasidePlatformSupport mimeDocumentClass contentType: mimeType seasideString
 	    content: self
     ]
 
@@ -263,7 +263,7 @@ ByteArray extend [
 
     asMIMEDocumentType: mimeType [
 	<category: '*Seaside-Core'>
-	^SeasidePlatformSupport mimeDocumentClass contentType: mimeType toString
+	^SeasidePlatformSupport mimeDocumentClass contentType: mimeType seasideString
 	    content: self
     ]
 
@@ -368,7 +368,7 @@ Object extend [
 
     deprecatedApi [
 	<category: '*Seaside-Core'>
-	self deprecatedApi: thisContext sender toString
+	self deprecatedApi: thisContext sender seasideString
     ]
 
     deprecatedApi: aString [
@@ -378,7 +378,7 @@ Object extend [
 
     encodeOn: aDocument [
 	<category: '*Seaside-Core'>
-	aDocument print: self toString
+	aDocument print: self seasideString
     ]
 
     inspectorFields [
@@ -1086,7 +1086,7 @@ WABrush subclass: WATagBrush [
 	<category: 'convenience'>
 	self 
 	    onKeyPress: 'if((window.event ? window.event.keyCode : event.which) == 13){' 
-		    , aString toString , '; return false}; return true'
+		    , aString seasideString , '; return false}; return true'
     ]
 
     onError: aString [
@@ -1587,7 +1587,7 @@ This code creates a new render-loop and displays a new instance of WACounter wit
 			    nextPut: $=.
 			stream nextPutAll: (assoc value == true 
 				    ifTrue: ['yes']
-				    ifFalse: [assoc value == false ifTrue: ['no'] ifFalse: [assoc value toString]])]
+				    ifFalse: [assoc value == false ifTrue: ['no'] ifFalse: [assoc value seasideString]])]
 		    separatedBy: [stream nextPut: $,]]
     ]
 
@@ -2384,7 +2384,7 @@ WAFormInputTag subclass: WACheckboxTag [
 
     submitFormNamed: formName [
 	<category: 'attributes'>
-	self onClick: 'submitForm(''' , formName toString , '''); return false;'
+	self onClick: 'submitForm(''' , formName seasideString , '''); return false;'
     ]
 
     type [
@@ -2897,7 +2897,7 @@ There are six levels of headings in HTML with H1 as the most important and H6 as
 
     tag [
 	<category: 'private'>
-	^'h' , self level toString
+	^'h' , self level seasideString
     ]
 ]
 
@@ -3348,7 +3348,7 @@ WATagBrush subclass: WAScriptTag [
 	<category: 'public'>
 	self attributes at: 'type' ifAbsentPut: ['text/javascript'].
 	super 
-	    with: [aString isNil ifFalse: [self document nextPutAll: aString toString]]
+	    with: [aString isNil ifFalse: [self document nextPutAll: aString seasideString]]
     ]
 ]
 
@@ -3366,7 +3366,7 @@ WATagBrush subclass: WATableCellTag [
 
     character: aStringOrCharacter [
 	<category: 'attributes'>
-	self attributes at: 'char' put: aStringOrCharacter toString
+	self attributes at: 'char' put: aStringOrCharacter seasideString
     ]
 
     characterOffset: anInteger [
@@ -3435,7 +3435,7 @@ WATagBrush subclass: WATableColumnGroupTag [
 
     character: aStringOrCharacter [
 	<category: 'attributes'>
-	self attributes at: 'char' put: aStringOrCharacter toString
+	self attributes at: 'char' put: aStringOrCharacter seasideString
     ]
 
     characterOffset: anInteger [
@@ -3460,7 +3460,7 @@ WATagBrush subclass: WATableColumnGroupTag [
 
     width: aNumber [
 	<category: 'attributes'>
-	self attributeAt: 'width' put: aNumber toString
+	self attributeAt: 'width' put: aNumber seasideString
     ]
 ]
 
@@ -4279,7 +4279,7 @@ WACanvas subclass: WAHtmlCanvas [
 
     encodeCharacter: aCharacter [
 	<category: 'convenience'>
-	self html: '&#' , aCharacter asInteger toString , ';'
+	self html: '&#' , aCharacter asInteger seasideString , ';'
     ]
 
     fieldSet [
@@ -4338,7 +4338,7 @@ WACanvas subclass: WAHtmlCanvas [
 
 	<category: 'public'>
 	self flush.
-	self document nextPutAll: aString toString
+	self document nextPutAll: aString seasideString
     ]
 
     iframe [
@@ -6015,7 +6015,7 @@ Instance Variables:
 
     stringForValue: anObject [
 	<category: 'converting'>
-	^anObject toString
+	^anObject seasideString
     ]
 
     valueFromString: aString [
@@ -6075,7 +6075,7 @@ Instance Variables:
 
     valueFromString: aString [
 	<category: 'converting'>
-	^self options detect: [:each | each toString = aString]
+	^self options detect: [:each | each seasideString = aString]
 	    ifNone: [self error: 'No matching list option']
     ]
 ]
@@ -6192,17 +6192,17 @@ For more information see  RFC2965 (http://tools.ietf.org/html/rfc2965)'>
 		stream
 		    nextPutAll: (expiry dayOfWeekName first: 3);
 		    nextPutAll: ', ';
-		    nextPutAll: expiry dayOfMonth toString;
+		    nextPutAll: expiry dayOfMonth seasideString;
 		    nextPut: $-;
 		    nextPutAll: expiry monthName;
 		    nextPut: $-;
-		    nextPutAll: expiry year toString;
+		    nextPutAll: expiry year seasideString;
 		    space;
-		    nextPutAll: expiry hour24 toString;
+		    nextPutAll: expiry hour24 seasideString;
 		    nextPut: $:;
-		    nextPutAll: expiry minute toString;
+		    nextPutAll: expiry minute seasideString;
 		    nextPut: $:;
-		    nextPutAll: expiry second toString;
+		    nextPutAll: expiry second seasideString;
 		    nextPutAll: ' GMT']
     ]
 
@@ -6986,7 +6986,7 @@ WAHtmlElement subclass: WAContentElement [
 	<category: 'printing'>
 	children isEmptyOrNil ifTrue: [^self].
 	aDocument nextPutAll: '/*<![CDATA[*/'.
-	children do: [:each | aDocument nextPutAll: each toString].
+	children do: [:each | aDocument nextPutAll: each seasideString].
 	aDocument nextPutAll: '/*]]>*/'
     ]
 
@@ -7429,7 +7429,7 @@ html meta
     redirectAfter: seconds to: aString [
 	<category: 'conveniance'>
 	self responseHeaderName: 'refresh'.
-	self content: seconds toString , ';URL=' , aString
+	self content: seconds seasideString , ';URL=' , aString
     ]
 
     responseHeaderName: aString [
@@ -7527,7 +7527,7 @@ WALRUCache is used to store the last n continutations of a session.
     nextKey [
 	<category: 'callbacks'>
 	| key |
-	[table includesKey: (key := WAExternalID new toString)] whileTrue.
+	[table includesKey: (key := WAExternalID new seasideString)] whileTrue.
 	^key
     ]
 
@@ -7805,7 +7805,7 @@ renderContentOn: html
 			stream
 			    tab;
 			    nextPutAll: '^ '''.
-			aByteArrayOrString toString do: 
+			aByteArrayOrString seasideString do: 
 				[:each | 
 				each = $' ifTrue: [stream nextPut: $'].
 				stream nextPut: each].
@@ -7905,7 +7905,7 @@ renderContentOn: html
 	    ifTrue: 
 		["convert Symbol to String"
 
-		^aSelector toString].
+		^aSelector seasideString].
 	extension := (aSelector last: aSelector size - dotIndex + 1) asLowercase.
 	^(aSelector first: dotIndex - 1) , '.' , extension
     ]
@@ -9341,11 +9341,11 @@ zza|||Zaza; Dimili; Dimli; Kirdki; Kirmanjki; Zazaki|zaza; dimili; dimli; kirdki
 	super printOn: aStream.
 	aStream
 	    nextPut: $(;
-	    nextPutAll: self toString;
+	    nextPutAll: self seasideString;
 	    nextPut: $)
     ]
 
-    toString [
+    seasideString [
 	<category: 'converting'>
 	^String streamContents: 
 		[:stream | 
@@ -9592,7 +9592,7 @@ sub
 	super printOn: aStream.
 	aStream
 	    nextPut: $(;
-	    nextPutAll: self toString;
+	    nextPutAll: self seasideString;
 	    nextPut: $)
     ]
 
@@ -9611,7 +9611,7 @@ sub
 	^self
     ]
 
-    toString [
+    seasideString [
 	<category: 'converting'>
 	^String streamContents: 
 		[:stream | 
@@ -10314,7 +10314,7 @@ Instance Variables:
     batch [
 	<category: 'accessing-calculated'>
 	^items 
-	    select: [:each | each toString asUppercase first = self currentPage]
+	    select: [:each | each seasideString asUppercase first = self currentPage]
     ]
 
     currentPage [
@@ -10416,7 +10416,7 @@ Instance Variables:
 
     validPages [
 	<category: 'accessing-calculated'>
-	^(items collect: [:each | each toString asUppercase first]) asSet 
+	^(items collect: [:each | each seasideString asUppercase first]) asSet 
 	    asSortedCollection
     ]
 ]
@@ -11699,7 +11699,7 @@ Instance Variables:
 
     monthHeading [
 	<category: 'private'>
-	^self monthName , ' ' , self year toString
+	^self monthName , ' ' , self year seasideString
     ]
 
     weeksDo: aBlock [
@@ -11844,7 +11844,7 @@ WAComponent subclass: WANavigation [
 
     labelForOption: anObject [
 	<category: 'query'>
-	^anObject toString
+	^anObject seasideString
     ]
 
     options [
@@ -12122,7 +12122,7 @@ Instance Variables:
 	<category: 'initialization'>
 	super initialize.
 	items := #().
-	labelBlock := [:each | each toString]
+	labelBlock := [:each | each seasideString]
     ]
 
     items [
@@ -12626,7 +12626,7 @@ Instance Variables:
 	<category: 'examples'>
 	^(self new)
 	    root: 'dispatcher' -> WADispatcher default;
-	    labelBlock: [:assoc | assoc key toString , ': ' , assoc value printString];
+	    labelBlock: [:assoc | assoc key seasideString , ': ' , assoc value printString];
 	    childrenBlock: [:assoc | assoc value inspectorFields];
 	    yourself
     ]
@@ -12705,7 +12705,7 @@ Instance Variables:
 	expanded := IdentitySet new.
 	self selectBlock: [:node | self answer: node].
 	self childrenBlock: [:node | Array new].
-	self labelBlock: [:node | node toString]
+	self labelBlock: [:node | node seasideString]
     ]
 
     isExpanded: aNode [
@@ -13069,7 +13069,7 @@ Instance Variables:
 	callbacks := WACallbackRegistry context: aRoot context owner: self.
 	url := aRoot context actionUrl 
 		    withParameter: (callbacks registerActionCallback: [self component answer]).
-	aRoot meta redirectAfter: self delay to: url toString
+	aRoot meta redirectAfter: self delay to: url seasideString
     ]
 ]
 
@@ -13653,7 +13653,7 @@ Object subclass: WARedirectHandler [
 	<category: 'actions'>
 	^(WAResponse 
 	    refreshWithMessage: 'That page has expired.'
-	    location: aUrl toString
+	    location: aUrl seasideString
 	    delay: 3)
 	    gone;
 	    yourself
@@ -13661,7 +13661,7 @@ Object subclass: WARedirectHandler [
 
     redirectTo: aUrl [
 	<category: 'actions'>
-	^WAResponse redirectTo: aUrl toString
+	^WAResponse redirectTo: aUrl seasideString
     ]
 ]
 
@@ -13828,7 +13828,7 @@ Object subclass: WARenderingContext [
 
     nextKey [
 	<category: 'callbacks'>
-	^count contents toString
+	^count contents seasideString
     ]
 
     properties [
@@ -13894,7 +13894,7 @@ Object subclass: WARenderingContext [
 		    document: anObject
 		    mimeType: mimeType
 		    fileName: fileName)) 
-	    toString
+	    seasideString
     ]
 ]
 
@@ -14003,7 +14003,7 @@ Instance Variables:
 
     initialize [
 	<category: 'initialize-release'>
-	formatBlock := [:x | x toString].
+	formatBlock := [:x | x seasideString].
 	sortBlock := [:a :b | a <= b].
 	valueBlock := [:row | nil].
 	clickBlock := nil.
@@ -15017,7 +15017,7 @@ Instance Variables:
 
     redirectResponseFor: aUrl [
 	<category: 'private'>
-	^WAResponse redirectTo: aUrl toString
+	^WAResponse redirectTo: aUrl seasideString
     ]
 
     registerRequestHandler: anObject [
@@ -15068,7 +15068,7 @@ Instance Variables:
 	| key url |
 	key := self ensureKeyForHandler: anObject.
 	url := self baseUrl.
-	url addParameter: self handlerField value: key toString.
+	url addParameter: self handlerField value: key seasideString.
 	^url
     ]
 ]
@@ -15426,7 +15426,7 @@ Smalltalk garbageCollect'>
 		    nextPutAll: '<html><script>';
 		    nextPutAll: 'self.close();';
 		    nextPutAll: 'self.opener.location=';
-		    nextPutAll: url toString printString;
+		    nextPutAll: url seasideString printString;
 		    nextPutAll: '</script></html>';
 		    yourself]
     ]
@@ -15611,7 +15611,7 @@ Smalltalk garbageCollect'>
 		[:url | 
 		WAResponse 
 		    refreshWithMessage: aString
-		    location: url toString
+		    location: url seasideString
 		    delay: aNumber]
     ]
 
@@ -15658,7 +15658,7 @@ Smalltalk garbageCollect'>
     sessionCookie [
 	<category: 'accessing'>
 	^WACookie key: self application handlerCookieName
-	    value: (self application ensureKeyForHandler: self) toString
+	    value: (self application ensureKeyForHandler: self) seasideString
     ]
 
     start: aRequest [
@@ -16027,7 +16027,7 @@ Object subclass: WAResponse [
 	super printOn: aStream.
 	aStream
 	    space;
-	    nextPutAll: self status toString
+	    nextPutAll: self status seasideString
     ]
 
     redirect [
@@ -16085,7 +16085,7 @@ Object subclass: WAResponse [
 		aStream
 		    nextPutAll: assoc key;
 		    nextPutAll: ': ';
-		    nextPutAll: assoc value toString.
+		    nextPutAll: assoc value seasideString.
 		aStream crlf].
 	cookies ifNotNil: 
 		[:foo | 
@@ -16096,7 +16096,7 @@ Object subclass: WAResponse [
 			aStream crlf]].
 	aStream
 	    nextPutAll: 'Content-Type: ';
-	    nextPutAll: self contentType toString.
+	    nextPutAll: self contentType seasideString.
 	aStream crlf
     ]
 
@@ -16113,7 +16113,7 @@ Object subclass: WAResponse [
 	aStream
 	    nextPutAll: self httpVersion;
 	    space;
-	    nextPutAll: self status toString;
+	    nextPutAll: self status seasideString;
 	    crlf
     ]
 ]
@@ -16572,7 +16572,7 @@ WASessionContinuation subclass: WARedirectContinuation [
 
     run [
 	<category: 'processing'>
-	self respond: [:response | response redirectTo: self url toString]
+	self respond: [:response | response redirectTo: self url seasideString]
     ]
 ]
 
@@ -16588,7 +16588,7 @@ WASessionContinuation subclass: WARenderContinuation [
 	<category: 'private'>
 	WAComponentsNotFoundError 
 	    signal: 'Components not found while processing callbacks: ' 
-		    , aCollection toString
+		    , aCollection seasideString
     ]
 
     context [
@@ -16699,7 +16699,7 @@ WASessionContinuation subclass: WARenderContinuation [
 	    closed: false.
 	aDocument nextPutAll: '/*<![CDATA[*/function onLoad(){'.
 	self session onLoadScripts 
-	    do: [:each | aDocument nextPutAll: each toString]
+	    do: [:each | aDocument nextPutAll: each seasideString]
 	    separatedBy: [aDocument nextPutAll: ';'].
 	aDocument nextPutAll: '}/*]]>*/'.
 	aDocument closeTag: 'script'.
@@ -16951,9 +16951,9 @@ WASmallDictionary subclass: WAHtmlAttributes [
 			self at: aKey
 			    ifPresent: 
 				[:value | 
-				stream nextPutAll: value toString.
+				stream nextPutAll: value seasideString.
 				stream nextPutAll: aString].
-			stream nextPutAll: aValue toString])
+			stream nextPutAll: aValue seasideString])
     ]
 
     encodeOn: aDocument [
@@ -17067,7 +17067,7 @@ Instance Variables
 		value ifNotNil: 
 			[:foo | 
 			aDocument nextPut: $=.
-			aDocument urlEncoder nextPutAll: value toString]]
+			aDocument urlEncoder nextPutAll: value seasideString]]
     ]
 
     encodePathOn: aDocument [
@@ -17228,7 +17228,7 @@ Instance Variables
 	"we really expect a String here, Old versions (2.7) expected a Symbol you can still pass a Symbol and get away with it but don't expect this behavior to be supported in future versions."
 
 	<category: 'accessing'>
-	scheme := aString toString
+	scheme := aString seasideString
     ]
 
     takeServerParametersFromRequest: aRequest [
@@ -17401,7 +17401,7 @@ Integer extend [
 
     printStringAsCents [
 	<category: '*Seaside-Core'>
-	^'$' , (self // 100) toString , '.' , (self \\ 100) asTwoCharacterString
+	^'$' , (self // 100) seasideString , '.' , (self \\ 100) asTwoCharacterString
     ]
 
 ]

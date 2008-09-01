@@ -488,7 +488,7 @@ WAFunctionalTest subclass: WAClosureTest [
     go [
 	<category: 'actions'>
 	#(#a #b #c) 
-	    keysAndValuesDo: [:a :b | self inform: a toString , ' ' , b toString]
+	    keysAndValuesDo: [:a :b | self inform: a seasideString , ' ' , b seasideString]
     ]
 
     label [
@@ -612,12 +612,12 @@ WAFunctionalTest subclass: WADateSelectorTest [
 	| dateDiff |
 	dateDiff := (endDAT dateAndTime asDate - beginDAT dateAndTime asDate) days.
 	dateDiff isZero 
-	    ifFalse: [self inform: dateDiff toString , ' day(s)']
+	    ifFalse: [self inform: dateDiff seasideString , ' day(s)']
 	    ifTrue: 
 		[self 
 		    inform: (endDAT dateAndTime asTime 
 			    subtractTime: beginDAT dateAndTime asTime) asSeconds 
-			    toString , ' second(s)']
+			    seasideString , ' second(s)']
     ]
 
     initialize [
@@ -666,7 +666,7 @@ WAFunctionalTest subclass: WADateSelectorTest [
 				    tableData: endDate]].
 		(html submitButton)
 		    callback: 
-			    [self inform: (endDate date - beginDate date) days toString , ' day(s)'];
+			    [self inform: (endDate date - beginDate date) days seasideString , ' day(s)'];
 		    text: 'Compute duration']
     ]
 
@@ -708,7 +708,7 @@ WAFunctionalTest subclass: WADateSelectorTest [
 		(html submitButton)
 		    callback: 
 			    [self 
-				inform: (endTime time subtractTime: beginTime time) asSeconds toString 
+				inform: (endTime time subtractTime: beginTime time) asSeconds seasideString 
 					, ' seconds(s)'];
 		    text: 'Compute duration']
     ]
@@ -791,7 +791,7 @@ WAFunctionalTest subclass: WADateTimeTest [
 	    with: 'Form with #dateInput and #timeInput'.
 	(html form)
 	    defaultAction: 
-		    [message := 'Default action: ' , date toString , ' ' , time toString];
+		    [message := 'Default action: ' , date seasideString , ' ' , time seasideString];
 	    with: 
 		    [html div: 
 			    [html dateInput on: #date of: self.
@@ -803,7 +803,7 @@ WAFunctionalTest subclass: WADateTimeTest [
 			    html text: message.
 			    html break.
 			    html submitButton 
-				callback: [message := 'Button action: ' , date toString , ' ' , time toString]]]
+				callback: [message := 'Button action: ' , date seasideString , ' ' , time seasideString]]]
     ]
 
     renderDeadDateTimeOn: html [
@@ -832,8 +832,8 @@ WAFunctionalTest subclass: WADateTimeTest [
 	(html form)
 	    id: 'submitForm';
 	    defaultAction: 
-		    [data := 'Default action : ' , data1 toString , ' ' , data2 toString , ' ' 
-				, numericData toString];
+		    [data := 'Default action : ' , data1 seasideString , ' ' , data2 seasideString , ' ' 
+				, numericData seasideString];
 	    with: 
 		    [html div: 
 			    [html textInput on: #data1 of: self.
@@ -844,8 +844,8 @@ WAFunctionalTest subclass: WADateTimeTest [
 			    html break.
 			    (html anchor)
 				callback: 
-					[data := 'Anchor action : ' , data1 toString , ' ' , data2 toString , ' ' 
-						    , numericData toString];
+					[data := 'Anchor action : ' , data1 seasideString , ' ' , data2 seasideString , ' ' 
+						    , numericData seasideString];
 				submitFormNamed: 'submitForm';
 				with: 'Click to submit']]
     ]
@@ -877,22 +877,22 @@ WAFunctionalTest subclass: WADefaultFormTest [
     renderContentOn: html [
 	<category: 'rendering'>
 	(html form)
-	    defaultAction: [self inform: 'Default: ' , value toString];
+	    defaultAction: [self inform: 'Default: ' , value seasideString];
 	    with: 
 		    [html div: 
 			    [(html submitButton)
-				callback: [self inform: 'Before: ' , value toString];
+				callback: [self inform: 'Before: ' , value seasideString];
 				text: 'Before'.
 			    html break.
 			    (html textInput)
 				value: '';
 				callback: [:v | value := v].
 			    (html submitButton)
-				callback: [self inform: 'Go: ' , value toString];
+				callback: [self inform: 'Go: ' , value seasideString];
 				text: 'Go'.
 			    html break.
 			    (html submitButton)
-				callback: [self inform: 'After: ' , value toString];
+				callback: [self inform: 'After: ' , value seasideString];
 				text: 'After']]
     ]
 ]
@@ -1288,14 +1288,14 @@ WAFunctionalTest subclass: WAFlowTest [
 			[:html | 
 			(html anchor)
 			    callback: [component answer];
-			    with: each toString , ': ' , (self depth: thisContext) toString].
+			    with: each seasideString , ': ' , (self depth: thisContext) seasideString].
 		self call: component]
     ]
 
     goButtons [
 	<category: 'actions'>
 	1 to: 5
-	    do: [:each | self inform: each toString , ': ' , (self depth: thisContext) toString]
+	    do: [:each | self inform: each seasideString , ': ' , (self depth: thisContext) seasideString]
     ]
 
     label [
@@ -1498,7 +1498,7 @@ WAFunctionalTest subclass: WAHtmlTest [
 		    do: 
 			[:index | 
 			(html submitButton)
-			    addShortcut: 'F' , index toString;
+			    addShortcut: 'F' , index seasideString;
 			    callback: [number := index];
 			    text: index.
 			html space]].
@@ -1678,7 +1678,7 @@ WAFunctionalTest subclass: WAImageMapTest [
 
     clickedAt: aPoint id: aString [
 	<category: 'actions'>
-	self inform: 'Clicked at ' , aPoint toString , ' on ' , aString toString
+	self inform: 'Clicked at ' , aPoint seasideString , ' on ' , aString seasideString
     ]
 
     label [
@@ -2079,8 +2079,8 @@ WAFunctionalTest subclass: WAPathTest [
     updateUrl: aUrl [
 	<category: 'path'>
 	super updateUrl: aUrl.
-	aUrl addToPath: counter count toString.
-	aUrl fragment: counter count toString
+	aUrl addToPath: counter count seasideString.
+	aUrl fragment: counter count seasideString
     ]
 ]
 
@@ -2486,7 +2486,7 @@ WAFunctionalTest subclass: WAUploadTest [
 		    document: file contents
 			mimeType: file contentType
 			fileName: file fileName;
-		    with: file fileName , ' (' , file contentType toString , ')'.
+		    with: file fileName , ' (' , file contentType seasideString , ')'.
 		html break.
 		(html anchor)
 		    document: file contents;
