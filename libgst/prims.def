@@ -5659,7 +5659,7 @@ primitive VMpr_FileDescriptor_socketOp [succeed,fail]
       {
 	int result;
         _gst_remove_fd_polling_handlers (fd);
-        result = closesocket (FD_TO_SOCKET (fd));
+        result = close (fd);
         resultOOP = FROM_INT (result);
         goto succeed;
       }

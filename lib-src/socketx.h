@@ -105,6 +105,11 @@ int win_recv(int fd, void* buffer, int n, int flags);
 #define FD_TO_SOCKET(fd)   ((SOCKET) _get_osfhandle ((fd)))
 #define SOCKET_TO_FD(fh)   (_open_osfhandle ((HANDLE) (fh), O_RDWR | O_BINARY))
 
+#undef close
+#define close		   win_close
+
+extern int win_close(int filehandle);
+
 #else /* !__MSVCRT__ */
 
 #include <sys/types.h>
@@ -118,7 +123,6 @@ int win_recv(int fd, void* buffer, int n, int flags);
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 
-#define closesocket(x)            close(x)
 #define is_socket_error(err)      (errno == (err))
 #define clear_socket_error()      (errno = 0)
 
