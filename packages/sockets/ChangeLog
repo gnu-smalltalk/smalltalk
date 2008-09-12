@@ -1,3 +1,7 @@
+2008-09-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sockets.c: connect returns EWOULDBLOCK for Winsock.
+
 2008-08-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* IP6SocketImpl.st: Fill in sa_len dutifully for BSD systems.

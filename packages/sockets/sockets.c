@@ -304,7 +304,7 @@ myConnect (int fd, struct sockaddr *sockaddr, int len)
   
   fix_sockaddr (sockaddr);
   connect (sock, sockaddr, len);
-  if (is_socket_error (EINPROGRESS))
+  if (is_socket_error (EINPROGRESS) || is_socket_error (EWOULDBLOCK))
     errno = 0;
 }
 
