@@ -1,3 +1,7 @@
+2008-09-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sport.st: Fix off-by-one in SpTimestamp and SpFilename methods.
+
 2008-08-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sporttests.st: Make SpWeakArrayTest a little more resilient.

@@ -854,7 +854,7 @@ Object subclass: SpFilename [
 	<category: 'accessing'>
 	| entry |
 	entry := File name: self asString.
-	^SpTimestamp fromSeconds: entry creationTime
+	^SpTimestamp fromSeconds: entry creationTime asSeconds
     ]
 
     delete [
@@ -951,7 +951,7 @@ Object subclass: SpFilename [
 	<category: 'accessing'>
 	| entry |
 	entry := File name: self asString.
-	^SpTimestamp fromSeconds: entry lastModifyTime
+	^SpTimestamp fromSeconds: entry lastModifyTime asSeconds
     ]
 
     name [
@@ -1624,7 +1624,7 @@ Object subclass: SpTimestamp [
 
 	<category: 'initialize-release'>
 	underlyingTimestamp := DateTime year: 1901 month: 1
-		day: anInteger // 86400
+		day: anInteger // 86400 + 1
 		hour: 0 minute: 0 second: anInteger \\ 86400.
 	^self
     ]
