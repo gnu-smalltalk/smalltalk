@@ -426,7 +426,7 @@ SpFilename extend [
 	 ^SpTimestamp fromDate: info first andTime: info last"
 
 	<category: '*Swazoo-accessing'>
-	^SpTimestamp now
+	^self modifiedTimestamp
     ]
 
 ]
