@@ -1,3 +1,8 @@
+2008-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* ConnectionInfo.st: Make db/dbname/database, and host/hostname,
+	synonyms of each other.
+
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Connection.st: Add table accessors.
