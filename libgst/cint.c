@@ -598,6 +598,10 @@ _gst_invoke_croutine (OOP cFuncOOP,
 
   incPtr = INC_SAVE_POINTER ();
 
+  /* Make sure the parameters do not die.  */
+  INC_ADD_OOP (cFuncOOP);
+  INC_ADD_OOP (receiver);
+
   desc = (gst_cfunc_descriptor) OOP_TO_OBJ (cFuncOOP);
   if (IS_NIL (desc->cFunction))
     return (NULL);
@@ -671,7 +675,9 @@ _gst_invoke_croutine (OOP cFuncOOP,
 	    &result.u, ffi_arg_vec);
 
   _gst_set_errno (errno);
+  desc = (gst_cfunc_descriptor) OOP_TO_OBJ (cFuncOOP);
   oop = c_to_smalltalk (&result, desc->returnType);
+  INC_ADD_OOP (oop);
 
   /* Fixup all returned string variables */
   if (c_func_cur->needPostprocessing)
@@ -931,6 +937,7 @@ push_smalltalk_obj (OOP oop,
                && (cType == CDATA_SYMBOL || cType == CDATA_STRING)))
     {
       cp->oop = oop;
+      INC_ADD_OOP (oop);
 
       if (cp->cType == CDATA_BYTEARRAY || cp->cType == CDATA_BYTEARRAY_OUT)
 	cp->u.ptrVal = _gst_to_byte_array (oop);
@@ -946,6 +953,8 @@ push_smalltalk_obj (OOP oop,
            && (cType == CDATA_WSTRING || cType == CDATA_WSTRING_OUT))
     {
       cp->oop = oop;
+      INC_ADD_OOP (oop);
+
       cp->u.ptrVal = (gst_uchar *) _gst_to_wide_cstring (oop);
 
       c_func_cur->needPostprocessing = true;
@@ -986,6 +995,8 @@ push_smalltalk_obj (OOP oop,
 	  cp->u.cObjectPtrVal.pPtrVal = &cp->u.cObjectPtrVal.ptrVal;
 	  cp->u.cObjectPtrVal.ptrVal = COBJECT_VALUE (oop);
 	  cp->oop = oop;
+          INC_ADD_OOP (oop);
+
 	  SET_TYPE (&ffi_type_pointer);
 	  return;
 
