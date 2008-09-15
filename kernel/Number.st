@@ -58,17 +58,19 @@ implicit type coercing code for binary operations.'>
 	scale := (aStream peekFor: $-) ifTrue: [-1] ifFalse: [1].
 	
 	[aStream atEnd ifTrue: [^self coerce: value].
-	(ch := aStream next asUppercase) isDigit: anInteger]
-		whileTrue: [value := ch digitValue * scale + (value * anInteger)].
-	ch = $.  ifFalse: 
-	    [aStream skip: -1.  ^self coerce: value].
-	
-	[aStream atEnd ifTrue: [^self coerce: value].
-	(ch := aStream next asUppercase) isDigit: anInteger]
+	(ch := aStream peek asUppercase) isDigit: anInteger]
+	    whileTrue: [
+		aStream next.
+		value := ch digitValue * scale + (value * anInteger)].
+
+	ch = $. ifTrue: [
+	    [aStream next.
+	    aStream atEnd ifTrue: [^self coerce: value].
+	    (ch := aStream peek asUppercase) isDigit: anInteger]
 		whileTrue: [
 		    scale := scale / anInteger.
-		    value := ch digitValue * scale + value].
-	aStream skip: -1.
+		    value := ch digitValue * scale + value]].
+
 	^self coerce: value
     ]
 

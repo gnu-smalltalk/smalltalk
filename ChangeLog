@@ -1,3 +1,7 @@
+2008-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
+        * kernel/Number.st: Do not use #skip:.
+
 2008-08-27  Masatake YAMATO  <yamato@redhat.com>
 
 	* kernel/Character.st: Add `ff'.
