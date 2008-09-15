@@ -1,0 +1,5 @@
+2008-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* ConnectionInfo.st: Make db/dbname/database, and host/hostname,
+	synonyms of each other.
+

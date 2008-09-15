@@ -61,7 +61,28 @@ Object subclass: ConnectionInfo [
 		[:p | 
 		| kv |
 		kv := p subStrings: $=.
-		params at: (kv at: 1) put: (kv size > 1 ifTrue: [kv at: 2] ifFalse: [nil])]
+		params at: (kv at: 1) put: (kv size > 1 ifTrue: [kv at: 2] ifFalse: [nil])].
+
+	self setUpParamSynonyms
+    ]
+
+    setUpParamSynonyms [
+	"Private - set up synonyms like dbname/db/database."
+	| database host |
+
+	database := params at: 'database' ifAbsent: [nil].
+	database := database ifNil: [ params at: 'db' ifAbsent: [nil] ].
+	database := database ifNil: [ params at: 'dbname' ifAbsent: [nil] ].
+	database isNil ifFalse: [
+	    params at: 'database' put: database.
+	    params at: 'db' put: database.
+	    params at: 'dbname' put: database ].
+
+	host := params at: 'host' ifAbsent: [nil].
+	host := host ifNil: [ params at: 'hostname' ifAbsent: [nil] ].
+	host isNil ifFalse: [
+	    params at: 'host' put: host.
+	    params at: 'hostname' put: host ]
     ]
 
     scheme: aString [
