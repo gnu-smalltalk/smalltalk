@@ -1217,9 +1217,10 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	self ensureReadable.
 
 	read := 0.
-	[ (available := self availableBytes) > 0 ] whileTrue: [
+	[ read < anInteger
+		and: [ (available := self availableBytes) > 0 ] ] whileTrue: [
 	    read := read + (self readBuffer
-		nextAvailable: available
+		nextAvailable: (available min: anInteger - read)
 		putAllOn: aStream) ].
 
 	^read
@@ -1236,9 +1237,10 @@ This class adds a read buffer to the basic model of AbstractSocket.'>
 	self ensureReadable.
 
 	read := 0.
-	[ (available := self availableBytes) > 0 ] whileTrue: [
+	[ read < anInteger
+		and: [ (available := self availableBytes) > 0 ] ] whileTrue: [
 	    read := read + (self readBuffer
-		nextAvailable: available
+		nextAvailable: (available min: anInteger - read)
 		into: aCollection
 		startingAt: pos + read) ].
 
