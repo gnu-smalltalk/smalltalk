@@ -719,6 +719,10 @@ _gst_invoke_croutine (OOP cFuncOOP,
 
   incPtr = INC_SAVE_POINTER ();
 
+  /* Make sure the parameters do not die.  */
+  INC_ADD_OOP (cFuncOOP);
+  INC_ADD_OOP (receiver);
+
   funcAddr = cobject_value (cFuncOOP);
   if (!funcAddr)
     return (NULL);
@@ -815,7 +819,9 @@ _gst_invoke_croutine (OOP cFuncOOP,
   ffi_call (&c_func_cur->cacheCif, FFI_FN (funcAddr), &result.u, ffi_arg_vec);
 
   _gst_set_errno (errno);
+  desc = (gst_c_callable) OOP_TO_OBJ (cFuncOOP);
   oop = c_to_smalltalk (&result, receiver, desc->returnTypeOOP);
+  INC_ADD_OOP (oop);
 
   /* Fixup all returned string variables */
   if (needPostprocessing)
@@ -1142,6 +1148,8 @@ push_smalltalk_obj (OOP oop,
     {
       cparam *cp = &c_func_cur->args[c_func_cur->arg_idx];
       ffi_type *type = smalltalk_to_c (oop, cp, cType);
+      if (cp->oop && !IS_NIL (cp->oop))
+	INC_ADD_OOP (cp->oop);
       if (type)
 	c_func_cur->types[c_func_cur->arg_idx++] = type;
     }

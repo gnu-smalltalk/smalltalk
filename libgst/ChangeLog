@@ -1,3 +1,7 @@
+2008-09-14  Paolo Bonzini  <bonzini@gnu.org>
+
+	* cint.c: Fix possible GC bugs.
+
 2008-09-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* prims.def: Do not use closesocket, close is now emulated
