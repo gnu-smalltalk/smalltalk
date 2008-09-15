@@ -1,3 +1,8 @@
+2008-09-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Connection.st: Support AF_UNIX sockets.  Change default
+	host from localhost to 127.0.0.1.
+
 2008-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Connection.st: Use Sockets namespace.

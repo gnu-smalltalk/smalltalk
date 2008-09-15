@@ -464,8 +464,15 @@ Connection subclass: MySQLConnection [
 	<category: 'instance creation'>
 	| database connection host port |
 	database := aParams at: 'dbname' ifAbsent: [nil].
-	host := aParams at: 'host' ifAbsent: ['localhost'].
-	port := (aParams at: 'port' ifAbsent: [3306]) asInteger.
+
+	(aParams includesKey: 'mysql_socket')
+	    ifTrue: [
+		host := Sockets.UnixAddress uniqueInstance.
+		port := aParams at: 'mysql_socket' ]
+	    ifFalse: [
+		host := aParams at: 'host' ifAbsent: ['127.0.0.1'].
+		port := (aParams at: 'port' ifAbsent: [3306]) asInteger ].
+
 	connection := self new.
 	connection connectTo: host port: port.
 	connection login: aUserName password: aPassword.
