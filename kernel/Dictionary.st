@@ -262,6 +262,13 @@ certain special cases.'>
 	^count
     ]
 
+    removeAllKeysSuchThat: aBlock [
+	"Remove from the receiver all keys for which aBlock returns true."
+
+	<category: 'removing'>
+	self removeAllKeys: (self keys select: aBlock) ifAbsent: []
+    ]
+
     removeAllKeys: keys [
 	"Remove all the keys in keys, without raising any errors"
 
@@ -274,7 +281,7 @@ certain special cases.'>
 	 to aBlock as they're encountered"
 
 	<category: 'dictionary removing'>
-	keys do: [:key | self removeKey: key ifAbsent: [aBlock value: key]]
+	keys do: [:key | self removeKey: key ifAbsent: [aBlock cull: key]]
     ]
 
     remove: anAssociation [

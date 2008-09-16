@@ -1,3 +1,10 @@
+2008-09-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Collection.st: Call #cull: for #removeAll:ifAbsent:.
+	* kernel/Dictionary.st: Call #cull: for #removeAllKeys:ifAbsent:,
+	add #removeAllKeysSuchThat:.
+	* kernel/DirMessage: Add #value:.
+
 2008-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/compiler.st: Test that filed-in streams are correctly

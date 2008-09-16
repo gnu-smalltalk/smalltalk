@@ -167,7 +167,7 @@ of objects.'>
 	"Remove from the receiver all objects for which aBlock returns true."
 
 	<category: 'removing'>
-	self removeAll: (self select: aBlock) ifAbsent: [:each | ]
+	self removeAll: (self select: aBlock) ifAbsent: []
     ]
 
     remove: oldObject ifAbsent: anExceptionBlock [
@@ -203,7 +203,7 @@ of objects.'>
 
 	<category: 'removing'>
 	aCollection 
-	    do: [:element | self remove: element ifAbsent: [aBlock value: element]].
+	    do: [:element | self remove: element ifAbsent: [aBlock cull: element]].
 	^aCollection
     ]
 
