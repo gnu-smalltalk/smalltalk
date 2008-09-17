@@ -493,6 +493,16 @@ superclass for blocks and methods'>
 	^aBoolean ifFalse: [ofs - result] ifTrue: [ofs + result]
     ]
 
+    sendsToSuper [
+	"Answer whether the receiver includes a send to super."
+
+	<category: 'testing accesses'>
+	self allByteCodeIndicesDo: 
+		[:i :byte :operand | 
+		(byte = 29 or: [ byte = 31 ]) ifTrue: [^true]].
+	^false
+    ]
+
     reads: instVarIndex [
 	"Answer whether the receiver reads the instance variable with the given
 	 index"

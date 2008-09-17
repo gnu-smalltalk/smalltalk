@@ -1,3 +1,9 @@
+2008-09-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Add #sourceCodeAt:ifAbsent:.
+	* kernel/CompildCode.st: Add #sendsToSuper.
+	* kernel/CompildMeth.st: Add #isAbstract and #sendsToSuper.
+
 2008-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
         * kernel/Number.st: Do not use #skip:.

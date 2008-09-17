@@ -641,6 +641,22 @@ instances.'>
 	descriptor stripSourceCode
     ]
 
+    isAbstract [
+	"Answer whether the receiver is abstract."
+
+	<category: 'testing'>
+	^self refersTo: #subclassResponsibility
+    ]
+
+    sendsToSuper [
+	"Answer whether the receiver or the blocks it contains have
+	 sends to super"
+
+	<category: 'testing'>
+	self allBlocksDo: [:ccode | ccode sendsToSuper ifTrue: [^true]].
+	^super sendsToSuper
+    ]
+
     reads: instVarIndex [
 	"Answer whether the receiver or the blocks it contains reads to
 	 the instance variable with the given index"

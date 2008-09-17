@@ -615,14 +615,22 @@ method dictionary, and iterating over the class hierarchy.'>
 	^(self >> selector) methodParseNode
     ]
 
-    sourceCodeAt: selector [
+    sourceCodeAt: selector ifAbsent: aBlock [
 	"Answer source code (if available) for the given selector."
 
 	<category: 'accessing the methodDictionary'>
 	| source |
 	source := (self >> selector) methodSourceCode.
-	source isNil ifTrue: [^'" *** SOURCE CODE NOT AVAILABLE *** "' copy].
+	source isNil ifTrue: [^aBlock value copy].
 	^source asString
+    ]
+
+    sourceCodeAt: selector [
+	"Answer source code (if available) for the given selector."
+
+	<category: 'accessing the methodDictionary'>
+	^self sourceCodeAt: selector ifAbsent: [
+	    '" *** SOURCE CODE NOT AVAILABLE *** "']
     ]
 
     sourceMethodAt: selector [
