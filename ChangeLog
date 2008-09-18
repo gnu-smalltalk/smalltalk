@@ -1,5 +1,11 @@
 2008-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* tests/compiler.st: Test that filed-in streams are correctly
+	associated to FileSegments or Strings.
+	* tests/compiler.ok: Regenerate.
+
+2008-09-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Behavior.st: Fix for methodDictionary being nil.
 	* kernel/ClassDesc.st: Fix for methodDictionary being nil.
 
