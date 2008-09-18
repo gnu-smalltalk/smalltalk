@@ -121,7 +121,7 @@ files.'>
 	<category: 'copying'>
 	| method |
 	method := aClass compiledMethodAt: selector.
-	methodDictionary at: selector put: (method withNewMethodClass: self)
+	self addSelector: selector withMethod: (method withNewMethodClass: self)
     ]
 
     copy: selector from: aClass classified: categoryName [
@@ -131,7 +131,7 @@ files.'>
 	| method |
 	method := (aClass compiledMethodAt: selector) withNewMethodClass: self.
 	method methodCategory: categoryName.
-	methodDictionary at: selector put: method
+	self addSelector: selector withMethod: method
     ]
 
     copyAll: arrayOfSelectors from: class [

@@ -1,3 +1,8 @@
+2008-09-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Behavior.st: Fix for methodDictionary being nil.
+	* kernel/ClassDesc.st: Fix for methodDictionary being nil.
+
 2008-09-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Behavior.st: Add #sourceCodeAt:ifAbsent:.
