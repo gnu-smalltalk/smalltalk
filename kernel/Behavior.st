@@ -217,9 +217,11 @@ method dictionary, and iterating over the class hierarchy.'>
 
 	<category: 'method dictionary'>
 	| newDictionary |
-	newDictionary := aDictionary 
+	aDictionary isNil ifFalse: [
+	    newDictionary := aDictionary 
 		    collect: [:each | each withNewMethodClass: self].
-	aDictionary become: newDictionary.
+	    aDictionary become: newDictionary
+	].
 	Behavior flushCache.
 	methodDictionary := aDictionary
     ]
