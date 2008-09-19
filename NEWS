@@ -77,7 +77,11 @@ o   ObjectMemory>>#snapshot and ObjectMemory>>#snapshot: return false in
     the instance of GNU Smalltalk that produced the snapshot, and
     true in the instance of GNU Smalltalk that was restored from the
     snapshot.  Note that this does not apply to CallinProcesses, since
-    those are stopped in saved images (will this be true in 3.1?).
+    those are stopped in saved images.
+
+o   RegexResults method #ifMatched:ifNotMatched:, and the similar methods,
+    accept either zero or one-argument blocks.  In 3.0, #ifMatched: accepted
+    a one-argument block, while #ifNotMatched: accepted a zero-argument block.
 
 o   Streams have a set of new methods that allow to eliminate useless copies
     when moving data from stream to stream, as well as to eliminate useless

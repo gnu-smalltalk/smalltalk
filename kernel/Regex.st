@@ -176,7 +176,7 @@ caller.'>
 	 not, evaluate zeroArgBlock and return its result."
 
 	<category: 'testing'>
-	^self ifNotMatched: zeroArgBlock ifMatched: [:results | results]
+	^self ifNotMatched: zeroArgBlock ifMatched: []
     ]
 
     ifMatched: oneArgBlock [
@@ -184,7 +184,7 @@ caller.'>
 	 oneArgBlock and return its result.  Otherwise, return nil."
 
 	<category: 'testing'>
-	^self ifNotMatched: [nil] ifMatched: oneArgBlock
+	^self ifNotMatched: [] ifMatched: oneArgBlock
     ]
 
     size [
@@ -312,12 +312,12 @@ RegexResults subclass: MatchingRegexResults [
 
     ifMatched: oneArgBlock ifNotMatched: zeroArgBlock [
 	<category: 'testing'>
-	^oneArgBlock value: self
+	^oneArgBlock cull: self
     ]
 
     ifNotMatched: zeroArgBlock ifMatched: oneArgBlock [
 	<category: 'testing'>
-	^oneArgBlock value: self
+	^oneArgBlock cull: self
     ]
 
     size [
@@ -418,12 +418,12 @@ RegexResults subclass: FailedMatchRegexResults [
 
     ifMatched: oneArgBlock ifNotMatched: zeroArgBlock [
 	<category: 'testing'>
-	^zeroArgBlock value
+	^zeroArgBlock cull: self
     ]
 
     ifNotMatched: zeroArgBlock ifMatched: oneArgBlock [
 	<category: 'testing'>
-	^zeroArgBlock value
+	^zeroArgBlock cull: self
     ]
 
     size [

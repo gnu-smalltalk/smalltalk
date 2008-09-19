@@ -1,3 +1,8 @@
+2008-09-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Regex.st: Call #cull: for #ifMatched:ifNotMatched: and
+	friends.
+
 2008-09-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Collection.st: Call #cull: for #removeAll:ifAbsent:.
