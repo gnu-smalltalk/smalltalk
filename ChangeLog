@@ -1,5 +1,10 @@
 2008-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CObject.st: Add #isNull.
+	* kernel/UndefObject.st: Add #isNull.
+
+2008-09-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Regex.st: Call #cull: for #ifMatched:ifNotMatched: and
 	friends.
 

@@ -228,6 +228,13 @@ into their corresponding C values for use in external routines.'>
 	^aValue
     ]
 
+    isNull [
+	"Return true if the receiver points to NULL."
+
+	<category: 'testing'>
+	^address = 0 and: [ self isAbsolute ]
+    ]
+
     isCObject [
 	<category: 'testing functionality'>
 	^true
