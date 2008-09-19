@@ -1,5 +1,11 @@
 2008-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/CObject.st: Add #isNull and #isCObject.
+	* kernel/Object.st: Add #isCObject.
+	* kernel/UndefObject.st: Add #isNull.
+
+2008-09-18  Paolo Bonzini  <bonzini@gnu.org>
+
 	* tests/compiler.st: Test that filed-in streams are correctly
 	associated to FileSegments or Strings.
 	* tests/compiler.ok: Regenerate.

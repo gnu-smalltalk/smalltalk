@@ -179,6 +179,18 @@ into their corresponding C values for use in external routines.'>
 	^aValue
     ]
 
+    isNull [
+	"Return true if the receiver points to NULL."
+
+	<category: 'testing'>
+	^address = 0
+    ]
+
+    isCObject [
+	<category: 'testing functionality'>
+	^true
+    ]
+
     incr [
 	"Adjust the pointer by sizeof(dereferencedType) bytes up (i.e. ++receiver)"
 

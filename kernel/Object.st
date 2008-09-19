@@ -222,6 +222,11 @@ All classes in the system are subclasses of me.'>
 	^false
     ]
 
+    isCObject [
+	<category: 'testing functionality'>
+	^false
+    ]
+
     isMeta [
 	"Same as isMetaclass"
 
