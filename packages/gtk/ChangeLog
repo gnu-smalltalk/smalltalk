@@ -1,5 +1,9 @@
 2008-09-20  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gst-gtk.c: Include a backtrace in log messages.
+
+2008-09-20  Paolo Bonzini  <bonzini@gnu.org>
+
 	* gst-gtk.c: Support signals with no user data.
 	* MoreFuncs.st: Likewise.
 
