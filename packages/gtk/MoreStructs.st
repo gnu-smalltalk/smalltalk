@@ -72,6 +72,16 @@ CStruct subclass: GtkRequisition [
 
 
 
+CStruct subclass: GList [
+    
+    <category: 'GTK'>
+    <comment: nil>
+    <declaration: #(#(#data #(#ptr #CObject ) ) #(#next #(#ptr #GSList ) )
+		    #(#prev #(#ptr #GSList ) ) )>
+]
+
+
+
 CStruct subclass: GSList [
     
     <category: 'GTK'>
