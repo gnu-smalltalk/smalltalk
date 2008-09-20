@@ -417,7 +417,7 @@ extern void _gst_invalidate_method_cache (void)
 
 /* Show a backtrace of the current state of the stack of execution
    contexts.  */
-extern void _gst_show_backtrace (void) 
+extern void _gst_show_backtrace (FILE *) 
   ATTRIBUTE_HIDDEN;
 
 /* Trap the signals that we care about, basically SIGBUS and

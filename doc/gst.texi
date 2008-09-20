@@ -4311,6 +4311,10 @@ procedure already scheduled with @code{asyncCall}, or from a call-in.
 It cannot be called from other threads than the Smalltalk thread.
 @end deftypefun
 
+@deftypefun void showBacktrace (FILE *)
+This functions show a backtrace on the given file.
+@end deftypefun
+
 
 @deftypefun OOP objectAlloc (OOP, int)
 The @code{objectAlloc} function allocates an OOP for a newly created

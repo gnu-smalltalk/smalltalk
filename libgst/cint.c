@@ -1282,7 +1282,7 @@ bad_type (OOP class_oop,
     _gst_errorf ("Attempt to pass an instance of %O as a %s", class_oop,
 	         c_type_name[cType]);
 
-  _gst_show_backtrace ();
+  _gst_show_backtrace (stderr);
 }
 
 

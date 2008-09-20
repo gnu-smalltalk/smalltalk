@@ -3272,7 +3272,7 @@ primitive VMpr_Object_bootstrapException :
   else
     printf ("%O error: %#O\n\n", oop1, oop2);
 
-  _gst_show_backtrace ();
+  _gst_show_backtrace (stdout);
   _gst_show_stack_contents ();
   abort ();
 }
@@ -3418,7 +3418,7 @@ primitive VMpr_Memory_addressOf [succeed,fail]
 primitive VMpr_SystemDictionary_backtrace [succeed]
 {
   _gst_primitives_executed++;
-  _gst_show_backtrace ();
+  _gst_show_backtrace (stdout);
   PRIM_SUCCEEDED;
 }
 

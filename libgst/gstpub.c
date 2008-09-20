@@ -117,7 +117,8 @@ VMProxy gst_interpreter_proxy = {
   _gst_oop_indexed_base,
   _gst_oop_indexed_kind,
   _gst_async_call,
-  _gst_sync_signal
+  _gst_sync_signal,
+  _gst_show_backtrace
 };
 
 /* Functions in comp.h.  */
@@ -397,6 +398,12 @@ void
 gst_async_call (void (*func) (OOP), OOP semaphore_oop)
 {
   _gst_async_call (func, semaphore_oop);
+}
+
+void
+gst_show_backtrace (FILE *fp)
+{
+  _gst_show_backtrace (fp);
 }
 
 void

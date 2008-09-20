@@ -63,11 +63,13 @@
 
 #ifdef __cplusplus
 #include <cstddef>
+#include <cstdio>
 extern "C"
 {
 #else
 
 #include <stddef.h>
+#include <stdio.h>
 #endif
 
 #include "gst.h"
@@ -204,7 +206,8 @@ typedef struct VMProxy
   void *(*OOPIndexedBase) (OOP oop);
   enum gst_indexed_kind (*OOPIndexedKind) (OOP oop); 
   void (*asyncCall) (void (*func) (OOP), OOP argOOP);
-  void (*syncSignal) (OOP semaphoreOOP, mst_Boolean incrIfEmpty);
+  mst_Boolean (*syncSignal) (OOP semaphoreOOP, mst_Boolean incrIfEmpty);
+  void (*showBacktrace) (FILE *fp);
 } VMProxy;
 
 /* Compatibility section */
@@ -282,6 +285,7 @@ extern void gst_async_signal (OOP semaphore_oop);
 extern void gst_async_call (void (*func) (OOP), OOP arg_oop);
 extern mst_Boolean gst_sync_signal (OOP semaphore_oop, mst_Boolean incr_if_empty);
 extern void gst_sync_wait (OOP semaphore_oop);
+extern void gst_show_backtrace (FILE *fp);
 extern void gst_async_signal_and_unregister (OOP semaphore_oop);
 extern void gst_register_oop_array (OOP **first, OOP **last);
 extern void gst_unregister_oop_array (OOP **first);

@@ -1,3 +1,13 @@
+2008-09-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* cint.c: Adjust calls to _gst_show_backtrace.
+	* gstpub.c: Add gst_show_backtrace and declare it in VMProxy.
+	* gstpub.h: Likewise.
+	* interp.c: Adjust calls to _gst_show_backtrace, add FILE *
+	argument there.
+	* interp.h: Adjust prototype of _gst_show_backtrace.
+	* prims.def: Adjust calls to _gst_show_backtrace.
+
 2008-09-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* input.c: Do not create FileSegments for non-FileStream streams.

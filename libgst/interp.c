@@ -2180,7 +2180,7 @@ _gst_nvmsg_send (OOP receiver,
 
   _gst_check_process_state ();
   /* _gst_print_process_state (); */
-  /* _gst_show_backtrace (); */
+  /* _gst_show_backtrace (stdout); */
 
   if (reentrancy_jmp_buf && !reentrancy_jmp_buf->suspended++)
     suspend_process (reentrancy_jmp_buf->processOOP);
@@ -2451,7 +2451,7 @@ backtrace_on_signal_1 (mst_Boolean is_serious_error, mst_Boolean c_backtrace)
       && !reentering
       && ip
       && !_gst_gc_running)
-    _gst_show_backtrace ();
+    _gst_show_backtrace (stderr);
   else
     {
       if (is_serious_error)
@@ -2506,7 +2506,7 @@ _gst_init_signals (void)
 
 
 void
-_gst_show_backtrace (void)
+_gst_show_backtrace (FILE *fp)
 {
   OOP contextOOP;
   gst_method_context context;
@@ -2524,7 +2524,7 @@ _gst_show_backtrace (void)
 	continue;
 
       /* printf ("(OOP %p)", context->method); */
-      printf ("(ip %d)", TO_INT (context->ipOffset));
+      fprintf (fp, "(ip %d)", TO_INT (context->ipOffset));
       if (CONTEXT_FLAGS (context) & MCF_IS_METHOD_CONTEXT)
 	{
 	  OOP receiver, receiverClass;
@@ -2532,14 +2532,14 @@ _gst_show_backtrace (void)
           if (CONTEXT_FLAGS (context) & MCF_IS_EXECUTION_ENVIRONMENT)
 	    {
 	      if (IS_NIL(context->parentContext))
-	        printf ("<bottom>\n");
+	        fprintf (fp, "<bottom>\n");
 	      else
-	        printf ("<unwind point>\n");
+	        fprintf (fp, "<unwind point>\n");
 	      continue;
 	    }
 
           if (CONTEXT_FLAGS (context) & MCF_IS_UNWIND_CONTEXT)
-	    printf ("<unwind> ");
+	    fprintf (fp, "<unwind> ");
 
 	  /* a method context */
 	  method = (gst_compiled_method) OOP_TO_OBJ (context->method);
@@ -2553,9 +2553,9 @@ _gst_show_backtrace (void)
 	    receiverClass = OOP_CLASS (receiver);
 
 	  if (receiverClass == methodInfo->class)
-	    printf ("%O", receiverClass);
+	    fprintf (fp, "%O", receiverClass);
 	  else
-	    printf ("%O(%O)", receiverClass, methodInfo->class);
+	    fprintf (fp, "%O(%O)", receiverClass, methodInfo->class);
 	}
       else
 	{
@@ -2565,9 +2565,9 @@ _gst_show_backtrace (void)
 	  methodInfo =
 	    (gst_method_info) OOP_TO_OBJ (method->descriptor);
 
-	  printf ("[] in %O", methodInfo->class);
+	  fprintf (fp, "[] in %O", methodInfo->class);
 	}
-      printf (">>%O\n", methodInfo->selector);
+      fprintf (fp, ">>%O\n", methodInfo->selector);
     }
 }
 
