@@ -136,8 +136,8 @@ static void fill_g_value_from_oop (GValue *val,
    only one is the closure's arity is 0).  */
 static GClosure *create_smalltalk_closure (OOP receiver,	
 					   OOP selector,
-					   OOP widget,
 					   OOP data,
+					   OOP widget,
 					   int n_params);
 
 /* The finalization notifier for Smalltalk GClosures.  Unregisters the
@@ -160,6 +160,13 @@ static int connect_signal (OOP widget,
 			    OOP receiver, 
 			    OOP selector,
 			    OOP user_data);
+
+/* A wrapper around g_signal_connect_closure that looks up the
+   selector and creates a Smalltalk GClosure.  */
+static int connect_signal_no_user_data (OOP widget, 
+					char *event_name, 
+					OOP receiver, 
+					OOP selector);
 
 /* A wrapper around g_object_get_property that replaces GValues with OOPs.  */
 static OOP object_get_property (GObject *anObject,
@@ -456,7 +463,8 @@ create_smalltalk_closure (OOP receiver,
 
   _gst_vm_proxy->registerOOP (receiver);
   _gst_vm_proxy->registerOOP (widget);
-  _gst_vm_proxy->registerOOP (data);
+  if (data)
+    _gst_vm_proxy->registerOOP (data);
 
   stc->receiver = receiver;
   stc->selector = selector;
@@ -477,7 +485,8 @@ finalize_smalltalk_closure (gpointer      data,
 
   _gst_vm_proxy->unregisterOOP (stc->receiver);
   _gst_vm_proxy->unregisterOOP (stc->widget);
-  _gst_vm_proxy->unregisterOOP (stc->data);
+  if (stc->data)
+    _gst_vm_proxy->unregisterOOP (stc->data);
 }
 
 void
@@ -515,10 +524,18 @@ invoke_smalltalk_closure (GClosure     *closure,
       args[i] = oop;
     }
 
-  if (stc->n_params > n_param_values + 1)
-    args[i++] = stc->widget;
-  if (stc->n_params > n_param_values)
-    args[i++] = stc->data;
+  if (stc->data)
+    {
+      if (stc->n_params > n_param_values + 1)
+        args[i++] = stc->widget;
+      if (stc->n_params > n_param_values)
+        args[i++] = stc->data;
+    }
+  else
+    {
+      if (stc->n_params > n_param_values)
+        args[i++] = stc->widget;
+    }
 
   resultOOP = _gst_vm_proxy->nvmsgSend (stc->receiver, stc->selector, args, i);
 
@@ -573,6 +590,15 @@ connect_signal (OOP widget,
 
   g_signal_connect_closure (cWidget, event_name, closure, FALSE);
   return (0);
+}
+
+int
+connect_signal_no_user_data (OOP widget, 
+			     char *event_name, 
+			     OOP receiver, 
+			     OOP selector)
+{
+  return connect_signal (widget, event_name, receiver, selector, NULL);
 }
 
 /* Event loop.  The GTK+ event loop in GNU Smalltalk takes place
@@ -849,6 +875,7 @@ gst_initModule (proxy)
   _gst_vm_proxy->defineCFunc ("gstGtkFreeGObjectOOP", free_oop_for_g_object);
   _gst_vm_proxy->defineCFunc ("gstGtkNarrowGObjectOOP", narrow_oop_for_g_object);
   _gst_vm_proxy->defineCFunc ("gstGtkConnectSignal", connect_signal);
+  _gst_vm_proxy->defineCFunc ("gstGtkConnectSignalNoUserData", connect_signal_no_user_data);
   _gst_vm_proxy->defineCFunc ("gstGtkMain", my_gtk_main);
   _gst_vm_proxy->defineCFunc ("gstGtkMainIteration", my_gtk_main_iteration);
   _gst_vm_proxy->defineCFunc ("gstGtkMainIterationDo", my_gtk_main_iteration_do);

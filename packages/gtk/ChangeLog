@@ -1,3 +1,8 @@
+2008-09-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-gtk.c: Support signals with no user data.
+	* MoreFuncs.st: Likewise.
+
 2008-08-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* example_arrow.st: Fix pasto.

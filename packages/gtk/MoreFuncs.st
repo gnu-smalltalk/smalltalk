@@ -56,6 +56,13 @@ GObject extend [
 	
     ]
 
+    connectSignal: name to: handler selector: sel [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkConnectSignalNoUserData' returning: #void
+	args: #(#selfSmalltalk #string #smalltalk #smalltalk )>
+	
+    ]
+
     narrow [
 	<category: 'C call-outs'>
 	<cCall: 'gstGtkNarrowGObjectOOP' returning: #smalltalk
