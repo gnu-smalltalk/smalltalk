@@ -1,6 +1,14 @@
 CLEANFILES = $(nodist_noinst_SCRIPTS) $(nodist_noinst_HEADERS) \
 	$(BUILT_SOURCES) $(nodist_noinst_DATA) order
 
+LC_UNSET = LANG=C; export LANG; \
+	LC_COLLATE=C; export LC_COLLATE; \
+	LC_CTYPE=C; export LC_CTYPE; \
+	LC_MESSAGES=C; export LC_MESSAGES; \
+	LC_MONETARY=C; export LC_MONETARY; \
+	LC_NUMERIC=C; export LC_NUMERIC; \
+	LC_TIME=C; export LC_TIME
+
 EXTRA_DIST = cpp.awk structs.awk funcs.awk mk_enums.awk mk_sizeof.awk order.st
 
 gst_module_ldflags = -rpath $(moduledir) -release $(VERSION) -module \
@@ -74,20 +82,20 @@ Libs.st: Makefile
 	done
 
 Structs.st: structs sizeof$(EXEEXT) cpp order
-	LANG=C; export LANG; xargs ./cpp < order | ./structs > Structs.st
-	LANG=C ./sizeof >> Structs.st
+	$(LC_UNSET); xargs ./cpp < order | ./structs > Structs.st
+	$(LC_UNSET); ./sizeof >> Structs.st
 
 Enums.st: enums$(EXEEXT)
-	LANG=C ./enums > Enums.st
+	$(LC_UNSET); ./enums > Enums.st
 
 Funcs.st: funcs cpp order
-	LANG=C; export LANG; xargs ./cpp < order | ./funcs > Funcs.st
+	$(LC_UNSET); xargs ./cpp < order | ./funcs > Funcs.st
 
 sizeof.c: mk_sizeof cpp order
-	LANG=C; export LANG; xargs ./cpp < order | ./mk_sizeof > sizeof.c
+	$(LC_UNSET); xargs ./cpp < order | ./mk_sizeof > sizeof.c
 
 enums.c: mk_enums cpp order
-	LANG=C; export LANG; xargs ./cpp < order | ./mk_enums > enums.c
+	$(LC_UNSET); xargs ./cpp < order | ./mk_enums > enums.c
 
 order: order.st Makefile $(LOCAL_FILES)
 	PKG_CONFIG='$(PKG_CONFIG)' ../../gst \
