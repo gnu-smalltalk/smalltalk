@@ -232,7 +232,7 @@ into their corresponding C values for use in external routines.'>
 	"Return true if the receiver points to NULL."
 
 	<category: 'testing'>
-	^address = 0 and: [ self isAbsolute ]
+	^self address = 0 and: [ self isAbsolute ]
     ]
 
     isCObject [
