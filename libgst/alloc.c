@@ -261,8 +261,11 @@ nospace:
       if (h->heap_limit && h->heap_total <= h->heap_limit
 	  && h->heap_total + nsz > h->heap_limit && h->nomemory)
 	{
-	  h->nomemory (h, nsz);
-	  break;
+	  h = h->nomemory (h, nsz);
+	  if (h)
+	    break;
+	  else
+	    return NULL;
 	}
 
     case 2:

@@ -210,7 +210,7 @@ static int oldspace_sigsegv_handler (void* fault_address, int serious);
 #endif
 
 /* Hook that triggers garbage collection.  */
-static void oldspace_nomemory (heap_data *h, size_t sz);
+static heap_data *oldspace_nomemory (heap_data *h, size_t sz);
 
 /* Answer the number of fields to be scanned in the object starting
    at OBJ, with the given FLAGS on its OOP.  */
@@ -899,11 +899,16 @@ oldspace_before_freeing (heap_data *h, heap_block *blk, size_t sz)
   _gst_mem_protect ((PTR) blk, sz, PROT_READ | PROT_WRITE);
 }
 
-void
+heap_data *
 oldspace_nomemory (heap_data *h, size_t sz)
 {
   if (!_gst_gc_running)
-    _gst_global_gc (sz);
+    {
+      _gst_global_gc (sz);
+      return _gst_mem.old;
+    }
+  else
+    return NULL;
 }
 
 #ifndef NO_SIGSEGV_HANDLING

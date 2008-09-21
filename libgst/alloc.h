@@ -97,7 +97,7 @@ heap_block;
 typedef struct heap_data heap_data;
 
 typedef void (*allocating_hook_t) (heap_data *, heap_block *, size_t);
-typedef void (*nomemory_hook_t) (heap_data *, size_t);
+typedef heap_data *(*nomemory_hook_t) (heap_data *, size_t);
 
 struct heap_data
 {
