@@ -62,7 +62,6 @@
 typedef struct cparam
 {
   union {
-    int intVal;
     long longVal;
     PTR ptrVal;
     float floatVal;
@@ -942,7 +941,7 @@ smalltalk_to_c (OOP oop,
       is_a_kind_of (class, _gst_float_class) ? CDATA_DOUBLE :
       CDATA_OOP;
 
-  cp->oop = NULL;
+  memset (cp, 0, sizeof (cparam));
   cp->cType = cType;
 
   if (cType == CDATA_OOP)
@@ -966,24 +965,27 @@ smalltalk_to_c (OOP oop,
 #endif
 
         case CDATA_INT:
+	  cp->u.longVal = (int) TO_C_INT (oop);
+	  return &ffi_type_sint;
+
 	case CDATA_UINT:
-	  cp->u.intVal = TO_C_INT (oop);
+	  cp->u.longVal = (unsigned int) TO_C_INT (oop);
 	  return &ffi_type_sint;
 
 	case CDATA_CHAR:
-	  cp->u.intVal = (char) TO_C_INT (oop);
+	  cp->u.longVal = (char) TO_C_INT (oop);
 	  return &ffi_type_sint;
 
 	case CDATA_UCHAR:
-	  cp->u.intVal = (unsigned char) TO_C_INT (oop);
+	  cp->u.longVal = (unsigned char) TO_C_INT (oop);
 	  return &ffi_type_sint;
 
 	case CDATA_SHORT:
-	  cp->u.intVal = (short) TO_C_INT (oop);
+	  cp->u.longVal = (short) TO_C_INT (oop);
 	  return &ffi_type_sint;
 
 	case CDATA_USHORT:
-	  cp->u.intVal = (unsigned short) TO_C_INT (oop);
+	  cp->u.longVal = (unsigned short) TO_C_INT (oop);
 	  return &ffi_type_sint;
 
 	case CDATA_DOUBLE:
@@ -1016,7 +1018,7 @@ smalltalk_to_c (OOP oop,
 	case CDATA_SHORT:
 	case CDATA_USHORT:
 	case CDATA_BOOLEAN:
-	  cp->u.intVal = (oop == _gst_true_oop);
+	  cp->u.longVal = (oop == _gst_true_oop);
 	  return &ffi_type_sint;
 	}
     }
@@ -1025,7 +1027,7 @@ smalltalk_to_c (OOP oop,
 	    && (cType == CDATA_CHAR || cType == CDATA_UCHAR || cType == CDATA_WCHAR))
            || (class == _gst_unicode_character_class && cType == CDATA_WCHAR))
     {
-      cp->u.intVal = CHAR_OOP_VALUE (oop);
+      cp->u.longVal = CHAR_OOP_VALUE (oop);
       return &ffi_type_sint;
     }
 
@@ -1174,31 +1176,31 @@ c_to_smalltalk (cparam *result, OOP receiverOOP, OOP returnTypeOOP)
 
     case CDATA_CHAR:
     case CDATA_UCHAR:
-      resultOOP = CHAR_OOP_AT ((gst_uchar) result->u.intVal);
+      resultOOP = CHAR_OOP_AT ((gst_uchar) result->u.longVal);
       break;
 
     case CDATA_WCHAR:
-      resultOOP = char_new ((wchar_t) result->u.intVal);
+      resultOOP = char_new ((wchar_t) result->u.longVal);
       break;
 
     case CDATA_BOOLEAN:
-      resultOOP = result->u.intVal ? _gst_true_oop : _gst_false_oop;
+      resultOOP = result->u.longVal ? _gst_true_oop : _gst_false_oop;
       break;
 
     case CDATA_INT:
-      resultOOP = FROM_C_INT ((int) result->u.intVal);
+      resultOOP = FROM_C_INT ((int) result->u.longVal);
       break;
 
     case CDATA_UINT:
-      resultOOP = FROM_C_UINT ((unsigned int) result->u.intVal);
+      resultOOP = FROM_C_UINT ((unsigned int) result->u.longVal);
       break;
 
     case CDATA_SHORT:
-      resultOOP = FROM_INT ((short) result->u.intVal);
+      resultOOP = FROM_INT ((short) result->u.longVal);
       break;
 
     case CDATA_USHORT:
-      resultOOP = FROM_INT ((unsigned short) result->u.intVal);
+      resultOOP = FROM_INT ((unsigned short) result->u.longVal);
       break;
 
     case CDATA_LONG:

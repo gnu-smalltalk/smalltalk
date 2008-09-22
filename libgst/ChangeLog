@@ -1,5 +1,10 @@
 2008-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* cint.c: Fix ia64 cobjects.st failure by always using a ffi_arg-sized
+	field.
+
+2008-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* genpr-parse.c: Rename strupr.
 	* genpr-parse.h: Rename strupr.
 	* genpr-parse.y: Rename strupr.
