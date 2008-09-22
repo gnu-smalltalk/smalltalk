@@ -89,6 +89,8 @@ struct pollfd
 
 #endif
 
+typedef int nfds_t;
+
 #ifdef need_poll
 #define poll rpl_poll
 #undef need_poll

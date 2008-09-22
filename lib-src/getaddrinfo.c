@@ -30,9 +30,8 @@
 /* Get snprintf. */
 #include <stdio.h>
 
-#include "gettext.h"
-#define _(String) gettext (String)
-#define N_(String) String
+#define _(String) (String)
+#define N_(String) (String)
 
 /* BeOS has AF_INET, but not PF_INET.  */
 #ifndef PF_INET

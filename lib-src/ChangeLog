@@ -1,3 +1,12 @@
+2008-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* getaddrinfo.c: Fix for win32.
+	* getaddrinfo.h: Fix for win32.
+	* poll_h.h: Define nfds_t.
+	* socketx.h: Remove win_select and win_recv prototypes.
+	* socketx.c: Remove win_select and win_recv code.  Use
+	WSAEnumNetworkEvents to distinguish sockets and pipes.
+
 2008-09-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* socketx.h: Emulate close on Windows.

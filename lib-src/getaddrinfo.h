@@ -26,7 +26,9 @@
    used below. */
 #include <sys/types.h>
 /* Get all getaddrinfo related declarations, if available.  */
-#include <sys/socket.h>
+#if !(defined WIN32 || defined _WIN32) || defined __CYGWIN__
+# include <sys/socket.h>
+#endif
 #ifdef HAVE_NETDB_H
 # include <netdb.h>
 #endif
