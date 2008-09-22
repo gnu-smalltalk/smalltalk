@@ -1,5 +1,11 @@
 2008-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
+	* genpr-parse.c: Rename strupr.
+	* genpr-parse.h: Rename strupr.
+	* genpr-parse.y: Rename strupr.
+
+2008-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
 	* input.c: Revert 2008-09-18 change.  Check whether get_cur_file()
 	returns nil instead.
 

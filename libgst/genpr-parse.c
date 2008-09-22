@@ -129,7 +129,7 @@ static void gen_prim_id (const char *name, int id, const char *attrs);
 static int lookup_prim_id (const char *s);
 static void free_data ();
 static void output ();
-static char *strupr (char *s);
+static char *strtoupper (char *s);
 
 #define YYPRINT(fp, tok, val) fprintf (fp, "%s", val);
 
@@ -177,7 +177,7 @@ typedef union YYSTYPE
   int id;
 }
 /* Line 187 of yacc.c.  */
-#line 181 "../../libgst/genpr-parse.c"
+#line 181 "genpr-parse.c"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -190,7 +190,7 @@ typedef union YYSTYPE
 
 
 /* Line 216 of yacc.c.  */
-#line 194 "../../libgst/genpr-parse.c"
+#line 194 "genpr-parse.c"
 
 #ifdef short
 # undef short
@@ -1470,7 +1470,7 @@ yyreduce:
 #line 190 "genpr-parse.y"
     {
 	    (yyval.text) = fildelete ((yyvsp[(2) - (3)].fil));
-	    strupr ((yyval.text));
+	    strtoupper ((yyval.text));
 	  }
     break;
 
@@ -1545,7 +1545,7 @@ yyreduce:
 
 
 /* Line 1267 of yacc.c.  */
-#line 1549 "../../libgst/genpr-parse.c"
+#line 1549 "genpr-parse.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1803,7 +1803,7 @@ gen_prim_decl (const char *s)
 }
 
 char *
-strupr (char *s)
+strtoupper (char *s)
 {
   char *base = s;
   while (*s)

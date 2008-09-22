@@ -91,7 +91,7 @@ static void gen_prim_id (const char *name, int id, const char *attrs);
 static int lookup_prim_id (const char *s);
 static void free_data ();
 static void output ();
-static char *strupr (char *s);
+static char *strtoupper (char *s);
 
 #define YYPRINT(fp, tok, val) fprintf (fp, "%s", val);
 
@@ -189,7 +189,7 @@ primitive_attrs:
 	'[' primitive_attr_list ']'
 	  {
 	    $$ = fildelete ($2);
-	    strupr ($$);
+	    strtoupper ($$);
 	  }
 	;
 	
@@ -294,7 +294,7 @@ gen_prim_decl (const char *s)
 }
 
 char *
-strupr (char *s)
+strtoupper (char *s)
 {
   char *base = s;
   while (*s)
