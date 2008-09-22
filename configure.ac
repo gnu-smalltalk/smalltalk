@@ -53,6 +53,7 @@ AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_LN_S
 GST_PROG_LN
+AC_PATH_TOOL(WINDRES, windres, no)
 AC_PATH_PROG(INSTALL_INFO, install-info, :, $PATH:/sbin:/usr/sbin)
 AC_PATH_PROG(ZIP, zip, no, $PATH)
 if test "$ZIP" = no; then
@@ -242,7 +243,8 @@ $lt_prog_compiler_pic -fomit-frame-pointer" ;;
 ])
 enable_shared=$save_enable_shared
 
-case "$host_os" in
+case "$host_os:$WINDRES" in
+  *:no) ICON= ;;
   cygwin*|mingw*) ICON=gsticon.o ;;
   *) ICON= ;;
 esac
