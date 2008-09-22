@@ -1,4 +1,102 @@
-2008-02-24  Anthony Green  <green@spindazzle.org>
+2008-07-17  Anthony Green  <green@redhat.com>
+
+	* configure.ac: Bump version to 3.0.6.
+	* configure, doc/stamp-vti, doc/version.texi: Rebuilt.
+	* libtool-version: Increment revision.  Add documentation.
+	* README: Update for new release.
+
+2008-07-16  Kaz Kojima  <kkojima@gcc.gnu.org>
+
+	* src/sh/ffi.c (ffi_prep_closure_loc): Turn INSN into an unsigned
+	int.
+
+2008-07-16  Kaz Kojima  <kkojima@gcc.gnu.org>
+
+	* src/sh/sysv.S: Add .note.GNU-stack on Linux.
+	* src/sh64/sysv.S: Likewise.
+
+2008-04-03  Anthony Green  <green@redhat.com>
+
+	* libffi.pc.in (Libs): Add -L${libdir}.
+	* configure.ac: Bump version to 3.0.5.
+	* configure, doc/stamp-vti, doc/version.texi: Rebuilt.
+	* libtool-version: Increment revision.
+	* README: Update for new release.
+
+2008-04-03  Anthony Green  <green@redhat.com>
+	    Xerces Ranby  <xerxes@zafena.se>
+
+	* include/ffi.h.in: Wrap definition of target architecture to
+	protect from double definitions.
+
+2008-03-22  Moriyoshi Koizumi  <moriyoshi@gmail.com>
+
+	* src/x86/ffi.c (ffi_prep_closure_loc): Fix for bug revealed in
+	closure_loc_fn0.c.
+	* testsuite/libffi.call/closure_loc_fn0.c (closure_loc_test_fn0):
+	New test.
+
+2008-03-04  Anthony Green  <green@redhat.com>
+	    Blake Chaffin
+	    hos@tamanegi.org
+
+	* testsuite/libffi.call/cls_align_longdouble_split2.c
+          testsuite/libffi.call/cls_align_longdouble_split.c
+          testsuite/libffi.call/cls_dbls_struct.c
+          testsuite/libffi.call/cls_double_va.c
+          testsuite/libffi.call/cls_longdouble.c
+          testsuite/libffi.call/cls_longdouble_va.c
+          testsuite/libffi.call/cls_pointer.c
+          testsuite/libffi.call/cls_pointer_stack.c
+          testsuite/libffi.call/err_bad_abi.c
+          testsuite/libffi.call/err_bad_typedef.c
+          testsuite/libffi.call/huge_struct.c
+          testsuite/libffi.call/stret_large2.c
+          testsuite/libffi.call/stret_large.c
+          testsuite/libffi.call/stret_medium2.c
+          testsuite/libffi.call/stret_medium.c: New tests from Apple.
+
+2008-02-26  Jakub Jelinek  <jakub@redhat.com>
+            Anthony Green  <green@redhat.com>
+
+	* src/alpha/osf.S: Add .note.GNU-stack on Linux.
+	* src/s390/sysv.S: Likewise.
+	* src/powerpc/linux64.S: Likewise.
+	* src/powerpc/linux64_closure.S: Likewise.
+	* src/powerpc/ppc_closure.S: Likewise.
+	* src/powerpc/sysv.S: Likewise.
+	* src/x86/unix64.S: Likewise.
+	* src/x86/sysv.S: Likewise.
+	* src/sparc/v8.S: Likewise.
+	* src/sparc/v9.S: Likewise.
+	* src/m68k/sysv.S: Likewise.
+	* src/ia64/unix.S: Likewise.
+	* src/arm/sysv.S: Likewise.
+
+2008-02-26  Anthony Green  <green@redhat.com>
+            Thomas Heller  <theller@ctypes.org>
+
+	* src/x86/ffi.c (ffi_closure_SYSV_inner): Change C++ comment to C
+	comment.
+
+2008-02-26  Anthony Green  <green@redhat.org>
+            Thomas Heller  <theller@ctypes.org>
+
+	* include/ffi.h.in: Change void (*)() to void (*)(void).
+
+2008-02-26  Anthony Green  <green@redhat.org>
+            Thomas Heller  <theller@ctypes.org>
+
+	* src/alpha/ffi.c: Change void (*)() to void (*)(void).
+	src/alpha/osf.S, src/arm/ffi.c, src/frv/ffi.c, src/ia64/ffi.c,
+	src/ia64/unix.S, src/java_raw_api.c, src/m32r/ffi.c,
+	src/mips/ffi.c, src/pa/ffi.c, src/pa/hpux32.S, src/pa/linux.S,
+	src/powerpc/ffi.c, src/powerpc/ffi_darwin.c, src/raw_api.c,
+	src/s390/ffi.c, src/sh/ffi.c, src/sh64/ffi.c, src/sparc/ffi.c,
+	src/x86/ffi.c, src/x86/unix64.S, src/x86/darwin64.S,
+	src/x86/ffi64.c: Ditto.
+
+2008-02-24  Anthony Green  <green@redhat.org>
 
 	* configure.ac: Accept openbsd*, not just openbsd.
 	Bump version to 3.0.4.
