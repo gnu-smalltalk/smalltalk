@@ -1,3 +1,9 @@
+2008-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* genpr-parse.c: Rename strupr.
+	* genpr-parse.h: Rename strupr.
+	* genpr-parse.y: Rename strupr.
+
 2008-09-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* alloc.h: Change nomemory hook prototype.

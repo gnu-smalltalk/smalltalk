@@ -67,7 +67,7 @@ typedef union YYSTYPE
   int id;
 }
 /* Line 1489 of yacc.c.  */
-#line 71 "../../libgst/genpr-parse.h"
+#line 71 "genpr-parse.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
