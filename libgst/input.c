@@ -490,10 +490,7 @@ _gst_get_source_string (off_t startPos, off_t endPos)
     return (_gst_nil_oop);
 
   /* FIXME: check isPipe too? */
-  if (startPos != -1 && !_gst_get_cur_stream_prompt ()
-      && (in_stream->type == STREAM_FILE
-	  || is_a_kind_of (OOP_CLASS (in_stream->st_oop.oop),
-			   _gst_file_descriptor_class)))
+  if (startPos != -1 && !_gst_get_cur_stream_prompt ())
     {
       OOP fileOOP;
       gst_file_segment fileSegment;
@@ -501,18 +498,23 @@ _gst_get_source_string (off_t startPos, off_t endPos)
 
       incPtr = INC_SAVE_POINTER ();
       fileOOP = get_cur_file ();
-      INC_ADD_OOP (fileOOP);
 
-      fileSegment = (gst_file_segment) new_instance (_gst_file_segment_class,
-                                                     &result);
+      if (!IS_NIL (fileOOP))
+	{
+          INC_ADD_OOP (fileOOP);
+          fileSegment = (gst_file_segment) new_instance (_gst_file_segment_class,
+                                                         &result);
 
-      fileSegment->fileOOP = fileOOP;
-      fileSegment->startPos = from_c_int_64 (startPos);
-      fileSegment->length = from_c_int_64 (endPos - startPos);
+          fileSegment->fileOOP = fileOOP;
+          fileSegment->startPos = from_c_int_64 (startPos);
+          fileSegment->length = from_c_int_64 (endPos - startPos);
 
-      assert (to_c_int_64 (fileSegment->length) >= 0);
+          assert (to_c_int_64 (fileSegment->length) >= 0);
+          INC_RESTORE_POINTER (incPtr);
+          return (result);
+	}
+
       INC_RESTORE_POINTER (incPtr);
-      return (result);
     }
 
   switch (in_stream->type)

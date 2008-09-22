@@ -41,6 +41,13 @@ successive objects and store them sequentially on a sink.  I provide
 some simple iteration over the contents of one of my instances, and 
 provide for writing collections sequentially.'>
 
+    file [
+	"Return nil by default; not all streams have a file."
+
+	<category: 'accessing-reading'>
+	^nil
+    ]
+
     name [
 	"Return nil by default; not all streams have a name."
 
@@ -624,7 +631,7 @@ provide for writing collections sequentially.'>
 	pos := [self position] on: MessageNotUnderstood do: [:ex | ex return: 0].
 	^self 
 	    fileInLine: 1
-	    fileName: self name
+	    file: self file
 	    at: pos
     ]
 
@@ -635,8 +642,8 @@ provide for writing collections sequentially.'>
 	<category: 'built ins'>
 	^self
 	    fileInLine: 1
-	    file: aFile full
-	    fileName: aFile displayString
+	    file: (aFile ifNotNil: [aFile full])
+	    fileName: (aFile ifNotNil: [aFile displayString])
 	    at: charPosInt
     ]
 

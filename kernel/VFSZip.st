@@ -301,6 +301,11 @@ Stream subclass: LimitedStream [
 	    nextPut: $]
     ]
 
+    file [
+	<category: 'accessing'>
+	^stream file
+    ]
+
     name [
 	<category: 'accessing'>
 	^stream name

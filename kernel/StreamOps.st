@@ -92,6 +92,12 @@ Stream subclass: ConcatenatedStream [
 	^self stream isNil
     ]
 
+    file [
+	<category: 'all'>
+	self atEnd ifTrue: [^nil].
+	^streams first file
+    ]
+
     name [
 	<category: 'all'>
 	self atEnd ifTrue: [^nil].
@@ -263,11 +269,6 @@ Stream subclass: FilteringStream [
 	^false
     ]
 
-    name [
-	<category: 'basic'>
-	^stream name
-    ]
-
     species [
 	<category: 'basic'>
 	^stream species
@@ -353,11 +354,6 @@ Stream subclass: CollectingStream [
 	stream position: anInteger
     ]
 
-    name [
-	<category: 'basic'>
-	^stream name
-    ]
-
     species [
 	<category: 'basic'>
 	^stream species
@@ -384,6 +380,11 @@ Stream subclass: PeekableStream [
     species [
 	<category: 'basic'>
 	^stream species
+    ]
+
+    file [
+	<category: 'basic'>
+	^stream file
     ]
 
     name [
@@ -470,6 +471,11 @@ Stream subclass: LineStream [
 
 	<category: 'instance creation'>
 	^self new initStream: aStream
+    ]
+
+    file [
+	<category: 'basic'>
+	^charStream file
     ]
 
     name [

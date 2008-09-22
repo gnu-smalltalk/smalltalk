@@ -1,3 +1,9 @@
+2008-09-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Stream.st: Add Stream>>#file, use it.
+	* kernel/StreamOps.st: Implement #file when relevant.
+	* kernel/VFSZip.st: Add LimitedStream>>#file.
+
 2008-09-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/CObject.st: Snafu.
