@@ -323,6 +323,7 @@ if the hardware supports it.'>
 	"Answer (self log: radix) ceiling."
 
 	<category: 'transcendental operations'>
+	| result ceil delta |
 	self < self zero 
 	    ifTrue: 
 		[^self arithmeticError: 'cannot extract logarithm of a negative number'].
@@ -330,13 +331,20 @@ if the hardware supports it.'>
 	    ifTrue: 
 		[radix <= radix zero ifTrue: [^self arithmeticError: 'bad radix'].
 		radix = radix unity ifTrue: [^self arithmeticError: 'bad radix']].
-	^(self log: radix) ceiling
+	result := self log: radix.
+	ceil := result ceiling.
+
+	"If the result differs from ceil - 1 by <0.5ulp, round up."
+	delta := (ceil - 1) - result.
+	ceil - 1 - (delta / 2) - ceil = -1.0 ifTrue: [ ceil := ceil - 1 ].
+	^ceil
     ]
 
     floorLog: radix [
 	"Answer (self log: radix) floor."
 
 	<category: 'transcendental operations'>
+	| result floor delta |
 	self < self zero 
 	    ifTrue: 
 		[^self arithmeticError: 'cannot extract logarithm of a negative number'].
@@ -344,7 +352,14 @@ if the hardware supports it.'>
 	    ifTrue: 
 		[radix <= radix zero ifTrue: [^self arithmeticError: 'bad radix'].
 		radix = radix unity ifTrue: [^self arithmeticError: 'bad radix']].
-	^(self log: radix) floor
+
+	result := self log: radix.
+	floor := result floor.
+
+	"If the result differs from floor + 1 by <0.5ulp, round up."
+	delta := (floor + 1) - result.
+	floor + 1 + (delta / 2) - floor = 1.0 ifTrue: [ floor := floor + 1 ].
+	^floor
     ]
 
     estimatedLog [

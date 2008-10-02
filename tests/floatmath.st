@@ -77,6 +77,9 @@ Eval [ 4523.234 exponent ]
 Eval [ 45.0 timesTwoPower: 4 ]
 Eval [ 45.0 timesTwoPower: -4 ]
 
+Eval [ 1000 asFloat floorLog: 10 ]
+Eval [ 1000 asFloat reciprocal ceilingLog: 10 ]
+
 Eval [ FloatD infinity ]
 Eval [ FloatD infinity printString ]
 
