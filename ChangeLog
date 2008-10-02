@@ -1,3 +1,9 @@
+2008-10-03  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Float.st: Fix possible rounding errors in floorLog/ceilingLog.
+	* tests/floatmath.st: Add regression test.
+	* tests/floatmath.ok: Regenerate.
+
 2008-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Stream.st: Add Stream>>#file, use it.
