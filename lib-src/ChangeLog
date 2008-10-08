@@ -1,3 +1,8 @@
+2008-10-07  Samuel Tardieu  <sam@rfc1149.net>
+
+	* ltdl.c (try_dlopen): sys_search_path cannot be null as
+	it is defined as an array.
+
 2008-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* getaddrinfo.c: Fix for win32.
