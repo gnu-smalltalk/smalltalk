@@ -1,3 +1,8 @@
+2008-10-07  Samuel Tardieu  <sam@rfc1149.net>
+
+	* ltdl.c (try_dlopen): sys_search_path cannot be null as
+	it is defined as an array.
+
 2008-04-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/tanl.c (kernel_tanl): Rename flag to invert, initialize it
