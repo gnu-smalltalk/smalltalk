@@ -6,7 +6,7 @@
 
 "======================================================================
 |
-| Copyright 2001, 2003 Free Software Foundation, Inc.
+| Copyright 2001, 2003, 2008 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.

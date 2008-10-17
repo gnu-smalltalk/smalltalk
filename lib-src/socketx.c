@@ -1,7 +1,7 @@
 /* socketx.c - Extend WinSock functions to handle other objects than sockets
    Contributed by Freddie Akeroyd.
 
-   Copyright 2007 Free Software Foundation, Inc.
+   Copyright 2007, 2008 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

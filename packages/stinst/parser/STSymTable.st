@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1995,1999,2000,2001,2002,2006,2007 Free Software Foundation, Inc.
+| Copyright 1995,1999,2000,2001,2002,2006,2007,2008 Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
 | This file is part of GNU Smalltalk.

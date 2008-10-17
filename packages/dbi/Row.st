@@ -8,6 +8,8 @@
 "======================================================================
 |
 | Copyright 2006 Mike Anderson
+| Copyright 2007, 2008 Free Software Foundation, Inc.
+|
 | Written by Mike Anderson
 |
 | This file is part of the GNU Smalltalk class library.
