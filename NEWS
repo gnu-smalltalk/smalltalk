@@ -1,6 +1,6 @@
 List of user-visible changes in GNU Smalltalk
 
-NEWS FROM 3.0.5 TO 3.0c
+NEWS FROM 3.0.5 TO 3.1
 
 o   BlockClosure methods #cull:, #cull:cull:, #cull:cull:cull:
     evaluate blocks removing parameters that are not accepted by
@@ -33,6 +33,8 @@ o   FileDescriptor is now a subclass of Stream.
 o   Functions gst_async_signal and gst_async_signal_and_unregister are
     now thread-safe, *not* async-signal-safe.  To trap signals from
     Smalltalk, you have to use ProcessorScheduler>>#signal:onInterrupt:.
+
+o   Halt is now a subclass of Exception (rather than Error).
 
 o   If possible, the installation is made relocatable.  To this end,
     the following conditions should be satisfied: 1) the exec-prefix
@@ -131,6 +133,9 @@ o   The semantics of #on:do: were changed: executing off the end of an
     exception handler will always return from the associated #on:do:.
     Older versions of GNU Smalltalk either returned or resumed depending
     on the resumability of the exception.
+
+o   The source code for methods loaded from Streams that are not FileStreams
+    is stored directly in the image.
 
 o   New tool gst-remote allows remote control of a GNU Smalltalk VM
     via a TCP socket.
