@@ -2,10 +2,36 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 3.0.4 TO 3.0.5
 
+o   Added the following methods
+	Character class>>#ff
+	CObject>>#isNull
+	Collection>>#includesAnyOf:
+	Duration>>#readFrom:
+	Number>>#readFrom:radix:
+	Object>>#isCObject
+	Package>>#/
+	SequenceableCollection>>#copyWithFirst:
+	SequenceableCollection>>#swap:with:
+	UndefinedObject>>#isNull
+	WeakArray class>>#new
+
+o   Bugfixes for gst-convert.
+
 o   CallinProcesses can be terminated with Process>>#terminate.
+
+o   DBI connection strings accept db/dbname/database, and host/hostname,
+    as synonyms.
+
+o   Fixed rare garbage collection bugs.
+
+o   Fixed rounding error in Float>>#floorLog: and Float>>#ceilingLog:.
 
 o   gst-doc implements a -F option to choose output format.  HTML and
     Texinfo are supported (contributed by Thomas Girard).
+
+o   GTK+ bindings updated to support changes in 2.12.
+
+o   #storeOn: fixed for classes in namespaces other than Smalltalk.
 
 -------------------------------------------------------------------------------
 
