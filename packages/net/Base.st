@@ -11,7 +11,7 @@
 | NetResponse, PluggableReporter and *Error are (c) 1995 Kazuki Yasumatsu
 | and in the public domain.
 |
-| The rest is copyright 2002 Free Software Foundation, Inc.
+| The rest is copyright 2002, 2007, 2008 Free Software Foundation, Inc.
 | and written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.

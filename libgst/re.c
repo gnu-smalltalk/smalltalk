@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2001, 2002, 2006 Free Software Foundation, Inc.
+ * Copyright 2001, 2002, 2006, 2008 Free Software Foundation, Inc.
  * Written by Paolo Bonzini and Dragomir Milevojevic.
  *
  * This file is part of GNU Smalltalk.

@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2000, 2001 Travis Griggs and Ken Treis
+| Copyright 2000, 2001, 2008 Travis Griggs and Ken Treis
 | Written by Travis Griggs, Ken Treis and others.
 | Port to GNU Smalltalk, enhancements and refactory by Paolo Bonzini.
 |
