@@ -198,12 +198,3 @@ Eval [ Object compile: 'a [ -16r-33 ]' ]
 Eval [ Object compile: 'a [ -16r-33.0 ]' ]
 Eval [ Object compile: 'a [ -16r-33s3 ]' ]
 Eval [ Object compile: 'a [ -16r-12345678901234567890123 ]' ]
-
-"test that streams are correctly associated to FileSegments"
-Eval [
-    (Object >> #addDependent:) descriptor sourceCode class
-]
-Eval [
-    'Object extend [ a [ ^5 ] ]' readStream fileIn.
-    (Object >> #a) descriptor sourceCode class
-]

@@ -487,11 +487,7 @@ _gst_get_source_string (off_t startPos, off_t endPos)
   if (!in_stream)
     return (_gst_nil_oop);
 
-  /* FIXME: check isPipe too? */
-  if (startPos != -1 && !_gst_get_cur_stream_prompt ()
-      && (in_stream->type == STREAM_FILE
-	  || is_a_kind_of (OOP_CLASS (in_stream->st_oop.oop),
-			   _gst_file_descriptor_class)))
+  if (startPos != -1 && !_gst_get_cur_stream_prompt ())
     {
       OOP fileName;
       gst_file_segment fileSegment;
@@ -523,7 +519,6 @@ _gst_get_source_string (off_t startPos, off_t endPos)
     case STREAM_READLINE:
 #endif /* HAVE_READLINE */
     case STREAM_OOP:
-    case STREAM_FILE:
       p = in_stream->st_oop.buf;
       break;
 
