@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2005,2006,2008
  * Free Software Foundation, Inc.
  * Written by Steve Byrne.
  *
@@ -191,13 +191,11 @@ extern const char *_gst_get_scope_kind (scope_type scope)
    SE is untouched and FALSE is returned.  */
 extern mst_Boolean _gst_find_variable (symbol_entry * se,
 				       tree_node list)
-  ATTRIBUTE_PURE
   ATTRIBUTE_HIDDEN;
 
 /* This converts a C string to a symbol and stores it in the symbol
    table.  */
 extern OOP _gst_intern_string (const char *str)
-  ATTRIBUTE_PURE
   ATTRIBUTE_HIDDEN;
 
 /* This makes an Array with an element for each instance variable
@@ -234,7 +232,6 @@ extern OOP _gst_get_undeclared_dictionary ()
 /* This converts the Smalltalk String STRINGOOP into a Symbol and
    return the converted Symbol.  */
 extern OOP _gst_intern_string_oop (OOP stringOOP)
-  ATTRIBUTE_PURE
   ATTRIBUTE_HIDDEN;
 
 /* Given a symbol, this routine returns a C string that corresponds to the
@@ -303,7 +300,7 @@ extern int _gst_declare_name (const char *name,
 			      mst_Boolean allowDup)
   ATTRIBUTE_HIDDEN;
 
-/* Computes the number of selectors that a message named SYMBOLOOP
+/* Computes the number of arguments that a message named SYMBOLOOP
    expects.  */
 extern int _gst_selector_num_args (OOP symbolOOP)
   ATTRIBUTE_PURE

@@ -293,7 +293,7 @@ static inline mst_Boolean cached_index_oop_put_primitive (OOP rec,
 
 /* Locates in the ProcessorScheduler's process lists and returns the
    highest priority process different from the current process.  */
-static OOP highest_priority_process (void) ATTRIBUTE_PURE;
+static OOP highest_priority_process (void);
 
 /* Remove the head of the given list (a Semaphore is a subclass of
    LinkedList) and answer it.  */
@@ -467,7 +467,7 @@ static void unwind_context (void);
    _gst_nil_oop or directly call _gst_selector_num_args.  */
 static inline mst_Boolean check_send_correctness (OOP receiver,
 						  OOP sendSelector,
-						  int numArgs) ATTRIBUTE_PURE;
+						  int numArgs);
 
 /* Unwind the contexts up until the caller of the method that
    created the block context, no matter how many levels of message

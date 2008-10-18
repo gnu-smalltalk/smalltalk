@@ -460,7 +460,6 @@ extern OOP _gst_binding_dictionary_new (int size,
    it.  If the methodDictionary associated with CLASS_OOP is nil, one
    is created and installed into that class.  */
 extern OOP _gst_valid_class_method_dictionary (OOP class_oop)
-  ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
 
 /* This returns the dictionary of class variables for CLASS_OOP */

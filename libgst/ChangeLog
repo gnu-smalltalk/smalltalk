@@ -1,3 +1,14 @@
+2008-10-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.h: Remove ATTRIBUTE_PURE from functions that are CSEable,
+	but write to memory (typically by memoizing values or allocating OOPs).
+	* libgst/input.h: Likewise.
+	* libgst/interp.c: Likewise.
+	* libgst/opt.h: Likewise.
+	* libgst/sym.h: Likewise.
+
+	* libgst/opt.c: Change compute_jump_length to be const.
+
 2008-09-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* cint.c: Fix ia64 cobjects.st failure by always using a ffi_arg-sized
