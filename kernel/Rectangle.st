@@ -62,6 +62,14 @@ Object subclass: Rectangle [
 	^self basicNew origin: originPoint corner: originPoint + extentPoint
     ]
 
+    Rectangle class >> left: leftNumber right: rightNumber top: topNumber bottom: bottomNumber [
+	"Answer a rectangle with the given coordinates"
+
+	<category: 'instance creation'>
+	^self basicNew origin: (Point x: leftNumber y: topNumber)
+	    corner: (Point x: rightNumber y: bottomNumber)
+    ]
+
     Rectangle class >> left: leftNumber top: topNumber right: rightNumber bottom: bottomNumber [
 	"Answer a rectangle with the given coordinates"
 

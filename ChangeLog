@@ -1,3 +1,7 @@
+2008-10-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Rectangle.st: Add both keyword orders.
+
 2008-10-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Rectangle.st: Fix keyword order in #left:top:right:bottom:.
