@@ -79,7 +79,6 @@ extern void _gst_push_unix_file (int fd,
 /* Return the current line and column into Y and X, respectively.  
    Also sets the method_start_pos pointer.  */
 extern YYLTYPE _gst_get_location (void) 
-  ATTRIBUTE_PURE
   ATTRIBUTE_HIDDEN;
 
 /* Pass the OOP to the parser; it must respond to #nextHunk.  */

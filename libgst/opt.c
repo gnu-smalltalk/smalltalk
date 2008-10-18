@@ -201,7 +201,7 @@ static int compare_blocks (const PTR a, const PTR b) ATTRIBUTE_PURE;
 static int search_block (const PTR a, const PTR b) ATTRIBUTE_PURE;
 
 /* Computes the length of a jump at distance OFS.  */
-static int compute_jump_length (int ofs) ATTRIBUTE_PURE;
+static int compute_jump_length (int ofs) ATTRIBUTE_CONST;
 
 /* This answers how the dirtyness of BLOCKOOP affects
    the block that encloses it.  */

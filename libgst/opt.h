@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2000, 2001, 2002, 2006 Free Software Foundation, Inc.
+ * Copyright 2000, 2001, 2002, 2006, 2008 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -108,7 +108,6 @@ extern const char *_gst_verify_method (OOP methodOOP,
    with an optimized return of self, of an instance variable or of
    a literal.  */
 extern int _gst_is_simple_return (bc_vector bytecodes)
-  ATTRIBUTE_PURE 
   ATTRIBUTE_HIDDEN;
 
 /* This decides whether the block compiled to the BC bytecodes can be
