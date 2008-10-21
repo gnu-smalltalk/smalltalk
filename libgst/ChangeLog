@@ -1,3 +1,7 @@
+2008-10-20  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/interp-jit.inl: Fix compilation error.
+
 2008-10-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.h: Remove ATTRIBUTE_PURE from functions that are CSEable,

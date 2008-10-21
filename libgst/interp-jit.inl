@@ -379,6 +379,7 @@ refresh_native_ips (OOP contextOOP)
 OOP
 _gst_interpret (OOP processOOP)
 {
+  interp_jmp_buf jb;
   gst_callin_process process;
   push_jmp_buf (&jb, true, processOOP);
 
