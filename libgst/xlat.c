@@ -3410,11 +3410,12 @@ decode_bytecode (gst_uchar *bp)
       else
 	{
 	  code_tree *value, *var;
+	  inline_cache *ic;
+
           push_tree_node_oop (IP0, NULL,
 			      TREE_ALT_PUSH | TREE_LIT_CONST, literals[n]);
-          inline_cache *ic =
-	    set_inline_cache (_gst_builtin_selectors[VALUE_COLON_SPECIAL].symbol,
-			      1, false, TREE_SEND, 0);
+          ic = set_inline_cache (_gst_builtin_selectors[VALUE_COLON_SPECIAL].symbol,
+			         1, false, TREE_SEND, 0);
 
 	  var = pop_tree_node (NULL);
 	  value = pop_tree_node (var);

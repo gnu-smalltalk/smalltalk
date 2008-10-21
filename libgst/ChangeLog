@@ -1,3 +1,7 @@
+2008-10-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/xlat.c: Fix ISO C99-ism.
+
 2008-10-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp-jit.inl: Fix compilation error.
