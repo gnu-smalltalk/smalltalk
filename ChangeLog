@@ -1,3 +1,7 @@
+2008-10-22  David M. Cooke  <dave@gyroid.ca>  (tiny change)
+
+	* gst-tool.c: Fix for "gst-remote -I".
+
 2008-10-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Rectangle.st: Add both keyword orders.

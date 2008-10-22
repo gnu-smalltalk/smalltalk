@@ -338,7 +338,7 @@ parse_short_options (const char *name, const char *arg)
         }
 
       else /* if (have_arg == OPT_MANDATORY) */
-        option_error ("expected argument for option -%s", name[-1]);
+        option_error ("expected argument for option -%c", short_opt);
     }
 
   return 1;
