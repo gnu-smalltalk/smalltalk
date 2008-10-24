@@ -2836,10 +2836,13 @@ method_new (method_header header,
       else
 	continue;
 
-      MAKE_OOP_UNTRUSTED (blockOOP, IS_OOP_UNTRUSTED (methodOOP));
       block = (gst_compiled_block) OOP_TO_OBJ (blockOOP);
-      block->method = methodOOP;
-      block->literals = literals;
+      if (IS_NIL (block->method))
+	{
+	  MAKE_OOP_UNTRUSTED (blockOOP, IS_OOP_UNTRUSTED (methodOOP));
+	  block->method = methodOOP;
+	  block->literals = literals;
+	}
     }
 
   if (bytecodes != NULL)

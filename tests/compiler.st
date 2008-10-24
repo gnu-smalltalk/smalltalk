@@ -185,6 +185,13 @@ Number extend [
 
 Eval [ 19 inWords ]
 
+"test that blocks defined with ##() work properly"
+Object extend [
+    block [ ^##([ 'abc' asUppercase ]) ]
+]
+
+Eval [ nil block value ]
+
 "test the limited support for unary minus in literals"
 Eval [ 2-2 ]
 Eval [ -2 + 2 ]

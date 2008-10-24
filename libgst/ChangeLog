@@ -1,3 +1,8 @@
+2008-10-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Do not modify already-complete blocks.
+	* libgst/interp-bc.inl: Sync _gst_send_method and _gst_send_message_internal.
+
 2008-10-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/xlat.c: Fix ISO C99-ism.

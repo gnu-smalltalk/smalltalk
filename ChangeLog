@@ -1,3 +1,8 @@
+2008-10-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/compiler.st: Add regression test.
+	* tests/compiler.ok: Regenerate.
+
 2008-10-22  David M. Cooke  <dave@gyroid.ca>  (tiny change)
 
 	* gst-tool.c: Fix for "gst-remote -I".

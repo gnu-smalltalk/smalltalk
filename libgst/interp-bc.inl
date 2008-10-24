@@ -348,9 +348,10 @@ _gst_send_method (OOP methodOOP)
 
 	case MTH_RETURN_LITERAL:
 	  {
+	    int primIndex = header.primitiveIndex;
 	    /* 3, return literal constant */
 	    /* replace receiver with the returned literal constant */
-	    SET_STACKTOP (GET_METHOD_LITERALS (methodOOP)[0]);
+	    SET_STACKTOP (GET_METHOD_LITERALS (methodOOP)[primIndex]);
 	    _gst_literal_returns++;
 	    return;
 	  }
