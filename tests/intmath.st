@@ -198,7 +198,7 @@ Stream extend [
 
 Eval [
     g := PiSeries new.
-    9 timesRepeat: [ g := g accelerate ].
+    7 timesRepeat: [ g := g accelerate ].
     pi := g peek.
     pi numerator size printNl.
     pi denominator size printNl.

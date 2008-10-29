@@ -1,3 +1,9 @@
+2008-10-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/intmath.st: Run the pi test with only 7 iterations.
+	Suggested by Stephen Woolerton.
+	* tests/intmath.ok: Regenerate.
+
 2008-10-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/compiler.st: Add regression test.
