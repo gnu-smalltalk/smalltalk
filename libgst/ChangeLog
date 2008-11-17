@@ -1,3 +1,8 @@
+2008-11-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/alloc.c: Use fixed values for MMAP_AREA_SIZE and
+	MMAP_THRESHOLD.
+
 2008-10-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	Revert:
