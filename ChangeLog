@@ -1,3 +1,8 @@
+2008-11-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Package.st: Fix explanation of the operation of
+	"gst-package -t ~/.st TestPack.star".
+
 2008-10-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* tests/intmath.st: Run the pi test with only 7 iterations.

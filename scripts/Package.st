@@ -165,7 +165,7 @@ File extend [
 	mode := self isExecutable ifTrue: [ 8r755 ] ifFalse: [ 8r644 ].
 	destFile := File name: dest.
 	('%1 -m %2 %3 %4' % {
-	    Command install. self. mode printString: 8. destFile })
+	    Command install. mode printString: 8. self. destFile })
 		displayNl.
 	Command
 	    execute: [
