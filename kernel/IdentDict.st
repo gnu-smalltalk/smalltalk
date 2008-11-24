@@ -53,6 +53,24 @@ comparision message == to determine equivalence of indices.'>
 	^anObject identityHash
     ]
 
+    findElementIndex: anObject [
+        "Tries to see where anObject can be placed as an indexed variable.
+	 As soon as nil is found, the index of that slot is answered.
+	 anObject also comes from an indexed variable."
+
+        <category: 'private methods'>
+        | index size element |
+        self beConsistent.
+
+        "Sorry for the lack of readability, but I want speed... :-)"
+        index := (anObject identityHash scramble bitAnd: (size := self primSize) - 1) + 1.
+   
+        [(element := self primAt: index) isNil
+            ifTrue: [^index].
+        index == size ifTrue: [index := 1] ifFalse: [index := index + 1]]
+                repeat
+    ]
+
     findIndex: anObject [
 	"Tries to see if anObject exists as an indexed variable. As soon as nil
 	 or anObject is found, the index of that slot is answered"
