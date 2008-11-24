@@ -1,3 +1,7 @@
+2008-11-24  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/IdentDict.st: Override #findIndex:.
+
 2008-11-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* scripts/Package.st: Fix explanation of the operation of
