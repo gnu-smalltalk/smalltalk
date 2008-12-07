@@ -903,12 +903,22 @@ heap_data *
 oldspace_nomemory (heap_data *h, size_t sz)
 {
   if (!_gst_gc_running)
-    {
-      _gst_global_gc (sz);
-      return _gst_mem.old;
-    }
+    _gst_global_gc (sz);
   else
-    return NULL;
+    {
+      /* Already garbage collecting, emergency growth just to satisfy
+	 tenuring necessities.  */
+      int grow_amount_to_satisfy_rate = _gst_mem.old->heap_limit
+           * (100.0 + _gst_mem.space_grow_rate) / 100;
+      int grow_amount_to_satisfy_threshold = 
+	   (sz + _gst_mem.old->heap_total)
+	   * 100.0 /_gst_mem.grow_threshold_percent;
+
+      _gst_mem.old->heap_limit = MAX (grow_amount_to_satisfy_rate,
+				      grow_amount_to_satisfy_threshold);
+    }
+
+  return _gst_mem.old;
 }
 
 #ifndef NO_SIGSEGV_HANDLING
@@ -1167,6 +1177,9 @@ _gst_scavenge (void)
 {
   int oldBytes, reclaimedBytes, tenuredBytes, reclaimedPercent;
 
+  /* Check if oldspace had to be grown in emergency.  */
+  size_t prev_heap_limit = _gst_mem.old->heap_limit;
+ 
   /* Force a GC as soon as possible if we're low on OOPs or memory.  */
   if UNCOMMON (_gst_mem.num_free_oops < LOW_WATER_OOP_THRESHOLD
      || _gst_mem.old->heap_total * 100.0 / _gst_mem.old->heap_limit >
@@ -1241,6 +1254,15 @@ _gst_scavenge (void)
     (1 - _gst_mem.factor) * _gst_mem.tenuredBytesPerScavenge;
 
   mourn_objects ();
+
+  /* If tenuring had to grow oldspace, do a global garbage collection
+     now.  */
+  if (_gst_mem.old->heap_limit > prev_heap_limit)
+    {
+      _gst_global_gc (0);
+      _gst_incremental_gc_step ();
+      return;
+    }
 }
 
 
