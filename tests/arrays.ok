@@ -107,3 +107,6 @@ Execution begins...
 'aabce'
 'bcdde'
 returned value is 'bcdde'
+
+Execution begins...
+returned value is 'SortedCollection (0 1 2 3 4 5 6 7 8 )'

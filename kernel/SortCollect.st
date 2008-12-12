@@ -385,7 +385,7 @@ above criteria -- actually any object which responds to #value:value:.'>
 	item := self basicAt: lastOrdered.
 	
 	[holeIndex > 0 and: 
-		[parentIndex := holeIndex // 2.
+		[parentIndex := (holeIndex - 1) // 2.
 		sortBlock value: (parent := self basicAt: firstIndex + parentIndex)
 		    value: item]] 
 		whileTrue: 

@@ -1,3 +1,9 @@
+2008-12-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/SortCollect.st: Fix #percolateUp bug.
+	* tests/arrays.st: Add regression test.
+        * tests/arrays.ok: Regenerate.
+
 2008-11-24  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/IdentDict.st: Override #findIndex:.

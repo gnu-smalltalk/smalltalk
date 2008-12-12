@@ -160,3 +160,21 @@ Eval [
     (a := 'abcde' copy) replaceFrom: 1 to: 3 with: a startingAt: 2.
     a printNl.
 ]
+
+"--------------"
+
+"This was wrong due to an off-by-one error in SortedCollection>>#percolateUp"
+
+Eval [
+    it := SortedCollection new.
+    it addAll: #(1 2 3 7 9 10 11).
+    it removeLast.
+    it add: 6.
+    it add: 8.
+    it removeLast. "<<< the bug happened here, the heap was inconsistent!"
+    it add: 5.
+    it add: 0.
+    it removeLast.
+    it add: 4.
+    it printString.
+]
