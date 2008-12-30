@@ -1,3 +1,7 @@
+2008-12-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Discard EPIPE too, it is caught by POLLHUP.
+
 2008-12-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.c: Resize the oldspace if tenuring needs more space than

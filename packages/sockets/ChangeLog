@@ -1,3 +1,7 @@
+2008-12-30  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sockets.c: Discard EPIPE too, it is caught by POLLHUP.
+
 2008-09-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Sockets.st: Fix #nextAvailable:... methods (broke DBD-MySQL).

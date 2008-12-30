@@ -386,7 +386,8 @@ getSoError (int fd)
      the primitive still fails and the file/socket is closed by the
      Smalltalk code.  */
   if (error == ESHUTDOWN || error == ECONNRESET
-      || error == ECONNABORTED || error == ENETRESET)
+      || error == ECONNABORTED || error == ENETRESET
+      || error == EPIPE)
     return 0;
   else
     return error;

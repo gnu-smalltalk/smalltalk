@@ -269,7 +269,8 @@ get_errno (void)
      the primitive still fails and the file/socket is closed by the
      Smalltalk code.  */
   if (old == ESHUTDOWN || old == ECONNRESET
-      || old == ECONNABORTED || old == ENETRESET)
+      || old == ECONNABORTED || old == ENETRESET
+      || old == EPIPE)
     return 0;
   else
     return (old);
