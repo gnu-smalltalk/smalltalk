@@ -317,6 +317,28 @@ size and timestamps.'>
 	self subclassResponsibility
     ]
 
+    owner: ownerString group: groupString [
+	"Set the owner and group of the file identified by the receiver to be
+	 aString."
+
+	<category: 'accessing'>
+	self subclassResponsibility
+    ]
+
+    group: aString [
+	"Set the group of the file identified by the receiver to be aString."
+
+	<category: 'accessing'>
+	self owner: nil group: aString
+    ]
+
+    owner: aString [
+	"Set the owner of the file identified by the receiver to be aString."
+
+	<category: 'accessing'>
+	self owner: aString group: nil
+    ]
+
     lastAccessTime: aDateTime [
 	"Update the last access time of the file corresponding to the receiver,
 	 to be aDateTime."

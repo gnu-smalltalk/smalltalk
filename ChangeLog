@@ -1,5 +1,11 @@
 2009-01-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/FilePath.st: Add group/owner setting methods.
+	* kernel/File.st: Add concrete implementation.
+	* kernel/VFS.st: Add recursive group/owner setting method
+
+2009-01-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/VFS.st: Add recursive mode and access time setters.
 
 2009-01-07  Paolo Bonzini  <bonzini@gnu.org>

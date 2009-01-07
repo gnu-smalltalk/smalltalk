@@ -59,6 +59,13 @@
 #include "ffi.h"
 #include <ltdl.h>
 
+#ifdef HAVE_GETGRNAM
+#include <grp.h>
+#endif
+#ifdef HAVE_GETPWNAM
+#include <pwd.h>
+#endif
+
 typedef struct cparam
 {
   union {
@@ -186,6 +193,7 @@ static int my_lstat (const char *name,
 		     OOP out);
 static int my_putenv (const char *str);
 static int my_chdir (const char *str);
+static int my_chown (const char *file, const char *owner, const char *group);
 static int my_symlink (const char* oldpath, const char* newpath);
 static char *my_mkdtemp (char* template);
 static int my_mkdir (const char* name, int mode);
@@ -543,6 +551,7 @@ _gst_init_cfuncs (void)
   _gst_define_cfunc ("lstat_obj", my_lstat);
   _gst_define_cfunc ("utime", _gst_set_file_access_times);
   _gst_define_cfunc ("chmod", chmod);
+  _gst_define_cfunc ("chown", my_chown);
 
   _gst_define_cfunc ("opendir", my_opendir);
   _gst_define_cfunc ("closedir", closedir);
@@ -1381,6 +1390,104 @@ _gst_set_errno(int errnum)
 #endif
 }
 
+
+int
+my_chown (const char *file, const char *user, const char *group)
+{
+#if defined HAVE_CHOWN && defined HAVE_GETGRNAM && defined HAVE_GETPWNAM
+  static char *save_user, *save_group;
+  static uid_t save_uid;
+  static gid_t save_gid;
+  static int recursive_depth;
+
+  uid_t uid, gid;
+  if (!file && !user && !group)
+    {
+      recursive_depth--;
+      if (recursive_depth == 0)
+	{
+#if defined HAVE_SETGROUPENT && defined HAVE_ENDGRENT
+	  endgrent ();
+#endif
+#if defined HAVE_SETPASSENT && defined HAVE_ENDPWENT
+	  endpwent ();
+#endif
+	}
+
+      free (save_user);
+      free (save_group);
+      save_user = save_group = NULL;
+      return 0;
+    }
+
+  if (!file)
+    {
+      recursive_depth++;
+      if (recursive_depth == 1)
+	{
+#if defined HAVE_SETGROUPENT && defined HAVE_ENDGRENT
+	  setgroupent (1);
+#endif
+#if defined HAVE_SETPASSENT && defined HAVE_ENDPWENT
+	  setpassent (1);
+#endif
+	}
+    }
+
+  if (!user)
+    uid = -1;
+  else if (save_user && !strcmp (save_user, user))
+    uid = save_uid;
+  else
+    {
+      struct passwd *pw;
+      pw = getpwnam (user);
+      if (!pw)
+	{
+	  errno = EINVAL;
+	  return -1;
+	}
+
+      uid = pw->pw_uid;
+      if (recursive_depth)
+	{
+	  if (save_user)
+	    free (save_user);
+          save_user = strdup (user);
+	  save_uid = uid;
+	}
+    }
+
+  if (!group)
+    gid = -1;
+  else if (save_group && !strcmp (save_group, group))
+    gid = save_gid;
+  else
+    {
+      struct group *gr;
+      gr = getgrnam (group);
+      if (!gr)
+	{
+	  errno = EINVAL;
+	  return -1;
+	}
+
+      gid = gr->gr_gid;
+      if (recursive_depth)
+	{
+	  if (save_group)
+	    free (save_group);
+          save_group = strdup (group);
+	  save_gid = gid;
+	}
+    }
+
+  if (!file)
+    return 0;
+  else
+    return chown (file, uid, gid);
+#endif
+}
 
 /* TODO: check if this can be changed to an extern declaration and/or
    an AC_CHECK_DECLS test.  */

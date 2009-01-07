@@ -91,6 +91,12 @@ FilePath subclass: File [
 	
     ]
 
+    File class >> setOwnerFor: fileName owner: ownerString group: groupString [
+	<category: 'private-C call-outs'>
+	<cCall: 'chown' returning: #int args: #(#string #string #string)>
+	
+    ]
+
     File class >> path: aString [
 	"Answer a new file with the given path.  The path is not validated until
 	 some of the fields of the newly created objects are accessed"
@@ -477,6 +483,17 @@ FilePath subclass: File [
 	^File isAbsolute: self asString
     ]
     
+    owner: ownerString group: groupString [
+	"Set the receiver's owner and group to be ownerString and groupString."
+
+	<category: 'file operations'>
+	self class 
+	    setOwnerFor: self asString
+	    owner: ownerString
+	    group: groupString.
+	File checkError
+    ]
+
     lastAccessTime: accessDateTime lastModifyTime: modifyDateTime [
 	"Set the receiver's timestamps to be accessDateTime and modifyDateTime."
 

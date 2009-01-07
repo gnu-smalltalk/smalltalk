@@ -192,6 +192,13 @@ virtual files that refer to a real file on disk.'>
         ^self file isSymbolicLink
     ]
 
+    owner: ownerString group: groupString [
+	"Set the receiver's owner and group to be ownerString and groupString."
+
+        <category: 'accessing'>
+        self file owner: ownerString group: groupString
+    ]
+
     lastAccessTime: accessDateTime lastModifyTime: modifyDateTime [
         "Update the timestamps of the file corresponding to the receiver, to be
          accessDateTime and modifyDateTime."
@@ -416,6 +423,19 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 	    ^super lastAccessTime: accessDateTime lastModifyTime: modifyDateTime ].
         self do: [ :each |
 	    each file lastAccessTime: accessDateTime lastModifyTime: modifyDateTime ]
+    ]
+
+    owner: ownerString group: groupString [
+	"Set the owner and group for all files and directories in the tree."
+
+        <category: 'accessing'>
+	self isDirectory ifFalse: [
+	    ^super owner: ownerString group: groupString ].
+	"These special calls cache the uid and gid to avoid repeated lookups."
+	[
+	    File setOwnerFor: nil owner: ownerString group: groupString.
+            self do: [ :each | each file owner: ownerString group: groupString ]
+	] ensure: [ File setOwnerFor: nil owner: nil group: nil ]
     ]
 
     mode: anInteger [

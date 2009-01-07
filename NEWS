@@ -1,5 +1,12 @@
 List of user-visible changes in GNU Smalltalk
 
+NEWS FROM 3.1 TO 3.1.1
+
+o   New FilePath methods #owner:, #group:, #owner:group: allow setting
+    a file's owner and group.
+
+-----------------------------------------------------------------------------
+
 NEWS FROM 3.0.5 TO 3.1
 
 o   BlockClosure methods #cull:, #cull:cull:, #cull:cull:cull:

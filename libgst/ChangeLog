@@ -1,3 +1,7 @@
+2009-01-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Add chown.
+
 2008-12-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Discard EPIPE too, it is caught by POLLHUP.
