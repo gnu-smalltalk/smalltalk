@@ -1,5 +1,9 @@
 2009-01-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/VFS.st: Add recursive mode and access time setters.
+
+2009-01-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FilePath.st: Add missing #setTimeFor:mtime:atime: method.
 
 2008-12-12  Paolo Bonzini  <bonzini@gnu.org>

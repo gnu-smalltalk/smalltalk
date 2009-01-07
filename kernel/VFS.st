@@ -406,6 +406,44 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 	<category: 'testing'>
 	^self file isFileSystemPath
     ]
+
+    lastAccessTime: accessDateTime lastModifyTime: modifyDateTime [
+	"Update the timestamps of all files in the tree to be
+	 accessDateTime and modifyDateTime."
+
+        <category: 'accessing'>
+	self isDirectory ifFalse: [
+	    ^super lastAccessTime: accessDateTime lastModifyTime: modifyDateTime ].
+        self do: [ :each |
+	    each file lastAccessTime: accessDateTime lastModifyTime: modifyDateTime ]
+    ]
+
+    mode: anInteger [
+	"Set the mode to be anInteger for all files in the tree.  Directory
+	 modes are left unchanged."
+
+        <category: 'accessing'>
+	self isDirectory ifFalse: [ ^super mode: anInteger ].
+
+	self do: [ :each |
+	    each isDirectory ifFalse: [ each file mode: anInteger ] ]
+    ]
+
+    fileMode: fMode directoryMode: dMode [
+	"Set the mode to be fMode for all files in the tree, and dMode for
+	 all directories in the tree."
+
+        <category: 'accessing'>
+	self isDirectory ifFalse: [ ^super mode: fMode ].
+
+	super mode: dMode.
+	self isDirectory ifTrue: [
+	    self do: [ :each |
+		each file
+		    mode: (each isDirectory
+				ifTrue: [ dMode ]
+				ifFalse: [ fMode ]) ] ]
+    ]
 ]
 
 ]
