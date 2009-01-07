@@ -432,7 +432,7 @@ poll (pfd, nfd, timeout)
   BOOL poll_again;
   MSG msg;
   char sockbuf[256];
-  int rc;
+  int rc = 0;
   nfds_t i;
 
   if (nfd < 0 || timeout < -1)

@@ -1,3 +1,7 @@
+2009-01-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* poll.c: Fix uninitialized variable.
+
 2008-10-07  Samuel Tardieu  <sam@rfc1149.net>
 
 	* ltdl.c (try_dlopen): sys_search_path cannot be null as
