@@ -85,6 +85,12 @@ FilePath subclass: File [
 	^true
     ]
 
+    File class >> setTimeFor: fileName atime: atimeSec mtime: mtimeSec [
+	<category: 'private-C call-outs'>
+	<cCall: 'utime' returning: #int args: #(#string #int #int)>
+	
+    ]
+
     File class >> path: aString [
 	"Answer a new file with the given path.  The path is not validated until
 	 some of the fields of the newly created objects are accessed"
