@@ -1,3 +1,7 @@
+2009-01-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/FilePath.st: Add back #fullName.
+
 2009-01-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FilePath.st: Add group/owner setting methods.

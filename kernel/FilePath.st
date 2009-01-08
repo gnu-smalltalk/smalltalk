@@ -523,8 +523,16 @@ size and timestamps.'>
 	^self class path: (File pathFor: self name ifNone: [ '.' ])
     ]
 
+    fullName [
+	"Answer a String with the full path to the receiver (same as #name;
+	 it is useless to override this method)."
+
+	<category: 'file name management'>
+	^self name
+    ]
+
     name [
-	"Answer the full path to the receiver"
+	"Answer String with the full path to the receiver (same as #fullName)."
 
 	<category: 'file name management'>
 	self subclassResponsibility
