@@ -352,15 +352,15 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 	"Same as the wrapped #do:, but reuses the file object for efficiency."
 
 	<category: 'enumerating'>
+	aBlock value: self file.
         self file namesDo: 
                 [:name |
                 | f |
-                f := self at: name. 
-                aBlock value: f.
-                f isDirectory 
-                    ifTrue:
-                        [((#('.' '..') includes: name) or: [f isSymbolicLink])
-                            ifFalse: [f do: aBlock]]]
+		(#('.' '..') includes: name) ifFalse: [
+		    f := self at: name. 
+		    aBlock value: f file.
+		    (f isDirectory and: [f isSymbolicLink not])
+                        ifTrue: [f do: aBlock]]]
      ]
 
      namesDo: aBlock prefixLength: anInteger [
@@ -372,14 +372,13 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
         self file namesDo: 
                 [:name |
                 | f |
-                f := self at: name. 
-                aBlock value: (f asString copyFrom: anInteger).
-                f isDirectory 
-                    ifTrue:
-                        [((#('.' '..') includes: name) or: [f isSymbolicLink])
-                            ifFalse: [f
-				namesDo: aBlock
-				prefixLength: anInteger ]]]
+		(#('.' '..') includes: name) ifFalse: [
+		    f := self at: name. 
+                    aBlock value: (f asString copyFrom: anInteger).
+		    (f isDirectory and: [f isSymbolicLink not])
+                        ifTrue: [f
+			    namesDo: aBlock
+			    prefixLength: anInteger ]]]
      ]
 
      namesDo: aBlock [
@@ -387,6 +386,7 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 	 tree recursively."
 
 	<category: 'enumerating'>
+	aBlock value: '.'.
         self namesDo: aBlock prefixLength: self asString size + 2
      ]
 
@@ -422,7 +422,7 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 	self isDirectory ifFalse: [
 	    ^super lastAccessTime: accessDateTime lastModifyTime: modifyDateTime ].
         self do: [ :each |
-	    each file lastAccessTime: accessDateTime lastModifyTime: modifyDateTime ]
+	    each lastAccessTime: accessDateTime lastModifyTime: modifyDateTime ]
     ]
 
     owner: ownerString group: groupString [
@@ -434,7 +434,7 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 	"These special calls cache the uid and gid to avoid repeated lookups."
 	[
 	    File setOwnerFor: nil owner: ownerString group: groupString.
-            self do: [ :each | each file owner: ownerString group: groupString ]
+            self do: [ :each | each owner: ownerString group: groupString ]
 	] ensure: [ File setOwnerFor: nil owner: nil group: nil ]
     ]
 
@@ -445,8 +445,7 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
         <category: 'accessing'>
 	self isDirectory ifFalse: [ ^super mode: anInteger ].
 
-	self do: [ :each |
-	    each isDirectory ifFalse: [ each file mode: anInteger ] ]
+	self do: [ :each | each isDirectory ifFalse: [ each mode: anInteger ] ]
     ]
 
     fileMode: fMode directoryMode: dMode [
@@ -459,8 +458,7 @@ VFS.FileWrapper subclass: RecursiveFileWrapper [
 	super mode: dMode.
 	self isDirectory ifTrue: [
 	    self do: [ :each |
-		each file
-		    mode: (each isDirectory
+		each mode: (each isDirectory
 				ifTrue: [ dMode ]
 				ifFalse: [ fMode ]) ] ]
     ]

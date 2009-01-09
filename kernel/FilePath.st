@@ -736,7 +736,10 @@ size and timestamps.'>
 
     all [
 	"Return a decorator of the receiver that will provide recursive
-	 descent into directories for iteration methods."
+	 descent into directories for iteration methods.  Furthermore,
+	 iteration on the returned wrapper will not include '.' or '..'
+	 directory entries, and will include the receiver (directly, not
+	 via '.')."
 
 	<category: 'decoration'>
 	^Kernel.RecursiveFileWrapper on: self
@@ -813,7 +816,9 @@ size and timestamps.'>
 
     do: aBlock [
 	"Evaluate aBlock once for each file in the directory represented by the
-	 receiver, passing its name."
+	 receiver, passing a FilePath object (or a subclass) to it.  It depends
+	 on the subclass whether iteration will include the '.' and '..'
+	 directory entries."
 
 	<category: 'enumerating'>
 	self namesDo: [ :name |
@@ -822,7 +827,8 @@ size and timestamps.'>
 
     namesDo: aBlock [
 	"Evaluate aBlock once for each file in the directory represented by the
-	 receiver, passing its name."
+	 receiver, passing its name.  It depends on the subclass whether
+	 iteration will include the '.' and '..'  directory entries."
 
 	<category: 'enumerating'>
 	self subclassResponsibility

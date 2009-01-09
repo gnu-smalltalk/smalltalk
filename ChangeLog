@@ -1,5 +1,14 @@
 2009-01-09  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/FilePath.st: Clarify semantics of #all, #do:, #namesDo:
+	with respect to . and .. entries.
+	* kernel/VFS.st: Do not pass . and .. in the RecursiveFileWrapper.
+	Pass an entry for the directory itself in #do: and #namesDo:.
+	Unwrap the passed object in #do:.  Adjust #mode:, #owner:group:,
+	#lastAccessTime:lastModifyTime:.
+
+2009-01-09  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Directory.st: Update class comment.
 
 2009-01-08  Paolo Bonzini  <bonzini@gnu.org>

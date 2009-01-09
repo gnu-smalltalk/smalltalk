@@ -5,6 +5,15 @@ NEWS FROM 3.1 TO 3.1.1
 o   New FilePath methods #owner:, #group:, #owner:group: allow setting
     a file's owner and group.
 
+o   Sending mode, file time and owner setters to a recursive directory
+    decorator (such as `Directory working all') sets the mode/time/owner
+    on all files under the path.
+
+o   The semantics of recursive directory descent were adjusted as follows:
+    1) the '.' and '..' directory entries are not passed; 2) for #do:, the
+    file is passed directly (3.1 used to pass another recursive decorator);
+    3) before the descent starts, the directory itself is passed to the block.
+
 -----------------------------------------------------------------------------
 
 NEWS FROM 3.0.5 TO 3.1
