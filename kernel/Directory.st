@@ -35,11 +35,13 @@
 Object subclass: Directory [
     
     <category: 'Streams-Files'>
-    <comment: 'I am the counterpart of File in a tree-structured file system: I can
-iterate through the file that I contain and construct new instances
-of File and Directory.  In addition I have the notion of a current
-working directory (which alas must be a real directory and not a
-virtual one).'>
+    <comment: 'I am the counterpart of File in a tree-structured file system.
+I provide the notion of a current working directory and know several well-known
+places in the file system.
+
+However, all navigation methods for directories are under FilePath or File
+for efficiency reasons.  Refer to the manual of FilePath for information on
+how to use the instances returned by my class methods.'>
 
     Directory class >> primCreateTemporary: dirName [
 	<category: 'private-C call-outs'>

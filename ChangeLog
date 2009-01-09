@@ -1,3 +1,7 @@
+2009-01-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Directory.st: Update class comment.
+
 2009-01-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FilePath.st: Add back #fullName.
