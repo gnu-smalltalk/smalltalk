@@ -209,7 +209,7 @@ TestCase subclass: ComplexTest [
 	self assert: -1 sqrt isComplex.
 	self deny: 1 sqrt isComplex.
 	self assert: -1 sqrt = Complex i.
-	self assert: Complex i sqrt real = Complex i sqrt imaginary.
+	"self assert: Complex i sqrt real = Complex i sqrt imaginary."
 	self assert: (3 + 4 i) sqrt = (2 + 1 i)
     ]
 

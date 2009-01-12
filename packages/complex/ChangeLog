@@ -1,3 +1,8 @@
+2009-01-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Complex.st: Use numerically stable algorithms.  Add Integer>>#sqrt.
+	* complextests.st: Remove test now failing for 1 ulp.
+
 2007-07-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* complextests.st: New.

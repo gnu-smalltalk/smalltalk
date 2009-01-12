@@ -1,5 +1,9 @@
 2009-01-12  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Fraction.st: Add #sqrt.
+
+2009-01-12  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/ExcHandling.st: Remove empty "Object extend".
 
 2009-01-09  Paolo Bonzini  <bonzini@gnu.org>

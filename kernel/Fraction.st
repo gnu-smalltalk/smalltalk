@@ -513,6 +513,19 @@ fraction.'>
 	    ifFalse: [^Fraction numerator: denominator denominator: numerator]
     ]
 
+    sqrt [
+	"Return the square root of the receiver."
+
+	<category: 'optimized cases'>
+	| n d |
+	n := numerator sqrt.
+	d := denominator sqrt.
+
+	"If both are integers the gcd is known to be 1, don't use n/d straight."
+	(n isInteger and: [ d isInteger ]) ifFalse: [ ^n / d ].
+	^Fraction numerator: n denominator: d
+    ]
+
     squared [
 	"Return the square of the receiver."
 

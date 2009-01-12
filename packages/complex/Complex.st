@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2007 Free Software Foundation, Inc.
+| Copyright 2007, 2009 Free Software Foundation, Inc.
 | Written by Paolo Bonzini
 |
 | This file is part of the GNU Smalltalk class library.
@@ -116,36 +116,60 @@ numbers, which in turn are created with `Complex i'' or the #i method
 	"Multiply the receiver by the (real or complex) number z."
 
 	<category: 'math'>
+	| ac bd abcd |
 	z isComplex 
 	    ifFalse: [^Complex realResult: self real * z imaginary: self imaginary * z].
-	^Complex realResult: self real * z real - (self imaginary * z imaginary)
-	    imaginary: self real * z imaginary + (self imaginary * z real)
+	ac := self real * z real.
+	bd := self imaginary * z imaginary.
+	abcd := (self real + self imaginary) * (z real + z imaginary).
+	^Complex realResult: ac - bd imaginary: abcd - ac - bd
     ]
 
     / z [
 	"Divide the receiver by the (real or complex) number z."
 
 	<category: 'math'>
+	| r1 r2 i1 i2 d1 d2 w |
 	z isComplex 
 	    ifFalse: [^Complex realResult: self real / z imaginary: self imaginary / z].
-	^self * z reciprocal
+	r1 := i2 := self real.
+	r2 := i1 := self imaginary.
+	d1 := z real.
+	d2 := z imaginary.
+	d1 abs > d2 abs
+	    ifTrue: [ w := d2 / d1. r2 := r2 * w. i2 := i2 * w. d2 := d2 * w ]
+	    ifFalse: [ w := d1 / d2. r1 := r1 * w. i1 := i1 * w. d1 := d1 * w ].
+
+	w := d1 + d2.
+	^Complex realResult: (r1 + r2) / w imaginary: (i1 - i2) / w
     ]
 
     reciprocal [
 	"Return the reciprocal of the receiver."
 
 	<category: 'math'>
-	| absSquared |
-	absSquared := self absSquared.
-	^Complex realResult: self real / absSquared
-	    imaginary: self imaginary negated / absSquared
+	| r1 i2 d1 d2 w |
+	r1 := 1. i2 := -1.
+	d1 := self real.
+	d2 := self imaginary.
+	d1 abs > d2 abs
+	    ifTrue: [ w := d2 / d1. i2 := w * -1. d2 := d2 * w ]
+	    ifFalse: [ r1 := d1 / d2. d1 := d1 * r1 ].
+
+	w := d1 + d2.
+	^Complex realResult: r1 / w imaginary: i2 / w
     ]
 
     abs [
 	"Return the absolute value of the receiver."
 
 	<category: 'math'>
-	^(self real squared + self imaginary squared) sqrt
+	| rAbs iAbs |
+	rAbs := self real abs.
+	iAbs := self imaginary abs.
+	^rAbs > iAbs
+	    ifTrue: [ rAbs * ((iAbs / rAbs) squared + 1) sqrt ]
+	    ifFalse: [ iAbs * ((rAbs / iAbs) squared + 1) sqrt ]
     ]
 
     absSquared [
@@ -176,11 +200,22 @@ numbers, which in turn are created with `Complex i'' or the #i method
 	"Return the square root of the receiver.  Can be improved!"
 
 	<category: 'transcendental functions'>
-	| abs |
-	self imaginary < 0 ifTrue: [^self conjugate sqrt conjugate].
-	abs := self abs.
-	^Complex realResult: ((abs + self real) / 2) sqrt
-	    imaginary: ((abs - self real) / 2) sqrt
+	| w x rAbs iAbs |
+	rAbs := self real abs.
+	iAbs := self imaginary abs.
+	rAbs > iAbs
+	    ifTrue: [
+		w := iAbs / rAbs.
+		w := rAbs sqrt * ((1 + (w squared + 1) sqrt) / 2) sqrt ]
+	    ifFalse: [
+		w := rAbs / iAbs.
+		w := iAbs sqrt * ((w + (w squared + 1) sqrt) / 2) sqrt ].
+
+	w = 0 ifTrue: [ ^0 ].
+	x := self imaginary / (w + w).
+	self real < 0 ifFalse: [ ^Complex realResult: w imaginary: x ].
+	self imaginary >= 0 ifTrue: [ ^Complex realResult: x abs imaginary: w ].
+	^Complex realResult: x abs imaginary: w negated
     ]
 
     sin [
@@ -549,12 +584,34 @@ Float extend [
 
 	<category: 'transcendental functions'>
 	self >= 0 ifTrue: [^self primSqrt].
-	^Complex real: 0 imaginary: self negated primSqrt
+	^Complex real: 0 imaginary: self negated sqrt
     ]
 
 ]
 
 
+
+Integer extend [
+    sqrt [
+	"Return the square root of the receiver.  Unlike the default
+	 implementation, this returns an integer if the receiver is
+	 a perfect square."
+
+	| k l l1 |
+	self < 0 ifTrue: [ ^Complex real: 0 imaginary: self negated sqrt ].
+	self <= 1 ifTrue: [ ^self ].
+	"Find an upper bound to self sqrt."
+	k := self bitShift: ((self floorLog: 2) quo: -2).
+	"Use Newton iteration to find if self is a perfect square."
+	[ 
+	    l1 := (self + k - 1) quo: k.
+	    (k - l1) < 1 ] whileFalse: [
+	        l := self / k.
+	        k := (k + l) / 2 ].
+	l1 squared = self ifTrue: [ ^l1 ].
+	^super sqrt
+    ]
+]
 
 Number extend [
 
