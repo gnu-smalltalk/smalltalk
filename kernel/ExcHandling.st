@@ -760,10 +760,3 @@ with a lower priority.'>
 	^NoTag
     ]
 ]
-
-
-
-Object extend [
-
-]
-

@@ -1,3 +1,7 @@
+2009-01-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ExcHandling.st: Remove empty "Object extend".
+
 2009-01-09  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FilePath.st: Clarify semantics of #all, #do:, #namesDo:
