@@ -1,5 +1,10 @@
 2008-01-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* ShiftReset.st: New.
+	* ShiftResetTest.st: New.
+
+2008-01-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Continuations.st: Split...
 	* Amb.st: ... into this...
 	* AmbTest.st: ... and this...

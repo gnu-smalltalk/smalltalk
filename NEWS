@@ -12,6 +12,10 @@ o   Sending mode, file time and owner setters to a recursive directory
     decorator (such as `Directory working all') sets the mode/time/owner
     on all files under the path.
 
+o   The Continuations package provides delimited continuations via
+    BlockClosure>>#shift and BlockClosure>>#reset.  Both methods accept
+    a block (1-arg for shift, 0-arg for reset).
+
 o   The semantics of recursive directory descent were adjusted as follows:
     1) the '.' and '..' directory entries are not passed; 2) for #do:, the
     file is passed directly (3.1 used to pass another recursive decorator);
