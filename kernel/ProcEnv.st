@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 2008 Free Software Foundation, Inc.
+| Copyright 2008, 2009 Free Software Foundation, Inc.
 | Written by Paolo Bonzini.
 |
 | This file is part of the GNU Smalltalk class library.
@@ -31,32 +31,54 @@
 
 
 
-Namespace current: Kernel [
-
 LookupKey subclass: ProcessVariable [
     <category: 'Language-Processes'>
     <comment: 'I represent a proxy for a thread-local variable defined
 for a process.  Requesting the value will return the thread-local
 setting for the current process.'>
 
+    ProcessVariable class >> key: anObject [
+	"Return a new ProcessVariable with the given key.  Not that the key
+	 need not be a symbol or string, for example you could use an
+	 array #(#{class name} 'name').  Setting the variable's value will
+	 automatically create it in the current process, while removal must
+	 be done by hand through the ProcessEnvironment singleton object."
+	<category: 'accessing'>
+	^self basicNew key: Object new
+    ]
+
+    ProcessVariable class >> new [
+	"Return a new ProcessVariable with a new anonymous but unique key.
+	 It is suggested to use a descriptive name instead to ease debugging.
+	 Setting the variable's value will automatically create it in
+	 the current process, while removal must be done by hand through
+	 the ProcessEnvironment singleton object."
+	<category: 'accessing'>
+	^self basicNew key: Object new
+    ]
+
     environment [
+	"Return the environment in which this ProcessVariable lives.  This
+	 is the singleton instance of ProcessEnvironment for all variables."
 	<category: 'accessing'>
 	^ProcessEnvironment uniqueInstance
     ]
 
     value [
+	"Return the value of this variable in the current process."
 	<category: 'accessing'>
 	^Processor activeProcess environment at: self key ifAbsent: [ nil ]
     ]
 
     value: anObject [
+	"Set the value of the current process's copy of the variable to be
+	 anObject."
 	<category: 'accessing'>
 	Processor activeProcess environment at: self key put: anObject
     ]
 ]
 
-]
-
+
 Object subclass: ProcessEnvironment [
     <category: 'Language-Processes'>
     <comment: 'I represent a proxy for thread-local variables defined for
@@ -131,7 +153,7 @@ a Dictionary; in particular the iteration protocol is absent.'>
          aBlock if the key is not found"
 
         <category: 'accessing'>
-        ^Kernel.ProcessVariable key: key
+        ^ProcessVariable key: key
     ]
 
     associationAt: key [
@@ -139,7 +161,7 @@ a Dictionary; in particular the iteration protocol is absent.'>
          aBlock if the key is not found"
 
         <category: 'accessing'>
-        ^Kernel.ProcessVariable key: key
+        ^ProcessVariable key: key
     ]
 
     keys [

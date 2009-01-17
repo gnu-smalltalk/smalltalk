@@ -1,3 +1,9 @@
+2009-01-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ProcEnv.st: Add comments for ProcessVariable and make it
+	public.
+	* kernel/Process.st: Make the environment an IdentityDictionary.
+
 2009-01-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Fraction.st: Add #sqrt.

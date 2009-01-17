@@ -7,7 +7,7 @@
 
 "======================================================================
 |
-| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2007,2008
+| Copyright 1988,92,94,95,99,2000,2001,2002,2003,2007,2008,2009
 | Free Software Foundation, Inc.
 | Written by Steve Byrne.
 |
@@ -327,7 +327,7 @@ can suspend themselves and resume themselves however they wish.'>
 	 backwards-incompatible."
 
 	<category: 'private'>
-	environment isNil ifTrue: [environment := LookupTable new].
+	environment isNil ifTrue: [environment := IdentityDictionary new].
 	^environment
     ]
 
