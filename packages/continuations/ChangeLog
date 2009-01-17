@@ -1,0 +1,6 @@
+2008-01-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Continuations.st: There's not anymore anything of the ST-Archive
+	continuations package in here.  The Continuation class was rewritten
+	and is now in the kernel; the Amb evaluator is taken from Seaside
+	and its MIT license is added to the file.
