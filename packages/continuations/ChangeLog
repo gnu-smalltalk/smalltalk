@@ -1,5 +1,12 @@
 2008-01-19  Paolo Bonzini  <bonzini@gnu.org>
 
+	* Continuations.st: Split...
+	* Amb.st: ... into this...
+	* AmbTest.st: ... and this...
+	* Test.st: ... and this.
+
+2008-01-19  Paolo Bonzini  <bonzini@gnu.org>
+
 	* Continuations.st: There's not anymore anything of the ST-Archive
 	continuations package in here.  The Continuation class was rewritten
 	and is now in the kernel; the Amb evaluator is taken from Seaside

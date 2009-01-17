@@ -1,9 +1,13 @@
 <package>
   <name>Continuations</name>
-  <sunit>ContinuationTest AmbTest</sunit>
-  <prereq>SUnit</prereq>
+  <test>
+    <sunit>ContinuationTest AmbTest</sunit>
+    <filein>Test.st</filein>
+    <filein>AmbTest.st</filein>
+    <file>Test.st</file>
+    <file>AmbTest.st</file>
+  </test>
 
-  <filein>Continuations.st</filein>
-
-  <file>Continuations.st</file>
+  <filein>Amb.st</filein>
+  <file>Amb.st</file>
 </package>
