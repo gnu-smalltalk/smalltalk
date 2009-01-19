@@ -44,7 +44,7 @@ setting for the current process.'>
 	 automatically create it in the current process, while removal must
 	 be done by hand through the ProcessEnvironment singleton object."
 	<category: 'accessing'>
-	^self basicNew key: Object new
+	^self basicNew key: anObject
     ]
 
     ProcessVariable class >> new [

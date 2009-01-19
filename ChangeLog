@@ -1,3 +1,7 @@
+2009-01-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ProcEnv.st: Fix ProcessVariable>>#key:.
+
 2009-01-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ProcEnv.st: Add comments for ProcessVariable and make it
