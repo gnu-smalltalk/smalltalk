@@ -1,3 +1,9 @@
+2009-01-19  Paolo Bonzini  <bonzini@gnu.org>
+	    Derek Zhou  <agonyzhou@comcast.net>
+
+	* libgst/oop.c: Always call _gst_finish_incremental_gc before
+	a non-growing compaction of the heap.
+
 2009-01-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Add chown.

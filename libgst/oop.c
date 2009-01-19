@@ -1006,6 +1006,8 @@ _gst_compact (size_t new_heap_limit)
     }
   else
     {
+      /* Do not copy garbage.  */
+      _gst_finish_incremental_gc ();
       _gst_mem.numCompactions++;
       update_stats (&stats.timeOfLastCompaction, NULL, NULL);
     }
@@ -1063,7 +1065,6 @@ void
 _gst_global_compact ()
 {
   _gst_global_gc (0);
-  _gst_finish_incremental_gc ();
   _gst_compact (0);
 }
 
