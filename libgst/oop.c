@@ -1123,12 +1123,24 @@ _gst_global_gc (int next_allocation)
     {
       old_limit = MAX (old_limit, _gst_mem.old->heap_total);
 
-      /* Check if it's time to compact the heap.  */
+      /* if memory is still low, go all the way on sweeping */
       if UNCOMMON ((next_allocation + _gst_mem.old->heap_total)
 	    * 100.0 / old_limit > _gst_mem.grow_threshold_percent)
         {
-          s = "done, heap compacted";
-          _gst_compact (0);
+          int target_limit;
+          _gst_finish_incremental_gc ();
+
+      /* Check if it's time to compact the heap. Compactions make the most 
+         sense if there were lots of garbage. And the heap limit is shrunk 
+         to avoid excessive garbage accumulation in the next round */
+          target_limit = (next_allocation + _gst_mem.old->heap_total) * 
+            (100.0 + _gst_mem.space_grow_rate) / _gst_mem.grow_threshold_percent;
+          if UNCOMMON ( target_limit < old_limit)
+            {
+              s = "done, heap compacted";
+              _gst_compact (0);
+              grow_memory_no_compact (target_limit);
+            }
         }
 
       /* Check if it's time to grow the heap.  */
@@ -1297,10 +1309,13 @@ finished_incremental_gc (void)
   _gst_mem.live_flags &= ~F_REACHABLE;
   _gst_mem.live_flags |= F_OLD;
 
-  _gst_mem.reclaimedBytesPerGlobalGC =
-    _gst_mem.factor * stats.reclaimedOldSpaceBytesSinceLastGlobalGC +
-    (1 - _gst_mem.factor) * _gst_mem.reclaimedBytesPerScavenge;
-
+  if (stats.reclaimedOldSpaceBytesSinceLastGlobalGC) 
+    {
+      _gst_mem.reclaimedBytesPerGlobalGC =
+        _gst_mem.factor * stats.reclaimedOldSpaceBytesSinceLastGlobalGC +
+        (1 - _gst_mem.factor) * _gst_mem.reclaimedBytesPerGlobalGC;
+      stats.reclaimedOldSpaceBytesSinceLastGlobalGC = 0;
+    }
 #ifdef ENABLE_JIT_TRANSLATION
   /* Go and really free the blocks associated to garbage collected
      native code.  */
