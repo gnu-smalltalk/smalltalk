@@ -1,3 +1,7 @@
+2009-01-23  Derek Zhou  <agonyzhou@comcast.net>
+    
+    	* libgst/oop.c: Allow shrinking the heap down to the eden's size.
+
 2009-01-21  Derek Zhou  <agonyzhou@comcast.net>
 
 	* libgst/oop.c: Only compact if there were lots of garbage,

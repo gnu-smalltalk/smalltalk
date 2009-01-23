@@ -1125,17 +1125,19 @@ _gst_global_gc (int next_allocation)
 
       /* if memory is still low, go all the way on sweeping */
       if UNCOMMON ((next_allocation + _gst_mem.old->heap_total)
-	    * 100.0 / old_limit > _gst_mem.grow_threshold_percent)
+		    * 100.0 / old_limit > _gst_mem.grow_threshold_percent)
         {
           int target_limit;
           _gst_finish_incremental_gc ();
 
-      /* Check if it's time to compact the heap. Compactions make the most 
-         sense if there were lots of garbage. And the heap limit is shrunk 
-         to avoid excessive garbage accumulation in the next round */
-          target_limit = (next_allocation + _gst_mem.old->heap_total) * 
-            (100.0 + _gst_mem.space_grow_rate) / _gst_mem.grow_threshold_percent;
-          if UNCOMMON ( target_limit < old_limit)
+	  /* Check if it's time to compact the heap. Compaction make the most 
+	     sense if there were lots of garbage. And the heap limit is shrunk 
+	     to avoid excessive garbage accumulation in the next round */
+	  target_limit = MAX(_gst_mem.eden.totalSize,
+			     ((next_allocation + _gst_mem.old->heap_total)
+			      * (100.0 + _gst_mem.space_grow_rate)
+			      / _gst_mem.grow_threshold_percent));
+	  if (target_limit < old_limit)
             {
               s = "done, heap compacted";
               _gst_compact (0);
