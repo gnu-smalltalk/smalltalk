@@ -9,7 +9,7 @@ AC_CACHE_CHECK([how to link with OpenGL libraries], gst_cv_opengl_libs, [
   if test $ac_cv_header_OpenGL_gl_h = yes || \
      test $ac_cv_header_GL_gl_h = yes; then
     case $host in
-      *-*-mingw* | *-*-cygwin*) gst_cv_opengl_libs='' ;;
+      *-*-mingw* | *-*-cygwin*) gst_cv_opengl_libs='-lglu' ;;
       *-*-beos* | *-*-qnx*) gst_cv_opengl_libs='-lGL' ;;
       *-*-darwin*) gst_cv_opengl_libs='-Wl,-framework,OpenGL' ;;
       *) gst_cv_opengl_libs='-lGL -lGLU $(X_LIBS) $(X_PRE_LIBS) -lX11' ;;
