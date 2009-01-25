@@ -44,25 +44,29 @@ size and timestamps.'>
 	"Answer the name of a file named `fileName' which resides in a directory
 	 named `directory'."
 
+	| dir fname |
 	<category: 'file name management'>
-	directory isEmpty ifTrue: [^fileName].
-	fileName isEmpty ifTrue: [
-	    SystemExceptions.InvalidArgument signalOn: fileName
+	dir := directory.
+	fname := fileName.
+	Directory pathSeparator == $\ ifTrue: [
+	    dir := dir copyReplacing: $/ with: $\.
+	    fname := fname copyReplacing: $/ with: $\ ].
+	dir isEmpty ifTrue: [^fname].
+	fname isEmpty ifTrue: [
+	    SystemExceptions.InvalidArgument signalOn: fname
 		reason: 'empty filenames are invalid' ].
 	Directory pathSeparator == $\ 
-	    ifFalse: [(fileName at: 1) isPathSeparator ifTrue: [^fileName]]
+	    ifFalse: [(fname at: 1) isPathSeparator ifTrue: [^fname]]
 	    ifTrue: 
-		[(fileName at: 1) isPathSeparator 
+		[(fname at: 1) isPathSeparator 
 		    ifTrue: 
-			[^(directory size >= 2 and: [(directory at: 2) = $:]) 
-			    ifTrue: ['%1:%2' % 
-					{directory first.
-					fileName}]
-			    ifFalse: [fileName]].
-		(fileName size >= 2 and: [(fileName at: 2) = $:]) ifTrue: [^fileName]].
-	^(directory at: directory size) isPathSeparator 
-	    ifTrue: [directory , fileName]
-	    ifFalse: [directory , Directory pathSeparatorString , fileName]
+			[^(dir size >= 2 and: [(dir at: 2) = $:]) 
+			    ifTrue: ['%1:%2' % {dir first.  fname}]
+			    ifFalse: [fname]].
+		(fname size >= 2 and: [(fname at: 2) = $:]) ifTrue: [^fname]].
+	^(dir at: dir size) isPathSeparator 
+	    ifTrue: [dir , fname]
+	    ifFalse: [dir , Directory pathSeparatorString , fname]
     ]
 
     FilePath class >> extensionFor: aString [
@@ -70,17 +74,19 @@ size and timestamps.'>
 	 includes an initial dot."
 
 	<category: 'file name management'>
-	| index |
+	| index str |
 	aString isEmpty ifTrue: [^''].
-	index := aString findLast: 
+	str := aString.
+	Directory pathSeparator = $\ ifTrue: [ str := str copyReplacing: $/ with: $\ ].
+	index := str findLast: 
 			[:each | 
 			each = Directory pathSeparator ifTrue: [^''].
 			each = $.].
 
 	"Special case foo, .foo and /bar/.foo, all of which have no extension"
 	index <= 1 ifTrue: [^''].
-	(aString at: index - 1) = Directory pathSeparator ifTrue: [^''].
-	^aString copyFrom: index to: aString size
+	(str at: index - 1) = Directory pathSeparator ifTrue: [^''].
+	^str copyFrom: index
     ]
 
     FilePath class >> stripExtensionFrom: aString [
@@ -88,17 +94,19 @@ size and timestamps.'>
 	 answer the result."
 
 	<category: 'file name management'>
-	| index |
+	| index str |
 	aString isEmpty ifTrue: [^''].
-	index := aString findLast: 
+	str := aString.
+	Directory pathSeparator = $\ ifTrue: [ str := str copyReplacing: $/ with: $\ ].
+	index := str findLast: 
 			[:each | 
-			each = Directory pathSeparator ifTrue: [^aString].
+			each = Directory pathSeparator ifTrue: [^str].
 			each = $.].
 
 	"Special case foo, .foo and /bar/.foo, all of which have no extension"
-	index <= 1 ifTrue: [^aString].
-	(aString at: index - 1) = Directory pathSeparator ifTrue: [^aString].
-	^aString copyFrom: 1 to: index - 1
+	index <= 1 ifTrue: [^str].
+	(str at: index - 1) = Directory pathSeparator ifTrue: [^str].
+	^str copyFrom: 1 to: index - 1
     ]
 
     FilePath class >> stripPathFrom: aString [
@@ -106,10 +114,12 @@ size and timestamps.'>
 	 answer the file name plus extension."
 
 	<category: 'file name management'>
-	| index |
+	| index str |
 	aString isEmpty ifTrue: [^''].
+	str := aString.
+	Directory pathSeparator = $\ ifTrue: [ str := str copyReplacing: $/ with: $\ ].
 	index := aString findLast: [:each | each = Directory pathSeparator].
-	^aString copyFrom: index + 1 to: aString size
+	^str copyFrom: index + 1
     ]
 
     FilePath class >> pathFor: aString ifNone: aBlock [
@@ -119,12 +129,13 @@ size and timestamps.'>
 	 return the result."
 
 	<category: 'file name management'>
-	| index |
-	aString isEmpty ifTrue: [^aBlock value].
-	index := aString findLast: [:each | each = Directory pathSeparator].
+	| index str |
+	str := aString.
+	Directory pathSeparator = $\ ifTrue: [ str := str copyReplacing: $/ with: $\ ].
+	index := str findLast: [:each | each = Directory pathSeparator].
 	index = 0 ifTrue: [^aBlock value].
 	index = 1 ifTrue: [^Directory pathSeparatorString].
-	^aString copyFrom: 1 to: index - 1
+	^str copyFrom: 1 to: index - 1
     ]
 
     FilePath class >> pathFor: aString [
@@ -141,12 +152,14 @@ size and timestamps.'>
 	 answer the result as a directory name including the final slash."
 
 	<category: 'file name management'>
-	| index |
+	| index str |
 	aString isEmpty ifTrue: [^'./'].
-	index := aString findLast: [:each | each = Directory pathSeparator].
+	str := aString.
+	Directory pathSeparator = $\ ifTrue: [ str := str copyReplacing: $/ with: $\ ].
+	index := str findLast: [:each | each = Directory pathSeparator].
 	index = 0 ifTrue: [^'./'].
 	index = 1 ifTrue: [^Directory pathSeparatorString].
-	^aString copyFrom: 1 to: index
+	^str copyFrom: 1 to: index
     ]
 
     FilePath class >> isAbsolute: aString [
@@ -176,7 +189,7 @@ size and timestamps.'>
 	 to allow easy parsing"
 	canonical := Directory pathSeparator = $/ 
 		    ifTrue: [aString]
-		    ifFalse: [aString copyReplacing: $/ withObject: Directory pathSeparator].
+		    ifFalse: [aString copyReplacing: $/ withObject: $\].
 	(canonical subStrings: Directory pathSeparator) do: 
 		[:each | 
 		each = '.' 
@@ -219,10 +232,10 @@ size and timestamps.'>
 	isUnix := Directory pathSeparator = $/.
 	srcCanon := isUnix
 		    ifTrue: [srcName]
-		    ifFalse: [srcName copyReplacing: $/ withObject: Directory pathSeparator].
+		    ifFalse: [srcName copyReplacing: $/ withObject: $\].
 	destCanon := isUnix
 		    ifTrue: [destName]
-		    ifFalse: [destName copyReplacing: $/ withObject: Directory pathSeparator].
+		    ifFalse: [destName copyReplacing: $/ withObject: $\].
 
 	src := srcCanon subStrings: Directory pathSeparator.
 	dest := destCanon subStrings: Directory pathSeparator.
