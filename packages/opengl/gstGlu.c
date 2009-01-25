@@ -247,12 +247,16 @@ void gst_initModule_glu() {
   vm_proxy->defineCFunc ("gluBeginPolygon", gluBeginPolygon) ;
   vm_proxy->defineCFunc ("gluBeginSurface", gluBeginSurface) ;
   vm_proxy->defineCFunc ("gluBeginTrim", gluBeginTrim) ;
+#if 0
   vm_proxy->defineCFunc ("gluBuild1DMipmapLevels", gluBuild1DMipmapLevels) ;
-  vm_proxy->defineCFunc ("gluBuild1DMipmaps", gluBuild1DMipmaps) ;
   vm_proxy->defineCFunc ("gluBuild2DMipmapLevels", gluBuild2DMipmapLevels) ;
-  vm_proxy->defineCFunc ("gluBuild2DMipmaps", gluBuild2DMipmaps) ;
   vm_proxy->defineCFunc ("gluBuild3DMipmapLevels", gluBuild3DMipmapLevels) ;
+#endif
+  vm_proxy->defineCFunc ("gluBuild1DMipmaps", gluBuild1DMipmaps) ;
+  vm_proxy->defineCFunc ("gluBuild2DMipmaps", gluBuild2DMipmaps) ;
+#if 0
   vm_proxy->defineCFunc ("gluBuild3DMipmaps", gluBuild3DMipmaps) ;
+#endif
   vm_proxy->defineCFunc ("gluCheckExtension", glu_check_extension) ;
   vm_proxy->defineCFunc ("gluCylinder", gst_opengl_gluCylinder) ;
   vm_proxy->defineCFunc ("gluDeleteTess", gluDeleteTess) ;

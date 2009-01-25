@@ -55,6 +55,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef GLU_NURBS_BEGIN
 
 #define nil  vm_proxy->nilOOP
 
@@ -290,3 +291,11 @@ void gst_initModule_gluNurbs() {
 
   vm_proxy->defineCFunc ("gluNurbsConnectSignal", gst_opengl_gluNurbsConnectSignal);
 }
+
+#else
+
+/* Init module */
+void gst_initModule_gluNurbs() {
+}
+
+#endif

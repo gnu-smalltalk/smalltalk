@@ -1094,13 +1094,17 @@ gst_opengl_glCallLists( GLsizei first, GLsizei last, OOP listsOOP )
 void gst_initModule_gl()
 {
   vm_proxy->defineCFunc ("glAccum", glAccum);
+#if 0
   vm_proxy->defineCFunc ("glActiveTexture", glActiveTexture);
+#endif
   vm_proxy->defineCFunc ("glAlphaFunc", glAlphaFunc);
   vm_proxy->defineCFunc ("glArrayElement", glArrayElement);
   vm_proxy->defineCFunc ("glBegin", glBegin);
   vm_proxy->defineCFunc ("glBindTexture", glBindTexture);
   vm_proxy->defineCFunc ("glBitmap", gst_opengl_glBitmap);
+#if 0
   vm_proxy->defineCFunc ("glBlendEquation", glBlendEquation);
+#endif
   vm_proxy->defineCFunc ("glBlendFunc", glBlendFunc);
   vm_proxy->defineCFunc ("glCallList", glCallList); 
   vm_proxy->defineCFunc ("glCallLists", gst_opengl_glCallLists); 
@@ -1111,7 +1115,9 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glClearDepth", glClearDepth);
   vm_proxy->defineCFunc ("glClearIndex", glClearIndex);
   vm_proxy->defineCFunc ("glClearStencil", glClearStencil);
+#if 0
   vm_proxy->defineCFunc ("glClientActiveTexture", glClientActiveTexture);
+#endif
   vm_proxy->defineCFunc ("glClipPlane", glClipPlane);
   vm_proxy->defineCFunc ("glColor3b", glColor3b);
   vm_proxy->defineCFunc ("glColor3bv", glColor3bv);
@@ -1140,12 +1146,14 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glColorv", gst_opengl_glColorv);
   vm_proxy->defineCFunc ("glColorMask", glColorMask);
   vm_proxy->defineCFunc ("glColorMaterial", glColorMaterial);
+#if 0
   vm_proxy->defineCFunc ("glCompressedTexImage1D", glCompressedTexImage1D);
   vm_proxy->defineCFunc ("glCompressedTexImage2D", glCompressedTexImage2D);
   vm_proxy->defineCFunc ("glCompressedTexImage3D", glCompressedTexImage3D);
   vm_proxy->defineCFunc ("glCompressedTexSubImage1D", glCompressedTexSubImage1D);
   vm_proxy->defineCFunc ("glCompressedTexSubImage2D", glCompressedTexSubImage2D);
   vm_proxy->defineCFunc ("glCompressedTexSubImage3D", glCompressedTexSubImage3D);
+#endif
   vm_proxy->defineCFunc ("glCullFace", glCullFace);
   vm_proxy->defineCFunc ("glDeleteLists", glDeleteLists);
   vm_proxy->defineCFunc ("glDeleteTextures", gst_opengl_glDeleteTextures);
@@ -1189,7 +1197,9 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glGenTextures", gst_opengl_glGenTextures);
   // vm_proxy->defineCFunc ("glGetBooleanv", glGetBooleanv);
   vm_proxy->defineCFunc ("glGetClipPlane", glGetClipPlane);
+#if 0
   vm_proxy->defineCFunc ("glGetCompressedTexImage", glGetCompressedTexImage);
+#endif
   vm_proxy->defineCFunc ("glGetDoublev", gst_opengl_glGetDoublev); 
   vm_proxy->defineCFunc ("glGetError", glGetError);
   vm_proxy->defineCFunc ("glGetFloatv", gst_opengl_glGetFloatv);
@@ -1250,8 +1260,10 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glLoadMatrixf", glLoadMatrixf);
   vm_proxy->defineCFunc ("glLoadMatrixv", gst_opengl_glLoadMatrixv);
   vm_proxy->defineCFunc ("glLoadName", glLoadName);
+#if 0
   vm_proxy->defineCFunc ("glLoadTransposeMatrixd", glLoadTransposeMatrixd);
   vm_proxy->defineCFunc ("glLoadTransposeMatrixf", glLoadTransposeMatrixf);
+#endif
   vm_proxy->defineCFunc ("glLoadTransposeMatrixv", gst_opengl_glLoadTransposeMatrixv);
   vm_proxy->defineCFunc ("glLogicOp", glLogicOp);
   vm_proxy->defineCFunc ("glMapGrid1d", glMapGrid1d); 
@@ -1267,9 +1279,12 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glMultMatrixd", glMultMatrixd);
   vm_proxy->defineCFunc ("glMultMatrixf", glMultMatrixf);
   vm_proxy->defineCFunc ("glMultMatrixv", gst_opengl_glMultMatrixv);
+#if 0
   vm_proxy->defineCFunc ("glMultTransposeMatrixd", glMultTransposeMatrixd);
   vm_proxy->defineCFunc ("glMultTransposeMatrixf", glMultTransposeMatrixf);
+#endif
   vm_proxy->defineCFunc ("glMultTransposeMatrixv", gst_opengl_glMultTransposeMatrixv);
+#if 0
   vm_proxy->defineCFunc ("glMultiTexCoord1d", glMultiTexCoord1d);
   vm_proxy->defineCFunc ("glMultiTexCoord1dv", glMultiTexCoord1dv);
   vm_proxy->defineCFunc ("glMultiTexCoord1f", glMultiTexCoord1f);
@@ -1302,6 +1317,7 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glMultiTexCoord4iv", glMultiTexCoord4iv);
   vm_proxy->defineCFunc ("glMultiTexCoord4s", glMultiTexCoord4s);
   vm_proxy->defineCFunc ("glMultiTexCoord4sv", glMultiTexCoord4sv);
+#endif
   vm_proxy->defineCFunc ("glNewList", glNewList);
   vm_proxy->defineCFunc ("glNormal3b", glNormal3b);
   vm_proxy->defineCFunc ("glNormal3bv", glNormal3bv);
@@ -1368,12 +1384,16 @@ void gst_initModule_gl()
   vm_proxy->defineCFunc ("glRects", glRects);
   vm_proxy->defineCFunc ("glRectsv", glRectsv);
   vm_proxy->defineCFunc ("glRenderMode", glRenderMode);
+#if 0
   vm_proxy->defineCFunc ("glResetHistogram", glResetHistogram);
   vm_proxy->defineCFunc ("glResetMinmax", glResetMinmax);
+#endif
   vm_proxy->defineCFunc ("glRotatev", gst_opengl_glRotatev);
   vm_proxy->defineCFunc ("glRotated", glRotated);
   vm_proxy->defineCFunc ("glRotatef", glRotatef);
+#if 0
   vm_proxy->defineCFunc ("glSampleCoverage", glSampleCoverage);
+#endif
   vm_proxy->defineCFunc ("glScalev", gst_opengl_glScalev);
   vm_proxy->defineCFunc ("glScaled", glScaled);
   vm_proxy->defineCFunc ("glScalef", glScalef);

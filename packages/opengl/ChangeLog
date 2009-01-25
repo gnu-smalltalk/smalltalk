@@ -1,5 +1,12 @@
 2009-01-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* OpenGL.st: Temporarily disable extensions not in Win32.
+	* gstGl.c: Temporarily disable extensions not in Win32.
+	* gstGlu.c: Temporarily disable functions not in Win32.
+	* gstGluNurbs.c: Disable if not available.
+
+2009-01-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* gstGl.c: Fixes for missing GL_ARB_transpose_matrix,
 	GL_EXT_blend_minmax, GL_EXT_blend_color.
 	* gstGlu.c: Reimplement gluCheckExtension.

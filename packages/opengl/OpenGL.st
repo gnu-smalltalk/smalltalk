@@ -416,30 +416,6 @@ See OpenGL programming guide for more informations.'>
 	
     ]
 
-    loadTransposeMatrixf: aMatrix [
-	<category: 'Matrix manipulation'>
-	<cCall: 'glLoadTransposeMatrixf' retuning: #void args: #(#cObject)>
-	
-    ]
-
-    multTransposeMatrixf: aMatrix [
-	<category: 'Matrix manipulation'>
-	<cCall: 'glMultTransposeMatrixf' retuning: #void args: #(#cObject)>
-	
-    ]
-
-    loadTransposeMatrixd: aMatrix [
-	<category: 'Matrix manipulation'>
-	<cCall: 'glLoadTransposeMatrixd' retuning: #void args: #(#cObject)>
-	
-    ]
-
-    multTransposeMatrixd: aMatrix [
-	<category: 'Matrix manipulation'>
-	<cCall: 'glMultTransposeMatrixd' retuning: #void args: #(#cObject)>
-	
-    ]
-
     loadMatrix: aMatrix [
 	<category: 'Matrix manipulation'>
 	<cCall: 'glLoadMatrixv' retuning: #void args: #(#smalltalk)>
