@@ -1,5 +1,11 @@
 2009-01-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gstGl.c: Fixes for missing GL_ARB_transpose_matrix,
+	GL_EXT_blend_minmax, GL_EXT_blend_color.
+	* gstGlu.c: Reimplement gluCheckExtension.
+
+2009-01-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* gstGluTess.c: Fix typo.
 
 2008-08-27  Olivier Blanc  <olivier.blanc@laposte.net>

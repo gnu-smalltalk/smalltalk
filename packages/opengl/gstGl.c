@@ -217,7 +217,19 @@ gst_opengl_glMultTransposeMatrixv (OOP matrixOOP)
   if (!p)
     return GL_INVALID_VALUE;
 
+#ifdef GL_ARB_transpose_matrix
   glMultTransposeMatrixf (p);
+#else
+  {
+    GLfloat mt[16];
+    mt[0] = p[0]; mt[1] = p[4]; mt[2] = p[8]; mt[3] = p[12];
+    mt[4] = p[1]; mt[5] = p[5]; mt[6] = p[9]; mt[7] = p[13];
+    mt[8] = p[2]; mt[9] = p[6]; mt[10] = p[10]; mt[11] = p[14];
+    mt[12] = p[3]; mt[13] = p[7]; mt[14] = p[11]; mt[15] = p[15];
+    glMultMatrixf (mt);
+  }
+#endif
+ 
   return 0;
 }
 
@@ -323,7 +335,18 @@ gst_opengl_glLoadTransposeMatrixv (OOP matrixOOP)
   if (!p)
     return GL_INVALID_VALUE;
 
+#ifdef GL_ARB_transpose_matrix
   glLoadTransposeMatrixf (p);
+#else
+  {
+    GLfloat mt[16];
+    mt[0] = p[0]; mt[1] = p[4]; mt[2] = p[8]; mt[3] = p[12];
+    mt[4] = p[1]; mt[5] = p[5]; mt[6] = p[9]; mt[7] = p[13];
+    mt[8] = p[2]; mt[9] = p[6]; mt[10] = p[10]; mt[11] = p[14];
+    mt[12] = p[3]; mt[13] = p[7]; mt[14] = p[11]; mt[15] = p[15];
+    glLoadMatrixf (mt);
+  }
+#endif
   return 0;
 }
 
@@ -700,7 +723,9 @@ gst_opengl_glGetv_size (GLenum pname)
     case GL_AUX_BUFFERS:
     case GL_BLEND:
     case GL_BLEND_DST:
+#if GL_EXT_blend_minmax
     case GL_BLEND_EQUATION_EXT:
+#endif
     case GL_BLEND_SRC:
     case GL_BLUE_BIAS:
     case GL_BLUE_BITS:
@@ -869,7 +894,9 @@ gst_opengl_glGetv_size (GLenum pname)
       return 3;
 
     case GL_ACCUM_CLEAR_VALUE:
+#if GL_EXT_blend_color
     case GL_BLEND_COLOR_EXT:
+#endif
     case GL_COLOR_CLEAR_VALUE:
     case GL_COLOR_WRITEMASK:
     case GL_CURRENT_COLOR:

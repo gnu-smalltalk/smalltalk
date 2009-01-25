@@ -221,6 +221,24 @@ void gst_opengl_gluPartialDisk (GLenum draw, GLenum normals, GLenum orient,
   gluDeleteQuadric (q);
 }
 
+/* Not provided on MinGW, but easy enough to provide.  */
+GLboolean
+glu_check_extension(const char *extName, const char * extString)
+{
+  const int len = strlen (extName);
+  const char *c;
+
+  while (extString && (c = strstr (extString, extName)) != NULL)
+    {
+      if ((c == extString || c[-1] == ' ') && (c[len] == ' ' || c[len] == 0))
+	return GL_TRUE;
+
+      extString = strchr (c + len, ' ');
+    }
+
+  return GL_FALSE;
+}
+
 /* Init module */
 void gst_initModule_glu() {
 
@@ -235,7 +253,7 @@ void gst_initModule_glu() {
   vm_proxy->defineCFunc ("gluBuild2DMipmaps", gluBuild2DMipmaps) ;
   vm_proxy->defineCFunc ("gluBuild3DMipmapLevels", gluBuild3DMipmapLevels) ;
   vm_proxy->defineCFunc ("gluBuild3DMipmaps", gluBuild3DMipmaps) ;
-  vm_proxy->defineCFunc ("gluCheckExtension", gluCheckExtension) ;
+  vm_proxy->defineCFunc ("gluCheckExtension", glu_check_extension) ;
   vm_proxy->defineCFunc ("gluCylinder", gst_opengl_gluCylinder) ;
   vm_proxy->defineCFunc ("gluDeleteTess", gluDeleteTess) ;
   vm_proxy->defineCFunc ("gluDisk", gst_opengl_gluDisk) ;
