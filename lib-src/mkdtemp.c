@@ -1,36 +1,41 @@
+/* Copyright (C) 1998, 1999, 2001, 2005, 2006, 2007 Free Software Foundation, Inc.
+   This file is derived from the one in the GNU C Library.
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+#if !_LIBC
+# include <config.h>
 #endif
 
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#else
-# include <string.h>
-#endif /* HAVE_STRINGS_H */
-
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif /* HAVE_STDLIB_H */
-
-#ifdef HAVE_SYS_FILE_H
-# include <sys/file.h>
-#endif /* HAVE_SYS_FILE_H */
-
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-
-#ifdef HAVE_FCNTL_H
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 #include <fcntl.h>
-#endif /* HAVE_FCNTL_H */
-
+#include <sys/time.h>
 #include <limits.h>
-#include <errno.h>
+#include <unistd.h>
 
-/* Generate a unique temporary directory name from template.  The last six characters of
-   template must be XXXXXX and these are replaced with a string that makes the
-   filename unique. */
+#include <errno.h>
+#ifndef __set_errno
+# define __set_errno(Val) errno = (Val)
+#endif
+
+/* These are the characters used in temporary file names.  */
+static const char letters[] =
+"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 static int 
 my_mkdir (name, mode)
@@ -48,39 +53,80 @@ my_mkdir (name, mode)
   return retstat;
 }
 
-char*
+/* Generate a unique temporary file name from TEMPLATE.
+   The last six characters of TEMPLATE must be "XXXXXX";
+   they are replaced with a string that makes the file name unique.
+   Then open the file and return the template or NULL. */
+char *
 mkdtemp (template)
      char *template;
 {
-  int i, j, n, save_errno;
-  char *data = template + strlen(template) - 6;
-  save_errno = errno;
+  int len;
+  char *XXXXXX;
+  static long long value;
+  long long random_time_bits;
+  unsigned int count;
+  int save_errno = errno;
+  struct timeval tv;
 
-  if (data < template) {
-    errno = EINVAL;
-    return NULL;
-  }
+  /* A lower bound on the number of temporary files to attempt to
+     generate.  The maximum total number of temporary file names that
+     can exist for a given template is 62**6.  It should never be
+     necessary to try all these combinations.  Instead if a reasonable
+     number of names is tried (we define reasonable as 62**3) fail to
+     give the system administrator the chance to remove the problems.  */
+#define ATTEMPTS_MIN (62 * 62 * 62)
 
-  for (n = 0; n <= 5; n++)
-    if (data[n] != 'X') {
-      errno = EINVAL;
+  /* The number of times to attempt to generate a temporary file.  To
+     conform to POSIX, this must be no smaller than TMP_MAX.  */
+#if defined TMP_MAX
+  unsigned int attempts = ATTEMPTS_MIN < TMP_MAX ? TMP_MAX : ATTEMPS_MIN;
+#else
+  unsigned int attempts = ATTEMPTS_MIN;
+#endif
+
+  len = strlen (template);
+  if (len < 6 || strcmp (&template[len - 6], "XXXXXX"))
+    {
+      __set_errno (EINVAL);
       return NULL;
     }
 
-  for (i = 0; i < INT_MAX; i++) {
-    j = i ^ 827714841;             /* Base 36 DOSSUX :-) */
-    for (n = 5; n >= 0; n--) {
-      data[n] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" [j % 36];
-      j /= 36;
+  /* This is where the Xs start.  */
+  XXXXXX = &template[len - 6];
+
+  /* Get some more or less random data.  */
+  gettimeofday (&tv, NULL);
+  random_time_bits = ((long long) tv.tv_usec << 16) ^ tv.tv_sec;
+  value += random_time_bits ^ getpid ();
+
+  for (count = 0; count < attempts; value += 7777, ++count)
+    {
+      long long v = value;
+
+      /* Fill in the random bits.  */
+      XXXXXX[0] = letters[v % 62];
+      v /= 62;
+      XXXXXX[1] = letters[v % 62];
+      v /= 62;
+      XXXXXX[2] = letters[v % 62];
+      v /= 62;
+      XXXXXX[3] = letters[v % 62];
+      v /= 62;
+      XXXXXX[4] = letters[v % 62];
+      v /= 62;
+      XXXXXX[5] = letters[v % 62];
+
+      if (my_mkdir(template, 0700) == 0)
+	{
+	  __set_errno (save_errno);
+	  return template;
+	}
+      else if (errno != EEXIST)
+	return NULL;
     }
 
-    if (my_mkdir(template, 0700) == 0)
-    {
-        errno = save_errno;
-        return template;
-    }
-  }
-    
-  errno = EEXIST;
+  /* We got out of the loop because we ran out of combinations to try.  */
+  __set_errno (EEXIST);
   return NULL;
 }
