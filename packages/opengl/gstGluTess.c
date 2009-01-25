@@ -107,7 +107,7 @@ gst_glu_tessCallback_Tess_EdgeFlag_Data ( GLenum edge, void* data )
 static void
 gst_glu_tessCallback_Tess_End_Data (void* data )
 {
-  gst_glu_tessCallback_sendMessageTo((OOP)data, GLU_NURBS_END, NULL, 0);
+  gst_glu_tessCallback_sendMessageTo((OOP)data, GLU_TESS_END, NULL, 0);
 }
 
 static void
@@ -159,7 +159,7 @@ static struct gst_glu_callback gst_glu_tessCallbackFuncs[] = {
     (GLUfuncptr) gst_glu_tessCallback_Tess_EdgeFlag_Data },
   { GLU_TESS_COMBINE, GLU_TESS_COMBINE_DATA,
     (GLUfuncptr) gst_glu_tessCallback_Tess_Combine_Data },
-  { GLU_NURBS_END, GLU_NURBS_END_DATA,
+  { GLU_TESS_END, GLU_TESS_END_DATA,
     (GLUfuncptr) gst_glu_tessCallback_Tess_End_Data }
 };
 

@@ -1,3 +1,7 @@
+2009-01-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gstGluTess.c: Fix typo.
+
 2008-08-27  Olivier Blanc  <olivier.blanc@laposte.net>
 
 	* test/trim.st: New.
