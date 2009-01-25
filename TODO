@@ -1,30 +1,18 @@
-* 3.1
 
-* new File classes (done)
+* File classes
 ** maybe add renaming as in Squeak's Rio?
 
-* ROE (done)
+* OpenGL
+** use GetProcAddress
+** split nurbs into separate package
 
-* Seaside (done)
-
-* Swazoo (done)
-
-* TwistedPools (done)
-
-** garbage-collected storage for CObjects (done)
-
-* more libraries
-** Cairo (missing cross-platform checking)
-** SDL (missing likewise)
-** OpenGL (add some examples of SDL+OpenGL usage)
-
-* less likely
+* Bindings
 ** Expat
 ** gnutls
 ** 3D gnuplot?
 
 * maybe
-** DBI refactoring and prepared statements support
+** prepared statements support for other DBI backends
 ** cookies and redirects for HTTPClient
 
 
