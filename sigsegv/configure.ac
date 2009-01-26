@@ -628,7 +628,8 @@ else
     linux*) CFG_STACKVMA=stackvma-linux.c ;;
     freebsd*) CFG_STACKVMA=stackvma-freebsd.c ;;
     beos*) CFG_STACKVMA=stackvma-beos.c ;;
-    macos* | darwin*) CFG_STACKVMA=stackvma-mach.c ;;
+    macos* | darwin*)
+      AC_CHECK_FUNC([vm_region], [CFG_STACKVMA=stackvma-mach.c]) ;;
   esac
 fi
 if test -z "$CFG_STACKVMA" && test $ac_cv_func_mincore = yes; then
