@@ -1,3 +1,7 @@
+2009-01-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* main.c: Link help message to home page.
+
 2009-01-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/FilePath.st: Always canonicalize / path separators to \

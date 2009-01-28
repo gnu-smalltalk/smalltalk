@@ -104,7 +104,9 @@ static const char help_text[] =
   "\n"
   "\nIn the second form, the file after -f is the last loaded file; any"
   "\nparameter after that file is passed to the Smalltalk program."
-  "\n" "\nReport bugs to help-smalltalk@gnu.org\n";
+  "\n" "\nReport bugs to <help-smalltalk@gnu.org>"
+  "\nGNU Smalltalk home page: <http://smalltalk.gnu.org/>."
+  "\nGeneral help using GNU software: <http://www.gnu.org/gethelp/>.";
 
 static const char copyright_and_legal_stuff_text[] =
   "GNU Smalltalk version %s"
