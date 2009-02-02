@@ -1,3 +1,8 @@
+2009-02-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/HashedColl.st: Inline and eliminate #findIndex:ifAbsent:.
+	* kernel/WeakObjects.st: Likewise.  Suggested by Derek Zhou.
+
 2009-01-29  Paolo Bonzini  <bonzini@gnu.org>
 
 	* main.c: Link help message to home page.

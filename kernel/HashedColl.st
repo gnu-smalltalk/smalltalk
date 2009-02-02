@@ -88,11 +88,10 @@ give fast responses on their presence in the collection.'>
 	<category: 'accessing'>
 	| index |
 	newObject isNil ifTrue: [^newObject].
-	index := self findIndex: newObject
-		    ifAbsent: 
-			[:index | 
-			self incrementTally ifTrue: [self findIndex: newObject] ifFalse: [index]].
-	self primAt: index put: newObject.
+	index := self findIndex: newObject.
+	(self primAt: index) isNil ifTrue: [
+	    self incrementTally ifTrue: [index := self findIndex: newObject].
+	    self primAt: index put: newObject].
 	^newObject
     ]
 
@@ -352,17 +351,6 @@ give fast responses on their presence in the collection.'>
 
 	<category: 'private methods'>
 	self subclassResponsibility
-    ]
-
-    findIndex: anObject ifAbsent: aBlock [
-	"Finds the given object in the set and returns its index.  If the set
-	 doesn't contain the object, aBlock is evaluated passing the index,
-	 and the result of evaluating aBlock is returned."
-
-	<category: 'private methods'>
-	| index |
-	index := self findIndex: anObject.
-	^(self primAt: index) isNil ifTrue: [aBlock value: index] ifFalse: [index]
     ]
 
     findIndexOrNil: anObject [

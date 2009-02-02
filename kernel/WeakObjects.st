@@ -219,18 +219,17 @@ I am similar to a plain set, but my items are stored in a weak array;
 I track which of them are garbage collected and, as soon as I encounter
 one of them, I swiftly remove all.'>
 
-    add: anObject [
+    add: newObject [
 	"Add newObject to the set, if and only if the set doesn't already contain
-	 an occurrence of it. Don't fail if a duplicate is found. Answer anObject"
+	 an occurrence of it. Don't fail if a duplicate is found. Answer newObject"
 
 	<category: 'accessing'>
 	| index |
-	index := self findIndex: anObject
-		    ifAbsent: 
-			[:index | 
-			self incrementTally ifTrue: [self findIndex: anObject] ifFalse: [index]].
-	self primAt: index put: (self newAssociation: anObject).
-	^anObject
+	index := self findIndex: newObject.
+	(self primAt: index) isNil ifTrue: [
+	    self incrementTally ifTrue: [index := self findIndex: newObject].
+	    self primAt: index put: (self newAssociation: newObject)].
+	^newObject
     ]
 
     do: aBlock [
