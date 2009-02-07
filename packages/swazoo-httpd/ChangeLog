@@ -1,3 +1,7 @@
+2009-02-07  Nicolas Petton  <petton.nicolas@gmail.com>
+
+	* HTTP.st: Fix typo.
+
 2008-09-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Resources.st: Fix SpFilename extension.

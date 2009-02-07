@@ -235,7 +235,7 @@ SwazooBuffer is a subclass of ReadWriteStream, with additional #clear to empty b
 	| first index |
 	first := aBoundaryBytes first.
 	"fast test"
-	((self ptr + 1 to: endPtr) 
+	((ptr + 1 to: endPtr) 
 	    contains: [:inx | (collection at: inx) = first]) ifFalse: [^0].
 	"full or partial boundary on the edge of buffer test"
 	index := self indexOfBoundary: aBoundaryBytes.	"index of full, or partial boundary at the edge"
