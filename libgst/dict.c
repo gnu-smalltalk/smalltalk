@@ -1753,7 +1753,7 @@ _gst_identity_dictionary_at_put (OOP identityDictionaryOOP,
      if the key is present in the dictionary (because it will most
      likely resolve some collisions and make things faster).  */
 
-  if UNCOMMON (TO_INT (identityDictionary->tally) >
+  if UNCOMMON (TO_INT (identityDictionary->tally) >=
       	       TO_INT (identityDictionary->objSize) * 3 / 8)
     identityDictionary =
       _gst_grow_identity_dictionary (identityDictionaryOOP);

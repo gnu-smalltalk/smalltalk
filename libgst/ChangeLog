@@ -1,3 +1,7 @@
+2009-02-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/dict.c: Fix off-by-one in _gst_identity_dictionary_at_put.
+
 2009-01-23  Derek Zhou  <agonyzhou@comcast.net>
     
     	* libgst/oop.c: Allow shrinking the heap down to the eden's size.
