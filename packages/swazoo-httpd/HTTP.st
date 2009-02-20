@@ -326,15 +326,11 @@ Object subclass: HTTPConnection [
 	<category: 'serving'>
 	| interactionBlock |
 	interactionBlock := 
-		[SpExceptionContext 
-		    for: 
-			[[true] whileTrue: 
+		[[[true] whileTrue: 
 				[self getAndDispatchMessages.
 				Processor yield]]
-		    on: SpError
-		    do: 
-			[:ex | 
-			(Delay forMilliseconds: 50) wait.	"to finish sending, if any"
+		    ifCurtailed: 
+			[(Delay forMilliseconds: 50) wait.	"to finish sending, if any"
 			self close]].
 	self server isMultiThreading 
 	    ifTrue: 

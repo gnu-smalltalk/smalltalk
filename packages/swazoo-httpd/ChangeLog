@@ -1,3 +1,8 @@
+2009-02-19  Julian Fitzell <jfitzell@gmail.com>
+
+	* HTTP.st: Close the socket on any curtailing, not
+	just exceptions.
+
 2009-02-07  Nicolas Petton  <petton.nicolas@gmail.com>
 
 	* HTTP.st: Fix typo.
