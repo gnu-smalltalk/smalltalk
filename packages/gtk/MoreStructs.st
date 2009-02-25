@@ -76,8 +76,13 @@ CStruct subclass: GList [
     
     <category: 'GTK'>
     <comment: nil>
-    <declaration: #(#(#data #(#ptr #CObject ) ) #(#next #(#ptr #GSList ) )
-		    #(#prev #(#ptr #GSList ) ) )>
+    <declaration: #(#(#data #(#ptr #CObject ) ) #(#next #(#ptr #{GList} ) )
+		    #(#prev #(#ptr #{GList} ) ) )>
+
+    free [
+        <category: 'C call-outs'>
+        <cCall: 'g_list_free' returning: #void args: #(#self )>
+    ]
 ]
 
 
@@ -86,7 +91,12 @@ CStruct subclass: GSList [
     
     <category: 'GTK'>
     <comment: nil>
-    <declaration: #(#(#data #(#ptr #CObject ) ) #(#next #(#ptr #GSList ) ) )>
+    <declaration: #(#(#data #(#ptr #CObject ) ) #(#next #(#ptr #{GSList} ) ) )>
+
+    free [
+        <category: 'C call-outs'>
+        <cCall: 'g_slist_free' returning: #void args: #(#self )>
+    ]
 ]
 
 
