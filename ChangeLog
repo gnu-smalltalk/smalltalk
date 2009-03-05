@@ -1,3 +1,7 @@
+2009-03-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Transcript.st: Use a RecursionLock, not a Semaphore.
+
 2009-02-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/HashedColl.st: Inline and eliminate #findIndex:ifAbsent:.
