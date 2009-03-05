@@ -192,7 +192,7 @@ implements the global Transcript object.'>
 	"Private - Initialize the receiver's instance variables"
 
 	<category: 'private'>
-	semaphore := Semaphore forMutualExclusion
+	semaphore := RecursionLock new
     ]
 ]
 

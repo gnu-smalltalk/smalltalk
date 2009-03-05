@@ -1,3 +1,7 @@
+2009-03-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Transcript.st: Use a RecursionLock, not a Semaphore.
+
 2008-12-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/SortCollect.st: Fix #percolateUp bug.
