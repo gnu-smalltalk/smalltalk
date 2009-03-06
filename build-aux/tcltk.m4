@@ -27,9 +27,9 @@ if test "x$with_tcl" = x || test "$with_tcl" = yes; then
           test -f "$with_tcl/../../tclConfig.sh" && with_tcl="$with_tcl/../.." && break
           with_tcl=`echo "$with_tcl" | sed 's,\(.*\)/share,\1/lib,'`
           test -f "$with_tcl/tclConfig.sh" && break
-          with_tcl=`echo "$with_tcl" | sed 's,/[^/]*/\{0,1\}$,,'`
+          with_tcl=`echo "$with_tcl" | sed 's:/[^/]*/\{0,1\}$::'`
           test -f "$with_tcl/tclConfig.sh" && break
-          with_tcl=`echo "$with_tcl" | sed 's,/[^/]*/\{0,1\}$,,'`
+          with_tcl=`echo "$with_tcl" | sed 's:/[^/]*/\{0,1\}$::'`
           test -f "$with_tcl/tclConfig.sh" && break
         fi
 	with_tcl=no
