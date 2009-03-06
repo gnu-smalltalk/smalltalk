@@ -733,8 +733,7 @@ Object subclass: HTTPString [
 		char = $% 
 		    ifTrue: 
 			[targetStream 
-			    nextPut: (SpEnvironment integerFromString: '16r' , (sourceStream next: 2)) 
-				    asCharacter]
+			    nextPut: (Character value: (SpEnvironment integerFromString: '16r' , (sourceStream next: 2)))]
 		    ifFalse: 
 			[char == $+ 
 			    ifTrue: [targetStream nextPut: Character space]
