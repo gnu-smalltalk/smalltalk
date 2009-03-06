@@ -251,8 +251,8 @@ static const char standard_files[] = {
 
   /* More core classes */
   "Random.st\0"
-  "Transcript.st\0"
   "RecursionLock.st\0"
+  "Transcript.st\0"
   "Point.st\0"
   "Rectangle.st\0"
   "RunArray.st\0"

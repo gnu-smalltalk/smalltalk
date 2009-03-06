@@ -1,3 +1,7 @@
+2009-03-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/files.c: Load RecursionLock.st before Transcript.st.
+
 2009-01-19  Paolo Bonzini  <bonzini@gnu.org>
 	    Derek Zhou  <agonyzhou@comcast.net>
 
