@@ -90,18 +90,16 @@ Options:
 	    package := PackageLoader packageAt: arg.
 	    loader currentNamespace: package createNamespace.
             files := package fullPathsOf: package fileIns.
-	    files do: [ :each || file |
-	        file := FileStream open: each mode: FileStream read.
+	    files do: [ :each |
 	        loader
-	            parseSmalltalkStream: file
+	            parseSmalltalkStream: each readStream
 	            with: STInST.GSTFileInParser ].
 
 	    loader currentNamespace: defaultNamespace ].
 
         opt = 'file' ifTrue: [
-	    file := FileStream open: arg mode: FileStream read.
 	    loader
-	        parseSmalltalkStream: file
+	        parseSmalltalkStream: arg asFile readStream
 	        with: STInST.GSTFileInParser ].
 
         opt = 'output-format' ifTrue: [

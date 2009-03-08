@@ -1,3 +1,7 @@
+2009-03-08  Nicolas Petton  <petton.nicolas@gmail.com>
+
+	* scripts/GenDoc.st: Use FilePath>>#readStream where appropriate.
+
 2009-03-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Transcript.st: Use a RecursionLock, not a Semaphore.
