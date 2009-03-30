@@ -664,4 +664,8 @@ extern mst_Boolean _gst_init_dictionary_on_image_load (mst_Boolean prim_table_ma
 extern int _gst_resolve_primitive_name (char *name) 
   ATTRIBUTE_HIDDEN;
 
+/* Entry point for the profiler.  */
+extern void _gst_record_profile (OOP oldMethod, OOP newMethod, int ipOffset)
+  ATTRIBUTE_HIDDEN;
+
 #endif /* GST_DICT_H */

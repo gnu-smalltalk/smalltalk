@@ -160,12 +160,15 @@
 #define GET_CONTEXT_IP(ctx) 	TO_INT((ctx)->ipOffset)
 
 #define SET_THIS_METHOD(method, ipOffset) do {				\
-  gst_compiled_method _method = (gst_compiled_method)			\
+  OOP old_method_oop = _gst_this_method;                                \
+  gst_compiled_method _method = (gst_compiled_method)                   \
     OOP_TO_OBJ (_gst_this_method = (method));				\
 									\
   method_base = _method->bytecodes;					\
-  _gst_literals = OOP_TO_OBJ (_method->literals)->data;			\
+  _gst_literals = OOP_TO_OBJ (_method->literals)->data;                 \
   ip = method_base + (ipOffset);					\
+  if UNCOMMON (_gst_raw_profile)                                        \
+    _gst_record_profile (old_method_oop, method, ipOffset);             \
 } while(0)
 
 
@@ -301,11 +304,11 @@ _gst_send_message_internal (OOP sendSelector,
 
   newContext = activate_new_context (header.stack_depth, sendArgs);
   newContext->flags = MCF_IS_METHOD_CONTEXT;
-  SET_THIS_METHOD (methodOOP, 0);
-  _gst_self = receiver;
-
   /* push args and temps, set sp and _gst_temporaries */
   prepare_context ((gst_context_part) newContext, sendArgs, header.numTemps);
+  _gst_self = receiver;
+  SET_THIS_METHOD (methodOOP, 0);
+
 }
 
 void
@@ -388,11 +391,11 @@ _gst_send_method (OOP methodOOP)
   /* prepare new state */
   newContext = activate_new_context (header.stack_depth, sendArgs);
   newContext->flags = MCF_IS_METHOD_CONTEXT;
-  SET_THIS_METHOD (methodOOP, 0);
-  _gst_self = receiver;
-
   /* push args and temps, set sp and _gst_temporaries */
   prepare_context ((gst_context_part) newContext, sendArgs, header.numTemps);
+  _gst_self = receiver;
+  SET_THIS_METHOD (methodOOP, 0);
+
 }
 
 
@@ -424,11 +427,11 @@ send_block_value (int numArgs, int cull_up_to)
     (gst_block_context) activate_new_context (header.depth, numArgs);
   closure = (gst_block_closure) OOP_TO_OBJ (closureOOP);
   blockContext->outerContext = closure->outerContext;
+  /* push args and temps */
+  prepare_context ((gst_context_part) blockContext, numArgs, header.numTemps);
   _gst_self = closure->receiver;
   SET_THIS_METHOD (closure->block, 0);
 
-  /* push args and temps */
-  prepare_context ((gst_context_part) blockContext, numArgs, header.numTemps);
   return (false);
 }
 

@@ -5935,6 +5935,30 @@ primitive VMpr_ObjectMemory_gcPrimitives :
   PRIM_SUCCEEDED;
 }
 
+/* SystemDictionary profilerOn */
+
+primitive VMpr_SystemDictionary_rawProfile [succeed]
+{
+  OOP oop1 = POP_OOP ();
+  if (_gst_raw_profile)
+    {
+      _gst_record_profile (_gst_this_method, NULL, -1);
+      SET_STACKTOP (_gst_raw_profile);
+      _gst_unregister_oop (_gst_raw_profile);
+    }
+  else
+    SET_STACKTOP (_gst_nil_oop);
+  if (IS_NIL (oop1))
+    _gst_raw_profile = NULL;
+  else
+    {
+      _gst_raw_profile = oop1;
+      _gst_register_oop (_gst_raw_profile);
+      _gst_saved_bytecode_counter = _gst_bytecode_counter;
+    }
+  PRIM_SUCCEEDED;
+}
+
 
 #undef INT_BIN_OP
 #undef BOOL_BIN_OP

@@ -449,6 +449,7 @@ GST_PACKAGE_ENABLE([LibSDL_ttf], [sdl/libsdl_ttf],
 GST_PACKAGE_ENABLE([Compiler], [stinst/compiler])
 GST_PACKAGE_ENABLE([Parser], [stinst/parser])
 GST_PACKAGE_ENABLE([ClassPublisher], [stinst/doc])
+GST_PACKAGE_ENABLE([ProfileTools], [profile])
 GST_PACKAGE_ENABLE([ROE], [roe])
 GST_PACKAGE_ENABLE([Seaside-Core], [seaside/core])
 GST_PACKAGE_ENABLE([Seaside-Development], [seaside/dev])

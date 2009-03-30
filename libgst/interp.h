@@ -301,6 +301,14 @@ extern OOP _gst_self
 extern OOP _gst_this_context_oop 
   ATTRIBUTE_HIDDEN;
 
+/* The OOP for an IdentityDictionary that stores the raw profile. */
+extern OOP _gst_raw_profile
+  ATTRIBUTE_HIDDEN;
+
+/* A bytecode counter value used while profiling. */
+extern unsigned long _gst_saved_bytecode_counter
+  ATTRIBUTE_HIDDEN;
+
 /* The type used to hold the instruction pointer.  For the JIT, this
    is an offset from a location which is deemed the `base' of
    native-compiled methods (because this way it will fit in a

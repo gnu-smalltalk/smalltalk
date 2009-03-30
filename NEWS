@@ -2,8 +2,15 @@ List of user-visible changes in GNU Smalltalk
 
 NEWS FROM 3.1 TO 3.1.1
 
+o   Fixes in garbage collection heuristics provide improved performance on
+    programs allocating many long-lived objects.  Contributed by Derek Zhou.
+
 o   New FilePath methods #owner:, #group:, #owner:group: allow setting
     a file's owner and group.
+
+o   New ProfilerTools package for callgraph profiling of Smalltalk programs.
+    A companion gst-profile tool will create profiles in callgrind-compatible
+    format.  Contributed by Derek Zhou.
 
 o   Process-local variables are now stored in an IdentityDictionary rather
     than a LookupTable.

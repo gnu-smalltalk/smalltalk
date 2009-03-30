@@ -201,6 +201,12 @@ static ssize_t identity_dictionary_find_key (OOP identityDictionaryOOP,
 static size_t identity_dictionary_find_key_or_nil (OOP identityDictionaryOOP,
 						   OOP keyOOP);
 
+/* assume the value is an integer already or key does not exist, increase the
+   value by inc or set the value to inc */
+static int _gst_identity_dictionary_at_inc (OOP identityDictionaryOOP,
+                                            OOP keyOOP,
+                                            int inc);
+
 /* Create a new instance of CLASSOOP (an IdentityDictionary subclass)
    and answer it.  */
 static OOP identity_dictionary_new (OOP classOOP,
@@ -568,7 +574,7 @@ static const class_definition class_info[] = {
    "WeakValueIdentityDictionary", NULL, NULL, NULL },
 
   {&_gst_identity_dictionary_class, &_gst_lookup_table_class,
-   GST_ISP_POINTER, false, 0,
+   GST_ISP_POINTER, true, 0,
    "IdentityDictionary", NULL, NULL, NULL },
 
   {&_gst_method_dictionary_class, &_gst_lookup_table_class,
@@ -2180,4 +2186,84 @@ _gst_set_file_stream_file (OOP fileStreamOOP,
   fileStream->isPipe =
     isPipe == -1 ? _gst_nil_oop :
     isPipe ? _gst_true_oop : _gst_false_oop;
+}
+
+/* Profiling callback.  The profiler use a simple data structure
+   to store the cost and the call graph, which is a 2 level
+   IdentityDictionary. First level keys are the CompiledMethod or
+   CompiledBlock, and the second level key is the CompiledMethod or
+   CompiledBlock that it calls. Values are the number of calls made. There
+   is a special key "true" in the second level whose corresponding value
+   is the accumulative cost for this method.  */
+
+void 
+_gst_record_profile (OOP oldMethod, OOP newMethod, int ipOffset)
+{
+  OOP profile;
+  inc_ptr incPtr;
+
+  /* Protect oldMethod from GC here to avoid complicating the fast path
+     in interp-bc.inl.  */
+  incPtr = INC_SAVE_POINTER ();
+  INC_ADD_OOP (oldMethod);
+
+  profile = _gst_identity_dictionary_at (_gst_raw_profile, oldMethod);
+  if UNCOMMON (IS_NIL (profile))
+    {
+      profile = identity_dictionary_new (_gst_identity_dictionary_class, 6);
+      _gst_identity_dictionary_at_put (_gst_raw_profile, oldMethod, 
+                                       profile);
+    }
+
+  _gst_identity_dictionary_at_inc (profile, _gst_true_oop, 
+                                   _gst_bytecode_counter
+				   - _gst_saved_bytecode_counter);
+  _gst_saved_bytecode_counter = _gst_bytecode_counter;
+
+  /* if ipOffset is 0 then it is a callin and not a return, so we also record 
+     the call.  */
+  if (ipOffset == 0) 
+    _gst_identity_dictionary_at_inc (profile, newMethod, 1);
+
+  INC_RESTORE_POINTER (incPtr);
+}
+
+/* Assume the value for KEYOOP is an integer already or the key does not exist;
+   increase the value by INC or set it to INC if it does not exist.  */
+int
+_gst_identity_dictionary_at_inc (OOP identityDictionaryOOP,
+				 OOP keyOOP,
+				 int inc)
+{
+  gst_identity_dictionary identityDictionary;
+  intptr_t index;
+  int oldValue;
+
+  identityDictionary =
+    (gst_identity_dictionary) OOP_TO_OBJ (identityDictionaryOOP);
+
+  /* Never make dictionaries too full! For simplicity, we do this even
+     if the key is present in the dictionary (because it will most
+     likely resolve some collisions and make things faster).  */
+
+  if UNCOMMON (TO_INT (identityDictionary->tally) >=
+      	       TO_INT (identityDictionary->objSize) * 3 / 8)
+    identityDictionary =
+      _gst_grow_identity_dictionary (identityDictionaryOOP);
+
+  index =
+    identity_dictionary_find_key_or_nil (identityDictionaryOOP, keyOOP);
+
+  if UNCOMMON (IS_NIL (identityDictionary->keys[index - 1]))
+    {
+      identityDictionary->tally = INCR_INT (identityDictionary->tally);
+      oldValue = 0;
+    }
+  else 
+    oldValue = TO_INT(identityDictionary->keys[index]);
+  
+  identityDictionary->keys[index - 1] = keyOOP;
+  identityDictionary->keys[index] = FROM_INT(inc+oldValue);
+
+  return (oldValue);
 }

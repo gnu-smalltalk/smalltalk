@@ -242,5 +242,13 @@ My instance also helps keep track of dependencies between objects.'>
 	<category: 'testing'>
 	^true
     ]
+
+    rawProfile: anIdentityDictionary [
+	"Set the raw profile to be anIdentityDictionary and return the
+         old one."
+
+	<category: 'profiling'>
+	<primitive: VMpr_SystemDictionary_rawProfile>
+    ]
 ]
 

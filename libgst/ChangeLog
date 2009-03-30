@@ -1,3 +1,19 @@
+2009-03-30  Derek Zhou  <agonyzhou@comcast.net>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Do not reset counters if profiling is on.
+
+	* libgst/interp-bc.inl: Make state consistent when
+	profiling callbacks might be called.
+	* libgst/interp.c: Likewise.
+ 
+	* libgst/dict.c: Add profiling callback.
+	* libgst/dict.h: Add profiling callback.
+	* libgst/interp-bc.inl: Call it.
+	* libgst/interp.c: Declare variables.
+	* libgst/interp.h: Declare variables.
+	* libgst/prims.def: Add profiling primitive.
+
 2009-03-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/files.c: Load RecursionLock.st before Transcript.st.

@@ -135,6 +135,13 @@ struct tool tools[] = {
 	-I|--image-file: --kernel-directory:",
     NULL
   },
+  {
+    "gst-profile", "scripts/Profile.st",
+    "-f|--file: -e|--eval: -o|--output: -h|--help --version \
+	--no-separate-blocks",
+    NULL
+  },
+
   { NULL, NULL, NULL, NULL }
 };
 

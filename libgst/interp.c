@@ -171,6 +171,12 @@ unsigned long _gst_cache_misses = 0;
 /* The number of cache lookups - either hits or misses */
 unsigned long _gst_sample_counter = 0;
 
+/* The OOP for an IdentityDictionary that stores the raw profile.  */
+OOP _gst_raw_profile = NULL;
+
+/* A bytecode counter value used while profiling. */
+unsigned long _gst_saved_bytecode_counter = 0;
+
 #ifdef ENABLE_JIT_TRANSLATION
 #define method_base		0
 char *native_ip = NULL;
@@ -1336,8 +1342,8 @@ resume_suspended_context (OOP oop)
 
   _gst_this_context_oop = oop;
   thisContext = (gst_method_context) OOP_TO_OBJ (oop);
-  SET_THIS_METHOD (thisContext->method, GET_CONTEXT_IP (thisContext));
   sp = thisContext->contextStack + TO_INT (thisContext->spOffset);
+  SET_THIS_METHOD (thisContext->method, GET_CONTEXT_IP (thisContext));
 
 #if ENABLE_JIT_TRANSLATION
   ip = TO_INT (thisContext->ipOffset);

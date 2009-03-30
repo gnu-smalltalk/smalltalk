@@ -674,10 +674,11 @@ _gst_execute_statements (tree_node temps,
   incPtr = INC_SAVE_POINTER ();
   INC_ADD_OOP (methodOOP);
 
-  _gst_bytecode_counter = _gst_primitives_executed =
-    _gst_self_returns = _gst_inst_var_returns = _gst_literal_returns =
-    0;
-  _gst_sample_counter = 0;
+  if (!_gst_raw_profile)
+    _gst_bytecode_counter = _gst_primitives_executed =
+      _gst_self_returns = _gst_inst_var_returns = _gst_literal_returns =
+      _gst_sample_counter = 0;
+
   startTime = _gst_get_milli_time ();
 #ifdef HAVE_GETRUSAGE
   getrusage (RUSAGE_SELF, &startRusage);

@@ -9,7 +9,7 @@ HTML_IMAGES = images/backon.png images/back.png images/blankon.png \
 	images/toc.png images/upon.png images/up.png
 
 dist_man_MANS = gst.1 gst-load.1 gst-package.1 gst-sunit.1 gst-config.1 \
-	gst-convert.1 gst-doc.1
+	gst-convert.1 gst-doc.1 gst-profile.1
 
 HELP2MAN = $(top_srcdir)/build-aux/help2man -p gst
 

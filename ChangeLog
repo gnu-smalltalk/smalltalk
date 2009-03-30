@@ -1,3 +1,12 @@
+2009-03-30  Derek Zhou  <agonyzhou@comcast.net>
+	    Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Profile.st: New.
+	* gst-tool.c: Add its options.
+
+	* kernel/CompildCode.st: Add #method.
+	* kernel/SysDict.st: Add profiling primitive.
+
 2009-03-08  Nicolas Petton  <petton.nicolas@gmail.com>
 
 	* scripts/GenDoc.st: Use FilePath>>#readStream where appropriate.

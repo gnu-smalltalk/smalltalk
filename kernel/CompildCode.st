@@ -339,6 +339,13 @@ superclass for blocks and methods'>
 	self subclassResponsibility
     ]
 
+    method [
+	"Answer the parent method for the receiver, or self if it is a method."
+
+	<category: 'accessing'>
+	^self
+    ]
+
     numLiterals [
 	"Answer the number of literals for the receiver"
 
