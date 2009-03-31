@@ -59,6 +59,11 @@ $(srcdir)/gst-doc.1: $(top_srcdir)/scripts/GenDoc.st $(top_srcdir)/configure.ac
 	  --name "GNU Smalltalk documentation generator" \
 	  "$(top_builddir)/gst-tool gst-doc $(GST_TOOL_ARGS)" >$@
 
+$(srcdir)/gst-profile.1: $(top_srcdir)/scripts/Profile.st $(top_srcdir)/configure.ac
+	$(HELP2MAN) \
+	  --name "GNU Smalltalk profiler" \
+	  "$(top_builddir)/gst-tool gst-doc $(GST_TOOL_ARGS)" >$@
+
 $(srcdir)/gst.1: $(top_srcdir)/main.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "the GNU Smalltalk virtual machine" $(top_builddir)/gst >$@
