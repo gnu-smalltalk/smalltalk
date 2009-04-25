@@ -414,6 +414,7 @@ Options:
                               converted output file
         --help                display this message and exit
         --version             print version information and exit
+
 ' % {formats keys asSortedCollection fold: [ :a :b | a, ', ', b ]}.
 
     Smalltalk

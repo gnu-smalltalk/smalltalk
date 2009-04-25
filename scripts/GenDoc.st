@@ -50,6 +50,7 @@ Options:
     -F --output-format=KIND   use the given publisher (HTML or default=Texinfo)
     -h --help             show this message
        --version          print version information and exit
+
 '.
 
 [

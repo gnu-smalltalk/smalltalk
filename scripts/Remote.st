@@ -99,6 +99,7 @@ Options:
 If a remote login name is given, gst-remote will use the SSH environment
 variable (if present) to launch commands remotely.  Netcat (nc) should be
 available in the PATH of the remote machine.
+
 '.
 
 "Parse the command-line arguments."

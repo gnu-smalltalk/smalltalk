@@ -1,3 +1,14 @@
+2009-04-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* main.c: Fix newlines at end of --help messages.
+	* scripts/Convert.st: Fix newlines at end of --help messages.
+	* scripts/GenDoc.st: Fix newlines at end of --help messages.
+	* scripts/Load.st: Fix newlines at end of --help messages.
+	* scripts/Package.st: Fix newlines at end of --help messages.
+	* scripts/Profile.st: Fix newlines at end of --help messages.
+	* scripts/Remote.st: Fix newlines at end of --help messages.
+	* scripts/Test.st: Fix newlines at end of --help messages.
+
 2009-03-30  Derek Zhou  <agonyzhou@comcast.net>
 	    Paolo Bonzini  <bonzini@gnu.org>
 

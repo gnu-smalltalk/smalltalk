@@ -107,10 +107,11 @@ static const char help_text[] =
   "\n" "\nReport bugs to <help-smalltalk@gnu.org>"
   "\nGNU Smalltalk home page: <http://smalltalk.gnu.org/>."
   "\nGeneral help using GNU software: <http://www.gnu.org/gethelp/>.";
+  "\n\n"
 
 static const char copyright_and_legal_stuff_text[] =
   "GNU Smalltalk version %s"
-  "\nCopyright 2006 Free Software Foundation, Inc."
+  "\nCopyright 2009 Free Software Foundation, Inc."
   "\nWritten by Steve Byrne (sbb@gnu.org) and Paolo Bonzini (bonzini@gnu.org)"
   "\n"
   "\nGNU Smalltalk comes with NO WARRANTY, to the extent permitted by law."
@@ -118,8 +119,9 @@ static const char copyright_and_legal_stuff_text[] =
   "\nGNU General Public License.  For more information, see the file named"
   "\nCOPYING."
   "\n"
-  "\nUsing default kernel path: %s" "\nUsing default image path: %s"
-  "\n";
+  "\nUsing default kernel path: %s"
+  "\nUsing default image path: %s"
+  "\n\n";
 
 #define OPT_KERNEL_DIR 2
 #define OPT_NO_USER 3

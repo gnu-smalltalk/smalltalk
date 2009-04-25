@@ -700,6 +700,7 @@ access to the GNU Smalltalk image directory, and merges the XML package
 files on the command line with that file.
 
 The default target directory is ', Directory image name, '
+
 '.
 
 [

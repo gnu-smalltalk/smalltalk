@@ -49,6 +49,7 @@ Options:
        --kernel-dir=PATH  use the specified kernel directory
     -h --help             show this message and exit
     -v --version          print version information and exit
+
 '.
 
 "Parse the command-line arguments."
