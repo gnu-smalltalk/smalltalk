@@ -106,8 +106,8 @@ static const char help_text[] =
   "\nparameter after that file is passed to the Smalltalk program."
   "\n" "\nReport bugs to <help-smalltalk@gnu.org>"
   "\nGNU Smalltalk home page: <http://smalltalk.gnu.org/>."
-  "\nGeneral help using GNU software: <http://www.gnu.org/gethelp/>.";
-  "\n\n"
+  "\nGeneral help using GNU software: <http://www.gnu.org/gethelp/>."
+  "\n\n";
 
 static const char copyright_and_legal_stuff_text[] =
   "GNU Smalltalk version %s"

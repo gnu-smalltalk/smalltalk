@@ -1,3 +1,7 @@
+2009-04-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* main.c: Fix for real.
+
 2009-04-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* main.c: Fix newlines at end of --help messages.
