@@ -1,5 +1,9 @@
 2009-04-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* MoreFuncs.st: Add functions to fire signals.
+
+2009-04-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* GtkImpl.st: Use gtk_*_iter_copy to allocate new iterators.
 	* funcs.awk: Wrap gtk_*_free to avoid freeing GC-allocated objects.
 
