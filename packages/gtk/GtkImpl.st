@@ -172,9 +172,16 @@ GdkRectangle extend [
 
 GtkTreeIter class extend [
 
+    Prototype := nil.
+
+    gcNew [
+	^self type gcNew
+    ]
+
     new [
 	<category: 'instance creation'>
-	^(self type new)
+        Prototype isNil ifTrue: [ Prototype := self type gcNew ].
+	^Prototype copy
 	    addToBeFinalized;
 	    yourself
     ]
@@ -185,9 +192,16 @@ GtkTreeIter class extend [
 
 GtkTextIter class extend [
 
+    Prototype := nil.
+
+    gcNew [
+	^self type gcNew
+    ]
+
     new [
 	<category: 'instance creation'>
-	^(self type new)
+        Prototype isNil ifTrue: [ Prototype := self type gcNew ].
+	^Prototype copy
 	    addToBeFinalized;
 	    yourself
     ]

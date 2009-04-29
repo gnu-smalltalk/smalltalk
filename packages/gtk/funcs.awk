@@ -308,6 +308,13 @@ match_function_first_line($0) {
   # print the declaration
 
   print "!" prefixClassName (self ? "" : " class") " methodsFor: 'C call-outs'!"
+  if (decl == "free") {
+      print "free"
+      print "    (self isAbsolute and: [ self address > 0 ])"
+      print "\tifTrue: [ self primFree. self address: 0 ]!"
+      decl = "primFree"
+  }
+
   print decl
   print "    <cCall: '" cFuncName "' returning: " retType
   print "\targs: #(" argdecl " )>! !\n"
