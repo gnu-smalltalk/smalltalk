@@ -20,4 +20,5 @@
   <file>magritte-gst.st</file>
   <file>magritte-model.st</file>
   <file>PORTING</file>
+  <file>ChangeLog</file>
 </package>

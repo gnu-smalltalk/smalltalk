@@ -1,0 +1,4 @@
+2009-05-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* magritte-model.st: Merge Magritte-Model-lr.345 (which was
+	actually proposed by me on the help-smalltalk mailing list).

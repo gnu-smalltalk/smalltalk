@@ -5507,13 +5507,9 @@ MAGraphVisitor subclass: MAValidatorVisitor [
 	<category: 'visiting-descriptions'>
 	[self validate: self object using: aDescription] on: MAValidationError
 	    do: 
-		[:err | 
-		err isResumable 
-		    ifTrue: [err pass]
-		    ifFalse: 
-			[err
-			    beResumable;
-			    signal]]
+		[:err |
+		err isResumable ifFalse: [err beResumable].
+		err pass]
     ]
 
     visitTableDescription: aDescription [
