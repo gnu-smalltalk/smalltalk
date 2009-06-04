@@ -15,7 +15,8 @@ UNRAR=$DRAR/unrar # Prefer unrar (freeware)
 
 mcrarfs_list ()
 {
-     $UNRAR v -c- "$1" | gawk -v uid=${UID-0} '
+     uid=`id -ru 2>/dev/null` || uid=0
+     $UNRAR v -c- "$1" | gawk -v uid=$uid '
 BEGIN { flag=0; date="JanFebMarAprMayJunJulAugSepOctNovDec" }
 /^-------/ { flag++; if (flag > 1) exit 0; next }
 {

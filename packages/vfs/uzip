@@ -19,9 +19,10 @@ XZIPINFO="$DZIP/unzip -Z"
 mczipfs_list ()
 {
 DOZIPINFO=no
+uid=`id -ru 2>/dev/null` || uid=0
 if test -n "$XZIPINFO"; then
     DOZIPINFO=
-    $XZIPINFO -l "$1" | gawk -v uid=${UID-0} -v zipfile="$1" -v xunzip=${XUNZIP-unzip} '
+    $XZIPINFO -l "$1" | gawk -v uid=$uid -v zipfile="$1" -v xunzip=${XUNZIP-unzip} '
 /^Archive/ { next }
 /^[0-9]*\ file/ { next }
 /unx/ { 
@@ -55,7 +56,7 @@ exit 214
     fi
 fi
 if test -n "$DOZIPINFO"; then
-    $XUNZIP -v "$1" | gawk -v uid=${UID-0} '
+    $XUNZIP -v "$1" | gawk -v uid=$uid '
 BEGIN { hyphens=0 }
 /^Archive/ { next }
 /^\ Length/ { next }
