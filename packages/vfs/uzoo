@@ -13,7 +13,8 @@ ZOO=zoo
 
 mczoofs_list ()
 {
-    $ZOO l $1 | gawk -v uid=${UID-0} '
+    uid=`id -ru 2>/dev/null` || uid=0
+    $ZOO l $1 | gawk -v uid=$uid '
 BEGIN { hyphens=0 }
 /^---/ { if (hyphens > 0) exit 0; hyphens=1; next }
 /^[^\ ]/ { next }
