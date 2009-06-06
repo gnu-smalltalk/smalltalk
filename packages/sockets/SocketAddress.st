@@ -128,7 +128,8 @@ and vice versa.'>
 
 	"Override with resolved addresses."
 	all := self allByName: self localHostName.
-	all do: [ :each | each class anyLocalAddress: each ]
+	all isNil
+	    ifFalse: [all do: [ :each | each class anyLocalAddress: each ]]
     ]
 
     SocketAddress class >> flush [

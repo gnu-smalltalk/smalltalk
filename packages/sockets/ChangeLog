@@ -1,3 +1,7 @@
+2009-06-06  Paolo Bonzini  <bonzini@gnu.org>
+
+	* SocketAddress.st: Fix case where the machine is disconnected.
+
 2008-12-30  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sockets.c: Discard EPIPE too, it is caught by POLLHUP.
