@@ -255,7 +255,9 @@ STInST.STFileInParser subclass: GSTFileInParser [
         node isAssignment
             ifFalse: [self parserError: 'expected assignment'].
         
-        self skipExpectedToken: $. .
+        (self skipToken: $.) ifFalse: [
+	    (currentToken value = $]) ifFalse: [
+		self parserError: 'expected . or ]']].
 
         name := RBLiteralNode value: (node variable name asSymbol).
         node := self makeSequenceNode: node.
