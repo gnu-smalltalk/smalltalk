@@ -268,7 +268,7 @@ STInST.STFileInParser subclass: GSTFileInParser [
 		self parserError: 'expected . or ]']].
 
         name := RBLiteralNode value: (node variable name asSymbol).
-        node := self makeSequenceNode: node.
+        node := self makeSequenceNode: node value.
         node := RBBlockNode body: node.
         
         stmt := RBMessageNode 
