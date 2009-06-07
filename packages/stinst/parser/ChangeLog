@@ -1,5 +1,9 @@
 2009-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* GSTParser.st: Fix compilation of class variables.
+
+2009-06-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* GSTParser.st: Accept no period at end of class variable if before ].
 
 2008-08-13  Paolo Bonzini  <bonzini@gnu.org>
