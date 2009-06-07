@@ -1197,7 +1197,7 @@ methodCategory
 !
 
 methodSourceCode
-    ^node source
+    ^node source asSourceCode
 !
 
 selector
@@ -1205,8 +1205,7 @@ selector
 !
 
 methodSourceString
-    "FIXME: this relies on the source code being a MappedCollection."
-    ^node source domain asString
+    ^node source asString
 ! !
 
 !LoadedMethod methodsFor: 'empty stubs'!

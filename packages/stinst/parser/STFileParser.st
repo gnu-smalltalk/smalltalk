@@ -27,7 +27,6 @@
 |
  ======================================================================"
 
-
 
 RBParser subclass: STFileParser [
     | driver |
@@ -149,8 +148,7 @@ RBParser subclass: STFileParser [
 	    ifFalse: 
 		[method := RBMethodNode selectorParts: #() arguments: #().
 		node parent: method].
-	source := scanner stream copyFrom: start to: stop.
-	source := MappedCollection collection: source map: (1 - start to: stop).
+	source := MappedSourceCode on: scanner from: start to: stop.
 	method source: source.
 	^node
     ]
@@ -377,6 +375,7 @@ PositionableStream extend [
 		self species name}
     ]
 
+
     segmentFrom: startPos to: endPos [
 	"Answer an object that, when sent #asString, will yield the result
 	 of sending `copyFrom: startPos to: endPos' to the receiver"
@@ -388,7 +387,18 @@ PositionableStream extend [
 ]
 
 
-
+Stream extend [
+
+    segmentFrom: startPos to: endPos [
+	"Answer an object that, when sent #asString, will yield the result
+	 of sending `copyFrom: startPos to: endPos' to the receiver"
+
+	<category: 'compiling'>
+	^nil
+    ]
+
+]
+
 FileStream extend [
 
     segmentFrom: startPos to: endPos [
@@ -396,11 +406,54 @@ FileStream extend [
 	 of sending `copyFrom: startPos to: endPos' to the receiver"
 
 	<category: 'compiling'>
+	self isPipe ifTrue: [^nil].
 	^FileSegment 
 	    on: self file
 	    startingAt: startPos
 	    for: endPos - startPos + 1
     ]
 
+]
+
+MappedCollection subclass: MappedSourceCode [
+    <comment: 'This class is a hack.  It allows the positions in the tokens
+and in the comments to be file-based, while at the same time only the source
+code of the method is kept in memory.'>
+    <category: 'Refactory-Parser'>
+
+    | sourceCode |
+
+    MappedSourceCode class >> on: aScanner from: start to: stop [
+	<category: 'instance creation'>
+	| collection coll sourceCode |
+	collection := aScanner stream copyFrom: start to: stop.
+	coll := self collection: collection map: (1 - start to: stop).
+	sourceCode := (aScanner stream segmentFrom: start to: stop)
+			ifNil: [collection].
+	coll sourceCode: sourceCode.
+	^coll
+    ]
+
+    asString [
+	<category: 'conversion'>
+	^self domain asString
+    ]
+
+    asSourceCode [
+	<category: 'conversion'>
+	^sourceCode
+    ]
+
+    sourceCode: anObject [
+	<category: 'private - initialization'>
+	sourceCode := anObject
+    ]
+]
+
+Object extend [
+    asSourceCode [
+	<category: 'private-compilation'>
+	^self
+    ]
 ]
 

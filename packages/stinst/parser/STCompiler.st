@@ -441,7 +441,7 @@ indexed'' bytecode. The resulting stream is
 		    bytecodes: bytecodes contents
 		    depth: maxDepth + symTable numTemps.
 	(method descriptor)
-	    setSourceCode: node source;
+	    setSourceCode: node source asSourceCode;
 	    methodClass: UndefinedObject;
 	    selector: #executeStatements.
 	^method
@@ -465,7 +465,7 @@ indexed'' bytecode. The resulting stream is
 		    bytecodes: bytecodes contents
 		    depth: maxDepth + node body temporaries size + node arguments size.
 	(method descriptor)
-	    setSourceCode: node source;
+	    setSourceCode: node source asSourceCode;
 	    methodClass: symTable environment;
 	    selector: node selector.
 	method attributesDo: 

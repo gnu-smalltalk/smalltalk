@@ -1,5 +1,14 @@
 2009-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
+	* STCompiler.st: Send #asSourceCode to the method's source code.
+	* STFileParser.st: Define a MappedSourceCode class and use it instead
+	of MappedCollection.  Define #segmentFrom:to: for Stream.
+	Define #asSourceCode for any object.
+	* STLoaderObjs.st: Remove #methodSourceString hack involving
+	MappedCollection.
+
+2009-06-07  Paolo Bonzini  <bonzini@gnu.org>
+
 	* GSTParser.st: Fix compilation of class variables.
 
 2009-06-07  Paolo Bonzini  <bonzini@gnu.org>

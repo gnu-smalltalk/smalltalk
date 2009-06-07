@@ -166,19 +166,6 @@ Stream subclass: ConcatenatedStream [
 	^stream copyFrom: (start - adjust max: 0) to: end - adjust
     ]
 
-    segmentFrom: start to: end [
-	"needed to do the documentation"
-
-	<category: 'all'>
-	| adjust stream |
-	stream := self stream.
-	end + 1 = start ifTrue: [^''].
-	adjust := end <= startPos 
-	    ifTrue: [stream := last. lastStart]
-	    ifFalse: [adjust := startPos].
-	^stream segmentFrom: (start - adjust max: 0) to: end - adjust
-    ]
-
     addStream: stream [
 	<category: 'initializing'>
 	streams addLast: stream
