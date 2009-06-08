@@ -1067,7 +1067,7 @@ precision arithmetic.'>
 
 	"Apply IEEE 754 round to nearest even default rounding mode"
 	carry := self bitAt: nTruncatedBits.
-	(carry = 1 and: [mantissa odd or: [self lowBit > nTruncatedBits]]) 
+	(carry = 1 and: [mantissa odd or: [self lowBit < nTruncatedBits]]) 
 	    ifTrue: [mantissa := mantissa + 1].
 	^(characterization coerce: mantissa) timesTwoPower: exponent
     ]

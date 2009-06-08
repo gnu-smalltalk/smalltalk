@@ -250,7 +250,14 @@ Float class extend [
 
 	"check for rounding bugs"
 	p := (1 bitShift: self precision - 1) + (self coerce: 1.0).
-	self assert: p rounded = p asExactFraction
+	self assert: p rounded = p asExactFraction.
+
+	"Test the case with the carry == 1 in LargeInteger>>#asFloat:.
+	 The number is huge so the truncated mantissa is even.  If
+	 there are other trailing bits behind the carry, as with p+1,
+	 the mantissa must be rounded up."
+	p := (1 bitShift: self precision * 2) + (1 bitShift: self precision).
+	self assert: p asFloatD truncated < (p + 1) asFloatD truncated
     ]
 ]
 

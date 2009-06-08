@@ -1,4 +1,10 @@
 2009-06-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/LargeInt.st: Fix #asFloat: as reported by Nicolas Cellier.
+	* tests/floatmath.st: Add regression test.
+	* tests/floatmath.ok: Regenerate.
+
+2009-06-08  Paolo Bonzini  <bonzini@gnu.org>
             Nicolas Cellier  <ncellier@ifrance.com>
 
 	* kernel/Float.st: Implement #rounded.
