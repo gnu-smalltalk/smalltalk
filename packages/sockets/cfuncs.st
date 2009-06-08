@@ -266,7 +266,7 @@ CAddrInfoStruct extend [
 
     aiAddr [
 	<category: 'C call-outs'>
-	<cCall: 'TCPgetAiAddr' returning: #(#ptr #{CSockAddrStruct})
+	<cCall: 'TCPgetAiAddr' returning: #(#ptr #{CObject})
 	args: #(#self)>
 	
     ]

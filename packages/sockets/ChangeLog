@@ -1,3 +1,7 @@
+2009-06-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* cfuncs.st: Fix remaining of CSockAddrStruct.
+
 2009-06-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* SocketAddress.st: Fix case where the machine is disconnected.
