@@ -1368,18 +1368,21 @@ primitive VMpr_LargeInteger_asFloatD [uses_gmp]
     _gst_mpz_from_oop (&a, oop1);
   else
     {
-      UNPOP (2);
+      UNPOP (1);
       PRIM_FAILED;
     }
 
-  d = _gst_mpz_get_d (&a);
-  oop2 = floatd_new (d);
-  _gst_mpz_clear (&a);
-  PUSH_OOP (oop2);
-  PRIM_SUCCEEDED;
-#else
-  PRIM_FAILED;
+  if (_gst_mpz_get_d (&a, &d))
+    {
+      oop2 = floatd_new (d);
+      _gst_mpz_clear (&a);
+      PUSH_OOP (oop2);
+      PRIM_SUCCEEDED;
+    }
+
+  UNPOP (1);
 #endif
+  PRIM_FAILED;
 }
 
 
@@ -1398,18 +1401,21 @@ primitive VMpr_LargeInteger_asFloatE [uses_gmp]
     _gst_mpz_from_oop (&a, oop1);
   else
     {
-      UNPOP (2);
+      UNPOP (1);
       PRIM_FAILED;
     }
 
-  d = _gst_mpz_get_d (&a);
-  oop2 = floate_new (d);
-  _gst_mpz_clear (&a);
-  PUSH_OOP (oop2);
-  PRIM_SUCCEEDED;
-#else
-  PRIM_FAILED;
+  if (_gst_mpz_get_d (&a, &d) && (double) (float) d == d)
+    {
+      oop2 = floate_new (d);
+      _gst_mpz_clear (&a);
+      PUSH_OOP (oop2);
+      PRIM_SUCCEEDED;
+    }
+
+  UNPOP (1);
 #endif
+  PRIM_FAILED;
 }
 
 
@@ -1428,18 +1434,21 @@ primitive VMpr_LargeInteger_asFloatQ [uses_gmp]
     _gst_mpz_from_oop (&a, oop1);
   else
     {
-      UNPOP (2);
+      UNPOP (1);
       PRIM_FAILED;
     }
 
-  d = _gst_mpz_get_ld (&a);
-  oop2 = floatq_new (d);
-  _gst_mpz_clear (&a);
-  PUSH_OOP (oop2);
-  PRIM_SUCCEEDED;
-#else
-  PRIM_FAILED;
+  if (_gst_mpz_get_ld (&a, &d) && (double) (float) d == d)
+    {
+      oop2 = floatq_new (d);
+      _gst_mpz_clear (&a);
+      PUSH_OOP (oop2);
+      PRIM_SUCCEEDED;
+    }
+
+  UNPOP (1);
 #endif
+  PRIM_FAILED;
 }
 
 primitive VMpr_FloatD_arith :

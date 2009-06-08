@@ -1,3 +1,10 @@
+2009-06-08  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/mpz.c: Return whether large integer->float conversion was
+	exact.
+	* libgst/mpz.h: Adjust prototypes.
+	* libgst/prims.def: Fail on inexact conversions.
+
 2009-03-30  Derek Zhou  <agonyzhou@comcast.net>
 	    Paolo Bonzini  <bonzini@gnu.org>
 

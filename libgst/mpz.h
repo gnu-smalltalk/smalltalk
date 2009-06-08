@@ -104,11 +104,11 @@ int _gst_mpz_cmp (const gst_mpz *, const gst_mpz *)
   ATTRIBUTE_HIDDEN;
 
 /* Convert to double */
-double _gst_mpz_get_d (const gst_mpz *) 
+mst_Boolean _gst_mpz_get_d (const gst_mpz *, double *) 
   ATTRIBUTE_HIDDEN;
 
 /* Convert to long double */
-long double _gst_mpz_get_ld (const gst_mpz *) 
+mst_Boolean _gst_mpz_get_ld (const gst_mpz *, long double *) 
   ATTRIBUTE_HIDDEN;
 
 /* Multiply an integer by 2**CNT  */

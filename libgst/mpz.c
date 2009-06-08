@@ -879,8 +879,8 @@ _gst_mpz_sub (gst_mpz *w, const gst_mpz *u, const gst_mpz *v)
   w->size = wsize;
 }
 
-double
-_gst_mpz_get_d(const gst_mpz *mpz)
+mst_Boolean
+_gst_mpz_get_d(const gst_mpz *mpz, double *p_d)
 {
   double d, old;
   int n;
@@ -899,14 +899,15 @@ _gst_mpz_get_d(const gst_mpz *mpz)
 
       if (d - old < mpz->d[n])
 	/* Lost some bytes of precision, exit now.  */
-	return ldexp (d, 8 * SIZEOF_MP_LIMB_T * n);
+	return false;
     }
 
-  return d;
+  *p_d = d;
+  return true;
 }
 
-long double
-_gst_mpz_get_ld(const gst_mpz *mpz)
+mst_Boolean
+_gst_mpz_get_ld(const gst_mpz *mpz, long double *p_ld)
 {
   long double d, old;
   int n;
@@ -925,10 +926,11 @@ _gst_mpz_get_ld(const gst_mpz *mpz)
 
       if (d - old < mpz->d[n])
 	/* Lost some bytes of precision, exit now.  */
-	return ldexpl (d, 8 * SIZEOF_MP_LIMB_T * n);
+	return false;
     }
 
-  return d;
+  *p_ld = d;
+  return true;
 }
 
 void
