@@ -151,6 +151,13 @@ accuracy as C''s "double" numbers.'>
 	^0.0
     ]
 
+    half [
+        "Coerce 0.5 to the receiver's class"
+
+        <category: 'converting'>
+	^0.5
+    ]
+
     unity [
 	"Coerce 1 to the receiver's class"
 

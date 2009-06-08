@@ -1,3 +1,13 @@
+2009-06-08  Paolo Bonzini  <bonzini@gnu.org>
+            Nicolas Cellier  <ncellier@ifrance.com>
+
+	* kernel/Float.st: Implement #rounded.
+	* kernel/FloatD.st: Implement #half.
+	* kernel/FloatE.st: Implement #half.
+	* kernel/FloatQ.st: Implement #half.
+	* tests/floatmath.st: Add regression test.
+	* tests/floatmath.ok: Regenerate.
+	
 2009-06-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/StreamOps.st: Remove #segmentFrom:to:.

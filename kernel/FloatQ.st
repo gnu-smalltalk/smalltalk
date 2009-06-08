@@ -159,6 +159,13 @@ accuracy as C''s "long double" numbers.'>
 	^0.0q
     ]
 
+    half [
+        "Coerce 0.5 to the receiver's class"
+
+        <category: 'converting'>
+	^0.5q
+    ]
+
     unity [
 	"Coerce 1 to the receiver's class"
 

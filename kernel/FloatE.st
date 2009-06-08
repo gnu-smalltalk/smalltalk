@@ -177,6 +177,13 @@ accuracy as C''s "float" numbers.'>
 	^0.0e
     ]
 
+    half [
+        "Coerce 0.5 to the receiver's class"
+
+        <category: 'converting'>
+	^0.5e
+    ]
+
     unity [
 	"Coerce 1 to the receiver's class"
 

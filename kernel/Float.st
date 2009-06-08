@@ -616,6 +616,22 @@ if the hardware supports it.'>
 	    ifFalse: [self truncated]
     ]
 
+    rounded [
+        "Answer the receiver, rounded to the nearest integer"
+
+        <category: 'truncation and round off'>
+	self fractionPart abs < self half
+	    ifTrue: [^self truncated]
+	    ifFalse: [^self truncated + self sign rounded]
+    ]
+
+    half [
+        "Answer 0.5 in the representation of the receiver"
+
+        <category: 'converting'>
+	^self unity / 2
+    ]
+
     primHash [
 	"Private - Answer an hash value for the receiver"
 

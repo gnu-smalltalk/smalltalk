@@ -246,7 +246,11 @@ Float class extend [
     
         p := 1 bitShift: 1 + self precision - self emin.
         self assert: (self coerce: 3 / p) isFinite.
-        self assert: (self coerce: -3 / p) isFinite
+        self assert: (self coerce: -3 / p) isFinite.
+
+	"check for rounding bugs"
+	p := (1 bitShift: self precision - 1) + (self coerce: 1.0).
+	self assert: p rounded = p asExactFraction
     ]
 ]
 
