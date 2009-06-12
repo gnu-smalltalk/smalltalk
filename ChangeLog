@@ -1,3 +1,7 @@
+2009-06-12  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Float.st: Implement #log:.
+
 2009-06-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/LargeInt.st: Fix #asFloat: as reported by Nicolas Cellier.
