@@ -319,6 +319,13 @@ if the hardware supports it.'>
 	^self ln / self class ln10
     ]
 
+    log: aNumber [
+	"Answer log base aNumber of the receiver"
+
+	<category: 'misc math'>
+	^self ln / (self coerce: aNumber) ln
+    ]
+
     ceilingLog: radix [
 	"Answer (self log: radix) ceiling."
 
