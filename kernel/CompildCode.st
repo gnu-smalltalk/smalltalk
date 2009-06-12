@@ -157,6 +157,8 @@ superclass for blocks and methods'>
 	self == aMethod ifTrue: [^true].
 	self class == aMethod class ifFalse: [^false].
 	header = aMethod getHeader ifFalse: [^false].
+	self numLiterals = aMethod numLiterals ifFalse: [^false].
+	self numBytecodes = aMethod numBytecodes ifFalse: [^false].
 	1 to: self numLiterals
 	    do: [:i | (self literalAt: i) = (aMethod literalAt: i) ifFalse: [^false]].
 	1 to: self numBytecodes

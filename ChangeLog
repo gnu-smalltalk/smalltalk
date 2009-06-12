@@ -1,3 +1,8 @@
+2009-06-12  Gwanael Casaccio  <mrgwen@gmail.com>
+
+	* kernel/CompildCode.st: Fix #= to compare number of literals and
+	of bytecodes.
+
 2009-06-12  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Implement #log:.
