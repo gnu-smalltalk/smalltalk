@@ -1,5 +1,13 @@
 2009-06-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/Float.st: Eliminate hack for #floorLog: and #ceilingLog:
+	that was inexact for numbers very close to 1.
+	Compute exponent in exact arithmetic while printing.
+	* tests/floatmath.st: Add regression test.
+	* tests/floatmath.ok: Regenerate.
+
+2009-06-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Float.st: Write well-known constants in binary.
 	* kernel/FloatE.st: Likewise.
 	* kernel/FloatQ.st: Likewise.
