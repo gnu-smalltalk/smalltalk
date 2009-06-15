@@ -197,6 +197,7 @@ Eval [ FloatD test: #[191 220 89 240 39 160 234 63] ]
 Eval [ FloatD test: #[227 220 89 240 39 160 234 63] ]
 Eval [ FloatD test: #[157 232 59 160 26 192 225 63] ]
 Eval [ FloatD test: #[148 232 59 160 26 192 225 63] ]
+Eval [ FloatD test: #[255 255 255 255 255 255 239 63] ]
 
 
 "Fun with rounding"

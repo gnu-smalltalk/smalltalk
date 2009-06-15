@@ -327,10 +327,12 @@ if the hardware supports it.'>
     ]
 
     ceilingLog: radix [
-	"Answer (self log: radix) ceiling."
+	"Answer (self log: radix) ceiling.  Use exact arithmetic if radix
+	 is not a floating point value."
 
 	<category: 'transcendental operations'>
-	| result ceil delta |
+	radix isFloat ifFalse: [ ^self asExactFraction ceilingLog: radix ].
+
 	self < self zero 
 	    ifTrue: 
 		[^self arithmeticError: 'cannot extract logarithm of a negative number'].
@@ -338,20 +340,17 @@ if the hardware supports it.'>
 	    ifTrue: 
 		[radix <= radix zero ifTrue: [^self arithmeticError: 'bad radix'].
 		radix = radix unity ifTrue: [^self arithmeticError: 'bad radix']].
-	result := self log: radix.
-	ceil := result ceiling.
 
-	"If the result differs from ceil - 1 by <0.5ulp, round up."
-	delta := (ceil - 1) - result.
-	ceil - 1 - (delta / 2) - ceil = -1.0 ifTrue: [ ceil := ceil - 1 ].
-	^ceil
+	^(self log: radix) ceiling
     ]
 
     floorLog: radix [
-	"Answer (self log: radix) floor."
+	"Answer (self log: radix) floor.  Use exact arithmetic if radix
+	 is not a floating point value."
 
 	<category: 'transcendental operations'>
-	| result floor delta |
+	radix isFloat ifFalse: [ ^self asExactFraction floorLog: radix ].
+
 	self < self zero 
 	    ifTrue: 
 		[^self arithmeticError: 'cannot extract logarithm of a negative number'].
@@ -360,13 +359,7 @@ if the hardware supports it.'>
 		[radix <= radix zero ifTrue: [^self arithmeticError: 'bad radix'].
 		radix = radix unity ifTrue: [^self arithmeticError: 'bad radix']].
 
-	result := self log: radix.
-	floor := result floor.
-
-	"If the result differs from floor + 1 by <0.5ulp, round up."
-	delta := (floor + 1) - result.
-	floor + 1 + (delta / 2) - floor = 1.0 ifTrue: [ floor := floor + 1 ].
-	^floor
+	^(self log: radix) floor
     ]
 
     estimatedLog [
@@ -506,10 +499,10 @@ if the hardware supports it.'>
 	"Figure out some quantities and the way we'll print the number."
 	exponential := me exponent abs > me class precision.
 	small := me < me unity.
-	exponent := (me floorLog: 10) + 1.
 
 	"Compute the digits one by one."
 	num := me asExactFraction.
+	exponent := (num floorLog: 10) + 1.
 	digits := 0.
 	weight := 10 raisedToInteger: exponent - 1.
 	me class decimalDigits timesRepeat: 
