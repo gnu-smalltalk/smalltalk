@@ -59,7 +59,7 @@ accuracy as C''s "long double" numbers.'>
 	"Returns the value of e. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^2.7182818284590452216265178949363q
+	^16r2.B7E151628AED2A6ABF71588q
     ]
 
     FloatQ class >> precision [
@@ -113,14 +113,14 @@ accuracy as C''s "long double" numbers.'>
 	"Returns the value of log2 10. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^3.3219280948873625223507781903972q
+	^16r3.5269E12F346E2BF924AFDBFDq
     ]
 
     FloatQ class >> ln10 [
 	"Returns the value of ln 10. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^2.3025850929940455480156462368249q
+	^16r2.4D763776AAA2B05BA95B58AEq
     ]
 
     FloatQ class >> infinity [
@@ -149,7 +149,7 @@ accuracy as C''s "long double" numbers.'>
 	"Returns the value of pi. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^3.1415926535897930885169542232694q
+	^16r3.243F6A8885A308D313198A2Eq
     ]
 
     zero [
