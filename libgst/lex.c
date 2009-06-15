@@ -822,7 +822,7 @@ scan_number (int c,
   if (ic == '.')
     {
       ic = _gst_next_char ();
-      if (!is_digit (ic))
+      if (!is_digit (ic) && base <= 10)
 	{
 	  /* OOPS...we gobbled the '.' by mistake...it was a statement
 	     boundary delimiter.  We have an integer that we need to
