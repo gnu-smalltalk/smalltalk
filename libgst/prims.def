@@ -1424,7 +1424,7 @@ primitive VMpr_LargeInteger_asFloatQ [uses_gmp]
 #ifdef HAVE_GMP
   gst_mpz a = { 0, 0, NULL };
   OOP oop1, oop2;
-  double d;
+  long double d;
 
   _gst_primitives_executed++;
   oop1 = POP_OOP ();
@@ -1438,7 +1438,7 @@ primitive VMpr_LargeInteger_asFloatQ [uses_gmp]
       PRIM_FAILED;
     }
 
-  if (_gst_mpz_get_ld (&a, &d) && (double) (float) d == d)
+  if (_gst_mpz_get_ld (&a, &d) && (long double) (float) d == d)
     {
       oop2 = floatq_new (d);
       _gst_mpz_clear (&a);

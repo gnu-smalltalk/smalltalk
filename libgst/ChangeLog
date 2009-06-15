@@ -1,3 +1,7 @@
+2009-06-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/prims.def: Fix typo.
+
 2009-06-08  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/mpz.c: Return whether large integer->float conversion was
