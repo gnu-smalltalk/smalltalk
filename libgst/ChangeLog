@@ -1,5 +1,9 @@
 2009-06-15  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/dict.inl: Pad long doubles to 16 bytes.
+
+2009-06-15  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/lex.c: Fix parsing of 16r2.ABCDEFd.
 
 2009-06-15  Paolo Bonzini  <bonzini@gnu.org>

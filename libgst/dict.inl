@@ -552,19 +552,16 @@ OOP
 floatq_new (long double f)
 {
   OOP floatOOP;
-#if (ALIGNOF_LONG_DOUBLE <= SIZEOF_OOP)
-  gst_floatq floatObject;
+  gst_object obj = new_instance_with (_gst_floatq_class, 16, &floatOOP);
 
-  floatObject = (gst_floatq) new_instance_with 
-    (_gst_floatq_class, sizeof (long double), &floatOOP);
+  memcpy (&obj->data, &f, 10);
 
-  floatObject->value = f;
+#if defined __i386__ || defined __x86_64__
+  /* Two bytes (six on x86-64) of 80-bit long doubles are unused.  */
+  memset (((char *)obj->data) + 10, 0, 6);
 #else
-  gst_object obj;
-
-  obj = new_instance_with (_gst_floatq_class, sizeof (long double), &floatOOP);
-
-  memcpy (&obj->data, &f, sizeof (long double));
+  memset (((char *)obj->data) + sizeof (long double), 0,
+	  16 - sizeof (long double));
 #endif
 
   MAKE_OOP_READONLY (floatOOP, true);
