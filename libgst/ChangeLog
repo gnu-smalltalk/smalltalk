@@ -1,3 +1,7 @@
+2009-06-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Fix parsing of 16r2.ABCDEFd.
+
 2009-03-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/files.c: Load RecursionLock.st before Transcript.st.
