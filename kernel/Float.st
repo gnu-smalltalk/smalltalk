@@ -53,28 +53,28 @@ if the hardware supports it.'>
 	"Returns the value of e. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^2.718281828459045
+	^16r2.B7E151628AED2A6ABF71588d
     ]
 
     Float class >> log10Base2 [
 	"Returns the value of log2 10. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^3.321928094887363
+	^16r3.5269E12F346E2BF924AFDBFDd
     ]
 
     Float class >> ln10 [
 	"Returns the value of ln 10. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^2.302585092994045
+	^16r2.4D763776AAA2B05BA95B58AEd
     ]
 
     Float class >> pi [
 	"Returns the value of pi. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^3.141592653589793
+	^16r3.243F6A8885A308D313198A2Ed
     ]
 
     Float class >> radix [

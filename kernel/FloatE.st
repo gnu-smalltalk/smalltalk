@@ -77,7 +77,7 @@ accuracy as C''s "float" numbers.'>
 	"Returns the value of e. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^2.7182818e
+	^16r2.B7E151628AED2A6ABF71588e
     ]
 
     FloatE class >> precision [
@@ -131,14 +131,14 @@ accuracy as C''s "float" numbers.'>
 	"Returns the value of log2 10. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^3.3219281e
+	^16r3.5269E12F346E2BF924AFDBFDe
     ]
 
     FloatE class >> ln10 [
 	"Returns the value of ln 10. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^2.3025852e
+	^16r2.4D763776AAA2B05BA95B58AEe
     ]
 
     FloatE class >> infinity [
@@ -167,7 +167,7 @@ accuracy as C''s "float" numbers.'>
 	"Returns the value of pi. Hope is that it is precise enough"
 
 	<category: 'characterization'>
-	^3.1415928e
+	^16r3.243F6A8885A308D313198A2Ee
     ]
 
     zero [

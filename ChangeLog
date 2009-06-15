@@ -1,3 +1,9 @@
+2009-06-15  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Float.st: Write well-known constants in binary.
+	* kernel/FloatE.st: Likewise.
+	* kernel/FloatQ.st: Likewise.
+
 2009-06-12  Gwanael Casaccio  <mrgwen@gmail.com>
 
 	* kernel/CompildCode.st: Fix #= to compare number of literals and
