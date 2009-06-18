@@ -1,3 +1,8 @@
+2009-06-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/comp.c: Check for infinite recursion of #doesNotUnderstand:
+	before printing the result of an evaluation.
+
 2009-06-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/dict.inl: Pad long doubles to 16 bytes.

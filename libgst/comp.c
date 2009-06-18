@@ -714,7 +714,14 @@ _gst_execute_statements (tree_node temps,
       save_execution = _gst_execution_tracing;
       if (_gst_execution_tracing == 1)
         _gst_execution_tracing = 0;
-      _gst_str_msg_send (_gst_last_returned_value, "printNl", NULL);
+      if (_gst_responds_to (_gst_last_returned_value,
+			    _gst_intern_string ("printNl"))
+          || _gst_responds_to (_gst_last_returned_value,
+			       _gst_does_not_understand_symbol))
+        _gst_str_msg_send (_gst_last_returned_value, "printNl", NULL);
+      else
+	printf ("%O\n", _gst_last_returned_value);
+
       _gst_execution_tracing = save_execution;
     }
   if (quiet || _gst_verbosity < 3)
