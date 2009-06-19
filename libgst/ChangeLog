@@ -1,3 +1,7 @@
+2009-06-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Fix my own snafu.
+
 2009-06-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/lex.c: Fix parsing of 16r2.ABCDEFd.
