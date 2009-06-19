@@ -1,3 +1,7 @@
+2009-06-19  Paolo Bonzini  <bonzini@gnu.org>
+
+	* tests/floatmath.st: Eliminate inexact regression test.
+
 2009-06-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Float.st: Eliminate hack for #floorLog: and #ceilingLog:
