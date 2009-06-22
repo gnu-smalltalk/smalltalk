@@ -206,7 +206,7 @@ how to use the instances returned by my class methods.'>
     Directory class >> allFilesMatching: aPattern do: aBlock [
 	"Invoke #allFilesMatching:do: on the current working directory."
 	<category: 'file operations'>
-	(File name: self working) allFilesMatching: aPattern do: aBlock
+	self working allFilesMatching: aPattern do: aBlock
     ]
 
     Directory class >> create: dirName [
