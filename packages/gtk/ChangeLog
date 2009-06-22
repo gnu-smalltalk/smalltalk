@@ -1,3 +1,9 @@
+2009-06-22  Gwenael Casaccio  <mrgwen@gmail.com>
+            Paolo Bonzini  <bonzini@gnu.org>
+
+	* gst-gtk.c: Add functions for accelerator groups.
+	* MoreFuncs.st: Add call-outs here.
+
 2009-04-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* MoreFuncs.st: Add functions to fire signals.

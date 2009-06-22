@@ -601,6 +601,57 @@ connect_signal_no_user_data (OOP widget,
   return connect_signal (widget, event_name, receiver, selector, NULL);
 }
 
+static int
+connect_accel_group (OOP accel_group,
+                     guint accel_key,
+                     GdkModifierType accel_mods,
+                     GtkAccelFlags accel_flags,
+                     OOP receiver,
+                     OOP selector,
+		     OOP user_data)
+{
+  GtkAccelGroup *cObject = _gst_vm_proxy->OOPToCObject (accel_group);
+  int n_params;
+  GClosure *closure;
+  OOP oop_sel_args;
+
+  oop_sel_args = _gst_vm_proxy->strMsgSend (selector, "numArgs", NULL);
+  if (oop_sel_args == _gst_vm_proxy->nilOOP)
+    return (-3); /* Invalid selector */
+
+  /* Check the number of arguments in the selector against the number of
+     arguments in the event callback */
+
+  /* We can return fewer arguments than are in the event, if the others aren't
+     wanted, but we can't return more, and returning nilOOPs instead is not
+     100% satisfactory, so fail. */
+  n_params = _gst_vm_proxy->OOPToInt (oop_sel_args);
+  if (n_params > 4)
+    return (-4);
+
+  /* Receiver is assumed to be OK, no matter what it is */
+  /* Parameters OK, so carry on and connect the signal */
+
+  accel_group = narrow_oop_for_g_object (G_OBJECT (cObject), accel_group);
+
+  closure = create_smalltalk_closure (receiver, selector, NULL,
+                                      accel_group, n_params);
+  gtk_accel_group_connect (cObject, accel_key, accel_mods, accel_flags, closure);
+  return 0;
+}
+
+static int
+connect_accel_group_no_user_data (OOP accel_group,
+		                  guint accel_key,
+		                  GdkModifierType accel_mods,
+		                  GtkAccelFlags accel_flags,
+		                  OOP receiver,
+		                  OOP selector)
+{
+  return connect_accel_group (accel_group, accel_key, accel_mods,
+		              accel_flags, receiver, selector, NULL);
+}
+
 /* Event loop.  The GTK+ event loop in GNU Smalltalk takes place
    using my_gtk_main_iteration in a separate process.  GtkImpl.st
    redefines Gtk class>>#main calling this function: the event
@@ -916,6 +967,8 @@ gst_initModule (proxy)
   _gst_vm_proxy->defineCFunc ("gstGtkRegisterForType", register_for_type);
   _gst_vm_proxy->defineCFunc ("gstGtkFreeGObjectOOP", free_oop_for_g_object);
   _gst_vm_proxy->defineCFunc ("gstGtkNarrowGObjectOOP", narrow_oop_for_g_object);
+  _gst_vm_proxy->defineCFunc ("gstGtkConnectAccelGroup", connect_accel_group);
+  _gst_vm_proxy->defineCFunc ("gstGtkConnectAccelGroupNoUserData", connect_accel_group_no_user_data);
   _gst_vm_proxy->defineCFunc ("gstGtkConnectSignal", connect_signal);
   _gst_vm_proxy->defineCFunc ("gstGtkConnectSignalNoUserData", connect_signal_no_user_data);
   _gst_vm_proxy->defineCFunc ("gstGtkMain", my_gtk_main);

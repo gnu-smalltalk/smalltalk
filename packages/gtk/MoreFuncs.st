@@ -93,6 +93,21 @@ GObject extend [
 
 
 
+GtkAccelGroup extend [
+    connect: accelKey accelModes: accelMods accelFlags: accelFlags receiver: receiver selector: selector userData: userData [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkAccelGroupConnect' returning: #void
+	args: #( #selfSmalltalk #int #int #int #smalltalk #smalltalk #smalltalk)>
+    ]
+
+    connect: accelKey accelModes: accelMods accelFlags: accelFlags receiver: receiver selector: selector [
+	<category: 'C call-outs'>
+	<cCall: 'gstGtkAccelGroupConnectNoUserData' returning: #void
+	args: #( #selfSmalltalk #int #int #int #smalltalk #smalltalk )>
+    ]
+]
+
+
 "These have a weird name in C."
 
 GtkObject extend [
