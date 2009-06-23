@@ -1,3 +1,16 @@
+2009-06-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Buffer.st: New.
+	* PORTING: New.
+	* Extensions.st: Include Sport extensions here to ease porting.
+	* Core.st: Update to 2.2.
+	* Exceptions.st: Update to 2.2.
+	* HTTP.st: Update to 2.2.
+	* Messages.st: Update to 2.2.
+	* Resources.st: Update to 2.2.
+	* Tests.st: Update to 2.2.
+	* package.xml: Update for new files.
+
 2009-03-05  Nicolas Petton  <petton.nicolas@gmail.com>
 
         * HTTP.st: Create Character, not UnicodeCharacter.

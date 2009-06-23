@@ -29,62 +29,6 @@
  ======================================================================"
 
 
-SpError subclass: SwazooHTTPParseError [
-    
-    <comment: nil>
-    <category: 'Swazoo-Exceptions'>
-]
-
-
-
-SpError subclass: SwazooHTTPRequestError [
-    
-    <comment: nil>
-    <category: 'Swazoo-Exceptions'>
-]
-
-
-
-SwazooHTTPRequestError subclass: SwazooHTTPPostError [
-    
-    <comment: nil>
-    <category: 'Swazoo-Exceptions'>
-]
-
-
-
-SwazooHTTPRequestError subclass: SwazooHTTPPutError [
-    
-    <comment: nil>
-    <category: 'Swazoo-Exceptions'>
-]
-
-
-
-SpError subclass: SwazooHeaderFieldParseError [
-    
-    <comment: nil>
-    <category: 'Swazoo-Exceptions'>
-]
-
-
-
-SpError subclass: SwazooSiteError [
-    
-    <comment: nil>
-    <category: 'Swazoo-Exceptions'>
-]
-
-
-
-SpError subclass: SwazooStreamNoDataError [
-    
-    <comment: nil>
-    <category: 'Swazoo-Exceptions'>
-]
-
-
-
 Error subclass: HTTPException [
     | response |
     
@@ -320,3 +264,62 @@ Instance Variables:
 	response := aHTTPResponse
     ]
 ]
+
+
+
+SpError subclass: SwazooHTTPParseError [
+    
+    <comment: nil>
+    <category: 'Swazoo-Exceptions'>
+]
+
+
+
+SpError subclass: SwazooHTTPRequestError [
+    
+    <comment: nil>
+    <category: 'Swazoo-Exceptions'>
+]
+
+
+
+SwazooHTTPRequestError subclass: SwazooHTTPPostError [
+    
+    <comment: nil>
+    <category: 'Swazoo-Exceptions'>
+]
+
+
+
+SwazooHTTPRequestError subclass: SwazooHTTPPutError [
+    
+    <comment: nil>
+    <category: 'Swazoo-Exceptions'>
+]
+
+
+
+SpError subclass: SwazooHeaderFieldParseError [
+    
+    <comment: nil>
+    <category: 'Swazoo-Exceptions'>
+]
+
+
+
+SpError subclass: SwazooSiteError [
+    
+    <comment: nil>
+    <category: 'Swazoo-Exceptions'>
+]
+
+
+
+SpError subclass: SwazooStreamNoDataError [
+    
+    <comment: nil>
+    <category: 'Swazoo-Exceptions'>
+]
+
+
+

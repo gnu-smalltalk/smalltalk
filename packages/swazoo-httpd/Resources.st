@@ -29,7 +29,156 @@
  ======================================================================"
 
 
-Resource subclass: FileMappingResource [
+Object subclass: SwazooCacheControl [
+    | request cacheTarget etag lastModified |
+    
+    <category: 'Swazoo-Resources'>
+    <comment: nil>
+
+    addNotModifedHeaders: aResponse [
+	"RFC2616 10.3.5
+	 If the conditional GET used a strong cache validator (see section 13.3.3), the response SHOULD NOT include other entity-headers. ... this prevents inconsistencies between cached entity-bodies and updated headers."
+
+	<category: 'operations'>
+	self isRequestStrongValidator 
+	    ifTrue: [aResponse headers addField: (HTTPETagField new entityTag: self etag)]
+	    ifFalse: [self basicAddResponseHeaders: aResponse].
+	^aResponse
+    ]
+
+    addResponseHeaders: aResponse [
+	"Add response headers to the response.
+	 We MUST differentiate between 200/302 responses"
+
+	<category: 'operations'>
+	^aResponse isNotModified 
+	    ifTrue: [self addNotModifedHeaders: aResponse]
+	    ifFalse: [self basicAddResponseHeaders: aResponse]
+    ]
+
+    basicAddResponseHeaders: aResponse [
+	"RFC 2616 13.3.4
+	 HTTP/1.1 origin servers:
+	 - SHOULD send an entity tag validator unless it is not feasible to generate one.
+	 - SHOULD send a Last-Modified value"
+
+	<category: 'operations'>
+	aResponse headers addField: (HTTPETagField new entityTag: self etag).
+	aResponse headers 
+	    addField: (HTTPLastModifiedField new timestamp: self lastModified).
+	^aResponse
+    ]
+
+    cacheTarget [
+	<category: 'accessing'>
+	^cacheTarget
+    ]
+
+    etag [
+	<category: 'accessing'>
+	etag isNil ifTrue: [etag := self generateETag].
+	^etag
+    ]
+
+    etag: aString [
+	<category: 'accessing'>
+	etag := aString
+    ]
+
+    generateETag [
+	<category: 'operations'>
+	^self cacheTarget etag
+    ]
+
+    generateLastModified [
+	<category: 'operations'>
+	^self cacheTarget lastModified
+    ]
+
+    isIfModifiedSince [
+	"Answers true if either
+	 - the request does not included the header
+	 -or there is not a match"
+
+	<category: 'testing'>
+	| ifModifiedSince |
+	ifModifiedSince := request headers fieldOfClass: HTTPIfModifiedSinceField
+		    ifNone: [nil].
+	^ifModifiedSince isNil or: [self lastModified > ifModifiedSince date]
+    ]
+
+    isIfNoneMatch [
+	"Answers true if either
+	 - the request does not included the header
+	 -or there is not a match"
+
+	<category: 'testing'>
+	| field |
+	field := request headers fieldOfClass: HTTPIfNoneMatchField ifNone: [nil].
+	^field isNil or: [(field entityTags includes: self etag) not]
+    ]
+
+    isNotModified [
+	"Compare the cacheTarget with the request headers and answer if the client's version is not modified.
+	 Takes into account http version, and uses best practices defined by HTTP spec"
+
+	<category: 'testing'>
+	^self isIfNoneMatch not or: [self isIfModifiedSince not]
+    ]
+
+    isRequestStrongValidator [
+	<category: 'testing'>
+	| field |
+	field := request headers fieldOfClass: HTTPIfNoneMatchField ifNone: [nil].
+	^field notNil and: [field entityTags isEmpty not]
+    ]
+
+    lastModified [
+	<category: 'testing'>
+	lastModified isNil ifTrue: [lastModified := self generateLastModified].
+	^lastModified
+    ]
+
+    lastModified: aRFC1123TimeStampString [
+	<category: 'testing'>
+	lastModified := aRFC1123TimeStampString
+    ]
+
+    request: aHTTPGet cacheTarget: anObject [
+	<category: 'accessing'>
+	request := aHTTPGet.
+	cacheTarget := anObject
+    ]
+]
+
+
+
+Object subclass: SwazooCompiler [
+    | accessor |
+    
+    <category: 'Swazoo-Resources'>
+    <comment: nil>
+
+    SwazooCompiler class >> evaluate: aString [
+	<category: 'evaluation'>
+	^SpEnvironment 
+	    evaluate: aString
+	    receiver: SwazooCompiler
+	    in: self class environment
+    ]
+
+    SwazooCompiler class >> evaluate: aString receiver: anObject [
+	<category: 'evaluation'>
+	^SpEnvironment 
+	    evaluate: aString
+	    receiver: anObject
+	    in: self class environment
+    ]
+]
+
+
+
+SwazooResource subclass: FileMappingResource [
     | directoryIndex filePath |
     
     <category: 'Swazoo-Resources'>
@@ -210,7 +359,7 @@ FileResource subclass: HomeResource [
 
 
 
-Resource subclass: HelloWorldResource [
+SwazooResource subclass: HelloWorldResource [
     
     <category: 'Swazoo-Resources'>
     <comment: nil>
@@ -228,7 +377,7 @@ Resource subclass: HelloWorldResource [
 
 
 
-Resource subclass: RedirectionResource [
+SwazooResource subclass: RedirectionResource [
     | targetUri |
     
     <category: 'Swazoo-Resources'>
@@ -256,179 +405,6 @@ Resource subclass: RedirectionResource [
 	<category: 'private-initialize'>
 	targetUri := aString
     ]
-]
-
-
-
-Object subclass: SwazooCacheControl [
-    | request cacheTarget etag lastModified |
-    
-    <category: 'Swazoo-Resources'>
-    <comment: nil>
-
-    addNotModifedHeaders: aResponse [
-	"RFC2616 10.3.5
-	 If the conditional GET used a strong cache validator (see section 13.3.3), the response SHOULD NOT include other entity-headers. ... this prevents inconsistencies between cached entity-bodies and updated headers."
-
-	<category: 'operations'>
-	self isRequestStrongValidator 
-	    ifTrue: [aResponse headers addField: (HTTPETagField new entityTag: self etag)]
-	    ifFalse: [self basicAddResponseHeaders: aResponse].
-	^aResponse
-    ]
-
-    addResponseHeaders: aResponse [
-	"Add response headers to the response.
-	 We MUST differentiate between 200/302 responses"
-
-	<category: 'operations'>
-	^aResponse isNotModified 
-	    ifTrue: [self addNotModifedHeaders: aResponse]
-	    ifFalse: [self basicAddResponseHeaders: aResponse]
-    ]
-
-    basicAddResponseHeaders: aResponse [
-	"RFC 2616 13.3.4
-	 HTTP/1.1 origin servers:
-	 - SHOULD send an entity tag validator unless it is not feasible to generate one.
-	 - SHOULD send a Last-Modified value"
-
-	<category: 'operations'>
-	aResponse headers addField: (HTTPETagField new entityTag: self etag).
-	aResponse headers 
-	    addField: (HTTPLastModifiedField new timestamp: self lastModified).
-	^aResponse
-    ]
-
-    cacheTarget [
-	<category: 'accessing'>
-	^cacheTarget
-    ]
-
-    etag [
-	<category: 'accessing'>
-	etag isNil ifTrue: [etag := self generateETag].
-	^etag
-    ]
-
-    etag: aString [
-	<category: 'accessing'>
-	etag := aString
-    ]
-
-    generateETag [
-	<category: 'operations'>
-	^self cacheTarget etag
-    ]
-
-    generateLastModified [
-	<category: 'operations'>
-	^self cacheTarget lastModified
-    ]
-
-    isIfModifiedSince [
-	"Answers true if either
-	 - the request does not included the header
-	 -or there is not a match"
-
-	<category: 'testing'>
-	| ifModifiedSince |
-	ifModifiedSince := request headers fieldOfClass: HTTPIfModifiedSinceField
-		    ifNone: [nil].
-	^ifModifiedSince isNil or: [self lastModified > ifModifiedSince date]
-    ]
-
-    isIfNoneMatch [
-	"Answers true if either
-	 - the request does not included the header
-	 -or there is not a match"
-
-	<category: 'testing'>
-	| field |
-	field := request headers fieldOfClass: HTTPIfNoneMatchField ifNone: [nil].
-	^field isNil or: [(field entityTags includes: self etag) not]
-    ]
-
-    isNotModified [
-	"Compare the cacheTarget with the request headers and answer if the client's version is not modified.
-	 Takes into account http version, and uses best practices defined by HTTP spec"
-
-	<category: 'testing'>
-	^self isIfNoneMatch not or: [self isIfModifiedSince not]
-    ]
-
-    isRequestStrongValidator [
-	<category: 'testing'>
-	| field |
-	field := request headers fieldOfClass: HTTPIfNoneMatchField ifNone: [nil].
-	^field notNil and: [field entityTags isEmpty not]
-    ]
-
-    lastModified [
-	<category: 'testing'>
-	lastModified isNil ifTrue: [lastModified := self generateLastModified].
-	^lastModified
-    ]
-
-    lastModified: aRFC1123TimeStampString [
-	<category: 'testing'>
-	lastModified := aRFC1123TimeStampString
-    ]
-
-    request: aHTTPGet cacheTarget: anObject [
-	<category: 'accessing'>
-	request := aHTTPGet.
-	cacheTarget := anObject
-    ]
-]
-
-
-
-Object subclass: SwazooCompiler [
-    | accessor |
-    
-    <category: 'Swazoo-Resources'>
-    <comment: nil>
-
-    SwazooCompiler class >> evaluate: aString [
-	<category: 'evaluation'>
-	^SpEnvironment 
-	    evaluate: aString
-	    receiver: SwazooCompiler
-	    in: self class environment
-    ]
-
-    SwazooCompiler class >> evaluate: aString receiver: anObject [
-	<category: 'evaluation'>
-	^SpEnvironment 
-	    evaluate: aString
-	    receiver: anObject
-	    in: self class environment
-    ]
-]
-
-
-
-SpFilename extend [
-
-    etag [
-	"^a String
-	 The etag of a file entity is taken to be the date last modified as a String.
-	 We use the SpTimestamp in"
-
-	<category: '*Swazoo-accessing'>
-	^self lastModified asRFC1123String
-    ]
-
-    lastModified [
-	"| info |
-	 info := self dates at: #modified.
-	 ^SpTimestamp fromDate: info first andTime: info last"
-
-	<category: '*Swazoo-accessing'>
-	^self modifiedTimestamp
-    ]
-
 ]
 
 

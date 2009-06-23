@@ -1,0 +1,41 @@
+#! /bin/sh
+#
+# This script does the bulk of the porting by splitting the converted
+# squeak source into multiple files
+#
+# The porting steps are:
+# 1) convert from squeak to gst with gst-convert
+#
+# 2) search for new classes
+#     grep  subclass: swazoo-2.2-gst.st |sort >classes-22
+#     grep -h subclass: ../../packages/swazoo-httpd/*.st | sort >classes-gst
+#     diff classes-22 classes-gst
+#
+# 3) add new classes to the file where you want them.  Just a simple stub
+#    like this
+#
+#        Foo subclass: NewClassName [
+#        ]
+#
+#    is enough
+#
+# 4) run this script:
+#     sh -x combine swazoo-2.2-gst.st ../../packages/swazoo-httpd/*.st
+#
+# 5) copy the new st files over the old ones and examine diffs; if something
+#    is wrong, git undo and redo the script
+
+source=$1
+shift
+{
+  echo '/^]$/{N;N;N;}'
+  echo 's/\r/\n/g'
+  for i; do
+    awk -vout=${i##*/}1 '/subclass:/ {print "/subclass: "$3" /,/^]/w" out}' $i
+  done 
+} | sed -nf - $source
+for i; do
+  sed -ne '0,/subclass:\|^Namespace /{;//!p;//r'${i##*/}1 \
+       -e '};/^Eval/,$p' $i > ${i##*/}
+  rm ${i##*/}1
+done 

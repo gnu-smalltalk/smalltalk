@@ -1,3 +1,7 @@
+2009-06-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* swazoo/Seaside-Adapters-Swazoo.st: Change to 2.2 class names.
+
 2008-09-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* swazoo/Seaside-Adapters-Swazoo.st: Change to #seasideString.

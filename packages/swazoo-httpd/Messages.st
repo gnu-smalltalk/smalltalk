@@ -790,10 +790,11 @@ Instance Variables:
 	"Finish appropriatelly streaming at the end (skip crlf etc.)"
 
 	<category: 'private-parsing support'>
-	| boundary nrOfBoundary contents inPrevious remainingBoundary boundaryIndex |
+	| boundary start nrOfBoundary contents inPrevious remainingBoundary boundaryIndex |
 	boundary := aSwazooStream readBuffer isBinary 
 		    ifTrue: [aBoundaryBytes asByteArray]
 		    ifFalse: [aBoundaryBytes asByteString].
+	start := self readPosition.
 	[true] whileTrue: 
 		[nrOfBoundary := 0.
 		[nrOfBoundary = 0] whileTrue: 
@@ -805,6 +806,7 @@ Instance Variables:
 				contents := aSwazooStream readBuffer readContents.
 				outStream nextPutAll: contents.
 				self incReadPosition: contents size.
+				self checkToEnlargeBufferIn: aSwazooStream from: start.	"for effective streaming"
 				aSwazooStream fillBuffer]].
 		"copy and stream out content up to potential boundary"
 		boundaryIndex := aSwazooStream readBuffer indexOfBoundary: boundary.
@@ -830,8 +832,31 @@ Instance Variables:
 			self incReadPosition: remainingBoundary size + 2.
 			^true].	"streaming complete"
 		outStream
-		    nextPutAll: (inPrevious copyFrom: inPrevious size - 1 to: inPrevious size);
+		    nextPutAll: (inPrevious copyFrom: inPrevious size - 2 to: inPrevious size);
 		    nextPutAll: (boundary copyFrom: 1 to: nrOfBoundary)	"potential crlf"	"boundary part in prev.buff."]	"continue from the start"
+    ]
+
+    checkToEnlargeBufferIn: aSwazooStream from: startPosition [
+	"enlarge buffer to 1MB (if not already) if more than 100KB already read"
+
+	<category: 'private-parsing support'>
+	aSwazooStream readBuffer isEnlarged ifTrue: [^nil].
+	self readPosition - startPosition > 100000 
+	    ifTrue: 
+		["about 100KB"
+
+		aSwazooStream readBuffer resizeEnlarge]
+    ]
+
+    containsHeaderNecessaryFields [
+	"content type and (content length or chunked transfer encoding)"
+
+	<category: 'private-parsing support'>
+	(self headers includesFieldOfClass: ContentTypeField) ifFalse: [^false].
+	(self headers includesFieldOfClass: HTTPContentLengthField) 
+	    ifTrue: [^true].
+	^(self headers fieldNamed: 'Transfer-encoding' ifNone: [^false]) value 
+	    = 'chunked'
     ]
 
     emptyData [
@@ -906,8 +931,6 @@ Instance Variables:
 
 	<category: 'private-parsing'>
 	| contentTypeField boundary part |
-	self headers fieldOfClass: HTTPContentLengthField
-	    ifNone: [^SwazooHTTPPostError raiseSignal: 'Content-Length header missing'].
 	contentTypeField := self headers fieldOfClass: ContentTypeField
 		    ifNone: [^aSwazooStream nextBytes: self contentLength].	"just skip"
 	boundary := contentTypeField transferCodings at: 'boundary'
@@ -917,17 +940,21 @@ Instance Variables:
 	[part notNil] whileTrue: 
 		[part := self partFromStream: aSwazooStream boundary: boundary.
 		part notNil ifTrue: [self postDataAt: part key put: part value]].
-	self skipMimeEpilogueFrom: aSwazooStream	"all to the end  as defined by contentLegth"
+	self skipMimeEpilogueFrom: aSwazooStream.	"all to the end  as defined by contentLegth"
+	aSwazooStream readBuffer isEnlarged 
+	    ifTrue: 
+		["if MIME part larger that 100KB was read"
+
+		aSwazooStream readBuffer resizeShrink]	"that is, release memory"
     ]
 
     parsePostDataFrom: aSwazooStream [
 	<category: 'parsing'>
 	| mediaType |
-	((self headers includesFieldOfClass: ContentTypeField) 
-	    and: [self headers includesFieldOfClass: HTTPContentLengthField]) 
-		ifFalse: 
-		    [^SwazooHTTPPostError 
-			raiseSignal: 'Both Content-Type and Content-Length needed'].
+	self containsHeaderNecessaryFields 
+	    ifFalse: 
+		[^SwazooHTTPPostError 
+		    raiseSignal: 'Content-Type and Content-Length or chunked needed'].
 	mediaType := (self headers fieldOfClass: ContentTypeField) mediaType.
 	mediaType = 'application/x-www-form-urlencoded' 
 	    ifTrue: [^self urlencodedDataFrom: aSwazooStream].
@@ -938,6 +965,8 @@ Instance Variables:
 
     partFromStream: aSwazooStream boundary: aBoundaryBytes [
 	"one mime part from a stream. Nil if no more multipart data"
+
+	"Squeak specific"
 
 	<category: 'private-parsing'>
 	| bytes name filename datum contentType |
@@ -951,7 +980,10 @@ Instance Variables:
 		["read all lines and at the end a body of that part"
 
 		| line |
-		line := (aSwazooStream upTo: Character cr asInteger) asString.
+		line := 
+			[(aSwazooStream upTo: Character cr asInteger) asString	"Squeak specific"] 
+				on: Error
+				do: [:ex | ''].	"usually nothing to read anymore), why happen this anyway?"
 		self readPosition: self readPosition + line size + 1.	"cr"
 		line := bytes asString , line.
 		bytes := ''.

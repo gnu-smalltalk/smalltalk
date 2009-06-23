@@ -35,3 +35,27 @@ Stream extend [
 	<category: 'useless portability hacks'>
     ]
 ]
+
+
+
+SpFilename extend [
+
+    etag [
+	"^a String
+	 The etag of a file entity is taken to be the date last modified as a String.
+	 We use the SpTimestamp in"
+
+	<category: '*Swazoo-accessing'>
+	^self lastModified asRFC1123String
+    ]
+
+    lastModified [
+	"| info |
+	 info := self dates at: #modified.
+	 ^SpTimestamp fromDate: info first andTime: info last"
+
+	<category: '*Swazoo-accessing'>
+	^self modifiedTimestamp
+    ]
+
+]

@@ -29,16 +29,372 @@
  ======================================================================"
 
 
+Object subclass: SwazooBenchmarks [
+    | server content |
+    
+    <category: 'Swazoo-Tests'>
+    <comment: 'SwazooBenchmarks stores several benchmarks and performance routines
+
+'>
+
+    Singleton := nil.
+
+    SwazooBenchmarks class >> singleton [
+	<category: 'accessing'>
+	Singleton isNil ifTrue: [Singleton := self new].
+	^Singleton
+    ]
+
+    content [
+	"test content to be writen to the socket"
+
+	<category: 'accessing'>
+	content isNil ifTrue: [self initContent].
+	^content
+    ]
+
+    content: aByteArray [
+	<category: 'accessing'>
+	content := aByteArray
+    ]
+
+    contentSize [
+	<category: 'initialize-release'>
+	^4
+    ]
+
+    initContent [
+	<category: 'initialize-release'>
+	| response ws |
+	response := HTTPResponse ok.
+	response entity: (ByteArray new: self contentSize withAll: 85).
+	ws := SwazooStream on: String new.
+	response writeTo: ws.
+	content := ws writeBuffer contents
+    ]
+
+    server [
+	"TCP server loop"
+
+	<category: 'accessing'>
+	^server
+    ]
+
+    server: aProcess [
+	"TCP server loop"
+
+	<category: 'accessing'>
+	server := aProcess
+    ]
+
+    serverLoop [
+	<category: 'socket performance'>
+	| socket clientSocket |
+	socket := SpSocket newTCPSocket.
+	socket
+	    setAddressReuse: true;
+	    bindSocketAddress: (SpIPAddress hostName: 'localhost' port: 9999).
+	
+	[socket listenBackloggingUpTo: 50.
+	[true] whileTrue: 
+		[clientSocket := socket accept.
+		
+		[[true] whileTrue: 
+			[clientSocket underlyingSocket waitForData.
+			clientSocket read: 60.	"HTTP request"
+			clientSocket write: self content]] 
+			on: Error
+			do: [:ex | ]]] 
+		ensure: 
+		    [clientSocket notNil ifTrue: [clientSocket close].
+		    socket close]
+    ]
+
+    startSocketServer [
+	"SwazooBenchmarks singleton startSocketServer"
+
+	"SwazooBenchmarks singleton stopSocketServer"
+
+	"testing raw socket performance.
+	 it will start a server on localhost:9999 to receive a request
+	 and respond with 10K response as drirectly as possible."
+
+	<category: 'socket performance'>
+	self stopSocketServer.
+	self server: [self serverLoop] fork
+    ]
+
+    stopSocketServer [
+	"SwazooBenchmarks singleton stopSocketServer"
+
+	<category: 'socket performance'>
+	self server notNil 
+	    ifTrue: 
+		[self server terminate.
+		self server: nil].
+	self content: nil.
+	(Delay forMilliseconds: 1000) wait
+    ]
+]
+
+
+
+Object subclass: TestPseudoSocket [
+    | byteStreamToServer byteStreamFromServer clientWaitSemaphore serverWaitSemaphore ipAddress |
+    
+    <category: 'Swazoo-Tests'>
+    <comment: 'TestPseudoSocket is a drop in replacement for a SwazooSocket that can be used during testing to feed bytes into a running SwazooHTTPServer and grab the responses without having to start a real socket pair.
+
+So, to the HTTP server it must look like a server socket.  To the tester it must look like a write stream (to send bytes to the HTTP server) and a read stream (to read the HTTP responses).'>
+
+    TestPseudoSocket class >> newTCPSocket [
+	"^a TestPseudoSocket
+	 I simply return a new instance of myself."
+
+	<category: 'instance creation'>
+	^self new
+    ]
+
+    TestPseudoSocket class >> serverOnIP: host port: port [
+	"^self
+	 I'm only pretending to be a socket class, so I ignore the host and port."
+
+	<category: 'instance creation'>
+	^self new
+    ]
+
+    acceptRetryingIfTransientErrors [
+	"^another TestSocketThing
+	 The sender expects me to block until a request comes in 'over the socket'.  What I really do is wait for someone to ask me to 'send in' a Byte array and then I return myself.  Note that I will only handle one request at a time!!"
+
+	<category: 'socket stuff'>
+	self serverWaitSemaphore wait.
+	^self
+    ]
+
+    bindSocketAddress: anOSkIPAddress [
+	"^self
+	 This is a no-op for me."
+
+	<category: 'socket stuff'>
+	ipAddress := anOSkIPAddress.
+	^self
+    ]
+
+    byteStreamFromServer [
+	<category: 'accessing'>
+	^byteStreamFromServer
+    ]
+
+    byteStreamFromServer: aByteStream [
+	<category: 'accessing'>
+	byteStreamFromServer := aByteStream.
+	^self
+    ]
+
+    byteStreamToServer [
+	<category: 'accessing'>
+	^byteStreamToServer
+    ]
+
+    byteStreamToServer: aByteStream [
+	<category: 'accessing'>
+	byteStreamToServer := aByteStream.
+	^self
+    ]
+
+    clientWaitSemaphore [
+	"^a Semaphore
+	 I return the semaphore I use to control 'client' activity."
+
+	<category: 'accessing'>
+	clientWaitSemaphore isNil ifTrue: [clientWaitSemaphore := Semaphore new].
+	^clientWaitSemaphore
+    ]
+
+    close [
+	"^self
+	 The server has finished with us at this point, so we signal the semaphore to give the client end chance to grab the response."
+
+	<category: 'socket stuff'>
+	self clientWaitSemaphore signal.
+	^self
+    ]
+
+    flush [
+	<category: 'socket stuff'>
+	^self
+    ]
+
+    getPeerName [
+	<category: 'socket stuff'>
+	^ipAddress
+    ]
+
+    getSocketName [
+	<category: 'socket stuff'>
+	^ipAddress
+    ]
+
+    isActive [
+	"^self
+	 I am pretending to be a socket, and the sender wants to know if I am active.  Of course I am!!."
+
+	<category: 'socket stuff'>
+	^true
+    ]
+
+    listenBackloggingUpTo: anInteger [
+	"^self
+	 This is a no-op for me."
+
+	<category: 'socket stuff'>
+	^self
+    ]
+
+    listenFor: anInteger [
+	"^self
+	 This is a no-op for now."
+
+	<category: 'socket stuff'>
+	^self
+    ]
+
+    next [
+	<category: 'stream-toServer'>
+	^self byteStreamToServer next
+    ]
+
+    nextPut: aCharacter [
+	<category: 'stream-fromServer'>
+	self byteStreamFromServer nextPut: aCharacter asInteger
+    ]
+
+    nextPutAll: aCollection [
+	"^self
+	 At present it seems that aCollection will always be a string of chacters."
+
+	<category: 'stream-fromServer'>
+	^self byteStreamFromServer nextPutAll: aCollection asByteArray
+    ]
+
+    nextPutBytes: aByteArray [
+	<category: 'stream-fromServer'>
+	self byteStreamFromServer nextPutAll: aByteArray
+    ]
+
+    peek [
+	"^a Character
+	 It seems that the HTTP server is expecting Characters not Bytes - this will have to change."
+
+	<category: 'stream-toServer'>
+	^byteStreamToServer isNil 
+	    ifTrue: [nil]
+	    ifFalse: [Character value: self byteStreamToServer peek]
+    ]
+
+    print: anObject [
+	<category: 'stream-fromServer'>
+	self nextPutAll: anObject printString asByteArray.
+	^self
+    ]
+
+    read: integerNumberOfBytes [
+	"^a ByteArray
+	 I read the next numberOfBytes from my underlying stream."
+
+	<category: 'stream-toServer'>
+	^byteStreamToServer isNil 
+	    ifTrue: [ByteArray new]
+	    ifFalse: [self byteStreamToServer nextAvailable: integerNumberOfBytes]
+    ]
+
+    serverWaitSemaphore [
+	"^a Semaphore
+	 I return the semaphore I use to control 'server' activity."
+
+	<category: 'accessing'>
+	serverWaitSemaphore isNil ifTrue: [serverWaitSemaphore := Semaphore new].
+	^serverWaitSemaphore
+    ]
+
+    setAddressReuse: aBoolean [
+	"^self
+	 This is a no-op for me."
+
+	<category: 'socket stuff'>
+	^self
+    ]
+
+    socket [
+	"^self
+	 I am being asked this as if I am a socket stream.  I return myself because I'm pretending to be both the socket and the socket stream."
+
+	<category: 'stream-toServer'>
+	^self
+    ]
+
+    space [
+	<category: 'stream-fromServer'>
+	self nextPut: Character space.
+	^self
+    ]
+
+    stream [
+	"^self
+	 I have to pretend to be a socket stream too."
+
+	<category: 'socket stuff'>
+	^self
+    ]
+
+    upTo: aCharacter [
+	"a ByteString
+	 For some reason, we have to look for a character in a ByteStream - this is a Swazoo thing."
+
+	<category: 'stream-toServer'>
+	^(self byteStreamToServer upTo: aCharacter asInteger) asByteString
+    ]
+
+    write: aByteArray [
+	"^an Integer
+	 I write the contents of the sourceByteArray to my underlying Socket.
+	 I return the number of bytes written."
+
+	<category: 'stream-fromServer'>
+	self byteStreamFromServer nextPutAll: aByteArray.
+	^aByteArray size
+    ]
+
+    writeBytesToServer: aByteArray [
+	"^self
+	 This is where we make the bytes available over the pseudo socket.  Unlike a socket this is a one off thing (at least in this implementation of the pseudo socket).  Once the bytes are written, control passes to the server and stays there until the server sends a close to what it thinks is the client socket, but is really me."
+
+	<category: 'actions-client'>
+	| results |
+	self byteStreamToServer: (ReadStream on: aByteArray).
+	self byteStreamFromServer: (WriteStream on: (ByteArray new: 1000)).
+	self serverWaitSemaphore signal.
+	self clientWaitSemaphore wait.
+	results := self byteStreamFromServer contents.
+	self byteStreamToServer: nil.
+	self byteStreamFromServer: nil.
+	^results
+    ]
+]
+
+
+
 TestCase subclass: CompositeResourceTest [
     | composite |
-
-    <category: 'Swazoo-Tests'>
+    
     <comment: nil>
+    <category: 'Swazoo-Tests'>
 
     sampleInSite [
 	<category: 'testing'>
 	| site |
-	site := Site new.
+	site := SwazooSite new.
 	site 
 	    host: 'swazoo.org'
 	    ip: '127.0.0.1'
@@ -103,7 +459,6 @@ TestCase subclass: CompositeResourceTest [
 	<category: 'testing'>
 	self assert: composite isValidlyConfigured
     ]
-
 ]
 
 
@@ -223,6 +578,327 @@ TestCase subclass: FileResourceTest [
 	request := HTTPGet request: 'foo/.. /./abc.html'.
 	response := URIResolution resolveRequest: request startingAt: resource.
 	self assert: response code = 200
+    ]
+]
+
+
+
+TestCase subclass: HTTPPostTest [
+    | request |
+    
+    <comment: nil>
+    <category: 'Swazoo-Tests'>
+
+    crlf [
+	<category: 'requests'>
+	^String with: Character cr with: Character lf
+    ]
+
+    fileContents [
+	"HTTPRequestTest new fileContents"
+
+	<category: 'requests'>
+	| stream |
+	stream := SwazooStream on: String new.
+	stream
+	    nextPutLine: 'BEGIN:VCALENDAR';
+	    nextPutLine: 'PRODID:-//Squeak-iCalendar//-';
+	    nextPutLine: 'VERSION:2.0';
+	    nextPutLine: 'X-WR-CALNAME:test';
+	    nextPutLine: 'METHOD:PUBLISH';
+	    nextPutLine: 'BEGIN:VEVENT';
+	    nextPutLine: 'UID:an event with a start date and not date and time';
+	    nextPutLine: 'CATEGORIES:category1,category2';
+	    nextPutLine: 'CREATED:20050501T110231Z';
+	    nextPutLine: 'SEQUENCE:0';
+	    nextPutLine: 'SUMMARY:aTitle';
+	    nextPutLine: 'PRIORITY:5';
+	    nextPutLine: 'DTSTART;VALUE=DATE:20050425';
+	    nextPutLine: 'END:VEVENT';
+	    nextPutLine: 'END:VCALENDAR'.
+	^stream writeBuffer contents asString
+    ]
+
+    postDashes [
+	<category: 'requests'>
+	| requestStream |
+	requestStream := SwazooStream on: String new.
+	requestStream
+	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
+	    nextPutLine: 'Host: biart.eranova.si';
+	    nextPutLine: 'Content-Type: multipart/form-data; boundary= boundary';
+	    nextPutLine: 'Content-Length: 149';
+	    crlf;
+	    nextPutLine: '--boundary';
+	    nextPutLine: 'Content-Disposition: form-data; name="id5273"';
+	    crlf;
+	    nextPutLine: '----';
+	    nextPutLine: '--boundary';
+	    nextPutLine: 'Content-Disposition: form-data; name="field2"';
+	    crlf;
+	    nextPutLine: '- --';
+	    nextPutLine: '--boundary--'.
+	^HTTPRequest 
+	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+    ]
+
+    postEmpty [
+	"post entity with empty value"
+
+	<category: 'requests'>
+	| requestStream |
+	requestStream := SwazooStream on: String new.
+	requestStream
+	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
+	    nextPutLine: 'Host: biart.eranova.si';
+	    nextPutLine: 'Content-Type: multipart/form-data; boundary= boundary';
+	    nextPutLine: 'Content-Length: 75';
+	    crlf;
+	    nextPutLine: '--boundary';
+	    nextPutLine: 'Content-Disposition: form-data; name="id5273"';
+	    crlf;
+	    nextPutLine: '';
+	    nextPutLine: '--boundary--'.
+	^HTTPRequest 
+	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+    ]
+
+    postFile [
+	<category: 'requests'>
+	| requestStream |
+	requestStream := SwazooStream on: String new.
+	requestStream
+	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
+	    nextPutLine: 'Connection: Keep-Alive';
+	    nextPutLine: 'User-Agent: Mozilla/4.72 [en] (X11; I; Linux 2.3.51 i686)';
+	    nextPutLine: 'Host: biart.eranova.si';
+	    nextPutLine: 'Referer: http://www.bar.com/takeMeThere.html';
+	    nextPutLine: 'Content-Type: multipart/form-data; boundary= -----------------20752836116568320241700153999';
+	    nextPutLine: 'Content-Length: ' 
+			, (527 + self fileContents size) printString;
+	    crlf;
+	    nextPutLine: '-------------------20752836116568320241700153999';
+	    nextPutLine: 'Content-Disposition: form-data; name="id5273"';
+	    crlf;
+	    nextPutLine: 'main';
+	    nextPutLine: '-------------------20752836116568320241700153999';
+	    nextPutLine: 'Content-Disposition: form-data; name="field2"';
+	    crlf;
+	    crlf;
+	    nextPutLine: '-------------------20752836116568320241700153999';
+	    nextPutLine: 'Content-Disposition: form-data; name="field7"; filename="event.ical"';
+	    nextPutLine: 'Content-Type: application/octet-stream';
+	    crlf;
+	    nextPutAll: self fileContents;
+	    crlf;
+	    nextPutLine: '-------------------20752836116568320241700153999';
+	    nextPutLine: 'Content-Disposition: form-data; name="attach"';
+	    crlf;
+	    nextPutLine: 'Attach';
+	    nextPutLine: '-------------------20752836116568320241700153999--'.
+	^HTTPRequest 
+	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+    ]
+
+    postPreambleEpilogue [
+	<category: 'requests'>
+	| requestStream |
+	requestStream := SwazooStream on: String new.
+	requestStream
+	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
+	    nextPutLine: 'Host: biart.eranova.si';
+	    nextPutLine: 'Content-Type: multipart/form-data; boundary= boundary';
+	    nextPutLine: 'Content-Length: 146';
+	    crlf;
+	    nextPutLine: 'This is a multi-part message in MIME format';
+	    nextPutLine: '--boundary';
+	    nextPutLine: 'Content-Disposition: form-data; name="id5273"';
+	    crlf;
+	    nextPutLine: 'main';
+	    nextPutLine: '--boundary--';
+	    nextPutLine: 'This is the epilogue'.
+	^HTTPRequest 
+	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+    ]
+
+    postSimple [
+	<category: 'requests'>
+	| requestStream |
+	requestStream := SwazooStream on: String new.
+	requestStream
+	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
+	    nextPutLine: 'Host: biart.eranova.si';
+	    nextPutLine: 'Content-Type: multipart/form-data; boundary= boundary';
+	    nextPutLine: 'Content-Length: 79';
+	    crlf;
+	    nextPutLine: '--boundary';
+	    nextPutLine: 'Content-Disposition: form-data; name="id5273"';
+	    crlf;
+	    nextPutLine: 'main';
+	    nextPutLine: '--boundary--'.
+	^HTTPRequest 
+	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+    ]
+
+    postUrlEncoded [
+	<category: 'requests'>
+	| requestStream |
+	requestStream := SwazooStream on: String new.
+	requestStream
+	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
+	    nextPutLine: 'Host: biart.eranova.si';
+	    nextPutLine: 'Content-Type: application/x-www-form-urlencoded';
+	    nextPutLine: 'Content-Length: 36';
+	    crlf;
+	    nextPutAll: 'home=Cosby+one&favorite+flavor=flies'.
+	^HTTPRequest 
+	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
+    ]
+
+    testBlockCopy [
+	"streaming with 8k blocks for performance"
+
+	"this is just a basic test with content shorter that one block"
+
+	<category: 'testing-mime parsing'>
+	| boundary message in out |
+	boundary := '--boundary--'.
+	message := 'just something'.
+	in := SwazooStream on: message , self crlf , boundary.
+	out := WriteStream on: String new.
+	HTTPPost new 
+	    blockStreamingFrom: in
+	    to: out
+	    until: boundary.
+	self assert: out contents = message
+    ]
+
+    testPost10Simple [
+	"just one entity"
+
+	<category: 'testing-posts'>
+	| post |
+	post := self postSimple.
+	self assert: post isPostDataEmpty not.
+	self assert: (post postDataStringAt: 'id5273') = 'main'
+    ]
+
+    testPost2Empty [
+	"post entity with empty value"
+
+	<category: 'testing-posts'>
+	| post |
+	post := self postEmpty.
+	self assert: post isPostDataEmpty not.
+	self assert: (post postDataStringAt: 'id5273') = ''
+    ]
+
+    testPost3Dashes [
+	"some ---- inside post data"
+
+	<category: 'testing-posts'>
+	| post |
+	post := self postDashes.
+	self assert: post isPostDataEmpty not.
+	self assert: (post postDataStringAt: 'id5273') = '----'.
+	self assert: (post postDataStringAt: 'field2') = '- --'
+    ]
+
+    testPost40File [
+	<category: 'testing-file posts'>
+	| post |
+	post := self postFile.
+	self assert: post isPostDataEmpty not.
+	self assert: (post postDataStringAt: 'id5273') = 'main'.
+	self assert: (post postDataStringAt: 'field2') = ''.
+	self assert: (post postDataAt: 'field7') filename = 'event.ical'.
+	self 
+	    assert: ((post postDataStringAt: 'field7') readStream upTo: Character cr) 
+		    = 'BEGIN:VCALENDAR'.
+	self assert: (post postDataStringAt: 'field7') = self fileContents.
+	self assert: (post postDataStringAt: 'attach') = 'Attach'
+    ]
+
+    testPost41FileStreamed [
+	<category: 'testing-file posts'>
+	| post stream |
+	post := self postFile.
+	stream := WriteStream on: ByteArray new.
+	post postDataAt: 'field7' streamTo: stream.
+	self assert: (post isPostDataStreamedAt: 'field7').
+	self deny: post postData isParsed.	"post data read from socket defered"
+	self assert: (post postDataStringAt: 'id5273') = 'main'.
+	self assert: post postData isParsed.	"first access to post data trigger full read and parse"
+	self assert: (post postDataAt: 'field7') filename = 'event.ical'.
+	self assert: (stream contents asString readStream upTo: Character cr) 
+		    = 'BEGIN:VCALENDAR'.
+	self assert: stream contents asString = self fileContents.
+	self assert: (post postDataStringAt: 'attach') = 'Attach'
+    ]
+
+    testPost42FileContentType [
+	<category: 'testing-file posts'>
+	| post |
+	post := self postFile.	"set the data to the post"
+	self assert: post isPostDataEmpty not.	"read the content of the stream"
+	self assert: (post postDataAt: 'field7') contentType 
+		    = 'application/octet-stream'
+    ]
+
+    testPost5UrlEncoded [
+	"just one entity"
+
+	<category: 'testing-posts'>
+	| post |
+	post := self postUrlEncoded.
+	self assert: post isPostDataEmpty not.
+	self assert: (post postDataStringAt: 'home') = 'Cosby one'.
+	self assert: (post postDataStringAt: 'favorite flavor') = 'flies'
+    ]
+
+    testPostPreambleEpilogue [
+	"mime preamble before first part and epilogue at the end. See #postPreambleEpilogue"
+
+	<category: 'testing-posts'>
+	| post |
+	post := self postPreambleEpilogue.
+	self assert: post isPostDataEmpty not.
+	self assert: (post postDataStringAt: 'id5273') = 'main'
+    ]
+
+    testPostRawEntity [
+	<category: 'testing-posts'>
+	| requestStream post |
+	requestStream := SwazooStream on: String new.
+	requestStream
+	    nextPutLine: 'POST /foobar HTTP/1.0';
+	    nextPutLine: 'Host: foo.com';
+	    nextPutLine: 'Content-Type: text/plain';
+	    nextPutLine: 'Content-Length: 12';
+	    crlf;
+	    nextPutLine: 'Hello, World'.
+	post := HTTPRequest 
+		    readFrom: (SwazooStream on: requestStream writeBuffer contents).
+	self assert: post isPostDataEmpty.
+	self assert: post entityBody = 'Hello, World'
+    ]
+
+    testPostUrlEncodedData [
+	<category: 'testing-posts'>
+	| requestStream post |
+	requestStream := SwazooStream on: String new.
+	requestStream
+	    nextPutLine: 'POST / HTTP/1.1';
+	    nextPutLine: 'Host: foo.com';
+	    nextPutLine: 'Content-Type: application/x-www-form-urlencoded';
+	    nextPutLine: 'Content-Length: 31';
+	    crlf;
+	    nextPutLine: 'address=+fs&product=&quantity=1'.
+	post := HTTPRequest 
+		    readFrom: (SwazooStream on: requestStream writeBuffer contents).
+	self assert: (post postDataAt: 'address') value = ' fs'.
+	self assert: (post postDataAt: 'product') value = ''.
+	self assert: (post postDataAt: 'quantity') value = '1'
     ]
 ]
 
@@ -792,7 +1468,7 @@ TestCase subclass: ResourceTest [
 
     setUp [
 	<category: 'running'>
-	resource := Resource uriPattern: 'foo'
+	resource := SwazooResource uriPattern: 'foo'
     ]
 
     testEmptyURIPatternInvalid [
@@ -916,7 +1592,7 @@ TestCase subclass: SiteTest [
     setUp [
 	<category: 'running'>
 	super setUp.
-	site := Site new.
+	site := SwazooSite new.
 	site addAlias: (SiteIdentifier 
 		    host: 'swazoo.org'
 		    ip: '127.0.0.1'
@@ -933,7 +1609,7 @@ TestCase subclass: SiteTest [
     testCurrentUrl80 [
 	<category: 'testing'>
 	| aSite |
-	aSite := Site new.
+	aSite := SwazooSite new.
 	aSite addAlias: (SiteIdentifier 
 		    host: 'swazoo.org'
 		    ip: '127.0.0.1'
@@ -991,6 +1667,92 @@ TestCase subclass: SwazooBaseExtensionsTest [
 	sizes := #(5 20 6127 2 100).
 	strings := sizes collect: [:each | HTTPString newRandomString: each].
 	strings with: sizes do: [:string :size | self assert: string size = size]
+    ]
+]
+
+
+
+TestCase subclass: SwazooBufferTest [
+    
+    <comment: nil>
+    <category: 'Swazoo-Tests'>
+
+    testBoundaryFull [
+	<category: 'testing-mime boundary'>
+	| boundary buffer |
+	boundary := '--boundary--'.
+	buffer := SwazooBuffer on: 'just--boundary--something'.	"full boundary"
+	self assert: (buffer signsOfBoundary: boundary) = boundary size
+    ]
+
+    testBoundaryMixed [
+	<category: 'testing-mime boundary'>
+	| boundary buffer |
+	boundary := '--boundary--'.
+	buffer := SwazooBuffer on: 'yes,--just--boundary--something'.	"partial, later full boundary"
+	self assert: (buffer signsOfBoundary: boundary) = boundary size
+    ]
+
+    testBoundaryOnEdge [
+	"part of boundary at the end of this buffer, remaining probably in the next"
+
+	<category: 'testing-mime boundary'>
+	| boundary buffer |
+	boundary := '--boundary--'.
+	buffer := SwazooBuffer on: 'just something-'.	"just first char of boundary"
+	self assert: (buffer signsOfBoundary: boundary) = 1.
+	buffer := SwazooBuffer on: 'just something--'.	"two chars"
+	self assert: (buffer signsOfBoundary: boundary) = 2.
+	buffer := SwazooBuffer on: 'just something--bound'.	"half"
+	self assert: (buffer signsOfBoundary: boundary) = 7.
+	buffer := SwazooBuffer on: 'just something--boundary--'.	"full boundary at the edge"
+	self assert: (buffer signsOfBoundary: boundary) = boundary size
+    ]
+
+    testBoundaryOnEdgeMixed [
+	"signs of boundary in the middle part at the end of this buffer, remaining probably in the next"
+
+	<category: 'testing-mime boundary'>
+	| boundary buffer |
+	boundary := '--boundary--'.
+	buffer := SwazooBuffer on: 'just-something-'.	"sign in the middle, one char at the end"
+	self assert: (buffer signsOfBoundary: boundary) = 1.
+	buffer := SwazooBuffer on: 'just-something--'.	"two chars"
+	self assert: (buffer signsOfBoundary: boundary) = 2.
+	buffer := SwazooBuffer on: 'just-so--mething--bound'.	"even more mixed case"
+	self assert: (buffer signsOfBoundary: boundary) = 7
+    ]
+
+    testBoundarySimple [
+	<category: 'testing-mime boundary'>
+	| boundary buffer |
+	boundary := '--boundary--'.
+	buffer := SwazooBuffer on: 'just something'.	"no boundary"
+	self assert: (buffer signsOfBoundary: boundary) = 0.
+	buffer := SwazooBuffer on: 'just-something'.	"sign of boundary"
+	self assert: (buffer signsOfBoundary: boundary) = 0.
+	buffer := SwazooBuffer on: 'just--something'.	"more sign of boundary"
+	self assert: (buffer signsOfBoundary: boundary) = 0.
+	buffer := SwazooBuffer on: 'just--boundary--something'.	"full boundary"
+	self assert: (buffer signsOfBoundary: boundary) = boundary size
+    ]
+
+    testIndexOfBoundary [
+	"index of start of boundary in buffer, both full or partial at the edge/end of buffer"
+
+	<category: 'testing-mime boundary'>
+	| boundary buffer |
+	boundary := '--boundary--'.
+	buffer := SwazooBuffer on: 'just something'.	"no boundary"
+	self assert: (buffer indexOfBoundary: boundary) = 0.
+	buffer := SwazooBuffer on: 'just--boundary--something-'.	"full boundary"
+	self assert: (buffer indexOfBoundary: boundary) = 5.
+	buffer := SwazooBuffer on: 'just something--boun'.	"partial boundary at the edge"
+	self assert: (buffer indexOfBoundary: boundary) = 15.
+	buffer := SwazooBuffer on: 'just something-'.	"partial boundary, one char only"
+	self assert: (buffer indexOfBoundary: boundary) = 15.
+	buffer := SwazooBuffer on: 'just-som--ething--boun'.	"mixed case with partial at the edge"
+	self assert: (buffer indexOfBoundary: boundary) = 17
     ]
 ]
 
@@ -1150,7 +1912,7 @@ TestCase subclass: SwazooConfigurationTest [
   </CompositeResource>
  </CompositeResource>
 </Site>'.
-	site := Site new readFrom: rs.
+	site := SwazooSite new readFrom: rs.
 	self assert: site children size = 1.
 	composite := site children first.
 	self assert: composite class == CompositeResource.
@@ -1179,7 +1941,7 @@ TestCase subclass: SwazooConfigurationTest [
 		    on: '<Site>
  <SiteIdentifier ip: ''192.168.1.66'' port: 80 host: ''swazoo.org''>
 </Site>'.
-	site := Site new readFrom: rs.
+	site := SwazooSite new readFrom: rs.
 	self assert: site aliases size = 1.
 	self assert: site currentUrl = 'http://swazoo.org/'.
 	alias := site aliases first.
@@ -1196,7 +1958,7 @@ TestCase subclass: SwazooConfigurationTest [
 <SiteIdentifier ip: ''192.168.1.66'' port: 80 host: ''swazoo.org''>
  <FileResource uriPattern: ''/'' filePath: ''files''>
 </Site>'.
-	site := Site new readFrom: rs.
+	site := SwazooSite new readFrom: rs.
 	self assert: site children size = 1.
 	resource := site children first.
 	self assert: resource class == FileResource.
@@ -1214,7 +1976,7 @@ TestCase subclass: SwazooConfigurationTest [
  <HelloWorldResource uriPattern: ''/''>
  <HelloWorldResource uriPattern: ''/''>
 </Site>'.
-	site := Site new readFrom: rs.
+	site := SwazooSite new readFrom: rs.
 	self assert: site children size = 2.
 	resource1 := site children first.
 	self assert: resource1 class == HelloWorldResource.
@@ -1256,7 +2018,7 @@ TestCase subclass: SwazooConfigurationTest [
 <SiteIdentifier ip: ''192.168.1.66'' port: 80 host: ''swazoo.org''>
  <HelloWorldResource uriPattern: ''/''>
 </Site>'.
-	site := Site new readFrom: rs.
+	site := SwazooSite new readFrom: rs.
 	self assert: site children size = 1.
 	resource := site children first.
 	self assert: resource class == HelloWorldResource.
@@ -1271,7 +2033,7 @@ TestCase subclass: SwazooConfigurationTest [
 	rs := ReadStream on: '  <Site>  
 
 </Site>   '.
-	config := Site new.
+	config := SwazooSite new.
 	tag := config nextTagFrom: rs.
 	self assert: tag = 'Site'.
 	tag := config nextTagFrom: rs.
@@ -1287,19 +2049,27 @@ TestCase subclass: SwazooServerTest [
     <comment: nil>
     <category: 'Swazoo-Tests'>
 
+    removeTestSiteIfAny [
+	<category: 'support'>
+	| site |
+	site := SwazooServer siteNamed: self testSiteName.
+	site notNil ifTrue: [SwazooServer singleton removeSite: site]
+    ]
+
     testAccessingSite [
 	<category: 'testing'>
 	| site |
-	site := (Site new)
-		    name: 'aabbcc';
+	self removeTestSiteIfAny.
+	site := (SwazooSite new)
+		    name: self testSiteName;
 		    host: 'test.org'
 			ip: 'localhost'
 			port: 8543.
 	
 	[SwazooServer singleton addSite: site.
-	self assert: (SwazooServer siteNamed: 'aabbcc') notNil.
-	site := SwazooServer siteNamed: 'aabbcc'.
-	self assert: site name = 'aabbcc'.
+	self assert: (SwazooServer siteNamed: self testSiteName) notNil.
+	site := SwazooServer siteNamed: self testSiteName.
+	self assert: site name = self testSiteName.
 	self assert: (SwazooServer siteHostnamed: 'test.org') notNil.
 	site := SwazooServer siteHostnamed: 'test.org'.
 	self assert: site host = 'test.org'] 
@@ -1311,33 +2081,35 @@ TestCase subclass: SwazooServerTest [
 
 	<category: 'testing-adding sites'>
 	| site server |
+	self removeTestSiteIfAny.
 	server := SwazooServer singleton.
-	self assert: (server siteNamed: 'allInterfaces') isNil.
-	site := (Site new)
-		    name: 'allInterfaces';
+	self assert: (server siteNamed: self testSiteName) isNil.
+	site := (SwazooSite new)
+		    name: self testSiteName;
 		    host: '*'
 			ip: '*'
 			port: 7261.
 	
 	[server addSite: site.
-	self assert: (server siteNamed: 'allInterfaces') notNil] 
+	self assert: (server siteNamed: self testSiteName) notNil] 
 		ensure: [server removeSite: site]
     ]
 
     testAddingSite [
 	<category: 'testing-adding sites'>
 	| site server nrSites |
+	self removeTestSiteIfAny.
 	server := SwazooServer singleton.
 	nrSites := server sites size.
-	self assert: (server siteNamed: 'aabbcc') isNil.
-	self assert: (server siteHostnamed: 'test.org') isNil.
-	site := (Site new)
-		    name: 'aabbcc';
+	self assert: (server siteNamed: self testSiteName) isNil.
+	self assert: (server siteHostnamed: self testSiteName) isNil.
+	site := (SwazooSite new)
+		    name: self testSiteName;
 		    host: 'test.org'
 			ip: 'localhost'
-			port: 80.
+			port: 5798.
 	server addSite: site.
-	self assert: (server siteNamed: 'aabbcc') notNil.
+	self assert: (server siteNamed: self testSiteName) notNil.
 	self assert: (server siteHostnamed: 'test.org') notNil.
 	server removeSite: site.
 	self assert: server sites size = nrSites
@@ -1349,12 +2121,12 @@ TestCase subclass: SwazooServerTest [
 	<category: 'testing-adding sites'>
 	| server site1 site2 |
 	server := SwazooServer singleton.
-	site1 := (Site new)
+	site1 := (SwazooSite new)
 		    name: 'allInterfaces1';
 		    host: '*'
 			ip: '*'
 			port: 7261.
-	site2 := (Site new)
+	site2 := (SwazooSite new)
 		    name: 'allInterfaces2';
 		    host: '*'
 			ip: '*'
@@ -1368,18 +2140,42 @@ TestCase subclass: SwazooServerTest [
 			removeSite: site2]
     ]
 
+    testAllStarsThenExactOnOtherPort [
+	<category: 'testing-adding sites'>
+	| server site1 site2 |
+	server := SwazooServer singleton.
+	site1 := (SwazooSite new)
+		    name: 'allstar232';
+		    host: '*'
+			ip: '*'
+			port: 7261.
+	site2 := (SwazooSite new)
+		    name: 'exactdfdf';
+		    host: 'localhost'
+			ip: 'localhost'
+			port: 7262.
+	
+	[server addSite: site1.
+	self shouldnt: 
+		[server
+		    addSite: site2;
+		    removeSite: site2]
+	    raise: Error] 
+		ensure: [server removeSite: site1]
+    ]
+
     testDuplicateAllInterfacesSite [
 	"two sites cannot run on all IP interfaces and same port"
 
 	<category: 'testing-adding sites'>
 	| server site1 site2 |
 	server := SwazooServer singleton.
-	site1 := (Site new)
+	site1 := (SwazooSite new)
 		    name: 'allInterfaces1';
 		    host: '*'
 			ip: '*'
 			port: 7261.
-	site2 := (Site new)
+	site2 := (SwazooSite new)
 		    name: 'allInterfaces2';
 		    host: '*'
 			ip: '*'
@@ -1393,24 +2189,30 @@ TestCase subclass: SwazooServerTest [
     testDuplicateNames [
 	<category: 'testing-adding sites'>
 	| site server |
+	self removeTestSiteIfAny.
 	server := SwazooServer singleton.
-	site := (Site new)
-		    name: 'aabbcc';
+	site := (SwazooSite new)
+		    name: self testSiteName;
 		    host: 'test.org'
 			ip: 'localhost'
-			port: 80.
+			port: 6376.
 	
 	[server addSite: site.
-	self should: [site name: 'aabbcc'] raise: Error.
+	self should: [site name: self testSiteName] raise: Error.
 	self shouldnt: [site host: 'test.org'] raise: Error.
 	self should: 
-		[(Site new)
-		    name: 'aabbcc';
+		[(SwazooSite new)
+		    name: self testSiteName;
 		    host: 'test.org'
 			ip: 'localhost'
-			port: 80]
+			port: 6376]
 	    raise: Error] 
 		ensure: [server removeSite: site]
+    ]
+
+    testSiteName [
+	<category: 'support'>
+	^'aaabbcc987'
     ]
 
     testStartingOnAPort [
@@ -1461,20 +2263,21 @@ TestCase subclass: SwazooServerTest [
     testStartingSite [
 	<category: 'testing'>
 	| site server nrServers |
+	self removeTestSiteIfAny.
 	server := SwazooServer singleton.
 	nrServers := server servers size.
-	site := (Site new)
-		    name: 'aabbcc';
+	site := (SwazooSite new)
+		    name: self testSiteName;
 		    host: 'test.org'
 			ip: 'localhost'
 			port: 8765.
 	
 	[server addSite: site.
 	self assert: site isServing not.
-	SwazooServer startSite: 'aabbcc'.
+	SwazooServer startSite: self testSiteName.
 	self assert: server servers size = (nrServers + 1).
 	self assert: site isServing.
-	SwazooServer stopSite: 'aabbcc'.
+	SwazooServer stopSite: self testSiteName.
 	self assert: site isServing not.
 	self assert: server servers size = nrServers] 
 		ensure: 
@@ -1919,7 +2722,7 @@ TestCase subclass: URIResolutionTest [
     testSiteAnswer [
 	<category: 'testing'>
 	| resource request response |
-	resource := Site new 
+	resource := SwazooSite new 
 		    host: 'foo.com'
 		    ip: '1.2.3.4'
 		    port: 80.
@@ -1942,7 +2745,7 @@ TestCase subclass: URIResolutionTest [
 		    from: 'myhosthost:1234'
 		    at: '1.2.3.4'.
 	visitor := URIResolution new initializeRequest: request.
-	site := Site new 
+	site := SwazooSite new 
 		    host: 'myhosthost'
 		    ip: '1.2.3.4'
 		    port: 1234.
@@ -1957,7 +2760,7 @@ TestCase subclass: URIResolutionTest [
 		    from: 'localhost:1234'
 		    at: '1.2.3.4'.
 	visitor := URIResolution new initializeRequest: request.
-	site := Site new 
+	site := SwazooSite new 
 		    host: 'remotehost'
 		    ip: '1.2.3.4'
 		    port: 1234.
@@ -1998,659 +2801,6 @@ TestCase subclass: URIResolutionTest [
 	self assert: resolution tailPath = #('quux') asOrderedCollection.
 	resolution advance.
 	self assert: resolution tailPath isEmpty
-    ]
-]
-
-
-
-Object subclass: TestPseudoSocket [
-    | byteStreamToServer byteStreamFromServer clientWaitSemaphore serverWaitSemaphore ipAddress |
-    
-    <category: 'Swazoo-Tests'>
-    <comment: 'TestPseudoSocket is a drop in replacement for a SwazooSocket that can be used during testing to feed bytes into a running SwazooHTTPServer and grab the responses without having to start a real socket pair.
-
-So, to the HTTP server it must look like a server socket.  To the tester it must look like a write stream (to send bytes to the HTTP server) and a read stream (to read the HTTP responses).'>
-
-    TestPseudoSocket class >> newTCPSocket [
-	"^a TestPseudoSocket
-	 I simply return a new instance of myself."
-
-	<category: 'instance creation'>
-	^self new
-    ]
-
-    TestPseudoSocket class >> serverOnIP: host port: port [
-	"^self
-	 I'm only pretending to be a socket class, so I ignore the host and port."
-
-	<category: 'instance creation'>
-	^self new
-    ]
-
-    acceptRetryingIfTransientErrors [
-	"^another TestSocketThing
-	 The sender expects me to block until a request comes in 'over the socket'.  What I really do is wait for someone to ask me to 'send in' a Byte array and then I return myself.  Note that I will only handle one request at a time!!"
-
-	<category: 'socket stuff'>
-	self serverWaitSemaphore wait.
-	^self
-    ]
-
-    bindSocketAddress: anOSkIPAddress [
-	"^self
-	 This is a no-op for me."
-
-	<category: 'socket stuff'>
-	ipAddress := anOSkIPAddress.
-	^self
-    ]
-
-    byteStreamFromServer [
-	<category: 'accessing'>
-	^byteStreamFromServer
-    ]
-
-    byteStreamFromServer: aByteStream [
-	<category: 'accessing'>
-	byteStreamFromServer := aByteStream.
-	^self
-    ]
-
-    byteStreamToServer [
-	<category: 'accessing'>
-	^byteStreamToServer
-    ]
-
-    byteStreamToServer: aByteStream [
-	<category: 'accessing'>
-	byteStreamToServer := aByteStream.
-	^self
-    ]
-
-    clientWaitSemaphore [
-	"^a Semaphore
-	 I return the semaphore I use to control 'client' activity."
-
-	<category: 'accessing'>
-	clientWaitSemaphore isNil ifTrue: [clientWaitSemaphore := Semaphore new].
-	^clientWaitSemaphore
-    ]
-
-    close [
-	"^self
-	 The server has finished with us at this point, so we signal the semaphore to give the client end chance to grab the response."
-
-	<category: 'socket stuff'>
-	self clientWaitSemaphore signal.
-	^self
-    ]
-
-    flush [
-	<category: 'socket stuff'>
-	^self
-    ]
-
-    getPeerName [
-	<category: 'socket stuff'>
-	^ipAddress
-    ]
-
-    getSocketName [
-	<category: 'socket stuff'>
-	^ipAddress
-    ]
-
-    isActive [
-	"^self
-	 I am pretending to be a socket, and the sender wants to know if I am active.  Of course I am!!."
-
-	<category: 'socket stuff'>
-	^true
-    ]
-
-    listenBackloggingUpTo: anInteger [
-	"^self
-	 This is a no-op for me."
-
-	<category: 'socket stuff'>
-	^self
-    ]
-
-    listenFor: anInteger [
-	"^self
-	 This is a no-op for now."
-
-	<category: 'socket stuff'>
-	^self
-    ]
-
-    next [
-	<category: 'stream-toServer'>
-	^self byteStreamToServer next
-    ]
-
-    nextPut: aCharacter [
-	<category: 'stream-fromServer'>
-	self byteStreamFromServer nextPut: aCharacter asInteger
-    ]
-
-    nextPutAll: aCollection [
-	"^self
-	 At present it seems that aCollection will always be a string of chacters."
-
-	<category: 'stream-fromServer'>
-	^self byteStreamFromServer nextPutAll: aCollection asByteArray
-    ]
-
-    nextPutBytes: aByteArray [
-	<category: 'stream-fromServer'>
-	self byteStreamFromServer nextPutAll: aByteArray
-    ]
-
-    peek [
-	"^a Character
-	 It seems that the HTTP server is expecting Characters not Bytes - this will have to change."
-
-	<category: 'stream-toServer'>
-	^byteStreamToServer isNil 
-	    ifTrue: [nil]
-	    ifFalse: [self byteStreamToServer peek asCharacter]
-    ]
-
-    print: anObject [
-	<category: 'stream-fromServer'>
-	self nextPutAll: anObject printString asByteArray.
-	^self
-    ]
-
-    read: integerNumberOfBytes [
-	"^a ByteArray
-	 I read the next numberOfBytes from my underlying stream."
-
-	<category: 'stream-toServer'>
-	^byteStreamToServer isNil 
-	    ifTrue: [ByteArray new]
-	    ifFalse: [self byteStreamToServer nextAvailable: integerNumberOfBytes]
-    ]
-
-    serverWaitSemaphore [
-	"^a Semaphore
-	 I return the semaphore I use to control 'server' activity."
-
-	<category: 'accessing'>
-	serverWaitSemaphore isNil ifTrue: [serverWaitSemaphore := Semaphore new].
-	^serverWaitSemaphore
-    ]
-
-    setAddressReuse: aBoolean [
-	"^self
-	 This is a no-op for me."
-
-	<category: 'socket stuff'>
-	^self
-    ]
-
-    socket [
-	"^self
-	 I am being asked this as if I am a socket stream.  I return myself because I'm pretending to be both the socket and the socket stream."
-
-	<category: 'stream-toServer'>
-	^self
-    ]
-
-    space [
-	<category: 'stream-fromServer'>
-	self nextPut: Character space.
-	^self
-    ]
-
-    stream [
-	"^self
-	 I have to pretend to be a socket stream too."
-
-	<category: 'socket stuff'>
-	^self
-    ]
-
-    upTo: aCharacter [
-	"a ByteString
-	 For some reason, we have to look for a character in a ByteStream - this is a Swazoo thing."
-
-	<category: 'stream-toServer'>
-	^(self byteStreamToServer upTo: aCharacter asInteger) asByteString
-    ]
-
-    write: aByteArray [
-	"^an Integer
-	 I write the contents of the sourceByteArray to my underlying Socket.
-	 I return the number of bytes written."
-
-	<category: 'stream-fromServer'>
-	self byteStreamFromServer nextPutAll: aByteArray.
-	^aByteArray size
-    ]
-
-    writeBytesToServer: aByteArray [
-	"^self
-	 This is where we make the bytes available over the pseudo socket.  Unlike a socket this is a one off thing (at least in this implementation of the pseudo socket).  Once the bytes are written, control passes to the server and stays there until the server sends a close to what it thinks is the client socket, but is really me."
-
-	<category: 'actions-client'>
-	| results |
-	self byteStreamToServer: (ReadStream on: aByteArray).
-	self byteStreamFromServer: (WriteStream on: (ByteArray new: 1000)).
-	self serverWaitSemaphore signal.
-	self clientWaitSemaphore wait.
-	results := self byteStreamFromServer contents.
-	self byteStreamToServer: nil.
-	self byteStreamFromServer: nil.
-	^results
-    ]
-]
-
-
-
-TestCase subclass: HTTPPostTest [
-    | request |
-    
-    <comment: nil>
-    <category: 'Swazoo-Tests'>
-
-    crlf [
-	<category: 'requests'>
-	^String with: Character cr with: Character lf
-    ]
-
-    fileContents [
-	"HTTPRequestTest new fileContents"
-
-	<category: 'requests'>
-	| stream |
-	stream := SwazooStream on: String new.
-	stream
-	    nextPutLine: 'BEGIN:VCALENDAR';
-	    nextPutLine: 'PRODID:-//Squeak-iCalendar//-';
-	    nextPutLine: 'VERSION:2.0';
-	    nextPutLine: 'X-WR-CALNAME:test';
-	    nextPutLine: 'METHOD:PUBLISH';
-	    nextPutLine: 'BEGIN:VEVENT';
-	    nextPutLine: 'UID:an event with a start date and not date and time';
-	    nextPutLine: 'CATEGORIES:category1,category2';
-	    nextPutLine: 'CREATED:20050501T110231Z';
-	    nextPutLine: 'SEQUENCE:0';
-	    nextPutLine: 'SUMMARY:aTitle';
-	    nextPutLine: 'PRIORITY:5';
-	    nextPutLine: 'DTSTART;VALUE=DATE:20050425';
-	    nextPutLine: 'END:VEVENT';
-	    nextPutLine: 'END:VCALENDAR'.
-	^stream writeBuffer contents asString
-    ]
-
-    postDashes [
-	<category: 'requests'>
-	| requestStream |
-	requestStream := SwazooStream on: String new.
-	requestStream
-	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
-	    nextPutLine: 'Host: biart.eranova.si';
-	    nextPutLine: 'Content-Type: multipart/form-data; boundary= boundary';
-	    nextPutLine: 'Content-Length: 149';
-	    crlf;
-	    nextPutLine: '--boundary';
-	    nextPutLine: 'Content-Disposition: form-data; name="id5273"';
-	    crlf;
-	    nextPutLine: '----';
-	    nextPutLine: '--boundary';
-	    nextPutLine: 'Content-Disposition: form-data; name="field2"';
-	    crlf;
-	    nextPutLine: '- --';
-	    nextPutLine: '--boundary--'.
-	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
-    ]
-
-    postEmpty [
-	"post entity with empty value"
-
-	<category: 'requests'>
-	| requestStream |
-	requestStream := SwazooStream on: String new.
-	requestStream
-	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
-	    nextPutLine: 'Host: biart.eranova.si';
-	    nextPutLine: 'Content-Type: multipart/form-data; boundary= boundary';
-	    nextPutLine: 'Content-Length: 75';
-	    crlf;
-	    nextPutLine: '--boundary';
-	    nextPutLine: 'Content-Disposition: form-data; name="id5273"';
-	    crlf;
-	    nextPutLine: '';
-	    nextPutLine: '--boundary--'.
-	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
-    ]
-
-    postFile [
-	<category: 'requests'>
-	| requestStream |
-	requestStream := SwazooStream on: String new.
-	requestStream
-	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
-	    nextPutLine: 'Connection: Keep-Alive';
-	    nextPutLine: 'User-Agent: Mozilla/4.72 [en] (X11; I; Linux 2.3.51 i686)';
-	    nextPutLine: 'Host: biart.eranova.si';
-	    nextPutLine: 'Referer: http://www.bar.com/takeMeThere.html';
-	    nextPutLine: 'Content-Type: multipart/form-data; boundary= -----------------20752836116568320241700153999';
-	    nextPutLine: 'Content-Length: ' 
-			, (527 + self fileContents size) printString;
-	    crlf;
-	    nextPutLine: '-------------------20752836116568320241700153999';
-	    nextPutLine: 'Content-Disposition: form-data; name="id5273"';
-	    crlf;
-	    nextPutLine: 'main';
-	    nextPutLine: '-------------------20752836116568320241700153999';
-	    nextPutLine: 'Content-Disposition: form-data; name="field2"';
-	    crlf;
-	    crlf;
-	    nextPutLine: '-------------------20752836116568320241700153999';
-	    nextPutLine: 'Content-Disposition: form-data; name="field7"; filename="event.ical"';
-	    nextPutLine: 'Content-Type: application/octet-stream';
-	    crlf;
-	    nextPutAll: self fileContents;
-	    crlf;
-	    nextPutLine: '-------------------20752836116568320241700153999';
-	    nextPutLine: 'Content-Disposition: form-data; name="attach"';
-	    crlf;
-	    nextPutLine: 'Attach';
-	    nextPutLine: '-------------------20752836116568320241700153999--'.
-	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
-    ]
-
-    postPreambleEpilogue [
-	<category: 'requests'>
-	| requestStream |
-	requestStream := SwazooStream on: String new.
-	requestStream
-	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
-	    nextPutLine: 'Host: biart.eranova.si';
-	    nextPutLine: 'Content-Type: multipart/form-data; boundary= boundary';
-	    nextPutLine: 'Content-Length: 146';
-	    crlf;
-	    nextPutLine: 'This is a multi-part message in MIME format';
-	    nextPutLine: '--boundary';
-	    nextPutLine: 'Content-Disposition: form-data; name="id5273"';
-	    crlf;
-	    nextPutLine: 'main';
-	    nextPutLine: '--boundary--';
-	    nextPutLine: 'This is the epilogue'.
-	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
-    ]
-
-    postSimple [
-	<category: 'requests'>
-	| requestStream |
-	requestStream := SwazooStream on: String new.
-	requestStream
-	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
-	    nextPutLine: 'Host: biart.eranova.si';
-	    nextPutLine: 'Content-Type: multipart/form-data; boundary= boundary';
-	    nextPutLine: 'Content-Length: 79';
-	    crlf;
-	    nextPutLine: '--boundary';
-	    nextPutLine: 'Content-Disposition: form-data; name="id5273"';
-	    crlf;
-	    nextPutLine: 'main';
-	    nextPutLine: '--boundary--'.
-	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
-    ]
-
-    postUrlEncoded [
-	<category: 'requests'>
-	| requestStream |
-	requestStream := SwazooStream on: String new.
-	requestStream
-	    nextPutLine: 'POST  /document/aab.html HTTP/1.1';
-	    nextPutLine: 'Host: biart.eranova.si';
-	    nextPutLine: 'Content-Type: application/x-www-form-urlencoded';
-	    nextPutLine: 'Content-Length: 36';
-	    crlf;
-	    nextPutAll: 'home=Cosby+one&favorite+flavor=flies'.
-	^HTTPRequest 
-	    readFrom: (SwazooStream on: requestStream writeBuffer contents)
-    ]
-
-    testBlockCopy [
-	"streaming with 8k blocks for performance"
-
-	"this is just a basic test with content shorter that one block"
-
-	<category: 'testing-mime parsing'>
-	| boundary message in out |
-	boundary := '--boundary--'.
-	message := 'just something'.
-	in := SwazooStream on: message , self crlf , boundary.
-	out := WriteStream on: String new.
-	HTTPPost new 
-	    blockStreamingFrom: in
-	    to: out
-	    until: boundary.
-	self assert: out contents = message
-    ]
-
-    testPost10Simple [
-	"just one entity"
-
-	<category: 'testing-posts'>
-	| post |
-	post := self postSimple.
-	self assert: post isPostDataEmpty not.
-	self assert: (post postDataStringAt: 'id5273') = 'main'
-    ]
-
-    testPost2Empty [
-	"post entity with empty value"
-
-	<category: 'testing-posts'>
-	| post |
-	post := self postEmpty.
-	self assert: post isPostDataEmpty not.
-	self assert: (post postDataStringAt: 'id5273') = ''
-    ]
-
-    testPost3Dashes [
-	"some ---- inside post data"
-
-	<category: 'testing-posts'>
-	| post |
-	post := self postDashes.
-	self assert: post isPostDataEmpty not.
-	self assert: (post postDataStringAt: 'id5273') = '----'.
-	self assert: (post postDataStringAt: 'field2') = '- --'
-    ]
-
-    testPost40File [
-	<category: 'testing-file posts'>
-	| post |
-	post := self postFile.
-	self assert: post isPostDataEmpty not.
-	self assert: (post postDataStringAt: 'id5273') = 'main'.
-	self assert: (post postDataStringAt: 'field2') = ''.
-	self assert: (post postDataAt: 'field7') filename = 'event.ical'.
-	self 
-	    assert: ((post postDataStringAt: 'field7') readStream upTo: Character cr) 
-		    = 'BEGIN:VCALENDAR'.
-	self assert: (post postDataStringAt: 'field7') = self fileContents.
-	self assert: (post postDataStringAt: 'attach') = 'Attach'
-    ]
-
-    testPost41FileStreamed [
-	<category: 'testing-file posts'>
-	| post stream |
-	post := self postFile.
-	stream := WriteStream on: ByteArray new.
-	post postDataAt: 'field7' streamTo: stream.
-	self assert: (post isPostDataStreamedAt: 'field7').
-	self deny: post postData isParsed.	"post data read from socket defered"
-	self assert: (post postDataStringAt: 'id5273') = 'main'.
-	self assert: post postData isParsed.	"first access to post data trigger full read and parse"
-	self assert: (post postDataAt: 'field7') filename = 'event.ical'.
-	self assert: (stream contents asString readStream upTo: Character cr) 
-		    = 'BEGIN:VCALENDAR'.
-	self assert: stream contents asString = self fileContents.
-	self assert: (post postDataStringAt: 'attach') = 'Attach'
-    ]
-
-    testPost42FileContentType [
-	<category: 'testing-file posts'>
-	| post |
-	post := self postFile.	"set the data to the post"
-	self assert: post isPostDataEmpty not.	"read the content of the stream"
-	self assert: (post postDataAt: 'field7') contentType 
-		    = 'application/octet-stream'
-    ]
-
-    testPost5UrlEncoded [
-	"just one entity"
-
-	<category: 'testing-posts'>
-	| post |
-	post := self postUrlEncoded.
-	self assert: post isPostDataEmpty not.
-	self assert: (post postDataStringAt: 'home') = 'Cosby one'.
-	self assert: (post postDataStringAt: 'favorite flavor') = 'flies'
-    ]
-
-    testPostPreambleEpilogue [
-	"mime preamble before first part and epilogue at the end. See #postPreambleEpilogue"
-
-	<category: 'testing-posts'>
-	| post |
-	post := self postPreambleEpilogue.
-	self assert: post isPostDataEmpty not.
-	self assert: (post postDataStringAt: 'id5273') = 'main'
-    ]
-
-    testPostRawEntity [
-	<category: 'testing-posts'>
-	| requestStream post |
-	requestStream := SwazooStream on: String new.
-	requestStream
-	    nextPutLine: 'POST /foobar HTTP/1.0';
-	    nextPutLine: 'Host: foo.com';
-	    nextPutLine: 'Content-Type: text/plain';
-	    nextPutLine: 'Content-Length: 12';
-	    crlf;
-	    nextPutLine: 'Hello, World'.
-	post := HTTPRequest 
-		    readFrom: (SwazooStream on: requestStream writeBuffer contents).
-	self assert: post isPostDataEmpty.
-	self assert: post entityBody = 'Hello, World'
-    ]
-
-    testPostUrlEncodedData [
-	<category: 'testing-posts'>
-	| requestStream post |
-	requestStream := SwazooStream on: String new.
-	requestStream
-	    nextPutLine: 'POST / HTTP/1.1';
-	    nextPutLine: 'Host: foo.com';
-	    nextPutLine: 'Content-Type: application/x-www-form-urlencoded';
-	    nextPutLine: 'Content-Length: 31';
-	    crlf;
-	    nextPutLine: 'address=+fs&product=&quantity=1'.
-	post := HTTPRequest 
-		    readFrom: (SwazooStream on: requestStream writeBuffer contents).
-	self assert: (post postDataAt: 'address') value = ' fs'.
-	self assert: (post postDataAt: 'product') value = ''.
-	self assert: (post postDataAt: 'quantity') value = '1'
-    ]
-]
-
-
-
-TestCase subclass: SwazooBufferTest [
-    
-    <comment: nil>
-    <category: 'Swazoo-Tests'>
-
-    testBoundaryFull [
-	<category: 'testing-mime boundary'>
-	| boundary buffer |
-	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'just--boundary--something'.	"full boundary"
-	self assert: (buffer signsOfBoundary: boundary) = boundary size
-    ]
-
-    testBoundaryMixed [
-	<category: 'testing-mime boundary'>
-	| boundary buffer |
-	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'yes,--just--boundary--something'.	"partial, later full boundary"
-	self assert: (buffer signsOfBoundary: boundary) = boundary size
-    ]
-
-    testBoundaryOnEdge [
-	"part of boundary at the end of this buffer, remaining probably in the next"
-
-	<category: 'testing-mime boundary'>
-	| boundary buffer |
-	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'just something-'.	"just first char of boundary"
-	self assert: (buffer signsOfBoundary: boundary) = 1.
-	buffer := SwazooBuffer on: 'just something--'.	"two chars"
-	self assert: (buffer signsOfBoundary: boundary) = 2.
-	buffer := SwazooBuffer on: 'just something--bound'.	"half"
-	self assert: (buffer signsOfBoundary: boundary) = 7.
-	buffer := SwazooBuffer on: 'just something--boundary--'.	"full boundary at the edge"
-	self assert: (buffer signsOfBoundary: boundary) = boundary size
-    ]
-
-    testBoundaryOnEdgeMixed [
-	"signs of boundary in the middle part at the end of this buffer, remaining probably in the next"
-
-	<category: 'testing-mime boundary'>
-	| boundary buffer |
-	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'just-something-'.	"sign in the middle, one char at the end"
-	self assert: (buffer signsOfBoundary: boundary) = 1.
-	buffer := SwazooBuffer on: 'just-something--'.	"two chars"
-	self assert: (buffer signsOfBoundary: boundary) = 2.
-	buffer := SwazooBuffer on: 'just-so--mething--bound'.	"even more mixed case"
-	self assert: (buffer signsOfBoundary: boundary) = 7
-    ]
-
-    testBoundarySimple [
-	<category: 'testing-mime boundary'>
-	| boundary buffer |
-	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'just something'.	"no boundary"
-	self assert: (buffer signsOfBoundary: boundary) = 0.
-	buffer := SwazooBuffer on: 'just-something'.	"sign of boundary"
-	self assert: (buffer signsOfBoundary: boundary) = 0.
-	buffer := SwazooBuffer on: 'just--something'.	"more sign of boundary"
-	self assert: (buffer signsOfBoundary: boundary) = 0.
-	buffer := SwazooBuffer on: 'just--boundary--something'.	"full boundary"
-	self assert: (buffer signsOfBoundary: boundary) = boundary size
-    ]
-
-    testIndexOfBoundary [
-	"index of start of boundary in buffer, both full or partial at the edge/end of buffer"
-
-	<category: 'testing-mime boundary'>
-	| boundary buffer |
-	boundary := '--boundary--'.
-	buffer := SwazooBuffer on: 'just something'.	"no boundary"
-	self assert: (buffer indexOfBoundary: boundary) = 0.
-	buffer := SwazooBuffer on: 'just--boundary--something-'.	"full boundary"
-	self assert: (buffer indexOfBoundary: boundary) = 5.
-	buffer := SwazooBuffer on: 'just something--boun'.	"partial boundary at the edge"
-	self assert: (buffer indexOfBoundary: boundary) = 15.
-	buffer := SwazooBuffer on: 'just something-'.	"partial boundary, one char only"
-	self assert: (buffer indexOfBoundary: boundary) = 15.
-	buffer := SwazooBuffer on: 'just-som--ething--boun'.	"mixed case with partial at the edge"
-	self assert: (buffer indexOfBoundary: boundary) = 17
     ]
 ]
 

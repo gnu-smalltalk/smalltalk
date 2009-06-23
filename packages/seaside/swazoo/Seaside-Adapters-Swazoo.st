@@ -66,7 +66,7 @@ Swazoo.HTTPMessage extend [
 
 
 
-Swazoo.Site subclass: SeasideSite [
+Swazoo.SwazooSite subclass: SeasideSite [
     | dispatcher codec |
     
     <comment: 'I am the implementation of the Seaside server adaptor for Swazoo 2.'>

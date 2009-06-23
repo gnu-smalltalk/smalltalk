@@ -50,6 +50,7 @@
   <filein>Messages.st</filein>
   <filein>Core.st</filein>
   <filein>Resources.st</filein>
+  <filein>Buffer.st</filein>
   <filein>HTTP.st</filein>
   <filein>Extensions.st</filein>
 
@@ -58,7 +59,9 @@
   <file>Messages.st</file>
   <file>Core.st</file>
   <file>Resources.st</file>
+  <file>Buffer.st</file>
   <file>HTTP.st</file>
   <file>Extensions.st</file>
   <file>Tests.st</file>
+  <file>PORTING</file>
 </package>
