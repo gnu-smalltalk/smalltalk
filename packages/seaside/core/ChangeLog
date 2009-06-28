@@ -1,3 +1,8 @@
+2009-06-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* core/Seaside-GST.st: Remove Signal>>#resumeContext, use
+	#signalingContext instead.
+
 2008-09-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* core/Seaside-Core.st: Change to #seasideString.

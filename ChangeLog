@@ -1,3 +1,7 @@
+2009-06-28  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/ExcHandling.st: Add #signalingContext to Signal.
+
 2009-06-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Directory.st: Fix #allFilesMatching:do:.

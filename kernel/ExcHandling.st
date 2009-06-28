@@ -665,6 +665,16 @@ with a lower priority.'>
 	self return: aBlock value
     ]
 
+    signalingContext [
+	"Return the execution context for the place that signaled the
+	 exception."
+	| context |
+        context := resumeBlock outerContext home.
+        [context isInternalExceptionHandlingContext] 
+            whileTrue: [context := context parentContext].
+        ^context
+    ]
+
     context [
 	"Return the execution context for the #on:do: snippet"
 

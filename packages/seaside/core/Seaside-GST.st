@@ -260,12 +260,6 @@ Date class extend [
     ]
 ]
 
-Signal extend [
-    resumeContext [
-	^resumeBlock outerContext home
-    ]
-]
-
 DirectedMessage extend [
     valueWithPossibleArgument: anObject [
 	<category: '*Seaside-Squeak-Core'>
@@ -630,7 +624,7 @@ Object subclass: WAGNUSmalltalkPlatform [
     walkbackStringsFor: anError [
 	| ctx strings |
 	strings := OrderedCollection new.
-	ctx := anError resumeContext.
+	ctx := anError signalingContext.
 	[ strings size <= 20 and: [ ctx notNil ] ] whileTrue: [
 	    ctx isInternalExceptionHandlingContext
 		ifFalse: [ strings add: ctx printString ].
