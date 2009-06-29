@@ -138,7 +138,7 @@ CObject subclass: CCompound [
 	maxAlignment := self superclass alignof.
 	inspStr := WriteStream on: (String new: 8).
 	inspStr
-	    nextPutAll: 'inspectSelectorList [';
+	    nextPutAll: 'fieldSelectorList [';
 	    nl;
 	    nextPutAll: '    ^#('.
 
@@ -149,7 +149,7 @@ CObject subclass: CCompound [
 		| typeDecl name str type |
 		name := dcl at: 1.
 		typeDecl := dcl at: 2.
-		self emitInspectTo: inspStr for: name.
+		self emitFieldNameTo: inspStr for: name.
 		type := CType from: typeDecl.
 		offset := aBlock value: offset value: type alignof.
 		maxAlignment := type alignof max: maxAlignment.
@@ -188,9 +188,9 @@ CObject subclass: CCompound [
 	self class compile: alignofMethod classified: 'accessing'
     ]
 
-    CCompound class >> emitInspectTo: str for: name [
+    CCompound class >> emitFieldNameTo: str for: name [
 	"Private - Emit onto the given stream the code for adding the
-	 given selector to the CCompound's inspector."
+	 given selector to the CCompound's #examineOn: method."
 
 	<category: 'subclass creation'>
 	str
@@ -200,29 +200,28 @@ CObject subclass: CCompound [
 	    nextPutAll: name
     ]
 
-    inspectSelectorList [
-	"Answer a list of selectors whose return values should be inspected
-	 by #inspect."
+    fieldSelectorList [
+	"Answer a list of selectors whose return values should be printed
+	 by #examineOn:."
 
 	"We can't call subclassResponsibility because #inspect should never
-	 fail - it would lead to recursive walkbacks. So answer an empty
-	 array.
+	 fail. So answer an empty array.
 	 For subclasses, it will answer an Array of the selectors whose
-	 values are to be shown in the inspector."
+	 values are to be shown in #examineOn: or a GUI inspector."
 
-	<category: 'instance creation'>
+	<category: 'debugging'>
 	^#()
     ]
 
-    inspect [
-	"Inspect the contents of the receiver"
+    examineOn: aStream [
+	"Print the contents of the receiver's fields on aStream"
 
-	"This inspect method applies to every instance of the receiver
-	 and their subclasses, which only override #inspectSelectorList."
+	"This method applies to every instance of the receiver
+	 and their subclasses, which only override #fieldSelectorList."
 
-	<category: 'instance creation'>
-	self printNl.
-	self inspectSelectorList do: 
+	<category: 'debugging'>
+	aStream print: self; nl.
+	self fieldSelectorList do: 
 		[:each | 
 		Transcript
 		    nextPutAll: '    ';

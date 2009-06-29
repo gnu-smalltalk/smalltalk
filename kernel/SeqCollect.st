@@ -54,14 +54,13 @@ some access and manipulation methods.'>
 	^newInst
     ]
 
-    inspect [
-	"Print all the instance variables and context of the receiver on the
-	 Transcript"
+    examineOn: aStream [
+	"Print all the instance variables and context of the receiver on aStream"
 
 	<category: 'testing'>
 	| instVars object output |
 	self beConsistent.
-	Transcript
+	aStream
 	    nextPutAll: 'An instance of ';
 	    print: self class;
 	    nl.
@@ -77,13 +76,13 @@ some access and manipulation methods.'>
 				    return: '%1 %2' % 
 						{object class article.
 						object class name asString}].
-		Transcript
+		aStream
 		    nextPutAll: '  ';
 		    nextPutAll: (instVars at: i);
 		    nextPutAll: ': ';
 		    nextPutAll: output;
 		    nl].
-	Transcript
+	aStream
 	    nextPutAll: '  contents: [';
 	    nl.
 	self keysAndValuesDo: 
@@ -96,13 +95,13 @@ some access and manipulation methods.'>
 				    return: '%1 %2' % 
 						{obj class article.
 						obj class name asString}].
-		Transcript
+		aStream
 		    nextPutAll: '    [';
 		    print: i;
 		    nextPutAll: ']: ';
 		    nextPutAll: output;
 		    nl].
-	Transcript
+	aStream
 	    nextPutAll: '  ]';
 	    nl
     ]

@@ -430,35 +430,35 @@ certain special cases.'>
 	^hashValue
     ]
 
-    inspect [
-	"Print all the instance variables and objects in the receiver on the
-	 Transcript"
+    examineOn: aStream [
+	"Print all the instance variables and objects in the receiver on aStream"
 
 	<category: 'printing'>
 	| class instVars i |
 	self beConsistent.
 	class := self class.
 	instVars := class allInstVarNames.
-	Transcript nextPutAll: 'An instance of '.
-	class printNl.
+	aStream nextPutAll: 'An instance of '.
+	aStream print: class; nl.
 	1 to: instVars size
 	    do: 
 		[:i | 
-		Transcript
+		aStream
 		    nextPutAll: '  ';
 		    nextPutAll: (instVars at: i);
-		    nextPutAll: ': '.
-		(self instVarAt: i) printNl].
-	Transcript
+		    nextPutAll: ': ';
+		    print: (self instVarAt: i);
+		    nl].
+	aStream
 	    nextPutAll: '  contents: [';
 	    nl.
 	self associationsDo: 
 		[:obj | 
-		Transcript
+		aStream
 		    nextPutAll: '    ';
 		    print: obj;
 		    nl].
-	Transcript
+	aStream
 	    nextPutAll: '  ]';
 	    nl
     ]

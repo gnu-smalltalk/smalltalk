@@ -362,13 +362,13 @@ superclass for blocks and methods'>
 	^self shallowCopy postCopy
     ]
 
-    inspect [
+    examineOn: aStream [
 	"Print the contents of the receiver in a verbose way."
 
 	<category: 'debugging'>
 	| instVars lit object output |
 	instVars := self class allInstVarNames.
-	Transcript
+	aStream
 	    nextPutAll: 'An instance of ';
 	    print: self class;
 	    nl.
@@ -383,35 +383,35 @@ superclass for blocks and methods'>
 				    return: '%1 %2' % 
 						{object class article.
 						object class name asString}].
-		Transcript
+		aStream
 		    nextPutAll: '  ';
 		    nextPutAll: (instVars at: i);
 		    nextPutAll: ': ';
 		    nextPutAll: output;
 		    nl.
-		i = 2 ifTrue: [self printHeaderOn: Transcript]].
+		i = 2 ifTrue: [self printHeaderOn: aStream]].
 	self numLiterals > 0 
 	    ifTrue: 
-		[Transcript
+		[aStream
 		    nextPutAll: '  literals: [';
 		    nl.
 		1 to: self numLiterals
 		    do: 
 			[:i | 
-			self bytecodeIndex: i with: Transcript.
-			Transcript tab.
+			self bytecodeIndex: i with: aStream.
+			aStream tab.
 			lit := self literalAt: i.
-			lit printNl].
-		Transcript
+			aStream print: lit; nl].
+		aStream
 		    nextPutAll: '  ]';
 		    nl].
 	self numBytecodes > 0 
 	    ifTrue: 
-		[Transcript
+		[aStream
 		    nextPutAll: '  byte codes: [';
 		    nl.
-		self printByteCodesOn: Transcript.
-		Transcript
+		self printByteCodesOn: aStream.
+		aStream
 		    nextPutAll: '  ]';
 		    nl]
     ]

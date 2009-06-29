@@ -1,4 +1,15 @@
 2009-06-28  Paolo Bonzini  <bonzini@gnu.org>
+	    Stefan Schmiedl  <s@xss.de>
+
+	* kernel/CStruct.st: Change #inspect to #examineOn:.
+	* kernel/Collection.st: Change #inspect to #examineOn:.
+	* kernel/CompildCode.st: Change #inspect to #examineOn:.
+	* kernel/Dictionary.st: Change #inspect to #examineOn:.
+	* kernel/Object.st: Change #inspect to #examineOn:, use it
+	for #inspect.
+	* kernel/SeqCollect.st: Change #inspect to #examineOn:.
+
+2009-06-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ExcHandling.st: Add #signalingContext to Signal.
 

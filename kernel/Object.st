@@ -696,12 +696,27 @@ All classes in the system are subclasses of me.'>
 	self subclassResponsibility
     ]
 
-    inspect [
+    examine [
 	"Print all the instance variables of the receiver on the Transcript"
 
 	<category: 'debugging'>
+        self examineOn: Transcript
+    ]
+
+    inspect [
+	"In a GUI environment, this opens a tool to examine and modify the
+	 receiver.  In the default image, it just calls #examine."
+
+	<category: 'debugging'>
+        self examineOn: Transcript
+    ]
+
+    examineOn: aStream [
+	"Print all the instance variables of the receiver on aStream"
+
+	<category: 'debugging'>
 	| instVars output object |
-	Transcript
+	aStream
 	    nextPutAll: 'An instance of ';
 	    print: self class;
 	    nl.
@@ -719,16 +734,16 @@ All classes in the system are subclasses of me.'>
 						object class name asString}].
 		i <= instVars size 
 		    ifTrue: 
-			[Transcript
+			[aStream
 			    nextPutAll: '  ';
 			    nextPutAll: (instVars at: i);
 			    nextPutAll: ': ']
 		    ifFalse: 
-			[Transcript
+			[aStream
 			    nextPutAll: '  [';
 			    print: i - instVars size;
 			    nextPutAll: ']: '].
-		Transcript
+		aStream
 		    nextPutAll: output;
 		    nl]
     ]
