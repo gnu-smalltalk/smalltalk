@@ -1,3 +1,8 @@
+2009-06-29  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Integer.st: Add #digitAt:.
+	* kernel/LargeInteger.st: Fix comment.
+
 2009-06-28  Paolo Bonzini  <bonzini@gnu.org>
 	    Stefan Schmiedl  <s@xss.de>
 

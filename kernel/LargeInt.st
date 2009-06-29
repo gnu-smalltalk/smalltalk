@@ -213,7 +213,8 @@ to speed them up a bit.'>
     ]
 
     digitAt: anIndex [
-	"Answer the anIndex-th base-256 digit in the receiver's representation"
+	"Answer the index-th base-256 digit of the receiver (byte), expressed
+	 in two's complement"
 
 	<category: 'built-ins'>
 	<primitive: VMpr_Object_basicAt>

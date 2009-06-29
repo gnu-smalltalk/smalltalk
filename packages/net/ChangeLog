@@ -1,4 +1,10 @@
-2008-04-07  Paolo Bonzini  <bonzini@gnu.org>
+2009-06-29  Paolo Bonzini  <bonzini@gnu.org>
+	    Joachim Jaeckel  <joachim.jaeckel@lucke-edv.de>
+
+	* Base.st: Add Base-64 encoding.
+	* MIME.st: Fix Base-64 decoding bugs.
+
+2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* FTP.st: Do not use #nextHunk.
 

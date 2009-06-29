@@ -467,6 +467,45 @@ Object subclass: NetProtocolInterpreter [
 	^NetResponse
     ]
 
+    NetProtocolInterpreter class >> base64Encode: aString [
+	| chars i j n t1 t2 t3 ch aStringSize b64Size b64String |
+	chars := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.
+
+	aStringSize := aString size.
+	b64Size := aStringSize // 3 * 4.
+	(aStringSize \\ 3 ~= 0) ifTrue: [b64Size := b64Size + 4].
+	b64String := String new: b64Size withAll: $=.
+
+	i := j := 1.
+	[i <= aStringSize] whileTrue: [
+	    t1 := (aString at: i ifAbsent: [Character nul]) asInteger.
+	    t2 := (aString at: i + 1 ifAbsent: [Character nul]) asInteger.
+	    t3 := (aString at: i + 2 ifAbsent: [Character nul]) asInteger.
+	    n := 3 min: aStringSize - i + 1.
+
+	    ch := t1 bitShift: -2.
+	    b64String at: j put: (chars at: ch + 1).
+
+	    ch := ((t1 bitAnd: 3) bitShift: 4) bitOr: (t2 bitShift: -4).
+	    b64String at: j + 1 put: (chars at: ch + 1).
+
+	    n >= 2 ifTrue: [
+		ch := ((t2 bitAnd: 15) bitShift: 2) bitOr: (t2 bitShift: -6).
+		b64String at: j + 2 put: (chars at: ch + 1).
+	    ].
+
+	    n >= 3 ifTrue: [
+		ch := t3 bitAnd: 63.
+		b64String at: j + 3 put: (chars at: ch + 1).
+	    ].
+
+	    i := i + 3.
+	    j := j + 4.
+	].
+
+	^b64String
+    ]
+
     client [
 	<category: 'accessing'>
 	^client

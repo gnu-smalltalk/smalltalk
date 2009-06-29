@@ -1631,57 +1631,13 @@ SimpleScanner subclass: MimeEncodedWordCoDec [
 	    ifFalse: [nil]
     ]
 
-    MimeEncodedWordCoDec class >> decodeBase64From: startIndex to: endIndex in: aString [
-	"Decode aString from startIndex to endIndex in base64."
-
-	<category: 'text processing'>
-	| codeChars decoder output index nl endChars end limit padding data sz |
-	codeChars := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.
-	decoder := (0 to: 255) 
-		    collect: [:n | (codeChars indexOf: (n + 1) asCharacter) - 1].
-	decoder replaceAll: -1 with: 0.
-	output := (data := String new: (endIndex - startIndex) * 3 // 4) 
-		    writeStream.
-	index := startIndex.
-	nl := Character nl.
-	"There is padding at the end of a base64 message if the content is not a multiple of
-	 3 bytes in length.  The padding is either two ='s to pad-out a trailing byte, 1 = to
-	 pad out a trailing pair of bytes, or no padding.  Here we count the padding.  After
-	 processing the message we cut-back by the amount of padding."
-	end := endIndex min: (sz := aString size).
-	endChars := codeChars , (String with: $=).
-	
-	[(endChars includes: (aString at: end)) 
-	    and: [end = endIndex or: [(aString at: end + 1) = nl]]] 
-		whileFalse: [end := end - 1].
-	limit := end.
-	padding := 0.
-	[(aString at: end) == $=] whileTrue: 
-		[padding := padding - 1.
-		end := end - 1].
-	[index <= limit] whileTrue: 
-		[| triple |
-		triple := ((decoder at: (aString at: index) asInteger) bitShift: 18) 
-			    + ((decoder at: (aString at: index + 1) asInteger) bitShift: 12) 
-				+ ((decoder at: (aString at: index + 2) asInteger) bitShift: 6) 
-				+ (decoder at: (aString at: index + 3) asInteger).
-		output nextPut: (Character value: (triple digitAt: 3)).
-		output nextPut: (Character value: (triple digitAt: 2)).
-		output nextPut: (Character value: (triple digitAt: 1)).
-		index := index + 4.
-		[(index > sz or: [(aString at: index) = nl]) and: [index <= limit]] 
-		    whileTrue: [index := index + 1]].
-	padding ~= 0 ifTrue: [output skip: padding].
-	^data copyFrom: 1 to: output position
-    ]
-
     MimeEncodedWordCoDec class >> decodeEncodedWord: contents charset: charset encoding: encodingString [
 	<category: 'text processing'>
 	| encoding |
 	encoding := encodingString asLowercase.
 	(#('b' 'base64') includes: encoding) 
 	    ifTrue: 
-		[^self 
+		[^MimeScanner 
 		    decodeBase64From: 1
 		    to: contents size
 		    in: contents].
@@ -2986,13 +2942,11 @@ RFC822Scanner subclass: MimeScanner [
 	"Decode aString from startIndex to endIndex in base64."
 
 	<category: 'text processing'>
-	| codeChars decoder output index nl endChars end limit padding data sz |
+	| codeChars decoder index nl endChars end padding data sz i outSize |
 	codeChars := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.
 	decoder := (0 to: 255) 
 		    collect: [:n | (codeChars indexOf: (n + 1) asCharacter) - 1].
 	decoder replaceAll: -1 with: 0.
-	output := (data := String new: (endIndex - startIndex) * 3 // 4) 
-		    writeStream.
 	index := startIndex.
 	nl := Character nl.
 	"There is padding at the end of a base64 message if the content is not a multiple of
@@ -3005,25 +2959,30 @@ RFC822Scanner subclass: MimeScanner [
 	[(endChars includes: (aString at: end)) 
 	    and: [end = endIndex or: [(aString at: end + 1) = nl]]] 
 		whileFalse: [end := end - 1].
-	limit := end.
 	padding := 0.
-	[(aString at: end) == $=] whileTrue: 
-		[padding := padding - 1.
-		end := end - 1].
-	[index <= limit] whileTrue: 
+	[(aString at: end - padding) == $=] whileTrue: 
+		[padding := padding + 1].
+	outSize := (end - startIndex + 1) * 3 // 4 - padding.
+	data := String new: outSize.
+	i := 1.
+	[index <= end] whileTrue: 
 		[| triple |
 		triple := ((decoder at: (aString at: index) asInteger) bitShift: 18) 
 			    + ((decoder at: (aString at: index + 1) asInteger) bitShift: 12) 
 				+ ((decoder at: (aString at: index + 2) asInteger) bitShift: 6) 
 				+ (decoder at: (aString at: index + 3) asInteger).
-		output nextPut: (Character value: (triple digitAt: 3)).
-		output nextPut: (Character value: (triple digitAt: 2)).
-		output nextPut: (Character value: (triple digitAt: 1)).
+		padding := outSize - i.
+		data at: i put: (Character value: (triple digitAt: 3)).
+		padding > 0 ifTrue: [
+			data at: i + 1 put: (Character value: (triple digitAt: 2))].
+		padding > 1 ifTrue: [
+			data at: i + 2 put: (Character value: (triple digitAt: 1))].
+
+		i := i + 3.
 		index := index + 4.
-		[(index > sz or: [(aString at: index) = nl]) and: [index <= limit]] 
+		[(index > sz or: [(aString at: index) = nl]) and: [index <= end]] 
 		    whileTrue: [index := index + 1]].
-	padding ~= 0 ifTrue: [output skip: padding].
-	^data copyFrom: 1 to: output position
+	^data
     ]
 
     MimeScanner class >> decodeQuotedPrintableFrom: startIndex to: endIndex in: aString [

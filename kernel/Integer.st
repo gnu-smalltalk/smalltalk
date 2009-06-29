@@ -64,6 +64,14 @@ efficiency.'>
 	1 to: self do: [:each | aBlock value]
     ]
 
+    digitAt: index [
+	"Answer the index-th base-256 digit of the receiver (byte), expressed
+	 in two's complement"
+
+	<category: 'bit operators'>
+	^(self bitShift: 8 - (8 * index)) bitAnd: 255
+    ]
+
     bitAt: index [
 	"Answer the index-th bit of the receiver (the LSB has an index
 	 of 1)"
