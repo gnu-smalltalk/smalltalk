@@ -368,7 +368,9 @@ GST_PACKAGE_ENABLE([GTK], [gtk], [
     AM_PATH_GLIB_2_0(2.0.0, [
       AM_PATH_GTK_2_0(2.0.0, [
         PKG_CHECK_MODULES(ATK, atk >= 1.0.0, [
-          PKG_CHECK_MODULES(PANGO, pango >= 1.0.0, [enable_gtk=$maybe_enable_gtk])
+          PKG_CHECK_MODULES(PANGO, pango >= 1.0.0, [
+            PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.0.0, [enable_gtk=$maybe_enable_gtk])
+          ])
         ])
       ])
     ], [], gobject)

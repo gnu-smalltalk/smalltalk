@@ -937,6 +937,8 @@ gst_gtk_init ()
 
   init++;
   gtk_init (&argc, &argv);
+  if (!g_thread_supported ())
+    g_thread_init (NULL);
 }
 
 void
@@ -945,7 +947,6 @@ gst_initModule (proxy)
 {
   q_gst_object = g_quark_from_string ("gst_object");
   g_type_init ();
-
   g_log_set_handler (NULL,
 		     G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL
 		     | G_LOG_LEVEL_ERROR

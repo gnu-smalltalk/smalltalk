@@ -1,3 +1,7 @@
+2009-07-01  Gwenael Casaccio  <mrgwen@gmail.com>
+
+	* gst-gtk.c: Call g_thread_init.
+
 2009-06-22  Gwenael Casaccio  <mrgwen@gmail.com>
             Paolo Bonzini  <bonzini@gnu.org>
 
