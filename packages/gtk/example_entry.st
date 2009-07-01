@@ -96,7 +96,7 @@ Object subclass: EntryExample [
 	    insertText: ' world'
 	    newTextLength: -1
 	    position: (CInt gcValue: entry getText size).
-	entry selectRegion: 0 end: entry getText size.
+	entry selectRegion: 0 endPos: entry getText size.
 	vbox 
 	    packStart: entry
 	    expand: true
