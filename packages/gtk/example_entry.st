@@ -99,7 +99,7 @@ Object subclass: EntryExample [
 	    newTextLength: -1
 	    position: pos.
 	pos free.
-	entry selectRegion: 0 end: entry getText size.
+	entry selectRegion: 0 endPos: entry getText size.
 	vbox 
 	    packStart: entry
 	    expand: true

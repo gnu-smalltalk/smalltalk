@@ -145,7 +145,7 @@ Object subclass: ButtonBoxExample [
 
 
 
-GtkButtonBox class extend [
+GTK.GtkButtonBox class extend [
 
     createButtonBox: title spacing: spacing layout: layout [
 	<category: 'creating button boxes'>
