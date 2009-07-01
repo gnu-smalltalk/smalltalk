@@ -155,7 +155,6 @@ Object subclass: EntryExample [
 
 
 Namespace current: GTK [
-    Gtk gstGtkInit.
     EntryExample new open.
     Gtk main
 ]

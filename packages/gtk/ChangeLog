@@ -1,3 +1,17 @@
+2009-07-01  Paolo Bonzini  <bonzini@gnu.org>
+
+	* MoreFuncs.st: Add gtkInitialized.  Stub gstGtkInit.
+	* example_arrow.st: Remove gstGtkInit.
+	* example_aspectframe.st: Remove gstGtkInit.
+	* example_buttonbox.st: Remove gstGtkInit.
+	* example_entry.st: Remove gstGtkInit.
+	* example_eventbox.st: Remove gstGtkInit.
+	* example_hello.st: Remove gstGtkInit.
+	* example_tictactoe.st: Remove gstGtkInit.
+	* example_tree.st: Remove gstGtkInit.
+	* gst-gtk.c: Add gtkInitialized, use gtk_init_check instead of
+	gtk_init moving it to gst_initModule.
+
 2009-07-01  Gwenael Casaccio  <mrgwen@gmail.com>
 
 	* gst-gtk.c: Call g_thread_init.

@@ -111,7 +111,6 @@ GTK.GtkButton class extend [
 
 
 Namespace current: GTK [
-    Gtk gstGtkInit.
     ArrowExample new open.
     Gtk main
 ]

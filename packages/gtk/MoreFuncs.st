@@ -25,9 +25,12 @@ Gtk class extend [
     ]
 
     gstGtkInit [
+	"For backwards compatibility."
+    ]
+
+    gtkInitialized [
 	<category: 'C call-outs'>
-	<cCall: 'gstGtkInit' returning: #void args: #()>
-	
+	<cCall: 'gtkInitialized' returning: #boolean args: #()>
     ]
 
 ]

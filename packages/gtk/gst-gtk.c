@@ -83,8 +83,6 @@ VMProxy *_gst_vm_proxy;
 static GQuark q_gst_object = 0;
 static int pending_quit_count = 0;
 
-static void gst_gtk_init ();
-
 /* Start the main event loop and then signal OOP.  */
 static void my_gtk_main (OOP semaphore);
 
@@ -924,27 +922,26 @@ void my_log_handler (const gchar * log_domain,
 
 /* Initialization.  */
  
-void
-gst_gtk_init ()
+static int initialized = 0;
+
+int
+gst_gtk_initialized ()
 {
-  static int init = 0;
-  int argc = 1;
-  gchar *argvArray[] = { (char *) "gst", NULL };
-  gchar **argv = argvArray;
-
-  if (init)
-    return;
-
-  init++;
-  gtk_init (&argc, &argv);
-  if (!g_thread_supported ())
-    g_thread_init (NULL);
+  return initialized;
 }
 
 void
 gst_initModule (proxy)
      VMProxy *proxy;
 {
+  int argc = 1;
+  gchar *argvArray[] = { (char *) "gst", NULL };
+  gchar **argv = argvArray;
+
+  initialized = gtk_init_check (&argc, &argv);
+  if (initialized && !g_thread_supported ())
+    g_thread_init (NULL);
+
   q_gst_object = g_quark_from_string ("gst_object");
   g_type_init ();
   g_log_set_handler (NULL,
@@ -964,7 +961,7 @@ gst_initModule (proxy)
 		     my_log_handler, NULL);
 
   _gst_vm_proxy = proxy;
-  _gst_vm_proxy->defineCFunc ("gstGtkInit", gst_gtk_init);
+  _gst_vm_proxy->defineCFunc ("gtkInitialized", gst_gtk_initialized);
   _gst_vm_proxy->defineCFunc ("gstGtkRegisterForType", register_for_type);
   _gst_vm_proxy->defineCFunc ("gstGtkFreeGObjectOOP", free_oop_for_g_object);
   _gst_vm_proxy->defineCFunc ("gstGtkNarrowGObjectOOP", narrow_oop_for_g_object);

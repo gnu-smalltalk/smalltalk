@@ -208,7 +208,6 @@ Object subclass: TreeExample [
 
 
 Namespace current: GTK [
-    Gtk gstGtkInit.
     TreeExample new open buildTree defaultExpand.
     Gtk main
 ]

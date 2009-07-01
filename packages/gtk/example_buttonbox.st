@@ -174,7 +174,6 @@ GtkButtonBox class extend [
 
 
 Namespace current: GTK [
-    Gtk gstGtkInit.
     ButtonBoxExample new open.
     Gtk main
 ]

@@ -77,7 +77,6 @@ Object subclass: AspectFrameExample [
 
 
 Namespace current: GTK [
-    Gtk gstGtkInit.
     AspectFrameExample new open.
     Gtk main
 ]

@@ -177,7 +177,6 @@ Object subclass: TicTacToe [
 
 
 Namespace current: GTK [
-    Gtk gstGtkInit.
     TicTacToe new open.
     Gtk main
 ]

@@ -80,7 +80,6 @@ Object subclass: HelloWorldExample [
 
 
 Namespace current: GTK [
-    Gtk gstGtkInit.
     HelloWorldExample new open.
     Gtk main
 ]

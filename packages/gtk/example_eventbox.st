@@ -82,7 +82,6 @@ Object subclass: EventBoxExample [
 
 
 Namespace current: GTK [
-    Gtk gstGtkInit.
     EventBoxExample new open.
     Gtk main
 ]
