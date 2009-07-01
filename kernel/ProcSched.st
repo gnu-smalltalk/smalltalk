@@ -242,6 +242,7 @@ Object subclass: ProcessorScheduler [
 		"Fire a low-priority process to finalize the objects"
 		localFinalizerProcess := [:array | array do: [:each | each mourn]] 
 			    newProcessWith: {local}.
+		localFinalizerProcess priority: Processor userSchedulingPriority.
 		localFinalizerProcess name: 'finalization worker'.
 		localFinalizerProcess resume] 
 			repeat] 
