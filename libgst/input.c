@@ -962,8 +962,8 @@ _gst_add_symbol_completion (const char *str,
 	}
     }
 
-  /* We enter globals in the table, too */
-  if (base == str && !islower (*str))
+  /* We enter all unary and binary symbols in the table, too */
+  if (base == str)
     add_completion (base, p - base);
 }
 
