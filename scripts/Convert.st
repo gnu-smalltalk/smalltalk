@@ -163,22 +163,22 @@ STInST.STClassLoader subclass: SyntaxConverter [
     
     
     SyntaxConverter class >> convertSqueakStream: in to: out [
-        <catogory: 'instance creation'>
+        <category: 'instance creation'>
         ^self convertStream: in with: STInST.SqueakFileInParser to: out
     ]
     
     SyntaxConverter class >> convertSIFStream: in to: out [
-        <catogory: 'instance creation'>
+        <category: 'instance creation'>
         ^self convertStream: in with: STInST.SIFFileInParser to: out
     ]
     
     SyntaxConverter class >> convertStream: in to: out [
-        <catogory: 'instance creation'>
+        <category: 'instance creation'>
         ^self convertStream: in with: STInST.STFileInParser to: out
     ]
     
     SyntaxConverter class >> convertStream: in with: aParserClass to: out [
-        <catogory: 'instance creation'>
+        <category: 'instance creation'>
         ^self new convertStream: in with: aParserClass to: out
     ]
 
@@ -192,7 +192,7 @@ STInST.STClassLoader subclass: SyntaxConverter [
     ]
 
     convertStream: in with: aParserClass to: out onError: aBlock [
-        <catogory: 'operation'>
+        <category: 'operation'>
         self
 	    outStream: out;
 	    parseSmalltalkStream: in with: aParserClass onError: aBlock;
@@ -200,7 +200,7 @@ STInST.STClassLoader subclass: SyntaxConverter [
     ]
 
     convertStream: in with: aParserClass to: out [
-        <catogory: 'operation'>
+        <category: 'operation'>
         self
 	    outStream: out;
 	    parseSmalltalkStream: in with: aParserClass;
