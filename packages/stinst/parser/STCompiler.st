@@ -154,13 +154,13 @@ indexed'' bytecode. The resulting stream is
 
     STCompiler class >> compile: methodNode asMethodOf: aBehavior classified: aString parser: aParser environment: aNamespace [
 	<category: 'compilation'>
-	| compiler |
+	| compiler method |
 	compiler := self new.
 	compiler class: aBehavior parser: aParser.
 	aNamespace isNil ifFalse: [compiler addPool: aNamespace].
-	^(compiler visitNode: methodNode)
-	    methodCategory: aString;
-	    yourself
+	method := compiler visitNode: methodNode.
+	aString isNil ifFalse: [ method methodCategory: aString ].
+	^method
     ]
 
     class: aBehavior parser: aParser [
