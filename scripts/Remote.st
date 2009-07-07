@@ -217,7 +217,7 @@ server ifTrue: [
 			    Behavior
 			        evaluate: (conn upTo: $<0>)
 			        to: nil
-			        ifError: [ :fname :msg :line |
+			        ifError: [ :fname :line :msg |
 				    conn nextPutAll: ('gst-remote: error at line %1: %2
 ' % { line. msg }) ].
 			    conn nextPut: $<0>; flush ] ]

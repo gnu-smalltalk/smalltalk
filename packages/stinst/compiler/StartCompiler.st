@@ -328,7 +328,7 @@ Behavior extend [
 	    parseSmalltalk: aString
 	    with: self evaluatorClass
 	    onError: 
-		[:l :m | 
+		[:m :l | 
 		^aBlock 
 		    value: 'a Smalltalk String'
 		    value: l
