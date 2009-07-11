@@ -1,5 +1,10 @@
 2009-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
+	* testsuite/floatmath.st: Stress-test reading pi.
+	* testsuite/floatmath.ok: Regenerate.
+
+2009-07-11  Paolo Bonzini  <bonzini@gnu.org>
+
 	* testsuite/compiler.st: Test reading 16r-33.0.
 	* testsuite/compiler.ok: Regenerate.
 
