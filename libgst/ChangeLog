@@ -1,3 +1,9 @@
+2009-07-11  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/lex.c: Use new real.c interface.
+	* libgst/real.c: New.
+	* libgst/real.h: New.
+
 2009-07-02  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/input.c: Include all symbols after popular demand for

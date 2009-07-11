@@ -119,9 +119,11 @@ static mst_Boolean is_base_digit (int c,
    the digits are stored in an obstack, and LARGEINTEGER is set to true
    if numPtr does not have sufficient precision.  */
 static int scan_fraction (int c,
-			   int base,
-			   long double *numPtr,
-			   mst_Boolean *largeInteger);
+			  mst_Boolean negative,
+			  unsigned base,
+			  uintptr_t *intNumPtr,
+			  struct real *numPtr,
+			  mst_Boolean *largeInteger);
 
 /* Parse a numeric constant and return it.  Read numbers in
    base-BASE, the first one being C.  If a - was parsed, NEGATIVE
@@ -129,10 +131,11 @@ static int scan_fraction (int c,
    If LARGEINTEGER is not NULL, the digits are stored in an obstack,
    and LARGEINTEGER is set to true if the return value does not have
    sufficient precision.  */
-static long double scan_digits (int c,
-			    mst_Boolean negative,
-			    int base,
-			    mst_Boolean * largeInteger);
+static uintptr_t scan_digits (int c,
+			      mst_Boolean negative,
+			      unsigned base,
+			      struct real * n,
+			      mst_Boolean * largeInteger);
 
 /* Parse the large integer constant stored as base-BASE
    digits in the buffer maintained by str.c, adjusting
@@ -209,11 +212,6 @@ static int scan_symbol (int c,
    value.  Raise an error if it is invalid.  */
 static int digit_to_int (int c,
 			 int base);
-
-/* Raise BASE to the N-th power and multiply MANT by the result.  */
-static inline long double mul_powl (long double mant,
-				    long double base,
-			            int n);
 
 #ifdef LEXDEBUG
 static void print_token (int token,
@@ -745,45 +743,19 @@ scan_ident (int c,
 }
 
 
-long double
-mul_powl (long double mant, 
-	  long double base,
-	  int n)
-{
-  long double result = 1.0;
-  int n_abs = n < 0 ? -n : n;
-  int exp;
-  int k = 1;
-
-  /* Restrict base to the range from 1.0 to 2.0.  */
-  base = frexpl (base, &exp);
-  base *= 2;
-  exp--;
-
-  while (n_abs)
-    {
-      if (n_abs & k)
-        {
-          result *= base;
-          n_abs ^= k;
-        }
-      base *= base;
-      k <<= 1;
-    }
-
-  if (n < 0)
-    return ldexpl (mant, exp * n) / result;
-  else
-    return ldexpl (mant * result, exp * n);
-}
+/* TODO: We track the number in *three* formats: struct real, uintptr_t,
+ * and just save the bytes for large integers.  We should just save
+ * the bytes and work on those.  */
 
 int
 scan_number (int c,
 	      YYSTYPE * lvalp)
 {
-  OOP numOOP;
+  OOP intNumOOP;
   int base, exponent, ic;
-  long double num, floatExponent;
+  uintptr_t intNum;
+  struct real num, dummy;
+  int floatExponent;
   mst_Boolean isNegative = false, largeInteger = false;
   int float_type = 0;
 
@@ -792,19 +764,20 @@ scan_number (int c,
   ic = c;
 
   assert (ic != '-');
-  num = scan_digits (ic, false, 10, &largeInteger);
+  intNum = scan_digits (ic, false, 10, &num, &largeInteger);
   ic = _gst_next_char ();
   if (ic == 'r')
     {
       char *p = obstack_finish (_gst_compilation_obstack);
       obstack_free (_gst_compilation_obstack, p);
 
-      base = (int) num;
-      if (base > 36 || largeInteger)
+      if (intNum > 36 || largeInteger)
         {
           _gst_errorf ("Numeric base too large %d", base);
           _gst_had_error = true;
         }
+      else
+        base = intNum;
       ic = _gst_next_char ();
 
       /* Having to support things like 16r-123 is a pity :-) because we
@@ -815,7 +788,7 @@ scan_number (int c,
 	  ic = _gst_next_char ();
 	}
 
-      num = scan_digits (ic, isNegative, base, &largeInteger);
+      intNum = scan_digits (ic, isNegative, base, &num, &largeInteger);
       ic = _gst_next_char ();
     }
 
@@ -834,7 +807,7 @@ scan_number (int c,
       else
 	{
 	  float_type = FLOATD_LITERAL;
-	  exponent = scan_fraction (ic, base, &num, &largeInteger);
+	  exponent = scan_fraction (ic, isNegative, base, &intNum, &num, &largeInteger);
 	  ic = _gst_next_char ();
 	}
     }
@@ -852,7 +825,7 @@ scan_number (int c,
 	else if (CHAR_TAB (ic)->char_class & DIGIT)
 	  {
 	    /* 123s4 format -- parse the exponent */
-	    floatExponent = scan_digits (ic, false, 10, NULL);
+	    floatExponent = scan_digits (ic, false, 10, &dummy, NULL);
 	  }
 	else if (CHAR_TAB (ic)->char_class & ID_CHAR)
 	  {
@@ -864,29 +837,26 @@ scan_number (int c,
 	else
 	  _gst_unread_char (ic);
 
-        if (isNegative)
-          num = -num;
-
-        if (largeInteger || num < MIN_ST_INT || num > MAX_ST_INT)
+        if (largeInteger)
           {
 	    /* Make a LargeInteger constant and create an object out of
 	       it.  */
 	    byte_object bo = scan_large_integer (isNegative, base);
-	    gst_object result = instantiate_with (bo->class, bo->size, &numOOP);
+	    gst_object result = instantiate_with (bo->class, bo->size, &intNumOOP);
             memcpy (result->data, bo->body, bo->size);
 	  }
         else
-          numOOP = FROM_INT(num);
+          intNumOOP = FROM_INT((intptr_t) (isNegative ? -intNum : intNum));
 
 	/* too much of a chore to create a Fraction, so we call-in. We
 	   lose the ability to create ScaledDecimals during the very
 	   first phases of bootstrapping, but who cares?... 
 
 	   This is equivalent to 
-		(num * (10 raisedToInteger: exponent)
+		(intNumOOP * (10 raisedToInteger: exponent)
 		   asScaledDecimal: floatExponent) */
 	lvalp->oval =
-	  _gst_msg_send (numOOP, _gst_as_scaled_decimal_radix_scale_symbol,
+	  _gst_msg_send (intNumOOP, _gst_as_scaled_decimal_radix_scale_symbol,
 			 FROM_INT (exponent),
 			 FROM_INT (base),
 			 FROM_INT ((int) floatExponent), 
@@ -914,12 +884,12 @@ scan_number (int c,
         ;
       else if (ic == '-') {
 	  floatExponent =
-	    scan_digits (_gst_next_char (), true, 10, NULL);
+	    scan_digits (_gst_next_char (), true, 10, &dummy, NULL);
 	  exponent -= (int) floatExponent;
 	}
       else if (CHAR_TAB (ic)->char_class & DIGIT)
 	{
-	  floatExponent = scan_digits (ic, false, 10, NULL);
+	  floatExponent = scan_digits (ic, false, 10, &dummy, NULL);
 	  exponent += (int) floatExponent;
 	}
       else if (CHAR_TAB (ic)->char_class & ID_CHAR)
@@ -935,24 +905,27 @@ scan_number (int c,
   else
     _gst_unread_char (ic);
 
-  if (exponent != 0)
-    num = mul_powl (num, (long double) base, exponent);
-
-  if (isNegative)
-    num = -num;
-
-#if defined(__FreeBSD__)
-  fpsetmask (0);
-#endif
-
   if (float_type)
     {
       char *p = obstack_finish (_gst_compilation_obstack);
       obstack_free (_gst_compilation_obstack, p);
-      lvalp->fval = num;
+
+      if (exponent)
+	{
+	  struct real r;
+	  _gst_real_from_int (&r, base);
+	  _gst_real_powi (&r, &r, exponent < 0 ? -exponent : exponent);
+	  if (exponent < 0)
+	    _gst_real_div (&num, &num, &r);
+	  else
+	    _gst_real_mul (&num, &r);
+	}
+      lvalp->fval = _gst_real_get_ld (&num);
+      if (isNegative)
+	lvalp->fval = -lvalp->fval;
       return (float_type);
     }
-  else if (largeInteger || num < MIN_ST_INT || num > MAX_ST_INT)
+  else if (largeInteger)
     {
       lvalp->boval = scan_large_integer (isNegative, base);
       return (LARGE_INTEGER_LITERAL);
@@ -961,36 +934,44 @@ scan_number (int c,
     {
       char *p = obstack_finish (_gst_compilation_obstack);
       obstack_free (_gst_compilation_obstack, p);
-      lvalp->ival = (intptr_t) num;
+      lvalp->ival = (intptr_t) (isNegative ? -intNum : intNum);
       return (INTEGER_LITERAL);
     }
 }
 
-long double
+uintptr_t
 scan_digits (int c,
-	      mst_Boolean negative,
-	      int base,
-	      mst_Boolean * largeInteger)
+	     mst_Boolean negative,
+	     unsigned base,
+	     struct real * n,
+	     mst_Boolean * largeInteger)
 {
-  long double result;
+  uintptr_t result;
   mst_Boolean oneDigit = false;
 
   while (c == '_')
     c = _gst_next_char ();
 
+  memset (n, 0, sizeof (*n));
   for (result = 0.0; is_base_digit (c, base); )
     {
-      result *= base;
-      oneDigit = true;
-      result += digit_to_int (c, base);
+      unsigned  value = digit_to_int (c, base);
       if (largeInteger)
 	{
 	  obstack_1grow (_gst_compilation_obstack, digit_to_int (c, base));
-	  if (result > -MIN_ST_INT
-	      || (!negative && result > MAX_ST_INT))
+	  if (result >
+	      (negative
+	       /* We want (uintptr_t) -MIN_ST_INT, but it's the same.  */
+	       ? (uintptr_t) MIN_ST_INT - value
+	       : (uintptr_t) MAX_ST_INT - value) / base)
 	    *largeInteger = true;
 	}
 
+      _gst_real_mul_int (n, base);
+      _gst_real_add_int (n, value);
+      oneDigit = true;
+      result *= base;
+      result += value;
       do
 	c = _gst_next_char ();
       while (c == '_');
@@ -1009,30 +990,39 @@ scan_digits (int c,
 
 int
 scan_fraction (int c,
-		int base,
-		long double *numPtr,
-		mst_Boolean *largeInteger)
+	       mst_Boolean negative,
+	       unsigned base,
+	       uintptr_t *intNumPtr,
+	       struct real *numPtr,
+	       mst_Boolean *largeInteger)
 {
+  uintptr_t intNum;
   int scale;
-  long double num;
 
   scale = 0;
 
   while (c == '_')
     c = _gst_next_char ();
 
-  for (num = *numPtr; is_base_digit (c, base); )
+  for (intNum = *intNumPtr; is_base_digit (c, base); )
     {
-      num *= base;
-      num += digit_to_int (c, base);
-      scale--;
-
+      unsigned value = digit_to_int (c, base);
       if (largeInteger)
-        {
-          obstack_1grow (_gst_compilation_obstack, digit_to_int (c, base));
-          if (num > MAX_ST_INT)
-            *largeInteger = true;
-        }
+	{
+	  obstack_1grow (_gst_compilation_obstack, digit_to_int (c, base));
+	  if (intNum >
+	      (negative
+	       /* We want (uintptr_t) -MIN_ST_INT, but it's the same.  */
+	       ? (uintptr_t) MIN_ST_INT - value
+	       : (uintptr_t) MAX_ST_INT - value) / base)
+	    *largeInteger = true;
+	}
+
+      _gst_real_mul_int (numPtr, base);
+      _gst_real_add_int (numPtr, value);
+      intNum *= base;
+      intNum += value;
+      scale--;
 
       do
 	c = _gst_next_char ();
@@ -1041,7 +1031,7 @@ scan_fraction (int c,
 
   _gst_unread_char (c);
 
-  *numPtr = num;
+  *intNumPtr = intNum;
   return scale;
 }
 

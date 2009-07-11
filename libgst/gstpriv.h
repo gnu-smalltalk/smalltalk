@@ -612,6 +612,7 @@ extern OOP _gst_nil_oop
 #include "mpz.h"
 #include "print.h"
 #include "security.h"
+#include "real.h"
 
 /* Include this last, it has the bad habit of #defining printf
    and this fools gcc's __attribute__ (format) */

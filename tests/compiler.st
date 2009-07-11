@@ -196,6 +196,7 @@ Eval [ nil block value ]
 Eval [ 2-2 ]
 Eval [ -2 + 2 ]
 Eval [ -16r33 + 16r33 ]		"Blue Book actually says 16r-33"
+Eval [ 16r33 + 16r-33 ]		"Blue Book actually says 16r-33"
 Eval [ -12345678901234567890123 + 12345678901234567890123 ]
 Eval [ -123.0 + 123.0 ]
 Eval [ -123s3 printString ]
