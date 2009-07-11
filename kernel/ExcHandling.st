@@ -667,10 +667,11 @@ with a lower priority.'>
 
     signalingContext [
 	"Return the execution context for the place that signaled the
-	 exception."
+	 exception, or nil if it is not available anymore (for example
+	 if the exception handler has returned."
 	| context |
         context := resumeBlock outerContext home.
-        [context isInternalExceptionHandlingContext] 
+        [context notNil and: [context isInternalExceptionHandlingContext]]
             whileTrue: [context := context parentContext].
         ^context
     ]

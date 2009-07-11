@@ -191,3 +191,9 @@ Eval [ p := [^'test'] fork. [p isReady] whileTrue: [Processor yield]]
 
 "Test error handling within a process."
 Eval [ p := [self error: 'test'] fork. [p isReady] whileTrue: [Processor yield]]
+
+"This is invalid, but it should not give a walkback."
+Eval [
+    [1 doSomething] on: Error do: [:err | error := err].
+    error signalingContext
+]

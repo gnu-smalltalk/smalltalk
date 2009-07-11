@@ -1,5 +1,11 @@
 2009-07-11  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/ExcHandling.st: Make #signalingContext more robust.
+	* testsuite/exceptions.st: Add regression test.
+	* testsuite/exceptions.ok: Regenerate.
+
+2009-07-11  Paolo Bonzini  <bonzini@gnu.org>
+
 	* testsuite/floatmath.st: Stress-test reading pi.
 	* testsuite/floatmath.ok: Regenerate.
 
