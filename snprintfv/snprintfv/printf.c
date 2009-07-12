@@ -43,7 +43,6 @@
 #include "filament.h"
 #include "stream.h"
 #include "mem.h"
-#include "dl.h"
 
 #define EOS			'\0'
 #define SNV_CHAR_SPEC		'%'
@@ -94,8 +93,6 @@ spec_init (void)
 	  spec_table[hash] = snv_default_spec_table + index;
 	  index++;
 	}
-
-      snv_load_all_modules ();
 
       is_init = TRUE;
     }

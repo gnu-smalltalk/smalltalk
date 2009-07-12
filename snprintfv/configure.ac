@@ -33,7 +33,7 @@ AC_CONFIG_AUX_DIR(../build-aux)
 AC_CONFIG_MACRO_DIR(../build-aux)
 
 AC_ARG_ENABLE(subdir,
-[  --enable-subdir     used in a package, libltdl+texinfo+testsuite stripped], ,
+[  --enable-subdir     used in a package, texinfo+testsuite stripped], ,
 [enable_subdir=no])
 
 AM_INIT_AUTOMAKE
@@ -130,7 +130,6 @@ AC_C_INLINE
 AC_EXEEXT
 AC_PROG_INSTALL
 AC_PROG_AWK
-AC_LIB_LTDL
 
 # ----------------------------------------------------------------------
 # check for standard headers.
