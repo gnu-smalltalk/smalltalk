@@ -4,6 +4,12 @@ config.sub
 depcomp
 elisp-comp
 install-sh
+libtool.m4
+ltmain.sh
+ltoptions.m4
+ltsugar.m4
+ltversion.m4
+lt~obsolete.m4
 mdate-sh
 missing
 texinfo.tex
