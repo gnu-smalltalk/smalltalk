@@ -21,66 +21,17 @@
 ## the same distribution terms that you use for the rest of that program.
 
 
-# AC_WITH_LTDL
-# ------------
-# Clients of libltdl can use this macro to allow the installer to
-# choose between a shipped copy of the ltdl sources or a preinstalled
-# version of the library.
-AC_DEFUN([AC_WITH_LTDL],
-[AC_REQUIRE([AC_LIB_LTDL])
-AC_SUBST([LIBLTDL])
-AC_SUBST([INCLTDL])
-
-# Unless the user asks us to check, assume no installed ltdl exists.
-use_installed_libltdl=no
-
-AC_ARG_WITH([included_ltdl],
-    [  --with-included-ltdl    use the GNU ltdl sources included here])
-
-if test "x$with_included_ltdl" != xyes; then
-  # We are not being forced to use the included libltdl sources, so
-  # decide whether there is a useful installed version we can use.
-  AC_CHECK_HEADER([ltdl.h],
-      [AC_CHECK_LIB([ltdl], [lt_dlcaller_register],
-          [with_included_ltdl=no],
-          [with_included_ltdl=yes])
-  ])
-fi
-
-if test "x$enable_ltdl_install" != xyes; then
-  # If the user did not specify an installable libltdl, then default
-  # to a convenience lib.
-  AC_LIBLTDL_CONVENIENCE
-fi
-
-if test "x$with_included_ltdl" = xno; then
-  # If the included ltdl is not to be used. then Use the
-  # preinstalled libltdl we found.
-  AC_DEFINE([HAVE_LTDL], 1,
-    [Define this if a modern libltdl is already installed])
-  LIBLTDL=-lltdl
-fi
-
-# Report our decision...
-AC_MSG_CHECKING([whether to use included libltdl])
-AC_MSG_RESULT([$with_included_ltdl])
-
-AC_CONFIG_SUBDIRS([libltdl])
-])# AC_WITH_LTDL
-
-
-# AC_LIB_LTDL
+# GST_LIB_LTDL
 # -----------
 # Perform all the checks necessary for compilation of the ltdl objects
 #  -- including compiler checks and header checks.
-AC_DEFUN([AC_LIB_LTDL],
+AC_DEFUN([GST_LIB_LTDL],
 [AC_PREREQ(2.50)
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([AC_C_CONST])
 AC_REQUIRE([AC_HEADER_STDC])
 AC_REQUIRE([AC_HEADER_DIRENT])
 AC_REQUIRE([_LT_AC_CHECK_DLFCN])
-AC_REQUIRE([AC_LTDL_ENABLE_INSTALL])
 AC_REQUIRE([AC_LTDL_SHLIBEXT])
 AC_REQUIRE([AC_LTDL_SHLIBPATH])
 AC_REQUIRE([AC_LTDL_SYSSEARCHPATH])
@@ -103,17 +54,6 @@ AC_CHECK_FUNCS([memcpy bcopy], [break])
 AC_CHECK_FUNCS([memmove strcmp])
 AC_CHECK_FUNCS([closedir opendir readdir])
 ])# AC_LIB_LTDL
-
-
-# AC_LTDL_ENABLE_INSTALL
-# ----------------------
-AC_DEFUN([AC_LTDL_ENABLE_INSTALL],
-[AC_ARG_ENABLE([ltdl-install],
-    [AC_HELP_STRING([--enable-ltdl-install], [install libltdl])])
-
-AM_CONDITIONAL(INSTALL_LTDL, test x"${enable_ltdl_install-no}" != xno)
-AM_CONDITIONAL(CONVENIENCE_LTDL, test x"${enable_ltdl_convenience-no}" != xno)
-])])# AC_LTDL_ENABLE_INSTALL
 
 
 # AC_LTDL_SYS_DLOPEN_DEPLIBS
