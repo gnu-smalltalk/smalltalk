@@ -19,7 +19,6 @@ AC_SUBST(CFLAGS)
 
 AM_PROG_AS
 AM_PROG_CC_C_O
-AC_LIBTOOL_TAGS([])
 AC_PROG_LIBTOOL
 
 dnl The -no-testsuite modules omit the test subdir.
