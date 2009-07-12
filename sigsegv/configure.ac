@@ -61,7 +61,6 @@ AC_SUBST(PLATFORM)
 AC_PROG_INSTALL
 AC_PROG_SED
 
-AC_LIBTOOL_TAGS([])
 AC_PROG_LIBTOOL
 
 # For testing cross-compilation behaviour.
