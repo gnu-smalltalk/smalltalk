@@ -213,6 +213,7 @@
   <file>GenDoc.st</file>
   <file>Convert.st</file>
   <file>Remote.st</file>
+  <file>Profile.st</file>
 </disabled-package>
 
 </packages>

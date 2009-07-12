@@ -73,7 +73,7 @@ noinst_HEADERS = \
 	tree.h byte.h interp.h comp.h memzero.h \
 	sym.h dict.h oop.h save.h cint.h xlat.h \
 	sysdep.h callin.h gstpub.h opt.h mpz.h \
-	md-config.h heap.h jitpriv.h oop.inl \
+	md-config.h heap.h real.h jitpriv.h oop.inl \
 	dict.inl interp.inl interp-bc.inl \
 	interp-jit.inl comp.inl input.h events.h \
 	print.h alloc.h genprims.h gst-parse.h \
