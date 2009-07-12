@@ -194,36 +194,19 @@ AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
-# We define two tags for LIBTOOL, one of which is special
-# for libgst.
 
-save_enable_shared=$enable_shared
-GST_LIBTOOL_TAG(LIBGST, CC, [
-  case "$host_cpu:$GCC:`$CC -v 2>&1 | sed -n '[s/^gcc version \([0-9.]*\).*/\1/p]'`" in
-   *:no:*)
-     enable_shared=no ;;
+case "$GCC:`$CC -v 2>&1 | sed -n '[s/^gcc version \([0-9.]*\).*/\1/p]'`" in
+   no:* | \
+   [*:[12].*] | \
+   [*:3.[012]*])
+     AC_MSG_ERROR([GNU Smalltalk requires GCC 3.3 or later.]) ;;
+esac
 
-   # Old versions of GCC do not support the visibility attribute,
-   # and we need it otherwise the library is dead slow.
-   [*:*:[12].*])
-     enable_shared=no ;;
-
-   [*:*:3.[012]*])
-     enable_shared=no ;;
-
-   i*86:yes:*)
-     # For the x86, building a shared library with the frame pointer
-     # is too slow.  On the other hand, most people will find a static
-     # library without it undebuggable, which is a problem with respeect
-     # to bug reports.  For this reason, we hack libtool to allow
-     # additional flags to be specified for the PIC case.
-     _LT_AC_TAGVAR(lt_prog_compiler_pic, LIBGST)="dnl
-$lt_prog_compiler_pic -fomit-frame-pointer" ;;
-
+case $host_cpu in
+   i*86) LIBGST_CFLAGS='-fomit-frame-pointer' ;;
    *) ;;
-  esac
-])
-enable_shared=$save_enable_shared
+esac
+AC_SUBST(LIBGST_CFLAGS)
 
 case "$host_os" in
   cygwin*|mingw*) ICON=gsticon.o ;;
