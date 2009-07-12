@@ -40,15 +40,14 @@ AM_CPPFLAGS		= -I$(top_srcdir)
 
 if INSTALL_SNPRINTFV
 include_HEADERS           = printf.h
-pkginclude_HEADERS        = mem.h filament.h stream.h dl.h
+pkginclude_HEADERS        = mem.h filament.h stream.h
 nodist_pkginclude_HEADERS = compat.h
-noinst_HEADERS            = ltdl.h
 else
-noinst_HEADERS            = mem.h filament.h stream.h printf.h dl.h ltdl.h
+noinst_HEADERS            = mem.h filament.h stream.h printf.h
 nodist_noinst_HEADERS     = compat.h
 endif
 
-dist_noinst_DATA          = filament.stamp stream.stamp printf.stamp dl.stamp
+dist_noinst_DATA          = filament.stamp stream.stamp printf.stamp
 CLEANFILES                = $(dist_noinst_DATA)
 
 EXTRA_LTLIBRARIES       = libsnprintfv.la libsnprintfvc.la
@@ -64,9 +63,7 @@ libsnprintfv_la_SOURCES	= 						\
 			printf.c					\
 			mem.c						\
 			stream.c					\
-			custom.c					\
-			dl-yes.c					\
-			ltdl.c
+			custom.c
 
 libsnprintfvc_la_CPPFLAGS = $(AM_CPPFLAGS) @LIBSNPRINTFVC_PRINT_FLOATS@
 libsnprintfvc_la_LIBADD	= @LTLIBOBJS@
@@ -76,8 +73,7 @@ libsnprintfvc_la_SOURCES= 						\
 			printf.c					\
 			mem.c						\
 			stream.c					\
-			custom.c					\
-			dl-no.c
+			custom.c
 
 
 # These files are the raw sources used to generate similarly named
@@ -87,14 +83,12 @@ EXTRA_DIST		=						\
 			compat.in					\
 			filament.in					\
 			printf.in					\
-			dl.in						\
 			stream.in
 
 BUILT_SOURCES		= 						\
 			compat.h					\
 			filament.h					\
 			printf.h					\
-			dl.h						\
 			stream.h
 
 gen: $(BUILT_SOURCES)
@@ -125,11 +119,9 @@ $(srcdir)/%.h: %.stamp
 printf.h: printf.stamp
 filament.h: filament.stamp
 stream.h: stream.stamp
-dl.h: dl.stamp
 printf.stamp: printf.in printf.c format.c custom.c
 filament.stamp: filament.in filament.c
 stream.stamp: stream.in stream.c
-dl.stamp: dl.in dl-yes.c
 
 #
 # compat.h is generated differently, so we can't use the pattern rule
