@@ -778,7 +778,7 @@ do arbitrary processing on the files.'>
 
         <category: 'polymorphism'>
 	atEnd := true.
-	super pastEnd
+	^super pastEnd
     ]
 
     nextAvailable: n into: aCollection startingAt: position [
