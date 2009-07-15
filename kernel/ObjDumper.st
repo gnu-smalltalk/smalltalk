@@ -293,6 +293,7 @@ references at design time and you override #storeOn: to deal with them'>
 	"Special-case metaclasses and other objects"
 
 	| index |
+	stream atEnd ifTrue: [^self pastEnd].
 	index := self nextLong.
 	^index < 0 
 	    ifTrue: [self specialCaseLoad: index]

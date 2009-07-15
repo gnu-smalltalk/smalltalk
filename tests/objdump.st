@@ -79,3 +79,13 @@ Eval [
 	(ObjectDumper on: stream) dump: #('asdf' 1 2 $a). 
 	^(ObjectDumper on: stream readStream) load = #('asdf' 1 2 $a)
 ]
+
+Eval [
+	| x y |
+	stream := String new readStream.
+	y := [ (ObjectDumper on: stream) load ]
+	    on: SystemExceptions.EndOfStream
+	    do: [ :ex | x := true. ex resume: ex defaultAction ].
+	y printNl.
+	^x
+]
