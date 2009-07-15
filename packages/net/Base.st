@@ -437,6 +437,41 @@ Object subclass: NetProtocolInterpreter [
     <category: 'NetClients-Framework'>
     <comment: nil>
 
+    NetProtocolInterpreter class >> base64Encode: aString [
+	| i j outSize c1 c2 c3 out b64string chars |
+	chars := 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.
+	outSize := aString size // 3 * 4.
+	(aString size \\ 3) = 0 ifFalse: [ outSize := outSize + 4 ].
+	b64string := String new: outSize.
+
+	i := 1.
+	1 to: outSize by: 4 do: [ :j |
+	    c1 := aString valueAt: i ifAbsent: [0].
+	    c2 := aString valueAt: i+1 ifAbsent: [0].
+	    c3 := aString valueAt: i+2 ifAbsent: [0].
+
+            out := c1 bitShift: -2.
+            b64string at: j put: (chars at: out + 1).
+
+            out := ((c1 bitAnd: 3) bitShift: 4) bitOr: (c2 bitShift: -4).
+            b64string at: j+1 put: (chars at: out + 1).
+
+            out := ((c2 bitAnd: 15) bitShift: 2) bitOr: (c3 bitShift: -6).
+            b64string at: j+2 put: (chars at: out + 1).
+
+            out := c3 bitAnd: 63.
+            b64string at: j+3 put: (chars at: out + 1).
+
+            i := i + 3.
+        ].
+
+	b64string
+	    replaceFrom: outSize - (i - aString size) + 2
+	    to: outSize withObject: $=.
+
+       ^b64string
+    ]
+
     NetProtocolInterpreter class >> log: aString level: aLevel [
 	<category: 'debugging'>
 	NetEnvironment default log: aString level: aLevel

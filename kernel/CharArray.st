@@ -643,6 +643,15 @@ accessing and manipulation methods for strings.'>
 	^SystemExceptions.IndexOutOfRange signalOn: self withIndex: index
     ]
 
+    valueAt: anIndex ifAbsent: aBlock [
+	"Answer the ascii value of the anIndex-th character of the receiver,
+	 or evaluate aBlock and answer the result if the index is out of range."
+
+	<category: 'basic'>
+	(anIndex between: 1 and: self size) ifFalse: [^aBlock value].
+	^self valueAt: anIndex
+    ]
+
     valueAt: index put: value [
 	"Store (Character value: value) in the index-th indexed instance variable
 	 of the receiver"

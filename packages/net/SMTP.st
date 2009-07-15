@@ -119,6 +119,10 @@ This is a test mail from Smalltalk (SMTPClient).
 	<category: 'accessing'>
 	self connectIfClosed.
 	self clientPI smtpHello: self getHostname.
+	(self clientPI isESMTP and: [self username isNil]) ifFalse: [
+            self clientPI esmtpAuthLogin: self username.
+            self password isNil ifFalse: [
+		self clientPI esmtpPassword: self password ]].
 	self clientPI smtpMail: sender.
 	recipients do: [:addr | self clientPI smtpRecipient: addr].
 	self clientPI smtpData: [self clientPI sendMessageWithPeriod: aStream]
@@ -143,6 +147,10 @@ This is a test mail from Smalltalk (SMTPClient).
 	<category: 'accessing'>
 	self connectIfClosed.
 	self clientPI smtpHello: self getHostname.
+	(self clientPI isESMTP and: [self username isNil]) ifFalse: [
+            self clientPI esmtpAuthLogin: self username.
+            self password isNil ifFalse: [
+		self clientPI esmtpPassword: self password ]].
 	self clientPI smtpMail: sender.
 	recipients do: [:addr | self clientPI smtpRecipient: addr].
 	self clientPI smtpData: [aMessage printMessageOnClient: self clientPI]
@@ -172,6 +180,8 @@ NetProtocolInterpreter subclass: SMTPProtocolInterpreter [
 Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 '>
     <category: 'NetClients-SMTP'>
+
+    | esmtp |
 
     SMTPProtocolInterpreter class >> defaultPortNumber [
 	<category: 'private-attributes'>
@@ -204,6 +214,11 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		["Service closing channel"
 
 		^self].
+        status = 235
+            ifTrue:
+                ["Authentication successful"
+
+                ^self].
 	status = 250 
 	    ifTrue: 
 		["Requested mail action okay"
@@ -216,6 +231,11 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 		^self].
 
 	"Positive Intermediate reply"
+        status = 334
+            ifTrue:
+                ["Authentication password"
+
+                ^self].
 	status = 354 
 	    ifTrue: 
 		["Start mail input"
@@ -307,8 +327,32 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
 
     connect [
 	<category: 'smtp protocol'>
+	| response |
 	super connect.
-	self checkResponse
+	response := self getResponse.
+	esmtp := response statusMessage ~ 'ESMTP'.
+	self checkResponse: response
+    ]
+
+    isESMTP [
+	<category: 'accssing'>
+	^esmtp
+    ]
+
+    esmtpAuthLogin: user [
+        <category: 'esmtp protocol'>
+        self
+            nextPutAll: 'AUTH LOGIN ', (self class base64Encode: user);
+            nl.
+        self checkResponse.
+    ]
+
+    esmtpPassword: password [
+        <category: 'esmtp protocol'>
+        self
+            nextPutAll: (self class base64Encode: password);
+            nl.
+        self checkResponse
     ]
 
     smtpData: streamBlock [
@@ -332,7 +376,7 @@ Copyright (c) Kazuki Yasumatsu, 1995. All rights reserved.
     smtpHello: domain [
 	<category: 'smtp protocol'>
 	self
-	    nextPutAll: 'HELO ' , domain;
+	    nextPutAll: ('%<EHLO|HELO>1 %2' % {esmtp. domain});
 	    nl.
 	self checkResponse
     ]

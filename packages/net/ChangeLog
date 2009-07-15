@@ -1,7 +1,12 @@
-2009-06-29  Paolo Bonzini  <bonzini@gnu.org>
+2009-07-15  Paolo Bonzini  <bonzini@gnu.org>
 	    Joachim Jaeckel  <joachim.jaeckel@lucke-edv.de>
 
 	* Base.st: Add Base-64 encoding.
+	* SMTP.st: Add ESMTP support.
+
+2009-06-29  Paolo Bonzini  <bonzini@gnu.org>
+	    Joachim Jaeckel  <joachim.jaeckel@lucke-edv.de>
+
 	* MIME.st: Fix Base-64 decoding bugs.
 
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
