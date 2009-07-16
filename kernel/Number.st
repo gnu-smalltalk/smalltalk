@@ -460,10 +460,14 @@ implicit type coercing code for binary operations.'>
 	 is a number)."
 
 	<category: 'testing'>
-	num isNumber ifFalse: [^self = num].
+	"Shortcut common cases.  But the first one is also needed
+	 so that FloatD infinity closeTo: FloatD infinity!"
+	self = num ifTrue: [^true].
+	num isNumber ifFalse: [^false].
 	self = self zero ifTrue: [^num abs < 0.0001].
 	num = num zero ifTrue: [^self abs < 0.0001].
-	^(self - num) abs / 0.0001 <= (self abs max: num abs)
+
+	^(self - num) abs / (self abs max: num abs) <= 0.0001
     ]
 
     isNaN [
