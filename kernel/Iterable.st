@@ -46,13 +46,6 @@ all possible) are left to the subclasses.'>
 	self subclassResponsibility
     ]
 
-    readStream [
-        "Answer a stream that gives elements of the receiver"
-
-	<category: 'enumeration'>
-	self subclassResponsibility
-    ]
-
     do: aBlock [
 	"Enumerate each object of the receiver, passing them to aBlock"
 

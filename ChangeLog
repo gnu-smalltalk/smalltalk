@@ -1,3 +1,7 @@
+2009-07-16  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Iterable.st: Remove duplicate method.
+
 2009-07-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/ObjDumper.st: Check #atEnd in #load.
