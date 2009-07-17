@@ -866,7 +866,7 @@ this class simply redirect their calls to an implementation class.'>
     ServerSocket class >> defaultQueueSize [
 	"Answer the default length of the queue for pending connections.  When
 	 the queue fills, new clients attempting to connect fail until the server
-	 is send #accept to accept a connection from the queue."
+	 has sent #accept to accept a connection from the queue."
 
 	<category: 'instance creation'>
 	^5
@@ -972,8 +972,7 @@ this class simply redirect their calls to an implementation class.'>
 	 one, else answer nil."
 
 	<category: 'accessing'>
-	self canRead ifFalse: [^nil].	"Make it non-blocking"
-	^self primAccept: Socket
+	^self accept: Socket
     ]
 
     accept: socketClass [
