@@ -240,8 +240,8 @@ body:
 prim_id_ref:
 	PRIM_ID '(' ID
 	  {
-	    $$ = lookup_prim_id ($3);
-	    if ($$ == NOT_FOUND)
+	    $<id>$ = lookup_prim_id ($3);
+	    if ($<id>$ == NOT_FOUND)
 	      yyerror ("Invalid primitive id");
 	  }
 	')'
