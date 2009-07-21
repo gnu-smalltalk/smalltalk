@@ -1173,15 +1173,18 @@ Object subclass: SpSocket [
 	"^self
 	 I set the socket I represent listening for incomming connections,
 	 allowing a 	backlog of up to aNumberOfConnections.
-	 Note that Squeak combines bind and listen so I noted the socket address
-	 when I was asked to bind - and I use that now.
-	 OK - I really wanter to be able to specify the interface, but that seems
-	 to be broken - I get a primitive error when I try to use it"
+	 Note that GNU Smalltalk combines bind and listen so I noted the
+	 socket address when I was asked to bind - and I use that now."
 
 	<category: 'services-status'>
+	| localAddress |
+	localAddress := socketAddress ifNotNil: [
+	    Sockets.IPAddress fromBytes: socketAddress hostAddress ].
+
 	underlyingSocket := TCP.ServerSocket
 	    port: socketAddress portNumber
-	    queueSize: aNumberOfConnections.
+	    queueSize: aNumberOfConnections
+	    bindTo: localAddress.
 	^self
     ]
 
