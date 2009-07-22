@@ -155,7 +155,6 @@ Packages
 * Other packages:                        Other packages.
 
 Emacs
-* Autoloading::       Autoloading @gst{} mode.
 * Editing::           Autoindent and more for @gst{}.
 * Interactor::        Smalltalk interactor mode.
 
@@ -2854,31 +2853,13 @@ and execute it a bytecode or a method at a time.
 code.  It also provides tools for interacting with a running Smalltalk
 system in an Emacs subwindow.
 
+Emacs will automatically go into Smalltalk mode when you edit a
+Smalltalk file (one with the extension @file{.st}).
+
 @menu
-* Autoloading::       Autoloading @gst{} mode.
 * Editing::           Autoindent and more for @gst{}.
 * Interactor::        Smalltalk interactor mode.
 @end menu
-
-@node Autoloading
-@section Autoloading @gst{} mode
-
-To cause Emacs to automatically go into Smalltalk mode when you edit a
-Smalltalk file (one with the extension @file{.st}), you need to add
-the following lines to your @file{.emacs} file:
-
-@example
-(setq auto-mode-alist
-      (append  '(("\\.st\\'" . smalltalk-mode))
-               auto-mode-alist))
-
-(autoload 'smalltalk-mode "@var{path}/smalltalk-mode.elc" "" t)
-@end example
-
-@noindent
-where @var{path} is the path to where the two Emacs Lisp files
-included with @gst{} are installed (by default, something like
-@file{/usr/local/share/emacs/site-lisp}).
 
 @node Editing
 @section Smalltalk editing mode

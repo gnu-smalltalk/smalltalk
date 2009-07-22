@@ -61,24 +61,34 @@ nodist_pkgconfig_DATA = gnu-smalltalk.pc
 
 pkglib_DATA = libc.la
 noinst_DATA = gst.im
-dist_noinst_DATA += smalltalk-mode.el.in gst-mode.el.in .gdbinit \
-	scripts/Finish.st gsticon.ico packages/xml/ChangeLog \
+dist_noinst_DATA += smalltalk-mode-init.el.in gst-mode.el.in
+	.gdbinit scripts/Finish.st gsticon.ico packages/xml/ChangeLog \
 	packages/seaside/PORTING
 
-if WITH_EMACS
-nodist_lisp_LISP = smalltalk-mode.el
-if WITH_EMACS_COMINT
-nodist_lisp_LISP += gst-mode.el
-endif
-endif
-
 bin_SCRIPTS = gst-config
-DISTCLEANFILES = termbold termnorm smalltalk-mode.el gst-mode.el pkgrules.tmp
-CLEANFILES = gst.im $(lisp_LISP)
+DISTCLEANFILES = termbold termnorm pkgrules.tmp
+CLEANFILES = gst.im $(nodist_lisp_LISP) $(nodist_lispstart_LISP)
 
-smalltalk-mode.el: smalltalk-mode.el.in
-	$(SED) -e "s,@\(lispdir\)@,$(lispdir)," $(srcdir)/smalltalk-mode.el.in \
-	  > smalltalk-mode.el
+lispstartdir = $(lispdir)/site-start.d
+
+if WITH_EMACS
+lisp_LISP = smalltalk-mode.el
+nodist_lispstart_LISP = smalltalk-mode-init.el
+if WITH_EMACS_COMINT
+nodist_lisp_LISP = gst-mode.el
+endif
+endif
+
+if WITH_EMACS_COMINT
+LISP_WITH_EMACS_COMINT =
+else
+LISP_WITH_EMACS_COMINT = ;
+endif
+
+smalltalk-mode-init.el: smalltalk-mode-init.el.in
+	$(SED) -e "s,@\(lispdir\)@,$(lispdir)," \
+	  -e "s/@\(WITH_EMACS_COMINT_TRUE\)@/$(LISP_WITH_EMACS_COMINT)/" \
+	  $(srcdir)/smalltalk-mode-init.el.in > smalltalk-mode-init.el
 
 gst-mode.el: gst-mode.el.in
 	$(SED) -e "s,@\(bindir\)@,$(bindir)," $(srcdir)/gst-mode.el.in \
