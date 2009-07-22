@@ -1,3 +1,7 @@
+2009-07-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sysdep.c: Small cleanup.
+
 2009-07-20  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/genpr-parse.y: Fix for newer bison.
