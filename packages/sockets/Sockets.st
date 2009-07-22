@@ -683,6 +683,13 @@ but it is done for cleanliness and symmetry.'>
 	self implementation bufferSize: size
     ]
 
+    datagramClass [
+	"Answer the class used by the socket to return datagrams."
+
+	<category: 'accessing'>
+	^self implementation class datagramClass
+    ]
+
     next [
 	"Read a datagram on the socket and answer it."
 

@@ -567,6 +567,14 @@ implementations.'>
 	^self sockDgram
     ]
 
+    DatagramSocketImpl class >> datagramClass [
+	"Answer the datagram class returned by default by instances of
+	 this class."
+
+	<category: 'parameters'>
+	^Datagram
+    ]
+
     bufferSize [
 	"Answer the size of the buffer in which datagrams are stored."
 
@@ -582,10 +590,11 @@ implementations.'>
     ]
 
     peek [
-	"Peek for a datagram on the receiver, answer a new Datagram object"
+	"Peek for a datagram on the receiver, answer a new object
+	 of the receiver's datagram class."
 
 	<category: 'socket operations'>
-	^self receive: self msgPeek datagram: Datagram new
+	^self receive: self msgPeek datagram: self class datagramClass new
     ]
 
     peek: aDatagram [
@@ -597,10 +606,11 @@ implementations.'>
     ]
 
     next [
-	"Retrieve a datagram from the receiver, answer a new Datagram object"
+	"Retrieve a datagram from the receiver, answer a new object
+	 of the receiver's datagram class."
 
 	<category: 'socket operations'>
-	^self receive: 0 datagram: Datagram new
+	^self receive: 0 datagram: self class datagramClass new
     ]
 
     receive: aDatagram [
