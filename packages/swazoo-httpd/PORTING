@@ -22,8 +22,11 @@
 # 4) run this script:
 #     sh -x combine swazoo-2.2-gst.st ../../packages/swazoo-httpd/*.st
 #
-# 5) copy the new st files over the old ones and examine diffs; if something
-#    is wrong, git undo and redo the script
+# 5) copy the new st files over the old ones and examine diffs.  Pay
+#    particular attention to HTTPConnection>>#interact as wrong closing
+#    of the socket can be disastrous.
+#
+#    If something is totally wrong, git undo and rerun the script.
 
 source=$1
 shift

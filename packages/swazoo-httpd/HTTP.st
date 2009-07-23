@@ -84,11 +84,12 @@ Object subclass: HTTPConnection [
 		[[[true] whileTrue: 
 			[self getAndDispatchMessages.
 			Processor yield]] 
+			    ifCurtailed: 
+			        [self close]]
 		    on: Error
-		    do: [:ex | ]] 
-			ifCurtailed: 
-			    [(Delay forMilliseconds: 50) wait.	"to finish sending, if any"
-			    self close]].
+		    do: [:ex |
+			(Delay forMilliseconds: 50) wait.	"to finish sending, if any"
+			self close]].
 	self server isMultiThreading 
 	    ifTrue: 
 		[self loop: (interactionBlock forkAt: Processor userBackgroundPriority)]
