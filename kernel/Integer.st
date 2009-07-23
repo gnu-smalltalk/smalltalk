@@ -513,6 +513,22 @@ efficiency.'>
 	^string
     ]
 
+    printOn: aStream paddedWith: padding to: size [
+	"Print on aStream the base 10 representation of the receiver,
+	 padded if necessary to size characters with copies of padding."
+
+	<category: 'printing'>
+        self printOn: aStream paddedWith: padding to: size base: 10
+    ]
+
+    printPaddedWith: padding to: size base: baseInteger [
+	"Return the base 10 representation of the receiver, padded if
+	 necessary to size characters with copies of padding."
+
+	<category: 'printing'>
+        ^self printPaddedWith: padding to: size base: 10
+    ]
+
     printOn: aStream paddedWith: padding to: size base: baseInteger [
 	"Print on aStream the base b representation of the receiver,
 	 padded if necessary to size characters with copies of padding."
