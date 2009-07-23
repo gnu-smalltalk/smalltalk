@@ -34,8 +34,8 @@ SUBDIRS += libgst . $(BUILT_PACKAGES) doc tests
 # Running gst inside the build directory...
 
 GST_OPTS = --kernel-dir="@abs_top_srcdir@/kernel" --image="@abs_top_builddir@/gst.im"
-GST = ./gst --no-user-files $(GST_OPTS)
-GST_PACKAGE = ./gst-tool gst-package $(GST_OPTS)
+GST = ./gst$(EXEEXT) --no-user-files $(GST_OPTS)
+GST_PACKAGE = ./gst-tool$(EXEEXT) gst-package $(GST_OPTS)
 
 
 ###########################################################
@@ -138,7 +138,8 @@ DISTCLEANFILES += config.h
 
 # These two lines add a beatiful icon to the Win32 executable
 gsticon.o: gsticon.ico
-	echo ProgramIcon ICON `$(CYGPATH_W) gsticon.ico` | windres -o gsticon.o
+	cd $(srcdir) && echo ProgramIcon ICON `$(CYGPATH_W) gsticon.ico` | \
+		$(WINDRES) -o $(abs_builddir)/gsticon.o
 
 gst.im: $(bin_PROGRAMS) $(srcdir)/kernel/stamp-classes
 	$(GST) -iQ /dev/null
@@ -216,7 +217,7 @@ install-data-hook::
 	    -f "@abs_top_srcdir@/scripts/Finish.st" \
 	    "$(pkgdatadir)" "$(imagedir)" $(MODULES)
 
-uninstall-local:: gst-tool
+uninstall-local:: gst-tool$(EXEEXT)
 	$(GST_PACKAGE) \
 	  --uninstall --destdir="$(DESTDIR)" --target-dir="$(pkgdatadir)" \
 	  --srcdir=$(srcdir) $(DESTDIR)$(pkgdatadir)/packages.xml

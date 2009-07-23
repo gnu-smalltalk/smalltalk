@@ -46,6 +46,7 @@ AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_LN_S
 GST_PROG_LN
+AC_PATH_TOOL(WINDRES, windres, no)
 AC_PATH_PROG(INSTALL_INFO, install-info, :, $PATH:/sbin:/usr/sbin)
 AC_PATH_PROG(ZIP, zip, no, $PATH)
 if test "$ZIP" = no; then
@@ -282,7 +283,7 @@ GST_HAVE_GMP
 GST_HAVE_READLINE
 
 GST_PACKAGE_PREFIX([packages])
-GST_PACKAGE_DEPENDENCIES([gst-tool gst.im])
+GST_PACKAGE_DEPENDENCIES([gst-tool$(EXEEXT) gst.im])
 
 GST_PACKAGE_ENABLE([BloxTK], [blox/tk],
    [GST_HAVE_TCLTK],
