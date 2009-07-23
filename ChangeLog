@@ -1,3 +1,7 @@
+2009-07-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Integer.st: Implement print-with-padding methods.
+
 2009-07-16  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Number.st: Don't say +Inf is close to -Inf.

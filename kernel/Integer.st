@@ -513,6 +513,46 @@ efficiency.'>
 	^string
     ]
 
+    printOn: aStream paddedWith: padding to: size base: baseInteger [
+	"Print on aStream the base b representation of the receiver,
+	 padded if necessary to size characters with copies of padding."
+
+	<category: 'printing'>
+	| num string extra reqSize |
+	self < self zero
+	    ifFalse: [num := self. extra := 0]
+	    ifTrue: [num := self negated. extra := 1. aStream nextPut: $-].
+
+	reqSize := (num floorLog: baseInteger) + 1.
+	aStream next: (size - reqSize - extra max: 0) put: padding.
+
+	string := String new: reqSize.
+	num replace: string withStringBase: baseInteger.
+	aStream nextPutAll: string
+    ]
+
+    printPaddedWith: padding to: size base: baseInteger [
+	"Return the base b representation of the receiver, padded if
+	 necessary to size characters with copies of padding."
+
+	<category: 'printing'>
+	| num string padFirst reqSize |
+	self < self zero
+	    ifFalse: [num := self. padFirst := 1]
+	    ifTrue: [num := self negated. padFirst := 2].
+
+	reqSize := (num floorLog: baseInteger) + padFirst.
+	string := String new: (reqSize max: size).
+	padFirst = 2 ifTrue: [string at: 1 put: $-].
+	string
+	    replaceFrom: padFirst
+	    to: string size - reqSize + padFirst - 1
+	    withObject: padding.
+
+	num replace: string withStringBase: baseInteger.
+	^string
+    ]
+
     printString: baseInteger [
 	"Return the base b representation of the receiver"
 
