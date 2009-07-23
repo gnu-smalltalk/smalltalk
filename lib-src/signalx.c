@@ -58,16 +58,123 @@
 #undef raise
 #undef signal
 
-sighandler_t sigtable[RPL_NSIG];
-#define SIG_HANDLER(sig) sigtable[-(sig) - 1]
+sighandler_t sigtable[NSIG];
+#define SIG_HANDLER(sig) sigtable[(sig) - 1]
+
+static inline int
+is_stdlib_signal (int sig)
+{
+  static const long long int non_stdlib_signals = (0
+#ifdef RPL_SIGHUP
+	| (1LL << RPL_SIGHUP)
+#endif
+#ifdef RPL_SIGINT
+	| (1LL << RPL_SIGINT)
+#endif
+#ifdef RPL_SIGQUIT
+	| (1LL << RPL_SIGQUIT)
+#endif
+#ifdef RPL_SIGILL
+	| (1LL << RPL_SIGILL)
+#endif
+#ifdef RPL_SIGTRAP
+	| (1LL << RPL_SIGTRAP)
+#endif
+#ifdef RPL_SIGABRT
+	| (1LL << RPL_SIGABRT)
+#endif
+#ifdef RPL_SIGIOT
+	| (1LL << RPL_SIGIOT)
+#endif
+#ifdef RPL_SIGBUS
+	| (1LL << RPL_SIGBUS)
+#endif
+#ifdef RPL_SIGFPE
+	| (1LL << RPL_SIGFPE)
+#endif
+#ifdef RPL_SIGKILL
+	| (1LL << RPL_SIGKILL)
+#endif
+#ifdef RPL_SIGUSR1
+	| (1LL << RPL_SIGUSR1)
+#endif
+#ifdef RPL_SIGSEGV
+	| (1LL << RPL_SIGSEGV)
+#endif
+#ifdef RPL_SIGUSR2
+	| (1LL << RPL_SIGUSR2)
+#endif
+#ifdef RPL_SIGPIPE
+	| (1LL << RPL_SIGPIPE)
+#endif
+#ifdef RPL_SIGALRM
+	| (1LL << RPL_SIGALRM)
+#endif
+#ifdef RPL_SIGTERM
+	| (1LL << RPL_SIGTERM)
+#endif
+#ifdef RPL_SIGSTKFLT
+	| (1LL << RPL_SIGSTKFLT)
+#endif
+#ifdef RPL_SIGCHLD
+	| (1LL << RPL_SIGCHLD)
+#endif
+#ifdef RPL_SIGCONT
+	| (1LL << RPL_SIGCONT)
+#endif
+#ifdef RPL_SIGSTOP
+	| (1LL << RPL_SIGSTOP)
+#endif
+#ifdef RPL_SIGTSTP
+	| (1LL << RPL_SIGTSTP)
+#endif
+#ifdef RPL_SIGTTIN
+	| (1LL << RPL_SIGTTIN)
+#endif
+#ifdef RPL_SIGTTOU
+	| (1LL << RPL_SIGTTOU)
+#endif
+#ifdef RPL_SIGURG
+	| (1LL << RPL_SIGURG)
+#endif
+#ifdef RPL_SIGXCPU
+	| (1LL << RPL_SIGXCPU)
+#endif
+#ifdef RPL_SIGXFSZ
+	| (1LL << RPL_SIGXFSZ)
+#endif
+#ifdef RPL_SIGVTALRM
+	| (1LL << RPL_SIGVTALRM)
+#endif
+#ifdef RPL_SIGPROF
+	| (1LL << RPL_SIGPROF)
+#endif
+#ifdef RPL_SIGWINCH
+	| (1LL << RPL_SIGWINCH)
+#endif
+#ifdef RPL_SIGIO
+	| (1LL << RPL_SIGIO)
+#endif
+#ifdef RPL_SIGPWR
+	| (1LL << RPL_SIGPWR)
+#endif
+#ifdef RPL_SIGSYS
+	| (1LL << RPL_SIGSYS)
+#endif
+	);
+
+  return (non_stdlib_signals & (1LL << sig)) == 0;
+}
 
 int
 rpl_raise (int sig)
 {
-  if (sig < -RPL_NSIG || sig > NSIG)
+  if (sig >= NSIG)
     return -1;
 
-  if (sig < 0)
+  if (is_stdlib_signal (sig))
+    return raise(sig);
+  else
     {
       sighandler_t old_handler = SIG_HANDLER(sig);
       SIG_HANDLER(sig) = SIG_DFL;
@@ -76,23 +183,21 @@ rpl_raise (int sig)
 
       return 0;
     }
-  else
-    return raise(sig);
 }
 
 sighandler_t
 rpl_signal (int sig, sighandler_t handler)
 {
-  if (sig < -RPL_NSIG || sig > NSIG || handler == SIG_ERR)
+  if (sig >= NSIG || handler == SIG_ERR)
     return SIG_ERR;
 
-  if (sig < 0)
+  if (is_stdlib_signal (sig))
+    return signal(sig, handler);
+  else
     {
       sighandler_t old_handler = SIG_HANDLER(sig);
       SIG_HANDLER(sig) = handler;
       return old_handler;
     }
-  else
-    return signal(sig, handler);
 }
 #endif /* RPL_NSIG */

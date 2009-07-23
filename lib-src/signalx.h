@@ -53,107 +53,125 @@
 #ifndef GST_SIGNALX_H
 #define GST_SIGNALX_H
 
+#include "config.h"
 #include <signal.h>
 
 #ifndef SIGHUP
-#define SIGHUP          -1       /* Hangup (POSIX).  */
-#define RPL_NSIG        1
-#endif
-
-#ifndef SIGINT
-#define SIGINT          -2       /* Interrupt (ANSI).  */
-#undef RPL_NSIG
+#define SIGHUP          1       /* Hangup (POSIX).  */
+#define RPL_SIGHUP      1
 #define RPL_NSIG        2
 #endif
 
-#ifndef SIGQUIT
-#define SIGQUIT         -3       /* Quit (POSIX).  */
+#ifndef SIGINT
+#define SIGINT          2       /* Interrupt (ANSI).  */
+#define RPL_SIGINT      2
 #undef RPL_NSIG
 #define RPL_NSIG        3
 #endif
 
-#ifndef SIGILL
-#define SIGILL          -4       /* Illegal instruction (ANSI).  */
+#ifndef SIGQUIT
+#define SIGQUIT         3       /* Quit (POSIX).  */
+#define RPL_SIGQUIT     3
 #undef RPL_NSIG
 #define RPL_NSIG        4
 #endif
 
-#ifndef SIGTRAP
-#define SIGTRAP         -5       /* Trace trap (POSIX).  */
+#ifndef SIGILL
+#define SIGILL          4       /* Illegal instruction (ANSI).  */
+#define RPL_SIGILL      4
 #undef RPL_NSIG
 #define RPL_NSIG        5
 #endif
 
+#ifndef SIGTRAP
+#define SIGTRAP         5       /* Trace trap (POSIX).  */
+#define RPL_SIGTRAP     5
+#undef RPL_NSIG
+#define RPL_NSIG        6
+#endif
+
 #ifndef SIGABRT
-#define SIGABRT         -6       /* Abort (ANSI).  */
-#undef RPL_NSIG
-#define RPL_NSIG        6
-#endif
-
-#ifndef SIGIOT
-#define SIGIOT          -6       /* IOT trap (4.2 BSD).  */
-#undef RPL_NSIG
-#define RPL_NSIG        6
-#endif
-
-#ifndef SIGBUS
-#define SIGBUS          -7       /* BUS error (4.2 BSD).  */
+#define SIGABRT         6       /* Abort (ANSI).  */
+#define RPL_SIGABRT     6
 #undef RPL_NSIG
 #define RPL_NSIG        7
 #endif
 
-#ifndef SIGFPE
-#define SIGFPE          -8       /* Floating-point exception (ANSI).  */
+#ifndef SIGIOT
+#define SIGIOT          6       /* IOT trap (4.2 BSD).  */
+#define RPL_SIGIOT      6
+#undef RPL_NSIG
+#define RPL_NSIG        7
+#endif
+
+#ifndef SIGBUS
+#define SIGBUS          7       /* BUS error (4.2 BSD).  */
+#define RPL_SIGBUS      7
 #undef RPL_NSIG
 #define RPL_NSIG        8
 #endif
 
-#ifndef SIGKILL
-#define SIGKILL         -9       /* Kill, unblockable (POSIX).  */
+#ifndef SIGFPE
+#define SIGFPE          8       /* Floating-point exception (ANSI).  */
+#define RPL_SIGFPE      8
 #undef RPL_NSIG
 #define RPL_NSIG        9
 #endif
 
-#ifndef SIGUSR1
-#define SIGUSR1         -10      /* User-defined signal 1 (POSIX).  */
+#ifndef SIGKILL
+#define SIGKILL         9       /* Kill, unblockable (POSIX).  */
+#define RPL_SIGKILL     9
 #undef RPL_NSIG
 #define RPL_NSIG        10
 #endif
 
-#ifndef SIGSEGV
-#define SIGSEGV         -11      /* Segmentation violation (ANSI).  */
+#ifndef SIGUSR1
+#define SIGUSR1         10      /* User-defined signal 1 (POSIX).  */
+#define RPL_SIGUSR1     10
 #undef RPL_NSIG
 #define RPL_NSIG        11
 #endif
 
-#ifndef SIGUSR2
-#define SIGUSR2         -12      /* User-defined signal 2 (POSIX).  */
+#ifndef SIGSEGV
+#define SIGSEGV         11      /* Segmentation violation (ANSI).  */
+#define RPL_SIGSEGV     11
 #undef RPL_NSIG
 #define RPL_NSIG        12
 #endif
 
-#ifndef SIGPIPE
-#define SIGPIPE         -13      /* Broken pipe (POSIX).  */
+#ifndef SIGUSR2
+#define SIGUSR2         12      /* User-defined signal 2 (POSIX).  */
+#define RPL_SIGUSR2     12
 #undef RPL_NSIG
 #define RPL_NSIG        13
 #endif
 
-#ifndef SIGALRM
-#define SIGALRM         -14      /* Alarm clock (POSIX).  */
+#ifndef SIGPIPE
+#define SIGPIPE         13      /* Broken pipe (POSIX).  */
+#define RPL_SIGPIPE     13
 #undef RPL_NSIG
 #define RPL_NSIG        14
 #endif
 
-#ifndef SIGTERM
-#define SIGTERM         -15      /* Termination (ANSI).  */
+#ifndef SIGALRM
+#define SIGALRM         14      /* Alarm clock (POSIX).  */
+#define RPL_SIGALRM     14
 #undef RPL_NSIG
 #define RPL_NSIG        15
 #endif
 
-#ifndef SIGSTKFLT
-#define SIGSTKFLT       -16      /* Stack fault.  */
+#ifndef SIGTERM
+#define SIGTERM         15      /* Termination (ANSI).  */
+#define RPL_SIGTERM     15
 #undef RPL_NSIG
 #define RPL_NSIG        16
+#endif
+
+#ifndef SIGSTKFLT
+#define SIGSTKFLT       16      /* Stack fault.  */
+#define RPL_SIGSTKFLT   16
+#undef RPL_NSIG
+#define RPL_NSIG        17
 #endif
 
 #ifndef SIGCLD
@@ -161,75 +179,94 @@
 #endif
 
 #ifndef SIGCHLD
-#define SIGCHLD         -17      /* Child status has changed (POSIX).  */
-#undef RPL_NSIG
-#define RPL_NSIG        17
-#endif
-
-#ifndef SIGCONT
-#define SIGCONT         -18      /* Continue (POSIX).  */
+#define SIGCHLD         17      /* Child status has changed (POSIX).  */
+#define RPL_SIGCHLD     17
 #undef RPL_NSIG
 #define RPL_NSIG        18
 #endif
 
-#ifndef SIGSTOP
-#define SIGSTOP         -19      /* Stop, unblockable (POSIX).  */
+#ifndef SIGCONT
+#define SIGCONT         18      /* Continue (POSIX).  */
+#define RPL_SIGCONT     18
 #undef RPL_NSIG
 #define RPL_NSIG        19
 #endif
 
-#ifndef SIGTSTP
-#define SIGTSTP         -20      /* Keyboard stop (POSIX).  */
+#ifndef SIGSTOP
+#define SIGSTOP         19      /* Stop, unblockable (POSIX).  */
+#define RPL_SIGSTOP     19
 #undef RPL_NSIG
 #define RPL_NSIG        20
 #endif
 
-#ifndef SIGTTIN
-#define SIGTTIN         -21      /* Background read from tty (POSIX).  */
+#ifndef SIGTSTP
+#define SIGTSTP         20      /* Keyboard stop (POSIX).  */
+#define RPL_SIGTSTP     20
 #undef RPL_NSIG
 #define RPL_NSIG        21
 #endif
 
-#ifndef SIGTTOU
-#define SIGTTOU         -22      /* Background write to tty (POSIX).  */
+/* 21 and 22 used by mingw, work around.  */
+#if STDLIB_NSIG > RPL_NSIG
+#define SIG_DELTA	(STDLIB_NSIG - 21)
+#else
+#define SIG_DELTA	0
+#endif
+
+#ifndef SIGTTIN
+#define SIGTTIN         (21 + SIG_DELTA)      /* Background read from tty (POSIX).  */
+#define RPL_SIGTTIN     (21 + SIG_DELTA)
 #undef RPL_NSIG
-#define RPL_NSIG        22
+#define RPL_NSIG        (22 + SIG_DELTA)
+#endif
+
+#ifndef SIGTTOU
+#define SIGTTOU         (22 + SIG_DELTA)      /* Background write to tty (POSIX).  */
+#define RPL_SIGTTOU     (22 + SIG_DELTA)
+#undef RPL_NSIG
+#define RPL_NSIG        (23 + SIG_DELTA)
 #endif
 
 #ifndef SIGURG
-#define SIGURG          -23      /* Urgent condition on socket (4.2 BSD).  */
+#define SIGURG          (23 + SIG_DELTA)      /* Urgent condition on socket (4.2 BSD).  */
+#define RPL_SIGURG      (23 + SIG_DELTA)
 #undef RPL_NSIG
-#define RPL_NSIG        23
+#define RPL_NSIG        (24 + SIG_DELTA)
 #endif
 
 #ifndef SIGXCPU
-#define SIGXCPU         -24      /* CPU limit exceeded (4.2 BSD).  */
+#define SIGXCPU         (24 + SIG_DELTA)      /* CPU limit exceeded (4.2 BSD).  */
+#define RPL_SIGXCPU     (24 + SIG_DELTA)
 #undef RPL_NSIG
-#define RPL_NSIG        24
+#define RPL_NSIG        (25 + SIG_DELTA)
 #endif
 
 #ifndef SIGXFSZ
-#define SIGXFSZ         -25      /* File size limit exceeded (4.2 BSD).  */
+#define SIGXFSZ         (25 + SIG_DELTA)      /* File size limit exceeded (4.2 BSD).  */
+#define RPL_SIGXFSZ     (25 + SIG_DELTA)
 #undef RPL_NSIG
-#define RPL_NSIG        25
+#define RPL_NSIG        (26 + SIG_DELTA)
 #endif
 
 #ifndef SIGVTALRM
-#define SIGVTALRM       -26      /* Virtual alarm clock (4.2 BSD).  */
+#define SIGVTALRM       (26 + SIG_DELTA)      /* Virtual alarm clock (4.2 BSD).  */
+#define RPL_SIGVTALRM   (26 + SIG_DELTA)
 #undef RPL_NSIG
-#define RPL_NSIG        26
+#define RPL_NSIG        (27 + SIG_DELTA)
 #endif
 
 #ifndef SIGPROF
-#define SIGPROF         -27      /* Profiling alarm clock (4.2 BSD).  */
+#define SIGPROF         (27 + SIG_DELTA)      /* Profiling alarm clock (4.2 BSD).  */
+#define RPL_SIGPROF     (27 + SIG_DELTA)
 #undef RPL_NSIG
-#define RPL_NSIG        27
+#define RPL_NSIG        (28 + SIG_DELTA)
 #endif
 
 #ifndef SIGWINCH
-#define SIGWINCH        -28      /* Window size change (4.3 BSD, Sun).  */
+#define SIGWINCH        (28 + SIG_DELTA)      /* Window size change (4.3 BSD, Sun).  */
+#define RPL_SIGWINCH    (28 + SIG_DELTA)
 #undef RPL_NSIG
-#define RPL_NSIG        28
+#define RPL_NSIG        (29 + SIG_DELTA)
 #endif
 
 #ifndef SIGPOLL
@@ -237,21 +274,24 @@
 #endif
 
 #ifndef SIGIO
-#define SIGIO           -29      /* I/O now possible (4.2 BSD).  */
+#define SIGIO           (29 + SIG_DELTA)      /* I/O now possible (4.2 BSD).  */
+#define RPL_SIGIO       (29 + SIG_DELTA)
 #undef RPL_NSIG
-#define RPL_NSIG        29
+#define RPL_NSIG        (30 + SIG_DELTA)
 #endif
 
 #ifndef SIGPWR
-#define SIGPWR          -30      /* Power failure restart (System V).  */
+#define SIGPWR          (30 + SIG_DELTA)      /* Power failure restart (System V).  */
+#define RPL_SIGPWR      (30 + SIG_DELTA)
 #undef RPL_NSIG
-#define RPL_NSIG        30
+#define RPL_NSIG        (31 + SIG_DELTA)
 #endif
 
 #ifndef SIGSYS
-#define SIGSYS          -31      /* Bad system call.  */
+#define SIGSYS          (31 + SIG_DELTA)      /* Bad system call.  */
+#define RPL_SIGSYS      (31 + SIG_DELTA)
 #undef RPL_NSIG
-#define RPL_NSIG        31
+#define RPL_NSIG        (32 + SIG_DELTA)
 #endif
 
 #ifdef RPL_NSIG
