@@ -1,3 +1,8 @@
+2009-07-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* signalx.h: Avoid negative "signal" numbers.
+	* signalx.c: Avoid negative "signal" numbers.
+
 2008-10-07  Samuel Tardieu  <sam@rfc1149.net>
 
 	* ltdl.c (try_dlopen): sys_search_path cannot be null as
