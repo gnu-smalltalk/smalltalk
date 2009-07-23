@@ -515,6 +515,12 @@ extern OOP _gst_nil_oop
 #define BYTES_TO_SIZE(bytes) \
   ((bytes) / sizeof (PTR))
 
+#ifdef __GNUC__
+#define no_opt(x)	({ __typeof__ ((x)) _result; \
+			 asm ("" : "=r" (_result) : "0" ((x))); _result; })
+#else
+#define no_opt(x)	(x)
+#endif
 
 /* integer conversions and some information on SmallIntegers.  */
 

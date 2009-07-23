@@ -233,7 +233,7 @@ operation PLUS_SPECIAL ( op1 op2 -- op ) {
     {
       intptr_t iop1 = (intptr_t) op1;
       intptr_t iop2 = ((intptr_t) op2) - 1;
-      intptr_t iresult = iop1 + iop2;
+      intptr_t iresult = no_opt (iop1 + iop2);
       if (iresult < iop1)
         {
 	  if (iop2 < 0)
@@ -267,7 +267,7 @@ operation MINUS_SPECIAL ( op1 op2 -- op ) {
     {
       intptr_t iop1 = (intptr_t) op1;
       intptr_t iop2 = ((intptr_t) op2) - 1;
-      intptr_t iresult = iop1 - iop2;
+      intptr_t iresult = no_opt (iop1 - iop2);
       if (iresult < iop1)
         {
 	  if (iop2 >= 0)

@@ -5493,6 +5493,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 		    result = _gst_read (fd, data + from - 1, to - from + 1);
 		    lseek (fd, save, SEEK_SET);
 		  }
+		else
+		  result = -1;
 	      }
 #endif
 
@@ -5533,6 +5535,8 @@ primitive VMpr_FileDescriptor_fileOp [succeed,fail]
 		    result = _gst_write (fd, data + from - 1, to - from + 1);
 		    lseek (fd, save, SEEK_SET);
 		  }
+		else
+		  result = -1;
 	      }
 #endif
 
