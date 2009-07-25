@@ -1,5 +1,9 @@
 2009-07-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiDates.st: Add Duration>>#wait.
+
+2009-07-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/Time.st: Simplify millisecond clock since GNU Smalltalk
 	has had LargeIntegers for, ehm, quite some time.
 

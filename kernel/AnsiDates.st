@@ -637,6 +637,13 @@ Time subclass: Duration [
 	<category: 'private'>
 	seconds := secs
     ]
+
+    wait [
+	"Answer a Delay waiting for the amount of time represented
+	 by the receiver and start waiting on it."
+	<category: 'processes'>
+	^(Delay forMilliseconds: self asSeconds * 1000) wait
+    ]
 ]
 
 
