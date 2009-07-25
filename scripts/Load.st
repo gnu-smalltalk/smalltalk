@@ -112,13 +112,14 @@ force ifTrue: [
     packages do: [ :each | Smalltalk removeFeature: each asSymbol ] ].
 
 [
+    packages := packages collect: [ :each | PackageLoader packageAt: each ].
+
     (startMessage selector == #start: and: [
 	(packages count: [ :each | each startScript notNil ]) > 1]) ifTrue: [
 	    stderr nextPutAll: 'gst-load: Cannot pass start argument to multiple packages
 '.
 	    ^self ].
 
-    packages := packages collect: [ :each | PackageLoader packageAt: each ].
     packages do: [ :each |
 	each perform: startMessage.
         sunit := sunit, ' ', each sunitScript ] ]
