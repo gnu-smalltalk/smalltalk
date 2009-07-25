@@ -49,8 +49,8 @@ size and timestamps.'>
 	dir := directory.
 	fname := fileName.
 	Directory pathSeparator == $\ ifTrue: [
-	    dir := dir copyReplacing: $/ with: $\.
-	    fname := fname copyReplacing: $/ with: $\ ].
+	    dir := dir copyReplacing: $/ withObject: $\.
+	    fname := fname copyReplacing: $/ withObject: $\ ].
 	dir isEmpty ifTrue: [^fname].
 	fname isEmpty ifTrue: [
 	    SystemExceptions.InvalidArgument signalOn: fname
@@ -77,7 +77,8 @@ size and timestamps.'>
 	| index str |
 	aString isEmpty ifTrue: [^''].
 	str := aString.
-	Directory pathSeparator = $\ ifTrue: [ str := str copyReplacing: $/ with: $\ ].
+	Directory pathSeparator = $\ ifTrue: [
+	    str := str copyReplacing: $/ withObject: $\ ].
 	index := str findLast: 
 			[:each | 
 			each = Directory pathSeparator ifTrue: [^''].
@@ -97,7 +98,8 @@ size and timestamps.'>
 	| index str |
 	aString isEmpty ifTrue: [^''].
 	str := aString.
-	Directory pathSeparator = $\ ifTrue: [ str := str copyReplacing: $/ with: $\ ].
+	Directory pathSeparator = $\ ifTrue: [
+	    str := str copyReplacing: $/ withObject: $\ ].
 	index := str findLast: 
 			[:each | 
 			each = Directory pathSeparator ifTrue: [^str].
@@ -117,7 +119,8 @@ size and timestamps.'>
 	| index str |
 	aString isEmpty ifTrue: [^''].
 	str := aString.
-	Directory pathSeparator = $\ ifTrue: [ str := str copyReplacing: $/ with: $\ ].
+	Directory pathSeparator = $\ ifTrue: [
+	    str := str copyReplacing: $/ withObject: $\ ].
 	index := aString findLast: [:each | each = Directory pathSeparator].
 	^str copyFrom: index + 1
     ]
@@ -131,7 +134,8 @@ size and timestamps.'>
 	<category: 'file name management'>
 	| index str |
 	str := aString.
-	Directory pathSeparator = $\ ifTrue: [ str := str copyReplacing: $/ with: $\ ].
+	Directory pathSeparator = $\ ifTrue: [
+	    str := str copyReplacing: $/ withObject: $\ ].
 	index := str findLast: [:each | each = Directory pathSeparator].
 	index = 0 ifTrue: [^aBlock value].
 	index = 1 ifTrue: [^Directory pathSeparatorString].
@@ -155,7 +159,8 @@ size and timestamps.'>
 	| index str |
 	aString isEmpty ifTrue: [^'./'].
 	str := aString.
-	Directory pathSeparator = $\ ifTrue: [ str := str copyReplacing: $/ with: $\ ].
+	Directory pathSeparator = $\ ifTrue: [
+	    str := str copyReplacing: $/ withObject: $\ ].
 	index := str findLast: [:each | each = Directory pathSeparator].
 	index = 0 ifTrue: [^'./'].
 	index = 1 ifTrue: [^Directory pathSeparatorString].
