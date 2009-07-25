@@ -288,6 +288,13 @@ AC_CHECK_FUNCS_ONCE(gethostname memcpy memmove sighold uname usleep lstat \
 	setsid spawnl nanosleep pread pwrite _NSGetExecutablePath \
 	chown getgrnam getpwnam endgrent endpwent setgroupent setpassent)
 
+AC_SEARCH_LIBS([clock_gettime], [rt])
+if test "$ac_cv_search_clock_gettime" != no; then
+  AC_DEFINE(HAVE_CLOCK_GETTIME, 1, 
+    [Define if the system provides clock_gettime.])
+fi
+
+
 GST_FUNC_LRINT
 GST_FUNC_STRTOUL
 GST_FUNC_LOCALTIME

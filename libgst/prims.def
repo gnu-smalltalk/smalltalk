@@ -2974,14 +2974,15 @@ primitive VMpr_Time_secondClock [succeed]
   PRIM_SUCCEEDED;
 }
 
-/* Time class millisecondClock -- Note: the semantics of this
-     primitive are different than those described in the book.  This
-     primitive returns the number of milliseconds since midnight
-   today.  */
+/* Time class millisecondClock.  */
 primitive VMpr_Time_millisecondClock [succeed]
 {
+  OOP milliOOP;
+  uint64_t milli;
   _gst_primitives_executed++;
-  SET_STACKTOP_INT (_gst_get_milli_time () % (24 * 60 * 60 * 1000));
+  milli = _gst_get_milli_time ();
+  milliOOP = from_c_int_64 (milli);
+  SET_STACKTOP (milliOOP);
   PRIM_SUCCEEDED;
 }
 

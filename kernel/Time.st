@@ -111,13 +111,7 @@ time value, and a block execution timing facility.'>
 	"Answer the number of milliseconds since startup."
 
 	<category: 'clocks'>
-	| second milli |
-	
-	[second := self primSecondClock.
-	milli := self primMillisecondClock \\ 1000.
-	second = self primSecondClock and: [milli > 10]] 
-		whileFalse.
-	^(second - ClockOnStartup) * 1000 + milli
+	^self primMillisecondClock - ClockOnStartup
     ]
 
     Time class >> primMillisecondClock [
@@ -143,7 +137,7 @@ time value, and a block execution timing facility.'>
 
 	<category: 'initialization'>
 	aspect == #returnFromSnapshot 
-	    ifTrue: [ClockOnStartup := Time primSecondClock]
+	    ifTrue: [ClockOnStartup := Time primMillisecondClock]
     ]
 
     Time class >> now [
@@ -258,13 +252,7 @@ time value, and a block execution timing facility.'>
 	"Answer the number of milliseconds since startup"
 
 	<category: 'clocks'>
-	| second milli |
-	
-	[second := self primSecondClock.
-	milli := self primMillisecondClock \\ 1000.
-	second = self primSecondClock and: [milli > 10]] 
-		whileFalse.
-	^(second - ClockOnStartup) * 1000 + milli
+	^self primMillisecondClock - ClockOnStartup
     ]
 
     Time class >> millisecondsPerDay [

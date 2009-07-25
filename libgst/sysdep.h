@@ -131,7 +131,7 @@ extern void _gst_debug (void)
   ATTRIBUTE_HIDDEN;
 
 /* Returns the local time since midnight in milliseconds */
-extern unsigned _gst_get_milli_time (void)
+extern uint64_t _gst_get_milli_time (void)
   ATTRIBUTE_HIDDEN;
 
 /* Returns the time in seconds since midnight Jan 1, 1970 (standard UNIX

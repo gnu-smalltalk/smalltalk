@@ -343,80 +343,49 @@ _gst_mem_protect (PTR addr, size_t len, int prot)
 
 
 
-unsigned
+uint64_t
 _gst_get_milli_time (void)
 {
-#if defined WIN32
-  /* time() seems not to work... so we hack. This method to obtain the
-     time is complex, but it is the most precise.  */
-  static long frequency = 0, frequencyH, adjust = 0;
+#if defined HAVE_CLOCK_GETTIME && defined _POSIX_MONOTONIC_CLOCK
+  struct timespec tp;
+  clock_gettime (CLOCK_MONOTONIC, &tp);
+  return (tp.tv_sec * (uint64_t) 1000 + tp.tv_nsec / 1000000);
+
+#elif defined WIN32
+  static long frequency = 0, frequencyH;
   long milli;
   LARGE_INTEGER counter;
-  SYSTEMTIME st;
 
   if (!frequency)
     {
-      if (QueryPerformanceFrequency (&counter))
-	{
-	  /* frequencyH = 1000 * 2^32 / frequency */
-	  frequency = counter.HighPart ? -1 : counter.LowPart;
-	  frequencyH = MulDiv (1000 * (1 << 16), (1 << 16), frequency);
-	}
-      else
-	frequency = -1;
+      QueryPerformanceFrequency (&counter);
+      /* frequencyH = 1000 * 2^32 / frequency */
+      frequency = counter.LowPart;
+      frequencyH = MulDiv (1000 * (1 << 16), (1 << 16), counter.LowPart);
     }
 
-  if (frequency == -1)
-    {
-      /* QueryPerformanceCounter not supported, always use GetLocalTime 
-       */
-      adjust = milli = 0;
-    }
-  else
-    {
-      QueryPerformanceCounter (&counter);
-      /* milli = (high * 2^32 + low) * 1000 / freq = high * (1000 *
-         2^32 / freq) + (low * 1000 / freq) = (high * frequencyH) +
-         (low / 4) * 4000 / freq) Dividing and multiplying
-         counter.LowPart by 4 is needed because MulDiv accepts signed
-         integers but counter.LowPart is unsigned.  */
-      milli = counter.HighPart * frequencyH;
-      milli += MulDiv (counter.LowPart >> 2, 4000, frequency);
-    }
-
-  if (!adjust)
-    {
-      GetLocalTime (&st);
-      adjust = st.wMilliseconds;
-      adjust += st.wSecond * 1000;
-      adjust += st.wMinute * 60000;
-      adjust += st.wHour * 3600000;
-      adjust -= milli;
-      milli += adjust;
-    }
-  else
-    {
-      milli += adjust;
-      while (milli > 86400000)
-	{
-	  milli -= 86400000;
-	  adjust -= 86400000;
-	}
-    }
-  return (unsigned) milli;
+  QueryPerformanceCounter (&counter);
+  /* milli = (high * 2^32 + low) * 1000 / freq =
+     high * (1000 * 2^32 / freq) + (low * 1000 / freq) =
+     (high * frequencyH) + (low / 4) * 4000 / freq)
+     
+     Dividing and multiplying counter.LowPart by 4 is needed because
+     MulDiv accepts signed integers but counter.LowPart is unsigned.  */
+  milli = counter.HighPart * frequencyH;
+  milli += MulDiv (counter.LowPart >> 2, 4000, frequency);
+  return milli;
 
 #elif defined HAVE_GETTIMEOFDAY 	/* BSD style */
   struct timeval t;
-
   gettimeofday (&t, NULL);
   t.tv_sec %= 86400;
-  return (t.tv_sec * 1000 + t.tv_usec / 1000);
+  return (t.tv_sec * (uint64_t) 1000 + t.tv_usec / 1000);
 
 #else
   /* Assume that ftime (System V) is available */
   struct timeb t;
   ftime (&t);
-  return t.time * 1000 + t.millitm;
+  return t.time * (uint64_t) 1000 + t.millitm;
 #endif
 }
 
