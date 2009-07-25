@@ -24,9 +24,10 @@ MOSTLYCLEANFILES = gst-libs.me gst-libs.mes gst-base.me gst-base.mes \
 	gst-libs.cl gst-libs.cls gst-base.cl gst-base.cls \
 	gst-libs.sl gst-libs.sls gst-base.sl gst-base.sls
 
+GST_TOOL = $(WINECONSOLE) $(top_builddir)/gst-tool$(EXEEXT) 
 GST_TOOL_ARGS = -I $(top_builddir)/gst.im --kernel-dir $(top_srcdir)/kernel
-GST_DOC = $(top_builddir)/gst-tool gst-doc $(GST_TOOL_ARGS)
-GST_PACKAGE = $(top_builddir)/gst-tool gst-package $(GST_TOOL_ARGS)
+GST_DOC = $(GST_TOOL) gst-doc $(GST_TOOL_ARGS)
+GST_PACKAGE = $(GST_TOOL) gst-package $(GST_TOOL_ARGS)
 
 ####################################################
 ##
