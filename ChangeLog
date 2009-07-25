@@ -1,5 +1,10 @@
 2009-07-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/PkgLoader.st: Automatically wrap start and stop
+	scripts with Eval.
+
+2009-07-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Load.st: Fix --start.
 
 2009-07-23  Paolo Bonzini  <bonzini@gnu.org>

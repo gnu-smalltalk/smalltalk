@@ -793,7 +793,9 @@ XML.'>
 	<category: 'accessing'>
 	self fileIn.
 	self startScript isNil ifTrue: [ ^self ].
-	(self startScript % { 'nil' }) readStream fileIn.
+	('Eval [',
+	    (self startScript % {'nil'}),
+	']') readStream fileIn.
     ]
 
     start: anObject [
@@ -803,7 +805,9 @@ XML.'>
 	<category: 'accessing'>
 	self fileIn.
 	self startScript isNil ifTrue: [ ^self ].
-	(self startScript % { anObject displayString storeString }) readStream fileIn.
+	('Eval [',
+	    (self startScript % { anObject displayString storeString }),
+	']') readStream fileIn.
     ]
 
     stop [
@@ -813,7 +817,9 @@ XML.'>
 	<category: 'accessing'>
 	self loaded ifFalse: [ ^self ].
 	self stopScript isNil ifTrue: [ ^self ].
-	(self stopScript % { 'nil' }) readStream fileIn.
+	('Eval [',
+	    (self stopScript % {'nil'}),
+	']') readStream fileIn.
     ]
 
     stop: anObject [
@@ -823,7 +829,9 @@ XML.'>
 	<category: 'accessing'>
 	self loaded ifFalse: [ ^self ].
 	self stopScript isNil ifTrue: [ ^self ].
-	(self stopScript % { anObject displayString storeString }) readStream fileIn.
+	('Eval [',
+	    (self stopScript % { anObject displayString storeString }),
+	']') readStream fileIn.
     ]
 
     allFiles: prefix [
