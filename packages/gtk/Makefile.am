@@ -83,10 +83,10 @@ Libs.st: Makefile
 
 Structs.st: structs sizeof$(EXEEXT) cpp order
 	$(LC_UNSET); xargs ./cpp < order | ./structs > Structs.st
-	$(LC_UNSET); ./sizeof >> Structs.st
+	$(LC_UNSET); ./sizeof$(EXEEXT) >> Structs.st
 
 Enums.st: enums$(EXEEXT)
-	$(LC_UNSET); ./enums > Enums.st
+	$(LC_UNSET); ./enums$(EXEEXT) > Enums.st
 
 Funcs.st: funcs cpp order
 	$(LC_UNSET); xargs ./cpp < order | ./funcs > Funcs.st
