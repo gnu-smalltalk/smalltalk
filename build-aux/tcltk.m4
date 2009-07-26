@@ -12,6 +12,13 @@ if test "x$with_tcl" = x || test "$with_tcl" = yes; then
   AC_MSG_CHECKING(for tclsh)
   exec AS_MESSAGE_FD([])>/dev/null
   AC_PATH_PROG(TCLSH, tclsh)
+
+  case $libdir in
+    $bindir | $prefix | '${prefix}') libpath=lib ;;
+    *) libpath=`echo ${libdir} | sed s:.*/::` ;;
+  esac
+
+  dataroot2lib='s,\(.*\)/'`echo ${datarootdir} | sed s:.*/::`,'\1'/$libpath,
   test "$silent" != yes && exec AS_MESSAGE_FD([])>&1
   if test -n "$TCLSH"; then
     for i in ${TCLSH}*; do
@@ -22,14 +29,20 @@ if test "x$with_tcl" = x || test "$with_tcl" = yes; then
 	  # to remove the last component from the path and to change
 	  # /usr/share to /usr/lib
 	  TCLSH=$i
-          test -f "$with_tcl/tclConfig.sh" && break
-          test -f "$with_tcl/../tclConfig.sh" && with_tcl="$with_tcl/.." && break
           test -f "$with_tcl/../../tclConfig.sh" && with_tcl="$with_tcl/../.." && break
-          with_tcl=`echo "$with_tcl" | sed 's,\(.*\)/share,\1/lib,'`
+          test -f "$with_tcl/../tclConfig.sh" && with_tcl="$with_tcl/.." && break
           test -f "$with_tcl/tclConfig.sh" && break
-          with_tcl=`echo "$with_tcl" | sed 's:/[^/]*/\{0,1\}$::'`
-          test -f "$with_tcl/tclConfig.sh" && break
-          with_tcl=`echo "$with_tcl" | sed 's:/[^/]*/\{0,1\}$::'`
+          with_tcl=`echo "$with_tcl" | sed $dataroot2lib`
+	  # Do not bother testing /usr/lib/tcl8.5/tclConfig.sh if there is one
+	  # in /usr/lib.
+          if test -f "$with_tcl/../tclConfig.sh"; then :; else
+            test -f "$with_tcl/tclConfig.sh" && break
+          fi
+          with_tcl=`echo "$with_tcl" | sed 's:/[[^/]]*/\{0,1\}$::'`
+          if test -f "$with_tcl/../tclConfig.sh"; then :; else
+            test -f "$with_tcl/tclConfig.sh" && break
+          fi
+          with_tcl=`echo "$with_tcl" | sed 's:/[[^/]]*/\{0,1\}$::'`
           test -f "$with_tcl/tclConfig.sh" && break
         fi
 	with_tcl=no
@@ -43,7 +56,7 @@ if test "x$with_tcl" = x || test "$with_tcl" = yes; then
   AC_MSG_RESULT($TCLSH)
 fi
 if test "x$with_tk" = x || test "$with_tk" = yes; then
-  with_tk=`echo "$with_tcl" | sed -e 's/tcl/tk/g' -e 's/Tcl/Tk/g'`
+  with_tk=`echo "$with_tcl" | sed -e 's/tcl/tk/g' -e 's/tktk/tcltk/g' -e 's/Tcl/Tk/g'`
   test -f "$with_tk/tkConfig.sh" || with_tk=no
 fi
 if test "$with_tcl" != no; then
