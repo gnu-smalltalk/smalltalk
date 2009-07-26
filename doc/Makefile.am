@@ -11,7 +11,7 @@ HTML_IMAGES = images/backon.png images/back.png images/blankon.png \
 dist_man_MANS = gst.1 gst-load.1 gst-package.1 gst-sunit.1 gst-config.1 \
 	gst-convert.1 gst-doc.1 gst-profile.1
 
-HELP2MAN = $(top_srcdir)/build-aux/help2man -p gst
+HELP2MAN = $(top_srcdir)/build-aux/`test "$(WINECONSOLE)" = "" || echo "missing "`help2man -p gst
 
 info_TEXINFOS = gst.texi gst-base.texi gst-libs.texi
 gst_TEXINFOS = tutorial.texi vers-gst.texi
@@ -38,36 +38,36 @@ GST_PACKAGE = $(GST_TOOL) gst-package $(GST_TOOL_ARGS)
 $(srcdir)/gst-package.1: $(top_srcdir)/scripts/Package.st $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "create and install GNU Smalltalk .star package files" \
-	  "$(top_builddir)/gst-tool gst-package $(GST_TOOL_ARGS)" >$@
+	  "$(GST_TOOL) gst-package $(GST_TOOL_ARGS)" >$@
 
 $(srcdir)/gst-convert.1: $(top_srcdir)/scripts/Load.st $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "Smalltalk syntax converter and beautifier" \
-	  "$(top_builddir)/gst-tool gst-convert $(GST_TOOL_ARGS)" >$@
+	  "$(GST_TOOL) gst-convert $(GST_TOOL_ARGS)" >$@
 
 $(srcdir)/gst-load.1: $(top_srcdir)/scripts/Load.st $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "test and load packages into a GNU Smalltalk image" \
-	  "$(top_builddir)/gst-tool gst-load $(GST_TOOL_ARGS)" >$@
+	  "$(GST_TOOL) gst-load $(GST_TOOL_ARGS)" >$@
 
 $(srcdir)/gst-sunit.1: $(top_srcdir)/scripts/Test.st $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "unit testing tool for GNU Smalltalk" \
-	  "$(top_builddir)/gst-tool gst-sunit $(GST_TOOL_ARGS)" >$@
+	  "$(GST_TOOL) gst-sunit $(GST_TOOL_ARGS)" >$@
 
 $(srcdir)/gst-doc.1: $(top_srcdir)/scripts/GenDoc.st $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "GNU Smalltalk documentation generator" \
-	  "$(top_builddir)/gst-tool gst-doc $(GST_TOOL_ARGS)" >$@
+	  "$(GST_TOOL) gst-doc $(GST_TOOL_ARGS)" >$@
 
 $(srcdir)/gst-profile.1: $(top_srcdir)/scripts/Profile.st $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
 	  --name "GNU Smalltalk profiler" \
-	  "$(top_builddir)/gst-tool gst-doc $(GST_TOOL_ARGS)" >$@
+	  "$(GST_TOOL) gst-doc $(GST_TOOL_ARGS)" >$@
 
 $(srcdir)/gst.1: $(top_srcdir)/main.c $(top_srcdir)/configure.ac
 	$(HELP2MAN) \
-	  --name "the GNU Smalltalk virtual machine" $(top_builddir)/gst >$@
+	  --name "the GNU Smalltalk virtual machine" $(top_builddir)/gst$(EXEEXT) >$@
 
 $(srcdir)/gst-config.1: $(top_srcdir)/gst-config.in
 	$(HELP2MAN) \
