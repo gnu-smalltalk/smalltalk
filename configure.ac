@@ -53,13 +53,23 @@ AC_PROG_SED
 AC_PROG_AWK
 AC_PROG_LN_S
 GST_PROG_LN
-GST_PROG_WINECONSOLE
+GST_PROG_WINEUTILS
 AC_PATH_TOOL(WINDRES, windres, no)
 AC_PATH_PROG(INSTALL_INFO, install-info, :, $PATH:/sbin:/usr/sbin)
 AC_PATH_PROG(ZIP, zip, no, $PATH)
 if test "$ZIP" = no; then
   AC_MSG_ERROR([Please install InfoZIP to use GNU Smalltalk.])
 fi
+
+# For Wine, compile in GST a generic path to zip.exe.  For build time,
+# wrap the native zip with winewrapper to hide Windows paths from it.
+GST_WINE_IF([WINEWRAPPER='winewrapper$(EXEEXT)'
+	     XZIP='$(abs_top_builddir)/winewrapper$(EXEEXT) '$ZIP
+	     ZIP=zip.exe],
+	    [WINEWRAPPER=
+	     XZIP=$ZIP])
+AC_SUBST([WINEWRAPPER])
+AC_SUBST([XZIP])
 
 AC_ARG_WITH(emacs, 
 [  --without-emacs         disable Emacs modes for Smalltalk], ,
@@ -312,7 +322,7 @@ GST_HAVE_GMP
 GST_HAVE_READLINE
 
 GST_PACKAGE_PREFIX([packages])
-GST_PACKAGE_DEPENDENCIES([gst-tool$(EXEEXT) gst.im])
+GST_PACKAGE_DEPENDENCIES([gst-tool$(EXEEXT) gst.im $(WINEWRAPPER)])
 
 GST_PACKAGE_ENABLE([BloxTK], [blox/tk],
    [GST_HAVE_TCLTK],

@@ -1,5 +1,10 @@
 2009-07-26  Paolo Bonzini  <bonzini@gnu.org>
 
+	* gst-tool.c: Accept overrides from the environment for ZIP etc.
+	* winewrapper.c: New.
+
+2009-07-26  Paolo Bonzini  <bonzini@gnu.org>
+
 	* kernel/FilePath.st: Fix Windows path cases.
 
 2009-07-25  Paolo Bonzini  <bonzini@gnu.org>

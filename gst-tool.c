@@ -503,13 +503,16 @@ main(int argc, const char **argv)
     }
 
 #ifdef CMD_LN_S
-  setenv ("LN_S", CMD_LN_S, 0);
+  if (!getenv ("LN_S"))
+    setenv ("LN_S", CMD_LN_S, 0);
 #endif
 #ifdef CMD_INSTALL
-  setenv ("INSTALL", CMD_INSTALL, 0);
+  if (!getenv ("INSTALL"))
+    setenv ("INSTALL", CMD_INSTALL, 0);
 #endif
 #ifdef CMD_ZIP
-  setenv ("XZIP", CMD_ZIP, 0);
+  if (!getenv ("XZIP"))
+    setenv ("XZIP", CMD_XZIP, 0);
 #endif
 
   gst_set_var (GST_VERBOSITY, 0);

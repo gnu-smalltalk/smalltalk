@@ -35,7 +35,7 @@ SUBDIRS += libgst . $(BUILT_PACKAGES) doc tests
 
 GST_OPTS = --kernel-dir="@srcdir@/kernel" --image=gst.im
 GST = $(WINECONSOLE) ./gst$(EXEEXT) --no-user-files $(GST_OPTS)
-GST_PACKAGE = $(WINECONSOLE) ./gst-tool$(EXEEXT) gst-package $(GST_OPTS)
+GST_PACKAGE = XZIP="$(XZIP)" $(WINECONSOLE) ./gst-tool$(EXEEXT) gst-package $(GST_OPTS)
 
 
 ###########################################################
@@ -102,7 +102,7 @@ gst-mode.el: gst-mode.el.in
 
 AM_CPPFLAGS = -I$(top_srcdir)/libgst		\
 	-I$(top_srcdir)/lib-src			\
-	-DCMD_ZIP="\"$(ZIP)\""			\
+	-DCMD_XZIP="\"$(XZIP)\""			\
 	-DCMD_INSTALL="\"$(INSTALL)\""		\
 	-DCMD_LN_S="\"$(LN_S)\""		\
 	$(RELOC_CPPFLAGS)
@@ -127,6 +127,10 @@ gst_tool_SOURCES = gst-tool.c
 gst_tool_LDADD = libgst/libgst.la lib-src/library.la
 gst_tool_DEPENDENCIES = libgst/libgst.la lib-src/library.la
 gst_tool_LDFLAGS = -export-dynamic $(RELOC_LDFLAGS)
+
+# Used to call the Unix zip from Wine
+EXTRA_PROGRAMS = winewrapper
+winewrapper_SOURCES = winewrapper.c
 
 GST_EXTRA_TOOLS = gst-reload gst-sunit gst-blox gst-package gst-convert \
 	gst-doc gst-remote gst-profile
