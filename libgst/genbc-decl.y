@@ -165,6 +165,7 @@ field_list:
 	  { struct field_info *f = malloc (sizeof (struct field_info *));
 	    define_var ($3);
 	    f->name = $3;
+	    f->next = NULL;
 	    *($1->pnext) = f;
 	    $$ = $1;
 	    $$->pnext = &(f->next);
@@ -173,6 +174,7 @@ field_list:
 	  { struct field_info *f = malloc (sizeof (struct field_info *));
 	    define_var ($1);
 	    f->name = $1;
+	    f->next = NULL;
 	    $$ = f;
 	    $$->pnext = &(f->next);
 	  }
