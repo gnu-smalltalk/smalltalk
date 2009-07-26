@@ -57,6 +57,10 @@
 
 #include "gst-sdl.h"
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 VMProxy *vmProxy;
 
 /* MacOS versions are Objective-C, so they are in sdlmain_cocoa.m.  */
