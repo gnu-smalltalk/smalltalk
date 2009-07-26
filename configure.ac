@@ -427,7 +427,7 @@ GST_PACKAGE_ENABLE([Cairo], [cairo],
   [ac_cv_lib_cairo_cairo_save])
 
 GST_PACKAGE_ENABLE([LibSDL], [sdl/libsdl],
-  [AM_PATH_SDL([], gst_cv_sdl=yes, gst_cv_sdl=no)
+  [PKG_CHECK_MODULES(SDL, sdl >= 1.2.0, [gst_cv_sdl=yes], [gst_cv_sdl=no])
   case "$SDL_LIBS" in
     *-framework,Cocoa* | *"-framework Cocoa"*) gst_cv_sdl_uses_cocoa=yes ;;
     *) gst_cv_sdl_uses_cocoa=no ;;
