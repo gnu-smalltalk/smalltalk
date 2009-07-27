@@ -901,8 +901,7 @@ I represent a text viewer with pretty good formatting options.'>
     create [
 	<category: 'private'>
 	self
-	    create: ' -bg white -wrap word -font {' , self class defaultFont 
-			, '} \
+	    create: ' -wrap word -font {' , self class defaultFont , '} \
 		  -state normal -highlightthickness 0 -takefocus 1';
 	    horizontal: true;
 	    vertical: true.

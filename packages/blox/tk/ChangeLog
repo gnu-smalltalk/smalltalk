@@ -1,3 +1,8 @@
+2009-07-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* BloxText.st: Don't force the background color.
+	* BloxWidgets.st: Don't force the background color.
+
 2007-09-28  Paolo Bonzini  <bonzini@gnu.org>
 
 	* BloxTK.c: Use strchr, not index.

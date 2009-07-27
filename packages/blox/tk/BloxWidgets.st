@@ -2775,7 +2775,7 @@ elements.'>
     create [
 	<category: 'private'>
 	self
-	    create: '-highlightthickness 0 -takefocus 1 -bg white \
+	    create: '-highlightthickness 0 -takefocus 1 \
 		 -exportselection no -font {' 
 			, self class defaultFont , '}';
 	    horizontal: true;
