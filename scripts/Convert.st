@@ -32,6 +32,24 @@
 
 PackageLoader fileInPackage: #Parser.
 
+STInST.FileOutExporter extend [
+    fileOutHeader [ ]
+]
+
+STInST.NewSyntaxExporter class extend [
+    emitEval: aBlock to: aStream for: namespace [
+        namespace isNil
+            ifTrue: [ aStream nextPutAll: 'Eval' ]
+            ifFalse: [ aStream nextPutAll: 'Namespace current: ';
+		       store: namespace ].
+
+	    aStream nextPutAll: ' ['.
+	    aBlock value.
+            aStream nl; nextPut: $]; nl; nl.
+    ]
+]
+
+
 Object subclass: EmittedEntity [  
     emitTo: aStream filteredBy: aBlock [
         self subclassResponsibility
@@ -118,7 +136,7 @@ EmittedEntity subclass: EmittedEval [
     ]
     
     initialize [
-        statements := STInST.OrderedCollection new
+        statements := OrderedCollection new
     ]
     
     namespace [ 
@@ -134,22 +152,19 @@ EmittedEntity subclass: EmittedEval [
     ] 
     
     emitTo: aStream filteredBy: aBlock [
-	| formatter |
 	statements isEmpty ifTrue: [ ^self ].
-	namespace isNil
-            ifTrue: [ aStream nextPutAll: 'Eval' ]
-            ifFalse: [ aStream nextPutAll: 'Namespace current: ';
-			store: namespace ].
-
-	aStream nextPutAll: ' ['.
-	formatter := STInST.RBFormatter new.
-	formatter indent: 1 while: [
-	    formatter indent.
-            aStream nextPutAll: (formatter formatAll: statements).
-	].
-        aStream nl; nextPut: $]; nl; nl.
+	STInST.FileOutExporter defaultExporter
+	    emitEval: [
+		| formatter |
+		formatter := STInST.RBFormatter new.
+		formatter indent: 1 while: [
+		    formatter indent.
+	            aStream nextPutAll: (formatter formatAll: statements) ]]
+	    to: aStream
+	    for: namespace.
     ]
 ]
+
 
 
 STInST.STClassLoader subclass: SyntaxConverter [

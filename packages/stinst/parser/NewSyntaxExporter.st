@@ -191,7 +191,6 @@ NewSyntaxExporter subclass: FormattingExporter [
     <comment: 'This class in addition to FileOutExporter, uses an RBFormatter
                to pretty print the body of every method.'>
                
-    fileOutHeader [ ]
     fileOutInitialize [ ]
 
     fileOutSource: selector class: isClass [

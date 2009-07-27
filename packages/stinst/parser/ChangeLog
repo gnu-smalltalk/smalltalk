@@ -1,5 +1,10 @@
 2009-07-27  Paolo Bonzini  <bonzini@gnu.org>
 
+	* NewSyntaxExporter.st: Do not disable #initialize in
+	FormattingExporter.
+
+2009-07-27  Paolo Bonzini  <bonzini@gnu.org>
+
 	* OldSyntaxExporter.st: New.
 
 2009-07-27  Paolo Bonzini  <bonzini@gnu.org>
