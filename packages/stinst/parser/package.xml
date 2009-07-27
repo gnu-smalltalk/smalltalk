@@ -20,6 +20,7 @@
   <filein>GSTParser.st</filein>
   <filein>Exporter.st</filein>
   <filein>NewSyntaxExporter.st</filein>
+  <filein>OldSyntaxExporter.st</filein>
   <filein>Extensions.st</filein>
 
   <test>
@@ -52,6 +53,7 @@
   <file>GSTParser.st</file>
   <file>Exporter.st</file>
   <file>NewSyntaxExporter.st</file>
+  <file>OldSyntaxExporter.st</file>
   <file>Extensions.st</file>
   <file>ChangeLog</file>
 </package>

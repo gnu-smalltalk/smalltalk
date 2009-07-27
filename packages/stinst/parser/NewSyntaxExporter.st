@@ -35,23 +35,6 @@ FileOutExporter subclass: NewSyntaxExporter [
     <comment: 'This class is responsible for filing out 
                a given class on a given stream'>
     
-    fileOutHeader [
-        | now |
-        outStream 
-            nextPutAll: '"Filed out from ';
-            nextPutAll: Smalltalk version;
-            nextPutAll: ' on '.
-            
-        now := Date dateAndTimeNow.
-        
-        outStream
-            print: now asDate;
-            space;
-            print: now asTime;
-            nextPutAll: '"';
-            nl; nl
-    ]
-    
     printFormattedSet: aSet [
         aSet isNil ifTrue: [ ^self ].
         aSet do: [ :element | outStream nextPutAll: element ]

@@ -118,9 +118,22 @@ Object subclass: FileOutExporter [
     ]
 
     fileOutHeader [
-	self subclassResponsibility
+        | now |
+        outStream 
+            nextPutAll: '"Filed out from ';
+            nextPutAll: Smalltalk version;
+            nextPutAll: ' on '.
+            
+        now := Date dateAndTimeNow.
+        
+        outStream
+            print: now asDate;
+            space;
+            print: now asTime;
+            nextPutAll: '"';
+            nl; nl
     ]
-
+    
     fileOutDeclaration: aBlock [
 	self subclassResponsibility
     ]
