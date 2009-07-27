@@ -19,6 +19,8 @@
   <filein>SIFParser.st</filein>
   <filein>GSTParser.st</filein>
   <filein>Exporter.st</filein>
+  <filein>NewSyntaxExporter.st</filein>
+  <filein>Extensions.st</filein>
 
   <test>
    <namespace>STInST.Tests</namespace>
@@ -49,5 +51,7 @@
   <file>SIFParser.st</file>
   <file>GSTParser.st</file>
   <file>Exporter.st</file>
+  <file>NewSyntaxExporter.st</file>
+  <file>Extensions.st</file>
   <file>ChangeLog</file>
 </package>

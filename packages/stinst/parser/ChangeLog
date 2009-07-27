@@ -1,3 +1,10 @@
+2009-07-27  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Exporter.st: Extract parts to...
+	* NewSyntaxExporter.st: ... here
+	* Extensions.st: ... and here.
+	* package.xml: Update.
+
 2009-07-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* STCompiler.st: Fix new syntax categories, reported by Stefan

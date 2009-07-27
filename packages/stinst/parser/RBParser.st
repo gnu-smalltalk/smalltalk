@@ -1460,3 +1460,24 @@ Eval [
     RBScanner initialize
 ]
 
+
+RBParser subclass: RBBracketedMethodParser [
+    skipToken: tokenValue [
+        (currentToken value = tokenValue)
+            ifTrue: [self step. ^true]
+            ifFalse: [^false]
+    ]
+
+    skipExpectedToken: tokenValue [
+        (self skipToken: tokenValue)
+            ifFalse: [self parserError: ('expected ' , tokenValue asSymbol)]
+    ]
+
+    parseMethodInto: methodNode [
+        <category: 'private-parsing'>
+        self skipExpectedToken: $[.
+	super parseMethodInto: methodNode.
+        self skipExpectedToken: $].
+        ^methodNode
+    ]
+]
