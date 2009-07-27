@@ -73,8 +73,8 @@ FileOutExporter subclass: OldSyntaxExporter [
     fileOutSelectors: selectors classSelectors: classSelectors [
         self fileOutHeader.
         self fileOutDeclaration: [
-            classSelectors do: [ :each | self fileOutSource: {each} class: outClass asMetaclass ].
-            selectors do: [ :each | self fileOutSource: {each} class: outClass ].
+            self fileOutSource: classSelectors class: outClass asMetaclass.
+            self fileOutSource: selectors class: outClass.
         ]
     ]
 
@@ -132,18 +132,34 @@ FileOutExporter subclass: OldSyntaxExporter [
 	self fileOutSource: methods class: class.
     ]
 
-    fileOutSource: methods class: aClass [
+    fileOutSource: selectors class: aClass [
+	| categories catSB methodSB |
+	catSB := [ :a :b | (a ifNil: ['~~']) < (b ifNil: ['~~']) ].
+	methodSB := [ :a :b | a selector < b selector ].
+
+	categories := Dictionary new.
+	selectors do: [ :each || method |
+	    method := aClass >> each.
+	    (categories
+		at: method methodCategory
+		ifAbsentPut: [SortedCollection sortBlock: methodSB]) add: method].
+
+	(categories associations asSortedCollection: catSB) do: [ :each |
+	    self fileOutCategory: each key methods: each value class: aClass ]
+    ]
+
+    fileOutCategory: aString methods: methods class: aClass [
         methods isEmpty ifTrue: [ ^self ].
         outStream
 	     nextPut: $!; print: aClass;
              nextPutAll: ' methodsFor: ';
-             print: (aClass >> methods anyOne) methodCategory;
+             print: aString;
              nextPut: $!.
 
-        methods asSortedCollection do: [ :selector |
+        methods do: [ :method |
             outStream
                 nl; nl;
-                nextPutAll: (self oldSyntaxSourceCodeFor: aClass >> selector);
+                nextPutAll: (self oldSyntaxSourceCodeFor: method);
                 nextPut: $!
         ].
         outStream nextPutAll: ' !'; nl; nl
