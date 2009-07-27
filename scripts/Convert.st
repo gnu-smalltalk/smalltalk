@@ -47,6 +47,12 @@ STInST.OldSyntaxExporter class extend [
     ]
 ]
 
+STInST.SqueakSyntaxExporter class extend [
+    emitEval: aBlock to: aStream for: namespace [
+	aBlock value
+    ]
+]
+
 STInST.NewSyntaxExporter class extend [
     emitEval: aBlock to: aStream for: namespace [
         namespace isNil
@@ -409,9 +415,11 @@ Eval [
     outFile := nil.
     filter := [ :class | true ].
     converter := SyntaxConverter new.
+    STInST.FileOutExporter defaultExporter: STInST.FormattingExporter.
     outFormats := Dictionary from: {
 	'gst2' -> STInST.OldSyntaxExporter.
 	'gst' -> STInST.FormattingExporter.
+	'squeak' -> STInST.SqueakSyntaxExporter.
     }.
     inFormats := Dictionary from: {
 	'gst2' -> STInST.STFileInParser.
@@ -565,5 +573,5 @@ Options:
 		 /dev/null disappear if you run gst-convert as root (which
 		 you shouldn't)."
 		[ (File name: outFile name) remove ] on: Error do: [ :ex | ] ].
-	    ex pass. ObjectMemory quit: 1 ].
+	    "ex pass." ObjectMemory quit: 1 ].
 ]

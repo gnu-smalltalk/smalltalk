@@ -157,12 +157,17 @@ FileOutExporter subclass: OldSyntaxExporter [
              nextPut: $!.
 
         methods do: [ :method |
-            outStream
-                nl; nl;
-                nextPutAll: (self oldSyntaxSourceCodeFor: method);
-                nextPut: $!
-        ].
+	    outStream nl.
+	    self fileOutChunk: (self oldSyntaxSourceCodeFor: method) ].
+
         outStream nextPutAll: ' !'; nl; nl
+    ]
+
+    fileOutChunk: aString [
+        outStream
+            nl;
+            nextPutAll: aString;
+            nextPut: $!
     ]
 
     oldSyntaxSourceCodeFor: aMethod [

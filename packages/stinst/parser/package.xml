@@ -21,6 +21,7 @@
   <filein>Exporter.st</filein>
   <filein>NewSyntaxExporter.st</filein>
   <filein>OldSyntaxExporter.st</filein>
+  <filein>SqueakExporter.st</filein>
   <filein>Extensions.st</filein>
 
   <test>
@@ -54,6 +55,7 @@
   <file>Exporter.st</file>
   <file>NewSyntaxExporter.st</file>
   <file>OldSyntaxExporter.st</file>
+  <file>SqueakExporter.st</file>
   <file>Extensions.st</file>
   <file>ChangeLog</file>
 </package>
