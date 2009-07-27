@@ -1,5 +1,10 @@
 2009-07-27  Paolo Bonzini  <bonzini@gnu.org>
 
+	* scripts/Convert.st: Support multiple output formats.
+	* gst-tool.c: Add new option.
+
+2009-07-27  Paolo Bonzini  <bonzini@gnu.org>
+
 	* scripts/Convert.st: Refactor emitting of eval.
 
 2009-07-26  Paolo Bonzini  <bonzini@gnu.org>

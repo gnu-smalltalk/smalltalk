@@ -36,6 +36,17 @@ STInST.FileOutExporter extend [
     fileOutHeader [ ]
 ]
 
+STInST.OldSyntaxExporter class extend [
+    emitEval: aBlock to: aStream for: namespace [
+        namespace isNil
+            ifFalse: [ aStream nextPutAll: 'Namespace current: ';
+		       store: namespace; nextPut: $!; nl ].
+
+	aBlock value.
+        aStream nextPut: $!; nl; nl.
+    ]
+]
+
 STInST.NewSyntaxExporter class extend [
     emitEval: aBlock to: aStream for: namespace [
         namespace isNil
@@ -119,7 +130,7 @@ EmittedEntity subclass: EmittedClass [
 		^self ].
 
         Notification signal: ('Converting %1...' % {class}).
-        (STInST.FormattingExporter on: class to: aStream)
+        (STInST.FileOutExporter defaultExporter on: class to: aStream)
             completeFileOut: isComplete;
             fileOutSelectors: methodsToEmit classSelectors: classMethodsToEmit.
     ]
@@ -390,7 +401,7 @@ String extend [
 
 Eval [ 
     | helpString inFile outFile quiet verbose converter filter parser
-	args formats |
+	args inFormats outFormats |
     args := OrderedCollection new.
     parser := STInST.STFileInParser.
     quiet := false.
@@ -398,7 +409,11 @@ Eval [
     outFile := nil.
     filter := [ :class | true ].
     converter := SyntaxConverter new.
-    formats := Dictionary from: {
+    outFormats := Dictionary from: {
+	'gst2' -> STInST.OldSyntaxExporter.
+	'gst' -> STInST.FormattingExporter.
+    }.
+    inFormats := Dictionary from: {
 	'gst2' -> STInST.STFileInParser.
 	'gst' -> STInST.GSTFileInParser.
 	'squeak' -> STInST.SqueakFileInParser.
@@ -415,6 +430,8 @@ Options:
     -v, --verbose             print extra information while processing
     -f, --format=FORMAT       convert from given input format (supported
                               formats are %1)
+    -F, --output-format=FORMAT convert to given output format (supported
+                              formats are %2)
     -C, --class=REGEX         convert only classes matching REGEX
     -C, --class=+REGEX        in addition, convert classes matching REGEX
     -C, --class=-REGEX        do not convert classes matching REGEX
@@ -430,12 +447,13 @@ Options:
         --help                display this message and exit
         --version             print version information and exit
 
-' % {formats keys asSortedCollection fold: [ :a :b | a, ', ', b ]}.
+' % {inFormats keys asSortedCollection fold: [ :a :b | a, ', ', b ].
+     outFormats keys asSortedCollection fold: [ :a :b | a, ', ', b ]}.
 
     Smalltalk
         arguments: '-h|--help --version -q|--quiet -v|-V|--verbose -r|--rule:
 		    -C|--class: -c|--category: -f|--format: -o|--output:
-		    -I|--image-file: --kernel-directory:'
+		    -F|--output-format: -I|--image-file: --kernel-directory:'
         do: [ :opt :arg |
 	    opt = 'help' ifTrue: [
 	        helpString displayOn: stdout.
@@ -480,8 +498,14 @@ Options:
 		    asFilterOn: filter
 		    through: [ :class | class category ifNil: [ '' ] ] ].
 
+	    opt = 'output-format' ifTrue: [
+		STInST.FileOutExporter defaultExporter:
+		    (outFormats at: arg ifAbsent: [
+		        helpString displayOn: stderr.
+		        ObjectMemory quit: 1 ]) ].
+
 	    opt = 'format' ifTrue: [
-		parser := formats at: arg ifAbsent: [
+		parser := inFormats at: arg ifAbsent: [
 		    helpString displayOn: stderr.
 		    ObjectMemory quit: 1 ] ].
 

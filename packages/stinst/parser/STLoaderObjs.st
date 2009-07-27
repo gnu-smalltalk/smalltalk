@@ -190,7 +190,7 @@ LoadedMetaclass comment:
 by an STClassLoader.'!
 
 Object subclass: #LoadedMethod
-        instanceVariableNames: 'node category'
+        instanceVariableNames: 'node category isOldSyntax'
         classVariableNames: ''
         poolDictionaries: ''
         category: 'System-Compiler'!
@@ -1206,13 +1206,17 @@ selector
 
 methodSourceString
     ^node source asString
+!
+
+isOldSyntax
+    ^isOldSyntax ifNil: [false]
+!
+
+noteOldSyntax
+    isOldSyntax := true.
 ! !
 
 !LoadedMethod methodsFor: 'empty stubs'!
-
-noteOldSyntax
-    "Do nothing"
-!
 
 discardTranslation
     "Do nothing"
