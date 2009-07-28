@@ -1038,7 +1038,8 @@ init_smalltalk_dictionary (void)
   for (i = 0; i < numFeatures; i++)
     featuresArray->data[i] = _gst_intern_string (feature_strings[i]);
 
-  sprintf (fullVersionString, "GNU Smalltalk version %s", VERSION);
+  sprintf (fullVersionString, "GNU Smalltalk version %s",
+	   VERSION PACKAGE_GIT_REVISION);
 
   add_smalltalk ("Smalltalk", _gst_smalltalk_dictionary);
   add_smalltalk ("Version", _gst_string_new (fullVersionString));

@@ -110,7 +110,7 @@ static const char help_text[] =
   "\n\n";
 
 static const char copyright_and_legal_stuff_text[] =
-  "GNU Smalltalk version %s"
+  "GNU Smalltalk version %s%s"
   "\nCopyright 2009 Free Software Foundation, Inc."
   "\nWritten by Steve Byrne (sbb@gnu.org) and Paolo Bonzini (bonzini@gnu.org)"
   "\n"
@@ -295,6 +295,7 @@ parse_args (int argc,
 
 	case 'v':
 	  printf (copyright_and_legal_stuff_text, VERSION,
+		  PACKAGE_GIT_REVISION,
 		  gst_relocate_path (KERNEL_PATH),
 		  gst_relocate_path (IMAGE_PATH));
 	  exit (0);
