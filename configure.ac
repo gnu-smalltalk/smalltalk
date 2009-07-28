@@ -22,6 +22,16 @@ AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 
+set -x
+if test -d $srcdir/.git; then
+  GIT_REVISION=-`git rev-parse --short HEAD 2>/dev/null || echo git`
+else	
+  GIT_REVISION=
+fi
+AC_DEFINE_UNQUOTED([PACKAGE_GIT_REVISION], ["$GIT_REVISION"],
+		   [The git version that GNU Smalltalk was compiled from.])
+
+
 RSE_BOLD
 
 dnl 
