@@ -424,7 +424,29 @@ Date subclass: DateTime [
 	"Store on aStream Smalltalk code compiling to the receiver"
 
 	<category: 'storing'>
-	self notYetImplemented
+	aStream
+	    nextPut: $(;
+	    nextPutAll: self class storeString;
+	    nextPutAll: ' year: ';
+	    store: self year;
+	    nextPutAll: ' month: ';
+	    store: self month;
+	    nextPutAll: ' day: ';
+	    store: self day;
+	    nextPutAll: ' hour: ';
+	    store: self hour;
+	    nextPutAll: ' minute: ';
+	    store: self minute;
+	    nextPutAll: ' second: ';
+	    store: self second.
+
+	self offset = Duration zero ifFalse: [
+	    aStream
+		nextPutAll: ' offset: ';
+		store: self offset ].
+
+	aStream
+	    nextPut: $)
     ]
 
     setDay: dayOfMonth monthIndex: monthIndex year: yearInteger [
@@ -593,6 +615,24 @@ Time subclass: Duration [
 
 	<category: 'arithmetics'>
 	^Duration fromSeconds: self asSeconds negated
+    ]
+
+    storeOn: aStream [
+	"Store on aStream Smalltalk code compiling to the receiver"
+
+	<category: 'storing'>
+	aStream
+	    nextPut: $(;
+	    nextPutAll: self class storeString;
+	    nextPutAll: ' days: ';
+	    store: self days;
+	    nextPutAll: ' hours: ';
+	    store: self hours;
+	    nextPutAll: ' minutes: ';
+	    store: self minutes;
+	    nextPutAll: ' seconds: ';
+	    store: self seconds;
+	    nextPut: $)
     ]
 
     negative [

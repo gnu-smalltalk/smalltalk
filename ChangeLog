@@ -1,5 +1,10 @@
 2009-07-28  Paolo Bonzini  <bonzini@gnu.org>
 
+	* kernel/AnsiDates.st: Add Duration>>#storeOn: and
+	DateTime>>#storeOn:.
+
+2009-07-28  Paolo Bonzini  <bonzini@gnu.org>
+
 	* main.c: Add git revision number to --version output.
 
 2009-07-27  Paolo Bonzini  <bonzini@gnu.org>
