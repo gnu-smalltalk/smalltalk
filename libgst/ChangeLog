@@ -1,5 +1,10 @@
 2009-08-01  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/interp.c: Do not create gcSemaphore.
+	* libgst/oop.c: Abort upon absence of gcSemaphore.
+
+2009-08-01  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/dict.c: Remove Delay, SharedQueue, MappedCollection, Bag.
 	* libgst/dict.h: Likewise.
 	* libgst/files.c: Move them after initialization.

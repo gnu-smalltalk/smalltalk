@@ -237,27 +237,30 @@ Object subclass: ProcessorScheduler [
 	idleTasks add: aBlock
     ]
 
+    startFinalizers [
+	"Private - Fire a low-priority process to finalize the objects"
+	<category: 'idle tasks'>
+	| local localFinalizerProcess |
+	local := gcArray.
+	gcArray := nil.
+
+	localFinalizerProcess := [:array | array do: [:each | each mourn]] 
+		    newProcessWith: {local}.
+	localFinalizerProcess priority: Processor userSchedulingPriority.
+	localFinalizerProcess name: 'finalization worker'.
+	localFinalizerProcess resume
+    ]
+
     initialize [
 	"Private - Start the finalization process."
 
 	<category: 'idle tasks'>
 	| finalizerProcess |
 	idleTasks := OrderedCollection with: 0.
+	gcSemaphore := Semaphore new.
 	ObjectMemory addDependent: self.
 	finalizerProcess := 
-		[| local localFinalizerProcess |
-		
-		[gcSemaphore wait.
-		local := gcArray.
-		gcArray := nil.
-
-		"Fire a low-priority process to finalize the objects"
-		localFinalizerProcess := [:array | array do: [:each | each mourn]] 
-			    newProcessWith: {local}.
-		localFinalizerProcess priority: Processor userSchedulingPriority.
-		localFinalizerProcess name: 'finalization worker'.
-		localFinalizerProcess resume] 
-			repeat] 
+		[[gcSemaphore wait.  self startFinalizers] repeat]
 			forkAt: Processor timingPriority.
 	finalizerProcess name: 'finalization listener'
     ]
@@ -268,7 +271,7 @@ Object subclass: ProcessorScheduler [
 
 	<category: 'idle tasks'>
 	aSymbol == #returnFromSnapshot ifFalse: [^self].
-	gcArray isNil ifFalse: [gcSemaphore signal]
+	gcArray isNil ifFalse: [self startFinalizers]
     ]
 
     printOn: aStream [

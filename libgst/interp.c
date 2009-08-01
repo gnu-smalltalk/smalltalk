@@ -2000,9 +2000,6 @@ _gst_init_process_system (void)
     processor->processTimeslice =
       FROM_INT (DEFAULT_PREEMPTION_TIMESLICE);
 
-  if (IS_NIL (processor->gcSemaphore))
-    processor->gcSemaphore = semaphore_new (0);
-
   /* No process is active -- so highest_priority_process() need not
      worry about discarding an active process.  */
   processor->activeProcess = _gst_nil_oop;

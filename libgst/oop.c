@@ -1479,7 +1479,13 @@ mourn_objects (void)
       /* Copy the buffer into an Array */
       array = new_instance_with (_gst_array_class, size, &processor->gcArray);
       _gst_copy_buffer (array->data);
-      _gst_async_signal (processor->gcSemaphore);
+      if (!IS_NIL (processor->gcSemaphore))
+        _gst_async_signal (processor->gcSemaphore);
+      else
+	{
+	  _gst_errorf ("Running finalizers before initialization.");
+	  abort ();
+	}
     }
 }
 
