@@ -206,8 +206,6 @@ static const char standard_files[] = {
   "Interval.st\0"
   "OrderColl.st\0"
   "SortCollect.st\0"
-  "Bag.st\0"
-  "MappedColl.st\0"
   "HashedColl.st\0"
   "Set.st\0"
   "IdentitySet.st\0"
@@ -226,8 +224,6 @@ static const char standard_files[] = {
   "RWStream.st\0"
   "UndefObject.st\0"
   "ProcSched.st\0"
-  "Delay.st\0"
-  "SharedQueue.st\0"
   "ContextPart.st\0"
   "MthContext.st\0"
   "BlkContext.st\0"
@@ -247,6 +243,10 @@ static const char standard_files[] = {
   "ObjMemory.st\0"
 
   /* More core classes */
+  "Bag.st\0"
+  "MappedColl.st\0"
+  "Delay.st\0"
+  "SharedQueue.st\0"
   "Random.st\0"
   "RecursionLock.st\0"
   "Transcript.st\0"

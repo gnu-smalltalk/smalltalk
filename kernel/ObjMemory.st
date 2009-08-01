@@ -89,7 +89,6 @@ state.'>
 	Date initialize.
 	Time initialize.
 	FileDescriptor initialize.
-	Delay initialize.
 	Namespace initialize.
 	Processor initialize.
 	SystemDictionary initialize.

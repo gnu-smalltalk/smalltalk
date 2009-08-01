@@ -80,7 +80,6 @@ OOP _gst_abstract_namespace_class = NULL;
 OOP _gst_array_class = NULL;
 OOP _gst_arrayed_collection_class = NULL;
 OOP _gst_association_class = NULL;
-OOP _gst_bag_class = NULL;
 OOP _gst_behavior_class = NULL;
 OOP _gst_binding_dictionary_class = NULL;
 OOP _gst_block_closure_class = NULL;
@@ -105,7 +104,6 @@ OOP _gst_context_part_class = NULL;
 OOP _gst_continuation_class = NULL;
 OOP _gst_date_class = NULL;
 OOP _gst_deferred_variable_binding_class = NULL;
-OOP _gst_delay_class = NULL;
 OOP _gst_dictionary_class = NULL;
 OOP _gst_directed_message_class = NULL;
 OOP _gst_false_class = NULL;
@@ -133,7 +131,6 @@ OOP _gst_linked_list_class = NULL;
 OOP _gst_lookup_key_class = NULL;
 OOP _gst_lookup_table_class = NULL;
 OOP _gst_magnitude_class = NULL;
-OOP _gst_mapped_collection_class = NULL;
 OOP _gst_memory_class = NULL;
 OOP _gst_message_class = NULL;
 OOP _gst_metaclass_class = NULL;
@@ -156,7 +153,6 @@ OOP _gst_security_policy_class = NULL;
 OOP _gst_semaphore_class = NULL;
 OOP _gst_sequenceable_collection_class = NULL;
 OOP _gst_set_class = NULL;
-OOP _gst_shared_queue_class = NULL;
 OOP _gst_small_integer_class = NULL;
 OOP _gst_smalltalk_dictionary = NULL;
 OOP _gst_sorted_collection_class = NULL;
@@ -521,14 +517,6 @@ static const class_definition class_info[] = {
    "DefaultSortBlock",
    NULL },
 
-  {&_gst_bag_class, &_gst_collection_class,
-   GST_ISP_FIXED, false, 1,
-   "Bag", "contents", NULL, NULL },
-
-  {&_gst_mapped_collection_class, &_gst_collection_class,
-   GST_ISP_FIXED, false, 2,
-   "MappedCollection", "domain map", NULL, NULL },
-
   {&_gst_hashed_collection_class, &_gst_collection_class,
    GST_ISP_POINTER, false, 1,
    "HashedCollection", "tally", NULL, NULL },
@@ -652,15 +640,6 @@ static const class_definition class_info[] = {
    "ProcessorScheduler",
    "processLists activeProcess idleTasks processTimeslice gcSemaphore gcArray",
    NULL, NULL },
-
-  {&_gst_delay_class, &_gst_object_class,
-   GST_ISP_FIXED, false, 2,
-   "Delay", "resumptionTime delayDuration",
-   "Queue TimeoutSem MutexSem DelayProcess IdleProcess ActiveDelay DelayEvent", NULL },
-
-  {&_gst_shared_queue_class, &_gst_object_class,
-   GST_ISP_FIXED, false, 3,
-   "SharedQueue", "queueSem valueReady queue", NULL, NULL },
 
   /* Change this, classDescription, or gst_class, and you must change
      the implementaion of new_metaclass some */
