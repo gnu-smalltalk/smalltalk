@@ -22,7 +22,6 @@ AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE
 AC_CANONICAL_HOST
 
-set -x
 if test -d $srcdir/.git; then
   GIT_REVISION=-`git rev-parse --short HEAD 2>/dev/null || echo git`
 else	
