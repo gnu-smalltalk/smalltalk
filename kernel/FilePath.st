@@ -647,8 +647,8 @@ size and timestamps.'>
     ]
 
     withReadStreamDo: aBlock [
-	"Invoke aBlock with a reading stream open on me, closing it
-	 when the dynamic extent of aBlock ends."
+	"Answer the result of invoking aBlock with a reading stream
+	 open on me, closing it when the dynamic extent of aBlock ends."
 	<category: 'file operations'>
 	| stream |
 	stream := self readStream.
@@ -670,8 +670,8 @@ size and timestamps.'>
     ]
 
     withWriteStreamDo: aBlock [
-	"Invoke aBlock with a writing stream open on me, closing it
-	 when the dynamic extent of aBlock ends."
+	"Answer the result of invoking aBlock with a writing stream
+	 open on me, closing it when the dynamic extent of aBlock ends."
 	<category: 'file operations'>
 	| stream |
 	stream := self writeStream.
