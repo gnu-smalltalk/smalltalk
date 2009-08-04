@@ -1,3 +1,7 @@
+2009-08-04  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Semaphore.st: Minor change, planning for future changes.
+
 2009-08-01  Stefan Schmiedl  <s@xss.de>
 
 	* kernel/FilePath.st: Improve commentary.

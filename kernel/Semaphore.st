@@ -108,7 +108,7 @@ I also provide some methods for implementing critical sections.'>
 	"Answer whether waiting on the receiver would suspend the current process."
 
 	<category: 'accessing'>
-	^signals = 0
+	^signals <= 0
     ]
 
     printOn: aStream [
@@ -133,13 +133,14 @@ I also provide some methods for implementing critical sections.'>
 	"Answer the number of processes that can be accomodated or (if negative
 	 the number of waiting processes."
 
-	"signals never goes below 0, even if there are waiting process. So
+	"If <= 0 the value of signals does not have a relationship to the number
+	 of waiting processes (currently it never goes at all below zero). So
 	 - if 0 and 0 processes are waiting, the signal count is 0
 	 - if 0 and k processes are waiting, the signal count is -k
 	 - if >0, no processes must be waiting and the signal count is signals"
 
 	<category: 'private'>
-	^signals - self size
+	^(signals max: 0) - self size
     ]
 
     notify [
