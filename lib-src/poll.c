@@ -85,6 +85,23 @@ char *alloca ();
 
 #ifdef WIN32_NATIVE
 
+#define IsConsoleHandle(h) (((long) (h) & 3) == 3)
+
+static BOOL
+IsSocketHandle(HANDLE h)
+{
+  WSANETWORKEVENTS ev;
+
+  if (IsConsoleHandle (h))
+    return FALSE;
+  
+  /* Under Wine, it seems that getsockopt returns 0 for pipes too.
+     WSAEnumNetworkEvents instead distinguishes the two correctly.  */
+  ev.lNetworkEvents = 0xDEADBEEF;
+  WSAEnumNetworkEvents ((SOCKET) h, NULL, &ev);
+  return ev.lNetworkEvents != 0xDEADBEEF;
+}
+
 /* Declare data structures for ntdll functions.  */
 typedef struct _FILE_PIPE_LOCAL_INFORMATION {
   ULONG NamedPipeType;
@@ -174,12 +191,21 @@ win32_compute_revents (HANDLE h, int sought)
       return happened;
 
     case FILE_TYPE_CHAR:
+      if (!(sought & (POLLIN | POLLRDNORM | POLLPRI | POLLRDBAND)))
+	break;
+
       ret = WaitForSingleObject (h, 0);
       if (ret == WAIT_OBJECT_0)
         {
+	  if (!IsConsoleHandle (h))
+	    return sought & ~(POLLPRI | POLLRDBAND);
+
 	  nbuffer = avail = 0;
 	  bRet = GetNumberOfConsoleInputEvents (h, &nbuffer);
-	  if (!bRet || nbuffer == 0)
+
+	  /* Screen buffer handles are filtered earlier.  */
+	  assert (bRet);
+	  if (nbuffer == 0)
 	    return POLLHUP;
 
 	  irbuffer = (INPUT_RECORD *) alloca (nbuffer * sizeof (INPUT_RECORD));
@@ -454,36 +480,32 @@ poll (pfd, nfd, timeout)
   for (i = 0; i < nfd; i++)
     {
       size_t optlen = sizeof(sockbuf);
+      int sought = pfd[i].events;
       pfd[i].revents = 0;
       if (pfd[i].fd < 0)
         continue;
-      if (!(pfd[i].events & (POLLIN | POLLRDNORM |
-                             POLLOUT | POLLWRNORM | POLLWRBAND)))
+      if (!(sought & (POLLIN | POLLRDNORM | POLLOUT | POLLWRNORM | POLLWRBAND)))
 	continue;
 
       h = (HANDLE) _get_osfhandle (pfd[i].fd);
       assert (h != NULL);
 
-      /* Under Wine, it seems that getsockopt returns 0 for pipes too.
-	 WSAEnumNetworkEvents instead distinguishes the two correctly.  */
-      ev.lNetworkEvents = 0xDEADBEEF;
-      WSAEnumNetworkEvents ((SOCKET) h, NULL, &ev);
-      if (ev.lNetworkEvents != 0xDEADBEEF)
+      if (IsSocketHandle (h))
         {
           int requested = FD_CLOSE;
 
           /* see above; socket handles are mapped onto select.  */
-          if (pfd[i].events & (POLLIN | POLLRDNORM))
+          if (sought & (POLLIN | POLLRDNORM))
 	    {
               requested |= FD_READ | FD_ACCEPT;
 	      FD_SET ((SOCKET) h, &rfds);
 	    }
-          if (pfd[i].events & (POLLOUT | POLLWRNORM | POLLWRBAND))
+          if (sought & (POLLOUT | POLLWRNORM | POLLWRBAND))
 	    {
               requested |= FD_WRITE | FD_CONNECT;
 	      FD_SET ((SOCKET) h, &wfds);
 	    }
-          if (pfd[i].events & (POLLPRI | POLLRDBAND))
+          if (sought & (POLLPRI | POLLRDBAND))
 	    {
               requested |= FD_OOB;
 	      FD_SET ((SOCKET) h, &xfds);
@@ -494,7 +516,20 @@ poll (pfd, nfd, timeout)
         }
       else
         {
+	  /* Screen buffer handles are waitable, and they'll block until
+	     a character is available.  Eliminate bits for the "wrong"
+	     direction. */
           handle_array[nhandles++] = h;
+	  if (IsConsoleHandle (h))
+	    {
+	      DWORD nbuffer;
+	      if (GetNumberOfConsoleInputEvents (h, &nbuffer))
+		sought &= (POLLIN | POLLRDNORM | POLLPRI | POLLRDBAND);
+	      else
+		sought &= (POLLOUT | POLLWRNORM);
+	      if (!sought)
+		continue;
+	    }
 
 	  /* Poll now.  If we get an event, do not poll again.  */
           pfd[i].revents = win32_compute_revents (h, pfd[i].events);
