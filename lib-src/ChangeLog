@@ -1,3 +1,7 @@
+2009-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c: Merge with gnulib.
+
 2009-08-04  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/poll.c: Do not check console screen buffer handles

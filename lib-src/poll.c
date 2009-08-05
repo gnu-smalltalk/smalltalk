@@ -136,10 +136,11 @@ typedef DWORD (WINAPI *PNtQueryInformationFile)
 #define PIPE_BUF	512
 #endif
 
-/* Compute revents values for file handle H.  */
+/* Compute revents values for file handle H.  If some events cannot happen
+   for the handle, eliminate them from *P_SOUGHT.  */
 
 static int
-win32_compute_revents (HANDLE h, int sought)
+win32_compute_revents (HANDLE h, int *p_sought)
 {
   int i, ret, happened;
   INPUT_RECORD *irbuffer;
@@ -165,7 +166,7 @@ win32_compute_revents (HANDLE h, int sought)
       if (PeekNamedPipe (h, NULL, 0, NULL, &avail, NULL) != 0)
 	{
 	  if (avail)
-	    happened |= sought & (POLLIN | POLLRDNORM);
+	    happened |= *p_sought & (POLLIN | POLLRDNORM);
 	}
 
       else
@@ -186,27 +187,25 @@ win32_compute_revents (HANDLE h, int sought)
 	      || fpli.WriteQuotaAvailable >= PIPE_BUF
 	      || (fpli.OutboundQuota < PIPE_BUF &&
 	          fpli.WriteQuotaAvailable == fpli.OutboundQuota))
-	    happened |= sought & (POLLOUT | POLLWRNORM | POLLWRBAND);
+	    happened |= *p_sought & (POLLOUT | POLLWRNORM | POLLWRBAND);
 	}
       return happened;
 
     case FILE_TYPE_CHAR:
-      if (!(sought & (POLLIN | POLLRDNORM | POLLPRI | POLLRDBAND)))
-	break;
-
       ret = WaitForSingleObject (h, 0);
-      if (ret == WAIT_OBJECT_0)
-        {
-	  if (!IsConsoleHandle (h))
-	    return sought & ~(POLLPRI | POLLRDBAND);
+      if (!IsConsoleHandle (h))
+	return ret == WAIT_OBJECT_0 ? *p_sought & ~(POLLPRI | POLLRDBAND) : 0;
 
-	  nbuffer = avail = 0;
-	  bRet = GetNumberOfConsoleInputEvents (h, &nbuffer);
-
-	  /* Screen buffer handles are filtered earlier.  */
-	  assert (bRet);
+      nbuffer = avail = 0;
+      bRet = GetNumberOfConsoleInputEvents (h, &nbuffer);
+      if (bRet)
+	{
+	  /* Input buffer.  */
+	  *p_sought &= POLLIN | POLLRDNORM;
 	  if (nbuffer == 0)
 	    return POLLHUP;
+	  if (!*p_sought)
+	    return 0;
 
 	  irbuffer = (INPUT_RECORD *) alloca (nbuffer * sizeof (INPUT_RECORD));
 	  bRet = PeekConsoleInput (h, irbuffer, nbuffer, &avail);
@@ -215,19 +214,23 @@ win32_compute_revents (HANDLE h, int sought)
 
 	  for (i = 0; i < avail; i++)
 	    if (irbuffer[i].EventType == KEY_EVENT)
-	      return sought & ~(POLLPRI | POLLRDBAND);
+	      return *p_sought;
+	  return 0;
 	}
-      break;
+      else
+	{
+	  /* Screen buffer.  */
+	  *p_sought &= POLLOUT | POLLWRNORM | POLLWRBAND;
+	  return *p_sought;
+	}
 
     default:
       ret = WaitForSingleObject (h, 0);
       if (ret == WAIT_OBJECT_0)
-        return sought & ~(POLLPRI | POLLRDBAND);
+        return *p_sought & ~(POLLPRI | POLLRDBAND);
 
-      break;
+      return *p_sought & (POLLOUT | POLLWRNORM | POLLWRBAND);
     }
-
-  return sought & (POLLOUT | POLLWRNORM | POLLWRBAND);
 }
 
 /* Convert fd_sets returned by select into revents values.  */
@@ -457,7 +460,6 @@ poll (pfd, nfd, timeout)
   fd_set rfds, wfds, xfds;
   BOOL poll_again;
   MSG msg;
-  char sockbuf[256];
   int rc = 0;
   nfds_t i;
 
@@ -479,12 +481,12 @@ poll (pfd, nfd, timeout)
   /* Classify socket handles and create fd sets. */
   for (i = 0; i < nfd; i++)
     {
-      size_t optlen = sizeof(sockbuf);
       int sought = pfd[i].events;
       pfd[i].revents = 0;
       if (pfd[i].fd < 0)
         continue;
-      if (!(sought & (POLLIN | POLLRDNORM | POLLOUT | POLLWRNORM | POLLWRBAND)))
+      if (!(sought & (POLLIN | POLLRDNORM | POLLOUT | POLLWRNORM | POLLWRBAND
+		      | POLLPRI | POLLRDBAND)))
 	continue;
 
       h = (HANDLE) _get_osfhandle (pfd[i].fd);
@@ -516,23 +518,13 @@ poll (pfd, nfd, timeout)
         }
       else
         {
-	  /* Screen buffer handles are waitable, and they'll block until
-	     a character is available.  Eliminate bits for the "wrong"
-	     direction. */
-          handle_array[nhandles++] = h;
-	  if (IsConsoleHandle (h))
-	    {
-	      DWORD nbuffer;
-	      if (GetNumberOfConsoleInputEvents (h, &nbuffer))
-		sought &= (POLLIN | POLLRDNORM | POLLPRI | POLLRDBAND);
-	      else
-		sought &= (POLLOUT | POLLWRNORM);
-	      if (!sought)
-		continue;
-	    }
-
-	  /* Poll now.  If we get an event, do not poll again.  */
-          pfd[i].revents = win32_compute_revents (h, pfd[i].events);
+	  /* Poll now.  If we get an event, do not poll again.  Also,
+	     screen buffer handles are waitable, and they'll block until
+	     a character is available.  win32_compute_revents eliminates
+	     bits for the "wrong" direction. */
+          pfd[i].revents = win32_compute_revents (h, &sought);
+	  if (sought)
+	    handle_array[nhandles++] = h;
           if (pfd[i].revents)
 	    wait_timeout = 0;
         }
@@ -613,8 +605,9 @@ poll (pfd, nfd, timeout)
       else
         {
           /* Not a socket.  */
+          int sought = pfd[i].events;
+          happened = win32_compute_revents (h, &sought);
           nhandles++;
-          happened = win32_compute_revents (h, pfd[i].events);
         }
 
        if ((pfd[i].revents |= happened) != 0)
