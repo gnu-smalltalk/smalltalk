@@ -1,3 +1,7 @@
+2009-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* gstGlu.c: Disable gluUnProject4, also not in Win32.
+
 2009-01-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* OpenGL.st: Temporarily disable extensions not in Win32.

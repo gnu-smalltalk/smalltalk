@@ -19,7 +19,7 @@ CLEANFILES = genprims$(EXEEXT) genbc$(EXEEXT) genvm$(EXEEXT)
 
 # definitions for libgst.la
 
-libgst_la_LIBADD=$(top_builddir)/lib-src/library.la \
+libgst_la_LIBADD=$(top_builddir)/lib-src/library.la $(SOCKET_LIBS) \
 	$(LIBSIGSEGV) $(LIBFFI) $(LIBSNPRINTFV) $(LIBREADLINE) $(LIBGMP) \
 	$(LIBTHREAD)
 

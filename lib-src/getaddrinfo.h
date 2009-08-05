@@ -28,6 +28,8 @@
 /* Get all getaddrinfo related declarations, if available.  */
 #if !(defined WIN32 || defined _WIN32) || defined __CYGWIN__
 # include <sys/socket.h>
+#else
+# include <ws2tcpip.h>
 #endif
 #ifdef HAVE_NETDB_H
 # include <netdb.h>

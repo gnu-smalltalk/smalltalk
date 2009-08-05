@@ -138,6 +138,7 @@ OOP gst_opengl_gluUnProject (GLdouble winX, GLdouble winY, GLdouble winZ, OOP mo
   return result ;
 }
 
+#if 0
 OOP gst_opengl_gluUnProject4 (GLdouble winX, GLdouble winY, GLdouble winZ, GLdouble clipW, 
 				OOP modelMatrix, OOP projectionMatrix, OOP viewportVertex, 
 				GLdouble nearVal, GLdouble farVal)
@@ -166,6 +167,7 @@ OOP gst_opengl_gluUnProject4 (GLdouble winX, GLdouble winY, GLdouble winZ, GLdou
 	}
   return result ;
 }
+#endif
 
 
 void gst_opengl_gluCylinder (GLenum draw, GLenum normals, GLenum orient,
@@ -277,7 +279,9 @@ void gst_initModule_glu() {
   vm_proxy->defineCFunc ("gluScaleImage", gluScaleImage) ;
   vm_proxy->defineCFunc ("gluSphere", gst_opengl_gluSphere) ;
   vm_proxy->defineCFunc ("gluUnProject", gst_opengl_gluUnProject) ;
+#if 0
   vm_proxy->defineCFunc ("gluUnProject4", gst_opengl_gluUnProject4) ;
+#endif
 
   gst_initModule_gluNurbs ();
   gst_initModule_gluTess ();

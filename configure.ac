@@ -441,6 +441,12 @@ GST_PACKAGE_ENABLE([LibSDL], [sdl/libsdl],
     *-framework,Cocoa* | *"-framework Cocoa"*) gst_cv_sdl_uses_cocoa=yes ;;
     *) gst_cv_sdl_uses_cocoa=no ;;
   esac
+
+  # We do SDLmain's job on our own, and mingw32 is linked automatically
+  # into the DLL.  If we do not do this, libtool refuses to create a DLL
+  # for the SDL module.
+  SDL_LIBS=`echo " $SDL_LIBS " | sed 's/ -lSDLmain / /; s/ -lmingw32 / /' `
+  
   AM_CONDITIONAL([HAVE_COCOA], [test $gst_cv_sdl_uses_cocoa = yes])],
   [gst_cv_sdl],
   [Makefile], [sdl.la])

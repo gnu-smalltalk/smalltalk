@@ -1,3 +1,10 @@
+2009-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
+	* packages/digest/md5.c: Copy from lib-src.
+	* packages/digest/md5.h: Copy from lib-src.
+	* packages/digest/sha1.c: Move from lib-src.
+	* packages/digest/sha1.h: Move from lib-src.
+
 2008-05-15  Paolo Bonzini  <bonzini@gnu.org>
 
 	* packages/digest/md5.st: Pass data to C functions as #cObject.

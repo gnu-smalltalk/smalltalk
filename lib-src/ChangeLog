@@ -1,5 +1,11 @@
 2009-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
+	* lib-src/getaddrinfo.h: Include ws2tcpip.h.
+	* lib-src/sha1.c: Move to packages/digest.
+	* lib-src/sha1.h: Move to packages/digest.
+
+2009-08-05  Paolo Bonzini  <bonzini@gnu.org>
+
 	* lib-src/poll.c: Merge with gnulib.
 
 2009-08-04  Paolo Bonzini  <bonzini@gnu.org>
