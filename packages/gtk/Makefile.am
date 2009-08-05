@@ -97,19 +97,16 @@ sizeof.c: mk_sizeof cpp order
 enums.c: mk_enums cpp order
 	$(LC_UNSET); xargs ./cpp < order | ./mk_enums > enums.c
 
-order: order.st Makefile $(LOCAL_FILES)
-	PKG_CONFIG='$(PKG_CONFIG)' ../../gst \
-	  -I ../../gst.im -f $(srcdir)/order.st \
-	  -Pg -Patk -Ppango \
-	  `$(PKG_CONFIG) --cflags-only-I gobject-2.0` \
-	  `$(PKG_CONFIG) --cflags-only-I gdk-2.0` \
-	  `$(PKG_CONFIG) --cflags-only-I gdk-pixbuf-2.0` \
-	  `$(PKG_CONFIG) --cflags-only-I pango` \
-	  `$(PKG_CONFIG) --cflags-only-I gtk+-2.0` \
-	  `$(PKG_CONFIG) --cflags-only-I atk` \
-	  $(GTK_FILES) \
-	  $(LOCAL_FILES) | while read i; do \
+order: mkorder.awk Makefile $(LOCAL_FILES)
+	$(AWK) \
+	  -vPKG_CONFIG='$(PKG_CONFIG)' \
+	  -v_prefixes='g atk pango' \
+	  -v_libs="gobject-2.0 gdk-2.0 gdk-pixbuf-2.0 pango gtk+-2.0 atk" \
+	  -v_files="$(GTK_FILES) $(LOCAL_FILES)" -f $(srcdir)/mkorder.awk \
+	  | while read i; do \
 	    case "$$i" in \
+	      error:*) \
+	        echo "$$i" >&2; exit 1;; \
 	      */gobject/*) \
 	        echo "$$i" ;; \
 	      */glib/*) \
