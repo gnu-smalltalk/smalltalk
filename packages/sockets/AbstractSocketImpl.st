@@ -477,6 +477,11 @@ this can be changed by class methods on SocketAddress sublcasses.'>
 	    with: 2
 	    ifFail: [[File checkError: self soError] ensure: [self close]]
     ]
+
+    soError [
+	<category: 'private'>
+	^self soError: self fd
+    ]
 ]
 
 

@@ -357,9 +357,9 @@ AbstractSocketImpl extend [
 	
     ]
 
-    soError [
+    soError: socket [
 	<category: 'C constants'>
-	<cCall: 'TCPgetSoError' returning: #int args: #()>
+	<cCall: 'TCPgetSoError' returning: #int args: #(#int)>
 	
     ]
 
