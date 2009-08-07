@@ -93,7 +93,7 @@ win_fd_isset (int fd, fd_set * set)
 }
 
 #define FD_TO_SOCKET(fd)   ((SOCKET) _get_osfhandle ((fd)))
-#define SOCKET_TO_FD(fh)   (_open_osfhandle ((HANDLE) (fh), O_RDWR | O_BINARY))
+#define SOCKET_TO_FD(fh)   (_open_osfhandle ((long) (fh), O_RDWR | O_BINARY))
 
 #undef close
 #define close		   win_close

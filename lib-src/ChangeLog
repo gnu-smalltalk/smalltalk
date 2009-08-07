@@ -1,3 +1,7 @@
+2009-08-07  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/socketx.h: Fix cast in SOCKET_TO_FD.
+
 2009-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/getaddrinfo.h: Include ws2tcpip.h.

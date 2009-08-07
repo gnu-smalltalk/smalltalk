@@ -245,29 +245,53 @@ constantFunction (aiV4mapped, AI_V4MAPPED)
 
 
 
+#if defined SOCK_CLOEXEC && !defined __MSVCRT__
+/* 0 = unknown, 1 = yes, -1 = no.  */
+static mst_Boolean have_sock_cloexec;
+
+static inline int
+check_have_sock_cloexec (int fh, int expected_errno)
+{
+  if (have_sock_cloexec == 0)
+    have_sock_cloexec = (fh == -1 && errno == expected_errno ? -1 : 1);
+  return (have_sock_cloexec == 1);
+}
+#endif
+
+static void
+socket_set_cloexec (SOCKET fh)
+{
+  if (fh == SOCKET_ERROR)
+    return;
+
+#if defined __MSVCRT__
+  /* Do not do FD_CLOEXEC under MinGW.  */
+  SetHandleInformation ((HANDLE) fh, HANDLE_FLAG_INHERIT, 0);
+#else
+  fcntl (fh, F_SETFD, fcntl (fh, F_GETFD, 0) | FD_CLOEXEC);
+#endif
+}
+
 static int
 mySocket (int domain, int type, int protocol)
 {
-  int fd;
-#if defined __MSVCRT__
-  SOCKET fh = socket (domain, type, protocol);
-  fd = SOCKET_TO_FD (fh);
+  SOCKET fh = SOCKET_ERROR;
 
-  /* Do not do FD_CLOEXEC under MinGW.  */
-  SetHandleInformation (fh, HANDLE_FLAG_INHERIT, 0);
-
-#elif defined SOCK_CLOEXEC
-  fd = socket (domain, type | SOCK_CLOEXEC, protocol);
-
-#else
-  fd = socket (domain, type, protocol);
-#ifdef FD_CLOEXEC
-  if (fd != -1)
-    fcntl (fd, F_SETFD, fcntl (fd, F_GETFD, 0) | FD_CLOEXEC);
+#if defined SOCK_CLOEXEC && !defined __MSVCRT__
+  if (have_sock_cloexec >= 0)
+    {
+      fh = socket (domain, type | SOCK_CLOEXEC, protocol);
+      if (check_have_sock_cloexec (fh, EINVAL))
+	return -1;
+    }
 #endif
-#endif
+  if (fh == SOCKET_ERROR)
+    {
+      fh = socket (domain, type, protocol);
+      socket_set_cloexec (fh);
+    }
 
-  return fd;
+  return fh == SOCKET_ERROR ? -1 : SOCKET_TO_FD (fh);
 }
 
 
@@ -311,8 +335,22 @@ myConnect (int fd, struct sockaddr *sockaddr, int len)
 static int
 myAccept (int fd, struct sockaddr *addr, int *addrlen)
 {
-  SOCKET r = accept (FD_TO_SOCKET (fd), addr, addrlen);
-  return r == SOCKET_ERROR ? -1 : SOCKET_TO_FD (r);
+  SOCKET fh = SOCKET_ERROR;
+#if defined SOCK_CLOEXEC && defined HAVE_ACCEPT4 && !defined __MSVCRT__
+  if (have_sock_cloexec >= 0)
+    {
+      fh = accept4 (FD_TO_SOCKET (fd), addr, addrlen, SOCK_CLOEXEC);
+      if (check_have_sock_cloexec (fh, ENOSYS))
+	return -1;
+    }
+#endif
+  if (fh == SOCKET_ERROR)
+    {
+      fh = accept (FD_TO_SOCKET (fd), addr, addrlen);
+      socket_set_cloexec (fh);
+    }
+
+  return fh == SOCKET_ERROR ? -1 : SOCKET_TO_FD (fh);
 }
 
 static int
