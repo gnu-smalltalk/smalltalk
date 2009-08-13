@@ -281,7 +281,7 @@ mySocket (int domain, int type, int protocol)
   if (have_sock_cloexec >= 0)
     {
       fh = socket (domain, type | SOCK_CLOEXEC, protocol);
-      if (check_have_sock_cloexec (fh, EINVAL))
+      if (!check_have_sock_cloexec (fh, EINVAL))
 	return -1;
     }
 #endif
@@ -340,7 +340,7 @@ myAccept (int fd, struct sockaddr *addr, int *addrlen)
   if (have_sock_cloexec >= 0)
     {
       fh = accept4 (FD_TO_SOCKET (fd), addr, addrlen, SOCK_CLOEXEC);
-      if (check_have_sock_cloexec (fh, ENOSYS))
+      if (!check_have_sock_cloexec (fh, ENOSYS))
 	return -1;
     }
 #endif
