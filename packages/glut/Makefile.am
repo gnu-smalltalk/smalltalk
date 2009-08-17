@@ -1,7 +1,7 @@
-gst_module_ldflags = -rpath $(pkglibdir) -release $(VERSION)  -module \
+gst_module_ldflags = -rpath $(moduleexecdir) -release $(VERSION)  -module \
 	-no-undefined -export-symbols-regex gst_initModule
 
-pkglib_LTLIBRARIES = gstglut.la
+moduleexec_LTLIBRARIES = gstglut.la
 gstglut_la_SOURCES = gstGlut.c
 gstglut_la_LIBADD = $(LIBGLUT) -lm
 gstglut_la_LDFLAGS = $(gst_module_ldflags)

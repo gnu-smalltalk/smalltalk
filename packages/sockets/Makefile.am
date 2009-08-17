@@ -1,6 +1,6 @@
-module_LTLIBRARIES = sockets.la
+moduleexec_LTLIBRARIES = sockets.la
 
-gst_module_ldflags = -rpath $(moduledir) -release $(VERSION) -module \
+gst_module_ldflags = -rpath $(moduleexecdir) -release $(VERSION) -module \
 	-no-undefined -export-symbols-regex gst_initModule
 
 sockets_la_SOURCES = sockets.c

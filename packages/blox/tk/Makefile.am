@@ -1,6 +1,6 @@
-pkglib_LTLIBRARIES = blox-tk.la
+moduleexec_LTLIBRARIES = blox-tk.la
 
-gst_module_ldflags = -rpath $(pkglibdir) -release $(VERSION) -module \
+gst_module_ldflags = -rpath $(moduleexecdir) -release $(VERSION) -module \
 	-no-undefined -export-symbols-regex gst_initModule
 
 blox_tk_la_SOURCES = BloxTK.c

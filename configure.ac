@@ -173,7 +173,9 @@ AC_ARG_WITH(moduledir,
 			  (default: /usr/local/lib/$PACKAGE)],
 [moduledir="$withval"],
 [moduledir='${pkglibdir}'])
+moduleexecdir='${moduledir}'
 AC_SUBST(moduledir)
+AC_SUBST(moduleexecdir)
 
 dnl 
 dnl ------------------------------ C COMPILER / OS ------------

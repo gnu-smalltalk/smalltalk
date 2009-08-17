@@ -1,6 +1,6 @@
-module_LTLIBRARIES = iconv.la
+moduleexec_LTLIBRARIES = iconv.la
 
-gst_module_ldflags = -rpath $(moduledir) -release $(VERSION) -module \
+gst_module_ldflags = -rpath $(moduleexecdir) -release $(VERSION) -module \
 	-no-undefined -export-symbols-regex gst_initModule
 
 iconv_la_LDFLAGS = $(gst_module_ldflags)

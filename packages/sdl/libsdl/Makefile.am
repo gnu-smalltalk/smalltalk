@@ -1,7 +1,7 @@
-gst_module_ldflags = -rpath $(moduledir) -release $(VERSION) -module \
+gst_module_ldflags = -rpath $(moduleexecdir) -release $(VERSION) -module \
         -no-undefined -export-symbols-regex gst_initModule
 
-module_LTLIBRARIES = sdl.la
+moduleexec_LTLIBRARIES = sdl.la
 sdl_la_SOURCES = gst-sdl.c
 sdl_la_LIBADD = $(SDL_LIBS)
 sdl_la_LDFLAGS = $(gst_module_ldflags)
