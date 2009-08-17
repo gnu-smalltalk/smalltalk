@@ -609,10 +609,7 @@ acl_final_moduledir=`echo "${moduledir}" | sed \
 if test "$enable_shared" != no; then
   case $host in
     *-*-cygwin* | *-*-mingw*)
-      # For Windows, the shared library must be in the bindir
-      if test "$acl_final_libdir" != "${acl_final_bindir}"; then
-        relocatable_reason='no, libdir not equal to bindir'
-      fi
+      # For Windows, the shared library will be installed in bindir anyway
       ;;
 
     *-linux*)
