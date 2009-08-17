@@ -45,7 +45,7 @@ BEGIN {
 function process_lib(lib, prog, i) {
     prog = PKG_CONFIG " --cflags " lib
     while (prog | getline)
-	for (i = 1; i < NF; i++)
+	for (i = 1; i <= NF; i++)
 	    if ($i ~ /^-I/)
 	        paths[++n_paths] = substr($i, 3)
     close(prog)

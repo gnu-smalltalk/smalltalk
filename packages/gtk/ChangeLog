@@ -1,3 +1,7 @@
+2009-08-17  Paolo Bonzini  <bonzini@gnu.org>
+
+	* mkorder.awk: Fix off-by-one.
+
 2009-08-05  Paolo Bonzini  <bonzini@gnu.org>
 
 	* order.st: Rewrite...
