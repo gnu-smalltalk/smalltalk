@@ -236,6 +236,7 @@ in CFunctionDescriptor.'>
 	<category: 'dynamic linking'>
 	| notLoaded |
 	aspect == #returnFromSnapshot ifFalse: [^self].
+	libraryList := libraryList reject: [:lib | lib key isNil].
 	libraryList do: [:lib | lib value: (self linkFile: lib key)].
 	notLoaded := WriteStream on: Array new.
 	moduleList 
@@ -251,7 +252,8 @@ in CFunctionDescriptor.'>
 	"Answer a copy of the search path of libraries to be used by DLD"
 
 	<category: 'dynamic linking'>
-	^libraryList copy
+	^(libraryList select: [:each | each key notNil])
+	    collect: [:each | each key]
     ]
 
     DLD class >> moduleList [
@@ -269,6 +271,15 @@ in CFunctionDescriptor.'>
 	    ifFalse: 
 		[libraryList add: library -> (self linkFile: library).
 		libraryStream := Kernel.RoundRobinStream on: libraryList readStream]
+    ]
+
+    DLD class >> addLibraryHandle: libraryHandle [
+	"This is called internally by gst_dlopen.  The library will
+	 be open and put in the search path."
+
+	<category: 'dynamic linking'>
+	libraryList add: nil -> libraryHandle.
+	libraryStream := Kernel.RoundRobinStream on: libraryList readStream
     ]
 
     DLD class >> addModule: library [

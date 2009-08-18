@@ -208,6 +208,12 @@ typedef struct VMProxy
   void (*asyncCall) (void (*func) (OOP), OOP argOOP);
   mst_Boolean (*syncSignal) (OOP semaphoreOOP, mst_Boolean incrIfEmpty);
   void (*showBacktrace) (FILE *fp);
+
+  /* 3.2+ functions.  */
+  mst_Boolean (*dlOpen) (const char *filename, mst_Boolean module);
+  void (*dlAddSearchDir) (const char *dir);
+  void (*dlPushSearchPath) (void);
+  void (*dlPopSearchPath) (void);
 } VMProxy;
 
 /* Compatibility section */
@@ -245,6 +251,18 @@ extern void gst_invoke_hook (enum gst_vm_hook);
 /* Functions in sysdep.h.  */
 extern void gst_set_executable_path (const char *);
 extern char *gst_relocate_path (const char *);
+
+/* Functions in cint.h.  */
+extern mst_Boolean gst_dlopen (const char *filename, mst_Boolean module);
+
+/* Add DIR at the beginning of the libltdl search path.  */
+extern void gst_dladdsearchdir (const char *dir);
+
+/* Push the current libltdl search path.  */
+extern void gst_dlpushsearchpath (void);
+
+/* Pop the saved search path into the current libltdl search path.  */
+extern void gst_dlpopsearchpath (void);
 
 /* These are the library counterparts of the functions in
    gst_vm_proxy.  */

@@ -118,11 +118,18 @@ VMProxy gst_interpreter_proxy = {
   _gst_oop_indexed_kind,
   _gst_async_call,
   _gst_sync_signal,
-  _gst_show_backtrace
+  _gst_show_backtrace,
+
+  /* New in 3.2.  */
+  _gst_dlopen,
+  _gst_dladdsearchdir,
+  _gst_dlpushsearchpath,
+  _gst_dlpopsearchpath
 };
 
 /* Functions in comp.h.  */
-void gst_invoke_hook (enum gst_vm_hook hook)
+void
+gst_invoke_hook (enum gst_vm_hook hook)
 {
   _gst_invoke_hook (hook);
 }
@@ -404,6 +411,30 @@ void
 gst_show_backtrace (FILE *fp)
 {
   _gst_show_backtrace (fp);
+}
+
+mst_Boolean
+gst_dlopen (const char *filename, mst_Boolean module)
+{
+  return _gst_dlopen (filename, module);
+}
+
+void
+gst_dladdsearchdir (const char *dir)
+{
+  _gst_dladdsearchdir (dir);
+}
+
+void
+gst_dlpushsearchpath (void)
+{
+  _gst_dlpushsearchpath ();
+}
+
+void
+gst_dlpopsearchpath (void)
+{
+  _gst_dlpopsearchpath ();
 }
 
 void

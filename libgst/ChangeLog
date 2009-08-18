@@ -1,3 +1,10 @@
+2009-08-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/cint.c: Add dlopen functions for modules.
+	* libgst/cint.h: Declare them.
+	* libgst/gstpub.c: Implement public variants and add to VMProxy.
+	* libgst/gstpub.h: Declare public variants.
+
 2009-08-01  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/interp.c: Do not create gcSemaphore.

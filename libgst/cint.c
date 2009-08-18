@@ -498,6 +498,52 @@ dld_open (const char *filename)
   return (NULL);
 #endif
 }
+
+struct search_path_stack {
+  char *saved_search_path;
+  struct search_path_stack *next;
+};
+
+struct search_path_stack *search_paths;
+
+mst_Boolean
+_gst_dlopen (const char *path, mst_Boolean module)
+{
+  PTR h = dld_open (path);
+  if (h && !module)
+    _gst_msg_sendf (NULL, "%v %o addLibraryHandle: %C",
+		    _gst_class_name_to_oop ("DLD"), h);
+  return !!h;
+}
+
+void
+_gst_dladdsearchdir (const char *dir)
+{
+  lt_dlinsertsearchdir (lt_dlgetsearchpath (), dir);
+}
+
+void
+_gst_dlpushsearchpath (void)
+{
+  struct search_path_stack *entry = xmalloc (sizeof (struct search_path_stack));
+  const char *path = lt_dlgetsearchpath ();
+  entry->saved_search_path = path ? strdup (path) : NULL;
+  entry->next = search_paths;
+  search_paths = entry;
+}
+
+void
+_gst_dlpopsearchpath (void)
+{
+  struct search_path_stack *path = search_paths;
+  if (!path)
+    return;
+
+  lt_dlsetsearchpath (path->saved_search_path);
+  search_paths = path->next;
+  free (path->saved_search_path);
+  free (path);
+}
 
 
 

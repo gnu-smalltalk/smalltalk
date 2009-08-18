@@ -3008,19 +3008,27 @@ goodies.  If they're written in Smalltalk only, no problem: getting them
 to work as packages (@pxref{Packages}), and to fit in with the @gst{}
 packaging system, is likely to be a five-minutes task.
 
-If your goodie is mostly written in C and you don't need particular glue
-to link it to Smalltalk (for example, there are no callbacks from C code
-to Smalltalk code), you can use the @code{dynamic library linking}
-system.  When using this system, you have to link @gst{} with the
-library at run-time using @sc{dld}; the method to be used here is
-@code{DLD class>>#addLibrary:}.
+If your goodie is creating a binding to an external C library and you do
+not need particular glue to link it to Smalltalk (for example, there are
+no callbacks from C code to Smalltalk code), you can use the @code{dynamic
+library linking} system.  When using this system, you have to link @gst{}
+with the library at run-time using @sc{dld}, using either
+@code{DLD class>>#addLibrary:} or a @code{<library>} tag in a
+@file{package.xml} file (@pxref{Packages}).  The following line:
 
-But if you want to provide a more intimate link between C and Smalltalk,
+@example
+DLD addLibrary: 'libc'
+@end example
+
+@noindent
+is often used to use the standard C library functions from Smalltalk.
+
+However, if you want to provide a more intimate link between C and Smalltalk,
 as is the case with Blox, you should use the @code{dynamic module
 linking} system.  This section explains what to do, taking the Blox
 library as a guide.
 
-Modules are searched for in the @file{gnu-smalltalk} subdirectory of the
+Modules are searched for in the @file{smalltalk} subdirectory of the
 system library path, or in the directory that the
 @env{SMALLTALK_MODULES} environment variable points to.  A module is
 distinguished from a standard shared library because it has a function
@@ -3087,9 +3095,11 @@ install the library wherever you want; @code{libtool} will even generate
 appropriate warnings to the installer if @code{ldconfig} (or an
 equivalent program) has to be re-run.
 
-Finally, you will have to add the name of the module in the
-@file{packages.xml} file.  In this case, the relevant entry in that file
-will be
+While you can use @code{DLD class>>#addModule:} to link a module into
+the virtual machine at run time, usually bindings that require a module
+are complex enough to be packaged
+Finally, you will have to add the name of the module in a package file
+(@pxref{Packages}).  In this case, the relevant entry in the file will be
 
 @example
 <package>
@@ -3113,6 +3123,40 @@ will be
   <file>colors.txt</file>
 </package>
 @end example
+
+There is also a third case, in which the bindings are a mixture of
+code written specially for @gst{}, and the normal C library.  In this
+case, you can use a combination of dynamic shared libraries and dynamic
+modules.  To do this, you can specify both @code{<library>} and
+@code{<module>} tags in the @file{package.xml} file.
+
+Alternatively, the following functions allow you to call @code{DLD
+class>>#addLibrary:} from within a module.
+
+@deftypefun mst_Boolean dlOpen (void *filename, int module)
+Open the library pointed to by with @var{filename} (which need not include
+an extension), and invoke gst_initModule if it is found in the library.
+If @var{module} is false, add the file to the list of libraries that
+Smalltalk searches for external symbols.
+
+Return true if the library was found.
+@end deftypefun
+
+@deftypefun void dlAddSearchDir (const char *dir)
+Add @var{dir} at the beginning of the search path of @code{dlOpen}. 
+@end deftypefun
+
+@deftypefun void dlPushSearchPath (void)
+Save the current value of the search path for @code{dlOpen}.  This can be
+used to temporarily add the search path for the libraries added by a
+module, without affecting subsequent libraries manually opened with the
+@code{DLD} class.
+@end deftypefun
+
+@deftypefun void dlPopSearchPath (void)
+Restore the last saved value of the search path.
+@end deftypefun
+
 
 @node C callout
 @section Using the C callout mechanism
