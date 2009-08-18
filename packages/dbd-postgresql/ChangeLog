@@ -1,3 +1,8 @@
+2009-08-18  Paolo Bonzini  <bonzini@gnu.org>
+	    Nigel Williams  <nigelw@elder-gods.net>
+
+	* Connection.st: Remove invalid arguments added by the superclass.
+
 2008-02-14  Paolo Bonzini  <bonzini@gnu.org>
 
 	* Connection.st: Add #primTableAt:ifAbsent:.

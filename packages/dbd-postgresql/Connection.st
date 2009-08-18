@@ -63,6 +63,15 @@ Connection subclass: PGConnection [
 	^ConnectionStatus at: aCode + 1
     ]
 
+    PGConnection class >> unrecognizedParameters [
+	<category: 'private'>
+
+	"These are the synonymous parameters which our superclass adds and
+	 PQconnectdb does not understand"
+
+	^#('db' 'database' 'hostname').
+    ]
+
     PGConnection class >> paramConnect: aParams user: aUserName password: aPassword [
 	"Normally you would use Connection>>connect:user:password: with a DSN
 	 specifying the appropriate driver string.
@@ -74,10 +83,13 @@ Connection subclass: PGConnection [
 
 	| connStr connParams handle conn connOK |
 	connParams := OrderedCollection new.
-	aParams keysAndValuesDo: [:k :v | connParams add: k , '=' , v].
+	aParams keysAndValuesDo: [:k :v |
+	    (self unrecognizedParameters includes: k)
+		ifFalse: [connParams add: k , '=' , v]].
+
 	aUserName notNil ifTrue: [connParams add: 'user=' , aUserName].
 	aPassword notNil ifTrue: [connParams add: 'password=' , aPassword].
-	connStr := connParams fold: [ :a :b | a, ' ', b ].
+	connStr := connParams inject: '' into: [ :a :b | a, ' ', b ].
 	handle := PQConnection connect: connStr.
 	connOK := self connectionStatus: handle status.
 	connOK == #CONNECTION_OK 
