@@ -2,7 +2,6 @@
   <name>GTK</name>
   <namespace>GTK</namespace>
   <filein>GtkDecl.st</filein>
-  <filein>Libs.st</filein>
   <filein>Structs.st</filein>
   <filein>MoreStructs.st</filein>
   <filein>Enums.st</filein>
@@ -15,7 +14,6 @@
   <built-file>Structs.st</built-file>
   <built-file>Enums.st</built-file>
   <built-file>Funcs.st</built-file>
-  <built-file>Libs.st</built-file>
   <file>GtkDecl.st</file>
   <file>GtkImpl.st</file>
   <file>MoreFuncs.st</file>

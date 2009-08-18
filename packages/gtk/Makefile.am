@@ -20,6 +20,8 @@ moduleexec_LTLIBRARIES = gst-gtk.la
 gst_gtk_la_LDFLAGS = $(gst_module_ldflags)
 gst_gtk_la_LIBADD = $(ALL_LIBS)
 dist_gst_gtk_la_SOURCES = gst-gtk.c placer.c
+nodist_gst_gtk_la_SOURCES = libs.def
+BUILT_SOURCES = libs.def
 dist_noinst_HEADERS = gst-gtk.h placer.h
 
 EXTRA_PROGRAMS = testplacer sizeof enums
@@ -41,13 +43,13 @@ GLIB_FILES = \
 
 LOCAL_FILES = $(srcdir)/placer.h
 
-nodist_noinst_DATA = Structs.st Funcs.st Enums.st Libs.st
+nodist_noinst_DATA = Structs.st Funcs.st Enums.st
 nodist_noinst_SCRIPTS = cpp structs funcs mk_sizeof mk_enums
 
 noinst_PROGRAMS = enums sizeof
 nodist_enums_SOURCES = enums.c
 nodist_sizeof_SOURCES = sizeof.c
-BUILT_SOURCES = enums.c sizeof.c
+BUILT_SOURCES += enums.c sizeof.c
 
 # Rules to build the bindings from the GTK+ header files follow...
 
@@ -72,14 +74,18 @@ mk_sizeof: $(srcdir)/mk_sizeof.awk
 
 # -------------------------------------
 
-Libs.st: Makefile
-	echo '"Automatically generated file, do not edit!"' > Libs.st; \
+libs.def: Makefile
 	for i in $(ALL_LIBS); do \
 	  case $$i in \
-	    -lg*|-latk*|-lpango*) echo "DLD addLibrary: 'lib$$i'!" | $(SED) 's/-l//' >> Libs.st ;; \
+	    -L*) \
+	      j=`echo $$i | sed 's,^-L,,'` ; \
+	      echo "_gst_vm_proxy->dlAddSearchDir(\"$$j\");" ;; \
+	    -lG*|-lg*|-lATK*|-latk*|-lPango*|-lpango*) \
+	      j=`echo $$i | sed 's,^-l,lib,'` ; \
+	      echo "_gst_vm_proxy->dlOpen(\"$$j\", false);" ;; \
 	    *) ;; \
 	  esac; \
-	done
+	done | sort -u > libs.def
 
 Structs.st: structs sizeof$(EXEEXT) cpp order
 	$(LC_UNSET); xargs ./cpp < order | ./structs > Structs.st

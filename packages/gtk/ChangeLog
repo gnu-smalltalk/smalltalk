@@ -1,3 +1,9 @@
+2009-08-18  Paolo Bonzini  <bonzini@gnu.org>
+
+	* Makefile: Build libs.def instead of Libs.st.
+	* gst-gtk.c: Include it.
+	* package.xml: Drop Libs.st.
+
 2009-08-17  Paolo Bonzini  <bonzini@gnu.org>
 
 	* mkorder.awk: Fix off-by-one.

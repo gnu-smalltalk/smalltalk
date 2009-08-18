@@ -1003,4 +1003,8 @@ gst_initModule (proxy)
   _gst_vm_proxy->defineCFunc ("gtk_placer_resize_rel", gtk_placer_resize_rel);
   _gst_vm_proxy->defineCFunc ("gtk_placer_set_has_window", gtk_placer_set_has_window);
   _gst_vm_proxy->defineCFunc ("gtk_placer_get_has_window", gtk_placer_get_has_window);
+
+  _gst_vm_proxy->dlPushSearchPath ();
+#include "libs.def"
+  _gst_vm_proxy->dlPopSearchPath ();
 }
