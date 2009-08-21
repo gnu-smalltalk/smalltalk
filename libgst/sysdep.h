@@ -130,6 +130,10 @@ extern void _gst_set_file_interrupt (int fd,
 extern void _gst_debug (void)
   ATTRIBUTE_HIDDEN;
 
+/* Sleeps for US milliseconds.  */
+extern void _gst_usleep (int us)
+  ATTRIBUTE_HIDDEN;
+
 /* Returns the local time since midnight in milliseconds */
 extern uint64_t _gst_get_milli_time (void)
   ATTRIBUTE_HIDDEN;

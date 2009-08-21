@@ -488,6 +488,19 @@ _gst_get_time (void)
 }
 
 
+void
+_gst_usleep (int us)
+{
+#ifdef WIN32
+  Sleep (us / 1000);
+#elif defined HAVE_USLEEP
+  usleep (us);
+#elif defined HAVE_NANOSLEEP
+  struct timespec ts = { us / 1000, (us % 1000) * 1000 };
+  nanosleep (&ts, NULL);
+#endif
+}
+
 
 #ifdef WIN32
 struct

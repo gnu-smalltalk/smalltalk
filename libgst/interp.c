@@ -297,6 +297,10 @@ static inline mst_Boolean cached_index_oop_put_primitive (OOP rec,
 							  OOP val,
 							  intptr_t spec);
 
+/* Try to find another process with higher or same priority as the
+   active one.  Return whether there is one.  */
+static mst_Boolean would_reschedule_process (void);
+
 /* Locates in the ProcessorScheduler's process lists and returns the
    highest priority process different from the current process.  */
 static OOP highest_priority_process (void);
@@ -337,6 +341,9 @@ static mst_Boolean parse_stream_with_protection (mst_Boolean method);
    PROCESSOOP's priority (i.e. it was the head of the list and becomes
    the tail).  */
 static void sleep_process (OOP processOOP);
+
+/* Yield control from the active process.  */
+static void active_process_yield (void);
 
 /* Sets flags so that the interpreter switches to PROCESSOOP at the
    next sequence point.  Unless PROCESSOOP is already active, in which
@@ -1543,6 +1550,21 @@ is_empty (OOP processListOOP)
   return (IS_NIL (processList->firstLink));
 }
 
+/* TODO: this was taken from VMpr_Processor_yield.  Try to use
+   the macro ACTIVE_PROCESS_YIELD instead?  */
+
+void
+active_process_yield (void)
+{
+  OOP activeProcess = get_active_process ();
+  OOP newProcess = highest_priority_process();
+
+  if (is_process_ready (activeProcess))
+    sleep_process (activeProcess);	/* move to the end of the list */
+
+  activate_process (IS_NIL (newProcess) ? activeProcess : newProcess);
+}
+
 
 mst_Boolean
 _gst_sync_signal (OOP semaphoreOOP, mst_Boolean incr_if_empty)
@@ -1614,6 +1636,12 @@ _gst_async_call (void (*func) (OOP), OOP arg)
     }
   
   SET_EXCEPT_FLAG (true);
+}
+
+mst_Boolean
+_gst_have_pending_async_calls ()
+{
+  return async_queue_index_sig > 0 || async_queue_index > 0;
 }
 
 void
@@ -1818,6 +1846,39 @@ sleep_process (OOP processOOP)
   add_last_link (processList, processOOP);
 }
 
+
+mst_Boolean
+would_reschedule_process ()
+{
+  OOP processLists, processListOOP;
+  int priority, activePriority;
+  OOP processOOP;
+  gst_process process;
+  gst_semaphore processList;
+
+  if (!IS_NIL (switch_to_process))
+    return false;
+
+  processOOP = get_scheduled_process ();
+  process = (gst_process) OOP_TO_OBJ (processOOP);
+  activePriority = TO_INT (process->priority);
+  processLists = GET_PROCESS_LISTS ();
+  priority = NUM_OOPS (OOP_TO_OBJ (processLists));
+  do
+    {
+      assert (priority > 0);
+      processListOOP = ARRAY_AT (processLists, priority);
+    }
+  while (is_empty (processListOOP) && --priority >= activePriority);
+
+  processList = (gst_semaphore) OOP_TO_OBJ (processListOOP);
+  return (priority < activePriority
+	  || (priority == activePriority
+	      /* If the same priority, check if the list has the
+		 current process as the sole element.  */
+	      && processList->firstLink == processList->lastLink
+	      && processList->firstLink == processOOP));
+}
 
 OOP
 highest_priority_process (void)

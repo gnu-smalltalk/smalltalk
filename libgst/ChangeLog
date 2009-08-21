@@ -1,5 +1,16 @@
 2009-08-21  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/events.c: Add _gst_pause.
+	* libgst/events.h: Declare it.
+	* libgst/interp.c: Add active_process_yield.
+	* libgst/prims.def: Use it.  Remove sleeping from VMpr_Processor_yield.
+	Add VMpr_Processor_pause.  Return whether incremental GC has finished
+	in the VMpr_ObjectMemory_incrementalGCStep primitive.
+	* libgst/sysdep.c: Add _gst_usleep.
+	* libgst/sysdep.h: Declare it.
+
+2009-08-21  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/oop.c: Track correctly the bottom-to-top sweeping of OOPs.
 	Return from _gst_incremental_gc_step whether incr. GC has finished.
 	* libgst/oop.h: Adjust prototype.

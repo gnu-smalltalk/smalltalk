@@ -219,16 +219,27 @@ Object subclass: ProcessorScheduler [
 	^1
     ]
 
-    idle [
-	"Private - Call the next idle task"
+    pause: aBoolean [
+	"Private - Pause for some time if aBoolean is false, or until a signal
+	 if it is true."
 
 	<category: 'idle tasks'>
-	| index |
-	idleTasks size <= 1 ifTrue: [^self].
+	<primitive: VMpr_Processor_pause>
+    ]
+
+    idle [
+	"Private - Call the next idle task.  Return whether GNU Smalltalk
+	 should pause until the next OS signal."
+
+	<category: 'idle tasks'>
+	| gcDone index |
+	gcDone := ObjectMemory incrementalGCStep.
+	idleTasks size <= 1 ifTrue: [ ^gcDone ].
+
 	index := idleTasks at: 1.
-	ObjectMemory incrementalGCStep.
 	(idleTasks at: index + 2) value.
-	idleTasks at: 1 put: (index + 1) \\ (idleTasks size - 1)
+	idleTasks at: 1 put: (index + 1) \\ (idleTasks size - 1).
+	^false
     ]
 
     idleAdd: aBlock [

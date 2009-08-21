@@ -2874,27 +2874,36 @@ primitive VMpr_Process_yield [succeed,check_interrupt]
 {
   OOP oop1;
 
-#if defined HAVE_NANOSLEEP
-  struct timespec ts = { 0, 1000000 };
-  nanosleep (&ts, NULL);
-#elif defined HAVE_USLEEP
-  usleep (1000);                /* exhibit good behavior */
-#endif
-
   _gst_primitives_executed++;
   oop1 = STACKTOP ();
   if (oop1 == get_active_process ())
     {
-      OOP new_process = highest_priority_process();
-
       SET_STACKTOP (_gst_nil_oop);	/* this is our return value */
-      if (is_process_ready (oop1))
-	sleep_process (oop1);	/* move to the end of the list */
-
-      activate_process (IS_NIL (new_process) ? oop1 : new_process);
+      active_process_yield ();
     }
   PRIM_SUCCEEDED;
 }
+
+/* Processor pause: waitForSignal */
+primitive VMpr_Processor_pause [succeed,check_interrupt]
+{
+  OOP oop1;
+  OOP activeProcessOOP;
+
+  _gst_primitives_executed++;
+  oop1 = POP_OOP ();
+  if (would_reschedule_process ())
+    {
+      if (oop1 == _gst_true_oop)
+	_gst_pause ();
+      else
+	_gst_usleep (20000);
+    }
+
+  active_process_yield ();
+  PRIM_SUCCEEDED;
+}
+
 
 
 /* Behavior flushCache */
@@ -5939,7 +5948,7 @@ primitive VMpr_ObjectMemory_gcPrimitives :
 	break;
 
       case prim_id (VMpr_ObjectMemory_incrementalGCStep):
-	_gst_incremental_gc_step ();
+	SET_STACKTOP_BOOLEAN (_gst_incremental_gc_step ());
 	break;
 
       case prim_id (VMpr_ObjectMemory_finishIncrementalGC):

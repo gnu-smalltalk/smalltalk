@@ -170,10 +170,7 @@ created.'>
 
     Delay class >> initialize [
 	<category: 'private-class initialization'>
-        IdleProcess := [
-                [Processor
-                    idle;
-                    yield] repeat] 
+        IdleProcess := [[Processor pause: Processor idle] repeat]
                     forkAt: Processor idlePriority.
         IdleProcess name: 'idle'.
 	self startDelayLoop

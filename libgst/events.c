@@ -280,6 +280,26 @@ file_polling_handler (int sig)
   _gst_set_signal_handler (sig, file_polling_handler);
 }
 
+void
+_gst_pause (void)
+{
+#ifdef WIN32
+  /* Dummy for now.  */
+  _gst_usleep (20000);
+#else
+  _gst_disable_interrupts (false);
+  if (!_gst_have_pending_async_calls ())
+    {
+      /* We use sigsuspend to atomically replace the mask.  pause does
+         not allow that.  */
+      sigset_t set;
+      sigemptyset (&set);
+      sigsuspend (&set);
+    }
+  _gst_enable_interrupts (false);
+#endif
+}
+
 int
 _gst_async_file_polling (int fd,
 			 int cond,
