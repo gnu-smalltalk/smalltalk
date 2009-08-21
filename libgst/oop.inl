@@ -175,10 +175,7 @@ alloc_oop (PTR objData, intptr_t flags)
 
   if UNCOMMON (_gst_mem.last_allocated_oop ==
 		_gst_mem.last_swept_oop)
-    {
-      oop = ++_gst_mem.last_allocated_oop;
-      ++_gst_mem.last_swept_oop;
-    }
+    oop = ++_gst_mem.last_allocated_oop;
   else
     {
       for (oop = _gst_mem.last_swept_oop;
@@ -216,6 +213,7 @@ alloc_oop (PTR objData, intptr_t flags)
   if UNCOMMON (_gst_mem.num_free_oops-- < LOW_WATER_OOP_THRESHOLD)
     _gst_mem.eden.maxPtr = _gst_mem.eden.allocPtr;
 
+  _gst_mem.last_swept_oop = oop;
   oop->object = obj;
   oop->flags = flags;
 

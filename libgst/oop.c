@@ -158,6 +158,9 @@ static void grow_memory_no_compact (size_t size);
    memory.  */
 static void reset_survivor_space (struct surv_space *space);
 
+/* Return whether the incremental collector is running.  */
+static inline mst_Boolean incremental_gc_running (void);
+
 /* Restart the incremental collector.  Objects before FIRSTOOP
    are assumed to be alive (currently the base of the OOP table is
    always passed, but you never know).  */
@@ -1275,12 +1278,19 @@ _gst_scavenge (void)
 }
 
 
-
+mst_Boolean
+incremental_gc_running ()
+{
+  return (_gst_mem.highest_swept_oop >= _gst_mem.last_swept_oop);
+}
 
 void
 _gst_finish_incremental_gc ()
 {
   OOP oop, firstOOP;
+
+  if (!incremental_gc_running ())
+    return;
 
 #if defined (GC_DEBUG_OUTPUT)
   printf ("Completing sweep (%p...%p), validity flags %x\n", _gst_mem.last_swept_oop,
@@ -1325,31 +1335,37 @@ finished_incremental_gc (void)
 #endif
 }
 
-void
+mst_Boolean
 _gst_incremental_gc_step ()
 {
   OOP oop, firstOOP;
   int i;
 
-  for (i = 0, oop = _gst_mem.highest_swept_oop,
-       firstOOP = _gst_mem.last_swept_oop;
-       i <= INCREMENTAL_SWEEP_STEP && --oop > firstOOP;
-       oop->flags &= ~F_REACHABLE)
+  if (!incremental_gc_running ())
+    return true;
+
+  i = 0;
+  oop = _gst_mem.highest_swept_oop;
+  firstOOP = _gst_mem.last_swept_oop;
+  for (;;)
     {
-      if (--oop > firstOOP)
+      if (--oop <= firstOOP)
         {
 	  finished_incremental_gc ();
-	  break;
+	  return true;
 	}
 
-      if (!IS_OOP_VALID_GC (oop))
+      if (IS_OOP_VALID_GC (oop))
+	oop->flags &= ~F_REACHABLE;
+      else
         {
-          i++;
           _gst_sweep_oop (oop);
   	  _gst_mem.num_free_oops++;
           _gst_mem.highest_swept_oop = oop;
           if (oop == _gst_mem.last_allocated_oop)
             _gst_mem.last_allocated_oop--;
+	  if (++i == INCREMENTAL_SWEEP_STEP)
+	    return false;
         }
     }
 }
@@ -1419,8 +1435,6 @@ reset_incremental_gc (OOP firstOOP)
 void
 _gst_sweep_oop (OOP oop)
 {
-  _gst_mem.last_swept_oop = oop;
-
   if (IS_OOP_FREE (oop))
     return;
 

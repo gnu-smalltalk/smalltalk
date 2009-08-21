@@ -1,3 +1,10 @@
+2009-08-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/oop.c: Track correctly the bottom-to-top sweeping of OOPs.
+	Return from _gst_incremental_gc_step whether incr. GC has finished.
+	* libgst/oop.h: Adjust prototype.
+	* libgst/oop.inl: Track here the bottom-to-top sweeping of OOPs.
+
 2009-08-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/cint.c: Add dlopen functions for modules.

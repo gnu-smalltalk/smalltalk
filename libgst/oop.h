@@ -304,8 +304,8 @@ extern void _gst_global_gc (int next_allocation)
 extern void _gst_global_compact (void) 
   ATTRIBUTE_HIDDEN;
 
-/* Mark, sweep & compact the old objects.  */
-extern void _gst_incremental_gc_step (void) 
+/* Sweep a bunch of old objects, return whether there are more.  */
+extern mst_Boolean _gst_incremental_gc_step (void) 
   ATTRIBUTE_HIDDEN;
 
 /* Finish the incremental sweep phase of the GC.  */
