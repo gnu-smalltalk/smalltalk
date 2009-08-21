@@ -1,3 +1,8 @@
+2009-08-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/lock.c: Remove pth/Solaris support.
+	* lib-src/lock.h: Remove pth/Solaris support.
+
 2009-08-07  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/socketx.h: Fix cast in SOCKET_TO_FD.

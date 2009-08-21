@@ -9,9 +9,8 @@ dnl From Bruno Haible.
 dnl GST_LOCK
 dnl -------
 dnl Tests for a multithreading library to be used.
-dnl Defines at most one of the macros USE_POSIX_THREADS, USE_SOLARIS_THREADS,
-dnl USE_WIN32_THREADS.  Sets the variables LIBTHREAD to the linker options for
-dnl use in a Makefile.
+dnl Defines at most one of the macros USE_POSIX_THREADS or USE_WIN32_THREADS.
+dnl Sets the variables LIBTHREAD to the linker options for use in a Makefile.
 dnl Adds to CPPFLAGS the flag -D_REENTRANT or -D_THREAD_SAFE if needed for
 dnl multithread-safe programs.
 
@@ -139,29 +138,6 @@ return !x;
 #endif],
             [AC_DEFINE([HAVE_PTHREAD_MUTEX_RECURSIVE], 1,
                [Define if the <pthread.h> defines PTHREAD_MUTEX_RECURSIVE.])])
-        fi
-      fi
-    fi
-    if test -z "$gst_have_pthread"; then
-      if test "$gst_use_threads" = yes || test "$gst_use_threads" = solaris; then
-        gst_have_solaristhread=
-        gst_save_LIBS="$LIBS"
-        LIBS="$LIBS -lthread"
-        AC_TRY_LINK([#include <thread.h>
-#include <synch.h>],
-          [thr_self();],
-          [gst_have_solaristhread=yes])
-        LIBS="$gst_save_LIBS"
-        if test -n "$gst_have_solaristhread"; then
-          gst_threads_api=solaris
-          LIBTHREAD=-lthread
-          AC_DEFINE([USE_SOLARIS_THREADS], 1,
-            [Define if the old Solaris multithreading library can be used.])
-          if test $gst_have_weak = yes; then
-            AC_DEFINE([USE_SOLARIS_THREADS_WEAK], 1,
-              [Define if references to the old Solaris multithreading library should be made weak.])
-            LIBTHREAD=
-          fi
         fi
       fi
     fi
