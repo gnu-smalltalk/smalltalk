@@ -22,8 +22,6 @@ Namespace current: NetClients.WikiWorks [
     "WebServer restartWikiNoImages."
     "WebServer restartWiki."
 
-    "leave the other processes running"
-    Processor activeProcess priority: Processor rockBottomPriority.
-    [Processor yield] repeat
+    Processor activeProcess suspend
 ]
 

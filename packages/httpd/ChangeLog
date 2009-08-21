@@ -1,3 +1,7 @@
+2009-08-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* test.st: Do not use rockBottomPriority.
+
 2008-08-06  Paolo Bonzini  <bonzini@gnu.org>
 
 	* FileServer.st: Do not use #nextHunk.

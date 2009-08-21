@@ -1,3 +1,9 @@
+2009-08-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* kernel/Delay.st: Rename rockBottomPriority to idlePriority.
+	* kernel/ObjMemory.st: Rename rockBottomPriority to idlePriority.
+	* kernel/ProcSched.st: Rename rockBottomPriority to idlePriority.
+
 2009-08-18  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/DLD.st: Add #addLibraryHandle:.

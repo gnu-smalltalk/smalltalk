@@ -128,7 +128,7 @@ Object subclass: ProcessorScheduler [
 	"Private - Answer a name for the given process priority"
 
 	<category: 'priorities'>
-	^#('rockBottomPriority' 'systemBackgroundPriority' 'userBackgroundPriority' 'userSchedulingPriority' 'userInterruptPriority' 'lowIOPriority' 'highIOPriority' 'timingPriority' 'unpreemptedPriority') 
+	^#('idlePriority' 'systemBackgroundPriority' 'userBackgroundPriority' 'userSchedulingPriority' 'userInterruptPriority' 'lowIOPriority' 'highIOPriority' 'timingPriority' 'unpreemptedPriority') 
 	    at: priority
     ]
 
@@ -197,15 +197,16 @@ Object subclass: ProcessorScheduler [
     ]
 
     systemBackgroundPriority [
-	"Answer the priority for system background-priority processes.
-	 Examples are an incremental garbage collector or status checker."
+	"Answer the priority for system background-priority processes.  An
+	 incremental garbage collector could run at this level but now
+	 it runs at idlePriority instead."
 
 	<category: 'priorities'>
 	^2
     ]
 
-    rockBottomPriority [
-	"Answer the lowest valid priority"
+    idlePriority [
+	"Answer the priority of idle processes."
 
 	<category: 'priorities'>
 	^1

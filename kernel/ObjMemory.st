@@ -68,7 +68,7 @@ state.'>
 
 	"Before quitting, wait until all processes are done."
 	aSymbol == #aboutToQuit ifTrue: [
-	    Processor activeProcess priority: Processor rockBottomPriority.
+	    Processor activeProcess priority: Processor idlePriority.
 	    Processor yield].
     ]
 

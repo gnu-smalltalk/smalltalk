@@ -174,7 +174,7 @@ created.'>
                 [Processor
                     idle;
                     yield] repeat] 
-                    forkAt: Processor systemBackgroundPriority.
+                    forkAt: Processor idlePriority.
         IdleProcess name: 'idle'.
 	self startDelayLoop
     ]
