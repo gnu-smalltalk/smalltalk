@@ -55,31 +55,82 @@
  *
  ***********************************************************************/
 
-#include "sysdep/common/time.c"
-#include "sysdep/common/files.c"
 
-#if defined __CYGWIN__
-#include "sysdep/cygwin/findexec.c"
-#include "sysdep/cygwin/timer.c"
-#include "sysdep/cygwin/signals.c"
-#include "sysdep/cygwin/events.c"
-#include "sysdep/cygwin/time.c"
-#include "sysdep/cygwin/files.c"
-#include "sysdep/cygwin/mem.c"
-#elif !defined WIN32
-#include "sysdep/posix/findexec.c"
-#include "sysdep/posix/timer.c"
-#include "sysdep/posix/signals.c"
-#include "sysdep/posix/events.c"
-#include "sysdep/posix/time.c"
-#include "sysdep/posix/files.c"
-#include "sysdep/posix/mem.c"
-#else
-#include "sysdep/win32/findexec.c"
-#include "sysdep/win32/timer.c"
-#include "sysdep/win32/signals.c"
-#include "sysdep/win32/events.c"
-#include "sysdep/win32/time.c"
-#include "sysdep/win32/files.c"
-#include "sysdep/win32/mem.c"
+#include "gstpriv.h"
+
+#ifdef HAVE_SYS_TIMES_H
+# include <sys/times.h>
 #endif
+
+/* Please feel free to make this more accurate for your operating system
+ * and send me the changes.
+ */
+void
+_gst_signal_after (int deltaMilli,
+		   SigHandler func,
+		   int kind)
+{
+  _gst_set_signal_handler (kind, func);
+
+  if (deltaMilli <= 0)
+    {
+      raise (kind);
+      return;
+    }
+
+  if (kind == TIMER_PROCESS)
+    {
+#if defined ITIMER_VIRTUAL
+      struct itimerval value;
+      value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
+      value.it_value.tv_sec = deltaMilli / 1000;
+      value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
+      setitimer (ITIMER_VIRTUAL, &value, (struct itimerval *) 0);
+#endif
+
+    }
+  else if (kind == TIMER_REAL)
+    {
+#if defined ITIMER_REAL
+      struct itimerval value;
+      value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
+      value.it_value.tv_sec = deltaMilli / 1000;
+      value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
+      setitimer (ITIMER_REAL, &value, (struct itimerval *) 0);
+
+#elif defined HAVE_FORK
+      static pid_t pid = -1;
+      long end, ticks;
+      if (pid != -1)
+	kill (pid, SIGTERM);
+
+      switch (pid = fork ())
+	{
+	case -1:
+	  /* Error, try to recover */
+	  raise (SIGALRM);
+	  break;
+
+	case 0:
+	  /* Child process */
+	  end = _gst_get_milli_time () + deltaMilli;
+	  do
+	    {
+	      ticks = end - _gst_get_milli_time ();
+	      if (ticks > 1100)	/* +100 is arbitrary */
+		sleep ((int) (ticks / 1000));
+	    }
+	  while (ticks > 0);
+	  kill (getppid (), SIGALRM);
+	  _exit (0);
+	}
+
+#elif defined HAVE_ALARM
+      alarm (deltaMilli / 1000);
+
+#else
+      /* Cannot do anything better than this */
+      raise (SIGALRM);
+#endif
+    }
+}

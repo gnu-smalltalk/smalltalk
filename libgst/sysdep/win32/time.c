@@ -55,31 +55,68 @@
  *
  ***********************************************************************/
 
-#include "sysdep/common/time.c"
-#include "sysdep/common/files.c"
 
-#if defined __CYGWIN__
-#include "sysdep/cygwin/findexec.c"
-#include "sysdep/cygwin/timer.c"
-#include "sysdep/cygwin/signals.c"
-#include "sysdep/cygwin/events.c"
-#include "sysdep/cygwin/time.c"
-#include "sysdep/cygwin/files.c"
-#include "sysdep/cygwin/mem.c"
-#elif !defined WIN32
-#include "sysdep/posix/findexec.c"
-#include "sysdep/posix/timer.c"
-#include "sysdep/posix/signals.c"
-#include "sysdep/posix/events.c"
-#include "sysdep/posix/time.c"
-#include "sysdep/posix/files.c"
-#include "sysdep/posix/mem.c"
-#else
-#include "sysdep/win32/findexec.c"
-#include "sysdep/win32/timer.c"
-#include "sysdep/win32/signals.c"
-#include "sysdep/win32/events.c"
-#include "sysdep/win32/time.c"
-#include "sysdep/win32/files.c"
-#include "sysdep/win32/mem.c"
+#include "gstpriv.h"
+
+#ifdef HAVE_SYS_TIMES_H
+# include <sys/times.h>
 #endif
+
+#ifdef HAVE_SYS_TIMEB_H
+#include <sys/timeb.h>
+#endif
+
+#ifdef WIN32
+# define WIN32_LEAN_AND_MEAN /* avoid including junk */
+# include <windows.h>
+#endif
+
+uint64_t
+_gst_get_milli_time (void)
+{
+  static long frequency = 0, frequencyH;
+  long milli;
+  LARGE_INTEGER counter;
+
+  if (!frequency)
+    {
+      QueryPerformanceFrequency (&counter);
+      /* frequencyH = 1000 * 2^32 / frequency */
+      frequency = counter.LowPart;
+      frequencyH = MulDiv (1000 * (1 << 16), (1 << 16), counter.LowPart);
+    }
+
+  QueryPerformanceCounter (&counter);
+  /* milli = (high * 2^32 + low) * 1000 / freq =
+     high * (1000 * 2^32 / freq) + (low * 1000 / freq) =
+     (high * frequencyH) + (low / 4) * 4000 / freq)
+     
+     Dividing and multiplying counter.LowPart by 4 is needed because
+     MulDiv accepts signed integers but counter.LowPart is unsigned.  */
+  milli = counter.HighPart * frequencyH;
+  milli += MulDiv (counter.LowPart >> 2, 4000, frequency);
+  return milli;
+}
+
+char *
+_gst_current_time_zone_name (void)
+{
+  char *zone;
+  long bias = _gst_current_time_zone_bias () / 60;
+  TIME_ZONE_INFORMATION tzi;
+  LPCWSTR name;
+  static char buffer[32];
+  GetTimeZoneInformation (&tzi);
+  zone = buffer;
+  name = (bias == (tzi.Bias + tzi.StandardBias))
+  	  ? tzi.StandardName : tzi.DaylightName;
+
+  WideCharToMultiByte (CP_ACP, 0, name, lstrlenW (name), zone, 32, NULL, NULL);
+  return xstrdup (zone);
+}
+
+void
+_gst_usleep (int us)
+{
+  Sleep (us / 1000);
+}

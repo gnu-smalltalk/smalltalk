@@ -55,31 +55,64 @@
  *
  ***********************************************************************/
 
-#include "sysdep/common/time.c"
-#include "sysdep/common/files.c"
 
-#if defined __CYGWIN__
-#include "sysdep/cygwin/findexec.c"
-#include "sysdep/cygwin/timer.c"
-#include "sysdep/cygwin/signals.c"
-#include "sysdep/cygwin/events.c"
-#include "sysdep/cygwin/time.c"
-#include "sysdep/cygwin/files.c"
-#include "sysdep/cygwin/mem.c"
-#elif !defined WIN32
-#include "sysdep/posix/findexec.c"
-#include "sysdep/posix/timer.c"
-#include "sysdep/posix/signals.c"
-#include "sysdep/posix/events.c"
-#include "sysdep/posix/time.c"
-#include "sysdep/posix/files.c"
-#include "sysdep/posix/mem.c"
-#else
-#include "sysdep/win32/findexec.c"
-#include "sysdep/win32/timer.c"
-#include "sysdep/win32/signals.c"
-#include "sysdep/win32/events.c"
-#include "sysdep/win32/time.c"
-#include "sysdep/win32/files.c"
-#include "sysdep/win32/mem.c"
-#endif
+#include "gstpriv.h"
+
+#define DISABLED_MASK ((-1) ^ (1 << SIGSEGV) ^ (1 << SIGBUS) ^ \
+			      (1 << SIGQUIT) ^ (1 << SIGILL) ^ (1 << SIGABRT))
+
+
+static long pending_sigs = 0;
+static SigHandler saved_handlers[8 * sizeof (long)];
+
+static RETSIGTYPE
+dummy_signal_handler (int sig)
+{
+  pending_sigs |= 1L << sig;
+  signal (sig, SIG_IGN);
+}
+
+int _gst_signal_count;
+
+void
+_gst_disable_interrupts (mst_Boolean from_signal_handler)
+{
+  int i;
+  
+  __sync_synchronize ();
+  if (_gst_signal_count++ == 0)
+    {
+      __sync_synchronize ();
+      for (i = 0; i < 8 * sizeof (long); i++)
+	if (DISABLED_MASK & (1 << i))
+  	  saved_handlers[i] = signal (i, dummy_signal_handler);
+    }
+}
+
+void
+_gst_enable_interrupts (mst_Boolean from_signal_handler)
+{
+  int i;
+  long local_pending_sigs;
+
+  __sync_synchronize ();
+  if (--_gst_signal_count == 0)
+    {
+      __sync_synchronize ();
+      for (i = 0; i < 8 * sizeof (long); i++)
+      	if (DISABLED_MASK & (1 << i))
+	  signal (i, saved_handlers[i]);
+      local_pending_sigs = pending_sigs;
+      pending_sigs = 0;
+      for (i = 0; local_pending_sigs; local_pending_sigs >>= 1, i++)
+      	if (local_pending_sigs & 1)
+	  raise (i);
+    }
+}
+
+SigHandler
+_gst_set_signal_handler (int signum,
+			 SigHandler handlerFunc)
+{
+  return signal (signum, handlerFunc);
+}

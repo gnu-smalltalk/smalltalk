@@ -55,31 +55,51 @@
  *
  ***********************************************************************/
 
-#include "sysdep/common/time.c"
-#include "sysdep/common/files.c"
 
-#if defined __CYGWIN__
-#include "sysdep/cygwin/findexec.c"
-#include "sysdep/cygwin/timer.c"
-#include "sysdep/cygwin/signals.c"
-#include "sysdep/cygwin/events.c"
-#include "sysdep/cygwin/time.c"
-#include "sysdep/cygwin/files.c"
-#include "sysdep/cygwin/mem.c"
-#elif !defined WIN32
-#include "sysdep/posix/findexec.c"
-#include "sysdep/posix/timer.c"
-#include "sysdep/posix/signals.c"
-#include "sysdep/posix/events.c"
-#include "sysdep/posix/time.c"
-#include "sysdep/posix/files.c"
-#include "sysdep/posix/mem.c"
-#else
-#include "sysdep/win32/findexec.c"
-#include "sysdep/win32/timer.c"
-#include "sysdep/win32/signals.c"
-#include "sysdep/win32/events.c"
-#include "sysdep/win32/time.c"
-#include "sysdep/win32/files.c"
-#include "sysdep/win32/mem.c"
+#include "gstpriv.h"
+
+#ifdef HAVE_SYS_TIMES_H
+# include <sys/times.h>
 #endif
+
+#ifdef HAVE_SYS_TIMEB_H
+#include <sys/timeb.h>
+#endif
+
+uint64_t
+_gst_get_milli_time (void)
+{
+#if defined HAVE_CLOCK_GETTIME && defined _POSIX_MONOTONIC_CLOCK
+  struct timespec tp;
+  clock_gettime (CLOCK_MONOTONIC, &tp);
+  return (tp.tv_sec * (uint64_t) 1000 + tp.tv_nsec / 1000000);
+
+#else
+  struct timeval t;
+  gettimeofday (&t, NULL);
+  t.tv_sec %= 86400;
+  return (t.tv_sec * (uint64_t) 1000 + t.tv_usec / 1000);
+#endif
+}
+
+char *
+_gst_current_time_zone_name (void)
+{
+  const char *zone;
+  zone = getenv ("TZ");
+  if (!zone)
+    zone = "XXX";
+
+  return xstrdup (zone);
+}
+
+void
+_gst_usleep (int us)
+{
+#if defined HAVE_USLEEP
+  usleep (us);
+#elif defined HAVE_NANOSLEEP
+  struct timespec ts = { us / 1000, (us % 1000) * 1000 };
+  nanosleep (&ts, NULL);
+#endif
+}

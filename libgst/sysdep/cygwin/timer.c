@@ -55,31 +55,95 @@
  *
  ***********************************************************************/
 
-#include "sysdep/common/time.c"
-#include "sysdep/common/files.c"
 
-#if defined __CYGWIN__
-#include "sysdep/cygwin/findexec.c"
-#include "sysdep/cygwin/timer.c"
-#include "sysdep/cygwin/signals.c"
-#include "sysdep/cygwin/events.c"
-#include "sysdep/cygwin/time.c"
-#include "sysdep/cygwin/files.c"
-#include "sysdep/cygwin/mem.c"
-#elif !defined WIN32
-#include "sysdep/posix/findexec.c"
-#include "sysdep/posix/timer.c"
-#include "sysdep/posix/signals.c"
-#include "sysdep/posix/events.c"
-#include "sysdep/posix/time.c"
-#include "sysdep/posix/files.c"
-#include "sysdep/posix/mem.c"
-#else
-#include "sysdep/win32/findexec.c"
-#include "sysdep/win32/timer.c"
-#include "sysdep/win32/signals.c"
-#include "sysdep/win32/events.c"
-#include "sysdep/win32/time.c"
-#include "sysdep/win32/files.c"
-#include "sysdep/win32/mem.c"
+#include "gstpriv.h"
+
+#ifdef WIN32
+# define WIN32_LEAN_AND_MEAN /* avoid including junk */
+# include <windows.h>
 #endif
+
+struct
+{
+  HANDLE hNewWaitEvent;
+  long sleepTime;
+}
+alarms;
+
+/* thread for precise alarm callbacks */
+void CALLBACK
+alarm_thread (unused)
+     LPVOID unused;
+{
+  WaitForSingleObject (alarms.hNewWaitEvent, INFINITE);
+  for (;;)
+    {
+      int sleepTime;
+
+      sleepTime = alarms.sleepTime;
+      if (sleepTime > 0)
+	{
+	  if (WaitForSingleObject (alarms.hNewWaitEvent, sleepTime) !=
+	      WAIT_TIMEOUT)
+	    {
+	      /* The old wait was canceled by a new one */
+	      continue;
+	    }
+	}
+      raise (SIGALRM);
+      WaitForSingleObject (alarms.hNewWaitEvent, INFINITE);
+    }
+}
+
+void
+_gst_init_sysdep_win32 ()
+{
+  HANDLE hthread;
+  DWORD tid;
+
+  /* Starts as non-signaled, so alarm_thread will wait */
+  alarms.hNewWaitEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
+
+  /* Start alarm_thread with a 1024 bytes stack */
+  hthread = CreateThread (NULL,
+			  1024,
+			  (LPTHREAD_START_ROUTINE) alarm_thread,
+			  NULL, 0, &tid);
+  
+  /* This does not terminate the thread - it only releases our handle */
+  CloseHandle (hthread);
+}
+
+/* Please feel free to make this more accurate for your operating system
+ * and send me the changes.
+ */
+void
+_gst_signal_after (int deltaMilli,
+		   SigHandler func,
+		   int kind)
+{
+  _gst_set_signal_handler (kind, func);
+
+  if (deltaMilli <= 0)
+    {
+      raise (kind);
+      return;
+    }
+
+  if (kind == TIMER_PROCESS)
+    {
+#if defined ITIMER_VIRTUAL
+      struct itimerval value;
+      value.it_interval.tv_sec = value.it_interval.tv_usec = 0;
+      value.it_value.tv_sec = deltaMilli / 1000;
+      value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
+      setitimer (ITIMER_VIRTUAL, &value, (struct itimerval *) 0);
+#endif
+
+    }
+  else if (kind == TIMER_REAL)
+    {
+      alarms.sleepTime = deltaMilli;
+      SetEvent (alarms.hNewWaitEvent);
+    }
+}

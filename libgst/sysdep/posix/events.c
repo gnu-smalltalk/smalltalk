@@ -1,14 +1,19 @@
 /******************************** -*- C -*- ****************************
  *
- *	Asynchronous events from the VM
+ * System specific implementation module.
+ *
+ * This module contains implementations of various operating system
+ * specific routines.  This module should encapsulate most (or all)
+ * of these calls so that the rest of the code is portable.
  *
  *
  ***********************************************************************/
 
 /***********************************************************************
  *
- * Copyright 2001, 2002, 2003, 2005, 2006, 2008 Free Software Foundation, Inc.
- * Written by Paolo Bonzini.
+ * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006,2007,2008
+ * Free Software Foundation, Inc.
+ * Written by Steve Byrne.
  *
  * This file is part of GNU Smalltalk.
  *
@@ -50,9 +55,108 @@
  *
  ***********************************************************************/
 
+
 #include "gstpriv.h"
 
+#ifdef HAVE_UTIME_H
+# include <utime.h>
+#endif
 
+#ifdef HAVE_SYS_TIMES_H
+# include <sys/times.h>
+#endif
+
+#ifdef HAVE_SYS_IOCTL_H
+# include <sys/ioctl.h>
+#endif
+
+#ifdef HAVE_TERMIOS_H
+# include <termios.h>
+#endif
+
+#ifdef HAVE_STROPTS_H
+#include <stropts.h>
+#endif
+
+static SigHandler sigio_handler = SIG_IGN;
+
+void
+set_file_interrupt (int fd,
+		    SigHandler func)
+{
+  if (func != sigio_handler) 
+    {
+      sigio_handler = func;
+
+#ifdef SIGPOLL
+      _gst_set_signal_handler (SIGPOLL, func);
+#else
+      _gst_set_signal_handler (SIGIO, func);
+#endif
+#ifdef SIGURG
+      _gst_set_signal_handler (SIGURG, func);
+#endif
+    }
+
+#if defined F_SETOWN && defined O_ASYNC
+
+  {
+    int oldflags;
+
+    oldflags = fcntl (fd, F_GETFL, 0);
+    if (((oldflags & O_ASYNC)
+	 || (fcntl (fd, F_SETFL, oldflags | O_ASYNC) != -1))
+	&& fcntl (fd, F_SETOWN, getpid ()) != -1)
+      return;
+  }
+#endif
+
+#ifdef I_SETSIG
+  if (ioctl (fd, I_SETSIG, S_INPUT | S_OUTPUT | S_HIPRI) > -1)
+    return;
+#endif
+
+#ifdef FIOSSAIOSTAT
+#ifdef FIOSSAIOOWN
+  {
+    int stat_flags = 1;
+    int own_flags = getpid();
+
+    if (ioctl (fd, FIOSSAIOSTAT, &stat_flags) != -1
+	&& ioctl (fd, FIOSSAIOOWN, &own_flags) != -1)
+      return;
+  }
+#endif
+#endif
+
+#ifndef __MSVCRT__
+#ifdef FIOASYNC
+  {
+    int argFIOASYNC = 1;
+#if defined SIOCSPGRP
+    int argSIOCSPGRP = getpid ();
+
+    if (ioctl (fd, SIOCSPGRP, &argSIOCSPGRP) > -1 ||
+        ioctl (fd, FIOASYNC, &argFIOASYNC) > -1)
+      return;
+#elif defined O_ASYNC
+    int oldflags;
+
+    oldflags = fcntl (fd, F_GETFL, 0);
+    if (((oldflags & O_ASYNC)
+         || (fcntl (fd, F_SETFL, oldflags | O_ASYNC) != -1))
+        && ioctl (fd, FIOASYNC, &argFIOASYNC) > -1)
+      return;
+#else
+    if (ioctl (fd, FIOASYNC, &argFIOASYNC) > -1)
+      return;
+#endif
+  }
+#endif
+#endif /* FIOASYNC */
+}
+
+
 /* This structure defines a list of pairs `struct pollfd'->semaphore
    which map each pollfd that is passed by the OS to the semaphore to
    be signalled when the corresponding I/O situation becomes possible.  */
@@ -130,15 +234,15 @@ void
 _gst_async_timed_wait (OOP semaphoreOOP,
 		       int delay)
 {
-  sem_int_vec[TIMER_REAL] = semaphoreOOP;
+  sem_int_vec[SIGALRM] = semaphoreOOP;
   _gst_register_oop (semaphoreOOP);
-  _gst_signal_after (delay, signal_handler, TIMER_REAL);
+  _gst_signal_after (delay, signal_handler, SIGALRM);
 }
 
 mst_Boolean
 _gst_is_timeout_programmed (void)
 {
-  return (!IS_NIL (sem_int_vec[TIMER_REAL]));
+  return (!IS_NIL (sem_int_vec[SIGALRM]));
 }
 
 void
@@ -283,10 +387,6 @@ file_polling_handler (int sig)
 void
 _gst_pause (void)
 {
-#ifdef WIN32
-  /* Dummy for now.  */
-  _gst_usleep (20000);
-#else
   _gst_disable_interrupts (false);
   if (!_gst_have_pending_async_calls ())
     {
@@ -297,7 +397,6 @@ _gst_pause (void)
       sigsuspend (&set);
     }
   _gst_enable_interrupts (false);
-#endif
 }
 
 int
@@ -341,7 +440,7 @@ _gst_async_file_polling (int fd,
     }
   pollfds[num_used_pollfds].revents = 0;
 
-  _gst_set_file_interrupt (fd, file_polling_handler);
+  set_file_interrupt (fd, file_polling_handler);
 
   /* Now check if I/O was made possible while setting up our machinery...
      If so, exit; otherwise, wait on the semaphore and the SIGIO

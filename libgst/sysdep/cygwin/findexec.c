@@ -55,31 +55,39 @@
  *
  ***********************************************************************/
 
-#include "sysdep/common/time.c"
-#include "sysdep/common/files.c"
 
-#if defined __CYGWIN__
-#include "sysdep/cygwin/findexec.c"
-#include "sysdep/cygwin/timer.c"
-#include "sysdep/cygwin/signals.c"
-#include "sysdep/cygwin/events.c"
-#include "sysdep/cygwin/time.c"
-#include "sysdep/cygwin/files.c"
-#include "sysdep/cygwin/mem.c"
-#elif !defined WIN32
-#include "sysdep/posix/findexec.c"
-#include "sysdep/posix/timer.c"
-#include "sysdep/posix/signals.c"
-#include "sysdep/posix/events.c"
-#include "sysdep/posix/time.c"
-#include "sysdep/posix/files.c"
-#include "sysdep/posix/mem.c"
-#else
-#include "sysdep/win32/findexec.c"
-#include "sysdep/win32/timer.c"
-#include "sysdep/win32/signals.c"
-#include "sysdep/win32/events.c"
-#include "sysdep/win32/time.c"
-#include "sysdep/win32/files.c"
-#include "sysdep/win32/mem.c"
+#include "gstpriv.h"
+
+#ifdef WIN32
+# define WIN32_LEAN_AND_MEAN /* avoid including junk */
+# include <windows.h>
 #endif
+
+/* The path to the executable, derived from argv[0].  */
+const char *_gst_executable_path = NULL;
+
+/* Store the full pathname of the current executable.  */
+void
+_gst_set_executable_path (const char *argv0)
+{
+  char location[MAX_PATH];
+  static char location_as_posix_path[2 * MAX_PATH];
+  int length = GetModuleFileName (NULL, location, sizeof (location));
+  if (length <= 0)
+    return NULL;
+
+  /* On Cygwin, we need to convert paths coming from Win32 system calls
+     to the Unix-like slashified notation.
+
+     There's no error return defined for cygwin_conv_to_posix_path.
+     See cygwin-api/func-cygwin-conv-to-posix-path.html.
+     Does it overflow the buffer of expected size MAX_PATH or does it
+     truncate the path?  I don't know.  Let's catch both.  */
+  cygwin_conv_to_posix_path (location, location_as_posix_path);
+  location_as_posix_path[MAX_PATH - 1] = '\0';
+  if (strlen (location_as_posix_path) >= MAX_PATH - 1)
+    /* A sign of buffer overflow or path truncation.  */
+    _gst_executable_path = NULL;
+  else
+    _gst_executable_path = _gst_get_full_file_name (location_as_posix_path);
+}

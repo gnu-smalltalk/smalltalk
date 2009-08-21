@@ -55,31 +55,74 @@
  *
  ***********************************************************************/
 
-#include "sysdep/common/time.c"
-#include "sysdep/common/files.c"
 
-#if defined __CYGWIN__
-#include "sysdep/cygwin/findexec.c"
-#include "sysdep/cygwin/timer.c"
-#include "sysdep/cygwin/signals.c"
-#include "sysdep/cygwin/events.c"
-#include "sysdep/cygwin/time.c"
-#include "sysdep/cygwin/files.c"
-#include "sysdep/cygwin/mem.c"
-#elif !defined WIN32
-#include "sysdep/posix/findexec.c"
-#include "sysdep/posix/timer.c"
-#include "sysdep/posix/signals.c"
-#include "sysdep/posix/events.c"
-#include "sysdep/posix/time.c"
-#include "sysdep/posix/files.c"
-#include "sysdep/posix/mem.c"
-#else
-#include "sysdep/win32/findexec.c"
-#include "sysdep/win32/timer.c"
-#include "sysdep/win32/signals.c"
-#include "sysdep/win32/events.c"
-#include "sysdep/win32/time.c"
-#include "sysdep/win32/files.c"
-#include "sysdep/win32/mem.c"
+#include "gstpriv.h"
+
+#if defined FASYNC && !defined O_ASYNC
+#define O_ASYNC FASYNC
 #endif
+
+
+/* Yield A - B, measured in seconds.
+   This function is copied from the GNU C Library.  */
+static int tm_diff (struct tm *a,
+		    struct tm *b);
+
+static sigset_t oldSet;
+int _gst_signal_count;
+
+void
+_gst_disable_interrupts (mst_Boolean from_signal_handler)
+{
+  sigset_t newSet;
+
+  __sync_synchronize ();
+  if (_gst_signal_count++ == 0)
+    {
+      __sync_synchronize ();
+      if (from_signal_handler)
+        return;
+
+      sigfillset (&newSet);
+      sigdelset (&newSet, SIGSEGV);
+      sigdelset (&newSet, SIGBUS);
+      sigdelset (&newSet, SIGILL);
+      sigdelset (&newSet, SIGQUIT);
+      sigdelset (&newSet, SIGABRT);
+      sigprocmask (SIG_BLOCK, &newSet, &oldSet);
+    }
+}
+
+void
+_gst_enable_interrupts (mst_Boolean from_signal_handler)
+{
+  __sync_synchronize ();
+  if (--_gst_signal_count == 0)
+    {
+      __sync_synchronize ();
+      if (from_signal_handler)
+        return;
+      sigprocmask (SIG_SETMASK, &oldSet, NULL);
+    }
+}
+
+SigHandler
+_gst_set_signal_handler (int signum,
+			 SigHandler handlerFunc)
+{
+  /* If we are running on a POSIX-compliant system, then do things the
+     POSIX way.  */
+  struct sigaction act, o_act;
+
+  act.sa_handler = handlerFunc;
+  act.sa_flags = 0;
+
+  sigfillset (&act.sa_mask);
+  sigdelset (&act.sa_mask, SIGSEGV);
+  sigdelset (&act.sa_mask, SIGBUS);
+  sigdelset (&act.sa_mask, SIGILL);
+  sigdelset (&act.sa_mask, SIGQUIT);
+  sigdelset (&act.sa_mask, SIGABRT);
+  sigaction (signum, &act, &o_act);
+  return o_act.sa_handler;
+}

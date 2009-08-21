@@ -55,31 +55,88 @@
  *
  ***********************************************************************/
 
-#include "sysdep/common/time.c"
-#include "sysdep/common/files.c"
 
-#if defined __CYGWIN__
-#include "sysdep/cygwin/findexec.c"
-#include "sysdep/cygwin/timer.c"
-#include "sysdep/cygwin/signals.c"
-#include "sysdep/cygwin/events.c"
-#include "sysdep/cygwin/time.c"
-#include "sysdep/cygwin/files.c"
-#include "sysdep/cygwin/mem.c"
-#elif !defined WIN32
-#include "sysdep/posix/findexec.c"
-#include "sysdep/posix/timer.c"
-#include "sysdep/posix/signals.c"
-#include "sysdep/posix/events.c"
-#include "sysdep/posix/time.c"
-#include "sysdep/posix/files.c"
-#include "sysdep/posix/mem.c"
-#else
-#include "sysdep/win32/findexec.c"
-#include "sysdep/win32/timer.c"
-#include "sysdep/win32/signals.c"
-#include "sysdep/win32/events.c"
-#include "sysdep/win32/time.c"
-#include "sysdep/win32/files.c"
-#include "sysdep/win32/mem.c"
+#include "gstpriv.h"
+
+#ifdef HAVE_UTIME_H
+# include <utime.h>
 #endif
+
+#ifdef HAVE_SYS_TIMES_H
+# include <sys/times.h>
+#endif
+
+#ifdef HAVE_SYS_TIMEB_H
+#include <sys/timeb.h>
+#endif
+
+#define TM_YEAR_BASE 1900
+
+/* Yield A - B, measured in seconds.
+   This function is copied from the GNU C Library.  */
+static int
+tm_diff (struct tm *a,
+	 struct tm *b)
+{
+  /* Compute intervening leap days correctly even if year is negative.
+     Take care to avoid int overflow in leap day calculations, but it's 
+     OK to assume that A and B are close to each other.  */
+  int a4 = (a->tm_year >> 2) + (TM_YEAR_BASE >> 2) - !(a->tm_year & 3);
+  int b4 = (b->tm_year >> 2) + (TM_YEAR_BASE >> 2) - !(b->tm_year & 3);
+  int a100 = a4 / 25 - (a4 % 25 < 0);
+  int b100 = b4 / 25 - (b4 % 25 < 0);
+  int a400 = a100 >> 2;
+  int b400 = b100 >> 2;
+  int intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
+  int years = a->tm_year - b->tm_year;
+  int days = (365 * years + intervening_leap_days
+	      + (a->tm_yday - b->tm_yday));
+  return (60 * (60 * (24 * days + (a->tm_hour - b->tm_hour))
+		+ (a->tm_min - b->tm_min)) + (a->tm_sec - b->tm_sec));
+}
+
+time_t
+_gst_adjust_time_zone (time_t t)
+{
+  struct tm save_tm, *decoded_time;
+  time_t bias;
+
+#ifdef LOCALTIME_CACHE
+  tzset ();
+#endif
+  decoded_time = localtime (&t);
+  save_tm = *decoded_time;
+  decoded_time = gmtime (&t);
+  bias = tm_diff (&save_tm, decoded_time);
+
+  return (t + bias);
+}
+
+long
+_gst_current_time_zone_bias (void)
+{
+  time_t now;
+  long bias;
+  struct tm save_tm, *decoded_time;
+
+  time (&now);
+
+#ifdef LOCALTIME_CACHE
+  tzset ();
+#endif
+
+  decoded_time = localtime (&now);
+  save_tm = *decoded_time;
+  decoded_time = gmtime (&now);
+  bias = tm_diff (&save_tm, decoded_time);
+  return (bias);
+}
+
+time_t
+_gst_get_time (void)
+{
+  time_t now;
+  time (&now);
+
+  return (_gst_adjust_time_zone (now));
+}

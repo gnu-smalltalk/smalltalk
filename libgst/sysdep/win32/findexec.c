@@ -55,31 +55,26 @@
  *
  ***********************************************************************/
 
-#include "sysdep/common/time.c"
-#include "sysdep/common/files.c"
 
-#if defined __CYGWIN__
-#include "sysdep/cygwin/findexec.c"
-#include "sysdep/cygwin/timer.c"
-#include "sysdep/cygwin/signals.c"
-#include "sysdep/cygwin/events.c"
-#include "sysdep/cygwin/time.c"
-#include "sysdep/cygwin/files.c"
-#include "sysdep/cygwin/mem.c"
-#elif !defined WIN32
-#include "sysdep/posix/findexec.c"
-#include "sysdep/posix/timer.c"
-#include "sysdep/posix/signals.c"
-#include "sysdep/posix/events.c"
-#include "sysdep/posix/time.c"
-#include "sysdep/posix/files.c"
-#include "sysdep/posix/mem.c"
-#else
-#include "sysdep/win32/findexec.c"
-#include "sysdep/win32/timer.c"
-#include "sysdep/win32/signals.c"
-#include "sysdep/win32/events.c"
-#include "sysdep/win32/time.c"
-#include "sysdep/win32/files.c"
-#include "sysdep/win32/mem.c"
+#include "gstpriv.h"
+
+#ifdef WIN32
+# define WIN32_LEAN_AND_MEAN /* avoid including junk */
+# include <windows.h>
 #endif
+
+/* The path to the executable, derived from argv[0].  */
+const char *_gst_executable_path = NULL;
+
+/* Store the full pathname of the current executable.  */
+
+void
+_gst_set_executable_path (const char *argv0)
+{
+  char location[MAX_PATH];
+  int length = GetModuleFileName (NULL, location, sizeof (location));
+  if (length <= 0)
+    _gst_executable_path = NULL;
+  else
+    _gst_executable_path = xstrdup (location);
+}

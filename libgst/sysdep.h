@@ -117,6 +117,9 @@ extern void _gst_signal_after (int deltaMilli,
 extern void _gst_init_sysdep (void)
   ATTRIBUTE_HIDDEN;
 
+extern void _gst_init_sysdep_win32 (void)
+  ATTRIBUTE_HIDDEN;
+
 /* Arrange so that FUNC is called when I/O becomes possible on
    registered file descriptors, and set up FD to trigger the
    signal.  */

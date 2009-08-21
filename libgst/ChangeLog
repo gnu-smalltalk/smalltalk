@@ -1,3 +1,24 @@
+2009-08-22  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/sysdep.h: Tweak.
+	* libgst/sysdep.c: Split into...
+	* libgst/sysdep/common/files.c, libgst/sysdep/common/time.c,
+	libgst/sysdep/cygwin/files.c, libgst/sysdep/cygwin/findexec.c,
+	libgst/sysdep/cygwin/mem.c, libgst/sysdep/cygwin/signals.c,
+	libgst/sysdep/cygwin/time.c, libgst/sysdep/cygwin/timer.c,
+	libgst/sysdep/posix/files.c, libgst/sysdep/posix/findexec.c,
+	libgst/sysdep/posix/mem.c, libgst/sysdep/posix/signals.c,
+	libgst/sysdep/posix/time.c, libgst/sysdep/posix/timer.c,
+	libgst/sysdep/win32/files.c, libgst/sysdep/win32/findexec.c,
+	libgst/sysdep/win32/mem.c, libgst/sysdep/win32/signals.c,
+	libgst/sysdep/win32/time.c, libgst/sysdep/win32/timer.c: ... all
+	these.
+
+	* libgst/events.c: Copy to...
+	* libgst/sysdep/posix/events.c: ... this...
+	* libgst/sysdep/win32/events.c: ... and this.
+	* libgst/sysdep/cygwin/events.c: New.
+
 2009-08-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/events.c: Add _gst_pause.

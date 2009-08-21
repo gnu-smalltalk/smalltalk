@@ -33,9 +33,9 @@ libgst_la_SOURCES = \
        str.c       tree.c        byte.c         comp.c       \
        sym.c       dict.c        oop.c  	opt.c        \
        save.c      cint.c    	 heap.c	        input.c      \
-       sysdep.c    callin.c      xlat.c         events.c     \
-       mpz.c       print.c	 alloc.c	security.c   \
-       re.c	   interp.c      real.c
+       sysdep.c    callin.c      xlat.c         mpz.c        \
+       print.c	   alloc.c	 security.c     re.c	     \
+       interp.c    real.c
 
 # definitions for genprims
 
@@ -79,6 +79,14 @@ noinst_HEADERS = \
 	genpr-parse.h genbc.h genbc-decl.h \
 	genbc-impl.h genvm-parse.h genvm.h \
 	security.h superop1.inl superop2.inl \
+	sysdep/common/files.c sysdep/common/time.c sysdep/cygwin/files.c \
+	sysdep/cygwin/findexec.c sysdep/cygwin/mem.c sysdep/cygwin/signals.c \
+	sysdep/cygwin/time.c sysdep/cygwin/timer.c sysdep/posix/files.c \
+	sysdep/posix/findexec.c sysdep/posix/mem.c sysdep/posix/signals.c \
+	sysdep/posix/time.c sysdep/posix/timer.c sysdep/win32/files.c \
+	sysdep/win32/findexec.c sysdep/win32/mem.c sysdep/win32/signals.c \
+	sysdep/win32/time.c sysdep/win32/timer.c sysdep/posix/events.c \
+	sysdep/win32/events.c sysdep/cygwin/events.c \
 	$(BUILT_SOURCES)
 
 # rules for invoking genbc

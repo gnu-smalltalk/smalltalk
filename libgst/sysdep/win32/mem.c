@@ -55,31 +55,113 @@
  *
  ***********************************************************************/
 
-#include "sysdep/common/time.c"
-#include "sysdep/common/files.c"
 
-#if defined __CYGWIN__
-#include "sysdep/cygwin/findexec.c"
-#include "sysdep/cygwin/timer.c"
-#include "sysdep/cygwin/signals.c"
-#include "sysdep/cygwin/events.c"
-#include "sysdep/cygwin/time.c"
-#include "sysdep/cygwin/files.c"
-#include "sysdep/cygwin/mem.c"
-#elif !defined WIN32
-#include "sysdep/posix/findexec.c"
-#include "sysdep/posix/timer.c"
-#include "sysdep/posix/signals.c"
-#include "sysdep/posix/events.c"
-#include "sysdep/posix/time.c"
-#include "sysdep/posix/files.c"
-#include "sysdep/posix/mem.c"
-#else
-#include "sysdep/win32/findexec.c"
-#include "sysdep/win32/timer.c"
-#include "sysdep/win32/signals.c"
-#include "sysdep/win32/events.c"
-#include "sysdep/win32/time.c"
-#include "sysdep/win32/files.c"
-#include "sysdep/win32/mem.c"
+#include "gstpriv.h"
+
+#ifdef WIN32
+# define WIN32_LEAN_AND_MEAN /* avoid including junk */
+# include <windows.h>
 #endif
+
+#ifndef MAP_FAILED
+# define MAP_FAILED ((char *) -1)
+#endif
+
+int
+_gst_mem_protect (PTR addr, size_t len, int prot)
+{
+  DWORD oldprot;
+  int my_prot;
+
+  switch (prot & (PROT_READ | PROT_WRITE | PROT_EXEC))
+  {
+  case PROT_NONE:
+    my_prot = 0; break;
+
+  case PROT_READ:
+    my_prot = PAGE_READONLY; break;
+
+  case PROT_WRITE:
+  case PROT_READ | PROT_WRITE:
+    my_prot = PAGE_READWRITE; break;
+
+  case PROT_EXEC:
+    my_prot = PAGE_EXECUTE; break;
+
+  case PROT_EXEC | PROT_READ:
+    my_prot = PAGE_EXECUTE_READ; break;
+
+  case PROT_EXEC | PROT_WRITE:
+  case PROT_EXEC | PROT_READ | PROT_WRITE:
+    my_prot = PAGE_EXECUTE_READWRITE; break;
+  
+  default:
+    return -1;
+  }
+
+  if (VirtualProtect (addr, len, my_prot, &oldprot))
+    return 0;
+  else
+    return -1;
+}
+
+PTR
+_gst_osmem_alloc (size_t size)
+{
+  PTR addr;
+  addr = VirtualAlloc(NULL, size, MEM_RESERVE, PAGE_NOACCESS);
+  if (addr)
+    {
+      PTR result = VirtualAlloc (addr, size, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+      if (result)
+        return result;
+
+      VirtualFree (addr, size, MEM_RELEASE);
+    }
+
+  errno = ENOMEM;
+  return NULL;
+}
+
+void
+_gst_osmem_free (PTR ptr, size_t size)
+{
+  VirtualFree(ptr, size, MEM_DECOMMIT);
+  VirtualFree(ptr, size, MEM_RELEASE);
+}
+
+PTR
+_gst_osmem_reserve (PTR address, size_t size)
+{
+  PTR base;
+  base = VirtualAlloc(address, size, MEM_RESERVE, PAGE_NOACCESS);
+  if (!base && address)
+    base = VirtualAlloc(NULL, size, MEM_RESERVE, PAGE_NOACCESS);
+  if (!base)
+    errno = ENOMEM;
+
+  return base;
+}
+
+void
+_gst_osmem_release (PTR base, size_t size)
+{
+  VirtualFree(base, size, MEM_RELEASE);
+}
+
+PTR
+_gst_osmem_commit (PTR base, size_t size)
+{
+  PTR addr;
+  addr = VirtualAlloc (base, size, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+  if (!addr)
+    errno = ENOMEM;
+
+  return addr;
+}
+
+void
+_gst_osmem_decommit (PTR base, size_t size)
+{
+  VirtualFree(base, size, MEM_DECOMMIT);
+}
