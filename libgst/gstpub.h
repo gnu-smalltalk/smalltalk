@@ -214,6 +214,7 @@ typedef struct VMProxy
   void (*dlAddSearchDir) (const char *dir);
   void (*dlPushSearchPath) (void);
   void (*dlPopSearchPath) (void);
+  void (*wakeUp) (void);
 } VMProxy;
 
 /* Compatibility section */
@@ -303,6 +304,7 @@ extern void gst_async_signal (OOP semaphore_oop);
 extern void gst_async_call (void (*func) (OOP), OOP arg_oop);
 extern mst_Boolean gst_sync_signal (OOP semaphore_oop, mst_Boolean incr_if_empty);
 extern void gst_sync_wait (OOP semaphore_oop);
+extern void gst_wakeup (void);
 extern void gst_show_backtrace (FILE *fp);
 extern void gst_async_signal_and_unregister (OOP semaphore_oop);
 extern void gst_register_oop_array (OOP **first, OOP **last);

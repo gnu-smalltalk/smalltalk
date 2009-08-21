@@ -1,3 +1,12 @@
+2009-08-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* libgst/events.h: Declare it.
+	* libgst/sysdep/posix/events.c: Add _gst_wakeup.
+	* libgst/sysdep/win32/events.c: Ditto.
+	* libgst/gstpub.c: Add it to VMproxy and add gst_wakeup.
+	* libgst/gstpub.h: Add wakeUp to VMproxy, add gst_wakeup.
+	* libgst/interp.c: Call _gst_wakeup from _gst_async_call.
+
 2009-08-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/sysdep.h: Tweak.

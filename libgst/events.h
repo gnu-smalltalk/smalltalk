@@ -108,19 +108,10 @@ extern int _gst_async_file_polling (int fd,
 				    OOP semaphoreOOP) 
   ATTRIBUTE_HIDDEN;
 
-/* Pause until a signal is received.  FIXME: this is not safe when
-   multiple threads are in use, because the signal may be delivered
-   to a different thread.  Since we cannot ensure that our signals
-   (SIGIO, SIGALRM mainly) are blocked in all threads but ours, we'd
-   need to reserve a signal in that case and use pthread_kill to signal
-   the waiting thread: something like
-
-     extern void _gst_wakeup (void)
-     {
-       if (pthread_in_use () && pthread_self () != _gst_waiting_thread)
-         pthread_kill (_gst_waiting_thread, SIGUSR2);
-     }
- */
+/* Pause until a signal is received.  */
 extern void _gst_pause (void);
+
+/* Wake up from a pause.  */
+extern void _gst_wakeup (void);
 
 #endif /* GST_EVENTS_H */

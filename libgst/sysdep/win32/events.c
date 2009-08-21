@@ -123,6 +123,7 @@ signal_handler (int sig)
 
   _gst_enable_interrupts (true);
   _gst_set_signal_handler (sig, SIG_DFL);
+  _gst_wakeup ();
 }
 
 void
@@ -278,6 +279,7 @@ file_polling_handler (int sig)
     }
 
   _gst_set_signal_handler (sig, file_polling_handler);
+  _gst_wakeup ();
 }
 #endif
 
@@ -299,6 +301,11 @@ _gst_pause (void)
     }
   _gst_enable_interrupts (false);
 #endif
+}
+
+void
+_gst_wakeup (void)
+{
 }
 
 int

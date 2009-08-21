@@ -57,8 +57,6 @@
 #include "gstpriv.h"
 #include "lock.h"
 
-
-
 /* The local regs concept hopes, by caching the values of IP and SP in
    local register variables, to increase performance.  You only need
    to export the variables when calling out to routines that might
@@ -1633,6 +1631,7 @@ _gst_async_call (void (*func) (OOP), OOP arg)
       queued_async_signals[async_queue_index].func = func;
       queued_async_signals[async_queue_index++].data = arg;
       gl_lock_unlock (async_queue_lock);
+      _gst_wakeup ();
     }
   
   SET_EXCEPT_FLAG (true);

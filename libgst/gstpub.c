@@ -124,7 +124,8 @@ VMProxy gst_interpreter_proxy = {
   _gst_dlopen,
   _gst_dladdsearchdir,
   _gst_dlpushsearchpath,
-  _gst_dlpopsearchpath
+  _gst_dlpopsearchpath,
+  _gst_wakeup
 };
 
 /* Functions in comp.h.  */
@@ -435,6 +436,12 @@ void
 gst_dlpopsearchpath (void)
 {
   _gst_dlpopsearchpath ();
+}
+
+void
+gst_wakeup ()
+{
+  _gst_wakeup ();
 }
 
 void

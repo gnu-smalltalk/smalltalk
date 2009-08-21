@@ -4301,6 +4301,13 @@ waken up; the signal request will be processed as soon as the next
 message send is executed.  The object is then removed from the registry.
 @end deftypefun
 
+@deftypefun void wakeUp (void)
+When no Smalltalk process is running, @gst{} tries to limit CPU usage
+by pausing until it gets a signal from the OS.  @code{wakeUp} is an
+alternative way to wake up the main Smalltalk loop.  This should rarely
+be necessary, since the above functions already call it automatically.
+@end deftypefun
+
 @deftypefun void syncSignal (OOP, mst_Boolean)
 This functions accepts an OOP for a @code{Semaphore} object and signals
 that object so that one of the processes waiting on that semaphore is

@@ -57,6 +57,7 @@
 
 
 #include "gstpriv.h"
+#include "lock.h"
 
 #ifdef HAVE_UTIME_H
 # include <utime.h>
@@ -195,10 +196,17 @@ static RETSIGTYPE signal_handler (int sig);
 static RETSIGTYPE file_polling_handler (int sig);
 
 
+static RETSIGTYPE
+dummy_signal_handler (int sig)
+{
+}
+
 void
 _gst_init_async_events (void)
 {
   int i;
+
+  _gst_set_signal_handler (SIGUSR2, dummy_signal_handler);
 
   for (i = 0; i < NSIG; i++)
     sem_int_vec[i] = _gst_nil_oop;
@@ -228,6 +236,7 @@ signal_handler (int sig)
 
   _gst_enable_interrupts (true);
   _gst_set_signal_handler (sig, SIG_DFL);
+  _gst_wakeup ();
 }
 
 void
@@ -382,11 +391,19 @@ file_polling_handler (int sig)
     }
 
   _gst_set_signal_handler (sig, file_polling_handler);
+  _gst_wakeup ();
 }
+
+#ifdef USE_POSIX_THREADS
+pthread_t waiting_thread;
+#endif
 
 void
 _gst_pause (void)
 {
+#ifdef USE_POSIX_THREADS
+  waiting_thread = pthread_in_use () ? 0 : pthread_self ();
+#endif
   _gst_disable_interrupts (false);
   if (!_gst_have_pending_async_calls ())
     {
@@ -396,7 +413,22 @@ _gst_pause (void)
       sigemptyset (&set);
       sigsuspend (&set);
     }
+#ifdef USE_POSIX_THREADS
+  waiting_thread = 0;
+#endif
   _gst_enable_interrupts (false);
+}
+
+void
+_gst_wakeup (void)
+{
+#ifdef USE_POSIX_THREADS
+  __sync_synchronize ();
+  if (pthread_in_use ()
+      && waiting_thread
+      && pthread_self () != waiting_thread)
+    pthread_kill (waiting_thread, SIGUSR2);
+#endif
 }
 
 int
