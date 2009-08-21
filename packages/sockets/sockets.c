@@ -252,8 +252,8 @@ static mst_Boolean have_sock_cloexec;
 static inline int
 check_have_sock_cloexec (int fh, int expected_errno)
 {
-  if (have_sock_cloexec == 0)
-    have_sock_cloexec = (fh == -1 && errno == expected_errno ? -1 : 1);
+  if (have_sock_cloexec == 0 && (fh >= 0 || errno == expected_errno))
+    have_sock_cloexec = (fh >= 0 ? 1 : -1);
   return (have_sock_cloexec == 1);
 }
 #endif

@@ -1,3 +1,7 @@
+2009-08-21  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sockets.c: Another check_have_cloexec nit.
+
 2009-08-13  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sockets.c: Fix if statements for check_have_cloexec.
