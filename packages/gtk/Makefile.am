@@ -9,7 +9,7 @@ LC_UNSET = LANG=C; export LANG; \
 	LC_NUMERIC=C; export LC_NUMERIC; \
 	LC_TIME=C; export LC_TIME
 
-EXTRA_DIST = cpp.awk structs.awk funcs.awk mk_enums.awk mk_sizeof.awk order.st
+EXTRA_DIST = cpp.awk structs.awk funcs.awk mk_enums.awk mk_sizeof.awk mkorder.awk
 
 gst_module_ldflags = -rpath $(moduleexecdir) -release $(VERSION) -module \
 	-no-undefined # -export-symbols-regex gst_initModule

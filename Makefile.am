@@ -72,7 +72,7 @@ CLEANFILES = gst.im $(nodist_lisp_LISP) $(nodist_lispstart_LISP)
 lispstartdir = $(lispdir)/site-start.d
 
 if WITH_EMACS
-lisp_LISP = smalltalk-mode.el
+dist_lisp_LISP = smalltalk-mode.el
 nodist_lispstart_LISP = smalltalk-mode-init.el
 if WITH_EMACS_COMINT
 nodist_lisp_LISP = gst-mode.el
