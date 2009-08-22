@@ -478,7 +478,7 @@ alloc_oop_table (size_t size)
   _gst_mem.num_free_oops = size;
   _gst_mem.first_allocated_oop = _gst_mem.ot;
   _gst_mem.last_allocated_oop = _gst_mem.last_swept_oop = _gst_mem.ot - 1;
-  _gst_mem.highest_swept_oop = _gst_mem.ot;
+  _gst_mem.next_oop_to_sweep = _gst_mem.ot - 1;
 }
 
 mst_Boolean
@@ -1281,7 +1281,7 @@ _gst_scavenge (void)
 mst_Boolean
 incremental_gc_running ()
 {
-  return (_gst_mem.highest_swept_oop >= _gst_mem.last_swept_oop);
+  return (_gst_mem.next_oop_to_sweep > _gst_mem.last_swept_oop);
 }
 
 void
@@ -1291,24 +1291,24 @@ _gst_finish_incremental_gc ()
 
 #if defined (GC_DEBUG_OUTPUT)
   printf ("Completing sweep (%p...%p), validity flags %x\n", _gst_mem.last_swept_oop,
-          _gst_mem.highest_swept_oop, _gst_mem.live_flags);
+          _gst_mem.next_oop_to_sweep, _gst_mem.live_flags);
 #endif
 
-  PREFETCH_START (_gst_mem.highest_swept_oop, PREF_BACKWARDS | PREF_READ | PREF_NTA);
-  for (oop = _gst_mem.highest_swept_oop, firstOOP = _gst_mem.last_swept_oop;
-       --oop > firstOOP; oop->flags &= ~F_REACHABLE)
+  PREFETCH_START (_gst_mem.next_oop_to_sweep, PREF_BACKWARDS | PREF_READ | PREF_NTA);
+  for (oop = _gst_mem.next_oop_to_sweep, firstOOP = _gst_mem.last_swept_oop;
+       oop > firstOOP; oop->flags &= ~F_REACHABLE, oop--)
     {
       PREFETCH_LOOP (oop, PREF_BACKWARDS | PREF_READ | PREF_NTA);
       if (!IS_OOP_VALID_GC (oop))
         {
           _gst_sweep_oop (oop);
 	  _gst_mem.num_free_oops++;
-          _gst_mem.highest_swept_oop = oop;
           if (oop == _gst_mem.last_allocated_oop)
             _gst_mem.last_allocated_oop--;
         }
     }
 
+  _gst_mem.next_oop_to_sweep = oop;
   finished_incremental_gc ();
 }
 
@@ -1345,29 +1345,28 @@ _gst_incremental_gc_step ()
     return true;
 
   i = 0;
-  oop = _gst_mem.highest_swept_oop;
   firstOOP = _gst_mem.last_swept_oop;
-  for (;;)
+  for (oop = _gst_mem.next_oop_to_sweep; oop > firstOOP; oop--)
     {
-      if (--oop <= firstOOP)
-        {
-	  finished_incremental_gc ();
-	  return true;
-	}
-
       if (IS_OOP_VALID_GC (oop))
 	oop->flags &= ~F_REACHABLE;
       else
         {
           _gst_sweep_oop (oop);
   	  _gst_mem.num_free_oops++;
-          _gst_mem.highest_swept_oop = oop;
           if (oop == _gst_mem.last_allocated_oop)
             _gst_mem.last_allocated_oop--;
 	  if (++i == INCREMENTAL_SWEEP_STEP)
-	    return false;
+	    {
+	      _gst_mem.next_oop_to_sweep = oop - 1;
+	      return false;
+	    }
         }
     }
+
+  _gst_mem.next_oop_to_sweep = oop;
+  finished_incremental_gc ();
+  return true;
 }
 
 void
@@ -1402,7 +1401,7 @@ reset_incremental_gc (OOP firstOOP)
   _gst_mem.first_allocated_oop = oop;
 
 #ifdef NO_INCREMENTAL_GC
-  _gst_mem.highest_swept_oop = _gst_mem.last_allocated_oop + 1;
+  _gst_mem.next_oop_to_sweep = _gst_mem.last_allocated_oop;
   _gst_finish_incremental_gc ();
 #else
   /* Skip high OOPs that are unallocated.  */
@@ -1410,7 +1409,7 @@ reset_incremental_gc (OOP firstOOP)
     _gst_sweep_oop (oop);
 
   _gst_mem.last_allocated_oop = oop;
-  _gst_mem.highest_swept_oop = oop + 1;
+  _gst_mem.next_oop_to_sweep = oop;
 #endif
 
   _gst_mem.last_swept_oop = _gst_mem.first_allocated_oop - 1;
@@ -1425,9 +1424,9 @@ reset_incremental_gc (OOP firstOOP)
 
 #if defined (GC_DEBUG_OUTPUT)
   printf ("Found unallocated at OOP %p, last allocated OOP %p\n"
-          "Highest OOP swept top to bottom %p, lowest swept bottom to top %p\n",
+          "Next OOP swept top to bottom %p, lowest swept bottom to top %p\n",
 	  _gst_mem.first_allocated_oop, _gst_mem.last_allocated_oop,
-	  _gst_mem.highest_swept_oop, _gst_mem.last_swept_oop);
+	  _gst_mem.next_oop_to_sweep, _gst_mem.last_swept_oop);
 #endif
 }
 

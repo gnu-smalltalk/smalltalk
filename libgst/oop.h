@@ -218,9 +218,10 @@ struct memory_space
 
   /* These are the pointer to the first allocated OOP since the last
      completed incremental GC pass, to the first free OOP, to the
-     last low OOP considered by the incremental sweeper.  */
+     last low OOP considered by the incremental sweeper, to the
+     first high OOP not considered by the incremental sweeper.  */
   OOP first_allocated_oop, last_allocated_oop, last_swept_oop,
-      highest_swept_oop;
+      next_oop_to_sweep;
 
   /* The active survivor space */
   struct surv_space *active_half;

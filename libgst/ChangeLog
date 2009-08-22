@@ -1,5 +1,10 @@
 2009-08-23  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/oop.c: Rename highest_swept_oop to next_oop_to_sweep,
+	shift it down by one.
+
+2009-08-23  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/oop.c: Always do _gst_finish_incremental_gc so that
 	finished_incremental_gc is called.
 
