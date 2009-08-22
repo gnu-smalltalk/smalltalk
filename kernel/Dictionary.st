@@ -515,6 +515,18 @@ certain special cases.'>
 	copy associationsDo: [:each | self addWhileGrowing: each]
     ]
 
+    copyAllFrom: aHashedCollection [
+	<category: 'private methods'>
+	| assoc |
+	1 to: aHashedCollection primSize
+	    do: 
+		[:index | 
+		assoc := aHashedCollection primAt: index.
+		assoc isNil
+		    ifFalse: [self addWhileGrowing: assoc key -> assoc value]].
+	^self
+    ]
+
     whileGrowingAt: key put: value [
 	"Private - Add the given key/value association to the receiver. Don't check
 	 for the set to be full - we want SPEED!."
