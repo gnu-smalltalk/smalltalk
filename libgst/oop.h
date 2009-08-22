@@ -309,6 +309,12 @@ extern void _gst_global_compact (void)
 extern mst_Boolean _gst_incremental_gc_step (void) 
   ATTRIBUTE_HIDDEN;
 
+/* The incremental collector has done its job.  Update statistics,
+   and if it was also sweeping old objects, make it consider all
+   objects as alive.  */
+extern void _gst_finished_incremental_gc (void) 
+  ATTRIBUTE_HIDDEN;
+
 /* Finish the incremental sweep phase of the GC.  */
 extern void _gst_finish_incremental_gc (void) 
   ATTRIBUTE_HIDDEN;

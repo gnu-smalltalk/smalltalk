@@ -166,11 +166,6 @@ static inline mst_Boolean incremental_gc_running (void);
    always passed, but you never know).  */
 static void reset_incremental_gc (OOP firstOOP);
 
-/* The incremental collector has done its job.  Update statistics,
-   and if it was also sweeping old objects, make it consider all
-   objects as alive.  */
-static void finished_incremental_gc ();
-
 /* Gather statistics.  */
 static void update_stats (unsigned long *last, double *between, double *duration);
 
@@ -1296,10 +1291,15 @@ _gst_finish_incremental_gc ()
 
   PREFETCH_START (_gst_mem.next_oop_to_sweep, PREF_BACKWARDS | PREF_READ | PREF_NTA);
   for (oop = _gst_mem.next_oop_to_sweep, firstOOP = _gst_mem.last_swept_oop;
-       oop > firstOOP; oop->flags &= ~F_REACHABLE, oop--)
+       oop > firstOOP; oop--)
     {
       PREFETCH_LOOP (oop, PREF_BACKWARDS | PREF_READ | PREF_NTA);
-      if (!IS_OOP_VALID_GC (oop))
+      if (IS_OOP_VALID_GC (oop))
+	{
+	  maybe_release_xlat (oop);
+	  oop->flags &= ~F_REACHABLE;
+	}
+      else
         {
           _gst_sweep_oop (oop);
 	  _gst_mem.num_free_oops++;
@@ -1309,11 +1309,11 @@ _gst_finish_incremental_gc ()
     }
 
   _gst_mem.next_oop_to_sweep = oop;
-  finished_incremental_gc ();
+  _gst_finished_incremental_gc ();
 }
 
 void
-finished_incremental_gc (void)
+_gst_finished_incremental_gc (void)
 {
   if (_gst_mem.live_flags & F_OLD)
     return;
@@ -1349,7 +1349,10 @@ _gst_incremental_gc_step ()
   for (oop = _gst_mem.next_oop_to_sweep; oop > firstOOP; oop--)
     {
       if (IS_OOP_VALID_GC (oop))
-	oop->flags &= ~F_REACHABLE;
+	{
+	  maybe_release_xlat (oop);
+	  oop->flags &= ~F_REACHABLE;
+	}
       else
         {
           _gst_sweep_oop (oop);
@@ -1365,7 +1368,7 @@ _gst_incremental_gc_step ()
     }
 
   _gst_mem.next_oop_to_sweep = oop;
-  finished_incremental_gc ();
+  _gst_finished_incremental_gc ();
   return true;
 }
 

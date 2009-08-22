@@ -1,5 +1,12 @@
 2009-08-23  Paolo Bonzini  <bonzini@gnu.org>
 
+	* libgst/oop.c: Export finished_incremental_gc.
+	* libgst/oop.h: Declare _gst_finished_incremental_gc.  Use
+	maybe_release_xlat.
+	* libgst/oop.inl: Fix bottom-to-top incremental collector.
+
+2009-08-23  Paolo Bonzini  <bonzini@gnu.org>
+
 	* libgst/oop.c: Rename highest_swept_oop to next_oop_to_sweep,
 	shift it down by one.
 

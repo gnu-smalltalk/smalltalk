@@ -97,7 +97,8 @@ static inline OOP alloc_oop (PTR obj, intptr_t flags);
 
 /* After a global GC, the live_flags say that an object is live
    if it is marked reachable.  Old objects that have already survived
-   the incremental sweep pass, however, are not marked as reachable.  */
+   the incremental sweep pass, however, are not marked as reachable.
+   ??? shouldn't it check next_oop_to_sweep too? */
 #define IS_OOP_VALID(oop) \
   ((oop)->flags & _gst_mem.live_flags \
    || ((oop) <= _gst_mem.last_swept_oop && !IS_OOP_NEW (oop)))
@@ -161,6 +162,29 @@ static inline OOP alloc_oop (PTR obj, intptr_t flags);
 
 
 
+static inline void
+maybe_release_xlat (OOP oop)
+{
+#if defined(ENABLE_JIT_TRANSLATION)
+  if (oop->flags & F_XLAT)
+    {
+      if (oop->flags & F_XLAT_REACHABLE)
+	/* Reachable, and referenced by active contexts.  Keep it
+    	   around.  */
+       	oop->flags &= ~F_XLAT_2NDCHANCE;
+      else
+	{
+    	  /* Reachable, but not referenced by active contexts.  We
+    	     give it a second chance...  */
+	  if (oop->flags & F_XLAT_2NDCHANCE)
+    	    _gst_release_native_code (oop);
+
+	  oop->flags ^= F_XLAT_2NDCHANCE;
+      	}
+    }
+#endif
+}
+
 /* Given an object OBJ, allocate an OOP table slot for it and returns
    it.  It marks the OOP so that it indicates the object is in new
    space, and that the oop has been referenced on this pass (to keep
@@ -169,53 +193,43 @@ static inline OOP
 alloc_oop (PTR objData, intptr_t flags)
 {
   REGISTER (1, OOP oop);
-  gst_object obj;
-
-  obj = (gst_object) objData;
-
-  if UNCOMMON (_gst_mem.last_allocated_oop ==
-		_gst_mem.last_swept_oop)
-    oop = ++_gst_mem.last_allocated_oop;
-  else
+  REGISTER (2, OOP lastOOP);
+  oop = _gst_mem.last_swept_oop + 1;
+  lastOOP = _gst_mem.next_oop_to_sweep;
+  if (COMMON (oop <= lastOOP))
     {
-      for (oop = _gst_mem.last_swept_oop;
-           ++oop, IS_OOP_VALID (oop);
-	   oop->flags &= ~F_REACHABLE)
-#if defined(ENABLE_JIT_TRANSLATION)
-        if (oop->flags & F_XLAT)
-          {
-            if (oop->flags & F_XLAT_REACHABLE)
-              /* Reachable, and referenced by active contexts.  Keep it
-                 around.  */
-              oop->flags &= ~F_XLAT_2NDCHANCE;
-            else
-              {
-                /* Reachable, but not referenced by active contexts.  We
-                   give it a second chance...  */
-                if (oop->flags & F_XLAT_2NDCHANCE)
-                  _gst_release_native_code (oop);
-
-                oop->flags ^= F_XLAT_2NDCHANCE;
-              }
-          }
-#else
-        ;
-#endif
-
-      if (oop > _gst_mem.last_allocated_oop)
-        _gst_mem.last_allocated_oop = oop;
-
+      while (IS_OOP_VALID_GC (oop))
+	{
+	  maybe_release_xlat (oop);
+	  oop->flags &= ~F_REACHABLE;
+	  if (oop >= lastOOP)
+	    {
+	      _gst_finished_incremental_gc ();
+	      goto fast;
+	    }
+	  oop++;
+	}
       _gst_sweep_oop (oop);
-      PREFETCH_LOOP (oop, PREF_READ);
+      if (oop >= lastOOP)
+	_gst_finished_incremental_gc ();
     }
+  else
+    while (IS_OOP_VALID_GC (oop))
+      {
+       fast:
+	oop++;
+      }
+
+  _gst_mem.last_swept_oop = oop;
+  PREFETCH_LOOP (oop, PREF_READ);
 
   /* Force a GC as soon as possible if we're low on OOPs.  */
   if UNCOMMON (_gst_mem.num_free_oops-- < LOW_WATER_OOP_THRESHOLD)
     _gst_mem.eden.maxPtr = _gst_mem.eden.allocPtr;
+  if (oop > _gst_mem.last_allocated_oop)
+    _gst_mem.last_allocated_oop = oop;
 
-  _gst_mem.last_swept_oop = oop;
-  oop->object = obj;
+  oop->object = (gst_object) objData;
   oop->flags = flags;
-
   return (oop);
 }
