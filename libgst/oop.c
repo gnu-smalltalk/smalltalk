@@ -1289,9 +1289,6 @@ _gst_finish_incremental_gc ()
 {
   OOP oop, firstOOP;
 
-  if (!incremental_gc_running ())
-    return;
-
 #if defined (GC_DEBUG_OUTPUT)
   printf ("Completing sweep (%p...%p), validity flags %x\n", _gst_mem.last_swept_oop,
           _gst_mem.highest_swept_oop, _gst_mem.live_flags);
@@ -1318,6 +1315,9 @@ _gst_finish_incremental_gc ()
 void
 finished_incremental_gc (void)
 {
+  if (_gst_mem.live_flags & F_OLD)
+    return;
+
   _gst_mem.live_flags &= ~F_REACHABLE;
   _gst_mem.live_flags |= F_OLD;
 
