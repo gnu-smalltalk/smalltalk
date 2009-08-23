@@ -97,11 +97,12 @@ static inline OOP alloc_oop (PTR obj, intptr_t flags);
 
 /* After a global GC, the live_flags say that an object is live
    if it is marked reachable.  Old objects that have already survived
-   the incremental sweep pass, however, are not marked as reachable.
-   ??? shouldn't it check next_oop_to_sweep too? */
+   the incremental sweep pass, however, are not marked as reachable.  */
 #define IS_OOP_VALID(oop) \
   ((oop)->flags & _gst_mem.live_flags \
-   || ((oop) <= _gst_mem.last_swept_oop && !IS_OOP_NEW (oop)))
+   || (((oop)->flags & F_OLD) \
+       && ((oop) <= _gst_mem.last_swept_oop \
+	   || (oop) > _gst_mem.next_oop_to_sweep)))
 
 #define IS_OOP_MARKED(oop) \
   ((oop)->flags & F_REACHABLE)
