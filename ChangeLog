@@ -1,3 +1,10 @@
+2009-08-24  Paolo Bonzini  <bonzini@gnu.org>
+	    Nicolas Petton  <petton.nicolas@gmail.com>
+
+	* kernel/Object.st: Add #becomeForward:.
+	* testsuite/objects.st: Add #becomeForward: tests.
+	* testsuite/objects.ok: Regenerate.
+
 2009-08-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* kernel/Dictionary.st: Override #copyAllFrom: to copy associations.

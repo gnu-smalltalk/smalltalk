@@ -1,3 +1,9 @@
+2009-08-24  Paolo Bonzini  <bonzini@gnu.org>
+	    Nicolas Petton  <petton.nicolas@gmail.com>
+
+	* libgst/dict.inl: Add num_valid_oops.
+	* libgst/prims.def: Add becomeForward primitive.
+
 2009-08-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* libgst/oop.inl: Fix ??? comment.

@@ -125,3 +125,22 @@ Eval [
  	t printNl.
 	Transcript nextPutAll: 'Well it seems to work fine'; nl
 ]
+
+"Test becomeForward"
+
+Eval [
+    a := Behavior new superclass: Object.
+    a compile: 'foo [ ^1 ]'.
+    b := Behavior new superclass: Object.
+    b compile: 'foo [ ^2 ]'.
+    o := a new.
+    a become: b.
+    o foo
+]
+
+Eval [
+    a := 'a' copy.
+    (a becomeForward: 'b') printNl.
+    a
+]
+

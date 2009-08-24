@@ -2497,6 +2497,49 @@ primitive VMpr_Object_nextInstance [succeed,fail]
   PRIM_FAILED;
 }
 
+/* Object becomeForward: */
+primitive VMpr_Object_becomeForward [succeed]
+{
+  OOP oop1, ownerOOP;
+  OOP oop2, lastOOP;
+  _gst_primitives_executed++;
+
+  oop2 = POP_OOP ();
+  oop1 = STACKTOP ();
+
+  if COMMON (IS_INT (oop1) || IS_OOP_READONLY (oop1))
+    {
+      UNPOP (1);
+      PRIM_FAILED;
+    }
+
+  PREFETCH_START (_gst_mem.ot_base, PREF_READ | PREF_NTA);
+  for (ownerOOP = _gst_mem.ot_base, lastOOP = &_gst_mem.ot[_gst_mem.ot_size];
+       ownerOOP < lastOOP; ownerOOP++)
+    {
+      gst_object object;
+      OOP *scanPtr;
+      int n;
+
+      PREFETCH_LOOP (ownerOOP, PREF_READ | PREF_NTA);
+      if COMMON (!IS_OOP_VALID (ownerOOP))
+	continue;
+
+      object = OOP_TO_OBJ (ownerOOP);
+      n = num_valid_oops (ownerOOP);
+      if UNCOMMON (object->objClass == oop1)
+        object->objClass = oop2;
+      for (scanPtr = object->data; n--; scanPtr++)
+	if UNCOMMON (*scanPtr == oop1)
+	  *scanPtr = oop2;
+    }
+
+  /* The above loop changed the reference to oop1 in the stacktop,
+     so we have to set it back manually!  */
+  SET_STACKTOP (oop1);
+  PRIM_SUCCEEDED;
+}
+
 /* Object allOwners */
 primitive VMpr_Object_allOwners [succeed]
 {

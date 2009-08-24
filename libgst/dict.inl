@@ -183,6 +183,9 @@ static inline OOP index_oop_spec (OOP oop,
 		                  size_t index,
 		                  intptr_t instanceSpec);
 
+/* Returns the number of valid object instance variables in OOP.  */
+static inline int num_valid_oops (OOP oop);
+
 /* Returns whether the SCANNEDOOP points to TARGETOOP.  */
 static inline mst_Boolean is_owner (OOP scannedOOP,
 				    OOP targetOOP);
@@ -866,6 +869,26 @@ oop_num_fields (OOP oop)
   return fixed + (dataBytes >> _gst_log2_sizes[instanceSpec & ISP_SHAPE]);
 }
 
+
+static int
+num_valid_oops (OOP oop)
+{
+  gst_object object;
+
+  object = OOP_TO_OBJ (oop);
+  if UNCOMMON (oop->flags & F_CONTEXT)
+    {
+      gst_method_context ctx;
+      intptr_t methodSP;
+      ctx = (gst_method_context) object;
+      methodSP = TO_INT (ctx->spOffset);
+      return ctx->contextStack + methodSP + 1 - object->data;
+    }
+  else
+    return NUM_OOPS (object);
+}
+
+
 /* Returns whether the SCANNEDOOP points to TARGETOOP.  */
 mst_Boolean
 is_owner (OOP scannedOOP,
@@ -879,16 +902,7 @@ is_owner (OOP scannedOOP,
   if UNCOMMON (object->objClass == targetOOP)
     return true;
 
-  if UNCOMMON (scannedOOP->flags & F_CONTEXT)
-    {
-      gst_method_context ctx;
-      intptr_t methodSP;
-      ctx = (gst_method_context) object;
-      methodSP = TO_INT (ctx->spOffset);
-      n = ctx->contextStack + methodSP + 1 - object->data;
-    }
-  else
-    n = NUM_OOPS (object);
+  n = num_valid_oops (scannedOOP);
 
   /* Peel a couple of iterations for optimization.  */
   if (n--)

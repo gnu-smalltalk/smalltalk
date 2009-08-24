@@ -889,6 +889,16 @@ All classes in the system are subclasses of me.'>
 	
     ]
 
+    becomeForward: otherObject [
+	"Change all references to the receiver into references to otherObject.
+	 References to otherObject are not transformed into the receiver.
+	 Answer the receiver so that it is not lost."
+
+	<category: 'built ins'>
+	<primitive: VMpr_Object_becomeForward>
+	^SystemExceptions.ReadOnlyObject signal
+    ]
+
     become: otherObject [
 	"Change all references to the receiver into references to otherObject.
 	 Depending on the implementation, references to otherObject might or
