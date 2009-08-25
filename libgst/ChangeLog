@@ -1,5 +1,9 @@
 2009-08-25  Paolo Bonzini  <bonzini@gnu.org>
 
+	* dict.c: Just skip primitives that are unknown to the image.
+
+2009-08-25  Paolo Bonzini  <bonzini@gnu.org>
+
 	* sockets.c: Move from packages/sockets/.
 	* sockets.h: New.
 	* files.c: Initialize sockets.

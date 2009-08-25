@@ -1348,11 +1348,9 @@ prepare_primitive_numbers_table ()
       symbolOOP = _gst_intern_string (pte->name);
       valueOOP = dictionary_at (primitivesDictionaryOOP, symbolOOP);
 
+      /* Do nothing if the primitive is unknown to the image.  */
       if (IS_NIL (valueOOP))
-        {
-          _gst_errorf ("bad primitive name");
-          continue;
-        }
+        continue;
 
       old_index = TO_INT (valueOOP);
       _gst_set_primitive_attributes (old_index, pte);
