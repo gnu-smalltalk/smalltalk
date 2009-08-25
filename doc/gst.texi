@@ -732,12 +732,11 @@ Number extend [
 
 A complete treatment of the Smalltalk syntax and of the class library
 can be found in the included tutorial and class reference (@pxref{Top, ,
-Class Reference, gst-libs, the @gst{} Library Reference}).
+Class Reference, gst-base, the @gst{} Library Reference}).
 
 More information on the implementation of the language can be found in
-the @cite{Blue Book}; the relevant parts are also available online as
-@sc{html} documents, at
-@url{http://users.ipa.net/~dwighth/smalltalk/bluebook/bluebook_imp_toc.html}.
+the @cite{Blue Book}; the relevant parts are available, scanned, at
+@url{http://stephane.ducasse.free.fr/FreeBooks/BlueBook/Bluebook.pdf}.
 
 
 @node Test suite
