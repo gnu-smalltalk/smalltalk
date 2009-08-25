@@ -1,3 +1,7 @@
+2009-08-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* scripts/Remote.st: Fix inadvertent commit.
+
 2009-08-24  Paolo Bonzini  <bonzini@gnu.org>
 	    Nicolas Petton  <petton.nicolas@gmail.com>
 

@@ -28,8 +28,7 @@
 |
  ======================================================================"
 
-KernelFilePath := (Directory working / '../kernel') name.
-PackageLoader refresh; fileInPackage: 'TCP'.
+PackageLoader fileInPackage: 'TCP'.
 DLD addLibrary: 'libc'.
 
 (CFunctionDescriptor isFunction: 'getpid')
