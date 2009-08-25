@@ -35,7 +35,7 @@ libgst_la_SOURCES = \
        save.c      cint.c    	 heap.c	        input.c      \
        sysdep.c    callin.c      xlat.c         mpz.c        \
        print.c	   alloc.c	 security.c     re.c	     \
-       interp.c    real.c
+       interp.c    real.c	 sockets.c
 
 # definitions for genprims
 
@@ -73,8 +73,8 @@ noinst_HEADERS = \
 	sym.h dict.h oop.h save.h cint.h xlat.h \
 	sysdep.h callin.h gstpub.h opt.h mpz.h \
 	md-config.h heap.h real.h jitpriv.h oop.inl \
-	dict.inl interp.inl interp-bc.inl \
-	interp-jit.inl comp.inl input.h events.h \
+	dict.inl interp.inl interp-bc.inl interp-jit.inl \
+	sockets.h comp.inl input.h events.h \
 	print.h alloc.h genprims.h gst-parse.h \
 	genpr-parse.h genbc.h genbc-decl.h \
 	genbc-impl.h genvm-parse.h genvm.h \

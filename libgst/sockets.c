@@ -69,15 +69,13 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include "socketx.h"
-
-#ifndef HAVE_SOCKETS
-#error Sockets not available.
-#endif
 
 #ifdef HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
 #endif
+
+#ifdef HAVE_SOCKETS
+#include "socketx.h"
 
 #ifndef O_NONBLOCK             
 #ifdef O_NDELAY
@@ -109,9 +107,6 @@
 #endif
 #endif /* ntohl */
 
-
-
-static VMProxy *vmProxy;
 
 
 
@@ -443,7 +438,7 @@ getSoError (int fd)
 
 
 void
-gst_initModule (VMProxy * proxy)
+_gst_init_sockets ()
 {
 #ifdef _WIN32
   WSADATA wsaData;
@@ -455,56 +450,63 @@ gst_initModule (VMProxy * proxy)
   }
 #endif /* _WIN32 */
 
-  vmProxy = proxy;
-  vmProxy->defineCFunc ("TCPgetaddrinfo", getaddrinfo);
-  vmProxy->defineCFunc ("TCPfreeaddrinfo", freeaddrinfo);
-  vmProxy->defineCFunc ("TCPgetHostByAddr", myGetHostByAddr);
-  vmProxy->defineCFunc ("TCPgetLocalName", myGetHostName);
-  vmProxy->defineCFunc ("TCPgetAiCanonname", get_aiCanonname);
-  vmProxy->defineCFunc ("TCPgetAiAddr", get_aiAddr);
+  _gst_define_cfunc ("TCPgetaddrinfo", getaddrinfo);
+  _gst_define_cfunc ("TCPfreeaddrinfo", freeaddrinfo);
+  _gst_define_cfunc ("TCPgetHostByAddr", myGetHostByAddr);
+  _gst_define_cfunc ("TCPgetLocalName", myGetHostName);
+  _gst_define_cfunc ("TCPgetAiCanonname", get_aiCanonname);
+  _gst_define_cfunc ("TCPgetAiAddr", get_aiAddr);
 
-  vmProxy->defineCFunc ("TCPaccept", myAccept);
-  vmProxy->defineCFunc ("TCPbind", myBind);
-  vmProxy->defineCFunc ("TCPconnect", myConnect);
-  vmProxy->defineCFunc ("TCPgetpeername", myGetpeername);
-  vmProxy->defineCFunc ("TCPgetsockname", myGetsockname);
-  vmProxy->defineCFunc ("TCPlisten", myListen);
-  vmProxy->defineCFunc ("TCPrecvfrom", myRecvfrom);
-  vmProxy->defineCFunc ("TCPsendto", mySendto);
-  vmProxy->defineCFunc ("TCPsetsockopt", mySetsockopt);
-  vmProxy->defineCFunc ("TCPgetsockopt", myGetsockopt);
-  vmProxy->defineCFunc ("TCPgetSoError", getSoError);
-  vmProxy->defineCFunc ("TCPsocket", mySocket);
+  _gst_define_cfunc ("TCPaccept", myAccept);
+  _gst_define_cfunc ("TCPbind", myBind);
+  _gst_define_cfunc ("TCPconnect", myConnect);
+  _gst_define_cfunc ("TCPgetpeername", myGetpeername);
+  _gst_define_cfunc ("TCPgetsockname", myGetsockname);
+  _gst_define_cfunc ("TCPlisten", myListen);
+  _gst_define_cfunc ("TCPrecvfrom", myRecvfrom);
+  _gst_define_cfunc ("TCPsendto", mySendto);
+  _gst_define_cfunc ("TCPsetsockopt", mySetsockopt);
+  _gst_define_cfunc ("TCPgetsockopt", myGetsockopt);
+  _gst_define_cfunc ("TCPgetSoError", getSoError);
+  _gst_define_cfunc ("TCPsocket", mySocket);
 
-  vmProxy->defineCFunc ("TCPpfUnspec", pfUnspec);
-  vmProxy->defineCFunc ("TCPpfInet", pfInet);
-  vmProxy->defineCFunc ("TCPpfInet6", pfInet6);
-  vmProxy->defineCFunc ("TCPpfUnix", pfUnix);
-  vmProxy->defineCFunc ("TCPafUnspec", afUnspec);
-  vmProxy->defineCFunc ("TCPafInet", afInet);
-  vmProxy->defineCFunc ("TCPafInet6", afInet6);
-  vmProxy->defineCFunc ("TCPafUnix", afUnix);
-  vmProxy->defineCFunc ("TCPipMulticastTtl", ipMulticastTtl);
-  vmProxy->defineCFunc ("TCPipMulticastIf", ipMulticastIf);
-  vmProxy->defineCFunc ("TCPipAddMembership", ipAddMembership);
-  vmProxy->defineCFunc ("TCPipDropMembership", ipDropMembership);
-  vmProxy->defineCFunc ("TCPtcpNodelay", tcpNodelay);
-  vmProxy->defineCFunc ("TCPmsgPeek", msgPeek);
-  vmProxy->defineCFunc ("TCPmsgOOB", msgOOB);
-  vmProxy->defineCFunc ("TCPsolSocket", solSocket);
-  vmProxy->defineCFunc ("TCPsoLinger", soLinger);
-  vmProxy->defineCFunc ("TCPsoReuseAddr", soReuseAddr);
-  vmProxy->defineCFunc ("TCPsockStream", sockStream);
-  vmProxy->defineCFunc ("TCPsockRaw", sockRaw);
-  vmProxy->defineCFunc ("TCPsockRDM", sockRDM);
-  vmProxy->defineCFunc ("TCPsockDgram", sockDgram);
-  vmProxy->defineCFunc ("TCPipprotoIp", ipprotoIp);
-  vmProxy->defineCFunc ("TCPipprotoTcp", ipprotoTcp);
-  vmProxy->defineCFunc ("TCPipprotoUdp", ipprotoUdp);
-  vmProxy->defineCFunc ("TCPipprotoIcmp", ipprotoIcmp);
-  vmProxy->defineCFunc ("TCPipprotoIcmpv6", ipprotoIcmpv6);
-  vmProxy->defineCFunc ("TCPaiAddrconfig", aiAddrconfig);
-  vmProxy->defineCFunc ("TCPaiCanonname", aiCanonname);
-  vmProxy->defineCFunc ("TCPaiAll", aiAll);
-  vmProxy->defineCFunc ("TCPaiV4mapped", aiV4mapped);
+  _gst_define_cfunc ("TCPpfUnspec", pfUnspec);
+  _gst_define_cfunc ("TCPpfInet", pfInet);
+  _gst_define_cfunc ("TCPpfInet6", pfInet6);
+  _gst_define_cfunc ("TCPpfUnix", pfUnix);
+  _gst_define_cfunc ("TCPafUnspec", afUnspec);
+  _gst_define_cfunc ("TCPafInet", afInet);
+  _gst_define_cfunc ("TCPafInet6", afInet6);
+  _gst_define_cfunc ("TCPafUnix", afUnix);
+  _gst_define_cfunc ("TCPipMulticastTtl", ipMulticastTtl);
+  _gst_define_cfunc ("TCPipMulticastIf", ipMulticastIf);
+  _gst_define_cfunc ("TCPipAddMembership", ipAddMembership);
+  _gst_define_cfunc ("TCPipDropMembership", ipDropMembership);
+  _gst_define_cfunc ("TCPtcpNodelay", tcpNodelay);
+  _gst_define_cfunc ("TCPmsgPeek", msgPeek);
+  _gst_define_cfunc ("TCPmsgOOB", msgOOB);
+  _gst_define_cfunc ("TCPsolSocket", solSocket);
+  _gst_define_cfunc ("TCPsoLinger", soLinger);
+  _gst_define_cfunc ("TCPsoReuseAddr", soReuseAddr);
+  _gst_define_cfunc ("TCPsockStream", sockStream);
+  _gst_define_cfunc ("TCPsockRaw", sockRaw);
+  _gst_define_cfunc ("TCPsockRDM", sockRDM);
+  _gst_define_cfunc ("TCPsockDgram", sockDgram);
+  _gst_define_cfunc ("TCPipprotoIp", ipprotoIp);
+  _gst_define_cfunc ("TCPipprotoTcp", ipprotoTcp);
+  _gst_define_cfunc ("TCPipprotoUdp", ipprotoUdp);
+  _gst_define_cfunc ("TCPipprotoIcmp", ipprotoIcmp);
+  _gst_define_cfunc ("TCPipprotoIcmpv6", ipprotoIcmpv6);
+  _gst_define_cfunc ("TCPaiAddrconfig", aiAddrconfig);
+  _gst_define_cfunc ("TCPaiCanonname", aiCanonname);
+  _gst_define_cfunc ("TCPaiAll", aiAll);
+  _gst_define_cfunc ("TCPaiV4mapped", aiV4mapped);
 }
+
+#else /* !HAVE_SOCKETS */
+
+void
+_gst_init_sockets ()
+{
+}
+#endif

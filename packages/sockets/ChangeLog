@@ -1,3 +1,8 @@
+2009-08-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sockets.c: Move to libgst/.
+	* package.xml: Check for TCPaccept.
+
 2009-08-21  Paolo Bonzini  <bonzini@gnu.org>
 
 	* sockets.c: Another check_have_cloexec nit.

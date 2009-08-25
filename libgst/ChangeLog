@@ -1,3 +1,9 @@
+2009-08-25  Paolo Bonzini  <bonzini@gnu.org>
+
+	* sockets.c: Move from packages/sockets/.
+	* sockets.h: New.
+	* files.c: Initialize sockets.
+
 2009-08-24  Paolo Bonzini  <bonzini@gnu.org>
 	    Nicolas Petton  <petton.nicolas@gmail.com>
 

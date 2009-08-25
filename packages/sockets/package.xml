@@ -13,7 +13,7 @@
   <filein>cfuncs.st</filein>
   <filein>init.st</filein>
 
-  <module>sockets</module>
+  <callout>TCPaccept</callout>
 
   <file>Buffers.st</file>
   <file>Datagram.st</file>
