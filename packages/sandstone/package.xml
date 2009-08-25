@@ -1,0 +1,59 @@
+<package>
+  <name>SandstoneDb</name>
+  <namespace>SandstoneDb</namespace>
+  <test>
+    <filein>Tests/Extensions.st</filein>
+    <filein>Tests/SDPersonMock.st</filein>
+    <filein>Tests/SDManMock.st</filein>
+    <filein>Tests/SDWomanMock.st</filein>
+    <filein>Tests/SDChildMock.st</filein>
+    <filein>Tests/SDGrandChildMock.st</filein>
+    <filein>Tests/FooObject.st</filein>
+    <filein>Tests/SDActiveRecordTest.st</filein>
+    <filein>Tests/SDMemoryStoreTest.st</filein>
+    <filein>Tests/SDFileStoreTest.st</filein>
+    <file>Tests/SDGrandChildMock.st</file>
+    <file>Tests/SDChildMock.st</file>
+    <file>Tests/FooObject.st</file>
+    <file>Tests/Extensions.st</file>
+    <file>Tests/SDManMock.st</file>
+    <file>Tests/SDWomanMock.st</file>
+    <file>Tests/SDActiveRecordTest.st</file>
+    <file>Tests/SDFileStoreTest.st</file>
+    <file>Tests/SDPersonMock.st</file>
+    <file>Tests/SDMemoryStoreTest.st</file>
+
+    <sunit>
+      SandstoneDb.SDFileStoreTest
+      SandstoneDb.SDMemoryStoreTest
+    </sunit>
+  </test>
+
+  <filein>Core/Extensions.st</filein>
+  <filein>Core/SDRecordMarker.st</filein>
+  <filein>Core/SDAbstractStore.st</filein>
+  <filein>Core/SDCachedStore.st</filein>
+  <filein>Store/SDFileStore.st</filein>
+  <filein>Store/SDMemoryStore.st</filein>
+  <filein>Core/SDConcurrentDictionary.st</filein>
+  <filein>Core/UUID.st</filein>
+  <filein>Core/SDCheckPointer.st</filein>
+  <filein>Core/SDActiveRecord.st</filein>
+  <filein>Core/SDError.st</filein>
+  <filein>Core/SDLoadError.st</filein>
+  <filein>Core/SDCommitError.st</filein>
+
+  <file>Core/Extensions.st</file>
+  <file>Core/SDRecordMarker.st</file>
+  <file>Core/SDAbstractStore.st</file>
+  <file>Core/SDCachedStore.st</file>
+  <file>Store/SDFileStore.st</file>
+  <file>Store/SDMemoryStore.st</file>
+  <file>Core/SDConcurrentDictionary.st</file>
+  <file>Core/UUID.st</file>
+  <file>Core/SDCheckPointer.st</file>
+  <file>Core/SDActiveRecord.st</file>
+  <file>Core/SDError.st</file>
+  <file>Core/SDLoadError.st</file>
+  <file>Core/SDCommitError.st</file>
+</package>

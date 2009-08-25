@@ -1,0 +1,5 @@
+Last updated from squeak version 118
+
+should remove mentioning of DependentsArray after updating
+
+also, GST does not have Monitors.  Use RecursionLock instead.
