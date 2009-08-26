@@ -34,8 +34,8 @@ SUBDIRS += libgst . $(BUILT_PACKAGES) doc tests
 # Running gst inside the build directory...
 
 GST_OPTS = --kernel-dir="@srcdir@/kernel" --image=gst.im
-GST = $(WINECONSOLE) ./gst$(EXEEXT) --no-user-files $(GST_OPTS)
-GST_PACKAGE = XZIP="$(XZIP)" $(WINECONSOLE) ./gst-tool$(EXEEXT) gst-package $(GST_OPTS)
+GST = ./gst$(EXEEXT) --no-user-files $(GST_OPTS)
+GST_PACKAGE = XZIP="$(XZIP)" ./gst-tool$(EXEEXT) gst-package $(GST_OPTS)
 
 
 ###########################################################

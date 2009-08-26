@@ -1,19 +1,15 @@
 /******************************** -*- C -*- ****************************
  *
- * System specific implementation module.
- *
- * This module contains implementations of various operating system
- * specific routines.  This module should encapsulate most (or all)
- * of these calls so that the rest of the code is portable.
+ * Asynchronous events handling.
  *
  *
  ***********************************************************************/
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006,2007,2008
+ * Copyright 2001,2002,2003,2005,2006,2008,2009 Free Software Foundation, Inc.
  * Free Software Foundation, Inc.
- * Written by Steve Byrne.
+ * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
  *
@@ -58,60 +54,52 @@
 
 #include "gstpriv.h"
 
-#define DISABLED_MASK ((-1) ^ (1 << SIGSEGV) ^ (1 << SIGILL) ^ (1 << SIGABRT))
+
+/* Holds the semaphores to be signaled when the operating system sends
+   us a C-style signal.  */
+volatile OOP _gst_sem_int_vec[NSIG];
+
+/* Signals _gst_sem_int_vec[SIG] and removes the semaphore from the vector
+   (because C-style signal handlers are one-shot).  */
+static RETSIGTYPE signal_handler (int sig);
 
 
-static long pending_sigs = 0;
-static SigHandler saved_handlers[8 * sizeof (long)];
-
-static RETSIGTYPE
-dummy_signal_handler (int sig)
+RETSIGTYPE
+signal_handler (int sig)
 {
-  pending_sigs |= 1L << sig;
-  signal (sig, SIG_IGN);
-}
+  _gst_disable_interrupts (true);
+  if (_gst_sem_int_vec[sig])
+    {
+      if (IS_CLASS (_gst_sem_int_vec[sig], _gst_semaphore_class))
+	{
+	  _gst_async_signal_and_unregister (_gst_sem_int_vec[sig]);
+	  _gst_sem_int_vec[sig] = NULL;
+	}
+      else
+	{
+	  _gst_errorf
+	    ("C signal trapped, but no semaphore was waiting");
+	  raise (sig);
+	}
+    }
 
-int _gst_signal_count;
+  _gst_enable_interrupts (true);
+  _gst_set_signal_handler (sig, SIG_DFL);
+  _gst_wakeup ();
+}
 
 void
-_gst_disable_interrupts (mst_Boolean from_signal_handler)
+_gst_async_interrupt_wait (OOP semaphoreOOP,
+			   int sig)
 {
-  int i;
-  
-  __sync_synchronize ();
-  if (_gst_signal_count++ == 0)
-    {
-      __sync_synchronize ();
-      for (i = 0; i < 8 * sizeof (long); i++)
-	if (DISABLED_MASK & (1 << i))
-  	  saved_handlers[i] = signal (i, dummy_signal_handler);
-    }
+  if (sig < 0 || sig >= NSIG)
+    return;
+
+  _gst_sem_int_vec[sig] = semaphoreOOP;
+  _gst_register_oop (semaphoreOOP);
+  _gst_set_signal_handler (sig, signal_handler);
+
+  /* should probably package up the old interrupt state here for return
+     so that it can be undone */
 }
 
-void
-_gst_enable_interrupts (mst_Boolean from_signal_handler)
-{
-  int i;
-  long local_pending_sigs;
-
-  __sync_synchronize ();
-  if (--_gst_signal_count == 0)
-    {
-      __sync_synchronize ();
-      for (i = 0; i < 8 * sizeof (long); i++)
-      	if (DISABLED_MASK & (1 << i))
-	  signal (i, saved_handlers[i]);
-      local_pending_sigs = pending_sigs;
-      pending_sigs = 0;
-      for (i = 0; local_pending_sigs; local_pending_sigs >>= 1, i++)
-      	if (local_pending_sigs & 1)
-	  raise (i);
-    }
-}
-
-SigHandler
-_gst_set_signal_handler (int signum,
-			 SigHandler handlerFunc)
-{
-  return signal (signum, handlerFunc);
-}

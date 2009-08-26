@@ -2,4 +2,4 @@
 abs_top_builddir=@abs_top_builddir@
 : ${LIBTOOL=$abs_top_builddir/libtool}
 
-exec $LIBTOOL --mode=execute @PACKAGE_DLOPEN_FLAGS@ @WINECONSOLE@ $abs_top_builddir/gst@EXEEXT@ ${1+"$@"}
+exec $LIBTOOL --mode=execute @PACKAGE_DLOPEN_FLAGS@ $abs_top_builddir/gst@EXEEXT@ ${1+"$@"}

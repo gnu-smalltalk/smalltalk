@@ -7,7 +7,7 @@
 
 /***********************************************************************
  *
- * Copyright 2001, 2002, 2006, 2008 Free Software Foundation, Inc.
+ * Copyright 2001, 2002, 2006, 2008, 2009 Free Software Foundation, Inc.
  * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
@@ -53,15 +53,12 @@
 #ifndef GST_EVENTS_H
 #define GST_EVENTS_H
 
+/* Array of semaphores associated to the C signals.  */
+volatile OOP _gst_sem_int_vec[NSIG];
+
 /* Initialize the data structures used to hold information about
    asynchronous events requested by Smalltalk programs.  */
 extern void _gst_init_async_events (void) 
-  ATTRIBUTE_HIDDEN;
-
-/* Arrange so that after DELAY milliseconds SEMAPHOREOOP is signaled
-   by the virtual machine. Previous waits are discarded.  */
-extern void _gst_async_timed_wait (OOP semaphoreOOP,
-				   int delay) 
   ATTRIBUTE_HIDDEN;
 
 /* Arrange so that when the SIG signal arrives from the operating
@@ -69,6 +66,15 @@ extern void _gst_async_timed_wait (OOP semaphoreOOP,
    previous wait for the same signal, if any, are discarded.  */
 extern void _gst_async_interrupt_wait (OOP semaphoreOOP,
 				       int sig) 
+  ATTRIBUTE_HIDDEN;
+
+
+/* These are defined in sysdep/.../events.c.  */
+
+/* Arrange so that after DELAY milliseconds SEMAPHOREOOP is signaled
+   by the virtual machine. Previous waits are discarded.  */
+extern void _gst_async_timed_wait (OOP semaphoreOOP,
+				   int delay) 
   ATTRIBUTE_HIDDEN;
 
 /* Answer whether a timeout has been scheduled and a semaphore was
@@ -80,6 +86,12 @@ extern mst_Boolean _gst_is_timeout_programmed (void)
 
 /* Fire and remove all I/O handlers for file descriptor FD.  */
 extern void _gst_remove_fd_polling_handlers (int fd)
+  ATTRIBUTE_HIDDEN;
+
+/* Initialize the socket for asynchronous event notifications for the
+   kind of socket given by PASSIVE and on the file descriptor FD.  */
+extern void _gst_register_socket (int fd,
+				  mst_Boolean passive)
   ATTRIBUTE_HIDDEN;
 
 /* Check whether I/O is possible on the FD file descriptor; COND is 0

@@ -70,7 +70,8 @@ _gst_signal_after (int deltaMilli,
 		   SigHandler func,
 		   int kind)
 {
-  _gst_set_signal_handler (kind, func);
+  if (func)
+    _gst_set_signal_handler (kind, func);
 
   if (deltaMilli <= 0)
     {
@@ -78,7 +79,8 @@ _gst_signal_after (int deltaMilli,
       return;
     }
 
-  if (kind == TIMER_PROCESS)
+#ifdef SIGVTALRM
+  if (kind == SIGVTALRM)
     {
 #if defined ITIMER_VIRTUAL
       struct itimerval value;
@@ -87,9 +89,10 @@ _gst_signal_after (int deltaMilli,
       value.it_value.tv_usec = (deltaMilli % 1000) * 1000;
       setitimer (ITIMER_VIRTUAL, &value, (struct itimerval *) 0);
 #endif
-
     }
-  else if (kind == TIMER_REAL)
+#endif
+
+  if (kind == SIGALRM)
     {
 #if defined ITIMER_REAL
       struct itimerval value;

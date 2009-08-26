@@ -1,3 +1,28 @@
+2009-08-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	Complete transition from events.c to sysdep/*/events.c, moving
+	the common parts back outside sysdep/ and adding a stab at the
+	Win32 version.  This lets us throw Makefile/lib-src hacks away.
+
+	* gstpriv.h: Include signal.h, do not include poll.h.
+	* events.h: Add _gst_register_socket.
+	* sysdep.h: Add _gst_wait_for_input.  Remove TIMER_REAL,
+	TIMER_PROCESS.
+	* input.c: Use _gst_wait_for_input and _gst_sync_file_polling.
+	* sockets.c: Use gstpriv.h.  Do _gst_register_socket.  Do
+	not warn under mingw.
+	* interp.c: Cope with nonexistent SIGUSR1.  Avoid useless
+	abstraction in _gst_signal_after.
+	* sysdep/common/files.c: Cope with nonexistent SIGPIPE.
+	* sysdep/cygwin/timer.c: Adjust for changes in sysdep.h.
+	* sysdep/posix/timer.c: Adjust for changes in sysdep.h.
+	* sysdep/win32/timer.c: Adjust for changes in sysdep.h.
+	* sysdep/win32/events.c: Rewrite.
+	* sysdep/win32/signals.c: Remove signals not found under mingw.
+	* sysdep/posix/events.c: Add _gst_register_socket and
+	_gst_wait_for_input.  Adjust to move OS-independent parts...
+	* events.c: ... here.
+
 2009-08-25  Paolo Bonzini  <bonzini@gnu.org>
 
 	* dict.c: Just skip primitives that are unknown to the image.

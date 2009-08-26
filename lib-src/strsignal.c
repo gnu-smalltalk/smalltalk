@@ -19,7 +19,7 @@
 #define sys_nsig sys_nsig__no_such_symbol
 
 #include <stdio.h>
-#include "signalx.h"
+#include <signal.h>
 
 /*  Routines imported from standard C runtime libraries. */
 

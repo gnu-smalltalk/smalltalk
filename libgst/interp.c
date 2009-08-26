@@ -2298,8 +2298,7 @@ set_preemption_timer (void)
 
   time_to_preempt = false;
   if (timeSlice > 0)
-    _gst_signal_after (timeSlice, preempt_smalltalk_process,
-		       TIMER_PROCESS);
+    _gst_signal_after (timeSlice, preempt_smalltalk_process, SIGVTALRM);
 #endif
 }
 
@@ -2545,12 +2544,14 @@ backtrace_on_signal (int sig)
   raise (sig);
 }
 
+#ifdef SIGUSR1
 static RETSIGTYPE
 user_backtrace_on_signal (int sig)
 {
   _gst_set_signal_handler (sig, user_backtrace_on_signal);
   backtrace_on_signal_1 (false, true);
 }
+#endif
 
 void
 _gst_init_signals (void)
@@ -2564,7 +2565,9 @@ _gst_init_signals (void)
     }
   _gst_set_signal_handler (SIGTERM, backtrace_on_signal);
   _gst_set_signal_handler (SIGINT, interrupt_on_signal);
+#ifdef SIGUSR1
   _gst_set_signal_handler (SIGUSR1, user_backtrace_on_signal);
+#endif
 }
 
 

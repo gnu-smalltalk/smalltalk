@@ -51,8 +51,7 @@
  *
  ***********************************************************************/
 
-#include "config.h"
-#include "gstpub.h"
+#include "gstpriv.h"
 
 #include <signal.h>
 #include <fcntl.h>
@@ -75,20 +74,6 @@
 #endif
 
 #ifdef HAVE_SOCKETS
-#include "socketx.h"
-
-#ifndef O_NONBLOCK             
-#ifdef O_NDELAY
-#define O_NONBLOCK O_NDELAY
-#else
-#ifdef FNDELAY
-#define O_NONBLOCK FNDELAY
-#else
-#warning Non-blocking I/O could not be enabled
-#define O_NONBLOCK 0
-#endif
-#endif
-#endif
 
 #ifndef ntohl
 #if WORDS_BIGENDIAN
@@ -271,6 +256,7 @@ static int
 mySocket (int domain, int type, int protocol)
 {
   SOCKET fh = SOCKET_ERROR;
+  int fd;
 
 #if defined SOCK_CLOEXEC && !defined __MSVCRT__
   if (have_sock_cloexec >= 0)
@@ -286,7 +272,10 @@ mySocket (int domain, int type, int protocol)
       socket_set_cloexec (fh);
     }
 
-  return fh == SOCKET_ERROR ? -1 : SOCKET_TO_FD (fh);
+  fd = (fh == SOCKET_ERROR ? -1 : SOCKET_TO_FD (fh));
+  if (fd != SOCKET_ERROR)
+    _gst_register_socket (fd, false);
+  return fd;
 }
 
 
@@ -317,6 +306,19 @@ myConnect (int fd, struct sockaddr *sockaddr, int len)
 #elif defined F_GETFL
   int oldflags = fcntl (sock, F_GETFL, NULL);
 
+#ifndef O_NONBLOCK             
+#ifdef O_NDELAY
+#define O_NONBLOCK O_NDELAY
+#else
+#ifdef FNDELAY
+#define O_NONBLOCK FNDELAY
+#else
+#warning Non-blocking I/O could not be enabled
+#define O_NONBLOCK 0
+#endif
+#endif
+#endif
+
   if (!(oldflags & O_NONBLOCK))
     fcntl (sock, F_SETFL, oldflags | O_NONBLOCK);
 #endif
@@ -331,6 +333,8 @@ static int
 myAccept (int fd, struct sockaddr *addr, int *addrlen)
 {
   SOCKET fh = SOCKET_ERROR;
+  int new_fd;
+
 #if defined SOCK_CLOEXEC && defined HAVE_ACCEPT4 && !defined __MSVCRT__
   if (have_sock_cloexec >= 0)
     {
@@ -345,7 +349,10 @@ myAccept (int fd, struct sockaddr *addr, int *addrlen)
       socket_set_cloexec (fh);
     }
 
-  return fh == SOCKET_ERROR ? -1 : SOCKET_TO_FD (fh);
+  new_fd = (fh == SOCKET_ERROR ? -1 : SOCKET_TO_FD (fh));
+  if (new_fd != SOCKET_ERROR)
+    _gst_register_socket (new_fd, false);
+  return new_fd;
 }
 
 static int
@@ -376,7 +383,10 @@ myGetsockopt (int fd, int level, int optname, char *optval, int *optlen)
 static int
 myListen (int fd, int backlog)
 {
-  return listen (FD_TO_SOCKET (fd), backlog);
+  int r = listen (FD_TO_SOCKET (fd), backlog);
+  if (r != SOCKET_ERROR)
+    _gst_register_socket (fd, true);
+  return r;
 }
 
 static int

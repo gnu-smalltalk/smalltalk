@@ -1,19 +1,14 @@
 /******************************** -*- C -*- ****************************
  *
- * System specific implementation module.
- *
- * This module contains implementations of various operating system
- * specific routines.  This module should encapsulate most (or all)
- * of these calls so that the rest of the code is portable.
+ *	Asynchronous events from the VM - POSIX version
  *
  *
  ***********************************************************************/
 
 /***********************************************************************
  *
- * Copyright 1988,89,90,91,92,94,95,99,2000,2001,2002,2003,2006,2007,2008
- * Free Software Foundation, Inc.
- * Written by Steve Byrne.
+ * Copyright 2003, 2006, 2008, 2009 Free Software Foundation, Inc.
+ * Written by Paolo Bonzini.
  *
  * This file is part of GNU Smalltalk.
  *
@@ -58,6 +53,8 @@
 
 #include "gstpriv.h"
 #include "lock.h"
+
+#include <poll.h>
 
 #ifdef HAVE_UTIME_H
 # include <utime.h>
@@ -182,17 +179,10 @@ static polling_queue *head, **p_tail_next;
 static struct pollfd *pollfds;
 static int num_used_pollfds, num_total_pollfds;
 
-/* Holds the semaphores to be signaled when the operating system sends
-   us a C-style signal.  */
-static volatile OOP sem_int_vec[NSIG];
-
 /* These are the signal handlers that we install to process
    asynchronous events and pass them to the Smalltalk virtual machine.
    file_polling_handler scans the above array of pollfds and signals
-   the corresponding semaphores, while signal_handler signals
-   sem_int_vec[SIG] and removes the semaphore from the vector (because
-   C-style signal handlers are one-shot).  */
-static RETSIGTYPE signal_handler (int sig);
+   the corresponding semaphores.  */
 static RETSIGTYPE file_polling_handler (int sig);
 
 
@@ -204,66 +194,27 @@ dummy_signal_handler (int sig)
 void
 _gst_init_async_events (void)
 {
-  int i;
-
   _gst_set_signal_handler (SIGUSR2, dummy_signal_handler);
-
-  for (i = 0; i < NSIG; i++)
-    sem_int_vec[i] = _gst_nil_oop;
-
-  head = NULL;
-  p_tail_next = NULL;
-}
-
-RETSIGTYPE
-signal_handler (int sig)
-{
-  _gst_disable_interrupts (true);
-  if (!IS_NIL (sem_int_vec[sig]))
-    {
-      if (IS_CLASS (sem_int_vec[sig], _gst_semaphore_class))
-	{
-	  _gst_async_signal_and_unregister (sem_int_vec[sig]);
-	  sem_int_vec[sig] = _gst_nil_oop;
-	}
-      else
-	{
-	  _gst_errorf
-	    ("C signal trapped, but no semaphore was waiting");
-	  raise (sig);
-	}
-    }
-
-  _gst_enable_interrupts (true);
-  _gst_set_signal_handler (sig, SIG_DFL);
-  _gst_wakeup ();
 }
 
 void
 _gst_async_timed_wait (OOP semaphoreOOP,
 		       int delay)
 {
-  sem_int_vec[SIGALRM] = semaphoreOOP;
-  _gst_register_oop (semaphoreOOP);
-  _gst_signal_after (delay, signal_handler, SIGALRM);
+  _gst_async_interrupt_wait (semaphoreOOP, SIGALRM);
+  _gst_signal_after (delay, NULL, SIGALRM);
 }
 
 mst_Boolean
 _gst_is_timeout_programmed (void)
 {
-  return (!IS_NIL (sem_int_vec[SIGALRM]));
+  return (!IS_NIL (_gst_sem_int_vec[SIGALRM]));
 }
 
 void
-_gst_async_interrupt_wait (OOP semaphoreOOP,
-			   int sig)
+_gst_register_socket (int fd,
+		      mst_Boolean passive)
 {
-  sem_int_vec[sig] = semaphoreOOP;
-  _gst_register_oop (semaphoreOOP);
-  _gst_set_signal_handler (sig, signal_handler);
-
-  /* should probably package up the old interrupt state here for return
-     so that it can be undone */
 }
 
 int
@@ -495,4 +446,23 @@ _gst_async_file_polling (int fd,
     xfree (new);
 
   return (result);
+}
+
+void
+_gst_wait_for_input (int fd)
+{
+  int result;
+
+  struct pollfd pfd;
+  pfd.fd = fd;
+  pfd.events = POLLIN;
+  pfd.revents = 0;
+
+  do
+    {
+      errno = 0;
+      result = poll (&pfd, 1, -1); /* Infinite wait */
+    }
+  while ((result == 0 && (pfd.revents & POLLHUP) == 0)
+	 || ((result == -1) && (errno == EINTR)));
 }

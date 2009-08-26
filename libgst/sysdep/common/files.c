@@ -455,7 +455,9 @@ _gst_init_sysdep (void)
 
   tzset ();
 
+#ifdef SIGPIPE
   _gst_set_signal_handler (SIGPIPE, SIG_IGN);
+#endif
   _gst_set_signal_handler (SIGFPE, SIG_IGN);
 #ifdef SIGPOLL
   _gst_set_signal_handler (SIGPOLL, SIG_IGN);

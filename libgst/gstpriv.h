@@ -69,9 +69,9 @@
 #include <math.h>
 #include <float.h>
 #include <errno.h>
+#include <signal.h>
 #include <sys/stat.h>
 #include <limits.h>
-#include <poll.h>
 #include <ctype.h>
 #include <wchar.h>
 #include <dirent.h>
@@ -585,7 +585,6 @@ extern OOP _gst_nil_oop
 #endif
 
 #include "ansidecl.h"
-#include "signalx.h"
 #include "mathl.h"
 #include "socketx.h"
 #include "strspell.h"

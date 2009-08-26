@@ -1,3 +1,10 @@
+2009-08-26  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/poll.c: Remove Win32 emulation code.
+	* lib-src/signalx.c: Remove.
+	* lib-src/signalx.h: Remove.
+	* lib-src/strsignal.c: Include signal.h.
+
 2009-08-22  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/lock.c: Remove pth/Solaris support.

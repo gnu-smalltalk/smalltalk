@@ -11,7 +11,7 @@ HTML_IMAGES = images/backon.png images/back.png images/blankon.png \
 dist_man_MANS = gst.1 gst-load.1 gst-package.1 gst-sunit.1 gst-config.1 \
 	gst-convert.1 gst-doc.1 gst-profile.1
 
-HELP2MAN = $(top_srcdir)/build-aux/`test "$(WINECONSOLE)" = "" || echo "missing "`help2man -p gst
+HELP2MAN = $(top_srcdir)/build-aux/help2man -p gst
 
 info_TEXINFOS = gst.texi gst-base.texi gst-libs.texi
 gst_TEXINFOS = tutorial.texi vers-gst.texi
@@ -24,7 +24,7 @@ MOSTLYCLEANFILES = gst-libs.me gst-libs.mes gst-base.me gst-base.mes \
 	gst-libs.cl gst-libs.cls gst-base.cl gst-base.cls \
 	gst-libs.sl gst-libs.sls gst-base.sl gst-base.sls
 
-GST_TOOL = $(WINECONSOLE) $(top_builddir)/gst-tool$(EXEEXT) 
+GST_TOOL = $(top_builddir)/gst-tool$(EXEEXT) 
 GST_TOOL_ARGS = -I $(top_builddir)/gst.im --kernel-dir $(top_srcdir)/kernel
 GST_DOC = $(GST_TOOL) gst-doc $(GST_TOOL_ARGS)
 GST_PACKAGE = $(GST_TOOL) gst-package $(GST_TOOL_ARGS)

@@ -35,7 +35,7 @@ libgst_la_SOURCES = \
        save.c      cint.c    	 heap.c	        input.c      \
        sysdep.c    callin.c      xlat.c         mpz.c        \
        print.c	   alloc.c	 security.c     re.c	     \
-       interp.c    real.c	 sockets.c
+       interp.c    real.c	 sockets.c	events.c
 
 # definitions for genprims
 

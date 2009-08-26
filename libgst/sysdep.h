@@ -65,9 +65,6 @@
 #define SEEK_END                2
 #endif
 
-#define TIMER_REAL       SIGALRM
-#define TIMER_PROCESS    SIGVTALRM
-
 #ifndef HAVE_SYS_MMAN_H
 #define PROT_READ       0x1             /* Page can be read.  */
 #define PROT_WRITE      0x2             /* Page can be written.  */
@@ -291,6 +288,10 @@ extern PTR _gst_osmem_commit (PTR base,
    but keep the addresses reserved.  */
 extern void _gst_osmem_decommit (PTR base,
 				 size_t size)
+  ATTRIBUTE_HIDDEN;
+
+/* Synchronously wait for FD to have input on it.  */
+extern void _gst_wait_for_input (int fd)
   ATTRIBUTE_HIDDEN;
 
 #endif /* GST_SYSDEP_H */

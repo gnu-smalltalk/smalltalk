@@ -68,7 +68,7 @@ _gst_signal_after (int deltaMilli,
 		   SigHandler func,
 		   int kind)
 {
-  assert (kind == TIMER_PROCESS);
+  abort ();
 }
 
 void
