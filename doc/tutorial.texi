@@ -204,7 +204,7 @@ examples should get you started:
 @example
    8 * (4 / 2)
    8 - (4 + 1)
-   5 + 4)
+   5 + 4
    2/3 + 7
    2 + 3 * 4
    2 + (3 * 4)
@@ -379,7 +379,7 @@ sent.  So saying @code{; add: 7} is the same as saying
 @code{x add: 7}, because @code{x} was the last thing a message was sent
 to.
 
-his may not seem like such a big savings, but compare
+This may not seem like such a big savings, but compare
 the ease when your variable is named @code{aVeryLongVariableName}
 instead of just @code{x}!  We'll revisit some other occasions
 where @code{;} saves you trouble, but for now let's continue with
@@ -1309,7 +1309,7 @@ previous chapters, the old definition will be overridden by
 this new one.
 @example
 Checking extend [
-    writeCheck: amount
+    writeCheck: amount [
        | num |
 
        (checksleft < 1)
@@ -2758,7 +2758,7 @@ Error subclass: ReadOnlyText [
     ]
 
     initText: aText range: anInterval [
-        &lt;category: 'private'>
+        <category: 'private'>
         ...
     ]
 ]
@@ -3182,7 +3182,7 @@ type whose permissible range is arbitrary.
        ]
        at: i put: v [
            self rangeCheck: i.
-           ^self basicAt: i- offset put: v
+           ^self basicAt: i - offset put: v
        ]
    ]
 @end example
@@ -3307,7 +3307,7 @@ String class, created like:
 @example
    y := 'Hello'
 @end example
-
+@noindent
 does not satisfy this.  Each time you execute this line, you
 may well get a new object.  But a very similar class, Symbol,
 will always return the same object:
@@ -3661,10 +3661,10 @@ class.
 
 @item Smalltalk Virtual Machine
 @gst{} is implemented as a virtual instruction
-set.  By invoking @gst{} with the @code{-d} option, you can
+set.  By invoking @gst{} with the @code{-D} option, you can
 view the byte opcodes which are generated as files on the
 command line are loaded.  Similarly, running @gst{}
-with @code{-e} will trace the execution of instructions in your
+with @code{-E} will trace the execution of instructions in your
 methods.
 
 You can look at the @gst{} source to gain more information
@@ -3897,17 +3897,18 @@ and keyword selectors:
    #at:put:
 @end example
 
-@itemx @t{eval: ``#'' ``#'' ``('' [temps] exprs ``)''}
+@itemx @t{eval: ``##('' [temps] exprs ``)''}
 This syntax also has not been used in the tutorial, and results
 in evaluating an arbitrarily complex expression at compile-time,
 and substituting the result: for example @code{##(Object allInstances
 size)} is the number of instances of @code{Object} held in the
 image @emph{at the time the method is compiled}.
 
-@item @t{id: letter[letter|dig]*}
+@item @t{id: letter[alphanum]*}
 @itemx @t{binchar: ``+'' | ``-'' | ``*'' | ``/'' | ``~'' | ``|'' | ``,'' |}
-@itemx @t{``<'' | ``>'' | ``='' | ``&'' | ``@'' | ``?'' | ``\'' | ``%''}
-@itemx @t{alphanum: ``0''..``9'' | ``A''..``Z''}
+@itemx @t{``<'' | ``>'' | ``='' | ``&'' | ``@@'' | ``?'' | ``\'' | ``%''}
+@itemx @t{alphanum: dig | letter}
+@itemx @t{letter: ``A''..``Z''}
 @itemx @t{dig: ``0''..``9''}
 These are the categories of characters and how they are combined
 at the most basic level.  binchar simply lists the
