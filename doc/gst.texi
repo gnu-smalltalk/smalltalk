@@ -937,7 +937,7 @@ guide for those who have never used regular expressions.
 @gst{} supports regular expressions in the core image with methods
 on @code{String}.
 
-The GNU @gst{} expression library is derived from GNU libc,
+The @gst{} regular expression library is derived from GNU libc,
 with modifications made originally for Ruby to support Perl-like syntax.
 It will always use its included library, and never the ones installed on
 your system; this may change in the future in backwards-compatible ways.
@@ -1631,7 +1631,7 @@ objects start to be freed nor after all objects are freed, at the end
 of the copy all the pages in the fragmented OldSpace will have been
 returned to the system (some of them might already have been used by
 the compacted OldSpace), and the new, compacted OldSpace is ready to
-be used as the system oldspace.  Growing the object heap (which is
+be used as the system OldSpace.  Growing the object heap (which is
 done when it is found to be quite full even after a mark & sweep
 collection) automatically triggers a compaction.
 
@@ -1653,7 +1653,7 @@ comes from the lexicon of @dfn{tri-color marking}, which is an
   abstraction of every possible garbage collection algorithm: in
   tri-color marking, grey objects are those that are known to be
   reachable or that we are not interested in reclaiming, yet have not
-  been scanned yet to mark the objects that they refer to as reachable.}
+  been scanned to mark the objects that they refer to as reachable.}
 contains one entry for each page in OldSpace or FixedSpace that is
 thought to contain at least a reference to an object housed in
 NewSpace.  Every page in OldSpace is created as grey, and is considered
@@ -1963,7 +1963,7 @@ this:
        need not be loaded once this one is.}} -->
   <provides>BLOX</provides>
   
-  <!-- @i{@r{The @code{filein} tag identifies packages that
+  <!-- @i{@r{The @code{filein} tag identifies files that
        compose this package and that should be loaded in the
        image in this order.}} -->
   <filein>BloxBasic.st</filein>
@@ -1972,7 +1972,7 @@ this:
   <filein>BloxExtend.st</filein>
   <filein>Blox.st</filein>
   
-  <!-- @i{@r{The @code{file} tag identifies packages that
+  <!-- @i{@r{The @code{file} tag identifies files that
        compose this package's distribution.}} -->
   <file>Blox.st</file>
   <file>BloxBasic.st</file>
@@ -2201,11 +2201,11 @@ The second is the automatic documentation extractor, contained in two
 files, @file{packages/stinst/compiler/STLoader.st} and
 @file{packages/stinst/compiler/STLoaderObjs.st}.  To be able to create
 Texinfo files even if the library cannot be loaded (for example,
-@code{BLOX} requires a running X server) Smalltalk source code is
+@code{BLOX} requires a running X server). Smalltalk source code is
 interpreted and objects for the classes and methods being read in are
 created; then, polymorphism allows one to treat these exactly like usual
 classes which can be fed to @gst{}'s @code{ClassPublisher} (found in
-@file{packages/stinst/doc/Publish.st}.
+@file{packages/stinst/doc/Publish.st}).
 
 @node Database
 @section Database connectivity
@@ -2246,8 +2246,8 @@ Here is how I execute a query.
 statement := connection execute: 'insert into aTable (aField) values (123)'.
 @end example
 
-The result that is returned is a @code{ResultSet}.  For date queries
-the object returns the number of ows affected.  For read queries (such
+The result that is returned is a @code{ResultSet}.  For write queries
+the object returns the number of rows affected.  For read queries (such
 as selection queries) the result set supports standard stream protocol
 (@code{next}, @code{atEnd} to read rows off the result stream) and
 can also supply collection of column information.  These are
@@ -2508,8 +2508,8 @@ virtual machine that you can control using further invocations of
 pages, and bring down the server, respectively with these commands:
 
 @example
-$ gst-remote --kill
 $ gst-remote --stop=Seaside
+$ gst-remote --kill
 @end example
 
 
@@ -3280,12 +3280,12 @@ before being returned: an example of this feature is given in the
 experimental Gtk+ bindings.
 @end table
 
-@item @code{args: #(string)}
+@item @code{args: #(#string)}
 This is an array of symbols that describes the types of the arguments in
 order.  For example, to specify a call to open(2), the arguments might
 look something like:
 @example
-   args: #(string int int)
+   args: #(#string #int #int)
 @end example
 
     The following argument types are supported; see above for details.
@@ -3686,7 +3686,7 @@ somewhere).  Let's say you stored this object in variable
 @example
     audioInfo gain value
 @end example
-
+@noindent
 to change the gain value in the structure, do
 @example
     audioInfo gain value: 255
@@ -3709,10 +3709,10 @@ variable.
 @section Manipulating Smalltalk data from C
 
 @gst{} internally maps every object except Integers to a data structure
-named an @dfn{OOP} (which is not an acronym for anything, as far as I
-know).  An OOP is a pointer to an internal data structure; this data
-structure basically adds a level of indirection in the representation of
-objects, since it contains
+named an @dfn{OOP} (which is short for @dfn{Ordinary Object Pointer}).
+An OOP is a pointer to an internal data structure; this data structure
+basically adds a level of indirection in the representation of objects,
+since it contains
 @itemize @bullet
 @item
 a pointer to the actual object data
@@ -3735,7 +3735,7 @@ object-oriented programming in a non-object-oriented environment like C,
 objects and C types.  This way you can simply declare OOP variables and
 then use these functions to treat their contents like C data.
 
-These functions are passed to a module via the @code{VMProxy} struct a
+These functions are passed to a module via the @code{VMProxy} struct, a
 pointer to which is passed to the module, as shown in @ref{External
 modules, , Linking your libraries to the virtual machine}.  They can be
 divided in two groups, those that map @emph{from Smalltalk objects to C
@@ -4144,7 +4144,7 @@ A C variable or Smalltalk object (depending on the type specifier) for
 the receiver
 
 @item
-If needed, The C variables and/or Smalltalk object (depending on the
+If needed, the C variables and/or Smalltalk object (depending on the
 type specifiers) for the arguments.
 @end itemize
 
@@ -4805,7 +4805,7 @@ these two lines:
 ObjectMemory class compile: 'quit        self shouldNotImplement'!
 ObjectMemory class compile: 'quit: n     self shouldNotImplement'!
 @end example
-
+@noindent
 which will effectively disable the two offending methods.  Other
 possibilities include using @code{atexit} (from the C library) to exit
 your program in a less traumatic way, or redefining these two methods to
@@ -4861,8 +4861,8 @@ incubator mechanism.  First you'd save a copy of the current pointer in
 a local variable.  Then, for each object you allocate (except the last,
 if you want to be optimal), after you create the object you add it to
 the incubator's list.  When you return, you need to restore the
-incubator's pointer to the value you got with incSavePointer using the
-incRestorePointer function.
+incubator's pointer to the value you got with @code{INC_SAVE_POINTER}
+using the @code{INC_RESTORE_POINTER} macro.
 
 Here's an example from cint.c:
 
