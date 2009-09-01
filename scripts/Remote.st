@@ -91,7 +91,7 @@ Options:
        --snapshot[=FILE]      save image
        --package=PACKAGE      load package
        --start=PACKAGE[:DATA] load package and start it (defined in package.xml)
-       --stop=PACKAGE[:DATA]  load package and start it (defined in package.xml)
+       --stop=PACKAGE[:DATA]  load package and stop it (defined in package.xml)
        --pid                  print daemon pid
     -h --help                 show this message
        --version              print version information and exit
