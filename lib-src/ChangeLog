@@ -1,3 +1,12 @@
+2009-09-02  Paolo Bonzini  <bonzini@gnu.org>
+
+	* lib-src/mkstemp.c: Change to LGPL v2 as allowed by the gnulib
+	mkstemp module.
+	* lib-src/mkdtemp.c: Change to LGPL v2 since this code
+	is derived from mkstemp.c and not from the gnulib mkdtemp module.
+	* lib-src/pointer-set.c: Import last GPLv2 code from GCC.
+	* lib-src/pointer-set.h: Import last GPLv2 code from GCC.
+
 2009-08-26  Paolo Bonzini  <bonzini@gnu.org>
 
 	* lib-src/poll.c: Remove Win32 emulation code.

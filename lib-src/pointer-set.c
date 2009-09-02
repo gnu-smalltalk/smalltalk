@@ -1,21 +1,22 @@
 /* Set operations on pointers
    Copyright (C) 2004, 2006, 2007 Free Software Foundation, Inc.
 
-This file is part of GCC.
+This file is part of GNU Smalltalk.
 
-GCC is free software; you can redistribute it and/or modify
+GNU Smalltalk is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
-GCC is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU Smalltalk is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
 You should have received a copy of the GNU General Public License
-along with GCC; see the file COPYING3.  If not see
-<http://www.gnu.org/licenses/>.  */
+along with GNU Smalltalk; see the file COPYING.  If not, write to the
+Free Software Foundation, 51 Franklin Street, Fifth Floor, Boston,
+MA 02110-1301, USA.  */
 
 #include "config.h"
 #include <stdlib.h>
@@ -36,7 +37,7 @@ struct pointer_set_t
   size_t n_slots;		/* n_slots = 2^log_slots */
   size_t n_elements;
 
-  const void **slots;
+  void **slots;
 };
 
 /* Use the multiplicative method, as described in Knuth 6.4, to obtain
@@ -64,7 +65,7 @@ hash1 (const void *p, unsigned long max, unsigned long logmax)
   const unsigned long A
     = (ULONG_MAX + 1.0L) * 0.6180339887498948482045868343656381177203L;
 #endif
-  const unsigned long shift = 8 - logmax;
+  const unsigned long shift = (SIZEOF_LONG * 8) - logmax;
 
   return ((A * (unsigned long) p) >> shift) & (max - 1);
 }
@@ -95,11 +96,11 @@ pointer_set_destroy (struct pointer_set_t *pset)
 
    Collisions are resolved by linear probing.  */
 int
-pointer_set_contains (const struct pointer_set_t *pset, const void *p)
+pointer_set_contains (struct pointer_set_t *pset, void *p)
 {
   size_t n = hash1 (p, pset->n_slots, pset->log_slots);
 
-  for (;;)
+  while (true)
     {
       if (pset->slots[n] == p)
        return 1;
@@ -117,10 +118,10 @@ pointer_set_contains (const struct pointer_set_t *pset, const void *p)
 /* Subroutine of pointer_set_insert.  Return the insertion slot for P into
    an empty element of SLOTS, an array of length N_SLOTS.  */
 static inline size_t
-insert_aux (const void *p, const void **slots, size_t n_slots, size_t log_slots)
+insert_aux (void *p, void **slots, size_t n_slots, size_t log_slots)
 {
   size_t n = hash1 (p, n_slots, log_slots);
-  for (;;)
+  while (true)
     {
       if (slots[n] == p || slots[n] == 0)
 	return n;
@@ -136,7 +137,7 @@ insert_aux (const void *p, const void **slots, size_t n_slots, size_t log_slots)
 /* Inserts P into PSET if it wasn't already there.  Returns nonzero
    if it was already there. P must be nonnull.  */
 int
-pointer_set_insert (struct pointer_set_t *pset, const void *p)
+pointer_set_insert (struct pointer_set_t *pset, void *p)
 {
   size_t n;
 
@@ -151,7 +152,7 @@ pointer_set_insert (struct pointer_set_t *pset, const void *p)
 
       for (i = 0; i < pset->n_slots; ++i)
         {
-	  const void *value = pset->slots[i];
+	  void *value = pset->slots[i];
 	  n = insert_aux (value, new_slots, new_n_slots, new_log_slots);
 	  new_slots[n] = value;
 	}
@@ -174,8 +175,8 @@ pointer_set_insert (struct pointer_set_t *pset, const void *p)
 /* Pass each pointer in PSET to the function in FN, together with the fixed
    parameter DATA.  If FN returns false, the iteration stops.  */
 
-void pointer_set_traverse (const struct pointer_set_t *pset,
-			   char (*fn) (const void *, void *), void *data)
+void pointer_set_traverse (struct pointer_set_t *pset,
+			   char (*fn) (void *, void *), void *data)
 {
   size_t i;
   for (i = 0; i < pset->n_slots; ++i)
@@ -196,7 +197,7 @@ struct pointer_map_t
   size_t n_slots;		/* n_slots = 2^log_slots */
   size_t n_elements;
 
-  const void **keys;
+  void **keys;
   void **values;
 };
 
@@ -228,11 +229,11 @@ void pointer_map_destroy (struct pointer_map_t *pmap)
 
    Collisions are resolved by linear probing.  */
 void **
-pointer_map_contains (const struct pointer_map_t *pmap, const void *p)
+pointer_map_contains (struct pointer_map_t *pmap, void *p)
 {
   size_t n = hash1 (p, pmap->n_slots, pmap->log_slots);
 
-  for (;;)
+  while (true)
     {
       if (pmap->keys[n] == p)
 	return &pmap->values[n];
@@ -250,7 +251,7 @@ pointer_map_contains (const struct pointer_map_t *pmap, const void *p)
 /* Inserts P into PMAP if it wasn't already there.  Returns a pointer
    to the value.  P must be nonnull.  */
 void **
-pointer_map_insert (struct pointer_map_t *pmap, const void *p)
+pointer_map_insert (struct pointer_map_t *pmap, void *p)
 {
   size_t n;
 
@@ -295,8 +296,8 @@ pointer_map_insert (struct pointer_map_t *pmap, const void *p)
    to the value and the fixed parameter DATA.  If FN returns false, the
    iteration stops.  */
 
-void pointer_map_traverse (const struct pointer_map_t *pmap,
-			   char (*fn) (const void *, void **, void *), void *data)
+void pointer_map_traverse (struct pointer_map_t *pmap,
+			   char (*fn) (void *, void **, void *), void *data)
 {
   size_t i;
   for (i = 0; i < pmap->n_slots; ++i)
